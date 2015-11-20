@@ -1,68 +1,65 @@
-From: Wukongming <wu.kongming@h3c.com>
-Subject: =?utf-8?B?6L2s5Y+ROiBSZWJvb3QgYmxvY2tlZCB3aGVuIHVuZG9pbmcgdW5tYXAgb3Au?=
-Date: Fri, 20 Nov 2015 02:42:49 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D7518DD65@H3CMLB12-EX.srv.huawei-3com.com>
-References: <47D132BF400BE64BAE6D71033F7D3D7518DD2C@H3CMLB12-EX.srv.huawei-3com.com>
+From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
+Subject: Re: OSD replacement feature
+Date: Fri, 20 Nov 2015 15:55:31 +0800
+Message-ID: <CABF_e-EyHHse14RGJnHTipZ+uG+8d0LyLVuYYJAh-NOmDXnPfA@mail.gmail.com>
+References: <564E04F9.20607@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:1132 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S934659AbbKTCnE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 Nov 2015 21:43:04 -0500
-In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D7518DD2C@H3CMLB12-EX.srv.huawei-3com.com>
-Content-Language: zh-CN
+Received: from mail-ob0-f171.google.com ([209.85.214.171]:33332 "EHLO
+	mail-ob0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934361AbbKTHzc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Nov 2015 02:55:32 -0500
+Received: by obbww6 with SMTP id ww6so80800357obb.0
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 23:55:32 -0800 (PST)
+In-Reply-To: <564E04F9.20607@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>
-Cc: "&RD-STOR-FIRE@h3c.com" <&RD-STOR-FIRE@h3c.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-QnkgdGhlIHdheSwgdGhlIGNlcGggY2x1c3RlciBpcyBPSyBiZWZvcmUgcmVib290aW5nLiBCdXQg
-d2hlbiBmYWlsZWQgcmVib290aW5nLCB3ZSBzaG91bGQgQ29sZCByZWJvb3QgdGhlIHNlcnZlciBh
-bmQgbWF5IGNhdXNlIGNlcGggY2x1c3RlciB3aXRoIGJhZCBjb25kaXRpb24gZXNwZWNpYWxseSB3
-aGVuIGhlYXJ0YmVhdGluZyBuZXR3b3JrIGlzIGFkZGVkLg0KDQoyMDE1LTEwLTI2IDA2OjM5OjQx
-LjA2NTE1NyBtb24uMCAxNzIuMTYuMTQyLjEzOTo2Nzg5LzAgMjUxOSA6IGNsdXN0ZXIgW0lORl0g
-cGdtYXAgdjE5OTczOiAyMDQ4IHBnczogNjU1IGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCAx
-MCBhY3RpdmUrcmVtYXBwZWQsIDcyNCBhY3RpdmUrY2xlYW4sIDY1OSB1bmRlcnNpemVkK2RlZ3Jh
-ZGVkK3BlZXJlZDsgNDM2IE1CIGRhdGEsIDIyOTAgTUIgdXNlZCwgMTU3NDAgR0IgLyAxNTc0MiBH
-QiBhdmFpbDsgNjgvMjMyIG9iamVjdHMgZGVncmFkZWQgKDI5LjMxMCUpDQoNCi0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0Kd3Vrb25nbWluZyBJRDogMTIwMTkN
-ClRlbO+8mjA1NzEtODY3NjAyMzkNCkRlcHTvvJoyMDE0IFVJUzIgT25lU3Rvcg0KDQoNCi0tLS0t
-6YKu5Lu25Y6f5Lu2LS0tLS0NCuWPkeS7tuS6ujogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
-bC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10g5Luj6KGoIFd1
-a29uZ21pbmcNCuWPkemAgeaXtumXtDogMjAxNeW5tDEx5pyIMjDml6UgMTA6MTkNCuaUtuS7tuS6
-ujogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IFNhZ2UgV2VpbA0K5Li76aKYOiBSZWJvb3Qg
-YmxvY2tlZCB3aGVuIHVuZG9pbmcgdW5tYXAgb3AuDQoNCkhpIFNhZ2UsDQoNCkkgY3JlYXRlZCBh
-IHJiZCBpbWFnZSwgYW5kIG1hcHBlZCB0byBhIGxvY2FsIHdoaWNoIG1lYW5zIEkgY2FuIGZpbmQg
-L2Rldi9yYmQwLCBhdCB0aGlzIHRpbWUgSSByZWJvb3QgdGhlIHN5c3RlbSwgaW4gbGFzdCBzdGVw
-IG9mIHNodXR0aW5nIGRvd24sIGl0IGJsb2NrZWQgd2l0aCBhbiBlcnJvcg0KDQpbMjM1NjE4LjAy
-MDIyMDddIGxpYmNlcGg6IGNvbm5lY3QgMTcyLjE2LjU3LjI1Mjo2Nzg5IGVycm9yIC0xMDEuDQoN
-Ck15IFdvcmtz4oCZIEVudjoNCg0KVWJ1bnR1IGtlcm5lbCAzLjE5LjANCkNlcGggMC45NC41DQpB
-IGNsdXN0ZXIgb2YgMiBTZXJ2ZXJzIHdpdGggaXNjc2l0Z3QgYW5kIG9wZW4taXNjc2ksIGJvdGgg
-YXMgc2VydmVyIGFuZCBjbGllbnQuIE11bHRpcGF0aCBwcm9jZXNzIGlzIG9uIGJ1dCBub3QgYWZm
-ZWN0IHRoaXMgaXNzdWUuIEnigJl2ZSB0cmllZCBzdG9wcGluZyBtdWx0aXBhdGgsIGJ1dCB0aGUg
-aXNzdWUgc3RpbGwgdGhlcmUuDQpJIG1hcCBhIHJiZCBpbWFnZSB0byBhIGxvY2FsLCB3aHkgc2hv
-dyBtZSBhIGNvbm5lY3QgZXJyb3I/DQoNCkkgc2F3IHlvdXIgcmVwbHkgb24gaHR0cDovL3Blcm1h
-bGluay5nbWFuZS5vcmcvZ21hbmUuY29tcC5maWxlLXN5c3RlbXMuY2VwaC5kZXZlbC8xMzA3Nywg
-YnV0IGp1c3QgYXBhcnQuIElzIHRoaXMgaXNzdWUgcmVzb2x2ZWQgYW5kIGhvdz8NCg0KVGhhbmtz
-ISENCnd1a29uZ21pbmcNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuacrOmCruS7tuWPiuWFtumZhOS7
-tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaB
-r++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4reWIl+WHug0K55qE5Liq5Lq65oiW
-576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI5YyF
-5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN5Yi244CBDQrmiJbm
-laPlj5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzpgq7k
-u7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDpmaTm
-nKwNCumCruS7tu+8gQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNv
-bmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMgaW50ZW5kZWQgb25seSBm
-b3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFu
-eSB1c2Ugb2YgdGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4gaW4gYW55IHdheSAoaW5j
-bHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRpYWwgZGlzY2xvc3VyZSwg
-cmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhl
-IGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhp
-cyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSBwaG9uZSBvciBl
-bWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0KTiAgICAgciAgeSAgIGIgWCAgx6d2IF4g
-Kd66ey5uICsgICB6IF16ICAge2F5IB3Kh9qZICxqICAgZiAgIGggICB6IB4gdyAgICAgICBqOit2
-ICAgdyBqIG0gICAgICAgICB6WisgICAgIN2iaiIgICEgaQ0K
+Hi Loic and cephers,
+
+Sure, I have time to help (comment) on this feature replace a disk.
+This is a useful feature to handle disk failure :p
+
+An simple step is described on http://tracker.ceph.com/issues/13732 :
+1. set noout flag - if the broken osd is primary osd, could we handle w=
+ell?
+2. stop osd daemon and we need to wait the osd actually down. (or
+maybe use deactivate option with ceph-disk)
+
+these two above step seems OK.
+about handle crush map, should we remove the broken osd out?
+If we do that, why we set noout flag? It still trigger re-balance
+after we remove osd from crushmap.
+
+Could we just remove the auth key and re-create osd with new disk
+(then add the auth key back)?
+
+I will try and test myself.
+
+feel free to let me know if you have any suggeations!
+
+thanks!!!
+vicente
+
+
+2015-11-20 1:20 GMT+08:00 Loic Dachary <loic@dachary.org>:
+> Hi Vicente,
+>
+> Now that your ceph-disk deactivate/destroy feature is merged (and doc=
+umented ;-), I wonder if you have time to comment on http://tracker.cep=
+h.com/issues/13732 which is about replacing a disk ? Your input would b=
+e much appreciated.
+>
+> Cheers
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
