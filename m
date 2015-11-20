@@ -1,94 +1,73 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ./run-make-check.sh
-Date: Fri, 20 Nov 2015 15:23:07 +0100
-Message-ID: <564F2CCB.6040105@dachary.org>
-References: <1842494150.16154755.1447976394788.JavaMail.zimbra@redhat.com>
- <564ED6AF.2030106@dachary.org>
- <1072642004.16652865.1448025708481.JavaMail.zimbra@redhat.com>
+From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
+Subject: Re: OSD replacement feature
+Date: Sat, 21 Nov 2015 00:40:13 +0800
+Message-ID: <CABF_e-FO87w1V7eB0nqGtxj4Lg+1xqyWw3KMY7cRtOusGXugoA@mail.gmail.com>
+References: <564E04F9.20607@dachary.org>
+	<CABF_e-EyHHse14RGJnHTipZ+uG+8d0LyLVuYYJAh-NOmDXnPfA@mail.gmail.com>
+	<alpine.DEB.2.00.1511200336260.25088@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="C8FJkJh7HgRQP3sspfT2NwgBsHXvHUGPu"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:36123 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1161851AbbKTOXO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Nov 2015 09:23:14 -0500
-In-Reply-To: <1072642004.16652865.1448025708481.JavaMail.zimbra@redhat.com>
+Received: from mail-oi0-f43.google.com ([209.85.218.43]:34713 "EHLO
+	mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760748AbbKTQkO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Nov 2015 11:40:14 -0500
+Received: by oies6 with SMTP id s6so68465133oie.1
+        for <ceph-devel@vger.kernel.org>; Fri, 20 Nov 2015 08:40:13 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1511200336260.25088@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shinobu Kinjo <skinjo@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---C8FJkJh7HgRQP3sspfT2NwgBsHXvHUGPu
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-If it does not fail the tests you can ignore it.
-
-On 20/11/2015 14:21, Shinobu Kinjo wrote:
-> Thanks, Loic!!!
->=20
-> Am I ought to dig into OSD.cc, or is that message ignorable ?
->=20
->  Shinobu
->=20
-> ----- Original Message -----
-> From: "Loic Dachary" <loic@dachary.org>
-> To: "Shinobu Kinjo" <skinjo@redhat.com>, "ceph-devel" <ceph-devel@vger.=
-kernel.org>
-> Sent: Friday, November 20, 2015 5:15:43 PM
-> Subject: Re: [CEPH-DEVEL] ./run-make-check.sh
->=20
-> Hi,
->=20
-> It is uncommon to run this script as root, there is no need to.
->=20
-> On 20/11/2015 00:39, Shinobu Kinjo wrote:
->> Hello,
+2015-11-20 19:38 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Fri, 20 Nov 2015, Wei-Chung Cheng wrote:
+>> Hi Loic and cephers,
 >>
->> I saw this message during executing run-make-check.sh on fc23:
+>> Sure, I have time to help (comment) on this feature replace a disk.
+>> This is a useful feature to handle disk failure :p
 >>
->> 2015-11-20 01:05:37.529021 7f8742e3d7c0 -1  ** ERROR: error creating e=
-mpty object store in testdir/osd-reactivate/0: (13) Permission denied
->=20
-> Could you publish somewhere (paste2.org for instance) the full output o=
-f run-make-check.sh ? It is possible to get EPERM for reasons other than =
-the underlying file system permission.
->=20
-> Cheers
->=20
+>> An simple step is described on http://tracker.ceph.com/issues/13732 :
+>> 1. set noout flag - if the broken osd is primary osd, could we handle well?
+>> 2. stop osd daemon and we need to wait the osd actually down. (or
+>> maybe use deactivate option with ceph-disk)
 >>
->> Can we ignore at the moment?
->>
->> If I've missed anything, let me know.
->>
->> Thanks!!
->> Shinobu
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->=20
+>> these two above step seems OK.
+>> about handle crush map, should we remove the broken osd out?
+>> If we do that, why we set noout flag? It still trigger re-balance
+>> after we remove osd from crushmap.
+>
+> Right--I think you generally want to do either one or the other:
+>
+> 1) mark osd out, leave failed disk in place.  or, replace with new disk
+> that re-uses the same osd id.
+>
+> or,
+>
+> 2) remove osd from crush map.  replace with new disk (which gets new osd
+> id).
+>
+> I think re-using the osd id is awkward currently, so doing 1 and replacing
+> the disk ends up moving data twice.
+>
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Hi sage,
 
+If the osd on "DNE" status, its weight must be zero and trigger moving
+object data?
 
---C8FJkJh7HgRQP3sspfT2NwgBsHXvHUGPu
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+In my test cases, I only remove the auth key and osd-id (osd is "DNE" status).
+Then replace with new disk that re-uses the same osd-id.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+The osd only has little time on the out status.
+I think this operation could reduce some redundant data moving.
+How you think this operation? or just like you say.
+mark osd out (deactivate/destroy ...etc) and replace with new disk
+that re-uses the same osd id?
 
-iEYEARECAAYFAlZPLMwACgkQ8dLMyEl6F23bAQCbB87znDdLqg8+0BE42XyZutxJ
-60oAoKyumD31eY2j9RpEreOBGsSnXmZi
-=9rdn
------END PGP SIGNATURE-----
+btw, if we just use ceph-deploy/ceph-disk, we could not create osd
+with specific osd-id.
+that should we implement for it?
 
---C8FJkJh7HgRQP3sspfT2NwgBsHXvHUGPu--
+thanks!!!
+vicente
