@@ -1,55 +1,68 @@
-From: Shinobu Kinjo <skinjo@redhat.com>
-Subject: Re: ./run-make-check.sh
-Date: Thu, 19 Nov 2015 21:30:56 -0500 (EST)
-Message-ID: <1898715288.16215515.1447986656826.JavaMail.zimbra@redhat.com>
-References: <955833108.16153353.1447976340808.JavaMail.zimbra@redhat.com> <1842494150.16154755.1447976394788.JavaMail.zimbra@redhat.com> <CAEf3A-zgvAXT3EUX_+U+ZN_QspFrFQhjMJHgtArnCqh5WDkXzQ@mail.gmail.com>
+From: Wukongming <wu.kongming@h3c.com>
+Subject: =?utf-8?B?6L2s5Y+ROiBSZWJvb3QgYmxvY2tlZCB3aGVuIHVuZG9pbmcgdW5tYXAgb3Au?=
+Date: Fri, 20 Nov 2015 02:42:49 +0000
+Message-ID: <47D132BF400BE64BAE6D71033F7D3D7518DD65@H3CMLB12-EX.srv.huawei-3com.com>
+References: <47D132BF400BE64BAE6D71033F7D3D7518DD2C@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:42434 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934659AbbKTCa6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Nov 2015 21:30:58 -0500
-In-Reply-To: <CAEf3A-zgvAXT3EUX_+U+ZN_QspFrFQhjMJHgtArnCqh5WDkXzQ@mail.gmail.com>
+Received: from smtp.h3c.com ([60.191.123.56]:1132 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S934659AbbKTCnE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 Nov 2015 21:43:04 -0500
+In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D7518DD2C@H3CMLB12-EX.srv.huawei-3com.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: tobe <tobeg3oogle@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>
+Cc: "&RD-STOR-FIRE@h3c.com" <&RD-STOR-FIRE@h3c.com>
 
-I always run with root -;
-
-Thanks!
-Shinobu
-
------ Original Message -----
-From: "tobe" <tobeg3oogle@gmail.com>
-To: "Shinobu Kinjo" <skinjo@redhat.com>
-Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-Sent: Friday, November 20, 2015 11:24:57 AM
-Subject: Re: [CEPH-DEVEL] ./run-make-check.sh
-
-It seems to be the permission problem and you got "Permission denied".
-
-Can you try again as the root user or sudo?
-
-On Fri, Nov 20, 2015 at 7:39 AM, Shinobu Kinjo <skinjo@redhat.com> wrote:
-
-> Hello,
->
-> I saw this message during executing run-make-check.sh on fc23:
->
-> 2015-11-20 01:05:37.529021 7f8742e3d7c0 -1  ** ERROR: error creating empty
-> object store in testdir/osd-reactivate/0: (13) Permission denied
->
-> Can we ignore at the moment?
->
-> If I've missed anything, let me know.
->
-> Thanks!!
-> Shinobu
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+QnkgdGhlIHdheSwgdGhlIGNlcGggY2x1c3RlciBpcyBPSyBiZWZvcmUgcmVib290aW5nLiBCdXQg
+d2hlbiBmYWlsZWQgcmVib290aW5nLCB3ZSBzaG91bGQgQ29sZCByZWJvb3QgdGhlIHNlcnZlciBh
+bmQgbWF5IGNhdXNlIGNlcGggY2x1c3RlciB3aXRoIGJhZCBjb25kaXRpb24gZXNwZWNpYWxseSB3
+aGVuIGhlYXJ0YmVhdGluZyBuZXR3b3JrIGlzIGFkZGVkLg0KDQoyMDE1LTEwLTI2IDA2OjM5OjQx
+LjA2NTE1NyBtb24uMCAxNzIuMTYuMTQyLjEzOTo2Nzg5LzAgMjUxOSA6IGNsdXN0ZXIgW0lORl0g
+cGdtYXAgdjE5OTczOiAyMDQ4IHBnczogNjU1IGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCAx
+MCBhY3RpdmUrcmVtYXBwZWQsIDcyNCBhY3RpdmUrY2xlYW4sIDY1OSB1bmRlcnNpemVkK2RlZ3Jh
+ZGVkK3BlZXJlZDsgNDM2IE1CIGRhdGEsIDIyOTAgTUIgdXNlZCwgMTU3NDAgR0IgLyAxNTc0MiBH
+QiBhdmFpbDsgNjgvMjMyIG9iamVjdHMgZGVncmFkZWQgKDI5LjMxMCUpDQoNCi0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0Kd3Vrb25nbWluZyBJRDogMTIwMTkN
+ClRlbO+8mjA1NzEtODY3NjAyMzkNCkRlcHTvvJoyMDE0IFVJUzIgT25lU3Rvcg0KDQoNCi0tLS0t
+6YKu5Lu25Y6f5Lu2LS0tLS0NCuWPkeS7tuS6ujogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
+bC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10g5Luj6KGoIFd1
+a29uZ21pbmcNCuWPkemAgeaXtumXtDogMjAxNeW5tDEx5pyIMjDml6UgMTA6MTkNCuaUtuS7tuS6
+ujogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IFNhZ2UgV2VpbA0K5Li76aKYOiBSZWJvb3Qg
+YmxvY2tlZCB3aGVuIHVuZG9pbmcgdW5tYXAgb3AuDQoNCkhpIFNhZ2UsDQoNCkkgY3JlYXRlZCBh
+IHJiZCBpbWFnZSwgYW5kIG1hcHBlZCB0byBhIGxvY2FsIHdoaWNoIG1lYW5zIEkgY2FuIGZpbmQg
+L2Rldi9yYmQwLCBhdCB0aGlzIHRpbWUgSSByZWJvb3QgdGhlIHN5c3RlbSwgaW4gbGFzdCBzdGVw
+IG9mIHNodXR0aW5nIGRvd24sIGl0IGJsb2NrZWQgd2l0aCBhbiBlcnJvcg0KDQpbMjM1NjE4LjAy
+MDIyMDddIGxpYmNlcGg6IGNvbm5lY3QgMTcyLjE2LjU3LjI1Mjo2Nzg5IGVycm9yIC0xMDEuDQoN
+Ck15IFdvcmtz4oCZIEVudjoNCg0KVWJ1bnR1IGtlcm5lbCAzLjE5LjANCkNlcGggMC45NC41DQpB
+IGNsdXN0ZXIgb2YgMiBTZXJ2ZXJzIHdpdGggaXNjc2l0Z3QgYW5kIG9wZW4taXNjc2ksIGJvdGgg
+YXMgc2VydmVyIGFuZCBjbGllbnQuIE11bHRpcGF0aCBwcm9jZXNzIGlzIG9uIGJ1dCBub3QgYWZm
+ZWN0IHRoaXMgaXNzdWUuIEnigJl2ZSB0cmllZCBzdG9wcGluZyBtdWx0aXBhdGgsIGJ1dCB0aGUg
+aXNzdWUgc3RpbGwgdGhlcmUuDQpJIG1hcCBhIHJiZCBpbWFnZSB0byBhIGxvY2FsLCB3aHkgc2hv
+dyBtZSBhIGNvbm5lY3QgZXJyb3I/DQoNCkkgc2F3IHlvdXIgcmVwbHkgb24gaHR0cDovL3Blcm1h
+bGluay5nbWFuZS5vcmcvZ21hbmUuY29tcC5maWxlLXN5c3RlbXMuY2VwaC5kZXZlbC8xMzA3Nywg
+YnV0IGp1c3QgYXBhcnQuIElzIHRoaXMgaXNzdWUgcmVzb2x2ZWQgYW5kIGhvdz8NCg0KVGhhbmtz
+ISENCnd1a29uZ21pbmcNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuacrOmCruS7tuWPiuWFtumZhOS7
+tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaB
+r++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4reWIl+WHug0K55qE5Liq5Lq65oiW
+576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI5YyF
+5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN5Yi244CBDQrmiJbm
+laPlj5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzpgq7k
+u7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDpmaTm
+nKwNCumCruS7tu+8gQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNv
+bmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMgaW50ZW5kZWQgb25seSBm
+b3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFu
+eSB1c2Ugb2YgdGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4gaW4gYW55IHdheSAoaW5j
+bHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRpYWwgZGlzY2xvc3VyZSwg
+cmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhl
+IGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhp
+cyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSBwaG9uZSBvciBl
+bWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0KTiAgICAgciAgeSAgIGIgWCAgx6d2IF4g
+Kd66ey5uICsgICB6IF16ICAge2F5IB3Kh9qZICxqICAgZiAgIGggICB6IB4gdyAgICAgICBqOit2
+ICAgdyBqIG0gICAgICAgICB6WisgICAgIN2iaiIgICEgaQ0K
