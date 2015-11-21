@@ -1,97 +1,34 @@
-From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
-Subject: =?utf-8?B?UmU6IOetlOWkjTogam91cm5hbCBhbGlnbm1lbnQ=?=
-Date: Fri, 20 Nov 2015 19:53:18 +0000
-Message-ID: <D274B588.92A7%evgeniy.firsov@sandisk.com>
-References: <019801d1236e$206f12e0$614d38a0$@com>
- <d742f6275e1645cdb02b0bad23110eec@R01UKEXCASM115.r01.fujitsu.local>
- <023e01d12373$941f1050$bc5d30f0$@com>
- <alpine.DEB.2.00.1511200339470.25088@cobra.newdream.net>
- <CACJqLybiXZC01ZDD2nUz58PmOWNBSNk01Dr6dNrnTzd6poNOLA@mail.gmail.com>
- <alpine.DEB.2.00.1511200507120.24879@cobra.newdream.net>
- <CACJqLyY48OX4rLFg9xj_UxEmO24x0bx70wyJsLjGnLyM-skkCA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Write path changes
+Date: Sat, 21 Nov 2015 02:21:57 +0000
+Message-ID: <CO1PR02MB20895A31B6C12F2AE0065C9F4190@CO1PR02MB208.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0063.outbound.protection.outlook.com ([157.56.110.63]:46608
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+Received: from mail-bl2on0077.outbound.protection.outlook.com ([65.55.169.77]:18656
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1760027AbbKTTxV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 20 Nov 2015 14:53:21 -0500
-In-Reply-To: <CACJqLyY48OX4rLFg9xj_UxEmO24x0bx70wyJsLjGnLyM-skkCA@mail.gmail.com>
+	id S1751345AbbKUCWA convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Nov 2015 21:22:00 -0500
 Content-Language: en-US
-Content-ID: <D96C27A3ADA67D46942F142A526F8440@namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>, Sage Weil <sage@newdream.net>
-Cc: changtao381 <changtao381@163.com>, =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-RG8geW91IHNlZSBhbnkgcGVyZm9ybWFuY2UgZGlmZmVyZW5jZSBiZXR3ZWVuIGRpcmVjdCBpbyBh
-bmQgbm9uIGRpcmVjdCBpbw0KbW9kZT8NCklmIGl0wrlzIGRpc2FibGVkLCB5b3UgZG9uwrl0IG5l
-ZWQgYW55IGJ1ZmZlciBhbGlnbm1lbnQuDQoNCk9uIDExLzIwLzE1LCA1OjI5IEFNLCAiY2VwaC1k
-ZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mDQpIYW9tYWkgV2FuZyIgPGNl
-cGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZg0KaGFvbWFpd2FuZ0Bn
-bWFpbC5jb20+IHdyb3RlOg0KDQo+T24gRnJpLCBOb3YgMjAsIDIwMTUgYXQgOTowOCBQTSwgU2Fn
-ZSBXZWlsIDxzYWdlQG5ld2RyZWFtLm5ldD4gd3JvdGU6DQo+PiBPbiBGcmksIDIwIE5vdiAyMDE1
-LCBIYW9tYWkgV2FuZyB3cm90ZToNCj4+PiBPbiBGcmksIE5vdiAyMCwgMjAxNSBhdCA3OjQxIFBN
-LCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3cm90ZToNCj4+PiA+IE9uIEZyaSwgMjAg
-Tm92IDIwMTUsIGNoYW5ndGFvMzgxIHdyb3RlOg0KPj4+ID4+IEhpIEFsbCwNCj4+PiA+Pg0KPj4+
-ID4+IFRoYW5rcyBmb3IgeW91IGFwcGx5IQ0KPj4+ID4+DQo+Pj4gPj4gSWYgZGlyZWN0aW9JTyAr
-IGFzeW5jIElPIHJlcXVpcmVtZW50IHRoYXQgYWxpZ25tZW50LCBpdCBzaG91bGRuJ3QNCj4+PmFs
-aWduZWQgYnkgUEFHRSBmb3IgZWFjaCBqb3VybmFsIGVudHJ5Lg0KPj4+ID4+IEZvciBpdCBtYXkg
-d3JpdGUgbWFueSBlbnRyaWVzIG9mIGpvdXJuYWwgb25jZSB0aW1lDQo+Pj4gPg0KPj4+ID4gV2Ug
-YWxzbyB3YW50IHRvIGF2b2lkIGNvcHlpbmcgdGhlIGRhdGEgYXJvdW5kIGluIG1lbW9yeSB0byBj
-aGFuZ2UgdGhlDQo+Pj4gPiBhbGlnbm1lbnQuICBUaGUgbWVzc2VuZ2VyIHRha2VzIGNhcmUgdG8g
-cmVhZCBkYXRhIG9mZiB0aGUgd2lyZSBpbnRvDQo+Pj4gPiBidWZmZXJzIHdpdGggdGhlIGNvcnJl
-Y3QgYWxpZ25tZW50IHNvIHRoYXQgd2UgY2FuIGxhdGVyIHVzZSB0aGVtIGZvcg0KPj4+ID4gZGly
-ZWN0LWlvLg0KPj4+ID4NCj4+PiA+IElmIHlvdSdyZSB3b3JyaWVkIGFib3V0IHRoZSBzbWFsbCBp
-byBjYXNlLCBJIHRoaW5rIHRoaXMgaXMganVzdCBhDQo+Pj5tYXR0ZXINCj4+PiA+IG9mIHNldHRp
-bmcgYSB0aHJlc2hvbGQgZm9yIHNtYWxsIGlvcyBzbyB0aGF0IHdlIGRvbid0IGJvdGhlciB3aXRo
-DQo+Pj5hbGwgb2YNCj4+PiA+IHRoZSBwYWRkaW5nIHdoZW4gdGhlIG1lbW9yeSBjb3B5IGlzbid0
-IHRoYXQgZXhwZW5zaXZlLiAgQnV0Li4uIGdpdmVuDQo+Pj50aGF0DQo+Pj4gPiB3ZSBoYXZlIGEg
-aGVhZGVyICphbmQqIGZvb3RlciBpbiB0aGUgam91cm5hbCBmb3JtYXQgYW5kIGFsbW9zdCBhbGwN
-Cj4+PklPcyBhcmUNCj4+PiA+IDRrIG11bHRpcGxlcyBJIHRoaW5rIGl0J2Qgc2F2ZSB5b3UgYSBz
-aW5nbGUgNGsgYmxvY2sgYXQgbW9zdC4NCj4+PiA+DQo+Pj4gPiAoQWxzbywgSSB0aG91Z2h0IHdl
-IGFscmVhZHkgZGlkIHNvbWV0aGluZyBsaWtlIHRoaXMsIGJ1dCBwZXJoYXBzDQo+Pj5ub3QhKQ0K
-Pj4+DQo+Pj4gSG1tLCBiYXNlZCBvbiBvdXIgcmVjZW50bHkgdGVzdCwgdGhlIGRhdGEgZnJvbSBt
-ZXNzZW5nZXIgaXMgYWxpZ25lZC4NCj4+PiBCdXQgdGhlIGVuY29kZWQgZGF0YShwZ2xvZywgdHJh
-bnNhY3Rpb24pIHdpbGwgbWFrZSB0aGluZyB3b3JzZSwgbGlrZQ0KPj4+IFBSKGh0dHBzOi8vZ2l0
-aHViLmNvbS9jZXBoL2NlcGgvcHVsbC82MzY4KSBzb2x2ZWQsIHdlIGV2ZW4gd2lsbCBnZXQgMTQN
-Cj4+PiBwdHIgaW4gdGhlIGJ1ZmZlcmxpc3Qgd2hpY2ggcGFzc2VkIGludG8gZmlsZWpvdXJuYWwg
-YmVmb3JlLiBTbyBpdCBtYWtlDQo+Pj4gd2UgcmVidWlsZCBlYWNoIHRpbWUgd2l0aGluIGZpbGVq
-b3VybmFsIHRocmVhZC4gTGlrZSB0aGlzDQo+Pj4gUFIoaHR0cHM6Ly9naXRodWIuY29tL2NlcGgv
-Y2VwaC9wdWxsLzY0ODQpLCB3ZSB0cnkgdG8gbWFrZSBpdCByZWJ1aWxkDQo+Pj4gbm90IGluIGZp
-bGVqb3VybmFsIHRocmVhZCB3aGljaCBpcyBzaW5nbGUuDQo+Pg0KPj4gYnVmZmVyOjpsaXN0Ojpy
-ZWJ1aWxkX3BhZ2VfYWxpZ25lZCgpIHNob3VsZCBvbmx5IGNvcHkvcmVidWlsZCBwdHJzIHRoYXQN
-Cj4+IGFyZSB1bmFsaWduZWQsIGFuZCBsZWF2ZSBhbGlnbmVkIG9uZXMgdW50b3VjaGVkLiAgSXQg
-bG9va3MgbGlrZSB0aGUNCj4+IGpvdXJuYWwgY29kZSBpcyBhbHJlYWR5IGRvaW5nIHRoaXM/DQo+
-DQo+WWVzIG9yIG5vdCwgZm9yIGV4YW1wbGUgd2UgaGF2ZSBhIGJ1ZmZlcmxpc3QgY29udGFpbnMg
-MiBwdHJzLCB0aGUNCj5maXJzdCBpcyB1bmFsaWduZWQsIHRoZSBzZWNvbmQgaXMgYWxpZ25lZC4g
-QnV0IHRoZSBjdXJyZW50IGltcGwgd2lsbA0KPmlnbm9yZSB0aGUgc2Vjb25kIGFsaWdubWVudCBm
-YWN0LiBMb29rIGF0IHRoZSBjb2RlOg0KPg0KPiAgdm9pZCBidWZmZXI6Omxpc3Q6OnJlYnVpbGRf
-YWxpZ25lZF9zaXplX2FuZF9tZW1vcnkodW5zaWduZWQgYWxpZ25fc2l6ZSwNCj4gICAgdW5zaWdu
-ZWQgYWxpZ25fbWVtb3J5KQ0KPiAgew0KPi4uLi4uLi4uDQo+ICAgICAgbGlzdCB1bmFsaWduZWQ7
-DQo+ICAgICAgdW5zaWduZWQgb2Zmc2V0ID0gMDsNCj4gICAgICBkbyB7DQo+ICAgICAgICAvKmNv
-dXQgPDwgIiBzZWdtZW50ICIgPDwgKHZvaWQqKXAtPmNfc3RyKCkNCj4gICAgICAgICAgICAgICA8
-PCAiIG9mZnNldCAiIDw8ICgodW5zaWduZWQgbG9uZylwLT5jX3N0cigpICYgKGFsaWduIC0gMSkp
-DQo+ICAgICAgICAgICAgICAgPDwgIiBsZW5ndGggIiA8PCBwLT5sZW5ndGgoKSA8PCAiICIgPDwg
-KHAtPmxlbmd0aCgpICYNCj4oYWxpZ24gLSAxKSkNCj4gICAgICAgICAgICAgICA8PCAiIG92ZXJh
-bGwgb2Zmc2V0ICIgPDwgb2Zmc2V0IDw8ICIgIiA8PCAob2Zmc2V0ICYgKGFsaWduDQo+LSAxKSkN
-Cj4gICAgICA8PCAiIG5vdCBvayIgPDwgc3RkOjplbmRsOw0KPiAgICAgICAgKi8NCj4gICAgICAg
-IG9mZnNldCArPSBwLT5sZW5ndGgoKTsNCj4gICAgICAgIHVuYWxpZ25lZC5wdXNoX2JhY2soKnAp
-Ow0KPiAgICAgICAgX2J1ZmZlcnMuZXJhc2UocCsrKTsNCj4gICAgICB9IHdoaWxlIChwICE9IF9i
-dWZmZXJzLmVuZCgpICYmDQo+ICAgICAgKCFwLT5pc19hbGlnbmVkKGFsaWduX21lbW9yeSkgfHwN
-Cj4gICAgICAgIXAtPmlzX25fYWxpZ25fc2l6ZWQoYWxpZ25fc2l6ZSkgfHwNCj4gICAgICAgKG9m
-ZnNldCAlIGFsaWduX3NpemUpKSk7DQo+KCgoKCgoKCgoKCgoKCBpdCB3aWxsIGNoZWNrIG9mZnNl
-dCBhbGlnbm1lbnQsIHNvIHdvbid0IGNvbnRpbnVlcyBhZnRlcg0KPm1lZXRpbmcgdGhlIGZpcnN0
-IHVuYWxpZ24gcHRyICkpKSkpKSkpKSkpKSkpDQo+DQo+ICAgICAgaWYgKCEodW5hbGlnbmVkLmlz
-X2NvbnRpZ3VvdXMoKSAmJg0KPnVuYWxpZ25lZC5fYnVmZmVycy5mcm9udCgpLmlzX2FsaWduZWQo
-YWxpZ25fbWVtb3J5KSkpIHsNCj4gICAgICAgIHB0ciBuYihidWZmZXI6OmNyZWF0ZV9hbGlnbmVk
-KHVuYWxpZ25lZC5fbGVuLCBhbGlnbl9tZW1vcnkpKTsNCj4gICAgICAgIHVuYWxpZ25lZC5yZWJ1
-aWxkKG5iKTsNCj4gICAgICAgIF9tZW1jb3B5X2NvdW50ICs9IHVuYWxpZ25lZC5fbGVuOw0KPiAg
-ICAgIH0NCj4gICAgICBfYnVmZmVycy5pbnNlcnQocCwgdW5hbGlnbmVkLl9idWZmZXJzLmZyb250
-KCkpOw0KPiAgICB9DQo+ICB9DQo+DQo+DQo+Pg0KPj4gc2FnZQ0KPg0KPg0KPg0KPi0tIA0KPkJl
-c3QgUmVnYXJkcywNCj4NCj5XaGVhdA0KPi0tDQo+VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
-c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+dGhlIGJvZHkg
-b2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj5Nb3JlIG1ham9yZG9t
-byBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0K
+Hi Sage,
+FYI, I have sent out a new PR addressing your earlier comments and some more enhancement. Here it is..
+
+https://github.com/ceph/ceph/pull/6670
+
+Did some exhaustive comparison with ceph latest master code base and found up to 32 OSDs (4 OSD nodes , one per 8TB SAS SSD) , my changes are giving ~35-40% improvement (more scale more delta). But, for 48 OSDs (6 OSD nodes) it is giving > 2x improvement for small IO. I didn't dig down much to find out why but my guess is the following.
+
+1. During the drive addition, I found out some of the drives are performing slow than others while running ceph workload. Because of this, the entire cluster throughput is suffering. The stock throttle scheme is very crude and probably not able to handle this. New PR has some changes in the throttling specifically addressing this kind of scenarios.
+
+2. Since those drives are slow the way Ceph stock code writes to the device is not helping much. Doing a big syncfs() on those drives are more harmful thus lowering those OSD throughput. In fact, stock code performance has degraded from 32 OSDs to 48 OSDs...
+
+3. Mixed workload also not scaling well with stock, getting ~2X benefit there as well.
+
+
+Thanks & Regards
+Somnath
