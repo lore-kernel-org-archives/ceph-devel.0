@@ -1,80 +1,93 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Multiple OSDs suicide because of client issues?
-Date: Sat, 21 Nov 2015 00:34:04 -0700
-Message-ID: <CAANLjFqL82wLfrYDD-LNgctWR=MpHWJ=PxfQJ8g2Ntbv8fgu2g@mail.gmail.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: Aggregate failure report in ceph -s
+Date: Sat, 21 Nov 2015 15:46:00 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC036504FE@shsmsx102.ccr.corp.intel.com>
+References: <6F3FA899187F0043BA1827A69DA2F7CC0365008A@shsmsx102.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1511200324480.24879@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f54.google.com ([209.85.213.54]:34832 "EHLO
-	mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751720AbbKUHeG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 21 Nov 2015 02:34:06 -0500
-Received: by vkha189 with SMTP id a189so11288000vkh.2
-        for <ceph-devel@vger.kernel.org>; Fri, 20 Nov 2015 23:34:04 -0800 (PST)
+Received: from mga11.intel.com ([192.55.52.93]:55764 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1760776AbbKUPqW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 21 Nov 2015 10:46:22 -0500
+In-Reply-To: <alpine.DEB.2.00.1511200324480.24879@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+Hi Sage,
 
-We had two interesting issues today. In both cases multiple OSDs
-suicided at the exact same moment. The first incident had four OSDs,
-the second had 12.
+Yeah, that is what I mean, and the output make more sense than I was th=
+inking before (only show if I cannot reach the whole crush level ).
 
-First set:
-145,159,79,176
+I will try to to it then.
 
-Second Set:
-osd.177 down at 20:59:48,
-osd.131, osd.136, osd.133, osd.139, osd.175, osd.170, osd.73 down at 20:00:03,
-osd.178, osd.179 down at 21:00:07,
-osd.159 down at 21:01:22,
-osd.110 down at 21:01:28
+Thanks.
 
-Only one OSD failed both times and only a couple of boxes had more
-than one OSD fail. The failures were spread out throughout the
-cluster. There is nothing in dmesg/messages/sar that indicate there
-was any type of hardware problem on the OSD hosts. All the OSDs
-indicate slow I/O and heartbeats missing starting at 20:57:32.
+-Xiaoxi
 
-The other odd thing is that most of the VMs across our 16 KVM hosts
-were fine, but several VMs on one host had kernel panics. In the
-messages logs of that host we see a kernel backtrace:
 
-Nov 20 20:58:32 compute8 kernel: WARNING: CPU: 4 PID: 0 at
-net/core/dev.c:2223 skb_warn_bad_offload+0xb6/0xbd()
 
-That host's clock was exactly one minute fast. Everything points to
-this host as having the issue, but I'm having a hard time
-understanding how a client (or several clients) could cause several
-OSDs to suicide. Can a non-responsive client in some way cause the OSD
-to fault?
-
-We have migrated all the VMs off this host and will continue to
-monitor the cluster. If there is interest in the logs (librbd did not
-dump any logs) from the OSDs, I can make them available.
-
-Thanks,
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.2.3
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJWUB5pCRDmVDuy+mK58QAAXbIP/jZyfbAalXRr4dFpEU4n
-OL5X0vBLCeg1UMbXjBRXbWlrUKHBvkruU0JCWEWEb9FFDfdkEggYwZazUVx/
-b3LU8LUGWD56wtaho8/V9FbDPsRD943k6TC+FoF4TL/FFuuiJ/Elnt97Fkkg
-xSBTKWS3p0I7PpSrefX+lUsDMzWJ1n6HTlYnE8SmlkkOgudh4IFFRObrv0Yr
-VPOzcD3RQULdFhEdtNZYUfVudypfKz1uFyq/FtgMSQbiHeQTn0JgD6ykWKZg
-9VWAVIUiHjyQn97KasCwpJjc2Vab5cUKJuUzLg72WlEKV/Q8rRcqHmxP10Pm
-+h30G2N1F9JsDmEeFtYNdd/AcvsoDIRaqQ7GzJf99sJAbLQCY9VT/LWd5H52
-PPUtRTHU8pr78rtVdOtQG1sxOZHvaNpPM9MQYnoxRkiCixazbO6dWVmuq32S
-iEaom2J1jNxUE+RUxHMVtb+qv4jOEMHBGpdragajslqiWKZrvtsPfVyn/E0s
-8m3nj67jkN4xMro3/fRJqeLUqc6QHAN/BXoTMm7flzFJyQ1fZ1l/Up8xR07J
-5xtl15vOf2Xa+IVFYPkLOoV+J/mTNiIQYaQKnkqYkL2OcbOq88TFHPUJ011+
-SegMD1aIYCUjLYbq+DVqarsnsJbSC51B6aR5Ko+ZOvHyMYYyRPfU4DBqGWO/
-GlcH
-=sFlz
------END PGP SIGNATURE-----
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Friday, November 20, 2015 7:28 PM
+> To: Chen, Xiaoxi
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Aggregate failure report in ceph -s
+>=20
+> On Fri, 20 Nov 2015, Chen, Xiaoxi wrote:
+> >
+> > Hi Sage,
+> >
+> > =A0=A0=A0=A0=A0=A0 As we are looking at the failure detection part =
+of
+> > ceph(basically around osd flipping issue), we=A0 got some suggestio=
+n
+> > from customer that showing the aggregated failure report in ?ceph ?=
+s?.
+> The idea is:
+> >
+> > =A0=A0=A0=A0=A0 When an OSD find it cannot hear heartbeat from some=
+ of the
+> > peers, it will try to aggregate the failure domain, say ?I cannot
+> > reach all my peers in Rack C,=A0=A0=A0 something wrong??=A0 and thi=
+s kind of
+> > log will be showed on ceph ?s.=A0=A0 So if we see ceph ?s and notic=
+e a lot
+> > of complain saying cannot reach Rack C, we will easily diagnose the=
+ Rack C
+> has some network issue.
+> >
+> >
+> >
+> > =A0=A0=A0=A0=A0 Is that make sense?
+>=20
+> Yeah, sounds reasonable to me!  It's a bit more awkward to do this at=
+ the
+> mon level since rack C may talk to the mon, but doing it at the OSD m=
+akes
+> sense.  There will be a lot of heuristics involved, though.  I expect=
+ the
+> messages might include
+>=20
+> - cannot reach _% of peers outside of my $crushlevel $foo [on front|b=
+ack]
+> - cannot reach _% of hosts in $crushlevel $foo [on front|back]
+>=20
+> ?
+>=20
+> Also note that it would be easiest to log these in the cluster log (c=
+eph -w, not
+> ceph -s).. I'm guessing that's what you mean?
+>=20
+> Thanks!
+> sage
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
