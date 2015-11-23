@@ -1,47 +1,52 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Multiple OSDs suicide because of client issues?
-Date: Mon, 23 Nov 2015 11:54:31 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1511231153210.11017@cobra.newdream.net>
-References: <CAANLjFqL82wLfrYDD-LNgctWR=MpHWJ=PxfQJ8g2Ntbv8fgu2g@mail.gmail.com> <CAJ4mKGb5F+cuUKdU6PHs47sed9ZCb+qEnNDvxfuxB=vFyDx96A@mail.gmail.com> <CAANLjFo=vCsny5=JW1wYiQk5S=oXdtVd0OzXEC=uTGgmDO9ydA@mail.gmail.com> <CAJ4mKGbYrDOpiEJiMKZwHaEHGrZT=b58GjzYg4x35U1XtDbDWg@mail.gmail.com>
- <CAANLjFpn+MGw4cY7aZarLuXgiVznovaJGXY2wtXwMmm8n24Qsw@mail.gmail.com> <CAJ4mKGaA=OnH3XPM=m5JE+1Rwc38gsmwrJv3FP1MCY5qO1nYrg@mail.gmail.com> <CAANLjFoyAyDrxoGLTdPwzRN12ffqkHqNeXgBZBmG+s7i02WBCw@mail.gmail.com> <CAJ4mKGawUUwAB7DC6uWf=6xVGpeg=ac3PB1wx2_3msDPCYDkOw@mail.gmail.com>
- <CAANLjFq-eqTy4XN_YTMyS0M2h4Smo1GNSmuqL+FuDAZDG3yXGg@mail.gmail.com> <alpine.DEB.2.00.1511231110530.11017@cobra.newdream.net> <CAANLjFrU0aDV44u7srskMOCHvFaHYEG4kdxnhxH_MMxW6S9Mfw@mail.gmail.com> <alpine.DEB.2.00.1511231131000.11017@cobra.newdream.net>
- <CAANLjFrA14SiTgGdNPGJZODeF1j-BO8GAJOEf9fFQCHbpM3MOg@mail.gmail.com>
+From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
+Subject: RE: All-Flash Ceph cluster and journal
+Date: Mon, 23 Nov 2015 21:20:23 +0000
+Message-ID: <3649A15A2562B54294DE14BCE5AC79120B8FA881@FMSMSX119.amr.corp.intel.com>
+References: <564DB2A1.9080603@gmail.com> <564DDDE3.9050409@redhat.com>
+ <564EF916.5020101@gmail.com>
+ <72f50d73f18d4749a6d37748abe03752@R01UKEXCASM115.r01.fujitsu.local>
+ <3649A15A2562B54294DE14BCE5AC79120B8FA54F@FMSMSX119.amr.corp.intel.com>
+ <n2vmh0$b9p$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41131 "EHLO mx1.redhat.com"
+Received: from mga01.intel.com ([192.55.52.88]:6209 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932108AbbKWTyd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 23 Nov 2015 14:54:33 -0500
-In-Reply-To: <CAANLjFrA14SiTgGdNPGJZODeF1j-BO8GAJOEf9fFQCHbpM3MOg@mail.gmail.com>
+	id S1752270AbbKWVUY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 23 Nov 2015 16:20:24 -0500
+In-Reply-To: <n2vmh0$b9p$1@ger.gmane.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Daniel Swarbrick <daniel.swarbrick@profitbricks.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, 23 Nov 2015, Robert LeBlanc wrote:
-> Thanks for the log dump command, I'll keep that in the back pocket, it
-> would have been helpful in a few situations.
-> 
-> I'm trying to microbenchmark the new Weighted Round Robin queue I've
-> been working on and just trying to dump the info to the logs so that I
-> can see it at runtime. So this is in a branch that isn't published
-> yet.
-> 
-> In file included from osd/OSD.cc:37:0:
-> osd/OSD.h: In member function ?virtual void
-> OSD::ShardedOpWQ::_process(uint32_t, ceph::heartbeat_handle_d*)?:
-> osd/OSD.h:1072:7: error: invalid use of non-static data member ?OSD::whoami?
->    int whoami;
->        ^
-> osd/OSD.cc:8270:388: error: from this location
->    dout(15) << "Wrr (" << dendl;
-
-#undef
-#define dout_prefix *_dout << "something: "
-
-(whatever dout_perfix currently is for this code includes whoami... you're 
-probably in a class other than OSD but still in OSD.cc.. move it to a 
-different .cc file, or put it above the current class OSD stuff.
-
-sage
+SXQncyBhbiBleGFtcGxlIG9mIHdoYXQgSGFtbWVyIGNhbiBkbywgYW5kIHdlJ3JlIHNlZWluZyBz
+b21lIGltcHJvdmVtZW50cyBhbHJlYWR5IHdpdGggSW5mZXJuYWxpcy4gIEkgYWdyZWUgcmVnYXJk
+aW5nIHRoZSB0dW5pbmcgYW5kIG9wdGltaXphdGlvbiwgYW5kIGEgbG90IG9mIHdvcmsgaXMgY3Vy
+cmVudGx5IHVuZGVyd2F5IHRvd2FyZHMgdGhhdCBnb2FsIGFzIFBpb3RyIHBvaW50ZWQgb3V0Lg0K
+DQpGb3IgY29tcGxldGVuZXNzIHdlIGRpZCBkbyBhIGJpdCBvZiB0aGUgT1NEIHR3ZWFraW5nIGEg
+d2VlayBvciBzbyBhZ28gKHJlc3VsdHMgaW4gdGhlIG1haWxpbmdsaXN0KS4gIGh0dHA6Ly93d3cu
+c3Bpbmljcy5uZXQvbGlzdHMvY2VwaC1kZXZlbC9tc2cyNzI1Ni5odG1sDQoNClRoYW5rcywNCg0K
+U3RlcGhlbg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1v
+d25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVs
+Lm9yZ10gT24gQmVoYWxmIE9mIERhbmllbCBTd2FyYnJpY2sNClNlbnQ6IE1vbmRheSwgTm92ZW1i
+ZXIgMjMsIDIwMTUgMTE6MzkgQU0NClRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3Vi
+amVjdDogUmU6IEFsbC1GbGFzaCBDZXBoIGNsdXN0ZXIgYW5kIGpvdXJuYWwNCg0KU2ltcGxlIGJ1
+dCBjbGV2ZXIgd2F5IG9mIGVuc3VyaW5nIHRoYXQgTlZNZSdzIGRlZXAgcXVldWVzIGFyZW4ndCBz
+dGFydmVkIG9mIHdvcmsgdG8gZG8uIEJ1dCBkb2Vzbid0IHRoaXMgc3VnZ2VzdCB0aGF0IENlcGgg
+bmVlZHMgb3B0aW1pemluZyBvciB0dW5pbmcgZm9yIE5WTWU/IENvdWxkIHlvdSBub3QgaGF2ZSB0
+d2Vha2VkIE9TRCBwYXJhbWV0ZXJzIHRvIGVuc3VyZSBtb3JlIHRocmVhZHMgLyBJTyBvcGVyYXRp
+b25zIGluIHBhcmFsbGVsIGFuZCBoYXZlIHRoZSBzYW1lIGVmZmVjdD8NCg0KT24gMjMvMTEvMTUg
+MTg6MzcsIEJsaW5pY2ssIFN0ZXBoZW4gTCB3cm90ZToNCj4gVGhpcyBsaW5rIHBvaW50cyB0byBh
+IHByZXNlbnRhdGlvbiB3ZSBkaWQgYSBmZXcgd2Vla3MgYmFjayB3aGVyZSB3ZSB1c2VkIE5WTWUg
+ZGV2aWNlcyBmb3IgYm90aCB0aGUgZGF0YSBhbmQgam91cm5hbC4gIFdlIHBhcnRpdGlvbmVkIHRo
+ZSBkZXZpY2VzIG11bHRpcGxlIHRpbWVzIHRvIGNvLWxvY2F0ZSBtdWx0aXBsZSBPU0QncyBwZXIg
+ZGV2aWNlLiAgVGhlIGNvbmZpZ3VyYXRpb24gZGF0YSBvbiB0aGUgY2x1c3RlciBpcyBpbiB0aGUg
+YmFja3VwLg0KPiANCj4gaHR0cDovL3d3dy5zbGlkZXNoYXJlLm5ldC9Jbmt0YW5rX0NlcGgvYWNj
+ZWxlcmF0aW5nLWNhc3NhbmRyYS13b3JrbG9hZA0KPiBzLW9uLWNlcGgtd2l0aC1hbGxmbGFzaC1w
+Y2llLXNzZHMNCj4gDQo+IFRoYW5rcywNCj4gDQo+IFN0ZXBoZW4NCj4gDQoNCg0KLS0NClRvIHVu
+c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
+LWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
+Lm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
+ZG9tby1pbmZvLmh0bWwNCg==
