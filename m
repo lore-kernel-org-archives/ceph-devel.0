@@ -1,35 +1,49 @@
-From: Gaudenz Steinlin <gaudenz@debian.org>
-Subject: Re: [Ceph-announce] v0.80.11 Firefly released
-Date: Mon, 23 Nov 2015 17:59:49 +0100
-Message-ID: <87d1v0ps6y.fsf@meteor.durcheinandertal.bofh>
-References: <alpine.DEB.2.00.1511191404500.3880@cobra.newdream.net>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Wiping object content on removal
+Date: Mon, 23 Nov 2015 11:11:30 -0600
+Message-ID: <CAJ4mKGYuQ0mPU+BPXOU=_3Tqf+ySLmiUfozi0hNbybJLkkxVRw@mail.gmail.com>
+References: <564C8E50.4070503@mirantis.com>
+	<CAJ4mKGYBzWfd7DB6cj6o0dv8BTP4jkwSFRZGGfNTisdsxp2vDA@mail.gmail.com>
+	<56534265.5040302@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from vechigen.cirrax.com ([217.197.128.12]:46459 "EHLO
-	mail.cirrax.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751699AbbKWRHo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Nov 2015 12:07:44 -0500
-In-Reply-To: <alpine.DEB.2.00.1511191404500.3880@cobra.newdream.net>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:34636 "EHLO
+	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751699AbbKWRLb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Nov 2015 12:11:31 -0500
+Received: by wmvv187 with SMTP id v187so171305172wmv.1
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Nov 2015 09:11:30 -0800 (PST)
+In-Reply-To: <56534265.5040302@mirantis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@redhat.com>, ceph-announce@ceph.com, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com
+To: Igor Fedotov <ifedotov@mirantis.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Sage Weil <sage@redhat.com> writes:
+On Mon, Nov 23, 2015 at 10:44 AM, Igor Fedotov <ifedotov@mirantis.com> wrote:
+> Hi Gregory,
 >
-> Getting Ceph
-> ------------
+> On 23.11.2015 18:52, Gregory Farnum wrote:
+>>
+>> On Wed, Nov 18, 2015 at 8:42 AM, Igor Fedotov <ifedotov@mirantis.com>
+>> wrote:
+>>>
+>>> Hi Cephers.
+>>>
+>>> Does Ceph have an ability to wipe object content during one's removal?
+>>> Surely one can do that manually from the client but I think that's
+>>> ineffective and not 100% secure.
+>>>
+>>> If no - what's about adding such feature to Ceph?
+>>>   I can start working on that.
+>>
+>> Wipe object content during removal of what? The OSD? Or are you
+>> talking about secure erase of object data instead of unlinking files?
 >
-> * Git at git://github.com/ceph/ceph.git
-> * Tarball at http://download.ceph.com/tarballs/ceph-0.80.11.tar.gz
+> I meant secure object removal.
+>
 
-This leads to a 404 Error. The tar.bz2 file is missing as well. In
-addition it would be nice to have some way to verify the downloaded
-files. There are no checksum files for uploads after the hacking of
-ceph.com and those that are there don't help much as they are not
-signed.
-
-download.ceph.com is available over https but this is not linked in the
-release announcements. Using https would be at least a first step.
-
-Gaudenz
+Yeah, I just don't see this happening. There aren't even exposed
+primitives to do a secure erase on SSDs, are there? Plus turning a
+delete operation into a full data overwrite....yuck.
+-Greg
