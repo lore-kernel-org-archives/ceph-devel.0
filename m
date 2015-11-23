@@ -1,8 +1,8 @@
 From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 1/2] block-rbd: Delete an unnecessary check before the
- function call "rbd_dev_destroy"
-Date: Mon, 23 Nov 2015 20:44:27 +0100
-Message-ID: <56536C9B.5010109@users.sourceforge.net>
+Subject: [PATCH 2/2] block-rbd: One function call less in
+ rbd_dev_probe_parent() after error detection
+Date: Mon, 23 Nov 2015 20:46:26 +0100
+Message-ID: <56536D12.4000308@users.sourceforge.net>
 References: <5307CAA2.8060406@users.sourceforge.net>
  <alpine.DEB.2.02.1402212321410.2043@localhost6.localdomain6>
  <530A086E.8010901@users.sourceforge.net>
@@ -23,40 +23,79 @@ References: <5307CAA2.8060406@users.sourceforge.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <kernel-janitors-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <56536BAD.4000309@users.sourceforge.net>
-Sender: kernel-janitors-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Alex Elder <elder@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, ceph-devel@vger.kernel.org
 Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
 List-Id: ceph-devel.vger.kernel.org
 
 From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Mon, 23 Nov 2015 20:16:45 +0100
+Date: Mon, 23 Nov 2015 20:22:41 +0100
 
-The rbd_dev_destroy() function tests whether its argument is NULL
-and then returns immediately. Thus the test around the call is not needed.
+The rbd_dev_destroy() function was called in two cases by the
+rbd_dev_probe_parent() function during error handling even if
+the passed variable contained a null pointer.
 
-This issue was detected by using the Coccinelle software.
+* This implementation detail could be improved by adjustments
+  for jump targets according to the Linux coding style convention.
+
+* Drop an unnecessary initialisation for the variable "parent" then.
 
 Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 ---
- drivers/block/rbd.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/block/rbd.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 235708c..24a757e 100644
+index 24a757e..2ad9092 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -5184,8 +5184,7 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
+@@ -5148,7 +5148,7 @@ out_err:
+  */
+ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
+ {
+-	struct rbd_device *parent = NULL;
++	struct rbd_device *parent;
+ 	int ret;
  
- out_err:
- 	rbd_dev_unparent(rbd_dev);
--	if (parent)
--		rbd_dev_destroy(parent);
-+	rbd_dev_destroy(parent);
+ 	if (!rbd_dev->parent_spec)
+@@ -5157,14 +5157,14 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
+ 	if (++depth > RBD_MAX_PARENT_CHAIN_LEN) {
+ 		pr_info("parent chain is too long (%d)\n", depth);
+ 		ret = -EINVAL;
+-		goto out_err;
++		goto unparent_device;
+ 	}
+ 
+ 	parent = rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec,
+ 				NULL);
+ 	if (!parent) {
+ 		ret = -ENOMEM;
+-		goto out_err;
++		goto unparent_device;
+ 	}
+ 
+ 	/*
+@@ -5176,15 +5176,15 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
+ 
+ 	ret = rbd_dev_image_probe(parent, depth);
+ 	if (ret < 0)
+-		goto out_err;
++		goto destroy_device;
+ 
+ 	rbd_dev->parent = parent;
+ 	atomic_set(&rbd_dev->parent_ref, 1);
+ 	return 0;
+-
+-out_err:
+-	rbd_dev_unparent(rbd_dev);
++destroy_device:
+ 	rbd_dev_destroy(parent);
++unparent_device:
++	rbd_dev_unparent(rbd_dev);
  	return ret;
  }
  
 -- 
 2.6.3
-
