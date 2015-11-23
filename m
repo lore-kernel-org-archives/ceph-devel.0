@@ -1,65 +1,124 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: Wiping object content on removal
-Date: Mon, 23 Nov 2015 19:53:42 +0300
-Message-ID: <CABYiri-aV2t-OkcrAFLwyy-FWz5Vk-3S7PUxUfwa2Fijr7RKmQ@mail.gmail.com>
-References: <564C8E50.4070503@mirantis.com> <CAJ4mKGYBzWfd7DB6cj6o0dv8BTP4jkwSFRZGGfNTisdsxp2vDA@mail.gmail.com>
- <56534265.5040302@mirantis.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: =?UTF-8?B?UmU6IOetlOWkjTogam91cm5hbCBhbGlnbm1lbnQ=?=
+Date: Tue, 24 Nov 2015 00:59:28 +0800
+Message-ID: <CACJqLyZAvQ+-Q_ZRTPxaS9pQoqD4sEZRCPZThQWk8DeUMo_GsQ@mail.gmail.com>
+References: <019801d1236e$206f12e0$614d38a0$@com>
+	<d742f6275e1645cdb02b0bad23110eec@R01UKEXCASM115.r01.fujitsu.local>
+	<023e01d12373$941f1050$bc5d30f0$@com>
+	<alpine.DEB.2.00.1511200339470.25088@cobra.newdream.net>
+	<CACJqLybiXZC01ZDD2nUz58PmOWNBSNk01Dr6dNrnTzd6poNOLA@mail.gmail.com>
+	<alpine.DEB.2.00.1511200507120.24879@cobra.newdream.net>
+	<CACJqLyY48OX4rLFg9xj_UxEmO24x0bx70wyJsLjGnLyM-skkCA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f179.google.com ([209.85.217.179]:33165 "EHLO
-	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750976AbbKWQyE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Nov 2015 11:54:04 -0500
-Received: by lbbkw15 with SMTP id kw15so99570484lbb.0
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Nov 2015 08:54:03 -0800 (PST)
-In-Reply-To: <56534265.5040302@mirantis.com>
+Received: from mail-oi0-f53.google.com ([209.85.218.53]:34311 "EHLO
+	mail-oi0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751742AbbKWQ73 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Nov 2015 11:59:29 -0500
+Received: by oies6 with SMTP id s6so134194124oie.1
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Nov 2015 08:59:28 -0800 (PST)
+In-Reply-To: <CACJqLyY48OX4rLFg9xj_UxEmO24x0bx70wyJsLjGnLyM-skkCA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: changtao381 <changtao381@163.com>, =?UTF-8?Q?Da=C5=82ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Nov 23, 2015 at 7:44 PM, Igor Fedotov <ifedotov@mirantis.com> wrote:
-> Hi Gregory,
->
-> On 23.11.2015 18:52, Gregory Farnum wrote:
+Actually, the broken zero-copy for data is discouraging. I think the
+way we could do is rearrange the layout of journal entry, just like
+message we make journal header and payload(extra encoding bytes
+without data), then data and footer. I think it should be a easy adapt
+change?
+
+On Fri, Nov 20, 2015 at 9:29 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> On Fri, Nov 20, 2015 at 9:08 PM, Sage Weil <sage@newdream.net> wrote:
+>> On Fri, 20 Nov 2015, Haomai Wang wrote:
+>>> On Fri, Nov 20, 2015 at 7:41 PM, Sage Weil <sage@newdream.net> wrote:
+>>> > On Fri, 20 Nov 2015, changtao381 wrote:
+>>> >> Hi All,
+>>> >>
+>>> >> Thanks for you apply!
+>>> >>
+>>> >> If directioIO + async IO requirement that alignment, it shouldn't aligned by PAGE for each journal entry.
+>>> >> For it may write many entries of journal once time
+>>> >
+>>> > We also want to avoid copying the data around in memory to change the
+>>> > alignment.  The messenger takes care to read data off the wire into
+>>> > buffers with the correct alignment so that we can later use them for
+>>> > direct-io.
+>>> >
+>>> > If you're worried about the small io case, I think this is just a matter
+>>> > of setting a threshold for small ios so that we don't bother with all of
+>>> > the padding when the memory copy isn't that expensive.  But... given that
+>>> > we have a header *and* footer in the journal format and almost all IOs are
+>>> > 4k multiples I think it'd save you a single 4k block at most.
+>>> >
+>>> > (Also, I thought we already did something like this, but perhaps not!)
+>>>
+>>> Hmm, based on our recently test, the data from messenger is aligned.
+>>> But the encoded data(pglog, transaction) will make thing worse, like
+>>> PR(https://github.com/ceph/ceph/pull/6368) solved, we even will get 14
+>>> ptr in the bufferlist which passed into filejournal before. So it make
+>>> we rebuild each time within filejournal thread. Like this
+>>> PR(https://github.com/ceph/ceph/pull/6484), we try to make it rebuild
+>>> not in filejournal thread which is single.
 >>
->> On Wed, Nov 18, 2015 at 8:42 AM, Igor Fedotov <ifedotov@mirantis.com>
->> wrote:
->>>
->>> Hi Cephers.
->>>
->>> Does Ceph have an ability to wipe object content during one's removal?
->>> Surely one can do that manually from the client but I think that's
->>> ineffective and not 100% secure.
->>>
->>> If no - what's about adding such feature to Ceph?
->>>   I can start working on that.
+>> buffer::list::rebuild_page_aligned() should only copy/rebuild ptrs that
+>> are unaligned, and leave aligned ones untouched.  It looks like the
+>> journal code is already doing this?
+>
+> Yes or not, for example we have a bufferlist contains 2 ptrs, the
+> first is unaligned, the second is aligned. But the current impl will
+> ignore the second alignment fact. Look at the code:
+>
+>   void buffer::list::rebuild_aligned_size_and_memory(unsigned align_size,
+>     unsigned align_memory)
+>   {
+> ........
+>       list unaligned;
+>       unsigned offset = 0;
+>       do {
+>         /*cout << " segment " << (void*)p->c_str()
+>                << " offset " << ((unsigned long)p->c_str() & (align - 1))
+>                << " length " << p->length() << " " << (p->length() &
+> (align - 1))
+>                << " overall offset " << offset << " " << (offset & (align - 1))
+>       << " not ok" << std::endl;
+>         */
+>         offset += p->length();
+>         unaligned.push_back(*p);
+>         _buffers.erase(p++);
+>       } while (p != _buffers.end() &&
+>       (!p->is_aligned(align_memory) ||
+>        !p->is_n_align_sized(align_size) ||
+>        (offset % align_size)));
+> ((((((((((((( it will check offset alignment, so won't continues after
+> meeting the first unalign ptr ))))))))))))))
+>
+>       if (!(unaligned.is_contiguous() &&
+> unaligned._buffers.front().is_aligned(align_memory))) {
+>         ptr nb(buffer::create_aligned(unaligned._len, align_memory));
+>         unaligned.rebuild(nb);
+>         _memcopy_count += unaligned._len;
+>       }
+>       _buffers.insert(p, unaligned._buffers.front());
+>     }
+>   }
+>
+>
 >>
->> Wipe object content during removal of what? The OSD? Or are you
->> talking about secure erase of object data instead of unlinking files?
+>> sage
 >
-> I meant secure object removal.
 >
->> I'm not sure if any of that is really more interesting than just
->> enabling disk encryption...
->> -Greg
 >
-> I agree that encryption is more secure but it consumes much more CPU
-> resources.
+> --
+> Best Regards,
 >
-> Thanks,
-> Igor
->
+> Wheat
 
-Hi,
 
-just wondering - do you have a complete security model where secure
-erase is required, but data protection by itself is not important by
-itself? In any way, the immediate object wipeout is not fast - it
-could consume tens of minutes or even hours after actual erase
-command, which is actually negates the requirement of the effective
-data destruction. Commonly the erase procedure is required when a
-media is moved between different security access zones, which could be
-seen as a lifecycle operation and it does not depend on any software
-functionality within those zones.
+
+-- 
+Best Regards,
+
+Wheat
