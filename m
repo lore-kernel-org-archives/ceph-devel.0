@@ -1,55 +1,98 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Wiping object content on removal
-Date: Tue, 24 Nov 2015 20:04:36 +0300
-Message-ID: <565498A4.2070001@mirantis.com>
-References: <564C8E50.4070503@mirantis.com>
- <CAJ4mKGYBzWfd7DB6cj6o0dv8BTP4jkwSFRZGGfNTisdsxp2vDA@mail.gmail.com>
- <56534265.5040302@mirantis.com>
- <CAJ4mKGYuQ0mPU+BPXOU=_3Tqf+ySLmiUfozi0hNbybJLkkxVRw@mail.gmail.com>
+From: SF Markus Elfring <elfring@users.sourceforge.net>
+Subject: Re: [PATCH 2/2] block-rbd: One function call less in
+ rbd_dev_probe_parent() after error detection
+Date: Tue, 24 Nov 2015 20:23:09 +0100
+Message-ID: <5654B91D.4040808@users.sourceforge.net>
+References: <5307CAA2.8060406@users.sourceforge.net>
+ <alpine.DEB.2.02.1402212321410.2043@localhost6.localdomain6>
+ <530A086E.8010901@users.sourceforge.net>
+ <alpine.DEB.2.02.1402231635510.1985@localhost6.localdomain6>
+ <530A72AA.3000601@users.sourceforge.net>
+ <alpine.DEB.2.02.1402240658210.2090@localhost6.localdomain6>
+ <530B5FB6.6010207@users.sourceforge.net>
+ <alpine.DEB.2.10.1402241710370.2074@hadrien>
+ <530C5E18.1020800@users.sourceforge.net>
+ <alpine.DEB.2.10.1402251014170.2080@hadrien>
+ <530CD2C4.4050903@users.sourceforge.net>
+ <alpine.DEB.2.10.1402251840450.7035@hadrien>
+ <530CF8FF.8080600@users.sourceforge.net>
+ <alpine.DEB.2.02.1402252117150.2047@localhost6.localdomain6>
+ <530DD06F.4090703@users.sourceforge.net>
+ <alpine.DEB.2.02.1402262129250.2221@localhost6.localdomain6>
+ <5317A59D.4@users.sourceforge.net> <56536BAD.4000309@users.sourceforge.net>
+ <56536D12.4000308@users.sourceforge.net>
+ <CAOi1vP_t6-vw-sesRwpgfbqLVRyevOP4uvhbj05b3PPg=oHD6Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f50.google.com ([209.85.215.50]:36371 "EHLO
-	mail-lf0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751256AbbKXREm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Nov 2015 12:04:42 -0500
-Received: by lfs39 with SMTP id 39so27594991lfs.3
-        for <ceph-devel@vger.kernel.org>; Tue, 24 Nov 2015 09:04:41 -0800 (PST)
-In-Reply-To: <CAJ4mKGYuQ0mPU+BPXOU=_3Tqf+ySLmiUfozi0hNbybJLkkxVRw@mail.gmail.com>
+Received: from mout.web.de ([212.227.17.11]:53058 "EHLO mout.web.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753770AbbKXTXY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 24 Nov 2015 14:23:24 -0500
+In-Reply-To: <CAOi1vP_t6-vw-sesRwpgfbqLVRyevOP4uvhbj05b3PPg=oHD6Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
 
-Gregory,
-
-the idea is to wipe object content optionally - when user requests for that.
-Thus not every delete operation will suffer from that.
-
-Igor.
-
-On 11/23/2015 8:11 PM, Gregory Farnum wrote:
-> On Mon, Nov 23, 2015 at 10:44 AM, Igor Fedotov <ifedotov@mirantis.com> wrote:
->> Hi Gregory,
+>> @@ -5157,14 +5157,14 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
+>>         if (++depth > RBD_MAX_PARENT_CHAIN_LEN) {
+>>                 pr_info("parent chain is too long (%d)\n", depth);
+>>                 ret = -EINVAL;
+>> -               goto out_err;
+>> +               goto unparent_device;
+>>         }
 >>
->> On 23.11.2015 18:52, Gregory Farnum wrote:
->>> On Wed, Nov 18, 2015 at 8:42 AM, Igor Fedotov <ifedotov@mirantis.com>
->>> wrote:
->>>> Hi Cephers.
->>>>
->>>> Does Ceph have an ability to wipe object content during one's removal?
->>>> Surely one can do that manually from the client but I think that's
->>>> ineffective and not 100% secure.
->>>>
->>>> If no - what's about adding such feature to Ceph?
->>>>    I can start working on that.
->>> Wipe object content during removal of what? The OSD? Or are you
->>> talking about secure erase of object data instead of unlinking files?
->> I meant secure object removal.
+>>         parent = rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec,
+>>                                 NULL);
+>>         if (!parent) {
+>>                 ret = -ENOMEM;
+>> -               goto out_err;
+>> +               goto unparent_device;
+>>         }
 >>
-> Yeah, I just don't see this happening. There aren't even exposed
-> primitives to do a secure erase on SSDs, are there? Plus turning a
-> delete operation into a full data overwrite....yuck.
-> -Greg
+>>         /*
+>> @@ -5176,15 +5176,15 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
+>>
+>>         ret = rbd_dev_image_probe(parent, depth);
+>>         if (ret < 0)
+>> -               goto out_err;
+>> +               goto destroy_device;
+>>
+>>         rbd_dev->parent = parent;
+>>         atomic_set(&rbd_dev->parent_ref, 1);
+>>         return 0;
+>> -
+>> -out_err:
+>> -       rbd_dev_unparent(rbd_dev);
+>> +destroy_device:
+>>         rbd_dev_destroy(parent);
+>> +unparent_device:
+>> +       rbd_dev_unparent(rbd_dev);
+>>         return ret;
+>>  }
+> 
+> Cleanup here is (and should be) done in reverse order.
 
+I have got an other impression about the appropriate order for the corresponding
+clean-up function calls.
+
+
+> We allocate parent rbd_device and then link it with what we already have,
+
+I guess that we have got a different understanding about the relevant "linking".
+
+
+> so the order in which we cleanup is unlink ("unparent"), destroy.
+
+I interpreted the eventual passing of a null pointer to the rbd_dev_destroy()
+function as an indication for further source code adjustments.
+
+
+> Changing it is just asking for use-after-free bugs.
+
+Do the affected implementation details need a bit more clarification?
+
+Regards,
+Markus
