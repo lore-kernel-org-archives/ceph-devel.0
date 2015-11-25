@@ -1,29 +1,47 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH 2/2] block-rbd: One function call less in
- rbd_dev_probe_parent() after error detection
-Date: Wed, 25 Nov 2015 18:26:44 +0300
-Message-ID: <20151125152644.GB18797@mwanda>
-References: <530DD06F.4090703@users.sourceforge.net>
- <alpine.DEB.2.02.1402262129250.2221@localhost6.localdomain6>
- <5317A59D.4@users.sourceforge.net>
- <56536BAD.4000309@users.sourceforge.net>
- <56536D12.4000308@users.sourceforge.net>
- <CAOi1vP_t6-vw-sesRwpgfbqLVRyevOP4uvhbj05b3PPg=oHD6Q@mail.gmail.com>
- <5654B91D.4040808@users.sourceforge.net>
- <CAOi1vP-Z2yfJVcpqZN8EOf6rYsd41ixOOQWVva_xkKmA6PLrhg@mail.gmail.com>
- <20151125115512.GA18797@mwanda>
- <CAOi1vP_zf6q=Dzy8F_OCUTDCHp2KXU2nv5DSjJXAKekcStXQgw@mail.gmail.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: Cache Tiering Investigation and Potential Patch
+Date: Wed, 25 Nov 2015 09:38:07 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1511250936470.11017@cobra.newdream.net>
+References: <3196669f.9Ro.9Gf.11.jZLaYO@mailjet.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAOi1vP_zf6q=Dzy8F_OCUTDCHp2KXU2nv5DSjJXAKekcStXQgw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: SF Markus Elfring <elfring@users.sourceforge.net>, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <3196669f.9Ro.9Gf.11.jZLaYO-ImYt9qTNe79BDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Nick Fisk <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org>
+Cc: 'ceph-users' <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Ah... I see now.  Thanks.
+On Wed, 25 Nov 2015, Nick Fisk wrote:
+> Presentation from the performance meeting.
+> 
+> I seem to be unable to post to Ceph-devel, so can someone please repost
+> there if useful.
 
-regards,
-dan carpenter
+Copying ceph-devel.  The problem is just that your email is 
+HTML-formatted. If you send it in plaintext vger won't reject it.
+
+> I will try and get a PR sorted, I realise that this change modifies the way
+> the cache was originally designed but I think it provides a quick win for
+> the performance increase involved. If there are plans for a better solution
+> in time for the next release, then I would be really interested in working
+> to that goal instead.
+
+It's how it was intended/documented to work, so I think this falls in the 
+'bug fix' category.  I did a quick PR here:
+
+	https://github.com/ceph/ceph/pull/6702
+
+Does that look right?
+
+Thanks!
+sage
