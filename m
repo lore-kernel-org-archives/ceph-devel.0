@@ -1,79 +1,81 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: block-rbd: One function call less in rbd_dev_probe_parent() after
- error detection
-Date: Tue, 24 Nov 2015 22:54:17 +0100
-Message-ID: <CAOi1vP_MoqiPqNMGJVEeAyBywtkHbZrn7cLayEgdT1cL63c7KQ@mail.gmail.com>
-References: <5307CAA2.8060406@users.sourceforge.net>
-	<alpine.DEB.2.02.1402231635510.1985@localhost6.localdomain6>
-	<530A72AA.3000601@users.sourceforge.net>
-	<alpine.DEB.2.02.1402240658210.2090@localhost6.localdomain6>
-	<530B5FB6.6010207@users.sourceforge.net>
-	<alpine.DEB.2.10.1402241710370.2074@hadrien>
-	<530C5E18.1020800@users.sourceforge.net>
-	<alpine.DEB.2.10.1402251014170.2080@hadrien>
-	<530CD2C4.4050903@users.sourceforge.net>
-	<alpine.DEB.2.10.1402251840450.7035@hadrien>
-	<530CF8FF.8080600@users.sourceforge.net>
-	<alpine.DEB.2.02.1402252117150.2047@localhost6.localdomain6>
-	<530DD06F.4090703@users.sourceforge.net>
-	<alpine.DEB.2.02.1402262129250.2221@localhost6.localdomain6>
-	<5317A59D.4@users.sourceforge.net>
-	<56536BAD.4000309@users.sourceforge.net>
-	<56536D12.4000308@users.sourceforge.net>
-	<CAOi1vP_t6-vw-sesRwpgfbqLVRyevOP4uvhbj05b3PPg=oHD6Q@mail.gmail.com>
-	<5654B91D.4040808@users.sourceforge.net>
-	<CAOi1vP-Z2yfJVcpqZN8EOf6rYsd41ixOOQWVva_xkKmA6PLrhg@mail.gmail.com>
-	<5654C9F2.20409@users.sourceforge.net>
+From: Wukongming <wu.kongming@h3c.com>
+Subject: =?utf-8?B?562U5aSNOiBSZWJvb3QgYmxvY2tlZCB3aGVuIHVuZG9pbmcgdW5tYXAgb3Au?=
+Date: Wed, 25 Nov 2015 06:36:50 +0000
+Message-ID: <47D132BF400BE64BAE6D71033F7D3D7518F02A@H3CMLB12-EX.srv.huawei-3com.com>
+References: <47D132BF400BE64BAE6D71033F7D3D7518DD2C@H3CMLB12-EX.srv.huawei-3com.com>
+ <CAOi1vP-eP_unRJFkZ-z2bQyWOcnpxnV+zBk1pRt2Q1OLnSU79Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5654C9F2.20409@users.sourceforge.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>
-Cc: Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.h3c.com ([221.12.31.13]:24671 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755168AbbKYGim (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 25 Nov 2015 01:38:42 -0500
+In-Reply-To: <CAOi1vP-eP_unRJFkZ-z2bQyWOcnpxnV+zBk1pRt2Q1OLnSU79Q@mail.gmail.com>
+Content-Language: zh-CN
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>
 
-On Tue, Nov 24, 2015 at 9:34 PM, SF Markus Elfring
-<elfring@users.sourceforge.net> wrote:
->> Well, there isn't any _literal_ linking (e.g. adding to a link list,
->> etc) in this case.  We just bump some refs and do probe to fill in the
->> newly allocated parent.
->
-> Thanks for your clarification.
->
->
->> The actual linking (rbd_dev->parent = parent) is done right before
->> returning so we never have to undo it in rbd_dev_probe_parent() and
->> that's the only reason your patch probably doesn't break anything.
->
-> Is this function implementation just also affected by an issue
-> which is mentioned in the Linux document "CodingStyle" as "one err bugs"?
-
-No, why?  "one err bug" as per CodingStyle is a NULL deref on line 2 if
-foo is NULL.  If it was just "err: kfree(foo); return ret;", a NULL foo
-would be perfectly OK.
-
-1       err:
-2               kfree(foo->bar);
-3               kfree(foo);
-4               return ret;
-
-If you can spot such a NULL deref in rbd_dev_probe_parent(), I'd gladly
-take a patch.
-
->
->
->> Think about what happens if, after your patch is applied, someone moves
->> that assignment up or adds an extra step that can fail after it...
->
-> Is such a software maintenance concern really enough to delay (or reject)
-> my second update suggestion in this small patch series?
-
-Yes - it's rejected because it messes up the order of cleanup for no
-good reason.  I realize why you think the patch is correct and it's not
-without merit, but it just doesn't fit the weird rbd_dev_probe_parent()
-contract.
-
-Thanks,
-
-                Ilya
+SSBhbSBnb25uYSBtb2RpZnkgcmVib290IHNjcmlwdCwgYnV0IHN0aWxsIG5vdCBTYXRpc2Z5aW5n
+LiBpZiB5b3UgY2FuIHNoYXJlIHlvdXIgcGF0Y2gsIHRoYXQgd2lsbCBiZSB2ZXJ5IGNvb2wuDQoN
+ClRoYW5rcywNCg0KICAgICAgICAgICAgICAgICAgICAgICAgS29uZ21pbmcgV3UNCi0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0Kd3Vrb25nbWluZyBJRDogMTIw
+MTkNClRlbO+8mjA1NzEtODY3NjAyMzkNCkRlcHTvvJoyMDE0IFVJUzIgT25lU3Rvcg0KDQotLS0t
+LemCruS7tuWOn+S7ti0tLS0tDQrlj5Hku7bkuro6IElseWEgRHJ5b21vdiBbbWFpbHRvOmlkcnlv
+bW92QGdtYWlsLmNvbV0NCuWPkemAgeaXtumXtDogMjAxNeW5tDEx5pyIMjDml6UgMTc6MzANCuaU
+tuS7tuS6ujogd3Vrb25nbWluZyAxMjAxOSAoUkQpDQrmioTpgIE6IGNlcGgtZGV2ZWxAdmdlci5r
+ZXJuZWwub3JnOyBTYWdlIFdlaWwNCuS4u+mimDogUmU6IFJlYm9vdCBibG9ja2VkIHdoZW4gdW5k
+b2luZyB1bm1hcCBvcC4NCg0KT24gRnJpLCBOb3YgMjAsIDIwMTUgYXQgMzoxOSBBTSwgV3Vrb25n
+bWluZyA8d3Uua29uZ21pbmdAaDNjLmNvbT4gd3JvdGU6DQo+IEhpIFNhZ2UsDQo+DQo+IEkgY3Jl
+YXRlZCBhIHJiZCBpbWFnZSwgYW5kIG1hcHBlZCB0byBhIGxvY2FsIHdoaWNoIG1lYW5zIEkgY2Fu
+IGZpbmQNCj4gL2Rldi9yYmQwLCBhdCB0aGlzIHRpbWUgSSByZWJvb3QgdGhlIHN5c3RlbSwgaW4g
+bGFzdCBzdGVwIG9mIHNodXR0aW5nDQo+IGRvd24sIGl0IGJsb2NrZWQgd2l0aCBhbiBlcnJvcg0K
+Pg0KPiBbMjM1NjE4LjAyMDIyMDddIGxpYmNlcGg6IGNvbm5lY3QgMTcyLjE2LjU3LjI1Mjo2Nzg5
+IGVycm9yIC0xMDEuDQo+DQo+IE15IFdvcmtz4oCZIEVudjoNCj4NCj4gVWJ1bnR1IGtlcm5lbCAz
+LjE5LjANCj4gQ2VwaCAwLjk0LjUNCj4gQSBjbHVzdGVyIG9mIDIgU2VydmVycyB3aXRoIGlzY3Np
+dGd0IGFuZCBvcGVuLWlzY3NpLCBib3RoIGFzIHNlcnZlciBhbmQgY2xpZW50LiBNdWx0aXBhdGgg
+cHJvY2VzcyBpcyBvbiBidXQgbm90IGFmZmVjdCB0aGlzIGlzc3VlLiBJ4oCZdmUgdHJpZWQgc3Rv
+cHBpbmcgbXVsdGlwYXRoLCBidXQgdGhlIGlzc3VlIHN0aWxsIHRoZXJlLg0KPiBJIG1hcCBhIHJi
+ZCBpbWFnZSB0byBhIGxvY2FsLCB3aHkgc2hvdyBtZSBhIGNvbm5lY3QgZXJyb3I/DQo+DQo+IEkg
+c2F3IHlvdXIgcmVwbHkgb24gaHR0cDovL3Blcm1hbGluay5nbWFuZS5vcmcvZ21hbmUuY29tcC5m
+aWxlLXN5c3RlbXMuY2VwaC5kZXZlbC8xMzA3NywgYnV0IGp1c3QgYXBhcnQuIElzIHRoaXMgaXNz
+dWUgcmVzb2x2ZWQgYW5kIGhvdz8NCg0KWWVhaCwgdGhpcyBoYXMgYmVlbiBhIGxvbmcgc3RhbmRp
+bmcgcHJvYmxlbSB3aXRoIGxpYmNlcGgvcmJkLiAgVGhlIGlzc3VlIGlzIHRoYXQgeW91ICpoYXZl
+KiB0byB1bW91bnQgKGFuZCBpZGVhbGx5IGFsc28gdW5tYXAsIGJ1dCB1bm1hcCBpc24ndCBzdHJp
+Y3RseSBuZWNlc3NhcnkpIGJlZm9yZSB5b3UgcmVib290LiAgT3RoZXJ3aXNlIChhbmQgSSBhc3N1
+bWUgYnkgbWFwcGVkIHRvIGEgbG9jYWwgeW91IG1lYW4geW91J3ZlIGdvdCBNT05zIGFuZCBPU0Rz
+IG9uIHRoZSBzYW1lIG5vZGUgYXMgeW91IGRvIHJiZCBtYXApLCB3aGVuIHlvdSBpc3N1ZSBhIHJl
+Ym9vdCwgZGFlbW9ucyBnZXQga2lsbGVkIGFuZCB0aGUga2VybmVsIGNsaWVudCBlbmRzIHVwIHdh
+aXRpbmcgZm9yIHRoZSB0aGVtIHRvIGNvbWUgYmFjaywgYmVjYXVzZSBvZiBvdXRzdGFuZGluZyB3
+cml0ZXMgaXNzdWVkIGJ5IHVtb3VudCBjYWxsZWQgYnkgc3lzdGVtZCAob3Igd2hhdGV2ZXIpLg0K
+VGhlcmUgYXJlIG90aGVyIHZhcmlhdGlvbnMgb2YgdGhpcywgYnV0IGl0IGFsbCBjb21lcyBkb3du
+IHRvIHlvdSBoYXZpbmcgdG8gY29sZCByZWJvb3QuDQoNClRoZSByaWdodCBmaXggaXMgdG8gaGF2
+ZSBhbGwgaW5pdCBzeXN0ZW1zIHNlcXVlbmNlIHRoZSBraWxsaW5nIG9mIGNlcGggZGFlbW9ucyBh
+ZnRlciB0aGUgdW1vdW50L3VubWFwLiAgSSBhbHNvIHRveWVkIHdpdGggYWRkaW5nIGEgcmVib290
+IG5vdGlmaWVyIGZvciBsaWJjZXBoIHRvIHNhdmUgYSBjb2xkIHJlYm9vdCwgYnV0IHRoZSBwcm9i
+bGVtIHdpdGggdGhhdCBpbiB0aGUgZ2VuZXJhbCBjYXNlIGlzIGRhdGEgaW50ZWdyaXR5LiAgSG93
+ZXZlciwgaW4gY2FzZXMgbGlrZSB0aGUgb25lIEkgZGVzY3JpYmVkIGFib3ZlLCB0aGVyZSBpcyBu
+byBnb2luZyBiYWNrIHNvIHdlIG1pZ2h0IGFzIHdlbGwga2lsbCBsaWJjZXBoIHRocm91Z2ggYSBu
+b3RpZmllci4gIEkgaGF2ZSBhbiBpbmNvbXBsZXRlIHBhdGNoIHNvbWV3aGVyZSwgYnV0IGl0IHJl
+YWxseSBzaG91bGRuJ3QgYmUgbmVjZXNzYXJ5Li4uDQoNClRoYW5rcywNCg0KICAgICAgICAgICAg
+ICAgIElseWENCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuacrOmCruS7tuWPiuWFtumZhOS7tuWQq+ac
+ieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaBr++8jOS7
+hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4reWIl+WHug0K55qE5Liq5Lq65oiW576k57uE
+44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI5YyF5ous5L2G
+5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN5Yi244CBDQrmiJbmlaPlj5Hv
+vInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzpgq7ku7bvvIzo
+r7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDpmaTmnKwNCumC
+ruS7tu+8gQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVu
+dGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkgZm9yIHRo
+ZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNl
+IG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRp
+bmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3VyZSwgcmVw
+cm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGlu
+dGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBl
+LW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUgb3IgZW1h
+aWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCg==
