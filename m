@@ -1,63 +1,50 @@
-From: "hzwulibin" <hzwulibin@gmail.com>
-Subject: Re: why my cluster become unavailable (min_size of pool)
-Date: Thu, 26 Nov 2015 15:54:04 +0800
-Message-ID: <5656BA98.4090301@gmail.com>
-References: <CAN4gH2NsnmOY8AcQaT245uwDh2fXmwnBTBKdP6_xKQ2M0PVeKA@mail.gmail.com>
-	<CACJqLyazL_vCxpRGUGROgXN0reyJdUxL-i-OxseT5UV2cXu3pQ@mail.gmail.com>
-	<alpine.DEB.2.00.1511210948270.24879@cobra.newdream.net>
-	<5652651C.8040902@gmail.com>
+From: SF Markus Elfring <elfring@users.sourceforge.net>
+Subject: Re: block-rbd: One function call less in rbd_dev_probe_parent() after
+ error detection
+Date: Thu, 26 Nov 2015 08:54:45 +0100
+Message-ID: <5656BAC5.3060501@users.sourceforge.net>
+References: <5307CAA2.8060406@users.sourceforge.net>
+ <alpine.DEB.2.02.1402231635510.1985@localhost6.localdomain6>
+ <530A72AA.3000601@users.sourceforge.net>
+ <alpine.DEB.2.02.1402240658210.2090@localhost6.localdomain6>
+ <530B5FB6.6010207@users.sourceforge.net>
+ <alpine.DEB.2.10.1402241710370.2074@hadrien>
+ <530C5E18.1020800@users.sourceforge.net>
+ <alpine.DEB.2.10.1402251014170.2080@hadrien>
+ <530CD2C4.4050903@users.sourceforge.net>
+ <alpine.DEB.2.10.1402251840450.7035@hadrien>
+ <530CF8FF.8080600@users.sourceforge.net>
+ <alpine.DEB.2.02.1402252117150.2047@localhost6.localdomain6>
+ <530DD06F.4090703@users.sourceforge.net>
+ <alpine.DEB.2.02.1402262129250.2221@localhost6.localdomain6>
+ <5317A59D.4@users.sourceforge.net> <56536BAD.4000309@users.sourceforge.net>
+ <56536D12.4000308@users.sourceforge.net>
+ <CAOi1vP_t6-vw-sesRwpgfbqLVRyevOP4uvhbj05b3PPg=oHD6Q@mail.gmail.com>
+ <5654B91D.4040808@users.sourceforge.net>
+ <CAOi1vP-Z2yfJVcpqZN8EOf6rYsd41ixOOQWVva_xkKmA6PLrhg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f180.google.com ([209.85.223.180]:32879 "EHLO
-	mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751444AbbKZHyG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Nov 2015 02:54:06 -0500
-Received: by iouu10 with SMTP id u10so78920975iou.0
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Nov 2015 23:54:06 -0800 (PST)
-In-Reply-To: <5652651C.8040902@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Haomai Wang <haomaiwang@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <CAOi1vP-Z2yfJVcpqZN8EOf6rYsd41ixOOQWVva_xkKmA6PLrhg@mail.gmail.com>
+Sender: kernel-janitors-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
+List-Id: ceph-devel.vger.kernel.org
 
-SGksIFNhZ2UNCg0KSSBoYXMgYSBxdWVzdGlvbiBhYm91dCBtaW5fc2l6ZSBvZiBwb29sLg0KDQpU
-aGUgZGVmYXVsdCB2YWx1ZSBvZiBtaW5fc2l6ZSBpcyAyLCBidXQgaW4gdGhpcyBzZXR0aW5nLCB3
-aGVuIHR3byBPU0RzIGFyZSBkb3duKG1lYW4gdHdvIHJlcGxpY2FzIGxvc3QpIGF0IHNhbWUgdGlt
-ZSwgdGhlIElPIHdpbGwgYmUgYmxvY2tlZC4NCldlIHdhbnQgdG8gc2V0IHRoZSBtaW5fc2l6ZSB0
-byAxIGluIG91ciBwcm9kdWN0aW9uIGVudmlyb25tZW50IGFzIHdlIHRoaW5rIGl0J3Mgbm9ybWFs
-IGNhc2Ugd2hlbiB0d28gT1NEcyBhcmUgZG93bihzdXJlIG9uIGRpZmZlcmVudCBob3N0KSBhdCBz
-YW1lIHRpbWUuDQoNClNvIGlzIHRoZXJlIGFueXBvdGVudGlhbCBwcm9ibGVtIG9mIHRoaXMgc2V0
-dGluZz8NCg0KV2UgdXNlIDAuODAuMTAgdmVyc2lvbi4NCg0KVGhhbmtzIQ0KDQoNCi0tLS0tLS0t
-LS0tLS0tLS0tLQkJCQkgDQpoend1bGliaW4NCjIwMTUtMTEtMjYNCg0KLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K5Y+R5Lu25Lq6
-77yaImh6d3VsaWJpbiI8aHp3dWxpYmluQGdtYWlsLmNvbT4NCuWPkemAgeaXpeacn++8mjIwMTUt
-MTEtMjMgMDk6MDANCuaUtuS7tuS6uu+8mlNhZ2UgV2VpbCxIYW9tYWkgV2FuZw0K5oqE6YCB77ya
-Y2VwaC1kZXZlbA0K5Li76aKY77yaUmU6IHdoeSBteSBjbHVzdGVyIGJlY29tZSB1bmF2YWlsYWJs
-ZQ0KDQpIaSwgU2FnZQ0KDQpUaGFua3MhIFdpbGwgdHJ5IGl0IHdoZW4gbmV4dCB0ZXN0aW5nIQ0K
-DQotLS0tLS0tLS0tLS0tLS0tLS0JCQkJIA0KaHp3dWxpYmluDQoyMDE1LTExLTIzDQoNCi0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0N
-CuWPkeS7tuS6uu+8mlNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+DQrlj5HpgIHml6XmnJ/v
-vJoyMDE1LTExLTIyIDAxOjQ5DQrmlLbku7bkurrvvJpIYW9tYWkgV2FuZw0K5oqE6YCB77yaTGli
-aW4gV3UsY2VwaC1kZXZlbA0K5Li76aKY77yaUmU6IHdoeSBteSBjbHVzdGVyIGJlY29tZSB1bmF2
-YWlsYWJsZQ0KDQpPbiBTdW4sIDIyIE5vdiAyMDE1LCBIYW9tYWkgV2FuZyB3cm90ZToNCj4gT24g
-VGh1LCBOb3YgMTksIDIwMTUgYXQgMTE6MjYgUE0sIExpYmluIFd1IDxoend1bGliaW5AZ21haWwu
-Y29tPiB3cm90ZToNCj4gPiBIaSwgY2VwaGVyDQo+ID4NCj4gPiBJIGhhdmUgYSBjbHVzdGVyIG9m
-IDYgT1NEIHNlcnZlciwgZXZlcnkgc2VydmVyIGhhcyA4IE9TRHMuDQo+ID4NCj4gPiBJIG91dCA0
-IE9TRHMgb24gZXZlcnkgc2VydmVyLCB0aGVuIG15IGNsaWVudCBpbyBpcyBibG9ja2luZy4NCj4g
-Pg0KPiA+IEkgcmVib290IG15IGNsaWVudCBhbmQgdGhlbiBjcmVhdGUgYSBuZXcgcmJkIGRldmlj
-ZSwgYnV0IHRoZSBuZXcNCj4gPiBkZXZpY2UgYWxzbyBjYW4ndCB3cml0ZSBpby4NCj4gPg0KPiA+
-IFllYWgsIGkgdW5kZXJzdGFuZCB0aGF0IHNvbWUgZGF0YSBtYXkgbG9zdCBhcyB0aHJlZWUgcmVw
-bGljYXMgb2Ygc29tZQ0KPiA+IG9iamVjdCB3ZXJlIGxvc3QsIGJ1dCB3aHkgdGhlIGNsdXN0ZXIg
-YmVjb21lIHVuYXZhaWxhYmxlPw0KPiA+DQo+ID4gVGhlcmUgODAgaW5jb21wbGV0ZSBwZyBhbmQg
-NCBkb3duK2luY29tcGxldGUgcGcuDQo+ID4NCj4gPiBBbnkgc29sdXRpb24gaSBjb3VsZCBzb2x2
-ZSB0aGUgcHJvYmxlbT8NCj4gDQo+IFllcywgaWYgeW91IGRvZXNuJ3QgaGF2ZSBhIHNwZWNpYWwg
-Y3J1c2htYXAgdG8gY29udHJvbCB0aGUgZGF0YQ0KPiByZXBsY2VtZW50IHBvbGljeSwgcGcgd2ls
-bCBsYWNrIG9mIG5lY2Vzc2FyeSBtZXRhZGF0YSB0byBib290LiBJZiBuZWVkDQo+IHRvIHJlYWRk
-IG91dGVkIG9zZHMgb3IgZm9yY2UgcmVtb3ZlIHBnIHdoaWNoIGlzIGluY29tcGxldGUoaG9wZSBp
-dCdzDQo+IGp1c3QgYSB0ZXN0KS4NCg0KSXMgbWluX3NpemUgMiBvciAxPyAgUmVkdWNpbmcgaXQg
-dG8gMSB3aWxsIGdlbmVyYWxseSBjbGVhciBzb21lIG9mIHRoZSANCmluY29tcGxldGUgcGdzLiAg
-SnVzdCByZW1lbWJlciB0byByYWlzZSBpdCBiYWNrIHRvIDIgYWZ0ZXIgdGhlIGNsdXN0ZXIgDQpy
-ZWNvdmVycy4NCg0Kc2FnZQ0KDQoNCg==
+>> I interpreted the eventual passing of a null pointer to the rbd_dev_destroy()
+>> function as an indication for further source code adjustments.
+> 
+> If all error paths could be adjusted so that NULL pointers are never passed in,
+> destroy functions wouldn't need to have a NULL check, would they?
 
+How do you think about to clarify corresponding implementation details a bit more?
+
+* Why was the function "rbd_dev_probe_parent" implemented in the way
+  that it relies on a sanity check in the function "rbd_dev_destroy" then?
+* How are the chances to restructure the source code a bit (like changing a few
+  jump labels) so that it should also work without an extra function call
+  during error handling there?
+
+Regards,
+Markus
