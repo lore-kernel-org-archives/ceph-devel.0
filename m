@@ -1,41 +1,70 @@
-From: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>
-Subject: RE: Scaling Ceph reviews and testing
-Date: Thu, 26 Nov 2015 10:02:26 +0000
-Message-ID: <12c02a1b6b854a22a4a8a6651c524e02@R01UKEXCASM111.r01.fujitsu.local>
-References: <CAJ4mKGbW56LFJy+_Swc=EF8AxbutBvCw5fei0kv_HUBnkhxLsQ@mail.gmail.com>
- <9729e578d68843629f98e17cf962814b@R01UKEXCASM111.r01.fujitsu.local>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: block-rbd: One function call less in rbd_dev_probe_parent() after
+ error detection
+Date: Thu, 26 Nov 2015 12:37:08 +0100
+Message-ID: <CAOi1vP-p8jSee8hEprH1eowDY4daSR0zjTgDpbyF6=vJRXTr1g@mail.gmail.com>
+References: <5307CAA2.8060406@users.sourceforge.net>
+	<alpine.DEB.2.02.1402231635510.1985@localhost6.localdomain6>
+	<530A72AA.3000601@users.sourceforge.net>
+	<alpine.DEB.2.02.1402240658210.2090@localhost6.localdomain6>
+	<530B5FB6.6010207@users.sourceforge.net>
+	<alpine.DEB.2.10.1402241710370.2074@hadrien>
+	<530C5E18.1020800@users.sourceforge.net>
+	<alpine.DEB.2.10.1402251014170.2080@hadrien>
+	<530CD2C4.4050903@users.sourceforge.net>
+	<alpine.DEB.2.10.1402251840450.7035@hadrien>
+	<530CF8FF.8080600@users.sourceforge.net>
+	<alpine.DEB.2.02.1402252117150.2047@localhost6.localdomain6>
+	<530DD06F.4090703@users.sourceforge.net>
+	<alpine.DEB.2.02.1402262129250.2221@localhost6.localdomain6>
+	<5317A59D.4@users.sourceforge.net>
+	<56536BAD.4000309@users.sourceforge.net>
+	<56536D12.4000308@users.sourceforge.net>
+	<CAOi1vP_t6-vw-sesRwpgfbqLVRyevOP4uvhbj05b3PPg=oHD6Q@mail.gmail.com>
+	<5654B91D.4040808@users.sourceforge.net>
+	<CAOi1vP-Z2yfJVcpqZN8EOf6rYsd41ixOOQWVva_xkKmA6PLrhg@mail.gmail.com>
+	<5656BAC5.3060501@users.sourceforge.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail1.bemta3.messagelabs.com ([195.245.230.161]:28705 "EHLO
-	mail1.bemta3.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750845AbbKZKCl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 Nov 2015 05:02:41 -0500
-In-Reply-To: <9729e578d68843629f98e17cf962814b@R01UKEXCASM111.r01.fujitsu.local>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <5656BAC5.3060501@users.sourceforge.net>
+Sender: kernel-janitors-owner@vger.kernel.org
+To: SF Markus Elfring <elfring@users.sourceforge.net>
+Cc: Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
+List-Id: ceph-devel.vger.kernel.org
 
-PiBTbywgbXkgcHJvcG9zaXRpb24gaXMgdG8gcG9zdHBvbmUgUUEnaW5nIHBlcmZvcm1hbmNlIHB1
-bGwNCj4gcmVxdWVzdHMgdW50aWwgc29tZW9uZSB1bnJlbGF0ZWQgdG8gUFIgYXV0aG9yIChvciBl
-dmVuIGF1dGhvcidzIGNvbXBhbnkpDQo+IGNhbiBjb25maXJtIHRoYXQgY2xhaW1zIGluIHRoYXQg
-cGFydGljdWxhciBQUiBhcmUgdHJ1ZS4gUHJvdmlkaW5nIGNvZGUgc25pcHBldA0KPiB0aGF0IHNo
-b3dzIHRoZSBwZXJmIGRpZmZlcmVuY2UgKG9yIHByb3ZpZGUgYSB3YXkgdG8gdmVyaWZ5IHRob3Nl
-IGNsYWltcyBpbg0KPiByZXByb2R1Y2libGUgbWF0dGVyKSBpbiBQUiBzaG91bGQgYmUgZW5vdWdo
-IGZvciBpdA0KPiAoaHR0cHM6Ly9naXRodWIuY29tL1hpbnplQ2hpL2NlcGgvY29tbWl0LzJjOGEx
-NzU2MGE3OTdiMzE2NTIwY2I2ODkyNDANCj4gZDRkY2VjZjNlNGNjIGZvciBhIHBhcnRpY3VsYXIg
-ZXhhbXBsZSksIGFuZCBpdCBzaG91bGQgaGVscCBnZXQgcmlkIG9mDQo+IHBlcmZvcm1hbmNlIFBS
-cyB0aGF0IGRlZ3JhZGUgcGVyZm9ybWFuY2Ugb3IgaW1wcm92ZSBpdCBvbmx5IG9uIHBhcnRpY3Vs
-YXINCj4gaGFyZHdhcmUvc29mdHdhcmUgY29uZmlndXJhdGlvbiBhbmQgYXQgYmVzdCBkb24ndCBp
-bXByb3ZlIGFueXRoaW5nDQo+IG90aGVyd2lzZS4NCg0KVG8gY2xhcmlmeTogaWYgUFIgZGVncmFk
-ZXMgcGVyZm9ybWFuY2UgZm9yIHNvbWVvbmUsIHRoYXQgcGVyc29uIHNob3VsZCBwcm92aWRlIGRl
-dGFpbHMgb2YgdGhlIGNhc2Ugc28gb3RoZXJzIChpbmNsdWRpbmcgUFIgYXV0aG9yKSBjYW4gcmV2
-aWV3IGl0IChhbmQgbWF5YmUgZml4IGl0KS4gDQpXZSdyZSBqdXN0IGh1bWFucyBhbmQgYXMgc3Vj
-aCwgd2UgYm90aCBtYWtlIG1pc3Rha2VzIGFuZCBsZWFybiBmcm9tIHRoZW0sIGFuZCBteSBwb2lu
-dCB3YXMgdG8gZW5jb3VyYWdlIGxlYXJuaW5nIGZyb20gbWlzdGFrZXMgYW5kIHNoYXJpbmcga25v
-d2xlZGdlLCBpbnN0ZWFkIG9mIGdvaW5nIGludG8gZnVsbC1vbiBpbnRlci1jb21wYW55IHBvbGl0
-aWNhbCB3YXJmYXJlLg0KDQoNCldpdGggYmVzdCByZWdhcmRzIC8gUG96ZHJhd2lhbQ0KUGlvdHIg
-RGHFgmVrDQo=
+On Thu, Nov 26, 2015 at 8:54 AM, SF Markus Elfring
+<elfring@users.sourceforge.net> wrote:
+>>> I interpreted the eventual passing of a null pointer to the rbd_dev_destroy()
+>>> function as an indication for further source code adjustments.
+>>
+>> If all error paths could be adjusted so that NULL pointers are never passed in,
+>> destroy functions wouldn't need to have a NULL check, would they?
+>
+> How do you think about to clarify corresponding implementation details a bit more?
+>
+> * Why was the function "rbd_dev_probe_parent" implemented in the way
+>   that it relies on a sanity check in the function "rbd_dev_destroy" then?
+
+Because it's not a bad thing?  What's wrong with an init to NULL,
+a possible assignment, in this case from rbd_dev_create(), and an
+unconditional rbd_dev_destroy()?
+
+The NULL check in rbd_dev_destroy() is not a sanity check, it's
+a feature.  It's not there to "fixup" callers that pass NULL - it's
+there because it is _expected_ that some callers will pass NULL.
+
+> * How are the chances to restructure the source code a bit (like changing a few
+>   jump labels) so that it should also work without an extra function call
+>   during error handling there?
+
+As I said in my reply to Dan, the problem with rbd_dev_probe_parent()
+is the calling code which expects it to call unparent if ->parent_spec.
+This makes it stand out and confuses people, but can't be fixed without
+refactoring a bunch of other code.
+
+The extra function call is *not* a problem.
+
+Thanks,
+
+                Ilya
