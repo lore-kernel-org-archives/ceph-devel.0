@@ -1,83 +1,87 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: Quick comparison of Hammer & Infernalis on NVMe
-Date: Thu, 26 Nov 2015 15:02:41 +0100 (CET)
-Message-ID: <715619802.10399931.1448546561295.JavaMail.zimbra@oxygem.tv>
-References: <3649A15A2562B54294DE14BCE5AC79120B8FD242@FMSMSX119.amr.corp.intel.com>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: [PATCH] mm: Allow GFP_IOFS for page_cache_read page cache
+ allocation
+Date: Thu, 26 Nov 2015 16:08:20 +0100
+Message-ID: <20151126150820.GI7953@dhcp22.suse.cz>
+References: <1447251233-14449-1-git-send-email-mhocko@kernel.org>
+ <20151112095301.GA25265@quack.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:52405 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751367AbbKZOCo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Nov 2015 09:02:44 -0500
-In-Reply-To: <3649A15A2562B54294DE14BCE5AC79120B8FD242@FMSMSX119.amr.corp.intel.com>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:34654 "EHLO
+	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751367AbbKZPIX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Nov 2015 10:08:23 -0500
+Content-Disposition: inline
+In-Reply-To: <20151112095301.GA25265@quack.suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>
+To: Jan Kara <jack@suse.cz>
+Cc: linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>, Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>, Mel Gorman <mgorman@suse.de>, Dave Chinner <david@fromorbit.com>, Mark Fasheh <mfasheh@suse.com>, ocfs2-devel@oss.oracle.com, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 
-Thanks for sharing !
+On Thu 12-11-15 10:53:01, Jan Kara wrote:
+> On Wed 11-11-15 15:13:53, mhocko@kernel.org wrote:
+> > From: Michal Hocko <mhocko@suse.com>
+> > 
+> > page_cache_read has been historically using page_cache_alloc_cold to
+> > allocate a new page. This means that mapping_gfp_mask is used as the
+> > base for the gfp_mask. Many filesystems are setting this mask to
+> > GFP_NOFS to prevent from fs recursion issues. page_cache_read is
+> > called from the vm_operations_struct::fault() context during the page
+> > fault. This context doesn't need the reclaim protection normally.
+> > 
+> > ceph and ocfs2 which call filemap_fault from their fault handlers
+> > seem to be OK because they are not taking any fs lock before invoking
+> > generic implementation. xfs which takes XFS_MMAPLOCK_SHARED is safe
+> > from the reclaim recursion POV because this lock serializes truncate
+> > and punch hole with the page faults and it doesn't get involved in the
+> > reclaim.
+> > 
+> > There is simply no reason to deliberately use a weaker allocation
+> > context when a __GFP_FS | __GFP_IO can be used. The GFP_NOFS
+> > protection might be even harmful. There is a push to fail GFP_NOFS
+> > allocations rather than loop within allocator indefinitely with a
+> > very limited reclaim ability. Once we start failing those requests
+> > the OOM killer might be triggered prematurely because the page cache
+> > allocation failure is propagated up the page fault path and end up in
+> > pagefault_out_of_memory.
+> > 
+> > We cannot play with mapping_gfp_mask directly because that would be racy
+> > wrt. parallel page faults and it might interfere with other users who
+> > really rely on NOFS semantic from the stored gfp_mask. The mask is also
+> > inode proper so it would even be a layering violation. What we can do
+> > instead is to push the gfp_mask into struct vm_fault and allow fs layer
+> > to overwrite it should the callback need to be called with a different
+> > allocation context.
+> > 
+> > Initialize the default to (mapping_gfp_mask | __GFP_FS | __GFP_IO)
+> > because this should be safe from the page fault path normally. Why do we
+> > care about mapping_gfp_mask at all then? Because this doesn't hold only
+> > reclaim protection flags but it also might contain zone and movability
+> > restrictions (GFP_DMA32, __GFP_MOVABLE and others) so we have to respect
+> > those.
+> > 
+> > Reported-by: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>
+> > Signed-off-by: Michal Hocko <mhocko@suse.com>
+> > ---
+> > 
+> > Hi,
+> > this has been posted previously as a part of larger GFP_NOFS related
+> > patch set (http://lkml.kernel.org/r/1438768284-30927-1-git-send-email-mhocko%40kernel.org)
+> > but I think it makes sense to discuss it even out of that scope.
+> > 
+> > I would like to hear FS and other MM people about the proposed interface.
+> > Using mapping_gfp_mask blindly doesn't sound good to me and vm_fault
+> > looks like a proper channel to communicate between MM and FS layers.
+> > 
+> > Comments? Are there any better ideas?
+> 
+> Makes sense to me and the filesystems I know should be fine with this
+> (famous last words ;). Feel free to add:
+> 
+> Acked-by: Jan Kara <jack@suse.com>
 
-Results are impressive, Great to see that write are finally improving.
-
-I just wonder how much you could have with rbd_cache=3Dfalse.
-
-Also, with such high load,
-
-maybe using jemalloc on fio could help too (I have seen around 20% impr=
-ovement on fio client)
-
-LD_PRELOAD=3D${JEMALLOC_PATH}/lib/libjemalloc.so.1 fio ....
-
-
-Regards,
-
-Alexandre
------ Mail original -----
-De: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>, "Sage Weil" <sweil@r=
-edhat.com>, "Mark Nelson" <mnelson@redhat.com>, "Somnath Roy" <Somnath.=
-Roy@sandisk.com>
-Envoy=C3=A9: Mercredi 25 Novembre 2015 22:52:59
-Objet: Quick comparison of Hammer & Infernalis on NVMe
-
-(2nd time w/o HTML formatting)=20
-As I mentioned today in the meeting we have a first pass set of numbers=
- from Infernalis. This is the same hardware, configuration (including c=
-eph.conf), and clients as the previous data from this presentation: htt=
-p://www.slideshare.net/Inktank_Ceph/accelerating-cassandra-workloads-on=
--ceph-with-allflash-pcie-ssds=20
-
-The comparison data is here: https://www.docdroid.net/X0kJcIp/quick-ham=
-mer-vs-infernalis-nvme-comparison.pdf.html=20
-
-Reads are a bit slower than we measured before at higher QD, but roughl=
-y the same up to 1M IOPS. Writes look a lot better! Also if you look at=
- the long-tail latency numbers (not graphed, in the backup slides) the =
-long tail latency is much lower for writes and mixed workloads, by 1/3r=
-d to 1/8th. We are doing analysis and building tools that are focusing =
-on 80th/90th/95th/99th latency across workloads at various queue depths=
- now so we'll see if we can get any more insight.=20
-
-We did at some point during the upgrade find that SELinux was set to 'e=
-nforcing', and originally this gave us a much lower performance measure=
-ment. We have some comparison data for that if anyone is interested.=20
-
-If you're in the U.S, have a great holiday!=20
-
-Thanks,=20
-
-Stephen=20
-
-
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n=20
-the body of a message to majordomo@vger.kernel.org=20
-More majordomo info at http://vger.kernel.org/majordomo-info.html=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks a lot! Are there any objections from other fs/mm people?
+-- 
+Michal Hocko
+SUSE Labs
