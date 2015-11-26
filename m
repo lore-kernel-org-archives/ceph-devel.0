@@ -1,124 +1,81 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: why my cluster become unavailable (min_size of pool)
-Date: Thu, 26 Nov 2015 16:00:02 +0800
-Message-ID: <CACJqLybEM0qiFBYsH0Ybg-R0X1xyf8UrWwY+9voR+eNfk-jNjQ@mail.gmail.com>
+From: "hzwulibin" <hzwulibin@gmail.com>
+Subject: Re:  Re: why my cluster become unavailable (min_size of pool)
+Date: Thu, 26 Nov 2015 16:04:58 +0800
+Message-ID: <5656BD25.4040905@gmail.com>
 References: <CAN4gH2NsnmOY8AcQaT245uwDh2fXmwnBTBKdP6_xKQ2M0PVeKA@mail.gmail.com>
 	<CACJqLyazL_vCxpRGUGROgXN0reyJdUxL-i-OxseT5UV2cXu3pQ@mail.gmail.com>
 	<alpine.DEB.2.00.1511210948270.24879@cobra.newdream.net>
 	<5652651C.8040902@gmail.com>
 	<5656BA98.4090301@gmail.com>
+	<CACJqLybEM0qiFBYsH0Ybg-R0X1xyf8UrWwY+9voR+eNfk-jNjQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f194.google.com ([209.85.223.194]:35953 "EHLO
-	mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750930AbbKZIAC convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Nov 2015 03:00:02 -0500
-Received: by iofh3 with SMTP id h3so7216278iof.3
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Nov 2015 00:00:02 -0800 (PST)
-In-Reply-To: <5656BA98.4090301@gmail.com>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:34317 "EHLO
+	mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751968AbbKZIFA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Nov 2015 03:05:00 -0500
+Received: by ioir85 with SMTP id r85so78403364ioi.1
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Nov 2015 00:04:59 -0800 (PST)
+In-Reply-To: <CACJqLybEM0qiFBYsH0Ybg-R0X1xyf8UrWwY+9voR+eNfk-jNjQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: hzwulibin <hzwulibin@gmail.com>
+To: Haomai Wang <haomaiwang@gmail.com>
 Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Nov 26, 2015 at 3:54 PM, hzwulibin <hzwulibin@gmail.com> wrote:
-> Hi, Sage
->
-> I has a question about min_size of pool.
->
-> The default value of min_size is 2, but in this setting, when two OSD=
-s are down(mean two replicas lost) at same time, the IO will be blocked=
-=2E
-> We want to set the min_size to 1 in our production environment as we =
-think it's normal case when two OSDs are down(sure on different host) a=
-t same time.
+SGksIGhhb21haQ0KDQpUaGFua3MgZm9yIHF1aWNrIHJlcGx5LCB5b3VyIGV4cGxhaW4gbWFrZSBz
+ZW5zZSBmb3IgbWUuDQoNClRoYW5rcyENCg0KLS0tLS0tLS0tLS0tLS0tLS0tCQkJCSANCmh6d3Vs
+aWJpbg0KMjAxNS0xMS0yNg0KDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrlj5Hku7bkurrvvJpIYW9tYWkgV2FuZyA8aGFvbWFp
+d2FuZ0BnbWFpbC5jb20+DQrlj5HpgIHml6XmnJ/vvJoyMDE1LTExLTI2IDE2OjAwDQrmlLbku7bk
+urrvvJpoend1bGliaW4NCuaKhOmAge+8mlNhZ2UgV2VpbCxjZXBoLWRldmVsDQrkuLvpopjvvJpS
+ZTogd2h5IG15IGNsdXN0ZXIgYmVjb21lIHVuYXZhaWxhYmxlIChtaW5fc2l6ZSBvZiBwb29sKQ0K
+DQpPbiBUaHUsIE5vdiAyNiwgMjAxNSBhdCAzOjU0IFBNLCBoend1bGliaW4gPGh6d3VsaWJpbkBn
+bWFpbC5jb20+IHdyb3RlOg0KPiBIaSwgU2FnZQ0KPg0KPiBJIGhhcyBhIHF1ZXN0aW9uIGFib3V0
+IG1pbl9zaXplIG9mIHBvb2wuDQo+DQo+IFRoZSBkZWZhdWx0IHZhbHVlIG9mIG1pbl9zaXplIGlz
+IDIsIGJ1dCBpbiB0aGlzIHNldHRpbmcsIHdoZW4gdHdvIE9TRHMgYXJlIGRvd24obWVhbiB0d28g
+cmVwbGljYXMgbG9zdCkgYXQgc2FtZSB0aW1lLCB0aGUgSU8gd2lsbCBiZSBibG9ja2VkLg0KPiBX
+ZSB3YW50IHRvIHNldCB0aGUgbWluX3NpemUgdG8gMSBpbiBvdXIgcHJvZHVjdGlvbiBlbnZpcm9u
+bWVudCBhcyB3ZSB0aGluayBpdCdzIG5vcm1hbCBjYXNlIHdoZW4gdHdvIE9TRHMgYXJlIGRvd24o
+c3VyZSBvbiBkaWZmZXJlbnQgaG9zdCkgYXQgc2FtZSB0aW1lLg0KDQptaW5fc2l6ZSB3aXRoIDIg
+bWVhbnMgZWFjaCBvYmplY3QgbXVzdCBlbnN1cmUgdHdvIGNvcGllcyBpbiB0aGlzIHBvb2wuDQpJ
+dCBtYWlubHkgcmVkdWNlIHRoZSBwZXJtYW5lbnQgc3RvcmFnZSBtZWRpYSBjb3JydXB0IHJpc2sg
+d2hpY2ggY2F1c2UNCmFjdHVhbCBkYXRhIGxvc2UuIFRoYXQncyBtZWFuIGlmIG1pbl9zaXplIGlz
+IDEgYW5kIHVuZGVyIHRoaXMgZGVncmFkZWQNCmNhc2UsIG9uZSBtb3JlIG9zZCAgcGVybWFuZW50
+IGNvcnJ1cHQgd2lsbCBjYXVzZSBkYXRhIGxvc2UuIElmDQptaW5fc2l6ZSBpcyAyLCBpdCBuZWVk
+IGF0IGxlYXN0IDIgb3Nkcy4NCg0KPg0KPiBTbyBpcyB0aGVyZSBhbnlwb3RlbnRpYWwgcHJvYmxl
+bSBvZiB0aGlzIHNldHRpbmc/DQo+DQo+IFdlIHVzZSAwLjgwLjEwIHZlcnNpb24uDQo+DQo+IFRo
+YW5rcyENCj4NCj4NCj4gLS0tLS0tLS0tLS0tLS0tLS0tDQo+IGh6d3VsaWJpbg0KPiAyMDE1LTEx
+LTI2DQo+DQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0NCj4g5Y+R5Lu25Lq677yaImh6d3VsaWJpbiI8aHp3dWxpYmluQGdtYWls
+LmNvbT4NCj4g5Y+R6YCB5pel5pyf77yaMjAxNS0xMS0yMyAwOTowMA0KPiDmlLbku7bkurrvvJpT
+YWdlIFdlaWwsSGFvbWFpIFdhbmcNCj4g5oqE6YCB77yaY2VwaC1kZXZlbA0KPiDkuLvpopjvvJpS
+ZTogd2h5IG15IGNsdXN0ZXIgYmVjb21lIHVuYXZhaWxhYmxlDQo+DQo+IEhpLCBTYWdlDQo+DQo+
+IFRoYW5rcyEgV2lsbCB0cnkgaXQgd2hlbiBuZXh0IHRlc3RpbmchDQo+DQo+IC0tLS0tLS0tLS0t
+LS0tLS0tLQ0KPiBoend1bGliaW4NCj4gMjAxNS0xMS0yMw0KPg0KPiAtLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+IOWPkeS7tuS6
+uu+8mlNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+DQo+IOWPkemAgeaXpeacn++8mjIwMTUt
+MTEtMjIgMDE6NDkNCj4g5pS25Lu25Lq677yaSGFvbWFpIFdhbmcNCj4g5oqE6YCB77yaTGliaW4g
+V3UsY2VwaC1kZXZlbA0KPiDkuLvpopjvvJpSZTogd2h5IG15IGNsdXN0ZXIgYmVjb21lIHVuYXZh
+aWxhYmxlDQo+DQo+IE9uIFN1biwgMjIgTm92IDIwMTUsIEhhb21haSBXYW5nIHdyb3RlOg0KPj4g
+T24gVGh1LCBOb3YgMTksIDIwMTUgYXQgMTE6MjYgUE0sIExpYmluIFd1IDxoend1bGliaW5AZ21h
+aWwuY29tPiB3cm90ZToNCj4+ID4gSGksIGNlcGhlcg0KPj4gPg0KPj4gPiBJIGhhdmUgYSBjbHVz
+dGVyIG9mIDYgT1NEIHNlcnZlciwgZXZlcnkgc2VydmVyIGhhcyA4IE9TRHMuDQo+PiA+DQo+PiA+
+IEkgb3V0IDQgT1NEcyBvbiBldmVyeSBzZXJ2ZXIsIHRoZW4gbXkgY2xpZW50IGlvIGlzIGJsb2Nr
+aW5nLg0KPj4gPg0KPj4gPiBJIHJlYm9vdCBteSBjbGllbnQgYW5kIHRoZW4gY3JlYXRlIGEgbmV3
+IHJiZCBkZXZpY2UsIGJ1dCB0aGUgbmV3DQo+PiA+IGRldmljZSBhbHNvIGNhbid0IHdyaXRlIGlv
+Lg0KPj4gPg0KPj4gPiBZZWFoLCBpIHVuZGVyc3RhbmQgdGhhdCBzb21lIGRhdGEgbWF5IGxvc3Qg
+YXMgdGhyZWVlIHJlcGxpY2FzIG9mIHNvbWUNCj4+ID4gb2JqZWN0IHdlcmUgbG9zdCwgYnV0IHdo
+eSB0aGUgY2x1c3RlciBiZWNvbWUgdW5hdmFpbGFibGU/DQo+PiA+DQo+PiA+IFRoZXJlIDgwIGlu
+Y29tcGxldGUgcGcgYW5kIDQgZG93bitpbmNvbXBsZXRlIHBnLg0KPj4gPg0KPj4gPiBBbnkgc29s
+dXRpb24gaSBjb3VsZCBzb2x2ZSB0aGUgcHJvYmxlbT8NCj4+DQo+PiBZZXMsIGlmIHlvdSBkb2Vz
+bid0IGhhdmUgYSBzcGVjaWFsIGNydXNobWFwIHRvIGNvbnRyb2wgdGhlIGRhdGENCj4+IHJlcGxj
+ZW1lbnQgcG9saWN5LCBwZyB3aWxsIGxhY2sgb2YgbmVjZXNzYXJ5IG1ldGFkYXRhIHRvIGJvb3Qu
+IElmIG5lZWQNCj4+IHRvIHJlYWRkIG91dGVkIG9zZHMgb3IgZm9yY2UgcmVtb3ZlIHBnIHdoaWNo
+IGlzIGluY29tcGxldGUoaG9wZSBpdCdzDQo+PiBqdXN0IGEgdGVzdCkuDQo+DQo+IElzIG1pbl9z
+aXplIDIgb3IgMT8gIFJlZHVjaW5nIGl0IHRvIDEgd2lsbCBnZW5lcmFsbHkgY2xlYXIgc29tZSBv
+ZiB0aGUNCj4gaW5jb21wbGV0ZSBwZ3MuICBKdXN0IHJlbWVtYmVyIHRvIHJhaXNlIGl0IGJhY2sg
+dG8gMiBhZnRlciB0aGUgY2x1c3Rlcg0KPiByZWNvdmVycy4NCj4NCj4gc2FnZQ0KPg0KPg0KDQoN
+Cg0KLS0gDQpCZXN0IFJlZ2FyZHMsDQoNCldoZWF0DQoNCg==
 
-min_size with 2 means each object must ensure two copies in this pool.
-It mainly reduce the permanent storage media corrupt risk which cause
-actual data lose. That's mean if min_size is 1 and under this degraded
-case, one more osd  permanent corrupt will cause data lose. If
-min_size is 2, it need at least 2 osds.
-
->
-> So is there anypotential problem of this setting?
->
-> We use 0.80.10 version.
->
-> Thanks!
->
->
-> ------------------
-> hzwulibin
-> 2015-11-26
->
-> -------------------------------------------------------------
-> =E5=8F=91=E4=BB=B6=E4=BA=BA=EF=BC=9A"hzwulibin"<hzwulibin@gmail.com>
-> =E5=8F=91=E9=80=81=E6=97=A5=E6=9C=9F=EF=BC=9A2015-11-23 09:00
-> =E6=94=B6=E4=BB=B6=E4=BA=BA=EF=BC=9ASage Weil,Haomai Wang
-> =E6=8A=84=E9=80=81=EF=BC=9Aceph-devel
-> =E4=B8=BB=E9=A2=98=EF=BC=9ARe: why my cluster become unavailable
->
-> Hi, Sage
->
-> Thanks! Will try it when next testing!
->
-> ------------------
-> hzwulibin
-> 2015-11-23
->
-> -------------------------------------------------------------
-> =E5=8F=91=E4=BB=B6=E4=BA=BA=EF=BC=9ASage Weil <sage@newdream.net>
-> =E5=8F=91=E9=80=81=E6=97=A5=E6=9C=9F=EF=BC=9A2015-11-22 01:49
-> =E6=94=B6=E4=BB=B6=E4=BA=BA=EF=BC=9AHaomai Wang
-> =E6=8A=84=E9=80=81=EF=BC=9ALibin Wu,ceph-devel
-> =E4=B8=BB=E9=A2=98=EF=BC=9ARe: why my cluster become unavailable
->
-> On Sun, 22 Nov 2015, Haomai Wang wrote:
->> On Thu, Nov 19, 2015 at 11:26 PM, Libin Wu <hzwulibin@gmail.com> wro=
-te:
->> > Hi, cepher
->> >
->> > I have a cluster of 6 OSD server, every server has 8 OSDs.
->> >
->> > I out 4 OSDs on every server, then my client io is blocking.
->> >
->> > I reboot my client and then create a new rbd device, but the new
->> > device also can't write io.
->> >
->> > Yeah, i understand that some data may lost as threee replicas of s=
-ome
->> > object were lost, but why the cluster become unavailable?
->> >
->> > There 80 incomplete pg and 4 down+incomplete pg.
->> >
->> > Any solution i could solve the problem?
->>
->> Yes, if you doesn't have a special crushmap to control the data
->> replcement policy, pg will lack of necessary metadata to boot. If ne=
-ed
->> to readd outed osds or force remove pg which is incomplete(hope it's
->> just a test).
->
-> Is min_size 2 or 1?  Reducing it to 1 will generally clear some of th=
-e
-> incomplete pgs.  Just remember to raise it back to 2 after the cluste=
-r
-> recovers.
->
-> sage
->
->
-
-
-
---=20
-Best Regards,
-
-Wheat
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
