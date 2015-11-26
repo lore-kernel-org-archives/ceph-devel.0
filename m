@@ -1,87 +1,69 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH] mm: Allow GFP_IOFS for page_cache_read page cache
- allocation
-Date: Thu, 26 Nov 2015 16:08:20 +0100
-Message-ID: <20151126150820.GI7953@dhcp22.suse.cz>
-References: <1447251233-14449-1-git-send-email-mhocko@kernel.org>
- <20151112095301.GA25265@quack.suse.cz>
+From: Karol Mroz <kmroz@suse.com>
+Subject: rgw/civetweb privileged port bind
+Date: Thu, 26 Nov 2015 11:25:48 -0800
+Message-ID: <20151126192548.GA27729@oak.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="FL5UXtIhxfXey3p5"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:34654 "EHLO
-	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751367AbbKZPIX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Nov 2015 10:08:23 -0500
+Received: from smtp2.provo.novell.com ([137.65.250.81]:46986 "EHLO
+	smtp2.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752867AbbKZTZw (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Thu, 26 Nov 2015 14:25:52 -0500
 Content-Disposition: inline
-In-Reply-To: <20151112095301.GA25265@quack.suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jan Kara <jack@suse.cz>
-Cc: linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>, Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>, Mel Gorman <mgorman@suse.de>, Dave Chinner <david@fromorbit.com>, Mark Fasheh <mfasheh@suse.com>, ocfs2-devel@oss.oracle.com, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu 12-11-15 10:53:01, Jan Kara wrote:
-> On Wed 11-11-15 15:13:53, mhocko@kernel.org wrote:
-> > From: Michal Hocko <mhocko@suse.com>
-> > 
-> > page_cache_read has been historically using page_cache_alloc_cold to
-> > allocate a new page. This means that mapping_gfp_mask is used as the
-> > base for the gfp_mask. Many filesystems are setting this mask to
-> > GFP_NOFS to prevent from fs recursion issues. page_cache_read is
-> > called from the vm_operations_struct::fault() context during the page
-> > fault. This context doesn't need the reclaim protection normally.
-> > 
-> > ceph and ocfs2 which call filemap_fault from their fault handlers
-> > seem to be OK because they are not taking any fs lock before invoking
-> > generic implementation. xfs which takes XFS_MMAPLOCK_SHARED is safe
-> > from the reclaim recursion POV because this lock serializes truncate
-> > and punch hole with the page faults and it doesn't get involved in the
-> > reclaim.
-> > 
-> > There is simply no reason to deliberately use a weaker allocation
-> > context when a __GFP_FS | __GFP_IO can be used. The GFP_NOFS
-> > protection might be even harmful. There is a push to fail GFP_NOFS
-> > allocations rather than loop within allocator indefinitely with a
-> > very limited reclaim ability. Once we start failing those requests
-> > the OOM killer might be triggered prematurely because the page cache
-> > allocation failure is propagated up the page fault path and end up in
-> > pagefault_out_of_memory.
-> > 
-> > We cannot play with mapping_gfp_mask directly because that would be racy
-> > wrt. parallel page faults and it might interfere with other users who
-> > really rely on NOFS semantic from the stored gfp_mask. The mask is also
-> > inode proper so it would even be a layering violation. What we can do
-> > instead is to push the gfp_mask into struct vm_fault and allow fs layer
-> > to overwrite it should the callback need to be called with a different
-> > allocation context.
-> > 
-> > Initialize the default to (mapping_gfp_mask | __GFP_FS | __GFP_IO)
-> > because this should be safe from the page fault path normally. Why do we
-> > care about mapping_gfp_mask at all then? Because this doesn't hold only
-> > reclaim protection flags but it also might contain zone and movability
-> > restrictions (GFP_DMA32, __GFP_MOVABLE and others) so we have to respect
-> > those.
-> > 
-> > Reported-by: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>
-> > Signed-off-by: Michal Hocko <mhocko@suse.com>
-> > ---
-> > 
-> > Hi,
-> > this has been posted previously as a part of larger GFP_NOFS related
-> > patch set (http://lkml.kernel.org/r/1438768284-30927-1-git-send-email-mhocko%40kernel.org)
-> > but I think it makes sense to discuss it even out of that scope.
-> > 
-> > I would like to hear FS and other MM people about the proposed interface.
-> > Using mapping_gfp_mask blindly doesn't sound good to me and vm_fault
-> > looks like a proper channel to communicate between MM and FS layers.
-> > 
-> > Comments? Are there any better ideas?
-> 
-> Makes sense to me and the filesystems I know should be fine with this
-> (famous last words ;). Feel free to add:
-> 
-> Acked-by: Jan Kara <jack@suse.com>
 
-Thanks a lot! Are there any objections from other fs/mm people?
--- 
-Michal Hocko
-SUSE Labs
+--FL5UXtIhxfXey3p5
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hello,
+
+As I understand it, with the release of infernalis, ceph
+daemons are no longer being run as root. Thus, rgw/civetweb
+is unable to bind to privileged ports:
+
+http://tracker.ceph.com/issues/13600
+
+We encountered this problem as well in our downstream (hammer
+based) product, where we run rgw/civetweb as "wwwuser". To allow
+privileged port binding, we used file caps (setcap from the spec file).
+Going forward, however, we were thinking of taking one of two
+approaches:
+
+1. Start rgw/civetweb as root and utilize an existing civetweb
+config option (run_as_user) to drop permissions _after_
+the port bind and after certificate files have been read.
+
+2. Utilize systemd socket activation, and allow systemd to bind
+to the necessary port. Once rgw/civetweb is started, civetweb
+can pull the listening socket from systemd.
+
+Is this something you folks upstream have given some thought to?
+
+--=20
+Regards,
+Karol
+
+--FL5UXtIhxfXey3p5
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJWV1y4AAoJECp28bThgzatTY4IAICLJpHPCSMJG/DUKk2FJIqa
+GzkepakzsuI4RCAxVTZN1dZRGh1kDkEYKTg6PZo09SQ4TAbL5SOiQ+6XTJqZ6fp9
+A6bZZTBQNlF+vZfLHNM4AXB3l5veHU+0nbYIVYsmWcOvmQp80UktjP6RzqvHJ1f0
+l4Dd/evbEywFtoVq8MVqOKAqmB9Yulh2LR8k82+640uUEg1ikPANnLUVQP4LR2Ct
+gXPLFELQ00Sygvq/L2LzQugx8ORMQTYHffDW/1a6/813h7JBNFxriSTRrUZICUDO
+PgOxPNZWQ7VzvBTj3O9i2ciSm2+H1iH4NCy6wI0p+vSFxzcQv34csCLyj6eVtWE=
+=u4A6
+-----END PGP SIGNATURE-----
+
+--FL5UXtIhxfXey3p5--
