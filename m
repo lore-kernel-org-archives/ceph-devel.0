@@ -1,109 +1,74 @@
-From: Karol Mroz <kmroz@suse.com>
-Subject: Re: rgw/civetweb privileged port bind
-Date: Thu, 26 Nov 2015 13:11:56 -0800
-Message-ID: <20151126211153.GA30089@oak.lan>
-References: <20151126192548.GA27729@oak.lan>
- <alpine.DEB.2.00.1511261136380.12118@cobra.newdream.net>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: What's the difference between Paxos::trim() and
+ PaxosService::trim?
+Date: Fri, 27 Nov 2015 11:20:08 +0000
+Message-ID: <56583C68.6050801@suse.de>
+References: <6F3FA899187F0043BA1827A69DA2F7CC03653DD1@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="opJtzjQTFsWo+cga"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.provo.novell.com ([137.65.250.81]:51449 "EHLO
-	smtp2.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753508AbbKZVMF (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Thu, 26 Nov 2015 16:12:05 -0500
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1511261136380.12118@cobra.newdream.net>
+Received: from mx2.suse.de ([195.135.220.15]:48304 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751504AbbK0LUK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 27 Nov 2015 06:20:10 -0500
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC03653DD1@shsmsx102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Hi Xiaoxi,
 
---opJtzjQTFsWo+cga
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+cc-ing ceph-devel for posterity ;)
 
-On Thu, Nov 26, 2015 at 11:38:26AM -0800, Sage Weil wrote:
-> On Thu, 26 Nov 2015, Karol Mroz wrote:
-> > Hello,
-> >=20
-> > As I understand it, with the release of infernalis, ceph
-> > daemons are no longer being run as root. Thus, rgw/civetweb
-> > is unable to bind to privileged ports:
-> >=20
-> > http://tracker.ceph.com/issues/13600
-> >=20
-> > We encountered this problem as well in our downstream (hammer
-> > based) product, where we run rgw/civetweb as "wwwuser". To allow
-> > privileged port binding, we used file caps (setcap from the spec file).
-> > Going forward, however, we were thinking of taking one of two
-> > approaches:
-> >=20
-> > 1. Start rgw/civetweb as root and utilize an existing civetweb
-> > config option (run_as_user) to drop permissions _after_
-> > the port bind and after certificate files have been read.
-> >
-> > 2. Utilize systemd socket activation, and allow systemd to bind
-> > to the necessary port. Once rgw/civetweb is started, civetweb
-> > can pull the listening socket from systemd.
-> >=20
-> > Is this something you folks upstream have given some thought to?
->=20
-> I haven't. #2 sounds like it's harder, and I'm not sure it brings a lot f=
-o=20
-> benefit. Making #1 work is probably super simple (replace our set user=20
-> option with the civetweb one?)...
->=20
-> What do you suggest?
+On 11/27/2015 08:25 AM, Chen, Xiaoxi wrote:
+> Hi joao,
+> 
+>         I am a bit confuse about  the difference between in
+> Paxos::trim() and PaxosService::trim? Seems they did same work basically?
 
-Hi Sage,
+In essence, both have the same purpose: remove no longer needed versions
+from the monitor store. They do, however, focus on different kinds of
+versions.
 
-I agree with you that #2 would be more work. I expect there may be some gai=
-ns
-in startup time associated with socket activation along with the other
-systemd benefits (cgroups, etc), which we may already be taking advantage o=
-f?
+The main difference is the way the Paxos class and PaxosService access
+the store.
 
-A couple months ago, I played around with option #1 in one of our downstream
-branches. Basically something like this: https://github.com/SUSE/ceph/pull/=
-22
-Further, we'd best pull in a couple civetweb upstream commits into the
-maintained civetweb submodule. Namely:
+PaxosService provides an abstraction to services (e.g., OSDService) such
+that each service, in a way, doesn't have to care much how their keys
+are named. PaxosService handles this by suffixing each key with the
+service's name (e.g., osdmap). Also, services tend to keep both
+incremental and full versions, and the PaxosService class is also aware
+of this.
 
-https://github.com/civetweb/civetweb/commit/5e753cc
-  - civetweb.c: fix setgroups() -Wimplicit-function-declaration
-https://github.com/civetweb/civetweb/commit/a3c460c
-  - call setgroups() to avoid supplemental group leakage
+Hence, PaxosService::trim() removes both incremental and full versions
+when the service prescribes a trim, while making sure that only versions
+related to that service are actually removed -- upon trim, the
+OSDMonitor will not remove MonmapMonitor's versions.
 
-So, option #1 is perhaps a decent solution for rgw/civetweb for the time be=
-ing.
-Later on, we might want to examine the prospect of leveraging socket activa=
-tion
-for all of ceph. I don't think the permissions drop in rgw/civetweb would n=
-egatively
-impact such a plan in the future.
+On the other hand, Paxos::trim() deals solely with paxos versions.
 
---=20
-Regards,
-Karol
+One should also take into account that each service may have different
+criteria on when to trim -- and PaxosService's abstraction takes that
+into account -- while the Paxos class' criteria is pretty
+straightforward: keep a minimum of N versions and a maximum of M.
 
---opJtzjQTFsWo+cga
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+Then you have PaxosService::maybe_trim(), where most of the logic on
+deciding "when to trim" is located, even though ascertaining the bounds
+are delegated to the services themselves. Again, given PaxosService is
+an abstraction for the various services, you also get a bunch of logic
+related to the nuances of removing versions from a paxos service, such
+as allowing each service to trim additional stuff beyond the incremental
+and full versions.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+In the end, maybe we could find a generic function that could serve both
+the Paxos class and PaxosServices, but these are both simple enough that
+I don't think that is warranted. I have the feeling we would always end
+up with at least one additional function (the generic one) and would
+maintain most of the logic on both Paxos::trim() and
+PaxosService::trim() in place anyway, and I don't think that's worth it.
 
-iQEcBAEBCAAGBQJWV3WXAAoJECp28bThgzatX9IIALne51NBaT/MBSy3oSO4u22y
-x3vwEGVsQxjchAAGr1DIRIgDP7lEhroYD2H/AdGrsFDwYsphuP2STnN4omdcuYnF
-H0vPHycj1gaUknfCIEB+kbBk0x3xPn9VJgCaxMTyMVdPz4tboAiEgOiyCgDrbQAn
-aopzKMqQJ8O2MSjQcScUwbenO5dzoa9Z7PRSSf/LsIsAYXrr+IZBZ+BNyBZeHyP4
-T7ScQYatroCfuDKx3XZQuibpttoWwO1q5fEAWUIcE/yy8SWnpmlsejvbGbaXDW9M
-cFdvrvemRhho1Oyr3mTeuK9xao6xbrritIHOye1KGfqJF33EisnEJIHvq69HqVs=
-=5F9l
------END PGP SIGNATURE-----
+Hope this helps clarifying things a bit.
 
---opJtzjQTFsWo+cga--
+  -Joao
