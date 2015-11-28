@@ -1,61 +1,57 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH] mm: Allow GFP_IOFS for page_cache_read page cache
- allocation
-Date: Fri, 27 Nov 2015 18:05:22 +0100
-Message-ID: <20151127170522.GL2493@dhcp22.suse.cz>
-References: <1447251233-14449-1-git-send-email-mhocko@kernel.org>
- <20151112095301.GA25265@quack.suse.cz>
- <20151126150820.GI7953@dhcp22.suse.cz>
- <56588789.1010300@suse.cz>
+From: Loic Dachary <loic@dachary.org>
+Subject: RFC: teuthology field in commit messages
+Date: Sat, 28 Nov 2015 16:56:02 +0100
+Message-ID: <5659CE92.4000203@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <56588789.1010300@suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Vlastimil Babka <vbabka@suse.cz>
-Cc: Jan Kara <jack@suse.cz>, linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>, Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>, Mel Gorman <mgorman@suse.de>, Dave Chinner <david@fromorbit.com>, Mark Fasheh <mfasheh@suse.com>, ocfs2-devel@oss.oracle.com, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="5gBWTQvA41EEP20DCBrp5NtVl0xNuVngu"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:40612 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752097AbbK1P4K (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Nov 2015 10:56:10 -0500
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 04595420AC
+	for <ceph-devel@vger.kernel.org>; Sat, 28 Nov 2015 16:56:03 +0100 (CET)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri 27-11-15 17:40:41, Vlastimil Babka wrote:
-> On 11/26/2015 04:08 PM, Michal Hocko wrote:
-> >On Thu 12-11-15 10:53:01, Jan Kara wrote:
-> >>On Wed 11-11-15 15:13:53, mhocko@kernel.org wrote:
-> >>>
-> >>>Hi,
-> >>>this has been posted previously as a part of larger GFP_NOFS related
-> >>>patch set (http://lkml.kernel.org/r/1438768284-30927-1-git-send-email-mhocko%40kernel.org)
-> >>>but I think it makes sense to discuss it even out of that scope.
-> >>>
-> >>>I would like to hear FS and other MM people about the proposed interface.
-> >>>Using mapping_gfp_mask blindly doesn't sound good to me and vm_fault
-> >>>looks like a proper channel to communicate between MM and FS layers.
-> >>>
-> >>>Comments? Are there any better ideas?
-> >>
-> >>Makes sense to me and the filesystems I know should be fine with this
-> >>(famous last words ;). Feel free to add:
-> >>
-> >>Acked-by: Jan Kara <jack@suse.com>
-> >
-> >Thanks a lot! Are there any objections from other fs/mm people?
-> 
-> Please replace "GFP_IOFS" in the subject, as the "flag" has been removed
-> recently. Otherwise
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--5gBWTQvA41EEP20DCBrp5NtVl0xNuVngu
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Done.
-mm: Allow GFP_{FS,IO} for page_cache_read page cache allocation
+Hi Ceph,
 
-> Acked-by: Vlastimil Babka <vbabka@suse.cz>
+An optional teuthology field could be added to a commit message like so:
 
-Thanks
+teuthology: --suite rbd
 
--- 
-Michal Hocko
-SUSE Labs
+to state that this commit should be tested with the rbd suite. It could b=
+e parsed by bots and humans.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+It would make it easy and cost effective to run partial teuthology suites=
+ automatically on pull requests.
+
+What do you think ?
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--5gBWTQvA41EEP20DCBrp5NtVl0xNuVngu
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlZZzpIACgkQ8dLMyEl6F22++gCeOyALaFtSiKmSrTyYxJKob1UN
+aa4AoK0unlDlmKO/x/qijYdcnBfmy+nr
+=2Sl4
+-----END PGP SIGNATURE-----
+
+--5gBWTQvA41EEP20DCBrp5NtVl0xNuVngu--
