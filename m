@@ -1,57 +1,47 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: RFC: teuthology field in commit messages
-Date: Sat, 28 Nov 2015 16:56:02 +0100
-Message-ID: <5659CE92.4000203@dachary.org>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: RFC: teuthology field in commit messages
+Date: Sun, 29 Nov 2015 11:51:27 +0000
+Message-ID: <565AE6BF.4040701@suse.de>
+References: <5659CE92.4000203@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="5gBWTQvA41EEP20DCBrp5NtVl0xNuVngu"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:40612 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752097AbbK1P4K (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Nov 2015 10:56:10 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 04595420AC
-	for <ceph-devel@vger.kernel.org>; Sat, 28 Nov 2015 16:56:03 +0100 (CET)
+Received: from mx2.suse.de ([195.135.220.15]:52984 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751428AbbK2Lv3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 29 Nov 2015 06:51:29 -0500
+In-Reply-To: <5659CE92.4000203@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---5gBWTQvA41EEP20DCBrp5NtVl0xNuVngu
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On 11/28/2015 03:56 PM, Loic Dachary wrote:
+> Hi Ceph,
+> 
+> An optional teuthology field could be added to a commit message like so:
+> 
+> teuthology: --suite rbd
+> 
+> to state that this commit should be tested with the rbd suite. It could be parsed by bots and humans.
+> 
+> It would make it easy and cost effective to run partial teuthology suites automatically on pull requests.
+> 
+> What do you think ?
 
-Hi Ceph,
+Can't we use git-notes for that instead?
 
-An optional teuthology field could be added to a commit message like so:
+I think this pollutes the history a bit. Especially considering this
+sort of metadata isn't necessarily specific to a given diff.
 
-teuthology: --suite rbd
+Also should be considered that this is a field that may make sense today
+but may not make much sense in 10, 15 years. And while we have quite a
+few special-purpose fields (e.g., Fixes, Backport), those are currently
+pretty explanatory and I believe will be still easily understandable in
+a decade's time.
 
-to state that this commit should be tested with the rbd suite. It could b=
-e parsed by bots and humans.
+In any case, if there's absolutely no other way to do this and the other
+folk thinks it's important to have this, I will certainly not be the
+party pooper ;)
 
-It would make it easy and cost effective to run partial teuthology suites=
- automatically on pull requests.
-
-What do you think ?
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---5gBWTQvA41EEP20DCBrp5NtVl0xNuVngu
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlZZzpIACgkQ8dLMyEl6F22++gCeOyALaFtSiKmSrTyYxJKob1UN
-aa4AoK0unlDlmKO/x/qijYdcnBfmy+nr
-=2Sl4
------END PGP SIGNATURE-----
-
---5gBWTQvA41EEP20DCBrp5NtVl0xNuVngu--
+  -Joao
