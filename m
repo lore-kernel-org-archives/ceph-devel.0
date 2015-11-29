@@ -1,36 +1,56 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Compiling for FreeBSD
-Date: Sun, 29 Nov 2015 19:57:03 +0100
-Message-ID: <565B4A7F.60301@digiware.nl>
-References: <565B3999.3050302@digiware.nl>
- <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: RFC: teuthology field in commit messages
+Date: Sun, 29 Nov 2015 20:08:30 +0000
+Message-ID: <CALe9h7edX3zQVri_KRRNRmjOnvcxhxq0EJXn=5nhF+AQY51g3g@mail.gmail.com>
+References: <5659CE92.4000203@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:13974 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751180AbbK2S5P (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 29 Nov 2015 13:57:15 -0500
-In-Reply-To: <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:34798 "EHLO
+	mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752126AbbK2UIw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 29 Nov 2015 15:08:52 -0500
+Received: by lffu14 with SMTP id u14so174624781lff.1
+        for <ceph-devel@vger.kernel.org>; Sun, 29 Nov 2015 12:08:50 -0800 (PST)
+In-Reply-To: <5659CE92.4000203@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
+To: Loic Dachary <loic@dachary.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 29-11-2015 19:08, Haomai Wang wrote:
+On Sat, Nov 28, 2015 at 3:56 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Ceph,
+>
+> An optional teuthology field could be added to a commit message like =
+so:
+>
+> teuthology: --suite rbd
+>
+> to state that this commit should be tested with the rbd suite. It cou=
+ld be parsed by bots and humans.
+>
+> It would make it easy and cost effective to run partial teuthology su=
+ites automatically on pull requests.
+>
+> What do you think ?
 
-> I guess we still expect FreeBSD support, which version do you test to
-> compile? I'd like to help to make bsd work :-)
+Hmm, we are usually testing things at the branch/PR level rather than
+on the per-commit level, so it feels a bit strange to have this in the
+commit message.
 
-I considered it is best to develop against HEAD aka:
-11.0-CURRENT FreeBSD 11.0-CURRENT #0 r291381: Sat Nov 28 14:22:54 CET 2015
-I'm also training configure the use as much of CLANG as possible.
+However, if a system existed that would auto-test things when I put
+something magic in a commit message, I would probably use it!
 
-I would guess that by the time we get anything worth mentioning 11.0
-will be released of close to release.
-Note that the release date for 11.0 is july 2016
-
---WjW
+John
 
 
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
