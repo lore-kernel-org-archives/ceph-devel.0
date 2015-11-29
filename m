@@ -1,104 +1,46 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: RFC: teuthology field in commit messages
-Date: Sun, 29 Nov 2015 15:58:10 +0100
-Message-ID: <565B1282.3050001@dachary.org>
-References: <5659CE92.4000203@dachary.org> <565AE6BF.4040701@suse.de>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Compiling for FreeBSD
+Date: Sun, 29 Nov 2015 18:44:57 +0100
+Message-ID: <565B3999.3050302@digiware.nl>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="fhvAsBjICPbJ0EVwtcMDj4HS8IvN1oxeJ"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:40953 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752548AbbK2O6M (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 29 Nov 2015 09:58:12 -0500
-In-Reply-To: <565AE6BF.4040701@suse.de>
+Received: from smtp.digiware.nl ([31.223.170.169]:29291 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751439AbbK2Rp2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 29 Nov 2015 12:45:28 -0500
+Received: from rack1.digiware.nl (unknown [127.0.0.1])
+	by smtp.digiware.nl (Postfix) with ESMTP id 2309A153416
+	for <ceph-devel@vger.kernel.org>; Sun, 29 Nov 2015 18:45:26 +0100 (CET)
+Received: from [IPv6:2001:4cb8:3:1:953f:f3db:1564:452f] (unknown [IPv6:2001:4cb8:3:1:953f:f3db:1564:452f])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.digiware.nl (Postfix) with ESMTPSA id D5D2B153418
+	for <ceph-devel@vger.kernel.org>; Sun, 29 Nov 2015 18:44:57 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao@suse.de>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---fhvAsBjICPbJ0EVwtcMDj4HS8IvN1oxeJ
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi,
 
-Hi Joao,
+Not unlike many others running FreeBSD I'd like to see if I/we can get
+Ceph to build and run on FreeBSD. If not all components than at least
+certain components.
 
-On 29/11/2015 12:51, Joao Eduardo Luis wrote:
-> On 11/28/2015 03:56 PM, Loic Dachary wrote:
->> Hi Ceph,
->>
->> An optional teuthology field could be added to a commit message like s=
-o:
->>
->> teuthology: --suite rbd
->>
->> to state that this commit should be tested with the rbd suite. It coul=
-d be parsed by bots and humans.
->>
->> It would make it easy and cost effective to run partial teuthology sui=
-tes automatically on pull requests.
->>
->> What do you think ?
->=20
-> Can't we use git-notes for that instead?
+With compilation I do get quite some way, even with the CLANG compiler.
+But I run into obvious part where Linux goes a different direction from
+what is available on FreeBSD.
 
-It possible but few people understand how it works.
+If I google one of the reports I ran into, I get at:
+http://lists.ceph.com/pipermail/ceph-commit-ceph.com/2013-November/005812.html
 
-> I think this pollutes the history a bit. Especially considering this
-> sort of metadata isn't necessarily specific to a given diff.
+Which sort of suggests that some of the code for FreeBSD has again been
+purged from the tree...
 
-I think it is relevant in a permanent way. When running a suite, we do it=
- on a given diff. For instance,
-in a 10 commit pull request, we run the suite on the head of the branch, =
-which will later become the second parent of the merge. Should we want to=
- test at a later time, long after the pull request has been merged, we wi=
-ll be able to do it using the same suite.=20
+Is that to remove FreeBSD completely from the tree?
+Or just because that code did not work?
 
-> Also should be considered that this is a field that may make sense toda=
-y
-> but may not make much sense in 10, 15 years. And while we have quite a
-> few special-purpose fields (e.g., Fixes, Backport), those are currently=
+Thanx,
+--WjW
 
-> pretty explanatory and I believe will be still easily understandable in=
-
-> a decade's time.
-
-It also holds for stable branches since we maintain stable branches for c=
-eph-qa-suite as well. So, for backporting 3 commits from a given pull req=
-uest, it will also help to know that the backport could also be tested wi=
-th this specific suite. And if the suite is missing the test, it's also a=
- good hint that this test needs to be backported as well.
-
-> In any case, if there's absolutely no other way to do this and the othe=
-r
-> folk thinks it's important to have this, I will certainly not be the
-> party pooper ;)
-
-:-) FWIW, I think the Backport: field should not be used ( see http://tra=
-cker.ceph.com/projects/ceph-releases/wiki/HOWTO_schedule_an_issue_for_bac=
-kporting#Backport-field-in-the-commit-messages for the full rationale ). =
-But I think the "teuthology" field being used *prior* to the pull request=
- being merged makes sense and is a valuable addition to the commit histor=
-y.
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---fhvAsBjICPbJ0EVwtcMDj4HS8IvN1oxeJ
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlZbEoIACgkQ8dLMyEl6F23NVQCfVAAyhcXmgeSk3reZrj72Z+XX
-nUEAnA4GuMGrXuhnSTEKHYFbqQsYL6nW
-=FTnN
------END PGP SIGNATURE-----
-
---fhvAsBjICPbJ0EVwtcMDj4HS8IvN1oxeJ--
