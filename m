@@ -1,22 +1,28 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: tarball for 10.0.0
-Date: Mon, 30 Nov 2015 19:57:58 +0000
-Message-ID: <DM2PR12MB0556459BF51B825FE200C6889B000@DM2PR12MB0556.namprd12.prod.outlook.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: nightlies moved to ovh (openstack)
+Date: Mon, 30 Nov 2015 14:22:10 -0800
+Message-ID: <CAMMFjmGuGheRrWed0qi7JCVrzAA1fvXKm7sfRLWGEEPJ0ZNosA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0097.outbound.protection.outlook.com ([157.56.110.97]:61312
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752076AbbK3VaJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Nov 2015 16:30:09 -0500
-Content-Language: en-US
+Received: from mail-io0-f180.google.com ([209.85.223.180]:34082 "EHLO
+	mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752538AbbK3WWL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Nov 2015 17:22:11 -0500
+Received: by ioir85 with SMTP id r85so190098985ioi.1
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Nov 2015 14:22:10 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Development, Ceph" <ceph-devel@vger.kernel.org>, ceph-qa <ceph-qa@ceph.com>
 
-I did not see the source tarball for 10.0.0 at http://download.ceph.com/tarballs/ceph-10.0.0.tar.gz
+In preparation to sepia lab move, nightlies' schedules were moved to
+the ovh (openstack) lab.
 
--- Tom Deneau
+See details here - http://tracker.ceph.com/projects/ceph-releases/wiki/ovh
 
+Please let me know if you see any problems.
+
+PS: I will optimize times/frequencies in next several days/weeks
+
+Thx
+YuriW
