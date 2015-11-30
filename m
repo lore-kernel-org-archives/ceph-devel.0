@@ -1,36 +1,30 @@
-From: Wukongming <wu.kongming@h3c.com>
-Subject: How to open clog debug?
-Date: Mon, 30 Nov 2015 12:07:28 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D7519ACEE@H3CMLB14-EX.srv.huawei-3com.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Compiling for FreeBSD
+Date: Mon, 30 Nov 2015 05:21:39 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
+References: <565B3999.3050302@digiware.nl> <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com> <565B4A7F.60301@digiware.nl> <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com> <20151130065812.GA20205@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:20495 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752352AbbK3MHH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 30 Nov 2015 07:07:07 -0500
-Content-Language: zh-CN
+Received: from cobra.newdream.net ([66.33.216.30]:42598 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752067AbbK3NVk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Nov 2015 08:21:40 -0500
+In-Reply-To: <20151130065812.GA20205@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mykola Golub <mgolub@mirantis.com>
+Cc: "Yan, Zheng" <ukernel@gmail.com>, Willem Jan Withagen <wjw@digiware.nl>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-SGksIEFsbA0KDQogICAgICAgIERvZXMgYW55b25lIGtub3cgaG93IHRvIG9wZW4gY2xvZyBkZWJ1
-Zz8NCg0KVGhhbmtzIQ0KDQogICAgIEtvbmdtaW5nIHd1DQotLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrm
-nKzpgq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDl
-hazlj7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3l
-iJflh7oNCueahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9
-leW9ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmc
-suOAgeWkjeWItuOAgQ0K5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c
-5oKo6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l
-5Y+R5Lu25Lq65bm25Yig6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0
-YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNo
-IGlzDQppbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNz
-IGlzIGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5lZCBo
-ZXJlaW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9y
-IHBhcnRpYWwNCmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkg
-cGVyc29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hpYml0
-ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRo
-ZSBzZW5kZXINCmJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo=
+The problem with all of the porting code in general is that it is doomed 
+to break later on if we don't have (at least) ongoing build tests.  In 
+order for a FreeBSD or OSX port to continue working we need VMs that run 
+either gitbuilder or a jenkins job or similar so that we can tell when it 
+breaks.
+
+If someone is willing to run a VM somewhere to do this we can pretty 
+easily stick it on the gitbuilder page at
+
+	http://ceph.com/gitbuilder.cgi
+
+sage
