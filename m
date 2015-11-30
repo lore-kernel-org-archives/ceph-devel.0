@@ -1,77 +1,34 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Compiling for FreeBSD
-Date: Mon, 30 Nov 2015 15:56:28 +0100
-Message-ID: <565C639C.1080009@digiware.nl>
-References: <565B3999.3050302@digiware.nl>
- <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
- <565B4A7F.60301@digiware.nl>
- <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
- <20151130065812.GA20205@gmail.com> <565C38D2.4080403@digiware.nl>
- <20151130141320.GB20205@gmail.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: updates to the fio objectstore engine
+Date: Mon, 30 Nov 2015 10:01:27 -0500 (EST)
+Message-ID: <411815055.24643573.1448895687464.JavaMail.zimbra@redhat.com>
+References: <1020408809.24616459.1448894405323.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:62627 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754071AbbK3O4l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 30 Nov 2015 09:56:41 -0500
-In-Reply-To: <20151130141320.GB20205@gmail.com>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:54435 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754071AbbK3PB3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Nov 2015 10:01:29 -0500
+In-Reply-To: <1020408809.24616459.1448894405323.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <mgolub@mirantis.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Mark Nelson <mnelson@redhat.com>, Haomai Wang <haomaiwang@gmail.com>, "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
 
-On 30-11-2015 15:13, Mykola Golub wrote:
-> On Mon, Nov 30, 2015 at 12:53:54PM +0100, Willem Jan Withagen wrote:
-> 
->>> git clone --recursive -b wip-freebsd https://github.com/trociny/ceph.git
->>> cd ceph
->>> ./install-deps.sh
->>> ./do_autogen.sh
->>> gmake
->>> cd src
->>> ./vstart.sh # start dev cluster
->>> ./ceph -s # check it works
->>>
->>
->> So what backend for the OSDs are you using here?
-> 
-> The default one, which is FileStore. I have not done much testing
-> though...
-> 
+Hi folks,
 
-Seems we have passed the first hurdle...
-It compiles...
+I made another pass at the fio objectstore engine over the long weekend. Some of the major changes:
 
-Onto the next phase: Testing.
-Lets see what the developers site has to tell about that.
+* added support for multiple jobs at a time by splitting global/ObjectStore initialization into a new Engine class
 
---WjW
+* when run with nr_files > 1, the objects are spread over multiple collections to model the concurrency we get from placement groups
 
-chmod +x ceph-coverage.tmp
-chmod a-w ceph-coverage.tmp
-mv ceph-coverage.tmp ceph-coverage
-cd ./ceph-detect-init ; python setup.py build
-running build
-running build_py
-gmake[3]: Leaving directory '/usr/srcs/Ceph/src/ceph/src'
-gmake[2]: Leaving directory '/usr/srcs/Ceph/src/ceph/src'
-gmake[1]: Leaving directory '/usr/srcs/Ceph/src/ceph/src'
-Making all in man
-gmake[1]: Entering directory '/usr/srcs/Ceph/src/ceph/man'
-gmake[1]: Nothing to be done for 'all'.
-gmake[1]: Leaving directory '/usr/srcs/Ceph/src/ceph/man'
-Making all in doc
-gmake[1]: Entering directory '/usr/srcs/Ceph/src/ceph/doc'
-gmake[1]: Nothing to be done for 'all'.
-gmake[1]: Leaving directory '/usr/srcs/Ceph/src/ceph/doc'
-Making all in systemd
-gmake[1]: Entering directory '/usr/srcs/Ceph/src/ceph/systemd'
-gmake[1]: Nothing to be done for 'all'.
-gmake[1]: Leaving directory '/usr/srcs/Ceph/src/ceph/systemd'
-Making all in selinux
-gmake[1]: Entering directory '/usr/srcs/Ceph/src/ceph/selinux'
-gmake[1]: Nothing to be done for 'all'.
-gmake[1]: Leaving directory '/usr/srcs/Ceph/src/ceph/selinux'
+* replaced other options with a 'conf' option to read in a ceph.conf
 
+* moved into src/test/fio and added a README and example job/config files
+
+You can find the pull request at https://github.com/ceph/ceph/pull/5943. Testing and feedback is appreciated!
+
+Casey
