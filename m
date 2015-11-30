@@ -1,7 +1,7 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
 Subject: Re: Compiling for FreeBSD
-Date: Mon, 30 Nov 2015 15:40:56 +0100
-Message-ID: <565C5FF8.1090003@digiware.nl>
+Date: Mon, 30 Nov 2015 15:56:28 +0100
+Message-ID: <565C639C.1080009@digiware.nl>
 References: <565B3999.3050302@digiware.nl>
  <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
  <565B4A7F.60301@digiware.nl>
@@ -12,10 +12,10 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:37594 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([31.223.170.169]:62627 "EHLO smtp.digiware.nl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753699AbbK3Ola (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 30 Nov 2015 09:41:30 -0500
+	id S1754071AbbK3O4l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 30 Nov 2015 09:56:41 -0500
 In-Reply-To: <20151130141320.GB20205@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -41,11 +41,37 @@ On 30-11-2015 15:13, Mykola Golub wrote:
 > though...
 > 
 
-Well,
-Cherry-picked a few of you diffs.
-Compilation is now slugging thru the tests in my tree.
-Running gmake in serial mode, so it is slow with clang.
+Seems we have passed the first hurdle...
+It compiles...
+
+Onto the next phase: Testing.
+Lets see what the developers site has to tell about that.
 
 --WjW
 
+chmod +x ceph-coverage.tmp
+chmod a-w ceph-coverage.tmp
+mv ceph-coverage.tmp ceph-coverage
+cd ./ceph-detect-init ; python setup.py build
+running build
+running build_py
+gmake[3]: Leaving directory '/usr/srcs/Ceph/src/ceph/src'
+gmake[2]: Leaving directory '/usr/srcs/Ceph/src/ceph/src'
+gmake[1]: Leaving directory '/usr/srcs/Ceph/src/ceph/src'
+Making all in man
+gmake[1]: Entering directory '/usr/srcs/Ceph/src/ceph/man'
+gmake[1]: Nothing to be done for 'all'.
+gmake[1]: Leaving directory '/usr/srcs/Ceph/src/ceph/man'
+Making all in doc
+gmake[1]: Entering directory '/usr/srcs/Ceph/src/ceph/doc'
+gmake[1]: Nothing to be done for 'all'.
+gmake[1]: Leaving directory '/usr/srcs/Ceph/src/ceph/doc'
+Making all in systemd
+gmake[1]: Entering directory '/usr/srcs/Ceph/src/ceph/systemd'
+gmake[1]: Nothing to be done for 'all'.
+gmake[1]: Leaving directory '/usr/srcs/Ceph/src/ceph/systemd'
+Making all in selinux
+gmake[1]: Entering directory '/usr/srcs/Ceph/src/ceph/selinux'
+gmake[1]: Nothing to be done for 'all'.
+gmake[1]: Leaving directory '/usr/srcs/Ceph/src/ceph/selinux'
 
