@@ -1,57 +1,45 @@
-From: Vimal <vikumar@redhat.com>
-Subject: Suggestions on tracker 13578
-Date: Tue, 1 Dec 2015 18:53:45 +0530
-Message-ID: <565D9F61.6070108@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Compiling for FreeBSD
+Date: Tue, 1 Dec 2015 05:30:01 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1512010529280.19170@cobra.newdream.net>
+References: <565B3999.3050302@digiware.nl> <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com> <565B4A7F.60301@digiware.nl> <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com> <20151130065812.GA20205@gmail.com>
+ <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net> <565D7FA8.3010301@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36540 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751640AbbLANXs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 1 Dec 2015 08:23:48 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 2CD5C8E6EF
-	for <ceph-devel@vger.kernel.org>; Tue,  1 Dec 2015 13:23:48 +0000 (UTC)
-Received: from [10.65.223.165] (dhcp223-165.pnq.redhat.com [10.65.223.165])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tB1DNk1R023751
-	for <ceph-devel@vger.kernel.org>; Tue, 1 Dec 2015 08:23:47 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:49120 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755216AbbLANaB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Dec 2015 08:30:01 -0500
+In-Reply-To: <565D7FA8.3010301@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Mykola Golub <mgolub@mirantis.com>, "Yan, Zheng" <ukernel@gmail.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hello,
+On Tue, 1 Dec 2015, Willem Jan Withagen wrote:
+> On 30-11-2015 14:21, Sage Weil wrote:
+> > The problem with all of the porting code in general is that it is doomed
+> > to break later on if we don't have (at least) ongoing build tests.  In
+> > order for a FreeBSD or OSX port to continue working we need VMs that run
+> > either gitbuilder or a jenkins job or similar so that we can tell when it
+> > breaks.
+> > 
+> > If someone is willing to run a VM somewhere to do this we can pretty
+> > easily stick it on the gitbuilder page at
+> > 
+> > 	http://ceph.com/gitbuilder.cgi
+> 
+> 
+> Hi Sage,
+> 
+> Could you give some pointers as to where to start running the tests.
+> I see a lot of "basic" tests to see if the platform is actually conformant.
+> 
+> So before plunging into running ceph-mon and stuff, it would perhaps be
+> better to actually run (parts of) the basic required tests..
 
-This mail is to discuss the feature request at 
-http://tracker.ceph.com/issues/13578.
+I would start with 'make check' from src/... that's what we'd actually 
+want the gitbuilder to do.
 
-If done, such a tool should help point out several mis-configurations 
-that may cause problems in a cluster later.
-
-Some of the suggestions are:
-
-a) A check to understand if the MONs and OSD nodes are on the same machines.
-
-b) If /var is a separate partition or not, to prevent the root 
-filesystem from being filled up.
-
-c) If monitors are deployed in different failure domains or not.
-
-d) If the OSDs are deployed in different failure domains.
-
-e) If a journal disk is used for more than six OSDs. Right now, the 
-documentation suggests upto 6 OSD journals to exist on a single journal 
-disk.
-
-f) Failure domains depending on the power source.
-
-There can be several more checks, and it can be a useful tool to test 
-the problems an existing cluster or a new installation.
-
-But I'd like to know how the engineering community sees this, if its 
-seems to be worth pursuing, and what suggestions do you have for 
-improving/adding to this.
-
-Thank you,
-
-Vimal
+sage
