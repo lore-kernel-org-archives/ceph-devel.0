@@ -1,80 +1,44 @@
-From: "Snyder, Emile" <emsnyder@ebay.com>
-Subject: issues running teuthology-openstack on private cloud
-Date: Tue, 1 Dec 2015 18:52:03 +0000
-Message-ID: <F7FEECE6-0874-4181-ACF9-EC9734F864E8@ebay.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="_002_F7FEECE608744181ACF9EC9734F864E8ebaycom_"
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] rbd: don't put snap_context twice in rbd_queue_workfn()
+Date: Tue,  1 Dec 2015 21:04:29 +0100
+Message-ID: <1449000269-27732-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from den-mipot-002.corp.ebay.com ([216.113.175.153]:17662 "EHLO
-	den-mipot-002.corp.ebay.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755177AbbLASwF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Dec 2015 13:52:05 -0500
-Content-Language: en-US
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:33325 "EHLO
+	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754908AbbLAUEv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Dec 2015 15:04:51 -0500
+Received: by wmec201 with SMTP id c201so222721427wme.0
+        for <ceph-devel@vger.kernel.org>; Tue, 01 Dec 2015 12:04:50 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Josh Durgin <jdurgin@redhat.com>
 
---_002_F7FEECE608744181ACF9EC9734F864E8ebaycom_
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <A1FB7CF92E8E7F47A5ECAFE62B861905@corp.ebay.com>
-Content-Transfer-Encoding: base64
+Commit 4e752f0ab0e8 ("rbd: access snapshot context and mapping size
+safely") moved ceph_get_snap_context() out of rbd_img_request_create()
+and into rbd_queue_workfn(), adding a ceph_put_snap_context() to the
+error path in rbd_queue_workfn().  However, rbd_img_request_create()
+consumes a ref on snapc, so calling ceph_put_snap_context() after
+a successful rbd_img_request_create() leads to an extra put.  Fix it.
 
-SGksDQoNCknigJltIHRyeWluZyB0byBnZXQgc2V0IHVwIHRvIHVzZSB0ZXV0aG9sb2d5IHRvIHJ1
-biB0ZXN0cyBvbiBhbiBpbi1ob3VzZSBvcGVuc3RhY2sgY2xvdWQuIElzIHRoaXMgbGlzdCB0aGUg
-YXBwcm9wcmlhdGUgdmVudWU/DQoNCg0KDQpJIGhhZCB0byBtYWtlIDIgY2hhbmdlcyB0byBnZXQg
-dGV1dGhvbG9neS1vcGVuc3RhY2sgdG8gcnVuIG9uIG15IGRldiBtYWNoaW5lOyBmaXJzdCB0aGVy
-ZSBpcyBhIGhhcmRjb2RlZCBzZXQgb2YgcHJvdmlkZXJzIGluIE9wZW5TdGFjay5zZXRfcHJvdmlk
-ZXIgdG8gbWF0Y2ggdGhlIEFVVEhfVVJMIGluIHlvdXIgZW52aXJvbm1lbnQsIGFuZCBzZWNvbmQg
-dGhlIHNoYXBlIG9mIHRoZSByZXN1bHQgZGF0YSB0aGF0IEkgc2VlIGluIHRoZSBPcGVuU3RhY2su
-Z2V0X3ZhbHVlKHJlc3VsdCwgZmllbGQpIG1ldGhvZCBkb2VzbuKAmXQgbWF0Y2ggdGhlIGNvZGUg
-ZXhwZWN0YXRpb25zLiBUaGUgY29kZSBleHBlY3RzIHRvIHNlZQ0KDQpbe+KAnEZpZWxk4oCdOiDi
-gJxuYW1l4oCdLCDigJxWYWx1ZeKAnTog4oCcZm9v4oCdfXvigJxGaWVsZOKAnTog4oCcaW1hZ2Xi
-gJ0sIOKAnFZhbHVl4oCdOiDigJzigKYifV0gYnV0IEkgc2VlIHvigJxuYW1l4oCdOiDigJxmb2/i
-gJ0g4oCcaW1hZ2XigJ06IOKAnOKApiJ9OyBhbnkgaWRlYXMgd2h5Pw0KDQpXaGVuIEkgaGFjayBh
-cm91bmQgdGhvc2UgMiB0aGluZ3MgKGF0dGFjaGVkIGRpZmYpIEkgY2FuIOKAnHN1Y2Nlc3NmdWxs
-eeKAnSBydW4gDQoNCid0ZXV0aG9sb2d5LW9wZW5zdGFjayDigJRrZXktZmlsZW5hbWUgbXlzZWxm
-LnBlbSDigJRrZXktbmFtZSBteXNlbGYg4oCUc3VpdGUgZHVtbXnigJkNCg0KYW5kIHRoZSB2beKA
-mXMgYXJlIGNyZWF0ZWQsIEkgc2VlIHRoZSBqb2IgaW4gUHVscGl0bywgYnV0IHRoZSBsb2cgZnJv
-bSB3aXRoaW4gUHVscGl0byBzaG93cyBpdOKAmXMgaGl0dGluZyB0aGUgZ2V0X3ZhbHVlIGlzc3Vl
-IG9uIHRoZSBWTSBhcyB3ZWxsLg0KDQpJ4oCZbSBoYXZpbmcgYSBoYXJkIHRpbWUgc2VlaW5nIGhv
-dyB0byBnZXQgdGhlIFZN4oCZcyB0byB1c2UgbXkgcGF0Y2hlZCB2ZXJzaW9uIG9mIHRldXRob2xv
-Z3kgdG9vLg0KDQpUaGFua3MsDQotRW1pbGUNCg==
+Cc: stable@vger.kernel.org # 3.18+
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 1 +
+ 1 file changed, 1 insertion(+)
 
---_002_F7FEECE608744181ACF9EC9734F864E8ebaycom_
-Content-Type: application/octet-stream; name="teuthology.diff"
-Content-Description: teuthology.diff
-Content-Disposition: attachment; filename="teuthology.diff"; size=1467;
-	creation-date="Tue, 01 Dec 2015 18:52:03 GMT";
-	modification-date="Tue, 01 Dec 2015 18:52:03 GMT"
-Content-ID: <F421ECBBF9B3E94F952D88132E25F04C@corp.ebay.com>
-Content-Transfer-Encoding: base64
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 24a757e97d56..4a876785b68c 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3442,6 +3442,7 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 		goto err_rq;
+ 	}
+ 	img_request->rq = rq;
++	snapc = NULL; /* img_request consumes a ref */
+ 
+ 	if (op_type == OBJ_OP_DISCARD)
+ 		result = rbd_img_request_fill(img_request, OBJ_REQUEST_NODATA,
+-- 
+2.4.3
 
-ZGlmZiAtLWdpdCBhL3RldXRob2xvZ3kvb3BlbnN0YWNrL19faW5pdF9fLnB5IGIvdGV1dGhvbG9n
-eS9vcGVuc3RhY2svX19pbml0X18ucHkKaW5kZXggMzZhYjY4Mi4uMDZhYjJjYyAxMDA2NDQKLS0t
-IGEvdGV1dGhvbG9neS9vcGVuc3RhY2svX19pbml0X18ucHkKKysrIGIvdGV1dGhvbG9neS9vcGVu
-c3RhY2svX19pbml0X18ucHkKQEAgLTc2LDcgKzc2LDggQEAgY2xhc3MgT3BlblN0YWNrKG9iamVj
-dCk6CiAgICAgICAgIHByb3ZpZGVycyA9ICgoJ2Nsb3VkLm92aC5uZXQnLCAnb3ZoJyksCiAgICAg
-ICAgICAgICAgICAgICAgICAoJ2VudGVyY2xvdWRzdWl0ZS5jb20nLCAnZW50ZXJjbG91ZHN1aXRl
-JyksCiAgICAgICAgICAgICAgICAgICAgICAoJ3JhY2tzcGFjZWNsb3VkLmNvbScsICdyYWNrc3Bh
-Y2UnKSwKLSAgICAgICAgICAgICAgICAgICAgICgnZHJlYW0uaW8nLCAnZHJlYW1ob3N0JykpCisg
-ICAgICAgICAgICAgICAgICAgICAoJ2RyZWFtLmlvJywgJ2RyZWFtaG9zdCcpLAorICAgICAgICAg
-ICAgICAgICAgICAgKCdlYmF5YzMuY29tJywgJ2ViYXljMycpKQogICAgICAgICBzZWxmLnByb3Zp
-ZGVyID0gTm9uZQogICAgICAgICBmb3IgKHBhdHRlcm4sIHByb3ZpZGVyKSBpbiBwcm92aWRlcnM6
-CiAgICAgICAgICAgICBpZiBwYXR0ZXJuIGluIG9zLmVudmlyb25bJ09TX0FVVEhfVVJMJ106CkBA
-IC05NSw4ICs5NiwxMyBAQCBjbGFzcyBPcGVuU3RhY2sob2JqZWN0KToKICAgICAgICAgOnBhcmFt
-IGZpZWxkOiAgIFRoZSBuYW1lIG9mIHRoZSBmaWVsZCB3aG9zZSB2YWx1ZSB0byByZXRyaWV2ZS4g
-Q2FzZSBpcwogICAgICAgICAgICAgICAgICAgICAgICAgaWdub3JlZC4KICAgICAgICAgIiIiCi0g
-ICAgICAgIGZpbHRlcl9mdW5jID0gbGFtYmRhIHY6IHZbJ0ZpZWxkJ10ubG93ZXIoKSA9PSBmaWVs
-ZC5sb3dlcigpCi0gICAgICAgIHJldHVybiBmaWx0ZXIoZmlsdGVyX2Z1bmMsIHJlc3VsdClbMF1b
-J1ZhbHVlJ10KKyAgICAgICAgaWYgdHlwZShyZXN1bHQpID09IHR5cGUoW10pOgorICAgICAgICAg
-ICAgZmlsdGVyX2Z1bmMgPSBsYW1iZGEgdjogdlsnRmllbGQnXS5sb3dlcigpID09IGZpZWxkLmxv
-d2VyKCkKKyAgICAgICAgICAgIHJldHVybiBmaWx0ZXIoZmlsdGVyX2Z1bmMsIHJlc3VsdClbMF1b
-J1ZhbHVlJ10KKyAgICAgICAgZWxzZToKKyAgICAgICAgICAgICMgd2UgZG9uJ3Qgc2VlIGxpc3Rz
-IG9mIGRpY3RzIHdpdGggRmllbGQvVmFsdWUgZW50cmllcywgYnV0IGp1c3QgYSBzaW5nbGUgZGlj
-dAorICAgICAgICAgICAgbGNhc2VfcmVzdWx0X2RpY3QgPSB7ay5sb3dlcigpOnYgZm9yIGssdiBp
-biByZXN1bHQuaXRlbXMoKSBpZiBrLmxvd2VyKCkgPT0gZmllbGQubG93ZXIoKX0KKyAgICAgICAg
-ICAgIHJldHVybiBsY2FzZV9yZXN1bHRfZGljdC5nZXQoZmllbGQubG93ZXIoKSkKIAogICAgIGRl
-ZiBpbWFnZV9leGlzdHMoc2VsZiwgaW1hZ2UpOgogICAgICAgICAiIiIK
-
---_002_F7FEECE608744181ACF9EC9734F864E8ebaycom_--
