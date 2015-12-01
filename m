@@ -1,67 +1,43 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Compiling for FreeBSD
-Date: Tue, 1 Dec 2015 06:35:55 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1512010634510.19170@cobra.newdream.net>
-References: <565B3999.3050302@digiware.nl> <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com> <565B4A7F.60301@digiware.nl> <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com> <20151130065812.GA20205@gmail.com>
- <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net> <565D7FA8.3010301@digiware.nl> <alpine.DEB.2.00.1512010529280.19170@cobra.newdream.net> <565DA3B5.1070608@digiware.nl>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: CodingStyle on existing code
+Date: Tue, 1 Dec 2015 07:00:39 -0800
+Message-ID: <CAJ4mKGbFz2OjLvN54sRD7Gw8VBiyvFti1ZpJZN3ZPCjU-p-uwA@mail.gmail.com>
+References: <565D9C37.3060903@42on.com>
+	<565DA503.9000401@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49395 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755288AbbLAOfz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Dec 2015 09:35:55 -0500
-In-Reply-To: <565DA3B5.1070608@digiware.nl>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:37806 "EHLO
+	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756626AbbLAPAl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Dec 2015 10:00:41 -0500
+Received: by wmww144 with SMTP id w144so16981198wmw.0
+        for <ceph-devel@vger.kernel.org>; Tue, 01 Dec 2015 07:00:40 -0800 (PST)
+In-Reply-To: <565DA503.9000401@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Mykola Golub <mgolub@mirantis.com>, "Yan, Zheng" <ukernel@gmail.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Wido den Hollander <wido@42on.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 1 Dec 2015, Willem Jan Withagen wrote:
-> On 1-12-2015 14:30, Sage Weil wrote:
-> > On Tue, 1 Dec 2015, Willem Jan Withagen wrote:
-> > > On 30-11-2015 14:21, Sage Weil wrote:
-> > > > The problem with all of the porting code in general is that it is doomed
-> > > > to break later on if we don't have (at least) ongoing build tests.  In
-> > > > order for a FreeBSD or OSX port to continue working we need VMs that run
-> > > > either gitbuilder or a jenkins job or similar so that we can tell when
-> > > > it
-> > > > breaks.
-> > > > 
-> > > > If someone is willing to run a VM somewhere to do this we can pretty
-> > > > easily stick it on the gitbuilder page at
-> > > > 
-> > > > 	http://ceph.com/gitbuilder.cgi
-> > > 
-> > > 
-> > > Hi Sage,
-> > > 
-> > > Could you give some pointers as to where to start running the tests.
-> > > I see a lot of "basic" tests to see if the platform is actually
-> > > conformant.
-> > > 
-> > > So before plunging into running ceph-mon and stuff, it would perhaps be
-> > > better to actually run (parts of) the basic required tests..
-> > 
-> > I would start with 'make check' from src/... that's what we'd actually
-> > want the gitbuilder to do.
-> 
-> I was running that at the moment....
-> Found the suggestion on the developers pages, in the manual section.
-> Sort of hidden at the bottom. :)
-> 
-> Did kill it in between, but now when I run it, it just only generates the
-> report.
-> So I just went make clean, which is rather too much...
-> But could not really figure out the makefiles in test (yet)
-> 
-> How do I reset the test results?
+On Tue, Dec 1, 2015 at 5:47 AM, Loic Dachary <loic@dachary.org> wrote:
+>
+>
+> On 01/12/2015 14:10, Wido den Hollander wrote:
+>> Hi,
+>>
+>> While working on mon/PGMonitor.cc I see that there is a lot of
+>> inconsistency on the code.
+>>
+>> A lot of whitespaces, indentation which is not correct, well, a lot of
+>> things.
+>>
+>> Is this something we want to fix? With some scripts we can probably do
+>> this easily, but it might cause merge hell with people working on features.
+>
+> A sane (but long) way to do that is to cleanup when fixing a bug or adding a feature. With (a lot) of patience, it will eventually be better :-)
 
-I don't think there is anything to reset... just re-ru make check.  The 
-exception is probably just if you hit control-c but it left running 
-processes behind (./stop.sh should clean those up).
-
-At least, that's the case on Linux.. maybe the (auto)tools are a bit 
-different on *BSD?
-
-sage
+Yeah, we generally want you to follow the standards in any new code. A
+mass update of the code style on existing code makes navigating the
+history a little harder so a lot of people don't like it much, though.
+*shrug*
+-Greg
