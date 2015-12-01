@@ -1,51 +1,80 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Compiling for FreeBSD
-Date: Tue, 1 Dec 2015 19:51:34 +0100
-Message-ID: <565DEC36.10102@digiware.nl>
-References: <565B3999.3050302@digiware.nl>
- <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
- <565B4A7F.60301@digiware.nl>
- <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
- <20151130065812.GA20205@gmail.com>
- <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
- <565D7FA8.3010301@digiware.nl>
- <alpine.DEB.2.00.1512010529280.19170@cobra.newdream.net>
- <565DA3B5.1070608@digiware.nl>
- <alpine.DEB.2.00.1512010634510.19170@cobra.newdream.net>
- <565DC9D4.7060701@digiware.nl>
+From: "Snyder, Emile" <emsnyder@ebay.com>
+Subject: issues running teuthology-openstack on private cloud
+Date: Tue, 1 Dec 2015 18:52:03 +0000
+Message-ID: <F7FEECE6-0874-4181-ACF9-EC9734F864E8@ebay.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="_002_F7FEECE608744181ACF9EC9734F864E8ebaycom_"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:20443 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751416AbbLASv5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 1 Dec 2015 13:51:57 -0500
-In-Reply-To: <565DC9D4.7060701@digiware.nl>
+Received: from den-mipot-002.corp.ebay.com ([216.113.175.153]:17662 "EHLO
+	den-mipot-002.corp.ebay.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755177AbbLASwF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Dec 2015 13:52:05 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Mykola Golub <mgolub@mirantis.com>, "Yan, Zheng" <ukernel@gmail.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 1-12-2015 17:24, Willem Jan Withagen wrote:
-> I think in the short run it will not be the code that is going to be a
-> major porting pain. But getting the run-time environment ironed out is
-> just plain (hard) work. Things where /bin/sh expects certain bash-isms.
-> Where paths have not been setup to the fullest all the way back into
-> ./configure: like ${initrddir} => /etc/init.d versus /usr/local/etc/rc.d.
-> Probably plenty more like these.
+--_002_F7FEECE608744181ACF9EC9734F864E8ebaycom_
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <A1FB7CF92E8E7F47A5ECAFE62B861905@corp.ebay.com>
+Content-Transfer-Encoding: base64
 
-To answer myself:
-	grep != grep
+SGksDQoNCknigJltIHRyeWluZyB0byBnZXQgc2V0IHVwIHRvIHVzZSB0ZXV0aG9sb2d5IHRvIHJ1
+biB0ZXN0cyBvbiBhbiBpbi1ob3VzZSBvcGVuc3RhY2sgY2xvdWQuIElzIHRoaXMgbGlzdCB0aGUg
+YXBwcm9wcmlhdGUgdmVudWU/DQoNCg0KDQpJIGhhZCB0byBtYWtlIDIgY2hhbmdlcyB0byBnZXQg
+dGV1dGhvbG9neS1vcGVuc3RhY2sgdG8gcnVuIG9uIG15IGRldiBtYWNoaW5lOyBmaXJzdCB0aGVy
+ZSBpcyBhIGhhcmRjb2RlZCBzZXQgb2YgcHJvdmlkZXJzIGluIE9wZW5TdGFjay5zZXRfcHJvdmlk
+ZXIgdG8gbWF0Y2ggdGhlIEFVVEhfVVJMIGluIHlvdXIgZW52aXJvbm1lbnQsIGFuZCBzZWNvbmQg
+dGhlIHNoYXBlIG9mIHRoZSByZXN1bHQgZGF0YSB0aGF0IEkgc2VlIGluIHRoZSBPcGVuU3RhY2su
+Z2V0X3ZhbHVlKHJlc3VsdCwgZmllbGQpIG1ldGhvZCBkb2VzbuKAmXQgbWF0Y2ggdGhlIGNvZGUg
+ZXhwZWN0YXRpb25zLiBUaGUgY29kZSBleHBlY3RzIHRvIHNlZQ0KDQpbe+KAnEZpZWxk4oCdOiDi
+gJxuYW1l4oCdLCDigJxWYWx1ZeKAnTog4oCcZm9v4oCdfXvigJxGaWVsZOKAnTog4oCcaW1hZ2Xi
+gJ0sIOKAnFZhbHVl4oCdOiDigJzigKYifV0gYnV0IEkgc2VlIHvigJxuYW1l4oCdOiDigJxmb2/i
+gJ0g4oCcaW1hZ2XigJ06IOKAnOKApiJ9OyBhbnkgaWRlYXMgd2h5Pw0KDQpXaGVuIEkgaGFjayBh
+cm91bmQgdGhvc2UgMiB0aGluZ3MgKGF0dGFjaGVkIGRpZmYpIEkgY2FuIOKAnHN1Y2Nlc3NmdWxs
+eeKAnSBydW4gDQoNCid0ZXV0aG9sb2d5LW9wZW5zdGFjayDigJRrZXktZmlsZW5hbWUgbXlzZWxm
+LnBlbSDigJRrZXktbmFtZSBteXNlbGYg4oCUc3VpdGUgZHVtbXnigJkNCg0KYW5kIHRoZSB2beKA
+mXMgYXJlIGNyZWF0ZWQsIEkgc2VlIHRoZSBqb2IgaW4gUHVscGl0bywgYnV0IHRoZSBsb2cgZnJv
+bSB3aXRoaW4gUHVscGl0byBzaG93cyBpdOKAmXMgaGl0dGluZyB0aGUgZ2V0X3ZhbHVlIGlzc3Vl
+IG9uIHRoZSBWTSBhcyB3ZWxsLg0KDQpJ4oCZbSBoYXZpbmcgYSBoYXJkIHRpbWUgc2VlaW5nIGhv
+dyB0byBnZXQgdGhlIFZN4oCZcyB0byB1c2UgbXkgcGF0Y2hlZCB2ZXJzaW9uIG9mIHRldXRob2xv
+Z3kgdG9vLg0KDQpUaGFua3MsDQotRW1pbGUNCg==
 
-freetest# grep -P test *
-grep: The -P option is not supported
+--_002_F7FEECE608744181ACF9EC9734F864E8ebaycom_
+Content-Type: application/octet-stream; name="teuthology.diff"
+Content-Description: teuthology.diff
+Content-Disposition: attachment; filename="teuthology.diff"; size=1467;
+	creation-date="Tue, 01 Dec 2015 18:52:03 GMT";
+	modification-date="Tue, 01 Dec 2015 18:52:03 GMT"
+Content-ID: <F421ECBBF9B3E94F952D88132E25F04C@corp.ebay.com>
+Content-Transfer-Encoding: base64
 
-:(
+ZGlmZiAtLWdpdCBhL3RldXRob2xvZ3kvb3BlbnN0YWNrL19faW5pdF9fLnB5IGIvdGV1dGhvbG9n
+eS9vcGVuc3RhY2svX19pbml0X18ucHkKaW5kZXggMzZhYjY4Mi4uMDZhYjJjYyAxMDA2NDQKLS0t
+IGEvdGV1dGhvbG9neS9vcGVuc3RhY2svX19pbml0X18ucHkKKysrIGIvdGV1dGhvbG9neS9vcGVu
+c3RhY2svX19pbml0X18ucHkKQEAgLTc2LDcgKzc2LDggQEAgY2xhc3MgT3BlblN0YWNrKG9iamVj
+dCk6CiAgICAgICAgIHByb3ZpZGVycyA9ICgoJ2Nsb3VkLm92aC5uZXQnLCAnb3ZoJyksCiAgICAg
+ICAgICAgICAgICAgICAgICAoJ2VudGVyY2xvdWRzdWl0ZS5jb20nLCAnZW50ZXJjbG91ZHN1aXRl
+JyksCiAgICAgICAgICAgICAgICAgICAgICAoJ3JhY2tzcGFjZWNsb3VkLmNvbScsICdyYWNrc3Bh
+Y2UnKSwKLSAgICAgICAgICAgICAgICAgICAgICgnZHJlYW0uaW8nLCAnZHJlYW1ob3N0JykpCisg
+ICAgICAgICAgICAgICAgICAgICAoJ2RyZWFtLmlvJywgJ2RyZWFtaG9zdCcpLAorICAgICAgICAg
+ICAgICAgICAgICAgKCdlYmF5YzMuY29tJywgJ2ViYXljMycpKQogICAgICAgICBzZWxmLnByb3Zp
+ZGVyID0gTm9uZQogICAgICAgICBmb3IgKHBhdHRlcm4sIHByb3ZpZGVyKSBpbiBwcm92aWRlcnM6
+CiAgICAgICAgICAgICBpZiBwYXR0ZXJuIGluIG9zLmVudmlyb25bJ09TX0FVVEhfVVJMJ106CkBA
+IC05NSw4ICs5NiwxMyBAQCBjbGFzcyBPcGVuU3RhY2sob2JqZWN0KToKICAgICAgICAgOnBhcmFt
+IGZpZWxkOiAgIFRoZSBuYW1lIG9mIHRoZSBmaWVsZCB3aG9zZSB2YWx1ZSB0byByZXRyaWV2ZS4g
+Q2FzZSBpcwogICAgICAgICAgICAgICAgICAgICAgICAgaWdub3JlZC4KICAgICAgICAgIiIiCi0g
+ICAgICAgIGZpbHRlcl9mdW5jID0gbGFtYmRhIHY6IHZbJ0ZpZWxkJ10ubG93ZXIoKSA9PSBmaWVs
+ZC5sb3dlcigpCi0gICAgICAgIHJldHVybiBmaWx0ZXIoZmlsdGVyX2Z1bmMsIHJlc3VsdClbMF1b
+J1ZhbHVlJ10KKyAgICAgICAgaWYgdHlwZShyZXN1bHQpID09IHR5cGUoW10pOgorICAgICAgICAg
+ICAgZmlsdGVyX2Z1bmMgPSBsYW1iZGEgdjogdlsnRmllbGQnXS5sb3dlcigpID09IGZpZWxkLmxv
+d2VyKCkKKyAgICAgICAgICAgIHJldHVybiBmaWx0ZXIoZmlsdGVyX2Z1bmMsIHJlc3VsdClbMF1b
+J1ZhbHVlJ10KKyAgICAgICAgZWxzZToKKyAgICAgICAgICAgICMgd2UgZG9uJ3Qgc2VlIGxpc3Rz
+IG9mIGRpY3RzIHdpdGggRmllbGQvVmFsdWUgZW50cmllcywgYnV0IGp1c3QgYSBzaW5nbGUgZGlj
+dAorICAgICAgICAgICAgbGNhc2VfcmVzdWx0X2RpY3QgPSB7ay5sb3dlcigpOnYgZm9yIGssdiBp
+biByZXN1bHQuaXRlbXMoKSBpZiBrLmxvd2VyKCkgPT0gZmllbGQubG93ZXIoKX0KKyAgICAgICAg
+ICAgIHJldHVybiBsY2FzZV9yZXN1bHRfZGljdC5nZXQoZmllbGQubG93ZXIoKSkKIAogICAgIGRl
+ZiBpbWFnZV9leGlzdHMoc2VsZiwgaW1hZ2UpOgogICAgICAgICAiIiIK
 
-And only to match things like:
-	ceph-authtool kring --list|grep -P '^\tcaps '
-
-Start looking for a mode that works could work on both....
-
---WjW
+--_002_F7FEECE608744181ACF9EC9734F864E8ebaycom_--
