@@ -1,82 +1,69 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Suggestions on tracker 13578
-Date: Wed, 02 Dec 2015 13:04:11 -0600
-Message-ID: <565F40AB.5060804@redhat.com>
-References: <565D9F61.6070108@redhat.com> <CAJ4mKGbg159aO7S1soYnR+uhR9uV=t3EjYW2Q=2fbh+PPeEAeQ@mail.gmail.com>
+From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Subject: Ceph_objectstore_bench crashed on keyvaluestore bench with ceph
+ master branch
+Date: Wed, 2 Dec 2015 19:19:56 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C05619A8E9@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48416 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758992AbbLBTEO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 2 Dec 2015 14:04:14 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id AC14FC0CC645
-	for <ceph-devel@vger.kernel.org>; Wed,  2 Dec 2015 19:04:14 +0000 (UTC)
-In-Reply-To: <CAJ4mKGbg159aO7S1soYnR+uhR9uV=t3EjYW2Q=2fbh+PPeEAeQ@mail.gmail.com>
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:45494 "EHLO
+	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750873AbbLBTUA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Dec 2015 14:20:00 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, Vimal <vikumar@redhat.com>
+To: Haomai Wang <haomaiwang@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-
-
-On 12/02/2015 12:23 PM, Gregory Farnum wrote:
-> On Tue, Dec 1, 2015 at 5:23 AM, Vimal <vikumar@redhat.com> wrote:
->> Hello,
->>
->> This mail is to discuss the feature request at
->> http://tracker.ceph.com/issues/13578.
->>
->> If done, such a tool should help point out several mis-configurations that
->> may cause problems in a cluster later.
->>
->> Some of the suggestions are:
->>
->> a) A check to understand if the MONs and OSD nodes are on the same machines.
->>
->> b) If /var is a separate partition or not, to prevent the root filesystem
->> from being filled up.
->>
->> c) If monitors are deployed in different failure domains or not.
->>
->> d) If the OSDs are deployed in different failure domains.
->>
->> e) If a journal disk is used for more than six OSDs. Right now, the
->> documentation suggests upto 6 OSD journals to exist on a single journal
->> disk.
->>
->> f) Failure domains depending on the power source.
->>
->> There can be several more checks, and it can be a useful tool to test the
->> problems an existing cluster or a new installation.
->>
->> But I'd like to know how the engineering community sees this, if its seems
->> to be worth pursuing, and what suggestions do you have for improving/adding
->> to this.
->
-> This is a user experience and support tool; I don't think the
-> engineering community can really judge its value. ;)
->
-> So sure, sounds good to me. It'll need to get into the hands of users
-> before we find out if it's a good plan or not. I was at the SDI Summit
-> yesterday and was hearing about how some of our choices (like
-> HEALTH_WARN on pg counts) are *really* scary for users who think
-> they're in danger of losing data. I suspect the difficulty of a tool
-> like this will be more in the communication of issues and severity,
-> more than in what exactly we choose to check.
-
-Frankly I've never been a big fan of how we report warnings like this 
-through the health check.  It's important to let users know if they've 
-set up things sub-optimally, but I don't think ceph health is the way to 
-do it.  The difference between your doctor telling you you should 
-exercise more and lose a few pounds vs you have Ebola and are going to 
-suffer an incredibly gruesome and painful death in the next 48 hours. :)
-
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+SGkgSGFvbWFpLA0KICAgSSBoYXBwZW5lZCB0byBydW4gY2VwaF9vYmplY3RzdG9yZV9iZW5jaCBh
+Z2FpbnN0IGtleSB2YWx1ZSBzdG9yZSBvbiBtYXN0ZXIgYnJhbmNoLiBJdCBhbHdheXMgY3Jhc2hl
+ZCBhdCBmaW5pc2hlcl90aHJlYWRfZW50cnkgOiAgYXNzZXJ0KCFsc19ydmFsLmVtcHR5KCkpOw0K
+DQogICBJdCBsb29rcyBsaWtlIHRoZSBjb21wbGV0aW9uIG5vdCBvbmx5IGhhcyBudWxsIGVudHJ5
+IGluIHRoZSBmaW5pc2hlciBxdWV1ZSAsIGJ1dCBhbHNvIGhhcyBub25lIGVudHJ5IGluIHRoZSBm
+aW5pc2hlcl9xdWV1ZV9ydmFsLiBJIHRpcmVkIGFuZCBpdCBhY3R1YWxseSBpcy4gDQoNCiBDb3Vs
+ZCB5b3UgIG1pbmQgdGVsbGluZyB1cyBpbiB3aGljaCBjYXNlIHRoZSBOVUxMIGVudHJ5IGluIGZp
+bmlzaGVyIHF1ZXVlIGFsc28gaGFzIG5vdCBhbnkgZW50cnkgaW4gZmluaXNoZXJfcXVldWVfcnZh
+bD8gDQoNCiAgVGhhbmtzLA0KDQoNCiAgUGxlYXNlIHJlZmVyIHRvIGlzc3VlIGh0dHA6Ly90cmFj
+a2VyLmNlcGguY29tL2lzc3Vlcy8xMzk2MSANCg0KDQpSZWdhcmRzLA0KSmFtZXMNCg0Kdm9pZCAq
+RmluaXNoZXI6OmZpbmlzaGVyX3RocmVhZF9lbnRyeSgpDQp7DQogIGZpbmlzaGVyX2xvY2suTG9j
+aygpOw0KICBsZG91dChjY3QsIDEwKSA8PCAiZmluaXNoZXJfdGhyZWFkIHN0YXJ0IiA8PCBkZW5k
+bDsNCg0KICB1dGltZV90IHN0YXJ0Ow0KICB3aGlsZSAoIWZpbmlzaGVyX3N0b3ApIHsNCiAgICAv
+Ly8gRXZlcnkgdGltZSB3ZSBhcmUgd29rZW4gdXAsIHdlIHByb2Nlc3MgdGhlIHF1ZXVlIHVudGls
+IGl0IGlzIGVtcHR5Lg0KICAgIHdoaWxlICghZmluaXNoZXJfcXVldWUuZW1wdHkoKSkgew0KICAg
+ICAgaWYgKGxvZ2dlcikNCiAgICAgICAgc3RhcnQgPSBjZXBoX2Nsb2NrX25vdyhjY3QpOw0KICAg
+ICAgLy8gVG8gcmVkdWNlIGxvY2sgY29udGVudGlvbiwgd2Ugc3dhcCBvdXQgdGhlIHF1ZXVlIHRv
+IHByb2Nlc3MuDQogICAgICAvLyBUaGlzIHdheSBvdGhlciB0aHJlYWRzIGNhbiBzdWJtaXQgbmV3
+IGNvbnRleHRzIHRvIGNvbXBsZXRlIHdoaWxlIHdlIGFyZSB3b3JraW5nLg0KICAgICAgdmVjdG9y
+PENvbnRleHQqPiBsczsNCiAgICAgIGxpc3Q8cGFpcjxDb250ZXh0KixpbnQ+ID4gbHNfcnZhbDsN
+CiAgICAgIGxzLnN3YXAoZmluaXNoZXJfcXVldWUpOw0KICAgICAgbHNfcnZhbC5zd2FwKGZpbmlz
+aGVyX3F1ZXVlX3J2YWwpOw0KICAgICAgZmluaXNoZXJfcnVubmluZyA9IHRydWU7DQogICAgICBm
+aW5pc2hlcl9sb2NrLlVubG9jaygpOw0KICAgICAgbGRvdXQoY2N0LCAxMCkgPDwgImZpbmlzaGVy
+X3RocmVhZCBkb2luZyAiIDw8IGxzIDw8IGRlbmRsOw0KCSAvLyBsZG91dChjY3QsIDEwKSA8PCIu
+Li4uLi4uLi4uLkZpbmlzaGVyIHRocmVhZCBpcyBjYWxsaW5nIGFnYWluIG92ZXIgaGVyZS4uLi4u
+Li4uIiA8PCBkZW5kbDsNCiAgICAgDQogICAgICAvLyBOb3cgYWN0dWFsbHkgcHJvY2VzcyB0aGUg
+Y29udGV4dHMuDQogICAgICBmb3IgKHZlY3RvcjxDb250ZXh0Kj46Oml0ZXJhdG9yIHAgPSBscy5i
+ZWdpbigpOw0KCSAgIHAgIT0gbHMuZW5kKCk7DQoJICAgKytwKSB7DQoJaWYgKCpwKSB7DQoJICAo
+KnApLT5jb21wbGV0ZSgwKTsNCgl9IGVsc2Ugew0KCSAgLy8gV2hlbiBhbiBpdGVtIGlzIE5VTEwg
+aW4gdGhlIGZpbmlzaGVyX3F1ZXVlLCBpdCBtZWFucw0KCSAgLy8gd2Ugc2hvdWxkIGluc3RlYWQg
+cHJvY2VzcyBhbiBpdGVtIGZyb20gZmluaXNoZXJfcXVldWVfcnZhbCwNCgkgIC8vIHdoaWNoIGhh
+cyBhIHBhcmFtZXRlciBmb3IgY29tcGxldGUoKSBvdGhlciB0aGFuIHplcm8uDQoJICAvLyBUaGlz
+IHByZXNlcnZlcyB0aGUgb3JkZXIgd2hpbGUgc2F2aW5nIHNvbWUgc3RvcmFnZS4NCgkgIGFzc2Vy
+dCghbHNfcnZhbC5lbXB0eSgpKTsNCgkgIENvbnRleHQgKmMgPSBsc19ydmFsLmZyb250KCkuZmly
+c3Q7DQoJICBjLT5jb21wbGV0ZShsc19ydmFsLmZyb250KCkuc2Vjb25kKTsNCgkgIGxzX3J2YWwu
+cG9wX2Zyb250KCk7DQoJfQ0KCWlmIChsb2dnZXIpIHsNCgkgIGxvZ2dlci0+ZGVjKGxfZmluaXNo
+ZXJfcXVldWVfbGVuKTsNCiAgICAgICAgICBsb2dnZXItPnRpbmMobF9maW5pc2hlcl9jb21wbGV0
+ZV9sYXQsIGNlcGhfY2xvY2tfbm93KGNjdCkgLSBzdGFydCk7DQogICAgICAgIH0NCiAgICAgIH0N
+CiAgICAgIGxkb3V0KGNjdCwgMTApIDw8ICJmaW5pc2hlcl90aHJlYWQgZG9uZSB3aXRoICIgPDwg
+bHMgPDwgZGVuZGw7DQogICAgICBscy5jbGVhcigpOw0KDQogICAgICBmaW5pc2hlcl9sb2NrLkxv
+Y2soKTsNCiAgICAgIGZpbmlzaGVyX3J1bm5pbmcgPSBmYWxzZTsNCiAgICB9DQogICAgbGRvdXQo
+Y2N0LCAxMCkgPDwgImZpbmlzaGVyX3RocmVhZCBlbXB0eSIgPDwgZGVuZGw7DQogICAgZmluaXNo
+ZXJfZW1wdHlfY29uZC5TaWduYWwoKTsNCiAgICBpZiAoZmluaXNoZXJfc3RvcCkNCiAgICAgIGJy
+ZWFrOw0KICAgIA0KICAgIGxkb3V0KGNjdCwgMTApIDw8ICJmaW5pc2hlcl90aHJlYWQgc2xlZXBp
+bmciIDw8IGRlbmRsOw0KICAgIGZpbmlzaGVyX2NvbmQuV2FpdChmaW5pc2hlcl9sb2NrKTsNCiAg
+fQ0KICAvLyBJZiB3ZSBhcmUgZXhpdGluZywgd2Ugc2lnbmFsIHRoZSB0aHJlYWQgd2FpdGluZyBp
+biBzdG9wKCksDQogIC8vIG90aGVyd2lzZSBpdCB3b3VsZCBuZXZlciB1bmJsb2NrDQogIGZpbmlz
+aGVyX2VtcHR5X2NvbmQuU2lnbmFsKCk7DQoNCiAgbGRvdXQoY2N0LCAxMCkgPDwgImZpbmlzaGVy
+X3RocmVhZCBzdG9wIiA8PCBkZW5kbDsNCiAgZmluaXNoZXJfc3RvcCA9IGZhbHNlOw0KICBmaW5p
+c2hlcl9sb2NrLlVubG9jaygpOw0KICByZXR1cm4gMDsNCn0NCg0K
