@@ -1,129 +1,53 @@
-From: Libin Wu <hzwulibin@gmail.com>
-Subject: Re: why my cluster become unavailable (min_size of pool)
-Date: Wed, 2 Dec 2015 19:22:03 +0800
-Message-ID: <CAN4gH2MfzO7XQAhVRuNqf-S_tPsz1Mc_xXpLonGfHF1WwoWj4A@mail.gmail.com>
-References: <CAN4gH2NsnmOY8AcQaT245uwDh2fXmwnBTBKdP6_xKQ2M0PVeKA@mail.gmail.com>
-	<CACJqLyazL_vCxpRGUGROgXN0reyJdUxL-i-OxseT5UV2cXu3pQ@mail.gmail.com>
-	<alpine.DEB.2.00.1511210948270.24879@cobra.newdream.net>
-	<5652651C.8040902@gmail.com>
-	<5656BA98.4090301@gmail.com>
-	<alpine.DEB.2.00.1511260528330.12118@cobra.newdream.net>
+From: =?windows-1252?Q?Javier_Mu=F1oz?= <jmunhoz@igalia.com>
+Subject: Re: RGW S3 Website hosting, non-clean code for early review
+Date: Wed, 02 Dec 2015 15:02:12 +0100
+Message-ID: <565EF9E4.2020501@igalia.com>
+References: <20150623093325.GH10754@orbis-terrarum.net> <1739382408.18844114.1435091419238.JavaMail.zimbra@redhat.com> <robbat2-20150623T230410-006258787Z@orbis-terrarum.net> <854662566.18884035.1435100864177.JavaMail.zimbra@redhat.com> <1563403567.1093721.1438280774967.JavaMail.zimbra@redhat.com> <robbat2-20150731T080643-628065411Z@orbis-terrarum.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:35067 "EHLO
-	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757923AbbLBLWE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Dec 2015 06:22:04 -0500
-Received: by wmeo63 with SMTP id o63so9170108wme.2
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Dec 2015 03:22:03 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1511260528330.12118@cobra.newdream.net>
+Received: from smtp3.mundo-r.com ([212.51.32.191]:33234 "EHLO
+	smtp4.mundo-r.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1758371AbbLBOMq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Dec 2015 09:12:46 -0500
+In-Reply-To: <robbat2-20150731T080643-628065411Z@orbis-terrarum.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Robin H. Johnson" <robbat2@gentoo.org>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: ceph-devel@vger.kernel.org, Jonathan LaCour <jonathan.lacour@dreamhost.com>
 
-Sage, thanks!
+Hi,
 
-I'm missing your email until i saw it in GMANE today.
+I would appreciate to know the current status of the implementation if
+possible. Any progress? Any 'deadline' to go upstream? :)
 
-Thanks again!
+Thanks in advance!
 
+Javier
 
-2015-11-26 21:30 GMT+08:00 Sage Weil <sage@newdream.net>:
-> On Thu, 26 Nov 2015, hzwulibin wrote:
->> Hi, Sage
->>
->> I has a question about min_size of pool.
->>
->> The default value of min_size is 2, but in this setting, when two OSDs
->> are down(mean two replicas lost) at same time, the IO will be blocked.
->> We want to set the min_size to 1 in our production environment as we
->> think it's normal case when two OSDs are down(sure on different host) at
->> same time.
->>
->> So is there anypotential problem of this setting?
->
-> min_size = 1 is okay, but be aware that it will increase the risk of a
-> situation of a pg history like
->
->  epoch 10: osd.0, osd.1, osd.2
->  epoch 11: osd.0   (1 and 2 down)
->  epoch 12: - (osd.0 fails hard)
->  epoch 13: osd.1 osd.2
->
-> i.e., a pg is serviced by a single osd for some period (possibly very
-> short) and then fails permanently, and any writes during that period are
-> *only* stored on that osd.  It'll require some manual recovery to get past
-> it (mark that osd as lost, and accept that you may have lost some recent
-> writes to the data).
->
-> sage
->
->
->
->
->
->>
->> We use 0.80.10 version.
->>
->> Thanks!
->>
->>
->> ------------------
->> hzwulibin
->> 2015-11-26
->>
->> -------------------------------------------------------------
->> ????"hzwulibin"<hzwulibin@gmail.com>
->> ?????2015-11-23 09:00
->> ????Sage Weil,Haomai Wang
->> ???ceph-devel
->> ???Re: why my cluster become unavailable
->>
->> Hi, Sage
->>
->> Thanks! Will try it when next testing!
->>
->> ------------------
->> hzwulibin
->> 2015-11-23
->>
->> -------------------------------------------------------------
->> ????Sage Weil <sage@newdream.net>
->> ?????2015-11-22 01:49
->> ????Haomai Wang
->> ???Libin Wu,ceph-devel
->> ???Re: why my cluster become unavailable
->>
->> On Sun, 22 Nov 2015, Haomai Wang wrote:
->> > On Thu, Nov 19, 2015 at 11:26 PM, Libin Wu <hzwulibin@gmail.com> wrote:
->> > > Hi, cepher
->> > >
->> > > I have a cluster of 6 OSD server, every server has 8 OSDs.
->> > >
->> > > I out 4 OSDs on every server, then my client io is blocking.
->> > >
->> > > I reboot my client and then create a new rbd device, but the new
->> > > device also can't write io.
->> > >
->> > > Yeah, i understand that some data may lost as threee replicas of some
->> > > object were lost, but why the cluster become unavailable?
->> > >
->> > > There 80 incomplete pg and 4 down+incomplete pg.
->> > >
->> > > Any solution i could solve the problem?
->> >
->> > Yes, if you doesn't have a special crushmap to control the data
->> > replcement policy, pg will lack of necessary metadata to boot. If need
->> > to readd outed osds or force remove pg which is incomplete(hope it's
->> > just a test).
->>
->> Is min_size 2 or 1?  Reducing it to 1 will generally clear some of the
->> incomplete pgs.  Just remember to raise it back to 2 after the cluster
->> recovers.
->>
->> sage
->>
->>
->>
+On 07/31/2015 10:21 AM, Robin H. Johnson wrote:
+> I'm busy travelling and wrapping other things up, but will resume major
+> work on this in August, probably week 2/3, depending on other
+> interrupts/priorities.
+> 
+> It's almost complete, the only missing features are:
+> - error page fetcher gets confused on conditional requests (I think a
+>   different approach is needed, esp re range & if-modified requests,
+>   they still seem to leak into the custom req_info on the second request)
+> - cascaded errors on conditional requests need more handling (eg
+>   404 bounces to the error page that doesn't exist as well)
+> Some further work that isn't blocking is also:
+> - review handling of x-amz-website-redirect-location header when it
+>   conflicts with RoutingRules
+> - Check what input validations Amazon does, because already they don't
+>   match the docs 
+>   - eg docs say any http code for redirect, but it really only allows
+> 	301-305, 307, 308
+>   - Exact validation on the URI/paths is also not immediately clear, I
+> 	had some unexpected results with URL-escaped inputs.
+> - Review cases in which AMZ sets the errors in the header as well as the
+>   page, didn't seem consistent, esp in the double-error cases.
+> - more cleanup/refactor of test cases
+> 
+
