@@ -1,109 +1,64 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: Compiling for FreeBSD
-Date: Wed, 2 Dec 2015 22:13:42 +0800
-Message-ID: <CAAM7YAmzq3a_kqXE2ZgK_fp4i6QduY49aXqiWVNK3F59iZUFRA@mail.gmail.com>
-References: <565B3999.3050302@digiware.nl>
-	<CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
-	<565B4A7F.60301@digiware.nl>
-	<CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
-	<20151130065812.GA20205@gmail.com>
-	<alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
-	<565D7FA8.3010301@digiware.nl>
-	<alpine.DEB.2.00.1512010529280.19170@cobra.newdream.net>
-	<565DA3B5.1070608@digiware.nl>
-	<alpine.DEB.2.00.1512010634510.19170@cobra.newdream.net>
-	<565DC9D4.7060701@digiware.nl>
-	<CAOtMX2jWDOLqmjY=S9PorKeaHDgTx5WyMo8jiV3LxOS4K67dMg@mail.gmail.com>
-	<565DE234.6070505@digiware.nl>
-	<CAOtMX2j5xJBnYoNdxTGGQFz-fTVX2xQka2NuyUZuOPpsft6HuA@mail.gmail.com>
-	<alpine.DEB.2.00.1512011034550.19170@cobra.newdream.net>
-	<565DEA60.7010608@digiware.nl>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Suggestions on tracker 13578
+Date: Wed, 2 Dec 2015 10:23:36 -0800
+Message-ID: <CAJ4mKGbg159aO7S1soYnR+uhR9uV=t3EjYW2Q=2fbh+PPeEAeQ@mail.gmail.com>
+References: <565D9F61.6070108@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f67.google.com ([209.85.215.67]:34685 "EHLO
-	mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757317AbbLBONn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Dec 2015 09:13:43 -0500
-Received: by lfu94 with SMTP id 94so5049920lfu.1
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Dec 2015 06:13:42 -0800 (PST)
-In-Reply-To: <565DEA60.7010608@digiware.nl>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:33502 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753431AbbLBSXi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Dec 2015 13:23:38 -0500
+Received: by wmec201 with SMTP id c201so266633479wme.0
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Dec 2015 10:23:37 -0800 (PST)
+In-Reply-To: <565D9F61.6070108@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Sage Weil <sage@newdream.net>, Alan Somers <asomers@freebsd.org>, Mykola Golub <mgolub@mirantis.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Vimal <vikumar@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-see https://github.com/ceph/ceph/pull/6770. The code can be compiled
-on FreeBSD/OSX, most client programs can connect to ceph servers on
-Linux.
+On Tue, Dec 1, 2015 at 5:23 AM, Vimal <vikumar@redhat.com> wrote:
+> Hello,
+>
+> This mail is to discuss the feature request at
+> http://tracker.ceph.com/issues/13578.
+>
+> If done, such a tool should help point out several mis-configurations that
+> may cause problems in a cluster later.
+>
+> Some of the suggestions are:
+>
+> a) A check to understand if the MONs and OSD nodes are on the same machines.
+>
+> b) If /var is a separate partition or not, to prevent the root filesystem
+> from being filled up.
+>
+> c) If monitors are deployed in different failure domains or not.
+>
+> d) If the OSDs are deployed in different failure domains.
+>
+> e) If a journal disk is used for more than six OSDs. Right now, the
+> documentation suggests upto 6 OSD journals to exist on a single journal
+> disk.
+>
+> f) Failure domains depending on the power source.
+>
+> There can be several more checks, and it can be a useful tool to test the
+> problems an existing cluster or a new installation.
+>
+> But I'd like to know how the engineering community sees this, if its seems
+> to be worth pursuing, and what suggestions do you have for improving/adding
+> to this.
 
-Regards
-Yan. Zheng
+This is a user experience and support tool; I don't think the
+engineering community can really judge its value. ;)
 
-On Wed, Dec 2, 2015 at 2:43 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
-> On 1-12-2015 19:36, Sage Weil wrote:
->>
->> On Tue, 1 Dec 2015, Alan Somers wrote:
->>>
->>> On Tue, Dec 1, 2015 at 11:08 AM, Willem Jan Withagen <wjw@digiware.nl>
->>> wrote:
->>>>
->>>> On 1-12-2015 18:22, Alan Somers wrote:
->>>>>
->>>>>
->>>>> I did some work porting Ceph to FreeBSD, but got distracted and
->>>>> stopped about two years ago.  You may find this port useful, though it
->>>>> will probably need to be updated:
->>>>>
->>>>> https://people.freebsd.org/~asomers/ports/net/ceph/
->>>>
->>>>
->>>>
->>>> I'll chcek that one as well...
->>>>
->>>>> Also, there's one major outstanding issue that I know of.  It breaks
->>>>> interoperability between FreeBSD and Linux Ceph nodes.  I posted a
->>>>> patch to fix it, but it doesn't look like it's been merged yet.
->>>>> http://tracker.ceph.com/issues/6636
->>>>
->>>>
->>>>
->>>> In the issues I find:
->>>> ====
->>>> Updated by Sage Weil almost 2 years ago
->>>>
->>>>      Status changed from New to Verified
->>>> Updated by Sage Weil almost 2 years ago
->>>>
->>>>      Assignee set to Noah Watkins
->>>> ====
->>>>
->>>> Probably left at that point because there was no presure to actually
->>>> commit?
->>>>
->>>> --WjW
->>>
->>>
->>> It looks like Sage reviewed the change, but had some comments that
->>> were mostly style-related.  Neither Noah nor I actually got around to
->>> implementing Sage's suggestions.
->>>
->>> https://github.com/ceph/ceph/pull/828
->>
->>
->> The uuid transition to boost::uuid has happened since then (a few months
->> back) and I believe Rohan's AIX and Solaris ports for librados (that just
->> merged) included a fix for the sockaddr_storage issue:
->>
->>         https://github.com/ceph/ceph/blob/master/src/msg/msg_types.h#L180
->>
->> and also
->>
->>         https://github.com/ceph/ceph/blob/master/src/msg/msg_types.h#L160
->
->
->
-> Would be nice to actually find that this works for FreeBSD as well.
-> But I'm putting this on the watch-list, once I get there.
->
-> --WjW
+So sure, sounds good to me. It'll need to get into the hands of users
+before we find out if it's a good plan or not. I was at the SDI Summit
+yesterday and was hearing about how some of our choices (like
+HEALTH_WARN on pg counts) are *really* scary for users who think
+they're in danger of losing data. I suspect the difficulty of a tool
+like this will be more in the communication of issues and severity,
+more than in what exactly we choose to check.
+-Greg
