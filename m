@@ -1,48 +1,44 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Compiling for FreeBSD, missing rbd
-Date: Wed, 2 Dec 2015 23:47:04 +0100
-Message-ID: <565F74E8.1070109@digiware.nl>
-References: <565B3999.3050302@digiware.nl>
- <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
- <565B4A7F.60301@digiware.nl>
- <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
- <20151130065812.GA20205@gmail.com>
- <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
- <565D7FA8.3010301@digiware.nl>
- <alpine.DEB.2.00.1512010529280.19170@cobra.newdream.net>
- <565DA3B5.1070608@digiware.nl>
- <alpine.DEB.2.00.1512010634510.19170@cobra.newdream.net>
- <565DC9D4.7060701@digiware.nl> <565DEC36.10102@digiware.nl>
- <565F5E28.8020706@digiware.nl>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: queue_transaction interface + unique_ptr
+Date: Thu, 3 Dec 2015 00:17:38 +0000
+Message-ID: <CO1PR02MB208E42BE84D3D7BF2048668F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:14489 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757077AbbLBWrb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 2 Dec 2015 17:47:31 -0500
-In-Reply-To: <565F5E28.8020706@digiware.nl>
+Received: from mail-bl2on0087.outbound.protection.outlook.com ([65.55.169.87]:43956
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755873AbbLCARp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Dec 2015 19:17:45 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Sage Weil (sage@newdream.net)" <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Hi Sage/Sam,
+As discussed in today's performance meeting , I am planning to change the queue_transactions() interface to the following.
+
+  int queue_transactions(Sequencer *osr, list<TransactionRef>& tls,
+                         Context *onreadable, Context *ondisk=0,
+                         Context *onreadable_sync=0,
+                         TrackedOpRef op = TrackedOpRef(),
+                         ThreadPool::TPHandle *handle = NULL) ;
+
+typedef unique_ptr<Transaction> TransactionRef;
 
 
-Running gmake check is starting to work.
-	reporting still thinks there are no successful tests
-	but tests themselves report OKE
+IMO , there is a problem with this approach.
 
-But where I really can not get it to work is with testing rbd.
+The interface like apply_transaction(), queue_transaction() etc. basically the interfaces taking single transaction pointer and internally forming a list to call the queue_transactions() also needs to be changed to accept TransactionRef which will be *bad*. The reason is while preparing list internally we need to move the uniqueue_ptr and callers won't be aware of that.
 
-Is starts with the simple:
-	 /bin/sh: rbd: not found
+Also, now changing every interfaces (and callers) that is taking Transaction* will produce a very big delta (and big testing effort as well). 
 
-And whatever I'm trying in configure, no way am I able to get either an
-executable or a script that will do rbd....
+So, should we *reconsider* co-existing both  queue_transactions() interfaces and call the new one from the IO path ?
 
-So how do I get a rbd that can be used in the tests.
+Thanks & Regards
+Somnath
 
-What I do have is rbdmap, but that is a totally different thingy.
 
---WjW
+
