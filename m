@@ -1,37 +1,47 @@
-From: Wukongming <wu.kongming@h3c.com>
-Subject: How long will the logs be kept?
-Date: Thu, 3 Dec 2015 04:37:42 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D75030E7B67@H3CMLB12-EX.srv.huawei-3com.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: How long will the logs be kept?
+Date: Thu, 3 Dec 2015 13:18:48 +0800
+Message-ID: <CABAwU-bNERLVaAgF_tJ8WFJ-eH3zvVO6zdU-7CQSB1wTh8EYJQ@mail.gmail.com>
+References: <47D132BF400BE64BAE6D71033F7D3D75030E7B67@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:11520 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932201AbbLCEiB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 2 Dec 2015 23:38:01 -0500
-Content-Language: zh-CN
+Received: from mail-lf0-f48.google.com ([209.85.215.48]:35701 "EHLO
+	mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750906AbbLCFSu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 00:18:50 -0500
+Received: by lfdl133 with SMTP id l133so77664414lfd.2
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Dec 2015 21:18:48 -0800 (PST)
+In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D75030E7B67@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Wukongming <wu.kongming@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-SGkgLEFsbA0KICAgICAgICBJcyB0aGVyZSBhbnlvbmUgd2hvIGtub3dzIEhvdyBsb25nIG9yIGhv
-dyBtYW55IGRheXMgd2lsbCB0aGUgbG9ncy5neiAobW9uL29zZC9tZHMpYmUga2VwdCwgbWF5YmUg
-YmVmb3JlIGZsdXNoZWQ/DQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLQ0Kd3Vrb25nbWluZyBJRDogMTIwMTkNClRlbKO6MDU3MS04Njc2MDIzOQ0KRGVwdKO6
-MjAxNCBVSVMyIE9uZVN0b3INCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+aXQgd2lsbCByb3RhdGUgZXZlcnkgd2VlayBieSBkZWZhdWx0LCB5b3UgY2FuIHNlZSB0aGUgbG9n
+cm90YXRlIGZpbGUNCi9ldGMvY2VwaC9sb2dyb3RhdGUuZC9jZXBoDQoNCjIwMTUtMTItMDMgMTI6
+MzcgR01UKzA4OjAwIFd1a29uZ21pbmcgPHd1LmtvbmdtaW5nQGgzYy5jb20+Og0KPiBIaSAsQWxs
+DQo+ICAgICAgICAgSXMgdGhlcmUgYW55b25lIHdobyBrbm93cyBIb3cgbG9uZyBvciBob3cgbWFu
+eSBkYXlzIHdpbGwgdGhlIGxvZ3MuZ3ogKG1vbi9vc2QvbWRzKWJlIGtlcHQsIG1heWJlIGJlZm9y
+ZSBmbHVzaGVkPw0KPg0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0NCj4gd3Vrb25nbWluZyBJRDogMTIwMTkNCj4gVGVs77yaMDU3MS04Njc2MDIzOQ0KPiBE
+ZXB077yaMjAxNCBVSVMyIE9uZVN0b3INCj4NCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
 LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0Ksb7Tyrz+vLDG5Li9vP66
-rNPQurzW3buqyP3NqNDFvLzK9dPQz965q8u+tcSxo8Pc0MXPoqOsvfbP3tPat6LLzbj4yc/D5rXY
-1rfW0MHQs/YNCrXEuPbIy7vyyLrX6aGjvfvWucjOus7G5Mv7yMvS1MjOus7Qzsq9yrnTw6OosPzA
-qLWrsrvP3tPayKuyv7vysr+31rXY0LnCtqGiuLTWxqGiDQq78smit6KjqbG+08q8/tbQtcTQxc+i
-oaPI57n7xPq07crVwcuxvtPKvP6jrMfrxPrBory0tee7sLvy08q8/s2o1qq3orz+yMuyosm+s/2x
-vg0K08q8/qOhDQpUaGlzIGUtbWFpbCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlk
-ZW50aWFsIGluZm9ybWF0aW9uIGZyb20gSDNDLCB3aGljaCBpcw0KaW50ZW5kZWQgb25seSBmb3Ig
-dGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1
-c2Ugb2YgdGhlDQppbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkgKGluY2x1
-ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsDQpkaXNjbG9zdXJlLCBy
-ZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUg
-aW50ZW5kZWQNCnJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlz
-IGUtbWFpbCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyDQpieSBwaG9uZSBvciBl
-bWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0K
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiDmnKzp
+gq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDlhazl
+j7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJfl
+h7oNCj4g55qE5Liq5Lq65oiW576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V
+5b2i5byP5L2/55So77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy
+44CB5aSN5Yi244CBDQo+IOaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OAguWmguae
+nOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumAmuef
+peWPkeS7tuS6uuW5tuWIoOmZpOacrA0KPiDpgq7ku7bvvIENCj4gVGhpcyBlLW1haWwgYW5kIGl0
+cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywg
+d2hpY2ggaXMNCj4gaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2Ug
+YWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhlDQo+IGluZm9ybWF0aW9uIGNv
+bnRhaW5lZCBoZXJlaW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8s
+IHRvdGFsIG9yIHBhcnRpYWwNCj4gZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1p
+bmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQo+IHJlY2lwaWVudChz
+KSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgcGxl
+YXNlIG5vdGlmeSB0aGUgc2VuZGVyDQo+IGJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFu
+ZCBkZWxldGUgaXQhDQoNCg0KDQotLSANCnRoYW5rcw0KaHVhbmdqdW4NCg==
