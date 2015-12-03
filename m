@@ -1,64 +1,58 @@
 From: Samuel Just <sjust@redhat.com>
 Subject: Re: queue_transaction interface + unique_ptr + performance
-Date: Thu, 3 Dec 2015 09:48:43 -0800
-Message-ID: <CAN=+7FU3cxZnr-9omBKqhL0NcLbg-rV66FuPcHPyYUnGmum2iQ@mail.gmail.com>
+Date: Thu, 3 Dec 2015 09:50:30 -0800
+Message-ID: <CAN=+7FU1z9w=dDZ8+qbvKu-_ucYEU8K0eKS99Pd6Ku=A=t2gWg@mail.gmail.com>
 References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 	<alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
-	<1998646860.28019612.1449155791509.JavaMail.zimbra@redhat.com>
-	<CO1PR02MB208F00D967903C505E92074F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
-	<20151203171704.GA13420@ultraspiritum.redhat.com>
-	<CO1PR02MB2081012549C4D8027F4BF80F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+	<CO1PR02MB2087E3AF3553B6269FBC10DF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+	<20151203172508.GB13420@ultraspiritum.redhat.com>
+	<CO1PR02MB208C446A80363743FC5D341F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f177.google.com ([209.85.213.177]:33528 "EHLO
-	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751115AbbLCRso (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 12:48:44 -0500
-Received: by igcmv3 with SMTP id mv3so18357833igc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 09:48:43 -0800 (PST)
-In-Reply-To: <CO1PR02MB2081012549C4D8027F4BF80F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+Received: from mail-io0-f170.google.com ([209.85.223.170]:33808 "EHLO
+	mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751441AbbLCRub convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 12:50:31 -0500
+Received: by ioir85 with SMTP id r85so89291361ioi.1
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 09:50:30 -0800 (PST)
+In-Reply-To: <CO1PR02MB208C446A80363743FC5D341F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: "Adam C. Emerson" <aemerson@redhat.com>, Casey Bodley <cbodley@redhat.com>, Sage Weil <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "Adam C. Emerson" <aemerson@redhat.com>, Sage Weil <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I still want there to be a single instance.  You need to have the
-interface take TransactionRef by rvalue ref to make that work
-(TransactionRef &&) as Adam mentioned.  This forces the caller to
-either pass an rvalue or use std::move() -- which forces it to be
-explicit.  The point of unique_ptr is to enforces single ownership
-(any current violation of which would be a serious bug) with minimal
-overhead.  I suspect that the performance issue you saw initially was
-that the compiler simply wasn't in-lining the construction?
-shared_ptr is of course more expensive due to the need to maintain a
-thread safe ref count.  Any user which actually needs the ref count
-would probably be just as slow with a hand-rolled implementation
-(assuming we use make_shared).  Any user which doesn't actually need
-the ref count could be switched to use unique_ptr.
+As far as I know, there are no current users which want to use the
+Transaction later.  You could also change apply_transaction to copy
+the Transaction into a unique_ptr since I don't think it's used in any
+performance sensitive code paths.
 -Sam
 
-On Thu, Dec 3, 2015 at 9:40 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Hmm..Thanks Adam, so, one of the cleanups on the Ceph path could be to introduce make_shared..
-> We will come up with a prototype of optimized io path with removing unnecessary use of shared_ptr and see how much overall gain we are getting..
+On Thu, Dec 3, 2015 at 9:48 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Yes, that we can do..But, in that case aren't we restricting user if they want to do something with this Transaction object later. I didn't go through each and every part of the code yet (which is huge) that are using these interfaces to understand if it is using Transaction object afterwards.
 >
 > Thanks & Regards
 > Somnath
->
 > -----Original Message-----
 > From: Adam C. Emerson [mailto:aemerson@redhat.com]
-> Sent: Thursday, December 03, 2015 9:17 AM
+> Sent: Thursday, December 03, 2015 9:25 AM
 > To: Somnath Roy
-> Cc: Casey Bodley; Sage Weil; Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org
+> Cc: Sage Weil; Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org
 > Subject: Re: queue_transaction interface + unique_ptr + performance
 >
 > On 03/12/2015, Somnath Roy wrote:
->> I don't think make_shared / make_unique is part of c++11 (and ceph is using that). It is part of c++14 I guess..
+>> Yes, I posted the new result after adding -O2 in the compiler flag and it shows almost no overhead with unique_ptr.
+>> I will add the test of adding to list overhead and start implementing the new interface.
+>> But, regarding my other point of changing all the objecstore interfaces (my first mail on this mail chain in case you have missed) taking Transaction, any thought of that ?
+>> Should we reconsider having two queue_transaction interface ?
 >
-> std::make_shared is in C++11, std::make_unique is in C++14. In addition to performance, std::make_shared is also more correct, in that:
+> As I understand it, the concern with switching to unique_ptr was that the callee would move from the reference without this being known to the caller.
 >
->   std::shared_ptr<T>(new T)
+> Would it make sense to pass as an RValue reference (i.e. TransactionRef&&)? That way the compiler should demand that the callers explicitly use std::move on the reference they're holding, documenting at the site of the call that they're willing to give up ownership.
 >
-> can leak object allocated by 'new T' if the allocation for the shared_ptr fails.
 >
-> std::make_unique is nice for cleanliness and symmetry, but doesn't add anything for performance or safety. (Also you can write your own make_unique, where make_shared is intimately involved with the details of shared_ptr.)
+> --
+> Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+> IRC: Aemerson@{RedHat, OFTC, Freenode}
+> 0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
