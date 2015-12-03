@@ -1,49 +1,61 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: queue_transaction interface + unique_ptr + performance
-Date: Thu, 3 Dec 2015 17:02:04 +0000
-Message-ID: <CO1PR02MB2087E3AF3553B6269FBC10DF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: queue_transaction interface + unique_ptr + performance
+Date: Thu, 3 Dec 2015 12:17:04 -0500
+Message-ID: <20151203171704.GA13420@ultraspiritum.redhat.com>
 References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
  <alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
+ <1998646860.28019612.1449155791509.JavaMail.zimbra@redhat.com>
+ <CO1PR02MB208F00D967903C505E92074F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="AhhlLboLdkugWU4S"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0076.outbound.protection.outlook.com ([207.46.100.76]:34368
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752095AbbLCRCG convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 12:02:06 -0500
-In-Reply-To: <alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:55888 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752594AbbLCRRG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Dec 2015 12:17:06 -0500
+Content-Disposition: inline
+In-Reply-To: <CO1PR02MB208F00D967903C505E92074F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Casey Bodley <cbodley@redhat.com>, Sage Weil <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Yes, I posted the new result after adding -O2 in the compiler flag and it shows almost no overhead with unique_ptr.
-I will add the test of adding to list overhead and start implementing the new interface.
-But, regarding my other point of changing all the objecstore interfaces (my first mail on this mail chain in case you have missed) taking Transaction, any thought of that ?
-Should we reconsider having two queue_transaction interface ?
 
-Thanks & Regards
-Somnath
+--AhhlLboLdkugWU4S
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
------Original Message-----
-From: Sage Weil [mailto:sage@newdream.net] 
-Sent: Thursday, December 03, 2015 3:50 AM
-To: Somnath Roy
-Cc: Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org
-Subject: RE: queue_transaction interface + unique_ptr + performance
+On 03/12/2015, Somnath Roy wrote:
+> I don't think make_shared / make_unique is part of c++11 (and ceph is using that). It is part of c++14 I guess..
 
-1- I agree we should avoid shared_ptr whenever possible.
+std::make_shared is in C++11, std::make_unique is in C++14. In addition to
+performance, std::make_shared is also more correct, in that:
 
-2- unique_ptr should not have any more overhead than a raw pointer--the compiler is enforcing the single-owner semantics.  See for example
+  std::shared_ptr<T>(new T)
 
-	https://msdn.microsoft.com/en-us/library/hh279676.aspx
+can leak object allocated by 'new T' if the allocation for the shared_ptr
+fails.
 
-"It is exactly is efficient as a raw pointer and can be used in STL containers."
+std::make_unique is nice for cleanliness and symmetry, but doesn't add anything
+for performance or safety. (Also you can write your own make_unique, where
+make_shared is intimately involved with the details of shared_ptr.)
 
-Unless the implementation is broken somehow?  That seems unlikely...
+--AhhlLboLdkugWU4S
+Content-Type: application/pgp-signature; name="signature.asc"
 
-sage
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
 
+iQF8BAEBCgBmBQJWYHkJXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
+ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
+OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4j/1kH/ReZpFvMA9thBp+2lS/FRBiH
+KRa7GjN1dwVTf0i3H9N7jg6+e17/bIBAoeXjrVr3Q4983JY66Vvv/o20AaUHujhb
++Lo0iArK5fX7HfqxDEpra3u9IV0StCWPQkx27RSd1Hf44jqGW+7uAc8pFnueHUMj
+fGWBaE/arwvYvyDfHRAjgl6DP9Ep6RcUU9Oy6A/Swi8j8DGpJFS9kV15dszutBEk
+jlW/9KMrOoOm6d5GAMBMyk+K8AKcn7BuQmPbn0qy5RgaRxnAQqgz8gmIKL1SF7N0
+A8MPBveCa1eMc29wK9U4JRwOhrrHdezhDx7Y16n0g9S2sWvP1vRP/cP7W6Y+1qg=
+=GFBx
+-----END PGP SIGNATURE-----
+
+--AhhlLboLdkugWU4S--
