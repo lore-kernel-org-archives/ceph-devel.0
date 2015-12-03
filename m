@@ -1,61 +1,73 @@
 From: "Adam C. Emerson" <aemerson@redhat.com>
 Subject: Re: queue_transaction interface + unique_ptr + performance
-Date: Thu, 3 Dec 2015 12:17:04 -0500
-Message-ID: <20151203171704.GA13420@ultraspiritum.redhat.com>
+Date: Thu, 3 Dec 2015 12:25:09 -0500
+Message-ID: <20151203172508.GB13420@ultraspiritum.redhat.com>
 References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
  <alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
- <1998646860.28019612.1449155791509.JavaMail.zimbra@redhat.com>
- <CO1PR02MB208F00D967903C505E92074F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+ <CO1PR02MB2087E3AF3553B6269FBC10DF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="AhhlLboLdkugWU4S"
+	protocol="application/pgp-signature"; boundary="2B/JsCI69OhZNC5r"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55888 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40162 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752594AbbLCRRG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 3 Dec 2015 12:17:06 -0500
+	id S1750723AbbLCRZK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Dec 2015 12:25:10 -0500
 Content-Disposition: inline
-In-Reply-To: <CO1PR02MB208F00D967903C505E92074F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+In-Reply-To: <CO1PR02MB2087E3AF3553B6269FBC10DF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Casey Bodley <cbodley@redhat.com>, Sage Weil <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 
---AhhlLboLdkugWU4S
+--2B/JsCI69OhZNC5r
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
 On 03/12/2015, Somnath Roy wrote:
-> I don't think make_shared / make_unique is part of c++11 (and ceph is using that). It is part of c++14 I guess..
+> Yes, I posted the new result after adding -O2 in the compiler flag and it=
+ shows almost no overhead with unique_ptr.
+> I will add the test of adding to list overhead and start implementing the=
+ new interface.
+> But, regarding my other point of changing all the objecstore interfaces (=
+my first mail on this mail chain in case you have missed) taking Transactio=
+n, any thought of that ?
+> Should we reconsider having two queue_transaction interface ?
 
-std::make_shared is in C++11, std::make_unique is in C++14. In addition to
-performance, std::make_shared is also more correct, in that:
+As I understand it, the concern with switching to unique_ptr was that the c=
+allee
+would move from the reference without this being known to the caller.
 
-  std::shared_ptr<T>(new T)
+Would it make sense to pass as an RValue reference (i.e. TransactionRef&&)?=
+ That
+way the compiler should demand that the callers explicitly use std::move on=
+ the
+reference they're holding, documenting at the site of the call that they're
+willing to give up ownership.
 
-can leak object allocated by 'new T' if the allocation for the shared_ptr
-fails.
 
-std::make_unique is nice for cleanliness and symmetry, but doesn't add anything
-for performance or safety. (Also you can write your own make_unique, where
-make_shared is intimately involved with the details of shared_ptr.)
+--=20
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
 
---AhhlLboLdkugWU4S
+--2B/JsCI69OhZNC5r
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2
 
-iQF8BAEBCgBmBQJWYHkJXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
+iQF8BAEBCgBmBQJWYHrvXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
 ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
-OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4j/1kH/ReZpFvMA9thBp+2lS/FRBiH
-KRa7GjN1dwVTf0i3H9N7jg6+e17/bIBAoeXjrVr3Q4983JY66Vvv/o20AaUHujhb
-+Lo0iArK5fX7HfqxDEpra3u9IV0StCWPQkx27RSd1Hf44jqGW+7uAc8pFnueHUMj
-fGWBaE/arwvYvyDfHRAjgl6DP9Ep6RcUU9Oy6A/Swi8j8DGpJFS9kV15dszutBEk
-jlW/9KMrOoOm6d5GAMBMyk+K8AKcn7BuQmPbn0qy5RgaRxnAQqgz8gmIKL1SF7N0
-A8MPBveCa1eMc29wK9U4JRwOhrrHdezhDx7Y16n0g9S2sWvP1vRP/cP7W6Y+1qg=
-=GFBx
+OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4j5iUH/0HFIm2+pgAguqrm0CYHbbVY
+dSy80ySy89JGiWKw47ycKLy84R0D3qBw8D58yBwhR/aUDu+c6rSYuHsgD0xxqaXW
+KH5NiABbU/k1xT4n+kaH9DD9P8C7jqE/sBFawokb1Tsm8fixAhUMHaLB7nJKT3WQ
+e1fy1a7Gjy3aIMKZ+0aljGMjN12EtLPTWQ6YZtPkhE5BB7eojVs51l6GP1lGRA6B
+VWpMMLnsF3pfOFjTTw5jtC7vzfv/yLFh2xq3UG/h+ikvHnd4ZW1/Kq9ScQ9j9M0f
+jXHjcQo9+jmFHFoiXlrjPHNrYI65QzAXJYu5CyDdaTGYhynn5b04CBY8K9hcxwQ=
+=pHIR
 -----END PGP SIGNATURE-----
 
---AhhlLboLdkugWU4S--
+--2B/JsCI69OhZNC5r--
