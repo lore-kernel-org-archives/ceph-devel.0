@@ -1,42 +1,50 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: ObjectStore interface and std::list
-Date: Thu, 3 Dec 2015 12:46:05 -0500 (EST)
-Message-ID: <1412841180.28305561.1449164765461.JavaMail.zimbra@redhat.com>
-References: <1147769245.28299019.1449164516705.JavaMail.zimbra@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: queue_transaction interface + unique_ptr + performance
+Date: Thu, 3 Dec 2015 17:48:29 +0000
+Message-ID: <CO1PR02MB208C446A80363743FC5D341F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+ <alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
+ <CO1PR02MB2087E3AF3553B6269FBC10DF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+ <20151203172508.GB13420@ultraspiritum.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:37468 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751138AbbLCRqG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 12:46:06 -0500
-Received: from zmail26.collab.prod.int.phx2.redhat.com (zmail26.collab.prod.int.phx2.redhat.com [10.5.83.33])
-	by mx5-phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tB3Hk5fY011889
-	for <ceph-devel@vger.kernel.org>; Thu, 3 Dec 2015 12:46:05 -0500
-In-Reply-To: <1147769245.28299019.1449164516705.JavaMail.zimbra@redhat.com>
+Received: from mail-bn1bbn0100.outbound.protection.outlook.com ([157.56.111.100]:6939
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751849AbbLCRsc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 12:48:32 -0500
+In-Reply-To: <20151203172508.GB13420@ultraspiritum.redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Yes, that we can do..But, in that case aren't we restricting user if they want to do something with this Transaction object later. I didn't go through each and every part of the code yet (which is huge) that are using these interfaces to understand if it is using Transaction object afterwards.
 
-I missed out on the context leading up to the discussion about
-queue_transactions and the use of raw vs. smart pointers, but I'm curious
-whether the use of std::list in the ObjectStore interface has come up as
-well. That's another source of allocations that could be avoided.
+Thanks & Regards
+Somnath
+-----Original Message-----
+From: Adam C. Emerson [mailto:aemerson@redhat.com] 
+Sent: Thursday, December 03, 2015 9:25 AM
+To: Somnath Roy
+Cc: Sage Weil; Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org
+Subject: Re: queue_transaction interface + unique_ptr + performance
 
-A naive approach could just replace the list with vector, which could at
-least reduce the number of allocations to one if you reserve() space for
-all of your elements up front.
+On 03/12/2015, Somnath Roy wrote:
+> Yes, I posted the new result after adding -O2 in the compiler flag and it shows almost no overhead with unique_ptr.
+> I will add the test of adding to list overhead and start implementing the new interface.
+> But, regarding my other point of changing all the objecstore interfaces (my first mail on this mail chain in case you have missed) taking Transaction, any thought of that ?
+> Should we reconsider having two queue_transaction interface ?
 
-An interface based on iterators could also help, by allowing the caller to
-put an array on the stack and pass that in. Iterators are tricky because
-the generic form requires templates, and template functions can't be
-virtual. But if we require the elements to be sequential in memory (i.e.
-raw array, std::array<Transaction*> or std::vector<Transaction*>), the
-interface could take (Transaction** begin, Transaction** end) without
-requiring templates. This interface can also be made compatible with
-unique_ptrs.
+As I understand it, the concern with switching to unique_ptr was that the callee would move from the reference without this being known to the caller.
 
-Casey
+Would it make sense to pass as an RValue reference (i.e. TransactionRef&&)? That way the compiler should demand that the callers explicitly use std::move on the reference they're holding, documenting at the site of the call that they're willing to give up ownership.
+
+
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
