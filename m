@@ -1,47 +1,55 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: How long will the logs be kept?
-Date: Thu, 3 Dec 2015 13:18:48 +0800
-Message-ID: <CABAwU-bNERLVaAgF_tJ8WFJ-eH3zvVO6zdU-7CQSB1wTh8EYJQ@mail.gmail.com>
-References: <47D132BF400BE64BAE6D71033F7D3D75030E7B67@H3CMLB12-EX.srv.huawei-3com.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: queue_transaction interface + unique_ptr
+Date: Thu, 3 Dec 2015 13:21:02 +0800
+Message-ID: <CACJqLyZDoNWzDErNm5FVwP5wZMNcVJs0V0P7UDfBCgjQ=VBVxA@mail.gmail.com>
+References: <CO1PR02MB208E42BE84D3D7BF2048668F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f48.google.com ([209.85.215.48]:35701 "EHLO
-	mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750906AbbLCFSu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 00:18:50 -0500
-Received: by lfdl133 with SMTP id l133so77664414lfd.2
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Dec 2015 21:18:48 -0800 (PST)
-In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D75030E7B67@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from mail-pu1apc01on0131.outbound.protection.outlook.com ([104.47.126.131]:34528
+	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750749AbbLCFVR convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 00:21:17 -0500
+Received: by igl9 with SMTP id 9so4089404igl.0
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Dec 2015 21:21:02 -0800 (PST)
+In-Reply-To: <CO1PR02MB208E42BE84D3D7BF2048668F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wukongming <wu.kongming@h3c.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: "Sage Weil (sage@newdream.net)" <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-aXQgd2lsbCByb3RhdGUgZXZlcnkgd2VlayBieSBkZWZhdWx0LCB5b3UgY2FuIHNlZSB0aGUgbG9n
-cm90YXRlIGZpbGUNCi9ldGMvY2VwaC9sb2dyb3RhdGUuZC9jZXBoDQoNCjIwMTUtMTItMDMgMTI6
-MzcgR01UKzA4OjAwIFd1a29uZ21pbmcgPHd1LmtvbmdtaW5nQGgzYy5jb20+Og0KPiBIaSAsQWxs
-DQo+ICAgICAgICAgSXMgdGhlcmUgYW55b25lIHdobyBrbm93cyBIb3cgbG9uZyBvciBob3cgbWFu
-eSBkYXlzIHdpbGwgdGhlIGxvZ3MuZ3ogKG1vbi9vc2QvbWRzKWJlIGtlcHQsIG1heWJlIGJlZm9y
-ZSBmbHVzaGVkPw0KPg0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0NCj4gd3Vrb25nbWluZyBJRDogMTIwMTkNCj4gVGVs77yaMDU3MS04Njc2MDIzOQ0KPiBE
-ZXB077yaMjAxNCBVSVMyIE9uZVN0b3INCj4NCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiDmnKzp
-gq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDlhazl
-j7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJfl
-h7oNCj4g55qE5Liq5Lq65oiW576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V
-5b2i5byP5L2/55So77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy
-44CB5aSN5Yi244CBDQo+IOaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OAguWmguae
-nOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumAmuef
-peWPkeS7tuS6uuW5tuWIoOmZpOacrA0KPiDpgq7ku7bvvIENCj4gVGhpcyBlLW1haWwgYW5kIGl0
-cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywg
-d2hpY2ggaXMNCj4gaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2Ug
-YWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhlDQo+IGluZm9ybWF0aW9uIGNv
-bnRhaW5lZCBoZXJlaW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8s
-IHRvdGFsIG9yIHBhcnRpYWwNCj4gZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1p
-bmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQo+IHJlY2lwaWVudChz
-KSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgcGxl
-YXNlIG5vdGlmeSB0aGUgc2VuZGVyDQo+IGJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFu
-ZCBkZWxldGUgaXQhDQoNCg0KDQotLSANCnRoYW5rcw0KaHVhbmdqdW4NCg==
+On Thu, Dec 3, 2015 at 8:17 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Hi Sage/Sam,
+> As discussed in today's performance meeting , I am planning to change the queue_transactions() interface to the following.
+>
+>   int queue_transactions(Sequencer *osr, list<TransactionRef>& tls,
+>                          Context *onreadable, Context *ondisk=0,
+>                          Context *onreadable_sync=0,
+>                          TrackedOpRef op = TrackedOpRef(),
+>                          ThreadPool::TPHandle *handle = NULL) ;
+>
+> typedef unique_ptr<Transaction> TransactionRef;
+>
+>
+> IMO , there is a problem with this approach.
+>
+> The interface like apply_transaction(), queue_transaction() etc. basically the interfaces taking single transaction pointer and internally forming a list to call the queue_transactions() also needs to be changed to accept TransactionRef which will be *bad*. The reason is while preparing list internally we need to move the uniqueue_ptr and callers won't be aware of that.
+>
+> Also, now changing every interfaces (and callers) that is taking Transaction* will produce a very big delta (and big testing effort as well).
+>
+> So, should we *reconsider* co-existing both  queue_transactions() interfaces and call the new one from the IO path ?
+
+I like this, isolate any share_ptr area is a hard job. Look forward to!
+
+>
+> Thanks & Regards
+> Somnath
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
