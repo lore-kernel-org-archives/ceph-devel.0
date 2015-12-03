@@ -1,73 +1,41 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Compiling for FreeBSD, runtimes for seperate tests.
-Date: Thu, 3 Dec 2015 15:12:46 +0100
-Message-ID: <56604DDE.2010501@digiware.nl>
-References: <565B3999.3050302@digiware.nl>
- <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
- <565B4A7F.60301@digiware.nl>
- <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
- <20151130065812.GA20205@gmail.com>
- <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
- <565D7FA8.3010301@digiware.nl>
- <alpine.DEB.2.00.1512010529280.19170@cobra.newdream.net>
- <565DA3B5.1070608@digiware.nl>
- <alpine.DEB.2.00.1512010634510.19170@cobra.newdream.net>
- <565DC9D4.7060701@digiware.nl> <565DEC36.10102@digiware.nl>
- <565F5E28.8020706@digiware.nl> <5660106F.90202@digiware.nl>
+From: Wukongming <wu.kongming@h3c.com>
+Subject: Confused about priority of client OP.
+Date: Thu, 3 Dec 2015 14:14:40 +0000
+Message-ID: <47D132BF400BE64BAE6D71033F7D3D75030E7D71@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:21425 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751529AbbLCOM5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 3 Dec 2015 09:12:57 -0500
-In-Reply-To: <5660106F.90202@digiware.nl>
+Received: from smtp.h3c.com ([60.191.123.56]:16582 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751529AbbLCOOx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Dec 2015 09:14:53 -0500
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+Cc: "zhengbin.08747@h3c.com" <zhengbin.08747@h3c.com>
 
-On 3-12-2015 10:50, Willem Jan Withagen wrote:
-> On 2-12-2015 22:10, Willem Jan Withagen wrote:
->
->> Running gmake check
->
-> Now I start wondering how long certain tests are able to run:
->
-> I've killed:
->       unittest_chain_xattr
-> because it was running already voor 12 hours.
->
-> And unittest_lfnindex is also running for > 20 minutes....
->
-> Is there a way to specify something like a max runtime for these tests?
-> So that I am able to run the testset repeatedly, to monitor regression
-> once I start changing code.
->
-> I saw Loic talk about some of the expected test runtimes.
-> But having a better feeling per specific test would be useful in getting
-> the test to progress
-
-Excluded all rbd tests, and killed some of the processes that ran > 1200 
-secs.
-But below the results...
-
-Need to figure the Makefiles out to exclude rbd testing.
-And perhaps start a timelimit on running processes.
-
---WjW
-
-============================================================================
-Testsuite summary for ceph 10.0.0
-============================================================================
-# TOTAL: 119
-# PASS:  87
-# SKIP:  0
-# XFAIL: 0
-# FAIL:  32
-# XPASS: 0
-# ERROR: 0
-============================================================================
-See src/test-suite.log
-Please report to ceph-devel@vger.kernel.org
-============================================================================
+SGksIEFsbDoNCiAgICAgICAgSSAndmUgZ290IGEgcXVlc3Rpb24gYWJvdXQgYSBwcmlvcml0eS4g
+V2UgZGVmaW5lZCBvc2RfY2xpZW50X29wX3ByaW9yaXR5ID0gNjMuIENFUEhfTVNHX1BSSU9fTE9X
+ID0gNjQuDQpXZSBhcmUgY2xlYXIgdGhlcmUgYXJlIG11bHRpcGxlIElPIHRvIGJlIGRpc2N1c3Nl
+ZC4gV2h5IG5vdCBkZWZpbmUgb3NkX2NsaWVudF9vcF9wcmlvcml0eSA+IDY0LCBzbyB3ZSBjYW4g
+anVzdCBkZWFsIHdpdGggY2xpZW50IElPIGluIGZpcnN0IHByaW9yaXR5Lg0KDQoNCi0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0Kd3Vrb25nbWluZyBJRDogMTIw
+MTkNClRlbKO6MDU3MS04Njc2MDIzOQ0KRGVwdKO6MjAxNCBVSVMyIE9ORVN0b3INCg0KDQotLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tDQqxvtPKvP68sMbkuL28/rqs09C6vNbdu6rI/c2o0MW8vMr109DP3rmr
+y761xLGjw9zQxc+io6y99s/e09q3osvNuPjJz8PmtdjWt9bQwdCz9g0KtcS49sjLu/LIutfpoaO9
++9a5yM66zsbky/vIy9LUyM66ztDOyr3KudPDo6iw/MCotauyu8/e09rIq7K/u/Kyv7fWtdjQucK2
+oaK4tNbGoaINCrvyyaK3oqOpsb7Tyrz+1tC1xNDFz6Kho8jnufvE+rTtytXBy7G+08q8/qOsx+vE
++sGivLS157uwu/LTyrz+zajWqreivP7Iy7Kiyb6z/bG+DQrTyrz+o6ENClRoaXMgZS1tYWlsIGFu
+ZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBI
+M0MsIHdoaWNoIGlzDQppbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9z
+ZSBhZGRyZXNzIGlzIGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNv
+bnRhaW5lZCBoZXJlaW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8s
+IHRvdGFsIG9yIHBhcnRpYWwNCmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5h
+dGlvbikgYnkgcGVyc29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlz
+IHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ug
+bm90aWZ5IHRoZSBzZW5kZXINCmJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxl
+dGUgaXQhDQo=
