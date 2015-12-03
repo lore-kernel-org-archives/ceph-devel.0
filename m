@@ -1,49 +1,49 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: queue_transaction interface + unique_ptr + performance
-Date: Thu, 3 Dec 2015 16:52:40 +0000
-Message-ID: <CO1PR02MB208F00D967903C505E92074F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+Date: Thu, 3 Dec 2015 17:02:04 +0000
+Message-ID: <CO1PR02MB2087E3AF3553B6269FBC10DF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
  <alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
- <1998646860.28019612.1449155791509.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0056.outbound.protection.outlook.com ([65.55.169.56]:12448
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+Received: from mail-by2on0076.outbound.protection.outlook.com ([207.46.100.76]:34368
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751621AbbLCQwn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 3 Dec 2015 11:52:43 -0500
-In-Reply-To: <1998646860.28019612.1449155791509.JavaMail.zimbra@redhat.com>
+	id S1752095AbbLCRCG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 12:02:06 -0500
+In-Reply-To: <alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>, Sage Weil <sage@newdream.net>
+To: Sage Weil <sage@newdream.net>
 Cc: "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SSBkb24ndCB0aGluayBtYWtlX3NoYXJlZCAvIG1ha2VfdW5pcXVlIGlzIHBhcnQgb2YgYysrMTEg
-KGFuZCBjZXBoIGlzIHVzaW5nIHRoYXQpLiBJdCBpcyBwYXJ0IG9mIGMrKzE0IEkgZ3Vlc3MuLg0K
-DQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQpGcm9tOiBDYXNleSBCb2RsZXkgW21haWx0bzpjYm9kbGV5QHJlZGhhdC5jb21dIA0KU2VudDog
-VGh1cnNkYXksIERlY2VtYmVyIDAzLCAyMDE1IDc6MTcgQU0NClRvOiBTYWdlIFdlaWwNCkNjOiBT
-b21uYXRoIFJveTsgU2FtdWVsIEp1c3QgKHNhbS5qdXN0QGlua3RhbmsuY29tKTsgY2VwaC1kZXZl
-bEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBxdWV1ZV90cmFuc2FjdGlvbiBpbnRlcmZh
-Y2UgKyB1bmlxdWVfcHRyICsgcGVyZm9ybWFuY2UNCg0KSGksDQoNClRvIHRob3NlIHdyaXRpbmcg
-YmVuY2htYXJrcywgcGxlYXNlIG5vdGUgdGhhdCB0aGUgc3RhbmRhcmQgbGlicmFyeSBwcm92aWRl
-cyBzdGQ6Om1ha2Vfc2hhcmVkKCkgYXMgYW4gb3B0aW1pemF0aW9uIGZvciBzaGFyZWRfcHRyLiBJ
-dCBjcmVhdGVzIHRoZSBvYmplY3QgYW5kIGl0cyBzaGFyZWQgc3RvcmFnZSBpbiBhIHNpbmdsZSBh
-bGxvY2F0aW9uLCBpbnN0ZWFkIG9mIHRoZSB0d28gYWxsb2NhdGlvbnMgcmVxdWlyZWQgZm9yICJz
-dGQ6OnNoYXJlZF9wdHI8Rm9vPiBmcyAobmV3IEZvbygpKSIuDQoNCkNhc2V5DQoNCi0tLS0tIE9y
-aWdpbmFsIE1lc3NhZ2UgLS0tLS0NCj4gMS0gSSBhZ3JlZSB3ZSBzaG91bGQgYXZvaWQgc2hhcmVk
-X3B0ciB3aGVuZXZlciBwb3NzaWJsZS4NCj4gDQo+IDItIHVuaXF1ZV9wdHIgc2hvdWxkIG5vdCBo
-YXZlIGFueSBtb3JlIG92ZXJoZWFkIHRoYW4gYSByYXcgDQo+IHBvaW50ZXItLXRoZSBjb21waWxl
-ciBpcyBlbmZvcmNpbmcgdGhlIHNpbmdsZS1vd25lciBzZW1hbnRpY3MuICBTZWUgDQo+IGZvciBl
-eGFtcGxlDQo+IA0KPiAJaHR0cHM6Ly9tc2RuLm1pY3Jvc29mdC5jb20vZW4tdXMvbGlicmFyeS9o
-aDI3OTY3Ni5hc3B4DQo+IA0KPiAiSXQgaXMgZXhhY3RseSBpcyBlZmZpY2llbnQgYXMgYSByYXcg
-cG9pbnRlciBhbmQgY2FuIGJlIHVzZWQgaW4gU1RMIA0KPiBjb250YWluZXJzLiINCj4gDQo+IFVu
-bGVzcyB0aGUgaW1wbGVtZW50YXRpb24gaXMgYnJva2VuIHNvbWVob3c/ICBUaGF0IHNlZW1zIHVu
-bGlrZWx5Li4uDQo+IA0KPiBzYWdlDQo+IA0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
-b3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
-Lmh0bWwNCj4gDQo=
+Yes, I posted the new result after adding -O2 in the compiler flag and it shows almost no overhead with unique_ptr.
+I will add the test of adding to list overhead and start implementing the new interface.
+But, regarding my other point of changing all the objecstore interfaces (my first mail on this mail chain in case you have missed) taking Transaction, any thought of that ?
+Should we reconsider having two queue_transaction interface ?
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net] 
+Sent: Thursday, December 03, 2015 3:50 AM
+To: Somnath Roy
+Cc: Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org
+Subject: RE: queue_transaction interface + unique_ptr + performance
+
+1- I agree we should avoid shared_ptr whenever possible.
+
+2- unique_ptr should not have any more overhead than a raw pointer--the compiler is enforcing the single-owner semantics.  See for example
+
+	https://msdn.microsoft.com/en-us/library/hh279676.aspx
+
+"It is exactly is efficient as a raw pointer and can be used in STL containers."
+
+Unless the implementation is broken somehow?  That seems unlikely...
+
+sage
+
