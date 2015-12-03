@@ -1,48 +1,42 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: queue_transaction interface + unique_ptr + performance
-Date: Thu, 3 Dec 2015 17:40:16 +0000
-Message-ID: <CO1PR02MB2081012549C4D8027F4BF80F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
-References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
- <alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
- <1998646860.28019612.1449155791509.JavaMail.zimbra@redhat.com>
- <CO1PR02MB208F00D967903C505E92074F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
- <20151203171704.GA13420@ultraspiritum.redhat.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: ObjectStore interface and std::list
+Date: Thu, 3 Dec 2015 12:46:05 -0500 (EST)
+Message-ID: <1412841180.28305561.1449164765461.JavaMail.zimbra@redhat.com>
+References: <1147769245.28299019.1449164516705.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0078.outbound.protection.outlook.com ([207.46.100.78]:28352
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750894AbbLCRkT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 12:40:19 -0500
-In-Reply-To: <20151203171704.GA13420@ultraspiritum.redhat.com>
-Content-Language: en-US
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:37468 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751138AbbLCRqG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 12:46:06 -0500
+Received: from zmail26.collab.prod.int.phx2.redhat.com (zmail26.collab.prod.int.phx2.redhat.com [10.5.83.33])
+	by mx5-phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tB3Hk5fY011889
+	for <ceph-devel@vger.kernel.org>; Thu, 3 Dec 2015 12:46:05 -0500
+In-Reply-To: <1147769245.28299019.1449164516705.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Adam C. Emerson" <aemerson@redhat.com>
-Cc: Casey Bodley <cbodley@redhat.com>, Sage Weil <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hmm..Thanks Adam, so, one of the cleanups on the Ceph path could be to introduce make_shared..
-We will come up with a prototype of optimized io path with removing unnecessary use of shared_ptr and see how much overall gain we are getting..
+Hi,
 
-Thanks & Regards
-Somnath
+I missed out on the context leading up to the discussion about
+queue_transactions and the use of raw vs. smart pointers, but I'm curious
+whether the use of std::list in the ObjectStore interface has come up as
+well. That's another source of allocations that could be avoided.
 
------Original Message-----
-From: Adam C. Emerson [mailto:aemerson@redhat.com] 
-Sent: Thursday, December 03, 2015 9:17 AM
-To: Somnath Roy
-Cc: Casey Bodley; Sage Weil; Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org
-Subject: Re: queue_transaction interface + unique_ptr + performance
+A naive approach could just replace the list with vector, which could at
+least reduce the number of allocations to one if you reserve() space for
+all of your elements up front.
 
-On 03/12/2015, Somnath Roy wrote:
-> I don't think make_shared / make_unique is part of c++11 (and ceph is using that). It is part of c++14 I guess..
+An interface based on iterators could also help, by allowing the caller to
+put an array on the stack and pass that in. Iterators are tricky because
+the generic form requires templates, and template functions can't be
+virtual. But if we require the elements to be sequential in memory (i.e.
+raw array, std::array<Transaction*> or std::vector<Transaction*>), the
+interface could take (Transaction** begin, Transaction** end) without
+requiring templates. This interface can also be made compatible with
+unique_ptrs.
 
-std::make_shared is in C++11, std::make_unique is in C++14. In addition to performance, std::make_shared is also more correct, in that:
-
-  std::shared_ptr<T>(new T)
-
-can leak object allocated by 'new T' if the allocation for the shared_ptr fails.
-
-std::make_unique is nice for cleanliness and symmetry, but doesn't add anything for performance or safety. (Also you can write your own make_unique, where make_shared is intimately involved with the details of shared_ptr.)
+Casey
