@@ -1,71 +1,73 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: queue_transaction interface + unique_ptr + performance
-Date: Thu, 3 Dec 2015 16:23:14 -0500 (EST)
-Message-ID: <1814262106.28521757.1449177794388.JavaMail.zimbra@redhat.com>
-References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com> <1575682875.28391996.1449169755619.JavaMail.zimbra@redhat.com> <20151203191233.GA17144@ultraspiritum.redhat.com> <CAN=+7FVC5QU7Gz6qq9PPeVv3Nvkq0c0cbVNNcC+Rz-j7OcnHxQ@mail.gmail.com> <1928144476.28418457.1449170995351.JavaMail.zimbra@redhat.com> <CAN=+7FV1aFxmT8E_-=G4+OuOG=VotWV7PQv45zL3v3+mjDYbrQ@mail.gmail.com> <291788535.28463587.1449173661550.JavaMail.zimbra@redhat.com> <alpine.DEB.2.00.1512031303010.19170@cobra.newdream.net>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: OSD public / cluster network isolation using VRF:s
+Date: Thu, 3 Dec 2015 13:25:42 -0800
+Message-ID: <CAJ4mKGZvgaEtLF=EX0t_74KS4-yxFMmR4oJUUx7YZhpXb-9EeQ@mail.gmail.com>
+References: <1449173601.2291.84.camel@millnert.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:50743 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754064AbbLCVXQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 16:23:16 -0500
-In-Reply-To: <alpine.DEB.2.00.1512031303010.19170@cobra.newdream.net>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:34991 "EHLO
+	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754019AbbLCVZn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 16:25:43 -0500
+Received: by wmuu63 with SMTP id u63so38613635wmu.0
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 13:25:42 -0800 (PST)
+In-Reply-To: <1449173601.2291.84.camel@millnert.se>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Samuel Just <sjust@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, ceph-devel@vger.kernel.org
+To: Martin Millnert <martin@millnert.se>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+On Thu, Dec 3, 2015 at 12:13 PM, Martin Millnert <martin@millnert.se> wrote:
+> Hi,
+>
+> we're deploying Ceph on Linux for multiple purposes.
+> We want to build network isolation in our L3 DC network using VRF:s.
+>
+> In the case of Ceph this means that we are separating the Ceph public
+> network from the Ceph cluster network, in this manner, into separate
+> network routing domains (for those who do not know what a VRF is).
+>
+> Furthermore, we're also running (per-VRF) dynamically routed L3 all the
+> way to the hosts (OSPF from ToR switch), and need to separate route
+> tables on the hosts properly. This is done using "ip rule" today.
+> We use VLANs to separate the VRF:s from each other between ToR and
+> hosts, so there is no problem to determine which VRF an incoming packet
+> to a host belongs to (iif $dev).
+>
+> The problem is selecting the proper route table for outbound packets
+> from the host.
+>
+> There is current work in progress for a redesign [1] of the old VRF [2]
+> design in the Linux Kernel. At least in the new design, there is an
+> intended way of placing processes within a VRF such that, similar to
+> network namespaces, the processes are unaware that they are in fact
+> living within a VRF.
+>
+> This would work for a process such as the 'mon', which only lives in the
+> public network.
+>
+> But it doesn't work for the OSD, which uses separate sockets for public
+> and cluster networks.
+>
+> There is however a real simple solution:
+> 1. Use something similar to
+>    setsockopt(sockfd, SOL_SOCKET, SO_MARK, puborclust_val, sizeof(one))
+>    (untested)
+> 2. set up "ip rule" for outbound traffic to select an appropriate route
+> table based on the MARK value of "puborclust_val" above.
+>
+> AFAIK BSD doesn't have SO_MARK specifically, but this is a quite simple
+> option that adds a lot of utility for us, and, I imagine others.
+>
+> I'm willing to write it and test it too. But before doing that, I'm
+> interested in feedback. Would obviously prefer it to be merged.
 
------ Original Message -----
-> On Thu, 3 Dec 2015, Casey Bodley wrote:
-> > > Well, yeah we are, it's just the actual Transaction structure which
-> > > wouldn't be dynamic -- the buffers and many other fields would still
-> > > hit the allocator.
-> > > -Sam
-> > 
-> > Sure. I was looking specifically at the tradeoffs between allocating
-> > and moving the Transaction object itself.
-> > 
-> > As it currently stands, the caller of ObjectStore can choose whether to
-> > allocate its Transactions on the heap, embed them in other objects, or
-> > put them on the stack for use with apply_transactions(). Switching to an
-> > interface built around unique_ptr forces all callers to use the heap. I'm
-> > advocating for an interface that doesn't.
-> 
-> That leaves us with either std::move or.. the raw Transaction* we have
-> now.  Right?
+I'm probably just being dense here, but I don't quite understand what
+all this is trying to accomplish. It looks like it's essentially
+trying to set up VLANs (with different rules) over a single physical
+network interface, that is still represented to userspace as a single
+device with a single IP. Is that right?
 
-Right. The thing I really like about the unique_ptr approach is that the
-caller no longer has to care about the Transaction's lifetime, so doesn't
-have to allocate the extra ObjectStore::C_DeleteTransaction for cleanup.
-Movable Transactions accomplish this as well.
-
-Casey
-
-> 
-> > > > It's true that the move ctor has to do work. I counted 18 fields, half
-> > > > of
-> > > > which are integers, and the rest have move ctors themselves. But the
-> > > > cpu
-> > > > is good at integers. The win here is that you're not hitting the
-> > > > allocator
-> > > > in the fast path.
-> 
-> To be fair, many of these are also legacy that we can remove... possibly
-> even now.  IIRC the only exposure to legacy encoded transactions (that use
-> the tbl hackery) are journal items from an upgrade pre-hammer OSD that
-> aren't flushed on upgrade.  We should have made the osd flush the journal
-> before recording the 0_94_4 ondisk feature.  We could add another one to
-> enforce that and rip all that code out now instead of waiting until
-> after jewel... that would be satisfying (and I think an ondisk ceph-osd
-> feature is enough here, then document that users should upgrade to
-> hammer 0.94.6 or infernalis 9.2.1 before moving to jewel).
-> 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+What's the point of doing that with Ceph?
+-Greg
