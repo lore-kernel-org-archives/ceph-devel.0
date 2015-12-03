@@ -1,95 +1,76 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Undefined Ref for simple prog
-Date: Thu, 3 Dec 2015 15:40:35 -0700
-Message-ID: <CAANLjFrbaa=wC=9tk9_w_ROxDF-yityFNRf=zBkrb6b0gA0gmg@mail.gmail.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: Undefined Ref for simple prog
+Date: Thu, 3 Dec 2015 18:08:14 -0500
+Message-ID: <20151203230814.GC17144@ultraspiritum.redhat.com>
+References: <CAANLjFrbaa=wC=9tk9_w_ROxDF-yityFNRf=zBkrb6b0gA0gmg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="JWEK1jqKZ6MHAcjA"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f51.google.com ([209.85.213.51]:33746 "EHLO
-	mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751719AbbLCWkg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 17:40:36 -0500
-Received: by vkca188 with SMTP id a188so55484743vkc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 14:40:35 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:44224 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751873AbbLCXIQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Dec 2015 18:08:16 -0500
+Content-Disposition: inline
+In-Reply-To: <CAANLjFrbaa=wC=9tk9_w_ROxDF-yityFNRf=zBkrb6b0gA0gmg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
 
-I'm trying to do some testing of Ceph components specifically around
-the OP queues. I'm trying to use the class in a simple program where I
-will do my testing, but I can't resolve one problem. I've had to
-include  types.h as forward defining the Formatter class (already
-included/forward defined in the base class). This is based on my PR
-https://github.com/ceph/ceph/pull/6781 .
+--JWEK1jqKZ6MHAcjA
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-//wrr_bench.cc
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-// vim: ts=8 sw=2 smarttab
+On 03/12/2015, Robert LeBlanc wrote:
+> I'm trying to do some testing of Ceph components specifically around
+> the OP queues. I'm trying to use the class in a simple program where I
+> will do my testing, but I can't resolve one problem. I've had to
+> include  types.h as forward defining the Formatter class (already
+> included/forward defined in the base class). This is based on my PR
+> https://github.com/ceph/ceph/pull/6781 .
 
-#include "include/types.h"
-#include "common/PrioritizedQueue.h"
-#include
+Ceph's assert is infelicitous. The libcommon static library
+has the definitions in src/common/assert.cc. It depends on other
+things, though, so the easiest thing to do, if you're using autotools, is j=
+ust
+to add a target to one of the Makefile.am scripts (probably in src/test)
+that uses CEPH_GLOBAL as its library. If you just copy and modify one
+of the targets for the binary tests, your program will get built as part of=
+ the
+unittests target.
 
-//namespace ceph {
-//  class Formatter;
-//}
+(You'll have to build src/gmock and src/gmock/gtest manually to call make
+unittests on its own.)
 
-int main() {
-  PrioritizedQueue pq(0,0);
-  std::cout << "Running.." << std::endl;
-}
+If you're using cmake, it's simpler. Just copy one of the
+add_executable/target_link_libraries pairs in src/test/CMakeLists.txt and m=
+odify
+as appropriate. Your executable will be built as part of the default CMake
+target.
 
-I'm compiling with:
-$ g++ -std=c++11 -I. wrr_bench.cc -o wrr_bench
-/tmp/ccf6wRFo.o: In function `PrioritizedQueue::length() const':
-wrr_bench.cc:(.text._ZNK16PrioritizedQueueIjjE6lengthEv[_ZNK16PrioritizedQueueIjjE6lengthEv]+0x5a):
-undefined reference to `ceph::__ceph_assert_fail(char const*, char
-const*, int, char const*)'
-wrr_bench.cc:(.text._ZNK16PrioritizedQueueIjjE6lengthEv[_ZNK16PrioritizedQueueIjjE6lengthEv]+0xfb):
-undefined reference to `ceph::__ceph_assert_fail(char const*, char
-const*, int, char const*)'
-/tmp/ccf6wRFo.o: In function `PrioritizedQueue::empty() const':
-wrr_bench.cc:(.text._ZNK16PrioritizedQueueIjjE5emptyEv[_ZNK16PrioritizedQueueIjjE5emptyEv]+0x2e):
-undefined reference to `ceph::__ceph_assert_fail(char const*, char
-const*, int, char const*)'
-wrr_bench.cc:(.text._ZNK16PrioritizedQueueIjjE5emptyEv[_ZNK16PrioritizedQueueIjjE5emptyEv]+0x68):
-undefined reference to `ceph::__ceph_assert_fail(char const*, char
-const*, int, char const*)'
-/tmp/ccf6wRFo.o: In function `PrioritizedQueue::dequeue()':
-wrr_bench.cc:(.text._ZN16PrioritizedQueueIjjE7dequeueEv[_ZN16PrioritizedQueueIjjE7dequeueEv]+0x3b):
-undefined reference to `ceph::__ceph_assert_fail(char const*, char
-const*, int, char const*)'
-/tmp/ccf6wRFo.o:wrr_bench.cc:(.text._ZN16PrioritizedQueueIjjE7dequeueEv[_ZN16PrioritizedQueueIjjE7dequeueEv]+0x1b0):
-more undefined references to `ceph::__ceph_assert_fail(char const*,
-char const*, int, char const*)' follow
-collect2: error: ld returned 1 exit status
+--=20
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
 
-Including assert.h doesn't help. Any pointers?
+--JWEK1jqKZ6MHAcjA
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Thanks,
-
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
 -----BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.3.0
-Comment: https://www.mailvelope.com
+Version: GnuPG v2
 
-wsFcBAEBCAAQBQJWYMTfCRDmVDuy+mK58QAACdUP/RkhdAhkYLM9jzEXss8b
-Z003Cz1jnEe9sw+xsMdvaQxU/d0RbhE1Mst1HvfAv9aFCjJbtUf5dYyqCy/6
-SnTWIPe79kEVJ61ATTSSbQGCDkMJZiONrnhc2IDdrY4b5N04kYRlG6jQfCr4
-s/k7cnu2ReTjIRtQzr+SmAtaqcNt2OyMGjt6Aa+Wu+MyoZ5Z2ELBo63LrjPu
-SSVBtKXSajXjz827broyA5zsejLrJzlww0UkwMCwFWZ6bHxKjRD5Xj4r15j0
-zh3HcRZZAJk2F7nePXKlpZfh96xmDbc3RJ4HY4ZvYCxxrprFfw9LJ/yE6qix
-TfvYMJIeKldQkG8vmNJKrKXQx9Lc1o32uCnOu1A9MMzA9tC4HrHFq69/IvcW
-SUMlXqxzw3KPA0PxYwvxCOy3PUMwtAfofZOmBeMCIpIuRJbY+YXhJz55/a7m
-8FEC1b7+MR54tpNOuaMeTXjmf5v1ddcMaTMO6L61YMKRoBFLHHMWVeuYeNxt
-okzvEnFWvkCvM0bEGMVFt038h3k7BpuxTe0FypKtAUpR1lgvsVKLWMP1y9ai
-XRqDB1eV13zxY/LIM3OlXbCDZFgWvycBrRQpScuYJ08SivkSg7ya5q85W4/J
-7Bpy5W7HgmUbN+fzqMZ/VPW52ys7fHiWDQRmULR7V35rnngvkQoIBcEmWLPd
-mEsp
-=N4vu
+iQF8BAEBCgBmBQJWYMtaXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
+ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
+OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jWCYIAKb525KFeUBHI5PGqR9TFPJS
+cW//qV0nupKmZmH36ZLDKzp/KXRag64lwxXtt2F0/DoNlNz3LCL6sgD3Q/qeqGCA
+OuTwFPnAy/AW2matlgqGY/jWGupxNj0v09Q/gDgm+AqgbJ/HcQDKG1ur8OaCJ3NN
+gW+8JVq2mWoj/6oxzD3q7bO7sNfIjLxOAmCShqGh/LAkAdOX88cXj7pjy8cgRDKB
+Ha3iL9kGt7IM+mj5zoyYC0WIshbwv67HUP1MTi8tJz53bQeLs2ZYDD+aWrEcdANZ
+PHZVDp0+8uwccDga0FQ0h7hCw+W8+mSvW9RBbnzqM7zuuHduFVsMstSULOHBABg=
+=OIS6
 -----END PGP SIGNATURE-----
+
+--JWEK1jqKZ6MHAcjA--
