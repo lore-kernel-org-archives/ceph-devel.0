@@ -1,86 +1,83 @@
-From: "wido@42on.com" <wido@42on.com>
-Subject: Re: OSD public / cluster network isolation using VRF:s
-Date: Thu, 3 Dec 2015 22:03:19 +0100
-Message-ID: <422901884.211767.1449176599032.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
-References: <1449173601.2291.84.camel@millnert.se>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Compiling for FreeBSD, runtimes for seperate tests.
+Date: Thu, 3 Dec 2015 13:06:31 -0800
+Message-ID: <CAJ4mKGaMWy-_JALeYKAXf3rJim_7e5KPG+ivZC5rEtq2aK+GOg@mail.gmail.com>
+References: <565B3999.3050302@digiware.nl>
+	<CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
+	<565B4A7F.60301@digiware.nl>
+	<CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
+	<20151130065812.GA20205@gmail.com>
+	<alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
+	<565D7FA8.3010301@digiware.nl>
+	<alpine.DEB.2.00.1512010529280.19170@cobra.newdream.net>
+	<565DA3B5.1070608@digiware.nl>
+	<alpine.DEB.2.00.1512010634510.19170@cobra.newdream.net>
+	<565DC9D4.7060701@digiware.nl>
+	<565DEC36.10102@digiware.nl>
+	<565F5E28.8020706@digiware.nl>
+	<5660106F.90202@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:52033 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753839AbbLCVDW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 16:03:22 -0500
-In-Reply-To: <1449173601.2291.84.camel@millnert.se>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:36193 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753889AbbLCVGc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 16:06:32 -0500
+Received: by wmww144 with SMTP id w144so38023256wmw.1
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 13:06:31 -0800 (PST)
+In-Reply-To: <5660106F.90202@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Millnert <martin@millnert.se>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+
+On Thu, Dec 3, 2015 at 1:50 AM, Willem Jan Withagen <wjw@digiware.nl> w=
+rote:
+> On 2-12-2015 22:10, Willem Jan Withagen wrote:
+>
+>> Running gmake check
+>
+>
+> Now I start wondering how long certain tests are able to run:
+>
+> I've killed:
+>          unittest_chain_xattr
+> because it was running already voor 12 hours.
+>
+> And unittest_lfnindex is also running for > 20 minutes....
+
+Well, 12 hours is ludicrous, but a few of the tests really do take 20
+minutes =E2=80=94 I think the shec EC one? I don't have any better info=
+ than
+that for you, though. I mostly just wait on the gitbuilders.
+-Greg
 
 
-
-> Op 3 dec. 2015 om 21:14 heeft Martin Millnert <martin@millnert.se> het volgende geschreven:
-> 
-> Hi,
-> 
-> we're deploying Ceph on Linux for multiple purposes.
-> We want to build network isolation in our L3 DC network using VRF:s.
-> 
-> In the case of Ceph this means that we are separating the Ceph public
-> network from the Ceph cluster network, in this manner, into separate
-> network routing domains (for those who do not know what a VRF is).
-> 
-> Furthermore, we're also running (per-VRF) dynamically routed L3 all the
-> way to the hosts (OSPF from ToR switch), and need to separate route
-> tables on the hosts properly. This is done using "ip rule" today.
-> We use VLANs to separate the VRF:s from each other between ToR and
-> hosts, so there is no problem to determine which VRF an incoming packet
-> to a host belongs to (iif $dev).
-> 
-> The problem is selecting the proper route table for outbound packets
-> from the host.
-> 
-> There is current work in progress for a redesign [1] of the old VRF [2]
-> design in the Linux Kernel. At least in the new design, there is an
-> intended way of placing processes within a VRF such that, similar to
-> network namespaces, the processes are unaware that they are in fact
-> living within a VRF.
-> 
-
-Why all the trouble and complexity? I personally always try to avoid the two networks and run with one. Also in large L3 envs.
-
-I like the idea that one machine has one IP I have to monitor.
-
-I would rethink about what a cluster network really adds. Imho it only adds complexity.
-
-
-> This would work for a process such as the 'mon', which only lives in the
-> public network.
-> 
-> But it doesn't work for the OSD, which uses separate sockets for public
-> and cluster networks.
-> 
-> There is however a real simple solution:
-> 1. Use something similar to 
->   setsockopt(sockfd, SOL_SOCKET, SO_MARK, puborclust_val, sizeof(one))
->   (untested)
-> 2. set up "ip rule" for outbound traffic to select an appropriate route
-> table based on the MARK value of "puborclust_val" above.
-> 
-> AFAIK BSD doesn't have SO_MARK specifically, but this is a quite simple
-> option that adds a lot of utility for us, and, I imagine others.
-> 
-> I'm willing to write it and test it too. But before doing that, I'm
-> interested in feedback. Would obviously prefer it to be merged.
-> 
-> Regards,
-> Martin Millnert
-> 
-> [1] https://lwn.net/Articles/632522/
-> [2] https://www.kernel.org/doc/Documentation/networking/vrf.txt
-> 
+>
+> Is there a way to specify something like a max runtime for these test=
+s?
+> So that I am able to run the testset repeatedly, to monitor regressio=
+n
+> once I start changing code.
+>
+> I saw Loic talk about some of the expected test runtimes.
+> But having a better feeling per specific test would be useful in gett=
+ing
+> the test to progress
+>
+> Thanx,
+> --WjW
+>
+>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
