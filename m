@@ -1,49 +1,43 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: queue_transaction interface + unique_ptr + performance
-Date: Thu, 3 Dec 2015 10:16:31 -0500 (EST)
-Message-ID: <1998646860.28019612.1449155791509.JavaMail.zimbra@redhat.com>
-References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com> <alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re:
+	=?gb2312?b?tPC4tDogIEhvdyBsb25nIHdpbGwgdGhlIGxvZ3Mg?=
+	=?gb2312?b?YmUga2VwdD8=?=
+Date: Thu, 3 Dec 2015 07:21:01 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1512030719360.19170@cobra.newdream.net>
+References: <47D132BF400BE64BAE6D71033F7D3D75030E7B67@H3CMLB12-EX.srv.huawei-3com.com>
+	<CABAwU-bNERLVaAgF_tJ8WFJ-eH3zvVO6zdU-7CQSB1wTh8EYJQ@mail.gmail.com>
+	<47D132BF400BE64BAE6D71033F7D3D75030E7C02@H3CMLB12-EX.srv.huawei-3com.com>
+	<37396A32-183A-45B5-A86B-6FC0C0939930@schermer.cz>
+	<47D132BF400BE64BAE6D71033F7D3D75030E7CCF@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:34363 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756460AbbLCPQz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 10:16:55 -0500
-In-Reply-To: <alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, ceph-devel@vger.kernel.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D75030E7CCF-JwQOC20i6vT3cnzPNjVLboSsE/coCuR8pWgKQ6/u3Fg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Wukongming <wu.kongming-vVzyEvZLFYE@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, huang jun <hjwsm1989-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+On Thu, 3 Dec 2015, Wukongming wrote:
+> OK! One more question. Do you know why ceph has 2 ways outputting 
+> logs(dout && clog). Cause I find dout is more helpful than clog, Did 
+> ceph use clog first, and dout added for new version?
 
-To those writing benchmarks, please note that the standard library
-provides std::make_shared() as an optimization for shared_ptr. It
-creates the object and its shared storage in a single allocation,
-instead of the two allocations required for
-"std::shared_ptr<Foo> fs (new Foo())".
+clog is the 'cluster log', that gets aggregated into a single log stream 
+and replicated on each monitor (normally /var/log/ceph/ceph.log). It's for 
+high-level events of interest to the entire cluster.  The intended 
+consumer is the system administrator.
 
-Casey
+dout is for debugging a single process.  It's used by a developer (or a 
+savvy admin).
 
------ Original Message -----
-> 1- I agree we should avoid shared_ptr whenever possible.
-> 
-> 2- unique_ptr should not have any more overhead than a raw pointer--the
-> compiler is enforcing the single-owner semantics.  See for example
-> 
-> 	https://msdn.microsoft.com/en-us/library/hh279676.aspx
-> 
-> "It is exactly is efficient as a raw pointer and can be used in STL
-> containers."
-> 
-> Unless the implementation is broken somehow?  That seems unlikely...
-> 
-> sage
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+sage
