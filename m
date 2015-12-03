@@ -1,43 +1,87 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re:
-	=?gb2312?b?tPC4tDogIEhvdyBsb25nIHdpbGwgdGhlIGxvZ3Mg?=
-	=?gb2312?b?YmUga2VwdD8=?=
-Date: Thu, 3 Dec 2015 07:21:01 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1512030719360.19170@cobra.newdream.net>
-References: <47D132BF400BE64BAE6D71033F7D3D75030E7B67@H3CMLB12-EX.srv.huawei-3com.com>
-	<CABAwU-bNERLVaAgF_tJ8WFJ-eH3zvVO6zdU-7CQSB1wTh8EYJQ@mail.gmail.com>
-	<47D132BF400BE64BAE6D71033F7D3D75030E7C02@H3CMLB12-EX.srv.huawei-3com.com>
-	<37396A32-183A-45B5-A86B-6FC0C0939930@schermer.cz>
-	<47D132BF400BE64BAE6D71033F7D3D75030E7CCF@H3CMLB12-EX.srv.huawei-3com.com>
+From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Subject: RE: Ceph_objectstore_bench crashed on keyvaluestore bench with ceph
+ master branch
+Date: Thu, 3 Dec 2015 16:39:05 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C05619ABD2@SSIEXCH-MB3.ssi.samsung.com>
+References: <99767EA2E27DD44DB4E9F9B9ACA458C05619A8E9@SSIEXCH-MB3.ssi.samsung.com>
+ <CACJqLybRecT1-g5_xV7MLfywyasy=SFjrTmcMvwT0h5N=wrJrw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D75030E7CCF-JwQOC20i6vT3cnzPNjVLboSsE/coCuR8pWgKQ6/u3Fg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Wukongming <wu.kongming-vVzyEvZLFYE@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, huang jun <hjwsm1989-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:48890 "EHLO
+	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752135AbbLCQjI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 11:39:08 -0500
+In-Reply-To: <CACJqLybRecT1-g5_xV7MLfywyasy=SFjrTmcMvwT0h5N=wrJrw@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 3 Dec 2015, Wukongming wrote:
-> OK! One more question. Do you know why ceph has 2 ways outputting 
-> logs(dout && clog). Cause I find dout is more helpful than clog, Did 
-> ceph use clog first, and dout added for new version?
-
-clog is the 'cluster log', that gets aggregated into a single log stream 
-and replicated on each monitor (normally /var/log/ceph/ceph.log). It's for 
-high-level events of interest to the entire cluster.  The intended 
-consumer is the system administrator.
-
-dout is for debugging a single process.  It's used by a developer (or a 
-savvy admin).
-
-sage
+SGkgSGFvbWFpLCANCg0KICAgQ29kZSB3YXMgcmV2aWV3ZWQgYW5kIGZpeGVzIHdhcyB2ZXJpZmll
+ZCBpbiBteSBiZW5jaC4gVGhhbmtzIGZvciB5b3VyIHF1aWNrIHR1cm5hcm91bmQuDQoNCiAgIFJl
+Z2FyZHMsDQogICBKYW1lcw0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogSGFv
+bWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0gDQpTZW50OiBXZWRuZXNkYXks
+IERlY2VtYmVyIDAyLCAyMDE1IDk6NDkgUE0NClRvOiBKYW1lcyAoRmVpKSBMaXUtU1NJDQpDYzog
+Y2VwaC1kZXZlbA0KU3ViamVjdDogUmU6IENlcGhfb2JqZWN0c3RvcmVfYmVuY2ggY3Jhc2hlZCBv
+biBrZXl2YWx1ZXN0b3JlIGJlbmNoIHdpdGggY2VwaCBtYXN0ZXIgYnJhbmNoDQoNCnRoYW5rcyEg
+Rml4ZWQgaW4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzY3ODMuIHBseiByZXZp
+ZXcNCg0KT24gVGh1LCBEZWMgMywgMjAxNSBhdCAzOjE5IEFNLCBKYW1lcyAoRmVpKSBMaXUtU1NJ
+IDxqYW1lcy5saXVAc3NpLnNhbXN1bmcuY29tPiB3cm90ZToNCj4gSGkgSGFvbWFpLA0KPiAgICBJ
+IGhhcHBlbmVkIHRvIHJ1biBjZXBoX29iamVjdHN0b3JlX2JlbmNoIGFnYWluc3Qga2V5IHZhbHVl
+IHN0b3JlIG9uIA0KPiBtYXN0ZXIgYnJhbmNoLiBJdCBhbHdheXMgY3Jhc2hlZCBhdCBmaW5pc2hl
+cl90aHJlYWRfZW50cnkgOiAgDQo+IGFzc2VydCghbHNfcnZhbC5lbXB0eSgpKTsNCj4NCj4gICAg
+SXQgbG9va3MgbGlrZSB0aGUgY29tcGxldGlvbiBub3Qgb25seSBoYXMgbnVsbCBlbnRyeSBpbiB0
+aGUgZmluaXNoZXIgcXVldWUgLCBidXQgYWxzbyBoYXMgbm9uZSBlbnRyeSBpbiB0aGUgZmluaXNo
+ZXJfcXVldWVfcnZhbC4gSSB0aXJlZCBhbmQgaXQgYWN0dWFsbHkgaXMuDQo+DQo+ICBDb3VsZCB5
+b3UgIG1pbmQgdGVsbGluZyB1cyBpbiB3aGljaCBjYXNlIHRoZSBOVUxMIGVudHJ5IGluIGZpbmlz
+aGVyIHF1ZXVlIGFsc28gaGFzIG5vdCBhbnkgZW50cnkgaW4gZmluaXNoZXJfcXVldWVfcnZhbD8N
+Cj4NCj4gICBUaGFua3MsDQo+DQo+DQo+ICAgUGxlYXNlIHJlZmVyIHRvIGlzc3VlIGh0dHA6Ly90
+cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xMzk2MQ0KPg0KPg0KPiBSZWdhcmRzLA0KPiBKYW1lcw0K
+Pg0KPiB2b2lkICpGaW5pc2hlcjo6ZmluaXNoZXJfdGhyZWFkX2VudHJ5KCkNCj4gew0KPiAgIGZp
+bmlzaGVyX2xvY2suTG9jaygpOw0KPiAgIGxkb3V0KGNjdCwgMTApIDw8ICJmaW5pc2hlcl90aHJl
+YWQgc3RhcnQiIDw8IGRlbmRsOw0KPg0KPiAgIHV0aW1lX3Qgc3RhcnQ7DQo+ICAgd2hpbGUgKCFm
+aW5pc2hlcl9zdG9wKSB7DQo+ICAgICAvLy8gRXZlcnkgdGltZSB3ZSBhcmUgd29rZW4gdXAsIHdl
+IHByb2Nlc3MgdGhlIHF1ZXVlIHVudGlsIGl0IGlzIGVtcHR5Lg0KPiAgICAgd2hpbGUgKCFmaW5p
+c2hlcl9xdWV1ZS5lbXB0eSgpKSB7DQo+ICAgICAgIGlmIChsb2dnZXIpDQo+ICAgICAgICAgc3Rh
+cnQgPSBjZXBoX2Nsb2NrX25vdyhjY3QpOw0KPiAgICAgICAvLyBUbyByZWR1Y2UgbG9jayBjb250
+ZW50aW9uLCB3ZSBzd2FwIG91dCB0aGUgcXVldWUgdG8gcHJvY2Vzcy4NCj4gICAgICAgLy8gVGhp
+cyB3YXkgb3RoZXIgdGhyZWFkcyBjYW4gc3VibWl0IG5ldyBjb250ZXh0cyB0byBjb21wbGV0ZSB3
+aGlsZSB3ZSBhcmUgd29ya2luZy4NCj4gICAgICAgdmVjdG9yPENvbnRleHQqPiBsczsNCj4gICAg
+ICAgbGlzdDxwYWlyPENvbnRleHQqLGludD4gPiBsc19ydmFsOw0KPiAgICAgICBscy5zd2FwKGZp
+bmlzaGVyX3F1ZXVlKTsNCj4gICAgICAgbHNfcnZhbC5zd2FwKGZpbmlzaGVyX3F1ZXVlX3J2YWwp
+Ow0KPiAgICAgICBmaW5pc2hlcl9ydW5uaW5nID0gdHJ1ZTsNCj4gICAgICAgZmluaXNoZXJfbG9j
+ay5VbmxvY2soKTsNCj4gICAgICAgbGRvdXQoY2N0LCAxMCkgPDwgImZpbmlzaGVyX3RocmVhZCBk
+b2luZyAiIDw8IGxzIDw8IGRlbmRsOw0KPiAgICAgICAgICAvLyBsZG91dChjY3QsIDEwKSA8PCIu
+Li4uLi4uLi4uLkZpbmlzaGVyIHRocmVhZCBpcyBjYWxsaW5nIA0KPiBhZ2FpbiBvdmVyIGhlcmUu
+Li4uLi4uLiIgPDwgZGVuZGw7DQo+DQo+ICAgICAgIC8vIE5vdyBhY3R1YWxseSBwcm9jZXNzIHRo
+ZSBjb250ZXh0cy4NCj4gICAgICAgZm9yICh2ZWN0b3I8Q29udGV4dCo+OjppdGVyYXRvciBwID0g
+bHMuYmVnaW4oKTsNCj4gICAgICAgICAgICBwICE9IGxzLmVuZCgpOw0KPiAgICAgICAgICAgICsr
+cCkgew0KPiAgICAgICAgIGlmICgqcCkgew0KPiAgICAgICAgICAgKCpwKS0+Y29tcGxldGUoMCk7
+DQo+ICAgICAgICAgfSBlbHNlIHsNCj4gICAgICAgICAgIC8vIFdoZW4gYW4gaXRlbSBpcyBOVUxM
+IGluIHRoZSBmaW5pc2hlcl9xdWV1ZSwgaXQgbWVhbnMNCj4gICAgICAgICAgIC8vIHdlIHNob3Vs
+ZCBpbnN0ZWFkIHByb2Nlc3MgYW4gaXRlbSBmcm9tIGZpbmlzaGVyX3F1ZXVlX3J2YWwsDQo+ICAg
+ICAgICAgICAvLyB3aGljaCBoYXMgYSBwYXJhbWV0ZXIgZm9yIGNvbXBsZXRlKCkgb3RoZXIgdGhh
+biB6ZXJvLg0KPiAgICAgICAgICAgLy8gVGhpcyBwcmVzZXJ2ZXMgdGhlIG9yZGVyIHdoaWxlIHNh
+dmluZyBzb21lIHN0b3JhZ2UuDQo+ICAgICAgICAgICBhc3NlcnQoIWxzX3J2YWwuZW1wdHkoKSk7
+DQo+ICAgICAgICAgICBDb250ZXh0ICpjID0gbHNfcnZhbC5mcm9udCgpLmZpcnN0Ow0KPiAgICAg
+ICAgICAgYy0+Y29tcGxldGUobHNfcnZhbC5mcm9udCgpLnNlY29uZCk7DQo+ICAgICAgICAgICBs
+c19ydmFsLnBvcF9mcm9udCgpOw0KPiAgICAgICAgIH0NCj4gICAgICAgICBpZiAobG9nZ2VyKSB7
+DQo+ICAgICAgICAgICBsb2dnZXItPmRlYyhsX2ZpbmlzaGVyX3F1ZXVlX2xlbik7DQo+ICAgICAg
+ICAgICBsb2dnZXItPnRpbmMobF9maW5pc2hlcl9jb21wbGV0ZV9sYXQsIGNlcGhfY2xvY2tfbm93
+KGNjdCkgLSBzdGFydCk7DQo+ICAgICAgICAgfQ0KPiAgICAgICB9DQo+ICAgICAgIGxkb3V0KGNj
+dCwgMTApIDw8ICJmaW5pc2hlcl90aHJlYWQgZG9uZSB3aXRoICIgPDwgbHMgPDwgZGVuZGw7DQo+
+ICAgICAgIGxzLmNsZWFyKCk7DQo+DQo+ICAgICAgIGZpbmlzaGVyX2xvY2suTG9jaygpOw0KPiAg
+ICAgICBmaW5pc2hlcl9ydW5uaW5nID0gZmFsc2U7DQo+ICAgICB9DQo+ICAgICBsZG91dChjY3Qs
+IDEwKSA8PCAiZmluaXNoZXJfdGhyZWFkIGVtcHR5IiA8PCBkZW5kbDsNCj4gICAgIGZpbmlzaGVy
+X2VtcHR5X2NvbmQuU2lnbmFsKCk7DQo+ICAgICBpZiAoZmluaXNoZXJfc3RvcCkNCj4gICAgICAg
+YnJlYWs7DQo+DQo+ICAgICBsZG91dChjY3QsIDEwKSA8PCAiZmluaXNoZXJfdGhyZWFkIHNsZWVw
+aW5nIiA8PCBkZW5kbDsNCj4gICAgIGZpbmlzaGVyX2NvbmQuV2FpdChmaW5pc2hlcl9sb2NrKTsN
+Cj4gICB9DQo+ICAgLy8gSWYgd2UgYXJlIGV4aXRpbmcsIHdlIHNpZ25hbCB0aGUgdGhyZWFkIHdh
+aXRpbmcgaW4gc3RvcCgpLA0KPiAgIC8vIG90aGVyd2lzZSBpdCB3b3VsZCBuZXZlciB1bmJsb2Nr
+DQo+ICAgZmluaXNoZXJfZW1wdHlfY29uZC5TaWduYWwoKTsNCj4NCj4gICBsZG91dChjY3QsIDEw
+KSA8PCAiZmluaXNoZXJfdGhyZWFkIHN0b3AiIDw8IGRlbmRsOw0KPiAgIGZpbmlzaGVyX3N0b3Ag
+PSBmYWxzZTsNCj4gICBmaW5pc2hlcl9sb2NrLlVubG9jaygpOw0KPiAgIHJldHVybiAwOw0KPiB9
+DQo+DQoNCg0KDQotLQ0KQmVzdCBSZWdhcmRzLA0KDQpXaGVhdA0K
