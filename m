@@ -1,146 +1,95 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: cmake
-Date: Thu, 3 Dec 2015 17:31:17 -0500 (EST)
-Message-ID: <1398623124.28563022.1449181877807.JavaMail.zimbra@redhat.com>
-References: <20151203152436.73e15e38@lembas.zaitcev.lan> <153715043.28562710.1449181828218.JavaMail.zimbra@redhat.com>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Undefined Ref for simple prog
+Date: Thu, 3 Dec 2015 15:40:35 -0700
+Message-ID: <CAANLjFrbaa=wC=9tk9_w_ROxDF-yityFNRf=zBkrb6b0gA0gmg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:58706 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751618AbbLCWbS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 17:31:18 -0500
-In-Reply-To: <153715043.28562710.1449181828218.JavaMail.zimbra@redhat.com>
+Received: from mail-vk0-f51.google.com ([209.85.213.51]:33746 "EHLO
+	mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751719AbbLCWkg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 17:40:36 -0500
+Received: by vkca188 with SMTP id a188so55484743vkc.0
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 14:40:35 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Pete Zaitcev <zaitcev@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-sorry, "cmake .." for Ceph's setup.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Matt
+I'm trying to do some testing of Ceph components specifically around
+the OP queues. I'm trying to use the class in a simple program where I
+will do my testing, but I can't resolve one problem. I've had to
+include  types.h as forward defining the Formatter class (already
+included/forward defined in the base class). This is based on my PR
+https://github.com/ceph/ceph/pull/6781 .
 
------ Original Message -----
-> From: "Matt Benjamin" <mbenjamin@redhat.com>
-> To: "Pete Zaitcev" <zaitcev@redhat.com>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Thursday, December 3, 2015 5:30:28 PM
-> Subject: Re: cmake
-> 
-> I always run cmake from a build directory which is not the root, usually
-> "build" in the root, so my minimal invocation would be "mkdir build; cd
-> build; cmake ../src"--I'd at least try that, though I wouldn't have thought
-> build location could affect something this basic (and it would be a bug).
-> 
-> Matt
-> 
-> ----- Original Message -----
-> > From: "Pete Zaitcev" <zaitcev@redhat.com>
-> > To: ceph-devel@vger.kernel.org
-> > Sent: Thursday, December 3, 2015 5:24:36 PM
-> > Subject: cmake
-> > 
-> > Dear All:
-> > 
-> > I'm trying to run cmake, in order to make sure my patches do not break it
-> > (in particular WIP 5073 added source files). Result looks like this:
-> > 
-> > [zaitcev@lembas ceph-tip]$ cmake src
-> > -- The C compiler identification is GNU 5.1.1
-> > -- The CXX compiler identification is GNU 5.1.1
-> > -- Check for working C compiler: /usr/bin/cc
-> > -- Check for working C compiler: /usr/bin/cc -- works
-> > -- Detecting C compiler ABI info
-> > -- Detecting C compiler ABI info - done
-> > -- Detecting C compile features
-> > -- Detecting C compile features - done
-> > -- Check for working CXX compiler: /usr/bin/c++
-> > -- Check for working CXX compiler: /usr/bin/c++ -- works
-> > -- Detecting CXX compiler ABI info
-> > -- Detecting CXX compiler ABI info - done
-> > -- Detecting CXX compile features
-> > -- Detecting CXX compile features - done
-> > CMake Error at CMakeLists.txt:1 (include):
-> >   include could not find load file:
-> > 
-> >     GetGitRevisionDescription
-> > 
-> > 
-> > -- The ASM compiler identification is GNU
-> > -- Found assembler: /usr/bin/cc
-> > CMake Warning (dev) at CMakeLists.txt:11 (add_definitions):
-> >   Policy CMP0005 is not set: Preprocessor definition values are now escaped
-> >   automatically.  Run "cmake --help-policy CMP0005" for policy details.
-> >   Use
-> >   the cmake_policy command to set the policy and suppress this warning.
-> > This warning is for project developers.  Use -Wno-dev to suppress it.
-> > 
-> > CMake Warning (dev) at CMakeLists.txt:12 (add_definitions):
-> >   Policy CMP0005 is not set: Preprocessor definition values are now escaped
-> >   automatically.  Run "cmake --help-policy CMP0005" for policy details.
-> >   Use
-> >   the cmake_policy command to set the policy and suppress this warning.
-> > This warning is for project developers.  Use -Wno-dev to suppress it.
-> > 
-> > --  we do not have a modern/working yasm
-> > -- Performing Test COMPILER_SUPPORTS_CXX11
-> > -- Performing Test COMPILER_SUPPORTS_CXX11 - Success
-> > CMake Error at CMakeLists.txt:95 (get_git_head_revision):
-> >   Unknown CMake command "get_git_head_revision".
-> > 
-> > 
-> > CMake Warning (dev) in CMakeLists.txt:
-> >   No cmake_minimum_required command is present.  A line of code such as
-> > 
-> >     cmake_minimum_required(VERSION 3.3)
-> > 
-> >   should be added at the top of the file.  The version specified may be
-> >   lower
-> >   if you wish to support older CMake versions for this project.  For more
-> >   information run "cmake --help-policy CMP0000".
-> > This warning is for project developers.  Use -Wno-dev to suppress it.
-> > 
-> > -- Configuring incomplete, errors occurred!
-> > See also "/q/zaitcev/ceph/ceph-tip/CMakeFiles/CMakeOutput.log".
-> > [zaitcev@lembas ceph-tip]$ rpm -qa | grep -i cmake
-> > extra-cmake-modules-5.16.0-1.fc23.noarch
-> > cmake-3.3.2-1.fc23.x86_64
-> > [zaitcev@lembas ceph-tip]$
-> > 
-> > Is this expected? Is my cmake incantation wrong?
-> > 
-> > Thanks,
-> > -- Pete
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> --
-> --
-> Matt Benjamin
-> Red Hat, Inc.
-> 315 West Huron Street, Suite 140A
-> Ann Arbor, Michigan 48103
-> 
-> http://www.redhat.com/en/technologies/storage
-> 
-> tel.  734-707-0660
-> fax.  734-769-8938
-> cel.  734-216-5309
-> 
+//wrr_bench.cc
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
+// vim: ts=8 sw=2 smarttab
 
--- 
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+#include "include/types.h"
+#include "common/PrioritizedQueue.h"
+#include
 
-http://www.redhat.com/en/technologies/storage
+//namespace ceph {
+//  class Formatter;
+//}
 
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+int main() {
+  PrioritizedQueue pq(0,0);
+  std::cout << "Running.." << std::endl;
+}
+
+I'm compiling with:
+$ g++ -std=c++11 -I. wrr_bench.cc -o wrr_bench
+/tmp/ccf6wRFo.o: In function `PrioritizedQueue::length() const':
+wrr_bench.cc:(.text._ZNK16PrioritizedQueueIjjE6lengthEv[_ZNK16PrioritizedQueueIjjE6lengthEv]+0x5a):
+undefined reference to `ceph::__ceph_assert_fail(char const*, char
+const*, int, char const*)'
+wrr_bench.cc:(.text._ZNK16PrioritizedQueueIjjE6lengthEv[_ZNK16PrioritizedQueueIjjE6lengthEv]+0xfb):
+undefined reference to `ceph::__ceph_assert_fail(char const*, char
+const*, int, char const*)'
+/tmp/ccf6wRFo.o: In function `PrioritizedQueue::empty() const':
+wrr_bench.cc:(.text._ZNK16PrioritizedQueueIjjE5emptyEv[_ZNK16PrioritizedQueueIjjE5emptyEv]+0x2e):
+undefined reference to `ceph::__ceph_assert_fail(char const*, char
+const*, int, char const*)'
+wrr_bench.cc:(.text._ZNK16PrioritizedQueueIjjE5emptyEv[_ZNK16PrioritizedQueueIjjE5emptyEv]+0x68):
+undefined reference to `ceph::__ceph_assert_fail(char const*, char
+const*, int, char const*)'
+/tmp/ccf6wRFo.o: In function `PrioritizedQueue::dequeue()':
+wrr_bench.cc:(.text._ZN16PrioritizedQueueIjjE7dequeueEv[_ZN16PrioritizedQueueIjjE7dequeueEv]+0x3b):
+undefined reference to `ceph::__ceph_assert_fail(char const*, char
+const*, int, char const*)'
+/tmp/ccf6wRFo.o:wrr_bench.cc:(.text._ZN16PrioritizedQueueIjjE7dequeueEv[_ZN16PrioritizedQueueIjjE7dequeueEv]+0x1b0):
+more undefined references to `ceph::__ceph_assert_fail(char const*,
+char const*, int, char const*)' follow
+collect2: error: ld returned 1 exit status
+
+Including assert.h doesn't help. Any pointers?
+
+Thanks,
+
+- ----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v1.3.0
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJWYMTfCRDmVDuy+mK58QAACdUP/RkhdAhkYLM9jzEXss8b
+Z003Cz1jnEe9sw+xsMdvaQxU/d0RbhE1Mst1HvfAv9aFCjJbtUf5dYyqCy/6
+SnTWIPe79kEVJ61ATTSSbQGCDkMJZiONrnhc2IDdrY4b5N04kYRlG6jQfCr4
+s/k7cnu2ReTjIRtQzr+SmAtaqcNt2OyMGjt6Aa+Wu+MyoZ5Z2ELBo63LrjPu
+SSVBtKXSajXjz827broyA5zsejLrJzlww0UkwMCwFWZ6bHxKjRD5Xj4r15j0
+zh3HcRZZAJk2F7nePXKlpZfh96xmDbc3RJ4HY4ZvYCxxrprFfw9LJ/yE6qix
+TfvYMJIeKldQkG8vmNJKrKXQx9Lc1o32uCnOu1A9MMzA9tC4HrHFq69/IvcW
+SUMlXqxzw3KPA0PxYwvxCOy3PUMwtAfofZOmBeMCIpIuRJbY+YXhJz55/a7m
+8FEC1b7+MR54tpNOuaMeTXjmf5v1ddcMaTMO6L61YMKRoBFLHHMWVeuYeNxt
+okzvEnFWvkCvM0bEGMVFt038h3k7BpuxTe0FypKtAUpR1lgvsVKLWMP1y9ai
+XRqDB1eV13zxY/LIM3OlXbCDZFgWvycBrRQpScuYJ08SivkSg7ya5q85W4/J
+7Bpy5W7HgmUbN+fzqMZ/VPW52ys7fHiWDQRmULR7V35rnngvkQoIBcEmWLPd
+mEsp
+=N4vu
+-----END PGP SIGNATURE-----
