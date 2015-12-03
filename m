@@ -1,115 +1,254 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Ceph_objectstore_bench crashed on keyvaluestore bench with ceph
- master branch
-Date: Thu, 3 Dec 2015 13:49:21 +0800
-Message-ID: <CACJqLybRecT1-g5_xV7MLfywyasy=SFjrTmcMvwT0h5N=wrJrw@mail.gmail.com>
-References: <99767EA2E27DD44DB4E9F9B9ACA458C05619A8E9@SSIEXCH-MB3.ssi.samsung.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: queue_transaction interface + unique_ptr + performance
+Date: Thu, 3 Dec 2015 07:21:13 +0000
+Message-ID: <CO1PR02MB208D989E53D60262099834CF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+ <99767EA2E27DD44DB4E9F9B9ACA458C05619AA91@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f172.google.com ([209.85.213.172]:33870 "EHLO
-	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750869AbbLCFtW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 00:49:22 -0500
-Received: by igvg19 with SMTP id g19so6073420igv.1
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Dec 2015 21:49:22 -0800 (PST)
-In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C05619A8E9@SSIEXCH-MB3.ssi.samsung.com>
+Received: from mail-bn1bon0063.outbound.protection.outlook.com ([157.56.111.63]:45034
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751745AbbLCHV3 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 02:21:29 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, "Sage Weil (sage@newdream.net)" <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-thanks! Fixed in https://github.com/ceph/ceph/pull/6783. plz review
+ Huh..One update :
+Earlier I didn't use any compiler optimization, now with O2  I got this..
 
-On Thu, Dec 3, 2015 at 3:19 AM, James (Fei) Liu-SSI
-<james.liu@ssi.samsung.com> wrote:
-> Hi Haomai,
->    I happened to run ceph_objectstore_bench against key value store on master branch. It always crashed at finisher_thread_entry :  assert(!ls_rval.empty());
->
->    It looks like the completion not only has null entry in the finisher queue , but also has none entry in the finisher_queue_rval. I tired and it actually is.
->
->  Could you  mind telling us in which case the NULL entry in finisher queue also has not any entry in finisher_queue_rval?
->
->   Thanks,
->
->
->   Please refer to issue http://tracker.ceph.com/issues/13961
->
->
-> Regards,
-> James
->
-> void *Finisher::finisher_thread_entry()
-> {
->   finisher_lock.Lock();
->   ldout(cct, 10) << "finisher_thread start" << dendl;
->
->   utime_t start;
->   while (!finisher_stop) {
->     /// Every time we are woken up, we process the queue until it is empty.
->     while (!finisher_queue.empty()) {
->       if (logger)
->         start = ceph_clock_now(cct);
->       // To reduce lock contention, we swap out the queue to process.
->       // This way other threads can submit new contexts to complete while we are working.
->       vector<Context*> ls;
->       list<pair<Context*,int> > ls_rval;
->       ls.swap(finisher_queue);
->       ls_rval.swap(finisher_queue_rval);
->       finisher_running = true;
->       finisher_lock.Unlock();
->       ldout(cct, 10) << "finisher_thread doing " << ls << dendl;
->          // ldout(cct, 10) <<"...........Finisher thread is calling again over here........" << dendl;
->
->       // Now actually process the contexts.
->       for (vector<Context*>::iterator p = ls.begin();
->            p != ls.end();
->            ++p) {
->         if (*p) {
->           (*p)->complete(0);
->         } else {
->           // When an item is NULL in the finisher_queue, it means
->           // we should instead process an item from finisher_queue_rval,
->           // which has a parameter for complete() other than zero.
->           // This preserves the order while saving some storage.
->           assert(!ls_rval.empty());
->           Context *c = ls_rval.front().first;
->           c->complete(ls_rval.front().second);
->           ls_rval.pop_front();
->         }
->         if (logger) {
->           logger->dec(l_finisher_queue_len);
->           logger->tinc(l_finisher_complete_lat, ceph_clock_now(cct) - start);
->         }
->       }
->       ldout(cct, 10) << "finisher_thread done with " << ls << dendl;
->       ls.clear();
->
->       finisher_lock.Lock();
->       finisher_running = false;
->     }
->     ldout(cct, 10) << "finisher_thread empty" << dendl;
->     finisher_empty_cond.Signal();
->     if (finisher_stop)
->       break;
->
->     ldout(cct, 10) << "finisher_thread sleeping" << dendl;
->     finisher_cond.Wait(finisher_lock);
->   }
->   // If we are exiting, we signal the thread waiting in stop(),
->   // otherwise it would never unblock
->   finisher_empty_cond.Signal();
->
->   ldout(cct, 10) << "finisher_thread stop" << dendl;
->   finisher_stop = false;
->   finisher_lock.Unlock();
->   return 0;
-> }
->
+##### Test conventional ptr ######
+start: 1449126917 secs, 565820 usecs
+end: 1449126940 secs, 227713 usecs
+micros_used for conventional ptr: 22661893
+
+##### Test Unique Smart ptr ######
+start: 1449126940 secs, 227758 usecs
+end: 1449126962 secs, 917930 usecs
+micros_used for unique ptr: 22690172
+
+##### Test Shared Smart ptr ######
+start: 1449126962 secs, 917973 usecs
+end: 1449127009 secs, 179995 usecs
+micros_used for shared ptr: 46262022
+
+So, unique_ptr is having now very little overhead and for shared_ptr overhead is >2X.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Somnath Roy 
+Sent: Wednesday, December 02, 2015 7:59 PM
+To: 'James (Fei) Liu-SSI'; Sage Weil (sage@newdream.net); Samuel Just (sam.just@inktank.com)
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: queue_transaction interface + unique_ptr + performance
+
+Thanks James for looking into this..
+Shared_ptr used heavily in the OSD.cc/Replicated PG path..
+
+Regards
+Somnath
+
+-----Original Message-----
+From: James (Fei) Liu-SSI [mailto:james.liu@ssi.samsung.com] 
+Sent: Wednesday, December 02, 2015 7:50 PM
+To: Somnath Roy; Sage Weil (sage@newdream.net); Samuel Just (sam.just@inktank.com)
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: queue_transaction interface + unique_ptr + performance
+
+Hi Somnath,
+  Great findings. As you mentioned, unique_ptr and smart_ptr always have a well known problem about the performance comparing to conventional pointer , Got a chance to run your interesting code and close to what you find.
+But I did not find any place in filestore/newstore (keyvaluestore and journal use them somewhere but not too heavily ) using smart pointer. Am I missing anything?
+
+Thanks,
+James
+
+  ##### Test conventional ptr ######
+start: %d secs, %d usecs
+1449112986729634end: 1449113038 secs, 235140 usecs micros_used for conventional ptr: 51505506 ##### Test Unique Smart ptr ######
+start: 1449113038 secs, 235186 usecs
+end: 1449113158 secs, 825106 usecs
+micros_used for unique ptr: 120589920
+##### Test Shared Smart ptr ######
+start: 1449113158 secs, 825130 usecs
+end: 1449113322 secs, 132210 usecs
+micros_used for shared ptr: 163307080
+Existing..
 
 
 
--- 
-Best Regards,
 
-Wheat
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+Sent: Wednesday, December 02, 2015 6:13 PM
+To: Somnath Roy; Sage Weil (sage@newdream.net); Samuel Just (sam.just@inktank.com)
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: queue_transaction interface + unique_ptr + performance
+
+*Also*, in this way we are unnecessary adding another smart pointer overhead in the Ceph IO path.
+As I communicated sometimes back (probably 2 years now :-) ) in the community, profiler is showing these smart pointers (shared_ptr) as one of the hot spot. Now, I decided to actually measure this..Here is my findings from a sample application and using jemalloc.
+
+1.  First, I measured the performance difference of just creation and deletion of various pointers..Here is the result..
+
+##### Test conventional ptr ######
+start: 1449107326 secs, 903873 usecs
+end: 1449107353 secs, 578709 usecs
+micros_used for conventional ptr: 26674836
+
+##### Test Unique Smart ptr ######
+start: 1449107353 secs, 578764 usecs
+end: 1449107438 secs, 835114 usecs
+micros_used for unique ptr: 85256350
+
+##### Test Shared Smart ptr ######
+start: 1449107438 secs, 835155 usecs
+end: 1449107543 secs, 285443 usecs
+micros_used for shared ptr: 104450288
+
+So, as you can see >3x degradation with unique_ptr and ~4x degradation with shared_ptr.
+My sample application is single threaded and I can see from perf top lot of other smart_ptr related functions are popping up reducing the actual % of jemalloc cpu usage (thus causing a slowdown).
+
+
+2. Next, I added pointer dereferencing in the code..Here is the result..
+
+##### Test conventional ptr ######
+start: 1449107850 secs, 500595 usecs
+end: 1449107876 secs, 936586 usecs
+micros_used for conventional ptr: 26435991 ##### Test Unique Smart ptr ######
+start: 1449107876 secs, 936643 usecs
+end: 1449107994 secs, 629418 usecs
+micros_used for unique ptr: 117692775
+##### Test Shared Smart ptr ######
+start: 1449107994 secs, 629459 usecs
+end: 1449108107 secs, 846052 usecs
+micros_used for shared ptr: 113216593
+
+This is interesting , not much change in case of conventional pointers but huge change for unique_ptr and some change for shared_ptr as well..So, now degradation for unique_ptr > 4X..This is probably inline with this http://stackoverflow.com/questions/8138284/about-unique-ptr-performances
+
+3. I didn't measure the other stuff like std::move() , reference count in case of shared object etc. This will degrade the performance even more.
+
+4. Here is the sample code in case anybody interested.
+
+#include <iostream>
+#include <memory>
+#include <list>
+#include <sys/time.h>
+#include <stdint.h>
+
+struct Foo { // object to manage
+    Foo():xx(99),yy(999999) { /*std::cout << "Foo ctor\n";*/ }
+    ~Foo() { /*std::cout << "~Foo dtor\n";*/ }
+    int xx;
+    long yy;
+    char str[1024];
+};
+int main()
+{
+   struct timeval start, end;
+   long secs_used,micros_used;
+    printf("##### Test conventional ptr ######\n");
+    gettimeofday(&start, NULL);
+    for (uint64_t i = 0; i < 1000000000; i++) {
+      Foo* f = new Foo();
+      int xxx = f->xx;
+      long yyy = f->yy;
+      delete f;
+    }
+    gettimeofday(&end, NULL);
+
+    printf("start: %d secs, %d usecs\n",start.tv_sec,start.tv_usec);
+    printf("end: %d secs, %d usecs\n",end.tv_sec,end.tv_usec);
+
+    secs_used=(end.tv_sec - start.tv_sec); //avoid overflow by subtracting first
+    micros_used= ((secs_used*1000000) + end.tv_usec) - (start.tv_usec);
+
+    printf("micros_used for conventional ptr: %d\n",micros_used);
+
+    printf("##### Test Unique Smart ptr ######\n");
+
+    gettimeofday(&start, NULL);
+    for (uint64_t i = 0; i < 1000000000; i++) {
+      std::unique_ptr<Foo> fu (new Foo());
+      int xxx = fu->xx;
+      long yyy = fu->yy;
+    }
+    gettimeofday(&end, NULL);
+
+    printf("start: %d secs, %d usecs\n",start.tv_sec,start.tv_usec);
+    printf("end: %d secs, %d usecs\n",end.tv_sec,end.tv_usec);
+
+    secs_used=(end.tv_sec - start.tv_sec); //avoid overflow by subtracting first
+    micros_used= ((secs_used*1000000) + end.tv_usec) - (start.tv_usec);
+
+    printf("micros_used for unique ptr: %d\n",micros_used);
+
+    printf("##### Test Shared Smart ptr ######\n");
+    gettimeofday(&start, NULL);
+    for (uint64_t i = 0; i < 1000000000; i++) {
+      std::shared_ptr<Foo> fs (new Foo());
+      int xxx = fs->xx;
+      long yyy = fs->yy;
+    }
+    gettimeofday(&end, NULL);
+
+    printf("start: %d secs, %d usecs\n",start.tv_sec,start.tv_usec);
+    printf("end: %d secs, %d usecs\n",end.tv_sec,end.tv_usec);
+
+    secs_used=(end.tv_sec - start.tv_sec); //avoid overflow by subtracting first
+    micros_used= ((secs_used*1000000) + end.tv_usec) - (start.tv_usec);
+
+    printf("micros_used for shared ptr: %d\n",micros_used);
+    std::cout <<"Existing..\n";
+    return 0;
+}
+
+
+
+So, my guess is, the heavy use of these smart pointers in the Ceph IO path is bringing iops/core down substantially.
+My suggestion is *not to introduce* any smart pointers in the objectstore interface.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+Sent: Wednesday, December 02, 2015 4:18 PM
+To: Sage Weil (sage@newdream.net); Samuel Just (sam.just@inktank.com)
+Cc: ceph-devel@vger.kernel.org
+Subject: queue_transaction interface + unique_ptr
+
+Hi Sage/Sam,
+As discussed in today's performance meeting , I am planning to change the queue_transactions() interface to the following.
+
+  int queue_transactions(Sequencer *osr, list<TransactionRef>& tls,
+                         Context *onreadable, Context *ondisk=0,
+                         Context *onreadable_sync=0,
+                         TrackedOpRef op = TrackedOpRef(),
+                         ThreadPool::TPHandle *handle = NULL) ;
+
+typedef unique_ptr<Transaction> TransactionRef;
+
+
+IMO , there is a problem with this approach.
+
+The interface like apply_transaction(), queue_transaction() etc. basically the interfaces taking single transaction pointer and internally forming a list to call the queue_transactions() also needs to be changed to accept TransactionRef which will be *bad*. The reason is while preparing list internally we need to move the uniqueue_ptr and callers won't be aware of that.
+
+Also, now changing every interfaces (and callers) that is taking Transaction* will produce a very big delta (and big testing effort as well). 
+
+So, should we *reconsider* co-existing both  queue_transactions() interfaces and call the new one from the IO path ?
+
+Thanks & Regards
+Somnath
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
