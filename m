@@ -1,104 +1,82 @@
-From: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>
-Subject: RE: queue_transaction interface + unique_ptr + performance
-Date: Thu, 3 Dec 2015 08:42:16 +0000
-Message-ID: <12767ffc79394b418661e919beab0e62@R01UKEXCASM111.r01.fujitsu.local>
-References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+From: Wukongming <wu.kongming@h3c.com>
+Subject: =?utf-8?B?562U5aSNOiBIb3cgbG9uZyB3aWxsIHRoZSBsb2dzIGJlIGtlcHQ/?=
+Date: Thu, 3 Dec 2015 08:38:18 +0000
+Message-ID: <47D132BF400BE64BAE6D71033F7D3D75030E7C02@H3CMLB12-EX.srv.huawei-3com.com>
+References: <47D132BF400BE64BAE6D71033F7D3D75030E7B67@H3CMLB12-EX.srv.huawei-3com.com>
+ <CABAwU-bNERLVaAgF_tJ8WFJ-eH3zvVO6zdU-7CQSB1wTh8EYJQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail1.bemta5.messagelabs.com ([195.245.231.142]:8640 "EHLO
-	mail1.bemta5.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759094AbbLCImV convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 3 Dec 2015 03:42:21 -0500
-In-Reply-To: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
-Content-Language: en-US
+Received: from smtp.h3c.com ([221.12.31.13]:27176 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1758691AbbLCIpv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Dec 2015 03:45:51 -0500
+In-Reply-To: <CABAwU-bNERLVaAgF_tJ8WFJ-eH3zvVO6zdU-7CQSB1wTh8EYJQ@mail.gmail.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, "Sage Weil (sage@newdream.net)" <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: huang jun <hjwsm1989@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Somnath Roy
-> Sent: Thursday, December 03, 2015 3:13 AM
->=20
-> *Also*, in this way we are unnecessary adding another smart pointer
-> overhead in the Ceph IO path.
-> As I communicated sometimes back (probably 2 years now :-) ) in the
-> community, profiler is showing these smart pointers (shared_ptr) as o=
-ne of
-> the hot spot. Now, I decided to actually measure this..Here is my fin=
-dings
-> from a sample application and using jemalloc.
->
-> 1.  First, I measured the performance difference of just creation and=
- deletion
-> of various pointers..Here is the result..
->=20
-> [..]
-> int main()
-> {
->    struct timeval start, end;
->    long secs_used,micros_used;
->     printf("##### Test conventional ptr ######\n");
->     gettimeofday(&start, NULL);
-
-Don't use gettimeofday, because it returns current wall time, which may=
- be adjusted any second by ntpd. Use clock_gettime with CLOCK_MONOTONIC=
- or CLOCK_MONOTONIC_RAW.
-
->     for (uint64_t i =3D 0; i < 1000000000; i++) {
->       Foo* f =3D new Foo();
->       int xxx =3D f->xx;
->       long yyy =3D f->yy;
->       delete f;
->     }
->     gettimeofday(&end, NULL);
-
->     printf("start: %d secs, %d usecs\n",start.tv_sec,start.tv_usec);
->     printf("end: %d secs, %d usecs\n",end.tv_sec,end.tv_usec);
->     secs_used=3D(end.tv_sec - start.tv_sec); //avoid overflow by subt=
-racting
-> first
->     micros_used=3D ((secs_used*1000000) + end.tv_usec) - (start.tv_us=
-ec);
->=20
->     printf("micros_used for conventional ptr: %d\n",micros_used);
-
-You calculate *total* time which is subject to drift due to context swi=
-tches, interrupts, and other stuff getting in the way. Divide that by 1=
-000000000 (times you ran your loop) to get average time per loop, which=
- is way more convincing. Then, count the number of actual uses of parti=
-cular thing and multiply by average times to get reliaible info whether=
- the perf gain outweighs reasons why shared_ptrs and unique_ptrs are us=
-ed in the first place.
-
-I actually redid your testing and I can confirm that creation and freei=
-ng of shared_ptrs is >3x slower than simple or unique_ptrs on g++ -std=3D=
-c++11 -O2:
-
-##### Test conventional ptr ######        =20
-nanoseconds used by conventional ptr: 66.33
-##### Test Unique Smart ptr ######        =20
-nanoseconds used by unique_ptr: 66.94     =20
-##### Test Shared Smart ptr ######        =20
-nanoseconds used by shared_ptr: 202.22    =20
-
-Also, accessing data through those pointers costs basically the same.
-But are we creating and destroying that many shared_ptrs for this to be=
-come actual problem? We may gain performance, but at (high) cost of fig=
-hting memory leaks and dangling pointers. I'm not sure if it's worth it=
- in long run.
-
-
-With best regards / Pozdrawiam
-Piotr Da=B3ek
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+WWVzLCBJIGNhbiBmaW5kIGNlcGggb2Ygcm90YXRlIGNvbmZpZ3VyZSBmaWxlIGluIHRoZSBkaXJl
+Y3Rvcnkgb2YgL2V0Yy9sb2dyb3RhdGUuZC4gDQpBbHNvLCBJIGZpbmQgc3RoLiBXZWlyZC4NCg0K
+ZHJ3eHIteHIteCAgMiByb290IHJvb3QgICA0LjBLIERlYyAgMyAxNDo1NCAuLw0KZHJ3eHJ3eHIt
+eCAxOSByb290IHN5c2xvZyA0LjBLIERlYyAgMyAxMzozMyAuLi8NCi1ydy0tLS0tLS0gIDEgcm9v
+dCByb290ICAgICAgMCBEZWMgIDIgMDY6MjUgY2VwaC5hdWRpdC5sb2cNCi1ydy0tLS0tLS0gIDEg
+cm9vdCByb290ICAgIDg1SyBOb3YgMjUgMDk6MTcgY2VwaC5hdWRpdC5sb2cuMS5neg0KLXJ3LS0t
+LS0tLSAgMSByb290IHJvb3QgICAyMjhLIERlYyAgMyAxNjowMCBjZXBoLmxvZw0KLXJ3LS0tLS0t
+LSAgMSByb290IHJvb3QgICAgMjhLIERlYyAgMyAwNjoyMyBjZXBoLmxvZy4xLmd6DQotcnctLS0t
+LS0tICAxIHJvb3Qgcm9vdCAgIDM3NEsgRGVjICAyIDA2OjIyIGNlcGgubG9nLjIuZ3oNCi1ydy1y
+LS1yLS0gIDEgcm9vdCByb290ICAgNC4zTSBEZWMgIDMgMTY6MDEgY2VwaC1tb24ud2ttMDEubG9n
+DQotcnctci0tci0tICAxIHJvb3Qgcm9vdCAgIDU2MUsgRGVjICAzIDA2OjI1IGNlcGgtbW9uLndr
+bTAxLmxvZy4xLmd6DQotcnctci0tci0tICAxIHJvb3Qgcm9vdCAgIDIuMk0gRGVjICAyIDA2OjI1
+IGNlcGgtbW9uLndrbTAxLmxvZy4yLmd6DQotcnctci0tci0tICAxIHJvb3Qgcm9vdCAgICAgIDAg
+RGVjICAyIDA2OjI1IGNlcGgtb3NkLjAubG9nDQotcnctci0tci0tICAxIHJvb3Qgcm9vdCAgICA5
+OTIgRGVjICAxIDA5OjA5IGNlcGgtb3NkLjAubG9nLjEuZ3oNCi1ydy1yLS1yLS0gIDEgcm9vdCBy
+b290ICAgIDE5SyBEZWMgIDMgMTA6NTEgY2VwaC1vc2QuMi5sb2cNCi1ydy1yLS1yLS0gIDEgcm9v
+dCByb290ICAgMi4zSyBEZWMgIDIgMTA6NTAgY2VwaC1vc2QuMi5sb2cuMS5neg0KLXJ3LXItLXIt
+LSAgMSByb290IHJvb3QgICAgMjdLIERlYyAgMSAxMDozMSBjZXBoLW9zZC4yLmxvZy4yLmd6DQot
+cnctci0tci0tICAxIHJvb3Qgcm9vdCAgICAxM0sgRGVjICAzIDEwOjIzIGNlcGgtb3NkLjUubG9n
+DQotcnctci0tci0tICAxIHJvb3Qgcm9vdCAgIDEuNksgRGVjICAyIDA5OjU3IGNlcGgtb3NkLjUu
+bG9nLjEuZ3oNCi1ydy1yLS1yLS0gIDEgcm9vdCByb290ICAgIDIySyBEZWMgIDEgMDk6NTEgY2Vw
+aC1vc2QuNS5sb2cuMi5neg0KLXJ3LXItLXItLSAgMSByb290IHJvb3QgICAgMTlLIERlYyAgMyAx
+MDo1MSBjZXBoLW9zZC44LmxvZw0KLXJ3LXItLXItLSAgMSByb290IHJvb3QgICAgMThLIERlYyAg
+MiAxMDo1MCBjZXBoLW9zZC44LmxvZy4xDQotcnctci0tci0tICAxIHJvb3Qgcm9vdCAgIDI2MUsg
+RGVjICAxIDEzOjU0IGNlcGgtb3NkLjgubG9nLjINCg0KSSBkZXBsb3llZCBjZXBoIGNsdXN0ZXIg
+b24gTm92IDIxLCBmcm9tIHRoYXQgZGF5IHRvIERlYy4xLCBJIG1lYW4gdGhlIGNvbnRpbnVlIDEw
+IGRheXMnIGxvZ3Mgd2VyZSBjb21wcmVzc2VkIGludG8gb25lIGZpbGUsIGl0IGlzIG5vdCB3aGF0
+IEkgd2FudC4NCkRvZXMgYW55IE9QIGFmZmVjdCBsb2cgY29tcHJlc3Npbmc/DQoNClRoYW5rcyEN
+CiAgICAgICAgICAgIEtvbmdtaW5nIFd1DQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0NCnd1a29uZ21pbmcgSUQ6IDEyMDE5DQpUZWzvvJowNTcxLTg2NzYwMjM5
+DQpEZXB077yaMjAxNCBVSVMyIE9ORVN0b3INCg0KLS0tLS3pgq7ku7bljp/ku7YtLS0tLQ0K5Y+R
+5Lu25Lq6OiBodWFuZyBqdW4gW21haWx0bzpoandzbTE5ODlAZ21haWwuY29tXSANCuWPkemAgeaX
+tumXtDogMjAxNeW5tDEy5pyIM+aXpSAxMzoxOQ0K5pS25Lu25Lq6OiB3dWtvbmdtaW5nIDEyMDE5
+IChSRCkNCuaKhOmAgTogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IGNlcGgtdXNlcnNAbGlz
+dHMuY2VwaC5jb20NCuS4u+mimDogUmU6IEhvdyBsb25nIHdpbGwgdGhlIGxvZ3MgYmUga2VwdD8N
+Cg0KaXQgd2lsbCByb3RhdGUgZXZlcnkgd2VlayBieSBkZWZhdWx0LCB5b3UgY2FuIHNlZSB0aGUg
+bG9ncm90YXRlIGZpbGUgL2V0Yy9jZXBoL2xvZ3JvdGF0ZS5kL2NlcGgNCg0KMjAxNS0xMi0wMyAx
+MjozNyBHTVQrMDg6MDAgV3Vrb25nbWluZyA8d3Uua29uZ21pbmdAaDNjLmNvbT46DQo+IEhpICxB
+bGwNCj4gICAgICAgICBJcyB0aGVyZSBhbnlvbmUgd2hvIGtub3dzIEhvdyBsb25nIG9yIGhvdyBt
+YW55IGRheXMgd2lsbCB0aGUgbG9ncy5neiAobW9uL29zZC9tZHMpYmUga2VwdCwgbWF5YmUgYmVm
+b3JlIGZsdXNoZWQ/DQo+DQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLQ0KPiB3dWtvbmdtaW5nIElEOiAxMjAxOQ0KPiBUZWzvvJowNTcxLTg2NzYwMjM5DQo+
+IERlcHTvvJoyMDE0IFVJUzIgT25lU3Rvcg0KPg0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+IC0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K
+PiDmnKzpgq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInp
+mZDlhazlj7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDk
+uK3liJflh7oNCj4g55qE5Liq5Lq65oiW576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul
+5Lu75L2V5b2i5byP5L2/55So77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw
+5rOE6Zyy44CB5aSN5Yi244CBDQo+IOaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OA
+guWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7
+tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0KPiDpgq7ku7bvvIENCj4gVGhpcyBlLW1haWwg
+YW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9t
+IA0KPiBIM0MsIHdoaWNoIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5
+IHdob3NlIGFkZHJlc3MgaXMgDQo+IGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUgaW5mb3Jt
+YXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IA0KPiAoaW5jbHVkaW5nLCBidXQgbm90
+IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRpYWwgZGlzY2xvc3VyZSwgDQo+IHJlcHJvZHVjdGlv
+biwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0K
+PiByZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwg
+aW4gZXJyb3IsIA0KPiBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgcGhvbmUgb3IgZW1haWwg
+aW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCg0KDQoNCi0tDQp0aGFua3MNCmh1YW5nanVuDQo=
