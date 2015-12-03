@@ -1,90 +1,72 @@
-From: Pete Zaitcev <zaitcev@redhat.com>
-Subject: cmake
-Date: Thu, 3 Dec 2015 15:24:36 -0700
-Message-ID: <20151203152436.73e15e38@lembas.zaitcev.lan>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: cmake
+Date: Thu, 3 Dec 2015 17:30:21 -0500
+Message-ID: <20151203223020.GB17144@ultraspiritum.redhat.com>
+References: <20151203152436.73e15e38@lembas.zaitcev.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="R3G7APHDIzY6R/pk"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42013 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:39478 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752979AbbLCWYg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 3 Dec 2015 17:24:36 -0500
+	id S1751957AbbLCWaW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Dec 2015 17:30:22 -0500
 Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id B307342E5D6
-	for <ceph-devel@vger.kernel.org>; Thu,  3 Dec 2015 22:24:36 +0000 (UTC)
-Received: from lembas.zaitcev.lan (ovpn-113-110.phx2.redhat.com [10.3.113.110])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tB3MOaNH012590
-	for <ceph-devel@vger.kernel.org>; Thu, 3 Dec 2015 17:24:36 -0500
+	by mx1.redhat.com (Postfix) with ESMTPS id 51EE5C000410
+	for <ceph-devel@vger.kernel.org>; Thu,  3 Dec 2015 22:30:22 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <20151203152436.73e15e38@lembas.zaitcev.lan>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-Dear All:
-
-I'm trying to run cmake, in order to make sure my patches do not break it
-(in particular WIP 5073 added source files). Result looks like this:
-
-[zaitcev@lembas ceph-tip]$ cmake src
--- The C compiler identification is GNU 5.1.1
--- The CXX compiler identification is GNU 5.1.1
--- Check for working C compiler: /usr/bin/cc
--- Check for working C compiler: /usr/bin/cc -- works
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Detecting C compile features
--- Detecting C compile features - done
--- Check for working CXX compiler: /usr/bin/c++
--- Check for working CXX compiler: /usr/bin/c++ -- works
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Detecting CXX compile features
--- Detecting CXX compile features - done
-CMake Error at CMakeLists.txt:1 (include):
-  include could not find load file:
-
-    GetGitRevisionDescription
+To: Pete Zaitcev <zaitcev@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 
--- The ASM compiler identification is GNU
--- Found assembler: /usr/bin/cc
-CMake Warning (dev) at CMakeLists.txt:11 (add_definitions):
-  Policy CMP0005 is not set: Preprocessor definition values are now escaped
-  automatically.  Run "cmake --help-policy CMP0005" for policy details.  Use
-  the cmake_policy command to set the policy and suppress this warning.
-This warning is for project developers.  Use -Wno-dev to suppress it.
+--R3G7APHDIzY6R/pk
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-CMake Warning (dev) at CMakeLists.txt:12 (add_definitions):
-  Policy CMP0005 is not set: Preprocessor definition values are now escaped
-  automatically.  Run "cmake --help-policy CMP0005" for policy details.  Use
-  the cmake_policy command to set the policy and suppress this warning.
-This warning is for project developers.  Use -Wno-dev to suppress it.
+On 03/12/2015, Pete Zaitcev wrote:
+> Dear All:
+>=20
+> I'm trying to run cmake, in order to make sure my patches do not break it
+> (in particular WIP 5073 added source files). Result looks like this:
+>=20
+> [zaitcev@lembas ceph-tip]$ cmake src
 
---  we do not have a modern/working yasm
--- Performing Test COMPILER_SUPPORTS_CXX11
--- Performing Test COMPILER_SUPPORTS_CXX11 - Success
-CMake Error at CMakeLists.txt:95 (get_git_head_revision):
-  Unknown CMake command "get_git_head_revision".
+I believe the problem is 'cmake src'
 
+The ceph-tip/src/CMakeLists.txt file is meant to be called from the
+ceph-tip/CMakeLists.txt file. I like to create a completely separate
+build directory and build there. i think the most popular incantation is
+something like:
 
-CMake Warning (dev) in CMakeLists.txt:
-  No cmake_minimum_required command is present.  A line of code such as
+  mkdir ceph-tip/build
+  cd ceph-tile/build
+  cmake ..
+  make
 
-    cmake_minimum_required(VERSION 3.3)
+--=20
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
 
-  should be added at the top of the file.  The version specified may be lower
-  if you wish to support older CMake versions for this project.  For more
-  information run "cmake --help-policy CMP0000".
-This warning is for project developers.  Use -Wno-dev to suppress it.
+--R3G7APHDIzY6R/pk
+Content-Type: application/pgp-signature; name="signature.asc"
 
--- Configuring incomplete, errors occurred!
-See also "/q/zaitcev/ceph/ceph-tip/CMakeFiles/CMakeOutput.log".
-[zaitcev@lembas ceph-tip]$ rpm -qa | grep -i cmake
-extra-cmake-modules-5.16.0-1.fc23.noarch
-cmake-3.3.2-1.fc23.x86_64
-[zaitcev@lembas ceph-tip]$ 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
 
-Is this expected? Is my cmake incantation wrong?
+iQF8BAEBCgBmBQJWYMJ3XxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
+ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
+OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4juREH/0T7zOPeAgO86U1lVSpilzBv
+BkES22gYBsR36nHOEjowJ3f41Np3wzcpKc+sh4eAWoQe7Id9XNDOM9gqj+fR+x+k
+XuB4ZZASuU4Wkm4ksiSgMJgBUEhvoYVqo4nQ7wHimnk3sGF4W+MtpjE7b1jtW55R
+v6uwMptP0Ous3lNfmP3dvJP8Y8S2rFGcYmsemlXD0+CCb4QFjgvKGcgA7/dEzTRF
+AvW8qTS48m2gSMcUEC9rumA17xHFzA6JNgQ2m0hf7xFGUKxH7+w7vheNwzBg7nzs
+S9dvyEeRhWdCLg+unil9BbkmvWpqCj1r5BzSPe+ROapxH9eBvE0BgklAQZLzPuM=
+=2Dev
+-----END PGP SIGNATURE-----
 
-Thanks,
--- Pete
+--R3G7APHDIzY6R/pk--
