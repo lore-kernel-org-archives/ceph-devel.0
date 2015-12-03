@@ -1,117 +1,65 @@
-From: Wukongming <wu.kongming-vVzyEvZLFYE@public.gmane.org>
-Subject: =?utf-8?b?562U5aSNOiAgSG93IGxvbmcgd2lsbCB0aGUgbG9n?=
- =?utf-8?q?s_be_kept=3F?=
-Date: Thu, 3 Dec 2015 12:36:01 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D75030E7CCF@H3CMLB12-EX.srv.huawei-3com.com>
-References: <47D132BF400BE64BAE6D71033F7D3D75030E7B67@H3CMLB12-EX.srv.huawei-3com.com>
-	<CABAwU-bNERLVaAgF_tJ8WFJ-eH3zvVO6zdU-7CQSB1wTh8EYJQ@mail.gmail.com>
-	<47D132BF400BE64BAE6D71033F7D3D75030E7C02@H3CMLB12-EX.srv.huawei-3com.com>
-	<37396A32-183A-45B5-A86B-6FC0C0939930@schermer.cz>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Compiling for FreeBSD, missing rbd
+Date: Thu, 3 Dec 2015 14:27:52 +0100
+Message-ID: <56604358.7010002@digiware.nl>
+References: <20151130065812.GA20205@gmail.com>
+ <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
+ <565D7FA8.3010301@digiware.nl>
+ <alpine.DEB.2.00.1512010529280.19170@cobra.newdream.net>
+ <565DA3B5.1070608@digiware.nl>
+ <alpine.DEB.2.00.1512010634510.19170@cobra.newdream.net>
+ <565DC9D4.7060701@digiware.nl> <565DEC36.10102@digiware.nl>
+ <565F5E28.8020706@digiware.nl> <565F74E8.1070109@digiware.nl>
+ <20151203123416.GA16372@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <37396A32-183A-45B5-A86B-6FC0C0939930-SB6/BxVxTjHtwjQa/ONI9g@public.gmane.org>
-Content-Language: zh-CN
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Jan Schermer <jan-SB6/BxVxTjHtwjQa/ONI9g@public.gmane.org>
-Cc: huang jun <hjwsm1989-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([31.223.170.169]:16884 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S964954AbbLCN2V (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Dec 2015 08:28:21 -0500
+In-Reply-To: <20151203123416.GA16372@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mykola Golub <mgolub@mirantis.com>
+Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
-T0shIE9uZSBtb3JlIHF1ZXN0aW9uLiBEbyB5b3Uga25vdyB3aHkgY2VwaCBoYXMgMiB3YXlzIG91
-dHB1dHRpbmcgbG9ncyhkb3V0ICYmIGNsb2cpLiBDYXVzZSBJIGZpbmQgZG91dCBpcyBtb3JlIGhl
-bHBmdWwgdGhhbiBjbG9nLCBEaWQgY2VwaCB1c2UgY2xvZyBmaXJzdCwgYW5kIGRvdXQgYWRkZWQg
-Zm9yIG5ldyB2ZXJzaW9uPw0KDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0NCnd1a29uZ21pbmcgSUQ6IDEyMDE5DQpUZWzvvJowNTcxLTg2NzYwMjM5DQpEZXB0
-77yaMjAxNCBVSVMyIE9ORVN0b3INCg0KLS0tLS3pgq7ku7bljp/ku7YtLS0tLQ0K5Y+R5Lu25Lq6
-OiBKYW4gU2NoZXJtZXIgW21haWx0bzpqYW5Ac2NoZXJtZXIuY3pdIA0K5Y+R6YCB5pe26Ze0OiAy
-MDE15bm0MTLmnIgz5pelIDE2OjU4DQrmlLbku7bkuro6IHd1a29uZ21pbmcgMTIwMTkgKFJEKQ0K
-5oqE6YCBOiBodWFuZyBqdW47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBjZXBoLXVzZXJz
-QGxpc3RzLmNlcGguY29tDQrkuLvpopg6IFJlOiBbY2VwaC11c2Vyc10gSG93IGxvbmcgd2lsbCB0
-aGUgbG9ncyBiZSBrZXB0Pw0KDQpZb3UgY2FuIHNldHVwIGxvZ3JvdGF0ZSBob3dldmVyIHlvdSB3
-YW50IC0gbm90IHN1cmUgd2hhdCB0aGUgZGVmYXVsdCBpcyBmb3IgeW91ciBkaXN0cm8uDQpVc3Vh
-bGx5IGxvZ3JvdGF0ZSBkb2Vzbid0IHRvdWNoIGZpbGVzIHRoYXQgYXJlIHNtYWxsZXIgdGhhbiBz
-b21lIHNpemUgZXZlbiBpZiB0aGV5IGFyZSBvbGQuIEl0IHdpbGwgYWxzbyBub3QgZGVsZXRlIGxv
-Z3MgZm9yIE9TRHMgdGhhdCBubyBsb25nZXIgZXhpc3QuIA0KDQpDZXBoIGl0c2VsZiBoYXMgbm90
-aGluZyB0byBkbyB3aXRoIGxvZyByb3RhdGlvbiwgbG9ncm90YXRlIGRvZXMgdGhlIHdvcmsuIENl
-cGggcGFja2FnZXMgbGlrZWx5IGNvbnRhaW4gZGVmYXVsdCBsb2dyb3RhdGUgcnVsZXMgZm9yIHRo
-ZSBsb2dzIGJ1dCB5b3UgY2FuIGVkaXQgdGhlbSB0byB5b3VyIGxpa2luZy4NCg0KSmFuDQoNCj4g
-T24gMDMgRGVjIDIwMTUsIGF0IDA5OjM4LCBXdWtvbmdtaW5nIDx3dS5rb25nbWluZ0BoM2MuY29t
-PiB3cm90ZToNCj4gDQo+IFllcywgSSBjYW4gZmluZCBjZXBoIG9mIHJvdGF0ZSBjb25maWd1cmUg
-ZmlsZSBpbiB0aGUgZGlyZWN0b3J5IG9mIC9ldGMvbG9ncm90YXRlLmQuIA0KPiBBbHNvLCBJIGZp
-bmQgc3RoLiBXZWlyZC4NCj4gDQo+IGRyd3hyLXhyLXggIDIgcm9vdCByb290ICAgNC4wSyBEZWMg
-IDMgMTQ6NTQgLi8NCj4gZHJ3eHJ3eHIteCAxOSByb290IHN5c2xvZyA0LjBLIERlYyAgMyAxMzoz
-MyAuLi8NCj4gLXJ3LS0tLS0tLSAgMSByb290IHJvb3QgICAgICAwIERlYyAgMiAwNjoyNSBjZXBo
-LmF1ZGl0LmxvZw0KPiAtcnctLS0tLS0tICAxIHJvb3Qgcm9vdCAgICA4NUsgTm92IDI1IDA5OjE3
-IGNlcGguYXVkaXQubG9nLjEuZ3oNCj4gLXJ3LS0tLS0tLSAgMSByb290IHJvb3QgICAyMjhLIERl
-YyAgMyAxNjowMCBjZXBoLmxvZw0KPiAtcnctLS0tLS0tICAxIHJvb3Qgcm9vdCAgICAyOEsgRGVj
-ICAzIDA2OjIzIGNlcGgubG9nLjEuZ3oNCj4gLXJ3LS0tLS0tLSAgMSByb290IHJvb3QgICAzNzRL
-IERlYyAgMiAwNjoyMiBjZXBoLmxvZy4yLmd6DQo+IC1ydy1yLS1yLS0gIDEgcm9vdCByb290ICAg
-NC4zTSBEZWMgIDMgMTY6MDEgY2VwaC1tb24ud2ttMDEubG9nDQo+IC1ydy1yLS1yLS0gIDEgcm9v
-dCByb290ICAgNTYxSyBEZWMgIDMgMDY6MjUgY2VwaC1tb24ud2ttMDEubG9nLjEuZ3oNCj4gLXJ3
-LXItLXItLSAgMSByb290IHJvb3QgICAyLjJNIERlYyAgMiAwNjoyNSBjZXBoLW1vbi53a20wMS5s
-b2cuMi5neg0KPiAtcnctci0tci0tICAxIHJvb3Qgcm9vdCAgICAgIDAgRGVjICAyIDA2OjI1IGNl
-cGgtb3NkLjAubG9nDQo+IC1ydy1yLS1yLS0gIDEgcm9vdCByb290ICAgIDk5MiBEZWMgIDEgMDk6
-MDkgY2VwaC1vc2QuMC5sb2cuMS5neg0KPiAtcnctci0tci0tICAxIHJvb3Qgcm9vdCAgICAxOUsg
-RGVjICAzIDEwOjUxIGNlcGgtb3NkLjIubG9nDQo+IC1ydy1yLS1yLS0gIDEgcm9vdCByb290ICAg
-Mi4zSyBEZWMgIDIgMTA6NTAgY2VwaC1vc2QuMi5sb2cuMS5neg0KPiAtcnctci0tci0tICAxIHJv
-b3Qgcm9vdCAgICAyN0sgRGVjICAxIDEwOjMxIGNlcGgtb3NkLjIubG9nLjIuZ3oNCj4gLXJ3LXIt
-LXItLSAgMSByb290IHJvb3QgICAgMTNLIERlYyAgMyAxMDoyMyBjZXBoLW9zZC41LmxvZw0KPiAt
-cnctci0tci0tICAxIHJvb3Qgcm9vdCAgIDEuNksgRGVjICAyIDA5OjU3IGNlcGgtb3NkLjUubG9n
-LjEuZ3oNCj4gLXJ3LXItLXItLSAgMSByb290IHJvb3QgICAgMjJLIERlYyAgMSAwOTo1MSBjZXBo
-LW9zZC41LmxvZy4yLmd6DQo+IC1ydy1yLS1yLS0gIDEgcm9vdCByb290ICAgIDE5SyBEZWMgIDMg
-MTA6NTEgY2VwaC1vc2QuOC5sb2cNCj4gLXJ3LXItLXItLSAgMSByb290IHJvb3QgICAgMThLIERl
-YyAgMiAxMDo1MCBjZXBoLW9zZC44LmxvZy4xDQo+IC1ydy1yLS1yLS0gIDEgcm9vdCByb290ICAg
-MjYxSyBEZWMgIDEgMTM6NTQgY2VwaC1vc2QuOC5sb2cuMg0KPiANCj4gSSBkZXBsb3llZCBjZXBo
-IGNsdXN0ZXIgb24gTm92IDIxLCBmcm9tIHRoYXQgZGF5IHRvIERlYy4xLCBJIG1lYW4gdGhlIGNv
-bnRpbnVlIDEwIGRheXMnIGxvZ3Mgd2VyZSBjb21wcmVzc2VkIGludG8gb25lIGZpbGUsIGl0IGlz
-IG5vdCB3aGF0IEkgd2FudC4NCj4gRG9lcyBhbnkgT1AgYWZmZWN0IGxvZyBjb21wcmVzc2luZz8N
-Cj4gDQo+IFRoYW5rcyENCj4gICAgICAgICAgICBLb25nbWluZyBXdQ0KPiAtLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gd3Vrb25nbWluZyBJRDogMTIwMTkN
-Cj4gVGVs77yaMDU3MS04Njc2MDIzOQ0KPiBEZXB077yaMjAxNCBVSVMyIE9ORVN0b3INCj4gDQo+
-IC0tLS0t6YKu5Lu25Y6f5Lu2LS0tLS0NCj4g5Y+R5Lu25Lq6OiBodWFuZyBqdW4gW21haWx0bzpo
-andzbTE5ODlAZ21haWwuY29tXQ0KPiDlj5HpgIHml7bpl7Q6IDIwMTXlubQxMuaciDPml6UgMTM6
-MTkNCj4g5pS25Lu25Lq6OiB3dWtvbmdtaW5nIDEyMDE5IChSRCkNCj4g5oqE6YCBOiBjZXBoLWRl
-dmVsQHZnZXIua2VybmVsLm9yZzsgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KPiDkuLvpopg6
-IFJlOiBIb3cgbG9uZyB3aWxsIHRoZSBsb2dzIGJlIGtlcHQ/DQo+IA0KPiBpdCB3aWxsIHJvdGF0
-ZSBldmVyeSB3ZWVrIGJ5IGRlZmF1bHQsIHlvdSBjYW4gc2VlIHRoZSBsb2dyb3RhdGUgZmlsZSAN
-Cj4gL2V0Yy9jZXBoL2xvZ3JvdGF0ZS5kL2NlcGgNCj4gDQo+IDIwMTUtMTItMDMgMTI6MzcgR01U
-KzA4OjAwIFd1a29uZ21pbmcgPHd1LmtvbmdtaW5nQGgzYy5jb20+Og0KPj4gSGkgLEFsbA0KPj4g
-ICAgICAgIElzIHRoZXJlIGFueW9uZSB3aG8ga25vd3MgSG93IGxvbmcgb3IgaG93IG1hbnkgZGF5
-cyB3aWxsIHRoZSBsb2dzLmd6IChtb24vb3NkL21kcyliZSBrZXB0LCBtYXliZSBiZWZvcmUgZmx1
-c2hlZD8NCj4+IA0KPj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tDQo+PiB3dWtvbmdtaW5nIElEOiAxMjAxOQ0KPj4gVGVs77yaMDU3MS04Njc2MDIzOQ0KPj4g
-RGVwdO+8mjIwMTQgVUlTMiBPbmVTdG9yDQo+PiANCj4+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPj4gLQ0KPj4g
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tDQo+PiDmnKzpgq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6Hm
-ioDmnK/mnInpmZDlhazlj7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrp
-naLlnLDlnYDkuK3liJflh7oNCj4+IOeahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWF
-tuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaI
-lumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOAgQ0KPj4g5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit
-55qE5L+h5oGv44CC5aaC5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S1
-6K+d5oiW6YKu5Lu26YCa55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pysDQo+PiDpgq7ku7bvvIENCj4+
-IFRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5m
-b3JtYXRpb24gZnJvbSANCj4+IEgzQywgd2hpY2ggaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHBl
-cnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyANCj4+IGxpc3RlZCBhYm92ZS4gQW55IHVz
-ZSBvZiB0aGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IA0KPj4gKGlu
-Y2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsIGRpc2Nsb3N1cmUs
-IA0KPj4gcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRo
-YW4gdGhlIGludGVuZGVkDQo+PiByZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJl
-Y2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIA0KPj4gcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVy
-IGJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo+IA0KPiANCj4g
-DQo+IC0tDQo+IHRoYW5rcw0KPiBodWFuZ2p1bg0KPiBfX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fXw0KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdA0KPiBjZXBo
-LXVzZXJzQGxpc3RzLmNlcGguY29tDQo+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5j
-Z2kvY2VwaC11c2Vycy1jZXBoLmNvbQ0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3Rz
-LmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1j
-ZXBoLmNvbQo=
+On 3-12-2015 13:34, Mykola Golub wrote:
+> On Wed, Dec 02, 2015 at 11:47:04PM +0100, Willem Jan Withagen wrote:
+>>
+>> Running gmake check is starting to work.
+>> 	reporting still thinks there are no successful tests
+>> 	but tests themselves report OKE
+>>
+>> But where I really can not get it to work is with testing rbd.
+>>
+>> Is starts with the simple:
+>> 	 /bin/sh: rbd: not found
+>>
+>> And whatever I'm trying in configure, no way am I able to get either an
+>> executable or a script that will do rbd....
+>>
+>> So how do I get a rbd that can be used in the tests.
+> 
+> On the master rbd is built on Linux only, see src/tools/Makefile-client.am.
+> 
+> I have a patch in my branch that makes rbd build on all platforms
+> (excluding kernel bits):
+> 
+> https://github.com/trociny/ceph/commit/cd427e3ef2a5a307d6649e5b1dcfefdf67d60b29
+> 
+> But large rbd refactoring has happened in master since that time, and
+> my patch requires some work to apply on the current master.
+> 
+
+Oke,
+
+Is see the patch, which is simple enough.
+Now when code has been moved around, I can imagine that there is going
+to be some work required.
+
+It's going on the list.
+
+--WjW
+
