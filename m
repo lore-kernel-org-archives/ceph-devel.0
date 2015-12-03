@@ -1,69 +1,72 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: queue_transaction interface + unique_ptr + performance
-Date: Thu, 3 Dec 2015 09:52:47 -0800
-Message-ID: <CAN=+7FU_vkNdD-AQfD-wnbDpxRJB2z0d-_22pSuEjciyOr096Q@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: queue_transaction interface + unique_ptr + performance
+Date: Thu, 3 Dec 2015 17:53:16 +0000
+Message-ID: <CO1PR02MB208B0C5A0B6995CC4EE87F5F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 	<alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
 	<CO1PR02MB2087E3AF3553B6269FBC10DF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 	<20151203172508.GB13420@ultraspiritum.redhat.com>
 	<CO1PR02MB208C446A80363743FC5D341F40D0@CO1PR02MB208.namprd02.prod.outlook.com>
-	<CAN=+7FU1z9w=dDZ8+qbvKu-_ucYEU8K0eKS99Pd6Ku=A=t2gWg@mail.gmail.com>
+ <CAN=+7FU1z9w=dDZ8+qbvKu-_ucYEU8K0eKS99Pd6Ku=A=t2gWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f171.google.com ([209.85.213.171]:35445 "EHLO
-	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751115AbbLCRws convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 12:52:48 -0500
-Received: by igl9 with SMTP id 9so16239568igl.0
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 09:52:47 -0800 (PST)
+Received: from mail-bn1on0082.outbound.protection.outlook.com ([157.56.110.82]:21824
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751115AbbLCRxS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Dec 2015 12:53:18 -0500
 In-Reply-To: <CAN=+7FU1z9w=dDZ8+qbvKu-_ucYEU8K0eKS99Pd6Ku=A=t2gWg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Samuel Just <sjust@redhat.com>
 Cc: "Adam C. Emerson" <aemerson@redhat.com>, Sage Weil <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-To be clear, I'm ok with having a queue_transaction which takes a
-Transaction by value and moves it into a dynamic unique_ptr controlled
-instance, but I don't want the filestore passing a naked pointer
-around internally with a flag indicating whether it needs to be
-deleted by the filestore.  If there is an actual user which requires
-the transaction to stick around afterwards *and* cannot afford to copy
-it, then we can talk about a design which accomplishes that.
--Sam
-
-On Thu, Dec 3, 2015 at 9:50 AM, Samuel Just <sjust@redhat.com> wrote:
-> As far as I know, there are no current users which want to use the
-> Transaction later.  You could also change apply_transaction to copy
-> the Transaction into a unique_ptr since I don't think it's used in any
-> performance sensitive code paths.
-> -Sam
->
-> On Thu, Dec 3, 2015 at 9:48 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> Yes, that we can do..But, in that case aren't we restricting user if they want to do something with this Transaction object later. I didn't go through each and every part of the code yet (which is huge) that are using these interfaces to understand if it is using Transaction object afterwards.
->>
->> Thanks & Regards
->> Somnath
->> -----Original Message-----
->> From: Adam C. Emerson [mailto:aemerson@redhat.com]
->> Sent: Thursday, December 03, 2015 9:25 AM
->> To: Somnath Roy
->> Cc: Sage Weil; Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org
->> Subject: Re: queue_transaction interface + unique_ptr + performance
->>
->> On 03/12/2015, Somnath Roy wrote:
->>> Yes, I posted the new result after adding -O2 in the compiler flag and it shows almost no overhead with unique_ptr.
->>> I will add the test of adding to list overhead and start implementing the new interface.
->>> But, regarding my other point of changing all the objecstore interfaces (my first mail on this mail chain in case you have missed) taking Transaction, any thought of that ?
->>> Should we reconsider having two queue_transaction interface ?
->>
->> As I understand it, the concern with switching to unique_ptr was that the callee would move from the reference without this being known to the caller.
->>
->> Would it make sense to pass as an RValue reference (i.e. TransactionRef&&)? That way the compiler should demand that the callers explicitly use std::move on the reference they're holding, documenting at the site of the call that they're willing to give up ownership.
->>
->>
->> --
->> Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
->> IRC: Aemerson@{RedHat, OFTC, Freenode}
->> 0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+WWVzLCBpZiB3ZSBjYW4gZG8gdGhhdCwgdGhhdCB3aWxsIGJlIGZhciBtb3JlIGVhc2llci4uSSB3
+aWxsIGRvdWJsZSBjaGVjayB0aGF0IGlmIGFwcGx5X3RyYW5zYWN0aW9uIGlzIGJlZW4gdXNlZCBm
+cm9tIGFueSBvZiB0aGUgcGVyZm9ybWFuY2Ugc2Vuc2l0aXZlIHBhdGggYW5kIGRvIHRoZSBjaGFu
+Z2VzIGFjY29yZGluZ2x5Li5UaGFua3MuLg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0K
+RnJvbTogU2FtdWVsIEp1c3QgW21haWx0bzpzanVzdEByZWRoYXQuY29tXSANClNlbnQ6IFRodXJz
+ZGF5LCBEZWNlbWJlciAwMywgMjAxNSA5OjUxIEFNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBBZGFt
+IEMuIEVtZXJzb247IFNhZ2UgV2VpbDsgU2FtdWVsIEp1c3QgKHNhbS5qdXN0QGlua3RhbmsuY29t
+KTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBxdWV1ZV90cmFuc2Fj
+dGlvbiBpbnRlcmZhY2UgKyB1bmlxdWVfcHRyICsgcGVyZm9ybWFuY2UNCg0KQXMgZmFyIGFzIEkg
+a25vdywgdGhlcmUgYXJlIG5vIGN1cnJlbnQgdXNlcnMgd2hpY2ggd2FudCB0byB1c2UgdGhlIFRy
+YW5zYWN0aW9uIGxhdGVyLiAgWW91IGNvdWxkIGFsc28gY2hhbmdlIGFwcGx5X3RyYW5zYWN0aW9u
+IHRvIGNvcHkgdGhlIFRyYW5zYWN0aW9uIGludG8gYSB1bmlxdWVfcHRyIHNpbmNlIEkgZG9uJ3Qg
+dGhpbmsgaXQncyB1c2VkIGluIGFueSBwZXJmb3JtYW5jZSBzZW5zaXRpdmUgY29kZSBwYXRocy4N
+Ci1TYW0NCg0KT24gVGh1LCBEZWMgMywgMjAxNSBhdCA5OjQ4IEFNLCBTb21uYXRoIFJveSA8U29t
+bmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBZZXMsIHRoYXQgd2UgY2FuIGRvLi5CdXQs
+IGluIHRoYXQgY2FzZSBhcmVuJ3Qgd2UgcmVzdHJpY3RpbmcgdXNlciBpZiB0aGV5IHdhbnQgdG8g
+ZG8gc29tZXRoaW5nIHdpdGggdGhpcyBUcmFuc2FjdGlvbiBvYmplY3QgbGF0ZXIuIEkgZGlkbid0
+IGdvIHRocm91Z2ggZWFjaCBhbmQgZXZlcnkgcGFydCBvZiB0aGUgY29kZSB5ZXQgKHdoaWNoIGlz
+IGh1Z2UpIHRoYXQgYXJlIHVzaW5nIHRoZXNlIGludGVyZmFjZXMgdG8gdW5kZXJzdGFuZCBpZiBp
+dCBpcyB1c2luZyBUcmFuc2FjdGlvbiBvYmplY3QgYWZ0ZXJ3YXJkcy4NCj4NCj4gVGhhbmtzICYg
+UmVnYXJkcw0KPiBTb21uYXRoDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206
+IEFkYW0gQy4gRW1lcnNvbiBbbWFpbHRvOmFlbWVyc29uQHJlZGhhdC5jb21dDQo+IFNlbnQ6IFRo
+dXJzZGF5LCBEZWNlbWJlciAwMywgMjAxNSA5OjI1IEFNDQo+IFRvOiBTb21uYXRoIFJveQ0KPiBD
+YzogU2FnZSBXZWlsOyBTYW11ZWwgSnVzdCAoc2FtLmp1c3RAaW5rdGFuay5jb20pOyANCj4gY2Vw
+aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IHF1ZXVlX3RyYW5zYWN0aW9u
+IGludGVyZmFjZSArIHVuaXF1ZV9wdHIgKyBwZXJmb3JtYW5jZQ0KPg0KPiBPbiAwMy8xMi8yMDE1
+LCBTb21uYXRoIFJveSB3cm90ZToNCj4+IFllcywgSSBwb3N0ZWQgdGhlIG5ldyByZXN1bHQgYWZ0
+ZXIgYWRkaW5nIC1PMiBpbiB0aGUgY29tcGlsZXIgZmxhZyBhbmQgaXQgc2hvd3MgYWxtb3N0IG5v
+IG92ZXJoZWFkIHdpdGggdW5pcXVlX3B0ci4NCj4+IEkgd2lsbCBhZGQgdGhlIHRlc3Qgb2YgYWRk
+aW5nIHRvIGxpc3Qgb3ZlcmhlYWQgYW5kIHN0YXJ0IGltcGxlbWVudGluZyB0aGUgbmV3IGludGVy
+ZmFjZS4NCj4+IEJ1dCwgcmVnYXJkaW5nIG15IG90aGVyIHBvaW50IG9mIGNoYW5naW5nIGFsbCB0
+aGUgb2JqZWNzdG9yZSBpbnRlcmZhY2VzIChteSBmaXJzdCBtYWlsIG9uIHRoaXMgbWFpbCBjaGFp
+biBpbiBjYXNlIHlvdSBoYXZlIG1pc3NlZCkgdGFraW5nIFRyYW5zYWN0aW9uLCBhbnkgdGhvdWdo
+dCBvZiB0aGF0ID8NCj4+IFNob3VsZCB3ZSByZWNvbnNpZGVyIGhhdmluZyB0d28gcXVldWVfdHJh
+bnNhY3Rpb24gaW50ZXJmYWNlID8NCj4NCj4gQXMgSSB1bmRlcnN0YW5kIGl0LCB0aGUgY29uY2Vy
+biB3aXRoIHN3aXRjaGluZyB0byB1bmlxdWVfcHRyIHdhcyB0aGF0IHRoZSBjYWxsZWUgd291bGQg
+bW92ZSBmcm9tIHRoZSByZWZlcmVuY2Ugd2l0aG91dCB0aGlzIGJlaW5nIGtub3duIHRvIHRoZSBj
+YWxsZXIuDQo+DQo+IFdvdWxkIGl0IG1ha2Ugc2Vuc2UgdG8gcGFzcyBhcyBhbiBSVmFsdWUgcmVm
+ZXJlbmNlIChpLmUuIFRyYW5zYWN0aW9uUmVmJiYpPyBUaGF0IHdheSB0aGUgY29tcGlsZXIgc2hv
+dWxkIGRlbWFuZCB0aGF0IHRoZSBjYWxsZXJzIGV4cGxpY2l0bHkgdXNlIHN0ZDo6bW92ZSBvbiB0
+aGUgcmVmZXJlbmNlIHRoZXkncmUgaG9sZGluZywgZG9jdW1lbnRpbmcgYXQgdGhlIHNpdGUgb2Yg
+dGhlIGNhbGwgdGhhdCB0aGV5J3JlIHdpbGxpbmcgdG8gZ2l2ZSB1cCBvd25lcnNoaXAuDQo+DQo+
+DQo+IC0tDQo+IFNlbmlvciBTb2Z0d2FyZSBFbmdpbmVlciAgICAgICAgICAgUmVkIEhhdCBTdG9y
+YWdlLCBBbm4gQXJib3IsIE1JLCBVUw0KPiBJUkM6IEFlbWVyc29uQHtSZWRIYXQsIE9GVEMsIEZy
+ZWVub2RlfQ0KPiAweDgwRjc1NDRCOTBFREJGQjkgRTcwNyA4NkJBIDBDMUIgNjJDQyAxNTJDICA3
+QzEyIDgwRjcgNTQ0QiA5MEVEIEJGQjkNCg==
