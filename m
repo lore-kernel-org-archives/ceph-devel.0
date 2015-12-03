@@ -1,41 +1,49 @@
-From: Wukongming <wu.kongming@h3c.com>
-Subject: Confused about priority of client OP.
-Date: Thu, 3 Dec 2015 14:14:40 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D75030E7D71@H3CMLB12-EX.srv.huawei-3com.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: queue_transaction interface + unique_ptr + performance
+Date: Thu, 3 Dec 2015 10:16:31 -0500 (EST)
+Message-ID: <1998646860.28019612.1449155791509.JavaMail.zimbra@redhat.com>
+References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com> <alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:16582 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751529AbbLCOOx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 3 Dec 2015 09:14:53 -0500
-Content-Language: zh-CN
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:34363 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756460AbbLCPQz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 10:16:55 -0500
+In-Reply-To: <alpine.DEB.2.00.1512030349200.19170@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
-Cc: "zhengbin.08747@h3c.com" <zhengbin.08747@h3c.com>
+To: Sage Weil <sage@newdream.net>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, ceph-devel@vger.kernel.org
 
-SGksIEFsbDoNCiAgICAgICAgSSAndmUgZ290IGEgcXVlc3Rpb24gYWJvdXQgYSBwcmlvcml0eS4g
-V2UgZGVmaW5lZCBvc2RfY2xpZW50X29wX3ByaW9yaXR5ID0gNjMuIENFUEhfTVNHX1BSSU9fTE9X
-ID0gNjQuDQpXZSBhcmUgY2xlYXIgdGhlcmUgYXJlIG11bHRpcGxlIElPIHRvIGJlIGRpc2N1c3Nl
-ZC4gV2h5IG5vdCBkZWZpbmUgb3NkX2NsaWVudF9vcF9wcmlvcml0eSA+IDY0LCBzbyB3ZSBjYW4g
-anVzdCBkZWFsIHdpdGggY2xpZW50IElPIGluIGZpcnN0IHByaW9yaXR5Lg0KDQoNCi0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0Kd3Vrb25nbWluZyBJRDogMTIw
-MTkNClRlbKO6MDU3MS04Njc2MDIzOQ0KRGVwdKO6MjAxNCBVSVMyIE9ORVN0b3INCg0KDQotLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tDQqxvtPKvP68sMbkuL28/rqs09C6vNbdu6rI/c2o0MW8vMr109DP3rmr
-y761xLGjw9zQxc+io6y99s/e09q3osvNuPjJz8PmtdjWt9bQwdCz9g0KtcS49sjLu/LIutfpoaO9
-+9a5yM66zsbky/vIy9LUyM66ztDOyr3KudPDo6iw/MCotauyu8/e09rIq7K/u/Kyv7fWtdjQucK2
-oaK4tNbGoaINCrvyyaK3oqOpsb7Tyrz+1tC1xNDFz6Kho8jnufvE+rTtytXBy7G+08q8/qOsx+vE
-+sGivLS157uwu/LTyrz+zajWqreivP7Iy7Kiyb6z/bG+DQrTyrz+o6ENClRoaXMgZS1tYWlsIGFu
-ZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBI
-M0MsIHdoaWNoIGlzDQppbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9z
-ZSBhZGRyZXNzIGlzIGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNv
-bnRhaW5lZCBoZXJlaW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8s
-IHRvdGFsIG9yIHBhcnRpYWwNCmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5h
-dGlvbikgYnkgcGVyc29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlz
-IHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ug
-bm90aWZ5IHRoZSBzZW5kZXINCmJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxl
-dGUgaXQhDQo=
+Hi,
+
+To those writing benchmarks, please note that the standard library
+provides std::make_shared() as an optimization for shared_ptr. It
+creates the object and its shared storage in a single allocation,
+instead of the two allocations required for
+"std::shared_ptr<Foo> fs (new Foo())".
+
+Casey
+
+----- Original Message -----
+> 1- I agree we should avoid shared_ptr whenever possible.
+> 
+> 2- unique_ptr should not have any more overhead than a raw pointer--the
+> compiler is enforcing the single-owner semantics.  See for example
+> 
+> 	https://msdn.microsoft.com/en-us/library/hh279676.aspx
+> 
+> "It is exactly is efficient as a raw pointer and can be used in STL
+> containers."
+> 
+> Unless the implementation is broken somehow?  That seems unlikely...
+> 
+> sage
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
