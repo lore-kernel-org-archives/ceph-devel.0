@@ -1,22 +1,37 @@
-From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: queue_transaction interface + unique_ptr + performance
-Date: Thu, 3 Dec 2015 03:50:13 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C05619AA91@SSIEXCH-MB3.ssi.samsung.com>
+Date: Thu, 3 Dec 2015 03:59:02 +0000
+Message-ID: <CO1PR02MB208E8626EC5EC561E4A518AF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
 References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+ <99767EA2E27DD44DB4E9F9B9ACA458C05619AA91@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:56965 "EHLO
-	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755111AbbLCDuR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Dec 2015 22:50:17 -0500
-In-Reply-To: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
+Received: from mail-bl2on0069.outbound.protection.outlook.com ([65.55.169.69]:41246
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755574AbbLCD7H convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Dec 2015 22:59:07 -0500
+In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C05619AA91@SSIEXCH-MB3.ssi.samsung.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, "Sage Weil (sage@newdream.net)" <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>
+To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, "Sage Weil (sage@newdream.net)" <sage@newdream.net>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Thanks James for looking into this..
+Shared_ptr used heavily in the OSD.cc/Replicated PG path..
+
+Regards
+Somnath
+
+-----Original Message-----
+From: James (Fei) Liu-SSI [mailto:james.liu@ssi.samsung.com] 
+Sent: Wednesday, December 02, 2015 7:50 PM
+To: Somnath Roy; Sage Weil (sage@newdream.net); Samuel Just (sam.just@inktank.com)
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: queue_transaction interface + unique_ptr + performance
 
 Hi Somnath,
   Great findings. As you mentioned, unique_ptr and smart_ptr always have a well known problem about the performance comparing to conventional pointer , Got a chance to run your interesting code and close to what you find.
@@ -27,9 +42,7 @@ James
 
   ##### Test conventional ptr ######
 start: %d secs, %d usecs
-1449112986729634end: 1449113038 secs, 235140 usecs
-micros_used for conventional ptr: 51505506
-##### Test Unique Smart ptr ######
+1449112986729634end: 1449113038 secs, 235140 usecs micros_used for conventional ptr: 51505506 ##### Test Unique Smart ptr ######
 start: 1449113038 secs, 235186 usecs
 end: 1449113158 secs, 825106 usecs
 micros_used for unique ptr: 120589920
