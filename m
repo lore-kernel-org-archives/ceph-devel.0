@@ -1,50 +1,94 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: Confused about priority of client OP.
-Date: Fri, 4 Dec 2015 14:18:16 +0800
-Message-ID: <CABAwU-aSBPEm0feGHTTB8tiYs5OScAAU43i7KD9iKkujDOu+8g@mail.gmail.com>
-References: <47D132BF400BE64BAE6D71033F7D3D75030E7D71@H3CMLB12-EX.srv.huawei-3com.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: queue_transaction interface + unique_ptr + performance
+Date: Fri, 4 Dec 2015 06:43:49 +0000
+Message-ID: <CO1PR02MB208669F157E93525AEB3772F40C0@CO1PR02MB208.namprd02.prod.outlook.com>
+References: <1575682875.28391996.1449169755619.JavaMail.zimbra@redhat.com>
+ <20151203191233.GA17144@ultraspiritum.redhat.com>
+ <CAN=+7FVC5QU7Gz6qq9PPeVv3Nvkq0c0cbVNNcC+Rz-j7OcnHxQ@mail.gmail.com>
+ <1928144476.28418457.1449170995351.JavaMail.zimbra@redhat.com>
+ <CAN=+7FV1aFxmT8E_-=G4+OuOG=VotWV7PQv45zL3v3+mjDYbrQ@mail.gmail.com>
+ <291788535.28463587.1449173661550.JavaMail.zimbra@redhat.com>
+ <alpine.DEB.2.00.1512031303010.19170@cobra.newdream.net>
+ <1814262106.28521757.1449177794388.JavaMail.zimbra@redhat.com>
+ <CAN=+7FX3goZteU+niLf5gXpVBq0yFxi6Gkqux5FZbvJNpQieJw@mail.gmail.com>
+ <CO1PR02MB208F2A592CD7CF75DF71346F40C0@CO1PR02MB208.namprd02.prod.outlook.com>
+ <20151204014358.GA7239@ultraspiritum.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f175.google.com ([209.85.217.175]:35489 "EHLO
-	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751010AbbLDGSR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Dec 2015 01:18:17 -0500
-Received: by lbbed20 with SMTP id ed20so379001lbb.2
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 22:18:16 -0800 (PST)
-In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D75030E7D71@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from mail-bn1on0057.outbound.protection.outlook.com ([157.56.110.57]:26976
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751178AbbLDGnw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Dec 2015 01:43:52 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wukongming <wu.kongming@h3c.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "zhengbin.08747@h3c.com" <zhengbin.08747@h3c.com>
+To: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: Samuel Just <sjust@redhat.com>, Casey Bodley <cbodley@redhat.com>, Sage Weil <sweil@redhat.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SW4gU2ltcGxlTWVzc2VuZ2VyLCB0aGUgY2xpZW50IE9QIGxpa2UgT1NEX09QIHdpbGwgZGlzcGF0
-Y2ggYnkNCm1zX2Zhc3RfZGlzcGF0Y2gsIGFuZCBub3QgcXVldWVkIGluIFByaW9ydGl6ZWRRdWV1
-ZSBpbiBNZXNzZW5nZXIuDQoNCjIwMTUtMTItMDMgMjI6MTQgR01UKzA4OjAwIFd1a29uZ21pbmcg
-PHd1LmtvbmdtaW5nQGgzYy5jb20+Og0KPiBIaSwgQWxsOg0KPiAgICAgICAgIEkgJ3ZlIGdvdCBh
-IHF1ZXN0aW9uIGFib3V0IGEgcHJpb3JpdHkuIFdlIGRlZmluZWQgb3NkX2NsaWVudF9vcF9wcmlv
-cml0eSA9IDYzLiBDRVBIX01TR19QUklPX0xPVyA9IDY0Lg0KPiBXZSBhcmUgY2xlYXIgdGhlcmUg
-YXJlIG11bHRpcGxlIElPIHRvIGJlIGRpc2N1c3NlZC4gV2h5IG5vdCBkZWZpbmUgb3NkX2NsaWVu
-dF9vcF9wcmlvcml0eSA+IDY0LCBzbyB3ZSBjYW4ganVzdCBkZWFsIHdpdGggY2xpZW50IElPIGlu
-IGZpcnN0IHByaW9yaXR5Lg0KPg0KPg0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0NCj4gd3Vrb25nbWluZyBJRDogMTIwMTkNCj4gVGVs77yaMDU3MS04Njc2
-MDIzOQ0KPiBEZXB077yaMjAxNCBVSVMyIE9ORVN0b3INCj4NCj4NCj4gLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLQ0KPiDmnKzpgq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDm
-nK/mnInpmZDlhazlj7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLl
-nLDlnYDkuK3liJflh7oNCj4g55qE5Liq5Lq65oiW576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW
-5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo
-5YiG5Zyw5rOE6Zyy44CB5aSN5Yi244CBDQo+IOaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/
-oeaBr+OAguWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaI
-lumCruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0KPiDpgq7ku7bvvIENCj4gVGhpcyBl
-LW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlv
-biBmcm9tIEgzQywgd2hpY2ggaXMNCj4gaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBl
-bnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhlDQo+IGlu
-Zm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90
-IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRpYWwNCj4gZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9u
-LCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQo+
-IHJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBp
-biBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyDQo+IGJ5IHBob25lIG9yIGVtYWlsIGlt
-bWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQoNCg0KDQotLSANCnRoYW5rcw0KaHVhbmdqdW4NCg==
+Sorry , I went through entire conversation and realized that we are expecting the move constructor of Transaction class won't be inducing much overhead vs unique_ptr.
+Thanks I will start coding around that and will publish the final interfaces soon for the sign off.
+
+Regards
+Somnath
+
+-----Original Message-----
+From: Somnath Roy 
+Sent: Thursday, December 03, 2015 10:16 PM
+To: 'Adam C. Emerson'
+Cc: Samuel Just; Casey Bodley; Sage Weil; Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org
+Subject: RE: queue_transaction interface + unique_ptr + performance
+
+Adam,
+May be I am missing something here. 
+Don't we need to do an extra Transaction copy in case of async completion and Transaction is allocated on stack for queue_transaction() taking vector<Transaction> ?
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Adam C. Emerson [mailto:aemerson@redhat.com]
+Sent: Thursday, December 03, 2015 5:44 PM
+To: Somnath Roy
+Cc: Samuel Just; Casey Bodley; Sage Weil; Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org
+Subject: Re: queue_transaction interface + unique_ptr + performance
+
+On 04/12/2015, Somnath Roy wrote:
+[snip]
+> ##### Test Shared Smart ptr ######
+> micros_used for shared ptr: 27105354
+
+One thing to keep in mind is that, if there are any cases where we really DO want to use shared_ptr, if we find ourselves assigning a new pointer then releasing an old one, it's better to std::move from one to the other, since it doesn't have to use locking/atomics to fiddle with the refcount in that case.
+But if we can avoid them, all the better.
+
+
+[snip]
+> 2. I have also measured the cost of list::push_back etc. , all is expected.. if I replace list with vector again I am getting *some benefit* , which is also expected I guess.
+
+If we have some idea how many elements we expect/want to hold, calling reserve will get all our allocations done all at once rather than dipping into the heap multiple times.
+
+> I am not seeing any conclusion on the interface change...Here is my understanding so far..
+> 
+> 1. For the method like apply_transaction() which is taking Transaction reference now, I will not be changing the interface , instead will do an extra copy to create unique_ptr inside.
+> 
+> 2. For all the cases taking Transaction* , I will change that to 
+> TransactionRef&&
+> 
+> 3. The queue_transactions() will be changed to vector< TransactionRef> 
+> instead of list< Transaction*>
+> 
+> Let me know if I am missing anything..
+
+My understanding is that in some cases we might not want to use the heap. (For example, if we're executing a transaction synchronously rather than enqueing
+it.) And to make Transaction movable. Then we would not build a std::vector<TransactionRef>, what we would build instead is std::vector<Transaction>
+
+In this case, we should probably have everything just take Transaction&& (so the caller can expect to have the contents of the transaction moved out.
+
+We might also want to consider building a transaction in place. I know I saw one constructor that takes bufferlist. If there are other cases where we could benefit from just passing in arguments and having the transaction built right into the vector (with emplace_back), that would be even better than constructing it on the stack and moving it in to the vector.
+
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
