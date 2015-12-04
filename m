@@ -1,65 +1,39 @@
-From: =?windows-1252?Q?Javier_Mu=F1oz?= <jmunhoz@igalia.com>
-Subject: Re: RGW S3 Website hosting, non-clean code for early review
-Date: Fri, 04 Dec 2015 13:10:47 +0100
-Message-ID: <566182C7.6010008@igalia.com>
-References: <20150623093325.GH10754@orbis-terrarum.net> <1739382408.18844114.1435091419238.JavaMail.zimbra@redhat.com> <robbat2-20150623T230410-006258787Z@orbis-terrarum.net> <854662566.18884035.1435100864177.JavaMail.zimbra@redhat.com> <1563403567.1093721.1438280774967.JavaMail.zimbra@redhat.com> <robbat2-20150731T080643-628065411Z@orbis-terrarum.net> <565EF9E4.2020501@igalia.com> <robbat2-20151203T214017-551971919Z@orbis-terrarum.net>
+From: Daniel Gryniewicz <dang@redhat.com>
+Subject: Re: cmake
+Date: Fri, 4 Dec 2015 09:15:58 -0500
+Message-ID: <CAL-2WbEdQDHO-FY_Ns0vigWv1S0gMUk8X1NSQKaXH3kB2Lrn5w@mail.gmail.com>
+References: <20151203152436.73e15e38@lembas.zaitcev.lan> <20151203223020.GB17144@ultraspiritum.redhat.com>
+ <20151203170347.33867061@lembas.zaitcev.lan> <295720458.28620860.1449188812348.JavaMail.zimbra@redhat.com>
+ <20151204015942.19951132@lembas.zaitcev.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp3.mundo-r.com ([212.51.32.191]:35503 "EHLO
-	smtp4.mundo-r.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752121AbbLDMLC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Dec 2015 07:11:02 -0500
-In-Reply-To: <robbat2-20151203T214017-551971919Z@orbis-terrarum.net>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:34701 "EHLO
+	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752834AbbLDOQS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Dec 2015 09:16:18 -0500
+Received: by wmvv187 with SMTP id v187so76511211wmv.1
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Dec 2015 06:16:17 -0800 (PST)
+In-Reply-To: <20151204015942.19951132@lembas.zaitcev.lan>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Robin H. Johnson" <robbat2@gentoo.org>
-Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel@vger.kernel.org, Jonathan LaCour <jonathan.lacour@dreamhost.com>
+To: Pete Zaitcev <zaitcev@redhat.com>
+Cc: Matt Benjamin <mbenjamin@redhat.com>, "Adam C. Emerson" <aemerson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 12/03/2015 10:47 PM, Robin H. Johnson wrote:
-> On Wed, Dec 02, 2015 at 03:02:12PM +0100, Javier Mu=F1oz wrote:
->> I would appreciate to know the current status of the implementation =
-if
->> possible. Any progress? Any 'deadline' to go upstream? :)
->=20
-> When:
-> As soon as it works 100% and passes my testsuite, which I hope is ver=
-y
-> soon. I would very much like to have this in Jewel.
->=20
-> My work was being done in this branch
-> https://github.com/dreamhost/ceph/tree/wip-static-website-robbat2-mas=
-ter
-> However, due to master moving forward, I can't use the latest parts o=
-f
-> the gitbuilder and automatic testing successfully (they've moved on,
-> while this has stayed behind).
->=20
-> Yehuda wanted me to try and NOT rebase it, for ease of his review, bu=
-t
-> that was no longer possible :-(.
-> (tagged as wip-static-website-robbat2-master_yehuda-review-20151012 i=
-n
-> the dreamhost fork).
->=20
-> The above, but squashed and updated to master as of 2015/12/02
-> https://github.com/dreamhost/ceph/tree/wip-static-website-robbat2-mas=
-ter-20151202
-> It's presently running against my testsuite, and if it passes the pie=
-ces
-> that I know it should [1], I'll be splitting it up to submit.
->=20
-> [1] I'm seeing some failures of places where I didn't touch the code,=
- so
-> having to separate those out.
+On Fri, Dec 4, 2015 at 3:59 AM, Pete Zaitcev <zaitcev@redhat.com> wrote:
+> On Thu, 3 Dec 2015 19:26:52 -0500 (EST)
+> Matt Benjamin <mbenjamin@redhat.com> wrote:
+>
+>> Could you share the branch you are trying to build?  (ceph/wip-5073 would not appear to be it.)
+>
+> It's the trunk with a few of my insignificant cleanups.
+>
+> But I found a fix: deleting the CMakeFiles/ and CMakeCache.txt let
+> it run. Thanks again for the tip about the separate build directory.
+>
 
-Thanks for the update!
+FWIW, many cmake issues can be fixed by nuking the cmake generated
+files.  This is one of the big advantages to a separate build dir,
+since the simplest way to do this is to nuke the build dir.
 
-Javier
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Daniel
