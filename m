@@ -1,60 +1,51 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: wip-cxx11time and wip-cxx11concurrency
-Date: Fri, 4 Dec 2015 15:36:03 -0500
-Message-ID: <20151204203602.GB10038@ultraspiritum.redhat.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Why FailedAssertion is not my favorite exception
+Date: Fri, 4 Dec 2015 12:37:18 -0800
+Message-ID: <CAJ4mKGbg+wadiRnTsXbdZoWfv5PHQRUvYU=U=J03PG1k8yQdhA@mail.gmail.com>
+References: <20151204203129.GA10038@ultraspiritum.redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="oLBj+sq0vYjzfsbl"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59751 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755200AbbLDUgE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 4 Dec 2015 15:36:04 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id 86041C0B7A15
-	for <ceph-devel@vger.kernel.org>; Fri,  4 Dec 2015 20:36:04 +0000 (UTC)
-Content-Disposition: inline
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:33825 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752444AbbLDUhT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Dec 2015 15:37:19 -0500
+Received: by wmvv187 with SMTP id v187so91293903wmv.1
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Dec 2015 12:37:18 -0800 (PST)
+In-Reply-To: <20151204203129.GA10038@ultraspiritum.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ceph Developers <ceph-devel@vger.kernel.org>
-Cc: Sage Weil <sweil@redhat.com>
 
+On Fri, Dec 4, 2015 at 12:31 PM, Adam C. Emerson <aemerson@redhat.com> wrote:
+> Noble Creators of the Squid Cybernetic Swimming in a Distributed Data Sea,
+>
+> There is a spectre haunting src/common/assert.cc: The spectre of throw
+> FailedAssertion.
+>
+> This seemingly inconsequential yet villainous statement destroys the
+> stack frame in which a failing assert statement is evaluated-- a stack
+> frame of great interest to those hoping to divine the cause of such
+> failures-- at the moment of their detection.
+>
+> This consequence follows from the hope that some caller might be able to
+> catch and recover from the failure. That is an unworthy goal, for any
+> failure sufficiently dire to rate an 'assert' is a failure from which
+> there can be no recovery. As I survey the code, I see FailedAssertion
+> is only caught as part of unit tests and in a few small programs where
+> it lead to an immediate exit.
+>
+> Therefore! If there is no objection, I would like to submit a patch that
+> will replace 'throw FailedException' with abort(). In support of this
+> goal, the patch will also remove attempts to catch FailedException from
+> driver programs like librados-config and change tests expecting a throw
+> of FailedAssertion to use the EXPECT_DEATH or ASSERT_DEATH macros instead.
+>
+> These changes, taken together, should be non-disruptive and make
+> debugging easier.
 
---oLBj+sq0vYjzfsbl
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Sage and Fellow Ceph Developers,
-
-Someone poked at me and asked me to rebased and repush the time and concurr=
-ency
-branches for merge. They have been so rebased and the loicbot tester seems =
-happy
-with them.
-
-Thank you.
-
---=20
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
-
---oLBj+sq0vYjzfsbl
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQF8BAEBCgBmBQJWYfkuXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
-ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
-OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jlh0H+gN0Fq0Cc6n6SiOxX6jgWr/Q
-M8WidMKNwxAPSfln6oQOsxBLVIjYHodeW3vpAVl9cFlzLOHAHg23d97LvKquYDvl
-NxsIcqBRwv5NW3PV8HybvlbL9uq7C4JKyCVja085RU9FORylOaL3ZWIhQMQwQShG
-We0hJIzoQvgkDY+mIcmAAFhY4hFxfUiUM46Jp4nLcOkKZ3qH3s0/oYKmdChuqmNv
-Z+SGGdftysgP52Tndz8GBUWPMj25uXUhqWMEmB5L0YbcBNV1pps4T0C5XeHsacJC
-dyQbzqVEELBoW4yVvc+rnpZI5/PB1R0ic/DoKVvz0zXhgfuRA455l42SvQP7MZM=
-=Ie/I
------END PGP SIGNATURE-----
-
---oLBj+sq0vYjzfsbl--
+I must be missing something here. As far as I can tell, "throw
+FailedAssertion" only happens in assert.cc, and I know that stuff
+doesn't destroy the relevant stack frames since I've pulled the info
+out of core dumps when debugging?
+-Greg
