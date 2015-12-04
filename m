@@ -1,27 +1,26 @@
-From: Haomai Wang <haomai@xsky.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
 Subject: Re: ack vs commit
-Date: Fri, 4 Dec 2015 10:57:28 +0800
-Message-ID: <CACJqLyZ91jC6nhNp04usE5jzdoMN85c6t_H+A7LOSVhWH78wGg@mail.gmail.com>
+Date: Thu, 3 Dec 2015 19:56:50 -0800
+Message-ID: <CADRKj5R0Ew5nK0Y1v_XHxM5ECeLrh4X8hysr5rnX75OxWJFQFg@mail.gmail.com>
 References: <alpine.DEB.2.00.1512031641060.20799@cobra.newdream.net>
 	<CAJ4mKGbwikMiRsYasu3Fg1RcrCq_5zKV8f1b4Qo5CCTANzjHNw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pu1apc01on0090.outbound.protection.outlook.com ([104.47.126.90]:11008
-	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754894AbbLDC5o convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 21:57:44 -0500
-Received: by ioir85 with SMTP id r85so102741033ioi.1
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 18:57:28 -0800 (PST)
+Received: from mail-vk0-f54.google.com ([209.85.213.54]:33518 "EHLO
+	mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754336AbbLDD4v convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 22:56:51 -0500
+Received: by vkca188 with SMTP id a188so58973910vkc.0
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 19:56:50 -0800 (PST)
 In-Reply-To: <CAJ4mKGbwikMiRsYasu3Fg1RcrCq_5zKV8f1b4Qo5CCTANzjHNw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <gfarnum@redhat.com>
 Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Dec 4, 2015 at 9:39 AM, Gregory Farnum <gfarnum@redhat.com> wro=
+On Thu, Dec 3, 2015 at 5:39 PM, Gregory Farnum <gfarnum@redhat.com> wro=
 te:
 > On Thu, Dec 3, 2015 at 4:54 PM, Sage Weil <sweil@redhat.com> wrote:
 >> From the beginning Ceph has had two kinds of acks for rados write/up=
@@ -121,6 +120,15 @@ ep it:
 l
 > feature for raw RADOS users
 >
+
+=46WIW, I completely agree. The fact that we hardly use it for
+cephfs/rgw/rbd, does not mean that there aren't any other users for
+it.  When breaking the framework is considered, we should weigh
+whether we add to it or detract from it. I think that in this case it
+would (at least seemingly) be the latter.
+
+Yehuda
+
 > 2) It's an incredibly useful protocol semantic for future performance
 > work of the sort that makes Sam start to cry, but which I find very
 > interesting. Consider a future when RBD treats the OSDs more like a
@@ -144,19 +152,6 @@ w
 > that'll be a lot harder than simply carrying it, both in terms of
 > banging it back into the code, and especially in terms of getting it
 > deployed to all the clients in the world again.
-
-=46or performance side, the ack/commit replies will double the potentia=
-l
-message number which make fast_dispatch thread overload. If we can
-reduce ack, I think it would make this problem disappear.
-
-I check the codes to refresh my mind, I think it make sense for
-users(rbd) disable ack wants. So we still has ack logic in osd side,
-but we wan't reply ack if caller doesn't need. Since we already has
-potential "need_ack" logic in message.
-
-plz correct me if wrong
-
 > -Greg
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
