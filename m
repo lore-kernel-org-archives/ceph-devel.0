@@ -1,77 +1,78 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: cmake
-Date: Thu, 3 Dec 2015 19:26:52 -0500 (EST)
-Message-ID: <295720458.28620860.1449188812348.JavaMail.zimbra@redhat.com>
-References: <20151203152436.73e15e38@lembas.zaitcev.lan> <20151203223020.GB17144@ultraspiritum.redhat.com> <20151203170347.33867061@lembas.zaitcev.lan>
+From: Sage Weil <sweil@redhat.com>
+Subject: ack vs commit
+Date: Thu, 3 Dec 2015 16:54:37 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1512031641060.20799@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:33358 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752137AbbLDA0w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 19:26:52 -0500
-In-Reply-To: <20151203170347.33867061@lembas.zaitcev.lan>
+Received: from mx1.redhat.com ([209.132.183.28]:56961 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750849AbbLDAyj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Dec 2015 19:54:39 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id D7F3EC0B0239
+	for <ceph-devel@vger.kernel.org>; Fri,  4 Dec 2015 00:54:38 +0000 (UTC)
+Received: from redhat.com ([10.3.112.19])
+	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tB40sbTk006739
+	for <ceph-devel@vger.kernel.org>; Thu, 3 Dec 2015 19:54:38 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Pete Zaitcev <zaitcev@redhat.com>
-Cc: "Adam C. Emerson" <aemerson@redhat.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Pete,
+From the beginning Ceph has had two kinds of acks for rados write/update 
+operations: ack (indicating the operation is accepted, serialized, and 
+staged in the osd's buffer cache) and commit (indicating the write is 
+durable).  The client, if it saw a failure on the OSD before getting the 
+commit, would have to resend the write to the new or recovered OSD, 
+attaching the version it got with the original ack so that the 
+new/recovered OSD could preserve the order.  (This is what the 
+replay_window pool property is for.)
 
-Could you share the branch you are trying to build?  (ceph/wip-5073 would not appear to be it.)
+The only user for this functionality is CephFS, and only when a file is 
+opened for write or read/write by multiple clients.  When that happens, 
+the clients do all read/write operations synchronously with the OSDs, and 
+effectively things are ordered there, at the object.  The idea is/was to 
+avoid penalizing this sort of IO by waiting for commits when the clients 
+aren't actually asking for that--at least until they call f[data]sync, at 
+which point the client will block and wait for the second commit replies 
+to arrive.
 
-Matt
+In practice, this doesn't actually help: everybody runs the OSDs on XFS, 
+and FileStore has to do write-ahead journaling, which means that these 
+operations are committed and durable before they are readable, and the 
+clients only ever see 'commit' (and not 'ack' followed by 'commit') 
+(commit implies ack too).   If you run the OSD on btrfs, you might see 
+some acks (journaling and writes to the file system/page cache are done in 
+parallel).
 
------ Original Message -----
-> From: "Pete Zaitcev" <zaitcev@redhat.com>
-> To: "Adam C. Emerson" <aemerson@redhat.com>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Thursday, December 3, 2015 7:03:47 PM
-> Subject: Re: cmake
-> 
-> On Thu, 3 Dec 2015 17:30:21 -0500
-> "Adam C. Emerson" <aemerson@redhat.com> wrote:
-> 
-> > On 03/12/2015, Pete Zaitcev wrote:
-> 
-> > > I'm trying to run cmake, in order to make sure my patches do not break it
-> > > (in particular WIP 5073 added source files). Result looks like this:
-> > > 
-> > > [zaitcev@lembas ceph-tip]$ cmake src
-> > 
-> > I believe the problem is 'cmake src'
-> 
-> Thanks for the tip about the separate build directory and the top-level
-> CMakeLists.txt. However, it still fails like this:
-> 
-> [zaitcev@lembas build]$ cmake ..
-> CMake Error at CMakeLists.txt:1 (include):
->   include could not find load file:
-> 
->     GetGitRevisionDescription
-> ...................
-> 
-> Do you know by any chance where it gets that include? Also, what's
-> your cmake --version?
-> 
-> Greetings,
-> -- Pete
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+With newstore/bluestore, the current implementation doesn't make any 
+attempt to make a write readable before it is durable.  This could be 
+changed, but.. I'm not sure it's worth it.  For most workloads (RBD, RGW) 
+we only care about making writes durable as quickly as possible, and all 
+of the OSD optimization efforts are focusing on making this as fast as 
+possible.  Is there much marginal benefit to the initial ack?  It's only 
+the CephFS clients with the same file open from multiple hosts that might 
+see a small benefit.
 
--- 
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+On the other hand, there is a bunch of code in the OSD and on the 
+client side to deal with the dual-ack behavior we could potentially drop.  
+Also, we are generating lots of extra messages on the backend network for 
+both ack and commit, even though the librados users don't usually care 
+(the clients don't get the dual acks unless they request them).
 
-http://www.redhat.com/en/technologies/storage
+Also, it is arguably Wrong and a Bad Thing that you could have client A 
+write to file F, client B reads from file F and sees that data, the OSD 
+and client A both fail, and when things recover client B re-reads the same 
+portion of the file and sees the file content from before client A's 
+change.  The MDS is extremely careful about this on the metadata side: no 
+side-effects of one client are visible to any other client until they are 
+durable, so that a combination MDS and client failure will never make 
+things appear to go back in time.
 
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+Any opinions here?  My inclination is to remove the functionality (less 
+code, less complexity, more sane semantics), but we'd be closing the door 
+on what might have been a half-decent idea (separating serialization from 
+durability when multiple clients have the same file open for 
+read/write)...
+
+sage
