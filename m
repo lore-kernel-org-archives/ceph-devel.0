@@ -1,142 +1,76 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: ack vs commit
-Date: Thu, 3 Dec 2015 17:39:04 -0800
-Message-ID: <CAJ4mKGbwikMiRsYasu3Fg1RcrCq_5zKV8f1b4Qo5CCTANzjHNw@mail.gmail.com>
-References: <alpine.DEB.2.00.1512031641060.20799@cobra.newdream.net>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: queue_transaction interface + unique_ptr + performance
+Date: Thu, 3 Dec 2015 20:43:58 -0500
+Message-ID: <20151204014358.GA7239@ultraspiritum.redhat.com>
+References: <1575682875.28391996.1449169755619.JavaMail.zimbra@redhat.com>
+ <20151203191233.GA17144@ultraspiritum.redhat.com>
+ <CAN=+7FVC5QU7Gz6qq9PPeVv3Nvkq0c0cbVNNcC+Rz-j7OcnHxQ@mail.gmail.com>
+ <1928144476.28418457.1449170995351.JavaMail.zimbra@redhat.com>
+ <CAN=+7FV1aFxmT8E_-=G4+OuOG=VotWV7PQv45zL3v3+mjDYbrQ@mail.gmail.com>
+ <291788535.28463587.1449173661550.JavaMail.zimbra@redhat.com>
+ <alpine.DEB.2.00.1512031303010.19170@cobra.newdream.net>
+ <1814262106.28521757.1449177794388.JavaMail.zimbra@redhat.com>
+ <CAN=+7FX3goZteU+niLf5gXpVBq0yFxi6Gkqux5FZbvJNpQieJw@mail.gmail.com>
+ <CO1PR02MB208F2A592CD7CF75DF71346F40C0@CO1PR02MB208.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:33680 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753487AbbLDBjH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 20:39:07 -0500
-Received: by wmec201 with SMTP id c201so53414232wme.0
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 17:39:04 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1512031641060.20799@cobra.newdream.net>
+Received: from mx1.redhat.com ([209.132.183.28]:58929 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754406AbbLDBoA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Dec 2015 20:44:00 -0500
+Content-Disposition: inline
+In-Reply-To: <CO1PR02MB208F2A592CD7CF75DF71346F40C0@CO1PR02MB208.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Samuel Just <sjust@redhat.com>, Casey Bodley <cbodley@redhat.com>, Sage Weil <sweil@redhat.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Dec 3, 2015 at 4:54 PM, Sage Weil <sweil@redhat.com> wrote:
-> From the beginning Ceph has had two kinds of acks for rados write/upd=
-ate
-> operations: ack (indicating the operation is accepted, serialized, an=
-d
-> staged in the osd's buffer cache) and commit (indicating the write is
-> durable).  The client, if it saw a failure on the OSD before getting =
-the
-> commit, would have to resend the write to the new or recovered OSD,
-> attaching the version it got with the original ack so that the
-> new/recovered OSD could preserve the order.  (This is what the
-> replay_window pool property is for.)
->
-> The only user for this functionality is CephFS, and only when a file =
-is
-> opened for write or read/write by multiple clients.  When that happen=
-s,
-> the clients do all read/write operations synchronously with the OSDs,=
- and
-> effectively things are ordered there, at the object.  The idea is/was=
- to
-> avoid penalizing this sort of IO by waiting for commits when the clie=
-nts
-> aren't actually asking for that--at least until they call f[data]sync=
-, at
-> which point the client will block and wait for the second commit repl=
-ies
-> to arrive.
->
-> In practice, this doesn't actually help: everybody runs the OSDs on X=
-=46S,
-> and FileStore has to do write-ahead journaling, which means that thes=
-e
-> operations are committed and durable before they are readable, and th=
-e
-> clients only ever see 'commit' (and not 'ack' followed by 'commit')
-> (commit implies ack too).   If you run the OSD on btrfs, you might se=
-e
-> some acks (journaling and writes to the file system/page cache are do=
-ne in
-> parallel).
->
-> With newstore/bluestore, the current implementation doesn't make any
-> attempt to make a write readable before it is durable.  This could be
-> changed, but.. I'm not sure it's worth it.  For most workloads (RBD, =
-RGW)
-> we only care about making writes durable as quickly as possible, and =
-all
-> of the OSD optimization efforts are focusing on making this as fast a=
-s
-> possible.  Is there much marginal benefit to the initial ack?  It's o=
-nly
-> the CephFS clients with the same file open from multiple hosts that m=
-ight
-> see a small benefit.
->
-> On the other hand, there is a bunch of code in the OSD and on the
-> client side to deal with the dual-ack behavior we could potentially d=
-rop.
-> Also, we are generating lots of extra messages on the backend network=
- for
-> both ack and commit, even though the librados users don't usually car=
-e
-> (the clients don't get the dual acks unless they request them).
->
-> Also, it is arguably Wrong and a Bad Thing that you could have client=
- A
-> write to file F, client B reads from file F and sees that data, the O=
-SD
-> and client A both fail, and when things recover client B re-reads the=
- same
-> portion of the file and sees the file content from before client A's
-> change.  The MDS is extremely careful about this on the metadata side=
-: no
-> side-effects of one client are visible to any other client until they=
- are
-> durable, so that a combination MDS and client failure will never make
-> things appear to go back in time.
->
-> Any opinions here?  My inclination is to remove the functionality (le=
-ss
-> code, less complexity, more sane semantics), but we'd be closing the =
-door
-> on what might have been a half-decent idea (separating serialization =
-from
-> durability when multiple clients have the same file open for
-> read/write)...
+On 04/12/2015, Somnath Roy wrote:
+[snip]
+> ##### Test Shared Smart ptr ######
+> micros_used for shared ptr: 27105354
 
-I've considered this briefly in the past, but I'd really rather we keep=
- it:
+One thing to keep in mind is that, if there are any cases where we really DO
+want to use shared_ptr, if we find ourselves assigning a new pointer then
+releasing an old one, it's better to std::move from one to the other, since it
+doesn't have to use locking/atomics to fiddle with the refcount in that case.
+But if we can avoid them, all the better.
 
-1) While we don't make much use of it right now, I think it's a useful
-feature for raw RADOS users
 
-2) It's an incredibly useful protocol semantic for future performance
-work of the sort that makes Sam start to cry, but which I find very
-interesting. Consider a future when RBD treats the OSDs more like a
-disk with a cache, and is able to send out operations to get them out
-of local memory, without forcing them instantly to permanent storage.
-Similarly, I think as soon as we have a backend that lets us use a bit
-of 3D Crosspoint in a system, we'll wish we had this functionality
-again.
-(Likewise with CephFS, where many many users will have different
-consistency expectations thanks to NFS and other parallel FSes which
-really aren't consistent.)
+[snip]
+> 2. I have also measured the cost of list::push_back etc. , all is expected.. if I replace list with vector again I am getting *some benefit* , which is also expected I guess.
 
-Maybe we just think it's not worth it and we'd rather throw this out.
-But the only complexity this really lets us drop is the OSD replay
-stuff (which realistically I can't assess) =E2=80=94 the dual acks is n=
-ot hard
-to work with, and doesn't get changed much anyway. If we drop this now
-and decide to bring back any similar semantic in the future I think
-that'll be a lot harder than simply carrying it, both in terms of
-banging it back into the code, and especially in terms of getting it
-deployed to all the clients in the world again.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+If we have some idea how many elements we expect/want to hold, calling reserve
+will get all our allocations done all at once rather than dipping into the heap
+multiple times.
+
+> I am not seeing any conclusion on the interface change...Here is my understanding so far..
+> 
+> 1. For the method like apply_transaction() which is taking Transaction reference now, I will not be changing the interface , instead will do an extra copy to create unique_ptr inside.
+> 
+> 2. For all the cases taking Transaction* , I will change that to TransactionRef&&
+> 
+> 3. The queue_transactions() will be changed to vector< TransactionRef> instead of list< Transaction*>
+> 
+> Let me know if I am missing anything..
+
+My understanding is that in some cases we might not want to use the heap. (For
+example, if we're executing a transaction synchronously rather than enqueing
+it.) And to make Transaction movable. Then we would not build a
+std::vector<TransactionRef>, what we would build instead is
+std::vector<Transaction>
+
+In this case, we should probably have everything just take Transaction&& (so the
+caller can expect to have the contents of the transaction moved out.
+
+We might also want to consider building a transaction in place. I know I
+saw one constructor that takes bufferlist. If there are other cases where
+we could benefit from just passing in arguments and having the transaction
+built right into the vector (with emplace_back), that would be even
+better than constructing it on the stack and moving it in to the vector.
+
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
