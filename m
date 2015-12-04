@@ -1,96 +1,80 @@
-From: Eric Sandeen <esandeen@redhat.com>
-Subject: Re: Fwd: Fwd: [newstore (again)] how disable double write WAL
-Date: Fri, 4 Dec 2015 14:20:14 -0600
-Message-ID: <5661F57E.80709@redhat.com>
-References: <9D046674-EA8B-4CB5-B049-3CF665D4ED64@aevoo.fr>
- <alpine.DEB.2.00.1511241240150.25734@cobra.newdream.net>
- <CA+gn+znHyioZhOvuidN1pvMgRMOMvjbjcues_+uayYVadetz=A@mail.gmail.com>
- <CA+gn+z=5+gu=3R3ssLq-kQBjB6DFYeb9JteXV5Y7in89b8cmKA@mail.gmail.com>
- <alpine.DEB.2.00.1512011357340.19170@cobra.newdream.net>
- <5661F3A9.8070703@redhat.com>
-Reply-To: sandeen@redhat.com
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Why FailedAssertion is not my favorite exception
+Date: Fri, 4 Dec 2015 15:31:30 -0500
+Message-ID: <20151204203129.GA10038@ultraspiritum.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="yrj/dFKFPuw6o+aM"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56450 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56734 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756123AbbLDUUR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 4 Dec 2015 15:20:17 -0500
-In-Reply-To: <5661F3A9.8070703@redhat.com>
+	id S1754338AbbLDUbb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 4 Dec 2015 15:31:31 -0500
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 24D2991351
+	for <ceph-devel@vger.kernel.org>; Fri,  4 Dec 2015 20:31:31 +0000 (UTC)
+Received: from ultraspiritum.redhat.com (ovpn-116-27.rdu2.redhat.com [10.10.116.27])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with SMTP id tB4KVUwd008459
+	for <ceph-devel@vger.kernel.org>; Fri, 4 Dec 2015 15:31:30 -0500
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ric Wheeler <rwheeler@redhat.com>, Sage Weil <sage@newdream.net>, David Casier <david.casier@aevoo.fr>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Dave Chinner <dchinner@redhat.com>, Brian Foster <bfoster@redhat.com>
+To: Ceph Developers <ceph-devel@vger.kernel.org>
 
-On 12/4/15 2:12 PM, Ric Wheeler wrote:
-> On 12/01/2015 05:02 PM, Sage Weil wrote:
->> Hi David,
->>
->> On Tue, 1 Dec 2015, David Casier wrote:
->>> Hi Sage,
->>> With a standard disk (4 to 6 TB), and a small flash drive, it's easy
->>> to create an ext4 FS with metadata on flash
->>>
->>> Example with sdg1 on flash and sdb on hdd :
->>>
->>> size_of() {
->>>    blockdev --getsize $1
->>> }
->>>
->>> mkdmsetup() {
->>>    _ssd=/dev/$1
->>>    _hdd=/dev/$2
->>>    _size_of_ssd=$(size_of $_ssd)
->>>    echo """0 $_size_of_ssd linear $_ssd 0
->>>    $_size_of_ssd $(size_of $_hdd) linear $_hdd 0" | dmsetup create dm-${1}-${2}
->>> }
->>>
->>> mkdmsetup sdg1 sdb
->>>
->>> mkfs.ext4 -O ^has_journal,flex_bg,^uninit_bg,^sparse_super,sparse_super2,^extra_isize,^dir_nlink,^resize_inode
->>> -E packed_meta_blocks=1,lazy_itable_init=0 -G 32768 -I 128 -i
->>> $((1024*512)) /dev/mapper/dm-sdg1-sdb
->>>
->>> With that, all meta_blocks are on the SSD
->>>
->>> If omap are on SSD, there are almost no metadata on HDD
->>>
->>> Consequence : performance Ceph (with hack on filestore without journal
->>> and directIO) are almost same that performance of the HDD.
->>>
->>> With cache-tier, it's very cool !
->> Cool!  I know XFS lets you do that with the journal, but I'm not sure if
->> you can push the fs metadata onto a different device too.. I'm guessing
->> not?
->>
->>> That is why we are working on a hybrid approach HDD / Flash on ARM or Intel
->>>
->>> With newstore, it's much more difficult to control the I/O profil.
->>> Because rocksDB embedded its own intelligence
->> This is coincidentally what I've been working on today.  So far I've just
->> added the ability to put the rocksdb WAL on a second device, but it's
->> super easy to push rocksdb data there as well (and have it spill over onto
->> the larger, slower device if it fills up).  Or to put the rocksdb WAL on a
->> third device (e.g., expensive NVMe or NVRAM).
->>
->> See this ticket for the ceph-disk tooling that's needed:
->>
->>     http://tracker.ceph.com/issues/13942
->>
->> I expect this will be more flexible and perform better than the ext4
->> metadata option, but we'll need to test on your hardware to confirm!
->>
->> sage
-> 
-> I think that XFS "realtime" subvolumes are the thing that does this -  the second volume contains only the data (no metadata).
-> 
-> Seem to recall that it is popular historically with video appliances, etc but it is not commonly used.
-> 
-> Some of the XFS crew cc'ed above would have more information on this,
 
-The realtime subvolume puts all data on a separate volume, and uses a different
-allocator; it is more for streaming type applications, in general.  And it's
-not enabled in RHEL - and not heavily tested at this point, I think.
+--yrj/dFKFPuw6o+aM
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
--Eric
+Noble Creators of the Squid Cybernetic Swimming in a Distributed Data Sea,
+
+There is a spectre haunting src/common/assert.cc: The spectre of throw
+FailedAssertion.
+
+This seemingly inconsequential yet villainous statement destroys the
+stack frame in which a failing assert statement is evaluated-- a stack
+frame of great interest to those hoping to divine the cause of such
+failures-- at the moment of their detection.
+
+This consequence follows from the hope that some caller might be able to
+catch and recover from the failure. That is an unworthy goal, for any
+failure sufficiently dire to rate an 'assert' is a failure from which
+there can be no recovery. As I survey the code, I see FailedAssertion
+is only caught as part of unit tests and in a few small programs where
+it lead to an immediate exit.
+
+Therefore! If there is no objection, I would like to submit a patch that
+will replace 'throw FailedException' with abort(). In support of this
+goal, the patch will also remove attempts to catch FailedException from
+driver programs like librados-config and change tests expecting a throw
+of FailedAssertion to use the EXPECT_DEATH or ASSERT_DEATH macros instead.
+
+These changes, taken together, should be non-disruptive and make
+debugging easier.
+
+Thank you all.
+
+--=20
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+
+--yrj/dFKFPuw6o+aM
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQF8BAEBCgBmBQJWYfgaXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
+ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
+OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jW7AH/1dY6n48n6e0O0qFzGdxe9ey
+1mW/L9rRTU1b71KtxsRLSHS7Ax+Z04OEc2ZrPZuyUVYxr2foNy8em9rRt62i3/yu
+grf+SFFBwKnt/OYylLaX7Sejc1/XnIKszzmHZtYCJeZFiLw/ViS7oJ6djeZGfGi3
+oLlzye4/d1UGo9rRFaGGLoFTZ9vESSSNOcdHQfpwlqkuRmArmWYRHKIGVYScUMzg
+yNESGX26jNU5h4Ze+LMlDINWX8dddVy5TM36AzU3ZrFctnZpiQv5eRaUcaHhw6kI
+9xtb0d3wPP7UkUgr1TdXtsGuRfNeO+NcNOOQAT2SbB8oV3qTaTcjoIHB6Wa3mVA=
+=oND1
+-----END PGP SIGNATURE-----
+
+--yrj/dFKFPuw6o+aM--
