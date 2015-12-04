@@ -1,101 +1,77 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: queue_transaction interface + unique_ptr + performance
-Date: Fri, 4 Dec 2015 00:25:48 +0000
-Message-ID: <CO1PR02MB208F2A592CD7CF75DF71346F40C0@CO1PR02MB208.namprd02.prod.outlook.com>
-References: <CO1PR02MB2082647268152AF8A71E84FF40D0@CO1PR02MB208.namprd02.prod.outlook.com>
-	<1575682875.28391996.1449169755619.JavaMail.zimbra@redhat.com>
-	<20151203191233.GA17144@ultraspiritum.redhat.com>
-	<CAN=+7FVC5QU7Gz6qq9PPeVv3Nvkq0c0cbVNNcC+Rz-j7OcnHxQ@mail.gmail.com>
-	<1928144476.28418457.1449170995351.JavaMail.zimbra@redhat.com>
-	<CAN=+7FV1aFxmT8E_-=G4+OuOG=VotWV7PQv45zL3v3+mjDYbrQ@mail.gmail.com>
-	<291788535.28463587.1449173661550.JavaMail.zimbra@redhat.com>
-	<alpine.DEB.2.00.1512031303010.19170@cobra.newdream.net>
-	<1814262106.28521757.1449177794388.JavaMail.zimbra@redhat.com>
- <CAN=+7FX3goZteU+niLf5gXpVBq0yFxi6Gkqux5FZbvJNpQieJw@mail.gmail.com>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: Re: cmake
+Date: Thu, 3 Dec 2015 19:26:52 -0500 (EST)
+Message-ID: <295720458.28620860.1449188812348.JavaMail.zimbra@redhat.com>
+References: <20151203152436.73e15e38@lembas.zaitcev.lan> <20151203223020.GB17144@ultraspiritum.redhat.com> <20151203170347.33867061@lembas.zaitcev.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0085.outbound.protection.outlook.com ([65.55.169.85]:47264
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752137AbbLDAZu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 3 Dec 2015 19:25:50 -0500
-In-Reply-To: <CAN=+7FX3goZteU+niLf5gXpVBq0yFxi6Gkqux5FZbvJNpQieJw@mail.gmail.com>
-Content-Language: en-US
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:33358 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752137AbbLDA0w (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 19:26:52 -0500
+In-Reply-To: <20151203170347.33867061@lembas.zaitcev.lan>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>, Casey Bodley <cbodley@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Pete Zaitcev <zaitcev@redhat.com>
+Cc: "Adam C. Emerson" <aemerson@redhat.com>, ceph-devel@vger.kernel.org
 
-U29tZSBtb3JlIGZpbmRpbmdzLi4NCg0KMS4gQnkgdXNpbmcgbWFrZV9zaGFyZWQgdGhlIGNvc3Qg
-b2Ygc2hhcmVkX3B0ciBpcyByZWR1Y2VkIHNpZ25pZmljYW50bHkuLg0KDQojIyMjIyBUZXN0IGNv
-bnZlbnRpb25hbCBwdHIgIyMjIyMjDQptaWNyb3NfdXNlZCBmb3IgY29udmVudGlvbmFsIHB0cjog
-MjI2MzM3MDIgDQoNCiMjIyMjIFRlc3QgVW5pcXVlIFNtYXJ0IHB0ciAjIyMjIyMNCm1pY3Jvc191
-c2VkIGZvciB1bmlxdWUgcHRyOiAyMjYzMzY5NA0KDQoNCiMjIyMjIFRlc3QgU2hhcmVkIFNtYXJ0
-IHB0ciAjIyMjIyMNCm1pY3Jvc191c2VkIGZvciBzaGFyZWQgcHRyOiAyNzEwNTM1NA0KDQoNClNv
-LCBhbG1vc3QgaGFsZiBub3cuLi4NCg0KV2lsbCBkbyBzb21lIGNsZWFudXAgaW4gdGhlIGNlcGgg
-aW8gcGF0aCBvbiB0aGlzLi4NCg0KMi4gSSBoYXZlIGFsc28gbWVhc3VyZWQgdGhlIGNvc3Qgb2Yg
-bGlzdDo6cHVzaF9iYWNrIGV0Yy4gLCBhbGwgaXMgZXhwZWN0ZWQuLiBpZiBJIHJlcGxhY2UgbGlz
-dCB3aXRoIHZlY3RvciBhZ2FpbiBJIGFtIGdldHRpbmcgKnNvbWUgYmVuZWZpdCogLCB3aGljaCBp
-cyBhbHNvIGV4cGVjdGVkIEkgZ3Vlc3MuDQoNCkkgYW0gbm90IHNlZWluZyBhbnkgY29uY2x1c2lv
-biBvbiB0aGUgaW50ZXJmYWNlIGNoYW5nZS4uLkhlcmUgaXMgbXkgdW5kZXJzdGFuZGluZyBzbyBm
-YXIuLg0KDQoxLiBGb3IgdGhlIG1ldGhvZCBsaWtlIGFwcGx5X3RyYW5zYWN0aW9uKCkgd2hpY2gg
-aXMgdGFraW5nIFRyYW5zYWN0aW9uIHJlZmVyZW5jZSBub3csIEkgd2lsbCBub3QgYmUgY2hhbmdp
-bmcgdGhlIGludGVyZmFjZSAsIGluc3RlYWQgd2lsbCBkbyBhbiBleHRyYSBjb3B5IHRvIGNyZWF0
-ZSB1bmlxdWVfcHRyIGluc2lkZS4NCg0KMi4gRm9yIGFsbCB0aGUgY2FzZXMgdGFraW5nIFRyYW5z
-YWN0aW9uKiAsIEkgd2lsbCBjaGFuZ2UgdGhhdCB0byBUcmFuc2FjdGlvblJlZiYmDQoNCjMuIFRo
-ZSBxdWV1ZV90cmFuc2FjdGlvbnMoKSB3aWxsIGJlIGNoYW5nZWQgdG8gdmVjdG9yPCBUcmFuc2Fj
-dGlvblJlZj4gaW5zdGVhZCBvZiBsaXN0PCBUcmFuc2FjdGlvbio+DQoNCkxldCBtZSBrbm93IGlm
-IEkgYW0gbWlzc2luZyBhbnl0aGluZy4uDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0K
-LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFNhbXVlbCBKdXN0IFttYWlsdG86c2p1
-c3RAcmVkaGF0LmNvbV0gDQpTZW50OiBUaHVyc2RheSwgRGVjZW1iZXIgMDMsIDIwMTUgMzoyNCBQ
-TQ0KVG86IENhc2V5IEJvZGxleQ0KQ2M6IFNhZ2UgV2VpbDsgU29tbmF0aCBSb3k7IFNhbXVlbCBK
-dXN0IChzYW0uanVzdEBpbmt0YW5rLmNvbSk7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpT
-dWJqZWN0OiBSZTogcXVldWVfdHJhbnNhY3Rpb24gaW50ZXJmYWNlICsgdW5pcXVlX3B0ciArIHBl
-cmZvcm1hbmNlDQoNCkZyb20gYSBzaW1wbGljaXR5IHBvaW50IG9mIHZpZXcsIEknZCByYXRoZXIg
-anVzdCBtb3ZlIGEgVHJhbnNhY3Rpb24NCm9iamVjdCB0aGFuIHVzZSBhIHVuaXF1ZV9wdHIuICAg
-TWF5YmUgdGhlIG92ZXJoZWFkIGRvZXNuJ3QgZW5kIHVwDQpiZWluZyBzaWduaWZpY2FudD8NCi1T
-YW0NCg0KT24gVGh1LCBEZWMgMywgMjAxNSBhdCAxOjIzIFBNLCBDYXNleSBCb2RsZXkgPGNib2Rs
-ZXlAcmVkaGF0LmNvbT4gd3JvdGU6DQo+DQo+IC0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0N
-Cj4+IE9uIFRodSwgMyBEZWMgMjAxNSwgQ2FzZXkgQm9kbGV5IHdyb3RlOg0KPj4gPiA+IFdlbGws
-IHllYWggd2UgYXJlLCBpdCdzIGp1c3QgdGhlIGFjdHVhbCBUcmFuc2FjdGlvbiBzdHJ1Y3R1cmUg
-DQo+PiA+ID4gd2hpY2ggd291bGRuJ3QgYmUgZHluYW1pYyAtLSB0aGUgYnVmZmVycyBhbmQgbWFu
-eSBvdGhlciBmaWVsZHMgDQo+PiA+ID4gd291bGQgc3RpbGwgaGl0IHRoZSBhbGxvY2F0b3IuDQo+
-PiA+ID4gLVNhbQ0KPj4gPg0KPj4gPiBTdXJlLiBJIHdhcyBsb29raW5nIHNwZWNpZmljYWxseSBh
-dCB0aGUgdHJhZGVvZmZzIGJldHdlZW4gDQo+PiA+IGFsbG9jYXRpbmcgYW5kIG1vdmluZyB0aGUg
-VHJhbnNhY3Rpb24gb2JqZWN0IGl0c2VsZi4NCj4+ID4NCj4+ID4gQXMgaXQgY3VycmVudGx5IHN0
-YW5kcywgdGhlIGNhbGxlciBvZiBPYmplY3RTdG9yZSBjYW4gY2hvb3NlIA0KPj4gPiB3aGV0aGVy
-IHRvIGFsbG9jYXRlIGl0cyBUcmFuc2FjdGlvbnMgb24gdGhlIGhlYXAsIGVtYmVkIHRoZW0gaW4g
-DQo+PiA+IG90aGVyIG9iamVjdHMsIG9yIHB1dCB0aGVtIG9uIHRoZSBzdGFjayBmb3IgdXNlIHdp
-dGggDQo+PiA+IGFwcGx5X3RyYW5zYWN0aW9ucygpLiBTd2l0Y2hpbmcgdG8gYW4gaW50ZXJmYWNl
-IGJ1aWx0IGFyb3VuZCANCj4+ID4gdW5pcXVlX3B0ciBmb3JjZXMgYWxsIGNhbGxlcnMgdG8gdXNl
-IHRoZSBoZWFwLiBJJ20gYWR2b2NhdGluZyBmb3IgYW4gaW50ZXJmYWNlIHRoYXQgZG9lc24ndC4N
-Cj4+DQo+PiBUaGF0IGxlYXZlcyB1cyB3aXRoIGVpdGhlciBzdGQ6Om1vdmUgb3IuLiB0aGUgcmF3
-IFRyYW5zYWN0aW9uKiB3ZSANCj4+IGhhdmUgbm93LiAgUmlnaHQ/DQo+DQo+IFJpZ2h0LiBUaGUg
-dGhpbmcgSSByZWFsbHkgbGlrZSBhYm91dCB0aGUgdW5pcXVlX3B0ciBhcHByb2FjaCBpcyB0aGF0
-IA0KPiB0aGUgY2FsbGVyIG5vIGxvbmdlciBoYXMgdG8gY2FyZSBhYm91dCB0aGUgVHJhbnNhY3Rp
-b24ncyBsaWZldGltZSwgc28gDQo+IGRvZXNuJ3QgaGF2ZSB0byBhbGxvY2F0ZSB0aGUgZXh0cmEg
-T2JqZWN0U3RvcmU6OkNfRGVsZXRlVHJhbnNhY3Rpb24gZm9yIGNsZWFudXAuDQo+IE1vdmFibGUg
-VHJhbnNhY3Rpb25zIGFjY29tcGxpc2ggdGhpcyBhcyB3ZWxsLg0KPg0KPiBDYXNleQ0KPg0KPj4N
-Cj4+ID4gPiA+IEl0J3MgdHJ1ZSB0aGF0IHRoZSBtb3ZlIGN0b3IgaGFzIHRvIGRvIHdvcmsuIEkg
-Y291bnRlZCAxOCANCj4+ID4gPiA+IGZpZWxkcywgaGFsZiBvZiB3aGljaCBhcmUgaW50ZWdlcnMs
-IGFuZCB0aGUgcmVzdCBoYXZlIG1vdmUgDQo+PiA+ID4gPiBjdG9ycyB0aGVtc2VsdmVzLiBCdXQg
-dGhlIGNwdSBpcyBnb29kIGF0IGludGVnZXJzLiBUaGUgd2luIGhlcmUgDQo+PiA+ID4gPiBpcyB0
-aGF0IHlvdSdyZSBub3QgaGl0dGluZyB0aGUgYWxsb2NhdG9yIGluIHRoZSBmYXN0IHBhdGguDQo+
-Pg0KPj4gVG8gYmUgZmFpciwgbWFueSBvZiB0aGVzZSBhcmUgYWxzbyBsZWdhY3kgdGhhdCB3ZSBj
-YW4gcmVtb3ZlLi4uIA0KPj4gcG9zc2libHkgZXZlbiBub3cuICBJSVJDIHRoZSBvbmx5IGV4cG9z
-dXJlIHRvIGxlZ2FjeSBlbmNvZGVkIA0KPj4gdHJhbnNhY3Rpb25zICh0aGF0IHVzZSB0aGUgdGJs
-IGhhY2tlcnkpIGFyZSBqb3VybmFsIGl0ZW1zIGZyb20gYW4gDQo+PiB1cGdyYWRlIHByZS1oYW1t
-ZXIgT1NEIHRoYXQgYXJlbid0IGZsdXNoZWQgb24gdXBncmFkZS4gIFdlIHNob3VsZCANCj4+IGhh
-dmUgbWFkZSB0aGUgb3NkIGZsdXNoIHRoZSBqb3VybmFsIGJlZm9yZSByZWNvcmRpbmcgdGhlIDBf
-OTRfNCANCj4+IG9uZGlzayBmZWF0dXJlLiAgV2UgY291bGQgYWRkIGFub3RoZXIgb25lIHRvIGVu
-Zm9yY2UgdGhhdCBhbmQgcmlwIGFsbCANCj4+IHRoYXQgY29kZSBvdXQgbm93IGluc3RlYWQgb2Yg
-d2FpdGluZyB1bnRpbCBhZnRlciBqZXdlbC4uLiB0aGF0IHdvdWxkIA0KPj4gYmUgc2F0aXNmeWlu
-ZyAoYW5kIEkgdGhpbmsgYW4gb25kaXNrIGNlcGgtb3NkIGZlYXR1cmUgaXMgZW5vdWdoIGhlcmUs
-IA0KPj4gdGhlbiBkb2N1bWVudCB0aGF0IHVzZXJzIHNob3VsZCB1cGdyYWRlIHRvIGhhbW1lciAw
-Ljk0LjYgb3IgaW5mZXJuYWxpcyA5LjIuMSBiZWZvcmUgbW92aW5nIHRvIGpld2VsKS4NCj4+DQo+
-PiBzYWdlDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
-IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNz
-YWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+PiBpbmZv
-IGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+DQo=
+Pete,
+
+Could you share the branch you are trying to build?  (ceph/wip-5073 would not appear to be it.)
+
+Matt
+
+----- Original Message -----
+> From: "Pete Zaitcev" <zaitcev@redhat.com>
+> To: "Adam C. Emerson" <aemerson@redhat.com>
+> Cc: ceph-devel@vger.kernel.org
+> Sent: Thursday, December 3, 2015 7:03:47 PM
+> Subject: Re: cmake
+> 
+> On Thu, 3 Dec 2015 17:30:21 -0500
+> "Adam C. Emerson" <aemerson@redhat.com> wrote:
+> 
+> > On 03/12/2015, Pete Zaitcev wrote:
+> 
+> > > I'm trying to run cmake, in order to make sure my patches do not break it
+> > > (in particular WIP 5073 added source files). Result looks like this:
+> > > 
+> > > [zaitcev@lembas ceph-tip]$ cmake src
+> > 
+> > I believe the problem is 'cmake src'
+> 
+> Thanks for the tip about the separate build directory and the top-level
+> CMakeLists.txt. However, it still fails like this:
+> 
+> [zaitcev@lembas build]$ cmake ..
+> CMake Error at CMakeLists.txt:1 (include):
+>   include could not find load file:
+> 
+>     GetGitRevisionDescription
+> ...................
+> 
+> Do you know by any chance where it gets that include? Also, what's
+> your cmake --version?
+> 
+> Greetings,
+> -- Pete
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+-- 
+-- 
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-707-0660
+fax.  734-769-8938
+cel.  734-216-5309
