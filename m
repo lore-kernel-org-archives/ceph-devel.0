@@ -1,165 +1,56 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: ack vs commit
-Date: Thu, 3 Dec 2015 19:56:50 -0800
-Message-ID: <CADRKj5R0Ew5nK0Y1v_XHxM5ECeLrh4X8hysr5rnX75OxWJFQFg@mail.gmail.com>
-References: <alpine.DEB.2.00.1512031641060.20799@cobra.newdream.net>
-	<CAJ4mKGbwikMiRsYasu3Fg1RcrCq_5zKV8f1b4Qo5CCTANzjHNw@mail.gmail.com>
+From: Wukongming <wu.kongming-vVzyEvZLFYE@public.gmane.org>
+Subject: =?gb2312?b?16q3ojogQ29uZnVzZWQgYWJvdXQgcHJpb3JpdHkg?=
+	=?gb2312?b?b2YgY2xpZW50IE9QLg==?=
+Date: Fri, 4 Dec 2015 06:09:59 +0000
+Message-ID: <47D132BF400BE64BAE6D71033F7D3D75030E7FF8@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f54.google.com ([209.85.213.54]:33518 "EHLO
-	mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754336AbbLDD4v convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Dec 2015 22:56:51 -0500
-Received: by vkca188 with SMTP id a188so58973910vkc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Dec 2015 19:56:50 -0800 (PST)
-In-Reply-To: <CAJ4mKGbwikMiRsYasu3Fg1RcrCq_5zKV8f1b4Qo5CCTANzjHNw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: zh-CN
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Haomai Wang <haomai-p1s0O0zx/60@public.gmane.org>
+Cc: "zhengbin.08747-vVzyEvZLFYE@public.gmane.org" <zhengbin.08747-vVzyEvZLFYE@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Dec 3, 2015 at 5:39 PM, Gregory Farnum <gfarnum@redhat.com> wro=
-te:
-> On Thu, Dec 3, 2015 at 4:54 PM, Sage Weil <sweil@redhat.com> wrote:
->> From the beginning Ceph has had two kinds of acks for rados write/up=
-date
->> operations: ack (indicating the operation is accepted, serialized, a=
-nd
->> staged in the osd's buffer cache) and commit (indicating the write i=
-s
->> durable).  The client, if it saw a failure on the OSD before getting=
- the
->> commit, would have to resend the write to the new or recovered OSD,
->> attaching the version it got with the original ack so that the
->> new/recovered OSD could preserve the order.  (This is what the
->> replay_window pool property is for.)
->>
->> The only user for this functionality is CephFS, and only when a file=
- is
->> opened for write or read/write by multiple clients.  When that happe=
-ns,
->> the clients do all read/write operations synchronously with the OSDs=
-, and
->> effectively things are ordered there, at the object.  The idea is/wa=
-s to
->> avoid penalizing this sort of IO by waiting for commits when the cli=
-ents
->> aren't actually asking for that--at least until they call f[data]syn=
-c, at
->> which point the client will block and wait for the second commit rep=
-lies
->> to arrive.
->>
->> In practice, this doesn't actually help: everybody runs the OSDs on =
-XFS,
->> and FileStore has to do write-ahead journaling, which means that the=
-se
->> operations are committed and durable before they are readable, and t=
-he
->> clients only ever see 'commit' (and not 'ack' followed by 'commit')
->> (commit implies ack too).   If you run the OSD on btrfs, you might s=
-ee
->> some acks (journaling and writes to the file system/page cache are d=
-one in
->> parallel).
->>
->> With newstore/bluestore, the current implementation doesn't make any
->> attempt to make a write readable before it is durable.  This could b=
-e
->> changed, but.. I'm not sure it's worth it.  For most workloads (RBD,=
- RGW)
->> we only care about making writes durable as quickly as possible, and=
- all
->> of the OSD optimization efforts are focusing on making this as fast =
-as
->> possible.  Is there much marginal benefit to the initial ack?  It's =
-only
->> the CephFS clients with the same file open from multiple hosts that =
-might
->> see a small benefit.
->>
->> On the other hand, there is a bunch of code in the OSD and on the
->> client side to deal with the dual-ack behavior we could potentially =
-drop.
->> Also, we are generating lots of extra messages on the backend networ=
-k for
->> both ack and commit, even though the librados users don't usually ca=
-re
->> (the clients don't get the dual acks unless they request them).
->>
->> Also, it is arguably Wrong and a Bad Thing that you could have clien=
-t A
->> write to file F, client B reads from file F and sees that data, the =
-OSD
->> and client A both fail, and when things recover client B re-reads th=
-e same
->> portion of the file and sees the file content from before client A's
->> change.  The MDS is extremely careful about this on the metadata sid=
-e: no
->> side-effects of one client are visible to any other client until the=
-y are
->> durable, so that a combination MDS and client failure will never mak=
-e
->> things appear to go back in time.
->>
->> Any opinions here?  My inclination is to remove the functionality (l=
-ess
->> code, less complexity, more sane semantics), but we'd be closing the=
- door
->> on what might have been a half-decent idea (separating serialization=
- from
->> durability when multiple clients have the same file open for
->> read/write)...
->
-> I've considered this briefly in the past, but I'd really rather we ke=
-ep it:
->
-> 1) While we don't make much use of it right now, I think it's a usefu=
-l
-> feature for raw RADOS users
->
-
-=46WIW, I completely agree. The fact that we hardly use it for
-cephfs/rgw/rbd, does not mean that there aren't any other users for
-it.  When breaking the framework is considered, we should weigh
-whether we add to it or detract from it. I think that in this case it
-would (at least seemingly) be the latter.
-
-Yehuda
-
-> 2) It's an incredibly useful protocol semantic for future performance
-> work of the sort that makes Sam start to cry, but which I find very
-> interesting. Consider a future when RBD treats the OSDs more like a
-> disk with a cache, and is able to send out operations to get them out
-> of local memory, without forcing them instantly to permanent storage.
-> Similarly, I think as soon as we have a backend that lets us use a bi=
-t
-> of 3D Crosspoint in a system, we'll wish we had this functionality
-> again.
-> (Likewise with CephFS, where many many users will have different
-> consistency expectations thanks to NFS and other parallel FSes which
-> really aren't consistent.)
->
-> Maybe we just think it's not worth it and we'd rather throw this out.
-> But the only complexity this really lets us drop is the OSD replay
-> stuff (which realistically I can't assess) =E2=80=94 the dual acks is=
- not hard
-> to work with, and doesn't get changed much anyway. If we drop this no=
-w
-> and decide to bring back any similar semantic in the future I think
-> that'll be a lot harder than simply carrying it, both in terms of
-> banging it back into the code, and especially in terms of getting it
-> deployed to all the clients in the world again.
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGmjrGhhb21haQ0KICAgICAgICBBIGJpdCB0b3VnaCBxdWVzdGlvbiBJIGFza2VkIGFib3ZlLCBi
+dXQgZG8geW91IGtub3cgdGhlIGFuc3dlcj8NCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tDQp3dWtvbmdtaW5nIElEOiAxMjAxOQ0KVGVso7owNTcxLTg2NzYw
+MjM5DQpEZXB0o7oyMDE0IFVJUzIgT05FU3Rvcg0KDQotLS0tLdPKvP7Urbz+LS0tLS0NCreivP7I
+yzogd3Vrb25nbWluZyAxMjAxOSAoUkQpDQq3osvNyrG85DogMjAxNcTqMTLUwjPI1SAyMjoxNQ0K
+ytW8/sjLOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgY2VwaC11c2Vyc0BsaXN0cy5jZXBo
+LmNvbQ0Ks63LzTogemhlbmdiaW4gMDg3NDcgKFJEKQ0K1vfM4jogQ29uZnVzZWQgYWJvdXQgcHJp
+b3JpdHkgb2YgY2xpZW50IE9QLg0KDQpIaSwgQWxsOg0KICAgICAgICBJICd2ZSBnb3QgYSBxdWVz
+dGlvbiBhYm91dCBhIHByaW9yaXR5LiBXZSBkZWZpbmVkIG9zZF9jbGllbnRfb3BfcHJpb3JpdHkg
+PSA2My4gQ0VQSF9NU0dfUFJJT19MT1cgPSA2NC4NCldlIGFyZSBjbGVhciB0aGVyZSBhcmUgbXVs
+dGlwbGUgSU8gdG8gYmUgZGlzY3Vzc2VkLiBXaHkgbm90IGRlZmluZSBvc2RfY2xpZW50X29wX3By
+aW9yaXR5ID4gNjQsIHNvIHdlIGNhbiBqdXN0IGRlYWwgd2l0aCBjbGllbnQgSU8gaW4gZmlyc3Qg
+cHJpb3JpdHkuDQoNCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tDQp3dWtvbmdtaW5nIElEOiAxMjAxOQ0KVGVso7owNTcxLTg2NzYwMjM5DQpEZXB0o7oyMDE0
+IFVJUzIgT05FU3Rvcg0KDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCrG+08q8/rywxuS4vbz+uqzT
+0Lq81t27qsj9zajQxby8yvXT0M/euavLvrXEsaPD3NDFz6KjrL32z97T2reiy824+MnPw+a12Na3
+1tDB0LP2DQq1xLj2yMu78si61+mho7371rnIzrrOxuTL+8jL0tTIzrrO0M7Kvcq508OjqLD8wKi1
+q7K7z97T2sirsr+78rK/t9a12NC5wrahori01sahog0Ku/LJoreio6mxvtPKvP7W0LXE0MXPoqGj
+yOe5+8T6tO3K1cHLsb7Tyrz+o6zH68T6waK8tLXnu7C78tPKvP7NqNaqt6K8/sjLsqLJvrP9sb4N
+CtPKvP6joQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVu
+dGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkgZm9yIHRo
+ZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNl
+IG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRp
+bmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3VyZSwgcmVw
+cm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGlu
+dGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBl
+LW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUgb3IgZW1h
+aWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCl9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVz
+ZXJzLWNlcGguY29tCg==
