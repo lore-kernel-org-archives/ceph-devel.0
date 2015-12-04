@@ -1,70 +1,93 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Compiling for FreeBSD
-Date: Fri, 4 Dec 2015 21:11:04 +0100
-Message-ID: <5661F358.2060401@digiware.nl>
-References: <565B3999.3050302@digiware.nl> <565B4A7F.60301@digiware.nl>
- <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
- <20151130065812.GA20205@gmail.com>
- <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
- <565D7FA8.3010301@digiware.nl>
- <alpine.DEB.2.00.1512010529280.19170@cobra.newdream.net>
- <565DA3B5.1070608@digiware.nl>
- <alpine.DEB.2.00.1512010634510.19170@cobra.newdream.net>
- <565DC9D4.7060701@digiware.nl>
- <CAOtMX2jWDOLqmjY=S9PorKeaHDgTx5WyMo8jiV3LxOS4K67dMg@mail.gmail.com>
- <565DE234.6070505@digiware.nl>
- <CAOtMX2j5xJBnYoNdxTGGQFz-fTVX2xQka2NuyUZuOPpsft6HuA@mail.gmail.com>
- <alpine.DEB.2.00.1512011034550.19170@cobra.newdream.net>
- <565DEA60.7010608@digiware.nl>
- <CAAM7YAmzq3a_kqXE2ZgK_fp4i6QduY49aXqiWVNK3F59iZUFRA@mail.gmail.com>
- <565F5A03.7020401@digiware.nl>
- <CAAM7YA=Q6gbBbN92a9KigAXw4e_SrshQ6Q8mC1Xff+vxQQkrKw@mail.gmail.com>
- <5661DBB8.1040505@digiware.nl>
- <CAJ4mKGZ+wjum+R3=pBS8urko4D1B_D+eKjytWE_uDdFcGW6sSA@mail.gmail.com>
+From: Ric Wheeler <rwheeler@redhat.com>
+Subject: Re: Fwd: Fwd: [newstore (again)] how disable double write WAL
+Date: Fri, 4 Dec 2015 15:12:25 -0500
+Message-ID: <5661F3A9.8070703@redhat.com>
+References: <9D046674-EA8B-4CB5-B049-3CF665D4ED64@aevoo.fr>
+ <alpine.DEB.2.00.1511241240150.25734@cobra.newdream.net>
+ <CA+gn+znHyioZhOvuidN1pvMgRMOMvjbjcues_+uayYVadetz=A@mail.gmail.com>
+ <CA+gn+z=5+gu=3R3ssLq-kQBjB6DFYeb9JteXV5Y7in89b8cmKA@mail.gmail.com>
+ <alpine.DEB.2.00.1512011357340.19170@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:14286 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:42909 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753923AbbLDULf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 4 Dec 2015 15:11:35 -0500
-In-Reply-To: <CAJ4mKGZ+wjum+R3=pBS8urko4D1B_D+eKjytWE_uDdFcGW6sSA@mail.gmail.com>
+	id S1753717AbbLDUM1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 4 Dec 2015 15:12:27 -0500
+In-Reply-To: <alpine.DEB.2.00.1512011357340.19170@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, Sage Weil <sage@newdream.net>, Alan Somers <asomers@freebsd.org>, Mykola Golub <mgolub@mirantis.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, David Casier <david.casier@aevoo.fr>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Dave Chinner <dchinner@redhat.com>, Brian Foster <bfoster@redhat.com>, Eric Sandeen <esandeen@redhat.com>
 
-On 4-12-2015 19:44, Gregory Farnum wrote:
-> On Fri, Dec 4, 2015 at 10:30 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> On 3-12-2015 01:27, Yan, Zheng wrote:
->>> On Thu, Dec 3, 2015 at 4:52 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>> On 2-12-2015 15:13, Yan, Zheng wrote:
+On 12/01/2015 05:02 PM, Sage Weil wrote:
+> Hi David,
+>
+> On Tue, 1 Dec 2015, David Casier wrote:
+>> Hi Sage,
+>> With a standard disk (4 to 6 TB), and a small flash drive, it's easy
+>> to create an ext4 FS with metadata on flash
 >>
->>>> I see that you have disabled uuid?
->>>> Might I ask why?
->>>
->>> not disable. Currently ceph uses boost uuid implementation. so no need
->>> to link to libuuid.
+>> Example with sdg1 on flash and sdb on hdd :
 >>
->> And
+>> size_of() {
+>>    blockdev --getsize $1
+>> }
 >>
->>>>>>> The uuid transition to boost::uuid has happened since then (a few months
->>>>>>> back) and I believe Rohan's AIX and Solaris ports for librados (that just
->>>>>>> merged) included a fix for the sockaddr_storage issue:
+>> mkdmsetup() {
+>>    _ssd=/dev/$1
+>>    _hdd=/dev/$2
+>>    _size_of_ssd=$(size_of $_ssd)
+>>    echo """0 $_size_of_ssd linear $_ssd 0
+>>    $_size_of_ssd $(size_of $_hdd) linear $_hdd 0" | dmsetup create dm-${1}-${2}
+>> }
 >>
->> I cannot seem to find the package or port that defines boost::uuid.
->> So how did you make it available to the build system?
-> 
-> http://www.boost.org/doc/libs/1_59_0/libs/uuid/
-> 
-> It's part of the boost labyrinth. I think in Debian it's just part of
-> libboost-dev, but you might need to dig around in whatever packaging
-> you're using for FreeBSD.
+>> mkdmsetup sdg1 sdb
+>>
+>> mkfs.ext4 -O ^has_journal,flex_bg,^uninit_bg,^sparse_super,sparse_super2,^extra_isize,^dir_nlink,^resize_inode
+>> -E packed_meta_blocks=1,lazy_itable_init=0 -G 32768 -I 128 -i
+>> $((1024*512)) /dev/mapper/dm-sdg1-sdb
+>>
+>> With that, all meta_blocks are on the SSD
+>>
+>> If omap are on SSD, there are almost no metadata on HDD
+>>
+>> Consequence : performance Ceph (with hack on filestore without journal
+>> and directIO) are almost same that performance of the HDD.
+>>
+>> With cache-tier, it's very cool !
+> Cool!  I know XFS lets you do that with the journal, but I'm not sure if
+> you can push the fs metadata onto a different device too.. I'm guessing
+> not?
+>
+>> That is why we are working on a hybrid approach HDD / Flash on ARM or Intel
+>>
+>> With newstore, it's much more difficult to control the I/O profil.
+>> Because rocksDB embedded its own intelligence
+> This is coincidentally what I've been working on today.  So far I've just
+> added the ability to put the rocksdb WAL on a second device, but it's
+> super easy to push rocksdb data there as well (and have it spill over onto
+> the larger, slower device if it fills up).  Or to put the rocksdb WAL on a
+> third device (e.g., expensive NVMe or NVRAM).
+>
+> See this ticket for the ceph-disk tooling that's needed:
+>
+> 	http://tracker.ceph.com/issues/13942
+>
+> I expect this will be more flexible and perform better than the ext4
+> metadata option, but we'll need to test on your hardware to confirm!
+>
+> sage
 
-I've dumped all of the labels in de boost libraries.
-So it is not default available with the pre-build packages.
-Which is understandable given the size of all that is available in
-boost. But lets go and fetch/build some of that stuff.
+I think that XFS "realtime" subvolumes are the thing that does this -  the 
+second volume contains only the data (no metadata).
 
---WjW
+Seem to recall that it is popular historically with video appliances, etc but it 
+is not commonly used.
+
+Some of the XFS crew cc'ed above would have more information on this,
+
+Ric
+
+
