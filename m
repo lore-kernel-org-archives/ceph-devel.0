@@ -1,56 +1,38 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: Re: Error handling during recovery read
-Date: Fri, 4 Dec 2015 18:24:46 -0800
-Message-ID: <56624AEE.7020605@redhat.com>
-References: <DUB403-EAS1052ED1A42AB6DFDA68D8BD50C0@phx.gbl>
+From: Blair Bethwaite <blair.bethwaite@gmail.com>
+Subject: Re: CephFS and single threaded RBD read performance
+Date: Sat, 5 Dec 2015 15:17:29 +1100
+Message-ID: <CA+z5Dszo2TgzBcydD+0YnB-2xjV7enCfhfON2BqVgAOBUs2gUQ@mail.gmail.com>
+References: <loom.20151204T201858-143@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59057 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753247AbbLECYs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 4 Dec 2015 21:24:48 -0500
-In-Reply-To: <DUB403-EAS1052ED1A42AB6DFDA68D8BD50C0@phx.gbl>
+Received: from mail-ob0-f172.google.com ([209.85.214.172]:32979 "EHLO
+	mail-ob0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752006AbbLEERt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Dec 2015 23:17:49 -0500
+Received: by obbww6 with SMTP id ww6so86192591obb.0
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Dec 2015 20:17:49 -0800 (PST)
+In-Reply-To: <loom.20151204T201858-143@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Markus Blank-Burian <burian@muenster.de>
-Cc: 'Ceph Development' <ceph-devel@vger.kernel.org>
+To: Ilja Slepnev <islepnev@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+Hi Ilja,
 
+On 5 December 2015 at 07:16, Ilja Slepnev <islepnev@gmail.com> wrote:
+> fio shows 70 MB/s seq read with 4M blocks, libaio, 1 thread, direct.
+> fio seq write 200 MB/s
 
-I can't remember the details now, but I know that recovery needed 
-additional work.   If it were a simple fix
-I would have done it when implementing that code.
+The fio numbers are from fio running on a CephFS mount I take it?
 
-I found this bug related to recovery and ec errors 
-(http://tracker.ceph.com/issues/13493)
-BUG #13493: osd: for ec, cascading crash during recovery if one shard is 
-corrupted
+> # rados bench -t 1 -p test 60 write --no-cleanup
 
-David
+I don't see an rbd test anywhere here...?
 
-On 12/4/15 2:03 AM, Markus Blank-Burian wrote:
-> Hi David,
->
->   
->
-> I am using ceph 9.2.0 with an erasure coded pool and have some problems with
-> missing objects.
->
->   
->
-> Reads for degraded/backfilling objects on an EC pool, which detect an error
-> (-2 in my case) seem to be aborted immediately instead of reading from the
-> remaining shards. Why is there an explicit check for "!rop.for_recovery" in
-> ECBackend::handle_sub_read_reply? Would it be possible to remove this check
-> and let the recovery read be completed from the remaining good shards?
->
->   
->
-> Markus
->
->   
->
->
+I suggest comparing fio on CephFS with fio on rbd (as in using fio's
+rbd ioengine), then at least the application side of your tests is
+constant.
 
+Cheers,
+~Blairo
