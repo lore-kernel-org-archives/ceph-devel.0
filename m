@@ -1,143 +1,148 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: rgw: new multisite update
-Date: Fri, 4 Dec 2015 22:34:49 -0800
-Message-ID: <CADRKj5ToZVUoP4qAro9ZnmTJTXS4vzMs++2S4-2Vk9U=_3pXwA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: proposal to run Ceph tests on pull requests
+Date: Sat, 5 Dec 2015 12:49:41 +0100
+Message-ID: <5662CF55.3050702@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="Tjk3LdMUux5a4lJaPAMX4IiFDu6dvC9ka"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f41.google.com ([209.85.213.41]:35504 "EHLO
-	mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750982AbbLEGeu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Dec 2015 01:34:50 -0500
-Received: by vkha189 with SMTP id a189so77783474vkh.2
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Dec 2015 22:34:49 -0800 (PST)
+Received: from mail2.dachary.org ([91.121.57.175]:44707 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751768AbbLELtu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Dec 2015 06:49:50 -0500
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 5836542B28
+	for <ceph-devel@vger.kernel.org>; Sat,  5 Dec 2015 12:49:41 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Orit, Casey and I have been working for quite a while now on a new
-multi-site framework that will replace the current sync-agent system.
-There are many improvements that we are working on, and we think it
-will be worth the wait (and effort!).
-First and foremost, the main complain that we hear about the rgw, and
-specifically about its multisite feature is the configuration
-complexity. The new scheme will make things much easier to configure,
-and will handle changes dynamically. There will be many new commands
-that will remove the need to manually edit and inject json
-configurations as was previously needed. Changes to the zones
-configuration will be applied to running gateways, and these will be
-able to handle those changes without the need to restarts the
-processes.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Tjk3LdMUux5a4lJaPAMX4IiFDu6dvC9ka
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-We're getting rid of the sync agent, and the gateways themselves will
-handle the sync process. Removing the sync agent will help with making
-the system much easier to set and configure. It also helps with the
-sync process itself in many aspects.
-The data sync will now be active-active, so all zones within the same
-zone group will be writable. Note that 'region' is now called 'zone
-group'; there was too much confusion with the old term. The metadata
-changes will keep the master-slave scheme to keep things simpler in
-that arena.
-We added a new entity called 'realm', which is a container for zone
-groups. Multiple realms can be created, which provides the ability to
-run completely different configurations on the same clusters with
-minimum effort.
-A new entity called 'period' (might be renamed to 'config') holds the
-realm configuration structure. A period changes when the master zone
-changes. A period epoch is being incremented whenever there's a change
-in the configuration that does not modify the master.
+Hi Ceph,
 
-New radosgw-admin commands were added to provide better view into the
-sync process status itself. The scheme still requires handling 3
-different logs (metadata, data, bucket indexes), and the sync statuses
-reflect the position in those logs (for incremental sync), or which
-entry is being synced (for the full sync).
+TL;DR: a ceph-qa-suite bot running on pull requests is sustainable and is=
+ an incentive for contributors to use teuthology-openstack independently
 
-There is also a new admin socket command ('cr dump') that dumps the
-current state of the coroutines framework (that was created for this
-feature), which helps quite a bit with debugging problems.
+When a pull request is submitted, it is compiled, some tests are run[1] a=
+nd the result is added to the pull request to confirm that it does not in=
+troduce a trivial problem. Such tests are however limited because they mu=
+st:
 
-Migrating from the old sync agent to the new sync will require the new
-sync to start from scratch. Note that this process should not copy any
-actual data, but the sync will need to build the new sync status (and
-verify that all the data is in place in the zones).
+* run within a few minutes at most
+* not require multiple machines
+* not require root privileges
 
-So, when is this going to be ready?
+More extensive tests (primarily integration tests) are needed before a co=
+ntribution can be merged into Ceph [2], to verify it does not introduce a=
+ subtle regression. It would be ideal to run these integration tests on e=
+ach pull request but there are two obstacles:
 
-We're aiming at having it in Jewel. At the moment nothing is merged
-yet (still at the wip-rgw-new-multisite branch); we're trying to make
-sure that things still work against it (e.g., the sync agent can still
-work), and we'll get it merged once we feel comfortable with the
-backward compatibility. The metadata sync is still missing some
-functionality that is related to fail over recovery, and the error
-reporting and retry still needs some more work. The data sync itself
-has a few cases that we don't handle correctly. The realm/period
-bootstrapping still needs some more work. Documentation is almost non
-existent. But the most important piece that we actually need to work
-on is the testing. We need to make sure that we have tests coverage
-for all the new functionality. Which brings me to this:
+* each test takes ~ 1.5 hour
+* each test cost ~ 0.30 euros
 
-It would be great if we had people outside of the team that could take
-an early look on it and help with mapping the pain points. It would be
-even greater if someone could help with the actual development of the
-automated tests (via teuthology), but even just manually testing and
-reporting of any issues will help a lot. Note: Danger! Danger! this
-could and will eat your data! It shouldn't be tested on a production
-environment (yet!).
+On the current master, running all tests would require ~1000 jobs [3]. Th=
+at would cost ~ 300 euros on each pull request and take ~10 hours assumin=
+g 100 jobs can run in parallel. We could resolve that problem by:
 
-The following is a sample config of a single zone group, with two
-separate zones. There are two machines that we set up the zones on:
-rgw1, rgw2, where rgw1 serves as the master for metadata.
+* maintaining a ceph-qa-suite map to be used as a white list mapping a di=
+ff to a set of tests. For instance, if the diff modifies the src/ceph-dis=
+k file, it outputs the ceph-disk suite[4]. This would effectively trim th=
+e tests that are unrelated to the contribution and reduce the number of t=
+ests to a maximum of ~100 [4] and most likely a dozen.
+* tests are run if one of the commits of the pull request has the *Needs-=
+qa: true* flag in the commit message[5]
+* limiting the number of tests to fit in the allocated budget. If there w=
+as enough funding for 10,000 jobs during the previous period and there wa=
+s a total of 1,000 test run required (a test run is a set of tests as pro=
+duced by the ceph-qa-suite map), each run is trimmed to a maximum of ten =
+tests, regardless.
 
-Note that there are a bunch of commands that we'll be able to redact
-later (e.g., all the default setting ones, separate commands to create
-a zone and attach it to a zonegroup). In some of the cases when you
-create the first realm/zonegroup/zone, the entity will automatically
-become the default. However, I've ran into some issues when trying to
-set multiple realms on a single cluster, and not having the default
-caused some issues. We'll need to clean that up.
+Here is an example:
+
+Joe submits a pull request to fix a bug in the librados API
+The make check bot compiles and fails make check because it introduces a =
+bug
+Joe uses run-make-check.sh locally to repeat the failure, fixes it and re=
+push
+The make check bot compiles and passes make check
+Joe amends the commit message to add *Needs-qa: true* and repushes
+The ceph-qa-suite map script finds a change on the librados API and outpu=
+ts smoke/basic/tasks/rados_api_tests.yaml
+The ceph-qa-suite bot runs the test smoke/basic/tasks/rados_api_tests.yam=
+l which fails
+Joe examines the logs found at http://teuthology-logs.public.ceph.com/ an=
+d decides to debug by running the test himself
+Joe runs teuthology-openstack --suite smoke/basic/tasks/rados_api_tests.y=
+aml against his own OpenStack tenant [6]
+Joe repush with a fix
+The ceph-qa-suite bot runs the test smoke/basic/tasks/rados_api_tests.yam=
+l which succeeds
+Kefu reviews the pull request and has a link to the successful test runs =
+in the comments
+
+This approach scales with the size of the Ceph developer community [7] be=
+cause regular contributors benefit directly from funding the ceph-qa-suit=
+e bot. New contributors can focus on learning how to interpret the ceph-q=
+a-suite error logs for their contribution and learn about how to debug it=
+ via teuthology-openstack if needed, which is a better user experience th=
+an trying to figure out which ceph-qa-suite job to run, learning about te=
+uthology, schedule the test and interpret the results.
+
+The maintenance workload of a ceph-qa-suite bot probably requires one wor=
+k day a week, to handle funding, sysadmin of the server where the bot run=
+s but mostly to sort out the false negatives. I believe a pure self-servi=
+ce approach where each contributor would be asked to run teuthology-opens=
+tack independently would actually require more work. The ceph-qa-suite bo=
+t provides a baseline on which everybody can agree to sort out the false =
+negatives. When a contributor runs teuthology-openstack by herself/himsel=
+f, it is difficult for her/him to figure out if a failure comes from some=
+thing she/he did incorrectly because she/he is not familiar with teutholo=
+gy-openstack or if it is related to her/his contribution. She/He will ask=
+s for assistance  in situations where comparing her/his run with the outp=
+ut of the ceph-qa-suite bot would probably give her/him enough hints to f=
+ix the problem herself/himself.
+
+If the ceph-qa-suite bot becomes unavailable, the contributors are not bl=
+ocked because they can run it by themselves on their own OpenStack tenant=
+ and link the results to the pull request in the same way the bot would. =
+Debugging a failed test is essentially the same thing as running the ceph=
+-qa-suite bot.
+
+Cheers
+
+[1] run-make-check.sh https://github.com/ceph/ceph/blob/master/run-make-c=
+heck.sh
+[2] Ceph test suites https://github.com/ceph/ceph-qa-suite/tree/master/su=
+ites
+[3] teuthology-suite --suite .  --subset 1/40000
+[4] minimal number of tests to run all tasks at least once: 130 for rados=
+, 76 for fs, 113 for upgrade, 18 for rgw, 45 for rbd.
+[5] a former proposal was to include the test suite to run in the commit =
+message, but this is more difficult to maintain that a boolean flag that =
+states a given commit needs to pass all the relevant tests
+[6] teuthology-openstack https://github.com/dachary/teuthology/tree/opens=
+tack#openstack-backend
+[7] Scaling out the Ceph community lab http://dachary.org/?p=3D3852
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
-access_key=<access key>
-secret=<secret>
+--Tjk3LdMUux5a4lJaPAMX4IiFDu6dvC9ka
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-# run on rgw1
-$ radosgw-admin realm create --rgw-realm=earth
-$ radosgw-admin zonegroup create --rgw-zonegroup=us
---endpoints=http://rgw1:80 --master
-$ radosgw-admin zonegroup default --rgw-zonegroup=us
-$ radosgw-admin zone create --rgw-zonegroup=us --rgw-zone=us-1
---access-key=${access_key} --secret=${secret}
---endponts=http://rgw1:80
-$ radosgw-admin zone default --rgw-zone=us-1
-$ radosgw-admin zonegroup add --rgw-zonegroup=us --rgw-zone=us-1
-$ radosgw-admin user create --uid=zone.jup --display-name="Zone User"
---access-key=${access_key} --secret=${secret} --system
-$ radosgw-admin period update --commit
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-$ radosgw --rgw-zone=us-1 --rgw-frontends="civetweb port=80"
+iEYEARECAAYFAlZiz1UACgkQ8dLMyEl6F20kjACfR9Shq65Rib3MmjdKEFpoRu9h
+MK0AmgJekjaCBn3hZ3WVP2X+yz4xmytw
+=6VNv
+-----END PGP SIGNATURE-----
 
-# run on rgw2
-$ radosgw-admin realm pull --url=http://rgw1
---access-key=${access_key} --secret=${secret}
-$ radosgw-admin realm default --rgw-realm=earth
-$ radosgw-admin zonegroup default --rgw-zonegroup=us
-$ radosgw-admin zone create --rgw-zonegroup=us --rgw-zone=us-2
---access-key=${access_key} --secret=${secret}
---endpoints=http://rgw2:80
-$ radosgw-admin period update --commit
-
-$ radosgw --rgw-zone=us-2 --rgw-frontends="civetweb port=80"
-
-At this point both zones should be running and syncing from each
-other. There are still a lot of rough edges, things that we're working
-to fix and clean up. As I said, it would be great to have some other
-people trying this, so that we understand better the pain points, and
-we can map the issues. As was mentioned before, this whole feature can
-be found at the wip-rgw-new-multisite development branch. It should
-used only in test environments, and it *will* eat your data (and if by
-any chance it doesn't eat your data, let us know and we'll try to
-figure out what went wrong). Beware!
-
-Thanks!
-Yehuda
+--Tjk3LdMUux5a4lJaPAMX4IiFDu6dvC9ka--
