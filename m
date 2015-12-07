@@ -1,40 +1,28 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: testing the /dev/cciss/c0d0 device names
-Date: Sun, 6 Dec 2015 20:15:21 +0100
-Message-ID: <CAOi1vP-jdgunEx4zt27ETZHbNGTzFxGp-rEbWJViD5OWLpS69A@mail.gmail.com>
-References: <56632EAC.3040105@dachary.org>
+From: Wuxiangwei <wuxiangwei@h3c.com>
+Subject: how to see file object-mappings for cephfuse client
+Date: Mon, 7 Dec 2015 02:51:56 +0000
+Message-ID: <F075EA5A8A3F8045B2A81359C8B5B07C5E3E8A52@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:38657 "EHLO
-	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753014AbbLFTPX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 6 Dec 2015 14:15:23 -0500
-Received: by wmec201 with SMTP id c201so125430940wme.1
-        for <ceph-devel@vger.kernel.org>; Sun, 06 Dec 2015 11:15:21 -0800 (PST)
-In-Reply-To: <56632EAC.3040105@dachary.org>
+Received: from smtp.h3c.com ([60.191.123.56]:11167 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755283AbbLGCwZ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 6 Dec 2015 21:52:25 -0500
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Stolte, Felix" <f.stolte@fz-juelich.de>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-On Sat, Dec 5, 2015 at 7:36 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Ilya,
->
-> ceph-disk has special handling for device names like /dev/cciss/c0d1 [1] and it was partially broken when support for device mapper was introduced. Ideally there would be a way to test that support when running the ceph-disk suite [2]. Do you know of a way to do that without having the hardware for which this driver is designed ?
->
-> Maybe this convention (/dev/cciss/c0d0 being mapped to /sys/block/cciss!c0d0 is not unique to this driver and I could use another to validate the name conversion from X/Y to X!Y and vice versa is handled as it should ?
+Hi, Everyone
 
-No, it's not unique.  driver core does strreplace(s, '/', '!') at
-register time to work around such block devices.  The list includes
-DAC960, aoeblk, cciss, cpqarray, sx8 and probably more, but I don't
-think anything widespread uses this naming scheme.  IIRC dm actually
-won't let you name a device with anything that contains a slash.
+Recently I'm trying to figure out how to use ceph-fuse. If we mount cephfs as the kernel client, there is a 'cephfs' command tool (though it seems to be 'deprecated') with 'map' and 'show_location' commands to show the RADOS objects belonging to a given file. However, it doesn't work well for ceph-fuse, neither can I find a similar tool to see the mappings. Any suggestions? 
+Thank you!
 
-If you really wanted you could set up aoeblk I guess, but a simple unit
-test should be be more than enough ;)
 
-Thanks,
+-----------------------
+Wu Xiangwei
+Tel : 0571-86760875
+2014 UIS 2, TEAM BORE
 
-                Ilya
