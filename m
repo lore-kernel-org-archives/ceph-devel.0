@@ -1,57 +1,91 @@
 From: Martin Millnert <martin@millnert.se>
 Subject: Re: OSD public / cluster network isolation using VRF:s
-Date: Mon, 07 Dec 2015 14:31:48 +0100
-Message-ID: <1449495108.29564.108.camel@millnert.se>
+Date: Mon, 07 Dec 2015 14:36:09 +0100
+Message-ID: <1449495369.29564.113.camel@millnert.se>
 References: <1449173601.2291.84.camel@millnert.se>
-	 <422901884.211767.1449176599032.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
+	 <CAJ4mKGZvgaEtLF=EX0t_74KS4-yxFMmR4oJUUx7YZhpXb-9EeQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ncis.millnert.se ([185.19.66.196]:44711 "EHLO mail.millnert.se"
+Received: from ncis.millnert.se ([185.19.66.196]:44741 "EHLO mail.millnert.se"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755734AbbLGNbw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 7 Dec 2015 08:31:52 -0500
-In-Reply-To: <422901884.211767.1449176599032.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
+	id S1753102AbbLGNgK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 7 Dec 2015 08:36:10 -0500
+In-Reply-To: <CAJ4mKGZvgaEtLF=EX0t_74KS4-yxFMmR4oJUUx7YZhpXb-9EeQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "wido@42on.com" <wido@42on.com>
+To: Gregory Farnum <gfarnum@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Wido, 
+Greg,
 
-thanks for your feedback.
+see below.
 
-On Thu, 2015-12-03 at 22:03 +0100, wido@42on.com wrote:
-> 
-> > Op 3 dec. 2015 om 21:14 heeft Martin Millnert <martin@millnert.se> het volgende geschreven:
-> > 
+On Thu, 2015-12-03 at 13:25 -0800, Gregory Farnum wrote:
+> On Thu, Dec 3, 2015 at 12:13 PM, Martin Millnert <martin@millnert.se> wrote:
 > > Hi,
-> > 
+> >
 > > we're deploying Ceph on Linux for multiple purposes.
 > > We want to build network isolation in our L3 DC network using VRF:s.
-<snip>
-> Why all the trouble and complexity? I personally always try to avoid
-> the two networks and run with one. Also in large L3 envs.
+> >
+> > In the case of Ceph this means that we are separating the Ceph public
+> > network from the Ceph cluster network, in this manner, into separate
+> > network routing domains (for those who do not know what a VRF is).
+> >
+> > Furthermore, we're also running (per-VRF) dynamically routed L3 all the
+> > way to the hosts (OSPF from ToR switch), and need to separate route
+> > tables on the hosts properly. This is done using "ip rule" today.
+> > We use VLANs to separate the VRF:s from each other between ToR and
+> > hosts, so there is no problem to determine which VRF an incoming packet
+> > to a host belongs to (iif $dev).
+> >
+> > The problem is selecting the proper route table for outbound packets
+> > from the host.
+> >
+> > There is current work in progress for a redesign [1] of the old VRF [2]
+> > design in the Linux Kernel. At least in the new design, there is an
+> > intended way of placing processes within a VRF such that, similar to
+> > network namespaces, the processes are unaware that they are in fact
+> > living within a VRF.
+> >
+> > This would work for a process such as the 'mon', which only lives in the
+> > public network.
+> >
+> > But it doesn't work for the OSD, which uses separate sockets for public
+> > and cluster networks.
+> >
+> > There is however a real simple solution:
+> > 1. Use something similar to
+> >    setsockopt(sockfd, SOL_SOCKET, SO_MARK, puborclust_val, sizeof(one))
+> >    (untested)
+> > 2. set up "ip rule" for outbound traffic to select an appropriate route
+> > table based on the MARK value of "puborclust_val" above.
+> >
+> > AFAIK BSD doesn't have SO_MARK specifically, but this is a quite simple
+> > option that adds a lot of utility for us, and, I imagine others.
+> >
+> > I'm willing to write it and test it too. But before doing that, I'm
+> > interested in feedback. Would obviously prefer it to be merged.
 > 
-> I like the idea that one machine has one IP I have to monitor.
-> 
-> I would rethink about what a cluster network really adds. Imho it only
-> adds complexity.
+> I'm probably just being dense here, but I don't quite understand what
+> all this is trying to accomplish. It looks like it's essentially
+> trying to set up VLANs (with different rules) over a single physical
+> network interface, that is still represented to userspace as a single
+> device with a single IP. Is that right?
 
-There is one main reason behind separation,  i.e. using cluster network:
-simple network level traffic classification.
+That's almost what it is, with two differences:
+ 1) there are separated route tables per VLAN,
+ 2) Each VLAN interface (public, cluster) has its own address. 
 
-We have machines where we need to be able to guarantee a minimum amount
-of osd-osd replication traffic on the network links (CoS). And it seems
-like "nice-to-have" feature in general. 
-An assumption here is that osd-osd "pinging" would happen on the cluster
-network if configured.
+With separate route tables,  there's a general problem of picking the
+correct table on outbound connections.
 
-A possible workaround I imagine would be if replication and osd-osd,
-osd-mon traffic would receive different values in the ToS field than
-client traffic. Not immediately obvious to me how one listening socket
-would manage the distinction.  
+> What's the point of doing that with Ceph?
+
+Classification & prioritization of ceph network traffic. In our case,
+prioritization of cluster traffic over client traffic. See my email to
+Wido.
 
 /Martin
 
