@@ -1,58 +1,92 @@
-From: Wuxiangwei <wuxiangwei-vVzyEvZLFYE@public.gmane.org>
-Subject: =?utf-8?b?562U5aSNOiBob3cgdG8gc2VlIGZpbGUgb2JqZWN0?=
- =?utf-8?q?-mappings_for_cephfuse_client?=
-Date: Mon, 7 Dec 2015 05:52:00 +0000
-Message-ID: <F075EA5A8A3F8045B2A81359C8B5B07C5E3E9B12@H3CMLB12-EX.srv.huawei-3com.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: =?UTF-8?Q?Re=3A_=E7=AD=94=E5=A4=8D=3A_how_to_see_file_object=2Dmappings_for_ceph?=
+	=?UTF-8?Q?fuse_client?=
+Date: Mon, 7 Dec 2015 16:43:35 +0800
+Message-ID: <CAAM7YA=bcqDfh0GVvxVXOdo0x239LkP+Z9rQ3txdYOJ9_Zo3QQ@mail.gmail.com>
 References: <F075EA5A8A3F8045B2A81359C8B5B07C5E3E8A52@H3CMLB12-EX.srv.huawei-3com.com>
 	<CAAM7YAkdHJ0jCWDhWBRX2v7tCiXxw7ZM3T39Lk5=6XHNCo2EOA@mail.gmail.com>
+	<F075EA5A8A3F8045B2A81359C8B5B07C5E3E9B12@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAAM7YAkdHJ0jCWDhWBRX2v7tCiXxw7ZM3T39Lk5=6XHNCo2EOA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: zh-CN
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lb0-f175.google.com ([209.85.217.175]:34424 "EHLO
+	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751450AbbLGInh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Dec 2015 03:43:37 -0500
+Received: by lbbcs9 with SMTP id cs9so53660252lbb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Dec 2015 00:43:35 -0800 (PST)
+In-Reply-To: <F075EA5A8A3F8045B2A81359C8B5B07C5E3E9B12@H3CMLB12-EX.srv.huawei-3com.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Wuxiangwei <wuxiangwei@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-VGhhbmtzIFlhbiwgd2hhdCBpZiB3ZSB3YW5uYSBzZWUgc29tZSBtb3JlIHNwZWNpZmljIG9yIGRl
-dGFpbGVkIGluZm9ybWF0aW9uPyBFLmcuIHdpdGggY2VwaGZzIHdlIG1heSBydW4gJ2NlcGhmcyAv
-bW50L2EudHh0IHNob3dfbG9jYXRpb24gLS1vZmZzZXQnIHRvIGZpbmQgdGhlIGxvY2F0aW9uIG9m
-IGEgZ2l2ZW4gb2Zmc2V0Lg0KDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KV3UgWGlhbmd3ZWkN
-ClRlbCA6IDA1NzEtODY3NjA4NzUNCjIwMTQgVUlTIDIsIFRFQU0gQk9SRQ0KDQoNCi0tLS0t6YKu
-5Lu25Y6f5Lu2LS0tLS0NCuWPkeS7tuS6ujogWWFuLCBaaGVuZyBbbWFpbHRvOnVrZXJuZWxAZ21h
-aWwuY29tXSANCuWPkemAgeaXtumXtDogMjAxNeW5tDEy5pyIN+aXpSAxMToyMg0K5pS25Lu25Lq6
-OiB3dXhpYW5nd2VpIDA5NjYwIChSRCkNCuaKhOmAgTogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5v
-cmc7IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20NCuS4u+mimDogUmU6IGhvdyB0byBzZWUgZmls
-ZSBvYmplY3QtbWFwcGluZ3MgZm9yIGNlcGhmdXNlIGNsaWVudA0KDQpPbiBNb24sIERlYyA3LCAy
-MDE1IGF0IDEwOjUxIEFNLCBXdXhpYW5nd2VpIDx3dXhpYW5nd2VpQGgzYy5jb20+IHdyb3RlOg0K
-PiBIaSwgRXZlcnlvbmUNCj4NCj4gUmVjZW50bHkgSSdtIHRyeWluZyB0byBmaWd1cmUgb3V0IGhv
-dyB0byB1c2UgY2VwaC1mdXNlLiBJZiB3ZSBtb3VudCBjZXBoZnMgYXMgdGhlIGtlcm5lbCBjbGll
-bnQsIHRoZXJlIGlzIGEgJ2NlcGhmcycgY29tbWFuZCB0b29sICh0aG91Z2ggaXQgc2VlbXMgdG8g
-YmUgJ2RlcHJlY2F0ZWQnKSB3aXRoICdtYXAnIGFuZCAnc2hvd19sb2NhdGlvbicgY29tbWFuZHMg
-dG8gc2hvdyB0aGUgUkFET1Mgb2JqZWN0cyBiZWxvbmdpbmcgdG8gYSBnaXZlbiBmaWxlLiBIb3dl
-dmVyLCBpdCBkb2Vzbid0IHdvcmsgd2VsbCBmb3IgY2VwaC1mdXNlLCBuZWl0aGVyIGNhbiBJIGZp
-bmQgYSBzaW1pbGFyIHRvb2wgdG8gc2VlIHRoZSBtYXBwaW5ncy4gQW55IHN1Z2dlc3Rpb25zPw0K
-PiBUaGFuayB5b3UhDQoNClJhZG9zIG9iamVjdHMgIGZvciBhIGdpdmUgaW5vZGUgaXMgaW4gZm9y
-bSA8aW5vZGUgbnVtYmVyIGluIGhleD4ueHh4eHh4eHguDQoNClRvIGdldCBhIGZpbGUncyBsYXlv
-dXQsIHlvdSBjYW4gdXNlIGdldGZhdHRyIC1uIGNlcGguZmlsZS5sYXlvdXQgPGZpbGUgbmFtZT4N
-Cg0KVG8gZmluZCBhIGdpdmVuIG9iamVjdCBpcyBzdG9yZWQgb24gd2hpY2ggT1NEcywgeW91IGNh
-biB1c2UgY29tbWFuZCwgY2VwaCBvc2QgbWFwIDxjZXBoZnMgZGF0YSBwb29sPiA8b2JqZWN0IG5h
-bWU+DQoNCj4NCj4NCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gV3UgWGlhbmd3ZWkNCj4g
-VGVsIDogMDU3MS04Njc2MDg3NQ0KPiAyMDE0IFVJUyAyLCBURUFNIEJPUkUNCj4NCj4gLS0NCj4g
-VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
-IGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
-bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxp
-c3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vy
-cy1jZXBoLmNvbQo=
+On Mon, Dec 7, 2015 at 1:52 PM, Wuxiangwei <wuxiangwei@h3c.com> wrote:
+> Thanks Yan, what if we wanna see some more specific or detailed infor=
+mation? E.g. with cephfs we may run 'cephfs /mnt/a.txt show_location --=
+offset' to find the location of a given offset.
+>
+
+When using default layout, object size is 4M, (offset / 4194304) is
+subfix of object name. For example. offset 0 is located in object
+<inode number in hex>.00000000, offset 4194304 is located in object
+<inode number in hex>.0000001.
+
+=46or fancy layout, please read
+http://docs.ceph.com/docs/master/dev/file-striping/
+
+> -----------------------
+> Wu Xiangwei
+> Tel : 0571-86760875
+> 2014 UIS 2, TEAM BORE
+>
+>
+> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
+> =E5=8F=91=E4=BB=B6=E4=BA=BA: Yan, Zheng [mailto:ukernel@gmail.com]
+> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B412=E6=9C=887=E6=97=
+=A5 11:22
+> =E6=94=B6=E4=BB=B6=E4=BA=BA: wuxiangwei 09660 (RD)
+> =E6=8A=84=E9=80=81: ceph-devel@vger.kernel.org; ceph-users@lists.ceph=
+=2Ecom
+> =E4=B8=BB=E9=A2=98: Re: how to see file object-mappings for cephfuse =
+client
+>
+> On Mon, Dec 7, 2015 at 10:51 AM, Wuxiangwei <wuxiangwei@h3c.com> wrot=
+e:
+>> Hi, Everyone
+>>
+>> Recently I'm trying to figure out how to use ceph-fuse. If we mount =
+cephfs as the kernel client, there is a 'cephfs' command tool (though i=
+t seems to be 'deprecated') with 'map' and 'show_location' commands to =
+show the RADOS objects belonging to a given file. However, it doesn't w=
+ork well for ceph-fuse, neither can I find a similar tool to see the ma=
+ppings. Any suggestions?
+>> Thank you!
+>
+> Rados objects  for a give inode is in form <inode number in hex>.xxxx=
+xxxx.
+>
+> To get a file's layout, you can use getfattr -n ceph.file.layout <fil=
+e name>
+>
+> To find a given object is stored on which OSDs, you can use command, =
+ceph osd map <cephfs data pool> <object name>
+>
+>>
+>>
+>> -----------------------
+>> Wu Xiangwei
+>> Tel : 0571-86760875
+>> 2014 UIS 2, TEAM BORE
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
