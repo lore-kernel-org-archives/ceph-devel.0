@@ -1,76 +1,83 @@
-From: Wuxiangwei <wuxiangwei@h3c.com>
-Subject: =?utf-8?B?562U5aSNOiDnrZTlpI06IGhvdyB0byBzZWUgZmlsZSBvYmplY3QtbWFwcGlu?=
- =?utf-8?Q?gs_for_cephfuse_client?=
-Date: Mon, 7 Dec 2015 09:13:27 +0000
-Message-ID: <F075EA5A8A3F8045B2A81359C8B5B07C5E3E9BFD@H3CMLB12-EX.srv.huawei-3com.com>
-References: <F075EA5A8A3F8045B2A81359C8B5B07C5E3E8A52@H3CMLB12-EX.srv.huawei-3com.com>
-	<CAAM7YAkdHJ0jCWDhWBRX2v7tCiXxw7ZM3T39Lk5=6XHNCo2EOA@mail.gmail.com>
-	<F075EA5A8A3F8045B2A81359C8B5B07C5E3E9B12@H3CMLB12-EX.srv.huawei-3com.com>
- <CAAM7YA=bcqDfh0GVvxVXOdo0x239LkP+Z9rQ3txdYOJ9_Zo3QQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: testing the /dev/cciss/c0d0 device names
+Date: Mon, 7 Dec 2015 10:29:39 +0100
+Message-ID: <56655183.7000007@dachary.org>
+References: <56632EAC.3040105@dachary.org>
+ <CAOi1vP-jdgunEx4zt27ETZHbNGTzFxGp-rEbWJViD5OWLpS69A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="hUVECCVExpR1kCPlhopfvtwJnPr84uD57"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:15371 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755333AbbLGJPH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 7 Dec 2015 04:15:07 -0500
-In-Reply-To: <CAAM7YA=bcqDfh0GVvxVXOdo0x239LkP+Z9rQ3txdYOJ9_Zo3QQ@mail.gmail.com>
-Content-Language: zh-CN
+Received: from mail2.dachary.org ([91.121.57.175]:45443 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754935AbbLGJ3m (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Dec 2015 04:29:42 -0500
+In-Reply-To: <CAOi1vP-jdgunEx4zt27ETZHbNGTzFxGp-rEbWJViD5OWLpS69A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Stolte, Felix" <f.stolte@fz-juelich.de>
 
-DQppdCBsb29rcyBzaW1wbGUgaWYgZXZlcnl0aGluZyBzdGF5cyBhcyBpdHMgZGVmYXVsdCB2YWx1
-ZS4gSG93ZXZlciwgd2UgZG8gd2FudCB0byBjaGFuZ2UgdGhlIHN0cmlwZSB1bml0IHNpemUgYW5k
-IHN0cmlwZSBjb3VudCB0byBhY2hpZXZlIHBvc3NpYmxlIGhpZ2hlciBwZXJmb3JtYW5jZS4gSWYg
-c28sIGl0IHdvdWxkIGJlIHRvbyB0cm91Ymxlc29tZSB0byBtYW51YWxseSBkbyB0aGUgY2FsY3Vs
-YXRpb24gZXZlcnkgdGltZSB3aGVuIHdlIHdhbnQgdG8gbG9jYXRlIGEgZ2l2ZW4gb2Zmc2V0KGFu
-ZCBtYXliZSBhIGNlcnRhaW4gaW50ZXJ2YWwpLiBUaGUgJ2NlcGhmcyBtYXAnIGFuZCAnY2VwaGZz
-IHNob3dfbG9jYXRpb24nIGNhbiBwcm92aWRlwqBnb29kIGluZm9ybWF0aW9uIGFzwqB3ZSB3YW50
-LCBidXQgc2FkbHkgbm90IGZvciBjZXBoLWZ1c2UuIFRoYXQncyB3aHkgSSBhc2sgZm9yIGEgc2lt
-aWxhciB0b29sLiANCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCld1IFhpYW5nd2VpDQpUZWwg
-OiAwNTcxLTg2NzYwODc1DQoyMDE0IFVJUyAyLCBURUFNIEJPUkUNCg0KDQotLS0tLemCruS7tuWO
-n+S7ti0tLS0tDQrlj5Hku7bkuro6IFlhbiwgWmhlbmcgW21haWx0bzp1a2VybmVsQGdtYWlsLmNv
-bV0gDQrlj5HpgIHml7bpl7Q6IDIwMTXlubQxMuaciDfml6UgMTY6NDQNCuaUtuS7tuS6ujogd3V4
-aWFuZ3dlaSAwOTY2MCAoUkQpDQrmioTpgIE6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBj
-ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tDQrkuLvpopg6IFJlOiDnrZTlpI06IGhvdyB0byBzZWUg
-ZmlsZSBvYmplY3QtbWFwcGluZ3MgZm9yIGNlcGhmdXNlIGNsaWVudA0KDQpPbiBNb24sIERlYyA3
-LCAyMDE1IGF0IDE6NTIgUE0sIFd1eGlhbmd3ZWkgPHd1eGlhbmd3ZWlAaDNjLmNvbT4gd3JvdGU6
-DQo+IFRoYW5rcyBZYW4sIHdoYXQgaWYgd2Ugd2FubmEgc2VlIHNvbWUgbW9yZSBzcGVjaWZpYyBv
-ciBkZXRhaWxlZCBpbmZvcm1hdGlvbj8gRS5nLiB3aXRoIGNlcGhmcyB3ZSBtYXkgcnVuICdjZXBo
-ZnMgL21udC9hLnR4dCBzaG93X2xvY2F0aW9uIC0tb2Zmc2V0JyB0byBmaW5kIHRoZSBsb2NhdGlv
-biBvZiBhIGdpdmVuIG9mZnNldC4NCj4NCg0KV2hlbiB1c2luZyBkZWZhdWx0IGxheW91dCwgb2Jq
-ZWN0IHNpemUgaXMgNE0sIChvZmZzZXQgLyA0MTk0MzA0KSBpcyBzdWJmaXggb2Ygb2JqZWN0IG5h
-bWUuIEZvciBleGFtcGxlLiBvZmZzZXQgMCBpcyBsb2NhdGVkIGluIG9iamVjdCA8aW5vZGUgbnVt
-YmVyIGluIGhleD4uMDAwMDAwMDAsIG9mZnNldCA0MTk0MzA0IGlzIGxvY2F0ZWQgaW4gb2JqZWN0
-IDxpbm9kZSBudW1iZXIgaW4gaGV4Pi4wMDAwMDAxLg0KDQpGb3IgZmFuY3kgbGF5b3V0LCBwbGVh
-c2UgcmVhZA0KaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9tYXN0ZXIvZGV2L2ZpbGUtc3RyaXBp
-bmcvDQoNCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gV3UgWGlhbmd3ZWkNCj4gVGVsIDog
-MDU3MS04Njc2MDg3NQ0KPiAyMDE0IFVJUyAyLCBURUFNIEJPUkUNCj4NCj4NCj4gLS0tLS3pgq7k
-u7bljp/ku7YtLS0tLQ0KPiDlj5Hku7bkuro6IFlhbiwgWmhlbmcgW21haWx0bzp1a2VybmVsQGdt
-YWlsLmNvbV0NCj4g5Y+R6YCB5pe26Ze0OiAyMDE15bm0MTLmnIg35pelIDExOjIyDQo+IOaUtuS7
-tuS6ujogd3V4aWFuZ3dlaSAwOTY2MCAoUkQpDQo+IOaKhOmAgTogY2VwaC1kZXZlbEB2Z2VyLmtl
-cm5lbC5vcmc7IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20NCj4g5Li76aKYOiBSZTogaG93IHRv
-IHNlZSBmaWxlIG9iamVjdC1tYXBwaW5ncyBmb3IgY2VwaGZ1c2UgY2xpZW50DQo+DQo+IE9uIE1v
-biwgRGVjIDcsIDIwMTUgYXQgMTA6NTEgQU0sIFd1eGlhbmd3ZWkgPHd1eGlhbmd3ZWlAaDNjLmNv
-bT4gd3JvdGU6DQo+PiBIaSwgRXZlcnlvbmUNCj4+DQo+PiBSZWNlbnRseSBJJ20gdHJ5aW5nIHRv
-IGZpZ3VyZSBvdXQgaG93IHRvIHVzZSBjZXBoLWZ1c2UuIElmIHdlIG1vdW50IGNlcGhmcyBhcyB0
-aGUga2VybmVsIGNsaWVudCwgdGhlcmUgaXMgYSAnY2VwaGZzJyBjb21tYW5kIHRvb2wgKHRob3Vn
-aCBpdCBzZWVtcyB0byBiZSAnZGVwcmVjYXRlZCcpIHdpdGggJ21hcCcgYW5kICdzaG93X2xvY2F0
-aW9uJyBjb21tYW5kcyB0byBzaG93IHRoZSBSQURPUyBvYmplY3RzIGJlbG9uZ2luZyB0byBhIGdp
-dmVuIGZpbGUuIEhvd2V2ZXIsIGl0IGRvZXNuJ3Qgd29yayB3ZWxsIGZvciBjZXBoLWZ1c2UsIG5l
-aXRoZXIgY2FuIEkgZmluZCBhIHNpbWlsYXIgdG9vbCB0byBzZWUgdGhlIG1hcHBpbmdzLiBBbnkg
-c3VnZ2VzdGlvbnM/DQo+PiBUaGFuayB5b3UhDQo+DQo+IFJhZG9zIG9iamVjdHMgIGZvciBhIGdp
-dmUgaW5vZGUgaXMgaW4gZm9ybSA8aW5vZGUgbnVtYmVyIGluIGhleD4ueHh4eHh4eHguDQo+DQo+
-IFRvIGdldCBhIGZpbGUncyBsYXlvdXQsIHlvdSBjYW4gdXNlIGdldGZhdHRyIC1uIGNlcGguZmls
-ZS5sYXlvdXQgPGZpbGUgDQo+IG5hbWU+DQo+DQo+IFRvIGZpbmQgYSBnaXZlbiBvYmplY3QgaXMg
-c3RvcmVkIG9uIHdoaWNoIE9TRHMsIHlvdSBjYW4gdXNlIGNvbW1hbmQsIA0KPiBjZXBoIG9zZCBt
-YXAgPGNlcGhmcyBkYXRhIHBvb2w+IDxvYmplY3QgbmFtZT4NCj4NCj4+DQo+Pg0KPj4gLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0NCj4+IFd1IFhpYW5nd2VpDQo+PiBUZWwgOiAwNTcxLTg2NzYwODc1
-DQo+PiAyMDE0IFVJUyAyLCBURUFNIEJPUkUNCj4+DQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUg
-ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+
-PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBN
-b3JlIG1ham9yZG9tbyANCj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0K
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--hUVECCVExpR1kCPlhopfvtwJnPr84uD57
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+
+Hi,
+
+On 06/12/2015 20:15, Ilya Dryomov wrote:
+> On Sat, Dec 5, 2015 at 7:36 PM, Loic Dachary <loic@dachary.org> wrote:
+>> Hi Ilya,
+>>
+>> ceph-disk has special handling for device names like /dev/cciss/c0d1 [=
+1] and it was partially broken when support for device mapper was introdu=
+ced. Ideally there would be a way to test that support when running the c=
+eph-disk suite [2]. Do you know of a way to do that without having the ha=
+rdware for which this driver is designed ?
+>>
+>> Maybe this convention (/dev/cciss/c0d0 being mapped to /sys/block/ccis=
+s!c0d0 is not unique to this driver and I could use another to validate t=
+he name conversion from X/Y to X!Y and vice versa is handled as it should=
+ ?
+>=20
+> No, it's not unique.  driver core does strreplace(s, '/', '!') at
+> register time to work around such block devices.  The list includes
+> DAC960, aoeblk, cciss, cpqarray, sx8 and probably more, but I don't
+> think anything widespread uses this naming scheme.  IIRC dm actually
+> won't let you name a device with anything that contains a slash.
+>=20
+> If you really wanted you could set up aoeblk I guess, but a simple unit=
+
+> test should be be more than enough ;)
+
+Thanks for the information. I'll refrain from attempting integration test=
+s and try to make it solid with unit tests :-)
+
+Cheers
+
+>=20
+> Thanks,
+>=20
+>                 Ilya
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--hUVECCVExpR1kCPlhopfvtwJnPr84uD57
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlZlUYMACgkQ8dLMyEl6F22NcgCgjuIF0M7GgOvwv7QBeAZw0FS5
+QSQAn3WdEhbOkFdBIfQx2UNQezke/Haj
+=MXyq
+-----END PGP SIGNATURE-----
+
+--hUVECCVExpR1kCPlhopfvtwJnPr84uD57--
