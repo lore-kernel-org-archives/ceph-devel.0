@@ -1,65 +1,52 @@
-From: Martin Millnert <martin@millnert.se>
-Subject: Re: OSD public / cluster network isolation using VRF:s
-Date: Mon, 07 Dec 2015 14:41:03 +0100
-Message-ID: <1449495663.29564.118.camel@millnert.se>
-References: <1449173601.2291.84.camel@millnert.se>
-	 <422901884.211767.1449176599032.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
-	 <alpine.DEB.2.00.1512031326331.19170@cobra.newdream.net>
+From: Libin Wu <hzwulibin@gmail.com>
+Subject: poor performance when recovering
+Date: Mon, 7 Dec 2015 21:45:57 +0800
+Message-ID: <CAN4gH2P0WeVxXd1hDbc5T_-_2mBd4wsAiqDt=9sFXnY=AgikZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ncis.millnert.se ([185.19.66.196]:44780 "EHLO mail.millnert.se"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751818AbbLGNlF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 7 Dec 2015 08:41:05 -0500
-In-Reply-To: <alpine.DEB.2.00.1512031326331.19170@cobra.newdream.net>
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36247 "EHLO
+	mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755658AbbLGNp7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Dec 2015 08:45:59 -0500
+Received: by wmec201 with SMTP id c201so27749679wme.3
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Dec 2015 05:45:57 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "wido@42on.com" <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>, ceph-users <ceph-users@ceph.com>
 
-Sage,
+Hi, cephers
 
-thanks for your feedback, please see below:
+I'm doing the performance test of ceph when recovering. The scene is si=
+mple:
+1. run fio on 6 krbd device
+2. stop one OSD for 10 seconds
+3. start that OSD
 
-On Thu, 2015-12-03 at 13:30 -0800, Sage Weil wrote:
-> On Thu, 3 Dec 2015, wido@42on.com wrote:
-> > Why all the trouble and complexity? I personally always try to avoid the 
-> > two networks and run with one. Also in large L3 envs.
-> > 
-> > I like the idea that one machine has one IP I have to monitor.
-> > 
-> > I would rethink about what a cluster network really adds. Imho it only 
-> > adds complexity.
-> 
-> FWIW I tend to agree.  There are probably some network deployments where 
-> it makes sense, but for most people I think it just adds complexity.  
-> Maybe it makes it easy to utilize dual interfaces, but my guess is you're 
-> better off bonding them if you can.
+However, when the OSD up and start recovering, the performance of fio
+drop down from 9k to 1k for about 20 seconds. At the same tiime, we
+found the SSD of that OSD's latency is more than 100ms, so it seems
+the SSD become the bottleneck=E3=80=82
 
-I'll add to the response to Wido that in our case it's not separated
-physical interfaces. (While providing good QoS, you would lose statmux
-gains and redundancy). ToR <-> host in our case is bonded or
-equivalent. 
+So we want to slow down the recovery speed to lighten the load of the
+SSD when recovery. But configuration like:
+    osd_recovery_max_active
+    osd_recovery_max_chunk
+    osd_max_backfills
+    osd_recovery_op_priority
+are all useless.
 
-> Note that on a largish cluster the public/client traffic is all 
-> north-south, while the backend traffic is also mostly north-south to the 
-> top-of-rack and then east-west.  I.e., within the rack, almost everything 
-> is north-south, and client and replication traffic don't look that 
-> different.
+After reading and change some code, we want add a flow control in the
+process of:
+    OSD::do_recovery
 
-This problem domain is one of the larger challenges. I worry about
-network timeouts for critical cluster traffic in one of the clusters due
-to hosts having 2x1GbE. I.e. in our case I want to
-prioritize/guarantee/reserve a minimum amount of bandwidth for cluster
-health traffic primarily, and secondarily cluster replication. Client
-write replication should then be least prioritized.
+So, will it be possible to do so and if this solution has some
+potential problem?
 
-To support this I need our network equipment to perform the CoS job, and
-in order to do that at some level in the stack I need to be able to
-classify traffic. And furthermore, I'd like to do this with as little
-added state as possible.
-
-/Martin
-
+Thanks!
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
