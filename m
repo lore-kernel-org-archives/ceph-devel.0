@@ -1,48 +1,57 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: OSD public / cluster network isolation using VRF:s
-Date: Mon, 7 Dec 2015 06:10:56 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1512070608030.25269@cobra.newdream.net>
-References: <1449173601.2291.84.camel@millnert.se> <422901884.211767.1449176599032.JavaMail.open-xchange@ox03.mail.pcextreme.nl> <alpine.DEB.2.00.1512031326331.19170@cobra.newdream.net> <1449495663.29564.118.camel@millnert.se>
+From: Libin Wu <hzwulibin@gmail.com>
+Subject: Re: poor performance when recovering
+Date: Mon, 7 Dec 2015 22:26:30 +0800
+Message-ID: <CAN4gH2P152bX-XeyqYc97XvHZqw624-x9AzgBfwXtXyFB0xptg@mail.gmail.com>
+References: <CAN4gH2P0WeVxXd1hDbc5T_-_2mBd4wsAiqDt=9sFXnY=AgikZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54852 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932457AbbLGOK5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Dec 2015 09:10:57 -0500
-In-Reply-To: <1449495663.29564.118.camel@millnert.se>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:35763 "EHLO
+	mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754735AbbLGO0b convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Dec 2015 09:26:31 -0500
+Received: by wmeo63 with SMTP id o63so28064385wme.2
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Dec 2015 06:26:30 -0800 (PST)
+In-Reply-To: <CAN4gH2P0WeVxXd1hDbc5T_-_2mBd4wsAiqDt=9sFXnY=AgikZQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Millnert <martin@millnert.se>
-Cc: "wido@42on.com" <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>, ceph-users <ceph-users@ceph.com>
 
-On Mon, 7 Dec 2015, Martin Millnert wrote:
-> > Note that on a largish cluster the public/client traffic is all 
-> > north-south, while the backend traffic is also mostly north-south to the 
-> > top-of-rack and then east-west.  I.e., within the rack, almost everything 
-> > is north-south, and client and replication traffic don't look that 
-> > different.
-> 
-> This problem domain is one of the larger challenges. I worry about
-> network timeouts for critical cluster traffic in one of the clusters due
-> to hosts having 2x1GbE. I.e. in our case I want to
-> prioritize/guarantee/reserve a minimum amount of bandwidth for cluster
-> health traffic primarily, and secondarily cluster replication. Client
-> write replication should then be least prioritized.
+Btw, my ceph version is 0.80.11
 
-One word of caution here: the health traffic should really be the 
-same path and class of service as the inter-osd traffic, or else it 
-will not identify failures.  e.g., if the health traffic is prioritized, 
-and lower-priority traffic is starved/dropped, we won't notice.
- 
-> To support this I need our network equipment to perform the CoS job, and
-> in order to do that at some level in the stack I need to be able to
-> classify traffic. And furthermore, I'd like to do this with as little
-> added state as possible.
-
-I seem to recall a conversation a year or so ago about tagging 
-stream/sockets so that the network layer could do this.  I don't think 
-we got anywhere, though...
-
-sage
-
+2015-12-07 21:45 GMT+08:00 Libin Wu <hzwulibin@gmail.com>:
+> Hi, cephers
+>
+> I'm doing the performance test of ceph when recovering. The scene is =
+simple:
+> 1. run fio on 6 krbd device
+> 2. stop one OSD for 10 seconds
+> 3. start that OSD
+>
+> However, when the OSD up and start recovering, the performance of fio
+> drop down from 9k to 1k for about 20 seconds. At the same tiime, we
+> found the SSD of that OSD's latency is more than 100ms, so it seems
+> the SSD become the bottleneck=E3=80=82
+>
+> So we want to slow down the recovery speed to lighten the load of the
+> SSD when recovery. But configuration like:
+>     osd_recovery_max_active
+>     osd_recovery_max_chunk
+>     osd_max_backfills
+>     osd_recovery_op_priority
+> are all useless.
+>
+> After reading and change some code, we want add a flow control in the
+> process of:
+>     OSD::do_recovery
+>
+> So, will it be possible to do so and if this solution has some
+> potential problem?
+>
+> Thanks!
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
