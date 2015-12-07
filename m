@@ -1,92 +1,76 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: =?UTF-8?Q?Re=3A_=E7=AD=94=E5=A4=8D=3A_how_to_see_file_object=2Dmappings_for_ceph?=
-	=?UTF-8?Q?fuse_client?=
-Date: Mon, 7 Dec 2015 16:43:35 +0800
-Message-ID: <CAAM7YA=bcqDfh0GVvxVXOdo0x239LkP+Z9rQ3txdYOJ9_Zo3QQ@mail.gmail.com>
+From: Wuxiangwei <wuxiangwei@h3c.com>
+Subject: =?utf-8?B?562U5aSNOiDnrZTlpI06IGhvdyB0byBzZWUgZmlsZSBvYmplY3QtbWFwcGlu?=
+ =?utf-8?Q?gs_for_cephfuse_client?=
+Date: Mon, 7 Dec 2015 09:13:27 +0000
+Message-ID: <F075EA5A8A3F8045B2A81359C8B5B07C5E3E9BFD@H3CMLB12-EX.srv.huawei-3com.com>
 References: <F075EA5A8A3F8045B2A81359C8B5B07C5E3E8A52@H3CMLB12-EX.srv.huawei-3com.com>
 	<CAAM7YAkdHJ0jCWDhWBRX2v7tCiXxw7ZM3T39Lk5=6XHNCo2EOA@mail.gmail.com>
 	<F075EA5A8A3F8045B2A81359C8B5B07C5E3E9B12@H3CMLB12-EX.srv.huawei-3com.com>
+ <CAAM7YA=bcqDfh0GVvxVXOdo0x239LkP+Z9rQ3txdYOJ9_Zo3QQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f175.google.com ([209.85.217.175]:34424 "EHLO
-	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751450AbbLGInh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Dec 2015 03:43:37 -0500
-Received: by lbbcs9 with SMTP id cs9so53660252lbb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Dec 2015 00:43:35 -0800 (PST)
-In-Reply-To: <F075EA5A8A3F8045B2A81359C8B5B07C5E3E9B12@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from smtp.h3c.com ([60.191.123.56]:15371 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755333AbbLGJPH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 7 Dec 2015 04:15:07 -0500
+In-Reply-To: <CAAM7YA=bcqDfh0GVvxVXOdo0x239LkP+Z9rQ3txdYOJ9_Zo3QQ@mail.gmail.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wuxiangwei <wuxiangwei@h3c.com>
+To: "Yan, Zheng" <ukernel@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-On Mon, Dec 7, 2015 at 1:52 PM, Wuxiangwei <wuxiangwei@h3c.com> wrote:
-> Thanks Yan, what if we wanna see some more specific or detailed infor=
-mation? E.g. with cephfs we may run 'cephfs /mnt/a.txt show_location --=
-offset' to find the location of a given offset.
->
-
-When using default layout, object size is 4M, (offset / 4194304) is
-subfix of object name. For example. offset 0 is located in object
-<inode number in hex>.00000000, offset 4194304 is located in object
-<inode number in hex>.0000001.
-
-=46or fancy layout, please read
-http://docs.ceph.com/docs/master/dev/file-striping/
-
-> -----------------------
-> Wu Xiangwei
-> Tel : 0571-86760875
-> 2014 UIS 2, TEAM BORE
->
->
-> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
-> =E5=8F=91=E4=BB=B6=E4=BA=BA: Yan, Zheng [mailto:ukernel@gmail.com]
-> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B412=E6=9C=887=E6=97=
-=A5 11:22
-> =E6=94=B6=E4=BB=B6=E4=BA=BA: wuxiangwei 09660 (RD)
-> =E6=8A=84=E9=80=81: ceph-devel@vger.kernel.org; ceph-users@lists.ceph=
-=2Ecom
-> =E4=B8=BB=E9=A2=98: Re: how to see file object-mappings for cephfuse =
-client
->
-> On Mon, Dec 7, 2015 at 10:51 AM, Wuxiangwei <wuxiangwei@h3c.com> wrot=
-e:
->> Hi, Everyone
->>
->> Recently I'm trying to figure out how to use ceph-fuse. If we mount =
-cephfs as the kernel client, there is a 'cephfs' command tool (though i=
-t seems to be 'deprecated') with 'map' and 'show_location' commands to =
-show the RADOS objects belonging to a given file. However, it doesn't w=
-ork well for ceph-fuse, neither can I find a similar tool to see the ma=
-ppings. Any suggestions?
->> Thank you!
->
-> Rados objects  for a give inode is in form <inode number in hex>.xxxx=
-xxxx.
->
-> To get a file's layout, you can use getfattr -n ceph.file.layout <fil=
-e name>
->
-> To find a given object is stored on which OSDs, you can use command, =
-ceph osd map <cephfs data pool> <object name>
->
->>
->>
->> -----------------------
->> Wu Xiangwei
->> Tel : 0571-86760875
->> 2014 UIS 2, TEAM BORE
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQppdCBsb29rcyBzaW1wbGUgaWYgZXZlcnl0aGluZyBzdGF5cyBhcyBpdHMgZGVmYXVsdCB2YWx1
+ZS4gSG93ZXZlciwgd2UgZG8gd2FudCB0byBjaGFuZ2UgdGhlIHN0cmlwZSB1bml0IHNpemUgYW5k
+IHN0cmlwZSBjb3VudCB0byBhY2hpZXZlIHBvc3NpYmxlIGhpZ2hlciBwZXJmb3JtYW5jZS4gSWYg
+c28sIGl0IHdvdWxkIGJlIHRvbyB0cm91Ymxlc29tZSB0byBtYW51YWxseSBkbyB0aGUgY2FsY3Vs
+YXRpb24gZXZlcnkgdGltZSB3aGVuIHdlIHdhbnQgdG8gbG9jYXRlIGEgZ2l2ZW4gb2Zmc2V0KGFu
+ZCBtYXliZSBhIGNlcnRhaW4gaW50ZXJ2YWwpLiBUaGUgJ2NlcGhmcyBtYXAnIGFuZCAnY2VwaGZz
+IHNob3dfbG9jYXRpb24nIGNhbiBwcm92aWRlwqBnb29kIGluZm9ybWF0aW9uIGFzwqB3ZSB3YW50
+LCBidXQgc2FkbHkgbm90IGZvciBjZXBoLWZ1c2UuIFRoYXQncyB3aHkgSSBhc2sgZm9yIGEgc2lt
+aWxhciB0b29sLiANCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCld1IFhpYW5nd2VpDQpUZWwg
+OiAwNTcxLTg2NzYwODc1DQoyMDE0IFVJUyAyLCBURUFNIEJPUkUNCg0KDQotLS0tLemCruS7tuWO
+n+S7ti0tLS0tDQrlj5Hku7bkuro6IFlhbiwgWmhlbmcgW21haWx0bzp1a2VybmVsQGdtYWlsLmNv
+bV0gDQrlj5HpgIHml7bpl7Q6IDIwMTXlubQxMuaciDfml6UgMTY6NDQNCuaUtuS7tuS6ujogd3V4
+aWFuZ3dlaSAwOTY2MCAoUkQpDQrmioTpgIE6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBj
+ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tDQrkuLvpopg6IFJlOiDnrZTlpI06IGhvdyB0byBzZWUg
+ZmlsZSBvYmplY3QtbWFwcGluZ3MgZm9yIGNlcGhmdXNlIGNsaWVudA0KDQpPbiBNb24sIERlYyA3
+LCAyMDE1IGF0IDE6NTIgUE0sIFd1eGlhbmd3ZWkgPHd1eGlhbmd3ZWlAaDNjLmNvbT4gd3JvdGU6
+DQo+IFRoYW5rcyBZYW4sIHdoYXQgaWYgd2Ugd2FubmEgc2VlIHNvbWUgbW9yZSBzcGVjaWZpYyBv
+ciBkZXRhaWxlZCBpbmZvcm1hdGlvbj8gRS5nLiB3aXRoIGNlcGhmcyB3ZSBtYXkgcnVuICdjZXBo
+ZnMgL21udC9hLnR4dCBzaG93X2xvY2F0aW9uIC0tb2Zmc2V0JyB0byBmaW5kIHRoZSBsb2NhdGlv
+biBvZiBhIGdpdmVuIG9mZnNldC4NCj4NCg0KV2hlbiB1c2luZyBkZWZhdWx0IGxheW91dCwgb2Jq
+ZWN0IHNpemUgaXMgNE0sIChvZmZzZXQgLyA0MTk0MzA0KSBpcyBzdWJmaXggb2Ygb2JqZWN0IG5h
+bWUuIEZvciBleGFtcGxlLiBvZmZzZXQgMCBpcyBsb2NhdGVkIGluIG9iamVjdCA8aW5vZGUgbnVt
+YmVyIGluIGhleD4uMDAwMDAwMDAsIG9mZnNldCA0MTk0MzA0IGlzIGxvY2F0ZWQgaW4gb2JqZWN0
+IDxpbm9kZSBudW1iZXIgaW4gaGV4Pi4wMDAwMDAxLg0KDQpGb3IgZmFuY3kgbGF5b3V0LCBwbGVh
+c2UgcmVhZA0KaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9tYXN0ZXIvZGV2L2ZpbGUtc3RyaXBp
+bmcvDQoNCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gV3UgWGlhbmd3ZWkNCj4gVGVsIDog
+MDU3MS04Njc2MDg3NQ0KPiAyMDE0IFVJUyAyLCBURUFNIEJPUkUNCj4NCj4NCj4gLS0tLS3pgq7k
+u7bljp/ku7YtLS0tLQ0KPiDlj5Hku7bkuro6IFlhbiwgWmhlbmcgW21haWx0bzp1a2VybmVsQGdt
+YWlsLmNvbV0NCj4g5Y+R6YCB5pe26Ze0OiAyMDE15bm0MTLmnIg35pelIDExOjIyDQo+IOaUtuS7
+tuS6ujogd3V4aWFuZ3dlaSAwOTY2MCAoUkQpDQo+IOaKhOmAgTogY2VwaC1kZXZlbEB2Z2VyLmtl
+cm5lbC5vcmc7IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20NCj4g5Li76aKYOiBSZTogaG93IHRv
+IHNlZSBmaWxlIG9iamVjdC1tYXBwaW5ncyBmb3IgY2VwaGZ1c2UgY2xpZW50DQo+DQo+IE9uIE1v
+biwgRGVjIDcsIDIwMTUgYXQgMTA6NTEgQU0sIFd1eGlhbmd3ZWkgPHd1eGlhbmd3ZWlAaDNjLmNv
+bT4gd3JvdGU6DQo+PiBIaSwgRXZlcnlvbmUNCj4+DQo+PiBSZWNlbnRseSBJJ20gdHJ5aW5nIHRv
+IGZpZ3VyZSBvdXQgaG93IHRvIHVzZSBjZXBoLWZ1c2UuIElmIHdlIG1vdW50IGNlcGhmcyBhcyB0
+aGUga2VybmVsIGNsaWVudCwgdGhlcmUgaXMgYSAnY2VwaGZzJyBjb21tYW5kIHRvb2wgKHRob3Vn
+aCBpdCBzZWVtcyB0byBiZSAnZGVwcmVjYXRlZCcpIHdpdGggJ21hcCcgYW5kICdzaG93X2xvY2F0
+aW9uJyBjb21tYW5kcyB0byBzaG93IHRoZSBSQURPUyBvYmplY3RzIGJlbG9uZ2luZyB0byBhIGdp
+dmVuIGZpbGUuIEhvd2V2ZXIsIGl0IGRvZXNuJ3Qgd29yayB3ZWxsIGZvciBjZXBoLWZ1c2UsIG5l
+aXRoZXIgY2FuIEkgZmluZCBhIHNpbWlsYXIgdG9vbCB0byBzZWUgdGhlIG1hcHBpbmdzLiBBbnkg
+c3VnZ2VzdGlvbnM/DQo+PiBUaGFuayB5b3UhDQo+DQo+IFJhZG9zIG9iamVjdHMgIGZvciBhIGdp
+dmUgaW5vZGUgaXMgaW4gZm9ybSA8aW5vZGUgbnVtYmVyIGluIGhleD4ueHh4eHh4eHguDQo+DQo+
+IFRvIGdldCBhIGZpbGUncyBsYXlvdXQsIHlvdSBjYW4gdXNlIGdldGZhdHRyIC1uIGNlcGguZmls
+ZS5sYXlvdXQgPGZpbGUgDQo+IG5hbWU+DQo+DQo+IFRvIGZpbmQgYSBnaXZlbiBvYmplY3QgaXMg
+c3RvcmVkIG9uIHdoaWNoIE9TRHMsIHlvdSBjYW4gdXNlIGNvbW1hbmQsIA0KPiBjZXBoIG9zZCBt
+YXAgPGNlcGhmcyBkYXRhIHBvb2w+IDxvYmplY3QgbmFtZT4NCj4NCj4+DQo+Pg0KPj4gLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0NCj4+IFd1IFhpYW5nd2VpDQo+PiBUZWwgOiAwNTcxLTg2NzYwODc1
+DQo+PiAyMDE0IFVJUyAyLCBURUFNIEJPUkUNCj4+DQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUg
+ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+
+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBN
+b3JlIG1ham9yZG9tbyANCj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
+b21vLWluZm8uaHRtbA0K
