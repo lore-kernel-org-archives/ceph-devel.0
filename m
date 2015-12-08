@@ -1,55 +1,100 @@
-From: <ghislain.chevalier@orange.com>
-Subject: [RADOSGATEWAY] Admin API
-Date: Tue, 8 Dec 2015 17:45:06 +0000
-Message-ID: <28235_1449596706_56671722_28235_9397_1_B9C8EFBF13B1354DB5FA000660D66DD00D668DB9@OPEXCLILM22.corporate.adroot.infra.ftgroup>
+From: Rongze Zhu <zrzhit@gmail.com>
+Subject: Long time between waiting_for_osdmap event and reached_pg event in dump_historic_ops
+Date: Wed, 9 Dec 2015 01:56:36 +0800
+Message-ID: <CAMXgYGbc8Z2XOpaB-b_-0VyoM+XAy5pFQk2EazMeA=VXd-0g6g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relais-nor35.orange.com ([80.12.70.35]:44614 "EHLO
-	relais-inet.orange.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751236AbbLHRpJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Dec 2015 12:45:09 -0500
-Received: from opfednr01.francetelecom.fr (unknown [xx.xx.xx.65])
-	by opfednr21.francetelecom.fr (ESMTP service) with ESMTP id 0AB9AC0947
-	for <ceph-devel@vger.kernel.org>; Tue,  8 Dec 2015 18:45:07 +0100 (CET)
-Received: from Exchangemail-eme2.itn.ftgroup (unknown [xx.xx.31.27])
-	by opfednr01.francetelecom.fr (ESMTP service) with ESMTP id E256A1A00AB
-	for <ceph-devel@vger.kernel.org>; Tue,  8 Dec 2015 18:45:06 +0100 (CET)
-Content-Language: fr-FR
+Received: from mail-io0-f175.google.com ([209.85.223.175]:36168 "EHLO
+	mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751155AbbLHR4h (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Dec 2015 12:56:37 -0500
+Received: by iofh3 with SMTP id h3so32301603iof.3
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Dec 2015 09:56:36 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-SGksDQoNCkNvbnRleHQgOiBGaXJlZmx5IDAuODAuMTANCg0KSSB1c2UgdGhlIHJndyBhZG1pbiBh
-cGkgdG8gZ2V0IGluZm9ybWF0aW9uIGFib3V0IHVzZXIgZnJvbSANCmh0dHA6Ly9kb2NzLmNlcGgu
-Y29tL2RvY3MvbWFzdGVyL3JhZG9zZ3cvYWRtaW5vcHMvI2dldC11c2VyLWluZm8NCg0KVGhlIGdl
-dCByZXF1ZXN0IGRvZXNuJ3QgcmV0dXJuIGFsbCB0aGUgaW5mb3JtYXRpb24gdGhhdCB3ZSBjYW4g
-Z2V0IHdpdGggcmFkb3Nndy1hZG1pbiB1c2VyIGluZm8gLS11aWQ9PHVzZXJuYW1lPg0KVGhlIG1l
-dGFkYXRhIHN1Y2ggYXMgb3BfbWFzaywgc3lzdGVtLCBkZWZhdWx0X3BsYWNlbWVudCwgcGxhY2Vt
-ZW50X3RhZ3MsIGJ1Y2tldF9xdW90YSwgdXNlcl9xdW90YSwgYW5kIHRlbXBfdXJsX2tleXMgIGFy
-ZSBtaXNzaW5nLg0KDQpJcyB0aGUgYWRtaW4gYXBpIGdvaW5nIHRvIGV2b2x2ZSBpbiBvcmRlciB0
-byBnZXQgdGhvc2UgaW5mb3JtYXRpb24/DQoNCkJyZ2RzDQoNCi0gLSAtIC0gLSAtIC0gLSAtIC0g
-LSAtIC0gLSAtIC0gLSANCkdoaXNsYWluIENoZXZhbGllcg0KT1JBTkdFL0lNVC9PTFBTL0FTRS9E
-QVBJL0NTRQ0KQXJjaGl0ZWN0ZSBkZSBzZXJ2aWNlcyBk4oCZaW5mcmFzdHJ1Y3R1cmUgZGUgc3Rv
-Y2thZ2UNClNvZndhcmUtRGVmaW5lZCBTdG9yYWdlIEFyY2hpdGVjdA0KICszMzI5OTEyNDQzMg0K
-ICszMzc4ODYyNDM3MA0KZ2hpc2xhaW4uY2hldmFsaWVyQG9yYW5nZS5jb20gDQrvgZDCoFBlbnNl
-eiDDoCBsJ0Vudmlyb25uZW1lbnQgYXZhbnQgZCdpbXByaW1lciBjZSBtZXNzYWdlICEgDQoNCg0K
-Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX18KCkNlIG1lc3NhZ2UgZXQgc2VzIHBpZWNlcyBqb2ludGVzIHBldXZlbnQgY29udGVu
-aXIgZGVzIGluZm9ybWF0aW9ucyBjb25maWRlbnRpZWxsZXMgb3UgcHJpdmlsZWdpZWVzIGV0IG5l
-IGRvaXZlbnQgZG9uYwpwYXMgZXRyZSBkaWZmdXNlcywgZXhwbG9pdGVzIG91IGNvcGllcyBzYW5z
-IGF1dG9yaXNhdGlvbi4gU2kgdm91cyBhdmV6IHJlY3UgY2UgbWVzc2FnZSBwYXIgZXJyZXVyLCB2
-ZXVpbGxleiBsZSBzaWduYWxlcgphIGwnZXhwZWRpdGV1ciBldCBsZSBkZXRydWlyZSBhaW5zaSBx
-dWUgbGVzIHBpZWNlcyBqb2ludGVzLiBMZXMgbWVzc2FnZXMgZWxlY3Ryb25pcXVlcyBldGFudCBz
-dXNjZXB0aWJsZXMgZCdhbHRlcmF0aW9uLApGcmFuY2UgVGVsZWNvbSAtIE9yYW5nZSBkZWNsaW5l
-IHRvdXRlIHJlc3BvbnNhYmlsaXRlIHNpIGNlIG1lc3NhZ2UgYSBldGUgYWx0ZXJlLCBkZWZvcm1l
-IG91IGZhbHNpZmllLiBNZXJjaQoKVGhpcyBtZXNzYWdlIGFuZCBpdHMgYXR0YWNobWVudHMgbWF5
-IGNvbnRhaW4gY29uZmlkZW50aWFsIG9yIHByaXZpbGVnZWQgaW5mb3JtYXRpb24gdGhhdCBtYXkg
-YmUgcHJvdGVjdGVkIGJ5IGxhdzsKdGhleSBzaG91bGQgbm90IGJlIGRpc3RyaWJ1dGVkLCB1c2Vk
-IG9yIGNvcGllZCB3aXRob3V0IGF1dGhvcml6YXRpb24uCklmIHlvdSBoYXZlIHJlY2VpdmVkIHRo
-aXMgZW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBhbmQgZGVsZXRlIHRo
-aXMgbWVzc2FnZSBhbmQgaXRzIGF0dGFjaG1lbnRzLgpBcyBlbWFpbHMgbWF5IGJlIGFsdGVyZWQs
-IEZyYW5jZSBUZWxlY29tIC0gT3JhbmdlIHNoYWxsIG5vdCBiZSBsaWFibGUgaWYgdGhpcyBtZXNz
-YWdlIHdhcyBtb2RpZmllZCwgY2hhbmdlZCBvciBmYWxzaWZpZWQuClRoYW5rIHlvdS4KCg==
+Hi guys,
+
+I found out a strange issue in a  ceph cluster. This ceph cluster is used
+for OpenStack cluster, there are 70 VMs in the cluster.  There are many
+slow request(osd_op_complaint_time = 3) in the ceph cache tier with high
+load( more than 3000 ops, 90% write).
+
+After the investigation, I found that sometimes the interval time between
+waiting_for_osdmap event and reached_pg event in the op will be very
+long(may be 10 ~ 100 seconds). This means that some ops will stay op_wq
+queue very long, until the osd op threads process it.
+
+What reasons can cause this issue? Before anyone encountered this
+situation?  I think that osdmap,pg lock,object lock can't block osd op
+thread so long(10s ~ 100 seconds).
+
+
+hardware(total 11 nodes):
+    - 6 x nodes(compute & storage):
+        - 3 x nodes: HUAWEI RH2288H V2 server, 2xE5-2658, 256GB,
+            - 1 x HUAWEI SSD disk 800GB, used for ceph osd
+            - 12 x 1.2TB SAS disk(each raid0 has 4 sas disk), used for ceph
+        - 3 x nodes: HP DL380 Gen9 server,  2xE5-2640, 128GB,
+            - 2 x OCZ SSD disk 800GB, used for ceph
+            - 12 x 1.2TB SAS disk(each raid0 has 4 sas disk), used for ceph
+    - 5 x nodes (compute)
+
+os:
+    - HUAWEI server: RHEL 6.4, 2.6.32-358.123.2.openstack
+    - HP DL380 Gen9 server: RHEL 6.5, 2.6.32-431.el6.x86_64
+
+ceph:
+    - ceph 0.80.10
+    - 9 ssd osd for cache tier
+    - 18 raid0 osd for storage tier
+    - replication size = 2
+    - pg num = 1024
+    - osd op thread = 20
+    - filestore op thread = 20
+
+dump_historic_ops(osd.4  ssd):
+
+        { "description": "osd_op(client.983894.0:8044023
+rbd_data.468d085e74d0.00000000000031b9 [] 4.5605c210 ack+ondisk+write
+e11409)",
+          "received_at": "2015-12-08 13:31:49.645295",
+          "age": "100.252129",
+          "duration": "25.419458",
+          "type_data": [
+                "commit sent; apply or cleanup",
+                { "client": "client.983894",
+                  "tid": 8044023},
+                [
+                    { "time": "2015-12-08 13:31:49.645616",
+                      "event": "waiting_for_osdmap"},
+                    { "time": "2015-12-08 13:32:01.529474",
+                      "event": "reached_pg"},
+                    { "time": "2015-12-08 13:32:01.529557",
+                      "event": "started"},
+                    { "time": "2015-12-08 13:32:01.529575",
+                      "event": "started"},
+                    { "time": "2015-12-08 13:32:01.529642",
+                      "event": "waiting for subops from 25"},
+                    { "time": "2015-12-08 13:32:01.530340",
+                      "event": "commit_queued_for_journal_write"},
+                    { "time": "2015-12-08 13:32:01.531270",
+                      "event": "write_thread_in_journal_buffer"},
+                    { "time": "2015-12-08 13:32:01.533131",
+                      "event": "journaled_completion_queued"},
+                    { "time": "2015-12-08 13:32:01.533412",
+                      "event": "sub_op_commit_rec"},
+                    { "time": "2015-12-08 13:32:05.813736",
+                      "event": "op_commit"},
+                    { "time": "2015-12-08 13:32:05.814035",
+                      "event": "commit_sent"},
+                    { "time": "2015-12-08 13:32:15.064722",
+                      "event": "op_applied"},
+                    { "time": "2015-12-08 13:32:15.064753",
+                      "event": "done"}]]}]}
+
+
+--
+Rongze Zhu
