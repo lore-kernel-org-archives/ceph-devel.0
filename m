@@ -1,64 +1,56 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Re: problem about pgmeta object?
-Date: Tue, 8 Dec 2015 19:08:15 +0800
-Message-ID: <CALZt5jzpGn1koOwK2PZ2w6xj-UPibc2B60HU-f1ZayFNDSy3EQ@mail.gmail.com>
-References: <CALZt5jx2bQKK6yE=bTu96CD=OE7uVGTagfqirHsXh5bNbS2t=w@mail.gmail.com>
-	<alpine.DEB.2.00.1511180511420.7964@cobra.newdream.net>
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: Re: Compiling for FreeBSD
+Date: Tue, 8 Dec 2015 14:36:58 +0200
+Message-ID: <20151208123656.GA22774@gmail.com>
+References: <CAOtMX2j5xJBnYoNdxTGGQFz-fTVX2xQka2NuyUZuOPpsft6HuA@mail.gmail.com>
+ <alpine.DEB.2.00.1512011034550.19170@cobra.newdream.net>
+ <565DEA60.7010608@digiware.nl>
+ <CAAM7YAmzq3a_kqXE2ZgK_fp4i6QduY49aXqiWVNK3F59iZUFRA@mail.gmail.com>
+ <565F5A03.7020401@digiware.nl>
+ <CAAM7YA=Q6gbBbN92a9KigAXw4e_SrshQ6Q8mC1Xff+vxQQkrKw@mail.gmail.com>
+ <5661DBB8.1040505@digiware.nl>
+ <CAJ4mKGZ+wjum+R3=pBS8urko4D1B_D+eKjytWE_uDdFcGW6sSA@mail.gmail.com>
+ <5661F358.2060401@digiware.nl>
+ <5666AB1D.5010101@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:38625 "EHLO
-	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932569AbbLHLIR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Dec 2015 06:08:17 -0500
-Received: by wmec201 with SMTP id c201so25002135wme.1
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Dec 2015 03:08:16 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1511180511420.7964@cobra.newdream.net>
+Received: from mail-lb0-f178.google.com ([209.85.217.178]:33421 "EHLO
+	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755518AbbLHMhC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Dec 2015 07:37:02 -0500
+Received: by lbbkw15 with SMTP id kw15so10276757lbb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Dec 2015 04:37:00 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <5666AB1D.5010101@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Gregory Farnum <gfarnum@redhat.com>, "Yan, Zheng" <ukernel@gmail.com>, Sage Weil <sage@newdream.net>, Alan Somers <asomers@freebsd.org>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Umm, it seems that MemStore requires in memory meta object to keep the
-attributes. So it is not a direct way to remove the pg_meta object
-backend storage. Any suggestions?
-I think we can just skip the pg_meta operation in FileStore api based
-on the value of hoid.pgmeta(), not a generic strategy for all
-backends.
-Regards
-Ning Yao
+On Tue, Dec 08, 2015 at 11:04:13AM +0100, Willem Jan Withagen wrote:
+> On 4-12-2015 21:11, Willem Jan Withagen wrote:
+> 
+> One larger problem with libraries I have is the stuff with dlopen.
+> 
+> In ./configure it seems that most of the code is short-circuited, and -ldl
+> gets appended in the Makefile.am's by default. The code there is rather hard
+> to parse.
+> 
+> FreeBSD has this in libc, so no specific includes needed.
+> 
+> Now the question is how do I cleanly fix this without breaking just
+> about every other platform?
 
+Could you provide particular examples? Because what I see in the
+master is usually like below:
 
-2015-11-18 21:12 GMT+08:00 Sage Weil <sage@newdream.net>:
-> On Wed, 18 Nov 2015, Ning Yao wrote:
->> Hi, Sage
->>
->> pgmeta object is a meta-object (like __head_00000000__2) without
->> significant information. It is created when in PG::_init() when
->> handling pg_create and split_coll and always exits there during pg's
->> life cycle until pg is removed in RemoveWQ. The real content related
->> to pgmeta-data is stored in omap. we may just treat pgmeta-object as a
->> logical object and not present it physically so that we can avoid
->> recursive searching object path by if(hoid.pgmeta())?
->> such as:
->> int FileStore::_omap_setkeys(coll_t cid, const ghobject_t &hoid,
->>     const map<string, bufferlist> &aset,
->>     const SequencerPosition &spos) {
->>   dout(15) << __func__ << " " << cid << "/" << hoid << dendl;
->>   Index index;
->>   int r;
->>   if(hoid.pgmeta())
->>     goto out;
->> ***
->> ***
->> ***
->> out:
->>   r = object_map->set_keys(hoid, aset, &spos);
->>   dout(20) << __func__ << " " << cid << "/" << hoid << " = " << r << dendl;
->>   return r;
->> }
->
-> This seems like a reasonable hack. We never store any byte data in it.
-> And if/when that changes, we can change this at the same time.
->
-> sage
+if LINUX
+xio_server_LDADD += -ldl
+endif
+
+If you see somewhere -ldl is added unconditionally it is likely to
+have to be fixed the same way.
+
+-- 
+Mykola Golub
