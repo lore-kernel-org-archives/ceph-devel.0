@@ -1,7 +1,7 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
 Subject: Re: Compiling for FreeBSD
-Date: Tue, 8 Dec 2015 11:04:13 +0100
-Message-ID: <5666AB1D.5010101@digiware.nl>
+Date: Tue, 8 Dec 2015 10:59:05 +0100
+Message-ID: <5666A9E9.7080109@digiware.nl>
 References: <565B3999.3050302@digiware.nl> <565B4A7F.60301@digiware.nl>
  <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
  <20151130065812.GA20205@gmail.com>
@@ -26,10 +26,10 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:25326 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([31.223.170.169]:10178 "EHLO smtp.digiware.nl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933224AbbLHKEs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 8 Dec 2015 05:04:48 -0500
+	id S933004AbbLHKJH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 8 Dec 2015 05:09:07 -0500
 In-Reply-To: <5661F358.2060401@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -37,19 +37,42 @@ To: Gregory Farnum <gfarnum@redhat.com>
 Cc: "Yan, Zheng" <ukernel@gmail.com>, Sage Weil <sage@newdream.net>, Alan Somers <asomers@freebsd.org>, Mykola Golub <mgolub@mirantis.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
 On 4-12-2015 21:11, Willem Jan Withagen wrote:
+> On 4-12-2015 19:44, Gregory Farnum wrote:
+>> On Fri, Dec 4, 2015 at 10:30 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>> On 3-12-2015 01:27, Yan, Zheng wrote:
+>>>> On Thu, Dec 3, 2015 at 4:52 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>>>> On 2-12-2015 15:13, Yan, Zheng wrote:
+>>>
+>>>>> I see that you have disabled uuid?
+>>>>> Might I ask why?
+>>>>
+>>>> not disable. Currently ceph uses boost uuid implementation. so no need
+>>>> to link to libuuid.
+>>>
+>>> And
+>>>
+>>>>>>>> The uuid transition to boost::uuid has happened since then (a few months
+>>>>>>>> back) and I believe Rohan's AIX and Solaris ports for librados (that just
+>>>>>>>> merged) included a fix for the sockaddr_storage issue:
+>>>
+>>> I cannot seem to find the package or port that defines boost::uuid.
+>>> So how did you make it available to the build system?
+>>
+>> http://www.boost.org/doc/libs/1_59_0/libs/uuid/
+>>
+>> It's part of the boost labyrinth. I think in Debian it's just part of
+>> libboost-dev, but you might need to dig around in whatever packaging
+>> you're using for FreeBSD.
+>
+> I've dumped all of the labels in de boost libraries.
+> So it is not default available with the pre-build packages.
+> Which is understandable given the size of all that is available in
+> boost. But lets go and fetch/build some of that stuff.
 
-One larger problem with libraries I have is the stuff with dlopen.
+For the time being I've chosen to use the misc/e2fsprogs-libuuid package.
+Reason for this is that is easily installed, instead of going thru the 
+motions
+of manually downloading/compiling a boost library.
+Once boost-uuid is available reverting is easy.
 
-In ./configure it seems that most of the code is short-circuited, and -ldl
-gets appended in the Makefile.am's by default. The code there is rather 
-hard
-to parse.
-
-FreeBSD has this in libc, so no specific includes needed.
-
-Now the question is how do I cleanly fix this without breaking just
-about every other platform?
-
-Thanx,
 --WjW
-
