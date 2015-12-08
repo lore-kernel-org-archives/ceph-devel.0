@@ -1,78 +1,72 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Compiling for FreeBSD
-Date: Tue, 8 Dec 2015 10:59:05 +0100
-Message-ID: <5666A9E9.7080109@digiware.nl>
-References: <565B3999.3050302@digiware.nl> <565B4A7F.60301@digiware.nl>
- <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
- <20151130065812.GA20205@gmail.com>
- <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
- <565D7FA8.3010301@digiware.nl>
- <alpine.DEB.2.00.1512010529280.19170@cobra.newdream.net>
- <565DA3B5.1070608@digiware.nl>
- <alpine.DEB.2.00.1512010634510.19170@cobra.newdream.net>
- <565DC9D4.7060701@digiware.nl>
- <CAOtMX2jWDOLqmjY=S9PorKeaHDgTx5WyMo8jiV3LxOS4K67dMg@mail.gmail.com>
- <565DE234.6070505@digiware.nl>
- <CAOtMX2j5xJBnYoNdxTGGQFz-fTVX2xQka2NuyUZuOPpsft6HuA@mail.gmail.com>
- <alpine.DEB.2.00.1512011034550.19170@cobra.newdream.net>
- <565DEA60.7010608@digiware.nl>
- <CAAM7YAmzq3a_kqXE2ZgK_fp4i6QduY49aXqiWVNK3F59iZUFRA@mail.gmail.com>
- <565F5A03.7020401@digiware.nl>
- <CAAM7YA=Q6gbBbN92a9KigAXw4e_SrshQ6Q8mC1Xff+vxQQkrKw@mail.gmail.com>
- <5661DBB8.1040505@digiware.nl>
- <CAJ4mKGZ+wjum+R3=pBS8urko4D1B_D+eKjytWE_uDdFcGW6sSA@mail.gmail.com>
- <5661F358.2060401@digiware.nl>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [ceph-users] Kernel RBD hang on OSD Failure
+Date: Tue, 8 Dec 2015 11:35:46 +0100
+Message-ID: <CAOi1vP-Aw4oWV6eC2h7ZkW87FycnBm0XjMMo0T2updLDjMNULQ@mail.gmail.com>
+References: <CAKeiORSsNQ-LOWQ0heLZQkekN_mwYQ81XSXfdJe-R1eP1Osz1w@mail.gmail.com>
+	<CA+z5DswarP0KHomWJocCxT29W1-kyzV2RhDOg7tc-0_DV0D1Kg@mail.gmail.com>
+	<CAAsTndwa95Vxeri=DOckQEiSfMQ04VBKvVbzdVhZw0dke1WgEQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:10178 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933004AbbLHKJH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 8 Dec 2015 05:09:07 -0500
-In-Reply-To: <5661F358.2060401@digiware.nl>
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:38720 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932347AbbLHKft (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Dec 2015 05:35:49 -0500
+Received: by wmec201 with SMTP id c201so23931502wme.1
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Dec 2015 02:35:47 -0800 (PST)
+In-Reply-To: <CAAsTndwa95Vxeri=DOckQEiSfMQ04VBKvVbzdVhZw0dke1WgEQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, Sage Weil <sage@newdream.net>, Alan Somers <asomers@freebsd.org>, Mykola Golub <mgolub@mirantis.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Tom Christensen <pavera@gmail.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 4-12-2015 21:11, Willem Jan Withagen wrote:
-> On 4-12-2015 19:44, Gregory Farnum wrote:
->> On Fri, Dec 4, 2015 at 10:30 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>> On 3-12-2015 01:27, Yan, Zheng wrote:
->>>> On Thu, Dec 3, 2015 at 4:52 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>>> On 2-12-2015 15:13, Yan, Zheng wrote:
->>>
->>>>> I see that you have disabled uuid?
->>>>> Might I ask why?
->>>>
->>>> not disable. Currently ceph uses boost uuid implementation. so no need
->>>> to link to libuuid.
->>>
->>> And
->>>
->>>>>>>> The uuid transition to boost::uuid has happened since then (a few months
->>>>>>>> back) and I believe Rohan's AIX and Solaris ports for librados (that just
->>>>>>>> merged) included a fix for the sockaddr_storage issue:
->>>
->>> I cannot seem to find the package or port that defines boost::uuid.
->>> So how did you make it available to the build system?
->>
->> http://www.boost.org/doc/libs/1_59_0/libs/uuid/
->>
->> It's part of the boost labyrinth. I think in Debian it's just part of
->> libboost-dev, but you might need to dig around in whatever packaging
->> you're using for FreeBSD.
->
-> I've dumped all of the labels in de boost libraries.
-> So it is not default available with the pre-build packages.
-> Which is understandable given the size of all that is available in
-> boost. But lets go and fetch/build some of that stuff.
+On Tue, Dec 8, 2015 at 10:57 AM, Tom Christensen <pavera@gmail.com> wrote:
+> We aren't running NFS, but regularly use the kernel driver to map RBDs and
+> mount filesystems in same.  We see very similar behavior across nearly all
+> kernel versions we've tried.  In my experience only very few versions of the
+> kernel driver survive any sort of crush map change/update while something is
+> mapped.  In fact in the last 2 years I think I've only seen this work on 1
+> kernel version unfortunately its badly out of date and we can't run it in
+> our environment anymore, I think it was a 3.0 kernel version running on
+> ubuntu 12.04.  We have just recently started trying to find a kernel that
+> will survive OSD outages or changes to the cluster.  We're on ubuntu 14.04,
+> and have tried 3.16, 3.19.0-25, 4.3, and 4.2 without success in the last
+> week.  We only map 1-3 RBDs per client machine at a time but we regularly
+> will get processes stuck in D state which are accessing the filesystem
+> inside the RBD and will have to hard reboot the RBD client machine.  This is
+> always associated with a cluster change in some way, reweighting OSDs,
+> rebooting an OSD host, restarting an individual OSD, adding OSDs, and
+> removing OSDs all cause the kernel client to hang.  If no change is made to
+> the cluster, the kernel client will be happy for weeks.
 
-For the time being I've chosen to use the misc/e2fsprogs-libuuid package.
-Reason for this is that is easily installed, instead of going thru the 
-motions
-of manually downloading/compiling a boost library.
-Once boost-uuid is available reverting is easy.
+There are a couple of known bugs in the remap/resubmit area, but those
+are supposedly corner cases (like *all* the OSDs going down and then
+back up, etc).  I had no idea it was that severe and goes that back.
+Apparently triggering it requires a heavier load, as we've never seen
+anything like that in our tests.
 
---WjW
+For unrelated reasons, remap/resubmit code is getting entirely
+rewritten for kernel 4.5, so, if you've been dealing with this issue
+for the last two years (I don't remember seeing any tickets listing
+that many kernel versions and not mentioning NFS), I'm afraid the best
+course of action for you would be to wait for 4.5 to come out and try
+it.  If you'd be willing to test out an early version on one of more of
+your client boxes, I can ping you when it's ready.
+
+I'll take a look at 3.0 vs 3.16 with an eye on remap code.  Did you
+happen to try 3.10?
+
+It sounds like you can reproduce this pretty easily.  Can you get it to
+lock up and do:
+
+# cat /sys/kernel/debug/ceph/*/osdmap
+# cat /sys/kernel/debug/ceph/*/osdc
+$ ceph status
+
+and bunch of times?  I have a hunch that kernel client simply fails to
+request enough of new osdmaps after the cluster topology changes under
+load.
+
+Thanks,
+
+                Ilya
