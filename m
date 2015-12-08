@@ -1,128 +1,111 @@
-From: David Zafman <dzafman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re:
- =?utf-8?b?562U5aSNOiAgSG93IGxvbmcgd2lsbCB0aGUgbG9n?=
- =?utf-8?q?s_be_kept=3F?=
-Date: Mon, 7 Dec 2015 16:50:50 -0800
-Message-ID: <5666296A.3010002@redhat.com>
-References: <47D132BF400BE64BAE6D71033F7D3D75030E7B67@H3CMLB12-EX.srv.huawei-3com.com>
-	<CABAwU-bNERLVaAgF_tJ8WFJ-eH3zvVO6zdU-7CQSB1wTh8EYJQ@mail.gmail.com>
-	<47D132BF400BE64BAE6D71033F7D3D75030E7C02@H3CMLB12-EX.srv.huawei-3com.com>
-	<37396A32-183A-45B5-A86B-6FC0C0939930@schermer.cz>
-	<47D132BF400BE64BAE6D71033F7D3D75030E7CCF@H3CMLB12-EX.srv.huawei-3com.com>
+From: Libin Wu <hzwulibin@gmail.com>
+Subject: Fwd: [ceph-users] poor performance when recovering
+Date: Tue, 8 Dec 2015 09:13:18 +0800
+Message-ID: <CAN4gH2OAEuRDORra1pua8MXgAsT6ME+zMpRG_O=2yKPDC7jO+A@mail.gmail.com>
+References: <CAN4gH2P0WeVxXd1hDbc5T_-_2mBd4wsAiqDt=9sFXnY=AgikZQ@mail.gmail.com>
+	<CAN4gH2P152bX-XeyqYc97XvHZqw624-x9AzgBfwXtXyFB0xptg@mail.gmail.com>
+	<566597CF.3060903@ip-interactive.de>
+	<CAN4gH2Ntpbza8S0GbMp86x=x=jYB=XcDjUZtbqSy7JYHmWSY8g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D75030E7CCF-JwQOC20i6vT3cnzPNjVLboSsE/coCuR8pWgKQ6/u3Fg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Wukongming <wu.kongming-vVzyEvZLFYE@public.gmane.org>, Jan Schermer <jan-SB6/BxVxTjHtwjQa/ONI9g@public.gmane.org>
-Cc: huang jun <hjwsm1989-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:33755 "EHLO
+	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932114AbbLHBNU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Dec 2015 20:13:20 -0500
+Received: by wmuu63 with SMTP id u63so1770083wmu.0
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Dec 2015 17:13:19 -0800 (PST)
+In-Reply-To: <CAN4gH2Ntpbza8S0GbMp86x=x=jYB=XcDjUZtbqSy7JYHmWSY8g@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-CmRvdXQoKSBpcyB1c2VkIGZvciBhbiBPU0QgdG8gbG9nIGluZm9ybWF0aW9uIGFib3V0IHdoYXQg
-aXQgaXMgZG9pbmcgCmxvY2FsbHkgYW5kIG1pZ2h0IGJlY29tZSB2ZXJ5IGNoYXR0eS4gIEl0IGlz
-IHNhdmVkIG9uIHRoZSBsb2NhbCBub2RlcyAKZGlzayBvbmx5LgoKY2xvZyBpcyB0aGUgY2x1c3Rl
-ciBsb2cgYW5kIGlzIHVzZWQgZm9yIG1ham9yIGV2ZW50cyB0aGF0IHNob3VsZCBiZSAKa25vd24g
-YnkgdGhlIGFkbWluaXN0cmF0b3IgKHNlZSBjZXBoIC13KS4gIENsb2cgc2hvdWxkIGJlIHVzZWQg
-c3BhcmluZ2x5IAphcyBpdCBzZW5kcyB0aGUgbWVzc2FnZXMgdG8gdGhlIG1vbml0b3IuCgpEYXZp
-ZAoKT24gMTIvMy8xNSA0OjM2IEFNLCBXdWtvbmdtaW5nIHdyb3RlOgo+IE9LISBPbmUgbW9yZSBx
-dWVzdGlvbi4gRG8geW91IGtub3cgd2h5IGNlcGggaGFzIDIgd2F5cyBvdXRwdXR0aW5nIGxvZ3Mo
-ZG91dCAmJiBjbG9nKS4gQ2F1c2UgSSBmaW5kIGRvdXQgaXMgbW9yZSBoZWxwZnVsIHRoYW4gY2xv
-ZywgRGlkIGNlcGggdXNlIGNsb2cgZmlyc3QsIGFuZCBkb3V0IGFkZGVkIGZvciBuZXcgdmVyc2lv
-bj8KPgo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+IHd1
-a29uZ21pbmcgSUQ6IDEyMDE5Cj4gVGVs77yaMDU3MS04Njc2MDIzOQo+IERlcHTvvJoyMDE0IFVJ
-UzIgT05FU3Rvcgo+Cj4gLS0tLS3pgq7ku7bljp/ku7YtLS0tLQo+IOWPkeS7tuS6ujogSmFuIFNj
-aGVybWVyIFttYWlsdG86amFuQHNjaGVybWVyLmN6XQo+IOWPkemAgeaXtumXtDogMjAxNeW5tDEy
-5pyIM+aXpSAxNjo1OAo+IOaUtuS7tuS6ujogd3Vrb25nbWluZyAxMjAxOSAoUkQpCj4g5oqE6YCB
-OiBodWFuZyBqdW47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBjZXBoLXVzZXJzQGxpc3Rz
-LmNlcGguY29tCj4g5Li76aKYOiBSZTogW2NlcGgtdXNlcnNdIEhvdyBsb25nIHdpbGwgdGhlIGxv
-Z3MgYmUga2VwdD8KPgo+IFlvdSBjYW4gc2V0dXAgbG9ncm90YXRlIGhvd2V2ZXIgeW91IHdhbnQg
-LSBub3Qgc3VyZSB3aGF0IHRoZSBkZWZhdWx0IGlzIGZvciB5b3VyIGRpc3Ryby4KPiBVc3VhbGx5
-IGxvZ3JvdGF0ZSBkb2Vzbid0IHRvdWNoIGZpbGVzIHRoYXQgYXJlIHNtYWxsZXIgdGhhbiBzb21l
-IHNpemUgZXZlbiBpZiB0aGV5IGFyZSBvbGQuIEl0IHdpbGwgYWxzbyBub3QgZGVsZXRlIGxvZ3Mg
-Zm9yIE9TRHMgdGhhdCBubyBsb25nZXIgZXhpc3QuCj4KPiBDZXBoIGl0c2VsZiBoYXMgbm90aGlu
-ZyB0byBkbyB3aXRoIGxvZyByb3RhdGlvbiwgbG9ncm90YXRlIGRvZXMgdGhlIHdvcmsuIENlcGgg
-cGFja2FnZXMgbGlrZWx5IGNvbnRhaW4gZGVmYXVsdCBsb2dyb3RhdGUgcnVsZXMgZm9yIHRoZSBs
-b2dzIGJ1dCB5b3UgY2FuIGVkaXQgdGhlbSB0byB5b3VyIGxpa2luZy4KPgo+IEphbgo+Cj4+IE9u
-IDAzIERlYyAyMDE1LCBhdCAwOTozOCwgV3Vrb25nbWluZyA8d3Uua29uZ21pbmdAaDNjLmNvbT4g
-d3JvdGU6Cj4+Cj4+IFllcywgSSBjYW4gZmluZCBjZXBoIG9mIHJvdGF0ZSBjb25maWd1cmUgZmls
-ZSBpbiB0aGUgZGlyZWN0b3J5IG9mIC9ldGMvbG9ncm90YXRlLmQuCj4+IEFsc28sIEkgZmluZCBz
-dGguIFdlaXJkLgo+Pgo+PiBkcnd4ci14ci14ICAyIHJvb3Qgcm9vdCAgIDQuMEsgRGVjICAzIDE0
-OjU0IC4vCj4+IGRyd3hyd3hyLXggMTkgcm9vdCBzeXNsb2cgNC4wSyBEZWMgIDMgMTM6MzMgLi4v
-Cj4+IC1ydy0tLS0tLS0gIDEgcm9vdCByb290ICAgICAgMCBEZWMgIDIgMDY6MjUgY2VwaC5hdWRp
-dC5sb2cKPj4gLXJ3LS0tLS0tLSAgMSByb290IHJvb3QgICAgODVLIE5vdiAyNSAwOToxNyBjZXBo
-LmF1ZGl0LmxvZy4xLmd6Cj4+IC1ydy0tLS0tLS0gIDEgcm9vdCByb290ICAgMjI4SyBEZWMgIDMg
-MTY6MDAgY2VwaC5sb2cKPj4gLXJ3LS0tLS0tLSAgMSByb290IHJvb3QgICAgMjhLIERlYyAgMyAw
-NjoyMyBjZXBoLmxvZy4xLmd6Cj4+IC1ydy0tLS0tLS0gIDEgcm9vdCByb290ICAgMzc0SyBEZWMg
-IDIgMDY6MjIgY2VwaC5sb2cuMi5nego+PiAtcnctci0tci0tICAxIHJvb3Qgcm9vdCAgIDQuM00g
-RGVjICAzIDE2OjAxIGNlcGgtbW9uLndrbTAxLmxvZwo+PiAtcnctci0tci0tICAxIHJvb3Qgcm9v
-dCAgIDU2MUsgRGVjICAzIDA2OjI1IGNlcGgtbW9uLndrbTAxLmxvZy4xLmd6Cj4+IC1ydy1yLS1y
-LS0gIDEgcm9vdCByb290ICAgMi4yTSBEZWMgIDIgMDY6MjUgY2VwaC1tb24ud2ttMDEubG9nLjIu
-Z3oKPj4gLXJ3LXItLXItLSAgMSByb290IHJvb3QgICAgICAwIERlYyAgMiAwNjoyNSBjZXBoLW9z
-ZC4wLmxvZwo+PiAtcnctci0tci0tICAxIHJvb3Qgcm9vdCAgICA5OTIgRGVjICAxIDA5OjA5IGNl
-cGgtb3NkLjAubG9nLjEuZ3oKPj4gLXJ3LXItLXItLSAgMSByb290IHJvb3QgICAgMTlLIERlYyAg
-MyAxMDo1MSBjZXBoLW9zZC4yLmxvZwo+PiAtcnctci0tci0tICAxIHJvb3Qgcm9vdCAgIDIuM0sg
-RGVjICAyIDEwOjUwIGNlcGgtb3NkLjIubG9nLjEuZ3oKPj4gLXJ3LXItLXItLSAgMSByb290IHJv
-b3QgICAgMjdLIERlYyAgMSAxMDozMSBjZXBoLW9zZC4yLmxvZy4yLmd6Cj4+IC1ydy1yLS1yLS0g
-IDEgcm9vdCByb290ICAgIDEzSyBEZWMgIDMgMTA6MjMgY2VwaC1vc2QuNS5sb2cKPj4gLXJ3LXIt
-LXItLSAgMSByb290IHJvb3QgICAxLjZLIERlYyAgMiAwOTo1NyBjZXBoLW9zZC41LmxvZy4xLmd6
-Cj4+IC1ydy1yLS1yLS0gIDEgcm9vdCByb290ICAgIDIySyBEZWMgIDEgMDk6NTEgY2VwaC1vc2Qu
-NS5sb2cuMi5nego+PiAtcnctci0tci0tICAxIHJvb3Qgcm9vdCAgICAxOUsgRGVjICAzIDEwOjUx
-IGNlcGgtb3NkLjgubG9nCj4+IC1ydy1yLS1yLS0gIDEgcm9vdCByb290ICAgIDE4SyBEZWMgIDIg
-MTA6NTAgY2VwaC1vc2QuOC5sb2cuMQo+PiAtcnctci0tci0tICAxIHJvb3Qgcm9vdCAgIDI2MUsg
-RGVjICAxIDEzOjU0IGNlcGgtb3NkLjgubG9nLjIKPj4KPj4gSSBkZXBsb3llZCBjZXBoIGNsdXN0
-ZXIgb24gTm92IDIxLCBmcm9tIHRoYXQgZGF5IHRvIERlYy4xLCBJIG1lYW4gdGhlIGNvbnRpbnVl
-IDEwIGRheXMnIGxvZ3Mgd2VyZSBjb21wcmVzc2VkIGludG8gb25lIGZpbGUsIGl0IGlzIG5vdCB3
-aGF0IEkgd2FudC4KPj4gRG9lcyBhbnkgT1AgYWZmZWN0IGxvZyBjb21wcmVzc2luZz8KPj4KPj4g
-VGhhbmtzIQo+PiAgICAgICAgICAgICBLb25nbWluZyBXdQo+PiAtLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPj4gd3Vrb25nbWluZyBJRDogMTIwMTkKPj4gVGVs
-77yaMDU3MS04Njc2MDIzOQo+PiBEZXB077yaMjAxNCBVSVMyIE9ORVN0b3IKPj4KPj4gLS0tLS3p
-gq7ku7bljp/ku7YtLS0tLQo+PiDlj5Hku7bkuro6IGh1YW5nIGp1biBbbWFpbHRvOmhqd3NtMTk4
-OUBnbWFpbC5jb21dCj4+IOWPkemAgeaXtumXtDogMjAxNeW5tDEy5pyIM+aXpSAxMzoxOQo+PiDm
-lLbku7bkuro6IHd1a29uZ21pbmcgMTIwMTkgKFJEKQo+PiDmioTpgIE6IGNlcGgtZGV2ZWxAdmdl
-ci5rZXJuZWwub3JnOyBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4+IOS4u+mimDogUmU6IEhv
-dyBsb25nIHdpbGwgdGhlIGxvZ3MgYmUga2VwdD8KPj4KPj4gaXQgd2lsbCByb3RhdGUgZXZlcnkg
-d2VlayBieSBkZWZhdWx0LCB5b3UgY2FuIHNlZSB0aGUgbG9ncm90YXRlIGZpbGUKPj4gL2V0Yy9j
-ZXBoL2xvZ3JvdGF0ZS5kL2NlcGgKPj4KPj4gMjAxNS0xMi0wMyAxMjozNyBHTVQrMDg6MDAgV3Vr
-b25nbWluZyA8d3Uua29uZ21pbmdAaDNjLmNvbT46Cj4+PiBIaSAsQWxsCj4+PiAgICAgICAgIElz
-IHRoZXJlIGFueW9uZSB3aG8ga25vd3MgSG93IGxvbmcgb3IgaG93IG1hbnkgZGF5cyB3aWxsIHRo
-ZSBsb2dzLmd6IChtb24vb3NkL21kcyliZSBrZXB0LCBtYXliZSBiZWZvcmUgZmx1c2hlZD8KPj4+
-Cj4+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPj4+IHd1
-a29uZ21pbmcgSUQ6IDEyMDE5Cj4+PiBUZWzvvJowNTcxLTg2NzYwMjM5Cj4+PiBEZXB077yaMjAx
-NCBVSVMyIE9uZVN0b3IKPj4+Cj4+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPj4+IC0KPj4+IC0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+Pj4g
-5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ
-5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit
-5YiX5Ye6Cj4+PiDnmoTkuKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbku5bkurrku6Xk
-u7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDm
-s4TpnLLjgIHlpI3liLbjgIEKPj4+IOaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OA
-guWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7
-tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrAo+Pj4g6YKu5Lu277yBCj4+PiBUaGlzIGUtbWFp
-bCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZy
-b20KPj4+IEgzQywgd2hpY2ggaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRp
-dHkgd2hvc2UgYWRkcmVzcyBpcwo+Pj4gbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZSBpbmZv
-cm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkKPj4+IChpbmNsdWRpbmcsIGJ1dCBu
-b3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbCBkaXNjbG9zdXJlLAo+Pj4gcmVwcm9kdWN0
-aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVk
-Cj4+PiByZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1h
-aWwgaW4gZXJyb3IsCj4+PiBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgcGhvbmUgb3IgZW1h
-aWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCEKPj4KPj4KPj4gLS0KPj4gdGhhbmtzCj4+IGh1
-YW5nanVuCj4+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-Cj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20K
-Pj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29t
-Cj4gTu+/ve+/ve+/ve+/ve+/vXLvv73vv71577+977+977+9Yu+/vVjvv73vv73Hp3bvv71e77+9
-Kd66ey5u77+9K++/ve+/ve+/vXrvv71deu+/ve+/ve+/vXthee+/vR3Kh9qZ77+9LGoH77+977+9
-Zu+/ve+/ve+/vWjvv73vv73vv71677+9Hu+/vXfvv73vv73vv70M77+977+977+9ajordu+/ve+/
-ve+/vXfvv71q77+9be+/ve+/ve+/ve+/vQfvv73vv73vv73vv716Wivvv73vv73vv73vv73vv73d
-omoi77+977+9IXRtbD0KCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20K
-aHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+---------- Forwarded message ----------
+=46rom: Libin Wu <hzwulibin@gmail.com>
+Date: 2015-12-08 9:12 GMT+08:00
+Subject: Re: [ceph-users] poor performance when recovering
+To: Oliver Dzombic <info@ip-interactive.de>
+=E6=8A=84=E9=80=81=EF=BC=9A ceph-users <ceph-users@lists.ceph.com>
+
+
+Yeah, we will upgrade in the near future. But i'm afraid the recovery
+problem also existed in the hammer version.
+So, why recovery affect performance so much, any plan to improve it?
+
+2015-12-07 22:29 GMT+08:00 Oliver Dzombic <info@ip-interactive.de>:
+> Hi,
+>
+> maybe you should first upgrade.
+>
+> "
+>
+>     Posted by sage
+>     November 19th, 2015
+>
+> This is a bugfix release for Firefly.  As the Firefly 0.80.x series i=
+s
+> nearing its planned end of life in January 2016 it may also be the la=
+st.
+> "
+>
+> I think you are wasting time, trying to analyse/fix issues on a versi=
+on
+> which will be EOL in 3 weeks...
+>
+>
+> --
+> Mit freundlichen Gruessen / Best regards
+>
+> Oliver Dzombic
+>
+> Am 07.12.2015 um 15:26 schrieb Libin Wu:
+>> Btw, my ceph version is 0.80.11
+>>
+>> 2015-12-07 21:45 GMT+08:00 Libin Wu <hzwulibin@gmail.com>:
+>>> Hi, cephers
+>>>
+>>> I'm doing the performance test of ceph when recovering. The scene i=
+s simple:
+>>> 1. run fio on 6 krbd device
+>>> 2. stop one OSD for 10 seconds
+>>> 3. start that OSD
+>>>
+>>> However, when the OSD up and start recovering, the performance of f=
+io
+>>> drop down from 9k to 1k for about 20 seconds. At the same tiime, we
+>>> found the SSD of that OSD's latency is more than 100ms, so it seems
+>>> the SSD become the bottleneck=E3=80=82
+>>>
+>>> So we want to slow down the recovery speed to lighten the load of t=
+he
+>>> SSD when recovery. But configuration like:
+>>>     osd_recovery_max_active
+>>>     osd_recovery_max_chunk
+>>>     osd_max_backfills
+>>>     osd_recovery_op_priority
+>>> are all useless.
+>>>
+>>> After reading and change some code, we want add a flow control in t=
+he
+>>> process of:
+>>>     OSD::do_recovery
+>>>
+>>> So, will it be possible to do so and if this solution has some
+>>> potential problem?
+>>>
+>>> Thanks!
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
