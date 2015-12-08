@@ -1,71 +1,55 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Compiling for FreeBSD
-Date: Tue, 8 Dec 2015 16:59:26 +0100
-Message-ID: <5666FE5E.6090908@digiware.nl>
-References: <CAOtMX2j5xJBnYoNdxTGGQFz-fTVX2xQka2NuyUZuOPpsft6HuA@mail.gmail.com>
- <alpine.DEB.2.00.1512011034550.19170@cobra.newdream.net>
- <565DEA60.7010608@digiware.nl>
- <CAAM7YAmzq3a_kqXE2ZgK_fp4i6QduY49aXqiWVNK3F59iZUFRA@mail.gmail.com>
- <565F5A03.7020401@digiware.nl>
- <CAAM7YA=Q6gbBbN92a9KigAXw4e_SrshQ6Q8mC1Xff+vxQQkrKw@mail.gmail.com>
- <5661DBB8.1040505@digiware.nl>
- <CAJ4mKGZ+wjum+R3=pBS8urko4D1B_D+eKjytWE_uDdFcGW6sSA@mail.gmail.com>
- <5661F358.2060401@digiware.nl> <5666AB1D.5010101@digiware.nl>
- <20151208123656.GA22774@gmail.com>
+From: <ghislain.chevalier@orange.com>
+Subject: [RADOSGATEWAY] Admin API
+Date: Tue, 8 Dec 2015 17:45:06 +0000
+Message-ID: <28235_1449596706_56671722_28235_9397_1_B9C8EFBF13B1354DB5FA000660D66DD00D668DB9@OPEXCLILM22.corporate.adroot.infra.ftgroup>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:61781 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756147AbbLHP7p (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 8 Dec 2015 10:59:45 -0500
-In-Reply-To: <20151208123656.GA22774@gmail.com>
+Received: from relais-nor35.orange.com ([80.12.70.35]:44614 "EHLO
+	relais-inet.orange.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751236AbbLHRpJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Dec 2015 12:45:09 -0500
+Received: from opfednr01.francetelecom.fr (unknown [xx.xx.xx.65])
+	by opfednr21.francetelecom.fr (ESMTP service) with ESMTP id 0AB9AC0947
+	for <ceph-devel@vger.kernel.org>; Tue,  8 Dec 2015 18:45:07 +0100 (CET)
+Received: from Exchangemail-eme2.itn.ftgroup (unknown [xx.xx.31.27])
+	by opfednr01.francetelecom.fr (ESMTP service) with ESMTP id E256A1A00AB
+	for <ceph-devel@vger.kernel.org>; Tue,  8 Dec 2015 18:45:06 +0100 (CET)
+Content-Language: fr-FR
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <mgolub@mirantis.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, "Yan, Zheng" <ukernel@gmail.com>, Sage Weil <sage@newdream.net>, Alan Somers <asomers@freebsd.org>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 8-12-2015 13:36, Mykola Golub wrote:
-> On Tue, Dec 08, 2015 at 11:04:13AM +0100, Willem Jan Withagen wrote:
->> On 4-12-2015 21:11, Willem Jan Withagen wrote:
->>
->> One larger problem with libraries I have is the stuff with dlopen.
->>
->> In ./configure it seems that most of the code is short-circuited, and -ldl
->> gets appended in the Makefile.am's by default. The code there is rather hard
->> to parse.
->>
->> FreeBSD has this in libc, so no specific includes needed.
->>
->> Now the question is how do I cleanly fix this without breaking just
->> about every other platform?
->
-> Could you provide particular examples? Because what I see in the
-> master is usually like below:
->
-> if LINUX
-> xio_server_LDADD += -ldl
-> endif
->
-> If you see somewhere -ldl is added unconditionally it is likely to
-> have to be fixed the same way.
-
-Several of the test makefiles did not have this.
-For this I've patched at least:
-src/tools/Makefile-server.am
-src/tracing/Makefile.am
-src/erasure-code/Makefile.am
-src/rgw/Makefile.am
-
-And this is indeed what I've added ATM to get my tests compiled.
-But I really wonder if this is the way to go, instead of fixing it
-in configure and be done with it. Just like wiht most of the other
-libraries that are setup thru automake/configure. That would also
-help other ports,  then for that port one does not have to augment
-again all locations.
-
-AND if new tests would be written, we do not have to check if all
-exempts are correctly covered.
-
---WjW
+SGksDQoNCkNvbnRleHQgOiBGaXJlZmx5IDAuODAuMTANCg0KSSB1c2UgdGhlIHJndyBhZG1pbiBh
+cGkgdG8gZ2V0IGluZm9ybWF0aW9uIGFib3V0IHVzZXIgZnJvbSANCmh0dHA6Ly9kb2NzLmNlcGgu
+Y29tL2RvY3MvbWFzdGVyL3JhZG9zZ3cvYWRtaW5vcHMvI2dldC11c2VyLWluZm8NCg0KVGhlIGdl
+dCByZXF1ZXN0IGRvZXNuJ3QgcmV0dXJuIGFsbCB0aGUgaW5mb3JtYXRpb24gdGhhdCB3ZSBjYW4g
+Z2V0IHdpdGggcmFkb3Nndy1hZG1pbiB1c2VyIGluZm8gLS11aWQ9PHVzZXJuYW1lPg0KVGhlIG1l
+dGFkYXRhIHN1Y2ggYXMgb3BfbWFzaywgc3lzdGVtLCBkZWZhdWx0X3BsYWNlbWVudCwgcGxhY2Vt
+ZW50X3RhZ3MsIGJ1Y2tldF9xdW90YSwgdXNlcl9xdW90YSwgYW5kIHRlbXBfdXJsX2tleXMgIGFy
+ZSBtaXNzaW5nLg0KDQpJcyB0aGUgYWRtaW4gYXBpIGdvaW5nIHRvIGV2b2x2ZSBpbiBvcmRlciB0
+byBnZXQgdGhvc2UgaW5mb3JtYXRpb24/DQoNCkJyZ2RzDQoNCi0gLSAtIC0gLSAtIC0gLSAtIC0g
+LSAtIC0gLSAtIC0gLSANCkdoaXNsYWluIENoZXZhbGllcg0KT1JBTkdFL0lNVC9PTFBTL0FTRS9E
+QVBJL0NTRQ0KQXJjaGl0ZWN0ZSBkZSBzZXJ2aWNlcyBk4oCZaW5mcmFzdHJ1Y3R1cmUgZGUgc3Rv
+Y2thZ2UNClNvZndhcmUtRGVmaW5lZCBTdG9yYWdlIEFyY2hpdGVjdA0KICszMzI5OTEyNDQzMg0K
+ICszMzc4ODYyNDM3MA0KZ2hpc2xhaW4uY2hldmFsaWVyQG9yYW5nZS5jb20gDQrvgZDCoFBlbnNl
+eiDDoCBsJ0Vudmlyb25uZW1lbnQgYXZhbnQgZCdpbXByaW1lciBjZSBtZXNzYWdlICEgDQoNCg0K
+Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX18KCkNlIG1lc3NhZ2UgZXQgc2VzIHBpZWNlcyBqb2ludGVzIHBldXZlbnQgY29udGVu
+aXIgZGVzIGluZm9ybWF0aW9ucyBjb25maWRlbnRpZWxsZXMgb3UgcHJpdmlsZWdpZWVzIGV0IG5l
+IGRvaXZlbnQgZG9uYwpwYXMgZXRyZSBkaWZmdXNlcywgZXhwbG9pdGVzIG91IGNvcGllcyBzYW5z
+IGF1dG9yaXNhdGlvbi4gU2kgdm91cyBhdmV6IHJlY3UgY2UgbWVzc2FnZSBwYXIgZXJyZXVyLCB2
+ZXVpbGxleiBsZSBzaWduYWxlcgphIGwnZXhwZWRpdGV1ciBldCBsZSBkZXRydWlyZSBhaW5zaSBx
+dWUgbGVzIHBpZWNlcyBqb2ludGVzLiBMZXMgbWVzc2FnZXMgZWxlY3Ryb25pcXVlcyBldGFudCBz
+dXNjZXB0aWJsZXMgZCdhbHRlcmF0aW9uLApGcmFuY2UgVGVsZWNvbSAtIE9yYW5nZSBkZWNsaW5l
+IHRvdXRlIHJlc3BvbnNhYmlsaXRlIHNpIGNlIG1lc3NhZ2UgYSBldGUgYWx0ZXJlLCBkZWZvcm1l
+IG91IGZhbHNpZmllLiBNZXJjaQoKVGhpcyBtZXNzYWdlIGFuZCBpdHMgYXR0YWNobWVudHMgbWF5
+IGNvbnRhaW4gY29uZmlkZW50aWFsIG9yIHByaXZpbGVnZWQgaW5mb3JtYXRpb24gdGhhdCBtYXkg
+YmUgcHJvdGVjdGVkIGJ5IGxhdzsKdGhleSBzaG91bGQgbm90IGJlIGRpc3RyaWJ1dGVkLCB1c2Vk
+IG9yIGNvcGllZCB3aXRob3V0IGF1dGhvcml6YXRpb24uCklmIHlvdSBoYXZlIHJlY2VpdmVkIHRo
+aXMgZW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBhbmQgZGVsZXRlIHRo
+aXMgbWVzc2FnZSBhbmQgaXRzIGF0dGFjaG1lbnRzLgpBcyBlbWFpbHMgbWF5IGJlIGFsdGVyZWQs
+IEZyYW5jZSBUZWxlY29tIC0gT3JhbmdlIHNoYWxsIG5vdCBiZSBsaWFibGUgaWYgdGhpcyBtZXNz
+YWdlIHdhcyBtb2RpZmllZCwgY2hhbmdlZCBvciBmYWxzaWZpZWQuClRoYW5rIHlvdS4KCg==
