@@ -1,69 +1,137 @@
 From: Ning Yao <zay11022@gmail.com>
-Subject: Fwd: problem about pgmeta object?
-Date: Wed, 9 Dec 2015 19:55:14 +0800
-Message-ID: <CALZt5jxE=_aS_X0d=F1mch2HRitvBDJtuCSvfoAZOhShjtTTMQ@mail.gmail.com>
-References: <CALZt5jx2bQKK6yE=bTu96CD=OE7uVGTagfqirHsXh5bNbS2t=w@mail.gmail.com>
-	<alpine.DEB.2.00.1511180511420.7964@cobra.newdream.net>
-	<CALZt5jzpGn1koOwK2PZ2w6xj-UPibc2B60HU-f1ZayFNDSy3EQ@mail.gmail.com>
-	<alpine.DEB.2.00.1512080536300.19170@cobra.newdream.net>
-	<CALZt5jy47HwGR7kGzmUC_cGRp-6Q0xe=aA+v+9viJW3vMYYRrA@mail.gmail.com>
+Subject: Fwd: Long time between waiting_for_osdmap event and reached_pg event
+ in dump_historic_ops
+Date: Wed, 9 Dec 2015 19:56:51 +0800
+Message-ID: <CALZt5jyAThOwYq-ZViK7JB6=1DTqE_qcNfvTmTYP0gEFbG110w@mail.gmail.com>
+References: <CAMXgYGbc8Z2XOpaB-b_-0VyoM+XAy5pFQk2EazMeA=VXd-0g6g@mail.gmail.com>
+	<CALZt5jyXLvUUg8hb4GGZc=Qjv-mby-HOwuKqmFoWiu+ZrgoKbA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:34699 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753984AbbLILzQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Dec 2015 06:55:16 -0500
-Received: by wmvv187 with SMTP id v187so257631444wmv.1
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Dec 2015 03:55:14 -0800 (PST)
-In-Reply-To: <CALZt5jy47HwGR7kGzmUC_cGRp-6Q0xe=aA+v+9viJW3vMYYRrA@mail.gmail.com>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:35746 "EHLO
+	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750933AbbLIL4x (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Dec 2015 06:56:53 -0500
+Received: by wmuu63 with SMTP id u63so218924616wmu.0
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Dec 2015 03:56:52 -0800 (PST)
+In-Reply-To: <CALZt5jyXLvUUg8hb4GGZc=Qjv-mby-HOwuKqmFoWiu+ZrgoKbA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: =?UTF-8?B?5aea5a6B?= <zay11022@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-The function and transactions corresponding with pgmeta object is listed below:
-touch()   and   remove()  for  pgmeta object creation and deletion
-_omap_setkeys()  and  _omap_rmkeys()  to  update k/v data in omap for
-pgmeta(pg_info, epoch, rollback_info, pg_log and so on)
-omap_get_values() to retrieve data from omap, always call it during
-osd daemon start proccess
+Hi, Rongze
 
-So I think the performance will be hurt in writeOp routine as heavily
-call _omap_setkeys()  and  _omap_rmkeys(). The ideal way to deal with
-it,  of course, is to eventually treat pgmeta as a logical object(not
-real object existed). But it needs alter much in FileStore, since we
-cannot directly remove the t.touch()  and  t.remove() transaction and
-upgrade store to remove the pgmeta_object based on info_struct_v. But
-as we discussed before, it is FileStore issue and need keep
-compatibility for other backends.
+This is mainly because of too many Ops waiting for process in op_wq,
+but the backend cannot process the Ops as fast as the Ops reach op_wq.
+It is simple to illustrate this. queue: {op10, op9, op8, op7, op6,
+op5, op4, op3, op2, op1}
+Under high pressure, client send requests so fast so that osd cannot
+process the arrived request as the same speed.
+Thus, osd thread, dequeue op1 to process for 10ms,  for  op2, process
+10ms. Therefore, when op10 is processed by the osd thread, the
+dequeue_op() routine, it already wait for 10*10ms = 100ms. So assume
+that 1000 ops in the queue, you will see the last several ops in the
+queue(that says, op1000 ~ op900) wait for about 1s in
+dump_historic_ops.
+So here, I assume that you set client_message_throttle params enough
+large to let the client enough Ops reach osd at the same time.
+Otherwise, it will throttle the total in-flight-ops so that this would
+not be occurs.
 
-Therefore, in order to not to alter FileStore too much and keep all
-its compatibility, my strategy is just to skip the meta object
-existence checking on the main routine of writeOps like this:
-https://github.com/ceph/ceph/pull/6870
-
-This brings a benefit to reduce _omap_setkeys()  execution time  from
-123.784us to 108.444us averagely (about 15% improvement), and reduce
-the whole cpu time 0.5% ~ 1% globally.
+We encounter this situation under two cases:
+   1) High load parallel requests comes from client
+   2) Or High miss rate for cache tier
 
 Regards
 Ning Yao
 
-2015-12-08 21:37 GMT+08:00 Sage Weil <sage@newdream.net>:
+2015-12-09 1:56 GMT+08:00 Rongze Zhu <zrzhit@gmail.com>:
 >
-> On Tue, 8 Dec 2015, Ning Yao wrote:
-> > Umm, it seems that MemStore requires in memory meta object to keep the
-> > attributes. So it is not a direct way to remove the pg_meta object
-> > backend storage. Any suggestions?
-> > I think we can just skip the pg_meta operation in FileStore api based
-> > on the value of hoid.pgmeta(), not a generic strategy for all
-> > backends.
+> Hi guys,
 >
-> Yeah--a FileStore hack makes more sense, as other backends probably
-> won't have the same inefficiency that FileStore does.
+> I found out a strange issue in a  ceph cluster. This ceph cluster is used
+> for OpenStack cluster, there are 70 VMs in the cluster.  There are many
+> slow request(osd_op_complaint_time = 3) in the ceph cache tier with high
+> load( more than 3000 ops, 90% write).
 >
-> Can you summarize the strategy, though?  We want to avoid doing anything
-> to weird to FileStore at this point unless there is a big performance win.
+> After the investigation, I found that sometimes the interval time between
+> waiting_for_osdmap event and reached_pg event in the op will be very
+> long(may be 10 ~ 100 seconds). This means that some ops will stay op_wq
+> queue very long, until the osd op threads process it.
 >
-> sage
+> What reasons can cause this issue? Before anyone encountered this
+> situation?  I think that osdmap,pg lock,object lock can't block osd op
+> thread so long(10s ~ 100 seconds).
+>
+>
+> hardware(total 11 nodes):
+>     - 6 x nodes(compute & storage):
+>         - 3 x nodes: HUAWEI RH2288H V2 server, 2xE5-2658, 256GB,
+>             - 1 x HUAWEI SSD disk 800GB, used for ceph osd
+>             - 12 x 1.2TB SAS disk(each raid0 has 4 sas disk), used for ceph
+>         - 3 x nodes: HP DL380 Gen9 server,  2xE5-2640, 128GB,
+>             - 2 x OCZ SSD disk 800GB, used for ceph
+>             - 12 x 1.2TB SAS disk(each raid0 has 4 sas disk), used for ceph
+>     - 5 x nodes (compute)
+>
+> os:
+>     - HUAWEI server: RHEL 6.4, 2.6.32-358.123.2.openstack
+>     - HP DL380 Gen9 server: RHEL 6.5, 2.6.32-431.el6.x86_64
+>
+> ceph:
+>     - ceph 0.80.10
+>     - 9 ssd osd for cache tier
+>     - 18 raid0 osd for storage tier
+>     - replication size = 2
+>     - pg num = 1024
+>     - osd op thread = 20
+>     - filestore op thread = 20
+>
+> dump_historic_ops(osd.4  ssd):
+>
+>         { "description": "osd_op(client.983894.0:8044023
+> rbd_data.468d085e74d0.00000000000031b9 [] 4.5605c210 ack+ondisk+write
+> e11409)",
+>           "received_at": "2015-12-08 13:31:49.645295",
+>           "age": "100.252129",
+>           "duration": "25.419458",
+>           "type_data": [
+>                 "commit sent; apply or cleanup",
+>                 { "client": "client.983894",
+>                   "tid": 8044023},
+>                 [
+>                     { "time": "2015-12-08 13:31:49.645616",
+>                       "event": "waiting_for_osdmap"},
+>                     { "time": "2015-12-08 13:32:01.529474",
+>                       "event": "reached_pg"},
+>                     { "time": "2015-12-08 13:32:01.529557",
+>                       "event": "started"},
+>                     { "time": "2015-12-08 13:32:01.529575",
+>                       "event": "started"},
+>                     { "time": "2015-12-08 13:32:01.529642",
+>                       "event": "waiting for subops from 25"},
+>                     { "time": "2015-12-08 13:32:01.530340",
+>                       "event": "commit_queued_for_journal_write"},
+>                     { "time": "2015-12-08 13:32:01.531270",
+>                       "event": "write_thread_in_journal_buffer"},
+>                     { "time": "2015-12-08 13:32:01.533131",
+>                       "event": "journaled_completion_queued"},
+>                     { "time": "2015-12-08 13:32:01.533412",
+>                       "event": "sub_op_commit_rec"},
+>                     { "time": "2015-12-08 13:32:05.813736",
+>                       "event": "op_commit"},
+>                     { "time": "2015-12-08 13:32:05.814035",
+>                       "event": "commit_sent"},
+>                     { "time": "2015-12-08 13:32:15.064722",
+>                       "event": "op_applied"},
+>                     { "time": "2015-12-08 13:32:15.064753",
+>                       "event": "done"}]]}]}
+>
+>
+> --
+> Rongze Zhu
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
