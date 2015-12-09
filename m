@@ -1,80 +1,87 @@
-From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
-Subject: Re: new OSD re-using old OSD id fails to boot
-Date: Wed, 9 Dec 2015 18:39:52 +0800
-Message-ID: <CABF_e-FC7TGFw9=_zEB2-GX=3EOcoX-oc6=L=NPbuipBRo+atg@mail.gmail.com>
-References: <5663158D.1010302@dachary.org>
-	<56678036.5050909@redhat.com>
-	<alpine.DEB.2.00.1512081838240.25269@cobra.newdream.net>
+From: <ghislain.chevalier@orange.com>
+Subject: RE: [RADOSGATEWAY] Admin API
+Date: Wed, 9 Dec 2015 10:58:04 +0000
+Message-ID: <13235_1449658684_5668093C_13235_4656_1_B9C8EFBF13B1354DB5FA000660D66DD00D6692C0@OPEXCLILM22.corporate.adroot.infra.ftgroup>
+References: <28235_1449596706_56671722_28235_9397_1_B9C8EFBF13B1354DB5FA000660D66DD00D668DB9@OPEXCLILM22.corporate.adroot.infra.ftgroup>
+ <CADjxd3LBOEZGXE_Z_WQ2xntYW5JZsAxjbz7VXgO1NbJgVcvmUQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f180.google.com ([209.85.214.180]:33026 "EHLO
-	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754040AbbLIKjw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Dec 2015 05:39:52 -0500
-Received: by obbww6 with SMTP id ww6so32784470obb.0
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Dec 2015 02:39:52 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1512081838240.25269@cobra.newdream.net>
+Received: from relais-nor36.orange.com ([80.12.70.36]:36938 "EHLO
+	relais-inet.orange.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751804AbbLIK6H (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Dec 2015 05:58:07 -0500
+In-Reply-To: <CADjxd3LBOEZGXE_Z_WQ2xntYW5JZsAxjbz7VXgO1NbJgVcvmUQ@mail.gmail.com>
+Content-Language: fr-FR
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: David Zafman <dzafman@redhat.com>, Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Alexandre Marangone <amarango@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Loic,
-
-I try to reproduce this problem on my CentOS7.
-I can not do the same issue.
-This is my version:
-ceph version 10.0.0-928-g8eb0ed1 (8eb0ed1dcda9ee6180a06ee6a4415b112090c534)
-Would you describe more detail?
-
-
-Hi David, Sage,
-
-In most of time, when we found the osd failure, the OSD is already in
-`out` state.
-It could not avoid the redundant data movement unless we could set the
-osd noout when failure.
-Is it right? (Means if OSD go into `out` state, it will make some
-redundant data movement)
-
-Could we try the traditional spare behavior? (Set some disks backup
-and auto replace the broken device?)
-
-That can replace the failure osd before it go into the `out` state.
-Or we could always set the osd noout?
-
-In fact, I think these is a different problems between David and Loic.
-(these two problems are the same import :p
-
-If you have any problems, feel free to let me know.
-
-thanks!!
-vicente
-
-
-2015-12-09 10:50 GMT+08:00 Sage Weil <sweil@redhat.com>:
-> On Tue, 8 Dec 2015, David Zafman wrote:
->> Remember I really think we want a disk replacement feature that would retain
->> the OSD id so that it avoids unnecessary data movement.  See tracker
->> http://tracker.ceph.com/issues/13732
->
-> Yeah, I totally agree.  We just need to form an opinion on how... probably
-> starting with the user experience.  Ideally we'd go from up + in to down +
-> in to down + out, then pull the drive and replace, and then initialize a
-> new OSD with the same id... and journal partition.  Something like
->
->   ceph-disk recreate id=N uuid=U <osd device path>
->
-> I.e., it could use the uuid (which the cluster has in the OSDMap) to find
-> (and re-use) the journal device.
->
-> For a journal failure it'd probably be different.. but maybe not?
->
-> Any other ideas?
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGksDQoNCkl0IHdvcmtzIGZpbmUuDQpUaGFua3MgYSBsb3QNCg0KSXQncyBhbHJlYWR5IGludGVn
+cmF0ZWQgaW4gaW5rc2NvcGUNCldlIHdpbGwgZGV2ZWxvcCBhIHNpbWlsYXIgZmVhdHVyZSBmb3Ig
+YnVja2V0cyBpbiBvcmRlciAgdG8gZGlzcGxheSBxdW90YSBhbmQgc3BlY2lmaWMgZmllbGRzIHJl
+bGF0ZWQgdG8gcGxhY2VtZW50DQoNCkhvdyBjYW4gd2UgZ2V0IGluZm8gYWJvdXQgcmVnaW9uIGFu
+ZCB6b25lIGJ5IHVzaW5nIHRoZSBhZG1pbiBBUEk/DQogDQpCZXN0IHJlZ2FyZHMNCg0KDQotLS0t
+LU1lc3NhZ2UgZCdvcmlnaW5lLS0tLS0NCkRlwqA6IEFsZXhhbmRyZSBNYXJhbmdvbmUgW21haWx0
+bzphbWFyYW5nb0ByZWRoYXQuY29tXSANCkVudm95w6nCoDogbWFyZGkgOCBkw6ljZW1icmUgMjAx
+NSAxOTo0NA0Kw4DCoDogQ0hFVkFMSUVSIEdoaXNsYWluIElNVC9PTFBTDQpDY8KgOiBjZXBoLWRl
+dmVsQHZnZXIua2VybmVsLm9yZw0KT2JqZXTCoDogUmU6IFtSQURPU0dBVEVXQVldIEFkbWluIEFQ
+SQ0KDQpIaSBHaGlzbGFpbiwNCg0KVGhlc2UgaW5mb3MgYXJlIGF2YWlsYWJsZSB3aXRoIHRoZSBt
+ZXRhZGF0YSBBUEkuIFlvdSB3aWxsIG5lZWQgdG8gYWRkIHRoZSBjYXAgbWV0YWRhdGE9cmVhZCB0
+byB5b3VyIGFkbWluIHVzZXIuDQpUaGUgQVBJIGNhbGwgaXM6IC9hZG1pbi9tZXRhZGF0YS91c2Vy
+P2tleT08dXNlcj4NCg0KQmVzdCwNCg0KQWxleA0KDQpPbiBUdWUsIERlYyA4LCAyMDE1IGF0IDk6
+NDUgQU0sICA8Z2hpc2xhaW4uY2hldmFsaWVyQG9yYW5nZS5jb20+IHdyb3RlOg0KPiBIaSwNCj4N
+Cj4gQ29udGV4dCA6IEZpcmVmbHkgMC44MC4xMA0KPg0KPiBJIHVzZSB0aGUgcmd3IGFkbWluIGFw
+aSB0byBnZXQgaW5mb3JtYXRpb24gYWJvdXQgdXNlciBmcm9tIA0KPiBodHRwOi8vZG9jcy5jZXBo
+LmNvbS9kb2NzL21hc3Rlci9yYWRvc2d3L2FkbWlub3BzLyNnZXQtdXNlci1pbmZvDQo+DQo+IFRo
+ZSBnZXQgcmVxdWVzdCBkb2Vzbid0IHJldHVybiBhbGwgdGhlIGluZm9ybWF0aW9uIHRoYXQgd2Ug
+Y2FuIGdldCANCj4gd2l0aCByYWRvc2d3LWFkbWluIHVzZXIgaW5mbyAtLXVpZD08dXNlcm5hbWU+
+IFRoZSBtZXRhZGF0YSBzdWNoIGFzIG9wX21hc2ssIHN5c3RlbSwgZGVmYXVsdF9wbGFjZW1lbnQs
+IHBsYWNlbWVudF90YWdzLCBidWNrZXRfcXVvdGEsIHVzZXJfcXVvdGEsIGFuZCB0ZW1wX3VybF9r
+ZXlzICBhcmUgbWlzc2luZy4NCj4NCj4gSXMgdGhlIGFkbWluIGFwaSBnb2luZyB0byBldm9sdmUg
+aW4gb3JkZXIgdG8gZ2V0IHRob3NlIGluZm9ybWF0aW9uPw0KPg0KPiBCcmdkcw0KPg0KPiAtIC0g
+LSAtIC0gLSAtIC0gLSAtIC0gLSAtIC0gLSAtIC0NCj4gR2hpc2xhaW4gQ2hldmFsaWVyDQo+IE9S
+QU5HRS9JTVQvT0xQUy9BU0UvREFQSS9DU0UNCj4gQXJjaGl0ZWN0ZSBkZSBzZXJ2aWNlcyBk4oCZ
+aW5mcmFzdHJ1Y3R1cmUgZGUgc3RvY2thZ2UgU29md2FyZS1EZWZpbmVkIA0KPiBTdG9yYWdlIEFy
+Y2hpdGVjdA0KPiAgKzMzMjk5MTI0NDMyDQo+ICArMzM3ODg2MjQzNzANCj4gZ2hpc2xhaW4uY2hl
+dmFsaWVyQG9yYW5nZS5jb20NCj4gUCBQZW5zZXogw6AgbCdFbnZpcm9ubmVtZW50IGF2YW50IGQn
+aW1wcmltZXIgY2UgbWVzc2FnZSAhDQo+DQo+DQo+DQo+IF9fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4gX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IENlIG1l
+c3NhZ2UgZXQgc2VzIHBpZWNlcyBqb2ludGVzIHBldXZlbnQgY29udGVuaXIgZGVzIGluZm9ybWF0
+aW9ucyANCj4gY29uZmlkZW50aWVsbGVzIG91IHByaXZpbGVnaWVlcyBldCBuZSBkb2l2ZW50IGRv
+bmMgcGFzIGV0cmUgZGlmZnVzZXMsIA0KPiBleHBsb2l0ZXMgb3UgY29waWVzIHNhbnMgYXV0b3Jp
+c2F0aW9uLiBTaSB2b3VzIGF2ZXogcmVjdSBjZSBtZXNzYWdlIA0KPiBwYXIgZXJyZXVyLCB2ZXVp
+bGxleiBsZSBzaWduYWxlciBhIGwnZXhwZWRpdGV1ciBldCBsZSBkZXRydWlyZSBhaW5zaSANCj4g
+cXVlIGxlcyBwaWVjZXMgam9pbnRlcy4gTGVzIG1lc3NhZ2VzIGVsZWN0cm9uaXF1ZXMgZXRhbnQg
+c3VzY2VwdGlibGVzIA0KPiBkJ2FsdGVyYXRpb24sIEZyYW5jZSBUZWxlY29tIC0gT3JhbmdlIGRl
+Y2xpbmUgdG91dGUgcmVzcG9uc2FiaWxpdGUgc2kgDQo+IGNlIG1lc3NhZ2UgYSBldGUgYWx0ZXJl
+LCBkZWZvcm1lIG91IGZhbHNpZmllLiBNZXJjaQ0KPg0KPiBUaGlzIG1lc3NhZ2UgYW5kIGl0cyBh
+dHRhY2htZW50cyBtYXkgY29udGFpbiBjb25maWRlbnRpYWwgb3IgDQo+IHByaXZpbGVnZWQgaW5m
+b3JtYXRpb24gdGhhdCBtYXkgYmUgcHJvdGVjdGVkIGJ5IGxhdzsgdGhleSBzaG91bGQgbm90IGJl
+IGRpc3RyaWJ1dGVkLCB1c2VkIG9yIGNvcGllZCB3aXRob3V0IGF1dGhvcml6YXRpb24uDQo+IElm
+IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgZW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhl
+IHNlbmRlciBhbmQgZGVsZXRlIHRoaXMgbWVzc2FnZSBhbmQgaXRzIGF0dGFjaG1lbnRzLg0KPiBB
+cyBlbWFpbHMgbWF5IGJlIGFsdGVyZWQsIEZyYW5jZSBUZWxlY29tIC0gT3JhbmdlIHNoYWxsIG5v
+dCBiZSBsaWFibGUgaWYgdGhpcyBtZXNzYWdlIHdhcyBtb2RpZmllZCwgY2hhbmdlZCBvciBmYWxz
+aWZpZWQuDQo+IFRoYW5rIHlvdS4NCj4NCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCgpDZSBtZXNzYWdlIGV0IHNlcyBwaWVj
+ZXMgam9pbnRlcyBwZXV2ZW50IGNvbnRlbmlyIGRlcyBpbmZvcm1hdGlvbnMgY29uZmlkZW50aWVs
+bGVzIG91IHByaXZpbGVnaWVlcyBldCBuZSBkb2l2ZW50IGRvbmMKcGFzIGV0cmUgZGlmZnVzZXMs
+IGV4cGxvaXRlcyBvdSBjb3BpZXMgc2FucyBhdXRvcmlzYXRpb24uIFNpIHZvdXMgYXZleiByZWN1
+IGNlIG1lc3NhZ2UgcGFyIGVycmV1ciwgdmV1aWxsZXogbGUgc2lnbmFsZXIKYSBsJ2V4cGVkaXRl
+dXIgZXQgbGUgZGV0cnVpcmUgYWluc2kgcXVlIGxlcyBwaWVjZXMgam9pbnRlcy4gTGVzIG1lc3Nh
+Z2VzIGVsZWN0cm9uaXF1ZXMgZXRhbnQgc3VzY2VwdGlibGVzIGQnYWx0ZXJhdGlvbiwKRnJhbmNl
+IFRlbGVjb20gLSBPcmFuZ2UgZGVjbGluZSB0b3V0ZSByZXNwb25zYWJpbGl0ZSBzaSBjZSBtZXNz
+YWdlIGEgZXRlIGFsdGVyZSwgZGVmb3JtZSBvdSBmYWxzaWZpZS4gTWVyY2kKClRoaXMgbWVzc2Fn
+ZSBhbmQgaXRzIGF0dGFjaG1lbnRzIG1heSBjb250YWluIGNvbmZpZGVudGlhbCBvciBwcml2aWxl
+Z2VkIGluZm9ybWF0aW9uIHRoYXQgbWF5IGJlIHByb3RlY3RlZCBieSBsYXc7CnRoZXkgc2hvdWxk
+IG5vdCBiZSBkaXN0cmlidXRlZCwgdXNlZCBvciBjb3BpZWQgd2l0aG91dCBhdXRob3JpemF0aW9u
+LgpJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGVtYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5
+IHRoZSBzZW5kZXIgYW5kIGRlbGV0ZSB0aGlzIG1lc3NhZ2UgYW5kIGl0cyBhdHRhY2htZW50cy4K
+QXMgZW1haWxzIG1heSBiZSBhbHRlcmVkLCBGcmFuY2UgVGVsZWNvbSAtIE9yYW5nZSBzaGFsbCBu
+b3QgYmUgbGlhYmxlIGlmIHRoaXMgbWVzc2FnZSB3YXMgbW9kaWZpZWQsIGNoYW5nZWQgb3IgZmFs
+c2lmaWVkLgpUaGFuayB5b3UuCgo=
