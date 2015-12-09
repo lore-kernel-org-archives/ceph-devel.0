@@ -1,72 +1,92 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Quering since when a PG is inactive
-Date: Wed, 9 Dec 2015 17:14:21 +0100
-Message-ID: <5668535D.7050509@42on.com>
-References: <5667DE37.4080502@42on.com>
- <alpine.DEB.2.00.1512090549400.12816@cobra.newdream.net>
+From: David Zafman <dzafman@redhat.com>
+Subject: Re: new OSD re-using old OSD id fails to boot
+Date: Wed, 9 Dec 2015 11:55:18 -0800
+Message-ID: <56688726.5000609@redhat.com>
+References: <5663158D.1010302@dachary.org> <56678036.5050909@redhat.com>
+ <alpine.DEB.2.00.1512081838240.25269@cobra.newdream.net>
+ <CABF_e-FC7TGFw9=_zEB2-GX=3EOcoX-oc6=L=NPbuipBRo+atg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:58285 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750994AbbLIQOY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Dec 2015 11:14:24 -0500
-In-Reply-To: <alpine.DEB.2.00.1512090549400.12816@cobra.newdream.net>
+Received: from mx1.redhat.com ([209.132.183.28]:41005 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750849AbbLITzW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 9 Dec 2015 14:55:22 -0500
+In-Reply-To: <CABF_e-FC7TGFw9=_zEB2-GX=3EOcoX-oc6=L=NPbuipBRo+atg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
-
-On 12/09/2015 02:50 PM, Sage Weil wrote:
-> Hi Wido!
-> 
-> On Wed, 9 Dec 2015, Wido den Hollander wrote:
->> Hi,
->>
->> I'm working on a patch in PGMonitor.cc that sets the state to HEALTH_ERR
->> if >= X PGs are stuck non-active.
->>
->> This works for me now, but I would like to add a timer that a PG has to
->> be inactive for more than Y seconds.
->>
->> The PGMap contains "last_active" and "last_clean", but these timestamps
->> are never updated. So I can't query for last_active =< (now() - 300) for
->> example.
->>
->> On a idle test cluster I have a PG for example:
->>
->> "last_active": "2015-12-09 02:32:31.540712",
->>
->> It's currently 08:53:56 here, so I can't check against last_active.
->>
->> What would a good way be to see for how long a PG has been inactive?
-> 
-> It sounds like maybe the current code is subtley broken:
-> 
-> 	https://github.com/ceph/ceph/blob/master/src/osd/PG.cc#L2566
-> 
-> The last_active/clean etc should be fresh within 
-> osd_pg_stat_report_interval_max seconds...
-> 
-
-Indeed, that seems broken. I created a issue for it:
-http://tracker.ceph.com/issues/14028
-
-I'm not sure where to start (yet).
-
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+To: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>, Sage Weil <sweil@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
 
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
+On 12/9/15 2:39 AM, Wei-Chung Cheng wrote:
+> Hi Loic,
+>
+> I try to reproduce this problem on my CentOS7.
+> I can not do the same issue.
+> This is my version:
+> ceph version 10.0.0-928-g8eb0ed1 (8eb0ed1dcda9ee6180a06ee6a4415b112090c534)
+> Would you describe more detail?
+>
+>
+> Hi David, Sage,
+>
+> In most of time, when we found the osd failure, the OSD is already in
+> `out` state.
+> It could not avoid the redundant data movement unless we could set the
+> osd noout when failure.
+> Is it right? (Means if OSD go into `out` state, it will make some
+> redundant data movement)
+Yes, one case would be that during the 5 minute down window of an OSD 
+disk failure, the noout flag can be set if a spare disk is available.  
+Another scenario would be a bad SMART status or noticing EIO errors from 
+a disk prompting a replacement.  So if a spare disk is already installed 
+or you have hot swappable drives, it would be nice to replace the drive 
+and let recovery copy back all the data that should be there.  Using 
+noout would be critical to this effort.
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+I don't understand why Sage suggests below that a down+out phase would 
+be required during the replacement.
+>
+> Could we try the traditional spare behavior? (Set some disks backup
+> and auto replace the broken device?)
+>
+> That can replace the failure osd before it go into the `out` state.
+> Or we could always set the osd noout?
+>
+> In fact, I think these is a different problems between David and Loic.
+> (these two problems are the same import :p
+>
+> If you have any problems, feel free to let me know.
+>
+> thanks!!
+> vicente
+>
+>
+> 2015-12-09 10:50 GMT+08:00 Sage Weil <sweil@redhat.com>:
+>> On Tue, 8 Dec 2015, David Zafman wrote:
+>>> Remember I really think we want a disk replacement feature that would retain
+>>> the OSD id so that it avoids unnecessary data movement.  See tracker
+>>> http://tracker.ceph.com/issues/13732
+>> Yeah, I totally agree.  We just need to form an opinion on how... probably
+>> starting with the user experience.  Ideally we'd go from up + in to down +
+>> in to down + out, then pull the drive and replace, and then initialize a
+Here ^^^^^^^^^^^^
+>> new OSD with the same id... and journal partition.  Something like
+>>
+>>    ceph-disk recreate id=N uuid=U <osd device path>
+>>
+>> I.e., it could use the uuid (which the cluster has in the OSDMap) to find
+>> (and re-use) the journal device.
+>>
+>> For a journal failure it'd probably be different.. but maybe not?
+>>
+>> Any other ideas?
+>>
+>> sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
