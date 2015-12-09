@@ -1,87 +1,69 @@
-From: <ghislain.chevalier@orange.com>
-Subject: RE: [RADOSGATEWAY] Admin API
-Date: Wed, 9 Dec 2015 10:58:04 +0000
-Message-ID: <13235_1449658684_5668093C_13235_4656_1_B9C8EFBF13B1354DB5FA000660D66DD00D6692C0@OPEXCLILM22.corporate.adroot.infra.ftgroup>
-References: <28235_1449596706_56671722_28235_9397_1_B9C8EFBF13B1354DB5FA000660D66DD00D668DB9@OPEXCLILM22.corporate.adroot.infra.ftgroup>
- <CADjxd3LBOEZGXE_Z_WQ2xntYW5JZsAxjbz7VXgO1NbJgVcvmUQ@mail.gmail.com>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Fwd: problem about pgmeta object?
+Date: Wed, 9 Dec 2015 19:55:14 +0800
+Message-ID: <CALZt5jxE=_aS_X0d=F1mch2HRitvBDJtuCSvfoAZOhShjtTTMQ@mail.gmail.com>
+References: <CALZt5jx2bQKK6yE=bTu96CD=OE7uVGTagfqirHsXh5bNbS2t=w@mail.gmail.com>
+	<alpine.DEB.2.00.1511180511420.7964@cobra.newdream.net>
+	<CALZt5jzpGn1koOwK2PZ2w6xj-UPibc2B60HU-f1ZayFNDSy3EQ@mail.gmail.com>
+	<alpine.DEB.2.00.1512080536300.19170@cobra.newdream.net>
+	<CALZt5jy47HwGR7kGzmUC_cGRp-6Q0xe=aA+v+9viJW3vMYYRrA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relais-nor36.orange.com ([80.12.70.36]:36938 "EHLO
-	relais-inet.orange.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751804AbbLIK6H (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Dec 2015 05:58:07 -0500
-In-Reply-To: <CADjxd3LBOEZGXE_Z_WQ2xntYW5JZsAxjbz7VXgO1NbJgVcvmUQ@mail.gmail.com>
-Content-Language: fr-FR
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:34699 "EHLO
+	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753984AbbLILzQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Dec 2015 06:55:16 -0500
+Received: by wmvv187 with SMTP id v187so257631444wmv.1
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Dec 2015 03:55:14 -0800 (PST)
+In-Reply-To: <CALZt5jy47HwGR7kGzmUC_cGRp-6Q0xe=aA+v+9viJW3vMYYRrA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Marangone <amarango@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?UTF-8?B?5aea5a6B?= <zay11022@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGksDQoNCkl0IHdvcmtzIGZpbmUuDQpUaGFua3MgYSBsb3QNCg0KSXQncyBhbHJlYWR5IGludGVn
-cmF0ZWQgaW4gaW5rc2NvcGUNCldlIHdpbGwgZGV2ZWxvcCBhIHNpbWlsYXIgZmVhdHVyZSBmb3Ig
-YnVja2V0cyBpbiBvcmRlciAgdG8gZGlzcGxheSBxdW90YSBhbmQgc3BlY2lmaWMgZmllbGRzIHJl
-bGF0ZWQgdG8gcGxhY2VtZW50DQoNCkhvdyBjYW4gd2UgZ2V0IGluZm8gYWJvdXQgcmVnaW9uIGFu
-ZCB6b25lIGJ5IHVzaW5nIHRoZSBhZG1pbiBBUEk/DQogDQpCZXN0IHJlZ2FyZHMNCg0KDQotLS0t
-LU1lc3NhZ2UgZCdvcmlnaW5lLS0tLS0NCkRlwqA6IEFsZXhhbmRyZSBNYXJhbmdvbmUgW21haWx0
-bzphbWFyYW5nb0ByZWRoYXQuY29tXSANCkVudm95w6nCoDogbWFyZGkgOCBkw6ljZW1icmUgMjAx
-NSAxOTo0NA0Kw4DCoDogQ0hFVkFMSUVSIEdoaXNsYWluIElNVC9PTFBTDQpDY8KgOiBjZXBoLWRl
-dmVsQHZnZXIua2VybmVsLm9yZw0KT2JqZXTCoDogUmU6IFtSQURPU0dBVEVXQVldIEFkbWluIEFQ
-SQ0KDQpIaSBHaGlzbGFpbiwNCg0KVGhlc2UgaW5mb3MgYXJlIGF2YWlsYWJsZSB3aXRoIHRoZSBt
-ZXRhZGF0YSBBUEkuIFlvdSB3aWxsIG5lZWQgdG8gYWRkIHRoZSBjYXAgbWV0YWRhdGE9cmVhZCB0
-byB5b3VyIGFkbWluIHVzZXIuDQpUaGUgQVBJIGNhbGwgaXM6IC9hZG1pbi9tZXRhZGF0YS91c2Vy
-P2tleT08dXNlcj4NCg0KQmVzdCwNCg0KQWxleA0KDQpPbiBUdWUsIERlYyA4LCAyMDE1IGF0IDk6
-NDUgQU0sICA8Z2hpc2xhaW4uY2hldmFsaWVyQG9yYW5nZS5jb20+IHdyb3RlOg0KPiBIaSwNCj4N
-Cj4gQ29udGV4dCA6IEZpcmVmbHkgMC44MC4xMA0KPg0KPiBJIHVzZSB0aGUgcmd3IGFkbWluIGFw
-aSB0byBnZXQgaW5mb3JtYXRpb24gYWJvdXQgdXNlciBmcm9tIA0KPiBodHRwOi8vZG9jcy5jZXBo
-LmNvbS9kb2NzL21hc3Rlci9yYWRvc2d3L2FkbWlub3BzLyNnZXQtdXNlci1pbmZvDQo+DQo+IFRo
-ZSBnZXQgcmVxdWVzdCBkb2Vzbid0IHJldHVybiBhbGwgdGhlIGluZm9ybWF0aW9uIHRoYXQgd2Ug
-Y2FuIGdldCANCj4gd2l0aCByYWRvc2d3LWFkbWluIHVzZXIgaW5mbyAtLXVpZD08dXNlcm5hbWU+
-IFRoZSBtZXRhZGF0YSBzdWNoIGFzIG9wX21hc2ssIHN5c3RlbSwgZGVmYXVsdF9wbGFjZW1lbnQs
-IHBsYWNlbWVudF90YWdzLCBidWNrZXRfcXVvdGEsIHVzZXJfcXVvdGEsIGFuZCB0ZW1wX3VybF9r
-ZXlzICBhcmUgbWlzc2luZy4NCj4NCj4gSXMgdGhlIGFkbWluIGFwaSBnb2luZyB0byBldm9sdmUg
-aW4gb3JkZXIgdG8gZ2V0IHRob3NlIGluZm9ybWF0aW9uPw0KPg0KPiBCcmdkcw0KPg0KPiAtIC0g
-LSAtIC0gLSAtIC0gLSAtIC0gLSAtIC0gLSAtIC0NCj4gR2hpc2xhaW4gQ2hldmFsaWVyDQo+IE9S
-QU5HRS9JTVQvT0xQUy9BU0UvREFQSS9DU0UNCj4gQXJjaGl0ZWN0ZSBkZSBzZXJ2aWNlcyBk4oCZ
-aW5mcmFzdHJ1Y3R1cmUgZGUgc3RvY2thZ2UgU29md2FyZS1EZWZpbmVkIA0KPiBTdG9yYWdlIEFy
-Y2hpdGVjdA0KPiAgKzMzMjk5MTI0NDMyDQo+ICArMzM3ODg2MjQzNzANCj4gZ2hpc2xhaW4uY2hl
-dmFsaWVyQG9yYW5nZS5jb20NCj4gUCBQZW5zZXogw6AgbCdFbnZpcm9ubmVtZW50IGF2YW50IGQn
-aW1wcmltZXIgY2UgbWVzc2FnZSAhDQo+DQo+DQo+DQo+IF9fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4gX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IENlIG1l
-c3NhZ2UgZXQgc2VzIHBpZWNlcyBqb2ludGVzIHBldXZlbnQgY29udGVuaXIgZGVzIGluZm9ybWF0
-aW9ucyANCj4gY29uZmlkZW50aWVsbGVzIG91IHByaXZpbGVnaWVlcyBldCBuZSBkb2l2ZW50IGRv
-bmMgcGFzIGV0cmUgZGlmZnVzZXMsIA0KPiBleHBsb2l0ZXMgb3UgY29waWVzIHNhbnMgYXV0b3Jp
-c2F0aW9uLiBTaSB2b3VzIGF2ZXogcmVjdSBjZSBtZXNzYWdlIA0KPiBwYXIgZXJyZXVyLCB2ZXVp
-bGxleiBsZSBzaWduYWxlciBhIGwnZXhwZWRpdGV1ciBldCBsZSBkZXRydWlyZSBhaW5zaSANCj4g
-cXVlIGxlcyBwaWVjZXMgam9pbnRlcy4gTGVzIG1lc3NhZ2VzIGVsZWN0cm9uaXF1ZXMgZXRhbnQg
-c3VzY2VwdGlibGVzIA0KPiBkJ2FsdGVyYXRpb24sIEZyYW5jZSBUZWxlY29tIC0gT3JhbmdlIGRl
-Y2xpbmUgdG91dGUgcmVzcG9uc2FiaWxpdGUgc2kgDQo+IGNlIG1lc3NhZ2UgYSBldGUgYWx0ZXJl
-LCBkZWZvcm1lIG91IGZhbHNpZmllLiBNZXJjaQ0KPg0KPiBUaGlzIG1lc3NhZ2UgYW5kIGl0cyBh
-dHRhY2htZW50cyBtYXkgY29udGFpbiBjb25maWRlbnRpYWwgb3IgDQo+IHByaXZpbGVnZWQgaW5m
-b3JtYXRpb24gdGhhdCBtYXkgYmUgcHJvdGVjdGVkIGJ5IGxhdzsgdGhleSBzaG91bGQgbm90IGJl
-IGRpc3RyaWJ1dGVkLCB1c2VkIG9yIGNvcGllZCB3aXRob3V0IGF1dGhvcml6YXRpb24uDQo+IElm
-IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgZW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhl
-IHNlbmRlciBhbmQgZGVsZXRlIHRoaXMgbWVzc2FnZSBhbmQgaXRzIGF0dGFjaG1lbnRzLg0KPiBB
-cyBlbWFpbHMgbWF5IGJlIGFsdGVyZWQsIEZyYW5jZSBUZWxlY29tIC0gT3JhbmdlIHNoYWxsIG5v
-dCBiZSBsaWFibGUgaWYgdGhpcyBtZXNzYWdlIHdhcyBtb2RpZmllZCwgY2hhbmdlZCBvciBmYWxz
-aWZpZWQuDQo+IFRoYW5rIHlvdS4NCj4NCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCgpDZSBtZXNzYWdlIGV0IHNlcyBwaWVj
-ZXMgam9pbnRlcyBwZXV2ZW50IGNvbnRlbmlyIGRlcyBpbmZvcm1hdGlvbnMgY29uZmlkZW50aWVs
-bGVzIG91IHByaXZpbGVnaWVlcyBldCBuZSBkb2l2ZW50IGRvbmMKcGFzIGV0cmUgZGlmZnVzZXMs
-IGV4cGxvaXRlcyBvdSBjb3BpZXMgc2FucyBhdXRvcmlzYXRpb24uIFNpIHZvdXMgYXZleiByZWN1
-IGNlIG1lc3NhZ2UgcGFyIGVycmV1ciwgdmV1aWxsZXogbGUgc2lnbmFsZXIKYSBsJ2V4cGVkaXRl
-dXIgZXQgbGUgZGV0cnVpcmUgYWluc2kgcXVlIGxlcyBwaWVjZXMgam9pbnRlcy4gTGVzIG1lc3Nh
-Z2VzIGVsZWN0cm9uaXF1ZXMgZXRhbnQgc3VzY2VwdGlibGVzIGQnYWx0ZXJhdGlvbiwKRnJhbmNl
-IFRlbGVjb20gLSBPcmFuZ2UgZGVjbGluZSB0b3V0ZSByZXNwb25zYWJpbGl0ZSBzaSBjZSBtZXNz
-YWdlIGEgZXRlIGFsdGVyZSwgZGVmb3JtZSBvdSBmYWxzaWZpZS4gTWVyY2kKClRoaXMgbWVzc2Fn
-ZSBhbmQgaXRzIGF0dGFjaG1lbnRzIG1heSBjb250YWluIGNvbmZpZGVudGlhbCBvciBwcml2aWxl
-Z2VkIGluZm9ybWF0aW9uIHRoYXQgbWF5IGJlIHByb3RlY3RlZCBieSBsYXc7CnRoZXkgc2hvdWxk
-IG5vdCBiZSBkaXN0cmlidXRlZCwgdXNlZCBvciBjb3BpZWQgd2l0aG91dCBhdXRob3JpemF0aW9u
-LgpJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGVtYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5
-IHRoZSBzZW5kZXIgYW5kIGRlbGV0ZSB0aGlzIG1lc3NhZ2UgYW5kIGl0cyBhdHRhY2htZW50cy4K
-QXMgZW1haWxzIG1heSBiZSBhbHRlcmVkLCBGcmFuY2UgVGVsZWNvbSAtIE9yYW5nZSBzaGFsbCBu
-b3QgYmUgbGlhYmxlIGlmIHRoaXMgbWVzc2FnZSB3YXMgbW9kaWZpZWQsIGNoYW5nZWQgb3IgZmFs
-c2lmaWVkLgpUaGFuayB5b3UuCgo=
+The function and transactions corresponding with pgmeta object is listed below:
+touch()   and   remove()  for  pgmeta object creation and deletion
+_omap_setkeys()  and  _omap_rmkeys()  to  update k/v data in omap for
+pgmeta(pg_info, epoch, rollback_info, pg_log and so on)
+omap_get_values() to retrieve data from omap, always call it during
+osd daemon start proccess
+
+So I think the performance will be hurt in writeOp routine as heavily
+call _omap_setkeys()  and  _omap_rmkeys(). The ideal way to deal with
+it,  of course, is to eventually treat pgmeta as a logical object(not
+real object existed). But it needs alter much in FileStore, since we
+cannot directly remove the t.touch()  and  t.remove() transaction and
+upgrade store to remove the pgmeta_object based on info_struct_v. But
+as we discussed before, it is FileStore issue and need keep
+compatibility for other backends.
+
+Therefore, in order to not to alter FileStore too much and keep all
+its compatibility, my strategy is just to skip the meta object
+existence checking on the main routine of writeOps like this:
+https://github.com/ceph/ceph/pull/6870
+
+This brings a benefit to reduce _omap_setkeys()  execution time  from
+123.784us to 108.444us averagely (about 15% improvement), and reduce
+the whole cpu time 0.5% ~ 1% globally.
+
+Regards
+Ning Yao
+
+2015-12-08 21:37 GMT+08:00 Sage Weil <sage@newdream.net>:
+>
+> On Tue, 8 Dec 2015, Ning Yao wrote:
+> > Umm, it seems that MemStore requires in memory meta object to keep the
+> > attributes. So it is not a direct way to remove the pg_meta object
+> > backend storage. Any suggestions?
+> > I think we can just skip the pg_meta operation in FileStore api based
+> > on the value of hoid.pgmeta(), not a generic strategy for all
+> > backends.
+>
+> Yeah--a FileStore hack makes more sense, as other backends probably
+> won't have the same inefficiency that FileStore does.
+>
+> Can you summarize the strategy, though?  We want to avoid doing anything
+> to weird to FileStore at this point unless there is a big performance win.
+>
+> sage
