@@ -1,127 +1,80 @@
-From: chen kael <chenji.bupt@gmail.com>
-Subject: radosgw thread got blocked ,does any one seen this before
-Date: Wed, 9 Dec 2015 18:36:58 +0800
-Message-ID: <CAA-rZjYWZs+D+AaKgBhKBjdP-2wpCH8paMwKd7-tR_VdrCfNtw@mail.gmail.com>
+From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
+Subject: Re: new OSD re-using old OSD id fails to boot
+Date: Wed, 9 Dec 2015 18:39:52 +0800
+Message-ID: <CABF_e-FC7TGFw9=_zEB2-GX=3EOcoX-oc6=L=NPbuipBRo+atg@mail.gmail.com>
+References: <5663158D.1010302@dachary.org>
+	<56678036.5050909@redhat.com>
+	<alpine.DEB.2.00.1512081838240.25269@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:32969 "EHLO
-	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754219AbbLIKhA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Dec 2015 05:37:00 -0500
-Received: by wmec201 with SMTP id c201so253108684wme.0
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Dec 2015 02:36:58 -0800 (PST)
+Received: from mail-ob0-f180.google.com ([209.85.214.180]:33026 "EHLO
+	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754040AbbLIKjw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Dec 2015 05:39:52 -0500
+Received: by obbww6 with SMTP id ww6so32784470obb.0
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Dec 2015 02:39:52 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1512081838240.25269@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: David Zafman <dzafman@redhat.com>, Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,ceph-dev
-  Sorry for trouble you, I am tracing a issus in radosgw
+Hi Loic,
 
-[root@ceph101 ~]# ceph -s
-    cluster e063f9a5-2e80-469e-a4ce-e31f9c6b4046
-     health HEALTH_WARN noout,noscrub,nodeep-scrub flag(s) set
-     monmap e3: 3 mons at
-{ceph101=10.150.130.101:6789/0,ceph102=10.150.130.102:6789/0,ceph103=10.150.130.103:6789/0},
-election epoch 56, quorum 0,1,2 ceph101,ceph102,ceph103
-     osdmap e6454: 72 osds: 72 up, 72 in
-            flags noout,noscrub,nodeep-scrub
-      pgmap v7088435: 1984 pgs, 15 pools, 14437 GB data, 80731 kobjects
-            45379 GB used, 177 TB / 221 TB avail
-                1984 active+clean
-  client io 8387 kB/s rd, 4624 kB/s wr, 8353 op/s
-
-[client.radosgw.gateway]
-host = ceph-apache05
-rgw dns name = **.com
-keyring = /etc/ceph/ceph.client.radosgw.keyring
-rgw socket path = /var/run/ceph/ceph.radosgw.gateway.fastcgi.sock
-log file = /var/log/radosgw/client.radosgw.gateway.log
-rgw enable usage log = true
-rgw usage log tick interval = 30
-rgw usage log flush threshold = 1024
-rgw usage max shards = 32
-rgw usage max user shards = 1
-rgw_enable_ops_log = false
-rgw_thread_pool_size = 2000
-rgw_override_bucket_index_max_shards = 128
-rgw_cache_lru_size = 100000
-rgw_max_chunk_size = 4194304
-rgw_cache_enabled = false
+I try to reproduce this problem on my CentOS7.
+I can not do the same issue.
+This is my version:
+ceph version 10.0.0-928-g8eb0ed1 (8eb0ed1dcda9ee6180a06ee6a4415b112090c534)
+Would you describe more detail?
 
 
-radosgw log:
+Hi David, Sage,
 
-2015-12-09 16:49:30.572723 7f773dbfb700  1 heartbeat_map is_healthy
-'RGWProcess::m_tp thread 0x7f71e8f0f700' had timed out after 600
-2015-12-09 16:49:30.572755 7f773dbfb700  1 heartbeat_map is_healthy
-'RGWProcess::m_tp thread 0x7f7215556700' had timed out after 600
-2015-12-09 16:49:30.572762 7f773dbfb700  1 heartbeat_map is_healthy
-'RGWProcess::m_tp thread 0x7f721b960700' had timed out after 600
-2015-12-09 16:49:30.663418 7f6f75d24700  1 ====== starting new request
-req=0x7f6d3ef66a80 =====
-2015-12-09 16:49:30.821609 7f6d715ea700  1 ====== starting new request
-req=0x7f6d4231bf80 =====
-2015-12-09 16:49:30.837774 7f6f75d24700  1 ====== req done
-req=0x7f6d3ef66a80 http_status=200 ======
-2015-12-09 16:49:30.882390 7f6d715ea700  1 ====== req done
-req=0x7f6d4231bf80 http_status=200 ======
+In most of time, when we found the osd failure, the OSD is already in
+`out` state.
+It could not avoid the redundant data movement unless we could set the
+osd noout when failure.
+Is it right? (Means if OSD go into `out` state, it will make some
+redundant data movement)
 
+Could we try the traditional spare behavior? (Set some disks backup
+and auto replace the broken device?)
 
-I tried ceph daemon /var/run/ceph/ceph-client.*.asok objecter_requests
-,but got nothing
-[root@ceph-apache05 ~]# ceph daemon /var/run/ceph/ceph-client.*.asok
-objecter_requests
-{ "ops": [],
-  "linger_ops": [],
-  "pool_ops": [],
-  "pool_stat_ops": [],
-  "statfs_ops": [],
-  "command_ops": []}
+That can replace the failure osd before it go into the `out` state.
+Or we could always set the osd noout?
+
+In fact, I think these is a different problems between David and Loic.
+(these two problems are the same import :p
+
+If you have any problems, feel free to let me know.
+
+thanks!!
+vicente
 
 
-Then I find all block threads stack is like below
-
-Thread 2077 (Thread 0x7fad4db21700 (LWP 21224)):
-#0  0x00000033b5e0b5bc in pthread_cond_wait@@GLIBC_2.3.2 () from
-/lib64/libpthread.so.0
-#1  0x00000000005c49cb in
-BucketIndexAioManager::wait_for_completions(int, int*, int*,
-std::map<int, std::basic_string<char, std::char_traits<char>,
-std::allocator<char> >, std::less<int>, std::allocator<std::pair<int
-const, std::basic_string<char, std::char_traits<char>,
-std::allocator<char> > > > >*) ()
-#2  0x0000000000559ad2 in CLSRGWConcurrentIO::operator()() ()
-#3  0x000000000054273f in RGWRados::cls_bucket_head(rgw_bucket&,
-std::map<std::basic_string<char, std::char_traits<char>,
-std::allocator<char> >, rgw_bucket_dir_header,
-std::less<std::basic_string<char, std::char_traits<char>,
-std::allocator<char> > >,
-std::allocator<std::pair<std::basic_string<char,
-std::char_traits<char>, std::allocator<char> > const,
-rgw_bucket_dir_header> > >&, std::map<int, std::basic_string<char,
-std::char_traits<char>, std::allocator<char> >, std::less<int>,
-std::allocator<std::pair<int const, std::basic_string<char,
-std::char_traits<char>, std::allocator<char> > > > >*) ()
-#4  0x0000000000542d58 in
-RGWRados::update_containers_stats(std::map<std::basic_string<char,
-std::char_traits<char>, std::allocator<char> >, RGWBucketEnt,
-std::less<std::basic_string<char, std::char_traits<char>,
-std::allocator<char> > >,
-std::allocator<std::pair<std::basic_string<char,
-std::char_traits<char>, std::allocator<char> > const, RGWBucketEnt> >
->&) ()
-#5  0x000000000057dbe2 in RGWStatBucket::execute() ()
-#6  0x00000000004d86a0 in ?? ()
-#7  0x00000000004d92ea in RGWFCGXProcess::handle_request(RGWRequest*) ()
-#8  0x00000000004dbcb7 in RGWProcess::RGWWQ::_process(RGWRequest*) ()
-#9  0x0000003e198ad316 in ThreadPool::worker(ThreadPool::WorkThread*)
-() from /usr/lib64/librados.so.2
-#10 0x0000003e198aef60 in ThreadPool::WorkThread::entry() () from
-/usr/lib64/librados.so.2
-#11 0x00000033b5e079d1 in start_thread () from /lib64/libpthread.so.0
-#12 0x00000033b5ae88fd in clone () from /lib64/libc.so.6
-
-Most request goes well, but as times goes, threads been blocked will
-be more and more, at last ,I have to restart the radosgw, Any
-suggestion is welcome,Thanks a lot!
+2015-12-09 10:50 GMT+08:00 Sage Weil <sweil@redhat.com>:
+> On Tue, 8 Dec 2015, David Zafman wrote:
+>> Remember I really think we want a disk replacement feature that would retain
+>> the OSD id so that it avoids unnecessary data movement.  See tracker
+>> http://tracker.ceph.com/issues/13732
+>
+> Yeah, I totally agree.  We just need to form an opinion on how... probably
+> starting with the user experience.  Ideally we'd go from up + in to down +
+> in to down + out, then pull the drive and replace, and then initialize a
+> new OSD with the same id... and journal partition.  Something like
+>
+>   ceph-disk recreate id=N uuid=U <osd device path>
+>
+> I.e., it could use the uuid (which the cluster has in the OSDMap) to find
+> (and re-use) the journal device.
+>
+> For a journal failure it'd probably be different.. but maybe not?
+>
+> Any other ideas?
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
