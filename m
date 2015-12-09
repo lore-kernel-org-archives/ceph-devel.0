@@ -1,66 +1,72 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: new OSD re-using old OSD id fails to boot
-Date: Wed, 9 Dec 2015 06:00:06 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1512090555030.12816@cobra.newdream.net>
-References: <5663158D.1010302@dachary.org> <56678036.5050909@redhat.com> <alpine.DEB.2.00.1512081838240.25269@cobra.newdream.net> <CABF_e-FC7TGFw9=_zEB2-GX=3EOcoX-oc6=L=NPbuipBRo+atg@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Quering since when a PG is inactive
+Date: Wed, 9 Dec 2015 17:14:21 +0100
+Message-ID: <5668535D.7050509@42on.com>
+References: <5667DE37.4080502@42on.com>
+ <alpine.DEB.2.00.1512090549400.12816@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56792 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754924AbbLIOAK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 9 Dec 2015 09:00:10 -0500
-In-Reply-To: <CABF_e-FC7TGFw9=_zEB2-GX=3EOcoX-oc6=L=NPbuipBRo+atg@mail.gmail.com>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:58285 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750994AbbLIQOY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Dec 2015 11:14:24 -0500
+In-Reply-To: <alpine.DEB.2.00.1512090549400.12816@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
-Cc: David Zafman <dzafman@redhat.com>, Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 9 Dec 2015, Wei-Chung Cheng wrote:
-> Hi Loic,
+On 12/09/2015 02:50 PM, Sage Weil wrote:
+> Hi Wido!
 > 
-> I try to reproduce this problem on my CentOS7.
-> I can not do the same issue.
-> This is my version:
-> ceph version 10.0.0-928-g8eb0ed1 (8eb0ed1dcda9ee6180a06ee6a4415b112090c534)
-> Would you describe more detail?
+> On Wed, 9 Dec 2015, Wido den Hollander wrote:
+>> Hi,
+>>
+>> I'm working on a patch in PGMonitor.cc that sets the state to HEALTH_ERR
+>> if >= X PGs are stuck non-active.
+>>
+>> This works for me now, but I would like to add a timer that a PG has to
+>> be inactive for more than Y seconds.
+>>
+>> The PGMap contains "last_active" and "last_clean", but these timestamps
+>> are never updated. So I can't query for last_active =< (now() - 300) for
+>> example.
+>>
+>> On a idle test cluster I have a PG for example:
+>>
+>> "last_active": "2015-12-09 02:32:31.540712",
+>>
+>> It's currently 08:53:56 here, so I can't check against last_active.
+>>
+>> What would a good way be to see for how long a PG has been inactive?
 > 
+> It sounds like maybe the current code is subtley broken:
 > 
-> Hi David, Sage,
+> 	https://github.com/ceph/ceph/blob/master/src/osd/PG.cc#L2566
 > 
-> In most of time, when we found the osd failure, the OSD is already in
-> `out` state.
-> It could not avoid the redundant data movement unless we could set the
-> osd noout when failure.
-> Is it right? (Means if OSD go into `out` state, it will make some
-> redundant data movement)
+> The last_active/clean etc should be fresh within 
+> osd_pg_stat_report_interval_max seconds...
 > 
-> Could we try the traditional spare behavior? (Set some disks backup
-> and auto replace the broken device?)
-> 
-> That can replace the failure osd before it go into the `out` state.
-> Or we could always set the osd noout?
 
-I don't think there is a problem with 'out' if the osd id is reused and 
-the crush position remains the same.  And I expect usually the OSD will be 
-replaced by a disk with a similar size.  If the replacement is smaller (or 
-0--removed entirely) then you get double-movement, but if it's the same or 
-larger I think it's fine.
+Indeed, that seems broken. I created a issue for it:
+http://tracker.ceph.com/issues/14028
 
-The sequence would be something like
+I'm not sure where to start (yet).
 
- up + in
- down + in 
- 5-10 minutes go by
- down + out    (marked out by monitor)
-  new replicas uniformly distributed across cluster
- days go by
- disk removed
- new disk inserted
- ceph-disk recreate ... recreates osd dir w/ the same id, new uuid
- on startup, osd adjusts crush weight (maybe.. usually by a smallish amount) 
- up + in
-  replicas migrate back to new device
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-sage
 
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
