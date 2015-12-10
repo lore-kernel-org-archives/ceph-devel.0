@@ -1,99 +1,34 @@
-From: Wukongming <wu.kongming@h3c.com>
-Subject: =?utf-8?B?562U5aSNOiBbY2VwaC11c2Vyc10gQ2xpZW50IGlvIGJsb2NrZWQgd2hlbiBy?=
- =?utf-8?Q?emoving_snapshot?=
-Date: Thu, 10 Dec 2015 11:27:45 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D7503DE1EDC@H3CMLB12-EX.srv.huawei-3com.com>
-References: <47D132BF400BE64BAE6D71033F7D3D7503DE0DF4@H3CMLB12-EX.srv.huawei-3com.com>
- <34168A89-37E0-4FCE-96EC-EBA0EC6CA904@schermer.cz>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [ceph-users] Client io blocked when removing snapshot
+Date: Thu, 10 Dec 2015 06:14:24 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1512100613120.19170@cobra.newdream.net>
+References: <47D132BF400BE64BAE6D71033F7D3D7503DE0DF4@H3CMLB12-EX.srv.huawei-3com.com> <34168A89-37E0-4FCE-96EC-EBA0EC6CA904@schermer.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:15615 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751157AbbLJL3Y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 10 Dec 2015 06:29:24 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:45037 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752209AbbLJOOZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Dec 2015 09:14:25 -0500
 In-Reply-To: <34168A89-37E0-4FCE-96EC-EBA0EC6CA904@schermer.cz>
-Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Jan Schermer <jan@schermer.cz>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "&RD-STOR-FIRE@h3c.com" <&RD-STOR-FIRE@h3c.com>
+Cc: Wukongming <wu.kongming@h3c.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "&RD-STOR-FIRE@h3c.com" <&RD-STOR-FIRE@h3c.com>
 
-V2hlbiBJIGFkanVzdGVkIHRoZSB0aGlyZCBwYXJhbWV0ZXIgb2YgT1BUSU9OKG9zZF9zbmFwX3Ry
-aW1fc2xlZXAsIE9QVF9GTE9BVCwgMCkgZnJvbSAwIHRvIDEsIHRoZSBpc3N1ZSBjb3VsZCBiZSBm
-aXhlZC4gSSB0cmllZCBhZ2FpbiB3aXRoIHRoZSB2YWx1ZSAwLjEsIGl0IHdvdWxkIG5vdCBjYXVz
-ZSBhbnkgcHJvYmxlbSBlaXRoZXIuIA0KU28gd2hhdCBpcyB0aGUgYmVzdCBjaG9pY2UsIEhhdmUg
-eW91IGdvdCBhIGNvbW1lbmRlZCB2YWx1ZT8NCg0KVGhhbmtzISENCiAgICAgICAgICAgICAgS29u
-Z21pbmcgV3UNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K
-d3Vrb25nbWluZyBJRDogMTIwMTkNClRlbO+8mjA1NzEtODY3NjAyMzkNCkRlcHTvvJoyMDE0IFVJ
-UzIgT05FU3Rvcg0KDQotLS0tLemCruS7tuWOn+S7ti0tLS0tDQrlj5Hku7bkuro6IEphbiBTY2hl
-cm1lciBbbWFpbHRvOmphbkBzY2hlcm1lci5jel0gDQrlj5HpgIHml7bpl7Q6IDIwMTXlubQxMuac
-iDEw5pelIDE4OjQzDQrmlLbku7bkuro6IHd1a29uZ21pbmcgMTIwMTkgKFJEKQ0K5oqE6YCBOiBj
-ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbTsgJlJE
-LVNUT1ItRklSRQ0K5Li76aKYOiBSZTogW2NlcGgtdXNlcnNdIENsaWVudCBpbyBibG9ja2VkIHdo
-ZW4gcmVtb3Zpbmcgc25hcHNob3QNCg0KUmVtb3Zpbmcgc25hcHNob3QgbWVhbnMgbG9va2luZyBm
-b3IgZXZlcnkgKnBvdGVudGlhbCogb2JqZWN0IHRoZSBzbmFwc2hvdCBjYW4gaGF2ZSwgYW5kIHRo
-aXMgdGFrZXMgYSB2ZXJ5IGxvbmcgdGltZSAoNlRCIHNuYXBzaG90IHdpbGwgY29uc2lzdCBvZiAx
-LjVNIG9iamVjdHMgKGluIG9uZSByZXBsaWNhKSBhc3N1bWluZyB0aGUgZGVmYXVsdCA0TUIgb2Jq
-ZWN0IHNpemUpLiBUaGUgc2FtZSBhcHBsaWVzIHRvIGxhcmdlIHRoaW4gdm9sdW1lcyAoZG9uJ3Qg
-dHJ5IGNyZWF0aW5nIGFuZCB0aGVuIGRyb3BwaW5nIGEgMSBFaUIgdm9sdW1lLCBldmVuIGlmIHlv
-dSBvbmx5IGhhdmUgMUdCIG9mIHBoeXNpY2FsIHNwYWNlIDopKS4NCkRvaW5nIHRoaXMgaXMgc2lt
-cGx5IGV4cGVuc2l2ZSBhbmQgbWlnaHQgc2F0dXJhdGUgeW91ciBPU0RzLiBJZiB5b3UgZG9uJ3Qg
-aGF2ZSBlbm91Z2ggUkFNIHRvIGNhY2hlIHRoZSBzdHJ1Y3R1cmUgdGhlbiBhbGwgdGhlICJpcyB0
-aGVyZSBhIGZpbGUgL3Zhci9saWIvY2VwaC8uLi4uIiB3aWxsIGdvIHRvIGRpc2sgYW5kIHRoYXQg
-Y2FuIGh1cnQgYSBsb3QuDQpJIGRvbid0IHRoaW5rIHRoZXJlJ3MgYW55IHByaW9yaXR5IHRvIHRo
-aXMgKGlzIHRoZXJlPyksIHNvIGl0IGNvbXBldGVzIHdpdGggZXZlcnl0aGluZyBlbHNlLg0KDQpJ
-J20gbm90IHN1cmUgaG93IHNuYXBzaG90cyBhcmUgZXhhY3RseSBjb2RlZCBpbiBDZXBoLCBidXQg
-aW4gYSBDT1cgZmlsZXN5c3RlbSB5b3Ugc2ltcGx5IGRvbid0IGRlcmVmZXJlbmNlIGJsb2NrcyBv
-ZiB0aGUgcGFyZW50IG9mIHRoZSAgc25hcHNob3Qgd2hlbiBkb2luZyB3cml0ZXMgdG8gaXQgYW5k
-IHRoYXQncyBjaGVhcCwgYnV0IENlcGggc3RvcmVzICJibG9ja3MiIGluIGZpbGVzIHdpdGggY29t
-cHV0YWJsZSBuYW1lcyBhbmQgaGFzIG5vIHBvaW50ZXJzIHRvIHRoZW0gdGhhdCBjb3VsZCBiZSBt
-b2RpZmllZCwgIHNvIGJ5IGNyZWF0aW5nIGEgc25hcHNob3QgeW91IGh1cnQgdGhlIHBlcmZvcm1h
-bmNlIGEgbG90ICh5b3UgbmVlZCB0byBjcmVhdGUgYSBjb3B5IG9mIHRoZSA0TUIgb2JqZWN0IGlu
-dG8gdGhlIHNuYXBzaG90KHMpIHdoZW4geW91IGRpcnR5IGEgYnl0ZSBpbiB0aGVyZSkuIFRob3Vn
-aCBJIHJlbWVtYmVyIHJlYWRpbmcgdGhhdCB0aGUgbG9naWMgaXMgYWN0dWFsbHkgcmV2ZXJzZWQg
-YW5kIGl0IGlzIHRoZSBzbmFwc2hvdCB0aGF0IGdldHMgdGhlIG9yaWdpbmFsIGJsb2Nrcyg/Pyku
-Li4NCkFueXdheSBpZiB5b3UgYXJlIHJlbW92aW5nIHNuYXBzaG90IGF0IHRoZSBzYW1lIHRpbWUg
-YXMgd3JpdGluZyB0byB0aGUgcGFyZW50IHRoZXJlIGNvdWxkIGJlIHBvdGVudGlvbmFseSBhIHBy
-b2JsZW0gaW4gd2hhdCBnZXRzIGRvbmUgZmlyc3QuIElzIENlcGggc21hcnQgZW5vdWdoIHRvIG5v
-dCBjYXJlIGFib3V0IHNuYXBzaG90cyB0aGF0IGFyZSBnZXR0aW5nIGRlbGV0ZWQ/IEkgaGF2ZSBu
-byBpZGVhIGJ1dCBJIHRoaW5rIGl0IG11c3QgYmUgYmVjYXVzZSB3ZSB1c2Ugc25hcHNob3RzIGEg
-bG90IGFuZCBoYXZlbid0IGhhZCB0aGF0IGFueSBpc3N1ZXMgd2l0aCBpdC4NCg0KSmFuDQoNCj4g
-T24gMTAgRGVjIDIwMTUsIGF0IDA3OjUyLCBXdWtvbmdtaW5nIDx3dS5rb25nbWluZ0BoM2MuY29t
-PiB3cm90ZToNCj4gDQo+IEhpLCBBbGwNCj4gDQo+IEkgdXNlZCBhIHJiZCBjb21tYW5kIHRvIGNy
-ZWF0ZSBhIDZUQi1zaXplIGltYWdlLCBBbmQgdGhlbiBjcmVhdGVkIGEgc25hcHNob3Qgb2YgdGhp
-cyBpbWFnZS4gQWZ0ZXIgdGhhdCwgSSBrZXB0IHdyaXRpbmcgc29tZXRoaW5nIGxpa2UgbW9kaWZ5
-aW5nIGZpbGVzIHNvIHRoZSBzbmFwc2hvdHMgd291bGQgYmUgY2xvbmVkIG9uZSBieSBvbmUuDQo+
-IEF0IHRoaXMgdGltZSwgSSBkaWQgdGhlIGZlbGxvdyAyIG9wcyBzaW11bHRhbmVvdXNseS4NCj4g
-DQo+IDEuIGtlZXAgY2xpZW50IGlvIHRvIHRoaXMgaW1hZ2UuDQo+IDIuIGV4Y3V0ZSBhIHJiZCBz
-bmFwIHJtIGNvbW1hbmQgdG8gZGVsZXRlIHNuYXBzaG90Lg0KPiANCj4gRmluYWxseSAsSSBmb3Vu
-ZCBjbGllbnQgaW8gYmxvY2tlZCBmb3IgcXVpdGUgYSBsb25nIHRpbWUuIEkgdXNlZCBTQVRBIGRp
-c2sgdG8gdGVzdCwgYW5kIGZlbHQgdGhhdCBjZXBoIG1ha2VzIGl0IGEgcHJpb3JpdHkgdG8gcmVt
-b3ZlIHNuYXBzaG90Lg0KPiBBbHNvIHdlIHVzZSBpb3N0YXQgdG9vbCB0byBoZWxwIHdhdGNoIHRo
-ZSBkaXNrIHN0YXRlLCBhbmQgaXQgcnVucyBpbiBmdWxsIHdvcmtsb2FkLg0KPiANCj4gU28sIHNo
-b3VsZCB3ZSBoYXZlIGEgcHJpb3JpdHkgdG8gZGVhbCB3aXRoIGNsaWVudCBpbyBpbnN0ZWFkIG9m
-IHJlbW92aW5nIHNuYXBzaG90Pw0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0NCj4gd3Vrb25nbWluZyBJRDogMTIwMTkNCj4gVGVs77yaMDU3MS04Njc2MDIz
-OQ0KPiBEZXB077yaMjAxNCBVSVMyIE9ORVN0b3INCj4gDQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tDQo+IOacrOmCruS7tuWPiuWFtumZhOS7tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOac
-r+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaBr++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWc
-sOWdgOS4reWIl+WHug0KPiDnmoTkuKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbku5bk
-urrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbpg6jl
-iIblnLDms4TpnLLjgIHlpI3liLbjgIENCj4g5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h
-5oGv44CC5aaC5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW
-6YKu5Lu26YCa55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pysDQo+IOmCruS7tu+8gQ0KPiBUaGlzIGUt
-bWFpbCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9u
-IGZyb20gDQo+IEgzQywgd2hpY2ggaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBl
-bnRpdHkgd2hvc2UgYWRkcmVzcyBpcyANCj4gbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZSBp
-bmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkgDQo+IChpbmNsdWRpbmcsIGJ1
-dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbCBkaXNjbG9zdXJlLCANCj4gcmVwcm9k
-dWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVu
-ZGVkDQo+IHJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUt
-bWFpbCBpbiBlcnJvciwgDQo+IHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSBwaG9uZSBvciBl
-bWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0KPiBfX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fXw0KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdA0KPiBj
-ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tDQo+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5m
-by5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQ0KDQo=
+On Thu, 10 Dec 2015, Jan Schermer wrote:
+> Removing snapshot means looking for every *potential* object the snapshot can have, and this takes a very long time (6TB snapshot will consist of 1.5M objects (in one replica) assuming the default 4MB object size). The same applies to large thin volumes (don't try creating and then dropping a 1 EiB volume, even if you only have 1GB of physical space :)).
+> Doing this is simply expensive and might saturate your OSDs. If you don't have enough RAM to cache the structure then all the "is there a file /var/lib/ceph/...." will go to disk and that can hurt a lot.
+> I don't think there's any priority to this (is there?), so it competes with everything else.
+> 
+> I'm not sure how snapshots are exactly coded in Ceph, but in a COW filesystem you simply don't dereference blocks of the parent of the  snapshot when doing writes to it and that's cheap, but Ceph stores "blocks" in files with computable names and has no pointers to them that could be modified,  so by creating a snapshot you hurt the performance a lot (you need to create a copy of the 4MB object into the snapshot(s) when you dirty a byte in there). Though I remember reading that the logic is actually reversed and it is the snapshot that gets the original blocks(??)...
+> Anyway if you are removing snapshot at the same time as writing to the parent there could be potentionaly a problem in what gets done first. Is Ceph smart enough to not care about snapshots that are getting deleted? I have no idea but I think it must be because we use snapshots a lot and haven't had that any issues with it.
+
+It's not quite so bad... the OSD maintains a map (in leveldb) of the 
+objects that are referenced by a snapshot, so the amount of work is 
+proportional to the number of objects that were cloned for that snapshot.
+
+There is certainly room for improvement in terms of the impact on client 
+IO, though.  :)
+
+sage
