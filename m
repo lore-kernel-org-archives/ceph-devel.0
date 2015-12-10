@@ -1,86 +1,89 @@
-From: Jan Schermer <jan@schermer.cz>
-Subject: Re: [ceph-users] Blocked requests after "osd in"
-Date: Thu, 10 Dec 2015 10:58:46 +0100
-Message-ID: <E90D6B3B-2F4A-4F7C-B85E-A4FF319AAC2F@schermer.cz>
-References: <5667FC6E.5080600@flyingcircus.io> <B0751415-538E-471E-B310-76812C3C374C@schermer.cz> <56683B9E.8070201@flyingcircus.io> <CAANLjFqUoGTFSYrdwCwRw0apfXJN61SeS7FiXb0A_Bxtu4PJJg@mail.gmail.com> <56693FF7.8050708@flyingcircus.io>
+From: Jan Schermer <jan-SB6/BxVxTjHtwjQa/ONI9g@public.gmane.org>
+Subject: Re: Client io blocked when removing snapshot
+Date: Thu, 10 Dec 2015 11:42:50 +0100
+Message-ID: <34168A89-37E0-4FCE-96EC-EBA0EC6CA904@schermer.cz>
+References: <47D132BF400BE64BAE6D71033F7D3D7503DE0DF4@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f52.google.com ([209.85.215.52]:33162 "EHLO
-	mail-lf0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753621AbbLJJ6u convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Dec 2015 04:58:50 -0500
-Received: by lfaz4 with SMTP id z4so52963718lfa.0
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Dec 2015 01:58:48 -0800 (PST)
-In-Reply-To: <56693FF7.8050708@flyingcircus.io>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Kauhaus <kc@flyingcircus.io>
-Cc: Robert LeBlanc <robert@leblancnet.us>, Ceph-User <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D7503DE0DF4-JwQOC20i6vT3cnzPNjVLboSsE/coCuR8pWgKQ6/u3Fg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Wukongming <wu.kongming-vVzyEvZLFYE@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "&RD-STOR-FIRE-vVzyEvZLFYE@public.gmane.org" <&RD-STOR-FIRE-vVzyEvZLFYE@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Just try to give the booting OSD and all MONs the resources they ask fo=
-r (CPU, memory).
-Yes, it causes disruption but only for a select group of clients, and o=
-nly for a moment (<20s with my extremely high number of PGs).
-=46rom a service provider perspective this might break SLAs, but until =
-you get to >60s blocked requests if will not manifest in clients (VM gu=
-ests) directly.
-
-Ad fixing it - I still think that the only way to achieve any form of S=
-LA I/O should never hang if one of the acting OSDs is acting up. In oth=
-er words, doing a write to min_size OSDs should always be enough, let t=
-he the rest of the writes buffer somewhere for a while.
-Even if you fix this one case, there are other situations where one OSD=
- can block I/O unnecessarily.
-
-Jan
-
-
-> On 10 Dec 2015, at 10:03, Christian Kauhaus <kc@flyingcircus.io> wrot=
-e:
->=20
-> Am 10.12.2015 um 06:38 schrieb Robert LeBlanc:
->> I noticed this a while back and did some tracing. As soon as the PGs
->> are read in by the OSD (very limited amount of housekeeping done), t=
-he
->> OSD is set to the "in" state so that peering with other OSDs can
->> happen and the recovery process can begin. The problem is that when
->> the OSD is "in", the clients also see that and start sending request=
-s
->> to the OSDs before it has had a chance to actually get its bearings
->> and is able to even service the requests. After discussion with some
->> of the developers, there is no easy way around this other than let t=
-he
->> PGs recover to other OSDs and then bring in the OSDs after recovery =
-(a
->> ton of data movement).
->=20
-> Many thanks for your detailed analysis. It's a bit disappointing that=
- there
-> seems to be no easy way around. Any work to improve the situation is =
-much
-> appreciated.
->=20
-> In the meantime, I'll be experimenting with pre-seeding the VFS cache=
- to speed
-> things up at least a little bit.
->=20
-> Regards
->=20
-> Christian
->=20
-> --=20
-> Dipl-Inf. Christian Kauhaus <>< =C2=B7 kc@flyingcircus.io =C2=B7 +49 =
-345 219401-0
-> Flying Circus Internet Operations GmbH =C2=B7 http://flyingcircus.io
-> Forsterstra=C3=9Fe 29 =C2=B7 06112 Halle (Saale) =C2=B7 Deutschland
-> HR Stendal 21169 =C2=B7 Gesch=C3=A4ftsf=C3=BChrer: Christian Theune, =
-Christian Zagrodnick
->=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+UmVtb3Zpbmcgc25hcHNob3QgbWVhbnMgbG9va2luZyBmb3IgZXZlcnkgKnBvdGVudGlhbCogb2Jq
+ZWN0IHRoZSBzbmFwc2hvdCBjYW4gaGF2ZSwgYW5kIHRoaXMgdGFrZXMgYSB2ZXJ5IGxvbmcgdGlt
+ZSAoNlRCIHNuYXBzaG90IHdpbGwgY29uc2lzdCBvZiAxLjVNIG9iamVjdHMgKGluIG9uZSByZXBs
+aWNhKSBhc3N1bWluZyB0aGUgZGVmYXVsdCA0TUIgb2JqZWN0IHNpemUpLiBUaGUgc2FtZSBhcHBs
+aWVzIHRvIGxhcmdlIHRoaW4gdm9sdW1lcyAoZG9uJ3QgdHJ5IGNyZWF0aW5nIGFuZCB0aGVuIGRy
+b3BwaW5nIGEgMSBFaUIgdm9sdW1lLCBldmVuIGlmIHlvdSBvbmx5IGhhdmUgMUdCIG9mIHBoeXNp
+Y2FsIHNwYWNlIDopKS4KRG9pbmcgdGhpcyBpcyBzaW1wbHkgZXhwZW5zaXZlIGFuZCBtaWdodCBz
+YXR1cmF0ZSB5b3VyIE9TRHMuIElmIHlvdSBkb24ndCBoYXZlIGVub3VnaCBSQU0gdG8gY2FjaGUg
+dGhlIHN0cnVjdHVyZSB0aGVuIGFsbCB0aGUgImlzIHRoZXJlIGEgZmlsZSAvdmFyL2xpYi9jZXBo
+Ly4uLi4iIHdpbGwgZ28gdG8gZGlzayBhbmQgdGhhdCBjYW4gaHVydCBhIGxvdC4KSSBkb24ndCB0
+aGluayB0aGVyZSdzIGFueSBwcmlvcml0eSB0byB0aGlzIChpcyB0aGVyZT8pLCBzbyBpdCBjb21w
+ZXRlcyB3aXRoIGV2ZXJ5dGhpbmcgZWxzZS4KCkknbSBub3Qgc3VyZSBob3cgc25hcHNob3RzIGFy
+ZSBleGFjdGx5IGNvZGVkIGluIENlcGgsIGJ1dCBpbiBhIENPVyBmaWxlc3lzdGVtIHlvdSBzaW1w
+bHkgZG9uJ3QgZGVyZWZlcmVuY2UgYmxvY2tzIG9mIHRoZSBwYXJlbnQgb2YgdGhlICBzbmFwc2hv
+dCB3aGVuIGRvaW5nIHdyaXRlcyB0byBpdCBhbmQgdGhhdCdzIGNoZWFwLCBidXQgQ2VwaCBzdG9y
+ZXMgImJsb2NrcyIgaW4gZmlsZXMgd2l0aCBjb21wdXRhYmxlIG5hbWVzIGFuZCBoYXMgbm8gcG9p
+bnRlcnMgdG8gdGhlbSB0aGF0IGNvdWxkIGJlIG1vZGlmaWVkLCAgc28gYnkgY3JlYXRpbmcgYSBz
+bmFwc2hvdCB5b3UgaHVydCB0aGUgcGVyZm9ybWFuY2UgYSBsb3QgKHlvdSBuZWVkIHRvIGNyZWF0
+ZSBhIGNvcHkgb2YgdGhlIDRNQiBvYmplY3QgaW50byB0aGUgc25hcHNob3Qocykgd2hlbiB5b3Ug
+ZGlydHkgYSBieXRlIGluIHRoZXJlKS4gVGhvdWdoIEkgcmVtZW1iZXIgcmVhZGluZyB0aGF0IHRo
+ZSBsb2dpYyBpcyBhY3R1YWxseSByZXZlcnNlZCBhbmQgaXQgaXMgdGhlIHNuYXBzaG90IHRoYXQg
+Z2V0cyB0aGUgb3JpZ2luYWwgYmxvY2tzKD8/KS4uLgpBbnl3YXkgaWYgeW91IGFyZSByZW1vdmlu
+ZyBzbmFwc2hvdCBhdCB0aGUgc2FtZSB0aW1lIGFzIHdyaXRpbmcgdG8gdGhlIHBhcmVudCB0aGVy
+ZSBjb3VsZCBiZSBwb3RlbnRpb25hbHkgYSBwcm9ibGVtIGluIHdoYXQgZ2V0cyBkb25lIGZpcnN0
+LiBJcyBDZXBoIHNtYXJ0IGVub3VnaCB0byBub3QgY2FyZSBhYm91dCBzbmFwc2hvdHMgdGhhdCBh
+cmUgZ2V0dGluZyBkZWxldGVkPyBJIGhhdmUgbm8gaWRlYSBidXQgSSB0aGluayBpdCBtdXN0IGJl
+IGJlY2F1c2Ugd2UgdXNlIHNuYXBzaG90cyBhIGxvdCBhbmQgaGF2ZW4ndCBoYWQgdGhhdCBhbnkg
+aXNzdWVzIHdpdGggaXQuCgpKYW4KCj4gT24gMTAgRGVjIDIwMTUsIGF0IDA3OjUyLCBXdWtvbmdt
+aW5nIDx3dS5rb25nbWluZ0BoM2MuY29tPiB3cm90ZToKPiAKPiBIaSwgQWxsCj4gCj4gSSB1c2Vk
+IGEgcmJkIGNvbW1hbmQgdG8gY3JlYXRlIGEgNlRCLXNpemUgaW1hZ2UsIEFuZCB0aGVuIGNyZWF0
+ZWQgYSBzbmFwc2hvdCBvZiB0aGlzIGltYWdlLiBBZnRlciB0aGF0LCBJIGtlcHQgd3JpdGluZyBz
+b21ldGhpbmcgbGlrZSBtb2RpZnlpbmcgZmlsZXMgc28gdGhlIHNuYXBzaG90cyB3b3VsZCBiZSBj
+bG9uZWQgb25lIGJ5IG9uZS4KPiBBdCB0aGlzIHRpbWUsIEkgZGlkIHRoZSBmZWxsb3cgMiBvcHMg
+c2ltdWx0YW5lb3VzbHkuCj4gCj4gMS4ga2VlcCBjbGllbnQgaW8gdG8gdGhpcyBpbWFnZS4KPiAy
+LiBleGN1dGUgYSByYmQgc25hcCBybSBjb21tYW5kIHRvIGRlbGV0ZSBzbmFwc2hvdC4KPiAKPiBG
+aW5hbGx5ICxJIGZvdW5kIGNsaWVudCBpbyBibG9ja2VkIGZvciBxdWl0ZSBhIGxvbmcgdGltZS4g
+SSB1c2VkIFNBVEEgZGlzayB0byB0ZXN0LCBhbmQgZmVsdCB0aGF0IGNlcGggbWFrZXMgaXQgYSBw
+cmlvcml0eSB0byByZW1vdmUgc25hcHNob3QuCj4gQWxzbyB3ZSB1c2UgaW9zdGF0IHRvb2wgdG8g
+aGVscCB3YXRjaCB0aGUgZGlzayBzdGF0ZSwgYW5kIGl0IHJ1bnMgaW4gZnVsbCB3b3JrbG9hZC4K
+PiAKPiBTbywgc2hvdWxkIHdlIGhhdmUgYSBwcmlvcml0eSB0byBkZWFsIHdpdGggY2xpZW50IGlv
+IGluc3RlYWQgb2YgcmVtb3Zpbmcgc25hcHNob3Q/Cj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tCj4gd3Vrb25nbWluZyBJRDogMTIwMTkKPiBUZWzvvJowNTcx
+LTg2NzYwMjM5Cj4gRGVwdO+8mjIwMTQgVUlTMiBPTkVTdG9yCj4gCj4gLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLQo+IOacrOmCruS7tuWPiuWFtumZhOS7tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOac
+r+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaBr++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWc
+sOWdgOS4reWIl+WHugo+IOeahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6
+uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWI
+huWcsOazhOmcsuOAgeWkjeWItuOAgQo+IOaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaB
+r+OAguWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumC
+ruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrAo+IOmCruS7tu+8gQo+IFRoaXMgZS1tYWls
+IGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJv
+bSBIM0MsIHdoaWNoIGlzCj4gaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkg
+d2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhlCj4gaW5mb3JtYXRp
+b24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRl
+ZCB0bywgdG90YWwgb3IgcGFydGlhbAo+IGRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlz
+c2VtaW5hdGlvbikgYnkgcGVyc29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZAo+IHJlY2lwaWVu
+dChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwg
+cGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyCj4gYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkg
+YW5kIGRlbGV0ZSBpdCEKPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fXwo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBo
+LmNvbQo+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBo
+LmNvbQoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2Vw
+aC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlz
+dHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
