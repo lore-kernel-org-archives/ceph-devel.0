@@ -1,51 +1,63 @@
-From: Jan Schermer <jan-SB6/BxVxTjHtwjQa/ONI9g@public.gmane.org>
-Subject: Re: Client io blocked when removing snapshot
-Date: Thu, 10 Dec 2015 15:21:32 +0100
-Message-ID: <4873E4A6-9470-472C-B2FB-630C944242CD@schermer.cz>
-References: <47D132BF400BE64BAE6D71033F7D3D7503DE0DF4@H3CMLB12-EX.srv.huawei-3com.com>
-	<34168A89-37E0-4FCE-96EC-EBA0EC6CA904@schermer.cz>
-	<alpine.DEB.2.00.1512100613120.19170@cobra.newdream.net>
-Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
-Content-Type: text/plain; charset="us-ascii"
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Compiling for FreeBSD, trouble in buffer.c
+Date: Thu, 10 Dec 2015 16:03:21 +0100
+Message-ID: <56699439.3090006@digiware.nl>
+References: <565B3999.3050302@digiware.nl>
+ <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
+ <565B4A7F.60301@digiware.nl>
+ <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
+ <20151130065812.GA20205@gmail.com>
+ <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1512100613120.19170-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: "&RD-STOR-FIRE-vVzyEvZLFYE@public.gmane.org" <&RD-STOR-FIRE-vVzyEvZLFYE@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Wukongming <wu.kongming-vVzyEvZLFYE@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([31.223.170.169]:55823 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753528AbbLJPEC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 10 Dec 2015 10:04:02 -0500
+In-Reply-To: <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+I have a failure in:
+  ./unittest_erasure_code_shec_arguments
+All tests befor this PASS. (other than rbd which is disabled to
+the time being)
 
-> On 10 Dec 2015, at 15:14, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> 
-> On Thu, 10 Dec 2015, Jan Schermer wrote:
->> Removing snapshot means looking for every *potential* object the snapshot can have, and this takes a very long time (6TB snapshot will consist of 1.5M objects (in one replica) assuming the default 4MB object size). The same applies to large thin volumes (don't try creating and then dropping a 1 EiB volume, even if you only have 1GB of physical space :)).
->> Doing this is simply expensive and might saturate your OSDs. If you don't have enough RAM to cache the structure then all the "is there a file /var/lib/ceph/...." will go to disk and that can hurt a lot.
->> I don't think there's any priority to this (is there?), so it competes with everything else.
->> 
->> I'm not sure how snapshots are exactly coded in Ceph, but in a COW filesystem you simply don't dereference blocks of the parent of the  snapshot when doing writes to it and that's cheap, but Ceph stores "blocks" in files with computable names and has no pointers to them that could be modified,  so by creating a snapshot you hurt the performance a lot (you need to create a copy of the 4MB object into the snapshot(s) when you dirty a byte in there). Though I remember reading that the logic is actually reversed and it is the snapshot that gets the original blocks(??)...
->> Anyway if you are removing snapshot at the same time as writing to the parent there could be potentionaly a problem in what gets done first. Is Ceph smart enough to not care about snapshots that are getting deleted? I have no idea but I think it must be because we use snapshots a lot and haven't had that any issues with it.
-> 
-> It's not quite so bad... the OSD maintains a map (in leveldb) of the 
-> objects that are referenced by a snapshot, so the amount of work is 
-> proportional to the number of objects that were cloned for that snapshot.
-> 
+Which I traceback to code in ErasureCodeShec.cc
+Line 218:
+	unsigned blocksize = (*chunks.begin()).second.length();
+After a few iterations I get a "negative" blocksize, which causes
+allocations further on to really thrash the system out of swap.
 
+At first I expected it could be due to a Clang typecasting problem.
+But after more debugging I found the following in
+buffer.h
+     unsigned length() const {
+#if 0
+       // DEBUG: verify _len
+       unsigned len = 0;
+       for (std::list<ptr>::const_iterator it = _buffers.begin();
+            it != _buffers.end();
+            it++) {
+         len += (*it).length();
+       }
+       assert(len == _len);
+#endif
+       return _len;
+     }
 
-Nice. I saw a blueprint somewhere earlier this year, so that's a pretty new thing (Hammer or Infernalis?)
-And is it a map (with pointers to objects) or just a bitmap of the overlay?
+Which suggests that debugging was needed at this point earlier in life.
+If I enable this debug block, I do get the assert affected.
 
-Jan
+Now the next question is why? Given the debug snippet it needed 
+analyzing before.
+And the derived question then is:
+	What is the easiest path to find out what is actually wrong here.
 
-> There is certainly room for improvement in terms of the impact on client 
-> IO, though.  :)
-> 
-> sage
+All suggestions welcome.
+
+--WjW
