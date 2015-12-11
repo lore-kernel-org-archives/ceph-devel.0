@@ -1,137 +1,80 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: ceph-osd mem usage growth
-Date: Fri, 11 Dec 2015 19:09:14 +0300
-Message-ID: <566AF52A.4070604@mirantis.com>
-References: <5669A726.8080009@mirantis.com>
- <CAN=+7FVrJ-kNRCctze4FVohxDfFm+5k=KnBi==5xENuZ94RmRQ@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: CEPH_MAX_OID_NAME_LEN in rbd kernel driver
+Date: Fri, 11 Dec 2015 17:46:00 +0100
+Message-ID: <CAOi1vP9znqun2LGbqSpvs6bs9U_YXH1Yqebu6dm4qPVfdFCR5g@mail.gmail.com>
+References: <566AE24E.1050107@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f182.google.com ([209.85.217.182]:34825 "EHLO
-	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755296AbbLKQJR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Dec 2015 11:09:17 -0500
-Received: by lbpu9 with SMTP id u9so66459608lbp.2
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Dec 2015 08:09:15 -0800 (PST)
-In-Reply-To: <CAN=+7FVrJ-kNRCctze4FVohxDfFm+5k=KnBi==5xENuZ94RmRQ@mail.gmail.com>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:37719 "EHLO
+	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751624AbbLKQqB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Dec 2015 11:46:01 -0500
+Received: by wmnn186 with SMTP id n186so39559503wmn.0
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Dec 2015 08:46:00 -0800 (PST)
+In-Reply-To: <566AE24E.1050107@corp.ovh.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Jean-Tiare Le Bigot <jean-tiare.le-bigot@corp.ovh.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Samuel,
+On Fri, Dec 11, 2015 at 3:48 PM, Jean-Tiare Le Bigot
+<jean-tiare.le-bigot@corp.ovh.com> wrote:
+> Hi,
+>
+> I hit a use case where rbd was failing to map an image because of the
+> name length.
+>
+> dmesg output:
+>
+> WARNING: CPU: 0 PID: 20851 at include/linux/ceph/osdmap.h:97
+> rbd_osd_req_create.isra.29+0xdd/0x140()
+>
+> ceph_oid_set_name
+> 'rbd_id.docker:devel:ib8k2cxvci9sh7b4ly8wwvpyjf6kjoyuero1k25zal3ypc916i04x78tbmn60gjm6pyp38lmjq:latest'
+> len 101 vs 100, truncating
+>
+>
+> It turns out the maximum ceph object name length is controlled by the
+> constant CEPH_MAX_OID_NAME_LEN. I naively tried to increase it to 500
+> which appears to workaround (fix ?) the issue.
+>
+>
+> diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
+> index 49ff69f..cf34bb0 100644
+> --- a/include/linux/ceph/osdmap.h
+> +++ b/include/linux/ceph/osdmap.h
+> @@ -50,7 +50,7 @@ struct ceph_object_locator {
+>   *
+>   * (probably outdated: must be >= RBD_MAX_MD_NAME_LEN -- currently 100)
+>   */
+> -#define CEPH_MAX_OID_NAME_LEN 100
+> +#define CEPH_MAX_OID_NAME_LEN 500
+>
+>  struct ceph_object_id {
+>         char name[CEPH_MAX_OID_NAME_LEN];
+>
+>
+> What is the impact of such a change ? Should I submit a proper patch ?
+> And, last but not least, shouldn't it return an error instead of trucate
+> it and fail because, obviously the object does not exist ? Worse, It
+> could exist with a different data. Which would be an interesting vector
+> for injecting data in a third party image...
 
-thanks for you answer.
+The impact is heavier allocations - each request has two of those and
+the encoding buffer is also CEPH_MAX_OID_NAME_LEN, not the actual name
+length.  I was actually considering lowering it, but I didn't consider
+image names from hell like that.
 
-One more question:
-Why erasure coded pools use PG log for setxattr op while replicated ones 
-don't?
-What's the rationale for that?
+librbd has #define RBD_MAX_OBJ_NAME_SIZE 96, but it's not enforced.
+
+Is that ID between devel: and :latest fixed-size in docker world?  I.e.
+would bumping it to something less than 500 do?
+
+I don't think injecting data is a valid concern - if you can create an
+image in a pool, you can write to it and if you can write to it...  It's
+better to return an error, of course.
 
 Thanks,
-Igor.
 
-On 10.12.2015 20:46, Samuel Just wrote:
-> The short answer is that you aren't supposed to store large things in
-> xattrs at all.  If you feel it's a "vulnerability", than we could add
-> a config option to reject xattrs over a particular size.
-> -Sam
->
-> On Thu, Dec 10, 2015 at 8:24 AM, Igor Fedotov <ifedotov@mirantis.com> wrote:
->> Hi Cephers,
->>
->> implementing compression support for EC pools I faced an issue that can be
->> summarized as follows.
->>
->> Imagine a client that continuously extends specific object xattr by doing
->> complete attribute rewrite with new data portion appended.
->> As a result one can observe permanently increasing mem usage for ceph-osd
->> processes. This happens for objects at EC pools only.
->>
->> I briefly investigated for the root cause and it looks like that's due to PG
->> log memory consumption growth. PG log entry count is pretty stable but each
->> entry consumes more and more memory over the time since it contains full
->> attribute value.
->> As far as I understand replicated pools do not log setattr operation (
->> actually mark it as unrollbackable ) that's why the issue isn't observed
->> there.
->>
->> With 3000 log entries and e.g. 64Kb attribute value memory consumption is
->> pretty visible.
->>
->> So the questions are:
->> * Are there any ideas how to resolve this issue? Obvious solution is to
->> refactor attribute extending by using multiple keys...  Anything else?
->> * Does it make sense to resolve it at all?  IMO that's a sort of
->> vulnerability for Ceph process to behave this way...
->>
->> Please find a python script to reproduce the issue below, to be started from
->> the folder where ceph.conf is located:
->>
->> python repro.py <poolname>
->>
->> ######################################
->> import rados, sys
->> from time import sleep
->> import psutil
->>
->> def print_process_mem_usage(pid):
->>    process = psutil.Process(pid)
->>    mem = process.get_memory_info()
->>    mem0=mem[0] / (2 ** 20)
->>    mem1=mem[1] / (2 ** 20)
->>    print "pid %d: Virt: %i MB, Res: %i MB" % (pid, mem1, mem0)
->>
->> def print_processes_mem_usage():
->>    for proc in psutil.process_iter():
->>      try:
->>        if 'ceph-osd' in proc.name():
->>          print_process_mem_usage(proc.pid)
->>      except psutil.NoSuchProcess:
->>        pass
->>
->> cluster = rados.Rados(conffile='./ceph.conf')
->>
->> cluster.connect()
->>
->> ioctx = cluster.open_ioctx(sys.argv[1])
->> try:
->>      ioctx.remove_object("pyobject")
->> except:
->>      pass
->> s=""
->> for i in range(25000):
->>      s=''.zfill( i*15)
->>      ioctx.set_xattr( 'pyobject', 'somekey', s)
->>      if (i % 500)==0:
->>          print '%d-th step, attr len = %d' % (i, len(s))
->>          print_processes_mem_usage()
->>
->> ioctx.close()
->> #########################
->> Sample output is as below:
->> 0-th step, attr len = 0
->> pid 23723: Virt: 700 MB, Res: 30 MB
->> pid 23922: Virt: 701 MB, Res: 32 MB
->> pid 24142: Virt: 700 MB, Res: 32 MB
->> ...
->> 4000-th step, attr len = 60000
->> pid 23723: Virt: 896 MB, Res: 207 MB
->> pid 23922: Virt: 900 MB, Res: 212 MB
->> pid 24142: Virt: 897 MB, Res: 210 MB
->> ...
->> 6000-th step, attr len = 90000
->> pid 23723: Virt: 1025 MB, Res: 331 MB
->> pid 23922: Virt: 1032 MB, Res: 338 MB
->> pid 24142: Virt: 1025 MB, Res: 333 MB
->> ...
->>
->>
->> Thanks,
->> Igor
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+                Ilya
