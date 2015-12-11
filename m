@@ -1,59 +1,482 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: The max single write IOPS on single RBD
-Date: Fri, 11 Dec 2015 05:15:02 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1512110512560.10312@cobra.newdream.net>
-References: <CAGkCoN+fT_9fqmUzc0HYkpder_qis-tB9jR-nCwvtJZPD=QGKQ@mail.gmail.com>
+From: Matt Conner <matt.conner@keepertech.com>
+Subject: Re: Kernel RBD hang on OSD Failure
+Date: Fri, 11 Dec 2015 08:32:57 -0500
+Message-ID: <CAKeiORSa9bqryDH-ArBz=tgLm-uvQ0P8XskqMhYyFmzXDNEozQ@mail.gmail.com>
+References: <CAKeiORSsNQ-LOWQ0heLZQkekN_mwYQ81XSXfdJe-R1eP1Osz1w@mail.gmail.com>
+	<CAOi1vP-ZvpDTQ1ej0Um2hJSG-LpquTMZAY8e3P2BtpSkNnL4Hw@mail.gmail.com>
+	<CAKeiORTAr1oO-yo2xNsKoiiEPWedVaTHBRqNNiMykGqPCsn20A@mail.gmail.com>
+	<CAOi1vP8qiG9_qodJPWwviay4f5TCMjnEUKJVNS1=Au4wmghpOQ@mail.gmail.com>
+	<CAKeiORRYycaoC6vXZ8TOpf9_oU3it3yrGO=nJen6Fnhiwn=Okw@mail.gmail.com>
+	<CAOi1vP_Oif-ufUDUTXjrEUoangq53fCquHGmkQNM+xMC+SccSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50574 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750814AbbLKNPE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Dec 2015 08:15:04 -0500
-In-Reply-To: <CAGkCoN+fT_9fqmUzc0HYkpder_qis-tB9jR-nCwvtJZPD=QGKQ@mail.gmail.com>
+Received: from mail-oi0-f53.google.com ([209.85.218.53]:34592 "EHLO
+	mail-oi0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751370AbbLKNc6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Dec 2015 08:32:58 -0500
+Received: by oihr132 with SMTP id r132so3117111oih.1
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Dec 2015 05:32:57 -0800 (PST)
+In-Reply-To: <CAOi1vP_Oif-ufUDUTXjrEUoangq53fCquHGmkQNM+xMC+SccSw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zhi Zhang <zhang.david2011@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, 11 Dec 2015, Zhi Zhang wrote:
-> Hi Guys,
-> 
-> We have a small 4 nodes cluster. Here is the hardware configuration.
-> 
-> 11 x 300GB SSD, 24 cores, 32GB memory per one node.
-> all the nodes connected within one 1Gb/s network.
-> 
-> So we have one Monitor and 44 OSDs for testing kernel RBD IOPS using
-> fio. Here are the major fio options.
-> 
-> -direct=1
-> -rw=randwrite
-> -ioengine=psync
-> -size=1000M
-> -bs=4k
-> -numjobs=1
-> 
-> The max IOPS we can achieve for single write (numjobs=1) is close to
-> 1000. This means each IO from RBD takes 1.x ms.
-> 
-> >From osd logs, we can also observe most of osd_ops will take 1.x ms,
-> including op processing, journal writing, replication, etc, before
-> sending commit back to client.
-> 
-> The network RTT is around 0.04 ms;
-> Most osd_ops on primary OSD take around 0.5~0.7 ms, journal write takes 0.3 ms;
-> Most osd_repops including writing journal on peer OSD take around 0.5 ms.
-> 
-> We even tried to modify journal to write page cache only, but didn't
-> get very significant improvement. Does it mean this is the best result
-> we can get for single write on single RBD?
+Hi Ilya,
 
-What version is this?  There have been a few recent changes that will 
-reduce the wall clock time spent preparing/processing a request.  There is 
-still a fair bit of work to do here, though--the theoretical lower bound 
-is the SSD write time + 2x RTT (client <-> primary osd <-> replica osd <-> 
-replica ssd).
+The only recovery method is to hard reboot the client. Unfortunately
+it will not gracefully reboot in this state. I managed to leave the
+system in this state overnight and I've placed the requested output
+below. Note that rbd_data.f54f9422698a8.0000000000000000 still appears
+in the list.
 
-sage
 
+osdmap:
+
+epoch 6255
+flags
+pool 3 pg_num 2048 (2047) read_tier -1 write_tier -1
+pool 8 pg_num 2048 (2047) read_tier -1 write_tier -1
+osd0 10.10.30.55:6830 100% (exists, up) 100%
+osd1 10.10.30.53:6809 100% (exists, up) 100%
+osd2 10.10.30.54:6839 100% (exists, up) 100%
+osd3 10.10.30.56:6833 100% (exists, up) 100%
+osd4 10.10.30.55:6848 100% (exists, up) 100%
+osd5 10.10.30.53:6854 100% (exists, up) 100%
+osd6 10.10.30.56:6818 100% (exists, up) 100%
+osd7 10.10.30.54:6830 100% (exists, up) 100%
+osd8 10.10.30.55:6839 100% (exists, up) 100%
+osd9 10.10.30.56:6845 100% (exists, up) 100%
+osd10 10.10.30.53:6860 100% (exists, up) 100%
+osd11 10.10.30.54:6842 100% (exists, up) 100%
+osd12 10.10.30.55:6836 100% (exists, up) 100%
+osd13 10.10.30.56:6863 100% (exists, up) 100%
+osd14 10.10.30.53:6839 100% (exists, up) 100%
+osd15 10.10.30.54:6866 100% (exists, up) 100%
+osd16 10.10.30.55:6869 100% (exists, up) 100%
+osd17 10.10.30.56:6812 100% (exists, up) 100%
+osd18 10.10.30.53:6824 100% (exists, up) 100%
+osd19 10.10.30.54:6818 100% (exists, up) 100%
+osd20 10.10.30.55:6833 100% (exists, up) 100%
+osd21 10.10.30.56:6869 100% (exists, up) 100%
+osd22 10.10.30.53:6857 100% (exists, up) 100%
+osd23 10.10.30.54:6833 100% (exists, up) 100%
+osd24 10.10.30.55:6803 100% (exists, up) 100%
+osd25 10.10.30.56:6821 100% (exists, up) 100%
+osd26 10.10.30.54:6848 100% (exists, up) 100%
+osd27 10.10.30.53:6848 100% (exists, up) 100%
+osd28 10.10.30.55:6863 100% (exists, up) 100%
+osd29 10.10.30.56:6827 100% (exists, up) 100%
+osd30 10.10.30.54:6836 100% (exists, up) 100%
+osd31 10.10.30.53:6863 100% (exists, up) 100%
+osd32 10.10.30.55:6845 100% (exists, up) 100%
+osd33 10.10.30.56:6839 100% (exists, up) 100%
+osd34 10.10.30.54:6851 100% (exists, up) 100%
+osd35 10.10.30.53:6845 100% (exists, up) 100%
+osd36 10.10.30.55:6854 100% (exists, up) 100%
+osd37 10.10.30.56:6851 100% (exists, up) 100%
+osd38 10.10.30.54:6806 100% (exists, up) 100%
+osd39 10.10.30.53:6824  0% (doesn't exist) 100%
+osd40 10.10.30.55:6815 100% (exists, up) 100%
+osd41 10.10.30.56:6842 100% (exists, up) 100%
+osd42 10.10.30.54:6863 100% (exists, up) 100%
+osd43 10.10.30.53:6806 100% (exists, up) 100%
+osd44 10.10.30.55:6821 100% (exists, up) 100%
+osd45 10.10.30.56:6803 100% (exists, up) 100%
+osd46 10.10.30.54:6812 100% (exists, up) 100%
+osd47 10.10.30.53:6866 100% (exists, up) 100%
+osd48 10.10.30.55:6812 100% (exists, up) 100%
+osd49 10.10.30.56:6815 100% (exists, up) 100%
+osd50 10.10.30.53:6842 100% (exists, up) 100%
+osd51 10.10.30.54:6854 100% (exists, up) 100%
+osd52 10.10.30.55:6842 100% (exists, up) 100%
+osd53 10.10.30.56:6836 100% (exists, up) 100%
+osd54 10.10.30.53:6803 100% (exists, up) 100%
+osd55 10.10.30.54:6869 100% (exists, up) 100%
+osd56 10.10.30.55:6866 100% (exists, up) 100%
+osd57 10.10.30.56:6860 100% (exists, up) 100%
+osd58 10.10.30.53:6800 100% (exists, up) 100%
+osd59 10.10.30.54:6803 100% (exists, up) 100%
+osd60 10.10.30.55:6824 100% (exists, up) 100%
+osd61 10.10.30.56:6804 100% (exists, up) 100%
+osd62 10.10.30.53:6815 100% (exists, up) 100%
+osd63 10.10.30.54:6857 100% (exists, up) 100%
+osd64 10.10.30.55:6800 100% (exists, up) 100%
+osd65 10.10.30.56:6866 100% (exists, up) 100%
+osd66 10.10.30.53:6836 100% (exists, up) 100%
+osd67 10.10.30.54:6845 100% (exists, up) 100%
+osd68 10.10.30.55:6860 100% (exists, up) 100%
+osd69 10.10.30.56:6824 100% (exists, up) 100%
+osd70 10.10.30.53:6821 100% (exists, up) 100%
+osd71 10.10.30.54:6809 100% (exists, up) 100%
+osd72 10.10.30.55:6806 100% (exists, up) 100%
+osd73 10.10.30.56:6809 100% (exists, up) 100%
+osd74 10.10.30.53:6818 100% (exists, up) 100%
+osd75 10.10.30.54:6815 100% (exists, up) 100%
+osd76 10.10.30.55:6827 100% (exists, up) 100%
+osd77 10.10.30.56:6830 100% (exists, up) 100%
+osd78 10.10.30.53:6833 100% (exists, up) 100%
+osd79 10.10.30.54:6800 100% (exists, up) 100%
+osd80 10.10.30.55:6851 100% (exists, up) 100%
+osd81 10.10.30.56:6800 100% (exists, up) 100%
+osd82 10.10.30.53:6812 100% (exists, up) 100%
+osd83 10.10.30.54:6821 100% (exists, up) 100%
+osd84 10.10.30.55:6857 100% (exists, up) 100%
+osd85 10.10.30.56:6848 100% (exists, up) 100%
+osd86 10.10.30.53:6830 100% (exists, up) 100%
+osd87 10.10.30.54:6827 100% (exists, up) 100%
+osd88 10.10.30.55:6809 100% (exists, up) 100%
+osd89 10.10.30.56:6854 100% (exists, up) 100%
+osd90 10.10.30.53:6827 100% (exists, up) 100%
+osd91 10.10.30.54:6860 100% (exists, up) 100%
+osd92 10.10.30.55:6818 100% (exists, up) 100%
+osd93 10.10.30.56:6857 100% (exists, up) 100%
+osd94 10.10.30.53:6851 100% (exists, up) 100%
+osd95 10.10.30.54:6824 100% (exists, up) 100%
+osd96 10.10.30.52:6863 100% (exists, up) 100%
+osd97 10.10.30.51:6839 100% (exists) 100%
+osd98 10.10.30.52:6854 100% (exists, up) 100%
+osd99 10.10.30.51:6842 100% (exists) 100%
+osd100 10.10.30.52:6809 100% (exists, up) 100%
+osd101 10.10.30.51:6851 100% (exists) 100%
+osd102 10.10.30.52:6857 100% (exists, up) 100%
+osd103 10.10.30.51:6806 100% (exists) 100%
+osd104 10.10.30.51:6809 100% (exists) 100%
+osd105 10.10.30.52:6827 100% (exists, up) 100%
+osd106 10.10.30.52:6881 100% (exists, up) 100%
+osd107 10.10.30.51:6845 100% (exists) 100%
+osd108 10.10.30.52:6803 100% (exists, up) 100%
+osd109 10.10.30.51:6833 100% (exists) 100%
+osd110 10.10.30.52:6878 100% (exists, up) 100%
+osd111 10.10.30.51:6824 100% (exists) 100%
+osd112 10.10.30.51:6803 100% (exists) 100%
+osd113 10.10.30.52:6860 100% (exists, up) 100%
+osd114 10.10.30.51:6836 100% (exists) 100%
+osd115 10.10.30.52:6845 100% (exists, up) 100%
+osd116 10.10.30.52:6872 100% (exists, up) 100%
+osd117 10.10.30.51:6860 100% (exists) 100%
+osd118 10.10.30.52:6806 100% (exists, up) 100%
+osd119 10.10.30.51:6830 100% (exists) 100%
+osd120 10.10.30.52:6842 100% (exists, up) 100%
+osd121 10.10.30.51:6815 100% (exists) 100%
+osd122 10.10.30.52:6824 100% (exists, up) 100%
+osd123 10.10.30.51:6857 100% (exists) 100%
+osd124 10.10.30.52:6839 100% (exists, up) 100%
+osd125 10.10.30.51:6866 100% (exists) 100%
+osd126 10.10.30.51:6827 100% (exists) 100%
+osd127 10.10.30.52:6848 100% (exists, up) 100%
+osd128 10.10.30.51:6881 100% (exists) 100%
+osd129 10.10.30.52:6836 100% (exists, up) 100%
+osd130 10.10.30.52:6812 100% (exists, up) 100%
+osd131 10.10.30.51:6818 100% (exists) 100%
+osd132 10.10.30.52:6821 100% (exists, up) 100%
+osd133 10.10.30.51:6872 100% (exists) 100%
+osd134 10.10.30.52:6828 100% (exists, up) 100%
+osd135 10.10.30.51:6869 100% (exists) 100%
+osd136 10.10.30.52:6833 100% (exists, up) 100%
+osd137 10.10.30.51:6812 100% (exists) 100%
+osd138 10.10.30.52:6869 100% (exists, up) 100%
+osd139 10.10.30.51:6863 100% (exists) 100%
+osd140 10.10.30.52:6875 100% (exists, up) 100%
+osd141 10.10.30.51:6821 100% (exists) 100%
+osd142 10.10.30.52:6800 100% (exists, up) 100%
+osd143 10.10.30.51:6878 100% (exists) 100%
+osd144 10.10.30.52:6851 100% (exists, up) 100%
+osd145 10.10.30.51:6875 100% (exists) 100%
+osd146 10.10.30.52:6815 100% (exists, up) 100%
+osd147 10.10.30.51:6848 100% (exists) 100%
+osd148 10.10.30.52:6866 100% (exists, up) 100%
+osd149 10.10.30.51:6800 100% (exists) 100%
+osd150 10.10.30.52:6818 100% (exists, up) 100%
+osd151 10.10.30.51:6854 100% (exists) 100%
+
+
+osdc:
+
+2565262 osd33 3.4f7c1f8e rbd_data.f659f7b8275f8.0000000000003c00 read
+2565924 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2565925 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2566603 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2566631 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2567779 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2567878 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2568494 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2568512 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2569177 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2569187 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2569548 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2569864 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2570180 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2570496 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2570857 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2571173 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2571534 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2571850 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2572166 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2572482 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2572843 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2573159 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2573475 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2573836 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2574152 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2574468 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2574829 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2575145 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2575461 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2575822 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2576138 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2576454 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2576815 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2577131 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2577447 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2577808 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2578124 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2578440 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2578801 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2579117 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2579433 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2579794 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2580110 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2580426 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2580787 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2581103 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2581419 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2581780 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2582096 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2582412 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2582773 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2583089 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2583405 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2583766 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2584082 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2584398 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2584759 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2585075 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2585391 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2585752 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2586068 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2586384 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2586745 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2587061 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2587377 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2587738 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2588054 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2588370 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2588731 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2589047 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2589363 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2589724 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2590040 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2590356 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2590717 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2591033 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2591349 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2591710 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2592026 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2592342 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2592703 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2593019 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2593335 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2593696 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2593792 osd43 3.485e015f rbd_header.f42e85cd8f5d2 192438'26800595927040 watch
+2593793 osd22 3.1679d3fd rbd_header.f54f346170e75 248651'26800595927040 watch
+2593794 osd23 3.967f0ac rbd_header.f54f943ff3510 271821'26800595927040 watch
+2593795 osd73 3.41d03b49 rbd_header.12628c3de5a 188527'26800595927040 watch
+2593796 osd91 3.b3705118 rbd_header.593b7323f25f 243419'26800595927040 watch
+2593797 osd148 3.7fb7b2bd rbd_header.4e4491321fb8d 68317'26800595927040 watch
+2593798 osd18 3.f82976fd rbd_header.4e449402e564a 57095'26800595927040 watch
+2593799 osd138 3.776060c2 rbd_header.f65a11e3967ed 209128'26800595927040 watch
+2593800 osd78 3.9ce9d2d8 rbd_header.f54f3f3f78ae 216654'26800595927040 watch
+2593801 osd35 3.658c8f8 rbd_header.f54f319d0e468 252143'26800595927040 watch
+2593802 osd132 3.4c72415a rbd_header.f659f6ca5381e 212921'26800595927040 watch
+2593803 osd40 3.dcb615cd rbd_header.f659f3b6599ce 281696'26800595927040 watch
+2593804 osd4 3.2c5dc7d9 rbd_header.f659f7b8275f8 265762'26800595927040 watch
+2593805 osd42 3.ff1718f5 rbd_header.f659f2b730b02 230028'26800595927040 watch
+2593806 osd144 3.45280ccc rbd_header.f54f91f78d63 225918'26800595927040 watch
+2593807 osd55 3.dcad1c74 rbd_header.f54f91e0c08fc 216768'26800595927040 watch
+2593808 osd55 3.38db7474 rbd_header.f65adcf2a53f 216765'26800595927040 watch
+2593809 osd45 3.ce94805a rbd_header.f66345f368639 295864'26800595927040 watch
+2593810 osd140 3.a030d1d8 rbd_header.f66341d1ccf35 290629'26800595927040 watch
+2593811 osd57 3.3df2d8ae rbd_header.4e44968299a31 74608'26800595927040 watch
+2593812 osd29 3.49c607ca rbd_header.f66343de35900 230429'26800595927040 watch
+2593813 osd41 3.a44fd23b rbd_header.1262487bcab5 170538'26800595927040 watch
+2593814 osd0 3.184871e7 rbd_header.12622ffb8aff 221268'26800595927040 watch
+2593815 osd38 3.b63d7b6c rbd_header.126253d67973 116592'26800595927040 watch
+2593816 osd115 3.e6b3a4e rbd_header.1262614d8810 231173'26800595927040 watch
+2593817 osd72 3.d9ede1c3 rbd_header.1262115f0cf 140197'26800595927040 watch
+2593818 osd12 3.6642c157 rbd_header.12621e7fc115 187593'26800595927040 watch
+2593819 osd52 3.854e4dfc rbd_header.593b6491ec9f 280116'26800595927040 watch
+2593820 osd93 3.71d7a587 rbd_header.593b5906fecb 248271'26800595927040 watch
+2593821 osd57 3.abcf9bf6 rbd_header.593b363a4411 209538'26800595927040 watch
+2593822 osd53 3.72c67cfe rbd_header.593b6072b1c7 291406'26800595927040 watch
+2593823 osd70 3.10504835 rbd_header.593b35e9ba2b 205415'26800595927040 watch
+2593824 osd45 3.8b381aaa rbd_header.593b418e8823 272511'26800595927040 watch
+2593825 osd142 3.2b5318b7 rbd_header.593b46f1aa31 210594'26800595927040 watch
+2593826 osd68 3.25c6ad00 rbd_header.4e449416a8478 72833'26800595927040 watch
+2593827 osd13 3.5102bd35 rbd_header.4e449723d5105 87452'26800595927040 watch
+2593828 osd46 3.d0ad9250 rbd_header.4e449104e5eea 75590'26800595927040 watch
+2593829 osd48 3.7adea980 rbd_header.4e4495a579b90 73658'26800595927040 watch
+2593830 osd10 3.39b4da2e rbd_header.4e44914acd83 60123'26800595927040 watch
+2593831 osd2 3.8fe8ba4d rbd_header.e6ec56f5dcb51 200753'26800595927040 watch
+2593832 osd6 3.66d6ca30 rbd_header.e6ec57072b44a 235673'26800595927040 watch
+2593833 osd80 3.25b25299 rbd_header.e6ec57e4a0ef9 188214'26800595927040 watch
+2593834 osd46 3.58e2250 rbd_header.e6ec550078b66 190030'26800595927040 watch
+2593835 osd116 3.b29b37d3 rbd_header.e6ec521c83559 180643'26800595927040 watch
+2593836 osd80 3.eca20f5e rbd_header.e6ec570293241 160701'26800595927040 watch
+2593837 osd80 3.b20df8a9 rbd_header.e6ec53b631e5a 144384'26800595927040 watch
+2593838 osd40 3.6cb419d5 rbd_header.e6ec54ba29f38 200692'26800595927040 watch
+2593839 osd38 3.5cce84bc rbd_header.f42e822939526 163677'26800595927040 watch
+2593840 osd47 3.13094d0 rbd_header.f42e869ead798 165850'26800595927040 watch
+2593841 osd102 3.7a15b5b6 rbd_header.f42e823bececa 182482'26800595927040 watch
+2593842 osd96 3.2ceb4f46 rbd_header.f42e867b637bd 175132'26800595927040 watch
+2593843 osd92 3.b72d8628 rbd_header.f42e8534aeb08 220526'26800595927040 watch
+2593844 osd138 3.42b95d27 rbd_header.f42e83bfec56b 154232'26800595927040 watch
+2593845 osd57 3.6daeb5a2 rbd_header.f42e82ecebca5 156055'26800595927040 watch
+2593846 osd37 3.a133da1c rbd_header.f42e816513fa7 196719'26800595927040 watch
+2593847 osd43 3.c0125aba rbd_header.f42e84c075b37 192587'26800595927040 watch
+2593848 osd69 3.a3527e5a rbd_header.f65a150a4c7f4 223891'26800595927040 watch
+2593849 osd2 3.8a1702f8 rbd_header.f65a1f9017a4 229537'26800595927040 watch
+2593850 osd146 3.ee1e56f3 rbd_header.f65a15677948f 200523'26800595927040 watch
+2593851 osd21 3.672cde13 rbd_header.f65a143514fd 198930'26800595927040 watch
+2593852 osd36 3.97cc7470 rbd_header.f65a11185e747 201523'26800595927040 watch
+2593853 osd70 3.18fcd272 rbd_header.f65a1158abf02 197611'26800595927040 watch
+2593854 osd82 3.8208b836 rbd_header.f65a12c47fed6 287608'26800595927040 watch
+2593855 osd16 3.99d5db06 rbd_header.f54f32ea892e4 250640'26800595927040 watch
+2593856 osd90 3.c8100cf5 rbd_header.f54f331b392f7 303745'26800595927040 watch
+2593857 osd60 3.c41f015d rbd_header.f659f6f6c01c3 174666'26800595927040 watch
+2593858 osd24 3.22b6834c rbd_header.f659f7570a216 252853'26800595927040 watch
+2593859 osd100 3.4355d651 rbd_header.f659f4963d64c 245170'26800595927040 watch
+2593860 osd80 3.133cf6eb rbd_header.f659f4da10e75 245743'26800595927040 watch
+2593861 osd1 3.eb339cb3 rbd_header.f659f7eb5f195 245316'26800595927040 watch
+2593862 osd82 3.918d4e00 rbd_header.f659f7c4753bc 220074'26800595927040 watch
+2593863 osd92 3.e4e19983 rbd_header.f659f314a46f 269470'26800595927040 watch
+2593864 osd115 3.642e224e rbd_header.f659f584de7fd 291576'26800595927040 watch
+2593865 osd118 3.50873837 rbd_header.f54f921268b0f 245740'26800595927040 watch
+2593866 osd7 3.877d0e06 rbd_header.f54f9253d6b46 230906'26800595927040 watch
+2593867 osd63 3.c87ca915 rbd_header.f54f94f111989 299124'26800595927040 watch
+2593868 osd124 3.5af1eb91 rbd_header.f54f97996dd85 230331'26800595927040 watch
+2593869 osd8 3.7031dc84 rbd_header.f54f967833a1e 179952'26800595927040 watch
+2593870 osd129 3.c80e056e rbd_header.f54f9422698a8 279482'26800595927040 watch
+2593871 osd98 3.9fa8711e rbd_header.f54f9412b530 228333'26800595927040 watch
+2593872 osd67 3.264a59c8 rbd_header.f65ad2e962255 234483'26800595927040 watch
+2593873 osd54 3.a56ea23f rbd_header.f65ad31c25f40 304518'26800595927040 watch
+2593874 osd80 3.13e40a42 rbd_header.f65ad65e773b1 250650'26800595927040 watch
+2593875 osd54 3.1f5c8bf4 rbd_header.f65ad16be944c 255781'26800595927040 watch
+2593876 osd3 3.73a827db rbd_header.f65ad4ab53d2 219699'26800595927040 watch
+2593877 osd16 3.d4745306 rbd_header.f66347b1b9a6e 250637'26800595927040 watch
+2593878 osd69 3.e8130397 rbd_header.f6634622f70bc 207323'26800595927040 watch
+2593879 osd74 3.7f33b105 rbd_header.f66347871909c 214234'26800595927040 watch
+2593880 osd14 3.cbdfe123 rbd_header.f663455329544 215780'26800595927040 watch
+2593881 osd44 3.27439970 rbd_header.f663436a83873 221219'26800595927040 watch
+2593882 osd110 3.e75d1953 rbd_header.f663475df588b 283149'26800595927040 watch
+2593883 osd4 3.5396c89b rbd_header.f6634a9aaa27 208564'26800595927040 watch
+2593884 osd51 3.20cb2f53 rbd_header.f42e81f94a5be 134631'26800595927040 watch
+2593885 osd68 3.9f1c071a rbd_header.f54f35d7af2cf 223450'26800595927040 watch
+2593886 osd35 3.fe6122f9 rbd_header.f65ad565c0a5d 216244'26800595927040 watch
+2594202 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2594518 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2594879 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2595195 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2595511 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2595872 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2596188 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2596504 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2596865 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2597181 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2597497 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2597858 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2598174 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2598490 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2598851 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2599167 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2599483 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2599844 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2600160 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2600476 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2600837 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2601153 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2601469 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2601830 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2602146 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2602462 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2602823 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2603139 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2603455 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2603816 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2604132 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2604448 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2604809 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2605125 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2605441 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2605802 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2606118 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2606434 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2606795 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2607111 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2607427 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2607788 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2608104 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+2608420 osd33 3.cac46c43 rbd_data.f54f9422698a8.0000000000000000 read
+
+ceph status:
+
+    cluster f1885784-0159-11e4-be58-a0d3c1f1936c
+     health HEALTH_WARN 2247 pgs degraded; 2247 pgs stuck unclean; 54
+requests are blocked > 32 sec; recovery 1804769/9770742 objects
+degraded (18.471%); 28/151 in osds are down; noout flag(s) set
+     monmap e6: 3 mons at
+{ic2mon01=10.10.30.115:6789/0,ic2mon02=10.10.30.116:6789/0,ic2mon03=10.10.30.117:6789/0},
+election epoch 74, quorum 0,1,2 ic2mon01,ic2mon02,ic2mon03
+     osdmap e6255: 151 osds: 123 up, 151 in
+            flags noout
+      pgmap v2328636: 4096 pgs, 2 pools, 12709 GB data, 3180 kobjects
+            35486 GB used, 513 TB / 547 TB avail
+            1804769/9770742 objects degraded (18.471%)
+                2247 active+degraded
+                1849 active+clean
+
+Thanks,
+
+Matt Conner
+Keeper Technology
+
+
+
+On Fri, Dec 11, 2015 at 3:26 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
+> On Fri, Dec 11, 2015 at 1:37 AM, Matt Conner <matt.conner@keepertech.com> wrote:
+>> Hi Ilya,
+>>
+>> I had already recovered but I managed to recreate the problem again. I ran
+>
+> How did you recover?
+>
+>> the commands against rbd_data.f54f9422698a8.0000000000000000 which was one
+>> of those listed in osdc this time. We have 2048 PGs in the pool so the list
+>> is long.
+>
+> That's not going to work - I need it in a consistent "stuck" state so
+> I can match the outputs.  I understand you can't keep it that way for
+> a long time, so can you please reproduce it and email me off list with
+> osdmap, osdc and ceph -s right away?
+>
+> You have a lot of OSDs but it also doesn't seem to take a long time to
+> recreate.  Bump debug ms to 1 on all OSDs.
+>
+>>
+>> As for when I fetched the object using rados, it grabbed it without issue.
+>>
+>> osd map:
+>> osdmap e6247 pool 'NAS-ic2gw01' (3) object
+>> 'rbd_data.f54f9422698a8.0000000000000000' -> pg 3.cac46c43 (3.443) -> up
+>> ([33,56], p33) acting ([33,56], p33)
+>>
+>> osdmaptool:
+>> pool 3 pg_num 2048
+>> 3.0     [23,138]        23
+>
+> If it's long, better to compress and attach.
+>
+> Thanks,
+>
+>                 Ilya
