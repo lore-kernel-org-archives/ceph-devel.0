@@ -1,221 +1,75 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Some more stats on the OP Queue
-Date: Thu, 10 Dec 2015 19:21:11 -0700
-Message-ID: <CAANLjFpVoCb+_Y=gs+1J1zEmbFtomFVks7TuRTNxZ=hi0B6sFQ@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: OSD public / cluster network isolation using VRF:s
+Date: Thu, 10 Dec 2015 18:38:18 -0800
+Message-ID: <CAJ4mKGYjr2_3gOwy2PhMCQvJLWC9Q0+wzyZskF9vJ3bOdC-OpQ@mail.gmail.com>
+References: <1449173601.2291.84.camel@millnert.se>
+	<CAJ4mKGZvgaEtLF=EX0t_74KS4-yxFMmR4oJUUx7YZhpXb-9EeQ@mail.gmail.com>
+	<1449495369.29564.113.camel@millnert.se>
+	<CAJ4mKGYFd41M_2ucr-d8y8g_HK4RN6ckdk=LGOSKgo-p9fvwsg@mail.gmail.com>
+	<1449502273.29564.145.camel@millnert.se>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f53.google.com ([209.85.213.53]:35816 "EHLO
-	mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750952AbbLKCVM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Dec 2015 21:21:12 -0500
-Received: by vkha189 with SMTP id a189so107246062vkh.2
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Dec 2015 18:21:11 -0800 (PST)
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:36216 "EHLO
+	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751499AbbLKCiT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Dec 2015 21:38:19 -0500
+Received: by mail-wm0-f47.google.com with SMTP id n186so10632144wmn.1
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Dec 2015 18:38:19 -0800 (PST)
+In-Reply-To: <1449502273.29564.145.camel@millnert.se>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Martin Millnert <martin@millnert.se>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I've been writing a test suite to inspect the working of the OP queue
-a little deeper. In this test, I randomly choose and op priority,
-cost, client and how the op is queued/dequeued (strict/normal,
-front/back), then do the same thing on both queues so the only
-variance is how it it queued/dequeued. What I find is that when ops
-are coming in faster than they are being dequeued in the Prioritized
-Queue, low priority ops are starved. The Weighted Round Robin
-constantly stays on target of dequeue ratios (A. Dist. % vs. C. Dist.
-%) in all cases. This testing also exposed the most likely cause for
-the SSD performance decrease. Right now I'm not clearing the stats
-between the different profiles, I can't think of an advantage of doing
-so.
+On Mon, Dec 7, 2015 at 7:31 AM, Martin Millnert <martin@millnert.se> wrote:
+> On Mon, 2015-12-07 at 06:48 -0800, Gregory Farnum wrote:
+> <snip>
+>> >> I'm probably just being dense here, but I don't quite understand what
+>> >> all this is trying to accomplish. It looks like it's essentially
+>> >> trying to set up VLANs (with different rules) over a single physical
+>> >> network interface, that is still represented to userspace as a single
+>> >> device with a single IP. Is that right?
+>> >
+>> > That's almost what it is, with two differences:
+>> >  1) there are separated route tables per VLAN,
+>> >  2) Each VLAN interface (public, cluster) has its own address.
+>>
+>> Okay, but if each interface has its own interface, why do you need
+>> Ceph to do anything at all? You can specify the public and cluster
+>> addresses, they'll bind to the appropriate interface, and then you can
+>> do stuff based on the interface/VLAN it's part of. Right?
+>> -Greg
+>
+> Yes. And in the generic case: almost good enough.
+>
+> In the case I'm discussing, with also separate Linux kernel routing
+> tables, we need to steer the route lookups that happens once the tcp
+> stack has performed its packetization, into the correct table.
+>
+> Depending on how Ceph behaves with interface/IP binding for outbound
+> connections, this may be easy!
+> I.e. if Ceph binds to the specific address, not only on the listening
+> socket, but also when creating outbound sockets, we can create "ip
+> rule"'s that uses the source address and AFAIU "we're home" - at this
+> level.
+> Do you know if this is how Ceph manages the sockets in this case?
+>
+> But if we instead end up with the kernel trying to figure which address
+> to use ( https://tools.ietf.org/html/rfc6724 ), it gets a whole lot
+> trickier.
 
-The first profile is working 10,000 ops at a 99% enqueue rate. The
-second is working 1,000,000 ops at a 70% enqueue rate (30% dequeue
-rate). The third profile is working 100,000 ops at a 30% enqueue rate.
-For the final profile the queue is dequeued.
+Mmm, yeah, I think it makes the kernel pick each time. But if you've
+got the same IP on both I would hope that's not a problem. I haven't
+dug into it though. :/
+-Greg
 
-The line starting with '>' is the (S)trict/(N)ormal queue, ops in the
-queue / number of OPs dequeued (Total Cost dequeued) : Enqueue mean
-us, Enqueue Standard Deviation us, Dequeue mean us, Dequeue Standard
-Deviation us, Dequeue missed count mean, Dequeue miss Standard
-Deviation.
 
-A miss is when any kind of iteration has to be done to find an OP to
-dequeue except for checking the strict queue. The strict queue can not
-miss.
 
-The line starting with '>>' is the priority: OPs dequeued in priority
-/ total ops in priority, % dequeued (actual % of total OPs dequeued by
-this priority / Computed % of total OPs that should be dequeued / if
-strict priority this would be the % ).
-
-The computed priority is done by taking any excess of higher priority
-queues after they have dequeued all their OPs and distributing them to
-the other priorities based on their priorities.
-
-My next course of action is to try and optimize the dequeue path.
-Please let me know if you see any problems with what I've done so far
-and if I'm missing something important.
-
-(copy to fixed width editor to line up columns)
-
-Prio Queue stats (warm-up):
->Q    len/ DQ ops (             T. cost) :   E. Mn,  E. SD,  D. Mn,  D. SD,  M. Mn,  M. SD
->>  P:    DQ OPs/Cost/    T. OPs/Cost     DQ %  (A Dist %/C Dist %/P Dist %)
->S   9798/    101 (           201909569) : 799.669,597.971,1104.42,771.008
->>256:            100/            184  54.35 %  ( 99.01 %/ 39.84 %/ 21.05 %)
->>192:              1/            186   0.54 %  (  0.99 %/ 29.92 %/  0.16 %)
->>256:      198334473/      372688703  53.22 %  ( 98.23 %/ 39.84 %/ 20.45 %)
->>192:        3575096/      376350091   0.95 %  (  1.77 %/ 29.92 %/  0.28 %)
->N   9798/      0 (                   0) :  799.67, 597.97,   0.00,   0.00,   0.00,   0.00
-Wrr Queue stats (warm-up):
->Q    len/ DQ ops (             T. cost) :   E. Mn,  E. SD,  D. Mn,  D. SD,  M. Mn,  M. SD
->>  P:    DQ OPs/Cost/    T. OPs/Cost     DQ %  (A Dist %/C Dist %/P Dist %)
->S   9798/    101 (           201909569) :  816.82, 646.67,1220.93, 844.97
->>256:            100/            184  54.35 %  ( 99.01 %/ 39.84 %/ 21.05 %)
->>192:              1/            186   0.54 %  (  0.99 %/ 29.92 %/  0.16 %)
->>256:      198334473/      372688703  53.22 %  ( 98.23 %/ 39.84 %/ 20.45 %)
->>192:        3575096/      376350091   0.95 %  (  1.77 %/ 29.92 %/  0.28 %)
->N   9798/      0 (                   0) :  816.82, 646.67,   0.00,   0.00,   0.00,   0.00
-Prio Queue stats (working):
->Q    len/ DQ ops (             T. cost) :   E. Mn,  E. SD,  D. Mn,  D. SD,  M. Mn,  M. SD
->>  P:    DQ OPs/Cost/    T. OPs/Cost     DQ %  (A Dist %/C Dist %/P Dist %)
->S 388782/  70176 (        140004720628) :  960.96, 676.46,1479.36, 509.77
->>256:          14127/          14127 100.00 %  ( 20.13 %/ 20.13 %/ 40.12 %)
->>192:          13859/          13859 100.00 %  ( 19.75 %/ 19.75 %/ 29.56 %)
->>128:          14018/          14018 100.00 %  ( 19.98 %/ 19.98 %/ 19.98 %)
->> 64:          14181/          14181 100.00 %  ( 20.21 %/ 20.21 %/ 10.19 %)
->>  0:          13991/          13991 100.00 %  ( 19.94 %/ 19.94 %/  0.15 %)
->>256:    28358583806/    28358583806 100.00 %  ( 20.26 %/ 20.26 %/ 40.28 %)
->>192:    27610191120/    27610191120 100.00 %  ( 19.72 %/ 19.72 %/ 29.45 %)
->>128:    27827012588/    27827012588 100.00 %  ( 19.88 %/ 19.88 %/ 19.84 %)
->> 64:    28626793914/    28626793914 100.00 %  ( 20.45 %/ 20.45 %/ 10.28 %)
->>  0:    27582139200/    27582139200 100.00 %  ( 19.70 %/ 19.70 %/  0.15 %)
->N 388782/ 240433 (        480101662400) :  960.96, 676.46,2361.54, 877.52,   4.52,   0.50
->>256:         126161/         126162 100.00 %  ( 52.47 %/ 39.84 %/ 39.92 %)
->>192:         114272/         125607  90.98 %  ( 47.53 %/ 29.92 %/ 27.15 %)
->>256:   252175942233/   252176024910 100.00 %  ( 52.53 %/ 39.84 %/ 39.93 %)
->>192:   227925720167/   250657500913  90.93 %  ( 47.47 %/ 29.92 %/ 27.10 %)
-Wrr Queue stats (working):
->Q    len/ DQ ops (             T. cost) :   E. Mn,  E. SD,  D. Mn,  D. SD,  M. Mn,  M. SD
->>  P:    DQ OPs/Cost/    T. OPs/Cost     DQ %  (A Dist %/C Dist %/P Dist %)
->S 388782/  70176 (        140004720628) :  879.62, 455.57,1529.75, 531.31
->>256:          14127/          14127 100.00 %  ( 20.13 %/ 20.13 %/ 40.12 %)
->>192:          13859/          13859 100.00 %  ( 19.75 %/ 19.75 %/ 29.56 %)
->>128:          14018/          14018 100.00 %  ( 19.98 %/ 19.98 %/ 19.98 %)
->> 64:          14181/          14181 100.00 %  ( 20.21 %/ 20.21 %/ 10.19 %)
->>  0:          13991/          13991 100.00 %  ( 19.94 %/ 19.94 %/  0.15 %)
->>256:    28358583806/    28358583806 100.00 %  ( 20.26 %/ 20.26 %/ 40.28 %)
->>192:    27610191120/    27610191120 100.00 %  ( 19.72 %/ 19.72 %/ 29.45 %)
->>128:    27827012588/    27827012588 100.00 %  ( 19.88 %/ 19.88 %/ 19.84 %)
->> 64:    28626793914/    28626793914 100.00 %  ( 20.45 %/ 20.45 %/ 10.28 %)
->>  0:    27582139200/    27582139200 100.00 %  ( 19.70 %/ 19.70 %/  0.15 %)
->N 388782/ 240433 (        480250798308) :  879.62, 455.57,3985.06,3407.50,  11.01,  14.00
->>256:          99920/         126162  79.20 %  ( 41.56 %/ 39.84 %/ 31.62 %)
->>192:          72246/         125607  57.52 %  ( 30.05 %/ 29.92 %/ 17.17 %)
->>128:          45605/         125658  36.29 %  ( 18.97 %/ 20.00 %/  7.24 %)
->> 64:          22228/         126486  17.57 %  (  9.24 %/ 10.08 %/  1.78 %)
->>  0:            434/         125302   0.35 %  (  0.18 %/  0.16 %/  0.00 %)
->>256:   199684387796/   252176024910  79.18 %  ( 41.58 %/ 39.84 %/ 31.62 %)
->>192:   144180561569/   250657500913  57.52 %  ( 30.02 %/ 29.92 %/ 17.15 %)
->>128:    91542528145/   251545721355  36.39 %  ( 19.06 %/ 20.00 %/  7.28 %)
->> 64:    44187519304/   252439552820  17.50 %  (  9.20 %/ 10.08 %/  1.77 %)
->>  0:      655801494/   249826066892   0.26 %  (  0.14 %/  0.16 %/  0.00 %)
-Prio Queue stats (cool-down):
->Q    len/ DQ ops (             T. cost) :   E. Mn,  E. SD,  D. Mn,  D. SD,  M. Mn,  M. SD
->>  P:    DQ OPs/Cost/    T. OPs/Cost     DQ %  (A Dist %/C Dist %/P Dist %)
->S 346628/  73143 (        146006740244) :  963.04, 670.59,1474.58, 507.26
->>256:          14728/          14728 100.00 %  ( 20.14 %/ 20.14 %/ 40.10 %)
->>192:          14482/          14482 100.00 %  ( 19.80 %/ 19.80 %/ 29.61 %)
->>128:          14617/          14617 100.00 %  ( 19.98 %/ 19.98 %/ 19.98 %)
->> 64:          14747/          14747 100.00 %  ( 20.16 %/ 20.16 %/ 10.16 %)
->>  0:          14569/          14569 100.00 %  ( 19.92 %/ 19.92 %/  0.15 %)
->>256:    29546967944/    29546967944 100.00 %  ( 20.24 %/ 20.24 %/ 40.21 %)
->>192:    28909078333/    28909078333 100.00 %  ( 19.80 %/ 19.80 %/ 29.55 %)
->>128:    29030645913/    29030645913 100.00 %  ( 19.88 %/ 19.88 %/ 19.83 %)
->> 64:    29792217934/    29792217934 100.00 %  ( 20.40 %/ 20.40 %/ 10.26 %)
->>  0:    28727830120/    28727830120 100.00 %  ( 19.68 %/ 19.68 %/  0.15 %)
->N 346628/ 308543 (        616613010670) :  963.04, 670.59,2237.03, 851.96,   4.26,   0.70
->>256:         131434/         131434 100.00 %  ( 42.60 %/ 39.84 %/ 39.93 %)
->>192:         130792/         130792 100.00 %  ( 42.39 %/ 29.92 %/ 29.84 %)
->>128:          46317/         130871  35.39 %  ( 15.01 %/ 20.00 %/  7.06 %)
->>256:   262750104474/   262750104474 100.00 %  ( 42.61 %/ 39.84 %/ 39.96 %)
->>192:   260925883134/   260925883134 100.00 %  ( 42.32 %/ 29.92 %/ 29.80 %)
->>128:    92937023062/   261807501792  35.50 %  ( 15.07 %/ 20.00 %/  7.09 %)
-Wrr Queue stats (cool-down):
->Q    len/ DQ ops (             T. cost) :   E. Mn,  E. SD,  D. Mn,  D. SD,  M. Mn,  M. SD
->>  P:    DQ OPs/Cost/    T. OPs/Cost     DQ %  (A Dist %/C Dist %/P Dist %)
->S 346628/  73143 (        146006740244) :  876.23, 450.91,1526.68, 526.78
->>256:          14728/          14728 100.00 %  ( 20.14 %/ 20.14 %/ 40.10 %)
->>192:          14482/          14482 100.00 %  ( 19.80 %/ 19.80 %/ 29.61 %)
->>128:          14617/          14617 100.00 %  ( 19.98 %/ 19.98 %/ 19.98 %)
->> 64:          14747/          14747 100.00 %  ( 20.16 %/ 20.16 %/ 10.16 %)
->>  0:          14569/          14569 100.00 %  ( 19.92 %/ 19.92 %/  0.15 %)
->>256:    29546967944/    29546967944 100.00 %  ( 20.24 %/ 20.24 %/ 40.21 %)
->>192:    28909078333/    28909078333 100.00 %  ( 19.80 %/ 19.80 %/ 29.55 %)
->>128:    29030645913/    29030645913 100.00 %  ( 19.88 %/ 19.88 %/ 19.83 %)
->> 64:    29792217934/    29792217934 100.00 %  ( 20.40 %/ 20.40 %/ 10.26 %)
->>  0:    28727830120/    28727830120 100.00 %  ( 19.68 %/ 19.68 %/  0.15 %)
->N 346628/ 308543 (        616074540458) :  876.23, 450.91,3894.63,3317.97,  11.01,  13.98
->>256:         128131/         131434  97.49 %  ( 41.53 %/ 39.84 %/ 38.93 %)
->>192:          92633/         130792  70.82 %  ( 30.02 %/ 29.92 %/ 21.13 %)
->>128:          58811/         130871  44.94 %  ( 19.06 %/ 20.00 %/  8.97 %)
->> 64:          28415/         131634  21.59 %  (  9.21 %/ 10.08 %/  2.18 %)
->>  0:            553/         130440   0.42 %  (  0.18 %/  0.16 %/  0.00 %)
->>256:   256113390514/   262750104474  97.47 %  ( 41.57 %/ 39.84 %/ 38.95 %)
->>192:   184820218480/   260925883134  70.83 %  ( 30.00 %/ 29.92 %/ 21.11 %)
->>128:   117859517439/   261807501792  45.02 %  ( 19.13 %/ 20.00 %/  9.00 %)
->> 64:    56411098533/   262741251306  21.47 %  (  9.16 %/ 10.08 %/  2.17 %)
->>  0:      870315492/   260238819990   0.33 %  (  0.14 %/  0.16 %/  0.00 %)
-Prio Queue stats (drain):
->Q    len/ DQ ops (             T. cost) :   E. Mn,  E. SD,  D. Mn,  D. SD,  M. Mn,  M. SD
->>  P:    DQ OPs/Cost/    T. OPs/Cost     DQ %  (A Dist %/C Dist %/P Dist %)
->S      0/  73143 (        146006740244) :  963.04, 670.59,1474.58, 507.26
->>256:          14728/          14728 100.00 %  ( 20.14 %/ 20.14 %/ 40.10 %)
->>192:          14482/          14482 100.00 %  ( 19.80 %/ 19.80 %/ 29.61 %)
->>128:          14617/          14617 100.00 %  ( 19.98 %/ 19.98 %/ 19.98 %)
->> 64:          14747/          14747 100.00 %  ( 20.16 %/ 20.16 %/ 10.16 %)
->>  0:          14569/          14569 100.00 %  ( 19.92 %/ 19.92 %/  0.15 %)
->>256:    29546967944/    29546967944 100.00 %  ( 20.24 %/ 20.24 %/ 40.21 %)
->>192:    28909078333/    28909078333 100.00 %  ( 19.80 %/ 19.80 %/ 29.55 %)
->>128:    29030645913/    29030645913 100.00 %  ( 19.88 %/ 19.88 %/ 19.83 %)
->> 64:    29792217934/    29792217934 100.00 %  ( 20.40 %/ 20.40 %/ 10.26 %)
->>  0:    28727830120/    28727830120 100.00 %  ( 19.68 %/ 19.68 %/  0.15 %)
->N      0/ 655171 (       1308463560696) :  963.04, 670.59,1808.89, 792.98,   3.00,   1.41
->>256:         131434/         131434 100.00 %  ( 20.06 %/ 20.06 %/ 39.93 %)
->>192:         130792/         130792 100.00 %  ( 19.96 %/ 19.96 %/ 29.84 %)
->>128:         130871/         130871 100.00 %  ( 19.98 %/ 19.98 %/ 19.96 %)
->> 64:         131634/         131634 100.00 %  ( 20.09 %/ 20.09 %/ 10.11 %)
->>  0:         130440/         130440 100.00 %  ( 19.91 %/ 19.91 %/  0.15 %)
->>256:   262750104474/   262750104474 100.00 %  ( 20.08 %/ 20.08 %/ 39.96 %)
->>192:   260925883134/   260925883134 100.00 %  ( 19.94 %/ 19.94 %/ 29.80 %)
->>128:   261807501792/   261807501792 100.00 %  ( 20.01 %/ 20.01 %/ 19.98 %)
->> 64:   262741251306/   262741251306 100.00 %  ( 20.08 %/ 20.08 %/ 10.11 %)
->>  0:   260238819990/   260238819990 100.00 %  ( 19.89 %/ 19.89 %/  0.15 %)
-Wrr Queue stats (drain):
->Q    len/ DQ ops (             T. cost) :   E. Mn,  E. SD,  D. Mn,  D. SD,  M. Mn,  M. SD
->>  P:    DQ OPs/Cost/    T. OPs/Cost     DQ %  (A Dist %/C Dist %/P Dist %)
->S      0/  73143 (        146006740244) :  876.23, 450.91,1526.68, 526.78
->>256:          14728/          14728 100.00 %  ( 20.14 %/ 20.14 %/ 40.10 %)
->>192:          14482/          14482 100.00 %  ( 19.80 %/ 19.80 %/ 29.61 %)
->>128:          14617/          14617 100.00 %  ( 19.98 %/ 19.98 %/ 19.98 %)
->> 64:          14747/          14747 100.00 %  ( 20.16 %/ 20.16 %/ 10.16 %)
->>  0:          14569/          14569 100.00 %  ( 19.92 %/ 19.92 %/  0.15 %)
->>256:    29546967944/    29546967944 100.00 %  ( 20.24 %/ 20.24 %/ 40.21 %)
->>192:    28909078333/    28909078333 100.00 %  ( 19.80 %/ 19.80 %/ 29.55 %)
->>128:    29030645913/    29030645913 100.00 %  ( 19.88 %/ 19.88 %/ 19.83 %)
->> 64:    29792217934/    29792217934 100.00 %  ( 20.40 %/ 20.40 %/ 10.26 %)
->>  0:    28727830120/    28727830120 100.00 %  ( 19.68 %/ 19.68 %/  0.15 %)
->N      0/ 655171 (       1308463560696) :  876.23, 450.91,5039.85,9403.06,  24.06,  69.38
->>256:         131434/         131434 100.00 %  ( 20.06 %/ 20.06 %/ 39.93 %)
->>192:         130792/         130792 100.00 %  ( 19.96 %/ 19.96 %/ 29.84 %)
->>128:         130871/         130871 100.00 %  ( 19.98 %/ 19.98 %/ 19.96 %)
->> 64:         131634/         131634 100.00 %  ( 20.09 %/ 20.09 %/ 10.11 %)
->>  0:         130440/         130440 100.00 %  ( 19.91 %/ 19.91 %/  0.15 %)
->>256:   262750104474/   262750104474 100.00 %  ( 20.08 %/ 20.08 %/ 39.96 %)
->>192:   260925883134/   260925883134 100.00 %  ( 19.94 %/ 19.94 %/ 29.80 %)
->>128:   261807501792/   261807501792 100.00 %  ( 20.01 %/ 20.01 %/ 19.98 %)
->> 64:   262741251306/   262741251306 100.00 %  ( 20.08 %/ 20.08 %/ 10.11 %)
->>  0:   260238819990/   260238819990 100.00 %  ( 19.89 %/ 19.89 %/  0.15 %)
-----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+>
+> For monitors that live only on the public network (as per
+> documentation), the situation is simpler; we can mark traffic outside of
+> Ceph using e.g. iptables.
+>
+> /Martin
+>
