@@ -1,60 +1,109 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: Kernel RBD hang on OSD Failure
-Date: Fri, 11 Dec 2015 09:26:59 +0100
-Message-ID: <CAOi1vP_Oif-ufUDUTXjrEUoangq53fCquHGmkQNM+xMC+SccSw@mail.gmail.com>
-References: <CAKeiORSsNQ-LOWQ0heLZQkekN_mwYQ81XSXfdJe-R1eP1Osz1w@mail.gmail.com>
-	<CAOi1vP-ZvpDTQ1ej0Um2hJSG-LpquTMZAY8e3P2BtpSkNnL4Hw@mail.gmail.com>
-	<CAKeiORTAr1oO-yo2xNsKoiiEPWedVaTHBRqNNiMykGqPCsn20A@mail.gmail.com>
-	<CAOi1vP8qiG9_qodJPWwviay4f5TCMjnEUKJVNS1=Au4wmghpOQ@mail.gmail.com>
-	<CAKeiORRYycaoC6vXZ8TOpf9_oU3it3yrGO=nJen6Fnhiwn=Okw@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Compiling for FreeBSD, trouble in buffer.c
+Date: Fri, 11 Dec 2015 10:56:50 +0100
+Message-ID: <566A9DE2.9070204@digiware.nl>
+References: <565B3999.3050302@digiware.nl>
+ <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
+ <565B4A7F.60301@digiware.nl>
+ <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
+ <20151130065812.GA20205@gmail.com>
+ <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
+ <56699439.3090006@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:38154 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754058AbbLKI1A (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Dec 2015 03:27:00 -0500
-Received: by wmec201 with SMTP id c201so59229381wme.1
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Dec 2015 00:26:59 -0800 (PST)
-In-Reply-To: <CAKeiORRYycaoC6vXZ8TOpf9_oU3it3yrGO=nJen6Fnhiwn=Okw@mail.gmail.com>
+Received: from smtp.digiware.nl ([31.223.170.169]:59017 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751118AbbLKJ5G (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 11 Dec 2015 04:57:06 -0500
+In-Reply-To: <56699439.3090006@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Conner <matt.conner@keepertech.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Dec 11, 2015 at 1:37 AM, Matt Conner <matt.conner@keepertech.com> wrote:
-> Hi Ilya,
+On 10-12-2015 16:03, Willem Jan Withagen wrote:
+> I have a failure in:
+>   ./unittest_erasure_code_shec_arguments
+> All tests befor this PASS. (other than rbd which is disabled to
+> the time being)
 >
-> I had already recovered but I managed to recreate the problem again. I ran
-
-How did you recover?
-
-> the commands against rbd_data.f54f9422698a8.0000000000000000 which was one
-> of those listed in osdc this time. We have 2048 PGs in the pool so the list
-> is long.
-
-That's not going to work - I need it in a consistent "stuck" state so
-I can match the outputs.  I understand you can't keep it that way for
-a long time, so can you please reproduce it and email me off list with
-osdmap, osdc and ceph -s right away?
-
-You have a lot of OSDs but it also doesn't seem to take a long time to
-recreate.  Bump debug ms to 1 on all OSDs.
-
+> Which I traceback to code in ErasureCodeShec.cc
+> Line 218:
+>      unsigned blocksize = (*chunks.begin()).second.length();
+> After a few iterations I get a "negative" blocksize, which causes
+> allocations further on to really thrash the system out of swap.
 >
-> As for when I fetched the object using rados, it grabbed it without issue.
+> At first I expected it could be due to a Clang typecasting problem.
+> But after more debugging I found the following in
+> buffer.h
+>      unsigned length() const {
+> #if 0
+>        // DEBUG: verify _len
+>        unsigned len = 0;
+>        for (std::list<ptr>::const_iterator it = _buffers.begin();
+>             it != _buffers.end();
+>             it++) {
+>          len += (*it).length();
+>        }
+>        assert(len == _len);
+> #endif
+>        return _len;
+>      }
 >
-> osd map:
-> osdmap e6247 pool 'NAS-ic2gw01' (3) object
-> 'rbd_data.f54f9422698a8.0000000000000000' -> pg 3.cac46c43 (3.443) -> up
-> ([33,56], p33) acting ([33,56], p33)
+> Which suggests that debugging was needed at this point earlier in life.
+> If I enable this debug block, I do get the assert affected.
 >
-> osdmaptool:
-> pool 3 pg_num 2048
-> 3.0     [23,138]        23
+> Now the next question is why? Given the debug snippet it needed
+> analyzing before.
+> And the derived question then is:
+>      What is the easiest path to find out what is actually wrong here.
 
-If it's long, better to compress and attach.
 
-Thanks,
+A further followup on this.
 
-                Ilya
+After some extensive debugging with gdb and watches, I've come to the 
+conclusion
+That the location of _len is used by more that one part of the code...
+The location gets alternately written during:
+TestErasureCodeShec_arguments.cc:136
+     shec_table.insert(std::make_pair(table_key,table_value));
+
+Old value = 63015016
+New value = 4294954344
+....
+Old value = 4294954344
+New value = 63015016
+.....
+
+To retain this value 4294954344, which is definitely not the length.
+Because printing values on the Linux variant, it gives 32. Which sounds 
+much more
+sensible....
+
+So there a few possibilities that I can think of:
+  1) Clang gets it wrong
+  2) There is a mixup of different type of libs that make for different 
+offsets in
+     the bufferlist structs
+  3) the bufferlist code is has portability issues
+  4) the bufferlist code has errors that do no show with gcc
+
+Most likely it will be either 2) or 3) ....
+But other suggestions are welcome...
+
+And since bufferlists are at the center of Ceph, better get things right.
+So I'm going to go over the test/bufferlist.cc code and see what is in 
+there.
+And/or extract a less convoluted example from 
+TestErasureCodeShec_arguments.cc
+and see if it is in there as well.
+
+--WjW
+
+
+
+
+
+	
