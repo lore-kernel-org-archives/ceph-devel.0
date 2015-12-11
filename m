@@ -1,75 +1,60 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: OSD public / cluster network isolation using VRF:s
-Date: Thu, 10 Dec 2015 18:38:18 -0800
-Message-ID: <CAJ4mKGYjr2_3gOwy2PhMCQvJLWC9Q0+wzyZskF9vJ3bOdC-OpQ@mail.gmail.com>
-References: <1449173601.2291.84.camel@millnert.se>
-	<CAJ4mKGZvgaEtLF=EX0t_74KS4-yxFMmR4oJUUx7YZhpXb-9EeQ@mail.gmail.com>
-	<1449495369.29564.113.camel@millnert.se>
-	<CAJ4mKGYFd41M_2ucr-d8y8g_HK4RN6ckdk=LGOSKgo-p9fvwsg@mail.gmail.com>
-	<1449502273.29564.145.camel@millnert.se>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: Kernel RBD hang on OSD Failure
+Date: Fri, 11 Dec 2015 09:26:59 +0100
+Message-ID: <CAOi1vP_Oif-ufUDUTXjrEUoangq53fCquHGmkQNM+xMC+SccSw@mail.gmail.com>
+References: <CAKeiORSsNQ-LOWQ0heLZQkekN_mwYQ81XSXfdJe-R1eP1Osz1w@mail.gmail.com>
+	<CAOi1vP-ZvpDTQ1ej0Um2hJSG-LpquTMZAY8e3P2BtpSkNnL4Hw@mail.gmail.com>
+	<CAKeiORTAr1oO-yo2xNsKoiiEPWedVaTHBRqNNiMykGqPCsn20A@mail.gmail.com>
+	<CAOi1vP8qiG9_qodJPWwviay4f5TCMjnEUKJVNS1=Au4wmghpOQ@mail.gmail.com>
+	<CAKeiORRYycaoC6vXZ8TOpf9_oU3it3yrGO=nJen6Fnhiwn=Okw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:36216 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751499AbbLKCiT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Dec 2015 21:38:19 -0500
-Received: by mail-wm0-f47.google.com with SMTP id n186so10632144wmn.1
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Dec 2015 18:38:19 -0800 (PST)
-In-Reply-To: <1449502273.29564.145.camel@millnert.se>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:38154 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754058AbbLKI1A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Dec 2015 03:27:00 -0500
+Received: by wmec201 with SMTP id c201so59229381wme.1
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Dec 2015 00:26:59 -0800 (PST)
+In-Reply-To: <CAKeiORRYycaoC6vXZ8TOpf9_oU3it3yrGO=nJen6Fnhiwn=Okw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Millnert <martin@millnert.se>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Matt Conner <matt.conner@keepertech.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Dec 7, 2015 at 7:31 AM, Martin Millnert <martin@millnert.se> wrote:
-> On Mon, 2015-12-07 at 06:48 -0800, Gregory Farnum wrote:
-> <snip>
->> >> I'm probably just being dense here, but I don't quite understand what
->> >> all this is trying to accomplish. It looks like it's essentially
->> >> trying to set up VLANs (with different rules) over a single physical
->> >> network interface, that is still represented to userspace as a single
->> >> device with a single IP. Is that right?
->> >
->> > That's almost what it is, with two differences:
->> >  1) there are separated route tables per VLAN,
->> >  2) Each VLAN interface (public, cluster) has its own address.
->>
->> Okay, but if each interface has its own interface, why do you need
->> Ceph to do anything at all? You can specify the public and cluster
->> addresses, they'll bind to the appropriate interface, and then you can
->> do stuff based on the interface/VLAN it's part of. Right?
->> -Greg
+On Fri, Dec 11, 2015 at 1:37 AM, Matt Conner <matt.conner@keepertech.com> wrote:
+> Hi Ilya,
 >
-> Yes. And in the generic case: almost good enough.
->
-> In the case I'm discussing, with also separate Linux kernel routing
-> tables, we need to steer the route lookups that happens once the tcp
-> stack has performed its packetization, into the correct table.
->
-> Depending on how Ceph behaves with interface/IP binding for outbound
-> connections, this may be easy!
-> I.e. if Ceph binds to the specific address, not only on the listening
-> socket, but also when creating outbound sockets, we can create "ip
-> rule"'s that uses the source address and AFAIU "we're home" - at this
-> level.
-> Do you know if this is how Ceph manages the sockets in this case?
->
-> But if we instead end up with the kernel trying to figure which address
-> to use ( https://tools.ietf.org/html/rfc6724 ), it gets a whole lot
-> trickier.
+> I had already recovered but I managed to recreate the problem again. I ran
 
-Mmm, yeah, I think it makes the kernel pick each time. But if you've
-got the same IP on both I would hope that's not a problem. I haven't
-dug into it though. :/
--Greg
+How did you recover?
 
+> the commands against rbd_data.f54f9422698a8.0000000000000000 which was one
+> of those listed in osdc this time. We have 2048 PGs in the pool so the list
+> is long.
 
+That's not going to work - I need it in a consistent "stuck" state so
+I can match the outputs.  I understand you can't keep it that way for
+a long time, so can you please reproduce it and email me off list with
+osdmap, osdc and ceph -s right away?
+
+You have a lot of OSDs but it also doesn't seem to take a long time to
+recreate.  Bump debug ms to 1 on all OSDs.
 
 >
-> For monitors that live only on the public network (as per
-> documentation), the situation is simpler; we can mark traffic outside of
-> Ceph using e.g. iptables.
+> As for when I fetched the object using rados, it grabbed it without issue.
 >
-> /Martin
+> osd map:
+> osdmap e6247 pool 'NAS-ic2gw01' (3) object
+> 'rbd_data.f54f9422698a8.0000000000000000' -> pg 3.cac46c43 (3.443) -> up
+> ([33,56], p33) acting ([33,56], p33)
 >
+> osdmaptool:
+> pool 3 pg_num 2048
+> 3.0     [23,138]        23
+
+If it's long, better to compress and attach.
+
+Thanks,
+
+                Ilya
