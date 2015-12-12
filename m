@@ -1,63 +1,34 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Rbd map failure in 3.16.0-55
-Date: Sat, 12 Dec 2015 17:42:01 +0000
-Message-ID: <CO1PR02MB2085A0DBA135C58BFB94441F4EB0@CO1PR02MB208.namprd02.prod.outlook.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: Rbd map failure in 3.16.0-55
+Date: Sat, 12 Dec 2015 19:56:24 +0100
+Message-ID: <CAOi1vP_hjcp4rs+hZRHekVjmoWK7U0T60Gbx1WjXfcbwf9hu7A@mail.gmail.com>
 References: <BLUPR0201MB1908E516F6CE6529654476ECE2EB0@BLUPR0201MB1908.namprd02.prod.outlook.com>
- <CAOi1vP9=szuwrgLjaqXa9Pq6CrwLhKu-J0D4_xCQQi_h_-VhYQ@mail.gmail.com>
+	<CAOi1vP9=szuwrgLjaqXa9Pq6CrwLhKu-J0D4_xCQQi_h_-VhYQ@mail.gmail.com>
+	<CO1PR02MB2085A0DBA135C58BFB94441F4EB0@CO1PR02MB208.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0055.outbound.protection.outlook.com ([157.56.110.55]:11254
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751307AbbLLRmG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 12 Dec 2015 12:42:06 -0500
-In-Reply-To: <CAOi1vP9=szuwrgLjaqXa9Pq6CrwLhKu-J0D4_xCQQi_h_-VhYQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:33321 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751673AbbLLS4Z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 12 Dec 2015 13:56:25 -0500
+Received: by mail-wm0-f45.google.com with SMTP id l68so12870443wml.0
+        for <ceph-devel@vger.kernel.org>; Sat, 12 Dec 2015 10:56:25 -0800 (PST)
+In-Reply-To: <CO1PR02MB2085A0DBA135C58BFB94441F4EB0@CO1PR02MB208.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, Varada Kari <Varada.Kari@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Varada Kari <Varada.Kari@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SWx5YSwNCklmIHdlIG1hcCB3aXRoICdub2NyYycgd291bGQgdGhhdCBoZWxwID8NCg0KVGhhbmtz
-ICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTog
-Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVy
-QHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIElseWEgRHJ5b21vdg0KU2VudDogU2F0dXJk
-YXksIERlY2VtYmVyIDEyLCAyMDE1IDM6MTIgQU0NClRvOiBWYXJhZGEgS2FyaQ0KQ2M6IGNlcGgt
-ZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogUmJkIG1hcCBmYWlsdXJlIGluIDMu
-MTYuMC01NQ0KDQpPbiBTYXQsIERlYyAxMiwgMjAxNSBhdCA3OjU2IEFNLCBWYXJhZGEgS2FyaSA8
-VmFyYWRhLkthcmlAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBIaSBhbGwsDQo+DQo+IFdlIGFyZSB3
-b3JraW5nIG9uIGpld2VsIGJyYW5jaCBvbiBhIHRlc3QgY2x1c3RlciB0byB2YWxpZGF0ZSBzb21l
-IG9mIHRoZSBmaXhlcy4gQnV0IGxhbmRlZCB1cCBpbiB0aGUgZm9sbG93aW5nIGVycm9yIHdoZW4g
-bWFwcGluZyBhbiBpbWFnZSB1c2luZyAga3JiZCBvbiBVYnVudHUgMTQuMDQuMiB3aXRoIDMuMTYu
-MC01NSBrZXJuZWwgdmVyc2lvbi4NCj4NCj4gJCBzdWRvIHJiZCBtYXAgLXAgcG9vbDEgcmJkMQ0K
-PiByYmQ6IHN5c2ZzIHdyaXRlIGZhaWxlZA0KPiByYmQ6IG1hcCBmYWlsZWQ6ICg1KSBJbnB1dC9v
-dXRwdXQgZXJyb3INCj4NCj4NCj4gJCB1bmFtZSAtYQ0KPiBMaW51eCAzLjE2LjAtNTUtZ2VuZXJp
-YyAjNzR+MTQuMDQuMS1VYnVudHUgU01QIFR1ZSBOb3YgMTcgMTA6MTU6NTkgVVRDIA0KPiAyMDE1
-IHg4Nl82NCB4ODZfNjQgeDg2XzY0IEdOVS9MaW51eA0KPg0KPiAkZG1lc2cNCj4gLi4uLg0KPiBb
-MTEwODIuMTk5MDA2XSBsaWJjZXBoOiByZWFkX3BhcnRpYWxfbWVzc2FnZSBiYWQgaGRyICBjcmMg
-MjExMjE1NDMyMiANCj4gIT0gZXhwZWN0ZWQgMCBbMTEwODIuMjA5NDE0XSBsaWJjZXBoOiBtb24w
-IHgueC54Lng6Njc4OSBzb2NrZXQgZXJyb3IgDQo+IG9uIHJlYWQgWzExMDkyLjIzODMxN10gbGli
-Y2VwaDogcmVhZF9wYXJ0aWFsX21lc3NhZ2UgYmFkIGhkciAgY3JjIA0KPiAyMTEyMTU0MzIyICE9
-IGV4cGVjdGVkIDAgWzExMDkyLjI0ODk4Ml0gbGliY2VwaDogbW9uMCB4LngueC54OjY3ODkgDQo+
-IHNvY2tldCBlcnJvciBvbiByZWFkIC4uLi4uDQo+DQo+IFdoZW4gSSBsb29rZWQgYXQgdGhlIGNl
-cGhfbXNnX2hlYWRlciBvbiAzLjE2IGtlcm5lbCANCj4gKGh0dHA6Ly9seHIuZnJlZS1lbGVjdHJv
-bnMuY29tL3NvdXJjZS9pbmNsdWRlL2xpbnV4L2NlcGgvbXNnci5oP3Y9My4xNg0KPiApDQo+DQo+
-IFRoZXJlIGlzIG9uZSBmaWVsZCBjaGFuZ2UgZnJvbSBqZXdlbCBicmFuY2gNCj4NCj4gMTQ1IHN0
-cnVjdCBjZXBoX21zZ19oZWFkZXIgew0KPiAuLi4uLi4uDQo+IDE1OQ0KPiAxNjAgICAgICAgICAv
-KiBvbGRlc3QgY29kZSB3ZSB0aGluayBjYW4gZGVjb2RlIHRoaXMuICB1bmtub3duIGlmIHplcm8u
-ICovDQo+IDE2MSAgICAgICAgIF9fbGUxNiBjb21wYXRfdmVyc2lvbjsgPDw8IE5ldyBvbmUsIHdo
-aWNoIGlzIHByZXNlbnQgZnJvbSAzLjE5IG9ud2FyZHMNCj4gMTYyICAgICAgICAgX19sZTE2IHJl
-c2VydmVkOw0KPiAxNjMgICAgICAgICBfX2xlMzIgY3JjOyAgICAgICAvKiBoZWFkZXIgY3JjMzJj
-ICovDQo+IDE2NCB9IF9fYXR0cmlidXRlX18gKChwYWNrZWQpKTsNCg0KVGhhdCdzIG5vdCBhIHBy
-b2JsZW0gLSB0aG9zZSAxNiBiaXRzIHVzZWQgdG8gYmUgcmVzZXJ2ZWQuDQoNCj4NCj4gSG93IGNh
-biBtYXAgdGhlIGltYWdlIGluIDMuMTYga2VybmVsIGFwYXJ0IGZyb20gdXBncmFkaW5nIHRoZSBr
-ZXJuZWw/IERvIHdlIGhhdmUgYW55IGJyYW5jaCB3aGVyZSBJIGNhbiBidWlsZCB0aGUgbW9kdWxl
-cyB3aXRoIGxhdGVzdCBjaGFuZ2VzPw0KDQpJJ20gZ3Vlc3NpbmcgeW91IGhhdmUgbXNfY3JjX2hl
-YWRlciBzZXQgdG8gZmFsc2UgLSB0aGUga2VybmVsIGNsaWVudCBhbHdheXMgY2hlY2tzIGhlYWRl
-ciAoYW5kIG1pZGRsZSkgY2hlY2tzdW1zLCBoZW5jZSB0aGUgbWlzbWF0Y2guDQoNClRoYW5rcywN
-Cg0KICAgICAgICAgICAgICAgIElseWENCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlz
-dDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5m
-byBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+On Sat, Dec 12, 2015 at 6:42 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Ilya,
+> If we map with 'nocrc' would that help ?
+
+No, it will disable data crcs, header and middle crcs will still be
+checked.  The header/data separation in userspace is fairly new, if
+that's something you care about, I can port it for 4.5 - it should be
+trivial enough.
+
+Thanks,
+
+                Ilya
