@@ -1,65 +1,65 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: Rbd map failure in 3.16.0-55
-Date: Sat, 12 Dec 2015 12:12:24 +0100
-Message-ID: <CAOi1vP9=szuwrgLjaqXa9Pq6CrwLhKu-J0D4_xCQQi_h_-VhYQ@mail.gmail.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: RE: Rbd map failure in 3.16.0-55
+Date: Sat, 12 Dec 2015 13:51:26 +0000
+Message-ID: <BLUPR0201MB1908FDAFD78E2A608EAEC2C3E2EB0@BLUPR0201MB1908.namprd02.prod.outlook.com>
 References: <BLUPR0201MB1908E516F6CE6529654476ECE2EB0@BLUPR0201MB1908.namprd02.prod.outlook.com>
+ <CAOi1vP9=szuwrgLjaqXa9Pq6CrwLhKu-J0D4_xCQQi_h_-VhYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:38107 "EHLO
-	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751862AbbLLLMZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 12 Dec 2015 06:12:25 -0500
-Received: by wmpp66 with SMTP id p66so4129916wmp.1
-        for <ceph-devel@vger.kernel.org>; Sat, 12 Dec 2015 03:12:24 -0800 (PST)
-In-Reply-To: <BLUPR0201MB1908E516F6CE6529654476ECE2EB0@BLUPR0201MB1908.namprd02.prod.outlook.com>
+Received: from mail-by2on0084.outbound.protection.outlook.com ([207.46.100.84]:51328
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751517AbbLLNv3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 12 Dec 2015 08:51:29 -0500
+In-Reply-To: <CAOi1vP9=szuwrgLjaqXa9Pq6CrwLhKu-J0D4_xCQQi_h_-VhYQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Varada Kari <Varada.Kari@sandisk.com>
+To: Ilya Dryomov <idryomov@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, Dec 12, 2015 at 7:56 AM, Varada Kari <Varada.Kari@sandisk.com> wrote:
-> Hi all,
->
-> We are working on jewel branch on a test cluster to validate some of the fixes. But landed up in the following error when mapping an image using  krbd on Ubuntu 14.04.2 with 3.16.0-55 kernel version.
->
-> $ sudo rbd map -p pool1 rbd1
-> rbd: sysfs write failed
-> rbd: map failed: (5) Input/output error
->
->
-> $ uname -a
-> Linux 3.16.0-55-generic #74~14.04.1-Ubuntu SMP Tue Nov 17 10:15:59 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
->
-> $dmesg
-> ....
-> [11082.199006] libceph: read_partial_message bad hdr  crc 2112154322 != expected 0
-> [11082.209414] libceph: mon0 x.x.x.x:6789 socket error on read
-> [11092.238317] libceph: read_partial_message bad hdr  crc 2112154322 != expected 0
-> [11092.248982] libceph: mon0 x.x.x.x:6789 socket error on read
-> .....
->
-> When I looked at the ceph_msg_header on 3.16 kernel (http://lxr.free-electrons.com/source/include/linux/ceph/msgr.h?v=3.16)
->
-> There is one field change from jewel branch
->
-> 145 struct ceph_msg_header {
-> .......
-> 159
-> 160         /* oldest code we think can decode this.  unknown if zero. */
-> 161         __le16 compat_version; <<< New one, which is present from 3.19 onwards
-> 162         __le16 reserved;
-> 163         __le32 crc;       /* header crc32c */
-> 164 } __attribute__ ((packed));
-
-That's not a problem - those 16 bits used to be reserved.
-
->
-> How can map the image in 3.16 kernel apart from upgrading the kernel? Do we have any branch where I can build the modules with latest changes?
-
-I'm guessing you have ms_crc_header set to false - the kernel client
-always checks header (and middle) checksums, hence the mismatch.
-
-Thanks,
-
-                Ilya
+VGhhbmtzIElseWEuIFllcywgd2UgYXJlIHNldHRpbmcgdGhlIHZhbHVlIHRvIGZhbHNlLiBXaWxs
+IGNoZWNrIGJ5IHNldHRpbmcgdG8gdHJ1ZSBhbmQgZ2V0IGJhY2suIA0KV2UgYXJlIHVzaW5nIHRo
+aXMgY29uZmlnIG9wdGlvbiBzZXQgdG8gZmFsc2UgaW4gcHJldmlvdXMgcmVsZWFzZSBhcyB3ZWxs
+LCB0aGF0IHdvcmtpbmcgZmluZS4gSXMgdGhlcmUgYW55IGNoYW5nZSBoYXBwZW5lZCB0byBtYWtl
+IGl0IG1hbmRhdG9yeT8gDQoNClZhcmFkYQ0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
+DQo+IEZyb206IElseWEgRHJ5b21vdiBbbWFpbHRvOmlkcnlvbW92QGdtYWlsLmNvbV0NCj4gU2Vu
+dDogU2F0dXJkYXksIERlY2VtYmVyIDEyLCAyMDE1IDQ6NDIgUE0NCj4gVG86IFZhcmFkYSBLYXJp
+IDxWYXJhZGEuS2FyaUBzYW5kaXNrLmNvbT4NCj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnDQo+IFN1YmplY3Q6IFJlOiBSYmQgbWFwIGZhaWx1cmUgaW4gMy4xNi4wLTU1DQo+IA0KPiBP
+biBTYXQsIERlYyAxMiwgMjAxNSBhdCA3OjU2IEFNLCBWYXJhZGEgS2FyaSA8VmFyYWRhLkthcmlA
+c2FuZGlzay5jb20+DQo+IHdyb3RlOg0KPiA+IEhpIGFsbCwNCj4gPg0KPiA+IFdlIGFyZSB3b3Jr
+aW5nIG9uIGpld2VsIGJyYW5jaCBvbiBhIHRlc3QgY2x1c3RlciB0byB2YWxpZGF0ZSBzb21lIG9m
+IHRoZQ0KPiBmaXhlcy4gQnV0IGxhbmRlZCB1cCBpbiB0aGUgZm9sbG93aW5nIGVycm9yIHdoZW4g
+bWFwcGluZyBhbiBpbWFnZSB1c2luZw0KPiBrcmJkIG9uIFVidW50dSAxNC4wNC4yIHdpdGggMy4x
+Ni4wLTU1IGtlcm5lbCB2ZXJzaW9uLg0KPiA+DQo+ID4gJCBzdWRvIHJiZCBtYXAgLXAgcG9vbDEg
+cmJkMQ0KPiA+IHJiZDogc3lzZnMgd3JpdGUgZmFpbGVkDQo+ID4gcmJkOiBtYXAgZmFpbGVkOiAo
+NSkgSW5wdXQvb3V0cHV0IGVycm9yDQo+ID4NCj4gPg0KPiA+ICQgdW5hbWUgLWENCj4gPiBMaW51
+eCAzLjE2LjAtNTUtZ2VuZXJpYyAjNzR+MTQuMDQuMS1VYnVudHUgU01QIFR1ZSBOb3YgMTcgMTA6
+MTU6NTkgVVRDDQo+ID4gMjAxNSB4ODZfNjQgeDg2XzY0IHg4Nl82NCBHTlUvTGludXgNCj4gPg0K
+PiA+ICRkbWVzZw0KPiA+IC4uLi4NCj4gPiBbMTEwODIuMTk5MDA2XSBsaWJjZXBoOiByZWFkX3Bh
+cnRpYWxfbWVzc2FnZSBiYWQgaGRyICBjcmMgMjExMjE1NDMyMg0KPiA+ICE9IGV4cGVjdGVkIDAg
+WzExMDgyLjIwOTQxNF0gbGliY2VwaDogbW9uMCB4LngueC54OjY3ODkgc29ja2V0IGVycm9yDQo+
+ID4gb24gcmVhZCBbMTEwOTIuMjM4MzE3XSBsaWJjZXBoOiByZWFkX3BhcnRpYWxfbWVzc2FnZSBi
+YWQgaGRyICBjcmMNCj4gPiAyMTEyMTU0MzIyICE9IGV4cGVjdGVkIDAgWzExMDkyLjI0ODk4Ml0g
+bGliY2VwaDogbW9uMCB4LngueC54OjY3ODkNCj4gPiBzb2NrZXQgZXJyb3Igb24gcmVhZCAuLi4u
+Lg0KPiA+DQo+ID4gV2hlbiBJIGxvb2tlZCBhdCB0aGUgY2VwaF9tc2dfaGVhZGVyIG9uIDMuMTYg
+a2VybmVsDQo+ID4gKGh0dHA6Ly9seHIuZnJlZS1lbGVjdHJvbnMuY29tL3NvdXJjZS9pbmNsdWRl
+L2xpbnV4L2NlcGgvbXNnci5oP3Y9My4xNg0KPiA+ICkNCj4gPg0KPiA+IFRoZXJlIGlzIG9uZSBm
+aWVsZCBjaGFuZ2UgZnJvbSBqZXdlbCBicmFuY2gNCj4gPg0KPiA+IDE0NSBzdHJ1Y3QgY2VwaF9t
+c2dfaGVhZGVyIHsNCj4gPiAuLi4uLi4uDQo+ID4gMTU5DQo+ID4gMTYwICAgICAgICAgLyogb2xk
+ZXN0IGNvZGUgd2UgdGhpbmsgY2FuIGRlY29kZSB0aGlzLiAgdW5rbm93biBpZiB6ZXJvLiAqLw0K
+PiA+IDE2MSAgICAgICAgIF9fbGUxNiBjb21wYXRfdmVyc2lvbjsgPDw8IE5ldyBvbmUsIHdoaWNo
+IGlzIHByZXNlbnQgZnJvbSAzLjE5DQo+IG9ud2FyZHMNCj4gPiAxNjIgICAgICAgICBfX2xlMTYg
+cmVzZXJ2ZWQ7DQo+ID4gMTYzICAgICAgICAgX19sZTMyIGNyYzsgICAgICAgLyogaGVhZGVyIGNy
+YzMyYyAqLw0KPiA+IDE2NCB9IF9fYXR0cmlidXRlX18gKChwYWNrZWQpKTsNCj4gDQo+IFRoYXQn
+cyBub3QgYSBwcm9ibGVtIC0gdGhvc2UgMTYgYml0cyB1c2VkIHRvIGJlIHJlc2VydmVkLg0KPiAN
+Cj4gPg0KPiA+IEhvdyBjYW4gbWFwIHRoZSBpbWFnZSBpbiAzLjE2IGtlcm5lbCBhcGFydCBmcm9t
+IHVwZ3JhZGluZyB0aGUga2VybmVsPyBEbw0KPiB3ZSBoYXZlIGFueSBicmFuY2ggd2hlcmUgSSBj
+YW4gYnVpbGQgdGhlIG1vZHVsZXMgd2l0aCBsYXRlc3QgY2hhbmdlcz8NCj4gDQo+IEknbSBndWVz
+c2luZyB5b3UgaGF2ZSBtc19jcmNfaGVhZGVyIHNldCB0byBmYWxzZSAtIHRoZSBrZXJuZWwgY2xp
+ZW50IGFsd2F5cw0KPiBjaGVja3MgaGVhZGVyIChhbmQgbWlkZGxlKSBjaGVja3N1bXMsIGhlbmNl
+IHRoZSBtaXNtYXRjaC4NCj4gDQo+IFRoYW5rcywNCj4gDQo+ICAgICAgICAgICAgICAgICBJbHlh
+DQo=
