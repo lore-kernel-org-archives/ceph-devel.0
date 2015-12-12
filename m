@@ -1,80 +1,56 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: CEPH_MAX_OID_NAME_LEN in rbd kernel driver
-Date: Fri, 11 Dec 2015 17:46:00 +0100
-Message-ID: <CAOi1vP9znqun2LGbqSpvs6bs9U_YXH1Yqebu6dm4qPVfdFCR5g@mail.gmail.com>
-References: <566AE24E.1050107@corp.ovh.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: Rbd map failure in 3.16.0-55
+Date: Sat, 12 Dec 2015 06:56:57 +0000
+Message-ID: <BLUPR0201MB1908E516F6CE6529654476ECE2EB0@BLUPR0201MB1908.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:37719 "EHLO
-	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751624AbbLKQqB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Dec 2015 11:46:01 -0500
-Received: by wmnn186 with SMTP id n186so39559503wmn.0
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Dec 2015 08:46:00 -0800 (PST)
-In-Reply-To: <566AE24E.1050107@corp.ovh.com>
+Received: from mail-bn1bon0073.outbound.protection.outlook.com ([157.56.111.73]:42752
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751497AbbLLIbL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 12 Dec 2015 03:31:11 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jean-Tiare Le Bigot <jean-tiare.le-bigot@corp.ovh.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Dec 11, 2015 at 3:48 PM, Jean-Tiare Le Bigot
-<jean-tiare.le-bigot@corp.ovh.com> wrote:
-> Hi,
->
-> I hit a use case where rbd was failing to map an image because of the
-> name length.
->
-> dmesg output:
->
-> WARNING: CPU: 0 PID: 20851 at include/linux/ceph/osdmap.h:97
-> rbd_osd_req_create.isra.29+0xdd/0x140()
->
-> ceph_oid_set_name
-> 'rbd_id.docker:devel:ib8k2cxvci9sh7b4ly8wwvpyjf6kjoyuero1k25zal3ypc916i04x78tbmn60gjm6pyp38lmjq:latest'
-> len 101 vs 100, truncating
->
->
-> It turns out the maximum ceph object name length is controlled by the
-> constant CEPH_MAX_OID_NAME_LEN. I naively tried to increase it to 500
-> which appears to workaround (fix ?) the issue.
->
->
-> diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
-> index 49ff69f..cf34bb0 100644
-> --- a/include/linux/ceph/osdmap.h
-> +++ b/include/linux/ceph/osdmap.h
-> @@ -50,7 +50,7 @@ struct ceph_object_locator {
->   *
->   * (probably outdated: must be >= RBD_MAX_MD_NAME_LEN -- currently 100)
->   */
-> -#define CEPH_MAX_OID_NAME_LEN 100
-> +#define CEPH_MAX_OID_NAME_LEN 500
->
->  struct ceph_object_id {
->         char name[CEPH_MAX_OID_NAME_LEN];
->
->
-> What is the impact of such a change ? Should I submit a proper patch ?
-> And, last but not least, shouldn't it return an error instead of trucate
-> it and fail because, obviously the object does not exist ? Worse, It
-> could exist with a different data. Which would be an interesting vector
-> for injecting data in a third party image...
+Hi all,
 
-The impact is heavier allocations - each request has two of those and
-the encoding buffer is also CEPH_MAX_OID_NAME_LEN, not the actual name
-length.  I was actually considering lowering it, but I didn't consider
-image names from hell like that.
+We are working on jewel branch on a test cluster to validate some of the fixes. But landed up in the following error when mapping an image using  krbd on Ubuntu 14.04.2 with 3.16.0-55 kernel version.
 
-librbd has #define RBD_MAX_OBJ_NAME_SIZE 96, but it's not enforced.
+$ sudo rbd map -p pool1 rbd1
+rbd: sysfs write failed
+rbd: map failed: (5) Input/output error
 
-Is that ID between devel: and :latest fixed-size in docker world?  I.e.
-would bumping it to something less than 500 do?
 
-I don't think injecting data is a valid concern - if you can create an
-image in a pool, you can write to it and if you can write to it...  It's
-better to return an error, of course.
+$ uname -a
+Linux 3.16.0-55-generic #74~14.04.1-Ubuntu SMP Tue Nov 17 10:15:59 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
 
-Thanks,
+$dmesg
+....
+[11082.199006] libceph: read_partial_message bad hdr  crc 2112154322 != expected 0
+[11082.209414] libceph: mon0 x.x.x.x:6789 socket error on read
+[11092.238317] libceph: read_partial_message bad hdr  crc 2112154322 != expected 0
+[11092.248982] libceph: mon0 x.x.x.x:6789 socket error on read
+.....
 
-                Ilya
+When I looked at the ceph_msg_header on 3.16 kernel (http://lxr.free-electrons.com/source/include/linux/ceph/msgr.h?v=3.16)
+
+There is one field change from jewel branch 
+
+145 struct ceph_msg_header {
+.......
+159
+160         /* oldest code we think can decode this.  unknown if zero. */
+161         __le16 compat_version; <<< New one, which is present from 3.19 onwards
+162         __le16 reserved;
+163         __le32 crc;       /* header crc32c */
+164 } __attribute__ ((packed));
+
+How can map the image in 3.16 kernel apart from upgrading the kernel? Do we have any branch where I can build the modules with latest changes? 
+
+Regards,
+Varada
+
