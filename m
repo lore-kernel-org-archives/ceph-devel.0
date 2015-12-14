@@ -1,72 +1,190 @@
-From: Martin Millnert <martin@millnert.se>
-Subject: Re: Improving Data-At-Rest encryption in Ceph
-Date: Mon, 14 Dec 2015 23:02:06 +0100
-Message-ID: <1450130526.1035.24.camel@millnert.se>
-References: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
-	 <CAJ4mKGZP3oHt6Rgsp_pogcAZEmBzcQzDc4vzESDjPyoxJKoBUw@mail.gmail.com>
+From: Luis Pabon <lpabon@redhat.com>
+Subject: Issues installing on CentOS 7.1
+Date: Mon, 14 Dec 2015 17:07:09 -0500 (EST)
+Message-ID: <1135941745.28525784.1450130829176.JavaMail.zimbra@redhat.com>
+References: <298784230.28525181.1450130580765.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ncis.millnert.se ([185.19.66.196]:57942 "EHLO mail.millnert.se"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932292AbbLNWCK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 14 Dec 2015 17:02:10 -0500
-In-Reply-To: <CAJ4mKGZP3oHt6Rgsp_pogcAZEmBzcQzDc4vzESDjPyoxJKoBUw@mail.gmail.com>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:37186 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932292AbbLNWHJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 17:07:09 -0500
+Received: from zmail17.collab.prod.int.phx2.redhat.com (zmail17.collab.prod.int.phx2.redhat.com [10.5.83.19])
+	by mx3-phx2.redhat.com (8.13.8/8.13.8) with ESMTP id tBEM79Pi004952
+	for <ceph-devel@vger.kernel.org>; Mon, 14 Dec 2015 17:07:09 -0500
+In-Reply-To: <298784230.28525181.1450130580765.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Radoslaw Zarzynski <rzarzynski@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>, Adam Kupczyk <akupczyk@mirantis.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 2015-12-14 at 12:28 -0800, Gregory Farnum wrote:
-> On Mon, Dec 14, 2015 at 5:17 AM, Radoslaw Zarzynski
-<snip>
-> > In typical case ciphertext data transferred from OSD to OSD can be
-> > used without change. This is when both OSDs have the same crypto key
-> > version for given placement group. In rare cases when crypto keys are
-> > different (key change or transition period) receiving OSD will recrypt
-> > with local key versions.
-> 
-> I don't understand this part at all. Do you plan to read and rewrite
-> the entire PG whenever you change the "key version"? How often do you
-> plan to change these keys? What is even the point of changing them,
-> since anybody who can control an OSD can grab the entire current key
-> set?
+Just wanted to check if it is me or something else is going on.  Is anyone seeing the following when installing on CentOS 7.1? :
 
-You may have leaked keys without having leaked ciphertext.
-The typical use case for FDE/SED is IMO being able to RMA drives.
-Nothing more than that.
+---------------------------------------
+------------ INFERNALIS ---------------
+---------------------------------------
 
-> > For compression to be effective it must be done before encryption. Due
-> > to that encryption may be applied differently for replication pools
-> > and EC pools. Replicated pools do not implement compression; for those
-> > pools encryption is applied right after data enters OSD. For EC pools
-> > encryption is applied after compressing. When compression will be
-> > implemented for replicated pools, it must be placed before encryption.
-> 
-> So this means you'll be encrypting the object data, but not the omap
-> nor xattrs, and not the file names on disk. Is that acceptable to
-> people? It's probably fine for a lot of rbd use cases, but not for
-> RGW, CephFS, nor raw RADOS where meaningful metadata (and even *data*)
-> is stored in those regions. I'd rather a solution worked on the full
-> data set. :/
-> -Greg
+[vagrant@ceph ~]$ sudo yum install http://download.ceph.com/rpm-infernalis/el7/noarch/ceph-release-1-1.el7.noarch.rpm
+Loaded plugins: fastestmirror
+ceph-release-1-1.el7.noarch.rpm                                                                                                                                        | 3.9 kB  00:00:00
+Examining /var/tmp/yum-root-r1Dzps/ceph-release-1-1.el7.noarch.rpm: ceph-release-1-1.el7.noarch
+Marking /var/tmp/yum-root-r1Dzps/ceph-release-1-1.el7.noarch.rpm to be installed
+Resolving Dependencies 
+--> Running transaction check
+---> Package ceph-release.noarch 0:1-1.el7 will be installed
+--> Finished Dependency Resolution
 
-This is indeed the largest weakness of the proposal.
+Dependencies Resolved  
 
-I'm lacking a bit on the motivation for what problem this solution
-solves that a dm-crypt-based solution doesn't address? When, except for
-snooping, is it a desired design to not encrypt all the things?
+==============================================================================================================================================================================================
+ Package                                     Arch                                  Version                                  Repository                                                   Size
+==============================================================================================================================================================================================
+Installing:
+ ceph-release                                noarch                                1-1.el7                                  /ceph-release-1-1.el7.noarch                                550
 
-I guess one could say: "ciphertext would be transferred on the network".
-But, it's incomplete. Internal transport encryption (and better auth)
-for Ceph is a different problem.
+Transaction Summary
+==============================================================================================================================================================================================
+Install  1 Package
 
-I'd probably rather dm-crypt key management processes were refined and
-improved (saying this without knowing the state of any current
-implementations for Ceph), and have a solid FDE solution than a solution
-that doesn't encrypt metadata. Only encrypting data but not metadata
-isn't sufficient anymore...
+Total size: 550
+Installed size: 550
+Is this ok [y/d/N]: y  
+Downloading packages:  
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : ceph-release-1-1.el7.noarch                                                                                                                                                1/1
+  Verifying  : ceph-release-1-1.el7.noarch                                                                                                                                                1/1
 
-/M
+Installed:
+  ceph-release.noarch 0:1-1.el7
 
+Complete!
+
+
+[vagrant@ceph ~]$ sudo yum install ceph-deploy
+Loaded plugins: fastestmirror
+Ceph                                                                                                                                                                   | 2.9 kB  00:00:00
+Ceph-noarch                                                                                                                                                            | 2.9 kB  00:00:00
+base                                                                                                                                                                   | 3.6 kB  00:00:00
+ceph-source                                                                                                                                                            | 2.9 kB  00:00:00
+extras                                                                                                                                                                 | 3.4 kB  00:00:00
+updates                                                                                                                                                                | 3.4 kB  00:00:00
+(1/7): Ceph-noarch/primary_db                                                                                                                                          | 2.5 kB  00:00:00
+(2/7): Ceph/x86_64/primary_db                                                                                                                                          |  25 kB  00:00:00
+(3/7): ceph-source/primary_db                                                                                                                                          | 3.7 kB  00:00:00
+(4/7): extras/7/x86_64/primary_db                                                                                                                                      |  90 kB  00:00:00
+(5/7): base/7/x86_64/group_gz                                                                                                                                          | 155 kB  00:00:00
+(6/7): updates/7/x86_64/primary_db                                                                                                                                     | 935 kB  00:00:01
+(7/7): base/7/x86_64/primary_db                                                                                                                                        | 5.3 MB  00:00:03
+Determining fastest mirrors
+ * base: mirror.umd.edu
+ * extras: distro.ibiblio.org
+ * updates: mirror.5ninesolutions.com
+Resolving Dependencies 
+--> Running transaction check
+---> Package ceph-deploy.noarch 0:1.5.30-0 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved  
+
+==============================================================================================================================================================================================
+ Package                                        Arch                                      Version                                        Repository                                      Size
+==============================================================================================================================================================================================
+Installing:
+ ceph-deploy                                    noarch                                    1.5.30-0                                       Ceph-noarch                                    268 k
+
+Transaction Summary
+==============================================================================================================================================================================================
+Install  1 Package
+
+Total download size: 268 k
+Installed size: 1.1 M
+Is this ok [y/d/N]: y
+Downloading packages:
+ceph-deploy-1.5.30-0.noarch.rp FAILED
+http://download.ceph.com/rpm-infernalis/el7/noarch/ceph-deploy-1.5.30-0.noarch.rpm: [Errno -1] Package does not match intended download. Suggestion: run yum --enablerepo=Ceph-noarch clean metadata
+Trying other mirror.
+
+
+Error downloading packages:
+  ceph-deploy-1.5.30-0.noarch: [Errno 256] No more mirrors to try.
+
+---------------------------------------
+------------ HAMMER -------------------
+---------------------------------------
+[vagrant@ceph ~]$ sudo yum install http://download.ceph.com/rpm-hammer/rhel7/noarch/ceph-release-1-1.el7.noarch.rpm
+Loaded plugins: fastestmirror
+ceph-release-1-1.el7.noarch.rpm                                                                                                                                        | 4.0 kB  00:00:00
+Examining /var/tmp/yum-root-r1Dzps/ceph-release-1-1.el7.noarch.rpm: ceph-release-1-1.el7.noarch
+Marking /var/tmp/yum-root-r1Dzps/ceph-release-1-1.el7.noarch.rpm to be installed
+Resolving Dependencies 
+--> Running transaction check
+---> Package ceph-release.noarch 0:1-1.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved  
+
+==============================================================================================================================================================================================
+ Package                                     Arch                                  Version                                  Repository                                                   Size
+==============================================================================================================================================================================================
+Installing:
+ ceph-release                                noarch                                1-1.el7                                  /ceph-release-1-1.el7.noarch                                583
+
+Transaction Summary
+==============================================================================================================================================================================================
+Install  1 Package
+
+Total size: 583  
+Installed size: 583  
+Is this ok [y/d/N]: y
+Downloading packages:
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : ceph-release-1-1.el7.noarch                                                                                                                                                1/1 
+  Verifying  : ceph-release-1-1.el7.noarch                                                                                                                                                1/1 
+
+Installed:
+  ceph-release.noarch 0:1-1.el7                                                                                                                                                               
+
+Complete!
+
+[vagrant@ceph ~]$ sudo yum install ceph-deploy
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirror.umd.edu
+ * extras: distro.ibiblio.org
+ * updates: mirror.5ninesolutions.com
+Resolving Dependencies
+--> Running transaction check
+---> Package ceph-deploy.noarch 0:1.5.30-0 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+==============================================================================================================================================================================================
+ Package                                        Arch                                      Version                                        Repository                                      Size
+==============================================================================================================================================================================================
+Installing:
+ ceph-deploy                                    noarch                                    1.5.30-0                                       Ceph-noarch                                    268 k
+
+Transaction Summary
+==============================================================================================================================================================================================
+Install  1 Package
+
+Total download size: 268 k
+Installed size: 1.1 M
+Is this ok [y/d/N]: y
+Downloading packages:
+Delta RPMs disabled because /usr/bin/applydeltarpm not installed.
+ceph-deploy-1.5.30-0.noarch.rp FAILED                                          
+http://ceph.com/rpm-hammer/rhel7/noarch/ceph-deploy-1.5.30-0.noarch.rpm: [Errno 14] HTTP Error 404 - Not Found                                              ]  0.0 B/s |    0 B  --:--:-- ETA 
+Trying other mirror.
+
+
+Error downloading packages:
+  ceph-deploy-1.5.30-0.noarch: [Errno 256] No more mirrors to try.
