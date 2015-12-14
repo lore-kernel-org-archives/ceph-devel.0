@@ -1,82 +1,89 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: misc: ignore some unusable block devices
-Date: Mon, 14 Dec 2015 16:12:16 +0100
-Message-ID: <566EDC50.3010901@dachary.org>
+From: Jason Dillaman <dillaman@redhat.com>
+Subject: Re: The max single write IOPS on single RBD
+Date: Mon, 14 Dec 2015 10:39:43 -0500 (EST)
+Message-ID: <467966684.33265514.1450107583480.JavaMail.zimbra@redhat.com>
+References: <CAGkCoN+fT_9fqmUzc0HYkpder_qis-tB9jR-nCwvtJZPD=QGKQ@mail.gmail.com> <alpine.DEB.2.00.1512110512560.10312@cobra.newdream.net> <CAGkCoNJcwWQ77BXGhsPXS0Gg-HJuxumiSDicUBhv9K9HHEDmSQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="IxkGH1k9Uw76As15E1879XsssK7Kj2Ex2"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:49878 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751700AbbLNPMa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 10:12:30 -0500
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:49996 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752084AbbLNPjs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 10:39:48 -0500
+In-Reply-To: <CAGkCoNJcwWQ77BXGhsPXS0Gg-HJuxumiSDicUBhv9K9HHEDmSQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Robin H. Johnson" <robbat2@gentoo.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Zhi Zhang <zhang.david2011@gmail.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---IxkGH1k9Uw76As15E1879XsssK7Kj2Ex2
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+If you are testing with "iodepth=1", I'd recommend testing with "rbd non blocking aio = false" in your Ceph config file to see if that improves your single-threaded IO performance.
 
-Hi Robin,
+-- 
 
-I removed misc: ignore some unusable block devices 9c5eaeccb807d103884f46=
-d174798dd982092696 from the openstack branch because it fails on CentOS 7=
- with
-the following. Could you please make a new pull request with it so we can=
- keep testing it there ?
-
-Thanks !
-
-2015-12-14T14:37:36.305 INFO:teuthology.orchestra.run.target167114236178:=
-Running: 'sudo blkid -o export -p /dev/vdc'
-2015-12-14T14:37:36.731 ERROR:teuthology.contextutil:Saw exception from n=
-ested tasks
-Traceback (most recent call last):
-  File "/home/ubuntu/teuthology/teuthology/contextutil.py", line 28, in n=
-ested
-    vars.append(enter())
-  File "/usr/lib/python2.7/contextlib.py", line 17, in __enter__
-    return self.gen.next()
-  File "/home/ubuntu/src/ceph-qa-suite_master/tasks/ceph.py", line 357, i=
-n cluster
-    devs =3D teuthology.get_scratch_devices(remote)
-  File "/home/ubuntu/teuthology/teuthology/misc.py", line 860, in get_scr=
-atch_devices
-    stderr=3DStringIO(),
-  File "/home/ubuntu/teuthology/teuthology/orchestra/remote.py", line 156=
-, in run
-    r =3D self._runner(client=3Dself.ssh, name=3Dself.shortname, **kwargs=
-)
-  File "/home/ubuntu/teuthology/teuthology/orchestra/run.py", line 378, i=
-n run
-    r.wait()
-  File "/home/ubuntu/teuthology/teuthology/orchestra/run.py", line 114, i=
-n wait
-    label=3Dself.label)
-CommandFailedError: Command failed on target167114236178 with status 2: '=
-sudo blkid -o export -p /dev/vdc'
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Jason Dillaman 
 
 
---IxkGH1k9Uw76As15E1879XsssK7Kj2Ex2
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlZu3FAACgkQ8dLMyEl6F20XIwCeN0Iq39fGHdEOTvJPViX4NPjg
-GoYAoIYURtCHrRoX3Xiem84++G1pDHDg
-=WqpM
------END PGP SIGNATURE-----
-
---IxkGH1k9Uw76As15E1879XsssK7Kj2Ex2--
+----- Original Message -----
+> From: "Zhi Zhang" <zhang.david2011@gmail.com>
+> To: "Sage Weil" <sage@newdream.net>
+> Cc: ceph-devel@vger.kernel.org
+> Sent: Sunday, December 13, 2015 10:10:58 PM
+> Subject: Re: The max single write IOPS on single RBD
+> 
+> On Fri, Dec 11, 2015 at 9:15 PM, Sage Weil <sage@newdream.net> wrote:
+> > On Fri, 11 Dec 2015, Zhi Zhang wrote:
+> >> Hi Guys,
+> >>
+> >> We have a small 4 nodes cluster. Here is the hardware configuration.
+> >>
+> >> 11 x 300GB SSD, 24 cores, 32GB memory per one node.
+> >> all the nodes connected within one 1Gb/s network.
+> >>
+> >> So we have one Monitor and 44 OSDs for testing kernel RBD IOPS using
+> >> fio. Here are the major fio options.
+> >>
+> >> -direct=1
+> >> -rw=randwrite
+> >> -ioengine=psync
+> >> -size=1000M
+> >> -bs=4k
+> >> -numjobs=1
+> >>
+> >> The max IOPS we can achieve for single write (numjobs=1) is close to
+> >> 1000. This means each IO from RBD takes 1.x ms.
+> >>
+> >> >From osd logs, we can also observe most of osd_ops will take 1.x ms,
+> >> including op processing, journal writing, replication, etc, before
+> >> sending commit back to client.
+> >>
+> >> The network RTT is around 0.04 ms;
+> >> Most osd_ops on primary OSD take around 0.5~0.7 ms, journal write takes
+> >> 0.3 ms;
+> >> Most osd_repops including writing journal on peer OSD take around 0.5 ms.
+> >>
+> >> We even tried to modify journal to write page cache only, but didn't
+> >> get very significant improvement. Does it mean this is the best result
+> >> we can get for single write on single RBD?
+> >
+> > What version is this?  There have been a few recent changes that will
+> > reduce the wall clock time spent preparing/processing a request.  There is
+> > still a fair bit of work to do here, though--the theoretical lower bound
+> > is the SSD write time + 2x RTT (client <-> primary osd <-> replica osd <->
+> > replica ssd).
+> >
+> 
+> Ceph version is 0.94.1 with few backports.
+> 
+> I already saw some related changes. I will try a newer version and
+> keep your guys on the updates.
+> 
+> Thanks.
+> 
+> > sage
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
