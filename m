@@ -1,89 +1,93 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: The max single write IOPS on single RBD
-Date: Mon, 14 Dec 2015 10:39:43 -0500 (EST)
-Message-ID: <467966684.33265514.1450107583480.JavaMail.zimbra@redhat.com>
-References: <CAGkCoN+fT_9fqmUzc0HYkpder_qis-tB9jR-nCwvtJZPD=QGKQ@mail.gmail.com> <alpine.DEB.2.00.1512110512560.10312@cobra.newdream.net> <CAGkCoNJcwWQ77BXGhsPXS0Gg-HJuxumiSDicUBhv9K9HHEDmSQ@mail.gmail.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: ceph-mon terminated with status 28
+Date: Mon, 14 Dec 2015 17:21:27 +0000
+Message-ID: <SN1PR12MB05583004753B74FFF2745DAA9BED0@SN1PR12MB0558.namprd12.prod.outlook.com>
+References: <DM2PR12MB0556410B658CF096B4F3326C9BEC0@DM2PR12MB0556.namprd12.prod.outlook.com>
+ <1290007151.43805078.1450045125175.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:49996 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752084AbbLNPjs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 10:39:48 -0500
-In-Reply-To: <CAGkCoNJcwWQ77BXGhsPXS0Gg-HJuxumiSDicUBhv9K9HHEDmSQ@mail.gmail.com>
+Received: from mail-by2on0065.outbound.protection.outlook.com ([207.46.100.65]:40459
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751223AbbLNRfb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 14 Dec 2015 12:35:31 -0500
+In-Reply-To: <1290007151.43805078.1450045125175.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zhi Zhang <zhang.david2011@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-If you are testing with "iodepth=1", I'd recommend testing with "rbd non blocking aio = false" in your Ceph config file to see if that improves your single-threaded IO performance.
-
--- 
-
-Jason Dillaman 
-
-
------ Original Message -----
-> From: "Zhi Zhang" <zhang.david2011@gmail.com>
-> To: "Sage Weil" <sage@newdream.net>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Sunday, December 13, 2015 10:10:58 PM
-> Subject: Re: The max single write IOPS on single RBD
-> 
-> On Fri, Dec 11, 2015 at 9:15 PM, Sage Weil <sage@newdream.net> wrote:
-> > On Fri, 11 Dec 2015, Zhi Zhang wrote:
-> >> Hi Guys,
-> >>
-> >> We have a small 4 nodes cluster. Here is the hardware configuration.
-> >>
-> >> 11 x 300GB SSD, 24 cores, 32GB memory per one node.
-> >> all the nodes connected within one 1Gb/s network.
-> >>
-> >> So we have one Monitor and 44 OSDs for testing kernel RBD IOPS using
-> >> fio. Here are the major fio options.
-> >>
-> >> -direct=1
-> >> -rw=randwrite
-> >> -ioengine=psync
-> >> -size=1000M
-> >> -bs=4k
-> >> -numjobs=1
-> >>
-> >> The max IOPS we can achieve for single write (numjobs=1) is close to
-> >> 1000. This means each IO from RBD takes 1.x ms.
-> >>
-> >> >From osd logs, we can also observe most of osd_ops will take 1.x ms,
-> >> including op processing, journal writing, replication, etc, before
-> >> sending commit back to client.
-> >>
-> >> The network RTT is around 0.04 ms;
-> >> Most osd_ops on primary OSD take around 0.5~0.7 ms, journal write takes
-> >> 0.3 ms;
-> >> Most osd_repops including writing journal on peer OSD take around 0.5 ms.
-> >>
-> >> We even tried to modify journal to write page cache only, but didn't
-> >> get very significant improvement. Does it mean this is the best result
-> >> we can get for single write on single RBD?
-> >
-> > What version is this?  There have been a few recent changes that will
-> > reduce the wall clock time spent preparing/processing a request.  There is
-> > still a fair bit of work to do here, though--the theoretical lower bound
-> > is the SSD write time + 2x RTT (client <-> primary osd <-> replica osd <->
-> > replica ssd).
-> >
-> 
-> Ceph version is 0.94.1 with few backports.
-> 
-> I already saw some related changes. I will try a newer version and
-> keep your guys on the updates.
-> 
-> Thanks.
-> 
-> > sage
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+VGhhbmtzLCBCcmFkLiAgVGhhdCB3YXMgdGhlIHByb2JsZW0uDQoNCklzIHRoZXJlIGEgcmVhc29u
+IHdoeSB3ZSBkb24ndCBsb2cgbW9yZSBkZXNjcmlwdGl2ZSBpbmZvIGZvciB0aGlzIGtpbmQgb2Yg
+ZmFpbHVyZT8NCg0KLS0gVG9tDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJv
+bTogQnJhZCBIdWJiYXJkIFttYWlsdG86Ymh1YmJhcmRAcmVkaGF0LmNvbV0NCj4gU2VudDogU3Vu
+ZGF5LCBEZWNlbWJlciAxMywgMjAxNSA0OjE5IFBNDQo+IFRvOiBEZW5lYXUsIFRvbQ0KPiBDYzog
+Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IGNlcGgtbW9uIHRlcm1p
+bmF0ZWQgd2l0aCBzdGF0dXMgMjgNCj4gDQo+IC0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0N
+Cj4gPiBGcm9tOiAiVG9tIERlbmVhdSIgPHRvbS5kZW5lYXVAYW1kLmNvbT4NCj4gPiBUbzogY2Vw
+aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gPiBTZW50OiBTdW5kYXksIDEzIERlY2VtYmVyLCAy
+MDE1IDExOjQ5OjE2IFBNDQo+ID4gU3ViamVjdDogY2VwaC1tb24gdGVybWluYXRlZCB3aXRoIHN0
+YXR1cyAyOA0KPiA+DQo+ID4gSSBhbSB0cnlpbmcgdG8gdW5kZXJzdGFuZCB0aGUgZm9sbG93aW5n
+IGZhaWx1cmU6DQo+ID4NCj4gPiBBIHNtYWxsIGNsdXN0ZXIgd2FzIHJ1bm5pbmcgZmluZSwgYW5k
+IHRoZW4gd2FzIGxlZnQgdW51c2VkIGZvciBhIHdoaWxlLg0KPiA+IFdoZW4gSSB3ZW50IHRvIHRy
+eSB0byB1c2UgaXQgYWdhaW4sIHRoZSBtb24gc29ja2V0IHdhc24ndCB0aGVyZSBhbmQgSQ0KPiA+
+IGNvdWxkIHNlZSB0aGF0IGNlcGgtbW9uIHdhcyBub3QgcnVubmluZy4gIEkgc2F3IHRoZSBsaW5l
+cyBiZWxvdyBhdCB0aGUNCj4gPiBlbmQgb2YgZG1lc2cgb3V0cHV0Lg0KPiA+IFdoZW4gSSB0cmll
+ZCB0byByZXN0YXJ0IGNlcGgtbW9uIHVzaW5nIHN1ZG8gc3RhcnQgY2VwaC1tb24gaWQ9bW9uaG9z
+dCwNCj4gPiBJIGdvdCB0aGUgc2FtZSBzZXQgb2YgZXJyb3JzIG5ld2x5IGFwcGVuZGVkIHRvIGRt
+ZXNnIG91dHB1dC4NCj4gPg0KPiA+IEkgZG9uJ3Qgc2VlIGFueXRoaW5nIG1vcmUgZGVzY3JpcHRp
+dmUgaW4gL3Zhci9sb2cvY2VwaC9jZXBoLW1vbi5sb2csDQo+ID4ganVzdCB0aGUgcmVjb3JkaW5n
+IG9mIG5ldyBtb24gcHJvY2Vzc2VzIHN0YXJ0aW5nLg0KPiA+DQo+ID4gSW4gdGhpcyBwYXJ0aWN1
+bGFyIHNtYWxsIGNsdXN0ZXIsIHRoZSBtb24gcHJvY2VzcyB3YXMgcnVubmluZyBvbiB0aGUNCj4g
+PiBzYW1lIG5vZGUgd2l0aCA3IG9zZCBwcm9jZXNzZXMuICBzdWRvIGluaXRjdGwgbGlzdCBzaG93
+cyB0aGF0IHRoZSBvc2QNCj4gPiBwcm9jcyBhcmUgc3RpbGwgdXAsIGFsdGhvdWdoIGxvZ2dpbmcg
+dGhlIGZhY3QgdGhhdCB0aGV5IGNhbid0DQo+ID4gY29tbXVuaWNhdGUgd2l0aCB0aGUgbW9uIHNv
+Y2tldC4NCj4gPg0KPiA+IElzIHRoZXJlIHNvbWVwbGFjZSBlbHNlIEkgc2hvdWxkIGxvb2sgZm9y
+IG1vcmUgZGV0YWlscyBhcyB0byB3aHkgbW9uDQo+ID4gaXMgZG93biBhbmQgY2FuJ3QgYmUgcmVz
+dGFydGVkPw0KPiA+DQo+ID4gLS0gVG9tIERlbmVhdQ0KPiA+DQo+ID4gZG1lc2cgb3V0cHV0Og0K
+PiA+IC0tLS0tLS0tLS0tLS0tDQo+ID4gIGluaXQ6IGNlcGgtbW9uIChjZXBoL21vbmhvc3QpIG1h
+aW4gcHJvY2VzcyAoMTY1MzgpIHRlcm1pbmF0ZWQgd2l0aA0KPiA+IHN0YXR1cyAyOA0KPiA+ICBp
+bml0OiBjZXBoLW1vbiAoY2VwaC9tb25ob3N0KSBtYWluIHByb2Nlc3MgZW5kZWQsIHJlc3Bhd25p
+bmcNCj4gPiAgaW5pdDogY2VwaC1jcmVhdGUta2V5cyBtYWluIHByb2Nlc3MgKDE2MjI3KSBraWxs
+ZWQgYnkgVEVSTSBzaWduYWwNCj4gPiAgaW5pdDogY2VwaC1tb24gKGNlcGgvbW9uaG9zdCkgbWFp
+biBwcm9jZXNzICgxNjU0NikgdGVybWluYXRlZCB3aXRoDQo+ID4gc3RhdHVzIDI4DQo+ID4gIGlu
+aXQ6IGNlcGgtbW9uIChjZXBoL21vbmhvc3QpIG1haW4gcHJvY2VzcyBlbmRlZCwgcmVzcGF3bmlu
+Zw0KPiA+ICBpbml0OiBjZXBoLWNyZWF0ZS1rZXlzIG1haW4gcHJvY2VzcyAoMTY1NDgpIGtpbGxl
+ZCBieSBURVJNIHNpZ25hbA0KPiA+ICBpbml0OiBjZXBoLW1vbiAoY2VwaC9tb25ob3N0KSBtYWlu
+IHByb2Nlc3MgKDE2NTU2KSB0ZXJtaW5hdGVkIHdpdGgNCj4gPiBzdGF0dXMgMjgNCj4gPiAgaW5p
+dDogY2VwaC1tb24gKGNlcGgvbW9uaG9zdCkgbWFpbiBwcm9jZXNzIGVuZGVkLCByZXNwYXduaW5n
+DQo+ID4gIGluaXQ6IGNlcGgtY3JlYXRlLWtleXMgbWFpbiBwcm9jZXNzICgxNjU1OCkga2lsbGVk
+IGJ5IFRFUk0gc2lnbmFsDQo+ID4gIGluaXQ6IGNlcGgtbW9uIChjZXBoL21vbmhvc3QpIG1haW4g
+cHJvY2VzcyAoMTY1NjYpIHRlcm1pbmF0ZWQgd2l0aA0KPiA+IHN0YXR1cyAyOA0KPiA+ICBpbml0
+OiBjZXBoLW1vbiAoY2VwaC9tb25ob3N0KSByZXNwYXduaW5nIHRvbyBmYXN0LCBzdG9wcGVkDQo+
+ID4gIGluaXQ6IGNlcGgtY3JlYXRlLWtleXMgbWFpbiBwcm9jZXNzICgxNjU2OCkga2lsbGVkIGJ5
+IFRFUk0gc2lnbmFsDQo+IA0KPiBJdCBsb29rcyBsaWtlIGl0J3MgY29tcGxhaW5pbmcgYWJvdXQg
+bGFjayBvZiBzcGFjZT8NCj4gDQo+IHNyYy9jZXBoX21vbi5jYzoNCj4gDQo+IDIwNCBpbnQgbWFp
+bihpbnQgYXJnYywgY29uc3QgY2hhciAqKmFyZ3YpwrcNCj4gMjA1IHsNCj4gLS0tLTg8LS0tLQ0K
+PiA0NzUgICB7DQo+IDQ3NiAgICAgLy8gY2hlY2sgZnMgc3RhdHMuIGRvbid0IHN0YXJ0IGlmIGl0
+J3MgY3JpdGljYWxseSBjbG9zZSB0byBmdWxsLg0KPiA0NzcgICAgIGNlcGhfZGF0YV9zdGF0c190
+IHN0YXRzOw0KPiA0NzggICAgIGludCBlcnIgPSBnZXRfZnNfc3RhdHMoc3RhdHMsIGdfY29uZi0+
+bW9uX2RhdGEuY19zdHIoKSk7DQo+IDQ3OSAgICAgaWYgKGVyciA8IDApIHsNCj4gNDgwICAgICAg
+IGNlcnIgPDwgImVycm9yIGNoZWNraW5nIG1vbml0b3IgZGF0YSdzIGZzIHN0YXRzOiAiIDw8DQo+
+IGNwcF9zdHJlcnJvcihlcnIpDQo+IDQ4MSAgICAgICAgICAgIDw8IHN0ZDo6ZW5kbDsNCj4gNDgy
+ICAgICAgIGV4aXQoLWVycik7DQo+IDQ4MyAgICAgfQ0KPiA0ODQgICAgIGlmIChzdGF0cy5hdmFp
+bF9wZXJjZW50IDw9IGdfY29uZi0+bW9uX2RhdGFfYXZhaWxfY3JpdCkgew0KPiA0ODUgICAgICAg
+Y2VyciA8PCAiZXJyb3I6IG1vbml0b3IgZGF0YSBmaWxlc3lzdGVtIHJlYWNoZWQgY29uY2Vybmlu
+Zw0KPiBsZXZlbHMgb2YiDQo+IDQ4NiAgICAgICAgICAgIDw8ICIgYXZhaWxhYmxlIHN0b3JhZ2Ug
+c3BhY2UgKGF2YWlsYWJsZTogIg0KPiA0ODcgICAgICAgICAgICA8PCBzdGF0cy5hdmFpbF9wZXJj
+ZW50IDw8ICIlICIgPDwNCj4gcHJldHR5Ynl0ZV90KHN0YXRzLmJ5dGVfYXZhaWwpDQo+IDQ4OCAg
+ICAgICAgICAgIDw8ICIpXG55b3UgbWF5IGFkanVzdCAnbW9uIGRhdGEgYXZhaWwgY3JpdCcgdG8g
+YSBsb3dlcg0KPiB2YWx1ZSINCj4gNDg5ICAgICAgICAgICAgPDwgIiB0byBtYWtlIHRoaXMgZ28g
+YXdheSAoZGVmYXVsdDogIiA8PCBnX2NvbmYtDQo+ID5tb25fZGF0YV9hdmFpbF9jcml0DQo+IDQ5
+MCAgICAgICAgICAgIDw8ICIlKVxuIiA8PCBzdGQ6OmVuZGw7DQo+IDQ5MSAgICAgICBleGl0KEVO
+T1NQQyk7DQo+IDQ5MiAgICAgfQ0KPiANCj4gI2RlZmluZSBFTk9TUEMgICAgICAgICAgMjggICAg
+ICAvKiBObyBzcGFjZSBsZWZ0IG9uIGRldmljZSAqLw0KPiANCj4gVHJ5IHN0YXJ0aW5nIGNlcGgt
+bW9uIGZyb20gdGhlIGNvbW1hbmQgbGluZSBhbmQgc2VlIGlmIHlvdSBnZXQgdGhlIGFib3ZlDQo+
+IG1lc3NhZ2UuDQo+IA0KPiA+DQo+ID4gLS0NCj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
+bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4gPiBpbiB0aGUg
+Ym9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9y
+ZG9tbw0KPiA+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
+aHRtbA0KPiA+DQo=
