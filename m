@@ -1,125 +1,71 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: ceph-mon terminated with status 28
-Date: Sun, 13 Dec 2015 17:18:45 -0500 (EST)
-Message-ID: <1290007151.43805078.1450045125175.JavaMail.zimbra@redhat.com>
-References: <DM2PR12MB0556410B658CF096B4F3326C9BEC0@DM2PR12MB0556.namprd12.prod.outlook.com>
+From: Zhi Zhang <zhang.david2011@gmail.com>
+Subject: Re: The max single write IOPS on single RBD
+Date: Mon, 14 Dec 2015 11:10:58 +0800
+Message-ID: <CAGkCoNJcwWQ77BXGhsPXS0Gg-HJuxumiSDicUBhv9K9HHEDmSQ@mail.gmail.com>
+References: <CAGkCoN+fT_9fqmUzc0HYkpder_qis-tB9jR-nCwvtJZPD=QGKQ@mail.gmail.com>
+ <alpine.DEB.2.00.1512110512560.10312@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:60146 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751061AbbLMWSs convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Dec 2015 17:18:48 -0500
-In-Reply-To: <DM2PR12MB0556410B658CF096B4F3326C9BEC0@DM2PR12MB0556.namprd12.prod.outlook.com>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:35785 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750749AbbLNDLj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Dec 2015 22:11:39 -0500
+Received: by mail-wm0-f46.google.com with SMTP id p66so25642711wmp.0
+        for <ceph-devel@vger.kernel.org>; Sun, 13 Dec 2015 19:11:39 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1512110512560.10312@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tom Deneau <tom.deneau@amd.com>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
------ Original Message -----
-> From: "Tom Deneau" <tom.deneau@amd.com>
-> To: ceph-devel@vger.kernel.org
-> Sent: Sunday, 13 December, 2015 11:49:16 PM
-> Subject: ceph-mon terminated with status 28
->=20
-> I am trying to understand the following failure:
->=20
-> A small cluster was running fine, and then was left unused for a whil=
-e.
-> When I went to try to use it again, the mon socket wasn't there and I=
- could
-> see that
-> ceph-mon was not running.  I saw the lines below at the end of dmesg =
-output.
-> When I tried to restart ceph-mon using sudo start ceph-mon id=3Dmonho=
-st,
-> I got the same set of errors newly appended to dmesg output.
->=20
-> I don't see anything more descriptive in /var/log/ceph/ceph-mon.log, =
-just
-> the recording of new mon processes starting.
->=20
-> In this particular small cluster, the mon process was running on the =
-same
-> node with 7 osd processes.  sudo initctl list shows that the osd proc=
-s are
-> still
-> up, although logging the fact that they can't communicate with the mo=
-n
-> socket.
->=20
-> Is there someplace else I should look for more details as to why mon =
-is down
-> and can't be restarted?
->=20
-> -- Tom Deneau
->=20
-> dmesg output:
-> --------------
->  init: ceph-mon (ceph/monhost) main process (16538) terminated with s=
-tatus 28
->  init: ceph-mon (ceph/monhost) main process ended, respawning
->  init: ceph-create-keys main process (16227) killed by TERM signal
->  init: ceph-mon (ceph/monhost) main process (16546) terminated with s=
-tatus 28
->  init: ceph-mon (ceph/monhost) main process ended, respawning
->  init: ceph-create-keys main process (16548) killed by TERM signal
->  init: ceph-mon (ceph/monhost) main process (16556) terminated with s=
-tatus 28
->  init: ceph-mon (ceph/monhost) main process ended, respawning
->  init: ceph-create-keys main process (16558) killed by TERM signal
->  init: ceph-mon (ceph/monhost) main process (16566) terminated with s=
-tatus 28
->  init: ceph-mon (ceph/monhost) respawning too fast, stopped
->  init: ceph-create-keys main process (16568) killed by TERM signal
+On Fri, Dec 11, 2015 at 9:15 PM, Sage Weil <sage@newdream.net> wrote:
+> On Fri, 11 Dec 2015, Zhi Zhang wrote:
+>> Hi Guys,
+>>
+>> We have a small 4 nodes cluster. Here is the hardware configuration.
+>>
+>> 11 x 300GB SSD, 24 cores, 32GB memory per one node.
+>> all the nodes connected within one 1Gb/s network.
+>>
+>> So we have one Monitor and 44 OSDs for testing kernel RBD IOPS using
+>> fio. Here are the major fio options.
+>>
+>> -direct=1
+>> -rw=randwrite
+>> -ioengine=psync
+>> -size=1000M
+>> -bs=4k
+>> -numjobs=1
+>>
+>> The max IOPS we can achieve for single write (numjobs=1) is close to
+>> 1000. This means each IO from RBD takes 1.x ms.
+>>
+>> >From osd logs, we can also observe most of osd_ops will take 1.x ms,
+>> including op processing, journal writing, replication, etc, before
+>> sending commit back to client.
+>>
+>> The network RTT is around 0.04 ms;
+>> Most osd_ops on primary OSD take around 0.5~0.7 ms, journal write takes 0.3 ms;
+>> Most osd_repops including writing journal on peer OSD take around 0.5 ms.
+>>
+>> We even tried to modify journal to write page cache only, but didn't
+>> get very significant improvement. Does it mean this is the best result
+>> we can get for single write on single RBD?
+>
+> What version is this?  There have been a few recent changes that will
+> reduce the wall clock time spent preparing/processing a request.  There is
+> still a fair bit of work to do here, though--the theoretical lower bound
+> is the SSD write time + 2x RTT (client <-> primary osd <-> replica osd <->
+> replica ssd).
+>
 
-It looks like it's complaining about lack of space?
+Ceph version is 0.94.1 with few backports.
 
-src/ceph_mon.cc:
+I already saw some related changes. I will try a newer version and
+keep your guys on the updates.
 
-204 int main(int argc, const char **argv)=C2=B7
-205 {
-----8<----
-475   {
-476     // check fs stats. don't start if it's critically close to full=
-=2E
-477     ceph_data_stats_t stats;
-478     int err =3D get_fs_stats(stats, g_conf->mon_data.c_str());
-479     if (err < 0) {
-480       cerr << "error checking monitor data's fs stats: " << cpp_str=
-error(err)
-481            << std::endl;
-482       exit(-err);
-483     }
-484     if (stats.avail_percent <=3D g_conf->mon_data_avail_crit) {
-485       cerr << "error: monitor data filesystem reached concerning le=
-vels of"
-486            << " available storage space (available: "
-487            << stats.avail_percent << "% " << prettybyte_t(stats.byt=
-e_avail)
-488            << ")\nyou may adjust 'mon data avail crit' to a lower v=
-alue"
-489            << " to make this go away (default: " << g_conf->mon_dat=
-a_avail_crit
-490            << "%)\n" << std::endl;
-491       exit(ENOSPC);
-492     }
+Thanks.
 
-#define ENOSPC          28      /* No space left on device */
-
-Try starting ceph-mon from the command line and see if you get the abov=
-e message.
-
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> sage
+>
