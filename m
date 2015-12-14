@@ -1,60 +1,67 @@
-From: Kyle Bader <kyle.bader@gmail.com>
-Subject: Re: OSD public / cluster network isolation using VRF:s
-Date: Mon, 14 Dec 2015 10:31:34 -0800
-Message-ID: <CAFMfnwqVUD7Uk9p+vciNd_XfU7wsDFD7F_w-OU7is86dtix54Q@mail.gmail.com>
-References: <1449173601.2291.84.camel@millnert.se>
-	<422901884.211767.1449176599032.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
-	<alpine.DEB.2.00.1512031326331.19170@cobra.newdream.net>
-	<1449495663.29564.118.camel@millnert.se>
-	<alpine.DEB.2.00.1512070608030.25269@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: misc: ignore some unusable block devices
+Date: Mon, 14 Dec 2015 19:40:57 +0100
+Message-ID: <566F0D39.1010909@dachary.org>
+References: <566EDC50.3010901@dachary.org>
+ <robbat2-20151214T181759-408594839Z@orbis-terrarum.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="IFd9psA47lud5JJPr4TdaEel58CML9CFS"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f178.google.com ([209.85.220.178]:35683 "EHLO
-	mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753452AbbLNSbf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 13:31:35 -0500
-Received: by qkfb125 with SMTP id b125so149024843qkf.2
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Dec 2015 10:31:34 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1512070608030.25269@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:50041 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753539AbbLNSk7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 13:40:59 -0500
+In-Reply-To: <robbat2-20151214T181759-408594839Z@orbis-terrarum.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Martin Millnert <martin@millnert.se>, "wido@42on.com" <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Robin H. Johnson" <robbat2@gentoo.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Dec 7, 2015 at 6:10 AM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 7 Dec 2015, Martin Millnert wrote:
->> > Note that on a largish cluster the public/client traffic is all
->> > north-south, while the backend traffic is also mostly north-south to the
->> > top-of-rack and then east-west.  I.e., within the rack, almost everything
->> > is north-south, and client and replication traffic don't look that
->> > different.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--IFd9psA47lud5JJPr4TdaEel58CML9CFS
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
+
+
+
+On 14/12/2015 19:18, Robin H. Johnson wrote:
+> On Mon, Dec 14, 2015 at 04:12:16PM +0100, Loic Dachary wrote:
+>> Hi Robin,
 >>
->> This problem domain is one of the larger challenges. I worry about
->> network timeouts for critical cluster traffic in one of the clusters due
->> to hosts having 2x1GbE. I.e. in our case I want to
->> prioritize/guarantee/reserve a minimum amount of bandwidth for cluster
->> health traffic primarily, and secondarily cluster replication. Client
->> write replication should then be least prioritized.
->
-> One word of caution here: the health traffic should really be the
-> same path and class of service as the inter-osd traffic, or else it
-> will not identify failures.  e.g., if the health traffic is prioritized,
-> and lower-priority traffic is starved/dropped, we won't notice.
->
->> To support this I need our network equipment to perform the CoS job, and
->> in order to do that at some level in the stack I need to be able to
->> classify traffic. And furthermore, I'd like to do this with as little
->> added state as possible.
->
-> I seem to recall a conversation a year or so ago about tagging
-> stream/sockets so that the network layer could do this.  I don't think
-> we got anywhere, though...
+>> I removed misc: ignore some unusable block devices
+>> 9c5eaeccb807d103884f46d174798dd982092696 from the openstack branch
+>> because it fails on CentOS 7 with
+>> the following. Could you please make a new pull request with it so we
+>> can keep testing it there ?
+> Will do, but I wonder how you managed to get a return code of 2 from it=
+;
+> as that should be device-does-not-exist.
 
-We talked about it, I think this was the resulting issue that was opened:
+IIRC that happens when blkid fails to retrieve information. I found blkid=
+ to be generally faster and less reliable than sgdisk -i 1 /dev/sdd for t=
+he purpose of getting partition information. For ceph-disk we chose relia=
+bility over speed. That being said I've not investigated the real reason =
+why blkid returns -2.
 
-http://tracker.ceph.com/issues/12260
+Cheers
 
--- 
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
-Kyle Bader
+
+--IFd9psA47lud5JJPr4TdaEel58CML9CFS
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlZvDTkACgkQ8dLMyEl6F20txgCgoLnaRlx1YAWxCsGPbhl2mNsS
+TEAAn3bMJ0j4GADIIwkdGxF6dO1tyjrc
+=PHVI
+-----END PGP SIGNATURE-----
+
+--IFd9psA47lud5JJPr4TdaEel58CML9CFS--
