@@ -1,247 +1,183 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: Notes from a discussion a design to allow EC overwrites
-Date: Mon, 14 Dec 2015 13:19:43 -0800
-Message-ID: <CAN=+7FVPHpiC262yPQ++6RoBu8UPsWCRhVWRXVzUeV6_JfHgaw@mail.gmail.com>
-References: <CAN=+7FUAd-Cc0=1yCekY1QjQ2DJR7WYLLv2OhR_0H5qo5DNgkQ@mail.gmail.com>
-	<alpine.DEB.2.00.1511130524120.7964@cobra.newdream.net>
-	<CAN=+7FV5zcZWRun3pxkL-z6uNp1-KPCYu=Ug6jOHfXoYjA1dbA@mail.gmail.com>
-	<CY1PR0201MB18974D8FD3E5D6714411AF91E8110@CY1PR0201MB1897.namprd02.prod.outlook.com>
-	<CAEv+sP5DZ6HrT5mp8PtJeMi2x7VOQh10zQhq8JGCUcN_k0p3hw@mail.gmail.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: ceph-mon terminated with status 28
+Date: Mon, 14 Dec 2015 16:46:52 -0500 (EST)
+Message-ID: <1465638247.45060213.1450129612249.JavaMail.zimbra@redhat.com>
+References: <DM2PR12MB0556410B658CF096B4F3326C9BEC0@DM2PR12MB0556.namprd12.prod.outlook.com> <1290007151.43805078.1450045125175.JavaMail.zimbra@redhat.com> <SN1PR12MB05583004753B74FFF2745DAA9BED0@SN1PR12MB0558.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f173.google.com ([209.85.223.173]:35147 "EHLO
-	mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932385AbbLNVTo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 16:19:44 -0500
-Received: by iofq126 with SMTP id q126so48968183iof.2
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Dec 2015 13:19:44 -0800 (PST)
-In-Reply-To: <CAEv+sP5DZ6HrT5mp8PtJeMi2x7VOQh10zQhq8JGCUcN_k0p3hw@mail.gmail.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:33693 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932273AbbLNVqz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 16:46:55 -0500
+In-Reply-To: <SN1PR12MB05583004753B74FFF2745DAA9BED0@SN1PR12MB0558.namprd12.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tianshan Qu <qutianshan@gmail.com>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Durgin, Josh" <jdurgin@redhat.com>, "Farnum, Gregory" <gfarnum@redhat.com>
+To: Tom Deneau <tom.deneau@amd.com>
+Cc: ceph-devel@vger.kernel.org
 
-I created a set of tickets for what I think needs to happen:
-http://tracker.ceph.com/issues/14031.  There's a doc linked from that
-ticket with more details on the design.
--Sam
+----- Original Message -----
+> From: "Tom Deneau" <tom.deneau@amd.com>
+> To: "Brad Hubbard" <bhubbard@redhat.com>
+> Cc: ceph-devel@vger.kernel.org
+> Sent: Tuesday, 15 December, 2015 3:21:27 AM
+> Subject: RE: ceph-mon terminated with status 28
+>=20
+> Thanks, Brad.  That was the problem.
 
-On Fri, Nov 13, 2015 at 10:26 AM, Tianshan Qu <qutianshan@gmail.com> wr=
-ote:
-> Hi:
->
-> sorry for half send.
->
-> I'm working on this recently. I think we should distinguish the scene
-> of sequence write and small write.
->
-> The first, overwrite is enough. The second small write's typical
-> optimal is a log based write, which do not need ec's reconstruct and
-> avoid parity chunk's extra read.
->
-> Fast14 paper (Parity Logging with Reserved Space Towards Ef=EF=AC=81c=
-ient
-> Updates and Recovery in Erasure-coded Clustered Storage)  propose a
-> way to further improve the performance, which use pre allocate reserv=
-e
-> space after parity chunk to avoid fragmentation.
->
-> I think the challenge to implement this in ceph is how to manager the
-> reserve space, since we may have no direct support.
->
-> also, the kv is another good choice for the log.
->
-> For the ec interface, I think we need extra function to apply parity =
-change.
->
->
->
-> 2015-11-14 0:16 GMT+08:00 Allen Samuels <Allen.Samuels@sandisk.com>:
->> This scheme fundamentally relies on the temporary objects "gracefull=
-y" transitioning into being portions of full-up long-term durable objec=
-ts.
->>
->> This means that if the allocation size for a temporary object signif=
-icantly mismatches the size of the mutation (partial stripe write) you'=
-re creating a problem that's proportional to the mismatch size.
->>
->> So either, NewStore is able to efficiently allocate small chunks
->> OR
->> You have some kind of background cleanup process that reclaims that =
-space (i.e., a "straightener")
->>
->> The right choices depend on having a shared notion of the operationa=
-l profile that you're trying to optimize for.
->>
->> The fundamental question becomes, are you going to optimize for smal=
-l-block random writes?
->>
->> In my experience this is a key use-case in virtually every customer'=
-s evaluation scenario. I believe we MUST make this case reasonably effi=
-cient.
->>
->> It seems to me that the lowest-complexity "fix" for the problem is t=
-o teach NewStore to have two different allocation sizes (big and small =
-:)).
->> Naturally the allocator becomes more complex. Worst case, you're now=
- left with the garbage collection problem. Which I suspect could be pun=
-ted to a subsequent release (i.e., I'm out of large blocks, but there's=
- plenty of fragmented available space -- This can happen, but's a prett=
-y pathological case which becomes rare-er and rare-er as you scale-out)
->>
->> Allen Samuels
->> Software Architect, Emerging Storage Solutions
->>
->> 2880 Junction Avenue, Milpitas, CA 95134
->> T: +1 408 801 7030| M: +1 408 780 6416
->> allen.samuels@SanDisk.com
->>
->>
->> -----Original Message-----
->> From: Samuel Just [mailto:sjust@redhat.com]
->> Sent: Friday, November 13, 2015 7:39 AM
->> To: Sage Weil <sweil@redhat.com>
->> Cc: ceph-devel@vger.kernel.org; Allen Samuels <Allen.Samuels@sandisk=
-=2Ecom>; Durgin, Josh <jdurgin@redhat.com>; Farnum, Gregory <gfarnum@re=
-dhat.com>
->> Subject: Re: Notes from a discussion a design to allow EC overwrites
->>
->> Lazily persisting the intermediate entries would certainly also work=
-, but there's an argument that it needlessly adds to the write transact=
-ion.
->>
->> Actually, we probably want to avoid having small writes be full stri=
-pe writes -- with a 8+3 code the difference between modifying a single =
-stripelet and modifying the full stripe is 4 writes vs 11 writes.
->>
->> It means that during peering, any log we can find (particularly the =
-shortest one) from the most recent active interval isn't an upper bound=
- on writes committed to the client (the (actingset.size() - M - 1)th on=
-e is?) -- we'd have to think carefully about the implications of that.
->> -Sam
->>
->> On Fri, Nov 13, 2015 at 5:35 AM, Sage Weil <sweil@redhat.com> wrote:
->>> On Thu, 12 Nov 2015, Samuel Just wrote:
->>>> I was present for a discussion about allowing EC overwrites and
->>>> thought it would be good to summarize it for the list:
->>>>
->>>> Commit Protocol:
->>>> 1) client sends write to primary
->>>> 2) primary reads in partial stripes needed for partial stripe
->>>> overwrites from replicas
->>>> 3) primary sends prepares to participating replicas and queues its
->>>> own prepare locally
->>>> 4) once all prepares are complete, primary sends a commit to the
->>>> client
->>>> 5) primary sends applies to all participating replicas
->>>>
->>>> When we get the prepare, we write out a temp object with the data =
-to
->>>> be written.  On apply, we use an objectstore primitive to atomical=
-ly
->>>> move those extents into the actual object.  The log entry contains
->>>> the name/id for the temp object so it can be applied on apply or r=
-emoved on rollback.
->>>
->>> Currently we assume that temp objects are/can be cleared out on res=
-tart.
->>> This will need to change.  And we'll need to be careful that they g=
-et
->>> cleaned out when peering completes (and the rollforward/rollback
->>> decision is made.
->>>
->>> If the stripes are small, then the objectstore primitive may not
->>> actually be that efficient.  I'd suggest also hinting that the temp
->>> object will be swapped later, so that the backend can, if it's smal=
-l,
->>> store it in a cheap temporary location in the expectation that it w=
-ill get rewritten later.
->>> (In particular, the newstore allocation chunk is currently targetti=
-ng
->>> 512kb, and this will only be efficient with narrow stripes, so it'l=
+Np.
+
+>=20
+> Is there a reason why we don't log more descriptive info for this kin=
+d of
+> failure?
+
+I guess it may not have been anticipated that init would swallow these =
+types of
+errors early in the process and just report the return code.
+
+If you wouldn't mind opening a tracker for "Fatal errors at start-up ar=
+e not
+logged", or something similar,  I can take a look at getting some meani=
+ngful log
+entries reported during these early failures.
+
+Let me know the tracker number.
+
+Cheers,
+Brad
+
+>=20
+> -- Tom
+>=20
+> > -----Original Message-----
+> > From: Brad Hubbard [mailto:bhubbard@redhat.com]
+> > Sent: Sunday, December 13, 2015 4:19 PM
+> > To: Deneau, Tom
+> > Cc: ceph-devel@vger.kernel.org
+> > Subject: Re: ceph-mon terminated with status 28
+> >=20
+> > ----- Original Message -----
+> > > From: "Tom Deneau" <tom.deneau@amd.com>
+> > > To: ceph-devel@vger.kernel.org
+> > > Sent: Sunday, 13 December, 2015 11:49:16 PM
+> > > Subject: ceph-mon terminated with status 28
+> > >
+> > > I am trying to understand the following failure:
+> > >
+> > > A small cluster was running fine, and then was left unused for a =
+while.
+> > > When I went to try to use it again, the mon socket wasn't there a=
+nd I
+> > > could see that ceph-mon was not running.  I saw the lines below a=
+t the
+> > > end of dmesg output.
+> > > When I tried to restart ceph-mon using sudo start ceph-mon id=3Dm=
+onhost,
+> > > I got the same set of errors newly appended to dmesg output.
+> > >
+> > > I don't see anything more descriptive in /var/log/ceph/ceph-mon.l=
+og,
+> > > just the recording of new mon processes starting.
+> > >
+> > > In this particular small cluster, the mon process was running on =
+the
+> > > same node with 7 osd processes.  sudo initctl list shows that the=
+ osd
+> > > procs are still up, although logging the fact that they can't
+> > > communicate with the mon socket.
+> > >
+> > > Is there someplace else I should look for more details as to why =
+mon
+> > > is down and can't be restarted?
+> > >
+> > > -- Tom Deneau
+> > >
+> > > dmesg output:
+> > > --------------
+> > >  init: ceph-mon (ceph/monhost) main process (16538) terminated wi=
+th
+> > > status 28
+> > >  init: ceph-mon (ceph/monhost) main process ended, respawning
+> > >  init: ceph-create-keys main process (16227) killed by TERM signa=
 l
->>> just get double-written.  We'll want to keep the temp value in the =
-kv
->>> store [log, hopefully] and not bother to allocate disk and rewrite
->>> it.)
->>>
->>>> Each log entry contains a list of the shard ids modified.  During
->>>> peering, we use the same protocol for choosing the authoritative l=
-og
->>>> for the existing EC pool, except that we first take the longest
->>>> candidate log and use it to extend shorter logs until they hit an =
-entry they should have witnessed, but didn't.
->>>>
->>>> Implicit in the above scheme is the fact that if an object is
->>>> written, but a particular shard isn't changed, the osd with that
->>>> shard will have a copy of the object with the correct data, but an
->>>> out of date object_into (notably, the version will be old).  To av=
-oid
->>>> this messing up the missing set during the log scan on OSD start,
->>>> we'll skip log entries we wouldn't have participated in (we may no=
-t
->>>> even choose to store them, see below).  This does generally pose a
->>>> challenge for maintaining prior_version.  It seems like it shouldn=
-'t
->>>> be much of a problem since rollbacks can only happen on prepared l=
-og
->>>> entries which haven't been applied, so log merging can never resul=
-t in a divergent entry causing a missing object.  I think we can get by=
- without it then?
->>>>
->>>> We can go further with the above and actually never persist a log
->>>> entry on a shard which it did not participate in.  As long as peer=
-ing
->>>> works correctly, the union of the logs we got must have all entrie=
-s.
->>>> The primary will need to keep a complete copy in memory to manage =
-dup op detection and recovery, however.
->>>
->>> That sounds more complex to me.  Maybe instead we could lazily pers=
-ist
->>> the entries (on the next pg write) so that it is always a contiguou=
-s sequence?
->>>
->>>> 2) above can also be done much more efficiently.  Some codes will
->>>> allow the parity chunks to be reconstructed more efficiently, so s=
-ome
->>>> thought will have to go into restructuring the plugin interface to
->>>> allow more efficient
->>>
->>> Hopefully the stripe size is chosen such that most writes will end =
-up
->>> being full stripe writes (we should figure out if the EC performanc=
-e
->>> degrades significantly in that case?).
->>>
->>> An alternative would be to do something like
->>>
->>> 1) client sends write to primary
->>> 2) primary sends prepare to the first M+1 shards, who write it in a
->>> temporary object/location
->>> 3) primary acks write once they ack
->>> 4) asynchronously, primary recalculates the affected stripes and se=
-nds
->>> an overwrite.
->>>
->>>  - step 4 doesn't need to be 2-phase, since we have the original da=
-ta
->>> persisted already on >M shards
->>>  - the client-observed latency is bounded by only M+1 OSDs (not
->>> acting.size())
->>>
->>> I suspect you discussed this option, though, and have other concern=
-s
->>> around its complexity?
->>>
->>> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >  init: ceph-mon (ceph/monhost) main process (16546) terminated wi=
+th
+> > > status 28
+> > >  init: ceph-mon (ceph/monhost) main process ended, respawning
+> > >  init: ceph-create-keys main process (16548) killed by TERM signa=
+l
+> > >  init: ceph-mon (ceph/monhost) main process (16556) terminated wi=
+th
+> > > status 28
+> > >  init: ceph-mon (ceph/monhost) main process ended, respawning
+> > >  init: ceph-create-keys main process (16558) killed by TERM signa=
+l
+> > >  init: ceph-mon (ceph/monhost) main process (16566) terminated wi=
+th
+> > > status 28
+> > >  init: ceph-mon (ceph/monhost) respawning too fast, stopped
+> > >  init: ceph-create-keys main process (16568) killed by TERM signa=
+l
+> >=20
+> > It looks like it's complaining about lack of space?
+> >=20
+> > src/ceph_mon.cc:
+> >=20
+> > 204 int main(int argc, const char **argv)=C2=B7
+> > 205 {
+> > ----8<----
+> > 475   {
+> > 476     // check fs stats. don't start if it's critically close to =
+full.
+> > 477     ceph_data_stats_t stats;
+> > 478     int err =3D get_fs_stats(stats, g_conf->mon_data.c_str());
+> > 479     if (err < 0) {
+> > 480       cerr << "error checking monitor data's fs stats: " <<
+> > cpp_strerror(err)
+> > 481            << std::endl;
+> > 482       exit(-err);
+> > 483     }
+> > 484     if (stats.avail_percent <=3D g_conf->mon_data_avail_crit) {
+> > 485       cerr << "error: monitor data filesystem reached concernin=
+g
+> > levels of"
+> > 486            << " available storage space (available: "
+> > 487            << stats.avail_percent << "% " <<
+> > prettybyte_t(stats.byte_avail)
+> > 488            << ")\nyou may adjust 'mon data avail crit' to a low=
+er
+> > value"
+> > 489            << " to make this go away (default: " << g_conf-
+> > >mon_data_avail_crit
+> > 490            << "%)\n" << std::endl;
+> > 491       exit(ENOSPC);
+> > 492     }
+> >=20
+> > #define ENOSPC          28      /* No space left on device */
+> >=20
+> > Try starting ceph-mon from the command line and see if you get the =
+above
+> > message.
+> >=20
+> > >
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel"
+> > > in the body of a message to majordomo@vger.kernel.org More majord=
+omo
+> > > info at  http://vger.kernel.org/majordomo-info.html
+> > >
+> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
+=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
+=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=
+=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=
+=EF=BF=BD=EF=BF=BD
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
