@@ -1,209 +1,242 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Improving Data-At-Rest encryption in Ceph
-Date: Mon, 14 Dec 2015 12:28:48 -0800
-Message-ID: <CAJ4mKGZP3oHt6Rgsp_pogcAZEmBzcQzDc4vzESDjPyoxJKoBUw@mail.gmail.com>
-References: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: Notes from a discussion a design to allow EC overwrites
+Date: Mon, 14 Dec 2015 13:19:43 -0800
+Message-ID: <CAN=+7FVPHpiC262yPQ++6RoBu8UPsWCRhVWRXVzUeV6_JfHgaw@mail.gmail.com>
+References: <CAN=+7FUAd-Cc0=1yCekY1QjQ2DJR7WYLLv2OhR_0H5qo5DNgkQ@mail.gmail.com>
+	<alpine.DEB.2.00.1511130524120.7964@cobra.newdream.net>
+	<CAN=+7FV5zcZWRun3pxkL-z6uNp1-KPCYu=Ug6jOHfXoYjA1dbA@mail.gmail.com>
+	<CY1PR0201MB18974D8FD3E5D6714411AF91E8110@CY1PR0201MB1897.namprd02.prod.outlook.com>
+	<CAEv+sP5DZ6HrT5mp8PtJeMi2x7VOQh10zQhq8JGCUcN_k0p3hw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:34847 "EHLO
-	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751317AbbLNU2t convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 15:28:49 -0500
-Received: by mail-wm0-f41.google.com with SMTP id p66so61848456wmp.0
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Dec 2015 12:28:49 -0800 (PST)
-In-Reply-To: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
+Received: from mail-io0-f173.google.com ([209.85.223.173]:35147 "EHLO
+	mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932385AbbLNVTo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 16:19:44 -0500
+Received: by iofq126 with SMTP id q126so48968183iof.2
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Dec 2015 13:19:44 -0800 (PST)
+In-Reply-To: <CAEv+sP5DZ6HrT5mp8PtJeMi2x7VOQh10zQhq8JGCUcN_k0p3hw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Adam Kupczyk <akupczyk@mirantis.com>
+To: Tianshan Qu <qutianshan@gmail.com>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Durgin, Josh" <jdurgin@redhat.com>, "Farnum, Gregory" <gfarnum@redhat.com>
 
-On Mon, Dec 14, 2015 at 5:17 AM, Radoslaw Zarzynski
-<rzarzynski@mirantis.com> wrote:
-> Hello Folks,
->
-> I would like to publish a proposal regarding improvements to Ceph
-> data-at-rest encryption mechanism. Adam Kupczyk and I worked
-> on that in last weeks.
->
-> Initially we considered several architectural approaches and made
-> several iterations of discussions with Intel storage group. The propo=
-sal
-> is condensed description of the solution we see as the most promising
-> one.
->
-> We are open to any comments and questions.
->
-> Regards,
-> Adam Kupczyk
-> Radoslaw Zarzynski
->
->
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> Summary
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->
-> Data at-rest encryption is mechanism for protecting data center
-> operator from revealing content of physical carriers.
->
-> Ceph already implements a form of at rest encryption. It is performed
-> through dm-crypt as intermediary layer between OSD and its physical
-> storage. The proposed at rest encryption mechanism will be orthogonal
-> and, in some ways, superior to already existing solution.
->
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> Owners
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->
-> * Radoslaw Zarzynski (Mirantis)
-> * Adam Kupczyk (Mirantis)
->
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> Interested Parties
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->
-> If you are interested in contributing to this blueprint, or want to b=
-e
-> a "speaker" during the Summit session, list your name here.
->
-> Name (Affiliation)
-> Name (Affiliation)
-> Name
->
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> Current Status
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->
-> Current data at rest encryption is achieved through dm-crypt placed
-> under OSD=E2=80=99s filestore. This solution is a generic one and can=
-not
-> leverage Ceph-specific characteristics. The best example is that
-> encryption is done multiple times - one time for each replica. Anothe=
-r
-> issue is lack of granularity - either OSD encrypts nothing, or OSD
-> encrypts everything (with dm-crypt on).
->
-> Cryptographic keys are stored on filesystem of storage node that host=
-s
-> OSDs. Changing them require redeploying the OSDs.
->
-> The best way to address those issues seems to be introducing
-> encryption into Ceph OSD.
->
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> Detailed Description
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->
-> In addition to the currently available solution, Ceph OSD would
-> accommodate encryption component placed in the replication mechanisms=
-=2E
->
-> Data incoming from Ceph clients would be encrypted by primary OSD. It
-> would replicate ciphertext to non-primary members of an acting set.
-> Data sent to Ceph client would be decrypted by OSD handling read
-> operation. This allows to:
-> * perform only one encryption per write,
-> * achieve per-pool key granulation for both key and encryption itself=
-=2E
->
-> Unfortunately, having always and everywhere the same key for a given
-> pool is unacceptable - it would make cluster migration and key change
-> extremely burdensome process. To address those issues crypto key
-> versioning would be introduced. All RADOS objects inside single
-> placement group stored on a given OSD would use the same crypto key
-> version. The same PG on other replica may use different version of th=
-e
-> same, per pool-granulated key.
->
-> In typical case ciphertext data transferred from OSD to OSD can be
-> used without change. This is when both OSDs have the same crypto key
-> version for given placement group. In rare cases when crypto keys are
-> different (key change or transition period) receiving OSD will recryp=
-t
-> with local key versions.
+I created a set of tickets for what I think needs to happen:
+http://tracker.ceph.com/issues/14031.  There's a doc linked from that
+ticket with more details on the design.
+-Sam
 
-I don't understand this part at all. Do you plan to read and rewrite
-the entire PG whenever you change the "key version"? How often do you
-plan to change these keys? What is even the point of changing them,
-since anybody who can control an OSD can grab the entire current key
-set?
-
-> For compression to be effective it must be done before encryption. Du=
+On Fri, Nov 13, 2015 at 10:26 AM, Tianshan Qu <qutianshan@gmail.com> wr=
+ote:
+> Hi:
+>
+> sorry for half send.
+>
+> I'm working on this recently. I think we should distinguish the scene
+> of sequence write and small write.
+>
+> The first, overwrite is enough. The second small write's typical
+> optimal is a log based write, which do not need ec's reconstruct and
+> avoid parity chunk's extra read.
+>
+> Fast14 paper (Parity Logging with Reserved Space Towards Ef=EF=AC=81c=
+ient
+> Updates and Recovery in Erasure-coded Clustered Storage)  propose a
+> way to further improve the performance, which use pre allocate reserv=
 e
-> to that encryption may be applied differently for replication pools
-> and EC pools. Replicated pools do not implement compression; for thos=
-e
-> pools encryption is applied right after data enters OSD. For EC pools
-> encryption is applied after compressing. When compression will be
-> implemented for replicated pools, it must be placed before encryption=
-=2E
-
-So this means you'll be encrypting the object data, but not the omap
-nor xattrs, and not the file names on disk. Is that acceptable to
-people? It's probably fine for a lot of rbd use cases, but not for
-RGW, CephFS, nor raw RADOS where meaningful metadata (and even *data*)
-is stored in those regions. I'd rather a solution worked on the full
-data set. :/
--Greg
-
+> space after parity chunk to avoid fragmentation.
 >
-> Ceph currently has thin abstraction layer over block ciphers
-> (CryptoHandler, CryptoKeyHandler). We want to extend this API to
-> introduce initialization vectors, chaining modes and asynchronous
-> operations. Implementation of this API may be based on AF_ALG kernel
-> interface. This assures the ability to use hardware accelerations
-> already implemented in Linux kernel. Moreover, due to working on
-> bigger chunks (dm-crypt operates on 512 byte long sectors) the raw
-> encryption performance may be even higher.
+> I think the challenge to implement this in ceph is how to manager the
+> reserve space, since we may have no direct support.
 >
-> The encryption process must not impede random reads and random writes
-> to RADOS objects. Solution for this is to create encryption/decryptio=
-n
-> process that will be applicable for arbitrary data range. This can be
-> done most easily by applying chaining mode that doesn=E2=80=99t impos=
-e
-> dependencies between subsequent data chunks. Good candidates are
-> CTR[1] and XTS[2].
+> also, the kv is another good choice for the log.
 >
-> Encryption-related metadata would be stored in extended attributes.
+> For the ec interface, I think we need extra function to apply parity =
+change.
 >
-> In order to coordinate encryption across acting set, all replicas wil=
+>
+>
+> 2015-11-14 0:16 GMT+08:00 Allen Samuels <Allen.Samuels@sandisk.com>:
+>> This scheme fundamentally relies on the temporary objects "gracefull=
+y" transitioning into being portions of full-up long-term durable objec=
+ts.
+>>
+>> This means that if the allocation size for a temporary object signif=
+icantly mismatches the size of the mutation (partial stripe write) you'=
+re creating a problem that's proportional to the mismatch size.
+>>
+>> So either, NewStore is able to efficiently allocate small chunks
+>> OR
+>> You have some kind of background cleanup process that reclaims that =
+space (i.e., a "straightener")
+>>
+>> The right choices depend on having a shared notion of the operationa=
+l profile that you're trying to optimize for.
+>>
+>> The fundamental question becomes, are you going to optimize for smal=
+l-block random writes?
+>>
+>> In my experience this is a key use-case in virtually every customer'=
+s evaluation scenario. I believe we MUST make this case reasonably effi=
+cient.
+>>
+>> It seems to me that the lowest-complexity "fix" for the problem is t=
+o teach NewStore to have two different allocation sizes (big and small =
+:)).
+>> Naturally the allocator becomes more complex. Worst case, you're now=
+ left with the garbage collection problem. Which I suspect could be pun=
+ted to a subsequent release (i.e., I'm out of large blocks, but there's=
+ plenty of fragmented available space -- This can happen, but's a prett=
+y pathological case which becomes rare-er and rare-er as you scale-out)
+>>
+>> Allen Samuels
+>> Software Architect, Emerging Storage Solutions
+>>
+>> 2880 Junction Avenue, Milpitas, CA 95134
+>> T: +1 408 801 7030| M: +1 408 780 6416
+>> allen.samuels@SanDisk.com
+>>
+>>
+>> -----Original Message-----
+>> From: Samuel Just [mailto:sjust@redhat.com]
+>> Sent: Friday, November 13, 2015 7:39 AM
+>> To: Sage Weil <sweil@redhat.com>
+>> Cc: ceph-devel@vger.kernel.org; Allen Samuels <Allen.Samuels@sandisk=
+=2Ecom>; Durgin, Josh <jdurgin@redhat.com>; Farnum, Gregory <gfarnum@re=
+dhat.com>
+>> Subject: Re: Notes from a discussion a design to allow EC overwrites
+>>
+>> Lazily persisting the intermediate entries would certainly also work=
+, but there's an argument that it needlessly adds to the write transact=
+ion.
+>>
+>> Actually, we probably want to avoid having small writes be full stri=
+pe writes -- with a 8+3 code the difference between modifying a single =
+stripelet and modifying the full stripe is 4 writes vs 11 writes.
+>>
+>> It means that during peering, any log we can find (particularly the =
+shortest one) from the most recent active interval isn't an upper bound=
+ on writes committed to the client (the (actingset.size() - M - 1)th on=
+e is?) -- we'd have to think carefully about the implications of that.
+>> -Sam
+>>
+>> On Fri, Nov 13, 2015 at 5:35 AM, Sage Weil <sweil@redhat.com> wrote:
+>>> On Thu, 12 Nov 2015, Samuel Just wrote:
+>>>> I was present for a discussion about allowing EC overwrites and
+>>>> thought it would be good to summarize it for the list:
+>>>>
+>>>> Commit Protocol:
+>>>> 1) client sends write to primary
+>>>> 2) primary reads in partial stripes needed for partial stripe
+>>>> overwrites from replicas
+>>>> 3) primary sends prepares to participating replicas and queues its
+>>>> own prepare locally
+>>>> 4) once all prepares are complete, primary sends a commit to the
+>>>> client
+>>>> 5) primary sends applies to all participating replicas
+>>>>
+>>>> When we get the prepare, we write out a temp object with the data =
+to
+>>>> be written.  On apply, we use an objectstore primitive to atomical=
+ly
+>>>> move those extents into the actual object.  The log entry contains
+>>>> the name/id for the temp object so it can be applied on apply or r=
+emoved on rollback.
+>>>
+>>> Currently we assume that temp objects are/can be cleared out on res=
+tart.
+>>> This will need to change.  And we'll need to be careful that they g=
+et
+>>> cleaned out when peering completes (and the rollforward/rollback
+>>> decision is made.
+>>>
+>>> If the stripes are small, then the objectstore primitive may not
+>>> actually be that efficient.  I'd suggest also hinting that the temp
+>>> object will be swapped later, so that the backend can, if it's smal=
+l,
+>>> store it in a cheap temporary location in the expectation that it w=
+ill get rewritten later.
+>>> (In particular, the newstore allocation chunk is currently targetti=
+ng
+>>> 512kb, and this will only be efficient with narrow stripes, so it'l=
 l
-> share information about crypto key versions they use. Real
-> cryptographic keys never be stored permanently by Ceph OSD. Instead,
-> it would be gathered from monitors. Key management improvements will
-> be addressed in separate task based on dedicated proposal [3].
->
->
-> [1] https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Coun=
-ter_.28CTR.29
->
-> [2] https://en.wikipedia.org/wiki/Disk_encryption_theory#XEX-based_tw=
-eaked-codebook_mode_with_ciphertext_stealing_.28XTS.29
->
-> [3] http://tracker.ceph.com/projects/ceph/wiki/Osd_-_simple_ceph-mon_=
-dm-crypt_key_management
->
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> Work items
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->
-> Coding tasks
-> * Extended Crypto API (CryptoHandler, CryptoKeyHandler).
-> * Encryption for replicated pools.
-> * Encryption for EC pools.
-> * Key management.
->
-> Build / release tasks
-> * Unit tests for extended Crypto API.
-> * Functional tests for encrypted replicated pools.
-> * Functional tests for encrypted EC pools.
->
-> Documentation tasks
-> * Document extended Crypto API.
-> * Document migration procedures.
-> * Document crypto key creation and versioning.
+>>> just get double-written.  We'll want to keep the temp value in the =
+kv
+>>> store [log, hopefully] and not bother to allocate disk and rewrite
+>>> it.)
+>>>
+>>>> Each log entry contains a list of the shard ids modified.  During
+>>>> peering, we use the same protocol for choosing the authoritative l=
+og
+>>>> for the existing EC pool, except that we first take the longest
+>>>> candidate log and use it to extend shorter logs until they hit an =
+entry they should have witnessed, but didn't.
+>>>>
+>>>> Implicit in the above scheme is the fact that if an object is
+>>>> written, but a particular shard isn't changed, the osd with that
+>>>> shard will have a copy of the object with the correct data, but an
+>>>> out of date object_into (notably, the version will be old).  To av=
+oid
+>>>> this messing up the missing set during the log scan on OSD start,
+>>>> we'll skip log entries we wouldn't have participated in (we may no=
+t
+>>>> even choose to store them, see below).  This does generally pose a
+>>>> challenge for maintaining prior_version.  It seems like it shouldn=
+'t
+>>>> be much of a problem since rollbacks can only happen on prepared l=
+og
+>>>> entries which haven't been applied, so log merging can never resul=
+t in a divergent entry causing a missing object.  I think we can get by=
+ without it then?
+>>>>
+>>>> We can go further with the above and actually never persist a log
+>>>> entry on a shard which it did not participate in.  As long as peer=
+ing
+>>>> works correctly, the union of the logs we got must have all entrie=
+s.
+>>>> The primary will need to keep a complete copy in memory to manage =
+dup op detection and recovery, however.
+>>>
+>>> That sounds more complex to me.  Maybe instead we could lazily pers=
+ist
+>>> the entries (on the next pg write) so that it is always a contiguou=
+s sequence?
+>>>
+>>>> 2) above can also be done much more efficiently.  Some codes will
+>>>> allow the parity chunks to be reconstructed more efficiently, so s=
+ome
+>>>> thought will have to go into restructuring the plugin interface to
+>>>> allow more efficient
+>>>
+>>> Hopefully the stripe size is chosen such that most writes will end =
+up
+>>> being full stripe writes (we should figure out if the EC performanc=
+e
+>>> degrades significantly in that case?).
+>>>
+>>> An alternative would be to do something like
+>>>
+>>> 1) client sends write to primary
+>>> 2) primary sends prepare to the first M+1 shards, who write it in a
+>>> temporary object/location
+>>> 3) primary acks write once they ack
+>>> 4) asynchronously, primary recalculates the affected stripes and se=
+nds
+>>> an overwrite.
+>>>
+>>>  - step 4 doesn't need to be 2-phase, since we have the original da=
+ta
+>>> persisted already on >M shards
+>>>  - the client-observed latency is bounded by only M+1 OSDs (not
+>>> acting.size())
+>>>
+>>> I suspect you discussed this option, though, and have other concern=
+s
+>>> around its complexity?
+>>>
+>>> sage
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
  in
