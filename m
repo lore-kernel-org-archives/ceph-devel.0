@@ -1,183 +1,242 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: ceph-mon terminated with status 28
-Date: Mon, 14 Dec 2015 16:46:52 -0500 (EST)
-Message-ID: <1465638247.45060213.1450129612249.JavaMail.zimbra@redhat.com>
-References: <DM2PR12MB0556410B658CF096B4F3326C9BEC0@DM2PR12MB0556.namprd12.prod.outlook.com> <1290007151.43805078.1450045125175.JavaMail.zimbra@redhat.com> <SN1PR12MB05583004753B74FFF2745DAA9BED0@SN1PR12MB0558.namprd12.prod.outlook.com>
+From: Martin Millnert <martin@millnert.se>
+Subject: Re: Improving Data-At-Rest encryption in Ceph
+Date: Mon, 14 Dec 2015 22:52:52 +0100
+Message-ID: <1450129972.1035.15.camel@millnert.se>
+References: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:33693 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932273AbbLNVqz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 16:46:55 -0500
-In-Reply-To: <SN1PR12MB05583004753B74FFF2745DAA9BED0@SN1PR12MB0558.namprd12.prod.outlook.com>
+Received: from ncis.millnert.se ([185.19.66.196]:57867 "EHLO mail.millnert.se"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932273AbbLNVwy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 14 Dec 2015 16:52:54 -0500
+In-Reply-To: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tom Deneau <tom.deneau@amd.com>
-Cc: ceph-devel@vger.kernel.org
+To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Adam Kupczyk <akupczyk@mirantis.com>
 
------ Original Message -----
-> From: "Tom Deneau" <tom.deneau@amd.com>
-> To: "Brad Hubbard" <bhubbard@redhat.com>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Tuesday, 15 December, 2015 3:21:27 AM
-> Subject: RE: ceph-mon terminated with status 28
+On Mon, 2015-12-14 at 14:17 +0100, Radoslaw Zarzynski wrote:
+> Hello Folks,
 >=20
-> Thanks, Brad.  That was the problem.
-
-Np.
-
+> I would like to publish a proposal regarding improvements to Ceph
+> data-at-rest encryption mechanism. Adam Kupczyk and I worked
+> on that in last weeks.
 >=20
-> Is there a reason why we don't log more descriptive info for this kin=
-d of
-> failure?
-
-I guess it may not have been anticipated that init would swallow these =
-types of
-errors early in the process and just report the return code.
-
-If you wouldn't mind opening a tracker for "Fatal errors at start-up ar=
-e not
-logged", or something similar,  I can take a look at getting some meani=
-ngful log
-entries reported during these early failures.
-
-Let me know the tracker number.
-
-Cheers,
-Brad
-
+> Initially we considered several architectural approaches and made
+> several iterations of discussions with Intel storage group. The propo=
+sal
+> is condensed description of the solution we see as the most promising
+> one.
 >=20
-> -- Tom
+> We are open to any comments and questions.
 >=20
-> > -----Original Message-----
-> > From: Brad Hubbard [mailto:bhubbard@redhat.com]
-> > Sent: Sunday, December 13, 2015 4:19 PM
-> > To: Deneau, Tom
-> > Cc: ceph-devel@vger.kernel.org
-> > Subject: Re: ceph-mon terminated with status 28
-> >=20
-> > ----- Original Message -----
-> > > From: "Tom Deneau" <tom.deneau@amd.com>
-> > > To: ceph-devel@vger.kernel.org
-> > > Sent: Sunday, 13 December, 2015 11:49:16 PM
-> > > Subject: ceph-mon terminated with status 28
-> > >
-> > > I am trying to understand the following failure:
-> > >
-> > > A small cluster was running fine, and then was left unused for a =
-while.
-> > > When I went to try to use it again, the mon socket wasn't there a=
-nd I
-> > > could see that ceph-mon was not running.  I saw the lines below a=
-t the
-> > > end of dmesg output.
-> > > When I tried to restart ceph-mon using sudo start ceph-mon id=3Dm=
-onhost,
-> > > I got the same set of errors newly appended to dmesg output.
-> > >
-> > > I don't see anything more descriptive in /var/log/ceph/ceph-mon.l=
-og,
-> > > just the recording of new mon processes starting.
-> > >
-> > > In this particular small cluster, the mon process was running on =
-the
-> > > same node with 7 osd processes.  sudo initctl list shows that the=
- osd
-> > > procs are still up, although logging the fact that they can't
-> > > communicate with the mon socket.
-> > >
-> > > Is there someplace else I should look for more details as to why =
-mon
-> > > is down and can't be restarted?
-> > >
-> > > -- Tom Deneau
-> > >
-> > > dmesg output:
-> > > --------------
-> > >  init: ceph-mon (ceph/monhost) main process (16538) terminated wi=
-th
-> > > status 28
-> > >  init: ceph-mon (ceph/monhost) main process ended, respawning
-> > >  init: ceph-create-keys main process (16227) killed by TERM signa=
+> Regards,
+> Adam Kupczyk
+> Radoslaw Zarzynski
+>=20
+>=20
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> Summary
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> Data at-rest encryption is mechanism for protecting data center
+> operator from revealing content of physical carriers.
+>=20
+> Ceph already implements a form of at rest encryption. It is performed
+> through dm-crypt as intermediary layer between OSD and its physical
+> storage. The proposed at rest encryption mechanism will be orthogonal
+> and, in some ways, superior to already existing solution.
+>=20
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> Owners
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> * Radoslaw Zarzynski (Mirantis)
+> * Adam Kupczyk (Mirantis)
+>=20
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> Interested Parties
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> If you are interested in contributing to this blueprint, or want to b=
+e
+> a "speaker" during the Summit session, list your name here.
+>=20
+> Name (Affiliation)
+> Name (Affiliation)
+> Name
+>=20
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> Current Status
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> Current data at rest encryption is achieved through dm-crypt placed
+> under OSD=E2=80=99s filestore. This solution is a generic one and can=
+not
+> leverage Ceph-specific characteristics. The best example is that
+> encryption is done multiple times - one time for each replica. Anothe=
+r
+> issue is lack of granularity - either OSD encrypts nothing, or OSD
+> encrypts everything (with dm-crypt on).
+
+All or nothing is some times a desired function of encryption.
+"In-betweens" are tricky.
+
+Additionally, dm-crypt is AFAICT fairly performant since at least
+there's no need to context switch per crypto-op, since it sits in the d=
+m
+IO path within kernel.
+
+These two points are not necessarily a critique of your proposal.
+
+> Cryptographic keys are stored on filesystem of storage node that host=
+s
+> OSDs. Changing them require redeploying the OSDs.
+
+Not very familiar with what deployment technique of dm-crypt you refer
+to (don't use ceph-deploy personally). But the LUKS FDE suite does allo=
+w
+for separating encryption key from activation key (or whatever it is
+called).
+
+> The best way to address those issues seems to be introducing
+> encryption into Ceph OSD.
+>=20
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> Detailed Description
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> In addition to the currently available solution, Ceph OSD would
+> accommodate encryption component placed in the replication mechanisms=
+=2E
+>=20
+> Data incoming from Ceph clients would be encrypted by primary OSD. It
+> would replicate ciphertext to non-primary members of an acting set.
+> Data sent to Ceph client would be decrypted by OSD handling read
+> operation. This allows to:
+> * perform only one encryption per write,
+> * achieve per-pool key granulation for both key and encryption itself=
+=2E
+
+I.e. the primary OSD's key for the PG in question, would be the one use=
+d
+for all replicas of the data, per acting set. I.e. granularity of
+actually one key per acting set, controlled by primary OSD?
+
+> Unfortunately, having always and everywhere the same key for a given
+> pool is unacceptable - it would make cluster migration and key change
+> extremely burdensome process. To address those issues crypto key
+> versioning would be introduced. All RADOS objects inside single
+> placement group stored on a given OSD would use the same crypto key
+> version.
+
+This seems to add key versioning on the primary OSD.
+
+> The same PG on other replica may use different version of the
+> same, per pool-granulated key.
+
+Attempt to rewrite to see if I parsed correctly: Within a PG's acting
+set, a non-primary OSD can use another version of the per-pool key.
+That seems fair, to support asynchronous key roll forward/backward.
+
+> In typical case ciphertext data transferred from OSD to OSD can be
+> used without change. This is when both OSDs have the same crypto key
+> version for given placement group. In rare cases when crypto keys are
+> different (key change or transition period) receiving OSD will recryp=
+t
+> with local key versions.
+
+Doesn't this presume the receiving OSD always has more up to date set o=
+f
+keys than the sending OSD?
+What if sending OSD has a newer key than the receiving OSD?
+
+> For compression to be effective it must be done before encryption. Du=
+e
+> to that encryption may be applied differently for replication pools
+> and EC pools. Replicated pools do not implement compression; for thos=
+e
+> pools encryption is applied right after data enters OSD. For EC pools
+> encryption is applied after compressing. When compression will be
+> implemented for replicated pools, it must be placed before encryption=
+=2E
+>=20
+> Ceph currently has thin abstraction layer over block ciphers
+> (CryptoHandler, CryptoKeyHandler). We want to extend this API to
+> introduce initialization vectors, chaining modes and asynchronous
+> operations. Implementation of this API may be based on AF_ALG kernel
+> interface. This assures the ability to use hardware accelerations
+> already implemented in Linux kernel. Moreover, due to working on
+> bigger chunks (dm-crypt operates on 512 byte long sectors) the raw
+> encryption performance may be even higher.
+
+
+> The encryption process must not impede random reads and random writes
+> to RADOS objects.
+
+That's a brave statement. :-)
+
+>  Solution for this is to create encryption/decryption
+> process that will be applicable for arbitrary data range. This can be
+> done most easily by applying chaining mode that doesn=E2=80=99t impos=
+e
+> dependencies between subsequent data chunks. Good candidates are
+> CTR[1] and XTS[2].
+>=20
+> Encryption-related metadata would be stored in extended attributes.
+>=20
+> In order to coordinate encryption across acting set, all replicas wil=
 l
-> > >  init: ceph-mon (ceph/monhost) main process (16546) terminated wi=
-th
-> > > status 28
-> > >  init: ceph-mon (ceph/monhost) main process ended, respawning
-> > >  init: ceph-create-keys main process (16548) killed by TERM signa=
-l
-> > >  init: ceph-mon (ceph/monhost) main process (16556) terminated wi=
-th
-> > > status 28
-> > >  init: ceph-mon (ceph/monhost) main process ended, respawning
-> > >  init: ceph-create-keys main process (16558) killed by TERM signa=
-l
-> > >  init: ceph-mon (ceph/monhost) main process (16566) terminated wi=
-th
-> > > status 28
-> > >  init: ceph-mon (ceph/monhost) respawning too fast, stopped
-> > >  init: ceph-create-keys main process (16568) killed by TERM signa=
-l
-> >=20
-> > It looks like it's complaining about lack of space?
-> >=20
-> > src/ceph_mon.cc:
-> >=20
-> > 204 int main(int argc, const char **argv)=C2=B7
-> > 205 {
-> > ----8<----
-> > 475   {
-> > 476     // check fs stats. don't start if it's critically close to =
-full.
-> > 477     ceph_data_stats_t stats;
-> > 478     int err =3D get_fs_stats(stats, g_conf->mon_data.c_str());
-> > 479     if (err < 0) {
-> > 480       cerr << "error checking monitor data's fs stats: " <<
-> > cpp_strerror(err)
-> > 481            << std::endl;
-> > 482       exit(-err);
-> > 483     }
-> > 484     if (stats.avail_percent <=3D g_conf->mon_data_avail_crit) {
-> > 485       cerr << "error: monitor data filesystem reached concernin=
-g
-> > levels of"
-> > 486            << " available storage space (available: "
-> > 487            << stats.avail_percent << "% " <<
-> > prettybyte_t(stats.byte_avail)
-> > 488            << ")\nyou may adjust 'mon data avail crit' to a low=
-er
-> > value"
-> > 489            << " to make this go away (default: " << g_conf-
-> > >mon_data_avail_crit
-> > 490            << "%)\n" << std::endl;
-> > 491       exit(ENOSPC);
-> > 492     }
-> >=20
-> > #define ENOSPC          28      /* No space left on device */
-> >=20
-> > Try starting ceph-mon from the command line and see if you get the =
-above
-> > message.
-> >=20
-> > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-de=
-vel"
-> > > in the body of a message to majordomo@vger.kernel.org More majord=
-omo
-> > > info at  http://vger.kernel.org/majordomo-info.html
-> > >
-> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
-=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
-=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=
-=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=
-=EF=BF=BD=EF=BF=BD
+> share information about crypto key versions they use. Real
+> cryptographic keys never be stored permanently by Ceph OSD. Instead,
+> it would be gathered from monitors. Key management improvements will
+> be addressed in separate task based on dedicated proposal [3].
+
+Key management is indeed the Achilles heel of any cluster solution like
+this, and depending on requirements sooner or later descends into some
+sort of TPM or similar, I guess.  I.e. "to trust a computer someone els=
+e
+may have arbitrary physical access to."
+
+/M
+
+> [1] https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Coun=
+ter_.28CTR.29
+>=20
+> [2] https://en.wikipedia.org/wiki/Disk_encryption_theory#XEX-based_tw=
+eaked-codebook_mode_with_ciphertext_stealing_.28XTS.29
+>=20
+> [3] http://tracker.ceph.com/projects/ceph/wiki/Osd_-_simple_ceph-mon_=
+dm-crypt_key_management
+>=20
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> Work items
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> Coding tasks
+> * Extended Crypto API (CryptoHandler, CryptoKeyHandler).
+> * Encryption for replicated pools.
+> * Encryption for EC pools.
+> * Key management.
+>=20
+> Build / release tasks
+> * Unit tests for extended Crypto API.
+> * Functional tests for encrypted replicated pools.
+> * Functional tests for encrypted EC pools.
+>=20
+> Documentation tasks
+> * Document extended Crypto API.
+> * Document migration procedures.
+> * Document crypto key creation and versioning.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
