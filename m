@@ -1,81 +1,72 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: Stable release HOWTO: hunt for lost page
-Date: Mon, 14 Dec 2015 15:58:47 +0100
-Message-ID: <566ED927.7040400@dachary.org>
-References: <566ED01C.2020306@dachary.org>
- <CAP3mxSwdrEN72xxCyCsvjkT5DSrk+jw3W2DnQ5sUL1grHZhFBw@mail.gmail.com>
+Subject: misc: ignore some unusable block devices
+Date: Mon, 14 Dec 2015 16:12:16 +0100
+Message-ID: <566EDC50.3010901@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="CeA504fJNCFsPVKFG7DfJKxMKqJoOpmq6"
+ boundary="IxkGH1k9Uw76As15E1879XsssK7Kj2Ex2"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:49865 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:49878 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751334AbbLNO6t (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 09:58:49 -0500
-In-Reply-To: <CAP3mxSwdrEN72xxCyCsvjkT5DSrk+jw3W2DnQ5sUL1grHZhFBw@mail.gmail.com>
+	with ESMTP id S1751700AbbLNPMa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Dec 2015 10:12:30 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Cc: Nathan Cutler <ncutler@suse.cz>, Abhishek L <abhishek.lekshmanan@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Robin H. Johnson" <robbat2@gentoo.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---CeA504fJNCFsPVKFG7DfJKxMKqJoOpmq6
+--IxkGH1k9Uw76As15E1879XsssK7Kj2Ex2
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi Abhishek,
+Hi Robin,
 
-On 14/12/2015 15:40, Abhishek Varshney wrote:
-> Hi Loic,
->=20
-> I have revived the page at
-> http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_triage_incomi=
-ng_backport_pull_requests
-> from https://web.archive.org with a version cached on 4th October.
+I removed misc: ignore some unusable block devices 9c5eaeccb807d103884f46=
+d174798dd982092696 from the openstack branch because it fails on CentOS 7=
+ with
+the following. Could you please make a new pull request with it so we can=
+ keep testing it there ?
 
-Perfect ! It has not changed much in the past few month, I can't think of=
- something we added that would be missing.
+Thanks !
 
-> Please review it, in case there are any changes to it.
->=20
-> Disabling the page deletion sounds like a good idea.
-
-Done.
+2015-12-14T14:37:36.305 INFO:teuthology.orchestra.run.target167114236178:=
+Running: 'sudo blkid -o export -p /dev/vdc'
+2015-12-14T14:37:36.731 ERROR:teuthology.contextutil:Saw exception from n=
+ested tasks
+Traceback (most recent call last):
+  File "/home/ubuntu/teuthology/teuthology/contextutil.py", line 28, in n=
+ested
+    vars.append(enter())
+  File "/usr/lib/python2.7/contextlib.py", line 17, in __enter__
+    return self.gen.next()
+  File "/home/ubuntu/src/ceph-qa-suite_master/tasks/ceph.py", line 357, i=
+n cluster
+    devs =3D teuthology.get_scratch_devices(remote)
+  File "/home/ubuntu/teuthology/teuthology/misc.py", line 860, in get_scr=
+atch_devices
+    stderr=3DStringIO(),
+  File "/home/ubuntu/teuthology/teuthology/orchestra/remote.py", line 156=
+, in run
+    r =3D self._runner(client=3Dself.ssh, name=3Dself.shortname, **kwargs=
+)
+  File "/home/ubuntu/teuthology/teuthology/orchestra/run.py", line 378, i=
+n run
+    r.wait()
+  File "/home/ubuntu/teuthology/teuthology/orchestra/run.py", line 114, i=
+n wait
+    label=3Dself.label)
+CommandFailedError: Command failed on target167114236178 with status 2: '=
+sudo blkid -o export -p /dev/vdc'
 
 Cheers
-
->=20
-> Thanks
-> Abhishek
->=20
-> On Mon, Dec 14, 2015 at 7:50 PM, Loic Dachary <loic@dachary.org> wrote:=
-
->> Hi,
->>
->> It looks like we've lost http://tracker.ceph.com/projects/ceph-release=
-s/wiki/HOWTO_triage_incoming_backport_pull_requests . We can re-write it,=
- of course, it's not that complex. But looking at the index I can't find =
-it ( http://tracker.ceph.com/projects/ceph-releases/wiki/index ) and the =
-activity backlog ( http://tracker.ceph.com/projects/ceph-releases/activit=
-y?utf8=3D%E2%9C%93&show_issues=3D1&show_wiki_edits=3D1 ) does not show an=
- event when a page is deleted.
->>
->> I suppose it's an accident and I propose we disable the page deletion =
-feature to avoid such mistakes in the future (pages can be renamed to thi=
-ngs like REMOVE-ME instead ;-).
->>
->> What do you think ?
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---CeA504fJNCFsPVKFG7DfJKxMKqJoOpmq6
+--IxkGH1k9Uw76As15E1879XsssK7Kj2Ex2
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -83,9 +74,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlZu2ScACgkQ8dLMyEl6F23JzQCgiZ1YkbbgG16i1sv+rvPbeQD/
-PrwAn1++R6dEhNiWNfhHavGlT086keId
-=x1fT
+iEYEARECAAYFAlZu3FAACgkQ8dLMyEl6F20XIwCeN0Iq39fGHdEOTvJPViX4NPjg
+GoYAoIYURtCHrRoX3Xiem84++G1pDHDg
+=WqpM
 -----END PGP SIGNATURE-----
 
---CeA504fJNCFsPVKFG7DfJKxMKqJoOpmq6--
+--IxkGH1k9Uw76As15E1879XsssK7Kj2Ex2--
