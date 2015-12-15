@@ -1,101 +1,73 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: Improving Data-At-Rest encryption in Ceph
-Date: Tue, 15 Dec 2015 18:31:12 -0500 (EST)
-Message-ID: <444466180.39100292.1450222272774.JavaMail.zimbra@redhat.com>
-References: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com> <20151215142304.GI31644@suse.de>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: FreeBSD is receiving traps on os/FileJournal.cc:1036
+Date: Wed, 16 Dec 2015 00:56:25 +0100
+Message-ID: <5670A8A9.3020708@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:40241 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751954AbbLOXbP convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Dec 2015 18:31:15 -0500
-In-Reply-To: <20151215142304.GI31644@suse.de>
+Received: from smtp.digiware.nl ([31.223.170.169]:11990 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751059AbbLPAJW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 15 Dec 2015 19:09:22 -0500
+Received: from rack1.digiware.nl (unknown [127.0.0.1])
+	by smtp.digiware.nl (Postfix) with ESMTP id 04F3F153430
+	for <ceph-devel@vger.kernel.org>; Wed, 16 Dec 2015 01:09:21 +0100 (CET)
+Received: from [IPv6:2001:4cb8:3:1:3137:f73:6440:a2ed] (unknown [IPv6:2001:4cb8:3:1:3137:f73:6440:a2ed])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.digiware.nl (Postfix) with ESMTPSA id 3D038153408
+	for <ceph-devel@vger.kernel.org>; Wed, 16 Dec 2015 00:56:27 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lars Marowsky-Bree <lmb@suse.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
 Hi,
 
-Thanks for this detailed response.
+I'm receiving traps when running the tests going with 'gmake check'
+and on one of the tests it traps on:
 
------ Original Message -----
-> From: "Lars Marowsky-Bree" <lmb@suse.com>
-> To: "Ceph Development" <ceph-devel@vger.kernel.org>
-> Sent: Tuesday, December 15, 2015 9:23:04 AM
-> Subject: Re: Improving Data-At-Rest encryption in Ceph
+os/FileJournal.cc:1036
+void FileJournal::align_bl(off64_t pos, bufferlist& bl)
+{
+  // make sure list segments are page aligned
+  if (directio && (!bl.is_aligned(block_size) ||
+                   !bl.is_n_align_sized(CEPH_MINIMUM_BLOCK_SIZE))) {
+    assert(0 == "bl should be align");
+    if ((bl.length() & (CEPH_MINIMUM_BLOCK_SIZE - 1)) != 0 ||
+        (pos & (CEPH_MINIMUM_BLOCK_SIZE - 1)) != 0)
+      dout(0) << "rebuild_page_aligned failed, " << bl << dendl;
+    assert((bl.length() & (CEPH_MINIMUM_BLOCK_SIZE - 1)) == 0);
+    assert((pos & (CEPH_MINIMUM_BLOCK_SIZE - 1)) == 0);
+  }
+}
 
->=20
-> It's not yet perfect, but I think the approach is superior to being
-> implemented in Ceph natively. If there's any encryption that should b=
-e
-> implemented in Ceph, I believe it'd be the on-the-wire encryption to
-> protect against evasedroppers.
+And then I get confused with the following commit in other tests:
+commit 8ed724222651812c2ee8cc3804dc1f54c973897d
+Author: Kefu Chai <kchai@redhat.com>
+Date:   Fri Sep 4 01:23:31 2015 +0800
 
-++
+    test/bufferlist: do not expect !is_page_aligned() after unaligned
+rebuild
 
->=20
-> Other scenarios would require client-side encryption.
+    if the size of a bufferlist is page aligned we allocate page aligned
+    memory chunk for it when rebuild() is called. otherwise we just call
+    the plain new() to allocate new memory chunk for holding the continuous
+    buffer. but we should not expect that `new` allocator always returns
+    unaligned memory chunks. instead, it *could* return page aligned
+    memory chunk as long as the allocator feels appropriate. so, the
+    `EXPECT_FALSE(bl.is_page_aligned())` after the `rebuild()` call is
+    removed.
 
-++
+    Signed-off-by: Kefu Chai <kchai@redhat.com>
 
->=20
-> > Cryptographic keys are stored on filesystem of storage node that ho=
-sts
-> > OSDs. Changing them require redeploying the OSDs.
->=20
-> This is solvable by storing the key on an external key server.
+Could these 2 be related, and do I have an alignment problem when
+allocating buffers and bufferlists....
 
-++
+Note that I also have not solved the illegal writes to _len in
+bufferlists when running unittest_erasure_code_shec_arguments.
 
->=20
-> Changing the key is only necessary if the key has been exposed. And w=
-ith
-> dm-crypt, that's still possible - it's not the actual encryption key
-> that's stored, but the secret that is needed to unlock it, and that c=
-an
-> be re-encrypted quite fast. (In theory; it's not implemented yet for
-> the Ceph OSDs.)
->=20
->=20
-> > Data incoming from Ceph clients would be encrypted by primary OSD. =
-It
-> > would replicate ciphertext to non-primary members of an acting set.
->=20
-> This still exposes data in coredumps or on swap on the primary OSD, a=
-nd
-> metadata on the secondaries.
->=20
->=20
-> Regards,
->     Lars
->=20
-> --
-> Architect Storage/HA
-> SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham No=
-rton, HRB
-> 21284 (AG N=C3=BCrnberg)
-> "Experience is the name everyone gives to their mistakes." -- Oscar W=
-ilde
->=20
+So any suggestions as to where to look at for this, are welcome.
 
+--WjW
 
---=20
---=20
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
