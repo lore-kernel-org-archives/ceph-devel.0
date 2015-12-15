@@ -1,256 +1,139 @@
-From: Adam Kupczyk <akupczyk@mirantis.com>
-Subject: Re: Improving Data-At-Rest encryption in Ceph
-Date: Tue, 15 Dec 2015 11:04:17 +0100
-Message-ID: <CAHMeWhGUBExWAg1OOVf4Ec0O5Jhd33qkA0OOMYAGm6h=CmfVYw@mail.gmail.com>
-References: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
-	<CAJ4mKGZP3oHt6Rgsp_pogcAZEmBzcQzDc4vzESDjPyoxJKoBUw@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Issue with Ceph File System and LIO
+Date: Tue, 15 Dec 2015 10:12:27 +0000
+Message-ID: <CALe9h7eH+OgKLH0EjR1ry8wPs5s2NNE7SyTtbCsA_aQHRfBQ2A@mail.gmail.com>
+References: <CA+9C14a0E9bc+GL-QiAxPD_B9_PRhEE4PRG2jAa9REWkdNQFiA@mail.gmail.com>
+ <566FDCCD.4090800@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:37470 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933271AbbLOKEX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Dec 2015 05:04:23 -0500
-Received: by mail-wm0-f46.google.com with SMTP id n186so17597601wmn.0
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Dec 2015 02:04:23 -0800 (PST)
-In-Reply-To: <CAJ4mKGZP3oHt6Rgsp_pogcAZEmBzcQzDc4vzESDjPyoxJKoBUw@mail.gmail.com>
+Received: from mail-lf0-f46.google.com ([209.85.215.46]:32769 "EHLO
+	mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964822AbbLOKMt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Dec 2015 05:12:49 -0500
+Received: by mail-lf0-f46.google.com with SMTP id p203so2893217lfa.0
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Dec 2015 02:12:48 -0800 (PST)
+In-Reply-To: <566FDCCD.4090800@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Radoslaw Zarzynski <rzarzynski@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Mike Christie <mchristi@redhat.com>
+Cc: Eric Eastman <eric.eastman@keepertech.com>, Ceph Development <ceph-devel@vger.kernel.org>, Zheng Yan <ukernel@gmail.com>
 
-On Mon, Dec 14, 2015 at 9:28 PM, Gregory Farnum <gfarnum@redhat.com> wr=
-ote:
->
-> On Mon, Dec 14, 2015 at 5:17 AM, Radoslaw Zarzynski
-> <rzarzynski@mirantis.com> wrote:
-> > Hello Folks,
-> >
-> > I would like to publish a proposal regarding improvements to Ceph
-> > data-at-rest encryption mechanism. Adam Kupczyk and I worked
-> > on that in last weeks.
-> >
-> > Initially we considered several architectural approaches and made
-> > several iterations of discussions with Intel storage group. The pro=
-posal
-> > is condensed description of the solution we see as the most promisi=
-ng
-> > one.
-> >
-> > We are open to any comments and questions.
-> >
-> > Regards,
-> > Adam Kupczyk
-> > Radoslaw Zarzynski
-> >
-> >
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > Summary
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> >
-> > Data at-rest encryption is mechanism for protecting data center
-> > operator from revealing content of physical carriers.
-> >
-> > Ceph already implements a form of at rest encryption. It is perform=
-ed
-> > through dm-crypt as intermediary layer between OSD and its physical
-> > storage. The proposed at rest encryption mechanism will be orthogon=
-al
-> > and, in some ways, superior to already existing solution.
-> >
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > Owners
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> >
-> > * Radoslaw Zarzynski (Mirantis)
-> > * Adam Kupczyk (Mirantis)
-> >
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > Interested Parties
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> >
-> > If you are interested in contributing to this blueprint, or want to=
- be
-> > a "speaker" during the Summit session, list your name here.
-> >
-> > Name (Affiliation)
-> > Name (Affiliation)
-> > Name
-> >
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > Current Status
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> >
-> > Current data at rest encryption is achieved through dm-crypt placed
-> > under OSD=E2=80=99s filestore. This solution is a generic one and c=
-annot
-> > leverage Ceph-specific characteristics. The best example is that
-> > encryption is done multiple times - one time for each replica. Anot=
-her
-> > issue is lack of granularity - either OSD encrypts nothing, or OSD
-> > encrypts everything (with dm-crypt on).
-> >
-> > Cryptographic keys are stored on filesystem of storage node that ho=
-sts
-> > OSDs. Changing them require redeploying the OSDs.
-> >
-> > The best way to address those issues seems to be introducing
-> > encryption into Ceph OSD.
-> >
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > Detailed Description
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> >
-> > In addition to the currently available solution, Ceph OSD would
-> > accommodate encryption component placed in the replication mechanis=
-ms.
-> >
-> > Data incoming from Ceph clients would be encrypted by primary OSD. =
-It
-> > would replicate ciphertext to non-primary members of an acting set.
-> > Data sent to Ceph client would be decrypted by OSD handling read
-> > operation. This allows to:
-> > * perform only one encryption per write,
-> > * achieve per-pool key granulation for both key and encryption itse=
-lf.
-> >
-> > Unfortunately, having always and everywhere the same key for a give=
-n
-> > pool is unacceptable - it would make cluster migration and key chan=
-ge
-> > extremely burdensome process. To address those issues crypto key
-> > versioning would be introduced. All RADOS objects inside single
-> > placement group stored on a given OSD would use the same crypto key
-> > version. The same PG on other replica may use different version of =
-the
-> > same, per pool-granulated key.
-> >
-> > In typical case ciphertext data transferred from OSD to OSD can be
-> > used without change. This is when both OSDs have the same crypto ke=
-y
-> > version for given placement group. In rare cases when crypto keys a=
-re
-> > different (key change or transition period) receiving OSD will recr=
-ypt
-> > with local key versions.
->
-> I don't understand this part at all. Do you plan to read and rewrite
-> the entire PG whenever you change the "key version"? How often do you
-> plan to change these keys? What is even the point of changing them,
-> since anybody who can control an OSD can grab the entire current key
-> set?
-We envision that key change will happen very infrequently. Usually in
-reaction to some possible security breach.
-After key version is incremented, nothing happens automatically. Old
-key is used for as long as  PG is not empty. When first RADOS object
-is created, the current key version is locked to PG.
-There is no solution when someone gets control over OSD - either by
-running custom OSD binary or extracting data by impersonating client.
-It is outside of scope of at-rest-encryption. We only addressed cases
-when media storage somehow leaves datacenter premises. Ability to
-change key is necessary, since we need procedure to recover data
-security after keys are compromised.
->
-> > For compression to be effective it must be done before encryption. =
-Due
-> > to that encryption may be applied differently for replication pools
-> > and EC pools. Replicated pools do not implement compression; for th=
-ose
-> > pools encryption is applied right after data enters OSD. For EC poo=
-ls
-> > encryption is applied after compressing. When compression will be
-> > implemented for replicated pools, it must be placed before encrypti=
-on.
->
-> So this means you'll be encrypting the object data, but not the omap
-> nor xattrs, and not the file names on disk. Is that acceptable to
-> people? It's probably fine for a lot of rbd use cases, but not for
-> RGW, CephFS, nor raw RADOS where meaningful metadata (and even *data*=
-)
-> is stored in those regions. I'd rather a solution worked on the full
-> data set. :/
+On Tue, Dec 15, 2015 at 9:26 AM, Mike Christie <mchristi@redhat.com> wrote:
+> On 12/15/2015 12:08 AM, Eric Eastman wrote:
+>> I am testing Linux Target SCSI, LIO, with a Ceph File System backstore
+>> and I am seeing this error on my LIO gateway.  I am using Ceph v9.2.0
+>> on a 4.4rc4 Kernel, on Trusty, using a kernel mounted Ceph File
+>> System.  A file on the Ceph File System is exported via iSCSI to a
+>> VMware ESXi 5.0 server, and I am seeing this error when doing a lot of
+>> I/O on the ESXi server.   Is this a LIO or a Ceph issue?
+>>
+>> [Tue Dec 15 00:46:55 2015] ------------[ cut here ]------------
+>> [Tue Dec 15 00:46:55 2015] WARNING: CPU: 0 PID: 1123421 at
+>> /home/kernel/COD/linux/fs/ceph/addr.c:125
+>> ceph_set_page_dirty+0x230/0x240 [ceph]()
+>> [Tue Dec 15 00:46:55 2015] Modules linked in: iptable_filter ip_tables
+>> x_tables xfs rbd iscsi_target_mod vhost_scsi tcm_qla2xxx ib_srpt
+>> tcm_fc tcm_usb_gadget tcm_loop target_core_file target_core_iblock
+>> target_core_pscsi target_core_user target_core_mod ipmi_devintf vhost
+>> qla2xxx ib_cm ib_sa ib_mad ib_core ib_addr libfc scsi_transport_fc
+>> libcomposite udc_core uio configfs ipmi_ssif ttm drm_kms_helper
+>> gpio_ich drm i2c_algo_bit fb_sys_fops coretemp syscopyarea ipmi_si
+>> sysfillrect ipmi_msghandler sysimgblt kvm acpi_power_meter 8250_fintek
+>> irqbypass hpilo shpchp input_leds serio_raw lpc_ich i7core_edac
+>> edac_core mac_hid ceph libceph libcrc32c fscache bonding lp parport
+>> mlx4_en vxlan ip6_udp_tunnel udp_tunnel ptp pps_core hid_generic
+>> usbhid hid hpsa mlx4_core psmouse bnx2 scsi_transport_sas fjes [last
+>> unloaded: target_core_mod]
+>> [Tue Dec 15 00:46:55 2015] CPU: 0 PID: 1123421 Comm: iscsi_trx
+>> Tainted: G        W I     4.4.0-040400rc4-generic #201512061930
+>> [Tue Dec 15 00:46:55 2015] Hardware name: HP ProLiant DL360 G6, BIOS
+>> P64 01/22/2015
+>> [Tue Dec 15 00:46:55 2015]  0000000000000000 00000000fdc0ce43
+>> ffff880bf38c38c0 ffffffff813c8ab4
+>> [Tue Dec 15 00:46:55 2015]  0000000000000000 ffff880bf38c38f8
+>> ffffffff8107d772 ffffea00127a8680
+>> [Tue Dec 15 00:46:55 2015]  ffff8804e52c1448 ffff8804e52c15b0
+>> ffff8804e52c10f0 0000000000000200
+>> [Tue Dec 15 00:46:55 2015] Call Trace:
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff813c8ab4>] dump_stack+0x44/0x60
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff8107d772>] warn_slowpath_common+0x82/0xc0
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff8107d8ba>] warn_slowpath_null+0x1a/0x20
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01fadb0>]
+>> ceph_set_page_dirty+0x230/0x240 [ceph]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff81188770>] ?
+>> pagecache_get_page+0x150/0x1c0
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01fe338>] ?
+>> ceph_pool_perm_check+0x48/0x700 [ceph]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff8119301d>] set_page_dirty+0x3d/0x70
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01fcd7e>]
+>> ceph_write_end+0x5e/0x180 [ceph]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff813dc006>] ?
+>> iov_iter_copy_from_user_atomic+0x156/0x220
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff81187bc4>]
+>> generic_perform_write+0x114/0x1c0
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01f818a>]
+>> ceph_write_iter+0xf8a/0x1050 [ceph]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc0205983>] ?
+>> ceph_put_cap_refs+0x143/0x320 [ceph]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff810b10ba>] ?
+>> check_preempt_wakeup+0xfa/0x220
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff811a7eec>] ? zone_statistics+0x7c/0xa0
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff813dd2ee>] ? copy_page_to_iter+0x5e/0xa0
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff816e5d22>] ?
+>> skb_copy_datagram_iter+0x122/0x250
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff812053f6>] vfs_iter_write+0x76/0xc0
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc02cbf88>]
+>> fd_do_rw.isra.5+0xd8/0x1e0 [target_core_file]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc02cc155>]
+>> fd_execute_rw+0xc5/0x2a0 [target_core_file]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc04696f2>]
+>> sbc_execute_rw+0x22/0x30 [target_core_mod]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc04681ef>]
+>> __target_execute_cmd+0x1f/0x70 [target_core_mod]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc0468da5>]
+>> target_execute_cmd+0x195/0x2a0 [target_core_mod]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05db89a>]
+>> iscsit_execute_cmd+0x20a/0x270 [iscsi_target_mod]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05e4aea>]
+>> iscsit_sequence_cmd+0xda/0x190 [iscsi_target_mod]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05eafbd>]
+>> iscsi_target_rx_thread+0x51d/0xe30 [iscsi_target_mod]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff8101566c>] ? __switch_to+0x1dc/0x5a0
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05eaaa0>] ?
+>> iscsi_target_tx_thread+0x1e0/0x1e0 [iscsi_target_mod]
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff8109c8b8>] kthread+0xd8/0xf0
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff8109c7e0>] ?
+>> kthread_create_on_node+0x1a0/0x1a0
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff817fc58f>] ret_from_fork+0x3f/0x70
+>> [Tue Dec 15 00:46:55 2015]  [<ffffffff8109c7e0>] ?
+>> kthread_create_on_node+0x1a0/0x1a0
+>> [Tue Dec 15 00:46:55 2015] ---[ end trace 4079437668c77cbb ]---
+>> [Tue Dec 15 00:47:45 2015] ABORT_TASK: Found referenced iSCSI task_tag: 95784927
+>> [Tue Dec 15 00:47:45 2015] ABORT_TASK: ref_tag: 95784927 already
+>> complete, skipping
 
-We intend to encrypt:
-- object data
-- omap values
-- xattr values
-We consider to encrypt:
-- object names
-- xattr names
-We are unable to encrypt:
-- omap names
-> -Greg
+Looks likely to be a kclient bug, as it's in the newish
+pool_perm_check path.  Perhaps we don't usually see this because we'd
+usually hit the permissions checks earlier (or during a read).
+
+CCing zyan, who will have a better idea than me.
+
+Eric: you should probably go ahead and open a ticket for this.
+
+John
+
+>>
 >
-> >
-> > Ceph currently has thin abstraction layer over block ciphers
-> > (CryptoHandler, CryptoKeyHandler). We want to extend this API to
-> > introduce initialization vectors, chaining modes and asynchronous
-> > operations. Implementation of this API may be based on AF_ALG kerne=
-l
-> > interface. This assures the ability to use hardware accelerations
-> > already implemented in Linux kernel. Moreover, due to working on
-> > bigger chunks (dm-crypt operates on 512 byte long sectors) the raw
-> > encryption performance may be even higher.
-> >
-> > The encryption process must not impede random reads and random writ=
-es
-> > to RADOS objects. Solution for this is to create encryption/decrypt=
-ion
-> > process that will be applicable for arbitrary data range. This can =
-be
-> > done most easily by applying chaining mode that doesn=E2=80=99t imp=
-ose
-> > dependencies between subsequent data chunks. Good candidates are
-> > CTR[1] and XTS[2].
-> >
-> > Encryption-related metadata would be stored in extended attributes.
-> >
-> > In order to coordinate encryption across acting set, all replicas w=
-ill
-> > share information about crypto key versions they use. Real
-> > cryptographic keys never be stored permanently by Ceph OSD. Instead=
-,
-> > it would be gathered from monitors. Key management improvements wil=
-l
-> > be addressed in separate task based on dedicated proposal [3].
-> >
-> >
-> > [1] https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Co=
-unter_.28CTR.29
-> >
-> > [2] https://en.wikipedia.org/wiki/Disk_encryption_theory#XEX-based_=
-tweaked-codebook_mode_with_ciphertext_stealing_.28XTS.29
-> >
-> > [3] http://tracker.ceph.com/projects/ceph/wiki/Osd_-_simple_ceph-mo=
-n_dm-crypt_key_management
-> >
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > Work items
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> >
-> > Coding tasks
-> > * Extended Crypto API (CryptoHandler, CryptoKeyHandler).
-> > * Encryption for replicated pools.
-> > * Encryption for EC pools.
-> > * Key management.
-> >
-> > Build / release tasks
-> > * Unit tests for extended Crypto API.
-> > * Functional tests for encrypted replicated pools.
-> > * Functional tests for encrypted EC pools.
-> >
-> > Documentation tasks
-> > * Document extended Crypto API.
-> > * Document migration procedures.
-> > * Document crypto key creation and versioning.
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> For writes, LIO just allocates pages using GFP_KERNEL, passes them to
+> sock_recvmsg to read the data into them, then passes them to the fs
+> using the function you see above, vfs_iter_write. So it does not do
+> anything fancy.
+>
+> Do we need to send specific types of pages to ceph?
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
