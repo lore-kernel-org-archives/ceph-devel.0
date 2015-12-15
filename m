@@ -1,79 +1,129 @@
-From: Adam Kupczyk <akupczyk@mirantis.com>
-Subject: Re: Improving Data-At-Rest encryption in Ceph
-Date: Tue, 15 Dec 2015 11:13:34 +0100
-Message-ID: <CAHMeWhEFu6FCc=wYLhtMJrtCYt+tYziYVxjhGALZWEV0YHgq9w@mail.gmail.com>
-References: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
-	<CAJ4mKGZP3oHt6Rgsp_pogcAZEmBzcQzDc4vzESDjPyoxJKoBUw@mail.gmail.com>
-	<1450130526.1035.24.camel@millnert.se>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: Issue with Ceph File System and LIO
+Date: Tue, 15 Dec 2015 20:05:40 +0800
+Message-ID: <CAAM7YAk=U7NqEujuMXAyem00NDJfx-TOYGgJez76f48HS6nt2A@mail.gmail.com>
+References: <CA+9C14a0E9bc+GL-QiAxPD_B9_PRhEE4PRG2jAa9REWkdNQFiA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:37269 "EHLO
-	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964822AbbLOKNg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Dec 2015 05:13:36 -0500
-Received: by mail-wm0-f42.google.com with SMTP id n186so17983322wmn.0
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Dec 2015 02:13:35 -0800 (PST)
-In-Reply-To: <1450130526.1035.24.camel@millnert.se>
+Received: from mail-lb0-f171.google.com ([209.85.217.171]:36493 "EHLO
+	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964921AbbLOMFm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Dec 2015 07:05:42 -0500
+Received: by mail-lb0-f171.google.com with SMTP id lt2so4148716lbb.3
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Dec 2015 04:05:41 -0800 (PST)
+In-Reply-To: <CA+9C14a0E9bc+GL-QiAxPD_B9_PRhEE4PRG2jAa9REWkdNQFiA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Millnert <martin@millnert.se>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Radoslaw Zarzynski <rzarzynski@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Eric Eastman <eric.eastman@keepertech.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Dec 14, 2015 at 11:02 PM, Martin Millnert <martin@millnert.se> wrote:
-> On Mon, 2015-12-14 at 12:28 -0800, Gregory Farnum wrote:
->> On Mon, Dec 14, 2015 at 5:17 AM, Radoslaw Zarzynski
-> <snip>
->> > In typical case ciphertext data transferred from OSD to OSD can be
->> > used without change. This is when both OSDs have the same crypto key
->> > version for given placement group. In rare cases when crypto keys are
->> > different (key change or transition period) receiving OSD will recrypt
->> > with local key versions.
->>
->> I don't understand this part at all. Do you plan to read and rewrite
->> the entire PG whenever you change the "key version"? How often do you
->> plan to change these keys? What is even the point of changing them,
->> since anybody who can control an OSD can grab the entire current key
->> set?
+On Tue, Dec 15, 2015 at 2:08 PM, Eric Eastman
+<eric.eastman@keepertech.com> wrote:
+> I am testing Linux Target SCSI, LIO, with a Ceph File System backstore
+> and I am seeing this error on my LIO gateway.  I am using Ceph v9.2.0
+> on a 4.4rc4 Kernel, on Trusty, using a kernel mounted Ceph File
+> System.  A file on the Ceph File System is exported via iSCSI to a
+> VMware ESXi 5.0 server, and I am seeing this error when doing a lot of
+> I/O on the ESXi server.   Is this a LIO or a Ceph issue?
 >
-> You may have leaked keys without having leaked ciphertext.
-> The typical use case for FDE/SED is IMO being able to RMA drives.
-> Nothing more than that.
+> [Tue Dec 15 00:46:55 2015] ------------[ cut here ]------------
+> [Tue Dec 15 00:46:55 2015] WARNING: CPU: 0 PID: 1123421 at
+> /home/kernel/COD/linux/fs/ceph/addr.c:125
+
+could you confirm that addr.c:125 is WARN_ON(!PageLocked(page));
+
+Regards
+Yan, Zheng
+
+> ceph_set_page_dirty+0x230/0x240 [ceph]()
+> [Tue Dec 15 00:46:55 2015] Modules linked in: iptable_filter ip_tables
+> x_tables xfs rbd iscsi_target_mod vhost_scsi tcm_qla2xxx ib_srpt
+> tcm_fc tcm_usb_gadget tcm_loop target_core_file target_core_iblock
+> target_core_pscsi target_core_user target_core_mod ipmi_devintf vhost
+> qla2xxx ib_cm ib_sa ib_mad ib_core ib_addr libfc scsi_transport_fc
+> libcomposite udc_core uio configfs ipmi_ssif ttm drm_kms_helper
+> gpio_ich drm i2c_algo_bit fb_sys_fops coretemp syscopyarea ipmi_si
+> sysfillrect ipmi_msghandler sysimgblt kvm acpi_power_meter 8250_fintek
+> irqbypass hpilo shpchp input_leds serio_raw lpc_ich i7core_edac
+> edac_core mac_hid ceph libceph libcrc32c fscache bonding lp parport
+> mlx4_en vxlan ip6_udp_tunnel udp_tunnel ptp pps_core hid_generic
+> usbhid hid hpsa mlx4_core psmouse bnx2 scsi_transport_sas fjes [last
+> unloaded: target_core_mod]
+> [Tue Dec 15 00:46:55 2015] CPU: 0 PID: 1123421 Comm: iscsi_trx
+> Tainted: G        W I     4.4.0-040400rc4-generic #201512061930
+> [Tue Dec 15 00:46:55 2015] Hardware name: HP ProLiant DL360 G6, BIOS
+> P64 01/22/2015
+> [Tue Dec 15 00:46:55 2015]  0000000000000000 00000000fdc0ce43
+> ffff880bf38c38c0 ffffffff813c8ab4
+> [Tue Dec 15 00:46:55 2015]  0000000000000000 ffff880bf38c38f8
+> ffffffff8107d772 ffffea00127a8680
+> [Tue Dec 15 00:46:55 2015]  ffff8804e52c1448 ffff8804e52c15b0
+> ffff8804e52c10f0 0000000000000200
+> [Tue Dec 15 00:46:55 2015] Call Trace:
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff813c8ab4>] dump_stack+0x44/0x60
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8107d772>] warn_slowpath_common+0x82/0xc0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8107d8ba>] warn_slowpath_null+0x1a/0x20
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01fadb0>]
+> ceph_set_page_dirty+0x230/0x240 [ceph]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff81188770>] ?
+> pagecache_get_page+0x150/0x1c0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01fe338>] ?
+> ceph_pool_perm_check+0x48/0x700 [ceph]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8119301d>] set_page_dirty+0x3d/0x70
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01fcd7e>]
+> ceph_write_end+0x5e/0x180 [ceph]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff813dc006>] ?
+> iov_iter_copy_from_user_atomic+0x156/0x220
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff81187bc4>]
+> generic_perform_write+0x114/0x1c0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01f818a>]
+> ceph_write_iter+0xf8a/0x1050 [ceph]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc0205983>] ?
+> ceph_put_cap_refs+0x143/0x320 [ceph]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff810b10ba>] ?
+> check_preempt_wakeup+0xfa/0x220
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff811a7eec>] ? zone_statistics+0x7c/0xa0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff813dd2ee>] ? copy_page_to_iter+0x5e/0xa0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff816e5d22>] ?
+> skb_copy_datagram_iter+0x122/0x250
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff812053f6>] vfs_iter_write+0x76/0xc0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc02cbf88>]
+> fd_do_rw.isra.5+0xd8/0x1e0 [target_core_file]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc02cc155>]
+> fd_execute_rw+0xc5/0x2a0 [target_core_file]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc04696f2>]
+> sbc_execute_rw+0x22/0x30 [target_core_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc04681ef>]
+> __target_execute_cmd+0x1f/0x70 [target_core_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc0468da5>]
+> target_execute_cmd+0x195/0x2a0 [target_core_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05db89a>]
+> iscsit_execute_cmd+0x20a/0x270 [iscsi_target_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05e4aea>]
+> iscsit_sequence_cmd+0xda/0x190 [iscsi_target_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05eafbd>]
+> iscsi_target_rx_thread+0x51d/0xe30 [iscsi_target_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8101566c>] ? __switch_to+0x1dc/0x5a0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05eaaa0>] ?
+> iscsi_target_tx_thread+0x1e0/0x1e0 [iscsi_target_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8109c8b8>] kthread+0xd8/0xf0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8109c7e0>] ?
+> kthread_create_on_node+0x1a0/0x1a0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff817fc58f>] ret_from_fork+0x3f/0x70
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8109c7e0>] ?
+> kthread_create_on_node+0x1a0/0x1a0
+> [Tue Dec 15 00:46:55 2015] ---[ end trace 4079437668c77cbb ]---
+> [Tue Dec 15 00:47:45 2015] ABORT_TASK: Found referenced iSCSI task_tag: 95784927
+> [Tue Dec 15 00:47:45 2015] ABORT_TASK: ref_tag: 95784927 already
+> complete, skipping
 >
->> > For compression to be effective it must be done before encryption. Due
->> > to that encryption may be applied differently for replication pools
->> > and EC pools. Replicated pools do not implement compression; for those
->> > pools encryption is applied right after data enters OSD. For EC pools
->> > encryption is applied after compressing. When compression will be
->> > implemented for replicated pools, it must be placed before encryption.
->>
->> So this means you'll be encrypting the object data, but not the omap
->> nor xattrs, and not the file names on disk. Is that acceptable to
->> people? It's probably fine for a lot of rbd use cases, but not for
->> RGW, CephFS, nor raw RADOS where meaningful metadata (and even *data*)
->> is stored in those regions. I'd rather a solution worked on the full
->> data set. :/
->> -Greg
+> If it is a Ceph File System issue, let me know and I will open a bug.
 >
-> This is indeed the largest weakness of the proposal.
+> Thanks
 >
-> I'm lacking a bit on the motivation for what problem this solution
-> solves that a dm-crypt-based solution doesn't address? When, except for
-> snooping, is it a desired design to not encrypt all the things?
-1) With dm-crypt encryption is performed separately for each replica.
-With OSD solution it is possible to encrypt only once, and distribute encrypted.
-2) It is best to encrypt everything. There just are some things we are
-unable to encrypt, it actually means: omap names.
->
-> I guess one could say: "ciphertext would be transferred on the network".
-> But, it's incomplete. Internal transport encryption (and better auth)
-> for Ceph is a different problem.
->
-> I'd probably rather dm-crypt key management processes were refined and
-> improved (saying this without knowing the state of any current
-> implementations for Ceph), and have a solid FDE solution than a solution
-> that doesn't encrypt metadata. Only encrypting data but not metadata
-> isn't sufficient anymore...
->
-> /M
->
+> Eric
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
