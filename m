@@ -1,59 +1,125 @@
-From: Eric Eastman <eric.eastman@keepertech.com>
-Subject: Re: Issue with Ceph File System and LIO
-Date: Tue, 15 Dec 2015 09:51:17 -0700
-Message-ID: <CA+9C14ZOZQcWSGL8ukDeVQAtoTEDRNOLq=CB1ZusiMsx6-seMw@mail.gmail.com>
-References: <CA+9C14a0E9bc+GL-QiAxPD_B9_PRhEE4PRG2jAa9REWkdNQFiA@mail.gmail.com>
-	<CAAM7YAk=U7NqEujuMXAyem00NDJfx-TOYGgJez76f48HS6nt2A@mail.gmail.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: ceph-mon terminated with status 28
+Date: Tue, 15 Dec 2015 20:11:52 +0000
+Message-ID: <DM2PR12MB0556EA07B6A224B5BB36F25D9BEE0@DM2PR12MB0556.namprd12.prod.outlook.com>
+References: <DM2PR12MB0556410B658CF096B4F3326C9BEC0@DM2PR12MB0556.namprd12.prod.outlook.com>
+ <1290007151.43805078.1450045125175.JavaMail.zimbra@redhat.com>
+ <SN1PR12MB05583004753B74FFF2745DAA9BED0@SN1PR12MB0558.namprd12.prod.outlook.com>
+ <1465638247.45060213.1450129612249.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:34495 "EHLO
-	mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751121AbbLOQvS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Dec 2015 11:51:18 -0500
-Received: by mail-qk0-f173.google.com with SMTP id p187so22280646qkd.1
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Dec 2015 08:51:17 -0800 (PST)
-In-Reply-To: <CAAM7YAk=U7NqEujuMXAyem00NDJfx-TOYGgJez76f48HS6nt2A@mail.gmail.com>
+Received: from mail-bn1bon0073.outbound.protection.outlook.com ([157.56.111.73]:27756
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S965465AbbLOULz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 15 Dec 2015 15:11:55 -0500
+In-Reply-To: <1465638247.45060213.1450129612249.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>, spray@redhat.com, mchristi@redhat.com
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I have opened ticket: 14086
-
-On Tue, Dec 15, 2015 at 5:05 AM, Yan, Zheng <ukernel@gmail.com> wrote:
-> On Tue, Dec 15, 2015 at 2:08 PM, Eric Eastman
->> [Tue Dec 15 00:46:55 2015] ------------[ cut here ]------------
->> [Tue Dec 15 00:46:55 2015] WARNING: CPU: 0 PID: 1123421 at
->> /home/kernel/COD/linux/fs/ceph/addr.c:125
->
-> could you confirm that addr.c:125 is WARN_ON(!PageLocked(page));
-
-I am using the generic kernel from:
-http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.4-rc4-wily
-and assuming they did not change anything, from the 4.4rc4 source tree
-I pulled down shows:
-
-124         ret = __set_page_dirty_nobuffers(page);
-125         WARN_ON(!PageLocked(page));
-126         WARN_ON(!page->mapping);
-
-
-modinfo ceph
-filename:       /lib/modules/4.4.0-040400rc4-generic/kernel/fs/ceph/ceph.ko
-license:        GPL
-description:    Ceph filesystem for Linux
-author:         Patience Warnick <patience@newdream.net>
-author:         Yehuda Sadeh <yehuda@hq.newdream.net>
-author:         Sage Weil <sage@newdream.net>
-alias:          fs-ceph
-srcversion:     E94BA78C2D998705FE2C600
-depends:        libceph,fscache
-intree:         Y
-vermagic:       4.4.0-040400rc4-generic SMP mod_unload modversions
-
-This error has shown up about 20 times in 12 hours, since I started
-the ESXi test.
-
-Thanks,
-Eric
+QnJhZCAtLQ0KDQpUaGUgaXNzdWUgaXMgaW4gdHJhY2tlciBub3cuLg0KaHR0cDovL3RyYWNrZXIu
+Y2VwaC5jb20vaXNzdWVzLzE0MDg4DQoNCi0tIFRvbQ0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQo+IEZyb206IEJyYWQgSHViYmFyZCBbbWFpbHRvOmJodWJiYXJkQHJlZGhhdC5jb21d
+DQo+IFNlbnQ6IE1vbmRheSwgRGVjZW1iZXIgMTQsIDIwMTUgMzo0NyBQTQ0KPiBUbzogRGVuZWF1
+LCBUb20NCj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBj
+ZXBoLW1vbiB0ZXJtaW5hdGVkIHdpdGggc3RhdHVzIDI4DQo+IA0KPiAtLS0tLSBPcmlnaW5hbCBN
+ZXNzYWdlIC0tLS0tDQo+ID4gRnJvbTogIlRvbSBEZW5lYXUiIDx0b20uZGVuZWF1QGFtZC5jb20+
+DQo+ID4gVG86ICJCcmFkIEh1YmJhcmQiIDxiaHViYmFyZEByZWRoYXQuY29tPg0KPiA+IENjOiBj
+ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiA+IFNlbnQ6IFR1ZXNkYXksIDE1IERlY2VtYmVy
+LCAyMDE1IDM6MjE6MjcgQU0NCj4gPiBTdWJqZWN0OiBSRTogY2VwaC1tb24gdGVybWluYXRlZCB3
+aXRoIHN0YXR1cyAyOA0KPiA+DQo+ID4gVGhhbmtzLCBCcmFkLiAgVGhhdCB3YXMgdGhlIHByb2Js
+ZW0uDQo+IA0KPiBOcC4NCj4gDQo+ID4NCj4gPiBJcyB0aGVyZSBhIHJlYXNvbiB3aHkgd2UgZG9u
+J3QgbG9nIG1vcmUgZGVzY3JpcHRpdmUgaW5mbyBmb3IgdGhpcyBraW5kDQo+IG9mDQo+ID4gZmFp
+bHVyZT8NCj4gDQo+IEkgZ3Vlc3MgaXQgbWF5IG5vdCBoYXZlIGJlZW4gYW50aWNpcGF0ZWQgdGhh
+dCBpbml0IHdvdWxkIHN3YWxsb3cgdGhlc2UNCj4gdHlwZXMgb2YNCj4gZXJyb3JzIGVhcmx5IGlu
+IHRoZSBwcm9jZXNzIGFuZCBqdXN0IHJlcG9ydCB0aGUgcmV0dXJuIGNvZGUuDQo+IA0KPiBJZiB5
+b3Ugd291bGRuJ3QgbWluZCBvcGVuaW5nIGEgdHJhY2tlciBmb3IgIkZhdGFsIGVycm9ycyBhdCBz
+dGFydC11cCBhcmUNCj4gbm90DQo+IGxvZ2dlZCIsIG9yIHNvbWV0aGluZyBzaW1pbGFyLCAgSSBj
+YW4gdGFrZSBhIGxvb2sgYXQgZ2V0dGluZyBzb21lDQo+IG1lYW5pbmdmdWwgbG9nDQo+IGVudHJp
+ZXMgcmVwb3J0ZWQgZHVyaW5nIHRoZXNlIGVhcmx5IGZhaWx1cmVzLg0KPiANCj4gTGV0IG1lIGtu
+b3cgdGhlIHRyYWNrZXIgbnVtYmVyLg0KPiANCj4gQ2hlZXJzLA0KPiBCcmFkDQo+IA0KPiA+DQo+
+ID4gLS0gVG9tDQo+ID4NCj4gPiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gPiBG
+cm9tOiBCcmFkIEh1YmJhcmQgW21haWx0bzpiaHViYmFyZEByZWRoYXQuY29tXQ0KPiA+ID4gU2Vu
+dDogU3VuZGF5LCBEZWNlbWJlciAxMywgMjAxNSA0OjE5IFBNDQo+ID4gPiBUbzogRGVuZWF1LCBU
+b20NCj4gPiA+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiA+ID4gU3ViamVjdDog
+UmU6IGNlcGgtbW9uIHRlcm1pbmF0ZWQgd2l0aCBzdGF0dXMgMjgNCj4gPiA+DQo+ID4gPiAtLS0t
+LSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0tDQo+ID4gPiA+IEZyb206ICJUb20gRGVuZWF1IiA8dG9t
+LmRlbmVhdUBhbWQuY29tPg0KPiA+ID4gPiBUbzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcN
+Cj4gPiA+ID4gU2VudDogU3VuZGF5LCAxMyBEZWNlbWJlciwgMjAxNSAxMTo0OToxNiBQTQ0KPiA+
+ID4gPiBTdWJqZWN0OiBjZXBoLW1vbiB0ZXJtaW5hdGVkIHdpdGggc3RhdHVzIDI4DQo+ID4gPiA+
+DQo+ID4gPiA+IEkgYW0gdHJ5aW5nIHRvIHVuZGVyc3RhbmQgdGhlIGZvbGxvd2luZyBmYWlsdXJl
+Og0KPiA+ID4gPg0KPiA+ID4gPiBBIHNtYWxsIGNsdXN0ZXIgd2FzIHJ1bm5pbmcgZmluZSwgYW5k
+IHRoZW4gd2FzIGxlZnQgdW51c2VkIGZvciBhDQo+IHdoaWxlLg0KPiA+ID4gPiBXaGVuIEkgd2Vu
+dCB0byB0cnkgdG8gdXNlIGl0IGFnYWluLCB0aGUgbW9uIHNvY2tldCB3YXNuJ3QgdGhlcmUgYW5k
+DQo+IEkNCj4gPiA+ID4gY291bGQgc2VlIHRoYXQgY2VwaC1tb24gd2FzIG5vdCBydW5uaW5nLiAg
+SSBzYXcgdGhlIGxpbmVzIGJlbG93IGF0DQo+IHRoZQ0KPiA+ID4gPiBlbmQgb2YgZG1lc2cgb3V0
+cHV0Lg0KPiA+ID4gPiBXaGVuIEkgdHJpZWQgdG8gcmVzdGFydCBjZXBoLW1vbiB1c2luZyBzdWRv
+IHN0YXJ0IGNlcGgtbW9uDQo+IGlkPW1vbmhvc3QsDQo+ID4gPiA+IEkgZ290IHRoZSBzYW1lIHNl
+dCBvZiBlcnJvcnMgbmV3bHkgYXBwZW5kZWQgdG8gZG1lc2cgb3V0cHV0Lg0KPiA+ID4gPg0KPiA+
+ID4gPiBJIGRvbid0IHNlZSBhbnl0aGluZyBtb3JlIGRlc2NyaXB0aXZlIGluIC92YXIvbG9nL2Nl
+cGgvY2VwaC1tb24ubG9nLA0KPiA+ID4gPiBqdXN0IHRoZSByZWNvcmRpbmcgb2YgbmV3IG1vbiBw
+cm9jZXNzZXMgc3RhcnRpbmcuDQo+ID4gPiA+DQo+ID4gPiA+IEluIHRoaXMgcGFydGljdWxhciBz
+bWFsbCBjbHVzdGVyLCB0aGUgbW9uIHByb2Nlc3Mgd2FzIHJ1bm5pbmcgb24gdGhlDQo+ID4gPiA+
+IHNhbWUgbm9kZSB3aXRoIDcgb3NkIHByb2Nlc3Nlcy4gIHN1ZG8gaW5pdGN0bCBsaXN0IHNob3dz
+IHRoYXQgdGhlDQo+IG9zZA0KPiA+ID4gPiBwcm9jcyBhcmUgc3RpbGwgdXAsIGFsdGhvdWdoIGxv
+Z2dpbmcgdGhlIGZhY3QgdGhhdCB0aGV5IGNhbid0DQo+ID4gPiA+IGNvbW11bmljYXRlIHdpdGgg
+dGhlIG1vbiBzb2NrZXQuDQo+ID4gPiA+DQo+ID4gPiA+IElzIHRoZXJlIHNvbWVwbGFjZSBlbHNl
+IEkgc2hvdWxkIGxvb2sgZm9yIG1vcmUgZGV0YWlscyBhcyB0byB3aHkgbW9uDQo+ID4gPiA+IGlz
+IGRvd24gYW5kIGNhbid0IGJlIHJlc3RhcnRlZD8NCj4gPiA+ID4NCj4gPiA+ID4gLS0gVG9tIERl
+bmVhdQ0KPiA+ID4gPg0KPiA+ID4gPiBkbWVzZyBvdXRwdXQ6DQo+ID4gPiA+IC0tLS0tLS0tLS0t
+LS0tDQo+ID4gPiA+ICBpbml0OiBjZXBoLW1vbiAoY2VwaC9tb25ob3N0KSBtYWluIHByb2Nlc3Mg
+KDE2NTM4KSB0ZXJtaW5hdGVkIHdpdGgNCj4gPiA+ID4gc3RhdHVzIDI4DQo+ID4gPiA+ICBpbml0
+OiBjZXBoLW1vbiAoY2VwaC9tb25ob3N0KSBtYWluIHByb2Nlc3MgZW5kZWQsIHJlc3Bhd25pbmcN
+Cj4gPiA+ID4gIGluaXQ6IGNlcGgtY3JlYXRlLWtleXMgbWFpbiBwcm9jZXNzICgxNjIyNykga2ls
+bGVkIGJ5IFRFUk0gc2lnbmFsDQo+ID4gPiA+ICBpbml0OiBjZXBoLW1vbiAoY2VwaC9tb25ob3N0
+KSBtYWluIHByb2Nlc3MgKDE2NTQ2KSB0ZXJtaW5hdGVkIHdpdGgNCj4gPiA+ID4gc3RhdHVzIDI4
+DQo+ID4gPiA+ICBpbml0OiBjZXBoLW1vbiAoY2VwaC9tb25ob3N0KSBtYWluIHByb2Nlc3MgZW5k
+ZWQsIHJlc3Bhd25pbmcNCj4gPiA+ID4gIGluaXQ6IGNlcGgtY3JlYXRlLWtleXMgbWFpbiBwcm9j
+ZXNzICgxNjU0OCkga2lsbGVkIGJ5IFRFUk0gc2lnbmFsDQo+ID4gPiA+ICBpbml0OiBjZXBoLW1v
+biAoY2VwaC9tb25ob3N0KSBtYWluIHByb2Nlc3MgKDE2NTU2KSB0ZXJtaW5hdGVkIHdpdGgNCj4g
+PiA+ID4gc3RhdHVzIDI4DQo+ID4gPiA+ICBpbml0OiBjZXBoLW1vbiAoY2VwaC9tb25ob3N0KSBt
+YWluIHByb2Nlc3MgZW5kZWQsIHJlc3Bhd25pbmcNCj4gPiA+ID4gIGluaXQ6IGNlcGgtY3JlYXRl
+LWtleXMgbWFpbiBwcm9jZXNzICgxNjU1OCkga2lsbGVkIGJ5IFRFUk0gc2lnbmFsDQo+ID4gPiA+
+ICBpbml0OiBjZXBoLW1vbiAoY2VwaC9tb25ob3N0KSBtYWluIHByb2Nlc3MgKDE2NTY2KSB0ZXJt
+aW5hdGVkIHdpdGgNCj4gPiA+ID4gc3RhdHVzIDI4DQo+ID4gPiA+ICBpbml0OiBjZXBoLW1vbiAo
+Y2VwaC9tb25ob3N0KSByZXNwYXduaW5nIHRvbyBmYXN0LCBzdG9wcGVkDQo+ID4gPiA+ICBpbml0
+OiBjZXBoLWNyZWF0ZS1rZXlzIG1haW4gcHJvY2VzcyAoMTY1NjgpIGtpbGxlZCBieSBURVJNIHNp
+Z25hbA0KPiA+ID4NCj4gPiA+IEl0IGxvb2tzIGxpa2UgaXQncyBjb21wbGFpbmluZyBhYm91dCBs
+YWNrIG9mIHNwYWNlPw0KPiA+ID4NCj4gPiA+IHNyYy9jZXBoX21vbi5jYzoNCj4gPiA+DQo+ID4g
+PiAyMDQgaW50IG1haW4oaW50IGFyZ2MsIGNvbnN0IGNoYXIgKiphcmd2KcK3DQo+ID4gPiAyMDUg
+ew0KPiA+ID4gLS0tLTg8LS0tLQ0KPiA+ID4gNDc1ICAgew0KPiA+ID4gNDc2ICAgICAvLyBjaGVj
+ayBmcyBzdGF0cy4gZG9uJ3Qgc3RhcnQgaWYgaXQncyBjcml0aWNhbGx5IGNsb3NlIHRvDQo+IGZ1
+bGwuDQo+ID4gPiA0NzcgICAgIGNlcGhfZGF0YV9zdGF0c190IHN0YXRzOw0KPiA+ID4gNDc4ICAg
+ICBpbnQgZXJyID0gZ2V0X2ZzX3N0YXRzKHN0YXRzLCBnX2NvbmYtPm1vbl9kYXRhLmNfc3RyKCkp
+Ow0KPiA+ID4gNDc5ICAgICBpZiAoZXJyIDwgMCkgew0KPiA+ID4gNDgwICAgICAgIGNlcnIgPDwg
+ImVycm9yIGNoZWNraW5nIG1vbml0b3IgZGF0YSdzIGZzIHN0YXRzOiAiIDw8DQo+ID4gPiBjcHBf
+c3RyZXJyb3IoZXJyKQ0KPiA+ID4gNDgxICAgICAgICAgICAgPDwgc3RkOjplbmRsOw0KPiA+ID4g
+NDgyICAgICAgIGV4aXQoLWVycik7DQo+ID4gPiA0ODMgICAgIH0NCj4gPiA+IDQ4NCAgICAgaWYg
+KHN0YXRzLmF2YWlsX3BlcmNlbnQgPD0gZ19jb25mLT5tb25fZGF0YV9hdmFpbF9jcml0KSB7DQo+
+ID4gPiA0ODUgICAgICAgY2VyciA8PCAiZXJyb3I6IG1vbml0b3IgZGF0YSBmaWxlc3lzdGVtIHJl
+YWNoZWQgY29uY2VybmluZw0KPiA+ID4gbGV2ZWxzIG9mIg0KPiA+ID4gNDg2ICAgICAgICAgICAg
+PDwgIiBhdmFpbGFibGUgc3RvcmFnZSBzcGFjZSAoYXZhaWxhYmxlOiAiDQo+ID4gPiA0ODcgICAg
+ICAgICAgICA8PCBzdGF0cy5hdmFpbF9wZXJjZW50IDw8ICIlICIgPDwNCj4gPiA+IHByZXR0eWJ5
+dGVfdChzdGF0cy5ieXRlX2F2YWlsKQ0KPiA+ID4gNDg4ICAgICAgICAgICAgPDwgIilcbnlvdSBt
+YXkgYWRqdXN0ICdtb24gZGF0YSBhdmFpbCBjcml0JyB0byBhIGxvd2VyDQo+ID4gPiB2YWx1ZSIN
+Cj4gPiA+IDQ4OSAgICAgICAgICAgIDw8ICIgdG8gbWFrZSB0aGlzIGdvIGF3YXkgKGRlZmF1bHQ6
+ICIgPDwgZ19jb25mLQ0KPiA+ID4gPm1vbl9kYXRhX2F2YWlsX2NyaXQNCj4gPiA+IDQ5MCAgICAg
+ICAgICAgIDw8ICIlKVxuIiA8PCBzdGQ6OmVuZGw7DQo+ID4gPiA0OTEgICAgICAgZXhpdChFTk9T
+UEMpOw0KPiA+ID4gNDkyICAgICB9DQo+ID4gPg0KPiA+ID4gI2RlZmluZSBFTk9TUEMgICAgICAg
+ICAgMjggICAgICAvKiBObyBzcGFjZSBsZWZ0IG9uIGRldmljZSAqLw0KPiA+ID4NCj4gPiA+IFRy
+eSBzdGFydGluZyBjZXBoLW1vbiBmcm9tIHRoZSBjb21tYW5kIGxpbmUgYW5kIHNlZSBpZiB5b3Ug
+Z2V0IHRoZQ0KPiBhYm92ZQ0KPiA+ID4gbWVzc2FnZS4NCj4gPiA+DQo+ID4gPiA+DQo+ID4gPiA+
+IC0tDQo+ID4gPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5l
+ICJ1bnN1YnNjcmliZSBjZXBoLQ0KPiBkZXZlbCINCj4gPiA+ID4gaW4gdGhlIGJvZHkgb2YgYSBt
+ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4gPiA+
+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+
+ID4gPiA+DQo+ID4NCj4gTu+/ve+/ve+/ve+/ve+/vXLvv73vv71577+977+977+9Yu+/vVjvv73v
+v73Hp3bvv71e77+9Kd66ey5u77+9K++/ve+/ve+/vXrvv71deu+/ve+/ve+/vXthee+/vcqH2pnv
+v70sau+/ve+/vWbvv73vv73vv71o77+977+977+9eu+/ve+/vXfvv73vv73vv73vv73vv73vv71q
+Oit277+9DQo+IO+/ve+/vXfvv71q77+9be+/ve+/ve+/ve+/ve+/ve+/ve+/ve+/vXpaK++/ve+/
+vd2iaiLvv73vv70NCg==
