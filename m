@@ -1,49 +1,30 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
+From: Sage Weil <sweil@redhat.com>
 Subject: Re: cmake
-Date: Wed, 16 Dec 2015 14:06:06 -0500 (EST)
-Message-ID: <1306047444.39980907.1450292766855.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.00.1512160839350.10312@cobra.newdream.net> <CADRKj5Ru75B=uNtb3OyaBBxYJVLrNXPhec77pnQddj88Jb05ng@mail.gmail.com>
+Date: Wed, 16 Dec 2015 11:36:43 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1512161136150.10312@cobra.newdream.net>
+References: <alpine.DEB.2.00.1512160839350.10312@cobra.newdream.net> <CALe9h7e4iS9=mgM4oR0iQcNBPUoA1G==bn4BK1TLka122NO=eQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:50384 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965728AbbLPTGH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Dec 2015 14:06:07 -0500
-In-Reply-To: <CADRKj5Ru75B=uNtb3OyaBBxYJVLrNXPhec77pnQddj88Jb05ng@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:38961 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S966000AbbLPTgq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Dec 2015 14:36:46 -0500
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id E2D86693C3
+	for <ceph-devel@vger.kernel.org>; Wed, 16 Dec 2015 19:36:45 +0000 (UTC)
+In-Reply-To: <CALe9h7e4iS9=mgM4oR0iQcNBPUoA1G==bn4BK1TLka122NO=eQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
-
-responding to all these at once.
-
------ Original Message -----
-> From: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
-> To: "Sage Weil" <sweil@redhat.com>
-> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Sent: Wednesday, December 16, 2015 1:45:54 PM
-> Subject: Re: cmake
-> 
-> On Wed, Dec 16, 2015 at 9:33 AM, Sage Weil <sweil@redhat.com> wrote:
+On Wed, 16 Dec 2015, John Spray wrote:
+> On Wed, Dec 16, 2015 at 5:33 PM, Sage Weil <sweil@redhat.com> wrote:
 > > The work to transition to cmake has stalled somewhat.  I've tried to use
 > > it a few times but keep running into issues that make it unusable for me.
 > > Not having make check is a big one, but I think the hackery required to
 > > get that going points to the underlying problem(s).
-
-I'm going to push for cmake work already in progress to be moved to the next milestone ASAP.
-
-With respect to "make check" blockers, which contains the issue of where cmake puts built objects.  Ali, Casey, and I discussed this today at some length.  We think the current "hackery" to make cmake make check work "the same way" auto* did is long-term undesirable due to it mutating files in the src dir.  I have not assumed that it would be an improvement to put all objects built in a tree of submakes into a single dir, as automake does.  I do think it is essential that at least eventually, it makes it simple to operate on any object that is built, and simple to extend processes like make check.
-
-Ali and Casey agree, but contend that the current make check work is "almost finished"--specifically, that it could be finished and a PR sent -this week-.  Rewriting it will take additional time.  They propose starting with finishing and documenting the current setup, then doing a larger cleanup.
-
-What do others think?
-
-Matt
-
 > >
 > > I seems like the main problem is that automake puts all build targets in
 > > src/ and cmake spreads them all over build/*.  This makes that you can't
@@ -57,32 +38,40 @@ Matt
 > >
 > > 1. Be able to completely replace autotools.  I don't fancy maintaining
 > > both in parallel.
-> >
 > 
-> Is cmake a viable option in all environments we expect ceph (or any
-> part of) to be compiled on? (e.g. aix, solaris, freebsd, different
-> linux arm distros, etc.)
-
-One cannot expect cmake to be pre-installed on those platforms, but it will work on every one you mentioned, some others, not to mention Windows.
-
+> Yes!
 > 
 > > 2. Be able to run vstart etc from the build dir.
 > 
-> There's an awful hack currently in vstart.sh and stop.sh that checks
-> for CMakeCache.txt in the current work directory to verify whether we
-> built using cmake or autotools. Can we make this go away?
-> We can do something like having the build system create a
-> 'ceph-setenv.sh' script that would set the env (or open a shelll) with
-> the appropriate paths.
-
-
-
+> I'm currently doing this (i.e. being in the build dir and running
+> ../src/vstart.sh), along with the vstart_runner.py for cephfs tests.
+> I did indeed have to make sure that vstart_runner was aware of the
+> differing binary paths though.
 > 
-> >
+> Though I'm obviously using just MDS+OSD, so I might be overstating the
+> extent to which it currently works.
+> 
 > > 3. Be able to run ./ceph[-anything] from the build dir, or put the build
 > > dir in the path.  (I suppose we could rely in a make install step, but
 > > that seems like more hassle... hopefully it's not neceesary?)
-> >
+> 
+> Shall we just put all our libs and binaries in one place?  This works for me:
+> set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+> set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+> set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+> 
+> (to get a bin/ and a lib/ with absolutely everything in)
+> 
+> That way folks can either get used to typing bin/foo instead of ./foo,
+> or add bin/ to their path.
+
+I like the sound of this... ^^  it sort of mirrors what a 
+make install would do.
+
+sage
+
+
+> 
 > > 4. make check has to work
 > >
 > > 5. Use make-dist.sh to generate a release tarball (not make dist)
@@ -105,16 +94,4 @@ One cannot expect cmake to be pre-installed on those platforms, but it will work
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-
--- 
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+> 
