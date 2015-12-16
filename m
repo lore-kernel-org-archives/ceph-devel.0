@@ -1,84 +1,113 @@
-From: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
-Subject: Re: FreeBSD is receiving traps on os/FileJournal.cc:1036
-Date: Wed, 16 Dec 2015 09:57:31 +0800
-Message-ID: <CANE=7sVrbvQehnuq5B=hE0Yo0BhDvr0xQV5DMAA_iph0T-0r-Q@mail.gmail.com>
-References: <5670A8A9.3020708@digiware.nl>
+From: Andrew Bartlett <abartlet@catalyst.net.nz>
+Subject: Re: Improving Data-At-Rest encryption in Ceph
+Date: Wed, 16 Dec 2015 15:13:42 +1300
+Message-ID: <1450232022.9871.30.camel@catalyst.net.nz>
+References: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
+	 <CAJ4mKGZP3oHt6Rgsp_pogcAZEmBzcQzDc4vzESDjPyoxJKoBUw@mail.gmail.com>
+	 <1450130526.1035.24.camel@millnert.se>
+	 <CAJ4mKGZmS3ThQcR3dZXoV3c3Kz1qRoHDRH=iSB6AUyKR1bwrPA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f173.google.com ([209.85.214.173]:35088 "EHLO
-	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965348AbbLPB5c (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Dec 2015 20:57:32 -0500
-Received: by mail-ob0-f173.google.com with SMTP id 18so22022640obc.2
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Dec 2015 17:57:32 -0800 (PST)
-In-Reply-To: <5670A8A9.3020708@digiware.nl>
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:57936 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965654AbbLPCXL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Dec 2015 21:23:11 -0500
+In-Reply-To: <CAJ4mKGZmS3ThQcR3dZXoV3c3Kz1qRoHDRH=iSB6AUyKR1bwrPA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>, Martin Millnert <martin@millnert.se>
+Cc: Radoslaw Zarzynski <rzarzynski@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>, Adam Kupczyk <akupczyk@mirantis.com>
 
-You mean your ceph assert(0 == "bl should be align"), right?
+On Mon, 2015-12-14 at 14:32 -0800, Gregory Farnum wrote:
+> On Mon, Dec 14, 2015 at 2:02 PM, Martin Millnert <martin@millnert.se>
+> wrote:
+> > On Mon, 2015-12-14 at 12:28 -0800, Gregory Farnum wrote:
+> > > On Mon, Dec 14, 2015 at 5:17 AM, Radoslaw Zarzynski
+> > <snip>
+> > > > In typical case ciphertext data transferred from OSD to OSD can
+> > > > be
+> > > > used without change. This is when both OSDs have the same
+> > > > crypto key
+> > > > version for given placement group. In rare cases when crypto
+> > > > keys are
+> > > > different (key change or transition period) receiving OSD will
+> > > > recrypt
+> > > > with local key versions.
+> > >=20
+> > > I don't understand this part at all. Do you plan to read and
+> > > rewrite
+> > > the entire PG whenever you change the "key version"? How often do
+> > > you
+> > > plan to change these keys? What is even the point of changing
+> > > them,
+> > > since anybody who can control an OSD can grab the entire current
+> > > key
+> > > set?
+> >=20
+> > You may have leaked keys without having leaked ciphertext.
+> > The typical use case for FDE/SED is IMO being able to RMA drives.
+> > Nothing more than that.
+>=20
+> Yeah, but you necessarily need to let people keep using the old key
+> *and* give them the new one on-demand if they've got access to the
+> system, in order to allow switching to the new key. You need to wait
+> for all the data to actually be rewritten with the new key before you
+> can consider it secure again, and that'll take a loooong time. I'm
+> not
+> saying there isn't threat mitigation here, just that I'm not sure
+> it's
+> useful against somebody who's already obtained access to your
+> encryption keys =E2=80=94 if they've gotten those it's unlikely they =
+won't
+> have gotten OSD keys as well, and if they've got network access they
+> can impersonate an OSD and get access to whatever data they like.
+>=20
+> I guess that still protects against an external database hack from
+> somebody who gets access to your old hard drives, but...*shrug*
 
-But in master branch, the 1036 line is not assert(0 == "bl should be align").
+An important part of why we moved to LUKS for key dm-crypt is that LUKS
+does some useful things to allow a form of key rotation.=C2=A0
 
-2015-12-16 7:56 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
-> Hi,
->
-> I'm receiving traps when running the tests going with 'gmake check'
-> and on one of the tests it traps on:
->
-> os/FileJournal.cc:1036
-> void FileJournal::align_bl(off64_t pos, bufferlist& bl)
-> {
->   // make sure list segments are page aligned
->   if (directio && (!bl.is_aligned(block_size) ||
->                    !bl.is_n_align_sized(CEPH_MINIMUM_BLOCK_SIZE))) {
->     assert(0 == "bl should be align");
->     if ((bl.length() & (CEPH_MINIMUM_BLOCK_SIZE - 1)) != 0 ||
->         (pos & (CEPH_MINIMUM_BLOCK_SIZE - 1)) != 0)
->       dout(0) << "rebuild_page_aligned failed, " << bl << dendl;
->     assert((bl.length() & (CEPH_MINIMUM_BLOCK_SIZE - 1)) == 0);
->     assert((pos & (CEPH_MINIMUM_BLOCK_SIZE - 1)) == 0);
->   }
-> }
->
-> And then I get confused with the following commit in other tests:
-> commit 8ed724222651812c2ee8cc3804dc1f54c973897d
-> Author: Kefu Chai <kchai@redhat.com>
-> Date:   Fri Sep 4 01:23:31 2015 +0800
->
->     test/bufferlist: do not expect !is_page_aligned() after unaligned
-> rebuild
->
->     if the size of a bufferlist is page aligned we allocate page aligned
->     memory chunk for it when rebuild() is called. otherwise we just call
->     the plain new() to allocate new memory chunk for holding the continuous
->     buffer. but we should not expect that `new` allocator always returns
->     unaligned memory chunks. instead, it *could* return page aligned
->     memory chunk as long as the allocator feels appropriate. so, the
->     `EXPECT_FALSE(bl.is_page_aligned())` after the `rebuild()` call is
->     removed.
->
->     Signed-off-by: Kefu Chai <kchai@redhat.com>
->
-> Could these 2 be related, and do I have an alignment problem when
-> allocating buffers and bufferlists....
->
-> Note that I also have not solved the illegal writes to _len in
-> bufferlists when running unittest_erasure_code_shec_arguments.
->
-> So any suggestions as to where to look at for this, are welcome.
->
-> --WjW
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The master key is never changed (except at reformat), but it also is
+never disclosed beyond the host's kernel. =C2=A0What is stored on the d=
+isks
+and/or on the key servers is a key-encryption-key. =C2=A0
+
+The process for rotating the key encryption key is pretty sensible,
+given the constraints, because they go to good lengths to rewrite the
+blocks where the old KEK encrypted the master key.=C2=A0
+
+> Yeah, I'd rather see dm-crypt get done well rather than in-Ceph
+> encryption like this. If we want to protect data I think that's a lot
+> more secure (and will *stay* that way since encryption is all that
+> project does), and adding TLS or similar to the messenger code would
+> give us on-the-wire protection from the clients to the disk.
+> -Greg
+
+The the good reason to use dm-crypt is that novel cryptography is NOT a
+good thing. =C2=A0The dm-crypt stuff is well used and well understood, =
+and
+any potential attacks against it are likely to be widely reported and
+property analysed.=C2=A0
+
+Andrew Bartlett
+
+--=C2=A0
+Andrew Bartlett
+https://samba.org/~abartlet/
+Authentication Developer, Samba Team         https://samba.org
+Samba Development and Support, Catalyst IT  =20
+https://catalyst.net.nz/services/samba
 
 
 
--- 
-Regards,
-Xinze Chi
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
