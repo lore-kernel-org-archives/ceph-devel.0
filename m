@@ -1,205 +1,199 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: FreeBSD is receiving traps on os/FileJournal.cc:1036
-Date: Wed, 16 Dec 2015 21:07:10 +0100
-Message-ID: <5671C46E.7020806@digiware.nl>
-References: <5670A8A9.3020708@digiware.nl>
- <CANE=7sVrbvQehnuq5B=hE0Yo0BhDvr0xQV5DMAA_iph0T-0r-Q@mail.gmail.com>
- <56712CC2.90507@digiware.nl>
- <CANE=7sU_R69V8cfUbZZFJiwE6YTd3LA_dLJHfK-n=5ymjwK4CA@mail.gmail.com>
- <56713C48.10009@digiware.nl>
- <CANE=7sUnSBUsNGFFURw+hOafAyop=nnUvXG3RYq211zbW5G3SA@mail.gmail.com>
+From: Adam Kupczyk <akupczyk@mirantis.com>
+Subject: Re: Improving Data-At-Rest encryption in Ceph
+Date: Wed, 16 Dec 2015 23:29:21 +0100
+Message-ID: <CAHMeWhFeSTd8w9zjoN1E=3ks7EysziFa_MRxNV4_oua18omRNw@mail.gmail.com>
+References: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
+	<20151215142304.GI31644@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:13711 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S966890AbbLPUHd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Dec 2015 15:07:33 -0500
-In-Reply-To: <CANE=7sUnSBUsNGFFURw+hOafAyop=nnUvXG3RYq211zbW5G3SA@mail.gmail.com>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:34485 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752039AbbLPW3W convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Dec 2015 17:29:22 -0500
+Received: by mail-wm0-f54.google.com with SMTP id l126so60692252wml.1
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Dec 2015 14:29:21 -0800 (PST)
+In-Reply-To: <20151215142304.GI31644@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+To: Lars Marowsky-Bree <lmb@suse.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 16-12-2015 13:51, Xinze Chi (=E4=BF=A1=E6=B3=BD) wrote:
-> Would you mind create an issue in http://tracker.ceph.com/ and tell m=
-e
-> how to reproduce the bug?
-
-http://tracker.ceph.com/issues/14095
-
-Not sure if the description is enough to actually to reproduce the asse=
-rt.
-
---WjW
-
->=20
-> Thanks.
->=20
-> 2015-12-16 18:26 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
->> On 16-12-2015 10:40, Xinze Chi (=E4=BF=A1=E6=B3=BD) wrote:
->>>
->>> Because we use the new strategy for filejournal in master branch. t=
-he
->>> write entry submit to writeq is aligned already.
->>> So if assert at this line, this strategy should have bug.
->>>
->>> I do not know why you have some heads #include, Maybe you modify th=
-e
->>> logic in filejournal?
->>
->>
->> No, the adds I've done are to work around the fact that the linux_ve=
-rsion
->> stuff
->> is not really going to work for FreeBSD. Not the test, nor the resul=
-ting
->> code.
->>
->> So the header part of the file  now looks like:
->> #include "common/blkdev.h"
->> #if defined(__linux__)
->> #include "common/linux_version.h"
->> #endif
->>
->> #if defined(__FreeBSD__)
->> #include "common/freebsd_version.h"
->> #define O_DSYNC O_SYNC
->> #endif
->>
->> The remainder of the diffs are about locking when using aio, which i=
- do not
->> ATM.
->>
->> So never say never with software, but I think I've left the logic as=
- it
->> is/was.
->>
->> --WjW
->>
->>
->>>
->>> 2015-12-16 17:20 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
->>>>
->>>> On 16-12-2015 02:57, Xinze Chi (=E4=BF=A1=E6=B3=BD) wrote:
->>>>>
->>>>> You mean your ceph assert(0 =3D=3D "bl should be align"), right?
->>>>>
->>>>> But in master branch, the 1036 line is not assert(0 =3D=3D "bl sh=
-ould be
->>>>> align").
->>>>
->>>>
->>>> Yes you are correct. I think I have some heade #includes why this =
-moves
->>>> down in my file.
->>>>
->>>> None the less I still get trapped on that specific assert.
->>>>
->>>> Next question is of course why this code is what it is. Since once=
- the
->>>> assert triggers, the remainder does not get executed.
->>>> Unless compiled with NDEBUG, then only the warning gets printed.
->>>> But the other asserts never get triggered.
->>>>
->>>> So back to my original question, Why have this very stringent test=
- and
->>>> than in test/buffer.cc forgo the fact that this could/should be al=
-igned.
->>>>
->>>> --WjW
->>>>
->>>>
->>>>> 2015-12-16 7:56 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
->>>>>>
->>>>>> Hi,
->>>>>>
->>>>>> I'm receiving traps when running the tests going with 'gmake che=
-ck'
->>>>>> and on one of the tests it traps on:
->>>>>>
->>>>>> os/FileJournal.cc:1036
->>>>>> void FileJournal::align_bl(off64_t pos, bufferlist& bl)
->>>>>> {
->>>>>>    // make sure list segments are page aligned
->>>>>>    if (directio && (!bl.is_aligned(block_size) ||
->>>>>>                     !bl.is_n_align_sized(CEPH_MINIMUM_BLOCK_SIZE=
-))) {
->>>>>>      assert(0 =3D=3D "bl should be align");
->>>>>>      if ((bl.length() & (CEPH_MINIMUM_BLOCK_SIZE - 1)) !=3D 0 ||
->>>>>>          (pos & (CEPH_MINIMUM_BLOCK_SIZE - 1)) !=3D 0)
->>>>>>        dout(0) << "rebuild_page_aligned failed, " << bl << dendl=
-;
->>>>>>      assert((bl.length() & (CEPH_MINIMUM_BLOCK_SIZE - 1)) =3D=3D=
- 0);
->>>>>>      assert((pos & (CEPH_MINIMUM_BLOCK_SIZE - 1)) =3D=3D 0);
->>>>>>    }
->>>>>> }
->>>>>>
->>>>>> And then I get confused with the following commit in other tests=
-:
->>>>>> commit 8ed724222651812c2ee8cc3804dc1f54c973897d
->>>>>> Author: Kefu Chai <kchai@redhat.com>
->>>>>> Date:   Fri Sep 4 01:23:31 2015 +0800
->>>>>>
->>>>>>      test/bufferlist: do not expect !is_page_aligned() after una=
-ligned
->>>>>> rebuild
->>>>>>
->>>>>>      if the size of a bufferlist is page aligned we allocate pag=
-e
->>>>>> aligned
->>>>>>      memory chunk for it when rebuild() is called. otherwise we =
-just
->>>>>> call
->>>>>>      the plain new() to allocate new memory chunk for holding th=
-e
->>>>>> continuous
->>>>>>      buffer. but we should not expect that `new` allocator alway=
-s
->>>>>> returns
->>>>>>      unaligned memory chunks. instead, it *could* return page al=
-igned
->>>>>>      memory chunk as long as the allocator feels appropriate. so=
-, the
->>>>>>      `EXPECT_FALSE(bl.is_page_aligned())` after the `rebuild()` =
-call is
->>>>>>      removed.
->>>>>>
->>>>>>      Signed-off-by: Kefu Chai <kchai@redhat.com>
->>>>>>
->>>>>> Could these 2 be related, and do I have an alignment problem whe=
+On Tue, Dec 15, 2015 at 3:23 PM, Lars Marowsky-Bree <lmb@suse.com> wrot=
+e:
+> On 2015-12-14T14:17:08, Radoslaw Zarzynski <rzarzynski@mirantis.com> =
+wrote:
+>
+> Hi all,
+>
+> great to see this revived.
+>
+> However, I have come to see some concerns with handling the encryptio=
 n
->>>>>> allocating buffers and bufferlists....
->>>>>>
->>>>>> Note that I also have not solved the illegal writes to _len in
->>>>>> bufferlists when running unittest_erasure_code_shec_arguments.
->>>>>>
->>>>>> So any suggestions as to where to look at for this, are welcome.
->>>>>>
->>>>>> --WjW
->>>>>>
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
-evel"
->>>>>> in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
-ml
->>>>>
->>>>>
->>>>>
->>>>>
->>>>
->>>
->>>
->>>
->>
->=20
->=20
->=20
+> within Ceph itself.
+>
+> The key part to any such approach is formulating the threat scenario.
+> For the use cases we have seen, the data-at-rest encryption matters s=
+o
+> they can confidently throw away disks without leaking data. It's not
+> meant as a defense against an online attacker. There usually is no
+> problem with "a few" disks being privileged, or one or two nodes that
+> need an admin intervention for booting (to enter some master encrypti=
+on
+> key somehow, somewhere).
+>
+> However, that requires *all* data on the OSDs to be encrypted.
+>
+> Crucially, that includes not just the file system meta data (so not j=
+ust
+> the data), but also the root and especially the swap partition. Those
+> potentially include swapped out data, coredumps, logs, etc.
+>
+> (As an optional feature, it'd be cool if an OSD could be moved to a
+> different chassis and continue operating there, to speed up recovery.
+> Another optional feature would be to eventually be able, for those
+> customers that trust them ;-), supply the key to the on-disk encrypti=
+on
+> (OPAL et al).)
+>
+> The proposal that Joshua posted a while ago essentially remained base=
+d
+> on dm-crypt, but put in simple hooks to retrieve the keys from some
+> "secured" server via sftp/ftps instead of loading them from the root =
+fs.
+> Similar to deo, that ties the key to being on the network and knowing
+> the OSD UUID.
+>
+> This would then also be somewhat easily extensible to utilize the sam=
+e
+> key management server via initrd/dracut.
+>
+> Yes, this means that each OSD disk is separately encrypted, but given
+> modern CPUs, this is less of a problem. It does have the benefit of
+> being completely transparent to Ceph, and actually covering the whole
+> node.
+Agreed, if encryption is infinitely fast dm-crypt is best solution.
+Below is short analysis of encryption burden for dm-crypt and
+OSD-encryption when using replicated pools.
 
+Summary:
+OSD encryption requires 2.6 times less crypto operations then dm-crypt.
+Crypto ops are bottleneck.
+Possible solutions:
+- make fewer crypto-ops (OSD based encryption can help)
+- take crypto ops off CPU (H/W accelerators; not all are integrated
+with kcrypto)
+
+Calculations and explanations:
+A) DM-CRYPT
+When we use dm-crypt whole data and metadata is encrypted. In typical
+deployment journal is located on different disc, but is also
+encrypted.
+On write data path is:
+1) enc when writing to journal
+2) dec when reading journal
+3) enc when writing to storage
+So for each byte 2-3 crypto operations are performed (2 can be skipped
+if kernel's page allocated in 1 has not been evicted). Lets assume
+2.5.
+On read data path we have:
+4) dec when reading from storage
+
+Balance between reads and writes depends on deployment. Assuming 75%
+are reads and 25% are writes and replication factor 3.
+This gives us 1*0.75+2.5*0.25*3=3D2.625 bytes of crypto operation per
+byte of disc i/o operation.
+
+B) CRYPTO INSIDE OSD
+When we do encryption in OSD less bytes are encrypted (dm-crypt has to
+encrypt entire disc sectors); anyway we round it to 1.
+Read requires 1 byte crypto op per byte. (when data comes from client)
+Write requires 1 byte crypto op per byte. (when data goes to client)
+This gives us 1*0.75+1*0.25=3D1 byte of crypto op per disc i/o.
+
+C) OSD I/O performance calculation
+Lets assume encryption speed 600MB/s per CPU core. (using AES-NI Haswel=
+l [1])
+This gives us 600/2.625 =3D 229MB for dm-crypt and 600MB/s for OSD loca=
+ted crypt.
+Usually there are few discs per CPU core in storage nodes. Lets say 6.
+6xHDD=3D~600MB/s
+6xSSD=3D~6000MB/s
+
+It is clear that crypto is limit for speed.
+
+https://software.intel.com/en-us/articles/intel-aes-ni-performance-enha=
+ncements-hytrust-datacontrol-case-study
+>
+> Of course, one of the key issues is always the key server.
+> Putting/retrieving/deleting keys is reasonably simple, but the questi=
+on
+> of how to ensure HA for it is a bit tricky. But doable; people have b=
+een
+> building HA ftp/http servers for a while ;-) Also, a single key serve=
+r
+> setup could theoretically serve multiple Ceph clusters.
+>
+> It's not yet perfect, but I think the approach is superior to being
+> implemented in Ceph natively. If there's any encryption that should b=
+e
+> implemented in Ceph, I believe it'd be the on-the-wire encryption to
+> protect against evasedroppers.
+>
+> Other scenarios would require client-side encryption.
+>
+>> Current data at rest encryption is achieved through dm-crypt placed
+>> under OSD=E2=80=99s filestore. This solution is a generic one and ca=
+nnot
+>> leverage Ceph-specific characteristics. The best example is that
+>> encryption is done multiple times - one time for each replica. Anoth=
+er
+>> issue is lack of granularity - either OSD encrypts nothing, or OSD
+>> encrypts everything (with dm-crypt on).
+>
+> True. But for the threat scenario, a holistic approach to encryption
+> seems actually required.
+>
+>> Cryptographic keys are stored on filesystem of storage node that hos=
+ts
+>> OSDs. Changing them require redeploying the OSDs.
+>
+> This is solvable by storing the key on an external key server.
+>
+> Changing the key is only necessary if the key has been exposed. And w=
+ith
+> dm-crypt, that's still possible - it's not the actual encryption key
+> that's stored, but the secret that is needed to unlock it, and that c=
+an
+> be re-encrypted quite fast. (In theory; it's not implemented yet for
+> the Ceph OSDs.)
+>
+>
+>> Data incoming from Ceph clients would be encrypted by primary OSD. I=
+t
+>> would replicate ciphertext to non-primary members of an acting set.
+>
+> This still exposes data in coredumps or on swap on the primary OSD, a=
+nd
+> metadata on the secondaries.
+>
+>
+> Regards,
+>     Lars
+>
+> --
+> Architect Storage/HA
+> SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham No=
+rton, HRB 21284 (AG N=C3=BCrnberg)
+> "Experience is the name everyone gives to their mistakes." -- Oscar W=
+ilde
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
