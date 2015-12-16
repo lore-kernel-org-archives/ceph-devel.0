@@ -1,207 +1,102 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: FreeBSD is receiving traps on os/FileJournal.cc:1036
-Date: Wed, 16 Dec 2015 14:45:21 +0100
-Message-ID: <56716AF1.5030800@digiware.nl>
-References: <5670A8A9.3020708@digiware.nl>
- <CANE=7sVrbvQehnuq5B=hE0Yo0BhDvr0xQV5DMAA_iph0T-0r-Q@mail.gmail.com>
- <56712CC2.90507@digiware.nl>
- <CANE=7sU_R69V8cfUbZZFJiwE6YTd3LA_dLJHfK-n=5ymjwK4CA@mail.gmail.com>
- <56713C48.10009@digiware.nl>
- <CANE=7sUnSBUsNGFFURw+hOafAyop=nnUvXG3RYq211zbW5G3SA@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: Issue with Ceph File System and LIO
+Date: Wed, 16 Dec 2015 22:29:52 +0800
+Message-ID: <CAAM7YAnktfNvd-EXU+1Eok4kUafWwnvj+CCGocF7ffTcAt-dsA@mail.gmail.com>
+References: <CA+9C14a0E9bc+GL-QiAxPD_B9_PRhEE4PRG2jAa9REWkdNQFiA@mail.gmail.com>
+	<CAAM7YAk=U7NqEujuMXAyem00NDJfx-TOYGgJez76f48HS6nt2A@mail.gmail.com>
+	<CA+9C14ZOZQcWSGL8ukDeVQAtoTEDRNOLq=CB1ZusiMsx6-seMw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary=001a114035ec51f530052704bdee
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:57706 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932562AbbLPNpy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Dec 2015 08:45:54 -0500
-In-Reply-To: <CANE=7sUnSBUsNGFFURw+hOafAyop=nnUvXG3RYq211zbW5G3SA@mail.gmail.com>
+Received: from mail-lf0-f41.google.com ([209.85.215.41]:35968 "EHLO
+	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933796AbbLPO3y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Dec 2015 09:29:54 -0500
+Received: by mail-lf0-f41.google.com with SMTP id z124so25573697lfa.3
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Dec 2015 06:29:54 -0800 (PST)
+In-Reply-To: <CA+9C14ZOZQcWSGL8ukDeVQAtoTEDRNOLq=CB1ZusiMsx6-seMw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Eric Eastman <eric.eastman@keepertech.com>
+Cc: spray@redhat.com, mchristi@redhat.com, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 16-12-2015 13:51, Xinze Chi (=E4=BF=A1=E6=B3=BD) wrote:
-> Would you mind create an issue in http://tracker.ceph.com/ and tell m=
-e
-> how to reproduce the bug?
+--001a114035ec51f530052704bdee
+Content-Type: text/plain; charset=UTF-8
 
-You are aware that that requires running FreeBSD?
-
-I will enter a ticket into the tracker.
-
---WjW
-
-
-> Thanks.
+On Wed, Dec 16, 2015 at 12:51 AM, Eric Eastman
+<eric.eastman@keepertech.com> wrote:
+> I have opened ticket: 14086
 >
-> 2015-12-16 18:26 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
->> On 16-12-2015 10:40, Xinze Chi (=E4=BF=A1=E6=B3=BD) wrote:
->>>
->>> Because we use the new strategy for filejournal in master branch. t=
-he
->>> write entry submit to writeq is aligned already.
->>> So if assert at this line, this strategy should have bug.
->>>
->>> I do not know why you have some heads #include, Maybe you modify th=
-e
->>> logic in filejournal?
+> On Tue, Dec 15, 2015 at 5:05 AM, Yan, Zheng <ukernel@gmail.com> wrote:
+>> On Tue, Dec 15, 2015 at 2:08 PM, Eric Eastman
+>>> [Tue Dec 15 00:46:55 2015] ------------[ cut here ]------------
+>>> [Tue Dec 15 00:46:55 2015] WARNING: CPU: 0 PID: 1123421 at
+>>> /home/kernel/COD/linux/fs/ceph/addr.c:125
 >>
->>
->> No, the adds I've done are to work around the fact that the linux_ve=
-rsion
->> stuff
->> is not really going to work for FreeBSD. Not the test, nor the resul=
-ting
->> code.
->>
->> So the header part of the file  now looks like:
->> #include "common/blkdev.h"
->> #if defined(__linux__)
->> #include "common/linux_version.h"
->> #endif
->>
->> #if defined(__FreeBSD__)
->> #include "common/freebsd_version.h"
->> #define O_DSYNC O_SYNC
->> #endif
->>
->> The remainder of the diffs are about locking when using aio, which i=
- do not
->> ATM.
->>
->> So never say never with software, but I think I've left the logic as=
- it
->> is/was.
->>
->> --WjW
->>
->>
->>>
->>> 2015-12-16 17:20 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
->>>>
->>>> On 16-12-2015 02:57, Xinze Chi (=E4=BF=A1=E6=B3=BD) wrote:
->>>>>
->>>>> You mean your ceph assert(0 =3D=3D "bl should be align"), right?
->>>>>
->>>>> But in master branch, the 1036 line is not assert(0 =3D=3D "bl sh=
-ould be
->>>>> align").
->>>>
->>>>
->>>> Yes you are correct. I think I have some heade #includes why this =
-moves
->>>> down in my file.
->>>>
->>>> None the less I still get trapped on that specific assert.
->>>>
->>>> Next question is of course why this code is what it is. Since once=
- the
->>>> assert triggers, the remainder does not get executed.
->>>> Unless compiled with NDEBUG, then only the warning gets printed.
->>>> But the other asserts never get triggered.
->>>>
->>>> So back to my original question, Why have this very stringent test=
- and
->>>> than in test/buffer.cc forgo the fact that this could/should be al=
-igned.
->>>>
->>>> --WjW
->>>>
->>>>
->>>>> 2015-12-16 7:56 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
->>>>>>
->>>>>> Hi,
->>>>>>
->>>>>> I'm receiving traps when running the tests going with 'gmake che=
-ck'
->>>>>> and on one of the tests it traps on:
->>>>>>
->>>>>> os/FileJournal.cc:1036
->>>>>> void FileJournal::align_bl(off64_t pos, bufferlist& bl)
->>>>>> {
->>>>>>     // make sure list segments are page aligned
->>>>>>     if (directio && (!bl.is_aligned(block_size) ||
->>>>>>                      !bl.is_n_align_sized(CEPH_MINIMUM_BLOCK_SIZ=
-E))) {
->>>>>>       assert(0 =3D=3D "bl should be align");
->>>>>>       if ((bl.length() & (CEPH_MINIMUM_BLOCK_SIZE - 1)) !=3D 0 |=
-|
->>>>>>           (pos & (CEPH_MINIMUM_BLOCK_SIZE - 1)) !=3D 0)
->>>>>>         dout(0) << "rebuild_page_aligned failed, " << bl << dend=
-l;
->>>>>>       assert((bl.length() & (CEPH_MINIMUM_BLOCK_SIZE - 1)) =3D=3D=
- 0);
->>>>>>       assert((pos & (CEPH_MINIMUM_BLOCK_SIZE - 1)) =3D=3D 0);
->>>>>>     }
->>>>>> }
->>>>>>
->>>>>> And then I get confused with the following commit in other tests=
-:
->>>>>> commit 8ed724222651812c2ee8cc3804dc1f54c973897d
->>>>>> Author: Kefu Chai <kchai@redhat.com>
->>>>>> Date:   Fri Sep 4 01:23:31 2015 +0800
->>>>>>
->>>>>>       test/bufferlist: do not expect !is_page_aligned() after un=
-aligned
->>>>>> rebuild
->>>>>>
->>>>>>       if the size of a bufferlist is page aligned we allocate pa=
-ge
->>>>>> aligned
->>>>>>       memory chunk for it when rebuild() is called. otherwise we=
- just
->>>>>> call
->>>>>>       the plain new() to allocate new memory chunk for holding t=
-he
->>>>>> continuous
->>>>>>       buffer. but we should not expect that `new` allocator alwa=
-ys
->>>>>> returns
->>>>>>       unaligned memory chunks. instead, it *could* return page a=
-ligned
->>>>>>       memory chunk as long as the allocator feels appropriate. s=
-o, the
->>>>>>       `EXPECT_FALSE(bl.is_page_aligned())` after the `rebuild()`=
- call is
->>>>>>       removed.
->>>>>>
->>>>>>       Signed-off-by: Kefu Chai <kchai@redhat.com>
->>>>>>
->>>>>> Could these 2 be related, and do I have an alignment problem whe=
-n
->>>>>> allocating buffers and bufferlists....
->>>>>>
->>>>>> Note that I also have not solved the illegal writes to _len in
->>>>>> bufferlists when running unittest_erasure_code_shec_arguments.
->>>>>>
->>>>>> So any suggestions as to where to look at for this, are welcome.
->>>>>>
->>>>>> --WjW
->>>>>>
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
-evel"
->>>>>> in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
-ml
->>>>>
->>>>>
->>>>>
->>>>>
->>>>
->>>
->>>
->>>
->>
+>> could you confirm that addr.c:125 is WARN_ON(!PageLocked(page));
+>
+> I am using the generic kernel from:
+> http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.4-rc4-wily
+> and assuming they did not change anything, from the 4.4rc4 source tree
+> I pulled down shows:
+>
+> 124         ret = __set_page_dirty_nobuffers(page);
+> 125         WARN_ON(!PageLocked(page));
+> 126         WARN_ON(!page->mapping);
 >
 >
+> modinfo ceph
+> filename:       /lib/modules/4.4.0-040400rc4-generic/kernel/fs/ceph/ceph.ko
+> license:        GPL
+> description:    Ceph filesystem for Linux
+> author:         Patience Warnick <patience@newdream.net>
+> author:         Yehuda Sadeh <yehuda@hq.newdream.net>
+> author:         Sage Weil <sage@newdream.net>
+> alias:          fs-ceph
+> srcversion:     E94BA78C2D998705FE2C600
+> depends:        libceph,fscache
+> intree:         Y
+> vermagic:       4.4.0-040400rc4-generic SMP mod_unload modversions
 >
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> This error has shown up about 20 times in 12 hours, since I started
+> the ESXi test.
+>
+
+This warning is really strange. Could you try the attached debug patch.
+
+Regards
+Yan, Zheng
+
+--001a114035ec51f530052704bdee
+Content-Type: application/octet-stream; name="cephfs.patch"
+Content-Disposition: attachment; filename="cephfs.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_ii8wwok10
+
+ZGlmZiAtLWdpdCBhL2ZzL2NlcGgvYWRkci5jIGIvZnMvY2VwaC9hZGRyLmMKaW5kZXggYjdkMjE4
+YS4uOTg4YmRhNCAxMDA2NDQKLS0tIGEvZnMvY2VwaC9hZGRyLmMKKysrIGIvZnMvY2VwaC9hZGRy
+LmMKQEAgLTExNDksMTYgKzExNDksMTkgQEAgc3RhdGljIGludCBjZXBoX3dyaXRlX2JlZ2luKHN0
+cnVjdCBmaWxlICpmaWxlLCBzdHJ1Y3QgYWRkcmVzc19zcGFjZSAqbWFwcGluZywKIAkJcGFnZSA9
+IGdyYWJfY2FjaGVfcGFnZV93cml0ZV9iZWdpbihtYXBwaW5nLCBpbmRleCwgMCk7CiAJCWlmICgh
+cGFnZSkKIAkJCXJldHVybiAtRU5PTUVNOworCQlXQVJOX09OKCFQYWdlTG9ja2VkKHBhZ2UpKTsK
+IAkJKnBhZ2VwID0gcGFnZTsKIAogCQlkb3V0KCJ3cml0ZV9iZWdpbiBmaWxlICVwIGlub2RlICVw
+IHBhZ2UgJXAgJWR+JWRcbiIsIGZpbGUsCiAJCSAgICAgaW5vZGUsIHBhZ2UsIChpbnQpcG9zLCAo
+aW50KWxlbik7CiAKIAkJciA9IGNlcGhfdXBkYXRlX3dyaXRlYWJsZV9wYWdlKGZpbGUsIHBvcywg
+bGVuLCBwYWdlKTsKLQkJaWYgKHIgPCAwKQorCQlpZiAociA8IDApIHsKIAkJCXBhZ2VfY2FjaGVf
+cmVsZWFzZShwYWdlKTsKLQkJZWxzZQorCQl9IGVsc2UgeworCQkJV0FSTl9PTighUGFnZUxvY2tl
+ZChwYWdlKSk7CiAJCQkqcGFnZXAgPSBwYWdlOworCQl9CiAJfSB3aGlsZSAociA9PSAtRUFHQUlO
+KTsKIAogCXJldHVybiByOwpAQCAtMTM3OCwxMSArMTM4MSwxMyBAQCBzdGF0aWMgaW50IGNlcGhf
+cGFnZV9ta3dyaXRlKHN0cnVjdCB2bV9hcmVhX3N0cnVjdCAqdm1hLCBzdHJ1Y3Qgdm1fZmF1bHQg
+KnZtZikKIAogCXJldCA9IFZNX0ZBVUxUX05PUEFHRTsKIAlpZiAoKG9mZiA+IHNpemUpIHx8Ci0J
+ICAgIChwYWdlLT5tYXBwaW5nICE9IGlub2RlLT5pX21hcHBpbmcpKQorCSAgICAocGFnZS0+bWFw
+cGluZyAhPSBpbm9kZS0+aV9tYXBwaW5nKSkgeworCQl1bmxvY2tfcGFnZShwYWdlKTsKIAkJZ290
+byBvdXQ7CisJfQogCiAJcmV0ID0gY2VwaF91cGRhdGVfd3JpdGVhYmxlX3BhZ2Uodm1hLT52bV9m
+aWxlLCBvZmYsIGxlbiwgcGFnZSk7Ci0JaWYgKHJldCA9PSAwKSB7CisJaWYgKHJldCA+PSAwKSB7
+CiAJCS8qIHN1Y2Nlc3MuICB3ZSdsbCBrZWVwIHRoZSBwYWdlIGxvY2tlZC4gKi8KIAkJc2V0X3Bh
+Z2VfZGlydHkocGFnZSk7CiAJCXJldCA9IFZNX0ZBVUxUX0xPQ0tFRDsKQEAgLTEzOTMsOCArMTM5
+OCw2IEBAIHN0YXRpYyBpbnQgY2VwaF9wYWdlX21rd3JpdGUoc3RydWN0IHZtX2FyZWFfc3RydWN0
+ICp2bWEsIHN0cnVjdCB2bV9mYXVsdCAqdm1mKQogCQkJcmV0ID0gVk1fRkFVTFRfU0lHQlVTOwog
+CX0KIG91dDoKLQlpZiAocmV0ICE9IFZNX0ZBVUxUX0xPQ0tFRCkKLQkJdW5sb2NrX3BhZ2UocGFn
+ZSk7CiAJaWYgKHJldCA9PSBWTV9GQVVMVF9MT0NLRUQgfHwKIAkgICAgY2ktPmlfaW5saW5lX3Zl
+cnNpb24gIT0gQ0VQSF9JTkxJTkVfTk9ORSkgewogCQlpbnQgZGlydHk7Cg==
+--001a114035ec51f530052704bdee--
