@@ -1,24 +1,24 @@
-From: John Spray <jspray@redhat.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
 Subject: Re: cmake
-Date: Wed, 16 Dec 2015 18:28:09 +0000
-Message-ID: <CALe9h7e4iS9=mgM4oR0iQcNBPUoA1G==bn4BK1TLka122NO=eQ@mail.gmail.com>
+Date: Wed, 16 Dec 2015 10:45:54 -0800
+Message-ID: <CADRKj5Ru75B=uNtb3OyaBBxYJVLrNXPhec77pnQddj88Jb05ng@mail.gmail.com>
 References: <alpine.DEB.2.00.1512160839350.10312@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:34548 "EHLO
-	mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933086AbbLPS2a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Dec 2015 13:28:30 -0500
-Received: by mail-lf0-f49.google.com with SMTP id y184so35547841lfc.1
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Dec 2015 10:28:29 -0800 (PST)
+Received: from mail-oi0-f43.google.com ([209.85.218.43]:35150 "EHLO
+	mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754785AbbLPSpy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Dec 2015 13:45:54 -0500
+Received: by mail-oi0-f43.google.com with SMTP id l9so838446oia.2
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Dec 2015 10:45:54 -0800 (PST)
 In-Reply-To: <alpine.DEB.2.00.1512160839350.10312@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Dec 16, 2015 at 5:33 PM, Sage Weil <sweil@redhat.com> wrote:
+On Wed, Dec 16, 2015 at 9:33 AM, Sage Weil <sweil@redhat.com> wrote:
 > The work to transition to cmake has stalled somewhat.  I've tried to use
 > it a few times but keep running into issues that make it unusable for me.
 > Not having make check is a big one, but I think the hackery required to
@@ -36,33 +36,26 @@ On Wed, Dec 16, 2015 at 5:33 PM, Sage Weil <sweil@redhat.com> wrote:
 >
 > 1. Be able to completely replace autotools.  I don't fancy maintaining
 > both in parallel.
+>
 
-Yes!
+Is cmake a viable option in all environments we expect ceph (or any
+part of) to be compiled on? (e.g. aix, solaris, freebsd, different
+linux arm distros, etc.)
 
 > 2. Be able to run vstart etc from the build dir.
 
-I'm currently doing this (i.e. being in the build dir and running
-../src/vstart.sh), along with the vstart_runner.py for cephfs tests.
-I did indeed have to make sure that vstart_runner was aware of the
-differing binary paths though.
+There's an awful hack currently in vstart.sh and stop.sh that checks
+for CMakeCache.txt in the current work directory to verify whether we
+built using cmake or autotools. Can we make this go away?
+We can do something like having the build system create a
+'ceph-setenv.sh' script that would set the env (or open a shelll) with
+the appropriate paths.
 
-Though I'm obviously using just MDS+OSD, so I might be overstating the
-extent to which it currently works.
-
+>
 > 3. Be able to run ./ceph[-anything] from the build dir, or put the build
 > dir in the path.  (I suppose we could rely in a make install step, but
 > that seems like more hassle... hopefully it's not neceesary?)
-
-Shall we just put all our libs and binaries in one place?  This works for me:
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-(to get a bin/ and a lib/ with absolutely everything in)
-
-That way folks can either get used to typing bin/foo instead of ./foo,
-or add bin/ to their path.
-
+>
 > 4. make check has to work
 >
 > 5. Use make-dist.sh to generate a release tarball (not make dist)
