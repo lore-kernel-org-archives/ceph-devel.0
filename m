@@ -1,133 +1,207 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: cmake
-Date: Wed, 16 Dec 2015 11:38:38 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1512161136490.10312@cobra.newdream.net>
-References: <alpine.DEB.2.00.1512160839350.10312@cobra.newdream.net> <CADRKj5Ru75B=uNtb3OyaBBxYJVLrNXPhec77pnQddj88Jb05ng@mail.gmail.com> <1306047444.39980907.1450292766855.JavaMail.zimbra@redhat.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: FreeBSD is receiving traps on os/FileJournal.cc:1036
+Date: Wed, 16 Dec 2015 21:07:10 +0100
+Message-ID: <5671C46E.7020806@digiware.nl>
+References: <5670A8A9.3020708@digiware.nl>
+ <CANE=7sVrbvQehnuq5B=hE0Yo0BhDvr0xQV5DMAA_iph0T-0r-Q@mail.gmail.com>
+ <56712CC2.90507@digiware.nl>
+ <CANE=7sU_R69V8cfUbZZFJiwE6YTd3LA_dLJHfK-n=5ymjwK4CA@mail.gmail.com>
+ <56713C48.10009@digiware.nl>
+ <CANE=7sUnSBUsNGFFURw+hOafAyop=nnUvXG3RYq211zbW5G3SA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39401 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([31.223.170.169]:13711 "EHLO smtp.digiware.nl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933202AbbLPTil (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Dec 2015 14:38:41 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id 093EB693D9
-	for <ceph-devel@vger.kernel.org>; Wed, 16 Dec 2015 19:38:41 +0000 (UTC)
-In-Reply-To: <1306047444.39980907.1450292766855.JavaMail.zimbra@redhat.com>
+	id S966890AbbLPUHd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Dec 2015 15:07:33 -0500
+In-Reply-To: <CANE=7sUnSBUsNGFFURw+hOafAyop=nnUvXG3RYq211zbW5G3SA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjamin@redhat.com>
-Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 16 Dec 2015, Matt Benjamin wrote:
-> I'm going to push for cmake work already in progress to be moved to the 
-> next milestone ASAP.
-> 
-> With respect to "make check" blockers, which contains the issue of where 
-> cmake puts built objects.  Ali, Casey, and I discussed this today at 
-> some length.  We think the current "hackery" to make cmake make check 
-> work "the same way" auto* did is long-term undesirable due to it 
-> mutating files in the src dir.  I have not assumed that it would be an 
-> improvement to put all objects built in a tree of submakes into a single 
-> dir, as automake does.  I do think it is essential that at least 
-> eventually, it makes it simple to operate on any object that is built, 
-> and simple to extend processes like make check.
+On 16-12-2015 13:51, Xinze Chi (=E4=BF=A1=E6=B3=BD) wrote:
+> Would you mind create an issue in http://tracker.ceph.com/ and tell m=
+e
+> how to reproduce the bug?
 
-All of the binaries eventually go into /usr[/local]/bin anyway.  Can we 
-do the same here?  (I don't care where intermediate .lo or .o objects 
-go...)
+http://tracker.ceph.com/issues/14095
 
-> Ali and Casey agree, but contend that the current make check work is 
-> "almost finished"--specifically, that it could be finished and a PR sent 
-> -this week-.  Rewriting it will take additional time.  They propose 
-> starting with finishing and documenting the current setup, then doing a 
-> larger cleanup.
-> 
-> What do others think?
+Not sure if the description is enough to actually to reproduce the asse=
+rt.
 
-I'd like to aim for what will work best long-term, and that undoubtable 
-also includes some source tree reorganization/cleanup.  But.. it seems 
-like John's suggestion would do the trick here?
+--WjW
 
-sage
+>=20
+> Thanks.
+>=20
+> 2015-12-16 18:26 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
+>> On 16-12-2015 10:40, Xinze Chi (=E4=BF=A1=E6=B3=BD) wrote:
+>>>
+>>> Because we use the new strategy for filejournal in master branch. t=
+he
+>>> write entry submit to writeq is aligned already.
+>>> So if assert at this line, this strategy should have bug.
+>>>
+>>> I do not know why you have some heads #include, Maybe you modify th=
+e
+>>> logic in filejournal?
+>>
+>>
+>> No, the adds I've done are to work around the fact that the linux_ve=
+rsion
+>> stuff
+>> is not really going to work for FreeBSD. Not the test, nor the resul=
+ting
+>> code.
+>>
+>> So the header part of the file  now looks like:
+>> #include "common/blkdev.h"
+>> #if defined(__linux__)
+>> #include "common/linux_version.h"
+>> #endif
+>>
+>> #if defined(__FreeBSD__)
+>> #include "common/freebsd_version.h"
+>> #define O_DSYNC O_SYNC
+>> #endif
+>>
+>> The remainder of the diffs are about locking when using aio, which i=
+ do not
+>> ATM.
+>>
+>> So never say never with software, but I think I've left the logic as=
+ it
+>> is/was.
+>>
+>> --WjW
+>>
+>>
+>>>
+>>> 2015-12-16 17:20 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
+>>>>
+>>>> On 16-12-2015 02:57, Xinze Chi (=E4=BF=A1=E6=B3=BD) wrote:
+>>>>>
+>>>>> You mean your ceph assert(0 =3D=3D "bl should be align"), right?
+>>>>>
+>>>>> But in master branch, the 1036 line is not assert(0 =3D=3D "bl sh=
+ould be
+>>>>> align").
+>>>>
+>>>>
+>>>> Yes you are correct. I think I have some heade #includes why this =
+moves
+>>>> down in my file.
+>>>>
+>>>> None the less I still get trapped on that specific assert.
+>>>>
+>>>> Next question is of course why this code is what it is. Since once=
+ the
+>>>> assert triggers, the remainder does not get executed.
+>>>> Unless compiled with NDEBUG, then only the warning gets printed.
+>>>> But the other asserts never get triggered.
+>>>>
+>>>> So back to my original question, Why have this very stringent test=
+ and
+>>>> than in test/buffer.cc forgo the fact that this could/should be al=
+igned.
+>>>>
+>>>> --WjW
+>>>>
+>>>>
+>>>>> 2015-12-16 7:56 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
+>>>>>>
+>>>>>> Hi,
+>>>>>>
+>>>>>> I'm receiving traps when running the tests going with 'gmake che=
+ck'
+>>>>>> and on one of the tests it traps on:
+>>>>>>
+>>>>>> os/FileJournal.cc:1036
+>>>>>> void FileJournal::align_bl(off64_t pos, bufferlist& bl)
+>>>>>> {
+>>>>>>    // make sure list segments are page aligned
+>>>>>>    if (directio && (!bl.is_aligned(block_size) ||
+>>>>>>                     !bl.is_n_align_sized(CEPH_MINIMUM_BLOCK_SIZE=
+))) {
+>>>>>>      assert(0 =3D=3D "bl should be align");
+>>>>>>      if ((bl.length() & (CEPH_MINIMUM_BLOCK_SIZE - 1)) !=3D 0 ||
+>>>>>>          (pos & (CEPH_MINIMUM_BLOCK_SIZE - 1)) !=3D 0)
+>>>>>>        dout(0) << "rebuild_page_aligned failed, " << bl << dendl=
+;
+>>>>>>      assert((bl.length() & (CEPH_MINIMUM_BLOCK_SIZE - 1)) =3D=3D=
+ 0);
+>>>>>>      assert((pos & (CEPH_MINIMUM_BLOCK_SIZE - 1)) =3D=3D 0);
+>>>>>>    }
+>>>>>> }
+>>>>>>
+>>>>>> And then I get confused with the following commit in other tests=
+:
+>>>>>> commit 8ed724222651812c2ee8cc3804dc1f54c973897d
+>>>>>> Author: Kefu Chai <kchai@redhat.com>
+>>>>>> Date:   Fri Sep 4 01:23:31 2015 +0800
+>>>>>>
+>>>>>>      test/bufferlist: do not expect !is_page_aligned() after una=
+ligned
+>>>>>> rebuild
+>>>>>>
+>>>>>>      if the size of a bufferlist is page aligned we allocate pag=
+e
+>>>>>> aligned
+>>>>>>      memory chunk for it when rebuild() is called. otherwise we =
+just
+>>>>>> call
+>>>>>>      the plain new() to allocate new memory chunk for holding th=
+e
+>>>>>> continuous
+>>>>>>      buffer. but we should not expect that `new` allocator alway=
+s
+>>>>>> returns
+>>>>>>      unaligned memory chunks. instead, it *could* return page al=
+igned
+>>>>>>      memory chunk as long as the allocator feels appropriate. so=
+, the
+>>>>>>      `EXPECT_FALSE(bl.is_page_aligned())` after the `rebuild()` =
+call is
+>>>>>>      removed.
+>>>>>>
+>>>>>>      Signed-off-by: Kefu Chai <kchai@redhat.com>
+>>>>>>
+>>>>>> Could these 2 be related, and do I have an alignment problem whe=
+n
+>>>>>> allocating buffers and bufferlists....
+>>>>>>
+>>>>>> Note that I also have not solved the illegal writes to _len in
+>>>>>> bufferlists when running unittest_erasure_code_shec_arguments.
+>>>>>>
+>>>>>> So any suggestions as to where to look at for this, are welcome.
+>>>>>>
+>>>>>> --WjW
+>>>>>>
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
+evel"
+>>>>>> in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
+ml
+>>>>>
+>>>>>
+>>>>>
+>>>>>
+>>>>
+>>>
+>>>
+>>>
+>>
+>=20
+>=20
+>=20
 
-
-> 
-> Matt
-> 
-> > >
-> > > I seems like the main problem is that automake puts all build targets in
-> > > src/ and cmake spreads them all over build/*.  This makes that you can't
-> > > just add ./ to anything that would normally be in your path (or,
-> > > PATH=.:$PATH, and then run, say, ../qa/workunits/cephtool/test.sh).
-> > > There's a bunch of kludges in vstart.sh to make it work that I think
-> > > mostly point to this issue (and the .libs things).  Is there simply an
-> > > option we can give cmake to make it put built binaries directly in build/?
-> > >
-> > > Stepping back a bit, it seems like the goals should be
-> > >
-> > > 1. Be able to completely replace autotools.  I don't fancy maintaining
-> > > both in parallel.
-> > >
-> > 
-> > Is cmake a viable option in all environments we expect ceph (or any
-> > part of) to be compiled on? (e.g. aix, solaris, freebsd, different
-> > linux arm distros, etc.)
-> 
-> One cannot expect cmake to be pre-installed on those platforms, but it will work on every one you mentioned, some others, not to mention Windows.
-> 
-> > 
-> > > 2. Be able to run vstart etc from the build dir.
-> > 
-> > There's an awful hack currently in vstart.sh and stop.sh that checks
-> > for CMakeCache.txt in the current work directory to verify whether we
-> > built using cmake or autotools. Can we make this go away?
-> > We can do something like having the build system create a
-> > 'ceph-setenv.sh' script that would set the env (or open a shelll) with
-> > the appropriate paths.
-> 
-> 
-> 
-> > 
-> > >
-> > > 3. Be able to run ./ceph[-anything] from the build dir, or put the build
-> > > dir in the path.  (I suppose we could rely in a make install step, but
-> > > that seems like more hassle... hopefully it's not neceesary?)
-> > >
-> > > 4. make check has to work
-> > >
-> > > 5. Use make-dist.sh to generate a release tarball (not make dist)
-> > >
-> > > 6. gitbuilders use make-dist.sh and cmake to build packages
-> > >
-> > > 7. release process uses make-dist.sh and cmake to build a relelase
-> > >
-> > > I'm probably missing something?
-> > >
-> > > Should we set a target of doing the 10.0.2 or .3 with cmake?
-> > >
-> > > sage
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> -- 
-> -- 
-> Matt Benjamin
-> Red Hat, Inc.
-> 315 West Huron Street, Suite 140A
-> Ann Arbor, Michigan 48103
-> 
-> http://www.redhat.com/en/technologies/storage
-> 
-> tel.  734-707-0660
-> fax.  734-769-8938
-> cel.  734-216-5309
-> 
-> 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
