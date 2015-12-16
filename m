@@ -1,102 +1,244 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: Issue with Ceph File System and LIO
-Date: Wed, 16 Dec 2015 22:29:52 +0800
-Message-ID: <CAAM7YAnktfNvd-EXU+1Eok4kUafWwnvj+CCGocF7ffTcAt-dsA@mail.gmail.com>
-References: <CA+9C14a0E9bc+GL-QiAxPD_B9_PRhEE4PRG2jAa9REWkdNQFiA@mail.gmail.com>
-	<CAAM7YAk=U7NqEujuMXAyem00NDJfx-TOYGgJez76f48HS6nt2A@mail.gmail.com>
-	<CA+9C14ZOZQcWSGL8ukDeVQAtoTEDRNOLq=CB1ZusiMsx6-seMw@mail.gmail.com>
+From: Adam Kupczyk <akupczyk@mirantis.com>
+Subject: Re: Improving Data-At-Rest encryption in Ceph
+Date: Wed, 16 Dec 2015 16:13:08 +0100
+Message-ID: <CAHMeWhEM1fFnWxLM480vtOu-8ppYUzPDbtJAVwUcEEZvyqW=jA@mail.gmail.com>
+References: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
+	<CAJ4mKGZP3oHt6Rgsp_pogcAZEmBzcQzDc4vzESDjPyoxJKoBUw@mail.gmail.com>
+	<CAHMeWhGgHWq=jPZfj8s_KCB=wLhsBNCyJjZSBQQFZXc8r63M7A@mail.gmail.com>
+	<CAJ4mKGYfCdF5p7cD+G4HSYmrSWKABRxWz2h0kOM1XbhOz7SBfQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=001a114035ec51f530052704bdee
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f41.google.com ([209.85.215.41]:35968 "EHLO
-	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933796AbbLPO3y (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Dec 2015 09:29:54 -0500
-Received: by mail-lf0-f41.google.com with SMTP id z124so25573697lfa.3
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Dec 2015 06:29:54 -0800 (PST)
-In-Reply-To: <CA+9C14ZOZQcWSGL8ukDeVQAtoTEDRNOLq=CB1ZusiMsx6-seMw@mail.gmail.com>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:35708 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933803AbbLPPNK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Dec 2015 10:13:10 -0500
+Received: by mail-wm0-f50.google.com with SMTP id l126so42965437wml.0
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Dec 2015 07:13:09 -0800 (PST)
+In-Reply-To: <CAJ4mKGYfCdF5p7cD+G4HSYmrSWKABRxWz2h0kOM1XbhOz7SBfQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric Eastman <eric.eastman@keepertech.com>
-Cc: spray@redhat.com, mchristi@redhat.com, Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Radoslaw Zarzynski <rzarzynski@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
---001a114035ec51f530052704bdee
-Content-Type: text/plain; charset=UTF-8
-
-On Wed, Dec 16, 2015 at 12:51 AM, Eric Eastman
-<eric.eastman@keepertech.com> wrote:
-> I have opened ticket: 14086
->
-> On Tue, Dec 15, 2015 at 5:05 AM, Yan, Zheng <ukernel@gmail.com> wrote:
->> On Tue, Dec 15, 2015 at 2:08 PM, Eric Eastman
->>> [Tue Dec 15 00:46:55 2015] ------------[ cut here ]------------
->>> [Tue Dec 15 00:46:55 2015] WARNING: CPU: 0 PID: 1123421 at
->>> /home/kernel/COD/linux/fs/ceph/addr.c:125
+On Tue, Dec 15, 2015 at 10:04 PM, Gregory Farnum <gfarnum@redhat.com> w=
+rote:
+> On Tue, Dec 15, 2015 at 1:58 AM, Adam Kupczyk <akupczyk@mirantis.com>=
+ wrote:
 >>
->> could you confirm that addr.c:125 is WARN_ON(!PageLocked(page));
+>>
+>> On Mon, Dec 14, 2015 at 9:28 PM, Gregory Farnum <gfarnum@redhat.com>=
+ wrote:
+>>>
+>>> On Mon, Dec 14, 2015 at 5:17 AM, Radoslaw Zarzynski
+>>> <rzarzynski@mirantis.com> wrote:
+>>> > Hello Folks,
+>>> >
+>>> > I would like to publish a proposal regarding improvements to Ceph
+>>> > data-at-rest encryption mechanism. Adam Kupczyk and I worked
+>>> > on that in last weeks.
+>>> >
+>>> > Initially we considered several architectural approaches and made
+>>> > several iterations of discussions with Intel storage group. The p=
+roposal
+>>> > is condensed description of the solution we see as the most promi=
+sing
+>>> > one.
+>>> >
+>>> > We are open to any comments and questions.
+>>> >
+>>> > Regards,
+>>> > Adam Kupczyk
+>>> > Radoslaw Zarzynski
+>>> >
+>>> >
+>>> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D
+>>> > Summary
+>>> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D
+>>> >
+>>> > Data at-rest encryption is mechanism for protecting data center
+>>> > operator from revealing content of physical carriers.
+>>> >
+>>> > Ceph already implements a form of at rest encryption. It is perfo=
+rmed
+>>> > through dm-crypt as intermediary layer between OSD and its physic=
+al
+>>> > storage. The proposed at rest encryption mechanism will be orthog=
+onal
+>>> > and, in some ways, superior to already existing solution.
+>>> >
+>>> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D
+>>> > Owners
+>>> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D
+>>> >
+>>> > * Radoslaw Zarzynski (Mirantis)
+>>> > * Adam Kupczyk (Mirantis)
+>>> >
+>>> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D
+>>> > Interested Parties
+>>> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D
+>>> >
+>>> > If you are interested in contributing to this blueprint, or want =
+to be
+>>> > a "speaker" during the Summit session, list your name here.
+>>> >
+>>> > Name (Affiliation)
+>>> > Name (Affiliation)
+>>> > Name
+>>> >
+>>> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D
+>>> > Current Status
+>>> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D
+>>> >
+>>> > Current data at rest encryption is achieved through dm-crypt plac=
+ed
+>>> > under OSD=E2=80=99s filestore. This solution is a generic one and=
+ cannot
+>>> > leverage Ceph-specific characteristics. The best example is that
+>>> > encryption is done multiple times - one time for each replica. An=
+other
+>>> > issue is lack of granularity - either OSD encrypts nothing, or OS=
+D
+>>> > encrypts everything (with dm-crypt on).
+>>> >
+>>> > Cryptographic keys are stored on filesystem of storage node that =
+hosts
+>>> > OSDs. Changing them require redeploying the OSDs.
+>>> >
+>>> > The best way to address those issues seems to be introducing
+>>> > encryption into Ceph OSD.
+>>> >
+>>> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D
+>>> > Detailed Description
+>>> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D
+>>> >
+>>> > In addition to the currently available solution, Ceph OSD would
+>>> > accommodate encryption component placed in the replication mechan=
+isms.
+>>> >
+>>> > Data incoming from Ceph clients would be encrypted by primary OSD=
+=2E It
+>>> > would replicate ciphertext to non-primary members of an acting se=
+t.
+>>> > Data sent to Ceph client would be decrypted by OSD handling read
+>>> > operation. This allows to:
+>>> > * perform only one encryption per write,
+>>> > * achieve per-pool key granulation for both key and encryption it=
+self.
+>>> >
+>>> > Unfortunately, having always and everywhere the same key for a gi=
+ven
+>>> > pool is unacceptable - it would make cluster migration and key ch=
+ange
+>>> > extremely burdensome process. To address those issues crypto key
+>>> > versioning would be introduced. All RADOS objects inside single
+>>> > placement group stored on a given OSD would use the same crypto k=
+ey
+>>> > version. The same PG on other replica may use different version o=
+f the
+>>> > same, per pool-granulated key.
+>>> >
+>>> > In typical case ciphertext data transferred from OSD to OSD can b=
+e
+>>> > used without change. This is when both OSDs have the same crypto =
+key
+>>> > version for given placement group. In rare cases when crypto keys=
+ are
+>>> > different (key change or transition period) receiving OSD will re=
+crypt
+>>> > with local key versions.
+>>>
+>>> I don't understand this part at all. Do you plan to read and rewrit=
+e
+>>> the entire PG whenever you change the "key version"? How often do y=
+ou
+>>> plan to change these keys? What is even the point of changing them,
+>>> since anybody who can control an OSD can grab the entire current ke=
+y
+>>> set?
+>>
+>> We envision that key change will happen very infrequently. Usually i=
+n
+>> reaction to some possible security breach.
+>> After key version is incremented, nothing happens automatically. Old=
+ key is
+>> used for as long as  PG is not empty. When first RADOS object is cre=
+ated,
+>> the current key version is locked to PG.
+>> There is no solution when someone gets control over OSD - either by =
+running
+>> custom OSD binary or extracting data by impersonating client. It is =
+outside
+>> of scope of at-rest-encryption. We only addressed cases when media s=
+torage
+>> somehow leaves datacenter premises. Ability to change key is necessa=
+ry,
+>> since we need procedure to recover data security after keys are comp=
+romised.
+>>>
+>>>
+>>> > For compression to be effective it must be done before encryption=
+=2E Due
+>>> > to that encryption may be applied differently for replication poo=
+ls
+>>> > and EC pools. Replicated pools do not implement compression; for =
+those
+>>> > pools encryption is applied right after data enters OSD. For EC p=
+ools
+>>> > encryption is applied after compressing. When compression will be
+>>> > implemented for replicated pools, it must be placed before encryp=
+tion.
+>>>
+>>> So this means you'll be encrypting the object data, but not the oma=
+p
+>>> nor xattrs, and not the file names on disk. Is that acceptable to
+>>> people? It's probably fine for a lot of rbd use cases, but not for
+>>> RGW, CephFS, nor raw RADOS where meaningful metadata (and even *dat=
+a*)
+>>> is stored in those regions. I'd rather a solution worked on the ful=
+l
+>>> data set. :/
+>>
+>> We intend to encrypt:
+>> - object data
+>> - omap values
+>> - xattr values
+>> We consider to encrypt:
+>> - object names
+>> - xattr names
+>> We are unable to encrypt:
+>> - omap names
 >
-> I am using the generic kernel from:
-> http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.4-rc4-wily
-> and assuming they did not change anything, from the 4.4rc4 source tree
-> I pulled down shows:
->
-> 124         ret = __set_page_dirty_nobuffers(page);
-> 125         WARN_ON(!PageLocked(page));
-> 126         WARN_ON(!page->mapping);
->
->
-> modinfo ceph
-> filename:       /lib/modules/4.4.0-040400rc4-generic/kernel/fs/ceph/ceph.ko
-> license:        GPL
-> description:    Ceph filesystem for Linux
-> author:         Patience Warnick <patience@newdream.net>
-> author:         Yehuda Sadeh <yehuda@hq.newdream.net>
-> author:         Sage Weil <sage@newdream.net>
-> alias:          fs-ceph
-> srcversion:     E94BA78C2D998705FE2C600
-> depends:        libceph,fscache
-> intree:         Y
-> vermagic:       4.4.0-040400rc4-generic SMP mod_unload modversions
->
-> This error has shown up about 20 times in 12 hours, since I started
-> the ESXi test.
->
-
-This warning is really strange. Could you try the attached debug patch.
-
-Regards
-Yan, Zheng
-
---001a114035ec51f530052704bdee
-Content-Type: application/octet-stream; name="cephfs.patch"
-Content-Disposition: attachment; filename="cephfs.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_ii8wwok10
-
-ZGlmZiAtLWdpdCBhL2ZzL2NlcGgvYWRkci5jIGIvZnMvY2VwaC9hZGRyLmMKaW5kZXggYjdkMjE4
-YS4uOTg4YmRhNCAxMDA2NDQKLS0tIGEvZnMvY2VwaC9hZGRyLmMKKysrIGIvZnMvY2VwaC9hZGRy
-LmMKQEAgLTExNDksMTYgKzExNDksMTkgQEAgc3RhdGljIGludCBjZXBoX3dyaXRlX2JlZ2luKHN0
-cnVjdCBmaWxlICpmaWxlLCBzdHJ1Y3QgYWRkcmVzc19zcGFjZSAqbWFwcGluZywKIAkJcGFnZSA9
-IGdyYWJfY2FjaGVfcGFnZV93cml0ZV9iZWdpbihtYXBwaW5nLCBpbmRleCwgMCk7CiAJCWlmICgh
-cGFnZSkKIAkJCXJldHVybiAtRU5PTUVNOworCQlXQVJOX09OKCFQYWdlTG9ja2VkKHBhZ2UpKTsK
-IAkJKnBhZ2VwID0gcGFnZTsKIAogCQlkb3V0KCJ3cml0ZV9iZWdpbiBmaWxlICVwIGlub2RlICVw
-IHBhZ2UgJXAgJWR+JWRcbiIsIGZpbGUsCiAJCSAgICAgaW5vZGUsIHBhZ2UsIChpbnQpcG9zLCAo
-aW50KWxlbik7CiAKIAkJciA9IGNlcGhfdXBkYXRlX3dyaXRlYWJsZV9wYWdlKGZpbGUsIHBvcywg
-bGVuLCBwYWdlKTsKLQkJaWYgKHIgPCAwKQorCQlpZiAociA8IDApIHsKIAkJCXBhZ2VfY2FjaGVf
-cmVsZWFzZShwYWdlKTsKLQkJZWxzZQorCQl9IGVsc2UgeworCQkJV0FSTl9PTighUGFnZUxvY2tl
-ZChwYWdlKSk7CiAJCQkqcGFnZXAgPSBwYWdlOworCQl9CiAJfSB3aGlsZSAociA9PSAtRUFHQUlO
-KTsKIAogCXJldHVybiByOwpAQCAtMTM3OCwxMSArMTM4MSwxMyBAQCBzdGF0aWMgaW50IGNlcGhf
-cGFnZV9ta3dyaXRlKHN0cnVjdCB2bV9hcmVhX3N0cnVjdCAqdm1hLCBzdHJ1Y3Qgdm1fZmF1bHQg
-KnZtZikKIAogCXJldCA9IFZNX0ZBVUxUX05PUEFHRTsKIAlpZiAoKG9mZiA+IHNpemUpIHx8Ci0J
-ICAgIChwYWdlLT5tYXBwaW5nICE9IGlub2RlLT5pX21hcHBpbmcpKQorCSAgICAocGFnZS0+bWFw
-cGluZyAhPSBpbm9kZS0+aV9tYXBwaW5nKSkgeworCQl1bmxvY2tfcGFnZShwYWdlKTsKIAkJZ290
-byBvdXQ7CisJfQogCiAJcmV0ID0gY2VwaF91cGRhdGVfd3JpdGVhYmxlX3BhZ2Uodm1hLT52bV9m
-aWxlLCBvZmYsIGxlbiwgcGFnZSk7Ci0JaWYgKHJldCA9PSAwKSB7CisJaWYgKHJldCA+PSAwKSB7
-CiAJCS8qIHN1Y2Nlc3MuICB3ZSdsbCBrZWVwIHRoZSBwYWdlIGxvY2tlZC4gKi8KIAkJc2V0X3Bh
-Z2VfZGlydHkocGFnZSk7CiAJCXJldCA9IFZNX0ZBVUxUX0xPQ0tFRDsKQEAgLTEzOTMsOCArMTM5
-OCw2IEBAIHN0YXRpYyBpbnQgY2VwaF9wYWdlX21rd3JpdGUoc3RydWN0IHZtX2FyZWFfc3RydWN0
-ICp2bWEsIHN0cnVjdCB2bV9mYXVsdCAqdm1mKQogCQkJcmV0ID0gVk1fRkFVTFRfU0lHQlVTOwog
-CX0KIG91dDoKLQlpZiAocmV0ICE9IFZNX0ZBVUxUX0xPQ0tFRCkKLQkJdW5sb2NrX3BhZ2UocGFn
-ZSk7CiAJaWYgKHJldCA9PSBWTV9GQVVMVF9MT0NLRUQgfHwKIAkgICAgY2ktPmlfaW5saW5lX3Zl
-cnNpb24gIT0gQ0VQSF9JTkxJTkVfTk9ORSkgewogCQlpbnQgZGlydHk7Cg==
---001a114035ec51f530052704bdee--
+> Are there any encryption mechanisms that can efficiently and
+> effectively encrypt pieces of data that small? I don't have any
+> expertise in crypto but I thought you needed a certain minimum size o=
+f
+> the output blob to get any security at all. If we're turning every
+> 8-byte thing into a 64-byte thing that's going to go much worse for u=
+s
+> than just having every OSD encrypt their local disk...
+> -Greg
+The idea we have is to use stream ciphers.
+Actually generator of stream ciphers; for encryption of omap entry Z
+in RADOS object Y, in pool X stream cipher will be configured (both
+key and initialization vector) with the function like
+AES(X)*AES(Y)*AES(Z).
+This is why the crypto key we need is actually multitude of atomic
+block cipher keys.
+Effectively, no data expansion will occur.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
