@@ -1,56 +1,98 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: cmake
-Date: Thu, 17 Dec 2015 00:47:48 +0100
-Message-ID: <5671F824.3070408@digiware.nl>
-References: <alpine.DEB.2.00.1512160839350.10312@cobra.newdream.net>
- <CADRKj5Ru75B=uNtb3OyaBBxYJVLrNXPhec77pnQddj88Jb05ng@mail.gmail.com>
- <1306047444.39980907.1450292766855.JavaMail.zimbra@redhat.com>
- <alpine.DEB.2.00.1512161136490.10312@cobra.newdream.net>
+From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Subject: RE: Configuration of your benchmark for the performance report with
+ functrace
+Date: Thu, 17 Dec 2015 00:26:54 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C0561A71C7@SSIEXCH-MB3.ssi.samsung.com>
+References: <99767EA2E27DD44DB4E9F9B9ACA458C0561A7181@SSIEXCH-MB3.ssi.samsung.com>
+ <3649A15A2562B54294DE14BCE5AC79120B904690@FMSMSX119.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:46008 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755302AbbLPXr7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Dec 2015 18:47:59 -0500
-In-Reply-To: <alpine.DEB.2.00.1512161136490.10312@cobra.newdream.net>
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:54579 "EHLO
+	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933178AbbLQA05 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Dec 2015 19:26:57 -0500
+In-Reply-To: <3649A15A2562B54294DE14BCE5AC79120B904690@FMSMSX119.amr.corp.intel.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>
-Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 16-12-2015 20:38, Sage Weil wrote:
-> On Wed, 16 Dec 2015, Matt Benjamin wrote:
->> I'm going to push for cmake work already in progress to be moved to the 
->> next milestone ASAP.
->>
->> With respect to "make check" blockers, which contains the issue of where 
->> cmake puts built objects.  Ali, Casey, and I discussed this today at 
->> some length.  We think the current "hackery" to make cmake make check 
->> work "the same way" auto* did is long-term undesirable due to it 
->> mutating files in the src dir.  I have not assumed that it would be an 
->> improvement to put all objects built in a tree of submakes into a single 
->> dir, as automake does.  I do think it is essential that at least 
->> eventually, it makes it simple to operate on any object that is built, 
->> and simple to extend processes like make check.
-> 
-> All of the binaries eventually go into /usr[/local]/bin anyway.  Can we 
-> do the same here?  (I don't care where intermediate .lo or .o objects 
-> go...)
+Hi Stephen,
+  We setup two methods in house for performance breakdown against ceph repo (wip-blkin branch).
+  1. The performance bench and latency breakdown with BLKIN(zipkin+lttng). As far as we know, It needs lot of efforts to get it support on new Ceph release like infernalis.
+  2. The performance bench and latency breakdown with lttng(functrace). 
+  We might soon to port our work to infernalis once we find bandwidth.  However, I did not quite understand your question like "   We are currently not seeing it capture any traces, but a build based on Hammer works..." . It should be easy to port functrace to support infernalis , right? 
 
-Why not take it one step further and have something like:
-	..../ceph/build/{bin,sbin,lib,libexec,etc,tmp,test,log,.....}
+  Regards,
+  James
 
-which would be separate tree part where all the stuff is build.
-Cleaning up will then also become a lot easier.... ATM the stuff in .lib
-is not cleaned, I think.
-It would also allow to process scripts to fit the local OS by running it
-thru m4/sed/awk/perl/...
+-----Original Message-----
+From: Blinick, Stephen L [mailto:stephen.l.blinick@intel.com] 
+Sent: Wednesday, December 16, 2015 4:01 PM
+To: James (Fei) Liu-SSI
+Subject: RE: Configuration of your benchmark for the performance report with functrace
 
-Or if you prefer so, hang it of ..../ceph/src
+Hi, first of all I'm sorry I didn't respond to your other queries a few weeks back.  I have been buried with end of the year stuff, and the hardware is in use on Infernalis work.
 
-But then again this might require something like: make install-build
+Next -- the full ceph.conf and yaml file with CBT we used for our all-flash stuff is in the backup slides of this deck: http://www.slideshare.net/Inktank_Ceph/accelerating-cassandra-workloads-on-ceph-with-allflash-pcie-ssds
 
---WjW
+But let me know if you want any more info, like the partition sizing. I think our journal partitions are 20GB each.   Lttng with all the function tracing I did had an impact of about 15% to latency & performance.   Make sure to increase the lttng buffer sizes a reasonable amount.  I did something like this:
+       lttng  create
+       lttng enable-channel -u cephtrc --subbuf-size 2097152 
+       lttng enable-event -u -a -c cephtrc
+       lttng add-context -c cephtrc -u -t pthread_id Then lttng start/stop/view/destroy....
 
+Lastly -- did you get lttng to work on infernalis?  We are currently not seeing it capture any traces, but a build based on Hammer works...
+
+Thanks,
+
+Stephen
+
+
+-----Original Message-----
+From: James (Fei) Liu-SSI [mailto:james.liu@ssi.samsung.com]
+Sent: Wednesday, December 16, 2015 4:57 PM
+To: Blinick, Stephen L
+Subject: Configuration of your benchmark for the performance report with functrace
+
+HI Stephen,
+  Thanks for your great help. We are successfully duplicate your effort over here to run the functrace and breakdown the latency. However, We got very high latency in our bench. I was wondering whether we can know your hardware configuration and ceph.conf.
+
+Appreciate for your great help as always.
+
+Regards,
+James
+
+-----Original Message-----
+From: Cbt [mailto:cbt-bounces@lists.ceph.com] On Behalf Of Blinick, Stephen L
+Sent: Monday, December 07, 2015 1:49 PM
+To: Blyth, Logan; cbt@lists.ceph.com
+Subject: Re: [Cbt] Is this list still active?
+
+I still monitor this list (as do some others I believe).  And we still use CBT for our Ceph performance work. 
+
+Thanks,
+
+Stephen
+
+
+-----Original Message-----
+From: Cbt [mailto:cbt-bounces@lists.ceph.com] On Behalf Of Blyth, Logan
+Sent: Monday, December 7, 2015 2:43 PM
+To: cbt@lists.ceph.com
+Subject: [Cbt] Is this list still active?
+
+Or does the discussion take place elsewhere? perhaps ceph-users?
+
+Logan
+_______________________________________________
+Cbt mailing list
+Cbt@lists.ceph.com
+http://lists.ceph.com/listinfo.cgi/cbt-ceph.com
+_______________________________________________
+Cbt mailing list
+Cbt@lists.ceph.com
+http://lists.ceph.com/listinfo.cgi/cbt-ceph.com
