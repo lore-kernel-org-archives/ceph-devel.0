@@ -1,232 +1,220 @@
 From: Derek Yarnell <derek@umiacs.umd.edu>
 Subject: Re: rgw subuser create and admin api
-Date: Thu, 17 Dec 2015 15:06:00 -0500
-Message-ID: <567315A8.7070905@umiacs.umd.edu>
+Date: Thu, 17 Dec 2015 17:44:01 -0500
+Message-ID: <56733AB1.9080908@umiacs.umd.edu>
 References: <5672EB1F.9070209@umiacs.umd.edu>
  <CADRKj5Ru=HhbhYGXq829oKPiB6Wr+9b8qgxjtmCn207xfCdc0Q@mail.gmail.com>
  <56730775.3070906@umiacs.umd.edu>
  <CADRKj5Rs4DeVGuZ-9hhFLNW2bMHQ44jsKjUtHw66yHApGVzD2g@mail.gmail.com>
+ <567315A8.7070905@umiacs.umd.edu>
+ <CADRKj5SqdHyBsnUUo=aFUtMwC1qKhuHyhi_b_v-NOYzKYUhm4A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bubs.umiacs.umd.edu ([128.8.132.55]:36868 "EHLO
-	bubs.umiacs.umd.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932100AbbLQUWk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Dec 2015 15:22:40 -0500
-In-Reply-To: <CADRKj5Rs4DeVGuZ-9hhFLNW2bMHQ44jsKjUtHw66yHApGVzD2g@mail.gmail.com>
+Received: from pompom.umiacs.umd.edu ([128.8.120.254]:51721 "EHLO
+	pompom.umiacs.umd.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933482AbbLQWoE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Dec 2015 17:44:04 -0500
+In-Reply-To: <CADRKj5SqdHyBsnUUo=aFUtMwC1qKhuHyhi_b_v-NOYzKYUhm4A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
 Cc: derek@umiacs.umd.edu, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 12/17/15 2:36 PM, Yehuda Sadeh-Weinraub wrote:
-> Try 'section=user&key=cephtests'
+On 12/17/15 3:15 PM, Yehuda Sadeh-Weinraub wrote:
+> 
+> Right. Reading the code again:
+> 
+> Try:
+> GET /admin/metadata/user&key=cephtest
 
-Doesn't seem to work either.
+Thanks this is very helpful and works and I was able to also get the PUT
+working.  Only question is that is it expected to return a 204 no content?
 
-# radosgw-admin metadata get user:cephtest
-{
-    "key": "user:cephtest",
-    "ver": {
-        "tag": "_dhpzgdOjqJI-OsR1MsYV5-p",
-        "ver": 1
-    },
-    "mtime": 1450378246,
-    "data": {
-        "user_id": "cephtest",
-        "display_name": "Ceph Test",
-        "email": "",
-        "suspended": 0,
-        "max_buckets": 1000,
-        "auid": 0,
-        "subusers": [],
-        "keys": [
-            {
-                "user": "cephtest",
-                "access_key": "eeeeeeeeeeeeeee",
-                "secret_key": "jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj"
-            },
-            {
-                "user": "cephtest",
-                "access_key": "aaaaaaaaaaaaaaa",
-                "secret_key": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-            }
-        ],
-        "swift_keys": [],
-        "caps": [],
-        "op_mask": "read, write, delete",
-        "default_placement": "",
-        "placement_tags": [],
-        "bucket_quota": {
-            "enabled": false,
-            "max_size_kb": -1,
-            "max_objects": -1
-        },
-        "user_quota": {
-            "enabled": false,
-            "max_size_kb": -1,
-            "max_objects": -1
-        },
-        "temp_url_keys": []
-    }
-}
-
-
-2015-12-17 15:03:41.126024 7f88ef7e6700 20 RGWEnv::set(): HTTP_HOST:
+2015-12-17 17:42:39.422612 7f88f47f0700 20 RGWEnv::set(): HTTP_HOST:
 localhost:7480
-2015-12-17 15:03:41.126056 7f88ef7e6700 20 RGWEnv::set(): HTTP_DATE:
-Thu, 17 Dec 2015 20:03:41 GMT
-2015-12-17 15:03:41.126059 7f88ef7e6700 20 RGWEnv::set(): HTTP_ACCEPT: */*
-2015-12-17 15:03:41.126064 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422619 7f88f47f0700 20 RGWEnv::set():
 HTTP_ACCEPT_ENCODING: gzip, deflate
-2015-12-17 15:03:41.126066 7f88ef7e6700 20 RGWEnv::set():
-HTTP_AUTHORIZATION: AWS RTJ1TL13CH613JRU2PJD:F6wMKxSrrFhl2m3fyo/M0yXIGT8=
-2015-12-17 15:03:41.126070 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422621 7f88f47f0700 20 RGWEnv::set(): HTTP_ACCEPT: */*
+2015-12-17 17:42:39.422623 7f88f47f0700 20 RGWEnv::set():
 HTTP_USER_AGENT: python-requests/2.3.0 CPython/2.7.10 Darwin/14.5.0
-2015-12-17 15:03:41.126071 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422625 7f88f47f0700 20 RGWEnv::set(): HTTP_DATE:
+Thu, 17 Dec 2015 22:42:39 GMT
+2015-12-17 17:42:39.422627 7f88f47f0700 20 RGWEnv::set(): CONTENT_TYPE:
+application/json
+2015-12-17 17:42:39.422629 7f88f47f0700 20 RGWEnv::set():
+HTTP_AUTHORIZATION: AWS RTJ1TL13CH613JRU2PJD:K3xaPHDy6t3r0COfjwl9rAUsUfY=
+2015-12-17 17:42:39.422630 7f88f47f0700 20 RGWEnv::set():
 HTTP_X_FORWARDED_FOR: 192.168.86.254
-2015-12-17 15:03:41.126073 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422632 7f88f47f0700 20 RGWEnv::set():
 HTTP_X_FORWARDED_HOST: ceph.umiacs.umd.edu
-2015-12-17 15:03:41.126075 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422634 7f88f47f0700 20 RGWEnv::set():
 HTTP_X_FORWARDED_SERVER: cephproxy00.umiacs.umd.edu
-2015-12-17 15:03:41.126077 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422636 7f88f47f0700 20 RGWEnv::set():
 HTTP_CONNECTION: Keep-Alive
-2015-12-17 15:03:41.126079 7f88ef7e6700 20 RGWEnv::set():
-REQUEST_METHOD: GET
-2015-12-17 15:03:41.126080 7f88ef7e6700 20 RGWEnv::set(): REQUEST_URI:
-/admin/metadata/get
-2015-12-17 15:03:41.126081 7f88ef7e6700 20 RGWEnv::set(): QUERY_STRING:
-section=user&key=cephtest
-2015-12-17 15:03:41.126082 7f88ef7e6700 20 RGWEnv::set(): REMOTE_USER:
-2015-12-17 15:03:41.126083 7f88ef7e6700 20 RGWEnv::set(): SCRIPT_URI:
-/admin/metadata/get
-2015-12-17 15:03:41.126089 7f88ef7e6700 20 RGWEnv::set(): SERVER_PORT: 7480
-2015-12-17 15:03:41.126090 7f88ef7e6700 20 HTTP_ACCEPT=*/*
-2015-12-17 15:03:41.126093 7f88ef7e6700 20 HTTP_ACCEPT_ENCODING=gzip,
+2015-12-17 17:42:39.422637 7f88f47f0700 20 RGWEnv::set():
+CONTENT_LENGTH: 1531
+2015-12-17 17:42:39.422638 7f88f47f0700 20 RGWEnv::set():
+REQUEST_METHOD: PUT
+2015-12-17 17:42:39.422640 7f88f47f0700 20 RGWEnv::set(): REQUEST_URI:
+/admin/metadata/user
+2015-12-17 17:42:39.422641 7f88f47f0700 20 RGWEnv::set(): QUERY_STRING:
+key=-staff
+2015-12-17 17:42:39.422643 7f88f47f0700 20 RGWEnv::set(): REMOTE_USER:
+2015-12-17 17:42:39.422644 7f88f47f0700 20 RGWEnv::set(): SCRIPT_URI:
+/admin/metadata/user
+2015-12-17 17:42:39.422651 7f88f47f0700 20 RGWEnv::set(): SERVER_PORT: 7480
+2015-12-17 17:42:39.422652 7f88f47f0700 20 CONTENT_LENGTH=1531
+2015-12-17 17:42:39.422654 7f88f47f0700 20 CONTENT_TYPE=application/json
+2015-12-17 17:42:39.422655 7f88f47f0700 20 HTTP_ACCEPT=*/*
+2015-12-17 17:42:39.422655 7f88f47f0700 20 HTTP_ACCEPT_ENCODING=gzip,
 deflate
-2015-12-17 15:03:41.126094 7f88ef7e6700 20 HTTP_AUTHORIZATION=AWS
-RTJ1TL13CH613JRU2PJD:F6wMKxSrrFhl2m3fyo/M0yXIGT8=
-2015-12-17 15:03:41.126094 7f88ef7e6700 20 HTTP_CONNECTION=Keep-Alive
-2015-12-17 15:03:41.126095 7f88ef7e6700 20 HTTP_DATE=Thu, 17 Dec 2015
-20:03:41 GMT
-2015-12-17 15:03:41.126095 7f88ef7e6700 20 HTTP_HOST=localhost:7480
-2015-12-17 15:03:41.126096 7f88ef7e6700 20
+2015-12-17 17:42:39.422656 7f88f47f0700 20 HTTP_AUTHORIZATION=AWS
+RTJ1TL13CH613JRU2PJD:K3xaPHDy6t3r0COfjwl9rAUsUfY=
+2015-12-17 17:42:39.422657 7f88f47f0700 20 HTTP_CONNECTION=Keep-Alive
+2015-12-17 17:42:39.422658 7f88f47f0700 20 HTTP_DATE=Thu, 17 Dec 2015
+22:42:39 GMT
+2015-12-17 17:42:39.422658 7f88f47f0700 20 HTTP_HOST=localhost:7480
+2015-12-17 17:42:39.422659 7f88f47f0700 20
 HTTP_USER_AGENT=python-requests/2.3.0 CPython/2.7.10 Darwin/14.5.0
-2015-12-17 15:03:41.126097 7f88ef7e6700 20
+2015-12-17 17:42:39.422660 7f88f47f0700 20
 HTTP_X_FORWARDED_FOR=192.168.86.254
-2015-12-17 15:03:41.126097 7f88ef7e6700 20
+2015-12-17 17:42:39.422660 7f88f47f0700 20
 HTTP_X_FORWARDED_HOST=ceph.umiacs.umd.edu
-2015-12-17 15:03:41.126098 7f88ef7e6700 20
+2015-12-17 17:42:39.422661 7f88f47f0700 20
 HTTP_X_FORWARDED_SERVER=cephproxy00.umiacs.umd.edu
-2015-12-17 15:03:41.126099 7f88ef7e6700 20
-QUERY_STRING=section=user&key=cephtest
-2015-12-17 15:03:41.126099 7f88ef7e6700 20 REMOTE_USER=
-2015-12-17 15:03:41.126100 7f88ef7e6700 20 REQUEST_METHOD=GET
-2015-12-17 15:03:41.126101 7f88ef7e6700 20 REQUEST_URI=/admin/metadata/get
-2015-12-17 15:03:41.126101 7f88ef7e6700 20 SCRIPT_URI=/admin/metadata/get
-2015-12-17 15:03:41.126102 7f88ef7e6700 20 SERVER_PORT=7480
-2015-12-17 15:03:41.126104 7f88ef7e6700 20 RGWEnv::set(): HTTP_HOST:
+2015-12-17 17:42:39.422662 7f88f47f0700 20 QUERY_STRING=key=-staff
+2015-12-17 17:42:39.422662 7f88f47f0700 20 REMOTE_USER=
+2015-12-17 17:42:39.422663 7f88f47f0700 20 REQUEST_METHOD=PUT
+2015-12-17 17:42:39.422664 7f88f47f0700 20 REQUEST_URI=/admin/metadata/user
+2015-12-17 17:42:39.422664 7f88f47f0700 20 SCRIPT_URI=/admin/metadata/user
+2015-12-17 17:42:39.422665 7f88f47f0700 20 SERVER_PORT=7480
+2015-12-17 17:42:39.422667 7f88f47f0700 20 RGWEnv::set(): HTTP_HOST:
 localhost:7480
-2015-12-17 15:03:41.126105 7f88ef7e6700 20 RGWEnv::set(): HTTP_DATE:
-Thu, 17 Dec 2015 20:03:41 GMT
-2015-12-17 15:03:41.126107 7f88ef7e6700 20 RGWEnv::set(): HTTP_ACCEPT: */*
-2015-12-17 15:03:41.126108 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422668 7f88f47f0700 20 RGWEnv::set():
 HTTP_ACCEPT_ENCODING: gzip, deflate
-2015-12-17 15:03:41.126110 7f88ef7e6700 20 RGWEnv::set():
-HTTP_AUTHORIZATION: AWS RTJ1TL13CH613JRU2PJD:F6wMKxSrrFhl2m3fyo/M0yXIGT8=
-2015-12-17 15:03:41.126113 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422670 7f88f47f0700 20 RGWEnv::set(): HTTP_ACCEPT: */*
+2015-12-17 17:42:39.422671 7f88f47f0700 20 RGWEnv::set():
 HTTP_USER_AGENT: python-requests/2.3.0 CPython/2.7.10 Darwin/14.5.0
-2015-12-17 15:03:41.126115 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422672 7f88f47f0700 20 RGWEnv::set(): HTTP_DATE:
+Thu, 17 Dec 2015 22:42:39 GMT
+2015-12-17 17:42:39.422673 7f88f47f0700 20 RGWEnv::set(): CONTENT_TYPE:
+application/json
+2015-12-17 17:42:39.422674 7f88f47f0700 20 RGWEnv::set():
+HTTP_AUTHORIZATION: AWS RTJ1TL13CH613JRU2PJD:K3xaPHDy6t3r0COfjwl9rAUsUfY=
+2015-12-17 17:42:39.422676 7f88f47f0700 20 RGWEnv::set():
 HTTP_X_FORWARDED_FOR: 192.168.86.254
-2015-12-17 15:03:41.126117 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422677 7f88f47f0700 20 RGWEnv::set():
 HTTP_X_FORWARDED_HOST: ceph.umiacs.umd.edu
-2015-12-17 15:03:41.126119 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422678 7f88f47f0700 20 RGWEnv::set():
 HTTP_X_FORWARDED_SERVER: cephproxy00.umiacs.umd.edu
-2015-12-17 15:03:41.126121 7f88ef7e6700 20 RGWEnv::set():
+2015-12-17 17:42:39.422679 7f88f47f0700 20 RGWEnv::set():
 HTTP_CONNECTION: Keep-Alive
-2015-12-17 15:03:41.126123 7f88ef7e6700 20 RGWEnv::set():
-REQUEST_METHOD: GET
-2015-12-17 15:03:41.126124 7f88ef7e6700 20 RGWEnv::set(): REQUEST_URI:
-/admin/metadata/get
-2015-12-17 15:03:41.126126 7f88ef7e6700 20 RGWEnv::set(): QUERY_STRING:
-section=user&key=cephtest
-2015-12-17 15:03:41.126128 7f88ef7e6700 20 RGWEnv::set(): REMOTE_USER:
-2015-12-17 15:03:41.126129 7f88ef7e6700 20 RGWEnv::set(): SCRIPT_URI:
-/admin/metadata/get
-2015-12-17 15:03:41.126132 7f88ef7e6700 20 RGWEnv::set(): SERVER_PORT: 7480
-2015-12-17 15:03:41.126133 7f88ef7e6700 20 HTTP_ACCEPT=*/*
-2015-12-17 15:03:41.126134 7f88ef7e6700 20 HTTP_ACCEPT_ENCODING=gzip,
+2015-12-17 17:42:39.422680 7f88f47f0700 20 RGWEnv::set():
+CONTENT_LENGTH: 1531
+2015-12-17 17:42:39.422681 7f88f47f0700 20 RGWEnv::set():
+REQUEST_METHOD: PUT
+2015-12-17 17:42:39.422682 7f88f47f0700 20 RGWEnv::set(): REQUEST_URI:
+/admin/metadata/user
+2015-12-17 17:42:39.422683 7f88f47f0700 20 RGWEnv::set(): QUERY_STRING:
+key=-staff
+2015-12-17 17:42:39.422684 7f88f47f0700 20 RGWEnv::set(): REMOTE_USER:
+2015-12-17 17:42:39.422685 7f88f47f0700 20 RGWEnv::set(): SCRIPT_URI:
+/admin/metadata/user
+2015-12-17 17:42:39.422686 7f88f47f0700 20 RGWEnv::set(): SERVER_PORT: 7480
+2015-12-17 17:42:39.422687 7f88f47f0700 20 CONTENT_LENGTH=1531
+2015-12-17 17:42:39.422687 7f88f47f0700 20 CONTENT_TYPE=application/json
+2015-12-17 17:42:39.422688 7f88f47f0700 20 HTTP_ACCEPT=*/*
+2015-12-17 17:42:39.422689 7f88f47f0700 20 HTTP_ACCEPT_ENCODING=gzip,
 deflate
-2015-12-17 15:03:41.126135 7f88ef7e6700 20 HTTP_AUTHORIZATION=AWS
-RTJ1TL13CH613JRU2PJD:F6wMKxSrrFhl2m3fyo/M0yXIGT8=
-2015-12-17 15:03:41.126136 7f88ef7e6700 20 HTTP_CONNECTION=Keep-Alive
-2015-12-17 15:03:41.126137 7f88ef7e6700 20 HTTP_DATE=Thu, 17 Dec 2015
-20:03:41 GMT
-2015-12-17 15:03:41.126138 7f88ef7e6700 20 HTTP_HOST=localhost:7480
-2015-12-17 15:03:41.126139 7f88ef7e6700 20
+2015-12-17 17:42:39.422689 7f88f47f0700 20 HTTP_AUTHORIZATION=AWS
+RTJ1TL13CH613JRU2PJD:K3xaPHDy6t3r0COfjwl9rAUsUfY=
+2015-12-17 17:42:39.422690 7f88f47f0700 20 HTTP_CONNECTION=Keep-Alive
+2015-12-17 17:42:39.422691 7f88f47f0700 20 HTTP_DATE=Thu, 17 Dec 2015
+22:42:39 GMT
+2015-12-17 17:42:39.422691 7f88f47f0700 20 HTTP_HOST=localhost:7480
+2015-12-17 17:42:39.422692 7f88f47f0700 20
 HTTP_USER_AGENT=python-requests/2.3.0 CPython/2.7.10 Darwin/14.5.0
-2015-12-17 15:03:41.126140 7f88ef7e6700 20
+2015-12-17 17:42:39.422693 7f88f47f0700 20
 HTTP_X_FORWARDED_FOR=192.168.86.254
-2015-12-17 15:03:41.126141 7f88ef7e6700 20
+2015-12-17 17:42:39.422693 7f88f47f0700 20
 HTTP_X_FORWARDED_HOST=ceph.umiacs.umd.edu
-2015-12-17 15:03:41.126142 7f88ef7e6700 20
+2015-12-17 17:42:39.422694 7f88f47f0700 20
 HTTP_X_FORWARDED_SERVER=cephproxy00.umiacs.umd.edu
-2015-12-17 15:03:41.126143 7f88ef7e6700 20
-QUERY_STRING=section=user&key=cephtest
-2015-12-17 15:03:41.126144 7f88ef7e6700 20 REMOTE_USER=
-2015-12-17 15:03:41.126145 7f88ef7e6700 20 REQUEST_METHOD=GET
-2015-12-17 15:03:41.126146 7f88ef7e6700 20 REQUEST_URI=/admin/metadata/get
-2015-12-17 15:03:41.126147 7f88ef7e6700 20 SCRIPT_URI=/admin/metadata/get
-2015-12-17 15:03:41.126148 7f88ef7e6700 20 SERVER_PORT=7480
-2015-12-17 15:03:41.126150 7f88ef7e6700  1 ====== starting new request
-req=0x7f8904068010 =====
-2015-12-17 15:03:41.126222 7f88ef7e6700  2 req 36:0.000072::GET
-/admin/metadata/get::initializing for trans_id =
-tx000000000000000000024-005673151d-5f7c-default
-2015-12-17 15:03:41.126230 7f88ef7e6700 10 host=localhost
-2015-12-17 15:03:41.126236 7f88ef7e6700 20 subdomain= domain=
+2015-12-17 17:42:39.422695 7f88f47f0700 20 QUERY_STRING=key=-staff
+2015-12-17 17:42:39.422695 7f88f47f0700 20 REMOTE_USER=
+2015-12-17 17:42:39.422696 7f88f47f0700 20 REQUEST_METHOD=PUT
+2015-12-17 17:42:39.422696 7f88f47f0700 20 REQUEST_URI=/admin/metadata/user
+2015-12-17 17:42:39.422697 7f88f47f0700 20 SCRIPT_URI=/admin/metadata/user
+2015-12-17 17:42:39.422698 7f88f47f0700 20 SERVER_PORT=7480
+2015-12-17 17:42:39.422698 7f88f47f0700  1 ====== starting new request
+req=0x7f891c045010 =====
+2015-12-17 17:42:39.422707 7f88f47f0700  2 req 301:0.000008::PUT
+/admin/metadata/user::initializing for trans_id =
+tx00000000000000000012d-0056733a5f-5f7c-default
+2015-12-17 17:42:39.422710 7f88f47f0700 10 host=localhost
+2015-12-17 17:42:39.422711 7f88f47f0700 20 subdomain= domain=
 in_hosted_domain=0
-2015-12-17 15:03:41.126289 7f88ef7e6700  2 req 36:0.000140::GET
-/admin/metadata/get::getting op
-2015-12-17 15:03:41.126293 7f88ef7e6700  2 req 36:0.000143::GET
-/admin/metadata/get:get_metadata:authorizing
-2015-12-17 15:03:41.126343 7f88ef7e6700 10 get_canon_resource():
-dest=/admin/metadata/get
-2015-12-17 15:03:41.126346 7f88ef7e6700 10 auth_hdr:
-GET
+2015-12-17 17:42:39.422727 7f88f47f0700  2 req 301:0.000028::PUT
+/admin/metadata/user::getting op
+2015-12-17 17:42:39.422729 7f88f47f0700  2 req 301:0.000030::PUT
+/admin/metadata/user:set_metadata:authorizing
+2015-12-17 17:42:39.422746 7f88f47f0700 10 get_canon_resource():
+dest=/admin/metadata/user
+2015-12-17 17:42:39.422748 7f88f47f0700 10 auth_hdr:
+PUT
 
-
-Thu, 17 Dec 2015 20:03:41 GMT
-/admin/metadata/get
-2015-12-17 15:03:41.126438 7f88ef7e6700 15 calculated
-digest=F6wMKxSrrFhl2m3fyo/M0yXIGT8=
-2015-12-17 15:03:41.126441 7f88ef7e6700 15
-auth_sign=F6wMKxSrrFhl2m3fyo/M0yXIGT8=
-2015-12-17 15:03:41.126442 7f88ef7e6700 15 compare=0
-2015-12-17 15:03:41.126444 7f88ef7e6700  2 req 36:0.000295::GET
-/admin/metadata/get:get_metadata:reading permissions
-2015-12-17 15:03:41.126446 7f88ef7e6700  2 req 36:0.000297::GET
-/admin/metadata/get:get_metadata:init op
-2015-12-17 15:03:41.126451 7f88ef7e6700  2 req 36:0.000302::GET
-/admin/metadata/get:get_metadata:verifying op mask
-2015-12-17 15:03:41.126453 7f88ef7e6700 20 required_mask= 0 user.op_mask=7
-2015-12-17 15:03:41.126454 7f88ef7e6700  2 req 36:0.000305::GET
-/admin/metadata/get:get_metadata:verifying op permissions
-2015-12-17 15:03:41.126456 7f88ef7e6700  2 req 36:0.000307::GET
-/admin/metadata/get:get_metadata:verifying op params
-2015-12-17 15:03:41.126458 7f88ef7e6700  2 req 36:0.000308::GET
-/admin/metadata/get:get_metadata:executing
-2015-12-17 15:03:41.126467 7f88ef7e6700  5 ERROR: can't get key: (2) No
-such file or directory
-2015-12-17 15:03:41.126603 7f88ef7e6700  2 req 36:0.000453::GET
-/admin/metadata/get:get_metadata:http status=404
-2015-12-17 15:03:41.126607 7f88ef7e6700  1 ====== req done
-req=0x7f8904068010 http_status=404 ======
-2015-12-17 15:03:41.126613 7f88ef7e6700 20 process_request() returned -2
-2015-12-17 15:03:41.126727 7f88ef7e6700  1 civetweb: 0x7f890400ea60:
-127.0.0.1 - - [17/Dec/2015:15:03:41 -0500] "GET /admin/metadata/get
-HTTP/1.1" 404 0 - python-requests/2.3.0 CPython/2.7.10 Darwin/14.5.0
+application/json
+Thu, 17 Dec 2015 22:42:39 GMT
+/admin/metadata/user
+2015-12-17 17:42:39.422777 7f88f47f0700 15 calculated
+digest=K3xaPHDy6t3r0COfjwl9rAUsUfY=
+2015-12-17 17:42:39.422779 7f88f47f0700 15
+auth_sign=K3xaPHDy6t3r0COfjwl9rAUsUfY=
+2015-12-17 17:42:39.422779 7f88f47f0700 15 compare=0
+2015-12-17 17:42:39.422781 7f88f47f0700  2 req 301:0.000082::PUT
+/admin/metadata/user:set_metadata:reading permissions
+2015-12-17 17:42:39.422783 7f88f47f0700  2 req 301:0.000084::PUT
+/admin/metadata/user:set_metadata:init op
+2015-12-17 17:42:39.422784 7f88f47f0700  2 req 301:0.000085::PUT
+/admin/metadata/user:set_metadata:verifying op mask
+2015-12-17 17:42:39.422785 7f88f47f0700 20 required_mask= 0 user.op_mask=7
+2015-12-17 17:42:39.422786 7f88f47f0700  2 req 301:0.000088::PUT
+/admin/metadata/user:set_metadata:verifying op permissions
+2015-12-17 17:42:39.422788 7f88f47f0700  2 req 301:0.000090::PUT
+/admin/metadata/user:set_metadata:verifying op params
+2015-12-17 17:42:39.422790 7f88f47f0700  2 req 301:0.000091::PUT
+/admin/metadata/user:set_metadata:executing
+2015-12-17 17:42:39.423280 7f88f47f0700 20 get_obj_state:
+rctx=0x7f88f47ea710 obj=.users.uid:-staff state=0x7f891c04ddd0
+s->prefetch_data=0
+2015-12-17 17:42:39.423286 7f88f47f0700 10 cache get:
+name=.users.uid+-staff : hit
+2015-12-17 17:42:39.423290 7f88f47f0700 20 get_obj_state: s->obj_tag was
+set empty
+2015-12-17 17:42:39.423292 7f88f47f0700 10 cache get:
+name=.users.uid+-staff : hit
+2015-12-17 17:42:39.442633 7f88f47f0700 10 cache put: name=.users.uid+-staff
+2015-12-17 17:42:39.442640 7f88f47f0700 10 moving .users.uid+-staff to
+cache LRU end
+2015-12-17 17:42:39.442660 7f88f47f0700 10 distributing notification
+oid=notify.7 bl.length()=1259
+2015-12-17 17:42:39.443653 7f89177fe700 10 RGWWatcher::handle_notify()
+notify_id 279172874441 cookie 66521888 notifier 24444 bl.length()=1259
+2015-12-17 17:42:39.443665 7f89177fe700 10 cache put: name=.users.uid+-staff
+2015-12-17 17:42:39.443667 7f89177fe700 10 moving .users.uid+-staff to
+cache LRU end
+2015-12-17 17:42:39.444461 7f88f47f0700  2 req 301:0.021761::PUT
+/admin/metadata/user:set_metadata:http status=204
+2015-12-17 17:42:39.444466 7f88f47f0700  1 ====== req done
+req=0x7f891c045010 http_status=204 ======
+2015-12-17 17:42:39.444471 7f88f47f0700 20 process_request() returned -1902
+2015-12-17 17:42:39.444493 7f88f47f0700  1 civetweb: 0x7f891c023d20:
+127.0.0.1 - - [17/Dec/2015:17:42:39 -0500] "PUT /admin/metadata/user
+HTTP/1.1" 204 0 - python-requests/2.3.0 CPython/2.7.10 Darwin/14.5.0
+2015-12-17 17:42:43.481916 7f8916ffd700  2
+RGWDataChangesLog::ChangesRenewThread: start
 
 -- 
 Derek T. Yarnell
