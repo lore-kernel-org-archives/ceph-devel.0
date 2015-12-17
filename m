@@ -1,58 +1,54 @@
-From: Patrick McGarry <pmcgarry@gmail.com>
-Subject: CoprHD Integrating Ceph
-Date: Thu, 17 Dec 2015 13:17:46 -0500
-Message-ID: <CAP8Oy=LaWzA3B4m4gOufTCKeUWYDAw4tsoacKSt3GuxuyA-G1w@mail.gmail.com>
+From: Derek Yarnell <derek@umiacs.umd.edu>
+Subject: Re: rgw subuser create and admin api
+Date: Thu, 17 Dec 2015 14:05:25 -0500
+Message-ID: <56730775.3070906@umiacs.umd.edu>
+References: <5672EB1F.9070209@umiacs.umd.edu>
+ <CADRKj5Ru=HhbhYGXq829oKPiB6Wr+9b8qgxjtmCn207xfCdc0Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f179.google.com ([209.85.160.179]:36201 "EHLO
-	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751661AbbLQSRr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Dec 2015 13:17:47 -0500
-Received: by mail-yk0-f179.google.com with SMTP id x184so29171205yka.3
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Dec 2015 10:17:47 -0800 (PST)
+Received: from homsar.umiacs.umd.edu ([128.8.120.251]:53985 "EHLO
+	homsar.umiacs.umd.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751797AbbLQTF1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Dec 2015 14:05:27 -0500
+In-Reply-To: <CADRKj5Ru=HhbhYGXq829oKPiB6Wr+9b8qgxjtmCn207xfCdc0Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: derek@umiacs.umd.edu, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hey cephers,
+On 12/17/15 1:09 PM, Yehuda Sadeh-Weinraub wrote:
+>> Bug? Design?
+> 
+> Somewhat a bug. The whole subusers that use s3 was unintentional, so
+> when creating the subuser api, we didn't think of needing the access
+> key. For some reason we do get the key type. Can you open a ceph
+> tracker issue for that?
+> 
+> You can try using the metadata api to modify the user once it has been
+> created (need to get the user info, add the s3 key to the structure,
+> put the user info).
+> 
 
-In the pursuit of openness I wanted to share a ceph-related bit of
-work that is happening beyond our immediate sphere of influence and
-see who is already contributing, or might be interested in the
-results.
+This will actually create a subuser and the S3 keys correctly (but not
+let you specify the access_key and secret_key).
 
-https://groups.google.com/forum/?hl=3Den#!topic/coprhddevsupport/llZeiT=
-WxddM
+DEBUG:requests.packages.urllib3.connectionpool:"PUT
+/admin/user?subuser&format=json&uid=-staff&subuser=test3&key-type=s3&access=read&generate-secret=True
+HTTP/1.1" 200 87
 
-EMC=E2=80=99s CoprHD initiative continues to try to expand their influe=
-nce
-through open contribution. Currently there is work to integrate Ceph
-support into their SB SDK. So, a few questions for anyone who wishes
-to weigh in:
+I know about a 'GET /admin/metadata/user?format=json' to get the list of
+users from the adminops.  I see I can do things like 'radosgw-admin
+metadata get user:cephtest' but I can't seem to get something like this
+to work.
 
-1) Is this inherently interesting to you?
-2) Are you already contributing to this effort (or would you be
-interested in contributing to this effort)?
-3) Would you want to see this made a priority by the core team to
-review and =E2=80=9Cbless=E2=80=9D an integration?
-
-Just want to get an idea to see if anyone is really excited about this
-and just hasn=E2=80=99t expressed it yet. If nothing else I wanted peop=
-le to
-be aware that it was an option that was floating around out there.
-Thanks.
-
-
-
-Best Regards,
+DEBUG:requests.packages.urllib3.connectionpool:"GET
+/admin/metadata/get?format=json&key=user%3Acephtest HTTP/1.1" 404 20
+ERROR:rgwadmin.rgw:{u'Code': u'NoSuchKey'}
 
 
-Patrick McGarry
-pmcgarry@gmail.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Derek T. Yarnell
+University of Maryland
+Institute for Advanced Computer Studies
