@@ -1,89 +1,80 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: puzzling disapearance of /dev/sdc1
-Date: Thu, 17 Dec 2015 15:10:32 +0100
-Message-ID: <5672C258.1020700@dachary.org>
-References: <5672AAD7.8030004@dachary.org>
- <alpine.DEB.2.00.1512170530200.10312@cobra.newdream.net>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: understanding partprobe failure
+Date: Thu, 17 Dec 2015 16:49:21 +0100
+Message-ID: <CAOi1vP8+D9SpyGHMsnxWPM0Xs4yLPvK27=h8NG=Oy+Rbd=YvjQ@mail.gmail.com>
+References: <5672A842.1030103@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="TTJavLRg9sqvt6kTGUFBUWRaJ1xCuEDHX"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:51962 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S934720AbbLQOKi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Dec 2015 09:10:38 -0500
-In-Reply-To: <alpine.DEB.2.00.1512170530200.10312@cobra.newdream.net>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:34025 "EHLO
+	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755866AbbLQPtW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Dec 2015 10:49:22 -0500
+Received: by mail-wm0-f51.google.com with SMTP id l126so29333036wml.1
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Dec 2015 07:49:21 -0800 (PST)
+In-Reply-To: <5672A842.1030103@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---TTJavLRg9sqvt6kTGUFBUWRaJ1xCuEDHX
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+On Thu, Dec 17, 2015 at 1:19 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Ilya,
+>
+> I'm seeing a partprobe failure right after a disk was zapped with sgdisk --clear --mbrtogpt -- /dev/vdb:
+>
+> partprobe /dev/vdb failed : Error: Partition(s) 1 on /dev/vdb have been written, but we have been unable to inform the kernel of the change, probably because it/they are in use. As a result, the old partition(s) will remain in use. You should reboot now before making further changes.
+>
+> waiting 60 seconds (see the log below) and trying again succeeds. The partprobe call is guarded by udevadm settle to prevent udev actions from racing and nothing else goes on in the machine.
+>
+> Any idea how that could happen ?
+>
+> Cheers
+>
+> 2015-12-17 11:46:10,356.356 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:DEBUG:ceph-disk:get_dm_uuid /dev/vdb uuid path is /sys/dev/block/253:16/dm/uuid
+> 2015-12-17 11:46:10,357.357 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:DEBUG:ceph-disk:Zapping partition table on /dev/vdb
+> 2015-12-17 11:46:10,358.358 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:INFO:ceph-disk:Running command: /usr/sbin/sgdisk --zap-all -- /dev/vdb
+> 2015-12-17 11:46:10,365.365 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:Caution: invalid backup GPT header, but valid main header; regenerating
+> 2015-12-17 11:46:10,366.366 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:backup header from main header.
+> 2015-12-17 11:46:10,366.366 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:
+> 2015-12-17 11:46:10,366.366 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:Warning! Main and backup partition tables differ! Use the 'c' and 'e' options
+> 2015-12-17 11:46:10,367.367 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:on the recovery & transformation menu to examine the two tables.
+> 2015-12-17 11:46:10,367.367 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:
+> 2015-12-17 11:46:10,367.367 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:Warning! One or more CRCs don't match. You should repair the disk!
+> 2015-12-17 11:46:10,368.368 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:
+> 2015-12-17 11:46:11,413.413 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:****************************************************************************
+> 2015-12-17 11:46:11,414.414 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:Caution: Found protective or hybrid MBR and corrupt GPT. Using GPT, but disk
+> 2015-12-17 11:46:11,414.414 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:verification and recovery are STRONGLY recommended.
+> 2015-12-17 11:46:11,414.414 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:****************************************************************************
+> 2015-12-17 11:46:11,415.415 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:Warning: The kernel is still using the old partition table.
+> 2015-12-17 11:46:11,415.415 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:The new table will be used at the next reboot.
+> 2015-12-17 11:46:11,416.416 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:GPT data structures destroyed! You may now partition the disk using fdisk or
+> 2015-12-17 11:46:11,416.416 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:other utilities.
+> 2015-12-17 11:46:11,416.416 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:INFO:ceph-disk:Running command: /usr/sbin/sgdisk --clear --mbrtogpt -- /dev/vdb
+> 2015-12-17 11:46:12,504.504 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:Creating new GPT entries.
+> 2015-12-17 11:46:12,505.505 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:Warning: The kernel is still using the old partition table.
+> 2015-12-17 11:46:12,505.505 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:The new table will be used at the next reboot.
+> 2015-12-17 11:46:12,505.505 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:The operation has completed successfully.
+> 2015-12-17 11:46:12,506.506 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:DEBUG:ceph-disk:Calling partprobe on zapped device /dev/vdb
+> 2015-12-17 11:46:12,507.507 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:INFO:ceph-disk:Running command: /usr/bin/udevadm settle --timeout=600
+> 2015-12-17 11:46:15,427.427 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:INFO:ceph-disk:Running command: /usr/sbin/partprobe /dev/vdb
+> 2015-12-17 11:46:16,860.860 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:DEBUG:ceph-disk:partprobe /dev/vdb failed : Error: Partition(s) 1 on /dev/vdb have been written, but we have been unable to inform the kernel of the change, probably because it/they are in use.  As a result, the old partition(s) will remain in use.  You should reboot now before making further changes.
+> 2015-12-17 11:46:16,860.860 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:(ignored, waiting 60s)
+> 2015-12-17 11:47:16,925.925 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:INFO:ceph-disk:Running command: /usr/bin/udevadm settle --timeout=600
+> 2015-12-17 11:47:19,681.681 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:INFO:ceph-disk:Running command: /usr/sbin/partprobe /dev/vdb
+> 2015-12-17 11:47:20,125.125 INFO:tasks.workunit.client.0.target167114233028.stderr:DEBUG:CephDisk:INFO:ceph-disk:Running command: /usr/bin/udevadm settle --timeout=600
 
-Hi Sage,
+Well, evidently something was using that partition.  This is on
+openstack, right?  It probably makes it hard to debug, but trying to
+reproduce and doing some tracing is probably the only way to get an
+idea.
 
-On 17/12/2015 14:31, Sage Weil wrote:
-> On Thu, 17 Dec 2015, Loic Dachary wrote:
->> Hi Ilya,
->>
->> This is another puzzling behavior (the log of all commands is at=20
->> http://tracker.ceph.com/issues/14094#note-4). in a nutshell, after a=20
->> series of sgdisk -i commands to examine various devices including=20
->> /dev/sdc1, the /dev/sdc1 file disappears (and I think it will showup=20
->> again although I don't have a definitive proof of this).
->>
->> It looks like a side effect of a previous partprobe command, the only =
+udevadm settle doesn't guarantee that a device (or one of its
+partitions) isn't going to be busy - it just waits for udevd to empty
+its queue.  Both sgdisk invocations complained about a busy device, is
+it possible something external to udev was doing something with it?
 
->> command I can think of that removes / re-adds devices. I thought calli=
-ng=20
->> udevadm settle after running partprobe would be enough to ensure=20
->> partprobe completed (and since it takes as much as 2mn30 to return, I =
+Thanks,
 
->> would be shocked if it does not ;-).
->>
->> Any idea ? I desperately try to find a consistent behavior, something =
-
->> reliable that we could use to say : "wait for the partition table to b=
-e=20
->> up to date in the kernel and all udev events generated by the partitio=
-n=20
->> table update to complete".
->=20
-> I wonder if the underlying issue is that we shouldn't be calling udevad=
-m=20
-> settle from something running from udev.  Instead, of a udev-triggered =
-
-> run of ceph-disk does something that changes the partitions, it=20
-> should just exit and let udevadm run ceph-disk again on the new=20
-> devices...?
-
-Unless I missed something this is on CentOS 7 and ceph-disk is only calle=
-d from udev as ceph-disk trigger which does nothing else but asynchronous=
-ly delegate the work to systemd. Therefore there is no udevadm settle fro=
-m within udev (which would deadlock and timeout every time... I hope ;-).=
-
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---TTJavLRg9sqvt6kTGUFBUWRaJ1xCuEDHX
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlZywlgACgkQ8dLMyEl6F22oGwCfVcBdq8j4NxPX5fltgworA8mx
-QloAn28UfbWrMNfPB0l5zembyZQypiKX
-=2+VP
------END PGP SIGNATURE-----
-
---TTJavLRg9sqvt6kTGUFBUWRaJ1xCuEDHX--
+                Ilya
