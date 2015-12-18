@@ -1,94 +1,165 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: Issue with Ceph File System and LIO
-Date: Fri, 18 Dec 2015 15:18:17 +0800
-Message-ID: <CAAM7YAky6409uw-hyDOJFE+3ftm46cDXpWG7RHznbZtQXcneCw@mail.gmail.com>
-References: <CA+9C14a0E9bc+GL-QiAxPD_B9_PRhEE4PRG2jAa9REWkdNQFiA@mail.gmail.com>
-	<CAAM7YAk=U7NqEujuMXAyem00NDJfx-TOYGgJez76f48HS6nt2A@mail.gmail.com>
-	<CA+9C14ZOZQcWSGL8ukDeVQAtoTEDRNOLq=CB1ZusiMsx6-seMw@mail.gmail.com>
-	<CAAM7YAnktfNvd-EXU+1Eok4kUafWwnvj+CCGocF7ffTcAt-dsA@mail.gmail.com>
-	<CA+9C14bbtBjgOD0hpSfapRrsx+Eg_dYyFfV+uXvgB5X7eRidDg@mail.gmail.com>
-	<CA+9C14bMs1u80P3g1D4QsDHHzLy5YUvB+KWmcrKa0o5aX9W38g@mail.gmail.com>
-	<CAAM7YAm2r+LVPMpE_GbWCJmE-bdi-uXHyzqAR1JgPMXCSx55pQ@mail.gmail.com>
-	<CA+9C14bVgWKMxxOe04qiLW6U+baA_TGbFt9RNjY+wPNMiW_R3w@mail.gmail.com>
-	<CAAM7YAkTA9skmSxyEPVnEWAyykg4hsoLwxxjFp2nJgMbJAC8VQ@mail.gmail.com>
-	<00b601d13954$5d4a94e0$17dfbea0$@samsung.com>
-	<CA+9C14aAAVaaLtjDCjLkc9TSmU=aMh-2iq0xKOb-KEcc9vcuMQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: puzzling disapearance of /dev/sdc1
+Date: Fri, 18 Dec 2015 13:38:15 +0100
+Message-ID: <5673FE37.8010408@dachary.org>
+References: <5672AAD7.8030004@dachary.org>
+ <alpine.DEB.2.00.1512170530200.10312@cobra.newdream.net>
+ <5672C258.1020700@dachary.org>
+ <CAOi1vP_602U1BB0+epJ6ROJjiF7d-1uLv75M_SYPDeR2Oa47ig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="55XKSR77TqsK7jxdFG7x1gMcHDJlF7xoJ"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f177.google.com ([209.85.217.177]:33130 "EHLO
-	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752176AbbLRHST (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Dec 2015 02:18:19 -0500
-Received: by mail-lb0-f177.google.com with SMTP id kw15so58775484lbb.0
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Dec 2015 23:18:19 -0800 (PST)
-In-Reply-To: <CA+9C14aAAVaaLtjDCjLkc9TSmU=aMh-2iq0xKOb-KEcc9vcuMQ@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:52498 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752742AbbLRMiR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Dec 2015 07:38:17 -0500
+In-Reply-To: <CAOi1vP_602U1BB0+epJ6ROJjiF7d-1uLv75M_SYPDeR2Oa47ig@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric Eastman <eric.eastman@keepertech.com>
-Cc: Chao Yu <chao2.yu@samsung.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Dec 18, 2015 at 2:23 PM, Eric Eastman
-<eric.eastman@keepertech.com> wrote:
->> Hi Yan Zheng, Eric Eastman
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--55XKSR77TqsK7jxdFG7x1gMcHDJlF7xoJ
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Ilya,
+
+It turns out that sgdisk 0.8.6 -i 2 /dev/vdb removes partitions and re-ad=
+ds them on CentOS 7 with a 3.10.0-229.11.1.el7 kernel, in the same way pa=
+rtprobe does. It is used intensively by ceph-disk and inevitably leads to=
+ races where a device temporarily disapears. The same command (sgdisk 0.8=
+=2E8) on Ubuntu 14.04 with a 3.13.0-62-generic kernel only generates two =
+udev change events and does not remove / add partitions. The source code =
+between sgdisk 0.8.6 and sgdisk 0.8.8 did not change in a significant way=
+ and the output of strace -e ioctl sgdisk -i 2 /dev/vdb is identical in b=
+oth environments.
+
+ioctl(3, BLKGETSIZE, 20971520)          =3D 0
+ioctl(3, BLKGETSIZE64, 10737418240)     =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, HDIO_GETGEO, {heads=3D16, sectors=3D63, cylinders=3D16383, start=
+=3D0}) =3D 0
+ioctl(3, HDIO_GETGEO, {heads=3D16, sectors=3D63, cylinders=3D16383, start=
+=3D0}) =3D 0
+ioctl(3, BLKGETSIZE, 20971520)          =3D 0
+ioctl(3, BLKGETSIZE64, 10737418240)     =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKGETSIZE, 20971520)          =3D 0
+ioctl(3, BLKGETSIZE64, 10737418240)     =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+ioctl(3, BLKSSZGET, 512)                =3D 0
+
+This leads me to the conclusion that the difference is in how the kernel =
+reacts to these ioctl.
+
+What do you think ?=20
+
+Cheers
+
+On 17/12/2015 17:26, Ilya Dryomov wrote:
+> On Thu, Dec 17, 2015 at 3:10 PM, Loic Dachary <loic@dachary.org> wrote:=
+
+>> Hi Sage,
 >>
->> Similar bug was reported in f2fs, btrfs, it does affect 4.4-rc4, the fixing
->> patch was merged into 4.4-rc5, dfd01f026058 ("sched/wait: Fix the signal
->> handling fix").
->>
->> Related report & discussion was here:
->> https://lkml.org/lkml/2015/12/12/149
->>
->> I'm not sure the current reported issue of ceph was related to that though,
->> but at least try testing with an upgraded or patched kernel could verify it.
->> :)
->>
->> Thanks,
->>
->>> -----Original Message-----
->>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of
->>> Yan, Zheng
->>> Sent: Friday, December 18, 2015 12:05 PM
->>> To: Eric Eastman
->>> Cc: Ceph Development
->>> Subject: Re: Issue with Ceph File System and LIO
+>> On 17/12/2015 14:31, Sage Weil wrote:
+>>> On Thu, 17 Dec 2015, Loic Dachary wrote:
+>>>> Hi Ilya,
+>>>>
+>>>> This is another puzzling behavior (the log of all commands is at
+>>>> http://tracker.ceph.com/issues/14094#note-4). in a nutshell, after a=
+
+>>>> series of sgdisk -i commands to examine various devices including
+>>>> /dev/sdc1, the /dev/sdc1 file disappears (and I think it will showup=
+
+>>>> again although I don't have a definitive proof of this).
+>>>>
+>>>> It looks like a side effect of a previous partprobe command, the onl=
+y
+>>>> command I can think of that removes / re-adds devices. I thought cal=
+ling
+>>>> udevadm settle after running partprobe would be enough to ensure
+>>>> partprobe completed (and since it takes as much as 2mn30 to return, =
+I
+>>>> would be shocked if it does not ;-).
+>=20
+> Yeah, IIRC partprobe goes through every slot in the partition table,
+> trying to first remove and then add the partition back.  But, I don't
+> see any mention of partprobe in the log you referred to.
+>=20
+> Should udevadm settle for a few vd* devices be taking that much time?
+> I'd investigate that regardless of the issue at hand.
+>=20
+>>>>
+>>>> Any idea ? I desperately try to find a consistent behavior, somethin=
+g
+>>>> reliable that we could use to say : "wait for the partition table to=
+ be
+>>>> up to date in the kernel and all udev events generated by the partit=
+ion
+>>>> table update to complete".
 >>>
->>> On Fri, Dec 18, 2015 at 3:49 AM, Eric Eastman
->>> <eric.eastman@keepertech.com> wrote:
->>> > With cephfs.patch and cephfs1.patch applied and I am now seeing:
->>> >
->>> > [Thu Dec 17 14:27:59 2015] ------------[ cut here ]------------
->>> > [Thu Dec 17 14:27:59 2015] WARNING: CPU: 0 PID: 3036 at
->>> > fs/ceph/addr.c:1171 ceph_write_begin+0xfb/0x120 [ceph]()
->>> > [Thu Dec 17 14:27:59 2015] Modules linked in: iscsi_target_mod
-> ...
->>> >
->>>
->>> The page gets unlocked mystically. I still don't find any clue. Could
->>> you please try the new patch (not incremental patch). Besides, please
->>> enable CONFIG_DEBUG_VM when compiling the kernel.
->>>
->>> Thanks you very much
->>> Yan, Zheng
+>>> I wonder if the underlying issue is that we shouldn't be calling udev=
+adm
+>>> settle from something running from udev.  Instead, of a udev-triggere=
+d
+>>> run of ceph-disk does something that changes the partitions, it
+>>> should just exit and let udevadm run ceph-disk again on the new
+>>> devices...?
+>=20
 >>
-> I have just installed the cephfs_new.patch and have set
-> CONFIG_DEBUG_VM=y on a new 4.4rc4 kernel and restarted the ESXi iSCSI
-> test to my Ceph File System gateway.  I plan to let it run overnight
-> and report the status tomorrow.
->
-> Let me know if I should move on to 4.4rc5 with or without patches and
-> with or without  CONFIG_DEBUG_VM=y
->
+>> Unless I missed something this is on CentOS 7 and ceph-disk is only ca=
+lled from udev as ceph-disk trigger which does nothing else but asynchron=
+ously delegate the work to systemd. Therefore there is no udevadm settle =
+from within udev (which would deadlock and timeout every time... I hope ;=
+-).
+>=20
+> That's a sure lockup, until one of them times out.
+>=20
+> How are you delegating to systemd?  Is it to avoid long-running udev
+> events?  I'm probably missing something - udevadm settle wouldn't block=
 
-please try rc5 kernel without patches and DEBUG_VM=y
+> on anything other than udev, so if you are shipping work off to
+> somewhere else, udev can't be relied upon for waiting.
+>=20
+> Thanks,
+>=20
+>                 Ilya
+>=20
 
-Regards
-Yan, Zheng
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
-> Looking at the network traffic stats on my iSCSI gateway, with
-> CONFIG_DEBUG_VM=y, throughput seems to be down by a factor of at least
-> 10 compared to my last test without setting CONFIG_DEBUG_VM=y
->
-> Regards,
-> Eric
+--55XKSR77TqsK7jxdFG7x1gMcHDJlF7xoJ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlZz/jcACgkQ8dLMyEl6F21PPQCfUZqWEOkeGQVhTzMzIWhYO8ZK
+EAgAnjcOu2kV1ZGTJI9bzYMay4fTdHnZ
+=zVCO
+-----END PGP SIGNATURE-----
+
+--55XKSR77TqsK7jxdFG7x1gMcHDJlF7xoJ--
