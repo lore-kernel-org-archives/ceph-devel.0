@@ -1,81 +1,51 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: puzzling disapearance of /dev/sdc1
-Date: Fri, 18 Dec 2015 17:34:38 +0100
-Message-ID: <5674359E.6020006@dachary.org>
-References: <5672AAD7.8030004@dachary.org>
- <alpine.DEB.2.00.1512170530200.10312@cobra.newdream.net>
- <5672C258.1020700@dachary.org>
- <CAOi1vP_602U1BB0+epJ6ROJjiF7d-1uLv75M_SYPDeR2Oa47ig@mail.gmail.com>
- <5673FE37.8010408@dachary.org>
- <CAOi1vP_2s7KFvxWJZSJB-=rY0eA7GR7AqAvaKHcQfkUWtOr+hg@mail.gmail.com>
- <56743316.1040805@dachary.org> <56743502.4010406@dachary.org>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: 2016 Ceph Tech Talks
+Date: Fri, 18 Dec 2015 14:06:04 -0500
+Message-ID: <CAAZbbf0pK7hrArSD4j49Ltdsv_ox6Mi=ofYJdxK5baSd_Nmbxw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="paDcqd0mwiktLO8T76xoE9xeK4thMg7F0"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:52670 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932264AbbLRQek (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Dec 2015 11:34:40 -0500
-In-Reply-To: <56743502.4010406@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---paDcqd0mwiktLO8T76xoE9xeK4thMg7F0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Nevermind, got it:
-
-CHANGES WITH 214:
-
-        * As an experimental feature, udev now tries to lock the
-          disk device node (flock(LOCK_SH|LOCK_NB)) while it
-          executes events for the disk or any of its partitions.
-          Applications like partitioning programs can lock the
-          disk device node (flock(LOCK_EX)) and claim temporary
-          device ownership that way; udev will entirely skip all event
-          handling for this disk and its partitions. If the disk
-          was opened for writing, the close will trigger a partition
-          table rescan in udev's "watch" facility, and if needed
-          synthesize "change" events for the disk and all its partitions.=
-
-          This is now unconditionally enabled, and if it turns out to
-          cause major problems, we might turn it on only for specific
-          devices, or might need to disable it entirely. Device Mapper
-          devices are excluded from this logic.
-
-
-On 18/12/2015 17:32, Loic Dachary wrote:
->=20
->>> AFAICT udevd started doing this in v214.
->=20
-> Do you have a specific commit / changelog entry in mind ? I'd like to a=
-dd it to the commit message fixing the problem reference.
->=20
-> Thanks !
->=20
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---paDcqd0mwiktLO8T76xoE9xeK4thMg7F0
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlZ0NZ4ACgkQ8dLMyEl6F22xpACfZmjQnZp2a6mTUSp0mj13fyiQ
-6nUAoJd4kQRV7RJm4vPwsdtF2qtph+OD
-=0K+k
------END PGP SIGNATURE-----
-
---paDcqd0mwiktLO8T76xoE9xeK4thMg7F0--
+SGV5IGNlcGhlcnMsCgpCZWZvcmUgd2UgYWxsIGhlYWQgb2ZmIHRvIHZhcmlvdXMgaG9saWRheSBz
+aGVuYW5pZ2FucyBhbmQgYmVmdWRkbGUgb3VyCnNlbnNlcyB3aXRoIHJlc3QsIHJlbGF4YXRpb24s
+IGFuZCBnbG9yaW91cyBtZWFscyBvZiBsZWdlbmQsIEkgd2FudGVkCnRvIGdpdmUgeW91IHNvbWV0
+aGluZyB0byBsb29rIGZvcndhcmQgdG8gZm9yIDIwMTYgaW4gdGhlIGZvcm0gb2YgQ2VwaApUZWNo
+IFRhbGtzIQoKaHR0cDovL2NlcGguY29tL2NlcGgtdGVjaC10YWxrcy8KCkZpcnN0IG9uIHRoZSBk
+b2NrZXQgaW4gSmFudWFyeSBpcyBvdXIgcmVzY2hlZHVsZWQgdGFsayBmcm9tIGVhcmxpZXIKdGhp
+cyB5ZWFyIGRpc2N1c3NpbmcgYSBQb3N0Z3JlU1FMIHNldHVwIG9uIENlcGggdW5kZXIgTWVzb3Mv
+QXVyb3JhCndpdGggRG9ja2VyLiBUaGF0IHNob3VsZCBiZSBhIGdyZWF0IHRhbGsgdGhhdCBoaXRz
+IGEgbG90IG9mIHRoZQpxdWVzdGlvbnMgSSBhbSBmcmVxdWVudGx5IGFza2VkIGFib3V0IGRhdGFi
+YXNlIHdvcmtsb2FkcywgY2VwaCwgYW5kCmNvbnRhaW5lcnMgYWxsIGluIG9uZS4KCldoaWxlIEkg
+aGF2ZW7igJl0IHNvbGlkaWZpZWQgdGhlIHNwZWNpZmljIHNwZWFrZXIvZGF0ZS90aW1lLCBvdXIg
+cGxhbnMKZm9yIEZlYnJ1YXJ5IGFyZSB0byBkaWcgaW4gdG8gdGhlIGltbWFuZW50IHJlbGVhc2Ug
+b2YgQ2VwaEZTIChob29yYXkhKQppbiBKZXdlbC4gV2XigJlsbCB0YWtlIGEgbG9vayBhdCB3aGF0
+IGF3ZXNvbWVuZXNzIGlzIGJlaW5nIGRlbGl2ZXJlZCwKYW5kIHdoZXJlIENlcGhGUyBpcyBoZWFk
+ZWQgbmV4dC4KCk1hcmNoIGlzIHdpZGUgb3Blbiwgc28gaWYgeW91IG9yIHNvbWVvbmUgeW91IGtu
+b3cgd291bGQgbGlrZSB0byBnaXZlIGEKQ2VwaCBUZWNoIFRhbGssIEnigJlkIGxvdmUgdG8gZmlu
+ZCBhIGNvbW11bml0eSB2b2x1bnRlZXIgdG8gdGFsayBhYm91dCBhCnRlY2huaWNhbCB0b3BpYyB0
+aGF0IGlzIENlcGgtcmVsYXRlZCBmb3IgYWJvdXQgYW4gaG91ciBvdmVyCnZpZGVvY29uZmVyZW5j
+ZS4gUGxlYXNlIGRyb3AgbWUgYSBsaW5lIGlmIHRoaXMgaXMgaW50ZXJlc3RpbmcgdG8geW91LgoK
+SW4gQXByaWwgd2Ugd2lsbCBvbmNlIGFnYWluIGJlIHZpc2l0aW5nIHRoZSBPcGVuU3RhY2sgRGV2
+ZWxvcGVyIFN1bW1pdAoodGhpcyB0aW1lIGluIFRYKSwgYXMgd2VsbCBhcyB3b3JraW5nIHRvIGRl
+bGl2ZXIgYSBDZXBoIHRyYWNrIGxpa2Ugd2UKZGlkIGluIFRva3lvLiBNeSBob3BlIGlzIHRvIGJy
+b2FkY2FzdCBzb21lIG9mIHRoaXMgY29udGVudCBmb3IKY29uc3VtcHRpb24gYnkgcmVtb3RlIHBh
+cnRpY2lwYW50cy4gS2VlcCBhbiBleWUgb3V0IQoKSWYgeW91IGhhdmUgYW55IHF1ZXN0aW9ucyBh
+Ym91dCB1cGNvbWluZyBldmVudHMgb3IgY29tbXVuaXR5IGVuZGVhdm9ycwpwbGVhc2UgZmVlbCBm
+cmVlIHRvIGRyb3AgbWUgYSBsaW5lLiBUaGFua3MhCgoKLS0gCgpCZXN0IFJlZ2FyZHMsCgpQYXRy
+aWNrIE1jR2FycnkKRGlyZWN0b3IgQ2VwaCBDb21tdW5pdHkgfHwgUmVkIEhhdApodHRwOi8vY2Vw
+aC5jb20gIHx8ICBodHRwOi8vY29tbXVuaXR5LnJlZGhhdC5jb20KQHNjdXR0bGVtb25rZXkgfHwg
+QGNlcGgKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2Vw
+aC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlz
+dHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
