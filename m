@@ -1,67 +1,58 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Weighted Priority Op Queue
-Date: Fri, 18 Dec 2015 09:24:22 -0700
-Message-ID: <CAANLjFokLZSHLwgVvqpm9ajgTEHwp+piwFeWdNAyd_ecdiff1Q@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: puzzling disapearance of /dev/sdc1
+Date: Fri, 18 Dec 2015 17:32:02 +0100
+Message-ID: <56743502.4010406@dachary.org>
+References: <5672AAD7.8030004@dachary.org>
+ <alpine.DEB.2.00.1512170530200.10312@cobra.newdream.net>
+ <5672C258.1020700@dachary.org>
+ <CAOi1vP_602U1BB0+epJ6ROJjiF7d-1uLv75M_SYPDeR2Oa47ig@mail.gmail.com>
+ <5673FE37.8010408@dachary.org>
+ <CAOi1vP_2s7KFvxWJZSJB-=rY0eA7GR7AqAvaKHcQfkUWtOr+hg@mail.gmail.com>
+ <56743316.1040805@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="4rh8rBCrvQpscaueWA6EOagoriQLQkcgg"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f54.google.com ([209.85.213.54]:35298 "EHLO
-	mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753966AbbLRQYX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Dec 2015 11:24:23 -0500
-Received: by mail-vk0-f54.google.com with SMTP id a189so68209496vkh.2
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Dec 2015 08:24:22 -0800 (PST)
+Received: from mail2.dachary.org ([91.121.57.175]:52665 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S932151AbbLRQcF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Dec 2015 11:32:05 -0500
+In-Reply-To: <56743316.1040805@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Sage Weil <sweil@redhat.com>, Samuel Just <sjust@redhat.com>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--4rh8rBCrvQpscaueWA6EOagoriQLQkcgg
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-I adjusted the algorithm from the Weighted Round Robin Queue and
-resolved the SSD performance issue. Since it is different, I've
-renamed it so that it doesn't cause confusion later.
 
-My tests are all showing a performance improvement of 3-17%. The
-enqueue and dequeue latencies are the same or just slightly better
-than Prioritized Queue, but the distribution of OPs is much more fair
-especially in the contention situations (more enqueue than dequeue).
-The new queue is always right on the expected distribution in all
-cases, even with highly skewed ops (higher priority ops have low
-costs/size and low priority ops have high costs/size).
+>> AFAICT udevd started doing this in v214.
 
-I could probably get a little more performance out of it by using
-intrusive containers, but since I'm getting the same latency with
-better overall performance gains, I wanted to get this in and tested.
-I can create another PR later if intrusive containers provide more
-performance.
+Do you have a specific commit / changelog entry in mind ? I'd like to add=
+ it to the commit message fixing the problem reference.
 
-The PR is at https://github.com/ceph/ceph/pull/6964
+Thanks !
 
-I've closed the previous RP (https://github.com/ceph/ceph/pull/6781)
-as this one supersedes it. Any feedback is appreciated.
 
-Thanks,
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--4rh8rBCrvQpscaueWA6EOagoriQLQkcgg
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
 -----BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.3.2
-Comment: https://www.mailvelope.com
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-wsFcBAEBCAAQBQJWdDMuCRDmVDuy+mK58QAAet0P/iRkGILB96Ryy6HPYZny
-ODzzn1ld/LkwK/JmVsWti48tOZbnG91WhxQIAQMeha5GeRAcv/Ie2OBZe7Y4
-Jo4tCaXbPGwZ9sk1kxjwTm4SYHKwCYf0vuyOVIT2+On0BrXUPfDFPFBHpUwY
-nDUkyZTi6YCo9W7qgST7AQJHI9wAeb0SlClAsBN3vd8JOoZfuWuA6+hNP6q5
-tI6RueXXy8LgbiIiNmm5MvAJQg/7I+rWs2JZyyyu0BaBSm3GPY15LPpIWa7F
-zg0+ax8pb5J0Ug4fSwzG7iKKNhO/TSC32bC2kRWPThQCmVQ6mUmrBWW311vK
-ZpFRAPy6mXCVKysFqZFxav5BFagkQZO470Vjej4riYHxRa4QdGOkjZODAb6+
-2GN+wtQH76dVsxm4mOGi4sUFJ5QLjk+nTDILIS5uh3x7nJ94UbqAetzgQA7m
-bAVQocMb5B0JZb6vHjg4TkwQ2pVgzBWxYQX7Lum3hm3DDVhm4BPbU0juCZaO
-o2XD6KgM40mxJmsjmyL/siCUV8wqZDamoHMAyljIr0hfkvBR+AB9a6B2+1iE
-DIIBX/blM7lSQRHIOrBj/FRBeplGbGP2cBXS0v4+N3l5jGFgk4Aisf1KPr22
-qaGbxv6pteMJhbpeBf4bOTeU8spwHmpAxmLINYECUk6ySoYJNva9T+IYsBiQ
-EoPN
-=bQwT
+iEYEARECAAYFAlZ0NQIACgkQ8dLMyEl6F20P+wCfTIPyclI7KiGkVrrSWIkbtAZg
+mDoAnAj9ZdwD8sxiwKLhlt2HaoKKNlcy
+=n3pE
 -----END PGP SIGNATURE-----
+
+--4rh8rBCrvQpscaueWA6EOagoriQLQkcgg--
