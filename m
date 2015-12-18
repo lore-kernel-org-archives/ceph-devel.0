@@ -1,146 +1,67 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: puzzling disapearance of /dev/sdc1
-Date: Fri, 18 Dec 2015 17:23:50 +0100
-Message-ID: <56743316.1040805@dachary.org>
-References: <5672AAD7.8030004@dachary.org>
- <alpine.DEB.2.00.1512170530200.10312@cobra.newdream.net>
- <5672C258.1020700@dachary.org>
- <CAOi1vP_602U1BB0+epJ6ROJjiF7d-1uLv75M_SYPDeR2Oa47ig@mail.gmail.com>
- <5673FE37.8010408@dachary.org>
- <CAOi1vP_2s7KFvxWJZSJB-=rY0eA7GR7AqAvaKHcQfkUWtOr+hg@mail.gmail.com>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Weighted Priority Op Queue
+Date: Fri, 18 Dec 2015 09:24:22 -0700
+Message-ID: <CAANLjFokLZSHLwgVvqpm9ajgTEHwp+piwFeWdNAyd_ecdiff1Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="oOPuAn0dD1BlrwgeLBf0keaEbAVHs0s9M"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:52657 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753815AbbLRQXx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Dec 2015 11:23:53 -0500
-In-Reply-To: <CAOi1vP_2s7KFvxWJZSJB-=rY0eA7GR7AqAvaKHcQfkUWtOr+hg@mail.gmail.com>
+Received: from mail-vk0-f54.google.com ([209.85.213.54]:35298 "EHLO
+	mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753966AbbLRQYX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Dec 2015 11:24:23 -0500
+Received: by mail-vk0-f54.google.com with SMTP id a189so68209496vkh.2
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Dec 2015 08:24:22 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sweil@redhat.com>, Samuel Just <sjust@redhat.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---oOPuAn0dD1BlrwgeLBf0keaEbAVHs0s9M
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
+I adjusted the algorithm from the Weighted Round Robin Queue and
+resolved the SSD performance issue. Since it is different, I've
+renamed it so that it doesn't cause confusion later.
 
+My tests are all showing a performance improvement of 3-17%. The
+enqueue and dequeue latencies are the same or just slightly better
+than Prioritized Queue, but the distribution of OPs is much more fair
+especially in the contention situations (more enqueue than dequeue).
+The new queue is always right on the expected distribution in all
+cases, even with highly skewed ops (higher priority ops have low
+costs/size and low priority ops have high costs/size).
 
-On 18/12/2015 16:31, Ilya Dryomov wrote:
-> On Fri, Dec 18, 2015 at 1:38 PM, Loic Dachary <loic@dachary.org> wrote:=
+I could probably get a little more performance out of it by using
+intrusive containers, but since I'm getting the same latency with
+better overall performance gains, I wanted to get this in and tested.
+I can create another PR later if intrusive containers provide more
+performance.
 
->> Hi Ilya,
->>
->> It turns out that sgdisk 0.8.6 -i 2 /dev/vdb removes partitions and re=
--adds them on CentOS 7 with a 3.10.0-229.11.1.el7 kernel, in the same way=
- partprobe does. It is used intensively by ceph-disk and inevitably leads=
- to races where a device temporarily disapears. The same command (sgdisk =
-0.8.8) on Ubuntu 14.04 with a 3.13.0-62-generic kernel only generates two=
- udev change events and does not remove / add partitions. The source code=
- between sgdisk 0.8.6 and sgdisk 0.8.8 did not change in a significant wa=
-y and the output of strace -e ioctl sgdisk -i 2 /dev/vdb is identical in =
-both environments.
->>
->> ioctl(3, BLKGETSIZE, 20971520)          =3D 0
->> ioctl(3, BLKGETSIZE64, 10737418240)     =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, HDIO_GETGEO, {heads=3D16, sectors=3D63, cylinders=3D16383, st=
-art=3D0}) =3D 0
->> ioctl(3, HDIO_GETGEO, {heads=3D16, sectors=3D63, cylinders=3D16383, st=
-art=3D0}) =3D 0
->> ioctl(3, BLKGETSIZE, 20971520)          =3D 0
->> ioctl(3, BLKGETSIZE64, 10737418240)     =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKGETSIZE, 20971520)          =3D 0
->> ioctl(3, BLKGETSIZE64, 10737418240)     =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->> ioctl(3, BLKSSZGET, 512)                =3D 0
->>
->> This leads me to the conclusion that the difference is in how the kern=
-el reacts to these ioctl.
->=20
-> I'm pretty sure it's not the kernel versions that matter here, but
-> systemd versions.  Those are all get-property ioctls, and I don't think=
+The PR is at https://github.com/ceph/ceph/pull/6964
 
-> sgdisk -i does anything with the partition table.
->=20
-> What it probably does though is it opens the disk for write for some
-> reason.  When it closes it, udevd (systemd-udevd process) picks that
-> close up via inotify and issues the BLKRRPART ioctl, instructing the
-> kernel to re-read the partition table.  Technically, that's different
-> from what partprobe does, but it still generates those udev events you
-> are seeing in the monitor.
->=20
-> AFAICT udevd started doing this in v214.
+I've closed the previous RP (https://github.com/ceph/ceph/pull/6781)
+as this one supersedes it. Any feedback is appreciated.
 
-That explains everything indeed.
-
-# strace -f -e open sgdisk -i 2 /dev/vdb
-=2E..
-open("/dev/vdb", O_RDONLY)              =3D 4
-open("/dev/vdb", O_WRONLY|O_CREAT, 0644) =3D 4
-open("/dev/vdb", O_RDONLY)              =3D 4
-Partition GUID code: 45B0969E-9B03-4F30-B4C6-B4B80CEFF106 (Unknown)
-Partition unique GUID: 7BBAA731-AA45-47B8-8661-B4FAA53C4162
-First sector: 2048 (at 1024.0 KiB)
-Last sector: 204800 (at 100.0 MiB)
-Partition size: 202753 sectors (99.0 MiB)
-Attribute flags: 0000000000000000
-Partition name: 'ceph journal'
-
-# strace -f -e open blkid /dev/vdb2
-=2E..
-open("/etc/blkid.conf", O_RDONLY)       =3D 4
-open("/dev/.blkid.tab", O_RDONLY)       =3D 4
-open("/dev/vdb2", O_RDONLY)             =3D 4
-open("/sys/dev/block/253:18", O_RDONLY) =3D 5
-open("/sys/block/vdb/dev", O_RDONLY)    =3D 6
-open("/dev/.blkid.tab-hVvwJi", O_RDWR|O_CREAT|O_EXCL, 0600) =3D 4
-
-blkid does not open the device for write, hence the different behavior. S=
-witching sgdisk in favor of blkid fixes the issue.
-
-Nice catch !
-
-> Thanks,
->=20
->                 Ilya
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---oOPuAn0dD1BlrwgeLBf0keaEbAVHs0s9M
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
+Thanks,
+- ----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+Version: Mailvelope v1.3.2
+Comment: https://www.mailvelope.com
 
-iEYEARECAAYFAlZ0MxcACgkQ8dLMyEl6F21CvgCgwYACLfWXsem0WHI9dp03BbRU
-eJcAn2nRVrYl+iCz3B5465qbMz0jgOch
-=uJCj
+wsFcBAEBCAAQBQJWdDMuCRDmVDuy+mK58QAAet0P/iRkGILB96Ryy6HPYZny
+ODzzn1ld/LkwK/JmVsWti48tOZbnG91WhxQIAQMeha5GeRAcv/Ie2OBZe7Y4
+Jo4tCaXbPGwZ9sk1kxjwTm4SYHKwCYf0vuyOVIT2+On0BrXUPfDFPFBHpUwY
+nDUkyZTi6YCo9W7qgST7AQJHI9wAeb0SlClAsBN3vd8JOoZfuWuA6+hNP6q5
+tI6RueXXy8LgbiIiNmm5MvAJQg/7I+rWs2JZyyyu0BaBSm3GPY15LPpIWa7F
+zg0+ax8pb5J0Ug4fSwzG7iKKNhO/TSC32bC2kRWPThQCmVQ6mUmrBWW311vK
+ZpFRAPy6mXCVKysFqZFxav5BFagkQZO470Vjej4riYHxRa4QdGOkjZODAb6+
+2GN+wtQH76dVsxm4mOGi4sUFJ5QLjk+nTDILIS5uh3x7nJ94UbqAetzgQA7m
+bAVQocMb5B0JZb6vHjg4TkwQ2pVgzBWxYQX7Lum3hm3DDVhm4BPbU0juCZaO
+o2XD6KgM40mxJmsjmyL/siCUV8wqZDamoHMAyljIr0hfkvBR+AB9a6B2+1iE
+DIIBX/blM7lSQRHIOrBj/FRBeplGbGP2cBXS0v4+N3l5jGFgk4Aisf1KPr22
+qaGbxv6pteMJhbpeBf4bOTeU8spwHmpAxmLINYECUk6ySoYJNva9T+IYsBiQ
+EoPN
+=bQwT
 -----END PGP SIGNATURE-----
-
---oOPuAn0dD1BlrwgeLBf0keaEbAVHs0s9M--
