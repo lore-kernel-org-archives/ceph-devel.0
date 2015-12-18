@@ -1,51 +1,126 @@
-From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: 2016 Ceph Tech Talks
-Date: Fri, 18 Dec 2015 14:06:04 -0500
-Message-ID: <CAAZbbf0pK7hrArSD4j49Ltdsv_ox6Mi=ofYJdxK5baSd_Nmbxw@mail.gmail.com>
+From: Mike Christie <mchristi@redhat.com>
+Subject: Re: Issue with Ceph File System and LIO
+Date: Fri, 18 Dec 2015 15:54:14 -0600
+Message-ID: <56748086.5050704@redhat.com>
+References: <CA+9C14a0E9bc+GL-QiAxPD_B9_PRhEE4PRG2jAa9REWkdNQFiA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:53528 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S965054AbbLRVyP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 18 Dec 2015 16:54:15 -0500
+In-Reply-To: <CA+9C14a0E9bc+GL-QiAxPD_B9_PRhEE4PRG2jAa9REWkdNQFiA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Eric Eastman <eric.eastman@keepertech.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-SGV5IGNlcGhlcnMsCgpCZWZvcmUgd2UgYWxsIGhlYWQgb2ZmIHRvIHZhcmlvdXMgaG9saWRheSBz
-aGVuYW5pZ2FucyBhbmQgYmVmdWRkbGUgb3VyCnNlbnNlcyB3aXRoIHJlc3QsIHJlbGF4YXRpb24s
-IGFuZCBnbG9yaW91cyBtZWFscyBvZiBsZWdlbmQsIEkgd2FudGVkCnRvIGdpdmUgeW91IHNvbWV0
-aGluZyB0byBsb29rIGZvcndhcmQgdG8gZm9yIDIwMTYgaW4gdGhlIGZvcm0gb2YgQ2VwaApUZWNo
-IFRhbGtzIQoKaHR0cDovL2NlcGguY29tL2NlcGgtdGVjaC10YWxrcy8KCkZpcnN0IG9uIHRoZSBk
-b2NrZXQgaW4gSmFudWFyeSBpcyBvdXIgcmVzY2hlZHVsZWQgdGFsayBmcm9tIGVhcmxpZXIKdGhp
-cyB5ZWFyIGRpc2N1c3NpbmcgYSBQb3N0Z3JlU1FMIHNldHVwIG9uIENlcGggdW5kZXIgTWVzb3Mv
-QXVyb3JhCndpdGggRG9ja2VyLiBUaGF0IHNob3VsZCBiZSBhIGdyZWF0IHRhbGsgdGhhdCBoaXRz
-IGEgbG90IG9mIHRoZQpxdWVzdGlvbnMgSSBhbSBmcmVxdWVudGx5IGFza2VkIGFib3V0IGRhdGFi
-YXNlIHdvcmtsb2FkcywgY2VwaCwgYW5kCmNvbnRhaW5lcnMgYWxsIGluIG9uZS4KCldoaWxlIEkg
-aGF2ZW7igJl0IHNvbGlkaWZpZWQgdGhlIHNwZWNpZmljIHNwZWFrZXIvZGF0ZS90aW1lLCBvdXIg
-cGxhbnMKZm9yIEZlYnJ1YXJ5IGFyZSB0byBkaWcgaW4gdG8gdGhlIGltbWFuZW50IHJlbGVhc2Ug
-b2YgQ2VwaEZTIChob29yYXkhKQppbiBKZXdlbC4gV2XigJlsbCB0YWtlIGEgbG9vayBhdCB3aGF0
-IGF3ZXNvbWVuZXNzIGlzIGJlaW5nIGRlbGl2ZXJlZCwKYW5kIHdoZXJlIENlcGhGUyBpcyBoZWFk
-ZWQgbmV4dC4KCk1hcmNoIGlzIHdpZGUgb3Blbiwgc28gaWYgeW91IG9yIHNvbWVvbmUgeW91IGtu
-b3cgd291bGQgbGlrZSB0byBnaXZlIGEKQ2VwaCBUZWNoIFRhbGssIEnigJlkIGxvdmUgdG8gZmlu
-ZCBhIGNvbW11bml0eSB2b2x1bnRlZXIgdG8gdGFsayBhYm91dCBhCnRlY2huaWNhbCB0b3BpYyB0
-aGF0IGlzIENlcGgtcmVsYXRlZCBmb3IgYWJvdXQgYW4gaG91ciBvdmVyCnZpZGVvY29uZmVyZW5j
-ZS4gUGxlYXNlIGRyb3AgbWUgYSBsaW5lIGlmIHRoaXMgaXMgaW50ZXJlc3RpbmcgdG8geW91LgoK
-SW4gQXByaWwgd2Ugd2lsbCBvbmNlIGFnYWluIGJlIHZpc2l0aW5nIHRoZSBPcGVuU3RhY2sgRGV2
-ZWxvcGVyIFN1bW1pdAoodGhpcyB0aW1lIGluIFRYKSwgYXMgd2VsbCBhcyB3b3JraW5nIHRvIGRl
-bGl2ZXIgYSBDZXBoIHRyYWNrIGxpa2Ugd2UKZGlkIGluIFRva3lvLiBNeSBob3BlIGlzIHRvIGJy
-b2FkY2FzdCBzb21lIG9mIHRoaXMgY29udGVudCBmb3IKY29uc3VtcHRpb24gYnkgcmVtb3RlIHBh
-cnRpY2lwYW50cy4gS2VlcCBhbiBleWUgb3V0IQoKSWYgeW91IGhhdmUgYW55IHF1ZXN0aW9ucyBh
-Ym91dCB1cGNvbWluZyBldmVudHMgb3IgY29tbXVuaXR5IGVuZGVhdm9ycwpwbGVhc2UgZmVlbCBm
-cmVlIHRvIGRyb3AgbWUgYSBsaW5lLiBUaGFua3MhCgoKLS0gCgpCZXN0IFJlZ2FyZHMsCgpQYXRy
-aWNrIE1jR2FycnkKRGlyZWN0b3IgQ2VwaCBDb21tdW5pdHkgfHwgUmVkIEhhdApodHRwOi8vY2Vw
-aC5jb20gIHx8ICBodHRwOi8vY29tbXVuaXR5LnJlZGhhdC5jb20KQHNjdXR0bGVtb25rZXkgfHwg
-QGNlcGgKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2Vw
-aC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlz
-dHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+Eric,
+
+Do you have iSCSI data digests on?
+
+On 12/15/2015 12:08 AM, Eric Eastman wrote:
+> I am testing Linux Target SCSI, LIO, with a Ceph File System backstore
+> and I am seeing this error on my LIO gateway.  I am using Ceph v9.2.0
+> on a 4.4rc4 Kernel, on Trusty, using a kernel mounted Ceph File
+> System.  A file on the Ceph File System is exported via iSCSI to a
+> VMware ESXi 5.0 server, and I am seeing this error when doing a lot of
+> I/O on the ESXi server.   Is this a LIO or a Ceph issue?
+> 
+> [Tue Dec 15 00:46:55 2015] ------------[ cut here ]------------
+> [Tue Dec 15 00:46:55 2015] WARNING: CPU: 0 PID: 1123421 at
+> /home/kernel/COD/linux/fs/ceph/addr.c:125
+> ceph_set_page_dirty+0x230/0x240 [ceph]()
+> [Tue Dec 15 00:46:55 2015] Modules linked in: iptable_filter ip_tables
+> x_tables xfs rbd iscsi_target_mod vhost_scsi tcm_qla2xxx ib_srpt
+> tcm_fc tcm_usb_gadget tcm_loop target_core_file target_core_iblock
+> target_core_pscsi target_core_user target_core_mod ipmi_devintf vhost
+> qla2xxx ib_cm ib_sa ib_mad ib_core ib_addr libfc scsi_transport_fc
+> libcomposite udc_core uio configfs ipmi_ssif ttm drm_kms_helper
+> gpio_ich drm i2c_algo_bit fb_sys_fops coretemp syscopyarea ipmi_si
+> sysfillrect ipmi_msghandler sysimgblt kvm acpi_power_meter 8250_fintek
+> irqbypass hpilo shpchp input_leds serio_raw lpc_ich i7core_edac
+> edac_core mac_hid ceph libceph libcrc32c fscache bonding lp parport
+> mlx4_en vxlan ip6_udp_tunnel udp_tunnel ptp pps_core hid_generic
+> usbhid hid hpsa mlx4_core psmouse bnx2 scsi_transport_sas fjes [last
+> unloaded: target_core_mod]
+> [Tue Dec 15 00:46:55 2015] CPU: 0 PID: 1123421 Comm: iscsi_trx
+> Tainted: G        W I     4.4.0-040400rc4-generic #201512061930
+> [Tue Dec 15 00:46:55 2015] Hardware name: HP ProLiant DL360 G6, BIOS
+> P64 01/22/2015
+> [Tue Dec 15 00:46:55 2015]  0000000000000000 00000000fdc0ce43
+> ffff880bf38c38c0 ffffffff813c8ab4
+> [Tue Dec 15 00:46:55 2015]  0000000000000000 ffff880bf38c38f8
+> ffffffff8107d772 ffffea00127a8680
+> [Tue Dec 15 00:46:55 2015]  ffff8804e52c1448 ffff8804e52c15b0
+> ffff8804e52c10f0 0000000000000200
+> [Tue Dec 15 00:46:55 2015] Call Trace:
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff813c8ab4>] dump_stack+0x44/0x60
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8107d772>] warn_slowpath_common+0x82/0xc0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8107d8ba>] warn_slowpath_null+0x1a/0x20
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01fadb0>]
+> ceph_set_page_dirty+0x230/0x240 [ceph]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff81188770>] ?
+> pagecache_get_page+0x150/0x1c0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01fe338>] ?
+> ceph_pool_perm_check+0x48/0x700 [ceph]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8119301d>] set_page_dirty+0x3d/0x70
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01fcd7e>]
+> ceph_write_end+0x5e/0x180 [ceph]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff813dc006>] ?
+> iov_iter_copy_from_user_atomic+0x156/0x220
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff81187bc4>]
+> generic_perform_write+0x114/0x1c0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc01f818a>]
+> ceph_write_iter+0xf8a/0x1050 [ceph]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc0205983>] ?
+> ceph_put_cap_refs+0x143/0x320 [ceph]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff810b10ba>] ?
+> check_preempt_wakeup+0xfa/0x220
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff811a7eec>] ? zone_statistics+0x7c/0xa0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff813dd2ee>] ? copy_page_to_iter+0x5e/0xa0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff816e5d22>] ?
+> skb_copy_datagram_iter+0x122/0x250
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff812053f6>] vfs_iter_write+0x76/0xc0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc02cbf88>]
+> fd_do_rw.isra.5+0xd8/0x1e0 [target_core_file]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc02cc155>]
+> fd_execute_rw+0xc5/0x2a0 [target_core_file]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc04696f2>]
+> sbc_execute_rw+0x22/0x30 [target_core_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc04681ef>]
+> __target_execute_cmd+0x1f/0x70 [target_core_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc0468da5>]
+> target_execute_cmd+0x195/0x2a0 [target_core_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05db89a>]
+> iscsit_execute_cmd+0x20a/0x270 [iscsi_target_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05e4aea>]
+> iscsit_sequence_cmd+0xda/0x190 [iscsi_target_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05eafbd>]
+> iscsi_target_rx_thread+0x51d/0xe30 [iscsi_target_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8101566c>] ? __switch_to+0x1dc/0x5a0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffffc05eaaa0>] ?
+> iscsi_target_tx_thread+0x1e0/0x1e0 [iscsi_target_mod]
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8109c8b8>] kthread+0xd8/0xf0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8109c7e0>] ?
+> kthread_create_on_node+0x1a0/0x1a0
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff817fc58f>] ret_from_fork+0x3f/0x70
+> [Tue Dec 15 00:46:55 2015]  [<ffffffff8109c7e0>] ?
+> kthread_create_on_node+0x1a0/0x1a0
+> [Tue Dec 15 00:46:55 2015] ---[ end trace 4079437668c77cbb ]---
+> [Tue Dec 15 00:47:45 2015] ABORT_TASK: Found referenced iSCSI task_tag: 95784927
+> [Tue Dec 15 00:47:45 2015] ABORT_TASK: ref_tag: 95784927 already
+> complete, skipping
+> 
+> If it is a Ceph File System issue, let me know and I will open a bug.
+> 
+> Thanks
+> 
+> Eric
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
