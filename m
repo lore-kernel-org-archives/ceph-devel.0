@@ -1,165 +1,24 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: puzzling disapearance of /dev/sdc1
-Date: Fri, 18 Dec 2015 13:38:15 +0100
-Message-ID: <5673FE37.8010408@dachary.org>
-References: <5672AAD7.8030004@dachary.org>
- <alpine.DEB.2.00.1512170530200.10312@cobra.newdream.net>
- <5672C258.1020700@dachary.org>
- <CAOi1vP_602U1BB0+epJ6ROJjiF7d-1uLv75M_SYPDeR2Oa47ig@mail.gmail.com>
+From: Michael@mail.microamerica.com.pe,
+	"J.Tynan <f.digeronimo"@federconsumatori.abruzzo.it
+Subject: Review & Reply
+Date: Fri, 18 Dec 2015 17:08:10 +0700
+Message-ID: <20151218100904.DEFCA8E507D5@mail.microamerica.com.pe>
+Reply-To: michaeljtynan8@gmail.com
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="55XKSR77TqsK7jxdFG7x1gMcHDJlF7xoJ"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:52498 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752742AbbLRMiR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Dec 2015 07:38:17 -0500
-In-Reply-To: <CAOi1vP_602U1BB0+epJ6ROJjiF7d-1uLv75M_SYPDeR2Oa47ig@mail.gmail.com>
+Received: from mail.microamerica.com.pe ([200.37.170.69]:40657 "EHLO
+	mail.microamerica.com.pe" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932294AbbLRNlz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Dec 2015 08:41:55 -0500
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Recipients <f.digeronimo@federconsumatori.abruzzo.it>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---55XKSR77TqsK7jxdFG7x1gMcHDJlF7xoJ
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Ilya,
-
-It turns out that sgdisk 0.8.6 -i 2 /dev/vdb removes partitions and re-ad=
-ds them on CentOS 7 with a 3.10.0-229.11.1.el7 kernel, in the same way pa=
-rtprobe does. It is used intensively by ceph-disk and inevitably leads to=
- races where a device temporarily disapears. The same command (sgdisk 0.8=
-=2E8) on Ubuntu 14.04 with a 3.13.0-62-generic kernel only generates two =
-udev change events and does not remove / add partitions. The source code =
-between sgdisk 0.8.6 and sgdisk 0.8.8 did not change in a significant way=
- and the output of strace -e ioctl sgdisk -i 2 /dev/vdb is identical in b=
-oth environments.
-
-ioctl(3, BLKGETSIZE, 20971520)          =3D 0
-ioctl(3, BLKGETSIZE64, 10737418240)     =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, HDIO_GETGEO, {heads=3D16, sectors=3D63, cylinders=3D16383, start=
-=3D0}) =3D 0
-ioctl(3, HDIO_GETGEO, {heads=3D16, sectors=3D63, cylinders=3D16383, start=
-=3D0}) =3D 0
-ioctl(3, BLKGETSIZE, 20971520)          =3D 0
-ioctl(3, BLKGETSIZE64, 10737418240)     =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKGETSIZE, 20971520)          =3D 0
-ioctl(3, BLKGETSIZE64, 10737418240)     =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-ioctl(3, BLKSSZGET, 512)                =3D 0
-
-This leads me to the conclusion that the difference is in how the kernel =
-reacts to these ioctl.
-
-What do you think ?=20
-
-Cheers
-
-On 17/12/2015 17:26, Ilya Dryomov wrote:
-> On Thu, Dec 17, 2015 at 3:10 PM, Loic Dachary <loic@dachary.org> wrote:=
-
->> Hi Sage,
->>
->> On 17/12/2015 14:31, Sage Weil wrote:
->>> On Thu, 17 Dec 2015, Loic Dachary wrote:
->>>> Hi Ilya,
->>>>
->>>> This is another puzzling behavior (the log of all commands is at
->>>> http://tracker.ceph.com/issues/14094#note-4). in a nutshell, after a=
-
->>>> series of sgdisk -i commands to examine various devices including
->>>> /dev/sdc1, the /dev/sdc1 file disappears (and I think it will showup=
-
->>>> again although I don't have a definitive proof of this).
->>>>
->>>> It looks like a side effect of a previous partprobe command, the onl=
-y
->>>> command I can think of that removes / re-adds devices. I thought cal=
-ling
->>>> udevadm settle after running partprobe would be enough to ensure
->>>> partprobe completed (and since it takes as much as 2mn30 to return, =
-I
->>>> would be shocked if it does not ;-).
->=20
-> Yeah, IIRC partprobe goes through every slot in the partition table,
-> trying to first remove and then add the partition back.  But, I don't
-> see any mention of partprobe in the log you referred to.
->=20
-> Should udevadm settle for a few vd* devices be taking that much time?
-> I'd investigate that regardless of the issue at hand.
->=20
->>>>
->>>> Any idea ? I desperately try to find a consistent behavior, somethin=
-g
->>>> reliable that we could use to say : "wait for the partition table to=
- be
->>>> up to date in the kernel and all udev events generated by the partit=
-ion
->>>> table update to complete".
->>>
->>> I wonder if the underlying issue is that we shouldn't be calling udev=
-adm
->>> settle from something running from udev.  Instead, of a udev-triggere=
-d
->>> run of ceph-disk does something that changes the partitions, it
->>> should just exit and let udevadm run ceph-disk again on the new
->>> devices...?
->=20
->>
->> Unless I missed something this is on CentOS 7 and ceph-disk is only ca=
-lled from udev as ceph-disk trigger which does nothing else but asynchron=
-ously delegate the work to systemd. Therefore there is no udevadm settle =
-from within udev (which would deadlock and timeout every time... I hope ;=
--).
->=20
-> That's a sure lockup, until one of them times out.
->=20
-> How are you delegating to systemd?  Is it to avoid long-running udev
-> events?  I'm probably missing something - udevadm settle wouldn't block=
-
-> on anything other than udev, so if you are shipping work off to
-> somewhere else, udev can't be relied upon for waiting.
->=20
-> Thanks,
->=20
->                 Ilya
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---55XKSR77TqsK7jxdFG7x1gMcHDJlF7xoJ
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlZz/jcACgkQ8dLMyEl6F21PPQCfUZqWEOkeGQVhTzMzIWhYO8ZK
-EAgAnjcOu2kV1ZGTJI9bzYMay4fTdHnZ
-=zVCO
------END PGP SIGNATURE-----
-
---55XKSR77TqsK7jxdFG7x1gMcHDJlF7xoJ--
+Greetings,
+My name is Mr.Michael J. Tynan, I am a banker with Bank Of America. It is true that we have not meet each other in person, but I strongly believe in trust and friendship in every business. I have a Lebanese deceased customer's abandoned fund, which I am his personal financial adviser before his accidental death, that being the main reason why I alone working in the bank here, know much about the existence of this fund and the secrets surrounding this money. But before I disclose the full details to you, I will like to know your interest and willingness to assist me. You can call me as soon you receive my message, so that i will send to you full details about the transaction.
+My best regards,
+Mr.Michael J. Tynan
+MOBILE: +1 347 269 3740
