@@ -1,73 +1,54 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: [ceph-users] v10.0.0 released
-Date: Fri, 18 Dec 2015 00:36:56 +0100
-Message-ID: <56734718.7010607@dachary.org>
-References: <alpine.DEB.2.00.1511230805110.16122@cobra.newdream.net>
- <7bce97699bb54cc58ffa5bca68045cdc@R01UKEXCASM111.r01.fujitsu.local>
+From: Jevon Qiao <scaleqiao@gmail.com>
+Subject: Re: Client still connect failed leader after that mon down
+Date: Fri, 18 Dec 2015 11:41:13 +0800
+Message-ID: <56738059.3070505@gmail.com>
+References: <CAKZcxgeK8=au4yBxcsP+=ewtFr8_ruZCxUKJtWWSk6eGc-b8Ow@mail.gmail.com>
+ <alpine.DEB.2.00.1512170525540.10312@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="NQoC81XuaogMgVIu0Tak2d7bGXM7lRVTv"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:52237 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751991AbbLQXg7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Dec 2015 18:36:59 -0500
-In-Reply-To: <7bce97699bb54cc58ffa5bca68045cdc@R01UKEXCASM111.r01.fujitsu.local>
+Received: from mail-pf0-f169.google.com ([209.85.192.169]:35689 "EHLO
+	mail-pf0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752205AbbLRDlZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Dec 2015 22:41:25 -0500
+Received: by mail-pf0-f169.google.com with SMTP id v86so41610173pfa.2
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Dec 2015 19:41:25 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1512170525540.10312@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>, "ceph-announce@ceph.com" <ceph-announce@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
+To: Sage Weil <sage@newdream.net>, Jaze Lee <jazeltq@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---NQoC81XuaogMgVIu0Tak2d7bGXM7lRVTv
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On 17/12/15 21:27, Sage Weil wrote:
+> On Thu, 17 Dec 2015, Jaze Lee wrote:
+>> Hello cephers:
+>>      In our test, there are three monitors. We find client run ceph
+>> command will slow when the leader mon is down. Even after long time, a
+>> client run ceph command will also slow in first time.
+>> >From strace, we find that the client first to connect the leader, then
+>> after 3s, it connect the second.
+>> After some search we find that the quorum is not change, the leader is
+>> still the down monitor.
+>> Is that normal?  Or is there something i miss?
+> It's normal.  Even when the quorum does change, the client doesn't
+> know that.  It should be contacting a random mon on startup, though, so I
+> would expect the 3s delay 1/3 of the time.
+That's because client randomly picks up a mon from Monmap. But what we 
+observed is that when a mon is down no change is made to monmap(neither 
+the epoch nor the members). Is it the culprit for this phenomenon?
 
-The script handles UTF-8 fine, the copy/paste is at fault here ;-)
+Thanks,
+Jevon
+> A long-standing low-priority feature request is to have the client contact
+> 2 mons in parallel so that it can still connect quickly if one is down.
+> It's requires some non-trivial work in mon/MonClient.{cc,h} though and I
+> don't think anyone has looked at it seriously.
+>
+> sage
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-On 24/11/2015 07:59, Piotr.Dalek@ts.fujitsu.com wrote:
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->> owner@vger.kernel.org] On Behalf Of Sage Weil
->> Sent: Monday, November 23, 2015 5:08 PM
->>
->> This is the first development release for the Jewel cycle.  We are off=
- to a
->> good start, with lots of performance improvements flowing into the tre=
-e.
->> We are targetting sometime in Q1 2016 for the final Jewel.
->>
->> [..]
->> (`pr#5853 <http://github.com/ceph/ceph/pull/5853>`_, Piotr Da=C3=85=E2=
-=80=9Aek)
->=20
-> Hopefully at that point the script that generates this list will learn =
-how to handle UTF-8 ;-)
->=20
->=20
-> With best regards / Pozdrawiam
-> Piotr Da=C5=82ek
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---NQoC81XuaogMgVIu0Tak2d7bGXM7lRVTv
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlZzRxgACgkQ8dLMyEl6F2115ACgu8RnpRsclBAocEf2+56v4V4Z
-nmQAnApxLGqoduJY80cNtPJIBg0Pemq1
-=eUfg
------END PGP SIGNATURE-----
-
---NQoC81XuaogMgVIu0Tak2d7bGXM7lRVTv--
