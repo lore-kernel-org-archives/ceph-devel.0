@@ -1,35 +1,46 @@
-From: Minfei Huang <mnfhuang@gmail.com>
-Subject: [PATCH] ceph: Avoid to propagate the invalid page point
-Date: Sat, 19 Dec 2015 10:54:59 +0800
-Message-ID: <1450493699-20983-1-git-send-email-mnfhuang@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, mhuang@redhat.com, Minfei Huang <mnfhuang@gmail.com>
-List-Id: ceph-devel.vger.kernel.org
+From: Kyle Bader <kyle.bader@gmail.com>
+Subject: Re: Best way to measure client and recovery I/O
+Date: Fri, 18 Dec 2015 22:02:52 -0800
+Message-ID: <CAFMfnwpn+0bYjpNOOzEu=3v8_j9m8c4Y84SR9MfGpfj4xfGpJA@mail.gmail.com>
+References: <CAANLjFo83v8m_z3MoN+8MR8awShrfuGzWgSbDroyqbHRscNN_w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yk0-f170.google.com ([209.85.160.170]:35303 "EHLO
+	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752206AbbLSGCw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Dec 2015 01:02:52 -0500
+Received: by mail-yk0-f170.google.com with SMTP id v6so82094975ykc.2
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Dec 2015 22:02:52 -0800 (PST)
+In-Reply-To: <CAANLjFo83v8m_z3MoN+8MR8awShrfuGzWgSbDroyqbHRscNN_w@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Mark Nelson <mnelson@redhat.com>
 
-The variant pagep will still get the invalid page point, although ceph
-fails in function ceph_update_writeable_page.
+> I've been working with Sam Just today and we would like to get some
+> performance data around client I/O and recovery I/O to test the new Op
+> queue I've been working on. I know that we can just set and OSD out/in
+> and such, but there seems like there could be a lot of variation in
+> the results making it difficult to come to a good conclusion. We could
+> just run the test many times, but I'd love to spend my time doing
+> other things.
 
-To fix this issue, Assigne the page to pagep until there is no failure
-in function ceph_update_writeable_page.
+CBT [1] can do failure simulations while pushing load against the
+cluster, here is a config to get you started:
 
-Signed-off-by: Minfei Huang <mnfhuang@gmail.com>
----
- fs/ceph/addr.c | 1 -
- 1 file changed, 1 deletion(-)
+https://gist.github.com/mmgaggle/471cd4227e961a243b22
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index b7d218a..6491079 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1149,7 +1149,6 @@ static int ceph_write_begin(struct file *file, struct address_space *mapping,
- 		page = grab_cache_page_write_begin(mapping, index, 0);
- 		if (!page)
- 			return -ENOMEM;
--		*pagep = page;
- 
- 		dout("write_begin file %p inode %p page %p %d~%d\n", file,
- 		     inode, page, (int)pos, (int)len);
+The osds array in the recovery test portion is the list of osd ids
+that you want to mark out during the test.
+
+CBT requires a bit of setup, but there is a script that can do most of
+it on a rpm based system. Make sure that your cbt head node has
+keyless ssh to itself, the mons, clients, and osd hosts (including
+accepting host keys). Let me know if you need help setting it up!
+
+[1] https://github.com/ceph/cbt
+
 -- 
-2.6.3
+
+Kyle Bader
