@@ -1,86 +1,52 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: RBD performance with many childs and snapshots
-Date: Mon, 21 Dec 2015 14:51:45 -0800
-Message-ID: <56788281.7050200@redhat.com>
-References: <56784DA9.9060304@42on.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: FreeBSD Building and Testing
+Date: Tue, 22 Dec 2015 00:40:35 +0100
+Message-ID: <56788DF3.3090205@digiware.nl>
+References: <5676D2D9.5010600@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33889 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([31.223.170.169]:57324 "EHLO smtp.digiware.nl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752483AbbLUWvq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 21 Dec 2015 17:51:46 -0500
-In-Reply-To: <56784DA9.9060304@42on.com>
+	id S1752057AbbLUXtm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 21 Dec 2015 18:49:42 -0500
+Received: from rack1.digiware.nl (unknown [127.0.0.1])
+	by smtp.digiware.nl (Postfix) with ESMTP id 09F27153430
+	for <ceph-devel@vger.kernel.org>; Tue, 22 Dec 2015 00:49:40 +0100 (CET)
+Received: from [IPv6:2001:4cb8:3:1:d90b:d712:e383:d07f] (unknown [IPv6:2001:4cb8:3:1:d90b:d712:e383:d07f])
+	by smtp.digiware.nl (Postfix) with ESMTP id 949D715340A
+	for <ceph-devel@vger.kernel.org>; Tue, 22 Dec 2015 00:40:50 +0100 (CET)
+In-Reply-To: <5676D2D9.5010600@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 12/21/2015 11:06 AM, Wido den Hollander wrote:
+On 20-12-2015 17:10, Willem Jan Withagen wrote:
 > Hi,
 >
-> While implementing the buildvolfrom method in libvirt for RBD I'm stuck
-> at some point.
->
-> $ virsh vol-clone --pool myrbdpool image1 image2
->
-> This would clone image1 to a new RBD image called 'image2'.
->
-> The code I've written now does:
->
-> 1. Create a snapshot called image1@libvirt-<epochtimestamp>
-> 2. Protect the snapshot
-> 3. Clone the snapshot to 'image1'
->
-> wido@wido-desktop:~/repos/libvirt$ ./tools/virsh vol-clone --pool
-> rbdpool image1 image2
-> Vol image2 cloned from image1
->
-> wido@wido-desktop:~/repos/libvirt$
->
-> root@alpha:~# rbd -p libvirt info image2
-> rbd image 'image2':
-> 	size 10240 MB in 2560 objects
-> 	order 22 (4096 kB objects)
-> 	block_name_prefix: rbd_data.1976451ead36b
-> 	format: 2
-> 	features: layering, striping
-> 	flags:
-> 	parent: libvirt/image1@libvirt-1450724650
-> 	overlap: 10240 MB
-> 	stripe unit: 4096 kB
-> 	stripe count: 1
-> root@alpha:~#
->
-> But this could potentially lead to a lot of snapshots with children on
-> 'image1'.
->
-> image1 itself will probably never change, but I'm wondering about the
-> negative performance impact this might have on a OSD.
+> Most of the Ceph is getting there in the most crude and rough state.
+> So beneath is a status update on what is not working for me jet.
 
-Creating them isn't so bad, more snapshots that don't change don't have
-much affect on the osds. Deleting them is what's expensive, since the
-osds need to scan the objects to see which ones are part of the
-snapshot and can be deleted. If you have too many snapshots created and
-deleted, it can affect cluster load, so I'd rather avoid always
-creating a snapshot.
+> Further:
+> A) unittest_erasure_code_plugin failes on the fact that there is a
+> different error code returned when dlopen-ing a non existent library.
+> load dlopen(.libs/libec_invalid.so): Cannot open
+> ".libs/libec_invalid.so"load dlsym(.libs/libec_missing_version.so, _
+> _erasure_code_init): Undefined symbol
+> "__erasure_code_init"test/erasure-code/TestErasureCodePlugin.cc:88: Failure
+> Value of: instance.factory("missing_version", g_conf->erasure_code_dir,
+> profile, &erasure_code, &cerr)
+>    Actual: -2
+> Expected: -18
 
-> I'd rather not hardcode a snapshot name like 'libvirt-parent-snapshot'
-> into libvirt. There is however no way to pass something like a snapshot
-> name in libvirt when cloning.
->
-> Any bright suggestions? Or is it fine to create so many snapshots?
+EXDEV is actually 18, so that part is correct.
+But EXDEV is cross-device link error.
 
-You could have canonical names for the libvirt snapshots like you 
-suggest, 'libvirt-<timestamp>', and check via rbd_diff_iterate2()
-whether the parent image changed since the last snapshot. That's a bit
-slower than plain cloning, but with object map + fast diff it's fast
-again, since it doesn't need to scan all the objects anymore.
+Where as the actual answer: -2 is factual correct:
+#define ENOENT          2               /* No such file or directory */
 
-I think libvirt would need to expand its api a bit to be able to really
-use it effectively to manage rbd. Hiding the snapshots becomes 
-cumbersome if the application wants to use them too. If libvirt's
-current model of clones lets parents be deleted before children,
-that may be a hassle to hide too...
+So why is the test for EXDEV instead of ENOENT?
+Could be a typical Linux <> FreeBSD thingy.
 
-Josh
+--WjW
