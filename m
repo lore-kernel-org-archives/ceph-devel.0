@@ -1,67 +1,151 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: Is rbd_discard enough to wipe an RBD image?
-Date: Mon, 21 Dec 2015 15:25:15 +0100 (CET)
-Message-ID: <1255550760.10644674.1450707915260.JavaMail.zimbra@oxygem.tv>
-References: <56771BEE.4050705@42on.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Issue with Ceph File System and LIO
+Date: Mon, 21 Dec 2015 06:51:44 -0800
+Message-ID: <CAJ4mKGYB70_401YHaj-Ka24UrX6tnfdmf==Y2djAfA_E1umH+g@mail.gmail.com>
+References: <CA+9C14a0E9bc+GL-QiAxPD_B9_PRhEE4PRG2jAa9REWkdNQFiA@mail.gmail.com>
+	<CAAM7YAk=U7NqEujuMXAyem00NDJfx-TOYGgJez76f48HS6nt2A@mail.gmail.com>
+	<CA+9C14ZOZQcWSGL8ukDeVQAtoTEDRNOLq=CB1ZusiMsx6-seMw@mail.gmail.com>
+	<CAAM7YAnktfNvd-EXU+1Eok4kUafWwnvj+CCGocF7ffTcAt-dsA@mail.gmail.com>
+	<CA+9C14bbtBjgOD0hpSfapRrsx+Eg_dYyFfV+uXvgB5X7eRidDg@mail.gmail.com>
+	<CA+9C14bMs1u80P3g1D4QsDHHzLy5YUvB+KWmcrKa0o5aX9W38g@mail.gmail.com>
+	<CAAM7YAm2r+LVPMpE_GbWCJmE-bdi-uXHyzqAR1JgPMXCSx55pQ@mail.gmail.com>
+	<CA+9C14bVgWKMxxOe04qiLW6U+baA_TGbFt9RNjY+wPNMiW_R3w@mail.gmail.com>
+	<CAAM7YAkTA9skmSxyEPVnEWAyykg4hsoLwxxjFp2nJgMbJAC8VQ@mail.gmail.com>
+	<00b601d13954$5d4a94e0$17dfbea0$@samsung.com>
+	<CA+9C14aAAVaaLtjDCjLkc9TSmU=aMh-2iq0xKOb-KEcc9vcuMQ@mail.gmail.com>
+	<CAAM7YAky6409uw-hyDOJFE+3ftm46cDXpWG7RHznbZtQXcneCw@mail.gmail.com>
+	<CA+9C14bj8A0NbQjrdyGJ5AMKmtoax9VJjEN3a9iXdtfJHueiTw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:34842 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751009AbbLUOZR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Dec 2015 09:25:17 -0500
-In-Reply-To: <56771BEE.4050705@42on.com>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:33773 "EHLO
+	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751392AbbLUOvq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Dec 2015 09:51:46 -0500
+Received: by mail-wm0-f41.google.com with SMTP id p187so71273367wmp.0
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Dec 2015 06:51:45 -0800 (PST)
+In-Reply-To: <CA+9C14bj8A0NbQjrdyGJ5AMKmtoax9VJjEN3a9iXdtfJHueiTw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Eric Eastman <eric.eastman@keepertech.com>
+Cc: "Yan, Zheng" <ukernel@gmail.com>, Chao Yu <chao2.yu@samsung.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
->>I just want to know if this is sufficient to wipe a RBD image?
+On Sun, Dec 20, 2015 at 6:38 PM, Eric Eastman
+<eric.eastman@keepertech.com> wrote:
+> On Fri, Dec 18, 2015 at 12:18 AM, Yan, Zheng <ukernel@gmail.com> wrote:
+>> On Fri, Dec 18, 2015 at 2:23 PM, Eric Eastman
+>> <eric.eastman@keepertech.com> wrote:
+>>>> Hi Yan Zheng, Eric Eastman
+>>>>
+>>>> Similar bug was reported in f2fs, btrfs, it does affect 4.4-rc4, the fixing
+>>>> patch was merged into 4.4-rc5, dfd01f026058 ("sched/wait: Fix the signal
+>>>> handling fix").
+>>>>
+>>>> Related report & discussion was here:
+>>>> https://lkml.org/lkml/2015/12/12/149
+>>>>
+>>>> I'm not sure the current reported issue of ceph was related to that though,
+>>>> but at least try testing with an upgraded or patched kernel could verify it.
+>>>> :)
+>>>>
+>>>> Thanks,
+>
+>>
+>> please try rc5 kernel without patches and DEBUG_VM=y
+>>
+>> Regards
+>> Yan, Zheng
+>
+>
+> The latest test with 4.4rc5 with CONFIG_DEBUG_VM=y has ran for over 36
+> hours with no ERRORS or WARNINGS.  My plan is to install the 4.4rc6
+> kernel from the Ubuntu kernel-ppa site once it is available, and rerun
+> the tests.
+>
+> Before running this test I had to rebuild the Ceph File System as
+> after the last logged errors on Friday using the 4.4rc4 kernel, the
+> Ceph File system hung accessing the exported image file.  After
+> rebooting my iSCSI gateway using the Ceph File System, from / using
+> command: strace du -a cephfs, the mount point, the hang happened on
+> the newfsstatat call on my image file:
+>
+> write(1, "0\tcephfs/ctdb/.ctdb.lock\n", 250 cephfs/ctdb/.ctdb.lock
+> ) = 25
+> close(5)                                = 0
+> write(1, "0\tcephfs/ctdb\n", 140 cephfs/ctdb
+> )        = 14
+> newfstatat(4, "iscsi", {st_mode=S_IFDIR|0755, st_size=993814480896,
+> ...}, AT_SYMLINK_NOFOLLOW) = 0
+> openat(4, "iscsi", O_RDONLY|O_NOCTTY|O_NONBLOCK|O_DIRECTORY|O_NOFOLLOW) = 3
+> fcntl(3, F_GETFD)                       = 0
+> fcntl(3, F_SETFD, FD_CLOEXEC)           = 0
+> fstat(3, {st_mode=S_IFDIR|0755, st_size=993814480896, ...}) = 0
+> fcntl(3, F_GETFL)                       = 0x38800 (flags
+> O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY|O_NOFOLLOW)
+> fcntl(3, F_SETFD, FD_CLOEXEC)           = 0
+> newfstatat(4, "iscsi", {st_mode=S_IFDIR|0755, st_size=993814480896,
+> ...}, AT_SYMLINK_NOFOLLOW) = 0
+> fcntl(3, F_DUPFD, 3)                    = 5
+> fcntl(5, F_GETFD)                       = 0
+> fcntl(5, F_SETFD, FD_CLOEXEC)           = 0
+> getdents(3, /* 8 entries */, 65536)     = 288
+> getdents(3, /* 0 entries */, 65536)     = 0
+> close(3)                                = 0
+> newfstatat(5, "iscsi900g.img", ^C
+> ^C^C^C
+> ^Z
+> I could not break out with a ^C, and had to background the process to
+> get my prompt back. The process would not die so I had to hard reset
+> the system.
+>
+> This same hang happened on 2 other kernel mounted systems using a 4.3.0 kernel.
+>
+> On a separate system, I fuse mounted the file system and a du -a
+> cephfs hung at the same point. Once again I could not break out of the
+> hang, and had to hard reset the system.
+>
+> Restarting the MDS and Monitors did not clear the issue. Taking a
+> quick look at the dumpcache showed it was large
+>
+> # ceph mds tell 0 dumpcache /tmp/dump.txt
+> ok
+> # wc /tmp/dump.txt
+>   370556  5002449 59211054 /tmp/dump.txt
+> # tail /tmp/dump.txt
+> [inode 10000259276 [...c4,head] ~mds0/stray0/10000259276/ auth v977593
+> snaprealm=0x561339e3fb00 f(v0 m2015-12-12 00:51:04.345614) n(v0
+> rc2015-12-12 00:51:04.345614 1=0+1) (iversion lock) 0x561339c66228]
+> [inode 1000020c1ba [...a6,head] ~mds0/stray0/1000020c1ba/ auth v742016
+> snaprealm=0x56133ad19600 f(v0 m2015-12-10 18:25:55.880167) n(v0
+> rc2015-12-10 18:25:55.880167 1=0+1) (iversion lock) 0x56133a5e0d88]
+> [inode 100000d0088 [...77,head] ~mds0/stray6/100000d0088/ auth v292336
+> snaprealm=0x5613537673c0 f(v0 m2015-12-08 19:23:20.269283) n(v0
+> rc2015-12-08 19:23:20.269283 1=0+1) (iversion lock) 0x56134c2f7378]
 
-AFAIK, ceph write zeroes in the rados objects with discard is used.
+These are deleted files that haven't been trimmed yet...
 
-They are an option for skip zeroes write if needed
+>
+> I tried one more thing:
+>
+> ceph daemon mds.0 flush journal
+>
+> and restarted the MDS. Accessing the file system still locked up, but
+> a du -a cephfs did not even get to the iscsi900g.img file. As I was
+> running on a broken rc kernel, with snapshots turned on
 
-OPTION(rbd_skip_partial_discard, OPT_BOOL, false) // when trying to dis=
-card a range inside an object, set to true to skip zeroing the range.
------ Mail original -----
-De: "Wido den Hollander" <wido@42on.com>
-=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Dimanche 20 D=C3=A9cembre 2015 22:21:50
-Objet: Is rbd_discard enough to wipe an RBD image?
+...and I think we have some known issues in the tracker about snap
+trimming and snapshotted inodes. So this is not entirely surprising.
+:/
+-Greg
 
-Hi,=20
 
-I'm busy implementing the volume wiping method of the libvirt storage=20
-pool backend and instead of writing to the whole RBD image with zeroes=20
-I'm using rbd_discard.=20
-
-Using a 4MB length I'm starting at offset 0 and work my way through the=
-=20
-whole RBD image.=20
-
-A quick try shows me that my partition table + filesystem are gone on=20
-the RBD image after I've run rbd_discard.=20
-
-I just want to know if this is sufficient to wipe a RBD image? Or would=
-=20
-it be better to fully fill the image with zeroes?=20
-
---=20
-Wido den Hollander=20
-42on B.V.=20
-Ceph trainer and consultant=20
-
-Phone: +31 (0)20 700 9902=20
-Skype: contact42on=20
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n=20
-the body of a message to majordomo@vger.kernel.org=20
-More majordomo info at http://vger.kernel.org/majordomo-info.html=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>, when this
+> corruption happened, I decided to recreated the file system and
+> restarted the ESXi iSCSI test.
+>
+> Regards,
+> Eric
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
