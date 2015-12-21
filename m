@@ -1,258 +1,151 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: v10.0.1 Contributor credits
-Date: Mon, 21 Dec 2015 01:33:23 +0100
-Message-ID: <567748D3.2040105@dachary.org>
+From: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Subject: Re: FreeBSD Building and Testing
+Date: Mon, 21 Dec 2015 08:45:05 +0800
+Message-ID: <CANE=7sVw1zhxYzT9q6WKkUV5tCioLuO0J_ZKCkdKXR5jFDHsKg@mail.gmail.com>
+References: <5676D2D9.5010600@digiware.nl>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="69PCBKhNst1ExQoVwQXvuiVdQ5MIVimCl"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:53521 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750847AbbLUAdb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Dec 2015 19:33:31 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 89FB3420AE
-	for <ceph-devel@vger.kernel.org>; Mon, 21 Dec 2015 01:33:24 +0100 (CET)
+Received: from mail-ob0-f195.google.com ([209.85.214.195]:32808 "EHLO
+	mail-ob0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751081AbbLUApH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Dec 2015 19:45:07 -0500
+Received: by mail-ob0-f195.google.com with SMTP id ny9so10123739obb.0
+        for <ceph-devel@vger.kernel.org>; Sun, 20 Dec 2015 16:45:06 -0800 (PST)
+In-Reply-To: <5676D2D9.5010600@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---69PCBKhNst1ExQoVwQXvuiVdQ5MIVimCl
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+sorry for delay reply. Please have a try
+https://github.com/ceph/ceph/commit/ae4a8162eacb606a7f65259c6ac236e144bfef0a.
 
-Hi Ceph,
-
-Here is a sorted list of authors and organizations who contributed to
-v10.0.1, by number of commits or reviews back to v10.0.0. The affiliation=
- of
-authors to organizations can be updated by submitting a patch to
-https://github.com/ceph/ceph/blob/master/.organizationmap
-
-All commits are reviewed but the number of reviews is a fraction of the
-number of commits. More often than not, the reviewer(s) is only
-mentioned in the message of the merge although it means that all
-associated commits have been reviewed. If you are curious about how it
-is done, do checkout the wiki entry at http://tracker.ceph.com/projects/c=
-eph/wiki/Ceph_contributors_list_maintenance_guide
-
-Number of lines added and removed, by authors
-     1	 44020 Jason Dillaman <dillaman@redhat.com>
-     2	 10457 Sage Weil <sweil@redhat.com>
-     3	  3790 Vicente Cheng <freeze.bilsted@gmail.com>
-     4	  1665 Mykola Golub <mgolub@mirantis.com>
-     5	  1390 Greg Farnum <gfarnum@redhat.com>
-     6	  1061 Loic Dachary <ldachary@redhat.com>
-     7	   910 David Coles <dcoles@gaikai.com>
-     8	   771 Rohan Mars <code@rohanmars.com>
-     9	   591 John Spray <jspray@redhat.com>
-    10	   449 David Zafman <dzafman@redhat.com>
-    11	   381 Xinze Chi <xinze@xsky.com>
-    12	   276 Xie Xingguo <xie.xingguo@zte.com.cn>
-    13	   252 Piotr Da=C5=82ek <piotr.dalek@ts.fujitsu.com>
-    14	   249 Javier M. Mellid <jmunhoz@igalia.com>
-    15	   233 MingXin Liu <mingxin.liu@kylin-cloud.com>
-    16	   149 Yan, Zheng <zyan@redhat.com>
-    17	   117 Radoslaw Zarzynski <rzarzynski@mirantis.com>
-    18	   115 Ilya Dryomov <idryomov@redhat.com>
-    19	    98 Shu, Xinxin <xinxin.shu@intel.com>
-    20	    94 Joe Julian <jjulian@io.com>
-    21	    92 Guang Yang <yguang@yahoo-inc.com>
-    22	    88 Xiaowei Chen <chen.xiaowei@h3c.com>
-    23	    68 Ma Jianpeng <jianpeng.ma@intel.com>
-    24	    67 Josh Durgin <jdurgin@redhat.com>
-    25	    63 Nathan Cutler <ncutler@suse.com>
-    26	    54 Yunchuan Wen <yunchuan.wen@kylin-cloud.com>
-    27	    50 Dan van der Ster <daniel.vanderster@cern.ch>
-    28	    46 Jianhui Yuan <zuiwanyuan@gmail.com>
-    29	    30 Li Wang <li.wang@kylin-cloud.com>
-    30	    28 Haomai Wang <haomai@xsky.com>
-    31	    26 James Page <james.page@ubuntu.com>
-    32	    22 Ning Yao <yaoning@ruijie.com.cn>
-    33	    18 Yuan Zhou <yuan.zhou@intel.com>
-    34	    17 Vasu Kulkarni <vasu.kulkarni@gmail.com>
-    35	    16 Yehuda Sadeh <ysadehwe@redhat.com>
-    36	    16 Jenkins <jenkins@ceph.com>
-    37	    12 Yann Dupont <yann@objoo.org>
-    38	    12 Vikhyat Umrao <vumrao@redhat.com>
-    39	    11 Rahul Aggarwal <rahul.1aggarwal@gmail.com>
-    40	    11 Brian Felton <bjfelton@gmail.com>
-    41	     9 Xiaoxi Chen <xiaoxi.chen@intel.com>
-    42	     8 Jiaying Ren <mikulely@gmail.com>
-    43	     6 Kefu Chai <kchai@redhat.com>
-    44	     5 Chengyuan Li <chengyli@ebay.com>
-    45	     4 Tobias Suckow <tobias@suckow.biz>
-    46	     4 Orit Wasserman <owasserm@redhat.com>
-    47	     4 Jie Wang <jie.wang@kylin-cloud.com>
-    48	     3 Ren Huanwen <ren.huanwen@zte.com.cn>
-    49	     3 Ji Chen <insomnia@139.com>
-    50	     2 Zhi Zhang <zhangz.david@outlook.com>
-    51	     2 Sangdi Xu <xu.sangdi@h3c.com>
-    52	     2 Ruifeng Yang <yangruifeng.09209@h3c.com>
-    53	     2 Herv=C3=A9 Rousseau <hroussea@cern.ch>
-    54	     2 Chris Holcombe <chris.holcombe@nebula.com>
-    55	     2 Brad Hubbard <bhubbard@redhat.com>
-    56	     1 Samuel Just <sjust@redhat.com>
-
-Number of lines added and removed, by organization
-     1	 58294 Red Hat <contact@redhat.com>
-     2	  4675 Unaffiliated <no@organization.net>
-     3	  1782 Mirantis <contact@mirantis.com>
-     4	   910 Gaikai <contact@gaikai.com>
-     5	   409 XSky <contact@xsky.com>
-     6	   321 Kylin Cloud <contact@kylin-cloud.com>
-     7	   279 ZTE <contact@zte.com.cn>
-     8	   252 Fujitsu <contact@fujitsu.com>
-     9	   249 Igalia <contact@igalia.com>
-    10	   193 Intel <contact@intel.com>
-    11	    94 IO <contact@io.com>
-    12	    92 Yahoo! <contact@yahoo-inc.com>
-    13	    92 H3C <wentao@h3c.com>
-    14	    63 SUSE <contact@suse.com>
-    15	    62 Inktank <contact@inktank.com>
-    16	    52 CERN <contact@cern.ch>
-    17	    26 Canonical <contact@canonical.com>
-    18	    22 Ruijie Networks <contact@ruijie.com.cn>
-    19	     3 LETV <contact@letv.com>
-    20	     2 Tencent <contact@tencent.com>
-    21	     2 Nebula <info@nebula.com>
-
-Commits, by authors
-     1	    121 Jason Dillaman <dillaman@redhat.com>
-     2	    107 Sage Weil <sweil@redhat.com>
-     3	     20 Vicente Cheng <freeze.bilsted@gmail.com>
-     4	     18 Mykola Golub <mgolub@mirantis.com>
-     5	     14 Loic Dachary <ldachary@redhat.com>
-     6	     12 John Spray <jspray@redhat.com>
-     7	     11 Yan, Zheng <zyan@redhat.com>
-     8	     11 Greg Farnum <gfarnum@redhat.com>
-     9	     10 David Zafman <dzafman@redhat.com>
-    10	      9 Xie Xingguo <xie.xingguo@zte.com.cn>
-    11	      9 Rohan Mars <code@rohanmars.com>
-    12	      9 Piotr Da=C5=82ek <piotr.dalek@ts.fujitsu.com>
-    13	      9 Josh Durgin <jdurgin@redhat.com>
-    14	      9 Ilya Dryomov <idryomov@redhat.com>
-    15	      7 David Coles <dcoles@gaikai.com>
-    16	      6 Li Wang <li.wang@kylin-cloud.com>
-    17	      5 Xinze Chi <xinze@xsky.com>
-    18	      5 Radoslaw Zarzynski <rzarzynski@mirantis.com>
-    19	      5 Nathan Cutler <ncutler@suse.com>
-    20	      5 MingXin Liu <mingxin.liu@kylin-cloud.com>
-    21	      5 Ma Jianpeng <jianpeng.ma@intel.com>
-    22	      5 Javier M. Mellid <jmunhoz@igalia.com>
-    23	      4 Yann Dupont <yann@objoo.org>
-    24	      4 Haomai Wang <haomai@xsky.com>
-    25	      3 Joe Julian <jjulian@io.com>
-    26	      2 Yunchuan Wen <yunchuan.wen@kylin-cloud.com>
-    27	      2 Yehuda Sadeh <ysadehwe@redhat.com>
-    28	      2 Xiaowei Chen <chen.xiaowei@h3c.com>
-    29	      2 Shu, Xinxin <xinxin.shu@intel.com>
-    30	      2 Ning Yao <yaoning@ruijie.com.cn>
-    31	      2 Ji Chen <insomnia@139.com>
-    32	      2 Jiaying Ren <mikulely@gmail.com>
-    33	      2 Jenkins <jenkins@ceph.com>
-    34	      2 Guang Yang <yguang@yahoo-inc.com>
-    35	      2 Dan van der Ster <daniel.vanderster@cern.ch>
-    36	      1 Zhi Zhang <zhangz.david@outlook.com>
-    37	      1 Yuan Zhou <yuan.zhou@intel.com>
-    38	      1 Xiaoxi Chen <xiaoxi.chen@intel.com>
-    39	      1 Vikhyat Umrao <vumrao@redhat.com>
-    40	      1 Vasu Kulkarni <vasu.kulkarni@gmail.com>
-    41	      1 Tobias Suckow <tobias@suckow.biz>
-    42	      1 Sangdi Xu <xu.sangdi@h3c.com>
-    43	      1 Samuel Just <sjust@redhat.com>
-    44	      1 Ruifeng Yang <yangruifeng.09209@h3c.com>
-    45	      1 Ren Huanwen <ren.huanwen@zte.com.cn>
-    46	      1 Rahul Aggarwal <rahul.1aggarwal@gmail.com>
-    47	      1 Orit Wasserman <owasserm@redhat.com>
-    48	      1 Kefu Chai <kchai@redhat.com>
-    49	      1 Jie Wang <jie.wang@kylin-cloud.com>
-    50	      1 Jianhui Yuan <zuiwanyuan@gmail.com>
-    51	      1 James Page <james.page@ubuntu.com>
-    52	      1 Herv=C3=A9 Rousseau <hroussea@cern.ch>
-    53	      1 Chris Holcombe <chris.holcombe@nebula.com>
-    54	      1 Chengyuan Li <chengyli@ebay.com>
-    55	      1 Brian Felton <bjfelton@gmail.com>
-    56	      1 Brad Hubbard <bhubbard@redhat.com>
-
-Commits, by organizations
-     1	    311 Red Hat <contact@redhat.com>
-     2	     41 Unaffiliated <no@organization.net>
-     3	     23 Mirantis <contact@mirantis.com>
-     4	     14 Kylin Cloud <contact@kylin-cloud.com>
-     5	     10 ZTE <contact@zte.com.cn>
-     6	      9 XSky <contact@xsky.com>
-     7	      9 Intel <contact@intel.com>
-     8	      9 Fujitsu <contact@fujitsu.com>
-     9	      7 Gaikai <contact@gaikai.com>
-    10	      5 SUSE <contact@suse.com>
-    11	      5 Igalia <contact@igalia.com>
-    12	      4 H3C <wentao@h3c.com>
-    13	      3 IO <contact@io.com>
-    14	      3 CERN <contact@cern.ch>
-    15	      2 Yahoo! <contact@yahoo-inc.com>
-    16	      2 Ruijie Networks <contact@ruijie.com.cn>
-    17	      2 LETV <contact@letv.com>
-    18	      2 Inktank <contact@inktank.com>
-    19	      1 Tencent <contact@tencent.com>
-    20	      1 Nebula <info@nebula.com>
-    21	      1 Canonical <contact@canonical.com>
-
-Reviews, by authors (one review spans multiple commits)
-     1	     19 Kefu Chai <kchai@redhat.com>
-     2	     17 Josh Durgin <jdurgin@redhat.com>
-     3	     16 Sage Weil <sweil@redhat.com>
-     4	     16 Loic Dachary <ldachary@redhat.com>
-     5	      9 Jason Dillaman <dillaman@redhat.com>
-     6	      8 Yehuda Sadeh <ysadehwe@redhat.com>
-     7	      8 Li Wang <li.wang@kylin-cloud.com>
-     8	      5 John Spray <jspray@redhat.com>
-     9	      4 Samuel Just <sjust@redhat.com>
-    10	      4 David Zafman <dzafman@redhat.com>
-    11	      3 Ken Dreyer <kdreyer@redhat.com>
-    12	      3 Joao Eduardo Luis <joao@suse.de>
-    13	      3 Haomai Wang <haomai@xsky.com>
-    14	      3 Greg Farnum <gfarnum@redhat.com>
-    15	      2 Yan, Zheng <zyan@redhat.com>
-    16	      2 Piotr Da=C5=82ek <piotr.dalek@ts.fujitsu.com>
-    17	      2 Nathan Cutler <ncutler@suse.com>
-    18	      2 Guang Yang <yguang@yahoo-inc.com>
-    19	      1 Sebastien Ponce <sebastien.ponce@cern.ch>
-    20	      1 David Coles <dcoles@gaikai.com>
-    21	      1 Brad Hubbard <bhubbard@redhat.com>
-    22	      1 Boris Ranto <branto@redhat.com>
-
-Reviews, by organizations (one review spans multiple commits)
-     1	    108 Red Hat <contact@redhat.com>
-     2	      8 Kylin Cloud <contact@kylin-cloud.com>
-     3	      5 SUSE <contact@suse.com>
-     4	      3 XSky <contact@xsky.com>
-     5	      2 Yahoo! <contact@yahoo-inc.com>
-     6	      2 Fujitsu <contact@fujitsu.com>
-     7	      1 Gaikai <contact@gaikai.com>
-     8	      1 CERN <contact@cern.ch>
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+2015-12-21 0:10 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
+> Hi,
+>
+> Most of the Ceph is getting there in the most crude and rough state.
+> So beneath is a status update on what is not working for me jet.
+>
+> Especially help with the aligment problem in os/FileJournal.cc would be
+> appricated... It would allow me to run ceph-osd and run more tests to
+> completion.
+>
+> What would happen if I comment out this test, and ignore the fact that
+> thing might be unaligned?
+> Is it a performance/paging issue?
+> Or is data going to be corrupted?
+>
+> --WjW
+>
+> PASS: src/test/run-cli-tests
+> ============================================================================
+> Testsuite summary for ceph 10.0.0
+> ============================================================================
+> # TOTAL: 1
+> # PASS:  1
+> # SKIP:  0
+> # XFAIL: 0
+> # FAIL:  0
+> # XPASS: 0
+> # ERROR: 0
+> ============================================================================
+>
+> gmake test:
+> ============================================================================
+> Testsuite summary for ceph 10.0.0
+> ============================================================================
+> # TOTAL: 119
+> # PASS:  95
+> # SKIP:  0
+> # XFAIL: 0
+> # FAIL:  24
+> # XPASS: 0
+> # ERROR: 0
+> ============================================================================
+>
+> The folowing notes can be made with this:
+> 1) the run-cli-tests run to completion because I excluded the RBD tests
+> 2) gmake test has the following tests FAIL:
+> FAIL: unittest_erasure_code_plugin
+> FAIL: ceph-detect-init/run-tox.sh
+> FAIL: test/erasure-code/test-erasure-code.sh
+> FAIL: test/erasure-code/test-erasure-eio.sh
+> FAIL: test/run-rbd-unit-tests.sh
+> FAIL: test/ceph_objectstore_tool.py
+> FAIL: test/test-ceph-helpers.sh
+> FAIL: test/cephtool-test-osd.sh
+> FAIL: test/cephtool-test-mon.sh
+> FAIL: test/cephtool-test-mds.sh
+> FAIL: test/cephtool-test-rados.sh
+> FAIL: test/mon/osd-crush.sh
+> FAIL: test/osd/osd-scrub-repair.sh
+> FAIL: test/osd/osd-scrub-snaps.sh
+> FAIL: test/osd/osd-config.sh
+> FAIL: test/osd/osd-bench.sh
+> FAIL: test/osd/osd-reactivate.sh
+> FAIL: test/osd/osd-copy-from.sh
+> FAIL: test/libradosstriper/rados-striper.sh
+> FAIL: test/test_objectstore_memstore.sh
+> FAIL: test/ceph-disk.sh
+> FAIL: test/pybind/test_ceph_argparse.py
+> FAIL: test/pybind/test_ceph_daemon.py
+> FAIL: ../qa/workunits/erasure-code/encode-decode-non-regression.sh
+>
+> Most of the fails are because ceph-osd crashed consistently on:
+> -1 journal  bl.is_aligned(block_size) 0
+> bl.is_n_align_sized(CEPH_MINIMUM_BLOCK_SIZE) 1
+> -1 journal  block_size 131072 CEPH_MINIMUM_BLOCK_SIZE 4096
+> CEPH_PAGE_SIZE 4096 header.alignment 131072
+> bl buffer::list(len=131072, buffer::ptr(0~131072 0x805319000 in raw
+> 0x805319000 len 131072 nref 1))
+> os/FileJournal.cc: In function 'void FileJournal::align_bl(off64_t,
+> bufferlist &)' thread 805217400 time 2015-12-19 13:43:06.706797
+> os/FileJournal.cc: 1045: FAILED assert(0 == "bl should be align")
+>
+> This is bugging me already for a few days, but I haven't found an easy
+> way to debug this, run it in gdb while being live or in post-mortum.
+>
+> Further:
+> A) unittest_erasure_code_plugin failes on the fact that there is a
+> different error code returned when dlopen-ing a non existent library.
+> load dlopen(.libs/libec_invalid.so): Cannot open
+> ".libs/libec_invalid.so"load dlsym(.libs/libec_missing_version.so, _
+> _erasure_code_init): Undefined symbol
+> "__erasure_code_init"test/erasure-code/TestErasureCodePlugin.cc:88: Failure
+> Value of: instance.factory("missing_version", g_conf->erasure_code_dir,
+> profile, &erasure_code, &cerr)
+>   Actual: -2
+> Expected: -18
+> load dlsym(.libs/libec_missing_entry_point.so, __erasure_code_init):
+> Undefined symbol "__erasure_code_init"erasure_co
+> de_init(fail_to_initialize,.libs): (3) No such processload
+> __erasure_code_init()did not register fail_to_registerload
+> : example erasure_code_init(example,.libs): (17) File existsload:
+> example [  FAILED  ] ErasureCodePluginRegistryTest.
+> all (330 ms)
+>
+> B) ceph-detect-init/run-tox.sh failes on the fact that I need to work in
+> FreeBSD in the tests.
+>
+> C) ./gtest/include/gtest/internal/gtest-port.h:1358:: Condition
+> has_owner_ && pthread_equal(owner_, pthread_se
+> lf()) failed. The current thread is not holding the mutex @0x161ef20
+> ./test/run-rbd-unit-tests.sh: line 9: 78053 Abort trap
+> (core dumped) unittest_librbd
+>
+> Which I think I found some commit comments about in either trac or git
+> about FreeBSD not being able to do things to its own thread. Got to look
+> into this.
+>
+> D) Fix some of the other python code to work as expected.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 
-
---69PCBKhNst1ExQoVwQXvuiVdQ5MIVimCl
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlZ3SNMACgkQ8dLMyEl6F225igCfaIQLwiyPMWEjABsEdnvQFz1N
-9SQAmwRu9/m0k2pD/Ebtbv83fORK8Nl5
-=2C4u
------END PGP SIGNATURE-----
-
---69PCBKhNst1ExQoVwQXvuiVdQ5MIVimCl--
+-- 
+Regards,
+Xinze Chi
