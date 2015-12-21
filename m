@@ -1,72 +1,41 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: cluster_network goes slow during erasure code pool's stress testing
-Date: Mon, 21 Dec 2015 23:21:36 +0800
-Message-ID: <CABAwU-bDsMvf7A2aDR7s_8fRdS+0BS_rcKXPj0xnDn3PyJtEFA@mail.gmail.com>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: Is rbd_discard enough to wipe an RBD image?
+Date: Mon, 21 Dec 2015 07:50:07 -0800
+Message-ID: <56781FAF.3010907@redhat.com>
+References: <56771BEE.4050705@42on.com>
+ <1255550760.10644674.1450707915260.JavaMail.zimbra@oxygem.tv>
+ <1795864225.1459105.1450710584514.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f179.google.com ([209.85.217.179]:34995 "EHLO
-	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751009AbbLUPVh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Dec 2015 10:21:37 -0500
-Received: by mail-lb0-f179.google.com with SMTP id bc4so17008465lbc.2
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Dec 2015 07:21:37 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:35310 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751049AbbLUPuC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 21 Dec 2015 10:50:02 -0500
+In-Reply-To: <1795864225.1459105.1450710584514.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users@lists.ceph.com
+To: Jason Dillaman <dillaman@redhat.com>, Wido den Hollander <wido@42on.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Alexandre DERUMIER <aderumier@odiso.com>
 
-hi,all
-We meet a problem related to erasure pool with k:m=3:1 and stripe_unit=64k*3.
-We have a cluster with 96 OSDs on 4 Hosts(hosts are: srv1, srv2, srv3,
-srv4), each host have 24 OSDs,
-each host have 12 core processors (Intel(R) Xeon(R) CPU E5-2620 v2 @
-2.10GHz) and 48GB memory.
-cluster configured with(both are 10GB ethernet):
-cluster_network = 172.19.0.0/16
-public_network = 192.168.0.0/16
+On 12/21/2015 07:09 AM, Jason Dillaman wrote:
+> You will have to ensure that your writes are properly aligned with the object size (or object set if fancy striping is used on the RBD volume).  In that case, the discard is translated to remove operations on each individual backing object.  The only time zeros are written to disk is if you specify an offset somewhere in the middle of an object (i.e. the whole object cannot be deleted nor can it be truncated) -- this is the partial discard case controlled by that configuration param.
+>
 
-Test suite below:
-1) on each host, mount a Kernel client which bind to erasue pool
-2) on each host, configure a smb server which use cephfs's mount point
-3) every samba server have a windows smb client, which doing file
-write\read\delete operations
-4) every kernel client, we run a test shell script, write a 5GB file
-recursivelly and create many dirs.
+I'm curious what's using the virVolWipe stuff - it can't guarantee it's
+actually wiping the data in many common configurations, not just with
+ceph but with any kind of disk, since libvirt is usually not consuming
+raw disks, and with modern flash and smr drives even that is not enough.
+There's a recent patch improving the docs on this [1].
 
-we run the test at 6:00 pm, but the second day morning, the cluster is broken,
-1) there are 48 ODSs down, on srv1 and srv4
-2) i check the down OSD's log, there are two kinds of log:
-a) many osds down due to Filestore::op_thread timeout suicide
-b) many osds down due to OSD::osd_op_tp timeout suicide
+If the goal is just to make the data inaccessible to the libvirt user,
+removing the image is just as good.
 
-Because we have met this problem before, we use iperf to check the
-network between srv1 and srv4;
-the public_network is fine, the throughput can reach 9.20 Gbits/sec.
-but the cluster_network performs bad from srv1 to srv4;
-"iperf -c 172.19.10.4 " shows:
-[ ID] Interval       Transfer     Bandwidth
-[  3]  0.0-79.6 sec   384 KBytes  39.5 Kbits/sec
+That said, with rbd there's not much cost to zeroing the image with
+object map enabled - it's effectively just doing the data removal step
+of 'rbd rm' early.
 
-**but** iperf test from srv4 to srv1 is ok.
+Josh
 
-**note**:
-a) at this time, there are no ceph-osd daemons on srv1 and srv4
-b) after restart the network, iperf test on all sides shows ok
-
-If the network is so slow, the osd_op_tp can be stucked in
-submit_message if the reader is reciving data,
-which can finally result the osd_op_tp thread suicide.
-
-And we have another cluster with the same configuration,and run the
-same tests, the **only** difference is
-this cluster is testing replicated pool, not erasure pool.
-
-why the network is so slow, bc the erasure pool use more cpu and mem
-than replicated pool?
-
-Any hints and tips are welcome.
-
-
--- 
-thanks
-huangjun
+[1] http://comments.gmane.org/gmane.comp.emulators.libvirt/122235
