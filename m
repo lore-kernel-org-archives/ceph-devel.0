@@ -1,77 +1,68 @@
 From: Wido den Hollander <wido@42on.com>
-Subject: Re: Is rbd_discard enough to wipe an RBD image?
-Date: Mon, 21 Dec 2015 20:00:27 +0100
-Message-ID: <56784C4B.8020408@42on.com>
-References: <56771BEE.4050705@42on.com>
- <1255550760.10644674.1450707915260.JavaMail.zimbra@oxygem.tv>
- <1795864225.1459105.1450710584514.JavaMail.zimbra@redhat.com>
- <56781FAF.3010907@redhat.com>
+Subject: RBD performance with many childs and snapshots
+Date: Mon, 21 Dec 2015 20:06:17 +0100
+Message-ID: <56784DA9.9060304@42on.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:45537 "EHLO
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:45865 "EHLO
 	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750870AbbLUTAd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Dec 2015 14:00:33 -0500
-In-Reply-To: <56781FAF.3010907@redhat.com>
+	with ESMTP id S1751611AbbLUTGW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Dec 2015 14:06:22 -0500
+Received: from [192.168.8.128] (cable-178-107.zeelandnet.nl [82.176.178.107])
+	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPSA id 940D34007F
+	for <ceph-devel@vger.kernel.org>; Mon, 21 Dec 2015 20:06:17 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>, Jason Dillaman <dillaman@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Alexandre DERUMIER <aderumier@odiso.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 12/21/2015 04:50 PM, Josh Durgin wrote:
-> On 12/21/2015 07:09 AM, Jason Dillaman wrote:
->> You will have to ensure that your writes are properly aligned with the
->> object size (or object set if fancy striping is used on the RBD
->> volume).  In that case, the discard is translated to remove operations
->> on each individual backing object.  The only time zeros are written to
->> disk is if you specify an offset somewhere in the middle of an object
->> (i.e. the whole object cannot be deleted nor can it be truncated) --
->> this is the partial discard case controlled by that configuration param.
->>
-> 
-> I'm curious what's using the virVolWipe stuff - it can't guarantee it's
-> actually wiping the data in many common configurations, not just with
-> ceph but with any kind of disk, since libvirt is usually not consuming
-> raw disks, and with modern flash and smr drives even that is not enough.
-> There's a recent patch improving the docs on this [1].
-> 
-> If the goal is just to make the data inaccessible to the libvirt user,
-> removing the image is just as good.
-> 
-> That said, with rbd there's not much cost to zeroing the image with
-> object map enabled - it's effectively just doing the data removal step
-> of 'rbd rm' early.
-> 
+Hi,
 
-I was looking at the features the RBD storage pool driver is missing in
-libvirt and it is:
+While implementing the buildvolfrom method in libvirt for RBD I'm stuck
+at some point.
 
-- Build from Volume. That's RBD cloning
-- Uploading and Downloading Volume
-- Wiping Volume
+$ virsh vol-clone --pool myrbdpool image1 image2
 
-The thing about wiping in libvirt is that the volume still exists
-afterwards, it is just empty.
+This would clone image1 to a new RBD image called 'image2'.
 
-My discard code now works, but I wanted to verify. If I understand Jason
-correctly it would be a matter of figuring out the 'order' of a image
-and call rbd_discard in a loop until you reach the end of the image.
+The code I've written now does:
 
-I just want libvirt to be as feature complete as possible when it comes
-to RBD.
+1. Create a snapshot called image1@libvirt-<epochtimestamp>
+2. Protect the snapshot
+3. Clone the snapshot to 'image1'
 
-Wido
+wido@wido-desktop:~/repos/libvirt$ ./tools/virsh vol-clone --pool
+rbdpool image1 image2
+Vol image2 cloned from image1
 
-> Josh
-> 
-> [1] http://comments.gmane.org/gmane.comp.emulators.libvirt/122235
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+wido@wido-desktop:~/repos/libvirt$
 
+root@alpha:~# rbd -p libvirt info image2
+rbd image 'image2':
+	size 10240 MB in 2560 objects
+	order 22 (4096 kB objects)
+	block_name_prefix: rbd_data.1976451ead36b
+	format: 2
+	features: layering, striping
+	flags:
+	parent: libvirt/image1@libvirt-1450724650
+	overlap: 10240 MB
+	stripe unit: 4096 kB
+	stripe count: 1
+root@alpha:~#
+
+But this could potentially lead to a lot of snapshots with children on
+'image1'.
+
+image1 itself will probably never change, but I'm wondering about the
+negative performance impact this might have on a OSD.
+
+I'd rather not hardcode a snapshot name like 'libvirt-parent-snapshot'
+into libvirt. There is however no way to pass something like a snapshot
+name in libvirt when cloning.
+
+Any bright suggestions? Or is it fine to create so many snapshots?
 
 -- 
 Wido den Hollander
