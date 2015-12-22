@@ -1,49 +1,96 @@
 From: Wido den Hollander <wido@42on.com>
-Subject: Re: Is rbd_discard enough to wipe an RBD image?
-Date: Tue, 22 Dec 2015 22:55:10 +0100
-Message-ID: <5679C6BE.6050604@42on.com>
-References: <56771BEE.4050705@42on.com>
- <1255550760.10644674.1450707915260.JavaMail.zimbra@oxygem.tv>
- <1795864225.1459105.1450710584514.JavaMail.zimbra@redhat.com>
- <56781FAF.3010907@redhat.com> <56784C4B.8020408@42on.com>
- <56787B17.2000807@redhat.com>
+Subject: Re: RBD performance with many childs and snapshots
+Date: Tue, 22 Dec 2015 22:55:52 +0100
+Message-ID: <5679C6E8.9060702@42on.com>
+References: <56784DA9.9060304@42on.com> <56788281.7050200@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:45960 "EHLO
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:45966 "EHLO
 	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752367AbbLVVzR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Dec 2015 16:55:17 -0500
-In-Reply-To: <56787B17.2000807@redhat.com>
+	with ESMTP id S933910AbbLVVzz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Dec 2015 16:55:55 -0500
+In-Reply-To: <56788281.7050200@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>, Jason Dillaman <dillaman@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Alexandre DERUMIER <aderumier@odiso.com>
+To: Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 12/21/2015 11:20 PM, Josh Durgin wrote:
-> On 12/21/2015 11:00 AM, Wido den Hollander wrote:
->> My discard code now works, but I wanted to verify. If I understand Jason
->> correctly it would be a matter of figuring out the 'order' of a image
->> and call rbd_discard in a loop until you reach the end of the image.
+On 12/21/2015 11:51 PM, Josh Durgin wrote:
+> On 12/21/2015 11:06 AM, Wido den Hollander wrote:
+>> Hi,
+>>
+>> While implementing the buildvolfrom method in libvirt for RBD I'm stuck
+>> at some point.
+>>
+>> $ virsh vol-clone --pool myrbdpool image1 image2
+>>
+>> This would clone image1 to a new RBD image called 'image2'.
+>>
+>> The code I've written now does:
+>>
+>> 1. Create a snapshot called image1@libvirt-<epochtimestamp>
+>> 2. Protect the snapshot
+>> 3. Clone the snapshot to 'image1'
+>>
+>> wido@wido-desktop:~/repos/libvirt$ ./tools/virsh vol-clone --pool
+>> rbdpool image1 image2
+>> Vol image2 cloned from image1
+>>
+>> wido@wido-desktop:~/repos/libvirt$
+>>
+>> root@alpha:~# rbd -p libvirt info image2
+>> rbd image 'image2':
+>>     size 10240 MB in 2560 objects
+>>     order 22 (4096 kB objects)
+>>     block_name_prefix: rbd_data.1976451ead36b
+>>     format: 2
+>>     features: layering, striping
+>>     flags:
+>>     parent: libvirt/image1@libvirt-1450724650
+>>     overlap: 10240 MB
+>>     stripe unit: 4096 kB
+>>     stripe count: 1
+>> root@alpha:~#
+>>
+>> But this could potentially lead to a lot of snapshots with children on
+>> 'image1'.
+>>
+>> image1 itself will probably never change, but I'm wondering about the
+>> negative performance impact this might have on a OSD.
 > 
-> You'd need to get the order via rbd_stat(), convert it to object size
-> (i.e. (1 << order)), and fetch stripe_count with rbd_get_stripe_count().
+> Creating them isn't so bad, more snapshots that don't change don't have
+> much affect on the osds. Deleting them is what's expensive, since the
+> osds need to scan the objects to see which ones are part of the
+> snapshot and can be deleted. If you have too many snapshots created and
+> deleted, it can affect cluster load, so I'd rather avoid always
+> creating a snapshot.
 > 
-> Then do the discards in (object size * stripe_count) chunks. This
-> ensures you discard entire objects. This is the size you'd want to use
-> for import/export as well, ideally.
+>> I'd rather not hardcode a snapshot name like 'libvirt-parent-snapshot'
+>> into libvirt. There is however no way to pass something like a snapshot
+>> name in libvirt when cloning.
+>>
+>> Any bright suggestions? Or is it fine to create so many snapshots?
+> 
+> You could have canonical names for the libvirt snapshots like you
+> suggest, 'libvirt-<timestamp>', and check via rbd_diff_iterate2()
+> whether the parent image changed since the last snapshot. That's a bit
+> slower than plain cloning, but with object map + fast diff it's fast
+> again, since it doesn't need to scan all the objects anymore.
+> 
+> I think libvirt would need to expand its api a bit to be able to really
+> use it effectively to manage rbd. Hiding the snapshots becomes
+> cumbersome if the application wants to use them too. If libvirt's
+> current model of clones lets parents be deleted before children,
+> that may be a hassle to hide too...
 > 
 
-Thanks! I just implemented this, could you take a look?
+I gave it a shot. callback functions are a bit new to me, but I gave it
+a try:
+https://github.com/wido/libvirt/commit/756dca8023027616f53c39fa73c52a6d8f86a223
 
-https://github.com/wido/libvirt/commit/b07925ad50fdb6683b5b21deefceb0829a7842dc
+Could you take a look?
 
->> I just want libvirt to be as feature complete as possible when it comes
->> to RBD.
-> 
-> I see, makes sense.
-> 
 > Josh
 > -- 
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
