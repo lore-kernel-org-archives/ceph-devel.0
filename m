@@ -1,81 +1,60 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Let's Not Destroy the World in 2038
-Date: Tue, 22 Dec 2015 15:10:40 -0500
-Message-ID: <20151222201039.GA24590@ultraspiritum.redhat.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Is rbd_discard enough to wipe an RBD image?
+Date: Tue, 22 Dec 2015 22:55:10 +0100
+Message-ID: <5679C6BE.6050604@42on.com>
+References: <56771BEE.4050705@42on.com>
+ <1255550760.10644674.1450707915260.JavaMail.zimbra@oxygem.tv>
+ <1795864225.1459105.1450710584514.JavaMail.zimbra@redhat.com>
+ <56781FAF.3010907@redhat.com> <56784C4B.8020408@42on.com>
+ <56787B17.2000807@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="8t9RHnE3ZwKMSgU+"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51082 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932707AbbLVUKl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Dec 2015 15:10:41 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 1CA4B49DAA
-	for <ceph-devel@vger.kernel.org>; Tue, 22 Dec 2015 20:10:41 +0000 (UTC)
-Received: from ultraspiritum.redhat.com (ovpn-116-43.rdu2.redhat.com [10.10.116.43])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with SMTP id tBMKAeB2003368
-	for <ceph-devel@vger.kernel.org>; Tue, 22 Dec 2015 15:10:40 -0500
-Content-Disposition: inline
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:45960 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752367AbbLVVzR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Dec 2015 16:55:17 -0500
+In-Reply-To: <56787B17.2000807@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>, Jason Dillaman <dillaman@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Alexandre DERUMIER <aderumier@odiso.com>
+
+On 12/21/2015 11:20 PM, Josh Durgin wrote:
+> On 12/21/2015 11:00 AM, Wido den Hollander wrote:
+>> My discard code now works, but I wanted to verify. If I understand Jason
+>> correctly it would be a matter of figuring out the 'order' of a image
+>> and call rbd_discard in a loop until you reach the end of the image.
+> 
+> You'd need to get the order via rbd_stat(), convert it to object size
+> (i.e. (1 << order)), and fetch stripe_count with rbd_get_stripe_count().
+> 
+> Then do the discards in (object size * stripe_count) chunks. This
+> ensures you discard entire objects. This is the size you'd want to use
+> for import/export as well, ideally.
+> 
+
+Thanks! I just implemented this, could you take a look?
+
+https://github.com/wido/libvirt/commit/b07925ad50fdb6683b5b21deefceb0829a7842dc
+
+>> I just want libvirt to be as feature complete as possible when it comes
+>> to RBD.
+> 
+> I see, makes sense.
+> 
+> Josh
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
---8t9RHnE3ZwKMSgU+
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
 
-Comrades,
-
-Ceph's victory is assured. It will be the storage system of The Future.
-Matt Benjamin has reminded me that if we don't act fast=B9 Ceph will be
-responsible for destroying the world.
-
-utime_t() uses a 32-bit second count internally. This isn't great, but it's
-something we can fix. ceph::real_time currently uses a 64-bit bit count of
-nanoseconds, which is better. And we can change it to something else without
-having to rewrite much other code.
-
-The problem lies in our encode/deocde functions for time (both utime_t
-and ceph::real_time, since I didn't want to break compatibility.) we
-use a 32-bit second count. I would like to change the wire and disk
-representation to a 64-bit second count and a 32-bit nanosecond count.
-
-Would there be resistance to a project to do this? I don't know if a
-FEATURE bit would help. A FEATURE bit to toggle the width of the second
-count would be ideal if it would work. Otherwise it looks like the best
-way to do this would be to find all the structures currently ::encoded
-that hold time values, bump the version number and have an 'old_utime'
-that we use for everything pre-change.
-
-Thank you!
-
-=B9 Within the next twenty-three years. But that's not really a long time i=
-n the
-  larger scheme of things.
-
---=20
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
-
---8t9RHnE3ZwKMSgU+
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQF8BAEBCgBmBQJWea44XxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
-ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
-OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4joWkH/1ZxjNyK2l3iuYdD+4diWSts
-oRkmjEI3gu4vqKOLX48PoUJvzUBzaT50OR46wjGzdy3jqbRS5gz8O41TBTwuWdM3
-d/hzjvhb3yKJVPSnROLqAISWN3CLHwS2lREPnRCvXo7StZ3bNLf70D3szRxpwpKb
-bUHfL3f9ysOyexdt+w3zUVa/WzMsYUEhRJvLiQKTGpZRI9+1HgKfBhXJ6sISKk9m
-M/TZ2A10QEONGl6ou0h3ST2CrJqaEp8viizbJHCSdYADanZkNMc779SKJk5Sv0D2
-3P9vR3bvJm2eAsFBoqfrBeU+vBpF4hEZjEnOK7dU5N7U9RTqAYF7eOJ2huUAwPY=
-=1YtG
------END PGP SIGNATURE-----
-
---8t9RHnE3ZwKMSgU+--
+Phone: +31 (0)20 700 9902
+Skype: contact42on
