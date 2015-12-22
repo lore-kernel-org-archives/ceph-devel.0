@@ -1,60 +1,119 @@
-From: "Igor.Podoski@ts.fujitsu.com" <Igor.Podoski@ts.fujitsu.com>
-Subject: RE: tool for applying 'ceph daemon <osd>' command to all OSDs
-Date: Tue, 22 Dec 2015 08:21:08 +0000
-Message-ID: <5265afb0293f4ecbb0a5506a912d943c@R01UKEXCASM222.r01.fujitsu.local>
-References: <5678E6C2.40007@redhat.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: RBD performance with many childs and snapshots
+Date: Tue, 22 Dec 2015 14:34:09 +0100
+Message-ID: <56795151.2040102@42on.com>
+References: <56784DA9.9060304@42on.com> <56788281.7050200@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail1.bemta3.messagelabs.com ([195.245.230.164]:39579 "EHLO
-	mail1.bemta3.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752232AbbLVIVS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Dec 2015 03:21:18 -0500
-In-Reply-To: <5678E6C2.40007@redhat.com>
-Content-Language: en-US
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:46872 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932149AbbLVNeQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Dec 2015 08:34:16 -0500
+In-Reply-To: <56788281.7050200@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
-Z10gT24gQmVoYWxmIE9mIERhbiBNaWNrDQo+IFNlbnQ6IFR1ZXNkYXksIERlY2VtYmVyIDIyLCAy
-MDE1IDc6MDAgQU0NCj4gVG86IGNlcGgtZGV2ZWwNCj4gU3ViamVjdDogUkZDOiB0b29sIGZvciBh
-cHBseWluZyAnY2VwaCBkYWVtb24gPG9zZD4nIGNvbW1hbmQgdG8gYWxsIE9TRHMNCj4gDQo+IEkg
-bmVlZGVkIHNvbWV0aGluZyB0byBmZXRjaCBjdXJyZW50IGNvbmZpZyB2YWx1ZXMgZnJvbSBhbGwg
-T1NEcyAoc29ydGEgdGhlDQo+IG9wcG9zaXRlIG9mICdpbmplY3RhcmdzIC0ta2V5IHZhbHVlKSwg
-c28gSSBoYWNrZWQgaXQsIGFuZCB0aGVuIHNwaWZmZWQgaXQgdXAgYSBiaXQuDQo+IERvZXMgdGhp
-cyBzZWVtIGxpa2Ugc29tZXRoaW5nIHRoYXQgd291bGQgYmUgdXNlZnVsIGluIHRoaXMgZm9ybSBp
-biB0aGUNCj4gdXBzdHJlYW0gQ2VwaCwgb3IgZG9lcyBhbnlvbmUgaGF2ZSBhbnkgdGhvdWdodHMg
-b24gaXRzIGRlc2lnbiBvcg0KPiBzdHJ1Y3R1cmU/DQo+DQoNCllvdSBjb3VsZCBkbyBpdCB1c2lu
-ZyBzb2NhdCB0b286DQoNCk5vZGUxIGhhcyBvc2QuMA0KDQpOb2RlMToNCmNkIC92YXIvcnVuL2Nl
-cGgNCnN1ZG8gc29jYXQgVENQLUxJU1RFTjo2MDEwMCxmb3JrIHVuaXgtY29ubmVjdDpjZXBoLW9z
-ZC4wLmFzb2sNCg0KTm9kZTI6DQpjZCAvdmFyL3J1bi9jZXBoDQpzdWRvICBzb2NhdCB1bml4LWxp
-c3RlbjpjZXBoLW9zZC4wLmFzb2ssZm9yayBUQ1A6Tm9kZTE6NjAxMDANCg0KTm9kZTI6DQpzdWRv
-IGNlcGggZGFlbW9uIG9zZC4wIGhlbHAgfCBoZWFkDQp7DQogICAgImNvbmZpZyBkaWZmIjogImR1
-bXAgZGlmZiBvZiBjdXJyZW50IGNvbmZpZyBhbmQgZGVmYXVsdCBjb25maWciLA0KICAgICJjb25m
-aWcgZ2V0IjogImNvbmZpZyBnZXQgPGZpZWxkPjogZ2V0IHRoZSBjb25maWcgdmFsdWUiLA0KDQpU
-aGlzIGlzIG1vcmUgZm9yIGRldmVsb3BtZW50L3Rlc3Qgc2V0dXAuDQoNClJlZ2FyZHMsDQpJZ29y
-Lg0KDQo+IEl0IHJlcXVpcmVzIGEgbG9jYWxseS1pbnN0YWxsZWQgY2VwaCBDTEkgYW5kIGEgY2Vw
-aC5jb25mIHRoYXQgcG9pbnRzIHRvIHRoZQ0KPiBjbHVzdGVyIGFuZCBhbnkgcmVxdWlyZWQga2V5
-cmluZ3MuICBZb3UgY2FuIGFsc28gcHJvdmlkZSBpdCB3aXRoIGEgWUFNTCBmaWxlDQo+IG1hcHBp
-bmcgaG9zdCB0byBvc2RzIGlmIHlvdSB3YW50IHRvIHNhdmUgdGltZSBjb2xsZWN0aW5nIHRoYXQg
-aW5mbyBmb3IgYQ0KPiBzdGF0aWNhbGx5LWRlZmluZWQgY2x1c3Rlciwgb3IgaWYgeW91IHdhbnQg
-anVzdCBhIHN1YnNldCBvZiBPU0RzLg0KPiANCj4gaHR0cHM6Ly9naXRodWIuY29tL2RtaWNrL3Rv
-b2xzL2Jsb2IvbWFzdGVyL29zZF9kYWVtb25fY21kLnB5DQo+IA0KPiBFeGNlcnB0IGZyb20gdXNh
-Z2U6DQo+IA0KPiBFeGVjdXRlIGEgQ2VwaCBvc2QgZGFlbW9uIGNvbW1hbmQgb24gZXZlcnkgT1NE
-IGluIGEgY2x1c3RlciB3aXRoIG9uZQ0KPiBjb25uZWN0aW9uIHRvIGVhY2ggT1NEIGhvc3QuDQo+
-IA0KPiBVc2FnZToNCj4gICAgIG9zZF9kYWVtb25fY21kIFstYyBDT05GXSBbLXUgVVNFUl0gWy1m
-IEZJTEVdIChDT01NQU5EIHwgLWsgS0VZKQ0KPiANCj4gT3B0aW9uczoNCj4gICAgLWMgQ09ORiAg
-IGNlcGguY29uZiBmaWxlIHRvIHVzZSBbZGVmYXVsdDogLi9jZXBoLmNvbmZdDQo+ICAgIC11IFVT
-RVIgICB1c2VyIHRvIGNvbm5lY3Qgd2l0aCBzc2gNCj4gICAgLWYgRklMRSAgIGdldCBuYW1lcyBh
-bmQgb3NkcyBmcm9tIHlhbWwNCj4gICAgQ09NTUFORCAgIGNvbW1hbmQgb3RoZXIgdGhhbiAiY29u
-ZmlnIGdldCIgdG8gZXhlY3V0ZQ0KPiAgICAtayBLRVkgICAgY29uZmlnIGtleSB0byByZXRyaWV2
-ZSB3aXRoIGNvbmZpZyBnZXQgPGtleT4NCj4gDQo+IC0tDQo+IERhbiBNaWNrDQo+IFJlZCBIYXQs
-IEluYy4NCj4gQ2VwaCBkb2NzOiBodHRwOi8vY2VwaC5jb20vZG9jcw0KPiAtLQ0KPiBUbyB1bnN1
-YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
-ZXZlbCIgaW4gdGhlDQo+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5l
-bC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
-am9yZG9tby1pbmZvLmh0bWwNCg==
+
+
+On 21-12-15 23:51, Josh Durgin wrote:
+> On 12/21/2015 11:06 AM, Wido den Hollander wrote:
+>> Hi,
+>>
+>> While implementing the buildvolfrom method in libvirt for RBD I'm stuck
+>> at some point.
+>>
+>> $ virsh vol-clone --pool myrbdpool image1 image2
+>>
+>> This would clone image1 to a new RBD image called 'image2'.
+>>
+>> The code I've written now does:
+>>
+>> 1. Create a snapshot called image1@libvirt-<epochtimestamp>
+>> 2. Protect the snapshot
+>> 3. Clone the snapshot to 'image1'
+>>
+>> wido@wido-desktop:~/repos/libvirt$ ./tools/virsh vol-clone --pool
+>> rbdpool image1 image2
+>> Vol image2 cloned from image1
+>>
+>> wido@wido-desktop:~/repos/libvirt$
+>>
+>> root@alpha:~# rbd -p libvirt info image2
+>> rbd image 'image2':
+>>     size 10240 MB in 2560 objects
+>>     order 22 (4096 kB objects)
+>>     block_name_prefix: rbd_data.1976451ead36b
+>>     format: 2
+>>     features: layering, striping
+>>     flags:
+>>     parent: libvirt/image1@libvirt-1450724650
+>>     overlap: 10240 MB
+>>     stripe unit: 4096 kB
+>>     stripe count: 1
+>> root@alpha:~#
+>>
+>> But this could potentially lead to a lot of snapshots with children on
+>> 'image1'.
+>>
+>> image1 itself will probably never change, but I'm wondering about the
+>> negative performance impact this might have on a OSD.
+> 
+> Creating them isn't so bad, more snapshots that don't change don't have
+> much affect on the osds. Deleting them is what's expensive, since the
+> osds need to scan the objects to see which ones are part of the
+> snapshot and can be deleted. If you have too many snapshots created and
+> deleted, it can affect cluster load, so I'd rather avoid always
+> creating a snapshot.
+> 
+>> I'd rather not hardcode a snapshot name like 'libvirt-parent-snapshot'
+>> into libvirt. There is however no way to pass something like a snapshot
+>> name in libvirt when cloning.
+>>
+>> Any bright suggestions? Or is it fine to create so many snapshots?
+> 
+> You could have canonical names for the libvirt snapshots like you
+> suggest, 'libvirt-<timestamp>', and check via rbd_diff_iterate2()
+> whether the parent image changed since the last snapshot. That's a bit
+> slower than plain cloning, but with object map + fast diff it's fast
+> again, since it doesn't need to scan all the objects anymore.
+> 
+
+I'll give that a try, seems like a good suggestion!
+
+I'll have to use rbd_diff_iterate() through since iterate2() is
+post-hammer and that will not be available on all systems.
+
+> I think libvirt would need to expand its api a bit to be able to really
+> use it effectively to manage rbd. Hiding the snapshots becomes
+> cumbersome if the application wants to use them too. If libvirt's
+> current model of clones lets parents be deleted before children,
+> that may be a hassle to hide too...
+> 
+
+Yes, I would love to see:
+
+- vol-snap-list
+- vol-snap-create
+- vol-snap-delete
+- vol-snap-revert
+
+And then:
+
+- vol-clone --snapshot <mysnap> --pool <mypool> image1 image2
+
+But this would need some more work inside libvirt. Would be very nice
+though.
+
+At CloudStack we want to do as much as possible using libvirt, the more
+features it has there, the less we have to do in Java code :)
+
+Wido
+
+> Josh
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
