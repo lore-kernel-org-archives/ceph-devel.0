@@ -1,66 +1,60 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: RFC: tool for applying 'ceph daemon <osd>' command to all OSDs
-Date: Mon, 21 Dec 2015 23:29:20 -0800
-Message-ID: <CAJ4mKGbeO+OQ0oLk+sZmv8rdT0wQCtXvyE3rq6QG2yfRmOqfSw@mail.gmail.com>
+From: "Igor.Podoski@ts.fujitsu.com" <Igor.Podoski@ts.fujitsu.com>
+Subject: RE: tool for applying 'ceph daemon <osd>' command to all OSDs
+Date: Tue, 22 Dec 2015 08:21:08 +0000
+Message-ID: <5265afb0293f4ecbb0a5506a912d943c@R01UKEXCASM222.r01.fujitsu.local>
 References: <5678E6C2.40007@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:33222 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751738AbbLVH3V (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Dec 2015 02:29:21 -0500
-Received: by mail-wm0-f53.google.com with SMTP id p187so96425738wmp.0
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Dec 2015 23:29:21 -0800 (PST)
+Received: from mail1.bemta3.messagelabs.com ([195.245.230.164]:39579 "EHLO
+	mail1.bemta3.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752232AbbLVIVS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Dec 2015 03:21:18 -0500
 In-Reply-To: <5678E6C2.40007@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dmick@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Dec 21, 2015 at 9:59 PM, Dan Mick <dmick@redhat.com> wrote:
-> I needed something to fetch current config values from all OSDs (sorta
-> the opposite of 'injectargs --key value), so I hacked it, and then
-> spiffed it up a bit.  Does this seem like something that would be useful
-> in this form in the upstream Ceph, or does anyone have any thoughts on
-> its design or structure?
->
-> It requires a locally-installed ceph CLI and a ceph.conf that points to
-> the cluster and any required keyrings.  You can also provide it with
-> a YAML file mapping host to osds if you want to save time collecting
-> that info for a statically-defined cluster, or if you want just a subset
-> of OSDs.
->
-> https://github.com/dmick/tools/blob/master/osd_daemon_cmd.py
->
-> Excerpt from usage:
->
-> Execute a Ceph osd daemon command on every OSD in a cluster with
-> one connection to each OSD host.
->
-> Usage:
->     osd_daemon_cmd [-c CONF] [-u USER] [-f FILE] (COMMAND | -k KEY)
->
-> Options:
->    -c CONF   ceph.conf file to use [default: ./ceph.conf]
->    -u USER   user to connect with ssh
->    -f FILE   get names and osds from yaml
->    COMMAND   command other than "config get" to execute
->    -k KEY    config key to retrieve with config get <key>
-
-I naively like the functionality being available, but if I'm skimming
-this correctly it looks like you're relying on the local node being
-able to passwordless-ssh to all of the nodes, and for that account to
-be able to access the ceph admin sockets. Granted we rely on the ssh
-for ceph-deploy as well, so maybe that's okay, but I'm not sure in
-this case since it implies a lot more network openness.
-
-Relatedly (perhaps in an opposing direction), maybe we want anything
-exposed over the network to have some sort of explicit permissions
-model?
-
-Maybe not and we should just ship the script for trusted users. I
-would have liked it on the long-running cluster I'm sure you built it
-for. ;)
-Indecisively yours,
--Greg
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIERhbiBNaWNrDQo+IFNlbnQ6IFR1ZXNkYXksIERlY2VtYmVyIDIyLCAy
+MDE1IDc6MDAgQU0NCj4gVG86IGNlcGgtZGV2ZWwNCj4gU3ViamVjdDogUkZDOiB0b29sIGZvciBh
+cHBseWluZyAnY2VwaCBkYWVtb24gPG9zZD4nIGNvbW1hbmQgdG8gYWxsIE9TRHMNCj4gDQo+IEkg
+bmVlZGVkIHNvbWV0aGluZyB0byBmZXRjaCBjdXJyZW50IGNvbmZpZyB2YWx1ZXMgZnJvbSBhbGwg
+T1NEcyAoc29ydGEgdGhlDQo+IG9wcG9zaXRlIG9mICdpbmplY3RhcmdzIC0ta2V5IHZhbHVlKSwg
+c28gSSBoYWNrZWQgaXQsIGFuZCB0aGVuIHNwaWZmZWQgaXQgdXAgYSBiaXQuDQo+IERvZXMgdGhp
+cyBzZWVtIGxpa2Ugc29tZXRoaW5nIHRoYXQgd291bGQgYmUgdXNlZnVsIGluIHRoaXMgZm9ybSBp
+biB0aGUNCj4gdXBzdHJlYW0gQ2VwaCwgb3IgZG9lcyBhbnlvbmUgaGF2ZSBhbnkgdGhvdWdodHMg
+b24gaXRzIGRlc2lnbiBvcg0KPiBzdHJ1Y3R1cmU/DQo+DQoNCllvdSBjb3VsZCBkbyBpdCB1c2lu
+ZyBzb2NhdCB0b286DQoNCk5vZGUxIGhhcyBvc2QuMA0KDQpOb2RlMToNCmNkIC92YXIvcnVuL2Nl
+cGgNCnN1ZG8gc29jYXQgVENQLUxJU1RFTjo2MDEwMCxmb3JrIHVuaXgtY29ubmVjdDpjZXBoLW9z
+ZC4wLmFzb2sNCg0KTm9kZTI6DQpjZCAvdmFyL3J1bi9jZXBoDQpzdWRvICBzb2NhdCB1bml4LWxp
+c3RlbjpjZXBoLW9zZC4wLmFzb2ssZm9yayBUQ1A6Tm9kZTE6NjAxMDANCg0KTm9kZTI6DQpzdWRv
+IGNlcGggZGFlbW9uIG9zZC4wIGhlbHAgfCBoZWFkDQp7DQogICAgImNvbmZpZyBkaWZmIjogImR1
+bXAgZGlmZiBvZiBjdXJyZW50IGNvbmZpZyBhbmQgZGVmYXVsdCBjb25maWciLA0KICAgICJjb25m
+aWcgZ2V0IjogImNvbmZpZyBnZXQgPGZpZWxkPjogZ2V0IHRoZSBjb25maWcgdmFsdWUiLA0KDQpU
+aGlzIGlzIG1vcmUgZm9yIGRldmVsb3BtZW50L3Rlc3Qgc2V0dXAuDQoNClJlZ2FyZHMsDQpJZ29y
+Lg0KDQo+IEl0IHJlcXVpcmVzIGEgbG9jYWxseS1pbnN0YWxsZWQgY2VwaCBDTEkgYW5kIGEgY2Vw
+aC5jb25mIHRoYXQgcG9pbnRzIHRvIHRoZQ0KPiBjbHVzdGVyIGFuZCBhbnkgcmVxdWlyZWQga2V5
+cmluZ3MuICBZb3UgY2FuIGFsc28gcHJvdmlkZSBpdCB3aXRoIGEgWUFNTCBmaWxlDQo+IG1hcHBp
+bmcgaG9zdCB0byBvc2RzIGlmIHlvdSB3YW50IHRvIHNhdmUgdGltZSBjb2xsZWN0aW5nIHRoYXQg
+aW5mbyBmb3IgYQ0KPiBzdGF0aWNhbGx5LWRlZmluZWQgY2x1c3Rlciwgb3IgaWYgeW91IHdhbnQg
+anVzdCBhIHN1YnNldCBvZiBPU0RzLg0KPiANCj4gaHR0cHM6Ly9naXRodWIuY29tL2RtaWNrL3Rv
+b2xzL2Jsb2IvbWFzdGVyL29zZF9kYWVtb25fY21kLnB5DQo+IA0KPiBFeGNlcnB0IGZyb20gdXNh
+Z2U6DQo+IA0KPiBFeGVjdXRlIGEgQ2VwaCBvc2QgZGFlbW9uIGNvbW1hbmQgb24gZXZlcnkgT1NE
+IGluIGEgY2x1c3RlciB3aXRoIG9uZQ0KPiBjb25uZWN0aW9uIHRvIGVhY2ggT1NEIGhvc3QuDQo+
+IA0KPiBVc2FnZToNCj4gICAgIG9zZF9kYWVtb25fY21kIFstYyBDT05GXSBbLXUgVVNFUl0gWy1m
+IEZJTEVdIChDT01NQU5EIHwgLWsgS0VZKQ0KPiANCj4gT3B0aW9uczoNCj4gICAgLWMgQ09ORiAg
+IGNlcGguY29uZiBmaWxlIHRvIHVzZSBbZGVmYXVsdDogLi9jZXBoLmNvbmZdDQo+ICAgIC11IFVT
+RVIgICB1c2VyIHRvIGNvbm5lY3Qgd2l0aCBzc2gNCj4gICAgLWYgRklMRSAgIGdldCBuYW1lcyBh
+bmQgb3NkcyBmcm9tIHlhbWwNCj4gICAgQ09NTUFORCAgIGNvbW1hbmQgb3RoZXIgdGhhbiAiY29u
+ZmlnIGdldCIgdG8gZXhlY3V0ZQ0KPiAgICAtayBLRVkgICAgY29uZmlnIGtleSB0byByZXRyaWV2
+ZSB3aXRoIGNvbmZpZyBnZXQgPGtleT4NCj4gDQo+IC0tDQo+IERhbiBNaWNrDQo+IFJlZCBIYXQs
+IEluYy4NCj4gQ2VwaCBkb2NzOiBodHRwOi8vY2VwaC5jb20vZG9jcw0KPiAtLQ0KPiBUbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
+ZXZlbCIgaW4gdGhlDQo+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5l
+bC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
+am9yZG9tby1pbmZvLmh0bWwNCg==
