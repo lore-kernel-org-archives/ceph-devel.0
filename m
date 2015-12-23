@@ -1,43 +1,46 @@
-From: "hzwulibin" <hzwulibin@gmail.com>
-Subject: use object size of 32k rather than 4M
-Date: Wed, 23 Dec 2015 20:00:29 +0800
-Message-ID: <567A8CD6.10707@gmail.com>
+From: "Van Leeuwen, Robert" <rovanleeuwen-ZuctOmHWJ9c@public.gmane.org>
+Subject: Re: use object size of 32k rather than 4M
+Date: Wed, 23 Dec 2015 12:57:06 +0000
+Message-ID: <23844535-D8F2-438E-9C4B-3BE523D0157A@ebay.com>
+References: <567A8CD6.10707@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:32960 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752078AbbLWMAa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Dec 2015 07:00:30 -0500
-Received: by mail-pa0-f46.google.com with SMTP id cy9so50112058pac.0
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Dec 2015 04:00:30 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
-Cc: Sage Weil <sage@newdream.net>, Haomai Wang <haomaiwang@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <567A8CD6.10707-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
+Content-ID: <14204E19106D2A4CB36097000238C078-idVjhtesxHvqlBn2x/YWAg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: hzwulibin <hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-SGksIGNlcGhlcnMsIFNhZ2UgYW5kIEhhb21haQ0KDQpSZWNlbnRseSB3ZSBzdHVjayBvZiB0aGUg
-cGVyZm9ybWFuY2UgZG93biBwcm9ibGVtIHdoZW4gcmVjb3ZlcnlpbmcuIFRoZSBzY2VuZSBpcyBz
-aW1wbGU6DQoxLiBydW4gZmlvIHdpdGggcmFuZCB3cml0ZShicz00aykNCjIuIHN0b3Agb25lIG9z
-ZDsgc2xlZXAgMTA7IHN0YXJ0IHRoZSBvc2QNCjMuIHRoZSBJT1BTIGRyb3AgZnJvbSA2SyB0byBh
-Ym91dCAyMDANCg0KV2Ugbm93IGtub3cgdGhlIFNTRCB3aGljaCB0aGF0IG9zZCBvbiBpcyB0aGUg
-Ym90dGxlbmVjayB3aGVuIHJlY292ZXJ5LiBBZnRlciByZWFkIHRoZSBjb2RlLCB3ZSBmaW5kIHRo
-ZSBJTyBvZiB0aGF0IA0KU1NEIGNvbWUgZnJvbSB0d28gd2F5czoNCjEuIG5vcm1hbCByZWNvdmVy
-eSBJTw0KMi4gdXNlciBJTyBidXQgaW4gdGhlIG1pc3NpbmcgbGlzdCwgbmVlZCB0byByZWNvdmVy
-eSB0aGUgNE0gb2JqZWN0IGZpcnN0Lg0KDQpTbyBvdXIgZmlyc3Qgc3RlcCBpcyBsaW1pdCB0aGUg
-cmVjb3ZlcnkgSU8gdG8gc2xvdyBkb3duIHRoZSBzdHJlc3Mgb2YgdGhhdCBTU0QuIFRoYXQgaGVs
-cHMgaW4gc29tZSBzY2VuZSwgYnV0IG5vdCB0aGlzIG9uZS4NCg0KDQpXZSBoYXZlIDM2IE9TRCB3
-aXRoIDMgcmVwbGljYXMsIHNvIHdoZW4gb25lIG9zZCBkb3duLCBhYm91dCAxLzEyIG9iamVjdHMg
-d2lsbCBiZSBpbiBkZWdyYWRlZCBzdGF0ZS4NCldoZW4gd2UgcnVuIGZpbyB3aXRoIDRrIHJhbmR3
-cml0ZSwgYWJvdXQgMS8xMiBpbyB3aWxsIHN0dWNrIGFuZCBuZWVkIHRvIHJlY292ZXJ5IHRoZSA0
-TSBvYmplY3QgZmlyc3QuDQpUaGF0IHJlYWxseSBlbmxhcmdlIHRoZSBzdHJlc3MgdGhlIHRoYXQg
-U1NELg0KDQpJbiBvcmRlciB0byByZWR1Y2UgdGhlIGVubGFyZ2UgaW1wYWN0LCB3ZSB3YW50IHRv
-IGNoYW5nZSB0aGUgZGVmYXVsdCBzaXplIG9mIHRoZSBvYmplY3QgZnJvbSA0TSB0byAzMmsuDQoN
-CldlIGtub3cgdGhhdCB3aWxsIGluY3JlYXNlIHRoZSBudW1iZXIgb2YgdGhlIG9iamVjdHMgb2Yg
-b25lIE9TRCBhbmQgbWFrZSByZW1vdmUgcHJvY2VzcyBiZWNvbWUgbG9uZ2VyLg0KDQpIbW0sIGhl
-cmUgaSB3YW50IHRvIGFzayB5b3VyIGd1eXMgaXMgdGhlcmUgYW55IG90aGVyIHBvdGVudGlhbCBw
-cm9ibGVtcyB3aWxsIDMyayBzaXplIGhhdmU/IElmIG5vIG9idmlvdXMgcHJvYmxlbSwgd2lsbCBj
-b3VsZCBkaXZlIGludG8NCml0IGFuZCBkbyBtb3JlIHRlc3Qgb24gaXQuDQoNCk1hbnkgdGhhbmtz
-IQ0KIAkJCQkNCi0tLS0tLS0tLS0tLS0tDQpoend1bGliaW4NCjIwMTUtMTItMjMNCg==
 
+>In order to reduce the enlarge impact, we want to change the default size of the object from 4M to 32k.
+>
+>We know that will increase the number of the objects of one OSD and make remove process become longer.
+>
+>Hmm, here i want to ask your guys is there any other potential problems will 32k size have? If no obvious problem, will could dive into
+>it and do more test on it.
+
+
+I assume the objects on the OSDs filesystem will become 32k when you do this.
+So if you have 1TB of data on one OSD you will have 31 million files == 31 million inodes 
+This is excluding the directory structure which also might be significant.
+If you have 10 OSDs on a server you will easily hit 310 million inodes.
+You will need a LOT of memory to make sure the inodes are cached but even then looking up the inode might add significant latency.
+
+My guess is it will be fast in the beginning but it will grind to an hold when the cluster gets fuller due to inodes no longer being in memory.
+
+Also this does not take in any other bottlenecks you might hit in ceph which other users can probably answer better.
+
+
+Cheers,
+Robert van Leeuwen
