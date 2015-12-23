@@ -1,26 +1,24 @@
 From: Josh Durgin <jdurgin@redhat.com>
 Subject: Re: RBD performance with many childs and snapshots
-Date: Tue, 22 Dec 2015 18:03:38 -0800
-Message-ID: <567A00FA.7070909@redhat.com>
+Date: Tue, 22 Dec 2015 18:04:20 -0800
+Message-ID: <567A0124.5010303@redhat.com>
 References: <56784DA9.9060304@42on.com> <56788281.7050200@redhat.com>
- <56795151.2040102@42on.com>
+ <5679C6E8.9060702@42on.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38727 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49588 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753941AbbLWCDi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Dec 2015 21:03:38 -0500
-In-Reply-To: <56795151.2040102@42on.com>
+	id S1756035AbbLWCEU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Dec 2015 21:04:20 -0500
+In-Reply-To: <5679C6E8.9060702@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 12/22/2015 05:34 AM, Wido den Hollander wrote:
->
->
-> On 21-12-15 23:51, Josh Durgin wrote:
+On 12/22/2015 01:55 PM, Wido den Hollander wrote:
+> On 12/21/2015 11:51 PM, Josh Durgin wrote:
 >> On 12/21/2015 11:06 AM, Wido den Hollander wrote:
 >>> Hi,
 >>>
@@ -82,12 +80,6 @@ On 12/22/2015 05:34 AM, Wido den Hollander wrote:
 >> slower than plain cloning, but with object map + fast diff it's fast
 >> again, since it doesn't need to scan all the objects anymore.
 >>
->
-> I'll give that a try, seems like a good suggestion!
->
-> I'll have to use rbd_diff_iterate() through since iterate2() is
-> post-hammer and that will not be available on all systems.
->
 >> I think libvirt would need to expand its api a bit to be able to really
 >> use it effectively to manage rbd. Hiding the snapshots becomes
 >> cumbersome if the application wants to use them too. If libvirt's
@@ -95,28 +87,13 @@ On 12/22/2015 05:34 AM, Wido den Hollander wrote:
 >> that may be a hassle to hide too...
 >>
 >
-> Yes, I would love to see:
+> I gave it a shot. callback functions are a bit new to me, but I gave it
+> a try:
+> https://github.com/wido/libvirt/commit/756dca8023027616f53c39fa73c52a6d8f86a223
 >
-> - vol-snap-list
-> - vol-snap-create
-> - vol-snap-delete
-> - vol-snap-revert
->
-> And then:
->
-> - vol-clone --snapshot <mysnap> --pool <mypool> image1 image2
->
-> But this would need some more work inside libvirt. Would be very nice
-> though.
+> Could you take a look?
 
-Yeah, those would be nice.
-
-> At CloudStack we want to do as much as possible using libvirt, the more
-> features it has there, the less we have to do in Java code :)
-
-Dan Berrange has talked about using libvirt storage pools for managing
-rbd and other storage from openstack nova too, for the same reason. I'm
-not sure if there are any current plans for that, but you may want to
-ask him about it on the libvirt list.
+Left some comments on the commits. Looks good in general.
 
 Josh
+
