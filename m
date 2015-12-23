@@ -1,103 +1,68 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: Let's Not Destroy the World in 2038
-Date: Wed, 23 Dec 2015 14:16:27 -0500
-Message-ID: <20151223191627.GA27953@ultraspiritum.redhat.com>
-References: <20151222201039.GA24590@ultraspiritum.redhat.com>
- <CAJ4mKGbmA=gpagHLa23TKEVDsqdJGitv+1GA51QL3PST3a-5UA@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: New "make check" job for Ceph pull requests
+Date: Wed, 23 Dec 2015 15:05:03 -0500
+Message-ID: <CAC-Np1wTpq4fJBtfJow9KY5dQ2vDmd_Mi_AsLhnavkhdr21apA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="ZPt4rx8FFjLCG7dd"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48134 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755647AbbLWTQ2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 23 Dec 2015 14:16:28 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id 568C58EA39
-	for <ceph-devel@vger.kernel.org>; Wed, 23 Dec 2015 19:16:28 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <CAJ4mKGbmA=gpagHLa23TKEVDsqdJGitv+1GA51QL3PST3a-5UA@mail.gmail.com>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:34124 "EHLO
+	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933827AbbLWUFE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Dec 2015 15:05:04 -0500
+Received: by mail-wm0-f41.google.com with SMTP id l126so158718663wml.1
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Dec 2015 12:05:03 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, sepia@ceph.com
+
+Hi all,
+
+As of yesterday (Tuesday Dec 22nd) we have the "make check" job
+running within our CI infrastructure, working very similarly as the
+previous check with a few differences:
+
+* there are no longer comments added to the pull requests
+* notifications of success (or failure) are done inline in the same
+notification box for "This branch has no conflicts with the base
+branch"
+* All members of the Ceph organization can trigger a job with the
+following comment:
+    test this please
+
+Changes to the job should be done following our new process: anyone can open
+a pull request against the "ceph-pull-requests" job that configures/modifies
+it. This process is fairly minimal:
+
+1) *Jobs no longer require to make changes in the Jenkins UI*, they
+are rather plain text YAML files that live in the ceph/ceph-build.git
+repository and have a specific structure. Job changes (including
+scripts) are made directly on that repository via pull requests.
+
+2) As soon as a PR is merged the changes are automatically pushed to
+Jenkins. Regardless if this is a new or old job. All one needs for a
+new job to appear is a directory with a working YAML file (see links
+at the end on what this means)
+
+Below, please find a list to resources on how to make changes to a
+Jenkins Job, and examples on how mostly anyone can provide changes:
+
+* Format and configuration of YAML files are consumed by JJB (Jenkins
+Job builder), full docs are here:
+http://docs.openstack.org/infra/jenkins-job-builder/definition.html
+* Where does the make-check configuration lives?
+https://github.com/ceph/ceph-build/tree/master/ceph-pull-requests
+* Full documentation on Job structure and configuration:
+https://github.com/ceph/ceph-build#ceph-build
+* Everyone has READ permissions on jenkins.ceph.com (you can 'login'
+with your github account), current admin members (WRITE permissions)
+are: ktdreyer, alfredodeza, gregmeno, dmick, zmc, andrewschoen,
+ceph-jenkins, dachary, ldachary
+
+If you have any questions, we can help and provide guidance and feedback. We
+highly encourage contributors to take ownership on this new tool and make it
+awesome!
+
+Thanks,
 
 
---ZPt4rx8FFjLCG7dd
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On 22/12/2015, Gregory Farnum wrote:
-[snip]
-> So I think we're stuck with creating a new utime_t and incrementing
-> the struct_v on everything that contains them. :/
-[snip]
-> We'll also then need the full feature bit system to make
-> sure we send the old encoding to clients which don't understand the
-> new one, and to prevent a mid-upgrade cluster from writing data on a
-> new node that gets moved to a new node which doesn't understand it.
-
-That is my understanding. I have the impression that network communication
-get feature bits for the other nodes and on-disk structures are explicitly
-versioned. If I'm mistaken, please hurl corrections at me.
-
-> Given that utime_t occurs in a lot of places, and really can't change
-> *again* after this, we probably shouldn't set up the new version with
-> versioned encoding?
-
-You're overly pessimistic. I'm hoping our post-human descendents store
-their unfathomably alien, reconstructed minds in some galaxy spanning
-descendent of Ceph and need more than a 64-bit second count.
-
-However, I agree that the time value itself should not have an encoded
-version tag.
-
-To my intuition, the best way forward would be to:
-
-(1) Add non-defaulted feature parameters on encode/decode of utime_t and
-    ceph::real_time. This will break everything that uses them.
-
-(2) Add explicit encode_old/encode_new functions. that way when we KNOW whi=
-ch
-    one we want at compile time we don't have to pay for a runtime check.
-
-(3) When we have feature bits, pass them in.
-
-(4) When we have a version, bump it. For new versions, explicitly call
-    encode_new. When we know we want old, call old.
-
-(5) If there are classes that we encode that have neither feature bits nor
-    versioning available, see what uses them and act accordingly. Hopefully=
- the
-    special cases will be few.
-
-Does that seem reasonable?
-
-I thank you.
-
-And all hypothetical post-huamn Ceph users thank you.
-
---=20
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
-
---ZPt4rx8FFjLCG7dd
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQF8BAEBCgBmBQJWevMCXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
-ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
-OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jxbsIAK9kwQBDZneCEi68EjviEZh5
-CSH96ZNIN612KEKoHQwramCMmS4GmN0sVzc5MglWe9db/0FuXD/eALJc6Ejz2T1K
-Vgfm/uK1Uhmi09365JDYX27/emWnvhOn/H3bPZoZWNZ/wSduxeupsq+CSZHKbKvi
-DL2JwCPwluigbgLNnGKAo7zYv8icsAOEgz16coOolg/ab/XByWlInv5DW7bqYwmp
-UbJw/aDP/nk0FDB/wkTXA7guZbMiriB3aCWuTLVZJlazisv/Ruh1H4lhomamRB7A
-gSu9ljj8BOlCGJir7cb6/eX060rIZ0+L+Hi8NEDgG7tey3Kbr4ecN+bBLI8TbCA=
-=hztC
------END PGP SIGNATURE-----
-
---ZPt4rx8FFjLCG7dd--
+Alfredo
