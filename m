@@ -1,99 +1,86 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: RBD performance with many childs and snapshots
-Date: Tue, 22 Dec 2015 18:04:20 -0800
-Message-ID: <567A0124.5010303@redhat.com>
-References: <56784DA9.9060304@42on.com> <56788281.7050200@redhat.com>
- <5679C6E8.9060702@42on.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Let's Not Destroy the World in 2038
+Date: Tue, 22 Dec 2015 19:54:43 -0800
+Message-ID: <CAJ4mKGbmA=gpagHLa23TKEVDsqdJGitv+1GA51QL3PST3a-5UA@mail.gmail.com>
+References: <20151222201039.GA24590@ultraspiritum.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49588 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756035AbbLWCEU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Dec 2015 21:04:20 -0500
-In-Reply-To: <5679C6E8.9060702@42on.com>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:34250 "EHLO
+	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752172AbbLWDyo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Dec 2015 22:54:44 -0500
+Received: by mail-wm0-f42.google.com with SMTP id l126so131397131wml.1
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Dec 2015 19:54:44 -0800 (PST)
+In-Reply-To: <20151222201039.GA24590@ultraspiritum.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On 12/22/2015 01:55 PM, Wido den Hollander wrote:
-> On 12/21/2015 11:51 PM, Josh Durgin wrote:
->> On 12/21/2015 11:06 AM, Wido den Hollander wrote:
->>> Hi,
->>>
->>> While implementing the buildvolfrom method in libvirt for RBD I'm stuck
->>> at some point.
->>>
->>> $ virsh vol-clone --pool myrbdpool image1 image2
->>>
->>> This would clone image1 to a new RBD image called 'image2'.
->>>
->>> The code I've written now does:
->>>
->>> 1. Create a snapshot called image1@libvirt-<epochtimestamp>
->>> 2. Protect the snapshot
->>> 3. Clone the snapshot to 'image1'
->>>
->>> wido@wido-desktop:~/repos/libvirt$ ./tools/virsh vol-clone --pool
->>> rbdpool image1 image2
->>> Vol image2 cloned from image1
->>>
->>> wido@wido-desktop:~/repos/libvirt$
->>>
->>> root@alpha:~# rbd -p libvirt info image2
->>> rbd image 'image2':
->>>      size 10240 MB in 2560 objects
->>>      order 22 (4096 kB objects)
->>>      block_name_prefix: rbd_data.1976451ead36b
->>>      format: 2
->>>      features: layering, striping
->>>      flags:
->>>      parent: libvirt/image1@libvirt-1450724650
->>>      overlap: 10240 MB
->>>      stripe unit: 4096 kB
->>>      stripe count: 1
->>> root@alpha:~#
->>>
->>> But this could potentially lead to a lot of snapshots with children on
->>> 'image1'.
->>>
->>> image1 itself will probably never change, but I'm wondering about the
->>> negative performance impact this might have on a OSD.
->>
->> Creating them isn't so bad, more snapshots that don't change don't have
->> much affect on the osds. Deleting them is what's expensive, since the
->> osds need to scan the objects to see which ones are part of the
->> snapshot and can be deleted. If you have too many snapshots created and
->> deleted, it can affect cluster load, so I'd rather avoid always
->> creating a snapshot.
->>
->>> I'd rather not hardcode a snapshot name like 'libvirt-parent-snapshot'
->>> into libvirt. There is however no way to pass something like a snapshot
->>> name in libvirt when cloning.
->>>
->>> Any bright suggestions? Or is it fine to create so many snapshots?
->>
->> You could have canonical names for the libvirt snapshots like you
->> suggest, 'libvirt-<timestamp>', and check via rbd_diff_iterate2()
->> whether the parent image changed since the last snapshot. That's a bit
->> slower than plain cloning, but with object map + fast diff it's fast
->> again, since it doesn't need to scan all the objects anymore.
->>
->> I think libvirt would need to expand its api a bit to be able to really
->> use it effectively to manage rbd. Hiding the snapshots becomes
->> cumbersome if the application wants to use them too. If libvirt's
->> current model of clones lets parents be deleted before children,
->> that may be a hassle to hide too...
->>
+On Tue, Dec 22, 2015 at 12:10 PM, Adam C. Emerson <aemerson@redhat.com>=
+ wrote:
+> Comrades,
 >
-> I gave it a shot. callback functions are a bit new to me, but I gave it
-> a try:
-> https://github.com/wido/libvirt/commit/756dca8023027616f53c39fa73c52a6d8f86a223
+> Ceph's victory is assured. It will be the storage system of The Futur=
+e.
+> Matt Benjamin has reminded me that if we don't act fast=C2=B9 Ceph wi=
+ll be
+> responsible for destroying the world.
 >
-> Could you take a look?
+> utime_t() uses a 32-bit second count internally. This isn't great, bu=
+t it's
+> something we can fix. ceph::real_time currently uses a 64-bit bit cou=
+nt of
+> nanoseconds, which is better. And we can change it to something else =
+without
+> having to rewrite much other code.
+>
+> The problem lies in our encode/deocde functions for time (both utime_=
+t
+> and ceph::real_time, since I didn't want to break compatibility.) we
+> use a 32-bit second count. I would like to change the wire and disk
+> representation to a 64-bit second count and a 32-bit nanosecond count=
+=2E
+>
+> Would there be resistance to a project to do this? I don't know if a
+> FEATURE bit would help. A FEATURE bit to toggle the width of the seco=
+nd
+> count would be ideal if it would work. Otherwise it looks like the be=
+st
+> way to do this would be to find all the structures currently ::encode=
+d
+> that hold time values, bump the version number and have an 'old_utime=
+'
+> that we use for everything pre-change.
 
-Left some comments on the commits. Looks good in general.
+Unfortunately, we include utimes in structures that are written to
+disk. So I think we're stuck with creating a new utime_t and
+incrementing the struct_v on everything that contains them. :/
 
-Josh
+Of course, we'll also then need the full feature bit system to make
+sure we send the old encoding to clients which don't understand the
+new one, and to prevent a mid-upgrade cluster from writing data on a
+new node that gets moved to a new node which doesn't understand it.
 
+Given that utime_t occurs in a lot of places, and really can't change
+*again* after this, we probably shouldn't set up the new version with
+versioned encoding?
+-Greg
+
+>
+> Thank you!
+>
+> =C2=B9 Within the next twenty-three years. But that's not really a lo=
+ng time in the
+>   larger scheme of things.
+>
+> --
+> Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+> IRC: Aemerson@{RedHat, OFTC, Freenode}
+> 0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
