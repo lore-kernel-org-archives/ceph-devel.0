@@ -1,106 +1,43 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: fixing jenkins builds on pull requests
-Date: Wed, 23 Dec 2015 12:28:57 +0100
-Message-ID: <567A8579.4040404@dachary.org>
-References: <567A6551.7030209@dachary.org>
+From: "hzwulibin" <hzwulibin@gmail.com>
+Subject: use object size of 32k rather than 4M
+Date: Wed, 23 Dec 2015 20:00:29 +0800
+Message-ID: <567A8CD6.10707@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="nK3gnHq9PHXAmmA7kAmO0xpeAPpQo93QC"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:54742 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755610AbbLWL27 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Dec 2015 06:28:59 -0500
-In-Reply-To: <567A6551.7030209@dachary.org>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:32960 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752078AbbLWMAa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Dec 2015 07:00:30 -0500
+Received: by mail-pa0-f46.google.com with SMTP id cy9so50112058pac.0
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Dec 2015 04:00:30 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+Cc: Sage Weil <sage@newdream.net>, Haomai Wang <haomaiwang@gmail.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---nK3gnHq9PHXAmmA7kAmO0xpeAPpQo93QC
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+SGksIGNlcGhlcnMsIFNhZ2UgYW5kIEhhb21haQ0KDQpSZWNlbnRseSB3ZSBzdHVjayBvZiB0aGUg
+cGVyZm9ybWFuY2UgZG93biBwcm9ibGVtIHdoZW4gcmVjb3ZlcnlpbmcuIFRoZSBzY2VuZSBpcyBz
+aW1wbGU6DQoxLiBydW4gZmlvIHdpdGggcmFuZCB3cml0ZShicz00aykNCjIuIHN0b3Agb25lIG9z
+ZDsgc2xlZXAgMTA7IHN0YXJ0IHRoZSBvc2QNCjMuIHRoZSBJT1BTIGRyb3AgZnJvbSA2SyB0byBh
+Ym91dCAyMDANCg0KV2Ugbm93IGtub3cgdGhlIFNTRCB3aGljaCB0aGF0IG9zZCBvbiBpcyB0aGUg
+Ym90dGxlbmVjayB3aGVuIHJlY292ZXJ5LiBBZnRlciByZWFkIHRoZSBjb2RlLCB3ZSBmaW5kIHRo
+ZSBJTyBvZiB0aGF0IA0KU1NEIGNvbWUgZnJvbSB0d28gd2F5czoNCjEuIG5vcm1hbCByZWNvdmVy
+eSBJTw0KMi4gdXNlciBJTyBidXQgaW4gdGhlIG1pc3NpbmcgbGlzdCwgbmVlZCB0byByZWNvdmVy
+eSB0aGUgNE0gb2JqZWN0IGZpcnN0Lg0KDQpTbyBvdXIgZmlyc3Qgc3RlcCBpcyBsaW1pdCB0aGUg
+cmVjb3ZlcnkgSU8gdG8gc2xvdyBkb3duIHRoZSBzdHJlc3Mgb2YgdGhhdCBTU0QuIFRoYXQgaGVs
+cHMgaW4gc29tZSBzY2VuZSwgYnV0IG5vdCB0aGlzIG9uZS4NCg0KDQpXZSBoYXZlIDM2IE9TRCB3
+aXRoIDMgcmVwbGljYXMsIHNvIHdoZW4gb25lIG9zZCBkb3duLCBhYm91dCAxLzEyIG9iamVjdHMg
+d2lsbCBiZSBpbiBkZWdyYWRlZCBzdGF0ZS4NCldoZW4gd2UgcnVuIGZpbyB3aXRoIDRrIHJhbmR3
+cml0ZSwgYWJvdXQgMS8xMiBpbyB3aWxsIHN0dWNrIGFuZCBuZWVkIHRvIHJlY292ZXJ5IHRoZSA0
+TSBvYmplY3QgZmlyc3QuDQpUaGF0IHJlYWxseSBlbmxhcmdlIHRoZSBzdHJlc3MgdGhlIHRoYXQg
+U1NELg0KDQpJbiBvcmRlciB0byByZWR1Y2UgdGhlIGVubGFyZ2UgaW1wYWN0LCB3ZSB3YW50IHRv
+IGNoYW5nZSB0aGUgZGVmYXVsdCBzaXplIG9mIHRoZSBvYmplY3QgZnJvbSA0TSB0byAzMmsuDQoN
+CldlIGtub3cgdGhhdCB3aWxsIGluY3JlYXNlIHRoZSBudW1iZXIgb2YgdGhlIG9iamVjdHMgb2Yg
+b25lIE9TRCBhbmQgbWFrZSByZW1vdmUgcHJvY2VzcyBiZWNvbWUgbG9uZ2VyLg0KDQpIbW0sIGhl
+cmUgaSB3YW50IHRvIGFzayB5b3VyIGd1eXMgaXMgdGhlcmUgYW55IG90aGVyIHBvdGVudGlhbCBw
+cm9ibGVtcyB3aWxsIDMyayBzaXplIGhhdmU/IElmIG5vIG9idmlvdXMgcHJvYmxlbSwgd2lsbCBj
+b3VsZCBkaXZlIGludG8NCml0IGFuZCBkbyBtb3JlIHRlc3Qgb24gaXQuDQoNCk1hbnkgdGhhbmtz
+IQ0KIAkJCQkNCi0tLS0tLS0tLS0tLS0tDQpoend1bGliaW4NCjIwMTUtMTItMjMNCg==
 
-Hi,
-
-I triaged the jenkins related failures (from #24 to #49):
-
-CentOS 6 not supported:
-
-  https://jenkins.ceph.com/job/ceph-pull-requests/26/console
-  https://jenkins.ceph.com/job/ceph-pull-requests/28/console
-  https://jenkins.ceph.com/job/ceph-pull-requests/29/console
-  https://jenkins.ceph.com/job/ceph-pull-requests/34/console
-  https://jenkins.ceph.com/job/ceph-pull-requests/38/console
-  https://jenkins.ceph.com/job/ceph-pull-requests/44/console
-  https://jenkins.ceph.com/job/ceph-pull-requests/46/console
-  https://jenkins.ceph.com/job/ceph-pull-requests/48/console
-  https://jenkins.ceph.com/job/ceph-pull-requests/49/console
-
-Ubuntu 12.04 not supported:
-
-  https://jenkins.ceph.com/job/ceph-pull-requests/27/console
-  https://jenkins.ceph.com/job/ceph-pull-requests/36/console
-
-Failure to fetch from github
-
-  https://jenkins.ceph.com/job/ceph-pull-requests/35/console
-
-I've not been able to analyze more failures because it looks like only 30=
- jobs are kept. Here is an updated summary:
-
- * running on unsupported operating systems (CentOS 6, precise and maybe =
-others)
- * leftovers from a previous test (which should be removed when a new sla=
-ve is provisionned for each test)
- * keep the last 300 jobs for forensic analysis (about one week worth)
- * disable reporting to github pull requests until the above are resolved=
- (all failures were false negative).
-
-Cheers
-
-On 23/12/2015 10:11, Loic Dachary wrote:
-> Hi Alfredo,
->=20
-> I forgot to mention that the ./run-make-check.sh run currently has no k=
-nown false negative on CentOS 7. By that I mean that if run on master 100=
- times, it will succeed 100 times. This is good to debug the jenkins buil=
-ds on pull requests as we know all problems either come from the infrastr=
-ucture or the pull request. We do not have to worry about random errors d=
-ue to race conditions in the tests or things like that.
->=20
-> I'll keep an eye on the test results and analyse each failure. For now =
-it would be best to disable reporting failures as they are almost entirel=
-y false negative and will confuse the contributor. The failures come from=
-:
->=20
->  * running on unsupported operating systems (CentOS 6 and maybe others)=
-
->  * leftovers from a previous test (which should be removed when a new s=
-lave is provisionned for each test)
->=20
-> I'll add to this thread when / if I find more.
->=20
-> Cheers
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---nK3gnHq9PHXAmmA7kAmO0xpeAPpQo93QC
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlZ6hXkACgkQ8dLMyEl6F23zmACfZITplYctlJfb/ytKObn5GPfW
-zrQAoLf4T14Pa8rXGO5nYHJKZtGd91/u
-=3n7h
------END PGP SIGNATURE-----
-
---nK3gnHq9PHXAmmA7kAmO0xpeAPpQo93QC--
