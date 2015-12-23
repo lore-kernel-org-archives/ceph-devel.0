@@ -1,46 +1,80 @@
-From: "Van Leeuwen, Robert" <rovanleeuwen-ZuctOmHWJ9c@public.gmane.org>
-Subject: Re: use object size of 32k rather than 4M
-Date: Wed, 23 Dec 2015 12:57:06 +0000
-Message-ID: <23844535-D8F2-438E-9C4B-3BE523D0157A@ebay.com>
+From: "hzwulibin" <hzwulibin@gmail.com>
+Subject: Re: [ceph-users] use object size of 32k rather than 4M
+Date: Wed, 23 Dec 2015 21:14:03 +0800
+Message-ID: <567A9E17.1020906@gmail.com>
 References: <567A8CD6.10707@gmail.com>
+	<23844535-D8F2-438E-9C4B-3BE523D0157A@ebay.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <567A8CD6.10707-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Content-Language: en-US
-Content-ID: <14204E19106D2A4CB36097000238C078-idVjhtesxHvqlBn2x/YWAg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: hzwulibin <hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pa0-f52.google.com ([209.85.220.52]:34460 "EHLO
+	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751382AbbLWNOE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Dec 2015 08:14:04 -0500
+Received: by mail-pa0-f52.google.com with SMTP id uo6so28306907pac.1
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Dec 2015 05:14:04 -0800 (PST)
+In-Reply-To: <23844535-D8F2-438E-9C4B-3BE523D0157A@ebay.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Van Leeuwen, Robert" <rovanleeuwen@ebay.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
+SGksIFJvYmVydA0KDQpUaGFua3MgZm9yIHlvdXIgcXVpY2sgcmVwbHkuIFllYWgsIHRoZSBudW1i
+ZXIgb2YgZmlsZSByZWFsbHkgd2lsbCBiZSB0aGUgcG90ZW50aWFsIHByb2JsZW0uIEJ1dCBpZiBq
+dXN0IHRoZSBtZW1vcnkgcHJvYmxlbSwgd2UgY291bGQgdXNlIG1vcmUgbWVtb3J5IGluIG91ciBP
+U0QNCnNlcnZlcnMuDQoNCkFsc28sIGkgdGVzdGVkIGl0IG9uIFhGUyB1c2UgbWR0ZXN0LCBoZXJl
+IGlzIHRoZSByZXN1bHQ6DQoNCg0KJCBzdWRvIH4vd3VsYi9iaW4vbWR0ZXN0IC1JIDEwMDAwIC16
+IDEgLWIgMTAyNCAtUiAtRg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCltbMTAzNDIsMV0sMF06IEEgaGln
+aC1wZXJmb3JtYW5jZSBPcGVuIE1QSSBwb2ludC10by1wb2ludCBtZXNzYWdpbmcgbW9kdWxlDQp3
+YXMgdW5hYmxlIHRvIGZpbmQgYW55IHJlbGV2YW50IG5ldHdvcmsgaW50ZXJmYWNlczoNCg0KTW9k
+dWxlOiBPcGVuRmFicmljcyAob3BlbmliKQ0KICBIb3N0OiAxMC0xODAtMC0zNA0KDQpBbm90aGVy
+IHRyYW5zcG9ydCB3aWxsIGJlIHVzZWQgaW5zdGVhZCwgYWx0aG91Z2ggdGhpcyBtYXkgcmVzdWx0
+IGluDQpsb3dlciBwZXJmb3JtYW5jZS4NCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQotLSBzdGFydGVkIGF0
+IDEyLzIzLzIwMTUgMTg6NTk6MTYgLS0NCg0KbWR0ZXN0LTEuOC4zIHdhcyBsYXVuY2hlZCB3aXRo
+IDEgdG90YWwgdGFzayhzKSBvbiAxIG5vZGVzDQpDb21tYW5kIGxpbmUgdXNlZDogL2hvbWUvY2Vw
+aC93dWxiL2Jpbi9tZHRlc3QgLUkgMTAwMDAgLXogMSAtYiAxMDI0IC1SIC1GDQpQYXRoOiAvaG9t
+ZS9jZXBoDQpGUzogODI0LjUgR2lCICAgVXNlZCBGUzogNC44JSAgIElub2RlczogNTIuNCBNaSAg
+IFVzZWQgSW5vZGVzOiAwLjYlDQpyYW5kb20gc2VlZDogMTQ1MDg2ODM1Ng0KDQoxIHRhc2tzLCAx
+MDI1MDAwMCBmaWxlcw0KDQpTVU1NQVJZOiAob2YgMSBpdGVyYXRpb25zKQ0KICAgT3BlcmF0aW9u
+ICAgICAgICAgICAgICAgICAgTWF4ICAgICAgICBNaW4gICAgICAgTWVhbiAgICBTdGQgRGV2DQog
+ICAtLS0tLS0tLS0gICAgICAgICAgICAgICAgICAtLS0gICAgICAgIC0tLSAgICAgICAtLS0tICAg
+IC0tLS0tLS0NCiAgIEZpbGUgY3JlYXRpb24gICAgIDogIDQ0NjYwLjUwNSAgNDQ2NjAuNTA1ICA0
+NDY2MC41MDUgICAgICAwLjAwMA0KICAgRmlsZSBzdGF0ICAgICAgICAgOiA2OTM3NDcuNzgzIDY5
+Mzc0Ny43ODMgNjkzNzQ3Ljc4MyAgICAgIDAuMDAwDQogICBGaWxlIHJlYWQgICAgICAgICA6IDM2
+NTMxOS40NDQgMzY1MzE5LjQ0NCAzNjUzMTkuNDQ0ICAgICAgMC4wMDANCiAgIEZpbGUgcmVtb3Zh
+bCAgICAgIDogIDYyMDY0LjU2MCAgNjIwNjQuNTYwICA2MjA2NC41NjAgICAgICAwLjAwMA0KICAg
+VHJlZSBjcmVhdGlvbiAgICAgOiAgNjk2ODAuNzI5ICA2OTY4MC43MjkgIDY5NjgwLjcyOSAgICAg
+IDAuMDAwDQogICBUcmVlIHJlbW92YWwgICAgICA6ICAgIDM1Mi45MDUgICAgMzUyLjkwNSAgICAz
+NTIuOTA1ICAgICAgMC4wMDANCg0KDQpGcm9tIHdoYXQgaSB0ZXN0ZWQsIHRoZSBzcGVlZCBvZiBG
+aWxlIHN0YXQgYW5kIEZpbGUgcmVhZCBhcmUgbm90IHNsb3cgZG93biBtdWNoLiAgU28sIGNvdWxk
+IGkgc2F5IHRoZSBzcGVlZCBvZiBPUCBsaWtlDQpsb29rdXAgYSBmaWxlIHdpbGwgbm90IGRlY3Jl
+YXNlIG11Y2gsIGp1c3QgaW5jcmVhc2UgdGhlIG51bWJlciBvZiB0aGUgZmlsZXM/DQoNCg0KLS0t
+LS0tLS0tLS0tLS0tLS0tCQkJCSANCmh6d3VsaWJpbg0KMjAxNS0xMi0yMw0KDQotLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrlj5Hk
+u7bkurrvvJoiVmFuIExlZXV3ZW4sIFJvYmVydCIgPHJvdmFubGVldXdlbkBlYmF5LmNvbT4NCuWP
+kemAgeaXpeacn++8mjIwMTUtMTItMjMgMjA6NTcNCuaUtuS7tuS6uu+8mmh6d3VsaWJpbixjZXBo
+LWRldmVsLGNlcGgtdXNlcnMNCuaKhOmAge+8mg0K5Li76aKY77yaUmU6IFtjZXBoLXVzZXJzXSB1
+c2Ugb2JqZWN0IHNpemUgb2YgMzJrIHJhdGhlciB0aGFuIDRNDQoNCg0KPkluIG9yZGVyIHRvIHJl
+ZHVjZSB0aGUgZW5sYXJnZSBpbXBhY3QsIHdlIHdhbnQgdG8gY2hhbmdlIHRoZSBkZWZhdWx0IHNp
+emUgb2YgdGhlIG9iamVjdCBmcm9tIDRNIHRvIDMyay4NCj4NCj5XZSBrbm93IHRoYXQgd2lsbCBp
+bmNyZWFzZSB0aGUgbnVtYmVyIG9mIHRoZSBvYmplY3RzIG9mIG9uZSBPU0QgYW5kIG1ha2UgcmVt
+b3ZlIHByb2Nlc3MgYmVjb21lIGxvbmdlci4NCj4NCj5IbW0sIGhlcmUgaSB3YW50IHRvIGFzayB5
+b3VyIGd1eXMgaXMgdGhlcmUgYW55IG90aGVyIHBvdGVudGlhbCBwcm9ibGVtcyB3aWxsIDMyayBz
+aXplIGhhdmU/IElmIG5vIG9idmlvdXMgcHJvYmxlbSwgd2lsbCBjb3VsZCBkaXZlIGludG8NCj5p
+dCBhbmQgZG8gbW9yZSB0ZXN0IG9uIGl0Lg0KDQoNCkkgYXNzdW1lIHRoZSBvYmplY3RzIG9uIHRo
+ZSBPU0RzIGZpbGVzeXN0ZW0gd2lsbCBiZWNvbWUgMzJrIHdoZW4geW91IGRvIHRoaXMuDQpTbyBp
+ZiB5b3UgaGF2ZSAxVEIgb2YgZGF0YSBvbiBvbmUgT1NEIHlvdSB3aWxsIGhhdmUgMzEgbWlsbGlv
+biBmaWxlcyA9PSAzMSBtaWxsaW9uIGlub2RlcyANClRoaXMgaXMgZXhjbHVkaW5nIHRoZSBkaXJl
+Y3Rvcnkgc3RydWN0dXJlIHdoaWNoIGFsc28gbWlnaHQgYmUgc2lnbmlmaWNhbnQuDQpJZiB5b3Ug
+aGF2ZSAxMCBPU0RzIG9uIGEgc2VydmVyIHlvdSB3aWxsIGVhc2lseSBoaXQgMzEwIG1pbGxpb24g
+aW5vZGVzLg0KWW91IHdpbGwgbmVlZCBhIExPVCBvZiBtZW1vcnkgdG8gbWFrZSBzdXJlIHRoZSBp
+bm9kZXMgYXJlIGNhY2hlZCBidXQgZXZlbiB0aGVuIGxvb2tpbmcgdXAgdGhlIGlub2RlIG1pZ2h0
+IGFkZCBzaWduaWZpY2FudCBsYXRlbmN5Lg0KDQpNeSBndWVzcyBpcyBpdCB3aWxsIGJlIGZhc3Qg
+aW4gdGhlIGJlZ2lubmluZyBidXQgaXQgd2lsbCBncmluZCB0byBhbiBob2xkIHdoZW4gdGhlIGNs
+dXN0ZXIgZ2V0cyBmdWxsZXIgZHVlIHRvIGlub2RlcyBubyBsb25nZXIgYmVpbmcgaW4gbWVtb3J5
+Lg0KDQpBbHNvIHRoaXMgZG9lcyBub3QgdGFrZSBpbiBhbnkgb3RoZXIgYm90dGxlbmVja3MgeW91
+IG1pZ2h0IGhpdCBpbiBjZXBoIHdoaWNoIG90aGVyIHVzZXJzIGNhbiBwcm9iYWJseSBhbnN3ZXIg
+YmV0dGVyLg0KDQoNCkNoZWVycywNClJvYmVydCB2YW4gTGVldXdlbg0KDQo=
 
->In order to reduce the enlarge impact, we want to change the default size of the object from 4M to 32k.
->
->We know that will increase the number of the objects of one OSD and make remove process become longer.
->
->Hmm, here i want to ask your guys is there any other potential problems will 32k size have? If no obvious problem, will could dive into
->it and do more test on it.
-
-
-I assume the objects on the OSDs filesystem will become 32k when you do this.
-So if you have 1TB of data on one OSD you will have 31 million files == 31 million inodes 
-This is excluding the directory structure which also might be significant.
-If you have 10 OSDs on a server you will easily hit 310 million inodes.
-You will need a LOT of memory to make sure the inodes are cached but even then looking up the inode might add significant latency.
-
-My guess is it will be fast in the beginning but it will grind to an hold when the cluster gets fuller due to inodes no longer being in memory.
-
-Also this does not take in any other bottlenecks you might hit in ceph which other users can probably answer better.
-
-
-Cheers,
-Robert van Leeuwen
