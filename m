@@ -1,48 +1,57 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: rgw: sticky user quota data on bucket removal
-Date: Wed, 23 Dec 2015 17:02:00 -0800
-Message-ID: <CADRKj5RiOVVNv+3f1WV+seHsswJzo++vxG9Km2vmFgd960=Viw@mail.gmail.com>
+From: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
+Subject: RE: rgw: sticky user quota data on bucket removal
+Date: Wed, 23 Dec 2015 17:32:44 -0800
+Message-ID: <622F4407872BA447A16110F65453358C04D1467F323C@FMSAMAIL.fmsa.local>
 References: <622F4407872BA447A16110F65453358C04D1467F323A@FMSAMAIL.fmsa.local>
+ <CADRKj5RiOVVNv+3f1WV+seHsswJzo++vxG9Km2vmFgd960=Viw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:35151 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750771AbbLXBCB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Dec 2015 20:02:01 -0500
-Received: by mail-ob0-f174.google.com with SMTP id 18so176916004obc.2
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Dec 2015 17:02:00 -0800 (PST)
-In-Reply-To: <622F4407872BA447A16110F65453358C04D1467F323A@FMSAMAIL.fmsa.local>
+Received: from fujitsu24.fnanic.fujitsu.com ([192.240.6.14]:39555 "EHLO
+	fujitsu24.fnanic.fujitsu.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932539AbbLXBcw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 23 Dec 2015 20:32:52 -0500
+In-Reply-To: <CADRKj5RiOVVNv+3f1WV+seHsswJzo++vxG9Km2vmFgd960=Viw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Dec 23, 2015 at 3:53 PM, Paul Von-Stamwitz
-<PVonStamwitz@us.fujitsu.com> wrote:
-> Hi,
->
-> We're testing user quotas on Hammer with civetweb and we're running into an issue with user stats.
->
-> If the user/admin removes a bucket using -force/-purge-objects options with s3cmd/radosgw-admin respectively, the user stats will continue to reflect the deleted objects for quota purposes, and there seems to be no way to reset them. It appears that user stats need to be sync'ed prior to bucket removal. Setting " rgw user quota bucket sync interval = 0" appears to solve the problem.
->
-> What is the downside to setting the interval to 0?
-
-We'll update the buckets that are getting modified continuously,
-instead of once every interval.
-
->
-> I think the right solution is to have an implied sync-stats during bucket removal. Other suggestions?
->
-
-No, syncing the bucket stats on removal sounds right.
-
-Yehuda
-
-> All the best,
-> Paul
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIFllaHVkYSBTYWRlaC1XZWlucmF1Yg0KPiBTZW50OiBXZWRuZXNkYXks
+IERlY2VtYmVyIDIzLCAyMDE1IDU6MDIgUE0NCj4gVG86IFBhdWwgVm9uLVN0YW13aXR6DQo+IENj
+OiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogcmd3OiBzdGlja3kg
+dXNlciBxdW90YSBkYXRhIG9uIGJ1Y2tldCByZW1vdmFsDQo+IA0KPiBPbiBXZWQsIERlYyAyMywg
+MjAxNSBhdCAzOjUzIFBNLCBQYXVsIFZvbi1TdGFtd2l0eg0KPiA8UFZvblN0YW13aXR6QHVzLmZ1
+aml0c3UuY29tPiB3cm90ZToNCj4gPiBIaSwNCj4gPg0KPiA+IFdlJ3JlIHRlc3RpbmcgdXNlciBx
+dW90YXMgb24gSGFtbWVyIHdpdGggY2l2ZXR3ZWIgYW5kIHdlJ3JlIHJ1bm5pbmcNCj4gPiBpbnRv
+IGFuIGlzc3VlIHdpdGggdXNlciBzdGF0cy4NCj4gPg0KPiA+IElmIHRoZSB1c2VyL2FkbWluIHJl
+bW92ZXMgYSBidWNrZXQgdXNpbmcgLWZvcmNlLy1wdXJnZS1vYmplY3RzIG9wdGlvbnMNCj4gPiB3
+aXRoIHMzY21kL3JhZG9zZ3ctYWRtaW4gcmVzcGVjdGl2ZWx5LCB0aGUgdXNlciBzdGF0cyB3aWxs
+IGNvbnRpbnVlIHRvDQo+ID4gcmVmbGVjdCB0aGUgZGVsZXRlZCBvYmplY3RzIGZvciBxdW90YSBw
+dXJwb3NlcywgYW5kIHRoZXJlIHNlZW1zIHRvIGJlIG5vDQo+ID4gd2F5IHRvIHJlc2V0IHRoZW0u
+IEl0IGFwcGVhcnMgdGhhdCB1c2VyIHN0YXRzIG5lZWQgdG8gYmUgc3luYydlZCBwcmlvciB0bw0K
+PiA+IGJ1Y2tldCByZW1vdmFsLiBTZXR0aW5nICIgcmd3IHVzZXIgcXVvdGEgYnVja2V0IHN5bmMg
+aW50ZXJ2YWwgPSAwIiBhcHBlYXJzIHRvDQo+ID4gc29sdmUgdGhlIHByb2JsZW0uDQo+ID4NCj4g
+PiBXaGF0IGlzIHRoZSBkb3duc2lkZSB0byBzZXR0aW5nIHRoZSBpbnRlcnZhbCB0byAwPw0KPiAN
+Cj4gV2UnbGwgdXBkYXRlIHRoZSBidWNrZXRzIHRoYXQgYXJlIGdldHRpbmcgbW9kaWZpZWQgY29u
+dGludW91c2x5LCBpbnN0ZWFkIG9mDQo+IG9uY2UgZXZlcnkgaW50ZXJ2YWwuDQo+DQoNClNvLCBJ
+IHByZXN1bWUgdGhhdCB0aGlzIHdpbGwgaW1wYWN0IHBlcmZvcm1hbmNlIG9uIHB1dHMgYW5kIGRl
+bGV0ZXMuIFdlJ2xsIHRha2UgYSBsb29rIGF0IHRoZSBpbXBhY3Qgb24gdGhpcy4NCg0KPiA+DQo+
+ID4gSSB0aGluayB0aGUgcmlnaHQgc29sdXRpb24gaXMgdG8gaGF2ZSBhbiBpbXBsaWVkIHN5bmMt
+c3RhdHMgZHVyaW5nIGJ1Y2tldA0KPiA+IHJlbW92YWwuIE90aGVyIHN1Z2dlc3Rpb25zPw0KPiA+
+DQo+IA0KPiBObywgc3luY2luZyB0aGUgYnVja2V0IHN0YXRzIG9uIHJlbW92YWwgc291bmRzIHJp
+Z2h0Lg0KPiANCg0KR3JlYXQuIFRoaXMgd291bGQgYWxsZXZpYXRlIGFueSBwZXJmb3JtYW5jZSBp
+bXBhY3Qgb24gY29udGludW91cyB1cGRhdGVzLg0KVGhhbmtzIQ0KDQo+IFllaHVkYQ0KPiANCj4g
+PiBBbGwgdGhlIGJlc3QsDQo+ID4gUGF1bA0KPiA+IC0tDQo+ID4gVG8gdW5zdWJzY3JpYmUgZnJv
+bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+ID4g
+aW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9y
+ZQ0KPiBtYWpvcmRvbW8NCj4gPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
+ZG9tby1pbmZvLmh0bWwNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
+bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZQ0KPiBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8g
+YXQNCj4gaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
