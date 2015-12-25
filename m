@@ -1,14 +1,14 @@
-From: Dong Wu <archer.wudong-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
 Subject: Re: why not add (offset,len) to pglog
-Date: Fri, 25 Dec 2015 16:45:23 +0800
-Message-ID: <CAAL-TMfuF4ueEiava-kDy5_YOn_uaLG1_Fu38LSYnXiPaFXz8Q@mail.gmail.com>
+Date: Fri, 25 Dec 2015 06:27:53 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1512250622060.10312@cobra.newdream.net>
 References: <CAAL-TMddLQ-fxNnPcZZhtd8Evk6j+h6PiNTu+KapyPsRCeW9bw@mail.gmail.com>
 	<CANE=7sUenL8oO_8CWP_VJJ_qWPWM2pLF6UxpFb-9AGFePT46oA@mail.gmail.com>
 	<CAAL-TMcndHOViDmearR5zb+XyEbvRnaV2ur-AMavfzvyDK=r6w@mail.gmail.com>
 	<CALZt5jxXuT7W+quYy5C-dDaXvFQ=+PV=35DbvY3D33NR1xX25A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <CALZt5jxXuT7W+quYy5C-dDaXvFQ=+PV=35DbvY3D33NR1xX25A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
@@ -21,55 +21,91 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 To: Ning Yao <zay11022-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: =?UTF-8?B?5aea5a6BKOeglOWFrSDnpo/lt54p?= <yaoning-BACTKzvjvLCPt1CcHtbs0g@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Cc: =?GB2312?B?0qbE/ijR0MH5ILij1t0p?= <yaoning-BACTKzvjvLCPt1CcHtbs0g@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-VGhhbmsgeW91IGZvciB5b3VyIHJlcGx5LiBJIGFtIGxvb2tpbmcgZm9ybWFyZCB0byBTYWdlJ3Mg
-b3BpbmlvbiB0b28gQHNhZ2UuCkFsc28gSSdsbCBrZWVwIG9uIHdpdGggdGhlIEJsdWVTdG9yZSBh
-bmQgS3N0b3JlJ3MgcHJvZ3Jlc3MuCgpSZWdhcmRzCgoyMDE1LTEyLTI1IDE0OjQ4IEdNVCswODow
-MCBOaW5nIFlhbyA8emF5MTEwMjJAZ21haWwuY29tPjoKPiBIaSwgRG9uZyBXdSwKPgo+IDEuIEFz
-IEkgY3VycmVudGx5IHdvcmsgZm9yIG90aGVyIHRoaW5ncywgdGhpcyBwcm9wb3NhbCBpcyBhYmFu
-ZG9uIGZvcgo+IGEgbG9uZyB0aW1lCj4gMi4gVGhpcyBpcyBhIGNvbXBsaWNhdGVkIHRhc2sgYXMg
-d2UgbmVlZCB0byBjb25zaWRlciBhIGxvdHMgc3VjaCBhcwo+IChub3QganVzdCBmb3Igd3JpdGVP
-cCwgYXMgd2VsbCBhcyB0cnVuY2F0ZSwgZGVsZXRlKSBhbmQgYWxzbyBuZWVkIHRvCj4gY29uc2lk
-ZXIgdGhlIGRpZmZlcmVudCBhZmZlY3RzIGZvciBkaWZmZXJlbnQgYmFja2VuZHMoUmVwbGljYXRl
-ZCwgRUMpLgo+IDMuIEkgZG9uJ3QgdGhpbmsgaXQgaXMgZ29vZCB0aW1lIHRvIHJlZG8gdGhpcyBw
-YXRjaCBub3csIHNpbmNlIHRoZQo+IEJsdWVTdG9yZSBhbmQgS3N0b3JlICBpcyBpbnByb2dyZXNz
-LCBhbmQgSSdtIGFmcmFpZCB0byBicmluZyBzb21lCj4gc2lkZS1lZmZlY3QuICBXZSBtYXkgcHJl
-cGFyZSBhbmQgcHJvcG9zZSB0aGUgd2hvbGUgZGVzaWduIGluIG5leHQgQ0RTLgo+IDQuIEN1cnJl
-bnRseSwgd2UgYWxyZWFkeSBoYXZlIHNvbWUgdHJpY2tzIHRvIGRlYWwgd2l0aCByZWNvdmVyeSAo
-bGlrZQo+IHRocm90dGxlIHRoZSBtYXggcmVjb3Zlcnkgb3AsIHNldCB0aGUgcHJpb3JpdHkgZm9y
-IHJlY292ZXJ5IGFuZCBzbwo+IG9uKS4gU28gdGhpcyBraW5kIG9mIHBhdGNoIG1heSBub3Qgc29s
-dmUgdGhlIGNyaXRpY2FsIHByb2JsZW0gYnV0IGp1c3QKPiBtYWtlIHRoaW5ncyBiZXR0ZXIsIGFu
-ZCBJIGFtIG5vdCBxdWl0ZSBzdXJlIHRoYXQgdGhpcyB3aWxsIHJlYWxseQo+IGJyaW5nIGEgYmln
-IGltcHJvdmVtZW50LiBCYXNlZCBvbiBteSBwcmV2aW91cyB0ZXN0LCBpdCB3b3Jrcwo+IGV4Y2Vs
-bGVudGx5IG9uIHNsb3cgZGlzayAoc2F5IGhkZCksIGFuZCBhbHNvIGZvciBhIHNob3J0LXRpbWUK
-PiBtYWludGFpbmluZy4gT3RoZXJ3aXNlLCBpdCB3aWxsIHRyaWdnZXIgdGhlIGJhY2tmaWxsIHBy
-b2Nlc3MuICBTbyB3YWl0Cj4gZm9yIFNhZ2UncyBvcGluaW9uIEBzYWdlCj4KPiBJZiB5b3UgYXJl
-IGludGVyZXN0IG9uIHRoaXMsIHdlIG1heSBjb29wZXJhdGUgdG8gZG8gdGhpcy4KPgo+IFJlZ2Fy
-ZHMKPiBOaW5nIFlhbwo+Cj4KPiAyMDE1LTEyLTI1IDE0OjIzIEdNVCswODowMCBEb25nIFd1IDxh
-cmNoZXIud3Vkb25nQGdtYWlsLmNvbT46Cj4+IFRoYW5rcywgZnJvbSB0aGlzIHB1bGwgcmVxdWVz
-dCBJIGxlYXJuZWQgdGhhdCB0aGlzIGlzc3VlIGlzIG5vdAo+PiBjb21wbGV0ZWQsIGlzIHRoZXJl
-IGFueSBuZXcgcHJvZ3Jlc3Mgb2YgdGhpcyBpc3N1ZT8KPj4KPj4gMjAxNS0xMi0yNSAxMjozMCBH
-TVQrMDg6MDAgWGluemUgQ2hpICjkv6Hms70pIDx4bWR4Y3h6QGdtYWlsLmNvbT46Cj4+PiBZZWFo
-LCBUaGlzIGlzIGdvb2QgaWRlYSBmb3IgcmVjb3ZlcnksIGJ1dCBub3QgZm9yIGJhY2tmaWxsLgo+
-Pj4gQFlhb05pbmcgaGF2ZSBwdWxsIGEgcmVxdWVzdCBhYm91dCB0aGlzCj4+PiBodHRwczovL2dp
-dGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMzgzNyB0aGlzIHllYXIuCj4+Pgo+Pj4gMjAxNS0xMi0y
-NSAxMToxNiBHTVQrMDg6MDAgRG9uZyBXdSA8YXJjaGVyLnd1ZG9uZ0BnbWFpbC5jb20+Ogo+Pj4+
-IEhpLAo+Pj4+IEkgaGF2ZSBkb3VidCBhYm91dCBwZ2xvZywgdGhlIHBnbG9nIGNvbnRhaW5zIChv
-cCxvYmplY3QsdmVyc2lvbikgZXRjLgo+Pj4+IHdoZW4gcGVlcmluZywgdXNlIHBnbG9nIHRvIGNv
-bnN0cnVjdCBtaXNzaW5nIGxpc3QsdGhlbiByZWNvdmVyIHRoZQo+Pj4+IHdob2xlIG9iamVjdCBp
-biBtaXNzaW5nIGxpc3QgZXZlbiBpZiBkaWZmZXJlbnQgZGF0YSBhbW9uZyByZXBsaWNhcyBpcwo+
-Pj4+IGxlc3MgdGhlbiBhIHdob2xlIG9iamVjdCBkYXRhKGVnLDRNQikuCj4+Pj4gd2h5IG5vdCBh
-ZGQgKG9mZnNldCxsZW4pIHRvIHBnbG9nPyBJZiBzbywgdGhlIG1pc3NpbmcgbGlzdCBjYW4gY29u
-dGFpbgo+Pj4+IChvYmplY3QsIG9mZnNldCwgbGVuKSwgdGhlbiB3ZSBjYW4gcmVkdWNlIHJlY292
-ZXIgZGF0YS4KPj4+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fXwo+Pj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4+Pj4gY2VwaC11c2Vyc0BsaXN0cy5j
-ZXBoLmNvbQo+Pj4+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vy
-cy1jZXBoLmNvbQo+Pj4KPj4+Cj4+Pgo+Pj4gLS0KPj4+IFJlZ2FyZHMsCj4+PiBYaW56ZSBDaGkK
-Pj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPj4gY2Vw
-aC11c2VycyBtYWlsaW5nIGxpc3QKPj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+PiBodHRw
-Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWls
-aW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20v
-bGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On Fri, 25 Dec 2015, Ning Yao wrote:
+> Hi, Dong Wu,
+> 
+> 1. As I currently work for other things, this proposal is abandon for
+> a long time
+> 2. This is a complicated task as we need to consider a lots such as
+> (not just for writeOp, as well as truncate, delete) and also need to
+> consider the different affects for different backends(Replicated, EC).
+> 3. I don't think it is good time to redo this patch now, since the
+> BlueStore and Kstore  is inprogress, and I'm afraid to bring some
+> side-effect.  We may prepare and propose the whole design in next CDS.
+> 4. Currently, we already have some tricks to deal with recovery (like
+> throttle the max recovery op, set the priority for recovery and so
+> on). So this kind of patch may not solve the critical problem but just
+> make things better, and I am not quite sure that this will really
+> bring a big improvement. Based on my previous test, it works
+> excellently on slow disk (say hdd), and also for a short-time
+> maintaining. Otherwise, it will trigger the backfill process.  So wait
+> for Sage's opinion @sage
+> 
+> If you are interest on this, we may cooperate to do this.
+
+I think it's a great idea.  We didn't do it before only because it is 
+complicated.  The good news is that if we can't conclusively infer exactly 
+which parts of hte object need to be recovered from the log entry we can 
+always just fall back to recovering the whole thing.  Also, the place 
+where this is currently most visible is RBD small writes:
+
+ - osd goes down
+ - client sends a 4k overwrite and modifies an object
+ - osd comes back up
+ - client sends another 4k overwrite
+ - client io blocks while osd recovers 4mb
+
+So even if we initially ignore truncate and omap and EC and clones and 
+anything else complicated I suspect we'll get a nice benefit.
+
+I haven't thought about this too much, but my guess is that the hard part 
+is making the primary's missing set representation include a partial delta 
+(say, an interval_set<> indicating which ranges of the file have changed) 
+in a way that gracefully degrades to recovering the whole object if we're 
+not sure.
+
+In any case, we should definitely have the design conversation!
+
+sage
+
+> 
+> Regards
+> Ning Yao
+> 
+> 
+> 2015-12-25 14:23 GMT+08:00 Dong Wu <archer.wudong-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+> > Thanks, from this pull request I learned that this issue is not
+> > completed, is there any new progress of this issue?
+> >
+> > 2015-12-25 12:30 GMT+08:00 Xinze Chi (??) <xmdxcxz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+> >> Yeah, This is good idea for recovery, but not for backfill.
+> >> @YaoNing have pull a request about this
+> >> https://github.com/ceph/ceph/pull/3837 this year.
+> >>
+> >> 2015-12-25 11:16 GMT+08:00 Dong Wu <archer.wudong-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+> >>> Hi,
+> >>> I have doubt about pglog, the pglog contains (op,object,version) etc.
+> >>> when peering, use pglog to construct missing list,then recover the
+> >>> whole object in missing list even if different data among replicas is
+> >>> less then a whole object data(eg,4MB).
+> >>> why not add (offset,len) to pglog? If so, the missing list can contain
+> >>> (object, offset, len), then we can reduce recover data.
+> >>> _______________________________________________
+> >>> ceph-users mailing list
+> >>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >>
+> >>
+> >>
+> >> --
+> >> Regards,
+> >> Xinze Chi
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
