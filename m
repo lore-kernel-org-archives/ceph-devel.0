@@ -1,78 +1,59 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: FreeBSD Building and Testing
-Date: Mon, 28 Dec 2015 17:53:04 +0100
-Message-ID: <568168F0.2060605@digiware.nl>
-References: <5676D2D9.5010600@digiware.nl>
- <CANE=7sVw1zhxYzT9q6WKkUV5tCioLuO0J_ZKCkdKXR5jFDHsKg@mail.gmail.com>
- <56785D9A.2020701@digiware.nl>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Fwd: how io works when backfill
+Date: Mon, 28 Dec 2015 09:30:27 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1512280927160.14646@cobra.newdream.net>
+References: <CAAL-TMe06UBK9XBWd+WW8FqB+o5J1n+_GvDJ7FgQtSO51KbSyQ@mail.gmail.com> <CA+cZ7sg8NXXmkX-RULnE3uYN91ZV1d1xeVqZeXjmdTyAwq1h2A@mail.gmail.com> <CA+cZ7sir4YJBJDtejh+2_r6Hq0AMOU1TEzvNzrfH=tbzUVvCuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:53664 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752043AbbL1QxI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 28 Dec 2015 11:53:08 -0500
-In-Reply-To: <56785D9A.2020701@digiware.nl>
+Received: from cobra.newdream.net ([66.33.216.30]:53589 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751371AbbL1Ra2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Dec 2015 12:30:28 -0500
+In-Reply-To: <CA+cZ7sir4YJBJDtejh+2_r6Hq0AMOU1TEzvNzrfH=tbzUVvCuA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Zhiqiang Wang <wonzhq@gmail.com>
+Cc: Dong Wu <archer.wudong@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi,
+On Mon, 28 Dec 2015, Zhiqiang Wang wrote:
+> 2015-12-27 20:48 GMT+08:00 Dong Wu <archer.wudong@gmail.com>:
+> > Hi,
+> > When add osd or remove osd, ceph will backfill to rebalance data.
+> > eg:
+> > - pg1.0    [1, 2, 3]
+> > - add an osd(eg. osd.7)
+> > - ceph start backfill, then pg1.0 osd set changes to [1, 2, 7]
+> > - if [a, b, c, d, e] are objects needing to backfill to osd.7 and now
+> > object a is backfilling
+> > - when a write io hits object a, then the io needs to wait for its
+> > complete, then goes on.
+> > - but if io hits object b which has not been backfilled, io reaches
+> > osd.1, then osd.1 send the io to osd.2  and osd.7, but osd.7 does not
+> > have object b, so osd.7 needs to wait for object b to backfilled, then
+> > write. Is it right? Or osd.1 only send the io to osd.2, not both?
+> 
+> I think in this case, when the write of object b reaches osd.1, it
+> holds the client write, raises the priority of the recovery of object
+> b, and kick off the recovery of it. When the recovery of object b is
+> done, it requeue the client write, and then everything goes like
+> usual.
 
-Can somebody try to help me and explain why
+It's more complicated than that.  In a normal (log-based) recovery 
+situation, it is something like the above: if the acting set is [1,2,3] 
+but 3 is missing the latest copy of A, a write to A will block on the 
+primary while the primary initiates recovery of A immediately.  Once that 
+completes the IO will continue.
 
-in test: Func: test/mon/osd-crash
-Func: TEST_crush_reject_empty started
+For backfill, it's different.  In your example, you start with [1,2,3] 
+then add in osd.7.  The OSD will see that 7 has no data for teh PG and 
+install a pg_temp entry mapping the PG back to [1,2,3] temporarily.  Then 
+things will proceed normally while backfill happens to 7.  Backfill won't 
+interfere with normal IO at all, except that IO to the portion of the PG 
+that has already been backfilled will also be sent to the backfill target 
+(7) so that it stays up to date.  Once it complets, the pg_temp entry is 
+removed and the mapping changes back to [1,2,7].  Then osd.3 is allowed to 
+remove it's copy of the PG.
 
-Fails with a python error which sort of startles me:
-test/mon/osd-crush.sh:227: TEST_crush_reject_empty:  local 
-empty_map=testdir/osd-crush/empty_map
-test/mon/osd-crush.sh:228: TEST_crush_reject_empty:  :
-test/mon/osd-crush.sh:229: TEST_crush_reject_empty:  ./crushtool -c 
-testdir/osd-crush/empty_map.txt -o testdir/osd-crush/empty_map.m
-ap
-test/mon/osd-crush.sh:230: TEST_crush_reject_empty:  expect_failure 
-testdir/osd-crush 'Error EINVAL' ./ceph osd setcrushmap -i testd
-ir/osd-crush/empty_map.map
-../qa/workunits/ceph-helpers.sh:1171: expect_failure:  local 
-dir=testdir/osd-crush
-../qa/workunits/ceph-helpers.sh:1172: expect_failure:  shift
-../qa/workunits/ceph-helpers.sh:1173: expect_failure:  local 
-'expected=Error EINVAL'
-../qa/workunits/ceph-helpers.sh:1174: expect_failure:  shift
-../qa/workunits/ceph-helpers.sh:1175: expect_failure:  local success
-../qa/workunits/ceph-helpers.sh:1176: expect_failure:  pwd
-../qa/workunits/ceph-helpers.sh:1177: expect_failure:  printenv
-../qa/workunits/ceph-helpers.sh:1178: expect_failure:  echo ./ceph osd 
-setcrushmap -i testdir/osd-crush/empty_map.map
-../qa/workunits/ceph-helpers.sh:1180: expect_failure:  ./ceph osd 
-setcrushmap -i testdir/osd-crush/empty_map.map
-*** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
-Traceback (most recent call last):
-   File "./ceph", line 936, in <module>
-     retval = main()
-   File "./ceph", line 874, in main
-     sigdict, inbuf, verbose)
-   File "./ceph", line 457, in new_style_command
-     inbuf=inbuf)
-   File 
-"/usr/srcs/Ceph/wip-freebsd-wjw/ceph/src/pybind/ceph_argparse.py", line 
-1208, in json_command
-     raise RuntimeError('"{0}": exception {1}'.format(argdict, e))
-RuntimeError: "{'prefix': u'osd setcrushmap'}": exception "['{"prefix": 
-"osd setcrushmap"}']": exception 'utf8' codec can't decode b
-yte 0x86 in position 56: invalid start byte
+sage
 
-Which is certainly not the type of error expected.
-But it is hard to detect any 0x86 in the arguments.
-
-And yes python is right, there are no UTF8 sequences that start with 0x86.
-Question is:
-	Why does it want to parse with UTF8?
-	And how do I switch it off?
-	Or how to I fix this error?
-
-Thanx,
---WjW
