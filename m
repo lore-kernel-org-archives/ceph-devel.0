@@ -1,59 +1,26 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Fwd: how io works when backfill
-Date: Mon, 28 Dec 2015 09:30:27 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1512280927160.14646@cobra.newdream.net>
-References: <CAAL-TMe06UBK9XBWd+WW8FqB+o5J1n+_GvDJ7FgQtSO51KbSyQ@mail.gmail.com> <CA+cZ7sg8NXXmkX-RULnE3uYN91ZV1d1xeVqZeXjmdTyAwq1h2A@mail.gmail.com> <CA+cZ7sir4YJBJDtejh+2_r6Hq0AMOU1TEzvNzrfH=tbzUVvCuA@mail.gmail.com>
+From: "Zahra Robert" <braun@pr.hu>
+Subject: Cordial greeting
+Date: Mon, 28 Dec 2015 19:40:31 +0100
+Message-ID: <81363b59c2ceb9334ef64c21e58b66c2.squirrel@oldwebmail.prtelecom.hu>
+Reply-To: zahrarobert@yahoo.com
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53589 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751371AbbL1Ra2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Dec 2015 12:30:28 -0500
-In-Reply-To: <CA+cZ7sir4YJBJDtejh+2_r6Hq0AMOU1TEzvNzrfH=tbzUVvCuA@mail.gmail.com>
+Received: from mail9.pr.hu ([87.242.0.9]:49484 "EHLO mail9.pr.hu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751412AbbL1Sku (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 28 Dec 2015 13:40:50 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zhiqiang Wang <wonzhq@gmail.com>
-Cc: Dong Wu <archer.wudong@gmail.com>, ceph-devel@vger.kernel.org
+To: balogh.bt@pr.hu
 
-On Mon, 28 Dec 2015, Zhiqiang Wang wrote:
-> 2015-12-27 20:48 GMT+08:00 Dong Wu <archer.wudong@gmail.com>:
-> > Hi,
-> > When add osd or remove osd, ceph will backfill to rebalance data.
-> > eg:
-> > - pg1.0    [1, 2, 3]
-> > - add an osd(eg. osd.7)
-> > - ceph start backfill, then pg1.0 osd set changes to [1, 2, 7]
-> > - if [a, b, c, d, e] are objects needing to backfill to osd.7 and now
-> > object a is backfilling
-> > - when a write io hits object a, then the io needs to wait for its
-> > complete, then goes on.
-> > - but if io hits object b which has not been backfilled, io reaches
-> > osd.1, then osd.1 send the io to osd.2  and osd.7, but osd.7 does not
-> > have object b, so osd.7 needs to wait for object b to backfilled, then
-> > write. Is it right? Or osd.1 only send the io to osd.2, not both?
-> 
-> I think in this case, when the write of object b reaches osd.1, it
-> holds the client write, raises the priority of the recovery of object
-> b, and kick off the recovery of it. When the recovery of object b is
-> done, it requeue the client write, and then everything goes like
-> usual.
 
-It's more complicated than that.  In a normal (log-based) recovery 
-situation, it is something like the above: if the acting set is [1,2,3] 
-but 3 is missing the latest copy of A, a write to A will block on the 
-primary while the primary initiates recovery of A immediately.  Once that 
-completes the IO will continue.
 
-For backfill, it's different.  In your example, you start with [1,2,3] 
-then add in osd.7.  The OSD will see that 7 has no data for teh PG and 
-install a pg_temp entry mapping the PG back to [1,2,3] temporarily.  Then 
-things will proceed normally while backfill happens to 7.  Backfill won't 
-interfere with normal IO at all, except that IO to the portion of the PG 
-that has already been backfilled will also be sent to the backfill target 
-(7) so that it stays up to date.  Once it complets, the pg_temp entry is 
-removed and the mapping changes back to [1,2,7].  Then osd.3 is allowed to 
-remove it's copy of the PG.
 
-sage
+Cordial greeting message from Fatima, I am seeking for your help,I will be
+very glad if you do assist me to relocate a sum of (US$4 Million Dollars)
+into your Bank account in your country for the benefit of both of us i
+want to use this money for investment. I will give you more details as you
+reply Yours Eva Zahra Robert
 
