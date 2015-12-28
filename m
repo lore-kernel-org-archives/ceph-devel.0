@@ -1,28 +1,78 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: How to configure if there are tow network cards in Client
-Date: Mon, 28 Dec 2015 08:47:47 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1512280846380.14656@cobra.newdream.net>
-References: <57b6c7ee.cffc.151d9741bd2.Coremail.cymengxiang@126.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: FreeBSD Building and Testing
+Date: Mon, 28 Dec 2015 17:53:04 +0100
+Message-ID: <568168F0.2060605@digiware.nl>
+References: <5676D2D9.5010600@digiware.nl>
+ <CANE=7sVw1zhxYzT9q6WKkUV5tCioLuO0J_ZKCkdKXR5jFDHsKg@mail.gmail.com>
+ <56785D9A.2020701@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51534 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([31.223.170.169]:53664 "EHLO smtp.digiware.nl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752578AbbL1Qru (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 28 Dec 2015 11:47:50 -0500
-In-Reply-To: <57b6c7ee.cffc.151d9741bd2.Coremail.cymengxiang@126.com>
+	id S1752043AbbL1QxI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 28 Dec 2015 11:53:08 -0500
+In-Reply-To: <56785D9A.2020701@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-2022-JP?Q?=1B$Bhq5#=1B=28J?= <cymengxiang@126.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-cn@lists.ceph.com
+To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 25 Dec 2015, ?? wrote:
-> Hi all,
->     When we read the code, we haven?t find the function that the client can bind a specific IP. In Ceph?s configuration, we could only find the parameter ?public network?, but it seems acts on the OSD but not the client.
->     There is a scenario that the client has two network cards named NIC1 and NIC2. The NIC1 is responsible for communicating with cluster (monitor and RADOS) and the NIC2 has other services except Ceph?s client. So   we need the client can bind specific IP in order to differentiate the IP communicating with cluster from another IP serving other applications. We want to know is there any configuration in Ceph to achieve this function? If there is, how could we configure the IP? if not, could we add this function in Ceph? Thank you so much.
+Hi,
 
-Right.  There isn't a configurable to do this now--we've always just let 
-the kernel network layer sort it out. Is this just a matter of calling 
-bind on the socket before connecting? I've never done this before..
+Can somebody try to help me and explain why
 
-sage
+in test: Func: test/mon/osd-crash
+Func: TEST_crush_reject_empty started
+
+Fails with a python error which sort of startles me:
+test/mon/osd-crush.sh:227: TEST_crush_reject_empty:  local 
+empty_map=testdir/osd-crush/empty_map
+test/mon/osd-crush.sh:228: TEST_crush_reject_empty:  :
+test/mon/osd-crush.sh:229: TEST_crush_reject_empty:  ./crushtool -c 
+testdir/osd-crush/empty_map.txt -o testdir/osd-crush/empty_map.m
+ap
+test/mon/osd-crush.sh:230: TEST_crush_reject_empty:  expect_failure 
+testdir/osd-crush 'Error EINVAL' ./ceph osd setcrushmap -i testd
+ir/osd-crush/empty_map.map
+../qa/workunits/ceph-helpers.sh:1171: expect_failure:  local 
+dir=testdir/osd-crush
+../qa/workunits/ceph-helpers.sh:1172: expect_failure:  shift
+../qa/workunits/ceph-helpers.sh:1173: expect_failure:  local 
+'expected=Error EINVAL'
+../qa/workunits/ceph-helpers.sh:1174: expect_failure:  shift
+../qa/workunits/ceph-helpers.sh:1175: expect_failure:  local success
+../qa/workunits/ceph-helpers.sh:1176: expect_failure:  pwd
+../qa/workunits/ceph-helpers.sh:1177: expect_failure:  printenv
+../qa/workunits/ceph-helpers.sh:1178: expect_failure:  echo ./ceph osd 
+setcrushmap -i testdir/osd-crush/empty_map.map
+../qa/workunits/ceph-helpers.sh:1180: expect_failure:  ./ceph osd 
+setcrushmap -i testdir/osd-crush/empty_map.map
+*** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+Traceback (most recent call last):
+   File "./ceph", line 936, in <module>
+     retval = main()
+   File "./ceph", line 874, in main
+     sigdict, inbuf, verbose)
+   File "./ceph", line 457, in new_style_command
+     inbuf=inbuf)
+   File 
+"/usr/srcs/Ceph/wip-freebsd-wjw/ceph/src/pybind/ceph_argparse.py", line 
+1208, in json_command
+     raise RuntimeError('"{0}": exception {1}'.format(argdict, e))
+RuntimeError: "{'prefix': u'osd setcrushmap'}": exception "['{"prefix": 
+"osd setcrushmap"}']": exception 'utf8' codec can't decode b
+yte 0x86 in position 56: invalid start byte
+
+Which is certainly not the type of error expected.
+But it is hard to detect any 0x86 in the arguments.
+
+And yes python is right, there are no UTF8 sequences that start with 0x86.
+Question is:
+	Why does it want to parse with UTF8?
+	And how do I switch it off?
+	Or how to I fix this error?
+
+Thanx,
+--WjW
