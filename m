@@ -1,39 +1,96 @@
-From: "Jeff Skoll" <verna.viajar@icdd.uni-kassel.de>
-Subject: Charity Donation
-Date: Mon, 28 Dec 2015 18:39:46 -0500
-Message-ID: <auto-000005467739@mailadmin.uni-kassel.de>
-Reply-To: jeff.skoll@skollcharity.org
+From: Dong Wu <archer.wudong@gmail.com>
+Subject: Re: Fwd: how io works when backfill
+Date: Tue, 29 Dec 2015 10:12:01 +0800
+Message-ID: <CAAL-TMdWiDBXrFSpG9MXGN2=2+MnEHrZBpXRdb7VEgGeyExwhw@mail.gmail.com>
+References: <CAAL-TMe06UBK9XBWd+WW8FqB+o5J1n+_GvDJ7FgQtSO51KbSyQ@mail.gmail.com>
+	<CA+cZ7sg8NXXmkX-RULnE3uYN91ZV1d1xeVqZeXjmdTyAwq1h2A@mail.gmail.com>
+	<CA+cZ7sir4YJBJDtejh+2_r6Hq0AMOU1TEzvNzrfH=tbzUVvCuA@mail.gmail.com>
+	<alpine.DEB.2.00.1512280927160.14646@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3.its.uni-kassel.de ([141.51.12.64]:57498 "EHLO
-	mx3.its.uni-kassel.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752676AbbL2Axa convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Dec 2015 19:53:30 -0500
-Content-Description: Mail message body
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:34082 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753096AbbL2CMD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Dec 2015 21:12:03 -0500
+Received: by mail-pa0-f43.google.com with SMTP id uo6so95229964pac.1
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Dec 2015 18:12:02 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1512280927160.14646@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Me <verna.viajar@icdd.uni-kassel.de>
+To: Sage Weil <sage@newdream.net>
+Cc: Zhiqiang Wang <wonzhq@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi,
-My name is Jeffrey Skoll, a philanthropist and the founder of one of th=
-e largest private foundations in the world. I believe strongly in =E2=80=
-=98giving while living.=E2=80=99 I had one idea that never changed in m=
-y mind =E2=80=94 that you should use your wealth to help people and I h=
-ave decided to secretly give USD2.498 Million to a randomly selected in=
-dividual. On receipt of this email, you should count yourself as the in=
-dividual. Kindly get back to me at your earliest convenience, so I know=
- your email address is valid.
+if add in osd.7 and 7 becomes the primary: pg1.0 [1, 2, 3]  --> pg1.0
+[7, 2, 3],  is it similar with the example above?
+still install a pg_temp entry mapping the PG back to [1, 2, 3], then
+backfill happens to 7, normal io write to [1, 2, 3], if io to the
+portion of the PG that has already been backfilled will also be sent
+to osd.7?
 
-Visit the web page to know more about me: http://www.theglobeandmail.co=
-m/news/national/meet-the-canadian-billionaire-whos-giving-it-all-away/a=
-rticle4209888/ or you can read an article of me on Wikipedia.
+how about these examples about removing an osd:
+- pg1.0 [1, 2, 3]
+- osd.3 down and be removed
+- mapping changes to [1, 2, 5], but osd.5 has no data, then install a
+pg_temp mapping the PG back to [1, 2], then backfill happens to 5,
+- normal io write to [1, 2], if io hits object which has been
+backfilled to osd.5, io will also send to osd.5
+- when backfill completes, remove the pg_temp and mapping changes back
+to [1, 2, 5]
 
-Regards,
-Jeffrey Skoll.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+another example:
+- pg1.0 [1, 2, 3]
+- osd.3 down and be removed
+- mapping changes to [5, 1, 2], but osd.5 has no data of the pg, then
+install a pg_temp mapping the PG back to [1, 2] which osd.1
+temporarily becomes the primary, then backfill happens to 5,
+- normal io write to [1, 2], if io hits object which has been
+backfilled to osd.5, io will also send to osd.5
+- when backfill completes, remove the pg_temp and mapping changes back
+to [5, 1, 2]
+
+is my ananysis right?
+
+2015-12-29 1:30 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Mon, 28 Dec 2015, Zhiqiang Wang wrote:
+>> 2015-12-27 20:48 GMT+08:00 Dong Wu <archer.wudong@gmail.com>:
+>> > Hi,
+>> > When add osd or remove osd, ceph will backfill to rebalance data.
+>> > eg:
+>> > - pg1.0    [1, 2, 3]
+>> > - add an osd(eg. osd.7)
+>> > - ceph start backfill, then pg1.0 osd set changes to [1, 2, 7]
+>> > - if [a, b, c, d, e] are objects needing to backfill to osd.7 and now
+>> > object a is backfilling
+>> > - when a write io hits object a, then the io needs to wait for its
+>> > complete, then goes on.
+>> > - but if io hits object b which has not been backfilled, io reaches
+>> > osd.1, then osd.1 send the io to osd.2  and osd.7, but osd.7 does not
+>> > have object b, so osd.7 needs to wait for object b to backfilled, then
+>> > write. Is it right? Or osd.1 only send the io to osd.2, not both?
+>>
+>> I think in this case, when the write of object b reaches osd.1, it
+>> holds the client write, raises the priority of the recovery of object
+>> b, and kick off the recovery of it. When the recovery of object b is
+>> done, it requeue the client write, and then everything goes like
+>> usual.
+>
+> It's more complicated than that.  In a normal (log-based) recovery
+> situation, it is something like the above: if the acting set is [1,2,3]
+> but 3 is missing the latest copy of A, a write to A will block on the
+> primary while the primary initiates recovery of A immediately.  Once that
+> completes the IO will continue.
+>
+> For backfill, it's different.  In your example, you start with [1,2,3]
+> then add in osd.7.  The OSD will see that 7 has no data for teh PG and
+> install a pg_temp entry mapping the PG back to [1,2,3] temporarily.  Then
+> things will proceed normally while backfill happens to 7.  Backfill won't
+> interfere with normal IO at all, except that IO to the portion of the PG
+> that has already been backfilled will also be sent to the backfill target
+> (7) so that it stays up to date.  Once it complets, the pg_temp entry is
+> removed and the mapping changes back to [1,2,7].  Then osd.3 is allowed to
+> remove it's copy of the PG.
+>
+> sage
+>
