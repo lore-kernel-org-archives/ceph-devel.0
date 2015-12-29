@@ -1,208 +1,47 @@
-From: gongfengguang <gongfengguang-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
-Subject: Create one millon empty files with cephfs
-Date: Tue, 29 Dec 2015 18:11:05 +0800
-Message-ID: <BAY403-EAS291EDAEC6F18236762EF719ADFC0@phx.gbl>
+From: Linux Chips <linux.chips@gmail.com>
+Subject: Re: How to configure if there are tow network cards in Client
+Date: Tue, 29 Dec 2015 13:21:21 +0300
+Message-ID: <56825EA1.1070803@gmail.com>
+References: <57b6c7ee.cffc.151d9741bd2.Coremail.cymengxiang@126.com>
+ <alpine.DEB.2.00.1512280846380.14656@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1696548318=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: zh-cn
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
---===============1696548318==
-Content-Type: multipart/alternative;
-	boundary="----=_NextPart_000_0054_01D14264.4914D580"
-Content-Language: zh-cn
-
-------=_NextPart_000_0054_01D14264.4914D580
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:34644 "EHLO
+	mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751301AbbL2KUx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Dec 2015 05:20:53 -0500
+Received: by mail-wm0-f66.google.com with SMTP id b14so1222958wmb.1
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Dec 2015 02:20:53 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1512280846380.14656@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, =?UTF-8?B?6JSh5q+F?= <cymengxiang@126.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-cn@lists.ceph.com
 
-Hi,
-
- 
-
-We create one millon empty files through filebench, here is the test env:
-
-MDS: one  MDS  
-
-MON: one  MON
-
-OSD: two OSD , each with one Intel P3700; data on OSD with 2x replica
-
-NetWork: all the nodes are connectted through 10 gigabit network
-
- 
-
-We use more than one client to create files, to test the scalability of MDS.
-Here are the results:
-
-IOPS under one client: 850
-
-IOPS under two client: 1150
-
-IOPS under four client: 1180
-
-As we can see,the IOPS almost maintains unchanged when the number of client
-increase from 2 to 4. 
-
-Cephfs may have a low scalability under one MDS, and we think its the big
-lock in MDSDamon::ms_dispatch()::Mutex::locker(every request acquires this
-lock), who limits the scalability of MDS.
-
- 
-
-We think this big lock could be removed through the following steps:
-
-1. separate the process of ClientRequest with other requests, so we can
-parallel the process of ClientRequest
-
-2. use some small granularity locks instead of big lock to ensure
-consistency 
-
- 
-
-Wondering this idea is reasonable ?
-
- 
-
-thanks
-
- 
+On 12/28/2015 07:47 PM, Sage Weil wrote:
+> On Fri, 25 Dec 2015, ?? wrote:
+>> Hi all,
+>>      When we read the code, we haven?t find the function that the client can bind a specific IP. In Ceph?s configuration, we could only find the parameter ?public network?, but it seems acts on the OSD but not the client.
+>>      There is a scenario that the client has two network cards named NIC1 and NIC2. The NIC1 is responsible for communicating with cluster (monitor and RADOS) and the NIC2 has other services except Ceph?s client. So   we need the client can bind specific IP in order to differentiate the IP communicating with cluster from another IP serving other applications. We want to know is there any configuration in Ceph to achieve this function? If there is, how could we configure the IP? if not, could we add this function in Ceph? Thank you so much.
+you can use routing tables plus routing rules. otherwise linux will just 
+use the default gateway.
+or you can put the second interface on the same public net of ceph. 
+though that would break if you have multiple external nets.
+> Right.  There isn't a configurable to do this now--we've always just let
+> the kernel network layer sort it out. Is this just a matter of calling
+> bind on the socket before connecting? I've never done this before..
+linux will send all packets to the default gateway event if an 
+application binds to an ip on different interface, the packet will go 
+out with the source address as the binded one but through your router. 
+the only solution, even if the bind function exists is to use the 
+routing tables and rules.
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
-------=_NextPart_000_0054_01D14264.4914D580
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-
-<html xmlns:v=3D"urn:schemas-microsoft-com:vml" =
-xmlns:o=3D"urn:schemas-microsoft-com:office:office" =
-xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
-xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" =
-xmlns=3D"http://www.w3.org/TR/REC-html40"><head><META =
-HTTP-EQUIV=3D"Content-Type" CONTENT=3D"text/html; =
-charset=3Dus-ascii"><meta name=3DGenerator content=3D"Microsoft Word 15 =
-(filtered medium)"><style><!--
-/* Font Definitions */
-@font-face
-	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;}
-@font-face
-	{font-family:\7B49\7EBF;
-	panose-1:2 1 6 0 3 1 1 1 1 1;}
-@font-face
-	{font-family:"\@\7B49\7EBF";
-	panose-1:2 1 6 0 3 1 1 1 1 1;}
-/* Style Definitions */
-p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin:0cm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	font-size:10.5pt;
-	font-family:\7B49\7EBF;}
-a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:#0563C1;
-	text-decoration:underline;}
-a:visited, span.MsoHyperlinkFollowed
-	{mso-style-priority:99;
-	color:#954F72;
-	text-decoration:underline;}
-span.EmailStyle17
-	{mso-style-type:personal-compose;
-	font-family:\7B49\7EBF;
-	color:windowtext;}
-.MsoChpDefault
-	{mso-style-type:export-only;
-	font-family:\7B49\7EBF;}
-/* Page Definitions */
-@page WordSection1
-	{size:612.0pt 792.0pt;
-	margin:72.0pt 90.0pt 72.0pt 90.0pt;}
-div.WordSection1
-	{page:WordSection1;}
---></style><!--[if gte mso 9]><xml>
-<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
-</xml><![endif]--><!--[if gte mso 9]><xml>
-<o:shapelayout v:ext=3D"edit">
-<o:idmap v:ext=3D"edit" data=3D"1" />
-</o:shapelayout></xml><![endif]--></head><body lang=3DZH-CN =
-link=3D"#0563C1" vlink=3D"#954F72" =
-style=3D'text-justify-trim:punctuation'><div class=3DWordSection1><p =
-class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'>Hi,<o:p></o:p></span></p><p =
-class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'><o:p>&nbsp;</o:p></span></p><p =
-class=3DMsoNormal><span lang=3DEN-US style=3D'font-size:14.0pt'>We =
-create one millon empty files through filebench, here is the test =
-env:<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'>MDS: one&nbsp; MDS&nbsp; =
-<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'>MON: one&nbsp; MON<o:p></o:p></span></p><p =
-class=3DMsoNormal><span lang=3DEN-US style=3D'font-size:14.0pt'>OSD: two =
-OSD , each with one Intel P3700; data on OSD with 2x =
-replica<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'>NetWork: all the nodes are connectted through =
-10 gigabit network<o:p></o:p></span></p><p class=3DMsoNormal><span =
-lang=3DEN-US style=3D'font-size:14.0pt'><o:p>&nbsp;</o:p></span></p><p =
-class=3DMsoNormal><span lang=3DEN-US style=3D'font-size:14.0pt'>We use =
-more than one client to create files, to test the scalability of MDS. =
-Here are the results:<o:p></o:p></span></p><p class=3DMsoNormal><span =
-lang=3DEN-US style=3D'font-size:14.0pt'>IOPS under one client: =
-850<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'>IOPS under two client: =
-1150<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'>IOPS under four client: =
-1180<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'>As we can see,the IOPS almost maintains =
-unchanged when the number of client increase from 2 to 4. =
-<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'>Cephfs may have a low scalability under one =
-MDS, and we think its the big lock in =
-MDSDamon::ms_dispatch()::Mutex::locker(every request acquires this =
-lock), who limits the scalability of MDS.<o:p></o:p></span></p><p =
-class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'><o:p>&nbsp;</o:p></span></p><p =
-class=3DMsoNormal><span lang=3DEN-US style=3D'font-size:14.0pt'>We think =
-this big lock could be removed through the following =
-steps:<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'>1. separate the process of ClientRequest with =
-other requests, so we can parallel the process of =
-ClientRequest<o:p></o:p></span></p><p class=3DMsoNormal><span =
-lang=3DEN-US style=3D'font-size:14.0pt'>2. use some small granularity =
-locks instead of big lock to ensure consistency <o:p></o:p></span></p><p =
-class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'><o:p>&nbsp;</o:p></span></p><p =
-class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'>Wondering this idea is reasonable =
-?<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'><o:p>&nbsp;</o:p></span></p><p =
-class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'>thanks<o:p></o:p></span></p><p =
-class=3DMsoNormal><span lang=3DEN-US =
-style=3D'font-size:14.0pt'><o:p>&nbsp;</o:p></span></p></div></body></htm=
-l>
-------=_NextPart_000_0054_01D14264.4914D580--
-
---===============1696548318==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1696548318==--
