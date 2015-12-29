@@ -1,46 +1,60 @@
-From: Fengguang Gong <fengguanggong@gmail.com>
-Subject: Create one millon empty files with cephfs
-Date: Tue, 29 Dec 2015 21:13:37 +0800
-Message-ID: <CAJ2LqzjocS7aszq77X5MiOJSTOPvG9J1=FEvbncANLOikk5dJA@mail.gmail.com>
+From: =?GBK?B?sszS4w==?= <cymengxiang@126.com>
+Subject: Re:Re: How to configure if there are tow network cards in Client
+Date: Tue, 29 Dec 2015 20:58:56 +0800 (CST)
+Message-ID: <64fd5de0.cb49.151edd1ed20.Coremail.cymengxiang@126.com>
+References: <57b6c7ee.cffc.151d9741bd2.Coremail.cymengxiang@126.com>
+ <alpine.DEB.2.00.1512280846380.14656@cobra.newdream.net>
+ <56825EA1.1070803@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:38275 "EHLO
-	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753294AbbL2NNj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Dec 2015 08:13:39 -0500
-Received: by mail-wm0-f51.google.com with SMTP id b14so12920533wmb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 29 Dec 2015 05:13:38 -0800 (PST)
+Received: from m15-43.126.com ([220.181.15.43]:34398 "EHLO m15-43.126.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752820AbbL2N3R (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 29 Dec 2015 08:29:17 -0500
+In-Reply-To: <56825EA1.1070803@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>, Linux Chips <linux.chips@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-hi,
-We create one million empty files through filebench, here is the test env:
-MDS: one MDS
-MON: one MON
-OSD: two OSD, each with one Inter P3700; data on OSD with 2x replica
-Network: all nodes are connected through 10 gigabit network
-
-We use more than one client to create files, to test the scalability
-of MDS. Here are the results:
-IOPS under one client: 850
-IOPS under two client: 1150
-IOPS under four client: 1180
-
-As we can see, the IOPS almost maintains unchanged when the number of
-client increase from 2 to 4.
-
-Cephfs may have a low scalability under one MDS, and we think its the
-big lock in
-MDSDamon::ms_dispatch()::Mutex::locker(every request acquires this
-lock), who limits the scalability of MDS.
-
-We think this big lock could be removed through the following steps:
-1. separate the process of ClientRequest with other requests, so we
-can parallel the process of ClientRequest
-2. use some small granularity locks instead of big lock to ensure consistency
-
-Wondering this idea is reasonable?
-
-thanks
+CiAgICAgIFRoYW5rIGZvciB5b3VyIHJlcGxpZXMuICAKICAgICAgU28gaXMgaXQgcmVhc29uYWJs
+ZSB0aGF0IHdlIGNvdWxkIHdyaXRlIGEgZmlsZSBzdWNoIGFzIHNoZWxsIHNjcmlwdCB0byBiaW5k
+IG9uZSBwcm9jZXNzIHdpdGggYSBzcGVjaWZpYyBJUCBhbmQgbW9kaWZ5IHRoZSByb3V0aW5nIHRh
+YmxlcyBhbmQgcnVsZXMKYXMgb25lIG9mIENlcGihr3MgdG9vbHM/IFNvIHRoYXQgdGhlIHVzZXJz
+IGlzIGNvbnZlbmllbnQgd2hlbiB0aGV5IHdhbnQgdG8gY2hhbmdlIHRoZSBOSUMgY29ubmVjdGlu
+ZyB3aXRoIHRoZSBPU0QuCgoKCkF0IDIwMTUtMTItMjkgMTg6MjE6MjEsICJMaW51eCBDaGlwcyIg
+PGxpbnV4LmNoaXBzQGdtYWlsLmNvbT4gd3JvdGU6Cj5PbiAxMi8yOC8yMDE1IDA3OjQ3IFBNLCBT
+YWdlIFdlaWwgd3JvdGU6Cj4+IE9uIEZyaSwgMjUgRGVjIDIwMTUsID8/IHdyb3RlOgo+Pj4gSGkg
+YWxsLAo+Pj4gICAgICBXaGVuIHdlIHJlYWQgdGhlIGNvZGUsIHdlIGhhdmVuP3QgZmluZCB0aGUg
+ZnVuY3Rpb24gdGhhdCB0aGUgY2xpZW50IGNhbiBiaW5kIGEgc3BlY2lmaWMgSVAuIEluIENlcGg/
+cyBjb25maWd1cmF0aW9uLCB3ZSBjb3VsZCBvbmx5IGZpbmQgdGhlIHBhcmFtZXRlciA/cHVibGlj
+IG5ldHdvcms/LCBidXQgaXQgc2VlbXMgYWN0cyBvbiB0aGUgT1NEIGJ1dCBub3QgdGhlIGNsaWVu
+dC4KPj4+ICAgICAgVGhlcmUgaXMgYSBzY2VuYXJpbyB0aGF0IHRoZSBjbGllbnQgaGFzIHR3byBu
+ZXR3b3JrIGNhcmRzIG5hbWVkIE5JQzEgYW5kIE5JQzIuIFRoZSBOSUMxIGlzIHJlc3BvbnNpYmxl
+IGZvciBjb21tdW5pY2F0aW5nIHdpdGggY2x1c3RlciAobW9uaXRvciBhbmQgUkFET1MpIGFuZCB0
+aGUgTklDMiBoYXMgb3RoZXIgc2VydmljZXMgZXhjZXB0IENlcGg/cyBjbGllbnQuIFNvICAgd2Ug
+bmVlZCB0aGUgY2xpZW50IGNhbiBiaW5kIHNwZWNpZmljIElQIGluIG9yZGVyIHRvIGRpZmZlcmVu
+dGlhdGUgdGhlIElQIGNvbW11bmljYXRpbmcgd2l0aCBjbHVzdGVyIGZyb20gYW5vdGhlciBJUCBz
+ZXJ2aW5nIG90aGVyIGFwcGxpY2F0aW9ucy4gV2Ugd2FudCB0byBrbm93IGlzIHRoZXJlIGFueSBj
+b25maWd1cmF0aW9uIGluIENlcGggdG8gYWNoaWV2ZSB0aGlzIGZ1bmN0aW9uPyBJZiB0aGVyZSBp
+cywgaG93IGNvdWxkIHdlIGNvbmZpZ3VyZSB0aGUgSVA/IGlmIG5vdCwgY291bGQgd2UgYWRkIHRo
+aXMgZnVuY3Rpb24gaW4gQ2VwaD8gVGhhbmsgeW91IHNvIG11Y2guCj55b3UgY2FuIHVzZSByb3V0
+aW5nIHRhYmxlcyBwbHVzIHJvdXRpbmcgcnVsZXMuIG90aGVyd2lzZSBsaW51eCB3aWxsIGp1c3Qg
+Cj51c2UgdGhlIGRlZmF1bHQgZ2F0ZXdheS4KPm9yIHlvdSBjYW4gcHV0IHRoZSBzZWNvbmQgaW50
+ZXJmYWNlIG9uIHRoZSBzYW1lIHB1YmxpYyBuZXQgb2YgY2VwaC4gCj50aG91Z2ggdGhhdCB3b3Vs
+ZCBicmVhayBpZiB5b3UgaGF2ZSBtdWx0aXBsZSBleHRlcm5hbCBuZXRzLgo+PiBSaWdodC4gIFRo
+ZXJlIGlzbid0IGEgY29uZmlndXJhYmxlIHRvIGRvIHRoaXMgbm93LS13ZSd2ZSBhbHdheXMganVz
+dCBsZXQKPj4gdGhlIGtlcm5lbCBuZXR3b3JrIGxheWVyIHNvcnQgaXQgb3V0LiBJcyB0aGlzIGp1
+c3QgYSBtYXR0ZXIgb2YgY2FsbGluZwo+PiBiaW5kIG9uIHRoZSBzb2NrZXQgYmVmb3JlIGNvbm5l
+Y3Rpbmc/IEkndmUgbmV2ZXIgZG9uZSB0aGlzIGJlZm9yZS4uCj5saW51eCB3aWxsIHNlbmQgYWxs
+IHBhY2tldHMgdG8gdGhlIGRlZmF1bHQgZ2F0ZXdheSBldmVudCBpZiBhbiAKPmFwcGxpY2F0aW9u
+IGJpbmRzIHRvIGFuIGlwIG9uIGRpZmZlcmVudCBpbnRlcmZhY2UsIHRoZSBwYWNrZXQgd2lsbCBn
+byAKPm91dCB3aXRoIHRoZSBzb3VyY2UgYWRkcmVzcyBhcyB0aGUgYmluZGVkIG9uZSBidXQgdGhy
+b3VnaCB5b3VyIHJvdXRlci4gCj50aGUgb25seSBzb2x1dGlvbiwgZXZlbiBpZiB0aGUgYmluZCBm
+dW5jdGlvbiBleGlzdHMgaXMgdG8gdXNlIHRoZSAKPnJvdXRpbmcgdGFibGVzIGFuZCBydWxlcy4K
+Pj4KPj4gc2FnZQo+PiAtLQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0
+aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPj4gdGhlIGJvZHkgb2YgYSBtZXNz
+YWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBh
+dCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4KPgo=
