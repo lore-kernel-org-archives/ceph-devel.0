@@ -1,104 +1,91 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Fwd: how io works when backfill
-Date: Tue, 29 Dec 2015 06:51:27 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1512290650040.10312@cobra.newdream.net>
-References: <CAAL-TMe06UBK9XBWd+WW8FqB+o5J1n+_GvDJ7FgQtSO51KbSyQ@mail.gmail.com> <CA+cZ7sg8NXXmkX-RULnE3uYN91ZV1d1xeVqZeXjmdTyAwq1h2A@mail.gmail.com> <CA+cZ7sir4YJBJDtejh+2_r6Hq0AMOU1TEzvNzrfH=tbzUVvCuA@mail.gmail.com> <alpine.DEB.2.00.1512280927160.14646@cobra.newdream.net>
- <CAAL-TMdWiDBXrFSpG9MXGN2=2+MnEHrZBpXRdb7VEgGeyExwhw@mail.gmail.com>
+From: Linux Chips <linux.chips@gmail.com>
+Subject: Re: How to configure if there are tow network cards in Client
+Date: Thu, 31 Dec 2015 11:45:15 +0300
+Message-ID: <5684EB1B.2030806@gmail.com>
+References: <57b6c7ee.cffc.151d9741bd2.Coremail.cymengxiang@126.com>
+ <alpine.DEB.2.00.1512280846380.14656@cobra.newdream.net>
+ <56825EA1.1070803@gmail.com>
+ <64fd5de0.cb49.151edd1ed20.Coremail.cymengxiang@126.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=gbk;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57805 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752695AbbL2Ov2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Dec 2015 09:51:28 -0500
-In-Reply-To: <CAAL-TMdWiDBXrFSpG9MXGN2=2+MnEHrZBpXRdb7VEgGeyExwhw@mail.gmail.com>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:35438 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751952AbbLaIoq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Dec 2015 03:44:46 -0500
+Received: by mail-wm0-f46.google.com with SMTP id f206so57770486wmf.0
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Dec 2015 00:44:46 -0800 (PST)
+In-Reply-To: <64fd5de0.cb49.151edd1ed20.Coremail.cymengxiang@126.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dong Wu <archer.wudong@gmail.com>
-Cc: Zhiqiang Wang <wonzhq@gmail.com>, ceph-devel@vger.kernel.org
+To: =?UTF-8?B?6JSh5q+F?= <cymengxiang@126.com>, Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 29 Dec 2015, Dong Wu wrote:
-> if add in osd.7 and 7 becomes the primary: pg1.0 [1, 2, 3]  --> pg1.0
-> [7, 2, 3],  is it similar with the example above?
-> still install a pg_temp entry mapping the PG back to [1, 2, 3], then
-> backfill happens to 7, normal io write to [1, 2, 3], if io to the
-> portion of the PG that has already been backfilled will also be sent
-> to osd.7?
+it would certainly help those with less knowledge about networking in=20
+linux, though i do not know how many people using ceph are in this=20
+category. Sage and the others here may have a better idea about its=20
+feasibility.
+but i usually use rule-* and route-* (in CentOS) files, they work with=20
+networkmanager, and very easy to configure. in ubuntu you can put them=20
+in interfaces file, and they are as easy. if such a tool is made, i=20
+think it should understand the ceph.conf file, but i doubt it can figur=
+e=20
+out the routes correctly without you putting them in.
 
-Yes (although I forget how it picks the ordering of the osds in the temp 
-mapping).  See PG::choose_acting() for the details.
+On 12/29/2015 03:58 PM, =B2=CC=D2=E3 wrote:
+>        Thank for your replies.
+>        So is it reasonable that we could write a file such as shell s=
+cript to bind one process with a specific IP and modify the routing tab=
+les and rules
+> as one of Ceph=A1=AFs tools? So that the users is convenient when the=
+y want to change the NIC connecting with the OSD.
+>
+>
+>
+> At 2015-12-29 18:21:21, "Linux Chips"<linux.chips@gmail.com>  wrote:
+>> On 12/28/2015 07:47 PM, Sage Weil wrote:
+>>> On Fri, 25 Dec 2015, ?? wrote:
+>>>> Hi all,
+>>>>       When we read the code, we haven?t find the function that the=
+ client can bind a specific IP. In Ceph?s configuration, we could only =
+find the parameter ?public network?, but it seems acts on the OSD but n=
+ot the client.
+>>>>       There is a scenario that the client has two network cards na=
+med NIC1 and NIC2. The NIC1 is responsible for communicating with clust=
+er (monitor and RADOS) and the NIC2 has other services except Ceph?s cl=
+ient. So   we need the client can bind specific IP in order to differen=
+tiate the IP communicating with cluster from another IP serving other a=
+pplications. We want to know is there any configuration in Ceph to achi=
+eve this function? If there is, how could we configure the IP? if not, =
+could we add this function in Ceph? Thank you so much.
+>> you can use routing tables plus routing rules. otherwise linux will =
+just
+>> use the default gateway.
+>> or you can put the second interface on the same public net of ceph.
+>> though that would break if you have multiple external nets.
+>>> Right.  There isn't a configurable to do this now--we've always jus=
+t let
+>>> the kernel network layer sort it out. Is this just a matter of call=
+ing
+>>> bind on the socket before connecting? I've never done this before..
+>> linux will send all packets to the default gateway event if an
+>> application binds to an ip on different interface, the packet will g=
+o
+>> out with the source address as the binded one but through your route=
+r.
+>> the only solution, even if the bind function exists is to use the
+>> routing tables and rules.
+>>> sage
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message tomajordomo@vger.kernel.org
+>>> More majordomo info athttp://vger.kernel.org/majordomo-info.html
 
-> how about these examples about removing an osd:
-> - pg1.0 [1, 2, 3]
-> - osd.3 down and be removed
-> - mapping changes to [1, 2, 5], but osd.5 has no data, then install a
-> pg_temp mapping the PG back to [1, 2], then backfill happens to 5,
-> - normal io write to [1, 2], if io hits object which has been
-> backfilled to osd.5, io will also send to osd.5
-> - when backfill completes, remove the pg_temp and mapping changes back
-> to [1, 2, 5]
-
-Yes
-
-> another example:
-> - pg1.0 [1, 2, 3]
-> - osd.3 down and be removed
-> - mapping changes to [5, 1, 2], but osd.5 has no data of the pg, then
-> install a pg_temp mapping the PG back to [1, 2] which osd.1
-> temporarily becomes the primary, then backfill happens to 5,
-> - normal io write to [1, 2], if io hits object which has been
-> backfilled to osd.5, io will also send to osd.5
-> - when backfill completes, remove the pg_temp and mapping changes back
-> to [5, 1, 2]
-> 
-> is my ananysis right?
-
-Yep!
-
-sage
-
-> 
-> 2015-12-29 1:30 GMT+08:00 Sage Weil <sage@newdream.net>:
-> > On Mon, 28 Dec 2015, Zhiqiang Wang wrote:
-> >> 2015-12-27 20:48 GMT+08:00 Dong Wu <archer.wudong@gmail.com>:
-> >> > Hi,
-> >> > When add osd or remove osd, ceph will backfill to rebalance data.
-> >> > eg:
-> >> > - pg1.0    [1, 2, 3]
-> >> > - add an osd(eg. osd.7)
-> >> > - ceph start backfill, then pg1.0 osd set changes to [1, 2, 7]
-> >> > - if [a, b, c, d, e] are objects needing to backfill to osd.7 and now
-> >> > object a is backfilling
-> >> > - when a write io hits object a, then the io needs to wait for its
-> >> > complete, then goes on.
-> >> > - but if io hits object b which has not been backfilled, io reaches
-> >> > osd.1, then osd.1 send the io to osd.2  and osd.7, but osd.7 does not
-> >> > have object b, so osd.7 needs to wait for object b to backfilled, then
-> >> > write. Is it right? Or osd.1 only send the io to osd.2, not both?
-> >>
-> >> I think in this case, when the write of object b reaches osd.1, it
-> >> holds the client write, raises the priority of the recovery of object
-> >> b, and kick off the recovery of it. When the recovery of object b is
-> >> done, it requeue the client write, and then everything goes like
-> >> usual.
-> >
-> > It's more complicated than that.  In a normal (log-based) recovery
-> > situation, it is something like the above: if the acting set is [1,2,3]
-> > but 3 is missing the latest copy of A, a write to A will block on the
-> > primary while the primary initiates recovery of A immediately.  Once that
-> > completes the IO will continue.
-> >
-> > For backfill, it's different.  In your example, you start with [1,2,3]
-> > then add in osd.7.  The OSD will see that 7 has no data for teh PG and
-> > install a pg_temp entry mapping the PG back to [1,2,3] temporarily.  Then
-> > things will proceed normally while backfill happens to 7.  Backfill won't
-> > interfere with normal IO at all, except that IO to the portion of the PG
-> > that has already been backfilled will also be sent to the backfill target
-> > (7) so that it stays up to date.  Once it complets, the pg_temp entry is
-> > removed and the mapping changes back to [1,2,7].  Then osd.3 is allowed to
-> > remove it's copy of the PG.
-> >
-> > sage
-> >
-> 
-> 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
