@@ -1,37 +1,54 @@
-From: "Skoll, Jeff" <uk038853@student.uni-kassel.de>
-Subject: Charity/Donation
-Date: Tue, 05 Jan 2016 00:04:11 -0500
-Message-ID: <auto-000000159799__2116.27592002532$1451971003$gmane$org@mailadmin.uni-kassel.de>
-Reply-To: jeff.skoll@skollcharity.org
+From: "EMAIL LOTTERIE" <christiane.hamann@aol.com>
+Subject: Benachrichtigung
+Date: Mon, 4 Jan 2016 07:24:07 -0500
+Message-ID: <be11e9e520408256f1ac4555de4c138b.squirrel__48104.4279331856$1451972659$gmane$org@185.121.132.26>
+Reply-To: christiane_hamann2@aol.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.its.uni-kassel.de ([141.51.12.52]:3318 "EHLO
-	mx2.its.uni-kassel.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750823AbcAEFPm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jan 2016 00:15:42 -0500
-Content-Description: Mail message body
+Received: from [185.121.132.26] ([185.121.132.26]:50080 "EHLO mail.vps.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751508AbcAEFn0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 Jan 2016 00:43:26 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Me <uk038853@student.uni-kassel.de>
 
-Hi,
-My name is Jeffrey Skoll, a philanthropist and the founder of one of th=
-e largest private foundations in the world. I believe strongly in =E2=80=
-=98giving while living.=E2=80=99 I had one idea that never changed in m=
-y mind =E2=80=94 that you should use your wealth to help people and I h=
-ave decided to secretly give USD2.498 Million to a randomly selected in=
-dividual. On receipt of this email, you should count yourself as the in=
-dividual. Kindly get back to me at your earliest convenience, so I know=
- your email address is valid.
 
-Visit the web page to know more about me: http://www.theglobeandmail.co=
-m/news/national/meet-the-canadian-billionaire-whos-giving-it-all-away/a=
-rticle4209888/ or you can read an article of me on Wikipedia.
 
-Regards,
-Jeffrey Skoll.
+
+Sehr geehrte / ter email Ben=FCtzer !
+
+Ihre email Adresse hat =801.200000,00=80 (EINEMILLIONZWEIHUNDERTAUSEND =
+EURO)
+gewonnen . Mit den Gl=FCckszahlen 9-3-8-26-28-4-64 In der EURO MILLIONE=
+N
+EMAIL LOTTERIE.Die Summe ergibt sich aus
+einer Gewinnausschuttung von. =8022.800,000,00
+( ZWEIUNDZWANZIGMILLIONENACHTHUNDERTTOUSEND )
+Die Summe wurde durch 19 Gewinnern aus der gleichen
+Kategorie geteilt. ! Bitte kontaktieren Sie f=FCr Ihren Gewinn zust=E4n=
+dige
+Sachbearbeiterin Frau Christiane Hamann per email:
+christiane_hamann2@aol.com
+BITTE AUSFUILLEN DEIN DATAS AUS UNTEN.
+Gl=FCckszahlen:_______________
+NAME: ___________________FAMILIENNAME:_____________________
+ADRESSE:__________________________________________________
+STADT: ________________PLZ: ____________LAND: _______________
+GEB: DATUM: __________________BERUF:________________________
+=46ESTNETZ TEL.NR: ____________________________________________
+MOBILETELEFON NR: ___________________FAX: ___________________
+EMAIL:___________________________ DATE____________________
+SIGNATURE:_________________________
+
+bitte f=FCllen Sie das anschlie=DFende Formular vollst=E4ndig aus und s=
+enden es
+per email zur=FCck !
+Hochachtungsvoll
+Inmaculada Garcia Martinez
+Koordinator.
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
