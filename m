@@ -1,45 +1,66 @@
 From: Guang Yang <guangyy@gmail.com>
-Subject: Long peering - throttle at FileStore::queue_transactions
-Date: Mon, 4 Jan 2016 15:32:19 -0800
-Message-ID: <CAKtk8hdb1dTJ013Qed1D9Wu_wWNvTM9H0hjqg2PGVr9xBnt51g@mail.gmail.com>
+Subject: OSD data file are OSD logs
+Date: Mon, 4 Jan 2016 15:37:26 -0800
+Message-ID: <CAKtk8hf=h19gTeDayhmo24ThhbJPPLmOfq2O++iuB7RuBr4gxQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f173.google.com ([209.85.160.173]:35074 "EHLO
-	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752012AbcADXcU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jan 2016 18:32:20 -0500
-Received: by mail-yk0-f173.google.com with SMTP id x67so264391020ykd.2
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Jan 2016 15:32:20 -0800 (PST)
+Received: from mail-yk0-f171.google.com ([209.85.160.171]:34945 "EHLO
+	mail-yk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753541AbcADXh0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jan 2016 18:37:26 -0500
+Received: by mail-yk0-f171.google.com with SMTP id x67so264494123ykd.2
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Jan 2016 15:37:26 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
-Cc: sjust@redhat.com
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Hi Cephers,
-Happy New Year! I got question regards to the long PG peering..
+Before I open a tracker, I would like check if it is a known issue or not..
 
-Over the last several days I have been looking into the *long peering*
-problem when we start a OSD / OSD host, what I observed was that the
-two peering working threads were throttled (stuck) when trying to
-queue new transactions (writing pg log), thus the peering process are
-dramatically slow down.
+One one of our clusters, there was OSD crash during repairing,  the
+crash happened after we issued a PG repair for inconsistent PGs, which
+failed because the recorded file size (within xattr) mismatched with
+the actual file size.
 
-The first question came to me was, what were the transactions in the
-queue? The major ones, as I saw, included:
+The mismatch was caused by the fact that the content of the data file
+are OSD logs, following is from osd.354 on c003:
 
-- The osd_map and incremental osd_map, this happens if the OSD had
-been down for a while (in a large cluster), or when the cluster got
-upgrade, which made the osd_map epoch the down OSD had, was far behind
-the latest osd_map epoch. During the OSD booting, it would need to
-persist all those osd_maps and generate lots of filestore transactions
-(linear with the epoch gap).
-> As the PG was not involved in most of those epochs, could we only take and persist those osd_maps which matter to the PGs on the OSD?
+-rw-r--r-- 1 yahoo root  75168 Jan  3 07:30
+default.12061.9\u8396947527\u52ac8b3ec6\uo.jpg__head_A2478171__3_ffffffffffffffff_7
+-bash-4.1$ head
+"default.12061.9\u8396947527\u52ac8b3ec6\uo.jpg__head_A2478171__3_ffffffffffffffff_7"
+2016-01-03 07:30:01.600119 7f7fe2096700 15
+filestore(/home/y/var/lib/ceph/osd/ceph-354) getattrs
+3.171s7_head/a2478171/default.12061.9_8396947527_52ac8b3ec6_o.jpg/head//3/18446744073709551615/7
+2016-01-03 07:30:01.604967 7f7fe2096700 10
+filestore(/home/y/var/lib/ceph/osd/ceph-354)  -ERANGE, len is 494
+2016-01-03 07:30:01.604984 7f7fe2096700 10
+filestore(/home/y/var/lib/ceph/osd/ceph-354)  -ERANGE, got 247
+2016-01-03 07:30:01.604986 7f7fe2096700 20
+filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
+'_user.rgw.idtag'
+2016-01-03 07:30:01.604996 7f7fe2096700 20
+filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting '_'
+2016-01-03 07:30:01.605007 7f7fe2096700 20
+filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
+'snapset'
+2016-01-03 07:30:01.605013 7f7fe2096700 20
+filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
+'_user.rgw.manifest'
+2016-01-03 07:30:01.605026 7f7fe2096700 20
+filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
+'hinfo_key'
+2016-01-03 07:30:01.605042 7f7fe2096700 20
+filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
+'_user.rgw.x-amz-meta-origin'
+2016-01-03 07:30:01.605049 7f7fe2096700 20
+filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
+'_user.rgw.acl'
 
-- There are lots of deletion transactions, and as the PG booting, it
-needs to merge the PG log from its peers, and for the deletion PG
-entry, it would need to queue the deletion transaction immediately.
-> Could we delay the queue of the transactions until all PGs on the host are peered?
+
+This only happens on the clusters we turned on the verbose log
+(debug_osd/filestore=20). And we are running ceph v0.87.
 
 Thanks,
 Guang
