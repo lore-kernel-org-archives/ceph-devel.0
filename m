@@ -1,37 +1,98 @@
-From: Wukongming <wu.kongming@h3c.com>
-Subject: Is rbd map/unmap op. configured like an event?
-Date: Mon, 4 Jan 2016 09:48:40 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D7503DEF998@H3CMLB12-EX.srv.huawei-3com.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Create one millon empty files with cephfs
+Date: Mon, 4 Jan 2016 06:57:54 -0800
+Message-ID: <CAJ4mKGYdccz9qo6a=g-i8TG8Ym4ND03wXKL7iPUCFmJLOh=YUQ@mail.gmail.com>
+References: <CAJ2LqzhCi0mCmyi6Uu_1KguYqyO9aUfDDkDJukOBTBP+P9S_AQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:32984 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751505AbcADJro (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 4 Jan 2016 04:47:44 -0500
-Content-Language: zh-CN
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:36686 "EHLO
+	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751354AbcADO5z convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jan 2016 09:57:55 -0500
+Received: by mail-wm0-f42.google.com with SMTP id l65so165741917wmf.1
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Jan 2016 06:57:55 -0800 (PST)
+In-Reply-To: <CAJ2LqzhCi0mCmyi6Uu_1KguYqyO9aUfDDkDJukOBTBP+P9S_AQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Fengguang Gong <fengguanggong@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgQWxsLA0KDQpJcyByYmQgbWFwL3VubWFwIG9wLiBjb25maWd1cmVkIGxpa2UgYW4gZXZlbnQg
-aW4gdGhlIGRpcmVjdG9yeSBvZiAvZXRjL2luaXQsIHNvIHdlIGNhbiB1c2Ugc3lzdGVtL3Vwc3Rh
-cnQgdG8gYXV0b21hbmFnZSBpdD8NCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tDQp3dWtvbmdtaW5nIElEOiAxMjAxOQ0KVGVso7owNTcxLTg2NzYwMjM5DQpE
-ZXB0o7oyMDE0IFVJUzIgT05FU3Rvcg0KDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCrG+08q8/ryw
-xuS4vbz+uqzT0Lq81t27qsj9zajQxby8yvXT0M/euavLvrXEsaPD3NDFz6KjrL32z97T2reiy824
-+MnPw+a12Na31tDB0LP2DQq1xLj2yMu78si61+mho7371rnIzrrOxuTL+8jL0tTIzrrO0M7Kvcq5
-08OjqLD8wKi1q7K7z97T2sirsr+78rK/t9a12NC5wrahori01sahog0Ku/LJoreio6mxvtPKvP7W
-0LXE0MXPoqGjyOe5+8T6tO3K1cHLsb7Tyrz+o6zH68T6waK8tLXnu7C78tPKvP7NqNaqt6K8/sjL
-sqLJvrP9sb4NCtPKvP6joQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWlu
-IGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9u
-bHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3Zl
-LiBBbnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5
-IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xv
-c3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRo
-YW4gdGhlIGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2Vp
-dmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhv
-bmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCg==
+On Tue, Dec 29, 2015 at 4:55 AM, Fengguang Gong <fengguanggong@gmail.co=
+m> wrote:
+> hi,
+> We create one million empty files through filebench, here is the test=
+ env:
+> MDS: one MDS
+> MON: one MON
+> OSD: two OSD, each with one Inter P3700; data on OSD with 2x replica
+> Network: all nodes are connected through 10 gigabit network
+>
+> We use more than one client to create files, to test the scalability =
+of
+> MDS. Here are the results:
+> IOPS under one client: 850
+> IOPS under two client: 1150
+> IOPS under four client: 1180
+>
+> As we can see, the IOPS almost maintains unchanged when the number of
+> client increase from 2 to 4.
+>
+> Cephfs may have a low scalability under one MDS, and we think its the=
+ big
+> lock in
+> MDSDamon::ms_dispatch()::Mutex::locker(every request acquires this lo=
+ck),
+> who limits the
+> scalability of MDS.
+>
+> We think this big lock could be removed through the following steps:
+> 1. separate the process of ClientRequest with other requests, so we c=
+an
+> parallel the process
+> of ClientRequest
+> 2. use some small granularity locks instead of big lock to ensure
+> consistency
+>
+> Wondering this idea is reasonable?
+
+Parallelizing the MDS is probably a very big job; it's on our radar
+but not for a while yet.
+
+If one were to do it, yes, breaking down the big MDS lock would be the
+way forward. I'm not sure entirely what that involves =E2=80=94 you'd n=
+eed to
+significantly chunk up the locking on our more critical data
+structures, most especially the MDCache. Luckily there is *some* help
+there in terms of the file cap locking structures we already have in
+place, but it's a *huge* project and not one to be undertaken lightly.
+A special processing mechanism for ClientRequests versus other
+requests is not an assumption I'd start with.
+
+I think you'll find that file creates are just about the least
+scalable thing you can do on CephFS right now, though, so there is
+some easier ground. One obvious approach is to extend the current
+inode preallocation =E2=80=94 it already allocates inodes per-client an=
+d has a
+fast path inside of the MDS for handing them back. It'd be great if
+clients were aware of that preallocation and could create files
+without waiting for the MDS to talk back to them! The issue with this
+is two-fold:
+1) need to update the cap flushing protocol to deal with files newly
+created by the client
+2) need to handle all the backtrace stuff normally performed by the
+MDS on file create (which still needs to happen, on either the client
+or the server)
+There's also clean up in case of a client failure, but we've already
+got a model for that in how we figure out real file sizes and things
+based on max size.
+
+I think there's a ticket about this somewhere, but I can't find it off-=
+hand...
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
