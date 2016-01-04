@@ -1,39 +1,37 @@
-From: "Jeff Skoll" <s_w9gc9x@uni-kassel.de>
-Subject: Charity Donation
-Date: Sat, 02 Jan 2016 11:02:00 -0500
-Message-ID: <auto-000000180799@mailadmin.uni-kassel.de>
-Reply-To: jeff.skoll@skollcharity.org
+From: Wukongming <wu.kongming@h3c.com>
+Subject: Is rbd map/unmap op. configured like an event?
+Date: Mon, 4 Jan 2016 09:48:40 +0000
+Message-ID: <47D132BF400BE64BAE6D71033F7D3D7503DEF998@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4.its.uni-kassel.de ([141.51.12.63]:15254 "EHLO
-	mx4.its.uni-kassel.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751813AbcABQMT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Jan 2016 11:12:19 -0500
-Content-Description: Mail message body
+Received: from smtp.h3c.com ([60.191.123.56]:32984 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751505AbcADJro (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 4 Jan 2016 04:47:44 -0500
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Me <s_w9gc9x@uni-kassel.de>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-Hi,
-My name is Jeffrey Skoll, a philanthropist and the founder of one of th=
-e largest private foundations in the world. I believe strongly in =E2=80=
-=98giving while living.=E2=80=99 I had one idea that never changed in m=
-y mind =E2=80=94 that you should use your wealth to help people and I h=
-ave decided to secretly give USD2.498 Million to a randomly selected in=
-dividual. On receipt of this email, you should count yourself as the in=
-dividual. Kindly get back to me at your earliest convenience, so I know=
- your email address is valid.
-
-Visit the web page to know more about me: http://www.theglobeandmail.co=
-m/news/national/meet-the-canadian-billionaire-whos-giving-it-all-away/a=
-rticle4209888/ or you can read an article of me on Wikipedia.
-
-Regards,
-Jeffrey Skoll.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgQWxsLA0KDQpJcyByYmQgbWFwL3VubWFwIG9wLiBjb25maWd1cmVkIGxpa2UgYW4gZXZlbnQg
+aW4gdGhlIGRpcmVjdG9yeSBvZiAvZXRjL2luaXQsIHNvIHdlIGNhbiB1c2Ugc3lzdGVtL3Vwc3Rh
+cnQgdG8gYXV0b21hbmFnZSBpdD8NCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tDQp3dWtvbmdtaW5nIElEOiAxMjAxOQ0KVGVso7owNTcxLTg2NzYwMjM5DQpE
+ZXB0o7oyMDE0IFVJUzIgT05FU3Rvcg0KDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCrG+08q8/ryw
+xuS4vbz+uqzT0Lq81t27qsj9zajQxby8yvXT0M/euavLvrXEsaPD3NDFz6KjrL32z97T2reiy824
++MnPw+a12Na31tDB0LP2DQq1xLj2yMu78si61+mho7371rnIzrrOxuTL+8jL0tTIzrrO0M7Kvcq5
+08OjqLD8wKi1q7K7z97T2sirsr+78rK/t9a12NC5wrahori01sahog0Ku/LJoreio6mxvtPKvP7W
+0LXE0MXPoqGjyOe5+8T6tO3K1cHLsb7Tyrz+o6zH68T6waK8tLXnu7C78tPKvP7NqNaqt6K8/sjL
+sqLJvrP9sb4NCtPKvP6joQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWlu
+IGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9u
+bHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3Zl
+LiBBbnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5
+IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xv
+c3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRo
+YW4gdGhlIGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2Vp
+dmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhv
+bmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCg==
