@@ -1,47 +1,39 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Long peering - throttle at FileStore::queue_transactions
-Date: Mon, 4 Jan 2016 22:21:57 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1601042220510.29548@cpach.fuggernut.com>
-References: <CAKtk8hdb1dTJ013Qed1D9Wu_wWNvTM9H0hjqg2PGVr9xBnt51g@mail.gmail.com>
+From: "Skoll, Jeff" <uk038853@student.uni-kassel.de>
+Subject: Charity/Donation
+Date: Tue, 05 Jan 2016 00:04:11 -0500
+Message-ID: <auto-000000159799__2116.27592002532$1451971003$gmane$org@mailadmin.uni-kassel.de>
+Reply-To: jeff.skoll@skollcharity.org
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51375 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753884AbcAEDV6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jan 2016 22:21:58 -0500
-In-Reply-To: <CAKtk8hdb1dTJ013Qed1D9Wu_wWNvTM9H0hjqg2PGVr9xBnt51g@mail.gmail.com>
+Received: from mx2.its.uni-kassel.de ([141.51.12.52]:3318 "EHLO
+	mx2.its.uni-kassel.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750823AbcAEFPm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jan 2016 00:15:42 -0500
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guang Yang <guangyy@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, sjust@redhat.com
+To: Me <uk038853@student.uni-kassel.de>
 
-On Mon, 4 Jan 2016, Guang Yang wrote:
-> Hi Cephers,
-> Happy New Year! I got question regards to the long PG peering..
-> 
-> Over the last several days I have been looking into the *long peering*
-> problem when we start a OSD / OSD host, what I observed was that the
-> two peering working threads were throttled (stuck) when trying to
-> queue new transactions (writing pg log), thus the peering process are
-> dramatically slow down.
-> 
-> The first question came to me was, what were the transactions in the
-> queue? The major ones, as I saw, included:
-> 
-> - The osd_map and incremental osd_map, this happens if the OSD had
-> been down for a while (in a large cluster), or when the cluster got
-> upgrade, which made the osd_map epoch the down OSD had, was far behind
-> the latest osd_map epoch. During the OSD booting, it would need to
-> persist all those osd_maps and generate lots of filestore transactions
-> (linear with the epoch gap).
-> > As the PG was not involved in most of those epochs, could we only take and persist those osd_maps which matter to the PGs on the OSD?
+Hi,
+My name is Jeffrey Skoll, a philanthropist and the founder of one of th=
+e largest private foundations in the world. I believe strongly in =E2=80=
+=98giving while living.=E2=80=99 I had one idea that never changed in m=
+y mind =E2=80=94 that you should use your wealth to help people and I h=
+ave decided to secretly give USD2.498 Million to a randomly selected in=
+dividual. On receipt of this email, you should count yourself as the in=
+dividual. Kindly get back to me at your earliest convenience, so I know=
+ your email address is valid.
 
-This part should happen before the OSD sends the MOSDBoot message, before 
-anyone knows it exists.  There is a tunable threshold that controls how 
-recent the map has to be before the OSD tries to boot.  If you're 
-seeing this in the real world, be probably just need to adjust that value 
-way down to something small(er).
+Visit the web page to know more about me: http://www.theglobeandmail.co=
+m/news/national/meet-the-canadian-billionaire-whos-giving-it-all-away/a=
+rticle4209888/ or you can read an article of me on Wikipedia.
 
-sage
-
+Regards,
+Jeffrey Skoll.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
