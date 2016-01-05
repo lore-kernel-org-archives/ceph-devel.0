@@ -1,87 +1,92 @@
-From: Guang Yang <guangyy@gmail.com>
-Subject: Re: OSD data file are OSD logs
-Date: Mon, 4 Jan 2016 16:06:09 -0800
-Message-ID: <CAKtk8hdjPS5zA4rzUf-CrHj_QV1Pt8e+CgQPcjskx587b0QikQ@mail.gmail.com>
-References: <CAKtk8hf=h19gTeDayhmo24ThhbJPPLmOfq2O++iuB7RuBr4gxQ@mail.gmail.com>
-	<CAN=+7FVZcjb1FHQGTt9WAwET3Meh8pcJW8XEbpm8rCz0D6qGJA@mail.gmail.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: Long peering - throttle at FileStore::queue_transactions
+Date: Mon, 4 Jan 2016 17:17:25 -0800
+Message-ID: <CAN=+7FVS7CUvBf+7cb+89R_gWhi=SRcZBGa3N9ZcKH3MXimNdw@mail.gmail.com>
+References: <CAKtk8hdb1dTJ013Qed1D9Wu_wWNvTM9H0hjqg2PGVr9xBnt51g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f171.google.com ([209.85.160.171]:34710 "EHLO
-	mail-yk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753408AbcAEAGK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jan 2016 19:06:10 -0500
-Received: by mail-yk0-f171.google.com with SMTP id a85so188082446ykb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Jan 2016 16:06:10 -0800 (PST)
-In-Reply-To: <CAN=+7FVZcjb1FHQGTt9WAwET3Meh8pcJW8XEbpm8rCz0D6qGJA@mail.gmail.com>
+Received: from mail-ig0-f179.google.com ([209.85.213.179]:34168 "EHLO
+	mail-ig0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753688AbcAEBRZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jan 2016 20:17:25 -0500
+Received: by mail-ig0-f179.google.com with SMTP id ik10so3607784igb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Jan 2016 17:17:25 -0800 (PST)
+In-Reply-To: <CAKtk8hdb1dTJ013Qed1D9Wu_wWNvTM9H0hjqg2PGVr9xBnt51g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Guang Yang <guangyy@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-Thanks Sam for the confirmation.
+We need every OSDMap persisted before persisting later ones because we
+rely on there being no holes for a bunch of reasons.
 
-Thanks,
-Guang
+The deletion transactions are more interesting.  It's not part of the
+boot process, these are deletions resulting from merging in a log from
+a peer which logically removed an object.  It's more noticeable on
+boot because all PGs will see these operations at once (if there are a
+bunch of deletes happening).  We need to process these transactions
+before we can serve reads (before we activate) currently since we use
+the on disk state (modulo the objectcontext locks) as authoritative.
+That transaction iirc also contains the updated PGLog.  We can't avoid
+writing down the PGLog prior to activation, but we *can* delay the
+deletes (and even batch/throttle them) if we do some work:
+1) During activation, we need to maintain a set of to-be-deleted
+objects.  For each of these objects, we need to populate the
+objectcontext cache with an exists=false objectcontext so that we
+don't erroneously read the deleted data.  Each of the entries in the
+to-be-deleted object set would have a reference to the context to keep
+it alive until the deletion is processed.
+2) Any write operation which references one of these objects needs to
+be preceded by a delete if one has not yet been queued (and the
+to-be-deleted set updated appropriately).  The tricky part is that the
+primary and replicas may have different objects in this set...  The
+replica would have to insert deletes ahead of any subop (or the ec
+equilivant) it gets from the primary.  For that to work, it needs to
+have something like the obc cache.  I have a wip-replica-read branch
+which refactors object locking to allow the replica to maintain locks
+(to avoid replica-reads conflicting with writes).  That machinery
+would probably be the right place to put it.
+3) We need to make sure that if a node restarts anywhere in this
+process that it correctly repopulates the set of to be deleted
+entries.  We might consider a deleted-to version in the log?  Not sure
+about this one since it would be different on the replica and the
+primary.
 
-On Mon, Jan 4, 2016 at 3:59 PM, Samuel Just <sjust@redhat.com> wrote:
-> IIRC, you are running giant.  I think that's the log rotate dangling
-> fd bug (not fixed in giant since giant is eol).  Fixed upstream
-> 8778ab3a1ced7fab07662248af0c773df759653d, firefly backport is
-> b8e3f6e190809febf80af66415862e7c7e415214.
-> -Sam
+Anyway, it's actually more complicated than you'd expect and will
+require more design (and probably depends on wip-replica-read
+landing).
+-Sam
+
+On Mon, Jan 4, 2016 at 3:32 PM, Guang Yang <guangyy@gmail.com> wrote:
+> Hi Cephers,
+> Happy New Year! I got question regards to the long PG peering..
 >
-> On Mon, Jan 4, 2016 at 3:37 PM, Guang Yang <guangyy@gmail.com> wrote:
->> Hi Cephers,
->> Before I open a tracker, I would like check if it is a known issue or not..
->>
->> One one of our clusters, there was OSD crash during repairing,  the
->> crash happened after we issued a PG repair for inconsistent PGs, which
->> failed because the recorded file size (within xattr) mismatched with
->> the actual file size.
->>
->> The mismatch was caused by the fact that the content of the data file
->> are OSD logs, following is from osd.354 on c003:
->>
->> -rw-r--r-- 1 yahoo root  75168 Jan  3 07:30
->> default.12061.9\u8396947527\u52ac8b3ec6\uo.jpg__head_A2478171__3_ffffffffffffffff_7
->> -bash-4.1$ head
->> "default.12061.9\u8396947527\u52ac8b3ec6\uo.jpg__head_A2478171__3_ffffffffffffffff_7"
->> 2016-01-03 07:30:01.600119 7f7fe2096700 15
->> filestore(/home/y/var/lib/ceph/osd/ceph-354) getattrs
->> 3.171s7_head/a2478171/default.12061.9_8396947527_52ac8b3ec6_o.jpg/head//3/18446744073709551615/7
->> 2016-01-03 07:30:01.604967 7f7fe2096700 10
->> filestore(/home/y/var/lib/ceph/osd/ceph-354)  -ERANGE, len is 494
->> 2016-01-03 07:30:01.604984 7f7fe2096700 10
->> filestore(/home/y/var/lib/ceph/osd/ceph-354)  -ERANGE, got 247
->> 2016-01-03 07:30:01.604986 7f7fe2096700 20
->> filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
->> '_user.rgw.idtag'
->> 2016-01-03 07:30:01.604996 7f7fe2096700 20
->> filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting '_'
->> 2016-01-03 07:30:01.605007 7f7fe2096700 20
->> filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
->> 'snapset'
->> 2016-01-03 07:30:01.605013 7f7fe2096700 20
->> filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
->> '_user.rgw.manifest'
->> 2016-01-03 07:30:01.605026 7f7fe2096700 20
->> filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
->> 'hinfo_key'
->> 2016-01-03 07:30:01.605042 7f7fe2096700 20
->> filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
->> '_user.rgw.x-amz-meta-origin'
->> 2016-01-03 07:30:01.605049 7f7fe2096700 20
->> filestore(/home/y/var/lib/ceph/osd/ceph-354) fgetattrs 61 getting
->> '_user.rgw.acl'
->>
->>
->> This only happens on the clusters we turned on the verbose log
->> (debug_osd/filestore=20). And we are running ceph v0.87.
->>
->> Thanks,
->> Guang
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Over the last several days I have been looking into the *long peering*
+> problem when we start a OSD / OSD host, what I observed was that the
+> two peering working threads were throttled (stuck) when trying to
+> queue new transactions (writing pg log), thus the peering process are
+> dramatically slow down.
+>
+> The first question came to me was, what were the transactions in the
+> queue? The major ones, as I saw, included:
+>
+> - The osd_map and incremental osd_map, this happens if the OSD had
+> been down for a while (in a large cluster), or when the cluster got
+> upgrade, which made the osd_map epoch the down OSD had, was far behind
+> the latest osd_map epoch. During the OSD booting, it would need to
+> persist all those osd_maps and generate lots of filestore transactions
+> (linear with the epoch gap).
+>> As the PG was not involved in most of those epochs, could we only take and persist those osd_maps which matter to the PGs on the OSD?
+>
+> - There are lots of deletion transactions, and as the PG booting, it
+> needs to merge the PG log from its peers, and for the deletion PG
+> entry, it would need to queue the deletion transaction immediately.
+>> Could we delay the queue of the transactions until all PGs on the host are peered?
+>
+> Thanks,
+> Guang
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
