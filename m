@@ -1,62 +1,83 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Long peering - throttle at FileStore::queue_transactions
-Date: Wed, 6 Jan 2016 09:09:42 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1601060908430.29548@cpach.fuggernut.com>
-References: <CAKtk8hdb1dTJ013Qed1D9Wu_wWNvTM9H0hjqg2PGVr9xBnt51g@mail.gmail.com> <alpine.DEB.2.11.1601042220510.29548@cpach.fuggernut.com> <CAKtk8hf8nDy75TdCvVAsy-tu9RXuAns+ARuvs1yr51JDUHn4mA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Stable releases preparation temporarily stalled
+Date: Wed, 6 Jan 2016 15:30:46 +0100
+Message-ID: <568D2516.2030706@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38081 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751936AbcAFOJn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jan 2016 09:09:43 -0500
-In-Reply-To: <CAKtk8hf8nDy75TdCvVAsy-tu9RXuAns+ARuvs1yr51JDUHn4mA@mail.gmail.com>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:39230 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751981AbcAFOav (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jan 2016 09:30:51 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guang Yang <guangyy@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Samuel Just <sjust@redhat.com>
+To: Abhishek L <abhishek.lekshmanan@gmail.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Nathan Cutler <ncutler@suse.cz>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 5 Jan 2016, Guang Yang wrote:
-> On Mon, Jan 4, 2016 at 7:21 PM, Sage Weil <sage@newdream.net> wrote:
-> > On Mon, 4 Jan 2016, Guang Yang wrote:
-> >> Hi Cephers,
-> >> Happy New Year! I got question regards to the long PG peering..
-> >>
-> >> Over the last several days I have been looking into the *long peering*
-> >> problem when we start a OSD / OSD host, what I observed was that the
-> >> two peering working threads were throttled (stuck) when trying to
-> >> queue new transactions (writing pg log), thus the peering process are
-> >> dramatically slow down.
-> >>
-> >> The first question came to me was, what were the transactions in the
-> >> queue? The major ones, as I saw, included:
-> >>
-> >> - The osd_map and incremental osd_map, this happens if the OSD had
-> >> been down for a while (in a large cluster), or when the cluster got
-> >> upgrade, which made the osd_map epoch the down OSD had, was far behind
-> >> the latest osd_map epoch. During the OSD booting, it would need to
-> >> persist all those osd_maps and generate lots of filestore transactions
-> >> (linear with the epoch gap).
-> >> > As the PG was not involved in most of those epochs, could we only take and persist those osd_maps which matter to the PGs on the OSD?
-> >
-> > This part should happen before the OSD sends the MOSDBoot message, before
-> > anyone knows it exists.  There is a tunable threshold that controls how
-> > recent the map has to be before the OSD tries to boot.  If you're
-> > seeing this in the real world, be probably just need to adjust that value
-> > way down to something small(er).
-> It would queue the transactions and then sends out the MOSDBoot, thus
-> there is still a chance that it could have contention with the peering
-> OPs (especially on large clusters where there are lots of activities
-> which generates many osdmap epoch). Any chance we can change the
-> *queue_transactions* to "apply_transactions*, thus we block there
-> waiting for the persistent of the osdmap. At least we may be able to
-> do that during OSD booting? The concern is, if the OSD is active, the
-> apply_transaction would take longer with holding the osd_lock..
-> I don't find such tuning, could you elaborate? Thanks!
+Hi,
 
-Yeah, that sounds like a good idea (and clearly safe).  Probably a simpler 
-fix is to just call store->flush() or similar before sending the boot 
-message?
+The stable releases (hammer, infernalis) did not make progress in the p=
+ast few weeks because we can't run tests.
 
-sage
+Before xmas the following happened:
 
+* the sepia lab was migrated and we discovered the OpenStack teuthology=
+ backend can't run without it (that was a problem during a few days onl=
+y)
+* there are OpenStack specific failures in each teuthology suites and i=
+t is non trivial to separate them from genuine backport errors
+* the make check bot went down (it was partially running on my private =
+hardware)
+
+If we just wait, I'm not sure when we will be able to resume our work b=
+ecause:
+
+* the sepia lab is back but has less horsepower than it did
+* not all of us have access to the sepia lab
+* the make check bot is being worked on by the infrastructure team but =
+it is low priority and it may take weeks before it's back online
+* the ceph-qa-suite errors that are OpenStack specific are low priority=
+ and it may never be fixed
+
+I think we should rely on the sepia lab for testing for the foreseeable=
+ future and wait for the make check bot to be back. Tests will take a l=
+ong time to run, but we've been able to work with a one week delay befo=
+re so it's not a blocker.
+
+Although fixing OpenStack specific errors would allow us to use the teu=
+thology OpenStack backend (I will fix the last error left in the rados =
+suite), it is unrealistic to set that as a requirement to run tests: we=
+ don't have the workforce nor the skills to do that. Hopefully, some ti=
+me in the future, Ceph developers will  use ceph-qa-suite on OpenStack =
+as part of the development workflow. But right now running ceph-qa-suit=
+e on OpenStack suites is outside of the development workflow and in a s=
+tate of continuous regression which is inconvenient for us because we n=
+eed something stable to compare the runs from the integration branch.
+
+=46ixing the make check bot is a two part problem. Each failed run must=
+ be looked at to chase false negatives (continuous integration with fal=
+se negatives is a plague), which I did in the past year on a daily basi=
+s and I'm happy to keep doing. Before xmas break the bot running at jen=
+kins.ceph.com sent over 90% false negative, primarily because it was tr=
+ying to run on unsupported operating systems and it was stopped until t=
+his is fixed. It also appears that the machine running the bot is not r=
+e-imaged after each test, meaning a bugous run may taint all future tes=
+ts and create a continuous flow of false negative. Addressing these two=
+ issues require knowing or learning about the Ceph jenkins setup and sl=
+ave provisioning. This probably is a few days of work, reason why the i=
+nfrastructure team can't resolve that immediately.
+
+If you have alternative creative ideas on how to improve the current si=
+tuation, please speak up :-)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
