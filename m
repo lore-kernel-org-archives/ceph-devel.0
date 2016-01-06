@@ -1,33 +1,56 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Speeding up rbd_stat() in libvirt
-Date: Wed, 6 Jan 2016 16:31:50 +0100
-Message-ID: <568D3366.3050104@42on.com>
-References: <56813DB8.2060008@42on.com>
- <780342854.4132479.1451921916433.JavaMail.zimbra@redhat.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 01/06/2016 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 06 Jan 2016 09:43:29 -0600
+Message-ID: <568D3621.40901@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:34763 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751777AbcAFPb3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jan 2016 10:31:29 -0500
-In-Reply-To: <780342854.4132479.1451921916433.JavaMail.zimbra@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:50006 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752425AbcAFPnc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 6 Jan 2016 10:43:32 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id B345C8F4FE
+	for <ceph-devel@vger.kernel.org>; Wed,  6 Jan 2016 15:43:32 +0000 (UTC)
+Received: from [10.3.112.84] (ovpn-112-84.phx2.redhat.com [10.3.112.84])
+	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u06FhU4w007207
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 6 Jan 2016 10:43:32 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+8AM PST as usual (ie in 18 minutes)! Discussion topics today include 
+bluestore testing results and a potential performance regression in 
+CentOS/RHEL 7.1 kernels.  Please feel free to add your own topics!
+
+Here's the links:
+
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
 
 
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
 
-On 04-01-16 16:38, Jason Dillaman wrote:
-> Short term, assuming there wouldn't be an objection from the libvirt community, I think spawning a thread pool and concurrently executing several rbd_stat calls concurrently would be the easiest and cleanest solution.  I wouldn't suggest trying to roll your own solution for retrieving image sizes for format 1 and 2 RBD images directly within libvirt.
-> 
-> Longer term, given this use case, perhaps it would make sense to add an async version of rbd_open.  The rbd_stat call itself just reads the data from memory initialized by rbd_open.  On the Jewel branch, librbd has had some major rework and image loading is asynchronous under the hood already.
-> 
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
 
-I created a issue for this: http://tracker.ceph.com/issues/14264
-
-Would be nice to have in librbd.
-
-Wido
+Mark
