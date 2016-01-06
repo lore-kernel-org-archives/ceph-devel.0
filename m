@@ -1,50 +1,62 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: FreeBSD Building and Testing
-Date: Wed, 6 Jan 2016 13:41:31 +0100
-Message-ID: <568D0B7B.2090203@digiware.nl>
-References: <5676D2D9.5010600@digiware.nl>
- <CANE=7sVw1zhxYzT9q6WKkUV5tCioLuO0J_ZKCkdKXR5jFDHsKg@mail.gmail.com>
- <56785D9A.2020701@digiware.nl> <568168F0.2060605@digiware.nl>
- <20160106075144.GA3402@gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Long peering - throttle at FileStore::queue_transactions
+Date: Wed, 6 Jan 2016 09:09:42 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1601060908430.29548@cpach.fuggernut.com>
+References: <CAKtk8hdb1dTJ013Qed1D9Wu_wWNvTM9H0hjqg2PGVr9xBnt51g@mail.gmail.com> <alpine.DEB.2.11.1601042220510.29548@cpach.fuggernut.com> <CAKtk8hf8nDy75TdCvVAsy-tu9RXuAns+ARuvs1yr51JDUHn4mA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:46528 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751140AbcAFMln (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 6 Jan 2016 07:41:43 -0500
-In-Reply-To: <20160106075144.GA3402@gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:38081 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751936AbcAFOJn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jan 2016 09:09:43 -0500
+In-Reply-To: <CAKtk8hf8nDy75TdCvVAsy-tu9RXuAns+ARuvs1yr51JDUHn4mA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <mgolub@mirantis.com>
-Cc: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Guang Yang <guangyy@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Samuel Just <sjust@redhat.com>
 
-On 6-1-2016 08:51, Mykola Golub wrote:
-> 
-> Are you able to reproduce this problem manually? I.e. in src dir, start the
-> cluster using vstart.sh:
-> 
-> ./vstart.sh -n
-> 
-> Check it is running:
-> 
-> ./ceph -s
-> 
-> Repeat the test:
-> 
-> truncate -s 0 empty_map.txt
-> ./crushtool -c empty_map.txt -o empty_map.map
-> ./ceph osd setcrushmap -i empty_map.map
-> 
-> Expected output:
-> 
->  "Error EINVAL: Failed crushmap test: ./crushtool: exit status: 1"
-> 
+On Tue, 5 Jan 2016, Guang Yang wrote:
+> On Mon, Jan 4, 2016 at 7:21 PM, Sage Weil <sage@newdream.net> wrote:
+> > On Mon, 4 Jan 2016, Guang Yang wrote:
+> >> Hi Cephers,
+> >> Happy New Year! I got question regards to the long PG peering..
+> >>
+> >> Over the last several days I have been looking into the *long peering*
+> >> problem when we start a OSD / OSD host, what I observed was that the
+> >> two peering working threads were throttled (stuck) when trying to
+> >> queue new transactions (writing pg log), thus the peering process are
+> >> dramatically slow down.
+> >>
+> >> The first question came to me was, what were the transactions in the
+> >> queue? The major ones, as I saw, included:
+> >>
+> >> - The osd_map and incremental osd_map, this happens if the OSD had
+> >> been down for a while (in a large cluster), or when the cluster got
+> >> upgrade, which made the osd_map epoch the down OSD had, was far behind
+> >> the latest osd_map epoch. During the OSD booting, it would need to
+> >> persist all those osd_maps and generate lots of filestore transactions
+> >> (linear with the epoch gap).
+> >> > As the PG was not involved in most of those epochs, could we only take and persist those osd_maps which matter to the PGs on the OSD?
+> >
+> > This part should happen before the OSD sends the MOSDBoot message, before
+> > anyone knows it exists.  There is a tunable threshold that controls how
+> > recent the map has to be before the OSD tries to boot.  If you're
+> > seeing this in the real world, be probably just need to adjust that value
+> > way down to something small(er).
+> It would queue the transactions and then sends out the MOSDBoot, thus
+> there is still a chance that it could have contention with the peering
+> OPs (especially on large clusters where there are lots of activities
+> which generates many osdmap epoch). Any chance we can change the
+> *queue_transactions* to "apply_transactions*, thus we block there
+> waiting for the persistent of the osdmap. At least we may be able to
+> do that during OSD booting? The concern is, if the OSD is active, the
+> apply_transaction would take longer with holding the osd_lock..
+> I don't find such tuning, could you elaborate? Thanks!
 
-Oke thanx....
+Yeah, that sounds like a good idea (and clearly safe).  Probably a simpler 
+fix is to just call store->flush() or similar before sending the boot 
+message?
 
-Nice to have some of these examples...
-
---WjW
+sage
 
