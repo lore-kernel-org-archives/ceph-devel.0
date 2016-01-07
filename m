@@ -1,75 +1,48 @@
-From: Javen Wu <javen.wu@xtaotech.com>
-Subject: Is BlueFS an alternative of BlueStore?
-Date: Thu, 7 Jan 2016 12:01:55 +0800
-Message-ID: <568DE333.7070206@xtaotech.com>
+From: CSa <Christian.Salzmann@fu-berlin.de>
+Subject: cephfs (hammer) flips directory access bits
+Date: Thu, 07 Jan 2016 09:05 +0100
+Message-ID: <n6l67c$hu$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mr213139.mail.yeah.net ([223.252.213.139]:44906 "EHLO
-	mr213139.mail.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751272AbcAGEIj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jan 2016 23:08:39 -0500
+Received: from plane.gmane.org ([80.91.229.3]:44131 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751616AbcAGIPJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Jan 2016 03:15:09 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1aH5iq-0001Cp-ED
+	for ceph-devel@vger.kernel.org; Thu, 07 Jan 2016 09:15:04 +0100
+Received: from mintzer.imp.fu-berlin.de ([160.45.113.19])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Jan 2016 09:15:04 +0100
+Received: from Christian.Salzmann by mintzer.imp.fu-berlin.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Jan 2016 09:15:04 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@redhat.com
-Cc: Peng Xie <peng.hse@xtaotech.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Sage,
+Hi,
 
-Sorry to bother you. I am not sure if it is appropriate to send email to 
-you
-directly, but I cannot find any useful information to address my confusion
-from Internet. Hope you can help me.
+we are using cephfs on a ceph cluster (V0.94.5, 3x MON, 1x MDS, ~50x OSD).
+Recently, we observed a spontaneous (and unwanted) change in the access 
+rights of newly created directories:
 
-Occasionally, I heard that you are going to start BlueFS to eliminate the
-redudancy between XFS journal and RocksDB WAL. I am a little confused.
-Is the Bluefs only to host RocksDB for BlueStore or it's an
-alternative of BlueStore?
+$ umask
+0077
+$ mkdir test 
+$ ls -ld test
+drwx------ 1 me me 0 Jan  6 14:59 test
+$ touch test/foo
+$ ls -ld test
+drwxrwxrwx 1 me me 0 Jan  6 14:59 test
+$
 
-I am a new comer to CEPH, I am not sure my understanding is correct about
-BlueStore. BlueStore in my mind is as below.
+I kindly would like to ask for help tracking down this issue.
 
-              BlueStore
-              =========
-    RocksDB
-+-----------+          +-----------+
-|   onode   |          |           |
-|    WAL    |          |           |
-|   omap    |          |           |
-+-----------+          |   bdev    |
-|           |          |           |
-|   XFS     |          |           |
-|           |          |           |
-+-----------+          +-----------+
+ciao
+Christian
 
-I am curious if BlueFS is able to host RocksDB, actually it's already a
-"filesystem" which have to maintain blockmap kind of metadata by its own
-WITHOUT the help of RocksDB. When BlueFS is introduced into the picture,
-why RocksDB is needed yet? So I guess BlueFS is an alternative of BlueStore
-and it's a new ObjectStore without leveraging RocksDB.
-
-Is my understanding correct?
-
-The reason we care the intention and the design target of BlueFS is that 
-I had
-discussion with my partner Peng.Hse about an idea to introduce a new
-ObjectStore using ZFS library. I know CEPH supports ZFS as FileStore 
-backend
-already, but we had a different immature idea to use libzpool to 
-implement a new
-ObjectStore for CEPH totally in userspace without SPL and ZOL kernel 
-module.
-So that we can align CEPH transaction and zfs transaction in order to  
-avoid
-double write for CEPH journal.
-ZFS core part libzpool (DMU, metaslab etc) offers a dnode object store and
-it's platform kernel/user independent. Another benefit for the idea is we
-can extend our metadata without bothering any DBStore.
-
-Frankly, we are not sure if our idea is realistic so far, but when I 
-heard of
-BlueFS, I think we need to know the BlueFS design goal.
-
-Thanks
-Javen
