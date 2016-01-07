@@ -1,87 +1,66 @@
 From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH 2/6] libceph: move r_reply_op_{len,result} into struct ceph_osd_req_op
-Date: Thu,  7 Jan 2016 22:05:24 +0800
-Message-ID: <1452175528-20751-3-git-send-email-zyan@redhat.com>
+Subject: [PATCH 3/6] libceph: allow reserving operations in OSD request
+Date: Thu,  7 Jan 2016 22:05:25 +0800
+Message-ID: <1452175528-20751-4-git-send-email-zyan@redhat.com>
 References: <1452175528-20751-1-git-send-email-zyan@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40947 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:46093 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752010AbcAGOFw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 7 Jan 2016 09:05:52 -0500
+	id S1752300AbcAGOF5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Jan 2016 09:05:57 -0500
 In-Reply-To: <1452175528-20751-1-git-send-email-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com, "Yan, Zheng" <zyan@redhat.com>
 
-This avoids defining large array of r_reply_op_{len,result} in
-in 'struct ceph_osd_request'
+This allows us to reserve some operations for furture use. we do
+not need to use all reserved operations.
 
 Signed-off-by: Yan, Zheng <zyan@redhat.com>
 ---
- drivers/block/rbd.c             | 2 +-
- include/linux/ceph/osd_client.h | 5 +++--
- net/ceph/osd_client.c           | 4 ++--
- 3 files changed, 6 insertions(+), 5 deletions(-)
+ include/linux/ceph/osd_client.h | 1 +
+ net/ceph/osd_client.c           | 7 +++++--
+ 2 files changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 4a87678..22cfc01 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1854,7 +1854,7 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
- 	 * passed to the block layer, which just supports a 32-bit
- 	 * length field.
- 	 */
--	obj_request->xferred = osd_req->r_reply_op_len[0];
-+	obj_request->xferred = osd_req->r_ops[0].reply_op_len;
- 	rbd_assert(obj_request->xferred < (u64)UINT_MAX);
- 
- 	opcode = osd_req->r_ops[0].op;
 diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 5bf428a..fda3a05 100644
+index fda3a05..9802df1 100644
 --- a/include/linux/ceph/osd_client.h
 +++ b/include/linux/ceph/osd_client.h
-@@ -116,6 +116,9 @@ struct ceph_osd_req_op {
- 			u64 expected_write_size;
- 		} alloc_hint;
- 	};
-+	/* reply */
-+	int               reply_op_len;
-+	s32               reply_op_result;
- };
+@@ -139,6 +139,7 @@ struct ceph_osd_request {
+ 	u32               r_sent;      /* >0 if r_request is sending/sent */
  
- /* an in-flight request */
-@@ -150,8 +153,6 @@ struct ceph_osd_request {
- 	struct ceph_eversion *r_request_reassert_version;
- 
- 	int               r_result;
--	int               r_reply_op_len[CEPH_OSD_MAX_OP];
--	s32               r_reply_op_result[CEPH_OSD_MAX_OP];
- 	int               r_got_reply;
- 	int		  r_linger;
- 
+ 	/* request osd ops array  */
++	unsigned int		r_max_ops;
+ 	unsigned int		r_num_ops;
+ 	struct ceph_osd_req_op	*r_ops;
+ 	struct ceph_osd_req_op	r_inline_ops[CEPH_OSD_INITIAL_OP];
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 8499a36..c76cbe1 100644
+index c76cbe1..4a9d4e5 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -1839,7 +1839,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- 		int len;
+@@ -385,7 +385,8 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
  
- 		len = le32_to_cpu(op->payload_len);
--		req->r_reply_op_len[i] = len;
-+		req->r_ops[i].reply_op_len = len;
- 		dout(" op %d has %d bytes\n", i, len);
- 		payload_len += len;
- 		p += sizeof(*op);
-@@ -1854,7 +1854,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- 	ceph_decode_need(&p, end, 4 + numops * 4, bad_put);
- 	retry_attempt = ceph_decode_32(&p);
- 	for (i = 0; i < numops; i++)
--		req->r_reply_op_result[i] = ceph_decode_32(&p);
-+		req->r_ops[i].reply_op_result = ceph_decode_32(&p);
+ 	req->r_osdc = osdc;
+ 	req->r_mempool = use_mempool;
+-	req->r_num_ops = num_ops;
++	req->r_num_ops = 0;
++	req->r_max_ops = num_ops;
  
- 	if (le16_to_cpu(msg->hdr.version) >= 6) {
- 		p += 8 + 4; /* skip replay_version */
+ 	if (num_ops <= CEPH_OSD_INITIAL_OP) {
+ 		req->r_ops = req->r_inline_ops;
+@@ -479,8 +480,10 @@ _osd_req_op_init(struct ceph_osd_request *osd_req, unsigned int which,
+ {
+ 	struct ceph_osd_req_op *op;
+ 
+-	BUG_ON(which >= osd_req->r_num_ops);
++	BUG_ON(which >= osd_req->r_max_ops);
+ 	BUG_ON(!osd_req_opcode_valid(opcode));
++	if (which >= osd_req->r_num_ops)
++		osd_req->r_num_ops = which + 1;
+ 
+ 	op = &osd_req->r_ops[which];
+ 	memset(op, 0, sizeof (*op));
 -- 
 2.5.0
 
