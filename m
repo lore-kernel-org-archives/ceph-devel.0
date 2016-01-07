@@ -1,91 +1,146 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Is BlueFS an alternative of BlueStore?
-Date: Thu, 7 Jan 2016 08:19:06 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1601070813000.26051@cpach.fuggernut.com>
-References: <568DE333.7070206@xtaotech.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: [PATCH 1/6] libceph: enlarge max number of operations in OSD request
+Date: Thu,  7 Jan 2016 22:05:23 +0800
+Message-ID: <1452175528-20751-2-git-send-email-zyan@redhat.com>
+References: <1452175528-20751-1-git-send-email-zyan@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34393 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49881 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752079AbcAGNTG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 7 Jan 2016 08:19:06 -0500
-In-Reply-To: <568DE333.7070206@xtaotech.com>
+	id S1752010AbcAGOFs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Jan 2016 09:05:48 -0500
+In-Reply-To: <1452175528-20751-1-git-send-email-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Javen Wu <javen.wu@xtaotech.com>
-Cc: Peng Xie <peng.hse@xtaotech.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com, "Yan, Zheng" <zyan@redhat.com>
 
-On Thu, 7 Jan 2016, Javen Wu wrote:
-> Hi Sage,
-> 
-> Sorry to bother you. I am not sure if it is appropriate to send email to you
-> directly, but I cannot find any useful information to address my confusion
-> from Internet. Hope you can help me.
-> 
-> Occasionally, I heard that you are going to start BlueFS to eliminate the
-> redudancy between XFS journal and RocksDB WAL. I am a little confused.
-> Is the Bluefs only to host RocksDB for BlueStore or it's an
-> alternative of BlueStore?
-> 
-> I am a new comer to CEPH, I am not sure my understanding is correct about
-> BlueStore. BlueStore in my mind is as below.
-> 
->              BlueStore
->              =========
->    RocksDB
-> +-----------+          +-----------+
-> |   onode   |          |           |
-> |    WAL    |          |           |
-> |   omap    |          |           |
-> +-----------+          |   bdev    |
-> |           |          |           |
-> |   XFS     |          |           |
-> |           |          |           |
-> +-----------+          +-----------+
+Each operation requires a 'ceph_osd_req_op' structure. To avoid
+increasing memory usage of 'struct ceph_osd_request' in ordinary
+cases, we dynamically allocate 'ceph_osd_req_op' structures when
+number of operations in OSD request are larger than 3
 
-This is the picture before BlueFS enters the picture.
+Signed-off-by: Yan, Zheng <zyan@redhat.com>
+---
+ include/linux/ceph/osd_client.h |  6 ++++--
+ net/ceph/osd_client.c           | 45 +++++++++++++++++++++++++++++------------
+ 2 files changed, 36 insertions(+), 15 deletions(-)
 
-> I am curious if BlueFS is able to host RocksDB, actually it's already a
-> "filesystem" which have to maintain blockmap kind of metadata by its own
-> WITHOUT the help of RocksDB. 
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 7506b48..5bf428a 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -43,7 +43,8 @@ struct ceph_osd {
+ };
+ 
+ 
+-#define CEPH_OSD_MAX_OP	3
++#define CEPH_OSD_MAX_OP		16
++#define CEPH_OSD_INITIAL_OP	3
+ 
+ enum ceph_osd_data_type {
+ 	CEPH_OSD_DATA_TYPE_NONE = 0,
+@@ -136,7 +137,8 @@ struct ceph_osd_request {
+ 
+ 	/* request osd ops array  */
+ 	unsigned int		r_num_ops;
+-	struct ceph_osd_req_op	r_ops[CEPH_OSD_MAX_OP];
++	struct ceph_osd_req_op	*r_ops;
++	struct ceph_osd_req_op	r_inline_ops[CEPH_OSD_INITIAL_OP];
+ 
+ 	/* these are updated on each send */
+ 	__le32           *r_request_osdmap_epoch;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index f8f2359..8499a36 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -335,12 +335,14 @@ static void ceph_osdc_release_request(struct kref *kref)
+ 	for (which = 0; which < req->r_num_ops; which++)
+ 		osd_req_op_data_release(req, which);
+ 
++	if (req->r_ops != req->r_inline_ops)
++		kvfree(req->r_ops);
++
+ 	ceph_put_snap_context(req->r_snapc);
+ 	if (req->r_mempool)
+ 		mempool_free(req, req->r_osdc->req_mempool);
+ 	else
+ 		kmem_cache_free(ceph_osd_request_cache, req);
+-
+ }
+ 
+ void ceph_osdc_get_request(struct ceph_osd_request *req)
+@@ -372,16 +374,6 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 	BUILD_BUG_ON(CEPH_OSD_MAX_OP > U16_MAX);
+ 	BUG_ON(num_ops > CEPH_OSD_MAX_OP);
+ 
+-	msg_size = 4 + 4 + 8 + 8 + 4+8;
+-	msg_size += 2 + 4 + 8 + 4 + 4; /* oloc */
+-	msg_size += 1 + 8 + 4 + 4;     /* pg_t */
+-	msg_size += 4 + CEPH_MAX_OID_NAME_LEN; /* oid */
+-	msg_size += 2 + num_ops*sizeof(struct ceph_osd_op);
+-	msg_size += 8;  /* snapid */
+-	msg_size += 8;  /* snap_seq */
+-	msg_size += 8 * (snapc ? snapc->num_snaps : 0);  /* snaps */
+-	msg_size += 4;
+-
+ 	if (use_mempool) {
+ 		req = mempool_alloc(osdc->req_mempool, gfp_flags);
+ 		memset(req, 0, sizeof(*req));
+@@ -395,6 +387,18 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 	req->r_mempool = use_mempool;
+ 	req->r_num_ops = num_ops;
+ 
++	if (num_ops <= CEPH_OSD_INITIAL_OP) {
++		req->r_ops = req->r_inline_ops;
++	} else {
++		BUG_ON(use_mempool);
++		req->r_ops = ceph_kvmalloc(sizeof(*req->r_ops) * num_ops,
++					   gfp_flags | __GFP_ZERO);
++		if (!req->r_ops) {
++			ceph_osdc_put_request(req);
++			return NULL;
++		}
++	}
++
+ 	kref_init(&req->r_kref);
+ 	init_completion(&req->r_completion);
+ 	init_completion(&req->r_safe_completion);
+@@ -409,11 +413,16 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 	req->r_target_oloc.pool = -1;
+ 
+ 	/* create reply message */
++	msg_size = OSD_OPREPLY_FRONT_LEN;
++	if (num_ops > CEPH_OSD_INITIAL_OP)
++		msg_size += (CEPH_OSD_MAX_OP - CEPH_OSD_INITIAL_OP) *
++			    (sizeof(struct ceph_osd_op) + 4);
++
+ 	if (use_mempool)
+ 		msg = ceph_msgpool_get(&osdc->msgpool_op_reply, 0);
+ 	else
+-		msg = ceph_msg_new(CEPH_MSG_OSD_OPREPLY,
+-				   OSD_OPREPLY_FRONT_LEN, gfp_flags, true);
++		msg = ceph_msg_new(CEPH_MSG_OSD_OPREPLY, msg_size,
++				   gfp_flags, true);
+ 	if (!msg) {
+ 		ceph_osdc_put_request(req);
+ 		return NULL;
+@@ -421,6 +430,16 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 	req->r_reply = msg;
+ 
+ 	/* create request message; allow space for oid */
++	msg_size = 4 + 4 + 8 + 8 + 4 + 8;
++	msg_size += 2 + 4 + 8 + 4 + 4; /* oloc */
++	msg_size += 1 + 8 + 4 + 4;     /* pg_t */
++	msg_size += 4 + CEPH_MAX_OID_NAME_LEN; /* oid */
++	msg_size += 2 + num_ops * sizeof(struct ceph_osd_op);
++	msg_size += 8;  /* snapid */
++	msg_size += 8;  /* snap_seq */
++	msg_size += 8 * (snapc ? snapc->num_snaps : 0);  /* snaps */
++	msg_size += 4;
++
+ 	if (use_mempool)
+ 		msg = ceph_msgpool_get(&osdc->msgpool_op, 0);
+ 	else
+-- 
+2.5.0
 
-Right.  BlueFS is a really simple "file system" that is *just* complicated 
-enough to implement the rocksdb::Env interface, which is what rocksdb 
-needs to store its log and sst files.  The after picture looks like
-
- +--------------------+
- |     bluestore      |
- +----------+         |
- | rocksdb  |         |
- +----------+         |
- |  bluefs  |         |
- +----------+---------+
- |    block device    |
- +--------------------+
-
-> The reason we care the intention and the design target of BlueFS is that I had
-> discussion with my partner Peng.Hse about an idea to introduce a new
-> ObjectStore using ZFS library. I know CEPH supports ZFS as FileStore backend
-> already, but we had a different immature idea to use libzpool to implement a
-> new
-> ObjectStore for CEPH totally in userspace without SPL and ZOL kernel module.
-> So that we can align CEPH transaction and zfs transaction in order to  avoid
-> double write for CEPH journal.
-> ZFS core part libzpool (DMU, metaslab etc) offers a dnode object store and
-> it's platform kernel/user independent. Another benefit for the idea is we
-> can extend our metadata without bothering any DBStore.
-> 
-> Frankly, we are not sure if our idea is realistic so far, but when I heard of
-> BlueFS, I think we need to know the BlueFS design goal.
-
-I think it makes a lot of sense, but there are a few challenges.  One 
-reason we use rocksdb (or a similar kv store) is that we need in-order 
-enumeration of objects in order to do collection listing (needed for 
-backfill, scrub, and omap).  You'll need something similar on top of zfs.  
-
-I suspect the simplest path would be to also implement the rocksdb::Env 
-interface on top of the zfs libraries.  See BlueRocksEnv.{cc,h} to see the 
-interface that has to be implemented...
-
-sage
