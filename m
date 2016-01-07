@@ -1,87 +1,91 @@
-From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
-Subject: Custom STL allocator
-Date: Thu, 7 Jan 2016 10:23:10 +0000
-Message-ID: <D2B160E5.9FE1%evgeniy.firsov@sandisk.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Is BlueFS an alternative of BlueStore?
+Date: Thu, 7 Jan 2016 08:19:06 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1601070813000.26051@cpach.fuggernut.com>
+References: <568DE333.7070206@xtaotech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0089.outbound.protection.outlook.com ([207.46.100.89]:12034
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752013AbcAGKXN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jan 2016 05:23:13 -0500
-Content-Language: en-US
-Content-ID: <079EBF073387BC4DBF0F644910CE7ABE@namprd02.prod.outlook.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34393 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752079AbcAGNTG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Jan 2016 08:19:06 -0500
+In-Reply-To: <568DE333.7070206@xtaotech.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Javen Wu <javen.wu@xtaotech.com>
+Cc: Peng Xie <peng.hse@xtaotech.com>, ceph-devel@vger.kernel.org
 
-I want your opinion guys regarding two features implemented in attempt =
-to
-greatly reduce number of memory allocation without major surgery in the
-code.
+On Thu, 7 Jan 2016, Javen Wu wrote:
+> Hi Sage,
+> 
+> Sorry to bother you. I am not sure if it is appropriate to send email to you
+> directly, but I cannot find any useful information to address my confusion
+> from Internet. Hope you can help me.
+> 
+> Occasionally, I heard that you are going to start BlueFS to eliminate the
+> redudancy between XFS journal and RocksDB WAL. I am a little confused.
+> Is the Bluefs only to host RocksDB for BlueStore or it's an
+> alternative of BlueStore?
+> 
+> I am a new comer to CEPH, I am not sure my understanding is correct about
+> BlueStore. BlueStore in my mind is as below.
+> 
+>              BlueStore
+>              =========
+>    RocksDB
+> +-----------+          +-----------+
+> |   onode   |          |           |
+> |    WAL    |          |           |
+> |   omap    |          |           |
+> +-----------+          |   bdev    |
+> |           |          |           |
+> |   XFS     |          |           |
+> |           |          |           |
+> +-----------+          +-----------+
 
-The features are:
-1. Custom STL allocator, which allocates first N items from the STL
-container itself. This is semi-transparent replacement of standard
-allocator. Just need to replace std::map with ceph_map for example.
-Limitation: a) Brakes move semantic. b) No deallocation implemented, so=
- no
-good for big long living containers.
-2. Placement allocator, which allows chained allocation of shorter livi=
-ng
-object from longer living. Example would be allocation of finish contex=
-ts
-from aio completion context.
-Limitation: a) May require some code rearrangement in order to avoid
-concurrent deallocations, otherwise deallocation code uses synchronizat=
-ion
-what limits performance. b) same as above b)
+This is the picture before BlueFS enters the picture.
 
-Performance results for 32 threads in a synthetic test, std allocator t=
-ime
-to custom=20
-allocator time ratio:
-            stlalloc	    		 stl+placement alloc	=09
-block jemalloc tcmalloc ptmalloc      jemalloc tcmalloc ptmalloc
-1M	1298.01	650.66	137.64		735.49	824.45	9.62
-64K	514.84	2.82	304.62		570.74	4.85	12.21
-32K	838.89	2.17	5.03		1600.5	7.43	8.28
-4K	2.76	1.99	4.98		4.36	5.3	8.23
-32B	2.67	5.09	3.69		4.41	8.48	6.4
-(100M test iterations for 32B and 4K, 2M for 32K and 64K, 200K for 1M)
+> I am curious if BlueFS is able to host RocksDB, actually it's already a
+> "filesystem" which have to maintain blockmap kind of metadata by its own
+> WITHOUT the help of RocksDB. 
 
-I didn=B9t see any performance improvement in 100% write fio test, it s=
-till
-can shine in other workloads or proper classes replaced.
-Let me know if it worth to PR them.
+Right.  BlueFS is a really simple "file system" that is *just* complicated 
+enough to implement the rocksdb::Env interface, which is what rocksdb 
+needs to store its log and sst files.  The after picture looks like
 
-STL allocator:=20
-https://github.com/efirs/ceph/commit/4eed0d63dbcbd00ee3aa325355bfbe56ac=
-bb7b
-05
-STL allocator usage example:
-https://github.com/efirs/ceph/commit/362c5c4e10563785cc89370d28511e0493=
-f1b2
-11
-https://github.com/efirs/ceph/commit/e2df67f7570c68e53775bc55cda12c6253=
-e66d
-2f
-Placement allocator:
-https://github.com/efirs/ceph/commit/8df5cd7d753fd09e79a24f2fc781cf3af0=
-2e6d
-3e
-Placement allocator usage example:
-https://github.com/efirs/ceph/commit/70db18d9c1b39190bde68548b57c2aa7a9=
-e455
-e0
+ +--------------------+
+ |     bluestore      |
+ +----------+         |
+ | rocksdb  |         |
+ +----------+         |
+ |  bluefs  |         |
+ +----------+---------+
+ |    block device    |
+ +--------------------+
 
-=8B
-Evgeniy
+> The reason we care the intention and the design target of BlueFS is that I had
+> discussion with my partner Peng.Hse about an idea to introduce a new
+> ObjectStore using ZFS library. I know CEPH supports ZFS as FileStore backend
+> already, but we had a different immature idea to use libzpool to implement a
+> new
+> ObjectStore for CEPH totally in userspace without SPL and ZOL kernel module.
+> So that we can align CEPH transaction and zfs transaction in order to  avoid
+> double write for CEPH journal.
+> ZFS core part libzpool (DMU, metaslab etc) offers a dnode object store and
+> it's platform kernel/user independent. Another benefit for the idea is we
+> can extend our metadata without bothering any DBStore.
+> 
+> Frankly, we are not sure if our idea is realistic so far, but when I heard of
+> BlueFS, I think we need to know the BlueFS design goal.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I think it makes a lot of sense, but there are a few challenges.  One 
+reason we use rocksdb (or a similar kv store) is that we need in-order 
+enumeration of objects in order to do collection listing (needed for 
+backfill, scrub, and omap).  You'll need something similar on top of zfs.  
+
+I suspect the simplest path would be to also implement the rocksdb::Env 
+interface on top of the zfs libraries.  See BlueRocksEnv.{cc,h} to see the 
+interface that has to be implemented...
+
+sage
