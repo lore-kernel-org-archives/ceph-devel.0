@@ -1,80 +1,77 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: scrub test assert
-Date: Thu, 7 Jan 2016 12:44:34 -0800
-Message-ID: <CAJ4mKGb-qtb99mFih+zZ-GD-HivgOdcAQpccnrGsD1i5+n77vA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: scrub test assert
+Date: Thu, 7 Jan 2016 20:47:01 +0000
+Message-ID: <CO1PR02MB208A06ED9F8B19063C3EF32F4F50@CO1PR02MB208.namprd02.prod.outlook.com>
 References: <D2B36D43.A56C%evgeniy.firsov@sandisk.com>
 	<CAJ4mKGahSM5kb-5vJttHuoY7pBQFkv9+EQr=V8Dg+sX+kOM6pg@mail.gmail.com>
 	<CO1PR02MB2089249E91F4EEAC402BE18F4F50@CO1PR02MB208.namprd02.prod.outlook.com>
+ <CAJ4mKGb-qtb99mFih+zZ-GD-HivgOdcAQpccnrGsD1i5+n77vA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:33089 "EHLO
-	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752209AbcAGUog convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jan 2016 15:44:36 -0500
-Received: by mail-wm0-f48.google.com with SMTP id f206so112839334wmf.0
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Jan 2016 12:44:35 -0800 (PST)
-In-Reply-To: <CO1PR02MB2089249E91F4EEAC402BE18F4F50@CO1PR02MB208.namprd02.prod.outlook.com>
+Received: from mail-by2on0075.outbound.protection.outlook.com ([207.46.100.75]:26564
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752853AbcAGUrF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Jan 2016 15:47:05 -0500
+In-Reply-To: <CAJ4mKGb-qtb99mFih+zZ-GD-HivgOdcAQpccnrGsD1i5+n77vA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Gregory Farnum <gfarnum@redhat.com>
 Cc: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Jan 7, 2016 at 12:25 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Greg,
-> I think one point is missing in the description..
->
-> After deleting pg entries, 1 PG becomes inconsistent (as expected).
->
-> Ran pg repair and the cluster became consistent again , all pgs are active + clean
->
-> But, after restart we got the assert.
->
-> So, yes, it seems there are some cache effect and not everything persisted during pg repair (?)..
->
-> I guess, the question is, if after PG repair is successful, why it is giving the assert during restart ? There shouldn't be any missing files , am I missing anything ?
-
-At a guess then, some portion of the files aren't in the fd cache and
-it's detecting and fixing those. But on restart it's detecting stuff
-which is in the pglog but not on the disk. This is stuff you can work
-out if you check the scrub repair logs and see what it does in
-comparison to known PG contents, and then what it's actually running
-into before asserting on restart.
-
-Or possibly there's an unnecessary assert in the startup path but not
-the recovery path; I think David fixed one of those recently. *shrug*
--Greg
-
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Gregory Farnum
-> Sent: Thursday, January 07, 2016 12:08 PM
-> To: Evgeniy Firsov
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: scrub test assert
->
-> On Thu, Jan 7, 2016 at 1:17 AM, Evgeniy Firsov <Evgeniy.Firsov@sandisk.com> wrote:
->> Hi, Devs,
->>
->> We hit an assert while doing scrub test.
->> Can you, please, verify if the test case is valid?
->>
->> The test:
->> 1. Start Jewel cluster. 2 nodes, 8 osds each.
->> 2. Start fio, pure write workload.
->> 3. Delete data of random pg: rm -rf
->> /var/lib/ceph/osd/ceph-7/2.185_head/*
->> 4. Stop workload
->> 5. Do a scrub on that pg. Cluster active and clean after that.
->> 6. Restart the node with that pg.
->> 7. The OSD with that pg fails to recover and asserts with:
->>      osd/PGLog.cc: 382: FAILED assert(objiter->second->version >
->> last_divergent_update)
->
-> The OSD is passing scrub tests because of the file descriptor cache (so it still has its own fds open for the deleted files that it references), but then on restart everything gets wiped away and it discovers its data store is inconsistent. I believe your team has run into this before when designing data loss tests. :) -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIEdyZWcgZm9yIHRoZSBzdWdnZXN0aW9uLiBXZSB3aWxsIGRlYnVnIG1vcmUgb24gdGhp
+cy4uDQoNClJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZy
+b206IEdyZWdvcnkgRmFybnVtIFttYWlsdG86Z2Zhcm51bUByZWRoYXQuY29tXSANClNlbnQ6IFRo
+dXJzZGF5LCBKYW51YXJ5IDA3LCAyMDE2IDEyOjQ1IFBNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBF
+dmdlbml5IEZpcnNvdjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBz
+Y3J1YiB0ZXN0IGFzc2VydA0KDQpPbiBUaHUsIEphbiA3LCAyMDE2IGF0IDEyOjI1IFBNLCBTb21u
+YXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBHcmVnLA0KPiBJIHRo
+aW5rIG9uZSBwb2ludCBpcyBtaXNzaW5nIGluIHRoZSBkZXNjcmlwdGlvbi4uDQo+DQo+IEFmdGVy
+IGRlbGV0aW5nIHBnIGVudHJpZXMsIDEgUEcgYmVjb21lcyBpbmNvbnNpc3RlbnQgKGFzIGV4cGVj
+dGVkKS4NCj4NCj4gUmFuIHBnIHJlcGFpciBhbmQgdGhlIGNsdXN0ZXIgYmVjYW1lIGNvbnNpc3Rl
+bnQgYWdhaW4gLCBhbGwgcGdzIGFyZSANCj4gYWN0aXZlICsgY2xlYW4NCj4NCj4gQnV0LCBhZnRl
+ciByZXN0YXJ0IHdlIGdvdCB0aGUgYXNzZXJ0Lg0KPg0KPiBTbywgeWVzLCBpdCBzZWVtcyB0aGVy
+ZSBhcmUgc29tZSBjYWNoZSBlZmZlY3QgYW5kIG5vdCBldmVyeXRoaW5nIHBlcnNpc3RlZCBkdXJp
+bmcgcGcgcmVwYWlyICg/KS4uDQo+DQo+IEkgZ3Vlc3MsIHRoZSBxdWVzdGlvbiBpcywgaWYgYWZ0
+ZXIgUEcgcmVwYWlyIGlzIHN1Y2Nlc3NmdWwsIHdoeSBpdCBpcyBnaXZpbmcgdGhlIGFzc2VydCBk
+dXJpbmcgcmVzdGFydCA/IFRoZXJlIHNob3VsZG4ndCBiZSBhbnkgbWlzc2luZyBmaWxlcyAsIGFt
+IEkgbWlzc2luZyBhbnl0aGluZyA/DQoNCkF0IGEgZ3Vlc3MgdGhlbiwgc29tZSBwb3J0aW9uIG9m
+IHRoZSBmaWxlcyBhcmVuJ3QgaW4gdGhlIGZkIGNhY2hlIGFuZCBpdCdzIGRldGVjdGluZyBhbmQg
+Zml4aW5nIHRob3NlLiBCdXQgb24gcmVzdGFydCBpdCdzIGRldGVjdGluZyBzdHVmZiB3aGljaCBp
+cyBpbiB0aGUgcGdsb2cgYnV0IG5vdCBvbiB0aGUgZGlzay4gVGhpcyBpcyBzdHVmZiB5b3UgY2Fu
+IHdvcmsgb3V0IGlmIHlvdSBjaGVjayB0aGUgc2NydWIgcmVwYWlyIGxvZ3MgYW5kIHNlZSB3aGF0
+IGl0IGRvZXMgaW4gY29tcGFyaXNvbiB0byBrbm93biBQRyBjb250ZW50cywgYW5kIHRoZW4gd2hh
+dCBpdCdzIGFjdHVhbGx5IHJ1bm5pbmcgaW50byBiZWZvcmUgYXNzZXJ0aW5nIG9uIHJlc3RhcnQu
+DQoNCk9yIHBvc3NpYmx5IHRoZXJlJ3MgYW4gdW5uZWNlc3NhcnkgYXNzZXJ0IGluIHRoZSBzdGFy
+dHVwIHBhdGggYnV0IG5vdCB0aGUgcmVjb3ZlcnkgcGF0aDsgSSB0aGluayBEYXZpZCBmaXhlZCBv
+bmUgb2YgdGhvc2UgcmVjZW50bHkuICpzaHJ1ZyogLUdyZWcNCg0KPg0KPiBUaGFua3MgJiBSZWdh
+cmRzDQo+IFNvbW5hdGgNCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTog
+Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1v
+d25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBHcmVnb3J5IEZhcm51bQ0KPiBTZW50
+OiBUaHVyc2RheSwgSmFudWFyeSAwNywgMjAxNiAxMjowOCBQTQ0KPiBUbzogRXZnZW5peSBGaXJz
+b3YNCj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBzY3J1
+YiB0ZXN0IGFzc2VydA0KPg0KPiBPbiBUaHUsIEphbiA3LCAyMDE2IGF0IDE6MTcgQU0sIEV2Z2Vu
+aXkgRmlyc292IDxFdmdlbml5LkZpcnNvdkBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+PiBIaSwgRGV2
+cywNCj4+DQo+PiBXZSBoaXQgYW4gYXNzZXJ0IHdoaWxlIGRvaW5nIHNjcnViIHRlc3QuDQo+PiBD
+YW4geW91LCBwbGVhc2UsIHZlcmlmeSBpZiB0aGUgdGVzdCBjYXNlIGlzIHZhbGlkPw0KPj4NCj4+
+IFRoZSB0ZXN0Og0KPj4gMS4gU3RhcnQgSmV3ZWwgY2x1c3Rlci4gMiBub2RlcywgOCBvc2RzIGVh
+Y2guDQo+PiAyLiBTdGFydCBmaW8sIHB1cmUgd3JpdGUgd29ya2xvYWQuDQo+PiAzLiBEZWxldGUg
+ZGF0YSBvZiByYW5kb20gcGc6IHJtIC1yZg0KPj4gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC03LzIu
+MTg1X2hlYWQvKg0KPj4gNC4gU3RvcCB3b3JrbG9hZA0KPj4gNS4gRG8gYSBzY3J1YiBvbiB0aGF0
+IHBnLiBDbHVzdGVyIGFjdGl2ZSBhbmQgY2xlYW4gYWZ0ZXIgdGhhdC4NCj4+IDYuIFJlc3RhcnQg
+dGhlIG5vZGUgd2l0aCB0aGF0IHBnLg0KPj4gNy4gVGhlIE9TRCB3aXRoIHRoYXQgcGcgZmFpbHMg
+dG8gcmVjb3ZlciBhbmQgYXNzZXJ0cyB3aXRoOg0KPj4gICAgICBvc2QvUEdMb2cuY2M6IDM4Mjog
+RkFJTEVEIGFzc2VydChvYmppdGVyLT5zZWNvbmQtPnZlcnNpb24gPg0KPj4gbGFzdF9kaXZlcmdl
+bnRfdXBkYXRlKQ0KPg0KPiBUaGUgT1NEIGlzIHBhc3Npbmcgc2NydWIgdGVzdHMgYmVjYXVzZSBv
+ZiB0aGUgZmlsZSBkZXNjcmlwdG9yIGNhY2hlIA0KPiAoc28gaXQgc3RpbGwgaGFzIGl0cyBvd24g
+ZmRzIG9wZW4gZm9yIHRoZSBkZWxldGVkIGZpbGVzIHRoYXQgaXQgDQo+IHJlZmVyZW5jZXMpLCBi
+dXQgdGhlbiBvbiByZXN0YXJ0IGV2ZXJ5dGhpbmcgZ2V0cyB3aXBlZCBhd2F5IGFuZCBpdCANCj4g
+ZGlzY292ZXJzIGl0cyBkYXRhIHN0b3JlIGlzIGluY29uc2lzdGVudC4gSSBiZWxpZXZlIHlvdXIg
+dGVhbSBoYXMgcnVuIA0KPiBpbnRvIHRoaXMgYmVmb3JlIHdoZW4gZGVzaWduaW5nIGRhdGEgbG9z
+cyB0ZXN0cy4gOikgLUdyZWcNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
+IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBv
+ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyAN
+Cj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
