@@ -1,51 +1,36 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: cephfs (hammer) flips directory access bits
-Date: Fri, 8 Jan 2016 16:54:34 +0800
-Message-ID: <CAAM7YA=9RR5KS9dgU9o4viN+-sqf=ij6a6Cg-6J=kjSskFz=dg@mail.gmail.com>
-References: <n6l67c$hu$1@ger.gmane.org>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: two tarballs for ceph 10.0.1
+Date: Fri, 8 Jan 2016 06:58:06 -0500
+Message-ID: <CAC-Np1x9nNX71eRj46MokpXbzLj9kyNF=VN729L=gxJmX9T8cw@mail.gmail.com>
+References: <CALqRxCzYFNfzhd4fR8J0ytM+yW6eHegciDQ8Lj6d7i1OP2wViA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f171.google.com ([209.85.217.171]:33673 "EHLO
-	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751397AbcAHIyg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jan 2016 03:54:36 -0500
-Received: by mail-lb0-f171.google.com with SMTP id sv6so213545598lbb.0
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Jan 2016 00:54:35 -0800 (PST)
-In-Reply-To: <n6l67c$hu$1@ger.gmane.org>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:35156 "EHLO
+	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753490AbcAHL6H (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jan 2016 06:58:07 -0500
+Received: by mail-wm0-f44.google.com with SMTP id f206so132268288wmf.0
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Jan 2016 03:58:07 -0800 (PST)
+In-Reply-To: <CALqRxCzYFNfzhd4fR8J0ytM+yW6eHegciDQ8Lj6d7i1OP2wViA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: CSa <Christian.Salzmann@fu-berlin.de>
+To: Ken Dreyer <kdreyer@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Jan 7, 2016 at 4:05 PM, CSa <Christian.Salzmann@fu-berlin.de> wrote:
-> Hi,
->
-> we are using cephfs on a ceph cluster (V0.94.5, 3x MON, 1x MDS, ~50x OSD).
-> Recently, we observed a spontaneous (and unwanted) change in the access
-> rights of newly created directories:
->
-> $ umask
-> 0077
-> $ mkdir test
-> $ ls -ld test
-> drwx------ 1 me me 0 Jan  6 14:59 test
-> $ touch test/foo
-> $ ls -ld test
-> drwxrwxrwx 1 me me 0 Jan  6 14:59 test
-> $
+This is certainly perplexing. I am not sure how we managed to get
+something like that. The correct tarball is the one closer
+to 10MB.
 
-do you use kernel client? I remember an ACL related bug in old kernel
-can cause this. mount cephfs with '-o noacl' option can avoid this
-issue.
+Fortunately, we do keep these things around in our binary API service
+so it is an easy fix.
 
+Thanks for spotting this
+
+On Thu, Jan 7, 2016 at 11:23 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
+> In http://download.ceph.com/tarballs/ , there's two tarballs:
+> "ceph_10.0.1.orig.tar.gz" and "ceph_10.0.1.orig.tar.gz.1"
 >
-> I kindly would like to ask for help tracking down this issue.
+> Which one is correct? Can we delete one?
 >
-> ciao
-> Christian
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> - Ken
