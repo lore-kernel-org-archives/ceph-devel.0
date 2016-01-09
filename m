@@ -1,32 +1,62 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: ovh hammer runs
-Date: Fri, 8 Jan 2016 13:23:51 -0800
-Message-ID: <CAMMFjmFGcG2fP_gu-W-T9UTJq1HBeYqRBo+oNxuBL1Tmh3N9rg@mail.gmail.com>
-References: <CAN=+7FXzHqeDrLYUhYnG4kMr+aBmmipPOsAHUkS5pgbg+3BrVA@mail.gmail.com>
+From: Wukongming <wu.kongming@h3c.com>
+Subject: ocfs2 with RBDcache
+Date: Sat, 9 Jan 2016 10:34:48 +0000
+Message-ID: <47D132BF400BE64BAE6D71033F7D3D7503DF32C1@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:34393 "EHLO
-	mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752069AbcAHVXw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jan 2016 16:23:52 -0500
-Received: by mail-io0-f169.google.com with SMTP id 1so252113117ion.1
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Jan 2016 13:23:52 -0800 (PST)
-In-Reply-To: <CAN=+7FXzHqeDrLYUhYnG4kMr+aBmmipPOsAHUkS5pgbg+3BrVA@mail.gmail.com>
+Received: from smtp.h3c.com ([60.191.123.56]:4863 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752285AbcAIKfN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 9 Jan 2016 05:35:13 -0500
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: "Meno, Gregory" <gmeno@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sweil@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-rados/hammer suite/runs were moved from ovh to smithi for now
-
-Thx
-YuriW
-
-On Fri, Jan 8, 2016 at 11:40 AM, Samuel Just <sjust@redhat.com> wrote:
-> We're still seeing ENOSPC hangs in the hammer runs, which are making
-> them not very valuable.  I filed a feature bug which should help
-> (http://tracker.ceph.com/issues/14312), but in the mean time, I think
-> we should move the hammer and jewel nightlies to smithi.  If it turns
-> out to be too much load, we can reassess.
-> -Sam
+SGksIGFsbA0KDQogICBJIG5vdGljZSB0aGlzIHNlbnRlbmNlICJSdW5uaW5nIEdGUyBvciBPQ0ZT
+IG9uIHRvcCBvZiBSQkQgd2lsbCBub3Qgd29yayB3aXRoIGNhY2hpbmcgZW5hYmxlZC4iIG9uIGh0
+dHA6Ly9kb2NzLmNlcGguY29tL2RvY3MvbWFzdGVyL3JiZC9yYmQtY29uZmlnLXJlZi8uIHdoeT8g
+SXMgdGhlcmUgYW55IHdheSB0byBvcGVuIHJiZCBjYWNoZSB3aXRoIG9jZnMyIGJhc2VkIG9uPyBC
+ZWNhdXNlIEkgaGF2ZSBhIGZpbyB0ZXN0IHdpdGggcWVtdS1rdm0gY29uZmlnIHNldHRpbmcgY2Fj
+aGU9bm9uZSwgd2hpY2ggZ2l2ZSBhIHRlcnJpYmxlIHJlc3VsdCBvZiBJT1BTIGxlc3MgdGhhbiAx
+MDAgKCBmaW8gLS1udW1qb2JzPTE2IC0taW9kZXB0aD0xNiAtLWlvZW5naW5lPWxpYmFpbyAtLXJ1
+bnRpbWU9MzAwIC0tZGlyZWN0PTEgLS1ncm91cF9yZXBvcnRpbmcgLS1maWxlbmFtZT0vZGV2L3Nk
+ZCAtLW5hbWU9bXl0ZXN0IC0tcnc9cmFuZHdyaXRlIC0tYnM9OGsgLS1zaXplPThHKQ0KLCB3aGls
+ZSBvdGhlciBub24tY2VwaCBjbHVzdGVyIGNvdWxkIGdpdmUgYSByZXN1bHQgb2YgSU9QUyB0byAx
+MDAwKy4gV291bGQgZGlzYWJsaW5nIHJiZCBjYWNoZSBjYXVzZSB0aGlzIHByb2JsZW0/DQotLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tfC0tLS0tLS0tLS0tLS0tLS0tLS0NCnwgIFJlZEhhdCBWTSAt
+LSB8LS0tLS0tLS0tLS0tLS0tLS0tfC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS1iYXNlZCBvbiBvY2ZzMg0KfC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIHwgICAgICAgICAg
+fA0KfCBMaW51eCB3aXRoIHFlbXUta3ZtKHFjb3cyKSB8DQotLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCiAgICAgICAgICB8IHwNCiAgICAgICAgICAgICAgICAg
+IHwgfHRndA0KICAgICAgICAgIHwgfA0KICAgICAgICAgICAgICAgICAgICAgIENlcGggY2x1c3Rl
+cigzKQ0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLQ0KfCAgICAgICAgICAgIHwgICAgICAgIG9jZnMyIHNoYXJlZCBmaWxlc3lzdGVt
+IChSYmQgSW1hZ2UpICAgfCAgICAgICAgICAgICB8DQp8ICAgICAgICAgICAgfF9fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX198ICAgICAgICAgICAgIHwNCnwgICAgICAgICAg
+ICAgICAgICAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgfCAgICAgICAgICAgICAgICAgICB8
+DQp8ICAgICAgICAgICAgICAgICAgICAgICB8ICAgICAgICAgICAgICAgICAgICAgIHwgICAgICAg
+ICAgICAgICAgICAgfA0KfCAgICAgICAgICAgICAgICAgICAgICAgfCAgICAgICAgICAgICAgICAg
+ICAgICB8ICAgICAgICAgICAgICAgICAgIHwNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCnd1a29uZ21pbmcgSUQ6IDEyMDE5DQpUZWyjujA1NzEt
+ODY3NjAyMzkNCkRlcHSjujIwMTQgVUlTMiBPTkVTdG9yDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0N
+CrG+08q8/rywxuS4vbz+uqzT0Lq81t27qsj9zajQxby8yvXT0M/euavLvrXEsaPD3NDFz6KjrL32
+z97T2reiy824+MnPw+a12Na31tDB0LP2DQq1xLj2yMu78si61+mho7371rnIzrrOxuTL+8jL0tTI
+zrrO0M7Kvcq508OjqLD8wKi1q7K7z97T2sirsr+78rK/t9a12NC5wrahori01sahog0Ku/LJorei
+o6mxvtPKvP7W0LXE0MXPoqGjyOe5+8T6tO3K1cHLsb7Tyrz+o6zH68T6waK8tLXnu7C78tPKvP7N
+qNaqt6K8/sjLsqLJvrP9sb4NCtPKvP6joQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50
+cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmlu
+dGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlz
+dGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBp
+biBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlh
+bA0KZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25z
+IG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYg
+eW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRl
+cg0KYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCg==
