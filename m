@@ -1,62 +1,108 @@
-From: Wukongming <wu.kongming@h3c.com>
-Subject: ocfs2 with RBDcache
-Date: Sat, 9 Jan 2016 10:34:48 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D7503DF32C1@H3CMLB12-EX.srv.huawei-3com.com>
+From: Zhi Zhang <zhang.david2011@gmail.com>
+Subject: Ceph mds stuck on replay forever
+Date: Mon, 11 Jan 2016 11:33:56 +0800
+Message-ID: <CAGkCoN+XLbjdCxtWjxXmgCHeb6SxdcBSwtLYfmQgkwum7p9XJw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:4863 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752285AbcAIKfN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 9 Jan 2016 05:35:13 -0500
-Content-Language: zh-CN
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:38531 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758005AbcAKDeh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Jan 2016 22:34:37 -0500
+Received: by mail-wm0-f45.google.com with SMTP id b14so248332354wmb.1
+        for <ceph-devel@vger.kernel.org>; Sun, 10 Jan 2016 19:34:36 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: ceph-devel@vger.kernel.org, Zheng Yan <ukernel@gmail.com>
 
-SGksIGFsbA0KDQogICBJIG5vdGljZSB0aGlzIHNlbnRlbmNlICJSdW5uaW5nIEdGUyBvciBPQ0ZT
-IG9uIHRvcCBvZiBSQkQgd2lsbCBub3Qgd29yayB3aXRoIGNhY2hpbmcgZW5hYmxlZC4iIG9uIGh0
-dHA6Ly9kb2NzLmNlcGguY29tL2RvY3MvbWFzdGVyL3JiZC9yYmQtY29uZmlnLXJlZi8uIHdoeT8g
-SXMgdGhlcmUgYW55IHdheSB0byBvcGVuIHJiZCBjYWNoZSB3aXRoIG9jZnMyIGJhc2VkIG9uPyBC
-ZWNhdXNlIEkgaGF2ZSBhIGZpbyB0ZXN0IHdpdGggcWVtdS1rdm0gY29uZmlnIHNldHRpbmcgY2Fj
-aGU9bm9uZSwgd2hpY2ggZ2l2ZSBhIHRlcnJpYmxlIHJlc3VsdCBvZiBJT1BTIGxlc3MgdGhhbiAx
-MDAgKCBmaW8gLS1udW1qb2JzPTE2IC0taW9kZXB0aD0xNiAtLWlvZW5naW5lPWxpYmFpbyAtLXJ1
-bnRpbWU9MzAwIC0tZGlyZWN0PTEgLS1ncm91cF9yZXBvcnRpbmcgLS1maWxlbmFtZT0vZGV2L3Nk
-ZCAtLW5hbWU9bXl0ZXN0IC0tcnc9cmFuZHdyaXRlIC0tYnM9OGsgLS1zaXplPThHKQ0KLCB3aGls
-ZSBvdGhlciBub24tY2VwaCBjbHVzdGVyIGNvdWxkIGdpdmUgYSByZXN1bHQgb2YgSU9QUyB0byAx
-MDAwKy4gV291bGQgZGlzYWJsaW5nIHJiZCBjYWNoZSBjYXVzZSB0aGlzIHByb2JsZW0/DQotLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tfC0tLS0tLS0tLS0tLS0tLS0tLS0NCnwgIFJlZEhhdCBWTSAt
-LSB8LS0tLS0tLS0tLS0tLS0tLS0tfC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS1iYXNlZCBvbiBvY2ZzMg0KfC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIHwgICAgICAgICAg
-fA0KfCBMaW51eCB3aXRoIHFlbXUta3ZtKHFjb3cyKSB8DQotLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCiAgICAgICAgICB8IHwNCiAgICAgICAgICAgICAgICAg
-IHwgfHRndA0KICAgICAgICAgIHwgfA0KICAgICAgICAgICAgICAgICAgICAgIENlcGggY2x1c3Rl
-cigzKQ0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLQ0KfCAgICAgICAgICAgIHwgICAgICAgIG9jZnMyIHNoYXJlZCBmaWxlc3lzdGVt
-IChSYmQgSW1hZ2UpICAgfCAgICAgICAgICAgICB8DQp8ICAgICAgICAgICAgfF9fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX198ICAgICAgICAgICAgIHwNCnwgICAgICAgICAg
-ICAgICAgICAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgfCAgICAgICAgICAgICAgICAgICB8
-DQp8ICAgICAgICAgICAgICAgICAgICAgICB8ICAgICAgICAgICAgICAgICAgICAgIHwgICAgICAg
-ICAgICAgICAgICAgfA0KfCAgICAgICAgICAgICAgICAgICAgICAgfCAgICAgICAgICAgICAgICAg
-ICAgICB8ICAgICAgICAgICAgICAgICAgIHwNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCnd1a29uZ21pbmcgSUQ6IDEyMDE5DQpUZWyjujA1NzEt
-ODY3NjAyMzkNCkRlcHSjujIwMTQgVUlTMiBPTkVTdG9yDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0N
-CrG+08q8/rywxuS4vbz+uqzT0Lq81t27qsj9zajQxby8yvXT0M/euavLvrXEsaPD3NDFz6KjrL32
-z97T2reiy824+MnPw+a12Na31tDB0LP2DQq1xLj2yMu78si61+mho7371rnIzrrOxuTL+8jL0tTI
-zrrO0M7Kvcq508OjqLD8wKi1q7K7z97T2sirsr+78rK/t9a12NC5wrahori01sahog0Ku/LJorei
-o6mxvtPKvP7W0LXE0MXPoqGjyOe5+8T6tO3K1cHLsb7Tyrz+o6zH68T6waK8tLXnu7C78tPKvP7N
-qNaqt6K8/sjLsqLJvrP9sb4NCtPKvP6joQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50
-cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmlu
-dGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlz
-dGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBp
-biBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlh
-bA0KZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25z
-IG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYg
-eW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRl
-cg0KYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCg==
+Hi Guys,
+
+Last week one of our clusters became unavailable because MDSes always
+stuck on replay state.
+
+From the log, we found some clues:
+
+MDS wants to replay log from 31885100783 to 31935430656. The last
+prefetch expects 4194304 bytes from one mds log. At this point, the
+requested_pos is increased to write_pos which is 31935430656, so there
+will be no prefetch any more.
+
+But this mds log (already the latest one) is only 4192831 bytes, so
+finally read_pos can only reach 31935429183, which is less than
+expected write_pos. MDS wants to read more for replay, but there is no
+mds log can be read, hence MDS is stuck forever.
+
+See below mds logs:
+----------------------------------------------------------------------------------------
+2016-01-08 13:26:34.468773 7f16a78a7700 10 mds.0.log replay start,
+from 31885100783 to 31935430656
+
+2016-01-08 13:26:35.164194 7f16a50a2700 10 mds.0.journaler(ro)
+_issue_read reading 31931236352~4194304, read pointers
+31889294570/31931236352/31935430656
+2016-01-08 13:26:35.164219 7f16a50a2700 10 mds.0.objecter _op_submit
+op 0x536ba80
+2016-01-08 13:26:35.164235 7f16a50a2700 10 mds.0.objecter _calc_target
+ pgid 2.ccfa8253 acting [0,6]
+2016-01-08 13:26:35.164241 7f16a50a2700 20 mds.0.objecter _get_session
+s=0x53b0f00 osd=0 2
+2016-01-08 13:26:35.164243 7f16a50a2700 20 mds.0.objecter  note: not
+requesting commit
+2016-01-08 13:26:35.164256 7f16a50a2700 10 mds.0.objecter _op_submit
+oid 200.00001dbd @2 @2 [read 0~4194304] tid 0 osd.0
+
+2016-01-08 13:26:35.172434 7f16a98ab700 10 mds.0.objecter ms_dispatch
+0x5370000 osd_op_reply(22 200.00001dbd [read 0~4192831] v0'0 uv42142
+ondisk = 0) v6
+2016-01-08 13:26:35.172493 7f16a98ab700 10 mds.0.objecter in handle_osd_op_reply
+
+2016-01-08 13:26:35.172832 7f16a78a7700 10 mds.0.journaler(ro)
+_finish_read got 31931236352~4192831
+2016-01-08 13:26:35.172852 7f16a78a7700 10 mds.0.journaler(ro)
+_assimilate_prefetch 31931236352~4192831
+2016-01-08 13:26:35.172896 7f16a78a7700 10 mds.0.journaler(ro)
+_assimilate_prefetch read_buf now 31889339375~46089808, read pointers
+31889339375/31935429183/31935430656
+
+2016-01-08 13:26:42.541242 7f16a50a2700 10 mds.0.journaler(ro)
+_is_readable read_buf.length() == 0, but need 12 for next entry;
+fetch_len is 41943040
+2016-01-08 13:26:42.541251 7f16a50a2700 10 mds.0.journaler(ro)
+_is_readable: not readable, returning false
+2016-01-08 13:26:42.541261 7f16a50a2700 10 mds.0.journaler(ro) _prefetch
+2016-01-08 13:26:42.541272 7f16a50a2700 10 mds.0.journaler(ro)
+_prefetch fetch_len=41943040 read_pos=31935429183 adjustment=1473
+target=31977373696 write_pos=31935430656
+2016-01-08 13:26:42.541282 7f16a50a2700 10 mds.0.journaler(ro)
+_is_readable read_buf.length() == 0, but need 12 for next entry;
+fetch_len is 41943040
+2016-01-08 13:26:42.541292 7f16a50a2700 10 mds.0.journaler(ro)
+_is_readable: not readable, returning false
+2016-01-08 13:26:42.541302 7f16a50a2700 10 mds.0.journaler(ro)
+wait_for_readable at 31935429183 onreadable 0x7f16a50a1d40
+----------------------------------------------------------------------------------------
+
+
+From mds log object, 200.00001dbd is the latest one whose size is
+4192831 bytes. The write_pos in 200.00000000 object is 31935430656.
+
+The strange thing is the modified time of this two objects.
+200.00000000 object's modified time is older than 200.00001dbd
+object's. Does this mean mds update log meta info first, then write
+log data? In our case, writing log data to 200.00001dbd fails somehow?
+
+----------------------------------------------------------------------------------------
+[ceph@xxx /data/lib/ceph/osd/ceph-0/current/2.94_head/DIR_4/DIR_9/DIR_4]$ ls -lh
+total 4.0K
+-rw-r--r-- 1 root root 90 Jan  8 02:06 200.00000000__head_844F3494__2
+
+[ceph@xxx /data/lib/ceph/osd/ceph-0/current/2.53_head/DIR_3/DIR_5/DIR_2]$ ls -l
+total 4096
+-rw-r--r-- 1 root root 4192831 Jan  8 02:09 200.00001dbd__head_CCFA8253__2
+----------------------------------------------------------------------------------------
+
+
+Regards,
+Zhi Zhang (David)
+Contact: zhang.david2011@gmail.com
+              zhangz.david@outlook.com
