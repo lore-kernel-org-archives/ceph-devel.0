@@ -1,108 +1,61 @@
-From: Zhi Zhang <zhang.david2011@gmail.com>
-Subject: Ceph mds stuck on replay forever
-Date: Mon, 11 Jan 2016 11:33:56 +0800
-Message-ID: <CAGkCoN+XLbjdCxtWjxXmgCHeb6SxdcBSwtLYfmQgkwum7p9XJw@mail.gmail.com>
+From: hnuzhoulin <hnuzhoulin2@gmail.com>
+Subject: an osd feign death,but ceph health is ok
+Date: Mon, 11 Jan 2016 16:08:04 +0800
+Message-ID: <op.ya2d7qwl6jkj1f@zhoulindemacbook-pro.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=gbk;
+	format=flowed	delsp=yes
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:38531 "EHLO
-	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758005AbcAKDeh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Jan 2016 22:34:37 -0500
-Received: by mail-wm0-f45.google.com with SMTP id b14so248332354wmb.1
-        for <ceph-devel@vger.kernel.org>; Sun, 10 Jan 2016 19:34:36 -0800 (PST)
+Received: from mail-pa0-f51.google.com ([209.85.220.51]:35597 "EHLO
+	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758561AbcAKIIU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jan 2016 03:08:20 -0500
+Received: by mail-pa0-f51.google.com with SMTP id ho8so56929102pac.2
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Jan 2016 00:08:20 -0800 (PST)
+Received: from zhoulindemacbook-pro.local ([183.62.249.162])
+        by smtp.gmail.com with ESMTPSA id 79sm3078027pfk.28.2016.01.11.00.08.15
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1 cipher=AES128-SHA bits=128/128);
+        Mon, 11 Jan 2016 00:08:18 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, Zheng Yan <ukernel@gmail.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Guys,
+Hi,guys.
+right now,I face a problem in my openstack+ceph.
+some vm can not start and some occur blue screen=A1=A3
 
-Last week one of our clusters became unavailable because MDSes always
-stuck on replay state.
+the output of ceph -s say the cluster is OK.
 
-From the log, we found some clues:
+So I using following command to check the volume first:
+rbd ls -p volumes|while read line;do rbd info $line -p volumes ;done
 
-MDS wants to replay log from 31885100783 to 31935430656. The last
-prefetch expects 4194304 bytes from one mds log. At this point, the
-requested_pos is increased to write_pos which is 31935430656, so there
-will be no prefetch any more.
+then quickly I get a error:
+2016-01-11 15:23:13.574314 7f8d95d8a700  0 -- 10.1.41.52:0/1003136 >> =20
+192.168.1.5:6805/18353 pipe(0x22d3bc0 sd=3D4 :0 s=3D1 pgs=3D0 cs=3D0 l=3D=
+1 =20
+c=3D0x22d3e50).fault
 
-But this mds log (already the latest one) is only 4192831 bytes, so
-finally read_pos can only reach 31935429183, which is less than
-expected write_pos. MDS wants to read more for replay, but there is no
-mds log can be read, hence MDS is stuck forever.
+so I restart the osd which pid is 18353 in host 192.168.1.5
 
-See below mds logs:
-----------------------------------------------------------------------------------------
-2016-01-08 13:26:34.468773 7f16a78a7700 10 mds.0.log replay start,
-from 31885100783 to 31935430656
+then it spend some time to recovery,when it become OK again.I can resta=
+rt =20
+vm as normal now.
 
-2016-01-08 13:26:35.164194 7f16a50a2700 10 mds.0.journaler(ro)
-_issue_read reading 31931236352~4194304, read pointers
-31889294570/31931236352/31935430656
-2016-01-08 13:26:35.164219 7f16a50a2700 10 mds.0.objecter _op_submit
-op 0x536ba80
-2016-01-08 13:26:35.164235 7f16a50a2700 10 mds.0.objecter _calc_target
- pgid 2.ccfa8253 acting [0,6]
-2016-01-08 13:26:35.164241 7f16a50a2700 20 mds.0.objecter _get_session
-s=0x53b0f00 osd=0 2
-2016-01-08 13:26:35.164243 7f16a50a2700 20 mds.0.objecter  note: not
-requesting commit
-2016-01-08 13:26:35.164256 7f16a50a2700 10 mds.0.objecter _op_submit
-oid 200.00001dbd @2 @2 [read 0~4194304] tid 0 osd.0
+so my problem is,how can I know whether occur feign death that ceph -s =
+can =20
+not monitor.
 
-2016-01-08 13:26:35.172434 7f16a98ab700 10 mds.0.objecter ms_dispatch
-0x5370000 osd_op_reply(22 200.00001dbd [read 0~4192831] v0'0 uv42142
-ondisk = 0) v6
-2016-01-08 13:26:35.172493 7f16a98ab700 10 mds.0.objecter in handle_osd_op_reply
+My ceoh is firefly 0.80.7
 
-2016-01-08 13:26:35.172832 7f16a78a7700 10 mds.0.journaler(ro)
-_finish_read got 31931236352~4192831
-2016-01-08 13:26:35.172852 7f16a78a7700 10 mds.0.journaler(ro)
-_assimilate_prefetch 31931236352~4192831
-2016-01-08 13:26:35.172896 7f16a78a7700 10 mds.0.journaler(ro)
-_assimilate_prefetch read_buf now 31889339375~46089808, read pointers
-31889339375/31935429183/31935430656
-
-2016-01-08 13:26:42.541242 7f16a50a2700 10 mds.0.journaler(ro)
-_is_readable read_buf.length() == 0, but need 12 for next entry;
-fetch_len is 41943040
-2016-01-08 13:26:42.541251 7f16a50a2700 10 mds.0.journaler(ro)
-_is_readable: not readable, returning false
-2016-01-08 13:26:42.541261 7f16a50a2700 10 mds.0.journaler(ro) _prefetch
-2016-01-08 13:26:42.541272 7f16a50a2700 10 mds.0.journaler(ro)
-_prefetch fetch_len=41943040 read_pos=31935429183 adjustment=1473
-target=31977373696 write_pos=31935430656
-2016-01-08 13:26:42.541282 7f16a50a2700 10 mds.0.journaler(ro)
-_is_readable read_buf.length() == 0, but need 12 for next entry;
-fetch_len is 41943040
-2016-01-08 13:26:42.541292 7f16a50a2700 10 mds.0.journaler(ro)
-_is_readable: not readable, returning false
-2016-01-08 13:26:42.541302 7f16a50a2700 10 mds.0.journaler(ro)
-wait_for_readable at 31935429183 onreadable 0x7f16a50a1d40
-----------------------------------------------------------------------------------------
+Thanks
 
 
-From mds log object, 200.00001dbd is the latest one whose size is
-4192831 bytes. The write_pos in 200.00000000 object is 31935430656.
-
-The strange thing is the modified time of this two objects.
-200.00000000 object's modified time is older than 200.00001dbd
-object's. Does this mean mds update log meta info first, then write
-log data? In our case, writing log data to 200.00001dbd fails somehow?
-
-----------------------------------------------------------------------------------------
-[ceph@xxx /data/lib/ceph/osd/ceph-0/current/2.94_head/DIR_4/DIR_9/DIR_4]$ ls -lh
-total 4.0K
--rw-r--r-- 1 root root 90 Jan  8 02:06 200.00000000__head_844F3494__2
-
-[ceph@xxx /data/lib/ceph/osd/ceph-0/current/2.53_head/DIR_3/DIR_5/DIR_2]$ ls -l
-total 4096
--rw-r--r-- 1 root root 4192831 Jan  8 02:09 200.00001dbd__head_CCFA8253__2
-----------------------------------------------------------------------------------------
-
-
-Regards,
-Zhi Zhang (David)
-Contact: zhang.david2011@gmail.com
-              zhangz.david@outlook.com
+-------------------------
+hnuzhoulin@gmail.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
