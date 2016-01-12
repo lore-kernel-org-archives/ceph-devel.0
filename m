@@ -1,124 +1,115 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: About ceph_clock_now()
-Date: Tue, 12 Jan 2016 12:32:48 -0500
-Message-ID: <20160112173248.GA8218@ultraspiritum.redhat.com>
-References: <177186823.10053087.1452614184109.JavaMail.zimbra@redhat.com>
- <892700092.10054838.1452614393452.JavaMail.zimbra@redhat.com>
+From: Boris Lukashev <blukashev@sempervictus.com>
+Subject: Re: 7915 is not resolved
+Date: Tue, 12 Jan 2016 12:43:05 -0500
+Message-ID: <CAFUG7CcVGQBhmO0cRS4u_3Zz7uXbz+fh1rbrhbai45xZAUx=qQ@mail.gmail.com>
+References: <CAFUG7Cd4KQRCCYamWQNnGUphY_OCXyeuqbK6DVcWT7AKko5=VA@mail.gmail.com>
+	<alpine.DEB.2.11.1601111224120.27580@cpach.fuggernut.com>
+	<CAFUG7CfS4uNp=Jxxc5bgf1s_X72Ezb8w5wg2zSdr=UnWCpYCQw@mail.gmail.com>
+	<20160111190619.GA22809@localhost>
+	<CAFUG7Cf+7wViua5YZCWt11_Q0253F3E4nzUPkfA9PoA8SHsNJA@mail.gmail.com>
+	<CAFUG7CcudK5zu0eezuTmZrsakE4s-oHyPss3cubSRL5txQmA9Q@mail.gmail.com>
+	<20160112065305.GA16215@gmail.com>
+	<alpine.DEB.2.11.1601120821210.27580@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="d6Gm4EdcadzBjdND"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58392 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752967AbcALRct (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 12 Jan 2016 12:32:49 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id 7719F18B253
-	for <ceph-devel@vger.kernel.org>; Tue, 12 Jan 2016 17:32:49 +0000 (UTC)
-Received: from ultraspiritum.redhat.com (ovpn-116-18.rdu2.redhat.com [10.10.116.18])
-	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with SMTP id u0CHWm7n032268
-	for <ceph-devel@vger.kernel.org>; Tue, 12 Jan 2016 12:32:49 -0500
-Content-Disposition: inline
-In-Reply-To: <892700092.10054838.1452614393452.JavaMail.zimbra@redhat.com>
+Received: from mail-pa0-f42.google.com ([209.85.220.42]:35226 "EHLO
+	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965421AbcALRnG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jan 2016 12:43:06 -0500
+Received: by mail-pa0-f42.google.com with SMTP id ho8so82319486pac.2
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Jan 2016 09:43:06 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1601120821210.27580@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel@vger.kernel.org
 
+Should i try altering the patch with the ! removed and reloading the
+OSDs? (would read as ' if (intersection == cached_removed_snaps) { ')
+Just for my own education on the matter - if there is disagreement
+between the contents of an OSD and the map, like in this case where a
+pending request seems to be outstanding, is there no mediation process
+between the on-disk data (OSD) and metadata (map) services? With XFS
+being used underneath most of the time, that strikes me as somewhat
+scary - its not the most consistent of filesystems on the best of
+days.
 
---d6Gm4EdcadzBjdND
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+With the mismatch between the OSD and map, but xfs_check coming back
+clean, should i be worried about a corrupt cluster in the event that i
+can somehow get it running?
+I figure that with FireFly dying and Hammer available from Mirantis, i
+should upgrade the cluster, but i would like to know what the safest
+way forward is - i'd really prefer to keep using Ceph, its been
+educational and quite handy, but if i have to rebuild the cluster
+it'll need to keep playing nice with the Fuel deployed OpenStack. If i
+can get access to the images stored by Glance and Swift metadata, i'll
+gladly export and rebuild clean presuming i can figure out how. The
+RBD images are already saved (manual export by tracking the rbd
+segment hashes from the metadata files bearing volume-UUID
+designations matching what i saw in Cinder, and dd-ing chunks into
+flat files for raw images). Worst case, if the cluster wont come back
+up and give me access to the data, what's the process for getting it
+to a "clean" state such that i can upgrade to hammer and reseed my
+glance, swift, and volume data from backups/exports? Do i need to
+remove and re-add OSDs, or is there some darker magic at play to
+ensure there are no remnants of bad data/messages?
 
-On 12/01/2016, Erwan Velu wrote:
-> Hi folks,
+Thank you all
+-Boris
 
-Hello!
-
-> When reading the code I noticed that ceph_clock_now() is mostly used to c=
-ompute a local difference of time.
-> I do see you are using "clock_gettime(CLOCK_REALTIME, &tp)" but was wonde=
-ring if CLOCK_MONOTONIC_RAW isn't more accurate.
->=20
-> I mean if the local system time is readujsted by NTP (or similar) some co=
-mputation could be wrong leading to some possible mis-interpretation or wro=
-ng scheduling.
-
-I have done some work starting in that direction currently in master. In
-common/ceph_time.h I define coarse and fine versions of the real clock
-and monotonic clock and I've switched the osdc subsystem over to use them.
-
-We use the std::chrono C++ time library, but we define our own clocks
-(so we can pick the right one for performance/resolution tradeoffs) and an
-in-memory timespan representation (so not every function taking a duration =
-has
-to be a template.)
-
-The real_clock and mono_clock classes correspond to CLOCK_REALTIME and CLOC=
-K_MONOTONIC, and coarse_real_clock and coarse_mono_clock correspond to CLOC=
-K_REALTIME_COARSE and CLOCK_MONOTONIC_COARSE. If you require millisecond re=
-solution but nothing finer, you should prefer the coarse variants.
-
-The std::chrono library lets us integrate with other C++ libraries (and use=
- the
-standard concurrency features) and has the advantage of stronger typing; we
-can't use a duration where a time point is required or subtract a monotonic
-time point from a real time point.
-
-As I understand it, CLOCK_MONOTONIC_RAW is generally the wrong choice.
-The raw hardware clock is prone to drift, and NTP synchronization (or other
-corrective) makes the elapsed time measurements more accurate.
-
-However, I am not a Time Lord. If someone knows better, please correct me h=
-ere.
-
-One concern with monotonic clocks, even for elapsed time, is that their epo=
-ch is
-unspecified. You cannot send a monotonic time over the network to another
-machine nor can you save it to a file and re-read it later. Anything to be
-serialized must be a real time.
-
-This is unfortunate. If I were a Time Lord I'd travel back in time and make=
- the
-POSIX committee adopt CLOCK_UTC and CLOCK_TAI so we could have serializable
-monotonic time values.
-
-> I could work on a PR is you find this interesting.
-
-I find it interesting. If you want to change more subsystems to use ceph_ti=
-me
-and use monotonic and coarse clocks in appropriate places I think that woul=
-d be
-wonderful. It might be worthwhile to focus on the places where we use doubl=
-e to
-represent a time value.
-
-Please read through ceph_time.h and osdc to get a feel for it. If you think=
- it
-could use improvement, I'd be happy to hear your ideas.
-
-Thank you.
-
---=20
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
-
---d6Gm4EdcadzBjdND
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQF8BAEBCgBmBQJWlTi6XxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
-ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
-OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4j0YAH/RY+erkYN9T94gMuJ+XIFoQ0
-/Fgp4tfOsdSduLr+4NSPB3agS9pdtLnSXjXYVLvJJEi6NvIjJU3Jtb2NP0tUmAd1
-Z19LV5k9tIH21aG0Pp3at/T9Fnp/IK9052jXJbZAuJUtFVlYQ88AydjMiE7tIjaX
-M6Y3KrBJwVrWEIgGHyUhkBAYLsb/AC9/mrL3RVJ+j+TFKIUT2V0DgICLr0HAcFPo
-twy4ELBfEheYvtI1XutuuC/HKPkr10VmYWxS8ANo4fDxiZaiGWUHJYJx2PRYO8XS
-kBZf5FY5K1za7ZHX8LVWF/fl4ftfhZxjWZ46b7+YTXPmrS71T5EcJqjxGpOdbxs=
-=eI8v
------END PGP SIGNATURE-----
-
---d6Gm4EdcadzBjdND--
+On Tue, Jan 12, 2016 at 8:24 AM, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 12 Jan 2016, Mykola Golub wrote:
+>> On Mon, Jan 11, 2016 at 09:00:18PM -0500, Boris Lukashev wrote:
+>> > In case anyone is following the mailing list later on, we spoke in IRC
+>> > and Sage provided a patch - http://fpaste.org/309609/52550203/
+>>
+>> > diff --git a/src/osd/PG.cc b/src/osd/PG.cc
+>> > index dc18aec..f9ee23c 100644
+>> > --- a/src/osd/PG.cc
+>> > +++ b/src/osd/PG.cc
+>> > @@ -135,8 +135,16 @@ void PGPool::update(OSDMapRef map)
+>> >    name = map->get_pool_name(id);
+>> >    if (pi->get_snap_epoch() == map->get_epoch()) {
+>> >      pi->build_removed_snaps(newly_removed_snaps);
+>> > -    newly_removed_snaps.subtract(cached_removed_snaps);
+>> > -    cached_removed_snaps.union_of(newly_removed_snaps);
+>> > +    interval_set<snapid_t> intersection;
+>> > +    intersection.intersection_of(newly_removed_snaps, cached_removed_snaps);
+>> > +    if (!(intersection == cached_removed_snaps)) {
+>> > +      newly_removed_snaps.subtract(cached_removed_snaps);
+>>
+>> Sage, won't it still violate the assert?
+>> "intersection != cached_removed_snaps" means that cached_removed_snaps
+>> contains snapshots missed in newly_removed_snaps, and we can't subtract?
+>
+> Oops, yeah, just remote the !.
+>
+> As you can see the problem is that the OSDMap's removed snaps shrank
+> somehow.  If you crank up logging you can see what the competing sets
+> are.
+>
+> An alternative fix/hack would be to modify the monitor to allow the
+> snapids that were previously in the set to be added back into the OSDMap.
+> That's arguably a better fix, although it's a bit more work.  But, even
+> then, something like the above will be needed since there are still
+> OSDMaps in the history where the set is smaller.
+>
+> sage
+>
+>>
+>> > +      cached_removed_snaps.union_of(newly_removed_snaps);
+>> > +    } else {
+>> > +      lgeneric_subdout(g_ceph_context, osd, 0) << __func__ << " cached_removed_snaps shrank from " << cached_removed_snaps << dendl;
+>> > +      cached_removed_snaps = newly_removed_snaps;
+>> > +      newly_removed_snaps.clear();
+>> > +    }
+>> >      snapc = pi->get_snap_context();
+>> >    } else {
+>> >      newly_removed_snaps.clear();
+>>
+>> --
+>> Mykola Golub
+>>
+>>
+>>
