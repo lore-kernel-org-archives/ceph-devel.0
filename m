@@ -1,51 +1,56 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: About ceph_clock_now()
-Date: Wed, 13 Jan 2016 10:28:16 -0500
-Message-ID: <20160113152816.GB24712@ultraspiritum.redhat.com>
-References: <177186823.10053087.1452614184109.JavaMail.zimbra@redhat.com>
- <892700092.10054838.1452614393452.JavaMail.zimbra@redhat.com>
- <20160112173248.GA8218@ultraspiritum.redhat.com>
- <964746730.10566211.1452681675142.JavaMail.zimbra@redhat.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 01/13/2016 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 13 Jan 2016 09:44:34 -0600
+Message-ID: <569670E2.6000001@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58111 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49445 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750746AbcAMP2S convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jan 2016 10:28:18 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id E2944C0BF2AF
-	for <ceph-devel@vger.kernel.org>; Wed, 13 Jan 2016 15:28:17 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <964746730.10566211.1452681675142.JavaMail.zimbra@redhat.com>
+	id S1752167AbcAMPoh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 13 Jan 2016 10:44:37 -0500
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 4C8A2C0A15FD
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Jan 2016 15:44:37 +0000 (UTC)
+Received: from [10.3.112.5] ([10.3.112.5])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u0DFiZaN015069
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Jan 2016 10:44:36 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Erwan Velu <evelu@redhat.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 13/01/2016, Erwan Velu wrote:
-[snip]
-> You consider the MONOTONIC clock drifting a lot ?
-> I mean an NTP adjustement can make a serious jump forward or even worse backward.
+8AM PST as usual (ie in 16 minutes)! Discussion topics today include 
+bluestore HDD test results, read ahead, and Haomai's bluestore NVMe 
+work.  Please feel free to add more!
 
-So, CLOCK_MONOTONIC will never jump backward (thus the name). And there
-is a system-defined limit on how much it will ever jump forward at any
-given time, though I don't know what that value is offhand. On a
-well-synchronized system, at least it should give more accurate durations than
-CLOCK_MONOTONIC_RAW. That said, if you're coming up from a cold boot and you're
-out of sync, it could be jumpier. As I said, I am not a Timelord, this is just
-what I've gathered as received wisdom. 
+Here's the links:
 
-[snip]
-> You mean we could switch some of ceph_clock_now() calls to ceph_time ? 
-> We could use coarse_mono_clock to perform that.
-> 
-> If you agree that switching code like the one I'm speaking is valuable, I can work on it.
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
 
-I think that would be very valuable, thank you.
+To join the Meeting:
+https://bluejeans.com/268261044
 
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
