@@ -1,160 +1,40 @@
-From: Christian Salzmann <Christian.Salzmann@fu-berlin.de>
-Subject: Re: cephfs (hammer) flips directory access bits
-Date: Wed, 13 Jan 2016 12:16:36 +0100
-Message-ID: <56963214.3000505@fu-berlin.de>
-References: <n6l67c$hu$1@ger.gmane.org>
- <CAAM7YA=9RR5KS9dgU9o4viN+-sqf=ij6a6Cg-6J=kjSskFz=dg@mail.gmail.com>
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: Re: 7915 is not resolved
+Date: Wed, 13 Jan 2016 13:35:22 +0200
+Message-ID: <20160113113521.GA11985@gmail.com>
+References: <20160111190619.GA22809@localhost>
+ <CAFUG7Cf+7wViua5YZCWt11_Q0253F3E4nzUPkfA9PoA8SHsNJA@mail.gmail.com>
+ <CAFUG7CcudK5zu0eezuTmZrsakE4s-oHyPss3cubSRL5txQmA9Q@mail.gmail.com>
+ <20160112065305.GA16215@gmail.com>
+ <alpine.DEB.2.11.1601120821210.27580@cpach.fuggernut.com>
+ <CAFUG7CcVGQBhmO0cRS4u_3Zz7uXbz+fh1rbrhbai45xZAUx=qQ@mail.gmail.com>
+ <alpine.DEB.2.11.1601121245040.27580@cpach.fuggernut.com>
+ <CAFUG7CcWbwG9fufWFUY=n9CJQFQpG+qQ8wY+3bE+Q2w_FSnb1A@mail.gmail.com>
+ <CAFUG7CcFSs8XWD4XWQ6fVvJ13322b=h5vGrgd+4pKfcRiTmjYg@mail.gmail.com>
+ <CAFUG7CdPcnxsHuOKVXZWXJdXuAParQTtpeAfkBi6NaHCLrCBqw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256; boundary="------------ms070606070804050807080201"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from outpost5.zedat.fu-berlin.de ([130.133.4.89]:51125 "EHLO
-	outpost5.zedat.fu-berlin.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755318AbcAMLYc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 13 Jan 2016 06:24:32 -0500
-In-Reply-To: <CAAM7YA=9RR5KS9dgU9o4viN+-sqf=ij6a6Cg-6J=kjSskFz=dg@mail.gmail.com>
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:33802 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754329AbcAMLf0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jan 2016 06:35:26 -0500
+Received: by mail-lb0-f173.google.com with SMTP id cl12so71462231lbc.1
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Jan 2016 03:35:25 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CAFUG7CdPcnxsHuOKVXZWXJdXuAParQTtpeAfkBi6NaHCLrCBqw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Boris Lukashev <blukashev@sempervictus.com>
+Cc: ceph-devel@vger.kernel.org
 
-This is a cryptographically signed message in MIME format.
+On Tue, Jan 12, 2016 at 08:06:03PM -0500, Boris Lukashev wrote:
+> Thank you sage! The patch below allowed one of the two stuck OSDs to start up.
+> Whats the procedure from here? Is there a way to make Ceph consistent?
+> OSD 4 is still refusing to start, new error message however.
 
---------------ms070606070804050807080201
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Could you please post the log for this case? It might be helpful to
+set 'debug osd = 20' before starting.
 
-On 08.01.2016 09:54, Yan, Zheng wrote:
-
-> do you use kernel client? I remember an ACL related bug in old kernel
-> can cause this. mount cephfs with '-o noacl' option can avoid this
-> issue.
-
-yes, we use the kernel client (in Debian stable) and yes, mounting with '=
-noacl' avoids this issue.
-Good catch!
-
-Do you eventually have a pointer to the patch fixing this bug?
-I am convinced the patch could be backported to the kernel in Debian Jess=
-ie (as long as it's not too intrusive).
-
-thank you
-Christian
-
---=20
-Christian Salzmann                     Christian.Salzmann@fu-berlin.de
-IT-Dienst                              Takustra=C3=9Fe 9, 14195 Berlin
-Fachbereich Mathematik und Informatik  http://www.mi.fu-berlin.de
-Freie Universit=C3=A4t Berlin
-
-
-
---------------ms070606070804050807080201
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
-
-MIAGCSqGSIb3DQEHAqCAMIACAQExDzANBglghkgBZQMEAgEFADCABgkqhkiG9w0BBwEAAKCC
-EMYwggTVMIIDvaADAgECAghQTsb1PRG0ZDANBgkqhkiG9w0BAQsFADBxMQswCQYDVQQGEwJE
-RTEcMBoGA1UEChMTRGV1dHNjaGUgVGVsZWtvbSBBRzEfMB0GA1UECxMWVC1UZWxlU2VjIFRy
-dXN0IENlbnRlcjEjMCEGA1UEAxMaRGV1dHNjaGUgVGVsZWtvbSBSb290IENBIDIwHhcNMTQw
-NzIyMTIwODI2WhcNMTkwNzA5MjM1OTAwWjBaMQswCQYDVQQGEwJERTETMBEGA1UEChMKREZO
-LVZlcmVpbjEQMA4GA1UECxMHREZOLVBLSTEkMCIGA1UEAxMbREZOLVZlcmVpbiBQQ0EgR2xv
-YmFsIC0gRzAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6ZvDZ4X5Da71jVTD
-llA1PWLpbkztlNcAW5UidNQg6zSP1uzAMQQLmYHiphTSUqAoI4SLdIkEXlvg4njBeMsWyyg1
-OXstkEXQ7aAAeny/Sg4bAMOG6VwrMRF7DPOCJEOMHDiLamgAmu7cT3ir0sYTm3at7t4m6O8B
-r3QPwQmi9mvOvdPNFDBP9eXjpMhim4IaAycwDQJlYE3t0QkjKpY1WCfTdsZxtpAdxO3/NYZ9
-bzOz2w/FEcKKg6GUXUFr2NIQ9Uz9ylGs2b3vkoO72uuLFlZWQ8/h1RM9ph8nMM1JVNvJEzSa
-cXXFbOqnC5j5IZ0nrz6jOTlIaoytyZn7wxLyvQIDAQABo4IBhjCCAYIwDgYDVR0PAQH/BAQD
-AgEGMB0GA1UdDgQWBBRJt8bP6D0ff+pEexMp9/EKcD7eZDAfBgNVHSMEGDAWgBQxw3kbuvVT
-1xfgiXotF2wKsyudMzASBgNVHRMBAf8ECDAGAQH/AgECMGIGA1UdIARbMFkwEQYPKwYBBAGB
-rSGCLAEBBAICMBEGDysGAQQBga0hgiwBAQQDADARBg8rBgEEAYGtIYIsAQEEAwEwDwYNKwYB
-BAGBrSGCLAEBBDANBgsrBgEEAYGtIYIsHjA+BgNVHR8ENzA1MDOgMaAvhi1odHRwOi8vcGtp
-MDMzNi50ZWxlc2VjLmRlL3JsL0RUX1JPT1RfQ0FfMi5jcmwweAYIKwYBBQUHAQEEbDBqMCwG
-CCsGAQUFBzABhiBodHRwOi8vb2NzcDAzMzYudGVsZXNlYy5kZS9vY3NwcjA6BggrBgEFBQcw
-AoYuaHR0cDovL3BraTAzMzYudGVsZXNlYy5kZS9jcnQvRFRfUk9PVF9DQV8yLmNlcjANBgkq
-hkiG9w0BAQsFAAOCAQEAYyAo/ZwhhnK+OUZZOTIlvKkBmw3Myn1BnIZtCm4ssxNZdbEzkhth
-Jxb/w7LVNYL7hCoBSb1mu2YvssIGXW4/buMBWlvKQ2NclbbhMacf1QdfTeZlgk4y+cN8ekvN
-TVx07iHydQLsUj7SyWrTkCNuSWc1vn9NVqTszC/Pt6GXqHI+ybxA1lqkCD3WvILDt7cyjrEs
-jmpttzUCGc/1OURYY6ckABCwu/xOr24vOLulV0k/2G5QbyyXltwdRpplic+uzPLl2Z9Tsz6h
-L5Kp2AvGhB8Exuse6J99tXulAvEkxSRjETTMWpMgKnmIOiVCkKllO3yG0xIVIyn8LNrMOVtU
-FzCCBY8wggR3oAMCAQICBxeQYMz5uW4wDQYJKoZIhvcNAQELBQAwWjELMAkGA1UEBhMCREUx
-EzARBgNVBAoTCkRGTi1WZXJlaW4xEDAOBgNVBAsTB0RGTi1QS0kxJDAiBgNVBAMTG0RGTi1W
-ZXJlaW4gUENBIEdsb2JhbCAtIEcwMTAeFw0xNDA1MTIxNTA1MzJaFw0xOTA3MDkyMzU5MDBa
-MIG1MQswCQYDVQQGEwJERTEPMA0GA1UECBMGQmVybGluMQ8wDQYDVQQHEwZCZXJsaW4xIjAg
-BgNVBAoTGUZyZWllIFVuaXZlcnNpdGFldCBCZXJsaW4xDjAMBgNVBAsTBVpFREFUMTAwLgYD
-VQQDEydGcmVpZSBVbml2ZXJzaXRhZXQgQmVybGluIC0gRlUtQ0EgLSBHMDExHjAcBgkqhkiG
-9w0BCQEWD2NhQEZVLUJlcmxpbi5ERTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB
-AI2FCNNOPMwzXr5Jl4qQg40qSK/rBG4Ylz81p2Zwp5JizqxDBWjQ1g1+pHFUNVT+9aKRHxrk
-eS7VtD+jfiTPBPMuR13Wqetmw+GH4NCkBJpYfb6TEO+QXJEXlu8ESh/zbXK4PIMJ/e3dex7P
-IYERpPHKQUQLOb+YXKkWXI0et5igorJrI5XejFXVkjWIWSYaXJ29HVczGtwO0X9TrFx8A164
-brAjaYdfj2s7sNl2yClkgrBUuKpYRzo+UAN++apOSI47FJ8NhapYy4s4rvcQeP44UsdX8+vu
-UVZ03uU2/RjG5OUVUfnbz058xfek/8luQ6rBSC/sQWEPI7haAUKINzMCAwEAAaOCAfwwggH4
-MBIGA1UdEwEB/wQIMAYBAf8CAQEwDgYDVR0PAQH/BAQDAgEGMBEGA1UdIAQKMAgwBgYEVR0g
-ADAdBgNVHQ4EFgQUBuE99G/0MLd6O1ewMQWJew1YWmwwHwYDVR0jBBgwFoAUSbfGz+g9H3/q
-RHsTKffxCnA+3mQwGgYDVR0RBBMwEYEPY2FARlUtQmVybGluLkRFMIGIBgNVHR8EgYAwfjA9
-oDugOYY3aHR0cDovL2NkcDEucGNhLmRmbi5kZS9nbG9iYWwtcm9vdC1jYS9wdWIvY3JsL2Nh
-Y3JsLmNybDA9oDugOYY3aHR0cDovL2NkcDIucGNhLmRmbi5kZS9nbG9iYWwtcm9vdC1jYS9w
-dWIvY3JsL2NhY3JsLmNybDCB1wYIKwYBBQUHAQEEgcowgccwMwYIKwYBBQUHMAGGJ2h0dHA6
-Ly9vY3NwLnBjYS5kZm4uZGUvT0NTUC1TZXJ2ZXIvT0NTUDBHBggrBgEFBQcwAoY7aHR0cDov
-L2NkcDEucGNhLmRmbi5kZS9nbG9iYWwtcm9vdC1jYS9wdWIvY2FjZXJ0L2NhY2VydC5jcnQw
-RwYIKwYBBQUHMAKGO2h0dHA6Ly9jZHAyLnBjYS5kZm4uZGUvZ2xvYmFsLXJvb3QtY2EvcHVi
-L2NhY2VydC9jYWNlcnQuY3J0MA0GCSqGSIb3DQEBCwUAA4IBAQA0ct/G7mY63wzfJmYrpBI5
-bMfurPwyo+WGFmgL1AeZKoS9kzOfGz8quLGAFQg1gC4nwJNdRseP0adTyzRXeLZ6EXELH4Df
-MsBAqVgW4BEjgu97X2umUjxGPLmeMlJNKNp8MZIFNFd/2+/+dVy6eUwOYAXi92mHI2ENe0Dd
-eDIddjIlxaeVWzwQ0x5Ip1F7d9egPEI9PcCZxzDo7eTPmQ5/NmGAu7xQ84zZDZsOOj0S94WT
-n2W9SEvn4VZUeHltBQS6phoPuGO2OCiq8AXAStzszBOYze9S5HTbtZZAeNzn0/mDjE/qamad
-ZdFOgxmWt0mcucX1mNxC+QWFTPMQH6GYMIIGVjCCBT6gAwIBAgIHFsAe9TkFUTANBgkqhkiG
-9w0BAQUFADCBtTELMAkGA1UEBhMCREUxDzANBgNVBAgTBkJlcmxpbjEPMA0GA1UEBxMGQmVy
-bGluMSIwIAYDVQQKExlGcmVpZSBVbml2ZXJzaXRhZXQgQmVybGluMQ4wDAYDVQQLEwVaRURB
-VDEwMC4GA1UEAxMnRnJlaWUgVW5pdmVyc2l0YWV0IEJlcmxpbiAtIEZVLUNBIC0gRzAxMR4w
-HAYJKoZIhvcNAQkBFg9jYUBGVS1CZXJsaW4uREUwHhcNMTMxMjA1MTU1MzEwWhcNMTYxMjA0
-MTU1MzEwWjCBtDELMAkGA1UEBhMCREUxDzANBgNVBAgTBkJlcmxpbjEPMA0GA1UEBxMGQmVy
-bGluMSIwIAYDVQQKExlGcmVpZSBVbml2ZXJzaXRhZXQgQmVybGluMS4wLAYDVQQLEyVGYWNo
-YmVyZWljaCBNYXRoZW1hdGlrIHVuZCBJbmZvcm1hdGlrMRIwEAYDVQQLEwlJVC1EaWVuc3Qx
-GzAZBgNVBAMTEkNocmlzdGlhbiBTYWx6bWFubjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC
-AQoCggEBAJ3qZX++hzyv5zTiMlUljIHQE41veiNYdUc77HxMnmrWRUaVVuVkm1WIGoKJS/6w
-iXQsPKSROpNP8KmmdFVG+IBLuRphDlKTIOkQ7U7fxzDdw8F6upZs7nc1zQmjAdPxQiJBuH2M
-8u/0KcM415BUDDmJGpzYBncILyXaiyOz3LyqUbkGCVD5fc6god+UHKOMbgYhS69KOfHmnonA
-BdzGiK4v71Vqf0sHS/7N3XKIhMmic6Y5UQLOVOBtdEzLpTuxttjk28AyJNJqFSfkLzPQc+rP
-wm/6m2I+MZ2R1vx3EbQrXHMCCFv07Cfx6ZLh6Xh3ChXQjzSxOue1kdJDtUTIWwcCAwEAAaOC
-AmgwggJkMC8GA1UdIAQoMCYwEQYPKwYBBAGBrSGCLAEBBAMBMBEGDysGAQQBga0hgiwCAQQD
-ATAJBgNVHRMEAjAAMAsGA1UdDwQEAwIF4DAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUH
-AwQwHQYDVR0OBBYEFP0jBQi3IoHt//ZJBEzLKNJqD+cpMB8GA1UdIwQYMBaAFAbhPfRv9DC3
-ejtXsDEFiXsNWFpsMIGvBgNVHREEgacwgaSBH0NocmlzdGlhbi5TYWx6bWFubkBmdS1iZXJs
-aW4uZGWBH2NocmlzdGlhbi5zYWx6bWFubkBmdS1iZXJsaW4uZGWBIkNocmlzdGlhbi5TYWx6
-bWFubkBtaS5mdS1iZXJsaW4uZGWBImNocmlzdGlhbi5zYWx6bWFubkBtaS5mdS1iZXJsaW4u
-ZGWBGHNhbHptYW5uQG1pLmZ1LWJlcmxpbi5kZTB1BgNVHR8EbjBsMDSgMqAwhi5odHRwOi8v
-Y2RwMS5wY2EuZGZuLmRlL2Z1LWNhL3B1Yi9jcmwvY2FjcmwuY3JsMDSgMqAwhi5odHRwOi8v
-Y2RwMi5wY2EuZGZuLmRlL2Z1LWNhL3B1Yi9jcmwvY2FjcmwuY3JsMIGQBggrBgEFBQcBAQSB
-gzCBgDA+BggrBgEFBQcwAoYyaHR0cDovL2NkcDEucGNhLmRmbi5kZS9mdS1jYS9wdWIvY2Fj
-ZXJ0L2NhY2VydC5jcnQwPgYIKwYBBQUHMAKGMmh0dHA6Ly9jZHAyLnBjYS5kZm4uZGUvZnUt
-Y2EvcHViL2NhY2VydC9jYWNlcnQuY3J0MA0GCSqGSIb3DQEBBQUAA4IBAQAZMiWpI7b9W/W5
-Tp7Zvi2M796w2ZSW3Zn1WT1LuJFRYsJTIQxRcp0OiZDLjXqtGioZj+OBsfCV3cmdqVmTMxER
-y4ioeZxvSX/7sq8yUTy78LYkdscdAMYw0fd16dmMNxeKvoYMISm3fauAqrFqHPiT/fyE8a4m
-wMaeJykiQ51N1fG1x8OMLdsdQdJwduignEVKbfWciFiYcnSQF+XEaRn6iMfcjsh1KfUno7ON
-7qvrgB5rKU/AocylG0fFgrJrZ9FbzbLBmfW4VRqA8SYMaHa/pYq++Hwf3A1w4bG36r8m0LnM
-h6IWfzy2v2tx46Eq4E4rkTXYhZqk+dPtlt/8kn5jMYIEdDCCBHACAQEwgcEwgbUxCzAJBgNV
-BAYTAkRFMQ8wDQYDVQQIEwZCZXJsaW4xDzANBgNVBAcTBkJlcmxpbjEiMCAGA1UEChMZRnJl
-aWUgVW5pdmVyc2l0YWV0IEJlcmxpbjEOMAwGA1UECxMFWkVEQVQxMDAuBgNVBAMTJ0ZyZWll
-IFVuaXZlcnNpdGFldCBCZXJsaW4gLSBGVS1DQSAtIEcwMTEeMBwGCSqGSIb3DQEJARYPY2FA
-RlUtQmVybGluLkRFAgcWwB71OQVRMA0GCWCGSAFlAwQCAQUAoIICgzAYBgkqhkiG9w0BCQMx
-CwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0xNjAxMTMxMTE2MzZaMC8GCSqGSIb3DQEJ
-BDEiBCAzBIm00vXMy8Agrsg0u56IByTDx/6PJ6UTZXuUeK6urjBsBgkqhkiG9w0BCQ8xXzBd
-MAsGCWCGSAFlAwQBKjALBglghkgBZQMEAQIwCgYIKoZIhvcNAwcwDgYIKoZIhvcNAwICAgCA
-MA0GCCqGSIb3DQMCAgFAMAcGBSsOAwIHMA0GCCqGSIb3DQMCAgEoMIHSBgkrBgEEAYI3EAQx
-gcQwgcEwgbUxCzAJBgNVBAYTAkRFMQ8wDQYDVQQIEwZCZXJsaW4xDzANBgNVBAcTBkJlcmxp
-bjEiMCAGA1UEChMZRnJlaWUgVW5pdmVyc2l0YWV0IEJlcmxpbjEOMAwGA1UECxMFWkVEQVQx
-MDAuBgNVBAMTJ0ZyZWllIFVuaXZlcnNpdGFldCBCZXJsaW4gLSBGVS1DQSAtIEcwMTEeMBwG
-CSqGSIb3DQEJARYPY2FARlUtQmVybGluLkRFAgcWwB71OQVRMIHUBgsqhkiG9w0BCRACCzGB
-xKCBwTCBtTELMAkGA1UEBhMCREUxDzANBgNVBAgTBkJlcmxpbjEPMA0GA1UEBxMGQmVybGlu
-MSIwIAYDVQQKExlGcmVpZSBVbml2ZXJzaXRhZXQgQmVybGluMQ4wDAYDVQQLEwVaRURBVDEw
-MC4GA1UEAxMnRnJlaWUgVW5pdmVyc2l0YWV0IEJlcmxpbiAtIEZVLUNBIC0gRzAxMR4wHAYJ
-KoZIhvcNAQkBFg9jYUBGVS1CZXJsaW4uREUCBxbAHvU5BVEwDQYJKoZIhvcNAQEBBQAEggEA
-A1PiQxuHIU3wW2XCDSgiYkk1BI9JaUnTaa5AoIljkQ3AsOpTG3QYhkeuvvRaccc+B0ZVriFq
-I2JIEILDSClGLDVYOhcl2YmkZ9OaRqAkuoHNU0cHAANCqc3lj/X645GCQAScKEFGBvD1f4vx
-wbRV9oN3N/Wdc0nyaLt9CRKstDCtNCO+yKW4/C7pfJh8Xj79TXEP/UZp41nSiT6h5ypmL0Mk
-UG1G8CSOqslmrEsUpGbSEXm+mHjJkZ8CM8YS1+HLEm2QPdht7mTfO9kb/uHIBJY4u/CDBc+L
-lIZm+CqkCPtM6t8TWArO6zt5Xr17e2HCHxtKz636xMZUE9+sjsdTwgAAAAAAAA==
---------------ms070606070804050807080201--
+-- 
+Mykola Golub
