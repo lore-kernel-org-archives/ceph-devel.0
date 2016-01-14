@@ -1,36 +1,32 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: osd logging
-Date: Thu, 14 Jan 2016 08:51:40 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1601140851310.26381@cpach.fuggernut.com>
-References: <56970DE3.3070904@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Regarding bluestore release schedule
+Date: Thu, 14 Jan 2016 09:08:21 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1601140906070.26381@cpach.fuggernut.com>
+References: <4EFB79CD-2601-4ABF-96DB-AAF6A90D0036@ict.ac.cn> <alpine.DEB.2.11.1601130842560.26381@cpach.fuggernut.com> <84CAA53B-B2B6-4F2A-B199-32534733068F@ict.ac.cn>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59419 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752839AbcANNvh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jan 2016 08:51:37 -0500
-In-Reply-To: <56970DE3.3070904@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:60110 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753508AbcANOIR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 14 Jan 2016 09:08:17 -0500
+In-Reply-To: <84CAA53B-B2B6-4F2A-B199-32534733068F@ict.ac.cn>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dmick@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Zhang Huan <zhanghuan@ict.ac.cn>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, 13 Jan 2016, Dan Mick wrote:
-> Watching osd logs, diagnosing a problem, I note a lot of level-5
-> messages of the form
-> 
-> tick
-> 
-> and
-> 
-> tick_without_osd_lock
-> 
-> Anyone else think those ought to be a higher debug level?  They're
-> awfully noisy for debug set to 5.
+On Thu, 14 Jan 2016, Zhang Huan wrote:
+> > The collection->lock doesn't need to be broken up since it's hidden 
+> > beneath the OSD's per-pg lock anyway.  
+> Thanks, I found the per-pg lock. If there exist per-pg locks, the
+> per-collection locks are actually not needed?
 
-Yep...
-
-	https://github.com/ceph/ceph/pull/7234
+If OSD were the only user, almost.. there are a few cases where PGs 
+touch the snapmapper object in the meta collection.  They also make it 
+possible for other parts of the system to access the store.  For example, 
+FuseStore (see https://github.com/ceph/ceph/pull/7134) lets you expose a 
+running ObjectStore via fuse on a running OSD for diagnostic/debugging 
+purposes.
 
 sage
