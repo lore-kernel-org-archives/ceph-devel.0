@@ -1,32 +1,43 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: Re: Regarding bluestore release schedule
-Date: Thu, 14 Jan 2016 09:08:21 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1601140906070.26381@cpach.fuggernut.com>
-References: <4EFB79CD-2601-4ABF-96DB-AAF6A90D0036@ict.ac.cn> <alpine.DEB.2.11.1601130842560.26381@cpach.fuggernut.com> <84CAA53B-B2B6-4F2A-B199-32534733068F@ict.ac.cn>
+Subject: v10.0.2 released
+Date: Thu, 14 Jan 2016 10:37:21 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1601141033010.21258@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60110 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:51162 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753508AbcANOIR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 14 Jan 2016 09:08:17 -0500
-In-Reply-To: <84CAA53B-B2B6-4F2A-B199-32534733068F@ict.ac.cn>
+	id S1754568AbcANPhR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 14 Jan 2016 10:37:17 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zhang Huan <zhanghuan@ict.ac.cn>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
 
-On Thu, 14 Jan 2016, Zhang Huan wrote:
-> > The collection->lock doesn't need to be broken up since it's hidden 
-> > beneath the OSD's per-pg lock anyway.  
-> Thanks, I found the per-pg lock. If there exist per-pg locks, the
-> per-collection locks are actually not needed?
+This development release includes a raft of changes and improvements for 
+Jewel. Key additions include CephFS scrub/repair improvements, an AIX and 
+Solaris port of librados, many librbd journaling additions and fixes, 
+extended per-pool options, and NBD driver for RBD (rbd-nbd) that allows 
+librbd to present a kernel-level block device on Linux, multitenancy 
+support for RGW, RGW bucket lifecycle support, RGW support for Swift 
+static large objects (SLO), and RGW support for Swift bulk delete.
 
-If OSD were the only user, almost.. there are a few cases where PGs 
-touch the snapmapper object in the meta collection.  They also make it 
-possible for other parts of the system to access the store.  For example, 
-FuseStore (see https://github.com/ceph/ceph/pull/7134) lets you expose a 
-running ObjectStore via fuse on a running OSD for diagnostic/debugging 
-purposes.
+There are also lots of smaller optimizations and performance fixes going 
+in all over the tree, particular in the OSD and common code.
 
-sage
+Notable Changes
+---------------
+
+See
+
+	http://ceph.com/releases/v10-0-2-released/
+
+[I'd include the changelog here but I'm missing a oneliner that renders 
+the rst in email-suitable form...]
+
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://download.ceph.com/tarballs/ceph-10.0.2.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
