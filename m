@@ -1,69 +1,59 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Compiling for FreeBSD
-Date: Sat, 16 Jan 2016 13:56:33 +0100
-Message-ID: <569A3E01.3030109@digiware.nl>
-References: <565B3999.3050302@digiware.nl>
- <CACJqLyaSTqKjAQf1Nb8UE00SrF0y1fskYhExmWd3vbCvNrFBkA@mail.gmail.com>
- <565B4A7F.60301@digiware.nl>
- <CAAM7YAmmOwfyiB1jFfGLz4fDxPxHRPQQNk80qEq2-RqFiHH-3g@mail.gmail.com>
- <20151130065812.GA20205@gmail.com>
- <alpine.DEB.2.00.1511300518210.19170@cobra.newdream.net>
- <565D7FA8.3010301@digiware.nl>
+Subject: Asserts while running test/erasure-code/test-erasure-eio.sh
+Date: Sun, 17 Jan 2016 17:32:09 +0100
+Message-ID: <569BC209.2000600@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:43543 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([31.223.170.169]:43883 "EHLO smtp.digiware.nl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751125AbcAQQaI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 17 Jan 2016 11:30:08 -0500
-In-Reply-To: <565D7FA8.3010301@digiware.nl>
+	id S1751127AbcAQQcl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 17 Jan 2016 11:32:41 -0500
+Received: from rack1.digiware.nl (unknown [127.0.0.1])
+	by smtp.digiware.nl (Postfix) with ESMTP id 8AE4915340A
+	for <ceph-devel@vger.kernel.org>; Sun, 17 Jan 2016 17:32:40 +0100 (CET)
+Received: from [192.168.10.10] (asus [192.168.10.10])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.digiware.nl (Postfix) with ESMTPSA id 9DDEB153401
+	for <ceph-devel@vger.kernel.org>; Sun, 17 Jan 2016 17:32:08 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Mykola Golub <mgolub@mirantis.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 1-12-2015 12:08, Willem Jan Withagen wrote:
-> On 30-11-2015 14:21, Sage Weil wrote:
->> The problem with all of the porting code in general is that it is doomed
->> to break later on if we don't have (at least) ongoing build tests.  In
->> order for a FreeBSD or OSX port to continue working we need VMs that run
->> either gitbuilder or a jenkins job or similar so that we can tell when it
->> breaks.
->>
->> If someone is willing to run a VM somewhere to do this we can pretty
->> easily stick it on the gitbuilder page at
->>
->>     http://ceph.com/gitbuilder.cgi
-> 
 
-I have build a pull request that includes the changes to get the
-automake tools do a decent job on the current master.
+When I run the above script I get asserts:
 
-https://github.com/ceph/ceph/pull/7239
+osd/ECBackend.cc: 201: FAILED assert(res.errors.empty())
 
-But then I tried building a second WIP with changes to the {cc,} code,
-but then I end up with a WIP tree with a complete string of other
-commits in between. Which is certainly not the intention.
+Which is in this code:
+struct OnRecoveryReadComplete :
+  public GenContext<pair<RecoveryMessages*, ECBackend::read_result_t& > &> {
+  ECBackend *pg;
+  hobject_t hoid;
+  set<int> want;
+  OnRecoveryReadComplete(ECBackend *pg, const hobject_t &hoid)
+    : pg(pg), hoid(hoid) {}
+  void finish(pair<RecoveryMessages *, ECBackend::read_result_t &> &in) {
+    ECBackend::read_result_t &res = in.second;
+    // FIXME???
+    assert(res.r == 0);
+    assert(res.errors.empty());
+    assert(res.returned.size() == 1);
+    pg->handle_recovery_read_complete(
+      hoid,
+      res.returned.back(),
+      res.attrs,
+      in.first);
+  }
+};
 
-https://github.com/wjwithagen/ceph/tree/wip-wjw-freebsd-compilechanges
+Now the //FIXME remark suggests that the code could be not oke.
+And/or the asserts are too strong.
+Any hints, suggestions or questions to fix this.
 
-The next one WIP would be wip-wjw-freebsd-testchanges which got me as
-far as 110 tests successfully completed.
-
-I see to be able to mess up the integration of the ceph/master into my
-fork and my WIPs...
-
-Is there a way to easily repair this? Or just
-	save the diffs
-	scrap the whole fork
-	make a new fork and WIP
-	push
-
-Once I get this straight I promise to write this down as simple howto,
-on then how to keep up in this fork and WIP with ceph/master
-
-Thanx,
 --WjW
+
 
 
