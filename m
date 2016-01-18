@@ -1,51 +1,55 @@
-From: Javen Wu <javen.wu@xtaotech.com>
-Subject: librados option 'conf' and 'cluster'.
-Date: Mon, 18 Jan 2016 18:07:37 +0800
-Message-ID: <569CB969.8080601@xtaotech.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: throttling reweight-by-utilization
+Date: Mon, 18 Jan 2016 11:35:10 +0100
+Message-ID: <CABZ+qqmnOCvGa_=XRowxHy=Q-wRihxiTs2=bX1AsDuymvOUd3g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m109-177.yeah.net ([123.58.177.109]:53310 "EHLO
-	m109-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754049AbcARKHy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jan 2016 05:07:54 -0500
-Received: from [192.168.10.243] (unknown [119.57.173.137])
-	by m199-177.yeah.net (HMail) with ESMTPSA id 1281D11052B8
-	for <ceph-devel@vger.kernel.org>; Mon, 18 Jan 2016 18:07:47 +0800 (CST)
+Received: from mail-lf0-f53.google.com ([209.85.215.53]:33373 "EHLO
+	mail-lf0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754006AbcARKfx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jan 2016 05:35:53 -0500
+Received: by mail-lf0-f53.google.com with SMTP id m198so169316953lfm.0
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Jan 2016 02:35:52 -0800 (PST)
+Received: from mail-lb0-f175.google.com (mail-lb0-f175.google.com. [209.85.217.175])
+        by smtp.gmail.com with ESMTPSA id r63sm3077926lfe.38.2016.01.18.02.35.50
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1/SSLv3 cipher=OTHER);
+        Mon, 18 Jan 2016 02:35:50 -0800 (PST)
+Received: by mail-lb0-f175.google.com with SMTP id x4so88230625lbm.0
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Jan 2016 02:35:50 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi buddies,
+Hi,
 
-Recently, I met a problem about librados option 'conf' and 'cluster'.
-I created a CEPH cluster but not name it 'ceph', it triggers a lot of 
-problems
-on my openstack environment.
-I found there are consumers of librados or librados python binding only 
-respect
-  'conf' option. However, the option 'cluster' is ignored usually.
+I'd like to propose a few changes to reweight-by-utilization which
+will make it significantly less scary:
 
-So far, I suffered the problem in:
-1. librados python binding
-2. qemu rbd driver
-3. cinder volume rbd driver
+1. Change reweight-by-utilization to run in "dry run" -- display only
+-- mode unless an admin runs with  --yes-i-really-really-mean-it. This
+way admins can see what will be reweighted before committing to any
+changes.
 
-I saw there is rados_create2() API in librados besides rados_create(), but
-it seems the API is not widedly used by consumers yet.
+2. Add a configurable to limit the number of OSDs changed per execution:
+  mon_reweight_max_osds_changed (default 4)
 
-I am thinking whether we can do a compromise in librados. If consumers of
-librados does not give an arguments for 'cluster'(cluster name) explicitly,
-Can we use (basename(conffile).split('.conf')[0]) as cluster name by
-default in librados?
+3. Add a configurable to limit the weight changed per OSD:
+  mon_reweight_max_weight_change (default 0.05)
 
-So that all consumers of the librados can tolerate the non-'ceph' 
-cluster name
-without any change.
+Along with (2) and (3), the main loop in reweight_by_utilization:
+  https://github.com/ceph/ceph/blob/master/src/mon/OSDMonitor.cc#L568
+needs to sort the OSDs by utilization.
 
-How do you guys think? If you agree to the change, I can do the quick 
-fixing.
+4. Make adjusting weights up optional with a new CLI option
+--adjust-up. This is useful because if you have nearly full OSDs you
+want to prioritize making space on those OSDs.
 
-Thanks
-Javen
+I have already been running with these options in a python prototype:
+  https://github.com/cernceph/ceph-scripts/blob/master/tools/crush-reweight-by-utilization.py
+
+If you agree I'll port these changes to OSDMonitor.cc and send a PR.
+
+Best Regards,
+Dan
