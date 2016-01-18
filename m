@@ -1,75 +1,82 @@
-From: Lars Marowsky-Bree <lmb@suse.com>
-Subject: Re: Improving Data-At-Rest encryption in Ceph
-Date: Mon, 18 Jan 2016 13:21:16 +0100
-Message-ID: <20160118122116.GH26972@suse.de>
-References: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
- <20151215142304.GI31644@suse.de>
- <CAHMeWhFeSTd8w9zjoN1E=3ks7EysziFa_MRxNV4_oua18omRNw@mail.gmail.com>
- <alpine.DEB.2.00.1512161431530.10312@cobra.newdream.net>
- <CAHMeWhHfiakLOJ6BDosXm1P1GDA0TR-pYt+UpZOeQJv4LFYtXA@mail.gmail.com>
- <CAHMeWhHn-8dD_5+1zDizBijwwMZNS7K9ukHk_y_EQQxjKgM88g@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: throttling reweight-by-utilization
+Date: Mon, 18 Jan 2016 09:06:19 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1601180859180.26381@cpach.fuggernut.com>
+References: <CABZ+qqmnOCvGa_=XRowxHy=Q-wRihxiTs2=bX1AsDuymvOUd3g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:48705 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754754AbcARMVS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 18 Jan 2016 07:21:18 -0500
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id 4230BAD8D
-	for <ceph-devel@vger.kernel.org>; Mon, 18 Jan 2016 12:21:16 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <CAHMeWhHn-8dD_5+1zDizBijwwMZNS7K9ukHk_y_EQQxjKgM88g@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:41878 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754972AbcAROGN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jan 2016 09:06:13 -0500
+In-Reply-To: <CABZ+qqmnOCvGa_=XRowxHy=Q-wRihxiTs2=bX1AsDuymvOUd3g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 2016-01-18T09:05:58, Adam Kupczyk <akupczyk@mirantis.com> wrote:
+On Mon, 18 Jan 2016, Dan van der Ster wrote:
+> Hi,
+> 
+> I'd like to propose a few changes to reweight-by-utilization which
+> will make it significantly less scary:
+> 
+> 1. Change reweight-by-utilization to run in "dry run" -- display only
+> -- mode unless an admin runs with  --yes-i-really-really-mean-it. This
+> way admins can see what will be reweighted before committing to any
+> changes.
 
-Hi Adam,
+I think this piece is key, and there is a lot we might do here to make 
+this more informative.  In particular, we have the (approx) sizes of each 
+PG(*) and can calculate their mapping after the proposed change, which 
+means we could show the min/max utilization, standard deviation, and/or 
+number of nearfull or full OSDs before and after.
 
-> Plugging this into calculations I was using previously, gives us:
-> 1) Dmcrypt:
-> 1*0.36+2.5*0.64*3 =3D 5.16 bytes of crypto operations per byte of io =
-data.
-> 2) potential inside OSD encryption
-> 1*0.36+1*0.64 =3D 1 byte of crypto operations per byte of io data.
->=20
-> This further deepens my concern that crypto transformations may be
-> limit for performance.
+* Almost... we don't really know how many bytes of key/value omap data are 
+consumed.  So we could either go by the user data accounting, which is a 
+lower bound, or average the OSD utilization by the PGs it stores 
+(averaging pools together), or try do the same for just the difference 
+(which would presumably be omap data + overall overhead).
 
-I see your concern, but my primary concern is not about performance,
-rather security.
+I'm not sure how much it is worth trying to be accurate here...
 
-By not encrypting the entire OSD device, one becomes susceptible to
-metadata analysis (on the file store), data exposure, etc. (Plus,
-obviously, that the system devices need to be encrypted to avoid data
-leaks via logs, swap, coredumps etc.)
+> 2. Add a configurable to limit the number of OSDs changed per execution:
+>   mon_reweight_max_osds_changed (default 4)
+> 
+> 3. Add a configurable to limit the weight changed per OSD:
+>   mon_reweight_max_weight_change (default 0.05)
+> 
+> Along with (2) and (3), the main loop in reweight_by_utilization:
+>   https://github.com/ceph/ceph/blob/master/src/mon/OSDMonitor.cc#L568
+> needs to sort the OSDs by utilization.
+> 
+> 4. Make adjusting weights up optional with a new CLI option
+> --adjust-up. This is useful because if you have nearly full OSDs you
+> want to prioritize making space on those OSDs.
 
-It doesn't help my use case that your implementation is theoretically
-faster if it doesn't fit the threat scenario.
+These sound reasonable to me.  Although, in general, if we ultimately want 
+people do to this regularly via cron or something, we'll need --adjust-up.  
+I wonder if there is some other way it should be biased so that we weight 
+the overfull stuff down before weighting the underfull stuff up.  Maybe 
+the max_osds_changed already mostly does that by doing the fullest osds 
+first?
 
-I'd obviously be delighted to see this all sped up (and consume less
-power), but as long as the system is fast enough to encrypt at
-near-device speeds, this seems preferable.
-
-I'm not opposed to your implementation - I just couldn't sell it to my
-customers for data-at-rest encryption.
+Thanks, Dan!
+sage
 
 
-Regards,
-    Lars
 
---=20
-Architect Storage/HA
-SUSE Linux GmbH, GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton,=
- HRB 21284 (AG N=FCrnberg)
-"Experience is the name everyone gives to their mistakes." -- Oscar Wil=
-de
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I have already been running with these options in a python prototype:
+>   https://github.com/cernceph/ceph-scripts/blob/master/tools/crush-reweight-by-utilization.py
+> 
+> If you agree I'll port these changes to OSDMonitor.cc and send a PR.
+> 
+> Best Regards,
+> Dan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
