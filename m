@@ -1,80 +1,55 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: /var/lib/ceph/*/*/config
-Date: Wed, 20 Jan 2016 00:55:49 +0800
-Message-ID: <CACJqLyb=W5XSY8V98LSdpFhp+e_jCe2hV+KcDGTmWRBEid3g2w@mail.gmail.com>
-References: <alpine.DEB.2.11.1601191009320.28274@cpach.fuggernut.com>
-	<CACJqLyaMC-UaAhTnzCeUqPCoY3HcoqLwHg3tpWW0H-+6AN6C7Q@mail.gmail.com>
-	<alpine.DEB.2.11.1601191144150.28274@cpach.fuggernut.com>
+From: Erwan Velu <evelu@redhat.com>
+Subject: Re: About ceph_clock_now()
+Date: Tue, 19 Jan 2016 11:57:40 -0500 (EST)
+Message-ID: <1802162103.13759253.1453222660602.JavaMail.zimbra@redhat.com>
+References: <177186823.10053087.1452614184109.JavaMail.zimbra@redhat.com> <892700092.10054838.1452614393452.JavaMail.zimbra@redhat.com> <20160112173248.GA8218@ultraspiritum.redhat.com> <964746730.10566211.1452681675142.JavaMail.zimbra@redhat.com> <alpine.DEB.2.11.1601130846500.26381@cpach.fuggernut.com> <1365711662.13730117.1453220271917.JavaMail.zimbra@redhat.com> <20160119162902.GA21358@ultraspiritum.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f182.google.com ([209.85.223.182]:36236 "EHLO
-	mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753626AbcASQzu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jan 2016 11:55:50 -0500
-Received: by mail-io0-f182.google.com with SMTP id g73so395842892ioe.3
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Jan 2016 08:55:49 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1601191144150.28274@cpach.fuggernut.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:55104 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754881AbcASQ5l convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jan 2016 11:57:41 -0500
+In-Reply-To: <20160119162902.GA21358@ultraspiritum.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 20, 2016 at 12:46 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 19 Jan 2016, Haomai Wang wrote:
->> On Tue, Jan 19, 2016 at 11:15 PM, Sage Weil <sweil@redhat.com> wrote:
->>       I think we should add an optional 'config' file location to the
->>       config
->>       search path.  This would allow you to put customized options for
->>       an
->>       individual daemon in the daemon data directory.  Or, you could
->>       avoid
->>       putting a config in /etc/ceph entirely, so that the daemon data
->>       is
->>       completely self-contained on the device.  That would streamline
->>       boot disk
->>       failure (just reinstall OS and ceph package) or drive swaps
->>       between failed
->>       host hardware.
->>
->>       What do you think?
->>
->>
->> Totally agreed!
->>
->> Actually we have implemented alike thing downstream, ceph-osd,ceph-mon will
->> check ceph.conf in the local dir(/var/lib/ceph/*/*/ceph.conf) then overwrite
->> existing config values. That's said, it will load system ceph
->> config(/etc/ceph/ceph.conf) file then load local ceph.conf.
->
-> The one reservation about this direction is that there are a few devices
-> where I'm not sure how to attach the metadata (keyring, conf, and other
-> random bits in the osd_data dir) to the device: the SPDK NVMe driver, and
-> kinetic.  These are somewhat obscure, but I'm curious if there are other
-> ideas floating around about how this should be approached...
+Thanks for the review & insights.
+I'll propagate the change over the code.
 
-Just like BlueStore::_write_bdev_label, I think it should use
-BlockDevice::raw_write api which is used to record system metadata
-instead of bufferlist::write_fd. So keyring, conf and others could be
-reserved at the first section?
+----- Mail original -----
+De: "Adam C. Emerson" <aemerson@redhat.com>
+=C3=80: "Erwan Velu" <evelu@redhat.com>
+Cc: "Sage Weil" <sweil@redhat.com>, "The Sacred Order of the Squid Cybe=
+rnetic" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Mardi 19 Janvier 2016 17:29:03
+Objet: Re: About ceph_clock_now()
 
-But it may exists dependence loop, if we want to read
-config/keyring/device_info from osd, we need to know non-kernel device
-info at first then we can attach this and do reading.
+On 19/01/2016, Erwan Velu wrote:
+> Before propagating the change to more code base and offer a PR with t=
+hat, what do you think of this style ?
+>=20
+> Is it aligned with the best-pratices of the project ?
+>=20
+> https://gist.github.com/ErwanAliasr1/f74f7f046e9300ac2c30
 
-A possible solution is that we could recover info from non-kernel
-device. For example, we still store osd info at os
-directory(/var/lib/ceph/osd/ceph-0), but we will write these into
-device(including kernel or non-kernel), if os disk failed, we could
-use ceph-device-scan tool to discover this and extract necessary info
-from this disk into the active os directory?
+One minor thing, you shouldn't use anything in time_detail directly. It=
+ SHOULD
+be ceph::coarse_mono_clock::now() ('detail' or leading underscores sign=
+al a
+'private' namespace.)
 
->
-> sage
+Other than that, this looks very good.
 
-
-
--- 
-Best Regards,
-
-Wheat
+--=20
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
