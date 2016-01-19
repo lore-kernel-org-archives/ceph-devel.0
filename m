@@ -1,106 +1,43 @@
-From: Erwan Velu <evelu@redhat.com>
-Subject: Re: About ceph_clock_now()
-Date: Tue, 19 Jan 2016 11:17:51 -0500 (EST)
-Message-ID: <1365711662.13730117.1453220271917.JavaMail.zimbra@redhat.com>
-References: <177186823.10053087.1452614184109.JavaMail.zimbra@redhat.com> <892700092.10054838.1452614393452.JavaMail.zimbra@redhat.com> <20160112173248.GA8218@ultraspiritum.redhat.com> <964746730.10566211.1452681675142.JavaMail.zimbra@redhat.com> <alpine.DEB.2.11.1601130846500.26381@cpach.fuggernut.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: /var/lib/ceph/*/*/config
+Date: Tue, 19 Jan 2016 15:48:41 +0000
+Message-ID: <CY1PR0201MB1897F9EED05D5243BF010003E8C10@CY1PR0201MB1897.namprd02.prod.outlook.com>
+References: <alpine.DEB.2.11.1601191009320.28274@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:50885 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932168AbcASQRx convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jan 2016 11:17:53 -0500
-In-Reply-To: <alpine.DEB.2.11.1601130846500.26381@cpach.fuggernut.com>
+Received: from mail-by2on0083.outbound.protection.outlook.com ([207.46.100.83]:55332
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932168AbcASQWN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jan 2016 11:22:13 -0500
+In-Reply-To: <alpine.DEB.2.11.1601191009320.28274@cpach.fuggernut.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "Adam C. Emerson" <aemerson@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Before propagating the change to more code base and offer a PR with tha=
-t, what do you think of this style ?
+Yes a step in the right direction.
 
-Is it aligned with the best-pratices of the project ?
+Allen Samuels
+Software Architect, Emerging Storage Solutions 
 
-https://gist.github.com/ErwanAliasr1/f74f7f046e9300ac2c30
+2880 Junction Avenue, Milpitas, CA 95134
+T: +1 408 801 7030| M: +1 408 780 6416
+allen.samuels@SanDisk.com
 
-Thanks,
 
------ Mail original -----
-De: "Sage Weil" <sweil@redhat.com>
-=C3=80: "Erwan Velu" <evelu@redhat.com>
-Cc: "Adam C. Emerson" <aemerson@redhat.com>, "The Sacred Order of the S=
-quid Cybernetic" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Mercredi 13 Janvier 2016 14:48:00
-Objet: Re: About ceph_clock_now()
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+Sent: Tuesday, January 19, 2016 7:15 AM
+To: ceph-devel@vger.kernel.org
+Subject: /var/lib/ceph/*/*/config
 
-On Wed, 13 Jan 2016, Erwan Velu wrote:
-> >One concern with monotonic clocks, even for elapsed time, is that th=
-eir epoch is
-> >unspecified. You cannot send a monotonic time over the network to an=
-other
-> >machine nor can you save it to a file and re-read it later. Anything=
- to be
-> >serialized must be a real time.
->=20
-> While speaking about ceph_clock_now(), I was more likely targeting lo=
-ts of local code like
->   start =3D ceph_clock_now();
->   ... do_stuff ...
->   elapse_time =3D ceph_clock_now() - start
->=20
->=20
-> I'm thinking of code like this in void OSD::tick_without_osd_lock():
-> Starting at https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L=
-4009.
->=20
-> This code is trying to estimate if a mon is still alive by computing =
-a difference of system time by
-> doing a  "if (now - last_pg_stats_sent > max) {" where now & last_pg_=
-stats_sent are the output of "ceph_clock_now()"
->=20
-> As ceph_clock_now() is using CLOCK_REALTIME, we could have cases wher=
-e a simple drift caused by a NTP trigger that code.
-> As we are only trying to compute a difference of absolute time (and n=
-ot system time), using a MONOTONIC_* seems much more accurate at my tas=
-te.
->=20
-> I know that's pretty picky but that could exists.
+I think we should add an optional 'config' file location to the config search path.  This would allow you to put customized options for an individual daemon in the daemon data directory.  Or, you could avoid putting a config in /etc/ceph entirely, so that the daemon data is completely self-contained on the device.  That would streamline boot disk failure (just reinstall OS and ceph package) or drive swaps between failed host hardware.
 
-That's a perfect example of where the monotonic time should be used. Th=
-ere=20
-are a zillion instances of this pattern that could be cleaned up... :)
-
-> >I find it interesting. If you want to change more subsystems to use =
-ceph_time
-> >and use monotonic and coarse clocks in appropriate places I think th=
-at would be
-> >wonderful. It might be worthwhile to focus on the places where we us=
-e double to
-> >represent a time value.
-> >Please read through ceph_time.h and osdc to get a feel for it. If yo=
-u think it
-> >could use improvement, I'd be happy to hear your ideas.
->=20
-> You mean we could switch some of ceph_clock_now() calls to ceph_time =
-?=20
-> We could use coarse_mono_clock to perform that.
->=20
-> If you agree that switching code like the one I'm speaking is valuabl=
-e,=20
-> I can work on it.
-
-That would be great!
-
+What do you think?
 sage
 
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
