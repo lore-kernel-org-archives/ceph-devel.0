@@ -1,87 +1,109 @@
 From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH V2 2/6] libceph: move r_reply_op_{len,result} into struct ceph_osd_req_op
-Date: Tue, 19 Jan 2016 16:08:07 +0800
-Message-ID: <1453190891-40937-3-git-send-email-zyan@redhat.com>
+Subject: [PATCH V2 4/6] libceph: add helper that extends numner of operations in OSD request
+Date: Tue, 19 Jan 2016 16:08:09 +0800
+Message-ID: <1453190891-40937-5-git-send-email-zyan@redhat.com>
 References: <1453190891-40937-1-git-send-email-zyan@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60068 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:60082 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932445AbcASIIj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 19 Jan 2016 03:08:39 -0500
+	id S932445AbcASIIt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 19 Jan 2016 03:08:49 -0500
 In-Reply-To: <1453190891-40937-1-git-send-email-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com, "Yan, Zheng" <zyan@redhat.com>
 
-This avoids defining large array of r_reply_op_{len,result} in
-in 'struct ceph_osd_request'
+The helper function resizes the r_ops array and re-allocates request
+messages.
 
 Signed-off-by: Yan, Zheng <zyan@redhat.com>
 ---
- drivers/block/rbd.c             | 2 +-
- include/linux/ceph/osd_client.h | 5 +++--
- net/ceph/osd_client.c           | 4 ++--
- 3 files changed, 6 insertions(+), 5 deletions(-)
+ include/linux/ceph/osd_client.h |  3 +++
+ net/ceph/osd_client.c           | 56 +++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 59 insertions(+)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 4a87678..22cfc01 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1854,7 +1854,7 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
- 	 * passed to the block layer, which just supports a 32-bit
- 	 * length field.
- 	 */
--	obj_request->xferred = osd_req->r_reply_op_len[0];
-+	obj_request->xferred = osd_req->r_ops[0].reply_op_len;
- 	rbd_assert(obj_request->xferred < (u64)UINT_MAX);
- 
- 	opcode = osd_req->r_ops[0].op;
 diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 5bf428a..fda3a05 100644
+index 9802df1..6430766 100644
 --- a/include/linux/ceph/osd_client.h
 +++ b/include/linux/ceph/osd_client.h
-@@ -116,6 +116,9 @@ struct ceph_osd_req_op {
- 			u64 expected_write_size;
- 		} alloc_hint;
- 	};
-+	/* reply */
-+	int               reply_op_len;
-+	s32               reply_op_result;
- };
+@@ -322,6 +322,9 @@ extern struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *
+ 					       unsigned int num_ops,
+ 					       bool use_mempool,
+ 					       gfp_t gfp_flags);
++extern int ceph_osdc_extend_request(struct ceph_osd_request *req,
++				    unsigned int num_ops, gfp_t gfp_flags);
++
  
- /* an in-flight request */
-@@ -150,8 +153,6 @@ struct ceph_osd_request {
- 	struct ceph_eversion *r_request_reassert_version;
- 
- 	int               r_result;
--	int               r_reply_op_len[CEPH_OSD_MAX_OP];
--	s32               r_reply_op_result[CEPH_OSD_MAX_OP];
- 	int               r_got_reply;
- 	int		  r_linger;
- 
+ extern void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
+ 				    struct ceph_snap_context *snapc,
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index b93752e..3852006 100644
+index 9c0cf2e..c9df912 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -1840,7 +1840,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- 		int len;
+@@ -361,6 +361,62 @@ void ceph_osdc_put_request(struct ceph_osd_request *req)
+ }
+ EXPORT_SYMBOL(ceph_osdc_put_request);
  
- 		len = le32_to_cpu(op->payload_len);
--		req->r_reply_op_len[i] = len;
-+		req->r_ops[i].reply_op_len = len;
- 		dout(" op %d has %d bytes\n", i, len);
- 		payload_len += len;
- 		p += sizeof(*op);
-@@ -1855,7 +1855,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- 	ceph_decode_need(&p, end, 4 + numops * 4, bad_put);
- 	retry_attempt = ceph_decode_32(&p);
- 	for (i = 0; i < numops; i++)
--		req->r_reply_op_result[i] = ceph_decode_32(&p);
-+		req->r_ops[i].reply_op_result = ceph_decode_32(&p);
- 
- 	if (le16_to_cpu(msg->hdr.version) >= 6) {
- 		p += 8 + 4; /* skip replay_version */
++int ceph_osdc_extend_request(struct ceph_osd_request *req,
++			     unsigned int num_ops, gfp_t gfp_flags)
++{
++	struct ceph_osd_req_op *new_ops;
++	struct ceph_msg *request_msg;
++	struct ceph_msg *reply_msg = NULL;
++	size_t msg_size;
++
++	if (num_ops > CEPH_OSD_MAX_OP)
++		return -EINVAL;
++
++	if (num_ops <= req->r_max_ops)
++		return 0;
++
++	msg_size = req->r_request->front_alloc_len +
++		   (num_ops - req->r_max_ops) *
++		   sizeof(struct ceph_osd_op);
++	request_msg = ceph_msg_new(CEPH_MSG_OSD_OP, msg_size, gfp_flags, true);
++	if (!request_msg)
++		return -ENOMEM;
++
++	if (num_ops > CEPH_OSD_INITIAL_OP) {
++		msg_size = req->r_reply->front_alloc_len +
++			   (num_ops - req->r_max_ops) *
++			   (sizeof(struct ceph_osd_op) + 4);
++		reply_msg = ceph_msg_new(CEPH_MSG_OSD_OPREPLY, msg_size,
++					 gfp_flags, true);
++		if (!reply_msg)
++			goto out_enomem;
++
++		new_ops = kzalloc(sizeof(*req->r_ops) * num_ops, gfp_flags);
++		if (!new_ops)
++			goto out_enomem;
++
++		memcpy(new_ops, req->r_ops,
++		       sizeof(*req->r_ops) * req->r_num_ops);
++		if (req->r_ops != req->r_inline_ops)
++			kfree(req->r_ops);
++		req->r_ops = new_ops;
++
++		ceph_msg_put(req->r_reply);
++		req->r_reply = reply_msg;
++	}
++
++	ceph_msg_put(req->r_request);
++	req->r_request = request_msg;
++	req->r_max_ops = num_ops;
++	return 0;
++out_enomem:
++	ceph_msg_put(request_msg);
++	if (reply_msg)
++		ceph_msg_put(reply_msg);
++	return -ENOMEM;
++}
++EXPORT_SYMBOL(ceph_osdc_extend_request);
++
+ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 					       struct ceph_snap_context *snapc,
+ 					       unsigned int num_ops,
 -- 
 2.5.0
 
