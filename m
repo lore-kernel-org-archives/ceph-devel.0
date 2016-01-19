@@ -1,111 +1,56 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: queue_transaction interface + unique_ptr + performance
-Date: Mon, 18 Jan 2016 20:48:53 +0000
-Message-ID: <CO1PR02MB2080C727FD30E072FDBB45DF4C00@CO1PR02MB208.namprd02.prod.outlook.com>
-References: <1575682875.28391996.1449169755619.JavaMail.zimbra@redhat.com>
- <20151203191233.GA17144@ultraspiritum.redhat.com>
- <CAN=+7FVC5QU7Gz6qq9PPeVv3Nvkq0c0cbVNNcC+Rz-j7OcnHxQ@mail.gmail.com>
- <1928144476.28418457.1449170995351.JavaMail.zimbra@redhat.com>
- <CAN=+7FV1aFxmT8E_-=G4+OuOG=VotWV7PQv45zL3v3+mjDYbrQ@mail.gmail.com>
- <291788535.28463587.1449173661550.JavaMail.zimbra@redhat.com>
- <alpine.DEB.2.00.1512031303010.19170@cobra.newdream.net>
- <1814262106.28521757.1449177794388.JavaMail.zimbra@redhat.com>
- <CAN=+7FX3goZteU+niLf5gXpVBq0yFxi6Gkqux5FZbvJNpQieJw@mail.gmail.com>
- <CO1PR02MB208F2A592CD7CF75DF71346F40C0@CO1PR02MB208.namprd02.prod.outlook.com>
- <20151204014358.GA7239@ultraspiritum.redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 0/6] scattered page writeback
+Date: Tue, 19 Jan 2016 01:12:08 +0100
+Message-ID: <CAOi1vP8n924tgUL1tr_R6LaQzFphjZzWUOauKao9z3iRLdo7Pw@mail.gmail.com>
+References: <1452175528-20751-1-git-send-email-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0055.outbound.protection.outlook.com ([65.55.169.55]:42446
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1756311AbcARUs4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jan 2016 15:48:56 -0500
-Content-Language: en-US
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:33275 "EHLO
+	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754668AbcASAMK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jan 2016 19:12:10 -0500
+Received: by mail-wm0-f44.google.com with SMTP id 123so71459369wmz.0
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Jan 2016 16:12:09 -0800 (PST)
+In-Reply-To: <1452175528-20751-1-git-send-email-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Adam C. Emerson" <aemerson@redhat.com>
-Cc: Samuel Just <sjust@redhat.com>, Casey Bodley <cbodley@redhat.com>, Sage Weil <sweil@redhat.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
-Please review the following pull request addressing this..
+On Thu, Jan 7, 2016 at 3:05 PM, Yan, Zheng <zyan@redhat.com> wrote:
+> This series adds scattered page writeback, which uses one OSD request
+> to writeback nonconsecutive dirty page within single strip. Scattered
+> page writeback can increase performance of buffered random writes.
 
-https://github.com/ceph/ceph/pull/7271
+Hi Zheng,
 
-It is working well in my tests with 384 TB cluster, 48 OSDs , 6 OSD nodes..It is giving ~3-4% cpu usage improvement as well..
- 
-Thanks & Regards
-Somnath
+I took a cursory look at this and I really wonder if turning an OSD
+request with its two messages into an ad-hoc dynamic array and using it
+like that is a good idea.  ceph_writepages_start() is one easy to
+follow function - is there no way to pre-calculate the number of dirty
+pages we'd want to stuff into a single request, or at least estimate
+it?  With the geometric expansion you've got in there, you'd go 3 ->
+6 -> 12 -> 16 for a 16 page strip?  That seems suboptimal...
 
------Original Message-----
-From: Somnath Roy 
-Sent: Thursday, December 03, 2015 10:44 PM
-To: 'Adam C. Emerson'
-Cc: 'Samuel Just'; 'Casey Bodley'; 'Sage Weil'; 'Samuel Just (sam.just@inktank.com)'; 'ceph-devel@vger.kernel.org'
-Subject: RE: queue_transaction interface + unique_ptr + performance
+A couple of implementation details in libceph that stood out:
 
-Sorry , I went through entire conversation and realized that we are expecting the move constructor of Transaction class won't be inducing much overhead vs unique_ptr.
-Thanks I will start coding around that and will publish the final interfaces soon for the sign off.
+- Why use ceph_kvmalloc() for r_ops array?  It's at most ~2k, so you'd
+  only be using vmalloc() as a fallback and we don't want to do that.
 
-Regards
-Somnath
+- Moving reply_op_{len,result} into ceph_osd_req_op to save memory is
+  the right thing, but, continuing on that, why waste r_inline_ops in
+  the >CEPH_OSD_INITIAL_OP case?  That's almost a quarter of r_ops max
+  capacity - ~500 bytes for each "fat" request.
 
------Original Message-----
-From: Somnath Roy
-Sent: Thursday, December 03, 2015 10:16 PM
-To: 'Adam C. Emerson'
-Cc: Samuel Just; Casey Bodley; Sage Weil; Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org
-Subject: RE: queue_transaction interface + unique_ptr + performance
+- Why is it that request message's front is enlarged proportionally to
+  max_ops, while reply message's front is always enlarged by
+  (MAX-INITIAL)*foo?  Shouldn't it be proportional to max_ops as well?
+  It definitely deserves a comment, if not.
 
-Adam,
-May be I am missing something here. 
-Don't we need to do an extra Transaction copy in case of async completion and Transaction is allocated on stack for queue_transaction() taking vector<Transaction> ?
+- The "4" in (sizeof(struct ceph_osd_op) + 4) also deserves a comment.
+  I had to go and look to figure out that it's for reply_op_result.
 
-Thanks & Regards
-Somnath
+Thanks,
 
------Original Message-----
-From: Adam C. Emerson [mailto:aemerson@redhat.com]
-Sent: Thursday, December 03, 2015 5:44 PM
-To: Somnath Roy
-Cc: Samuel Just; Casey Bodley; Sage Weil; Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org
-Subject: Re: queue_transaction interface + unique_ptr + performance
-
-On 04/12/2015, Somnath Roy wrote:
-[snip]
-> ##### Test Shared Smart ptr ######
-> micros_used for shared ptr: 27105354
-
-One thing to keep in mind is that, if there are any cases where we really DO want to use shared_ptr, if we find ourselves assigning a new pointer then releasing an old one, it's better to std::move from one to the other, since it doesn't have to use locking/atomics to fiddle with the refcount in that case.
-But if we can avoid them, all the better.
-
-
-[snip]
-> 2. I have also measured the cost of list::push_back etc. , all is expected.. if I replace list with vector again I am getting *some benefit* , which is also expected I guess.
-
-If we have some idea how many elements we expect/want to hold, calling reserve will get all our allocations done all at once rather than dipping into the heap multiple times.
-
-> I am not seeing any conclusion on the interface change...Here is my understanding so far..
-> 
-> 1. For the method like apply_transaction() which is taking Transaction reference now, I will not be changing the interface , instead will do an extra copy to create unique_ptr inside.
-> 
-> 2. For all the cases taking Transaction* , I will change that to 
-> TransactionRef&&
-> 
-> 3. The queue_transactions() will be changed to vector< TransactionRef> 
-> instead of list< Transaction*>
-> 
-> Let me know if I am missing anything..
-
-My understanding is that in some cases we might not want to use the heap. (For example, if we're executing a transaction synchronously rather than enqueing
-it.) And to make Transaction movable. Then we would not build a std::vector<TransactionRef>, what we would build instead is std::vector<Transaction>
-
-In this case, we should probably have everything just take Transaction&& (so the caller can expect to have the contents of the transaction moved out.
-
-We might also want to consider building a transaction in place. I know I saw one constructor that takes bufferlist. If there are other cases where we could benefit from just passing in arguments and having the transaction built right into the vector (with emplace_back), that would be even better than constructing it on the stack and moving it in to the vector.
-
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+                Ilya
