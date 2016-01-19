@@ -1,72 +1,59 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: About ceph_clock_now()
-Date: Tue, 19 Jan 2016 11:29:03 -0500
-Message-ID: <20160119162902.GA21358@ultraspiritum.redhat.com>
-References: <177186823.10053087.1452614184109.JavaMail.zimbra@redhat.com>
- <892700092.10054838.1452614393452.JavaMail.zimbra@redhat.com>
- <20160112173248.GA8218@ultraspiritum.redhat.com>
- <964746730.10566211.1452681675142.JavaMail.zimbra@redhat.com>
- <alpine.DEB.2.11.1601130846500.26381@cpach.fuggernut.com>
- <1365711662.13730117.1453220271917.JavaMail.zimbra@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: /var/lib/ceph/*/*/config
+Date: Tue, 19 Jan 2016 11:46:32 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1601191144150.28274@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1601191009320.28274@cpach.fuggernut.com> <CACJqLyaMC-UaAhTnzCeUqPCoY3HcoqLwHg3tpWW0H-+6AN6C7Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="opJtzjQTFsWo+cga"
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-43724043-1453221995=:28274"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46426 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41526 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755753AbcASQ3F (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 19 Jan 2016 11:29:05 -0500
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id 7DDFB3D1D8A
-	for <ceph-devel@vger.kernel.org>; Tue, 19 Jan 2016 16:29:04 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <1365711662.13730117.1453220271917.JavaMail.zimbra@redhat.com>
+	id S1753626AbcASQqZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 19 Jan 2016 11:46:25 -0500
+In-Reply-To: <CACJqLyaMC-UaAhTnzCeUqPCoY3HcoqLwHg3tpWW0H-+6AN6C7Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Erwan Velu <evelu@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
---opJtzjQTFsWo+cga
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+--8323329-43724043-1453221995=:28274
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
-On 19/01/2016, Erwan Velu wrote:
-> Before propagating the change to more code base and offer a PR with that,=
- what do you think of this style ?
->=20
-> Is it aligned with the best-pratices of the project ?
->=20
-> https://gist.github.com/ErwanAliasr1/f74f7f046e9300ac2c30
+On Tue, 19 Jan 2016, Haomai Wang wrote:
+> On Tue, Jan 19, 2016 at 11:15 PM, Sage Weil <sweil@redhat.com> wrote:
+>       I think we should add an optional 'config' file location to the
+>       config
+>       search path.  This would allow you to put customized options for
+>       an
+>       individual daemon in the daemon data directory.  Or, you could
+>       avoid
+>       putting a config in /etc/ceph entirely, so that the daemon data
+>       is
+>       completely self-contained on the device.  That would streamline
+>       boot disk
+>       failure (just reinstall OS and ceph package) or drive swaps
+>       between failed
+>       host hardware.
+> 
+>       What do you think?
+> 
+> 
+> Totally agreed!
+> 
+> Actually we have implemented alike thing downstream, ceph-osd,ceph-mon will
+> check ceph.conf in the local dir(/var/lib/ceph/*/*/ceph.conf) then overwrite
+> existing config values. That's said, it will load system ceph
+> config(/etc/ceph/ceph.conf) file then load local ceph.conf.
 
-One minor thing, you shouldn't use anything in time_detail directly. It SHO=
-ULD
-be ceph::coarse_mono_clock::now() ('detail' or leading underscores signal a
-'private' namespace.)
+The one reservation about this direction is that there are a few devices 
+where I'm not sure how to attach the metadata (keyring, conf, and other 
+random bits in the osd_data dir) to the device: the SPDK NVMe driver, and 
+kinetic.  These are somewhat obscure, but I'm curious if there are other 
+ideas floating around about how this should be approached...
 
-Other than that, this looks very good.
-
---=20
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
-
---opJtzjQTFsWo+cga
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQF8BAEBCgBmBQJWnmRJXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
-ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
-OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jiW8H/RxE9NLc0CRkyyehhUjU+6la
-xFTpW8Ooq2OarZ2hYp8IChK6e/CgI1t79W0r1W20KNKhsbqC+dt9vKM8ZqGxcAo4
-/Jkv1X03vpixG+5HRYast4cp15IK5q+Zs0r1KJRxhIF0HKPOOMaQMtpE5j8eaI8N
-iKwtolPabSDCsbvLrRbhKkAmwVI3x7RzepzkC3d9QbwYRQ29ZCF2m4X5/Korjdh0
-JOS2Mp7+qh5+6hl5r8Hi3kdzrZ1Gm1Xlio9IoVb9PPMPtrHolaGVqW9UV0TBZRYN
-oxqrNSFr2UD1SJHj4ndWwNYebWMI9RfanGo4PzcIGWd59Mbk51Avxu1v95cOaek=
-=TUBk
------END PGP SIGNATURE-----
-
---opJtzjQTFsWo+cga--
+sage
+--8323329-43724043-1453221995=:28274--
