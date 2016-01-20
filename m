@@ -1,44 +1,48 @@
-From: Xiaoxi Chen <superdebuger@gmail.com>
-Subject: Nodown/Noout by OSD_ID?
-Date: Wed, 20 Jan 2016 13:42:03 +0800
-Message-ID: <CAEYCsVLFUYAeKT_2bxyA1DpC5K5yzS6JHM=eJ=4WuGpjdypTnw@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: /var/lib/ceph/*/*/config
+Date: Wed, 20 Jan 2016 10:42:07 +0000
+Message-ID: <CALe9h7csaYPgL_SZtot9Y+idSJUxsL=e_QRaos+f_k51V0P6GA@mail.gmail.com>
+References: <alpine.DEB.2.11.1601191009320.28274@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f172.google.com ([209.85.160.172]:33329 "EHLO
-	mail-yk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751099AbcATFmF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jan 2016 00:42:05 -0500
-Received: by mail-yk0-f172.google.com with SMTP id k129so652517907yke.0
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Jan 2016 21:42:04 -0800 (PST)
+Received: from mail-lb0-f178.google.com ([209.85.217.178]:35236 "EHLO
+	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934160AbcATKm3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jan 2016 05:42:29 -0500
+Received: by mail-lb0-f178.google.com with SMTP id bc4so2697406lbc.2
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Jan 2016 02:42:28 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1601191009320.28274@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+On Tue, Jan 19, 2016 at 3:15 PM, Sage Weil <sweil@redhat.com> wrote:
+> I think we should add an optional 'config' file location to the config
+> search path.  This would allow you to put customized options for an
+> individual daemon in the daemon data directory.  Or, you could avoid
+> putting a config in /etc/ceph entirely, so that the daemon data is
+> completely self-contained on the device.  That would streamline boot disk
+> failure (just reinstall OS and ceph package) or drive swaps between failed
+> host hardware.
+>
+> What do you think?
 
-     In many case we need to tag some OSD with NODOWN/NOOUT/NOUP/NOIN
-tag, but we dont want it cluster wise as these tag may stop other OSDs
-doing self-healthing.As a an example when an recovered OSD need to
-catch up with the OSDMap, to prevent flipping we set
-NODOWN/NOOUT/NOUP, but if other OSD failed by disk error, the failure
-will be hidden and we are in the risk of lossing the data.
+Seems very reasonable.
 
-     Is that reasonable to have these flag work in OSD granularity?
-say ceph osd nodown osd.xxx?
-     Quick look at the code seems NODOWN/NOUP is easier as we could
-have new status bits in OSDMap
-     /* status bits */
-#define CEPH_OSD_EXISTS  (1<<0)
-#define CEPH_OSD_UP      (1<<1)
-#define CEPH_OSD_AUTOOUT (1<<2)  /* osd was automatically marked out */
-#define CEPH_OSD_NEW     (1<<3)  /* osd is new, never marked in */
+In a related thought, I've been wishing that we could store a config
+in the data directory for a different reason.  It would be nice if
+daemons could self-set persistent configuration, so that we could make
+options set over `tell` (optionally) persistent.  The idea is that if
+a management tool wanted to e.g. configure log verbosity, it could do
+it purely over ceph commands, rather than needing out-of-band (SSH)
+access to modify files on disk (and to reconcile its changes with the
+human-editable ceph.conf).
 
-#define CEPH_OSD_NOUP     (1<<4)  /* osd cannot be marked in */
-#define CEPH_OSD_NODOWN     (1<<5)  /* osd cannot be marked out */
+What if we had two (optional) config files in the data dir, one for
+human consumption (to makes drive swaps and host rebuilds simpler),
+and one machine generated for the daemon to update itself when
+requested to remotely?
 
-     But for NOIN/NOOUT seems a bit struggle as IN/OUT depends on
-weight? Any suggestion?
-
-
-Xiaoxi
+John
