@@ -1,63 +1,81 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Nodown/Noout by OSD_ID?
-Date: Wed, 20 Jan 2016 13:55:08 +0000
-Message-ID: <CALe9h7cqj+ck9-tKBgKuSx=4KcPSJnjO3O=eWSfV3yUT3J=QcQ@mail.gmail.com>
-References: <CAEYCsVLFUYAeKT_2bxyA1DpC5K5yzS6JHM=eJ=4WuGpjdypTnw@mail.gmail.com>
- <alpine.DEB.2.11.1601200813250.4600@cpach.fuggernut.com>
+From: Javen Wu <javen.wu@xtaotech.com>
+Subject: Re: librados option 'conf' and 'cluster'.
+Date: Wed, 20 Jan 2016 22:26:34 +0800
+Message-ID: <569F991A.8030407@xtaotech.com>
+References: <569CB969.8080601@xtaotech.com>
+ <alpine.DEB.2.11.1601191007570.28274@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f51.google.com ([209.85.215.51]:33184 "EHLO
-	mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932261AbcATNza (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jan 2016 08:55:30 -0500
-Received: by mail-lf0-f51.google.com with SMTP id m198so6302255lfm.0
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Jan 2016 05:55:29 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1601200813250.4600@cpach.fuggernut.com>
+Received: from mr213139.mail.yeah.net ([223.252.213.139]:48317 "EHLO
+	mr213139.mail.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751367AbcATO0r (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jan 2016 09:26:47 -0500
+In-Reply-To: <alpine.DEB.2.11.1601191007570.28274@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: Xiaoxi Chen <superdebuger@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org, jdurgin@redhat.com
 
-On Wed, Jan 20, 2016 at 1:32 PM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 20 Jan 2016, Xiaoxi Chen wrote:
->> Hi,
->>
->>      In many case we need to tag some OSD with NODOWN/NOOUT/NOUP/NOIN
->> tag, but we dont want it cluster wise as these tag may stop other OSDs
->> doing self-healthing.As a an example when an recovered OSD need to
->> catch up with the OSDMap, to prevent flipping we set
->> NODOWN/NOOUT/NOUP, but if other OSD failed by disk error, the failure
->> will be hidden and we are in the risk of lossing the data.
->>
->>      Is that reasonable to have these flag work in OSD granularity?
->> say ceph osd nodown osd.xxx?
->>      Quick look at the code seems NODOWN/NOUP is easier as we could
->> have new status bits in OSDMap
->>      /* status bits */
->> #define CEPH_OSD_EXISTS  (1<<0)
->> #define CEPH_OSD_UP      (1<<1)
->> #define CEPH_OSD_AUTOOUT (1<<2)  /* osd was automatically marked out */
->> #define CEPH_OSD_NEW     (1<<3)  /* osd is new, never marked in */
->>
->> #define CEPH_OSD_NOUP     (1<<4)  /* osd cannot be marked in */
->> #define CEPH_OSD_NODOWN     (1<<5)  /* osd cannot be marked out */
->>
->>      But for NOIN/NOOUT seems a bit struggle as IN/OUT depends on
->> weight? Any suggestion?
->
-> This looks reasonable if we can sort out a good interface and suitable
-> health warnings.  For example, ceph health and ceph -s should say "N osds
-> have noin set", and 'ceph health detail' should tell you which ones.
->
-> Maybe something like
->
->  ceph osd set-osd osd.123 noin
->
-> ?  I don't particularly like that but we can't do 'ceph osd set ...' since
-> that does global osdmap flags.
+Hi Sage,
 
-I think we should make this operate on arbitrary named CRUSH nodes
-rather than just OSDs, so that someone can mark a whole host/rack.
+I have a quick fixing and will run more testing before post code review.
+The change would be restricted to the config parsing.
 
-John
+With the fixing (hacking) ;)
+1. When only configuration file is given, cluster name would be the 
+prefix of
+the basename of conf file.
+2. When both configuration file and cluster name are given, both 
+arguments are
+respected.
+3. When only cluster name is given, configuration file would be
+/etc/ceph/$cluster.conf.
+
+With the change,
+1. openstack cinder-volume rbd driver
+2. qemu rbd driver
+3. all consumers of rados_create()
+would be able to support the CEPH clusters not being named 'ceph'
+without change.
+
+Thanks
+Javen
+Sage Weil wrote:
+> On Mon, 18 Jan 2016, Javen Wu wrote:
+>> Hi buddies,
+>>
+>> Recently, I met a problem about librados option 'conf' and 'cluster'.
+>> I created a CEPH cluster but not name it 'ceph', it triggers a lot of problems
+>> on my openstack environment.
+>> I found there are consumers of librados or librados python binding only
+>> respect
+>>   'conf' option. However, the option 'cluster' is ignored usually.
+>>
+>> So far, I suffered the problem in:
+>> 1. librados python binding
+>> 2. qemu rbd driver
+>> 3. cinder volume rbd driver
+>>
+>> I saw there is rados_create2() API in librados besides rados_create(), but
+>> it seems the API is not widedly used by consumers yet.
+>>
+>> I am thinking whether we can do a compromise in librados. If consumers of
+>> librados does not give an arguments for 'cluster'(cluster name) explicitly,
+>> Can we use (basename(conffile).split('.conf')[0]) as cluster name by
+>> default in librados?
+>>
+>> So that all consumers of the librados can tolerate the non-'ceph' cluster name
+>> without any change.
+>>
+>> How do you guys think? If you agree to the change, I can do the quick fixing.
+> This would be a bit of a hack, but it seems reasonable enough to me--I
+> can't think of anything that would break as a result.
+>
+> Josh, what do you think?  The logic it could even be restricted to the
+> client side only...
+>
+> sage
+>
+
