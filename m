@@ -1,60 +1,59 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Ceph scale testing
-Date: Thu, 21 Jan 2016 17:26:50 +0000
-Message-ID: <CO1PR02MB208F1B40F44717D4A49C3C7F4C30@CO1PR02MB208.namprd02.prod.outlook.com>
-References: <CO1PR02MB208D28221FDCE8CDB8D3802F4C30@CO1PR02MB208.namprd02.prod.outlook.com>
-	<CADr68Wa-CUThHr_N_J+jEcCYK_Vo2jH=bZpLreZNuPJGcRk4Yw@mail.gmail.com>
-	<CO1PR02MB2080DFD074B56344F3BD4ECF4C30@CO1PR02MB208.namprd02.prod.outlook.com>
- <CACJqLyYfWHUPhWAUocDUv8SqjgG8HQxRBp6LPEYb2nbJTnsAjA@mail.gmail.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: inconsistent rados semantics between automake/cmake builds
+Date: Thu, 21 Jan 2016 12:48:08 -0500
+Message-ID: <20160121174808.GA20010@ultraspiritum.redhat.com>
+References: <CAB2gnbUxzE7z6ec39=cPg2sqNOtMc6cS8_GN9ybxxdvB7zXW+g@mail.gmail.com>
+ <CADRKj5RFKdLWWAaWg1EtTtJB+g3FigoEm3=xJ2+FCostq7fp4A@mail.gmail.com>
+ <20160121170305.GA32590@ultraspiritum.redhat.com>
+ <CAB2gnbUG6kJF40kcDTcHHjXS5TeLALnTBfF1wFVCGE8PTxeSeg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="a8Wt8u1KmwUX3Y2C"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0056.outbound.protection.outlook.com ([157.56.110.56]:12274
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1759928AbcAUR0w (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 21 Jan 2016 12:26:52 -0500
-In-Reply-To: <CACJqLyYfWHUPhWAUocDUv8SqjgG8HQxRBp6LPEYb2nbJTnsAjA@mail.gmail.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:43180 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755545AbcAURsK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 21 Jan 2016 12:48:10 -0500
+Content-Disposition: inline
+In-Reply-To: <CAB2gnbUG6kJF40kcDTcHHjXS5TeLALnTBfF1wFVCGE8PTxeSeg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Jens Rosenboom <j.rosenboom@x-ion.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Noah Watkins <noahwatkins@gmail.com>
+Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Casey Bodley <cbodley@redhat.com>, Orit Wasserman <owasserm@redhat.com>
 
-SGFvbWFpLA0KVGhpcyBpcyBub3QgaW1wcm92ZWQgcGVyZm9ybWFuY2UgZnJvbSBzdG9jayBqZXdl
-bCBidXQgZnJvbSBzdG9jayBIYW1tZXIuDQpOb3QgMTAwJSBiZWNhdXNlIG9mIG15IGNoYW5nZXMs
-IGJ1dCAqbW9zdGx5KiBJIGd1ZXNzIGF0IGxlYXN0IGluIG15IGVudmlyb25tZW50IHdpdGggU0FT
-IFNTRHMuLlRoZXJlIGFyZSBzb21lIGltcHJvdmVtZW50cyB3ZW50IGluIHBvc3QgaGFtbWVyIHRo
-YXQgaW1wcm92ZWQgcGVyZm9ybWFuY2UgKDIwJSBvciBzbykgYXMgd2VsbC4uDQoNCkdvb2QgdG8g
-c2VlIElGMTAwIGRlcGxveWluZyB3aWRlbHkgOi0pDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5h
-dGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEhhb21haSBXYW5nIFttYWls
-dG86aGFvbWFpd2FuZ0BnbWFpbC5jb21dIA0KU2VudDogVGh1cnNkYXksIEphbnVhcnkgMjEsIDIw
-MTYgMToyMSBBTQ0KVG86IFNvbW5hdGggUm95DQpDYzogSmVucyBSb3NlbmJvb207IGNlcGgtZGV2
-ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogQ2VwaCBzY2FsZSB0ZXN0aW5nDQoNCk9u
-IFRodSwgSmFuIDIxLCAyMDE2IGF0IDQ6MjAgUE0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBz
-YW5kaXNrLmNvbT4gd3JvdGU6DQo+IEFsbCB0aGUgbnVtYmVycyBvdGhlciB0aGFuIHRoZSBsYXN0
-IHdyaXRlIG51bWJlcnMgYXJlIGZyb20gSGFtbWVyLi4uTGFzdCBvbmUgd2l0aCBqZXdlbCArIGFu
-IG91dHN0YW5kaW5nIHdyaXRlIHBhdGggcGF0Y2guLg0KPiBXZSB1c2VkIGplbWFsbG9jIGJhc2Vk
-IGhhbW1lciArIHdlIGhhdmUgc29tZSB0dW5pbmcgc3BlY2lmaWMgdG8gb3VyIGZsYXNoIGFuZCBl
-bnZpcm9ubWVudC4uDQoNClNvIHlvdSBtZWFuIHRoYXQgdGhlIGltcHJvdmVkIHBlcmZvcm1hbmNl
-IGZyb20gSmV3ZWwgaXMgY2F1c2VkIGJ5IGZpbGVzdG9yZSB3cml0ZSBwYXRoIG9wdGltaXphdGlv
-bihhcyBsaXN0ZWQgaW4gcHIpPw0KDQpCVFcsIEkganVzdCBzZWUgeW91ciBJRjEwMCBpbiBjdXN0
-b21lciBlbnYsIGNvbmdyYXR1bGF0aW9ucyENCg0KaHR0cDovL3d3dy50aWlrb25pLmNvbS90aXMv
-dmlldy8/aWQ9ZGNiMWQ1Mw0KDQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZy
-b206IEplbnMgUm9zZW5ib29tIFttYWlsdG86ai5yb3NlbmJvb21AeC1pb24uZGVdDQo+IFNlbnQ6
-IFRodXJzZGF5LCBKYW51YXJ5IDIxLCAyMDE2IDEyOjEzIEFNDQo+IFRvOiBTb21uYXRoIFJveQ0K
-PiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IENlcGggc2Nh
-bGUgdGVzdGluZw0KPg0KPiAyMDE2LTAxLTIxIDU6MDMgR01UKzAxOjAwIFNvbW5hdGggUm95IDxT
-b21uYXRoLlJveUBzYW5kaXNrLmNvbT46DQo+PiBIaSwNCj4+IEhlcmUgaXMgdGhlIGNvcHkgb2Yg
-dGhlIHBwdCBJIHByZXNlbnRlZCBpbiB0b2RheSdzIHBlcmZvcm1hbmNlIG1lZXRpbmcuLg0KPj4N
-Cj4+IGh0dHBzOi8vZG9jcy5nb29nbGUuY29tL3ByZXNlbnRhdGlvbi9kLzFqNExjYjlmeDBPWTdl
-UWxRX2lVSTZUUFZKNnRfbw0KPj4gcg0KPj4gWldLSnloejBTXzNpYy9lZGl0P3VzcD1zaGFyaW5n
-DQo+DQo+IFdvdywgdGhlc2UgbnVtYmVyIGxvb2sgcHJldHR5IGltcHJlc3NpdmUuIERpZCB5b3Ug
-dXNlIHNvbWUgYWRkaXRpb25hbCBwYXRjaGVzIGluIHlvdXIgSmV3ZWwgYnVpbGQ/IEluIG15IG93
-biB0ZXN0aW5nIEknbSBzZWVpbmcgb25seSBtYXJnaW5hbCBpbXByb3ZlbWVudHMgaW4gcGxhaW4g
-SmV3ZWwgdnMuIEhhbW1lci4NCj4NCj4gVG8gaGF2ZSBhIGZhaXIgY29tcGFyaXNvbiwgeW91IHNo
-b3VsZCBhbHNvIHVzZSB0aGUgc2FtZSBRRCBmb3IgYm90aCBIYW1tZXIgYW5kIEpld2VsLg0KPg0K
-PiBGaW5hbGx5LCB0aGUgYXZnIGxhdGVuY3kgZm9yIDRrIG9wcyBpc24ndCB0aGF0IHNpZ25pZmlj
-YW50LCBjb3VsZCB5b3UgYWxzbyBhZGQgbnVtYmVycyBmb3IgbWF4IGxhdGVuY3kgb3IgOTkueHgg
-cGVyY2VudGlsZT8NCg0KLS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCg==
+
+--a8Wt8u1KmwUX3Y2C
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On 21/01/2016, Noah Watkins wrote:
+> It's easy for me to reproduce. What would you like me to run?
+
+Sorry about that, I had misread the message I responded to and thought
+it was still bound up with RadosGW. I'm running your test case, I should
+have a patch sometime soon to fix it.
+
+--=20
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+
+--a8Wt8u1KmwUX3Y2C
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQF8BAEBCgBmBQJWoRnTXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
+ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
+OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jID4IAJpfDNQNT5ygRycabEmwd8gZ
+Mes2iaap2/bUyAhbATyu++ltnDX2pL9QIN80JdZzYV8kvCiGHy3xJ629z27oSSEU
+Hb2pDMKVofcQvyvAfkbiDjVOiEPmXos7/J3ywoa8ukFkSJn1rnksRlpr65231OpO
+5Jt48NjrvQiWXVKxT9FHzAi0yG9W5qR3yWGBN292G2AL0aSfYpX6ihMMvbO7Mst4
+jjVz5DOvCClZswC4v0sVYj8uPvQJPxVEdUsaXZAGM7DmqGBkyrtOmNkIMYNicjzt
+ehmRcfUzaBaPAoUHbedxuuQ+tnIs7U+QRPBC51lRd2UgQ0dSSTZd91OMQHuiQoI=
+=PccP
+-----END PGP SIGNATURE-----
+
+--a8Wt8u1KmwUX3Y2C--
