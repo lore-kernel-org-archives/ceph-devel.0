@@ -1,59 +1,152 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: c++ build flags, clang++, -Wnomismatched-tags?
-Date: Thu, 21 Jan 2016 12:18:05 +0100
-Message-ID: <CAOi1vP-gCvix34C=AhbGS7+4_sHqg-jo2+0HfaQAmr7dnqJOwg@mail.gmail.com>
-References: <1295550971.21353553.1453329599755.JavaMail.zimbra@redhat.com>
-	<alpine.DEB.2.11.1601201756390.18145@cpach.fuggernut.com>
-	<1103317763.21365872.1453331251349.JavaMail.zimbra@redhat.com>
-	<CAJ4mKGbjZ0vbupUwN1yH813Hw2cBQqXq=wpAf4zqKHRz2_Y5zQ@mail.gmail.com>
+From: Noah Watkins <noahwatkins@gmail.com>
+Subject: inconsistent rados semantics between automake/cmake builds
+Date: Thu, 21 Jan 2016 07:53:23 -0800
+Message-ID: <CAB2gnbUxzE7z6ec39=cPg2sqNOtMc6cS8_GN9ybxxdvB7zXW+g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:38831 "EHLO
-	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758886AbcAULSH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jan 2016 06:18:07 -0500
-Received: by mail-wm0-f51.google.com with SMTP id b14so75064642wmb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Jan 2016 03:18:06 -0800 (PST)
-In-Reply-To: <CAJ4mKGbjZ0vbupUwN1yH813Hw2cBQqXq=wpAf4zqKHRz2_Y5zQ@mail.gmail.com>
+Received: from mail-io0-f170.google.com ([209.85.223.170]:36838 "EHLO
+	mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752233AbcAUPxX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jan 2016 10:53:23 -0500
+Received: by mail-io0-f170.google.com with SMTP id g73so59701177ioe.3
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Jan 2016 07:53:23 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Matt Benjamin <mbenjamin@redhat.com>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Jan 21, 2016 at 12:49 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> On Wed, Jan 20, 2016 at 3:07 PM, Matt Benjamin <mbenjamin@redhat.com> wrote:
->> My annoyance with this warning is that I don't really want to see "friend struct foo" decls, which seems vaguely bogus?  The warnings could be eliminated by using class everywhere and adding public specifier where expected--but we shouldn't have to do that...
->
-> Do we know what other class of issues this flag warns us on? I
-> actually think it might be good to be consistent about the
-> struct/class distinction but don't have a strong opinion on it as long
-> as we aren't masking something else by zapping the warning.
+I'm seeing an anomaly of semantics between Ceph built with Automake
+and with CMake. I've not been lucky so far tracking this down so I
+thought I'd toss it out here.
 
-I think the reason this warning exists has to do with Microsoft
-compilers, which used to (?) mangle structs and classes differently,
-leading to link errors.
+Here is the basic test description to reproduce (patch below, and
+available at mtime branch: github.com/noahdesu/ceph mtime):
 
-From the errata to Herb Sutter's "Exceptional C++" [1]:
+0. create object class method to return object mtime via stat
+1. from librados client, create an object with write_full
+2. print mtime1 returned from ioctx.stat
+3. print mtime2 returned from object class method via exec (step [0])
+4. compare mtime1,2: values should be equal (step [3] didn't modify anything)
 
-"It's perfectly legal and standards-conforming to forward-declare
-a class as a struct and vice versa. In most of the book I've tended to
-avoid doing that, though. Why? Only because some compilers are buggy
-and still don't get this right -- e.g., by name-mangling a class and
-a struct differently, which will cause the linker to fail to match them
-up. Such compiler bugs really are bugs and are wrong, but they're
-common enough that we might as well avoid the issue by not relying on
-this standard feature. Sigh."
+The first valid question is assertion [4] true?
 
-It looks like MSVC 6 at least was among those compilers.  I assume it
-was fixed, but this warning is still there in the latest Visual Studio [2].
+In either case, what is weird, is that this test works (ie both mtime
+values are equal) when I build with automake, and does not work when I
+build with cmake. The times have a large difference, and the mtime on
+the OSD seems to travel back in time w.r.t. to the time on the client.
+Tests are the same machine.
 
-[1] http://www.gotw.ca/publications/xc++-errata.htm
-[2] https://msdn.microsoft.com/en-us/library/695x5bes.aspx
+Automake Steps:
 
-I doubt there is anything else we would mask by zapping it.
+./autogen.sh
+./configure
+make
+cd src
+vstart.sh -x -n -l
+./ceph_test_cls_hello --gtest_filter=ClsHello.ReturnMtime
 
-Thanks,
+[ RUN      ] ClsHello.ReturnMtime
+from client: 1453391360
+   from osd: 1453391360 (EQUAL)
 
-                Ilya
+CMake Steps:
+
+mkdir build
+cd build
+cmake ..
+make
+./src/vstart.sh -x -n -l
+./src/test/test_cls_hello --gtest_filter=ClsHello.ReturnMtime
+
+[ RUN      ] ClsHello.ReturnMtime
+from client: 1453528535
+   from osd: 1453388425 (OLDER)
+
+-----
+
+diff --git a/src/cls/hello/cls_hello.cc b/src/cls/hello/cls_hello.cc
+index 878130f..1c2d00c 100644
+--- a/src/cls/hello/cls_hello.cc
++++ b/src/cls/hello/cls_hello.cc
+@@ -47,6 +47,7 @@ cls_method_handle_t h_writes_dont_return_data;
+ cls_method_handle_t h_turn_it_to_11;
+ cls_method_handle_t h_bad_reader;
+ cls_method_handle_t h_bad_writer;
++cls_method_handle_t h_return_mtime;
+
+ /**
+  * say hello - a "read" method that does not depend on the object
+@@ -291,6 +292,22 @@ PGLSFilter *hello_filter()
+   return new PGLSHelloFilter();
+ }
+
++static int return_mtime(cls_method_context_t hctx, bufferlist *in,
+bufferlist *out)
++{
++  uint64_t size;
++  time_t mtime;
++
++  int ret = cls_cxx_stat(hctx, &size, &mtime);
++  if (ret) {
++    CLS_ERR("ERROR: return_mtime %d", ret);
++    return ret;
++  }
++
++  ::encode(mtime, *out);
++
++  return 0;
++}
++
+
+ /**
+  * initialize class
+@@ -339,6 +356,11 @@ void __cls_init()
+   cls_register_cxx_method(h_class, "bad_writer", CLS_METHOD_RD,
+   bad_writer, &h_bad_writer);
+
++  // mtime test
++  cls_register_cxx_method(h_class, "return_mtime",
++      CLS_METHOD_RD | CLS_METHOD_WR, return_mtime,
++      &h_return_mtime);
++
+   // A PGLS filter
+   cls_register_cxx_filter(h_class, "hello", hello_filter);
+ }
+diff --git a/src/test/cls_hello/test_cls_hello.cc
+b/src/test/cls_hello/test_cls_hello.cc
+index efd9fc7..70364d0 100644
+--- a/src/test/cls_hello/test_cls_hello.cc
++++ b/src/test/cls_hello/test_cls_hello.cc
+@@ -183,3 +183,32 @@ TEST(ClsHello, Filter) {
+   ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
+ }
+
++TEST(ClsHello, ReturnMtime) {
++  Rados cluster;
++  std::string pool_name = get_temp_pool_name();
++  ASSERT_EQ("", create_one_pool_pp(pool_name, cluster));
++  IoCtx ioctx;
++  cluster.ioctx_create(pool_name.c_str(), ioctx);
++
++  char buf[128];
++  memset(buf, 0xcc, sizeof(buf));
++  bufferlist obj_content;
++  obj_content.append(buf, sizeof(buf));
++
++  ASSERT_EQ(0, ioctx.write_full("oid", obj_content));
++
++  uint64_t size;
++  time_t mtime;
++
++  ASSERT_EQ(0, ioctx.stat("oid", &size, &mtime));
++  std::cout << "from client: " << mtime << std::endl;
++
++  bufferlist in, out;
++  ASSERT_EQ(0, ioctx.exec("oid", "hello", "return_mtime", in, out));
++
++  bufferlist::iterator it = out.begin();
++  ::decode(mtime, it);
++  std::cout << "   from osd: " << mtime << std::endl;
++
++  ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
++}
