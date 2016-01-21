@@ -1,42 +1,58 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Ceph scale testing
-Date: Thu, 21 Jan 2016 08:20:25 +0000
-Message-ID: <CO1PR02MB2080DFD074B56344F3BD4ECF4C30@CO1PR02MB208.namprd02.prod.outlook.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: Ceph scale testing
+Date: Thu, 21 Jan 2016 17:21:29 +0800
+Message-ID: <CACJqLyYfWHUPhWAUocDUv8SqjgG8HQxRBp6LPEYb2nbJTnsAjA@mail.gmail.com>
 References: <CO1PR02MB208D28221FDCE8CDB8D3802F4C30@CO1PR02MB208.namprd02.prod.outlook.com>
- <CADr68Wa-CUThHr_N_J+jEcCYK_Vo2jH=bZpLreZNuPJGcRk4Yw@mail.gmail.com>
+	<CADr68Wa-CUThHr_N_J+jEcCYK_Vo2jH=bZpLreZNuPJGcRk4Yw@mail.gmail.com>
+	<CO1PR02MB2080DFD074B56344F3BD4ECF4C30@CO1PR02MB208.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0069.outbound.protection.outlook.com ([157.56.111.69]:38855
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1758282AbcAUIU1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 21 Jan 2016 03:20:27 -0500
-In-Reply-To: <CADr68Wa-CUThHr_N_J+jEcCYK_Vo2jH=bZpLreZNuPJGcRk4Yw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-io0-f181.google.com ([209.85.223.181]:35930 "EHLO
+	mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750878AbcAUJVa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jan 2016 04:21:30 -0500
+Received: by mail-io0-f181.google.com with SMTP id g73so49169307ioe.3
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Jan 2016 01:21:30 -0800 (PST)
+In-Reply-To: <CO1PR02MB2080DFD074B56344F3BD4ECF4C30@CO1PR02MB208.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jens Rosenboom <j.rosenboom@x-ion.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Jens Rosenboom <j.rosenboom@x-ion.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-QWxsIHRoZSBudW1iZXJzIG90aGVyIHRoYW4gdGhlIGxhc3Qgd3JpdGUgbnVtYmVycyBhcmUgZnJv
-bSBIYW1tZXIuLi5MYXN0IG9uZSB3aXRoIGpld2VsICsgYW4gb3V0c3RhbmRpbmcgd3JpdGUgcGF0
-aCBwYXRjaC4uDQpXZSB1c2VkIGplbWFsbG9jIGJhc2VkIGhhbW1lciArIHdlIGhhdmUgc29tZSB0
-dW5pbmcgc3BlY2lmaWMgdG8gb3VyIGZsYXNoIGFuZCBlbnZpcm9ubWVudC4uDQoNCi0tLS0tT3Jp
-Z2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBKZW5zIFJvc2VuYm9vbSBbbWFpbHRvOmoucm9zZW5i
-b29tQHgtaW9uLmRlXSANClNlbnQ6IFRodXJzZGF5LCBKYW51YXJ5IDIxLCAyMDE2IDEyOjEzIEFN
-DQpUbzogU29tbmF0aCBSb3kNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVj
-dDogUmU6IENlcGggc2NhbGUgdGVzdGluZw0KDQoyMDE2LTAxLTIxIDU6MDMgR01UKzAxOjAwIFNv
-bW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT46DQo+IEhpLA0KPiBIZXJlIGlzIHRo
-ZSBjb3B5IG9mIHRoZSBwcHQgSSBwcmVzZW50ZWQgaW4gdG9kYXkncyBwZXJmb3JtYW5jZSBtZWV0
-aW5nLi4NCj4NCj4gaHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2QvMWo0TGNi
-OWZ4ME9ZN2VRbFFfaVVJNlRQVko2dF9vcg0KPiBaV0tKeWh6MFNfM2ljL2VkaXQ/dXNwPXNoYXJp
-bmcNCg0KV293LCB0aGVzZSBudW1iZXIgbG9vayBwcmV0dHkgaW1wcmVzc2l2ZS4gRGlkIHlvdSB1
-c2Ugc29tZSBhZGRpdGlvbmFsIHBhdGNoZXMgaW4geW91ciBKZXdlbCBidWlsZD8gSW4gbXkgb3du
-IHRlc3RpbmcgSSdtIHNlZWluZyBvbmx5IG1hcmdpbmFsIGltcHJvdmVtZW50cyBpbiBwbGFpbiBK
-ZXdlbCB2cy4gSGFtbWVyLg0KDQpUbyBoYXZlIGEgZmFpciBjb21wYXJpc29uLCB5b3Ugc2hvdWxk
-IGFsc28gdXNlIHRoZSBzYW1lIFFEIGZvciBib3RoIEhhbW1lciBhbmQgSmV3ZWwuDQoNCkZpbmFs
-bHksIHRoZSBhdmcgbGF0ZW5jeSBmb3IgNGsgb3BzIGlzbid0IHRoYXQgc2lnbmlmaWNhbnQsIGNv
-dWxkIHlvdSBhbHNvIGFkZCBudW1iZXJzIGZvciBtYXggbGF0ZW5jeSBvciA5OS54eCBwZXJjZW50
-aWxlPw0K
+On Thu, Jan 21, 2016 at 4:20 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> All the numbers other than the last write numbers are from Hammer...Last one with jewel + an outstanding write path patch..
+> We used jemalloc based hammer + we have some tuning specific to our flash and environment..
+
+So you mean that the improved performance from Jewel is caused by
+filestore write path optimization(as listed in pr)?
+
+BTW, I just see your IF100 in customer env, congratulations!
+
+http://www.tiikoni.com/tis/view/?id=dcb1d53
+
+>
+> -----Original Message-----
+> From: Jens Rosenboom [mailto:j.rosenboom@x-ion.de]
+> Sent: Thursday, January 21, 2016 12:13 AM
+> To: Somnath Roy
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Ceph scale testing
+>
+> 2016-01-21 5:03 GMT+01:00 Somnath Roy <Somnath.Roy@sandisk.com>:
+>> Hi,
+>> Here is the copy of the ppt I presented in today's performance meeting..
+>>
+>> https://docs.google.com/presentation/d/1j4Lcb9fx0OY7eQlQ_iUI6TPVJ6t_or
+>> ZWKJyhz0S_3ic/edit?usp=sharing
+>
+> Wow, these number look pretty impressive. Did you use some additional patches in your Jewel build? In my own testing I'm seeing only marginal improvements in plain Jewel vs. Hammer.
+>
+> To have a fair comparison, you should also use the same QD for both Hammer and Jewel.
+>
+> Finally, the avg latency for 4k ops isn't that significant, could you also add numbers for max latency or 99.xx percentile?
+
+-- 
+Best Regards,
+
+Wheat
