@@ -1,59 +1,68 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: inconsistent rados semantics between automake/cmake builds
-Date: Thu, 21 Jan 2016 12:48:08 -0500
-Message-ID: <20160121174808.GA20010@ultraspiritum.redhat.com>
-References: <CAB2gnbUxzE7z6ec39=cPg2sqNOtMc6cS8_GN9ybxxdvB7zXW+g@mail.gmail.com>
- <CADRKj5RFKdLWWAaWg1EtTtJB+g3FigoEm3=xJ2+FCostq7fp4A@mail.gmail.com>
- <20160121170305.GA32590@ultraspiritum.redhat.com>
- <CAB2gnbUG6kJF40kcDTcHHjXS5TeLALnTBfF1wFVCGE8PTxeSeg@mail.gmail.com>
+From: Erwan Velu <evelu@redhat.com>
+Subject: Re: About ceph_clock_now()
+Date: Thu, 21 Jan 2016 14:22:56 -0500 (EST)
+Message-ID: <1522288191.15295456.1453404176015.JavaMail.zimbra@redhat.com>
+References: <177186823.10053087.1452614184109.JavaMail.zimbra@redhat.com> <892700092.10054838.1452614393452.JavaMail.zimbra@redhat.com> <20160112173248.GA8218@ultraspiritum.redhat.com> <964746730.10566211.1452681675142.JavaMail.zimbra@redhat.com> <alpine.DEB.2.11.1601130846500.26381@cpach.fuggernut.com> <1365711662.13730117.1453220271917.JavaMail.zimbra@redhat.com> <20160119162902.GA21358@ultraspiritum.redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="a8Wt8u1KmwUX3Y2C"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43180 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755545AbcAURsK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 21 Jan 2016 12:48:10 -0500
-Content-Disposition: inline
-In-Reply-To: <CAB2gnbUG6kJF40kcDTcHHjXS5TeLALnTBfF1wFVCGE8PTxeSeg@mail.gmail.com>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:48910 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752770AbcAUTW4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jan 2016 14:22:56 -0500
+In-Reply-To: <20160119162902.GA21358@ultraspiritum.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noahwatkins@gmail.com>
-Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Casey Bodley <cbodley@redhat.com>, Orit Wasserman <owasserm@redhat.com>
+To: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
+Hi,
 
---a8Wt8u1KmwUX3Y2C
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+I'm sadly not at full time on Ceph but you can find my work in progress=
+ on this PR in my personal branch.
+I'm thinking of making a single commit explaining this change and propa=
+gating it to the whole codebase:=20
+https://github.com/ErwanAliasr1/ceph/commit/00daa403831c9e0dfffb6f31a48=
+723ca3cc3b569
 
-On 21/01/2016, Noah Watkins wrote:
-> It's easy for me to reproduce. What would you like me to run?
+Note this is WIP and I'm currently hiting obvious places where ceph_clo=
+ck_now() can be replaced. I don't know a lot about the coebase so I'll =
+ask my questions later about the locations where I have doubts.
 
-Sorry about that, I had misread the message I responded to and thought
-it was still bound up with RadosGW. I'm running your test case, I should
-have a patch sometime soon to fix it.
+Cheers,
+Erwan
+
+----- Mail original -----
+De: "Adam C. Emerson" <aemerson@redhat.com>
+=C3=80: "Erwan Velu" <evelu@redhat.com>
+Cc: "Sage Weil" <sweil@redhat.com>, "The Sacred Order of the Squid Cybe=
+rnetic" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Mardi 19 Janvier 2016 17:29:03
+Objet: Re: About ceph_clock_now()
+
+On 19/01/2016, Erwan Velu wrote:
+> Before propagating the change to more code base and offer a PR with t=
+hat, what do you think of this style ?
+>=20
+> Is it aligned with the best-pratices of the project ?
+>=20
+> https://gist.github.com/ErwanAliasr1/f74f7f046e9300ac2c30
+
+One minor thing, you shouldn't use anything in time_detail directly. It=
+ SHOULD
+be ceph::coarse_mono_clock::now() ('detail' or leading underscores sign=
+al a
+'private' namespace.)
+
+Other than that, this looks very good.
 
 --=20
 Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
 IRC: Aemerson@{RedHat, OFTC, Freenode}
 0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
-
---a8Wt8u1KmwUX3Y2C
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQF8BAEBCgBmBQJWoRnTXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
-ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
-OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jID4IAJpfDNQNT5ygRycabEmwd8gZ
-Mes2iaap2/bUyAhbATyu++ltnDX2pL9QIN80JdZzYV8kvCiGHy3xJ629z27oSSEU
-Hb2pDMKVofcQvyvAfkbiDjVOiEPmXos7/J3ywoa8ukFkSJn1rnksRlpr65231OpO
-5Jt48NjrvQiWXVKxT9FHzAi0yG9W5qR3yWGBN292G2AL0aSfYpX6ihMMvbO7Mst4
-jjVz5DOvCClZswC4v0sVYj8uPvQJPxVEdUsaXZAGM7DmqGBkyrtOmNkIMYNicjzt
-ehmRcfUzaBaPAoUHbedxuuQ+tnIs7U+QRPBC51lRd2UgQ0dSSTZd91OMQHuiQoI=
-=PccP
------END PGP SIGNATURE-----
-
---a8Wt8u1KmwUX3Y2C--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
