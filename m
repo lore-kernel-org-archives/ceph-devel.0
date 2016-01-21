@@ -1,64 +1,74 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: clang builds failing for me (cmake)--rocksdb and (I had forgotten)
- also leveldb
-Date: Thu, 21 Jan 2016 11:27:42 -0500 (EST)
-Message-ID: <1307627579.21914617.1453393662272.JavaMail.zimbra@redhat.com>
-References: <1364796719.21886735.1453391951145.JavaMail.zimbra@redhat.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: inconsistent rados semantics between automake/cmake builds
+Date: Thu, 21 Jan 2016 12:03:05 -0500
+Message-ID: <20160121170305.GA32590@ultraspiritum.redhat.com>
+References: <CAB2gnbUxzE7z6ec39=cPg2sqNOtMc6cS8_GN9ybxxdvB7zXW+g@mail.gmail.com>
+ <CADRKj5RFKdLWWAaWg1EtTtJB+g3FigoEm3=xJ2+FCostq7fp4A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="SLDf9lqlvOQaIe6s"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:53849 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759312AbcAUQ1m convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jan 2016 11:27:42 -0500
-In-Reply-To: <1364796719.21886735.1453391951145.JavaMail.zimbra@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:41030 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759882AbcAURDH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 21 Jan 2016 12:03:07 -0500
+Content-Disposition: inline
+In-Reply-To: <CADRKj5RFKdLWWAaWg1EtTtJB+g3FigoEm3=xJ2+FCostq7fp4A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Ali Maredia <amaredia@redhat.com>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Noah Watkins <noahwatkins@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Casey Bodley <cbodley@redhat.com>, Orit Wasserman <owasserm@redhat.com>
 
-Hi CMake/C++ Devs,
 
-Ok, so I tried to build w/clang 3.9 yesterday, and ran into problems linking (on master) rocksdb and leveldb and (on older rgw branch), still have problems with leveldb.
+--SLDf9lqlvOQaIe6s
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Marcus and I pored over it a bit.  What I think I see as the immediate problem is:
+On 21/01/2016, Yehuda Sadeh-Weinraub wrote:
+[snip]
+> This sounds somewhat like an issue Casey and Orit had seen, one that I
+> wasn't able to replicate (both of them are using cmake, I'm using
+> automake). I think they tracked it to Adam's c++11 time change.
+[snip]
 
-[ 42%] Linking CXX executable ceph-dencoder
-cd /home/mbenjamin/dev/rgw/ceph/build/src && /usr/bin/cmake -E cmake_link_script CMakeFiles/ceph-dencoder.dir/link.txt --verbose=1
-/opt/clang/bin/clang++   -O0 -g3 -gdwarf-4 -Wall -Wtype-limits -Wignored-qualifiers -Winit-self -Wpointer-arith -Werror=format-security -fno-strict-aliasing -fsigned-char -fPIC -ftemplate-depth-1024 -Wno-invalid-offsetof -Wnon-virtual-dtor -Wno-invalid-offsetof  -Woverloaded-virtual -std=c++11 -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free   CMakeFiles/ceph-dencoder.dir/test/encoding/ceph_dencoder.cc.o CMakeFiles/ceph-dencoder.dir/krbd.cc.o CMakeFiles/ceph-dencoder.dir/common/secret.c.o CMakeFiles/ceph-dencoder.dir/common/TextTable.cc.o CMakeFiles/ceph-dencoder.dir/rgw/rgw_dencoder.cc.o CMakeFiles/ceph-dencoder.dir/rgw/rgw_acl.cc.o CMakeFiles/ceph-dencoder.dir/rgw/rgw_common.cc.o CMakeFiles/ceph-dencoder.dir/rgw/rgw_env.cc.o CMakeFiles/ceph-dencoder.dir/rgw/
- rgw_json_enc.cc.o CMakeFiles/heap_profiler_objs.dir/perfglue/heap_profiler.cc.o  -o ceph-dencoder -rdynamic librbd.so.1.0.0 libceph-global.a libosd.a libmds.a libmon.a libosdc.a cls/libcls_lock_client.a cls/libcls_refcount_client.a cls/libcls_log_client.a cls/libcls_statelog_client.a cls/libcls_version_client.a cls/libcls_replica_log_client.a libcls_kvs.so.1.0.0 cls/libcls_user_client.a librgw_a.a cls/libcls_rgw_client.a -lcurl -lexpat -lfcgi -lresolv -lblkid -ludev -lkeyutils -latomic_ops -luuid -lrt -ldl -lprofiler -ltcmalloc -ldl librados.so.2.0.0 libcommon.a json_spirit/libjson_spirit.a libcommon_utf8.a erasure-code/liberasure_code.a -lboost_thread -lboost_system -lboost_regex -lpthread -lcryptopp -lleveldb -latomic_ops -luuid -lrt -lprofiler -ldl -Wl,-rpath,/home/mbenjamin/dev/rgw/c
- eph/build/src 
-librados.so.2.0.0: undefined reference to `leveldb::Status::ToString() const'
-clang-3.9: error: linker command failed with exit code 1 (use -v to see invocation)
-src/CMakeFiles/ceph-dencoder.dir/build.make:330: recipe for target 'src/ceph-dencoder' failed
+I was thinking about this the other night. There doesn't seem to be any pro=
+blem
+with the actual /read/ that I can find. (There'd be failures in stat all ov=
+er
+the place.)
 
-This is the leveldb version.  There's something similar with rocksdb.  In this case, I've verified that librados.so was linked dynamically with libleveldb, and we've even added it to the ceph-dencoder link line, redundantly.
+But I recalled that Objecter allows you to specify the mtime for operations=
+ and
+thought perhaps that might be where the problem is. If we know what operati=
+on is
+creating/last touching these objects, can someone who's able to reproduce t=
+he
+problem run a cycle or two of it through valgrind? It might be feeding in a
+not-properly-initialized time value, and if this shows up under one build s=
+ystem
+but not another that feels like it could be a touch more likely.
 
-I'm guessing that this is just a straight-up C++ ABI issue preventing us from mixing g++- and clang++-compiled versions of leveldb and it's friend rocksdb, since these libraries have C++ mangled names in the interface:
+--=20
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
 
-[mbenjamin@lemon build]$ nm -D /usr/lib64/libleveldb.so | grep Status::To
-[mbenjamin@lemon build]$ nm -D /usr/lib64/libleveldb.so | grep ToString
-000000000004aea0 T _ZN7leveldb14NumberToStringB5cxx11Em
-00000000000466d0 T _ZN7leveldb16ReadFileToStringEPNS_3EnvERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
-000000000004b1f0 T _ZNK7leveldb6Status8ToStringB5cxx11Ev
-000000000004a860 T _ZNK7leveldb9Histogram8ToStringB5cxx11Ev
+--SLDf9lqlvOQaIe6s
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Am I correct that we can't actually rely on this?
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
 
-Marcus noted, the issues with rocksdb currently a bit more broad.  One, we are building it in-tree.  Two, we are building a static library, and seemingly not linking it in every shared library where it is used (that is easy to fix, of course).
+iQF8BAEBCgBmBQJWoQ9DXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
+ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
+OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jNZcH/2Zy0ySplQKpNcTRWoG0CJqU
+/d/UFyy5QEhtCtsUPu/lDa3jtTW2E5hiROUBFB/rYkNbB5AT3DXkzsQRB2zXK+3k
+2KT67uDUY9slxzGrqC9jSZqzUe7L0wctn1XgysRjHlqVrpJ2AGEexElmyxEHNOgL
+GpS1G6JkTOSZ3kmtejVpQf+yQ/frHmniEzUDNUF8XhV9mfOXsKUqFbRo8BDxrr8q
+C/kjQSe0kYpv4DfJLV31QieIs+0eKoRVe33Dc69wcZC8raS2H2wru7HlDueo7GK5
+XO9QAUIpqHWKoT9+mLApZ1db5xn1+PFrhmEeMXNCCjNKPg1M62FnlZcfWOVQZ2c=
+=ldgn
+-----END PGP SIGNATURE-----
 
-Matt
-
--- 
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+--SLDf9lqlvOQaIe6s--
