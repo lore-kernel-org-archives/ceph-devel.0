@@ -1,55 +1,48 @@
-From: "Wang, Yaguang" <yaguang.wang@intel.com>
-Subject: RE: /var/lib/ceph/*/*/config
-Date: Thu, 21 Jan 2016 06:15:47 +0000
-Message-ID: <6B43196FC9DF2F4CB632BC82E45653B31A9B53CC@SHSMSX104.ccr.corp.intel.com>
-References: <alpine.DEB.2.11.1601191009320.28274@cpach.fuggernut.com>
- <CALe9h7csaYPgL_SZtot9Y+idSJUxsL=e_QRaos+f_k51V0P6GA@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: Ceph scale testing
+Date: Thu, 21 Jan 2016 08:03:35 +0100 (CET)
+Message-ID: <978138159.78266341.1453359815080.JavaMail.zimbra@oxygem.tv>
+References: <CO1PR02MB208D28221FDCE8CDB8D3802F4C30@CO1PR02MB208.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:26672 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750751AbcAUGPv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 21 Jan 2016 01:15:51 -0500
-In-Reply-To: <CALe9h7csaYPgL_SZtot9Y+idSJUxsL=e_QRaos+f_k51V0P6GA@mail.gmail.com>
-Content-Language: en-US
+Received: from mailpro.odiso.net ([89.248.211.110]:60834 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751329AbcAUHDh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jan 2016 02:03:37 -0500
+In-Reply-To: <CO1PR02MB208D28221FDCE8CDB8D3802F4C30@CO1PR02MB208.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>, Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-QmVmb3JlIHRvIHNldCBwZXIgZGFlbW9uIG9wdGlvbnMsIGlzIHRoZXJlIGFuIGFwcHJvYWNoIHRv
-IGdldCBhIGZ1bGwgc2V0IG9mIGVmZmVjdGl2ZSBvcHRpb25zIGZvciBjb25maWd1cmF0aW9uPw0K
-DQoNCi15YWd1YW5nDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRl
-dmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSm9obiBTcHJheQ0KU2VudDogV2VkbmVzZGF5LCBKYW51
-YXJ5IDIwLCAyMDE2IDY6NDIgUE0NClRvOiBTYWdlIFdlaWwNCkNjOiBDZXBoIERldmVsb3BtZW50
-DQpTdWJqZWN0OiBSZTogL3Zhci9saWIvY2VwaC8qLyovY29uZmlnDQoNCk9uIFR1ZSwgSmFuIDE5
-LCAyMDE2IGF0IDM6MTUgUE0sIFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6DQo+
-IEkgdGhpbmsgd2Ugc2hvdWxkIGFkZCBhbiBvcHRpb25hbCAnY29uZmlnJyBmaWxlIGxvY2F0aW9u
-IHRvIHRoZSBjb25maWcgDQo+IHNlYXJjaCBwYXRoLiAgVGhpcyB3b3VsZCBhbGxvdyB5b3UgdG8g
-cHV0IGN1c3RvbWl6ZWQgb3B0aW9ucyBmb3IgYW4gDQo+IGluZGl2aWR1YWwgZGFlbW9uIGluIHRo
-ZSBkYWVtb24gZGF0YSBkaXJlY3RvcnkuICBPciwgeW91IGNvdWxkIGF2b2lkIA0KPiBwdXR0aW5n
-IGEgY29uZmlnIGluIC9ldGMvY2VwaCBlbnRpcmVseSwgc28gdGhhdCB0aGUgZGFlbW9uIGRhdGEg
-aXMgDQo+IGNvbXBsZXRlbHkgc2VsZi1jb250YWluZWQgb24gdGhlIGRldmljZS4gIFRoYXQgd291
-bGQgc3RyZWFtbGluZSBib290IA0KPiBkaXNrIGZhaWx1cmUgKGp1c3QgcmVpbnN0YWxsIE9TIGFu
-ZCBjZXBoIHBhY2thZ2UpIG9yIGRyaXZlIHN3YXBzIA0KPiBiZXR3ZWVuIGZhaWxlZCBob3N0IGhh
-cmR3YXJlLg0KPg0KPiBXaGF0IGRvIHlvdSB0aGluaz8NCg0KU2VlbXMgdmVyeSByZWFzb25hYmxl
-Lg0KDQpJbiBhIHJlbGF0ZWQgdGhvdWdodCwgSSd2ZSBiZWVuIHdpc2hpbmcgdGhhdCB3ZSBjb3Vs
-ZCBzdG9yZSBhIGNvbmZpZyBpbiB0aGUgZGF0YSBkaXJlY3RvcnkgZm9yIGEgZGlmZmVyZW50IHJl
-YXNvbi4gIEl0IHdvdWxkIGJlIG5pY2UgaWYgZGFlbW9ucyBjb3VsZCBzZWxmLXNldCBwZXJzaXN0
-ZW50IGNvbmZpZ3VyYXRpb24sIHNvIHRoYXQgd2UgY291bGQgbWFrZSBvcHRpb25zIHNldCBvdmVy
-IGB0ZWxsYCAob3B0aW9uYWxseSkgcGVyc2lzdGVudC4gIFRoZSBpZGVhIGlzIHRoYXQgaWYgYSBt
-YW5hZ2VtZW50IHRvb2wgd2FudGVkIHRvIGUuZy4gY29uZmlndXJlIGxvZyB2ZXJib3NpdHksIGl0
-IGNvdWxkIGRvIGl0IHB1cmVseSBvdmVyIGNlcGggY29tbWFuZHMsIHJhdGhlciB0aGFuIG5lZWRp
-bmcgb3V0LW9mLWJhbmQgKFNTSCkgYWNjZXNzIHRvIG1vZGlmeSBmaWxlcyBvbiBkaXNrIChhbmQg
-dG8gcmVjb25jaWxlIGl0cyBjaGFuZ2VzIHdpdGggdGhlIGh1bWFuLWVkaXRhYmxlIGNlcGguY29u
-ZikuDQoNCldoYXQgaWYgd2UgaGFkIHR3byAob3B0aW9uYWwpIGNvbmZpZyBmaWxlcyBpbiB0aGUg
-ZGF0YSBkaXIsIG9uZSBmb3IgaHVtYW4gY29uc3VtcHRpb24gKHRvIG1ha2VzIGRyaXZlIHN3YXBz
-IGFuZCBob3N0IHJlYnVpbGRzIHNpbXBsZXIpLCBhbmQgb25lIG1hY2hpbmUgZ2VuZXJhdGVkIGZv
-ciB0aGUgZGFlbW9uIHRvIHVwZGF0ZSBpdHNlbGYgd2hlbiByZXF1ZXN0ZWQgdG8gcmVtb3RlbHk/
-DQoNCkpvaG4NCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
-ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
-am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3Zn
-ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+Thanks Somnath !
+
+----- Mail original -----
+De: "Somnath Roy" <Somnath.Roy@sandisk.com>
+=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>, "ceph-users" <ceph-u=
+sers@lists.ceph.com>
+Envoy=C3=A9: Jeudi 21 Janvier 2016 05:03:59
+Objet: Ceph scale testing
+
+Hi,=20
+Here is the copy of the ppt I presented in today's performance meeting.=
+=2E=20
+
+https://docs.google.com/presentation/d/1j4Lcb9fx0OY7eQlQ_iUI6TPVJ6t_orZ=
+WKJyhz0S_3ic/edit?usp=3Dsharing=20
+
+Thanks & Regards=20
+Somnath=20
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
