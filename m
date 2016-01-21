@@ -1,168 +1,64 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: inconsistent rados semantics between automake/cmake builds
-Date: Thu, 21 Jan 2016 08:03:00 -0800
-Message-ID: <CADRKj5RFKdLWWAaWg1EtTtJB+g3FigoEm3=xJ2+FCostq7fp4A@mail.gmail.com>
-References: <CAB2gnbUxzE7z6ec39=cPg2sqNOtMc6cS8_GN9ybxxdvB7zXW+g@mail.gmail.com>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: clang builds failing for me (cmake)--rocksdb and (I had forgotten)
+ also leveldb
+Date: Thu, 21 Jan 2016 11:27:42 -0500 (EST)
+Message-ID: <1307627579.21914617.1453393662272.JavaMail.zimbra@redhat.com>
+References: <1364796719.21886735.1453391951145.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f180.google.com ([209.85.214.180]:34709 "EHLO
-	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965482AbcAUQDB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jan 2016 11:03:01 -0500
-Received: by mail-ob0-f180.google.com with SMTP id vt7so38406826obb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Jan 2016 08:03:00 -0800 (PST)
-In-Reply-To: <CAB2gnbUxzE7z6ec39=cPg2sqNOtMc6cS8_GN9ybxxdvB7zXW+g@mail.gmail.com>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:53849 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759312AbcAUQ1m convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jan 2016 11:27:42 -0500
+In-Reply-To: <1364796719.21886735.1453391951145.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noahwatkins@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Casey Bodley <cbodley@redhat.com>, Adam Emerson <aemerson@redhat.com>, Orit Wasserman <owasserm@redhat.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Ali Maredia <amaredia@redhat.com>
 
-On Thu, Jan 21, 2016 at 7:53 AM, Noah Watkins <noahwatkins@gmail.com> wrote:
-> I'm seeing an anomaly of semantics between Ceph built with Automake
-> and with CMake. I've not been lucky so far tracking this down so I
-> thought I'd toss it out here.
->
-> Here is the basic test description to reproduce (patch below, and
-> available at mtime branch: github.com/noahdesu/ceph mtime):
->
-> 0. create object class method to return object mtime via stat
-> 1. from librados client, create an object with write_full
-> 2. print mtime1 returned from ioctx.stat
-> 3. print mtime2 returned from object class method via exec (step [0])
-> 4. compare mtime1,2: values should be equal (step [3] didn't modify anything)
->
-> The first valid question is assertion [4] true?
->
-> In either case, what is weird, is that this test works (ie both mtime
-> values are equal) when I build with automake, and does not work when I
-> build with cmake. The times have a large difference, and the mtime on
-> the OSD seems to travel back in time w.r.t. to the time on the client.
-> Tests are the same machine.
+Hi CMake/C++ Devs,
 
+Ok, so I tried to build w/clang 3.9 yesterday, and ran into problems linking (on master) rocksdb and leveldb and (on older rgw branch), still have problems with leveldb.
 
-This sounds somewhat like an issue Casey and Orit had seen, one that I
-wasn't able to replicate (both of them are using cmake, I'm using
-automake). I think they tracked it to Adam's c++11 time change.
+Marcus and I pored over it a bit.  What I think I see as the immediate problem is:
 
-Yehuda
+[ 42%] Linking CXX executable ceph-dencoder
+cd /home/mbenjamin/dev/rgw/ceph/build/src && /usr/bin/cmake -E cmake_link_script CMakeFiles/ceph-dencoder.dir/link.txt --verbose=1
+/opt/clang/bin/clang++   -O0 -g3 -gdwarf-4 -Wall -Wtype-limits -Wignored-qualifiers -Winit-self -Wpointer-arith -Werror=format-security -fno-strict-aliasing -fsigned-char -fPIC -ftemplate-depth-1024 -Wno-invalid-offsetof -Wnon-virtual-dtor -Wno-invalid-offsetof  -Woverloaded-virtual -std=c++11 -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free   CMakeFiles/ceph-dencoder.dir/test/encoding/ceph_dencoder.cc.o CMakeFiles/ceph-dencoder.dir/krbd.cc.o CMakeFiles/ceph-dencoder.dir/common/secret.c.o CMakeFiles/ceph-dencoder.dir/common/TextTable.cc.o CMakeFiles/ceph-dencoder.dir/rgw/rgw_dencoder.cc.o CMakeFiles/ceph-dencoder.dir/rgw/rgw_acl.cc.o CMakeFiles/ceph-dencoder.dir/rgw/rgw_common.cc.o CMakeFiles/ceph-dencoder.dir/rgw/rgw_env.cc.o CMakeFiles/ceph-dencoder.dir/rgw/
+ rgw_json_enc.cc.o CMakeFiles/heap_profiler_objs.dir/perfglue/heap_profiler.cc.o  -o ceph-dencoder -rdynamic librbd.so.1.0.0 libceph-global.a libosd.a libmds.a libmon.a libosdc.a cls/libcls_lock_client.a cls/libcls_refcount_client.a cls/libcls_log_client.a cls/libcls_statelog_client.a cls/libcls_version_client.a cls/libcls_replica_log_client.a libcls_kvs.so.1.0.0 cls/libcls_user_client.a librgw_a.a cls/libcls_rgw_client.a -lcurl -lexpat -lfcgi -lresolv -lblkid -ludev -lkeyutils -latomic_ops -luuid -lrt -ldl -lprofiler -ltcmalloc -ldl librados.so.2.0.0 libcommon.a json_spirit/libjson_spirit.a libcommon_utf8.a erasure-code/liberasure_code.a -lboost_thread -lboost_system -lboost_regex -lpthread -lcryptopp -lleveldb -latomic_ops -luuid -lrt -lprofiler -ldl -Wl,-rpath,/home/mbenjamin/dev/rgw/c
+ eph/build/src 
+librados.so.2.0.0: undefined reference to `leveldb::Status::ToString() const'
+clang-3.9: error: linker command failed with exit code 1 (use -v to see invocation)
+src/CMakeFiles/ceph-dencoder.dir/build.make:330: recipe for target 'src/ceph-dencoder' failed
 
->
-> Automake Steps:
->
-> ./autogen.sh
-> ./configure
-> make
-> cd src
-> vstart.sh -x -n -l
-> ./ceph_test_cls_hello --gtest_filter=ClsHello.ReturnMtime
->
-> [ RUN      ] ClsHello.ReturnMtime
-> from client: 1453391360
->    from osd: 1453391360 (EQUAL)
->
-> CMake Steps:
->
-> mkdir build
-> cd build
-> cmake ..
-> make
-> ./src/vstart.sh -x -n -l
-> ./src/test/test_cls_hello --gtest_filter=ClsHello.ReturnMtime
->
-> [ RUN      ] ClsHello.ReturnMtime
-> from client: 1453528535
->    from osd: 1453388425 (OLDER)
->
-> -----
->
-> diff --git a/src/cls/hello/cls_hello.cc b/src/cls/hello/cls_hello.cc
-> index 878130f..1c2d00c 100644
-> --- a/src/cls/hello/cls_hello.cc
-> +++ b/src/cls/hello/cls_hello.cc
-> @@ -47,6 +47,7 @@ cls_method_handle_t h_writes_dont_return_data;
->  cls_method_handle_t h_turn_it_to_11;
->  cls_method_handle_t h_bad_reader;
->  cls_method_handle_t h_bad_writer;
-> +cls_method_handle_t h_return_mtime;
->
->  /**
->   * say hello - a "read" method that does not depend on the object
-> @@ -291,6 +292,22 @@ PGLSFilter *hello_filter()
->    return new PGLSHelloFilter();
->  }
->
-> +static int return_mtime(cls_method_context_t hctx, bufferlist *in,
-> bufferlist *out)
-> +{
-> +  uint64_t size;
-> +  time_t mtime;
-> +
-> +  int ret = cls_cxx_stat(hctx, &size, &mtime);
-> +  if (ret) {
-> +    CLS_ERR("ERROR: return_mtime %d", ret);
-> +    return ret;
-> +  }
-> +
-> +  ::encode(mtime, *out);
-> +
-> +  return 0;
-> +}
-> +
->
->  /**
->   * initialize class
-> @@ -339,6 +356,11 @@ void __cls_init()
->    cls_register_cxx_method(h_class, "bad_writer", CLS_METHOD_RD,
->    bad_writer, &h_bad_writer);
->
-> +  // mtime test
-> +  cls_register_cxx_method(h_class, "return_mtime",
-> +      CLS_METHOD_RD | CLS_METHOD_WR, return_mtime,
-> +      &h_return_mtime);
-> +
->    // A PGLS filter
->    cls_register_cxx_filter(h_class, "hello", hello_filter);
->  }
-> diff --git a/src/test/cls_hello/test_cls_hello.cc
-> b/src/test/cls_hello/test_cls_hello.cc
-> index efd9fc7..70364d0 100644
-> --- a/src/test/cls_hello/test_cls_hello.cc
-> +++ b/src/test/cls_hello/test_cls_hello.cc
-> @@ -183,3 +183,32 @@ TEST(ClsHello, Filter) {
->    ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
->  }
->
-> +TEST(ClsHello, ReturnMtime) {
-> +  Rados cluster;
-> +  std::string pool_name = get_temp_pool_name();
-> +  ASSERT_EQ("", create_one_pool_pp(pool_name, cluster));
-> +  IoCtx ioctx;
-> +  cluster.ioctx_create(pool_name.c_str(), ioctx);
-> +
-> +  char buf[128];
-> +  memset(buf, 0xcc, sizeof(buf));
-> +  bufferlist obj_content;
-> +  obj_content.append(buf, sizeof(buf));
-> +
-> +  ASSERT_EQ(0, ioctx.write_full("oid", obj_content));
-> +
-> +  uint64_t size;
-> +  time_t mtime;
-> +
-> +  ASSERT_EQ(0, ioctx.stat("oid", &size, &mtime));
-> +  std::cout << "from client: " << mtime << std::endl;
-> +
-> +  bufferlist in, out;
-> +  ASSERT_EQ(0, ioctx.exec("oid", "hello", "return_mtime", in, out));
-> +
-> +  bufferlist::iterator it = out.begin();
-> +  ::decode(mtime, it);
-> +  std::cout << "   from osd: " << mtime << std::endl;
-> +
-> +  ASSERT_EQ(0, destroy_one_pool_pp(pool_name, cluster));
-> +}
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This is the leveldb version.  There's something similar with rocksdb.  In this case, I've verified that librados.so was linked dynamically with libleveldb, and we've even added it to the ceph-dencoder link line, redundantly.
+
+I'm guessing that this is just a straight-up C++ ABI issue preventing us from mixing g++- and clang++-compiled versions of leveldb and it's friend rocksdb, since these libraries have C++ mangled names in the interface:
+
+[mbenjamin@lemon build]$ nm -D /usr/lib64/libleveldb.so | grep Status::To
+[mbenjamin@lemon build]$ nm -D /usr/lib64/libleveldb.so | grep ToString
+000000000004aea0 T _ZN7leveldb14NumberToStringB5cxx11Em
+00000000000466d0 T _ZN7leveldb16ReadFileToStringEPNS_3EnvERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+000000000004b1f0 T _ZNK7leveldb6Status8ToStringB5cxx11Ev
+000000000004a860 T _ZNK7leveldb9Histogram8ToStringB5cxx11Ev
+
+Am I correct that we can't actually rely on this?
+
+Marcus noted, the issues with rocksdb currently a bit more broad.  One, we are building it in-tree.  Two, we are building a static library, and seemingly not linking it in every shared library where it is used (that is easy to fix, of course).
+
+Matt
+
+-- 
+-- 
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-707-0660
+fax.  734-769-8938
+cel.  734-216-5309
