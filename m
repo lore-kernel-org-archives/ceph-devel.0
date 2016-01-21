@@ -1,46 +1,60 @@
-From: Noah Watkins <noahwatkins@gmail.com>
-Subject: Re: inconsistent rados semantics between automake/cmake builds
-Date: Thu, 21 Jan 2016 09:13:22 -0800
-Message-ID: <CAB2gnbUG6kJF40kcDTcHHjXS5TeLALnTBfF1wFVCGE8PTxeSeg@mail.gmail.com>
-References: <CAB2gnbUxzE7z6ec39=cPg2sqNOtMc6cS8_GN9ybxxdvB7zXW+g@mail.gmail.com>
-	<CADRKj5RFKdLWWAaWg1EtTtJB+g3FigoEm3=xJ2+FCostq7fp4A@mail.gmail.com>
-	<20160121170305.GA32590@ultraspiritum.redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Ceph scale testing
+Date: Thu, 21 Jan 2016 17:26:50 +0000
+Message-ID: <CO1PR02MB208F1B40F44717D4A49C3C7F4C30@CO1PR02MB208.namprd02.prod.outlook.com>
+References: <CO1PR02MB208D28221FDCE8CDB8D3802F4C30@CO1PR02MB208.namprd02.prod.outlook.com>
+	<CADr68Wa-CUThHr_N_J+jEcCYK_Vo2jH=bZpLreZNuPJGcRk4Yw@mail.gmail.com>
+	<CO1PR02MB2080DFD074B56344F3BD4ECF4C30@CO1PR02MB208.namprd02.prod.outlook.com>
+ <CACJqLyYfWHUPhWAUocDUv8SqjgG8HQxRBp6LPEYb2nbJTnsAjA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f182.google.com ([209.85.213.182]:34188 "EHLO
-	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933293AbcAURNX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jan 2016 12:13:23 -0500
-Received: by mail-ig0-f182.google.com with SMTP id ik10so128376806igb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Jan 2016 09:13:23 -0800 (PST)
-In-Reply-To: <20160121170305.GA32590@ultraspiritum.redhat.com>
+Received: from mail-bn1on0056.outbound.protection.outlook.com ([157.56.110.56]:12274
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1759928AbcAUR0w (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 21 Jan 2016 12:26:52 -0500
+In-Reply-To: <CACJqLyYfWHUPhWAUocDUv8SqjgG8HQxRBp6LPEYb2nbJTnsAjA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Noah Watkins <noahwatkins@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Casey Bodley <cbodley@redhat.com>, Orit Wasserman <owasserm@redhat.com>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Jens Rosenboom <j.rosenboom@x-ion.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-It's easy for me to reproduce. What would you like me to run?
-
-On Thu, Jan 21, 2016 at 9:03 AM, Adam C. Emerson <aemerson@redhat.com> wrote:
-> On 21/01/2016, Yehuda Sadeh-Weinraub wrote:
-> [snip]
->> This sounds somewhat like an issue Casey and Orit had seen, one that I
->> wasn't able to replicate (both of them are using cmake, I'm using
->> automake). I think they tracked it to Adam's c++11 time change.
-> [snip]
->
-> I was thinking about this the other night. There doesn't seem to be any problem
-> with the actual /read/ that I can find. (There'd be failures in stat all over
-> the place.)
->
-> But I recalled that Objecter allows you to specify the mtime for operations and
-> thought perhaps that might be where the problem is. If we know what operation is
-> creating/last touching these objects, can someone who's able to reproduce the
-> problem run a cycle or two of it through valgrind? It might be feeding in a
-> not-properly-initialized time value, and if this shows up under one build system
-> but not another that feels like it could be a touch more likely.
->
-> --
-> Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-> IRC: Aemerson@{RedHat, OFTC, Freenode}
-> 0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+SGFvbWFpLA0KVGhpcyBpcyBub3QgaW1wcm92ZWQgcGVyZm9ybWFuY2UgZnJvbSBzdG9jayBqZXdl
+bCBidXQgZnJvbSBzdG9jayBIYW1tZXIuDQpOb3QgMTAwJSBiZWNhdXNlIG9mIG15IGNoYW5nZXMs
+IGJ1dCAqbW9zdGx5KiBJIGd1ZXNzIGF0IGxlYXN0IGluIG15IGVudmlyb25tZW50IHdpdGggU0FT
+IFNTRHMuLlRoZXJlIGFyZSBzb21lIGltcHJvdmVtZW50cyB3ZW50IGluIHBvc3QgaGFtbWVyIHRo
+YXQgaW1wcm92ZWQgcGVyZm9ybWFuY2UgKDIwJSBvciBzbykgYXMgd2VsbC4uDQoNCkdvb2QgdG8g
+c2VlIElGMTAwIGRlcGxveWluZyB3aWRlbHkgOi0pDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5h
+dGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEhhb21haSBXYW5nIFttYWls
+dG86aGFvbWFpd2FuZ0BnbWFpbC5jb21dIA0KU2VudDogVGh1cnNkYXksIEphbnVhcnkgMjEsIDIw
+MTYgMToyMSBBTQ0KVG86IFNvbW5hdGggUm95DQpDYzogSmVucyBSb3NlbmJvb207IGNlcGgtZGV2
+ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogQ2VwaCBzY2FsZSB0ZXN0aW5nDQoNCk9u
+IFRodSwgSmFuIDIxLCAyMDE2IGF0IDQ6MjAgUE0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBz
+YW5kaXNrLmNvbT4gd3JvdGU6DQo+IEFsbCB0aGUgbnVtYmVycyBvdGhlciB0aGFuIHRoZSBsYXN0
+IHdyaXRlIG51bWJlcnMgYXJlIGZyb20gSGFtbWVyLi4uTGFzdCBvbmUgd2l0aCBqZXdlbCArIGFu
+IG91dHN0YW5kaW5nIHdyaXRlIHBhdGggcGF0Y2guLg0KPiBXZSB1c2VkIGplbWFsbG9jIGJhc2Vk
+IGhhbW1lciArIHdlIGhhdmUgc29tZSB0dW5pbmcgc3BlY2lmaWMgdG8gb3VyIGZsYXNoIGFuZCBl
+bnZpcm9ubWVudC4uDQoNClNvIHlvdSBtZWFuIHRoYXQgdGhlIGltcHJvdmVkIHBlcmZvcm1hbmNl
+IGZyb20gSmV3ZWwgaXMgY2F1c2VkIGJ5IGZpbGVzdG9yZSB3cml0ZSBwYXRoIG9wdGltaXphdGlv
+bihhcyBsaXN0ZWQgaW4gcHIpPw0KDQpCVFcsIEkganVzdCBzZWUgeW91ciBJRjEwMCBpbiBjdXN0
+b21lciBlbnYsIGNvbmdyYXR1bGF0aW9ucyENCg0KaHR0cDovL3d3dy50aWlrb25pLmNvbS90aXMv
+dmlldy8/aWQ9ZGNiMWQ1Mw0KDQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZy
+b206IEplbnMgUm9zZW5ib29tIFttYWlsdG86ai5yb3NlbmJvb21AeC1pb24uZGVdDQo+IFNlbnQ6
+IFRodXJzZGF5LCBKYW51YXJ5IDIxLCAyMDE2IDEyOjEzIEFNDQo+IFRvOiBTb21uYXRoIFJveQ0K
+PiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IENlcGggc2Nh
+bGUgdGVzdGluZw0KPg0KPiAyMDE2LTAxLTIxIDU6MDMgR01UKzAxOjAwIFNvbW5hdGggUm95IDxT
+b21uYXRoLlJveUBzYW5kaXNrLmNvbT46DQo+PiBIaSwNCj4+IEhlcmUgaXMgdGhlIGNvcHkgb2Yg
+dGhlIHBwdCBJIHByZXNlbnRlZCBpbiB0b2RheSdzIHBlcmZvcm1hbmNlIG1lZXRpbmcuLg0KPj4N
+Cj4+IGh0dHBzOi8vZG9jcy5nb29nbGUuY29tL3ByZXNlbnRhdGlvbi9kLzFqNExjYjlmeDBPWTdl
+UWxRX2lVSTZUUFZKNnRfbw0KPj4gcg0KPj4gWldLSnloejBTXzNpYy9lZGl0P3VzcD1zaGFyaW5n
+DQo+DQo+IFdvdywgdGhlc2UgbnVtYmVyIGxvb2sgcHJldHR5IGltcHJlc3NpdmUuIERpZCB5b3Ug
+dXNlIHNvbWUgYWRkaXRpb25hbCBwYXRjaGVzIGluIHlvdXIgSmV3ZWwgYnVpbGQ/IEluIG15IG93
+biB0ZXN0aW5nIEknbSBzZWVpbmcgb25seSBtYXJnaW5hbCBpbXByb3ZlbWVudHMgaW4gcGxhaW4g
+SmV3ZWwgdnMuIEhhbW1lci4NCj4NCj4gVG8gaGF2ZSBhIGZhaXIgY29tcGFyaXNvbiwgeW91IHNo
+b3VsZCBhbHNvIHVzZSB0aGUgc2FtZSBRRCBmb3IgYm90aCBIYW1tZXIgYW5kIEpld2VsLg0KPg0K
+PiBGaW5hbGx5LCB0aGUgYXZnIGxhdGVuY3kgZm9yIDRrIG9wcyBpc24ndCB0aGF0IHNpZ25pZmlj
+YW50LCBjb3VsZCB5b3UgYWxzbyBhZGQgbnVtYmVycyBmb3IgbWF4IGxhdGVuY3kgb3IgOTkueHgg
+cGVyY2VudGlsZT8NCg0KLS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCg==
