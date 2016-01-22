@@ -1,53 +1,86 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: Re: liwang@ubuntukylin.com
-Date: Fri, 22 Jan 2016 11:39:05 +0800
-Message-ID: <56A1A459.8020009@ubuntukylin.com>
-References: <tencent_689DE8F42859AD361F9B87A4@qq.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Ceph scale testing
+Date: Fri, 22 Jan 2016 07:15:42 +0000
+Message-ID: <CO1PR02MB208D6C86D2C0BC8C0A7A161F4C40@CO1PR02MB208.namprd02.prod.outlook.com>
+References: <CO1PR02MB208D28221FDCE8CDB8D3802F4C30@CO1PR02MB208.namprd02.prod.outlook.com>
+	<CADr68Wa-CUThHr_N_J+jEcCYK_Vo2jH=bZpLreZNuPJGcRk4Yw@mail.gmail.com>
+	<CO1PR02MB2080DFD074B56344F3BD4ECF4C30@CO1PR02MB208.namprd02.prod.outlook.com>
+	<CACJqLyYfWHUPhWAUocDUv8SqjgG8HQxRBp6LPEYb2nbJTnsAjA@mail.gmail.com>
+	<CO1PR02MB208F1B40F44717D4A49C3C7F4C30@CO1PR02MB208.namprd02.prod.outlook.com>
+ <CAEYCsVJSOE765RjaSzQQfm5PdbUfFTYd8JiumXdO+EJxaecPGg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gb18030;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mr213138.mail.yeah.net ([223.252.213.138]:45187 "EHLO
-	mr213138.mail.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751648AbcAVDrT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jan 2016 22:47:19 -0500
-In-Reply-To: <tencent_689DE8F42859AD361F9B87A4@qq.com>
+Received: from mail-by2on0099.outbound.protection.outlook.com ([207.46.100.99]:29376
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751344AbcAVHPo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 22 Jan 2016 02:15:44 -0500
+In-Reply-To: <CAEYCsVJSOE765RjaSzQQfm5PdbUfFTYd8JiumXdO+EJxaecPGg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dmick@redhat.com
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Xiaoxi Chen <superdebuger@gmail.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, Jens Rosenboom <j.rosenboom@x-ion.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Should be ok now, sorry for the inconvenience
-
-
-> *=B7=A2=BC=FE=C8=CB:* "Dan Mick";<dmick@redhat.com>;
-> *=B7=A2=CB=CD=CA=B1=BC=E4:* 2016=C4=EA1=D4=C221=C8=D5(=D0=C7=C6=DA=CB=
-=C4) =C9=CF=CE=E710:38
-> *=CA=D5=BC=FE=C8=CB:* "ceph-devel"<ceph-devel@vger.kernel.org>;
-> *=D6=F7=CC=E2:* liwang@ubuntukylin.com
->
-> All mail to this address (liwang@ubuntukylin.com) has been bouncing f=
-or
-> weeks (again).  Anyone know if
->
-> 1) if this email address is dead
-> 2) if Li has moved on to a different address and forgotten to update =
-his
-> email in tracker.ceph.com, or
-> 3) any alternate address to try to contact him to resolve this?
->
-> --
-> Dan Mick
-> Red Hat, Inc.
-> Ceph docs: http://ceph.com/docs
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgWGlhb3hpLA0KUGF0Y2ggbmVlZHMgc29tZSB0aHJvdHRsZSB0dW5pbmcgYW5kIGl0ICptYXkq
+IG5vdCBnaXZlIHNpbWlsYXIgYm9vc3QgaWYgeW91IHVzZSBleHRlcm5hbCBTU0Qgam91cm5hbCBm
+b3IgU1NEIGRhdGEgc3RvcmUuIFNlcGFyYXRpbmcgU1NEIGl0c2VsZiBzaG91bGQgZ2l2ZSB5b3Ug
+fjJ4IGJvb3N0IGluIGNhc2Ugb2YgYWxsIFNTRCBzY2VuYXJpbyAoSSBoYXZlIHByZXNlbnRlZCBz
+b21lIGRhdGEgaW4gY29tbXVuaXR5IHJlZ2FyZGluZyB0aGlzIGVhcmxpZXIpLiBCdXQsIGF0IHNj
+YWxlIGFsbCBmbGFzaCB1c2UgY2FzZSBJIGRvbid0IHRoaW5rIHVzZXIgd2lsbCBkbyB0aGF0IGFz
+IGNvc3Qgd2lsbCBiZSBleG9yYml0YW50Li4NCkFueXdheXMsIEkgaGF2ZW4ndCB0ZXN0IGl0IHdp
+dGggTlZNRSBTU0RzIGJ1dCBmb3IgU0FTIFNTRHMgSSB0aGluayBpdCBzaG91bGQgYmUgYmVoYXZp
+bmcgc2ltaWxhcmx5IGlmIGJvdGggZGF0YS9qb3VybmFsIG9uIHRoZSBzYW1lIFNTRC4NCg0KVGhh
+bmtzICYgUmVnYXJkcw0KU29tbmF0aCANCg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0K
+RnJvbTogWGlhb3hpIENoZW4gW21haWx0bzpzdXBlcmRlYnVnZXJAZ21haWwuY29tXSANClNlbnQ6
+IFRodXJzZGF5LCBKYW51YXJ5IDIxLCAyMDE2IDY6MzQgUE0NClRvOiBTb21uYXRoIFJveQ0KQ2M6
+IEhhb21haSBXYW5nOyBKZW5zIFJvc2VuYm9vbTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcN
+ClN1YmplY3Q6IFJlOiBDZXBoIHNjYWxlIHRlc3RpbmcNCg0KSGkgU29tbmF0aCwNCg0KSSByZW1l
+bWJlciBYaW54aW5ASW50ZWwgY291bGQgZ2V0IDE1MEsgKyBSVyBpb3BzIGZvciAyWCByZXBsaWNh
+dGlvbiwgd2l0aCBEQ1MzNzAwIGFzIE9TRCBhbmQgUDM3MDAgYXMgSm91cm5hbCBvbiBhIDQgbm9k
+ZXMgSGFzd2VsbCBjbHVzdGVyKGJhc2VkIG9uIGluZmVybmFsaXMgKyB0dW5pbmcgKyBqZW1hbGxv
+YyArIHJvY2tzZGIpLiBBbmQgc2VlbXMgeW91ciBwYXRjaCBkb2VzbnQgd29ya3Mgd2VsbCBpbiB0
+aGlzIGVudmlyb25tZW50Lg0KDQpNYXliZSBJIGFtIHdyb25nIGJ1dCBJIGtpbmQgdG8gZmVlbCB0
+aGF0IHRoZSBwYXRjaCBzZWVtcyBkb2Vzbid0IHdvcmsgd2l0aCBhbGwgdmVuZG9yJ3MgU1NELCBv
+ciBtYXliZSB3b3JrIGJldHRlciB3aXRoIGNhcGFjaXR5LXdpc2Ugc3NkPw0KDQpYaWFveGkNCg0K
+DQoNCg0KDQoyMDE2LTAxLTIyIDE6MjYgR01UKzA4OjAwIFNvbW5hdGggUm95IDxTb21uYXRoLlJv
+eUBzYW5kaXNrLmNvbT46DQo+IEhhb21haSwNCj4gVGhpcyBpcyBub3QgaW1wcm92ZWQgcGVyZm9y
+bWFuY2UgZnJvbSBzdG9jayBqZXdlbCBidXQgZnJvbSBzdG9jayBIYW1tZXIuDQo+IE5vdCAxMDAl
+IGJlY2F1c2Ugb2YgbXkgY2hhbmdlcywgYnV0ICptb3N0bHkqIEkgZ3Vlc3MgYXQgbGVhc3QgaW4g
+bXkgZW52aXJvbm1lbnQgd2l0aCBTQVMgU1NEcy4uVGhlcmUgYXJlIHNvbWUgaW1wcm92ZW1lbnRz
+IHdlbnQgaW4gcG9zdCBoYW1tZXIgdGhhdCBpbXByb3ZlZCBwZXJmb3JtYW5jZSAoMjAlIG9yIHNv
+KSBhcyB3ZWxsLi4NCj4NCj4gR29vZCB0byBzZWUgSUYxMDAgZGVwbG95aW5nIHdpZGVseSA6LSkN
+Cj4NCj4gVGhhbmtzICYgUmVnYXJkcw0KPiBTb21uYXRoDQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVz
+c2FnZS0tLS0tDQo+IEZyb206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFpd2FuZ0BnbWFpbC5j
+b21dDQo+IFNlbnQ6IFRodXJzZGF5LCBKYW51YXJ5IDIxLCAyMDE2IDE6MjEgQU0NCj4gVG86IFNv
+bW5hdGggUm95DQo+IENjOiBKZW5zIFJvc2VuYm9vbTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5v
+cmcNCj4gU3ViamVjdDogUmU6IENlcGggc2NhbGUgdGVzdGluZw0KPg0KPiBPbiBUaHUsIEphbiAy
+MSwgMjAxNiBhdCA0OjIwIFBNLCBTb21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+
+IHdyb3RlOg0KPj4gQWxsIHRoZSBudW1iZXJzIG90aGVyIHRoYW4gdGhlIGxhc3Qgd3JpdGUgbnVt
+YmVycyBhcmUgZnJvbSBIYW1tZXIuLi5MYXN0IG9uZSB3aXRoIGpld2VsICsgYW4gb3V0c3RhbmRp
+bmcgd3JpdGUgcGF0aCBwYXRjaC4uDQo+PiBXZSB1c2VkIGplbWFsbG9jIGJhc2VkIGhhbW1lciAr
+IHdlIGhhdmUgc29tZSB0dW5pbmcgc3BlY2lmaWMgdG8gb3VyIGZsYXNoIGFuZCBlbnZpcm9ubWVu
+dC4uDQo+DQo+IFNvIHlvdSBtZWFuIHRoYXQgdGhlIGltcHJvdmVkIHBlcmZvcm1hbmNlIGZyb20g
+SmV3ZWwgaXMgY2F1c2VkIGJ5IGZpbGVzdG9yZSB3cml0ZSBwYXRoIG9wdGltaXphdGlvbihhcyBs
+aXN0ZWQgaW4gcHIpPw0KPg0KPiBCVFcsIEkganVzdCBzZWUgeW91ciBJRjEwMCBpbiBjdXN0b21l
+ciBlbnYsIGNvbmdyYXR1bGF0aW9ucyENCj4NCj4gaHR0cDovL3d3dy50aWlrb25pLmNvbS90aXMv
+dmlldy8/aWQ9ZGNiMWQ1Mw0KPg0KPj4NCj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+
+PiBGcm9tOiBKZW5zIFJvc2VuYm9vbSBbbWFpbHRvOmoucm9zZW5ib29tQHgtaW9uLmRlXQ0KPj4g
+U2VudDogVGh1cnNkYXksIEphbnVhcnkgMjEsIDIwMTYgMTI6MTMgQU0NCj4+IFRvOiBTb21uYXRo
+IFJveQ0KPj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+PiBTdWJqZWN0OiBSZTog
+Q2VwaCBzY2FsZSB0ZXN0aW5nDQo+Pg0KPj4gMjAxNi0wMS0yMSA1OjAzIEdNVCswMTowMCBTb21u
+YXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+Og0KPj4+IEhpLA0KPj4+IEhlcmUgaXMg
+dGhlIGNvcHkgb2YgdGhlIHBwdCBJIHByZXNlbnRlZCBpbiB0b2RheSdzIHBlcmZvcm1hbmNlIG1l
+ZXRpbmcuLg0KPj4+DQo+Pj4gaHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vcHJlc2VudGF0aW9uL2Qv
+MWo0TGNiOWZ4ME9ZN2VRbFFfaVVJNlRQVko2dF8NCj4+PiBvDQo+Pj4gcg0KPj4+IFpXS0p5aHow
+U18zaWMvZWRpdD91c3A9c2hhcmluZw0KPj4NCj4+IFdvdywgdGhlc2UgbnVtYmVyIGxvb2sgcHJl
+dHR5IGltcHJlc3NpdmUuIERpZCB5b3UgdXNlIHNvbWUgYWRkaXRpb25hbCBwYXRjaGVzIGluIHlv
+dXIgSmV3ZWwgYnVpbGQ/IEluIG15IG93biB0ZXN0aW5nIEknbSBzZWVpbmcgb25seSBtYXJnaW5h
+bCBpbXByb3ZlbWVudHMgaW4gcGxhaW4gSmV3ZWwgdnMuIEhhbW1lci4NCj4+DQo+PiBUbyBoYXZl
+IGEgZmFpciBjb21wYXJpc29uLCB5b3Ugc2hvdWxkIGFsc28gdXNlIHRoZSBzYW1lIFFEIGZvciBi
+b3RoIEhhbW1lciBhbmQgSmV3ZWwuDQo+Pg0KPj4gRmluYWxseSwgdGhlIGF2ZyBsYXRlbmN5IGZv
+ciA0ayBvcHMgaXNuJ3QgdGhhdCBzaWduaWZpY2FudCwgY291bGQgeW91IGFsc28gYWRkIG51bWJl
+cnMgZm9yIG1heCBsYXRlbmN5IG9yIDk5Lnh4IHBlcmNlbnRpbGU/DQo+DQo+IC0tDQo+IEJlc3Qg
+UmVnYXJkcywNCj4NCj4gV2hlYXQNCg==
