@@ -1,118 +1,101 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Re: [ceph-users] why not add (offset,len) to pglog
-Date: Fri, 22 Jan 2016 19:40:21 +0800
-Message-ID: <CALZt5jyzHBcUftq1YGkfW7+dXNA9MPFT3vKF9LDwkdpmZucX-g@mail.gmail.com>
-References: <CAAL-TMddLQ-fxNnPcZZhtd8Evk6j+h6PiNTu+KapyPsRCeW9bw@mail.gmail.com>
-	<CANE=7sUenL8oO_8CWP_VJJ_qWPWM2pLF6UxpFb-9AGFePT46oA@mail.gmail.com>
-	<CAAL-TMcndHOViDmearR5zb+XyEbvRnaV2ur-AMavfzvyDK=r6w@mail.gmail.com>
-	<CALZt5jxXuT7W+quYy5C-dDaXvFQ=+PV=35DbvY3D33NR1xX25A@mail.gmail.com>
-	<alpine.DEB.2.00.1512250622060.10312@cobra.newdream.net>
+From: Erwan Velu <evelu@redhat.com>
+Subject: Re: About ceph_clock_now()
+Date: Fri, 22 Jan 2016 11:00:38 -0500 (EST)
+Message-ID: <1575597139.15885899.1453478438366.JavaMail.zimbra@redhat.com>
+References: <177186823.10053087.1452614184109.JavaMail.zimbra@redhat.com> <892700092.10054838.1452614393452.JavaMail.zimbra@redhat.com> <20160112173248.GA8218@ultraspiritum.redhat.com> <964746730.10566211.1452681675142.JavaMail.zimbra@redhat.com> <alpine.DEB.2.11.1601130846500.26381@cpach.fuggernut.com> <1365711662.13730117.1453220271917.JavaMail.zimbra@redhat.com> <20160119162902.GA21358@ultraspiritum.redhat.com> <1522288191.15295456.1453404176015.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:35319 "EHLO
-	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752763AbcAVLkW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jan 2016 06:40:22 -0500
-Received: by mail-wm0-f42.google.com with SMTP id r129so209642387wmr.0
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Jan 2016 03:40:21 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1512250622060.10312@cobra.newdream.net>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:36223 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752733AbcAVQAj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jan 2016 11:00:39 -0500
+In-Reply-To: <1522288191.15295456.1453404176015.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Dong Wu <archer.wudong@gmail.com>, =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>, =?UTF-8?B?5aea5a6BKOeglOWFrSDnpo/lt54p?= <yaoning@ruijie.com.cn>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Great! Based on Sage's suggestion, we just add a flag
-can_recover_partial to indicate whether.
-And I promote a new PR for this https://github.com/ceph/ceph/pull/7325
-Please review and comment
-Regards
-Ning Yao
+Hey,
 
+I've been able to continue this work and updated by branch accordingly.
+I understand the benefit of using the ceph_time work but I feel that it=
+ makes the change pretty verbose for a not a so big change (CLOCK_REALT=
+IME vs CLOCK_MONO).
 
-2015-12-25 22:27 GMT+08:00 Sage Weil <sage@newdream.net>:
-> On Fri, 25 Dec 2015, Ning Yao wrote:
->> Hi, Dong Wu,
->>
->> 1. As I currently work for other things, this proposal is abandon for
->> a long time
->> 2. This is a complicated task as we need to consider a lots such as
->> (not just for writeOp, as well as truncate, delete) and also need to
->> consider the different affects for different backends(Replicated, EC).
->> 3. I don't think it is good time to redo this patch now, since the
->> BlueStore and Kstore  is inprogress, and I'm afraid to bring some
->> side-effect.  We may prepare and propose the whole design in next CDS.
->> 4. Currently, we already have some tricks to deal with recovery (like
->> throttle the max recovery op, set the priority for recovery and so
->> on). So this kind of patch may not solve the critical problem but just
->> make things better, and I am not quite sure that this will really
->> bring a big improvement. Based on my previous test, it works
->> excellently on slow disk (say hdd), and also for a short-time
->> maintaining. Otherwise, it will trigger the backfill process.  So wait
->> for Sage's opinion @sage
->>
->> If you are interest on this, we may cooperate to do this.
->
-> I think it's a great idea.  We didn't do it before only because it is
-> complicated.  The good news is that if we can't conclusively infer exactly
-> which parts of hte object need to be recovered from the log entry we can
-> always just fall back to recovering the whole thing.  Also, the place
-> where this is currently most visible is RBD small writes:
->
->  - osd goes down
->  - client sends a 4k overwrite and modifies an object
->  - osd comes back up
->  - client sends another 4k overwrite
->  - client io blocks while osd recovers 4mb
->
-> So even if we initially ignore truncate and omap and EC and clones and
-> anything else complicated I suspect we'll get a nice benefit.
->
-> I haven't thought about this too much, but my guess is that the hard part
-> is making the primary's missing set representation include a partial delta
-> (say, an interval_set<> indicating which ranges of the file have changed)
-> in a way that gracefully degrades to recovering the whole object if we're
-> not sure.
->
-> In any case, we should definitely have the design conversation!
->
-> sage
->
->>
->> Regards
->> Ning Yao
->>
->>
->> 2015-12-25 14:23 GMT+08:00 Dong Wu <archer.wudong@gmail.com>:
->> > Thanks, from this pull request I learned that this issue is not
->> > completed, is there any new progress of this issue?
->> >
->> > 2015-12-25 12:30 GMT+08:00 Xinze Chi (??) <xmdxcxz@gmail.com>:
->> >> Yeah, This is good idea for recovery, but not for backfill.
->> >> @YaoNing have pull a request about this
->> >> https://github.com/ceph/ceph/pull/3837 this year.
->> >>
->> >> 2015-12-25 11:16 GMT+08:00 Dong Wu <archer.wudong@gmail.com>:
->> >>> Hi,
->> >>> I have doubt about pglog, the pglog contains (op,object,version) etc.
->> >>> when peering, use pglog to construct missing list,then recover the
->> >>> whole object in missing list even if different data among replicas is
->> >>> less then a whole object data(eg,4MB).
->> >>> why not add (offset,len) to pglog? If so, the missing list can contain
->> >>> (object, offset, len), then we can reduce recover data.
->> >>> _______________________________________________
->> >>> ceph-users mailing list
->> >>> ceph-users@lists.ceph.com
->> >>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->> >>
->> >>
->> >>
->> >> --
->> >> Regards,
->> >> Xinze Chi
->> > _______________________________________________
->> > ceph-users mailing list
->> > ceph-users@lists.ceph.com
->> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
->>
+This imply a change of all utime_t and makes the computations a little =
+bit more complex to read.
+
+Does it worth the time spent on it ? If yes, I don't have any issue con=
+tinuing this way.
+I'm pretty new to the project and would like to make the best PR as pos=
+sible.
+So your insights on the under-work patch would be very helpful.
+
+https://github.com/ErwanAliasr1/ceph/tree/evelu-monotonic
+
+Thanks,
+
+----- Mail original -----
+De: "Erwan Velu" <evelu@redhat.com>
+=C3=80: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: "Sage Weil" <sweil@redhat.com>, "The Sacred Order of the Squid Cybe=
+rnetic" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Jeudi 21 Janvier 2016 20:22:56
+Objet: Re: About ceph_clock_now()
+
+Hi,
+
+I'm sadly not at full time on Ceph but you can find my work in progress=
+ on this PR in my personal branch.
+I'm thinking of making a single commit explaining this change and propa=
+gating it to the whole codebase:=20
+https://github.com/ErwanAliasr1/ceph/commit/00daa403831c9e0dfffb6f31a48=
+723ca3cc3b569
+
+Note this is WIP and I'm currently hiting obvious places where ceph_clo=
+ck_now() can be replaced. I don't know a lot about the coebase so I'll =
+ask my questions later about the locations where I have doubts.
+
+Cheers,
+Erwan
+
+----- Mail original -----
+De: "Adam C. Emerson" <aemerson@redhat.com>
+=C3=80: "Erwan Velu" <evelu@redhat.com>
+Cc: "Sage Weil" <sweil@redhat.com>, "The Sacred Order of the Squid Cybe=
+rnetic" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Mardi 19 Janvier 2016 17:29:03
+Objet: Re: About ceph_clock_now()
+
+On 19/01/2016, Erwan Velu wrote:
+> Before propagating the change to more code base and offer a PR with t=
+hat, what do you think of this style ?
+>=20
+> Is it aligned with the best-pratices of the project ?
+>=20
+> https://gist.github.com/ErwanAliasr1/f74f7f046e9300ac2c30
+
+One minor thing, you shouldn't use anything in time_detail directly. It=
+ SHOULD
+be ceph::coarse_mono_clock::now() ('detail' or leading underscores sign=
+al a
+'private' namespace.)
+
+Other than that, this looks very good.
+
+--=20
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
