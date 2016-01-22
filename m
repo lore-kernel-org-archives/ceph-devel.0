@@ -1,105 +1,59 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: About ceph_clock_now()
-Date: Fri, 22 Jan 2016 12:35:22 -0500
-Message-ID: <20160122173521.GA29065@ultraspiritum.redhat.com>
-References: <177186823.10053087.1452614184109.JavaMail.zimbra@redhat.com>
- <892700092.10054838.1452614393452.JavaMail.zimbra@redhat.com>
- <20160112173248.GA8218@ultraspiritum.redhat.com>
- <964746730.10566211.1452681675142.JavaMail.zimbra@redhat.com>
- <alpine.DEB.2.11.1601130846500.26381@cpach.fuggernut.com>
- <1365711662.13730117.1453220271917.JavaMail.zimbra@redhat.com>
- <20160119162902.GA21358@ultraspiritum.redhat.com>
- <1522288191.15295456.1453404176015.JavaMail.zimbra@redhat.com>
- <1575597139.15885899.1453478438366.JavaMail.zimbra@redhat.com>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Weighted Priority Queue Recovery
+Date: Fri, 22 Jan 2016 14:31:21 -0700
+Message-ID: <CAANLjFp3dOUqF5MGde4D92s1GnnLAoFamNFiAQAvdHQfe567MA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="/04w6evG8XlLl3ft"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55070 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751908AbcAVRfX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 22 Jan 2016 12:35:23 -0500
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id 5584732D3C5
-	for <ceph-devel@vger.kernel.org>; Fri, 22 Jan 2016 17:35:23 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <1575597139.15885899.1453478438366.JavaMail.zimbra@redhat.com>
+Received: from mail-vk0-f52.google.com ([209.85.213.52]:35981 "EHLO
+	mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751431AbcAVVbX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jan 2016 16:31:23 -0500
+Received: by mail-vk0-f52.google.com with SMTP id n1so48134187vkb.3
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jan 2016 13:31:22 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Erwan Velu <evelu@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sweil@redhat.com>, Samuel Just <sjust@redhat.com>
 
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
---/04w6evG8XlLl3ft
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+I finally got the data all aligned and distilled for the recovery
+tests of PrioritizedQueue and Weighted Priority Queue.
+https://docs.google.com/spreadsheets/d/1tRCy_myvtpcuNhkuRxKInPXpFFD0mRsWxK1rPJGDF9w/edit?usp=sharing
 
-On 22/01/2016, Erwan Velu wrote:
-> Hey,
->=20
-> I've been able to continue this work and updated by branch accordingly.
-> I understand the benefit of using the ceph_time work but I feel that it m=
-akes the change pretty verbose for a not a so big change (CLOCK_REALTIME vs=
- CLOCK_MONO).
->
-> This imply a change of all utime_t and makes the computations a little bi=
-t more complex to read.
+The 4KB recovery takes a bit longer on WPQ, but the plus side is that
+it hardly effects normal I/O unlike PrioritzedQueue which has a
+definite hit in client I/O performance.
 
-There are a few changes one can use to make it less verbose. If you're not =
-in a
-header file (or inside a function), you might like to do:
+The 4MB recovery seems to take about the same amount of time if
+PrioritizedQueue was able to actually complete recovery. The WQP tests
+have more fio data after recovery, this was just because I wasn't
+around to stop it right away, but it helps show the recovery client
+performance vs no recovery.
 
-using ceph::coarse_mono_clock;
-
-(Don't do that in headers outside of functions, though.)
-
-Then you can just do things like
-
-auto now =3D mono_clock_coarse::now();
-
-Which should be a bit less verbose.
-
-Or even:
-
-using cm_clock =3D ceph::coarse_mono_clock;
-
-auto now =3D cm_clock::now();
-
-> Does it worth the time spent on it ? If yes, I don't have any issue conti=
-nuing this way.
-> I'm pretty new to the project and would like to make the best PR as possi=
-ble.
-> So your insights on the under-work patch would be very helpful.
-
-I think so. We definitely wnat to use monotonic clocks where appropriate. A=
-nd we
-can get a performance benefit from using coarse clocks where appropriate, t=
-oo.
-And we want to switch to the ceph_time stuff anyway just because it rules o=
-ut a
-whole class of bugs and integrates with standard and third-party libraries.
-
---=20
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
-
---/04w6evG8XlLl3ft
-Content-Type: application/pgp-signature; name="signature.asc"
-
+I hope to have the config options Sam and I discussed ready next week,
+this data massaging took a lot of time.
+- ----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+Version: Mailvelope v1.3.3
+Comment: https://www.mailvelope.com
 
-iQF8BAEBCgBmBQJWomhUXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
-ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
-OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jIk0H/1yVCBgTDIH+goqLV5aR5CJX
-PFV8wL+8H8J61caNgfqlOVMm+HVg77pxZeDxGDTr2U5QzbPA74bBJhfFDbkuXCVx
-99t73LQYmYM3sTcVCBc2lsUe3LqdzA12+OI+rpsAJJ5OZjGwDWA0zWhjfLkDTBxP
-9EsBk38VYlxAuu5bLM88XXMQCCBxCcbjtjY7kL4enDBSlomsLPGaKNr9W2XtDOoA
-TNKnr/d859OIfubcG6OqVEMI+2k7K7j2TgtGSEPAbozqi9PF4j/DnSABSl7KRKYq
-IiCJHYkmY/slaNfrmDG9UR4NYXm+eS98pOHm16p+ubSf5q7IAPJZXnj9iHLiJXY=
-=Hv0F
+wsFcBAEBCAAQBQJWop+lCRDmVDuy+mK58QAAD0YQALMtqmmiY5+2q2mLwnYG
+V3E3MFXtAPRU+sXVq6STP6fCFBpL6McXsq6L4/htg+5Ib8kXyYWJAM6+baI2
+ONGjo3hyK8qqg7ihs/s9vO8q6nRMqLU/C1/MdVosIemV4/D+RjpdiT4ocjMg
+lT0qyHE9Fw+2hIM2onSwVDMvhp9xvkQ9M2Tm1xd0EsPsB4zQlddVZJPzBb+p
+s5gvFvRypx4EW2cEsNX2/i5dxrfxddquydNBV8pAqZK3uIam4onPwD8QiTe5
+XLBBBIdfn/1MO31vahRI/sbVwNj878KmtvlyO+4oVTMsNNe0BkFUxip9yhvf
+ltIM/SqVDzfQ5Zc+29Je3V0ZyeVkwUI7sOI3j5HhTjmxrVHEzWSqoADIrrEY
+r9FTb+pePIuT9TvU8rQ7w+oxZ1+7pPd6QiUTPlgrLCTPxSBuYfiKWiBpLZo0
+Uz0F2LGWbgmebLZ0Nzb50VMP5IlvHZ9NMVBxt+zPpk9AfpB/iqn2CbYDNZEr
+HtfayxxLlEZAoe8A2hjC9r9CrwtywCvqtmi5B+YSO/XcZ2GEvJhjMwSIuUsD
+UMCH4FyqMBrb4tmGbSdYogG3VY8d0vgHxid5VytOv++urX2rbmmmaNDV0TZl
+PuebBbzMAYspQMR5CqzFCvWq0OWJC/Ts7Za3ucJcFzlSaF/wnLiM3s9JaffN
+ytDW
+=1r0Y
 -----END PGP SIGNATURE-----
-
---/04w6evG8XlLl3ft--
