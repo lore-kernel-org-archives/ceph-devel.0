@@ -1,67 +1,53 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: inconsistent rados semantics between automake/cmake builds
-Date: Thu, 21 Jan 2016 21:49:35 -0500
-Message-ID: <20160122024935.GA15962@ultraspiritum.redhat.com>
-References: <CAB2gnbUxzE7z6ec39=cPg2sqNOtMc6cS8_GN9ybxxdvB7zXW+g@mail.gmail.com>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: Re: liwang@ubuntukylin.com
+Date: Fri, 22 Jan 2016 11:39:05 +0800
+Message-ID: <56A1A459.8020009@ubuntukylin.com>
+References: <tencent_689DE8F42859AD361F9B87A4@qq.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="pf9I7BMVVzbSWLtt"
+Content-Type: text/plain; charset=gb18030;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40930 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752448AbcAVCtg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 21 Jan 2016 21:49:36 -0500
-Content-Disposition: inline
-In-Reply-To: <CAB2gnbUxzE7z6ec39=cPg2sqNOtMc6cS8_GN9ybxxdvB7zXW+g@mail.gmail.com>
+Received: from mr213138.mail.yeah.net ([223.252.213.138]:45187 "EHLO
+	mr213138.mail.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751648AbcAVDrT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jan 2016 22:47:19 -0500
+In-Reply-To: <tencent_689DE8F42859AD361F9B87A4@qq.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noahwatkins@gmail.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: dmick@redhat.com
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+Should be ok now, sorry for the inconvenience
 
 
---pf9I7BMVVzbSWLtt
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On 21/01/2016, Noah Watkins wrote:
-> I'm seeing an anomaly of semantics between Ceph built with Automake
-> and with CMake. I've not been lucky so far tracking this down so I
-> thought I'd toss it out here.
-
-All right.  Commit 9717714cf62eeb7db979b0e6b509ef305cb757eb in=20
-github.com/cohortfsllc/cohort-ceph should have this. It's the top entry on =
-the
-mtime branch in that repository. If you like things web-style,
-https://github.com/cohortfsllc/cohortfs-ceph/commit/9717714cf62eeb7db979b0e=
-6b509ef305cb757eb
-
-Casey chased this down to the encode/decode functions and once I took a loo=
-k at
-them I realized the cast was screwy. It now passes your unit test reliably =
-(at
-least it worked a few times) under cmake.
-
---=20
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
-
---pf9I7BMVVzbSWLtt
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQF8BAEBCgBmBQJWoZi0XxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
-ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
-OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jqgEH/2daDIfFCRATJW2GDIOm5vRi
-Rt+lKx/Wv+b8IzNQ7O87cgEX3NAEuOvH0FgQMfl4uoiMt0RQfJMWFpDKd5AB5Bfu
-yGMZ4d1S3309+NKzWNxJfoGgtLyVIrLfVUIkLCI6Xvjp60bwGGOQLbO5ME/oQ+uZ
-pKRmVgA6tSKAuBtUyYwmIcEwOR8nWXV6HxXFOk4flfKTfgCpn9UugRioizkl9T2R
-clb7eWyWBjlFlMAqt01IDoDYu7gAmpKXscv9Nb8m8QPq5mpTQsqd4Wvk2g8jqwDM
-e3RhSydscvChM07H8dOILjkCE7RGxhcwvQlO44qRSirmWVbEPwjO16OrL/7XljA=
-=aGOI
------END PGP SIGNATURE-----
-
---pf9I7BMVVzbSWLtt--
+> *=B7=A2=BC=FE=C8=CB:* "Dan Mick";<dmick@redhat.com>;
+> *=B7=A2=CB=CD=CA=B1=BC=E4:* 2016=C4=EA1=D4=C221=C8=D5(=D0=C7=C6=DA=CB=
+=C4) =C9=CF=CE=E710:38
+> *=CA=D5=BC=FE=C8=CB:* "ceph-devel"<ceph-devel@vger.kernel.org>;
+> *=D6=F7=CC=E2:* liwang@ubuntukylin.com
+>
+> All mail to this address (liwang@ubuntukylin.com) has been bouncing f=
+or
+> weeks (again).  Anyone know if
+>
+> 1) if this email address is dead
+> 2) if Li has moved on to a different address and forgotten to update =
+his
+> email in tracker.ceph.com, or
+> 3) any alternate address to try to contact him to resolve this?
+>
+> --
+> Dan Mick
+> Red Hat, Inc.
+> Ceph docs: http://ceph.com/docs
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
