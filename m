@@ -1,101 +1,38 @@
-From: Erwan Velu <evelu@redhat.com>
-Subject: Re: About ceph_clock_now()
-Date: Fri, 22 Jan 2016 11:00:38 -0500 (EST)
-Message-ID: <1575597139.15885899.1453478438366.JavaMail.zimbra@redhat.com>
-References: <177186823.10053087.1452614184109.JavaMail.zimbra@redhat.com> <892700092.10054838.1452614393452.JavaMail.zimbra@redhat.com> <20160112173248.GA8218@ultraspiritum.redhat.com> <964746730.10566211.1452681675142.JavaMail.zimbra@redhat.com> <alpine.DEB.2.11.1601130846500.26381@cpach.fuggernut.com> <1365711662.13730117.1453220271917.JavaMail.zimbra@redhat.com> <20160119162902.GA21358@ultraspiritum.redhat.com> <1522288191.15295456.1453404176015.JavaMail.zimbra@redhat.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: OpenStack Developer Summit - Austin
+Date: Fri, 22 Jan 2016 12:31:40 -0500
+Message-ID: <CAAZbbf0HnQk4-mYxrppmbA_nSc7yU=CNBaZtoYytZLdw7he9hw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:36223 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752733AbcAVQAj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jan 2016 11:00:39 -0500
-In-Reply-To: <1522288191.15295456.1453404176015.JavaMail.zimbra@redhat.com>
+Received: from mail-lb0-f177.google.com ([209.85.217.177]:32926 "EHLO
+	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754157AbcAVRbm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jan 2016 12:31:42 -0500
+Received: by mail-lb0-f177.google.com with SMTP id x4so45493989lbm.0
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jan 2016 09:31:41 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Adam C. Emerson" <aemerson@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-Hey,
+Hey cephers,
 
-I've been able to continue this work and updated by branch accordingly.
-I understand the benefit of using the ceph_time work but I feel that it=
- makes the change pretty verbose for a not a so big change (CLOCK_REALT=
-IME vs CLOCK_MONO).
+Just a reminder that if you are planning to submit a Ceph talk to the
+OpenStack Developer Summit in Austin on 25-29 Apr, that submissions
+close in just over 1 week (01 Feb @ 23:59 PST).  If anyone that
+submits a talk that is Ceph-related, I would greatly appreciate you
+dropping me a quick note as I will be promoting all Ceph talks to
+ensure that we are appropriately represented in the depth and breadth
+of talks at the summit.
 
-This imply a change of all utime_t and makes the computations a little =
-bit more complex to read.
+If you have any questions, or would like help coordinating speakers or
+content, please feel free to drop me a line. Thanks!
 
-Does it worth the time spent on it ? If yes, I don't have any issue con=
-tinuing this way.
-I'm pretty new to the project and would like to make the best PR as pos=
-sible.
-So your insights on the under-work patch would be very helpful.
+-- 
 
-https://github.com/ErwanAliasr1/ceph/tree/evelu-monotonic
+Best Regards,
 
-Thanks,
-
------ Mail original -----
-De: "Erwan Velu" <evelu@redhat.com>
-=C3=80: "Adam C. Emerson" <aemerson@redhat.com>
-Cc: "Sage Weil" <sweil@redhat.com>, "The Sacred Order of the Squid Cybe=
-rnetic" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Jeudi 21 Janvier 2016 20:22:56
-Objet: Re: About ceph_clock_now()
-
-Hi,
-
-I'm sadly not at full time on Ceph but you can find my work in progress=
- on this PR in my personal branch.
-I'm thinking of making a single commit explaining this change and propa=
-gating it to the whole codebase:=20
-https://github.com/ErwanAliasr1/ceph/commit/00daa403831c9e0dfffb6f31a48=
-723ca3cc3b569
-
-Note this is WIP and I'm currently hiting obvious places where ceph_clo=
-ck_now() can be replaced. I don't know a lot about the coebase so I'll =
-ask my questions later about the locations where I have doubts.
-
-Cheers,
-Erwan
-
------ Mail original -----
-De: "Adam C. Emerson" <aemerson@redhat.com>
-=C3=80: "Erwan Velu" <evelu@redhat.com>
-Cc: "Sage Weil" <sweil@redhat.com>, "The Sacred Order of the Squid Cybe=
-rnetic" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Mardi 19 Janvier 2016 17:29:03
-Objet: Re: About ceph_clock_now()
-
-On 19/01/2016, Erwan Velu wrote:
-> Before propagating the change to more code base and offer a PR with t=
-hat, what do you think of this style ?
->=20
-> Is it aligned with the best-pratices of the project ?
->=20
-> https://gist.github.com/ErwanAliasr1/f74f7f046e9300ac2c30
-
-One minor thing, you shouldn't use anything in time_detail directly. It=
- SHOULD
-be ceph::coarse_mono_clock::now() ('detail' or leading underscores sign=
-al a
-'private' namespace.)
-
-Other than that, this looks very good.
-
---=20
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
