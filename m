@@ -1,42 +1,57 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: About ceph_clock_now()
-Date: Sat, 23 Jan 2016 16:55:44 -0500
-Message-ID: <20160123215543.GA8011@ultraspiritum.redhat.com>
-References: <177186823.10053087.1452614184109.JavaMail.zimbra@redhat.com>
- <964746730.10566211.1452681675142.JavaMail.zimbra@redhat.com>
- <alpine.DEB.2.11.1601130846500.26381@cpach.fuggernut.com>
- <1365711662.13730117.1453220271917.JavaMail.zimbra@redhat.com>
- <20160119162902.GA21358@ultraspiritum.redhat.com>
- <1522288191.15295456.1453404176015.JavaMail.zimbra@redhat.com>
- <1575597139.15885899.1453478438366.JavaMail.zimbra@redhat.com>
- <56A368C1.8000508@digiware.nl>
- <747915460.23855157.1453580447803.JavaMail.zimbra@redhat.com>
+From: "EMAIL LOTTERIE" <christiane_hamann2@aol.com>
+Subject: Benachrichtigung
+Date: Sat, 23 Jan 2016 06:53:25 -0500
+Message-ID: <6a1696ffe7e1c5b6c76757e7fc01c339.squirrel@185.121.132.88>
+Reply-To: christianeham07@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58483 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753276AbcAWVzq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 23 Jan 2016 16:55:46 -0500
-Content-Disposition: inline
-In-Reply-To: <747915460.23855157.1453580447803.JavaMail.zimbra@redhat.com>
+Received: from [185.121.132.88] ([185.121.132.88]:37813 "EHLO mail.one.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750938AbcAXGKI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 24 Jan 2016 01:10:08 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjamin@redhat.com>
-Cc: Willem Jan Withagen <wjw@digiware.nl>, Erwan Velu <evelu@redhat.com>, Sage Weil <sweil@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On 23/01/2016, Matt Benjamin wrote:
-> Hi Willem,
-> 
-> Agree.  The c++ notations and our declarations using them do centralize all this.  I don't know if we're actually defining anything equivalent to the coarse/fast clocks (it seems like a good idea, and I assumed we would), and it's straightforward to do.
-> 
-> (Adam may have, already.)
 
-We do. We can switch out ceph::coarse_mono_clock for BSD's FAST MONO CLOCK or on
-systems that don't have a coarse/fast option, just fall back to CLOCK_MONOTONIC
-easily.
 
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+
+Sehr geehrte / ter email Ben=FCtzer !
+
+Ihre email Adresse hat =801.200000,00=80 (EINEMILLIONZWEIHUNDERTAUSEND =
+EURO)
+gewonnen . Mit den Gl=FCckszahlen 9-3-8-26-28-4-64 In der EURO MILLIONE=
+N
+EMAIL LOTTERIE.Die Summe ergibt sich aus
+einer Gewinnausschuttung von. =8022.800,000,00
+( ZWEIUNDZWANZIGMILLIONENACHTHUNDERTTOUSEND )
+Die Summe wurde durch 19 Gewinnern aus der gleichen
+Kategorie geteilt. ! Bitte kontaktieren Sie f=FCr Ihren Gewinn zust=E4n=
+dige
+Sachbearbeiterin Frau
+Christiane Hamann per email:christianeham07@gmail.com
+BITTE AUSFUILLEN DEIN DATAS AUS UNTEN.
+Gl=FCckszahlen:_______________
+NAME: ___________________FAMILIENNAME:_____________________
+ADRESSE:__________________________________________________
+STADT: ________________PLZ: ____________LAND: _______________
+GEB: DATUM: __________________BERUF:________________________
+=46ESTNETZ TEL.NR: ____________________________________________
+MOBILETELEFON NR: ___________________FAX: ___________________
+EMAIL:___________________________ DATE____________________
+SIGNATURE:_________________________
+
+bitte f=FCllen Sie das anschlie=DFende Formular vollst=E4ndig aus und s=
+enden es
+per email zur=FCck !
+Hochachtungsvoll
+Inmaculada Garcia Martinez
+Koordinator.
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
