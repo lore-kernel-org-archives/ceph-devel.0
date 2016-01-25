@@ -1,65 +1,68 @@
-From: Kyle Bader <kyle.bader@gmail.com>
-Subject: Re: Improving Data-At-Rest encryption in Ceph
-Date: Mon, 25 Jan 2016 14:20:11 -0800
-Message-ID: <CAFMfnwrq_UWWkcRJxA060UQ8rg8JACZE7Ks2DC_xsv2xVRrHLg@mail.gmail.com>
-References: <CA+H5UW3DXVm2cQQe5Faw5moeD8jbb9Or5PiN4YJX54Axr-qKYQ@mail.gmail.com>
-	<20151215142304.GI31644@suse.de>
-	<CAHMeWhFeSTd8w9zjoN1E=3ks7EysziFa_MRxNV4_oua18omRNw@mail.gmail.com>
-	<alpine.DEB.2.00.1512161431530.10312@cobra.newdream.net>
-	<CAHMeWhHfiakLOJ6BDosXm1P1GDA0TR-pYt+UpZOeQJv4LFYtXA@mail.gmail.com>
-	<CAHMeWhHn-8dD_5+1zDizBijwwMZNS7K9ukHk_y_EQQxjKgM88g@mail.gmail.com>
-	<20160118122116.GH26972@suse.de>
-	<CA+H5UW0jK58c5-n3TjkdN=WXkAp+exhWEUBePdCTfVB56_sHrA@mail.gmail.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: historic ops showing up on unexpected osds
+Date: Mon, 25 Jan 2016 22:54:10 +0000
+Message-ID: <DM2PR12MB0556C8923853CD1A83FC44729BC70@DM2PR12MB0556.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f169.google.com ([209.85.160.169]:33696 "EHLO
-	mail-yk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932084AbcAYWUM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Jan 2016 17:20:12 -0500
-Received: by mail-yk0-f169.google.com with SMTP id k129so179840308yke.0
-        for <ceph-devel@vger.kernel.org>; Mon, 25 Jan 2016 14:20:11 -0800 (PST)
-In-Reply-To: <CA+H5UW0jK58c5-n3TjkdN=WXkAp+exhWEUBePdCTfVB56_sHrA@mail.gmail.com>
+Received: from mail-bn1bon0091.outbound.protection.outlook.com ([157.56.111.91]:36312
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754225AbcAYWyO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Jan 2016 17:54:14 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Cc: Lars Marowsky-Bree <lmb@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "cbt@lists.ceph.com" <cbt@lists.ceph.com>
 
-> I can agree that in case of HDDs full disk encryption is an affordable
-> solution. This is a consequence of relatively low throughput of a magnetic
-> carrier in comparison to modern crypto performance.
-> However, the status quo is challenged by proliferation of fast SSDs.
-> It drives demand for crypto performance much higher. HW acceleration
-> would become must-have.
+I was looking at a performance discrepancy with reading objects
+and I was looking at some historic ops and noticed several like this.
+This is an erasure pool with k=2, m=1 so 3 chunks for each object.
 
-Right, most workloads are likely bottlenecked by seeks - not math.
+When I look at the  pg mapping for this object shown below on this pool, it is [12,14,6].
+And indeed when I look at the actual pieces on disk, they are on the disks that map to osds 12, 14, and 6.
 
->> Implementation of this API may be based on AF_ALG kernel
->> interface. This assures the ability to use hardware accelerations
->> already implemented in Linux kernel. Moreover, due to working on
->> bigger chunks (dm-crypt operates on 512 byte long sectors) the raw
->> encryption performance may be even higher.
->
-> There are at least three approaches that can be combined to form a holistic
-> solution:
->  1) minimizing amount of plaintext through per-poor granulation,
->  2) skipping repetitive encryption,
->  3) utilizing full performance of an accelerator.
->
-> dm-crypt is not optimized for advanced HW accelerators. Using the same
-> accelerator in different way gives more performance gain.
+Yet this osd for which this particular historic op showed up was osd 11.
+And I have seen other historic ops mapped to this same pg, which showed up for instance on osd 15.
+Why would osd 11 or ods 15 be involved in this object at all?
 
-What hardware accelerators are we talking about here?
+-- Tom
 
-Intel's AES_NI instructions are already helping accelerate dm-crypt, and
-you don't need AF_ALG in userland to use them either. Is there a significant
-difference in cost between crypto PCIe card(s), and simply buying SED SSDs?
 
-It seems to me that if you are willing to trust a black box (crypto
-card), you might
-as well trust the drive manufacturer to do your encryption. The benefit of SED
-would be that the crypo throughput increases linearly with the storage.
-
--- 
-
-Kyle Bader
+        {
+            "description": "osd_op(client.13056.0:2691 0-ggggjbjm [] 3.a3ebd1b8 ack+read+known_if_redirected e305)",
+            "initiated_at": "2016-01-25 13:01:15.824133",
+            "age": 60.812474,
+            "duration": 8.913674,
+            "type_data": [
+                "started",
+                {
+                    "client": "client.13056",
+                    "tid": 2691
+                },
+                [
+                    {
+                        "time": "2016-01-25 13:01:15.824133",
+                        "event": "initiated"
+                    },
+                    {
+                        "time": "2016-01-25 13:01:15.824258",
+                        "event": "queued_for_pg"
+                    },
+                    {
+                        "time": "2016-01-25 13:01:23.056172",
+                        "event": "reached_pg"
+                    },
+                    {
+                        "time": "2016-01-25 13:01:23.082064",
+                        "event": "started"
+                    },
+                    {
+                        "time": "2016-01-25 13:01:24.737807",
+                        "event": "done"
+                    }
+                ]
+            ]
+        },
