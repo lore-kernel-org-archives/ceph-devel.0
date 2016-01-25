@@ -1,42 +1,44 @@
-From: Greg KH <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 6/26] staging: rtl8192u: Use skcipher and ahash
-Date: Sun, 24 Jan 2016 12:00:52 -0800
-Message-ID: <20160124200052.GB17868@kroah.com>
-References: <20160124131021.GA31153@gondor.apana.org.au>
- <E1aNKXJ-0008BG-BI@gondolin.me.apana.org.au>
-Reply-To: open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: About ceph_clock_now()
+Date: Sun, 24 Jan 2016 19:03:37 -0500
+Message-ID: <20160125000337.GA19230@ultraspiritum.redhat.com>
+References: <alpine.DEB.2.11.1601130846500.26381@cpach.fuggernut.com>
+ <1365711662.13730117.1453220271917.JavaMail.zimbra@redhat.com>
+ <20160119162902.GA21358@ultraspiritum.redhat.com>
+ <1522288191.15295456.1453404176015.JavaMail.zimbra@redhat.com>
+ <1575597139.15885899.1453478438366.JavaMail.zimbra@redhat.com>
+ <56A368C1.8000508@digiware.nl>
+ <747915460.23855157.1453580447803.JavaMail.zimbra@redhat.com>
+ <20160123215543.GA8011@ultraspiritum.redhat.com>
+ <56A4BB20.1040305@digiware.nl>
+ <56A4C8D2.6020303@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <open-iscsi+bncBDK73744WQBRB5O2SS2QKGQE4CYEEOQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:36762 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751501AbcAYADj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 24 Jan 2016 19:03:39 -0500
 Content-Disposition: inline
-In-Reply-To: <E1aNKXJ-0008BG-BI-XQvu0L+U/CjiRBuR/1fSEKKkPtS2pBon@public.gmane.org>
-List-Post: <https://groups.google.com/group/open-iscsi/post>, <mailto:open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:open-iscsi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/open-iscsi
-Sender: open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <https://groups.google.com/group/open-iscsi/subscribe>, <mailto:open-iscsi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+856124926423+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/open-iscsi/subscribe>
-To: Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>
-Cc: Linux Crypto Mailing List <linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, dm-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ecryptfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-bluetooth-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wpan-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org, open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+In-Reply-To: <56A4C8D2.6020303@digiware.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Matt Benjamin <mbenjamin@redhat.com>, Erwan Velu <evelu@redhat.com>, Sage Weil <sweil@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Sun, Jan 24, 2016 at 09:16:57PM +0800, Herbert Xu wrote:
-> This patch replaces uses of blkcipher with skcipher, and the long
-> obsolete hash interface with ahash.
->     
-> Signed-off-by: Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>
-> ---
-> 
->  drivers/staging/rtl8192u/ieee80211/ieee80211_crypt_tkip.c |   92 +++++++-------
->  drivers/staging/rtl8192u/ieee80211/ieee80211_crypt_wep.c  |   46 ++++---
->  2 files changed, 81 insertions(+), 57 deletions(-)
+On 24/01/2016, Willem Jan Withagen wrote:
+> Not to irritate, but I just updated my copy of ceph:master and I could
+> not find any trace of a reference to CLOCK_MONOTONIC_FAST, so it has to
+> be in any of the WIPs ??
 
-Acked-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+I had meant that there was an abstraction there, rather than that we had
+CLOCK_MONOTONIC_FAST already. But, does:
+
+https://github.com/ceph/ceph/pull/7340
+
+Work under your system/seem a sane way of doing it?
 
 -- 
-You received this message because you are subscribed to the Google Groups "open-iscsi" group.
-To unsubscribe from this group and stop receiving emails from it, send an email to open-iscsi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-To post to this group, send email to open-iscsi-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-Visit this group at https://groups.google.com/group/open-iscsi.
-For more options, visit https://groups.google.com/d/optout.
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
