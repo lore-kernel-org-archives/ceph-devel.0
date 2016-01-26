@@ -1,91 +1,161 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [patch] ceph: checking for IS_ERR instead of NULL
-Date: Tue, 26 Jan 2016 16:26:30 +0100
-Message-ID: <CAOi1vP9ChfgeKjxdGmZvEZseLhuW3S_=G7=EkORhUvY_ATm5VQ@mail.gmail.com>
-References: <20160126092444.GB15717@mwanda>
-	<CAOi1vP-kT4tA-vvjg5QD-h5zkUJFC+X5Hw07tFsnjfP8tww4PA@mail.gmail.com>
-	<727F0631-509B-4410-9344-7D03B4D32E0D@redhat.com>
-	<CAOi1vP9Tw5a8GkHuZiBUNf+tpb4g97Z8C5pUcdUkjfAE+ZM_hA@mail.gmail.com>
-	<25A36812-97DA-46D7-BE1A-A8C15C2A29AC@redhat.com>
-	<CAOi1vP9UDdoTXPu_Cd3ZYzezj7E0TgVt38b-za_dnktsAOYMwA@mail.gmail.com>
+From: Stefan Schmidt <stefan@osg.samsung.com>
+Subject: Re: [PATCH 17/26] mac802154: Use skcipher
+Date: Tue, 26 Jan 2016 17:55:02 +0100
+Message-ID: <56A7A4E6.4090409@osg.samsung.com>
+References: <20160124131021.GA31153@gondor.apana.org.au>
+ <E1aNKZ8-0008EN-PU@gondolin.me.apana.org.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:34531 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934623AbcAZP0c (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jan 2016 10:26:32 -0500
-In-Reply-To: <CAOi1vP9UDdoTXPu_Cd3ZYzezj7E0TgVt38b-za_dnktsAOYMwA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <E1aNKZ8-0008EN-PU@gondolin.me.apana.org.au>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Herbert Xu <herbert@gondor.apana.org.au>, Linux Crypto Mailing List <linux-crypto@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, netdev@vger.kernel.org, devel@driverdev.osuosl.org, dm-devel@redhat.com, linux-wireless@vger.kernel.org, linux-cifs@vger.kernel.org, ecryptfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-nfs@vger.kernel.org, keyrings@vger.kernel.org, linux-bluetooth@vger.kernel.org, ceph-devel@vger.kernel.org, linux-wpan@vger.kernel.org, linux-afs@lists.infradead.org, drbd-dev@lists.linbit.com, open-iscsi@googlegroups.com
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Jan 26, 2016 at 3:51 PM, Yan, Zheng <zyan@redhat.com> wrote:
+Hello.
+
+On 24/01/16 14:18, Herbert Xu wrote:
+> This patch replaces uses of blkcipher with skcipher.
+>     
+> Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+> ---
 >
->> On Jan 26, 2016, at 22:02, Ilya Dryomov <idryomov@gmail.com> wrote:
->>
->> On Tue, Jan 26, 2016 at 12:54 PM, Yan, Zheng <zyan@redhat.com> wrote:
->>>
->>>> On Jan 26, 2016, at 19:40, Ilya Dryomov <idryomov@gmail.com> wrote:
->>>>
->>>> On Tue, Jan 26, 2016 at 12:16 PM, Yan, Zheng <zyan@redhat.com> wrote:
->>>>>
->>>>>> On Jan 26, 2016, at 18:30, Ilya Dryomov <idryomov@gmail.com> wrote:
->>>>>>
->>>>>> On Tue, Jan 26, 2016 at 10:24 AM, Dan Carpenter
->>>>>> <dan.carpenter@oracle.com> wrote:
->>>>>>> ceph_osdc_alloc_request() returns NULL on error, it never returns error
->>>>>>> pointers.
->>>>>>>
->>>>>>> Fixes: 5be0389dac66 ('ceph: re-send AIO write request when getting -EOLDSNAP error')
->>>>>>> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
->>>>>>>
->>>>>>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->>>>>>> index d37efdd..a52cf9b 100644
->>>>>>> --- a/fs/ceph/file.c
->>>>>>> +++ b/fs/ceph/file.c
->>>>>>> @@ -698,8 +698,8 @@ static void ceph_aio_retry_work(struct work_struct *work)
->>>>>>>
->>>>>>>      req = ceph_osdc_alloc_request(orig_req->r_osdc, snapc, 2,
->>>>>>>                      false, GFP_NOFS);
->>>>>>> -       if (IS_ERR(req)) {
->>>>>>> -               ret = PTR_ERR(req);
->>>>>>> +       if (!req) {
->>>>>>> +               ret = -ENOMEM;
->>>>>>>              req = orig_req;
->>>>>>>              goto out;
->>>>>>>      }
->>>>>>
->>>>>> Applied, thanks Dan.
->>>>>>
->>>>>> Zheng, I have an related concern: where do you put snapc (refcount is
->>>>>> bumped a few lines above) if ceph_osdc_alloc_request() fails?  It looks
->>>>>> like it's leaked to me.
->>>>>>
->>>>>> The BUG_ON(ret == -EOLDSNAPC) also seems a bit bogus, given that ret is
->>>>>> either -ENOMEM or ceph_osdc_start_request() retval.
->>>>>
->>>>> ceph_aio_complete_req treats -EOLDSNAP distinguishingly.  Purpose of this BUG_ON is detect potential infinite loop.
->>>>
->>>> Did you miss the part about the snap context?
->>>>
->>>> I get the purpose of -EOLDSNAPC assert in ceph_direct_read_write(),
->>>> where you can actually get it from ceph_osdc_wait_request() - it's
->>>> a server-side error code.  Asserting it in ceph_aio_retry_work(), in
->>>> which only client helpers are called and the only two possible error
->>>> codes are -ENOMEM and -EIO doesn't make much sense to me.
->>>>
->>>
->>> Yeah, removing that BUG_ON is completely OK.
->>
->> I still want to know where snapc is put ;)
->>
+>   net/mac802154/llsec.c |   41 +++++++++++++++++++++++------------------
+>   net/mac802154/llsec.h |    3 +--
+>   2 files changed, 24 insertions(+), 20 deletions(-)
 >
-> you are right. I missed that
+> diff --git a/net/mac802154/llsec.c b/net/mac802154/llsec.c
+> index a13d02b..6a3e1c2 100644
+> --- a/net/mac802154/llsec.c
+> +++ b/net/mac802154/llsec.c
+> @@ -17,9 +17,9 @@
+>   #include <linux/err.h>
+>   #include <linux/bug.h>
+>   #include <linux/completion.h>
+> -#include <linux/crypto.h>
+>   #include <linux/ieee802154.h>
+>   #include <crypto/aead.h>
+> +#include <crypto/skcipher.h>
+>   
+>   #include "ieee802154_i.h"
+>   #include "llsec.h"
+> @@ -144,18 +144,18 @@ llsec_key_alloc(const struct ieee802154_llsec_key *template)
+>   			goto err_tfm;
+>   	}
+>   
+> -	key->tfm0 = crypto_alloc_blkcipher("ctr(aes)", 0, CRYPTO_ALG_ASYNC);
+> +	key->tfm0 = crypto_alloc_skcipher("ctr(aes)", 0, CRYPTO_ALG_ASYNC);
+>   	if (IS_ERR(key->tfm0))
+>   		goto err_tfm;
+>   
+> -	if (crypto_blkcipher_setkey(key->tfm0, template->key,
+> -				    IEEE802154_LLSEC_KEY_SIZE))
+> +	if (crypto_skcipher_setkey(key->tfm0, template->key,
+> +				   IEEE802154_LLSEC_KEY_SIZE))
+>   		goto err_tfm0;
+>   
+>   	return key;
+>   
+>   err_tfm0:
+> -	crypto_free_blkcipher(key->tfm0);
+> +	crypto_free_skcipher(key->tfm0);
+>   err_tfm:
+>   	for (i = 0; i < ARRAY_SIZE(key->tfm); i++)
+>   		if (key->tfm[i])
+> @@ -175,7 +175,7 @@ static void llsec_key_release(struct kref *ref)
+>   	for (i = 0; i < ARRAY_SIZE(key->tfm); i++)
+>   		crypto_free_aead(key->tfm[i]);
+>   
+> -	crypto_free_blkcipher(key->tfm0);
+> +	crypto_free_skcipher(key->tfm0);
+>   	kzfree(key);
+>   }
+>   
+> @@ -620,15 +620,17 @@ llsec_do_encrypt_unauth(struct sk_buff *skb, const struct mac802154_llsec *sec,
+>   {
+>   	u8 iv[16];
+>   	struct scatterlist src;
+> -	struct blkcipher_desc req = {
+> -		.tfm = key->tfm0,
+> -		.info = iv,
+> -		.flags = 0,
+> -	};
+> +	SKCIPHER_REQUEST_ON_STACK(req, key->tfm0);
+> +	int err;
+>   
+>   	llsec_geniv(iv, sec->params.hwaddr, &hdr->sec);
+>   	sg_init_one(&src, skb->data, skb->len);
+> -	return crypto_blkcipher_encrypt_iv(&req, &src, &src, skb->len);
+> +	skcipher_request_set_tfm(req, key->tfm0);
+> +	skcipher_request_set_callback(req, 0, NULL, NULL);
+> +	skcipher_request_set_crypt(req, &src, &src, skb->len, iv);
+> +	err = crypto_skcipher_encrypt(req);
+> +	skcipher_request_zero(req);
+> +	return err;
+>   }
+>   
+>   static struct crypto_aead*
+> @@ -830,11 +832,8 @@ llsec_do_decrypt_unauth(struct sk_buff *skb, const struct mac802154_llsec *sec,
+>   	unsigned char *data;
+>   	int datalen;
+>   	struct scatterlist src;
+> -	struct blkcipher_desc req = {
+> -		.tfm = key->tfm0,
+> -		.info = iv,
+> -		.flags = 0,
+> -	};
+> +	SKCIPHER_REQUEST_ON_STACK(req, key->tfm0);
+> +	int err;
+>   
+>   	llsec_geniv(iv, dev_addr, &hdr->sec);
+>   	data = skb_mac_header(skb) + skb->mac_len;
+> @@ -842,7 +841,13 @@ llsec_do_decrypt_unauth(struct sk_buff *skb, const struct mac802154_llsec *sec,
+>   
+>   	sg_init_one(&src, data, datalen);
+>   
+> -	return crypto_blkcipher_decrypt_iv(&req, &src, &src, datalen);
+> +	skcipher_request_set_tfm(req, key->tfm0);
+> +	skcipher_request_set_callback(req, 0, NULL, NULL);
+> +	skcipher_request_set_crypt(req, &src, &src, datalen, iv);
+> +
+> +	err = crypto_skcipher_decrypt(req);
+> +	skcipher_request_zero(req);
+> +	return err;
+>   }
+>   
+>   static int
+> diff --git a/net/mac802154/llsec.h b/net/mac802154/llsec.h
+> index 950578e..6f3b658 100644
+> --- a/net/mac802154/llsec.h
+> +++ b/net/mac802154/llsec.h
+> @@ -19,7 +19,6 @@
+>   
+>   #include <linux/slab.h>
+>   #include <linux/hashtable.h>
+> -#include <linux/crypto.h>
+>   #include <linux/kref.h>
+>   #include <linux/spinlock.h>
+>   #include <net/af_ieee802154.h>
+> @@ -30,7 +29,7 @@ struct mac802154_llsec_key {
+>   
+>   	/* one tfm for each authsize (4/8/16) */
+>   	struct crypto_aead *tfm[3];
+> -	struct crypto_blkcipher *tfm0;
+> +	struct crypto_skcipher *tfm0;
+>   
+>   	struct kref ref;
+>   };
 
-Great, you can remove that BUG_ON in the same commit then.
+Reviewed-by: Stefan Schmidt <stefan@osg.samsung.com>
 
-Thanks,
-
-                Ilya
+regards
+Stefan Schmidt
