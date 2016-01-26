@@ -1,127 +1,59 @@
-From: Herbert Xu <herbert@gondor.apana.org.au>
-Subject: Re: [PATCH 16/26] libceph: Use skcipher
-Date: Tue, 26 Jan 2016 18:54:55 +0800
-Message-ID: <20160126105455.GA19674@gondor.apana.org.au>
-References: <20160124131021.GA31153@gondor.apana.org.au>
- <E1aNKYy-0008E6-GI@gondolin.me.apana.org.au>
- <CAOi1vP9jmMYHR21UeAO175susZ5V74vcXyoxwayBVSTFHxjhBQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <CAOi1vP9jmMYHR21UeAO175susZ5V74vcXyoxwayBVSTFHxjhBQ@mail.gmail.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [patch] ceph: checking for IS_ERR instead of NULL
+Date: Tue, 26 Jan 2016 19:16:06 +0800
+Message-ID: <727F0631-509B-4410-9344-7D03B4D32E0D@redhat.com>
+References: <20160126092444.GB15717@mwanda> <CAOi1vP-kT4tA-vvjg5QD-h5zkUJFC+X5Hw07tFsnjfP8tww4PA@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAOi1vP-kT4tA-vvjg5QD-h5zkUJFC+X5Hw07tFsnjfP8tww4PA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ilya Dryomov <idryomov@gmail.com>
-Cc: devel@driverdev.osuosl.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, open-iscsi@googlegroups.com, netdev <netdev@vger.kernel.org>, ecryptfs@vger.kernel.org, linux-wireless@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-f2fs-devel@lists.sourceforge.net, linux-bluetooth@vger.kernel.org, dm-devel@redhat.com, keyrings@vger.kernel.org, Linux Crypto Mailing List <linux-crypto@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, linux-ext4@vger.kernel.org, linux-wpan@vger.kernel.org, linux-afs@lists.infradead.org, Lars Ellenberg <drbd-dev@lists.linbit.com>
+Cc: Dan Carpenter <dan.carpenter@oracle.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Jan 25, 2016 at 05:18:47PM +0100, Ilya Dryomov wrote:
+
+> On Jan 26, 2016, at 18:30, Ilya Dryomov <idryomov@gmail.com> wrote:
 > 
-> Could you get rid of ivsize instead of assigning to it - see the
-> attached diff?
+> On Tue, Jan 26, 2016 at 10:24 AM, Dan Carpenter
+> <dan.carpenter@oracle.com> wrote:
+>> ceph_osdc_alloc_request() returns NULL on error, it never returns error
+>> pointers.
+>> 
+>> Fixes: 5be0389dac66 ('ceph: re-send AIO write request when getting -EOLDSNAP error')
+>> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+>> 
+>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+>> index d37efdd..a52cf9b 100644
+>> --- a/fs/ceph/file.c
+>> +++ b/fs/ceph/file.c
+>> @@ -698,8 +698,8 @@ static void ceph_aio_retry_work(struct work_struct *work)
+>> 
+>>        req = ceph_osdc_alloc_request(orig_req->r_osdc, snapc, 2,
+>>                        false, GFP_NOFS);
+>> -       if (IS_ERR(req)) {
+>> -               ret = PTR_ERR(req);
+>> +       if (!req) {
+>> +               ret = -ENOMEM;
+>>                req = orig_req;
+>>                goto out;
+>>        }
+> 
+> Applied, thanks Dan.
+> 
+> Zheng, I have an related concern: where do you put snapc (refcount is
+> bumped a few lines above) if ceph_osdc_alloc_request() fails?  It looks
+> like it's leaked to me.
+> 
+> The BUG_ON(ret == -EOLDSNAPC) also seems a bit bogus, given that ret is
+> either -ENOMEM or ceph_osdc_start_request() retval.
 
-How about an incremental patch like this? Thanks!
+ceph_aio_complete_req treats -EOLDSNAP distinguishingly.  Purpose of this BUG_ON is detect potential infinite loop.
 
----8<---
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: libceph: Remove unnecessary ivsize variables
+Regards
+Yan, Zheng
 
-This patch removes the unnecessary ivsize variabls as they always
-have the value of AES_BLOCK_SIZE.
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-
-diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
-index fb9cb2b..db2847a 100644
---- a/net/ceph/crypto.c
-+++ b/net/ceph/crypto.c
-@@ -166,8 +166,7 @@ static int ceph_aes_encrypt(const void *key, int key_len,
- 	struct crypto_skcipher *tfm = ceph_crypto_alloc_cipher();
- 	SKCIPHER_REQUEST_ON_STACK(req, tfm);
- 	int ret;
--	int ivsize = AES_BLOCK_SIZE;
--	char iv[ivsize];
-+	char iv[AES_BLOCK_SIZE];
- 	size_t zero_padding = (0x10 - (src_len & 0x0f));
- 	char pad[16];
- 
-@@ -186,7 +185,7 @@ static int ceph_aes_encrypt(const void *key, int key_len,
- 		goto out_tfm;
- 
- 	crypto_skcipher_setkey((void *)tfm, key, key_len);
--	memcpy(iv, aes_iv, ivsize);
-+	memcpy(iv, aes_iv, AES_BLOCK_SIZE);
- 
- 	skcipher_request_set_tfm(req, tfm);
- 	skcipher_request_set_callback(req, 0, NULL, NULL);
-@@ -229,8 +228,7 @@ static int ceph_aes_encrypt2(const void *key, int key_len, void *dst,
- 	struct crypto_skcipher *tfm = ceph_crypto_alloc_cipher();
- 	SKCIPHER_REQUEST_ON_STACK(req, tfm);
- 	int ret;
--	int ivsize = AES_BLOCK_SIZE;
--	char iv[ivsize];
-+	char iv[AES_BLOCK_SIZE];
- 	size_t zero_padding = (0x10 - ((src1_len + src2_len) & 0x0f));
- 	char pad[16];
- 
-@@ -250,7 +248,7 @@ static int ceph_aes_encrypt2(const void *key, int key_len, void *dst,
- 		goto out_tfm;
- 
- 	crypto_skcipher_setkey((void *)tfm, key, key_len);
--	memcpy(iv, aes_iv, ivsize);
-+	memcpy(iv, aes_iv, AES_BLOCK_SIZE);
- 
- 	skcipher_request_set_tfm(req, tfm);
- 	skcipher_request_set_callback(req, 0, NULL, NULL);
-@@ -294,8 +292,7 @@ static int ceph_aes_decrypt(const void *key, int key_len,
- 	struct crypto_skcipher *tfm = ceph_crypto_alloc_cipher();
- 	SKCIPHER_REQUEST_ON_STACK(req, tfm);
- 	char pad[16];
--	int ivsize = AES_BLOCK_SIZE;
--	char iv[16];
-+	char iv[AES_BLOCK_SIZE];
- 	int ret;
- 	int last_byte;
- 
-@@ -310,7 +307,7 @@ static int ceph_aes_decrypt(const void *key, int key_len,
- 		goto out_tfm;
- 
- 	crypto_skcipher_setkey((void *)tfm, key, key_len);
--	memcpy(iv, aes_iv, ivsize);
-+	memcpy(iv, aes_iv, AES_BLOCK_SIZE);
- 
- 	skcipher_request_set_tfm(req, tfm);
- 	skcipher_request_set_callback(req, 0, NULL, NULL);
-@@ -363,8 +360,7 @@ static int ceph_aes_decrypt2(const void *key, int key_len,
- 	struct crypto_skcipher *tfm = ceph_crypto_alloc_cipher();
- 	SKCIPHER_REQUEST_ON_STACK(req, tfm);
- 	char pad[16];
--	int ivsize = AES_BLOCK_SIZE;
--	char iv[ivsize];
-+	char iv[AES_BLOCK_SIZE];
- 	int ret;
- 	int last_byte;
- 
-@@ -380,7 +376,7 @@ static int ceph_aes_decrypt2(const void *key, int key_len,
- 		goto out_tfm;
- 
- 	crypto_skcipher_setkey((void *)tfm, key, key_len);
--	memcpy(iv, aes_iv, ivsize);
-+	memcpy(iv, aes_iv, AES_BLOCK_SIZE);
- 
- 	skcipher_request_set_tfm(req, tfm);
- 	skcipher_request_set_callback(req, 0, NULL, NULL);
-
--- 
-Email: Herbert Xu <herbert@gondor.apana.org.au>
-Home Page: http://gondor.apana.org.au/~herbert/
-PGP Key: http://gondor.apana.org.au/~herbert/pubkey.txt
+> 
+>                Ilya
