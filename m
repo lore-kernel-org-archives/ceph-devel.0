@@ -1,161 +1,49 @@
-From: Stefan Schmidt <stefan@osg.samsung.com>
-Subject: Re: [PATCH 17/26] mac802154: Use skcipher
-Date: Tue, 26 Jan 2016 17:55:02 +0100
-Message-ID: <56A7A4E6.4090409@osg.samsung.com>
-References: <20160124131021.GA31153@gondor.apana.org.au>
- <E1aNKZ8-0008EN-PU@gondolin.me.apana.org.au>
+From: Marcel Lauhoff <lauhoff@uni-mainz.de>
+Subject: Re: An Evaluation of Object Name Hashing
+Date: Tue, 26 Jan 2016 19:40:41 +0100
+Message-ID: <87r3h4gp5i.fsf@uni-mainz.de>
+References: <87a8obhr88.fsf@uni-mainz.de> <alpine.DEB.2.11.1601120831470.27580@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <E1aNKZ8-0008EN-PU@gondolin.me.apana.org.au>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Herbert Xu <herbert@gondor.apana.org.au>, Linux Crypto Mailing List <linux-crypto@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, netdev@vger.kernel.org, devel@driverdev.osuosl.org, dm-devel@redhat.com, linux-wireless@vger.kernel.org, linux-cifs@vger.kernel.org, ecryptfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-nfs@vger.kernel.org, keyrings@vger.kernel.org, linux-bluetooth@vger.kernel.org, ceph-devel@vger.kernel.org, linux-wpan@vger.kernel.org, linux-afs@lists.infradead.org, drbd-dev@lists.linbit.com, open-iscsi@googlegroups.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mailgate-01.zdv.uni-mainz.de ([134.93.178.241]:41006 "EHLO
+	mailgate-01.zdv.uni-mainz.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750903AbcAZSkt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 26 Jan 2016 13:40:49 -0500
+In-Reply-To: <alpine.DEB.2.11.1601120831470.27580@cpach.fuggernut.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello.
 
-On 24/01/16 14:18, Herbert Xu wrote:
-> This patch replaces uses of blkcipher with skcipher.
->     
-> Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
-> ---
+Hi!
+
+Sage Weil <sage@newdream.net> writes:
+> On Tue, 12 Jan 2016, Marcel Lauhoff wrote:
+>>
+>> I wrote an article on my website with the analysis, changes to the
+>> source and how I ran the tests:
+>>
+>>   http://irq0.org/articles/ceph/object_name_hashing
 >
->   net/mac802154/llsec.c |   41 +++++++++++++++++++++++------------------
->   net/mac802154/llsec.h |    3 +--
->   2 files changed, 24 insertions(+), 20 deletions(-)
->
-> diff --git a/net/mac802154/llsec.c b/net/mac802154/llsec.c
-> index a13d02b..6a3e1c2 100644
-> --- a/net/mac802154/llsec.c
-> +++ b/net/mac802154/llsec.c
-> @@ -17,9 +17,9 @@
->   #include <linux/err.h>
->   #include <linux/bug.h>
->   #include <linux/completion.h>
-> -#include <linux/crypto.h>
->   #include <linux/ieee802154.h>
->   #include <crypto/aead.h>
-> +#include <crypto/skcipher.h>
->   
->   #include "ieee802154_i.h"
->   #include "llsec.h"
-> @@ -144,18 +144,18 @@ llsec_key_alloc(const struct ieee802154_llsec_key *template)
->   			goto err_tfm;
->   	}
->   
-> -	key->tfm0 = crypto_alloc_blkcipher("ctr(aes)", 0, CRYPTO_ALG_ASYNC);
-> +	key->tfm0 = crypto_alloc_skcipher("ctr(aes)", 0, CRYPTO_ALG_ASYNC);
->   	if (IS_ERR(key->tfm0))
->   		goto err_tfm;
->   
-> -	if (crypto_blkcipher_setkey(key->tfm0, template->key,
-> -				    IEEE802154_LLSEC_KEY_SIZE))
-> +	if (crypto_skcipher_setkey(key->tfm0, template->key,
-> +				   IEEE802154_LLSEC_KEY_SIZE))
->   		goto err_tfm0;
->   
->   	return key;
->   
->   err_tfm0:
-> -	crypto_free_blkcipher(key->tfm0);
-> +	crypto_free_skcipher(key->tfm0);
->   err_tfm:
->   	for (i = 0; i < ARRAY_SIZE(key->tfm); i++)
->   		if (key->tfm[i])
-> @@ -175,7 +175,7 @@ static void llsec_key_release(struct kref *ref)
->   	for (i = 0; i < ARRAY_SIZE(key->tfm); i++)
->   		crypto_free_aead(key->tfm[i]);
->   
-> -	crypto_free_blkcipher(key->tfm0);
-> +	crypto_free_skcipher(key->tfm0);
->   	kzfree(key);
->   }
->   
-> @@ -620,15 +620,17 @@ llsec_do_encrypt_unauth(struct sk_buff *skb, const struct mac802154_llsec *sec,
->   {
->   	u8 iv[16];
->   	struct scatterlist src;
-> -	struct blkcipher_desc req = {
-> -		.tfm = key->tfm0,
-> -		.info = iv,
-> -		.flags = 0,
-> -	};
-> +	SKCIPHER_REQUEST_ON_STACK(req, key->tfm0);
-> +	int err;
->   
->   	llsec_geniv(iv, sec->params.hwaddr, &hdr->sec);
->   	sg_init_one(&src, skb->data, skb->len);
-> -	return crypto_blkcipher_encrypt_iv(&req, &src, &src, skb->len);
-> +	skcipher_request_set_tfm(req, key->tfm0);
-> +	skcipher_request_set_callback(req, 0, NULL, NULL);
-> +	skcipher_request_set_crypt(req, &src, &src, skb->len, iv);
-> +	err = crypto_skcipher_encrypt(req);
-> +	skcipher_request_zero(req);
-> +	return err;
->   }
->   
->   static struct crypto_aead*
-> @@ -830,11 +832,8 @@ llsec_do_decrypt_unauth(struct sk_buff *skb, const struct mac802154_llsec *sec,
->   	unsigned char *data;
->   	int datalen;
->   	struct scatterlist src;
-> -	struct blkcipher_desc req = {
-> -		.tfm = key->tfm0,
-> -		.info = iv,
-> -		.flags = 0,
-> -	};
-> +	SKCIPHER_REQUEST_ON_STACK(req, key->tfm0);
-> +	int err;
->   
->   	llsec_geniv(iv, dev_addr, &hdr->sec);
->   	data = skb_mac_header(skb) + skb->mac_len;
-> @@ -842,7 +841,13 @@ llsec_do_decrypt_unauth(struct sk_buff *skb, const struct mac802154_llsec *sec,
->   
->   	sg_init_one(&src, data, datalen);
->   
-> -	return crypto_blkcipher_decrypt_iv(&req, &src, &src, datalen);
-> +	skcipher_request_set_tfm(req, key->tfm0);
-> +	skcipher_request_set_callback(req, 0, NULL, NULL);
-> +	skcipher_request_set_crypt(req, &src, &src, datalen, iv);
-> +
-> +	err = crypto_skcipher_decrypt(req);
-> +	skcipher_request_zero(req);
-> +	return err;
->   }
->   
->   static int
-> diff --git a/net/mac802154/llsec.h b/net/mac802154/llsec.h
-> index 950578e..6f3b658 100644
-> --- a/net/mac802154/llsec.h
-> +++ b/net/mac802154/llsec.h
-> @@ -19,7 +19,6 @@
->   
->   #include <linux/slab.h>
->   #include <linux/hashtable.h>
-> -#include <linux/crypto.h>
->   #include <linux/kref.h>
->   #include <linux/spinlock.h>
->   #include <net/af_ieee802154.h>
-> @@ -30,7 +29,7 @@ struct mac802154_llsec_key {
->   
->   	/* one tfm for each authsize (4/8/16) */
->   	struct crypto_aead *tfm[3];
-> -	struct crypto_blkcipher *tfm0;
-> +	struct crypto_skcipher *tfm0;
->   
->   	struct kref ref;
->   };
+> The interesting thing to me is the error bars for linux prefix (the
+> right-most set of bars on the last graph).  They range is significantly
+> wider than rjenkins + prefix (ranging from 2.1TiB to 4.0TiB (vs 2.3-3.7ish
+> for the others).  The reason we switched away from the linux dcache hash
+> (it was the original choice) is because it is very weak.  I suspect that
+> even if you look at the average + standard deviation it hides some of the
+> badness; looking at 99th or 99.9th percentile, or simply a plot of the osd
+> utilization distribution, will show that there are more low- and high-
+> utilization outliers.
 
-Reviewed-by: Stefan Schmidt <stefan@osg.samsung.com>
+I rerun the tests and included Adler-32, CRC32, MD5 and SHA-1 (MD5 and
+SHA-1 truncated to 32 bit). I updated the article.
 
-regards
-Stefan Schmidt
+In summary: Adler-32 does not work. MD5 and SHA-1 are OK. CRC32 as good
+as RJenkins, maybe even slightly better.
+
+~marcel
+
+--
+Marcel Lauhoff
