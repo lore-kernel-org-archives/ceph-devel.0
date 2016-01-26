@@ -1,99 +1,91 @@
-From: Sage Weil <sage@newdream.net>
-Subject: RE: historic ops showing up on unexpected osds
-Date: Tue, 26 Jan 2016 09:41:45 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1601260941140.6524@cpach.fuggernut.com>
-References: <DM2PR12MB0556411468778691D8ED4CA79BD80@DM2PR12MB0556.namprd12.prod.outlook.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [patch] ceph: checking for IS_ERR instead of NULL
+Date: Tue, 26 Jan 2016 16:26:30 +0100
+Message-ID: <CAOi1vP9ChfgeKjxdGmZvEZseLhuW3S_=G7=EkORhUvY_ATm5VQ@mail.gmail.com>
+References: <20160126092444.GB15717@mwanda>
+	<CAOi1vP-kT4tA-vvjg5QD-h5zkUJFC+X5Hw07tFsnjfP8tww4PA@mail.gmail.com>
+	<727F0631-509B-4410-9344-7D03B4D32E0D@redhat.com>
+	<CAOi1vP9Tw5a8GkHuZiBUNf+tpb4g97Z8C5pUcdUkjfAE+ZM_hA@mail.gmail.com>
+	<25A36812-97DA-46D7-BE1A-A8C15C2A29AC@redhat.com>
+	<CAOi1vP9UDdoTXPu_Cd3ZYzezj7E0TgVt38b-za_dnktsAOYMwA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43648 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966091AbcAZOlf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jan 2016 09:41:35 -0500
-In-Reply-To: <DM2PR12MB0556411468778691D8ED4CA79BD80@DM2PR12MB0556.namprd12.prod.outlook.com>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:34531 "EHLO
+	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934623AbcAZP0c (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jan 2016 10:26:32 -0500
+In-Reply-To: <CAOi1vP9UDdoTXPu_Cd3ZYzezj7E0TgVt38b-za_dnktsAOYMwA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "cbt@lists.ceph.com" <cbt@lists.ceph.com>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: Dan Carpenter <dan.carpenter@oracle.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 
-On Tue, 26 Jan 2016, Deneau, Tom wrote:
-> And I assume when I see an op with a description like
->    "MOSDECSubOpRead(3.23s1 305 ECSubRead..."
-> that this is the reading of the second chunk in a k=2,m=1 erasure pool?
+On Tue, Jan 26, 2016 at 3:51 PM, Yan, Zheng <zyan@redhat.com> wrote:
+>
+>> On Jan 26, 2016, at 22:02, Ilya Dryomov <idryomov@gmail.com> wrote:
+>>
+>> On Tue, Jan 26, 2016 at 12:54 PM, Yan, Zheng <zyan@redhat.com> wrote:
+>>>
+>>>> On Jan 26, 2016, at 19:40, Ilya Dryomov <idryomov@gmail.com> wrote:
+>>>>
+>>>> On Tue, Jan 26, 2016 at 12:16 PM, Yan, Zheng <zyan@redhat.com> wrote:
+>>>>>
+>>>>>> On Jan 26, 2016, at 18:30, Ilya Dryomov <idryomov@gmail.com> wrote:
+>>>>>>
+>>>>>> On Tue, Jan 26, 2016 at 10:24 AM, Dan Carpenter
+>>>>>> <dan.carpenter@oracle.com> wrote:
+>>>>>>> ceph_osdc_alloc_request() returns NULL on error, it never returns error
+>>>>>>> pointers.
+>>>>>>>
+>>>>>>> Fixes: 5be0389dac66 ('ceph: re-send AIO write request when getting -EOLDSNAP error')
+>>>>>>> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+>>>>>>>
+>>>>>>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+>>>>>>> index d37efdd..a52cf9b 100644
+>>>>>>> --- a/fs/ceph/file.c
+>>>>>>> +++ b/fs/ceph/file.c
+>>>>>>> @@ -698,8 +698,8 @@ static void ceph_aio_retry_work(struct work_struct *work)
+>>>>>>>
+>>>>>>>      req = ceph_osdc_alloc_request(orig_req->r_osdc, snapc, 2,
+>>>>>>>                      false, GFP_NOFS);
+>>>>>>> -       if (IS_ERR(req)) {
+>>>>>>> -               ret = PTR_ERR(req);
+>>>>>>> +       if (!req) {
+>>>>>>> +               ret = -ENOMEM;
+>>>>>>>              req = orig_req;
+>>>>>>>              goto out;
+>>>>>>>      }
+>>>>>>
+>>>>>> Applied, thanks Dan.
+>>>>>>
+>>>>>> Zheng, I have an related concern: where do you put snapc (refcount is
+>>>>>> bumped a few lines above) if ceph_osdc_alloc_request() fails?  It looks
+>>>>>> like it's leaked to me.
+>>>>>>
+>>>>>> The BUG_ON(ret == -EOLDSNAPC) also seems a bit bogus, given that ret is
+>>>>>> either -ENOMEM or ceph_osdc_start_request() retval.
+>>>>>
+>>>>> ceph_aio_complete_req treats -EOLDSNAP distinguishingly.  Purpose of this BUG_ON is detect potential infinite loop.
+>>>>
+>>>> Did you miss the part about the snap context?
+>>>>
+>>>> I get the purpose of -EOLDSNAPC assert in ceph_direct_read_write(),
+>>>> where you can actually get it from ceph_osdc_wait_request() - it's
+>>>> a server-side error code.  Asserting it in ceph_aio_retry_work(), in
+>>>> which only client helpers are called and the only two possible error
+>>>> codes are -ENOMEM and -EIO doesn't make much sense to me.
+>>>>
+>>>
+>>> Yeah, removing that BUG_ON is completely OK.
+>>
+>> I still want to know where snapc is put ;)
+>>
+>
+> you are right. I missed that
 
-Yes (although you can't tell k and m from the pgid--only that it's shard 
-1).
+Great, you can remove that BUG_ON in the same commit then.
 
-sage
+Thanks,
 
-
-> 
-> -- Tom
-> 
-> 
-> > -----Original Message-----
-> > From: Deneau, Tom
-> > Sent: Monday, January 25, 2016 4:54 PM
-> > To: ceph-devel@vger.kernel.org
-> > Cc: cbt@lists.ceph.com
-> > Subject: historic ops showing up on unexpected osds
-> > 
-> > I was looking at a performance discrepancy with reading objects
-> > and I was looking at some historic ops and noticed several like this.
-> > This is an erasure pool with k=2, m=1 so 3 chunks for each object.
-> > 
-> > When I look at the  pg mapping for this object shown below on this pool,
-> > it is [12,14,6].
-> > And indeed when I look at the actual pieces on disk, they are on the disks
-> > that map to osds 12, 14, and 6.
-> > 
-> > Yet this osd for which this particular historic op showed up was osd 11.
-> > And I have seen other historic ops mapped to this same pg, which showed up
-> > for instance on osd 15.
-> > Why would osd 11 or ods 15 be involved in this object at all?
-> > 
-> > -- Tom
-> > 
-> > 
-> >         {
-> >             "description": "osd_op(client.13056.0:2691 0-ggggjbjm []
-> > 3.a3ebd1b8 ack+read+known_if_redirected e305)",
-> >             "initiated_at": "2016-01-25 13:01:15.824133",
-> >             "age": 60.812474,
-> >             "duration": 8.913674,
-> >             "type_data": [
-> >                 "started",
-> >                 {
-> >                     "client": "client.13056",
-> >                     "tid": 2691
-> >                 },
-> >                 [
-> >                     {
-> >                         "time": "2016-01-25 13:01:15.824133",
-> >                         "event": "initiated"
-> >                     },
-> >                     {
-> >                         "time": "2016-01-25 13:01:15.824258",
-> >                         "event": "queued_for_pg"
-> >                     },
-> >                     {
-> >                         "time": "2016-01-25 13:01:23.056172",
-> >                         "event": "reached_pg"
-> >                     },
-> >                     {
-> >                         "time": "2016-01-25 13:01:23.082064",
-> >                         "event": "started"
-> >                     },
-> >                     {
-> >                         "time": "2016-01-25 13:01:24.737807",
-> >                         "event": "done"
-> >                     }
-> >                 ]
-> >             ]
-> >         },
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+                Ilya
