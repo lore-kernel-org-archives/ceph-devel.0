@@ -1,53 +1,31 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 0/6] net: ceph: messenger: code cleanup
-Date: Wed, 27 Jan 2016 12:17:18 +0100
-Message-ID: <CAOi1vP-Lqj4iA+cjFY1D3ERMdCyFxwkXTGEPpY2_oNJ9D-4PXA@mail.gmail.com>
-References: <cover.1453853617.git.ciorneiioana@gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH]common/str_map: Removed unnecessary function overloading
+ of get_str_map()
+Date: Wed, 27 Jan 2016 08:55:23 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1601270854570.6524@cpach.fuggernut.com>
+References: <CAAKF69rJmAA2rNaFjDetkN5-1uQf+UZXhmD9xXx+89-S0goE4g@mail.gmail.com> <CAOi1vP-w+EHRON1QLALYGJQvmAuFux2mRBn26ZcCutSEF_HnMw@mail.gmail.com> <CAAKF69pPmS60vaHc8XUhZOcti2Sx-7VzdkB_2g1kq9kieFgqdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:35762 "EHLO
-	mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932075AbcA0LRT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jan 2016 06:17:19 -0500
-Received: by mail-wm0-f68.google.com with SMTP id 123so2700933wmz.2
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Jan 2016 03:17:19 -0800 (PST)
-In-Reply-To: <cover.1453853617.git.ciorneiioana@gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:48232 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932145AbcA0NzM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jan 2016 08:55:12 -0500
+In-Reply-To: <CAAKF69pPmS60vaHc8XUhZOcti2Sx-7VzdkB_2g1kq9kieFgqdg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ioana Ciornei <ciorneiioana@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@ieee.org>
+To: Sahithi R V <sahithi.rv1@gmail.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 27, 2016 at 1:43 AM, Ioana Ciornei <ciorneiioana@gmail.com> wrote:
->
-> This patchset makes some small code cleanup on the messenger code from net/ceph.
-> Most of the patches are a result of running checkpatch.pl on
-> net/ceph/messenger.c
->
->
-> Ioana Ciornei (6):
->   net: ceph: messenger: remove unnecessary blank spaces
->   net: ceph: messenger: fix coding style comparison to NULL
->   net: ceph: messenger: add blank line after declarations
->   net: ceph: messenger: properly align function parameters
->   net: ceph: messenger: change printk to pr_warn
->   net: ceph: messenger: add braces to all arms of conditional statement
->
->  net/ceph/messenger.c | 207 ++++++++++++++++++++++++++-------------------------
->  1 file changed, 107 insertions(+), 100 deletions(-)
+On Wed, 27 Jan 2016, Sahithi R V wrote:
+> Hi Ilya,
+> 
+> 
+> I have made a pull request( #7266) . I have not received any comments.
+> Can you please check.(https://github.com/ceph/ceph/pull/7266).
 
-Hi Ioana,
+Sorry about that--it fell through the cracks.  I'll catch it in my next 
+test batch.
 
-Most of above (especially patch 4/6) just clutters the history (think
-"git blame" output) and, more importantly, complicates backporting of
-future fixes to older kernels for no benefit at all.
-
-There is a reason checkpatch.pl is called "check" "patch" - it is to be
-run on patches, not files, with pretty much the only exception to that
-being code in drivers/staging.  In certain cases, it might be OK to use
-it on existing files to fix what it classifies as errors, but fixing
-warnings or so called checks does more harm than good in most cases.
-
-Thanks,
-
-                Ilya
+Thanks!
+sage
