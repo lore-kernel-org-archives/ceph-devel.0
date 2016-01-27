@@ -1,116 +1,151 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: [Cbt] rados benchmark, even distribution vs. random distribution
-Date: Wed, 27 Jan 2016 19:14:16 +0000
-Message-ID: <SN1PR12MB0558247BD41965A55C045EF79BD90@SN1PR12MB0558.namprd12.prod.outlook.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: [Cbt] rados benchmark, even distribution vs. random distribution
+Date: Wed, 27 Jan 2016 11:17:37 -0800
+Message-ID: <CAJ4mKGZYtP3kpsRR3U6e5JRzoOowjSOwcznwpqRVS+oe9F0i0w@mail.gmail.com>
 References: <DM2PR12MB055626F2390C23B79AAE88E59BD80@DM2PR12MB0556.namprd12.prod.outlook.com>
 	<CAJ4mKGbn6SJAdyj=g3wRa1vynG47Tjux4i9nJLGP=T6BU8V-Gg@mail.gmail.com>
 	<SN1PR12MB05589AD8303E61D8671FA5729BD90@SN1PR12MB0558.namprd12.prod.outlook.com>
- <CAJ4mKGYy2+oQihX2S=Pa5+eDv0+Hrn8e5v_fQhcZ+hChHZq8YQ@mail.gmail.com>
+	<CAJ4mKGYy2+oQihX2S=Pa5+eDv0+Hrn8e5v_fQhcZ+hChHZq8YQ@mail.gmail.com>
+	<SN1PR12MB0558247BD41965A55C045EF79BD90@SN1PR12MB0558.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0066.outbound.protection.outlook.com ([157.56.111.66]:30570
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S964940AbcA0TOT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 27 Jan 2016 14:14:19 -0500
-In-Reply-To: <CAJ4mKGYy2+oQihX2S=Pa5+eDv0+Hrn8e5v_fQhcZ+hChHZq8YQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:38211 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965836AbcA0TRj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jan 2016 14:17:39 -0500
+Received: by mail-wm0-f54.google.com with SMTP id p63so41714079wmp.1
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Jan 2016 11:17:38 -0800 (PST)
+In-Reply-To: <SN1PR12MB0558247BD41965A55C045EF79BD90@SN1PR12MB0558.namprd12.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
+To: "Deneau, Tom" <tom.deneau@amd.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "cbt@lists.ceph.com" <cbt@lists.ceph.com>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogR3JlZ29yeSBGYXJudW0g
-W21haWx0bzpnZmFybnVtQHJlZGhhdC5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgSmFudWFyeSAy
-NywgMjAxNiAxMjowOCBQTQ0KPiBUbzogRGVuZWF1LCBUb20NCj4gQ2M6IGNlcGgtZGV2ZWxAdmdl
-ci5rZXJuZWwub3JnOyBjYnRAbGlzdHMuY2VwaC5jb20NCj4gU3ViamVjdDogUmU6IFtDYnRdIHJh
-ZG9zIGJlbmNobWFyaywgZXZlbiBkaXN0cmlidXRpb24gdnMuIHJhbmRvbQ0KPiBkaXN0cmlidXRp
-b24NCj4gDQo+IE9uIFdlZCwgSmFuIDI3LCAyMDE2IGF0IDk6MDEgQU0sIERlbmVhdSwgVG9tIDx0
-b20uZGVuZWF1QGFtZC5jb20+IHdyb3RlOg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
-ZS0tLS0tDQo+ID4+IEZyb206IEdyZWdvcnkgRmFybnVtIFttYWlsdG86Z2Zhcm51bUByZWRoYXQu
-Y29tXQ0KPiA+PiBTZW50OiBUdWVzZGF5LCBKYW51YXJ5IDI2LCAyMDE2IDE6MzMgUE0NCj4gPj4g
-VG86IERlbmVhdSwgVG9tDQo+ID4+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgY2J0
-QGxpc3RzLmNlcGguY29tDQo+ID4+IFN1YmplY3Q6IFJlOiBbQ2J0XSByYWRvcyBiZW5jaG1hcmss
-IGV2ZW4gZGlzdHJpYnV0aW9uIHZzLiByYW5kb20NCj4gPj4gZGlzdHJpYnV0aW9uDQo+ID4+DQo+
-ID4+IE9uIFR1ZSwgSmFuIDI2LCAyMDE2IGF0IDExOjExIEFNLCBEZW5lYXUsIFRvbSA8dG9tLmRl
-bmVhdUBhbWQuY29tPg0KPiB3cm90ZToNCj4gPj4gPiBMb29raW5nIGZvciBzb21lIGhlbHAgd2l0
-aCBhIENlcGggcGVyZm9ybWFuY2UgcHV6emxlci4uLg0KPiA+PiA+DQo+ID4+ID4gQmFja2dyb3Vu
-ZDoNCj4gPj4gPiBJIGhhZCBiZWVuIGV4cGVyaW1lbnRpbmcgd2l0aCBydW5uaW5nIHJhZG9zIGJl
-bmNobWFya3Mgd2l0aCBhIG1vcmUNCj4gPj4gPiBjb250cm9sbGVkIGRpc3RyaWJ1dGlvbiBvZiBv
-YmplY3RzIGFjcm9zcyBvc2RzLiAgVGhlIG1haW4gcmVhc29uDQo+ID4+ID4gd2FzIHRvIHJlZHVj
-ZSBydW4gdG8gcnVuIHZhcmlhYmlsaXR5IHNpbmNlIEkgd2FzIHJ1bm5pbmcgb24gZmFpcmx5DQo+
-ID4+ID4gc21hbGwgY2x1c3RlcnMuDQo+ID4+ID4NCj4gPj4gPiBJIG1vZGlmaWVkIHJhZG9zIGJl
-bmNoIGl0c2VsZiB0byBvcHRpb25hbGx5IHRha2UgYSBmaWxlIHdpdGggYSBsaXN0DQo+ID4+ID4g
-b2YgbmFtZXMgYW5kIHVzZSB0aG9zZSBpbnN0ZWFkIG9mIHRoZSB1c3VhbCByYW5kb21seSBnZW5l
-cmF0ZWQNCj4gPj4gPiBuYW1lcyB0aGF0IHJhZG9zIGJlbmNoIHVzZXMsDQo+ID4+ID4gImJlbmNo
-bWFya19kYXRhX2hvc3RuYW1lX3BpZF9vYmplY3R4eHgiLiAgSXQgd2FzIHRoZW4gcG9zc2libGUg
-dG8NCj4gPj4gPiBnZW5lcmF0ZSBhbmQgdXNlIGEgbGlzdCBvZiBuYW1lcyB3aGljaCBoYXNoZWQg
-dG8gYW4gImV2ZW4NCj4gPj4gPiBkaXN0cmlidXRpb24iIGFjcm9zcyBvc2RzIGlmIGRlc2lyZWQu
-ICBUaGUgbGlzdCBvZiBuYW1lcyB3YXMNCj4gPj4gPiBnZW5lcmF0ZWQgYnkgZmluZGluZyBhIHNl
-dCBvZiBwZ3MgdGhhdCBnYXZlIGV2ZW4gZGlzdHJpYnV0aW9uIGFuZA0KPiA+PiA+IHRoZW4gZ2Vu
-ZXJhdGluZyBuYW1lcyB0aGF0IG1hcHBlZCB0byB0aG9zZSBwZ3MuICBTbyBmb3IgZXhhbXBsZQ0K
-PiA+PiA+IHdpdGggNSBvc2RzIG9uIGEgcmVwbGljYXRlZD0yIHBvb2wgd2UgbWlnaHQgZmluZCA1
-IHBncyBtYXBwaW5nIHRvDQo+ID4+ID4gWzAsMl0gWzEsNF0gWzIsM10gWzMsMV0gWzQsMF0gYW5k
-IHRoZW4gYWxsIHRoZSBuYW1lcyBnZW5lcmF0ZWQgd291bGQNCj4gbWFwIHRvIG9ubHkgdGhvc2Ug
-NSBwZ3MuDQo+ID4+ID4NCj4gPj4gPiBVcCB1bnRpbCByZWNlbnRseSwgdGhlIHJlc3VsdHMgZnJv
-bSB0aGVzZSBleHBlcmltZW50cyB3ZXJlIHdoYXQgSQ0KPiA+PiBleHBlY3RlZCwNCj4gPj4gPiAg
-ICAqIGJldHRlciByZXBlYXRhYmlsaXR5IGFjcm9zcyBydW5zDQo+ID4+ID4gICAgKiBldmVuIGRp
-c2sgdXRpbGl6YXRpb24uDQo+ID4+ID4gICAgKiBnZW5lcmFsbHkgaGlnaGVyIHRvdGFsIEJhbmR3
-aWR0aA0KPiA+PiA+DQo+ID4+ID4gUmVjZW50bHkgaG93ZXZlciBJIHNhdyByZXN1bHRzIG9uIG9u
-ZSBwbGF0Zm9ybSB0aGF0IGhhZCBtdWNoIGxvd2VyDQo+ID4+ID4gYmFuZHdpZHRoIChsZXNzIHRo
-YW4gaGFsZikgd2l0aCB0aGUgImV2ZW4gZGlzdHJpYnV0aW9uIiBydW4NCj4gPj4gPiBjb21wYXJl
-ZCB0byB0aGUgZGVmYXVsdCByYW5kb20gZGlzdHJpYnV0aW9uIHJ1bi4gIFNvbWUgbm90ZXMgd2Vy
-ZToNCj4gPj4gPg0KPiA+PiA+ICAgICogc2hvd2VkIHVwIGluIGVyYXN1cmUgY29kZWQgcG9vbCB3
-aXRoIGs9MiwgbT0xLCB3aXRoIDRNIHNpemUNCj4gPj4gPiAgICAgIG9iamVjdHMuICBEaWQgbm90
-IHNob3cgdGhlIGRpc2NyZXBhbmN5IG9uIGEgcmVwbGljYXRlZCAyIHBvb2wgb24NCj4gPj4gPiAg
-ICAgIHRoZSBzYW1lIGNsdXN0ZXIuDQo+ID4+ID4NCj4gPj4gPiAgICAqIEluIGdlbmVyYWwsIGxh
-cmdlciBvYmplY3RzIHNob3dlZCB0aGUgcHJvYmxlbSBtb3JlIHRoYW4gc21hbGxlcg0KPiA+PiA+
-ICAgICAgb2JqZWN0cy4NCj4gPj4gPg0KPiA+PiA+ICAgICogc2hvd2VkIHVwIG9ubHkgb24gcmVh
-ZHMgZnJvbSB0aGUgZXJhc3VyZSBwb29sLiAgV3JpdGVzIHRvIHRoZQ0KPiA+PiA+ICAgICAgc2Ft
-ZSBwb29sIGhhZCBoaWdoZXIgYmFuZHdpZHRoIHdpdGggdGhlICJldmVuIGRpc3RyaWJ1dGlvbiIN
-Cj4gPj4gPg0KPiA+PiA+ICAgICogc2hvd2VkIHVwIG9uIG9ubHkgb25lIGNsdXN0ZXIsIGEgc2Vw
-YXJhdGUgY2x1c3RlciB3aXRoIHRoZSBzYW1lDQo+ID4+ID4gICAgICBudW1iZXIgb2Ygbm9kZXMg
-YW5kIGRpc2tzIGJ1dCBkaWZmZXJlbnQgc3lzdGVtIGFyY2hpdGVjdHVyZSBkaWQNCj4gPj4gPiAg
-ICAgIG5vdCBzaG93IHRoaXMuDQo+ID4+ID4NCj4gPj4gPiAgICAqIHNob3dlZCB1cCBvbmx5IHdo
-ZW4gdGhlIHRvdGFsIG51bWJlciBvZiBjbGllbnQgdGhyZWFkcyBnb3QgImhpZ2gNCj4gPj4gPiAg
-ICAgIGVub3VnaCIuICBGb3IgZXhhbXBsZSBzaG93ZWQgdXAgd2l0aCA2NCB0b3RhbCBjbGllbnQg
-dGhyZWFkcyBidXQNCj4gPj4gPiAgICAgIG5vdCB3aXRoIDE2LiAgVGhlIGRpc3RyaWJ1dGlvbiBv
-ZiB0aHJlYWRzIGFjcm9zcyBjbGllbnQNCj4gcHJvY2Vzc2VzDQo+ID4+ID4gICAgICBkaWQgbm90
-IHNlZW0gdG8gbWF0dGVyLg0KPiA+PiA+DQo+ID4+ID4gSSB0cmllZCBsb29raW5nIGF0ICJkdW1w
-X2hpc3RvcmljX29wcyIgYW5kIGRpZCBpbmRlZWQgc2VlIHNvbWUgcmVhZA0KPiA+PiA+IG9wcyBs
-b2dnZWQgd2l0aCBoaWdoIGxhdGVuY3kgaW4gdGhlICJldmVuIGRpc3RyaWJ1dGlvbiIgY2FzZS4g
-IFRoZQ0KPiA+PiA+IGxhcmdlciBlbGFwc2VkIHRpbWVzIGluIHRoZSBoaXN0b3JpYyBvcHMgd2Vy
-ZSBhbHdheXMgaW4gdGhlDQo+ID4+ID4gInJlYWNoZWRfcGciIGFuZCAiZG9uZSIgc3RlcHMuICBC
-dXQgSSBzYXcgc2ltaWxhciBoaWdoIGxhdGVuY2llcw0KPiA+PiA+IGFuZCBlbGFwc2VkIHRpbWVz
-IGZvciAicmVhY2hlZF9wZyIgYW5kICJkb25lIiBmb3IgaGlzdG9yaWMgcmVhZCBvcHMNCj4gPj4g
-PiBpbiB0aGUgcmFuZG9tIGNhc2UuDQo+ID4+ID4NCj4gPj4gPiBJIGhhdmUgcGVyZiBjb3VudGVy
-cyBiZWZvcmUgYW5kIGFmdGVyIHRoZSByZWFkIHRlc3RzLiAgSSBzZWUgYmlnDQo+ID4+ID4gZGlm
-ZmVyZW5jZXMgaW4gdGhlIG9wX3Jfb3V0X2J5dGVzIHdoaWNoIG1ha2VzIHNlbnNlIGJlY2F1c2Ug
-dGhlDQo+ID4+ID4gaGlnaGVyIGJ3IHJ1biBwcm9jZXNzZWQgbW9yZSBieXRlcy4gIEZvciBzb21l
-IG9zZHMsDQo+ID4+ID4gb3Bfcl9sYXRlbmN5L3N1bSBpcyBzbGlnaHRseSBoaWdoZXIgaW4gdGhl
-ICJldmVuIiBydW4gYnV0IG5vdCBzdXJlIGlmDQo+IHRoaXMgaXMgc2lnbmlmaWNhbnQuDQo+ID4+
-ID4NCj4gPj4gPiBBbnl3YXksIEkgd2lsbCBwcm9iYWJseSBqdXN0IHN0b3AgZG9pbmcgdGhlc2Ug
-ImV2ZW4gZGlzdHJpYnV0aW9uIg0KPiA+PiA+IHJ1bnMgYnV0IEkgd2FzIGhvcGluZyB0byBnZXQg
-YW4gdW5kZXJzdGFuZGluZyBvZiB3aHkgdGhleSBtaWdodA0KPiA+PiA+IGhhdmUgc3VjaGUgcmVk
-dWNlZCBiYW5kd2lkdGggaW4gdGhpcyBwYXJ0aWN1bGFyIGNhc2UuICBJcyB0aGVyZQ0KPiA+PiA+
-IHNvbWV0aGluZyBhYm91dCBtYXBwaW5nIHRvIGEgc21hbGxlciBudW1iZXIgb2YgcGdzIHRoYXQg
-YmVjb21lcyBhDQo+IGJvdHRsZW5lY2s/DQo+ID4+DQo+ID4+IFRoZXJlJ3MgYSBsb3Qgb2YgcGVy
-LXBnIGxvY2tpbmcgYW5kIHBpcGVsaW5pbmcgdGhhdCBoYXBwZW5zIHdpdGhpbg0KPiA+PiB0aGUg
-T1NEIHByb2Nlc3MuIElmIHlvdSdyZSBtYXBwaW5nIHRvIG9ubHkgYSBzaW5nbGUgUEcgcGVyIE9T
-RCwgdGhlbg0KPiA+PiB5b3UncmUgYmFzaWNhbGx5IGZvcmNpbmcgaXQgdG8gcnVuIHNpbmdsZS10
-aHJlYWRlZCBhbmQgdG8gb25seSBoYW5kbGUNCj4gPj4gb25lIHJlYWQgYXQgYSB0aW1lLiBJZiB5
-b3Ugd2FudCB0byBmb3JjZSBhbiBldmVuIGRpc3RyaWJ1dGlvbiBvZg0KPiA+PiBvcGVyYXRpb25z
-IGFjcm9zcyBPU0RzLCB5b3UnbGwgbmVlZCB0byBjYWxjdWxhdGUgbmFtZXMgZm9yIGVub3VnaCBQ
-R3MNCj4gPj4gdG8gZXhjZWVkIHRoZSBzaGFyZGluZyBjb3VudHMgeW91J3JlIHVzaW5nIGluIG9y
-ZGVyIHRvIGF2b2lkDQo+ICJhcnRpZmljaWFsIiBib3R0bGVuZWNrcy4NCj4gPj4gLUdyZWcNCj4g
-Pg0KPiA+IEdyZWcgLS0NCj4gPg0KPiA+IElzIHRoZXJlIGFueSBwZXJmb3JtYW5jZSBjb3VudGVy
-IHdoaWNoIHdvdWxkIHNob3cgdGhlIGZhY3QgdGhhdCB3ZQ0KPiA+IHdlcmUgYmFzaWNhbGx5IHNp
-bmdsZS10aHJlYWRpbmcgaW4gdGhlIE9TRHM/DQo+IA0KPiBJJ20gbm90IGF3YXJlIG9mIGFueXRo
-aW5nIGNvdmVyaW5nIHRoYXQuIEl0J3MgcHJvYmFibHkgbm90IHRvbyBoYXJkIHRvIGFkZA0KPiBj
-b3VudGVycyBvbiBob3cgbWFueSBvcHMgcGVyIHNoYXJkIGhhdmUgYmVlbiBwZXJmb3JtZWQ7IFBS
-cyBhbmQgdGlja2V0cw0KPiB3ZWxjb21lLg0KPiAtR3JlZw0KDQpHcmVnIC0tDQoNCldoYXQgaXMg
-dGhlIG1lYW5pbmcgb2YgJ3NoYXJkJyBpbiB0aGlzIGNvbnRleHQ/ICBXb3VsZCB0aGlzIHRlbGwg
-dXMNCmhvdyBtdWNoIHBhcmFsbGVsaXNtIHdhcyBnb2luZyBvbiBpbiB0aGUgb3NkPw0KDQotLSBU
-b20NCg==
+On Wed, Jan 27, 2016 at 11:14 AM, Deneau, Tom <tom.deneau@amd.com> wrote:
+>
+>
+>> -----Original Message-----
+>> From: Gregory Farnum [mailto:gfarnum@redhat.com]
+>> Sent: Wednesday, January 27, 2016 12:08 PM
+>> To: Deneau, Tom
+>> Cc: ceph-devel@vger.kernel.org; cbt@lists.ceph.com
+>> Subject: Re: [Cbt] rados benchmark, even distribution vs. random
+>> distribution
+>>
+>> On Wed, Jan 27, 2016 at 9:01 AM, Deneau, Tom <tom.deneau@amd.com> wrote:
+>> >
+>> >> -----Original Message-----
+>> >> From: Gregory Farnum [mailto:gfarnum@redhat.com]
+>> >> Sent: Tuesday, January 26, 2016 1:33 PM
+>> >> To: Deneau, Tom
+>> >> Cc: ceph-devel@vger.kernel.org; cbt@lists.ceph.com
+>> >> Subject: Re: [Cbt] rados benchmark, even distribution vs. random
+>> >> distribution
+>> >>
+>> >> On Tue, Jan 26, 2016 at 11:11 AM, Deneau, Tom <tom.deneau@amd.com>
+>> wrote:
+>> >> > Looking for some help with a Ceph performance puzzler...
+>> >> >
+>> >> > Background:
+>> >> > I had been experimenting with running rados benchmarks with a more
+>> >> > controlled distribution of objects across osds.  The main reason
+>> >> > was to reduce run to run variability since I was running on fairly
+>> >> > small clusters.
+>> >> >
+>> >> > I modified rados bench itself to optionally take a file with a list
+>> >> > of names and use those instead of the usual randomly generated
+>> >> > names that rados bench uses,
+>> >> > "benchmark_data_hostname_pid_objectxxx".  It was then possible to
+>> >> > generate and use a list of names which hashed to an "even
+>> >> > distribution" across osds if desired.  The list of names was
+>> >> > generated by finding a set of pgs that gave even distribution and
+>> >> > then generating names that mapped to those pgs.  So for example
+>> >> > with 5 osds on a replicated=2 pool we might find 5 pgs mapping to
+>> >> > [0,2] [1,4] [2,3] [3,1] [4,0] and then all the names generated would
+>> map to only those 5 pgs.
+>> >> >
+>> >> > Up until recently, the results from these experiments were what I
+>> >> expected,
+>> >> >    * better repeatability across runs
+>> >> >    * even disk utilization.
+>> >> >    * generally higher total Bandwidth
+>> >> >
+>> >> > Recently however I saw results on one platform that had much lower
+>> >> > bandwidth (less than half) with the "even distribution" run
+>> >> > compared to the default random distribution run.  Some notes were:
+>> >> >
+>> >> >    * showed up in erasure coded pool with k=2, m=1, with 4M size
+>> >> >      objects.  Did not show the discrepancy on a replicated 2 pool on
+>> >> >      the same cluster.
+>> >> >
+>> >> >    * In general, larger objects showed the problem more than smaller
+>> >> >      objects.
+>> >> >
+>> >> >    * showed up only on reads from the erasure pool.  Writes to the
+>> >> >      same pool had higher bandwidth with the "even distribution"
+>> >> >
+>> >> >    * showed up on only one cluster, a separate cluster with the same
+>> >> >      number of nodes and disks but different system architecture did
+>> >> >      not show this.
+>> >> >
+>> >> >    * showed up only when the total number of client threads got "high
+>> >> >      enough".  For example showed up with 64 total client threads but
+>> >> >      not with 16.  The distribution of threads across client
+>> processes
+>> >> >      did not seem to matter.
+>> >> >
+>> >> > I tried looking at "dump_historic_ops" and did indeed see some read
+>> >> > ops logged with high latency in the "even distribution" case.  The
+>> >> > larger elapsed times in the historic ops were always in the
+>> >> > "reached_pg" and "done" steps.  But I saw similar high latencies
+>> >> > and elapsed times for "reached_pg" and "done" for historic read ops
+>> >> > in the random case.
+>> >> >
+>> >> > I have perf counters before and after the read tests.  I see big
+>> >> > differences in the op_r_out_bytes which makes sense because the
+>> >> > higher bw run processed more bytes.  For some osds,
+>> >> > op_r_latency/sum is slightly higher in the "even" run but not sure if
+>> this is significant.
+>> >> >
+>> >> > Anyway, I will probably just stop doing these "even distribution"
+>> >> > runs but I was hoping to get an understanding of why they might
+>> >> > have suche reduced bandwidth in this particular case.  Is there
+>> >> > something about mapping to a smaller number of pgs that becomes a
+>> bottleneck?
+>> >>
+>> >> There's a lot of per-pg locking and pipelining that happens within
+>> >> the OSD process. If you're mapping to only a single PG per OSD, then
+>> >> you're basically forcing it to run single-threaded and to only handle
+>> >> one read at a time. If you want to force an even distribution of
+>> >> operations across OSDs, you'll need to calculate names for enough PGs
+>> >> to exceed the sharding counts you're using in order to avoid
+>> "artificial" bottlenecks.
+>> >> -Greg
+>> >
+>> > Greg --
+>> >
+>> > Is there any performance counter which would show the fact that we
+>> > were basically single-threading in the OSDs?
+>>
+>> I'm not aware of anything covering that. It's probably not too hard to add
+>> counters on how many ops per shard have been performed; PRs and tickets
+>> welcome.
+>> -Greg
+>
+> Greg --
+>
+> What is the meaning of 'shard' in this context?  Would this tell us
+> how much parallelism was going on in the osd?
+
+We have a "ShardedOpQueue" (or similar) in the OSD which handles all
+the worker threads. PGs are mapped to a single shard for all
+processing, and while operations within a single shard might be
+concurrent (eg, a write can go to disk and leave the CPU free to
+process an op on another PG within the same shard), it is the unit of
+parallelism. So if you've got ops within only a single shard, you'll
+know you're not getting an even spread and are probably bottlenecking
+on that thread. You can do similar comparisons across time by taking
+snapshots of the counters and seeing how they change, or introducing
+more complicated counters to try and directly measure parallelism.
+-Greg
