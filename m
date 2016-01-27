@@ -1,119 +1,97 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: /var/lib/ceph/*/*/config
-Date: Thu, 28 Jan 2016 00:29:02 +0800
-Message-ID: <CACJqLyYkniPVVhG4WEzYM7PMYnTVODMnopK5exMxGrkC-ibiPQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1601191009320.28274@cpach.fuggernut.com>
-	<CACJqLyaMC-UaAhTnzCeUqPCoY3HcoqLwHg3tpWW0H-+6AN6C7Q@mail.gmail.com>
-	<alpine.DEB.2.11.1601191144150.28274@cpach.fuggernut.com>
-	<alpine.DEB.2.11.1601270956260.6524@cpach.fuggernut.com>
-	<56A8E142.4040401@42on.com>
-	<alpine.DEB.2.11.1601271042590.6524@cpach.fuggernut.com>
-	<56A8EA6D.1030808@42on.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: [Cbt] rados benchmark, even distribution vs. random distribution
+Date: Wed, 27 Jan 2016 17:01:50 +0000
+Message-ID: <SN1PR12MB05589AD8303E61D8671FA5729BD90@SN1PR12MB0558.namprd12.prod.outlook.com>
+References: <DM2PR12MB055626F2390C23B79AAE88E59BD80@DM2PR12MB0556.namprd12.prod.outlook.com>
+ <CAJ4mKGbn6SJAdyj=g3wRa1vynG47Tjux4i9nJLGP=T6BU8V-Gg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f176.google.com ([209.85.213.176]:33840 "EHLO
-	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932158AbcA0Q3D (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jan 2016 11:29:03 -0500
-Received: by mail-ig0-f176.google.com with SMTP id ik10so84543899igb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Jan 2016 08:29:03 -0800 (PST)
-In-Reply-To: <56A8EA6D.1030808@42on.com>
+Received: from mail-by2on0056.outbound.protection.outlook.com ([207.46.100.56]:44672
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754485AbcA0RBx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 27 Jan 2016 12:01:53 -0500
+In-Reply-To: <CAJ4mKGbn6SJAdyj=g3wRa1vynG47Tjux4i9nJLGP=T6BU8V-Gg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "cbt@lists.ceph.com" <cbt@lists.ceph.com>
 
-On Thu, Jan 28, 2016 at 12:03 AM, Wido den Hollander <wido@42on.com> wrote:
->
->
-> On 27-01-16 16:45, Sage Weil wrote:
->> On Wed, 27 Jan 2016, Wido den Hollander wrote:
->>> On 27-01-16 15:59, Sage Weil wrote:
->>>> Loic pointed out that adding a new config file that is overrides/combines
->>>> with the global config makes our already-complicated config infrastructure
->>>> even more so.  And it turned out to be more complicated to implement than
->>>> I'd hoped.  On the other hand, I think there are valid use-cases for a
->>>> global config, e.g.:
->>>>
->>>>  - most config on the osd disk itself
->>>>  - /etc/ceph/ceph.conf containing crush_location and mon_host
->>>>
->>>> ...and with a single config I'm not sure how we'd get the datacenter
->>>> location set properly.
->>>>
->>>
->>> Yes, you probably want the mon_host variable in a global config. We
->>> might and I say *might* want to look at a DNS lookup at some time?
->>>
->>> A lookup for 'ceph-monitor' in the current DNS search domain. But that
->>> might be offtopic here.
->>
->> Yeah, I think if we make standard practice setting up DNS with an A or
->> AAAA record for each monitor then we can avoid a global mon_host.  But
->> there's still the crush location piece...
->>
->
-> Yes. I created a issue for that: http://tracker.ceph.com/issues/14527
->
->>>> Anyway, I have two versions implemented.  The first just adds
->>>> $data_dir/config to the search pathh:
->>>>
->>>>     https://github.com/ceph/ceph/pull/7377
->>>>
->>>
->>> I like the first patch, but it doesn't seem to merge the config files,
->>> right?
->>>
->>> If a global /etc/ceph/ceph.conf is found it doesn't search any further.
->>>
->>>> The second adds the extra_config infrastructure.  It's just the last patch
->>>> that is different:
->>>>
->>>>     https://github.com/ceph/ceph/pull/7378
->>>>
->>>
->>> The --extra-config seems weird to me. Isn't there a way where you supply
->>> --config multiple times with multiple files?
->>
->> Right now config is a search path, and when it finds a match, it stops and
->> uses that config file exclusively.  extra_config is a way to merge two of
->> them.  I agree it's not ideal...
->>
->> An alternative approach would be to support 'include <file>' so that the
->> $data_dir/config, if present, would include something from /etc/ceph.
->>
->
-> I think that a include would be much nicer. I filed a issue for that
-> some time ago: http://tracker.ceph.com/issues/4771
->
-> The default config we created for a daemon could be just a one-liner:
->
->
-> /var/lib/ceph/osd/ceph-0/ceph.conf:
->
-> include "/etc/ceph/ceph.conf"
-
-The most annoying thing I think is config section and section
-priority, I'm not sure
-PR(https://github.com/ceph/ceph/pull/7378/files) resolve this problem.
-
-For example, global ceph conf has [global] and [osd.0] section, local
-ceph conf has [osd] section, which has higher priority?
-
-Then local ceph conf now will clear global ceph conf section if exists
-overlap, it will make thing misunderstanding for users.
-
-
->
-> Wido
->
->> sage
->>
-
-
-
--- 
-Best Regards,
-
-Wheat
+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEdyZWdvcnkgRmFybnVtIFtt
+YWlsdG86Z2Zhcm51bUByZWRoYXQuY29tXQ0KPiBTZW50OiBUdWVzZGF5LCBKYW51YXJ5IDI2LCAy
+MDE2IDE6MzMgUE0NCj4gVG86IERlbmVhdSwgVG9tDQo+IENjOiBjZXBoLWRldmVsQHZnZXIua2Vy
+bmVsLm9yZzsgY2J0QGxpc3RzLmNlcGguY29tDQo+IFN1YmplY3Q6IFJlOiBbQ2J0XSByYWRvcyBi
+ZW5jaG1hcmssIGV2ZW4gZGlzdHJpYnV0aW9uIHZzLiByYW5kb20NCj4gZGlzdHJpYnV0aW9uDQo+
+IA0KPiBPbiBUdWUsIEphbiAyNiwgMjAxNiBhdCAxMToxMSBBTSwgRGVuZWF1LCBUb20gPHRvbS5k
+ZW5lYXVAYW1kLmNvbT4gd3JvdGU6DQo+ID4gTG9va2luZyBmb3Igc29tZSBoZWxwIHdpdGggYSBD
+ZXBoIHBlcmZvcm1hbmNlIHB1enpsZXIuLi4NCj4gPg0KPiA+IEJhY2tncm91bmQ6DQo+ID4gSSBo
+YWQgYmVlbiBleHBlcmltZW50aW5nIHdpdGggcnVubmluZyByYWRvcyBiZW5jaG1hcmtzIHdpdGgg
+YSBtb3JlDQo+ID4gY29udHJvbGxlZCBkaXN0cmlidXRpb24gb2Ygb2JqZWN0cyBhY3Jvc3Mgb3Nk
+cy4gIFRoZSBtYWluIHJlYXNvbiB3YXMNCj4gPiB0byByZWR1Y2UgcnVuIHRvIHJ1biB2YXJpYWJp
+bGl0eSBzaW5jZSBJIHdhcyBydW5uaW5nIG9uIGZhaXJseSBzbWFsbA0KPiA+IGNsdXN0ZXJzLg0K
+PiA+DQo+ID4gSSBtb2RpZmllZCByYWRvcyBiZW5jaCBpdHNlbGYgdG8gb3B0aW9uYWxseSB0YWtl
+IGEgZmlsZSB3aXRoIGEgbGlzdCBvZg0KPiA+IG5hbWVzIGFuZCB1c2UgdGhvc2UgaW5zdGVhZCBv
+ZiB0aGUgdXN1YWwgcmFuZG9tbHkgZ2VuZXJhdGVkIG5hbWVzIHRoYXQNCj4gPiByYWRvcyBiZW5j
+aCB1c2VzLCAiYmVuY2htYXJrX2RhdGFfaG9zdG5hbWVfcGlkX29iamVjdHh4eCIuICBJdCB3YXMN
+Cj4gPiB0aGVuIHBvc3NpYmxlIHRvIGdlbmVyYXRlIGFuZCB1c2UgYSBsaXN0IG9mIG5hbWVzIHdo
+aWNoIGhhc2hlZCB0byBhbg0KPiA+ICJldmVuIGRpc3RyaWJ1dGlvbiIgYWNyb3NzIG9zZHMgaWYg
+ZGVzaXJlZC4gIFRoZSBsaXN0IG9mIG5hbWVzIHdhcw0KPiA+IGdlbmVyYXRlZCBieSBmaW5kaW5n
+IGEgc2V0IG9mIHBncyB0aGF0IGdhdmUgZXZlbiBkaXN0cmlidXRpb24gYW5kIHRoZW4NCj4gPiBn
+ZW5lcmF0aW5nIG5hbWVzIHRoYXQgbWFwcGVkIHRvIHRob3NlIHBncy4gIFNvIGZvciBleGFtcGxl
+IHdpdGggNSBvc2RzDQo+ID4gb24gYSByZXBsaWNhdGVkPTIgcG9vbCB3ZSBtaWdodCBmaW5kIDUg
+cGdzIG1hcHBpbmcgdG8gWzAsMl0gWzEsNF0NCj4gPiBbMiwzXSBbMywxXSBbNCwwXSBhbmQgdGhl
+biBhbGwgdGhlIG5hbWVzIGdlbmVyYXRlZCB3b3VsZCBtYXAgdG8gb25seQ0KPiA+IHRob3NlIDUg
+cGdzLg0KPiA+DQo+ID4gVXAgdW50aWwgcmVjZW50bHksIHRoZSByZXN1bHRzIGZyb20gdGhlc2Ug
+ZXhwZXJpbWVudHMgd2VyZSB3aGF0IEkNCj4gZXhwZWN0ZWQsDQo+ID4gICAgKiBiZXR0ZXIgcmVw
+ZWF0YWJpbGl0eSBhY3Jvc3MgcnVucw0KPiA+ICAgICogZXZlbiBkaXNrIHV0aWxpemF0aW9uLg0K
+PiA+ICAgICogZ2VuZXJhbGx5IGhpZ2hlciB0b3RhbCBCYW5kd2lkdGgNCj4gPg0KPiA+IFJlY2Vu
+dGx5IGhvd2V2ZXIgSSBzYXcgcmVzdWx0cyBvbiBvbmUgcGxhdGZvcm0gdGhhdCBoYWQgbXVjaCBs
+b3dlcg0KPiA+IGJhbmR3aWR0aCAobGVzcyB0aGFuIGhhbGYpIHdpdGggdGhlICJldmVuIGRpc3Ry
+aWJ1dGlvbiIgcnVuIGNvbXBhcmVkDQo+ID4gdG8gdGhlIGRlZmF1bHQgcmFuZG9tIGRpc3RyaWJ1
+dGlvbiBydW4uICBTb21lIG5vdGVzIHdlcmU6DQo+ID4NCj4gPiAgICAqIHNob3dlZCB1cCBpbiBl
+cmFzdXJlIGNvZGVkIHBvb2wgd2l0aCBrPTIsIG09MSwgd2l0aCA0TSBzaXplDQo+ID4gICAgICBv
+YmplY3RzLiAgRGlkIG5vdCBzaG93IHRoZSBkaXNjcmVwYW5jeSBvbiBhIHJlcGxpY2F0ZWQgMiBw
+b29sIG9uDQo+ID4gICAgICB0aGUgc2FtZSBjbHVzdGVyLg0KPiA+DQo+ID4gICAgKiBJbiBnZW5l
+cmFsLCBsYXJnZXIgb2JqZWN0cyBzaG93ZWQgdGhlIHByb2JsZW0gbW9yZSB0aGFuIHNtYWxsZXIN
+Cj4gPiAgICAgIG9iamVjdHMuDQo+ID4NCj4gPiAgICAqIHNob3dlZCB1cCBvbmx5IG9uIHJlYWRz
+IGZyb20gdGhlIGVyYXN1cmUgcG9vbC4gIFdyaXRlcyB0byB0aGUNCj4gPiAgICAgIHNhbWUgcG9v
+bCBoYWQgaGlnaGVyIGJhbmR3aWR0aCB3aXRoIHRoZSAiZXZlbiBkaXN0cmlidXRpb24iDQo+ID4N
+Cj4gPiAgICAqIHNob3dlZCB1cCBvbiBvbmx5IG9uZSBjbHVzdGVyLCBhIHNlcGFyYXRlIGNsdXN0
+ZXIgd2l0aCB0aGUgc2FtZQ0KPiA+ICAgICAgbnVtYmVyIG9mIG5vZGVzIGFuZCBkaXNrcyBidXQg
+ZGlmZmVyZW50IHN5c3RlbSBhcmNoaXRlY3R1cmUgZGlkDQo+ID4gICAgICBub3Qgc2hvdyB0aGlz
+Lg0KPiA+DQo+ID4gICAgKiBzaG93ZWQgdXAgb25seSB3aGVuIHRoZSB0b3RhbCBudW1iZXIgb2Yg
+Y2xpZW50IHRocmVhZHMgZ290ICJoaWdoDQo+ID4gICAgICBlbm91Z2giLiAgRm9yIGV4YW1wbGUg
+c2hvd2VkIHVwIHdpdGggNjQgdG90YWwgY2xpZW50IHRocmVhZHMgYnV0DQo+ID4gICAgICBub3Qg
+d2l0aCAxNi4gIFRoZSBkaXN0cmlidXRpb24gb2YgdGhyZWFkcyBhY3Jvc3MgY2xpZW50IHByb2Nl
+c3Nlcw0KPiA+ICAgICAgZGlkIG5vdCBzZWVtIHRvIG1hdHRlci4NCj4gPg0KPiA+IEkgdHJpZWQg
+bG9va2luZyBhdCAiZHVtcF9oaXN0b3JpY19vcHMiIGFuZCBkaWQgaW5kZWVkIHNlZSBzb21lIHJl
+YWQNCj4gPiBvcHMgbG9nZ2VkIHdpdGggaGlnaCBsYXRlbmN5IGluIHRoZSAiZXZlbiBkaXN0cmli
+dXRpb24iIGNhc2UuICBUaGUNCj4gPiBsYXJnZXIgZWxhcHNlZCB0aW1lcyBpbiB0aGUgaGlzdG9y
+aWMgb3BzIHdlcmUgYWx3YXlzIGluIHRoZQ0KPiA+ICJyZWFjaGVkX3BnIiBhbmQgImRvbmUiIHN0
+ZXBzLiAgQnV0IEkgc2F3IHNpbWlsYXIgaGlnaCBsYXRlbmNpZXMgYW5kDQo+ID4gZWxhcHNlZCB0
+aW1lcyBmb3IgInJlYWNoZWRfcGciIGFuZCAiZG9uZSIgZm9yIGhpc3RvcmljIHJlYWQgb3BzIGlu
+IHRoZQ0KPiA+IHJhbmRvbSBjYXNlLg0KPiA+DQo+ID4gSSBoYXZlIHBlcmYgY291bnRlcnMgYmVm
+b3JlIGFuZCBhZnRlciB0aGUgcmVhZCB0ZXN0cy4gIEkgc2VlIGJpZw0KPiA+IGRpZmZlcmVuY2Vz
+IGluIHRoZSBvcF9yX291dF9ieXRlcyB3aGljaCBtYWtlcyBzZW5zZSBiZWNhdXNlIHRoZSBoaWdo
+ZXINCj4gPiBidyBydW4gcHJvY2Vzc2VkIG1vcmUgYnl0ZXMuICBGb3Igc29tZSBvc2RzLCBvcF9y
+X2xhdGVuY3kvc3VtIGlzDQo+ID4gc2xpZ2h0bHkgaGlnaGVyIGluIHRoZSAiZXZlbiIgcnVuIGJ1
+dCBub3Qgc3VyZSBpZiB0aGlzIGlzIHNpZ25pZmljYW50Lg0KPiA+DQo+ID4gQW55d2F5LCBJIHdp
+bGwgcHJvYmFibHkganVzdCBzdG9wIGRvaW5nIHRoZXNlICJldmVuIGRpc3RyaWJ1dGlvbiIgcnVu
+cw0KPiA+IGJ1dCBJIHdhcyBob3BpbmcgdG8gZ2V0IGFuIHVuZGVyc3RhbmRpbmcgb2Ygd2h5IHRo
+ZXkgbWlnaHQgaGF2ZSBzdWNoZQ0KPiA+IHJlZHVjZWQgYmFuZHdpZHRoIGluIHRoaXMgcGFydGlj
+dWxhciBjYXNlLiAgSXMgdGhlcmUgc29tZXRoaW5nIGFib3V0DQo+ID4gbWFwcGluZyB0byBhIHNt
+YWxsZXIgbnVtYmVyIG9mIHBncyB0aGF0IGJlY29tZXMgYSBib3R0bGVuZWNrPw0KPiANCj4gVGhl
+cmUncyBhIGxvdCBvZiBwZXItcGcgbG9ja2luZyBhbmQgcGlwZWxpbmluZyB0aGF0IGhhcHBlbnMg
+d2l0aGluIHRoZSBPU0QNCj4gcHJvY2Vzcy4gSWYgeW91J3JlIG1hcHBpbmcgdG8gb25seSBhIHNp
+bmdsZSBQRyBwZXIgT1NELCB0aGVuIHlvdSdyZQ0KPiBiYXNpY2FsbHkgZm9yY2luZyBpdCB0byBy
+dW4gc2luZ2xlLXRocmVhZGVkIGFuZCB0byBvbmx5IGhhbmRsZSBvbmUgcmVhZCBhdA0KPiBhIHRp
+bWUuIElmIHlvdSB3YW50IHRvIGZvcmNlIGFuIGV2ZW4gZGlzdHJpYnV0aW9uIG9mIG9wZXJhdGlv
+bnMgYWNyb3NzDQo+IE9TRHMsIHlvdSdsbCBuZWVkIHRvIGNhbGN1bGF0ZSBuYW1lcyBmb3IgZW5v
+dWdoIFBHcyB0byBleGNlZWQgdGhlIHNoYXJkaW5nDQo+IGNvdW50cyB5b3UncmUgdXNpbmcgaW4g
+b3JkZXIgdG8gYXZvaWQgImFydGlmaWNpYWwiIGJvdHRsZW5lY2tzLg0KPiAtR3JlZw0KDQpHcmVn
+IC0tDQoNCklzIHRoZXJlIGFueSBwZXJmb3JtYW5jZSBjb3VudGVyIHdoaWNoIHdvdWxkIHNob3cg
+dGhlDQpmYWN0IHRoYXQgd2Ugd2VyZSBiYXNpY2FsbHkgc2luZ2xlLXRocmVhZGluZyBpbiB0aGUg
+T1NEcz8NCg0KLS0gVG9tDQoNCg==
