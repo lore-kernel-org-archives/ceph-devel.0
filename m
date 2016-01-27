@@ -1,34 +1,36 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: pg rebalancing after taking osds out
-Date: Tue, 26 Jan 2016 22:26:02 +0000
-Message-ID: <DM2PR12MB0556E3531B9E94EAF8131BCB9BD80@DM2PR12MB0556.namprd12.prod.outlook.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Ioana Ciornei <ciorneiioana@gmail.com>
+Subject: [PATCH 0/6] net: ceph: messenger: code cleanup
+Date: Wed, 27 Jan 2016 02:43:33 +0200
+Message-ID: <cover.1453853617.git.ciorneiioana@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0064.outbound.protection.outlook.com ([157.56.111.64]:13680
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751110AbcAZWkq convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jan 2016 17:40:46 -0500
-Content-Language: en-US
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:33607 "EHLO
+	mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752721AbcAZWnt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jan 2016 17:43:49 -0500
+Received: by mail-wm0-f66.google.com with SMTP id r129so21935wmr.0
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Jan 2016 14:43:49 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: elder@ieee.org, Ioana Ciornei <ciorneiioana@gmail.com>
 
-I have a replicated x2 pool with the crush step of host.
-When the pool was created there were 3 hosts with 7 osds each,
-and looking at the pg-by-pool for that pool I can see that
-every pg has  copies on two different hosts.
 
-Now I want to take 2 osds out of each node, which I did using
-the osd out command. (So there are then 5 osds per host node).
+This patchset makes some small code cleanup on the messenger code from net/ceph.
+Most of the patches are a result of running checkpatch.pl on
+net/ceph/messenger.c
 
-Now I rerun ceph pg ls-by-pool for that pool and it shows that
-some pgs have both their copies on the same node.
 
-Is this normal?  My expectation was that each pg still
-had its two copies on two different hosts.
+Ioana Ciornei (6):
+  net: ceph: messenger: remove unnecessary blank spaces
+  net: ceph: messenger: fix coding style comparison to NULL
+  net: ceph: messenger: add blank line after declarations
+  net: ceph: messenger: properly align function parameters
+  net: ceph: messenger: change printk to pr_warn
+  net: ceph: messenger: add braces to all arms of conditional statement
 
--- Tom Deneau
+ net/ceph/messenger.c | 207 ++++++++++++++++++++++++++-------------------------
+ 1 file changed, 107 insertions(+), 100 deletions(-)
+
+-- 
+2.6.4
 
