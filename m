@@ -1,65 +1,78 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: Where is the source code about data movement when osdmap changes
-Date: Thu, 28 Jan 2016 20:12:19 +0800
-Message-ID: <CABAwU-ZKCD2_7MFN_VhHUmdgPrxmTkFvWS=EO8O8oQmqcTx5Ug@mail.gmail.com>
-References: <CAEO_8=-rfny49UepfcTaN-ObJitt3o9L9-CnV4MoOK1c9ogn0Q@mail.gmail.com>
-	<56A9CE29.3030307@icloud.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: HEALTH_ERR when (re)starting ceph-osd's
+Date: Thu, 28 Jan 2016 13:37:39 +0100
+Message-ID: <56AA0B93.8050105@42on.com>
+References: <0ec5364ea10c41a687edca2bfe7818e6@R01UKEXCASM115.r01.fujitsu.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f169.google.com ([209.85.217.169]:34318 "EHLO
-	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932900AbcA1MMU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jan 2016 07:12:20 -0500
-Received: by mail-lb0-f169.google.com with SMTP id cl12so22239382lbc.1
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jan 2016 04:12:20 -0800 (PST)
-In-Reply-To: <56A9CE29.3030307@icloud.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:41988 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S935526AbcA1Mhf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jan 2016 07:37:35 -0500
+In-Reply-To: <0ec5364ea10c41a687edca2bfe7818e6@R01UKEXCASM115.r01.fujitsu.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Javen Wu <javen.wu@icloud.com>
-Cc: ouyang tao <ouyangtao1988@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
-
-you can start at  OSD::handle_osd_map function, it trigger the peering
-process when osdmap changed
-
-2016-01-28 16:15 GMT+08:00 Javen Wu <javen.wu@icloud.com>:
-> OSDMap change would trigger peering and then recovery.
-> I assume you are referring "Peering" and "Recovery".
-> There are boost state machine PG::RecoveryState.
->
-> I think you can start from there...
->
->
-> On 2016=E5=B9=B401=E6=9C=8828=E6=97=A5 16:06, ouyang tao wrote:
->>
->> Hi, all
->>      I can't find the source code about the data movement when i rea=
-d
->> the source code about handling the osdmap changes.  can your to fing=
-er
->> out the code?
->>      Very appreciate your kindly reply.
->>
->> Thx
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 
 
---=20
-thanks
-huangjun
+On 28-01-16 11:48, Piotr.Dalek@ts.fujitsu.com wrote:
+> Hello,
+>=20
+> I haven't noticed it before, but since merging https://github.com/cep=
+h/ceph/pull/7253 I see that, when restarting daemons on healthy ceph cl=
+uster, it goes to HEALTH_ERR state with "$(random_number) pgs are stuck=
+ inactive for more than 300 seconds".=20
+> I looked at the commit and it turns out it will be always occurring o=
+n restart/boot, as booting pgs are inactive "by default" (since mons ne=
+ver received any sign of life from them) - not because they're actually=
+ stuck inactive.
+
+Well, in that case, isn't the PR correct? But I see what you mean.
+
+> One solution to this would be to mark pg_stat.last_* fields to the po=
+int where it were first seen, so they will become stuck (mon_pg_stuck_t=
+hreshold) seconds after first registering, and not right away.
+
+That sounds like a good solution, you might want to take a look at:
+http://tracker.ceph.com/issues/14028
+
+> Another, less invasive one, is to just let user disable this warning.
+>=20
+
+As you can see in the discussion on Github, we decided to set
+'mon_pg_min_inactive' to 1 by default.
+
+You can disable these warnings by either setting it to zero or to maybe
+something like 10.
+
+This is just there that people are informed when multiple PGs are inact=
+ive.
+
+Being in WARN state, but still not performing I/O is a bad thing. WARN
+should be where you take a look, but aren't worried.
+
+If I/O stops ERR is a good thing to go in to.
+
+Wido
+
+> What do you think?
+>=20
+> With best regards / Pozdrawiam
+> Piotr Da=C5=82ek
+>=20
+> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=
+=EF=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=
+=BD=1E=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BD=
+j:+v=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!tml=3D
+>=20
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
