@@ -1,130 +1,65 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Fwd: Re: osd dm-crypt key management, part... deux?
-Date: Thu, 28 Jan 2016 19:00:00 +0700
-Message-ID: <56AA02C0.4050901@dachary.org>
-References: <56A9E13E.8050508@suse.de> <56A9E2EC.8040000@suse.de>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: Where is the source code about data movement when osdmap changes
+Date: Thu, 28 Jan 2016 20:12:19 +0800
+Message-ID: <CABAwU-ZKCD2_7MFN_VhHUmdgPrxmTkFvWS=EO8O8oQmqcTx5Ug@mail.gmail.com>
+References: <CAEO_8=-rfny49UepfcTaN-ObJitt3o9L9-CnV4MoOK1c9ogn0Q@mail.gmail.com>
+	<56A9CE29.3030307@icloud.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from slow1-d.mail.gandi.net ([217.70.178.86]:39060 "EHLO
-	slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933991AbcA1MAN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jan 2016 07:00:13 -0500
-Received: from relay5-d.mail.gandi.net (relay5-d.mail.gandi.net [217.70.183.197])
-	by slow1-d.mail.gandi.net (Postfix) with ESMTP id 1357547BD5C
-	for <ceph-devel@vger.kernel.org>; Thu, 28 Jan 2016 13:00:10 +0100 (CET)
-In-Reply-To: <56A9E2EC.8040000@suse.de>
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:34318 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932900AbcA1MMU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jan 2016 07:12:20 -0500
+Received: by mail-lb0-f169.google.com with SMTP id cl12so22239382lbc.1
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jan 2016 04:12:20 -0800 (PST)
+In-Reply-To: <56A9CE29.3030307@icloud.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joshua Schmid <jschmid@suse.de>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Javen Wu <javen.wu@icloud.com>
+Cc: ouyang tao <ouyangtao1988@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Joshua,
+you can start at  OSD::handle_osd_map function, it trigger the peering
+process when osdmap changed
 
-Is there an issue related to your changes in http://tracker.ceph.com/ o=
-r would you like me to create one ?
-
-Cheers
-
-On 28/01/2016 16:44, Joshua Schmid wrote:
->=20
-> Hi Sage,
->=20
-> On 01/27/2016 03:26 PM, Sage Weil wrote:
->> We've had several partial starts to address this problem but haven't=
-=20
->> gotten anything over the line.  A quick summary:
+2016-01-28 16:15 GMT+08:00 Javen Wu <javen.wu@icloud.com>:
+> OSDMap change would trigger peering and then recovery.
+> I assume you are referring "Peering" and "Recovery".
+> There are boost state machine PG::RecoveryState.
+>
+> I think you can start from there...
+>
+>
+> On 2016=E5=B9=B401=E6=9C=8828=E6=97=A5 16:06, ouyang tao wrote:
 >>
->> 1- Currently we store dm-crypt keys in /etc/ceph/dmcrypt-keys/$osd_u=
-uid,=20
->> on the boot disk.  This lets you throw away OSD disk but not boot di=
-sks=20
->> and doesn't help you if someone walks away with a whole server.
+>> Hi, all
+>>      I can't find the source code about the data movement when i rea=
+d
+>> the source code about handling the osdmap changes.  can your to fing=
+er
+>> out the code?
+>>      Very appreciate your kindly reply.
 >>
->> 2- SUSE had a pull request that made ceph-disk push/pull keys over (=
-s)ftp. =20
->> I can't find it now.. did it get closed?
->=20
-> It's here.
->=20
-> https://github.com/SUSE/ceph/commit/0f5644ef3d1b1a9a14be97717b9d8dfe0=
-338b74d
->=20
->>
->> I suggest we do something simple:
->>
->> 1- Update SUSE's ceph-disk changes to make it easy to plug in=20
->> different key management strategies.
->=20
-> And there.
->=20
-> https://github.com/SUSE/ceph/commit/127a47ca7cf28f387d832da265f6955bb=
-04107c3
->=20
-> SUSE currently sticks with this solution since its pluggable and work=
-s
-> fairly well. It may not be the cleanest solution to rely on an extern=
-al
-> tool(ftp) but until now there is simply no other option.
->=20
->>
->> 2- Implement a simple mon-based strategy upstream.  We've discussed =
-this a=20
->> fair bit in the past, and were getting stuck on the problem of where=
- to=20
->> store the key-fetching-key.  I.e., we want a key on the disk that yo=
-u use=20
->> to ask the monitor for the LUKS key, which you then provide to LUKS =
-to=20
->> unlock the actual encryption key.  This means that we need a unencry=
-pted=20
->> spot on the device to store it in.  Milan has indicated that putting=
- it in=20
->> a LUKS key slot would be a bad idea and difficult to maintain.  Inst=
-ead, I=20
->> propose we create a new GPT partition type called OSD_LOCKBOX (or=20
->> similar), with a tiny filesystem and a few files indicating what to =
-do. =20
->> This will make it easy to store the info we need for the mon scheme,=
- and=20
->> to support new key management approaches later (we can put whatever =
-we=20
->> want there as long as it's not too big).
->=20
-> Sounds good! But i still see the possible scenario where you dump a
-> whole rack with a MON + OSD. As a potential attacker, having these tw=
-o
-> components would grant you access to all the keys needed to decrypt t=
-he
-> OSDdata. If I got understood it correctly that every MON should hold =
-all
-> available keys.
->=20
-> Some additions:
->=20
-> The MON should only hand out keys when authenticated or in a clean
-> cluster context. So what i mean is basically some way to proof if the
-> MON is not in a made up environment.
->=20
->=20
->>
->> I put some notes here:
->>
->> 	http://pad.ceph.com/p/osd-key-management
->>
->> Thoughts?
->> sage
->>
+>> Thx
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
 " in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->=20
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
 
 --=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+thanks
+huangjun
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
