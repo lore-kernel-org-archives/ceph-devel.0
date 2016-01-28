@@ -1,74 +1,48 @@
-From: "Laison Computech Inc" <danny@lamicro.com>
-Subject: NEW ARRIVALS, CISCO,CPU's,Memory, LAPTOP AND AVAYA
-Date: Wed, 27 Jan 2016 10:54:32 +0700
-Message-ID: <201601270357.AQX00680@razorgate1.infokom.net>
-Reply-To: <LaisonComputer@computer4u.com>
+From: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
+Subject: RE: Community Update
+Date: Wed, 27 Jan 2016 18:47:01 -0800
+Message-ID: <622F4407872BA447A16110F65453358C04DCD73008ED@FMSAMAIL.fmsa.local>
+References: <CAP8Oy=Jr8VN_0JHy8pbSh-Jp9Dk4UuU=+jB-NHN8j=+kqTQ=4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="Windows-1251"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from razorgate1.infokom.net ([202.147.192.101]:41839 "EHLO
-	razorgate1.infokom.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966424AbcA1COa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jan 2016 21:14:30 -0500
+Received: from fujitsu25.fnanic.fujitsu.com ([192.240.6.15]:45020 "EHLO
+	fujitsu25.fnanic.fujitsu.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S965155AbcA1CrG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 27 Jan 2016 21:47:06 -0500
+In-Reply-To: <CAP8Oy=Jr8VN_0JHy8pbSh-Jp9Dk4UuU=+jB-NHN8j=+kqTQ=4Q@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Patrick McGarry <pmcgarry@gmail.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Dear Sir/Madam,
-
-Clean tested working pulls CPUs and QTYs in stock.
-
-115  X   X5650
-65  X   E5410
-75  X   X5660
-145  X   E5530
-100  X   E5645
-40  X   X5680
-75  X   X5690
-
-Brand new sealed  IP phones and QTYs in stock.
-
-55 x CP-7937G
-77 x CP-7942G
-54 x CP-7945G
-75 x CP-7962G
-......
-45 x Avaya 9630
-65 x Avaya 9641
-55 x Avaya 9640
-
-All NIB.
-
-Here is our current stock list.
-
- SSD drives and 750 gig 2.5" sata drives
-
-We also have
-250 x i5 dell
-133 x HP
-360 x Lenevo
-all grade A
-
-Here is the qty in stock for laptops
- 
-150 x E6500 Dell Latitude E6500 Core 2 Duo 2.80GHz T9600 4GB 160GB DVD+/-RW Win 7
- 60 x E6510 Dell Ltitude E6510. 15.6" Intel Core i5- M520 @ 2.40GHz. 4GB. 320GB DVD+/-RW Win 7
-30 X 8530P HP EliteBook 8530p 15.4" Laptop 2.53GHz Core 2 Duo T9400, 4GB RAM, 160GB HDD, Win
-100 x  8740W  HP EliteBook 8740w 17" 2.4Ghz Core i5 6GB 250GB Win 7 Pr
-45 x 8760W HP EliteBook 8760W 17.3" 2nd Gen Intel Core i7 2.70GHz 8GB 320GB Windows 7 Pro
-50 x DELL 6520Dell latitude e6520 15.6" i5-2520M 2.5Ghz, 8GB Ram, 500GB HD Win 7 @ $115
-120 x DELL 6420 Laptop Dell Latitude E6420 14" Intel Core i5 2.4Ghz 4GB RAM 250GB HDD DVD Win 7
-150 x T410 Lenovo ThinkPad Laptop T410s 14.1" 2.40GHz Core i5 4GB RAM 160GB Win 7
-180 x 8440P HP EliteBook 8440p 14" M520 Core i5 2.4GHz 4GB 250GB Win 7
-
-
-Let me know if you're interested. We are very open to offers and willing to work with you to make sure that we have a deal.
-
-Thank You
-Barbara Johnson
-Laison Computech Inc
-210 N Scoring Ave,
-Rialto California, 92376
-Tel: +1-657-232-7047
-Fax: +1-347-214-047
+SGkgUGF0cmljaywNCg0KV2lsbCB0aGVyZSBiZSBhIHNpZ251cCBmb3IgdGhlIDMxIE1hci0wMSBB
+cHIgaGFja2F0aG9uL2Rlc2lnbiBzZXNzaW9uIGF0IFNhbXN1bmcsIGxpa2UgdGhlIG9uZSB3ZSBo
+YWQgZm9yIGxhc3QgQXVndXN0J3M/DQpJcyB0aGVyZSBhbnkgb3RoZXIgaW5mb3JtYXRpb24gcmVn
+YXJkaW5nIHRoaXM/DQoNCkR1ZSB0byB0cmF2ZWwsIHdlIG5lZWQgdG8gcGxhbiBhaGVhZCBhIGJp
+dC4NCg0KVGhhbmtzLA0KUGF1bA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTog
+Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVy
+QHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFBhdHJpY2sgTWNHYXJyeQ0KU2VudDogVGh1
+cnNkYXksIEphbnVhcnkgMTQsIDIwMTYgMTowMyBQTQ0KVG86IENlcGggRGV2ZWw7IENlcGgtVXNl
+cg0KU3ViamVjdDogQ29tbXVuaXR5IFVwZGF0ZQ0KDQpIZXkgY2VwaGVycywNCg0KSXQgaGFzIGJl
+ZW4gcXVpdGUgYSB3aGlsZSBzaW5jZSBJIGRpc3RpbGxlZCB0aGUgaGlnaGxpZ2h0cyBvZiB3aGF0
+IGlzIGdvaW5nIG9uIGluIHRoZSBjb21tdW5pdHkgaW50byBhIHNpbmdsZSBwb3N0LCBzbyBJIGZp
+Z3VyZWQgaXQgd2FzIGxvbmcgb3ZlcmR1ZS4gUGxlYXNlIGNoZWNrIG91dCB0aGUgbGF0ZXN0IENl
+cGguY29tIGJsb2cgYW5kIHNvbWUgb2YgdGhlIG1hbnkgZ3JlYXQgdGhpbmdzIHRoYXQgYXJlIG9u
+IG91ciBzaG9ydC10ZXJtIHJhZGFyIGF0IHRoZSBtb21lbnQ6DQoNCmh0dHA6Ly9jZXBoLmNvbS9j
+b21tdW5pdHkvY29tbXVuaXR5LXVwZGF0ZS13ZWxjb21lLXRvLTIwMTYvDQoNCkluIHRoaXMgcG9z
+dCB3ZSBjb3ZlcjoNCg0KKiBUZXN0aW5nIHJlc291cmNlcyAoU2VwaWEgTGFiKQ0KKiBDZXBoIFRl
+Y2ggVGFsa3MNCiogQ2VwaCBEYXlzDQoqIENlcGguY29tIG92ZXJoYXVsDQoqIENlcGgtYnJhZw0K
+KiBDZXBoIERldmVsb3BlciBTdW1taXQgY2hhbmdlcw0KKiBSZWQgSGF0IFN1bW1pdA0KDQpXaGls
+ZSB0aGlzIGlzIGJ5IG5vIG1lYW5zIGFuIGV4aGF1c3RpdmUgbGlzdCwgaXQgc2hvdWxkIGdpdmUg
+eW91IGEgcHJldHR5IGdvb2Qgc25hcHNob3Qgb2Ygd2hhdCBpcyBjb21pbmcgaW4gdGhlIG5lYXIg
+ZnV0dXJlIHdpdGggdGhlIENlcGggQ29tbXVuaXR5LiBQbGVhc2UgZmVlbCBmcmVlIHRvIHJlYWNo
+IG91dCB0byBtZSB3aXRoIGFueSBxdWVzdGlvbnMsIGNvbmNlcm5zLCBvciBhbnl0aGluZyBmb3Ig
+dGhlIGdvb2Qgb2YgdGhlIGNhdXNlLiBUaGFua3MhDQoNCg0KDQpCZXN0IFJlZ2FyZHMsDQoNCg0K
+UGF0cmljayBNY0dhcnJ5DQpwbWNnYXJyeUBnbWFpbC5jb20NCi0tDQpUbyB1bnN1YnNjcmliZSBm
+cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4g
+dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBt
+YWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5o
+dG1sDQo=
