@@ -1,48 +1,99 @@
-From: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
-Subject: RE: Community Update
-Date: Wed, 27 Jan 2016 18:47:01 -0800
-Message-ID: <622F4407872BA447A16110F65453358C04DCD73008ED@FMSAMAIL.fmsa.local>
+From: Patrick McGarry <pmcgarry@gmail.com>
+Subject: Re: Community Update
+Date: Wed, 27 Jan 2016 22:42:35 -0500
+Message-ID: <CAP8Oy=KX1SsW_BWR0GQGxi7-uTOqnx+yjiWbtYB4kzPTY9tOJw@mail.gmail.com>
 References: <CAP8Oy=Jr8VN_0JHy8pbSh-Jp9Dk4UuU=+jB-NHN8j=+kqTQ=4Q@mail.gmail.com>
+	<622F4407872BA447A16110F65453358C04DCD73008ED@FMSAMAIL.fmsa.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fujitsu25.fnanic.fujitsu.com ([192.240.6.15]:45020 "EHLO
-	fujitsu25.fnanic.fujitsu.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S965155AbcA1CrG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 27 Jan 2016 21:47:06 -0500
-In-Reply-To: <CAP8Oy=Jr8VN_0JHy8pbSh-Jp9Dk4UuU=+jB-NHN8j=+kqTQ=4Q@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-yk0-f175.google.com ([209.85.160.175]:33915 "EHLO
+	mail-yk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S968139AbcA1Dmg convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jan 2016 22:42:36 -0500
+Received: by mail-yk0-f175.google.com with SMTP id a85so17036259ykb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Jan 2016 19:42:35 -0800 (PST)
+In-Reply-To: <622F4407872BA447A16110F65453358C04DCD73008ED@FMSAMAIL.fmsa.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <pmcgarry@gmail.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-SGkgUGF0cmljaywNCg0KV2lsbCB0aGVyZSBiZSBhIHNpZ251cCBmb3IgdGhlIDMxIE1hci0wMSBB
-cHIgaGFja2F0aG9uL2Rlc2lnbiBzZXNzaW9uIGF0IFNhbXN1bmcsIGxpa2UgdGhlIG9uZSB3ZSBo
-YWQgZm9yIGxhc3QgQXVndXN0J3M/DQpJcyB0aGVyZSBhbnkgb3RoZXIgaW5mb3JtYXRpb24gcmVn
-YXJkaW5nIHRoaXM/DQoNCkR1ZSB0byB0cmF2ZWwsIHdlIG5lZWQgdG8gcGxhbiBhaGVhZCBhIGJp
-dC4NCg0KVGhhbmtzLA0KUGF1bA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTog
-Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVy
-QHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFBhdHJpY2sgTWNHYXJyeQ0KU2VudDogVGh1
-cnNkYXksIEphbnVhcnkgMTQsIDIwMTYgMTowMyBQTQ0KVG86IENlcGggRGV2ZWw7IENlcGgtVXNl
-cg0KU3ViamVjdDogQ29tbXVuaXR5IFVwZGF0ZQ0KDQpIZXkgY2VwaGVycywNCg0KSXQgaGFzIGJl
-ZW4gcXVpdGUgYSB3aGlsZSBzaW5jZSBJIGRpc3RpbGxlZCB0aGUgaGlnaGxpZ2h0cyBvZiB3aGF0
-IGlzIGdvaW5nIG9uIGluIHRoZSBjb21tdW5pdHkgaW50byBhIHNpbmdsZSBwb3N0LCBzbyBJIGZp
-Z3VyZWQgaXQgd2FzIGxvbmcgb3ZlcmR1ZS4gUGxlYXNlIGNoZWNrIG91dCB0aGUgbGF0ZXN0IENl
-cGguY29tIGJsb2cgYW5kIHNvbWUgb2YgdGhlIG1hbnkgZ3JlYXQgdGhpbmdzIHRoYXQgYXJlIG9u
-IG91ciBzaG9ydC10ZXJtIHJhZGFyIGF0IHRoZSBtb21lbnQ6DQoNCmh0dHA6Ly9jZXBoLmNvbS9j
-b21tdW5pdHkvY29tbXVuaXR5LXVwZGF0ZS13ZWxjb21lLXRvLTIwMTYvDQoNCkluIHRoaXMgcG9z
-dCB3ZSBjb3ZlcjoNCg0KKiBUZXN0aW5nIHJlc291cmNlcyAoU2VwaWEgTGFiKQ0KKiBDZXBoIFRl
-Y2ggVGFsa3MNCiogQ2VwaCBEYXlzDQoqIENlcGguY29tIG92ZXJoYXVsDQoqIENlcGgtYnJhZw0K
-KiBDZXBoIERldmVsb3BlciBTdW1taXQgY2hhbmdlcw0KKiBSZWQgSGF0IFN1bW1pdA0KDQpXaGls
-ZSB0aGlzIGlzIGJ5IG5vIG1lYW5zIGFuIGV4aGF1c3RpdmUgbGlzdCwgaXQgc2hvdWxkIGdpdmUg
-eW91IGEgcHJldHR5IGdvb2Qgc25hcHNob3Qgb2Ygd2hhdCBpcyBjb21pbmcgaW4gdGhlIG5lYXIg
-ZnV0dXJlIHdpdGggdGhlIENlcGggQ29tbXVuaXR5LiBQbGVhc2UgZmVlbCBmcmVlIHRvIHJlYWNo
-IG91dCB0byBtZSB3aXRoIGFueSBxdWVzdGlvbnMsIGNvbmNlcm5zLCBvciBhbnl0aGluZyBmb3Ig
-dGhlIGdvb2Qgb2YgdGhlIGNhdXNlLiBUaGFua3MhDQoNCg0KDQpCZXN0IFJlZ2FyZHMsDQoNCg0K
-UGF0cmljayBNY0dhcnJ5DQpwbWNnYXJyeUBnbWFpbC5jb20NCi0tDQpUbyB1bnN1YnNjcmliZSBm
-cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4g
-dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBt
-YWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5o
-dG1sDQo=
+Hey Paul,
+
+Yes, I will be opening up a signup and topic suggestion in the very
+near future. I=E2=80=99m hoping to gather some guidance based on where =
+Jewel
+things (specifically, CephFS) are as we get closer. I can push this
+sooner and just allow for some pivots as we get closer though. I=E2=80=99=
+ll
+let everyone know when the signups are up. Thanks.
+
+Best Regards,
+
+
+Patrick McGarry
+pmcgarry@gmail.com
+
+
+On Wed, Jan 27, 2016 at 9:47 PM, Paul Von-Stamwitz
+<PVonStamwitz@us.fujitsu.com> wrote:
+> Hi Patrick,
+>
+> Will there be a signup for the 31 Mar-01 Apr hackathon/design session=
+ at Samsung, like the one we had for last August's?
+> Is there any other information regarding this?
+>
+> Due to travel, we need to plan ahead a bit.
+>
+> Thanks,
+> Paul
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Patrick McGarry
+> Sent: Thursday, January 14, 2016 1:03 PM
+> To: Ceph Devel; Ceph-User
+> Subject: Community Update
+>
+> Hey cephers,
+>
+> It has been quite a while since I distilled the highlights of what is=
+ going on in the community into a single post, so I figured it was long=
+ overdue. Please check out the latest Ceph.com blog and some of the man=
+y great things that are on our short-term radar at the moment:
+>
+> http://ceph.com/community/community-update-welcome-to-2016/
+>
+> In this post we cover:
+>
+> * Testing resources (Sepia Lab)
+> * Ceph Tech Talks
+> * Ceph Days
+> * Ceph.com overhaul
+> * Ceph-brag
+> * Ceph Developer Summit changes
+> * Red Hat Summit
+>
+> While this is by no means an exhaustive list, it should give you a pr=
+etty good snapshot of what is coming in the near future with the Ceph C=
+ommunity. Please feel free to reach out to me with any questions, conce=
+rns, or anything for the good of the cause. Thanks!
+>
+>
+>
+> Best Regards,
+>
+>
+> Patrick McGarry
+> pmcgarry@gmail.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in the body of a message to majordomo@vger.kernel.org More majordomo i=
+nfo at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
