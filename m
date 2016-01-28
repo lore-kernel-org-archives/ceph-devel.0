@@ -1,129 +1,37 @@
-From: Joshua Schmid <jschmid@suse.de>
-Subject: Fwd: Re: osd dm-crypt key management, part... deux?
-Date: Thu, 28 Jan 2016 10:44:12 +0100
-Message-ID: <56A9E2EC.8040000@suse.de>
-References: <56A9E13E.8050508@suse.de>
+From: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>
+Subject: HEALTH_ERR when (re)starting ceph-osd's
+Date: Thu, 28 Jan 2016 10:48:15 +0000
+Message-ID: <0ec5364ea10c41a687edca2bfe7818e6@R01UKEXCASM115.r01.fujitsu.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:39136 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751488AbcA1Jiu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 28 Jan 2016 04:38:50 -0500
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id 3E042ADCC
-	for <ceph-devel@vger.kernel.org>; Thu, 28 Jan 2016 09:38:49 +0000 (UTC)
-In-Reply-To: <56A9E13E.8050508@suse.de>
+Received: from mail1.bemta14.messagelabs.com ([193.109.254.111]:36189 "EHLO
+	mail1.bemta14.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S966781AbcA1Kzh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 28 Jan 2016 05:55:37 -0500
+Received: from R01UKEXCASM113.r01.fujitsu.local (ex2k13_113.fs.fujitsu.com [10.183.43.169])
+	by mailhost3.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id u0SAj6bq029261
+	(version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Thu, 28 Jan 2016 10:45:23 GMT
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-Hi Sage,
-
-On 01/27/2016 03:26 PM, Sage Weil wrote:
-> We've had several partial starts to address this problem but haven't=20
-> gotten anything over the line.  A quick summary:
->=20
-> 1- Currently we store dm-crypt keys in /etc/ceph/dmcrypt-keys/$osd_uu=
-id,=20
-> on the boot disk.  This lets you throw away OSD disk but not boot dis=
-ks=20
-> and doesn't help you if someone walks away with a whole server.
->=20
-> 2- SUSE had a pull request that made ceph-disk push/pull keys over (s=
-)ftp. =20
-> I can't find it now.. did it get closed?
-
-It's here.
-
-https://github.com/SUSE/ceph/commit/0f5644ef3d1b1a9a14be97717b9d8dfe033=
-8b74d
-
->=20
-> I suggest we do something simple:
->=20
-> 1- Update SUSE's ceph-disk changes to make it easy to plug in=20
-> different key management strategies.
-
-And there.
-
-https://github.com/SUSE/ceph/commit/127a47ca7cf28f387d832da265f6955bb04=
-107c3
-
-SUSE currently sticks with this solution since its pluggable and works
-fairly well. It may not be the cleanest solution to rely on an external
-tool(ftp) but until now there is simply no other option.
-
->=20
-> 2- Implement a simple mon-based strategy upstream.  We've discussed t=
-his a=20
-> fair bit in the past, and were getting stuck on the problem of where =
-to=20
-> store the key-fetching-key.  I.e., we want a key on the disk that you=
- use=20
-> to ask the monitor for the LUKS key, which you then provide to LUKS t=
-o=20
-> unlock the actual encryption key.  This means that we need a unencryp=
-ted=20
-> spot on the device to store it in.  Milan has indicated that putting =
-it in=20
-> a LUKS key slot would be a bad idea and difficult to maintain.  Inste=
-ad, I=20
-> propose we create a new GPT partition type called OSD_LOCKBOX (or=20
-> similar), with a tiny filesystem and a few files indicating what to d=
-o. =20
-> This will make it easy to store the info we need for the mon scheme, =
-and=20
-> to support new key management approaches later (we can put whatever w=
-e=20
-> want there as long as it's not too big).
-
-Sounds good! But i still see the possible scenario where you dump a
-whole rack with a MON + OSD. As a potential attacker, having these two
-components would grant you access to all the keys needed to decrypt the
-OSDdata. If I got understood it correctly that every MON should hold al=
-l
-available keys.
-
-Some additions:
-
-The MON should only hand out keys when authenticated or in a clean
-cluster context. So what i mean is basically some way to proof if the
-MON is not in a made up environment.
-
-
->=20
-> I put some notes here:
->=20
-> 	http://pad.ceph.com/p/osd-key-management
->=20
-> Thoughts?
-> sage
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-=46reundliche Gr=FC=DFe - Kind regards,
-Joshua Schmid
-SUSE Enterprise Storage - Trainee
-SUSE Linux GmbH - Maxfeldstr. 5 - 90409 N=FCrnberg
------------------------------------------------------------------------=
----------------------------------------------
-SUSE Linux GmbH, GF: Felix Imend=F6rffer, Jane Smithard,
-Jennifer Guild, Dilip Upmanyu, Graham Norton, HRB 21284 (AG N=FCrnberg)
------------------------------------------------------------------------=
----------------------------------------------
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGVsbG8sDQoNCkkgaGF2ZW4ndCBub3RpY2VkIGl0IGJlZm9yZSwgYnV0IHNpbmNlIG1lcmdpbmcg
+aHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzcyNTMgSSBzZWUgdGhhdCwgd2hlbiBy
+ZXN0YXJ0aW5nIGRhZW1vbnMgb24gaGVhbHRoeSBjZXBoIGNsdXN0ZXIsIGl0IGdvZXMgdG8gSEVB
+TFRIX0VSUiBzdGF0ZSB3aXRoICIkKHJhbmRvbV9udW1iZXIpIHBncyBhcmUgc3R1Y2sgaW5hY3Rp
+dmUgZm9yIG1vcmUgdGhhbiAzMDAgc2Vjb25kcyIuIA0KSSBsb29rZWQgYXQgdGhlIGNvbW1pdCBh
+bmQgaXQgdHVybnMgb3V0IGl0IHdpbGwgYmUgYWx3YXlzIG9jY3VycmluZyBvbiByZXN0YXJ0L2Jv
+b3QsIGFzIGJvb3RpbmcgcGdzIGFyZSBpbmFjdGl2ZSAiYnkgZGVmYXVsdCIgKHNpbmNlIG1vbnMg
+bmV2ZXIgcmVjZWl2ZWQgYW55IHNpZ24gb2YgbGlmZSBmcm9tIHRoZW0pIC0gbm90IGJlY2F1c2Ug
+dGhleSdyZSBhY3R1YWxseSBzdHVjayBpbmFjdGl2ZS4NCk9uZSBzb2x1dGlvbiB0byB0aGlzIHdv
+dWxkIGJlIHRvIG1hcmsgcGdfc3RhdC5sYXN0XyogZmllbGRzIHRvIHRoZSBwb2ludCB3aGVyZSBp
+dCB3ZXJlIGZpcnN0IHNlZW4sIHNvIHRoZXkgd2lsbCBiZWNvbWUgc3R1Y2sgKG1vbl9wZ19zdHVj
+a190aHJlc2hvbGQpIHNlY29uZHMgYWZ0ZXIgZmlyc3QgcmVnaXN0ZXJpbmcsIGFuZCBub3Qgcmln
+aHQgYXdheS4NCkFub3RoZXIsIGxlc3MgaW52YXNpdmUgb25lLCBpcyB0byBqdXN0IGxldCB1c2Vy
+IGRpc2FibGUgdGhpcyB3YXJuaW5nLg0KDQpXaGF0IGRvIHlvdSB0aGluaz8NCg0KV2l0aCBiZXN0
+IHJlZ2FyZHMgLyBQb3pkcmF3aWFtDQpQaW90ciBEYcWCZWsNCg0K
