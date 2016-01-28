@@ -1,80 +1,46 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: HEALTH_ERR when (re)starting ceph-osd's
-Date: Thu, 28 Jan 2016 13:37:39 +0100
-Message-ID: <56AA0B93.8050105@42on.com>
+From: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>
+Subject: RE: HEALTH_ERR when (re)starting ceph-osd's
+Date: Thu, 28 Jan 2016 13:05:10 +0000
+Message-ID: <900f8c968c71408e95e894d63a174ef7@R01UKEXCASM115.r01.fujitsu.local>
 References: <0ec5364ea10c41a687edca2bfe7818e6@R01UKEXCASM115.r01.fujitsu.local>
+ <56AA0B93.8050105@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:41988 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935526AbcA1Mhf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jan 2016 07:37:35 -0500
-In-Reply-To: <0ec5364ea10c41a687edca2bfe7818e6@R01UKEXCASM115.r01.fujitsu.local>
+Received: from mail1.bemta14.messagelabs.com ([193.109.254.117]:19638 "EHLO
+	mail1.bemta14.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S966362AbcA1NFW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 28 Jan 2016 08:05:22 -0500
+In-Reply-To: <56AA0B93.8050105@42on.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-
-On 28-01-16 11:48, Piotr.Dalek@ts.fujitsu.com wrote:
-> Hello,
->=20
-> I haven't noticed it before, but since merging https://github.com/cep=
-h/ceph/pull/7253 I see that, when restarting daemons on healthy ceph cl=
-uster, it goes to HEALTH_ERR state with "$(random_number) pgs are stuck=
- inactive for more than 300 seconds".=20
-> I looked at the commit and it turns out it will be always occurring o=
-n restart/boot, as booting pgs are inactive "by default" (since mons ne=
-ver received any sign of life from them) - not because they're actually=
- stuck inactive.
-
-Well, in that case, isn't the PR correct? But I see what you mean.
-
-> One solution to this would be to mark pg_stat.last_* fields to the po=
-int where it were first seen, so they will become stuck (mon_pg_stuck_t=
-hreshold) seconds after first registering, and not right away.
-
-That sounds like a good solution, you might want to take a look at:
-http://tracker.ceph.com/issues/14028
-
-> Another, less invasive one, is to just let user disable this warning.
->=20
-
-As you can see in the discussion on Github, we decided to set
-'mon_pg_min_inactive' to 1 by default.
-
-You can disable these warnings by either setting it to zero or to maybe
-something like 10.
-
-This is just there that people are informed when multiple PGs are inact=
-ive.
-
-Being in WARN state, but still not performing I/O is a bad thing. WARN
-should be where you take a look, but aren't worried.
-
-If I/O stops ERR is a good thing to go in to.
-
-Wido
-
-> What do you think?
->=20
-> With best regards / Pozdrawiam
-> Piotr Da=C5=82ek
->=20
-> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=
-=EF=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=
-=BD=1E=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BD=
-j:+v=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD=EF=BF=BD=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!tml=3D
->=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBXaWRvIGRlbiBIb2xsYW5kZXIg
+W21haWx0bzp3aWRvQDQyb24uY29tXQ0KPiBTZW50OiBUaHVyc2RheSwgSmFudWFyeSAyOCwgMjAx
+NiAxOjM4IFBNDQo+IA0KPiBPbiAyOC0wMS0xNiAxMTo0OCwgUGlvdHIuRGFsZWtAdHMuZnVqaXRz
+dS5jb20gd3JvdGU6DQo+ID4gSGVsbG8sDQo+ID4NCj4gPiBJIGhhdmVuJ3Qgbm90aWNlZCBpdCBi
+ZWZvcmUsIGJ1dCBzaW5jZSBtZXJnaW5nDQo+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgv
+cHVsbC83MjUzIEkgc2VlIHRoYXQsIHdoZW4gcmVzdGFydGluZw0KPiBkYWVtb25zIG9uIGhlYWx0
+aHkgY2VwaCBjbHVzdGVyLCBpdCBnb2VzIHRvIEhFQUxUSF9FUlIgc3RhdGUgd2l0aA0KPiAiJChy
+YW5kb21fbnVtYmVyKSBwZ3MgYXJlIHN0dWNrIGluYWN0aXZlIGZvciBtb3JlIHRoYW4gMzAwIHNl
+Y29uZHMiLg0KPiA+IEkgbG9va2VkIGF0IHRoZSBjb21taXQgYW5kIGl0IHR1cm5zIG91dCBpdCB3
+aWxsIGJlIGFsd2F5cyBvY2N1cnJpbmcgb24NCj4gcmVzdGFydC9ib290LCBhcyBib290aW5nIHBn
+cyBhcmUgaW5hY3RpdmUgImJ5IGRlZmF1bHQiIChzaW5jZSBtb25zIG5ldmVyDQo+IHJlY2VpdmVk
+IGFueSBzaWduIG9mIGxpZmUgZnJvbSB0aGVtKSAtIG5vdCBiZWNhdXNlIHRoZXkncmUgYWN0dWFs
+bHkgc3R1Y2sNCj4gaW5hY3RpdmUuDQo+IA0KPiBXZWxsLCBpbiB0aGF0IGNhc2UsIGlzbid0IHRo
+ZSBQUiBjb3JyZWN0PyBCdXQgSSBzZWUgd2hhdCB5b3UgbWVhbi4NCg0KQWN0dWFsbHksIHRoZSBv
+bmx5IHRoaW5nIHdyb25nIHdpdGggdGhpcyBpcyB0aGF0IGl0IHJlcG9ydHMgUEdzIGFzIGluYWN0
+aXZlIGZvciBzb21lIHByb2xvbmdlZCBwZXJpb2Qgb2YgdGltZSwgd2hlbiBpdCdzIG5vdCB0cnVl
+Lg0KIA0KPiA+IE9uZSBzb2x1dGlvbiB0byB0aGlzIHdvdWxkIGJlIHRvIG1hcmsgcGdfc3RhdC5s
+YXN0XyogZmllbGRzIHRvIHRoZSBwb2ludA0KPiB3aGVyZSBpdCB3ZXJlIGZpcnN0IHNlZW4sIHNv
+IHRoZXkgd2lsbCBiZWNvbWUgc3R1Y2sNCj4gKG1vbl9wZ19zdHVja190aHJlc2hvbGQpIHNlY29u
+ZHMgYWZ0ZXIgZmlyc3QgcmVnaXN0ZXJpbmcsIGFuZCBub3QgcmlnaHQNCj4gYXdheS4NCj4gDQo+
+IFRoYXQgc291bmRzIGxpa2UgYSBnb29kIHNvbHV0aW9uLCB5b3UgbWlnaHQgd2FudCB0byB0YWtl
+IGEgbG9vayBhdDoNCj4gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzE0MDI4DQoNCkkn
+bGwgdGFrZSBhIGxvb2suIE1heWJlIHdlIGNvdWxkIGZpeCB0d28gaXNzdWVzIHdpdGggb25lIFBS
+IDstKQ0KDQpXaXRoIGJlc3QgcmVnYXJkcyAvIFBvemRyYXdpYW0NClBpb3RyIERhxYJlaw0KDQoN
+Cg==
