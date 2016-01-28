@@ -1,46 +1,31 @@
-From: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>
-Subject: RE: HEALTH_ERR when (re)starting ceph-osd's
-Date: Thu, 28 Jan 2016 13:05:10 +0000
-Message-ID: <900f8c968c71408e95e894d63a174ef7@R01UKEXCASM115.r01.fujitsu.local>
-References: <0ec5364ea10c41a687edca2bfe7818e6@R01UKEXCASM115.r01.fujitsu.local>
- <56AA0B93.8050105@42on.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: how to debug librados/librbd in logfile
+Date: Thu, 28 Jan 2016 22:33:10 +0800
+Message-ID: <CABAwU-YLhiSdD8cbZWHC=8cBeNi_UM2rp3XpJefwWsiszwv6ww@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail1.bemta14.messagelabs.com ([193.109.254.117]:19638 "EHLO
-	mail1.bemta14.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S966362AbcA1NFW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 28 Jan 2016 08:05:22 -0500
-In-Reply-To: <56AA0B93.8050105@42on.com>
-Content-Language: en-US
+Received: from mail-lf0-f48.google.com ([209.85.215.48]:35107 "EHLO
+	mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753529AbcA1OdM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jan 2016 09:33:12 -0500
+Received: by mail-lf0-f48.google.com with SMTP id c192so28014180lfe.2
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jan 2016 06:33:11 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBXaWRvIGRlbiBIb2xsYW5kZXIg
-W21haWx0bzp3aWRvQDQyb24uY29tXQ0KPiBTZW50OiBUaHVyc2RheSwgSmFudWFyeSAyOCwgMjAx
-NiAxOjM4IFBNDQo+IA0KPiBPbiAyOC0wMS0xNiAxMTo0OCwgUGlvdHIuRGFsZWtAdHMuZnVqaXRz
-dS5jb20gd3JvdGU6DQo+ID4gSGVsbG8sDQo+ID4NCj4gPiBJIGhhdmVuJ3Qgbm90aWNlZCBpdCBi
-ZWZvcmUsIGJ1dCBzaW5jZSBtZXJnaW5nDQo+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgv
-cHVsbC83MjUzIEkgc2VlIHRoYXQsIHdoZW4gcmVzdGFydGluZw0KPiBkYWVtb25zIG9uIGhlYWx0
-aHkgY2VwaCBjbHVzdGVyLCBpdCBnb2VzIHRvIEhFQUxUSF9FUlIgc3RhdGUgd2l0aA0KPiAiJChy
-YW5kb21fbnVtYmVyKSBwZ3MgYXJlIHN0dWNrIGluYWN0aXZlIGZvciBtb3JlIHRoYW4gMzAwIHNl
-Y29uZHMiLg0KPiA+IEkgbG9va2VkIGF0IHRoZSBjb21taXQgYW5kIGl0IHR1cm5zIG91dCBpdCB3
-aWxsIGJlIGFsd2F5cyBvY2N1cnJpbmcgb24NCj4gcmVzdGFydC9ib290LCBhcyBib290aW5nIHBn
-cyBhcmUgaW5hY3RpdmUgImJ5IGRlZmF1bHQiIChzaW5jZSBtb25zIG5ldmVyDQo+IHJlY2VpdmVk
-IGFueSBzaWduIG9mIGxpZmUgZnJvbSB0aGVtKSAtIG5vdCBiZWNhdXNlIHRoZXkncmUgYWN0dWFs
-bHkgc3R1Y2sNCj4gaW5hY3RpdmUuDQo+IA0KPiBXZWxsLCBpbiB0aGF0IGNhc2UsIGlzbid0IHRo
-ZSBQUiBjb3JyZWN0PyBCdXQgSSBzZWUgd2hhdCB5b3UgbWVhbi4NCg0KQWN0dWFsbHksIHRoZSBv
-bmx5IHRoaW5nIHdyb25nIHdpdGggdGhpcyBpcyB0aGF0IGl0IHJlcG9ydHMgUEdzIGFzIGluYWN0
-aXZlIGZvciBzb21lIHByb2xvbmdlZCBwZXJpb2Qgb2YgdGltZSwgd2hlbiBpdCdzIG5vdCB0cnVl
-Lg0KIA0KPiA+IE9uZSBzb2x1dGlvbiB0byB0aGlzIHdvdWxkIGJlIHRvIG1hcmsgcGdfc3RhdC5s
-YXN0XyogZmllbGRzIHRvIHRoZSBwb2ludA0KPiB3aGVyZSBpdCB3ZXJlIGZpcnN0IHNlZW4sIHNv
-IHRoZXkgd2lsbCBiZWNvbWUgc3R1Y2sNCj4gKG1vbl9wZ19zdHVja190aHJlc2hvbGQpIHNlY29u
-ZHMgYWZ0ZXIgZmlyc3QgcmVnaXN0ZXJpbmcsIGFuZCBub3QgcmlnaHQNCj4gYXdheS4NCj4gDQo+
-IFRoYXQgc291bmRzIGxpa2UgYSBnb29kIHNvbHV0aW9uLCB5b3UgbWlnaHQgd2FudCB0byB0YWtl
-IGEgbG9vayBhdDoNCj4gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzE0MDI4DQoNCkkn
-bGwgdGFrZSBhIGxvb2suIE1heWJlIHdlIGNvdWxkIGZpeCB0d28gaXNzdWVzIHdpdGggb25lIFBS
-IDstKQ0KDQpXaXRoIGJlc3QgcmVnYXJkcyAvIFBvemRyYXdpYW0NClBpb3RyIERhxYJlaw0KDQoN
-Cg==
+hi,all
+I want to get debug log when using librados/librbd,
+set client section in ceph.conf:
+[client]
+debug_rbd = 20
+debug_objecter = 20
+log_file = /var/log/ceph/ceph.rbd.log
+
+that not work, file "/var/log/ceph/ceph.rbd.log" does not exist at all.
+Any ideas?
+
+-- 
+thanks
+huangjun
