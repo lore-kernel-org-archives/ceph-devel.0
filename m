@@ -1,72 +1,36 @@
-From: "Snyder, Emile" <emsnyder@ebay.com>
-Subject: Re: Community Update
-Date: Thu, 28 Jan 2016 18:12:38 +0000
-Message-ID: <BA1388EE-434F-493F-BE57-B6D5B7476C3D@ebay.com>
-References: <CAP8Oy=Jr8VN_0JHy8pbSh-Jp9Dk4UuU=+jB-NHN8j=+kqTQ=4Q@mail.gmail.com>
- <622F4407872BA447A16110F65453358C04DCD73008ED@FMSAMAIL.fmsa.local>
- <CAP8Oy=KX1SsW_BWR0GQGxi7-uTOqnx+yjiWbtYB4kzPTY9tOJw@mail.gmail.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Ceph Tech Talk - High-Performance Production Databases on Ceph
+Date: Thu, 28 Jan 2016 14:56:21 -0500
+Message-ID: <CAAZbbf3WKYiLtihz21pnQ-HUXXvLWmreYdQ_1XEaYe=VSDPUHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from den-mipot-002.corp.ebay.com ([216.113.175.153]:51222 "EHLO
-	den-mipot-002.corp.ebay.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S964807AbcA1SWV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 28 Jan 2016 13:22:21 -0500
-In-Reply-To: <CAP8Oy=KX1SsW_BWR0GQGxi7-uTOqnx+yjiWbtYB4kzPTY9tOJw@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <A62FEB81C81F9D468DD12A946EEAB422@corp.ebay.com>
+Received: from mail-lb0-f176.google.com ([209.85.217.176]:36266 "EHLO
+	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S966388AbcA1T4X (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jan 2016 14:56:23 -0500
+Received: by mail-lb0-f176.google.com with SMTP id dx2so29610671lbd.3
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jan 2016 11:56:22 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <pmcgarry@gmail.com>, Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-T24gMS8yNy8xNiwgNzo0MiBQTSwgImNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIG9u
-IGJlaGFsZiBvZiBQYXRyaWNrIE1jR2FycnkiIDxjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVs
-Lm9yZyBvbiBiZWhhbGYgb2YgcG1jZ2FycnlAZ21haWwuY29tPiB3cm90ZToNCg0KDQo+SGV5IFBh
-dWwsDQo+DQo+WWVzLCBJIHdpbGwgYmUgb3BlbmluZyB1cCBhIHNpZ251cCBhbmQgdG9waWMgc3Vn
-Z2VzdGlvbiBpbiB0aGUgdmVyeQ0KPm5lYXIgZnV0dXJlLiBJ4oCZbSBob3BpbmcgdG8gZ2F0aGVy
-IHNvbWUgZ3VpZGFuY2UgYmFzZWQgb24gd2hlcmUgSmV3ZWwNCj50aGluZ3MgKHNwZWNpZmljYWxs
-eSwgQ2VwaEZTKSBhcmUgYXMgd2UgZ2V0IGNsb3Nlci4gSSBjYW4gcHVzaCB0aGlzDQo+c29vbmVy
-IGFuZCBqdXN0IGFsbG93IGZvciBzb21lIHBpdm90cyBhcyB3ZSBnZXQgY2xvc2VyIHRob3VnaC4g
-SeKAmWxsDQo+bGV0IGV2ZXJ5b25lIGtub3cgd2hlbiB0aGUgc2lnbnVwcyBhcmUgdXAuIFRoYW5r
-cy4NCg0KV291bGQgaXQgYmUgYXBwcm9wcmlhdGUgZm9yIGNlcGggZGV2ZWxvcG1lbnQgbmV3Ymll
-cyB0byBhdHRlbmQgdGhpcyBldmVudCwgb3IgaXMgaXQgaW50ZW5kZWQgZm9yIHRob3NlIHdpdGgg
-bW9yZSBleHBlcmllbmNlPw0KDQpUaGFua3MsDQotRW1pbGUNCg0KPg0KPkJlc3QgUmVnYXJkcywN
-Cj4NCj4NCj5QYXRyaWNrIE1jR2FycnkNCj5wbWNnYXJyeUBnbWFpbC5jb20NCj4NCj4NCj5PbiBX
-ZWQsIEphbiAyNywgMjAxNiBhdCA5OjQ3IFBNLCBQYXVsIFZvbi1TdGFtd2l0eg0KPjxQVm9uU3Rh
-bXdpdHpAdXMuZnVqaXRzdS5jb20+IHdyb3RlOg0KPj4gSGkgUGF0cmljaywNCj4+DQo+PiBXaWxs
-IHRoZXJlIGJlIGEgc2lnbnVwIGZvciB0aGUgMzEgTWFyLTAxIEFwciBoYWNrYXRob24vZGVzaWdu
-IHNlc3Npb24gYXQgU2Ftc3VuZywgbGlrZSB0aGUgb25lIHdlIGhhZCBmb3IgbGFzdCBBdWd1c3Qn
-cz8NCj4+IElzIHRoZXJlIGFueSBvdGhlciBpbmZvcm1hdGlvbiByZWdhcmRpbmcgdGhpcz8NCj4+
-DQo+PiBEdWUgdG8gdHJhdmVsLCB3ZSBuZWVkIHRvIHBsYW4gYWhlYWQgYSBiaXQuDQo+Pg0KPj4g
-VGhhbmtzLA0KPj4gUGF1bA0KPj4NCj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+PiBG
-cm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwt
-b3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgUGF0cmljayBNY0dhcnJ5DQo+PiBT
-ZW50OiBUaHVyc2RheSwgSmFudWFyeSAxNCwgMjAxNiAxOjAzIFBNDQo+PiBUbzogQ2VwaCBEZXZl
-bDsgQ2VwaC1Vc2VyDQo+PiBTdWJqZWN0OiBDb21tdW5pdHkgVXBkYXRlDQo+Pg0KPj4gSGV5IGNl
-cGhlcnMsDQo+Pg0KPj4gSXQgaGFzIGJlZW4gcXVpdGUgYSB3aGlsZSBzaW5jZSBJIGRpc3RpbGxl
-ZCB0aGUgaGlnaGxpZ2h0cyBvZiB3aGF0IGlzIGdvaW5nIG9uIGluIHRoZSBjb21tdW5pdHkgaW50
-byBhIHNpbmdsZSBwb3N0LCBzbyBJIGZpZ3VyZWQgaXQgd2FzIGxvbmcgb3ZlcmR1ZS4gUGxlYXNl
-IGNoZWNrIG91dCB0aGUgbGF0ZXN0IENlcGguY29tIGJsb2cgYW5kIHNvbWUgb2YgdGhlIG1hbnkg
-Z3JlYXQgdGhpbmdzIHRoYXQgYXJlIG9uIG91ciBzaG9ydC10ZXJtIHJhZGFyIGF0IHRoZSBtb21l
-bnQ6DQo+Pg0KPj4gaHR0cDovL2NlcGguY29tL2NvbW11bml0eS9jb21tdW5pdHktdXBkYXRlLXdl
-bGNvbWUtdG8tMjAxNi8NCj4+DQo+PiBJbiB0aGlzIHBvc3Qgd2UgY292ZXI6DQo+Pg0KPj4gKiBU
-ZXN0aW5nIHJlc291cmNlcyAoU2VwaWEgTGFiKQ0KPj4gKiBDZXBoIFRlY2ggVGFsa3MNCj4+ICog
-Q2VwaCBEYXlzDQo+PiAqIENlcGguY29tIG92ZXJoYXVsDQo+PiAqIENlcGgtYnJhZw0KPj4gKiBD
-ZXBoIERldmVsb3BlciBTdW1taXQgY2hhbmdlcw0KPj4gKiBSZWQgSGF0IFN1bW1pdA0KPj4NCj4+
-IFdoaWxlIHRoaXMgaXMgYnkgbm8gbWVhbnMgYW4gZXhoYXVzdGl2ZSBsaXN0LCBpdCBzaG91bGQg
-Z2l2ZSB5b3UgYSBwcmV0dHkgZ29vZCBzbmFwc2hvdCBvZiB3aGF0IGlzIGNvbWluZyBpbiB0aGUg
-bmVhciBmdXR1cmUgd2l0aCB0aGUgQ2VwaCBDb21tdW5pdHkuIFBsZWFzZSBmZWVsIGZyZWUgdG8g
-cmVhY2ggb3V0IHRvIG1lIHdpdGggYW55IHF1ZXN0aW9ucywgY29uY2VybnMsIG9yIGFueXRoaW5n
-IGZvciB0aGUgZ29vZCBvZiB0aGUgY2F1c2UuIFRoYW5rcyENCj4+DQo+Pg0KPj4NCj4+IEJlc3Qg
-UmVnYXJkcywNCj4+DQo+Pg0KPj4gUGF0cmljayBNY0dhcnJ5DQo+PiBwbWNnYXJyeUBnbWFpbC5j
-b20NCj4+IC0tDQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
-ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
-am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3Zn
-ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+LS0NCj5UbyB1bnN1YnNjcmliZSBm
-cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4N
-Cj50aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPk1v
-cmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWlu
-Zm8uaHRtbA0K
+Hey cephers,
+
+Here are the links to both the video and the slides from the Ceph Tech
+Talk today. Thanks again to Thorvald and Medallia for stepping forward
+to present.
+
+Video: https://youtu.be/OqlC7S3cUKs
+
+Slides: http://www.slideshare.net/Inktank_Ceph/2016jan28-high-performance-production-databases-on-ceph-57620014
+
+
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
