@@ -1,29 +1,35 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Publishing hammer v0.94.6
-Date: Fri, 29 Jan 2016 12:37:54 +0700
-Message-ID: <56AAFAB2.9010103@dachary.org>
+Subject: AIO error
+Date: Fri, 29 Jan 2016 16:07:23 +0700
+Message-ID: <56AB2BCB.80501@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:36002 "EHLO
-	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750813AbcA2FiE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jan 2016 00:38:04 -0500
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:35079 "EHLO
+	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754773AbcA2JHd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jan 2016 04:07:33 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
+To: Ilya Dryomov <idryomov@gmail.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+Hi Ilya,
 
-Now that the test infrastructure is back, we could try to publish v0.94=
-=2E6. These are the issues it fixes: http://tracker.ceph.com/versions/5=
-05. And these are the backports that are in flight and would not be in =
-v0.94.6 if we decide to cut the release today: http://tracker.ceph.com/=
-projects/ceph/issues?query_id=3D78
+This time is not a udev related question. I think (hope ?) there won't =
+be any other udev trick questions.
 
-What do you think ?
+A year ago I spent some time investigating the possible cause of http:/=
+/tracker.ceph.com/issues/9570#note-8 I exhausted all options (the log o=
+f my research is at http://tracker.ceph.com/issues/9570#note-17 and fol=
+lowing). The problem resurfaces, rarely but often enough to re-open the=
+ case and examine new logs.
+
+I would be grateful if you could share bits of wisdom regarding AIO, if=
+ you have some :-)
+
+Cheers
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
