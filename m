@@ -1,43 +1,38 @@
-From: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Subject: =?utf-8?Q?=D0=9A=D0=BB=D0=B8=D0=B5=D0=BD=D1=82=D1=81=D0?=
-	=?utf-8?Q?=BA=D0=B8=D0=B5_=D0=B1=D0=B0=D0=B7=D1=8B!!!_=D0?=
-	=?utf-8?Q?=A2=D0=B5=D0=BB=5CViber=5CWhatsapp=3A+791339138?=
-	=?utf-8?Q?37_Skype=3Aprodawez389_Email=3Agorskova32=40gma?=
-	=?utf-8?Q?il=2Ecom_=D0=A3=D0=B7=D0=BD=D0=B0=D0=B9=D1=82?=
-	=?utf-8?Q?=D0=B5_=D0=BF=D0=BE=D0=B4=D1=80=D0=BE=D0=B1=D0?=
-	=?utf-8?Q?=BD=D0=B5=D0=B5!!!?=
-Date: Mon, 1 Feb 2016 10:22:43 +0600
-Message-ID: <28D2DB434F9BB477ABAEE758AC58EE2C@vger.kernel.org>
-Reply-To: "ceph-devel@vger.kernel.org" <gorskova32@gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: AIO error
+Date: Mon, 1 Feb 2016 10:01:32 +0100
+Message-ID: <CAOi1vP8C=qqqHBRtcAnoBRr4uc7YrJdPX3FE=hyAUGKoj8jeqA@mail.gmail.com>
+References: <56AB2BCB.80501@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 190-202-22-171.estatic.cantv.net ([190.202.22.171]:41478 "EHLO
-	svsqmij01.localdomain" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1757595AbcBAEa5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 31 Jan 2016 23:30:57 -0500
-Received: from 190.202.22.171 (localhost.localdomain [127.0.0.1])
-	by svsqmij01.localdomain (Postfix) with SMTP id 64F3AC12EC
-	for <ceph-devel@vger.kernel.org>; Sun, 31 Jan 2016 23:52:46 -0430 (VET)
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:33431 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752101AbcBAJBe convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Feb 2016 04:01:34 -0500
+Received: by mail-wm0-f54.google.com with SMTP id l66so59528521wml.0
+        for <ceph-devel@vger.kernel.org>; Mon, 01 Feb 2016 01:01:33 -0800 (PST)
+In-Reply-To: <56AB2BCB.80501@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-=D0=A1=D0=BE=D0=B1=D0=B5=D1=80=D0=B5=D0=BC =D0=B4=D0=BB=D1=8F =D0=92=D0=
-=B0=D1=81 =D0=BF=D0=BE =D0=B8=D0=BD=D1=82=D0=B5=D1=80=D0=BD=D0=B5=D1=82=
- =D0=B1=D0=B0=D0=B7=D1=83 =D0=B4=D0=B0=D0=BD=D0=BD=D1=8B=D1=85 =D0=BF=D0=
-=BE=D1=82=D0=B5=D0=BD=D1=86=D0=B8=D0=B0=D0=BB=D1=8C=D0=BD=D1=8B=D1=85 =D0=
-=BA=D0=BB=D0=B8=D0=B5=D0=BD=D1=82=D0=BE=D0=B2 =D0=B4=D0=BB=D1=8F =D0=92=
-=D0=B0=D1=88=D0=B5=D0=B3=D0=BE =D0=91=D0=B8=D0=B7=D0=BD=D0=B5=D1=81=D0=B0=
-!!! =D0=9C=D0=BD=D0=BE=D0=B3=D0=BE! =D0=91=D1=8B=D1=81=D1=82=D1=80=D0=BE=
-! =D0=9D=D0=B5 =D0=B4=D0=BE=D1=80=D0=BE=D0=B3=D0=BE! =D0=A3=D0=B7=D0=BD=
-=D0=B0=D0=B9=D1=82=D0=B5 =D0=BE=D0=B1 =D1=8D=D1=82=D0=BE=D0=BC =D0=BF=D0=
-=BE=D0=B4=D1=80=D0=BE=D0=B1=D0=BD=D0=B5=D0=B5 =D0=BF=D0=BE =D0=A2=D0=B5=
-=D0=BB\Viber\Whatsapp:+79133913837 Skype:prodawez389 Email:opotapova53@=
-gmail.com =20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Fri, Jan 29, 2016 at 10:07 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Ilya,
+>
+> This time is not a udev related question. I think (hope ?) there won't be any other udev trick questions.
+>
+> A year ago I spent some time investigating the possible cause of http://tracker.ceph.com/issues/9570#note-8 I exhausted all options (the log of my research is at http://tracker.ceph.com/issues/9570#note-17 and following). The problem resurfaces, rarely but often enough to re-open the case and examine new logs.
+>
+> I would be grateful if you could share bits of wisdom regarding AIO, if you have some :-)
+
+Hi Loic,
+
+I posted my thoughts to the tracker and also made some adjustments -
+I don't think the update-grub thing is a duplicate of this.
+
+Thanks,
+
+                Ilya
