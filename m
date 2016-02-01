@@ -1,44 +1,49 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Reminder: CDM ("CDS lite") is Wednesday!
-Date: Mon, 1 Feb 2016 16:50:48 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1602011624380.28963@cpach.fuggernut.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Ceph Developer Monthly (CDM)
+Date: Mon, 1 Feb 2016 16:57:27 -0500
+Message-ID: <CAAZbbf3=XBrWp2aSJd-BS-phtsi7Kj7k4JkmC=H9B-S83aBhog@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53128 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751973AbcBAVud (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 1 Feb 2016 16:50:33 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 35BE17AE84
-	for <ceph-devel@vger.kernel.org>; Mon,  1 Feb 2016 21:50:33 +0000 (UTC)
-Received: from cpach (ovpn-112-45.phx2.redhat.com [10.3.112.45])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u11LoVYw011417
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Mon, 1 Feb 2016 16:50:32 -0500
+Received: from mail-lf0-f51.google.com ([209.85.215.51]:36644 "EHLO
+	mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932212AbcBAV53 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Feb 2016 16:57:29 -0500
+Received: by mail-lf0-f51.google.com with SMTP id 78so57410532lfy.3
+        for <ceph-devel@vger.kernel.org>; Mon, 01 Feb 2016 13:57:28 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-Hey everyone,
+Hey cephers,
 
-In case you missed Patrick's email, we're doing a Ceph Developer Meeting 
-this Wednesday (Feb 3) starting at 12:30 EST.  We're shooting for two 
-hours, although we can adjust the duration as needed.
+Just as a reminder, the new format for our periodic developer meetings
+is starting this Wed @ 12:30p EST.
 
-If there are any design related discussions you'd like to have with 
-developers "in person" (over bluejeans video conferencing), please sign up 
-at
+http://tracker.ceph.com/projects/ceph/wiki/Planning
 
-	http://tracker.ceph.com/projects/ceph/wiki/CDM_03-FEB-2016
+This meeting will be replacing the once quarterly (ish) Ceph Developer
+Summits. Our hope is that a less formal, and more frequent, meeting
+will allow for tighter coordination on Ceph work between the many
+stakeholders. We=E2=80=99re hoping to keep this pretty short and on-tra=
+ck, so
+if you have a topic to discuss, please add it to the wiki:
 
-For example, there are items there already to discuss the overwrite 
-support for erasure code pools, compression, and encryption.
-
-We're trying out this format to see if it's a more effective replacement 
-for the two-day Ceph Developer Summits we've done in the past.  Sign 
-up if there's something you want to discuss, and tune in if you're 
-interested in what is coming next.
+http://tracker.ceph.com/projects/ceph/wiki/CDM_03-FEB-2016
 
 Thanks!
-sage
+
+--=20
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
