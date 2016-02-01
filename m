@@ -1,49 +1,41 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: Ceph Developer Monthly (CDM)
-Date: Mon, 1 Feb 2016 16:57:27 -0500
-Message-ID: <CAAZbbf3=XBrWp2aSJd-BS-phtsi7Kj7k4JkmC=H9B-S83aBhog@mail.gmail.com>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: teuthology-describe-tests -> add meaning to the tests!
+Date: Mon, 1 Feb 2016 15:27:57 -0800
+Message-ID: <56AFE9FD.6040400@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f51.google.com ([209.85.215.51]:36644 "EHLO
-	mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932212AbcBAV53 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Feb 2016 16:57:29 -0500
-Received: by mail-lf0-f51.google.com with SMTP id 78so57410532lfy.3
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Feb 2016 13:57:28 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:50315 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750823AbcBAX16 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 1 Feb 2016 18:27:58 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: ceph-qa@ceph.com
 
-Hey cephers,
+After the initial implementation [0], we have a new cli in teuthology*
+suite of tools - teuthology-describe-tests and thus a cool new way to
+add English words to our tests. This should make suites more
+understandable to someone who hasn't read all the teuthology tasks used.
 
-Just as a reminder, the new format for our periodic developer meetings
-is starting this Wed @ 12:30p EST.
+To add descriptions to yaml fragments, the syntax is:
 
-http://tracker.ceph.com/projects/ceph/wiki/Planning
+"meta:
+- desc: <words>"
 
-This meeting will be replacing the once quarterly (ish) Ceph Developer
-Summits. Our hope is that a less formal, and more frequent, meeting
-will allow for tighter coordination on Ceph work between the many
-stakeholders. We=E2=80=99re hoping to keep this pretty short and on-tra=
-ck, so
-if you have a topic to discuss, please add it to the wiki:
+as can be seen in this example annotated suite:
 
-http://tracker.ceph.com/projects/ceph/wiki/CDM_03-FEB-2016
+https://github.com/ceph/ceph-qa-suite/tree/master/suites/upgrade/infernalis-x
 
-Thanks!
+Example output for this suite can be seen here:
 
---=20
+http://tracker.ceph.com/projects/ceph-qa-suite/wiki/infernalis-x
 
-Best Regards,
+Now we need folks changing tests in ceph-qa-suite to start adding
+descriptions.
 
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Josh & Yuri
+
+[0] https://github.com/ceph/teuthology/pull/714
