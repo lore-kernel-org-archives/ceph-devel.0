@@ -1,68 +1,32 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: Monthly Dev Meeting Today
-Date: Wed, 3 Feb 2016 08:12:52 -0500
-Message-ID: <CAAZbbf2BCZRcZJZsU-hdLAK=_Nm_9esNmTnwSHUYwvJx2xj0WA@mail.gmail.com>
+From: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Subject: objecter incremental osdmap crc check
+Date: Wed, 3 Feb 2016 21:54:07 +0800
+Message-ID: <CANE=7sVATveDWRxv_X=jprzcJW50ssu0zojQgHLOUDP5aGF5Pw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f42.google.com ([209.85.215.42]:33224 "EHLO
-	mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752451AbcBCNMy convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Feb 2016 08:12:54 -0500
-Received: by mail-lf0-f42.google.com with SMTP id m1so13768248lfg.0
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Feb 2016 05:12:53 -0800 (PST)
+Received: from mail-ob0-f181.google.com ([209.85.214.181]:33482 "EHLO
+	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752617AbcBCNyI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Feb 2016 08:54:08 -0500
+Received: by mail-ob0-f181.google.com with SMTP id is5so30144833obc.0
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Feb 2016 05:54:07 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hey cephers,
+hi, all:
 
-Just a reminder that the monthly replacement for CDS (Ceph Developer
-Summit) is today at 12:30p EST. This will be a short meeting to
-discuss all pending work going on with Ceph, so if you have anything
-to share or discuss, please drop a very brief summary in the wiki:
+      When osd update the osdmap, it would apply the
+OSDMap::Incremental and get the crc for the new osdmap. If the crc is
+not the same as define in Incremental osd would request the full
+osdmap. I think the logic is quite well.
 
-http://tracker.ceph.com/projects/ceph/wiki/CDM_03-FEB-2016
+     But in the client, the objecter do not check the crc. I do not
+know why not client do the same logic as osd.
 
-The discussion will be held on BlueJeans, as usual. For call info
-please join with the following:
+    Could anyone explain this? Thanks.
 
-To join the Meeting:
-https://bluejeans.com/707503600
-To join via Browser:
-https://bluejeans.com/707503600/browser
-To join with Lync:
-https://bluejeans.com/707503600/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 707503600
-
-To join via Phone:
-1) Dial:
-        +1 800 451 8679
-        +1 212 729 5016
-        (see all numbers -
-https://www.intercallonline.com/listNumbersByCode.action?confCode=3D989=
-1145960)
-2) Enter Conference ID: 9891145960
-
-
-If you have any questions, please don=E2=80=99t hesitate to ask. Thanks=
-=2E
-
---=20
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Regards,
+Xinze Chi
