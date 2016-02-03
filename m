@@ -1,59 +1,70 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Please test Weighted Priority Queue in Master
-Date: Wed, 3 Feb 2016 10:20:54 -0700
-Message-ID: <CAANLjFoFEfQTYVU31f22t6Ra-ceP+6fB-Q-VX99HwB+0OAoWPQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Please test Weighted Priority Queue in Master
+Date: Wed, 3 Feb 2016 17:24:19 +0000
+Message-ID: <BN1PR02MB055BDFF2DBF2BA648A58D07F4D00@BN1PR02MB055.namprd02.prod.outlook.com>
+References: <CAANLjFoFEfQTYVU31f22t6Ra-ceP+6fB-Q-VX99HwB+0OAoWPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f53.google.com ([209.85.213.53]:33126 "EHLO
-	mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752217AbcBCRUz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Feb 2016 12:20:55 -0500
-Received: by mail-vk0-f53.google.com with SMTP id e64so19290713vkg.0
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Feb 2016 09:20:54 -0800 (PST)
+Received: from mail-bn1on0063.outbound.protection.outlook.com ([157.56.110.63]:55249
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932499AbcBCRYV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 3 Feb 2016 12:24:21 -0500
+In-Reply-To: <CAANLjFoFEfQTYVU31f22t6Ra-ceP+6fB-Q-VX99HwB+0OAoWPQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>, ceph-devel <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
-
-Now that WPQ has been merged in master, please test it out in your
-environments. There have been performance improvements across the
-board in my testing with SSDs having the largest gains and it would be
-great to get some others' review as well. There was discussion to
-potentially make this the default queue for Jewel, so the more testing
-the better.
-
-To enable the WPQ and adjust the priority cutoff, use the following in
-ceph.conf (by default it uses the PrioritizedQueue):
-
-osd_op_queue = wpq
-osd_op_queue_cut_off = low
-
-It does require an OSD restart (not a run time tuneable option) to
-change the queue/cutoff.
-
-Thanks,
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.3.4
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJWsjbxCRDmVDuy+mK58QAAhQEP/3CXxHXY6G1TXb4toG2W
-rD3QngEKNZDeAh/J86Dm/wpmELryqdj510HKbZHUchmnvdtgsshGxDUkaK8z
-rKnspw/M/04DdgPDoImc2n69hw1JcaHiGJ3hh5Obhp0ur6zLX8VnpSBvP4a1
-lveCNSkx0mpTv2VhawClUJ1VTet489iJcTRP8OCwx2JApkjzokAw33AOqbua
-zyhpmPiDCrYvzRb0K/xgiyJxQuXY4TQA8OU1Yklyl9tvAvCRQvjFQkF3+QpH
-r/KifpcXfPkfPsiasFLkDJaCrccoqjCrl9aHrYcXJ7Ap88kZeUaR2RbMqUUH
-1mTIh5oA5GjSjE6wrpGqe2nn+NymkIV0b+KXDvbM9sZnPUQVRf5yGUOY7jiK
-5Ta3rDs0Mj469RJlT3UEZhSyz0qLTfihq0QR0AkiutWE5QNvcsy+ozhaOYEO
-XAXEfI1CZJPnpLTPeghOqIQTwKZOJ2m15y+lrTyC5qmnYJBKzkNi9iPzx7hl
-gFwBUih4TcBd2uUAg4p/ntnSRei6RLrx1VGy53nxVnZ4Oiu+FHMEndtMc0zX
-XQUkS+AUM8eJLQutHA8rEhYguE6vb7kvf130TLZ77YrckCkBlqWRbVX/cQQI
-ffZ8ioMjC+I8nH3lRD7fyhchdyeKK7AmroqnYTNX8/jxDpAGJTxn3vhOAu0p
-tDED
-=JKs2
------END PGP SIGNATURE-----
+R3JlYXQgd29yayAsIHRoYW5rcyAhDQpXaWxsIHRlc3QgdGhpcyBvdXQuLg0KDQpSZWdhcmRzDQpT
+b21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93
+bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwu
+b3JnXSBPbiBCZWhhbGYgT2YgUm9iZXJ0IExlQmxhbmMNClNlbnQ6IFdlZG5lc2RheSwgRmVicnVh
+cnkgMDMsIDIwMTYgOToyMSBBTQ0KVG86IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFBsZWFzZSB0ZXN0
+IFdlaWdodGVkIFByaW9yaXR5IFF1ZXVlIGluIE1hc3Rlcg0KDQotLS0tLUJFR0lOIFBHUCBTSUdO
+RUQgTUVTU0FHRS0tLS0tDQpIYXNoOiBTSEEyNTYNCg0KTm93IHRoYXQgV1BRIGhhcyBiZWVuIG1l
+cmdlZCBpbiBtYXN0ZXIsIHBsZWFzZSB0ZXN0IGl0IG91dCBpbiB5b3VyIGVudmlyb25tZW50cy4g
+VGhlcmUgaGF2ZSBiZWVuIHBlcmZvcm1hbmNlIGltcHJvdmVtZW50cyBhY3Jvc3MgdGhlIGJvYXJk
+IGluIG15IHRlc3Rpbmcgd2l0aCBTU0RzIGhhdmluZyB0aGUgbGFyZ2VzdCBnYWlucyBhbmQgaXQg
+d291bGQgYmUgZ3JlYXQgdG8gZ2V0IHNvbWUgb3RoZXJzJyByZXZpZXcgYXMgd2VsbC4gVGhlcmUg
+d2FzIGRpc2N1c3Npb24gdG8gcG90ZW50aWFsbHkgbWFrZSB0aGlzIHRoZSBkZWZhdWx0IHF1ZXVl
+IGZvciBKZXdlbCwgc28gdGhlIG1vcmUgdGVzdGluZyB0aGUgYmV0dGVyLg0KDQpUbyBlbmFibGUg
+dGhlIFdQUSBhbmQgYWRqdXN0IHRoZSBwcmlvcml0eSBjdXRvZmYsIHVzZSB0aGUgZm9sbG93aW5n
+IGluIGNlcGguY29uZiAoYnkgZGVmYXVsdCBpdCB1c2VzIHRoZSBQcmlvcml0aXplZFF1ZXVlKToN
+Cg0Kb3NkX29wX3F1ZXVlID0gd3BxDQpvc2Rfb3BfcXVldWVfY3V0X29mZiA9IGxvdw0KDQpJdCBk
+b2VzIHJlcXVpcmUgYW4gT1NEIHJlc3RhcnQgKG5vdCBhIHJ1biB0aW1lIHR1bmVhYmxlIG9wdGlv
+bikgdG8gY2hhbmdlIHRoZSBxdWV1ZS9jdXRvZmYuDQoNClRoYW5rcywNCi0gLS0tLS0tLS0tLS0t
+LS0tLQ0KUm9iZXJ0IExlQmxhbmMNClBHUCBGaW5nZXJwcmludCA3OUEyIDlDQTQgNkNDNCA0NURE
+IEE5MDQgIEM3MEUgRTY1NCAzQkIyIEZBNjIgQjlGMSAtLS0tLUJFR0lOIFBHUCBTSUdOQVRVUkUt
+LS0tLQ0KVmVyc2lvbjogTWFpbHZlbG9wZSB2MS4zLjQNCkNvbW1lbnQ6IGh0dHBzOi8vd3d3Lm1h
+aWx2ZWxvcGUuY29tDQoNCndzRmNCQUVCQ0FBUUJRSldzamJ4Q1JEbVZEdXkrbUs1OFFBQWhRRVAv
+M0NYeEhYWTZHMVRYYjR0b0cyVw0KckQzUW5nRUtOWkRlQWgvSjg2RG0vd3BtRUxyeXFkajUxMEhL
+YlpIVWNobW52ZHRnc3NoR3hEVWthSzh6DQpyS25zcHcvTS8wNERkZ1BEb0ltYzJuNjlodzFKY2FI
+aUdKM2hoNU9iaHAwdXI2ekxYOFZucFNCdlA0YTENCmx2ZUNOU2t4MG1wVHYyVmhhd0NsVUoxVlRl
+dDQ4OWlKY1RSUDhPQ3d4MkpBcGtqem9rQXczM0FPcWJ1YQ0KenlocG1QaURDcll2elJiMEsveGdp
+eUp4UXVYWTRUUUE4T1UxWWtseWw5dHZBdkNSUXZqRlFrRjMrUXBIDQpyL0tpZnBjWGZQa2ZQc2lh
+c0ZMa0RKYUNyY2NvcWpDcmw5YUhyWWNYSjdBcDg4a1plVWFSMlJiTXFVVUgNCjFtVEloNW9BNUdq
+U2pFNndycEdxZTJubitOeW1rSVYwYitLWER2Yk05c1puUFVRVlJmNXlHVU9ZN2ppSw0KNVRhM3JE
+czBNajQ2OVJKbFQzVUVaaFN5ejBxTFRmaWhxMFFSMEFraXV0V0U1UU52Y3N5K296aGFPWUVPDQpY
+QVhFZkkxQ1pKUG5wTFRQZWdoT3FJUVR3S1pPSjJtMTV5K2xyVHlDNXFtbllKQkt6a05pOWlQeng3
+aGwNCmdGd0JVaWg0VGNCZDJ1VUFnNHAvbnRuU1JlaTZSTHJ4MVZHeTUzbnhWblo0T2l1K0ZITUVu
+ZHRNYzB6WA0KWFFVa1MrQVVNOGVKTFF1dEhBOHJFaFlndUU2dmI3a3ZmMTMwVExaNzdZcmNrQ2tC
+bHFXUmJWWC9jUVFJDQpmZlo4aW9NakMrSThuSDNsUkQ3ZnloY2hkeWVLSzdBbXJvcW5ZVE5YOC9q
+eERwQUdKVHhuM3ZoT0F1MHANCnRERUQNCj1KS3MyDQotLS0tLUVORCBQR1AgU0lHTkFUVVJFLS0t
+LS0NCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
+dWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9t
+b0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
+bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9u
+IGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9u
+bHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3Zl
+LiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lw
+aWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlz
+IG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlz
+dHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJp
+dGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBs
+ZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBh
+Ym92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMg
+bWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ry
+b25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo=
