@@ -1,70 +1,48 @@
-From: Deepa Dinamani <deepa.kernel@gmail.com>
-Subject: Re: [PATCH 09/10] fs: ceph: Replace CURRENT_TIME by
- ktime_get_real_ts()
-Date: Wed, 3 Feb 2016 08:17:23 -0800
-Message-ID: <20160203161720.GA9546@deepa-ubuntu>
-References: <1454479670-8204-1-git-send-email-deepa.kernel@gmail.com>
- <1454479670-8204-10-git-send-email-deepa.kernel@gmail.com>
- <CAAM7YAm6enhGMJd+BMDAuAzXCMxVwb24Ch951A3_ygGUhXivxQ@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: objecter incremental osdmap crc check
+Date: Wed, 3 Feb 2016 09:00:08 -0800
+Message-ID: <CAJ4mKGYLs1nKOnU24s5Xh3SBPeCf=RUd-=hky02-q2FYPwf3Fw@mail.gmail.com>
+References: <CANE=7sVATveDWRxv_X=jprzcJW50ssu0zojQgHLOUDP5aGF5Pw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAAM7YAm6enhGMJd+BMDAuAzXCMxVwb24Ch951A3_ygGUhXivxQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Deepa Dinamani <deepa.kernel@gmail.com>, linux-fsdevel@vger.kernel.org, y2038@lists.linaro.org, Arnd Bergmann <arnd@arndb.de>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, linux-kernel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:36428 "EHLO
+	mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756648AbcBCRAJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Feb 2016 12:00:09 -0500
+Received: by mail-wm0-f49.google.com with SMTP id p63so174738003wmp.1
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Feb 2016 09:00:09 -0800 (PST)
+In-Reply-To: <CANE=7sVATveDWRxv_X=jprzcJW50ssu0zojQgHLOUDP5aGF5Pw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Feb 03, 2016 at 10:34:00PM +0800, Yan, Zheng wrote:
-> On Wed, Feb 3, 2016 at 2:07 PM, Deepa Dinamani <deepa.kernel@gmail.com> wrote:
-> > This is in preparation for the series that transitions
-> > filesystem timestamps to use 64 bit time and hence make
-> > them y2038 safe.
-> >
-> > CURRENT_TIME macro will be deleted before merging the
-> > aforementioned series.
-> >
-> > Filesystems will use current_fs_time() instead of
-> > CURRENT_TIME.
-> > Use ktime_get_real_ts() here as this is not filesystem time.
-> > ktime_get_real_ts() returns the timestamp in ns which can
-> > be used to calculate MDS request timestamp.
-> >
-> > Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
-> > Cc: "Yan, Zheng" <zyan@redhat.com>
-> > Cc: Sage Weil <sage@redhat.com>
-> > Cc: Ilya Dryomov <idryomov@gmail.com>
-> > Cc: ceph-devel@vger.kernel.org
-> > ---
-> >  fs/ceph/mds_client.c | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> > index e7b130a..348b22e 100644
-> > --- a/fs/ceph/mds_client.c
-> > +++ b/fs/ceph/mds_client.c
-> > @@ -1721,7 +1721,7 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
-> >         init_completion(&req->r_safe_completion);
-> >         INIT_LIST_HEAD(&req->r_unsafe_item);
-> >
-> > -       req->r_stamp = CURRENT_TIME;
-> > +       ktime_get_real_ts(&req->r_stamp);
-> 
-> I think we should use current_fs_time() here. I have squash the change
-> into another patch
+On Wed, Feb 3, 2016 at 5:54 AM, Xinze Chi (=E4=BF=A1=E6=B3=BD) <xmdxcxz=
+@gmail.com> wrote:
+> hi, all:
+>
+>       When osd update the osdmap, it would apply the
+> OSDMap::Incremental and get the crc for the new osdmap. If the crc is
+> not the same as define in Incremental osd would request the full
+> osdmap. I think the logic is quite well.
+>
+>      But in the client, the objecter do not check the crc. I do not
+> know why not client do the same logic as osd.
+>
+>     Could anyone explain this? Thanks.
 
-Ok. I missed this commit b8e69066d8afa8d2670dc697252ff0e5907aafad
-earlier which says that the r_stamp is used as ctime now.
-I had assumed that this is a message timestamp.
-
-I was not able to find any documentation on what the server does
-with the message sent by the client. Where can I find that?
-
-So, this should actually look like
-
-req->r_stamp = current_fs_time(mdsc->fsc->sb);
-
-Let me know if you want me to resend.
-
--Deepa
+Two things:
+1) The client doesn't necessarily have the full OSDMap that the OSDs
+do, so the CRC won't match. (You can see this in the encoding family
+of functions; there are sections which are server-only.) I suppose the
+monitors could include a client-only CRC as well...
+2) Nobody bothered since it seemed less important for "ephemeral"
+clients versus OSDs that persist their maps and share them with peers.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
