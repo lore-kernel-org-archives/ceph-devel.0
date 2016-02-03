@@ -1,48 +1,68 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Multiple IPnr for OSDs in a multi-tenant environment
-Date: Wed, 3 Feb 2016 13:21:07 +0100
-Message-ID: <56B1F0B3.5050907@digiware.nl>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Monthly Dev Meeting Today
+Date: Wed, 3 Feb 2016 08:12:52 -0500
+Message-ID: <CAAZbbf2BCZRcZJZsU-hdLAK=_Nm_9esNmTnwSHUYwvJx2xj0WA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:11718 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751372AbcBCMVS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Feb 2016 07:21:18 -0500
-Received: from rack1.digiware.nl (unknown [127.0.0.1])
-	by smtp.digiware.nl (Postfix) with ESMTP id BB40B1534EC
-	for <ceph-devel@vger.kernel.org>; Wed,  3 Feb 2016 13:21:15 +0100 (CET)
-Received: from [192.168.101.175] (vpn.ecoracks.nl [31.223.170.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.digiware.nl (Postfix) with ESMTPSA id 522CE1534E6
-	for <ceph-devel@vger.kernel.org>; Wed,  3 Feb 2016 13:21:06 +0100 (CET)
+Received: from mail-lf0-f42.google.com ([209.85.215.42]:33224 "EHLO
+	mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752451AbcBCNMy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Feb 2016 08:12:54 -0500
+Received: by mail-lf0-f42.google.com with SMTP id m1so13768248lfg.0
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Feb 2016 05:12:53 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-Hi,
+Hey cephers,
 
-I was discussing multi-tenant sollutions with our engineers.
-And one of the requirements we have there is:
-	- tenants should not see one-another in the network
-	- Seperate VLAN to customer/tenant
+Just a reminder that the monthly replacement for CDS (Ceph Developer
+Summit) is today at 12:30p EST. This will be a short meeting to
+discuss all pending work going on with Ceph, so if you have anything
+to share or discuss, please drop a very brief summary in the wiki:
 
-Now perhaps the first one would be possible by stringently applying
-firewalls. But that is not really the most performant way since
-everything has to go thru a firewall at 10Gb.
+http://tracker.ceph.com/projects/ceph/wiki/CDM_03-FEB-2016
 
-The second one would be relatively easy dependant on the chosen
-construction of the infra.
+The discussion will be held on BlueJeans, as usual. For call info
+please join with the following:
 
-I've seen some discussion on having multiple addresses on OSDs, but as
-far as I can see/remember, and this is limitted to max 2 ipnrs.
+To join the Meeting:
+https://bluejeans.com/707503600
+To join via Browser:
+https://bluejeans.com/707503600/browser
+To join with Lync:
+https://bluejeans.com/707503600/lync
 
-For performance reasons perhaps everything can go over the same network,
-but for separation and security, it might be that more is needed.
 
-Who have others solved this in a multi-tenant environment?
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 707503600
 
-Thanx,
---WjW
+To join via Phone:
+1) Dial:
+        +1 800 451 8679
+        +1 212 729 5016
+        (see all numbers -
+https://www.intercallonline.com/listNumbersByCode.action?confCode=3D989=
+1145960)
+2) Enter Conference ID: 9891145960
+
+
+If you have any questions, please don=E2=80=99t hesitate to ask. Thanks=
+=2E
+
+--=20
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
