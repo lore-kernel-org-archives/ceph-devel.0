@@ -1,116 +1,121 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: inline vector container
-Date: Wed, 3 Feb 2016 22:06:57 +0000
-Message-ID: <CY1PR0201MB1897486B3D49159CEDCD3007E8D00@CY1PR0201MB1897.namprd02.prod.outlook.com>
-References: <CY1PR0201MB189757D3C50DF09DDD8F2877E8D00@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1602031503230.28963@cpach.fuggernut.com>
- <1382260306.31547015.1454533040094.JavaMail.zimbra@redhat.com>
- <59448274.31581132.1454534771209.JavaMail.zimbra@redhat.com>
+From: Karol Mroz <kmroz@suse.com>
+Subject: logfile created with root:root ownership when "log_file" config
+ option specified
+Date: Wed, 3 Feb 2016 15:17:27 -0800
+Message-ID: <20160203231727.GA18601@oak.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="y0ulUmNC+osPPQO6"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0094.outbound.protection.outlook.com ([157.56.110.94]:6896
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755068AbcBCWkF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Feb 2016 17:40:05 -0500
-In-Reply-To: <59448274.31581132.1454534771209.JavaMail.zimbra@redhat.com>
-Content-Language: en-US
+Received: from smtp2.provo.novell.com ([137.65.250.81]:34290 "EHLO
+	smtp2.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932214AbcBCXRj (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Wed, 3 Feb 2016 18:17:39 -0500
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-SSB3b3VsZCBzYXkgdGhhdCBqdXN0IHB1bGxpbmcgdGhlIGxhdGVzdCBib29zdCBpbnRvIHRoZSB0
-cmVlIGFuZCB1c2luZyBpdCBmb3IgYnVpbGRzIGlzIHRoZSBiZXN0IHBhdGggZm9yd2FyZC4gQnV0
-IEknbSBpbiBubyB3YXkgY29tcGV0ZW50IHRvIG1ha2UgdGhhdCBraW5kIG9mIGNoYW5nZSBpbiB0
-aGUgYnVpbGQgc3lzdGVtIC0tIGVzcGVjaWFsbHkgZHVyaW5nIHRoZSBhdXRvbWFrZSBjbWFrZSBj
-aGFuZ2VvdmVyIHBlcmlvZC4NCg0KDQpBbGxlbiBTYW11ZWxzDQpTb2Z0d2FyZSBBcmNoaXRlY3Qs
-IEZlbGxvdywgU3lzdGVtcyBhbmQgU29mdHdhcmUgU29sdXRpb25zDQoNCjI4ODAgSnVuY3Rpb24g
-QXZlbnVlLCBTYW4gSm9zZSwgQ0EgOTUxMzQNClQ6ICsxIDQwOCA4MDEgNzAzMHwgTTogKzEgNDA4
-IDc4MCA2NDE2DQphbGxlbi5zYW11ZWxzQFNhbkRpc2suY29tDQoNCg0KLS0tLS1PcmlnaW5hbCBN
-ZXNzYWdlLS0tLS0NCkZyb206IENhc2V5IEJvZGxleSBbbWFpbHRvOmNib2RsZXlAcmVkaGF0LmNv
-bV0NClNlbnQ6IFdlZG5lc2RheSwgRmVicnVhcnkgMDMsIDIwMTYgMToyNiBQTQ0KVG86IE1hdHQg
-QmVuamFtaW4gPG1iZW5qYW1pbkByZWRoYXQuY29tPg0KQ2M6IFNhZ2UgV2VpbCA8c3dlaWxAcmVk
-aGF0LmNvbT47IEFsbGVuIFNhbXVlbHMgPEFsbGVuLlNhbXVlbHNAc2FuZGlzay5jb20+OyBjZXBo
-LWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IGlubGluZSB2ZWN0b3IgY29udGFp
-bmVyDQoNCkhpIEFsbGVuLA0KDQpJIGRpZCBzcGVuZCBzb21lIHRpbWUgYSBjb3VwbGUgbW9udGhz
-IGFnbyBleHBlcmltZW50aW5nIHdpdGggYSBjdXN0b20gYWxsb2NhdG9yIHdpdGggaW5saW5lIHN0
-b3JhZ2UgZm9yIHN0YW5kYXJkIGNvbnRhaW5lcnMuIFlvdSBjYW4gZmluZCBteSBicmFuY2ggb24g
-Z2l0aHViIGF0IGh0dHBzOi8vZ2l0aHViLmNvbS9jYm9kbGV5L2NlcGgvY29tbWl0cy93aXAtcHJl
-YWxsb2NhdG9yLg0KDQpJIHdhcyBhaW1pbmcgZm9yIGEgZ2VuZXJhbCBzb2x1dGlvbiB0aGF0IHdv
-cmtlZCB3aXRoIG5vbi1jb250aWd1b3VzIGNvbnRhaW5lcnMsIGJ1dCBjb3VsZG4ndCBmaW5kIGEg
-Z29vZCB3YXkgdG8gaGFuZGxlIGRlYWxsb2NhdGlvbnMuIFNvIHRoZSBhcHByb2FjaCB3YXMgcmVh
-bGx5IG9ubHkgYSBnb29kIGZpdCBmb3Igc3RkOjp2ZWN0b3IuDQoNCkkgYWxzbyBoYWQgdHJvdWJs
-ZSBnZXR0aW5nIGl0IHRvIGRvIHRoZSByaWdodCB0aGluZyB3aXRoIHRoZSBjb3B5IGFuZCBtb3Zl
-IG9wZXJhdG9ycy4gSSBmb3VuZCB0aGF0IGl0IHdhcyB0cnlpbmcgdG8gdXNlIHRoZSBuZXcgYWxs
-b2NhdG9yIHRvIHJlbGVhc2UgbWVtb3J5IHRoYXQgY2FtZSBmcm9tIHRoZSBvbGQgYWxsb2NhdG9y
-LiBQcmVzdW1hYmx5IHRoZXJlJ3MgYSB3YXkgdG8gbWFrZSB0aGlzIHdvcmsgdXNpbmcgc3RkOjph
-bGxvY2F0b3JfdHJhaXRzOyBoYXZlIHlvdSBoYWQgYmV0dGVyIGx1Y2sgaGVyZT8gSSdkIGxvdmUg
-dG8gc2VlIHlvdXIgcHJvdG90eXBlLg0KDQpJIHRlbmQgdG8gYWdyZWUgdGhhdCB3ZSBzaG91bGQg
-Z28gd2l0aCB0aGUgYm9vc3Qgc29sdXRpb24gaWYgd2UgY2FuLiBCdXQgaWYNCmEpIHdlIGNhbid0
-IHVzZSBib29zdDo6c21hbGxfdmVjdG9yIGluIHRoZSBuZWFyLXRlcm0gZHVlIHRvIHZlcnNpb25p
-bmcsIGFuZA0KYikgd2UgY2FuIGdldCBhIGN1c3RvbSB2ZXJzaW9uIHRlc3RlZCBhbmQgd29ya2lu
-ZywgaXQgbWlnaHQgYmUgd29ydGggcHVyc3VpbmcuDQoNCkNhc2V5DQoNCi0tLS0tIE9yaWdpbmFs
-IE1lc3NhZ2UgLS0tLS0NCj4gSGksDQo+DQo+IEkgdGhpbmsgd2Ugc2hvdWxkIGdvIHdpdGggc21h
-bGxfdmVjdG9yIGZvciB0aGlzIHJvbGUsIHllcy4gIEkgZm91bmQNCj4gdHdvIGlzc3Vlcy4gIEZp
-cnN0LCB0aGVyZSBhcmUgY3JpdGljYWwgZGVmZWN0cyBpbiBzbWFsbF92ZWN0b3IgcHJpb3INCj4g
-dG8gYm9vc3QgMS42LjAuICBTZWNvbmQsIHRob3VnaCBpdCBpcyBoZWFkZXItb25seSwgdGhlIGNv
-dXBsaW5nIHdpdGgNCj4gcmVsYXRlZCB2ZXJzaW9uLXNwZWNpZmljIGJvb3N0IHR5cGVzIChjb250
-YWluZXIsIGFsbG9jYXRvciwgcmVzcGVjdGl2ZQ0KPiBkZXRhaWwgdHlwZXMsIGFuZCBwbGF0Zm9y
-bS1zcGVjaWZpYyBzZWxlY3RvcnMuLi4pIHNlZW1zIHRvIG1ha2UNCj4gcHVsbGluZyBpdCBpbiBz
-ZXBhcmF0ZWx5IHByZXR0eSB1bnJlYWxpc3RpYyBhcyBhbiBvcHRpb24uICBJIGxvb2tlZCBhdA0K
-PiB0aGUgY29zdCBvZiBwdWxsaW5nIGluIGFuZCBzZWxlY3RpdmVseSBjb21waWxpbmcgKGxpYnMp
-IGFuIGVudGlyZQ0KPiBib29zdCAxLjYsIGFuZCB0aGF0IHdlbnQgYSBsb3QgZWFzaWVyIChhZGRl
-ZCBsZXNzIHRoYW4gYSBtaW51dGUgdG8gbXkgYnVpbGQgdGltZSkuDQo+DQo+IE1hdHQNCj4NCj4g
-LS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLQ0KPiA+IEZyb206ICJTYWdlIFdlaWwiIDxzd2Vp
-bEByZWRoYXQuY29tPg0KPiA+IFRvOiAiQWxsZW4gU2FtdWVscyIgPEFsbGVuLlNhbXVlbHNAc2Fu
-ZGlzay5jb20+DQo+ID4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnLCBtYmVuamFtaUBy
-ZWRoYXQuY29tLA0KPiA+IGNib2RsZXlAcmVkaGF0LmNvbQ0KPiA+IFNlbnQ6IFdlZG5lc2RheSwg
-RmVicnVhcnkgMywgMjAxNiAzOjA0OjU3IFBNDQo+ID4gU3ViamVjdDogUmU6IGlubGluZSB2ZWN0
-b3IgY29udGFpbmVyDQo+ID4NCj4gPiBPbiBXZWQsIDMgRmViIDIwMTYsIEFsbGVuIFNhbXVlbHMg
-d3JvdGU6DQo+ID4gPiBPbmUgdGhpbmcgdGhhdCB0aGUgY29kZSBiYXNlIG5lZWRzIGlzIGEgc2lt
-cGxlIHZlY3RvciBjb250YWluZXINCj4gPiA+IHRoYXQgaXMgb3B0aW1pemVkIGZvciBhIHNtYWxs
-IG51bWJlciBvZiBlbGVtZW50cywgaS5lLiwgZm9yIHNtYWxsDQo+ID4gPiBlbGVtZW50IGNvdW50
-cyB3ZSBhdm9pZCB0aGUgbWFsbG9jL2ZyZWUgb3ZlcmhlYWQuIEJ1dCBmdWxseQ0KPiA+ID4gc3Vw
-cG9ydHMgYmVpbmcgcmVzaXplZCBpbnRvIGxhcmdlciBjb250YWluZXJzIHRoYXQgYXJlIHVuYm91
-bmRlZC4NCj4gPiA+IE9mIGNvdXJzZSBpdCB3aWxsIG5lZWQgdG8gZm9sbG93IGFsbCBvZiB0aGUg
-cHJvcGVyIG9iamVjdA0KPiA+ID4gY29weS9tb3ZlIHNlbWFudGljcyBzbyB0aGF0IHRoaW5ncyBs
-aWtlIHVuaXF1ZV9wdHIsIGV0YyB3b3JrDQo+ID4gPiBjb3JyZWN0bHkuDQo+ID4gPg0KPiA+ID4g
-SSBoZWFyZCBydW1vcnMgdGhhdCB0aGVyZSB3YXMgb25lIGF2YWlsYWJsZSBpbiB0aGUgYm9vc3Qg
-d29ybGQsDQo+ID4gPiBidXQgSSBjYW7igJl0IHNlZW0gdG8gZmluZCBpdC4gRG8geW91IGtub3cg
-YWJvdXQgb25lIGJlaW5nDQo+ID4gPiBhdmFpbGFibGU/DQo+ID4NCj4gPiBodHRwOi8vd3d3LmJv
-b3N0Lm9yZy9kb2MvbGlicy8xXzYwXzAvZG9jL2h0bWwvYm9vc3QvY29udGFpbmVyL3NtYWxsXw0K
-PiA+IHZlY3Rvci5odG1sDQo+ID4NCj4gPiA+IEnigJl2ZSBiZWVuIHByb3RvdHlwaW5nIG9uZSBt
-eXNlbGYsIGp1c3QgdG8gZ2V0IHJlLWZhbWlsaWFyIHdpdGggYWxsDQo+ID4gPiBvZiB0aGUNCj4g
-PiA+IEMrKzExIG1vdmUgc2VtZW50aWNzLCBhbmQgdHJpdmlhbCBjb25zdHJ1Y3RvcnMsIGV0Yy4N
-Cj4gPiA+DQo+ID4gPiBUaGUgY29kZSBpcyBwcmV0dHkgY29tcGxldGUsIGJ1dCB0aGUgdGVzdGlu
-ZyBnZXRzIHJhdGhlciBpbnZvbHZlZC4NCj4gPiA+IFRoZXJl4oCZcw0KPiA+ID4gbm8gcmVhc29u
-IHRvIGNvbnRhaW4gdGhpcyBpZiBpdOKAmXMgYXZhaWxhYmxlIGVsc2V3aGVyZS4gQnV0IGlmIGl0
-DQo+ID4gPiBpc27igJl0IEkgcGxhbiBvbiBjb250aW51aW5nIHRoaXPigKYNCj4gPg0KPiA+IEkg
-dGhpbmsgQ2FzZXkgaGFkIHByb3RvdHlwZWQgc29tZXRoaW5nIHNpbWlsYXIgdXNpbmcgYSBjdXN0
-b20NCj4gPiBhbGxvY2F0b3IsIHRvbywgYnV0IEkgZGlkbid0IGFjdHVhbGx5IGxvb2sgYXQgdGhl
-IHJlc3VsdC4gIEFuZCBNYXR0DQo+ID4gdGFsa2VkIGFib3V0IGp1c3QgcHVsbGluZyB0aGUgYm9v
-c3Qgb25lIGluLXRyZWUgdW50aWwgd2UgZ2V0IHVwZGF0ZWQNCj4gPiBib29zdCBpbiB0aGUgc3Vw
-cG9ydGVkIGRpc3Ryb3MsIGJ1dCBJIGZvcmdldCBpZiBoZSByYW4gaW50byBwcm9ibGVtcyB0aGVy
-ZSBvciBub3QuLi4NCj4gPg0KPiA+IHNhZ2UNCj4NCj4gLS0NCj4gLS0NCj4gTWF0dCBCZW5qYW1p
-bg0KPiBSZWQgSGF0LCBJbmMuDQo+IDMxNSBXZXN0IEh1cm9uIFN0cmVldCwgU3VpdGUgMTQwQQ0K
-PiBBbm4gQXJib3IsIE1pY2hpZ2FuIDQ4MTAzDQo+DQo+IGh0dHA6Ly93d3cucmVkaGF0LmNvbS9l
-bi90ZWNobm9sb2dpZXMvc3RvcmFnZQ0KPg0KPiB0ZWwuICA3MzQtNzA3LTA2NjANCj4gZmF4LiAg
-NzM0LTc2OS04OTM4DQo+IGNlbC4gIDczNC0yMTYtNTMwOQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmli
-ZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIN
-Cj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcg
-TW9yZSBtYWpvcmRvbW8NCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
-bW8taW5mby5odG1sDQo+DQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBp
-biB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1
-c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVh
-ZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFy
-ZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4g
-ZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBv
-ciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3Ug
-aGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkg
-dGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRp
-YXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5
-b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3Rv
-cmVkIGNvcGllcykuDQo=
+
+--y0ulUmNC+osPPQO6
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Greetings Ceph Developers,
+
+I recently discovered that when explicitly setting "log_file" for radosgw in
+ceph.conf, the logfile was created with root:root ownership. Initially I th=
+ought
+that this was a RGW issue, which prompted me to open: http://tracker.ceph.c=
+om/issues/14613
+
+Tracing this a bit further, I believe it to be a more general problem with =
+when the
+LogObs observer is invoked.
+
+The LogObs observer is first invoked from global_pre_init() by way of:
+
+global_pre_init():
+=2E..
+  conf->apply_changes(NULL)
+=2E..
+
+Which then invokes:
+
+md_config_t::_apply_changes()
+{
+=2E..
+  // Make any pending observer callbacks
+  for (rev_obs_map_t::const_iterator r =3D robs.begin(); r !=3D robs.end();=
+ ++r) {
+    md_config_obs_t *obs =3D r->first;
+    obs->handle_conf_change(this, r->second);
+  }
+=2E..
+}
+
+Which in turn fires the LogObs observer code:
+
+class LogObs : public md_config_obs_t {
+=2E..
+void handle_conf_change()
+=2E..
+  if (changed.count("log_file")) {
+    log->set_log_file(conf->log_file);
+    log->reopen_log_file();
+  }
+=2E..
+
+When "log_file" is specified in ceph.conf, Log::reopen_log_file() is called=
+ and
+the logfile is open()'d. However, at this point in time, the daemon is stil=
+l running
+as root, and thus the logfile is created with root:root ownership.
+
+A quick workaround is to manually not set "log_file" in ceph.conf. The defa=
+ult
+logfile is then created later on in global_init(), by way of:
+
+global_init()
+=2E..
+  g_conf->call_all_observers();
+=2E..
+
+This is called _after_ the correct permissions have been set.
+
+=46rom a quick glance, removing changed.count("log_file"...) from
+LogObs::handle_conf_changes() would skip over the early logfile creation in=
+ this observer.
+A more invasive option would be to remove conf->apply_changes() from global=
+_pre_init(),
+thus delaying running the observers for the first time until after the perm=
+issions drop.
+However, I suspect there may be valid reason why conf->apply_changes() is n=
+eeded in
+global_pre_init()? As I'm not familiar with the nuances here, a comment fro=
+m someone more
+familiar with this would be appreciated.
+
+--=20
+Regards,
+Karol
+
+--y0ulUmNC+osPPQO6
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJWsoqEAAoJECp28bThgzatiPAH+QG+VtYZCG4qscZOyP9eRJg9
+rE9fQ4SsusHDN/JIR6sf/JGRGNNPU4Ng8+SrRWM893KRkfqnk8HWtDxqQQ5MDUzn
+8/yKkdSq8VtHjCoz5htw4j+UI6B5EIJq3ZOx735nUEOloG8RQ9Vpe/rKAw6+ghBH
+A/OQbyQIvHBSSgRlm8yD7aob3S7LkOLFS/Y4JaOshaLtU2SQpwVRVTMAMoyubMqs
+vvF2yGuePkNfh45uNYir7UYAgbHo4hYVQzX7UD7jd7K/kCFNR33MJMO8WdQuAO/L
+3m0/ebcNYXbkKKjshzPiCgXLUYAl5U/eM31DIUBDMK2QScGyKlHN86svsdPzG5g=
+=mzKG
+-----END PGP SIGNATURE-----
+
+--y0ulUmNC+osPPQO6--
