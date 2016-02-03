@@ -1,216 +1,116 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: inline vector container
-Date: Wed, 3 Feb 2016 17:10:42 -0500 (EST)
-Message-ID: <1674294591.31606738.1454537442587.JavaMail.zimbra@redhat.com>
-References: <CY1PR0201MB189757D3C50DF09DDD8F2877E8D00@CY1PR0201MB1897.namprd02.prod.outlook.com> <alpine.DEB.2.11.1602031503230.28963@cpach.fuggernut.com> <1382260306.31547015.1454533040094.JavaMail.zimbra@redhat.com> <59448274.31581132.1454534771209.JavaMail.zimbra@redhat.com> <CY1PR0201MB1897486B3D49159CEDCD3007E8D00@CY1PR0201MB1897.namprd02.prod.outlook.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: inline vector container
+Date: Wed, 3 Feb 2016 22:06:57 +0000
+Message-ID: <CY1PR0201MB1897486B3D49159CEDCD3007E8D00@CY1PR0201MB1897.namprd02.prod.outlook.com>
+References: <CY1PR0201MB189757D3C50DF09DDD8F2877E8D00@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1602031503230.28963@cpach.fuggernut.com>
+ <1382260306.31547015.1454533040094.JavaMail.zimbra@redhat.com>
+ <59448274.31581132.1454534771209.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:47298 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965210AbcBCWKp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Feb 2016 17:10:45 -0500
-In-Reply-To: <CY1PR0201MB1897486B3D49159CEDCD3007E8D00@CY1PR0201MB1897.namprd02.prod.outlook.com>
+Received: from mail-bn1on0094.outbound.protection.outlook.com ([157.56.110.94]:6896
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755068AbcBCWkF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 3 Feb 2016 17:40:05 -0500
+In-Reply-To: <59448274.31581132.1454534771209.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Casey Bodley <cbodley@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Casey Bodley <cbodley@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I'll prioritize this.  Using more of folly may be a worthy project as w=
-ell, but that can wait for later... :)
-
-tx!
-
-Matt
-
------ Original Message -----
-> From: "Allen Samuels" <Allen.Samuels@sandisk.com>
-> To: "Casey Bodley" <cbodley@redhat.com>, "Matt Benjamin" <mbenjamin@r=
-edhat.com>
-> Cc: "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
-> Sent: Wednesday, February 3, 2016 5:06:57 PM
-> Subject: RE: inline vector container
->=20
-> I would say that just pulling the latest boost into the tree and usin=
-g it for
-> builds is the best path forward. But I'm in no way competent to make =
-that
-> kind of change in the build system -- especially during the automake =
-cmake
-> changeover period.
->=20
->=20
-> Allen Samuels
-> Software Architect, Fellow, Systems and Software Solutions
->=20
-> 2880 Junction Avenue, San Jose, CA 95134
-> T: +1 408 801 7030| M: +1 408 780 6416
-> allen.samuels@SanDisk.com
->=20
->=20
-> -----Original Message-----
-> From: Casey Bodley [mailto:cbodley@redhat.com]
-> Sent: Wednesday, February 03, 2016 1:26 PM
-> To: Matt Benjamin <mbenjamin@redhat.com>
-> Cc: Sage Weil <sweil@redhat.com>; Allen Samuels <Allen.Samuels@sandis=
-k.com>;
-> ceph-devel@vger.kernel.org
-> Subject: Re: inline vector container
->=20
-> Hi Allen,
->=20
-> I did spend some time a couple months ago experimenting with a custom
-> allocator with inline storage for standard containers. You can find m=
-y
-> branch on github at
-> https://github.com/cbodley/ceph/commits/wip-preallocator.
->=20
-> I was aiming for a general solution that worked with non-contiguous
-> containers, but couldn't find a good way to handle deallocations. So =
-the
-> approach was really only a good fit for std::vector.
->=20
-> I also had trouble getting it to do the right thing with the copy and=
- move
-> operators. I found that it was trying to use the new allocator to rel=
-ease
-> memory that came from the old allocator. Presumably there's a way to =
-make
-> this work using std::allocator_traits; have you had better luck here?=
- I'd
-> love to see your prototype.
->=20
-> I tend to agree that we should go with the boost solution if we can. =
-But if
-> a) we can't use boost::small_vector in the near-term due to versionin=
-g, and
-> b) we can get a custom version tested and working, it might be worth
-> pursuing.
->=20
-> Casey
->=20
-> ----- Original Message -----
-> > Hi,
-> >
-> > I think we should go with small_vector for this role, yes.  I found
-> > two issues.  First, there are critical defects in small_vector prio=
-r
-> > to boost 1.6.0.  Second, though it is header-only, the coupling wit=
-h
-> > related version-specific boost types (container, allocator, respect=
-ive
-> > detail types, and platform-specific selectors...) seems to make
-> > pulling it in separately pretty unrealistic as an option.  I looked=
- at
-> > the cost of pulling in and selectively compiling (libs) an entire
-> > boost 1.6, and that went a lot easier (added less than a minute to =
-my build
-> > time).
-> >
-> > Matt
-> >
-> > ----- Original Message -----
-> > > From: "Sage Weil" <sweil@redhat.com>
-> > > To: "Allen Samuels" <Allen.Samuels@sandisk.com>
-> > > Cc: ceph-devel@vger.kernel.org, mbenjami@redhat.com,
-> > > cbodley@redhat.com
-> > > Sent: Wednesday, February 3, 2016 3:04:57 PM
-> > > Subject: Re: inline vector container
-> > >
-> > > On Wed, 3 Feb 2016, Allen Samuels wrote:
-> > > > One thing that the code base needs is a simple vector container
-> > > > that is optimized for a small number of elements, i.e., for sma=
-ll
-> > > > element counts we avoid the malloc/free overhead. But fully
-> > > > supports being resized into larger containers that are unbounde=
-d.
-> > > > Of course it will need to follow all of the proper object
-> > > > copy/move semantics so that things like unique_ptr, etc work
-> > > > correctly.
-> > > >
-> > > > I heard rumors that there was one available in the boost world,
-> > > > but I can=E2=80=99t seem to find it. Do you know about one bein=
-g
-> > > > available?
-> > >
-> > > http://www.boost.org/doc/libs/1_60_0/doc/html/boost/container/sma=
-ll_
-> > > vector.html
-> > >
-> > > > I=E2=80=99ve been prototyping one myself, just to get re-famili=
-ar with all
-> > > > of the
-> > > > C++11 move sementics, and trivial constructors, etc.
-> > > >
-> > > > The code is pretty complete, but the testing gets rather involv=
-ed.
-> > > > There=E2=80=99s
-> > > > no reason to contain this if it=E2=80=99s available elsewhere. =
-But if it
-> > > > isn=E2=80=99t I plan on continuing this=E2=80=A6
-> > >
-> > > I think Casey had prototyped something similar using a custom
-> > > allocator, too, but I didn't actually look at the result.  And Ma=
-tt
-> > > talked about just pulling the boost one in-tree until we get upda=
-ted
-> > > boost in the supported distros, but I forget if he ran into probl=
-ems
-> > > there or not...
-> > >
-> > > sage
-> >
-> > --
-> > --
-> > Matt Benjamin
-> > Red Hat, Inc.
-> > 315 West Huron Street, Suite 140A
-> > Ann Arbor, Michigan 48103
-> >
-> > http://www.redhat.com/en/technologies/storage
-> >
-> > tel.  734-707-0660
-> > fax.  734-769-8938
-> > cel.  734-216-5309
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l"
-> > in the body of a message to majordomo@vger.kernel.org More majordom=
-o
-> > info at  http://vger.kernel.org/majordomo-info.html
-> >
-> PLEASE NOTE: The information contained in this electronic mail messag=
-e is
-> intended only for the use of the designated recipient(s) named above.=
- If the
-> reader of this message is not the intended recipient, you are hereby
-> notified that you have received this message in error and that any re=
-view,
-> dissemination, distribution, or copying of this message is strictly
-> prohibited. If you have received this communication in error, please =
-notify
-> the sender by telephone or e-mail (as shown above) immediately and de=
-stroy
-> any and all copies of this message in your possession (whether hard c=
-opies
-> or electronically stored copies).
->=20
-
---=20
---=20
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SSB3b3VsZCBzYXkgdGhhdCBqdXN0IHB1bGxpbmcgdGhlIGxhdGVzdCBib29zdCBpbnRvIHRoZSB0
+cmVlIGFuZCB1c2luZyBpdCBmb3IgYnVpbGRzIGlzIHRoZSBiZXN0IHBhdGggZm9yd2FyZC4gQnV0
+IEknbSBpbiBubyB3YXkgY29tcGV0ZW50IHRvIG1ha2UgdGhhdCBraW5kIG9mIGNoYW5nZSBpbiB0
+aGUgYnVpbGQgc3lzdGVtIC0tIGVzcGVjaWFsbHkgZHVyaW5nIHRoZSBhdXRvbWFrZSBjbWFrZSBj
+aGFuZ2VvdmVyIHBlcmlvZC4NCg0KDQpBbGxlbiBTYW11ZWxzDQpTb2Z0d2FyZSBBcmNoaXRlY3Qs
+IEZlbGxvdywgU3lzdGVtcyBhbmQgU29mdHdhcmUgU29sdXRpb25zDQoNCjI4ODAgSnVuY3Rpb24g
+QXZlbnVlLCBTYW4gSm9zZSwgQ0EgOTUxMzQNClQ6ICsxIDQwOCA4MDEgNzAzMHwgTTogKzEgNDA4
+IDc4MCA2NDE2DQphbGxlbi5zYW11ZWxzQFNhbkRpc2suY29tDQoNCg0KLS0tLS1PcmlnaW5hbCBN
+ZXNzYWdlLS0tLS0NCkZyb206IENhc2V5IEJvZGxleSBbbWFpbHRvOmNib2RsZXlAcmVkaGF0LmNv
+bV0NClNlbnQ6IFdlZG5lc2RheSwgRmVicnVhcnkgMDMsIDIwMTYgMToyNiBQTQ0KVG86IE1hdHQg
+QmVuamFtaW4gPG1iZW5qYW1pbkByZWRoYXQuY29tPg0KQ2M6IFNhZ2UgV2VpbCA8c3dlaWxAcmVk
+aGF0LmNvbT47IEFsbGVuIFNhbXVlbHMgPEFsbGVuLlNhbXVlbHNAc2FuZGlzay5jb20+OyBjZXBo
+LWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IGlubGluZSB2ZWN0b3IgY29udGFp
+bmVyDQoNCkhpIEFsbGVuLA0KDQpJIGRpZCBzcGVuZCBzb21lIHRpbWUgYSBjb3VwbGUgbW9udGhz
+IGFnbyBleHBlcmltZW50aW5nIHdpdGggYSBjdXN0b20gYWxsb2NhdG9yIHdpdGggaW5saW5lIHN0
+b3JhZ2UgZm9yIHN0YW5kYXJkIGNvbnRhaW5lcnMuIFlvdSBjYW4gZmluZCBteSBicmFuY2ggb24g
+Z2l0aHViIGF0IGh0dHBzOi8vZ2l0aHViLmNvbS9jYm9kbGV5L2NlcGgvY29tbWl0cy93aXAtcHJl
+YWxsb2NhdG9yLg0KDQpJIHdhcyBhaW1pbmcgZm9yIGEgZ2VuZXJhbCBzb2x1dGlvbiB0aGF0IHdv
+cmtlZCB3aXRoIG5vbi1jb250aWd1b3VzIGNvbnRhaW5lcnMsIGJ1dCBjb3VsZG4ndCBmaW5kIGEg
+Z29vZCB3YXkgdG8gaGFuZGxlIGRlYWxsb2NhdGlvbnMuIFNvIHRoZSBhcHByb2FjaCB3YXMgcmVh
+bGx5IG9ubHkgYSBnb29kIGZpdCBmb3Igc3RkOjp2ZWN0b3IuDQoNCkkgYWxzbyBoYWQgdHJvdWJs
+ZSBnZXR0aW5nIGl0IHRvIGRvIHRoZSByaWdodCB0aGluZyB3aXRoIHRoZSBjb3B5IGFuZCBtb3Zl
+IG9wZXJhdG9ycy4gSSBmb3VuZCB0aGF0IGl0IHdhcyB0cnlpbmcgdG8gdXNlIHRoZSBuZXcgYWxs
+b2NhdG9yIHRvIHJlbGVhc2UgbWVtb3J5IHRoYXQgY2FtZSBmcm9tIHRoZSBvbGQgYWxsb2NhdG9y
+LiBQcmVzdW1hYmx5IHRoZXJlJ3MgYSB3YXkgdG8gbWFrZSB0aGlzIHdvcmsgdXNpbmcgc3RkOjph
+bGxvY2F0b3JfdHJhaXRzOyBoYXZlIHlvdSBoYWQgYmV0dGVyIGx1Y2sgaGVyZT8gSSdkIGxvdmUg
+dG8gc2VlIHlvdXIgcHJvdG90eXBlLg0KDQpJIHRlbmQgdG8gYWdyZWUgdGhhdCB3ZSBzaG91bGQg
+Z28gd2l0aCB0aGUgYm9vc3Qgc29sdXRpb24gaWYgd2UgY2FuLiBCdXQgaWYNCmEpIHdlIGNhbid0
+IHVzZSBib29zdDo6c21hbGxfdmVjdG9yIGluIHRoZSBuZWFyLXRlcm0gZHVlIHRvIHZlcnNpb25p
+bmcsIGFuZA0KYikgd2UgY2FuIGdldCBhIGN1c3RvbSB2ZXJzaW9uIHRlc3RlZCBhbmQgd29ya2lu
+ZywgaXQgbWlnaHQgYmUgd29ydGggcHVyc3VpbmcuDQoNCkNhc2V5DQoNCi0tLS0tIE9yaWdpbmFs
+IE1lc3NhZ2UgLS0tLS0NCj4gSGksDQo+DQo+IEkgdGhpbmsgd2Ugc2hvdWxkIGdvIHdpdGggc21h
+bGxfdmVjdG9yIGZvciB0aGlzIHJvbGUsIHllcy4gIEkgZm91bmQNCj4gdHdvIGlzc3Vlcy4gIEZp
+cnN0LCB0aGVyZSBhcmUgY3JpdGljYWwgZGVmZWN0cyBpbiBzbWFsbF92ZWN0b3IgcHJpb3INCj4g
+dG8gYm9vc3QgMS42LjAuICBTZWNvbmQsIHRob3VnaCBpdCBpcyBoZWFkZXItb25seSwgdGhlIGNv
+dXBsaW5nIHdpdGgNCj4gcmVsYXRlZCB2ZXJzaW9uLXNwZWNpZmljIGJvb3N0IHR5cGVzIChjb250
+YWluZXIsIGFsbG9jYXRvciwgcmVzcGVjdGl2ZQ0KPiBkZXRhaWwgdHlwZXMsIGFuZCBwbGF0Zm9y
+bS1zcGVjaWZpYyBzZWxlY3RvcnMuLi4pIHNlZW1zIHRvIG1ha2UNCj4gcHVsbGluZyBpdCBpbiBz
+ZXBhcmF0ZWx5IHByZXR0eSB1bnJlYWxpc3RpYyBhcyBhbiBvcHRpb24uICBJIGxvb2tlZCBhdA0K
+PiB0aGUgY29zdCBvZiBwdWxsaW5nIGluIGFuZCBzZWxlY3RpdmVseSBjb21waWxpbmcgKGxpYnMp
+IGFuIGVudGlyZQ0KPiBib29zdCAxLjYsIGFuZCB0aGF0IHdlbnQgYSBsb3QgZWFzaWVyIChhZGRl
+ZCBsZXNzIHRoYW4gYSBtaW51dGUgdG8gbXkgYnVpbGQgdGltZSkuDQo+DQo+IE1hdHQNCj4NCj4g
+LS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLQ0KPiA+IEZyb206ICJTYWdlIFdlaWwiIDxzd2Vp
+bEByZWRoYXQuY29tPg0KPiA+IFRvOiAiQWxsZW4gU2FtdWVscyIgPEFsbGVuLlNhbXVlbHNAc2Fu
+ZGlzay5jb20+DQo+ID4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnLCBtYmVuamFtaUBy
+ZWRoYXQuY29tLA0KPiA+IGNib2RsZXlAcmVkaGF0LmNvbQ0KPiA+IFNlbnQ6IFdlZG5lc2RheSwg
+RmVicnVhcnkgMywgMjAxNiAzOjA0OjU3IFBNDQo+ID4gU3ViamVjdDogUmU6IGlubGluZSB2ZWN0
+b3IgY29udGFpbmVyDQo+ID4NCj4gPiBPbiBXZWQsIDMgRmViIDIwMTYsIEFsbGVuIFNhbXVlbHMg
+d3JvdGU6DQo+ID4gPiBPbmUgdGhpbmcgdGhhdCB0aGUgY29kZSBiYXNlIG5lZWRzIGlzIGEgc2lt
+cGxlIHZlY3RvciBjb250YWluZXINCj4gPiA+IHRoYXQgaXMgb3B0aW1pemVkIGZvciBhIHNtYWxs
+IG51bWJlciBvZiBlbGVtZW50cywgaS5lLiwgZm9yIHNtYWxsDQo+ID4gPiBlbGVtZW50IGNvdW50
+cyB3ZSBhdm9pZCB0aGUgbWFsbG9jL2ZyZWUgb3ZlcmhlYWQuIEJ1dCBmdWxseQ0KPiA+ID4gc3Vw
+cG9ydHMgYmVpbmcgcmVzaXplZCBpbnRvIGxhcmdlciBjb250YWluZXJzIHRoYXQgYXJlIHVuYm91
+bmRlZC4NCj4gPiA+IE9mIGNvdXJzZSBpdCB3aWxsIG5lZWQgdG8gZm9sbG93IGFsbCBvZiB0aGUg
+cHJvcGVyIG9iamVjdA0KPiA+ID4gY29weS9tb3ZlIHNlbWFudGljcyBzbyB0aGF0IHRoaW5ncyBs
+aWtlIHVuaXF1ZV9wdHIsIGV0YyB3b3JrDQo+ID4gPiBjb3JyZWN0bHkuDQo+ID4gPg0KPiA+ID4g
+SSBoZWFyZCBydW1vcnMgdGhhdCB0aGVyZSB3YXMgb25lIGF2YWlsYWJsZSBpbiB0aGUgYm9vc3Qg
+d29ybGQsDQo+ID4gPiBidXQgSSBjYW7igJl0IHNlZW0gdG8gZmluZCBpdC4gRG8geW91IGtub3cg
+YWJvdXQgb25lIGJlaW5nDQo+ID4gPiBhdmFpbGFibGU/DQo+ID4NCj4gPiBodHRwOi8vd3d3LmJv
+b3N0Lm9yZy9kb2MvbGlicy8xXzYwXzAvZG9jL2h0bWwvYm9vc3QvY29udGFpbmVyL3NtYWxsXw0K
+PiA+IHZlY3Rvci5odG1sDQo+ID4NCj4gPiA+IEnigJl2ZSBiZWVuIHByb3RvdHlwaW5nIG9uZSBt
+eXNlbGYsIGp1c3QgdG8gZ2V0IHJlLWZhbWlsaWFyIHdpdGggYWxsDQo+ID4gPiBvZiB0aGUNCj4g
+PiA+IEMrKzExIG1vdmUgc2VtZW50aWNzLCBhbmQgdHJpdmlhbCBjb25zdHJ1Y3RvcnMsIGV0Yy4N
+Cj4gPiA+DQo+ID4gPiBUaGUgY29kZSBpcyBwcmV0dHkgY29tcGxldGUsIGJ1dCB0aGUgdGVzdGlu
+ZyBnZXRzIHJhdGhlciBpbnZvbHZlZC4NCj4gPiA+IFRoZXJl4oCZcw0KPiA+ID4gbm8gcmVhc29u
+IHRvIGNvbnRhaW4gdGhpcyBpZiBpdOKAmXMgYXZhaWxhYmxlIGVsc2V3aGVyZS4gQnV0IGlmIGl0
+DQo+ID4gPiBpc27igJl0IEkgcGxhbiBvbiBjb250aW51aW5nIHRoaXPigKYNCj4gPg0KPiA+IEkg
+dGhpbmsgQ2FzZXkgaGFkIHByb3RvdHlwZWQgc29tZXRoaW5nIHNpbWlsYXIgdXNpbmcgYSBjdXN0
+b20NCj4gPiBhbGxvY2F0b3IsIHRvbywgYnV0IEkgZGlkbid0IGFjdHVhbGx5IGxvb2sgYXQgdGhl
+IHJlc3VsdC4gIEFuZCBNYXR0DQo+ID4gdGFsa2VkIGFib3V0IGp1c3QgcHVsbGluZyB0aGUgYm9v
+c3Qgb25lIGluLXRyZWUgdW50aWwgd2UgZ2V0IHVwZGF0ZWQNCj4gPiBib29zdCBpbiB0aGUgc3Vw
+cG9ydGVkIGRpc3Ryb3MsIGJ1dCBJIGZvcmdldCBpZiBoZSByYW4gaW50byBwcm9ibGVtcyB0aGVy
+ZSBvciBub3QuLi4NCj4gPg0KPiA+IHNhZ2UNCj4NCj4gLS0NCj4gLS0NCj4gTWF0dCBCZW5qYW1p
+bg0KPiBSZWQgSGF0LCBJbmMuDQo+IDMxNSBXZXN0IEh1cm9uIFN0cmVldCwgU3VpdGUgMTQwQQ0K
+PiBBbm4gQXJib3IsIE1pY2hpZ2FuIDQ4MTAzDQo+DQo+IGh0dHA6Ly93d3cucmVkaGF0LmNvbS9l
+bi90ZWNobm9sb2dpZXMvc3RvcmFnZQ0KPg0KPiB0ZWwuICA3MzQtNzA3LTA2NjANCj4gZmF4LiAg
+NzM0LTc2OS04OTM4DQo+IGNlbC4gIDczNC0yMTYtNTMwOQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmli
+ZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIN
+Cj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcg
+TW9yZSBtYWpvcmRvbW8NCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
+bW8taW5mby5odG1sDQo+DQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBp
+biB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1
+c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVh
+ZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFy
+ZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4g
+ZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBv
+ciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3Ug
+aGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkg
+dGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRp
+YXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5
+b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3Rv
+cmVkIGNvcGllcykuDQo=
