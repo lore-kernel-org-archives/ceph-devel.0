@@ -1,86 +1,47 @@
 From: Deepa Dinamani <deepa.kernel@gmail.com>
-Subject: [PATCH 08/10] fs: ceph: replace CURRENT_TIME by current_fs_time()
-Date: Tue,  2 Feb 2016 22:07:48 -0800
-Message-ID: <1454479670-8204-9-git-send-email-deepa.kernel@gmail.com>
+Subject: [PATCH 09/10] fs: ceph: Replace CURRENT_TIME by
+	ktime_get_real_ts()
+Date: Tue,  2 Feb 2016 22:07:49 -0800
+Message-ID: <1454479670-8204-10-git-send-email-deepa.kernel@gmail.com>
 References: <1454479670-8204-1-git-send-email-deepa.kernel@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <y2038-bounces@lists.linaro.org>
 In-Reply-To: <1454479670-8204-1-git-send-email-deepa.kernel@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/y2038/>
+List-Post: <mailto:y2038@lists.linaro.org>
+List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
+List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=subscribe>
+Errors-To: y2038-bounces@lists.linaro.org
+Sender: "Y2038" <y2038-bounces@lists.linaro.org>
 To: linux-fsdevel@vger.kernel.org, y2038@lists.linaro.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, linux-kernel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>, Sage Weil <sage@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Dave Chinner <david@fromorbit.com>, linux-kernel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-CURRENT_TIME macro is not appropriate for filesystems as it
-doesn't use the right granularity for filesystem timestamps.
-Use current_fs_time() instead.
-
-Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>
-Cc: Sage Weil <sage@redhat.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org
----
- fs/ceph/file.c  | 4 ++--
- fs/ceph/inode.c | 2 +-
- fs/ceph/xattr.c | 4 ++--
- 3 files changed, 5 insertions(+), 5 deletions(-)
-
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 86a9c38..9b338ff 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -783,7 +783,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
- 	int num_pages = 0;
- 	int flags;
- 	int ret;
--	struct timespec mtime = CURRENT_TIME;
-+	struct timespec mtime = current_fs_time(inode->i_sb);
- 	size_t count = iov_iter_count(iter);
- 	loff_t pos = iocb->ki_pos;
- 	bool write = iov_iter_rw(iter) == WRITE;
-@@ -988,7 +988,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
- 	int flags;
- 	int check_caps = 0;
- 	int ret;
--	struct timespec mtime = CURRENT_TIME;
-+	struct timespec mtime = current_fs_time(inode->i_sb);
- 	size_t count = iov_iter_count(from);
- 
- 	if (ceph_snap(file_inode(file)) != CEPH_NOSNAP)
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index fb4ba2e..63d0198 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1959,7 +1959,7 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
- 	if (dirtied) {
- 		inode_dirty_flags = __ceph_mark_dirty_caps(ci, dirtied,
- 							   &prealloc_cf);
--		inode->i_ctime = CURRENT_TIME;
-+		inode->i_ctime = current_fs_time(inode->i_sb);
- 	}
- 
- 	release &= issued;
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 819163d..1e1c00a 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -999,7 +999,7 @@ retry:
- 		dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_XATTR_EXCL,
- 					       &prealloc_cf);
- 		ci->i_xattrs.dirty = true;
--		inode->i_ctime = CURRENT_TIME;
-+		inode->i_ctime = current_fs_time(inode->i_sb);
- 	}
- 
- 	spin_unlock(&ci->i_ceph_lock);
-@@ -1136,7 +1136,7 @@ retry:
- 	dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_XATTR_EXCL,
- 				       &prealloc_cf);
- 	ci->i_xattrs.dirty = true;
--	inode->i_ctime = CURRENT_TIME;
-+	inode->i_ctime = current_fs_time(inode->i_sb);
- 	spin_unlock(&ci->i_ceph_lock);
- 	if (lock_snap_rwsem)
- 		up_read(&mdsc->snap_rwsem);
--- 
-1.9.1
+VGhpcyBpcyBpbiBwcmVwYXJhdGlvbiBmb3IgdGhlIHNlcmllcyB0aGF0IHRyYW5zaXRpb25zCmZp
+bGVzeXN0ZW0gdGltZXN0YW1wcyB0byB1c2UgNjQgYml0IHRpbWUgYW5kIGhlbmNlIG1ha2UKdGhl
+bSB5MjAzOCBzYWZlLgoKQ1VSUkVOVF9USU1FIG1hY3JvIHdpbGwgYmUgZGVsZXRlZCBiZWZvcmUg
+bWVyZ2luZyB0aGUKYWZvcmVtZW50aW9uZWQgc2VyaWVzLgoKRmlsZXN5c3RlbXMgd2lsbCB1c2Ug
+Y3VycmVudF9mc190aW1lKCkgaW5zdGVhZCBvZgpDVVJSRU5UX1RJTUUuClVzZSBrdGltZV9nZXRf
+cmVhbF90cygpIGhlcmUgYXMgdGhpcyBpcyBub3QgZmlsZXN5c3RlbSB0aW1lLgprdGltZV9nZXRf
+cmVhbF90cygpIHJldHVybnMgdGhlIHRpbWVzdGFtcCBpbiBucyB3aGljaCBjYW4KYmUgdXNlZCB0
+byBjYWxjdWxhdGUgTURTIHJlcXVlc3QgdGltZXN0YW1wLgoKU2lnbmVkLW9mZi1ieTogRGVlcGEg
+RGluYW1hbmkgPGRlZXBhLmtlcm5lbEBnbWFpbC5jb20+CkNjOiAiWWFuLCBaaGVuZyIgPHp5YW5A
+cmVkaGF0LmNvbT4KQ2M6IFNhZ2UgV2VpbCA8c2FnZUByZWRoYXQuY29tPgpDYzogSWx5YSBEcnlv
+bW92IDxpZHJ5b21vdkBnbWFpbC5jb20+CkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZwot
+LS0KIGZzL2NlcGgvbWRzX2NsaWVudC5jIHwgMiArLQogMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0
+aW9uKCspLCAxIGRlbGV0aW9uKC0pCgpkaWZmIC0tZ2l0IGEvZnMvY2VwaC9tZHNfY2xpZW50LmMg
+Yi9mcy9jZXBoL21kc19jbGllbnQuYwppbmRleCBlN2IxMzBhLi4zNDhiMjJlIDEwMDY0NAotLS0g
+YS9mcy9jZXBoL21kc19jbGllbnQuYworKysgYi9mcy9jZXBoL21kc19jbGllbnQuYwpAQCAtMTcy
+MSw3ICsxNzIxLDcgQEAgY2VwaF9tZHNjX2NyZWF0ZV9yZXF1ZXN0KHN0cnVjdCBjZXBoX21kc19j
+bGllbnQgKm1kc2MsIGludCBvcCwgaW50IG1vZGUpCiAJaW5pdF9jb21wbGV0aW9uKCZyZXEtPnJf
+c2FmZV9jb21wbGV0aW9uKTsKIAlJTklUX0xJU1RfSEVBRCgmcmVxLT5yX3Vuc2FmZV9pdGVtKTsK
+IAotCXJlcS0+cl9zdGFtcCA9IENVUlJFTlRfVElNRTsKKwlrdGltZV9nZXRfcmVhbF90cygmcmVx
+LT5yX3N0YW1wKTsKIAogCXJlcS0+cl9vcCA9IG9wOwogCXJlcS0+cl9kaXJlY3RfbW9kZSA9IG1v
+ZGU7Ci0tIAoxLjkuMQoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18KWTIwMzggbWFpbGluZyBsaXN0ClkyMDM4QGxpc3RzLmxpbmFyby5vcmcKaHR0cHM6Ly9s
+aXN0cy5saW5hcm8ub3JnL21haWxtYW4vbGlzdGluZm8veTIwMzgK
