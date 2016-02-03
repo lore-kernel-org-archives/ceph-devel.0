@@ -1,51 +1,55 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: Log spam in master with leveldb messages
-Date: Wed, 3 Feb 2016 00:03:02 +0000
-Message-ID: <BN1PR02MB0552D50CE91834B14896AFAF4D00@BN1PR02MB055.namprd02.prod.outlook.com>
+From: "Moreno, Orlando" <orlando.moreno@intel.com>
+Subject: Infernalis on NVMe cephx authentication impact
+Date: Wed, 3 Feb 2016 00:18:29 +0000
+Message-ID: <034AAD465C6CBE4F96D9FB98573A79A6024B1591@FMSMSX108.amr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0099.outbound.protection.outlook.com ([157.56.110.99]:40708
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755177AbcBCADF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Feb 2016 19:03:05 -0500
+Received: from mga01.intel.com ([192.55.52.88]:21781 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751011AbcBCASv convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Feb 2016 19:18:51 -0500
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
 
-Hi,
-I saw osd log is spamming with following leveldb messages..
+Following up on the first pass of all-flash performance numbers for Infernalis, we ran the same tests with cephx authentication on. Previously, for both Hammer and Infernalis, the performance reported was with authentication turned off. Since the authentication interface changed to libnss between Hammer and Infernalis, we wanted to verify the impact of authentication in a high-performance Ceph cluster.
 
-2016-02-02 15:47:01.559086 7f6565fff700  1 leveldb: Compacting 2@0 + 6@1 files
-2016-02-02 15:47:01.601971 7f6565fff700  1 leveldb: Generated table #45588: 57785 keys, 2130651 bytes
-2016-02-02 15:47:01.645375 7f6565fff700  1 leveldb: Generated table #45589: 58653 keys, 2131228 bytes
-2016-02-02 15:47:01.692566 7f6565fff700  1 leveldb: Generated table #45590: 57729 keys, 2131490 bytes
-2016-02-02 15:47:01.696688 7f6565fff700  1 leveldb: Generated table #45591: 4131 keys, 167758 bytes
-2016-02-02 15:47:01.735986 7f6565fff700  1 leveldb: Generated table #45592: 44341 keys, 1684603 bytes
-2016-02-02 15:47:01.783394 7f6565fff700  1 leveldb: Generated table #45593: 57672 keys, 2130488 bytes
-2016-02-02 15:47:01.792750 7f6565fff700  1 leveldb: Generated table #45594: 11073 keys, 408429 bytes
-2016-02-02 15:47:01.792759 7f6565fff700  1 leveldb: Compacted 2@0 + 6@1 files => 10784647 bytes
-2016-02-02 15:47:01.793017 7f6565fff700  1 leveldb: compacted to: files[ 0 7 25 0 0 0 0 ]
-2016-02-02 15:47:01.793089 7f6565fff700  1 leveldb: Compacting 1@1 + 4@2 files
-2016-02-02 15:47:01.830144 7f6565fff700  1 leveldb: Generated table #45595: 32249 keys, 2130919 bytes
-2016-02-02 15:47:01.867178 7f6565fff700  1 leveldb: Generated table #45596: 32228 keys, 2131274 bytes
-2016-02-02 15:47:01.908135 7f6565fff700  1 leveldb: Generated table #45597: 32246 keys, 2130944 bytes
-2016-02-02 15:47:01.949642 7f6565fff700  1 leveldb: Generated table #45598: 32211 keys, 2130740 bytes
-2016-02-02 15:47:01.950102 7f6565fff700  1 leveldb: Generated table #45599: 60 keys, 4062 bytes
-2016-02-02 15:47:01.950110 7f6565fff700  1 leveldb: Compacted 1@1 + 4@2 files => 8527939 bytes
-2016-02-02 15:47:01.950356 7f6565fff700  1 leveldb: compacted to: files[ 0 6 26 0 0 0 0 ]
-2016-02-02 15:47:01.950566 7f6565fff700  1 leveldb: Delete type=2 #45577
+With authentication on, random 4K read performance drops by about 11% and clearly hits a wall in terms of max IOPS. Random writes see a greater impact with max performance reaching 176K IOPS compared to the 200K+ IOPS with authentication off. The mixed workload seems to be affected by this as well and maxes out at 408K IOPS. Considering the high throughput of the cluster, these numbers seem reasonable and the overhead of adding authentication did not degrade the performance as much as Hammer's authentication implementation where we saw at least a 30% hit on reads/writes.
 
-2016-02-02 15:47:01.951127 7f6565fff700  1 leveldb: Delete type=2 #45578
+Below is a comparison table of authentication on vs off. More detailed data is available for anyone that is interested.
 
-I found out now we are redirecting leveldb logs to ceph log based on config option "leveldb_log_to_ceph_log" which is by default true.
+				Infernalis			Infernalis w/ cephx	
+		IODepth	IOPS		Avg Lat (ms)	IOPS		Avg Lat (ms)
+========================================================================
+100% Rand Read	4	383747		0.619167	347850		0.683139
+			8	645551		0.7345		581384		0.815726
+			16	955990		0.994833	820765		1.153785
+			32	1072001	1.774667	937832		2.023074
+			64	1028112	3.578667	942742		4.036471
+			96	1070847	5.402833	941746		6.06505
+			128	1088625	7.085		N/A		N/A
 
-If there is no strong reason I think it should be by default false.
+100% Rand Write	4	131447		1.820833	111689		2.135115
+			8	175180		2.8385		138931		3.43494
+			16	198219		5.129333	163417		5.844878
+			32	191775		10.0895		174522		10.956354
+			64	185602		21.089167	176733		21.669579
+			96	204202		30.601833	163963		35.046025
+			128	233095		37.532667	150943		50.75762
 
-Thanks & Regards
-Somnath
+70% Rand Read		4	234445		1.015333	210798		1.129461
+			8	337808		1.417667	309584		1.538977
+			16	394676		2.425333	360150		2.649063
+			32	445295		4.3465		391638		4.879287
+			64	478867		8.297833	408463		9.364712
+			96	513590		11.9885		407493		14.084794
+			128	532439		15.970333	406757		18.814887
 
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
+Thanks,
+
+Orlando
