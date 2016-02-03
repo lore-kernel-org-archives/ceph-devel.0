@@ -1,70 +1,49 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Please test Weighted Priority Queue in Master
-Date: Wed, 3 Feb 2016 17:24:19 +0000
-Message-ID: <BN1PR02MB055BDFF2DBF2BA648A58D07F4D00@BN1PR02MB055.namprd02.prod.outlook.com>
-References: <CAANLjFoFEfQTYVU31f22t6Ra-ceP+6fB-Q-VX99HwB+0OAoWPQ@mail.gmail.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: Backporting stability fixes for ceph-disk
+Date: Wed, 3 Feb 2016 10:56:46 -0700
+Message-ID: <CALqRxCyTk5NPQJE7PTX4txbCPB2eagMBvH+V9HLHXkir4hij4g@mail.gmail.com>
+References: <56B04476.5020203@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0063.outbound.protection.outlook.com ([157.56.110.63]:55249
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932499AbcBCRYV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Feb 2016 12:24:21 -0500
-In-Reply-To: <CAANLjFoFEfQTYVU31f22t6Ra-ceP+6fB-Q-VX99HwB+0OAoWPQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:38081 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964787AbcBCR4s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Feb 2016 12:56:48 -0500
+Received: by mail-wm0-f45.google.com with SMTP id p63so82337525wmp.1
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Feb 2016 09:56:47 -0800 (PST)
+In-Reply-To: <56B04476.5020203@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <ldachary@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-R3JlYXQgd29yayAsIHRoYW5rcyAhDQpXaWxsIHRlc3QgdGhpcyBvdXQuLg0KDQpSZWdhcmRzDQpT
-b21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93
-bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwu
-b3JnXSBPbiBCZWhhbGYgT2YgUm9iZXJ0IExlQmxhbmMNClNlbnQ6IFdlZG5lc2RheSwgRmVicnVh
-cnkgMDMsIDIwMTYgOToyMSBBTQ0KVG86IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFBsZWFzZSB0ZXN0
-IFdlaWdodGVkIFByaW9yaXR5IFF1ZXVlIGluIE1hc3Rlcg0KDQotLS0tLUJFR0lOIFBHUCBTSUdO
-RUQgTUVTU0FHRS0tLS0tDQpIYXNoOiBTSEEyNTYNCg0KTm93IHRoYXQgV1BRIGhhcyBiZWVuIG1l
-cmdlZCBpbiBtYXN0ZXIsIHBsZWFzZSB0ZXN0IGl0IG91dCBpbiB5b3VyIGVudmlyb25tZW50cy4g
-VGhlcmUgaGF2ZSBiZWVuIHBlcmZvcm1hbmNlIGltcHJvdmVtZW50cyBhY3Jvc3MgdGhlIGJvYXJk
-IGluIG15IHRlc3Rpbmcgd2l0aCBTU0RzIGhhdmluZyB0aGUgbGFyZ2VzdCBnYWlucyBhbmQgaXQg
-d291bGQgYmUgZ3JlYXQgdG8gZ2V0IHNvbWUgb3RoZXJzJyByZXZpZXcgYXMgd2VsbC4gVGhlcmUg
-d2FzIGRpc2N1c3Npb24gdG8gcG90ZW50aWFsbHkgbWFrZSB0aGlzIHRoZSBkZWZhdWx0IHF1ZXVl
-IGZvciBKZXdlbCwgc28gdGhlIG1vcmUgdGVzdGluZyB0aGUgYmV0dGVyLg0KDQpUbyBlbmFibGUg
-dGhlIFdQUSBhbmQgYWRqdXN0IHRoZSBwcmlvcml0eSBjdXRvZmYsIHVzZSB0aGUgZm9sbG93aW5n
-IGluIGNlcGguY29uZiAoYnkgZGVmYXVsdCBpdCB1c2VzIHRoZSBQcmlvcml0aXplZFF1ZXVlKToN
-Cg0Kb3NkX29wX3F1ZXVlID0gd3BxDQpvc2Rfb3BfcXVldWVfY3V0X29mZiA9IGxvdw0KDQpJdCBk
-b2VzIHJlcXVpcmUgYW4gT1NEIHJlc3RhcnQgKG5vdCBhIHJ1biB0aW1lIHR1bmVhYmxlIG9wdGlv
-bikgdG8gY2hhbmdlIHRoZSBxdWV1ZS9jdXRvZmYuDQoNClRoYW5rcywNCi0gLS0tLS0tLS0tLS0t
-LS0tLQ0KUm9iZXJ0IExlQmxhbmMNClBHUCBGaW5nZXJwcmludCA3OUEyIDlDQTQgNkNDNCA0NURE
-IEE5MDQgIEM3MEUgRTY1NCAzQkIyIEZBNjIgQjlGMSAtLS0tLUJFR0lOIFBHUCBTSUdOQVRVUkUt
-LS0tLQ0KVmVyc2lvbjogTWFpbHZlbG9wZSB2MS4zLjQNCkNvbW1lbnQ6IGh0dHBzOi8vd3d3Lm1h
-aWx2ZWxvcGUuY29tDQoNCndzRmNCQUVCQ0FBUUJRSldzamJ4Q1JEbVZEdXkrbUs1OFFBQWhRRVAv
-M0NYeEhYWTZHMVRYYjR0b0cyVw0KckQzUW5nRUtOWkRlQWgvSjg2RG0vd3BtRUxyeXFkajUxMEhL
-YlpIVWNobW52ZHRnc3NoR3hEVWthSzh6DQpyS25zcHcvTS8wNERkZ1BEb0ltYzJuNjlodzFKY2FI
-aUdKM2hoNU9iaHAwdXI2ekxYOFZucFNCdlA0YTENCmx2ZUNOU2t4MG1wVHYyVmhhd0NsVUoxVlRl
-dDQ4OWlKY1RSUDhPQ3d4MkpBcGtqem9rQXczM0FPcWJ1YQ0KenlocG1QaURDcll2elJiMEsveGdp
-eUp4UXVYWTRUUUE4T1UxWWtseWw5dHZBdkNSUXZqRlFrRjMrUXBIDQpyL0tpZnBjWGZQa2ZQc2lh
-c0ZMa0RKYUNyY2NvcWpDcmw5YUhyWWNYSjdBcDg4a1plVWFSMlJiTXFVVUgNCjFtVEloNW9BNUdq
-U2pFNndycEdxZTJubitOeW1rSVYwYitLWER2Yk05c1puUFVRVlJmNXlHVU9ZN2ppSw0KNVRhM3JE
-czBNajQ2OVJKbFQzVUVaaFN5ejBxTFRmaWhxMFFSMEFraXV0V0U1UU52Y3N5K296aGFPWUVPDQpY
-QVhFZkkxQ1pKUG5wTFRQZWdoT3FJUVR3S1pPSjJtMTV5K2xyVHlDNXFtbllKQkt6a05pOWlQeng3
-aGwNCmdGd0JVaWg0VGNCZDJ1VUFnNHAvbnRuU1JlaTZSTHJ4MVZHeTUzbnhWblo0T2l1K0ZITUVu
-ZHRNYzB6WA0KWFFVa1MrQVVNOGVKTFF1dEhBOHJFaFlndUU2dmI3a3ZmMTMwVExaNzdZcmNrQ2tC
-bHFXUmJWWC9jUVFJDQpmZlo4aW9NakMrSThuSDNsUkQ3ZnloY2hkeWVLSzdBbXJvcW5ZVE5YOC9q
-eERwQUdKVHhuM3ZoT0F1MHANCnRERUQNCj1KS3MyDQotLS0tLUVORCBQR1AgU0lHTkFUVVJFLS0t
-LS0NCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
-dWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9t
-b0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
-bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9u
-IGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9u
-bHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3Zl
-LiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lw
-aWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlz
-IG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlz
-dHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJp
-dGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBs
-ZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBh
-Ym92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMg
-bWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ry
-b25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo=
+Hi Loic,
+
+Thanks for explaining the differences between Hammer's disk
+activations and Jewel's. I think I understand the problem better now.
+
+On Mon, Feb 1, 2016 at 10:53 PM, Loic Dachary <ldachary@redhat.com> wrote:
+> The conservative approach to the problem would be to cherry-pick what
+> we can (
+> https://github.com/dachary/ceph/commit/9dce05a8cdfc564c5162885bbb67a04ad7b95c5a
+> for instance ) and document known side effects of ceph-disk
+> instability so people know it's an annoyance but nothing destructive
+> or blocking. In the worst case scenario, deactivating the udev rules
+> and running ceph-disk prepare + ceph-disk activate manually or by
+> writing a script that does things sequentially is a viable workaround.
+
+This approach (documentation) sounds reasonable to me, and it makes
+sense that the larger re-architecture of running "ceph-disk activate"
+outside udev is only something that can happen in a major release
+boundary (in this case Infernalis / Jewel). Once we're happy that the
+docs for manually recovering are solid, we can possibly address it
+with a script as you suggest.
+
+If we can document the worst case scenario and what to do when
+ceph-disk-in-udev fails, that would really improve the user
+experience.
+
+What's the procedure for deactivating the Hammer udev rules, for example?
+
+- Ken
