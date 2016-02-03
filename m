@@ -1,33 +1,45 @@
-From: Sage Weil <sage@newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Log spam in master with leveldb messages
-Date: Tue, 2 Feb 2016 22:50:45 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1602022247170.28963@cpach.fuggernut.com>
-References: <BN1PR02MB0552D50CE91834B14896AFAF4D00@BN1PR02MB055.namprd02.prod.outlook.com> <alpine.DEB.2.11.1602022058310.28963@cpach.fuggernut.com> <BN1PR02MB055E36916EBBC1C3503A8A1F4D00@BN1PR02MB055.namprd02.prod.outlook.com>
+Date: Wed, 3 Feb 2016 03:56:45 +0000
+Message-ID: <BN1PR02MB055C314B3FB6F2A039815A0F4D00@BN1PR02MB055.namprd02.prod.outlook.com>
+References: <BN1PR02MB0552D50CE91834B14896AFAF4D00@BN1PR02MB055.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1602022058310.28963@cpach.fuggernut.com>
+ <BN1PR02MB055E36916EBBC1C3503A8A1F4D00@BN1PR02MB055.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1602022247170.28963@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50838 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755282AbcBCDua (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Feb 2016 22:50:30 -0500
-In-Reply-To: <BN1PR02MB055E36916EBBC1C3503A8A1F4D00@BN1PR02MB055.namprd02.prod.outlook.com>
+Received: from mail-by2on0094.outbound.protection.outlook.com ([207.46.100.94]:59501
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755181AbcBCD4u convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Feb 2016 22:56:50 -0500
+In-Reply-To: <alpine.DEB.2.11.1602022247170.28963@cpach.fuggernut.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Sage Weil <sage@newdream.net>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+That would be ideal ,  BTW, it is the filestore kv store which is dumping this log for me not the monitor kv store..
+
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net] 
+Sent: Tuesday, February 02, 2016 7:51 PM
+To: Somnath Roy
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: Log spam in master with leveldb messages
 
 On Wed, 3 Feb 2016, Somnath Roy wrote:
 > In my single osd test, every one sec (~) it's dumping the below chunk..
 > In past, was the leveldb log helpful, helped debugging in any environment ?
 > If so, we have to keep it I guess :-(..
 
-Hrm, yeah that's a lot.  It makes me nervous to just send it all to 
-/dev/null, though, too.
+Hrm, yeah that's a lot.  It makes me nervous to just send it all to /dev/null, though, too.
 
-Perhaps what we should really do is move the monitor kv store to rocksdb, 
-which lets you adjust the logging level.  This will avoid our annoying 
-distro-dependent leveldb issues since it's linked statically. (And get the 
-distro folks up in arms, no doubt...)
+Perhaps what we should really do is move the monitor kv store to rocksdb, which lets you adjust the logging level.  This will avoid our annoying distro-dependent leveldb issues since it's linked statically. (And get the distro folks up in arms, no doubt...)
 
 sage
 
@@ -95,13 +107,14 @@ sage
 > 
 > The problem is that otherwise the log goes to the db directory and is never rotated.  Or, we set it to /dev/null and we get no logs at all.
 > 
-> Is the quantity of logging too much?  In rocksdb we can limit by log level (warn/info/debug etc), but not so in leveldb.  :/
+> Is the quantity of logging too much?  In rocksdb we can limit by log 
+> level (warn/info/debug etc), but not so in leveldb.  :/
 > 
 > sage
 > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
