@@ -1,66 +1,47 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: reducing buffer allocations
-Date: Thu, 4 Feb 2016 17:40:09 -0500
-Message-ID: <20160204224009.GA22061@ultraspiritum.redhat.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: reducing buffer allocations
+Date: Thu, 4 Feb 2016 22:43:36 +0000
+Message-ID: <CY1PR0201MB1897C54EB50EA1194D9DB2DDE8D10@CY1PR0201MB1897.namprd02.prod.outlook.com>
 References: <alpine.DEB.2.11.1602041730260.28396@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="X1bOJ3K7DJ5YkBrT"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35552 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933879AbcBDWkK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 4 Feb 2016 17:40:10 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id CCC423F3B3
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Feb 2016 22:40:10 +0000 (UTC)
-Content-Disposition: inline
+Received: from mail-bn1on0080.outbound.protection.outlook.com ([157.56.110.80]:65378
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932106AbcBDWni convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Feb 2016 17:43:38 -0500
 In-Reply-To: <alpine.DEB.2.11.1602041730260.28396@cpach.fuggernut.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Looks like another place for small_vector ;-)
 
 
---X1bOJ3K7DJ5YkBrT
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Allen Samuels
+Software Architect, Fellow, Systems and Software Solutions
 
-On 04/02/2016, Sage Weil wrote:
-[snip]
-> (2) convert buffer::list into an intrusive_list, while embedding N
-> (=3D3) buffer::ptr's in the buffer::raw so that most buffers require only
-> 1 allocation (provided they aren't on more than N lists).
-[snip]
-> Do we want both, or just 1, or is there an alternative we should
-> consider?
+2880 Junction Avenue, San Jose, CA 95134
+T: +1 408 801 7030| M: +1 408 780 6416
+allen.samuels@SanDisk.com
 
-Do we have any places in the code where we seek into a buffer::list that ha=
-s a
-good number of buffer::ptrs in it? If so then we could get a speedup by
-switching from an intrusive list to an intrusive set (or avlset).
 
---=20
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+Sent: Thursday, February 04, 2016 2:33 PM
+To: ceph-devel@vger.kernel.org
+Subject: reducing buffer allocations
 
---X1bOJ3K7DJ5YkBrT
-Content-Type: application/pgp-signature; name="signature.asc"
+https://github.com/ceph/ceph/pull/5534
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+does two things: (1) combine the buffer::raw reference count and buffer into a single allocation (ala make_shared), and (2) convert buffer::list into an intrusive_list, while embedding N (=3) buffer::ptr's in the buffer::raw so that most buffers require only 1 allocation (provided they aren't on more than N lists).
 
-iQF8BAEBCgBmBQJWs9NCXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
-ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
-OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jwHsH/i/RbDPRkCJXMtzsYGR4Ut0k
-eN7MA4XsGkCyKIqCgl7+hSOrHJhd1sLbbrCSoDBqK6AQv4R9u+nzlROJzm4SwkYO
-a/w0zSiLjaF3i1xQuGBTZGZZot1o+nDEyzl9st0khT6hIyUeqk7FC/Wc3c2XQIMq
-uHTkDm6xU8gTW8JR19KIZENyb1SiLQncOxpdYN0nfqVnJKibHbjX7O7yT56OTGMd
-Cl4V2JGOwyRMOURivWX6yL2v9HzH9htVZgJ70uBUyxBdgPzF5VSepHCpzdfxXapK
-P5IK0yVidToGMgEjZ4CAmxK/qPPyZFl4/2yPDQ4+7GkS8zFhw8DtVwy82nBnZoM=
-=/aO4
------END PGP SIGNATURE-----
+This needs a rebase, and some benchmarking.  But before I pull it up, is this the right direction?  I saw little benefit from (2) after doing (1), but I was doing a really simple microbenchmark.  Do we want both, or just 1, or is there an alternative we should consider?
 
---X1bOJ3K7DJ5YkBrT--
+sage
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
