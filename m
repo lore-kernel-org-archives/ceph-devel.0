@@ -1,68 +1,277 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 09/10] fs: ceph: Replace CURRENT_TIME by
-	ktime_get_real_ts()
-Date: Thu, 04 Feb 2016 22:02:28 +0100
-Message-ID: <2730461.dq5ziXmlM8@wuerfel>
-References: <1454479670-8204-1-git-send-email-deepa.kernel@gmail.com>
- <3114558.FPEUoEgqxL@wuerfel>
- <CAJ4mKGa0NDGNOPTg_MyE_B7BpPQLQ7JfiiBFuZ5t-t57VNihRQ@mail.gmail.com>
+From: Odintsov Vladislav <VlOdintsov@croc.ru>
+Subject: Re: ceph official RPMs ./configure default flags
+Date: Thu, 4 Feb 2016 22:04:50 +0000
+Message-ID: <1454623495659.44971@croc.ru>
+References: <1454569441928.38241@croc.ru>
+	<CAANLjFox6GarmHS+0MEiQK=G7yJROEXUxBVUWPhSVQ+r69c9sg@mail.gmail.com>
+	<1454613322703.72233@croc.ru>,<CAANLjFpWFUYuR_O===S_m2cS9=xODofKjPTx5q6EbC292fZC+w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <y2038-bounces@lists.linaro.org>
-In-Reply-To: <CAJ4mKGa0NDGNOPTg_MyE_B7BpPQLQ7JfiiBFuZ5t-t57VNihRQ@mail.gmail.com>
-List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/y2038/>
-List-Post: <mailto:y2038@lists.linaro.org>
-List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
-List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=subscribe>
-Errors-To: y2038-bounces@lists.linaro.org
-Sender: "Y2038" <y2038-bounces@lists.linaro.org>
-To: y2038@lists.linaro.org
-Cc: Theodore Ts'o <tytso@mit.edu>, Sage Weil <sage@redhat.com>, Zheng Yan <ukernel@gmail.com>, Dave Chinner <david@fromorbit.com>, linux-kernel <linux-kernel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Deepa Dinamani <deepa.kernel@gmail.com>, Alex Elder <elder@linaro.org>, linux-fsdevel@vger.kernel.org, ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Gregory Farnum <gfarnum@redhat.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from ironport1.croc.ru ([195.38.23.101]:38592 "EHLO
+	ironport1.croc.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756983AbcBDWE7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Feb 2016 17:04:59 -0500
+In-Reply-To: <CAANLjFpWFUYuR_O===S_m2cS9=xODofKjPTx5q6EbC292fZC+w@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-T24gVGh1cnNkYXkgMDQgRmVicnVhcnkgMjAxNiAwNzoyNjo1MSBHcmVnb3J5IEZhcm51bSB3cm90
-ZToKPiBPbiBUaHUsIEZlYiA0LCAyMDE2IGF0IDU6MzEgQU0sIEFybmQgQmVyZ21hbm4gPGFybmRA
-YXJuZGIuZGU+IHdyb3RlOgo+ID4gT24gVGh1cnNkYXkgMDQgRmVicnVhcnkgMjAxNiAxMDowMToz
-MSBJbHlhIERyeW9tb3Ygd3JvdGU6Cj4gPj4gT24gVGh1LCBGZWIgNCwgMjAxNiBhdCA5OjMwIEFN
-LCBBcm5kIEJlcmdtYW5uIDxhcm5kQGFybmRiLmRlPiB3cm90ZToKPiA+Cj4gPiBBIGxvdCBvZiBv
-dGhlciBmaWxlIHN5c3RlbXMgKGpmcywgamZmczIsIGhwZnMsIG1pbml4KSBhcHBhcmVudGx5Cj4g
-PiBwcmVmZXIgdGhlIDE5NzAuLjIxMDYgaW50ZXJwcmV0YXRpb24gb2YgdGltZSB2YWx1ZXMuCj4g
-Pgo+ID4+IFRoZSBwbGFuIGlzIHRvIGV2ZW50dWFsbHkgc3dpdGNoIHRvIGEgNjQtYml0IHR2X3Nl
-YyBhbmQKPiA+PiB0dl9uc2VjLCBidW1wIHRoZSB2ZXJzaW9uIG9uIGFsbCB0aGUgc3RydWN0dXJl
-cyB0aGF0IGNvbnRhaW4gaXQgYW5kIGFkZAo+ID4+IGEgY2x1c3Rlci13aWRlIGZlYXR1cmUgYml0
-IHRvIGRlYWwgd2l0aCBvbGRlciBjbGllbnRzLiAgV2UndmUgcmVjZW50bHkgaGFkCj4gPj4gYSBk
-aXNjdXNzaW9uIGFib3V0IHRoaXMsIHNvIGl0IG1heSBldmVuIGhhcHBlbiBpbiBhIG5vdCBzbyBk
-aXN0YW50IGZ1dHVyZSwgYnV0Cj4gPj4gbm8gcHJvbWlzZXMKPiA+Cj4gPiBPay4gV2UgaGF2ZSBh
-IChyb3VnaCkgcGxhbiB0byBkZWFsIHdpdGggZmlsZSBzeXN0ZW1zIHRoYXQgZG9uJ3Qgc3VwcG9y
-dAo+ID4gZXh0ZW5kZWQgdGltZSBzdGFtcHMgaW4gdGhlIG1lYW50aW1lLCBzbyBkZXBlbmRpbmcg
-b24gdXNlciBwcmVmZXJlbmNlcwo+ID4gd2Ugd291bGQgZWl0aGVyIGFsbG93IHRoZW0gdG8gYmUg
-dXNlZCBhcyBiZWZvcmUgd2l0aCB0aW1lcyBjbGFtcGVkCj4gPiB0byB0aGUgMjAzOCBvdmVyZmxv
-dyBkYXRlLCBvciBvbmx5IG1vdW50ZWQgcmVhZG9ubHkgZm9yIHVzZXJzIHRoYXQgd2FudAo+ID4g
-dG8gZW5zdXJlIHRoZWlyIHN5c3RlbXMgY2FuIHN1cnZpdmUgd2l0aG91dCByZWdyZXNzaW9ucyBp
-biAyMDM4Lgo+IAo+IEkgZHVnIHVwIHRoZSBlbWFpbCBjb252ZXJzYXRpb24sIGFib3V0IGl0LCBh
-bHRob3VnaCBJIHRoaW5rIEFkYW0gaGFzCj4gZG9uZSBtb3JlIHdvcmsgdGhhbiBpdCBpbmRpY2F0
-ZXM6Cj4gaHR0cDovL3d3dy5zcGluaWNzLm5ldC9saXN0cy9jZXBoLWRldmVsL21zZzI3OTAwLmh0
-bWwuIEkgY2FuJ3Qgc3BlYWsKPiB0byBhbnkga2VybmVsLXNwZWNpZmljIGlzc3VlcyBidXQgdGhp
-cyBraW5kIG9mIHRyYW5zaXRpb24gd2hpbGUKPiBtYWludGFpbmluZyB3aXJlIGNvbXBhdGliaWxp
-dHkgd2l0aCBvbGRlciBjb2RlIGlzIHNvbWV0aGluZyB3ZSd2ZSBkb25lCj4gYSBsb3Q7IGl0IHNo
-b3VsZG4ndCBiZSBhIGJpZyBkZWFsIGV2ZW4gaW4gdGhlIGtlcm5lbCB3aGVyZSB3ZSdyZQo+IHNs
-aWdodGx5IGxlc3MgcHJvbGlmaWMgd2l0aCBzdWNoIHRoaW5ncy4gCgpPbiB0aGUga2VybmVsIHNp
-ZGUsIHRoZSBpbnRlcmVzdGluZyBwYXJ0IGlzIHRvIGZpZ3VyZSBvdXQgd2hldGhlcgp0aGUgb3Ro
-ZXIgZW5kIGNhbiBzdXBwb3J0IHRoZSBuZXcgZm9ybWF0IG9yIG5vdCwgYW5kIHNldHRpbmcgdGhl
-IGxpbWl0CmluIHRoZSBzdXBlcmJsb2NrIGFjY29yZGluZ2x5LiBPbmNlIHlvdSBoYXZlIGRldGVy
-bWluZWQgdGhhdCBib3RoCnNpZGVzIHN1cHBvcnQgdGhlIGV4dGVuZGVkIHRpbWVzdGFtcHMsIHNl
-bmRpbmcgYSB0aW1lc3RhbXAgYmV5b25kIDIwMzgKbXVzdCBub3QgZmFpbCBvciBjYXVzZSBpbmNv
-cnJlY3QgZGF0YS4KCk9uIHRoZSB3aXJlIHByb3RvY29sLCB5b3UgY291bGQgY29uc2lkZXIgZXh0
-ZW5kaW5nIHRoZSB0aW1lc3RhbXBzIGluCnRoZSBzYW1lIHdheSBhcyBleHQ0LCBhcyB5b3UgYWxy
-ZWFkeSBoYXZlIG5hbm9zZWNvbmQgdGltZXN0YW1wcywgYW5kCnlvdSBjYW4gdXNlIHRoZSB1cHBl
-ciB0d28gYml0cyBvZiB0aGUgbmFub3NlY29uZHMgdG8gZXh0ZW5kIHRoZSBzZWNvbmRzCmZpZWxk
-IHRvIDM0IGJpdHMsIGdpdmluZyB5b3UgYSByYW5nZSBvZiB2YWxpZCB0aW1lcyBiZXR3ZWVuIDE5
-MDIKYW5kIDI0NDYsIHRob3VnaCBpZiB5b3UgaGF2ZSB0byBtYWtlIGFuIGluY29tcGF0aWJsZSBj
-aGFuZ2UgYW55d2F5LApnb2luZyB0byA2NCBiaXQgaXMgZWFzaWVyLgoKCUFybmQKX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KWTIwMzggbWFpbGluZyBsaXN0
-ClkyMDM4QGxpc3RzLmxpbmFyby5vcmcKaHR0cHM6Ly9saXN0cy5saW5hcm8ub3JnL21haWxtYW4v
-bGlzdGluZm8veTIwMzgK
+Thank you for help.
+The problem was that I checked diff in a wrong way.
+But I see that make clean is an excess command.
+
+In 2 and 3 directories are extracted ceph.tar' after make clean and without make clean:
+
+[root@i-c9d5cec0 ~]# diff --brief -Nr 2/ 3/
+[root@i-c9d5cec0 ~]#
+
+No diff.
+
+Also, ChangeLog differs in commits, which are in other branches:
+
+< 294f016 (origin/wip-13227-hammer) init-radosgw.sysv: remove
+< 698d75c (origin/wip-13410-hammer) tests: robust test for the pool create crushmap test
+< 2a28114 (origin/wip-13401-hammer) crush/CrushTester: test fewer inputs when running crushtool
+---
+> 294f016 init-radosgw.sysv: remove
+> 698d75c tests: robust test for the pool create crushmap test
+> 2a28114 crush/CrushTester: test fewer inputs when running crushtool
+
+
+________________________________
+Regards,
+
+Vladislav Odintsov
+System Engineer of Croc Cloud Development Team
+tel.: +7 (495) 974-2274 #2608
+
+________________________________________
+From: Robert LeBlanc <robert@leblancnet.us>
+Sent: Thursday, February 4, 2016 23:22
+To: Odintsov Vladislav
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: ceph official RPMs ./configure default flags
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+I can't get it to exactly match either, but I have far fewer differences:
+
+git checkout v0.94.5
+git reset --hard HEAD
+./autogen.sh
+./configure
+make clean
+make dist-bzip2
+
+$ diff --brief -Nr make-tar/ upstream-tar/
+Files make-tar/ceph-0.94.5/aclocal.m4 and
+upstream-tar/ceph-0.94.5/aclocal.m4 differ
+Files make-tar/ceph-0.94.5/ar-lib and upstream-tar/ceph-0.94.5/ar-lib differ
+Files make-tar/ceph-0.94.5/ChangeLog and
+upstream-tar/ceph-0.94.5/ChangeLog differ
+Files make-tar/ceph-0.94.5/compile and upstream-tar/ceph-0.94.5/compile differ
+Files make-tar/ceph-0.94.5/config.guess and
+upstream-tar/ceph-0.94.5/config.guess differ
+Files make-tar/ceph-0.94.5/config.sub and
+upstream-tar/ceph-0.94.5/config.sub differ
+Files make-tar/ceph-0.94.5/configure and
+upstream-tar/ceph-0.94.5/configure differ
+Files make-tar/ceph-0.94.5/depcomp and upstream-tar/ceph-0.94.5/depcomp differ
+Files make-tar/ceph-0.94.5/install-sh and
+upstream-tar/ceph-0.94.5/install-sh differ
+Files make-tar/ceph-0.94.5/ltmain.sh and
+upstream-tar/ceph-0.94.5/ltmain.sh differ
+Files make-tar/ceph-0.94.5/m4/pkg.m4 and
+upstream-tar/ceph-0.94.5/m4/pkg.m4 differ
+Files make-tar/ceph-0.94.5/Makefile.in and
+upstream-tar/ceph-0.94.5/Makefile.in differ
+Files make-tar/ceph-0.94.5/man/Makefile.in and
+upstream-tar/ceph-0.94.5/man/Makefile.in differ
+Files make-tar/ceph-0.94.5/missing and upstream-tar/ceph-0.94.5/missing differ
+Files make-tar/ceph-0.94.5/py-compile and
+upstream-tar/ceph-0.94.5/py-compile differ
+Files make-tar/ceph-0.94.5/src/ceph-crush-location and
+upstream-tar/ceph-0.94.5/src/ceph-crush-location differ
+Files make-tar/ceph-0.94.5/src/gmock/aclocal.m4 and
+upstream-tar/ceph-0.94.5/src/gmock/aclocal.m4 differ
+Files make-tar/ceph-0.94.5/src/gmock/build-aux/compile and
+upstream-tar/ceph-0.94.5/src/gmock/build-aux/compile differ
+Files make-tar/ceph-0.94.5/src/gmock/build-aux/config.guess and
+upstream-tar/ceph-0.94.5/src/gmock/build-aux/config.guess differ
+Files make-tar/ceph-0.94.5/src/gmock/build-aux/config.sub and
+upstream-tar/ceph-0.94.5/src/gmock/build-aux/config.sub differ
+Files make-tar/ceph-0.94.5/src/gmock/build-aux/depcomp and
+upstream-tar/ceph-0.94.5/src/gmock/build-aux/depcomp differ
+Files make-tar/ceph-0.94.5/src/gmock/build-aux/install-sh and
+upstream-tar/ceph-0.94.5/src/gmock/build-aux/install-sh differ
+Files make-tar/ceph-0.94.5/src/gmock/build-aux/ltmain.sh and
+upstream-tar/ceph-0.94.5/src/gmock/build-aux/ltmain.sh differ
+Files make-tar/ceph-0.94.5/src/gmock/build-aux/missing and
+upstream-tar/ceph-0.94.5/src/gmock/build-aux/missing differ
+Files make-tar/ceph-0.94.5/src/gmock/build-aux/test-driver and
+upstream-tar/ceph-0.94.5/src/gmock/build-aux/test-driver differ
+Files make-tar/ceph-0.94.5/src/gmock/configure and
+upstream-tar/ceph-0.94.5/src/gmock/configure differ
+Files make-tar/ceph-0.94.5/src/gmock/gtest/aclocal.m4 and
+upstream-tar/ceph-0.94.5/src/gmock/gtest/aclocal.m4 differ
+Files make-tar/ceph-0.94.5/src/gmock/gtest/build-aux/compile and
+upstream-tar/ceph-0.94.5/src/gmock/gtest/build-aux/compile differ
+Files make-tar/ceph-0.94.5/src/gmock/gtest/build-aux/config.guess and
+upstream-tar/ceph-0.94.5/src/gmock/gtest/build-aux/config.guess differ
+Files make-tar/ceph-0.94.5/src/gmock/gtest/build-aux/config.sub and
+upstream-tar/ceph-0.94.5/src/gmock/gtest/build-aux/config.sub differ
+Files make-tar/ceph-0.94.5/src/gmock/gtest/build-aux/depcomp and
+upstream-tar/ceph-0.94.5/src/gmock/gtest/build-aux/depcomp differ
+Files make-tar/ceph-0.94.5/src/gmock/gtest/build-aux/install-sh and
+upstream-tar/ceph-0.94.5/src/gmock/gtest/build-aux/install-sh differ
+Files make-tar/ceph-0.94.5/src/gmock/gtest/build-aux/ltmain.sh and
+upstream-tar/ceph-0.94.5/src/gmock/gtest/build-aux/ltmain.sh differ
+Files make-tar/ceph-0.94.5/src/gmock/gtest/build-aux/missing and
+upstream-tar/ceph-0.94.5/src/gmock/gtest/build-aux/missing differ
+Files make-tar/ceph-0.94.5/src/gmock/gtest/build-aux/test-driver and
+upstream-tar/ceph-0.94.5/src/gmock/gtest/build-aux/test-driver differ
+Files make-tar/ceph-0.94.5/src/gmock/gtest/configure and
+upstream-tar/ceph-0.94.5/src/gmock/gtest/configure differ
+Files make-tar/ceph-0.94.5/src/gmock/gtest/Makefile.in and
+upstream-tar/ceph-0.94.5/src/gmock/gtest/Makefile.in differ
+Files make-tar/ceph-0.94.5/src/gmock/Makefile.in and
+upstream-tar/ceph-0.94.5/src/gmock/Makefile.in differ
+Files make-tar/ceph-0.94.5/src/java/Makefile.in and
+upstream-tar/ceph-0.94.5/src/java/Makefile.in differ
+Files make-tar/ceph-0.94.5/src/Makefile.in and
+upstream-tar/ceph-0.94.5/src/Makefile.in differ
+Files make-tar/ceph-0.94.5/src/ocf/Makefile.in and
+upstream-tar/ceph-0.94.5/src/ocf/Makefile.in differ
+Files make-tar/ceph-0.94.5/src/tracing/Makefile.in and
+upstream-tar/ceph-0.94.5/src/tracing/Makefile.in differ
+Files make-tar/ceph-0.94.5/test-driver and
+upstream-tar/ceph-0.94.5/test-driver differ
+
+At lot of files point to using a different version of automake, but
+there seemed to be a lot of differences in the changelogs.
+
+I don't know the exact process either, I'm just trying to help you out.
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v1.3.4
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJWs7L8CRDmVDuy+mK58QAAiQQP/AoXZviCa/dm89xC5LZ6
+GszZWnQf4vNUbl02jMebAOQXU9CxKSHSTfgU51NCDUkWEeXyhPHGFzivE2Sh
+bqWsjtZ33kYfLFrmfl7Ywna/OAdnQBjlg4C15fIYJq6DRo8I+n5MHaeMfCvs
+sSh3Dfr6po0G66w+CFVv/UNorW7JyCPBGHZrIwFSbYT1Y49YlEOUVV2aywwQ
+xfWhVTU8mFEsGACyqvs4+X04mAUHHZAyEWu5YeSqDM6DcoxERC0H8hgQ170r
+Ot4uinQvQh5O964cb/v2mfNRvgn7Du8yz7o3Wj/O6i1WnYp6iUDwAxKyDV2i
+Qgu0F4WSA/YpUoRJKUQH8wLjJaerWk4+q/STdRfmL5aauKitHsxBPEkhZwhF
+F2dPbHDj4emxxvB9EnRyt+mYllnJ711rlKavn3PZhPTih+s7iK2PSmxqW65Q
+RgUqGOBqg9T2MVx7DmyCIBk9bO+LXlBwQJZmS6IvzH06G15o6EkLVYgJ2LFA
+Oea26WV9sNQR6EnCcLkmPuF11JLVzwTAJOHBwfv+r1b2HUb+CmNoxmy4Ax9G
+7vTXPBBDRTFuRmitb8KgDggB2nKKvLI7OdehQ2PiqN+wcEwvAvd8bmEfw0Ug
+THUhBzbmxQ7hrHpLaIQKFnvXmsNgR36ltlSn2E7z4HIyK/LnkmX9+64a0L1a
+DzQr
+=ZZ09
+-----END PGP SIGNATURE-----
+----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+
+
+On Thu, Feb 4, 2016 at 12:15 PM, Odintsov Vladislav <VlOdintsov@croc.ru> wrote:
+> I do these commands:
+>
+> git clone https://github.com/ceph/ceph
+> cd ceph
+> git reset --hard v0.94.5
+> ./autogen.sh
+> ./configure
+> make dist-bzip2
+> tar -tf ceph-0.94.5.tar.bz2 > make-tar
+> (cd ../; wget http://download.ceph.com/tarballs/ceph-0.94.5.tar.bz2)
+> tar -tf ../ceph-0.94.5.tar.bz2 > upstream-tar
+> diff make-tar upstream-tar | wc -l
+>
+> Output of last command is 5474.
+>
+> I've saved in my public gist four files:
+> - https://gist.github.com/odivlad/137e21382084e7d5a0aa#file-diff  <-- diff between tarballs
+> - https://gist.github.com/odivlad/137e21382084e7d5a0aa#file-output  <-- output of commands above
+> - https://gist.github.com/odivlad/137e21382084e7d5a0aa#file-make-tar  <-- listing of tarball made by make-bzip2
+> - https://gist.github.com/odivlad/137e21382084e7d5a0aa#file-upstream-tar  <-- listing of uptream tarball
+>
+> So, there is a huge difference in these tarballs and I'd like to find the right way how to make my own tarball the same as upstream one.
+>
+> ________________________________________
+> From: Robert LeBlanc <robert@leblancnet.us>
+> Sent: Thursday, February 4, 2016 19:59
+> To: Odintsov Vladislav
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: ceph official RPMs ./configure default flags
+>
+> -----BEGIN PGP SIGNED MESSAGE-----
+> Hash: SHA256
+>
+> Are you checking out the branch (constantly being merged to) or the
+> tag? I don't think the config options matter because at that stage it
+> is only configuring the version information in a couple of files. Have
+> you cracked open both tarballs to see what files are different? I
+> thought there was some issue with getting the same exact commit number
+> in the version information, but I don't remember the details.
+> - ----------------
+> Robert LeBlanc
+> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+>
+>
+> On Thu, Feb 4, 2016 at 12:03 AM, Odintsov Vladislav  wrote:
+>> Hi all,
+>>
+>> can anyone tell me, how official ceph tarballs (on download.ceph.com) are made from git repo?
+>>
+>> I tried:
+>>
+>> git reset --hard v
+>> ./autogen
+>> ./configure with flags from ceph.spec
+>> make dist-bzip2
+>>
+>> But tar.bz2 differs from the same tar.bz2 on download.ceph.com (I checked on hammer).
+>>
+>> Also, which ./configure flags are used? Maybe, I'm wrong with my choice...
+>> Where can I find actual information about ceph release & build process?
+>>
+>> I saw some repos, but it seems to me, this is not what I'm looking for...
+>>
+>> - https://github.com/ceph/ceph-build
+>> - https://github.com/ceph/autobuild-ceph
+>> - ceph docs "how to build"
+>>
+>> Thank you.
+>>
+>> Regards,
+>>
+>> Vladislav Odintsov
+>> System Engineer of Croc Cloud Development Team
+>>
+>
+> -----BEGIN PGP SIGNATURE-----
+> Version: Mailvelope v1.3.4
+> Comment: https://www.mailvelope.com
+>
+> wsFcBAEBCAAQBQJWs4NTCRDmVDuy+mK58QAAtb0P/jW9lbeOTMBfTGQPJcuc
+> iBTkHZWz49haDPC3kLly3HOVdKZjaMH3xh5p25L2yu10h0T7sbqBTLlIoACQ
+> N4RHU5DbgVdE4MmG1zQxfnhg43upZZ7rLYnLy3DH7oOMiIMYCxgdVs22Dp30
+> 46d3ac2eTVSRZkzBlV4DUZmqyuT0DjEQZdKSwE6BB/xcYUFhxMz7C2p8vERq
+> HVm7LhOEkpPM8aJQlLhiWXONT0m9B7QFkVAk2646bV/SfE05ssg2i90R0IFJ
+> cedQz7S/rqPyF8roKYd5EJdw2JS9WgB6l7gLB0++FyHALA5ldo7GJ7HM2T1m
+> wBfSWvEok2czUmltpoXV32XqWh1s8nZfzY/Cjba/mz9xYTopZJjwoDe2Ewuh
+> VR9j0SluWs0C9BLwLSDx868GMe/8pKACogNPg5mMUA0sn8FhpC/xGXIrEPMS
+> IHK5F1kI7yxmoK1afvoVNy7OiGOhbIDXqKv6jw2gcT+1115mltwUv30gnxYF
+> Ss0sDYMgwF0EmEtFjzh4AoIumArsFUa7I3zPE9GlfsXinGgELP7KI90vr2zh
+> UaCBnzZgCc/+J7i3VOsqDr8qaZy2TRo62qnUlQCENokBO4SWS+c901n43tnH
+> p6dOLqyRe6D120zRoUPANiF5oh3B5oWu6zCXoRCa4ktt+L7gGZ3un1YQzXxl
+> Dlop
+> =EZ25
+> -----END PGP SIGNATURE
