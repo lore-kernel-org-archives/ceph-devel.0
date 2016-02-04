@@ -1,74 +1,30 @@
 From: Odintsov Vladislav <VlOdintsov@croc.ru>
-Subject: Re: rgw and the next hammer release v0.94.6
-Date: Thu, 4 Feb 2016 06:40:49 +0000
-Message-ID: <1454568051909.92077@croc.ru>
-References: <56B185DD.3050905@dachary.org>
+Subject: ceph official RPMs ./configure default flags
+Date: Thu, 4 Feb 2016 07:03:59 +0000
+Message-ID: <1454569441928.38241@croc.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ironport2.croc.moscow ([195.38.23.105]:56097 "EHLO
+Received: from ironport2.croc.ru ([195.38.23.105]:13688 "EHLO
 	ironport2.croc.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753049AbcBDGvO convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Feb 2016 01:51:14 -0500
-In-Reply-To: <56B185DD.3050905@dachary.org>
+	with ESMTP id S1753166AbcBDHED (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Feb 2016 02:04:03 -0500
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Yehuda Sadeh <yehuda@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi all,
-
-there are at least two issues (backports) and related PRs for RGW for h=
-ammer,
-is it possible to look at them in this release (0.94.6)?
-
-
-1. Make RGW_MAX_PUT_SIZE configurable
-http://tracker.ceph.com/issues/14569
-https://github.com/ceph/ceph/pull/7441
-
-2. rgw: fix wrong etag calculation during POST on S3 bucket
-http://tracker.ceph.com/issues/14570
-https://github.com/ceph/ceph/pull/7442
-
-It would be very good if these PRs are merged them before 0.94.6 releas=
-e.
-Thank you.
-
-________________________________
-Regards,
-
-Vladislav Odintsov
-System Engineer of Croc Cloud Development Team
-
-________________________________________
-=46rom: ceph-devel-owner@vger.kernel.org <ceph-devel-owner@vger.kernel.=
-org> on behalf of Loic Dachary <loic@dachary.org>
-Sent: Wednesday, February 3, 2016 07:45
-To: Yehuda Sadeh
-Cc: Ceph Development; Nathan Cutler
-Subject: rgw and the next hammer release v0.94.6
-
-Hi Yehuda,
-
-The next hammer release as found at https://github.com/ceph/ceph/tree/h=
-ammer passed the rgw suite (http://tracker.ceph.com/issues/13356#note-4=
-5). Do you think the hammer branch is ready for QE to start their own r=
-ound of testing ?
-
-Cheers
-
---
-Lo=EFc Dachary, Artisan Logiciel Libre
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html--
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgYWxsLAoKY2FuIGFueW9uZSB0ZWxsIG1lLCBob3cgb2ZmaWNpYWwgY2VwaCB0YXJiYWxscyAo
+b24gZG93bmxvYWQuY2VwaC5jb20pIGFyZSBtYWRlIGZyb20gZ2l0IHJlcG8/CgpJIHRyaWVkOgoK
+Z2l0IHJlc2V0IC0taGFyZMKgdjx2ZXJzaW9uPgouL2F1dG9nZW4KLi9jb25maWd1cmUgd2l0aCBm
+bGFncyBmcm9tIGNlcGguc3BlYwptYWtlIGRpc3QtYnppcDIKCkJ1dCB0YXIuYnoyIGRpZmZlcnMg
+ZnJvbSB0aGUgc2FtZSB0YXIuYnoyIG9uIGRvd25sb2FkLmNlcGguY29tIChJIGNoZWNrZWQgb24g
+aGFtbWVyKS4KCkFsc28sIHdoaWNoIC4vY29uZmlndXJlIGZsYWdzIGFyZSB1c2VkP+KAiyBNYXli
+ZSwgSSdtIHdyb25nIHdpdGggbXkgY2hvaWNlLi4uCldoZXJlIGNhbiBJIGZpbmQgYWN0dWFswqBp
+bmZvcm1hdGlvbiBhYm91dCBjZXBoIHJlbGVhc2UgJiBidWlsZCBwcm9jZXNzPwoKSSBzYXcgc29t
+ZSByZXBvcywgYnV0IGl0IHNlZW1zIHRvIG1lLCB0aGlzIGlzIG5vdCB3aGF0IEknbSBsb29raW5n
+IGZvci4uLgoKLSBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoLWJ1aWxkCi0gaHR0cHM6Ly9n
+aXRodWIuY29tL2NlcGgvYXV0b2J1aWxkLWNlcGgKLSBjZXBoIGRvY3MgImhvdyB0byBidWlsZCIK
+ClRoYW5rIHlvdS4KClJlZ2FyZHMsCgpWbGFkaXNsYXYgT2RpbnRzb3YKU3lzdGVtIEVuZ2luZWVy
+IG9mIENyb2MgQ2xvdWQgRGV2ZWxvcG1lbnQgVGVhbQogICAgICAgICAgICAg
