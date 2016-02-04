@@ -1,84 +1,246 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: ceph official RPMs ./configure default flags
-Date: Thu, 4 Feb 2016 09:59:02 -0700
-Message-ID: <CAANLjFox6GarmHS+0MEiQK=G7yJROEXUxBVUWPhSVQ+r69c9sg@mail.gmail.com>
-References: <1454569441928.38241@croc.ru>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: inline vector container
+Date: Thu, 4 Feb 2016 18:01:31 +0100
+Message-ID: <56B383EB.6020207@digiware.nl>
+References: <CY1PR0201MB189757D3C50DF09DDD8F2877E8D00@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1602031503230.28963@cpach.fuggernut.com>
+ <1382260306.31547015.1454533040094.JavaMail.zimbra@redhat.com>
+ <59448274.31581132.1454534771209.JavaMail.zimbra@redhat.com>
+ <CY1PR0201MB1897486B3D49159CEDCD3007E8D00@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <1674294591.31606738.1454537442587.JavaMail.zimbra@redhat.com>
+ <56B33EB6.5030004@digiware.nl>
+ <1606323224.32079941.1454596978667.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f50.google.com ([209.85.213.50]:32902 "EHLO
-	mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934057AbcBDQ7E (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Feb 2016 11:59:04 -0500
-Received: by mail-vk0-f50.google.com with SMTP id e64so40580560vkg.0
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Feb 2016 08:59:03 -0800 (PST)
-In-Reply-To: <1454569441928.38241@croc.ru>
+Received: from smtp.digiware.nl ([31.223.170.169]:31424 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1161049AbcBDRBo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 4 Feb 2016 12:01:44 -0500
+In-Reply-To: <1606323224.32079941.1454596978667.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Odintsov Vladislav <VlOdintsov@croc.ru>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Casey Bodley <cbodley@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+On 4-2-2016 15:42, Matt Benjamin wrote:
+> Hi Willem,
+>=20
+> Milosz pasted a file inline.  Facebook's upstream repo is
+> https://github.com/facebook/folly (Mr. Google), but what I was
+> agreeing is, for the present, if we can't realize boost small_vector,
+> we might adapt just that type from Folly for the short term (that was
+> Milosz meaning, in this thread).
+>=20
+> (So don't panic ;)
 
-Are you checking out the branch (constantly being merged to) or the
-tag? I don't think the config options matter because at that stage it
-is only configuring the version information in a couple of files. Have
-you cracked open both tarballs to see what files are different? I
-thought there was some issue with getting the same exact commit number
-in the version information, but I don't remember the details.
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+It'll take a bit more to panic, but it would be a shame if we have to
+port something for the intermediate 2-times. And then to only throw it
+out a bit later.
 
+Where I still have to look at "trivia" like AIO, and RBD...
 
-On Thu, Feb 4, 2016 at 12:03 AM, Odintsov Vladislav  wrote:
-> Hi all,
->
-> can anyone tell me, how official ceph tarballs (on download.ceph.com) are made from git repo?
->
-> I tried:
->
-> git reset --hard v
-> ./autogen
-> ./configure with flags from ceph.spec
-> make dist-bzip2
->
-> But tar.bz2 differs from the same tar.bz2 on download.ceph.com (I checked on hammer).
->
-> Also, which ./configure flags are used? Maybe, I'm wrong with my choice...
-> Where can I find actual information about ceph release & build process?
->
-> I saw some repos, but it seems to me, this is not what I'm looking for...
->
-> - https://github.com/ceph/ceph-build
-> - https://github.com/ceph/autobuild-ceph
-> - ceph docs "how to build"
->
-> Thank you.
->
-> Regards,
->
-> Vladislav Odintsov
-> System Engineer of Croc Cloud Development Team
->
+Although my main interest is to get RBD in the freebsd guest DOM's
+running, especially bhyve. So I hope that that is going to be a bit les=
+s
+convoluted than writting a RBD device in the kernel. Especially since
+only recently I saw patches to add VirtFS to the bhyve virt-io infra.
 
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.3.4
-Comment: https://www.mailvelope.com
+--WjW
 
-wsFcBAEBCAAQBQJWs4NTCRDmVDuy+mK58QAAtb0P/jW9lbeOTMBfTGQPJcuc
-iBTkHZWz49haDPC3kLly3HOVdKZjaMH3xh5p25L2yu10h0T7sbqBTLlIoACQ
-N4RHU5DbgVdE4MmG1zQxfnhg43upZZ7rLYnLy3DH7oOMiIMYCxgdVs22Dp30
-46d3ac2eTVSRZkzBlV4DUZmqyuT0DjEQZdKSwE6BB/xcYUFhxMz7C2p8vERq
-HVm7LhOEkpPM8aJQlLhiWXONT0m9B7QFkVAk2646bV/SfE05ssg2i90R0IFJ
-cedQz7S/rqPyF8roKYd5EJdw2JS9WgB6l7gLB0++FyHALA5ldo7GJ7HM2T1m
-wBfSWvEok2czUmltpoXV32XqWh1s8nZfzY/Cjba/mz9xYTopZJjwoDe2Ewuh
-VR9j0SluWs0C9BLwLSDx868GMe/8pKACogNPg5mMUA0sn8FhpC/xGXIrEPMS
-IHK5F1kI7yxmoK1afvoVNy7OiGOhbIDXqKv6jw2gcT+1115mltwUv30gnxYF
-Ss0sDYMgwF0EmEtFjzh4AoIumArsFUa7I3zPE9GlfsXinGgELP7KI90vr2zh
-UaCBnzZgCc/+J7i3VOsqDr8qaZy2TRo62qnUlQCENokBO4SWS+c901n43tnH
-p6dOLqyRe6D120zRoUPANiF5oh3B5oWu6zCXoRCa4ktt+L7gGZ3un1YQzXxl
-Dlop
-=EZ25
------END PGP SIGNATURE-----
+>=20
+> Matt
+>=20
+> ----- Original Message -----
+>> From: "Willem Jan Withagen" <wjw@digiware.nl> To: "Matt Benjamin"
+>> <mbenjamin@redhat.com>, "Allen Samuels"
+>> <Allen.Samuels@sandisk.com> Cc: "Casey Bodley"
+>> <cbodley@redhat.com>, "Sage Weil" <sweil@redhat.com>,
+>> ceph-devel@vger.kernel.org Sent: Thursday, February 4, 2016 7:06:14
+>> AM Subject: Re: inline vector container
+>>=20
+>> On 3-2-2016 23:10, Matt Benjamin wrote:
+>>> I'll prioritize this.  Using more of folly may be a worthy
+>>> project as well, but that can wait for later... :)
+>>=20
+>> Hi Matt,
+>>=20
+>> Can you give me a URL for the folly stuff. Since I cannot find any
+>> reference to it in the FreeBSD ports.
+>>=20
+>> I think I'd otherwise prefer Boost, since the ports already
+>> contains a fair amount of Boost stuff.
+>>=20
+>> Currently I have installed: boost-all-1.55.0      The "meta-port"
+>> for boost libraries boost-docs-1.55.0     Documentation for
+>> libraries from boost.org boost-jam-1.55.0      Build tool from the
+>> boost.org boost-libs-1.55.0_9   Free portable C++ libraries
+>> (without Boost.Python)
+>>=20
+>> But I see that the new ports have migrated to:=20
+>> /usr/ports/devel/boost_build/Makefile:PORTVERSION=3D      2.0.m12
+>>=20
+>> So that would move it beyond 1.6, I presume.
+>>=20
+>> --WjW
+>>=20
+>>=20
+>>> tx!
+>>>=20
+>>> Matt
+>>>=20
+>>> ----- Original Message -----
+>>>> From: "Allen Samuels" <Allen.Samuels@sandisk.com> To: "Casey
+>>>> Bodley" <cbodley@redhat.com>, "Matt Benjamin"=20
+>>>> <mbenjamin@redhat.com> Cc: "Sage Weil" <sweil@redhat.com>,
+>>>> ceph-devel@vger.kernel.org Sent: Wednesday, February 3, 2016
+>>>> 5:06:57 PM Subject: RE: inline vector container
+>>>>=20
+>>>> I would say that just pulling the latest boost into the tree
+>>>> and using it for builds is the best path forward. But I'm in no
+>>>> way competent to make that kind of change in the build system
+>>>> -- especially during the automake cmake changeover period.
+>>>>=20
+>>>>=20
+>>>> Allen Samuels Software Architect, Fellow, Systems and Software
+>>>> Solutions
+>>>>=20
+>>>> 2880 Junction Avenue, San Jose, CA 95134 T: +1 408 801 7030| M:
+>>>> +1 408 780 6416 allen.samuels@SanDisk.com
+>>>>=20
+>>>>=20
+>>>> -----Original Message----- From: Casey Bodley
+>>>> [mailto:cbodley@redhat.com] Sent: Wednesday, February 03, 2016
+>>>> 1:26 PM To: Matt Benjamin <mbenjamin@redhat.com> Cc: Sage Weil
+>>>> <sweil@redhat.com>; Allen Samuels <Allen.Samuels@sandisk.com>;=20
+>>>> ceph-devel@vger.kernel.org Subject: Re: inline vector
+>>>> container
+>>>>=20
+>>>> Hi Allen,
+>>>>=20
+>>>> I did spend some time a couple months ago experimenting with a
+>>>> custom allocator with inline storage for standard containers.
+>>>> You can find my branch on github at=20
+>>>> https://github.com/cbodley/ceph/commits/wip-preallocator.
+>>>>=20
+>>>> I was aiming for a general solution that worked with
+>>>> non-contiguous containers, but couldn't find a good way to
+>>>> handle deallocations. So the approach was really only a good
+>>>> fit for std::vector.
+>>>>=20
+>>>> I also had trouble getting it to do the right thing with the
+>>>> copy and move operators. I found that it was trying to use the
+>>>> new allocator to release memory that came from the old
+>>>> allocator. Presumably there's a way to make this work using
+>>>> std::allocator_traits; have you had better luck here? I'd love
+>>>> to see your prototype.
+>>>>=20
+>>>> I tend to agree that we should go with the boost solution if we
+>>>> can. But if a) we can't use boost::small_vector in the
+>>>> near-term due to versioning, and b) we can get a custom version
+>>>> tested and working, it might be worth pursuing.
+>>>>=20
+>>>> Casey
+>>>>=20
+>>>> ----- Original Message -----
+>>>>> Hi,
+>>>>>=20
+>>>>> I think we should go with small_vector for this role, yes.  I
+>>>>> found two issues.  First, there are critical defects in
+>>>>> small_vector prior to boost 1.6.0.  Second, though it is
+>>>>> header-only, the coupling with related version-specific boost
+>>>>> types (container, allocator, respective detail types, and
+>>>>> platform-specific selectors...) seems to make pulling it in
+>>>>> separately pretty unrealistic as an option.  I looked at the
+>>>>> cost of pulling in and selectively compiling (libs) an
+>>>>> entire boost 1.6, and that went a lot easier (added less than
+>>>>> a minute to my build time).
+>>>>>=20
+>>>>> Matt
+>>>>>=20
+>>>>> ----- Original Message -----
+>>>>>> From: "Sage Weil" <sweil@redhat.com> To: "Allen Samuels"
+>>>>>> <Allen.Samuels@sandisk.com> Cc: ceph-devel@vger.kernel.org,
+>>>>>> mbenjami@redhat.com, cbodley@redhat.com Sent: Wednesday,
+>>>>>> February 3, 2016 3:04:57 PM Subject: Re: inline vector
+>>>>>> container
+>>>>>>=20
+>>>>>> On Wed, 3 Feb 2016, Allen Samuels wrote:
+>>>>>>> One thing that the code base needs is a simple vector
+>>>>>>> container that is optimized for a small number of
+>>>>>>> elements, i.e., for small element counts we avoid the
+>>>>>>> malloc/free overhead. But fully supports being resized
+>>>>>>> into larger containers that are unbounded. Of course it
+>>>>>>> will need to follow all of the proper object copy/move
+>>>>>>> semantics so that things like unique_ptr, etc work=20
+>>>>>>> correctly.
+>>>>>>>=20
+>>>>>>> I heard rumors that there was one available in the boost
+>>>>>>> world, but I can=E2=80=99t seem to find it. Do you know about o=
+ne
+>>>>>>> being available?
+>>>>>>=20
+>>>>>> http://www.boost.org/doc/libs/1_60_0/doc/html/boost/container/sm=
+all_
+>>>>>>
+>>>>>>=20
+vector.html
+>>>>>>=20
+>>>>>>> I=E2=80=99ve been prototyping one myself, just to get re-famili=
+ar
+>>>>>>> with all of the C++11 move sementics, and trivial
+>>>>>>> constructors, etc.
+>>>>>>>=20
+>>>>>>> The code is pretty complete, but the testing gets rather
+>>>>>>> involved. There=E2=80=99s no reason to contain this if it=E2=80=
+=99s
+>>>>>>> available elsewhere. But if it isn=E2=80=99t I plan on continui=
+ng
+>>>>>>> this=E2=80=A6
+>>>>>>=20
+>>>>>> I think Casey had prototyped something similar using a
+>>>>>> custom allocator, too, but I didn't actually look at the
+>>>>>> result.  And Matt talked about just pulling the boost one
+>>>>>> in-tree until we get updated boost in the supported
+>>>>>> distros, but I forget if he ran into problems there or
+>>>>>> not...
+>>>>>>=20
+>>>>>> sage
+>>>>>=20
+>>>>> -- -- Matt Benjamin Red Hat, Inc. 315 West Huron Street,
+>>>>> Suite 140A Ann Arbor, Michigan 48103
+>>>>>=20
+>>>>> http://www.redhat.com/en/technologies/storage
+>>>>>=20
+>>>>> tel.  734-707-0660 fax.  734-769-8938 cel.  734-216-5309 --=20
+>>>>> To unsubscribe from this list: send the line "unsubscribe
+>>>>> ceph-devel" in the body of a message to
+>>>>> majordomo@vger.kernel.org More majordomo info at
+>>>>> http://vger.kernel.org/majordomo-info.html
+>>>>>=20
+>>>> PLEASE NOTE: The information contained in this electronic mail
+>>>> message is intended only for the use of the designated
+>>>> recipient(s) named above. If the reader of this message is not
+>>>> the intended recipient, you are hereby notified that you have
+>>>> received this message in error and that any review,=20
+>>>> dissemination, distribution, or copying of this message is
+>>>> strictly prohibited. If you have received this communication in
+>>>> error, please notify the sender by telephone or e-mail (as
+>>>> shown above) immediately and destroy any and all copies of this
+>>>> message in your possession (whether hard copies or
+>>>> electronically stored copies).
+>>>>=20
+>>>=20
+>>=20
+>> -- To unsubscribe from this list: send the line "unsubscribe
+>> ceph-devel" in the body of a message to majordomo@vger.kernel.org=20
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>=20
+>=20
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
