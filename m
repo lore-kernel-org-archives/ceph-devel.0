@@ -1,232 +1,80 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: inline vector container
-Date: Thu, 4 Feb 2016 13:06:14 +0100
-Message-ID: <56B33EB6.5030004@digiware.nl>
-References: <CY1PR0201MB189757D3C50DF09DDD8F2877E8D00@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1602031503230.28963@cpach.fuggernut.com>
- <1382260306.31547015.1454533040094.JavaMail.zimbra@redhat.com>
- <59448274.31581132.1454534771209.JavaMail.zimbra@redhat.com>
- <CY1PR0201MB1897486B3D49159CEDCD3007E8D00@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <1674294591.31606738.1454537442587.JavaMail.zimbra@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] libceph: MOSDOpReply v7 encoding
+Date: Thu,  4 Feb 2016 13:12:17 +0100
+Message-ID: <1454587937-27996-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:65153 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750727AbcBDMGZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 4 Feb 2016 07:06:25 -0500
-In-Reply-To: <1674294591.31606738.1454537442587.JavaMail.zimbra@redhat.com>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:34446 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750798AbcBDMMd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Feb 2016 07:12:33 -0500
+Received: by mail-wm0-f46.google.com with SMTP id 128so24034544wmz.1
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Feb 2016 04:12:32 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjamin@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Casey Bodley <cbodley@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sweil@redhat.com>
 
-On 3-2-2016 23:10, Matt Benjamin wrote:
-> I'll prioritize this.  Using more of folly may be a worthy project as=
- well, but that can wait for later... :)
+Empty request_redirect_t (struct ceph_request_redirect in the kernel
+client) is now encoded with a bool.  NEW_OSDOPREPLY_ENCODING feature
+bit overlaps with already supported CRUSH_TUNABLES5.
 
-Hi Matt,
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ include/linux/ceph/ceph_features.h |  5 ++++-
+ net/ceph/osd_client.c              | 10 ++++++++++
+ 2 files changed, 14 insertions(+), 1 deletion(-)
 
-Can you give me a URL for the folly stuff.
-Since I cannot find any reference to it in the FreeBSD ports.
+diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
+index 6b4b059c158f..d2d78861c30a 100644
+--- a/include/linux/ceph/ceph_features.h
++++ b/include/linux/ceph/ceph_features.h
+@@ -73,6 +73,8 @@
+ #define CEPH_FEATURE_MON_STATEFUL_SUB (1ULL<<57) /* stateful mon subscription */
+ #define CEPH_FEATURE_MON_ROUTE_OSDMAP (1ULL<<57) /* peon sends osdmaps */
+ #define CEPH_FEATURE_CRUSH_TUNABLES5	(1ULL<<58) /* chooseleaf stable mode */
++// duplicated since it was introduced at the same time as CEPH_FEATURE_CRUSH_TUNABLES5
++#define CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING   (1ULL<<58) /* New, v7 encoding */
+ 
+ /*
+  * The introduction of CEPH_FEATURE_OSD_SNAPMAPPER caused the feature
+@@ -120,7 +122,8 @@ static inline u64 ceph_sanitize_features(u64 features)
+ 	 CEPH_FEATURE_OSD_PRIMARY_AFFINITY |	\
+ 	 CEPH_FEATURE_MSGR_KEEPALIVE2 |		\
+ 	 CEPH_FEATURE_CRUSH_V4 |		\
+-	 CEPH_FEATURE_CRUSH_TUNABLES5)
++	 CEPH_FEATURE_CRUSH_TUNABLES5 |		\
++	 CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING)
+ 
+ #define CEPH_FEATURES_REQUIRED_DEFAULT   \
+ 	(CEPH_FEATURE_NOSRCADDR |	 \
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 95d7443943fc..fb9da42eae98 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1814,6 +1814,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 	u32 osdmap_epoch;
+ 	int already_completed;
+ 	u32 bytes;
++	u8 decode_redir;
+ 	unsigned int i;
+ 
+ 	tid = le64_to_cpu(msg->hdr.tid);
+@@ -1885,6 +1886,15 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 		p += 8 + 4; /* skip replay_version */
+ 		p += 8; /* skip user_version */
+ 
++		if (le16_to_cpu(msg->hdr.version) >= 7)
++			ceph_decode_8_safe(&p, end, decode_redir, bad_put);
++		else
++			decode_redir = 1;
++	} else {
++		decode_redir = 0;
++	}
++
++	if (decode_redir) {
+ 		err = ceph_redirect_decode(&p, end, &redir);
+ 		if (err)
+ 			goto bad_put;
+-- 
+2.4.3
 
-I think I'd otherwise prefer Boost, since the ports already contains a
-fair amount of Boost stuff.
-
-Currently I have installed:
-boost-all-1.55.0      The "meta-port" for boost libraries
-boost-docs-1.55.0     Documentation for libraries from boost.org
-boost-jam-1.55.0      Build tool from the boost.org
-boost-libs-1.55.0_9   Free portable C++ libraries (without Boost.Python=
-)
-
-But I see that the new ports have migrated to:
-/usr/ports/devel/boost_build/Makefile:PORTVERSION=3D      2.0.m12
-
-So that would move it beyond 1.6, I presume.
-
---WjW
-
-
-> tx!
->=20
-> Matt
->=20
-> ----- Original Message -----
->> From: "Allen Samuels" <Allen.Samuels@sandisk.com>
->> To: "Casey Bodley" <cbodley@redhat.com>, "Matt Benjamin" <mbenjamin@=
-redhat.com>
->> Cc: "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
->> Sent: Wednesday, February 3, 2016 5:06:57 PM
->> Subject: RE: inline vector container
->>
->> I would say that just pulling the latest boost into the tree and usi=
-ng it for
->> builds is the best path forward. But I'm in no way competent to make=
- that
->> kind of change in the build system -- especially during the automake=
- cmake
->> changeover period.
->>
->>
->> Allen Samuels
->> Software Architect, Fellow, Systems and Software Solutions
->>
->> 2880 Junction Avenue, San Jose, CA 95134
->> T: +1 408 801 7030| M: +1 408 780 6416
->> allen.samuels@SanDisk.com
->>
->>
->> -----Original Message-----
->> From: Casey Bodley [mailto:cbodley@redhat.com]
->> Sent: Wednesday, February 03, 2016 1:26 PM
->> To: Matt Benjamin <mbenjamin@redhat.com>
->> Cc: Sage Weil <sweil@redhat.com>; Allen Samuels <Allen.Samuels@sandi=
-sk.com>;
->> ceph-devel@vger.kernel.org
->> Subject: Re: inline vector container
->>
->> Hi Allen,
->>
->> I did spend some time a couple months ago experimenting with a custo=
-m
->> allocator with inline storage for standard containers. You can find =
-my
->> branch on github at
->> https://github.com/cbodley/ceph/commits/wip-preallocator.
->>
->> I was aiming for a general solution that worked with non-contiguous
->> containers, but couldn't find a good way to handle deallocations. So=
- the
->> approach was really only a good fit for std::vector.
->>
->> I also had trouble getting it to do the right thing with the copy an=
-d move
->> operators. I found that it was trying to use the new allocator to re=
-lease
->> memory that came from the old allocator. Presumably there's a way to=
- make
->> this work using std::allocator_traits; have you had better luck here=
-? I'd
->> love to see your prototype.
->>
->> I tend to agree that we should go with the boost solution if we can.=
- But if
->> a) we can't use boost::small_vector in the near-term due to versioni=
-ng, and
->> b) we can get a custom version tested and working, it might be worth
->> pursuing.
->>
->> Casey
->>
->> ----- Original Message -----
->>> Hi,
->>>
->>> I think we should go with small_vector for this role, yes.  I found
->>> two issues.  First, there are critical defects in small_vector prio=
-r
->>> to boost 1.6.0.  Second, though it is header-only, the coupling wit=
-h
->>> related version-specific boost types (container, allocator, respect=
-ive
->>> detail types, and platform-specific selectors...) seems to make
->>> pulling it in separately pretty unrealistic as an option.  I looked=
- at
->>> the cost of pulling in and selectively compiling (libs) an entire
->>> boost 1.6, and that went a lot easier (added less than a minute to =
-my build
->>> time).
->>>
->>> Matt
->>>
->>> ----- Original Message -----
->>>> From: "Sage Weil" <sweil@redhat.com>
->>>> To: "Allen Samuels" <Allen.Samuels@sandisk.com>
->>>> Cc: ceph-devel@vger.kernel.org, mbenjami@redhat.com,
->>>> cbodley@redhat.com
->>>> Sent: Wednesday, February 3, 2016 3:04:57 PM
->>>> Subject: Re: inline vector container
->>>>
->>>> On Wed, 3 Feb 2016, Allen Samuels wrote:
->>>>> One thing that the code base needs is a simple vector container
->>>>> that is optimized for a small number of elements, i.e., for small
->>>>> element counts we avoid the malloc/free overhead. But fully
->>>>> supports being resized into larger containers that are unbounded.
->>>>> Of course it will need to follow all of the proper object
->>>>> copy/move semantics so that things like unique_ptr, etc work
->>>>> correctly.
->>>>>
->>>>> I heard rumors that there was one available in the boost world,
->>>>> but I can=E2=80=99t seem to find it. Do you know about one being
->>>>> available?
->>>>
->>>> http://www.boost.org/doc/libs/1_60_0/doc/html/boost/container/smal=
-l_
->>>> vector.html
->>>>
->>>>> I=E2=80=99ve been prototyping one myself, just to get re-familiar=
- with all
->>>>> of the
->>>>> C++11 move sementics, and trivial constructors, etc.
->>>>>
->>>>> The code is pretty complete, but the testing gets rather involved=
-=2E
->>>>> There=E2=80=99s
->>>>> no reason to contain this if it=E2=80=99s available elsewhere. Bu=
-t if it
->>>>> isn=E2=80=99t I plan on continuing this=E2=80=A6
->>>>
->>>> I think Casey had prototyped something similar using a custom
->>>> allocator, too, but I didn't actually look at the result.  And Mat=
-t
->>>> talked about just pulling the boost one in-tree until we get updat=
-ed
->>>> boost in the supported distros, but I forget if he ran into proble=
-ms
->>>> there or not...
->>>>
->>>> sage
->>>
->>> --
->>> --
->>> Matt Benjamin
->>> Red Hat, Inc.
->>> 315 West Huron Street, Suite 140A
->>> Ann Arbor, Michigan 48103
->>>
->>> http://www.redhat.com/en/technologies/storage
->>>
->>> tel.  734-707-0660
->>> fax.  734-769-8938
->>> cel.  734-216-5309
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l"
->>> in the body of a message to majordomo@vger.kernel.org More majordom=
-o
->>> info at  http://vger.kernel.org/majordomo-info.html
->>>
->> PLEASE NOTE: The information contained in this electronic mail messa=
-ge is
->> intended only for the use of the designated recipient(s) named above=
-=2E If the
->> reader of this message is not the intended recipient, you are hereby
->> notified that you have received this message in error and that any r=
-eview,
->> dissemination, distribution, or copying of this message is strictly
->> prohibited. If you have received this communication in error, please=
- notify
->> the sender by telephone or e-mail (as shown above) immediately and d=
-estroy
->> any and all copies of this message in your possession (whether hard =
-copies
->> or electronically stored copies).
->>
->=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
