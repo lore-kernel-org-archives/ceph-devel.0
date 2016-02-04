@@ -1,121 +1,61 @@
-From: Karol Mroz <kmroz@suse.com>
-Subject: logfile created with root:root ownership when "log_file" config
- option specified
-Date: Wed, 3 Feb 2016 15:17:27 -0800
-Message-ID: <20160203231727.GA18601@oak.lan>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="y0ulUmNC+osPPQO6"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.provo.novell.com ([137.65.250.81]:34290 "EHLO
-	smtp2.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932214AbcBCXRj (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Wed, 3 Feb 2016 18:17:39 -0500
-Content-Disposition: inline
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH 09/10] fs: ceph: Replace CURRENT_TIME by
+	ktime_get_real_ts()
+Date: Thu, 4 Feb 2016 10:00:19 +0800
+Message-ID: <A70D88EB-6B14-4553-9C9D-88D54F7BA689@redhat.com>
+References: <1454479670-8204-1-git-send-email-deepa.kernel@gmail.com>
+ <CAAM7YAm6enhGMJd+BMDAuAzXCMxVwb24Ch951A3_ygGUhXivxQ@mail.gmail.com>
+ <20160203161720.GA9546@deepa-ubuntu> <3267742.ulDeDOimis@wuerfel>
+Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <y2038-bounces@lists.linaro.org>
+In-Reply-To: <3267742.ulDeDOimis@wuerfel>
+List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/y2038/>
+List-Post: <mailto:y2038@lists.linaro.org>
+List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
+List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=subscribe>
+Errors-To: y2038-bounces@lists.linaro.org
+Sender: "Y2038" <y2038-bounces@lists.linaro.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Theodore Ts'o <tytso@mit.edu>, Sage Weil <sage@redhat.com>, Zheng Yan <ukernel@gmail.com>, Dave Chinner <david@fromorbit.com>, linux-kernel <linux-kernel@vger.kernel.org>, y2038@lists.linaro.org, Deepa Dinamani <deepa.kernel@gmail.com>, linux-fsdevel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-
---y0ulUmNC+osPPQO6
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Greetings Ceph Developers,
-
-I recently discovered that when explicitly setting "log_file" for radosgw in
-ceph.conf, the logfile was created with root:root ownership. Initially I th=
-ought
-that this was a RGW issue, which prompted me to open: http://tracker.ceph.c=
-om/issues/14613
-
-Tracing this a bit further, I believe it to be a more general problem with =
-when the
-LogObs observer is invoked.
-
-The LogObs observer is first invoked from global_pre_init() by way of:
-
-global_pre_init():
-=2E..
-  conf->apply_changes(NULL)
-=2E..
-
-Which then invokes:
-
-md_config_t::_apply_changes()
-{
-=2E..
-  // Make any pending observer callbacks
-  for (rev_obs_map_t::const_iterator r =3D robs.begin(); r !=3D robs.end();=
- ++r) {
-    md_config_obs_t *obs =3D r->first;
-    obs->handle_conf_change(this, r->second);
-  }
-=2E..
-}
-
-Which in turn fires the LogObs observer code:
-
-class LogObs : public md_config_obs_t {
-=2E..
-void handle_conf_change()
-=2E..
-  if (changed.count("log_file")) {
-    log->set_log_file(conf->log_file);
-    log->reopen_log_file();
-  }
-=2E..
-
-When "log_file" is specified in ceph.conf, Log::reopen_log_file() is called=
- and
-the logfile is open()'d. However, at this point in time, the daemon is stil=
-l running
-as root, and thus the logfile is created with root:root ownership.
-
-A quick workaround is to manually not set "log_file" in ceph.conf. The defa=
-ult
-logfile is then created later on in global_init(), by way of:
-
-global_init()
-=2E..
-  g_conf->call_all_observers();
-=2E..
-
-This is called _after_ the correct permissions have been set.
-
-=46rom a quick glance, removing changed.count("log_file"...) from
-LogObs::handle_conf_changes() would skip over the early logfile creation in=
- this observer.
-A more invasive option would be to remove conf->apply_changes() from global=
-_pre_init(),
-thus delaying running the observers for the first time until after the perm=
-issions drop.
-However, I suspect there may be valid reason why conf->apply_changes() is n=
-eeded in
-global_pre_init()? As I'm not familiar with the nuances here, a comment fro=
-m someone more
-familiar with this would be appreciated.
-
---=20
-Regards,
-Karol
-
---y0ulUmNC+osPPQO6
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJWsoqEAAoJECp28bThgzatiPAH+QG+VtYZCG4qscZOyP9eRJg9
-rE9fQ4SsusHDN/JIR6sf/JGRGNNPU4Ng8+SrRWM893KRkfqnk8HWtDxqQQ5MDUzn
-8/yKkdSq8VtHjCoz5htw4j+UI6B5EIJq3ZOx735nUEOloG8RQ9Vpe/rKAw6+ghBH
-A/OQbyQIvHBSSgRlm8yD7aob3S7LkOLFS/Y4JaOshaLtU2SQpwVRVTMAMoyubMqs
-vvF2yGuePkNfh45uNYir7UYAgbHo4hYVQzX7UD7jd7K/kCFNR33MJMO8WdQuAO/L
-3m0/ebcNYXbkKKjshzPiCgXLUYAl5U/eM31DIUBDMK2QScGyKlHN86svsdPzG5g=
-=mzKG
------END PGP SIGNATURE-----
-
---y0ulUmNC+osPPQO6--
+Cj4gT24gRmViIDQsIDIwMTYsIGF0IDA1OjI3LCBBcm5kIEJlcmdtYW5uIDxhcm5kQGFybmRiLmRl
+PiB3cm90ZToKPiAKPiBPbiBXZWRuZXNkYXkgMDMgRmVicnVhcnkgMjAxNiAwODoxNzoyMyBEZWVw
+YSBEaW5hbWFuaSB3cm90ZToKPj4gT24gV2VkLCBGZWIgMDMsIDIwMTYgYXQgMTA6MzQ6MDBQTSAr
+MDgwMCwgWWFuLCBaaGVuZyB3cm90ZToKPj4+IE9uIFdlZCwgRmViIDMsIDIwMTYgYXQgMjowNyBQ
+TSwgRGVlcGEgRGluYW1hbmkgPGRlZXBhLmtlcm5lbEBnbWFpbC5jb20+IHdyb3RlOgo+Pj4+IC0t
+LSBhL2ZzL2NlcGgvbWRzX2NsaWVudC5jCj4+Pj4gKysrIGIvZnMvY2VwaC9tZHNfY2xpZW50LmMK
+Pj4+PiBAQCAtMTcyMSw3ICsxNzIxLDcgQEAgY2VwaF9tZHNjX2NyZWF0ZV9yZXF1ZXN0KHN0cnVj
+dCBjZXBoX21kc19jbGllbnQgKm1kc2MsIGludCBvcCwgaW50IG1vZGUpCj4+Pj4gICAgICAgIGlu
+aXRfY29tcGxldGlvbigmcmVxLT5yX3NhZmVfY29tcGxldGlvbik7Cj4+Pj4gICAgICAgIElOSVRf
+TElTVF9IRUFEKCZyZXEtPnJfdW5zYWZlX2l0ZW0pOwo+Pj4+IAo+Pj4+IC0gICAgICAgcmVxLT5y
+X3N0YW1wID0gQ1VSUkVOVF9USU1FOwo+Pj4+ICsgICAgICAga3RpbWVfZ2V0X3JlYWxfdHMoJnJl
+cS0+cl9zdGFtcCk7Cj4+PiAKPj4+IEkgdGhpbmsgd2Ugc2hvdWxkIHVzZSBjdXJyZW50X2ZzX3Rp
+bWUoKSBoZXJlLiBJIGhhdmUgc3F1YXNoIHRoZSBjaGFuZ2UKPj4+IGludG8gYW5vdGhlciBwYXRj
+aAo+PiAKPj4gT2suIEkgbWlzc2VkIHRoaXMgY29tbWl0IGI4ZTY5MDY2ZDhhZmE4ZDI2NzBkYzY5
+NzI1MmZmMGU1OTA3YWFmYWQKPj4gZWFybGllciB3aGljaCBzYXlzIHRoYXQgdGhlIHJfc3RhbXAg
+aXMgdXNlZCBhcyBjdGltZSBub3cuCj4+IEkgaGFkIGFzc3VtZWQgdGhhdCB0aGlzIGlzIGEgbWVz
+c2FnZSB0aW1lc3RhbXAuCj4+IAo+PiBJIHdhcyBub3QgYWJsZSB0byBmaW5kIGFueSBkb2N1bWVu
+dGF0aW9uIG9uIHdoYXQgdGhlIHNlcnZlciBkb2VzCj4+IHdpdGggdGhlIG1lc3NhZ2Ugc2VudCBi
+eSB0aGUgY2xpZW50LiBXaGVyZSBjYW4gSSBmaW5kIHRoYXQ/Cj4+IAo+PiBTbywgdGhpcyBzaG91
+bGQgYWN0dWFsbHkgbG9vayBsaWtlCj4+IAo+PiByZXEtPnJfc3RhbXAgPSBjdXJyZW50X2ZzX3Rp
+bWUobWRzYy0+ZnNjLT5zYik7Cj4+IAo+PiBMZXQgbWUga25vdyBpZiB5b3Ugd2FudCBtZSB0byBy
+ZXNlbmQuCgpJIGhhdmUgYWxyZWFkeSBzcXVhc2hlZCB0aGUgY2hhbmdlIGludG8gcGF0Y2ggOAoK
+PiAKPiBJIHNlZSB0aGF0IHRoZSB0aW1lc3RhbXAgaXMgc2VudCB1c2luZwo+IAo+IAljZXBoX2Vu
+Y29kZV9jb3B5KCZwLCAmcmVxLT5yX3N0YW1wLCBzaXplb2YocmVxLT5yX3N0YW1wKSk7Cgp0aGlz
+IGNvZGUgaXMgb3V0ZGF0ZWQsIGN1cnJlbnQgY29kZSBpczoKCnsKICAgICAgICAgIHN0cnVjdCBj
+ZXBoX3RpbWVzcGVjIHRzOwogICAgICAgICAgY2VwaF9lbmNvZGVfdGltZXNwZWMoJnRzLCAmcmVx
+LT5yX3N0YW1wKTsKICAgICAgICAgIGNlcGhfZW5jb2RlX2NvcHkoJnAsICZ0cywgc2l6ZW9mKHRz
+KSk7Cn0KPiAKPiBXaGF0IGhhcHBlbnMgd2l0aCB0aGUgdGltZXN0YW1wIGFjcm9zcyByZWJvb3Rz
+IGlmIHdlIGNoYW5nZSB0aGUKPiB0eXBlPyBJIGFzc3VtZSB0aGUgZGF0YSB3aWxsIG5vdCBiZSB1
+c2VkIGFjcm9zcyByZWJvb3RzLCBpZiBpdAo+IGRvZXMsIHdlIGFscmVhZHkgaGF2ZSBhIHByb2Js
+ZW0gb24gbWFjaGluZXMgdGhhdCBjYW4gYm9vdAo+IGJvdGggYmlnLWVuZGlhbiBhbmQgbGl0dGxl
+LWVuZGlhbiBrZXJuZWxzLCBvciB0aGF0IGNhbiBib290Cj4gYm90aCAzMi1iaXQgYW5kIDY0LWJp
+dCBrZXJuZWxzLgo+IAo+IAlBcm5kCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXwpZMjAzOCBtYWlsaW5nIGxpc3QKWTIwMzhAbGlzdHMubGluYXJvLm9yZwpo
+dHRwczovL2xpc3RzLmxpbmFyby5vcmcvbWFpbG1hbi9saXN0aW5mby95MjAzOAo=
