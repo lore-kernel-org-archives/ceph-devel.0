@@ -1,80 +1,29 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] libceph: MOSDOpReply v7 encoding
-Date: Thu,  4 Feb 2016 13:12:17 +0100
-Message-ID: <1454587937-27996-1-git-send-email-idryomov@gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Where is monthly dev meeting recording
+Date: Thu, 4 Feb 2016 15:43:59 +0300
+Message-ID: <56B3478F.10701@mirantis.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:34446 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750798AbcBDMMd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Feb 2016 07:12:33 -0500
-Received: by mail-wm0-f46.google.com with SMTP id 128so24034544wmz.1
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Feb 2016 04:12:32 -0800 (PST)
+Received: from mail-lf0-f51.google.com ([209.85.215.51]:33313 "EHLO
+	mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932966AbcBDMoD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Feb 2016 07:44:03 -0500
+Received: by mail-lf0-f51.google.com with SMTP id m1so35830067lfg.0
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Feb 2016 04:44:02 -0800 (PST)
+Received: from [127.0.0.1] ([91.218.144.129])
+        by smtp.googlemail.com with ESMTPSA id xf10sm1503941lbb.23.2016.02.04.04.44.00
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1/SSLv3 cipher=OTHER);
+        Thu, 04 Feb 2016 04:44:00 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sweil@redhat.com>
+To: Ceph Devel <ceph-devel@vger.kernel.org>
 
-Empty request_redirect_t (struct ceph_request_redirect in the kernel
-client) is now encoded with a bool.  NEW_OSDOPREPLY_ENCODING feature
-bit overlaps with already supported CRUSH_TUNABLES5.
+Hi guys,
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- include/linux/ceph/ceph_features.h |  5 ++++-
- net/ceph/osd_client.c              | 10 ++++++++++
- 2 files changed, 14 insertions(+), 1 deletion(-)
+Could you please advise where can I find yesterday meeting recording?
 
-diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
-index 6b4b059c158f..d2d78861c30a 100644
---- a/include/linux/ceph/ceph_features.h
-+++ b/include/linux/ceph/ceph_features.h
-@@ -73,6 +73,8 @@
- #define CEPH_FEATURE_MON_STATEFUL_SUB (1ULL<<57) /* stateful mon subscription */
- #define CEPH_FEATURE_MON_ROUTE_OSDMAP (1ULL<<57) /* peon sends osdmaps */
- #define CEPH_FEATURE_CRUSH_TUNABLES5	(1ULL<<58) /* chooseleaf stable mode */
-+// duplicated since it was introduced at the same time as CEPH_FEATURE_CRUSH_TUNABLES5
-+#define CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING   (1ULL<<58) /* New, v7 encoding */
- 
- /*
-  * The introduction of CEPH_FEATURE_OSD_SNAPMAPPER caused the feature
-@@ -120,7 +122,8 @@ static inline u64 ceph_sanitize_features(u64 features)
- 	 CEPH_FEATURE_OSD_PRIMARY_AFFINITY |	\
- 	 CEPH_FEATURE_MSGR_KEEPALIVE2 |		\
- 	 CEPH_FEATURE_CRUSH_V4 |		\
--	 CEPH_FEATURE_CRUSH_TUNABLES5)
-+	 CEPH_FEATURE_CRUSH_TUNABLES5 |		\
-+	 CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING)
- 
- #define CEPH_FEATURES_REQUIRED_DEFAULT   \
- 	(CEPH_FEATURE_NOSRCADDR |	 \
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 95d7443943fc..fb9da42eae98 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1814,6 +1814,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- 	u32 osdmap_epoch;
- 	int already_completed;
- 	u32 bytes;
-+	u8 decode_redir;
- 	unsigned int i;
- 
- 	tid = le64_to_cpu(msg->hdr.tid);
-@@ -1885,6 +1886,15 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- 		p += 8 + 4; /* skip replay_version */
- 		p += 8; /* skip user_version */
- 
-+		if (le16_to_cpu(msg->hdr.version) >= 7)
-+			ceph_decode_8_safe(&p, end, decode_redir, bad_put);
-+		else
-+			decode_redir = 1;
-+	} else {
-+		decode_redir = 0;
-+	}
-+
-+	if (decode_redir) {
- 		err = ceph_redirect_decode(&p, end, &redir);
- 		if (err)
- 			goto bad_put;
--- 
-2.4.3
-
+Thanks,
+Igor.
