@@ -1,65 +1,73 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: CephFS and the next hammer release v0.94.6
-Date: Thu, 4 Feb 2016 12:44:03 +0700
-Message-ID: <56B2E523.9030104@dachary.org>
-References: <56B18773.6000304@dachary.org>
- <CAJ4mKGYBc5O312mGDYzfxYR3uwyVGBu0vgQr-0ofz60vtLLOyw@mail.gmail.com>
+From: Odintsov Vladislav <VlOdintsov@croc.ru>
+Subject: Re: rgw and the next hammer release v0.94.6
+Date: Thu, 4 Feb 2016 06:40:49 +0000
+Message-ID: <1454568051909.92077@croc.ru>
+References: <56B185DD.3050905@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:34827 "EHLO
-	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750897AbcBDFoQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Feb 2016 00:44:16 -0500
-In-Reply-To: <CAJ4mKGYBc5O312mGDYzfxYR3uwyVGBu0vgQr-0ofz60vtLLOyw@mail.gmail.com>
+Received: from ironport2.croc.moscow ([195.38.23.105]:56097 "EHLO
+	ironport2.croc.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753049AbcBDGvO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Feb 2016 01:51:14 -0500
+In-Reply-To: <56B185DD.3050905@dachary.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
+To: Loic Dachary <loic@dachary.org>, Yehuda Sadeh <yehuda@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>
 
-Hi Greg,
+Hi all,
 
-On 03/02/2016 16:23, Gregory Farnum wrote:
-> On Tue, Feb 2, 2016 at 8:52 PM, Loic Dachary <loic@dachary.org> wrote=
-:
->> Hi Greg,
->>
->> The next hammer release as found at https://github.com/ceph/ceph/tre=
-e/hammer passed the fs suite (http://tracker.ceph.com/issues/13356#note=
--25). A more recent run showed 3 failures and I'm not sure how to inter=
-pret them ( http://pulpito.ceph.com/loic-2016-01-29_03:02:05-fs-hammer-=
---basic-multi/ ).
->>
->> Do you think the hammer branch is ready for QE to start their own ro=
-und of testing ? Or should the above errors be investigated first ?
->=20
-> Well, one of them looks to be an infrastructure issue of some kind.
-> You appear to have figured out the fsstress one
-> (http://tracker.ceph.com/issues/14584#change-65185), and the fsx one
-> is http://tracker.ceph.com/issues/14384. I'd get that quick backport
+there are at least two issues (backports) and related PRs for RGW for h=
+ammer,
+is it possible to look at them in this release (0.94.6)?
 
-Thanks for the pointer :-) (and to Nathan for backporting).
 
-> in as well (it's just a change to the qa script to point at a working
-> version of the repo).
+1. Make RGW_MAX_PUT_SIZE configurable
+http://tracker.ceph.com/issues/14569
+https://github.com/ceph/ceph/pull/7441
 
-Do you think the hammer branch is ready for QE to start their own round=
- of testing ?
+2. rgw: fix wrong etag calculation during POST on S3 bucket
+http://tracker.ceph.com/issues/14570
+https://github.com/ceph/ceph/pull/7442
+
+It would be very good if these PRs are merged them before 0.94.6 releas=
+e.
+Thank you.
+
+________________________________
+Regards,
+
+Vladislav Odintsov
+System Engineer of Croc Cloud Development Team
+
+________________________________________
+=46rom: ceph-devel-owner@vger.kernel.org <ceph-devel-owner@vger.kernel.=
+org> on behalf of Loic Dachary <loic@dachary.org>
+Sent: Wednesday, February 3, 2016 07:45
+To: Yehuda Sadeh
+Cc: Ceph Development; Nathan Cutler
+Subject: rgw and the next hammer release v0.94.6
+
+Hi Yehuda,
+
+The next hammer release as found at https://github.com/ceph/ceph/tree/h=
+ammer passed the rgw suite (http://tracker.ceph.com/issues/13356#note-4=
+5). Do you think the hammer branch is ready for QE to start their own r=
+ound of testing ?
 
 Cheers
 
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
 --
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html--
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
 the body of a message to majordomo@vger.kernel.org
