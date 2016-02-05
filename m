@@ -1,92 +1,93 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: reducing buffer allocations
-Date: Thu, 4 Feb 2016 18:49:17 -0500 (EST)
-Message-ID: <862942027.32511349.1454629757280.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.11.1602041730260.28396@cpach.fuggernut.com> <CY1PR0201MB1897C54EB50EA1194D9DB2DDE8D10@CY1PR0201MB1897.namprd02.prod.outlook.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: reducing buffer allocations
+Date: Fri, 5 Feb 2016 00:01:17 +0000
+Message-ID: <CY1PR0201MB189786205F79D8880D2982BDE8D20@CY1PR0201MB1897.namprd02.prod.outlook.com>
+References: <alpine.DEB.2.11.1602041730260.28396@cpach.fuggernut.com>
+ <CY1PR0201MB1897C54EB50EA1194D9DB2DDE8D10@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <862942027.32511349.1454629757280.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:50833 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750901AbcBDXtU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Feb 2016 18:49:20 -0500
-In-Reply-To: <CY1PR0201MB1897C54EB50EA1194D9DB2DDE8D10@CY1PR0201MB1897.namprd02.prod.outlook.com>
+Received: from mail-by2on0067.outbound.protection.outlook.com ([207.46.100.67]:49312
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1758244AbcBEABT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 4 Feb 2016 19:01:19 -0500
+In-Reply-To: <862942027.32511349.1454629757280.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is the approach that Casey and I lean toward, but if the intrusive ptr change is ready now, I'd work on merging it.
-
-Matt
-
------ Original Message -----
-> From: "Allen Samuels" <Allen.Samuels@sandisk.com>
-> To: "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
-> Sent: Thursday, February 4, 2016 5:43:36 PM
-> Subject: RE: reducing buffer allocations
-> 
-> Looks like another place for small_vector ;-)
-> 
-> 
-> Allen Samuels
-> Software Architect, Fellow, Systems and Software Solutions
-> 
-> 2880 Junction Avenue, San Jose, CA 95134
-> T: +1 408 801 7030| M: +1 408 780 6416
-> allen.samuels@SanDisk.com
-> 
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Thursday, February 04, 2016 2:33 PM
-> To: ceph-devel@vger.kernel.org
-> Subject: reducing buffer allocations
-> 
-> https://github.com/ceph/ceph/pull/5534
-> 
-> does two things: (1) combine the buffer::raw reference count and buffer into
-> a single allocation (ala make_shared), and (2) convert buffer::list into an
-> intrusive_list, while embedding N (=3) buffer::ptr's in the buffer::raw so
-> that most buffers require only 1 allocation (provided they aren't on more
-> than N lists).
-> 
-> This needs a rebase, and some benchmarking.  But before I pull it up, is this
-> the right direction?  I saw little benefit from (2) after doing (1), but I
-> was doing a really simple microbenchmark.  Do we want both, or just 1, or is
-> there an alternative we should consider?
-> 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
-> PLEASE NOTE: The information contained in this electronic mail message is
-> intended only for the use of the designated recipient(s) named above. If the
-> reader of this message is not the intended recipient, you are hereby
-> notified that you have received this message in error and that any review,
-> dissemination, distribution, or copying of this message is strictly
-> prohibited. If you have received this communication in error, please notify
-> the sender by telephone or e-mail (as shown above) immediately and destroy
-> any and all copies of this message in your possession (whether hard copies
-> or electronically stored copies).
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
--- 
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+QWdyZWVkLg0KDQoNCkFsbGVuIFNhbXVlbHMNClNvZnR3YXJlIEFyY2hpdGVjdCwgRmVsbG93LCBT
+eXN0ZW1zIGFuZCBTb2Z0d2FyZSBTb2x1dGlvbnMNCg0KMjg4MCBKdW5jdGlvbiBBdmVudWUsIFNh
+biBKb3NlLCBDQSA5NTEzNA0KVDogKzEgNDA4IDgwMSA3MDMwfCBNOiArMSA0MDggNzgwIDY0MTYN
+CmFsbGVuLnNhbXVlbHNAU2FuRGlzay5jb20NCg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
+LQ0KRnJvbTogTWF0dCBCZW5qYW1pbiBbbWFpbHRvOm1iZW5qYW1pbkByZWRoYXQuY29tXQ0KU2Vu
+dDogVGh1cnNkYXksIEZlYnJ1YXJ5IDA0LCAyMDE2IDM6NDkgUE0NClRvOiBBbGxlbiBTYW11ZWxz
+IDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPg0KQ2M6IFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0
+LmNvbT47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogcmVkdWNpbmcg
+YnVmZmVyIGFsbG9jYXRpb25zDQoNClRoaXMgaXMgdGhlIGFwcHJvYWNoIHRoYXQgQ2FzZXkgYW5k
+IEkgbGVhbiB0b3dhcmQsIGJ1dCBpZiB0aGUgaW50cnVzaXZlIHB0ciBjaGFuZ2UgaXMgcmVhZHkg
+bm93LCBJJ2Qgd29yayBvbiBtZXJnaW5nIGl0Lg0KDQpNYXR0DQoNCi0tLS0tIE9yaWdpbmFsIE1l
+c3NhZ2UgLS0tLS0NCj4gRnJvbTogIkFsbGVuIFNhbXVlbHMiIDxBbGxlbi5TYW11ZWxzQHNhbmRp
+c2suY29tPg0KPiBUbzogIlNhZ2UgV2VpbCIgPHN3ZWlsQHJlZGhhdC5jb20+LCBjZXBoLWRldmVs
+QHZnZXIua2VybmVsLm9yZw0KPiBTZW50OiBUaHVyc2RheSwgRmVicnVhcnkgNCwgMjAxNiA1OjQz
+OjM2IFBNDQo+IFN1YmplY3Q6IFJFOiByZWR1Y2luZyBidWZmZXIgYWxsb2NhdGlvbnMNCj4NCj4g
+TG9va3MgbGlrZSBhbm90aGVyIHBsYWNlIGZvciBzbWFsbF92ZWN0b3IgOy0pDQo+DQo+DQo+IEFs
+bGVuIFNhbXVlbHMNCj4gU29mdHdhcmUgQXJjaGl0ZWN0LCBGZWxsb3csIFN5c3RlbXMgYW5kIFNv
+ZnR3YXJlIFNvbHV0aW9ucw0KPg0KPiAyODgwIEp1bmN0aW9uIEF2ZW51ZSwgU2FuIEpvc2UsIENB
+IDk1MTM0DQo+IFQ6ICsxIDQwOCA4MDEgNzAzMHwgTTogKzEgNDA4IDc4MCA2NDE2IGFsbGVuLnNh
+bXVlbHNAU2FuRGlzay5jb20NCj4NCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4g
+RnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcNCj4gW21haWx0bzpjZXBoLWRl
+dmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNhZ2UgV2VpbA0KPiBTZW50
+OiBUaHVyc2RheSwgRmVicnVhcnkgMDQsIDIwMTYgMjozMyBQTQ0KPiBUbzogY2VwaC1kZXZlbEB2
+Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogcmVkdWNpbmcgYnVmZmVyIGFsbG9jYXRpb25zDQo+
+DQo+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC81NTM0DQo+DQo+IGRvZXMgdHdv
+IHRoaW5nczogKDEpIGNvbWJpbmUgdGhlIGJ1ZmZlcjo6cmF3IHJlZmVyZW5jZSBjb3VudCBhbmQN
+Cj4gYnVmZmVyIGludG8gYSBzaW5nbGUgYWxsb2NhdGlvbiAoYWxhIG1ha2Vfc2hhcmVkKSwgYW5k
+ICgyKSBjb252ZXJ0DQo+IGJ1ZmZlcjo6bGlzdCBpbnRvIGFuIGludHJ1c2l2ZV9saXN0LCB3aGls
+ZSBlbWJlZGRpbmcgTiAoPTMpDQo+IGJ1ZmZlcjo6cHRyJ3MgaW4gdGhlIGJ1ZmZlcjo6cmF3IHNv
+IHRoYXQgbW9zdCBidWZmZXJzIHJlcXVpcmUgb25seSAxDQo+IGFsbG9jYXRpb24gKHByb3ZpZGVk
+IHRoZXkgYXJlbid0IG9uIG1vcmUgdGhhbiBOIGxpc3RzKS4NCj4NCj4gVGhpcyBuZWVkcyBhIHJl
+YmFzZSwgYW5kIHNvbWUgYmVuY2htYXJraW5nLiAgQnV0IGJlZm9yZSBJIHB1bGwgaXQgdXAsDQo+
+IGlzIHRoaXMgdGhlIHJpZ2h0IGRpcmVjdGlvbj8gIEkgc2F3IGxpdHRsZSBiZW5lZml0IGZyb20g
+KDIpIGFmdGVyDQo+IGRvaW5nICgxKSwgYnV0IEkgd2FzIGRvaW5nIGEgcmVhbGx5IHNpbXBsZSBt
+aWNyb2JlbmNobWFyay4gIERvIHdlIHdhbnQNCj4gYm90aCwgb3IganVzdCAxLCBvciBpcyB0aGVy
+ZSBhbiBhbHRlcm5hdGl2ZSB3ZSBzaG91bGQgY29uc2lkZXI/DQo+DQo+IHNhZ2UNCj4gLS0NCj4g
+VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
+IGNlcGgtZGV2ZWwiDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
+ci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+IGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVs
+Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24g
+Y29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UNCj4gaXMgaW50ZW5kZWQg
+b25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQNCj4g
+YWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQg
+cmVjaXBpZW50LA0KPiB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2Vp
+dmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvcg0KPiBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1p
+bmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcw0KPiBtZXNzYWdlIGlzIHN0
+cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMNCj4gY29tbXVuaWNh
+dGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvcg0K
+PiBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5k
+IGFsbCBjb3BpZXMgb2YNCj4gdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhl
+ciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4gLS0NCj4g
+VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
+IGNlcGgtZGV2ZWwiDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
+ci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5l
+bC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPg0KDQotLQ0KLS0NCk1hdHQgQmVuamFtaW4NClJl
+ZCBIYXQsIEluYy4NCjMxNSBXZXN0IEh1cm9uIFN0cmVldCwgU3VpdGUgMTQwQQ0KQW5uIEFyYm9y
+LCBNaWNoaWdhbiA0ODEwMw0KDQpodHRwOi8vd3d3LnJlZGhhdC5jb20vZW4vdGVjaG5vbG9naWVz
+L3N0b3JhZ2UNCg0KdGVsLiAgNzM0LTcwNy0wNjYwDQpmYXguICA3MzQtNzY5LTg5MzgNCmNlbC4g
+IDczNC0yMTYtNTMwOQ0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4g
+dGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNl
+IG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRl
+ciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUg
+aGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVy
+cm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3Ig
+Y29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhh
+dmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRo
+ZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0
+ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91
+ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3Jl
+ZCBjb3BpZXMpLg0K
