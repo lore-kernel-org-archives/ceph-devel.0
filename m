@@ -1,121 +1,166 @@
-From: "Vish (Vishwanath) Maram-SSI" <vishwanath.m@ssi.samsung.com>
-Subject: Reg:.[CBT] Unable to do a CBT Clean Run.
-Date: Fri, 5 Feb 2016 16:43:18 +0000
-Message-ID: <B22CD36FB1C8D94DB1871AFD0023B0E438D720F8@SSIEXCH-MB3.ssi.samsung.com>
+From: Jason Dillaman <dillaman@redhat.com>
+Subject: Re: Reg:. Unable to observe the performance impact of Rbd_Cache
+ parameter.
+Date: Fri, 5 Feb 2016 11:54:17 -0500 (EST)
+Message-ID: <534704547.20063459.1454691257465.JavaMail.zimbra@redhat.com>
+References: <B22CD36FB1C8D94DB1871AFD0023B0E438D720D5@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.ssi.samsung.com ([207.140.43.204]:54914 "EHLO
-	mx1.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755134AbcBEQun convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Feb 2016 11:50:43 -0500
-Received: from ssiexch-casht1.ssi.samsung.com ([105.128.134.61]) by mx1.ssi.samsung.com with ESMTP id NbMZJpGxgaAlzPyw for <ceph-devel@vger.kernel.org>; Fri, 05 Feb 2016 08:50:41 -0800 (PST)
-Content-Language: en-US
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:50466 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752738AbcBEQyS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Feb 2016 11:54:18 -0500
+In-Reply-To: <B22CD36FB1C8D94DB1871AFD0023B0E438D720D5@SSIEXCH-MB3.ssi.samsung.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Vish (Vishwanath) Maram-SSI" <vishwanath.m@ssi.samsung.com>
+Cc: ceph-devel-owner@vger.kernel.org, ceph-devel@vger.kernel.org
+
+Writeback is disabled by default until a flush is encountered.  Try setting "rbd_cache_writethrough_until_flush = false" in your config.
+
+-- 
+
+Jason Dillaman 
 
 
-Hi All,
-
-We are trying to do a clean run with CBT and please find below all the details:
-
-1.	OS - CentOS7.2
-2.	CBT - Commit ID "1203c2b9d25344d1e15b28236ea2f19aa3103e0b" from "git log"
-3.	CEPH Code - Hammer Version - 0.94.5
-4.	Test.yaml - Please find below
-5.	Ceph.conf - Please find below
-
-Issue:
-Command - ./cbt.py --archive="Archive" --conf=./ceph.conf ./test.yaml > cmd_log.txt
-
-After the above command is executed we were able to check the Cluster is being created on the Server and able to see the status/OSD Tree as well. All those show correct, but we didn't see any IO going on the disk (iostat -t 5). So we started debugging the CBT code ceph.py under cluster directory. When we debugged and we observed that pool creation is not happening and we inserted break in ceph.py just before pool creation and executed the pool creation command on Server and get the below error:
-
-Error EINVAL: error running crushmap through crushtool: (125) Operation canceled
-
-And because of the above issue we weren't able to see any FIO run.
-
-Appreciate any inputs.
-
-Thanks,
--Vish
-
-
-Test.yaml - 
-
-  1  cluster:
-  2   user: 'root'
-  3   head: "Server"
-  4   clients: ["client"]
-  5   osds: ["Server"]
-  6   mons:
-  7     Mon1:
-  8       a: "10.10.10.150:6789"
-  9   osds_per_node: 1
-10   fs: 'xfs'
-11   mkfs_opts: '-f -i size=2048 -n size=64k'
-12   mount_opts: '-o inode64,noatime,logbsize=256k'
-13   conf_file: '/usr/local/ceph-cbt/ceph.conf.1osd'
-14   iterations: 1
-15   use_existing: False
-16 #  clusterid: "8eda02e2-04b7-4eed-a85a-8471ea51528c"
-17   clusterid: "cbttest"
-18   tmp_dir: "/tmp/cbt"
-19   pool_profiles:
-20     rbd:
-21       pg_size: 256
-22       pgp_size: 256
-23       replication: 1
-24 benchmarks:
-25   librbdfio:
-26     time: 300
-27     vol_size: 16384
-28     mode: [write]
-29     op_size: [1048576]
-30     concurrent_procs: [1]
-31     iodepth: [64]
-32     osd_ra: [4096]
-33     cmd_path: '/usr/local/bin/fio'
-34     pool_profile: 'rbd'
-
-Ceph.conf - 
-
-[global]
-        osd pool default size = 1
-        auth cluster required = none
-        auth service required = none
-        auth client required = none
-        keyring = /tmp/cbt/ceph/keyring
-        osd pg bits = 8  
-        osd pgp bits = 8
-        log to syslog = false
-        log file = /tmp/cbt/ceph/log/$name.log
-        public network = 10.10.10.0/24
-        cluster network = 10.10.10.0/24
-        rbd cache = true
-        osd scrub load threshold = 0.01
-        osd scrub min interval = 137438953472
-        osd scrub max interval = 137438953472
-        osd deep scrub interval = 137438953472
-        osd max scrubs = 16
-        filestore merge threshold = 40
-        filestore split multiple = 8
-        osd op threads = 8
-        mon pg warn max object skew = 100000
-        mon pg warn min per osd = 0
-        mon pg warn max per osd = 32768
-
-[mon]
-        mon data = /tmp/cbt/ceph/mon.$id
-
-[mon.a]
-        host = Mon1 
-        mon addr = 10.10.10.150:6789
-
-[osd.0]
-        host = Server
-        osd data = /tmp/cbt/mnt/osd-device-0-data
-        osd journal = /dev/disk/by-partlabel/osd-device-0-journal
-
-
+----- Original Message -----
+> From: "Vish (Vishwanath) Maram-SSI" <vishwanath.m@ssi.samsung.com>
+> To: ceph-devel-owner@vger.kernel.org, ceph-devel@vger.kernel.org
+> Sent: Friday, February 5, 2016 11:36:29 AM
+> Subject: Reg:. Unable to observe the performance impact of Rbd_Cache parameter.
+> 
+> Hi All,
+> 
+> We are trying to experiment with Rbd_Cache parameter and expect it to improve
+> the performance when run on a "rbdimage" using FIO. Please find the below
+> details:
+> 
+> 1.	1 OS - CentOS7.2
+> 2.	CEPH Code - Hammer Version - 0.94.5
+> 3.	Ceph.conf - Please find below
+> 4.	rbd -p pool3 bench-write im3 --io-size 4096 --io-threads 256 --io-total
+> 10240000000 --io-pattern seq
+> a.	With the above command we were able to observe performance improvement by
+> modifying Rbd_Cache (True/False)
+> 5.	We were expecting that we could observe the same improvement if we run FIO
+> directly on the above pool, but we don't observe any difference with or
+> without Rbd_Cache (True/False)
+> 
+> It would be great if someone throw some light.
+> 
+> Thanks,
+> -Vish
+> 
+> 
+> Ceph.conf -
+> 
+> 
+> [global]
+> fsid = 9eda02e2-04b7-4eed-a85a-8471ea51528d
+> 
+> auth_cluster_required = none
+> auth_service_required = none
+> auth_client_required = none
+> #auth_supported = none
+> cephx sign messages = false
+> cephx require signatures = false
+> 
+> debug_lockdep = 0/0
+> debug_context = 0/0
+> debug_crush = 0/0
+> debug_buffer = 0/0
+> debug_timer = 0/0
+> debug_filer = 0/0
+> debug_objecter = 0/0
+> debug_rados = 0/0
+> debug_rbd = 0/0
+> debug_ms = 0/0
+> debug_monc = 0/0
+> debug_tp = 0/0
+> debug_auth = 0/0
+> debug_finisher = 0/0
+> debug_heartbeatmap = 0/0
+> debug_perfcounter = 0/0
+> debug_rgw = 0/0
+> debug_asok = 0/0
+> debug_throttle = 0/0
+> 
+> debug_journaler = 0/0
+> debug_objectcatcher = 0/0
+> debug_client = 0/0
+> debug_osd = 0/0
+> debug_optracker = 0/0
+> debug_objclass = 0/0
+> debug_filestore = 0/0
+> debug_journal = 0/0
+> debug_mon = 0/0
+> debug_paxos = 0/0
+> 
+> filestore_xattr_use_omap = true
+> osd_pool_default_size = 1
+> osd_pool_default_min_size = 1
+> osd_pool_default_pg_num = 128
+> osd_pool_default_pgp_num = 128
+> 
+> mon_pg_warn_max_object_skew = 10000
+> mon_pg_warn_min_per_osd = 0
+> mon_pg_warn_max_per_osd = 32768
+> osd_pg_bits = 8
+> osd_pgp_bits = 8
+> 
+> mon_compact_on_trim = false
+> log_to_syslog = false
+> log_file = /var/log/ceph/$name.log
+> perf = true
+> mutex_perf_counter = true
+> throttler_perf_counter = false
+> 
+> [mon.a]
+> host = Mon1
+> mon_addr = 10.10.10.150:6789
+> mon_max_pool_pg_num = 166496
+> mon_osd_max_split_count = 10000
+> 
+> [osd]
+> filestore_wbthrottle_enable = false
+> filestore_queue_max_bytes = 1048576000
+> 
+> filestore_queue_committing_max_bytes = 1048576000
+> filestore_queue_max_ops = 5000
+> filestore_queue_committing_max_ops = 5000
+> filestore_max_sync_interval = 10
+> filestore_fd_cache_size = 64
+> filestore_fd_cache_shards = 32
+> filestore_op_threads = 6
+> 
+> osd_op_threads = 32
+> osd_op_num_shards = 25
+> osd_op_num_threads_per_shard = 2
+> osd_enable_op_tracker = false
+> osd_client_message_size_cap = 0
+> osd_client_message_cap = 0
+> objecter_inflight_ops = 102400
+> objecter_inflight_op_bytes = 1048576000
+> 
+> ms_dispatch_throttle_bytes = 1048576000
+> ms_nocrc = true
+> throttler_perf_counter = false
+> 
+> [osd.0]
+> host = server2a
+> public_addr = 10.10.10.154
+> 
+> [client]
+> rbd_cache = true
+> rbd_cache_writethrough_until_flush = true
+> admin_socket = /var/run/ceph/$cluster-$type.$id.$pid.$cctid.asok
+> log_file = /var/log/ceph/
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
