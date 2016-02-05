@@ -1,64 +1,132 @@
-From: kbuild test robot <fengguang.wu@intel.com>
-Subject: [ceph:wip-fs-filelayout2 2/6] net/ceph/pool_ns.c:112:14: sparse:
- incompatible types in comparison expression (different address spaces)
-Date: Fri, 5 Feb 2016 23:02:17 +0800
-Message-ID: <201602052313.e32b8EyC%fengguang.wu@intel.com>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: cls_rbd ops on rbd_id.$name objects in EC pool
+Date: Fri, 5 Feb 2016 10:42:17 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1602051036131.28396@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:55602 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751076AbcBEPDl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 5 Feb 2016 10:03:41 -0500
-Content-Disposition: inline
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: kbuild-all@01.org, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Nick Fisk <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-tree:   https://github.com/ceph/ceph-client.git wip-fs-filelayout2
-head:   f3d10f2b8cb86727e6a25e2817818cdb91ce7b49
-commit: 1dcfb90ff006e0bb9311a3f13afbffd442125155 [2/6] libceph: introduce pool namespace cache
-reproduce:
-        # apt-get install sparse
-        git checkout 1dcfb90ff006e0bb9311a3f13afbffd442125155
-        make ARCH=x86_64 allmodconfig
-        make C=1 CF=-D__CHECK_ENDIAN__
+On Wed, 27 Jan 2016, Nick Fisk wrote:
+> 
+> > -----Original Message-----
+> > From: ceph-users [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Behalf Of
+> > Jason Dillaman
+> > Sent: 27 January 2016 14:25
+> > To: Nick Fisk <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org>
+> > Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > Subject: Re: [ceph-users] Possible Cache Tier Bug - Can someone confirm
+> > 
+> > Are you running with an EC pool behind the cache tier? I know there was an
+> > issue with the first Infernalis release where unsupported ops were being
+> > proxied down to the EC pool, resulting in that same error.
+> 
+> Hi Jason, yes I am. 3x Replicated pool on top of an EC pool.
+> 
+> It's probably something similar to what you mention. Either the client
+> should be able to access the RBD header object on the base pool, or it
+> should be flagged so that it can't be evicted.
+
+I just confirmed that the rbd_id.$name object doesn't have any omap, so 
+from rados's perspective, flushing and evicting it is fine.  But yeah, the 
+cls_rbd ops aren't permitted in the EC pool.
+
+In master/jewel we have a cache-pin function that prevents an object from 
+being flushed.
+
+A few options are:
+
+1) Have cls_rbd cache-pin it's objects.
+
+2) Have cls_rbd put an omap key on the object to indirectly do the same.
+
+3) Add a requires-cls type object flag that keeps hte object out of an EC 
+pool *until* it eventually supports cls ops.
+
+I'd lean toward 1 since it's simple and explicit, and when we eventually 
+make classes work we can remove the cache-pin behavior from cls_rbd.  
+It's harder to fix in infernalis unless we also backport cache-pin/unpin 
+ops, too, so maybe #2 would be a simple infernalis workaround?
+
+Jason?  Sam?
+sage
 
 
-sparse warnings: (new ones prefixed by >>)
 
-   include/linux/compiler.h:228:8: sparse: attribute 'no_sanitize_address': unknown attribute
->> net/ceph/pool_ns.c:112:14: sparse: incompatible types in comparison expression (different address spaces)
-
-vim +112 net/ceph/pool_ns.c
-
-    96	
-    97		spin_lock(&pool_ns_lock);
-    98		if (!RB_EMPTY_NODE(&ns->node)) {
-    99			rb_erase(&ns->node, &pool_ns_tree);
-   100			RB_CLEAR_NODE(&ns->node);
-   101		}
-   102		spin_unlock(&pool_ns_lock);
-   103	
-   104		call_rcu(&ns->rcu, ceph_free_pool_ns);
-   105	}
-   106	EXPORT_SYMBOL(ceph_release_pool_ns);
-   107	
-   108	struct ceph_pool_ns *ceph_try_get_pool_ns(struct ceph_pool_ns **pns)
-   109	{
-   110		struct ceph_pool_ns *ns;
-   111		rcu_read_lock();
- > 112		ns = rcu_dereference(*pns);
-   113		if (ns && !kref_get_unless_zero(&ns->kref))
-   114			ns = NULL;
-   115		rcu_read_unlock();
-   116		return ns;
-   117	}
-   118	EXPORT_SYMBOL(ceph_try_get_pool_ns);
-   119	
-   120	void ceph_pool_ns_cleanup(void)
-
----
-0-DAY kernel test infrastructure                Open Source Technology Center
-https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
+> 
+> > 
+> > --
+> > 
+> > Jason Dillaman
+> > 
+> > 
+> > ----- Original Message -----
+> > > From: "Nick Fisk" <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org>
+> > > To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > > Sent: Wednesday, January 27, 2016 8:46:53 AM
+> > > Subject: [ceph-users] Possible Cache Tier Bug - Can someone confirm
+> > >
+> > > Hi All,
+> > >
+> > > I think I have stumbled on a bug. I'm running Infernalis (Kernel 4.4
+> > > on the
+> > > client) and it seems that if the RBD header object gets evicted from
+> > > the cache pool then you can no longer map it.
+> > >
+> > > Steps to reproduce
+> > >
+> > > rbd -p cache1 create Test --size=10G
+> > > rbd - p cache1 map Test
+> > >
+> > > /dev/rbd1  <-Works!!
+> > >
+> > > rbd unmap /dev/rbd1
+> > >
+> > > rados -p cache1 cache-flush rbd_id.Test rados -p cache1 cache-evict
+> > > rbd_id.Test rbd - p cache1 map Test
+> > >
+> > > rbd: sysfs write failed
+> > > rbd: map failed: (95) Operation not supported
+> > >
+> > > or with the rbd-nbd client
+> > >
+> > > 2016-01-27 13:39:52.686770 7f9e54162b00 -1 asok(0x561837b88360)
+> > > AdminSocketConfigObs::init: failed: AdminSocket::bind_and_listen:
+> > > failed to bind the UNIX domain socket to
+> > > '/var/run/ceph/ceph-client.admin.asok': (17) File exists
+> > > 2016-01-27 13:39:52.703987 7f9e32ffd700 -1 librbd::image::OpenRequest:
+> > > failed to retrieve image id: (95) Operation not supported
+> > > rbd-nbd: failed to map, status: (95) Operation not supported
+> > > 2016-01-27 13:39:52.704138 7f9e327fc700 -1 librbd::ImageState: failed
+> > > to open image: (95) Operation not supported
+> > >
+> > > Nick
+> > >
+> > > _______________________________________________
+> > > ceph-users mailing list
+> > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > >
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
