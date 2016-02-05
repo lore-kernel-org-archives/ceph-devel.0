@@ -1,34 +1,46 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: apache/fcgi deprecation?
-Date: Fri, 5 Feb 2016 05:12:22 +0100
-Message-ID: <56B42126.7090106@suse.cz>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Add Pending Backport status to Documentation tracker?
+Date: Fri, 5 Feb 2016 12:12:44 +0700
+Message-ID: <56B42F4C.8010908@dachary.org>
+References: <56B3A93B.3080900@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:40642 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750989AbcBEEMZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 4 Feb 2016 23:12:25 -0500
-Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id 7DC95AB45
-	for <ceph-devel@vger.kernel.org>; Fri,  5 Feb 2016 04:12:23 +0000 (UTC)
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:53749 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750817AbcBEFMz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Feb 2016 00:12:55 -0500
+In-Reply-To: <56B3A93B.3080900@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I was just browsing the RGW documentation and noticed that parts of it 
-are still apache/fcgi-oriented (with no mention of civetweb) even in master.
+Hi Nathan,
 
-My impression was that civetweb is now recommended for RGW deployments 
-as it is faster. Is that true? And is there a plan to deprecate/drop 
-apache/fcgi support, or will it remain indefinitely?
+I added the "Pending Backport" status to the workflow of the Documentat=
+ion tracker as well as the "Backport" custom field.
 
-Would it be a good idea to expunge apache/fcgi from the docs and point 
-folks to civetweb instead?
+Cheers
 
--- 
-Nathan Cutler
-Software Engineer Distributed Storage
-SUSE LINUX, s.r.o.
-Tel.: +420 284 084 037
+On 05/02/2016 02:40, Nathan Cutler wrote:
+> Hi Loic:
+>=20
+> Looking at http://tracker.ceph.com/issues/14637 I see Ken has backpor=
+ted it to hammer, but there is no "Pending Backport" status in the Docu=
+mentation tracker, so I can't set it correctly.
+>=20
+> Can you add "Pending Backport" to the list of possible issue statuses=
+ in the Backport tracker?
+>=20
+> Thanks!
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
