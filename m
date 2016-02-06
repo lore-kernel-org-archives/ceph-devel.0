@@ -1,76 +1,57 @@
-From: Karol Mroz <kmroz@suse.com>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: logfile created with root:root ownership when "log_file" config
  option specified
-Date: Fri, 5 Feb 2016 16:46:52 -0800
-Message-ID: <20160206004652.GA29769@oak.lan>
-References: <20160203231727.GA18601@oak.lan>
+Date: Fri, 5 Feb 2016 21:02:58 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1602052051140.28396@cpach.fuggernut.com>
+References: <20160203231727.GA18601@oak.lan> <20160206004652.GA29769@oak.lan>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="AqsLC8rIMeq19msA"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.provo.novell.com ([137.65.250.81]:46195 "EHLO
-	smtp2.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750955AbcBFAq5 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Fri, 5 Feb 2016 19:46:57 -0500
-Content-Disposition: inline
-In-Reply-To: <20160203231727.GA18601@oak.lan>
+Received: from cobra.newdream.net ([66.33.216.30]:56850 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750737AbcBFCCm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Feb 2016 21:02:42 -0500
+In-Reply-To: <20160206004652.GA29769@oak.lan>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Karol Mroz <kmroz@suse.com>
+Cc: ceph-devel@vger.kernel.org
 
+On Fri, 5 Feb 2016, Karol Mroz wrote:
+> On Wed, Feb 03, 2016 at 03:17:27PM -0800, Karol Mroz wrote:
+> [...]
+> > From a quick glance, removing changed.count("log_file"...) from
+> > LogObs::handle_conf_changes() would skip over the early logfile creation in this observer.
+> > A more invasive option would be to remove conf->apply_changes() from global_pre_init(),
+> > thus delaying running the observers for the first time until after the permissions drop.
+> > However, I suspect there may be valid reason why conf->apply_changes() is needed in
+> > global_pre_init()? As I'm not familiar with the nuances here, a comment from someone more
+> > familiar with this would be appreciated.
+> 
+> Removing the changed.count("log_file") section in LogObs::handle_conf_changes() I think would kill
+> the possibility of changing the logfile via injectargs. I'd say that's a no-go.
+> 
+> The more I look at it, the more I think running conf->handle_changes(NULL) from global_pre_init()
+> is not needed. Upon returning to global_init(), we invoke g_conf->call_all_observers() which does
+> meta variable expansion and runs _all_ observers. This should be enough... or am I oversimplifying
+> things? :D
 
---AqsLC8rIMeq19msA
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+That sounds like the right thing to me.  These are dark and crufty parts 
+of the code, though, so we'll have to make the change and see what 
+breaks..
 
-On Wed, Feb 03, 2016 at 03:17:27PM -0800, Karol Mroz wrote:
-[...]
-> From a quick glance, removing changed.count("log_file"...) from
-> LogObs::handle_conf_changes() would skip over the early logfile creation =
-in this observer.
-> A more invasive option would be to remove conf->apply_changes() from glob=
-al_pre_init(),
-> thus delaying running the observers for the first time until after the pe=
-rmissions drop.
-> However, I suspect there may be valid reason why conf->apply_changes() is=
- needed in
-> global_pre_init()? As I'm not familiar with the nuances here, a comment f=
-rom someone more
-> familiar with this would be appreciated.
+There are only 2 global_pre_init callers: global_init (the next method 
+down), and ceph-conf.  Presumably this was split to make ceph-conf happy.  
+So this is primarily a matter of looking through global_init to make sure 
+nothing depends on metavariable expansion.  The only thing htat catches my 
+eye is g_conf->run_dir.  We can probably move that below 
+call_all_observers?  Or, put the apply_changes just after we drop 
+privileges.
 
-Removing the changed.count("log_file") section in LogObs::handle_conf_chang=
-es() I think would kill
-the possibility of changing the logfile via injectargs. I'd say that's a no=
--go.
+Take a look at
 
-The more I look at it, the more I think running conf->handle_changes(NULL) =
-=66rom global_pre_init()
-is not needed. Upon returning to global_init(), we invoke g_conf->call_all_=
-observers() which does
-meta variable expansion and runs _all_ observers. This should be enough... =
-or am I oversimplifying
-things? :D
+	https://github.com/ceph/ceph/pull/7545
 
---=20
-Regards,
-Karol
+I think this does the trick, and passes my quick smoke test...
 
---AqsLC8rIMeq19msA
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJWtUJ6AAoJECp28bThgzatQ2AIAIX4eBy7gFslI8pOKMxBB19l
-vCRP8qgWAtUxLk0xdzo7HAMEX3HQkf4Kx0hupPBo5+xZcqo6LPtsHpwbAeAzAE4l
-7OSxk2BFerOQngRCY+hR/I5GDiXDrHlNwOpmJ7WpL6XJYOR0sOjsyzjO7oY1gqXg
-Mm3oSjHzPh+BmCeZzQrx3GYwLot4ImsA26oi9pAE8YwVMP/dyGey0kx9zoRuHCaj
-jVq5MPCup6oai1DW25jbarus8q+sO+BsTTQ3P2f888kHMr9p2iJjG436I59p/SQ3
-haohWkrvrATkwbqddttcVWxUprt8Sslqg4LxPrvK3o7Y1nrWBH66w5+OM7AGEJM=
-=amcQ
------END PGP SIGNATURE-----
-
---AqsLC8rIMeq19msA--
+sage
