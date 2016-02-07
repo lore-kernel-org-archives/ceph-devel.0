@@ -1,57 +1,74 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: FreeBSD crushtool crashing while checking a crushmap
-Date: Sat, 6 Feb 2016 23:12:16 +0100
-Message-ID: <56B66FC0.70409@digiware.nl>
+From: "Interfax Online" <incoming@interfax.net>
+Subject: You have 1 new fax, document 00000719950
+Date: Sun, 7 Feb 2016 07:45:49 +0100
+Message-ID: <0f88b7af30c5c7070ad567c892412594@interfax.net>
+Reply-To: "Interfax Online" <incoming@interfax.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="b1_841cd044720ee4d7cd497337a321adca"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:44367 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752634AbcBFWM2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 6 Feb 2016 17:12:28 -0500
-Received: from rack1.digiware.nl (unknown [127.0.0.1])
-	by smtp.digiware.nl (Postfix) with ESMTP id 56AF3153413
-	for <ceph-devel@vger.kernel.org>; Sat,  6 Feb 2016 23:12:25 +0100 (CET)
-Received: from [192.168.10.10] (asus [192.168.10.10])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.digiware.nl (Postfix) with ESMTPSA id 2128C1534E3
-	for <ceph-devel@vger.kernel.org>; Sat,  6 Feb 2016 23:12:16 +0100 (CET)
+Received: from mout.kundenserver.de ([212.227.126.131]:50109 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751053AbcBGGpv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 7 Feb 2016 01:45:51 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi,
+--b1_841cd044720ee4d7cd497337a321adca
+Content-Type: text/plain; charset=us-ascii
 
-While running run-cli-tests one of the tests dumps while checking if the
-previous command has build the correct crushmap.
-I've verified the actual crushmap against one build on CentOS, and they
-are byte for byte equal.
+New incoming fax document.
 
-Before I rebased (from beginning of januari) all these tests completed
-just fine.
+To view it please open the attachment.
 
-During checking I get the following dump:
+Document name:        scanned-00000719950.doc
+File size:            148 Kb
+Scanned by:           Kurt Bright
+Scan time:            19 seconds
+Pages scanned:        3
+Quality:              400 DPI
+Scanned at:           Sat, 6 Feb 2016 11:37:51 +0300
 
-# src/crushtool -i
-src/tes/cli/crushtool/check-overlapped-rules.crushmap.ref --check
-Assertion failed: (this->_map.find(inter_val) == this->_map.end()),
-function gap_insert, file
-/usr/local/include/boost/icl/interval_base_map.hpp, line 555.
-*** Caught signal (Abort trap) **
- in thread 803e15000
- ceph version Development (no_version)
- 1: 0x86f865 <_ZN4ceph9BackTraceC2Ei+0x35> at
-/usr/srcs/Ceph/work/ceph/src/crushtool
- 2: 0x86e5f9 <_ZL19handle_fatal_signali+0xa9> at
-/usr/srcs/Ceph/work/ceph/src/crushtool
- 3: 0x801811c7d <pthread_sigmask+0x50d> at /lib/libthr.so.3
- 4: 0x8018112b2 <pthread_getspecific+0xe22> at /lib/libthr.so.3
-2016-02-06 22:55:09.075189 803e15000 -1
+Thanks for using Interfax service!
 
-Deleted remainder of the output....
 
-And I appreciate any pointers in helping me debugging this.
+--b1_841cd044720ee4d7cd497337a321adca
+Content-Type: application/zip; name="scanned-00000719950.zip"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename=scanned-00000719950.zip
 
---WjW
+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
+
+
+--b1_841cd044720ee4d7cd497337a321adca--
+
