@@ -1,80 +1,74 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: Prevent rbd mapping/mounting on multiple hosts workaround
-Date: Mon, 8 Feb 2016 15:44:12 -0500 (EST)
-Message-ID: <913505319.20723124.1454964252136.JavaMail.zimbra@redhat.com>
-References: <CAAVaRixeAPiyK2Xx1=nXAZBD=8ckctgFV=6Ag2EyTsAGhPrPUw@mail.gmail.com> <CAAVaRixPMWYibHFmmZmVgYB3RjPWaO2-gEhoyTnCHpBkkZjbgQ@mail.gmail.com> <CAJ4mKGb4x3Wn=hK_qz_p-fkWxcjQSJnotX=mz4pfM-DyPCQxZw@mail.gmail.com>
+From: Karol Mroz <kmroz@suse.com>
+Subject: Re: Infernalis RGW failure investigation
+Date: Mon, 8 Feb 2016 13:02:18 -0800
+Message-ID: <20160208210218.GC14128@oak.lan>
+References: <56B8110D.8040401@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="/Uq4LBwYP4y1W6pO"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:33766 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932228AbcBHUoO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 15:44:14 -0500
-In-Reply-To: <CAJ4mKGb4x3Wn=hK_qz_p-fkWxcjQSJnotX=mz4pfM-DyPCQxZw@mail.gmail.com>
+Received: from smtp2.provo.novell.com ([137.65.250.81]:36033 "EHLO
+	smtp2.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753464AbcBHVC1 (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Mon, 8 Feb 2016 16:02:27 -0500
+Content-Disposition: inline
+In-Reply-To: <56B8110D.8040401@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Mauricio Garavaglia <mauricio@medallia.com>, ceph-devel <ceph-devel@vger.kernel.org>
-
-Within librbd there is support for blacklisting clients before stealing the exclusive lock.  I don't remember any such enhancement to the rbd CLI's map command.  In general it sounds like a good feature request.  The automatic unblacklist on reboot would be outside the scope of any rbd CLI change.  I added a new tracker ticket for the feature request.
-
-[1] http://tracker.ceph.com/issues/14700
-
--- 
-
-Jason Dillaman 
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 
------ Original Message -----
-> From: "Gregory Farnum" <gfarnum@redhat.com>
-> To: "Mauricio Garavaglia" <mauricio@medallia.com>, "Jason Dillaman" <dillaman@redhat.com>
-> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Sent: Monday, February 8, 2016 10:41:40 AM
-> Subject: Re: Prevent rbd mapping/mounting on multiple hosts workaround
-> 
-> On Fri, Feb 5, 2016 at 6:24 AM, Mauricio Garavaglia
-> <mauricio@medallia.com> wrote:
-> > Hello,
-> >
-> > In the January Tech Talk (PostgreSQL on Ceph under Mesos/Aurora with
-> > Docker [https://youtu.be/OqlC7S3cUKs]) we presented a challenge we are
-> > facing at Medallia when running databases on ceph under
-> > mesos/aurora/docker; which is related to prevent mapping/mounting the
-> > same rbd image in two hosts at the same time during network
-> > partitions.
-> >
-> > As a workaround it was mentioned that we are wrapping rbd in a shell
-> > script that executes extra logic around certain operations:
-> >
-> > - On Map; rbd lock add <image>
-> >         - If no success; then
-> >                 - "rbd status <image>": check for Watchers, 3 times each 15
-> >                 secs
-> >                         - If found, ABORT the mapping. The image is
-> > still in use in a host that is healthy
-> >                 - "ceph osd blacklist add <previous lock holder>".
-> > Image locked without a watcher
-> >                 - steal the lock in <image>
-> >         - map the image
-> >
-> > - On Unmap;
-> >         - rbd lock remove
-> >
-> > - On reboot of server;
-> >         - "ceph osd blacklist rm <self>"
-> >
-> > I was wondering if this mechanism could be incorporated as part of the
-> > rbd CLI, of course controlled by an option during map. We'll be happy
-> > to work on it, but want to check the feasibility of having the patch
-> > accepted.
-> 
-> I actually thought we had a disable-by-default config option in later
-> releases that grab the locks before allowing a mount, but now I can't
-> find it. Jason?
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+--/Uq4LBwYP4y1W6pO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, Feb 08, 2016 at 10:52:45AM +0700, Loic Dachary wrote:
+> Dear RGW developers,
+>=20
+> We ran into http://tracker.ceph.com/issues/14665 on the infernalis branch=
+=2E It would be great if someone could shed some light on why it happens.
+>=20
+
+Hi Loic,
+
+If this has already been discussed elsewhere, or I'm simply stating the obv=
+ious,
+my apologies in advance. However, it looks like the rgw socket file _may_ b=
+e created
+with some odd permissions/ownership, relative to the user under which the t=
+est is being
+run.
+
+With a recent ceph/master build on my end (I don't have immediate access to=
+ an infernalis
+system), the rgw admin socket is created as ceph:ceph. Running `radosgw-adm=
+in` as root
+then binds fine.
+
+
+I've added http://tracker.ceph.com/issues/14665#note-3
+
+--=20
+Regards,
+Karol
+
+--/Uq4LBwYP4y1W6pO
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJWuQJVAAoJECp28bThgzatc2oIAJMTlvWdGXzcHEBzSHR3Vox/
+eJcq8pTjwGavZey1RmW+YM7LY7F0AfxDQ28an//Vny36Ynffr91S0h2kfLBD6H73
+Tz1oRor1aQsA+eylsUwLw/3NeH1YBOvXQKoYBh7ruTIAnaS8a7ti6dBBrxG7+Q72
+zMpTl2yDVfylC7s4e/HovyOTmhli1XY9rJNCzPM++aQO3KdXwfOw6OJoHqEXE8bf
+e3Duije6GbNra28V4nu6LEgl7t5Qw4C6EXAvK1vGmlnSigDqpT/ZuDiOSjCLSW1+
+y7lf4EYzvXjnloF+J2bzM1u9lZgKkJtEji/sWwzVjmO2mGnzHuIDk4DxF25C3Uc=
+=ECU+
+-----END PGP SIGNATURE-----
+
+--/Uq4LBwYP4y1W6pO--
