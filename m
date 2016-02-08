@@ -1,74 +1,32 @@
-From: Karol Mroz <kmroz@suse.com>
-Subject: Re: Infernalis RGW failure investigation
-Date: Mon, 8 Feb 2016 13:02:18 -0800
-Message-ID: <20160208210218.GC14128@oak.lan>
-References: <56B8110D.8040401@dachary.org>
+From: Lionel Bouton <lionel-subscription-WTamNBQcZIx7tPAFqOLdPg@public.gmane.org>
+Subject: Re: K is for Kraken
+Date: Mon, 8 Feb 2016 22:09:55 +0100
+Message-ID: <56B90423.6000606@bouton.name>
+References: <alpine.DEB.2.11.1602081333360.8341@cpach.fuggernut.com>
+	<CAANLjFpTSyAHki-whW+H+0QO4icGdomGqFKvaJYMPo6jTsw_tA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="/Uq4LBwYP4y1W6pO"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.provo.novell.com ([137.65.250.81]:36033 "EHLO
-	smtp2.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753464AbcBHVC1 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Mon, 8 Feb 2016 16:02:27 -0500
-Content-Disposition: inline
-In-Reply-To: <56B8110D.8040401@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
-
-
---/Uq4LBwYP4y1W6pO
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAANLjFpTSyAHki-whW+H+0QO4icGdomGqFKvaJYMPo6jTsw_tA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Feb 08, 2016 at 10:52:45AM +0700, Loic Dachary wrote:
-> Dear RGW developers,
->=20
-> We ran into http://tracker.ceph.com/issues/14665 on the infernalis branch=
-=2E It would be great if someone could shed some light on why it happens.
->=20
+Le 08/02/2016 20:09, Robert LeBlanc a =E9crit :
+> Too bad K isn't an LTS. It was be fun to release the Kraken many times.
 
-Hi Loic,
+Kraken is an awesome release name !
+How I will miss being able to say/write to our clients that we just
+released the Kraken on their infra :-/
 
-If this has already been discussed elsewhere, or I'm simply stating the obv=
-ious,
-my apologies in advance. However, it looks like the rgw socket file _may_ b=
-e created
-with some odd permissions/ownership, relative to the user under which the t=
-est is being
-run.
-
-With a recent ceph/master build on my end (I don't have immediate access to=
- an infernalis
-system), the rgw admin socket is created as ceph:ceph. Running `radosgw-adm=
-in` as root
-then binds fine.
-
-
-I've added http://tracker.ceph.com/issues/14665#note-3
-
---=20
-Regards,
-Karol
-
---/Uq4LBwYP4y1W6pO
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJWuQJVAAoJECp28bThgzatc2oIAJMTlvWdGXzcHEBzSHR3Vox/
-eJcq8pTjwGavZey1RmW+YM7LY7F0AfxDQ28an//Vny36Ynffr91S0h2kfLBD6H73
-Tz1oRor1aQsA+eylsUwLw/3NeH1YBOvXQKoYBh7ruTIAnaS8a7ti6dBBrxG7+Q72
-zMpTl2yDVfylC7s4e/HovyOTmhli1XY9rJNCzPM++aQO3KdXwfOw6OJoHqEXE8bf
-e3Duije6GbNra28V4nu6LEgl7t5Qw4C6EXAvK1vGmlnSigDqpT/ZuDiOSjCLSW1+
-y7lf4EYzvXjnloF+J2bzM1u9lZgKkJtEji/sWwzVjmO2mGnzHuIDk4DxF25C3Uc=
-=ECU+
------END PGP SIGNATURE-----
-
---/Uq4LBwYP4y1W6pO--
+Lionel
