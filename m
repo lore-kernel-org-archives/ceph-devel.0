@@ -1,31 +1,56 @@
 From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: hammer v0.94.7 & jewel
-Date: Mon, 8 Feb 2016 10:23:49 +0100
-Message-ID: <56B85EA5.2060401@suse.cz>
-References: <56B8402E.60402@dachary.org>
- <CANA9Uk45r3WvvcfU54yofeyFPDEtwZTrYa4Vjc_0g4AmCJSRYg@mail.gmail.com>
- <56B857BA.2090007@dachary.org>
+Subject: How to make systemd unit files work in all supported distros?
+Date: Mon, 8 Feb 2016 10:44:18 +0100
+Message-ID: <56B86372.4020600@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:37688 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:40388 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751098AbcBHJXw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 8 Feb 2016 04:23:52 -0500
-In-Reply-To: <56B857BA.2090007@dachary.org>
+	id S1751809AbcBHJoU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 8 Feb 2016 04:44:20 -0500
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id 42A9DAD45
+	for <ceph-devel@vger.kernel.org>; Mon,  8 Feb 2016 09:44:19 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, M Ranga Swami Reddy <swamireddy@gmail.com>
-Cc: Abhishek L <abhishek.lekshmanan@gmail.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
->>> In a few weeks jewel will be published and we'll have one more stable release to care for. Maybe we could send a call for participation to get more help ? One or two mentee when the work starts on v0.94.7 would be ideal. It turns out that Robin had no time for learning the process on v0.94.6 (although he did numerous patches to improve teuthology and therefore helped with backports in other ways). And since Firefly is EOL, Swami did not get a chance either. This is not to say we're in a bad position, but I think it's an additional incentive to recruit now.
+In master we currently have an issue with the systemd unit files in that 
+they contain hard-coded paths that are specific to RH/CentOS/Fedora. 
+Other distros can and do have the executables in different places.
 
-I'd say it's always a good idea to recruit. For my part, I am ready to 
-participate more, up to and including driving a release.
+I opened a bug[1] for this, but before I go off trying to fix it I would 
+like to solicit your feedback on the following possible approaches I 
+came up with (and/or "turn me on" to a different approach):
 
-By the way, I was going to drive 0.94.6 but couldn't due to a 
-personal/family issue. Loic took over - thanks for that!
+(1) Rely on PATH. Basically, instead of running executables directly, 
+run them by "/bin/sh -c", which summons the system PATH to help find the 
+executables. See https://github.com/ceph/ceph/pull/6803 for an example 
+of this.
+
+(2) Set environment variables in /etc/sysconfig/ceph. Systemd has an 
+EnvironmentFile directive which reads environment variables from a file. 
+If this were pointed to /etc/sysconfig/ceph (as it is in several unit 
+files already), we could set the distro-specific parts of the paths 
+there and write the paths similar to how we do it in the spec file.
+
+(3) Generate unit files at build time. In this approach, the unit files 
+would exist in the source tree as templates (e.g. ceph-osd@.service.in) 
+and these would get transformed into the "real" unit files at build 
+time. The ceph-detect-init utility could be used to determine the distro 
+and the Makefile logic would then fill in the templates as needed for 
+the distro.
+
+Of these three approaches, only (3) would seem to be general enough to 
+work nicely for all distros. (For example, EnvironmentFile will need to 
+be set to /etc/default/ceph on Debianesque systems and there is no 
+obvious way to set *this* path as an environment variable.)
+
+Any thoughts on this? Thanks in advance!
+
+[1] http://tracker.ceph.com/issues/14687
 
 -- 
 Nathan Cutler
