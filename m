@@ -1,52 +1,87 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: hammer v0.94.7 & jewel
-Date: Mon, 8 Feb 2016 17:42:53 +0700
-Message-ID: <56B8712D.1010102@dachary.org>
-References: <56B8402E.60402@dachary.org>
- <CANA9Uk45r3WvvcfU54yofeyFPDEtwZTrYa4Vjc_0g4AmCJSRYg@mail.gmail.com>
- <56B857BA.2090007@dachary.org> <56B85EA5.2060401@suse.cz>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: FreeBSD crushtool crashing while checking a crushmap
+Date: Mon, 8 Feb 2016 12:01:10 +0100
+Message-ID: <56B87576.5010200@digiware.nl>
+References: <56B66FC0.70409@digiware.nl>
+ <CAJE9aOOj3kak2p90RUcD8ps+M_j05NwA-KfYGxZyb3-u1zHkYw@mail.gmail.com>
+ <CAJE9aONwRb7pfG=K+GdJ1mg8ePd9FQ0iy-fnwWcF7qQ5jarbbQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:53785 "EHLO
-	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751910AbcBHKnZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 05:43:25 -0500
-In-Reply-To: <56B85EA5.2060401@suse.cz>
+Received: from smtp.digiware.nl ([31.223.170.169]:26574 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751123AbcBHLBm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 8 Feb 2016 06:01:42 -0500
+In-Reply-To: <CAJE9aONwRb7pfG=K+GdJ1mg8ePd9FQ0iy-fnwWcF7qQ5jarbbQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>, M Ranga Swami Reddy <swamireddy@gmail.com>
-Cc: Abhishek L <abhishek.lekshmanan@gmail.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Nathan,
+On 8-2-2016 06:53, kefu chai wrote:
+> sorry, just sent an out-dated reply.
+>
+> On Sun, Feb 7, 2016 at 6:12 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> Hi,
+>>
+>> While running run-cli-tests one of the tests dumps while checking if the
+>> previous command has build the correct crushmap.
+>> I've verified the actual crushmap against one build on CentOS, and they
+>> are byte for byte equal.
+>>
+>> Before I rebased (from beginning of januari) all these tests completed
+>> just fine.
+>>
+>> During checking I get the following dump:
+>>
+>> # src/crushtool -i
+>> src/tes/cli/crushtool/check-overlapped-rules.crushmap.ref --check
+>> Assertion failed: (this->_map.find(inter_val) == this->_map.end()),
+>> function gap_insert, file
+>> /usr/local/include/boost/icl/interval_base_map.hpp, line 555.
+>> *** Caught signal (Abort trap) **
+>>   in thread 803e15000
+>>   ceph version Development (no_version)
+>>   1: 0x86f865 <_ZN4ceph9BackTraceC2Ei+0x35> at
+>> /usr/srcs/Ceph/work/ceph/src/crushtool
+>>   2: 0x86e5f9 <_ZL19handle_fatal_signali+0xa9> at
+>> /usr/srcs/Ceph/work/ceph/src/crushtool
+>>   3: 0x801811c7d <pthread_sigmask+0x50d> at /lib/libthr.so.3
+>>   4: 0x8018112b2 <pthread_getspecific+0xe22> at /lib/libthr.so.3
+>> 2016-02-06 22:55:09.075189 803e15000 -1
+>>
+>> Deleted remainder of the output....
+>>
+>> And I appreciate any pointers in helping me debugging this.
+>
+> hey Willem, thanks for looking into this. turns out this is a known issue of
+> boost 1.55. just posted a pull request to workaround it at
+> https://github.com/ceph/ceph/pull/7560.
+>
+> also did i create a minimal reproducer, it can help with reproducing this
+> issue and verify the fix.
+>
+> you can compile it using:
+>
+> $ clang++ -std=c++11 -O0 -g test.cc -lm -o test
+>
 
-Thanks for offering to drive v0.94.7 :-) http://tracker.ceph.com/projec=
-ts/ceph-releases/wiki/HOWTO#Whos-who is updated accordingly.
+pffh,
 
-Cheers
+That's a relieve, since I would otherwise be quite a chase....
+and yes, I'm still at boost 1.55.
 
-On 08/02/2016 16:23, Nathan Cutler wrote:
->>>> In a few weeks jewel will be published and we'll have one more sta=
-ble release to care for. Maybe we could send a call for participation t=
-o get more help ? One or two mentee when the work starts on v0.94.7 wou=
-ld be ideal. It turns out that Robin had no time for learning the proce=
-ss on v0.94.6 (although he did numerous patches to improve teuthology a=
-nd therefore helped with backports in other ways). And since Firefly is=
- EOL, Swami did not get a chance either. This is not to say we're in a =
-bad position, but I think it's an additional incentive to recruit now.
->=20
-> I'd say it's always a good idea to recruit. For my part, I am ready t=
-o participate more, up to and including driving a release.
->=20
-> By the way, I was going to drive 0.94.6 but couldn't due to a persona=
-l/family issue. Loic took over - thanks for that!
->=20
+Perhaps in the test check-overlapped-rules.t an extra test:
+	cmp "$TESTDIR/check-overlapped-rules.crushmap" 
+"$TESTDIR/check-overlapped-rules.crushmap.ref"
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Which will at least tell you that the output was consistent with what 
+sould be there.
+And it'll pin-point the source of the error perhaps a bit better.
+
+Can I just "accept" a pull request in my fork without running into trouble
+when I rebase?
+
+--WjW
+
