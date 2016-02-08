@@ -1,50 +1,97 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: hammer branch for v0.94.6 ready for QE
-Date: Mon, 8 Feb 2016 13:21:10 -0800
-Message-ID: <CAMMFjmFh9e2dM2ScPL1pj8eDN5k8Ndb7o5dog=-v7xE6gY7Tog@mail.gmail.com>
-References: <56B843B7.1070002@dachary.org>
+From: Bill Sanders <billysanders@gmail.com>
+Subject: Re: Prevent rbd mapping/mounting on multiple hosts workaround
+Date: Mon, 8 Feb 2016 14:41:37 -0800
+Message-ID: <CAEhqmjLL8et0OPVVwHiCVqnuxpPj8VyjojS0OBgraOr0i0_gHA@mail.gmail.com>
+References: <CAAVaRixeAPiyK2Xx1=nXAZBD=8ckctgFV=6Ag2EyTsAGhPrPUw@mail.gmail.com>
+ <CAAVaRixPMWYibHFmmZmVgYB3RjPWaO2-gEhoyTnCHpBkkZjbgQ@mail.gmail.com>
+ <CAJ4mKGb4x3Wn=hK_qz_p-fkWxcjQSJnotX=mz4pfM-DyPCQxZw@mail.gmail.com> <913505319.20723124.1454964252136.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:36442 "EHLO
-	mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756117AbcBHVVL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 16:21:11 -0500
-Received: by mail-io0-f171.google.com with SMTP id g73so209559248ioe.3
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Feb 2016 13:21:10 -0800 (PST)
-In-Reply-To: <56B843B7.1070002@dachary.org>
+Received: from mail-yw0-f175.google.com ([209.85.161.175]:36020 "EHLO
+	mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757057AbcBHWrx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 17:47:53 -0500
+Received: by mail-yw0-f175.google.com with SMTP id q190so114176128ywd.3
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Feb 2016 14:47:53 -0800 (PST)
+In-Reply-To: <913505319.20723124.1454964252136.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Mauricio Garavaglia <mauricio@medallia.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Loic
+So the idea here to prevent multiple hosts from mapping the same RBD
+image simultaneously?  If so, please do try to keep it optional (even
+if it's the default)... I'm not sure who else might, but Teradata
+relies on this functionality. :)
 
-Copy and started testing today, thx
+Thanks,
+Bill
 
-ceph-deploy question - I see that you had failures during integration
-testing, what is the plan for those known issues?
-
-Thx
-YuriW
-
-On Sun, Feb 7, 2016 at 11:28 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Yuri,
+On Mon, Feb 8, 2016 at 12:44 PM, Jason Dillaman <dillaman@redhat.com> wrote:
+> Within librbd there is support for blacklisting clients before stealing the exclusive lock.  I don't remember any such enhancement to the rbd CLI's map command.  In general it sounds like a good feature request.  The automatic unblacklist on reboot would be outside the scope of any rbd CLI change.  I added a new tracker ticket for the feature request.
 >
-> The hammer branch for v0.94.6 as found at https://github.com/ceph/cep=
-h/commits/hammer has been approved by Greg, Yehuda, Josh and Sam and is=
- ready for QE. For the record, the head is https://github.com/ceph/ceph=
-/commit/7abb6ae8f3cba67009bd022aaeee0a87cdfc6477 and the details of the=
- tests run are at http://tracker.ceph.com/issues/13356.
->
-> Cheers
+> [1] http://tracker.ceph.com/issues/14700
 >
 > --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
 >
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Jason Dillaman
+>
+>
+> ----- Original Message -----
+>> From: "Gregory Farnum" <gfarnum@redhat.com>
+>> To: "Mauricio Garavaglia" <mauricio@medallia.com>, "Jason Dillaman" <dillaman@redhat.com>
+>> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+>> Sent: Monday, February 8, 2016 10:41:40 AM
+>> Subject: Re: Prevent rbd mapping/mounting on multiple hosts workaround
+>>
+>> On Fri, Feb 5, 2016 at 6:24 AM, Mauricio Garavaglia
+>> <mauricio@medallia.com> wrote:
+>> > Hello,
+>> >
+>> > In the January Tech Talk (PostgreSQL on Ceph under Mesos/Aurora with
+>> > Docker [https://youtu.be/OqlC7S3cUKs]) we presented a challenge we are
+>> > facing at Medallia when running databases on ceph under
+>> > mesos/aurora/docker; which is related to prevent mapping/mounting the
+>> > same rbd image in two hosts at the same time during network
+>> > partitions.
+>> >
+>> > As a workaround it was mentioned that we are wrapping rbd in a shell
+>> > script that executes extra logic around certain operations:
+>> >
+>> > - On Map; rbd lock add <image>
+>> >         - If no success; then
+>> >                 - "rbd status <image>": check for Watchers, 3 times each 15
+>> >                 secs
+>> >                         - If found, ABORT the mapping. The image is
+>> > still in use in a host that is healthy
+>> >                 - "ceph osd blacklist add <previous lock holder>".
+>> > Image locked without a watcher
+>> >                 - steal the lock in <image>
+>> >         - map the image
+>> >
+>> > - On Unmap;
+>> >         - rbd lock remove
+>> >
+>> > - On reboot of server;
+>> >         - "ceph osd blacklist rm <self>"
+>> >
+>> > I was wondering if this mechanism could be incorporated as part of the
+>> > rbd CLI, of course controlled by an option during map. We'll be happy
+>> > to work on it, but want to check the feasibility of having the patch
+>> > accepted.
+>>
+>> I actually thought we had a disable-by-default config option in later
+>> releases that grab the locks before allowing a mount, but now I can't
+>> find it. Jason?
+>> -Greg
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
