@@ -1,32 +1,50 @@
-From: Lionel Bouton <lionel-subscription-WTamNBQcZIx7tPAFqOLdPg@public.gmane.org>
-Subject: Re: K is for Kraken
-Date: Mon, 8 Feb 2016 22:09:55 +0100
-Message-ID: <56B90423.6000606@bouton.name>
-References: <alpine.DEB.2.11.1602081333360.8341@cpach.fuggernut.com>
-	<CAANLjFpTSyAHki-whW+H+0QO4icGdomGqFKvaJYMPo6jTsw_tA@mail.gmail.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: hammer branch for v0.94.6 ready for QE
+Date: Mon, 8 Feb 2016 13:21:10 -0800
+Message-ID: <CAMMFjmFh9e2dM2ScPL1pj8eDN5k8Ndb7o5dog=-v7xE6gY7Tog@mail.gmail.com>
+References: <56B843B7.1070002@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAANLjFpTSyAHki-whW+H+0QO4icGdomGqFKvaJYMPo6jTsw_tA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-io0-f171.google.com ([209.85.223.171]:36442 "EHLO
+	mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756117AbcBHVVL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 16:21:11 -0500
+Received: by mail-io0-f171.google.com with SMTP id g73so209559248ioe.3
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Feb 2016 13:21:10 -0800 (PST)
+In-Reply-To: <56B843B7.1070002@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>
 
-Le 08/02/2016 20:09, Robert LeBlanc a =E9crit :
-> Too bad K isn't an LTS. It was be fun to release the Kraken many times.
+Loic
 
-Kraken is an awesome release name !
-How I will miss being able to say/write to our clients that we just
-released the Kraken on their infra :-/
+Copy and started testing today, thx
 
-Lionel
+ceph-deploy question - I see that you had failures during integration
+testing, what is the plan for those known issues?
+
+Thx
+YuriW
+
+On Sun, Feb 7, 2016 at 11:28 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Yuri,
+>
+> The hammer branch for v0.94.6 as found at https://github.com/ceph/cep=
+h/commits/hammer has been approved by Greg, Yehuda, Josh and Sam and is=
+ ready for QE. For the record, the head is https://github.com/ceph/ceph=
+/commit/7abb6ae8f3cba67009bd022aaeee0a87cdfc6477 and the details of the=
+ tests run are at http://tracker.ceph.com/issues/13356.
+>
+> Cheers
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
