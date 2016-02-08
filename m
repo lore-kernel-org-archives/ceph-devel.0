@@ -1,73 +1,49 @@
-From: Gaurav Bafna <bafnag@gmail.com>
-Subject: Re: PG States Diagram on Ceph Website is unreadable due to very less resolution
-Date: Mon, 8 Feb 2016 12:27:57 +0530
-Message-ID: <CAPg135amULGFt84v3fE5ULYk4jPZgHCpt3oN7KVt-ddsZfSmuA@mail.gmail.com>
-References: <CAPg135YZaPxaWHVw0hLGuTc-crdPubR76WjTg2Q7sKQU2oi0TA@mail.gmail.com>
-	<56B50A50.7040805@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: hammer v0.94.7 & jewel
+Date: Mon, 8 Feb 2016 14:13:50 +0700
+Message-ID: <56B8402E.60402@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:33980 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751402AbcBHG57 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 01:57:59 -0500
-Received: by mail-wm0-f46.google.com with SMTP id 128so141971838wmz.1
-        for <ceph-devel@vger.kernel.org>; Sun, 07 Feb 2016 22:57:58 -0800 (PST)
-In-Reply-To: <56B50A50.7040805@redhat.com>
+Received: from relay5-d.mail.gandi.net ([217.70.183.197]:57788 "EHLO
+	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752136AbcBHHOI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 02:14:08 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Zafman <dzafman@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Abhishek L <abhishek.lekshmanan@gmail.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Nathan Cutler <ncutler@suse.cz>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi David,
+Dear backporters,
 
-Yeah , it worked :) .
+Hammer v0.94.6 will be published soon and now would be a good time to s=
+tart v0.94.7. I'm willing to participate in this release, either as bac=
+kup or driver. If you'd like to help as well, feel free to update http:=
+//tracker.ceph.com/projects/ceph-releases/wiki/HOWTO#Whos-who with the =
+role that you prefer. The past few weeks have been good (much better th=
+an when the make check bot was down and the test infrastructure in cons=
+truction, that's for sure ;-). Even at normal priority the tests take l=
+ess than a week to complete and often less than 48h, which is really co=
+nfortable. And since we now all have access to the lab, there is nothin=
+g stopping progress!
 
-Thanks a lot for your help.
+In a few weeks jewel will be published and we'll have one more stable r=
+elease to care for. Maybe we could send a call for participation to get=
+ more help ? One or two mentee when the work starts on v0.94.7 would be=
+ ideal. It turns out that Robin had no time for learning the process on=
+ v0.94.6 (although he did numerous patches to improve teuthology and th=
+erefore helped with backports in other ways). And since Firefly is EOL,=
+ Swami did not get a chance either. This is not to say we're in a bad p=
+osition, but I think it's an additional incentive to recruit now.
 
-Thanks
-Gaurav
+What do you think ?
 
-On Sat, Feb 6, 2016 at 2:17 AM, David Zafman <dzafman@redhat.com> wrote:
->
-> Gaurav,
->
-> From git checkout of hammer
->
-> cat src/osd/PG.h src/osd/PG.cc | doc/scripts/gen_state_diagram.py >
-> /tmp/hammer.dot
->
-> I installed "xdot" on my Linux box to view it.
->
-> David
->
->
->
-> On 2/5/16 5:00 AM, Gaurav Bafna wrote:
->>
->> Hi Cephers,
->>
->> The PG State Diagram on Ceph website is of very low resolution (33
->> KB). It is not at all clear . Does anybody has a higher resolution
->> picture of PG States ?
->>
->> Link :
->> http://docs.ceph.com/docs/hammer/_images/graphviz-4358d0071ed1241baaed0a5450debde6eb61e0e3.png
->>
->>
->>
->> Thanks & Regards
->> Gaurav Bafna
->> 9540631400
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
-
-
-
--- 
-Gaurav Bafna
-9540631400
+Cheers
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
