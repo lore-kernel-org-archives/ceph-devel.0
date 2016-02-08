@@ -1,56 +1,67 @@
-From: "Handzik, Joseph" <joseph.t.handzik@hpe.com>
-Subject: RE: [ceph-users] K is for Kraken
-Date: Mon, 8 Feb 2016 19:12:30 +0000
-Message-ID: <2C438B34CAC8264398F5C7AF7411910A75267255@G4W3206.americas.hpqcorp.net>
-References: <alpine.DEB.2.11.1602081333360.8341@cpach.fuggernut.com>
- <20160208190706.GB14128@oak.lan>
- <alpine.DEB.2.11.1602081410190.28396@cpach.fuggernut.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: Dev Meeting followup on compression
+Date: Mon, 8 Feb 2016 20:23:18 +0100
+Message-ID: <CAOi1vP9tGqqMVV+GmF4ikmvLecKkT21HVFWB=0Bnc5WCwoNyYA@mail.gmail.com>
+References: <56B8C37F.9050904@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from g4t3426.houston.hp.com ([15.201.208.54]:6120 "EHLO
-	g4t3426.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753041AbcBHTMc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 14:12:32 -0500
-In-Reply-To: <alpine.DEB.2.11.1602081410190.28396@cpach.fuggernut.com>
-Content-Language: en-US
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:33789 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750982AbcBHTXT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 14:23:19 -0500
+Received: by mail-wm0-f45.google.com with SMTP id g62so146561981wme.0
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Feb 2016 11:23:19 -0800 (PST)
+In-Reply-To: <56B8C37F.9050904@mirantis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Karol Mroz <kmroz@suse.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: Igor Fedotov <ifedotov@mirantis.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Might be a bit of a stretch, but a quick search of "legend" turned up some diving equipment along with the "Legend of the Octopus" (the tradition of throwing octopi on the ice at Detroit Red Wings games).
+On Mon, Feb 8, 2016 at 5:34 PM, Igor Fedotov <ifedotov@mirantis.com> wrote:
+> Guys,
+>
+> let me summarize what we decided regarding compression support in Ceph
+> during the Dev Meeting last week.
+>
+> Below are possible implementation options, their pros/cons and the
+> conclusion.
+>
+> 1) Add compression support to RGW.
+> Pros/Cons:
+> + Simple
+> + Reduced inter-component traffic
+> - Limited to specific clients
+> - Will conflict with partial read/writes if any appear
+>
+> Alyona Kiseleva from Mirantis (akyseleva@mirantis.com) will start
+> implementing this promptly. You can ask additional questions to her via
+> e-mail or during daily RGW stendups she is planning to attend regularly.
+>
+> 2) Add basic compression support to BlueStore. Basic = "Append only"
+> functionality to be implemented. Specific "append only" hint/flag needs to
+> be introduced for object creation interface.
+>
+> Pros/Cons:
+> + Moderate complexity
+> + Suits for any client/PG backend
+> + Good isolation from other Ceph components
+> - Limited applicability
+> - additional 50-200% CPU load for the cluster since we compress each
+> replica/EC shard independently
+> - no inter-component traffic saving
+> - recovery procedure requires decompress/recompress sequence
 
-So...Legend?
+This is for EC pools only, right?  Can you elaborate on this bullet?
 
-Joe
+>
+> Mirantis ( me specifically ) will start blueprint/POC creation for this
+> promptly. I'm planning to attend daily RBD syncup regularly to inform on the
+> progress.
 
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-Sent: Monday, February 8, 2016 1:10 PM
-To: Karol Mroz
-Cc: ceph-devel@vger.kernel.org; ceph-users@ceph.com
-Subject: Re: [ceph-users] K is for Kraken
+Core standup and/or the new EC-overwrite meeting Sam is planning on
+holding is probably a better place for this.
 
-On Mon, 8 Feb 2016, Karol Mroz wrote:
-> On Mon, Feb 08, 2016 at 01:36:57PM -0500, Sage Weil wrote:
-> > I didn't find any other good K names, but I'm not sure anything 
-> > would top kraken anyway, so I didn't look too hard.  :)
-> > 
-> > For L, the options I found were
-> > 
-> > 	luminous (flying squid)
-> > 	longfin (squid)
-> > 	long barrel (squid)
-> > 	liliput (octopus)
-> 
-> Kraken is awesome.
-> 
-> Perhaps we can add 'Loligo' (https://en.wikipedia.org/wiki/Loligo) to the L list?
+Thanks,
 
-Yep!
-
-http://pad.ceph.com/p/l
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+                Ilya
