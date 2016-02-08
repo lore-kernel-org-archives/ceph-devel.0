@@ -1,72 +1,211 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: How to make systemd unit files work in all supported distros?
-Date: Mon, 8 Feb 2016 08:30:37 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1602080829060.28396@cpach.fuggernut.com>
-References: <56B86372.4020600@suse.cz>
+From: Jason Dillaman <dillaman@redhat.com>
+Subject: Re: Reg:. Unable to observe the performance impact of Rbd_Cache
+ parameter.
+Date: Mon, 8 Feb 2016 08:34:50 -0500 (EST)
+Message-ID: <1190701419.20506317.1454938490394.JavaMail.zimbra@redhat.com>
+References: <B22CD36FB1C8D94DB1871AFD0023B0E438D720D5@SSIEXCH-MB3.ssi.samsung.com> <534704547.20063459.1454691257465.JavaMail.zimbra@redhat.com> <B22CD36FB1C8D94DB1871AFD0023B0E438D73402@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54775 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753699AbcBHNaU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 08:30:20 -0500
-In-Reply-To: <56B86372.4020600@suse.cz>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:34378 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753489AbcBHNew (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 08:34:52 -0500
+In-Reply-To: <B22CD36FB1C8D94DB1871AFD0023B0E438D73402@SSIEXCH-MB3.ssi.samsung.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Vish (Vishwanath) Maram-SSI" <vishwanath.m@ssi.samsung.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 8 Feb 2016, Nathan Cutler wrote:
-> In master we currently have an issue with the systemd unit files in that they
-> contain hard-coded paths that are specific to RH/CentOS/Fedora. Other distros
-> can and do have the executables in different places.
-> 
-> I opened a bug[1] for this, but before I go off trying to fix it I would like
-> to solicit your feedback on the following possible approaches I came up with
-> (and/or "turn me on" to a different approach):
-> 
-> (1) Rely on PATH. Basically, instead of running executables directly, run them
-> by "/bin/sh -c", which summons the system PATH to help find the executables.
-> See https://github.com/ceph/ceph/pull/6803 for an example of this.
-> 
-> (2) Set environment variables in /etc/sysconfig/ceph. Systemd has an
-> EnvironmentFile directive which reads environment variables from a file. If
-> this were pointed to /etc/sysconfig/ceph (as it is in several unit files
-> already), we could set the distro-specific parts of the paths there and write
-> the paths similar to how we do it in the spec file.
-> 
-> (3) Generate unit files at build time. In this approach, the unit files would
-> exist in the source tree as templates (e.g. ceph-osd@.service.in) and these
-> would get transformed into the "real" unit files at build time. The
-> ceph-detect-init utility could be used to determine the distro and the
-> Makefile logic would then fill in the templates as needed for the distro.
-> 
-> Of these three approaches, only (3) would seem to be general enough to work
-> nicely for all distros. (For example, EnvironmentFile will need to be set to
-> /etc/default/ceph on Debianesque systems and there is no obvious way to set
-> *this* path as an environment variable.)
+It would not directly affect read performance -- only writes.  These are (user-space) RBD-only configuration parameters, so they would have no effect on the OSDs and MONs, nor krbd.
 
-If (1) isn't enough to get us by, then I agree that (3) seems to be the 
-cleanest.  But autoconf/automake at least should be able to feed these 
-paths into the .in file without needed ceph-detect-init, right?  Which 
-paths are you having problems with?
+-- 
 
-sage
+Jason Dillaman 
 
-
+----- Original Message -----
+> From: "Vish (Vishwanath) Maram-SSI" <vishwanath.m@ssi.samsung.com>
+> To: "Jason Dillaman" <dillaman@redhat.com>
+> Sent: Friday, February 5, 2016 6:11:31 PM
+> Subject: RE: Reg:. Unable to observe the performance impact of Rbd_Cache parameter.
 > 
-> Any thoughts on this? Thanks in advance!
+> Jason,
 > 
-> [1] http://tracker.ceph.com/issues/14687
+> Setting rbd_cache_writethrough_until_flush = true is it going improve read
+> performance as well?
 > 
-> -- 
-> Nathan Cutler
-> Software Engineer Distributed Storage
-> SUSE LINUX, s.r.o.
-> Tel.: +420 284 084 037
+> Also can you let me know if having the below under [global] section will have
+> any impact with regard to OSD and Mon?
+> 
+> [global]
+> ...
+> rbd_cache = true
+> rbd_cache_writethrough_until_flush = false
+> 
+> ...
+> [Client]
+> rbd_cache = true
+> rbd_cache_writethrough_until_flush = false
+> 
+> Would this help in improving performance from both OSD Node and client?
+> 
+> Thanks,
+> -Vish
+> 
+> -----Original Message-----
+> From: Jason Dillaman [mailto:dillaman@redhat.com]
+> Sent: Friday, February 05, 2016 8:54 AM
+> To: Vish (Vishwanath) Maram-SSI
+> Cc: ceph-devel-owner@vger.kernel.org; ceph-devel@vger.kernel.org
+> Subject: Re: Reg:. Unable to observe the performance impact of Rbd_Cache
+> parameter.
+> 
+> Writeback is disabled by default until a flush is encountered.  Try setting
+> "rbd_cache_writethrough_until_flush = false" in your config.
+> 
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
+> Jason Dillaman
+> 
+> 
+> ----- Original Message -----
+> > From: "Vish (Vishwanath) Maram-SSI" <vishwanath.m@ssi.samsung.com>
+> > To: ceph-devel-owner@vger.kernel.org, ceph-devel@vger.kernel.org
+> > Sent: Friday, February 5, 2016 11:36:29 AM
+> > Subject: Reg:. Unable to observe the performance impact of Rbd_Cache
+> > parameter.
+> > 
+> > Hi All,
+> > 
+> > We are trying to experiment with Rbd_Cache parameter and expect it to
+> > improve the performance when run on a "rbdimage" using FIO. Please
+> > find the below
+> > details:
+> > 
+> > 1.	1 OS - CentOS7.2
+> > 2.	CEPH Code - Hammer Version - 0.94.5
+> > 3.	Ceph.conf - Please find below
+> > 4.	rbd -p pool3 bench-write im3 --io-size 4096 --io-threads 256 --io-total
+> > 10240000000 --io-pattern seq
+> > a.	With the above command we were able to observe performance improvement
+> > by
+> > modifying Rbd_Cache (True/False)
+> > 5.	We were expecting that we could observe the same improvement if we run
+> > FIO
+> > directly on the above pool, but we don't observe any difference with
+> > or without Rbd_Cache (True/False)
+> > 
+> > It would be great if someone throw some light.
+> > 
+> > Thanks,
+> > -Vish
+> > 
+> > 
+> > Ceph.conf -
+> > 
+> > 
+> > [global]
+> > fsid = 9eda02e2-04b7-4eed-a85a-8471ea51528d
+> > 
+> > auth_cluster_required = none
+> > auth_service_required = none
+> > auth_client_required = none
+> > #auth_supported = none
+> > cephx sign messages = false
+> > cephx require signatures = false
+> > 
+> > debug_lockdep = 0/0
+> > debug_context = 0/0
+> > debug_crush = 0/0
+> > debug_buffer = 0/0
+> > debug_timer = 0/0
+> > debug_filer = 0/0
+> > debug_objecter = 0/0
+> > debug_rados = 0/0
+> > debug_rbd = 0/0
+> > debug_ms = 0/0
+> > debug_monc = 0/0
+> > debug_tp = 0/0
+> > debug_auth = 0/0
+> > debug_finisher = 0/0
+> > debug_heartbeatmap = 0/0
+> > debug_perfcounter = 0/0
+> > debug_rgw = 0/0
+> > debug_asok = 0/0
+> > debug_throttle = 0/0
+> > 
+> > debug_journaler = 0/0
+> > debug_objectcatcher = 0/0
+> > debug_client = 0/0
+> > debug_osd = 0/0
+> > debug_optracker = 0/0
+> > debug_objclass = 0/0
+> > debug_filestore = 0/0
+> > debug_journal = 0/0
+> > debug_mon = 0/0
+> > debug_paxos = 0/0
+> > 
+> > filestore_xattr_use_omap = true
+> > osd_pool_default_size = 1
+> > osd_pool_default_min_size = 1
+> > osd_pool_default_pg_num = 128
+> > osd_pool_default_pgp_num = 128
+> > 
+> > mon_pg_warn_max_object_skew = 10000
+> > mon_pg_warn_min_per_osd = 0
+> > mon_pg_warn_max_per_osd = 32768
+> > osd_pg_bits = 8
+> > osd_pgp_bits = 8
+> > 
+> > mon_compact_on_trim = false
+> > log_to_syslog = false
+> > log_file = /var/log/ceph/$name.log
+> > perf = true
+> > mutex_perf_counter = true
+> > throttler_perf_counter = false
+> > 
+> > [mon.a]
+> > host = Mon1
+> > mon_addr = 10.10.10.150:6789
+> > mon_max_pool_pg_num = 166496
+> > mon_osd_max_split_count = 10000
+> > 
+> > [osd]
+> > filestore_wbthrottle_enable = false
+> > filestore_queue_max_bytes = 1048576000
+> > 
+> > filestore_queue_committing_max_bytes = 1048576000
+> > filestore_queue_max_ops = 5000 filestore_queue_committing_max_ops =
+> > 5000 filestore_max_sync_interval = 10 filestore_fd_cache_size = 64
+> > filestore_fd_cache_shards = 32 filestore_op_threads = 6
+> > 
+> > osd_op_threads = 32
+> > osd_op_num_shards = 25
+> > osd_op_num_threads_per_shard = 2
+> > osd_enable_op_tracker = false
+> > osd_client_message_size_cap = 0
+> > osd_client_message_cap = 0
+> > objecter_inflight_ops = 102400
+> > objecter_inflight_op_bytes = 1048576000
+> > 
+> > ms_dispatch_throttle_bytes = 1048576000 ms_nocrc = true
+> > throttler_perf_counter = false
+> > 
+> > [osd.0]
+> > host = server2a
+> > public_addr = 10.10.10.154
+> > 
+> > [client]
+> > rbd_cache = true
+> > rbd_cache_writethrough_until_flush = true admin_socket =
+> > /var/run/ceph/$cluster-$type.$id.$pid.$cctid.asok
+> > log_file = /var/log/ceph/
+> > 
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > 
 > 
