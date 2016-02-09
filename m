@@ -1,41 +1,70 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: How to make systemd unit files work in all supported distros?
-Date: Mon, 8 Feb 2016 21:10:55 -0700
-Message-ID: <CALqRxCyG8XsEXf_btKV4RdbHWPzT3sbqk-CQKN=1_9Y4OkwvGw@mail.gmail.com>
-References: <56B86372.4020600@suse.cz>
-	<CALqRxCwzm-SB6j6VRzHzt+eefLbCB5cjuurP1mnHGAZ_Exjy2g@mail.gmail.com>
-	<56B92149.3060905@suse.cz>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Infernalis RGW failure investigation
+Date: Tue, 9 Feb 2016 12:34:04 +0700
+Message-ID: <56B97A4C.2020303@dachary.org>
+References: <56B8110D.8040401@dachary.org> <20160208210218.GC14128@oak.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:36697 "EHLO
-	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756306AbcBIEK4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 23:10:56 -0500
-Received: by mail-wm0-f52.google.com with SMTP id p63so140979111wmp.1
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Feb 2016 20:10:55 -0800 (PST)
-In-Reply-To: <56B92149.3060905@suse.cz>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:46889 "EHLO
+	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750962AbcBIFeM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2016 00:34:12 -0500
+Received: from mfilter22-d.gandi.net (mfilter22-d.gandi.net [217.70.178.150])
+	by relay2-d.mail.gandi.net (Postfix) with ESMTP id BE288C5A54
+	for <ceph-devel@vger.kernel.org>; Tue,  9 Feb 2016 06:34:10 +0100 (CET)
+Received: from relay2-d.mail.gandi.net ([IPv6:::ffff:217.70.183.194])
+	by mfilter22-d.gandi.net (mfilter22-d.gandi.net [::ffff:10.0.15.180]) (amavisd-new, port 10024)
+	with ESMTP id r4Ckwy8ac6yJ for <ceph-devel@vger.kernel.org>;
+	Tue,  9 Feb 2016 06:34:09 +0100 (CET)
+Received: from [10.7.10.93] (node-ar0.pool-118-172.dynamic.totbb.net [118.172.54.108])
+	(Authenticated sender: loic@dachary.org)
+	by relay2-d.mail.gandi.net (Postfix) with ESMTPSA id 8EA25C5A4E
+	for <ceph-devel@vger.kernel.org>; Tue,  9 Feb 2016 06:34:08 +0100 (CET)
+In-Reply-To: <20160208210218.GC14128@oak.lan>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 8, 2016 at 4:14 PM, Nathan Cutler <ncutler@suse.cz> wrote:
-> On 02/08/2016 11:55 PM, Ken Dreyer wrote:
+Hi,
+
+On 09/02/2016 04:02, Karol Mroz wrote:
+> On Mon, Feb 08, 2016 at 10:52:45AM +0700, Loic Dachary wrote:
+>> Dear RGW developers,
 >>
->> Which executables are different? Fedora's pretty flexible about this;
->> I'm sure we could ship ceph-disk in /usr/bin if it lets us align with
->> SUSE or whatever.
->
->
-> Here's another one:
->
-> https://github.com/ceph/ceph/blob/master/systemd/ceph-osd%40.service#L13
->
-> %{_libexecdir} expands to /usr/lib on SUSE :-(
->
-> And "sh -c" would not help us here, either.
+>> We ran into http://tracker.ceph.com/issues/14665 on the infernalis b=
+ranch. It would be great if someone could shed some light on why it hap=
+pens.
+>>
+>=20
+> Hi Loic,
+>=20
+> If this has already been discussed elsewhere, or I'm simply stating t=
+he obvious,
+> my apologies in advance. However, it looks like the rgw socket file _=
+may_ be created
+> with some odd permissions/ownership, relative to the user under which=
+ the test is being
+> run.
+>=20
+> With a recent ceph/master build on my end (I don't have immediate acc=
+ess to an infernalis
+> system), the rgw admin socket is created as ceph:ceph. Running `rados=
+gw-admin` as root
+> then binds fine.
+>=20
+>=20
+> I've added http://tracker.ceph.com/issues/14665#note-3
 
-I see, yeah. Sounds like a .in template is the way to go, then.
+Thanks ! let's continue this discussion in the tracker :-)
 
-- Ken
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
