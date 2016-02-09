@@ -1,93 +1,71 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: FreeBSD crushtool crashing while checking a crushmap
-Date: Tue, 9 Feb 2016 01:13:48 +0100
-Message-ID: <56B92F3C.9070203@digiware.nl>
-References: <56B66FC0.70409@digiware.nl>
- <CAJE9aOOj3kak2p90RUcD8ps+M_j05NwA-KfYGxZyb3-u1zHkYw@mail.gmail.com>
- <CAJE9aONwRb7pfG=K+GdJ1mg8ePd9FQ0iy-fnwWcF7qQ5jarbbQ@mail.gmail.com>
- <56B87576.5010200@digiware.nl>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: apache/fcgi deprecation?
+Date: Mon, 8 Feb 2016 19:30:33 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1602081929450.28396@cpach.fuggernut.com>
+References: <56B42126.7090106@suse.cz> <CALqRxCxtJ5a0xB68kSNP7xr3qcJ-rEr=xP+ByqyusyuOWU2HgQ@mail.gmail.com> <56B91FA8.8080709@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:60374 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:42882 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755839AbcBIAOD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 8 Feb 2016 19:14:03 -0500
-In-Reply-To: <56B87576.5010200@digiware.nl>
+	id S1755589AbcBIAaO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 8 Feb 2016 19:30:14 -0500
+In-Reply-To: <56B91FA8.8080709@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Ken Dreyer <kdreyer@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 8-2-2016 12:01, Willem Jan Withagen wrote:
-> On 8-2-2016 06:53, kefu chai wrote:
->> sorry, just sent an out-dated reply.
->>
->> On Sun, Feb 7, 2016 at 6:12 AM, Willem Jan Withagen <wjw@digiware.nl>
->> wrote:
->>> Hi,
->>>
->>> While running run-cli-tests one of the tests dumps while checking if the
->>> previous command has build the correct crushmap.
->>> I've verified the actual crushmap against one build on CentOS, and they
->>> are byte for byte equal.
->>>
->>> Before I rebased (from beginning of januari) all these tests completed
->>> just fine.
->>>
->>> During checking I get the following dump:
->>>
->>> # src/crushtool -i
->>> src/tes/cli/crushtool/check-overlapped-rules.crushmap.ref --check
->>> Assertion failed: (this->_map.find(inter_val) == this->_map.end()),
->>> function gap_insert, file
->>> /usr/local/include/boost/icl/interval_base_map.hpp, line 555.
->>> *** Caught signal (Abort trap) **
->>>   in thread 803e15000
->>>   ceph version Development (no_version)
->>>   1: 0x86f865 <_ZN4ceph9BackTraceC2Ei+0x35> at
->>> /usr/srcs/Ceph/work/ceph/src/crushtool
->>>   2: 0x86e5f9 <_ZL19handle_fatal_signali+0xa9> at
->>> /usr/srcs/Ceph/work/ceph/src/crushtool
->>>   3: 0x801811c7d <pthread_sigmask+0x50d> at /lib/libthr.so.3
->>>   4: 0x8018112b2 <pthread_getspecific+0xe22> at /lib/libthr.so.3
->>> 2016-02-06 22:55:09.075189 803e15000 -1
->>>
->>> Deleted remainder of the output....
->>>
->>> And I appreciate any pointers in helping me debugging this.
->>
->> hey Willem, thanks for looking into this. turns out this is a known
->> issue of
->> boost 1.55. just posted a pull request to workaround it at
->> https://github.com/ceph/ceph/pull/7560.
->>
->> also did i create a minimal reproducer, it can help with reproducing this
->> issue and verify the fix.
->>
->> you can compile it using:
->>
->> $ clang++ -std=c++11 -O0 -g test.cc -lm -o test
->>
-> 
-> pffh,
-> 
-> That's a relieve, since I would otherwise be quite a chase....
-> and yes, I'm still at boost 1.55.
-> 
-> Perhaps in the test check-overlapped-rules.t an extra test:
->     cmp "$TESTDIR/check-overlapped-rules.crushmap"
-> "$TESTDIR/check-overlapped-rules.crushmap.ref"
-> 
-> Which will at least tell you that the output was consistent with what
-> sould be there.
-> And it'll pin-point the source of the error perhaps a bit better.
-> 
-> Can I just "accept" a pull request in my fork without running into trouble
-> when I rebase?
+Matt, Yehuda-
 
-Not sure if I reported back, but the PULL fixed the issue.
+What do you think?  There are some valid use-cases for wanting apache (or 
+whatever) in front as it gives you access to a bunch of modules.  On the 
+other hand, you can do the same with a proxy.
 
---WjW
+sage
 
+
+On Tue, 9 Feb 2016, Nathan Cutler wrote:
+
+> On 02/08/2016 11:57 PM, Ken Dreyer wrote:
+> > Sure, please do it!
+> > 
+> > I think it's just a matter of no one having time to remove it.
+> 
+> So we could remove the FastCGI dependency from the packaging, too?
+> 
+> > On Thu, Feb 4, 2016 at 9:12 PM, Nathan Cutler <ncutler@suse.cz> wrote:
+> > > I was just browsing the RGW documentation and noticed that parts of it are
+> > > still apache/fcgi-oriented (with no mention of civetweb) even in master.
+> > > 
+> > > My impression was that civetweb is now recommended for RGW deployments as
+> > > it
+> > > is faster. Is that true? And is there a plan to deprecate/drop apache/fcgi
+> > > support, or will it remain indefinitely?
+> > > 
+> > > Would it be a good idea to expunge apache/fcgi from the docs and point
+> > > folks
+> > > to civetweb instead?
+> > > 
+> > > --
+> > > Nathan Cutler
+> > > Software Engineer Distributed Storage
+> > > SUSE LINUX, s.r.o.
+> > > Tel.: +420 284 084 037
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> -- 
+> Nathan Cutler
+> Software Engineer Distributed Storage
+> SUSE LINUX, s.r.o.
+> Tel.: +420 284 084 037
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
