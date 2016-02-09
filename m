@@ -1,63 +1,41 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: hammer branch for v0.94.6 ready for QE
-Date: Tue, 9 Feb 2016 12:38:38 +0700
-Message-ID: <56B97B5E.3080501@dachary.org>
-References: <56B843B7.1070002@dachary.org>
- <CAMMFjmFh9e2dM2ScPL1pj8eDN5k8Ndb7o5dog=-v7xE6gY7Tog@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Jenkins error in running tests ....
+Date: Tue, 9 Feb 2016 10:25:53 +0100
+Message-ID: <56B9B0A1.6090807@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:43487 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751929AbcBIFjW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2016 00:39:22 -0500
-In-Reply-To: <CAMMFjmFh9e2dM2ScPL1pj8eDN5k8Ndb7o5dog=-v7xE6gY7Tog@mail.gmail.com>
+Received: from smtp.digiware.nl ([31.223.170.169]:11323 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753375AbcBIJZ7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 9 Feb 2016 04:25:59 -0500
+Received: from rack1.digiware.nl (unknown [127.0.0.1])
+	by smtp.digiware.nl (Postfix) with ESMTP id 131391534E5
+	for <ceph-devel@vger.kernel.org>; Tue,  9 Feb 2016 10:25:56 +0100 (CET)
+Received: from [IPv6:2001:4cb8:3:1:803c:86a1:8c68:7aa4] (unknown [IPv6:2001:4cb8:3:1:803c:86a1:8c68:7aa4])
+	by smtp.digiware.nl (Postfix) with ESMTP id C3126153401
+	for <ceph-devel@vger.kernel.org>; Tue,  9 Feb 2016 10:25:54 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>
+To: ceph-devel@vger.kernel.org
 
 Hi,
 
-On 09/02/2016 04:21, Yuri Weinstein wrote:
-> Loic
->=20
-> Copy and started testing today, thx
->=20
-> ceph-deploy question - I see that you had failures during integration
-> testing, what is the plan for those known issues?
+https://jenkins.ceph.com/job/ceph-pull-requests/1261/console
 
-Testing ceph-deploy is out of the scope of the stable release team. Hop=
-efully it will be when there is more workforce.
+.......
+PASS: test/osd/osd-scrub-repair.sh
+make[5]: execvp: /bin/sh: Argument list too long
+make[5]: *** [test-suite.log] Error 127
+make[5]: Leaving directory 
+`/home/jenkins-build/build/workspace/ceph-pull-requests/src'
+make[4]: *** [check-TESTS] Error 2
+make[4]: Leaving directory 
+`/home/jenkins-build/build/workspace/ceph-pull-requests/src'
+make[3]: *** [check-am] Error 2	
 
-Cheers
+I'm assuming that it is not something I did in my code.
+But then again I've been proven wrong....
 
->=20
-> Thx
-> YuriW
->=20
-> On Sun, Feb 7, 2016 at 11:28 PM, Loic Dachary <loic@dachary.org> wrot=
-e:
->> Hi Yuri,
->>
->> The hammer branch for v0.94.6 as found at https://github.com/ceph/ce=
-ph/commits/hammer has been approved by Greg, Yehuda, Josh and Sam and i=
-s ready for QE. For the record, the head is https://github.com/ceph/cep=
-h/commit/7abb6ae8f3cba67009bd022aaeee0a87cdfc6477 and the details of th=
-e tests run are at http://tracker.ceph.com/issues/13356.
->>
->> Cheers
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--WjW
