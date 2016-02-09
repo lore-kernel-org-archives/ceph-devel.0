@@ -1,68 +1,61 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: Infernalis RGW failure investigation
-Date: Tue, 9 Feb 2016 12:34:04 +0700
-Message-ID: <56B97A4C.2020303@dachary.org>
-References: <56B8110D.8040401@dachary.org> <20160208210218.GC14128@oak.lan>
+Subject: Re: hammer branch for v0.94.6 ready for QE
+Date: Tue, 9 Feb 2016 12:38:38 +0700
+Message-ID: <56B97B5E.3080501@dachary.org>
+References: <56B843B7.1070002@dachary.org>
+ <CAMMFjmFh9e2dM2ScPL1pj8eDN5k8Ndb7o5dog=-v7xE6gY7Tog@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:46889 "EHLO
-	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750962AbcBIFeM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2016 00:34:12 -0500
-Received: from mfilter22-d.gandi.net (mfilter22-d.gandi.net [217.70.178.150])
-	by relay2-d.mail.gandi.net (Postfix) with ESMTP id BE288C5A54
-	for <ceph-devel@vger.kernel.org>; Tue,  9 Feb 2016 06:34:10 +0100 (CET)
-Received: from relay2-d.mail.gandi.net ([IPv6:::ffff:217.70.183.194])
-	by mfilter22-d.gandi.net (mfilter22-d.gandi.net [::ffff:10.0.15.180]) (amavisd-new, port 10024)
-	with ESMTP id r4Ckwy8ac6yJ for <ceph-devel@vger.kernel.org>;
-	Tue,  9 Feb 2016 06:34:09 +0100 (CET)
-Received: from [10.7.10.93] (node-ar0.pool-118-172.dynamic.totbb.net [118.172.54.108])
-	(Authenticated sender: loic@dachary.org)
-	by relay2-d.mail.gandi.net (Postfix) with ESMTPSA id 8EA25C5A4E
-	for <ceph-devel@vger.kernel.org>; Tue,  9 Feb 2016 06:34:08 +0100 (CET)
-In-Reply-To: <20160208210218.GC14128@oak.lan>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:43487 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751929AbcBIFjW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2016 00:39:22 -0500
+In-Reply-To: <CAMMFjmFh9e2dM2ScPL1pj8eDN5k8Ndb7o5dog=-v7xE6gY7Tog@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>
 
 Hi,
 
-On 09/02/2016 04:02, Karol Mroz wrote:
-> On Mon, Feb 08, 2016 at 10:52:45AM +0700, Loic Dachary wrote:
->> Dear RGW developers,
->>
->> We ran into http://tracker.ceph.com/issues/14665 on the infernalis b=
-ranch. It would be great if someone could shed some light on why it hap=
-pens.
->>
+On 09/02/2016 04:21, Yuri Weinstein wrote:
+> Loic
 >=20
-> Hi Loic,
+> Copy and started testing today, thx
 >=20
-> If this has already been discussed elsewhere, or I'm simply stating t=
-he obvious,
-> my apologies in advance. However, it looks like the rgw socket file _=
-may_ be created
-> with some odd permissions/ownership, relative to the user under which=
- the test is being
-> run.
->=20
-> With a recent ceph/master build on my end (I don't have immediate acc=
-ess to an infernalis
-> system), the rgw admin socket is created as ceph:ceph. Running `rados=
-gw-admin` as root
-> then binds fine.
->=20
->=20
-> I've added http://tracker.ceph.com/issues/14665#note-3
+> ceph-deploy question - I see that you had failures during integration
+> testing, what is the plan for those known issues?
 
-Thanks ! let's continue this discussion in the tracker :-)
+Testing ceph-deploy is out of the scope of the stable release team. Hop=
+efully it will be when there is more workforce.
 
 Cheers
 
+>=20
+> Thx
+> YuriW
+>=20
+> On Sun, Feb 7, 2016 at 11:28 PM, Loic Dachary <loic@dachary.org> wrot=
+e:
+>> Hi Yuri,
+>>
+>> The hammer branch for v0.94.6 as found at https://github.com/ceph/ce=
+ph/commits/hammer has been approved by Greg, Yehuda, Josh and Sam and i=
+s ready for QE. For the record, the head is https://github.com/ceph/cep=
+h/commit/7abb6ae8f3cba67009bd022aaeee0a87cdfc6477 and the details of th=
+e tests run are at http://tracker.ceph.com/issues/13356.
+>>
+>> Cheers
+>>
+>> --
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>
+>=20
+
 --=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
