@@ -1,90 +1,114 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: apache/fcgi deprecation?
-Date: Mon, 8 Feb 2016 17:16:05 -0800
-Message-ID: <CADRKj5SJSxNsZNgKOi-Q497JMAfA=GbBZ_FT_vxV9iD1Bhcv2g@mail.gmail.com>
-References: <56B42126.7090106@suse.cz>
-	<CALqRxCxtJ5a0xB68kSNP7xr3qcJ-rEr=xP+ByqyusyuOWU2HgQ@mail.gmail.com>
-	<56B91FA8.8080709@suse.cz>
-	<alpine.DEB.2.11.1602081929450.28396@cpach.fuggernut.com>
+From: Jason Dillaman <dillaman@redhat.com>
+Subject: Re: Prevent rbd mapping/mounting on multiple hosts workaround
+Date: Mon, 8 Feb 2016 20:25:49 -0500 (EST)
+Message-ID: <548678370.20789680.1454981149809.JavaMail.zimbra@redhat.com>
+References: <CAAVaRixeAPiyK2Xx1=nXAZBD=8ckctgFV=6Ag2EyTsAGhPrPUw@mail.gmail.com> <CAAVaRixPMWYibHFmmZmVgYB3RjPWaO2-gEhoyTnCHpBkkZjbgQ@mail.gmail.com> <CAJ4mKGb4x3Wn=hK_qz_p-fkWxcjQSJnotX=mz4pfM-DyPCQxZw@mail.gmail.com> <913505319.20723124.1454964252136.JavaMail.zimbra@redhat.com> <CAEhqmjLL8et0OPVVwHiCVqnuxpPj8VyjojS0OBgraOr0i0_gHA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f171.google.com ([209.85.214.171]:34786 "EHLO
-	mail-ob0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964804AbcBIBQG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 20:16:06 -0500
-Received: by mail-ob0-f171.google.com with SMTP id wb13so175447547obb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Feb 2016 17:16:05 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1602081929450.28396@cpach.fuggernut.com>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:59302 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932520AbcBIBZx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Feb 2016 20:25:53 -0500
+In-Reply-To: <CAEhqmjLL8et0OPVVwHiCVqnuxpPj8VyjojS0OBgraOr0i0_gHA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Nathan Cutler <ncutler@suse.cz>, Ken Dreyer <kdreyer@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Bill Sanders <billysanders@gmail.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Mauricio Garavaglia <mauricio@medallia.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Right, apache can be used as a proxy. In any case, my understanding is
-that it's not a dependency, but we'll still have the ability to
-install it (mod-proxy-fcgi) if needed (correct me if I'm wrong here).
-There aren't any current plans that I know of to remove the rgw fcgi
-frontend.
+Yes, and 100% concur that this needs to be optional -- plenty of valid use-cases where the device is mapped concurrently.
 
-Yehuda
+Thanks,
+Jason Dillaman 
 
 
-On Mon, Feb 8, 2016 at 4:30 PM, Sage Weil <sweil@redhat.com> wrote:
-> Matt, Yehuda-
->
-> What do you think?  There are some valid use-cases for wanting apache (or
-> whatever) in front as it gives you access to a bunch of modules.  On the
-> other hand, you can do the same with a proxy.
->
-> sage
->
->
-> On Tue, 9 Feb 2016, Nathan Cutler wrote:
->
->> On 02/08/2016 11:57 PM, Ken Dreyer wrote:
->> > Sure, please do it!
->> >
->> > I think it's just a matter of no one having time to remove it.
->>
->> So we could remove the FastCGI dependency from the packaging, too?
->>
->> > On Thu, Feb 4, 2016 at 9:12 PM, Nathan Cutler <ncutler@suse.cz> wrote:
->> > > I was just browsing the RGW documentation and noticed that parts of it are
->> > > still apache/fcgi-oriented (with no mention of civetweb) even in master.
->> > >
->> > > My impression was that civetweb is now recommended for RGW deployments as
->> > > it
->> > > is faster. Is that true? And is there a plan to deprecate/drop apache/fcgi
->> > > support, or will it remain indefinitely?
->> > >
->> > > Would it be a good idea to expunge apache/fcgi from the docs and point
->> > > folks
->> > > to civetweb instead?
->> > >
->> > > --
->> > > Nathan Cutler
->> > > Software Engineer Distributed Storage
->> > > SUSE LINUX, s.r.o.
->> > > Tel.: +420 284 084 037
->> > > --
->> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > > the body of a message to majordomo@vger.kernel.org
->> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->> --
->> Nathan Cutler
->> Software Engineer Distributed Storage
->> SUSE LINUX, s.r.o.
->> Tel.: +420 284 084 037
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+----- Original Message -----
+> From: "Bill Sanders" <billysanders@gmail.com>
+> To: "Jason Dillaman" <dillaman@redhat.com>
+> Cc: "Gregory Farnum" <gfarnum@redhat.com>, "Mauricio Garavaglia" <mauricio@medallia.com>, "ceph-devel"
+> <ceph-devel@vger.kernel.org>
+> Sent: Monday, February 8, 2016 5:41:37 PM
+> Subject: Re: Prevent rbd mapping/mounting on multiple hosts workaround
+> 
+> So the idea here to prevent multiple hosts from mapping the same RBD
+> image simultaneously?  If so, please do try to keep it optional (even
+> if it's the default)... I'm not sure who else might, but Teradata
+> relies on this functionality. :)
+> 
+> Thanks,
+> Bill
+> 
+> On Mon, Feb 8, 2016 at 12:44 PM, Jason Dillaman <dillaman@redhat.com> wrote:
+> > Within librbd there is support for blacklisting clients before stealing the
+> > exclusive lock.  I don't remember any such enhancement to the rbd CLI's
+> > map command.  In general it sounds like a good feature request.  The
+> > automatic unblacklist on reboot would be outside the scope of any rbd CLI
+> > change.  I added a new tracker ticket for the feature request.
+> >
+> > [1] http://tracker.ceph.com/issues/14700
+> >
+> > --
+> >
+> > Jason Dillaman
+> >
+> >
+> > ----- Original Message -----
+> >> From: "Gregory Farnum" <gfarnum@redhat.com>
+> >> To: "Mauricio Garavaglia" <mauricio@medallia.com>, "Jason Dillaman"
+> >> <dillaman@redhat.com>
+> >> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+> >> Sent: Monday, February 8, 2016 10:41:40 AM
+> >> Subject: Re: Prevent rbd mapping/mounting on multiple hosts workaround
+> >>
+> >> On Fri, Feb 5, 2016 at 6:24 AM, Mauricio Garavaglia
+> >> <mauricio@medallia.com> wrote:
+> >> > Hello,
+> >> >
+> >> > In the January Tech Talk (PostgreSQL on Ceph under Mesos/Aurora with
+> >> > Docker [https://youtu.be/OqlC7S3cUKs]) we presented a challenge we are
+> >> > facing at Medallia when running databases on ceph under
+> >> > mesos/aurora/docker; which is related to prevent mapping/mounting the
+> >> > same rbd image in two hosts at the same time during network
+> >> > partitions.
+> >> >
+> >> > As a workaround it was mentioned that we are wrapping rbd in a shell
+> >> > script that executes extra logic around certain operations:
+> >> >
+> >> > - On Map; rbd lock add <image>
+> >> >         - If no success; then
+> >> >                 - "rbd status <image>": check for Watchers, 3 times each
+> >> >                 15
+> >> >                 secs
+> >> >                         - If found, ABORT the mapping. The image is
+> >> > still in use in a host that is healthy
+> >> >                 - "ceph osd blacklist add <previous lock holder>".
+> >> > Image locked without a watcher
+> >> >                 - steal the lock in <image>
+> >> >         - map the image
+> >> >
+> >> > - On Unmap;
+> >> >         - rbd lock remove
+> >> >
+> >> > - On reboot of server;
+> >> >         - "ceph osd blacklist rm <self>"
+> >> >
+> >> > I was wondering if this mechanism could be incorporated as part of the
+> >> > rbd CLI, of course controlled by an option during map. We'll be happy
+> >> > to work on it, but want to check the feasibility of having the patch
+> >> > accepted.
+> >>
+> >> I actually thought we had a disable-by-default config option in later
+> >> releases that grab the locks before allowing a mount, but now I can't
+> >> find it. Jason?
+> >> -Greg
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
