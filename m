@@ -1,80 +1,80 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Dev Meeting followup on compression
-Date: Tue, 9 Feb 2016 16:24:49 +0300
-Message-ID: <56B9E8A1.5010805@mirantis.com>
-References: <56B8C37F.9050904@mirantis.com>
- <CAOi1vP9tGqqMVV+GmF4ikmvLecKkT21HVFWB=0Bnc5WCwoNyYA@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: RBD image usage with librbd (rbd du)
+Date: Tue, 9 Feb 2016 16:10:48 +0100 (CET)
+Message-ID: <1733706853.3038.c431756f-cd7a-42e0-b485-4e1bed922f21.open-xchange@ox.pcextreme.nl>
+References: <1015683166.2791.c431756f-cd7a-42e0-b485-4e1bed922f21.open-xchange@ox.pcextreme.nl>
+ <537222148.20525326.1454939052122.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f41.google.com ([209.85.215.41]:35221 "EHLO
-	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753446AbcBINYw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2016 08:24:52 -0500
-Received: by mail-lf0-f41.google.com with SMTP id l143so115384611lfe.2
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Feb 2016 05:24:51 -0800 (PST)
-In-Reply-To: <CAOi1vP9tGqqMVV+GmF4ikmvLecKkT21HVFWB=0Bnc5WCwoNyYA@mail.gmail.com>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:35712 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753107AbcBIPKv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2016 10:10:51 -0500
+In-Reply-To: <537222148.20525326.1454939052122.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
+To: Jason Dillaman <dillaman@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Ilya,
 
-please find my comments inline.
+> Op 8 februari 2016 om 14:44 schreef Jason Dillaman <dillaman@redhat.com>:
+> 
+> 
+> The 'rbd du' utility actually just performs a diff operation on the image [1].
+>  If the image doesn't have the _FAST_DIFF feature enabled, this operation will
+> require scanning all potential objects in the RBD image.
+> 
 
-On 08.02.2016 22:23, Ilya Dryomov wrote:
-> On Mon, Feb 8, 2016 at 5:34 PM, Igor Fedotov <ifedotov@mirantis.com> wrote:
->> Guys,
->>
->> let me summarize what we decided regarding compression support in Ceph
->> during the Dev Meeting last week.
->>
->> Below are possible implementation options, their pros/cons and the
->> conclusion.
->>
->> 1) Add compression support to RGW.
->> Pros/Cons:
->> + Simple
->> + Reduced inter-component traffic
->> - Limited to specific clients
->> - Will conflict with partial read/writes if any appear
->>
->> Alyona Kiseleva from Mirantis (akyseleva@mirantis.com) will start
->> implementing this promptly. You can ask additional questions to her via
->> e-mail or during daily RGW stendups she is planning to attend regularly.
->>
->> 2) Add basic compression support to BlueStore. Basic = "Append only"
->> functionality to be implemented. Specific "append only" hint/flag needs to
->> be introduced for object creation interface.
->>
->> Pros/Cons:
->> + Moderate complexity
->> + Suits for any client/PG backend
->> + Good isolation from other Ceph components
->> - Limited applicability
->> - additional 50-200% CPU load for the cluster since we compress each
->> replica/EC shard independently
->> - no inter-component traffic saving
->> - recovery procedure requires decompress/recompress sequence
-> This is for EC pools only, right?  Can you elaborate on this bullet?
-That's for any pool type. When compression takes place at object store 
-level and recovery is performed at OSD(PGBackend instance) you need to 
-retrieve an object replica from the store ( and hence decompress it ) 
-and subsequently compress it back when saving at a new store .
-Contrary having compress/decompress at PGBackend allows to bypass such 
-decompress/compress overhead.
+Thanks! How does this look:
+https://github.com/wido/libvirt/commit/16817a46b6948bd97968712d4865299da54b4fff
 
->> Mirantis ( me specifically ) will start blueprint/POC creation for this
->> promptly. I'm planning to attend daily RBD syncup regularly to inform on the
->> progress.
-> Core standup and/or the new EC-overwrite meeting Sam is planning on
-> holding is probably a better place for this.
-Where can I find a schedule for these meetings?
+If all good I'll send it to libvirt upstream.
 
-> Thanks,
->
->                  Ilya
-Regards,
-Igor
+Wido
+
+> [1]
+> https://github.com/ceph/ceph/blob/master/src/tools/rbd/action/DiskUsage.cc#L58
+> 
+> -- 
+> 
+> Jason Dillaman 
+> 
+> 
+> ----- Original Message -----
+> > From: "Wido den Hollander" <wido@42on.com>
+> > To: "ceph-devel" <ceph-devel@vger.kernel.org>
+> > Sent: Saturday, February 6, 2016 2:57:23 AM
+> > Subject: RBD image usage with librbd (rbd du)
+> > 
+> > Hi,
+> > 
+> > I'm working on libvirt again and for volumes libvirt has a 'capacity' and
+> > 'allocation'.
+> > 
+> > Until recently both were set to the size of the RBD image since it was not
+> > possible to fetch the allocation of a image.
+> > 
+> > We now have 'rbd du' and this uses a librbd call to fetch the real usage of
+> > a
+> > image.
+> > 
+> > What is the best way to fetch the 'allocation' of a RBD image using librbd
+> > (C)?
+> > rbd_stat() won't tell and looking through librbd.h I don't know which
+> > function
+> > to use.
+> > 
+> > Thanks,
+> > 
+> > Wido
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
