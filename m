@@ -1,74 +1,28 @@
-From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Subject: RE: G++ internal compiler error
-Date: Wed, 10 Feb 2016 00:51:55 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C0561C1808@SSIEXCH-MB3.ssi.samsung.com>
-References: <99767EA2E27DD44DB4E9F9B9ACA458C0561C17D6@SSIEXCH-MB3.ssi.samsung.com>
- <BN1PR02MB05598CD4C9C59FC429B0B40F4D70@BN1PR02MB055.namprd02.prod.outlook.com>
+From: fu.zhongjun@execs.com
+Subject: Good day!
+Date: Tue, 09 Feb 2016 21:43:26 +0100
+Message-ID: <20160209204354.B1D2B14E016@ampsrv1.comunidad-ameripol.org>
+Reply-To: fuzhong348@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:38690 "EHLO
-	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753107AbcBJAv5 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2016 19:51:57 -0500
-In-Reply-To: <BN1PR02MB05598CD4C9C59FC429B0B40F4D70@BN1PR02MB055.namprd02.prod.outlook.com>
-Content-Language: en-US
+Received: from Static-IP-181569120.cable.net.co ([181.56.9.120]:47018 "EHLO
+	ampsrv1.comunidad-ameripol.org" rhost-flags-OK-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1756126AbcBJBjP convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 9 Feb 2016 20:39:15 -0500
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Recipients <fu.zhongjun@execs.com>
 
-Thanks . After adding more memory, problem was solved.  
-Regards,
-James
+Good day,
 
------Original Message-----
-From: Somnath Roy [mailto:Somnath.Roy@sandisk.com] 
-Sent: Tuesday, February 09, 2016 4:19 PM
-To: James (Fei) Liu-SSI; ceph-devel@vger.kernel.org
-Subject: RE: G++ internal compiler error
+I need a foreign partner for a proposed mutual business, which refers to the transfer of a large sum of money to an account abroad, as the beneficiary of the funds. Everything about this operation, will be legally done without any bridge financial authority, both in my country and yours.I wil indulge you exercise the utmost discretion in all matters concerning this issue. If you are interested, please reply back through my private email address written down, I'll give you more information about myself with the financial institution I represented and the actual amounts involved about the project so I receive your positive response.
 
-Hope you have enough memory in the build system..
+Private E-mail: fu.zhong@fuzhongjun.net
 
-Thanks & Regards
-Somnath
+Friendly greeting,
 
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of James (Fei) Liu-SSI
-Sent: Tuesday, February 09, 2016 4:10 PM
-To: ceph-devel@vger.kernel.org
-Subject: FW: G++ internal compiler error
-
-
-Hi All,
- Compiler errors against Ceph master. Any clues?
- Here is my g++ version :
- g++ (Ubuntu 4.8.4-2ubuntu1~14.04) 4.8.4  Copyright (C) 2013 Free Software Foundation, Inc.
- This is free software; see the source for copying conditions.  There is NO  warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-
-Errors output:
-CXX      mon/MonCap.lo
-  CXX      mon/MonClient.lo
-  CXX      mon/MonMap.lo
-  CXX      osd/OSDMap.lo
-  CXX      osd/osd_types.lo
-g++: internal compiler error: Killed (program cc1plus)
-Please submit a full bug report,
-with preprocessed source if appropriate.
-See <file:///usr/share/doc/gcc-4.8/README.Bugs> for instructions.
-make[3]: *** [mon/MonCap.lo] Error 1
-make[3]: *** Waiting for unfinished jobs....
-make[3]: Leaving directory `/home/jamesliu/WorkSpace/omni_ceph/src'
-make[2]: *** [all-recursive] Error 1
-make[2]: Leaving directory `/home/jamesliu/WorkSpace/omni_ceph/src'
-make[1]: *** [all] Error 2
-make[1]: Leaving directory `/home/jamesliu/WorkSpace/omni_ceph/src'
-make: *** [all-recursive] Error 1
-
-
-Regards,
-James
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+Executive director.
