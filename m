@@ -1,126 +1,80 @@
-From: Ferhat Ozkasgarli <ozkasgarli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: K is for Kraken
-Date: Tue, 9 Feb 2016 14:26:33 +0200
-Message-ID: <CADWq11ZNgtS52Ucaf0Q3A7ZNpNqRWOeUx09RPwfDyMLsv0wJoA@mail.gmail.com>
-References: <alpine.DEB.2.11.1602081333360.8341@cpach.fuggernut.com>
-	<20160208190706.GB14128@oak.lan>
-	<alpine.DEB.2.11.1602081410190.28396@cpach.fuggernut.com>
-	<CABZ+qqkQ0AFpDB0ohxqw3YRPXwmt9suYnGOqMQ8-5bzHMZ-_VQ@mail.gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Dev Meeting followup on compression
+Date: Tue, 9 Feb 2016 16:24:49 +0300
+Message-ID: <56B9E8A1.5010805@mirantis.com>
+References: <56B8C37F.9050904@mirantis.com>
+ <CAOi1vP9tGqqMVV+GmF4ikmvLecKkT21HVFWB=0Bnc5WCwoNyYA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0932298401=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CABZ+qqkQ0AFpDB0ohxqw3YRPXwmt9suYnGOqMQ8-5bzHMZ-_VQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
---===============0932298401==
-Content-Type: multipart/alternative; boundary=001a114b157a8d9651052b556dfa
-
---001a114b157a8d9651052b556dfa
-Content-Type: text/plain; charset=UTF-8
-
-Release the Kraken! (Please...)
-On Feb 9, 2016 1:05 PM, "Dan van der Ster" <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org> wrote:
-
-> On Mon, Feb 8, 2016 at 8:10 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> > On Mon, 8 Feb 2016, Karol Mroz wrote:
-> >> On Mon, Feb 08, 2016 at 01:36:57PM -0500, Sage Weil wrote:
-> >> > I didn't find any other good K names, but I'm not sure anything would
-> top
-> >> > kraken anyway, so I didn't look too hard.  :)
-> >> >
-> >> > For L, the options I found were
-> >> >
-> >> >     luminous (flying squid)
-> >> >     longfin (squid)
-> >> >     long barrel (squid)
-> >> >     liliput (octopus)
-> >>
-> >> Kraken is awesome.
-> >>
-> >> Perhaps we can add 'Loligo' (https://en.wikipedia.org/wiki/Loligo) to
-> the L list?
-> >
-> > Yep!
-> >
-> > http://pad.ceph.com/p/l
->
-> I took the liberty of adding L'Octopus, our 8 legged French friend.
->
-> .. Dan (re-sent due to Gmail suckiness)
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
---001a114b157a8d9651052b556dfa
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<p dir=3D"ltr">Release the Kraken! (Please...)</p>
-<div class=3D"gmail_quote">On Feb 9, 2016 1:05 PM, &quot;Dan van der Ster&q=
-uot; &lt;<a href=3D"mailto:dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org">dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org</a>&gt; w=
-rote:<br type=3D"attribution"><blockquote class=3D"gmail_quote" style=3D"ma=
-rgin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">On Mon, Feb 8,=
- 2016 at 8:10 PM, Sage Weil &lt;<a href=3D"mailto:sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">sweil@r=
-edhat.com</a>&gt; wrote:<br>
-&gt; On Mon, 8 Feb 2016, Karol Mroz wrote:<br>
-&gt;&gt; On Mon, Feb 08, 2016 at 01:36:57PM -0500, Sage Weil wrote:<br>
-&gt;&gt; &gt; I didn&#39;t find any other good K names, but I&#39;m not sur=
-e anything would top<br>
-&gt;&gt; &gt; kraken anyway, so I didn&#39;t look too hard.=C2=A0 :)<br>
-&gt;&gt; &gt;<br>
-&gt;&gt; &gt; For L, the options I found were<br>
-&gt;&gt; &gt;<br>
-&gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0luminous (flying squid)<br>
-&gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0longfin (squid)<br>
-&gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0long barrel (squid)<br>
-&gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0liliput (octopus)<br>
-&gt;&gt;<br>
-&gt;&gt; Kraken is awesome.<br>
-&gt;&gt;<br>
-&gt;&gt; Perhaps we can add &#39;Loligo&#39; (<a href=3D"https://en.wikiped=
-ia.org/wiki/Loligo" rel=3D"noreferrer" target=3D"_blank">https://en.wikiped=
-ia.org/wiki/Loligo</a>) to the L list?<br>
-&gt;<br>
-&gt; Yep!<br>
-&gt;<br>
-&gt; <a href=3D"http://pad.ceph.com/p/l" rel=3D"noreferrer" target=3D"_blan=
-k">http://pad.ceph.com/p/l</a><br>
-<br>
-I took the liberty of adding L&#39;Octopus, our 8 legged French friend.<br>
-<br>
-.. Dan (re-sent due to Gmail suckiness)<br>
-_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
-br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
-oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
-ceph.com</a><br>
-</blockquote></div>
-
---001a114b157a8d9651052b556dfa--
-
---===============0932298401==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lf0-f41.google.com ([209.85.215.41]:35221 "EHLO
+	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753446AbcBINYw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Feb 2016 08:24:52 -0500
+Received: by mail-lf0-f41.google.com with SMTP id l143so115384611lfe.2
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Feb 2016 05:24:51 -0800 (PST)
+In-Reply-To: <CAOi1vP9tGqqMVV+GmF4ikmvLecKkT21HVFWB=0Bnc5WCwoNyYA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Ilya,
 
---===============0932298401==--
+please find my comments inline.
+
+On 08.02.2016 22:23, Ilya Dryomov wrote:
+> On Mon, Feb 8, 2016 at 5:34 PM, Igor Fedotov <ifedotov@mirantis.com> wrote:
+>> Guys,
+>>
+>> let me summarize what we decided regarding compression support in Ceph
+>> during the Dev Meeting last week.
+>>
+>> Below are possible implementation options, their pros/cons and the
+>> conclusion.
+>>
+>> 1) Add compression support to RGW.
+>> Pros/Cons:
+>> + Simple
+>> + Reduced inter-component traffic
+>> - Limited to specific clients
+>> - Will conflict with partial read/writes if any appear
+>>
+>> Alyona Kiseleva from Mirantis (akyseleva@mirantis.com) will start
+>> implementing this promptly. You can ask additional questions to her via
+>> e-mail or during daily RGW stendups she is planning to attend regularly.
+>>
+>> 2) Add basic compression support to BlueStore. Basic = "Append only"
+>> functionality to be implemented. Specific "append only" hint/flag needs to
+>> be introduced for object creation interface.
+>>
+>> Pros/Cons:
+>> + Moderate complexity
+>> + Suits for any client/PG backend
+>> + Good isolation from other Ceph components
+>> - Limited applicability
+>> - additional 50-200% CPU load for the cluster since we compress each
+>> replica/EC shard independently
+>> - no inter-component traffic saving
+>> - recovery procedure requires decompress/recompress sequence
+> This is for EC pools only, right?  Can you elaborate on this bullet?
+That's for any pool type. When compression takes place at object store 
+level and recovery is performed at OSD(PGBackend instance) you need to 
+retrieve an object replica from the store ( and hence decompress it ) 
+and subsequently compress it back when saving at a new store .
+Contrary having compress/decompress at PGBackend allows to bypass such 
+decompress/compress overhead.
+
+>> Mirantis ( me specifically ) will start blueprint/POC creation for this
+>> promptly. I'm planning to attend daily RBD syncup regularly to inform on the
+>> progress.
+> Core standup and/or the new EC-overwrite meeting Sam is planning on
+> holding is probably a better place for this.
+Where can I find a schedule for these meetings?
+
+> Thanks,
+>
+>                  Ilya
+Regards,
+Igor
