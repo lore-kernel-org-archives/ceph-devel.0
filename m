@@ -1,33 +1,45 @@
-From: Anton Protopopov <a.s.protopopov@gmail.com>
-Subject: [PATCH] ceph: fix a wrong comparison
-Date: Wed, 10 Feb 2016 12:38:03 -0500
-Message-ID: <1455125883-27735-1-git-send-email-a.s.protopopov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Anton Protopopov <a.s.protopopov@gmail.com>
-List-Id: ceph-devel.vger.kernel.org
+From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Subject: RE: NVMEDevice.cc fails to build
+Date: Wed, 10 Feb 2016 18:42:41 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C0561C1A18@SSIEXCH-MB3.ssi.samsung.com>
+References: <CAJE9aOPODHBXtUJfxY9YF6s5-0=yJey3BBm=gYJds5v-e8+yPw@mail.gmail.com>
+ <CACJqLya53aoZcEO9=cxHPZRd94ernO+4aLekaeHAf7mbBVVFew@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:38302 "EHLO
+	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753056AbcBJSmp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 13:42:45 -0500
+In-Reply-To: <CACJqLya53aoZcEO9=cxHPZRd94ernO+4aLekaeHAf7mbBVVFew@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Haomai Wang <haomai@xsky.com>, kefu chai <tchaikov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "haomai@xsky.org" <haomai@xsky.org>
 
-A negative value rc compared to the positive value ENOENT in the
-finish_read() function.
-
-Signed-off-by: Anton Protopopov <a.s.protopopov@gmail.com>
----
- fs/ceph/addr.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index c222137..1b809c9 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -276,7 +276,7 @@ static void finish_read(struct ceph_osd_request *req, struct ceph_msg *msg)
- 	for (i = 0; i < num_pages; i++) {
- 		struct page *page = osd_data->pages[i];
- 
--		if (rc < 0 && rc != ENOENT)
-+		if (rc < 0 && rc != -ENOENT)
- 			goto unlock;
- 		if (bytes < (int)PAGE_CACHE_SIZE) {
- 			/* zero (remainder of) page */
--- 
-2.6.5
+SGkgSGFvbWFpIGFuZCBLZWZ1LA0KICBJIGdvdCBzYW1lIGlzc3VlcyB3aGVuIEkgdHJpZWQgdG8g
+Y29tcGlsZSB0aGUgc3Bkay4gSXQgdHVybnMgb3V0IHRoYXQgeW91IG5lZWQgdG8gc2V0dXAgdGhl
+IERQREsgcGF0aCBpbiB0aGUgY29uZmlndXJlLmFjIGFuZCBwdXQgdGhlIHNwZGsgaGVhZGVyIGZp
+bGUgaW50byAvdXNyL2luY2x1ZGUuKEkgdHJpZWQgdG8gc2V0dXAgdGhlIFBBVEggYnV0IHdvbid0
+IHdvcmspLg0KDQogIFJlZ2FyZHMsDQogIEphbWVzDQoNCiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
+LS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBo
+LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQpT
+ZW50OiBXZWRuZXNkYXksIEZlYnJ1YXJ5IDEwLCAyMDE2IDU6MDggQU0NClRvOiBrZWZ1IGNoYWkN
+CkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgaGFvbWFpQHhza3kub3JnDQpTdWJqZWN0
+OiBSZTogTlZNRURldmljZS5jYyBmYWlscyB0byBidWlsZA0KDQpzdXJlLCBJIGhhZCBhIGxvY2Fs
+IGJyYW5jaCB3aGljaCBoYXMgYSByZWZhY3RvciBhZnRlciB2YWNhdGlvbi4NCg0KT24gV2VkLCBG
+ZWIgMTAsIDIwMTYgYXQgODowNyBQTSwga2VmdSBjaGFpIDx0Y2hhaWtvdkBnbWFpbC5jb20+IHdy
+b3RlOg0KPiBoaSBoYW9tYWksDQo+DQo+IHRoZSBidWlsZCBXSVRIX1NQREsgZmFpbHMgYWZ0ZXIN
+Cj4gYmQ2OTRkNGE2ZDYzNjdjMjljMTkzNWM5MDZmZTgwNTlkZDEzNjhkYyBhbmQgDQo+IGI2MjMx
+OGVhMTZkNTgzMGJiMmIyM2IxYTk1Y2EzOWE1MzEwZmFjMzQsIGNvdWxkIHlvdSB1cGRhdGUgdGhl
+IA0KPiBOVk1FRGV2aWNlcyBhY2NvcmRpbmdseT8NCj4NCj4gdGhhbmtzLA0KPg0KPiAtLQ0KPiBS
+ZWdhcmRzDQo+IEtlZnUgQ2hhaQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlz
+dDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5
+IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21v
+IA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwN
+Ci0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
+Y3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
+Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVs
+Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
