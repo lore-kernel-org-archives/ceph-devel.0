@@ -1,106 +1,28 @@
 From: kefu chai <tchaikov@gmail.com>
-Subject: Re: FreeBSD crushtool crashing while checking a crushmap
-Date: Wed, 10 Feb 2016 20:13:27 +0800
-Message-ID: <CAJE9aOMDdHBm6qKbZeWn6ySAdeH92EkbM0+z5ZxemowOo2irFA@mail.gmail.com>
-References: <56B66FC0.70409@digiware.nl>
-	<CAJE9aOOj3kak2p90RUcD8ps+M_j05NwA-KfYGxZyb3-u1zHkYw@mail.gmail.com>
-	<CAJE9aONwRb7pfG=K+GdJ1mg8ePd9FQ0iy-fnwWcF7qQ5jarbbQ@mail.gmail.com>
-	<56B87576.5010200@digiware.nl>
+Subject: NVMEDevice.cc fails to build
+Date: Wed, 10 Feb 2016 20:07:51 +0800
+Message-ID: <CAJE9aOPODHBXtUJfxY9YF6s5-0=yJey3BBm=gYJds5v-e8+yPw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f182.google.com ([209.85.161.182]:34313 "EHLO
-	mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750713AbcBJMN3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 07:13:29 -0500
-Received: by mail-yw0-f182.google.com with SMTP id h129so12395551ywb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 04:13:27 -0800 (PST)
-In-Reply-To: <56B87576.5010200@digiware.nl>
+Received: from mail-yw0-f173.google.com ([209.85.161.173]:35137 "EHLO
+	mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750713AbcBJMNi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 07:13:38 -0500
+Received: by mail-yw0-f173.google.com with SMTP id g127so12335914ywf.2
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 04:13:38 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, haomai@xsky.org
 
-On Mon, Feb 8, 2016 at 7:01 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
-> On 8-2-2016 06:53, kefu chai wrote:
->>
->> sorry, just sent an out-dated reply.
->>
->> On Sun, Feb 7, 2016 at 6:12 AM, Willem Jan Withagen <wjw@digiware.nl>
->> wrote:
->>>
->>> Hi,
->>>
->>> While running run-cli-tests one of the tests dumps while checking if the
->>> previous command has build the correct crushmap.
->>> I've verified the actual crushmap against one build on CentOS, and they
->>> are byte for byte equal.
->>>
->>> Before I rebased (from beginning of januari) all these tests completed
->>> just fine.
->>>
->>> During checking I get the following dump:
->>>
->>> # src/crushtool -i
->>> src/tes/cli/crushtool/check-overlapped-rules.crushmap.ref --check
->>> Assertion failed: (this->_map.find(inter_val) == this->_map.end()),
->>> function gap_insert, file
->>> /usr/local/include/boost/icl/interval_base_map.hpp, line 555.
->>> *** Caught signal (Abort trap) **
->>>   in thread 803e15000
->>>   ceph version Development (no_version)
->>>   1: 0x86f865 <_ZN4ceph9BackTraceC2Ei+0x35> at
->>> /usr/srcs/Ceph/work/ceph/src/crushtool
->>>   2: 0x86e5f9 <_ZL19handle_fatal_signali+0xa9> at
->>> /usr/srcs/Ceph/work/ceph/src/crushtool
->>>   3: 0x801811c7d <pthread_sigmask+0x50d> at /lib/libthr.so.3
->>>   4: 0x8018112b2 <pthread_getspecific+0xe22> at /lib/libthr.so.3
->>> 2016-02-06 22:55:09.075189 803e15000 -1
->>>
->>> Deleted remainder of the output....
->>>
->>> And I appreciate any pointers in helping me debugging this.
->>
->>
->> hey Willem, thanks for looking into this. turns out this is a known issue
->> of
->> boost 1.55. just posted a pull request to workaround it at
->> https://github.com/ceph/ceph/pull/7560.
->>
->> also did i create a minimal reproducer, it can help with reproducing this
->> issue and verify the fix.
->>
->> you can compile it using:
->>
->> $ clang++ -std=c++11 -O0 -g test.cc -lm -o test
->>
->
-> pffh,
->
-> That's a relieve, since I would otherwise be quite a chase....
-> and yes, I'm still at boost 1.55.
->
-> Perhaps in the test check-overlapped-rules.t an extra test:
->         cmp "$TESTDIR/check-overlapped-rules.crushmap"
-> "$TESTDIR/check-overlapped-rules.crushmap.ref"
+hi haomai,
 
-we have compile-decompile-recompile.t for testing this.
+the build WITH_SPDK fails after
+bd694d4a6d6367c29c1935c906fe8059dd1368dc and
+b62318ea16d5830bb2b23b1a95ca39a5310fac34, could you update the
+NVMEDevices accordingly?
 
->
-> Which will at least tell you that the output was consistent with what sould
-> be there.
-> And it'll pin-point the source of the error perhaps a bit better.
->
-> Can I just "accept" a pull request in my fork without running into trouble
-> when I rebase?
-
-i don't think you can. rebase against the master is the way to go, i guess.
-
->
-> --WjW
->
-
-
+thanks,
 
 -- 
 Regards
