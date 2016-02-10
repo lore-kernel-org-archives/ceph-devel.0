@@ -1,40 +1,52 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: NVMEDevice.cc fails to build
-Date: Wed, 10 Feb 2016 21:07:41 +0800
-Message-ID: <CACJqLya53aoZcEO9=cxHPZRd94ernO+4aLekaeHAf7mbBVVFew@mail.gmail.com>
-References: <CAJE9aOPODHBXtUJfxY9YF6s5-0=yJey3BBm=gYJds5v-e8+yPw@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Jenkins error in running tests ....
+Date: Wed, 10 Feb 2016 13:04:13 +0100
+Message-ID: <56BB273D.2040007@digiware.nl>
+References: <56B9B0A1.6090807@digiware.nl>
+ <CAJE9aONSEzJVWe4Ows7oNrg403_ucT4vYdvCNEujGr74h7cYqw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sg2apc01on0094.outbound.protection.outlook.com ([104.47.125.94]:28680
-	"EHLO APC01-SG2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751335AbcBJNH4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 10 Feb 2016 08:07:56 -0500
-Received: by mail-ig0-f179.google.com with SMTP id xg9so13132864igb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 05:07:51 -0800 (PST)
-In-Reply-To: <CAJE9aOPODHBXtUJfxY9YF6s5-0=yJey3BBm=gYJds5v-e8+yPw@mail.gmail.com>
+Received: from smtp.digiware.nl ([31.223.170.169]:55854 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750925AbcBJNPE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 10 Feb 2016 08:15:04 -0500
+In-Reply-To: <CAJE9aONSEzJVWe4Ows7oNrg403_ucT4vYdvCNEujGr74h7cYqw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, haomai@xsky.org
+To: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-sure, I had a local branch which has a refactor after vacation.
+On 10-2-2016 12:58, kefu chai wrote:
+> On Tue, Feb 9, 2016 at 5:25 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> Hi,
+>>
+>> https://jenkins.ceph.com/job/ceph-pull-requests/1261/console
+>>
+>> .......
+>> PASS: test/osd/osd-scrub-repair.sh
+>> make[5]: execvp: /bin/sh: Argument list too long
+>> make[5]: *** [test-suite.log] Error 127
+>> make[5]: Leaving directory
+>> `/home/jenkins-build/build/workspace/ceph-pull-requests/src'
+>> make[4]: *** [check-TESTS] Error 2
+>> make[4]: Leaving directory
+>> `/home/jenkins-build/build/workspace/ceph-pull-requests/src'
+>> make[3]: *** [check-am] Error 2
+>>
+>> I'm assuming that it is not something I did in my code.
+>> But then again I've been proven wrong....
+>
+> Willem, seems you are not the only one having this failure in the
+> jenkins run. i have
+> the same error in
+> https://jenkins.ceph.com/job/ceph-pull-requests/1294/console for
+> my pull request of https://github.com/ceph/ceph/pull/7523 as well.
 
-On Wed, Feb 10, 2016 at 8:07 PM, kefu chai <tchaikov@gmail.com> wrote:
-> hi haomai,
->
-> the build WITH_SPDK fails after
-> bd694d4a6d6367c29c1935c906fe8059dd1368dc and
-> b62318ea16d5830bb2b23b1a95ca39a5310fac34, could you update the
-> NVMEDevices accordingly?
->
-> thanks,
->
-> --
-> Regards
-> Kefu Chai
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Problem is that I cannot reproduce it here. Atleast not thusfar.
+And Jenkins has limitted debug possibilities.
+
+So, i guess, it is a sort of catch-22, which needs to be solved by
+people with more access to the platform.
+
+--WjW
