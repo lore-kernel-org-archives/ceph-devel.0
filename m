@@ -1,104 +1,149 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: fixing inconsistent merge messages & release notes
-Date: Wed, 10 Feb 2016 16:16:09 +0700
-Message-ID: <56BAFFD9.6050108@dachary.org>
+From: Milan Broz <gmazyland@gmail.com>
+Subject: Re: osd dm-crypt key management, part... deux?
+Date: Wed, 10 Feb 2016 11:17:04 +0100
+Message-ID: <56BB0E20.9000800@gmail.com>
+References: <alpine.DEB.2.11.1601262106390.6524@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:34964 "EHLO
-	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752002AbcBJJQU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 04:16:20 -0500
-Received: from mfilter43-d.gandi.net (mfilter43-d.gandi.net [217.70.178.174])
-	by relay5-d.mail.gandi.net (Postfix) with ESMTP id 05D7141C0CE
-	for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 10:16:19 +0100 (CET)
-Received: from relay5-d.mail.gandi.net ([IPv6:::ffff:217.70.183.197])
-	by mfilter43-d.gandi.net (mfilter43-d.gandi.net [::ffff:10.0.15.180]) (amavisd-new, port 10024)
-	with ESMTP id Y4kUQHobsESQ for <ceph-devel@vger.kernel.org>;
-	Wed, 10 Feb 2016 10:16:16 +0100 (CET)
-Received: from [10.7.10.93] (node-ar0.pool-118-172.dynamic.totbb.net [118.172.54.108])
-	(Authenticated sender: loic@dachary.org)
-	by relay5-d.mail.gandi.net (Postfix) with ESMTPSA id 3C0EF41C104
-	for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 10:16:15 +0100 (CET)
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:35503 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757412AbcBJKRH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 05:17:07 -0500
+Received: by mail-wm0-f50.google.com with SMTP id c200so21035644wme.0
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 02:17:06 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1601262106390.6524@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
 Hi,
 
-TL;DR: Fix the PR title via the GitHub web interface, not in the merge =
-message.=20
-       Use the merge message to write a user readable paragraph that wi=
-ll show in the release notes.
+just few notes, I know that too late, but anyway...
 
-A few month ago it was proposed that merge messages are improved to hel=
-p write better release notes, but that did not quite succeed. Yet :-)
+(Partially based on meeting with Deo author yesterday...)
 
-When using the GitHub web interface, the default merge message looks li=
-ke that:
+On 01/27/2016 03:26 PM, Sage Weil wrote:
+> We've had several partial starts to address this problem but haven't 
+> gotten anything over the line.  A quick summary:
+> 
+> 1- Currently we store dm-crypt keys in /etc/ceph/dmcrypt-keys/$osd_uuid, 
+> on the boot disk.  This lets you throw away OSD disk but not boot disks 
+> and doesn't help you if someone walks away with a whole server.
+> 
+> 2- SUSE had a pull request that made ceph-disk push/pull keys over (s)ftp.  
+> I can't find it now.. did it get closed?
+> 
+> 3- We built a generic "config-key" storage service into the monitor that 
+> lets you restrict access to certain key/value pairs based on your 
+> (cephx) authentication key, intending that the osd dm-crypt keys be stored 
+> there.
 
-    Merge pull request #7037 from mathslinux/rgw-add-missing-error-code
-    rgw: add missing error code for admin op API
-    Reviewed-by: Yehuda Sadeh <yehuda@redhat.com>
+My (upstream cryptsetup) plan is to have LUKS2 configurable keyslot and these
+should allow plugins that can directly fetch the key for example.
 
-Where the first two lines (Merge and rgw: ...) are automatically genera=
-ted by GitHub using the title of the pull request. And the Reviewed-By:=
- is added manually by the reviewer.
+In fact proof-of-concept code was inspired by Ceph OSD use case and
+allows fetching key from remote server through libssh (it expects
+ssh keys configured such way, that you can run ssh to some server
+with public key auth without password - but that's just example).
 
-If the title of the pull request needs fixing, it can also be done via =
-the GitHub web interface and it will reflect in the merge message templ=
-ate. It is convenient because the title of the pull request exactly mat=
-ches the title found in the merge message. Fixing the title in the merg=
-e message leaves us with an unnecessary inconsistency between the merge=
- message and the title of the pull request. I manually fixed a few doze=
-ns of such inconsistencies by copying the merge message back to the pul=
-l request title for the 10.0.3 release.
+In LUKS2 header then we store just ssh server/user/dir
+https://gitlab.com/cryptsetup/cryptsetup/blob/wip-luks2/misc/luks2_keyslot_example/keyslot_test.c
+(please note it is just wip example of standalone binary, interface will change,
+and currently it uses real volume key, not unlocking passphrase)
 
-The script used to list the notable changes for the release notes[1] wi=
-ll assume merge messages that are not the default (see above) are writt=
-en for inclusion in the release notes. For instance https://github.com/=
-ceph/ceph/pull/6926 title is ceph-disk: fix failures when preparing dis=
-ks with udev > 214 and the merge message is:
+I can imagine that in long-term there can be simple keyslot using
+cephx auth as well or whatever Ceph will need.
 
-    Merge pull request #6926 from dachary/wip-14080-ceph-disk-udevadm
-    ceph-disk: fix failures when preparing disks with udev > 214
+Integration then would be just to properly format
+that keyslot, all luks commands will then work as today automagically.
 
-    On CentOS 7.1 and other operating systems with a version of udev gr=
-eater or equal to 214,=20
-    running ceph-disk prepare triggered unexpected removal and addition=
- of partitions on
-    the disk being prepared. That created problems ranging from the OSD=
- not being activated
-    to failures because /dev/sdb1 does not exist although it should.
+(There are priority for keyslot, so we can have fallback to other
+kesylot type like password-based if network is down.)
 
-    Reviewed-by: Sage Weil <sage@redhat.com>
+The real problem is that LUKS2 can be stable in next months, not earlier.
 
-The two examples above will show as follows in the release notes:
+I have some notes in Devconf presentation but that's relay just overview
+of current experiment with LUKS2 (it can still be completely abandoned :)
+https://mbroz.fedorapeople.org/talks/DevConf2016/devconf2016-luks2.pdf
 
-* rgw: add missing error code for admin op API (`pr#7037 <http://github=
-=2Ecom/ceph/ceph/pull/7037>`_, Dunrong Huang)
-* ceph-disk: fix failures when preparing disks with udev > 214 (`issue#=
-14080 <http://tracker.ceph.com/issues/14080>`_, `issue#14094 <http://tr=
-acker.ceph.com/issues/14094>`_, `pr#6926 <http://github.com/ceph/ceph/p=
-ull/6926>`_, Loic Dachary, Ilya Dryomov)
-    On CentOS 7.1 and other operating systems with a version of udev gr=
-eater or equal to 214,
-    running ceph-disk prepare triggered unexpected removal and addition=
- of partitions on
-    the disk being prepared. That created problems ranging from the OSD=
- not being activated
-    to failures because /dev/sdb1 does not exist although it should.
+> 
+> 4- Red Hat had a DEO project that addressed network-bound encryption in 
+> the works but that project has been shelved in favor of something 
+> newer/shinier/better.
 
+Yes, Deo (formerly Petera) is dead, replaced with Clevis/Tang project.
 
-Cheers
+For more info see Devconf presentation
+http://slides.com/npmccallum/devconf16#/ (there is also youtube recording)
 
-[1] https://github.com/ceph/ceph/blob/master/src/script/ceph-release-no=
-tes
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This approach is usable for you as well but it requires another
+configuration and dependencies. It will probably use on-disk LUKS2 data
+in long-term, just with intermediate implementation using LUKS1 and something
+for metadata store (IIRC they mentioned file on boot disk).
+
+The major risk is that the new cryptographic protocol is not yet properly
+reviewed and if broken, half of it need to be redesigned.
+(Also it is not in any distro yet.)
+
+> 5- Lars observes that any solution is incomplete if we don't *also* 
+> encrypt the swap devices.  (I think we don't need to worry about the boot 
+> disks, though, unless we're paranoid about /var/log/ceph?)
+
+It depends on your threat model...
+
+But you can easily create encrypted swap using key from /dev/urandom
+(iow regenerated every boot).
+
+This is common solution if you do not store hibernation data in swap.
+(Just one line in crypttab/fstab.)
+
+> 6- Radoslaw and Adam observe that anything using dm-crypt may have higher 
+> overhead than something implemented in RADOS itself.  But this is vastly 
+> more complicated and, if we move in this direction, a long way off.
+
+Gluster implemented encryption this way (no idea if it is used in reality),
+it is months of development. It can provide almost native performance but
+risk of doing something wrong and later redesign is quite high.
+
+Also you can be hit by FIPS (and similar) certification requirements later...
+(for government users)
+
+But yes, there will be always overhead for dmcrypt, but because OSDs usually
+run on quite powerful hw (with AESNI etc) device-mapper team can help to
+solve performance issues.
+
+> 7- In the meantime, we have nothing better than /etc/ceph/dmcrypt-keys 
+> upstream...
+> 
+> 
+> I suggest we do something simple:
+> 
+> 1- Update SUSE's ceph-disk changes to make it easy to plug in 
+> different key management strategies.
+> 
+> 2- Implement a simple mon-based strategy upstream.  We've discussed this a 
+> fair bit in the past, and were getting stuck on the problem of where to 
+> store the key-fetching-key.  I.e., we want a key on the disk that you use 
+> to ask the monitor for the LUKS key, which you then provide to LUKS to 
+> unlock the actual encryption key.  This means that we need a unencrypted 
+> spot on the device to store it in.  Milan has indicated that putting it in 
+> a LUKS key slot would be a bad idea and difficult to maintain.  Instead, I 
+> propose we create a new GPT partition type called OSD_LOCKBOX (or 
+> similar), with a tiny filesystem and a few files indicating what to do.  
+> This will make it easy to store the info we need for the mon scheme, and 
+> to support new key management approaches later (we can put whatever we 
+> want there as long as it's not too big).
+
+I would like to have LUKS1 to be stable format, so hacking with
+keyslots would be fragile solution... (Despite it is possible.)
+
+As I mentioned, LUKS2 should solve this but it is probably not usable
+in this timeframe you need.
+
+I just want to mention LUKS2 just idea but it can simplify the whole configuration
+in future for you.
+
+Milan
+
