@@ -1,64 +1,174 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Changing code in a subproject ceph-erasure-code-corpus
-Date: Wed, 10 Feb 2016 18:31:15 +0700
-Message-ID: <56BB1F83.3090304@dachary.org>
-References: <56BB1BFA.6040603@digiware.nl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH 4/4] libceph: enable large, variable-sized OSD requests
+Date: Wed, 10 Feb 2016 19:56:21 +0800
+Message-ID: <B936396F-DD22-444D-8DC5-D7CD5B53F885@redhat.com>
+References: <1455103447-23559-1-git-send-email-idryomov@gmail.com> <1455103447-23559-5-git-send-email-idryomov@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:55145 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753095AbcBJLbZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 06:31:25 -0500
-In-Reply-To: <56BB1BFA.6040603@digiware.nl>
+Received: from mx1.redhat.com ([209.132.183.28]:40019 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757516AbcBJL42 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 06:56:28 -0500
+In-Reply-To: <1455103447-23559-5-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>, ceph-devel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
 
-You can submit a patch against https://github.com/ceph/ceph-erasure-cod=
-e-corpus
+> On Feb 10, 2016, at 19:24, Ilya Dryomov <idryomov@gmail.com> wrote:
+> 
+> Turn r_ops into a flexible array member to enable large, consisting of
+> up to 16 ops, OSD requests.  The use case is scattered writeback in
+> cephfs and, as far as the kernel client is concerned, 16 is just a made
+> up number.
+> 
+> r_ops had size 3 for copyup+hint+write, but copyup is really a special
+> case - it can only happen once.  ceph_osd_request_cache is therefore
+> stuffed with num_ops=2 requests, anything bigger than that is allocated
+> with kmalloc().  req_mempool is backed by ceph_osd_request_cache, which
+> means either num_ops=1 or num_ops=2 for use_mempool=true - all existing
+> users (ceph_writepages_start(), ceph_osdc_writepages()) are fine with
+> that.
+> 
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> ---
+> drivers/block/rbd.c             |  2 --
+> include/linux/ceph/osd_client.h |  6 ++++--
+> net/ceph/osd_client.c           | 32 +++++++++++++++++++-------------
+> 3 files changed, 23 insertions(+), 17 deletions(-)
+> 
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 94f31bde73e8..08018710f363 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1847,8 +1847,6 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
+> 	if (osd_req->r_result < 0)
+> 		obj_request->result = osd_req->r_result;
+> 
+> -	rbd_assert(osd_req->r_num_ops <= CEPH_OSD_MAX_OP);
+> -
+> 	/*
+> 	 * We support a 64-bit length, but ultimately it has to be
+> 	 * passed to the block layer, which just supports a 32-bit
+> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+> index c6d1d603bacf..aada6a1383a4 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -43,7 +43,8 @@ struct ceph_osd {
+> };
+> 
+> 
+> -#define CEPH_OSD_MAX_OP	3
+> +#define CEPH_OSD_SLAB_OPS	2
+> +#define CEPH_OSD_MAX_OPS	16
+> 
+> enum ceph_osd_data_type {
+> 	CEPH_OSD_DATA_TYPE_NONE = 0,
+> @@ -139,7 +140,6 @@ struct ceph_osd_request {
+> 
+> 	/* request osd ops array  */
+> 	unsigned int		r_num_ops;
+> -	struct ceph_osd_req_op	r_ops[CEPH_OSD_MAX_OP];
+> 
+> 	/* these are updated on each send */
+> 	__le32           *r_request_osdmap_epoch;
+> @@ -175,6 +175,8 @@ struct ceph_osd_request {
+> 	unsigned long     r_stamp;            /* send OR check time */
+> 
+> 	struct ceph_snap_context *r_snapc;    /* snap context for writes */
+> +
+> +	struct ceph_osd_req_op r_ops[];
+> };
+> 
+> struct ceph_request_redirect {
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 8bf4f74064e5..37a0fc5273d1 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -338,9 +338,10 @@ static void ceph_osdc_release_request(struct kref *kref)
+> 	ceph_put_snap_context(req->r_snapc);
+> 	if (req->r_mempool)
+> 		mempool_free(req, req->r_osdc->req_mempool);
+> -	else
+> +	else if (req->r_num_ops <= CEPH_OSD_SLAB_OPS)
+> 		kmem_cache_free(ceph_osd_request_cache, req);
+> -
+> +	else
+> +		kfree(req);
+> }
+> 
+> void ceph_osdc_get_request(struct ceph_osd_request *req)
+> @@ -369,9 +370,6 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+> 	struct ceph_msg *msg;
+> 	size_t msg_size;
+> 
+> -	BUILD_BUG_ON(CEPH_OSD_MAX_OP > U16_MAX);
+> -	BUG_ON(num_ops > CEPH_OSD_MAX_OP);
+> -
+> 	msg_size = 4 + 4 + 8 + 8 + 4+8;
+> 	msg_size += 2 + 4 + 8 + 4 + 4; /* oloc */
+> 	msg_size += 1 + 8 + 4 + 4;     /* pg_t */
+> @@ -383,14 +381,21 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+> 	msg_size += 4;
+> 
+> 	if (use_mempool) {
+> +		BUG_ON(num_ops > CEPH_OSD_SLAB_OPS);
+> 		req = mempool_alloc(osdc->req_mempool, gfp_flags);
+> -		memset(req, 0, sizeof(*req));
+> +	} else if (num_ops <= CEPH_OSD_SLAB_OPS) {
+> +		req = kmem_cache_alloc(ceph_osd_request_cache, gfp_flags);
+> 	} else {
+> -		req = kmem_cache_zalloc(ceph_osd_request_cache, gfp_flags);
+> +		BUG_ON(num_ops > CEPH_OSD_MAX_OPS);
+> +		req = kmalloc(sizeof(*req) + num_ops * sizeof(req->r_ops[0]),
+> +			      gfp_flags);
+> 	}
+> -	if (req == NULL)
+> +	if (unlikely(!req))
+> 		return NULL;
+> 
+> +	/* req only, each op is zeroed in _osd_req_op_init() */
+> +	memset(req, 0, sizeof(*req));
+> +
+> 	req->r_osdc = osdc;
+> 	req->r_mempool = use_mempool;
+> 	req->r_num_ops = num_ops;
+> @@ -1809,7 +1814,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+> 
+> 	ceph_decode_need(&p, end, 4, bad_put);
+> 	numops = ceph_decode_32(&p);
+> -	if (numops > CEPH_OSD_MAX_OP)
+> +	if (numops > CEPH_OSD_MAX_OPS)
+> 		goto bad_put;
+> 	if (numops != req->r_num_ops)
+> 		goto bad_put;
+> @@ -2773,11 +2778,12 @@ EXPORT_SYMBOL(ceph_osdc_writepages);
+> 
+> int ceph_osdc_setup(void)
+> {
+> +	size_t size = sizeof(struct ceph_osd_request) +
+> +	    CEPH_OSD_SLAB_OPS * sizeof(struct ceph_osd_req_op);
+> +
+> 	BUG_ON(ceph_osd_request_cache);
+> -	ceph_osd_request_cache = kmem_cache_create("ceph_osd_request",
+> -					sizeof (struct ceph_osd_request),
+> -					__alignof__(struct ceph_osd_request),
+> -					0, NULL);
+> +	ceph_osd_request_cache = kmem_cache_create("ceph_osd_request", size,
+> +						   0, 0, NULL);
+> 
+> 	return ceph_osd_request_cache ? 0 : -ENOMEM;
+> }
 
-Cheers
+This approach is better than mine. But the code that calculates r_request/r_reply messages size get lost in your patch
 
-On 10/02/2016 18:16, Willem Jan Withagen wrote:
-> Hi,
->=20
-> I have  one-line change in the erasure-code subproject.
-> but git status reports:
->   modified:   ceph-erasure-code-corpus (modified content)
->=20
-> So that change is not going to make it in my pull...
-> But it is influencing my tests, and I keep fixing it after
-> every fetch of the tree
->=20
-> It is in
-> ./ceph-erasure-code-corpus/v0.92-988/non-regression.sh:25
->=20
-> and it replaces
->     TMP=3D$(mktemp --directory)
-> by
->     TMP=3D$(mktemp -d)
->=20
-> So how do get something like this commited?
->=20
-> Thanx,
-> --WjW
->=20
->=20
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+Regards
+Yan, Zheng
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -- 
+> 2.4.3
+> 
+
