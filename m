@@ -1,100 +1,162 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 1/4] libceph: rename ceph_osd_req_op::payload_len to indata_len
-Date: Wed, 10 Feb 2016 12:24:04 +0100
-Message-ID: <1455103447-23559-2-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 4/4] libceph: enable large, variable-sized OSD requests
+Date: Wed, 10 Feb 2016 12:24:07 +0100
+Message-ID: <1455103447-23559-5-git-send-email-idryomov@gmail.com>
 References: <1455103447-23559-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:33225 "EHLO
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:35289 "EHLO
 	mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753936AbcBJLYk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 06:24:40 -0500
-Received: by mail-wm0-f68.google.com with SMTP id c200so3541909wme.0
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 03:24:40 -0800 (PST)
+	with ESMTP id S1754618AbcBJLYo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 06:24:44 -0500
+Received: by mail-wm0-f68.google.com with SMTP id g62so3532462wme.2
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 03:24:43 -0800 (PST)
 In-Reply-To: <1455103447-23559-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Zheng Yan <zyan@redhat.com>
 
-Follow userspace nomenclature on this - the next commit adds
-outdata_len.
+Turn r_ops into a flexible array member to enable large, consisting of
+up to 16 ops, OSD requests.  The use case is scattered writeback in
+cephfs and, as far as the kernel client is concerned, 16 is just a made
+up number.
+
+r_ops had size 3 for copyup+hint+write, but copyup is really a special
+case - it can only happen once.  ceph_osd_request_cache is therefore
+stuffed with num_ops=2 requests, anything bigger than that is allocated
+with kmalloc().  req_mempool is backed by ceph_osd_request_cache, which
+means either num_ops=1 or num_ops=2 for use_mempool=true - all existing
+users (ceph_writepages_start(), ceph_osdc_writepages()) are fine with
+that.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- include/linux/ceph/osd_client.h |  2 +-
- net/ceph/osd_client.c           | 12 ++++++------
- 2 files changed, 7 insertions(+), 7 deletions(-)
+ drivers/block/rbd.c             |  2 --
+ include/linux/ceph/osd_client.h |  6 ++++--
+ net/ceph/osd_client.c           | 32 +++++++++++++++++++-------------
+ 3 files changed, 23 insertions(+), 17 deletions(-)
 
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 94f31bde73e8..08018710f363 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1847,8 +1847,6 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
+ 	if (osd_req->r_result < 0)
+ 		obj_request->result = osd_req->r_result;
+ 
+-	rbd_assert(osd_req->r_num_ops <= CEPH_OSD_MAX_OP);
+-
+ 	/*
+ 	 * We support a 64-bit length, but ultimately it has to be
+ 	 * passed to the block layer, which just supports a 32-bit
 diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 7506b485bb6d..35c8b006916f 100644
+index c6d1d603bacf..aada6a1383a4 100644
 --- a/include/linux/ceph/osd_client.h
 +++ b/include/linux/ceph/osd_client.h
-@@ -77,7 +77,7 @@ struct ceph_osd_data {
- struct ceph_osd_req_op {
- 	u16 op;           /* CEPH_OSD_OP_* */
- 	u32 flags;        /* CEPH_OSD_OP_FLAG_* */
--	u32 payload_len;
-+	u32 indata_len;   /* request */
- 	union {
- 		struct ceph_osd_data raw_data_in;
- 		struct {
+@@ -43,7 +43,8 @@ struct ceph_osd {
+ };
+ 
+ 
+-#define CEPH_OSD_MAX_OP	3
++#define CEPH_OSD_SLAB_OPS	2
++#define CEPH_OSD_MAX_OPS	16
+ 
+ enum ceph_osd_data_type {
+ 	CEPH_OSD_DATA_TYPE_NONE = 0,
+@@ -139,7 +140,6 @@ struct ceph_osd_request {
+ 
+ 	/* request osd ops array  */
+ 	unsigned int		r_num_ops;
+-	struct ceph_osd_req_op	r_ops[CEPH_OSD_MAX_OP];
+ 
+ 	/* these are updated on each send */
+ 	__le32           *r_request_osdmap_epoch;
+@@ -175,6 +175,8 @@ struct ceph_osd_request {
+ 	unsigned long     r_stamp;            /* send OR check time */
+ 
+ 	struct ceph_snap_context *r_snapc;    /* snap context for writes */
++
++	struct ceph_osd_req_op r_ops[];
+ };
+ 
+ struct ceph_request_redirect {
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index a1babb77b813..38bdfafe9dd6 100644
+index 8bf4f74064e5..37a0fc5273d1 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -498,7 +498,7 @@ void osd_req_op_extent_init(struct ceph_osd_request *osd_req,
- 	if (opcode == CEPH_OSD_OP_WRITE || opcode == CEPH_OSD_OP_WRITEFULL)
- 		payload_len += length;
- 
--	op->payload_len = payload_len;
-+	op->indata_len = payload_len;
+@@ -338,9 +338,10 @@ static void ceph_osdc_release_request(struct kref *kref)
+ 	ceph_put_snap_context(req->r_snapc);
+ 	if (req->r_mempool)
+ 		mempool_free(req, req->r_osdc->req_mempool);
+-	else
++	else if (req->r_num_ops <= CEPH_OSD_SLAB_OPS)
+ 		kmem_cache_free(ceph_osd_request_cache, req);
+-
++	else
++		kfree(req);
  }
- EXPORT_SYMBOL(osd_req_op_extent_init);
  
-@@ -517,7 +517,7 @@ void osd_req_op_extent_update(struct ceph_osd_request *osd_req,
- 	BUG_ON(length > previous);
+ void ceph_osdc_get_request(struct ceph_osd_request *req)
+@@ -369,9 +370,6 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 	struct ceph_msg *msg;
+ 	size_t msg_size;
  
- 	op->extent.length = length;
--	op->payload_len -= previous - length;
-+	op->indata_len -= previous - length;
- }
- EXPORT_SYMBOL(osd_req_op_extent_update);
+-	BUILD_BUG_ON(CEPH_OSD_MAX_OP > U16_MAX);
+-	BUG_ON(num_ops > CEPH_OSD_MAX_OP);
+-
+ 	msg_size = 4 + 4 + 8 + 8 + 4+8;
+ 	msg_size += 2 + 4 + 8 + 4 + 4; /* oloc */
+ 	msg_size += 1 + 8 + 4 + 4;     /* pg_t */
+@@ -383,14 +381,21 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 	msg_size += 4;
  
-@@ -554,7 +554,7 @@ void osd_req_op_cls_init(struct ceph_osd_request *osd_req, unsigned int which,
+ 	if (use_mempool) {
++		BUG_ON(num_ops > CEPH_OSD_SLAB_OPS);
+ 		req = mempool_alloc(osdc->req_mempool, gfp_flags);
+-		memset(req, 0, sizeof(*req));
++	} else if (num_ops <= CEPH_OSD_SLAB_OPS) {
++		req = kmem_cache_alloc(ceph_osd_request_cache, gfp_flags);
+ 	} else {
+-		req = kmem_cache_zalloc(ceph_osd_request_cache, gfp_flags);
++		BUG_ON(num_ops > CEPH_OSD_MAX_OPS);
++		req = kmalloc(sizeof(*req) + num_ops * sizeof(req->r_ops[0]),
++			      gfp_flags);
+ 	}
+-	if (req == NULL)
++	if (unlikely(!req))
+ 		return NULL;
  
- 	op->cls.argc = 0;	/* currently unused */
++	/* req only, each op is zeroed in _osd_req_op_init() */
++	memset(req, 0, sizeof(*req));
++
+ 	req->r_osdc = osdc;
+ 	req->r_mempool = use_mempool;
+ 	req->r_num_ops = num_ops;
+@@ -1809,7 +1814,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg)
  
--	op->payload_len = payload_len;
-+	op->indata_len = payload_len;
- }
- EXPORT_SYMBOL(osd_req_op_cls_init);
+ 	ceph_decode_need(&p, end, 4, bad_put);
+ 	numops = ceph_decode_32(&p);
+-	if (numops > CEPH_OSD_MAX_OP)
++	if (numops > CEPH_OSD_MAX_OPS)
+ 		goto bad_put;
+ 	if (numops != req->r_num_ops)
+ 		goto bad_put;
+@@ -2773,11 +2778,12 @@ EXPORT_SYMBOL(ceph_osdc_writepages);
  
-@@ -587,7 +587,7 @@ int osd_req_op_xattr_init(struct ceph_osd_request *osd_req, unsigned int which,
- 	op->xattr.cmp_mode = cmp_mode;
+ int ceph_osdc_setup(void)
+ {
++	size_t size = sizeof(struct ceph_osd_request) +
++	    CEPH_OSD_SLAB_OPS * sizeof(struct ceph_osd_req_op);
++
+ 	BUG_ON(ceph_osd_request_cache);
+-	ceph_osd_request_cache = kmem_cache_create("ceph_osd_request",
+-					sizeof (struct ceph_osd_request),
+-					__alignof__(struct ceph_osd_request),
+-					0, NULL);
++	ceph_osd_request_cache = kmem_cache_create("ceph_osd_request", size,
++						   0, 0, NULL);
  
- 	ceph_osd_data_pagelist_init(&op->xattr.osd_data, pagelist);
--	op->payload_len = payload_len;
-+	op->indata_len = payload_len;
- 	return 0;
- }
- EXPORT_SYMBOL(osd_req_op_xattr_init);
-@@ -707,7 +707,7 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
- 			BUG_ON(osd_data->type == CEPH_OSD_DATA_TYPE_NONE);
- 			dst->cls.indata_len = cpu_to_le32(data_length);
- 			ceph_osdc_msg_data_add(req->r_request, osd_data);
--			src->payload_len += data_length;
-+			src->indata_len += data_length;
- 			request_data_len += data_length;
- 		}
- 		osd_data = &src->cls.response_data;
-@@ -750,7 +750,7 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
- 
- 	dst->op = cpu_to_le16(src->op);
- 	dst->flags = cpu_to_le32(src->flags);
--	dst->payload_len = cpu_to_le32(src->payload_len);
-+	dst->payload_len = cpu_to_le32(src->indata_len);
- 
- 	return request_data_len;
+ 	return ceph_osd_request_cache ? 0 : -ENOMEM;
  }
 -- 
 2.4.3
