@@ -1,41 +1,40 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH V4 5/5] ceph: scattered page writeback
-Date: Wed, 10 Feb 2016 20:39:08 +0800
-Message-ID: <6D6CF180-88C2-4D8C-B71D-401DD88FCE49@redhat.com>
-References: <1453973811-2018-1-git-send-email-zyan@redhat.com> <CAOi1vP9W1AkQ=G1mFAkdqR84JdFN2Uf2_5usCpsa54GUAc6gQA@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: NVMEDevice.cc fails to build
+Date: Wed, 10 Feb 2016 21:07:41 +0800
+Message-ID: <CACJqLya53aoZcEO9=cxHPZRd94ernO+4aLekaeHAf7mbBVVFew@mail.gmail.com>
+References: <CAJE9aOPODHBXtUJfxY9YF6s5-0=yJey3BBm=gYJds5v-e8+yPw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52337 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750817AbcBJMjO convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 07:39:14 -0500
-In-Reply-To: <CAOi1vP9W1AkQ=G1mFAkdqR84JdFN2Uf2_5usCpsa54GUAc6gQA@mail.gmail.com>
+Received: from mail-sg2apc01on0094.outbound.protection.outlook.com ([104.47.125.94]:28680
+	"EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751335AbcBJNH4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 10 Feb 2016 08:07:56 -0500
+Received: by mail-ig0-f179.google.com with SMTP id xg9so13132864igb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 05:07:51 -0800 (PST)
+In-Reply-To: <CAJE9aOPODHBXtUJfxY9YF6s5-0=yJey3BBm=gYJds5v-e8+yPw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, haomai@xsky.org
 
+sure, I had a local branch which has a refactor after vacation.
 
-> On Feb 10, 2016, at 19:22, Ilya Dryomov <idryomov@gmail.com> wrote:
-> 
-> This is not quite what I described and the whole function is still as
-> entangled as it was and very hard to validate.  But, with the dynamic
-> array logic gone, I won't press it any further.
-> 
-> The r_inline_ops being unused in the >CEPH_OSD_INITAL_OP case concern
-> still stands however.  I pushed wip-alloc-request for that, could you
-> see if you can rebase "libceph: add helper that duplicates last extent
-> operation" and "ceph: scattered page writeback" on top of it?
-
-I pushed the rebased patches to sip-alloc-request branch. I also updated your patch, adding code to calculate r_request/r_reply messages sizes.
-
-Regards
-Yan, Zheng
-
-> 
-> Thanks,
-> 
->                Ilya
-
+On Wed, Feb 10, 2016 at 8:07 PM, kefu chai <tchaikov@gmail.com> wrote:
+> hi haomai,
+>
+> the build WITH_SPDK fails after
+> bd694d4a6d6367c29c1935c906fe8059dd1368dc and
+> b62318ea16d5830bb2b23b1a95ca39a5310fac34, could you update the
+> NVMEDevices accordingly?
+>
+> thanks,
+>
+> --
+> Regards
+> Kefu Chai
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
