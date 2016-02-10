@@ -1,56 +1,33 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 02/10/2016 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 10 Feb 2016 09:20:46 -0600
-Message-ID: <56BB554E.3050308@redhat.com>
-Reply-To: mnelson@redhat.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54464 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751111AbcBJPUs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 10 Feb 2016 10:20:48 -0500
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id 6F1103D7AE2
-	for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 15:20:48 +0000 (UTC)
-Received: from [10.3.112.52] (ovpn-112-52.phx2.redhat.com [10.3.112.52])
-	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u1AFKkRH032590
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 10:20:48 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: Anton Protopopov <a.s.protopopov@gmail.com>
+Subject: [PATCH] ceph: fix a wrong comparison
+Date: Wed, 10 Feb 2016 12:38:03 -0500
+Message-ID: <1455125883-27735-1-git-send-email-a.s.protopopov@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Anton Protopopov <a.s.protopopov@gmail.com>
+List-Id: ceph-devel.vger.kernel.org
 
-8AM PST as usual! Discussion topics today include continued work on 
-cache tier probabilistic promotion throttling.  Please feel free to add 
-your own!
+A negative value rc compared to the positive value ENOENT in the
+finish_read() function.
 
-Here's the links:
+Signed-off-by: Anton Protopopov <a.s.protopopov@gmail.com>
+---
+ fs/ceph/addr.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
-
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index c222137..1b809c9 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -276,7 +276,7 @@ static void finish_read(struct ceph_osd_request *req, struct ceph_msg *msg)
+ 	for (i = 0; i < num_pages; i++) {
+ 		struct page *page = osd_data->pages[i];
+ 
+-		if (rc < 0 && rc != ENOENT)
++		if (rc < 0 && rc != -ENOENT)
+ 			goto unlock;
+ 		if (bytes < (int)PAGE_CACHE_SIZE) {
+ 			/* zero (remainder of) page */
+-- 
+2.6.5
