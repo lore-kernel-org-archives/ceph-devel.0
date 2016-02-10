@@ -1,18 +1,17 @@
 From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
 Subject: RE: NVMEDevice.cc fails to build
-Date: Wed, 10 Feb 2016 18:42:41 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C0561C1A18@SSIEXCH-MB3.ssi.samsung.com>
+Date: Wed, 10 Feb 2016 18:43:26 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C0561C1A33@SSIEXCH-MB3.ssi.samsung.com>
 References: <CAJE9aOPODHBXtUJfxY9YF6s5-0=yJey3BBm=gYJds5v-e8+yPw@mail.gmail.com>
  <CACJqLya53aoZcEO9=cxHPZRd94ernO+4aLekaeHAf7mbBVVFew@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:38302 "EHLO
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:38343 "EHLO
 	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753056AbcBJSmp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 13:42:45 -0500
-In-Reply-To: <CACJqLya53aoZcEO9=cxHPZRd94ernO+4aLekaeHAf7mbBVVFew@mail.gmail.com>
+	with ESMTP id S1752929AbcBJSn2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 13:43:28 -0500
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
