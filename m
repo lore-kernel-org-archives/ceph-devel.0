@@ -1,44 +1,68 @@
-From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Subject: RE: NVMEDevice.cc fails to build
-Date: Wed, 10 Feb 2016 18:43:26 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C0561C1A33@SSIEXCH-MB3.ssi.samsung.com>
-References: <CAJE9aOPODHBXtUJfxY9YF6s5-0=yJey3BBm=gYJds5v-e8+yPw@mail.gmail.com>
- <CACJqLya53aoZcEO9=cxHPZRd94ernO+4aLekaeHAf7mbBVVFew@mail.gmail.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: hammer v0.94.6 QE Validation status
+Date: Wed, 10 Feb 2016 10:56:11 -0800
+Message-ID: <CAMMFjmHcBKZubn7e_ebmNMcE-7MbzPYXD0fAPFzA_ME2oEBkPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:38343 "EHLO
-	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752929AbcBJSn2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 13:43:28 -0500
-Content-Language: en-US
+Received: from mail-ig0-f170.google.com ([209.85.213.170]:38329 "EHLO
+	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753165AbcBJS4M (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Feb 2016 13:56:12 -0500
+Received: by mail-ig0-f170.google.com with SMTP id mw1so20683249igb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 10:56:12 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>, kefu chai <tchaikov@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "haomai@xsky.org" <haomai@xsky.org>
+To: ceph-qa <ceph-qa@ceph.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Dachary, Loic" <ldachary@redhat.com>, "Weil, Sage" <sage@redhat.com>, Nathan Cutler <ncutler@suse.cz>
 
-SGkgSGFvbWFpIGFuZCBLZWZ1LA0KICBJIGdvdCBzYW1lIGlzc3VlcyB3aGVuIEkgdHJpZWQgdG8g
-Y29tcGlsZSB0aGUgc3Bkay4gSXQgdHVybnMgb3V0IHRoYXQgeW91IG5lZWQgdG8gc2V0dXAgdGhl
-IERQREsgcGF0aCBpbiB0aGUgY29uZmlndXJlLmFjIGFuZCBwdXQgdGhlIHNwZGsgaGVhZGVyIGZp
-bGUgaW50byAvdXNyL2luY2x1ZGUuKEkgdHJpZWQgdG8gc2V0dXAgdGhlIFBBVEggYnV0IHdvbid0
-IHdvcmspLg0KDQogIFJlZ2FyZHMsDQogIEphbWVzDQoNCiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
-LS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQpT
-ZW50OiBXZWRuZXNkYXksIEZlYnJ1YXJ5IDEwLCAyMDE2IDU6MDggQU0NClRvOiBrZWZ1IGNoYWkN
-CkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgaGFvbWFpQHhza3kub3JnDQpTdWJqZWN0
-OiBSZTogTlZNRURldmljZS5jYyBmYWlscyB0byBidWlsZA0KDQpzdXJlLCBJIGhhZCBhIGxvY2Fs
-IGJyYW5jaCB3aGljaCBoYXMgYSByZWZhY3RvciBhZnRlciB2YWNhdGlvbi4NCg0KT24gV2VkLCBG
-ZWIgMTAsIDIwMTYgYXQgODowNyBQTSwga2VmdSBjaGFpIDx0Y2hhaWtvdkBnbWFpbC5jb20+IHdy
-b3RlOg0KPiBoaSBoYW9tYWksDQo+DQo+IHRoZSBidWlsZCBXSVRIX1NQREsgZmFpbHMgYWZ0ZXIN
-Cj4gYmQ2OTRkNGE2ZDYzNjdjMjljMTkzNWM5MDZmZTgwNTlkZDEzNjhkYyBhbmQgDQo+IGI2MjMx
-OGVhMTZkNTgzMGJiMmIyM2IxYTk1Y2EzOWE1MzEwZmFjMzQsIGNvdWxkIHlvdSB1cGRhdGUgdGhl
-IA0KPiBOVk1FRGV2aWNlcyBhY2NvcmRpbmdseT8NCj4NCj4gdGhhbmtzLA0KPg0KPiAtLQ0KPiBS
-ZWdhcmRzDQo+IEtlZnUgQ2hhaQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlz
-dDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5
-IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21v
-IA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwN
-Ci0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
-Y3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
-Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVs
-Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+Hello
+
+Detailed summary of the QE Validation can be found here
+http://tracker.ceph.com/issues/13356#note-61
+
+The following suites were in scope of this point release testing:
+
+rados (subset 1/7)
+rbd
+rgw
+fs
+krbd
+kcephfs
+hadoop
+samba
+rest
+ceph-deploy
+upgrade/client-upgrade
+upgrade/dumpling-firefly-x (hammer)
+upgrade/firefly-x (hammer)
+upgrade/hammer
+upgrade/hammer-x (infernalis)
+powercycle
+
+Outstanding issues (approval requested):
+
+fs:
+http://tracker.ceph.com/issues/14716 - Greg, do you want those to be
+fixed for this release or approve release as is with a known issue?
+
+samba:
+http://tracker.ceph.com/issues/14714 - Greg, do you want those to be
+fixed for this release or approve release as is with a known issue?
+
+krbd:
+http://tracker.ceph.com/issues/14715
+http://tracker.ceph.com/issues/14717
+- Josh, do you want those to be fixed for this release or approve
+release as is with known issues?
+
+ceph-deploy:
+http://tracker.ceph.com/issues/14223
+- Sage, Alfredo, do you want those to be fixed for this release or
+approve release  as is with a known issue?
+
+Note - ovh environment is not performing reliably for some suites (rgw
+-  http://tracker.ceph.com/issues/14712, knfs -
+http://tracker.ceph.com/issues/13980)
+
+Thx
+YuriW
