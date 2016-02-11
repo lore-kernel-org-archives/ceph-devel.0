@@ -1,31 +1,31 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: any bluestore design spec?
-Date: Thu, 11 Feb 2016 16:57:05 +0300
-Message-ID: <56BC9331.6010609@mirantis.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: any bluestore design spec?
+Date: Thu, 11 Feb 2016 09:10:41 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1602110907540.28396@cpach.fuggernut.com>
+References: <56BC9331.6010609@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f177.google.com ([209.85.217.177]:36857 "EHLO
-	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752252AbcBKN5F (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Feb 2016 08:57:05 -0500
-Received: by mail-lb0-f177.google.com with SMTP id tk3so15688892lbb.3
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Feb 2016 05:57:04 -0800 (PST)
-Received: from [127.0.0.1] ([91.218.144.129])
-        by smtp.googlemail.com with ESMTPSA id 34sm1273459lfv.35.2016.02.11.05.57.02
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1/SSLv3 cipher=OTHER);
-        Thu, 11 Feb 2016 05:57:02 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:54418 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750974AbcBKOKW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Feb 2016 09:10:22 -0500
+In-Reply-To: <56BC9331.6010609@mirantis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Cephers,
+On Thu, 11 Feb 2016, Igor Fedotov wrote:
+> Hi Cephers,
+> 
+> I'm wondering if some spec on bluestore design is present.
+> Can community suggest something to read on the topic to better understand
+> bluestore internals?
 
-I'm wondering if some spec on bluestore design is present.
-Can community suggest something to read on the topic to better 
-understand bluestore internals?
+Not yet, although I expect to put something together soon.  I also plan to 
+do a tech talk/deep dive session with some slideware sometime in the next 
+month or so that we can record.  I'll also be doing a standard-format 
+BlueStore talk at the LF Vault conference in April.
 
-Thanks in advance,
-Igor.
+sage
