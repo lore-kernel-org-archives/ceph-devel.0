@@ -1,319 +1,743 @@
-From: Nick Fisk <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org>
-Subject: Re: cls_rbd ops on rbd_id.$name objects in EC pool
-Date: Thu, 11 Feb 2016 21:40:16 -0000
-Message-ID: <9ebbbae0.9Ro.9Gf.cs.1lNjEIPmE7@mailjet.com>
-References: <alpine.DEB.2.11.1602051036131.28396@cpach.fuggernut.com>
-	<1582262647.20033136.1454687586287.JavaMail.zimbra@redhat.com>
-	<CAN=+7FXJ6je1WpYpO-ozqo-ZKnBcRhv3hpaiH+GNku9YyK49Kg@mail.gmail.com>
-	<alpine.DEB.2.11.1602051340490.28396@cpach.fuggernut.com>
-	<0bc701d1604f$8f21e0a0$ad65a1e0$@fisk.me.uk>
-	<5848cd48.9Ro.9Gf.h0.1onaHAyHUe@mailjet.com>
-	<549809462.21912115.1455221387486.JavaMail.zimbra@redhat.com>
-	<alpine.DEB.2.11.1602111557000.28396@cpach.fuggernut.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: New Defects reported by Coverity Scan for ceph
+Date: Thu, 11 Feb 2016 14:01:16 -0800
+Message-ID: <CAJ4mKGbhV28AW=tiavCw1STFiP_kgHinFVF21sR-3C-8x_sMPw@mail.gmail.com>
+References: <56bccb71750ff_105ef2d3209258f@ss1435.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1602111557000.28396-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
-Content-Language: en-gb
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: 'Sage Weil' <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, 'Jason Dillaman' <dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:35968 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751516AbcBKWBR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Feb 2016 17:01:17 -0500
+Received: by mail-wm0-f46.google.com with SMTP id p63so93174040wmp.1
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Feb 2016 14:01:17 -0800 (PST)
+In-Reply-To: <56bccb71750ff_105ef2d3209258f@ss1435.mail>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Adam Emerson <aemerson@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-VGhhdOKAmXMgYSByZWxpZWYsIEkgd2FzIHNlbnNpbmcgYSBtYWpvciBjYXNlIG9mIGZhY2UgcGFs
-bSBvY2N1cmluZyB3aGVuIEkgcmVhZCBKYXNvbidzIGVtYWlsISEhCgo+IC0tLS0tT3JpZ2luYWwg
-TWVzc2FnZS0tLS0tCj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21h
-aWx0bzpjZXBoLWRldmVsLQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNh
-Z2UgV2VpbAo+IFNlbnQ6IDExIEZlYnJ1YXJ5IDIwMTYgMjE6MDAKPiBUbzogSmFzb24gRGlsbGFt
-YW4gPGRpbGxhbWFuQHJlZGhhdC5jb20+Cj4gQ2M6IE5pY2sgRmlzayA8bmlja0BmaXNrLm1lLnVr
-PjsgU2FtdWVsIEp1c3QgPHNqdXN0QHJlZGhhdC5jb20+OyBjZXBoLQo+IHVzZXJzQGxpc3RzLmNl
-cGguY29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZwo+IFN1YmplY3Q6IFJlOiBjbHNfcmJk
-IG9wcyBvbiByYmRfaWQuJG5hbWUgb2JqZWN0cyBpbiBFQyBwb29sCj4gCj4gSSB3YXMgYWJsZSB0
-byByZXByb2R1Y2UgdGhpcyBvbiBtYXN0ZXI6Cj4gCj4gT24gVGh1LCAxMSBGZWIgMjAxNiwgSmFz
-b24gRGlsbGFtYW4gd3JvdGU6Cj4gPiBJIHRoaW5rIEkgc2VlIHRoZSBwcm9ibGVtLiAgSXQgbG9v
-a3MgbGlrZSB5b3UgYXJlIHBlcmZvcm1pbmcgb3BzIGRpcmVjdGx5Cj4gYWdhaW5zdCB0aGUgY2Fj
-aGUgdGllciBpbnN0ZWFkIG9mIHRoZSBiYXNlIHRpZXIgKGFzc3VtaW5nIGNhY2hlMSBpcyB5b3Vy
-IGNhY2hlCj4gcG9vbCkuICBIZXJlIGFyZSBteSBzdGVwcyBhZ2FpbnN0IG1hc3RlciB3aGVyZSB0
-aGUgb2JqZWN0IGlzIHN1Y2Nlc3NmdWxseQo+IHByb21vdGVkIHVwb24gJ3JiZCBpbmZvJzoKPiA+
-Cj4gPiAjIGNlcGggb3NkIGVyYXN1cmUtY29kZS1wcm9maWxlIHNldCB0ZXV0aG9sb2d5cHJvZmls
-ZQo+ID4gcnVsZXNldC1mYWlsdXJlLWRvbWFpbj1vc2QgbT0xIGs9Mgo+ID4KPiA+ICMgY2VwaCBv
-c2QgcG9vbCBkZWxldGUgcmJkIHJiZCAtLXllcy1pLXJlYWxseS1yZWFsbHktbWVhbi1pdCBwb29s
-Cj4gPiAncmJkJyByZW1vdmVkCj4gPgo+ID4gIyBjZXBoIG9zZCBwb29sIGNyZWF0ZSByYmQgNCA0
-IGVyYXN1cmUgdGV1dGhvbG9neXByb2ZpbGUgcG9vbCAncmJkJwo+ID4gY3JlYXRlZAo+ID4KPiA+
-ICMgY2VwaCBvc2QgcG9vbCBjcmVhdGUgY2FjaGUgNAo+ID4gcG9vbCAnY2FjaGUnIGNyZWF0ZWQK
-PiA+Cj4gPiAjIGNlcGggb3NkIHRpZXIgYWRkIHJiZCBjYWNoZQo+ID4gcG9vbCAnY2FjaGUnIGlz
-IG5vdyAob3IgYWxyZWFkeSB3YXMpIGEgdGllciBvZiAncmJkJwo+ID4KPiA+ICMgY2VwaCBvc2Qg
-dGllciBjYWNoZS1tb2RlIGNhY2hlIHdyaXRlYmFjayBzZXQgY2FjaGUtbW9kZSBmb3IgcG9vbAo+
-ID4gJ2NhY2hlJyB0byB3cml0ZWJhY2sKPiA+Cj4gPiAjIGNlcGggb3NkIHRpZXIgc2V0LW92ZXJs
-YXkgcmJkIGNhY2hlCj4gPiBvdmVybGF5IGZvciAncmJkJyBpcyBub3cgKG9yIGFscmVhZHkgd2Fz
-KSAnY2FjaGUnCj4gPgo+ID4gIyBjZXBoIG9zZCBwb29sIHNldCBjYWNoZSBoaXRfc2V0X3R5cGUg
-Ymxvb20gc2V0IHBvb2wgMiBoaXRfc2V0X3R5cGUKPiA+IHRvIGJsb29tCj4gPgo+ID4gIyBjZXBo
-IG9zZCBwb29sIHNldCBjYWNoZSBoaXRfc2V0X2NvdW50IDggc2V0IHBvb2wgMiBoaXRfc2V0X2Nv
-dW50IHRvCj4gPiA4Cj4gPgo+ID4gIyBjZXBoIG9zZCBwb29sIHNldCBjYWNoZSBoaXRfc2V0X3Bl
-cmlvZCA2MCBzZXQgcG9vbCAyIGhpdF9zZXRfcGVyaW9kCj4gPiB0byA2MAo+ID4KPiA+ICMgY2Vw
-aCBvc2QgcG9vbCBzZXQgY2FjaGUgdGFyZ2V0X21heF9vYmplY3RzIDI1MCBzZXQgcG9vbCAyCj4g
-PiB0YXJnZXRfbWF4X29iamVjdHMgdG8gMjUwCj4gCj4gc2V0IHBvb2wgY2FjaGUgbWluX3JlYWRf
-cmVjZW5jeV9mb3JfcHJvbW90ZSA0Cj4gCj4gPiAjIHJiZCAtcCByYmQgY3JlYXRlIHRlc3QgLS1z
-aXplPTFNCj4gPgo+ID4gIyBmb3IgeCBpbiB7MC4uMTB9OyBkbyByYmQgLXAgcmJkIGluZm8gdGVz
-dCA+IC9kZXYvbnVsbCAyPi9kZXYvbnVsbCA7Cj4gPiBkb25lCj4gPgo+ID4gIyByYWRvcyAtcCBj
-YWNoZSBscwo+ID4gcmJkX2lkLnRlc3QKPiA+IHRlc3QucmJkCj4gPiByYmRfZGlyZWN0b3J5Cj4g
-PiByYmRfaGVhZGVyLjEwMTk0NGJhNzMzNQo+ID4KPiA+ICMgcmFkb3MgLXAgY2FjaGUgY2FjaGUt
-Zmx1c2ggcmJkX2lkLnRlc3QKPiA+Cj4gPiAjIHJhZG9zIC1wIGNhY2hlIGNhY2hlLWV2aWN0IHJi
-ZF9pZC50ZXN0Cj4gPgo+ID4gIyByYWRvcyAtcCBjYWNoZSBscwo+ID4gdGVzdC5yYmQKPiA+IHJi
-ZF9kaXJlY3RvcnkKPiA+IHJiZF9oZWFkZXIuMTAxOTQ0YmE3MzM1Cj4gPgo+ID4gIyByYmQgLXAg
-cmJkIGluZm8gdGVzdAo+ID4gcmJkIGltYWdlICd0ZXN0JzoKPiA+IAlzaXplIDEwMjQga0IgaW4g
-MSBvYmplY3RzCj4gPiAJb3JkZXIgMjIgKDQwOTYga0Igb2JqZWN0cykKPiA+IAlibG9ja19uYW1l
-X3ByZWZpeDogcmJkX2RhdGEuMTAxOTQ0YmE3MzM1Cj4gPiAJZm9ybWF0OiAyCj4gPiAJZmVhdHVy
-ZXM6IGxheWVyaW5nCj4gPiAJZmxhZ3M6Cj4gCj4gQW5kIHRoZW4gSSBnZXQgRU9QTk9TVVBQIHRv
-by4KPiAKPiBUaGUgcHJvYmxlbSBpcyB0aGUgZ2V0X2lkIG9wIGRvZXMgc3luY19yZWFkLCB3aGlj
-aCBmaWxlcy4KPiAKPiBJIHRoaW5rIE5pY2sncyBzdWdnZXN0aW9uIGlzIHRoZSByaWdodCBvbmU6
-IGlmIHdlIGdldCBFT1BOT1NVUFAgd2UgZm9yY2UgYQo+IHByb21vdGlvbi4gIE5vdCBzdXJlIGhv
-dyB0cmlja3kgdGhhdCB3aWxsIGJlIHRvIGdldCByaWdodCwgdGhvdWdoLiAgQQo+IHdvcmthcm91
-bmQgZm9yIHJiZCBtaWdodCBiZSB0byBwdXQgdGhlIGluZm8gaW4gYW4geGF0dHIgaW5zdGVhZCBv
-ZiBpbiB0aGUgZGF0YQo+IHBheWxvYWQuLiB0aGF0J3MgcHJvYmFibHkgbW9yZSBlZmZpY2llbnQg
-YW55d2F5Lgo+IAo+IHNhZ2UKPiAKPiA+Cj4gPiAjIHJhZG9zIC1wIGNhY2hlIGxzCj4gPiByYmRf
-aWQudGVzdAo+ID4gdGVzdC5yYmQKPiA+IHJiZF9kaXJlY3RvcnkKPiA+IHJiZF9oZWFkZXIuMTAx
-OTQ0YmE3MzM1Cj4gPgo+ID4gLS0KPiA+Cj4gPiBKYXNvbiBEaWxsYW1hbgo+ID4gUmVkIEhhdCBD
-ZXBoIFN0b3JhZ2UgRW5naW5lZXJpbmcKPiA+IGRpbGxhbWFuQHJlZGhhdC5jb20KPiA+IGh0dHA6
-Ly93d3cucmVkaGF0LmNvbQo+ID4KPiA+Cj4gPiAtLS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0t
-Cj4gPiA+IEZyb206ICJOaWNrIEZpc2siIDxuaWNrQGZpc2subWUudWs+Cj4gPiA+IFRvOiAiU2Fn
-ZSBXZWlsIiA8c3dlaWxAcmVkaGF0LmNvbT4sICJTYW11ZWwgSnVzdCIKPiA8c2p1c3RAcmVkaGF0
-LmNvbT4KPiA+ID4gQ2M6ICJKYXNvbiBEaWxsYW1hbiIgPGRpbGxhbWFuQHJlZGhhdC5jb20+LAo+
-ID4gPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tLCBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
-Zwo+ID4gPiBTZW50OiBUaHVyc2RheSwgRmVicnVhcnkgMTEsIDIwMTYgMTI6NDY6MzggUE0KPiA+
-ID4gU3ViamVjdDogUkU6IGNsc19yYmQgb3BzIG9uIHJiZF9pZC4kbmFtZSBvYmplY3RzIGluIEVD
-IHBvb2wKPiA+ID4KPiA+ID4gSGkgU2FnZSwKPiA+ID4KPiA+ID4gRG8geW91IHRoaW5rIHRoaXMg
-d2lsbCBnZXQgZml4ZWQgaW4gdGltZSBmb3IgdGhlIEpld2VsIHJlbGVhc2U/IEl0Cj4gPiA+IHN0
-aWxsIHNlZW1zIHRvIGhhcHBlbiBpbiBNYXN0ZXIgYW5kIGlzIGRlZmluaXRlbHkgcmVsYXRlZCB0
-byB0aGUgcmVjZW5jeQo+IHNldHRpbmcuCj4gPiA+IEknbSBndWVzc2luZyB0aGF0IHRoZSBpbmZv
-IGNvbW1hbmQgZG9lcyBzb21lIHNvcnQgb2YgcmVhZCBhbmQgdGhlbiBhCj4gd3JpdGUuCj4gPiA+
-IEluIHRoZSBvbGQgYmVoYXZpb3VyIHRoZSByZWFkIHdvdWxkIGhhdmUgYWx3YXlzIHRyaWdnZXJl
-ZCBhIHByb21vdGlvbj8KPiA+ID4KPiA+ID4KPiA+ID4gbmlja0BDZXBoLVRlc3Q6fiQgY2VwaCBv
-c2QgcG9vbCBnZXQgY2FjaGUxCj4gPiA+IG1pbl9yZWFkX3JlY2VuY3lfZm9yX3Byb21vdGUKPiA+
-ID4gbWluX3JlYWRfcmVjZW5jeV9mb3JfcHJvbW90ZTogOAo+ID4gPiBuaWNrQENlcGgtVGVzdDp+
-JCBjZXBoIG9zZCBwb29sIGdldCBjYWNoZTEKPiA+ID4gbWluX3dyaXRlX3JlY2VuY3lfZm9yX3By
-b21vdGUKPiA+ID4gbWluX3dyaXRlX3JlY2VuY3lfZm9yX3Byb21vdGU6IDgKPiA+ID4gbmlja0BD
-ZXBoLVRlc3Q6fiQgcmJkIC1wIGNhY2hlMSBjcmVhdGUgVGVzdDk5IC0tc2l6ZT0xMEcKPiA+ID4g
-bmlja0BDZXBoLVRlc3Q6fiQgcmJkIC1wIGNhY2hlMSBpbmZvIFRlc3Q5OSByYmQgaW1hZ2UgJ1Rl
-c3Q5OSc6Cj4gPiA+ICAgICAgICAgc2l6ZSAxMDI0MCBNQiBpbiAyNTYwIG9iamVjdHMKPiA+ID4g
-ICAgICAgICBvcmRlciAyMiAoNDA5NiBrQiBvYmplY3RzKQo+ID4gPiAgICAgICAgIGJsb2NrX25h
-bWVfcHJlZml4OiByYmRfZGF0YS5lOGU3MzQ2ODlhNWUKPiA+ID4gICAgICAgICBmb3JtYXQ6IDIK
-PiA+ID4gICAgICAgICBmZWF0dXJlczogbGF5ZXJpbmcKPiA+ID4gICAgICAgICBmbGFnczoKPiA+
-ID4gbmlja0BDZXBoLVRlc3Q6fiQgcmFkb3MgLXAgY2FjaGUxIGNhY2hlLWZsdXNoIHJiZF9pZC5U
-ZXN0OTkKPiA+ID4gbmlja0BDZXBoLVRlc3Q6fiQgcmFkb3MgLXAgY2FjaGUxIGNhY2hlLWV2aWN0
-IHJiZF9pZC5UZXN0OTkKPiA+ID4gbmlja0BDZXBoLVRlc3Q6fiQgcmJkIC1wIGNhY2hlMSBpbmZv
-IFRlc3Q5OQo+ID4gPiAyMDE2LTAyLTExIDE3OjM5OjQwLjk0MjAzMCA3ZjAwMDZlYjM3MDAgLTEK
-PiA+ID4gbGlicmJkOjppbWFnZTo6T3BlblJlcXVlc3Q6IGZhaWxlZCB0byByZXRyaWV2ZSBpbWFn
-ZSBpZDogKDk1KQo+ID4gPiBPcGVyYXRpb24gbm90IHN1cHBvcnRlZAo+ID4gPiAyMDE2LTAyLTEx
-IDE3OjM5OjQwLjk0MjIwNSA3ZjAwMDY2YjI3MDAgLTEgbGlicmJkOjpJbWFnZVN0YXRlOgo+ID4g
-PiBmYWlsZWQgdG8gb3Blbgo+ID4gPiBpbWFnZTogKDk1KSBPcGVyYXRpb24gbm90IHN1cHBvcnRl
-ZAo+ID4gPiByYmQ6IGVycm9yIG9wZW5pbmcgaW1hZ2UgVGVzdDk5OiAoOTUpIE9wZXJhdGlvbiBu
-b3Qgc3VwcG9ydGVkCj4gPiA+IG5pY2tAQ2VwaC1UZXN0On4kIGNlcGggb3NkIHBvb2wgc2V0IGNh
-Y2hlMQo+ID4gPiBtaW5fcmVhZF9yZWNlbmN5X2Zvcl9wcm9tb3RlIDAgc2V0IHBvb2wgMTIKPiA+
-ID4gbWluX3JlYWRfcmVjZW5jeV9mb3JfcHJvbW90ZSB0byAwIG5pY2tAQ2VwaC1UZXN0On4kIHJi
-ZCAtcCBjYWNoZTEKPiA+ID4gaW5mbyBUZXN0OTkgcmJkIGltYWdlICdUZXN0OTknOgo+ID4gPiAg
-ICAgICAgIHNpemUgMTAyNDAgTUIgaW4gMjU2MCBvYmplY3RzCj4gPiA+ICAgICAgICAgb3JkZXIg
-MjIgKDQwOTYga0Igb2JqZWN0cykKPiA+ID4gICAgICAgICBibG9ja19uYW1lX3ByZWZpeDogcmJk
-X2RhdGEuZThlNzM0Njg5YTVlCj4gPiA+ICAgICAgICAgZm9ybWF0OiAyCj4gPiA+ICAgICAgICAg
-ZmVhdHVyZXM6IGxheWVyaW5nCj4gPiA+ICAgICAgICAgZmxhZ3M6Cj4gPiA+Cj4gPiA+Cj4gPiA+
-Cj4gPiA+Cj4gPiA+Cj4gPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0KPiA+ID4gPiBG
-cm9tOiBOaWNrIEZpc2sgW21haWx0bzpuaWNrQGZpc2subWUudWtdCj4gPiA+ID4gU2VudDogMDUg
-RmVicnVhcnkgMjAxNiAxOTo1OAo+ID4gPiA+IFRvOiAnU2FnZSBXZWlsJyA8c3dlaWxAcmVkaGF0
-LmNvbT47ICdTYW11ZWwgSnVzdCcKPiA+ID4gPiA8c2p1c3RAcmVkaGF0LmNvbT4KPiA+ID4gPiBD
-YzogJ0phc29uIERpbGxhbWFuJyA8ZGlsbGFtYW5AcmVkaGF0LmNvbT47Cj4gPiA+ID4gY2VwaC11
-c2Vyc0BsaXN0cy5jZXBoLmNvbTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcKPiA+ID4gPiBT
-dWJqZWN0OiBSRTogY2xzX3JiZCBvcHMgb24gcmJkX2lkLiRuYW1lIG9iamVjdHMgaW4gRUMgcG9v
-bAo+ID4gPiA+Cj4gPiA+ID4gPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQo+ID4gPiA+ID4g
-RnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVs
-LQo+ID4gPiA+ID4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgU2FnZSBXZWls
-Cj4gPiA+ID4gPiBTZW50OiAwNSBGZWJydWFyeSAyMDE2IDE4OjQ1Cj4gPiA+ID4gPiBUbzogU2Ft
-dWVsIEp1c3QgPHNqdXN0QHJlZGhhdC5jb20+Cj4gPiA+ID4gPiBDYzogSmFzb24gRGlsbGFtYW4g
-PGRpbGxhbWFuQHJlZGhhdC5jb20+OyBOaWNrIEZpc2sKPiA+ID4gPiA+IDxuaWNrQGZpc2subWUu
-dWs+OyBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tOwo+ID4gPiA+ID4gY2VwaC1kZXZlbEB2Z2Vy
-Lmtlcm5lbC5vcmcKPiA+ID4gPiA+IFN1YmplY3Q6IFJlOiBjbHNfcmJkIG9wcyBvbiByYmRfaWQu
-JG5hbWUgb2JqZWN0cyBpbiBFQyBwb29sCj4gPiA+ID4gPgo+ID4gPiA+ID4gT24gRnJpLCA1IEZl
-YiAyMDE2LCBTYW11ZWwgSnVzdCB3cm90ZToKPiA+ID4gPiA+ID4gT24gRnJpLCBGZWIgNSwgMjAx
-NiBhdCA3OjUzIEFNLCBKYXNvbiBEaWxsYW1hbgo+ID4gPiA+ID4gPiA8ZGlsbGFtYW5AcmVkaGF0
-LmNvbT4KPiA+ID4gPiA+IHdyb3RlOgo+ID4gPiA+ID4gPiA+ICMxIGFuZCAjMiBhcmUgYXdrd2Fy
-ZCBmb3IgZXhpc3RpbmcgcG9vbHMgc2luY2Ugd2Ugd291bGQgbmVlZAo+ID4gPiA+ID4gPiA+IGEg
-dG9vbCB0byBpbmplY3QgZHVtbXkgb21hcCB2YWx1ZXMgd2l0aGluIGV4aXN0aW5nIGltYWdlcy4K
-PiA+ID4gPiA+ID4gPiBDYW4gdGhlIGNhY2hlIHRpZXIgZm9yY2UtcHJvbW90ZSBpdCBmcm9tIHRo
-ZSBFQyBwb29sIHRvIHRoZQo+ID4gPiA+ID4gPiA+IGNhY2hlIHdoZW4gYW4gdW5zdXBwb3J0ZWQg
-b3AgaXMgZW5jb3VudGVyZWQ/ICBUaGVyZSBpcyBsb2dpYwo+ID4gPiA+ID4gPiA+IGxpa2UgdGhh
-dCBpbiBqZXdlbC9tYXN0ZXIgZm9yIGhhbmRsaW5nIHRoZSBwcm94aWVkIHdyaXRlcy4KPiA+ID4g
-PiA+Cj4gPiA+ID4gPiBUaGF0IHNvdW5kZWQgZmFtaWxpYXIgYnV0IEkgY291bGRuJ3QgZmluZCB0
-aGlzIGluIHRoZSBjb2RlIG9yCj4gPiA+ID4gPiBoaXN0b3J5IGJldHdlZW4gaW5mZXJuYWxpcyBh
-bmQgbWFzdGVyLiAgQW5kIHRoZW4gSSB3ZW50IGJhY2sgYW5kCj4gPiA+ID4gPiB3YXMgdW5hYmxl
-IHRvIHJlcHJvZHVjZSB0aGUgYSBwcm9ibGVtIG9uIGVpdGhlciBpbmZlcm5hbGlzIGJyYW5jaCBv
-cgo+IHY5LjIuMC4KPiA+ID4gPiA+Cj4gPiA+ID4gPiBOaWNrLCBJIHdhcyBkb2luZwo+ID4gPiA+
-ID4gIDEwMTMgIC4vcmJkIC1wIGVjIGNyZWF0ZSBmb28gLS1zaXplIDEwCj4gPiA+ID4gPiAgMTAx
-NCAgLi9yYmQgLXAgZWMgaW5mbyBmb28KPiA+ID4gPiA+ICAxMDE1ICAuL3JhZG9zIC1wIGVjLWNh
-Y2hlIGNhY2hlLWZsdXNoIHJiZF9pZC5mb28KPiA+ID4gPiA+ICAxMDE2ICAuL3JhZG9zIC1wIGVj
-LWNhY2hlIGNhY2hlLWV2aWN0IHJiZF9pZC5mb28KPiA+ID4gPiA+ICAxMDE3ICAuL3JiZCAtcCBl
-YyBpbmZvIGZvbwo+ID4gPiA+ID4gIDEwMTggIC4vcmFkb3MgLXAgZWMtY2FjaGUgbHMgLQo+ID4g
-PiA+ID4KPiA+ID4gPiA+IFRoZSByYmQuZ2V0X2lkIGlzIHN1Y2Nlc3NmdWxseSBmb3JjaW5nIGEg
-cHJvbW90aW9uLgo+ID4gPiA+ID4KPiA+ID4gPiA+IFdoaWNoIG1ha2VzIG1lIHRoaW5rIHNvbWV0
-aGluZyBlbHNlIGlzIGdvaW5nIG9uLi4uIE5pY2ssIGNhbiB5b3UKPiA+ID4gPiA+IHRyeSB0byBy
-ZXByb2R1Y2UgdGhpcyB3aXRoIGEgdXNlcnNwYWNlIGxpYnJiZCBjbGllbnQ/ICAncmJkCj4gPiA+
-ID4gPiBpbmZvJyB3aWxsIGRvIGEgZmV3IGJhc2ljIG9wZXJhdGlvbnMsIGJ1dCBpZiB0aGF0IGlz
-bid0Cj4gPiA+ID4gPiBwcm9ibGVtYXRpYywgdHJ5ICdyYmQgYmVuY2gtd3JpdGUnIG9yICdyYmQg
-ZXhwb3J0Jywgd2hpY2ggd2lsbCBkbyByZWFsCj4gSU8/Cj4gPiA+ID4KPiA+ID4gPiBIaSBTYWdl
-LAo+ID4gPiA+Cj4gPiA+ID4gSnVzdCB0cmllZCBhZ2FpbiBhbmQgSSBjYW4gY29uZmlybSBpdHMg
-ZGVmaW5pdGVseSBub3Qgd29ya2luZywgYnV0Cj4gPiA+ID4gSSB0aGluayBJIG1heSBoYXZlIHN0
-dW1ibGVkIG9uIHRoZSByZWFzb24gd2h5Lgo+ID4gPiA+Cj4gPiA+ID4gRmlyc3QgYXBvbG9naWVz
-IGZvciBub3QgbWVudGlvbmluZyBpdCBiZWZvcmUsIGJ1dCBJIGFtIHN0aWxsCj4gPiA+ID4gcnVu
-bmluZyB0aGF0IHJlY2VuY3kgZml4IG9uIEluZmVybmFsaXMuIEluaXRpYWxseSBJIHRob3VnaHQg
-dGhpcwo+ID4gPiA+IHdhcyBhIGZsdXNoaW5nIGlzc3VlIGFzIEkganVzdCBhc3N1bWVkIHRob3Nl
-IG9iamVjdHMgc2hvdWxkbid0IGdldAo+ID4gPiA+IGZsdXNoZWQgb3V0IGF0IGFsbC4gQnV0IGFm
-dGVyIHJlYWRpbmcgeW91ciBlbWFpbCB3aGVyZSB5b3Ugc2FpZCBpdAo+ID4gPiA+IGZvcmNlZCB0
-aGUgcHJvbW90aW9uLCBpdCBzdHJ1Y2sgbWUgdGhhdCB0aGUgYnJva2VuIHJlY2VuY3kKPiA+ID4g
-PiBiZWhhdmlvdXIgbWF5IGhhdmUgYmVlbiBtYXNraW5nIHRoaXMgaXNzdWUuIFdpdGggdGhlIGZp
-eCBpdCB3b3VsZAo+ID4gPiA+IG9ubHkgcHJvbW90ZSBpZiB0aGUgb2JqZWN0IHdhcyBob3QgZW5v
-dWdoLCB3aGljaCBpdCBwcm9iYWJseSBpbgo+ID4gPiA+IG1vc3QgY2FzZXMgd291bGRuJ3QgYmUu
-IEFzIGEgdGVzdCBJIHNldCBteSByZWNlbmN5J3MgZG93biB0byAwIGFuZAo+ID4gPiA+IHRyaWVk
-IHRoZSBzdGVwcyBhYm92ZSBhZ2FpbiBhbmQgdGhpcyB0aW1lIGl0IHdvcmtlZC4gRG9lcyB0aGlz
-Cj4gPiA+ID4gbWFrZSBzZW5zZT8KPiA+ID4gPgo+ID4gPiA+IE5pY2sKPiA+ID4gPgo+ID4gPiA+
-ID4KPiA+ID4gPiA+IHNhZ2UKPiA+ID4gPiA+Cj4gPiA+ID4gPgo+ID4gPiA+ID4gPiAtU2FtCj4g
-PiA+ID4gPiA+Cj4gPiA+ID4gPiA+ID4KPiA+ID4gPiA+ID4gPiAtLQo+ID4gPiA+ID4gPiA+Cj4g
-PiA+ID4gPiA+ID4gSmFzb24gRGlsbGFtYW4KPiA+ID4gPiA+ID4gPgo+ID4gPiA+ID4gPiA+IC0t
-LS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0KPiA+ID4gPiA+ID4gPj4gRnJvbTogIlNhZ2UgV2Vp
-bCIgPHN3ZWlsQHJlZGhhdC5jb20+Cj4gPiA+ID4gPiA+ID4+IFRvOiAiTmljayBGaXNrIiA8bmlj
-a0BmaXNrLm1lLnVrPgo+ID4gPiA+ID4gPiA+PiBDYzogIkphc29uIERpbGxhbWFuIiA8ZGlsbGFt
-YW5AcmVkaGF0LmNvbT4sCj4gPiA+ID4gPiA+ID4+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20s
-IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnCj4gPiA+ID4gPiA+ID4+IFNlbnQ6IEZyaWRheSwg
-RmVicnVhcnkgNSwgMjAxNiAxMDo0MjoxNyBBTQo+ID4gPiA+ID4gPiA+PiBTdWJqZWN0OiBjbHNf
-cmJkIG9wcyBvbiByYmRfaWQuJG5hbWUgb2JqZWN0cyBpbiBFQyBwb29sCj4gPiA+ID4gPiA+ID4+
-Cj4gPiA+ID4gPiA+ID4+IE9uIFdlZCwgMjcgSmFuIDIwMTYsIE5pY2sgRmlzayB3cm90ZToKPiA+
-ID4gPiA+ID4gPj4gPgo+ID4gPiA+ID4gPiA+PiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
-LS0KPiA+ID4gPiA+ID4gPj4gPiA+IEZyb206IGNlcGgtdXNlcnMKPiA+ID4gPiA+ID4gPj4gPiA+
-IFttYWlsdG86Y2VwaC11c2Vycy1ib3VuY2VzQGxpc3RzLmNlcGguY29tXQo+ID4gPiA+ID4gPiA+
-PiA+ID4gT24gQmVoYWxmIE9mIEphc29uIERpbGxhbWFuCj4gPiA+ID4gPiA+ID4+ID4gPiBTZW50
-OiAyNyBKYW51YXJ5IDIwMTYgMTQ6MjUKPiA+ID4gPiA+ID4gPj4gPiA+IFRvOiBOaWNrIEZpc2sg
-PG5pY2tAZmlzay5tZS51az4KPiA+ID4gPiA+ID4gPj4gPiA+IENjOiBjZXBoLXVzZXJzQGxpc3Rz
-LmNlcGguY29tCj4gPiA+ID4gPiA+ID4+ID4gPiBTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIFBv
-c3NpYmxlIENhY2hlIFRpZXIgQnVnIC0gQ2FuCj4gPiA+ID4gPiA+ID4+ID4gPiBzb21lb25lIGNv
-bmZpcm0KPiA+ID4gPiA+ID4gPj4gPiA+Cj4gPiA+ID4gPiA+ID4+ID4gPiBBcmUgeW91IHJ1bm5p
-bmcgd2l0aCBhbiBFQyBwb29sIGJlaGluZCB0aGUgY2FjaGUgdGllcj8KPiA+ID4gPiA+ID4gPj4g
-PiA+IEkga25vdyB0aGVyZSB3YXMgYW4gaXNzdWUgd2l0aCB0aGUgZmlyc3QgSW5mZXJuYWxpcwo+
-ID4gPiA+ID4gPiA+PiA+ID4gcmVsZWFzZSB3aGVyZSB1bnN1cHBvcnRlZCBvcHMgd2VyZSBiZWlu
-ZyBwcm94aWVkIGRvd24KPiA+ID4gPiA+ID4gPj4gPiA+IHRvIHRoZSBFQyBwb29sLCByZXN1bHRp
-bmcgaW4gdGhhdCBzYW1lIGVycm9yLgo+ID4gPiA+ID4gPiA+PiA+Cj4gPiA+ID4gPiA+ID4+ID4g
-SGkgSmFzb24sIHllcyBJIGFtLiAzeCBSZXBsaWNhdGVkIHBvb2wgb24gdG9wIG9mIGFuIEVDIHBv
-b2wuCj4gPiA+ID4gPiA+ID4+ID4KPiA+ID4gPiA+ID4gPj4gPiBJdCdzIHByb2JhYmx5IHNvbWV0
-aGluZyBzaW1pbGFyIHRvIHdoYXQgeW91IG1lbnRpb24uCj4gPiA+ID4gPiA+ID4+ID4gRWl0aGVy
-IHRoZSBjbGllbnQgc2hvdWxkIGJlIGFibGUgdG8gYWNjZXNzIHRoZSBSQkQgaGVhZGVyCj4gPiA+
-ID4gPiA+ID4+ID4gb2JqZWN0IG9uIHRoZSBiYXNlIHBvb2wsIG9yIGl0IHNob3VsZCBiZSBmbGFn
-Z2VkIHNvIHRoYXQgaXQgY2FuJ3QKPiBiZSBldmljdGVkLgo+ID4gPiA+ID4gPiA+Pgo+ID4gPiA+
-ID4gPiA+PiBJIGp1c3QgY29uZmlybWVkIHRoYXQgdGhlIHJiZF9pZC4kbmFtZSBvYmplY3QgZG9l
-c24ndCBoYXZlCj4gPiA+ID4gPiA+ID4+IGFueSBvbWFwLCBzbyBmcm9tIHJhZG9zJ3MgcGVyc3Bl
-Y3RpdmUsIGZsdXNoaW5nIGFuZAo+ID4gPiA+ID4gPiA+PiBldmljdGluZyBpdCBpcyBmaW5lLiAg
-QnV0IHllYWgsIHRoZSBjbHNfcmJkIG9wcyBhcmVuJ3QgcGVybWl0dGVkIGluCj4gdGhlIEVDIHBv
-b2wuCj4gPiA+ID4gPiA+ID4+Cj4gPiA+ID4gPiA+ID4+IEluIG1hc3Rlci9qZXdlbCB3ZSBoYXZl
-IGEgY2FjaGUtcGluIGZ1bmN0aW9uIHRoYXQgcHJldmVudHMKPiA+ID4gPiA+ID4gPj4gYW4gb2Jq
-ZWN0IGZyb20gYmVpbmcgZmx1c2hlZC4KPiA+ID4gPiA+ID4gPj4KPiA+ID4gPiA+ID4gPj4gQSBm
-ZXcgb3B0aW9ucyBhcmU6Cj4gPiA+ID4gPiA+ID4+Cj4gPiA+ID4gPiA+ID4+IDEpIEhhdmUgY2xz
-X3JiZCBjYWNoZS1waW4gaXQncyBvYmplY3RzLgo+ID4gPiA+ID4gPiA+Pgo+ID4gPiA+ID4gPiA+
-PiAyKSBIYXZlIGNsc19yYmQgcHV0IGFuIG9tYXAga2V5IG9uIHRoZSBvYmplY3QgdG8gaW5kaXJl
-Y3RseQo+ID4gPiA+ID4gPiA+PiBkbyB0aGUKPiA+ID4gPiA+IHNhbWUuCj4gPiA+ID4gPiA+ID4+
-Cj4gPiA+ID4gPiA+ID4+IDMpIEFkZCBhIHJlcXVpcmVzLWNscyB0eXBlIG9iamVjdCBmbGFnIHRo
-YXQga2VlcHMgaHRlCj4gPiA+ID4gPiA+ID4+IG9iamVjdCBvdXQgb2YgYW4gRUMgcG9vbCAqdW50
-aWwqIGl0IGV2ZW50dWFsbHkgc3VwcG9ydHMgY2xzIG9wcy4KPiA+ID4gPiA+ID4gPj4KPiA+ID4g
-PiA+ID4gPj4gSSdkIGxlYW4gdG93YXJkIDEgc2luY2UgaXQncyBzaW1wbGUgYW5kIGV4cGxpY2l0
-LCBhbmQgd2hlbgo+ID4gPiA+ID4gPiA+PiB3ZSBldmVudHVhbGx5IG1ha2UgY2xhc3NlcyB3b3Jr
-IHdlIGNhbiByZW1vdmUgdGhlIGNhY2hlLXBpbgo+ID4gPiA+ID4gPiA+PiBiZWhhdmlvcgo+ID4g
-PiA+ID4gZnJvbSBjbHNfcmJkLgo+ID4gPiA+ID4gPiA+PiBJdCdzIGhhcmRlciB0byBmaXggaW4g
-aW5mZXJuYWxpcyB1bmxlc3Mgd2UgYWxzbyBiYWNrcG9ydAo+ID4gPiA+ID4gPiA+PiBjYWNoZS1w
-aW4vdW5waW4gb3BzLCB0b28sIHNvIG1heWJlICMyIHdvdWxkIGJlIGEgc2ltcGxlCj4gPiA+ID4g
-PiA+ID4+IGluZmVybmFsaXMKPiA+ID4gPiA+IHdvcmthcm91bmQ/Cj4gPiA+ID4gPiA+ID4+Cj4g
-PiA+ID4gPiA+ID4+IEphc29uPyAgU2FtPwo+ID4gPiA+ID4gPiA+PiBzYWdlCj4gPiA+ID4gPiA+
-ID4+Cj4gPiA+ID4gPiA+ID4+Cj4gPiA+ID4gPiA+ID4+Cj4gPiA+ID4gPiA+ID4+ID4KPiA+ID4g
-PiA+ID4gPj4gPiA+Cj4gPiA+ID4gPiA+ID4+ID4gPiAtLQo+ID4gPiA+ID4gPiA+PiA+ID4KPiA+
-ID4gPiA+ID4gPj4gPiA+IEphc29uIERpbGxhbWFuCj4gPiA+ID4gPiA+ID4+ID4gPgo+ID4gPiA+
-ID4gPiA+PiA+ID4KPiA+ID4gPiA+ID4gPj4gPiA+IC0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0t
-LS0KPiA+ID4gPiA+ID4gPj4gPiA+ID4gRnJvbTogIk5pY2sgRmlzayIgPG5pY2tAZmlzay5tZS51
-az4KPiA+ID4gPiA+ID4gPj4gPiA+ID4gVG86IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiA+
-ID4gPiA+ID4gPj4gPiA+ID4gU2VudDogV2VkbmVzZGF5LCBKYW51YXJ5IDI3LCAyMDE2IDg6NDY6
-NTMgQU0KPiA+ID4gPiA+ID4gPj4gPiA+ID4gU3ViamVjdDogW2NlcGgtdXNlcnNdIFBvc3NpYmxl
-IENhY2hlIFRpZXIgQnVnIC0gQ2FuCj4gPiA+ID4gPiA+ID4+ID4gPiA+IHNvbWVvbmUgY29uZmly
-bQo+ID4gPiA+ID4gPiA+PiA+ID4gPgo+ID4gPiA+ID4gPiA+PiA+ID4gPiBIaSBBbGwsCj4gPiA+
-ID4gPiA+ID4+ID4gPiA+Cj4gPiA+ID4gPiA+ID4+ID4gPiA+IEkgdGhpbmsgSSBoYXZlIHN0dW1i
-bGVkIG9uIGEgYnVnLiBJJ20gcnVubmluZwo+ID4gPiA+ID4gPiA+PiA+ID4gPiBJbmZlcm5hbGlz
-IChLZXJuZWwgNC40IG9uIHRoZQo+ID4gPiA+ID4gPiA+PiA+ID4gPiBjbGllbnQpIGFuZCBpdCBz
-ZWVtcyB0aGF0IGlmIHRoZSBSQkQgaGVhZGVyIG9iamVjdAo+ID4gPiA+ID4gPiA+PiA+ID4gPiBn
-ZXRzIGV2aWN0ZWQgZnJvbSB0aGUgY2FjaGUgcG9vbCB0aGVuIHlvdSBjYW4gbm8gbG9uZ2VyCj4g
-bWFwIGl0Lgo+ID4gPiA+ID4gPiA+PiA+ID4gPgo+ID4gPiA+ID4gPiA+PiA+ID4gPiBTdGVwcyB0
-byByZXByb2R1Y2UKPiA+ID4gPiA+ID4gPj4gPiA+ID4KPiA+ID4gPiA+ID4gPj4gPiA+ID4gcmJk
-IC1wIGNhY2hlMSBjcmVhdGUgVGVzdCAtLXNpemU9MTBHIHJiZCAtIHAgY2FjaGUxCj4gPiA+ID4g
-PiA+ID4+ID4gPiA+IG1hcCBUZXN0Cj4gPiA+ID4gPiA+ID4+ID4gPiA+Cj4gPiA+ID4gPiA+ID4+
-ID4gPiA+IC9kZXYvcmJkMSAgPC1Xb3JrcyEhCj4gPiA+ID4gPiA+ID4+ID4gPiA+Cj4gPiA+ID4g
-PiA+ID4+ID4gPiA+IHJiZCB1bm1hcCAvZGV2L3JiZDEKPiA+ID4gPiA+ID4gPj4gPiA+ID4KPiA+
-ID4gPiA+ID4gPj4gPiA+ID4gcmFkb3MgLXAgY2FjaGUxIGNhY2hlLWZsdXNoIHJiZF9pZC5UZXN0
-IHJhZG9zIC1wCj4gPiA+ID4gPiA+ID4+ID4gPiA+IGNhY2hlMSBjYWNoZS1ldmljdCByYmRfaWQu
-VGVzdCByYmQgLSBwIGNhY2hlMSBtYXAKPiA+ID4gPiA+ID4gPj4gPiA+ID4gVGVzdAo+ID4gPiA+
-ID4gPiA+PiA+ID4gPgo+ID4gPiA+ID4gPiA+PiA+ID4gPiByYmQ6IHN5c2ZzIHdyaXRlIGZhaWxl
-ZAo+ID4gPiA+ID4gPiA+PiA+ID4gPiByYmQ6IG1hcCBmYWlsZWQ6ICg5NSkgT3BlcmF0aW9uIG5v
-dCBzdXBwb3J0ZWQKPiA+ID4gPiA+ID4gPj4gPiA+ID4KPiA+ID4gPiA+ID4gPj4gPiA+ID4gb3Ig
-d2l0aCB0aGUgcmJkLW5iZCBjbGllbnQKPiA+ID4gPiA+ID4gPj4gPiA+ID4KPiA+ID4gPiA+ID4g
-Pj4gPiA+ID4gMjAxNi0wMS0yNyAxMzozOTo1Mi42ODY3NzAgN2Y5ZTU0MTYyYjAwIC0xCj4gPiA+
-ID4gPiA+ID4+ID4gPiA+IGFzb2soMHg1NjE4MzdiODgzNjApCj4gPiA+ID4gPiA+ID4+ID4gPiA+
-IEFkbWluU29ja2V0Q29uZmlnT2JzOjppbml0OiBmYWlsZWQ6Cj4gPiA+ID4gPiBBZG1pblNvY2tl
-dDo6YmluZF9hbmRfbGlzdGVuOgo+ID4gPiA+ID4gPiA+PiA+ID4gPiBmYWlsZWQgdG8gYmluZCB0
-aGUgVU5JWCBkb21haW4gc29ja2V0IHRvCj4gPiA+ID4gPiA+ID4+ID4gPiA+ICcvdmFyL3J1bi9j
-ZXBoL2NlcGgtY2xpZW50LmFkbWluLmFzb2snOiAoMTcpIEZpbGUKPiA+ID4gPiA+ID4gPj4gPiA+
-ID4gZXhpc3RzCj4gPiA+ID4gPiA+ID4+ID4gPiA+IDIwMTYtMDEtMjcgMTM6Mzk6NTIuNzAzOTg3
-IDdmOWUzMmZmZDcwMCAtMQo+ID4gPiA+ID4gbGlicmJkOjppbWFnZTo6T3BlblJlcXVlc3Q6Cj4g
-PiA+ID4gPiA+ID4+ID4gPiA+IGZhaWxlZCB0byByZXRyaWV2ZSBpbWFnZSBpZDogKDk1KSBPcGVy
-YXRpb24gbm90Cj4gPiA+ID4gPiA+ID4+ID4gPiA+IHN1cHBvcnRlZAo+ID4gPiA+ID4gPiA+PiA+
-ID4gPiByYmQtbmJkOiBmYWlsZWQgdG8gbWFwLCBzdGF0dXM6ICg5NSkgT3BlcmF0aW9uIG5vdAo+
-ID4gPiA+ID4gPiA+PiA+ID4gPiBzdXBwb3J0ZWQKPiA+ID4gPiA+ID4gPj4gPiA+ID4gMjAxNi0w
-MS0yNyAxMzozOTo1Mi43MDQxMzggN2Y5ZTMyN2ZjNzAwIC0xCj4gPiA+ID4gPiA+ID4+ID4gPiA+
-IGxpYnJiZDo6SW1hZ2VTdGF0ZTogZmFpbGVkIHRvIG9wZW4gaW1hZ2U6ICg5NSkKPiA+ID4gPiA+
-ID4gPj4gPiA+ID4gT3BlcmF0aW9uIG5vdCBzdXBwb3J0ZWQKPiA+ID4gPiA+ID4gPj4gPiA+ID4K
-PiA+ID4gPiA+ID4gPj4gPiA+ID4gTmljawo+ID4gPiA+ID4gPiA+PiA+ID4gPgo+ID4gPiA+ID4g
-PiA+PiA+ID4gPgo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fCj4gPiA+ID4gPiA+ID4+ID4gPiA+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0IGNlcGgtdXNl
-cnNAbGlzdHMuY2VwaC5jb20KPiA+ID4gPiA+ID4gPj4gPiA+ID4gaHR0cDovL2xpc3RzLmNlcGgu
-Y29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY28KPiA+ID4gPiA+ID4gPj4gPiA+ID4g
-bQo+ID4gPiA+ID4gPiA+PiA+ID4gPgo+ID4gPiA+ID4gPiA+PiA+ID4KPiBfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+ID4gPiA+ID4gPiA+PiA+ID4gY2Vw
-aC11c2VycyBtYWlsaW5nIGxpc3QgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+ID4gPiA+ID4g
-PiA+PiA+ID4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNl
-cGguY29tCj4gPiA+ID4gPiA+ID4+ID4KPiA+ID4gPiA+ID4gPj4gPiBfX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+ID4gPiA+ID4gPiA+PiA+IGNlcGgtdXNl
-cnMgbWFpbGluZyBsaXN0Cj4gPiA+ID4gPiA+ID4+ID4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
-bQo+ID4gPiA+ID4gPiA+PiA+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
-aC11c2Vycy1jZXBoLmNvbQo+ID4gPiA+ID4gPiA+PiA+Cj4gPiA+ID4gPiA+ID4+ID4KPiA+ID4g
-PiA+ID4gPj4gLS0KPiA+ID4gPiA+ID4gPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
-IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlCj4gPiA+ID4gPiA+ID4+IGNlcGgtZGV2ZWwiIGlu
-IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0bwo+ID4gPiA+ID4gPiA+PiBtYWpvcmRvbW9Admdlci5r
-ZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQKPiA+ID4gPiA+ID4gPj4gaHR0cDovL3Zn
-ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4gPiA+ID4gPiA+ID4+Cj4gPiA+ID4g
-PiA+ID4gLS0KPiA+ID4gPiA+ID4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2Vu
-ZCB0aGUgbGluZSAidW5zdWJzY3JpYmUKPiA+ID4gPiA+ID4gPiBjZXBoLWRldmVsIiBpbiB0aGUg
-Ym9keSBvZiBhIG1lc3NhZ2UgdG8KPiA+ID4gPiA+ID4gPiBtYWpvcmRvbW9Admdlci5rZXJuZWwu
-b3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQKPiA+ID4gPiA+ID4gPiBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKPiA+ID4gPiA+ID4KPiA+ID4gPiA+ID4KPiA+ID4g
-PiA+IC0tCj4gPiA+ID4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUg
-bGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIKPiA+ID4gPiA+IGluIHRoZSBib2R5IG9mIGEg
-bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUKPiA+ID4gPiBtYWpvcmRv
-bW8KPiA+ID4gPiA+IGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
-by5odG1sCj4gPiA+Cj4gPiA+Cj4gPiAtLQo+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
-c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiCj4gPiBpbiB0aGUgYm9k
-eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlCj4gbWFqb3Jk
-b21vCj4gPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwKPiA+Cj4gPgo+IC0tCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
-IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZQo+IGJvZHkgb2YgYSBtZXNzYWdl
-IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdAo+IGh0
-dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAoKX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QK
-Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8u
-Y2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+So if I'm reading the samples changes here correctly, we seem to have
+a bunch of new warnings around the lock changes? Is this something we
+should be resolving in the lock users, or whitelisting, or fixing
+lower down in the stack?
+-Greg
+
+On Thu, Feb 11, 2016 at 9:57 AM,  <scan-admin@coverity.com> wrote:
+>
+> Hi,
+>
+> Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+>
+> 28 new defect(s) introduced to ceph found with Coverity Scan.
+> 106 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+>
+> New defect(s) Reported-by: Coverity Scan
+> Showing 20 of 28 defect(s)
+>
+>
+> ** CID 1352097:  Control flow issues  (UNREACHABLE)
+> /common/shunique_lock.h: 326 in ceph::shunique_lock<boost::shared_mutex>::release_to_unique()()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352097:  Control flow issues  (UNREACHABLE)
+> /common/shunique_lock.h: 326 in ceph::shunique_lock<boost::shared_mutex>::release_to_unique()()
+> 320           return tu;
+> 321         } else if (m == nullptr) {
+> 322           return unique_lock_type();
+> 323         }
+> 324         throw std::system_error((int)std::errc::operation_not_permitted,
+> 325                                 std::generic_category());
+>>>>     CID 1352097:  Control flow issues  (UNREACHABLE)
+>>>>     This code cannot be reached: "return ceph::shunique_lock<...".
+> 326         return unique_lock_type();
+> 327       }
+> 328
+> 329       shared_lock_type release_to_shared() {
+> 330         if (o == ownership::shared) {
+> 331           o = ownership::none;
+>
+> ** CID 1352096:    (UNCAUGHT_EXCEPT)
+> /test/rbd_mirror/test_main.cc: 14 in main()
+> /test/rbd_mirror/test_main.cc: 14 in main()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352096:    (UNCAUGHT_EXCEPT)
+> /test/rbd_mirror/test_main.cc: 14 in main()
+> 8     #include <iostream>
+> 9     #include <string>
+> 10
+> 11     extern void register_test_cluster_watcher();
+> 12     extern void register_test_pool_watcher();
+> 13
+>>>>     CID 1352096:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 14     int main(int argc, char **argv)
+> 15     {
+> 16       register_test_cluster_watcher();
+> 17       register_test_pool_watcher();
+> 18
+> 19       ::testing::InitGoogleTest(&argc, argv);
+> /test/rbd_mirror/test_main.cc: 14 in main()
+> 8     #include <iostream>
+> 9     #include <string>
+> 10
+> 11     extern void register_test_cluster_watcher();
+> 12     extern void register_test_pool_watcher();
+> 13
+>>>>     CID 1352096:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 14     int main(int argc, char **argv)
+> 15     {
+> 16       register_test_cluster_watcher();
+> 17       register_test_pool_watcher();
+> 18
+> 19       ::testing::InitGoogleTest(&argc, argv);
+>
+> ** CID 1352095:    (UNCAUGHT_EXCEPT)
+> /tools/cephfs/cephfs-table-tool.cc: 11 in main()
+> /tools/cephfs/cephfs-table-tool.cc: 11 in main()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352095:    (UNCAUGHT_EXCEPT)
+> /tools/cephfs/cephfs-table-tool.cc: 11 in main()
+> 5     #include "common/errno.h"
+> 6     #include "global/global_init.h"
+> 7
+> 8     #include "TableTool.h"
+> 9
+> 10
+>>>>     CID 1352095:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
+> 11     int main(int argc, const char **argv)
+> 12     {
+> 13       vector<const char*> args;
+> 14       argv_to_vec(argc, argv, args);
+> 15       env_to_vec(args);
+> 16
+> /tools/cephfs/cephfs-table-tool.cc: 11 in main()
+> 5     #include "common/errno.h"
+> 6     #include "global/global_init.h"
+> 7
+> 8     #include "TableTool.h"
+> 9
+> 10
+>>>>     CID 1352095:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
+> 11     int main(int argc, const char **argv)
+> 12     {
+> 13       vector<const char*> args;
+> 14       argv_to_vec(argc, argv, args);
+> 15       env_to_vec(args);
+> 16
+>
+> ** CID 1352094:    (UNCAUGHT_EXCEPT)
+> /tools/cephfs/cephfs-journal-tool.cc: 24 in main()
+> /tools/cephfs/cephfs-journal-tool.cc: 24 in main()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352094:    (UNCAUGHT_EXCEPT)
+> /tools/cephfs/cephfs-journal-tool.cc: 24 in main()
+> 18     #include "common/errno.h"
+> 19     #include "global/global_init.h"
+> 20
+> 21     #include "JournalTool.h"
+> 22
+> 23
+>>>>     CID 1352094:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
+> 24     int main(int argc, const char **argv)
+> 25     {
+> 26       vector<const char*> args;
+> 27       argv_to_vec(argc, argv, args);
+> 28       env_to_vec(args);
+> 29
+> /tools/cephfs/cephfs-journal-tool.cc: 24 in main()
+> 18     #include "common/errno.h"
+> 19     #include "global/global_init.h"
+> 20
+> 21     #include "JournalTool.h"
+> 22
+> 23
+>>>>     CID 1352094:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
+> 24     int main(int argc, const char **argv)
+> 25     {
+> 26       vector<const char*> args;
+> 27       argv_to_vec(argc, argv, args);
+> 28       env_to_vec(args);
+> 29
+>
+> ** CID 1352093:    (UNCAUGHT_EXCEPT)
+> /tools/cephfs/cephfs-data-scan.cc: 11 in main()
+> /tools/cephfs/cephfs-data-scan.cc: 11 in main()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352093:    (UNCAUGHT_EXCEPT)
+> /tools/cephfs/cephfs-data-scan.cc: 11 in main()
+> 5     #include "common/errno.h"
+> 6     #include "global/global_init.h"
+> 7
+> 8     #include "DataScan.h"
+> 9
+> 10
+>>>>     CID 1352093:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
+> 11     int main(int argc, const char **argv)
+> 12     {
+> 13       vector<const char*> args;
+> 14       argv_to_vec(argc, argv, args);
+> 15       env_to_vec(args);
+> 16
+> /tools/cephfs/cephfs-data-scan.cc: 11 in main()
+> 5     #include "common/errno.h"
+> 6     #include "global/global_init.h"
+> 7
+> 8     #include "DataScan.h"
+> 9
+> 10
+>>>>     CID 1352093:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
+> 11     int main(int argc, const char **argv)
+> 12     {
+> 13       vector<const char*> args;
+> 14       argv_to_vec(argc, argv, args);
+> 15       env_to_vec(args);
+> 16
+>
+> ** CID 1352092:  Error handling issues  (UNCAUGHT_EXCEPT)
+> /tools/rbd_mirror/main.cc: 32 in main()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352092:  Error handling issues  (UNCAUGHT_EXCEPT)
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352092:  Error handling issues  (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "ceph::buffer::end_of_buffer" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+>
+> ** CID 1352091:    (UNCAUGHT_EXCEPT)
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+> /tools/rbd_mirror/main.cc: 32 in main()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352091:    (UNCAUGHT_EXCEPT)
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+> /tools/rbd_mirror/main.cc: 32 in main()
+> 26     static void handle_signal(int signum)
+> 27     {
+> 28       if (mirror)
+> 29         mirror->handle_signal(signum);
+> 30     }
+> 31
+>>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
+> 32     int main(int argc, const char **argv)
+> 33     {
+> 34       std::vector<const char*> args;
+> 35       argv_to_vec(argc, argv, args);
+> 36       env_to_vec(args);
+> 37
+>
+> ** CID 1352090:  Error handling issues  (UNCAUGHT_EXCEPT)
+> /tools/rados/rados.cc: 2969 in main()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352090:  Error handling issues  (UNCAUGHT_EXCEPT)
+> /tools/rados/rados.cc: 2969 in main()
+> 2963
+> 2964     out:
+> 2965       delete formatter;
+> 2966       return (ret < 0) ? 1 : 0;
+> 2967     }
+> 2968
+>>>>     CID 1352090:  Error handling issues  (UNCAUGHT_EXCEPT)
+>>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
+> 2969     int main(int argc, const char **argv)
+> 2970     {
+> 2971       vector<const char*> args;
+> 2972       argv_to_vec(argc, argv, args);
+> 2973       env_to_vec(args);
+> 2974
+>
+> ** CID 1352089:  Resource leaks  (RESOURCE_LEAK)
+> /global/global_init.cc: 249 in global_init(std::vector<const char *, std::allocator<const char *>> *, std::vector<const char *, std::allocator<const char *>> &, unsigned int, code_environment_t, int, const char *)()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352089:  Resource leaks  (RESOURCE_LEAK)
+> /global/global_init.cc: 249 in global_init(std::vector<const char *, std::allocator<const char *>> *, std::vector<const char *, std::allocator<const char *>> &, unsigned int, code_environment_t, int, const char *)()
+> 243       // test leak checking
+> 244       if (g_conf->debug_deliberately_leak_memory) {
+> 245         derr << "deliberately leaking some memory" << dendl;
+> 246         char *s = new char[1234567];
+> 247         (void)s;
+> 248         // cppcheck-suppress memleak
+>>>>     CID 1352089:  Resource leaks  (RESOURCE_LEAK)
+>>>>     Variable "s" going out of scope leaks the storage it points to.
+> 249       }
+> 250
+> 251       if (code_env == CODE_ENVIRONMENT_DAEMON && !(flags & CINIT_FLAG_NO_DAEMON_ACTIONS))
+> 252         output_ceph_version();
+> 253     }
+> 254
+>
+> ** CID 1352088:    (RESOURCE_LEAK)
+> /test/librados/cmd.cc: 84 in LibRadosCmd_OSDCmd_Test::TestBody()()
+> /test/librados/cmd.cc: 87 in LibRadosCmd_OSDCmd_Test::TestBody()()
+> /test/librados/cmd.cc: 90 in LibRadosCmd_OSDCmd_Test::TestBody()()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352088:    (RESOURCE_LEAK)
+> /test/librados/cmd.cc: 84 in LibRadosCmd_OSDCmd_Test::TestBody()()
+> 78       char *cmd[2];
+> 79       cmd[1] = NULL;
+> 80
+> 81       // note: tolerate NXIO here in case the cluster is thrashing out underneath us.
+> 82       cmd[0] = (char *)"asdfasdf";
+> 83       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
+>>>>     CID 1352088:    (RESOURCE_LEAK)
+>>>>     Variable "st" going out of scope leaks the storage it points to.
+> 84       ASSERT_TRUE(r == -22 || r == -ENXIO);
+> 85       cmd[0] = (char *)"version";
+> 86       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
+> 87       ASSERT_TRUE(r == -22 || r == -ENXIO);
+> 88       cmd[0] = (char *)"{\"prefix\":\"version\"}";
+> 89       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
+> /test/librados/cmd.cc: 87 in LibRadosCmd_OSDCmd_Test::TestBody()()
+> 81       // note: tolerate NXIO here in case the cluster is thrashing out underneath us.
+> 82       cmd[0] = (char *)"asdfasdf";
+> 83       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
+> 84       ASSERT_TRUE(r == -22 || r == -ENXIO);
+> 85       cmd[0] = (char *)"version";
+> 86       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
+>>>>     CID 1352088:    (RESOURCE_LEAK)
+>>>>     Variable "st" going out of scope leaks the storage it points to.
+> 87       ASSERT_TRUE(r == -22 || r == -ENXIO);
+> 88       cmd[0] = (char *)"{\"prefix\":\"version\"}";
+> 89       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
+> 90       ASSERT_TRUE((r == 0 && buflen > 0) || (r == -ENXIO && buflen == 0));
+> 91       rados_buffer_free(buf);
+> 92       rados_buffer_free(st);
+> /test/librados/cmd.cc: 90 in LibRadosCmd_OSDCmd_Test::TestBody()()
+> 84       ASSERT_TRUE(r == -22 || r == -ENXIO);
+> 85       cmd[0] = (char *)"version";
+> 86       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
+> 87       ASSERT_TRUE(r == -22 || r == -ENXIO);
+> 88       cmd[0] = (char *)"{\"prefix\":\"version\"}";
+> 89       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
+>>>>     CID 1352088:    (RESOURCE_LEAK)
+>>>>     Variable "st" going out of scope leaks the storage it points to.
+> 90       ASSERT_TRUE((r == 0 && buflen > 0) || (r == -ENXIO && buflen == 0));
+> 91       rados_buffer_free(buf);
+> 92       rados_buffer_free(st);
+> 93       rados_shutdown(cluster);
+> 94     }
+> 95
+>
+> ** CID 1352087:  Parse warnings  (PARSE_ERROR)
+> /mds/StrayManager.cc: 1 in ()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352087:  Parse warnings  (PARSE_ERROR)
+> /mds/StrayManager.cc: 1 in ()
+>>>>     CID 1352087:  Parse warnings  (PARSE_ERROR)
+>>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
+> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
+> 2     // vim: ts=8 sw=2 smarttab
+> 3     /*
+> 4      * Ceph - scalable distributed file system
+> 5      *
+> 6      * Copyright (C) 2015 Red Hat
+>
+> ** CID 1352086:  Parse warnings  (PARSE_ERROR)
+> /mds/SnapServer.cc: 1 in ()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352086:  Parse warnings  (PARSE_ERROR)
+> /mds/SnapServer.cc: 1 in ()
+>>>>     CID 1352086:  Parse warnings  (PARSE_ERROR)
+>>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
+> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
+> 2     // vim: ts=8 sw=2 smarttab
+> 3     /*
+> 4      * Ceph - scalable distributed file system
+> 5      *
+> 6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
+>
+> ** CID 1352085:  Parse warnings  (PARSE_ERROR)
+> /mds/Server.cc: 1 in ()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352085:  Parse warnings  (PARSE_ERROR)
+> /mds/Server.cc: 1 in ()
+>>>>     CID 1352085:  Parse warnings  (PARSE_ERROR)
+>>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
+> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
+> 2     // vim: ts=8 sw=2 smarttab
+> 3     /*
+> 4      * Ceph - scalable distributed file system
+> 5      *
+> 6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
+>
+> ** CID 1352084:  Parse warnings  (PARSE_ERROR)
+> /mds/MDSRank.cc: 1 in ()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352084:  Parse warnings  (PARSE_ERROR)
+> /mds/MDSRank.cc: 1 in ()
+>>>>     CID 1352084:  Parse warnings  (PARSE_ERROR)
+>>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
+> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
+> 2     // vim: ts=8 sw=2 smarttab
+> 3     /*
+> 4      * Ceph - scalable distributed file system
+> 5      *
+> 6      * Copyright (C) 2015 Red Hat
+>
+> ** CID 1352083:  Parse warnings  (PARSE_ERROR)
+> /mds/MDSDaemon.cc: 1 in ()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352083:  Parse warnings  (PARSE_ERROR)
+> /mds/MDSDaemon.cc: 1 in ()
+>>>>     CID 1352083:  Parse warnings  (PARSE_ERROR)
+>>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
+> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
+> 2     // vim: ts=8 sw=2 smarttab
+> 3     /*
+> 4      * Ceph - scalable distributed file system
+> 5      *
+> 6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
+>
+> ** CID 1352082:  Parse warnings  (PARSE_ERROR)
+> /librados/RadosClient.cc: 1 in ()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352082:  Parse warnings  (PARSE_ERROR)
+> /librados/RadosClient.cc: 1 in ()
+>>>>     CID 1352082:  Parse warnings  (PARSE_ERROR)
+>>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
+> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
+> 2     // vim: ts=8 sw=2 smarttab
+> 3     /*
+> 4      * Ceph - scalable distributed file system
+> 5      *
+> 6      * Copyright (C) 2004-2012 Sage Weil <sage@newdream.net>
+>
+> ** CID 1352081:  Parse warnings  (PARSE_ERROR)
+> /client/SyntheticClient.cc: 1 in ()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352081:  Parse warnings  (PARSE_ERROR)
+> /client/SyntheticClient.cc: 1 in ()
+>>>>     CID 1352081:  Parse warnings  (PARSE_ERROR)
+>>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
+> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
+> 2     // vim: ts=8 sw=2 smarttab
+> 3     /*
+> 4      * Ceph - scalable distributed file system
+> 5      *
+> 6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
+>
+> ** CID 1352080:  Parse warnings  (PARSE_ERROR)
+> /client/Client.cc: 1 in ()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352080:  Parse warnings  (PARSE_ERROR)
+> /client/Client.cc: 1 in ()
+>>>>     CID 1352080:  Parse warnings  (PARSE_ERROR)
+>>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
+> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
+> 2     // vim: ts=8 sw=2 smarttab
+> 3     /*
+> 4      * Ceph - scalable distributed file system
+> 5      *
+> 6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
+>
+> ** CID 1352079:  Memory - corruptions  (OVERRUN)
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352079:  Memory - corruptions  (OVERRUN)
+> /librbd/journal/Types.cc: 378 in librbd::journal::ClientData::encode(ceph::buffer::list &) const()
+> 372
+> 373     ClientMetaType ClientData::get_client_meta_type() const {
+> 374       return boost::apply_visitor(GetTypeVisitor<ClientMetaType>(), client_meta);
+> 375     }
+> 376
+> 377     void ClientData::encode(bufferlist& bl) const {
+>>>>     CID 1352079:  Memory - corruptions  (OVERRUN)
+>>>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
+> 378       ENCODE_START(1, 1, bl);
+> 379       boost::apply_visitor(EncodeVisitor(bl), client_meta);
+> 380       ENCODE_FINISH(bl);
+> 381     }
+> 382
+> 383     void ClientData::decode(bufferlist::iterator& it) {
+>
+> ** CID 1352078:  Memory - corruptions  (OVERRUN)
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1352078:  Memory - corruptions  (OVERRUN)
+> /cls/journal/cls_journal_types.cc: 104 in cls::journal::Tag::encode(ceph::buffer::list &) const()
+> 98       o.push_back(new Client());
+> 99       o.push_back(new Client("id", data));
+> 100       o.push_back(new Client("id", data, {1, {{1, 120}, {2, 121}}}));
+> 101     }
+> 102
+> 103     void Tag::encode(bufferlist& bl) const {
+>>>>     CID 1352078:  Memory - corruptions  (OVERRUN)
+>>>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
+> 104       ENCODE_START(1, 1, bl);
+> 105       ::encode(tid, bl);
+> 106       ::encode(tag_class, bl);
+> 107       ::encode(data, bl);
+> 108       ENCODE_FINISH(bl);
+> 109     }
+>
+>
+> ________________________________________________________________________________________________________
+> To view the defects in Coverity Scan visit, https://scan.coverity.com/projects/ceph?tab=overview
+>
+> To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
