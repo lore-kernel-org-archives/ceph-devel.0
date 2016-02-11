@@ -1,47 +1,32 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: fix a wrong comparison
-Date: Thu, 11 Feb 2016 10:52:14 +0800
-Message-ID: <1ED8DAC2-EEA9-4D59-A396-A0B08FC92416@redhat.com>
-References: <1455125883-27735-1-git-send-email-a.s.protopopov@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1455125883-27735-1-git-send-email-a.s.protopopov@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Anton Protopopov <a.s.protopopov@gmail.com>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Abhishek Varshney <abhishek.varshney@flipkart.com>
+Subject: rgw and the next infernalis release v9.2.1
+Date: Thu, 11 Feb 2016 11:47:10 +0530
+Message-ID: <CAP3mxSw9bgcyfCeSRtQZQctEgLHfbvXJa-VMM9uhMGX9-Zgesg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:32965 "EHLO
+	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750757AbcBKGRM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Feb 2016 01:17:12 -0500
+Received: by mail-lf0-f47.google.com with SMTP id m1so25579345lfg.0
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Feb 2016 22:17:11 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: yehuda@redhat.com
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
 
+Hi Yehuda,
 
-> On Feb 11, 2016, at 01:38, Anton Protopopov <a.s.protopopov@gmail.com> wrote:
-> 
-> A negative value rc compared to the positive value ENOENT in the
-> finish_read() function.
-> 
-> Signed-off-by: Anton Protopopov <a.s.protopopov@gmail.com>
-> ---
-> fs/ceph/addr.c | 2 +-
-> 1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index c222137..1b809c9 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -276,7 +276,7 @@ static void finish_read(struct ceph_osd_request *req, struct ceph_msg *msg)
-> 	for (i = 0; i < num_pages; i++) {
-> 		struct page *page = osd_data->pages[i];
-> 
-> -		if (rc < 0 && rc != ENOENT)
-> +		if (rc < 0 && rc != -ENOENT)
-> 			goto unlock;
-> 		if (bytes < (int)PAGE_CACHE_SIZE) {
-> 			/* zero (remainder of) page */
+The next infernalis release as found at
+https://github.com/ceph/ceph/tree/infernalis passed the rgw suite (
+http://tracker.ceph.com/issues/13750#note-21 ). Do you think the
+infernalis branch is ready for QE to start their own round of testing
+?
 
-Good catch, thanks
+The upgrade suite has a RGW failed test (
+http://tracker.ceph.com/issues/14665 ), is it something that needs to
+be fixed before the release ?
 
-Yan, Zheng
-
-> -- 
-> 2.6.5
-> 
+Thanks
+Abhishek
