@@ -1,63 +1,46 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Changing code in a subproject ceph-erasure-code-corpus
-Date: Thu, 11 Feb 2016 14:07:14 +0100
-Message-ID: <56BC8782.5010401@digiware.nl>
-References: <56BB1BFA.6040603@digiware.nl> <56BB1F83.3090304@dachary.org>
- <56BB2696.30505@digiware.nl> <56BB42BD.3050808@dachary.org>
- <56BB44A9.2080700@dachary.org> <56BB514A.10004@digiware.nl>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: deep-scrub and .rgw.index pool
+Date: Thu, 11 Feb 2016 08:35:43 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1602110832310.28396@cpach.fuggernut.com>
+References: <CADr68WaQW0-MY60qyN-B8bRufJ1odG7GZ9DL5q7pGtzLQFfBrg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:65033 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752433AbcBKNHZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 11 Feb 2016 08:07:25 -0500
-In-Reply-To: <56BB514A.10004@digiware.nl>
+Received: from cobra.newdream.net ([66.33.216.30]:54214 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753279AbcBKNfY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Feb 2016 08:35:24 -0500
+In-Reply-To: <CADr68WaQW0-MY60qyN-B8bRufJ1odG7GZ9DL5q7pGtzLQFfBrg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Jens Rosenboom <j.rosenboom@x-ion.de>
+Cc: Ceph <ceph-devel@vger.kernel.org>
 
-On 10-2-2016 16:03, Willem Jan Withagen wrote:
-> On 10-2-2016 15:09, Loic Dachary wrote:
->> Once https://github.com/ceph/ceph/pull/7596 is merged, your change
->> will be in use. Would you mind verifying it's the case ?
->
-> Thanx,
-> And it'll show itself immediately on a next 'make check' run.
-> IF it's not there, I'll let you know.
+On Thu, 11 Feb 2016, Jens Rosenboom wrote:
+> Does the digest of an object also include its metadata? Or is possibly
+> deep-scrubbing a pool full of objects of size 0 completely pointless?
 
-Hi Loic,
+It includes the omap (key/value) data stored in an object, which isn't 
+reflected in the object size.
+ 
+> I'm asking because we are seeing lot of blocked requests during
+> deep-scrubs for one particular PG in our index pool for a cluster
+> containing around 200M objects. The scrub also takes a couple of
+> minutes instead of a couple of seconds that we see for all the other
+> PGs in that pool, but I haven't yet found out what makes this
+> particular PG so special.
 
-It has arived. Currently running a large recompile.
+You probably have a large RGW bucket whose index object happens to live in 
+that PG.  The scrub iterates over its keys and values to compare 
+checksums, which can take a while.
 
---WjW
+There's a bucket sharding capability that should be used when you know a 
+bucket will grow very large.  Big index objects can cause other annoying 
+behavior besides just scrub.  For example, recovery can be very slow and 
+block index operations if one of the replicas drops out of the PG and 
+needs to be brought back in sync.
 
+Unfortunately there's no [automatic] resharding capability yet in RGW... 
+that will need to be tackled sooner or later (hopefully sooner!).
 
->
-> --WjW
->
->> On 10/02/2016 21:01, Loic Dachary wrote:
->>> Hi,
->>>
->>> On 10/02/2016 19:01, Willem Jan Withagen wrote:
->>>> On 10-2-2016 12:31, Loic Dachary wrote:
->>>>> Hi,
->>>>>
->>>>> You can submit a patch against
->>>>> https://github.com/ceph/ceph-erasure-code-corpus
->>>>
->>>> Right,
->>>>
->>>> Thru the github interface that went more than easy.....
->>>>
->>>> https://github.com/ceph/ceph-erasure-code-corpus/pull/3
->>>
->>> Merged, thanks !
->>>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
