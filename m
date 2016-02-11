@@ -1,398 +1,319 @@
-From: Sage Weil <sage@newdream.net>
+From: Nick Fisk <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org>
 Subject: Re: cls_rbd ops on rbd_id.$name objects in EC pool
-Date: Thu, 11 Feb 2016 16:00:12 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1602111557000.28396@cpach.fuggernut.com>
-References: <alpine.DEB.2.11.1602051036131.28396@cpach.fuggernut.com> <1582262647.20033136.1454687586287.JavaMail.zimbra@redhat.com> <CAN=+7FXJ6je1WpYpO-ozqo-ZKnBcRhv3hpaiH+GNku9YyK49Kg@mail.gmail.com> <alpine.DEB.2.11.1602051340490.28396@cpach.fuggernut.com>
- <0bc701d1604f$8f21e0a0$ad65a1e0$@fisk.me.uk> <5848cd48.9Ro.9Gf.h0.1onaHAyHUe@mailjet.com> <549809462.21912115.1455221387486.JavaMail.zimbra@redhat.com>
+Date: Thu, 11 Feb 2016 21:40:16 -0000
+Message-ID: <9ebbbae0.9Ro.9Gf.cs.1lNjEIPmE7@mailjet.com>
+References: <alpine.DEB.2.11.1602051036131.28396@cpach.fuggernut.com>
+	<1582262647.20033136.1454687586287.JavaMail.zimbra@redhat.com>
+	<CAN=+7FXJ6je1WpYpO-ozqo-ZKnBcRhv3hpaiH+GNku9YyK49Kg@mail.gmail.com>
+	<alpine.DEB.2.11.1602051340490.28396@cpach.fuggernut.com>
+	<0bc701d1604f$8f21e0a0$ad65a1e0$@fisk.me.uk>
+	<5848cd48.9Ro.9Gf.h0.1onaHAyHUe@mailjet.com>
+	<549809462.21912115.1455221387486.JavaMail.zimbra@redhat.com>
+	<alpine.DEB.2.11.1602111557000.28396@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57274 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751067AbcBKU7x (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Feb 2016 15:59:53 -0500
-In-Reply-To: <549809462.21912115.1455221387486.JavaMail.zimbra@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Nick Fisk <nick@fisk.me.uk>, Samuel Just <sjust@redhat.com>, ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1602111557000.28396-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
+Content-Language: en-gb
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: 'Sage Weil' <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, 'Jason Dillaman' <dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-I was able to reproduce this on master:
-
-On Thu, 11 Feb 2016, Jason Dillaman wrote:
-> I think I see the problem.  It looks like you are performing ops directly against the cache tier instead of the base tier (assuming cache1 is your cache pool).  Here are my steps against master where the object is successfully promoted upon 'rbd info':
-> 
-> # ceph osd erasure-code-profile set teuthologyprofile ruleset-failure-domain=osd m=1 k=2
-> 
-> # ceph osd pool delete rbd rbd --yes-i-really-really-mean-it
-> pool 'rbd' removed
-> 
-> # ceph osd pool create rbd 4 4 erasure teuthologyprofile
-> pool 'rbd' created
-> 
-> # ceph osd pool create cache 4
-> pool 'cache' created
-> 
-> # ceph osd tier add rbd cache
-> pool 'cache' is now (or already was) a tier of 'rbd'
-> 
-> # ceph osd tier cache-mode cache writeback
-> set cache-mode for pool 'cache' to writeback
-> 
-> # ceph osd tier set-overlay rbd cache
-> overlay for 'rbd' is now (or already was) 'cache'
-> 
-> # ceph osd pool set cache hit_set_type bloom
-> set pool 2 hit_set_type to bloom
-> 
-> # ceph osd pool set cache hit_set_count 8
-> set pool 2 hit_set_count to 8
-> 
-> # ceph osd pool set cache hit_set_period 60
-> set pool 2 hit_set_period to 60
-> 
-> # ceph osd pool set cache target_max_objects 250
-> set pool 2 target_max_objects to 250
-
-set pool cache min_read_recency_for_promote 4
-
-> # rbd -p rbd create test --size=1M
-> 
-> # for x in {0..10}; do rbd -p rbd info test > /dev/null 2>/dev/null ; done
-> 
-> # rados -p cache ls
-> rbd_id.test
-> test.rbd
-> rbd_directory
-> rbd_header.101944ba7335
-> 
-> # rados -p cache cache-flush rbd_id.test
-> 
-> # rados -p cache cache-evict rbd_id.test
-> 
-> # rados -p cache ls
-> test.rbd
-> rbd_directory
-> rbd_header.101944ba7335
-> 
-> # rbd -p rbd info test
-> rbd image 'test':
-> 	size 1024 kB in 1 objects
-> 	order 22 (4096 kB objects)
-> 	block_name_prefix: rbd_data.101944ba7335
-> 	format: 2
-> 	features: layering
-> 	flags: 
-
-And then I get EOPNOSUPP too.
-
-The problem is the get_id op does sync_read, which files.
-
-I think Nick's suggestion is the right one: if we get EOPNOSUPP we force a 
-promotion.  Not sure how tricky that will be to get right, though.  A 
-workaround for rbd might be to put the info in an xattr instead of in 
-the data payload.. that's probably more efficient anyway.
-
-sage
-
-> 
-> # rados -p cache ls
-> rbd_id.test
-> test.rbd
-> rbd_directory
-> rbd_header.101944ba7335
-> 
-> -- 
-> 
-> Jason Dillaman 
-> Red Hat Ceph Storage Engineering 
-> dillaman@redhat.com 
-> http://www.redhat.com 
-> 
-> 
-> ----- Original Message -----
-> > From: "Nick Fisk" <nick@fisk.me.uk>
-> > To: "Sage Weil" <sweil@redhat.com>, "Samuel Just" <sjust@redhat.com>
-> > Cc: "Jason Dillaman" <dillaman@redhat.com>, ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
-> > Sent: Thursday, February 11, 2016 12:46:38 PM
-> > Subject: RE: cls_rbd ops on rbd_id.$name objects in EC pool
-> > 
-> > Hi Sage,
-> > 
-> > Do you think this will get fixed in time for the Jewel release? It still
-> > seems to happen in Master and is definitely related to the recency setting.
-> > I'm guessing that the info command does some sort of read and then a write.
-> > In the old behaviour the read would have always triggered a promotion?
-> > 
-> > 
-> > nick@Ceph-Test:~$ ceph osd pool get cache1 min_read_recency_for_promote
-> > min_read_recency_for_promote: 8
-> > nick@Ceph-Test:~$ ceph osd pool get cache1 min_write_recency_for_promote
-> > min_write_recency_for_promote: 8
-> > nick@Ceph-Test:~$ rbd -p cache1 create Test99 --size=10G
-> > nick@Ceph-Test:~$ rbd -p cache1 info Test99
-> > rbd image 'Test99':
-> >         size 10240 MB in 2560 objects
-> >         order 22 (4096 kB objects)
-> >         block_name_prefix: rbd_data.e8e734689a5e
-> >         format: 2
-> >         features: layering
-> >         flags:
-> > nick@Ceph-Test:~$ rados -p cache1 cache-flush rbd_id.Test99
-> > nick@Ceph-Test:~$ rados -p cache1 cache-evict rbd_id.Test99
-> > nick@Ceph-Test:~$ rbd -p cache1 info Test99
-> > 2016-02-11 17:39:40.942030 7f0006eb3700 -1 librbd::image::OpenRequest: failed
-> > to retrieve image id: (95) Operation not supported
-> > 2016-02-11 17:39:40.942205 7f00066b2700 -1 librbd::ImageState: failed to open
-> > image: (95) Operation not supported
-> > rbd: error opening image Test99: (95) Operation not supported
-> > nick@Ceph-Test:~$ ceph osd pool set cache1 min_read_recency_for_promote 0
-> > set pool 12 min_read_recency_for_promote to 0
-> > nick@Ceph-Test:~$ rbd -p cache1 info Test99
-> > rbd image 'Test99':
-> >         size 10240 MB in 2560 objects
-> >         order 22 (4096 kB objects)
-> >         block_name_prefix: rbd_data.e8e734689a5e
-> >         format: 2
-> >         features: layering
-> >         flags:
-> > 
-> > 
-> > 
-> > 
-> > 
-> > > -----Original Message-----
-> > > From: Nick Fisk [mailto:nick@fisk.me.uk]
-> > > Sent: 05 February 2016 19:58
-> > > To: 'Sage Weil' <sweil@redhat.com>; 'Samuel Just' <sjust@redhat.com>
-> > > Cc: 'Jason Dillaman' <dillaman@redhat.com>; ceph-users@lists.ceph.com;
-> > > ceph-devel@vger.kernel.org
-> > > Subject: RE: cls_rbd ops on rbd_id.$name objects in EC pool
-> > > 
-> > > > -----Original Message-----
-> > > > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> > > > owner@vger.kernel.org] On Behalf Of Sage Weil
-> > > > Sent: 05 February 2016 18:45
-> > > > To: Samuel Just <sjust@redhat.com>
-> > > > Cc: Jason Dillaman <dillaman@redhat.com>; Nick Fisk <nick@fisk.me.uk>;
-> > > > ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org
-> > > > Subject: Re: cls_rbd ops on rbd_id.$name objects in EC pool
-> > > >
-> > > > On Fri, 5 Feb 2016, Samuel Just wrote:
-> > > > > On Fri, Feb 5, 2016 at 7:53 AM, Jason Dillaman <dillaman@redhat.com>
-> > > > wrote:
-> > > > > > #1 and #2 are awkward for existing pools since we would need a
-> > > > > > tool to inject dummy omap values within existing images.  Can the
-> > > > > > cache tier force-promote it from the EC pool to the cache when an
-> > > > > > unsupported op is encountered?  There is logic like that in
-> > > > > > jewel/master for handling the proxied writes.
-> > > >
-> > > > That sounded familiar but I couldn't find this in the code or history
-> > > > between infernalis and master.  And then I went back and was unable to
-> > > > reproduce the a problem on either infernalis branch or v9.2.0.
-> > > >
-> > > > Nick, I was doing
-> > > >  1013  ./rbd -p ec create foo --size 10
-> > > >  1014  ./rbd -p ec info foo
-> > > >  1015  ./rados -p ec-cache cache-flush rbd_id.foo
-> > > >  1016  ./rados -p ec-cache cache-evict rbd_id.foo
-> > > >  1017  ./rbd -p ec info foo
-> > > >  1018  ./rados -p ec-cache ls -
-> > > >
-> > > > The rbd.get_id is successfully forcing a promotion.
-> > > >
-> > > > Which makes me think something else is going on... Nick, can you try
-> > > > to reproduce this with a userspace librbd client?  'rbd info' will do
-> > > > a few basic operations, but if that isn't problematic, try 'rbd
-> > > > bench-write' or 'rbd export', which will do real IO?
-> > > 
-> > > Hi Sage,
-> > > 
-> > > Just tried again and I can confirm its definitely not working, but I think
-> > > I may
-> > > have stumbled on the reason why.
-> > > 
-> > > First apologies for not mentioning it before, but I am still running that
-> > > recency
-> > > fix on Infernalis. Initially I thought this was a flushing issue as I just
-> > > assumed
-> > > those objects shouldn't get flushed out at all. But after reading your
-> > > email
-> > > where you said it forced the promotion, it struck me that the broken
-> > > recency
-> > > behaviour may have been masking this issue. With the fix it would only
-> > > promote if the object was hot enough, which it probably in most cases
-> > > wouldn't be. As a test I set my recency's down to 0 and tried the steps
-> > > above
-> > > again and this time it worked. Does this make sense?
-> > > 
-> > > Nick
-> > > 
-> > > >
-> > > > sage
-> > > >
-> > > >
-> > > > > -Sam
-> > > > >
-> > > > > >
-> > > > > > --
-> > > > > >
-> > > > > > Jason Dillaman
-> > > > > >
-> > > > > > ----- Original Message -----
-> > > > > >> From: "Sage Weil" <sweil@redhat.com>
-> > > > > >> To: "Nick Fisk" <nick@fisk.me.uk>
-> > > > > >> Cc: "Jason Dillaman" <dillaman@redhat.com>,
-> > > > > >> ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
-> > > > > >> Sent: Friday, February 5, 2016 10:42:17 AM
-> > > > > >> Subject: cls_rbd ops on rbd_id.$name objects in EC pool
-> > > > > >>
-> > > > > >> On Wed, 27 Jan 2016, Nick Fisk wrote:
-> > > > > >> >
-> > > > > >> > > -----Original Message-----
-> > > > > >> > > From: ceph-users [mailto:ceph-users-bounces@lists.ceph.com]
-> > > > > >> > > On Behalf Of Jason Dillaman
-> > > > > >> > > Sent: 27 January 2016 14:25
-> > > > > >> > > To: Nick Fisk <nick@fisk.me.uk>
-> > > > > >> > > Cc: ceph-users@lists.ceph.com
-> > > > > >> > > Subject: Re: [ceph-users] Possible Cache Tier Bug - Can
-> > > > > >> > > someone confirm
-> > > > > >> > >
-> > > > > >> > > Are you running with an EC pool behind the cache tier? I know
-> > > > > >> > > there was an issue with the first Infernalis release where
-> > > > > >> > > unsupported ops were being proxied down to the EC pool,
-> > > > > >> > > resulting in that same error.
-> > > > > >> >
-> > > > > >> > Hi Jason, yes I am. 3x Replicated pool on top of an EC pool.
-> > > > > >> >
-> > > > > >> > It's probably something similar to what you mention. Either the
-> > > > > >> > client should be able to access the RBD header object on the
-> > > > > >> > base pool, or it should be flagged so that it can't be evicted.
-> > > > > >>
-> > > > > >> I just confirmed that the rbd_id.$name object doesn't have any
-> > > > > >> omap, so from rados's perspective, flushing and evicting it is
-> > > > > >> fine.  But yeah, the cls_rbd ops aren't permitted in the EC pool.
-> > > > > >>
-> > > > > >> In master/jewel we have a cache-pin function that prevents an
-> > > > > >> object from being flushed.
-> > > > > >>
-> > > > > >> A few options are:
-> > > > > >>
-> > > > > >> 1) Have cls_rbd cache-pin it's objects.
-> > > > > >>
-> > > > > >> 2) Have cls_rbd put an omap key on the object to indirectly do
-> > > > > >> the
-> > > > same.
-> > > > > >>
-> > > > > >> 3) Add a requires-cls type object flag that keeps hte object out
-> > > > > >> of an EC pool *until* it eventually supports cls ops.
-> > > > > >>
-> > > > > >> I'd lean toward 1 since it's simple and explicit, and when we
-> > > > > >> eventually make classes work we can remove the cache-pin behavior
-> > > > from cls_rbd.
-> > > > > >> It's harder to fix in infernalis unless we also backport
-> > > > > >> cache-pin/unpin ops, too, so maybe #2 would be a simple
-> > > > > >> infernalis
-> > > > workaround?
-> > > > > >>
-> > > > > >> Jason?  Sam?
-> > > > > >> sage
-> > > > > >>
-> > > > > >>
-> > > > > >>
-> > > > > >> >
-> > > > > >> > >
-> > > > > >> > > --
-> > > > > >> > >
-> > > > > >> > > Jason Dillaman
-> > > > > >> > >
-> > > > > >> > >
-> > > > > >> > > ----- Original Message -----
-> > > > > >> > > > From: "Nick Fisk" <nick@fisk.me.uk>
-> > > > > >> > > > To: ceph-users@lists.ceph.com
-> > > > > >> > > > Sent: Wednesday, January 27, 2016 8:46:53 AM
-> > > > > >> > > > Subject: [ceph-users] Possible Cache Tier Bug - Can someone
-> > > > > >> > > > confirm
-> > > > > >> > > >
-> > > > > >> > > > Hi All,
-> > > > > >> > > >
-> > > > > >> > > > I think I have stumbled on a bug. I'm running Infernalis
-> > > > > >> > > > (Kernel 4.4 on the
-> > > > > >> > > > client) and it seems that if the RBD header object gets
-> > > > > >> > > > evicted from the cache pool then you can no longer map it.
-> > > > > >> > > >
-> > > > > >> > > > Steps to reproduce
-> > > > > >> > > >
-> > > > > >> > > > rbd -p cache1 create Test --size=10G rbd - p cache1 map
-> > > > > >> > > > Test
-> > > > > >> > > >
-> > > > > >> > > > /dev/rbd1  <-Works!!
-> > > > > >> > > >
-> > > > > >> > > > rbd unmap /dev/rbd1
-> > > > > >> > > >
-> > > > > >> > > > rados -p cache1 cache-flush rbd_id.Test rados -p cache1
-> > > > > >> > > > cache-evict rbd_id.Test rbd - p cache1 map Test
-> > > > > >> > > >
-> > > > > >> > > > rbd: sysfs write failed
-> > > > > >> > > > rbd: map failed: (95) Operation not supported
-> > > > > >> > > >
-> > > > > >> > > > or with the rbd-nbd client
-> > > > > >> > > >
-> > > > > >> > > > 2016-01-27 13:39:52.686770 7f9e54162b00 -1
-> > > > > >> > > > asok(0x561837b88360)
-> > > > > >> > > > AdminSocketConfigObs::init: failed:
-> > > > AdminSocket::bind_and_listen:
-> > > > > >> > > > failed to bind the UNIX domain socket to
-> > > > > >> > > > '/var/run/ceph/ceph-client.admin.asok': (17) File exists
-> > > > > >> > > > 2016-01-27 13:39:52.703987 7f9e32ffd700 -1
-> > > > librbd::image::OpenRequest:
-> > > > > >> > > > failed to retrieve image id: (95) Operation not supported
-> > > > > >> > > > rbd-nbd: failed to map, status: (95) Operation not
-> > > > > >> > > > supported
-> > > > > >> > > > 2016-01-27 13:39:52.704138 7f9e327fc700 -1
-> > > > > >> > > > librbd::ImageState: failed to open image: (95) Operation
-> > > > > >> > > > not supported
-> > > > > >> > > >
-> > > > > >> > > > Nick
-> > > > > >> > > >
-> > > > > >> > > > _______________________________________________
-> > > > > >> > > > ceph-users mailing list
-> > > > > >> > > > ceph-users@lists.ceph.com
-> > > > > >> > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> > > > > >> > > >
-> > > > > >> > > _______________________________________________
-> > > > > >> > > ceph-users mailing list
-> > > > > >> > > ceph-users@lists.ceph.com
-> > > > > >> > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> > > > > >> >
-> > > > > >> > _______________________________________________
-> > > > > >> > ceph-users mailing list
-> > > > > >> > ceph-users@lists.ceph.com
-> > > > > >> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> > > > > >> >
-> > > > > >> >
-> > > > > >> --
-> > > > > >> To unsubscribe from this list: send the line "unsubscribe
-> > > > > >> ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > > > >> More majordomo info at
-> > > > > >> http://vger.kernel.org/majordomo-info.html
-> > > > > >>
-> > > > > > --
-> > > > > > To unsubscribe from this list: send the line "unsubscribe
-> > > > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > > >
-> > > > >
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > > in the body of a message to majordomo@vger.kernel.org More
-> > > majordomo
-> > > > info at http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+VGhhdOKAmXMgYSByZWxpZWYsIEkgd2FzIHNlbnNpbmcgYSBtYWpvciBjYXNlIG9mIGZhY2UgcGFs
+bSBvY2N1cmluZyB3aGVuIEkgcmVhZCBKYXNvbidzIGVtYWlsISEhCgo+IC0tLS0tT3JpZ2luYWwg
+TWVzc2FnZS0tLS0tCj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21h
+aWx0bzpjZXBoLWRldmVsLQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNh
+Z2UgV2VpbAo+IFNlbnQ6IDExIEZlYnJ1YXJ5IDIwMTYgMjE6MDAKPiBUbzogSmFzb24gRGlsbGFt
+YW4gPGRpbGxhbWFuQHJlZGhhdC5jb20+Cj4gQ2M6IE5pY2sgRmlzayA8bmlja0BmaXNrLm1lLnVr
+PjsgU2FtdWVsIEp1c3QgPHNqdXN0QHJlZGhhdC5jb20+OyBjZXBoLQo+IHVzZXJzQGxpc3RzLmNl
+cGguY29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZwo+IFN1YmplY3Q6IFJlOiBjbHNfcmJk
+IG9wcyBvbiByYmRfaWQuJG5hbWUgb2JqZWN0cyBpbiBFQyBwb29sCj4gCj4gSSB3YXMgYWJsZSB0
+byByZXByb2R1Y2UgdGhpcyBvbiBtYXN0ZXI6Cj4gCj4gT24gVGh1LCAxMSBGZWIgMjAxNiwgSmFz
+b24gRGlsbGFtYW4gd3JvdGU6Cj4gPiBJIHRoaW5rIEkgc2VlIHRoZSBwcm9ibGVtLiAgSXQgbG9v
+a3MgbGlrZSB5b3UgYXJlIHBlcmZvcm1pbmcgb3BzIGRpcmVjdGx5Cj4gYWdhaW5zdCB0aGUgY2Fj
+aGUgdGllciBpbnN0ZWFkIG9mIHRoZSBiYXNlIHRpZXIgKGFzc3VtaW5nIGNhY2hlMSBpcyB5b3Vy
+IGNhY2hlCj4gcG9vbCkuICBIZXJlIGFyZSBteSBzdGVwcyBhZ2FpbnN0IG1hc3RlciB3aGVyZSB0
+aGUgb2JqZWN0IGlzIHN1Y2Nlc3NmdWxseQo+IHByb21vdGVkIHVwb24gJ3JiZCBpbmZvJzoKPiA+
+Cj4gPiAjIGNlcGggb3NkIGVyYXN1cmUtY29kZS1wcm9maWxlIHNldCB0ZXV0aG9sb2d5cHJvZmls
+ZQo+ID4gcnVsZXNldC1mYWlsdXJlLWRvbWFpbj1vc2QgbT0xIGs9Mgo+ID4KPiA+ICMgY2VwaCBv
+c2QgcG9vbCBkZWxldGUgcmJkIHJiZCAtLXllcy1pLXJlYWxseS1yZWFsbHktbWVhbi1pdCBwb29s
+Cj4gPiAncmJkJyByZW1vdmVkCj4gPgo+ID4gIyBjZXBoIG9zZCBwb29sIGNyZWF0ZSByYmQgNCA0
+IGVyYXN1cmUgdGV1dGhvbG9neXByb2ZpbGUgcG9vbCAncmJkJwo+ID4gY3JlYXRlZAo+ID4KPiA+
+ICMgY2VwaCBvc2QgcG9vbCBjcmVhdGUgY2FjaGUgNAo+ID4gcG9vbCAnY2FjaGUnIGNyZWF0ZWQK
+PiA+Cj4gPiAjIGNlcGggb3NkIHRpZXIgYWRkIHJiZCBjYWNoZQo+ID4gcG9vbCAnY2FjaGUnIGlz
+IG5vdyAob3IgYWxyZWFkeSB3YXMpIGEgdGllciBvZiAncmJkJwo+ID4KPiA+ICMgY2VwaCBvc2Qg
+dGllciBjYWNoZS1tb2RlIGNhY2hlIHdyaXRlYmFjayBzZXQgY2FjaGUtbW9kZSBmb3IgcG9vbAo+
+ID4gJ2NhY2hlJyB0byB3cml0ZWJhY2sKPiA+Cj4gPiAjIGNlcGggb3NkIHRpZXIgc2V0LW92ZXJs
+YXkgcmJkIGNhY2hlCj4gPiBvdmVybGF5IGZvciAncmJkJyBpcyBub3cgKG9yIGFscmVhZHkgd2Fz
+KSAnY2FjaGUnCj4gPgo+ID4gIyBjZXBoIG9zZCBwb29sIHNldCBjYWNoZSBoaXRfc2V0X3R5cGUg
+Ymxvb20gc2V0IHBvb2wgMiBoaXRfc2V0X3R5cGUKPiA+IHRvIGJsb29tCj4gPgo+ID4gIyBjZXBo
+IG9zZCBwb29sIHNldCBjYWNoZSBoaXRfc2V0X2NvdW50IDggc2V0IHBvb2wgMiBoaXRfc2V0X2Nv
+dW50IHRvCj4gPiA4Cj4gPgo+ID4gIyBjZXBoIG9zZCBwb29sIHNldCBjYWNoZSBoaXRfc2V0X3Bl
+cmlvZCA2MCBzZXQgcG9vbCAyIGhpdF9zZXRfcGVyaW9kCj4gPiB0byA2MAo+ID4KPiA+ICMgY2Vw
+aCBvc2QgcG9vbCBzZXQgY2FjaGUgdGFyZ2V0X21heF9vYmplY3RzIDI1MCBzZXQgcG9vbCAyCj4g
+PiB0YXJnZXRfbWF4X29iamVjdHMgdG8gMjUwCj4gCj4gc2V0IHBvb2wgY2FjaGUgbWluX3JlYWRf
+cmVjZW5jeV9mb3JfcHJvbW90ZSA0Cj4gCj4gPiAjIHJiZCAtcCByYmQgY3JlYXRlIHRlc3QgLS1z
+aXplPTFNCj4gPgo+ID4gIyBmb3IgeCBpbiB7MC4uMTB9OyBkbyByYmQgLXAgcmJkIGluZm8gdGVz
+dCA+IC9kZXYvbnVsbCAyPi9kZXYvbnVsbCA7Cj4gPiBkb25lCj4gPgo+ID4gIyByYWRvcyAtcCBj
+YWNoZSBscwo+ID4gcmJkX2lkLnRlc3QKPiA+IHRlc3QucmJkCj4gPiByYmRfZGlyZWN0b3J5Cj4g
+PiByYmRfaGVhZGVyLjEwMTk0NGJhNzMzNQo+ID4KPiA+ICMgcmFkb3MgLXAgY2FjaGUgY2FjaGUt
+Zmx1c2ggcmJkX2lkLnRlc3QKPiA+Cj4gPiAjIHJhZG9zIC1wIGNhY2hlIGNhY2hlLWV2aWN0IHJi
+ZF9pZC50ZXN0Cj4gPgo+ID4gIyByYWRvcyAtcCBjYWNoZSBscwo+ID4gdGVzdC5yYmQKPiA+IHJi
+ZF9kaXJlY3RvcnkKPiA+IHJiZF9oZWFkZXIuMTAxOTQ0YmE3MzM1Cj4gPgo+ID4gIyByYmQgLXAg
+cmJkIGluZm8gdGVzdAo+ID4gcmJkIGltYWdlICd0ZXN0JzoKPiA+IAlzaXplIDEwMjQga0IgaW4g
+MSBvYmplY3RzCj4gPiAJb3JkZXIgMjIgKDQwOTYga0Igb2JqZWN0cykKPiA+IAlibG9ja19uYW1l
+X3ByZWZpeDogcmJkX2RhdGEuMTAxOTQ0YmE3MzM1Cj4gPiAJZm9ybWF0OiAyCj4gPiAJZmVhdHVy
+ZXM6IGxheWVyaW5nCj4gPiAJZmxhZ3M6Cj4gCj4gQW5kIHRoZW4gSSBnZXQgRU9QTk9TVVBQIHRv
+by4KPiAKPiBUaGUgcHJvYmxlbSBpcyB0aGUgZ2V0X2lkIG9wIGRvZXMgc3luY19yZWFkLCB3aGlj
+aCBmaWxlcy4KPiAKPiBJIHRoaW5rIE5pY2sncyBzdWdnZXN0aW9uIGlzIHRoZSByaWdodCBvbmU6
+IGlmIHdlIGdldCBFT1BOT1NVUFAgd2UgZm9yY2UgYQo+IHByb21vdGlvbi4gIE5vdCBzdXJlIGhv
+dyB0cmlja3kgdGhhdCB3aWxsIGJlIHRvIGdldCByaWdodCwgdGhvdWdoLiAgQQo+IHdvcmthcm91
+bmQgZm9yIHJiZCBtaWdodCBiZSB0byBwdXQgdGhlIGluZm8gaW4gYW4geGF0dHIgaW5zdGVhZCBv
+ZiBpbiB0aGUgZGF0YQo+IHBheWxvYWQuLiB0aGF0J3MgcHJvYmFibHkgbW9yZSBlZmZpY2llbnQg
+YW55d2F5Lgo+IAo+IHNhZ2UKPiAKPiA+Cj4gPiAjIHJhZG9zIC1wIGNhY2hlIGxzCj4gPiByYmRf
+aWQudGVzdAo+ID4gdGVzdC5yYmQKPiA+IHJiZF9kaXJlY3RvcnkKPiA+IHJiZF9oZWFkZXIuMTAx
+OTQ0YmE3MzM1Cj4gPgo+ID4gLS0KPiA+Cj4gPiBKYXNvbiBEaWxsYW1hbgo+ID4gUmVkIEhhdCBD
+ZXBoIFN0b3JhZ2UgRW5naW5lZXJpbmcKPiA+IGRpbGxhbWFuQHJlZGhhdC5jb20KPiA+IGh0dHA6
+Ly93d3cucmVkaGF0LmNvbQo+ID4KPiA+Cj4gPiAtLS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0t
+Cj4gPiA+IEZyb206ICJOaWNrIEZpc2siIDxuaWNrQGZpc2subWUudWs+Cj4gPiA+IFRvOiAiU2Fn
+ZSBXZWlsIiA8c3dlaWxAcmVkaGF0LmNvbT4sICJTYW11ZWwgSnVzdCIKPiA8c2p1c3RAcmVkaGF0
+LmNvbT4KPiA+ID4gQ2M6ICJKYXNvbiBEaWxsYW1hbiIgPGRpbGxhbWFuQHJlZGhhdC5jb20+LAo+
+ID4gPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tLCBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+Zwo+ID4gPiBTZW50OiBUaHVyc2RheSwgRmVicnVhcnkgMTEsIDIwMTYgMTI6NDY6MzggUE0KPiA+
+ID4gU3ViamVjdDogUkU6IGNsc19yYmQgb3BzIG9uIHJiZF9pZC4kbmFtZSBvYmplY3RzIGluIEVD
+IHBvb2wKPiA+ID4KPiA+ID4gSGkgU2FnZSwKPiA+ID4KPiA+ID4gRG8geW91IHRoaW5rIHRoaXMg
+d2lsbCBnZXQgZml4ZWQgaW4gdGltZSBmb3IgdGhlIEpld2VsIHJlbGVhc2U/IEl0Cj4gPiA+IHN0
+aWxsIHNlZW1zIHRvIGhhcHBlbiBpbiBNYXN0ZXIgYW5kIGlzIGRlZmluaXRlbHkgcmVsYXRlZCB0
+byB0aGUgcmVjZW5jeQo+IHNldHRpbmcuCj4gPiA+IEknbSBndWVzc2luZyB0aGF0IHRoZSBpbmZv
+IGNvbW1hbmQgZG9lcyBzb21lIHNvcnQgb2YgcmVhZCBhbmQgdGhlbiBhCj4gd3JpdGUuCj4gPiA+
+IEluIHRoZSBvbGQgYmVoYXZpb3VyIHRoZSByZWFkIHdvdWxkIGhhdmUgYWx3YXlzIHRyaWdnZXJl
+ZCBhIHByb21vdGlvbj8KPiA+ID4KPiA+ID4KPiA+ID4gbmlja0BDZXBoLVRlc3Q6fiQgY2VwaCBv
+c2QgcG9vbCBnZXQgY2FjaGUxCj4gPiA+IG1pbl9yZWFkX3JlY2VuY3lfZm9yX3Byb21vdGUKPiA+
+ID4gbWluX3JlYWRfcmVjZW5jeV9mb3JfcHJvbW90ZTogOAo+ID4gPiBuaWNrQENlcGgtVGVzdDp+
+JCBjZXBoIG9zZCBwb29sIGdldCBjYWNoZTEKPiA+ID4gbWluX3dyaXRlX3JlY2VuY3lfZm9yX3By
+b21vdGUKPiA+ID4gbWluX3dyaXRlX3JlY2VuY3lfZm9yX3Byb21vdGU6IDgKPiA+ID4gbmlja0BD
+ZXBoLVRlc3Q6fiQgcmJkIC1wIGNhY2hlMSBjcmVhdGUgVGVzdDk5IC0tc2l6ZT0xMEcKPiA+ID4g
+bmlja0BDZXBoLVRlc3Q6fiQgcmJkIC1wIGNhY2hlMSBpbmZvIFRlc3Q5OSByYmQgaW1hZ2UgJ1Rl
+c3Q5OSc6Cj4gPiA+ICAgICAgICAgc2l6ZSAxMDI0MCBNQiBpbiAyNTYwIG9iamVjdHMKPiA+ID4g
+ICAgICAgICBvcmRlciAyMiAoNDA5NiBrQiBvYmplY3RzKQo+ID4gPiAgICAgICAgIGJsb2NrX25h
+bWVfcHJlZml4OiByYmRfZGF0YS5lOGU3MzQ2ODlhNWUKPiA+ID4gICAgICAgICBmb3JtYXQ6IDIK
+PiA+ID4gICAgICAgICBmZWF0dXJlczogbGF5ZXJpbmcKPiA+ID4gICAgICAgICBmbGFnczoKPiA+
+ID4gbmlja0BDZXBoLVRlc3Q6fiQgcmFkb3MgLXAgY2FjaGUxIGNhY2hlLWZsdXNoIHJiZF9pZC5U
+ZXN0OTkKPiA+ID4gbmlja0BDZXBoLVRlc3Q6fiQgcmFkb3MgLXAgY2FjaGUxIGNhY2hlLWV2aWN0
+IHJiZF9pZC5UZXN0OTkKPiA+ID4gbmlja0BDZXBoLVRlc3Q6fiQgcmJkIC1wIGNhY2hlMSBpbmZv
+IFRlc3Q5OQo+ID4gPiAyMDE2LTAyLTExIDE3OjM5OjQwLjk0MjAzMCA3ZjAwMDZlYjM3MDAgLTEK
+PiA+ID4gbGlicmJkOjppbWFnZTo6T3BlblJlcXVlc3Q6IGZhaWxlZCB0byByZXRyaWV2ZSBpbWFn
+ZSBpZDogKDk1KQo+ID4gPiBPcGVyYXRpb24gbm90IHN1cHBvcnRlZAo+ID4gPiAyMDE2LTAyLTEx
+IDE3OjM5OjQwLjk0MjIwNSA3ZjAwMDY2YjI3MDAgLTEgbGlicmJkOjpJbWFnZVN0YXRlOgo+ID4g
+PiBmYWlsZWQgdG8gb3Blbgo+ID4gPiBpbWFnZTogKDk1KSBPcGVyYXRpb24gbm90IHN1cHBvcnRl
+ZAo+ID4gPiByYmQ6IGVycm9yIG9wZW5pbmcgaW1hZ2UgVGVzdDk5OiAoOTUpIE9wZXJhdGlvbiBu
+b3Qgc3VwcG9ydGVkCj4gPiA+IG5pY2tAQ2VwaC1UZXN0On4kIGNlcGggb3NkIHBvb2wgc2V0IGNh
+Y2hlMQo+ID4gPiBtaW5fcmVhZF9yZWNlbmN5X2Zvcl9wcm9tb3RlIDAgc2V0IHBvb2wgMTIKPiA+
+ID4gbWluX3JlYWRfcmVjZW5jeV9mb3JfcHJvbW90ZSB0byAwIG5pY2tAQ2VwaC1UZXN0On4kIHJi
+ZCAtcCBjYWNoZTEKPiA+ID4gaW5mbyBUZXN0OTkgcmJkIGltYWdlICdUZXN0OTknOgo+ID4gPiAg
+ICAgICAgIHNpemUgMTAyNDAgTUIgaW4gMjU2MCBvYmplY3RzCj4gPiA+ICAgICAgICAgb3JkZXIg
+MjIgKDQwOTYga0Igb2JqZWN0cykKPiA+ID4gICAgICAgICBibG9ja19uYW1lX3ByZWZpeDogcmJk
+X2RhdGEuZThlNzM0Njg5YTVlCj4gPiA+ICAgICAgICAgZm9ybWF0OiAyCj4gPiA+ICAgICAgICAg
+ZmVhdHVyZXM6IGxheWVyaW5nCj4gPiA+ICAgICAgICAgZmxhZ3M6Cj4gPiA+Cj4gPiA+Cj4gPiA+
+Cj4gPiA+Cj4gPiA+Cj4gPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0KPiA+ID4gPiBG
+cm9tOiBOaWNrIEZpc2sgW21haWx0bzpuaWNrQGZpc2subWUudWtdCj4gPiA+ID4gU2VudDogMDUg
+RmVicnVhcnkgMjAxNiAxOTo1OAo+ID4gPiA+IFRvOiAnU2FnZSBXZWlsJyA8c3dlaWxAcmVkaGF0
+LmNvbT47ICdTYW11ZWwgSnVzdCcKPiA+ID4gPiA8c2p1c3RAcmVkaGF0LmNvbT4KPiA+ID4gPiBD
+YzogJ0phc29uIERpbGxhbWFuJyA8ZGlsbGFtYW5AcmVkaGF0LmNvbT47Cj4gPiA+ID4gY2VwaC11
+c2Vyc0BsaXN0cy5jZXBoLmNvbTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcKPiA+ID4gPiBT
+dWJqZWN0OiBSRTogY2xzX3JiZCBvcHMgb24gcmJkX2lkLiRuYW1lIG9iamVjdHMgaW4gRUMgcG9v
+bAo+ID4gPiA+Cj4gPiA+ID4gPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQo+ID4gPiA+ID4g
+RnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVs
+LQo+ID4gPiA+ID4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgU2FnZSBXZWls
+Cj4gPiA+ID4gPiBTZW50OiAwNSBGZWJydWFyeSAyMDE2IDE4OjQ1Cj4gPiA+ID4gPiBUbzogU2Ft
+dWVsIEp1c3QgPHNqdXN0QHJlZGhhdC5jb20+Cj4gPiA+ID4gPiBDYzogSmFzb24gRGlsbGFtYW4g
+PGRpbGxhbWFuQHJlZGhhdC5jb20+OyBOaWNrIEZpc2sKPiA+ID4gPiA+IDxuaWNrQGZpc2subWUu
+dWs+OyBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tOwo+ID4gPiA+ID4gY2VwaC1kZXZlbEB2Z2Vy
+Lmtlcm5lbC5vcmcKPiA+ID4gPiA+IFN1YmplY3Q6IFJlOiBjbHNfcmJkIG9wcyBvbiByYmRfaWQu
+JG5hbWUgb2JqZWN0cyBpbiBFQyBwb29sCj4gPiA+ID4gPgo+ID4gPiA+ID4gT24gRnJpLCA1IEZl
+YiAyMDE2LCBTYW11ZWwgSnVzdCB3cm90ZToKPiA+ID4gPiA+ID4gT24gRnJpLCBGZWIgNSwgMjAx
+NiBhdCA3OjUzIEFNLCBKYXNvbiBEaWxsYW1hbgo+ID4gPiA+ID4gPiA8ZGlsbGFtYW5AcmVkaGF0
+LmNvbT4KPiA+ID4gPiA+IHdyb3RlOgo+ID4gPiA+ID4gPiA+ICMxIGFuZCAjMiBhcmUgYXdrd2Fy
+ZCBmb3IgZXhpc3RpbmcgcG9vbHMgc2luY2Ugd2Ugd291bGQgbmVlZAo+ID4gPiA+ID4gPiA+IGEg
+dG9vbCB0byBpbmplY3QgZHVtbXkgb21hcCB2YWx1ZXMgd2l0aGluIGV4aXN0aW5nIGltYWdlcy4K
+PiA+ID4gPiA+ID4gPiBDYW4gdGhlIGNhY2hlIHRpZXIgZm9yY2UtcHJvbW90ZSBpdCBmcm9tIHRo
+ZSBFQyBwb29sIHRvIHRoZQo+ID4gPiA+ID4gPiA+IGNhY2hlIHdoZW4gYW4gdW5zdXBwb3J0ZWQg
+b3AgaXMgZW5jb3VudGVyZWQ/ICBUaGVyZSBpcyBsb2dpYwo+ID4gPiA+ID4gPiA+IGxpa2UgdGhh
+dCBpbiBqZXdlbC9tYXN0ZXIgZm9yIGhhbmRsaW5nIHRoZSBwcm94aWVkIHdyaXRlcy4KPiA+ID4g
+PiA+Cj4gPiA+ID4gPiBUaGF0IHNvdW5kZWQgZmFtaWxpYXIgYnV0IEkgY291bGRuJ3QgZmluZCB0
+aGlzIGluIHRoZSBjb2RlIG9yCj4gPiA+ID4gPiBoaXN0b3J5IGJldHdlZW4gaW5mZXJuYWxpcyBh
+bmQgbWFzdGVyLiAgQW5kIHRoZW4gSSB3ZW50IGJhY2sgYW5kCj4gPiA+ID4gPiB3YXMgdW5hYmxl
+IHRvIHJlcHJvZHVjZSB0aGUgYSBwcm9ibGVtIG9uIGVpdGhlciBpbmZlcm5hbGlzIGJyYW5jaCBv
+cgo+IHY5LjIuMC4KPiA+ID4gPiA+Cj4gPiA+ID4gPiBOaWNrLCBJIHdhcyBkb2luZwo+ID4gPiA+
+ID4gIDEwMTMgIC4vcmJkIC1wIGVjIGNyZWF0ZSBmb28gLS1zaXplIDEwCj4gPiA+ID4gPiAgMTAx
+NCAgLi9yYmQgLXAgZWMgaW5mbyBmb28KPiA+ID4gPiA+ICAxMDE1ICAuL3JhZG9zIC1wIGVjLWNh
+Y2hlIGNhY2hlLWZsdXNoIHJiZF9pZC5mb28KPiA+ID4gPiA+ICAxMDE2ICAuL3JhZG9zIC1wIGVj
+LWNhY2hlIGNhY2hlLWV2aWN0IHJiZF9pZC5mb28KPiA+ID4gPiA+ICAxMDE3ICAuL3JiZCAtcCBl
+YyBpbmZvIGZvbwo+ID4gPiA+ID4gIDEwMTggIC4vcmFkb3MgLXAgZWMtY2FjaGUgbHMgLQo+ID4g
+PiA+ID4KPiA+ID4gPiA+IFRoZSByYmQuZ2V0X2lkIGlzIHN1Y2Nlc3NmdWxseSBmb3JjaW5nIGEg
+cHJvbW90aW9uLgo+ID4gPiA+ID4KPiA+ID4gPiA+IFdoaWNoIG1ha2VzIG1lIHRoaW5rIHNvbWV0
+aGluZyBlbHNlIGlzIGdvaW5nIG9uLi4uIE5pY2ssIGNhbiB5b3UKPiA+ID4gPiA+IHRyeSB0byBy
+ZXByb2R1Y2UgdGhpcyB3aXRoIGEgdXNlcnNwYWNlIGxpYnJiZCBjbGllbnQ/ICAncmJkCj4gPiA+
+ID4gPiBpbmZvJyB3aWxsIGRvIGEgZmV3IGJhc2ljIG9wZXJhdGlvbnMsIGJ1dCBpZiB0aGF0IGlz
+bid0Cj4gPiA+ID4gPiBwcm9ibGVtYXRpYywgdHJ5ICdyYmQgYmVuY2gtd3JpdGUnIG9yICdyYmQg
+ZXhwb3J0Jywgd2hpY2ggd2lsbCBkbyByZWFsCj4gSU8/Cj4gPiA+ID4KPiA+ID4gPiBIaSBTYWdl
+LAo+ID4gPiA+Cj4gPiA+ID4gSnVzdCB0cmllZCBhZ2FpbiBhbmQgSSBjYW4gY29uZmlybSBpdHMg
+ZGVmaW5pdGVseSBub3Qgd29ya2luZywgYnV0Cj4gPiA+ID4gSSB0aGluayBJIG1heSBoYXZlIHN0
+dW1ibGVkIG9uIHRoZSByZWFzb24gd2h5Lgo+ID4gPiA+Cj4gPiA+ID4gRmlyc3QgYXBvbG9naWVz
+IGZvciBub3QgbWVudGlvbmluZyBpdCBiZWZvcmUsIGJ1dCBJIGFtIHN0aWxsCj4gPiA+ID4gcnVu
+bmluZyB0aGF0IHJlY2VuY3kgZml4IG9uIEluZmVybmFsaXMuIEluaXRpYWxseSBJIHRob3VnaHQg
+dGhpcwo+ID4gPiA+IHdhcyBhIGZsdXNoaW5nIGlzc3VlIGFzIEkganVzdCBhc3N1bWVkIHRob3Nl
+IG9iamVjdHMgc2hvdWxkbid0IGdldAo+ID4gPiA+IGZsdXNoZWQgb3V0IGF0IGFsbC4gQnV0IGFm
+dGVyIHJlYWRpbmcgeW91ciBlbWFpbCB3aGVyZSB5b3Ugc2FpZCBpdAo+ID4gPiA+IGZvcmNlZCB0
+aGUgcHJvbW90aW9uLCBpdCBzdHJ1Y2sgbWUgdGhhdCB0aGUgYnJva2VuIHJlY2VuY3kKPiA+ID4g
+PiBiZWhhdmlvdXIgbWF5IGhhdmUgYmVlbiBtYXNraW5nIHRoaXMgaXNzdWUuIFdpdGggdGhlIGZp
+eCBpdCB3b3VsZAo+ID4gPiA+IG9ubHkgcHJvbW90ZSBpZiB0aGUgb2JqZWN0IHdhcyBob3QgZW5v
+dWdoLCB3aGljaCBpdCBwcm9iYWJseSBpbgo+ID4gPiA+IG1vc3QgY2FzZXMgd291bGRuJ3QgYmUu
+IEFzIGEgdGVzdCBJIHNldCBteSByZWNlbmN5J3MgZG93biB0byAwIGFuZAo+ID4gPiA+IHRyaWVk
+IHRoZSBzdGVwcyBhYm92ZSBhZ2FpbiBhbmQgdGhpcyB0aW1lIGl0IHdvcmtlZC4gRG9lcyB0aGlz
+Cj4gPiA+ID4gbWFrZSBzZW5zZT8KPiA+ID4gPgo+ID4gPiA+IE5pY2sKPiA+ID4gPgo+ID4gPiA+
+ID4KPiA+ID4gPiA+IHNhZ2UKPiA+ID4gPiA+Cj4gPiA+ID4gPgo+ID4gPiA+ID4gPiAtU2FtCj4g
+PiA+ID4gPiA+Cj4gPiA+ID4gPiA+ID4KPiA+ID4gPiA+ID4gPiAtLQo+ID4gPiA+ID4gPiA+Cj4g
+PiA+ID4gPiA+ID4gSmFzb24gRGlsbGFtYW4KPiA+ID4gPiA+ID4gPgo+ID4gPiA+ID4gPiA+IC0t
+LS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0KPiA+ID4gPiA+ID4gPj4gRnJvbTogIlNhZ2UgV2Vp
+bCIgPHN3ZWlsQHJlZGhhdC5jb20+Cj4gPiA+ID4gPiA+ID4+IFRvOiAiTmljayBGaXNrIiA8bmlj
+a0BmaXNrLm1lLnVrPgo+ID4gPiA+ID4gPiA+PiBDYzogIkphc29uIERpbGxhbWFuIiA8ZGlsbGFt
+YW5AcmVkaGF0LmNvbT4sCj4gPiA+ID4gPiA+ID4+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20s
+IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnCj4gPiA+ID4gPiA+ID4+IFNlbnQ6IEZyaWRheSwg
+RmVicnVhcnkgNSwgMjAxNiAxMDo0MjoxNyBBTQo+ID4gPiA+ID4gPiA+PiBTdWJqZWN0OiBjbHNf
+cmJkIG9wcyBvbiByYmRfaWQuJG5hbWUgb2JqZWN0cyBpbiBFQyBwb29sCj4gPiA+ID4gPiA+ID4+
+Cj4gPiA+ID4gPiA+ID4+IE9uIFdlZCwgMjcgSmFuIDIwMTYsIE5pY2sgRmlzayB3cm90ZToKPiA+
+ID4gPiA+ID4gPj4gPgo+ID4gPiA+ID4gPiA+PiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
+LS0KPiA+ID4gPiA+ID4gPj4gPiA+IEZyb206IGNlcGgtdXNlcnMKPiA+ID4gPiA+ID4gPj4gPiA+
+IFttYWlsdG86Y2VwaC11c2Vycy1ib3VuY2VzQGxpc3RzLmNlcGguY29tXQo+ID4gPiA+ID4gPiA+
+PiA+ID4gT24gQmVoYWxmIE9mIEphc29uIERpbGxhbWFuCj4gPiA+ID4gPiA+ID4+ID4gPiBTZW50
+OiAyNyBKYW51YXJ5IDIwMTYgMTQ6MjUKPiA+ID4gPiA+ID4gPj4gPiA+IFRvOiBOaWNrIEZpc2sg
+PG5pY2tAZmlzay5tZS51az4KPiA+ID4gPiA+ID4gPj4gPiA+IENjOiBjZXBoLXVzZXJzQGxpc3Rz
+LmNlcGguY29tCj4gPiA+ID4gPiA+ID4+ID4gPiBTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIFBv
+c3NpYmxlIENhY2hlIFRpZXIgQnVnIC0gQ2FuCj4gPiA+ID4gPiA+ID4+ID4gPiBzb21lb25lIGNv
+bmZpcm0KPiA+ID4gPiA+ID4gPj4gPiA+Cj4gPiA+ID4gPiA+ID4+ID4gPiBBcmUgeW91IHJ1bm5p
+bmcgd2l0aCBhbiBFQyBwb29sIGJlaGluZCB0aGUgY2FjaGUgdGllcj8KPiA+ID4gPiA+ID4gPj4g
+PiA+IEkga25vdyB0aGVyZSB3YXMgYW4gaXNzdWUgd2l0aCB0aGUgZmlyc3QgSW5mZXJuYWxpcwo+
+ID4gPiA+ID4gPiA+PiA+ID4gcmVsZWFzZSB3aGVyZSB1bnN1cHBvcnRlZCBvcHMgd2VyZSBiZWlu
+ZyBwcm94aWVkIGRvd24KPiA+ID4gPiA+ID4gPj4gPiA+IHRvIHRoZSBFQyBwb29sLCByZXN1bHRp
+bmcgaW4gdGhhdCBzYW1lIGVycm9yLgo+ID4gPiA+ID4gPiA+PiA+Cj4gPiA+ID4gPiA+ID4+ID4g
+SGkgSmFzb24sIHllcyBJIGFtLiAzeCBSZXBsaWNhdGVkIHBvb2wgb24gdG9wIG9mIGFuIEVDIHBv
+b2wuCj4gPiA+ID4gPiA+ID4+ID4KPiA+ID4gPiA+ID4gPj4gPiBJdCdzIHByb2JhYmx5IHNvbWV0
+aGluZyBzaW1pbGFyIHRvIHdoYXQgeW91IG1lbnRpb24uCj4gPiA+ID4gPiA+ID4+ID4gRWl0aGVy
+IHRoZSBjbGllbnQgc2hvdWxkIGJlIGFibGUgdG8gYWNjZXNzIHRoZSBSQkQgaGVhZGVyCj4gPiA+
+ID4gPiA+ID4+ID4gb2JqZWN0IG9uIHRoZSBiYXNlIHBvb2wsIG9yIGl0IHNob3VsZCBiZSBmbGFn
+Z2VkIHNvIHRoYXQgaXQgY2FuJ3QKPiBiZSBldmljdGVkLgo+ID4gPiA+ID4gPiA+Pgo+ID4gPiA+
+ID4gPiA+PiBJIGp1c3QgY29uZmlybWVkIHRoYXQgdGhlIHJiZF9pZC4kbmFtZSBvYmplY3QgZG9l
+c24ndCBoYXZlCj4gPiA+ID4gPiA+ID4+IGFueSBvbWFwLCBzbyBmcm9tIHJhZG9zJ3MgcGVyc3Bl
+Y3RpdmUsIGZsdXNoaW5nIGFuZAo+ID4gPiA+ID4gPiA+PiBldmljdGluZyBpdCBpcyBmaW5lLiAg
+QnV0IHllYWgsIHRoZSBjbHNfcmJkIG9wcyBhcmVuJ3QgcGVybWl0dGVkIGluCj4gdGhlIEVDIHBv
+b2wuCj4gPiA+ID4gPiA+ID4+Cj4gPiA+ID4gPiA+ID4+IEluIG1hc3Rlci9qZXdlbCB3ZSBoYXZl
+IGEgY2FjaGUtcGluIGZ1bmN0aW9uIHRoYXQgcHJldmVudHMKPiA+ID4gPiA+ID4gPj4gYW4gb2Jq
+ZWN0IGZyb20gYmVpbmcgZmx1c2hlZC4KPiA+ID4gPiA+ID4gPj4KPiA+ID4gPiA+ID4gPj4gQSBm
+ZXcgb3B0aW9ucyBhcmU6Cj4gPiA+ID4gPiA+ID4+Cj4gPiA+ID4gPiA+ID4+IDEpIEhhdmUgY2xz
+X3JiZCBjYWNoZS1waW4gaXQncyBvYmplY3RzLgo+ID4gPiA+ID4gPiA+Pgo+ID4gPiA+ID4gPiA+
+PiAyKSBIYXZlIGNsc19yYmQgcHV0IGFuIG9tYXAga2V5IG9uIHRoZSBvYmplY3QgdG8gaW5kaXJl
+Y3RseQo+ID4gPiA+ID4gPiA+PiBkbyB0aGUKPiA+ID4gPiA+IHNhbWUuCj4gPiA+ID4gPiA+ID4+
+Cj4gPiA+ID4gPiA+ID4+IDMpIEFkZCBhIHJlcXVpcmVzLWNscyB0eXBlIG9iamVjdCBmbGFnIHRo
+YXQga2VlcHMgaHRlCj4gPiA+ID4gPiA+ID4+IG9iamVjdCBvdXQgb2YgYW4gRUMgcG9vbCAqdW50
+aWwqIGl0IGV2ZW50dWFsbHkgc3VwcG9ydHMgY2xzIG9wcy4KPiA+ID4gPiA+ID4gPj4KPiA+ID4g
+PiA+ID4gPj4gSSdkIGxlYW4gdG93YXJkIDEgc2luY2UgaXQncyBzaW1wbGUgYW5kIGV4cGxpY2l0
+LCBhbmQgd2hlbgo+ID4gPiA+ID4gPiA+PiB3ZSBldmVudHVhbGx5IG1ha2UgY2xhc3NlcyB3b3Jr
+IHdlIGNhbiByZW1vdmUgdGhlIGNhY2hlLXBpbgo+ID4gPiA+ID4gPiA+PiBiZWhhdmlvcgo+ID4g
+PiA+ID4gZnJvbSBjbHNfcmJkLgo+ID4gPiA+ID4gPiA+PiBJdCdzIGhhcmRlciB0byBmaXggaW4g
+aW5mZXJuYWxpcyB1bmxlc3Mgd2UgYWxzbyBiYWNrcG9ydAo+ID4gPiA+ID4gPiA+PiBjYWNoZS1w
+aW4vdW5waW4gb3BzLCB0b28sIHNvIG1heWJlICMyIHdvdWxkIGJlIGEgc2ltcGxlCj4gPiA+ID4g
+PiA+ID4+IGluZmVybmFsaXMKPiA+ID4gPiA+IHdvcmthcm91bmQ/Cj4gPiA+ID4gPiA+ID4+Cj4g
+PiA+ID4gPiA+ID4+IEphc29uPyAgU2FtPwo+ID4gPiA+ID4gPiA+PiBzYWdlCj4gPiA+ID4gPiA+
+ID4+Cj4gPiA+ID4gPiA+ID4+Cj4gPiA+ID4gPiA+ID4+Cj4gPiA+ID4gPiA+ID4+ID4KPiA+ID4g
+PiA+ID4gPj4gPiA+Cj4gPiA+ID4gPiA+ID4+ID4gPiAtLQo+ID4gPiA+ID4gPiA+PiA+ID4KPiA+
+ID4gPiA+ID4gPj4gPiA+IEphc29uIERpbGxhbWFuCj4gPiA+ID4gPiA+ID4+ID4gPgo+ID4gPiA+
+ID4gPiA+PiA+ID4KPiA+ID4gPiA+ID4gPj4gPiA+IC0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0t
+LS0KPiA+ID4gPiA+ID4gPj4gPiA+ID4gRnJvbTogIk5pY2sgRmlzayIgPG5pY2tAZmlzay5tZS51
+az4KPiA+ID4gPiA+ID4gPj4gPiA+ID4gVG86IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiA+
+ID4gPiA+ID4gPj4gPiA+ID4gU2VudDogV2VkbmVzZGF5LCBKYW51YXJ5IDI3LCAyMDE2IDg6NDY6
+NTMgQU0KPiA+ID4gPiA+ID4gPj4gPiA+ID4gU3ViamVjdDogW2NlcGgtdXNlcnNdIFBvc3NpYmxl
+IENhY2hlIFRpZXIgQnVnIC0gQ2FuCj4gPiA+ID4gPiA+ID4+ID4gPiA+IHNvbWVvbmUgY29uZmly
+bQo+ID4gPiA+ID4gPiA+PiA+ID4gPgo+ID4gPiA+ID4gPiA+PiA+ID4gPiBIaSBBbGwsCj4gPiA+
+ID4gPiA+ID4+ID4gPiA+Cj4gPiA+ID4gPiA+ID4+ID4gPiA+IEkgdGhpbmsgSSBoYXZlIHN0dW1i
+bGVkIG9uIGEgYnVnLiBJJ20gcnVubmluZwo+ID4gPiA+ID4gPiA+PiA+ID4gPiBJbmZlcm5hbGlz
+IChLZXJuZWwgNC40IG9uIHRoZQo+ID4gPiA+ID4gPiA+PiA+ID4gPiBjbGllbnQpIGFuZCBpdCBz
+ZWVtcyB0aGF0IGlmIHRoZSBSQkQgaGVhZGVyIG9iamVjdAo+ID4gPiA+ID4gPiA+PiA+ID4gPiBn
+ZXRzIGV2aWN0ZWQgZnJvbSB0aGUgY2FjaGUgcG9vbCB0aGVuIHlvdSBjYW4gbm8gbG9uZ2VyCj4g
+bWFwIGl0Lgo+ID4gPiA+ID4gPiA+PiA+ID4gPgo+ID4gPiA+ID4gPiA+PiA+ID4gPiBTdGVwcyB0
+byByZXByb2R1Y2UKPiA+ID4gPiA+ID4gPj4gPiA+ID4KPiA+ID4gPiA+ID4gPj4gPiA+ID4gcmJk
+IC1wIGNhY2hlMSBjcmVhdGUgVGVzdCAtLXNpemU9MTBHIHJiZCAtIHAgY2FjaGUxCj4gPiA+ID4g
+PiA+ID4+ID4gPiA+IG1hcCBUZXN0Cj4gPiA+ID4gPiA+ID4+ID4gPiA+Cj4gPiA+ID4gPiA+ID4+
+ID4gPiA+IC9kZXYvcmJkMSAgPC1Xb3JrcyEhCj4gPiA+ID4gPiA+ID4+ID4gPiA+Cj4gPiA+ID4g
+PiA+ID4+ID4gPiA+IHJiZCB1bm1hcCAvZGV2L3JiZDEKPiA+ID4gPiA+ID4gPj4gPiA+ID4KPiA+
+ID4gPiA+ID4gPj4gPiA+ID4gcmFkb3MgLXAgY2FjaGUxIGNhY2hlLWZsdXNoIHJiZF9pZC5UZXN0
+IHJhZG9zIC1wCj4gPiA+ID4gPiA+ID4+ID4gPiA+IGNhY2hlMSBjYWNoZS1ldmljdCByYmRfaWQu
+VGVzdCByYmQgLSBwIGNhY2hlMSBtYXAKPiA+ID4gPiA+ID4gPj4gPiA+ID4gVGVzdAo+ID4gPiA+
+ID4gPiA+PiA+ID4gPgo+ID4gPiA+ID4gPiA+PiA+ID4gPiByYmQ6IHN5c2ZzIHdyaXRlIGZhaWxl
+ZAo+ID4gPiA+ID4gPiA+PiA+ID4gPiByYmQ6IG1hcCBmYWlsZWQ6ICg5NSkgT3BlcmF0aW9uIG5v
+dCBzdXBwb3J0ZWQKPiA+ID4gPiA+ID4gPj4gPiA+ID4KPiA+ID4gPiA+ID4gPj4gPiA+ID4gb3Ig
+d2l0aCB0aGUgcmJkLW5iZCBjbGllbnQKPiA+ID4gPiA+ID4gPj4gPiA+ID4KPiA+ID4gPiA+ID4g
+Pj4gPiA+ID4gMjAxNi0wMS0yNyAxMzozOTo1Mi42ODY3NzAgN2Y5ZTU0MTYyYjAwIC0xCj4gPiA+
+ID4gPiA+ID4+ID4gPiA+IGFzb2soMHg1NjE4MzdiODgzNjApCj4gPiA+ID4gPiA+ID4+ID4gPiA+
+IEFkbWluU29ja2V0Q29uZmlnT2JzOjppbml0OiBmYWlsZWQ6Cj4gPiA+ID4gPiBBZG1pblNvY2tl
+dDo6YmluZF9hbmRfbGlzdGVuOgo+ID4gPiA+ID4gPiA+PiA+ID4gPiBmYWlsZWQgdG8gYmluZCB0
+aGUgVU5JWCBkb21haW4gc29ja2V0IHRvCj4gPiA+ID4gPiA+ID4+ID4gPiA+ICcvdmFyL3J1bi9j
+ZXBoL2NlcGgtY2xpZW50LmFkbWluLmFzb2snOiAoMTcpIEZpbGUKPiA+ID4gPiA+ID4gPj4gPiA+
+ID4gZXhpc3RzCj4gPiA+ID4gPiA+ID4+ID4gPiA+IDIwMTYtMDEtMjcgMTM6Mzk6NTIuNzAzOTg3
+IDdmOWUzMmZmZDcwMCAtMQo+ID4gPiA+ID4gbGlicmJkOjppbWFnZTo6T3BlblJlcXVlc3Q6Cj4g
+PiA+ID4gPiA+ID4+ID4gPiA+IGZhaWxlZCB0byByZXRyaWV2ZSBpbWFnZSBpZDogKDk1KSBPcGVy
+YXRpb24gbm90Cj4gPiA+ID4gPiA+ID4+ID4gPiA+IHN1cHBvcnRlZAo+ID4gPiA+ID4gPiA+PiA+
+ID4gPiByYmQtbmJkOiBmYWlsZWQgdG8gbWFwLCBzdGF0dXM6ICg5NSkgT3BlcmF0aW9uIG5vdAo+
+ID4gPiA+ID4gPiA+PiA+ID4gPiBzdXBwb3J0ZWQKPiA+ID4gPiA+ID4gPj4gPiA+ID4gMjAxNi0w
+MS0yNyAxMzozOTo1Mi43MDQxMzggN2Y5ZTMyN2ZjNzAwIC0xCj4gPiA+ID4gPiA+ID4+ID4gPiA+
+IGxpYnJiZDo6SW1hZ2VTdGF0ZTogZmFpbGVkIHRvIG9wZW4gaW1hZ2U6ICg5NSkKPiA+ID4gPiA+
+ID4gPj4gPiA+ID4gT3BlcmF0aW9uIG5vdCBzdXBwb3J0ZWQKPiA+ID4gPiA+ID4gPj4gPiA+ID4K
+PiA+ID4gPiA+ID4gPj4gPiA+ID4gTmljawo+ID4gPiA+ID4gPiA+PiA+ID4gPgo+ID4gPiA+ID4g
+PiA+PiA+ID4gPgo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fCj4gPiA+ID4gPiA+ID4+ID4gPiA+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0IGNlcGgtdXNl
+cnNAbGlzdHMuY2VwaC5jb20KPiA+ID4gPiA+ID4gPj4gPiA+ID4gaHR0cDovL2xpc3RzLmNlcGgu
+Y29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY28KPiA+ID4gPiA+ID4gPj4gPiA+ID4g
+bQo+ID4gPiA+ID4gPiA+PiA+ID4gPgo+ID4gPiA+ID4gPiA+PiA+ID4KPiBfX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+ID4gPiA+ID4gPiA+PiA+ID4gY2Vw
+aC11c2VycyBtYWlsaW5nIGxpc3QgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+ID4gPiA+ID4g
+PiA+PiA+ID4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNl
+cGguY29tCj4gPiA+ID4gPiA+ID4+ID4KPiA+ID4gPiA+ID4gPj4gPiBfX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+ID4gPiA+ID4gPiA+PiA+IGNlcGgtdXNl
+cnMgbWFpbGluZyBsaXN0Cj4gPiA+ID4gPiA+ID4+ID4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
+bQo+ID4gPiA+ID4gPiA+PiA+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
+aC11c2Vycy1jZXBoLmNvbQo+ID4gPiA+ID4gPiA+PiA+Cj4gPiA+ID4gPiA+ID4+ID4KPiA+ID4g
+PiA+ID4gPj4gLS0KPiA+ID4gPiA+ID4gPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
+IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlCj4gPiA+ID4gPiA+ID4+IGNlcGgtZGV2ZWwiIGlu
+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0bwo+ID4gPiA+ID4gPiA+PiBtYWpvcmRvbW9Admdlci5r
+ZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQKPiA+ID4gPiA+ID4gPj4gaHR0cDovL3Zn
+ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4gPiA+ID4gPiA+ID4+Cj4gPiA+ID4g
+PiA+ID4gLS0KPiA+ID4gPiA+ID4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2Vu
+ZCB0aGUgbGluZSAidW5zdWJzY3JpYmUKPiA+ID4gPiA+ID4gPiBjZXBoLWRldmVsIiBpbiB0aGUg
+Ym9keSBvZiBhIG1lc3NhZ2UgdG8KPiA+ID4gPiA+ID4gPiBtYWpvcmRvbW9Admdlci5rZXJuZWwu
+b3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQKPiA+ID4gPiA+ID4gPiBodHRwOi8vdmdlci5rZXJu
+ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKPiA+ID4gPiA+ID4KPiA+ID4gPiA+ID4KPiA+ID4g
+PiA+IC0tCj4gPiA+ID4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUg
+bGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIKPiA+ID4gPiA+IGluIHRoZSBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUKPiA+ID4gPiBtYWpvcmRv
+bW8KPiA+ID4gPiA+IGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
+by5odG1sCj4gPiA+Cj4gPiA+Cj4gPiAtLQo+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
+c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiCj4gPiBpbiB0aGUgYm9k
+eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlCj4gbWFqb3Jk
+b21vCj4gPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
+bWwKPiA+Cj4gPgo+IC0tCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
+IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZQo+IGJvZHkgb2YgYSBtZXNzYWdl
+IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdAo+IGh0
+dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAoKX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QK
+Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8u
+Y2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
