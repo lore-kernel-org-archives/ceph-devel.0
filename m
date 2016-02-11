@@ -1,743 +1,186 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: New Defects reported by Coverity Scan for ceph
-Date: Thu, 11 Feb 2016 14:01:16 -0800
-Message-ID: <CAJ4mKGbhV28AW=tiavCw1STFiP_kgHinFVF21sR-3C-8x_sMPw@mail.gmail.com>
-References: <56bccb71750ff_105ef2d3209258f@ss1435.mail>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: BUG: held lock freed! - request_sock_queue::rskq_lock
+Date: Thu, 11 Feb 2016 23:43:34 +0100
+Message-ID: <CAOi1vP9b78Y7-ddcZna2xM+vST6iuw+RmRL+BxR3HQZKbaa0ZA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/mixed; boundary=001a1148d7c4d73081052b8647d6
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:35968 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751516AbcBKWBR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Feb 2016 17:01:17 -0500
-Received: by mail-wm0-f46.google.com with SMTP id p63so93174040wmp.1
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Feb 2016 14:01:17 -0800 (PST)
-In-Reply-To: <56bccb71750ff_105ef2d3209258f@ss1435.mail>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:33660 "EHLO
+	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750865AbcBKWnf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Feb 2016 17:43:35 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Adam Emerson <aemerson@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Eric Dumazet <edumazet@google.com>
+Cc: netdev <netdev@vger.kernel.org>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
-So if I'm reading the samples changes here correctly, we seem to have
-a bunch of new warnings around the lock changes? Is this something we
-should be resolving in the lock users, or whitelisting, or fixing
-lower down in the stack?
--Greg
+--001a1148d7c4d73081052b8647d6
+Content-Type: text/plain; charset=UTF-8
 
-On Thu, Feb 11, 2016 at 9:57 AM,  <scan-admin@coverity.com> wrote:
->
-> Hi,
->
-> Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
->
-> 28 new defect(s) introduced to ceph found with Coverity Scan.
-> 106 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
->
-> New defect(s) Reported-by: Coverity Scan
-> Showing 20 of 28 defect(s)
->
->
-> ** CID 1352097:  Control flow issues  (UNREACHABLE)
-> /common/shunique_lock.h: 326 in ceph::shunique_lock<boost::shared_mutex>::release_to_unique()()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352097:  Control flow issues  (UNREACHABLE)
-> /common/shunique_lock.h: 326 in ceph::shunique_lock<boost::shared_mutex>::release_to_unique()()
-> 320           return tu;
-> 321         } else if (m == nullptr) {
-> 322           return unique_lock_type();
-> 323         }
-> 324         throw std::system_error((int)std::errc::operation_not_permitted,
-> 325                                 std::generic_category());
->>>>     CID 1352097:  Control flow issues  (UNREACHABLE)
->>>>     This code cannot be reached: "return ceph::shunique_lock<...".
-> 326         return unique_lock_type();
-> 327       }
-> 328
-> 329       shared_lock_type release_to_shared() {
-> 330         if (o == ownership::shared) {
-> 331           o = ownership::none;
->
-> ** CID 1352096:    (UNCAUGHT_EXCEPT)
-> /test/rbd_mirror/test_main.cc: 14 in main()
-> /test/rbd_mirror/test_main.cc: 14 in main()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352096:    (UNCAUGHT_EXCEPT)
-> /test/rbd_mirror/test_main.cc: 14 in main()
-> 8     #include <iostream>
-> 9     #include <string>
-> 10
-> 11     extern void register_test_cluster_watcher();
-> 12     extern void register_test_pool_watcher();
-> 13
->>>>     CID 1352096:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 14     int main(int argc, char **argv)
-> 15     {
-> 16       register_test_cluster_watcher();
-> 17       register_test_pool_watcher();
-> 18
-> 19       ::testing::InitGoogleTest(&argc, argv);
-> /test/rbd_mirror/test_main.cc: 14 in main()
-> 8     #include <iostream>
-> 9     #include <string>
-> 10
-> 11     extern void register_test_cluster_watcher();
-> 12     extern void register_test_pool_watcher();
-> 13
->>>>     CID 1352096:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 14     int main(int argc, char **argv)
-> 15     {
-> 16       register_test_cluster_watcher();
-> 17       register_test_pool_watcher();
-> 18
-> 19       ::testing::InitGoogleTest(&argc, argv);
->
-> ** CID 1352095:    (UNCAUGHT_EXCEPT)
-> /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> /tools/cephfs/cephfs-table-tool.cc: 11 in main()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352095:    (UNCAUGHT_EXCEPT)
-> /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> 5     #include "common/errno.h"
-> 6     #include "global/global_init.h"
-> 7
-> 8     #include "TableTool.h"
-> 9
-> 10
->>>>     CID 1352095:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-> 11     int main(int argc, const char **argv)
-> 12     {
-> 13       vector<const char*> args;
-> 14       argv_to_vec(argc, argv, args);
-> 15       env_to_vec(args);
-> 16
-> /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> 5     #include "common/errno.h"
-> 6     #include "global/global_init.h"
-> 7
-> 8     #include "TableTool.h"
-> 9
-> 10
->>>>     CID 1352095:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-> 11     int main(int argc, const char **argv)
-> 12     {
-> 13       vector<const char*> args;
-> 14       argv_to_vec(argc, argv, args);
-> 15       env_to_vec(args);
-> 16
->
-> ** CID 1352094:    (UNCAUGHT_EXCEPT)
-> /tools/cephfs/cephfs-journal-tool.cc: 24 in main()
-> /tools/cephfs/cephfs-journal-tool.cc: 24 in main()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352094:    (UNCAUGHT_EXCEPT)
-> /tools/cephfs/cephfs-journal-tool.cc: 24 in main()
-> 18     #include "common/errno.h"
-> 19     #include "global/global_init.h"
-> 20
-> 21     #include "JournalTool.h"
-> 22
-> 23
->>>>     CID 1352094:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-> 24     int main(int argc, const char **argv)
-> 25     {
-> 26       vector<const char*> args;
-> 27       argv_to_vec(argc, argv, args);
-> 28       env_to_vec(args);
-> 29
-> /tools/cephfs/cephfs-journal-tool.cc: 24 in main()
-> 18     #include "common/errno.h"
-> 19     #include "global/global_init.h"
-> 20
-> 21     #include "JournalTool.h"
-> 22
-> 23
->>>>     CID 1352094:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-> 24     int main(int argc, const char **argv)
-> 25     {
-> 26       vector<const char*> args;
-> 27       argv_to_vec(argc, argv, args);
-> 28       env_to_vec(args);
-> 29
->
-> ** CID 1352093:    (UNCAUGHT_EXCEPT)
-> /tools/cephfs/cephfs-data-scan.cc: 11 in main()
-> /tools/cephfs/cephfs-data-scan.cc: 11 in main()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352093:    (UNCAUGHT_EXCEPT)
-> /tools/cephfs/cephfs-data-scan.cc: 11 in main()
-> 5     #include "common/errno.h"
-> 6     #include "global/global_init.h"
-> 7
-> 8     #include "DataScan.h"
-> 9
-> 10
->>>>     CID 1352093:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-> 11     int main(int argc, const char **argv)
-> 12     {
-> 13       vector<const char*> args;
-> 14       argv_to_vec(argc, argv, args);
-> 15       env_to_vec(args);
-> 16
-> /tools/cephfs/cephfs-data-scan.cc: 11 in main()
-> 5     #include "common/errno.h"
-> 6     #include "global/global_init.h"
-> 7
-> 8     #include "DataScan.h"
-> 9
-> 10
->>>>     CID 1352093:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-> 11     int main(int argc, const char **argv)
-> 12     {
-> 13       vector<const char*> args;
-> 14       argv_to_vec(argc, argv, args);
-> 15       env_to_vec(args);
-> 16
->
-> ** CID 1352092:  Error handling issues  (UNCAUGHT_EXCEPT)
-> /tools/rbd_mirror/main.cc: 32 in main()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352092:  Error handling issues  (UNCAUGHT_EXCEPT)
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352092:  Error handling issues  (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "ceph::buffer::end_of_buffer" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
->
-> ** CID 1352091:    (UNCAUGHT_EXCEPT)
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
-> /tools/rbd_mirror/main.cc: 32 in main()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352091:    (UNCAUGHT_EXCEPT)
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
-> /tools/rbd_mirror/main.cc: 32 in main()
-> 26     static void handle_signal(int signum)
-> 27     {
-> 28       if (mirror)
-> 29         mirror->handle_signal(signum);
-> 30     }
-> 31
->>>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-> 32     int main(int argc, const char **argv)
-> 33     {
-> 34       std::vector<const char*> args;
-> 35       argv_to_vec(argc, argv, args);
-> 36       env_to_vec(args);
-> 37
->
-> ** CID 1352090:  Error handling issues  (UNCAUGHT_EXCEPT)
-> /tools/rados/rados.cc: 2969 in main()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352090:  Error handling issues  (UNCAUGHT_EXCEPT)
-> /tools/rados/rados.cc: 2969 in main()
-> 2963
-> 2964     out:
-> 2965       delete formatter;
-> 2966       return (ret < 0) ? 1 : 0;
-> 2967     }
-> 2968
->>>>     CID 1352090:  Error handling issues  (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-> 2969     int main(int argc, const char **argv)
-> 2970     {
-> 2971       vector<const char*> args;
-> 2972       argv_to_vec(argc, argv, args);
-> 2973       env_to_vec(args);
-> 2974
->
-> ** CID 1352089:  Resource leaks  (RESOURCE_LEAK)
-> /global/global_init.cc: 249 in global_init(std::vector<const char *, std::allocator<const char *>> *, std::vector<const char *, std::allocator<const char *>> &, unsigned int, code_environment_t, int, const char *)()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352089:  Resource leaks  (RESOURCE_LEAK)
-> /global/global_init.cc: 249 in global_init(std::vector<const char *, std::allocator<const char *>> *, std::vector<const char *, std::allocator<const char *>> &, unsigned int, code_environment_t, int, const char *)()
-> 243       // test leak checking
-> 244       if (g_conf->debug_deliberately_leak_memory) {
-> 245         derr << "deliberately leaking some memory" << dendl;
-> 246         char *s = new char[1234567];
-> 247         (void)s;
-> 248         // cppcheck-suppress memleak
->>>>     CID 1352089:  Resource leaks  (RESOURCE_LEAK)
->>>>     Variable "s" going out of scope leaks the storage it points to.
-> 249       }
-> 250
-> 251       if (code_env == CODE_ENVIRONMENT_DAEMON && !(flags & CINIT_FLAG_NO_DAEMON_ACTIONS))
-> 252         output_ceph_version();
-> 253     }
-> 254
->
-> ** CID 1352088:    (RESOURCE_LEAK)
-> /test/librados/cmd.cc: 84 in LibRadosCmd_OSDCmd_Test::TestBody()()
-> /test/librados/cmd.cc: 87 in LibRadosCmd_OSDCmd_Test::TestBody()()
-> /test/librados/cmd.cc: 90 in LibRadosCmd_OSDCmd_Test::TestBody()()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352088:    (RESOURCE_LEAK)
-> /test/librados/cmd.cc: 84 in LibRadosCmd_OSDCmd_Test::TestBody()()
-> 78       char *cmd[2];
-> 79       cmd[1] = NULL;
-> 80
-> 81       // note: tolerate NXIO here in case the cluster is thrashing out underneath us.
-> 82       cmd[0] = (char *)"asdfasdf";
-> 83       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
->>>>     CID 1352088:    (RESOURCE_LEAK)
->>>>     Variable "st" going out of scope leaks the storage it points to.
-> 84       ASSERT_TRUE(r == -22 || r == -ENXIO);
-> 85       cmd[0] = (char *)"version";
-> 86       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
-> 87       ASSERT_TRUE(r == -22 || r == -ENXIO);
-> 88       cmd[0] = (char *)"{\"prefix\":\"version\"}";
-> 89       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
-> /test/librados/cmd.cc: 87 in LibRadosCmd_OSDCmd_Test::TestBody()()
-> 81       // note: tolerate NXIO here in case the cluster is thrashing out underneath us.
-> 82       cmd[0] = (char *)"asdfasdf";
-> 83       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
-> 84       ASSERT_TRUE(r == -22 || r == -ENXIO);
-> 85       cmd[0] = (char *)"version";
-> 86       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
->>>>     CID 1352088:    (RESOURCE_LEAK)
->>>>     Variable "st" going out of scope leaks the storage it points to.
-> 87       ASSERT_TRUE(r == -22 || r == -ENXIO);
-> 88       cmd[0] = (char *)"{\"prefix\":\"version\"}";
-> 89       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
-> 90       ASSERT_TRUE((r == 0 && buflen > 0) || (r == -ENXIO && buflen == 0));
-> 91       rados_buffer_free(buf);
-> 92       rados_buffer_free(st);
-> /test/librados/cmd.cc: 90 in LibRadosCmd_OSDCmd_Test::TestBody()()
-> 84       ASSERT_TRUE(r == -22 || r == -ENXIO);
-> 85       cmd[0] = (char *)"version";
-> 86       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
-> 87       ASSERT_TRUE(r == -22 || r == -ENXIO);
-> 88       cmd[0] = (char *)"{\"prefix\":\"version\"}";
-> 89       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
->>>>     CID 1352088:    (RESOURCE_LEAK)
->>>>     Variable "st" going out of scope leaks the storage it points to.
-> 90       ASSERT_TRUE((r == 0 && buflen > 0) || (r == -ENXIO && buflen == 0));
-> 91       rados_buffer_free(buf);
-> 92       rados_buffer_free(st);
-> 93       rados_shutdown(cluster);
-> 94     }
-> 95
->
-> ** CID 1352087:  Parse warnings  (PARSE_ERROR)
-> /mds/StrayManager.cc: 1 in ()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352087:  Parse warnings  (PARSE_ERROR)
-> /mds/StrayManager.cc: 1 in ()
->>>>     CID 1352087:  Parse warnings  (PARSE_ERROR)
->>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-> 2     // vim: ts=8 sw=2 smarttab
-> 3     /*
-> 4      * Ceph - scalable distributed file system
-> 5      *
-> 6      * Copyright (C) 2015 Red Hat
->
-> ** CID 1352086:  Parse warnings  (PARSE_ERROR)
-> /mds/SnapServer.cc: 1 in ()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352086:  Parse warnings  (PARSE_ERROR)
-> /mds/SnapServer.cc: 1 in ()
->>>>     CID 1352086:  Parse warnings  (PARSE_ERROR)
->>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-> 2     // vim: ts=8 sw=2 smarttab
-> 3     /*
-> 4      * Ceph - scalable distributed file system
-> 5      *
-> 6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
->
-> ** CID 1352085:  Parse warnings  (PARSE_ERROR)
-> /mds/Server.cc: 1 in ()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352085:  Parse warnings  (PARSE_ERROR)
-> /mds/Server.cc: 1 in ()
->>>>     CID 1352085:  Parse warnings  (PARSE_ERROR)
->>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-> 2     // vim: ts=8 sw=2 smarttab
-> 3     /*
-> 4      * Ceph - scalable distributed file system
-> 5      *
-> 6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
->
-> ** CID 1352084:  Parse warnings  (PARSE_ERROR)
-> /mds/MDSRank.cc: 1 in ()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352084:  Parse warnings  (PARSE_ERROR)
-> /mds/MDSRank.cc: 1 in ()
->>>>     CID 1352084:  Parse warnings  (PARSE_ERROR)
->>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-> 2     // vim: ts=8 sw=2 smarttab
-> 3     /*
-> 4      * Ceph - scalable distributed file system
-> 5      *
-> 6      * Copyright (C) 2015 Red Hat
->
-> ** CID 1352083:  Parse warnings  (PARSE_ERROR)
-> /mds/MDSDaemon.cc: 1 in ()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352083:  Parse warnings  (PARSE_ERROR)
-> /mds/MDSDaemon.cc: 1 in ()
->>>>     CID 1352083:  Parse warnings  (PARSE_ERROR)
->>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-> 2     // vim: ts=8 sw=2 smarttab
-> 3     /*
-> 4      * Ceph - scalable distributed file system
-> 5      *
-> 6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
->
-> ** CID 1352082:  Parse warnings  (PARSE_ERROR)
-> /librados/RadosClient.cc: 1 in ()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352082:  Parse warnings  (PARSE_ERROR)
-> /librados/RadosClient.cc: 1 in ()
->>>>     CID 1352082:  Parse warnings  (PARSE_ERROR)
->>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-> 2     // vim: ts=8 sw=2 smarttab
-> 3     /*
-> 4      * Ceph - scalable distributed file system
-> 5      *
-> 6      * Copyright (C) 2004-2012 Sage Weil <sage@newdream.net>
->
-> ** CID 1352081:  Parse warnings  (PARSE_ERROR)
-> /client/SyntheticClient.cc: 1 in ()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352081:  Parse warnings  (PARSE_ERROR)
-> /client/SyntheticClient.cc: 1 in ()
->>>>     CID 1352081:  Parse warnings  (PARSE_ERROR)
->>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-> 2     // vim: ts=8 sw=2 smarttab
-> 3     /*
-> 4      * Ceph - scalable distributed file system
-> 5      *
-> 6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
->
-> ** CID 1352080:  Parse warnings  (PARSE_ERROR)
-> /client/Client.cc: 1 in ()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352080:  Parse warnings  (PARSE_ERROR)
-> /client/Client.cc: 1 in ()
->>>>     CID 1352080:  Parse warnings  (PARSE_ERROR)
->>>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-> 1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-> 2     // vim: ts=8 sw=2 smarttab
-> 3     /*
-> 4      * Ceph - scalable distributed file system
-> 5      *
-> 6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
->
-> ** CID 1352079:  Memory - corruptions  (OVERRUN)
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352079:  Memory - corruptions  (OVERRUN)
-> /librbd/journal/Types.cc: 378 in librbd::journal::ClientData::encode(ceph::buffer::list &) const()
-> 372
-> 373     ClientMetaType ClientData::get_client_meta_type() const {
-> 374       return boost::apply_visitor(GetTypeVisitor<ClientMetaType>(), client_meta);
-> 375     }
-> 376
-> 377     void ClientData::encode(bufferlist& bl) const {
->>>>     CID 1352079:  Memory - corruptions  (OVERRUN)
->>>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-> 378       ENCODE_START(1, 1, bl);
-> 379       boost::apply_visitor(EncodeVisitor(bl), client_meta);
-> 380       ENCODE_FINISH(bl);
-> 381     }
-> 382
-> 383     void ClientData::decode(bufferlist::iterator& it) {
->
-> ** CID 1352078:  Memory - corruptions  (OVERRUN)
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1352078:  Memory - corruptions  (OVERRUN)
-> /cls/journal/cls_journal_types.cc: 104 in cls::journal::Tag::encode(ceph::buffer::list &) const()
-> 98       o.push_back(new Client());
-> 99       o.push_back(new Client("id", data));
-> 100       o.push_back(new Client("id", data, {1, {{1, 120}, {2, 121}}}));
-> 101     }
-> 102
-> 103     void Tag::encode(bufferlist& bl) const {
->>>>     CID 1352078:  Memory - corruptions  (OVERRUN)
->>>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-> 104       ENCODE_START(1, 1, bl);
-> 105       ::encode(tid, bl);
-> 106       ::encode(tag_class, bl);
-> 107       ::encode(data, bl);
-> 108       ENCODE_FINISH(bl);
-> 109     }
->
->
-> ________________________________________________________________________________________________________
-> To view the defects in Coverity Scan visit, https://scan.coverity.com/projects/ceph?tab=overview
->
-> To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi Eric,
+
+I'm hitting the following splat (attached in full):
+
+kernel: =========================
+kernel: [ BUG: held lock freed! ]
+kernel: 4.5.0-rc1-ceph-00026-g5e0a311 #1 Not tainted
+kernel: -------------------------
+kernel: swapper/5/0 is freeing memory
+ffff880035c9d200-ffff880035c9dbff, with a lock still held there!
+kernel: (&(&queue->rskq_lock)->rlock){+.-...}, at:
+[<ffffffff816f6a88>] inet_csk_reqsk_queue_add+0x28/0xa0
+kernel: 4 locks held by swapper/5/0:
+kernel: #0:  (rcu_read_lock){......}, at: [<ffffffff8169ef6b>]
+netif_receive_skb_internal+0x4b/0x1f0
+kernel: #1:  (rcu_read_lock){......}, at: [<ffffffff816e977f>]
+ip_local_deliver_finish+0x3f/0x380
+kernel: #2:  (slock-AF_INET){+.-...}, at: [<ffffffff81685ffb>]
+sk_clone_lock+0x19b/0x440
+kernel: #3:  (&(&queue->rskq_lock)->rlock){+.-...}, at:
+[<ffffffff816f6a88>] inet_csk_reqsk_queue_add+0x28/0xa0
+
+The first couple of occurrences were on 4.4-rc2, a couple of recent ones
+on 4.5-rc1.  I'm suspecting your ebb516af60e1 ("tcp/dccp: fix race at
+listener dismantle phase") and/or a bunch of related commits before it,
+authored in the first half of Oct 2015.
+
+The spinlock that lockdep complains about is embedded in
+inet_connection_sock, which I think is getting freed in
+inet_child_forget(), called from inet_csk_reqsk_queue_add():
+
+inet_csk_complete_hashdance
+  inet_csk_reqsk_queue_add
+    spin_lock(&queue->rskq_lock)
+    inet_child_forget
+      reqsk_put
+        reqsk_free
+          sock_put(req->rsk_listener)
+          # rsk_listener is sk that queue is embedded in #
+
+Your comment in inet_csk_complete_hashdance()
+
+                /* Warning: caller must not call reqsk_put(req);
+                 * child stole last reference on it.
+                 */
+
+suggests that there is only one reference to req at that point in time
+and yet ebb516af60e1 added a reqsk_put() to that path: there was one in
+inet_csk_listen_stop() before, but not in inet_csk_reqsk_queue_add().
+
+This is from a quick and dirty git blame analysis, so don't shout if
+all of it is wrong...
+
+Thanks,
+
+                Ilya
+
+--001a1148d7c4d73081052b8647d6
+Content-Type: text/plain; charset=US-ASCII; name="rskq_lock.txt"
+Content-Disposition: attachment; filename="rskq_lock.txt"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_ikiuoyr00
+
+MjAxNi0wMi0wNVQxMjoyNTozMy44NDk0MjkrMDA6MDAgc21pdGhpMDEzIGtlcm5lbDogPT09PT09
+PT09PT09PT09PT09PT09PT09PQoyMDE2LTAyLTA1VDEyOjI1OjMzLjg0OTQ2MiswMDowMCBzbWl0
+aGkwMTMga2VybmVsOiBbIEJVRzogaGVsZCBsb2NrIGZyZWVkISBdCjIwMTYtMDItMDVUMTI6MjU6
+MzMuODQ5NDg2KzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6IDQuNS4wLXJjMS1jZXBoLTAwMDI2LWc1
+ZTBhMzExICMxIE5vdCB0YWludGVkCjIwMTYtMDItMDVUMTI6MjU6MzMuODQ5NTEwKzAwOjAwIHNt
+aXRoaTAxMyBrZXJuZWw6IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KMjAxNi0wMi0wNVQxMjoy
+NTozMy44NDk1NDYrMDA6MDAgc21pdGhpMDEzIGtlcm5lbDogc3dhcHBlci81LzAgaXMgZnJlZWlu
+ZyBtZW1vcnkgZmZmZjg4MDAzNWM5ZDIwMC1mZmZmODgwMDM1YzlkYmZmLCB3aXRoIGEgbG9jayBz
+dGlsbCBoZWxkIHRoZXJlIQoyMDE2LTAyLTA1VDEyOjI1OjMzLjg0OTU3MCswMDowMCBzbWl0aGkw
+MTMga2VybmVsOiAoJigmcXVldWUtPnJza3FfbG9jayktPnJsb2NrKXsrLi0uLi59LCBhdDogWzxm
+ZmZmZmZmZjgxNmY2YTg4Pl0gaW5ldF9jc2tfcmVxc2tfcXVldWVfYWRkKzB4MjgvMHhhMAoyMDE2
+LTAyLTA1VDEyOjI1OjMzLjg0OTU5MyswMDowMCBzbWl0aGkwMTMga2VybmVsOiA0IGxvY2tzIGhl
+bGQgYnkgc3dhcHBlci81LzA6CjIwMTYtMDItMDVUMTI6MjU6MzMuODQ5NjE3KzAwOjAwIHNtaXRo
+aTAxMyBrZXJuZWw6ICMwOiAgKHJjdV9yZWFkX2xvY2spey4uLi4uLn0sIGF0OiBbPGZmZmZmZmZm
+ODE2OWVmNmI+XSBuZXRpZl9yZWNlaXZlX3NrYl9pbnRlcm5hbCsweDRiLzB4MWYwCjIwMTYtMDIt
+MDVUMTI6MjU6MzMuODQ5NjM5KzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6ICMxOiAgKHJjdV9yZWFk
+X2xvY2spey4uLi4uLn0sIGF0OiBbPGZmZmZmZmZmODE2ZTk3N2Y+XSBpcF9sb2NhbF9kZWxpdmVy
+X2ZpbmlzaCsweDNmLzB4MzgwCjIwMTYtMDItMDVUMTI6MjU6MzMuODQ5NjYyKzAwOjAwIHNtaXRo
+aTAxMyBrZXJuZWw6ICMyOiAgKHNsb2NrLUFGX0lORVQpeysuLS4uLn0sIGF0OiBbPGZmZmZmZmZm
+ODE2ODVmZmI+XSBza19jbG9uZV9sb2NrKzB4MTliLzB4NDQwCjIwMTYtMDItMDVUMTI6MjU6MzMu
+ODQ5Njg1KzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6ICMzOiAgKCYoJnF1ZXVlLT5yc2txX2xvY2sp
+LT5ybG9jayl7Ky4tLi4ufSwgYXQ6IFs8ZmZmZmZmZmY4MTZmNmE4OD5dIGluZXRfY3NrX3JlcXNr
+X3F1ZXVlX2FkZCsweDI4LzB4YTAKMjAxNi0wMi0wNVQxMjoyNTozMy44NDk3MDkrMDA6MDAgc21p
+dGhpMDEzIGtlcm5lbDogIzAxMnN0YWNrIGJhY2t0cmFjZToKMjAxNi0wMi0wNVQxMjoyNTozMy44
+NDk3MzMrMDA6MDAgc21pdGhpMDEzIGtlcm5lbDogQ1BVOiA1IFBJRDogMCBDb21tOiBzd2FwcGVy
+LzUgTm90IHRhaW50ZWQgNC41LjAtcmMxLWNlcGgtMDAwMjYtZzVlMGEzMTEgIzEKMjAxNi0wMi0w
+NVQxMjoyNTozMy44NDk3NjArMDA6MDAgc21pdGhpMDEzIGtlcm5lbDogSGFyZHdhcmUgbmFtZTog
+U3VwZXJtaWNybyBTWVMtNTAxOFItV1IvWDEwU1JXLUYsIEJJT1MgMS4wYyAwOS8wNy8yMDE1CjIw
+MTYtMDItMDVUMTI6MjU6MzMuODQ5NzgzKzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6IDAwMDAwMDAw
+MDAwMDAwMDAgOTU0YmJiNjZjNmE4OTA4OSBmZmZmODgwODdmZDQzOGQwIGZmZmZmZmZmODEzZjdi
+MjcKMjAxNi0wMi0wNVQxMjoyNTozMy44NDk4MDYrMDA6MDAgc21pdGhpMDEzIGtlcm5lbDogZmZm
+Zjg4MDg1YjlhYWZjOCBmZmZmODgwODdmZDQzOTA4IGZmZmZmZmZmODEwZmUwMmMgZmZmZjg4MDAz
+NWM5ZDIwMAoyMDE2LTAyLTA1VDEyOjI1OjMzLjg0OTgyOCswMDowMCBzbWl0aGkwMTMga2VybmVs
+OiBmZmZmODgwODViNzc2ODAwIGZmZmZlYTAwMDBkNzI2MDAgZmZmZmZmZmY4MTY4NWM1MSAwMDAw
+MDAwMDAwMDAwMjAyCjIwMTYtMDItMDVUMTI6MjU6MzMuODQ5ODUxKzAwOjAwIHNtaXRoaTAxMyBr
+ZXJuZWw6IENhbGwgVHJhY2U6CjIwMTYtMDItMDVUMTI6MjU6MzMuODQ5ODczKzAwOjAwIHNtaXRo
+aTAxMyBrZXJuZWw6IDxJUlE+ICBbPGZmZmZmZmZmODEzZjdiMjc+XSBkdW1wX3N0YWNrKzB4NGIv
+MHg2NAoyMDE2LTAyLTA1VDEyOjI1OjMzLjg0OTg5NiswMDowMCBzbWl0aGkwMTMga2VybmVsOiBb
+PGZmZmZmZmZmODEwZmUwMmM+XSBkZWJ1Z19jaGVja19ub19sb2Nrc19mcmVlZCsweDExYy8weDE4
+MAoyMDE2LTAyLTA1VDEyOjI1OjMzLjg0OTkxOCswMDowMCBzbWl0aGkwMTMga2VybmVsOiBbPGZm
+ZmZmZmZmODE2ODVjNTE+XSA/IHNrX2Rlc3RydWN0KzB4MTQxLzB4MTcwCjIwMTYtMDItMDVUMTI6
+MjU6MzMuODQ5OTQ3KzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6IFs8ZmZmZmZmZmY4MTIzMmVkNT5d
+IGttZW1fY2FjaGVfZnJlZSsweDEwNS8weDJkMAoyMDE2LTAyLTA1VDEyOjI1OjMzLjg0OTk3Mysw
+MDowMCBzbWl0aGkwMTMga2VybmVsOiBbPGZmZmZmZmZmODE2ODVjNTE+XSBza19kZXN0cnVjdCsw
+eDE0MS8weDE3MAoyMDE2LTAyLTA1VDEyOjI1OjMzLjg0OTk5NSswMDowMCBzbWl0aGkwMTMga2Vy
+bmVsOiBbPGZmZmZmZmZmODE2ODVjZWY+XSBfX3NrX2ZyZWUrMHg2Zi8weGIwCjIwMTYtMDItMDVU
+MTI6MjU6MzMuODUwMDE4KzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6IFs8ZmZmZmZmZmY4MTY4NWQ0
+OD5dIHNrX2ZyZWUrMHgxOC8weDIwCjIwMTYtMDItMDVUMTI6MjU6MzMuODUwMDQ1KzAwOjAwIHNt
+aXRoaTAxMyBrZXJuZWw6IFs8ZmZmZmZmZmY4MTZmNmE0ZD5dIGluZXRfY2hpbGRfZm9yZ2V0KzB4
+MTNkLzB4MTUwCjIwMTYtMDItMDVUMTI6MjU6MzMuODUwMDY3KzAwOjAwIHNtaXRoaTAxMyBrZXJu
+ZWw6IFs8ZmZmZmZmZmY4MTZmNmE5ZT5dIGluZXRfY3NrX3JlcXNrX3F1ZXVlX2FkZCsweDNlLzB4
+YTAKMjAxNi0wMi0wNVQxMjoyNTozMy44NTAwOTArMDA6MDAgc21pdGhpMDEzIGtlcm5lbDogWzxm
+ZmZmZmZmZjgxNmY3MGJhPl0gaW5ldF9jc2tfY29tcGxldGVfaGFzaGRhbmNlKzB4NGEvMHg4MAoy
+MDE2LTAyLTA1VDEyOjI1OjMzLjg1MDExMyswMDowMCBzbWl0aGkwMTMga2VybmVsOiBbPGZmZmZm
+ZmZmODE3MTIwNzQ+XSB0Y3BfY2hlY2tfcmVxKzB4Mzc0LzB4NDUwCjIwMTYtMDItMDVUMTI6MjU6
+MzMuODUwMTM5KzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6IFs8ZmZmZmZmZmY4MTcxMGJmND5dIHRj
+cF92NF9yY3YrMHgzZjQvMHhhYzAKMjAxNi0wMi0wNVQxMjoyNTozMy44NTAxNjErMDA6MDAgc21p
+dGhpMDEzIGtlcm5lbDogWzxmZmZmZmZmZjgxMGZiN2VlPl0gPyBfX2xvY2tfaXNfaGVsZCsweDNl
+LzB4NjAKMjAxNi0wMi0wNVQxMjoyNTozMy44NTAxODQrMDA6MDAgc21pdGhpMDEzIGtlcm5lbDog
+WzxmZmZmZmZmZjgxNmU5OTA5Pl0gaXBfbG9jYWxfZGVsaXZlcl9maW5pc2grMHgxYzkvMHgzODAK
+MjAxNi0wMi0wNVQxMjoyNTozMy44NTAyMDYrMDA6MDAgc21pdGhpMDEzIGtlcm5lbDogWzxmZmZm
+ZmZmZjgxNmU5NzdmPl0gPyBpcF9sb2NhbF9kZWxpdmVyX2ZpbmlzaCsweDNmLzB4MzgwCjIwMTYt
+MDItMDVUMTI6MjU6MzMuODUwMjQ0KzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6IFs8ZmZmZmZmZmY4
+MTZlOWNkZj5dIGlwX2xvY2FsX2RlbGl2ZXIrMHg2Zi8weGUwCjIwMTYtMDItMDVUMTI6MjU6MzMu
+ODUwMjY3KzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6IFs8ZmZmZmZmZmY4MTBmYjcwMj5dID8gbWF0
+Y2hfaGVsZF9sb2NrKzB4ZjIvMHgxYTAKMjAxNi0wMi0wNVQxMjoyNTozMy44NTAyOTArMDA6MDAg
+c21pdGhpMDEzIGtlcm5lbDogWzxmZmZmZmZmZjgxNmU5NzQwPl0gPyBpcF9yY3ZfZmluaXNoKzB4
+NGYwLzB4NGYwCjIwMTYtMDItMDVUMTI6MjU6MzMuODUwMzEzKzAwOjAwIHNtaXRoaTAxMyBrZXJu
+ZWw6IFs8ZmZmZmZmZmY4MTZlOTYyND5dIGlwX3Jjdl9maW5pc2grMHgzZDQvMHg0ZjAKMjAxNi0w
+Mi0wNVQxMjoyNTozMy44NTAzMzUrMDA6MDAgc21pdGhpMDEzIGtlcm5lbDogWzxmZmZmZmZmZjgx
+NmVhMDVmPl0gaXBfcmN2KzB4MzBmLzB4M2MwCjIwMTYtMDItMDVUMTI6MjU6MzMuODUwMzU4KzAw
+OjAwIHNtaXRoaTAxMyBrZXJuZWw6IFs8ZmZmZmZmZmY4MTdiYzgwNz5dID8gcGFja2V0X3Jjdisw
+eDM4Ny8weDNjMAoyMDE2LTAyLTA1VDEyOjI1OjMzLjg1MDM4NSswMDowMCBzbWl0aGkwMTMga2Vy
+bmVsOiBbPGZmZmZmZmZmODE2OWRmODY+XSBfX25ldGlmX3JlY2VpdmVfc2tiX2NvcmUrMHg5NjYv
+MHhhMzAKMjAxNi0wMi0wNVQxMjoyNTozMy44NTA0MDgrMDA6MDAgc21pdGhpMDEzIGtlcm5lbDog
+WzxmZmZmZmZmZjgxNjllZjZiPl0gPyBuZXRpZl9yZWNlaXZlX3NrYl9pbnRlcm5hbCsweDRiLzB4
+MWYwCjIwMTYtMDItMDVUMTI6MjU6MzMuODUwNDMxKzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6IFs8
+ZmZmZmZmZmY4MTY5ZTA5ZT5dIF9fbmV0aWZfcmVjZWl2ZV9za2IrMHg0ZS8weDYwCjIwMTYtMDIt
+MDVUMTI6MjU6MzMuODUwNDUzKzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6IFs8ZmZmZmZmZmY4MTY5
+ZjA0ZD5dIG5ldGlmX3JlY2VpdmVfc2tiX2ludGVybmFsKzB4MTJkLzB4MWYwCjIwMTYtMDItMDVU
+MTI6MjU6MzMuODUwNDc5KzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6IFs8ZmZmZmZmZmY4MTY5ZWY2
+Yj5dID8gbmV0aWZfcmVjZWl2ZV9za2JfaW50ZXJuYWwrMHg0Yi8weDFmMAoyMDE2LTAyLTA1VDEy
+OjI1OjMzLjg1MDUwMiswMDowMCBzbWl0aGkwMTMga2VybmVsOiBbPGZmZmZmZmZmODE2YTA3OGM+
+XSBuYXBpX2dyb19yZWNlaXZlKzB4ZmMvMHgxODAKMjAxNi0wMi0wNVQxMjoyNTozMy44NTA1MjUr
+MDA6MDAgc21pdGhpMDEzIGtlcm5lbDogWzxmZmZmZmZmZmEwMGMyODkxPl0gaXhnYmVfY2xlYW5f
+cnhfaXJxKzB4ODQxLzB4OWIwIFtpeGdiZV0KMjAxNi0wMi0wNVQxMjoyNTozMy44NTA1NDgrMDA6
+MDAgc21pdGhpMDEzIGtlcm5lbDogWzxmZmZmZmZmZmEwMGMzNzNiPl0gaXhnYmVfcG9sbCsweDUw
+Yi8weDcxMCBbaXhnYmVdCjIwMTYtMDItMDVUMTI6MjU6MzMuODUwNTc4KzAwOjAwIHNtaXRoaTAx
+MyBrZXJuZWw6IFs8ZmZmZmZmZmY4MTRlYzdkYz5dID8gYWRkX2ludGVycnVwdF9yYW5kb21uZXNz
+KzB4MTljLzB4MWMwCjIwMTYtMDItMDVUMTI6MjU6MzMuODUwNjA0KzAwOjAwIHNtaXRoaTAxMyBr
+ZXJuZWw6IFs8ZmZmZmZmZmY4MTY5ZjlkMT5dIG5ldF9yeF9hY3Rpb24rMHgxNDEvMHgzZTAKMjAx
+Ni0wMi0wNVQxMjoyNTozMy44NTA2MjcrMDA6MDAgc21pdGhpMDEzIGtlcm5lbDogWzxmZmZmZmZm
+ZjgxMGFiZDlhPl0gX19kb19zb2Z0aXJxKzB4MWVhLzB4NDUwCjIwMTYtMDItMDVUMTI6MjU6MzMu
+ODUwNjUwKzAwOjAwIHNtaXRoaTAxMyBrZXJuZWw6IFs8ZmZmZmZmZmY4MTBhYzJhNj5dIGlycV9l
+eGl0KzB4NTYvMHgxMDAKMjAxNi0wMi0wNVQxMjoyNTozMy44NTA2NzIrMDA6MDAgc21pdGhpMDEz
+IGtlcm5lbDogWzxmZmZmZmZmZjgxN2RjMjhmPl0gZG9fSVJRKzB4ZWYvMHgxMTAKMjAxNi0wMi0w
+NVQxMjoyNTozMy44NTA2OTUrMDA6MDAgc21pdGhpMDEzIGtlcm5lbDogWzxmZmZmZmZmZjgxN2Q5
+ZmQ2Pl0gY29tbW9uX2ludGVycnVwdCsweDk2LzB4OTYKMjAxNi0wMi0wNVQxMjoyNTozMy44NTA3
+MTcrMDA6MDAgc21pdGhpMDEzIGtlcm5lbDogPEVPST4gIFs8ZmZmZmZmZmY4MTFlZDNjMT5dID8g
+cXVpZXRfdm1zdGF0KzB4MzEvMHg2MAoyMDE2LTAyLTA1VDEyOjI1OjMzLjg1MDc0MCswMDowMCBz
+bWl0aGkwMTMga2VybmVsOiBbPGZmZmZmZmZmODEwZjM3ZjA+XSBjcHVfc3RhcnR1cF9lbnRyeSsw
+eDkwLzB4NDAwCjIwMTYtMDItMDVUMTI6MjU6MzMuODUwNzYzKzAwOjAwIHNtaXRoaTAxMyBrZXJu
+ZWw6IFs8ZmZmZmZmZmY4MTA1NTI2Mj5dIHN0YXJ0X3NlY29uZGFyeSsweDE4Mi8weDFhMAo=
+--001a1148d7c4d73081052b8647d6--
