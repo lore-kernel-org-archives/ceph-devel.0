@@ -1,734 +1,308 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Thu, 11 Feb 2016 09:57:05 -0800
-Message-ID: <56bccb71750ff_105ef2d3209258f@ss1435.mail>
+From: Jason Dillaman <dillaman@redhat.com>
+Subject: Re: cls_rbd ops on rbd_id.$name objects in EC pool
+Date: Thu, 11 Feb 2016 13:39:52 -0500 (EST)
+Message-ID: <271250224.21879902.1455215992099.JavaMail.zimbra@redhat.com>
+References: <alpine.DEB.2.11.1602051036131.28396@cpach.fuggernut.com> <1582262647.20033136.1454687586287.JavaMail.zimbra@redhat.com> <CAN=+7FXJ6je1WpYpO-ozqo-ZKnBcRhv3hpaiH+GNku9YyK49Kg@mail.gmail.com> <alpine.DEB.2.11.1602051340490.28396@cpach.fuggernut.com> <0bc701d1604f$8f21e0a0$ad65a1e0$@fisk.me.uk> <5848cd48.9Ro.9Gf.h0.1onaHAyHUe@mailjet.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtprelay6.synopsys.com ([198.182.37.59]:50381 "EHLO
-	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750885AbcBKSCk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Feb 2016 13:02:40 -0500
-Received: from localhost.localdomain (static-208.69.177.245.nephosdns.com [208.69.177.245])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtprelay.synopsys.com (Postfix) with ESMTPS id 2C8491E05E9
-	for <ceph-devel@vger.kernel.org>; Thu, 11 Feb 2016 18:56:52 +0100 (CET)
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:49361 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750978AbcBKSj4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Feb 2016 13:39:56 -0500
+In-Reply-To: <5848cd48.9Ro.9Gf.h0.1onaHAyHUe@mailjet.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-
-Hi,
-
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
-
-28 new defect(s) introduced to ceph found with Coverity Scan.
-106 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
-
-New defect(s) Reported-by: Coverity Scan
-Showing 20 of 28 defect(s)
-
-
-** CID 1352097:  Control flow issues  (UNREACHABLE)
-/common/shunique_lock.h: 326 in ceph::shunique_lock<boost::shared_mutex>::release_to_unique()()
-
-
-________________________________________________________________________________________________________
-*** CID 1352097:  Control flow issues  (UNREACHABLE)
-/common/shunique_lock.h: 326 in ceph::shunique_lock<boost::shared_mutex>::release_to_unique()()
-320           return tu;
-321         } else if (m == nullptr) {
-322           return unique_lock_type();
-323         }
-324         throw std::system_error((int)std::errc::operation_not_permitted,
-325     			    std::generic_category());
->>>     CID 1352097:  Control flow issues  (UNREACHABLE)
->>>     This code cannot be reached: "return ceph::shunique_lock<...".
-326         return unique_lock_type();
-327       }
-328     
-329       shared_lock_type release_to_shared() {
-330         if (o == ownership::shared) {
-331           o = ownership::none;
-
-** CID 1352096:    (UNCAUGHT_EXCEPT)
-/test/rbd_mirror/test_main.cc: 14 in main()
-/test/rbd_mirror/test_main.cc: 14 in main()
-
-
-________________________________________________________________________________________________________
-*** CID 1352096:    (UNCAUGHT_EXCEPT)
-/test/rbd_mirror/test_main.cc: 14 in main()
-8     #include <iostream>
-9     #include <string>
-10     
-11     extern void register_test_cluster_watcher();
-12     extern void register_test_pool_watcher();
-13     
->>>     CID 1352096:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-14     int main(int argc, char **argv)
-15     {
-16       register_test_cluster_watcher();
-17       register_test_pool_watcher();
-18     
-19       ::testing::InitGoogleTest(&argc, argv);
-/test/rbd_mirror/test_main.cc: 14 in main()
-8     #include <iostream>
-9     #include <string>
-10     
-11     extern void register_test_cluster_watcher();
-12     extern void register_test_pool_watcher();
-13     
->>>     CID 1352096:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-14     int main(int argc, char **argv)
-15     {
-16       register_test_cluster_watcher();
-17       register_test_pool_watcher();
-18     
-19       ::testing::InitGoogleTest(&argc, argv);
-
-** CID 1352095:    (UNCAUGHT_EXCEPT)
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-
-
-________________________________________________________________________________________________________
-*** CID 1352095:    (UNCAUGHT_EXCEPT)
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-5     #include "common/errno.h"
-6     #include "global/global_init.h"
-7     
-8     #include "TableTool.h"
-9     
-10     
->>>     CID 1352095:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-11     int main(int argc, const char **argv)
-12     {
-13       vector<const char*> args;
-14       argv_to_vec(argc, argv, args);
-15       env_to_vec(args);
-16     
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-5     #include "common/errno.h"
-6     #include "global/global_init.h"
-7     
-8     #include "TableTool.h"
-9     
-10     
->>>     CID 1352095:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-11     int main(int argc, const char **argv)
-12     {
-13       vector<const char*> args;
-14       argv_to_vec(argc, argv, args);
-15       env_to_vec(args);
-16     
-
-** CID 1352094:    (UNCAUGHT_EXCEPT)
-/tools/cephfs/cephfs-journal-tool.cc: 24 in main()
-/tools/cephfs/cephfs-journal-tool.cc: 24 in main()
-
-
-________________________________________________________________________________________________________
-*** CID 1352094:    (UNCAUGHT_EXCEPT)
-/tools/cephfs/cephfs-journal-tool.cc: 24 in main()
-18     #include "common/errno.h"
-19     #include "global/global_init.h"
-20     
-21     #include "JournalTool.h"
-22     
-23     
->>>     CID 1352094:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-24     int main(int argc, const char **argv)
-25     {
-26       vector<const char*> args;
-27       argv_to_vec(argc, argv, args);
-28       env_to_vec(args);
-29     
-/tools/cephfs/cephfs-journal-tool.cc: 24 in main()
-18     #include "common/errno.h"
-19     #include "global/global_init.h"
-20     
-21     #include "JournalTool.h"
-22     
-23     
->>>     CID 1352094:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-24     int main(int argc, const char **argv)
-25     {
-26       vector<const char*> args;
-27       argv_to_vec(argc, argv, args);
-28       env_to_vec(args);
-29     
-
-** CID 1352093:    (UNCAUGHT_EXCEPT)
-/tools/cephfs/cephfs-data-scan.cc: 11 in main()
-/tools/cephfs/cephfs-data-scan.cc: 11 in main()
-
-
-________________________________________________________________________________________________________
-*** CID 1352093:    (UNCAUGHT_EXCEPT)
-/tools/cephfs/cephfs-data-scan.cc: 11 in main()
-5     #include "common/errno.h"
-6     #include "global/global_init.h"
-7     
-8     #include "DataScan.h"
-9     
-10     
->>>     CID 1352093:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-11     int main(int argc, const char **argv)
-12     {
-13       vector<const char*> args;
-14       argv_to_vec(argc, argv, args);
-15       env_to_vec(args);
-16     
-/tools/cephfs/cephfs-data-scan.cc: 11 in main()
-5     #include "common/errno.h"
-6     #include "global/global_init.h"
-7     
-8     #include "DataScan.h"
-9     
-10     
->>>     CID 1352093:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-11     int main(int argc, const char **argv)
-12     {
-13       vector<const char*> args;
-14       argv_to_vec(argc, argv, args);
-15       env_to_vec(args);
-16     
-
-** CID 1352092:  Error handling issues  (UNCAUGHT_EXCEPT)
-/tools/rbd_mirror/main.cc: 32 in main()
-
-
-________________________________________________________________________________________________________
-*** CID 1352092:  Error handling issues  (UNCAUGHT_EXCEPT)
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352092:  Error handling issues  (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "ceph::buffer::end_of_buffer" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-
-** CID 1352091:    (UNCAUGHT_EXCEPT)
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-/tools/rbd_mirror/main.cc: 32 in main()
-
-
-________________________________________________________________________________________________________
-*** CID 1352091:    (UNCAUGHT_EXCEPT)
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-/tools/rbd_mirror/main.cc: 32 in main()
-26     static void handle_signal(int signum)
-27     {
-28       if (mirror)
-29         mirror->handle_signal(signum);
-30     }
-31     
->>>     CID 1352091:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-32     int main(int argc, const char **argv)
-33     {
-34       std::vector<const char*> args;
-35       argv_to_vec(argc, argv, args);
-36       env_to_vec(args);
-37     
-
-** CID 1352090:  Error handling issues  (UNCAUGHT_EXCEPT)
-/tools/rados/rados.cc: 2969 in main()
-
-
-________________________________________________________________________________________________________
-*** CID 1352090:  Error handling issues  (UNCAUGHT_EXCEPT)
-/tools/rados/rados.cc: 2969 in main()
-2963     
-2964     out:
-2965       delete formatter;
-2966       return (ret < 0) ? 1 : 0;
-2967     }
-2968     
->>>     CID 1352090:  Error handling issues  (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >" is thrown and never caught.
-2969     int main(int argc, const char **argv)
-2970     {
-2971       vector<const char*> args;
-2972       argv_to_vec(argc, argv, args);
-2973       env_to_vec(args);
-2974     
-
-** CID 1352089:  Resource leaks  (RESOURCE_LEAK)
-/global/global_init.cc: 249 in global_init(std::vector<const char *, std::allocator<const char *>> *, std::vector<const char *, std::allocator<const char *>> &, unsigned int, code_environment_t, int, const char *)()
-
-
-________________________________________________________________________________________________________
-*** CID 1352089:  Resource leaks  (RESOURCE_LEAK)
-/global/global_init.cc: 249 in global_init(std::vector<const char *, std::allocator<const char *>> *, std::vector<const char *, std::allocator<const char *>> &, unsigned int, code_environment_t, int, const char *)()
-243       // test leak checking
-244       if (g_conf->debug_deliberately_leak_memory) {
-245         derr << "deliberately leaking some memory" << dendl;
-246         char *s = new char[1234567];
-247         (void)s;
-248         // cppcheck-suppress memleak
->>>     CID 1352089:  Resource leaks  (RESOURCE_LEAK)
->>>     Variable "s" going out of scope leaks the storage it points to.
-249       }
-250     
-251       if (code_env == CODE_ENVIRONMENT_DAEMON && !(flags & CINIT_FLAG_NO_DAEMON_ACTIONS))
-252         output_ceph_version();
-253     }
-254     
-
-** CID 1352088:    (RESOURCE_LEAK)
-/test/librados/cmd.cc: 84 in LibRadosCmd_OSDCmd_Test::TestBody()()
-/test/librados/cmd.cc: 87 in LibRadosCmd_OSDCmd_Test::TestBody()()
-/test/librados/cmd.cc: 90 in LibRadosCmd_OSDCmd_Test::TestBody()()
-
-
-________________________________________________________________________________________________________
-*** CID 1352088:    (RESOURCE_LEAK)
-/test/librados/cmd.cc: 84 in LibRadosCmd_OSDCmd_Test::TestBody()()
-78       char *cmd[2];
-79       cmd[1] = NULL;
-80     
-81       // note: tolerate NXIO here in case the cluster is thrashing out underneath us.
-82       cmd[0] = (char *)"asdfasdf";
-83       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
->>>     CID 1352088:    (RESOURCE_LEAK)
->>>     Variable "st" going out of scope leaks the storage it points to.
-84       ASSERT_TRUE(r == -22 || r == -ENXIO);
-85       cmd[0] = (char *)"version";
-86       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
-87       ASSERT_TRUE(r == -22 || r == -ENXIO);
-88       cmd[0] = (char *)"{\"prefix\":\"version\"}";
-89       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
-/test/librados/cmd.cc: 87 in LibRadosCmd_OSDCmd_Test::TestBody()()
-81       // note: tolerate NXIO here in case the cluster is thrashing out underneath us.
-82       cmd[0] = (char *)"asdfasdf";
-83       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
-84       ASSERT_TRUE(r == -22 || r == -ENXIO);
-85       cmd[0] = (char *)"version";
-86       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
->>>     CID 1352088:    (RESOURCE_LEAK)
->>>     Variable "st" going out of scope leaks the storage it points to.
-87       ASSERT_TRUE(r == -22 || r == -ENXIO);
-88       cmd[0] = (char *)"{\"prefix\":\"version\"}";
-89       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
-90       ASSERT_TRUE((r == 0 && buflen > 0) || (r == -ENXIO && buflen == 0));
-91       rados_buffer_free(buf);
-92       rados_buffer_free(st);
-/test/librados/cmd.cc: 90 in LibRadosCmd_OSDCmd_Test::TestBody()()
-84       ASSERT_TRUE(r == -22 || r == -ENXIO);
-85       cmd[0] = (char *)"version";
-86       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
-87       ASSERT_TRUE(r == -22 || r == -ENXIO);
-88       cmd[0] = (char *)"{\"prefix\":\"version\"}";
-89       r = rados_osd_command(cluster, 0, (const char **)cmd, 1, "", 0, &buf, &buflen, &st, &stlen);
->>>     CID 1352088:    (RESOURCE_LEAK)
->>>     Variable "st" going out of scope leaks the storage it points to.
-90       ASSERT_TRUE((r == 0 && buflen > 0) || (r == -ENXIO && buflen == 0));
-91       rados_buffer_free(buf);
-92       rados_buffer_free(st);
-93       rados_shutdown(cluster);
-94     }
-95     
-
-** CID 1352087:  Parse warnings  (PARSE_ERROR)
-/mds/StrayManager.cc: 1 in ()
-
-
-________________________________________________________________________________________________________
-*** CID 1352087:  Parse warnings  (PARSE_ERROR)
-/mds/StrayManager.cc: 1 in ()
->>>     CID 1352087:  Parse warnings  (PARSE_ERROR)
->>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
-2     // vim: ts=8 sw=2 smarttab
-3     /*
-4      * Ceph - scalable distributed file system
-5      *
-6      * Copyright (C) 2015 Red Hat
-
-** CID 1352086:  Parse warnings  (PARSE_ERROR)
-/mds/SnapServer.cc: 1 in ()
-
-
-________________________________________________________________________________________________________
-*** CID 1352086:  Parse warnings  (PARSE_ERROR)
-/mds/SnapServer.cc: 1 in ()
->>>     CID 1352086:  Parse warnings  (PARSE_ERROR)
->>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
-2     // vim: ts=8 sw=2 smarttab
-3     /*
-4      * Ceph - scalable distributed file system
-5      *
-6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
-
-** CID 1352085:  Parse warnings  (PARSE_ERROR)
-/mds/Server.cc: 1 in ()
-
-
-________________________________________________________________________________________________________
-*** CID 1352085:  Parse warnings  (PARSE_ERROR)
-/mds/Server.cc: 1 in ()
->>>     CID 1352085:  Parse warnings  (PARSE_ERROR)
->>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-2     // vim: ts=8 sw=2 smarttab
-3     /*
-4      * Ceph - scalable distributed file system
-5      *
-6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
-
-** CID 1352084:  Parse warnings  (PARSE_ERROR)
-/mds/MDSRank.cc: 1 in ()
-
-
-________________________________________________________________________________________________________
-*** CID 1352084:  Parse warnings  (PARSE_ERROR)
-/mds/MDSRank.cc: 1 in ()
->>>     CID 1352084:  Parse warnings  (PARSE_ERROR)
->>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-2     // vim: ts=8 sw=2 smarttab
-3     /*
-4      * Ceph - scalable distributed file system
-5      *
-6      * Copyright (C) 2015 Red Hat
-
-** CID 1352083:  Parse warnings  (PARSE_ERROR)
-/mds/MDSDaemon.cc: 1 in ()
-
-
-________________________________________________________________________________________________________
-*** CID 1352083:  Parse warnings  (PARSE_ERROR)
-/mds/MDSDaemon.cc: 1 in ()
->>>     CID 1352083:  Parse warnings  (PARSE_ERROR)
->>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-2     // vim: ts=8 sw=2 smarttab
-3     /*
-4      * Ceph - scalable distributed file system
-5      *
-6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
-
-** CID 1352082:  Parse warnings  (PARSE_ERROR)
-/librados/RadosClient.cc: 1 in ()
-
-
-________________________________________________________________________________________________________
-*** CID 1352082:  Parse warnings  (PARSE_ERROR)
-/librados/RadosClient.cc: 1 in ()
->>>     CID 1352082:  Parse warnings  (PARSE_ERROR)
->>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-2     // vim: ts=8 sw=2 smarttab
-3     /*
-4      * Ceph - scalable distributed file system
-5      *
-6      * Copyright (C) 2004-2012 Sage Weil <sage@newdream.net>
-
-** CID 1352081:  Parse warnings  (PARSE_ERROR)
-/client/SyntheticClient.cc: 1 in ()
-
-
-________________________________________________________________________________________________________
-*** CID 1352081:  Parse warnings  (PARSE_ERROR)
-/client/SyntheticClient.cc: 1 in ()
->>>     CID 1352081:  Parse warnings  (PARSE_ERROR)
->>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
-2     // vim: ts=8 sw=2 smarttab
-3     /*
-4      * Ceph - scalable distributed file system
-5      *
-6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
-
-** CID 1352080:  Parse warnings  (PARSE_ERROR)
-/client/Client.cc: 1 in ()
-
-
-________________________________________________________________________________________________________
-*** CID 1352080:  Parse warnings  (PARSE_ERROR)
-/client/Client.cc: 1 in ()
->>>     CID 1352080:  Parse warnings  (PARSE_ERROR)
->>>     The Coverity compiler fails to compile this file. Please see the build output log for more information.
-1     // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-2     // vim: ts=8 sw=2 smarttab
-3     /*
-4      * Ceph - scalable distributed file system
-5      *
-6      * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
-
-** CID 1352079:  Memory - corruptions  (OVERRUN)
-
-
-________________________________________________________________________________________________________
-*** CID 1352079:  Memory - corruptions  (OVERRUN)
-/librbd/journal/Types.cc: 378 in librbd::journal::ClientData::encode(ceph::buffer::list &) const()
-372     
-373     ClientMetaType ClientData::get_client_meta_type() const {
-374       return boost::apply_visitor(GetTypeVisitor<ClientMetaType>(), client_meta);
-375     }
-376     
-377     void ClientData::encode(bufferlist& bl) const {
->>>     CID 1352079:  Memory - corruptions  (OVERRUN)
->>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-378       ENCODE_START(1, 1, bl);
-379       boost::apply_visitor(EncodeVisitor(bl), client_meta);
-380       ENCODE_FINISH(bl);
-381     }
-382     
-383     void ClientData::decode(bufferlist::iterator& it) {
-
-** CID 1352078:  Memory - corruptions  (OVERRUN)
-
-
-________________________________________________________________________________________________________
-*** CID 1352078:  Memory - corruptions  (OVERRUN)
-/cls/journal/cls_journal_types.cc: 104 in cls::journal::Tag::encode(ceph::buffer::list &) const()
-98       o.push_back(new Client());
-99       o.push_back(new Client("id", data));
-100       o.push_back(new Client("id", data, {1, {{1, 120}, {2, 121}}}));
-101     }
-102     
-103     void Tag::encode(bufferlist& bl) const {
->>>     CID 1352078:  Memory - corruptions  (OVERRUN)
->>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-104       ENCODE_START(1, 1, bl);
-105       ::encode(tid, bl);
-106       ::encode(tag_class, bl);
-107       ::encode(data, bl);
-108       ENCODE_FINISH(bl);
-109     }
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, https://scan.coverity.com/projects/ceph?tab=overview
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c
-
+To: Nick Fisk <nick@fisk.me.uk>
+Cc: Sage Weil <sweil@redhat.com>, Samuel Just <sjust@redhat.com>, ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
+
+What's your cache mode?  In the master branch, I would expect that class method ops should force a promotion to the cache tier if the base tier is an EC pool [1].
+
+[1] https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L8905
+
+-- 
+
+Jason Dillaman 
+
+
+----- Original Message -----
+> From: "Nick Fisk" <nick@fisk.me.uk>
+> To: "Sage Weil" <sweil@redhat.com>, "Samuel Just" <sjust@redhat.com>
+> Cc: "Jason Dillaman" <dillaman@redhat.com>, ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
+> Sent: Thursday, February 11, 2016 12:46:38 PM
+> Subject: RE: cls_rbd ops on rbd_id.$name objects in EC pool
+> 
+> Hi Sage,
+> 
+> Do you think this will get fixed in time for the Jewel release? It still
+> seems to happen in Master and is definitely related to the recency setting.
+> I'm guessing that the info command does some sort of read and then a write.
+> In the old behaviour the read would have always triggered a promotion?
+> 
+> 
+> nick@Ceph-Test:~$ ceph osd pool get cache1 min_read_recency_for_promote
+> min_read_recency_for_promote: 8
+> nick@Ceph-Test:~$ ceph osd pool get cache1 min_write_recency_for_promote
+> min_write_recency_for_promote: 8
+> nick@Ceph-Test:~$ rbd -p cache1 create Test99 --size=10G
+> nick@Ceph-Test:~$ rbd -p cache1 info Test99
+> rbd image 'Test99':
+>         size 10240 MB in 2560 objects
+>         order 22 (4096 kB objects)
+>         block_name_prefix: rbd_data.e8e734689a5e
+>         format: 2
+>         features: layering
+>         flags:
+> nick@Ceph-Test:~$ rados -p cache1 cache-flush rbd_id.Test99
+> nick@Ceph-Test:~$ rados -p cache1 cache-evict rbd_id.Test99
+> nick@Ceph-Test:~$ rbd -p cache1 info Test99
+> 2016-02-11 17:39:40.942030 7f0006eb3700 -1 librbd::image::OpenRequest: failed
+> to retrieve image id: (95) Operation not supported
+> 2016-02-11 17:39:40.942205 7f00066b2700 -1 librbd::ImageState: failed to open
+> image: (95) Operation not supported
+> rbd: error opening image Test99: (95) Operation not supported
+> nick@Ceph-Test:~$ ceph osd pool set cache1 min_read_recency_for_promote 0
+> set pool 12 min_read_recency_for_promote to 0
+> nick@Ceph-Test:~$ rbd -p cache1 info Test99
+> rbd image 'Test99':
+>         size 10240 MB in 2560 objects
+>         order 22 (4096 kB objects)
+>         block_name_prefix: rbd_data.e8e734689a5e
+>         format: 2
+>         features: layering
+>         flags:
+> 
+> 
+> 
+> 
+> 
+> > -----Original Message-----
+> > From: Nick Fisk [mailto:nick@fisk.me.uk]
+> > Sent: 05 February 2016 19:58
+> > To: 'Sage Weil' <sweil@redhat.com>; 'Samuel Just' <sjust@redhat.com>
+> > Cc: 'Jason Dillaman' <dillaman@redhat.com>; ceph-users@lists.ceph.com;
+> > ceph-devel@vger.kernel.org
+> > Subject: RE: cls_rbd ops on rbd_id.$name objects in EC pool
+> > 
+> > > -----Original Message-----
+> > > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> > > owner@vger.kernel.org] On Behalf Of Sage Weil
+> > > Sent: 05 February 2016 18:45
+> > > To: Samuel Just <sjust@redhat.com>
+> > > Cc: Jason Dillaman <dillaman@redhat.com>; Nick Fisk <nick@fisk.me.uk>;
+> > > ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org
+> > > Subject: Re: cls_rbd ops on rbd_id.$name objects in EC pool
+> > >
+> > > On Fri, 5 Feb 2016, Samuel Just wrote:
+> > > > On Fri, Feb 5, 2016 at 7:53 AM, Jason Dillaman <dillaman@redhat.com>
+> > > wrote:
+> > > > > #1 and #2 are awkward for existing pools since we would need a
+> > > > > tool to inject dummy omap values within existing images.  Can the
+> > > > > cache tier force-promote it from the EC pool to the cache when an
+> > > > > unsupported op is encountered?  There is logic like that in
+> > > > > jewel/master for handling the proxied writes.
+> > >
+> > > That sounded familiar but I couldn't find this in the code or history
+> > > between infernalis and master.  And then I went back and was unable to
+> > > reproduce the a problem on either infernalis branch or v9.2.0.
+> > >
+> > > Nick, I was doing
+> > >  1013  ./rbd -p ec create foo --size 10
+> > >  1014  ./rbd -p ec info foo
+> > >  1015  ./rados -p ec-cache cache-flush rbd_id.foo
+> > >  1016  ./rados -p ec-cache cache-evict rbd_id.foo
+> > >  1017  ./rbd -p ec info foo
+> > >  1018  ./rados -p ec-cache ls -
+> > >
+> > > The rbd.get_id is successfully forcing a promotion.
+> > >
+> > > Which makes me think something else is going on... Nick, can you try
+> > > to reproduce this with a userspace librbd client?  'rbd info' will do
+> > > a few basic operations, but if that isn't problematic, try 'rbd
+> > > bench-write' or 'rbd export', which will do real IO?
+> > 
+> > Hi Sage,
+> > 
+> > Just tried again and I can confirm its definitely not working, but I think
+> > I may
+> > have stumbled on the reason why.
+> > 
+> > First apologies for not mentioning it before, but I am still running that
+> > recency
+> > fix on Infernalis. Initially I thought this was a flushing issue as I just
+> > assumed
+> > those objects shouldn't get flushed out at all. But after reading your
+> > email
+> > where you said it forced the promotion, it struck me that the broken
+> > recency
+> > behaviour may have been masking this issue. With the fix it would only
+> > promote if the object was hot enough, which it probably in most cases
+> > wouldn't be. As a test I set my recency's down to 0 and tried the steps
+> > above
+> > again and this time it worked. Does this make sense?
+> > 
+> > Nick
+> > 
+> > >
+> > > sage
+> > >
+> > >
+> > > > -Sam
+> > > >
+> > > > >
+> > > > > --
+> > > > >
+> > > > > Jason Dillaman
+> > > > >
+> > > > > ----- Original Message -----
+> > > > >> From: "Sage Weil" <sweil@redhat.com>
+> > > > >> To: "Nick Fisk" <nick@fisk.me.uk>
+> > > > >> Cc: "Jason Dillaman" <dillaman@redhat.com>,
+> > > > >> ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
+> > > > >> Sent: Friday, February 5, 2016 10:42:17 AM
+> > > > >> Subject: cls_rbd ops on rbd_id.$name objects in EC pool
+> > > > >>
+> > > > >> On Wed, 27 Jan 2016, Nick Fisk wrote:
+> > > > >> >
+> > > > >> > > -----Original Message-----
+> > > > >> > > From: ceph-users [mailto:ceph-users-bounces@lists.ceph.com]
+> > > > >> > > On Behalf Of Jason Dillaman
+> > > > >> > > Sent: 27 January 2016 14:25
+> > > > >> > > To: Nick Fisk <nick@fisk.me.uk>
+> > > > >> > > Cc: ceph-users@lists.ceph.com
+> > > > >> > > Subject: Re: [ceph-users] Possible Cache Tier Bug - Can
+> > > > >> > > someone confirm
+> > > > >> > >
+> > > > >> > > Are you running with an EC pool behind the cache tier? I know
+> > > > >> > > there was an issue with the first Infernalis release where
+> > > > >> > > unsupported ops were being proxied down to the EC pool,
+> > > > >> > > resulting in that same error.
+> > > > >> >
+> > > > >> > Hi Jason, yes I am. 3x Replicated pool on top of an EC pool.
+> > > > >> >
+> > > > >> > It's probably something similar to what you mention. Either the
+> > > > >> > client should be able to access the RBD header object on the
+> > > > >> > base pool, or it should be flagged so that it can't be evicted.
+> > > > >>
+> > > > >> I just confirmed that the rbd_id.$name object doesn't have any
+> > > > >> omap, so from rados's perspective, flushing and evicting it is
+> > > > >> fine.  But yeah, the cls_rbd ops aren't permitted in the EC pool.
+> > > > >>
+> > > > >> In master/jewel we have a cache-pin function that prevents an
+> > > > >> object from being flushed.
+> > > > >>
+> > > > >> A few options are:
+> > > > >>
+> > > > >> 1) Have cls_rbd cache-pin it's objects.
+> > > > >>
+> > > > >> 2) Have cls_rbd put an omap key on the object to indirectly do
+> > > > >> the
+> > > same.
+> > > > >>
+> > > > >> 3) Add a requires-cls type object flag that keeps hte object out
+> > > > >> of an EC pool *until* it eventually supports cls ops.
+> > > > >>
+> > > > >> I'd lean toward 1 since it's simple and explicit, and when we
+> > > > >> eventually make classes work we can remove the cache-pin behavior
+> > > from cls_rbd.
+> > > > >> It's harder to fix in infernalis unless we also backport
+> > > > >> cache-pin/unpin ops, too, so maybe #2 would be a simple
+> > > > >> infernalis
+> > > workaround?
+> > > > >>
+> > > > >> Jason?  Sam?
+> > > > >> sage
+> > > > >>
+> > > > >>
+> > > > >>
+> > > > >> >
+> > > > >> > >
+> > > > >> > > --
+> > > > >> > >
+> > > > >> > > Jason Dillaman
+> > > > >> > >
+> > > > >> > >
+> > > > >> > > ----- Original Message -----
+> > > > >> > > > From: "Nick Fisk" <nick@fisk.me.uk>
+> > > > >> > > > To: ceph-users@lists.ceph.com
+> > > > >> > > > Sent: Wednesday, January 27, 2016 8:46:53 AM
+> > > > >> > > > Subject: [ceph-users] Possible Cache Tier Bug - Can someone
+> > > > >> > > > confirm
+> > > > >> > > >
+> > > > >> > > > Hi All,
+> > > > >> > > >
+> > > > >> > > > I think I have stumbled on a bug. I'm running Infernalis
+> > > > >> > > > (Kernel 4.4 on the
+> > > > >> > > > client) and it seems that if the RBD header object gets
+> > > > >> > > > evicted from the cache pool then you can no longer map it.
+> > > > >> > > >
+> > > > >> > > > Steps to reproduce
+> > > > >> > > >
+> > > > >> > > > rbd -p cache1 create Test --size=10G rbd - p cache1 map
+> > > > >> > > > Test
+> > > > >> > > >
+> > > > >> > > > /dev/rbd1  <-Works!!
+> > > > >> > > >
+> > > > >> > > > rbd unmap /dev/rbd1
+> > > > >> > > >
+> > > > >> > > > rados -p cache1 cache-flush rbd_id.Test rados -p cache1
+> > > > >> > > > cache-evict rbd_id.Test rbd - p cache1 map Test
+> > > > >> > > >
+> > > > >> > > > rbd: sysfs write failed
+> > > > >> > > > rbd: map failed: (95) Operation not supported
+> > > > >> > > >
+> > > > >> > > > or with the rbd-nbd client
+> > > > >> > > >
+> > > > >> > > > 2016-01-27 13:39:52.686770 7f9e54162b00 -1
+> > > > >> > > > asok(0x561837b88360)
+> > > > >> > > > AdminSocketConfigObs::init: failed:
+> > > AdminSocket::bind_and_listen:
+> > > > >> > > > failed to bind the UNIX domain socket to
+> > > > >> > > > '/var/run/ceph/ceph-client.admin.asok': (17) File exists
+> > > > >> > > > 2016-01-27 13:39:52.703987 7f9e32ffd700 -1
+> > > librbd::image::OpenRequest:
+> > > > >> > > > failed to retrieve image id: (95) Operation not supported
+> > > > >> > > > rbd-nbd: failed to map, status: (95) Operation not
+> > > > >> > > > supported
+> > > > >> > > > 2016-01-27 13:39:52.704138 7f9e327fc700 -1
+> > > > >> > > > librbd::ImageState: failed to open image: (95) Operation
+> > > > >> > > > not supported
+> > > > >> > > >
+> > > > >> > > > Nick
+> > > > >> > > >
+> > > > >> > > > _______________________________________________
+> > > > >> > > > ceph-users mailing list
+> > > > >> > > > ceph-users@lists.ceph.com
+> > > > >> > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > > > >> > > >
+> > > > >> > > _______________________________________________
+> > > > >> > > ceph-users mailing list
+> > > > >> > > ceph-users@lists.ceph.com
+> > > > >> > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > > > >> >
+> > > > >> > _______________________________________________
+> > > > >> > ceph-users mailing list
+> > > > >> > ceph-users@lists.ceph.com
+> > > > >> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > > > >> >
+> > > > >> >
+> > > > >> --
+> > > > >> To unsubscribe from this list: send the line "unsubscribe
+> > > > >> ceph-devel" in the body of a message to majordomo@vger.kernel.org
+> > > > >> More majordomo info at
+> > > > >> http://vger.kernel.org/majordomo-info.html
+> > > > >>
+> > > > > --
+> > > > > To unsubscribe from this list: send the line "unsubscribe
+> > > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
+> > > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > >
+> > > >
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > > in the body of a message to majordomo@vger.kernel.org More
+> > majordomo
+> > > info at http://vger.kernel.org/majordomo-info.html
+> 
+> 
