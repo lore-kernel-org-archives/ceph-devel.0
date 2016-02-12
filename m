@@ -1,55 +1,87 @@
-From: Tyler Bishop <tyler.bishop-fpbapw3w7t1dpuOT5p4XHl6hYfS7NtTn@public.gmane.org>
-Subject: Re: v10.0.3 released
-Date: Fri, 12 Feb 2016 13:27:55 -0500 (EST)
-Message-ID: <972233343.58315.1455301675151.JavaMail.zimbra@beyondhosting.net>
-References: <alpine.DEB.2.11.1602101439530.4289@cpach.fuggernut.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: [Ceph - Bug #14664] (New) valgrind: mmap(...) failed in UME with
+ error 12 (Cannot allocate memory).
+Date: Fri, 12 Feb 2016 10:35:08 -0800
+Message-ID: <CAJ4mKGb6YM25g3tpSkTbG+HxVgQadAvw4x5Gwfr94LR7WW7eCA@mail.gmail.com>
+References: <redmine.issue-14664.20160205062333@tracker.ceph.com>
+	<redmine.issue-14664.20160205062333.9e0e78b35c3f3488@tracker.ceph.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1602101439530.4289-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:34756 "EHLO
+	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751325AbcBLSfK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Feb 2016 13:35:10 -0500
+Received: by mail-wm0-f44.google.com with SMTP id 128so73542177wmz.1
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Feb 2016 10:35:09 -0800 (PST)
+In-Reply-To: <redmine.issue-14664.20160205062333.9e0e78b35c3f3488@tracker.ceph.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-qa <ceph-qa@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-R3JlYXQgd29yayBhcyBhbHdheXMgc2FnZSEKClR5bGVyIEJpc2hvcCAKQ2hpZWYgVGVjaG5pY2Fs
-IE9mZmljZXIgCjUxMy0yOTktNzEwOCB4MTAgCgoKClR5bGVyLkJpc2hvcEBCZXlvbmRIb3N0aW5n
-Lm5ldCAKCgpJZiB5b3UgYXJlIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50IG9mIHRoaXMgdHJh
-bnNtaXNzaW9uIHlvdSBhcmUgbm90aWZpZWQgdGhhdCBkaXNjbG9zaW5nLCBjb3B5aW5nLCBkaXN0
-cmlidXRpbmcgb3IgdGFraW5nIGFueSBhY3Rpb24gaW4gcmVsaWFuY2Ugb24gdGhlIGNvbnRlbnRz
-IG9mIHRoaXMgaW5mb3JtYXRpb24gaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4KCi0tLS0tIE9yaWdp
-bmFsIE1lc3NhZ2UgLS0tLS0KRnJvbTogIlNhZ2UgV2VpbCIgPHN3ZWlsQHJlZGhhdC5jb20+ClRv
-OiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZywgImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGNl
-cGguY29tPiwgY2VwaC1tYWludGFpbmVyc0BjZXBoLmNvbSwgY2VwaC1hbm5vdW5jZUBjZXBoLmNv
-bQpTZW50OiBXZWRuZXNkYXksIEZlYnJ1YXJ5IDEwLCAyMDE2IDI6NDA6NDYgUE0KU3ViamVjdDog
-W2NlcGgtdXNlcnNdIHYxMC4wLjMgcmVsZWFzZWQKClRoaXMgaXMgdGhlIGZvdXJ0aCBkZXZlbG9w
-bWVudCByZWxlYXNlIGZvciBKZXdlbC4gU2V2ZXJhbCBiaWcgcGllY2VzIGhhdmUgCmJlZW4gYWRk
-ZWQgdGhpcyByZWxlYXNlLCBpbmNsdWRpbmcgQmx1ZVN0b3JlIChhIG5ldyBiYWNrZW5kIGZvciBP
-U0QgdG8gCnJlcGxhY2UgRmlsZVN0b3JlKSwgbWFueSBjZXBoLWRpc2sgZml4ZXMsIGEgbmV3IENS
-VVNIIHR1bmFibGUgdGhhdCAKaW1wcm92ZXMgbWFwcGluZyBzdGFiaWxpdHksIGEgbmV3IGxpYnJh
-ZG9zIG9iamVjdCBlbnVtZXJhdGlvbiBBUEksIGFuZCBhIAp3aG9sZSBzbGV3IG9mIE9TRCBhbmQg
-UkFET1Mgb3B0aW1pemF0aW9ucy4KCk5vdGUgdGhhdCwgZHVlIHRvIGdlbmVyYWwgZGV2ZWxvcGVy
-IGJ1c3luZXNzLCB3ZSBhcmVu4oCZdCBidWlsZGluZyBvZmZpY2lhbCAKcmVsZWFzZSBwYWNrYWdl
-cyBmb3IgdGhpcyBkZXYgcmVsZWFzZS4gWW91IGNhbiBmZXRjaCBhdXRvYnVpbHQgZ2l0YnVpbGRl
-ciAKcGFja2FnZXMgZnJvbSB0aGUgdXN1YWwgbG9jYXRpb24gKGh0dHA6Ly9naXRidWlsZGVyLmNl
-cGguY29tKS4KCk5vdGFibGUgQ2hhbmdlcwotLS0tLS0tLS0tLS0tLS0KCiAgICAgICAgaHR0cDov
-L2NlcGguY29tL3JlbGVhc2VzL3YxMC0wLTMtcmVsZWFzZWQvCgpHZXR0aW5nIENlcGgKLS0tLS0t
-LS0tLS0tCgoqIEdpdCBhdCBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2VwaC5naXQKKiBGb3IgcGFj
-a2FnZXMsIHNlZSBodHRwOi8vY2VwaC5jb20vZG9jcy9tYXN0ZXIvaW5zdGFsbC9nZXQtcGFja2Fn
-ZXMjYWRkLWNlcGgtZGV2ZWxvcG1lbnQKKiBGb3IgY2VwaC1kZXBsb3ksIHNlZSBodHRwOi8vY2Vw
-aC5jb20vZG9jcy9tYXN0ZXIvaW5zdGFsbC9pbnN0YWxsLWNlcGgtZGVwbG95Cl9fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBs
-aXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3Rp
-bmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlz
-dHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
-LWNlcGguY29tCg==
+This bug is showing up a bit for me as well, on Ubuntu. Are we just
+waiting hopefully for the distros to release new valgrind packages for
+this to go away, or do we have a plan?
+I'm concerned that we might not get fixed packages at all =E2=80=94 if =
+I'm
+understanding this correctly it's a result of us running new kernels
+against "old" valgrind, and the distros obviously don't upgrade their
+kernels like we are...
+-Greg
+
+On Thu, Feb 4, 2016 at 10:23 PM,  <redmine@tracker.ceph.com> wrote:
+> Issue #14664 has been reported by Loic Dachary.
+> ________________________________
+>
+> Bug #14664: valgrind: mmap(...) failed in UME with error 12 (Cannot a=
+llocate
+> memory).
+>
+> Author: Loic Dachary
+> Status: New
+> Priority: Normal
+> Assignee:
+> Category:
+> Target version:
+> Source: other
+> Tags:
+> Backport:
+> Regression: No
+> Severity: 3 - minor
+> Reviewed:
+> Affected Versions:
+> ceph-qa-suite:
+> Release:
+>
+> http://pulpito.ceph.com/loic-2016-02-04_00:33:20-rados-infernalis-bac=
+kports---basic-multi/6141/
+>
+> CommandFailedError: Command failed on smithi054 with status 1: 'sudo =
+ceph
+> osd crush tunables default'
+>
+> 2016-02-04T01:11:56.731 INFO:teuthology.orchestra.run.smithi054:Runni=
+ng:
+> 'sudo ceph osd crush tunables default'
+> 2016-02-04T01:11:56.847 INFO:tasks.ceph.mon.a.smithi054.stderr:valgri=
+nd:
+> mmap(0xaf5000, 131072) failed in UME with error 12 (Cannot allocate m=
+emory).
+> 2016-02-04T01:11:56.848 INFO:tasks.ceph.mon.c.smithi054.stderr:valgri=
+nd:
+> mmap(0xaf5000, 131072) failed in UME with error 12 (Cannot allocate m=
+emory).
+>
+> ________________________________
+>
+> You have received this notification because you have either subscribe=
+d to
+> it, or are involved in it.
+> To change your notification preferences, please click here:
+> http://tracker.ceph.com/my/account
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
