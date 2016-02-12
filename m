@@ -1,71 +1,80 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: High CPU usage in Tiering Agent
-Date: Fri, 12 Feb 2016 15:23:59 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1602121515270.4107@cpach.fuggernut.com>
-References: <DUB403-EAS22267EA4719FB866706912FD5A90@phx.gbl> <alpine.DEB.2.11.1602121312170.4107@cpach.fuggernut.com> <DUB403-EAS146B9358CF393BC59C36360D5A90@phx.gbl>
+From: Nick Fisk <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org>
+Subject: Re: cls_rbd ops on rbd_id.$name objects in EC pool
+Date: Fri, 12 Feb 2016 20:50:08 -0000
+Message-ID: <dbf516f5.9Ro.9Gf.cV.1onaHKNmVW@mailjet.com>
+References: <alpine.DEB.2.11.1602051036131.28396@cpach.fuggernut.com>
+	<1582262647.20033136.1454687586287.JavaMail.zimbra@redhat.com>
+	<CAN=+7FXJ6je1WpYpO-ozqo-ZKnBcRhv3hpaiH+GNku9YyK49Kg@mail.gmail.com>
+	<alpine.DEB.2.11.1602051340490.28396@cpach.fuggernut.com>
+	<0bc701d1604f$8f21e0a0$ad65a1e0$@fisk.me.uk>
+	<5848cd48.9Ro.9Gf.h0.1onaHAyHUe@mailjet.com>
+	<549809462.21912115.1455221387486.JavaMail.zimbra@redhat.com>
+	<alpine.DEB.2.11.1602111557000.28396@cpach.fuggernut.com>
+	<dbf6eb9a.9Ro.9Gf.cs.1lNjEIPmE9@mailjet.com>
+	<alpine.DEB.2.11.1602112008490.28396@cpach.fuggernut.com>
+	<alpine.DEB.2.11.1602120730010.4107@cpach.fuggernut.com>
+	<00f201d16599$9a0d7570$ce286050$@fisk.me.uk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36206 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750714AbcBLUXj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 12 Feb 2016 15:23:39 -0500
-In-Reply-To: <DUB403-EAS146B9358CF393BC59C36360D5A90@phx.gbl>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Markus Blank-Burian <burian@muenster.de>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <00f201d16599$9a0d7570$ce286050$@fisk.me.uk>
+Content-Language: en-gb
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: 'Sage Weil' <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 12 Feb 2016, Markus Blank-Burian wrote:
-> In my tests, as a workaround I have set osd_agent_max_low_ops ==
-> osd_agent_max_ops. As expected, while in low flush mode the agent now only
-> iterates the objects until it finds something to flush, then waits.. and
-> does nothing when at idle. I can see this from the log files. So if there is
-> no side effect to this fix, I can test it later on our production system.
-> For any advanced solution further reducing the agents load, I have too
-> little knowledge about the internals. Just read through the code the first
-> time today to find out what's going on.
-
-Okay, I looked at this some more and see the issue now.  It's a bit 
-confusing because the low/high thing is flush based but the agent does 
-evicts too.  This basically means we may fail to keep up to max evict ops 
-in flight when in low mode, but that seems just fine to me.
-
-Can you take a look at this patch?
-
-	https://github.com/ceph/ceph/pull/7631
-
-Thanks!
-sage
-
-> 
-> Markus
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com] 
-> Sent: Freitag, 12. Februar 2016 19:13
-> To: Markus Blank-Burian <burian@muenster.de>
-> Subject: Re: High CPU usage in Tiering Agent
-> 
-> On Fri, 12 Feb 2016, Markus Blank-Burian wrote:
-> > Hi,
-> > 
-> > I had an issue with major CPU usage on several OSDs. Looking further 
-> > into this matter it turned out, that the tiering agent was iterating 
-> > directories over and over. The metadata was all cached, so there was no
-> disk activity.
-> > 
-> > If we have e.g. flush-mode low and evict-mode idle, then there are 
-> > only osd_agent_max_low_ops concurrent requests allowed, but the check 
-> > in OSDService::agent_entry only waits, if agent_ops >= 
-> > osd_agent_max_ops. It would be straight forward to add an additional 
-> > check for osd_agent_max_low_ops. Would there be any issues with the 
-> > modifications in the attached patch?
-> 
-> That sounds reasonable to me.  Does it address the core problem though?  
-> It sounds like what we really need is to limit the amount of non-op work the
-> agent does...
-> 
-> sage
-> 
-> 
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQo+IEZyb206IE5pY2sgRmlzayBbbWFpbHRvOm5p
+Y2tAZmlzay5tZS51a10KPiBTZW50OiAxMiBGZWJydWFyeSAyMDE2IDEzOjMxCj4gVG86ICdTYWdl
+IFdlaWwnIDxzYWdlQG5ld2RyZWFtLm5ldD4KPiBDYzogJ0phc29uIERpbGxhbWFuJyA8ZGlsbGFt
+YW5AcmVkaGF0LmNvbT47ICdTYW11ZWwgSnVzdCcKPiA8c2p1c3RAcmVkaGF0LmNvbT47IGNlcGgt
+dXNlcnNAbGlzdHMuY2VwaC5jb207IGNlcGgtCj4gZGV2ZWxAdmdlci5rZXJuZWwub3JnCj4gU3Vi
+amVjdDogUkU6IGNsc19yYmQgb3BzIG9uIHJiZF9pZC4kbmFtZSBvYmplY3RzIGluIEVDIHBvb2wK
+PiAKPiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tCj4gPiBGcm9tOiBjZXBoLWRldmVsLW93
+bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtCj4gPiBvd25lckB2Z2VyLmtl
+cm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTYWdlIFdlaWwKPiA+IFNlbnQ6IDEyIEZlYnJ1YXJ5IDIw
+MTYgMTM6MTUKPiA+IFRvOiBOaWNrIEZpc2sgPG5pY2tAZmlzay5tZS51az4KPiA+IENjOiAnSmFz
+b24gRGlsbGFtYW4nIDxkaWxsYW1hbkByZWRoYXQuY29tPjsgJ1NhbXVlbCBKdXN0Jwo+ID4gPHNq
+dXN0QHJlZGhhdC5jb20+OyBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tOyBjZXBoLQo+ID4gZGV2
+ZWxAdmdlci5rZXJuZWwub3JnCj4gPiBTdWJqZWN0OiBSRTogY2xzX3JiZCBvcHMgb24gcmJkX2lk
+LiRuYW1lIG9iamVjdHMgaW4gRUMgcG9vbAo+ID4KPiA+IE9uIFRodSwgMTEgRmViIDIwMTYsIFNh
+Z2UgV2VpbCB3cm90ZToKPiA+ID4gT24gVGh1LCAxMSBGZWIgMjAxNiwgTmljayBGaXNrIHdyb3Rl
+Ogo+ID4gPiA+IFRoYXTigJlzIGEgcmVsaWVmLCBJIHdhcyBzZW5zaW5nIGEgbWFqb3IgY2FzZSBv
+ZiBmYWNlIHBhbG0gb2NjdXJpbmcKPiA+ID4gPiB3aGVuIEkgcmVhZCBKYXNvbidzIGVtYWlsISEh
+Cj4gPiA+Cj4gPiA+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC83NjE3Cj4gPiA+
+Cj4gPiA+IFRoZSB0YW5nbGVkIGxvZ2ljIGluIG1heWJlX2hhbmRsZV9jYWNoZSB3YXNuJ3QgcmVz
+cGVjdGluZyB0aGUgZm9yY2UKPiA+ID4gcHJvbW90aW9uIGJvb2wuCj4gPgo+ID4gU28sIHRoZSBj
+YXVzZSBvbiBoYW1tZXIgd2FzIGVudGlyZWx5IGRpZmZlcmVudCB0aGFuIG9uIG1hc3Rlci4gIFRo
+ZXJlCj4gPiB3ZSBicm9rZSB0aGluZ3MgZHVyaW5nIGEgcmVmYWN0b3IsIGJ1dCBvbiBoYW1tZXIg
+d2UganVzdCBoYWRuJ3QKPiA+IGJhY2twb3J0ZWQgYSBmaXguICBJJ3ZlIHByZXBhcmVkIGEgcHVs
+bCByZXF1ZXN0IGZvciB0aGF0Ogo+ID4KPiA+IAlodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBo
+L3B1bGwvNzYyMgo+ID4KPiA+IE5pY2ssIGRvIHlvdSBtaW5kIHZlcmlmeWluZyB0aGF0IHRoaXMg
+Zml4ZXMgdGhpbmdzIGZvciB5b3U/Cj4gCj4gWWVhaCBzdXJlLCBJJ20ganVzdCBydW5uaW5nIGEg
+ZmV3IHByb21vdGlvbiBiZW5jaG1hcmtzLCBidXQgd2lsbCBnZXQgb24gaXQKPiBhZnRlcndhcmRz
+LgoKU29ycnkgZm9yIHRoZSBkZWxheSwgYnV0IGFsbCBsb29rcyBnb29kIHRvIG1lCgpuaWNrQENl
+cGgtVGVzdDp+JCByYmQgLXAgZWNwb29sIGNyZWF0ZSBUZXN0MTIgLS1zaXplPTEwRwpuaWNrQENl
+cGgtVGVzdDp+JCByYmQgLXAgY2FjaGUxIGluZm8gVGVzdDEyCnJiZCBpbWFnZSAnVGVzdDEyJzoK
+ICAgICAgICBzaXplIDEwMjQwIE1CIGluIDI1NjAgb2JqZWN0cwogICAgICAgIG9yZGVyIDIyICg0
+MDk2IGtCIG9iamVjdHMpCiAgICAgICAgYmxvY2tfbmFtZV9wcmVmaXg6IHJiZF9kYXRhLmYyYjQ4
+NGM1NmM2YmEKICAgICAgICBmb3JtYXQ6IDIKICAgICAgICBmZWF0dXJlczogbGF5ZXJpbmcKICAg
+ICAgICBmbGFnczoKbmlja0BDZXBoLVRlc3Q6fiQgcmFkb3MgLXAgY2FjaGUxIGNhY2hlLWZsdXNo
+IHJiZF9pZC5UZXN0MTIKbmlja0BDZXBoLVRlc3Q6fiQgcmFkb3MgLXAgY2FjaGUxIGNhY2hlLWV2
+aWN0IHJiZF9pZC5UZXN0MTIKbmlja0BDZXBoLVRlc3Q6fiQgY2VwaCBvc2QgcG9vbCBzZXQgY2Fj
+aGUxIG1pbl9yZWFkX3JlY2VuY3lfZm9yX3Byb21vdGUgOApzZXQgcG9vbCAxMiBtaW5fcmVhZF9y
+ZWNlbmN5X2Zvcl9wcm9tb3RlIHRvIDgKbmlja0BDZXBoLVRlc3Q6fiQgcmJkIC1wIGNhY2hlMSBp
+bmZvIFRlc3QxMgpyYmQgaW1hZ2UgJ1Rlc3QxMic6CiAgICAgICAgc2l6ZSAxMDI0MCBNQiBpbiAy
+NTYwIG9iamVjdHMKICAgICAgICBvcmRlciAyMiAoNDA5NiBrQiBvYmplY3RzKQogICAgICAgIGJs
+b2NrX25hbWVfcHJlZml4OiByYmRfZGF0YS5mMmI0ODRjNTZjNmJhCiAgICAgICAgZm9ybWF0OiAy
+CiAgICAgICAgZmVhdHVyZXM6IGxheWVyaW5nCiAgICAgICAgZmxhZ3M6CgoKPiAKPiA+Cj4gPiBz
+YWdlCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBo
+LXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0
+cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
