@@ -1,80 +1,55 @@
-From: Nick Fisk <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org>
-Subject: Re: cls_rbd ops on rbd_id.$name objects in EC pool
-Date: Fri, 12 Feb 2016 20:50:08 -0000
-Message-ID: <dbf516f5.9Ro.9Gf.cV.1onaHKNmVW@mailjet.com>
-References: <alpine.DEB.2.11.1602051036131.28396@cpach.fuggernut.com>
-	<1582262647.20033136.1454687586287.JavaMail.zimbra@redhat.com>
-	<CAN=+7FXJ6je1WpYpO-ozqo-ZKnBcRhv3hpaiH+GNku9YyK49Kg@mail.gmail.com>
-	<alpine.DEB.2.11.1602051340490.28396@cpach.fuggernut.com>
-	<0bc701d1604f$8f21e0a0$ad65a1e0$@fisk.me.uk>
-	<5848cd48.9Ro.9Gf.h0.1onaHAyHUe@mailjet.com>
-	<549809462.21912115.1455221387486.JavaMail.zimbra@redhat.com>
-	<alpine.DEB.2.11.1602111557000.28396@cpach.fuggernut.com>
-	<dbf6eb9a.9Ro.9Gf.cs.1lNjEIPmE9@mailjet.com>
-	<alpine.DEB.2.11.1602112008490.28396@cpach.fuggernut.com>
-	<alpine.DEB.2.11.1602120730010.4107@cpach.fuggernut.com>
-	<00f201d16599$9a0d7570$ce286050$@fisk.me.uk>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Fun probably useless QMC PG distribution simulation
+Date: Fri, 12 Feb 2016 16:46:45 -0600
+Message-ID: <56BE60D5.1050300@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <00f201d16599$9a0d7570$ce286050$@fisk.me.uk>
-Content-Language: en-gb
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: 'Sage Weil' <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:42787 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750857AbcBLWqs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Feb 2016 17:46:48 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id D3EE8804E0
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Feb 2016 22:46:48 +0000 (UTC)
+Received: from [10.3.112.52] (ovpn-112-52.phx2.redhat.com [10.3.112.52])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u1CMkja7009853
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Feb 2016 17:46:47 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQo+IEZyb206IE5pY2sgRmlzayBbbWFpbHRvOm5p
-Y2tAZmlzay5tZS51a10KPiBTZW50OiAxMiBGZWJydWFyeSAyMDE2IDEzOjMxCj4gVG86ICdTYWdl
-IFdlaWwnIDxzYWdlQG5ld2RyZWFtLm5ldD4KPiBDYzogJ0phc29uIERpbGxhbWFuJyA8ZGlsbGFt
-YW5AcmVkaGF0LmNvbT47ICdTYW11ZWwgSnVzdCcKPiA8c2p1c3RAcmVkaGF0LmNvbT47IGNlcGgt
-dXNlcnNAbGlzdHMuY2VwaC5jb207IGNlcGgtCj4gZGV2ZWxAdmdlci5rZXJuZWwub3JnCj4gU3Vi
-amVjdDogUkU6IGNsc19yYmQgb3BzIG9uIHJiZF9pZC4kbmFtZSBvYmplY3RzIGluIEVDIHBvb2wK
-PiAKPiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tCj4gPiBGcm9tOiBjZXBoLWRldmVsLW93
-bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtCj4gPiBvd25lckB2Z2VyLmtl
-cm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTYWdlIFdlaWwKPiA+IFNlbnQ6IDEyIEZlYnJ1YXJ5IDIw
-MTYgMTM6MTUKPiA+IFRvOiBOaWNrIEZpc2sgPG5pY2tAZmlzay5tZS51az4KPiA+IENjOiAnSmFz
-b24gRGlsbGFtYW4nIDxkaWxsYW1hbkByZWRoYXQuY29tPjsgJ1NhbXVlbCBKdXN0Jwo+ID4gPHNq
-dXN0QHJlZGhhdC5jb20+OyBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tOyBjZXBoLQo+ID4gZGV2
-ZWxAdmdlci5rZXJuZWwub3JnCj4gPiBTdWJqZWN0OiBSRTogY2xzX3JiZCBvcHMgb24gcmJkX2lk
-LiRuYW1lIG9iamVjdHMgaW4gRUMgcG9vbAo+ID4KPiA+IE9uIFRodSwgMTEgRmViIDIwMTYsIFNh
-Z2UgV2VpbCB3cm90ZToKPiA+ID4gT24gVGh1LCAxMSBGZWIgMjAxNiwgTmljayBGaXNrIHdyb3Rl
-Ogo+ID4gPiA+IFRoYXTigJlzIGEgcmVsaWVmLCBJIHdhcyBzZW5zaW5nIGEgbWFqb3IgY2FzZSBv
-ZiBmYWNlIHBhbG0gb2NjdXJpbmcKPiA+ID4gPiB3aGVuIEkgcmVhZCBKYXNvbidzIGVtYWlsISEh
-Cj4gPiA+Cj4gPiA+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC83NjE3Cj4gPiA+
-Cj4gPiA+IFRoZSB0YW5nbGVkIGxvZ2ljIGluIG1heWJlX2hhbmRsZV9jYWNoZSB3YXNuJ3QgcmVz
-cGVjdGluZyB0aGUgZm9yY2UKPiA+ID4gcHJvbW90aW9uIGJvb2wuCj4gPgo+ID4gU28sIHRoZSBj
-YXVzZSBvbiBoYW1tZXIgd2FzIGVudGlyZWx5IGRpZmZlcmVudCB0aGFuIG9uIG1hc3Rlci4gIFRo
-ZXJlCj4gPiB3ZSBicm9rZSB0aGluZ3MgZHVyaW5nIGEgcmVmYWN0b3IsIGJ1dCBvbiBoYW1tZXIg
-d2UganVzdCBoYWRuJ3QKPiA+IGJhY2twb3J0ZWQgYSBmaXguICBJJ3ZlIHByZXBhcmVkIGEgcHVs
-bCByZXF1ZXN0IGZvciB0aGF0Ogo+ID4KPiA+IAlodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBo
-L3B1bGwvNzYyMgo+ID4KPiA+IE5pY2ssIGRvIHlvdSBtaW5kIHZlcmlmeWluZyB0aGF0IHRoaXMg
-Zml4ZXMgdGhpbmdzIGZvciB5b3U/Cj4gCj4gWWVhaCBzdXJlLCBJJ20ganVzdCBydW5uaW5nIGEg
-ZmV3IHByb21vdGlvbiBiZW5jaG1hcmtzLCBidXQgd2lsbCBnZXQgb24gaXQKPiBhZnRlcndhcmRz
-LgoKU29ycnkgZm9yIHRoZSBkZWxheSwgYnV0IGFsbCBsb29rcyBnb29kIHRvIG1lCgpuaWNrQENl
-cGgtVGVzdDp+JCByYmQgLXAgZWNwb29sIGNyZWF0ZSBUZXN0MTIgLS1zaXplPTEwRwpuaWNrQENl
-cGgtVGVzdDp+JCByYmQgLXAgY2FjaGUxIGluZm8gVGVzdDEyCnJiZCBpbWFnZSAnVGVzdDEyJzoK
-ICAgICAgICBzaXplIDEwMjQwIE1CIGluIDI1NjAgb2JqZWN0cwogICAgICAgIG9yZGVyIDIyICg0
-MDk2IGtCIG9iamVjdHMpCiAgICAgICAgYmxvY2tfbmFtZV9wcmVmaXg6IHJiZF9kYXRhLmYyYjQ4
-NGM1NmM2YmEKICAgICAgICBmb3JtYXQ6IDIKICAgICAgICBmZWF0dXJlczogbGF5ZXJpbmcKICAg
-ICAgICBmbGFnczoKbmlja0BDZXBoLVRlc3Q6fiQgcmFkb3MgLXAgY2FjaGUxIGNhY2hlLWZsdXNo
-IHJiZF9pZC5UZXN0MTIKbmlja0BDZXBoLVRlc3Q6fiQgcmFkb3MgLXAgY2FjaGUxIGNhY2hlLWV2
-aWN0IHJiZF9pZC5UZXN0MTIKbmlja0BDZXBoLVRlc3Q6fiQgY2VwaCBvc2QgcG9vbCBzZXQgY2Fj
-aGUxIG1pbl9yZWFkX3JlY2VuY3lfZm9yX3Byb21vdGUgOApzZXQgcG9vbCAxMiBtaW5fcmVhZF9y
-ZWNlbmN5X2Zvcl9wcm9tb3RlIHRvIDgKbmlja0BDZXBoLVRlc3Q6fiQgcmJkIC1wIGNhY2hlMSBp
-bmZvIFRlc3QxMgpyYmQgaW1hZ2UgJ1Rlc3QxMic6CiAgICAgICAgc2l6ZSAxMDI0MCBNQiBpbiAy
-NTYwIG9iamVjdHMKICAgICAgICBvcmRlciAyMiAoNDA5NiBrQiBvYmplY3RzKQogICAgICAgIGJs
-b2NrX25hbWVfcHJlZml4OiByYmRfZGF0YS5mMmI0ODRjNTZjNmJhCiAgICAgICAgZm9ybWF0OiAy
-CiAgICAgICAgZmVhdHVyZXM6IGxheWVyaW5nCiAgICAgICAgZmxhZ3M6CgoKPiAKPiA+Cj4gPiBz
-YWdlCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBo
-LXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0
-cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+Hi All,
+
+In my spare time I've started playing around with an idea I've been 
+kicking around since the Inktank days.  Basically I wanted to see what 
+would happen if I tried to use a quasi-monte-carlo method like a Halton 
+Sequence for distributing PGs.
+
+The current toy code is here:
+
+https://github.com/markhpc/pghalton
+
+So the good news is that as expected, the distribution quality is 
+fantastic, even at low PG counts.  Remapping is inexpensive so long as 
+the bucket count is near what was specified in the original mapping, but 
+every bucket removal (or reinsertion) increases the remapping cost by 
+1/<bucket count>.  IE if you have 70/100 OSDs out, and 1 comes back up, 
+you have ~30% data movement, the same cost in fact if 30 OSDs came back 
+up.  Adding new buckets is also going to be difficult, probably 
+requiring a doubling of the buckets and then marking some of them out to 
+avoid remapping the entire sequence.
+
+I think it would be fairly easy to re-partition the space in this 
+approach to allow for arbitrary weighting and you could probably do 
+something vaguely crush like with hierarchical placement.  The data 
+movement problem is the big issue.  I suspect you could do some kind of 
+fancy tree structure to reduce the remapping cost, but I don't think it 
+would every be as good as crush.
+
+Anyway, thought people might interesting in playing with it and maybe it 
+will get someone's noodle going to think up other exotic ideas. :)
+
+Mark
