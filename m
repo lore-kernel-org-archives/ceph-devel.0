@@ -1,92 +1,37 @@
-From: Eric Dumazet <eric.dumazet@gmail.com>
-Subject: Re: BUG: held lock freed! - request_sock_queue::rskq_lock
-Date: Thu, 11 Feb 2016 15:54:54 -0800
-Message-ID: <1455234894.18740.3.camel@edumazet-glaptop2.roam.corp.google.com>
-References: <CAOi1vP9b78Y7-ddcZna2xM+vST6iuw+RmRL+BxR3HQZKbaa0ZA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: cls_rbd ops on rbd_id.$name objects in EC pool
+Date: Thu, 11 Feb 2016 20:09:31 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1602112008490.28396@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1602051036131.28396@cpach.fuggernut.com> <1582262647.20033136.1454687586287.JavaMail.zimbra@redhat.com> <CAN=+7FXJ6je1WpYpO-ozqo-ZKnBcRhv3hpaiH+GNku9YyK49Kg@mail.gmail.com> <alpine.DEB.2.11.1602051340490.28396@cpach.fuggernut.com>
+ <0bc701d1604f$8f21e0a0$ad65a1e0$@fisk.me.uk> <5848cd48.9Ro.9Gf.h0.1onaHAyHUe@mailjet.com> <549809462.21912115.1455221387486.JavaMail.zimbra@redhat.com> <alpine.DEB.2.11.1602111557000.28396@cpach.fuggernut.com> <dbf6eb9a.9Ro.9Gf.cs.1lNjEIPmE9@mailjet.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1515539657-1455239374=:28396"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:35876 "EHLO
-	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751046AbcBKXy6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Feb 2016 18:54:58 -0500
-In-Reply-To: <CAOi1vP9b78Y7-ddcZna2xM+vST6iuw+RmRL+BxR3HQZKbaa0ZA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:48951 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751062AbcBLBJM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 11 Feb 2016 20:09:12 -0500
+In-Reply-To: <dbf6eb9a.9Ro.9Gf.cs.1lNjEIPmE9@mailjet.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Eric Dumazet <edumazet@google.com>, netdev <netdev@vger.kernel.org>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Nick Fisk <nick@fisk.me.uk>
+Cc: 'Jason Dillaman' <dillaman@redhat.com>, 'Samuel Just' <sjust@redhat.com>, ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
 
-On Thu, 2016-02-11 at 23:43 +0100, Ilya Dryomov wrote:
-> Hi Eric,
-> 
-> I'm hitting the following splat (attached in full):
-> 
-> kernel: =========================
-> kernel: [ BUG: held lock freed! ]
-> kernel: 4.5.0-rc1-ceph-00026-g5e0a311 #1 Not tainted
-> kernel: -------------------------
-> kernel: swapper/5/0 is freeing memory
-> ffff880035c9d200-ffff880035c9dbff, with a lock still held there!
-> kernel: (&(&queue->rskq_lock)->rlock){+.-...}, at:
-> [<ffffffff816f6a88>] inet_csk_reqsk_queue_add+0x28/0xa0
-> kernel: 4 locks held by swapper/5/0:
-> kernel: #0:  (rcu_read_lock){......}, at: [<ffffffff8169ef6b>]
-> netif_receive_skb_internal+0x4b/0x1f0
-> kernel: #1:  (rcu_read_lock){......}, at: [<ffffffff816e977f>]
-> ip_local_deliver_finish+0x3f/0x380
-> kernel: #2:  (slock-AF_INET){+.-...}, at: [<ffffffff81685ffb>]
-> sk_clone_lock+0x19b/0x440
-> kernel: #3:  (&(&queue->rskq_lock)->rlock){+.-...}, at:
-> [<ffffffff816f6a88>] inet_csk_reqsk_queue_add+0x28/0xa0
-> 
-> The first couple of occurrences were on 4.4-rc2, a couple of recent ones
-> on 4.5-rc1.  I'm suspecting your ebb516af60e1 ("tcp/dccp: fix race at
-> listener dismantle phase") and/or a bunch of related commits before it,
-> authored in the first half of Oct 2015.
-> 
-> The spinlock that lockdep complains about is embedded in
-> inet_connection_sock, which I think is getting freed in
-> inet_child_forget(), called from inet_csk_reqsk_queue_add():
-> 
-> inet_csk_complete_hashdance
->   inet_csk_reqsk_queue_add
->     spin_lock(&queue->rskq_lock)
->     inet_child_forget
->       reqsk_put
->         reqsk_free
->           sock_put(req->rsk_listener)
->           # rsk_listener is sk that queue is embedded in #
-> 
-> Your comment in inet_csk_complete_hashdance()
-> 
->                 /* Warning: caller must not call reqsk_put(req);
->                  * child stole last reference on it.
->                  */
-> 
-> suggests that there is only one reference to req at that point in time
-> and yet ebb516af60e1 added a reqsk_put() to that path: there was one in
-> inet_csk_listen_stop() before, but not in inet_csk_reqsk_queue_add().
-> 
-> This is from a quick and dirty git blame analysis, so don't shout if
-> all of it is wrong...
-> 
-> Thanks,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Nice catch !
+--8323329-1515539657-1455239374=:28396
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
-It is a bit late here, I will take a look tomorrow, as it looks
-definitely tricky ;)
+On Thu, 11 Feb 2016, Nick Fisk wrote:
+> That’s a relief, I was sensing a major case of face palm occuring when I 
+> read Jason's email!!!
 
-inet_csk_reqsk_queue_add() should probably return a status.
+https://github.com/ceph/ceph/pull/7617
 
-Even tcp_child_process() looks racy in its access to
-parent->sk_data_ready(parent) if parent got freed.
+The tangled logic in maybe_handle_cache wasn't respecting the force 
+promotion bool.
 
-Thanks !
-
-
-
-Thanks !
- 
-
+sage
+--8323329-1515539657-1455239374=:28396--
