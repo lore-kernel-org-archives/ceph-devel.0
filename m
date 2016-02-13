@@ -1,60 +1,60 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: CephFS and the next infernalis release v9.2.1
-Date: Sat, 13 Feb 2016 08:33:51 +0700
-Message-ID: <56BE87FF.3080307@dachary.org>
-References: <CAP3mxSwYvhDwi8Bzd3DSUAph+7Cchmtjw-QqtsDgkoN-CBkAjw@mail.gmail.com>
- <CAJ4mKGaWYit3X2j8bhsZyiG2ODUinAmTjbS6W3uVzHwALHG4Mw@mail.gmail.com>
+From: Markus Blank-Burian <burian@muenster.de>
+Subject: RE: High CPU usage in Tiering Agent
+Date: Sat, 13 Feb 2016 12:44:56 +0100
+Message-ID: <DUB403-EAS29005B8333CF9CF52F5810ED5AA0@phx.gbl>
+References: <DUB403-EAS22267EA4719FB866706912FD5A90@phx.gbl> <alpine.DEB.2.11.1602121312170.4107@cpach.fuggernut.com> <DUB403-EAS146B9358CF393BC59C36360D5A90@phx.gbl> <alpine.DEB.2.11.1602121515270.4107@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay6-d.mail.gandi.net ([217.70.183.198]:36442 "EHLO
-	relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752046AbcBMBeD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Feb 2016 20:34:03 -0500
-In-Reply-To: <CAJ4mKGaWYit3X2j8bhsZyiG2ODUinAmTjbS6W3uVzHwALHG4Mw@mail.gmail.com>
+Received: from dub004-omc4s17.hotmail.com ([157.55.2.92]:55702 "EHLO
+	DUB004-OMC4S17.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750992AbcBMLo7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 13 Feb 2016 06:44:59 -0500
+In-Reply-To: <alpine.DEB.2.11.1602121515270.4107@cpach.fuggernut.com>
+Content-Language: de
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: 'Sage Weil' <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
+Patch looks good, compiles and is now running on one host. During testing,
+the agent queues were always empty, so there was no activity at all. Due to
+a hardware upgrade, nearly all PGs are backfilling or waiting to backfill,
+because of near full OSDs, so the new primaries have no data yet. Might take
+a few days until I have test results.
 
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com] 
+Sent: Freitag, 12. Februar 2016 21:24
+To: Markus Blank-Burian <burian@muenster.de>
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: High CPU usage in Tiering Agent
 
-On 13/02/2016 01:13, Gregory Farnum wrote:
-> On Thu, Feb 11, 2016 at 11:36 PM, Abhishek Varshney
-> <abhishek.varshney@flipkart.com> wrote:
->> Hi Greg,
->>
->> The next infernalis release as found at
->> https://github.com/ceph/ceph/tree/infernalis passed most of the Ceph=
-=46S
->> suite ( http://tracker.ceph.com/issues/13750#note-19 ) except for 1
->> failure, which was not seen at a later run (
->> http://tracker.ceph.com/issues/13750#note-26 ). Do you think the
->> infernalis branch is ready for QE to start their own round of testin=
-g
->> ?
->=20
-> Uh, assuming I'm reading this correctly, you've hit a known
-> intermittent bug which happened to show up on one run, but not the
-> next.
->=20
-> You can release without the fix (it's not a regression), but please
-> realize that we have a lot of intermittent bugs so just because an
-> issue doesn't appear in one run doesn't mean the issue is gone. :)
+On Fri, 12 Feb 2016, Markus Blank-Burian wrote:
+> In my tests, as a workaround I have set osd_agent_max_low_ops == 
+> osd_agent_max_ops. As expected, while in low flush mode the agent now 
+> only iterates the objects until it finds something to flush, then 
+> waits.. and does nothing when at idle. I can see this from the log 
+> files. So if there is no side effect to this fix, I can test it later on
+our production system.
+> For any advanced solution further reducing the agents load, I have too 
+> little knowledge about the internals. Just read through the code the 
+> first time today to find out what's going on.
 
-Hi Greg,
+Okay, I looked at this some more and see the issue now.  It's a bit
+confusing because the low/high thing is flush based but the agent does
+evicts too.  This basically means we may fail to keep up to max evict ops in
+flight when in low mode, but that seems just fine to me.
 
-We realize there are intermittent bugs. This is why we're asking you to=
- decide wether this specific bug should be a blocker for the release or=
- not. What do you think ?
+Can you take a look at this patch?
 
-Cheers
+	https://github.com/ceph/ceph/pull/7631
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks!
+sage
+
+> 
+> Markus
+> 
