@@ -1,102 +1,63 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: hammer v0.94.6 QE Validation status
-Date: Sun, 14 Feb 2016 13:05:30 -0800
-Message-ID: <CAJ4mKGYeZ4q2v123-Xpcs6GOfSLXg2bw770D+RoJqu+JU0ok=Q@mail.gmail.com>
-References: <CAMMFjmHcBKZubn7e_ebmNMcE-7MbzPYXD0fAPFzA_ME2oEBkPQ@mail.gmail.com>
-	<CAJ4mKGZi_pMc4eXq91FPync-gz_7_5NmDCb3QGz5n=zB+5GTTQ@mail.gmail.com>
-	<CAJ4mKGZLedmu7PsTtPQuLOQtsjRC6TK+HWB6yixOzUMgEbJCMQ@mail.gmail.com>
-	<CAMMFjmFBXkj=JYbxOkpbfTdAcfGG2G=F=ud9bqoQh2ws4K_ygg@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Help in analyzing Jenkins output
+Date: Sun, 14 Feb 2016 23:07:22 +0100
+Message-ID: <56C0FA9A.3030609@digiware.nl>
+References: <56C07822.5080600@digiware.nl>
+ <CAJ4mKGaQjLFzO3gfD=iDw-12xY+XZNcVks_r2uenw+Q7jYx8jQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:38820 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751191AbcBNVFf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 14 Feb 2016 16:05:35 -0500
-Received: by mail-wm0-f47.google.com with SMTP id a4so32377211wme.1
-        for <ceph-devel@vger.kernel.org>; Sun, 14 Feb 2016 13:05:35 -0800 (PST)
-In-Reply-To: <CAMMFjmFBXkj=JYbxOkpbfTdAcfGG2G=F=ud9bqoQh2ws4K_ygg@mail.gmail.com>
+Received: from smtp.digiware.nl ([31.223.170.169]:22352 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751605AbcBNWHz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 14 Feb 2016 17:07:55 -0500
+In-Reply-To: <CAJ4mKGaQjLFzO3gfD=iDw-12xY+XZNcVks_r2uenw+Q7jYx8jQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: ceph-qa <ceph-qa@ceph.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sun, Feb 14, 2016 at 1:00 PM, Yuri Weinstein <yweinste@redhat.com> w=
-rote:
-> On Sun, Feb 14, 2016 at 12:31 PM, Gregory Farnum <gfarnum@redhat.com>=
- wrote:
->> On Wed, Feb 10, 2016 at 11:24 AM, Gregory Farnum <gfarnum@redhat.com=
-> wrote:
->>> On Wed, Feb 10, 2016 at 10:56 AM, Yuri Weinstein <yweinste@redhat.c=
-om> wrote:
->>>> Hello
->>>>
->>>> Detailed summary of the QE Validation can be found here
->>>> http://tracker.ceph.com/issues/13356#note-61
->>>>
->>>> The following suites were in scope of this point release testing:
->>>>
->>>> rados (subset 1/7)
->>>> rbd
->>>> rgw
->>>> fs
->>>> krbd
->>>> kcephfs
->>>> hadoop
->>>> samba
->>>> rest
->>>> ceph-deploy
->>>> upgrade/client-upgrade
->>>> upgrade/dumpling-firefly-x (hammer)
->>>> upgrade/firefly-x (hammer)
->>>> upgrade/hammer
->>>> upgrade/hammer-x (infernalis)
->>>> powercycle
->>>>
->>>> Outstanding issues (approval requested):
->>>>
->>>> fs:
->>>> http://tracker.ceph.com/issues/14716 - Greg, do you want those to =
-be
->>>> fixed for this release or approve release as is with a known issue=
-?
->>>>
->>>> samba:
->>>> http://tracker.ceph.com/issues/14714 - Greg, do you want those to =
-be
->>>> fixed for this release or approve release as is with a known issue=
-?
+On 14-2-2016 20:46, Gregory Farnum wrote:
+> On Sun, Feb 14, 2016 at 4:50 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> I'm having a bit of trouble in finding the actual error in
 >>
->> Okay, I looked briefly at the samba issue and honestly I'm just not
->> that fussed about it. I'm a little concerned by the thread assert,
->> although the fact that it's happening on shutdown anyway mitigates i=
-t
->> some...
->> I suppose I wouldn't call it a release blocker, but it's not a great
->> precedent to set. I think ideally you'd want to try and identify whe=
-re
->> it happened =E2=80=94 is it a genuinely new issue, or something show=
-ing up on
->> the smithi boxes but not other hardware?
->> You might check that by running this on the miras and/or ovh, and by
->> running the version that last passed on ovh against smithi and seein=
-g
->> if/where the issues show up.
->> -Greg
->
-> OK, Greg, I will try rerunning samba jobs in suggested environments
-> and we will see more info.
->
-> Are you still looking into the fs issue http://tracker.ceph.com/issue=
-s/14716
+>> https://jenkins.ceph.com/job/ceph-pull-requests/1419/console
+>>
+>> The first few python warning/errors seem harmless, because the tests
+>> are actually run.
+>> Then 'bash -x tests/ceph-disk.sh' is run, which generates a lot of
+>> output. But I'm missing the point where that generates an error.
+>>
+>> Could somebody help me point out where the error is that makes this test
+>> fail??
+>>
+>> The test ATM fails under FreeBSD because of other errors still in some
+>> of the scripts and programs..
+>> So testing it there doest not even get as far as this point.
+> 
+> Search for "FAIL:" and you get:
+>> FAIL: ceph-disk/run-tox.sh
 
-14716 is what I'm referring to when I talk about running the tests
-elsewhere. :) I'm not looking at it actively right now but will take
-the results of any bisecting tests to try and track it down further.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yup, run-tox.sh is rather a collection of tests run under tox
+supervision. And it ends in running tests/ceph-disks.sh....
+I've augmented the script to actually print the status value of the test
+executions.
+So:
+	tests/ceph-disk.sh:386: run:  status=0
+tells me that all components are executed and completed successfully.
+
+Still leaving me to wonder why run-tox.sh concludes that there has been
+an error....
+
+> and then farther down a big block of output from that test. It's angry
+> about a bunch of python syntax issues.
+> There's also what looks like an unexpected network disconnect at the
+> end; we've been having network troubles and the jenkins bot is failing
+> intermittently.
+
+I found the argy puthon murmers, but these do not trigger on my Centos7
+platform. Even though they are pressent in the logfiles.
+
+Thanx for helping,
+--WjW
