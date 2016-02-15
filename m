@@ -1,94 +1,92 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [Y2038] [PATCH] include: ceph: Fix encode and decode type conversions
-Date: Mon, 15 Feb 2016 12:17:34 +0100
-Message-ID: <6208883.1yJqoj6hbg@wuerfel>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] include: ceph: Fix encode and decode type
+	conversions
+Date: Mon, 15 Feb 2016 13:37:24 +0100
+Message-ID: <CAOi1vP9wVn=vqwD153eQeaJgA_isCo+BjTfcOKL43BZbmS91sQ@mail.gmail.com>
 References: <1455505313-1298-1-git-send-email-deepa.kernel@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.187]:49476 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751103AbcBOLRl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Feb 2016 06:17:41 -0500
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <y2038-bounces@lists.linaro.org>
 In-Reply-To: <1455505313-1298-1-git-send-email-deepa.kernel@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: y2038@lists.linaro.org
-Cc: Deepa Dinamani <deepa.kernel@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/y2038/>
+List-Post: <mailto:y2038@lists.linaro.org>
+List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
+List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=subscribe>
+Errors-To: y2038-bounces@lists.linaro.org
+Sender: "Y2038" <y2038-bounces@lists.linaro.org>
+To: Deepa Dinamani <deepa.kernel@gmail.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, y2038@lists.linaro.org, Ceph Development <ceph-devel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Sage Weil <sage@redhat.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Sunday 14 February 2016 19:01:53 Deepa Dinamani wrote:
-> long/ kernel_time_t is 32 bit on a 32 bit system and
-> 64 bit on a 64 bit system.
-> 
-> ceph_encode_timespec() encodes only the lower 32 bits on
-> a 64 bit system and encodes all of 32 bits on a 32bit
-> system.
-> 
-> ceph_decode_timespec() decodes 32 bit tv_sec and tv_nsec
-> into kernel_time_t/ long.
-> 
-> The encode and decode functions do not match when the
-> values are negative:
-> 
-> Consider the following scenario on a 32 bit system:
-> When a negative number is cast to u32 as encode does, the
-> value is positive and is greater than INT_MAX. Decode reads
-> back this value. And, this value cannot be represented by
-> long on 32 bit systems. So by section 6.3.1.3 of the
-> C99 standard, the result is implementation defined.
-> 
-> Consider the following scenario on a 64 bit system:
-> When a negative number is cast to u32 as encode does, the
-> value is positive. This value is later assigned by decode
-> function by a cast to long. Since this value can be
-> represented in long data type, this becomes a positive
-> value greater than INT_MAX. But, the value encoded was
-> negative, so the encode and decode functions do not match.
-> 
-> Change the decode function as follows to overcome the above
-> bug:
-> The decode should first cast the value to a s64 this will
-> be positive value greater than INT_MAX(in case of a negative
-> encoded value)and then cast this value again as s32, which
-> drops the higher order 32 bits.
-> On 32 bit systems, this is the right value in kernel_time_t/
-> long.
-> On 64 bit systems, assignment to kernel_time_t/ long
-> will sign extend this value to reflect the signed bit encoded.
-> 
-> Assume ceph timestamp ranges permitted are 1902..2038.
-> 
-> Suggested-by: Arnd Bergmann <arnd@arndb.de>
-> Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
-> ---
-
-Actually I was thinking we'd do the opposite and document the
-existing 64-bit behavior, and then make sure we do it the same
-on 32-bit machines once we have the new syscalls.
-
-The most important part of course is to document what the file
-system is expected to do. Having this in the changelog is important
-here, but I'd also like to see a comment in the code to ensure
-readers can see that the behavior is intentional.
- 
-> diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
-> index a6ef9cc..e777e99 100644
-> --- a/include/linux/ceph/decode.h
-> +++ b/include/linux/ceph/decode.h
-> @@ -137,8 +137,8 @@ bad:
->  static inline void ceph_decode_timespec(struct timespec *ts,
->                                         const struct ceph_timespec *tv)
->  {
-> -       ts->tv_sec = (__kernel_time_t)le32_to_cpu(tv->tv_sec);
-> -       ts->tv_nsec = (long)le32_to_cpu(tv->tv_nsec);
-> +       ts->tv_sec = (s32)(s64)le32_to_cpu(tv->tv_sec);
-> +       ts->tv_nsec = (s32)(s64)le32_to_cpu(tv->tv_nsec);
->  }
-
-Why did you choose to express this as "(s32)(s64)..." rather than
-"(s64)(s32)..."? The result is the same (just the s32 cast by itself
-would be sufficient), I just don't see yet how it clarifies what is
-going on.
-
-	Arnd
+T24gTW9uLCBGZWIgMTUsIDIwMTYgYXQgNDowMSBBTSwgRGVlcGEgRGluYW1hbmkgPGRlZXBhLmtl
+cm5lbEBnbWFpbC5jb20+IHdyb3RlOgo+IGxvbmcvIGtlcm5lbF90aW1lX3QgaXMgMzIgYml0IG9u
+IGEgMzIgYml0IHN5c3RlbSBhbmQKPiA2NCBiaXQgb24gYSA2NCBiaXQgc3lzdGVtLgo+Cj4gY2Vw
+aF9lbmNvZGVfdGltZXNwZWMoKSBlbmNvZGVzIG9ubHkgdGhlIGxvd2VyIDMyIGJpdHMgb24KPiBh
+IDY0IGJpdCBzeXN0ZW0gYW5kIGVuY29kZXMgYWxsIG9mIDMyIGJpdHMgb24gYSAzMmJpdAo+IHN5
+c3RlbS4KPgo+IGNlcGhfZGVjb2RlX3RpbWVzcGVjKCkgZGVjb2RlcyAzMiBiaXQgdHZfc2VjIGFu
+ZCB0dl9uc2VjCj4gaW50byBrZXJuZWxfdGltZV90LyBsb25nLgo+Cj4gVGhlIGVuY29kZSBhbmQg
+ZGVjb2RlIGZ1bmN0aW9ucyBkbyBub3QgbWF0Y2ggd2hlbiB0aGUKPiB2YWx1ZXMgYXJlIG5lZ2F0
+aXZlOgo+Cj4gQ29uc2lkZXIgdGhlIGZvbGxvd2luZyBzY2VuYXJpbyBvbiBhIDMyIGJpdCBzeXN0
+ZW06Cj4gV2hlbiBhIG5lZ2F0aXZlIG51bWJlciBpcyBjYXN0IHRvIHUzMiBhcyBlbmNvZGUgZG9l
+cywgdGhlCj4gdmFsdWUgaXMgcG9zaXRpdmUgYW5kIGlzIGdyZWF0ZXIgdGhhbiBJTlRfTUFYLiBE
+ZWNvZGUgcmVhZHMKPiBiYWNrIHRoaXMgdmFsdWUuIEFuZCwgdGhpcyB2YWx1ZSBjYW5ub3QgYmUg
+cmVwcmVzZW50ZWQgYnkKPiBsb25nIG9uIDMyIGJpdCBzeXN0ZW1zLiBTbyBieSBzZWN0aW9uIDYu
+My4xLjMgb2YgdGhlCj4gQzk5IHN0YW5kYXJkLCB0aGUgcmVzdWx0IGlzIGltcGxlbWVudGF0aW9u
+IGRlZmluZWQuCj4KPiBDb25zaWRlciB0aGUgZm9sbG93aW5nIHNjZW5hcmlvIG9uIGEgNjQgYml0
+IHN5c3RlbToKPiBXaGVuIGEgbmVnYXRpdmUgbnVtYmVyIGlzIGNhc3QgdG8gdTMyIGFzIGVuY29k
+ZSBkb2VzLCB0aGUKPiB2YWx1ZSBpcyBwb3NpdGl2ZS4gVGhpcyB2YWx1ZSBpcyBsYXRlciBhc3Np
+Z25lZCBieSBkZWNvZGUKPiBmdW5jdGlvbiBieSBhIGNhc3QgdG8gbG9uZy4gU2luY2UgdGhpcyB2
+YWx1ZSBjYW4gYmUKPiByZXByZXNlbnRlZCBpbiBsb25nIGRhdGEgdHlwZSwgdGhpcyBiZWNvbWVz
+IGEgcG9zaXRpdmUKPiB2YWx1ZSBncmVhdGVyIHRoYW4gSU5UX01BWC4gQnV0LCB0aGUgdmFsdWUg
+ZW5jb2RlZCB3YXMKPiBuZWdhdGl2ZSwgc28gdGhlIGVuY29kZSBhbmQgZGVjb2RlIGZ1bmN0aW9u
+cyBkbyBub3QgbWF0Y2guCj4KPiBDaGFuZ2UgdGhlIGRlY29kZSBmdW5jdGlvbiBhcyBmb2xsb3dz
+IHRvIG92ZXJjb21lIHRoZSBhYm92ZQo+IGJ1ZzoKPiBUaGUgZGVjb2RlIHNob3VsZCBmaXJzdCBj
+YXN0IHRoZSB2YWx1ZSB0byBhIHM2NCB0aGlzIHdpbGwKPiBiZSBwb3NpdGl2ZSB2YWx1ZSBncmVh
+dGVyIHRoYW4gSU5UX01BWChpbiBjYXNlIG9mIGEgbmVnYXRpdmUKPiBlbmNvZGVkIHZhbHVlKWFu
+ZCB0aGVuIGNhc3QgdGhpcyB2YWx1ZSBhZ2FpbiBhcyBzMzIsIHdoaWNoCj4gZHJvcHMgdGhlIGhp
+Z2hlciBvcmRlciAzMiBiaXRzLgo+IE9uIDMyIGJpdCBzeXN0ZW1zLCB0aGlzIGlzIHRoZSByaWdo
+dCB2YWx1ZSBpbiBrZXJuZWxfdGltZV90Lwo+IGxvbmcuCj4gT24gNjQgYml0IHN5c3RlbXMsIGFz
+c2lnbm1lbnQgdG8ga2VybmVsX3RpbWVfdC8gbG9uZwo+IHdpbGwgc2lnbiBleHRlbmQgdGhpcyB2
+YWx1ZSB0byByZWZsZWN0IHRoZSBzaWduZWQgYml0IGVuY29kZWQuCj4KPiBBc3N1bWUgY2VwaCB0
+aW1lc3RhbXAgcmFuZ2VzIHBlcm1pdHRlZCBhcmUgMTkwMi4uMjAzOC4KPgo+IFN1Z2dlc3RlZC1i
+eTogQXJuZCBCZXJnbWFubiA8YXJuZEBhcm5kYi5kZT4KPiBTaWduZWQtb2ZmLWJ5OiBEZWVwYSBE
+aW5hbWFuaSA8ZGVlcGEua2VybmVsQGdtYWlsLmNvbT4KPiAtLS0KPiAgaW5jbHVkZS9saW51eC9j
+ZXBoL2RlY29kZS5oIHwgNCArKy0tCj4gIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKyks
+IDIgZGVsZXRpb25zKC0pCj4KPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9jZXBoL2RlY29k
+ZS5oIGIvaW5jbHVkZS9saW51eC9jZXBoL2RlY29kZS5oCj4gaW5kZXggYTZlZjljYy4uZTc3N2U5
+OSAxMDA2NDQKPiAtLS0gYS9pbmNsdWRlL2xpbnV4L2NlcGgvZGVjb2RlLmgKPiArKysgYi9pbmNs
+dWRlL2xpbnV4L2NlcGgvZGVjb2RlLmgKPiBAQCAtMTM3LDggKzEzNyw4IEBAIGJhZDoKPiAgc3Rh
+dGljIGlubGluZSB2b2lkIGNlcGhfZGVjb2RlX3RpbWVzcGVjKHN0cnVjdCB0aW1lc3BlYyAqdHMs
+Cj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNvbnN0IHN0cnVjdCBj
+ZXBoX3RpbWVzcGVjICp0dikKPiAgewo+IC0gICAgICAgdHMtPnR2X3NlYyA9IChfX2tlcm5lbF90
+aW1lX3QpbGUzMl90b19jcHUodHYtPnR2X3NlYyk7Cj4gLSAgICAgICB0cy0+dHZfbnNlYyA9IChs
+b25nKWxlMzJfdG9fY3B1KHR2LT50dl9uc2VjKTsKPiArICAgICAgIHRzLT50dl9zZWMgPSAoczMy
+KShzNjQpbGUzMl90b19jcHUodHYtPnR2X3NlYyk7Cj4gKyAgICAgICB0cy0+dHZfbnNlYyA9IChz
+MzIpKHM2NClsZTMyX3RvX2NwdSh0di0+dHZfbnNlYyk7Cj4gIH0KPiAgc3RhdGljIGlubGluZSB2
+b2lkIGNlcGhfZW5jb2RlX3RpbWVzcGVjKHN0cnVjdCBjZXBoX3RpbWVzcGVjICp0diwKPiAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgY29uc3Qgc3RydWN0IHRpbWVzcGVj
+ICp0cykKCkkgdGhpbmsgeW91IGFyZSBmb3JnZXR0aW5nIHRoYXQgdGhpcyBpcyBhIHdpcmUgcHJv
+dG9jb2wuICBDaGFuZ2luZyBob3cKdmFsdWVzIGFyZSBpbnRlcnByZXRlZCBvbiBvbmUgc2lkZSB3
+aXRob3V0IGxvb2tpbmcgYXQgdGhlIG90aGVyIHNpZGUgaXMKZ2VuZXJhbGx5IG5vdCB3aGF0IHlv
+dSB3YW50IHRvIGRvLgoKVGhlcmUgYXJlbid0IGFueSBjYXN0cyBvbiB0aGUgc2VydmVyIHNpZGU6
+IF9fdTMyIGlzIHNpbXBseSBhc3NpZ25lZCB0bwp0aW1lX3QsIG1lYW5pbmcgbm8gc2lnbi1leHRl
+bnNpb24gaXMgaGFwcGVuaW5nIC0gc2VlIHNyYy9pbmNsdWRlL3V0aW1lLmgKaW4gY2VwaC5naXQu
+ICBUaGUgY3VycmVudCBfX2tlcm5lbF90aW1lX3QgYW5kIGxvbmcgY2FzdHMgb24gdGhlIGtlcm5l
+bApzaWRlIGFyZSBtZWFuaW5nbGVzcyAtIHRoZXkgZG9uJ3QgY2hhbmdlIHRoZSBiaXQgcGF0dGVy
+biwgc28gZXZlcnl0aGluZwppcyBpbnRlcnByZXRlZCB0aGUgc2FtZSB3YXkuICBZb3VyIHBhdGNo
+IGNoYW5nZXMgdGhhdC4KCklmIHRoZXJlIGlzIGFueXRoaW5nIHRvIGJlIGRvbmUgaGVyZSwgaXQg
+aXMgZG9jdW1lbnRpbmcgdGhlIGV4aXN0aW5nCmJlaGF2aW9yLiAgVGhpcyBpc24ndCB0byBzYXkg
+dGhhdCB0aGVyZSBhcmVuJ3QgYW55IHF1aXJrcyBvciBidWdzIGluCm91ciB0aW1lIGhhbmRsaW5n
+LCBpdCdzIHRoYXQgYW55IGNoYW5nZXMgY29uY2VybmluZyB0aGUgcHJvdG9jb2wgb3IgaG93CnRo
+ZSBhY3R1YWwgYml0cyBhcmUgaW50ZXJwcmV0ZWQgc2hvdWxkIGZvbGxvdyBvciBhbGlnbiB3aXRo
+IHRoZSByZXN0IG9mCmNlcGggYW5kIGhhdmUgYSBub3RlIGluIHRoZSBjaGFuZ2Vsb2cgb24gdGhh
+dC4KCihBcyBHcmVnIGFuZCBJIG1lbnRpb25lZCBiZWZvcmUsIHdlIGRvIGhhdmUgYSBzZW1pLWNv
+bmNyZXRlIHBsYW4gb24gaG93CnRvIGRlYWwgd2l0aCB5MjAzOCBpbiBjZXBoLCBqdXN0IG5vIHRp
+bWV0YWJsZSB5ZXQuKQoKVGhhbmtzLAoKICAgICAgICAgICAgICAgIElseWEKX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KWTIwMzggbWFpbGluZyBsaXN0Clky
+MDM4QGxpc3RzLmxpbmFyby5vcmcKaHR0cHM6Ly9saXN0cy5saW5hcm8ub3JnL21haWxtYW4vbGlz
+dGluZm8veTIwMzgK
