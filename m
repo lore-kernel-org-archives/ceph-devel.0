@@ -1,62 +1,48 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: Ceph and Google Summer of Code
-Date: Mon, 15 Feb 2016 12:33:08 -0500
-Message-ID: <CAAZbbf0Ng2hLe=YkgCDXeb73WOmOCfkv-KxTVA6s2Mi_B8rG1g@mail.gmail.com>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Need some help fixing an assert
+Date: Mon, 15 Feb 2016 11:26:13 -0700
+Message-ID: <CAANLjFopvMzfezr=UmJGG1Dzg+VV6bC7cpvuJbGJPxk0AN99WQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f43.google.com ([209.85.215.43]:32945 "EHLO
-	mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751630AbcBORdK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Feb 2016 12:33:10 -0500
-Received: by mail-lf0-f43.google.com with SMTP id m1so93815756lfg.0
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Feb 2016 09:33:09 -0800 (PST)
+Received: from mail-vk0-f53.google.com ([209.85.213.53]:32860 "EHLO
+	mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751217AbcBOS0O (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Feb 2016 13:26:14 -0500
+Received: by mail-vk0-f53.google.com with SMTP id k196so114525764vka.0
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Feb 2016 10:26:13 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Ian Colle <icolle@redhat.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hey all,
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-The application period for GSoC is once again upon us (it actually
-launched while I was out on vacation last week).  I wanted to extend
-this call to anyone who might be interested in mentoring a student
-over the summer months in a project for Ceph development.
+I've got https://github.com/ceph/ceph/pull/7654 that I'm working on,
+but I just can't track down why I'm getting the assert in Mutex::Lock.
+If you can give me a push in the right direction, it would be very
+helpful.
 
-=46or those of you who are not familiar with the GSoC program, you can
-check out the newly redesigned site:
-https://summerofcode.withgoogle.com/.  The gist of it is Google offers
-a stipend to both the student and the mentoring org to produce Open
-Source code and for the students to learn about, and get used to
-working with, the Open Source community. Ceph has been a mentoring org
-for the last couple of years, and always donate our mentor org stipend
-to the Software Freedom Conservancy.
+Thanks,
+- ----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v1.3.4
+Comment: https://www.mailvelope.com
 
-While previous years have seen primarily core developers (Inktank/Red
-Hat) as mentors, this year I would like to open it up to any Ceph
-developer that would like to propose a project and mentor the student.
-If you are interested in submitting a project to mentor, you can do so
-via email to me **before 5p EST this Thursday 18 Feb**.
-
-=46or a guideline of previous projects and mentors you can take a look
-at last years submission page: http://ceph.com/gsoc2015/
-
-If you have any questions, please let me know and hopefully we=E2=80=99=
-ll have
-another great year with Ceph and Google Summer of Code. Thanks!
-
-
---=20
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+wsFcBAEBCAAQBQJWwhhBCRDmVDuy+mK58QAAbe0P/1g6raiPu5NipSFS1YF4
+t2TJOuIlGRkyLhigmb2726VJpYg0ylmaQ7eDyppJ62ek/GIvP084nLLPfgMH
+ePUnJ+uSQ5tUV2n7qveabqpEPDVWlIUVedcvZDspb9kLJB1/EyhtyXAgacit
+Ny4yhQOjFQ2QdSS7WH4uz6z7F94UgLc5M+VP+mv6SHjt1Aqo+uIiRtKhUckP
+9KbjQjFHk/GaZ9BHdxzINAqv+uTTii9c2cZzWKoKbsMGlcPnSCFgMSZIx/cc
+/rxXWEZqdb7MnNsR1ZUYhdyAJmhX+PpivWhg+dVQzwTrrQvvlrKo76MgStnW
+RWa+88JqQkVpZF93aqkhWS7SHqnOv9Yv+aQ6qg6ivVYR/bhyY0TvHI3QqF+7
+aChuy0YtB4l/imXjpWtfEg5gvT9yVLl+wWeg9TFawpf2OoRlfglFmDBP0daX
+AnlbwToyKjz5D3TeWxN7EChvk3vPB0tFRt+yRrcnn/4G2UE0PK3k2hX3Tc+2
+fDVZkeqigTB5vDt1lFuIaUtFpRlgeC407eGgTz2qt6KHOJWmbo1NmztrFuuI
+gNUp2GuwkHR9177X2iH4Dcg182foaxzJiFHvj1WFvwj9lDNawT8Rdtz12tTv
+hy7CXKUhvVjxlmq85JYYhmeULX+Z8GZvpAg43/CYGQ8qmBWt72k+LM/7p0NW
+Om/p
+=Ml7I
+-----END PGP SIGNATURE-----
