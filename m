@@ -1,131 +1,164 @@
-From: Eric Sandeen <esandeen@redhat.com>
-Subject: Re: Fwd: Fwd: [newstore (again)] how disable double write WAL
-Date: Mon, 15 Feb 2016 10:21:05 -0600
-Message-ID: <56C1FAF1.3030805@redhat.com>
-References: <9D046674-EA8B-4CB5-B049-3CF665D4ED64@aevoo.fr>
- <alpine.DEB.2.00.1511241240150.25734@cobra.newdream.net>
- <CA+gn+znHyioZhOvuidN1pvMgRMOMvjbjcues_+uayYVadetz=A@mail.gmail.com>
- <CA+gn+z=5+gu=3R3ssLq-kQBjB6DFYeb9JteXV5Y7in89b8cmKA@mail.gmail.com>
- <alpine.DEB.2.00.1512011357340.19170@cobra.newdream.net>
- <5661F3A9.8070703@redhat.com> <20151208044640.GL1983@devil.localdomain>
- <CA+gn+znGzF+J=qAk+511qdfPJV4xYB+4F5k8KMLWh0+JtryLeA@mail.gmail.com>
-Reply-To: sandeen@redhat.com
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Adding compression support for bluestore.
+Date: Mon, 15 Feb 2016 19:29:39 +0300
+Message-ID: <56C1FCF3.4030505@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42828 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751024AbcBOQVI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 15 Feb 2016 11:21:08 -0500
-In-Reply-To: <CA+gn+znGzF+J=qAk+511qdfPJV4xYB+4F5k8KMLWh0+JtryLeA@mail.gmail.com>
+Received: from mail-lf0-f43.google.com ([209.85.215.43]:34938 "EHLO
+	mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751137AbcBOQ3f (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Feb 2016 11:29:35 -0500
+Received: by mail-lf0-f43.google.com with SMTP id l143so92343236lfe.2
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Feb 2016 08:29:34 -0800 (PST)
+Received: from [127.0.0.1] ([91.218.144.129])
+        by smtp.googlemail.com with ESMTPSA id fb9sm260034lbc.26.2016.02.15.08.29.32
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1/SSLv3 cipher=OTHER);
+        Mon, 15 Feb 2016 08:29:32 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Casier <david.casier@aevoo.fr>, Dave Chinner <dchinner@redhat.com>
-Cc: Ric Wheeler <rwheeler@redhat.com>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>, Brian Foster <bfoster@redhat.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 2/15/16 9:18 AM, David Casier wrote:
-> Hi Dave,
-> 1TB is very wide for SSD.
-> Exemple with only 10GiB :
-> https://www.aevoo.fr/2016/02/14/ceph-ext4-optimisation-for-filestore/
+Hi guys,
+Here is my preliminary overview how one can add compression support 
+allowing random reads/writes for bluestore.
 
-It wouldn't be too hard to modify the inode32 restriction to a lower
-threshold, I think, if it would really be useful.
+Preface:
+Bluestore keeps object content using a set of dispersed extents aligned 
+by 64K (configurable param). It also permits gaps in object content i.e. 
+it prevents storage space allocation for object data regions unaffected 
+by user writes.
+A sort of following mapping is used for tracking stored object content 
+disposition (actual current implementation may differ but representation 
+below seems to be sufficient for our purposes):
+Extent Map
+{
+< logical offset 0 -> extent 0 'physical' offset, extent 0 size >
+...
+< logical offset N -> extent N 'physical' offset, extent N size >
+}
 
-On the other hand, 10GiB seems awfully small.  What are realistic
-sizes for this usecase?
 
--Eric
+Compression support approach:
+The aim is to provide generic compression support allowing random object 
+read/write.
+To do that compression engine to be placed (logically - actual 
+implementation may be discussed later) on top of bluestore to 
+"intercept" read-write requests and modify them as needed.
+The major idea is to split object content into fixed size logical blocks 
+( MAX_BLOCK_SIZE,  e.g. 1Mb). Blocks are compressed independently. Due 
+to compression each block can potentially occupy smaller store space 
+comparing to their original size. Each block is addressed using original 
+data offset ( AKA 'logical offset' above ). After compression is applied 
+each block is written using the existing bluestore infra. In fact single 
+original write request may affect multiple blocks thus it transforms 
+into multiple sub-write requests. Block logical offset, compressed block 
+data and compressed data length are the parameters for injected 
+sub-write requests. As a result stored object content:
+a) Has gaps
+b) Uses less space if compression was beneficial enough.
 
- 
-> 2015-12-08 5:46 GMT+01:00 Dave Chinner <dchinner@redhat.com>:
->> On Fri, Dec 04, 2015 at 03:12:25PM -0500, Ric Wheeler wrote:
->>> On 12/01/2015 05:02 PM, Sage Weil wrote:
->>>> Hi David,
->>>>
->>>> On Tue, 1 Dec 2015, David Casier wrote:
->>>>> Hi Sage,
->>>>> With a standard disk (4 to 6 TB), and a small flash drive, it's easy
->>>>> to create an ext4 FS with metadata on flash
->>>>>
->>>>> Example with sdg1 on flash and sdb on hdd :
->>>>>
->>>>> size_of() {
->>>>>   blockdev --getsize $1
->>>>> }
->>>>>
->>>>> mkdmsetup() {
->>>>>   _ssd=/dev/$1
->>>>>   _hdd=/dev/$2
->>>>>   _size_of_ssd=$(size_of $_ssd)
->>>>>   echo """0 $_size_of_ssd linear $_ssd 0
->>>>>   $_size_of_ssd $(size_of $_hdd) linear $_hdd 0" | dmsetup create dm-${1}-${2}
->>>>> }
->>
->> So this is just a linear concatenation that relies on ext4 putting
->> all it's metadata at the front of the filesystem?
->>
->>>>>
->>>>> mkdmsetup sdg1 sdb
->>>>>
->>>>> mkfs.ext4 -O ^has_journal,flex_bg,^uninit_bg,^sparse_super,sparse_super2,^extra_isize,^dir_nlink,^resize_inode
->>>>> -E packed_meta_blocks=1,lazy_itable_init=0 -G 32768 -I 128 -i
->>>>> $((1024*512)) /dev/mapper/dm-sdg1-sdb
->>>>>
->>>>> With that, all meta_blocks are on the SSD
->>
->> IIRC, it's the "packed_meta_blocks=1" that does this.
->>
->> THis is something that is pretty trivial to do with XFS, too,
->> by use of the inode32 allocation mechanism. That reserves the
->> first TB of space for inodes and other metadata allocations,
->> so if you span the first TB with SSDs, you get almost all the
->> metadata on the SSDs, and all the data in the higher AGs. With the
->> undocumented log location mkfs option, you can also put hte log at
->> the start og AG 0 which means that would sit on the SSD, too,
->> without needing an external log device.
->>
->> SGI even had a mount option hack to limit this allocator behaviour
->> to a block limit lower than 1TB so they could limit the metadata AG
->> regions to, say, the first 200GB.
->>
->>>> This is coincidentally what I've been working on today.  So far I've just
->>>> added the ability to put the rocksdb WAL on a second device, but it's
->>>> super easy to push rocksdb data there as well (and have it spill over onto
->>>> the larger, slower device if it fills up).  Or to put the rocksdb WAL on a
->>>> third device (e.g., expensive NVMe or NVRAM).
->>
->> I have old bits and pieces from 7-8 years ago that would allow some
->> application control of allocation policy to allow things like this
->> to be done, but I left SGI before it was anything mor ethan just a
->> proof of concept....
->>
->>>> See this ticket for the ceph-disk tooling that's needed:
->>>>
->>>>     http://tracker.ceph.com/issues/13942
->>>>
->>>> I expect this will be more flexible and perform better than the ext4
->>>> metadata option, but we'll need to test on your hardware to confirm!
->>>>
->>>> sage
->>>
->>> I think that XFS "realtime" subvolumes are the thing that does this
->>> -  the second volume contains only the data (no metadata).
->>>
->>> Seem to recall that it is popular historically with video
->>> appliances, etc but it is not commonly used.
->>
->> Because it's a single threaded allocator. It's not suited to highly
->> concurrent applications, just applications that require large
->> extents allocated in a deterministic manner.
->>
->> Cheers,
->>
->> Dave.
->> --
->> Dave Chinner
->> dchinner@redhat.com
-> 
-> 
-> 
+Overwrite request handling is pretty simple. Write request data is 
+splitted into fully and partially overlapping blocks. Fully overlapping 
+blocks are compressed and written to the store (given the extended write 
+functionality described below). For partially overwlapping blocks ( no 
+more than 2 of them - head and tail in general case)  we need to 
+retrieve already stored blocks, decompress them, merge the existing and 
+received data into a block, compress it and save to the store using new 
+size.
+The tricky thing for any written block is that it can be both longer and 
+shorter than previously stored one.  However it always has upper limit 
+(MAX_BLOCK_SIZE) since we can omit compression and use original block if 
+compression ratio is poor. Thus corresponding bluestore extent for this 
+block is limited too and existing bluestore mapping doesn't suffer: 
+offsets are permanent and are equal to originally ones provided by the 
+caller.
+The only extension required for bluestore interface is to provide an 
+ability to remove existing extents( specified by logical offset, size). 
+In other words we need write request semantics extension ( rather by 
+introducing an additional extended write method). Currently overwriting 
+request can either increase allocated space or leave it unaffected only. 
+And it can have arbitrary offset,size parameters pair. Extended one 
+should be able to squeeze store space ( e.g. by removing existing 
+extents for a block and allocating reduced set of new ones) as well. And 
+extended write should be applied to a specific block only, i.e. logical 
+offset to be aligned with block start offset and size limited to 
+MAX_BLOCK_SIZE. It seems this is pretty simple to add - most of the 
+functionality for extent append/removal if already present.
+
+To provide reading and (over)writing compression engine needs to track 
+additional block mapping:
+Block Map
+{
+< logical offset 0 -> compression method, compressed block 0 size >
+...
+< logical offset N -> compression method, compressed block N size >
+}
+Please note that despite the similarity with the original bluestore 
+extent map the difference is in record granularity: 1Mb vs 64Kb. Thus 
+each block mapping record might have multiple corresponding extent 
+mapping records.
+
+Below is a sample of mappings transform for a pair of overwrites.
+1) Original mapping ( 3 Mb were written before, compress ratio 2 for 
+each block)
+Block Map
+{
+  0 -> zlib, 512Kb
+  1Mb -> zlib, 512Kb
+  2Mb -> zlib, 512Kb
+}
+Extent Map
+{
+  0 -> 0, 512Kb
+  1Mb -> 512Kb, 512Kb
+  2Mb -> 1Mb, 512Kb
+}
+1.5Mb allocated [ 0, 1.5 Mb] range )
+
+1) Result mapping ( after overwriting 1Mb data at 512 Kb offset, 
+compress ratio 1 for both affected blocks)
+Block Map
+{
+  0 -> none, 1Mb
+  1Mb -> none, 1Mb
+  2Mb -> zlib, 512Kb
+}
+Extent Map
+{
+  0 -> 1.5Mb, 1Mb
+  1Mb -> 2.5Mb, 1Mb
+  2Mb -> 1Mb, 512Kb
+}
+2.5Mb allocated ( [1Mb, 3.5 Mb] range )
+
+2) Result mapping ( after (over)writing 3Mb data at 1Mb offset, compress 
+ratio 4 for all affected blocks)
+Block Map
+{
+  0 -> none, 1Mb
+  1Mb -> zlib, 256Kb
+  2Mb -> zlib, 256Kb
+  3Mb -> zlib, 256Kb
+}
+Extent Map
+{
+  0 -> 1.5Mb, 1Mb
+  1Mb -> 0Mb, 256Kb
+  2Mb -> 0.25Mb, 256Kb
+  3Mb -> 0.5Mb, 256Kb
+}
+1.75Mb allocated (  [0Mb-0.75Mb] [1.5 Mb, 2.5 Mb )
+
+
+Any comments/suggestions are highly appreciated.
+
+Kind regards,
+Igor.
+
+
+
+
+
