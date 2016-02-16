@@ -1,111 +1,85 @@
-From: David Casier <david.casier@aevoo.fr>
-Subject: Re: Fwd: Fwd: [newstore (again)] how disable double write WAL
-Date: Tue, 16 Feb 2016 09:39:28 +0100
-Message-ID: <CA+gn+zmCx_Pu6oEUT31SfKRF1A9Pzi1aWTPbXJY7dOgQqCqARQ@mail.gmail.com>
-References: <9D046674-EA8B-4CB5-B049-3CF665D4ED64@aevoo.fr>
-	<alpine.DEB.2.00.1511241240150.25734@cobra.newdream.net>
-	<CA+gn+znHyioZhOvuidN1pvMgRMOMvjbjcues_+uayYVadetz=A@mail.gmail.com>
-	<CA+gn+z=5+gu=3R3ssLq-kQBjB6DFYeb9JteXV5Y7in89b8cmKA@mail.gmail.com>
-	<alpine.DEB.2.00.1512011357340.19170@cobra.newdream.net>
-	<5661F3A9.8070703@redhat.com>
-	<20151208044640.GL1983@devil.localdomain>
-	<CA+gn+znGzF+J=qAk+511qdfPJV4xYB+4F5k8KMLWh0+JtryLeA@mail.gmail.com>
-	<20160216033538.GB2005@devil.localdomain>
-	<CA+gn+z=dGTeLo71h=z=AvoLM-RRq_-RfbJwFamyfxK93bvk+Hw@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [Y2038] [PATCH] include: ceph: Fix encode and decode type conversions
+Date: Tue, 16 Feb 2016 09:56 +0100
+Message-ID: <6833154.QUCaxj5s9M@wuerfel>
+References: <1455505313-1298-1-git-send-email-deepa.kernel@gmail.com> <6208883.1yJqoj6hbg@wuerfel> <CABeXuvoTX1Bq=3GEO7POgmgThOk8eCOOJPOKJFza5U3UrkGwog@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:36522 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752494AbcBPIja (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Feb 2016 03:39:30 -0500
-Received: by mail-wm0-f47.google.com with SMTP id g62so94071457wme.1
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Feb 2016 00:39:29 -0800 (PST)
-In-Reply-To: <CA+gn+z=dGTeLo71h=z=AvoLM-RRq_-RfbJwFamyfxK93bvk+Hw@mail.gmail.com>
+Received: from mout.kundenserver.de ([217.72.192.75]:49968 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754082AbcBPI4J (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Feb 2016 03:56:09 -0500
+In-Reply-To: <CABeXuvoTX1Bq=3GEO7POgmgThOk8eCOOJPOKJFza5U3UrkGwog@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dave Chinner <dchinner@redhat.com>
-Cc: Ric Wheeler <rwheeler@redhat.com>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>, Brian Foster <bfoster@redhat.com>, Eric Sandeen <esandeen@redhat.com>, =?UTF-8?Q?Beno=C3=AEt_LORIOT?= <benoit.loriot@aevoo.fr>
+To: Deepa Dinamani <deepa.kernel@gmail.com>
+Cc: y2038@lists.linaro.org, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-        "With this model, filestore rearrange the tree very
-        frequently : + 40 I/O every 32 objects link/unlink."
-It is the consequence of parameters :
-filestore_merge_threshold = 2
-filestore_split_multiple = 1
+On Monday 15 February 2016 21:02:33 Deepa Dinamani wrote:
+> > Actually I was thinking we'd do the opposite and document the
+> > existing 64-bit behavior, and then make sure we do it the same
+> > on 32-bit machines once we have the new syscalls.
+> 
+> I'm not sure I follow what is opposite here.
+> You just want to document the behavior and fix it later when the time
+> range is extended beyond 2038?
 
-Not of ext4 customization.
+What I meant was that rather than changing the returned range from
+1970..2106 to 1902..2038, I would make the current behavior explicit
+and document that it is correct.
 
-The large amount of objects in FileStore require indirect access and
-more IOPS for every directory.
+> >>  static inline void ceph_decode_timespec(struct timespec *ts,
+> >>                                         const struct ceph_timespec *tv)
+> >>  {
+> >> -       ts->tv_sec = (__kernel_time_t)le32_to_cpu(tv->tv_sec);
+> >> -       ts->tv_nsec = (long)le32_to_cpu(tv->tv_nsec);
+> >> +       ts->tv_sec = (s32)(s64)le32_to_cpu(tv->tv_sec);
+> >> +       ts->tv_nsec = (s32)(s64)le32_to_cpu(tv->tv_nsec);
+> >>  }
+> >
+> > Why did you choose to express this as "(s32)(s64)..." rather than
+> > "(s64)(s32)..."? The result is the same (just the s32 cast by itself
+> > would be sufficient), I just don't see yet how it clarifies what is
+> > going on.
+> 
+> Let's say we encode -1.
+> so when you pass the same value to decode, ceph_timespec is {0xFFFFFFFF,0}.
+> 0xFFFFFFFF is greater than INT_MAX. And, according to c99 the result
+> is implementation dependent if this cast to a s32.
+> 
+> Quoting from http://c0x.coding-guidelines.com/6.3.1.3.html :
+> 6.3.1.3 Signed and unsigned integers
+> 1 When a value with integer type is converted to another integer type
+> other than _Bool, if the value can be represented by the newtype, it
+> is unchanged.
+> 2 Otherwise, if the newtype is unsigned, the value is converted by
+> repeatedly adding or subtracting one more than the maximum value that
+> can be represented in the newtype until the value is in the range of
+> the newtype.49)
+> 3 Otherwise, the newtype is signed and the value cannot be represented
+> in it; either the result is implementation-defined or an
+> implementation-defined signal is raised
+> 
+> GCC does guarantee the behavior.
+> Quoting from GCC manual
+> (https://gcc.gnu.org/onlinedocs/gcc/Integers-implementation.html):
+> The result of, or the signal raised by, converting an integer to a
+> signed integer type when the value cannot be represented in an object
+> of that type (C90 6.2.1.2, C99 and C11 6.3.1.3).
+> For conversion to a type of width N, the value is reduced modulo 2^N
+> to be within range of the type; no signal is raised.
+> 
+> But, as the C standard suggests, behavior is implementation dependent.
+> This is why I cast it to s64 before casting it to s32.
+> I explained in the commit text, but missed GCC part.
 
-If root of inode B+tree is a simple block, we have the same problem with XFS
+Ok, fair enough. I always assumed that "implementation specific"
+in this context meant that on any architectures that implement
+negative numbers as twos-complement (anything that Linux runs on)
+we get the expected result. I'm sure we rely on that behavior in
+a lot of places in the kernel, but you are correct that the C
+standard makes your code well-defined, and the other one not.
 
-2016-02-16 9:14 GMT+01:00 David Casier <david.casier@aevoo.fr>:
-> Hi,
-> All inodes, xattrs and extent are stored at the beginning of the disk
-> with inode32 XFS ?
->
-> 2016-02-16 4:35 GMT+01:00 Dave Chinner <dchinner@redhat.com>:
->> On Mon, Feb 15, 2016 at 04:18:28PM +0100, David Casier wrote:
->>> Hi Dave,
->>> 1TB is very wide for SSD.
->>
->> It fills from the bottom, so you don't need 1TB to make it work
->> in a similar manner to the ext4 hack being described.
->>
->>> Exemple with only 10GiB :
->>> https://www.aevoo.fr/2016/02/14/ceph-ext4-optimisation-for-filestore/
->>
->> It's a nice toy, but it's not something that is going scale reliably
->> for production.  That caveat at the end:
->>
->>         "With this model, filestore rearrange the tree very
->>         frequently : + 40 I/O every 32 objects link/unlink."
->>
->> Indicates how bad the IO patterns will be when modifying the
->> directory structure, and says to me that it's not a useful
->> optimisation at all when you might be creating several thousand
->> files/s on a filesystem. That will end up IO bound, SSD or not.
->>
->> Cheers,
->>
->> Dave.
->> --
->> Dave Chinner
->> dchinner@redhat.com
->
->
->
-> --
->
-> ________________________________________________________
->
-> Cordialement,
->
-> David CASIER
->
->
-> 3B Rue Taylor, CS20004
-> 75481 PARIS Cedex 10 Paris
->
-> Ligne directe: 01 75 98 53 85
-> Email: david.casier@aevoo.fr
-> ________________________________________________________
-
-
-
--- 
-
-________________________________________________________
-
-Cordialement,
-
-David CASIER
-
-
-3B Rue Taylor, CS20004
-75481 PARIS Cedex 10 Paris
-
-Ligne directe: 01 75 98 53 85
-Email: david.casier@aevoo.fr
-________________________________________________________
+	Arnd
