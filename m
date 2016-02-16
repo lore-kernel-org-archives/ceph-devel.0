@@ -1,53 +1,114 @@
-From: Dave Chinner <dchinner@redhat.com>
-Subject: Re: Fwd: Fwd: [newstore (again)] how disable double write WAL
-Date: Tue, 16 Feb 2016 14:35:38 +1100
-Message-ID: <20160216033538.GB2005@devil.localdomain>
-References: <9D046674-EA8B-4CB5-B049-3CF665D4ED64@aevoo.fr>
- <alpine.DEB.2.00.1511241240150.25734@cobra.newdream.net>
- <CA+gn+znHyioZhOvuidN1pvMgRMOMvjbjcues_+uayYVadetz=A@mail.gmail.com>
- <CA+gn+z=5+gu=3R3ssLq-kQBjB6DFYeb9JteXV5Y7in89b8cmKA@mail.gmail.com>
- <alpine.DEB.2.00.1512011357340.19170@cobra.newdream.net>
- <5661F3A9.8070703@redhat.com>
- <20151208044640.GL1983@devil.localdomain>
- <CA+gn+znGzF+J=qAk+511qdfPJV4xYB+4F5k8KMLWh0+JtryLeA@mail.gmail.com>
+From: Deepa Dinamani <deepa.kernel@gmail.com>
+Subject: Re: [Y2038] [PATCH] include: ceph: Fix encode and decode type conversions
+Date: Mon, 15 Feb 2016 21:02:33 -0800
+Message-ID: <CABeXuvoTX1Bq=3GEO7POgmgThOk8eCOOJPOKJFza5U3UrkGwog@mail.gmail.com>
+References: <1455505313-1298-1-git-send-email-deepa.kernel@gmail.com>
+	<6208883.1yJqoj6hbg@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36521 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752759AbcBPDfo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 15 Feb 2016 22:35:44 -0500
-Content-Disposition: inline
-In-Reply-To: <CA+gn+znGzF+J=qAk+511qdfPJV4xYB+4F5k8KMLWh0+JtryLeA@mail.gmail.com>
+Received: from mail-ig0-f173.google.com ([209.85.213.173]:32910 "EHLO
+	mail-ig0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750719AbcBPFCd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Feb 2016 00:02:33 -0500
+Received: by mail-ig0-f173.google.com with SMTP id y8so89260110igp.0
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Feb 2016 21:02:33 -0800 (PST)
+In-Reply-To: <6208883.1yJqoj6hbg@wuerfel>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Casier <david.casier@aevoo.fr>
-Cc: Ric Wheeler <rwheeler@redhat.com>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>, Brian Foster <bfoster@redhat.com>, Eric Sandeen <esandeen@redhat.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: y2038@lists.linaro.org, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 15, 2016 at 04:18:28PM +0100, David Casier wrote:
-> Hi Dave,
-> 1TB is very wide for SSD.
+> Actually I was thinking we'd do the opposite and document the
+> existing 64-bit behavior, and then make sure we do it the same
+> on 32-bit machines once we have the new syscalls.
 
-It fills from the bottom, so you don't need 1TB to make it work
-in a similar manner to the ext4 hack being described.
+I'm not sure I follow what is opposite here.
+You just want to document the behavior and fix it later when the time
+range is extended beyond 2038?
 
-> Exemple with only 10GiB :
-> https://www.aevoo.fr/2016/02/14/ceph-ext4-optimisation-for-filestore/
+> The most important part of course is to document what the file
+> system is expected to do. Having this in the changelog is important
+> here, but I'd also like to see a comment in the code to ensure
+> readers can see that the behavior is intentional.
 
-It's a nice toy, but it's not something that is going scale reliably
-for production.  That caveat at the end:
+Will add this comment in the code.
 
-	"With this model, filestore rearrange the tree very
-	frequently : + 40 I/O every 32 objects link/unlink."
+>> diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
+>> index a6ef9cc..e777e99 100644
+>> --- a/include/linux/ceph/decode.h
+>> +++ b/include/linux/ceph/decode.h
+>> @@ -137,8 +137,8 @@ bad:
+>>  static inline void ceph_decode_timespec(struct timespec *ts,
+>>                                         const struct ceph_timespec *tv)
+>>  {
+>> -       ts->tv_sec = (__kernel_time_t)le32_to_cpu(tv->tv_sec);
+>> -       ts->tv_nsec = (long)le32_to_cpu(tv->tv_nsec);
+>> +       ts->tv_sec = (s32)(s64)le32_to_cpu(tv->tv_sec);
+>> +       ts->tv_nsec = (s32)(s64)le32_to_cpu(tv->tv_nsec);
+>>  }
+>
+> Why did you choose to express this as "(s32)(s64)..." rather than
+> "(s64)(s32)..."? The result is the same (just the s32 cast by itself
+> would be sufficient), I just don't see yet how it clarifies what is
+> going on.
 
-Indicates how bad the IO patterns will be when modifying the
-directory structure, and says to me that it's not a useful
-optimisation at all when you might be creating several thousand
-files/s on a filesystem. That will end up IO bound, SSD or not.
+Let's say we encode -1.
+so when you pass the same value to decode, ceph_timespec is {0xFFFFFFFF,0}.
+0xFFFFFFFF is greater than INT_MAX. And, according to c99 the result
+is implementation dependent if this cast to a s32.
 
-Cheers,
+Quoting from http://c0x.coding-guidelines.com/6.3.1.3.html :
+6.3.1.3 Signed and unsigned integers
+1 When a value with integer type is converted to another integer type
+other than _Bool, if the value can be represented by the newtype, it
+is unchanged.
+2 Otherwise, if the newtype is unsigned, the value is converted by
+repeatedly adding or subtracting one more than the maximum value that
+can be represented in the newtype until the value is in the range of
+the newtype.49)
+3 Otherwise, the newtype is signed and the value cannot be represented
+in it; either the result is implementation-defined or an
+implementation-defined signal is raised
 
-Dave.
--- 
-Dave Chinner
-dchinner@redhat.com
+GCC does guarantee the behavior.
+Quoting from GCC manual
+(https://gcc.gnu.org/onlinedocs/gcc/Integers-implementation.html):
+The result of, or the signal raised by, converting an integer to a
+signed integer type when the value cannot be represented in an object
+of that type (C90 6.2.1.2, C99 and C11 6.3.1.3).
+For conversion to a type of width N, the value is reduced modulo 2^N
+to be within range of the type; no signal is raised.
+
+But, as the C standard suggests, behavior is implementation dependent.
+This is why I cast it to s64 before casting it to s32.
+I explained in the commit text, but missed GCC part.
+Quoting from commit text:
+
+>> Consider the following scenario on a 32 bit system:
+>> When a negative number is cast to u32 as encode does, the
+>> value is positive and is greater than INT_MAX. Decode reads
+>> back this value. And, this value cannot be represented by
+>> long on 32 bit systems. So by section 6.3.1.3 of the
+>> C99 standard, the result is implementation defined.
+>>
+>> Consider the following scenario on a 64 bit system:
+>> When a negative number is cast to u32 as encode does, the
+>> value is positive. This value is later assigned by decode
+>> function by a cast to long. Since this value can be
+>> represented in long data type, this becomes a positive
+>> value greater than INT_MAX. But, the value encoded was
+>> negative, so the encode and decode functions do not match.
+>>
+>> Change the decode function as follows to overcome the above
+>> bug:
+>> The decode should first cast the value to a s64 this will
+>> be positive value greater than INT_MAX(in case of a negative
+>> encoded value)and then cast this value again as s32, which
+>> drops the higher order 32 bits.
+>> On 32 bit systems, this is the right value in kernel_time_t/
+>> long.
+>> On 64 bit systems, assignment to kernel_time_t/ long
+>> will sign extend this value to reflect the signed bit encoded
+
+-Deepa
