@@ -1,108 +1,169 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: Need some help fixing an assert
-Date: Tue, 16 Feb 2016 14:58:14 -0700
-Message-ID: <CAANLjFoyBTsLpJHDuOG7=_P8CJipp=Xz9icAFDyeA8PjF7MU4g@mail.gmail.com>
-References: <CAANLjFopvMzfezr=UmJGG1Dzg+VV6bC7cpvuJbGJPxk0AN99WQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] ceph: kill ceph_empty_snapc
+Date: Tue, 16 Feb 2016 23:15:37 +0100
+Message-ID: <1455660937-6694-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f51.google.com ([209.85.213.51]:34925 "EHLO
-	mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932624AbcBPV6P (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Feb 2016 16:58:15 -0500
-Received: by mail-vk0-f51.google.com with SMTP id e6so146113876vkh.2
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Feb 2016 13:58:14 -0800 (PST)
-In-Reply-To: <CAANLjFopvMzfezr=UmJGG1Dzg+VV6bC7cpvuJbGJPxk0AN99WQ@mail.gmail.com>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:37802 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756115AbcBPWQa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Feb 2016 17:16:30 -0500
+Received: by mail-wm0-f46.google.com with SMTP id g62so1650991wme.0
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Feb 2016 14:16:30 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Zheng Yan <zyan@redhat.com>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+ceph_empty_snapc->num_snaps == 0 at all times.  Passing such a snapc to
+ceph_osdc_alloc_request() (possibly through ceph_osdc_new_request()) is
+equivalent to passing NULL, as ceph_osdc_alloc_request() uses it only
+for sizing the request message.
 
-What is the lifecycle of the OP through the queue? I'm guessing that a
-reference of the OP is passed into the queue. Maybe when inserting
-that reference into the intrusive data structure it changing the scope
-or something. It looks like pg is falling out of scope between
+Further, in all four cases the subsequent ceph_osdc_build_request() is
+passed NULL for snapc, meaning that 0 is encoded for seq and num_snaps
+and making ceph_empty_snapc entirely useless.  The two cases where it
+actually mattered were removed in commits 860560904962 ("ceph: avoid
+sending unnessesary FLUSHSNAP message") and 23078637e054 ("ceph: fix
+queuing inode to mdsdir's snaprealm").
 
-void PGQueueable::RunVis::operator()(OpRequestRef &op) {
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ fs/ceph/addr.c  | 13 +++++--------
+ fs/ceph/snap.c  | 16 ----------------
+ fs/ceph/super.c |  8 +-------
+ fs/ceph/super.h |  3 ---
+ 4 files changed, 6 insertions(+), 34 deletions(-)
 
-and
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index aea449a4d038..32f57a1f1baf 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1609,7 +1609,7 @@ int ceph_uninline_data(struct file *filp, struct page *locked_page)
+ 				    ceph_vino(inode), 0, &len, 0, 1,
+ 				    CEPH_OSD_OP_CREATE,
+ 				    CEPH_OSD_FLAG_ONDISK | CEPH_OSD_FLAG_WRITE,
+-				    ceph_empty_snapc, 0, 0, false);
++				    NULL, 0, 0, false);
+ 	if (IS_ERR(req)) {
+ 		err = PTR_ERR(req);
+ 		goto out;
+@@ -1627,9 +1627,8 @@ int ceph_uninline_data(struct file *filp, struct page *locked_page)
+ 				    ceph_vino(inode), 0, &len, 1, 3,
+ 				    CEPH_OSD_OP_WRITE,
+ 				    CEPH_OSD_FLAG_ONDISK | CEPH_OSD_FLAG_WRITE,
+-				    ceph_empty_snapc,
+-				    ci->i_truncate_seq, ci->i_truncate_size,
+-				    false);
++				    NULL, ci->i_truncate_seq,
++				    ci->i_truncate_size, false);
+ 	if (IS_ERR(req)) {
+ 		err = PTR_ERR(req);
+ 		goto out;
+@@ -1750,8 +1749,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci, u32 pool)
+ 		goto out;
+ 	}
+ 
+-	rd_req = ceph_osdc_alloc_request(&fsc->client->osdc,
+-					 ceph_empty_snapc,
++	rd_req = ceph_osdc_alloc_request(&fsc->client->osdc, NULL,
+ 					 1, false, GFP_NOFS);
+ 	if (!rd_req) {
+ 		err = -ENOMEM;
+@@ -1765,8 +1763,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci, u32 pool)
+ 		 "%llx.00000000", ci->i_vino.ino);
+ 	rd_req->r_base_oid.name_len = strlen(rd_req->r_base_oid.name);
+ 
+-	wr_req = ceph_osdc_alloc_request(&fsc->client->osdc,
+-					 ceph_empty_snapc,
++	wr_req = ceph_osdc_alloc_request(&fsc->client->osdc, NULL,
+ 					 1, false, GFP_NOFS);
+ 	if (!wr_req) {
+ 		err = -ENOMEM;
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index 4aa7122a8d38..9caaa7ffc93f 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -296,8 +296,6 @@ static int cmpu64_rev(const void *a, const void *b)
+ }
+ 
+ 
+-struct ceph_snap_context *ceph_empty_snapc;
+-
+ /*
+  * build the snap context for a given realm.
+  */
+@@ -987,17 +985,3 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 		up_write(&mdsc->snap_rwsem);
+ 	return;
+ }
+-
+-int __init ceph_snap_init(void)
+-{
+-	ceph_empty_snapc = ceph_create_snap_context(0, GFP_NOFS);
+-	if (!ceph_empty_snapc)
+-		return -ENOMEM;
+-	ceph_empty_snapc->seq = 1;
+-	return 0;
+-}
+-
+-void ceph_snap_exit(void)
+-{
+-	ceph_put_snap_context(ceph_empty_snapc);
+-}
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index e82acc6f3ac3..715282a92a07 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -1042,19 +1042,14 @@ static int __init init_ceph(void)
+ 
+ 	ceph_flock_init();
+ 	ceph_xattr_init();
+-	ret = ceph_snap_init();
+-	if (ret)
+-		goto out_xattr;
+ 	ret = register_filesystem(&ceph_fs_type);
+ 	if (ret)
+-		goto out_snap;
++		goto out_xattr;
+ 
+ 	pr_info("loaded (mds proto %d)\n", CEPH_MDSC_PROTOCOL);
+ 
+ 	return 0;
+ 
+-out_snap:
+-	ceph_snap_exit();
+ out_xattr:
+ 	ceph_xattr_exit();
+ 	destroy_caches();
+@@ -1066,7 +1061,6 @@ static void __exit exit_ceph(void)
+ {
+ 	dout("exit_ceph\n");
+ 	unregister_filesystem(&ceph_fs_type);
+-	ceph_snap_exit();
+ 	ceph_xattr_exit();
+ 	destroy_caches();
+ }
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index ff236d316aec..16f9edc5d1c7 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -719,7 +719,6 @@ static inline int default_congestion_kb(void)
+ 
+ 
+ /* snap.c */
+-extern struct ceph_snap_context *ceph_empty_snapc;
+ struct ceph_snap_realm *ceph_lookup_snap_realm(struct ceph_mds_client *mdsc,
+ 					       u64 ino);
+ extern void ceph_get_snap_realm(struct ceph_mds_client *mdsc,
+@@ -736,8 +735,6 @@ extern void ceph_queue_cap_snap(struct ceph_inode_info *ci);
+ extern int __ceph_finish_cap_snap(struct ceph_inode_info *ci,
+ 				  struct ceph_cap_snap *capsnap);
+ extern void ceph_cleanup_empty_realms(struct ceph_mds_client *mdsc);
+-extern int ceph_snap_init(void);
+-extern void ceph_snap_exit(void);
+ 
+ /*
+  * a cap_snap is "pending" if it is still awaiting an in-progress
+-- 
+2.4.3
 
-void OSD::dequeue_op(
-
-but not when I'm using the standard STL containers. I get (I added
-some more debugging):
-
-Getting data length...
-OpRequest Destroyed.
-Destroyed TrackedOp.
-RunVis: going to dequeue 0x55555ffef000 : 0x55555fdf7c00
-2016-02-16 21:49:17.612752 7fffd7326700 10 osd.0 240 dequeue_op: Priority = 63
-
-Program received signal SIGSEGV, Segmentation fault.
-[Switching to Thread 0x7fffd7326700 (LWP 26718)]
-0x00005555558b0b66 in OSD::dequeue_op (this=0x55555ff4a000, pg=, op=
-   std::shared_ptr (count 3, weak -1) 0x55555fdf7c00, handle=...) at
-osd/OSD.cc:8569
-8569      unsigned cost = op->get_req()->get_cost();
-
-At least this is the only thing I can come up with. Any ideas?
-
-Thanks,
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.3.5
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJWw5tvCRDmVDuy+mK58QAAwTsP/2hmkG7hLYvIgKGGJTyt
-4E2aQgjXDhtRrKSvtPF3HCGjk9ahdlKAEKxSSLjLfJuWpJf8iM5opRZGv7vG
-Ij4MjZjHVFqlM1ln++bFLO0gZSYn3ieU0l+vopMPyJNJGkJy48Ckk7+1Agh2
-6TY+3fyuv6bwLcs/IQpCxaQNwo25h0gXYrfz2iyxNaX5ihM9nISZK2lRbdl9
-QtZ2aMvZ8rLKPli6pPXz+viRaYlA92R0vwQuMjzVIos5bbt+Kjtz8PIlBfGo
-Uwj0a6dI0cF1XwmMYhIjabFMLywpGyLTAKElno6wuCAx158x0mSqGEmqqAd3
-NvZ0gHHlyETUt4GEbCP58IClO2MYICWhUt7HnA1mxxjLCGRM6oNMNdG2u6y9
-3mA8aY0+/GpkIZBVe+CB0VzIvkMfN0lQYQMVaW+QGgQz7/oyiC+tuQgmtEwi
-ZHtPM5D2ve5E9dlWQwUaea8ipMURskijP3Yj7+LFnc0Ik8JD74LilWU60SgQ
-eJ7LnP4M9JRtmF/gQfgu4RD8CWD2lRTnT8ZW5AoZOU9yj0qqpZh/RgNiFENI
-dL2aHW9026u5EI1H7jCOEyR2CmRtf0wTF3nYYPapp/+17oSzqEmSNMH4HZI4
-1tTJ/XXkFDQtXbj5AWPw5hztFL8/ZAnFs8zALvvpgTnE9XsCOMQaDc7TYt4Y
-ybXt
-=WzP4
------END PGP SIGNATURE-----
-----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-
-
-On Mon, Feb 15, 2016 at 11:26 AM, Robert LeBlanc <robert@leblancnet.us> wrote:
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
->
-> I've got https://github.com/ceph/ceph/pull/7654 that I'm working on,
-> but I just can't track down why I'm getting the assert in Mutex::Lock.
-> If you can give me a push in the right direction, it would be very
-> helpful.
->
-> Thanks,
-> - ----------------
-> Robert LeBlanc
-> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-> -----BEGIN PGP SIGNATURE-----
-> Version: Mailvelope v1.3.4
-> Comment: https://www.mailvelope.com
->
-> wsFcBAEBCAAQBQJWwhhBCRDmVDuy+mK58QAAbe0P/1g6raiPu5NipSFS1YF4
-> t2TJOuIlGRkyLhigmb2726VJpYg0ylmaQ7eDyppJ62ek/GIvP084nLLPfgMH
-> ePUnJ+uSQ5tUV2n7qveabqpEPDVWlIUVedcvZDspb9kLJB1/EyhtyXAgacit
-> Ny4yhQOjFQ2QdSS7WH4uz6z7F94UgLc5M+VP+mv6SHjt1Aqo+uIiRtKhUckP
-> 9KbjQjFHk/GaZ9BHdxzINAqv+uTTii9c2cZzWKoKbsMGlcPnSCFgMSZIx/cc
-> /rxXWEZqdb7MnNsR1ZUYhdyAJmhX+PpivWhg+dVQzwTrrQvvlrKo76MgStnW
-> RWa+88JqQkVpZF93aqkhWS7SHqnOv9Yv+aQ6qg6ivVYR/bhyY0TvHI3QqF+7
-> aChuy0YtB4l/imXjpWtfEg5gvT9yVLl+wWeg9TFawpf2OoRlfglFmDBP0daX
-> AnlbwToyKjz5D3TeWxN7EChvk3vPB0tFRt+yRrcnn/4G2UE0PK3k2hX3Tc+2
-> fDVZkeqigTB5vDt1lFuIaUtFpRlgeC407eGgTz2qt6KHOJWmbo1NmztrFuuI
-> gNUp2GuwkHR9177X2iH4Dcg182foaxzJiFHvj1WFvwj9lDNawT8Rdtz12tTv
-> hy7CXKUhvVjxlmq85JYYhmeULX+Z8GZvpAg43/CYGQ8qmBWt72k+LM/7p0NW
-> Om/p
-> =Ml7I
-> -----END PGP SIGNATURE-----
