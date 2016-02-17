@@ -1,120 +1,184 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: Need some help fixing an assert
-Date: Tue, 16 Feb 2016 14:37:23 -0800
-Message-ID: <CAN=+7FXE9Myz2_qnQfw+tFFu794icW6AAgRPnCLeQ8Y8ow_49g@mail.gmail.com>
-References: <CAANLjFopvMzfezr=UmJGG1Dzg+VV6bC7cpvuJbGJPxk0AN99WQ@mail.gmail.com>
-	<CAANLjFoyBTsLpJHDuOG7=_P8CJipp=Xz9icAFDyeA8PjF7MU4g@mail.gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Adding compression support for bluestore.
+Date: Wed, 17 Feb 2016 03:11:15 +0300
+Message-ID: <56C3BAA3.3070804@mirantis.com>
+References: <56C1FCF3.4030505@mirantis.com>
+ <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f174.google.com ([209.85.161.174]:34134 "EHLO
-	mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756123AbcBPWhX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Feb 2016 17:37:23 -0500
-Received: by mail-yw0-f174.google.com with SMTP id h129so152426227ywb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Feb 2016 14:37:23 -0800 (PST)
-In-Reply-To: <CAANLjFoyBTsLpJHDuOG7=_P8CJipp=Xz9icAFDyeA8PjF7MU4g@mail.gmail.com>
+Received: from mail-lb0-f180.google.com ([209.85.217.180]:35810 "EHLO
+	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933384AbcBQALS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Feb 2016 19:11:18 -0500
+Received: by mail-lb0-f180.google.com with SMTP id bc4so283170lbc.2
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Feb 2016 16:11:17 -0800 (PST)
+In-Reply-To: <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>
+To: Haomai Wang <haomaiwang@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SubQueue::pop appears to be taking a reference to an object, deleting
-that object, and then returning the reference.  That's generally a
-no-no.
--Sam
+Hi Haomai,
+Thanks for your comments.
+Please find my response inline.
 
-On Tue, Feb 16, 2016 at 1:58 PM, Robert LeBlanc <robert@leblancnet.us> wrote:
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
->
-> What is the lifecycle of the OP through the queue? I'm guessing that a
-> reference of the OP is passed into the queue. Maybe when inserting
-> that reference into the intrusive data structure it changing the scope
-> or something. It looks like pg is falling out of scope between
->
-> void PGQueueable::RunVis::operator()(OpRequestRef &op) {
->
-> and
->
-> void OSD::dequeue_op(
->
-> but not when I'm using the standard STL containers. I get (I added
-> some more debugging):
->
-> Getting data length...
-> OpRequest Destroyed.
-> Destroyed TrackedOp.
-> RunVis: going to dequeue 0x55555ffef000 : 0x55555fdf7c00
-> 2016-02-16 21:49:17.612752 7fffd7326700 10 osd.0 240 dequeue_op: Priority = 63
->
-> Program received signal SIGSEGV, Segmentation fault.
-> [Switching to Thread 0x7fffd7326700 (LWP 26718)]
-> 0x00005555558b0b66 in OSD::dequeue_op (this=0x55555ff4a000, pg=, op=
->    std::shared_ptr (count 3, weak -1) 0x55555fdf7c00, handle=...) at
-> osd/OSD.cc:8569
-> 8569      unsigned cost = op->get_req()->get_cost();
->
-> At least this is the only thing I can come up with. Any ideas?
->
-> Thanks,
-> -----BEGIN PGP SIGNATURE-----
-> Version: Mailvelope v1.3.5
-> Comment: https://www.mailvelope.com
->
-> wsFcBAEBCAAQBQJWw5tvCRDmVDuy+mK58QAAwTsP/2hmkG7hLYvIgKGGJTyt
-> 4E2aQgjXDhtRrKSvtPF3HCGjk9ahdlKAEKxSSLjLfJuWpJf8iM5opRZGv7vG
-> Ij4MjZjHVFqlM1ln++bFLO0gZSYn3ieU0l+vopMPyJNJGkJy48Ckk7+1Agh2
-> 6TY+3fyuv6bwLcs/IQpCxaQNwo25h0gXYrfz2iyxNaX5ihM9nISZK2lRbdl9
-> QtZ2aMvZ8rLKPli6pPXz+viRaYlA92R0vwQuMjzVIos5bbt+Kjtz8PIlBfGo
-> Uwj0a6dI0cF1XwmMYhIjabFMLywpGyLTAKElno6wuCAx158x0mSqGEmqqAd3
-> NvZ0gHHlyETUt4GEbCP58IClO2MYICWhUt7HnA1mxxjLCGRM6oNMNdG2u6y9
-> 3mA8aY0+/GpkIZBVe+CB0VzIvkMfN0lQYQMVaW+QGgQz7/oyiC+tuQgmtEwi
-> ZHtPM5D2ve5E9dlWQwUaea8ipMURskijP3Yj7+LFnc0Ik8JD74LilWU60SgQ
-> eJ7LnP4M9JRtmF/gQfgu4RD8CWD2lRTnT8ZW5AoZOU9yj0qqpZh/RgNiFENI
-> dL2aHW9026u5EI1H7jCOEyR2CmRtf0wTF3nYYPapp/+17oSzqEmSNMH4HZI4
-> 1tTJ/XXkFDQtXbj5AWPw5hztFL8/ZAnFs8zALvvpgTnE9XsCOMQaDc7TYt4Y
-> ybXt
-> =WzP4
-> -----END PGP SIGNATURE-----
-> ----------------
-> Robert LeBlanc
-> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->
->
-> On Mon, Feb 15, 2016 at 11:26 AM, Robert LeBlanc <robert@leblancnet.us> wrote:
->> -----BEGIN PGP SIGNED MESSAGE-----
->> Hash: SHA256
+On 2/16/2016 5:06 AM, Haomai Wang wrote:
+> On Tue, Feb 16, 2016 at 12:29 AM, Igor Fedotov <ifedotov@mirantis.com> wrote:
+>> Hi guys,
+>> Here is my preliminary overview how one can add compression support allowing
+>> random reads/writes for bluestore.
 >>
->> I've got https://github.com/ceph/ceph/pull/7654 that I'm working on,
->> but I just can't track down why I'm getting the assert in Mutex::Lock.
->> If you can give me a push in the right direction, it would be very
->> helpful.
+>> Preface:
+>> Bluestore keeps object content using a set of dispersed extents aligned by
+>> 64K (configurable param). It also permits gaps in object content i.e. it
+>> prevents storage space allocation for object data regions unaffected by user
+>> writes.
+>> A sort of following mapping is used for tracking stored object content
+>> disposition (actual current implementation may differ but representation
+>> below seems to be sufficient for our purposes):
+>> Extent Map
+>> {
+>> < logical offset 0 -> extent 0 'physical' offset, extent 0 size >
+>> ...
+>> < logical offset N -> extent N 'physical' offset, extent N size >
+>> }
 >>
->> Thanks,
->> - ----------------
->> Robert LeBlanc
->> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->> -----BEGIN PGP SIGNATURE-----
->> Version: Mailvelope v1.3.4
->> Comment: https://www.mailvelope.com
 >>
->> wsFcBAEBCAAQBQJWwhhBCRDmVDuy+mK58QAAbe0P/1g6raiPu5NipSFS1YF4
->> t2TJOuIlGRkyLhigmb2726VJpYg0ylmaQ7eDyppJ62ek/GIvP084nLLPfgMH
->> ePUnJ+uSQ5tUV2n7qveabqpEPDVWlIUVedcvZDspb9kLJB1/EyhtyXAgacit
->> Ny4yhQOjFQ2QdSS7WH4uz6z7F94UgLc5M+VP+mv6SHjt1Aqo+uIiRtKhUckP
->> 9KbjQjFHk/GaZ9BHdxzINAqv+uTTii9c2cZzWKoKbsMGlcPnSCFgMSZIx/cc
->> /rxXWEZqdb7MnNsR1ZUYhdyAJmhX+PpivWhg+dVQzwTrrQvvlrKo76MgStnW
->> RWa+88JqQkVpZF93aqkhWS7SHqnOv9Yv+aQ6qg6ivVYR/bhyY0TvHI3QqF+7
->> aChuy0YtB4l/imXjpWtfEg5gvT9yVLl+wWeg9TFawpf2OoRlfglFmDBP0daX
->> AnlbwToyKjz5D3TeWxN7EChvk3vPB0tFRt+yRrcnn/4G2UE0PK3k2hX3Tc+2
->> fDVZkeqigTB5vDt1lFuIaUtFpRlgeC407eGgTz2qt6KHOJWmbo1NmztrFuuI
->> gNUp2GuwkHR9177X2iH4Dcg182foaxzJiFHvj1WFvwj9lDNawT8Rdtz12tTv
->> hy7CXKUhvVjxlmq85JYYhmeULX+Z8GZvpAg43/CYGQ8qmBWt72k+LM/7p0NW
->> Om/p
->> =Ml7I
->> -----END PGP SIGNATURE-----
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Compression support approach:
+>> The aim is to provide generic compression support allowing random object
+>> read/write.
+>> To do that compression engine to be placed (logically - actual
+>> implementation may be discussed later) on top of bluestore to "intercept"
+>> read-write requests and modify them as needed.
+>> The major idea is to split object content into fixed size logical blocks (
+>> MAX_BLOCK_SIZE,  e.g. 1Mb). Blocks are compressed independently. Due to
+>> compression each block can potentially occupy smaller store space comparing
+>> to their original size. Each block is addressed using original data offset (
+>> AKA 'logical offset' above ). After compression is applied each block is
+>> written using the existing bluestore infra. In fact single original write
+>> request may affect multiple blocks thus it transforms into multiple
+>> sub-write requests. Block logical offset, compressed block data and
+>> compressed data length are the parameters for injected sub-write requests.
+>> As a result stored object content:
+>> a) Has gaps
+>> b) Uses less space if compression was beneficial enough.
+>>
+>> Overwrite request handling is pretty simple. Write request data is splitted
+>> into fully and partially overlapping blocks. Fully overlapping blocks are
+>> compressed and written to the store (given the extended write functionality
+>> described below). For partially overwlapping blocks ( no more than 2 of them
+>> - head and tail in general case)  we need to retrieve already stored blocks,
+>> decompress them, merge the existing and received data into a block, compress
+>> it and save to the store using new size.
+>> The tricky thing for any written block is that it can be both longer and
+>> shorter than previously stored one.  However it always has upper limit
+>> (MAX_BLOCK_SIZE) since we can omit compression and use original block if
+>> compression ratio is poor. Thus corresponding bluestore extent for this
+>> block is limited too and existing bluestore mapping doesn't suffer: offsets
+>> are permanent and are equal to originally ones provided by the caller.
+>> The only extension required for bluestore interface is to provide an ability
+>> to remove existing extents( specified by logical offset, size). In other
+>> words we need write request semantics extension ( rather by introducing an
+>> additional extended write method). Currently overwriting request can either
+>> increase allocated space or leave it unaffected only. And it can have
+>> arbitrary offset,size parameters pair. Extended one should be able to
+>> squeeze store space ( e.g. by removing existing extents for a block and
+>> allocating reduced set of new ones) as well. And extended write should be
+>> applied to a specific block only, i.e. logical offset to be aligned with
+>> block start offset and size limited to MAX_BLOCK_SIZE. It seems this is
+>> pretty simple to add - most of the functionality for extent append/removal
+>> if already present.
+>>
+>> To provide reading and (over)writing compression engine needs to track
+>> additional block mapping:
+>> Block Map
+>> {
+>> < logical offset 0 -> compression method, compressed block 0 size >
+>> ...
+>> < logical offset N -> compression method, compressed block N size >
+>> }
+>> Please note that despite the similarity with the original bluestore extent
+>> map the difference is in record granularity: 1Mb vs 64Kb. Thus each block
+>> mapping record might have multiple corresponding extent mapping records.
+>>
+>> Below is a sample of mappings transform for a pair of overwrites.
+>> 1) Original mapping ( 3 Mb were written before, compress ratio 2 for each
+>> block)
+>> Block Map
+>> {
+>>   0 -> zlib, 512Kb
+>>   1Mb -> zlib, 512Kb
+>>   2Mb -> zlib, 512Kb
+>> }
+>> Extent Map
+>> {
+>>   0 -> 0, 512Kb
+>>   1Mb -> 512Kb, 512Kb
+>>   2Mb -> 1Mb, 512Kb
+>> }
+>> 1.5Mb allocated [ 0, 1.5 Mb] range )
+>>
+>> 1) Result mapping ( after overwriting 1Mb data at 512 Kb offset, compress
+>> ratio 1 for both affected blocks)
+>> Block Map
+>> {
+>>   0 -> none, 1Mb
+>>   1Mb -> none, 1Mb
+>>   2Mb -> zlib, 512Kb
+>> }
+>> Extent Map
+>> {
+>>   0 -> 1.5Mb, 1Mb
+>>   1Mb -> 2.5Mb, 1Mb
+>>   2Mb -> 1Mb, 512Kb
+>> }
+>> 2.5Mb allocated ( [1Mb, 3.5 Mb] range )
+>>
+>> 2) Result mapping ( after (over)writing 3Mb data at 1Mb offset, compress
+>> ratio 4 for all affected blocks)
+>> Block Map
+>> {
+>>   0 -> none, 1Mb
+>>   1Mb -> zlib, 256Kb
+>>   2Mb -> zlib, 256Kb
+>>   3Mb -> zlib, 256Kb
+>> }
+>> Extent Map
+>> {
+>>   0 -> 1.5Mb, 1Mb
+>>   1Mb -> 0Mb, 256Kb
+>>   2Mb -> 0.25Mb, 256Kb
+>>   3Mb -> 0.5Mb, 256Kb
+>> }
+>> 1.75Mb allocated (  [0Mb-0.75Mb] [1.5 Mb, 2.5 Mb )
+>>
+> Thanks for Igore!
+>
+> Maybe I'm missing something, is it compressed inline not offline?
+That's about inline compression.
+> If so, I guess we need to provide with more flexible controls to
+> upper, like explicate compression flag or compression unit.
+Yes I agree. We need a sort of control for compression - on per object 
+or per pool basis...
+But at the overview above I was more concerned about algorithmic aspect 
+i.e. how to implement random read/write handling for compressed objects. 
+Compression management from the user side can be considered a bit later.
+
+>> Any comments/suggestions are highly appreciated.
+>>
+>> Kind regards,
+>> Igor.
+>>
+>>
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+Thanks,
+Igor
