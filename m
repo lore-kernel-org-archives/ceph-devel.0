@@ -1,57 +1,62 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 02/17/2016 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 17 Feb 2016 09:18:15 -0600
-Message-ID: <56C48F37.80200@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Eric Blake <eblake@redhat.com>
+Subject: Re: [Qemu-devel] [PATCH] add CephFS support in VirtFS
+Date: Wed, 17 Feb 2016 08:41:16 -0700
+Message-ID: <56C4949C.6090200@redhat.com>
+References: <56C00B60.6000502@gmail.com> <20160215091727.GB3105@redhat.com>
+ <56C421F6.1000102@gmail.com> <20160217093716.GC30300@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="6MdhT6I7i10ocFGIIeh54hO6pdivS7bHf"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55881 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47138 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1160998AbcBQPSR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 17 Feb 2016 10:18:17 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id 7E684461C3
-	for <ceph-devel@vger.kernel.org>; Wed, 17 Feb 2016 15:18:17 +0000 (UTC)
-Received: from [10.3.112.52] (ovpn-112-52.phx2.redhat.com [10.3.112.52])
-	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u1HFIFgM015299
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 17 Feb 2016 10:18:17 -0500
+	id S1422745AbcBQPlY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Feb 2016 10:41:24 -0500
+In-Reply-To: <20160217093716.GC30300@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Daniel P. Berrange" <berrange@redhat.com>, Jevon Qiao <scaleqiao@gmail.com>
+Cc: haomaiwang@gmail.com, mst@redhat.com, qemu-devel@nongnu.org, aneesh.kumar@linux.vnet.ibm.com, Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, gfarnum@redhat.com, gkurz@linux.vnet.ibm.com
 
-8AM PST as usual! Discussion topics today include any updates on 
-probabilistic promotion throttling and some toy code I've been playing 
-with to attempt to simulate PG distribution using Quasi-Monte-Carlo 
-methods.  Please feel free to add your own!
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--6MdhT6I7i10ocFGIIeh54hO6pdivS7bHf
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Here's the links:
+On 02/17/2016 02:37 AM, Daniel P. Berrange wrote:
+> If you have a branch holding a whole series of patches to submit, then
+> it is easier to automate it. eg
+>=20
+>  git rebase -i master -x 'git show | ./scripts/checkpatch.pl -'
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
+Or even make it part of 'git commit':
+http://wiki.qemu.org/Contribute/SubmitAPatch mentions a link to
+http://blog.vmsplice.net/2011/03/how-to-automatically-run-checkpatchpl.ht=
+ml
 
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
+--=20
+Eric Blake   eblake redhat com    +1-919-301-3266
+Libvirt virtualization library http://libvirt.org
 
 
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
+--6MdhT6I7i10ocFGIIeh54hO6pdivS7bHf
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+Comment: Public key at http://people.redhat.com/eblake/eblake.gpg
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-Mark
+iQEcBAEBCAAGBQJWxJScAAoJEKeha0olJ0NqTwsH/3iU/3HTgEzuTxRv9Ec1DR4K
+MQ9iGqxVu8I0sYaUTVPGAF/ZxH70lFPHbBCzjF5PGZVN5iMDXwq3unobO4goX8NK
+GK0GoLCwDgl3VLF8pI0LOlR74gq4XRb+iYHZ1qdzjkQQtWSwW14oCVQMAs5ytoxl
+Sbq9ZO806XP1mNrfoB+B/RRYG592UduhHEXNccabgczdb3vRuKZXokkkMpYydp87
+y2malIhJFnjX/4zhv24ktu0+LteAUDbk3kyh9zrA91TIJQD05uMkISPXaFn6YVL9
+OP+OmqHY2W+b++1YJsUrW/40cbEPLTboLI4yAfTpXdc8CaEwHbvMVz69DiYLYNM=
+=it43
+-----END PGP SIGNATURE-----
+
+--6MdhT6I7i10ocFGIIeh54hO6pdivS7bHf--
