@@ -1,36 +1,57 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Regarding outreachy/gsoc 2016
-Date: Wed, 17 Feb 2016 06:55:00 -0800
-Message-ID: <CAJ4mKGZefyBKYRzQPwqwAAsHRGm-i3O1DWbWjnVCvR2k-DwsTg@mail.gmail.com>
-References: <CACmM9b_cKoJ21-WLAKxJOxhtDphAU3EAELh219OBWWEaf5CwFw@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 02/17/2016 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 17 Feb 2016 09:18:15 -0600
+Message-ID: <56C48F37.80200@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f42.google.com ([209.85.213.42]:35028 "EHLO
-	mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756422AbcBQOzC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Feb 2016 09:55:02 -0500
-Received: by mail-vk0-f42.google.com with SMTP id e6so16300404vkh.2
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Feb 2016 06:55:01 -0800 (PST)
-In-Reply-To: <CACmM9b_cKoJ21-WLAKxJOxhtDphAU3EAELh219OBWWEaf5CwFw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:55881 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1160998AbcBQPSR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Feb 2016 10:18:17 -0500
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id 7E684461C3
+	for <ceph-devel@vger.kernel.org>; Wed, 17 Feb 2016 15:18:17 +0000 (UTC)
+Received: from [10.3.112.52] (ovpn-112-52.phx2.redhat.com [10.3.112.52])
+	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u1HFIFgM015299
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 17 Feb 2016 10:18:17 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dianthus Dia <dian.dianthus@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Feb 17, 2016 at 5:23 AM, Dianthus Dia <dian.dianthus@gmail.com> wrote:
-> Hello,
->
-> I have looked at the previous year's projects of Ceph in
-> outreachy/gsoc. I found them very interesting and doable.I wish to
-> contribute to Ceph.
-> Presently, I installed Ceph and trying to work on some bugs.
-> As the application period for outreachy 2016 has started, I would like
-> to know about Ceph's participation in outreachy and gsoc 2016, and its
-> projects.
+8AM PST as usual! Discussion topics today include any updates on 
+probabilistic promotion throttling and some toy code I've been playing 
+with to attempt to simulate PG distribution using Quasi-Monte-Carlo 
+methods.  Please feel free to add your own!
 
-http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/29620
+Here's the links:
 
-No Outreachy this year. We're doing GSoC but are a bit behind getting
-organized for it so there isn't a good list of projects yet.
--Greg
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
