@@ -1,90 +1,64 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: rgw and the next infernalis release v9.2.1
-Date: Thu, 18 Feb 2016 13:39:36 -0800
-Message-ID: <CAMMFjmGhpfhBSMTNkW7Xj-xRY4DYYf1gKFt6JwoGXXrVV8KL4g@mail.gmail.com>
-References: <CAP3mxSw9bgcyfCeSRtQZQctEgLHfbvXJa-VMM9uhMGX9-Zgesg@mail.gmail.com>
-	<CAP3mxSwgaVTxAVQT-bXfMiJsC6ABrW2yTVeTAwxnPoD_7TbffQ@mail.gmail.com>
-	<CADRKj5S6JPGNevV1Nd1zwjstGbezpNDA1PcLttUno1aAYmnANw@mail.gmail.com>
-	<CAMMFjmH1yK4W7mrH7oqtHfBD3A_ELD8ShgU6M7xPYwrHNTdKww@mail.gmail.com>
-	<CAP3mxSzyCSQQ7mwVjysTXrbSWWjbKVkyyHkN9MmYHKyncZHrmg@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Running src/ceph generates python error
+Date: Thu, 18 Feb 2016 23:05:48 +0100
+Message-ID: <56C6403C.7060400@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f175.google.com ([209.85.223.175]:35020 "EHLO
-	mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753790AbcBRVjh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Feb 2016 16:39:37 -0500
-Received: by mail-io0-f175.google.com with SMTP id g203so88888662iof.2
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Feb 2016 13:39:37 -0800 (PST)
-In-Reply-To: <CAP3mxSzyCSQQ7mwVjysTXrbSWWjbKVkyyHkN9MmYHKyncZHrmg@mail.gmail.com>
+Received: from smtp.digiware.nl ([31.223.170.169]:63197 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1423513AbcBRWGD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 18 Feb 2016 17:06:03 -0500
+Received: from rack1.digiware.nl (unknown [127.0.0.1])
+	by smtp.digiware.nl (Postfix) with ESMTP id D8F4715340A
+	for <ceph-devel@vger.kernel.org>; Thu, 18 Feb 2016 23:06:00 +0100 (CET)
+Received: from [192.168.10.10] (asus [192.168.10.10])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.digiware.nl (Postfix) with ESMTPSA id 536B7153401
+	for <ceph-devel@vger.kernel.org>; Thu, 18 Feb 2016 23:05:50 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-The RGW test that failed in the upgrade suite run should be fixed by
-https://github.com/ceph/ceph-qa-suite/pull/826
+I'm trying to run
+And it terminates with:
+======
+.......
+.......
+../qa/workunits/ceph-helpers.sh:555: activate_osd:  mkdir -p
+testdir/test-erasure-code/0
+../qa/workunits/ceph-helpers.sh:556: activate_osd:
+CEPH_ARGS='--fsid=d9e9b487-d5e0-11e5-be15-1c6f6582ec12
+--auth-supported=none -
+-mon-host=127.0.0.1:7101  --osd-backfill-full-ratio=.99
+--osd-failsafe-full-ratio=.99 --osd-journal-size=100 --osd-scrub-load-thre
+shold=2000 --osd-data=testdir/test-erasure-code/0 --chdir=
+--erasure-code-dir=.libs --plugin-dir=.libs --osd-class-dir=.libs --run
+-dir=testdir/test-erasure-code --debug-osd=20
+--log-file=testdir/test-erasure-code/$name.log
+--pid-file=testdir/test-erasure-code/
+$name.pid  '
+../qa/workunits/ceph-helpers.sh:556: activate_osd:  ceph-disk
+--statedir=testdir/test-erasure-code --sysconfdir=testdir/test-erasu
+re-code --prepend-to-path= activate --mark-init=none
+testdir/test-erasure-code/0
+ceph-disk: Error: ceph osd create failed: Command './ceph' returned
+non-zero exit status 22: --plugin-dir=.libs not valid:  --plug
+in-dir=.libs doesn't represent an int
+Invalid command:  unused arguments: [u'--plugin-dir=.libs']
+osd create {<uuid>} {<int[0-]>} :  create new osd (with optional UUID
+and ID)
+Error EINVAL: invalid command
 
-tests passed on wip branch.
+======
 
-Thx
-YuriW
+So it seems it does not like all the values that are put in the
+ENV{CEPH_ARGS}.
 
-On Wed, Feb 17, 2016 at 6:54 PM, Abhishek Varshney
-<abhishek.varshney@flipkart.com> wrote:
-> Hi Yuri,
->
-> The RGW test that failed in the upgrade suite run (
-> http://tracker.ceph.com/issues/13750#note-15 ) can be found here :
-> http://pulpito.ceph.com/loic-2016-02-05_13:57:02-upgrade:infernalis-infernalis---basic-vps/
->
-> Thanks
-> Abhishek
->
->
->
-> On Wed, Feb 17, 2016 at 11:21 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
->> Can you point me to the test in question?
->>
->> Thx
->> YuriW
->>
->> On Wed, Feb 17, 2016 at 7:52 AM, Yehuda Sadeh-Weinraub
->> <yehuda@redhat.com> wrote:
->>> Yeah, it's fine. Note that the upgrade test failure seems like an
->>> issue with the test itself (running radosgw-admin/radosgw while
->>> upgrading the libraries).
->>>
->>> Yehuda
->>>
->>>
->>> On Tue, Feb 16, 2016 at 10:41 PM, Abhishek Varshney
->>> <abhishek.varshney@flipkart.com> wrote:
->>>> Hi Yehuda,
->>>>
->>>> A gentle reminder. We are waiting for your response to move ahead with
->>>> next infernalis release v9.2.1.
->>>>
->>>> Thanks
->>>> Abhishek
->>>>
->>>> On Thu, Feb 11, 2016 at 11:47 AM, Abhishek Varshney
->>>> <abhishek.varshney@flipkart.com> wrote:
->>>>> Hi Yehuda,
->>>>>
->>>>> The next infernalis release as found at
->>>>> https://github.com/ceph/ceph/tree/infernalis passed the rgw suite (
->>>>> http://tracker.ceph.com/issues/13750#note-21 ). Do you think the
->>>>> infernalis branch is ready for QE to start their own round of testing
->>>>> ?
->>>>>
->>>>> The upgrade suite has a RGW failed test (
->>>>> http://tracker.ceph.com/issues/14665 ), is it something that needs to
->>>>> be fixed before the release ?
->>>>>
->>>>> Thanks
->>>>> Abhishek
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Is this just my problem?
+And if so, what am I doing wrong?
+
+--WjW
+
