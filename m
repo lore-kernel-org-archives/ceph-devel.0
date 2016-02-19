@@ -1,134 +1,163 @@
-From: Jevon Qiao <scaleqiao@gmail.com>
-Subject: Re: [PATCH 2/2] hw/9pfs: fix alignment issue when host
- filesystem block size is larger than client msize
-Date: Fri, 19 Feb 2016 17:32:02 +0800
-Message-ID: <56C6E112.8090102@gmail.com>
-References: <56C02E4F.6030303@gmail.com> <87y4an8l93.fsf@linux.vnet.ibm.com>
-	<56C41DE8.2030904@gmail.com>
-	<20160217112419.62c49792@bahia.huguette.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] include: ceph: Fix encode and decode type conversions
+Date: Fri, 19 Feb 2016 11:00:48 +0100
+Message-ID: <3047619.1giXQfFTZa@wuerfel>
+References: <1455505313-1298-1-git-send-email-deepa.kernel@gmail.com> <12201396.FPdHi0skie@wuerfel> <CAOi1vP9n2UiYPj+EC6FsofG5kdCwpNv1CVK=AuKuOSUXqmMRcg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
-In-Reply-To: <20160217112419.62c49792@bahia.huguette.org>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: <http://lists.nongnu.org/archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-To: Greg Kurz <gkurz@linux.vnet.ibm.com>
-Cc: haomaiwang@gmail.com, mst@redhat.com, qemu-devel@nongnu.org, "Aneesh Kumar K.V" <aneesh.kumar@linux.vnet.ibm.com>, sage@newdream.net, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, gfarnum@redhat.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.126.187]:59042 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1427514AbcBSKA4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Feb 2016 05:00:56 -0500
+In-Reply-To: <CAOi1vP9n2UiYPj+EC6FsofG5kdCwpNv1CVK=AuKuOSUXqmMRcg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Deepa Dinamani <deepa.kernel@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, "y2038@lists.linaro.org" <y2038@lists.linaro.org>
 
-Hi Greg,
->>>> From: Jevon Qiao <scaleqiao@gmail.com>
->>>> Date: Sun, 14 Feb 2016 15:11:08 +0800
->>>> Subject: [PATCH] hw/9pfs: fix alignment issue when host filesystem block
->>>> size
->>>>     is larger than client msize.
->>>>
->>>> Per the previous implementation, iounit will be assigned to be 0 after the
->>>> first if statement as (s->msize - P9_IOHDRSZ)/stbuf.f_bsize will be zero
->>>> when
->>>> host filesystem block size is larger than msize. Finally, iounit will be
->>>> equal
->>>> to s->msize - P9_IOHDRSZ, which is usually not aligned.
->>>>
->>>> Signed-off-by: Jevon Qiao <scaleqiao@gmail.com>
->>>> ---
->>>>     hw/9pfs/virtio-9p.c | 19 ++++++++++++++++---
-> Hmmm I just realize your tree is not up-to-date since hw/9pfs/virtio-9p.c got
-> renamed with this recent commit:
->
-> commit 60ce86c7140d5ca33d5fd87ce821681165d06b2a
-> Author: Wei Liu <wei.liu2@citrix.com>
-> Date:   Thu Jan 7 18:42:20 2016 +0000
->
->      9pfs: rename virtio-9p.c to 9p.c
->
-> Also 9p.c only contains generic code now, not related to virtio... see below.
-The feature was finished before it happened, I'm sorry I did not sync my 
-tree up
-with master.
->>>>     1 file changed, 16 insertions(+), 3 deletions(-)
->>>>
->>>> diff --git a/hw/9pfs/virtio-9p.c b/hw/9pfs/virtio-9p.c
->>>> index f972731..005d3a8 100644
->>>> --- a/hw/9pfs/virtio-9p.c
->>>> +++ b/hw/9pfs/virtio-9p.c
->>>> @@ -1326,7 +1326,7 @@ out_nofid:
->>>>     static int32_t get_iounit(V9fsPDU *pdu, V9fsPath *path)
->>>>     {
->>>>         struct statfs stbuf;
->>>> -    int32_t iounit = 0;
->>>> +    int32_t iounit = 0, unit = 0;
->>>>         V9fsState *s = pdu->s;
->>>>
->>>>         /*
->>>> @@ -1334,8 +1334,21 @@ static int32_t get_iounit(V9fsPDU *pdu, V9fsPath
->>>> *path)
->>>>          * and as well as less than (client msize - P9_IOHDRSZ))
->>>>          */
->>>>         if (!v9fs_co_statfs(pdu, path, &stbuf)) {
->>>> -        iounit = stbuf.f_bsize;
->>>> -        iounit *= (s->msize - P9_IOHDRSZ)/stbuf.f_bsize;
->>>> +    /*
->>>> +     * If host filesystem block size is larger than client msize,
->>>> +     * we will use PAGESIZE as the unit. The reason why we choose
->>>> +     * PAGESIZE is because the data will be splitted in terms of
->>>> +     * PAGESIZE in the virtio layer. In this case, the final
-> ... and here you mention virtio. Does this code really belong here ?
-Sorry for confusing you, the comment might not be very clear. Here I mean
-the issue I mentioned in another thread with Aneesh. It's not related to 
-virtio.
->>>> +     * iounit is equal to the value of ((msize/unit) - 1) * unit.
->>>> +     */
->>>> +    if (stbuf.f_bsize > s->msize) {
->>>> +        iounit = 4096;
->>>> +        unit = 4096;
-> This looks weird when reading the initial comment in get_iounit()... is
-> iounit a multiple of stbuf.f_bsize in this case ?
-Yes, I think so. The stbuf.f_bsize refers to the iounit of backend 
-filesystem,
-and to comply with the backend is a right way to go always.
->>> What page size it should be guest or host ?. Also why 4096 ?. ppc64 use
->>> 64K page size.
->> The data to be read or written will be divided into pieces according to the
->> size of iounit and msize firstly, and then mapped to pages before being
->> added
->> into virtqueue. Since all these operations happen in the guest side, so the
->> page size should be guest. Please correct me if I'm wrong.
->>
->> As for the number 4096, It's the default value in Linux OS. I did not take
->> other platforms into account, it's my fault. To make it suitable for all
->> platforms,
->> shall I use the function getpagesize() here?
->>
-> getpagesize() will return the host page size. If you need the guest page size,
-> you should use TARGET_PAGE_SIZE.
-> And then you will hit another problem: the 9p.c file is in common-obj and
-> cannot contain target specific code...
-Well, good to know this, thank you for sharing this.
-> Along with the other remark, I'm beginning to think you may need to move this
-> to virtio-9p-device.c.
-I'll think of this, thank you for the option.
+On Thursday 18 February 2016 18:22:55 Ilya Dryomov wrote:
+> On Thu, Feb 18, 2016 at 5:20 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> > On Thursday 18 February 2016 17:02:25 Ilya Dryomov wrote:
+> >>
+> >> If we are going to touch this function at all, let's drop all casts and
+> >> just add a comment along the lines of "the lack of cast/sign-extension
+> >> here is intentional, this function has a counterpart on the server side
+> >> which also lacks cast/sign-extension, etc".  To someone who is not up
+> >> on these subtleties, the __u64 cast is going to be more confusing than
+> >> explicit...
+> >
+> > We certainly a comment, I was just suggesting to add the cast as well.
+> >
+> > Again, it's not the lack of the cast on the server that is important
+> > here, it's whether it gets interpreted as signed or unsigned at the
+> > point where the timestamp is actually used for comparison or
+> > printing. Let me suggest a comment here:
+> 
+> I'd argue it's important to have encode/decode code look the same.
+> 
+> I mentioned before that at least in some places it's interpreted as
+> signed and that the interpretation is not totally up to the client.
+> The printing (at least some of it) is right there in the same file
+> (src/include/utime.h) and you can see ... + 1900.
 
-Thanks,
-Jevon
->> Thanks,
->> Jevon
->>>> +    } else {
->>>> +            iounit = stbuf.f_bsize;
->>>> +        unit = stbuf.f_bsize;
->>>> +    }
->>>> +        iounit *= (s->msize - P9_IOHDRSZ)/unit;
->>>>         }
->>>>         if (!iounit) {
->>>>             iounit = s->msize - P9_IOHDRSZ;
->>>> --
->>> -aneesh
->>>   
+I see this code:
+
+class utime_t {
+  struct {
+    __u32 tv_sec, tv_nsec;
+  } tv;
+
+  time_t        sec()  const { return tv.tv_sec; }
+
+  ostream& gmtime(ostream& out) const {
+    out.setf(std::ios::right);
+    char oldfill = out.fill();
+    out.fill('0');
+    if (sec() < ((time_t)(60*60*24*365*10))) {
+      // raw seconds.  this looks like a relative time.
+      out << (long)sec() << "." << std::setw(6) << usec();
+    } else {
+      // localtime.  this looks like an absolute time.
+      //  aim for http://en.wikipedia.org/wiki/ISO_8601
+      struct tm bdt;
+      time_t tt = sec();
+      gmtime_r(&tt, &bdt);
+      out << std::setw(4) << (bdt.tm_year+1900)  // 2007 -> '07'
+          << '-' << std::setw(2) << (bdt.tm_mon+1)
+          << '-' << std::setw(2) << bdt.tm_mday
+          << ' '
+          << std::setw(2) << bdt.tm_hour
+          << ':' << std::setw(2) << bdt.tm_min
+          << ':' << std::setw(2) << bdt.tm_sec;
+      out << "." << std::setw(6) << usec();
+      out << "Z";
+    }
+    out.fill(oldfill);
+    out.unsetf(std::ios::right);
+    return out;
+  }
+
+which interprets the time roughly in the way I explained:
+
+* On 64-bit architectures, the time is interpreted as an unsigned
+  number in the range from 1980-2106, while any times between 1970
+  and 1980 are interpreted as a relative time and printed as
+  a positive seconds number.
+
+* On 32-bit architectures, times in the range 1980-2038 are printed
+  as a date like 64-bit does, times from 1970-1980 are also printed
+  as a positive seconds number, and anything with the top bit set
+  is printed as a negative seconds number.
+
+It this the intended behavior? I guess we could change the kernel
+to reject any timestamps before 1980 and after 2038 in
+ceph_decode_timespec and just set the Linux timestamp to (time_t)0
+(Jan 1 1970) in that case, and document that there is no valid
+interpretation for those.
+
+> >  * ceph timestamps are unsigned 32-bit starting at 1970, which is
+> >  * different from a signed 32-bit or 64-bit time_t. On 64-bit
+> >  * architectures, this gets interpreted as a subset of time_t
+> >  * in the range from 1970 to 2106.
+> >  * Machines with a 32-bit time_t will incorrectly interpret the
+> >  * timestamps with years 2038-2106 as negative numbers in the
+> >  * 1902-1969 range, until both kernel and glibc are change to
+> >  * using 64-bit time_t.
+> >  */
+> 
+> I think a more accurate description would be "ceph timestamps are
+> signed 32-bit, with the caveat that something somewhere is likely to
+> break on a negative timestamp".
+
+This is the opposite of what you said previously, citing:
+
+| There aren't any casts on the server side: __u32 is simply assigned to
+| time_t, meaning no sign-extension is happening
+
+which I read as meaning you are using it as an unsigned number,
+because of the way the assignment operator works when you assign
+an unsigned 32-bit number to a signed 64-bit number.
+
+> We are not looking at trying to reuse that extra bit for 1970..2106.
+> As I said earlier, utime_t is used in quite a lot of places throughout
+> the code base and is part of both in-core and on-disk data structures.
+> Auditing all those sites for that is probably never going to happen.
+> I think the plan is to live with what we've got until a proper 64-bit
+> sec/nsec conversion is done in a way that was described earlier
+> (message versions, ceph feature bit, etc).  Any vfs timespec-handling
+> changes should simply preserve the existing behavior, for now.
+
+And that is a third option: preserve the existing behavior (different
+between 32-bit and 64-bit) even when we extend the 32-bit client to
+have 64-bit timestamps. I can't believe that is what you actually meant
+here but if you did, that would probably be the worst solution.
+
+Please just make up your mind and say which behavior you want the
+kernel client to have when dealing with servers that communicate
+using 32-bit timestamps:
+
+a) Remain consistent with current 64-bit servers and clients,
+   interpreting the number as an unsigned 32-bit integer where
+   possible, and remain broken on existing 32-bit machines
+   until they start using 64-bit time_t.
+
+b) Change 64-bit clients to behave the same way that that 32-bit
+   clients and servers do today, and actually use the times as
+   a signed number that you claimed they already did.
+
+c) Interpret all times before 1980 or after 2038 as buggy servers
+   and only accept times that are always handled consistently.
+   Also fix the server to reject those times coming from broken
+   clients.
+
+d) Leave 64-bit clients unchanged (using unsigned timestamps) and
+   document that 32-bit clients should keep interpreting them as
+   signed even when we fix VFS, to preserve the existing behavior.
+
+I think a), b) and c) are all reasonable, and I can send a patch
+as soon as you know what you want. If you want d), please leave
+me out of that and do it yourself.
+
+	Arnd
