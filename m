@@ -1,100 +1,56 @@
 From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 2/4] libceph: use the right footer size when skipping a
- message
-Date: Sat, 20 Feb 2016 12:44:29 -0600
-Message-ID: <56C8B40D.90602@ieee.org>
+Subject: Re: [PATCH 3/4] libceph: don't spam dmesg with stray reply warnings
+Date: Sat, 20 Feb 2016 12:46:07 -0600
+Message-ID: <56C8B46F.5020408@ieee.org>
 References: <1455986729-12544-1-git-send-email-idryomov@gmail.com>
- <1455986729-12544-3-git-send-email-idryomov@gmail.com>
+ <1455986729-12544-4-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f173.google.com ([209.85.223.173]:33408 "EHLO
-	mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751666AbcBTSob (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Feb 2016 13:44:31 -0500
-Received: by mail-io0-f173.google.com with SMTP id z135so141425936iof.0
-        for <ceph-devel@vger.kernel.org>; Sat, 20 Feb 2016 10:44:31 -0800 (PST)
-In-Reply-To: <1455986729-12544-3-git-send-email-idryomov@gmail.com>
+Received: from mail-io0-f171.google.com ([209.85.223.171]:36094 "EHLO
+	mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751666AbcBTSqJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Feb 2016 13:46:09 -0500
+Received: by mail-io0-f171.google.com with SMTP id l127so140761049iof.3
+        for <ceph-devel@vger.kernel.org>; Sat, 20 Feb 2016 10:46:08 -0800 (PST)
+In-Reply-To: <1455986729-12544-4-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 Cc: Varada Kari <Varada.Kari@sandisk.com>
 
-+On 02/20/2016 10:45 AM, Ilya Dryomov wrote:
-> ceph_msg_footer is 21 bytes long, while ceph_msg_footer_old is only 13.
-> Don't skip too much when CEPH_FEATURE_MSG_AUTH isn't negotiated.
+On 02/20/2016 10:45 AM, Ilya Dryomov wrote:
+> Commit d15f9d694b77 ("libceph: check data_len in ->alloc_msg()")
+> mistakenly bumped the log level on the "tid %llu unknown, skipping"
+> message.  Turn it back into a dout() - stray replies are perfectly
+> normal when OSDs flap, crash, get killed for testing purposes, etc.
+> 
+> Cc: stable@vger.kernel.org # 4.3+
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 
-This looks good, but I have a few suggestions.
-
-You could done some factoring in prepare_write_message_footer()
-to use the new function for setting iov_len and updating
-out_kvec_bytes.
-
-Consider my suggestions, but otherwise I believe this
-is correct.
+Looks good.
 
 Reviewed-by: Alex Elder <elder@linaro.org>
 
-> Cc: stable@vger.kernel.org # 3.19+
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 > ---
->  net/ceph/messenger.c | 17 ++++++++++-------
->  1 file changed, 10 insertions(+), 7 deletions(-)
+>  net/ceph/osd_client.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index fec20819a5ea..dd7c1b7f932b 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -2284,6 +2284,13 @@ static int read_partial_msg_data(struct ceph_connection *con)
->  	return 1;	/* must return > 0 to indicate success */
->  }
->  
-> +static size_t sizeof_footer(struct ceph_connection *con)
-
-I understand why this is named this way.  But it's supplying a
-connection as argument, but a footer is a message attribute.
-So I might call this con_msg_footer_size().
-
-> +{
-> +	return (con->peer_features & CEPH_FEATURE_MSG_AUTH) ?
-> +	    sizeof(struct ceph_msg_footer) :
-> +	    sizeof(struct ceph_msg_footer_old);
-> +}
-> +
->  /*
->   * read (part of) a message.
->   */
-> @@ -2335,7 +2342,7 @@ static int read_partial_message(struct ceph_connection *con)
->  			ceph_pr_addr(&con->peer_addr.in_addr),
->  			seq, con->in_seq + 1);
->  		con->in_base_pos = -front_len - middle_len - data_len -
-> -			sizeof(m->footer);
-> +			sizeof_footer(con);
->  		con->in_tag = CEPH_MSGR_TAG_READY;
->  		return 1;
->  	} else if ((s64)seq - (s64)con->in_seq > 1) {
-> @@ -2360,7 +2367,7 @@ static int read_partial_message(struct ceph_connection *con)
->  			/* skip this message */
->  			dout("alloc_msg said skip message\n");
->  			con->in_base_pos = -front_len - middle_len - data_len -
-> -				sizeof(m->footer);
-> +				sizeof_footer(con);
->  			con->in_tag = CEPH_MSGR_TAG_READY;
->  			con->in_seq++;
->  			return 1;
-> @@ -2402,11 +2409,7 @@ static int read_partial_message(struct ceph_connection *con)
->  	}
->  
->  	/* footer */
-> -	if (need_sign)
-> -		size = sizeof(m->footer);
-> -	else
-> -		size = sizeof(m->old_footer);
-> -
-> +	size = sizeof_footer(con);
->  	end += size;
->  	ret = read_partial(con, end, size, &m->footer);
->  	if (ret <= 0)
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 7c1a5d1734c3..32355d9d0103 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -2890,8 +2890,8 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
+>  	mutex_lock(&osdc->request_mutex);
+>  	req = __lookup_request(osdc, tid);
+>  	if (!req) {
+> -		pr_warn("%s osd%d tid %llu unknown, skipping\n",
+> -			__func__, osd->o_osd, tid);
+> +		dout("%s osd%d tid %llu unknown, skipping\n", __func__,
+> +		     osd->o_osd, tid);
+>  		m = NULL;
+>  		*skip = 1;
+>  		goto out;
 > 
 
