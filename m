@@ -1,34 +1,42 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Has rgw recently switched to deque usuage??
-Date: Sat, 20 Feb 2016 15:41:45 +0100
-Message-ID: <56C87B29.5040005@digiware.nl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH 4/4] libceph: use sizeof_footer() in ceph_msg_revoke()
+Date: Sat, 20 Feb 2016 17:45:29 +0100
+Message-ID: <1455986729-12544-5-git-send-email-idryomov@gmail.com>
+References: <1455986729-12544-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:43322 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753322AbcBTOl6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 20 Feb 2016 09:41:58 -0500
-Received: from rack1.digiware.nl (unknown [127.0.0.1])
-	by smtp.digiware.nl (Postfix) with ESMTP id 650E51534E3
-	for <ceph-devel@vger.kernel.org>; Sat, 20 Feb 2016 15:41:55 +0100 (CET)
-Received: from [192.168.10.10] (asus [192.168.10.10])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.digiware.nl (Postfix) with ESMTPSA id 4A2B2153413
-	for <ceph-devel@vger.kernel.org>; Sat, 20 Feb 2016 15:41:46 +0100 (CET)
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:32979 "EHLO
+	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757850AbcBTQp6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Feb 2016 11:45:58 -0500
+Received: by mail-wm0-f41.google.com with SMTP id g62so106057933wme.0
+        for <ceph-devel@vger.kernel.org>; Sat, 20 Feb 2016 08:45:58 -0800 (PST)
+In-Reply-To: <1455986729-12544-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Varada Kari <Varada.Kari@sandisk.com>
 
-Hi,
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ net/ceph/messenger.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-With the last rebase I'm getting compilation errors on rgw stuff.
-So I was wondering if deque usuage got included recently, or that I'm
-running into a case where Clang doesn't like the way some code is used.
-And GCC just compiles fine...
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index dd7c1b7f932b..43edf897c9eb 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -3085,10 +3085,7 @@ void ceph_msg_revoke(struct ceph_msg *msg)
+ 			con->out_skip += con_out_kvec_skip(con);
+ 		} else {
+ 			BUG_ON(!msg->data_length);
+-			if (con->peer_features & CEPH_FEATURE_MSG_AUTH)
+-				con->out_skip += sizeof(msg->footer);
+-			else
+-				con->out_skip += sizeof(msg->old_footer);
++			con->out_skip += sizeof_footer(con);
+ 		}
+ 		/* data, middle, front */
+ 		if (msg->data_length)
+-- 
+2.4.3
 
-Any answer would be appriciated
-
---WjW
