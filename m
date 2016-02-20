@@ -1,51 +1,61 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 1/4] libceph: don't bail early from try_read() when
- skipping a message
-Date: Sat, 20 Feb 2016 14:38:47 -0600
-Message-ID: <56C8CED6.7080701@ieee.org>
-References: <1455986729-12544-1-git-send-email-idryomov@gmail.com>
- <1455986729-12544-2-git-send-email-idryomov@gmail.com>
- <56C8B03A.3020602@ieee.org>
- <CAOi1vP8V7Ni6G53Y-xhmuJihd=dmM6Fg6960CQZmLt451y5V5A@mail.gmail.com>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: Re: Has rgw recently switched to deque usuage??
+Date: Sat, 20 Feb 2016 16:33:05 -0500 (EST)
+Message-ID: <1565267399.44124691.1456003985235.JavaMail.zimbra@redhat.com>
+References: <56C87B29.5040005@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:34608 "EHLO
-	mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752126AbcBTUit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Feb 2016 15:38:49 -0500
-Received: by mail-io0-f181.google.com with SMTP id 9so143053337iom.1
-        for <ceph-devel@vger.kernel.org>; Sat, 20 Feb 2016 12:38:49 -0800 (PST)
-In-Reply-To: <CAOi1vP8V7Ni6G53Y-xhmuJihd=dmM6Fg6960CQZmLt451y5V5A@mail.gmail.com>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:41079 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752563AbcBTVdI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Feb 2016 16:33:08 -0500
+In-Reply-To: <56C87B29.5040005@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Varada Kari <Varada.Kari@sandisk.com>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 02/20/2016 02:21 PM, Ilya Dryomov wrote:
->> > So...  There are two places in try_read_message() where
->> > incoming messages should be discarded, and they represent:
->> > receipt of a duplicate (re-sent) message; receipt of an
->> > unexpected message type; receipt of a response message
->> > that was not expected; or receipt of a response that was
->> > too large for the buffer that had been allocated to hold it.
-> Just a note: it's less about the preallocated buffer being too small
-> part (in theory we could allocate everything in alloc_msg(), although
-> that would be stupid) and more about the "no outstanding request is
-> waiting for that response" part.  Stray and/or duplicate replies from
-> the OSDs are expected in various cases.
+Hi Willem,
 
-Agreed.  That one case (buffer too large) is anomalous.  But
-the code *does* say "skip the message" in that case, which
-is why I mentioned it.
+A number of new features have merged, sure, and they make use of new primitives.  I haven't compiled with clang recently, mainly due to issues linking with gcc-compiled leveldb and rocksdb on Linux platforms.  For now, maybe you can send more specific info.
 
-Like I said before, when it's been a while since I've reviewed
-code I need to go immerse myself in it for a little while.  And
-while I'm at it, I figure I might as well explain it all for the
-benefit of other people.  This is especially true for these tiny
-patches--sometimes the smaller the patch, the bigger the context
-needed to understand why it fixes a problem.
+(I'll be able to try-build on FreeBSD at some point, probably, but not in the next day or so due to travel.)
 
-					-Alex
+Matt
 
+----- Original Message -----
+> From: "Willem Jan Withagen" <wjw@digiware.nl>
+> To: "Ceph Development" <ceph-devel@vger.kernel.org>
+> Sent: Saturday, February 20, 2016 9:41:45 AM
+> Subject: Has rgw recently switched to deque usuage??
+> 
+> Hi,
+> 
+> With the last rebase I'm getting compilation errors on rgw stuff.
+> So I was wondering if deque usuage got included recently, or that I'm
+> running into a case where Clang doesn't like the way some code is used.
+> And GCC just compiles fine...
+> 
+> Any answer would be appriciated
+> 
+> --WjW
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+-- 
+-- 
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-707-0660
+fax.  734-769-8938
+cel.  734-216-5309
