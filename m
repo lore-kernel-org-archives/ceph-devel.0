@@ -1,46 +1,45 @@
-From: Howard Chu <hyc@symas.com>
-Subject: Re: Fwd: Fwd: [newstore (again)] how disable double write WAL
-Date: Mon, 22 Feb 2016 17:17:22 +0000
-Message-ID: <56CB42A2.1090901@symas.com>
-References: <9D046674-EA8B-4CB5-B049-3CF665D4ED64@aevoo.fr>
- <alpine.DEB.2.00.1511241240150.25734@cobra.newdream.net>
- <CA+gn+znHyioZhOvuidN1pvMgRMOMvjbjcues_+uayYVadetz=A@mail.gmail.com>
- <CA+gn+z=5+gu=3R3ssLq-kQBjB6DFYeb9JteXV5Y7in89b8cmKA@mail.gmail.com>
- <alpine.DEB.2.00.1512011357340.19170@cobra.newdream.net>
- <5661F3A9.8070703@redhat.com> <20151208044640.GL1983@devil.localdomain>
- <CA+gn+znGzF+J=qAk+511qdfPJV4xYB+4F5k8KMLWh0+JtryLeA@mail.gmail.com>
- <20160216033538.GB2005@devil.localdomain> <56C74B91.9080508@redhat.com>
- <CA+gn+znGy7VnfkZ+vz65s-j+hpTafQ731-T_tx6gYZrRk3h1Yw@mail.gmail.com>
- <56CB2FCB.8080105@redhat.com>
- <CA+gn+z=7N+uaNXQ3DU65ZFiNhW-VPjwf+ppaMLxswgoep5EJ3g@mail.gmail.com>
- <56CB346B.50200@redhat.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Ceph Tech Talk on Thurs
+Date: Mon, 22 Feb 2016 12:55:26 -0500
+Message-ID: <CAAZbbf1u1VjZQL6hTQna3VLsiPDQ6trrHpfL3D5mG97zqfgf5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from zill.ext.symas.net ([69.43.206.106]:58628 "EHLO
-	zill.ext.symas.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752376AbcBVRsn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Feb 2016 12:48:43 -0500
-Received: from cust230-77.nwewn.com ([78.155.230.77] helo=[192.168.1.204])
-	by zill.ext.symas.net with esmtpsa (TLS1.2:DHE_RSA_AES_128_CBC_SHA1:128)
-	(Exim 4.80)
-	(envelope-from <hyc@symas.com>)
-	id 1aXu6y-0004nR-JZ
-	for ceph-devel@vger.kernel.org; Mon, 22 Feb 2016 09:17:29 -0800
-In-Reply-To: <56CB346B.50200@redhat.com>
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:33443 "EHLO
+	mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751278AbcBVRz2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Feb 2016 12:55:28 -0500
+Received: by mail-lf0-f49.google.com with SMTP id m1so99947434lfg.0
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Feb 2016 09:55:27 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-(Just as an aside on the Subject - in preliminary testing with a run of the 
-mill 32GB microSD card, LMDB on a raw partition performs synchronous commits 
-~8x faster than the same card formatted with an ext4 filesystem. There's a 
-huge cost to journaling filesystems that a reliable database engine simply 
-doesn't need.)
+Hey cephers,
 
--- 
-   -- Howard Chu
-   CTO, Symas Corp.           http://www.symas.com
-   Director, Highland Sun     http://highlandsun.com/hyc/
-   Chief Architect, OpenLDAP  http://www.openldap.org/project/
+Just a reminder that this month=E2=80=99s Ceph Tech Talk will be Thursd=
+ay at
+1p EST. This month we have a development update on CephFS as we
+approach the Jewel release and the migration of CephFS from =E2=80=9Cne=
+arly
+awesome=E2=80=9D to =E2=80=9Cfully awesome!=E2=80=9D  Don=E2=80=99t mis=
+s out.
+
+http://ceph.com/ceph-tech-talks/
+
+
+
+--=20
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
