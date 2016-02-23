@@ -1,225 +1,83 @@
-From: Sage Weil <sage@redhat.com>
-Subject: v0.94.6 Hammer released
-Date: Tue, 23 Feb 2016 11:01:55 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1602231059590.7485@cpach.fuggernut.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: ceph-disk disk partition alignment
+Date: Tue, 23 Feb 2016 16:52:54 +0000
+Message-ID: <BN1PR02MB0557B4F9B3010BC004E2F29F4A40@BN1PR02MB055.namprd02.prod.outlook.com>
+References: <BN1PR02MB0555D538EB56A2908359F32F4A30@BN1PR02MB055.namprd02.prod.outlook.com>
+	<56CBEA15.4090309@dachary.org>
+	<BN1PR02MB0550FC810BB08A29F672683F4A40@BN1PR02MB055.namprd02.prod.outlook.com>
+	<56CBF2DB.10602@dachary.org>
+ <CAGtbiz0Ks4NU58YBjNoVNNUy1+gApMCZhuC7o3i4ti+r7M5rxA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1090459261-1456243315=:7485"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42888 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753231AbcBWQCZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Feb 2016 11:02:25 -0500
+Received: from mail-bl2on0059.outbound.protection.outlook.com ([65.55.169.59]:12016
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753979AbcBWQw5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 23 Feb 2016 11:52:57 -0500
+In-Reply-To: <CAGtbiz0Ks4NU58YBjNoVNNUy1+gApMCZhuC7o3i4ti+r7M5rxA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
+To: =?utf-8?B?0JLQsNGB0LjQu9C40Lkg0JDQvdCz0LDQv9C+0LI=?= <angapov@gmail.com>, Loic Dachary <loic@dachary.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-1090459261-1456243315=:7485
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-This Hammer point release fixes a range of bugs, most notably a fix for=20
-unbounded growth of the monitor=E2=80=99s leveldb store, and a workaround i=
-n the=20
-OSD to keep most xattrs small enough to be stored inline in XFS inodes.
-
-We recommend that all hammer v0.94.x users upgrade.
-
-For more detailed information, see the complete changelog:
-
-  http://docs.ceph.com/docs/master/_downloads/v0.94.6.txt
-
-Notable Changes
----------------
-
-* build/ops: Ceph daemon failed to start, because the service name was alre=
-ady used. (#13474, Chuanhong Wang)
-* build/ops: LTTng-UST tracing should be dynamically enabled (#13274, Jason=
- Dillaman)
-* build/ops: ceph upstart script rbdmap.conf incorrectly processes paramete=
-rs (#13214, Sage Weil)
-* build/ops: ceph.spec.in License line does not reflect COPYING (#12935, Na=
-than Cutler)
-* build/ops: ceph.spec.in libcephfs_jni1 has no %post and %postun  (#12927,=
- Owen Synge)
-* build/ops: configure.ac: no use to add "+" before ac_ext=3Dc (#14330, Kef=
-u Chai, Robin H. Johnson)
-* build/ops: deb: strip tracepoint libraries from Wheezy/Precise builds (#1=
-4801, Jason Dillaman)
-* build/ops: init script reload doesn't work on EL7 (#13709, Herv=C3=A9 Rou=
-sseau)
-* build/ops: init-rbdmap uses distro-specific functions (#12415, Boris Rant=
-o)
-* build/ops: logrotate reload error on Ubuntu 14.04 (#11330, Sage Weil)
-* build/ops: miscellaneous spec file fixes (#12931, #12994, #12924, #12360,=
- Boris Ranto, Nathan Cutler, Owen Synge, Travis Rhoden, Ken Dreyer)
-* build/ops: pass tcmalloc env through to ceph-os (#14802, Sage Weil)
-* build/ops: rbd-replay-* moved from ceph-test-dbg to ceph-common-dbg as we=
-ll (#13785, Loic Dachary)
-* build/ops: unknown argument --quiet in udevadm settle (#13560, Jason Dill=
-aman)
-* common: Objecter: pool op callback may hang forever. (#13642, xie xingguo=
-)
-* common: Objecter: potential null pointer access when do pool_snap_list. (=
-#13639, xie xingguo)
-* common: ThreadPool add/remove work queue methods not thread safe (#12662,=
- Jason Dillaman)
-* common: auth/cephx: large amounts of log are produced by osd (#13610, Qia=
-nkun Zheng)
-* common: client nonce collision due to unshared pid namespaces (#13032, Jo=
-sh Durgin)
-* common: common/Thread:pthread_attr_destroy(thread_attr) when done with it=
- (#12570, Piotr Da=C5=82ek)
-* common: log: Log.cc: Assign LOG_DEBUG priority to syslog calls (#13993, B=
-rad Hubbard)
-* common: objecter: cancellation bugs (#13071, Jianpeng Ma)
-* common: pure virtual method called (#13636, Jason Dillaman)
-* common: small probability sigabrt when setting rados_osd_op_timeout (#132=
-08, Ruifeng Yang)
-* common: wrong conditional for boolean function KeyServer::get_auth() (#97=
-56, #13424, Nathan Cutler)
-* crush: crash if we see CRUSH_ITEM_NONE in early rule step (#13477, Sage W=
-eil)
-* doc: man: document listwatchers cmd in "rados" manpage (#14556, Kefu Chai=
-)
-* doc: regenerate man pages, add orphans commands to radosgw-admin(8) (#146=
-37, Ken Dreyer)
-* fs: CephFS restriction on removing cache tiers is overly strict (#11504, =
-John Spray)
-* fs: fsstress.sh fails (#12710, Yan, Zheng)
-* librados: LibRadosWatchNotify.WatchNotify2Timeout (#13114, Sage Weil)
-* librbd: ImageWatcher shouldn't block the notification thread (#14373, Jas=
-on Dillaman)
-* librbd: diff_iterate needs to handle holes in parent images (#12885, Jaso=
-n Dillaman)
-* librbd: fix merge-diff for >2GB diff-files (#14030, Jason Dillaman)
-* librbd: invalidate object map on error even w/o holding lock (#13372, Jas=
-on Dillaman)
-* librbd: reads larger than cache size hang (#13164, Lu Shi)
-* mds: ceph mds add_data_pool check for EC pool is wrong (#12426, John Spra=
-y)
-* mon: MonitorDBStore: get_next_key() only if prefix matches (#11786, Joao =
-Eduardo Luis)
-* mon: OSDMonitor: do not assume a session exists in send_incremental() (#1=
-4236, Joao Eduardo Luis)
-* mon: check for store writeablility before participating in election (#130=
-89, Sage Weil)
-* mon: compact full epochs also (#14537, Kefu Chai)
-* mon: include min_last_epoch_clean as part of PGMap::print_summary and PGM=
-ap::dump (#13198, Guang Yang)
-* mon: map_cache can become inaccurate if osd does not receive the osdmaps =
-(#10930, Kefu Chai)
-* mon: should not set isvalid =3D true when cephx_verify_authorizer return =
-false (#13525, Ruifeng Yang)
-* osd: Ceph Pools' MAX AVAIL is 0 if some OSDs' weight is 0 (#13840, Chengy=
-uan Li)
-* osd: FileStore calls syncfs(2) even it is not supported (#12512, Kefu Cha=
-i)
-* osd: FileStore: potential memory leak if getattrs fails. (#13597, xie xin=
-gguo)
-* osd: IO error on kvm/rbd with an erasure coded pool tier (#12012, Kefu Ch=
-ai)
-* osd: OSD::build_past_intervals_parallel() shall reset primary and up_prim=
-ary when begin a new past_interval. (#13471, xiexingguo)
-* osd: ReplicatedBackend: populate recovery_info.size for clone (bug sympto=
-m is size mismatch on replicated backend on a clone in scrub) (#12828, Samu=
-el Just)
-* osd: ReplicatedPG: wrong result code checking logic during sparse_read (#=
-14151, xie xingguo)
-* osd: ReplicatedPG::hit_set_trim osd/ReplicatedPG.cc: 11006: FAILED assert=
-(obc) (#13192, #9732, #12968, Kefu Chai, Zhiqiang Wang, Samuel Just, David =
-Zafman)
-* osd: avoid multi set osd_op.outdata in tier pool (#12540, Xinze Chi)
-* osd: bug with cache/tiering and snapshot reads (#12748, Kefu Chai)
-* osd: ceph osd pool stats broken in hammer (#13843, BJ Lougee)
-* osd: ceph-disk prepare fails if device is a symlink (#13438, Joe Julian)
-* osd: check for full before changing the cached obc (hammer) (#13098, Alex=
-ey Sheplyakov)
-* osd: config_opts: increase suicide timeout to 300 to match recovery (#143=
-76, Samuel Just)
-* osd: disable filestore_xfs_extsize by default (#14397, Ken Dreyer)
-* osd: do not cache unused memory in attrs (#12565, Xinze Chi, Ning Yao)
-* osd: dumpling incrementals do not work properly on hammer and newer (#132=
-34, Samuel Just)
-* osd: filestore: fix peek_queue for OpSequencer (#13209, Xinze Chi)
-* osd: hit set clear repops fired in same epoch as map change -- segfault s=
-ince they fall into the new interval even though the repops are cleared (#1=
-2809, Samuel Just)
-* osd: object_info_t::decode() has wrong version (#13462, David Zafman)
-* osd: osd/OSD.cc: 2469: FAILED assert(pg_stat_queue.empty()) on shutdown (=
-#14212, Sage Weil)
-* osd: osd/PG.cc: 288: FAILED assert(info.last_epoch_started >=3D info.hist=
-ory.last_epoch_started) (#14015, David Zafman)
-* osd: osd/PG.cc: 3837: FAILED assert(0 =3D=3D "Running incompatible OSD") =
-(#11661, David Zafman)
-* osd: osd/ReplicatedPG: Recency fix (#14320, Sage Weil, Robert LeBlanc)
-* osd: pg stuck in replay (#13116, Sage Weil)
-* osd: race condition detected during send_failures (#13821, Sage Weil)
-* osd: randomize scrub times (#10973, Kefu Chai)
-* osd: requeue_scrub when kick_object_context_blocked (#12515, Xinze Chi)
-* osd: revert: use GMT time for hitsets (#13812, Loic Dachary)
-* osd: segfault in agent_work (#13199, Samuel Just)
-* osd: should recalc the min_last_epoch_clean when decode PGMap (#13112, Ke=
-fu Chai)
-* osd: smaller object_info_t xattrs (#14803, Sage Weil)
-* osd: we do not ignore notify from down osds (#12990, Samuel Just)
-* rbd: QEMU hangs after creating snapshot and stopping VM (#13726, Jason Di=
-llaman)
-* rbd: TaskFinisher::cancel should remove event from SafeTimer (#14476, Dou=
-glas Fuller)
-* rbd: avoid re-writing old-format image header on resize (#13674, Jason Di=
-llaman)
-* rbd: fix bench-write (#14225, Sage Weil)
-* rbd: rbd-replay does not check for EOF and goes to endless loop (#14452, =
-Mykola Golub)
-* rbd: rbd-replay-prep and rbd-replay improvements (#13221, #13220, #13378,=
- Jason Dillaman)
-* rbd: verify self-managed snapshot functionality on image create (#13633, =
-Jason Dillaman)
-* rgw: Make RGW_MAX_PUT_SIZE configurable (#6999, Vladislav Odintsov, Yuan =
-Zhou)
-* rgw: Setting ACL on Object removes ETag (#12955, Brian Felton)
-* rgw: backport content-type casing (#12939, Robin H. Johnson)
-* rgw: bucket listing hangs on versioned buckets (#12913, Yehuda Sadeh)
-* rgw: fix wrong etag calculation during POST on S3 bucket. (#11241, Vladis=
-lav Odintsov, Radoslaw Zarzynski)
-* rgw: get bucket location returns region name, not region api name (#13458=
-, Yehuda Sadeh)
-* rgw: missing handling of encoding-type=3Durl when listing keys in bucket =
-(#12735, Jeff Weber)
-* rgw: orphan tool should be careful about removing head objects (#12958, Y=
-ehuda Sadeh)
-* rgw: orphans finish segfaults (#13824, Igor Fedotov)
-* rgw: rgw-admin: document orphans commands in usage (#14516, Yehuda Sadeh)
-* rgw: swift API returns more than real object count and bytes used when re=
-trieving account metadata (#13140, Sangdi Xu)
-* rgw: swift use Civetweb ssl can not get right url (#13628, Weijun Duan)
-* rgw: value of Swift API's X-Object-Manifest header is not url_decoded dur=
-ing segment look up (#12728, Radoslaw Zarzynski)
-* tests: fixed broken Makefiles after integration of ttng into rados (#1321=
-0, Sebastien Ponce)
-* tests: fsx failed to compile (#14384, Greg Farnum)
-* tests: notification slave needs to wait for master (#13810, Jason Dillama=
-n)
-* tests: qa: remove legacy OS support from rbd/qemu-iotests (#13483, #14385=
-, Vasu Kulkarni, Jason Dillaman)
-* tests: testprofile must be removed before it is re-created (#13664, Loic =
-Dachary)
-* tools: ceph-monstore-tool must do out_store.close() (#10093, huangjun)
-* tools: heavy memory shuffling in rados bench (#12946, Piotr Da=C5=82ek)
-* tools: race condition in rados bench (#12947, Piotr Da=C5=82ek)
-* tools: tool for artificially inflate the leveldb of the mon store for tes=
-ting purposes  (#10093, #11815, #14217, Cilang Zhao, Bo Cai, Kefu Chai, hua=
-ngjun, Joao Eduardo Luis)
-
-Getting Ceph
-------------
-
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-0.94.6.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-dep=
-loy
---8323329-1090459261-1456243315=:7485--
+QnkgZGVmYXVsdCBmZGlzayBkZXRlY3RzIGRvcyBwYXJ0aXRpb25zICwgeW91IG5lZWQgdG8gY2hh
+bmdlIG1vZGUgdG8gc2VlIEdQVCBwYXJ0aXRpb25zLg0KSSBkaWRuJ3Qgc2VlIGNlcGgtZGlzayBv
+dXRwdXQgYmVsb3cgLCBhdCB3aGF0IHNlY3RvciBpdCBpcyBzdGFydGluZyB3aXRoID8NCg0KDQpU
+aGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpG
+cm9tOiDQktCw0YHQuNC70LjQuSDQkNC90LPQsNC/0L7QsiBbbWFpbHRvOmFuZ2Fwb3ZAZ21haWwu
+Y29tXQ0KU2VudDogTW9uZGF5LCBGZWJydWFyeSAyMiwgMjAxNiAxMTowOSBQTQ0KVG86IExvaWMg
+RGFjaGFyeQ0KQ2M6IFNvbW5hdGggUm95OyBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogY2VwaC1k
+aXNrIGRpc2sgcGFydGl0aW9uIGFsaWdubWVudA0KDQpJbiBteSBjYXNlIChIYW1tZXIgMC45NC41
+KSBJIHNlZSBhY3R1YWxseSB0aGUgcHJvcGVyIGFsaWdubWVudCBtYWRlIGJ5IGNlcGgtZGlzay4g
+VGhpbmcgaXMgdGhhdCBmZGlzayBpcyBub3QgYWJsZSB0byBzZWUgR1BUIHBhcnRpdGlvbnM6DQoN
+CnJvb3RAc2xwZWFoMDAxOlt+XTojIGZkaXNrIC1sIC9kZXYvc2RmDQoNCkRpc2sgL2Rldi9zZGY6
+IDQwMDAuOCBHQiwgNDAwMDc4NzAzMDAxNiBieXRlcywgNzgxNDAzNzE2OCBzZWN0b3JzIFVuaXRz
+ID0gc2VjdG9ycyBvZiAxICogNTEyID0gNTEyIGJ5dGVzIFNlY3RvciBzaXplIChsb2dpY2FsL3Bo
+eXNpY2FsKTogNTEyIGJ5dGVzIC8gNTEyIGJ5dGVzIEkvTyBzaXplIChtaW5pbXVtL29wdGltYWwp
+OiA1MTIgYnl0ZXMgLyA1MTIgYnl0ZXMgRGlzayBsYWJlbCB0eXBlOiBkb3MgRGlzayBpZGVudGlm
+aWVyOiAweDAwMDAwMDAwDQoNCiAgIERldmljZSBCb290ICAgICAgU3RhcnQgICAgICAgICBFbmQg
+ICAgICBCbG9ja3MgICBJZCAgU3lzdGVtDQovZGV2L3NkZjEgICAgICAgICAgICAgICAxICA0Mjk0
+OTY3Mjk1ICAyMTQ3NDgzNjQ3KyAgZWUgIEdQVA0Kcm9vdEBzbHBlYWgwMDE6W35dOiMgZ2Rpc2sg
+LWwgL2Rldi9zZGYNCkdQVCBmZGlzayAoZ2Rpc2spIHZlcnNpb24gMC44LjYNCg0KUGFydGl0aW9u
+IHRhYmxlIHNjYW46DQogIE1CUjogcHJvdGVjdGl2ZQ0KICBCU0Q6IG5vdCBwcmVzZW50DQogIEFQ
+TTogbm90IHByZXNlbnQNCiAgR1BUOiBwcmVzZW50DQoNCkZvdW5kIHZhbGlkIEdQVCB3aXRoIHBy
+b3RlY3RpdmUgTUJSOyB1c2luZyBHUFQuDQpEaXNrIC9kZXYvc2RmOiA3ODE0MDM3MTY4IHNlY3Rv
+cnMsIDMuNiBUaUIgTG9naWNhbCBzZWN0b3Igc2l6ZTogNTEyIGJ5dGVzIERpc2sgaWRlbnRpZmll
+ciAoR1VJRCk6IEUxMDYzRDk3LTNFRkYtNEY4MS1BMDhGLTgxRDA2OTYyNTY3Nw0KUGFydGl0aW9u
+IHRhYmxlIGhvbGRzIHVwIHRvIDEyOCBlbnRyaWVzDQpGaXJzdCB1c2FibGUgc2VjdG9yIGlzIDM0
+LCBsYXN0IHVzYWJsZSBzZWN0b3IgaXMgNzgxNDAzNzEzNCBQYXJ0aXRpb25zIHdpbGwgYmUgYWxp
+Z25lZCBvbiAyMDQ4LXNlY3RvciBib3VuZGFyaWVzIFRvdGFsIGZyZWUgc3BhY2UgaXMgMjAxNCBz
+ZWN0b3JzICgxMDA3LjAgS2lCKQ0KDQpOdW1iZXIgIFN0YXJ0IChzZWN0b3IpICAgIEVuZCAoc2Vj
+dG9yKSAgU2l6ZSAgICAgICBDb2RlICBOYW1lDQogICAxICAgICAgICAgICAgMjA0OCAgICAgIDc4
+MTQwMzcxMzQgICAzLjYgVGlCICAgICBGRkZGICBjZXBoIGRhdGENCg0KU28gSSB0aGluayBjZXBo
+LWRpc2sgZG9lcyB0aGluZ3MgcmlnaHQuLi4gQnV0ICBiZWZvcmUgSSB1c2UgY2VwaC1kaXNrIEkg
+Y3JlYXRlIGFuIGVtcHR5IEdQVCB3aXRoIGdkaXNrLg0KDQoyMDE2LTAyLTIzIDEzOjQ5IEdNVCsw
+ODowMCBMb2ljIERhY2hhcnkgPGxvaWNAZGFjaGFyeS5vcmc+Og0KPiBIZXJlIGl0IGlzIGh0dHA6
+Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xNDg0Mg0KPg0KPiBPbiAyMy8wMi8yMDE2IDEyOjI0
+LCBTb21uYXRoIFJveSB3cm90ZToNCj4+IGVwaC1kZXBsb3kgaXMgY3JlYXRpbmcgZGF0YSBwYXJ0
+aXRpb24gZnJvbSBzZWN0b3IgMSBpZ25vcmluZyB3aGF0IHNnZGlzayBpcyByZWNvbW1lbmRpbmcg
+KDI1NiBpbiBteSBkaXNrKS4gQmFzaWNhbGx5LCBpdCBzaG91bGQgYmUgYWxpZ25lZCB3aXRoIHBo
+eXNpY2FsIHNlY3RvciBzaXplIChyZXBvcnRlZCBpbiAvc3lzL2Jsb2NrLzxkZXZpY2U+L3F1ZXVl
+L3BoeXNpY2FsX2Jsb2NrX3NpemUpLiBJbiBteSBjYXNlIGl0IGlzIDE2SyBwaHlzaWNhbCBhbmQg
+NEsgbG9naWNhbC4uLjI1NiBpcyBwZXJmZWN0bHkgZmluZSBhcyBzZ2Rpc2svZmRpc2sgaW50ZXJu
+YWxseSBkZWNpZGVzLg0KPj4+IERpc2sgcGVyZm9ybWFuY2Ugd2lsbCBiZSBzZXZlcmVseSBpbXBh
+Y3RlZCBiZWNhdXNlIG9mIHBhcnRpdGlvbmluZw0KPj4+IHRoaXMgd2F5IGZyb20gY2VwaC1kZXBs
+b3kgLA0KPg0KPiAtLQ0KPiBMb8OvYyBEYWNoYXJ5LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJlDQo+
+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1
+YnNjcmliZSBjZXBoLWRldmVsIg0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jk
+b21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbw0KPiBpbmZvIGF0ICBodHRwOi8vdmdl
+ci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3Jt
+YXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5k
+ZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQg
+YWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQg
+cmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVk
+IHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9u
+LCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHBy
+b2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJv
+ciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNo
+b3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2Yg
+dGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBl
+bGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
