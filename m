@@ -1,54 +1,82 @@
-From: Dave Chinner <dchinner@redhat.com>
-Subject: Re: Fwd: Fwd: [newstore (again)] how disable double write WAL
-Date: Tue, 23 Feb 2016 16:20:21 +1100
-Message-ID: <20160223052021.GH2005@devil.localdomain>
-References: <alpine.DEB.2.00.1512011357340.19170@cobra.newdream.net>
- <5661F3A9.8070703@redhat.com>
- <20151208044640.GL1983@devil.localdomain>
- <CA+gn+znGzF+J=qAk+511qdfPJV4xYB+4F5k8KMLWh0+JtryLeA@mail.gmail.com>
- <20160216033538.GB2005@devil.localdomain>
- <56C74B91.9080508@redhat.com>
- <CA+gn+znGy7VnfkZ+vz65s-j+hpTafQ731-T_tx6gYZrRk3h1Yw@mail.gmail.com>
- <56CB2FCB.8080105@redhat.com>
- <CA+gn+z=7N+uaNXQ3DU65ZFiNhW-VPjwf+ppaMLxswgoep5EJ3g@mail.gmail.com>
- <56CB346B.50200@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: ceph-disk disk partition alignment
+Date: Tue, 23 Feb 2016 05:24:07 +0000
+Message-ID: <BN1PR02MB0550FC810BB08A29F672683F4A40@BN1PR02MB055.namprd02.prod.outlook.com>
+References: <BN1PR02MB0555D538EB56A2908359F32F4A30@BN1PR02MB055.namprd02.prod.outlook.com>
+ <56CBEA15.4090309@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47176 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750835AbcBWFU1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 23 Feb 2016 00:20:27 -0500
-Content-Disposition: inline
-In-Reply-To: <56CB346B.50200@redhat.com>
+Received: from mail-bl2on0093.outbound.protection.outlook.com ([65.55.169.93]:33146
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750780AbcBWFYJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Feb 2016 00:24:09 -0500
+In-Reply-To: <56CBEA15.4090309@dachary.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: David Casier <david.casier@aevoo.fr>, Ric Wheeler <rwheeler@redhat.com>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>, Brian Foster <bfoster@redhat.com>
+To: Loic Dachary <loic@dachary.org>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 22, 2016 at 10:16:43AM -0600, Eric Sandeen wrote:
-> On 2/22/16 10:12 AM, David Casier wrote:
-> > I have carried out tests very quickly and I have not had time to
-> > concentrate fully on XFS.
-> >  maxpct =0.2 => 0.2% of 4To = 8Go
-> > Because my existing ssd partitions are small
-> > 
-> > If i'm not mistaken, and with what Dave says :
-> > By default, data is written to 2^32 inodes of 256 bytes (= 1TiB).
-> > With maxpct, you set the maximum size used by inodes, depending on the
-> > percentage of disk
+Yeah, my bad, ceph-disk issue, thanks...No, I didn't file any tracker, =
+please go ahead..
 
-maxpct doesn't work like that. It's a limit on the count of inodes,
-not a limit on their physical location.
+<< IIRC there are cases where sgdisk is not able to create a partition =
+ aligned as recommended (but parted could).
 
-And, FWIW, mkfs does not take floating point numbers, so that
-mkfs.xfs command line is not doing what you think it's doing. In
-fact, it's probably setting maxpct to zero, and the kernel is then
-ignoring it because it's invalid.
+Nope, I don't know the scenarios where sgdisk/fdisk/gdisk won't be able=
+ to create properly aligned partitions..If you can share that knowledge=
+ would be helpful..
 
-Cheers,
+Thanks & Regards
+Somnath
 
-Dave.
--- 
-Dave Chinner
-dchinner@redhat.com
+-----Original Message-----
+=46rom: Loic Dachary [mailto:loic@dachary.org]
+Sent: Monday, February 22, 2016 9:12 PM
+To: Somnath Roy; ceph-devel
+Subject: Re: ceph-disk disk partition alignment
+
+Hi,
+
+This not a ceph-deploy issue, rather a ceph-disk issue. Did you file an=
+ issue regarding this problem or would you like me to create one ? IIRC=
+ there are cases where sgdisk is not able to create a partition  aligne=
+d as recommended (but parted could). Do you know anything about that ?
+
+Cheers
+
+On 23/02/2016 01:27, Somnath Roy wrote:
+> Hi,
+> I am seeing ceph-deploy is creating data partition from sector 1 igno=
+ring what sgdisk is recommending (256 in my disk). Basically, it should=
+ be aligned with physical sector size (reported in /sys/block/<device>/=
+queue/physical_block_size). In my case it is 16K physical and 4K logica=
+l...256 is perfectly fine as sgdisk/fdisk internally decides.
+> Disk performance will be severely impacted because of partitioning th=
+is way from ceph-deploy , any reason why we are doing like this ?
+
+
+
+> Thanks & Regards
+> Somnath
+>
+
+--
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above=
+=2E If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
