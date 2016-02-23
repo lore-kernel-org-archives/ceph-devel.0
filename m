@@ -1,51 +1,54 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph-disk disk partition alignment
-Date: Tue, 23 Feb 2016 12:11:49 +0700
-Message-ID: <56CBEA15.4090309@dachary.org>
-References: <BN1PR02MB0555D538EB56A2908359F32F4A30@BN1PR02MB055.namprd02.prod.outlook.com>
+From: Dave Chinner <dchinner@redhat.com>
+Subject: Re: Fwd: Fwd: [newstore (again)] how disable double write WAL
+Date: Tue, 23 Feb 2016 16:20:21 +1100
+Message-ID: <20160223052021.GH2005@devil.localdomain>
+References: <alpine.DEB.2.00.1512011357340.19170@cobra.newdream.net>
+ <5661F3A9.8070703@redhat.com>
+ <20151208044640.GL1983@devil.localdomain>
+ <CA+gn+znGzF+J=qAk+511qdfPJV4xYB+4F5k8KMLWh0+JtryLeA@mail.gmail.com>
+ <20160216033538.GB2005@devil.localdomain>
+ <56C74B91.9080508@redhat.com>
+ <CA+gn+znGy7VnfkZ+vz65s-j+hpTafQ731-T_tx6gYZrRk3h1Yw@mail.gmail.com>
+ <56CB2FCB.8080105@redhat.com>
+ <CA+gn+z=7N+uaNXQ3DU65ZFiNhW-VPjwf+ppaMLxswgoep5EJ3g@mail.gmail.com>
+ <56CB346B.50200@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:49135 "EHLO
-	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754179AbcBWFMA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Feb 2016 00:12:00 -0500
-In-Reply-To: <BN1PR02MB0555D538EB56A2908359F32F4A30@BN1PR02MB055.namprd02.prod.outlook.com>
+Received: from mx1.redhat.com ([209.132.183.28]:47176 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750835AbcBWFU1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 23 Feb 2016 00:20:27 -0500
+Content-Disposition: inline
+In-Reply-To: <56CB346B.50200@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Eric Sandeen <sandeen@redhat.com>
+Cc: David Casier <david.casier@aevoo.fr>, Ric Wheeler <rwheeler@redhat.com>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>, Brian Foster <bfoster@redhat.com>
 
-Hi,
+On Mon, Feb 22, 2016 at 10:16:43AM -0600, Eric Sandeen wrote:
+> On 2/22/16 10:12 AM, David Casier wrote:
+> > I have carried out tests very quickly and I have not had time to
+> > concentrate fully on XFS.
+> >  maxpct =0.2 => 0.2% of 4To = 8Go
+> > Because my existing ssd partitions are small
+> > 
+> > If i'm not mistaken, and with what Dave says :
+> > By default, data is written to 2^32 inodes of 256 bytes (= 1TiB).
+> > With maxpct, you set the maximum size used by inodes, depending on the
+> > percentage of disk
 
-This not a ceph-deploy issue, rather a ceph-disk issue. Did you file an=
- issue regarding this problem or would you like me to create one ? IIRC=
- there are cases where sgdisk is not able to create a partition  aligne=
-d as recommended (but parted could). Do you know anything about that ?
+maxpct doesn't work like that. It's a limit on the count of inodes,
+not a limit on their physical location.
 
-Cheers
+And, FWIW, mkfs does not take floating point numbers, so that
+mkfs.xfs command line is not doing what you think it's doing. In
+fact, it's probably setting maxpct to zero, and the kernel is then
+ignoring it because it's invalid.
 
-On 23/02/2016 01:27, Somnath Roy wrote:
-> Hi,
-> I am seeing ceph-deploy is creating data partition from sector 1 igno=
-ring what sgdisk is recommending (256 in my disk). Basically, it should=
- be aligned with physical sector size (reported in /sys/block/<device>/=
-queue/physical_block_size). In my case it is 16K physical and 4K logica=
-l...256 is perfectly fine as sgdisk/fdisk internally decides.
-> Disk performance will be severely impacted because of partitioning th=
-is way from ceph-deploy , any reason why we are doing like this ?
+Cheers,
 
-
-
-> Thanks & Regards
-> Somnath
->
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Dave.
+-- 
+Dave Chinner
+dchinner@redhat.com
