@@ -1,109 +1,51 @@
-From: Gregory Meno <gmeno@redhat.com>
-Subject: Re: [ceph-calamari] Calamari 1.4
-Date: Mon, 22 Feb 2016 11:10:35 -0800
-Message-ID: <CABq-AyTQwkEZREf8u-m=h-aEYBBKTB6+hPqi_XQ=_JbyddvQfA@mail.gmail.com>
-References: <CABq-AySXr9TPruUTB_6V986XGRGaZAETV1djmsYTCTGf2ssPyA@mail.gmail.com>
-	<133B26F9-D7EA-4F08-BC3C-72676C24C4E3@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: ceph-disk disk partition alignment
+Date: Tue, 23 Feb 2016 12:11:49 +0700
+Message-ID: <56CBEA15.4090309@dachary.org>
+References: <BN1PR02MB0555D538EB56A2908359F32F4A30@BN1PR02MB055.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f182.google.com ([209.85.161.182]:35067 "EHLO
-	mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752774AbcBVTKg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Feb 2016 14:10:36 -0500
-Received: by mail-yw0-f182.google.com with SMTP id g127so127335226ywf.2
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Feb 2016 11:10:35 -0800 (PST)
-In-Reply-To: <133B26F9-D7EA-4F08-BC3C-72676C24C4E3@gmail.com>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:49135 "EHLO
+	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754179AbcBWFMA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Feb 2016 00:12:00 -0500
+In-Reply-To: <BN1PR02MB0555D538EB56A2908359F32F4A30@BN1PR02MB055.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Daniel Rolfe <daniel.rolfe.au@gmail.com>, Phillip Carinhas <pcarinhas@zenoss.com>
-Cc: ceph-calamari@lists.ceph.com, ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Feb 19, 2016 at 5:32 PM, Daniel Rolfe <daniel.rolfe.au@gmail.com> wrote:
-> Hi Gregory ,
+Hi,
+
+This not a ceph-deploy issue, rather a ceph-disk issue. Did you file an=
+ issue regarding this problem or would you like me to create one ? IIRC=
+ there are cases where sgdisk is not able to create a partition  aligne=
+d as recommended (but parted could). Do you know anything about that ?
+
+Cheers
+
+On 23/02/2016 01:27, Somnath Roy wrote:
+> Hi,
+> I am seeing ceph-deploy is creating data partition from sector 1 igno=
+ring what sgdisk is recommending (256 in my disk). Basically, it should=
+ be aligned with physical sector size (reported in /sys/block/<device>/=
+queue/physical_block_size). In my case it is 16K physical and 4K logica=
+l...256 is perfectly fine as sgdisk/fdisk internally decides.
+> Disk performance will be severely impacted because of partitioning th=
+is way from ceph-deploy , any reason why we are doing like this ?
+
+
+
+> Thanks & Regards
+> Somnath
 >
-> Have you considered doing away with the graphite server in favor for another metrics db like influxdb
->
-> Just doesn't make sense to install all the graphite dependencies just to pull metric data
->
-> Plus do we really need two web interfaces i.e calamari web and graphite web
->
-> Just my thoughts
->
-> Regards Daniel
->
->> On 20 Feb 2016, at 12:14 PM, Gregory Meno <gmeno@redhat.com> wrote:
->>
->> Coming soon to a jewel near you.
->>
->> What is it:
->>
->> Calamari is a REST API written in python. It seeks to give API
->> endpoints like /cluster,
->> /pool, and /osd and unsurprisingly allow HTTP requests to inspect and
->> modify the resources a Ceph cluster provides. It simplifies access to
->> the control-plane by making it available across the network.
->>
->> What is changing from the calamari I knew:
->> Calamari is going on a diet. We're shedding dependencies on saltstack.
->> The new version will be able to be run along-side Ceph Monitor
->> processes on the monitor nodes.  Where before calamari sought to place
->> agents on all nodes on the clusters it managed and monitored;  we now
->> only care about the cluster we're setup on
->>
->> What is staying the same:
->> The API -- http://calamari.readthedocs.org/en/latest/calamari_rest/index.html
->> This is really the part I'm most excited about. If you've used
->> calamari in the past I am committed to delivering compatibility in
->> this release
->>
->>
->> How can I try it out:
->> * note this is still development code -- don't put it on production clusters
->> * http://calamari.readthedocs.org/en/latest/development/dev_env.html#using-vagrant
->> * release candidate packages will be available soon
->>
->>
->> How can I help:
->> * Contribute doc improvements
->> * File bugs in https://github.com/ceph/calamari/issues
->> * Fix bugs :)
->> * help with packaging
->> * contribute to the future direction by discussing this on the mailing
->> list -- ceph-calamari@lists.ceph.com
->>
->> regards,
->> Gregory
->> _______________________________________________
->> ceph-calamari mailing list
->> ceph-calamari@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-calamari-ceph.com
 
-Daniel,
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
-I'm not sure I understand what you are asking. We could certainly try
-to strip it down now that I'm not really expecting graphs output for a
-GUI.
-
-Graphite is really just a front-end to the data living in carbon and
-reported by diamond.
-
-The sticking point is that I believe that some are using the graphite
-API that is wrapped by calamari. Phillip would you please say more
-about this?
-
-Influxdb seems promising AND I have a concern that it seems to not be
-packages in any of the distros yet.
-
-https://admin.fedoraproject.org/pkgdb/packages/?motif=influxdb*
-
-http://packages.ubuntu.com/search?keywords=influxdb -- sure it's in
-xenial but I'm not there yet
-
-https://software.opensuse.org/package/influxdb
-
-
-What do you think?
-
-thank you,
-Gregory
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
