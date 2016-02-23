@@ -1,60 +1,29 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: ceph-deploy disk partition alignment
-Date: Tue, 23 Feb 2016 16:58:23 +0000
-Message-ID: <BN1PR02MB0550E18ADED51175B2D3409F4A40@BN1PR02MB055.namprd02.prod.outlook.com>
-References: <BN1PR02MB0555D538EB56A2908359F32F4A30@BN1PR02MB055.namprd02.prod.outlook.com>
- <CAC-Np1xPNBur=vbBMrcEkBwsi1_b9AKxaK0-n2ABahLFFatBUg@mail.gmail.com>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: 'mon_addr' vs 'public_addr'
+Date: Tue, 23 Feb 2016 18:07:57 +0000
+Message-ID: <56CC9FFD.2030801@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0088.outbound.protection.outlook.com ([65.55.169.88]:6883
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751728AbcBWQ6Z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 23 Feb 2016 11:58:25 -0500
-In-Reply-To: <CAC-Np1xPNBur=vbBMrcEkBwsi1_b9AKxaK0-n2ABahLFFatBUg@mail.gmail.com>
-Content-Language: en-US
+Received: from mx2.suse.de ([195.135.220.15]:53680 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753131AbcBWSH7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 23 Feb 2016 13:07:59 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, 'Gregory Farnum' <gfarnum@redhat.com>
 
-WWVzLCBhcyBMb2ljIG1lbnRpb25lZCB0aGUgdGl0bGUgc2hvdWxkIGJlIGNlcGgtZGlzayBub3Qg
-Y2VwaC1kZXBsb3kgOi0pDQpJIHNhdyBjZXBoLWRpc2sgaXMgcmV0dXJuaW5nIGhhcmRjb2RlZCBz
-ZWN0b3IgMSBpbiB0aGUgY29kZSBvbiBzb21lIGNvbmRpdGlvbiAoSSBmb3Jnb3QpDQpBbnl3YXlz
-LCB3aWxsIHRyeSB3aXRoIGNlcGgtZGlzayBkaXJlY3RseSB0byBzZWUgdGhlIGJlaGF2aW9yLi4N
-Cg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
-LQ0KRnJvbTogQWxmcmVkbyBEZXphIFttYWlsdG86YWRlemFAcmVkaGF0LmNvbV0gDQpTZW50OiBU
-dWVzZGF5LCBGZWJydWFyeSAyMywgMjAxNiA0OjEyIEFNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBj
-ZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogY2VwaC1kZXBsb3kgZGlzayBwYXJ0aXRpb24gYWxpZ25t
-ZW50DQoNCk9uIE1vbiwgRmViIDIyLCAyMDE2IGF0IDE6MjcgUE0sIFNvbW5hdGggUm95IDxTb21u
-YXRoLlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEhpLA0KPiBJIGFtIHNlZWluZyBjZXBoLWRl
-cGxveSBpcyBjcmVhdGluZyBkYXRhIHBhcnRpdGlvbiBmcm9tIHNlY3RvciAxIGlnbm9yaW5nIHdo
-YXQgc2dkaXNrIGlzIHJlY29tbWVuZGluZyAoMjU2IGluIG15IGRpc2spLiBCYXNpY2FsbHksIGl0
-IHNob3VsZCBiZSBhbGlnbmVkIHdpdGggcGh5c2ljYWwgc2VjdG9yIHNpemUgKHJlcG9ydGVkIGlu
-IC9zeXMvYmxvY2svPGRldmljZT4vcXVldWUvcGh5c2ljYWxfYmxvY2tfc2l6ZSkuIEluIG15IGNh
-c2UgaXQgaXMgMTZLIHBoeXNpY2FsIGFuZCA0SyBsb2dpY2FsLi4uMjU2IGlzIHBlcmZlY3RseSBm
-aW5lIGFzIHNnZGlzay9mZGlzayBpbnRlcm5hbGx5IGRlY2lkZXMuDQo+IERpc2sgcGVyZm9ybWFu
-Y2Ugd2lsbCBiZSBzZXZlcmVseSBpbXBhY3RlZCBiZWNhdXNlIG9mIHBhcnRpdGlvbmluZyB0aGlz
-IHdheSBmcm9tIGNlcGgtZGVwbG95ICwgYW55IHJlYXNvbiB3aHkgd2UgYXJlIGRvaW5nIGxpa2Ug
-dGhpcyA/DQoNCkkgZG9uJ3QgdGhpbmsgY2VwaC1kZXBsb3kgaXMgcGFydGljdWxhcmx5IG9waW5p
-b25hdGVkIG9uIHRoaXMuIEhhdmUgeW91IHRyaWVkIHVzaW5nIGNlcGgtZGlzayBkaXJlY3RseSB0
-byBzZWUgaWYgdGhlIGJlaGF2aW9yIHBlcnNpc3RzPw0KDQpGb3IgT1NEcy9kaXNrcyBjZXBoLWRl
-cGxveSBtb3N0bHkgcHJveGllcyB0byBhIHJlbW90ZSBub2RlIHdpdGggY2VwaC1kaXNrLg0KPg0K
-PiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1h
-dGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRl
-ZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBh
-Ym92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCBy
-ZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQg
-dGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24s
-IGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJv
-aGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9y
-LCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hv
-d24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0
-aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVs
-ZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9t
-IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGlu
-IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUg
-bWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
-bmZvLmh0bWwNCg==
+Hi all,
+
+does anyone remember the rationale behind not simply relying on
+'public_addr' instead of 'mon_addr' for the monitors?
+
+I keep coming back to this, and I keep thinking this must be an artefact
+of some long-gone era, during which public_addr maybe didn't exist? I
+tried to backtrace its inception and ended up all the way in af870763
+back from 2009, but the commit itself didn't help much.
+
+Any thoughts?
+
+  -Joao
