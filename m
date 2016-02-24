@@ -1,53 +1,267 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: QE validation infernalis v9.2.1 status
-Date: Wed, 24 Feb 2016 08:24:04 -0800
-Message-ID: <CAMMFjmG3ukLQQiw6=R8z4PaR=MxVBvME4Qh3e-RsqFvrgdpqug@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: [ceph-users] v0.94.6 Hammer released
+Date: Wed, 24 Feb 2016 11:27:30 -0500
+Message-ID: <CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
+References: <alpine.DEB.2.11.1602231059590.7485@cpach.fuggernut.com>
+	<CABZ+qq=ZqhaL9uwobM1NZ7+AszUMqirHATLJZyRcowD1iDRsww@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f179.google.com ([209.85.223.179]:36057 "EHLO
-	mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751837AbcBXQYG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Feb 2016 11:24:06 -0500
-Received: by mail-io0-f179.google.com with SMTP id l127so49470604iof.3
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Feb 2016 08:24:05 -0800 (PST)
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:36007 "EHLO
+	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752126AbcBXQ1c convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Feb 2016 11:27:32 -0500
+Received: by mail-wm0-f51.google.com with SMTP id g62so279990478wme.1
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Feb 2016 08:27:31 -0800 (PST)
+In-Reply-To: <CABZ+qq=ZqhaL9uwobM1NZ7+AszUMqirHATLJZyRcowD1iDRsww@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-qa <ceph-qa@ceph.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sage@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>, "Dachary, Loic" <ldachary@redhat.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Gregory Farnum <gfarnum@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, Gregory Meno <gmeno@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: Sage Weil <sage@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-Detailed summary of the QE Validation can be found here
-http://tracker.ceph.com/issues/13750#note-32
+On Wed, Feb 24, 2016 at 4:31 AM, Dan van der Ster <dan@vanderster.com> =
+wrote:
+> Thanks Sage, looking forward to some scrub randomization.
+>
+> Were binaries built for el6? http://download.ceph.com/rpm-hammer/el6/=
+x86_64/
 
-The following suites were in scope of this point release testing:
+We are no longer building binaries for el6. Just for Centos 7, Ubuntu
+Trusty, and Debian Jessie.
 
-rados (subset 1/7)
-rbd
-rgw
-fs
-krbd
-kcephfs
-knfs
-hadoop
-samba
-rest
-ceph-deploy
-upgrade/client-upgrade
-upgrade/hammer-x (infernalis)
-upgrade/firefly-x (infernalis)
-upgrade/firefly-hammer-x (infernalis)
-upgrade/infernalis
-powercycle
-
-Known issues (approved for release):
-
-krbd:
-http://tracker.ceph.com/issues/14848 - approved by Jason
-
-ceph-deploy:
-http://tracker.ceph.com/issues/14223 - assumed approved by Sage (?)
-
-powercycle:
-http://tracker.ceph.com/issues/14810 - needs Sage approval
-
-Thx
-YuriW
+>
+> Cheers, Dan
+>
+>
+> On Tue, Feb 23, 2016 at 5:01 PM, Sage Weil <sage@redhat.com> wrote:
+>> This Hammer point release fixes a range of bugs, most notably a fix =
+for
+>> unbounded growth of the monitor=E2=80=99s leveldb store, and a worka=
+round in the
+>> OSD to keep most xattrs small enough to be stored inline in XFS inod=
+es.
+>>
+>> We recommend that all hammer v0.94.x users upgrade.
+>>
+>> For more detailed information, see the complete changelog:
+>>
+>>   http://docs.ceph.com/docs/master/_downloads/v0.94.6.txt
+>>
+>> Notable Changes
+>> ---------------
+>>
+>> * build/ops: Ceph daemon failed to start, because the service name w=
+as already used. (#13474, Chuanhong Wang)
+>> * build/ops: LTTng-UST tracing should be dynamically enabled (#13274=
+, Jason Dillaman)
+>> * build/ops: ceph upstart script rbdmap.conf incorrectly processes p=
+arameters (#13214, Sage Weil)
+>> * build/ops: ceph.spec.in License line does not reflect COPYING (#12=
+935, Nathan Cutler)
+>> * build/ops: ceph.spec.in libcephfs_jni1 has no %post and %postun  (=
+#12927, Owen Synge)
+>> * build/ops: configure.ac: no use to add "+" before ac_ext=3Dc (#143=
+30, Kefu Chai, Robin H. Johnson)
+>> * build/ops: deb: strip tracepoint libraries from Wheezy/Precise bui=
+lds (#14801, Jason Dillaman)
+>> * build/ops: init script reload doesn't work on EL7 (#13709, Herv=C3=
+=A9 Rousseau)
+>> * build/ops: init-rbdmap uses distro-specific functions (#12415, Bor=
+is Ranto)
+>> * build/ops: logrotate reload error on Ubuntu 14.04 (#11330, Sage We=
+il)
+>> * build/ops: miscellaneous spec file fixes (#12931, #12994, #12924, =
+#12360, Boris Ranto, Nathan Cutler, Owen Synge, Travis Rhoden, Ken Drey=
+er)
+>> * build/ops: pass tcmalloc env through to ceph-os (#14802, Sage Weil=
+)
+>> * build/ops: rbd-replay-* moved from ceph-test-dbg to ceph-common-db=
+g as well (#13785, Loic Dachary)
+>> * build/ops: unknown argument --quiet in udevadm settle (#13560, Jas=
+on Dillaman)
+>> * common: Objecter: pool op callback may hang forever. (#13642, xie =
+xingguo)
+>> * common: Objecter: potential null pointer access when do pool_snap_=
+list. (#13639, xie xingguo)
+>> * common: ThreadPool add/remove work queue methods not thread safe (=
+#12662, Jason Dillaman)
+>> * common: auth/cephx: large amounts of log are produced by osd (#136=
+10, Qiankun Zheng)
+>> * common: client nonce collision due to unshared pid namespaces (#13=
+032, Josh Durgin)
+>> * common: common/Thread:pthread_attr_destroy(thread_attr) when done =
+with it (#12570, Piotr Da=C5=82ek)
+>> * common: log: Log.cc: Assign LOG_DEBUG priority to syslog calls (#1=
+3993, Brad Hubbard)
+>> * common: objecter: cancellation bugs (#13071, Jianpeng Ma)
+>> * common: pure virtual method called (#13636, Jason Dillaman)
+>> * common: small probability sigabrt when setting rados_osd_op_timeou=
+t (#13208, Ruifeng Yang)
+>> * common: wrong conditional for boolean function KeyServer::get_auth=
+() (#9756, #13424, Nathan Cutler)
+>> * crush: crash if we see CRUSH_ITEM_NONE in early rule step (#13477,=
+ Sage Weil)
+>> * doc: man: document listwatchers cmd in "rados" manpage (#14556, Ke=
+fu Chai)
+>> * doc: regenerate man pages, add orphans commands to radosgw-admin(8=
+) (#14637, Ken Dreyer)
+>> * fs: CephFS restriction on removing cache tiers is overly strict (#=
+11504, John Spray)
+>> * fs: fsstress.sh fails (#12710, Yan, Zheng)
+>> * librados: LibRadosWatchNotify.WatchNotify2Timeout (#13114, Sage We=
+il)
+>> * librbd: ImageWatcher shouldn't block the notification thread (#143=
+73, Jason Dillaman)
+>> * librbd: diff_iterate needs to handle holes in parent images (#1288=
+5, Jason Dillaman)
+>> * librbd: fix merge-diff for >2GB diff-files (#14030, Jason Dillaman=
+)
+>> * librbd: invalidate object map on error even w/o holding lock (#133=
+72, Jason Dillaman)
+>> * librbd: reads larger than cache size hang (#13164, Lu Shi)
+>> * mds: ceph mds add_data_pool check for EC pool is wrong (#12426, Jo=
+hn Spray)
+>> * mon: MonitorDBStore: get_next_key() only if prefix matches (#11786=
+, Joao Eduardo Luis)
+>> * mon: OSDMonitor: do not assume a session exists in send_incrementa=
+l() (#14236, Joao Eduardo Luis)
+>> * mon: check for store writeablility before participating in electio=
+n (#13089, Sage Weil)
+>> * mon: compact full epochs also (#14537, Kefu Chai)
+>> * mon: include min_last_epoch_clean as part of PGMap::print_summary =
+and PGMap::dump (#13198, Guang Yang)
+>> * mon: map_cache can become inaccurate if osd does not receive the o=
+sdmaps (#10930, Kefu Chai)
+>> * mon: should not set isvalid =3D true when cephx_verify_authorizer =
+return false (#13525, Ruifeng Yang)
+>> * osd: Ceph Pools' MAX AVAIL is 0 if some OSDs' weight is 0 (#13840,=
+ Chengyuan Li)
+>> * osd: FileStore calls syncfs(2) even it is not supported (#12512, K=
+efu Chai)
+>> * osd: FileStore: potential memory leak if getattrs fails. (#13597, =
+xie xingguo)
+>> * osd: IO error on kvm/rbd with an erasure coded pool tier (#12012, =
+Kefu Chai)
+>> * osd: OSD::build_past_intervals_parallel() shall reset primary and =
+up_primary when begin a new past_interval. (#13471, xiexingguo)
+>> * osd: ReplicatedBackend: populate recovery_info.size for clone (bug=
+ symptom is size mismatch on replicated backend on a clone in scrub) (#=
+12828, Samuel Just)
+>> * osd: ReplicatedPG: wrong result code checking logic during sparse_=
+read (#14151, xie xingguo)
+>> * osd: ReplicatedPG::hit_set_trim osd/ReplicatedPG.cc: 11006: FAILED=
+ assert(obc) (#13192, #9732, #12968, Kefu Chai, Zhiqiang Wang, Samuel J=
+ust, David Zafman)
+>> * osd: avoid multi set osd_op.outdata in tier pool (#12540, Xinze Ch=
+i)
+>> * osd: bug with cache/tiering and snapshot reads (#12748, Kefu Chai)
+>> * osd: ceph osd pool stats broken in hammer (#13843, BJ Lougee)
+>> * osd: ceph-disk prepare fails if device is a symlink (#13438, Joe J=
+ulian)
+>> * osd: check for full before changing the cached obc (hammer) (#1309=
+8, Alexey Sheplyakov)
+>> * osd: config_opts: increase suicide timeout to 300 to match recover=
+y (#14376, Samuel Just)
+>> * osd: disable filestore_xfs_extsize by default (#14397, Ken Dreyer)
+>> * osd: do not cache unused memory in attrs (#12565, Xinze Chi, Ning =
+Yao)
+>> * osd: dumpling incrementals do not work properly on hammer and newe=
+r (#13234, Samuel Just)
+>> * osd: filestore: fix peek_queue for OpSequencer (#13209, Xinze Chi)
+>> * osd: hit set clear repops fired in same epoch as map change -- seg=
+fault since they fall into the new interval even though the repops are =
+cleared (#12809, Samuel Just)
+>> * osd: object_info_t::decode() has wrong version (#13462, David Zafm=
+an)
+>> * osd: osd/OSD.cc: 2469: FAILED assert(pg_stat_queue.empty()) on shu=
+tdown (#14212, Sage Weil)
+>> * osd: osd/PG.cc: 288: FAILED assert(info.last_epoch_started >=3D in=
+fo.history.last_epoch_started) (#14015, David Zafman)
+>> * osd: osd/PG.cc: 3837: FAILED assert(0 =3D=3D "Running incompatible=
+ OSD") (#11661, David Zafman)
+>> * osd: osd/ReplicatedPG: Recency fix (#14320, Sage Weil, Robert LeBl=
+anc)
+>> * osd: pg stuck in replay (#13116, Sage Weil)
+>> * osd: race condition detected during send_failures (#13821, Sage We=
+il)
+>> * osd: randomize scrub times (#10973, Kefu Chai)
+>> * osd: requeue_scrub when kick_object_context_blocked (#12515, Xinze=
+ Chi)
+>> * osd: revert: use GMT time for hitsets (#13812, Loic Dachary)
+>> * osd: segfault in agent_work (#13199, Samuel Just)
+>> * osd: should recalc the min_last_epoch_clean when decode PGMap (#13=
+112, Kefu Chai)
+>> * osd: smaller object_info_t xattrs (#14803, Sage Weil)
+>> * osd: we do not ignore notify from down osds (#12990, Samuel Just)
+>> * rbd: QEMU hangs after creating snapshot and stopping VM (#13726, J=
+ason Dillaman)
+>> * rbd: TaskFinisher::cancel should remove event from SafeTimer (#144=
+76, Douglas Fuller)
+>> * rbd: avoid re-writing old-format image header on resize (#13674, J=
+ason Dillaman)
+>> * rbd: fix bench-write (#14225, Sage Weil)
+>> * rbd: rbd-replay does not check for EOF and goes to endless loop (#=
+14452, Mykola Golub)
+>> * rbd: rbd-replay-prep and rbd-replay improvements (#13221, #13220, =
+#13378, Jason Dillaman)
+>> * rbd: verify self-managed snapshot functionality on image create (#=
+13633, Jason Dillaman)
+>> * rgw: Make RGW_MAX_PUT_SIZE configurable (#6999, Vladislav Odintsov=
+, Yuan Zhou)
+>> * rgw: Setting ACL on Object removes ETag (#12955, Brian Felton)
+>> * rgw: backport content-type casing (#12939, Robin H. Johnson)
+>> * rgw: bucket listing hangs on versioned buckets (#12913, Yehuda Sad=
+eh)
+>> * rgw: fix wrong etag calculation during POST on S3 bucket. (#11241,=
+ Vladislav Odintsov, Radoslaw Zarzynski)
+>> * rgw: get bucket location returns region name, not region api name =
+(#13458, Yehuda Sadeh)
+>> * rgw: missing handling of encoding-type=3Durl when listing keys in =
+bucket (#12735, Jeff Weber)
+>> * rgw: orphan tool should be careful about removing head objects (#1=
+2958, Yehuda Sadeh)
+>> * rgw: orphans finish segfaults (#13824, Igor Fedotov)
+>> * rgw: rgw-admin: document orphans commands in usage (#14516, Yehuda=
+ Sadeh)
+>> * rgw: swift API returns more than real object count and bytes used =
+when retrieving account metadata (#13140, Sangdi Xu)
+>> * rgw: swift use Civetweb ssl can not get right url (#13628, Weijun =
+Duan)
+>> * rgw: value of Swift API's X-Object-Manifest header is not url_deco=
+ded during segment look up (#12728, Radoslaw Zarzynski)
+>> * tests: fixed broken Makefiles after integration of ttng into rados=
+ (#13210, Sebastien Ponce)
+>> * tests: fsx failed to compile (#14384, Greg Farnum)
+>> * tests: notification slave needs to wait for master (#13810, Jason =
+Dillaman)
+>> * tests: qa: remove legacy OS support from rbd/qemu-iotests (#13483,=
+ #14385, Vasu Kulkarni, Jason Dillaman)
+>> * tests: testprofile must be removed before it is re-created (#13664=
+, Loic Dachary)
+>> * tools: ceph-monstore-tool must do out_store.close() (#10093, huang=
+jun)
+>> * tools: heavy memory shuffling in rados bench (#12946, Piotr Da=C5=82=
+ek)
+>> * tools: race condition in rados bench (#12947, Piotr Da=C5=82ek)
+>> * tools: tool for artificially inflate the leveldb of the mon store =
+for testing purposes  (#10093, #11815, #14217, Cilang Zhao, Bo Cai, Kef=
+u Chai, huangjun, Joao Eduardo Luis)
+>>
+>> Getting Ceph
+>> ------------
+>>
+>> * Git at git://github.com/ceph/ceph.git
+>> * Tarball at http://download.ceph.com/tarballs/ceph-0.94.6.tar.gz
+>> * For packages, see http://ceph.com/docs/master/install/get-packages
+>> * For ceph-deploy, see http://ceph.com/docs/master/install/install-c=
+eph-deploy
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
