@@ -1,90 +1,123 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Ceph stable release team: call for participation
-Date: Wed, 24 Feb 2016 12:19:47 +0700
-Message-ID: <56CD3D73.1000204@dachary.org>
+From: Marcus Watts <mwatts@redhat.com>
+Subject: ceph: building out of tree
+Date: Wed, 24 Feb 2016 00:48:20 -0500
+Message-ID: <20160224054820.GB6585@degu.b.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:33372 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932457AbcBXFT5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Feb 2016 00:19:57 -0500
+Received: from mx1.redhat.com ([209.132.183.28]:42201 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750718AbcBXFsX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 24 Feb 2016 00:48:23 -0500
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id 0FAFE8E3D4
+	for <ceph-devel@vger.kernel.org>; Wed, 24 Feb 2016 05:48:23 +0000 (UTC)
+Received: from degu.b.linuxbox.com (vpn-60-96.rdu2.redhat.com [10.10.60.96])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u1O5mLYp014072
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 24 Feb 2016 00:48:22 -0500
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Ceph,
+When I was working on "wip-openssl", I quickly found myself bogged down
+dealing with build issues.
 
-TL;DR: If you have one day a week to work on the next Ceph stable relea=
-ses [1] your help would be most welcome.
+1. why I do out of tree builds
+2. changes for out of tree builds
+3. doing an out of tree build
+4. well, not quite
 
-The Ceph "Long Term Stable" (LTS) releases - currently hammer[2] - are =
-used by individuals, non-profits, government agencies and companies for=
- their production Ceph clusters. They are also used when Ceph is integr=
-ated into larger products, such as hardware appliances. Ceph packages f=
-or a range of supported distribution are available at http://ceph.com/.=
- Before the packages for a new stable release are published, they are c=
-arefully tested for potential regressions or upgrade problems. The Ceph=
- project makes every effort to ensure the packages published at http://=
-ceph.com/ can be used and upgraded in production.
+____ 1. why I do out of tree builds
 
-The Stable release team[3] plays an essential role in the making of eac=
-h Ceph stable release. In addition to maintaining an inventory of bugfi=
-xes that are in various stages of backporting[4], in most cases we do t=
-he actual backporting ourselves[5]. We also run integration tests invol=
-ving hundreds of machines[6] and analyze the test results when they fai=
-l[7]. The developers of the bugfixes only hear from us when we're stuck=
- or to make the final decision whether to merge a backport into the sta=
-ble branch. Our process is well documented[8] and participating is a re=
-laxing experience (IMHO ;-). Every month or so we have the satisfaction=
- of seeing a new stable release published.
+So, as a matter of habit, I do most of my large project builds doing
+"out of tree" builds.  There are a variety of reasons I have adopted
+this habit.  For many years, I was supporting multiple architectures
+in a shared filesystem, and it was a lot easier to not lose changes
+if I had one source tree shared between several build trees. (especially
+when my source control system was rcs!)  Today, I still like to do this;
+it means I can more easily test out several different configurations
+in parallel, efficiently put an old build aside for later reference,
+and quickly discard older stuff without fear of losing an important
+source change.
 
-There are no pre-requistes to participate. Over time, it is an opportun=
-ity to learn how the code base is organized. When trying to figure out =
-which commit does not cherry-pick cleanly, you will learn some of the l=
-ogic of the Ceph internals. Last but not least, running the integration=
- tests[6] and analyzing failures is a great way to know precisely what =
-Ceph is capable of.
+And so, with wip-openssl, I find myself with several different build
+configurations: with cmake, and with automake.  Cmake is my preferred
+solution: it works faster, and excepting for one recent change it supports
+out of tree builds just fine.
+	[ the one exception is rocksdb, and I'll post separately on that. ]
+For automake, I found myself looking at a much longer list of things
+that didn't quite work.
 
-Nathan Cutler (SUSE) drives the next Hammer release[9] and Abhishek Var=
-shney (Flipkart) drives the next Infernalis release[10]. Abhishek Leksh=
-manan (SUSE) helps on all releases and M Ranga Swami Reddy (Reliance Ji=
-o Infocomm Ltd.) learns the workflow by helping with Hammer. Loic Dacha=
-ry (Red Hat), one of the Ceph core developers, oversees the process and=
- provides help and advice when necessary. After these two releases are =
-published (which should happen in the next few weeks), the roles will c=
-hange and we would like to invite you to participate. If you're employe=
-d by a company using Ceph or doing business with it, maybe your manager=
- could agree to give back to the Ceph community in this way. You can jo=
-in at any time and you will be mentored while the ongoing releases comp=
-lete. When the time comes (and if you feel ready), you will be offered =
-a seat to drive the next release.
+____ 2. changes for out of tree builds
 
-Cheers
+List of commits from wip-openssl that together do most of what I want,
+96f16f9c61b8f96ddb86c3b3630078c4a28058ec
+0a60a5fa3582a97a2a8914dc96abe469f3244fbe
+	WITH_DLIBROCKSDB
+	I'm used to other automake based systems where one can say things
+	like "with-krb5=yes" and have it find the external (system) copy of krb5.
+	I am not sure "with-rocksdb" ever really worked right in ceph,
+	but it kind of looked like it wanted a dynamic version of rocksdb
+	(again, I'll post more on that separately.) So I wound up repurposing
+	this to mean just that.
+ddca62ffdb3b7908140f7c4072692b6148bd54a0
+	src/ceph.in is a classic sort of "out of tree" build problem.
+	The proper automake way to reference src/ceph.in is
+	$(srcdir)/ceph.in .   With gnu make, it's possible to cheat
+	and just call it $< .  Do we support other makes?
+e51fd743587454cf0b08aaea4977eee253a71664
+	build version files are another ubiquitious "out of tree" build problem.
+	In ceph, the use of "FORCE" for this logic means every make run
+	wants to relink every library and executable, which really slows
+	things down.   I left .git_version in the source tree
+	but moved ceph_ver.h to the object tree.  This doesn't make
+	me completely happy, but it at least gave me something buildable.
+1ddd0ed672d1a8a8201b1bf65cf6a173456320c6
+c8792d96e5c2cfbdaf555e9ae545cb2aa0d7c8e6
+	pybind/setup.py wanted to read ceph_ver.h.  I should probably
+	have taught it to read ceph_ver.h in the build tree,
+	but instead I taught it to find .git_version.  I did put
+	logic in it to construct "PEP-440" friendly version tags,
+	which got rid of one build warning.
 
-[1] Ceph Releases timeline http://ceph.com/docs/master/releases/
-[2] Hammer v0.94.6 http://ceph.com/docs/master/release-notes/#v0-94-6-h=
-ammer
-[3] Stable release team http://tracker.ceph.com/projects/ceph-releases
-[4] Hammer backports http://tracker.ceph.com/projects/ceph/issues?query=
-_id=3D78
-[5] Backporting commits http://tracker.ceph.com/projects/ceph-releases/=
-wiki/HOWTO_backport_commits
-[6] Integration tests http://tracker.ceph.com/projects/ceph-releases/wi=
-ki/HOWTO_run_integration_and_upgrade_tests
-[7] Forensic analysis of integration tests http://tracker.ceph.com/proj=
-ects/ceph-releases/wiki/HOWTO_forensic_analysis_of_integration_and_upgr=
-ade_tests
-[8] Ceph Stable releases home page http://tracker.ceph.com/projects/cep=
-h-releases/wiki/HOWTO
-[9] Hammer v0.94.7 http://tracker.ceph.com/issues/14692
-[10] Infernalis v9.2.1 http://tracker.ceph.com/issues/13750
+____ 3. doing an out of tree build
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+With this set of changes, I can now make a "readonly" source tree
+and build with it this way,
+	git clone -b wip-openssl git@github.com:ceph/ceph.git ceph-ssl
+	cd ceph-ssl
+	git clean -fdx
+	git submodule update --init --recursive
+	sh autogen.sh
+	sleep 1; touch src/acconfig.h.in src/gmock/build-aux/config.h.in
+	rm -f src/.git_version src/ceph_ver.h
+	src/make_version -g src/.git_version
+	find .  \! -type l -print0 | xargs -0 chmod a-w
+	mkdir ../td ; cd ../td
+	CFLAGS="-fno-omit-frame-pointer -g -O2" CXXFLAGS="-fno-omit-frame-pointer -g" \
+	../ceph-ssl/configure --with-debug --with-radosgw \
+	--with-libatomic-ops --without-lttng --disable-static \
+	--with-librocksdb=yes --with-librocksdb-static=no
+
+The "sleep 1" business is because it turns out that
+src/acconfig.h.in src/gmock/build-aux/config.h.in
+have to be at least 1 second newer than other stuff
+in the source tree, and my build machine is fast
+enough at running autogen.sh that that's never true.
+
+I think autogen.sh could also be making .git_version directly,
+but I didn't bother here.
+
+____ 4. well, not quite
+
+This will still blow up late in the build process.  There's
+something that makes 2 python virtual environments in the
+source tree.  They should be in the build tree, and
+also this should be part of "make check", not "make all".
+
+But other than that, I have something that works, and that
+doesn't blow up git builder.
+
+					-Marcus Watts
