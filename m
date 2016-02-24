@@ -1,39 +1,25 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: 'mon_addr' vs 'public_addr'
-Date: Tue, 23 Feb 2016 13:16:49 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1602231315450.7555@cpach.fuggernut.com>
-References: <56CC9FFD.2030801@suse.de>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Why should we need trim_pushed_data() in handle_pull_response()
+Date: Wed, 24 Feb 2016 12:00:10 +0800
+Message-ID: <CALZt5jxbXJ9hit8_cvw7Fmo-VSZ5OJSyVWCyz8YrXjfgy3YDMQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45988 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754531AbcBWSRT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 23 Feb 2016 13:17:19 -0500
-In-Reply-To: <56CC9FFD.2030801@suse.de>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:35473 "EHLO
+	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756658AbcBXEAM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Feb 2016 23:00:12 -0500
+Received: by mail-wm0-f44.google.com with SMTP id c200so250409161wme.0
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Feb 2016 20:00:11 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao@suse.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, 'Gregory Farnum' <gfarnum@redhat.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>, "sjust@redhat.com" <sjust@redhat.com>
 
-On Tue, 23 Feb 2016, Joao Eduardo Luis wrote:
-> Hi all,
-> 
-> does anyone remember the rationale behind not simply relying on
-> 'public_addr' instead of 'mon_addr' for the monitors?
-> 
-> I keep coming back to this, and I keep thinking this must be an artefact
-> of some long-gone era, during which public_addr maybe didn't exist? I
+Hi, Sam
+  why we need trim_pushed_data() in handle_pull_response(). I think
+data_included is always a subset of recovery_info.copy_subset since
+the logic in build_push_op tells us that, isn't it?
 
-Yes.
 
-> tried to backtrace its inception and ended up all the way in af870763
-> back from 2009, but the commit itself didn't help much.
-> 
-> Any thoughts?
-
-It's slightly tricky because we need to make mon addr still work.. but we 
-can move all the docs refer to public_addr instead and make mon_addr 
-override that if it is non-empty.
-
-sage
+Regards
+Ning Yao
