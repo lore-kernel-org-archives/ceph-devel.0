@@ -1,52 +1,61 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: osd dm-crypt key management, seconde partie
-Date: Wed, 24 Feb 2016 19:13:46 +0700
-Message-ID: <56CD9E7A.2050901@dachary.org>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Weekly Ceph Performance Meeting Invitation
+Date: Wed, 24 Feb 2016 16:05:16 +0000
+Message-ID: <BN1PR02MB05588B56CA9FC2531E95ABDF4A50@BN1PR02MB055.namprd02.prod.outlook.com>
+References: <542B043F.6020600@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:47988 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751174AbcBXMNz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Feb 2016 07:13:55 -0500
-Received: from mfilter47-d.gandi.net (mfilter47-d.gandi.net [217.70.178.178])
-	by relay4-d.mail.gandi.net (Postfix) with ESMTP id E58D817209C
-	for <ceph-devel@vger.kernel.org>; Wed, 24 Feb 2016 13:13:52 +0100 (CET)
-Received: from relay4-d.mail.gandi.net ([IPv6:::ffff:217.70.183.196])
-	by mfilter47-d.gandi.net (mfilter47-d.gandi.net [::ffff:10.0.15.180]) (amavisd-new, port 10024)
-	with ESMTP id e-Ojtt0TICXh for <ceph-devel@vger.kernel.org>;
-	Wed, 24 Feb 2016 13:13:51 +0100 (CET)
-Received: from [10.9.0.6] (197.ip-167-114-246.eu [167.114.246.197])
-	(Authenticated sender: loic@dachary.org)
-	by relay4-d.mail.gandi.net (Postfix) with ESMTPSA id 888DD1720BA
-	for <ceph-devel@vger.kernel.org>; Wed, 24 Feb 2016 13:13:49 +0100 (CET)
+Received: from mail-bn1bon0063.outbound.protection.outlook.com ([157.56.111.63]:18048
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753630AbcBXQFS convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Feb 2016 11:05:18 -0500
+In-Reply-To: <542B043F.6020600@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Mark,
+Do we have meeting today ?
 
-A first implementation[1] of the key management scheme[2] was completed=
- today (it passes tests, integration and make check). While work is don=
-e to add tests to verify legacy key storage support, it would be great =
-to get reviews and feedback. There is little time before the jewel merg=
-e window closes: now would be a perfect time to catch blockers :-)
+Thanks & Regards
+Somnath
 
-Cheers
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Tuesday, September 30, 2014 12:28 PM
+To: ceph-devel@vger.kernel.org
+Subject: Weekly Ceph Performance Meeting Invitation
 
-[1] https://github.com/ceph/ceph/pull/7552/files=20
-[2] http://pad.ceph.com/p/osd-key-management
+Hi All,
 
-P.S. The previous mail thread on that topic was : "osd dm-crypt key man=
-agement, part... deux?", hence the "seconde partie" instead, which carr=
-ies the idea that there won't be a third part (yes, French has that kin=
-d of words : https://fr.wiktionary.org/wiki/second, 2.).
+I put together a bluejeans meeting for the Ceph performance meeting tomorrow at 8AM PST.  Hope to see you there!
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
