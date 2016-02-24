@@ -1,72 +1,34 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: ceph-disk disk partition alignment
-Date: Wed, 24 Feb 2016 22:01:19 +0000
-Message-ID: <BN1PR02MB055755F2C83F7524F44ACEFF4A50@BN1PR02MB055.namprd02.prod.outlook.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: osd dm-crypt key management, seconde partie
+Date: Wed, 24 Feb 2016 17:35:28 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1602241733260.7555@cpach.fuggernut.com>
+References: <56CD9E7A.2050901@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0064.outbound.protection.outlook.com ([157.56.111.64]:34080
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751974AbcBXWBW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 24 Feb 2016 17:01:22 -0500
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:57017 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756832AbcBXWf6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Feb 2016 17:35:58 -0500
+In-Reply-To: <56CD9E7A.2050901@dachary.org>
+Content-ID: <alpine.DEB.2.11.1602241734381.7555@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, jschmid@suse.de
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgQWxmcmVkbywNCkFzIGV4cGVjdGVkLCB3YW50ZWQgdG8gY29uZmlybSB0aGF0IHRoaXMgaXMg
-aGFwcGVuaW5nIHdpdGggY2VwaC1kaXNrIGFsc28uLkFmdGVyIHJ1bm5pbmcgJ2NlcGgtZGlzayBw
-cmVwYXJlJyBJIGFtIHNlZWluZyB0aGUgc2ltaWxhciBiZWhhdmlvci4uDQoNCkRpc2sgL2Rldi9z
-ZGo6IDc2ODEuNSBHQiwgNzY4MTUwMTEyNjY1NiBieXRlcw0KMjU2IGhlYWRzLCA2MyBzZWN0b3Jz
-L3RyYWNrLCAxMTYyODAgY3lsaW5kZXJzLCB0b3RhbCAxODc1MzY2NDg2IHNlY3RvcnMNClVuaXRz
-ID0gc2VjdG9ycyBvZiAxICogNDA5NiA9IDQwOTYgYnl0ZXMNClNlY3RvciBzaXplIChsb2dpY2Fs
-L3BoeXNpY2FsKTogNDA5NiBieXRlcyAvIDE2Mzg0IGJ5dGVzDQpJL08gc2l6ZSAobWluaW11bS9v
-cHRpbWFsKTogMTYzODQgYnl0ZXMgLyAxNjM4NCBieXRlcw0KRGlzayBpZGVudGlmaWVyOiAweDAw
-MDAwMDAwDQoNCiAgIERldmljZSBCb290ICAgICAgU3RhcnQgICAgICAgICBFbmQgICAgICBCbG9j
-a3MgICBJZCAgU3lzdGVtDQovZGV2L3NkajEgICAgICAgICAgICAgICAxICAxODc1MzY2NDg1ICAz
-MjA2NDk4NjQ0ICAgZWUgIEdQVA0KUGFydGl0aW9uIDEgZG9lcyBub3Qgc3RhcnQgb24gcGh5c2lj
-YWwgc2VjdG9yIGJvdW5kYXJ5Lg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0t
-T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBTb21uYXRoIFJveSANClNlbnQ6IFR1ZXNkYXks
-IEZlYnJ1YXJ5IDIzLCAyMDE2IDg6NTggQU0NClRvOiAnQWxmcmVkbyBEZXphJw0KQ2M6IGNlcGgt
-ZGV2ZWwNClN1YmplY3Q6IFJFOiBjZXBoLWRlcGxveSBkaXNrIHBhcnRpdGlvbiBhbGlnbm1lbnQN
-Cg0KWWVzLCBhcyBMb2ljIG1lbnRpb25lZCB0aGUgdGl0bGUgc2hvdWxkIGJlIGNlcGgtZGlzayBu
-b3QgY2VwaC1kZXBsb3kgOi0pIEkgc2F3IGNlcGgtZGlzayBpcyByZXR1cm5pbmcgaGFyZGNvZGVk
-IHNlY3RvciAxIGluIHRoZSBjb2RlIG9uIHNvbWUgY29uZGl0aW9uIChJIGZvcmdvdCkgQW55d2F5
-cywgd2lsbCB0cnkgd2l0aCBjZXBoLWRpc2sgZGlyZWN0bHkgdG8gc2VlIHRoZSBiZWhhdmlvci4u
-DQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
-LS0NCkZyb206IEFsZnJlZG8gRGV6YSBbbWFpbHRvOmFkZXphQHJlZGhhdC5jb21dDQpTZW50OiBU
-dWVzZGF5LCBGZWJydWFyeSAyMywgMjAxNiA0OjEyIEFNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBj
-ZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogY2VwaC1kZXBsb3kgZGlzayBwYXJ0aXRpb24gYWxpZ25t
-ZW50DQoNCk9uIE1vbiwgRmViIDIyLCAyMDE2IGF0IDE6MjcgUE0sIFNvbW5hdGggUm95IDxTb21u
-YXRoLlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEhpLA0KPiBJIGFtIHNlZWluZyBjZXBoLWRl
-cGxveSBpcyBjcmVhdGluZyBkYXRhIHBhcnRpdGlvbiBmcm9tIHNlY3RvciAxIGlnbm9yaW5nIHdo
-YXQgc2dkaXNrIGlzIHJlY29tbWVuZGluZyAoMjU2IGluIG15IGRpc2spLiBCYXNpY2FsbHksIGl0
-IHNob3VsZCBiZSBhbGlnbmVkIHdpdGggcGh5c2ljYWwgc2VjdG9yIHNpemUgKHJlcG9ydGVkIGlu
-IC9zeXMvYmxvY2svPGRldmljZT4vcXVldWUvcGh5c2ljYWxfYmxvY2tfc2l6ZSkuIEluIG15IGNh
-c2UgaXQgaXMgMTZLIHBoeXNpY2FsIGFuZCA0SyBsb2dpY2FsLi4uMjU2IGlzIHBlcmZlY3RseSBm
-aW5lIGFzIHNnZGlzay9mZGlzayBpbnRlcm5hbGx5IGRlY2lkZXMuDQo+IERpc2sgcGVyZm9ybWFu
-Y2Ugd2lsbCBiZSBzZXZlcmVseSBpbXBhY3RlZCBiZWNhdXNlIG9mIHBhcnRpdGlvbmluZyB0aGlz
-IHdheSBmcm9tIGNlcGgtZGVwbG95ICwgYW55IHJlYXNvbiB3aHkgd2UgYXJlIGRvaW5nIGxpa2Ug
-dGhpcyA/DQoNCkkgZG9uJ3QgdGhpbmsgY2VwaC1kZXBsb3kgaXMgcGFydGljdWxhcmx5IG9waW5p
-b25hdGVkIG9uIHRoaXMuIEhhdmUgeW91IHRyaWVkIHVzaW5nIGNlcGgtZGlzayBkaXJlY3RseSB0
-byBzZWUgaWYgdGhlIGJlaGF2aW9yIHBlcnNpc3RzPw0KDQpGb3IgT1NEcy9kaXNrcyBjZXBoLWRl
-cGxveSBtb3N0bHkgcHJveGllcyB0byBhIHJlbW90ZSBub2RlIHdpdGggY2VwaC1kaXNrLg0KPg0K
-PiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1h
-dGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRl
-ZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBh
-Ym92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCBy
-ZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQg
-dGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24s
-IGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJv
-aGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9y
-LCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hv
-d24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0
-aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVs
-ZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9t
-IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGlu
-IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUg
-bWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
-bmZvLmh0bWwNCg==
+On Wed, 24 Feb 2016, Loic Dachary wrote:
+> Hi,
+> 
+> A first implementation[1] of the key management scheme[2] was completed 
+> today (it passes tests, integration and make check). While work is done 
+> to add tests to verify legacy key storage support, it would be great to 
+> get reviews and feedback. There is little time before the jewel merge 
+> window closes: now would be a perfect time to catch blockers :-)
+
+Great!  I skimmed the patchset (on my phone) and it looked clean and sane 
+to me.  Joshua, maybe you can take a look at make sure this approach meets 
+your needs as well?
+
+Thanks!
+sage
