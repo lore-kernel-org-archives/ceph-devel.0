@@ -1,82 +1,83 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: ceph / rocksdb
-Date: Wed, 24 Feb 2016 18:04:45 +0000
-Message-ID: <CY1PR0201MB189710A36C47200EDB0E335BE8A50@CY1PR0201MB1897.namprd02.prod.outlook.com>
-References: <20160224060546.GC6585@degu.b.linuxbox.com>
- <CALqRxCwrsTv=Lbrc98f7WLqwZxeySiAdq08E0h8a2eNyDU6SPQ@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: ceph / rocksdb
+Date: Wed, 24 Feb 2016 13:06:48 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1602241305060.7555@cpach.fuggernut.com>
+References: <20160224060546.GC6585@degu.b.linuxbox.com> <CALqRxCwrsTv=Lbrc98f7WLqwZxeySiAdq08E0h8a2eNyDU6SPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0092.outbound.protection.outlook.com ([157.56.110.92]:63951
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753109AbcBXSEr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 24 Feb 2016 13:04:47 -0500
+Received: from mx1.redhat.com ([209.132.183.28]:55388 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758502AbcBXSHR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 24 Feb 2016 13:07:17 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id CB9677F092
+	for <ceph-devel@vger.kernel.org>; Wed, 24 Feb 2016 18:07:17 +0000 (UTC)
 In-Reply-To: <CALqRxCwrsTv=Lbrc98f7WLqwZxeySiAdq08E0h8a2eNyDU6SPQ@mail.gmail.com>
-Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>, Marcus Watts <mwatts@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Marcus Watts <mwatts@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SSBiZWxpZXZlIHRoYXQgU2FnZSBoYXMgbWFkZSBhIGxvdCBvZiBjaGFuZ2VzIGluIHRoZSB3YXkg
-dGhhdCBqb3VybmFsaW5nIGlzIGRvbmUuIEkgd291bGQgYWxzbyB2b3RlIHRvIGNoYW5nZSB0aGUg
-bmFtZSB0byBhdm9pZCBhbnkgY2hhbmNlIG9mIGFjY2lkZW50YWxseSByZXVzaW5nIGEgbG9jYWwg
-dmVyc2lvbi4NCg0KQWxsZW4gU2FtdWVscw0KU29mdHdhcmUgQXJjaGl0ZWN0LCBFbWVyZ2luZyBT
-dG9yYWdlIFNvbHV0aW9ucw0KDQoyODgwIEp1bmN0aW9uIEF2ZW51ZSwgTWlscGl0YXMsIENBIDk1
-MTM0DQpUOiArMSA0MDggODAxIDcwMzB8IE06ICsxIDQwOCA3ODAgNjQxNg0KYWxsZW4uc2FtdWVs
-c0BTYW5EaXNrLmNvbQ0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdl
-ci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgS2VuIERyZXllcg0KU2VudDogV2VkbmVzZGF5LCBG
-ZWJydWFyeSAyNCwgMjAxNiA5OjU5IEFNDQpUbzogTWFyY3VzIFdhdHRzIDxtd2F0dHNAcmVkaGF0
-LmNvbT4NCkNjOiBjZXBoLWRldmVsIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NClN1Ympl
-Y3Q6IFJlOiBjZXBoIC8gcm9ja3NkYg0KDQpJJ20gcmVhbGx5IGludGVyZXN0ZWQgaW4gZ2V0dGlu
-ZyBvdXIgdmFyaW91cyBidW5kbGVkIGxpYnJhcmllcyBpbnRvIHNlcGFyYXRlIHBhY2thZ2VzLg0K
-DQpEb2VzIGNlcGgncyByb2Nrc2RiIGhhdmUgYSBsb3Qgb2YgY2hhbmdlcyBmcm9tIHJvY2tzZGIg
-dXBzdHJlYW0/IElmIHNvLCBJJ20gbGVhbmluZyB0b3dhcmRzIHBhY2thZ2luZyB0aGlzIGFzICJj
-ZXBoLXJvY2tzZGIiIHVudGlsIHRob3NlIGNoYW5nZXMgYXJlIHByZXNlbnQgaW4gYW4gdXBzdHJl
-YW0gcm9ja3NkYiByZWxlYXNlLg0KDQotIEtlbg0KDQpPbiBUdWUsIEZlYiAyMywgMjAxNiBhdCAx
-MTowNSBQTSwgTWFyY3VzIFdhdHRzIDxtd2F0dHNAcmVkaGF0LmNvbT4gd3JvdGU6DQo+IFNvLCBh
-Ym91dCB0aGF0IHJvY2tzZGIgdGhpbmcuDQo+DQo+IFJvY2tzZGIgc2hpcHMgd2l0aCAyIGJ1aWxk
-IHN5c3RlbXM6DQo+ICAgICAgICAgY21ha2UgICAgICAgICAgIC0gd2luZG93cyBvbmx5DQo+ICAg
-ICAgICAgbWFrZSBiYXNlZCAgICAgIC0gZXZlcnl0aGluZyBlbHNlDQo+DQo+IFRoZSBtYWtlZmls
-ZSBpcyB2ZXJ5ICJyZXRybyIuICBVbS4gIExldCdzIGp1c3QgbGVhdmUgaXQgdGhlcmUuDQo+DQo+
-IFRoZSBjbWFrZSBwYXJ0IHdhcyBtb3JlIGludGVyZXN0aW5nOyB0aGUgbWFpbiBwcm9ibGVtIGl0
-IGhhZCB3YXMgaXQNCj4gd2FzICp3YXkqIHRvbyB3aW5kb3dzIHNwZWNpZmljLiAgV2hpY2ggaXMg
-YWN0dWFsbHkga2luZGEgaGFyZCB0byBkbywNCj4gc2luY2UgdGhhdCdzIGp1c3Qgd2hhdCBjbWFr
-ZSB3YXNuJ3Qgc3VwcG9zZWQgdG8gYmUuDQo+DQo+IEJ1aWxkaW5nIHJvY2tzZGIgKC1nKSB0YWtl
-cyBhYm91dCAxZyBvZiBidWlsZCB0cmVlIHNwYWNlLCBhbmQgcnVubmluZw0KPiAibWFrZSBjaGVj
-ayIgb24gaXQgdGFrZXMgYWJvdXQgaGFsZiBhbiBob3VyLg0KPiBJIHJlYWxseSBkb24ndCB3YW50
-IHRvIHNsb3cgZG93biBteSBjZXBoIGJ1aWxkcyB0aGlzIHdheSwgc28gcmF0aGVyDQo+IHRoYW4g
-bWFrZSByb2Nrc2RiIHdpdGggdGhlIHJlc3Qgb2YgY2VwaCwgSSB3b3VsZCBtdWNoIHJhdGhlciBp
-dCBiZQ0KPiBwYWNrYWdlZCAvIGluc3RhbGxlZCBzZXBhcmF0ZWx5Lg0KPg0KPiBTbyBJIHB1dCB0
-b2dldGhlcjoNCj4gYSBzZXQgb2YgY2hhbmdlcyB0byBidWlsZCByb2Nrc2RiIHdpdGggY21ha2Ug
-b24gbGludXggYW4gcnBtIC5zcGVjDQo+IGZpbGUgdG8gYnVpbGQgaXQgZm9yIGZlZG9yYS4NCj4N
-Cj4gUnBtcyAoc291cmNlICYgYW1kNjQpIGNhbiBiZSBmb3VuZCBoZXJlOg0KPiAgICAgICAgIGh0
-dHA6Ly9wZW9wbGUucmVkaGF0LmNvbS9td2F0dHMvcm9ja3NkYi8NCj4gYW5kIGEgZ2l0IHJlcG8g
-d2l0aCB0aGUgY21ha2UgY2hhbmdlcyBoZXJlLA0KPiAgICAgICAgIGh0dHBzOi8vZ2l0aHViLmNv
-bS9tZHctYXQtbGludXhib3gvcm9ja3NkYg0KPg0KPiBUaGUgY21ha2UgcGFydHMgY291bGQgY2Vy
-dGFpbmx5IHN0aWxsIHVzZSBtb3JlIHdvcms7IEkgaGF2ZW4ndCB0ZXN0ZWQNCj4gdGhpcyBhbmQg
-aXQgd2lsbCBwcm9iYWJseSBuZWVkIGNoYW5nZXMgb24gYW55dGhpbmcgb3RoZXIgdGhhbiB4ODZf
-NjQsDQo+IHN1Y2ggYXMgY2VydGFpbmx5IGFueSBub24tZ2NjL25vbi1saW51eCBwbGF0Zm9ybS4N
-Cj4NCj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIC1NYXJjdXMgV2F0
-dHMNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUg
-InVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBt
-YWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+IGluZm8gYXQgIGh0dHA6
-Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KLS0NClRvIHVuc3Vic2NyaWJl
-IGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBp
-biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
-IG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
-Lmh0bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxl
-Y3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUg
-ZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhp
-cyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBu
-b3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQg
-dGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcg
-b2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2Vp
-dmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVy
-IGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQg
-ZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vz
-c2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVz
-KS4NCg==
+On Wed, 24 Feb 2016, Ken Dreyer wrote:
+> I'm really interested in getting our various bundled libraries into
+> separate packages.
+> 
+> Does ceph's rocksdb have a lot of changes from rocksdb upstream? If
+> so, I'm leaning towards packaging this as "ceph-rocksdb" until those
+> changes are present in an upstream rocksdb release.
+
+There are a few that aren't upstream yet, but they'll merge eventually. 
+That said, I fully expect that we'll make other changes in the future that 
+we'll want to build/test/ship before they go upstream... so a special 
+package name probably makes sense.
+
+sage
+
+
+> 
+> - Ken
+> 
+> On Tue, Feb 23, 2016 at 11:05 PM, Marcus Watts <mwatts@redhat.com> wrote:
+> > So, about that rocksdb thing.
+> >
+> > Rocksdb ships with 2 build systems:
+> >         cmake           - windows only
+> >         make based      - everything else
+> >
+> > The makefile is very "retro".  Um.  Let's just leave it there.
+> >
+> > The cmake part was more interesting; the main problem it had
+> > was it was *way* too windows specific.  Which is actually kinda
+> > hard to do, since that's just what cmake wasn't supposed to be.
+> >
+> > Building rocksdb (-g) takes about 1g of build tree space,
+> > and running "make check" on it takes about half an hour.
+> > I really don't want to slow down my ceph builds this way,
+> > so rather than make rocksdb with the rest of ceph, I would
+> > much rather it be packaged / installed separately.
+> >
+> > So I put together:
+> > a set of changes to build rocksdb with cmake on linux
+> > an rpm .spec file to build it for fedora.
+> >
+> > Rpms (source & amd64) can be found here:
+> >         http://people.redhat.com/mwatts/rocksdb/
+> > and a git repo with the cmake changes here,
+> >         https://github.com/mdw-at-linuxbox/rocksdb
+> >
+> > The cmake parts could certainly still use more work; I haven't
+> > tested this and it will probably need changes on anything other
+> > than x86_64, such as certainly any non-gcc/non-linux platform.
+> >
+> >                                         -Marcus Watts
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
