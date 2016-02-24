@@ -1,32 +1,63 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: BlueStore deep-dive over bluejeans
-Date: Wed, 24 Feb 2016 14:51:39 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1602241447430.7555@cpach.fuggernut.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: QE validation infernalis v9.2.1 status
+Date: Wed, 24 Feb 2016 13:41:35 -0800
+Message-ID: <CAMMFjmGzpf_a7jDbkyUX9cp0MtNajLcsAPHvi+2HLuYHfwm5Cg@mail.gmail.com>
+References: <CAMMFjmG3ukLQQiw6=R8z4PaR=MxVBvME4Qh3e-RsqFvrgdpqug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52753 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756448AbcBXTwI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 24 Feb 2016 14:52:08 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 990D08F4FF
-	for <ceph-devel@vger.kernel.org>; Wed, 24 Feb 2016 19:52:08 +0000 (UTC)
-Received: from cpach (ovpn-112-87.phx2.redhat.com [10.3.112.87])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u1OJq6Wk018708
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 24 Feb 2016 14:52:07 -0500
+Received: from mail-io0-f169.google.com ([209.85.223.169]:33171 "EHLO
+	mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752247AbcBXVlh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Feb 2016 16:41:37 -0500
+Received: by mail-io0-f169.google.com with SMTP id z135so68827942iof.0
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Feb 2016 13:41:37 -0800 (PST)
+In-Reply-To: <CAMMFjmG3ukLQQiw6=R8z4PaR=MxVBvME4Qh3e-RsqFvrgdpqug@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-qa <ceph-qa@ceph.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sage@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>, "Dachary, Loic" <ldachary@redhat.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Gregory Farnum <gfarnum@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, Gregory Meno <gmeno@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>
 
-Hey all,
+Alfredo,
 
-I'm planning on doing an hour-ish deep-dive into the inner workings of 
-BlueStore next Monday, 2/29, 5pm-6pm ET / 2pm-3pm PT.  It'll be a 
-mostly-informal brain dump and walk-through of the code over bluejeans, 
-and we'll record it.  Anyone who is or is planning to be involved in 
-bluestore development, please join and ask questions etc!  I'll send out 
-the bluejeans link shortly before we start.
+QE validation for infernalis v9.2.1 is completed and it's ready for publishing.
 
-sage
+Thx
+YuriW
+
+On Wed, Feb 24, 2016 at 8:24 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
+> Detailed summary of the QE Validation can be found here
+> http://tracker.ceph.com/issues/13750#note-32
+>
+> The following suites were in scope of this point release testing:
+>
+> rados (subset 1/7)
+> rbd
+> rgw
+> fs
+> krbd
+> kcephfs
+> knfs
+> hadoop
+> samba
+> rest
+> ceph-deploy
+> upgrade/client-upgrade
+> upgrade/hammer-x (infernalis)
+> upgrade/firefly-x (infernalis)
+> upgrade/firefly-hammer-x (infernalis)
+> upgrade/infernalis
+> powercycle
+>
+> Known issues (approved for release):
+>
+> krbd:
+> http://tracker.ceph.com/issues/14848 - approved by Jason
+>
+> ceph-deploy:
+> http://tracker.ceph.com/issues/14223 - assumed approved by Sage (?)
+>
+> powercycle:
+> http://tracker.ceph.com/issues/14810 - needs Sage approval
+>
+> Thx
+> YuriW
