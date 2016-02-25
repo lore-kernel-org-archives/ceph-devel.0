@@ -1,89 +1,43 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Weekly Ceph Performance Meeting Invitation
-Date: Thu, 25 Feb 2016 01:09:36 +0000
-Message-ID: <BN1PR02MB055EB3F447239E3C2952924F4A60@BN1PR02MB055.namprd02.prod.outlook.com>
-References: <542B043F.6020600@redhat.com>
- <BN1PR02MB05588B56CA9FC2531E95ABDF4A50@BN1PR02MB055.namprd02.prod.outlook.com>
- <56CE53FF.8010307@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: "Franklin M. Siler" <me@franksiler.com>
+Subject: Re: [ceph-users] v0.94.6 Hammer released
+Date: Wed, 24 Feb 2016 22:13:49 -0600
+Message-ID: <EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com>
+References: <alpine.DEB.2.11.1602231059590.7485@cpach.fuggernut.com> <CABZ+qq=ZqhaL9uwobM1NZ7+AszUMqirHATLJZyRcowD1iDRsww@mail.gmail.com> <CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0062.outbound.protection.outlook.com ([65.55.169.62]:52640
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751270AbcBYBJj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Feb 2016 20:09:39 -0500
-In-Reply-To: <56CE53FF.8010307@redhat.com>
-Content-Language: en-US
+Received: from mail-ig0-f169.google.com ([209.85.213.169]:38442 "EHLO
+	mail-ig0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753007AbcBYENz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Feb 2016 23:13:55 -0500
+Received: by mail-ig0-f169.google.com with SMTP id y8so5761033igp.1
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Feb 2016 20:13:54 -0800 (PST)
+In-Reply-To: <CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>
+Cc: Dan van der Ster <dan@vanderster.com>, Sage Weil <sage@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-Yeah, I remembered after shooting the mail...:-)
+On Feb 24, 2016, at 1027, Alfredo Deza <adeza@redhat.com> wrote:
 
-Thanks & Regards
-Somnath
+>=20
+> We are no longer building binaries for el6. Just for Centos 7, Ubuntu
+> Trusty, and Debian Jessie.
 
------Original Message-----
-From: Mark Nelson [mailto:mnelson@redhat.com] 
-Sent: Wednesday, February 24, 2016 5:08 PM
-To: Somnath Roy; Mark Nelson; ceph-devel@vger.kernel.org
-Subject: Re: Weekly Ceph Performance Meeting Invitation
+I could really use a build for Ubuntu 15.10 Wily (and soon 16.04)- thes=
+e use systemd but have an old version of ceph-deploy, so things are not=
+ working.  I=92m in the process of getting Ubuntu to upgrade their pack=
+age, but is there a process by which I could contribute a build?
 
-Hi Somnath,
+Cheers,
 
-Several of the Red Hat folks (including me) are out at the FAST USENIX conference today.  I mentioned it at the meeting last week but forgot to send out an email.  Sorry about that!
+=46rank Siler
+Siler Industrial Analytics
+314.799.9405
 
-We'll be reconvening again next week though with 2 full weeks of pull request updates to enjoy. ;)
-
-Thanks,
-Mark
-
-On 02/24/2016 10:05 AM, Somnath Roy wrote:
-> Mark,
-> Do we have meeting today ?
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-> Sent: Tuesday, September 30, 2014 12:28 PM
-> To: ceph-devel@vger.kernel.org
-> Subject: Weekly Ceph Performance Meeting Invitation
->
-> Hi All,
->
-> I put together a bluejeans meeting for the Ceph performance meeting tomorrow at 8AM PST.  Hope to see you there!
->
-> To join the Meeting:
-> https://bluejeans.com/268261044
->
-> To join via Browser:
-> https://bluejeans.com/268261044/browser
->
-> To join with Lync:
-> https://bluejeans.com/268261044/lync
->
->
-> To join via Room System:
-> Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID: 
-> 268261044
->
-> To join via Phone:
-> 1) Dial:
->             +1 408 740 7256
->             +1 888 240 2560(US Toll Free)
->             +1 408 317 9253(Alternate Number)
->             (see all numbers - http://bluejeans.com/numbers)
-> 2) Enter Conference ID: 268261044
->
-> Mark
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
