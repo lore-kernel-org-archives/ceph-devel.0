@@ -1,23 +1,33 @@
-From: Yuri Weinstein <yweinste@redhat.com>
+From: Shinobu Kinjo <skinjo@redhat.com>
 Subject: Re: [ceph-users] "ceph-installer" in GitHub
-Date: Thu, 25 Feb 2016 15:01:36 -0800
-Message-ID: <CAMMFjmFJYWdzqZ--F740cVHedaWvGe44K1M0hzhZj-sdfjd5Cg@mail.gmail.com>
-References: <CALqRxCwLvXtGDb3t0eg5-4c27eTO=PLSx1zkv+g7MR9+8oMfMA@mail.gmail.com>
-	<722555143.53556042.1456441041302.JavaMail.zimbra@redhat.com>
+Date: Thu, 25 Feb 2016 18:06:40 -0500 (EST)
+Message-ID: <2076300853.53563625.1456441600740.JavaMail.zimbra@redhat.com>
+References: <CALqRxCwLvXtGDb3t0eg5-4c27eTO=PLSx1zkv+g7MR9+8oMfMA@mail.gmail.com> <722555143.53556042.1456441041302.JavaMail.zimbra@redhat.com> <CAMMFjmFJYWdzqZ--F740cVHedaWvGe44K1M0hzhZj-sdfjd5Cg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:35400 "EHLO
-	mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750717AbcBYXBh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Feb 2016 18:01:37 -0500
-Received: by mail-io0-f181.google.com with SMTP id g203so104822835iof.2
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Feb 2016 15:01:37 -0800 (PST)
-In-Reply-To: <722555143.53556042.1456441041302.JavaMail.zimbra@redhat.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:42944 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751268AbcBYXGm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Feb 2016 18:06:42 -0500
+In-Reply-To: <CAMMFjmFJYWdzqZ--F740cVHedaWvGe44K1M0hzhZj-sdfjd5Cg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shinobu Kinjo <skinjo@redhat.com>
+To: Yuri Weinstein <yweinste@redhat.com>
 Cc: Ken Dreyer <kdreyer@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+
+Thank you for the pointer.
+
+Rgds,
+Shinobu
+
+----- Original Message -----
+From: "Yuri Weinstein" <yweinste@redhat.com>
+To: "Shinobu Kinjo" <skinjo@redhat.com>
+Cc: "Ken Dreyer" <kdreyer@redhat.com>, "ceph-devel" <ceph-devel@vger.kernel.org>, "ceph-users" <ceph-users@lists.ceph.com>
+Sent: Friday, February 26, 2016 8:01:36 AM
+Subject: Re: [ceph-users] "ceph-installer" in GitHub
 
 The code is here https://github.com/ceph/ceph-installer
 
