@@ -1,44 +1,31 @@
-From: Erwan Velu <evelu@redhat.com>
-Subject: Re: BlueStore deep-dive over bluejeans
-Date: Thu, 25 Feb 2016 08:59:20 -0500 (EST)
-Message-ID: <1897606090.36976108.1456408760977.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.11.1602241447430.7555@cpach.fuggernut.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Building packages from a SHA instead of the tip of a branch
+Date: Thu, 25 Feb 2016 09:37:25 -0800
+Message-ID: <CAJ4mKGbR-PnAztnEYzPjjyOS9gbh5EHBrx8Y=iZQTTugf=TS_A@mail.gmail.com>
+References: <56CEF369.7020403@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:34286 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760161AbcBYN7W (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Feb 2016 08:59:22 -0500
-In-Reply-To: <alpine.DEB.2.11.1602241447430.7555@cpach.fuggernut.com>
+Received: from mail-vk0-f41.google.com ([209.85.213.41]:33963 "EHLO
+	mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932381AbcBYRh1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Feb 2016 12:37:27 -0500
+Received: by mail-vk0-f41.google.com with SMTP id e185so54377866vkb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Feb 2016 09:37:26 -0800 (PST)
+In-Reply-To: <56CEF369.7020403@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Gregory Meno <gmeno@redhat.com>, Alfredo Deza <adeza@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-I cannot attend but will watch the recording.
-If you can paste it on this thread, would be nice.
+On Thu, Feb 25, 2016 at 4:28 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Gregory and Alfredo,
+>
+> The system in place to build packages uses the tip of the stable branch, which has been a recurring problem over the past years. It would make a lot of sense to use a specific SHA1 instead of "whatever is at the tip of the stable branch at the moment".
+>
+> Is there already an issue in tracker.ceph.com for this ? If not, in which tracker do you suggest I file this feature request ?
 
-Thx,
-
------ Original Message -----
-From: "Sage Weil" <sweil@redhat.com>
-To: ceph-devel@vger.kernel.org
-Sent: Wednesday, February 24, 2016 8:51:39 PM
-Subject: BlueStore deep-dive over bluejeans
-
-Hey all,
-
-I'm planning on doing an hour-ish deep-dive into the inner workings of 
-BlueStore next Monday, 2/29, 5pm-6pm ET / 2pm-3pm PT.  It'll be a 
-mostly-informal brain dump and walk-through of the code over bluejeans, 
-and we'll record it.  Anyone who is or is planning to be involved in 
-bluestore development, please join and ask questions etc!  I'll send out 
-the bluejeans link shortly before we start.
-
-sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+It might be easier to build from a tag or to push a specifically-named
+branch (infernalis-release-2016-02-25) as well. Just to think around
+the problem. ;)
+-Greg
