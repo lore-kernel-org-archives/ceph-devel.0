@@ -1,36 +1,44 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Building packages from a SHA instead of the tip of a branch
-Date: Thu, 25 Feb 2016 19:28:25 +0700
-Message-ID: <56CEF369.7020403@dachary.org>
+From: Erwan Velu <evelu@redhat.com>
+Subject: Re: BlueStore deep-dive over bluejeans
+Date: Thu, 25 Feb 2016 08:59:20 -0500 (EST)
+Message-ID: <1897606090.36976108.1456408760977.JavaMail.zimbra@redhat.com>
+References: <alpine.DEB.2.11.1602241447430.7555@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay6-d.mail.gandi.net ([217.70.183.198]:47203 "EHLO
-	relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759631AbcBYM2d (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Feb 2016 07:28:33 -0500
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:34286 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760161AbcBYN7W (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Feb 2016 08:59:22 -0500
+In-Reply-To: <alpine.DEB.2.11.1602241447430.7555@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Meno <gmeno@redhat.com>, Alfredo Deza <adeza@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Gregory and Alfredo,
+I cannot attend but will watch the recording.
+If you can paste it on this thread, would be nice.
 
-The system in place to build packages uses the tip of the stable branch=
-, which has been a recurring problem over the past years. It would make=
- a lot of sense to use a specific SHA1 instead of "whatever is at the t=
-ip of the stable branch at the moment".
+Thx,
 
-Is there already an issue in tracker.ceph.com for this ? If not, in whi=
-ch tracker do you suggest I file this feature request ?
+----- Original Message -----
+From: "Sage Weil" <sweil@redhat.com>
+To: ceph-devel@vger.kernel.org
+Sent: Wednesday, February 24, 2016 8:51:39 PM
+Subject: BlueStore deep-dive over bluejeans
 
-Cheers
+Hey all,
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+I'm planning on doing an hour-ish deep-dive into the inner workings of 
+BlueStore next Monday, 2/29, 5pm-6pm ET / 2pm-3pm PT.  It'll be a 
+mostly-informal brain dump and walk-through of the code over bluejeans, 
+and we'll record it.  Anyone who is or is planning to be involved in 
+bluestore development, please join and ask questions etc!  I'll send out 
+the bluejeans link shortly before we start.
+
+sage
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 the body of a message to majordomo@vger.kernel.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
