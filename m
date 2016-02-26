@@ -1,41 +1,59 @@
-From: Pete Zaitcev <zaitcev@redhat.com>
-Subject: Re: vstart and Python bindings
-Date: Thu, 25 Feb 2016 17:35:44 -0700
-Message-ID: <20160225173544.62c8fb5e@lembas.zaitcev.lan>
-References: <20160224233718.6a8c7569@lembas.zaitcev.lan>
-	<CALe9h7dfBm1hvCMDZQb4TERjUMh2GhcsUyWFe16k7ZJ8fon2nQ@mail.gmail.com>
+From: Xiaoxi Chen <superdebuger@gmail.com>
+Subject: Re: [ceph-users] v0.94.6 Hammer released
+Date: Fri, 26 Feb 2016 08:39:56 +0800
+Message-ID: <CAEYCsVKeOwOWp0yRmb5KHduqwUQ-fVUaMcQCaszmGaN-WDp=Gw@mail.gmail.com>
+References: <alpine.DEB.2.11.1602231059590.7485@cpach.fuggernut.com>
+	<CABZ+qq=ZqhaL9uwobM1NZ7+AszUMqirHATLJZyRcowD1iDRsww@mail.gmail.com>
+	<CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
+	<EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40896 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751865AbcBZAfp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 25 Feb 2016 19:35:45 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id 84DDD3D0051
-	for <ceph-devel@vger.kernel.org>; Fri, 26 Feb 2016 00:35:45 +0000 (UTC)
-In-Reply-To: <CALe9h7dfBm1hvCMDZQb4TERjUMh2GhcsUyWFe16k7ZJ8fon2nQ@mail.gmail.com>
+Received: from mail-yw0-f181.google.com ([209.85.161.181]:35816 "EHLO
+	mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752605AbcBZAj5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Feb 2016 19:39:57 -0500
+Received: by mail-yw0-f181.google.com with SMTP id g127so57488669ywf.2
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Feb 2016 16:39:57 -0800 (PST)
+In-Reply-To: <EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Franklin M. Siler" <me@franksiler.com>
+Cc: Alfredo Deza <adeza@redhat.com>, Dan van der Ster <dan@vanderster.com>, Sage Weil <sage@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-On Thu, 25 Feb 2016 11:41:46 +0000
-John Spray <jspray@redhat.com> wrote:
+Will we build package for ubuntu 12.04 (Precise)?
+Seems it also doesnt show in the repo
 
-> The cython changes broke cmake (amaredia mentioned in IRC he
-> was working on a fix?) and libcephfs's python bindings (fix
-> https://github.com/ceph/ceph/pull/7745).
+-Xiaoxi
 
-The above seems to imply that something at least gets built and then
-works, so for my general education I'm curious just how you do that.
-Even if large parts, such as cephfs, are knocked out, I could be
-okay with what's left, as long as I can get OSDs and monitor to run.
-But I use vstart for that and it does not work (because rados.py
-is not built/cythonized). Is there a simple workaround everyone
-employs that I just don't see? Willem mentioned that he's tweaking
-Makefile.am, which could help... if ./configure even tried to
-source those in src/pybind. I'm missing something obvious here, am I?
-
--- Pete
+2016-02-25 12:13 GMT+08:00 Franklin M. Siler <me@franksiler.com>:
+> On Feb 24, 2016, at 1027, Alfredo Deza <adeza@redhat.com> wrote:
+>
+>>
+>> We are no longer building binaries for el6. Just for Centos 7, Ubunt=
+u
+>> Trusty, and Debian Jessie.
+>
+> I could really use a build for Ubuntu 15.10 Wily (and soon 16.04)- th=
+ese use systemd but have an old version of ceph-deploy, so things are n=
+ot working.  I=E2=80=99m in the process of getting Ubuntu to upgrade th=
+eir package, but is there a process by which I could contribute a build=
+?
+>
+> Cheers,
+>
+> Frank Siler
+> Siler Industrial Analytics
+> 314.799.9405
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
