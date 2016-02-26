@@ -1,80 +1,294 @@
-From: M Ranga Swami Reddy <swamireddy@gmail.com>
-Subject: Re: (Un)Stable release team
-Date: Fri, 26 Feb 2016 19:39:27 +0530
-Message-ID: <CANA9Uk5nOe5vLT2uLMTh=xLx-GmK4KnActLqXhS42OQDimzwhQ@mail.gmail.com>
-References: <56D001C6.5080804@dachary.org>
+From: Dominik Mostowiec <dominikmostowiec@gmail.com>
+Subject: Re: [ceph-users] Problem: silently corrupted RadosGW objects caused
+ by slow requests
+Date: Fri, 26 Feb 2016 15:32:49 +0100
+Message-ID: <CAMNMNTxs46Hcaq-ZJZfYfF5m8aL9ETNjtBKr8UrdAxZFM7E=nw@mail.gmail.com>
+References: <156923D1D92AF640829D4E847271EDAE522A46F435@MXMBON06.grupa.onet>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f45.google.com ([209.85.213.45]:34605 "EHLO
-	mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750993AbcBZOJ2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Feb 2016 09:09:28 -0500
-Received: by mail-vk0-f45.google.com with SMTP id e185so77910950vkb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Feb 2016 06:09:28 -0800 (PST)
-In-Reply-To: <56D001C6.5080804@dachary.org>
+Received: from mail-ig0-f169.google.com ([209.85.213.169]:33201 "EHLO
+	mail-ig0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753764AbcBZOcu convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Feb 2016 09:32:50 -0500
+Received: by mail-ig0-f169.google.com with SMTP id y8so38772479igp.0
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Feb 2016 06:32:50 -0800 (PST)
+In-Reply-To: <156923D1D92AF640829D4E847271EDAE522A46F435@MXMBON06.grupa.onet>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Nathan Cutler <ncutler@suse.cz>, Abhishek L <abhishek.lekshmanan@gmail.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, Gaurav Bafna <bafnag@gmail.com>, Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>, Martin Palma <martin@palma.bz>, Chris Jones <cjones@cloudm2.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-users@ceph.com" <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
 Hi,
+Maybe this is the reason of another bug?
+http://tracker.ceph.com/issues/13764
+The situation is very similiar...
 
-Welcome to Chen Xiaoxi, Gaurav Bafna, Wei-Chung Cheng, Martin Palma
-and Chris Jones.
+--
+Regards
+Dominik
 
-Loic - Now we have a good number of workforce and can do the tasks
-quickly and efficiently.
-
-Thanks
-Swami
-
-
-On Fri, Feb 26, 2016 at 1:11 PM, Loic Dachary <loic@dachary.org> wrote:
+2016-02-25 16:17 GMT+01:00 Ritter S=C5=82awomir <Slawomir.Ritter@dreaml=
+ab.pl>:
 > Hi,
 >
-> It's a quiet time in the small world of the stable release team, idea=
-l for mentoring the new members who generously answered our call for pa=
-rticipation. Welcome to Chen Xiaoxi, Gaurav Bafna, Wei-Chung Cheng, Mar=
-tin Palma and Chris Jones :-)
 >
-> I propose that we take advantage of the next few weeks to expand our =
-scope in two ways:
 >
-> * test Ceph development versions as well as stable versions
-> * publish packages for Ceph development versions
+> We have two CEPH clusters running on Dumpling 0.67.11 and some of our
+> "multipart objects" are incompleted. It seems that some slow requests=
+ could
+> cause corruption of related S3 objects. Moveover GETs for that object=
+s are
+> working without any error messages. There are only HTTP 200 in logs a=
+s well
+> as no information about problems from popular client tools/libs.
 >
-> Testing Ceph development versions is actually less work than with sta=
-ble versions because the developers run a lot of tests already and fix =
-problems on a daily basis. Our help would likely be needed with a few t=
-euthology suite runs right before the development release is published,=
- once a month. But the development versions tend to be more frequent, t=
-herefore it will probably be as much work as for a stable release, over=
-all. The workflow would be revisited: there is no cherry-picking. Inste=
-ad, bug fixes must be against the jewel branch or whatever branch will =
-be the upcoming stable. And this branch is merged back into master on a=
- regular basis (i.e. more frequently than the development releases).
 >
-> As you may have noticed, no packages were published for the 10.0.3 de=
-velopment release and that's where we could make a real difference. Thi=
-s would be an entirely new part of our workflow, but also an exciting o=
-ne because it's the last missing piece of the puzzle. Once we are able =
-to publish usable packages for development releases, nothing is stoppin=
-g us to do the same for stable releases. It's a lot easier than it seem=
-s since the packages are already built for the teuthology jobs. All we =
-need is a public space to archive them and sign them. This is not mutua=
-lly exclusive with the current package publication workflow, it would b=
-e a community driven alternative that is much needed in some cases.
 >
-> Of course, this is easier said than done :-) What do you think ? Are =
-there other important work that we should try to accomplish instead ? T=
-hings that would benefit Ceph users and developers more ?
+> The situation looks very similiar to described in bug #8269, but we a=
+re
+> using fixed 0.67.11 version:  http://tracker.ceph.com/issues/8269
 >
-> Cheers
 >
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+> Regards,
+>
+>
+>
+> S=C5=82awomir Ritter
+>
+>
+>
+>
+>
+>
+>
+> EXAMPLE#1
+>
+>
+>
+> slow_request
+>
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>
+> 2016-02-23 13:49:58.818640 osd.260 10.176.67.27:6800/688083 2119 : [W=
+RN] 4
+> slow requests, 4 included below; oldest blocked for > 30.727096 secs
+>
+> 2016-02-23 13:49:58.818673 osd.260 10.176.67.27:6800/688083 2120 : [W=
+RN]
+> slow request 30.727096 seconds old, received at 2016-02-23 13:49:28.0=
+91460:
+> osd_op(c
+>
+> lient.47792965.0:185007087
+> default.14654.445__shadow_c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.145623=
+1572.877051.ismv.b73N3OmW4OhCjDYSR-RTkZNNIKA1C9Z.57_2
+> [writef
+>
+> ull 0~524288] 10.ce729ebe e107594) v4 currently waiting for subops fr=
+om
+> [469,9]
+>
+>
+>
+>
+>
+> HTTP_500 in apache.log
+>
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>
+> 127.0.0.1 - - [23/Feb/2016:13:49:27 +0100] "PUT
+> /video-shbc/c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1456231572.877051.is=
+mv?uploadId=3Db73N3OmW4OhCjDYSR-RTkZNNIKA1C9Z&partNumber=3D56
+> HTTP/1.0" 200 221 "-" "Boto/2.31.1 Python/2.7.3
+> Linux/3.13.0-39-generic(syncworker)"
+>
+> 127.0.0.1 - - [23/Feb/2016:13:49:28 +0100] "PUT
+> /video-shbc/c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1456231572.877051.is=
+mv?uploadId=3Db73N3OmW4OhCjDYSR-RTkZNNIKA1C9Z&partNumber=3D57
+> HTTP/1.0" 500 751 "-" "Boto/2.31.1 Python/2.7.3
+> Linux/3.13.0-39-generic(syncworker)"
+>
+> 127.0.0.1 - - [23/Feb/2016:13:49:58 +0100] "PUT
+> /video-shbc/c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1456231572.877051.is=
+mv?uploadId=3Db73N3OmW4OhCjDYSR-RTkZNNIKA1C9Z&partNumber=3D57
+> HTTP/1.0" 200 221 "-" "Boto/2.31.1 Python/2.7.3
+> Linux/3.13.0-39-generic(syncworker)"
+>
+> 127.0.0.1 - - [23/Feb/2016:13:49:59 +0100] "PUT
+> /video-shbc/c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1456231572.877051.is=
+mv?uploadId=3Db73N3OmW4OhCjDYSR-RTkZNNIKA1C9Z&partNumber=3D58
+> HTTP/1.0" 200 221 "-" "Boto/2.31.1 Python/2.7.3
+> Linux/3.13.0-39-generic(syncworker)"
+>
+>
+>
+>
+>
+> Empty RADOS object (real size =3D 0 bytes), list generated basis on M=
+ANIFEST
+>
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D
+>
+> found
+> default.14654.445__shadow_c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.145623=
+1572.877051.ismv.b73N3OmW4OhCjDYSR-RTkZNNIKA1C9Z.56_2
+> 2097152   ok          2097152       10.7acc9476 (10.1476) [278,142,43=
+6]
+> [278,142,436]
+>
+> found
+> default.14654.445__multipart_c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.145=
+6231572.877051.ismv.b73N3OmW4OhCjDYSR-RTkZNNIKA1C9Z.57
+> 0         diff        4194304       10.4f5be025 (10.25)   [57,310,428=
+]
+> [57,310,428]
+>
+> found
+> default.14654.445__shadow_c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.145623=
+1572.877051.ismv.b73N3OmW4OhCjDYSR-RTkZNNIKA1C9Z.57_1
+> 4194304   ok          4194304       10.81191602 (10.1602) [441,109,42=
+0]
+> [441,109,420]
+>
+> found
+> default.14654.445__shadow_c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.145623=
+1572.877051.ismv.b73N3OmW4OhCjDYSR-RTkZNNIKA1C9Z.57_2
+> 2097152   ok          2097152       10.ce729ebe (10.1ebe) [260,469,9]
+> [260,469,9]
+>
+>
+>
+>
+>
+> "Silent" GETs
+>
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>
+> # object size from headers
+>
+> $ s3 -u head
+> video-shbc/c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1456231572.877051.ism=
+v
+> Content-Type: binary/octet-stream
+>
+> Content-Length: 641775701
+>
+> Server: nginx
+>
+>
+>
+> # but GETs only 637581397 (641775701 - missing 4194304 =3D 637581397)
+>
+> $ s3 -u get
+> video-shbc/c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1456231572.877051.ism=
+v >
+> /tmp/test
+>
+> $  ls -al /tmp/test
+>
+> -rw-r--r-- 1 root root 637581397 Feb 23 17:05 /tmp/test
+>
+>
+>
+> # no error in logs
+>
+> 127.0.0.1 - - [23/Feb/2016:17:05:00 +0100] "GET
+> /video-shbc/c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1456231572.877051.is=
+mv
+> HTTP/1.0" 200 637581711 "-" "Mozilla/4.0 (Compatible; s3; libs3 2.0; =
+Linux
+> x86_64)"
+>
+>
+>
+> # wget - retry for missing part, but there is no missing part, so it =
+GETs
+> head/tail of the file again....
+>
+> $ wget
+> http://127.0.0.1:88/video-shbc/c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1=
+456231572.877051.ismv
+>
+> --2016-02-23 17:10:11--
+> http://127.0.0.1:88/video-shbc/c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1=
+456231572.877051.ismv
+>
+> Connecting to 127.0.0.1:88... connected.
+>
+> HTTP request sent, awaiting response... 200 OK
+>
+> Length: 641775701 (612M) [binary/octet-stream]
+>
+> Saving to: `c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1456231572.877051.is=
+mv'
+>
+>
+>
+> 99%
+> [=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D>
+> ] 637,581,397 63.9M/s   in 9.5s
+>
+>
+>
+> 2016-02-23 17:10:20 (64.1 MB/s) - Connection closed at byte 637581397=
+=2E
+> Retrying.
+>
+>
+>
+> --2016-02-23 17:10:21--  (try: 2)
+> http://127.0.0.1:88/video-shbc/c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1=
+456231572.877051.ismv
+>
+> Connecting to 127.0.0.1:88... connected.
+>
+> HTTP request sent, awaiting response... 206 Partial Content
+>
+> Length: 641775701 (612M), 4194304 (4.0M) remaining [binary/octet-stre=
+am]
+>
+> Saving to: `c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1456231572.877051.is=
+mv'
+>
+>
+>
+> 100%[++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=
++++++++++++++++++++++++++++++++++++++++++++++++++++>]
+> 641,775,701 --.-K/s   in 0.007s
+>
+>
+>
+> 2016-02-23 17:10:21 (601 MB/s) -
+> `c9f8db1b-cee2-4ec8-8fb3-8b4bc7585d80.1456231572.877051.ismv' saved
+> [641775701/641775701]
+>
+>
+>
+>
+>
+>
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+
+
+
+--=20
+Pozdrawiam
+Dominik
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
