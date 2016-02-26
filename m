@@ -1,69 +1,202 @@
-From: Joshua Schmid <jschmid@suse.de>
-Subject: Re: osd dm-crypt key management, seconde partie
-Date: Fri, 26 Feb 2016 11:54:47 +0100
-Message-ID: <56D02EF7.60703@suse.de>
-References: <56CD9E7A.2050901@dachary.org>
- <alpine.DEB.2.11.1602241733260.7555@cpach.fuggernut.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: QE validation infernalis v9.2.1 status
+Date: Fri, 26 Feb 2016 07:20:45 -0500
+Message-ID: <CAC-Np1zJ_3KgUMZRv_7mxZuPChKqNZNcNSM3VO=Jz3=Lw1-fJw@mail.gmail.com>
+References: <CAMMFjmG3ukLQQiw6=R8z4PaR=MxVBvME4Qh3e-RsqFvrgdpqug@mail.gmail.com>
+	<CAMMFjmGzpf_a7jDbkyUX9cp0MtNajLcsAPHvi+2HLuYHfwm5Cg@mail.gmail.com>
+	<56CE80A5.2050104@dachary.org>
+	<CAC-Np1xtXyOBUVSJqC_mXUngh2+hj+mMBPyjGHUAOs0dCC4Qkg@mail.gmail.com>
+	<56CEEFF1.3020804@dachary.org>
+	<CAC-Np1x-Tgac6ffMd25E7ggWr4cD4wZ1v54C9BvUw5hDti08kg@mail.gmail.com>
+	<56CFD59A.3090605@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:45160 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932135AbcBZKtO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 26 Feb 2016 05:49:14 -0500
-In-Reply-To: <alpine.DEB.2.11.1602241733260.7555@cpach.fuggernut.com>
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:37111 "EHLO
+	mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751124AbcBZMUq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Feb 2016 07:20:46 -0500
+Received: by mail-wm0-f49.google.com with SMTP id g62so67904832wme.0
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Feb 2016 04:20:46 -0800 (PST)
+In-Reply-To: <56CFD59A.3090605@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Yuri Weinstein <yweinste@redhat.com>, ceph-qa <ceph-qa@ceph.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sage@redhat.com>, "Dachary, Loic" <ldachary@redhat.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Gregory Farnum <gfarnum@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, Gregory Meno <gmeno@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>
 
-
-
-On 02/24/2016 11:35 PM, Sage Weil wrote:
-> On Wed, 24 Feb 2016, Loic Dachary wrote:
->> Hi,
+On Thu, Feb 25, 2016 at 11:33 PM, Loic Dachary <loic@dachary.org> wrote=
+:
+>
+>
+> On 26/02/2016 02:21, Alfredo Deza wrote:
+>> On Thu, Feb 25, 2016 at 7:13 AM, Loic Dachary <loic@dachary.org> wro=
+te:
+>>>
+>>>
+>>> On 25/02/2016 18:55, Alfredo Deza wrote:
+>>>> On Wed, Feb 24, 2016 at 11:18 PM, Loic Dachary <loic@dachary.org> =
+wrote:
+>>>>> Hi Alfredo & Yuri,
+>>>>>
+>>>>> Please note that the SHA for the infernalis release v9.2.1 is 71f=
+380a81c6870466e11a74a597f847494ba23e9 as mentioned at http://tracker.ce=
+ph.com/issues/13750#Release-information. It is *not* the head of the in=
+fernalis branch which contains two additional commits. These two additi=
+onal commits have been tested and approved by Yehuda but they have not =
+been tested by QE.
+>>>>
+>>>> This is very very unfortunate as we already had built the packages
+>>>> from the tip of infernalis.
+>>>>
+>>>
+>>> What was the tip of infernalis when you built the packages ?
+>>>
 >>
->> A first implementation[1] of the key management scheme[2] was comple=
-ted=20
->> today (it passes tests, integration and make check). While work is d=
-one=20
->> to add tests to verify legacy key storage support, it would be great=
- to=20
->> get reviews and feedback. There is little time before the jewel merg=
-e=20
->> window closes: now would be a perfect time to catch blockers :-)
->=20
-> Great!  I skimmed the patchset (on my phone) and it looked clean and =
-sane=20
-> to me.  Joshua, maybe you can take a look at make sure this approach =
-meets=20
-> your needs as well?
+>> https://github.com/ceph/ceph/commit/71f380a81c6870466e11a74a597f8474=
+94ba23e9
+>
+> It is the good SHA1, all is well :-)
 
-Looks good to me! I'm pretty sure this will fit.
-Thanks for the effort.
+It is!
 
->=20
-> Thanks!
-> sage
+I somehow didn't connect that with the SHA you sent earlier. Will try
+to get this out today.
+>
+>>
+>>>> As it currently stands we don't have the ability to configure a bu=
+ild
+>>>> from a distinct SHA commit.
+>>>>
+>>>> Please let me know when this is ready to build from the tip of the=
+ branch.
+>>>>
+>>>>
+>>>>>
+>>>>> Cheers
+>>>>>
+>>>>>
+>>>>> *   commit d148ed64e4b865baceeadbe999dcba2ca956d932
+>>>>> |\  Merge: d9e3ffb 43f0305
+>>>>> | | Author: Loic Dachary <loic@dachary.org>
+>>>>> | | Date:   Thu Feb 25 11:08:07 2016 +0700
+>>>>> | |
+>>>>> | |     Merge pull request #7423 from Abhishekvrshny/wip-14324-in=
+fernalis
+>>>>> | |
+>>>>> | |     infernalis: rgw: radosgw-admin bucket check --fix not wor=
+k
+>>>>> | |
+>>>>> | |     Reviewed-by: Yehuda Sadeh <ysadehwe@redhat.com>
+>>>>> | |
+>>>>> | * commit 43f0305e596a51985fa06379ed6228e1c21aa445
+>>>>> | | Author: Weijun Duan <duanweijun@h3c.com>
+>>>>> | | Date:   Sun Jan 3 20:12:04 2016 -0500
+>>>>> | |
+>>>>> | |     rgw: radosgw-admin bucket check --fix not work
+>>>>> | |
+>>>>> | |     Fixed:#14215
+>>>>> | |
+>>>>> | |     Signed-off-by: Weijun Duan <duanweijun@h3c.com>
+>>>>> | |     (cherry picked from commit a17f4e27d608ef29cf499fe7624692=
+9ec7962783)
+>>>>> | |
+>>>>> * |   commit d9e3ffb2fe1061aa1035d507019216d76cd71664
+>>>>> |\ \  Merge: 71f380a beb4b66
+>>>>> | | | Author: Loic Dachary <loic@dachary.org>
+>>>>> | | | Date:   Thu Feb 25 11:07:44 2016 +0700
+>>>>> | | |
+>>>>> | | |     Merge pull request #7424 from Abhishekvrshny/wip-13887-=
+infernalis
+>>>>> | | |
+>>>>> | | |     infernalis: rgw: orphans finish segfaults
+>>>>> | | |
+>>>>> | | |     Reviewed-by: Yehuda Sadeh <ysadehwe@redhat.com>
+>>>>> | | |
+>>>>> | * | commit beb4b66c2f2eb4a22e6213b4b87d1670c10e5227
+>>>>> | |/  Author: Igor Fedotov <ifedotov@mirantis.com>
+>>>>> | |   Date:   Thu Nov 19 13:38:40 2015 +0300
+>>>>> | |
+>>>>> | |       Fixing NULL pointer dereference
+>>>>> | |
+>>>>> | |       Signed-off-by: Igor Fedotov <ifedotov@mirantis.com>
+>>>>> | |       (cherry picked from commit 93d3dfe0441be50a6990d458ee0e=
+e3289af39b20)
+>>>>> | |
+>>>>>
+>>>>>
+>>>>> On 25/02/2016 04:41, Yuri Weinstein wrote:
+>>>>>> Alfredo,
+>>>>>>
+>>>>>> QE validation for infernalis v9.2.1 is completed and it's ready =
+for publishing.
+>>>>>>
+>>>>>> Thx
+>>>>>> YuriW
+>>>>>>
+>>>>>> On Wed, Feb 24, 2016 at 8:24 AM, Yuri Weinstein <yweinste@redhat=
+=2Ecom> wrote:
+>>>>>>> Detailed summary of the QE Validation can be found here
+>>>>>>> http://tracker.ceph.com/issues/13750#note-32
+>>>>>>>
+>>>>>>> The following suites were in scope of this point release testin=
+g:
+>>>>>>>
+>>>>>>> rados (subset 1/7)
+>>>>>>> rbd
+>>>>>>> rgw
+>>>>>>> fs
+>>>>>>> krbd
+>>>>>>> kcephfs
+>>>>>>> knfs
+>>>>>>> hadoop
+>>>>>>> samba
+>>>>>>> rest
+>>>>>>> ceph-deploy
+>>>>>>> upgrade/client-upgrade
+>>>>>>> upgrade/hammer-x (infernalis)
+>>>>>>> upgrade/firefly-x (infernalis)
+>>>>>>> upgrade/firefly-hammer-x (infernalis)
+>>>>>>> upgrade/infernalis
+>>>>>>> powercycle
+>>>>>>>
+>>>>>>> Known issues (approved for release):
+>>>>>>>
+>>>>>>> krbd:
+>>>>>>> http://tracker.ceph.com/issues/14848 - approved by Jason
+>>>>>>>
+>>>>>>> ceph-deploy:
+>>>>>>> http://tracker.ceph.com/issues/14223 - assumed approved by Sage=
+ (?)
+>>>>>>>
+>>>>>>> powercycle:
+>>>>>>> http://tracker.ceph.com/issues/14810 - needs Sage approval
+>>>>>>>
+>>>>>>> Thx
+>>>>>>> YuriW
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
+evel" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
+ml
+>>>>>>
+>>>>>
+>>>>> --
+>>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>
+>>> --
+>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-=46reundliche Gr=FC=DFe - Kind regards,
-Joshua Schmid
-SUSE Enterprise Storage
-SUSE Linux GmbH - Maxfeldstr. 5 - 90409 N=FCrnberg
------------------------------------------------------------------------=
----------------------------------------------
-SUSE Linux GmbH, GF: Felix Imend=F6rffer, Jane Smithard,
-Jennifer Guild, Dilip Upmanyu, Graham Norton, HRB 21284 (AG N=FCrnberg)
------------------------------------------------------------------------=
----------------------------------------------
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
