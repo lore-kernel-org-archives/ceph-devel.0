@@ -1,179 +1,150 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: Ceph space amplification ratio with write is more than 2
-Date: Sat, 27 Feb 2016 09:27:02 +0800
-Message-ID: <CACJqLya3_A4U=dZhDu8kxJaz6N96exjY4-qtVFhDNnXzSZORhA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Ceph space amplification ratio with write is more than 2
+Date: Sat, 27 Feb 2016 01:58:01 +0000
+Message-ID: <BN1PR02MB0555C4954C611D023E86732F4B80@BN1PR02MB055.namprd02.prod.outlook.com>
 References: <99767EA2E27DD44DB4E9F9B9ACA458C0561C4194@SSIEXCH-MB3.ssi.samsung.com>
+ <CACJqLya3_A4U=dZhDu8kxJaz6N96exjY4-qtVFhDNnXzSZORhA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pu1apc01on0122.outbound.protection.outlook.com ([104.47.126.122]:17120
-	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+Received: from mail-bn1bon0065.outbound.protection.outlook.com ([157.56.111.65]:39299
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752617AbcB0B1R (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 26 Feb 2016 20:27:17 -0500
-Received: by mail-vk0-f45.google.com with SMTP id k196so93320955vka.0
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Feb 2016 17:27:12 -0800 (PST)
-In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C0561C4194@SSIEXCH-MB3.ssi.samsung.com>
+	id S1752617AbcB0B6F (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 26 Feb 2016 20:58:05 -0500
+In-Reply-To: <CACJqLya3_A4U=dZhDu8kxJaz6N96exjY4-qtVFhDNnXzSZORhA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+To: Haomai Wang <haomai@xsky.com>, "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-It should be as expected. The reason is FileJournal will prepend
-header and append footer to the transaction data, and if using
-aio+dio, we need to align these. So normally for 4k io, it will become
-5-6k filejournal write IIRC. Plus filestore writeback to filesystem,
-it should be 2.5x. But local file system and disk should has some
-merge tricky, it should be less than 2.5x.
-
-On Sat, Feb 27, 2016 at 1:46 AM, James (Fei) Liu-SSI
-<james.liu@ssi.samsung.com> wrote:
-> Hi Cepher,
->    We recently have tested the Ceph space amplification with filestore through  writing data to ramdisk with rados bench. However, we found only
-> 3584 MB was written from rados bench  but totally 8658M(1G of total 9G of ramdisk was used for journal) was used in the ramdisk.
->
-> The totally space amplification is 7658/3584 = 2.14. (It is surprising huge factor)
-> 1. Cluster configuration:
-> . One OSD and one MON  are in the same machine with rados bench. Replication factor  was set as 1.
-> . ceph version from ceph master 5979c8e34fa2f3d7efa28c29fb90758b3f9f818 (45979c8e34fa2f3d7efa28c29fb90758b3f9f818)
-> 2. Rados command we have been used :
-> rados bench -p rbd -b 4096 --max-objects 1048576  300 write --no-cleanup
-> 3. ceph cluster configuration:
-> Please see appendix 1.
-> 4. Results investigation.
-> Please see appendix 0.
->
-> Could anyone help to explain why  the space amplification with filestore is huge?  Thanks a lot.
->
-> Regards,
-> James
->
-> Appendix 0:
->
-> ssd@OptiPlex-9020-1:~/src/bluestore$ ceph df
-> GLOBAL:
->     SIZE      AVAIL     RAW USED     %RAW USED
->     9206M      547M        8658M         94.05
-> POOLS:
->     NAME     ID     USED      %USED     MAX AVAIL     OBJECTS
->     rbd      0      3584M     38.93          547M      917505
-> ssd@OptiPlex-9020-1:~/src/bluestore$ ceph -s
->     cluster a7f64266-0894-4f1e-a635-d0aeaca0e993
->      health HEALTH_WARN
->             1 near full osd(s)
->      monmap e1: 1 mons at {localhost=127.0.0.1:6789/0}
->             election epoch 3, quorum 0 localhost
->      osdmap e7: 1 osds: 1 up, 1 in
->             flags sortbitwise
->       pgmap v31: 64 pgs, 1 pools, 3584 MB data, 896 kobjects
->             8658 MB used, 547 MB / 9206 MB avail
->                   64 active+clean
-> ssd@OptiPlex-9020-1:~/src/bluestore$ df -h
-> Filesystem      Size  Used Avail Use% Mounted on
-> /dev/sda2       2.7T  1.4T  1.2T  55% /
-> none            4.0K     0  4.0K   0% /sys/fs/cgroup
-> udev            5.9G  4.0K  5.9G   1% /dev
-> tmpfs           1.2G  720K  1.2G   1% /run
-> none            5.0M     0  5.0M   0% /run/lock
-> none            5.9G   81M  5.8G   2% /run/shm
-> none            100M   20K  100M   1% /run/user
-> /dev/ram1       9.0G  8.4G  618M  94% /home/ssd/src/bluestore/ceph-deploy/osd/myosddata
->
-> Journal size:
->
-> -rw-r--r--   1 ssd ssd         37 Feb 25 15:53 ceph_fsid
-> drwxr-xr-x 132 ssd ssd       4096 Feb 25 15:53 current
-> -rw-r--r--   1 ssd ssd         37 Feb 25 15:53 fsid
-> -rw-r--r--   1 ssd ssd         21 Feb 25 15:53 magic
-> -rw-r--r--   1 ssd ssd 1073741824 Feb 25 15:53 myosdjournal
-> -rw-r--r--   1 ssd ssd          6 Feb 25 15:53 ready
-> -rw-r--r--   1 ssd ssd          4 Feb 25 15:53 store_version
-> -rw-r--r--   1 ssd ssd         53 Feb 25 15:53 superblock
-> -rw-r--r--   1 ssd ssd         10 Feb 25 15:53 type
-> -rw-r--r--   1 ssd ssd          2 Feb 25 15:53 whoami
->
-> du -sh
-> It shows current use 8G.
->
-> Appendix 1:
-> [global]
-> fsid = a7f64266-0894-4f1e-a635-d0aeaca0e993
-> auth_cluster_required = none
-> auth_service_required = none
-> auth_client_required = none
-> filestore_xattr_use_omap = true
-> filestore_max_sync_interval=10
-> filestore_fd_cache_size = 64
-> filestore_fd_cache_shards = 32
-> filestore_op_threads = 6
-> filestore_queue_max_ops=5000
-> filestore_queue_committing_max_ops=5000
-> journal_max_write_entries=1000
-> journal_queue_max_ops=3000
-> filestore_wbthrottle_enable=false
-> filestore_queue_max_bytes=1048576000
-> filestore_queue_committing_max_bytes=1048576000
-> journal_max_write_bytes=1048576000
-> journal_queue_max_bytes=1048576000
->
-> osd_journal_size = 1024
-> debug_lockdep = 0/0
-> debug_context = 0/0
-> debug_crush = 0/0
-> debug_buffer = 0/0
-> debug_timer = 0/0
-> debug_filer = 0/0
-> debug_objecter = 0/0
-> debug_rados = 0/0
-> debug_rbd = 0/0
-> debug_journaler = 0/0
-> debug_objectcatcher = 0/0
-> debug_client = 0/0
-> debug_osd = 0/0
-> debug_optracker = 0/0
-> debug_objclass = 0/0
-> debug_filestore = 0/0
-> debug_journal = 0/0
-> debug_ms = 0/0
-> debug_monc = 0/0
-> debug_tp = 0/0
-> debug_auth = 0/0
-> debug_finisher = 0/0
-> debug_heartbeatmap = 0/0
-> debug_perfcounter = 0/0
-> debug_asok = 0/0
-> debug_throttle = 0/0
-> debug_mon = 0/0
-> debug_paxos = 0/0
-> debug_rgw = 0/0
-> debug_newstore = 0/0
-> debug_keyvaluestore = 0/0
-> osd_tracing = true
-> osd_objectstore_tracing = true
-> rados_tracing = true
-> rbd_tracing = true
-> osd_mount_options_xfs = rw,noatime,inode64,logbsize=256k,delaylog
-> osd_mkfs_options_xfs = -f -i size=2048
-> osd_op_threads = 32
-> objecter_inflight_ops=102400
-> ms_dispatch_throttle_bytes=1048576000
-> objecter_infilght_op_bytes=1048576000
-> osd_mkfs_type = xfs
-> osd_client_message_size_cap = 0
-> osd_client_message_cap = 0
-> osd_enable_op_tracker = false
-> mon_initial_members = localhost
-> mon_host = 127.0.0.1
-> mon data = '$CEPH_DEPLOY'/mon/mymondata
-> mon cluster log file = '$CEPH_DEPLOY'/mon/mon.log
-> keyring='$CEPH_DEPLOY'/ceph.client.admin.keyring
-> run dir = '$CEPH_DEPLOY'/run
-> [osd.0]
-> osd data = '$CEPH_DEPLOY'/osd/myosddata
-> osd journal = '$CEPH_DEPLOY'/osd/myosddata/myosdjournal
-> #osd journal = '$WORKSPACE'/myosdjournal/myosdjournal
-> log file = '$CEPH_DEPLOY'/osd/osd.log'
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGFvbWFpLA0KSSB0aGluayB3aGF0IEphbWVzIGlzIHNlZWluZyBleGNsdWRpbmcgIGpvdXJuYWwg
+d3JpdGUgaXQgaXMgPiAyWCB3cml0ZSBhbXAuIE11c3QgYmUgc29tZXRoaW5nIGZpc2h5IG9uIGhp
+cyBzZXR1cC4uDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCi0tLS0tT3JpZ2luYWwgTWVz
+c2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRv
+OmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSGFvbWFpIFdh
+bmcNClNlbnQ6IEZyaWRheSwgRmVicnVhcnkgMjYsIDIwMTYgNToyNyBQTQ0KVG86IEphbWVzIChG
+ZWkpIExpdS1TU0kNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6
+IENlcGggc3BhY2UgYW1wbGlmaWNhdGlvbiByYXRpbyB3aXRoIHdyaXRlIGlzIG1vcmUgdGhhbiAy
+DQoNCkl0IHNob3VsZCBiZSBhcyBleHBlY3RlZC4gVGhlIHJlYXNvbiBpcyBGaWxlSm91cm5hbCB3
+aWxsIHByZXBlbmQgaGVhZGVyIGFuZCBhcHBlbmQgZm9vdGVyIHRvIHRoZSB0cmFuc2FjdGlvbiBk
+YXRhLCBhbmQgaWYgdXNpbmcNCmFpbytkaW8sIHdlIG5lZWQgdG8gYWxpZ24gdGhlc2UuIFNvIG5v
+cm1hbGx5IGZvciA0ayBpbywgaXQgd2lsbCBiZWNvbWUNCjUtNmsgZmlsZWpvdXJuYWwgd3JpdGUg
+SUlSQy4gUGx1cyBmaWxlc3RvcmUgd3JpdGViYWNrIHRvIGZpbGVzeXN0ZW0sIGl0IHNob3VsZCBi
+ZSAyLjV4LiBCdXQgbG9jYWwgZmlsZSBzeXN0ZW0gYW5kIGRpc2sgc2hvdWxkIGhhcyBzb21lIG1l
+cmdlIHRyaWNreSwgaXQgc2hvdWxkIGJlIGxlc3MgdGhhbiAyLjV4Lg0KDQpPbiBTYXQsIEZlYiAy
+NywgMjAxNiBhdCAxOjQ2IEFNLCBKYW1lcyAoRmVpKSBMaXUtU1NJIDxqYW1lcy5saXVAc3NpLnNh
+bXN1bmcuY29tPiB3cm90ZToNCj4gSGkgQ2VwaGVyLA0KPiAgICBXZSByZWNlbnRseSBoYXZlIHRl
+c3RlZCB0aGUgQ2VwaCBzcGFjZSBhbXBsaWZpY2F0aW9uIHdpdGggZmlsZXN0b3JlDQo+IHRocm91
+Z2ggIHdyaXRpbmcgZGF0YSB0byByYW1kaXNrIHdpdGggcmFkb3MgYmVuY2guIEhvd2V2ZXIsIHdl
+IGZvdW5kDQo+IG9ubHkNCj4gMzU4NCBNQiB3YXMgd3JpdHRlbiBmcm9tIHJhZG9zIGJlbmNoICBi
+dXQgdG90YWxseSA4NjU4TSgxRyBvZiB0b3RhbCA5RyBvZiByYW1kaXNrIHdhcyB1c2VkIGZvciBq
+b3VybmFsKSB3YXMgdXNlZCBpbiB0aGUgcmFtZGlzay4NCj4NCj4gVGhlIHRvdGFsbHkgc3BhY2Ug
+YW1wbGlmaWNhdGlvbiBpcyA3NjU4LzM1ODQgPSAyLjE0LiAoSXQgaXMgc3VycHJpc2luZw0KPiBo
+dWdlIGZhY3RvcikgMS4gQ2x1c3RlciBjb25maWd1cmF0aW9uOg0KPiAuIE9uZSBPU0QgYW5kIG9u
+ZSBNT04gIGFyZSBpbiB0aGUgc2FtZSBtYWNoaW5lIHdpdGggcmFkb3MgYmVuY2guIFJlcGxpY2F0
+aW9uIGZhY3RvciAgd2FzIHNldCBhcyAxLg0KPiAuIGNlcGggdmVyc2lvbiBmcm9tIGNlcGggbWFz
+dGVyDQo+IDU5NzljOGUzNGZhMmYzZDdlZmEyOGMyOWZiOTA3NThiM2Y5ZjgxOA0KPiAoNDU5Nzlj
+OGUzNGZhMmYzZDdlZmEyOGMyOWZiOTA3NThiM2Y5ZjgxOCkNCj4gMi4gUmFkb3MgY29tbWFuZCB3
+ZSBoYXZlIGJlZW4gdXNlZCA6DQo+IHJhZG9zIGJlbmNoIC1wIHJiZCAtYiA0MDk2IC0tbWF4LW9i
+amVjdHMgMTA0ODU3NiAgMzAwIHdyaXRlDQo+IC0tbm8tY2xlYW51cCAzLiBjZXBoIGNsdXN0ZXIg
+Y29uZmlndXJhdGlvbjoNCj4gUGxlYXNlIHNlZSBhcHBlbmRpeCAxLg0KPiA0LiBSZXN1bHRzIGlu
+dmVzdGlnYXRpb24uDQo+IFBsZWFzZSBzZWUgYXBwZW5kaXggMC4NCj4NCj4gQ291bGQgYW55b25l
+IGhlbHAgdG8gZXhwbGFpbiB3aHkgIHRoZSBzcGFjZSBhbXBsaWZpY2F0aW9uIHdpdGggZmlsZXN0
+b3JlIGlzIGh1Z2U/ICBUaGFua3MgYSBsb3QuDQo+DQo+IFJlZ2FyZHMsDQo+IEphbWVzDQo+DQo+
+IEFwcGVuZGl4IDA6DQo+DQo+IHNzZEBPcHRpUGxleC05MDIwLTE6fi9zcmMvYmx1ZXN0b3JlJCBj
+ZXBoIGRmDQo+IEdMT0JBTDoNCj4gICAgIFNJWkUgICAgICBBVkFJTCAgICAgUkFXIFVTRUQgICAg
+ICVSQVcgVVNFRA0KPiAgICAgOTIwNk0gICAgICA1NDdNICAgICAgICA4NjU4TSAgICAgICAgIDk0
+LjA1DQo+IFBPT0xTOg0KPiAgICAgTkFNRSAgICAgSUQgICAgIFVTRUQgICAgICAlVVNFRCAgICAg
+TUFYIEFWQUlMICAgICBPQkpFQ1RTDQo+ICAgICByYmQgICAgICAwICAgICAgMzU4NE0gICAgIDM4
+LjkzICAgICAgICAgIDU0N00gICAgICA5MTc1MDUNCj4gc3NkQE9wdGlQbGV4LTkwMjAtMTp+L3Ny
+Yy9ibHVlc3RvcmUkIGNlcGggLXMNCj4gICAgIGNsdXN0ZXIgYTdmNjQyNjYtMDg5NC00ZjFlLWE2
+MzUtZDBhZWFjYTBlOTkzDQo+ICAgICAgaGVhbHRoIEhFQUxUSF9XQVJODQo+ICAgICAgICAgICAg
+IDEgbmVhciBmdWxsIG9zZChzKQ0KPiAgICAgIG1vbm1hcCBlMTogMSBtb25zIGF0IHtsb2NhbGhv
+c3Q9MTI3LjAuMC4xOjY3ODkvMH0NCj4gICAgICAgICAgICAgZWxlY3Rpb24gZXBvY2ggMywgcXVv
+cnVtIDAgbG9jYWxob3N0DQo+ICAgICAgb3NkbWFwIGU3OiAxIG9zZHM6IDEgdXAsIDEgaW4NCj4g
+ICAgICAgICAgICAgZmxhZ3Mgc29ydGJpdHdpc2UNCj4gICAgICAgcGdtYXAgdjMxOiA2NCBwZ3Ms
+IDEgcG9vbHMsIDM1ODQgTUIgZGF0YSwgODk2IGtvYmplY3RzDQo+ICAgICAgICAgICAgIDg2NTgg
+TUIgdXNlZCwgNTQ3IE1CIC8gOTIwNiBNQiBhdmFpbA0KPiAgICAgICAgICAgICAgICAgICA2NCBh
+Y3RpdmUrY2xlYW4NCj4gc3NkQE9wdGlQbGV4LTkwMjAtMTp+L3NyYy9ibHVlc3RvcmUkIGRmIC1o
+DQo+IEZpbGVzeXN0ZW0gICAgICBTaXplICBVc2VkIEF2YWlsIFVzZSUgTW91bnRlZCBvbg0KPiAv
+ZGV2L3NkYTIgICAgICAgMi43VCAgMS40VCAgMS4yVCAgNTUlIC8NCj4gbm9uZSAgICAgICAgICAg
+IDQuMEsgICAgIDAgIDQuMEsgICAwJSAvc3lzL2ZzL2Nncm91cA0KPiB1ZGV2ICAgICAgICAgICAg
+NS45RyAgNC4wSyAgNS45RyAgIDElIC9kZXYNCj4gdG1wZnMgICAgICAgICAgIDEuMkcgIDcyMEsg
+IDEuMkcgICAxJSAvcnVuDQo+IG5vbmUgICAgICAgICAgICA1LjBNICAgICAwICA1LjBNICAgMCUg
+L3J1bi9sb2NrDQo+IG5vbmUgICAgICAgICAgICA1LjlHICAgODFNICA1LjhHICAgMiUgL3J1bi9z
+aG0NCj4gbm9uZSAgICAgICAgICAgIDEwME0gICAyMEsgIDEwME0gICAxJSAvcnVuL3VzZXINCj4g
+L2Rldi9yYW0xICAgICAgIDkuMEcgIDguNEcgIDYxOE0gIDk0JSAvaG9tZS9zc2Qvc3JjL2JsdWVz
+dG9yZS9jZXBoLWRlcGxveS9vc2QvbXlvc2RkYXRhDQo+DQo+IEpvdXJuYWwgc2l6ZToNCj4NCj4g
+LXJ3LXItLXItLSAgIDEgc3NkIHNzZCAgICAgICAgIDM3IEZlYiAyNSAxNTo1MyBjZXBoX2ZzaWQN
+Cj4gZHJ3eHIteHIteCAxMzIgc3NkIHNzZCAgICAgICA0MDk2IEZlYiAyNSAxNTo1MyBjdXJyZW50
+DQo+IC1ydy1yLS1yLS0gICAxIHNzZCBzc2QgICAgICAgICAzNyBGZWIgMjUgMTU6NTMgZnNpZA0K
+PiAtcnctci0tci0tICAgMSBzc2Qgc3NkICAgICAgICAgMjEgRmViIDI1IDE1OjUzIG1hZ2ljDQo+
+IC1ydy1yLS1yLS0gICAxIHNzZCBzc2QgMTA3Mzc0MTgyNCBGZWIgMjUgMTU6NTMgbXlvc2Rqb3Vy
+bmFsDQo+IC1ydy1yLS1yLS0gICAxIHNzZCBzc2QgICAgICAgICAgNiBGZWIgMjUgMTU6NTMgcmVh
+ZHkNCj4gLXJ3LXItLXItLSAgIDEgc3NkIHNzZCAgICAgICAgICA0IEZlYiAyNSAxNTo1MyBzdG9y
+ZV92ZXJzaW9uDQo+IC1ydy1yLS1yLS0gICAxIHNzZCBzc2QgICAgICAgICA1MyBGZWIgMjUgMTU6
+NTMgc3VwZXJibG9jaw0KPiAtcnctci0tci0tICAgMSBzc2Qgc3NkICAgICAgICAgMTAgRmViIDI1
+IDE1OjUzIHR5cGUNCj4gLXJ3LXItLXItLSAgIDEgc3NkIHNzZCAgICAgICAgICAyIEZlYiAyNSAx
+NTo1MyB3aG9hbWkNCj4NCj4gZHUgLXNoDQo+IEl0IHNob3dzIGN1cnJlbnQgdXNlIDhHLg0KPg0K
+PiBBcHBlbmRpeCAxOg0KPiBbZ2xvYmFsXQ0KPiBmc2lkID0gYTdmNjQyNjYtMDg5NC00ZjFlLWE2
+MzUtZDBhZWFjYTBlOTkzDQo+IGF1dGhfY2x1c3Rlcl9yZXF1aXJlZCA9IG5vbmUNCj4gYXV0aF9z
+ZXJ2aWNlX3JlcXVpcmVkID0gbm9uZQ0KPiBhdXRoX2NsaWVudF9yZXF1aXJlZCA9IG5vbmUNCj4g
+ZmlsZXN0b3JlX3hhdHRyX3VzZV9vbWFwID0gdHJ1ZQ0KPiBmaWxlc3RvcmVfbWF4X3N5bmNfaW50
+ZXJ2YWw9MTANCj4gZmlsZXN0b3JlX2ZkX2NhY2hlX3NpemUgPSA2NA0KPiBmaWxlc3RvcmVfZmRf
+Y2FjaGVfc2hhcmRzID0gMzINCj4gZmlsZXN0b3JlX29wX3RocmVhZHMgPSA2DQo+IGZpbGVzdG9y
+ZV9xdWV1ZV9tYXhfb3BzPTUwMDANCj4gZmlsZXN0b3JlX3F1ZXVlX2NvbW1pdHRpbmdfbWF4X29w
+cz01MDAwDQo+IGpvdXJuYWxfbWF4X3dyaXRlX2VudHJpZXM9MTAwMA0KPiBqb3VybmFsX3F1ZXVl
+X21heF9vcHM9MzAwMA0KPiBmaWxlc3RvcmVfd2J0aHJvdHRsZV9lbmFibGU9ZmFsc2UNCj4gZmls
+ZXN0b3JlX3F1ZXVlX21heF9ieXRlcz0xMDQ4NTc2MDAwDQo+IGZpbGVzdG9yZV9xdWV1ZV9jb21t
+aXR0aW5nX21heF9ieXRlcz0xMDQ4NTc2MDAwDQo+IGpvdXJuYWxfbWF4X3dyaXRlX2J5dGVzPTEw
+NDg1NzYwMDANCj4gam91cm5hbF9xdWV1ZV9tYXhfYnl0ZXM9MTA0ODU3NjAwMA0KPg0KPiBvc2Rf
+am91cm5hbF9zaXplID0gMTAyNA0KPiBkZWJ1Z19sb2NrZGVwID0gMC8wDQo+IGRlYnVnX2NvbnRl
+eHQgPSAwLzANCj4gZGVidWdfY3J1c2ggPSAwLzANCj4gZGVidWdfYnVmZmVyID0gMC8wDQo+IGRl
+YnVnX3RpbWVyID0gMC8wDQo+IGRlYnVnX2ZpbGVyID0gMC8wDQo+IGRlYnVnX29iamVjdGVyID0g
+MC8wDQo+IGRlYnVnX3JhZG9zID0gMC8wDQo+IGRlYnVnX3JiZCA9IDAvMA0KPiBkZWJ1Z19qb3Vy
+bmFsZXIgPSAwLzANCj4gZGVidWdfb2JqZWN0Y2F0Y2hlciA9IDAvMA0KPiBkZWJ1Z19jbGllbnQg
+PSAwLzANCj4gZGVidWdfb3NkID0gMC8wDQo+IGRlYnVnX29wdHJhY2tlciA9IDAvMA0KPiBkZWJ1
+Z19vYmpjbGFzcyA9IDAvMA0KPiBkZWJ1Z19maWxlc3RvcmUgPSAwLzANCj4gZGVidWdfam91cm5h
+bCA9IDAvMA0KPiBkZWJ1Z19tcyA9IDAvMA0KPiBkZWJ1Z19tb25jID0gMC8wDQo+IGRlYnVnX3Rw
+ID0gMC8wDQo+IGRlYnVnX2F1dGggPSAwLzANCj4gZGVidWdfZmluaXNoZXIgPSAwLzANCj4gZGVi
+dWdfaGVhcnRiZWF0bWFwID0gMC8wDQo+IGRlYnVnX3BlcmZjb3VudGVyID0gMC8wDQo+IGRlYnVn
+X2Fzb2sgPSAwLzANCj4gZGVidWdfdGhyb3R0bGUgPSAwLzANCj4gZGVidWdfbW9uID0gMC8wDQo+
+IGRlYnVnX3BheG9zID0gMC8wDQo+IGRlYnVnX3JndyA9IDAvMA0KPiBkZWJ1Z19uZXdzdG9yZSA9
+IDAvMA0KPiBkZWJ1Z19rZXl2YWx1ZXN0b3JlID0gMC8wDQo+IG9zZF90cmFjaW5nID0gdHJ1ZQ0K
+PiBvc2Rfb2JqZWN0c3RvcmVfdHJhY2luZyA9IHRydWUNCj4gcmFkb3NfdHJhY2luZyA9IHRydWUN
+Cj4gcmJkX3RyYWNpbmcgPSB0cnVlDQo+IG9zZF9tb3VudF9vcHRpb25zX3hmcyA9IHJ3LG5vYXRp
+bWUsaW5vZGU2NCxsb2dic2l6ZT0yNTZrLGRlbGF5bG9nDQo+IG9zZF9ta2ZzX29wdGlvbnNfeGZz
+ID0gLWYgLWkgc2l6ZT0yMDQ4IG9zZF9vcF90aHJlYWRzID0gMzINCj4gb2JqZWN0ZXJfaW5mbGln
+aHRfb3BzPTEwMjQwMA0KPiBtc19kaXNwYXRjaF90aHJvdHRsZV9ieXRlcz0xMDQ4NTc2MDAwDQo+
+IG9iamVjdGVyX2luZmlsZ2h0X29wX2J5dGVzPTEwNDg1NzYwMDANCj4gb3NkX21rZnNfdHlwZSA9
+IHhmcw0KPiBvc2RfY2xpZW50X21lc3NhZ2Vfc2l6ZV9jYXAgPSAwDQo+IG9zZF9jbGllbnRfbWVz
+c2FnZV9jYXAgPSAwDQo+IG9zZF9lbmFibGVfb3BfdHJhY2tlciA9IGZhbHNlDQo+IG1vbl9pbml0
+aWFsX21lbWJlcnMgPSBsb2NhbGhvc3QNCj4gbW9uX2hvc3QgPSAxMjcuMC4wLjENCj4gbW9uIGRh
+dGEgPSAnJENFUEhfREVQTE9ZJy9tb24vbXltb25kYXRhIG1vbiBjbHVzdGVyIGxvZyBmaWxlID0N
+Cj4gJyRDRVBIX0RFUExPWScvbW9uL21vbi5sb2cNCj4ga2V5cmluZz0nJENFUEhfREVQTE9ZJy9j
+ZXBoLmNsaWVudC5hZG1pbi5rZXlyaW5nDQo+IHJ1biBkaXIgPSAnJENFUEhfREVQTE9ZJy9ydW4N
+Cj4gW29zZC4wXQ0KPiBvc2QgZGF0YSA9ICckQ0VQSF9ERVBMT1knL29zZC9teW9zZGRhdGEgb3Nk
+IGpvdXJuYWwgPQ0KPiAnJENFUEhfREVQTE9ZJy9vc2QvbXlvc2RkYXRhL215b3Nkam91cm5hbA0K
+PiAjb3NkIGpvdXJuYWwgPSAnJFdPUktTUEFDRScvbXlvc2Rqb3VybmFsL215b3Nkam91cm5hbA0K
+PiBsb2cgZmlsZSA9ICckQ0VQSF9ERVBMT1knL29zZC9vc2QubG9nJw0KPiAtLQ0KPiBUbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
+ZXZlbCINCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5l
+bC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
+YWpvcmRvbW8taW5mby5odG1sDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
+bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVz
+c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQg
+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KUExFQVNFIE5PVEU6
+IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2Fn
+ZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVu
+dChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRo
+ZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhh
+dmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRp
+c3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMg
+c3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0
+aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUt
+bWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxs
+IGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQg
+Y29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0K
