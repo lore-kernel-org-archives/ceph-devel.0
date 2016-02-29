@@ -1,63 +1,68 @@
-From: Zhi Zhang <zhang.david2011@gmail.com>
-Subject: [ceph-fuse] fuse fails to invalidate dentry when ceph-fuse mounts sub
- directory as root_directory
-Date: Mon, 29 Feb 2016 16:13:22 +0800
-Message-ID: <CAGkCoNKm+XeUGnfTT7QfC7OfMyEqhT8xSeRirJFeeNyvGivebQ@mail.gmail.com>
+From: Odintsov Vladislav <VlOdintsov-b5CV0i+qpxk@public.gmane.org>
+Subject: Re: v0.94.6 Hammer released
+Date: Mon, 29 Feb 2016 09:04:02 +0000
+Message-ID: <1456736629334.47610@croc.ru>
+References: <alpine.DEB.2.11.1602231059590.7485@cpach.fuggernut.com>
+	<CABZ+qq=ZqhaL9uwobM1NZ7+AszUMqirHATLJZyRcowD1iDRsww@mail.gmail.com>
+	<CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
+	<EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com>
+	<CAEYCsVKeOwOWp0yRmb5KHduqwUQ-fVUaMcQCaszmGaN-WDp=Gw@mail.gmail.com>,
+	<FE41C953-5D62-41E0-A1C5-97891B7A7438@franksiler.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:38795 "EHLO
-	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751978AbcB2IOD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 03:14:03 -0500
-Received: by mail-wm0-f48.google.com with SMTP id l68so47214324wml.1
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 00:14:02 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, Zheng Yan <ukernel@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <FE41C953-5D62-41E0-A1C5-97891B7A7438-yJlFm309LvW+XT7JhA+gdA@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "Franklin M. Siler" <me-yJlFm309LvW+XT7JhA+gdA@public.gmane.org>, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi cepher,
+Hi all,
 
-Steps to reproduce this issue:
-1. reduce mds_cache_size to 200 for quick verification
-2. mount sub directory as root_directory, e.g, ceph-fuse -r /zhi_test
-/mnt/cephfs
-3. create a new sub directory under /mnt/cephfs, e.g, /mnt/cephfs/sub_dir
-4. write more than 200 files into /mnt/cephfs/sub_dir/ directory
-5. client should start to trim_caps, but caps are not released.
+should we build el6 packages ourself or, it's hoped that these packages would be built officially by community?
 
-ceph version: 0.94.1 with some backports
-fuse version: both 2.8.3 or 2.9.2
-
-By further looking at the codes, ceph-fuse wants fuse to invalidate
-some dentries by calling Client::_async_dentry_invalidate, which will
-call dentry_invalidate_cb in fuse_ll.cc and fuse's API
-fuse_lowlevel_notify_delete.
-
-Within these calls, the parent's inode (dirino) is our mount point's
-inode (zhi_test), NOT the original default root inode ("/"), the child
-inode may be a fake inode or sub directory's inode (sub_dir).
-
-However, fuse's API fuse_lowlevel_notify_delete returns -2, so no
-ll_forget will be called on those files under sub_dir and those caps
-are not released. MDS will report failing to respond to cache
-pressure.
-
-We have changed the parent's inode to the original default root inode
-("/") in Client::_async_dentry_invalidate, but no changes on child
-inode. After this, fuse can invalidate child dentry (sub_dir)
-successfully and ll_forget will be called on those files under
-sub_dir.
-
-I didn't find much information from the fuse's doc
-https://fossies.org/dox/fuse-2.9.5/fuse__lowlevel_8h.html#a94893b3eb83fe2a218e80e43089670a1.
-But it looks like fuse looking for the child from the head of the
-tree, can't from an intermediate node? otherwise is it a bug from ceph
-side?
-
-Thanks.
-
+________________________________
 Regards,
-Zhi Zhang (David)
-Contact: zhang.david2011@gmail.com
-              zhangz.david@outlook.com
+
+Vladislav Odintsov
+
+________________________________________
+From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org <ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org> on behalf of Franklin M. Siler <me-yJlFm309LvW+XT7JhA+gdA@public.gmane.org>
+Sent: Friday, February 26, 2016 05:03
+To: Xiaoxi Chen
+Cc: Alfredo Deza; Dan van der Ster; Sage Weil; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users
+Subject: Re: [ceph-users] v0.94.6 Hammer released
+
+On Feb 25, 2016, at 1839, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+
+> Will we build package for ubuntu 12.04 (Precise)?
+> Seems it also doesnt show in the repo
+
+The Ceph packages provided by Ubuntu are old.  However, the Ceph project publishes its own packages.
+
+http://download.ceph.com/debian-hammer/dists/precise/
+
+so repo lines for sources.list would be, I think:
+
+deb http://download.ceph.com/debian-hammer/ precise main
+deb-src http://download.ceph.com/debian-hammer/ precise main
+
+
+Cheers,
+
+Frank Siler
+Siler Industrial Analytics
+314.799.9405--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
