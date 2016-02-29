@@ -1,43 +1,63 @@
-From: Alfredo Deza <adeza@redhat.com>
+From: Dan van der Ster <dan@vanderster.com>
 Subject: Re: [ceph-users] v0.94.6 Hammer released
-Date: Mon, 29 Feb 2016 07:50:53 -0500
-Message-ID: <CAC-Np1we_V4McV=9UdD--5QvGyRzaC3uZLp7q2DSjeF8DKtb4g@mail.gmail.com>
+Date: Mon, 29 Feb 2016 14:28:44 +0100
+Message-ID: <CABZ+qqkD_w4xM-qNdxC_WkZbGPf+w0gHh2cgYnPF2-_0go5-SA@mail.gmail.com>
 References: <alpine.DEB.2.11.1602231059590.7485@cpach.fuggernut.com>
-	<CABZ+qq=ZqhaL9uwobM1NZ7+AszUMqirHATLJZyRcowD1iDRsww@mail.gmail.com>
-	<CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
-	<EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com>
-	<CAEYCsVKeOwOWp0yRmb5KHduqwUQ-fVUaMcQCaszmGaN-WDp=Gw@mail.gmail.com>
-	<FE41C953-5D62-41E0-A1C5-97891B7A7438@franksiler.com>
-	<1456736629334.47610@croc.ru>
-	<191489558.55229005.1456744289131.JavaMail.zimbra@redhat.com>
-	<1456745435596.21796@croc.ru>
+ <CABZ+qq=ZqhaL9uwobM1NZ7+AszUMqirHATLJZyRcowD1iDRsww@mail.gmail.com>
+ <CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
+ <EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com> <CAEYCsVKeOwOWp0yRmb5KHduqwUQ-fVUaMcQCaszmGaN-WDp=Gw@mail.gmail.com>
+ <FE41C953-5D62-41E0-A1C5-97891B7A7438@franksiler.com> <1456736629334.47610@croc.ru>
+ <191489558.55229005.1456744289131.JavaMail.zimbra@redhat.com> <1456745435596.21796@croc.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:33254 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750709AbcB2Muz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 07:50:55 -0500
-Received: by mail-wm0-f46.google.com with SMTP id l68so35287792wml.0
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 04:50:54 -0800 (PST)
+Received: from mail-lb0-f182.google.com ([209.85.217.182]:33528 "EHLO
+	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754044AbcB2N32 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 08:29:28 -0500
+Received: by mail-lb0-f182.google.com with SMTP id ed16so1709279lbb.0
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 05:29:27 -0800 (PST)
+Received: from mail-lb0-f181.google.com (mail-lb0-f181.google.com. [209.85.217.181])
+        by smtp.gmail.com with ESMTPSA id l10sm1872169lfb.35.2016.02.29.05.29.24
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1/SSLv3 cipher=OTHER);
+        Mon, 29 Feb 2016 05:29:24 -0800 (PST)
+Received: by mail-lb0-f181.google.com with SMTP id bc4so79774340lbc.2
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 05:29:24 -0800 (PST)
 In-Reply-To: <1456745435596.21796@croc.ru>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Odintsov Vladislav <VlOdintsov@croc.ru>
 Cc: Shinobu Kinjo <skinjo@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Franklin M. Siler" <me@franksiler.com>, Sage Weil <sage@redhat.com>, Xiaoxi Chen <superdebuger@gmail.com>, ceph-users <ceph-users@ceph.com>
 
-On Mon, Feb 29, 2016 at 6:30 AM, Odintsov Vladislav <VlOdintsov@croc.ru> wrote:
+On Mon, Feb 29, 2016 at 12:30 PM, Odintsov Vladislav <VlOdintsov@croc.ru> wrote:
 > Can you please provide right way for building rpm packages?
 
-Building binaries is tricky. CI has a few steps to be able to get
-binaries at the end of the process. The actual RPM building is mainly
-this portion: https://github.com/ceph/ceph-build/blob/master/ceph-build/build/build_rpm#L87-L110
+It's documented here:
+http://docs.ceph.com/docs/master/install/build-ceph/#rpm-package-manager
 
-But before doing that you need to install dependencies and run
-autogen.sh and configure, etc... as this script does:
+For 0.94.6 you need to change the .spec file to use .tar.gz (because
+there was no .bz2 published for some reason). And then also grab
+init-ceph.in-fedora.patch from here:
+https://raw.githubusercontent.com/ceph/ceph/master/rpm/init-ceph.in-fedora.patch
 
-https://github.com/ceph/ceph-build/blob/master/ceph-setup/build/build
->
+BTW, I've put our build here:
+http://linuxsoft.cern.ch/internal/repos/ceph6-stable/x86_64/os/
+These are unsigned, untested and come with no warranty, no guarantees
+of any sort. And IMHO, no third party build would ever to give that
+warm fuzzy trust-it-with-my-data feeling like a ceph.com build would
+;)
+
+Moving forward, it would be great if the required community effort
+could be put to work to get ceph.com el6 (and other) builds. For el6
+in particular there is also the option to help out the Centos Storage
+SIG to produce builds. I don't have a good feeling which direction is
+better ... maybe both.
+
+-- Dan
+CERN IT Storage Group
+
+
 > ________________________________
 > Regards,
 >
@@ -51,37 +71,6 @@ https://github.com/ceph/ceph-build/blob/master/ceph-setup/build/build
 > Subject: Re: [ceph-users] v0.94.6 Hammer released
 >
 > Can we make any kind of general procedure to make packages so that almost everyone in community build packages by themselves and reduce developers work load caused by too much requirement -;
-
-This is also very tricky to do. All I can offer is to point you (and
-others) to the tools that we have and use to create binaries in hopes
-that they
-can be generalized a bit. For building Ceph we have 3 main steps:
-
-tagging: done with ansible ->
-https://github.com/ceph/ceph-build/blob/master/ansible/roles/ceph-release/tasks/main.yml
-setup: https://github.com/ceph/ceph-build/blob/master/ceph-setup/build/build
-building: depending on the binary type to build, broken up into a few
-scripts: https://github.com/ceph/ceph-build/tree/master/ceph-build/build
-
-Once these are built, they are pushed to an HTTP binary API where they
-can be consumed later https://chacra.ceph.com/
-
-If a community/generalized effort would be in place I would think a
-separate instance of this API should exist so that binary-building
-chores
-could be split (e.g. by release/distro) and be pushed independently to
-this community-owned service.
-
-The service is configured to create the repositories when a new binary
-is POSTed so once new ones exist, consuming the repos is trivial.
-
-Everything related to the service is very well documented here:
-https://github.com/ceph/chacra#chacra
-
-The most important thing on that service would be the need for space
-as repos can get quite large. I wouldn't mind helping out setting up
-an instance.
-
 >
 > Cheers,
 > Shinobu
