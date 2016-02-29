@@ -1,43 +1,39 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: Ceph and Google Summer of Code
-Date: Mon, 29 Feb 2016 16:12:33 -0500
-Message-ID: <CAAZbbf2bm6EZopVdYCQ0XaHWGrwWC7wmXpHwwDkexPuXiOL4bQ@mail.gmail.com>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph Developer Monthly this Wed!
+Date: Mon, 29 Feb 2016 16:40:51 -0500
+Message-ID: <CAAZbbf2gSrBmGxb5BP3obW71Hj+R6=0C=EWKavgdPVh9WQq7Yw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f182.google.com ([209.85.217.182]:34626 "EHLO
-	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750719AbcB2VMf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 16:12:35 -0500
-Received: by mail-lb0-f182.google.com with SMTP id of3so87648236lbc.1
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 13:12:34 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>, board@lists.ceph.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
 Hey cephers,
 
-As many of you may have seen by now, Ceph was accepted back for
-another year of GSoC. I=E2=80=99m asking all of you to make sure that a=
-ny
-applicable students that you know consider working with Ceph this
-year.
+Just a reminder, the monthly dev meeting [0] for ceph developers is
+this Wed at 9p EST (we are on an APAC-friendly month). If you are
+currently working on commits to ceph, or would like to be, please join
+us for a quick rundown of work in progress.
 
-We=E2=80=99re happy to accept proposals from our ideas list [0], or any=
- custom
-proposal that you and they might dream up. This also applies to
-mentors. While we have a great group of initial mentors, if you are
-interested in mentoring and have a student work with you to create a
-proposal, I can add you as a mentor all the way through the end of the
-application period.
+If you are able, it would be greatly appreciated if you added your
+work to the wiki page [1] so that we know what to expect for
+disucssions. Thanks!
 
-If you have questions or comments, please feel free to reach out to me
-directly. Thanks!
 
-[0] http://ceph.com/gsoc2016
+[0] http://tracker.ceph.com/projects/ceph/wiki/Planning
+[1] http://tracker.ceph.com/projects/ceph/wiki/CDM_02-MAR-2016
 
---=20
+-- 
 
 Best Regards,
 
@@ -45,8 +41,3 @@ Patrick McGarry
 Director Ceph Community || Red Hat
 http://ceph.com  ||  http://community.redhat.com
 @scuttlemonkey || @ceph
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
