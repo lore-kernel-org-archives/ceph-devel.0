@@ -1,100 +1,68 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
+From: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: Ceph and Google Summer of Code
-Date: Mon, 29 Feb 2016 17:27:42 -0500
-Message-ID: <CAAZbbf0Jp3+Qry3v-TPu--CXk0iQNB91ioWgS+CK+VLcgwQGDQ@mail.gmail.com>
+Date: Mon, 29 Feb 2016 17:36:49 -0500 (EST)
+Message-ID: <2130201559.55866593.1456785409534.JavaMail.zimbra@redhat.com>
 References: <CAAZbbf2bm6EZopVdYCQ0XaHWGrwWC7wmXpHwwDkexPuXiOL4bQ@mail.gmail.com>
 	<699644695.235.d7ffd153-d370-4e4f-b11c-f6d6fe6e94f4.open-xchange@ox.pcextreme.nl>
+	<C9E5F44F-E60A-43F3-8F71-4780089B0411@visions.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f45.google.com ([209.85.215.45]:35434 "EHLO
-	mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750729AbcB2W1p convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 17:27:45 -0500
-Received: by mail-lf0-f45.google.com with SMTP id j186so27112893lfg.2
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 14:27:43 -0800 (PST)
-In-Reply-To: <699644695.235.d7ffd153-d370-4e4f-b11c-f6d6fe6e94f4.open-xchange@ox.pcextreme.nl>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>, board@lists.ceph.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <C9E5F44F-E60A-43F3-8F71-4780089B0411-wMiaxBNS8SzLoDKTGw+V6w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: David <david-wMiaxBNS8SzLoDKTGw+V6w@public.gmane.org>
+Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, board-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hey Wido,
-
-That=E2=80=99s a great idea, I=E2=80=99ll add it to the ideas list (and=
- you as a
-mentor). You, or anyone, should feel free to solicit a student to
-submit the proposal if you know any. I think this would be a great
-summer project. Thanks.
-
-
-On Mon, Feb 29, 2016 at 4:53 PM, Wido den Hollander <wido@42on.com> wro=
-te:
-> A long wanted feature is mail storage in RADOS:
-> http://tracker.ceph.com/issues/12430
->
-> Would that be a good idea? I'd be more than happy to mentor this one.
->
-> I will probably lack the technical C++ skills, but e-mail storage its=
-elf is
-> something I'm very familiar with.
->
-> Wido
->
->> Op 29 februari 2016 om 22:12 schreef Patrick McGarry <pmcgarry@redha=
-t.com>:
->>
->>
->> Hey cephers,
->>
->> As many of you may have seen by now, Ceph was accepted back for
->> another year of GSoC. I=E2=80=99m asking all of you to make sure tha=
-t any
->> applicable students that you know consider working with Ceph this
->> year.
->>
->> We=E2=80=99re happy to accept proposals from our ideas list [0], or =
-any custom
->> proposal that you and they might dream up. This also applies to
->> mentors. While we have a great group of initial mentors, if you are
->> interested in mentoring and have a student work with you to create a
->> proposal, I can add you as a mentor all the way through the end of t=
-he
->> application period.
->>
->> If you have questions or comments, please feel free to reach out to =
-me
->> directly. Thanks!
->>
->> [0] http://ceph.com/gsoc2016
->>
->> --
->>
->> Best Regards,
->>
->> Patrick McGarry
->> Director Ceph Community || Red Hat
->> http://ceph.com  ||  http://community.redhat.com
->> @scuttlemonkey || @ceph
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
---=20
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+WWVhaCwgc291bmRzIGdvb2QuICsxCgpDaGVlcnMsCgotLS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0t
+LS0tCkZyb206ICJEYXZpZCIgPGRhdmlkQHZpc2lvbnMuc2U+ClRvOiAiV2lkbyBkZW4gSG9sbGFu
+ZGVyIiA8d2lkb0A0Mm9uLmNvbT4KQ2M6ICJDZXBoIERldmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtl
+cm5lbC5vcmc+LCAiQ2VwaC1Vc2VyIiA8Y2VwaC11c2Vyc0BjZXBoLmNvbT4sIGJvYXJkQGxpc3Rz
+LmNlcGguY29tClNlbnQ6IFR1ZXNkYXksIE1hcmNoIDEsIDIwMTYgNzoyMjozMSBBTQpTdWJqZWN0
+OiBSZTogW2NlcGgtdXNlcnNdIENlcGggYW5kIEdvb2dsZSBTdW1tZXIgb2YgQ29kZQoKR3JlYXQg
+aWRlYSEgKzEKCkRhdmlkIE1hamNocnphawoKPiAyOSBmZWIuIDIwMTYga2wuIDIyOjUzIHNrcmV2
+IFdpZG8gZGVuIEhvbGxhbmRlciA8d2lkb0A0Mm9uLmNvbT46Cj4gCj4gQSBsb25nIHdhbnRlZCBm
+ZWF0dXJlIGlzIG1haWwgc3RvcmFnZSBpbiBSQURPUzoKPiBodHRwOi8vdHJhY2tlci5jZXBoLmNv
+bS9pc3N1ZXMvMTI0MzAKPiAKPiBXb3VsZCB0aGF0IGJlIGEgZ29vZCBpZGVhPyBJJ2QgYmUgbW9y
+ZSB0aGFuIGhhcHB5IHRvIG1lbnRvciB0aGlzIG9uZS4KPiAKPiBJIHdpbGwgcHJvYmFibHkgbGFj
+ayB0aGUgdGVjaG5pY2FsIEMrKyBza2lsbHMsIGJ1dCBlLW1haWwgc3RvcmFnZSBpdHNlbGYgaXMK
+PiBzb21ldGhpbmcgSSdtIHZlcnkgZmFtaWxpYXIgd2l0aC4KPiAKPiBXaWRvCj4gCj4+IE9wIDI5
+IGZlYnJ1YXJpIDIwMTYgb20gMjI6MTIgc2NocmVlZiBQYXRyaWNrIE1jR2FycnkgPHBtY2dhcnJ5
+QHJlZGhhdC5jb20+Ogo+PiAKPj4gCj4+IEhleSBjZXBoZXJzLAo+PiAKPj4gQXMgbWFueSBvZiB5
+b3UgbWF5IGhhdmUgc2VlbiBieSBub3csIENlcGggd2FzIGFjY2VwdGVkIGJhY2sgZm9yCj4+IGFu
+b3RoZXIgeWVhciBvZiBHU29DLiBJ4oCZbSBhc2tpbmcgYWxsIG9mIHlvdSB0byBtYWtlIHN1cmUg
+dGhhdCBhbnkKPj4gYXBwbGljYWJsZSBzdHVkZW50cyB0aGF0IHlvdSBrbm93IGNvbnNpZGVyIHdv
+cmtpbmcgd2l0aCBDZXBoIHRoaXMKPj4geWVhci4KPj4gCj4+IFdl4oCZcmUgaGFwcHkgdG8gYWNj
+ZXB0IHByb3Bvc2FscyBmcm9tIG91ciBpZGVhcyBsaXN0IFswXSwgb3IgYW55IGN1c3RvbQo+PiBw
+cm9wb3NhbCB0aGF0IHlvdSBhbmQgdGhleSBtaWdodCBkcmVhbSB1cC4gVGhpcyBhbHNvIGFwcGxp
+ZXMgdG8KPj4gbWVudG9ycy4gV2hpbGUgd2UgaGF2ZSBhIGdyZWF0IGdyb3VwIG9mIGluaXRpYWwg
+bWVudG9ycywgaWYgeW91IGFyZQo+PiBpbnRlcmVzdGVkIGluIG1lbnRvcmluZyBhbmQgaGF2ZSBh
+IHN0dWRlbnQgd29yayB3aXRoIHlvdSB0byBjcmVhdGUgYQo+PiBwcm9wb3NhbCwgSSBjYW4gYWRk
+IHlvdSBhcyBhIG1lbnRvciBhbGwgdGhlIHdheSB0aHJvdWdoIHRoZSBlbmQgb2YgdGhlCj4+IGFw
+cGxpY2F0aW9uIHBlcmlvZC4KPj4gCj4+IElmIHlvdSBoYXZlIHF1ZXN0aW9ucyBvciBjb21tZW50
+cywgcGxlYXNlIGZlZWwgZnJlZSB0byByZWFjaCBvdXQgdG8gbWUKPj4gZGlyZWN0bHkuIFRoYW5r
+cyEKPj4gCj4+IFswXSBodHRwOi8vY2VwaC5jb20vZ3NvYzIwMTYKPj4gCj4+IC0tIAo+PiAKPj4g
+QmVzdCBSZWdhcmRzLAo+PiAKPj4gUGF0cmljayBNY0dhcnJ5Cj4+IERpcmVjdG9yIENlcGggQ29t
+bXVuaXR5IHx8IFJlZCBIYXQKPj4gaHR0cDovL2NlcGguY29tICB8fCAgaHR0cDovL2NvbW11bml0
+eS5yZWRoYXQuY29tCj4+IEBzY3V0dGxlbW9ua2V5IHx8IEBjZXBoCj4+IC0tCj4+IFRvIHVuc3Vi
+c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRl
+dmVsIiBpbgo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
+Lm9yZwo+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
+am9yZG9tby1pbmZvLmh0bWwKPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fXwo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5j
+ZXBoLmNvbQo+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1j
+ZXBoLmNvbQoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
+Y2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8v
+bGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5n
+IGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlz
+dGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
