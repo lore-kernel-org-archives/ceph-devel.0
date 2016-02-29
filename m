@@ -1,121 +1,652 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Getting cython to define ENODATA on FreeBSD. (Was: Re: [ceph]
- pybind: move cephfs to Cython (#7745))
-Date: Mon, 29 Feb 2016 14:26:58 +0100
-Message-ID: <56D44722.6000801@digiware.nl>
-References: <56D446DD.1020302@digiware.nl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:18323 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754298AbcB2N1a (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 29 Feb 2016 08:27:30 -0500
-Received: from rack1.digiware.nl (unknown [127.0.0.1])
-	by smtp.digiware.nl (Postfix) with ESMTP id 9234F1534ED
-	for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 14:27:26 +0100 (CET)
-Received: from [192.168.101.175] (vpn.ecoracks.nl [31.223.170.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.digiware.nl (Postfix) with ESMTPSA id 4FAF31534EF
-	for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 14:26:58 +0100 (CET)
-In-Reply-To: <56D446DD.1020302@digiware.nl>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+From: Josef Johansson <josef86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: v0.94.6 Hammer released
+Date: Mon, 29 Feb 2016 14:38:29 +0100
+Message-ID: <FB2D860E-F299-4096-9D97-79B84F79C2DB@gmail.com>
+References: <alpine.DEB.2.11.1602231059590.7485@cpach.fuggernut.com>
+	<CABZ+qq=ZqhaL9uwobM1NZ7+AszUMqirHATLJZyRcowD1iDRsww@mail.gmail.com>
+	<CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
+	<EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com>
+	<CAEYCsVKeOwOWp0yRmb5KHduqwUQ-fVUaMcQCaszmGaN-WDp=Gw@mail.gmail.com>
+	<FE41C953-5D62-41E0-A1C5-97891B7A7438@franksiler.com>
+	<1456736629334.47610@croc.ru>
+	<191489558.55229005.1456744289131.JavaMail.zimbra@redhat.com>
+	<1456745435596.21796@croc.ru>
+	<CABZ+qqkD_w4xM-qNdxC_WkZbGPf+w0gHh2cgYnPF2-_0go5-SA@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
+Content-Type: multipart/mixed; boundary="===============1795399348=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CABZ+qqkD_w4xM-qNdxC_WkZbGPf+w0gHh2cgYnPF2-_0go5-SA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
+Cc: Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Franklin M. Siler" <me-yJlFm309LvW+XT7JhA+gdA@public.gmane.org>, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 29-2-2016 12:57, Mehdi Abaakouk wrote:
-> Hi,
->=20
-> Le 2016-02-29 11:27, Willem Jan Withagen a =C3=A9crit :
->> Hi,
->>
->> You write:
->>
->> If you have errno.pxd, and cimport won't work, perhaps that means yo=
-u
->> have something wrong with your cython package. Cython/Includes/libc =
-is
->> automatically included on Linux for cython compilation and it looks =
-not
->> on FreeBSD.
->>
->> But probably is one of the  issues that lies ahead of this, is the f=
-act
->> that in
->>     /usr/include/errno.h FreeBSD does not define ENODATA.
->> And thus during compilation that value is not known (anywhere)
->>
->> In most of the Ceph code it is replaced by ENOATTR.
->=20
->> I did not picked that but others that did work before me. And whatev=
-er
->> choice you make it is going to break somewhere nayways.
->>
->> Now the question here is going to be how to educate cython to actual=
-ly
->> pickup on this change....
->> Perhaps by adding an extra include that "overlays" the current one a=
-nd
->> adds errno.ENODATA to the errno enum?
->>
->> I do not know enough of python/cython how to do that, or that it is =
-even
->> possible?
->=20
-> If a Cython headers (*.pyd) have ENODATA, you need to fix it.
->=20
-> So, the only good solution for that is fixing cython for FreeBSD, I
-> don't see why you would add crap in Ceph here.
->=20
-> I'm sure the FreeBSD community is open and aware about not existing
-> ENODATA on their system, and regulary patch application to remove it.
-> You just have to fix the FreeBSD Cython Package (or even upstream Cyt=
-hon
-> if they officially support FreeBSD).
+
+--===============1795399348==
+Content-Type: multipart/alternative; boundary="Apple-Mail=_7853D1AC-76F2-47B6-AA72-B6BA4093D7BD"
+
+
+--Apple-Mail=_7853D1AC-76F2-47B6-AA72-B6BA4093D7BD
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=utf-8
 
 Hi,
 
-I'm a member of the FreeBSD community since 1993. :)
+There is also https://github.com/jordansissel/fpm/wiki =
+<https://github.com/jordansissel/fpm/wiki>
 
-The reason that it is not in FreeBSD is might be  because the standard
-does not require it. :(
+I find it quite useful for building deb/rpm.
 
-------
-IEEE Std 1003.1 2004 says that ENODATA is an 'XSR' extension:
+What would be useful for the community per se would be if you made a =
+Dockerfile for each type of combination, i.e. Ubuntu trusty / 10.0.3 and =
+so forth.
 
-"The functionality described is optional. The functionality described i=
-s
-also an extension to the ISO C standard."
+That way anyone could just docker run ceph/compile-ubuntu-trusty-10.0.3 =
+and that would be it.
 
-ENODATA appears to be mandatory.
--------
+I don=E2=80=99t think that would even be tough to do.
 
-And as such it might be, might not be able to get it into the FreeBSD
-include files. However that will take a long time, and during that time
-I will not be able to complete the tests required to run all tests for
-=46reeBSD.
+I=E2=80=99m unsure how well you can test that it=E2=80=99s not tampered =
+with, but I assume it=E2=80=99s possible to solve, or at least set up =
+trusts between a contributor and the repo.=20
 
-And as such is the 'crap' you refer too, a consequence of using
-extensions to the standard for software, thus hampering the portability=
-=2E
-Uptil now I've been able to tackle just about all the issues.
-And if I remember correctly this one wasn't an issue in my previous
-testruns until the python piece got ripped out, and replaced with cytho=
-n.
+Regards,
+Josef
 
-So I you ( or anybody else on this list) know(s) any ways to keep me
-going with porting I'd be very thankful.
+> On 29 Feb 2016, at 14:28, Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org> wrote:
+>=20
+> On Mon, Feb 29, 2016 at 12:30 PM, Odintsov Vladislav =
+<VlOdintsov-b5CV0i+qpxk@public.gmane.org <mailto:VlOdintsov-b5CV0i+qpxk@public.gmane.org>> wrote:
+>> Can you please provide right way for building rpm packages?
+>=20
+> It's documented here:
+> =
+http://docs.ceph.com/docs/master/install/build-ceph/#rpm-package-manager =
+<http://docs.ceph.com/docs/master/install/build-ceph/#rpm-package-manager>=
 
---WjW
+>=20
+> For 0.94.6 you need to change the .spec file to use .tar.gz (because
+> there was no .bz2 published for some reason). And then also grab
+> init-ceph.in-fedora.patch from here:
+> =
+https://raw.githubusercontent.com/ceph/ceph/master/rpm/init-ceph.in-fedora=
+.patch =
+<https://raw.githubusercontent.com/ceph/ceph/master/rpm/init-ceph.in-fedor=
+a.patch>
+>=20
+> BTW, I've put our build here:
+> http://linuxsoft.cern.ch/internal/repos/ceph6-stable/x86_64/os/ =
+<http://linuxsoft.cern.ch/internal/repos/ceph6-stable/x86_64/os/>
+> These are unsigned, untested and come with no warranty, no guarantees
+> of any sort. And IMHO, no third party build would ever to give that
+> warm fuzzy trust-it-with-my-data feeling like a ceph.com =
+<http://ceph.com/> build would
+> ;)
+>=20
+> Moving forward, it would be great if the required community effort
+> could be put to work to get ceph.com <http://ceph.com/> el6 (and =
+other) builds. For el6
+> in particular there is also the option to help out the Centos Storage
+> SIG to produce builds. I don't have a good feeling which direction is
+> better ... maybe both.
+>=20
+> -- Dan
+> CERN IT Storage Group
+>=20
+>=20
+>> ________________________________
+>> Regards,
+>>=20
+>> Vladislav Odintsov
+>>=20
+>> ________________________________________
+>> From: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> Sent: Monday, February 29, 2016 14:11
+>> To: Odintsov Vladislav
+>> Cc: Franklin M. Siler; Xiaoxi Chen; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; =
+ceph-users; Sage Weil
+>> Subject: Re: [ceph-users] v0.94.6 Hammer released
+>>=20
+>> Can we make any kind of general procedure to make packages so that =
+almost everyone in community build packages by themselves and reduce =
+developers work load caused by too much requirement -;
+>>=20
+>> Cheers,
+>> Shinobu
+>>=20
+>> ----- Original Message -----
+>> From: "Odintsov Vladislav" <VlOdintsov-b5CV0i+qpxk@public.gmane.org>
+>> To: "Franklin M. Siler" <me-yJlFm309LvW+XT7JhA+gdA@public.gmane.org>, "Xiaoxi Chen" =
+<superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+>> Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "ceph-users" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, =
+"Sage Weil" <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> Sent: Monday, February 29, 2016 6:04:02 PM
+>> Subject: Re: [ceph-users] v0.94.6 Hammer released
+>>=20
+>> Hi all,
+>>=20
+>> should we build el6 packages ourself or, it's hoped that these =
+packages would be built officially by community?
+>>=20
+>> ________________________________
+>> Regards,
+>>=20
+>> Vladislav Odintsov
+>>=20
+>> ________________________________________
+>> From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org =
+<ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org> on behalf of Franklin M. Siler =
+<me-yJlFm309LvW+XT7JhA+gdA@public.gmane.org>
+>> Sent: Friday, February 26, 2016 05:03
+>> To: Xiaoxi Chen
+>> Cc: Alfredo Deza; Dan van der Ster; Sage Weil; =
+ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users
+>> Subject: Re: [ceph-users] v0.94.6 Hammer released
+>>=20
+>> On Feb 25, 2016, at 1839, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>>=20
+>>> Will we build package for ubuntu 12.04 (Precise)?
+>>> Seems it also doesnt show in the repo
+>>=20
+>> The Ceph packages provided by Ubuntu are old.  However, the Ceph =
+project publishes its own packages.
+>>=20
+>> http://download.ceph.com/debian-hammer/dists/precise/
+>>=20
+>> so repo lines for sources.list would be, I think:
+>>=20
+>> deb http://download.ceph.com/debian-hammer/ precise main
+>> deb-src http://download.ceph.com/debian-hammer/ precise main
+>>=20
+>>=20
+>> Cheers,
+>>=20
+>> Frank Siler
+>> Siler Industrial Analytics
+>> 314.799.9405--
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com =
+<http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>
 
-I will also try to raise the issue in the FreeBSD lists.
+--Apple-Mail=_7853D1AC-76F2-47B6-AA72-B6BA4093D7BD
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset=utf-8
 
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html =
+charset=3Dutf-8"></head><body style=3D"word-wrap: break-word; =
+-webkit-nbsp-mode: space; -webkit-line-break: after-white-space;" =
+class=3D"">Hi,<div class=3D""><br class=3D""></div><div class=3D"">There =
+is also&nbsp;<a href=3D"https://github.com/jordansissel/fpm/wiki" =
+class=3D"">https://github.com/jordansissel/fpm/wiki</a></div><div =
+class=3D""><br class=3D""></div><div class=3D"">I find it quite useful =
+for building deb/rpm.</div><div class=3D""><br class=3D""></div><div =
+class=3D"">What would be useful for the community per se would be if you =
+made a Dockerfile for each type of combination, i.e. Ubuntu trusty / =
+10.0.3 and so forth.</div><div class=3D""><br class=3D""></div><div =
+class=3D"">That way anyone could just docker run =
+ceph/compile-ubuntu-trusty-10.0.3 and that would be it.</div><div =
+class=3D""><div class=3D""><br class=3D""></div><div class=3D"">I =
+don=E2=80=99t think that would even be tough to do.</div></div><div =
+class=3D""><br class=3D""></div><div class=3D"">I=E2=80=99m unsure how =
+well you can test that it=E2=80=99s not tampered with, but I assume =
+it=E2=80=99s possible to solve, or at least set up trusts between a =
+contributor and the repo.&nbsp;</div><div class=3D""><br =
+class=3D""></div><div class=3D"">Regards,</div><div =
+class=3D"">Josef</div><div class=3D""><br class=3D""></div><div =
+class=3D""><div><blockquote type=3D"cite" class=3D""><div class=3D"">On =
+29 Feb 2016, at 14:28, Dan van der Ster &lt;<a =
+href=3D"mailto:dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org" class=3D"">dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org</a>&gt; =
+wrote:</div><br class=3D"Apple-interchange-newline"><div class=3D""><span =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; float: none; display: inline =
+!important;" class=3D"">On Mon, Feb 29, 2016 at 12:30 PM, Odintsov =
+Vladislav &lt;</span><a href=3D"mailto:VlOdintsov-b5CV0i+qpxk@public.gmane.org" =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" class=3D"">VlOdintsov-b5CV0i+qpxk@public.gmane.org</a><span =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; float: none; display: inline =
+!important;" class=3D"">&gt; wrote:</span><br style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" =
+class=3D""><blockquote type=3D"cite" style=3D"font-family: Helvetica; =
+font-size: 12px; font-style: normal; font-variant: normal; font-weight: =
+normal; letter-spacing: normal; orphans: auto; text-align: start; =
+text-indent: 0px; text-transform: none; white-space: normal; widows: =
+auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D"">Can =
+you please provide right way for building rpm packages?<br =
+class=3D""></blockquote><br style=3D"font-family: Helvetica; font-size: =
+12px; font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><span =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; float: none; display: inline =
+!important;" class=3D"">It's documented here:</span><br =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" class=3D""><a =
+href=3D"http://docs.ceph.com/docs/master/install/build-ceph/#rpm-package-m=
+anager" style=3D"font-family: Helvetica; font-size: 12px; font-style: =
+normal; font-variant: normal; font-weight: normal; letter-spacing: =
+normal; orphans: auto; text-align: start; text-indent: 0px; =
+text-transform: none; white-space: normal; widows: auto; word-spacing: =
+0px; -webkit-text-stroke-width: 0px;" =
+class=3D"">http://docs.ceph.com/docs/master/install/build-ceph/#rpm-packag=
+e-manager</a><br style=3D"font-family: Helvetica; font-size: 12px; =
+font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><br =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" class=3D""><span style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; float: =
+none; display: inline !important;" class=3D"">For 0.94.6 you need to =
+change the .spec file to use .tar.gz (because</span><br =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" class=3D""><span style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; float: =
+none; display: inline !important;" class=3D"">there was no .bz2 =
+published for some reason). And then also grab</span><br =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" class=3D""><span style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; float: =
+none; display: inline !important;" class=3D"">init-ceph.in-fedora.patch =
+from here:</span><br style=3D"font-family: Helvetica; font-size: 12px; =
+font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><a =
+href=3D"https://raw.githubusercontent.com/ceph/ceph/master/rpm/init-ceph.i=
+n-fedora.patch" style=3D"font-family: Helvetica; font-size: 12px; =
+font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" =
+class=3D"">https://raw.githubusercontent.com/ceph/ceph/master/rpm/init-cep=
+h.in-fedora.patch</a><br style=3D"font-family: Helvetica; font-size: =
+12px; font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><br =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" class=3D""><span style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; float: =
+none; display: inline !important;" class=3D"">BTW, I've put our build =
+here:</span><br style=3D"font-family: Helvetica; font-size: 12px; =
+font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><a =
+href=3D"http://linuxsoft.cern.ch/internal/repos/ceph6-stable/x86_64/os/" =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" =
+class=3D"">http://linuxsoft.cern.ch/internal/repos/ceph6-stable/x86_64/os/=
+</a><br style=3D"font-family: Helvetica; font-size: 12px; font-style: =
+normal; font-variant: normal; font-weight: normal; letter-spacing: =
+normal; orphans: auto; text-align: start; text-indent: 0px; =
+text-transform: none; white-space: normal; widows: auto; word-spacing: =
+0px; -webkit-text-stroke-width: 0px;" class=3D""><span =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; float: none; display: inline =
+!important;" class=3D"">These are unsigned, untested and come with no =
+warranty, no guarantees</span><br style=3D"font-family: Helvetica; =
+font-size: 12px; font-style: normal; font-variant: normal; font-weight: =
+normal; letter-spacing: normal; orphans: auto; text-align: start; =
+text-indent: 0px; text-transform: none; white-space: normal; widows: =
+auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><span=
+ style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; float: none; display: inline =
+!important;" class=3D"">of any sort. And IMHO, no third party build =
+would ever to give that</span><br style=3D"font-family: Helvetica; =
+font-size: 12px; font-style: normal; font-variant: normal; font-weight: =
+normal; letter-spacing: normal; orphans: auto; text-align: start; =
+text-indent: 0px; text-transform: none; white-space: normal; widows: =
+auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><span=
+ style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; float: none; display: inline =
+!important;" class=3D"">warm fuzzy trust-it-with-my-data feeling like =
+a<span class=3D"Apple-converted-space">&nbsp;</span></span><a =
+href=3D"http://ceph.com/" style=3D"font-family: Helvetica; font-size: =
+12px; font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" =
+class=3D"">ceph.com</a><span style=3D"font-family: Helvetica; font-size: =
+12px; font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px; float: none; display: =
+inline !important;" class=3D""><span =
+class=3D"Apple-converted-space">&nbsp;</span>build would</span><br =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" class=3D""><span style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; float: =
+none; display: inline !important;" class=3D"">;)</span><br =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" class=3D""><br style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" =
+class=3D""><span style=3D"font-family: Helvetica; font-size: 12px; =
+font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px; float: none; display: =
+inline !important;" class=3D"">Moving forward, it would be great if the =
+required community effort</span><br style=3D"font-family: Helvetica; =
+font-size: 12px; font-style: normal; font-variant: normal; font-weight: =
+normal; letter-spacing: normal; orphans: auto; text-align: start; =
+text-indent: 0px; text-transform: none; white-space: normal; widows: =
+auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><span=
+ style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; float: none; display: inline =
+!important;" class=3D"">could be put to work to get<span =
+class=3D"Apple-converted-space">&nbsp;</span></span><a =
+href=3D"http://ceph.com/" style=3D"font-family: Helvetica; font-size: =
+12px; font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" =
+class=3D"">ceph.com</a><span style=3D"font-family: Helvetica; font-size: =
+12px; font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px; float: none; display: =
+inline !important;" class=3D""><span =
+class=3D"Apple-converted-space">&nbsp;</span>el6 (and other) builds. For =
+el6</span><br style=3D"font-family: Helvetica; font-size: 12px; =
+font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><span =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; float: none; display: inline =
+!important;" class=3D"">in particular there is also the option to help =
+out the Centos Storage</span><br style=3D"font-family: Helvetica; =
+font-size: 12px; font-style: normal; font-variant: normal; font-weight: =
+normal; letter-spacing: normal; orphans: auto; text-align: start; =
+text-indent: 0px; text-transform: none; white-space: normal; widows: =
+auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><span=
+ style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; float: none; display: inline =
+!important;" class=3D"">SIG to produce builds. I don't have a good =
+feeling which direction is</span><br style=3D"font-family: Helvetica; =
+font-size: 12px; font-style: normal; font-variant: normal; font-weight: =
+normal; letter-spacing: normal; orphans: auto; text-align: start; =
+text-indent: 0px; text-transform: none; white-space: normal; widows: =
+auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><span=
+ style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; float: none; display: inline =
+!important;" class=3D"">better ... maybe both.</span><br =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" class=3D""><br style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" =
+class=3D""><span style=3D"font-family: Helvetica; font-size: 12px; =
+font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px; float: none; display: =
+inline !important;" class=3D"">-- Dan</span><br style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" =
+class=3D""><span style=3D"font-family: Helvetica; font-size: 12px; =
+font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px; float: none; display: =
+inline !important;" class=3D"">CERN IT Storage Group</span><br =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" class=3D""><br style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" =
+class=3D""><br style=3D"font-family: Helvetica; font-size: 12px; =
+font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><blockquote=
+ type=3D"cite" style=3D"font-family: Helvetica; font-size: 12px; =
+font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" =
+class=3D"">________________________________<br class=3D"">Regards,<br =
+class=3D""><br class=3D"">Vladislav Odintsov<br class=3D""><br =
+class=3D"">________________________________________<br class=3D"">From: =
+Shinobu Kinjo &lt;<a href=3D"mailto:skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" =
+class=3D"">skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;<br class=3D"">Sent: Monday, =
+February 29, 2016 14:11<br class=3D"">To: Odintsov Vladislav<br =
+class=3D"">Cc: Franklin M. Siler; Xiaoxi Chen; <a =
+href=3D"mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" =
+class=3D"">ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>; ceph-users; Sage Weil<br =
+class=3D"">Subject: Re: [ceph-users] v0.94.6 Hammer released<br =
+class=3D""><br class=3D"">Can we make any kind of general procedure to =
+make packages so that almost everyone in community build packages by =
+themselves and reduce developers work load caused by too much =
+requirement -;<br class=3D""><br class=3D"">Cheers,<br =
+class=3D"">Shinobu<br class=3D""><br class=3D"">----- Original Message =
+-----<br class=3D"">From: "Odintsov Vladislav" &lt;<a =
+href=3D"mailto:VlOdintsov-b5CV0i+qpxk@public.gmane.org" =
+class=3D"">VlOdintsov-b5CV0i+qpxk@public.gmane.org</a>&gt;<br class=3D"">To: "Franklin M. =
+Siler" &lt;<a href=3D"mailto:me-yJlFm309LvW+XT7JhA+gdA@public.gmane.org" =
+class=3D"">me-yJlFm309LvW+XT7JhA+gdA@public.gmane.org</a>&gt;, "Xiaoxi Chen" &lt;<a =
+href=3D"mailto:superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" =
+class=3D"">superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;<br class=3D"">Cc: <a =
+href=3D"mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" =
+class=3D"">ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>, "ceph-users" &lt;<a =
+href=3D"mailto:ceph-users-Qp0mS5GaXlQ@public.gmane.org" =
+class=3D"">ceph-users-Qp0mS5GaXlQ@public.gmane.org</a>&gt;, "Sage Weil" &lt;<a =
+href=3D"mailto:sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" class=3D"">sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;<br =
+class=3D"">Sent: Monday, February 29, 2016 6:04:02 PM<br =
+class=3D"">Subject: Re: [ceph-users] v0.94.6 Hammer released<br =
+class=3D""><br class=3D"">Hi all,<br class=3D""><br class=3D"">should we =
+build el6 packages ourself or, it's hoped that these packages would be =
+built officially by community?<br class=3D""><br =
+class=3D"">________________________________<br class=3D"">Regards,<br =
+class=3D""><br class=3D"">Vladislav Odintsov<br class=3D""><br =
+class=3D"">________________________________________<br class=3D"">From: =
+<a href=3D"mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" =
+class=3D"">ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a> &lt;<a =
+href=3D"mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" =
+class=3D"">ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>&gt; on behalf of =
+Franklin M. Siler &lt;<a href=3D"mailto:me-yJlFm309LvW+XT7JhA+gdA@public.gmane.org" =
+class=3D"">me-yJlFm309LvW+XT7JhA+gdA@public.gmane.org</a>&gt;<br class=3D"">Sent: Friday, =
+February 26, 2016 05:03<br class=3D"">To: Xiaoxi Chen<br class=3D"">Cc: =
+Alfredo Deza; Dan van der Ster; Sage Weil; <a =
+href=3D"mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" =
+class=3D"">ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>; ceph-users<br =
+class=3D"">Subject: Re: [ceph-users] v0.94.6 Hammer released<br =
+class=3D""><br class=3D"">On Feb 25, 2016, at 1839, Xiaoxi Chen &lt;<a =
+href=3D"mailto:superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" =
+class=3D"">superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br class=3D""><br =
+class=3D""><blockquote type=3D"cite" class=3D"">Will we build package =
+for ubuntu 12.04 (Precise)?<br class=3D"">Seems it also doesnt show in =
+the repo<br class=3D""></blockquote><br class=3D"">The Ceph packages =
+provided by Ubuntu are old. &nbsp;However, the Ceph project publishes =
+its own packages.<br class=3D""><br class=3D""><a =
+href=3D"http://download.ceph.com/debian-hammer/dists/precise/" =
+class=3D"">http://download.ceph.com/debian-hammer/dists/precise/</a><br =
+class=3D""><br class=3D"">so repo lines for sources.list would be, I =
+think:<br class=3D""><br class=3D"">deb =
+http://download.ceph.com/debian-hammer/ precise main<br class=3D"">deb-src=
+ http://download.ceph.com/debian-hammer/ precise main<br class=3D""><br =
+class=3D""><br class=3D"">Cheers,<br class=3D""><br class=3D"">Frank =
+Siler<br class=3D"">Siler Industrial Analytics<br =
+class=3D"">314.799.9405--<br class=3D"">To unsubscribe from this list: =
+send the line "unsubscribe ceph-devel" in<br class=3D"">the body of a =
+message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org<br class=3D"">More majordomo info =
+at &nbsp;http://vger.kernel.org/majordomo-info.html<br =
+class=3D"">_______________________________________________<br =
+class=3D"">ceph-users mailing list<br =
+class=3D"">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org<br =
+class=3D"">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com<br =
+class=3D"">_______________________________________________<br =
+class=3D"">ceph-users mailing list<br =
+class=3D"">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org<br =
+class=3D"">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com<br =
+class=3D""></blockquote><span style=3D"font-family: Helvetica; =
+font-size: 12px; font-style: normal; font-variant: normal; font-weight: =
+normal; letter-spacing: normal; orphans: auto; text-align: start; =
+text-indent: 0px; text-transform: none; white-space: normal; widows: =
+auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; float: none; =
+display: inline !important;" =
+class=3D"">_______________________________________________</span><br =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" class=3D""><span style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; float: =
+none; display: inline !important;" class=3D"">ceph-users mailing =
+list</span><br style=3D"font-family: Helvetica; font-size: 12px; =
+font-style: normal; font-variant: normal; font-weight: normal; =
+letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; widows: auto; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px;" class=3D""><a =
+href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" =
+class=3D"">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br style=3D"font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
+font-weight: normal; letter-spacing: normal; orphans: auto; text-align: =
+start; text-indent: 0px; text-transform: none; white-space: normal; =
+widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;" =
+class=3D""><a =
+href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" =
+style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant: normal; font-weight: normal; letter-spacing: normal; =
+orphans: auto; text-align: start; text-indent: 0px; text-transform: =
+none; white-space: normal; widows: auto; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px;" =
+class=3D"">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a></div=
+></blockquote></div><br class=3D""></div></body></html>=
 
+--Apple-Mail=_7853D1AC-76F2-47B6-AA72-B6BA4093D7BD--
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--===============1795399348==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1795399348==--
