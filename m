@@ -1,74 +1,58 @@
-From: Wido den Hollander <wido@42on.com>
+From: David <david-wMiaxBNS8SzLoDKTGw+V6w@public.gmane.org>
 Subject: Re: Ceph and Google Summer of Code
-Date: Mon, 29 Feb 2016 22:53:26 +0100 (CET)
-Message-ID: <699644695.235.d7ffd153-d370-4e4f-b11c-f6d6fe6e94f4.open-xchange@ox.pcextreme.nl>
+Date: Mon, 29 Feb 2016 23:22:31 +0100
+Message-ID: <C9E5F44F-E60A-43F3-8F71-4780089B0411@visions.se>
 References: <CAAZbbf2bm6EZopVdYCQ0XaHWGrwWC7wmXpHwwDkexPuXiOL4bQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:40446 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750819AbcB2Vxa convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 16:53:30 -0500
-In-Reply-To: <CAAZbbf2bm6EZopVdYCQ0XaHWGrwWC7wmXpHwwDkexPuXiOL4bQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>, board@lists.ceph.com, Patrick McGarry <pmcgarry@redhat.com>
+	<699644695.235.d7ffd153-d370-4e4f-b11c-f6d6fe6e94f4.open-xchange@ox.pcextreme.nl>
+Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <699644695.235.d7ffd153-d370-4e4f-b11c-f6d6fe6e94f4.open-xchange-4q+tAGQs9zLCXE5Mi8V/gA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, board-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-A long wanted feature is mail storage in RADOS:
-http://tracker.ceph.com/issues/12430
-
-Would that be a good idea? I'd be more than happy to mentor this one.
-
-I will probably lack the technical C++ skills, but e-mail storage itsel=
-f is
-something I'm very familiar with.
-
-Wido
-
-> Op 29 februari 2016 om 22:12 schreef Patrick McGarry <pmcgarry@redhat=
-=2Ecom>:
->=20
->=20
-> Hey cephers,
->=20
-> As many of you may have seen by now, Ceph was accepted back for
-> another year of GSoC. I=E2=80=99m asking all of you to make sure that=
- any
-> applicable students that you know consider working with Ceph this
-> year.
->=20
-> We=E2=80=99re happy to accept proposals from our ideas list [0], or a=
-ny custom
-> proposal that you and they might dream up. This also applies to
-> mentors. While we have a great group of initial mentors, if you are
-> interested in mentoring and have a student work with you to create a
-> proposal, I can add you as a mentor all the way through the end of th=
-e
-> application period.
->=20
-> If you have questions or comments, please feel free to reach out to m=
-e
-> directly. Thanks!
->=20
-> [0] http://ceph.com/gsoc2016
->=20
-> --=20
->=20
-> Best Regards,
->=20
-> Patrick McGarry
-> Director Ceph Community || Red Hat
-> http://ceph.com  ||  http://community.redhat.com
-> @scuttlemonkey || @ceph
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+R3JlYXQgaWRlYSEgKzEKCkRhdmlkIE1hamNocnphawoKPiAyOSBmZWIuIDIwMTYga2wuIDIyOjUz
+IHNrcmV2IFdpZG8gZGVuIEhvbGxhbmRlciA8d2lkb0A0Mm9uLmNvbT46Cj4gCj4gQSBsb25nIHdh
+bnRlZCBmZWF0dXJlIGlzIG1haWwgc3RvcmFnZSBpbiBSQURPUzoKPiBodHRwOi8vdHJhY2tlci5j
+ZXBoLmNvbS9pc3N1ZXMvMTI0MzAKPiAKPiBXb3VsZCB0aGF0IGJlIGEgZ29vZCBpZGVhPyBJJ2Qg
+YmUgbW9yZSB0aGFuIGhhcHB5IHRvIG1lbnRvciB0aGlzIG9uZS4KPiAKPiBJIHdpbGwgcHJvYmFi
+bHkgbGFjayB0aGUgdGVjaG5pY2FsIEMrKyBza2lsbHMsIGJ1dCBlLW1haWwgc3RvcmFnZSBpdHNl
+bGYgaXMKPiBzb21ldGhpbmcgSSdtIHZlcnkgZmFtaWxpYXIgd2l0aC4KPiAKPiBXaWRvCj4gCj4+
+IE9wIDI5IGZlYnJ1YXJpIDIwMTYgb20gMjI6MTIgc2NocmVlZiBQYXRyaWNrIE1jR2FycnkgPHBt
+Y2dhcnJ5QHJlZGhhdC5jb20+Ogo+PiAKPj4gCj4+IEhleSBjZXBoZXJzLAo+PiAKPj4gQXMgbWFu
+eSBvZiB5b3UgbWF5IGhhdmUgc2VlbiBieSBub3csIENlcGggd2FzIGFjY2VwdGVkIGJhY2sgZm9y
+Cj4+IGFub3RoZXIgeWVhciBvZiBHU29DLiBJ4oCZbSBhc2tpbmcgYWxsIG9mIHlvdSB0byBtYWtl
+IHN1cmUgdGhhdCBhbnkKPj4gYXBwbGljYWJsZSBzdHVkZW50cyB0aGF0IHlvdSBrbm93IGNvbnNp
+ZGVyIHdvcmtpbmcgd2l0aCBDZXBoIHRoaXMKPj4geWVhci4KPj4gCj4+IFdl4oCZcmUgaGFwcHkg
+dG8gYWNjZXB0IHByb3Bvc2FscyBmcm9tIG91ciBpZGVhcyBsaXN0IFswXSwgb3IgYW55IGN1c3Rv
+bQo+PiBwcm9wb3NhbCB0aGF0IHlvdSBhbmQgdGhleSBtaWdodCBkcmVhbSB1cC4gVGhpcyBhbHNv
+IGFwcGxpZXMgdG8KPj4gbWVudG9ycy4gV2hpbGUgd2UgaGF2ZSBhIGdyZWF0IGdyb3VwIG9mIGlu
+aXRpYWwgbWVudG9ycywgaWYgeW91IGFyZQo+PiBpbnRlcmVzdGVkIGluIG1lbnRvcmluZyBhbmQg
+aGF2ZSBhIHN0dWRlbnQgd29yayB3aXRoIHlvdSB0byBjcmVhdGUgYQo+PiBwcm9wb3NhbCwgSSBj
+YW4gYWRkIHlvdSBhcyBhIG1lbnRvciBhbGwgdGhlIHdheSB0aHJvdWdoIHRoZSBlbmQgb2YgdGhl
+Cj4+IGFwcGxpY2F0aW9uIHBlcmlvZC4KPj4gCj4+IElmIHlvdSBoYXZlIHF1ZXN0aW9ucyBvciBj
+b21tZW50cywgcGxlYXNlIGZlZWwgZnJlZSB0byByZWFjaCBvdXQgdG8gbWUKPj4gZGlyZWN0bHku
+IFRoYW5rcyEKPj4gCj4+IFswXSBodHRwOi8vY2VwaC5jb20vZ3NvYzIwMTYKPj4gCj4+IC0tIAo+
+PiAKPj4gQmVzdCBSZWdhcmRzLAo+PiAKPj4gUGF0cmljayBNY0dhcnJ5Cj4+IERpcmVjdG9yIENl
+cGggQ29tbXVuaXR5IHx8IFJlZCBIYXQKPj4gaHR0cDovL2NlcGguY29tICB8fCAgaHR0cDovL2Nv
+bW11bml0eS5yZWRoYXQuY29tCj4+IEBzY3V0dGxlbW9ua2V5IHx8IEBjZXBoCj4+IC0tCj4+IFRv
+IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBj
+ZXBoLWRldmVsIiBpbgo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIu
+a2VybmVsLm9yZwo+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwu
+b3JnL21ham9yZG9tby1pbmZvLmh0bWwKPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fXwo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0Bs
+aXN0cy5jZXBoLmNvbQo+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
+c2Vycy1jZXBoLmNvbQoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpo
+dHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
