@@ -1,175 +1,175 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: (Un)Stable release team
-Date: Mon, 29 Feb 2016 21:47:48 +0700
-Message-ID: <56D45A14.2060906@dachary.org>
-References: <56D001C6.5080804@dachary.org>
- <CAP3mxSwfM+z_p=ppFUxB-6M8w_u_tty8Yu1uv=+UN1MonQ_m4A@mail.gmail.com>
- <56D3F913.8020008@dachary.org> <56D42F0B.9050304@dachary.org>
- <CAP3mxSy+VODD72z0LtZ0iJ5YMDqAnLOtV3p460yg9_QuW63Q2g@mail.gmail.com>
+Subject: Re: [ceph-users] v0.94.6 Hammer released
+Date: Mon, 29 Feb 2016 21:59:24 +0700
+Message-ID: <56D45CCC.8010608@dachary.org>
+References: <alpine.DEB.2.11.1602231059590.7485@cpach.fuggernut.com>
+ <CABZ+qq=ZqhaL9uwobM1NZ7+AszUMqirHATLJZyRcowD1iDRsww@mail.gmail.com>
+ <CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
+ <EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com>
+ <CAEYCsVKeOwOWp0yRmb5KHduqwUQ-fVUaMcQCaszmGaN-WDp=Gw@mail.gmail.com>
+ <FE41C953-5D62-41E0-A1C5-97891B7A7438@franksiler.com>
+ <1456736629334.47610@croc.ru>
+ <191489558.55229005.1456744289131.JavaMail.zimbra@redhat.com>
+ <1456745435596.21796@croc.ru>
+ <CABZ+qqkD_w4xM-qNdxC_WkZbGPf+w0gHh2cgYnPF2-_0go5-SA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:32883 "EHLO
-	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752162AbcB2OsD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 09:48:03 -0500
-In-Reply-To: <CAP3mxSy+VODD72z0LtZ0iJ5YMDqAnLOtV3p460yg9_QuW63Q2g@mail.gmail.com>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:37757 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754538AbcB2O7g (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 09:59:36 -0500
+In-Reply-To: <CABZ+qqkD_w4xM-qNdxC_WkZbGPf+w0gHh2cgYnPF2-_0go5-SA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Cc: Nathan Cutler <ncutler@suse.cz>, Abhishek L <abhishek.lekshmanan@gmail.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, Gaurav Bafna <bafnag@gmail.com>, Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>, Martin Palma <martin@palma.bz>, Chris Jones <cjones@cloudm2.com>, M Ranga Swami Reddy <swamireddy@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>, Odintsov Vladislav <VlOdintsov@croc.ru>
+Cc: Shinobu Kinjo <skinjo@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Franklin M. Siler" <me@franksiler.com>, Sage Weil <sage@redhat.com>, Xiaoxi Chen <superdebuger@gmail.com>, ceph-users <ceph-users@ceph.com>
+
+Hi Dan & al,
+
+I think it would be relatively simple to have these binaries published =
+as part of the current "Stable release" team effort[1]. Essentially doi=
+ng what you did and electing a central place to store these binaries. T=
+he trick is to find a sustainable way to do this which means having a p=
+rocess that is simple to maintain and understand as well as enough of u=
+s to maintain that in the long run.
+
+The basic idea is to copy the packages that are build by gitbuilders or=
+ by the buildpackage teuthology task in a central place. Because these =
+packages are built, for development versions as well as stable versions=
+[2]. And they are tested via teuthology. The packages that are publishe=
+d on http://ceph.com/ are rebuilt from scratch, using the process that =
+Alfredo described. This is fine for the supported platforms and for the=
+ stable releases. But for the development releases and the platforms th=
+at are no longer supported but still built by gibuilders, we could just=
+ copy the packages over.
+
+Does that sound sensible ?
+
+[1] http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO
+[2] http://gitbuilder.ceph.com/
 
 
-
-On 29/02/2016 19:46, Abhishek Varshney wrote:
-> Hi Loic,
+On 29/02/2016 20:28, Dan van der Ster wrote:
+> On Mon, Feb 29, 2016 at 12:30 PM, Odintsov Vladislav <VlOdintsov@croc=
+=2Eru> wrote:
+>> Can you please provide right way for building rpm packages?
 >=20
-> On Mon, Feb 29, 2016 at 5:14 PM, Loic Dachary <loic@dachary.org> wrot=
-e:
->> To quickly summarize the discussion on IRC, should we decide to go f=
-or improving paddles, it would probably make sense to:
->>
->> * Implement a mirror feature in paddles. A new paddle could query an=
- existing paddle and update its database with what it finds there. The =
-issue / comment fields would only be allowed on completed runs which ar=
-e immutable in the existing paddles and do not cause problems with sync=
-rhonization.
->> * A centralized paddles read/write to the public would mirror inform=
-ation from the paddles that are used by http://pulpito.ceph.com/ and ht=
-tp://pulpito.ovh.sepia.ceph.com:8081/
->> * A pulpito would run from this centralized paddles and implement ne=
-w features, with no risk to disrupt the existing paddles/pulpito, which=
- would be a good testbed to demonstrate pull requests implementing thes=
-e new features can be accepted
->> * teuthology-openstack ( or ceph-workbench ceph-qa-suite ) would hav=
-e a new --paddles options to use this centralized paddles server instea=
-d of creating a new one, so that results are archived in a permanent pl=
-ace (that would be the default).
+> It's documented here:
+> http://docs.ceph.com/docs/master/install/build-ceph/#rpm-package-mana=
+ger
 >=20
-> This looks good to me. This would mean that paddles+pulpito would
-> eventually evolve into more interactive tool :)
-
-Yes. And more plain text if I can help it ;-)
-
+> For 0.94.6 you need to change the .spec file to use .tar.gz (because
+> there was no .bz2 published for some reason). And then also grab
+> init-ceph.in-fedora.patch from here:
+> https://raw.githubusercontent.com/ceph/ceph/master/rpm/init-ceph.in-f=
+edora.patch
+>=20
+> BTW, I've put our build here:
+> http://linuxsoft.cern.ch/internal/repos/ceph6-stable/x86_64/os/
+> These are unsigned, untested and come with no warranty, no guarantees
+> of any sort. And IMHO, no third party build would ever to give that
+> warm fuzzy trust-it-with-my-data feeling like a ceph.com build would
+> ;)
+>=20
+> Moving forward, it would be great if the required community effort
+> could be put to work to get ceph.com el6 (and other) builds. For el6
+> in particular there is also the option to help out the Centos Storage
+> SIG to produce builds. I don't have a good feeling which direction is
+> better ... maybe both.
+>=20
+> -- Dan
+> CERN IT Storage Group
+>=20
+>=20
+>> ________________________________
+>> Regards,
 >>
->> On 29/02/2016 14:53, Loic Dachary wrote:
->>> Hi,
->>>
->>> This week-end I updated http://ceph-workbench.dachary.org/root/ceph=
--workbench and got the integration tests to pass again (a few minor iss=
-ues broke it in the past two months http://ceph-workbench.dachary.org/r=
-oot/ceph-workbench/activity). I suppose the most important item in the =
-backlog is to have a convenient way to record the teuthology runs and a=
-ssociate them with known issues. I updated http://ceph-workbench.dachar=
-y.org/root/ceph-workbench/issues/26 with a short description of what it=
- would look like if we used the redmine wiki for that purpose. But it f=
-eels fragile and redundant with paddles (the database that records the =
-tests).
->>>
->>> I think we have three options to automate the use case we want (i.e=
-=2E what we've been doing at http://tracker.ceph.com/issues/14692 & al)=
-=2E
->>>
->>> * Automate the redmine update using issue comments & wiki pages (ht=
-tp://ceph-workbench.dachary.org/root/ceph-workbench/issues/26).
->>> * Create a git-notes database with links to issues / pr / test resu=
-lts (http://ceph-workbench.dachary.org/root/ceph-workbench/issues/5)
->>> * Improve paddles / pulpito
->>>
->>> We've discussed the first two options extensively over the past yea=
-r but not so much the idea of improving paddles / pulpito. Maybe becaus=
-e pulpito is too much web and not enough plain text for my taste, at le=
-ast that's one of the things that comes to mind. But this can probably =
-be improved as well. It could go
->>> like this:
->>>
->>> * Add an "issue" and "comment" field in paddles for each test.
->>> * Add a query to show all jobs that ran against a given SHA1 to pad=
-dles (that's the focus we have in the stable release issues)
->>> * Add a query to show all run of a given job (based on the descript=
-ion) to paddles
->>> * Add a redmine friendly text output to pulpito so that it can be c=
-opy/pasted to a comment (instead of doing what we do with the fail.py s=
-cript and maybe more)
->>> * Add the input fields in pulpito to fill the "issue" field and the=
- "comment" field to the pulpito UI (which is what we do when analyzing =
-failures).
->>>
->>> What do you think ?
->>>
->>> Cheers
->>>
->>> On 26/02/2016 15:12, Abhishek Varshney wrote:
->>>> Hi Loic,
->>>>
->>>> On Fri, Feb 26, 2016 at 1:11 PM, Loic Dachary <loic@dachary.org> w=
-rote:
->>>>> Hi,
->>>>>
->>>>> It's a quiet time in the small world of the stable release team, =
-ideal for mentoring the new members who generously answered our call fo=
-r participation. Welcome to Chen Xiaoxi, Gaurav Bafna, Wei-Chung Cheng,=
- Martin Palma and Chris Jones :-)
->>>>>
->>>>> I propose that we take advantage of the next few weeks to expand =
-our scope in two ways:
->>>>>
->>>>> * test Ceph development versions as well as stable versions
->>>>> * publish packages for Ceph development versions
->>>>>
->>>>> Testing Ceph development versions is actually less work than with=
- stable versions because the developers run a lot of tests already and =
-fix problems on a daily basis. Our help would likely be needed with a f=
-ew teuthology suite runs right before the development release is publis=
-hed, once a month. But the development versions tend to be more frequen=
-t, therefore it will probably be as much work as for a stable release, =
-overall. The workflow would be revisited: there is no cherry-picking. I=
-nstead, bug fixes must be against the jewel branch or whatever branch w=
-ill be the upcoming stable. And this branch is merged back into master =
-on a regular basis (i.e. more frequently than the development releases)=
-=2E
->>>>>
->>>>> As you may have noticed, no packages were published for the 10.0.=
-3 development release and that's where we could make a real difference.=
- This would be an entirely new part of our workflow, but also an exciti=
-ng one because it's the last missing piece of the puzzle. Once we are a=
-ble to publish usable packages for development releases, nothing is sto=
-pping us to do the same for stable releases. It's a lot easier than it =
-seems since the packages are already built for the teuthology jobs. All=
- we need is a public space to archive them and sign them. This is not m=
-utually exclusive with the current package publication workflow, it wou=
-ld be a community driven alternative that is much needed in some cases.
->>>>>
->>>>> Of course, this is easier said than done :-) What do you think ? =
-Are there other important work that we should try to accomplish instead=
- ? Things that would benefit Ceph users and developers more ?
->>>>
->>>> Would it be a good idea to give some focus to ceph-workbench[1] to=
-o
->>>> and formalise backport workflows, since we have a bigger Stable
->>>> Releases Team now?
->>>>
->>>> [1] https://pypi.python.org/pypi/ceph-workbench
->>>>
->>>>>
->>>>> Cheers
->>>>>
->>>>> --
->>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>>
->>>> Thanks
->>>> Abhishek
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
+>> Vladislav Odintsov
 >>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>> ________________________________________
+>> From: Shinobu Kinjo <skinjo@redhat.com>
+>> Sent: Monday, February 29, 2016 14:11
+>> To: Odintsov Vladislav
+>> Cc: Franklin M. Siler; Xiaoxi Chen; ceph-devel@vger.kernel.org; ceph=
+-users; Sage Weil
+>> Subject: Re: [ceph-users] v0.94.6 Hammer released
+>>
+>> Can we make any kind of general procedure to make packages so that a=
+lmost everyone in community build packages by themselves and reduce dev=
+elopers work load caused by too much requirement -;
+>>
+>> Cheers,
+>> Shinobu
+>>
+>> ----- Original Message -----
+>> From: "Odintsov Vladislav" <VlOdintsov@croc.ru>
+>> To: "Franklin M. Siler" <me@franksiler.com>, "Xiaoxi Chen" <superdeb=
+uger@gmail.com>
+>> Cc: ceph-devel@vger.kernel.org, "ceph-users" <ceph-users@ceph.com>, =
+"Sage Weil" <sage@redhat.com>
+>> Sent: Monday, February 29, 2016 6:04:02 PM
+>> Subject: Re: [ceph-users] v0.94.6 Hammer released
+>>
+>> Hi all,
+>>
+>> should we build el6 packages ourself or, it's hoped that these packa=
+ges would be built officially by community?
+>>
+>> ________________________________
+>> Regards,
+>>
+>> Vladislav Odintsov
+>>
+>> ________________________________________
+>> From: ceph-devel-owner@vger.kernel.org <ceph-devel-owner@vger.kernel=
+=2Eorg> on behalf of Franklin M. Siler <me@franksiler.com>
+>> Sent: Friday, February 26, 2016 05:03
+>> To: Xiaoxi Chen
+>> Cc: Alfredo Deza; Dan van der Ster; Sage Weil; ceph-devel@vger.kerne=
+l.org; ceph-users
+>> Subject: Re: [ceph-users] v0.94.6 Hammer released
+>>
+>> On Feb 25, 2016, at 1839, Xiaoxi Chen <superdebuger@gmail.com> wrote=
+:
+>>
+>>> Will we build package for ubuntu 12.04 (Precise)?
+>>> Seems it also doesnt show in the repo
+>>
+>> The Ceph packages provided by Ubuntu are old.  However, the Ceph pro=
+ject publishes its own packages.
+>>
+>> http://download.ceph.com/debian-hammer/dists/precise/
+>>
+>> so repo lines for sources.list would be, I think:
+>>
+>> deb http://download.ceph.com/debian-hammer/ precise main
+>> deb-src http://download.ceph.com/debian-hammer/ precise main
+>>
+>>
+>> Cheers,
+>>
+>> Frank Siler
+>> Siler Industrial Analytics
+>> 314.799.9405--
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >=20
 
 --=20
