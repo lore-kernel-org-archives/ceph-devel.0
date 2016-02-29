@@ -1,175 +1,133 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: [ceph-users] v0.94.6 Hammer released
-Date: Mon, 29 Feb 2016 21:59:24 +0700
-Message-ID: <56D45CCC.8010608@dachary.org>
-References: <alpine.DEB.2.11.1602231059590.7485@cpach.fuggernut.com>
- <CABZ+qq=ZqhaL9uwobM1NZ7+AszUMqirHATLJZyRcowD1iDRsww@mail.gmail.com>
- <CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
- <EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com>
- <CAEYCsVKeOwOWp0yRmb5KHduqwUQ-fVUaMcQCaszmGaN-WDp=Gw@mail.gmail.com>
- <FE41C953-5D62-41E0-A1C5-97891B7A7438@franksiler.com>
- <1456736629334.47610@croc.ru>
- <191489558.55229005.1456744289131.JavaMail.zimbra@redhat.com>
- <1456745435596.21796@croc.ru>
- <CABZ+qqkD_w4xM-qNdxC_WkZbGPf+w0gHh2cgYnPF2-_0go5-SA@mail.gmail.com>
+Subject: Re: make error while building ceph
+Date: Mon, 29 Feb 2016 22:15:57 +0700
+Message-ID: <56D460AD.9070806@dachary.org>
+References: <CAPpuMWyW6jzG2TE=FRLdGAxP-OOBg3=WyCcw72DU79StsM2G7A@mail.gmail.com>
+ <56D2D089.7090109@dachary.org>
+ <CAPpuMWx9Or8ETDKtzFsUUkF0wSDnPEjiKhOSuVT=VrVYiUNohg@mail.gmail.com>
+ <56D2D55C.7060603@dachary.org>
+ <CAPpuMWyePM_TvmO1MHFRF=jQMw5KRqyy4FA3+QRU2pAq97UwSw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:37757 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754538AbcB2O7g (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 09:59:36 -0500
-In-Reply-To: <CABZ+qqkD_w4xM-qNdxC_WkZbGPf+w0gHh2cgYnPF2-_0go5-SA@mail.gmail.com>
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:39759 "EHLO
+	relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750796AbcB2PQH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 10:16:07 -0500
+In-Reply-To: <CAPpuMWyePM_TvmO1MHFRF=jQMw5KRqyy4FA3+QRU2pAq97UwSw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>, Odintsov Vladislav <VlOdintsov@croc.ru>
-Cc: Shinobu Kinjo <skinjo@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Franklin M. Siler" <me@franksiler.com>, Sage Weil <sage@redhat.com>, Xiaoxi Chen <superdebuger@gmail.com>, ceph-users <ceph-users@ceph.com>
-
-Hi Dan & al,
-
-I think it would be relatively simple to have these binaries published =
-as part of the current "Stable release" team effort[1]. Essentially doi=
-ng what you did and electing a central place to store these binaries. T=
-he trick is to find a sustainable way to do this which means having a p=
-rocess that is simple to maintain and understand as well as enough of u=
-s to maintain that in the long run.
-
-The basic idea is to copy the packages that are build by gitbuilders or=
- by the buildpackage teuthology task in a central place. Because these =
-packages are built, for development versions as well as stable versions=
-[2]. And they are tested via teuthology. The packages that are publishe=
-d on http://ceph.com/ are rebuilt from scratch, using the process that =
-Alfredo described. This is fine for the supported platforms and for the=
- stable releases. But for the development releases and the platforms th=
-at are no longer supported but still built by gibuilders, we could just=
- copy the packages over.
-
-Does that sound sensible ?
-
-[1] http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO
-[2] http://gitbuilder.ceph.com/
+To: Jai <jai_97@rediffmail.com>
+Cc: ceph-devel@vger.kernel.org
 
 
-On 29/02/2016 20:28, Dan van der Ster wrote:
-> On Mon, Feb 29, 2016 at 12:30 PM, Odintsov Vladislav <VlOdintsov@croc=
-=2Eru> wrote:
->> Can you please provide right way for building rpm packages?
+
+On 29/02/2016 21:34, Jai wrote:
+> Loic,
 >=20
-> It's documented here:
-> http://docs.ceph.com/docs/master/install/build-ceph/#rpm-package-mana=
-ger
+> With centos 7, I ve moved further .. The build is stuck however at th=
+is --
 >=20
-> For 0.94.6 you need to change the .spec file to use .tar.gz (because
-> there was no .bz2 published for some reason). And then also grab
-> init-ceph.in-fedora.patch from here:
-> https://raw.githubusercontent.com/ceph/ceph/master/rpm/init-ceph.in-f=
-edora.patch
+> ./make_version -g ./.git_version
+> if [ -n "$NO_VERSION" ] ; then \
+>         ./make_version -g ./.git_version -c ./ceph_ver.h -n ; \
+> else \
+>         ./make_version -g ./.git_version -c ./ceph_ver.h ; \
+> fi
+>   CXX      test/encoding/ceph_dencoder-ceph_dencoder.o
 >=20
-> BTW, I've put our build here:
-> http://linuxsoft.cern.ch/internal/repos/ceph6-stable/x86_64/os/
-> These are unsigned, untested and come with no warranty, no guarantees
-> of any sort. And IMHO, no third party build would ever to give that
-> warm fuzzy trust-it-with-my-data feeling like a ceph.com build would
-> ;)
+> I ve tried restarting the make a few times after cleaning up, but it
+> comes back to this point. Could this be a failed/hung test ?
+
+I'm not sure, it looks like the compilation is not finished yet and the=
+ tests did not start. Could you provide details about what is stuck ?
+
+Cheers
+
 >=20
-> Moving forward, it would be great if the required community effort
-> could be put to work to get ceph.com el6 (and other) builds. For el6
-> in particular there is also the option to help out the Centos Storage
-> SIG to produce builds. I don't have a good feeling which direction is
-> better ... maybe both.
->=20
-> -- Dan
-> CERN IT Storage Group
->=20
->=20
->> ________________________________
->> Regards,
->>
->> Vladislav Odintsov
->>
->> ________________________________________
->> From: Shinobu Kinjo <skinjo@redhat.com>
->> Sent: Monday, February 29, 2016 14:11
->> To: Odintsov Vladislav
->> Cc: Franklin M. Siler; Xiaoxi Chen; ceph-devel@vger.kernel.org; ceph=
--users; Sage Weil
->> Subject: Re: [ceph-users] v0.94.6 Hammer released
->>
->> Can we make any kind of general procedure to make packages so that a=
-lmost everyone in community build packages by themselves and reduce dev=
-elopers work load caused by too much requirement -;
->>
->> Cheers,
->> Shinobu
->>
->> ----- Original Message -----
->> From: "Odintsov Vladislav" <VlOdintsov@croc.ru>
->> To: "Franklin M. Siler" <me@franksiler.com>, "Xiaoxi Chen" <superdeb=
-uger@gmail.com>
->> Cc: ceph-devel@vger.kernel.org, "ceph-users" <ceph-users@ceph.com>, =
-"Sage Weil" <sage@redhat.com>
->> Sent: Monday, February 29, 2016 6:04:02 PM
->> Subject: Re: [ceph-users] v0.94.6 Hammer released
->>
->> Hi all,
->>
->> should we build el6 packages ourself or, it's hoped that these packa=
-ges would be built officially by community?
->>
->> ________________________________
->> Regards,
->>
->> Vladislav Odintsov
->>
->> ________________________________________
->> From: ceph-devel-owner@vger.kernel.org <ceph-devel-owner@vger.kernel=
-=2Eorg> on behalf of Franklin M. Siler <me@franksiler.com>
->> Sent: Friday, February 26, 2016 05:03
->> To: Xiaoxi Chen
->> Cc: Alfredo Deza; Dan van der Ster; Sage Weil; ceph-devel@vger.kerne=
-l.org; ceph-users
->> Subject: Re: [ceph-users] v0.94.6 Hammer released
->>
->> On Feb 25, 2016, at 1839, Xiaoxi Chen <superdebuger@gmail.com> wrote=
-:
->>
->>> Will we build package for ubuntu 12.04 (Precise)?
->>> Seems it also doesnt show in the repo
->>
->> The Ceph packages provided by Ubuntu are old.  However, the Ceph pro=
-ject publishes its own packages.
->>
->> http://download.ceph.com/debian-hammer/dists/precise/
->>
->> so repo lines for sources.list would be, I think:
->>
->> deb http://download.ceph.com/debian-hammer/ precise main
->> deb-src http://download.ceph.com/debian-hammer/ precise main
->>
->>
->> Cheers,
->>
->> Frank Siler
->> Siler Industrial Analytics
->> 314.799.9405--
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Jai
+>=20
+> On Sun, Feb 28, 2016 at 4:39 PM, Loic Dachary <loic@dachary.org> wrot=
+e:
+>> Hi,
+>>
+>> Ubuntu 12.04 is no longer supported, reason why you're having troubl=
+es. I recommend CentOS 7 or Ubunut 14.04 instead.
+>>
+>> Cheers
+>>
+>> On 28/02/2016 17:55, Jai wrote:
+>>> Loic,
+>>>
+>>> I did run install-deps before the make, and it completed without
+>>> error. I have an Ubuntu (1204) VM (uname shows 3.5.0-30-generic
+>>> #51~precise1-Ubuntu)
+>>>
+>>> I ran these as per the README --
+>>> ./install-deps.sh
+>>> ./autogen.sh
+>>>   ./configure
+>>>   make
+>>>
+>>> I found the bugs link on http://ceph.com/community/contribute/ unde=
+r
+>>> "submit issues"
+>>>
+>>> --
+>>> Jai
+>>>
+>>> On Sun, Feb 28, 2016 at 4:18 PM, Loic Dachary <loic@dachary.org> wr=
+ote:
+>>>> Hi,
+>>>>
+>>>> You should try to run ./install-deps.sh first so that the required=
+ dependencies are all installed. Which operating system are you using ?
+>>>> The bug tracker is at http://tracker.ceph.com/. Where did you find=
+ a link to http://tracker.newdream.net/projects/ceph ? It should be fix=
+ed :-)
+>>>>
+>>>> Cheers
+>>>>
+>>>> On 28/02/2016 17:29, Jai wrote:
+>>>>> I followed instructions in the README, but "make" gives me this e=
+rror --
+>>>>>
+>>>>> In file included from ./include/types.h:21:0,
+>>>>>                  from kv/LevelDBStore.h:6,
+>>>>>                  from kv/KeyValueDB.cc:5:
+>>>>> ./include/uuid.h:14:42: fatal error: boost/random/random_device.h=
+pp:
+>>>>> No such file or directory
+>>>>> compilation terminated.
+>>>>>
+>>>>> I m compiling on ubuntu, and it looks like I have boost headers
+>>>>> (/usr/include/boost), but this file is absent. llibboost appears =
+to be
+>>>>> 1.46.1
+>>>>> appreciate any pointers to resolve this error.
+>>>>>
+>>>>> Also, I couldn't access the web page for bugs
+>>>>> (http://tracker.newdream.net/projects/ceph) - where can I find a =
+list
+>>>>> of bugs/ features ?
+>>>>> --
+>>>>> Jai
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
+l
+>>>>>
+>>>>
+>>>> --
+>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>>
+>>
+>> --
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
 >=20
 
 --=20
