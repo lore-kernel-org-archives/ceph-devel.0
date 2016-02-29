@@ -1,219 +1,137 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Re: Ceph space amplification ratio with write is more than 2
-Date: Mon, 29 Feb 2016 14:47:16 +0800
-Message-ID: <CALZt5jwjv7e3S=GWV2yxq5-bws3dTEXQp7OqTo-9Z90M1ROTdA@mail.gmail.com>
-References: <99767EA2E27DD44DB4E9F9B9ACA458C0561C4194@SSIEXCH-MB3.ssi.samsung.com>
-	<CACJqLya3_A4U=dZhDu8kxJaz6N96exjY4-qtVFhDNnXzSZORhA@mail.gmail.com>
-	<BN1PR02MB0555C4954C611D023E86732F4B80@BN1PR02MB055.namprd02.prod.outlook.com>
-	<CACJqLyY_B=gzUxiNr9EOXFWez65qhXymS4U=+bDt6fh8rzi49A@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: (Un)Stable release team
+Date: Mon, 29 Feb 2016 14:53:55 +0700
+Message-ID: <56D3F913.8020008@dachary.org>
+References: <56D001C6.5080804@dachary.org>
+ <CAP3mxSwfM+z_p=ppFUxB-6M8w_u_tty8Yu1uv=+UN1MonQ_m4A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:34116 "EHLO
-	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750923AbcB2GrS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 01:47:18 -0500
-Received: by mail-wm0-f44.google.com with SMTP id p65so54727608wmp.1
-        for <ceph-devel@vger.kernel.org>; Sun, 28 Feb 2016 22:47:17 -0800 (PST)
-In-Reply-To: <CACJqLyY_B=gzUxiNr9EOXFWez65qhXymS4U=+bDt6fh8rzi49A@mail.gmail.com>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:39586 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751978AbcB2HyI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 02:54:08 -0500
+In-Reply-To: <CAP3mxSwfM+z_p=ppFUxB-6M8w_u_tty8Yu1uv=+UN1MonQ_m4A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Abhishek Varshney <abhishek.varshney@flipkart.com>
+Cc: Nathan Cutler <ncutler@suse.cz>, Abhishek L <abhishek.lekshmanan@gmail.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, Gaurav Bafna <bafnag@gmail.com>, Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>, Martin Palma <martin@palma.bz>, Chris Jones <cjones@cloudm2.com>, M Ranga Swami Reddy <swamireddy@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Yeah, I think James refers to space amplification, but no write amp.
-So this has nothing to do with journal.
- I'm but it may relate to xfs filesystem layout, since you have 1M
-objects, and currently, we use mkfs.xfs -i size=2048k to explicitly
-tell the each inode size is 2k.  And also, the directory /current/omap
-will cost some spaces, which will not stat by pools.
-You may use a large-size disk instead of ramdisk and have a try, I
-think this will happen again
-Regards
-Ning Yao
+Hi,
 
+This week-end I updated http://ceph-workbench.dachary.org/root/ceph-wor=
+kbench and got the integration tests to pass again (a few minor issues =
+broke it in the past two months http://ceph-workbench.dachary.org/root/=
+ceph-workbench/activity). I suppose the most important item in the back=
+log is to have a convenient way to record the teuthology runs and assoc=
+iate them with known issues. I updated http://ceph-workbench.dachary.or=
+g/root/ceph-workbench/issues/26 with a short description of what it wou=
+ld look like if we used the redmine wiki for that purpose. But it feels=
+ fragile and redundant with paddles (the database that records the test=
+s).=20
 
-2016-02-27 13:50 GMT+08:00 Haomai Wang <haomai@xsky.com>:
-> On Sat, Feb 27, 2016 at 9:58 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> Haomai,
->> I think what James is seeing excluding  journal write it is > 2X write amp. Must be something fishy on his setup..
->
-> Oh, thanks for reminder. Hmm, I double checked the current
-> FileJournal, it should be aligned with 4k... So it could be possible
-> too......
->
+I think we have three options to automate the use case we want (i.e. wh=
+at we've been doing at http://tracker.ceph.com/issues/14692 & al).
+
+* Automate the redmine update using issue comments & wiki pages (http:/=
+/ceph-workbench.dachary.org/root/ceph-workbench/issues/26).
+* Create a git-notes database with links to issues / pr / test results =
+(http://ceph-workbench.dachary.org/root/ceph-workbench/issues/5)
+* Improve paddles / pulpito
+
+We've discussed the first two options extensively over the past year bu=
+t not so much the idea of improving paddles / pulpito. Maybe because pu=
+lpito is too much web and not enough plain text for my taste, at least =
+that's one of the things that comes to mind. But this can probably be i=
+mproved as well. It could go=20
+like this:
+
+* Add an "issue" and "comment" field in paddles for each test.
+* Add a query to show all jobs that ran against a given SHA1 to paddles=
+ (that's the focus we have in the stable release issues)
+* Add a query to show all run of a given job (based on the description)=
+ to paddles
+* Add a redmine friendly text output to pulpito so that it can be copy/=
+pasted to a comment (instead of doing what we do with the fail.py scrip=
+t and maybe more)
+* Add the input fields in pulpito to fill the "issue" field and the "co=
+mment" field to the pulpito UI (which is what we do when analyzing fail=
+ures).
+
+What do you think ?
+
+Cheers
+
+On 26/02/2016 15:12, Abhishek Varshney wrote:
+> Hi Loic,
+>=20
+> On Fri, Feb 26, 2016 at 1:11 PM, Loic Dachary <loic@dachary.org> wrot=
+e:
+>> Hi,
 >>
->> Thanks & Regards
->> Somnath
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai Wang
->> Sent: Friday, February 26, 2016 5:27 PM
->> To: James (Fei) Liu-SSI
->> Cc: ceph-devel@vger.kernel.org
->> Subject: Re: Ceph space amplification ratio with write is more than 2
+>> It's a quiet time in the small world of the stable release team, ide=
+al for mentoring the new members who generously answered our call for p=
+articipation. Welcome to Chen Xiaoxi, Gaurav Bafna, Wei-Chung Cheng, Ma=
+rtin Palma and Chris Jones :-)
 >>
->> It should be as expected. The reason is FileJournal will prepend header and append footer to the transaction data, and if using
->> aio+dio, we need to align these. So normally for 4k io, it will become
->> 5-6k filejournal write IIRC. Plus filestore writeback to filesystem, it should be 2.5x. But local file system and disk should has some merge tricky, it should be less than 2.5x.
+>> I propose that we take advantage of the next few weeks to expand our=
+ scope in two ways:
 >>
->> On Sat, Feb 27, 2016 at 1:46 AM, James (Fei) Liu-SSI <james.liu@ssi.samsung.com> wrote:
->>> Hi Cepher,
->>>    We recently have tested the Ceph space amplification with filestore
->>> through  writing data to ramdisk with rados bench. However, we found
->>> only
->>> 3584 MB was written from rados bench  but totally 8658M(1G of total 9G of ramdisk was used for journal) was used in the ramdisk.
->>>
->>> The totally space amplification is 7658/3584 = 2.14. (It is surprising
->>> huge factor) 1. Cluster configuration:
->>> . One OSD and one MON  are in the same machine with rados bench. Replication factor  was set as 1.
->>> . ceph version from ceph master
->>> 5979c8e34fa2f3d7efa28c29fb90758b3f9f818
->>> (45979c8e34fa2f3d7efa28c29fb90758b3f9f818)
->>> 2. Rados command we have been used :
->>> rados bench -p rbd -b 4096 --max-objects 1048576  300 write
->>> --no-cleanup 3. ceph cluster configuration:
->>> Please see appendix 1.
->>> 4. Results investigation.
->>> Please see appendix 0.
->>>
->>> Could anyone help to explain why  the space amplification with filestore is huge?  Thanks a lot.
->>>
->>> Regards,
->>> James
->>>
->>> Appendix 0:
->>>
->>> ssd@OptiPlex-9020-1:~/src/bluestore$ ceph df
->>> GLOBAL:
->>>     SIZE      AVAIL     RAW USED     %RAW USED
->>>     9206M      547M        8658M         94.05
->>> POOLS:
->>>     NAME     ID     USED      %USED     MAX AVAIL     OBJECTS
->>>     rbd      0      3584M     38.93          547M      917505
->>> ssd@OptiPlex-9020-1:~/src/bluestore$ ceph -s
->>>     cluster a7f64266-0894-4f1e-a635-d0aeaca0e993
->>>      health HEALTH_WARN
->>>             1 near full osd(s)
->>>      monmap e1: 1 mons at {localhost=127.0.0.1:6789/0}
->>>             election epoch 3, quorum 0 localhost
->>>      osdmap e7: 1 osds: 1 up, 1 in
->>>             flags sortbitwise
->>>       pgmap v31: 64 pgs, 1 pools, 3584 MB data, 896 kobjects
->>>             8658 MB used, 547 MB / 9206 MB avail
->>>                   64 active+clean
->>> ssd@OptiPlex-9020-1:~/src/bluestore$ df -h
->>> Filesystem      Size  Used Avail Use% Mounted on
->>> /dev/sda2       2.7T  1.4T  1.2T  55% /
->>> none            4.0K     0  4.0K   0% /sys/fs/cgroup
->>> udev            5.9G  4.0K  5.9G   1% /dev
->>> tmpfs           1.2G  720K  1.2G   1% /run
->>> none            5.0M     0  5.0M   0% /run/lock
->>> none            5.9G   81M  5.8G   2% /run/shm
->>> none            100M   20K  100M   1% /run/user
->>> /dev/ram1       9.0G  8.4G  618M  94% /home/ssd/src/bluestore/ceph-deploy/osd/myosddata
->>>
->>> Journal size:
->>>
->>> -rw-r--r--   1 ssd ssd         37 Feb 25 15:53 ceph_fsid
->>> drwxr-xr-x 132 ssd ssd       4096 Feb 25 15:53 current
->>> -rw-r--r--   1 ssd ssd         37 Feb 25 15:53 fsid
->>> -rw-r--r--   1 ssd ssd         21 Feb 25 15:53 magic
->>> -rw-r--r--   1 ssd ssd 1073741824 Feb 25 15:53 myosdjournal
->>> -rw-r--r--   1 ssd ssd          6 Feb 25 15:53 ready
->>> -rw-r--r--   1 ssd ssd          4 Feb 25 15:53 store_version
->>> -rw-r--r--   1 ssd ssd         53 Feb 25 15:53 superblock
->>> -rw-r--r--   1 ssd ssd         10 Feb 25 15:53 type
->>> -rw-r--r--   1 ssd ssd          2 Feb 25 15:53 whoami
->>>
->>> du -sh
->>> It shows current use 8G.
->>>
->>> Appendix 1:
->>> [global]
->>> fsid = a7f64266-0894-4f1e-a635-d0aeaca0e993
->>> auth_cluster_required = none
->>> auth_service_required = none
->>> auth_client_required = none
->>> filestore_xattr_use_omap = true
->>> filestore_max_sync_interval=10
->>> filestore_fd_cache_size = 64
->>> filestore_fd_cache_shards = 32
->>> filestore_op_threads = 6
->>> filestore_queue_max_ops=5000
->>> filestore_queue_committing_max_ops=5000
->>> journal_max_write_entries=1000
->>> journal_queue_max_ops=3000
->>> filestore_wbthrottle_enable=false
->>> filestore_queue_max_bytes=1048576000
->>> filestore_queue_committing_max_bytes=1048576000
->>> journal_max_write_bytes=1048576000
->>> journal_queue_max_bytes=1048576000
->>>
->>> osd_journal_size = 1024
->>> debug_lockdep = 0/0
->>> debug_context = 0/0
->>> debug_crush = 0/0
->>> debug_buffer = 0/0
->>> debug_timer = 0/0
->>> debug_filer = 0/0
->>> debug_objecter = 0/0
->>> debug_rados = 0/0
->>> debug_rbd = 0/0
->>> debug_journaler = 0/0
->>> debug_objectcatcher = 0/0
->>> debug_client = 0/0
->>> debug_osd = 0/0
->>> debug_optracker = 0/0
->>> debug_objclass = 0/0
->>> debug_filestore = 0/0
->>> debug_journal = 0/0
->>> debug_ms = 0/0
->>> debug_monc = 0/0
->>> debug_tp = 0/0
->>> debug_auth = 0/0
->>> debug_finisher = 0/0
->>> debug_heartbeatmap = 0/0
->>> debug_perfcounter = 0/0
->>> debug_asok = 0/0
->>> debug_throttle = 0/0
->>> debug_mon = 0/0
->>> debug_paxos = 0/0
->>> debug_rgw = 0/0
->>> debug_newstore = 0/0
->>> debug_keyvaluestore = 0/0
->>> osd_tracing = true
->>> osd_objectstore_tracing = true
->>> rados_tracing = true
->>> rbd_tracing = true
->>> osd_mount_options_xfs = rw,noatime,inode64,logbsize=256k,delaylog
->>> osd_mkfs_options_xfs = -f -i size=2048 osd_op_threads = 32
->>> objecter_inflight_ops=102400
->>> ms_dispatch_throttle_bytes=1048576000
->>> objecter_infilght_op_bytes=1048576000
->>> osd_mkfs_type = xfs
->>> osd_client_message_size_cap = 0
->>> osd_client_message_cap = 0
->>> osd_enable_op_tracker = false
->>> mon_initial_members = localhost
->>> mon_host = 127.0.0.1
->>> mon data = '$CEPH_DEPLOY'/mon/mymondata mon cluster log file =
->>> '$CEPH_DEPLOY'/mon/mon.log
->>> keyring='$CEPH_DEPLOY'/ceph.client.admin.keyring
->>> run dir = '$CEPH_DEPLOY'/run
->>> [osd.0]
->>> osd data = '$CEPH_DEPLOY'/osd/myosddata osd journal =
->>> '$CEPH_DEPLOY'/osd/myosddata/myosdjournal
->>> #osd journal = '$WORKSPACE'/myosdjournal/myosdjournal
->>> log file = '$CEPH_DEPLOY'/osd/osd.log'
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>> info at  http://vger.kernel.org/majordomo-info.html
+>> * test Ceph development versions as well as stable versions
+>> * publish packages for Ceph development versions
+>>
+>> Testing Ceph development versions is actually less work than with st=
+able versions because the developers run a lot of tests already and fix=
+ problems on a daily basis. Our help would likely be needed with a few =
+teuthology suite runs right before the development release is published=
+, once a month. But the development versions tend to be more frequent, =
+therefore it will probably be as much work as for a stable release, ove=
+rall. The workflow would be revisited: there is no cherry-picking. Inst=
+ead, bug fixes must be against the jewel branch or whatever branch will=
+ be the upcoming stable. And this branch is merged back into master on =
+a regular basis (i.e. more frequently than the development releases).
+>>
+>> As you may have noticed, no packages were published for the 10.0.3 d=
+evelopment release and that's where we could make a real difference. Th=
+is would be an entirely new part of our workflow, but also an exciting =
+one because it's the last missing piece of the puzzle. Once we are able=
+ to publish usable packages for development releases, nothing is stoppi=
+ng us to do the same for stable releases. It's a lot easier than it see=
+ms since the packages are already built for the teuthology jobs. All we=
+ need is a public space to archive them and sign them. This is not mutu=
+ally exclusive with the current package publication workflow, it would =
+be a community driven alternative that is much needed in some cases.
+>>
+>> Of course, this is easier said than done :-) What do you think ? Are=
+ there other important work that we should try to accomplish instead ? =
+Things that would benefit Ceph users and developers more ?
+>=20
+> Would it be a good idea to give some focus to ceph-workbench[1] too
+> and formalise backport workflows, since we have a bigger Stable
+> Releases Team now?
+>=20
+> [1] https://pypi.python.org/pypi/ceph-workbench
+>=20
+>>
+>> Cheers
+>>
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
+> Thanks
+> Abhishek
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
