@@ -1,131 +1,121 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: Re: [ceph-users] v0.94.6 Hammer released
-Date: Mon, 29 Feb 2016 14:28:44 +0100
-Message-ID: <CABZ+qqkD_w4xM-qNdxC_WkZbGPf+w0gHh2cgYnPF2-_0go5-SA@mail.gmail.com>
-References: <alpine.DEB.2.11.1602231059590.7485@cpach.fuggernut.com>
- <CABZ+qq=ZqhaL9uwobM1NZ7+AszUMqirHATLJZyRcowD1iDRsww@mail.gmail.com>
- <CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
- <EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com> <CAEYCsVKeOwOWp0yRmb5KHduqwUQ-fVUaMcQCaszmGaN-WDp=Gw@mail.gmail.com>
- <FE41C953-5D62-41E0-A1C5-97891B7A7438@franksiler.com> <1456736629334.47610@croc.ru>
- <191489558.55229005.1456744289131.JavaMail.zimbra@redhat.com> <1456745435596.21796@croc.ru>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Getting cython to define ENODATA on FreeBSD. (Was: Re: [ceph]
+ pybind: move cephfs to Cython (#7745))
+Date: Mon, 29 Feb 2016 14:26:58 +0100
+Message-ID: <56D44722.6000801@digiware.nl>
+References: <56D446DD.1020302@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f182.google.com ([209.85.217.182]:33528 "EHLO
-	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754044AbcB2N32 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 08:29:28 -0500
-Received: by mail-lb0-f182.google.com with SMTP id ed16so1709279lbb.0
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 05:29:27 -0800 (PST)
-Received: from mail-lb0-f181.google.com (mail-lb0-f181.google.com. [209.85.217.181])
-        by smtp.gmail.com with ESMTPSA id l10sm1872169lfb.35.2016.02.29.05.29.24
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1/SSLv3 cipher=OTHER);
-        Mon, 29 Feb 2016 05:29:24 -0800 (PST)
-Received: by mail-lb0-f181.google.com with SMTP id bc4so79774340lbc.2
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 05:29:24 -0800 (PST)
-In-Reply-To: <1456745435596.21796@croc.ru>
+Received: from smtp.digiware.nl ([31.223.170.169]:18323 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754298AbcB2N1a (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 29 Feb 2016 08:27:30 -0500
+Received: from rack1.digiware.nl (unknown [127.0.0.1])
+	by smtp.digiware.nl (Postfix) with ESMTP id 9234F1534ED
+	for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 14:27:26 +0100 (CET)
+Received: from [192.168.101.175] (vpn.ecoracks.nl [31.223.170.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.digiware.nl (Postfix) with ESMTPSA id 4FAF31534EF
+	for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 14:26:58 +0100 (CET)
+In-Reply-To: <56D446DD.1020302@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Odintsov Vladislav <VlOdintsov@croc.ru>
-Cc: Shinobu Kinjo <skinjo@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Franklin M. Siler" <me@franksiler.com>, Sage Weil <sage@redhat.com>, Xiaoxi Chen <superdebuger@gmail.com>, ceph-users <ceph-users@ceph.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 29, 2016 at 12:30 PM, Odintsov Vladislav <VlOdintsov@croc.ru> wrote:
-> Can you please provide right way for building rpm packages?
+On 29-2-2016 12:57, Mehdi Abaakouk wrote:
+> Hi,
+>=20
+> Le 2016-02-29 11:27, Willem Jan Withagen a =C3=A9crit :
+>> Hi,
+>>
+>> You write:
+>>
+>> If you have errno.pxd, and cimport won't work, perhaps that means yo=
+u
+>> have something wrong with your cython package. Cython/Includes/libc =
+is
+>> automatically included on Linux for cython compilation and it looks =
+not
+>> on FreeBSD.
+>>
+>> But probably is one of the  issues that lies ahead of this, is the f=
+act
+>> that in
+>>     /usr/include/errno.h FreeBSD does not define ENODATA.
+>> And thus during compilation that value is not known (anywhere)
+>>
+>> In most of the Ceph code it is replaced by ENOATTR.
+>=20
+>> I did not picked that but others that did work before me. And whatev=
+er
+>> choice you make it is going to break somewhere nayways.
+>>
+>> Now the question here is going to be how to educate cython to actual=
+ly
+>> pickup on this change....
+>> Perhaps by adding an extra include that "overlays" the current one a=
+nd
+>> adds errno.ENODATA to the errno enum?
+>>
+>> I do not know enough of python/cython how to do that, or that it is =
+even
+>> possible?
+>=20
+> If a Cython headers (*.pyd) have ENODATA, you need to fix it.
+>=20
+> So, the only good solution for that is fixing cython for FreeBSD, I
+> don't see why you would add crap in Ceph here.
+>=20
+> I'm sure the FreeBSD community is open and aware about not existing
+> ENODATA on their system, and regulary patch application to remove it.
+> You just have to fix the FreeBSD Cython Package (or even upstream Cyt=
+hon
+> if they officially support FreeBSD).
 
-It's documented here:
-http://docs.ceph.com/docs/master/install/build-ceph/#rpm-package-manager
+Hi,
 
-For 0.94.6 you need to change the .spec file to use .tar.gz (because
-there was no .bz2 published for some reason). And then also grab
-init-ceph.in-fedora.patch from here:
-https://raw.githubusercontent.com/ceph/ceph/master/rpm/init-ceph.in-fedora.patch
+I'm a member of the FreeBSD community since 1993. :)
 
-BTW, I've put our build here:
-http://linuxsoft.cern.ch/internal/repos/ceph6-stable/x86_64/os/
-These are unsigned, untested and come with no warranty, no guarantees
-of any sort. And IMHO, no third party build would ever to give that
-warm fuzzy trust-it-with-my-data feeling like a ceph.com build would
-;)
+The reason that it is not in FreeBSD is might be  because the standard
+does not require it. :(
 
-Moving forward, it would be great if the required community effort
-could be put to work to get ceph.com el6 (and other) builds. For el6
-in particular there is also the option to help out the Centos Storage
-SIG to produce builds. I don't have a good feeling which direction is
-better ... maybe both.
+------
+IEEE Std 1003.1 2004 says that ENODATA is an 'XSR' extension:
 
--- Dan
-CERN IT Storage Group
+"The functionality described is optional. The functionality described i=
+s
+also an extension to the ISO C standard."
+
+ENODATA appears to be mandatory.
+-------
+
+And as such it might be, might not be able to get it into the FreeBSD
+include files. However that will take a long time, and during that time
+I will not be able to complete the tests required to run all tests for
+=46reeBSD.
+
+And as such is the 'crap' you refer too, a consequence of using
+extensions to the standard for software, thus hampering the portability=
+=2E
+Uptil now I've been able to tackle just about all the issues.
+And if I remember correctly this one wasn't an issue in my previous
+testruns until the python piece got ripped out, and replaced with cytho=
+n.
+
+So I you ( or anybody else on this list) know(s) any ways to keep me
+going with porting I'd be very thankful.
+
+--WjW
+
+I will also try to raise the issue in the FreeBSD lists.
 
 
-> ________________________________
-> Regards,
->
-> Vladislav Odintsov
->
-> ________________________________________
-> From: Shinobu Kinjo <skinjo@redhat.com>
-> Sent: Monday, February 29, 2016 14:11
-> To: Odintsov Vladislav
-> Cc: Franklin M. Siler; Xiaoxi Chen; ceph-devel@vger.kernel.org; ceph-users; Sage Weil
-> Subject: Re: [ceph-users] v0.94.6 Hammer released
->
-> Can we make any kind of general procedure to make packages so that almost everyone in community build packages by themselves and reduce developers work load caused by too much requirement -;
->
-> Cheers,
-> Shinobu
->
-> ----- Original Message -----
-> From: "Odintsov Vladislav" <VlOdintsov@croc.ru>
-> To: "Franklin M. Siler" <me@franksiler.com>, "Xiaoxi Chen" <superdebuger@gmail.com>
-> Cc: ceph-devel@vger.kernel.org, "ceph-users" <ceph-users@ceph.com>, "Sage Weil" <sage@redhat.com>
-> Sent: Monday, February 29, 2016 6:04:02 PM
-> Subject: Re: [ceph-users] v0.94.6 Hammer released
->
-> Hi all,
->
-> should we build el6 packages ourself or, it's hoped that these packages would be built officially by community?
->
-> ________________________________
-> Regards,
->
-> Vladislav Odintsov
->
-> ________________________________________
-> From: ceph-devel-owner@vger.kernel.org <ceph-devel-owner@vger.kernel.org> on behalf of Franklin M. Siler <me@franksiler.com>
-> Sent: Friday, February 26, 2016 05:03
-> To: Xiaoxi Chen
-> Cc: Alfredo Deza; Dan van der Ster; Sage Weil; ceph-devel@vger.kernel.org; ceph-users
-> Subject: Re: [ceph-users] v0.94.6 Hammer released
->
-> On Feb 25, 2016, at 1839, Xiaoxi Chen <superdebuger@gmail.com> wrote:
->
->> Will we build package for ubuntu 12.04 (Precise)?
->> Seems it also doesnt show in the repo
->
-> The Ceph packages provided by Ubuntu are old.  However, the Ceph project publishes its own packages.
->
-> http://download.ceph.com/debian-hammer/dists/precise/
->
-> so repo lines for sources.list would be, I think:
->
-> deb http://download.ceph.com/debian-hammer/ precise main
-> deb-src http://download.ceph.com/debian-hammer/ precise main
->
->
-> Cheers,
->
-> Frank Siler
-> Siler Industrial Analytics
-> 314.799.9405--
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
