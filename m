@@ -1,36 +1,52 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: BlueStore deep-dive over bluejeans
-Date: Mon, 29 Feb 2016 16:01:19 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1602291600100.1904@cpach.fuggernut.com>
-References: <alpine.DEB.2.11.1602241447430.7555@cpach.fuggernut.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Ceph and Google Summer of Code
+Date: Mon, 29 Feb 2016 16:12:33 -0500
+Message-ID: <CAAZbbf2bm6EZopVdYCQ0XaHWGrwWC7wmXpHwwDkexPuXiOL4bQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41085 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750775AbcB2VBq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 16:01:46 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTPS id 650158002D
-	for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 13:01:45 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1602241447430.7555@cpach.fuggernut.com>
+Received: from mail-lb0-f182.google.com ([209.85.217.182]:34626 "EHLO
+	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750719AbcB2VMf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Feb 2016 16:12:35 -0500
+Received: by mail-lb0-f182.google.com with SMTP id of3so87648236lbc.1
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Feb 2016 13:12:34 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>, board@lists.ceph.com
 
-On Wed, 24 Feb 2016, Sage Weil wrote:
-> Hey all,
-> 
-> I'm planning on doing an hour-ish deep-dive into the inner workings of 
-> BlueStore next Monday, 2/29, 5pm-6pm ET / 2pm-3pm PT.  It'll be a 
-> mostly-informal brain dump and walk-through of the code over bluejeans, 
-> and we'll record it.  Anyone who is or is planning to be involved in 
-> bluestore development, please join and ask questions etc!  I'll send out 
-> the bluejeans link shortly before we start.
+Hey cephers,
 
-I'm going to defer this until later--I'm not feeling well.  I'll send out 
-another email soon with a new time slot.
+As many of you may have seen by now, Ceph was accepted back for
+another year of GSoC. I=E2=80=99m asking all of you to make sure that a=
+ny
+applicable students that you know consider working with Ceph this
+year.
 
-Sorry!
-sage
+We=E2=80=99re happy to accept proposals from our ideas list [0], or any=
+ custom
+proposal that you and they might dream up. This also applies to
+mentors. While we have a great group of initial mentors, if you are
+interested in mentoring and have a student work with you to create a
+proposal, I can add you as a mentor all the way through the end of the
+application period.
 
+If you have questions or comments, please feel free to reach out to me
+directly. Thanks!
+
+[0] http://ceph.com/gsoc2016
+
+--=20
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
