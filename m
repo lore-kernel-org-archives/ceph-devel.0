@@ -1,121 +1,154 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: Re: throttling reweight-by-utilization
-Date: Tue, 1 Mar 2016 09:58:13 +0100
-Message-ID: <CABZ+qq=Cdeq83=Fihp+3NvjGmvtUeZm=YygvJEO2XBd8PHrYhw@mail.gmail.com>
-References: <CABZ+qqmnOCvGa_=XRowxHy=Q-wRihxiTs2=bX1AsDuymvOUd3g@mail.gmail.com>
- <alpine.DEB.2.11.1601180859180.26381@cpach.fuggernut.com> <CABZ+qqkCZEZcj99sXQw_hZzaBbLAJyaO48MLbbrA6JVhNYEFOQ@mail.gmail.com>
+From: Daniel Gryniewicz <dang@redhat.com>
+Subject: Re: make error while building ceph
+Date: Tue, 1 Mar 2016 08:45:38 -0500
+Message-ID: <56D59D02.1050808@redhat.com>
+References: <CAPpuMWyW6jzG2TE=FRLdGAxP-OOBg3=WyCcw72DU79StsM2G7A@mail.gmail.com>
+ <56D2D089.7090109@dachary.org>
+ <CAPpuMWx9Or8ETDKtzFsUUkF0wSDnPEjiKhOSuVT=VrVYiUNohg@mail.gmail.com>
+ <56D2D55C.7060603@dachary.org>
+ <CAPpuMWyePM_TvmO1MHFRF=jQMw5KRqyy4FA3+QRU2pAq97UwSw@mail.gmail.com>
+ <56D460AD.9070806@dachary.org>
+ <CAPpuMWxo-qSeMyiv2eMNhbM-5=dp-+eQOxqvH_yZUNCenfDQUg@mail.gmail.com>
+Reply-To: dang@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f179.google.com ([209.85.217.179]:36819 "EHLO
-	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751870AbcCAI65 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Mar 2016 03:58:57 -0500
-Received: by mail-lb0-f179.google.com with SMTP id x1so95005614lbj.3
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Mar 2016 00:58:56 -0800 (PST)
-Received: from mail-lf0-f41.google.com (mail-lf0-f41.google.com. [209.85.215.41])
-        by smtp.gmail.com with ESMTPSA id ay2sm4680789lbc.39.2016.03.01.00.58.53
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1/SSLv3 cipher=OTHER);
-        Tue, 01 Mar 2016 00:58:53 -0800 (PST)
-Received: by mail-lf0-f41.google.com with SMTP id j186so34318333lfg.2
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Mar 2016 00:58:53 -0800 (PST)
-In-Reply-To: <CABZ+qqkCZEZcj99sXQw_hZzaBbLAJyaO48MLbbrA6JVhNYEFOQ@mail.gmail.com>
+Received: from mail-ig0-f171.google.com ([209.85.213.171]:35766 "EHLO
+	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753505AbcCANpl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Mar 2016 08:45:41 -0500
+Received: by mail-ig0-f171.google.com with SMTP id hb3so18038796igb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 01 Mar 2016 05:45:40 -0800 (PST)
+In-Reply-To: <CAPpuMWxo-qSeMyiv2eMNhbM-5=dp-+eQOxqvH_yZUNCenfDQUg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jai <jai_97@rediffmail.com>, Loic Dachary <loic@dachary.org>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Sage,
-I have a wip here: https://github.com/cernceph/ceph/commits/wip-reweight
-I still need to spin up a small test cluster to test it.
--- Dan
-
-On Mon, Jan 18, 2016 at 4:25 PM, Dan van der Ster <dan@vanderster.com> wrote:
-> On Mon, Jan 18, 2016 at 3:06 PM, Sage Weil <sage@newdream.net> wrote:
->> On Mon, 18 Jan 2016, Dan van der Ster wrote:
->>> Hi,
+On 02/29/2016 12:13 PM, Jai wrote:
+> That was the output from make.
+> ps shows the actual compilation  command as --
+>
+> jai       2822  2821  3 19:47 pts/0    00:05:09
+> /usr/libexec/gcc/x86_64-redhat-linux/4.8.5/cc1plus -quiet -I . -I
+> /usr/include/nss3 -I /usr/include/nspr4 -MD
+> test/encoding/ceph_dencoder-ceph_dencoder.d -MF
+> test/encoding/.deps/ceph_dencoder-ceph_dencoder.Tpo -MP -MT
+> test/encoding/ceph_dencoder-ceph_dencoder.o -D_GNU_SOURCE -D
+> HAVE_CONFIG_H -D __CEPH__ -D _FILE_OFFSET_BITS=64 -D _THREAD_SAFE -D
+> __STDC_FORMAT_MACROS -D _GNU_SOURCE -D CEPH_LIBDIR="/usr/local/lib" -D
+> CEPH_PKGLIBDIR="/usr/local/lib/ceph" -D GTEST_USE_OWN_TR1_TUPLE=0 -D
+> _REENTRANT -D WITH_RBD -D WITH_RADOSGW -U_FORTIFY_SOURCE
+> -D_FORTIFY_SOURCE=2 test/encoding/ceph_dencoder.cc -quiet -dumpbase
+> ceph_dencoder.cc -mtune=generic -march=x86-64 -auxbase-strip
+> test/encoding/ceph_dencoder-ceph_dencoder.o -g -g -O2 -O2
+> -Wtype-limits -Wignored-qualifiers -Winit-self -Wpointer-arith
+> -Wnon-virtual-dtor -Wno-invalid-offsetof -Wall -Wstrict-null-sentinel
+> -std=gnu++11 -fno-strict-aliasing -fsigned-char -ftemplate-depth=1024
+> -fexceptions -fPIE -fstack-protector -fno-builtin-malloc
+> -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+> -fno-var-tracking-assignments --param ssp-buffer-size=4 -o -
+>
+> It appears to be stuck in strcmp in libc.
+>
+> gstack 2822
+> #0  0x00007f57bd9b3006 in __strcmp_sse42 () from /lib64/libc.so.6
+> #1  0x000000000096447c in ?? ()
+> #2  0x0000000000dcd027 in htab_find_slot_with_hash ()
+> #3  0x000000000096b3b1 in ?? ()
+> #4  0x000000000098b741 in ?? ()
+> #5  0x0000000000e2f626 in ?? ()
+> #6  0x0000000000e3005c in toplev_main(int, char**) ()
+> #7  0x00007f57bd8a2b15 in __libc_start_main () from /lib64/libc.so.6
+> #8  0x0000000000dceaad in _start ()
+>
+> On Mon, Feb 29, 2016 at 8:45 PM, Loic Dachary <loic@dachary.org> wrote:
+>>
+>>
+>> On 29/02/2016 21:34, Jai wrote:
+>>> Loic,
 >>>
->>> I'd like to propose a few changes to reweight-by-utilization which
->>> will make it significantly less scary:
+>>> With centos 7, I ve moved further .. The build is stuck however at this --
 >>>
->>> 1. Change reweight-by-utilization to run in "dry run" -- display only
->>> -- mode unless an admin runs with  --yes-i-really-really-mean-it. This
->>> way admins can see what will be reweighted before committing to any
->>> changes.
->>
->> I think this piece is key, and there is a lot we might do here to make
->> this more informative.  In particular, we have the (approx) sizes of each
->> PG(*) and can calculate their mapping after the proposed change, which
->> means we could show the min/max utilization, standard deviation, and/or
->> number of nearfull or full OSDs before and after.
->>
->
-> I hadn't thought of that, but it would be cool.
-> My main use of the dry-run functionality is to ensure that it's not
-> going to change too many OSDs at once (IOW letting me try different
-> oload and pool values). Maybe some users want to make a large change
-> all in one go -- in that case this would be useful.
->
->
->> * Almost... we don't really know how many bytes of key/value omap data are
->> consumed.  So we could either go by the user data accounting, which is a
->> lower bound, or average the OSD utilization by the PGs it stores
->> (averaging pools together), or try do the same for just the difference
->> (which would presumably be omap data + overall overhead).
->>
->> I'm not sure how much it is worth trying to be accurate here...
->>
->>> 2. Add a configurable to limit the number of OSDs changed per execution:
->>>   mon_reweight_max_osds_changed (default 4)
+>>> ./make_version -g ./.git_version
+>>> if [ -n "$NO_VERSION" ] ; then \
+>>>          ./make_version -g ./.git_version -c ./ceph_ver.h -n ; \
+>>> else \
+>>>          ./make_version -g ./.git_version -c ./ceph_ver.h ; \
+>>> fi
+>>>    CXX      test/encoding/ceph_dencoder-ceph_dencoder.o
 >>>
->>> 3. Add a configurable to limit the weight changed per OSD:
->>>   mon_reweight_max_weight_change (default 0.05)
->>>
->>> Along with (2) and (3), the main loop in reweight_by_utilization:
->>>   https://github.com/ceph/ceph/blob/master/src/mon/OSDMonitor.cc#L568
->>> needs to sort the OSDs by utilization.
->>>
->>> 4. Make adjusting weights up optional with a new CLI option
->>> --adjust-up. This is useful because if you have nearly full OSDs you
->>> want to prioritize making space on those OSDs.
+>>> I ve tried restarting the make a few times after cleaning up, but it
+>>> comes back to this point. Could this be a failed/hung test ?
 >>
->> These sound reasonable to me.  Although, in general, if we ultimately want
->> people do to this regularly via cron or something, we'll need --adjust-up.
->> I wonder if there is some other way it should be biased so that we weight
->> the overfull stuff down before weighting the underfull stuff up.  Maybe
->> the max_osds_changed already mostly does that by doing the fullest osds
->> first?
->
-> One other reason we need to be able to disable --adjust-up is for
-> non-flat crush trees, where some OSDs get more PGs because of a non
-> trivial ruleset. reweight-by-pg helps in this case, but its still not
-> perfect for all crush layouts. For example, we have a ruleset which
-> puts two replicas in one root and a third replica in another root...
-> this is difficult for the reweight-by-* function to get right. One
-> solution to this which I haven't yet tried is to add a --bucket option
-> to reweight-by-* which only looks at OSDs under a given point in the
-> tree.
->
-> -- Dan
->
->
->
->> Thanks, Dan!
->> sage
+>> I'm not sure, it looks like the compilation is not finished yet and the tests did not start. Could you provide details about what is stuck ?
 >>
+>> Cheers
 >>
->>
->>> I have already been running with these options in a python prototype:
->>>   https://github.com/cernceph/ceph-scripts/blob/master/tools/crush-reweight-by-utilization.py
 >>>
->>> If you agree I'll port these changes to OSDMonitor.cc and send a PR.
->>>
->>> Best Regards,
->>> Dan
 >>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> Jai
 >>>
->>>
+>>> On Sun, Feb 28, 2016 at 4:39 PM, Loic Dachary <loic@dachary.org> wrote:
+>>>> Hi,
+>>>>
+>>>> Ubuntu 12.04 is no longer supported, reason why you're having troubles. I recommend CentOS 7 or Ubunut 14.04 instead.
+>>>>
+>>>> Cheers
+>>>>
+>>>> On 28/02/2016 17:55, Jai wrote:
+>>>>> Loic,
+>>>>>
+>>>>> I did run install-deps before the make, and it completed without
+>>>>> error. I have an Ubuntu (1204) VM (uname shows 3.5.0-30-generic
+>>>>> #51~precise1-Ubuntu)
+>>>>>
+>>>>> I ran these as per the README --
+>>>>> ./install-deps.sh
+>>>>> ./autogen.sh
+>>>>>    ./configure
+>>>>>    make
+>>>>>
+>>>>> I found the bugs link on http://ceph.com/community/contribute/ under
+>>>>> "submit issues"
+>>>>>
+>>>>> --
+>>>>> Jai
+>>>>>
+>>>>> On Sun, Feb 28, 2016 at 4:18 PM, Loic Dachary <loic@dachary.org> wrote:
+>>>>>> Hi,
+>>>>>>
+>>>>>> You should try to run ./install-deps.sh first so that the required dependencies are all installed. Which operating system are you using ?
+>>>>>> The bug tracker is at http://tracker.ceph.com/. Where did you find a link to http://tracker.newdream.net/projects/ceph ? It should be fixed :-)
+>>>>>>
+>>>>>> Cheers
+>>>>>>
+>>>>>> On 28/02/2016 17:29, Jai wrote:
+>>>>>>> I followed instructions in the README, but "make" gives me this error --
+>>>>>>>
+>>>>>>> In file included from ./include/types.h:21:0,
+>>>>>>>                   from kv/LevelDBStore.h:6,
+>>>>>>>                   from kv/KeyValueDB.cc:5:
+>>>>>>> ./include/uuid.h:14:42: fatal error: boost/random/random_device.hpp:
+>>>>>>> No such file or directory
+>>>>>>> compilation terminated.
+>>>>>>>
+>>>>>>> I m compiling on ubuntu, and it looks like I have boost headers
+>>>>>>> (/usr/include/boost), but this file is absent. llibboost appears to be
+>>>>>>> 1.46.1
+>>>>>>> appreciate any pointers to resolve this error.
+>>>>>>>
+>>>>>>> Also, I couldn't access the web page for bugs
+>>>>>>> (http://tracker.newdream.net/projects/ceph) - where can I find a list
+>>>>>>> of bugs/ features ?
+>>>>>>> --
+>>>>>>> Jai
+
+Could you possibly not have enough RAM on the box?  Ceph takes lots of 
+RAM to build (I've run out with 4GB, and with 8G on a small parallel 
+build).  If you are heavily into swap, for example, individual compiles 
+can take 10 of minutes each, and appear to be hung.
+
+Daniel
+
