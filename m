@@ -1,67 +1,40 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [ceph] what's going on with d_rehash() in splice_dentry()?
-Date: Tue, 1 Mar 2016 09:50:24 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1603010946290.24758@cpach.fuggernut.com>
-References: <20160226174250.GA17997@ZenIV.linux.org.uk>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: BlueStore deep-dive over bluejeans
+Date: Tue, 1 Mar 2016 10:19:22 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1603011014570.1904@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1602241447430.7555@cpach.fuggernut.com> <alpine.DEB.2.11.1602291600100.1904@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160226174250.GA17997@ZenIV.linux.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Al Viro <viro@ZenIV.linux.org.uk>
-Cc: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, zyan@redhat.com, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:46219 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753690AbcCAPTt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Mar 2016 10:19:49 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTPS id 4506B800BB
+	for <ceph-devel@vger.kernel.org>; Tue,  1 Mar 2016 07:19:48 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1602291600100.1904@cpach.fuggernut.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Al,
-
-On Fri, 26 Feb 2016, Al Viro wrote:
-> You have, modulo printks and BUG_ON(),
-> {
->         struct dentry *realdn;
->         /* dn must be unhashed */
->         if (!d_unhashed(dn))
->                 d_drop(dn);
->         realdn = d_splice_alias(in, dn);
->         if (IS_ERR(realdn)) {
->                 if (prehash)
->                         *prehash = false; /* don't rehash on error */
->                 dn = realdn; /* note realdn contains the error */
->                 goto out;
->         } else if (realdn) {
->                 dput(dn);
->                 dn = realdn;
->         }
->         if ((!prehash || *prehash) && d_unhashed(dn))
->                 d_rehash(dn);
+On Mon, 29 Feb 2016, Sage Weil wrote:
+> On Wed, 24 Feb 2016, Sage Weil wrote:
+> > Hey all,
+> > 
+> > I'm planning on doing an hour-ish deep-dive into the inner workings of 
+> > BlueStore next Monday, 2/29, 5pm-6pm ET / 2pm-3pm PT.  It'll be a 
+> > mostly-informal brain dump and walk-through of the code over bluejeans, 
+> > and we'll record it.  Anyone who is or is planning to be involved in 
+> > bluestore development, please join and ask questions etc!  I'll send out 
+> > the bluejeans link shortly before we start.
 > 
-> When d_splice_alias() returns NULL it has hashed the dentry you'd given it;
-> when it returns a different dentry, that dentry is also returned hashed.
-> IOW, d_rehash(dn) in there should never be called.
-> 
-> If you have a case when it _is_ called, you've found a bug somewhere and
-> I'd like to see details.  AFAICS, the whole prehash thing appears to be
-> pointless - even the place where we modify *prehash, since in that case
-> we return ERR_PTR() and the only caller passing non-NULL prehash (&have_lease)
-> buggers off on such return value past all code that would look at have_lease
-> value.
+> I'm going to defer this until later--I'm not feeling well.  I'll send out 
+> another email soon with a new time slot.
 
-Right.
- 
-> One possible reading is that you want to prevent hashing in !have_lease
-> case of
->                         dn = splice_dentry(dn, in, &have_lease);
-> If that's the case, you might have a problem, since it will be hashed no
-> matter what...
+We try again with the same time slot today (5pm ET, 2pm PT).  The 
+bluejeans URL will be
 
-In this case it doesn't actually matter if it is hashed or not, since 
-we will look at the lease state on the dentry before trusting it...
-
-This code dates back to when Ceph was originally upstreamed, so the 
-history is murky, but I expect at that point I wanted to avoid hashing in 
-the no-lease case.  But I don't think it matters.  We should just remove 
-the prehash argument from splice_dentry entirely.
-
-Zheng, does that sound right?
-
-Thanks!
+	https://bluejeans.com/SWeil09
+	
 sage
