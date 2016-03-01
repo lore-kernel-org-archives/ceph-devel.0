@@ -1,78 +1,39 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [Y2038] [PATCH] include: ceph: Fix encode and decode type
- conversions
-Date: Tue, 1 Mar 2016 11:18:56 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1603011117280.1904@cpach.fuggernut.com>
-References: <1455505313-1298-1-git-send-email-deepa.kernel@gmail.com> <3047619.1giXQfFTZa@wuerfel> <CAOi1vP8fnBXw3pOspN7KeAVUk3wEEbMLhdbW2qQ4xryrGpoyTg@mail.gmail.com> <2888792.FMmWd8y8pW@wuerfel>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: make error while building ceph
+Date: Tue, 1 Mar 2016 21:15:45 +0100
+Message-ID: <56D5F871.2040901@suse.cz>
+References: <CAPpuMWyW6jzG2TE=FRLdGAxP-OOBg3=WyCcw72DU79StsM2G7A@mail.gmail.com>
+ <56D2D089.7090109@dachary.org>
+ <CAPpuMWx9Or8ETDKtzFsUUkF0wSDnPEjiKhOSuVT=VrVYiUNohg@mail.gmail.com>
+ <56D2D55C.7060603@dachary.org>
+ <CAPpuMWyePM_TvmO1MHFRF=jQMw5KRqyy4FA3+QRU2pAq97UwSw@mail.gmail.com>
+ <56D460AD.9070806@dachary.org>
+ <CAPpuMWxo-qSeMyiv2eMNhbM-5=dp-+eQOxqvH_yZUNCenfDQUg@mail.gmail.com>
+ <56D59D02.1050808@redhat.com>
+ <CAPpuMWzZHMLSTRuWcvwbQLQ9hSj2+BufYLB5BTAys+0_KDHh4g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46675 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750751AbcCAQTY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Mar 2016 11:19:24 -0500
-In-Reply-To: <2888792.FMmWd8y8pW@wuerfel>
+Received: from mx2.suse.de ([195.135.220.15]:51528 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751062AbcCAUPs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 1 Mar 2016 15:15:48 -0500
+In-Reply-To: <CAPpuMWzZHMLSTRuWcvwbQLQ9hSj2+BufYLB5BTAys+0_KDHh4g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: y2038@lists.linaro.org, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Deepa Dinamani <deepa.kernel@gmail.com>
+To: Jai <jai_97@rediffmail.com>
+Cc: dang@redhat.com, Loic Dachary <loic@dachary.org>, ceph-devel@vger.kernel.org
 
-On Fri, 19 Feb 2016, Arnd Bergmann wrote:
-> On Friday 19 February 2016 12:42:02 Ilya Dryomov wrote:
-> > I want the kernel client to be bug compatible with servers and other
-> > clients in ceph.git.
-> > 
-> > >
-> > > a) Remain consistent with current 64-bit servers and clients,
-> > >    interpreting the number as an unsigned 32-bit integer where
-> > >    possible, and remain broken on existing 32-bit machines
-> > >    until they start using 64-bit time_t.
-> > >
-> > > b) Change 64-bit clients to behave the same way that that 32-bit
-> > >    clients and servers do today, and actually use the times as
-> > >    a signed number that you claimed they already did.
-> > >
-> > > c) Interpret all times before 1980 or after 2038 as buggy servers
-> > >    and only accept times that are always handled consistently.
-> > >    Also fix the server to reject those times coming from broken
-> > >    clients.
-> > >
-> > > d) Leave 64-bit clients unchanged (using unsigned timestamps) and
-> > >    document that 32-bit clients should keep interpreting them as
-> > >    signed even when we fix VFS, to preserve the existing behavior.
-> > >
-> > > I think a), b) and c) are all reasonable, and I can send a patch
-> > > as soon as you know what you want. If you want d), please leave
-> > > me out of that and do it yourself.
-> > 
-> > My preference would be a), possibly with some comments along the lines
-> > of c), to make the ..2038 range more explicit, as I doubt we've ever
-> > assumed ..2106 on 64-bit.  This is all really old code and goes back to
-> > the dawn of ceph and beyond the kernel client, so let's wait for Sage
-> > to chime in.
-> 
-> Ok, thanks!
-> 
-> I think the same problem appeared in a lot of places when code was
-> originally written with the assumption that time_t is 32-bit,
-> and then it kept working in practice when ported to 64-bit systems
-> for the first time but the underlying assumptions changed.
-> 
-> /*
->  * ceph timestamp handling is traditionally inconsistent between
->  * 32-bit clients and servers using them as a signed 32-bit time_t
->  * ranging from 1902 to 2038, and 64-bit clients and servers
->  * interpreting the same numbers as unsigned 32-bit integers
->  * with negative numbers turning into dates between 2038 and 2106.
->  *
->  * Most clients and servers these days are 64-bit, so let's pretend
->  * that interpreting the times as "__u32" is intended, and use
->  * that on 32-bit systems as well once using a 64-bit time_t.
->  */
+On 03/01/2016 03:39 PM, Jai wrote:
+> I saw one report of a RAM issue.
+> I have 2G on the VM - and  it was hung for > half a day.
 
-This sounsd right to me.  In practice we never have negative timestamps, 
-so keeping the unsigned interpretation makes the most sense, and buys us 
-several decades.  Although it's pretty likely we'll switch to a 64-bit 
-encoding long before then...
+I've found that compiling Ceph requires at least 8GB of RAM - anything 
+less is a recipe for failure. I have not tried using cmake, though.
 
-sage
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
