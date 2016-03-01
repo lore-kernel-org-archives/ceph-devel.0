@@ -1,80 +1,53 @@
-From: Marcus Watts <mwatts@redhat.com>
-Subject: Re: ceph + -lssl
-Date: Mon, 29 Feb 2016 20:31:02 -0500
-Message-ID: <20160301013102.GB25207@degu.b.linuxbox.com>
-References: <20160224050912.GA6585@degu.b.linuxbox.com>
- <CADRKj5Shu=S4aHX+bz-yw8zuXgGPWE2YE_au5x1HYExwer6HTw@mail.gmail.com>
- <20160227075001.GA21701@degu.b.linuxbox.com>
- <56D19B44.9080005@digiware.nl>
+From: Rajath Shashidhara <rajath.shashidhara@gmail.com>
+Subject: Interest in Implementing Cache layer on top of NVME Driver [GSoC]
+Date: Tue, 1 Mar 2016 14:01:07 +0530
+Message-ID: <CAFjGuFSazLzQq-AAhXyn_gyZv=fJspQuB+dA0-CY4-JjZ9gMSA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47454 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750699AbcCABbG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 29 Feb 2016 20:31:06 -0500
-Content-Disposition: inline
-In-Reply-To: <56D19B44.9080005@digiware.nl>
+Received: from mail-vk0-f53.google.com ([209.85.213.53]:34663 "EHLO
+	mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752549AbcCAIbI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Mar 2016 03:31:08 -0500
+Received: by mail-vk0-f53.google.com with SMTP id e185so160174104vkb.1
+        for <ceph-devel@vger.kernel.org>; Tue, 01 Mar 2016 00:31:08 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: haomai@xsky.com
 
-On Sat, Feb 27, 2016 at 01:49:08PM +0100, Willem Jan Withagen wrote:
-> On 27-2-2016 08:50, Marcus Watts wrote:
-> > On Fri, Feb 26, 2016 at 12:43:24PM -0800, Yehuda Sadeh-Weinraub wrote:
-> >> I rebased these 4 commits on top of a recent master, and here's the
-> >> new pull request:
-> >> https://github.com/ceph/ceph/pull/7825
-> >>
-> >> On Tue, Feb 23, 2016 at 9:09 PM, Marcus Watts <mwatts@redhat.com> wrote:
-> >>> I've been working on better integrating ssl int ceph.
-> > ...
-> > 
-> > Thanks Yehuda for doing this.
-> > 
-> > Matt pointed out in the pull request that cmake builds were failing
-> > on this branch.  I've pushed a commit to fix that.
-> 
-> I know I'm not doing the work, but would it be possible to base the work
-> on for example LibreSSL from OpenBSD or BoringSSL from Google.
-> 
-> From the things I've seen and read about it, these libraries are (good)
-> attempts to shed a lot of cruft of openssl resulting in a compacter and
-> better build lib.
-> 
-> Next to the history of OpenBSD which is "not all that bad" for security.
-> And I'd expect Ceph to only use the more modern parts of the lib, and
-> thus historical compatibility is not that important here.
-> --WjW
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hello,
 
-I looked at libressl a bit.  It still has the same license emcumbrances
-as openssl.  So no real win there.  And, since it's not packaged as part
-of many linux distributions, the gpl/ssleay license incompatibility issue
-becomes a real problem here.  Hopefully a future version of libressl will
-adopt a plain bsd license.  I know they were working hard to discard
-the crufty openssl build system, a good thing.  When I worked with an
-earlier version of openssl (adding a new hash or encryption algorithm,
-I don't remember which today), I remember being disappointed at finding
-internal interfaces that just assumed various max sizes of things.  I hope
-the libressl folks work on making those things better too.
+I am a GSoC' 2016 aspirant. I have browsed through your ideas page and
+I find that the above project best aligns with my experience and
+interest.
 
-I'm not familiar with google's "boringSSL".  Do you have some references
-for it?  I won't have the time to look at it right now - but I don't mind
-learning at least a bit more about it.  I see from wikipedia that it's
-yet another fork of openssl - will they fix the license issue?
+During the course of my academics, I have developed an interest in
+development of performance critical software development. I am
+familiar with the parallel and distributed computing paradigms and I
+would like to gain further experience in this field.
 
-I did look (mostly superficially) at,
-	botan libressl gnutls matrixssl mbed wolfssl cryptlib nss
-	& apple's "secure transport"
-It was mostly superficial because my first question was "are there
-a lot of other people using this" aka "am I going to be debugging
-and supporting this myself"?
+I have experience in the development of Page buffers for efficient I/O
+from secondary storage. I lead the development of External Memory
+(secondary storage) data structures [1] for C++ over the last few
+months. We have implemented custom buffering (modifications of the LRU
+strategy) specific to each data structure. Some features of the page
+buffer include - support for page pinning, priority paging (pages with
+higher priority are harder to replace as compared to pages with low
+priority of comparable recent access time), prefetching (strategy
+specific to data structure). (It is an ongoing project and we are
+expanding the number of Data structures and corresponding
+optimizations)
 
-					-Marcus
+I will familiarize myself with the architecture of Ceph, the userspace
+NVME driver and the cache requirements. Please point me to the right
+resources and the documentation related to this problem. It would be
+great if you can suggest me a bug to fix or any contribution that
+would help me understand the underlying source code.
+
+Note : I have successfully completed GSoC' 2013 with Apache OpenOffice.
+
+Thank you,
+Rajath Shashidhara
+
+[1] https://github.com/ExternalMemoryDS/external-mem-ds
