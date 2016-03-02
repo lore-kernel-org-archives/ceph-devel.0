@@ -1,67 +1,51 @@
-From: Laison Computech Inc <7sales@laiisoncomputech.com>
-Subject: CISCO AND AVAYA IP Phones
-Date: Wed, 02 Mar 2016 03:09:52 +0700
-Message-ID: <20160301210900.26BB75747B9@srv-mta.gcmillenium.com.br>
-Reply-To: sales@laiisoncomputech.com
+From: Chris Dunlop <chris-s239Etu9j1dPR4JQBCEnsQ@public.gmane.org>
+Subject: Re: v0.94.6 Hammer released
+Date: Wed, 2 Mar 2016 12:06:25 +1100
+Message-ID: <20160302010625.GA10914@onthe.net.au>
+References: <CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
+	<EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com>
+	<CAEYCsVKeOwOWp0yRmb5KHduqwUQ-fVUaMcQCaszmGaN-WDp=Gw@mail.gmail.com>
+	<FE41C953-5D62-41E0-A1C5-97891B7A7438@franksiler.com>
+	<1456736629334.47610@croc.ru>
+	<191489558.55229005.1456744289131.JavaMail.zimbra@redhat.com>
+	<1456745435596.21796@croc.ru>
+	<CABZ+qqkD_w4xM-qNdxC_WkZbGPf+w0gHh2cgYnPF2-_0go5-SA@mail.gmail.com>
+	<56D45CCC.8010608@dachary.org>
+	<alpine.DEB.2.11.1602291056350.1904@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from srv-mta.gcmillenium.com.br ([177.125.218.132]:57705 "EHLO
-	srv-mta.gcmillenium.com.br" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756019AbcCAX4o convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 1 Mar 2016 18:56:44 -0500
-Content-Description: Mail message body
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <7sales@laiisoncomputech.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1602291056350.1904-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
 Hi,
 
-Clean tested working pulls CPUs and QTYs in stock.
+The "old list of supported platforms" includes debian wheezy.
+Will v0.94.6 be built for this?
 
-115 X X5650
-65 X E5410
-75 X X5660
-145 X E5530
-100 X E5645
-40 X X5680
-75 X X5690
+Chris
 
-Brand new sealed IP phones and QTYs in stock.
-
-55 x CP-7937G
-77 x CP-7942G
-54 x CP-7945G
-75 x CP-7962G
-=2E.....
-45 x Avaya 9630
-65 x Avaya 9641
-55 x Avaya 9640=20
-
-USED IT HARDWARE FROM:
-
-=46UJITSU       IBM         SUN        HP
-QUANTUM   DELL       HDS        STK
-NETAPP      SGI         Oracle      EMC=B2
-
-3Com, ADVA, Alcatel, Brocade, Cisco,
-Cabletron, Enterasys, Extreme Networks,
-Huawei, Marconi, Nortel, Qlogic, Avaya
-
-Let me know if you're interested. We are very open to offers and willin=
-g to work with you to make sure that we have a deal.
-
-Sincerely
-Barbara Johnson
-Laison Computech Inc
-Tel: +1-657-205-7860
-=46ax: +1-347-214-0478
-Email: sales@laiisoncomputech.com
-Web: www.laisoncomputech.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Mon, Feb 29, 2016 at 10:57:53AM -0500, Sage Weil wrote:
+> The intention was to continue building stable releases (0.94.x) on the old 
+> list of supported platforms (which inclues 12.04 and el6).  I think it was 
+> just an oversight that they weren't built this time around.  I the 
+> overhead to doing so is just keeping a 12.04 and el6 jenkins build slave 
+> around.
+> 
+> Doing this builds in the existing environment sounds much better than 
+> trying to pull in externally built binaries...
+> 
+> sage
