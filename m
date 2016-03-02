@@ -1,73 +1,58 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: ceph OSD facts file
-Date: Wed, 2 Mar 2016 15:50:37 -0700
-Message-ID: <CALqRxCwLovLsdhWKMztqsuz5Mv46XYyjU6Z9O9BRt1GtnONKBg@mail.gmail.com>
+From: Kyle Bader <kyle.bader@gmail.com>
+Subject: Re: ceph + -lssl
+Date: Wed, 2 Mar 2016 14:58:13 -0800
+Message-ID: <CAFMfnwqfOs-VSUdS6kd=DM7TREi8GQze0nnv2SbSVM0ZEfU+Mg@mail.gmail.com>
+References: <20160224050912.GA6585@degu.b.linuxbox.com>
+	<CADRKj5Shu=S4aHX+bz-yw8zuXgGPWE2YE_au5x1HYExwer6HTw@mail.gmail.com>
+	<20160227075001.GA21701@degu.b.linuxbox.com>
+	<56D19B44.9080005@digiware.nl>
+	<20160301013102.GB25207@degu.b.linuxbox.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:37981 "EHLO
-	mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750917AbcCBWuj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Mar 2016 17:50:39 -0500
-Received: by mail-wm0-f49.google.com with SMTP id l68so9198415wml.1
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Mar 2016 14:50:38 -0800 (PST)
+Received: from mail-yw0-f177.google.com ([209.85.161.177]:34047 "EHLO
+	mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754231AbcCBW6O (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Mar 2016 17:58:14 -0500
+Received: by mail-yw0-f177.google.com with SMTP id h129so3782434ywb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Mar 2016 14:58:14 -0800 (PST)
+In-Reply-To: <20160301013102.GB25207@degu.b.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Marcus Watts <mwatts@redhat.com>
+Cc: Willem Jan Withagen <wjw@digiware.nl>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Loic,
+> I looked at libressl a bit.  It still has the same license emcumbrances
+> as openssl.  So no real win there.  And, since it's not packaged as part
+> of many linux distributions, the gpl/ssleay license incompatibility issue
+> becomes a real problem here.  Hopefully a future version of libressl will
+> adopt a plain bsd license.  I know they were working hard to discard
+> the crufty openssl build system, a good thing.  When I worked with an
+> earlier version of openssl (adding a new hash or encryption algorithm,
+> I don't remember which today), I remember being disappointed at finding
+> internal interfaces that just assumed various max sizes of things.  I hope
+> the libressl folks work on making those things better too.
+>
+> I'm not familiar with google's "boringSSL".  Do you have some references
+> for it?  I won't have the time to look at it right now - but I don't mind
+> learning at least a bit more about it.  I see from wikipedia that it's
+> yet another fork of openssl - will they fix the license issue?
+>
+> I did look (mostly superficially) at,
+>         botan libressl gnutls matrixssl mbed wolfssl cryptlib nss
+>         & apple's "secure transport"
+> It was mostly superficial because my first question was "are there
+> a lot of other people using this" aka "am I going to be debugging
+> and supporting this myself"?
 
-In Red Hat we're interested in having a Ceph "facts" file that we can
-integrate with RHEL's subscription-manager (upstream
-http://www.candlepinproject.org/ fyi) in order to report on the
-available raw disk capacity available per OSD.
+BoringSSL
 
-We need a script to write a "/etc/rhsm/facts/ceph_disk.facts" file.
-That file needs to contain JSON of the form:
+https://boringssl.googlesource.com/boringssl/
 
-{
-  "band.storage.usage": <integer number of TB used on this node, such as 55>
-}
+This might also be worth a look:
 
-for example:
-{
-  "band.storage.usage": 55
-}
+https://github.com/awslabs/s2n
 
-As long as that file exists (and it can be named anything that ends in
-".facts") the contents will be read in and added to the system facts.
-On RHEL this can be verified by running `subscription-manager facts`
-to ensure that your value is showing up properly.
+-- 
 
-In terms of creating this .facts file, we will need a script to do
-that. We could call it /usr/bin/ceph-update-fact-file, or make it a
-ceph-disk sub-command, or whatever you want, really.
-
-The facts file should be kept up-to-date every four hours, which makes
-me think that we could implement this as a systemd service and timer.
-Something like
-
-  $ cat /etc/systemd/system/ceph-update-facts-file.service
-
-  [Unit]
-  Description=Update Ceph OSD fact file
-
-  [Service]
-  Type=oneshot
-  ExecStart=/usr/bin/ceph-update-fact-file
-
-
-...and:
-
-  $ cat /etc/systemd/system/ceph-update-facts-file.timer
-  [Unit]
-  Description=Trigger an automatic rewrite every four hours
-
-  [Timer]
-  OnCalendar=4hours
-  Persistent=true
-
-  [Install]
-  WantedBy=multi-user.target
-
-(The above is untested, it's just an idea).  What do you think?
+Kyle Bader
