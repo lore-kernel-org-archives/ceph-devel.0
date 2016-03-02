@@ -1,106 +1,128 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: Issues with exclusive-lock code on testing
-Date: Wed, 2 Mar 2016 15:10:39 +0100
-Message-ID: <CAOi1vP-CVdSmFeskBSZ=H8rwkd9d1EEarfSCPUAWkFxOTYZHyw@mail.gmail.com>
-References: <CAOi1vP-+LaGx5q4_MkW7w0gShDzA7fEgAFmJOONvDxL3Owjf5g@mail.gmail.com>
-	<959DE663-CCF9-4EA9-98E0-A0C00C1CB127@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [ceph-users] v0.94.6 Hammer released
+Date: Wed, 2 Mar 2016 21:49:26 +0700
+Message-ID: <56D6FD76.2090306@dachary.org>
+References: <CAC-Np1yGWf02kVkJzPDi5hWEcm_L01jG-qev1WhMpNvgpHw8NA@mail.gmail.com>
+ <EA4E4293-B9AF-44EA-ACAB-55A8A322C317@franksiler.com>
+ <CAEYCsVKeOwOWp0yRmb5KHduqwUQ-fVUaMcQCaszmGaN-WDp=Gw@mail.gmail.com>
+ <FE41C953-5D62-41E0-A1C5-97891B7A7438@franksiler.com>
+ <1456736629334.47610@croc.ru>
+ <191489558.55229005.1456744289131.JavaMail.zimbra@redhat.com>
+ <1456745435596.21796@croc.ru>
+ <CABZ+qqkD_w4xM-qNdxC_WkZbGPf+w0gHh2cgYnPF2-_0go5-SA@mail.gmail.com>
+ <56D45CCC.8010608@dachary.org>
+ <alpine.DEB.2.11.1602291056350.1904@cpach.fuggernut.com>
+ <20160302010625.GA10914@onthe.net.au> <1456913706999.87255@croc.ru>
+ <56D6CF42.7080909@dachary.org>
+ <CABZ+qqkfjbmxZuBhODV8q4-k-rVaD2eCAdpa3CyPc+PbHbWN_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:36474 "EHLO
-	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753225AbcCBOKk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Mar 2016 09:10:40 -0500
-Received: by mail-wm0-f52.google.com with SMTP id n186so87558992wmn.1
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Mar 2016 06:10:40 -0800 (PST)
-In-Reply-To: <959DE663-CCF9-4EA9-98E0-A0C00C1CB127@redhat.com>
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:45038 "EHLO
+	relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753004AbcCBOtf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Mar 2016 09:49:35 -0500
+In-Reply-To: <CABZ+qqkfjbmxZuBhODV8q4-k-rVaD2eCAdpa3CyPc+PbHbWN_w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Douglas Fuller <dfuller@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: Odintsov Vladislav <VlOdintsov@croc.ru>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-On Wed, Mar 2, 2016 at 2:59 PM, Douglas Fuller <dfuller@redhat.com> wro=
-te:
->
->> On Mar 2, 2016, at 6:26 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
+Hi Dan,
+
+On 02/03/2016 19:48, Dan van der Ster wrote:
+> Hi Loic,
+>=20
+> On Wed, Mar 2, 2016 at 12:32 PM, Loic Dachary <loic@dachary.org> wrot=
+e:
 >>
->> Hi Doug,
 >>
->> The cause of that memory corruption is a premature (duplicate, too)
->> call to rbd_obj_request_complete() in the !object-map DELETE case.
->> You've got:
+>> On 02/03/2016 17:15, Odintsov Vladislav wrote:
+>>> Hi,
+>>>
+>>> it looks very strange, that LTS release suddenly stopped support of=
+ one of OS'es in the middle of lifecycle. Especially when there are no =
+technical problems.
+>>> How can we help community with building hammer branch officially?
+>>>
 >>
->>    <dispatch>
->>    rbd_osd_req_callback
->>      rbd_osd_delete_callback
->>        rbd_osd_discard_callback
->>        rbd_obj_request_complete
->>          <complete obj_request->completion>
->>                                                <waiter is woken up>
->>                                                ...
->>                                                rbd_obj_request_put
->>                                                <obj_request is gone>
->>    <do more things with obj_request> <- !!!
->>    rbd_obj_request_complete
->>      <complete obj_request->completion>
->
-> Ah, yes, that is left over from before when I used the delete callbac=
-k explicitly (assigning it to r_callback) instead of routing it through=
- rbd_osd_req_callback like everything else. That likely explains it, th=
-anks.
->
->> I also spotted two memory leaks on the NOTIFY_COMPLETE path in
->> __do_event().  The event one is trivial,
->
-> We cannot free the event here because CEPH_WATCH_EVENT_NOTIFY_COMPLET=
-E fills values needed by the caller that may be waiting on it. The wait=
-er has to call ceph_osdc_cancel_event when done with it.
+>> Hi,
+>>
+>> I think you misread what Sage wrote : "The intention was to continue=
+ building stable releases (0.94.x) on the old list of supported platfor=
+ms (which inclues 12.04 and el6)". In other words, the old OS'es are st=
+ill supported. Their absence is a glitch in the release process that wi=
+ll be fixed.
+>>
+>=20
+> BTW, has there been any discussion to do 0.94.7 on a shorter interval=
+?
+> There is at least one unfortunate regression in .6:
+> http://tracker.ceph.com/issues/14873
 
-My ceph_osdc_put_event() doesn't free the event, it just puts a ref
-that was acquired above with get_event().
+It's an incentive to have 0.94.7, indeed. It could be released this mon=
+th, should Sage decide it's worth it.
 
->
->> the page vector one I have
->> a question about.  The data item is allocated in alloc_msg() and the
->> actual buffer is then passed into __do_event() and eventually into
->> rbd_send_async_notify(), but not further up the stack.  Is anything
->> going to use it?  If not, we should remove it entirely.
->
-> The incoming message may contain the data item. In the case of CEPH_W=
-ATCH_EVENT_NOTIFY_COMPLETE, rbd does not expect any data from the OSD, =
-only the return code. The protocol allows it to be present, though, so =
-osd_client should handle this case.
+Cheers
 
-If there won't be any users of it on the kernel client side, there's no
-point in allocating the data item, extracting that data and propagating
-it half way up, only to discard the data and free the data item.
+>=20
+> Cheers, Dan
+>=20
+>=20
+>> Cheers
+>>
+>>> ________________________________
+>>> Regards,
+>>>
+>>> Vladislav Odintsov
+>>>
+>>> ________________________________________
+>>> From: ceph-users <ceph-users-bounces@lists.ceph.com> on behalf of C=
+hris Dunlop <chris@onthe.net.au>
+>>> Sent: Wednesday, March 2, 2016 04:06
+>>> To: Sage Weil
+>>> Cc: Loic Dachary; ceph-devel@vger.kernel.org; ceph-users@ceph.com
+>>> Subject: Re: [ceph-users] v0.94.6 Hammer released
+>>>
+>>> Hi,
+>>>
+>>> The "old list of supported platforms" includes debian wheezy.
+>>> Will v0.94.6 be built for this?
+>>>
+>>> Chris
+>>>
+>>> On Mon, Feb 29, 2016 at 10:57:53AM -0500, Sage Weil wrote:
+>>>> The intention was to continue building stable releases (0.94.x) on=
+ the old
+>>>> list of supported platforms (which inclues 12.04 and el6).  I thin=
+k it was
+>>>> just an oversight that they weren't built this time around.  I the
+>>>> overhead to doing so is just keeping a 12.04 and el6 jenkins build=
+ slave
+>>>> around.
+>>>>
+>>>> Doing this builds in the existing environment sounds much better t=
+han
+>>>> trying to pull in externally built binaries...
+>>>>
+>>>> sage
+>>> _______________________________________________
+>>> ceph-users mailing list
+>>> ceph-users@lists.ceph.com
+>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>>
+>>
+>> --
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>=20
 
->
->> Another thing that caught my eye is your diff adds a bunch of
->> ceph_get_snap_context() calls on header.snapc with no corresponding
->> puts.  My understanding is the ones around rbd_image_request_fill() =
-are
->> there to workaround the fact that rbd_queue_workfn() isn't used,
->
-> Yes. I think I left a comment there, but I=E2=80=99ll add one if I di=
-d not.
->
->> but
->> the one in rbd_obj_delete_sync() is immediately followed by
->> ceph_osdc_build_request() which bumps snapc and so is almost certain=
-ly
->> a leak.
->
-> Yes. I thought you promised not to look at the garbage/junk commits, =
-where that line is.
-
-I looked at the entire diff - it was blowing past 1G of memory, after
-all ;)
-
-Thanks,
-
-                Ilya
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
