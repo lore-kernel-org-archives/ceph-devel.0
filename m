@@ -1,152 +1,80 @@
-From: =?utf-8?B?Uml0dGVyIFPFgmF3b21pcg==?= <Slawomir.Ritter-Z2hfbh6AaPmrDJvtcaxF/A@public.gmane.org>
-Subject: Re: Problem: silently corrupted RadosGW objects caused
- by slow requests
-Date: Thu, 3 Mar 2016 13:55:13 +0100
-Message-ID: <156923D1D92AF640829D4E847271EDAE522A46FD66@MXMBON06.grupa.onet>
-References: <156923D1D92AF640829D4E847271EDAE522A46F435@MXMBON06.grupa.onet>
-	<CAMNMNTxs46Hcaq-ZJZfYfF5m8aL9ETNjtBKr8UrdAxZFM7E=nw@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: ceph + -lssl
+Date: Thu, 3 Mar 2016 13:55:42 +0100
+Message-ID: <56D8344E.6060507@digiware.nl>
+References: <20160224050912.GA6585@degu.b.linuxbox.com>
+ <CADRKj5Shu=S4aHX+bz-yw8zuXgGPWE2YE_au5x1HYExwer6HTw@mail.gmail.com>
+ <20160227075001.GA21701@degu.b.linuxbox.com> <56D19B44.9080005@digiware.nl>
+ <20160301013102.GB25207@degu.b.linuxbox.com>
+ <CAFMfnwqfOs-VSUdS6kd=DM7TREi8GQze0nnv2SbSVM0ZEfU+Mg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAMNMNTxs46Hcaq-ZJZfYfF5m8aL9ETNjtBKr8UrdAxZFM7E=nw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: pl-PL
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([31.223.170.169]:41073 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753512AbcCCM5Y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Mar 2016 07:57:24 -0500
+In-Reply-To: <CAFMfnwqfOs-VSUdS6kd=DM7TREi8GQze0nnv2SbSVM0ZEfU+Mg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Kyle Bader <kyle.bader@gmail.com>, Marcus Watts <mwatts@redhat.com>
+Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGksDQoNCkkgdGhpbmsgdGhpcyBpcyByZWFsbHkgc2VyaW91cyBwcm9ibGVtIC0gYWdhaW46ICAN
-Cg0KLSB3ZSBzaWxlbnRseSBsb3N0IFMzL1JHVyBvYmplY3RzIGluIGNsdXN0ZXJzIA0KDQpNb3Jl
-b3ZlciwgaXQgb3VyIHNpdHVhdGlvbiBsb29rcyB2ZXJ5IHNpbWlsaWFyIHRvIGRlc2NyaWJlZCBp
-biB1bmNvcnJlY3RlZCBidWcgIzEzNzY0IChIYW1tZXIpIGFuZCBpbiBjb3JyZWN0ZWQgIzgyNjkg
-KER1bXBsaW5nKS4NCg0KUmVnYXJkcywNCg0KU1INCg0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2Fn
-ZS0tLS0tDQpGcm9tOiBjZXBoLXVzZXJzIFttYWlsdG86Y2VwaC11c2Vycy1ib3VuY2VzQGxpc3Rz
-LmNlcGguY29tXSBPbiBCZWhhbGYgT2YgRG9taW5payBNb3N0b3dpZWMNClNlbnQ6IEZyaWRheSwg
-RmVicnVhcnkgMjYsIDIwMTYgMzozMyBQTQ0KVG86IGNlcGgtdXNlcnNAY2VwaC5jb207IGNlcGgt
-ZGV2ZWwNClN1YmplY3Q6IFJlOiBbY2VwaC11c2Vyc10gUHJvYmxlbTogc2lsZW50bHkgY29ycnVw
-dGVkIFJhZG9zR1cgb2JqZWN0cyBjYXVzZWQgYnkgc2xvdyByZXF1ZXN0cw0KDQpIaSwNCk1heWJl
-IHRoaXMgaXMgdGhlIHJlYXNvbiBvZiBhbm90aGVyIGJ1Zz8NCmh0dHA6Ly90cmFja2VyLmNlcGgu
-Y29tL2lzc3Vlcy8xMzc2NA0KVGhlIHNpdHVhdGlvbiBpcyB2ZXJ5IHNpbWlsaWFyLi4uDQoNCi0t
-DQpSZWdhcmRzDQpEb21pbmlrDQoNCjIwMTYtMDItMjUgMTY6MTcgR01UKzAxOjAwIFJpdHRlciBT
-xYJhd29taXIgPFNsYXdvbWlyLlJpdHRlckBkcmVhbWxhYi5wbD46DQo+IEhpLA0KPg0KPg0KPg0K
-PiBXZSBoYXZlIHR3byBDRVBIIGNsdXN0ZXJzIHJ1bm5pbmcgb24gRHVtcGxpbmcgMC42Ny4xMSBh
-bmQgc29tZSBvZiBvdXINCj4gIm11bHRpcGFydCBvYmplY3RzIiBhcmUgaW5jb21wbGV0ZWQuIEl0
-IHNlZW1zIHRoYXQgc29tZSBzbG93IHJlcXVlc3RzIGNvdWxkDQo+IGNhdXNlIGNvcnJ1cHRpb24g
-b2YgcmVsYXRlZCBTMyBvYmplY3RzLiBNb3Zlb3ZlciBHRVRzIGZvciB0aGF0IG9iamVjdHMgYXJl
-DQo+IHdvcmtpbmcgd2l0aG91dCBhbnkgZXJyb3IgbWVzc2FnZXMuIFRoZXJlIGFyZSBvbmx5IEhU
-VFAgMjAwIGluIGxvZ3MgYXMgd2VsbA0KPiBhcyBubyBpbmZvcm1hdGlvbiBhYm91dCBwcm9ibGVt
-cyBmcm9tIHBvcHVsYXIgY2xpZW50IHRvb2xzL2xpYnMuDQo+DQo+DQo+DQo+IFRoZSBzaXR1YXRp
-b24gbG9va3MgdmVyeSBzaW1pbGlhciB0byBkZXNjcmliZWQgaW4gYnVnICM4MjY5LCBidXQgd2Ug
-YXJlDQo+IHVzaW5nIGZpeGVkIDAuNjcuMTEgdmVyc2lvbjogIGh0dHA6Ly90cmFja2VyLmNlcGgu
-Y29tL2lzc3Vlcy84MjY5DQo+DQo+DQo+DQo+IFJlZ2FyZHMsDQo+DQo+DQo+DQo+IFPFgmF3b21p
-ciBSaXR0ZXINCj4NCj4NCj4NCj4NCj4NCj4NCj4NCj4gRVhBTVBMRSMxDQo+DQo+DQo+DQo+IHNs
-b3dfcmVxdWVzdA0KPg0KPiA9PT09PT09PT09PT0NCj4NCj4gMjAxNi0wMi0yMyAxMzo0OTo1OC44
-MTg2NDAgb3NkLjI2MCAxMC4xNzYuNjcuMjc6NjgwMC82ODgwODMgMjExOSA6IFtXUk5dIDQNCj4g
-c2xvdyByZXF1ZXN0cywgNCBpbmNsdWRlZCBiZWxvdzsgb2xkZXN0IGJsb2NrZWQgZm9yID4gMzAu
-NzI3MDk2IHNlY3MNCj4NCj4gMjAxNi0wMi0yMyAxMzo0OTo1OC44MTg2NzMgb3NkLjI2MCAxMC4x
-NzYuNjcuMjc6NjgwMC82ODgwODMgMjEyMCA6IFtXUk5dDQo+IHNsb3cgcmVxdWVzdCAzMC43Mjcw
-OTYgc2Vjb25kcyBvbGQsIHJlY2VpdmVkIGF0IDIwMTYtMDItMjMgMTM6NDk6MjguMDkxNDYwOg0K
-PiBvc2Rfb3AoYw0KPg0KPiBsaWVudC40Nzc5Mjk2NS4wOjE4NTAwNzA4Nw0KPiBkZWZhdWx0LjE0
-NjU0LjQ0NV9fc2hhZG93X2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4xNDU2
-MjMxNTcyLjg3NzA1MS5pc212LmI3M04zT21XNE9oQ2pEWVNSLVJUa1pOTklLQTFDOVouNTdfMg0K
-PiBbd3JpdGVmDQo+DQo+IHVsbCAwfjUyNDI4OF0gMTAuY2U3MjllYmUgZTEwNzU5NCkgdjQgY3Vy
-cmVudGx5IHdhaXRpbmcgZm9yIHN1Ym9wcyBmcm9tDQo+IFs0NjksOV0NCj4NCj4NCj4NCj4NCj4N
-Cj4gSFRUUF81MDAgaW4gYXBhY2hlLmxvZw0KPg0KPiA9PT09PT09PT09PT09PT09PT09PT09DQo+
-DQo+IDEyNy4wLjAuMSAtIC0gWzIzL0ZlYi8yMDE2OjEzOjQ5OjI3ICswMTAwXSAiUFVUDQo+IC92
-aWRlby1zaGJjL2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcy
-Ljg3NzA1MS5pc212P3VwbG9hZElkPWI3M04zT21XNE9oQ2pEWVNSLVJUa1pOTklLQTFDOVomcGFy
-dE51bWJlcj01Ng0KPiBIVFRQLzEuMCIgMjAwIDIyMSAiLSIgIkJvdG8vMi4zMS4xIFB5dGhvbi8y
-LjcuMw0KPiBMaW51eC8zLjEzLjAtMzktZ2VuZXJpYyhzeW5jd29ya2VyKSINCj4NCj4gMTI3LjAu
-MC4xIC0gLSBbMjMvRmViLzIwMTY6MTM6NDk6MjggKzAxMDBdICJQVVQNCj4gL3ZpZGVvLXNoYmMv
-YzlmOGRiMWItY2VlMi00ZWM4LThmYjMtOGI0YmM3NTg1ZDgwLjE0NTYyMzE1NzIuODc3MDUxLmlz
-bXY/dXBsb2FkSWQ9YjczTjNPbVc0T2hDakRZU1ItUlRrWk5OSUtBMUM5WiZwYXJ0TnVtYmVyPTU3
-DQo+IEhUVFAvMS4wIiA1MDAgNzUxICItIiAiQm90by8yLjMxLjEgUHl0aG9uLzIuNy4zDQo+IExp
-bnV4LzMuMTMuMC0zOS1nZW5lcmljKHN5bmN3b3JrZXIpIg0KPg0KPiAxMjcuMC4wLjEgLSAtIFsy
-My9GZWIvMjAxNjoxMzo0OTo1OCArMDEwMF0gIlBVVA0KPiAvdmlkZW8tc2hiYy9jOWY4ZGIxYi1j
-ZWUyLTRlYzgtOGZiMy04YjRiYzc1ODVkODAuMTQ1NjIzMTU3Mi44NzcwNTEuaXNtdj91cGxvYWRJ
-ZD1iNzNOM09tVzRPaENqRFlTUi1SVGtaTk5JS0ExQzlaJnBhcnROdW1iZXI9NTcNCj4gSFRUUC8x
-LjAiIDIwMCAyMjEgIi0iICJCb3RvLzIuMzEuMSBQeXRob24vMi43LjMNCj4gTGludXgvMy4xMy4w
-LTM5LWdlbmVyaWMoc3luY3dvcmtlcikiDQo+DQo+IDEyNy4wLjAuMSAtIC0gWzIzL0ZlYi8yMDE2
-OjEzOjQ5OjU5ICswMTAwXSAiUFVUDQo+IC92aWRlby1zaGJjL2M5ZjhkYjFiLWNlZTItNGVjOC04
-ZmIzLThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcyLjg3NzA1MS5pc212P3VwbG9hZElkPWI3M04zT21X
-NE9oQ2pEWVNSLVJUa1pOTklLQTFDOVomcGFydE51bWJlcj01OA0KPiBIVFRQLzEuMCIgMjAwIDIy
-MSAiLSIgIkJvdG8vMi4zMS4xIFB5dGhvbi8yLjcuMw0KPiBMaW51eC8zLjEzLjAtMzktZ2VuZXJp
-YyhzeW5jd29ya2VyKSINCj4NCj4NCj4NCj4NCj4NCj4gRW1wdHkgUkFET1Mgb2JqZWN0IChyZWFs
-IHNpemUgPSAwIGJ5dGVzKSwgbGlzdCBnZW5lcmF0ZWQgYmFzaXMgb24gTUFOSUZFU1QNCj4NCj4g
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT0NCj4NCj4gZm91bmQNCj4gZGVmYXVsdC4xNDY1NC40NDVfX3NoYWRv
-d19jOWY4ZGIxYi1jZWUyLTRlYzgtOGZiMy04YjRiYzc1ODVkODAuMTQ1NjIzMTU3Mi44NzcwNTEu
-aXNtdi5iNzNOM09tVzRPaENqRFlTUi1SVGtaTk5JS0ExQzlaLjU2XzINCj4gMjA5NzE1MiAgIG9r
-ICAgICAgICAgIDIwOTcxNTIgICAgICAgMTAuN2FjYzk0NzYgKDEwLjE0NzYpIFsyNzgsMTQyLDQz
-Nl0NCj4gWzI3OCwxNDIsNDM2XQ0KPg0KPiBmb3VuZA0KPiBkZWZhdWx0LjE0NjU0LjQ0NV9fbXVs
-dGlwYXJ0X2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcyLjg3
-NzA1MS5pc212LmI3M04zT21XNE9oQ2pEWVNSLVJUa1pOTklLQTFDOVouNTcNCj4gMCAgICAgICAg
-IGRpZmYgICAgICAgIDQxOTQzMDQgICAgICAgMTAuNGY1YmUwMjUgKDEwLjI1KSAgIFs1NywzMTAs
-NDI4XQ0KPiBbNTcsMzEwLDQyOF0NCj4NCj4gZm91bmQNCj4gZGVmYXVsdC4xNDY1NC40NDVfX3No
-YWRvd19jOWY4ZGIxYi1jZWUyLTRlYzgtOGZiMy04YjRiYzc1ODVkODAuMTQ1NjIzMTU3Mi44Nzcw
-NTEuaXNtdi5iNzNOM09tVzRPaENqRFlTUi1SVGtaTk5JS0ExQzlaLjU3XzENCj4gNDE5NDMwNCAg
-IG9rICAgICAgICAgIDQxOTQzMDQgICAgICAgMTAuODExOTE2MDIgKDEwLjE2MDIpIFs0NDEsMTA5
-LDQyMF0NCj4gWzQ0MSwxMDksNDIwXQ0KPg0KPiBmb3VuZA0KPiBkZWZhdWx0LjE0NjU0LjQ0NV9f
-c2hhZG93X2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcyLjg3
-NzA1MS5pc212LmI3M04zT21XNE9oQ2pEWVNSLVJUa1pOTklLQTFDOVouNTdfMg0KPiAyMDk3MTUy
-ICAgb2sgICAgICAgICAgMjA5NzE1MiAgICAgICAxMC5jZTcyOWViZSAoMTAuMWViZSkgWzI2MCw0
-NjksOV0NCj4gWzI2MCw0NjksOV0NCj4NCj4NCj4NCj4NCj4NCj4gIlNpbGVudCIgR0VUcw0KPg0K
-PiA9PT09PT09PT09PT09DQo+DQo+ICMgb2JqZWN0IHNpemUgZnJvbSBoZWFkZXJzDQo+DQo+ICQg
-czMgLXUgaGVhZA0KPiB2aWRlby1zaGJjL2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4
-NWQ4MC4xNDU2MjMxNTcyLjg3NzA1MS5pc212DQo+IENvbnRlbnQtVHlwZTogYmluYXJ5L29jdGV0
-LXN0cmVhbQ0KPg0KPiBDb250ZW50LUxlbmd0aDogNjQxNzc1NzAxDQo+DQo+IFNlcnZlcjogbmdp
-bngNCj4NCj4NCj4NCj4gIyBidXQgR0VUcyBvbmx5IDYzNzU4MTM5NyAoNjQxNzc1NzAxIC0gbWlz
-c2luZyA0MTk0MzA0ID0gNjM3NTgxMzk3KQ0KPg0KPiAkIHMzIC11IGdldA0KPiB2aWRlby1zaGJj
-L2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcyLjg3NzA1MS5p
-c212ID4NCj4gL3RtcC90ZXN0DQo+DQo+ICQgIGxzIC1hbCAvdG1wL3Rlc3QNCj4NCj4gLXJ3LXIt
-LXItLSAxIHJvb3Qgcm9vdCA2Mzc1ODEzOTcgRmViIDIzIDE3OjA1IC90bXAvdGVzdA0KPg0KPg0K
-Pg0KPiAjIG5vIGVycm9yIGluIGxvZ3MNCj4NCj4gMTI3LjAuMC4xIC0gLSBbMjMvRmViLzIwMTY6
-MTc6MDU6MDAgKzAxMDBdICJHRVQNCj4gL3ZpZGVvLXNoYmMvYzlmOGRiMWItY2VlMi00ZWM4LThm
-YjMtOGI0YmM3NTg1ZDgwLjE0NTYyMzE1NzIuODc3MDUxLmlzbXYNCj4gSFRUUC8xLjAiIDIwMCA2
-Mzc1ODE3MTEgIi0iICJNb3ppbGxhLzQuMCAoQ29tcGF0aWJsZTsgczM7IGxpYnMzIDIuMDsgTGlu
-dXgNCj4geDg2XzY0KSINCj4NCj4NCj4NCj4gIyB3Z2V0IC0gcmV0cnkgZm9yIG1pc3NpbmcgcGFy
-dCwgYnV0IHRoZXJlIGlzIG5vIG1pc3NpbmcgcGFydCwgc28gaXQgR0VUcw0KPiBoZWFkL3RhaWwg
-b2YgdGhlIGZpbGUgYWdhaW4uLi4uDQo+DQo+ICQgd2dldA0KPiBodHRwOi8vMTI3LjAuMC4xOjg4
-L3ZpZGVvLXNoYmMvYzlmOGRiMWItY2VlMi00ZWM4LThmYjMtOGI0YmM3NTg1ZDgwLjE0NTYyMzE1
-NzIuODc3MDUxLmlzbXYNCj4NCj4gLS0yMDE2LTAyLTIzIDE3OjEwOjExLS0NCj4gaHR0cDovLzEy
-Ny4wLjAuMTo4OC92aWRlby1zaGJjL2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4
-MC4xNDU2MjMxNTcyLjg3NzA1MS5pc212DQo+DQo+IENvbm5lY3RpbmcgdG8gMTI3LjAuMC4xOjg4
-Li4uIGNvbm5lY3RlZC4NCj4NCj4gSFRUUCByZXF1ZXN0IHNlbnQsIGF3YWl0aW5nIHJlc3BvbnNl
-Li4uIDIwMCBPSw0KPg0KPiBMZW5ndGg6IDY0MTc3NTcwMSAoNjEyTSkgW2JpbmFyeS9vY3RldC1z
-dHJlYW1dDQo+DQo+IFNhdmluZyB0bzogYGM5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4
-NWQ4MC4xNDU2MjMxNTcyLjg3NzA1MS5pc212Jw0KPg0KPg0KPg0KPiA5OSUNCj4gWz09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4NCj4gXSA2
-MzcsNTgxLDM5NyA2My45TS9zICAgaW4gOS41cw0KPg0KPg0KPg0KPiAyMDE2LTAyLTIzIDE3OjEw
-OjIwICg2NC4xIE1CL3MpIC0gQ29ubmVjdGlvbiBjbG9zZWQgYXQgYnl0ZSA2Mzc1ODEzOTcuDQo+
-IFJldHJ5aW5nLg0KPg0KPg0KPg0KPiAtLTIwMTYtMDItMjMgMTc6MTA6MjEtLSAgKHRyeTogMikN
-Cj4gaHR0cDovLzEyNy4wLjAuMTo4OC92aWRlby1zaGJjL2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIz
-LThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcyLjg3NzA1MS5pc212DQo+DQo+IENvbm5lY3RpbmcgdG8g
-MTI3LjAuMC4xOjg4Li4uIGNvbm5lY3RlZC4NCj4NCj4gSFRUUCByZXF1ZXN0IHNlbnQsIGF3YWl0
-aW5nIHJlc3BvbnNlLi4uIDIwNiBQYXJ0aWFsIENvbnRlbnQNCj4NCj4gTGVuZ3RoOiA2NDE3NzU3
-MDEgKDYxMk0pLCA0MTk0MzA0ICg0LjBNKSByZW1haW5pbmcgW2JpbmFyeS9vY3RldC1zdHJlYW1d
-DQo+DQo+IFNhdmluZyB0bzogYGM5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4x
-NDU2MjMxNTcyLjg3NzA1MS5pc212Jw0KPg0KPg0KPg0KPiAxMDAlWysrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKys+XQ0KPiA2NDEsNzc1LDcw
-MSAtLS4tSy9zICAgaW4gMC4wMDdzDQo+DQo+DQo+DQo+IDIwMTYtMDItMjMgMTc6MTA6MjEgKDYw
-MSBNQi9zKSAtDQo+IGBjOWY4ZGIxYi1jZWUyLTRlYzgtOGZiMy04YjRiYzc1ODVkODAuMTQ1NjIz
-MTU3Mi44NzcwNTEuaXNtdicgc2F2ZWQNCj4gWzY0MTc3NTcwMS82NDE3NzU3MDFdDQo+DQo+DQo+
-DQo+DQo+DQo+DQo+DQo+DQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fDQo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0DQo+IGNlcGgtdXNlcnNAbGlzdHMu
-Y2VwaC5jb20NCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
-LWNlcGguY29tDQo+DQoNCg0KDQotLSANClBvemRyYXdpYW0NCkRvbWluaWsNCl9fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpjZXBoLXVzZXJzIG1haWxpbmcg
-bGlzdA0KY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
-c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tDQpfX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJz
-QGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
-c2Vycy1jZXBoLmNvbQo=
+On 2-3-2016 23:58, Kyle Bader wrote:
+>> I looked at libressl a bit.  It still has the same license emcumbrances
+>> as openssl.  So no real win there.  And, since it's not packaged as part
+>> of many linux distributions, the gpl/ssleay license incompatibility issue
+>> becomes a real problem here.  Hopefully a future version of libressl will
+>> adopt a plain bsd license.  I know they were working hard to discard
+>> the crufty openssl build system, a good thing.  When I worked with an
+>> earlier version of openssl (adding a new hash or encryption algorithm,
+>> I don't remember which today), I remember being disappointed at finding
+>> internal interfaces that just assumed various max sizes of things.  I hope
+>> the libressl folks work on making those things better too.
+>>
+>> I'm not familiar with google's "boringSSL".  Do you have some references
+>> for it?  I won't have the time to look at it right now - but I don't mind
+>> learning at least a bit more about it.  I see from wikipedia that it's
+>> yet another fork of openssl - will they fix the license issue?
+>>
+>> I did look (mostly superficially) at,
+>>         botan libressl gnutls matrixssl mbed wolfssl cryptlib nss
+>>         & apple's "secure transport"
+>> It was mostly superficial because my first question was "are there
+>> a lot of other people using this" aka "am I going to be debugging
+>> and supporting this myself"?
+> 
+> BoringSSL
+> 
+> https://boringssl.googlesource.com/boringssl/
+> 
+> This might also be worth a look:
+> 
+> https://github.com/awslabs/s2n
+
+I myself have spoken to one of the people that works on integration of
+LibreSSL in FreeBSD ports (he lives in town here). And yes he tells me
+that it is a lot of work, but mainly because of the "liberties" that
+openssl allows. And even though LibreSSL attempts to be a plugin
+replacement, it are these edge corners which do work, but according the
+API should not, that create the porting pain.
+
+So that would be another argument of trying to see if you can hook this
+in. I'm sure you will find odd bits and pieces that do not work as
+expected. But in the end it will improve you code quality. Same feeling
+I have trying to port to FreeBSD. 99,9% is compatible, and sometimes
+Linuxisms creep in where the do not have to because POSIX is good enough.
+
+But you are right, on occassion you will hit a wall and damage you nose.
+On the other hand, I'm upgrading openssl in all environments I maintain
+for the 3 or 4th time in 2 years, because of major bugs in openssl.
+Doesn't say there are no bugs in the other implementations.
+
+But it was just a things I was wondering when I saw the implementation
+come by. And any implementation is beter than none. So thanx for doing
+the work.
+
+--WjW
+
+
