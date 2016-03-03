@@ -1,181 +1,87 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: OSD not coming up after being set down
-Date: Wed, 2 Mar 2016 15:02:19 -0800
-Message-ID: <CAN=+7FUp8oh2184dp7Y_RvCORsYyy0qUwye=1TWF7y4FTU9FDg@mail.gmail.com>
-References: <56D70ED5.7080203@digiware.nl>
-	<CANA9Uk4bgcG4P0RGWaZQwiJP_fp+2xC_3RJbfF25VJTAy7UPJQ@mail.gmail.com>
-	<56D74555.7060004@digiware.nl>
-	<CAN=+7FX-JXXy29y6m4=RkrivuwP0Kc9M7vkqTnmaqjKCdP4yow@mail.gmail.com>
-	<56D74B52.7060104@digiware.nl>
+From: Jason Dillaman <dillaman@redhat.com>
+Subject: Re: question on rbd mirror feature
+Date: Wed, 2 Mar 2016 22:02:08 -0500 (EST)
+Message-ID: <787694555.33082090.1456974128233.JavaMail.zimbra@redhat.com>
+References: <06681238D8946F44A60AA400760A1CBF022B2D24@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f171.google.com ([209.85.160.171]:34346 "EHLO
-	mail-yk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750963AbcCBXCU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Mar 2016 18:02:20 -0500
-Received: by mail-yk0-f171.google.com with SMTP id u9so1989150ykd.1
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Mar 2016 15:02:20 -0800 (PST)
-In-Reply-To: <56D74B52.7060104@digiware.nl>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:50709 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754944AbcCCDCK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Mar 2016 22:02:10 -0500
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF022B2D24@SHSMSX104.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: M Ranga Swami Reddy <swamireddy@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Yuan Zhou <yuan.zhou@intel.com>
+Cc: Jianpeng Ma <jianpeng.ma@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Maps are created by the mons (that's pretty much what they're for).
-The entire paxos thing it there to make sure that two maps with the
-same epoch number are identical and that we produce them in increasing
-epoch number.  The ceph command therefore causes the mon cluster to
-publish a new map at the next epoch number.  That map is then sent out
-to some number of osds who then gossip it out to the rest.  As osds
-find out that osd 0 is down, they should start responding to osd.0's
-pings with a "you died" message and otherwise ignoring it.  osd.0 will
-then contact the mon for a more up-to-date map (which must be at least
-as recent as the one which marked it down).  osd.0 will then get that
-map, find out that it died, kill and reopen it's network connections
-(so that it's a new instance), and send a boot to the mons requesting
-that it be marked back up.
--Sam
 
-On Wed, Mar 2, 2016 at 12:21 PM, Willem Jan Withagen <wjw@digiware.nl> =
-wrote:
-> On 2-3-2016 21:11, Samuel Just wrote:
->> At this point, you will want to run the script and then dig through
->> the logs until you find something that doesn't match.
->> - Was osd.0 up to begin with?
->> - Is its process running?
->> - Did it get the map marking it down?
->> - Did it send a boot message back to the mon requesting that it be
->> marked back up?
->> - Did the mon get that message?
->> - Did the mon create a new map marking it up?
->
-> Right this is sort of a handholding I was looking for.
->
-> The first 2 items are true.
-> Who sends "the map marking it down"?
->         ceph osd down 0 =3D> Mon =3D> Osd
-> Or does that go directly ceph =3D> Osd
->
-> Are there any statemachine pictures of this in the manuals?
->
-> --WjW
->
->> Etc
->> -Sam
->>
->> On Wed, Mar 2, 2016 at 11:56 AM, Willem Jan Withagen <wjw@digiware.n=
-l> wrote:
->>> On 2-3-2016 18:01, M Ranga Swami Reddy wrote:
->>>> Please see the below:
->>>> ---
->>>> The If something is causing OSDs to =E2=80=98flap=E2=80=99 (repeat=
-edly getting marked
->>>> down and then up again), you can force the monitors to stop the
->>>> flapping with:
->>>>
->>>> ceph osd set noup      # prevent OSDs from getting marked up
->>>> ceph osd set nodown    # prevent OSDs from getting marked down
->>>> ----
->>>> ref: http://docs.ceph.com/docs/hammer/rados/troubleshooting/troubl=
-eshooting-osd/
->>>
->>> I don't think this is the issue.
->>>
->>> The testcode should run as is. This run on Linux oke, but FreeBSD i=
-s
->>> giving trouble.
->>> The OSD should get up, but does not.
->>> - OSD not receiving the UP
->>> - OSD not able to go UP
->>> - Or the monitors are not picking up?
->>>
->>> --WjW
->>>
->>>> On Wed, Mar 2, 2016 at 9:33 PM, Willem Jan Withagen <wjw@digiware.=
-nl> wrote:
->>>>> Hi,
->>>>>
->>>>> Any handholding is welcomed!!
->>>>>
->>>>> In test/cephtool-mon-test.sh part of the excuted code is:
->>>>>  ceph osd down 0
->>>>>   ceph osd dump | grep 'osd.0 down'
->>>>>   ceph osd unset noup
->>>>>   for ((i=3D0; i < 120; i++)); do
->>>>>     if ! ceph osd dump | grep 'osd.0 up'; then
->>>>>       echo "waiting for osd.0 to come back up"
->>>>>       sleep 1
->>>>>     else
->>>>>       break
->>>>>     fi
->>>>>   done
->>>>>   ceph osd dump | grep 'osd.0 up'
->>>>>
->>>>> But the OSD refused to come back up.
->>>>> Below the output of the dump.
->>>>>
->>>>> How would I start analyzing this issue?
->>>>> What kind of things would I expect to see in the logfile?
->>>>>   What if the OSD does come up
->>>>>   What if the OSD stays down
->>>>>
->>>>> Thanx,
->>>>> --WjW
->>>>>
->>>>>
->>>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH =
-***
->>>>> epoch 170
->>>>> fsid 8b5c0b4b-e08c-11e5-8cd4-1c6f6582ec12
->>>>> created 2016-03-02 16:36:35.001700
->>>>> modified 2016-03-02 16:45:17.802073
->>>>> flags sortbitwise
->>>>> pool 0 'rbd' replicated size 3 min_size 1 crush_ruleset 0 object_=
-hash
->>>>> rjenkins pg_num 8 pgp_num 8 last_change 1 flags hashpspool stripe=
-_width 0
->>>>> max_osd 3
->>>>> osd.0 down out weight 0 up_from 4 up_thru 163 down_at 166
->>>>> last_clean_interval [0,0) 127.0.0.1:6804/2455 127.0.0.1:6805/2455
->>>>> 127.0.0.1:6806/2455 127.0.0.1:6807/2455 autoout,exists
->>>>> 8bc29c74-e08c-11e5-8cd4-1c6f6582ec12
->>>>> osd.1 up   in  weight 1 up_from 8 up_thru 166 down_at 0
->>>>> last_clean_interval [0,0) 127.0.0.1:6808/2475 127.0.0.1:6811/2475
->>>>> 127.0.0.1:6813/2475 127.0.0.1:6816/2475 exists,up
->>>>> 8d7a2cb5-e08c-11e5-8cd4-1c6f6582ec12
->>>>> osd.2 up   in  weight 1 up_from 13 up_thru 166 down_at 0
->>>>> last_clean_interval [0,0) 127.0.0.1:6817/2495 127.0.0.1:6818/2495
->>>>> 127.0.0.1:6819/2495 127.0.0.1:6820/2495 exists,up
->>>>> 8f46df05-e08c-11e5-8cd4-1c6f6582ec12
->>>>> pg_temp 0.0 [0,2,1]
->>>>> pg_temp 0.1 [2,0,1]
->>>>> pg_temp 0.2 [0,1,2]
->>>>> pg_temp 0.3 [2,0,1]
->>>>> pg_temp 0.4 [0,2,1]
->>>>> pg_temp 0.5 [0,2,1]
->>>>> pg_temp 0.6 [0,1,2]
->>>>> pg_temp 0.7 [1,0,2]
->>>>> 2016-03-02 16:56:11.027977 8021d7800  0 lockdep stop
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-de=
-vel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
-l
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Hi Jason,
+
+> I=E2=80=99m a software engineer in Intel. We=E2=80=99re trying to do =
+some tests with the new
+> rbd mirror feature and got some basic questions here:
+> 1. Each rbd_write will be append to journal then ACK to clients. Rbd =
+journal
+> will flush the contents back to rados with some policy. In the flush =
+period,
+> will the rbd journal read data out from the journal objects and then =
+do the
+> flush?
+
+Correct, a write will first append the event to the journal before proc=
+eeding with the actual write to the image.  If caching is enabled, the =
+write is immediately applied to the in-memory cache but any writeback o=
+f the affected extent will be paused until the event and its predecesso=
+rs are safe in the journal.  Once the journal event append is acked by =
+rados, the actual write to the RBD objects can proceed (i.e. unpause an=
+y writeback if the cache is enabled or actually perform the write if ca=
+che is disabled).  The default configuration will append the events to =
+the journal without batching.  There are configurable options to batch =
+the journal append for X seconds, or Y bytes, or Z events -- depending =
+on how much data you are comfortable losing in the event of a crash.  N=
+ote that any flush request to librbd will flush out any batched journal=
+ events.  There is an open tracker ticket [1] to optionally throttle li=
+brbd flush requests if, again, a user doesn't mind losing X seconds of =
+data even in the presence of flush requests.
+
+> 2. If a rbd_read is accessing the contents that just got written(in r=
+bd
+> journal but not flushed back), will it serviced from the rbd journal?
+
+If cache is enabled, we service the read from the in-memory cache (sinc=
+e I didn't want to develop essentially another cache layer).  If the ca=
+che is disabled, we won't ack the librbd write request until the RBD im=
+age has been updated.
+
+> 3. Is rbd journal feature working with the existing rbd cache? If yes=
+ then
+> rbd journal should be laying under of rbd cache?
+
+Yes, the tentacles of journaling reach into the cache for tracking whic=
+h extents are associated to which journal event.  When librbd adds an e=
+xtent to the cache, it provides the associated journal event identifier=
+=2E   The cache layer will provide this identifier back to librbd when =
+requesting writeback so that librbd can "pause" the request until the j=
+ournal event is safe (if needed).  The cache also tracks when extents a=
+re overwritten by future write requests and again informs librbd that i=
+t should never expect to receive a writeback for a particular journal e=
+vent extent.  There is some possible future optimization with this if j=
+ournal event batching is enabled where a complete event overwrite could=
+ result in the batched journal event being removed from the pending app=
+end-to-journal list.
+
+> Thanks for implementing this amazon feature!
+
+> -yuan
+
+[1] http://tracker.ceph.com/issues/13983
+
+--=20
+
+Jason Dillaman=20
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
