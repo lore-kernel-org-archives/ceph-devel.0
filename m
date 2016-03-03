@@ -1,50 +1,75 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: ceph mon failed to restart
-Date: Thu, 3 Mar 2016 10:32:45 +0100
-Message-ID: <56D804BD.1010806@suse.cz>
-References: <CANA9Uk7foqUXQkbVBerBdHothy91CzohWeW+NfYMdtaTqHXwOw@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [ceph-fuse] fuse fails to invalidate dentry when ceph-fuse mounts
+ sub directory as root_directory
+Date: Thu, 3 Mar 2016 20:16:49 +0800
+Message-ID: <CAAM7YAmh8y5U6kDaAs-N=PNXGGm54Yj5aN=8yyUHrjauNi6UOQ@mail.gmail.com>
+References: <CAGkCoNKm+XeUGnfTT7QfC7OfMyEqhT8xSeRirJFeeNyvGivebQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:46404 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757165AbcCCJcr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 3 Mar 2016 04:32:47 -0500
-In-Reply-To: <CANA9Uk7foqUXQkbVBerBdHothy91CzohWeW+NfYMdtaTqHXwOw@mail.gmail.com>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:35660 "EHLO
+	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755934AbcCCMQv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Mar 2016 07:16:51 -0500
+Received: by mail-wm0-f53.google.com with SMTP id l68so128499273wml.0
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Mar 2016 04:16:50 -0800 (PST)
+In-Reply-To: <CAGkCoNKm+XeUGnfTT7QfC7OfMyEqhT8xSeRirJFeeNyvGivebQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: M Ranga Swami Reddy <swamireddy@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Zhi Zhang <zhang.david2011@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 03/03/2016 09:30 AM, M Ranga Swami Reddy wrote:
-> I have tried to restart the one of the ceph mon , got the below error:
-> ==
+On Mon, Feb 29, 2016 at 4:13 PM, Zhi Zhang <zhang.david2011@gmail.com> wrote:
+> Hi cepher,
 >
-> 2016-03-03 08:16:00.120355 7f43b067d7c0 -1 obtain_monmap unable to find a monmap
+> Steps to reproduce this issue:
+> 1. reduce mds_cache_size to 200 for quick verification
+> 2. mount sub directory as root_directory, e.g, ceph-fuse -r /zhi_test
+> /mnt/cephfs
+> 3. create a new sub directory under /mnt/cephfs, e.g, /mnt/cephfs/sub_dir
+> 4. write more than 200 files into /mnt/cephfs/sub_dir/ directory
+> 5. client should start to trim_caps, but caps are not released.
 >
-> 2016-03-03 08:16:00.120374 7f43b067d7c0 -1 unable to obtain a monmap:
-> (2) No such file or directory
+> ceph version: 0.94.1 with some backports
+> fuse version: both 2.8.3 or 2.9.2
 >
-> 2016-03-03 08:16:00.124437 7f43b067d7c0 -1 mon.node-11@-1(probing) e0
-> not in monmap and have been in a quorum before; must have been removed
+> By further looking at the codes, ceph-fuse wants fuse to invalidate
+> some dentries by calling Client::_async_dentry_invalidate, which will
+> call dentry_invalidate_cb in fuse_ll.cc and fuse's API
+> fuse_lowlevel_notify_delete.
 >
-> 2016-03-03 08:16:00.124715 7f43b067d7c0 -1 mon.node-11@-1(probing) e0
-> commit suicide!
+> Within these calls, the parent's inode (dirino) is our mount point's
+> inode (zhi_test), NOT the original default root inode ("/"), the child
+> inode may be a fake inode or sub directory's inode (sub_dir).
 >
-> 2016-03-03 08:16:00.124727 7f43b067d7c0 -1 failed to initialize
+> However, fuse's API fuse_lowlevel_notify_delete returns -2, so no
+> ll_forget will be called on those files under sub_dir and those caps
+> are not released. MDS will report failing to respond to cache
+> pressure.
 >
-> failed: 'ulimit -n 32768;  /usr/bin/ceph-mon -i node-11 --pid-file
-> /var/run/ceph/mon.node-11.pid -c /etc/ceph/ceph.conf --cluster ceph '
+> We have changed the parent's inode to the original default root inode
+> ("/") in Client::_async_dentry_invalidate, but no changes on child
+> inode. After this, fuse can invalidate child dentry (sub_dir)
+> successfully and ll_forget will be called on those files under
+> sub_dir.
 >
-> Starting ceph-create-keys on node-11...
-> ===
->
-> Any hint appriciated...
+> I didn't find much information from the fuse's doc
+> https://fossies.org/dox/fuse-2.9.5/fuse__lowlevel_8h.html#a94893b3eb83fe2a218e80e43089670a1.
+> But it looks like fuse looking for the child from the head of the
+> tree, can't from an intermediate node? otherwise is it a bug from ceph
+> side?
 
-Which Ceph version are you running?
+Using fuse_lowlevel_notify_delete() to invalidate dentry no longer
+works for 3.18+ kernel.  See http://tracker.ceph.com/issues/9997 for
+detail
 
--- 
-Nathan Cutler
-Software Engineer Distributed Storage
-SUSE LINUX, s.r.o.
-Tel.: +420 284 084 037
+Regards
+Yan, Zheng
+
+
+> Thanks.
+>
+> Regards,
+> Zhi Zhang (David)
+> Contact: zhang.david2011@gmail.com
+>               zhangz.david@outlook.com
