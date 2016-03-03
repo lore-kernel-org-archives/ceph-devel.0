@@ -1,89 +1,59 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: question on rbd mirror feature
-Date: Wed, 2 Mar 2016 22:02:08 -0500 (EST)
-Message-ID: <787694555.33082090.1456974128233.JavaMail.zimbra@redhat.com>
-References: <06681238D8946F44A60AA400760A1CBF022B2D24@SHSMSX104.ccr.corp.intel.com>
+From: Zhi Zhang <zhang.david2011@gmail.com>
+Subject: Re: why cache tier creates an empty object for a non-existent object?
+Date: Thu, 3 Mar 2016 11:37:09 +0800
+Message-ID: <CAGkCoN+Jnc-iWTe_H_n+5u4+vaOa7A7V7LgMM2B6PhuexcKJpg@mail.gmail.com>
+References: <CAGkCoN+V=-g20fDZ2P5=eQvgWk5BBVJ0GaUkQPG2cX8nW5jRNQ@mail.gmail.com>
+ <CALe9h7dNA7XDwWw=1=8wkRBRt7A74HMHiHkABD_NHw7JCHEJzw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:50709 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754944AbcCCDCK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Mar 2016 22:02:10 -0500
-In-Reply-To: <06681238D8946F44A60AA400760A1CBF022B2D24@SHSMSX104.ccr.corp.intel.com>
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:38851 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751891AbcCCDhu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Mar 2016 22:37:50 -0500
+Received: by mail-wm0-f45.google.com with SMTP id l68so14685469wml.1
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Mar 2016 19:37:50 -0800 (PST)
+In-Reply-To: <CALe9h7dNA7XDwWw=1=8wkRBRt7A74HMHiHkABD_NHw7JCHEJzw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuan Zhou <yuan.zhou@intel.com>
-Cc: Jianpeng Ma <jianpeng.ma@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+Regards,
+Zhi Zhang (David)
+Contact: zhang.david2011@gmail.com
+              zhangz.david@outlook.com
 
 
-> Hi Jason,
+On Wed, Mar 2, 2016 at 6:32 PM, John Spray <jspray@redhat.com> wrote:
+> On Wed, Mar 2, 2016 at 9:05 AM, Zhi Zhang <zhang.david2011@gmail.com> wrote:
+>> Hi Guys,
+>>
+>> Recently I am trying cache tier and if I try to stat a non-existent
+>> object in both cache tier pool and base pool, I find cache tier will
+>> not just return -ENOENT, but also create an empty object with setting
+>> its flag as FLAG_WHITEOUT in cache tier pool.
+>>
+>> Although it indicates this object is not existed logically, why cache
+>> tier will try to create it rather than only returning -ENOENT?
+>
+> I would imagine the logic is to cache the fact that the object doesn't
+> exist, so that if the client repeatedly tries to fetch the
+> non-existent object, it doesn't have to keep querying the backing pool
+> to check.
+>
 
-> I=E2=80=99m a software engineer in Intel. We=E2=80=99re trying to do =
-some tests with the new
-> rbd mirror feature and got some basic questions here:
-> 1. Each rbd_write will be append to journal then ACK to clients. Rbd =
-journal
-> will flush the contents back to rados with some policy. In the flush =
-period,
-> will the rbd journal read data out from the journal objects and then =
-do the
-> flush?
+thanks, you are right.
 
-Correct, a write will first append the event to the journal before proc=
-eeding with the actual write to the image.  If caching is enabled, the =
-write is immediately applied to the in-memory cache but any writeback o=
-f the affected extent will be paused until the event and its predecesso=
-rs are safe in the journal.  Once the journal event append is acked by =
-rados, the actual write to the RBD objects can proceed (i.e. unpause an=
-y writeback if the cache is enabled or actually perform the write if ca=
-che is disabled).  The default configuration will append the events to =
-the journal without batching.  There are configurable options to batch =
-the journal append for X seconds, or Y bytes, or Z events -- depending =
-on how much data you are comfortable losing in the event of a crash.  N=
-ote that any flush request to librbd will flush out any batched journal=
- events.  There is an open tracker ticket [1] to optionally throttle li=
-brbd flush requests if, again, a user doesn't mind losing X seconds of =
-data even in the presence of flush requests.
-
-> 2. If a rbd_read is accessing the contents that just got written(in r=
-bd
-> journal but not flushed back), will it serviced from the rbd journal?
-
-If cache is enabled, we service the read from the in-memory cache (sinc=
-e I didn't want to develop essentially another cache layer).  If the ca=
-che is disabled, we won't ack the librbd write request until the RBD im=
-age has been updated.
-
-> 3. Is rbd journal feature working with the existing rbd cache? If yes=
- then
-> rbd journal should be laying under of rbd cache?
-
-Yes, the tentacles of journaling reach into the cache for tracking whic=
-h extents are associated to which journal event.  When librbd adds an e=
-xtent to the cache, it provides the associated journal event identifier=
-=2E   The cache layer will provide this identifier back to librbd when =
-requesting writeback so that librbd can "pause" the request until the j=
-ournal event is safe (if needed).  The cache also tracks when extents a=
-re overwritten by future write requests and again informs librbd that i=
-t should never expect to receive a writeback for a particular journal e=
-vent extent.  There is some possible future optimization with this if j=
-ournal event batching is enabled where a complete event overwrite could=
- result in the batched journal event being removed from the pending app=
-end-to-journal list.
-
-> Thanks for implementing this amazon feature!
-
-> -yuan
-
-[1] http://tracker.ceph.com/issues/13983
-
---=20
-
-Jason Dillaman=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> John
+>
+>> Thanks.
+>>
+>> Regards,
+>> Zhi Zhang (David)
+>> Contact: zhang.david2011@gmail.com
+>>               zhangz.david@outlook.com
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
