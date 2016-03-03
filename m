@@ -1,56 +1,58 @@
-From: <ghislain.chevalier@orange.com>
-Subject: [ceph][radosgw] radosgw behind a reverse proxy
-Date: Thu, 3 Mar 2016 16:36:18 +0000
-Message-ID: <13775_1457022979_56D86803_13775_1230_1_B9C8EFBF13B1354DB5FA000660D66DD00D6BE394@OPEXCLILM22.corporate.adroot.infra.ftgroup>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: CentOS 6 and Ubuntu Precise binaries for Hammer 0.94.6
+Date: Thu, 3 Mar 2016 14:41:16 -0500
+Message-ID: <CAC-Np1xgn8TsowLqrtkRjjLYbmpmy1dk2NuG3v+uDpm4AVHJRg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relais-ias92.francetelecom.com ([193.251.215.92]:17432 "EHLO
-	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751923AbcCCQqO convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 3 Mar 2016 11:46:14 -0500
-Received: from omfedm07.si.francetelecom.fr (unknown [xx.xx.xx.3])
-	by omfedm14.si.francetelecom.fr (ESMTP service) with ESMTP id AD38322C256
-	for <ceph-devel@vger.kernel.org>; Thu,  3 Mar 2016 17:36:19 +0100 (CET)
-Received: from Exchangemail-eme2.itn.ftgroup (unknown [10.114.31.69])
-	by omfedm07.si.francetelecom.fr (ESMTP service) with ESMTP id 8FAC64C063
-	for <ceph-devel@vger.kernel.org>; Thu,  3 Mar 2016 17:36:19 +0100 (CET)
-Content-Language: fr-FR
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:34320 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758117AbcCCTlS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Mar 2016 14:41:18 -0500
+Received: by mail-wm0-f50.google.com with SMTP id p65so49686350wmp.1
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Mar 2016 11:41:17 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi all,
+Hi All,
 
-Context: 
-Ceph version : firefly 0.80.11
-OS : ubuntu 12.04.5 LTS
+Some good news, we were able to go back and get CentOS 6 binaries
+built for the 0.94.6 release.
+
+They aren't published yet (they remain unsigned, queued up in our
+release process).
+
+However, we are at an impasse with the Precise build. We can't get
+Precise nodes to build because the distro has a very old version of
+the JVM which causes issues when connecting to Jenkins as a node.
+
+The exact error when attempting a connection is:
+
+     Caused by: java.lang.UnsupportedClassVersionError:
+hudson/slaves/SlaveComputer$SlaveVersion: Unsupported major.minor 51.0
+
+The way we get a new node for the build system up and running is by
+making an API call to an OpenStack provider that a boot time it runs
+some Ansible playbook which allows the new host to comply with our
+needs to be a workable node and register itself to the Master Jenkins
+server.
+
+What does this mean? --> I can't commit to fix this and would love to
+have some help from anyone in the community. I can review/merge a pull
+request with a patch to the playbook we use to setup slaves so that if
+a Precise machine is used it gets a newer JVM version.
+
+The Github project for our build system is: https://github.com/ceph/ceph-build
+
+The YAML file we use to setup new slaves is:
+https://github.com/ceph/ceph-build/blob/master/ansible/slave.yml
+
+Once a fix is in place I can go and get the process going again,
+complete the signing of the binaries and get them released into the
+Hammer repositories.
+
+Thanks
 
 
-I installed a rados gateway with civetweb listening on port 8081
-This rados gateway is accessible from the internet cephstorage.orange-labs.fr:80
-A reverse proxy forwards the  requests from cephstorage.orange-labs.fr:80 to the rgw server v-sbceph21:8081
-
-It works well using the S3 API.
-
-But when using the swift API, if I successfully get the token (cepstorage.orange-labs.fr/auth) , the url for getting the objects is malformed : cephstorage.orange-labs.fr:8081/swift...
-
-Is there a solution to force the port to 80?
-
-Best regards
-
-_________________________________________________________________________________________________________________________
-
-Ce message et ses pieces jointes peuvent contenir des informations confidentielles ou privilegiees et ne doivent donc
-pas etre diffuses, exploites ou copies sans autorisation. Si vous avez recu ce message par erreur, veuillez le signaler
-a l'expediteur et le detruire ainsi que les pieces jointes. Les messages electroniques etant susceptibles d'alteration,
-Orange decline toute responsabilite si ce message a ete altere, deforme ou falsifie. Merci.
-
-This message and its attachments may contain confidential or privileged information that may be protected by law;
-they should not be distributed, used or copied without authorisation.
-If you have received this email in error, please notify the sender and delete this message and its attachments.
-As emails may be altered, Orange is not liable for messages that have been modified, changed or falsified.
-Thank you.
-
+Alfredo
