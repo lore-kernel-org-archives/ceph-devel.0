@@ -1,75 +1,152 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [ceph-fuse] fuse fails to invalidate dentry when ceph-fuse mounts
- sub directory as root_directory
-Date: Thu, 3 Mar 2016 20:16:49 +0800
-Message-ID: <CAAM7YAmh8y5U6kDaAs-N=PNXGGm54Yj5aN=8yyUHrjauNi6UOQ@mail.gmail.com>
-References: <CAGkCoNKm+XeUGnfTT7QfC7OfMyEqhT8xSeRirJFeeNyvGivebQ@mail.gmail.com>
+From: =?utf-8?B?Uml0dGVyIFPFgmF3b21pcg==?= <Slawomir.Ritter-Z2hfbh6AaPmrDJvtcaxF/A@public.gmane.org>
+Subject: Re: Problem: silently corrupted RadosGW objects caused
+ by slow requests
+Date: Thu, 3 Mar 2016 13:55:13 +0100
+Message-ID: <156923D1D92AF640829D4E847271EDAE522A46FD66@MXMBON06.grupa.onet>
+References: <156923D1D92AF640829D4E847271EDAE522A46F435@MXMBON06.grupa.onet>
+	<CAMNMNTxs46Hcaq-ZJZfYfF5m8aL9ETNjtBKr8UrdAxZFM7E=nw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:35660 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755934AbcCCMQv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Mar 2016 07:16:51 -0500
-Received: by mail-wm0-f53.google.com with SMTP id l68so128499273wml.0
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Mar 2016 04:16:50 -0800 (PST)
-In-Reply-To: <CAGkCoNKm+XeUGnfTT7QfC7OfMyEqhT8xSeRirJFeeNyvGivebQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Zhi Zhang <zhang.david2011@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAMNMNTxs46Hcaq-ZJZfYfF5m8aL9ETNjtBKr8UrdAxZFM7E=nw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: pl-PL
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Feb 29, 2016 at 4:13 PM, Zhi Zhang <zhang.david2011@gmail.com> wrote:
-> Hi cepher,
->
-> Steps to reproduce this issue:
-> 1. reduce mds_cache_size to 200 for quick verification
-> 2. mount sub directory as root_directory, e.g, ceph-fuse -r /zhi_test
-> /mnt/cephfs
-> 3. create a new sub directory under /mnt/cephfs, e.g, /mnt/cephfs/sub_dir
-> 4. write more than 200 files into /mnt/cephfs/sub_dir/ directory
-> 5. client should start to trim_caps, but caps are not released.
->
-> ceph version: 0.94.1 with some backports
-> fuse version: both 2.8.3 or 2.9.2
->
-> By further looking at the codes, ceph-fuse wants fuse to invalidate
-> some dentries by calling Client::_async_dentry_invalidate, which will
-> call dentry_invalidate_cb in fuse_ll.cc and fuse's API
-> fuse_lowlevel_notify_delete.
->
-> Within these calls, the parent's inode (dirino) is our mount point's
-> inode (zhi_test), NOT the original default root inode ("/"), the child
-> inode may be a fake inode or sub directory's inode (sub_dir).
->
-> However, fuse's API fuse_lowlevel_notify_delete returns -2, so no
-> ll_forget will be called on those files under sub_dir and those caps
-> are not released. MDS will report failing to respond to cache
-> pressure.
->
-> We have changed the parent's inode to the original default root inode
-> ("/") in Client::_async_dentry_invalidate, but no changes on child
-> inode. After this, fuse can invalidate child dentry (sub_dir)
-> successfully and ll_forget will be called on those files under
-> sub_dir.
->
-> I didn't find much information from the fuse's doc
-> https://fossies.org/dox/fuse-2.9.5/fuse__lowlevel_8h.html#a94893b3eb83fe2a218e80e43089670a1.
-> But it looks like fuse looking for the child from the head of the
-> tree, can't from an intermediate node? otherwise is it a bug from ceph
-> side?
-
-Using fuse_lowlevel_notify_delete() to invalidate dentry no longer
-works for 3.18+ kernel.  See http://tracker.ceph.com/issues/9997 for
-detail
-
-Regards
-Yan, Zheng
-
-
-> Thanks.
->
-> Regards,
-> Zhi Zhang (David)
-> Contact: zhang.david2011@gmail.com
->               zhangz.david@outlook.com
+SGksDQoNCkkgdGhpbmsgdGhpcyBpcyByZWFsbHkgc2VyaW91cyBwcm9ibGVtIC0gYWdhaW46ICAN
+Cg0KLSB3ZSBzaWxlbnRseSBsb3N0IFMzL1JHVyBvYmplY3RzIGluIGNsdXN0ZXJzIA0KDQpNb3Jl
+b3ZlciwgaXQgb3VyIHNpdHVhdGlvbiBsb29rcyB2ZXJ5IHNpbWlsaWFyIHRvIGRlc2NyaWJlZCBp
+biB1bmNvcnJlY3RlZCBidWcgIzEzNzY0IChIYW1tZXIpIGFuZCBpbiBjb3JyZWN0ZWQgIzgyNjkg
+KER1bXBsaW5nKS4NCg0KUmVnYXJkcywNCg0KU1INCg0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQpGcm9tOiBjZXBoLXVzZXJzIFttYWlsdG86Y2VwaC11c2Vycy1ib3VuY2VzQGxpc3Rz
+LmNlcGguY29tXSBPbiBCZWhhbGYgT2YgRG9taW5payBNb3N0b3dpZWMNClNlbnQ6IEZyaWRheSwg
+RmVicnVhcnkgMjYsIDIwMTYgMzozMyBQTQ0KVG86IGNlcGgtdXNlcnNAY2VwaC5jb207IGNlcGgt
+ZGV2ZWwNClN1YmplY3Q6IFJlOiBbY2VwaC11c2Vyc10gUHJvYmxlbTogc2lsZW50bHkgY29ycnVw
+dGVkIFJhZG9zR1cgb2JqZWN0cyBjYXVzZWQgYnkgc2xvdyByZXF1ZXN0cw0KDQpIaSwNCk1heWJl
+IHRoaXMgaXMgdGhlIHJlYXNvbiBvZiBhbm90aGVyIGJ1Zz8NCmh0dHA6Ly90cmFja2VyLmNlcGgu
+Y29tL2lzc3Vlcy8xMzc2NA0KVGhlIHNpdHVhdGlvbiBpcyB2ZXJ5IHNpbWlsaWFyLi4uDQoNCi0t
+DQpSZWdhcmRzDQpEb21pbmlrDQoNCjIwMTYtMDItMjUgMTY6MTcgR01UKzAxOjAwIFJpdHRlciBT
+xYJhd29taXIgPFNsYXdvbWlyLlJpdHRlckBkcmVhbWxhYi5wbD46DQo+IEhpLA0KPg0KPg0KPg0K
+PiBXZSBoYXZlIHR3byBDRVBIIGNsdXN0ZXJzIHJ1bm5pbmcgb24gRHVtcGxpbmcgMC42Ny4xMSBh
+bmQgc29tZSBvZiBvdXINCj4gIm11bHRpcGFydCBvYmplY3RzIiBhcmUgaW5jb21wbGV0ZWQuIEl0
+IHNlZW1zIHRoYXQgc29tZSBzbG93IHJlcXVlc3RzIGNvdWxkDQo+IGNhdXNlIGNvcnJ1cHRpb24g
+b2YgcmVsYXRlZCBTMyBvYmplY3RzLiBNb3Zlb3ZlciBHRVRzIGZvciB0aGF0IG9iamVjdHMgYXJl
+DQo+IHdvcmtpbmcgd2l0aG91dCBhbnkgZXJyb3IgbWVzc2FnZXMuIFRoZXJlIGFyZSBvbmx5IEhU
+VFAgMjAwIGluIGxvZ3MgYXMgd2VsbA0KPiBhcyBubyBpbmZvcm1hdGlvbiBhYm91dCBwcm9ibGVt
+cyBmcm9tIHBvcHVsYXIgY2xpZW50IHRvb2xzL2xpYnMuDQo+DQo+DQo+DQo+IFRoZSBzaXR1YXRp
+b24gbG9va3MgdmVyeSBzaW1pbGlhciB0byBkZXNjcmliZWQgaW4gYnVnICM4MjY5LCBidXQgd2Ug
+YXJlDQo+IHVzaW5nIGZpeGVkIDAuNjcuMTEgdmVyc2lvbjogIGh0dHA6Ly90cmFja2VyLmNlcGgu
+Y29tL2lzc3Vlcy84MjY5DQo+DQo+DQo+DQo+IFJlZ2FyZHMsDQo+DQo+DQo+DQo+IFPFgmF3b21p
+ciBSaXR0ZXINCj4NCj4NCj4NCj4NCj4NCj4NCj4NCj4gRVhBTVBMRSMxDQo+DQo+DQo+DQo+IHNs
+b3dfcmVxdWVzdA0KPg0KPiA9PT09PT09PT09PT0NCj4NCj4gMjAxNi0wMi0yMyAxMzo0OTo1OC44
+MTg2NDAgb3NkLjI2MCAxMC4xNzYuNjcuMjc6NjgwMC82ODgwODMgMjExOSA6IFtXUk5dIDQNCj4g
+c2xvdyByZXF1ZXN0cywgNCBpbmNsdWRlZCBiZWxvdzsgb2xkZXN0IGJsb2NrZWQgZm9yID4gMzAu
+NzI3MDk2IHNlY3MNCj4NCj4gMjAxNi0wMi0yMyAxMzo0OTo1OC44MTg2NzMgb3NkLjI2MCAxMC4x
+NzYuNjcuMjc6NjgwMC82ODgwODMgMjEyMCA6IFtXUk5dDQo+IHNsb3cgcmVxdWVzdCAzMC43Mjcw
+OTYgc2Vjb25kcyBvbGQsIHJlY2VpdmVkIGF0IDIwMTYtMDItMjMgMTM6NDk6MjguMDkxNDYwOg0K
+PiBvc2Rfb3AoYw0KPg0KPiBsaWVudC40Nzc5Mjk2NS4wOjE4NTAwNzA4Nw0KPiBkZWZhdWx0LjE0
+NjU0LjQ0NV9fc2hhZG93X2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4xNDU2
+MjMxNTcyLjg3NzA1MS5pc212LmI3M04zT21XNE9oQ2pEWVNSLVJUa1pOTklLQTFDOVouNTdfMg0K
+PiBbd3JpdGVmDQo+DQo+IHVsbCAwfjUyNDI4OF0gMTAuY2U3MjllYmUgZTEwNzU5NCkgdjQgY3Vy
+cmVudGx5IHdhaXRpbmcgZm9yIHN1Ym9wcyBmcm9tDQo+IFs0NjksOV0NCj4NCj4NCj4NCj4NCj4N
+Cj4gSFRUUF81MDAgaW4gYXBhY2hlLmxvZw0KPg0KPiA9PT09PT09PT09PT09PT09PT09PT09DQo+
+DQo+IDEyNy4wLjAuMSAtIC0gWzIzL0ZlYi8yMDE2OjEzOjQ5OjI3ICswMTAwXSAiUFVUDQo+IC92
+aWRlby1zaGJjL2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcy
+Ljg3NzA1MS5pc212P3VwbG9hZElkPWI3M04zT21XNE9oQ2pEWVNSLVJUa1pOTklLQTFDOVomcGFy
+dE51bWJlcj01Ng0KPiBIVFRQLzEuMCIgMjAwIDIyMSAiLSIgIkJvdG8vMi4zMS4xIFB5dGhvbi8y
+LjcuMw0KPiBMaW51eC8zLjEzLjAtMzktZ2VuZXJpYyhzeW5jd29ya2VyKSINCj4NCj4gMTI3LjAu
+MC4xIC0gLSBbMjMvRmViLzIwMTY6MTM6NDk6MjggKzAxMDBdICJQVVQNCj4gL3ZpZGVvLXNoYmMv
+YzlmOGRiMWItY2VlMi00ZWM4LThmYjMtOGI0YmM3NTg1ZDgwLjE0NTYyMzE1NzIuODc3MDUxLmlz
+bXY/dXBsb2FkSWQ9YjczTjNPbVc0T2hDakRZU1ItUlRrWk5OSUtBMUM5WiZwYXJ0TnVtYmVyPTU3
+DQo+IEhUVFAvMS4wIiA1MDAgNzUxICItIiAiQm90by8yLjMxLjEgUHl0aG9uLzIuNy4zDQo+IExp
+bnV4LzMuMTMuMC0zOS1nZW5lcmljKHN5bmN3b3JrZXIpIg0KPg0KPiAxMjcuMC4wLjEgLSAtIFsy
+My9GZWIvMjAxNjoxMzo0OTo1OCArMDEwMF0gIlBVVA0KPiAvdmlkZW8tc2hiYy9jOWY4ZGIxYi1j
+ZWUyLTRlYzgtOGZiMy04YjRiYzc1ODVkODAuMTQ1NjIzMTU3Mi44NzcwNTEuaXNtdj91cGxvYWRJ
+ZD1iNzNOM09tVzRPaENqRFlTUi1SVGtaTk5JS0ExQzlaJnBhcnROdW1iZXI9NTcNCj4gSFRUUC8x
+LjAiIDIwMCAyMjEgIi0iICJCb3RvLzIuMzEuMSBQeXRob24vMi43LjMNCj4gTGludXgvMy4xMy4w
+LTM5LWdlbmVyaWMoc3luY3dvcmtlcikiDQo+DQo+IDEyNy4wLjAuMSAtIC0gWzIzL0ZlYi8yMDE2
+OjEzOjQ5OjU5ICswMTAwXSAiUFVUDQo+IC92aWRlby1zaGJjL2M5ZjhkYjFiLWNlZTItNGVjOC04
+ZmIzLThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcyLjg3NzA1MS5pc212P3VwbG9hZElkPWI3M04zT21X
+NE9oQ2pEWVNSLVJUa1pOTklLQTFDOVomcGFydE51bWJlcj01OA0KPiBIVFRQLzEuMCIgMjAwIDIy
+MSAiLSIgIkJvdG8vMi4zMS4xIFB5dGhvbi8yLjcuMw0KPiBMaW51eC8zLjEzLjAtMzktZ2VuZXJp
+YyhzeW5jd29ya2VyKSINCj4NCj4NCj4NCj4NCj4NCj4gRW1wdHkgUkFET1Mgb2JqZWN0IChyZWFs
+IHNpemUgPSAwIGJ5dGVzKSwgbGlzdCBnZW5lcmF0ZWQgYmFzaXMgb24gTUFOSUZFU1QNCj4NCj4g
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT0NCj4NCj4gZm91bmQNCj4gZGVmYXVsdC4xNDY1NC40NDVfX3NoYWRv
+d19jOWY4ZGIxYi1jZWUyLTRlYzgtOGZiMy04YjRiYzc1ODVkODAuMTQ1NjIzMTU3Mi44NzcwNTEu
+aXNtdi5iNzNOM09tVzRPaENqRFlTUi1SVGtaTk5JS0ExQzlaLjU2XzINCj4gMjA5NzE1MiAgIG9r
+ICAgICAgICAgIDIwOTcxNTIgICAgICAgMTAuN2FjYzk0NzYgKDEwLjE0NzYpIFsyNzgsMTQyLDQz
+Nl0NCj4gWzI3OCwxNDIsNDM2XQ0KPg0KPiBmb3VuZA0KPiBkZWZhdWx0LjE0NjU0LjQ0NV9fbXVs
+dGlwYXJ0X2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcyLjg3
+NzA1MS5pc212LmI3M04zT21XNE9oQ2pEWVNSLVJUa1pOTklLQTFDOVouNTcNCj4gMCAgICAgICAg
+IGRpZmYgICAgICAgIDQxOTQzMDQgICAgICAgMTAuNGY1YmUwMjUgKDEwLjI1KSAgIFs1NywzMTAs
+NDI4XQ0KPiBbNTcsMzEwLDQyOF0NCj4NCj4gZm91bmQNCj4gZGVmYXVsdC4xNDY1NC40NDVfX3No
+YWRvd19jOWY4ZGIxYi1jZWUyLTRlYzgtOGZiMy04YjRiYzc1ODVkODAuMTQ1NjIzMTU3Mi44Nzcw
+NTEuaXNtdi5iNzNOM09tVzRPaENqRFlTUi1SVGtaTk5JS0ExQzlaLjU3XzENCj4gNDE5NDMwNCAg
+IG9rICAgICAgICAgIDQxOTQzMDQgICAgICAgMTAuODExOTE2MDIgKDEwLjE2MDIpIFs0NDEsMTA5
+LDQyMF0NCj4gWzQ0MSwxMDksNDIwXQ0KPg0KPiBmb3VuZA0KPiBkZWZhdWx0LjE0NjU0LjQ0NV9f
+c2hhZG93X2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcyLjg3
+NzA1MS5pc212LmI3M04zT21XNE9oQ2pEWVNSLVJUa1pOTklLQTFDOVouNTdfMg0KPiAyMDk3MTUy
+ICAgb2sgICAgICAgICAgMjA5NzE1MiAgICAgICAxMC5jZTcyOWViZSAoMTAuMWViZSkgWzI2MCw0
+NjksOV0NCj4gWzI2MCw0NjksOV0NCj4NCj4NCj4NCj4NCj4NCj4gIlNpbGVudCIgR0VUcw0KPg0K
+PiA9PT09PT09PT09PT09DQo+DQo+ICMgb2JqZWN0IHNpemUgZnJvbSBoZWFkZXJzDQo+DQo+ICQg
+czMgLXUgaGVhZA0KPiB2aWRlby1zaGJjL2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4
+NWQ4MC4xNDU2MjMxNTcyLjg3NzA1MS5pc212DQo+IENvbnRlbnQtVHlwZTogYmluYXJ5L29jdGV0
+LXN0cmVhbQ0KPg0KPiBDb250ZW50LUxlbmd0aDogNjQxNzc1NzAxDQo+DQo+IFNlcnZlcjogbmdp
+bngNCj4NCj4NCj4NCj4gIyBidXQgR0VUcyBvbmx5IDYzNzU4MTM5NyAoNjQxNzc1NzAxIC0gbWlz
+c2luZyA0MTk0MzA0ID0gNjM3NTgxMzk3KQ0KPg0KPiAkIHMzIC11IGdldA0KPiB2aWRlby1zaGJj
+L2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcyLjg3NzA1MS5p
+c212ID4NCj4gL3RtcC90ZXN0DQo+DQo+ICQgIGxzIC1hbCAvdG1wL3Rlc3QNCj4NCj4gLXJ3LXIt
+LXItLSAxIHJvb3Qgcm9vdCA2Mzc1ODEzOTcgRmViIDIzIDE3OjA1IC90bXAvdGVzdA0KPg0KPg0K
+Pg0KPiAjIG5vIGVycm9yIGluIGxvZ3MNCj4NCj4gMTI3LjAuMC4xIC0gLSBbMjMvRmViLzIwMTY6
+MTc6MDU6MDAgKzAxMDBdICJHRVQNCj4gL3ZpZGVvLXNoYmMvYzlmOGRiMWItY2VlMi00ZWM4LThm
+YjMtOGI0YmM3NTg1ZDgwLjE0NTYyMzE1NzIuODc3MDUxLmlzbXYNCj4gSFRUUC8xLjAiIDIwMCA2
+Mzc1ODE3MTEgIi0iICJNb3ppbGxhLzQuMCAoQ29tcGF0aWJsZTsgczM7IGxpYnMzIDIuMDsgTGlu
+dXgNCj4geDg2XzY0KSINCj4NCj4NCj4NCj4gIyB3Z2V0IC0gcmV0cnkgZm9yIG1pc3NpbmcgcGFy
+dCwgYnV0IHRoZXJlIGlzIG5vIG1pc3NpbmcgcGFydCwgc28gaXQgR0VUcw0KPiBoZWFkL3RhaWwg
+b2YgdGhlIGZpbGUgYWdhaW4uLi4uDQo+DQo+ICQgd2dldA0KPiBodHRwOi8vMTI3LjAuMC4xOjg4
+L3ZpZGVvLXNoYmMvYzlmOGRiMWItY2VlMi00ZWM4LThmYjMtOGI0YmM3NTg1ZDgwLjE0NTYyMzE1
+NzIuODc3MDUxLmlzbXYNCj4NCj4gLS0yMDE2LTAyLTIzIDE3OjEwOjExLS0NCj4gaHR0cDovLzEy
+Ny4wLjAuMTo4OC92aWRlby1zaGJjL2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4
+MC4xNDU2MjMxNTcyLjg3NzA1MS5pc212DQo+DQo+IENvbm5lY3RpbmcgdG8gMTI3LjAuMC4xOjg4
+Li4uIGNvbm5lY3RlZC4NCj4NCj4gSFRUUCByZXF1ZXN0IHNlbnQsIGF3YWl0aW5nIHJlc3BvbnNl
+Li4uIDIwMCBPSw0KPg0KPiBMZW5ndGg6IDY0MTc3NTcwMSAoNjEyTSkgW2JpbmFyeS9vY3RldC1z
+dHJlYW1dDQo+DQo+IFNhdmluZyB0bzogYGM5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4
+NWQ4MC4xNDU2MjMxNTcyLjg3NzA1MS5pc212Jw0KPg0KPg0KPg0KPiA5OSUNCj4gWz09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4NCj4gXSA2
+MzcsNTgxLDM5NyA2My45TS9zICAgaW4gOS41cw0KPg0KPg0KPg0KPiAyMDE2LTAyLTIzIDE3OjEw
+OjIwICg2NC4xIE1CL3MpIC0gQ29ubmVjdGlvbiBjbG9zZWQgYXQgYnl0ZSA2Mzc1ODEzOTcuDQo+
+IFJldHJ5aW5nLg0KPg0KPg0KPg0KPiAtLTIwMTYtMDItMjMgMTc6MTA6MjEtLSAgKHRyeTogMikN
+Cj4gaHR0cDovLzEyNy4wLjAuMTo4OC92aWRlby1zaGJjL2M5ZjhkYjFiLWNlZTItNGVjOC04ZmIz
+LThiNGJjNzU4NWQ4MC4xNDU2MjMxNTcyLjg3NzA1MS5pc212DQo+DQo+IENvbm5lY3RpbmcgdG8g
+MTI3LjAuMC4xOjg4Li4uIGNvbm5lY3RlZC4NCj4NCj4gSFRUUCByZXF1ZXN0IHNlbnQsIGF3YWl0
+aW5nIHJlc3BvbnNlLi4uIDIwNiBQYXJ0aWFsIENvbnRlbnQNCj4NCj4gTGVuZ3RoOiA2NDE3NzU3
+MDEgKDYxMk0pLCA0MTk0MzA0ICg0LjBNKSByZW1haW5pbmcgW2JpbmFyeS9vY3RldC1zdHJlYW1d
+DQo+DQo+IFNhdmluZyB0bzogYGM5ZjhkYjFiLWNlZTItNGVjOC04ZmIzLThiNGJjNzU4NWQ4MC4x
+NDU2MjMxNTcyLjg3NzA1MS5pc212Jw0KPg0KPg0KPg0KPiAxMDAlWysrKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKys+XQ0KPiA2NDEsNzc1LDcw
+MSAtLS4tSy9zICAgaW4gMC4wMDdzDQo+DQo+DQo+DQo+IDIwMTYtMDItMjMgMTc6MTA6MjEgKDYw
+MSBNQi9zKSAtDQo+IGBjOWY4ZGIxYi1jZWUyLTRlYzgtOGZiMy04YjRiYzc1ODVkODAuMTQ1NjIz
+MTU3Mi44NzcwNTEuaXNtdicgc2F2ZWQNCj4gWzY0MTc3NTcwMS82NDE3NzU3MDFdDQo+DQo+DQo+
+DQo+DQo+DQo+DQo+DQo+DQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fDQo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0DQo+IGNlcGgtdXNlcnNAbGlzdHMu
+Y2VwaC5jb20NCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
+LWNlcGguY29tDQo+DQoNCg0KDQotLSANClBvemRyYXdpYW0NCkRvbWluaWsNCl9fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpjZXBoLXVzZXJzIG1haWxpbmcg
+bGlzdA0KY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
+c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tDQpfX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
+c2Vycy1jZXBoLmNvbQo=
