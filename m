@@ -1,225 +1,99 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] ceph: initial CEPH_FEATURE_FS_FILE_LAYOUT_V2 support
-Date: Thu, 3 Mar 2016 10:24:19 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1603031024110.1904@cpach.fuggernut.com>
-References: <1457018028-32252-1-git-send-email-idryomov@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: ceph OSD facts file
+Date: Thu, 3 Mar 2016 22:41:30 +0700
+Message-ID: <56D85B2A.2000709@dachary.org>
+References: <CALqRxCwLovLsdhWKMztqsuz5Mv46XYyjU6Z9O9BRt1GtnONKBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36025 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752348AbcCCPYo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Mar 2016 10:24:44 -0500
-In-Reply-To: <1457018028-32252-1-git-send-email-idryomov@gmail.com>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:42959 "EHLO
+	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751272AbcCCPlk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Mar 2016 10:41:40 -0500
+In-Reply-To: <CALqRxCwLovLsdhWKMztqsuz5Mv46XYyjU6Z9O9BRt1GtnONKBg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Zheng Yan <zyan@redhat.com>
+To: Ken Dreyer <kdreyer@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 3 Mar 2016, Ilya Dryomov wrote:
-> From: "Yan, Zheng" <zyan@redhat.com>
-> 
-> Add support for the format change of MClientReply/MclientCaps.
-> Also add code that denies access to inodes with pool_ns layouts.
-> 
-> Signed-off-by: Yan, Zheng <zyan@redhat.com>
+Hi Ken,
 
-Reviewed-by: Sage Weil <sage@redhat.com>
+I'll work on http://tracker.ceph.com/issues/14972 and create that scrip=
+t.
 
-> ---
->  fs/ceph/addr.c                     |  4 ++++
->  fs/ceph/caps.c                     | 27 ++++++++++++++++++++++++---
->  fs/ceph/inode.c                    |  2 ++
->  fs/ceph/mds_client.c               | 16 ++++++++++++++++
->  fs/ceph/mds_client.h               |  1 +
->  fs/ceph/super.h                    |  1 +
->  include/linux/ceph/ceph_features.h |  1 +
->  7 files changed, 49 insertions(+), 3 deletions(-)
-> 
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 32f57a1f1baf..888674c311c5 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -1840,6 +1840,10 @@ int ceph_pool_perm_check(struct ceph_inode_info *ci, int need)
->  	u32 pool;
->  	int ret, flags;
->  
-> +	/* does not support pool namespace yet */
-> +	if (ci->i_pool_ns_len)
-> +		return -EIO;
-> +
->  	if (ceph_test_mount_opt(ceph_inode_to_client(&ci->vfs_inode),
->  				NOPOOLPERM))
->  		return 0;
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 6094d0e7cdc1..de17bb232ff8 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -2756,7 +2756,8 @@ static void handle_cap_grant(struct ceph_mds_client *mdsc,
->  			     void *inline_data, int inline_len,
->  			     struct ceph_buffer *xattr_buf,
->  			     struct ceph_mds_session *session,
-> -			     struct ceph_cap *cap, int issued)
-> +			     struct ceph_cap *cap, int issued,
-> +			     u32 pool_ns_len)
->  	__releases(ci->i_ceph_lock)
->  	__releases(mdsc->snap_rwsem)
->  {
-> @@ -2876,6 +2877,8 @@ static void handle_cap_grant(struct ceph_mds_client *mdsc,
->  	if (newcaps & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR)) {
->  		/* file layout may have changed */
->  		ci->i_layout = grant->layout;
-> +		ci->i_pool_ns_len = pool_ns_len;
-> +
->  		/* size/truncate_seq? */
->  		queue_trunc = ceph_fill_file_size(inode, issued,
->  					le32_to_cpu(grant->truncate_seq),
-> @@ -3414,6 +3417,7 @@ void ceph_handle_caps(struct ceph_mds_session *session,
->  	u32  inline_len = 0;
->  	void *snaptrace;
->  	size_t snaptrace_len;
-> +	u32 pool_ns_len = 0;
->  	void *p, *end;
->  
->  	dout("handle_caps from mds%d\n", mds);
-> @@ -3466,6 +3470,21 @@ void ceph_handle_caps(struct ceph_mds_session *session,
->  		p += inline_len;
->  	}
->  
-> +	if (le16_to_cpu(msg->hdr.version) >= 8) {
-> +		u64 flush_tid;
-> +		u32 caller_uid, caller_gid;
-> +		u32 osd_epoch_barrier;
-> +		/* version >= 5 */
-> +		ceph_decode_32_safe(&p, end, osd_epoch_barrier, bad);
-> +		/* version >= 6 */
-> +		ceph_decode_64_safe(&p, end, flush_tid, bad);
-> +		/* version >= 7 */
-> +		ceph_decode_32_safe(&p, end, caller_uid, bad);
-> +		ceph_decode_32_safe(&p, end, caller_gid, bad);
-> +		/* version >= 8 */
-> +		ceph_decode_32_safe(&p, end, pool_ns_len, bad);
-> +	}
-> +
->  	/* lookup ino */
->  	inode = ceph_find_inode(sb, vino);
->  	ci = ceph_inode(inode);
-> @@ -3521,7 +3540,8 @@ void ceph_handle_caps(struct ceph_mds_session *session,
->  				  &cap, &issued);
->  		handle_cap_grant(mdsc, inode, h,
->  				 inline_version, inline_data, inline_len,
-> -				 msg->middle, session, cap, issued);
-> +				 msg->middle, session, cap, issued,
-> +				 pool_ns_len);
->  		if (realm)
->  			ceph_put_snap_realm(mdsc, realm);
->  		goto done_unlocked;
-> @@ -3545,7 +3565,8 @@ void ceph_handle_caps(struct ceph_mds_session *session,
->  		issued |= __ceph_caps_dirty(ci);
->  		handle_cap_grant(mdsc, inode, h,
->  				 inline_version, inline_data, inline_len,
-> -				 msg->middle, session, cap, issued);
-> +				 msg->middle, session, cap, issued,
-> +				 pool_ns_len);
->  		goto done_unlocked;
->  
->  	case CEPH_CAP_OP_FLUSH_ACK:
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 13c71f906d80..39c8e79b5f9e 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -396,6 +396,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
->  	ci->i_symlink = NULL;
->  
->  	memset(&ci->i_dir_layout, 0, sizeof(ci->i_dir_layout));
-> +	ci->i_pool_ns_len = 0;
->  
->  	ci->i_fragtree = RB_ROOT;
->  	mutex_init(&ci->i_fragtree_mutex);
-> @@ -760,6 +761,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
->  		if (ci->i_layout.fl_pg_pool != info->layout.fl_pg_pool)
->  			ci->i_ceph_flags &= ~CEPH_I_POOL_PERM;
->  		ci->i_layout = info->layout;
-> +		ci->i_pool_ns_len = iinfo->pool_ns_len;
->  
->  		queue_trunc = ceph_fill_file_size(inode, issued,
->  					le32_to_cpu(info->truncate_seq),
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index b6bec2943a51..aa43dcb5f9b9 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -100,6 +100,14 @@ static int parse_reply_info_in(void **p, void *end,
->  	} else
->  		info->inline_version = CEPH_INLINE_NONE;
->  
-> +	if (features & CEPH_FEATURE_FS_FILE_LAYOUT_V2) {
-> +		ceph_decode_32_safe(p, end, info->pool_ns_len, bad);
-> +		ceph_decode_need(p, end, info->pool_ns_len, bad);
-> +		*p += info->pool_ns_len;
-> +	} else {
-> +		info->pool_ns_len = 0;
-> +	}
-> +
->  	return 0;
->  bad:
->  	return err;
-> @@ -2298,6 +2306,14 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
->  		ceph_get_cap_refs(ceph_inode(req->r_old_dentry_dir),
->  				  CEPH_CAP_PIN);
->  
-> +	/* deny access to directories with pool_ns layouts */
-> +	if (req->r_inode && S_ISDIR(req->r_inode->i_mode) &&
-> +	    ceph_inode(req->r_inode)->i_pool_ns_len)
-> +		return -EIO;
-> +	if (req->r_locked_dir &&
-> +	    ceph_inode(req->r_locked_dir)->i_pool_ns_len)
-> +		return -EIO;
-> +
->  	/* issue */
->  	mutex_lock(&mdsc->mutex);
->  	__register_request(mdsc, req, dir);
-> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> index ccf11ef0ca87..37712ccffcc6 100644
-> --- a/fs/ceph/mds_client.h
-> +++ b/fs/ceph/mds_client.h
-> @@ -44,6 +44,7 @@ struct ceph_mds_reply_info_in {
->  	u64 inline_version;
->  	u32 inline_len;
->  	char *inline_data;
-> +	u32 pool_ns_len;
->  };
->  
->  /*
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 16f9edc5d1c7..57ac43d64322 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -286,6 +286,7 @@ struct ceph_inode_info {
->  
->  	struct ceph_dir_layout i_dir_layout;
->  	struct ceph_file_layout i_layout;
-> +	size_t i_pool_ns_len;
->  	char *i_symlink;
->  
->  	/* for dirs */
-> diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
-> index d2d78861c30a..ae2f66833762 100644
-> --- a/include/linux/ceph/ceph_features.h
-> +++ b/include/linux/ceph/ceph_features.h
-> @@ -75,6 +75,7 @@
->  #define CEPH_FEATURE_CRUSH_TUNABLES5	(1ULL<<58) /* chooseleaf stable mode */
->  // duplicated since it was introduced at the same time as CEPH_FEATURE_CRUSH_TUNABLES5
->  #define CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING   (1ULL<<58) /* New, v7 encoding */
-> +#define CEPH_FEATURE_FS_FILE_LAYOUT_V2       (1ULL<<58) /* file_layout_t */
->  
->  /*
->   * The introduction of CEPH_FEATURE_OSD_SNAPMAPPER caused the feature
-> -- 
-> 2.4.3
-> 
+Thanks for a nice and precise description :-)
+
+On 03/03/2016 05:50, Ken Dreyer wrote:
+> Hi Loic,
+>=20
+> In Red Hat we're interested in having a Ceph "facts" file that we can
+> integrate with RHEL's subscription-manager (upstream
+> http://www.candlepinproject.org/ fyi) in order to report on the
+> available raw disk capacity available per OSD.
+>=20
+> We need a script to write a "/etc/rhsm/facts/ceph_disk.facts" file.
+> That file needs to contain JSON of the form:
+>=20
+> {
+>   "band.storage.usage": <integer number of TB used on this node, such=
+ as 55>
+> }
+>=20
+> for example:
+> {
+>   "band.storage.usage": 55
+> }
+>=20
+> As long as that file exists (and it can be named anything that ends i=
+n
+> ".facts") the contents will be read in and added to the system facts.
+> On RHEL this can be verified by running `subscription-manager facts`
+> to ensure that your value is showing up properly.
+>=20
+> In terms of creating this .facts file, we will need a script to do
+> that. We could call it /usr/bin/ceph-update-fact-file, or make it a
+> ceph-disk sub-command, or whatever you want, really.
+>=20
+> The facts file should be kept up-to-date every four hours, which make=
+s
+> me think that we could implement this as a systemd service and timer.
+> Something like
+>=20
+>   $ cat /etc/systemd/system/ceph-update-facts-file.service
+>=20
+>   [Unit]
+>   Description=3DUpdate Ceph OSD fact file
+>=20
+>   [Service]
+>   Type=3Doneshot
+>   ExecStart=3D/usr/bin/ceph-update-fact-file
+>=20
+>=20
+> ...and:
+>=20
+>   $ cat /etc/systemd/system/ceph-update-facts-file.timer
+>   [Unit]
+>   Description=3DTrigger an automatic rewrite every four hours
+>=20
+>   [Timer]
+>   OnCalendar=3D4hours
+>   Persistent=3Dtrue
+>=20
+>   [Install]
+>   WantedBy=3Dmulti-user.target
+>=20
+> (The above is untested, it's just an idea).  What do you think?
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
