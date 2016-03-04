@@ -1,49 +1,54 @@
-From: M Ranga Swami Reddy <swamireddy@gmail.com>
-Subject: ceph-mon - mon daemon issues
-Date: Sat, 5 Mar 2016 00:18:10 +0530
-Message-ID: <CANA9Uk5h16Nmzm3s4YirdCDn9fMcLV+O4H1X855+K5_xTQUy9w@mail.gmail.com>
+From: "tournier.elie" <tournier.elie@gmail.com>
+Subject: [GSoC2016] Interest in implementing RBD diff checksums
+Date: Fri, 4 Mar 2016 20:07:12 +0100
+Message-ID: <CA+SrN4wDh5SaU9bXBo=LB7LHN4F=3_1zLbZtWXm-Gsqq1_h7WA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:35479 "EHLO
-	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751414AbcCDSsL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2016 13:48:11 -0500
-Received: by mail-vk0-f46.google.com with SMTP id e6so62850090vkh.2
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Mar 2016 10:48:11 -0800 (PST)
+Received: from mail-io0-f171.google.com ([209.85.223.171]:35973 "EHLO
+	mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758341AbcCDTHN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2016 14:07:13 -0500
+Received: by mail-io0-f171.google.com with SMTP id l127so72305676iof.3
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Mar 2016 11:07:12 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users <ceph-users@ceph.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hello,
-I have couple of questions on ceph-mon with mon daemon:
+Hi everyone.
 
-Q1:   Working command:  /etc/init.d/ceph status mon
-         Not working          : status ceph-mon id=node-13
+My name is Elie TOURNIER, I am a last year undergraduate student
+enrolled in a 5 years Medical ICT course at T=C3=A9l=C3=A9com Physiques
+Strasbourg, France.
+I came to know about the Ceph project and would like to contribute to
+"RBD diff checksums subject" as a part of GSoC 2016.
+I am fluent in C/C++ and know a bit about cryptography.
 
-       Why first command is working and why not the 2nd command nto working
-====
+I have many ideas but I have some questions too.
 
-status ceph-mon id=node-13
-status: Unknown instance: ceph/node-13
+So questions:
+ 1- Is this feature must be integrated to the Ceph code or must be a st=
+andalone?
+ 2- What is the maximum time allowed for the checksum?
 
-node-13:~# /etc/init.d/ceph status mon
-=== mon.node-13 ===
-mon.node-13: running {"version":"0.80.7"}
-===
+My ideas:
+ 1- Use fast hash algorithm like xxHash [1] or Highwayhash [2] in
+order to reduce computation time.
+ 2- Use the size of the file as a seed.
 
-Q2:
+[1] https://github.com/Cyan4973/xxHash
+[2] https://github.com/google/highwayhash
 
-   In ceph-mon command running with --pid-file
-   Not seen the --pid-file option in neither ceph doc or ceph-mon help?
-   Why --pid-file option required? if it not passed what was the
-default for this option?
+Thank you in advance for yours answers.
 
-===
-node-13:~# ps -ef | grep ceph-mon
+Regards,
+Elie TOURNIER
 
-root     43508     1  1 18:31 ?        00:00:04 /usr/bin/ceph-mon -i
-node-13 --pid-file /var/run/ceph/mon.node-13.pid -c
-/etc/ceph/ceph.conf --cluster ceph
-====
+PS: If you have any questions, remarks about me or my ideas for the
+project, don't hesitate to contact me.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
