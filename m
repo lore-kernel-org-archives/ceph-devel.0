@@ -1,54 +1,88 @@
-From: =?utf-8?B?Uml0dGVyIFPFgmF3b21pcg==?= <Slawomir.Ritter-Z2hfbh6AaPmrDJvtcaxF/A@public.gmane.org>
-Subject: Re: Problem: silently corrupted RadosGW objects caused
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: [ceph-users] Problem: silently corrupted RadosGW objects caused
  by slow requests
-Date: Fri, 4 Mar 2016 16:26:44 +0100
-Message-ID: <156923D1D92AF640829D4E847271EDAE522A46FF66@MXMBON06.grupa.onet>
+Date: Fri, 4 Mar 2016 09:23:01 -0800
+Message-ID: <CADRKj5QYiCWxqxQkhDsFET8CJEfJM9_X1XiEH1_Zcn0Z_jSkNQ@mail.gmail.com>
 References: <156923D1D92AF640829D4E847271EDAE522A46F435@MXMBON06.grupa.onet>
 	<CAMNMNTxs46Hcaq-ZJZfYfF5m8aL9ETNjtBKr8UrdAxZFM7E=nw@mail.gmail.com>
 	<156923D1D92AF640829D4E847271EDAE522A46FD66@MXMBON06.grupa.onet>
 	<robbat2-20160303T232148-550781944Z@orbis-terrarum.net>
+	<156923D1D92AF640829D4E847271EDAE522A46FF66@MXMBON06.grupa.onet>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <robbat2-20160303T232148-550781944Z-UgNl/1uUEYUufQK+DwRw3KxOck334EZe@public.gmane.org>
-Content-Language: pl-PL
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "Robin H. Johnson" <robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "	ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:33611 "EHLO
+	mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759575AbcCDRXE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2016 12:23:04 -0500
+Received: by mail-vk0-f48.google.com with SMTP id k1so44023887vkb.0
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Mar 2016 09:23:02 -0800 (PST)
+In-Reply-To: <156923D1D92AF640829D4E847271EDAE522A46FF66@MXMBON06.grupa.onet>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: =?UTF-8?Q?Ritter_S=C5=82awomir?= <Slawomir.Ritter@dreamlab.pl>
+Cc: "Robin H. Johnson" <robbat2@gentoo.org>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-PiBGcm9tOiBSb2JpbiBILiBKb2huc29uIFttYWlsdG86cm9iYmF0MkBnZW50b28ub3JnXQ0KPiBT
-ZW50OiBGcmlkYXksIE1hcmNoIDA0LCAyMDE2IDEyOjQwIEFNDQo+IFRvOiBSaXR0ZXIgU8WCYXdv
-bWlyDQo+IENjOiBjZXBoLXVzZXJzQGNlcGguY29tOyBjZXBoLWRldmVsDQo+IFN1YmplY3Q6IFJl
-OiBbY2VwaC11c2Vyc10gUHJvYmxlbTogc2lsZW50bHkgY29ycnVwdGVkIFJhZG9zR1cgb2JqZWN0
-cyBjYXVzZWQNCj4gYnkgc2xvdyByZXF1ZXN0cw0KPiANCj4gT24gVGh1LCBNYXIgMDMsIDIwMTYg
-YXQgMDE6NTU6MTNQTSArMDEwMCwgUml0dGVyIFPFgmF3b21pciB3cm90ZToNCj4gPiBIaSwNCj4g
-Pg0KPiA+IEkgdGhpbmsgdGhpcyBpcyByZWFsbHkgc2VyaW91cyBwcm9ibGVtIC0gYWdhaW46DQo+
-ID4NCj4gPiAtIHdlIHNpbGVudGx5IGxvc3QgUzMvUkdXIG9iamVjdHMgaW4gY2x1c3RlcnMNCj4g
-Pg0KPiA+IE1vcmVvdmVyLCBpdCBvdXIgc2l0dWF0aW9uIGxvb2tzIHZlcnkgc2ltaWxpYXIgdG8g
-ZGVzY3JpYmVkIGluDQo+ID4gdW5jb3JyZWN0ZWQgYnVnICMxMzc2NCAoSGFtbWVyKSBhbmQgaW4g
-Y29ycmVjdGVkICM4MjY5IChEdW1wbGluZykuDQo+IEZZSSBmaXggaW4gIzgyNjkgX2lzXyBwcmVz
-ZW50IGluIEhhbW1lcjoNCj4gY29tbWl0IGJkOGUwMjZmODhiIHJndzogZG9uJ3QgYWxsb3cgbXVs
-dGlwbGUgd3JpdGVycyB0byBzYW1lIG11bHRpb2JqZWN0IHBhcnQNCj4gDQo+IC0tDQo+IFJvYmlu
-IEh1Z2ggSm9obnNvbg0KPiBHZW50b28gTGludXg6IERldmVsb3BlciwgSW5mcmFzdHJ1Y3R1cmUg
-TGVhZCwgRm91bmRhdGlvbiBUcnVzdGVlDQo+IEUtTWFpbCAgICAgOiByb2JiYXQyQGdlbnRvby5v
-cmcNCj4gR251UEcgRlAgICA6IDExQUNCQTRGIDQ3NzhFM0Y2IEU0RURGMzhFIEIyN0I5NDRFIDM0
-ODg0RTg1DQpZZXMsDQoNCmZpeCBmb3IgIzgyNjkgYWxzbyBoYXMgYmVlbiBpbmNsdWRlZCBpbiBv
-dXIgdmVyc2lvbjogRHVtcGxpbmcgMC42Ny4xMS4NCkd1eXMgZnJvbSAjMTM3NjQgYXJlIHVzaW5n
-IHBhdGNoZWQgSGFtbWVyIHZlcnNpb24uDQoNCkJvdGggc2l0dWF0aW9ucyB3aXRoIGNvcnJ1cHRl
-ZCBmaWxlcyBhcmUgdmVyeSBzaW1pbGlhciB0byB0aGF0IGRlc2NyaWJlZCBpbiAjODI2OS4NClRo
-ZXJlIHdhcyBhIHByb2JsZW0gd2l0aCAyIHRocmVhZHMgd3JpdGluZyB0byB0aGUgc2FtZSBSQURP
-UyBvYmplY3RzLiANCg0KTWF5YmUgdGhlcmUgaXMgYW5vdGhlciBvbmUgdWtub3duIGFuZCBzcGVj
-aWZpYyBleGNlcHRpb24gdG8gZml4Pw0KDQpDaGVlcnMsDQpTUg0KDQpfX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApj
-ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5j
-Z2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Fri, Mar 4, 2016 at 7:26 AM, Ritter S=C5=82awomir
+<Slawomir.Ritter@dreamlab.pl> wrote:
+>> From: Robin H. Johnson [mailto:robbat2@gentoo.org]
+>> Sent: Friday, March 04, 2016 12:40 AM
+>> To: Ritter S=C5=82awomir
+>> Cc: ceph-users@ceph.com; ceph-devel
+>> Subject: Re: [ceph-users] Problem: silently corrupted RadosGW object=
+s caused
+>> by slow requests
+>>
+>> On Thu, Mar 03, 2016 at 01:55:13PM +0100, Ritter S=C5=82awomir wrote=
+:
+>> > Hi,
+>> >
+>> > I think this is really serious problem - again:
+>> >
+>> > - we silently lost S3/RGW objects in clusters
+>> >
+>> > Moreover, it our situation looks very similiar to described in
+>> > uncorrected bug #13764 (Hammer) and in corrected #8269 (Dumpling).
+>> FYI fix in #8269 _is_ present in Hammer:
+>> commit bd8e026f88b rgw: don't allow multiple writers to same multiob=
+ject part
+>>
+>> --
+>> Robin Hugh Johnson
+>> Gentoo Linux: Developer, Infrastructure Lead, Foundation Trustee
+>> E-Mail     : robbat2@gentoo.org
+>> GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+> Yes,
+>
+> fix for #8269 also has been included in our version: Dumpling 0.67.11=
+=2E
+> Guys from #13764 are using patched Hammer version
+
+I didn't notice that you were actually running Dumpling (which we
+haven't supported and backported fixes for a while). Here's one issue
+that you might have hit:
+
+http://tracker.ceph.com/issues/11604
+
+Yehuda
+
+>
+> Both situations with corrupted files are very similiar to that descri=
+bed in #8269.
+> There was a problem with 2 threads writing to the same RADOS objects.
+>
+> Maybe there is another one uknown and specific exception to fix?
+>
+> Cheers,
+> SR
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
