@@ -1,201 +1,54 @@
-From: Shehbaz Jaffer <shehbazjaffer007@gmail.com>
-Subject: Unable to build ceph: Ubuntu 15.04 Ceph master
-Date: Fri, 4 Mar 2016 09:41:45 -0500
-Message-ID: <CAPLK-i8OBSir0ad7whXp7pwNZ_nXhu1GB_G5okhqhzsH5pWzyA@mail.gmail.com>
+From: =?utf-8?B?Uml0dGVyIFPFgmF3b21pcg==?= <Slawomir.Ritter-Z2hfbh6AaPmrDJvtcaxF/A@public.gmane.org>
+Subject: Re: Problem: silently corrupted RadosGW objects caused
+ by slow requests
+Date: Fri, 4 Mar 2016 16:26:44 +0100
+Message-ID: <156923D1D92AF640829D4E847271EDAE522A46FF66@MXMBON06.grupa.onet>
+References: <156923D1D92AF640829D4E847271EDAE522A46F435@MXMBON06.grupa.onet>
+	<CAMNMNTxs46Hcaq-ZJZfYfF5m8aL9ETNjtBKr8UrdAxZFM7E=nw@mail.gmail.com>
+	<156923D1D92AF640829D4E847271EDAE522A46FD66@MXMBON06.grupa.onet>
+	<robbat2-20160303T232148-550781944Z@orbis-terrarum.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f176.google.com ([209.85.161.176]:33015 "EHLO
-	mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750993AbcCDOlq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2016 09:41:46 -0500
-Received: by mail-yw0-f176.google.com with SMTP id b72so43094659ywe.0
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Mar 2016 06:41:46 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <robbat2-20160303T232148-550781944Z-UgNl/1uUEYUufQK+DwRw3KxOck334EZe@public.gmane.org>
+Content-Language: pl-PL
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "Robin H. Johnson" <robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "	ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
-
-I have cloned ceph from git master branch. I am getting the following
-errors while build:
-
-ENVIRONMENT
-----------------------
-
-$ uname -a
-Linux donjaffer 4.3.0-dev #1 SMP Sun Dec 6 13:56:49 EST 2015 x86_64
-x86_64 x86_64 GNU/Linux
-
-$ g++ -v
-Using built-in specs.
-COLLECT_GCC=g++
-COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper
-Target: x86_64-linux-gnu
-Configured with: ../src/configure -v --with-pkgversion='Ubuntu
-4.9.2-10ubuntu13'
---with-bugurl=file:///usr/share/doc/gcc-4.9/README.Bugs
---enable-languages=c,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr
---program-suffix=-4.9 --enable-shared --enable-linker-build-id
---libexecdir=/usr/lib --without-included-gettext
---enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.9
---libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu
---enable-libstdcxx-debug --enable-libstdcxx-time=yes
---enable-gnu-unique-object --disable-vtable-verify --enable-plugin
---with-system-zlib --disable-browser-plugin --enable-java-awt=gtk
---enable-gtk-cairo
---with-java-home=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64/jre
---enable-java-home
---with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64
---with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-4.9-amd64
---with-arch-directory=amd64
---with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc
---enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64
---with-multilib-list=m32,m64,mx32 --enable-multilib
---with-tune=generic --enable-checking=release --build=x86_64-linux-gnu
---host=x86_64-linux-gnu --target=x86_64-linux-gnu
-Thread model: posix
-gcc version 4.9.2 (Ubuntu 4.9.2-10ubuntu13)
-
-BUILD ERROR
----------------------
-
-$make
-...
-  CXXLD    ceph-dencoder
-rgw/ceph_dencoder-rgw_dencoder.o: In function
-`RGWZoneGroup::generate_test_instances(std::list<RGWZoneGroup*,
-std::allocator<RGWZoneGroup*> >&)':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:1095: undefined
-reference to `vtable for RGWZoneGroup'
-rgw/ceph_dencoder-rgw_dencoder.o: In function
-`RGWZoneParams::generate_test_instances(std::list<RGWZoneParams*,
-std::allocator<RGWZoneParams*> >&)':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:870: undefined
-reference to `vtable for RGWZoneParams'
-rgw/ceph_dencoder-rgw_json_enc.o: In function
-`decode_zonegroups(std::map<std::string, RGWZoneGroup,
-std::less<std::string>, std::allocator<std::pair<std::string const,
-RGWZoneGroup> > >&, JSONObj*)':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:1095: undefined
-reference to `vtable for RGWZoneGroup'
-rgw/ceph_dencoder-rgw_json_enc.o: In function
-`RGWSystemMetaObj::~RGWSystemMetaObj()':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:763: undefined
-reference to `vtable for RGWSystemMetaObj'
-rgw/ceph_dencoder-rgw_json_enc.o: In function
-`RGWSystemMetaObj::~RGWSystemMetaObj()':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:763: undefined
-reference to `vtable for RGWSystemMetaObj'
-rgw/ceph_dencoder-rgw_json_enc.o: In function `RGWZoneGroup::~RGWZoneGroup()':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:1096: undefined
-reference to `vtable for RGWZoneGroup'
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:763: undefined
-reference to `vtable for RGWSystemMetaObj'
-rgw/ceph_dencoder-rgw_json_enc.o: In function `RGWZoneGroup::~RGWZoneGroup()':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:1096: undefined
-reference to `vtable for RGWZoneGroup'
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:763: undefined
-reference to `vtable for RGWSystemMetaObj'
-rgw/ceph_dencoder-rgw_json_enc.o: In function
-`std::_Rb_tree<std::string, std::pair<std::string const,
-RGWZoneGroup>, std::_Select1st<std::pair<std::string const,
-RGWZoneGroup> >, std::less<std::string>,
-std::allocator<std::pair<std::string const, RGWZoneGroup> >
->::_M_erase(std::_Rb_tree_node<std::pair<std::string const,
-RGWZoneGroup> >*)':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:1096: undefined
-reference to `vtable for RGWZoneGroup'
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:763: undefined
-reference to `vtable for RGWSystemMetaObj'
-rgw/ceph_dencoder-rgw_json_enc.o: In function
-`std::_Rb_tree_iterator<std::pair<std::string const, RGWZoneGroup> >
-std::_Rb_tree<std::string, std::pair<std::string const, RGWZoneGroup>,
-std::_Select1st<std::pair<std::string const, RGWZoneGroup> >,
-std::less<std::string>, std::allocator<std::pair<std::string const,
-RGWZoneGroup> > >::_M_emplace_hint_unique<std::piecewise_construct_t
-const&, std::tuple<std::string const&>, std::tuple<>
->(std::_Rb_tree_const_iterator<std::pair<std::string const,
-RGWZoneGroup> >, std::piecewise_construct_t const&,
-std::tuple<std::string const&>&&, std::tuple<>&&)':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:1095: undefined
-reference to `vtable for RGWZoneGroup'
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:763: undefined
-reference to `vtable for RGWSystemMetaObj'
-rgw/ceph_dencoder-rgw_json_enc.o: In function `bool
-JSONDecoder::decode_json<RGWZoneGroup>(char const*, RGWZoneGroup&,
-JSONObj*, bool)':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:1095: undefined
-reference to `vtable for RGWZoneGroup'
-rgw/ceph_dencoder-rgw_json_enc.o: In function `void
-decode_json_obj<std::string, RGWZoneGroup>(std::map<std::string,
-RGWZoneGroup, std::less<std::string>,
-std::allocator<std::pair<std::string const, RGWZoneGroup> > >&,
-JSONObj*)':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:1095: undefined
-reference to `vtable for RGWZoneGroup'
-rgw/ceph_dencoder-rgw_json_enc.o: In function
-`std::_Rb_tree_iterator<std::pair<std::string const, RGWZoneGroup> >
-std::_Rb_tree<std::string, std::pair<std::string const, RGWZoneGroup>,
-std::_Select1st<std::pair<std::string const, RGWZoneGroup> >,
-std::less<std::string>, std::allocator<std::pair<std::string const,
-RGWZoneGroup> > >::_M_insert_<std::pair<std::string const,
-RGWZoneGroup>&>(std::_Rb_tree_node_base*, std::_Rb_tree_node_base*,
-std::pair<std::string const, RGWZoneGroup>&)':
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:733: undefined
-reference to `vtable for RGWSystemMetaObj'
-/home/shehbaz/gsoc/ceph/ceph/src/rgw/rgw_rados.h:1063: undefined
-reference to `vtable for RGWZoneGroup'
-collect2: error: ld returned 1 exit status
-Makefile:15392: recipe for target 'ceph-dencoder' failed
-make[3]: *** [ceph-dencoder] Error 1
-make[3]: Leaving directory '/home/shehbaz/gsoc/ceph/ceph/src'
-Makefile:29913: recipe for target 'all-recursive' failed
-make[2]: *** [all-recursive] Error 1
-make[2]: Leaving directory '/home/shehbaz/gsoc/ceph/ceph/src'
-Makefile:12277: recipe for target 'all' failed
-make[1]: *** [all] Error 2
-make[1]: Leaving directory '/home/shehbaz/gsoc/ceph/ceph/src'
-Makefile:689: recipe for target 'all-recursive' failed
-make: *** [all-recursive] Error 1
-shehbaz@donjaffer:~/gsoc/ceph/ceph$
-
-
-INITIAL DIAGNOSTICS
--------------------------------
-
-In src/rgw/rgw_rados.h
-
-struct RGWZoneGroup : public RGWSystemMetaObj
-
-all pure virtual functions in base class should be overriden in derived class.
-
-In RGWSystemMetaObj, the following functions are defined pure virtual:
-
- virtual const string& get_pool_name(CephContext *cct) = 0;
-  virtual const string get_default_oid(bool old_format = false) = 0;
-  virtual const string& get_names_oid_prefix() = 0;
-  virtual const string& get_info_oid_prefix(bool old_format = false) = 0;
-  virtual const string& get_predefined_name(CephContext *cct) = 0;
-
-All these functions have been declared and overridden in struct RGWZoneGroup:
-
- const string& get_pool_name(CephContext *cct);
-  const string get_default_oid(bool old_region_format = false);
-  const string& get_info_oid_prefix(bool old_region_format = false);
-  const string& get_names_oid_prefix();
-  const string& get_predefined_name(CephContext *cct);
-
-I also found a similar report here:
-
-http://ceph.predictor.org.pl/rgw_vtable.txt
-
-But a solution to the problem is not provided.
-
-Any help is much appreciated.
-
--- 
-Shehbaz Jaffer
-First Year Graduate Student
-Sir Edward S Rogers Sr Department of Electrical and Computer Engineering
-University of Toronto
+PiBGcm9tOiBSb2JpbiBILiBKb2huc29uIFttYWlsdG86cm9iYmF0MkBnZW50b28ub3JnXQ0KPiBT
+ZW50OiBGcmlkYXksIE1hcmNoIDA0LCAyMDE2IDEyOjQwIEFNDQo+IFRvOiBSaXR0ZXIgU8WCYXdv
+bWlyDQo+IENjOiBjZXBoLXVzZXJzQGNlcGguY29tOyBjZXBoLWRldmVsDQo+IFN1YmplY3Q6IFJl
+OiBbY2VwaC11c2Vyc10gUHJvYmxlbTogc2lsZW50bHkgY29ycnVwdGVkIFJhZG9zR1cgb2JqZWN0
+cyBjYXVzZWQNCj4gYnkgc2xvdyByZXF1ZXN0cw0KPiANCj4gT24gVGh1LCBNYXIgMDMsIDIwMTYg
+YXQgMDE6NTU6MTNQTSArMDEwMCwgUml0dGVyIFPFgmF3b21pciB3cm90ZToNCj4gPiBIaSwNCj4g
+Pg0KPiA+IEkgdGhpbmsgdGhpcyBpcyByZWFsbHkgc2VyaW91cyBwcm9ibGVtIC0gYWdhaW46DQo+
+ID4NCj4gPiAtIHdlIHNpbGVudGx5IGxvc3QgUzMvUkdXIG9iamVjdHMgaW4gY2x1c3RlcnMNCj4g
+Pg0KPiA+IE1vcmVvdmVyLCBpdCBvdXIgc2l0dWF0aW9uIGxvb2tzIHZlcnkgc2ltaWxpYXIgdG8g
+ZGVzY3JpYmVkIGluDQo+ID4gdW5jb3JyZWN0ZWQgYnVnICMxMzc2NCAoSGFtbWVyKSBhbmQgaW4g
+Y29ycmVjdGVkICM4MjY5IChEdW1wbGluZykuDQo+IEZZSSBmaXggaW4gIzgyNjkgX2lzXyBwcmVz
+ZW50IGluIEhhbW1lcjoNCj4gY29tbWl0IGJkOGUwMjZmODhiIHJndzogZG9uJ3QgYWxsb3cgbXVs
+dGlwbGUgd3JpdGVycyB0byBzYW1lIG11bHRpb2JqZWN0IHBhcnQNCj4gDQo+IC0tDQo+IFJvYmlu
+IEh1Z2ggSm9obnNvbg0KPiBHZW50b28gTGludXg6IERldmVsb3BlciwgSW5mcmFzdHJ1Y3R1cmUg
+TGVhZCwgRm91bmRhdGlvbiBUcnVzdGVlDQo+IEUtTWFpbCAgICAgOiByb2JiYXQyQGdlbnRvby5v
+cmcNCj4gR251UEcgRlAgICA6IDExQUNCQTRGIDQ3NzhFM0Y2IEU0RURGMzhFIEIyN0I5NDRFIDM0
+ODg0RTg1DQpZZXMsDQoNCmZpeCBmb3IgIzgyNjkgYWxzbyBoYXMgYmVlbiBpbmNsdWRlZCBpbiBv
+dXIgdmVyc2lvbjogRHVtcGxpbmcgMC42Ny4xMS4NCkd1eXMgZnJvbSAjMTM3NjQgYXJlIHVzaW5n
+IHBhdGNoZWQgSGFtbWVyIHZlcnNpb24uDQoNCkJvdGggc2l0dWF0aW9ucyB3aXRoIGNvcnJ1cHRl
+ZCBmaWxlcyBhcmUgdmVyeSBzaW1pbGlhciB0byB0aGF0IGRlc2NyaWJlZCBpbiAjODI2OS4NClRo
+ZXJlIHdhcyBhIHByb2JsZW0gd2l0aCAyIHRocmVhZHMgd3JpdGluZyB0byB0aGUgc2FtZSBSQURP
+UyBvYmplY3RzLiANCg0KTWF5YmUgdGhlcmUgaXMgYW5vdGhlciBvbmUgdWtub3duIGFuZCBzcGVj
+aWZpYyBleGNlcHRpb24gdG8gZml4Pw0KDQpDaGVlcnMsDQpTUg0KDQpfX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApj
+ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5j
+Z2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
