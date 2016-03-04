@@ -1,63 +1,124 @@
-From: M Ranga Swami Reddy <swamireddy@gmail.com>
-Subject: Re: ceph mon failed to restart
-Date: Fri, 4 Mar 2016 14:26:16 +0530
-Message-ID: <CANA9Uk5NunzikNVvWe5REppEjSWcr4CXeTyJQr-+zsv45KSErw@mail.gmail.com>
-References: <CANA9Uk7foqUXQkbVBerBdHothy91CzohWeW+NfYMdtaTqHXwOw@mail.gmail.com>
-	<56D804BD.1010806@suse.cz>
+From: <ghislain.chevalier@orange.com>
+Subject: RE: [ceph][radosgw] radosgw behind a reverse proxy
+Date: Fri, 4 Mar 2016 09:04:11 +0000
+Message-ID: <12448_1457082251_56D94F8B_12448_975_1_B9C8EFBF13B1354DB5FA000660D66DD00D6BE861@OPEXCLILM22.corporate.adroot.infra.ftgroup>
+References: <13775_1457022979_56D86803_13775_1230_1_B9C8EFBF13B1354DB5FA000660D66DD00D6BE394@OPEXCLILM22.corporate.adroot.infra.ftgroup>
+ <06681238D8946F44A60AA400760A1CBF022B51CF@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f51.google.com ([209.85.213.51]:34618 "EHLO
-	mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752112AbcCDI4R (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2016 03:56:17 -0500
-Received: by mail-vk0-f51.google.com with SMTP id e185so47631132vkb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Mar 2016 00:56:17 -0800 (PST)
-In-Reply-To: <56D804BD.1010806@suse.cz>
+Received: from relais-nor36.orange.com ([80.12.70.36]:54189 "EHLO
+	relais-inet.orange.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759025AbcCDJLo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2016 04:11:44 -0500
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF022B51CF@SHSMSX104.ccr.corp.intel.com>
+Content-Language: fr-FR
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Zhou, Yuan" <yuan.zhou@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This issue was fixed...by removing the mon (clean remove) from the
-cluster and add it again.
+Hi,
 
-Thanks
-Swami
+I read your response after having found  this parameter=20
 
-On Thu, Mar 3, 2016 at 3:02 PM, Nathan Cutler <ncutler@suse.cz> wrote:
-> On 03/03/2016 09:30 AM, M Ranga Swami Reddy wrote:
->>
->> I have tried to restart the one of the ceph mon , got the below error:
->> ==
->>
->> 2016-03-03 08:16:00.120355 7f43b067d7c0 -1 obtain_monmap unable to find a
->> monmap
->>
->> 2016-03-03 08:16:00.120374 7f43b067d7c0 -1 unable to obtain a monmap:
->> (2) No such file or directory
->>
->> 2016-03-03 08:16:00.124437 7f43b067d7c0 -1 mon.node-11@-1(probing) e0
->> not in monmap and have been in a quorum before; must have been removed
->>
->> 2016-03-03 08:16:00.124715 7f43b067d7c0 -1 mon.node-11@-1(probing) e0
->> commit suicide!
->>
->> 2016-03-03 08:16:00.124727 7f43b067d7c0 -1 failed to initialize
->>
->> failed: 'ulimit -n 32768;  /usr/bin/ceph-mon -i node-11 --pid-file
->> /var/run/ceph/mon.node-11.pid -c /etc/ceph/ceph.conf --cluster ceph '
->>
->> Starting ceph-create-keys on node-11...
->> ===
->>
->> Any hint appriciated...
->
->
-> Which Ceph version are you running?
->
-> --
-> Nathan Cutler
-> Software Engineer Distributed Storage
-> SUSE LINUX, s.r.o.
-> Tel.: +420 284 084 037
+And it works!
+
+Thx for the link
+
+-----Message d'origine-----
+De=A0: Zhou, Yuan [mailto:yuan.zhou@intel.com]=20
+Envoy=E9=A0: vendredi 4 mars 2016 07:52
+=C0=A0: CHEVALIER Ghislain IMT/OLPS; ceph-devel@vger.kernel.org
+Objet=A0: RE: [ceph][radosgw] radosgw behind a reverse proxy
+
+Hi,
+
+There's one option in rgw to customize the swift storage url:
+https://github.com/ceph/ceph/blob/master/src/common/config_opts.h#L1202
+
+Can you please try again with rgw_swift_url =3D http://cepstorage.orang=
+e-labs.fr:80
+
+thanks, -yuan
+
+-----Original Message-----
+=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of ghislain.chevalier@orange.com
+Sent: Friday, March 4, 2016 12:36 AM
+To: ceph-devel@vger.kernel.org
+Subject: [ceph][radosgw] radosgw behind a reverse proxy
+
+Hi all,
+
+Context:=20
+Ceph version : firefly 0.80.11
+OS : ubuntu 12.04.5 LTS
+
+
+I installed a rados gateway with civetweb listening on port 8081 This r=
+ados gateway is accessible from the internet cephstorage.orange-labs.fr=
+:80 A reverse proxy forwards the  requests from cephstorage.orange-labs=
+=2Efr:80 to the rgw server v-sbceph21:8081
+
+It works well using the S3 API.
+
+But when using the swift API, if I successfully get the token (cepstora=
+ge.orange-labs.fr/auth) , the url for getting the objects is malformed =
+: cephstorage.orange-labs.fr:8081/swift...
+
+Is there a solution to force the port to 80?
+
+Best regards
+
+_______________________________________________________________________=
+__________________________________________________
+
+Ce message et ses pieces jointes peuvent contenir des informations conf=
+identielles ou privilegiees et ne doivent donc pas etre diffuses, explo=
+ites ou copies sans autorisation. Si vous avez recu ce message par erre=
+ur, veuillez le signaler a l'expediteur et le detruire ainsi que les pi=
+eces jointes. Les messages electroniques etant susceptibles d'alteratio=
+n, Orange decline toute responsabilite si ce message a ete altere, defo=
+rme ou falsifie. Merci.
+
+This message and its attachments may contain confidential or privileged=
+ information that may be protected by law; they should not be distribut=
+ed, used or copied without authorisation.
+If you have received this email in error, please notify the sender and =
+delete this message and its attachments.
+As emails may be altered, Orange is not liable for messages that have b=
+een modified, changed or falsified.
+Thank you.
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n the body of a message to majordomo@vger.kernel.org More majordomo inf=
+o at  http://vger.kernel.org/majordomo-info.html
+
+_______________________________________________________________________=
+__________________________________________________
+
+Ce message et ses pieces jointes peuvent contenir des informations conf=
+identielles ou privilegiees et ne doivent donc
+pas etre diffuses, exploites ou copies sans autorisation. Si vous avez =
+recu ce message par erreur, veuillez le signaler
+a l'expediteur et le detruire ainsi que les pieces jointes. Les message=
+s electroniques etant susceptibles d'alteration,
+Orange decline toute responsabilite si ce message a ete altere, deforme=
+ ou falsifie. Merci.
+
+This message and its attachments may contain confidential or privileged=
+ information that may be protected by law;
+they should not be distributed, used or copied without authorisation.
+If you have received this email in error, please notify the sender and =
+delete this message and its attachments.
+As emails may be altered, Orange is not liable for messages that have b=
+een modified, changed or falsified.
+Thank you.
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
