@@ -1,54 +1,49 @@
-From: Ankush Sharma <ankush.sharma.ece12@iitbhu.ac.in>
-Subject: [GSOC'16] Introductory Mail
-Date: Sat, 5 Mar 2016 06:56:57 +0000 (UTC)
-Message-ID: <loom.20160305T075537-284@post.gmane.org>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: BlueStore deep-dive over bluejeans
+Date: Sat, 5 Mar 2016 18:41:00 +0800
+Message-ID: <CABAwU-ZMQcB=9QuRjRwqdLiPDhFk68b8vXzSEwJ1UvYO=pDK-Q@mail.gmail.com>
+References: <alpine.DEB.2.11.1602241447430.7555@cpach.fuggernut.com>
+	<alpine.DEB.2.11.1602291600100.1904@cpach.fuggernut.com>
+	<alpine.DEB.2.11.1603011014570.1904@cpach.fuggernut.com>
+	<alpine.DEB.2.11.1603020834020.1904@cpach.fuggernut.com>
+	<alpine.DEB.2.11.1603020854510.1904@cpach.fuggernut.com>
+	<56D7B8DB.5060203@redhat.com>
+	<alpine.DEB.2.11.1603030819500.1904@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:59477 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751170AbcCEHAJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 5 Mar 2016 02:00:09 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1ac6C5-0007rY-4v
-	for ceph-devel@vger.kernel.org; Sat, 05 Mar 2016 08:00:05 +0100
-Received: from 128.199.112.205 ([128.199.112.205])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sat, 05 Mar 2016 08:00:05 +0100
-Received: from ankush.sharma.ece12 by 128.199.112.205 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sat, 05 Mar 2016 08:00:05 +0100
+Received: from mail-lb0-f175.google.com ([209.85.217.175]:35855 "EHLO
+	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755993AbcCEKlD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Mar 2016 05:41:03 -0500
+Received: by mail-lb0-f175.google.com with SMTP id x1so86317307lbj.3
+        for <ceph-devel@vger.kernel.org>; Sat, 05 Mar 2016 02:41:01 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1603030819500.1904@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello all,
+where to get the ppt in the video?
 
-I am Ankush Sharma from India, a fourth year undergraduate at IIT-
-BHU,Varanasi, India. I am proficient at Python and other various other 
-programming languages.
+2016-03-03 21:19 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Wed, 2 Mar 2016, Dan Mick wrote:
+>>
+>> >     https://bluejeans.com/s/9dck/
+>>
+>> Can you set this to allow download?  I can't get it to play in the
+>> bluejeans interface, but downloadable files usually work for me
+>
+> Fixed!
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I contributed to GNU-Mailman during GSoC'15. I also delivered a talk at PyCon 
-India 2014 about Powering apps with gesture control using python programming 
-language [1].  As an open source enthusiast, I regularly contribute to open 
-source projects [2].
 
-I found the project Python3 support for Ceph of my subtle interest. I am 
-going through the codebase of the Ceph components required to be ported to 
-Python3. 
 
-Expecting help from the mentors and a lot of learning during the period ;)
-
-Ankush Sharma
-ECE IV
-IIT-BHU
-Varanasi-221005
-http://black-perl.in
-
-[1]  in.pycon.org/funnel/2014/208-python-the-eyes-of-real-world-computer-
-applications
-[2] GITHUB : github.com/black-perl
-
+-- 
+thanks
+huangjun
