@@ -1,55 +1,77 @@
-From: Shehbaz Jaffer <shehbazjaffer007@gmail.com>
-Subject: [GSoC2016] BlueStore SMR Support
-Date: Fri, 4 Mar 2016 15:06:17 -0500
-Message-ID: <CAPLK-i83vpHT7CwoczKULwpvJ+-eMLdhxWUy6YwyE0wj27kiOw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: (Un)Stable release team
+Date: Sat, 5 Mar 2016 08:23:32 +0700
+Message-ID: <56DA3514.6060706@dachary.org>
+References: <56D001C6.5080804@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f169.google.com ([209.85.160.169]:36426 "EHLO
-	mail-yk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759182AbcCDUGX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2016 15:06:23 -0500
-Received: by mail-yk0-f169.google.com with SMTP id 1so27399821ykg.3
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Mar 2016 12:06:18 -0800 (PST)
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:46861 "EHLO
+	relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759049AbcCEBXo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2016 20:23:44 -0500
+In-Reply-To: <56D001C6.5080804@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, sage@redhat.com
+To: Nathan Cutler <ncutler@suse.cz>, Abhishek L <abhishek.lekshmanan@gmail.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, Gaurav Bafna <bafnag@gmail.com>, Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>, Martin Palma <martin@palma.bz>, Chris Jones <cjones@cloudm2.com>, M Ranga Swami Reddy <swamireddy@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi All,
+Hi,
 
-I am a 1st Year PhD student at University of Toronto. I am interested
-in working on the SMR friendly allocator for Bluestore file system. I
-am new to Ceph. But I am familiar with FS development in user space, and
-SMR drives. I am currently going through Ceph codebase.
-It looks like the allocator is very basic, hence the current name of
-the block allocator:
-os/bluestore/StupidAllocator.cc :-)
+Here is a draft of the release process for development versions (http:/=
+/pad.ceph.com/p/development-releases-draft) which I experimented with m=
+anually. Comment and suggestions are welcome.
 
-Few initial questions:
+Cheers
 
-1) Will the project involve Drive managed SMR drives or Host Managed SMR drives?
+On 26/02/2016 14:41, Loic Dachary wrote:
+> Hi,
+>=20
+> It's a quiet time in the small world of the stable release team, idea=
+l for mentoring the new members who generously answered our call for pa=
+rticipation. Welcome to Chen Xiaoxi, Gaurav Bafna, Wei-Chung Cheng, Mar=
+tin Palma and Chris Jones :-)
+>=20
+> I propose that we take advantage of the next few weeks to expand our =
+scope in two ways:=20
+>=20
+> * test Ceph development versions as well as stable versions
+> * publish packages for Ceph development versions
+>=20
+> Testing Ceph development versions is actually less work than with sta=
+ble versions because the developers run a lot of tests already and fix =
+problems on a daily basis. Our help would likely be needed with a few t=
+euthology suite runs right before the development release is published,=
+ once a month. But the development versions tend to be more frequent, t=
+herefore it will probably be as much work as for a stable release, over=
+all. The workflow would be revisited: there is no cherry-picking. Inste=
+ad, bug fixes must be against the jewel branch or whatever branch will =
+be the upcoming stable. And this branch is merged back into master on a=
+ regular basis (i.e. more frequently than the development releases).
+>=20
+> As you may have noticed, no packages were published for the 10.0.3 de=
+velopment release and that's where we could make a real difference. Thi=
+s would be an entirely new part of our workflow, but also an exciting o=
+ne because it's the last missing piece of the puzzle. Once we are able =
+to publish usable packages for development releases, nothing is stoppin=
+g us to do the same for stable releases. It's a lot easier than it seem=
+s since the packages are already built for the teuthology jobs. All we =
+need is a public space to archive them and sign them. This is not mutua=
+lly exclusive with the current package publication workflow, it would b=
+e a community driven alternative that is much needed in some cases.
+>=20
+> Of course, this is easier said than done :-) What do you think ? Are =
+there other important work that we should try to accomplish instead ? T=
+hings that would benefit Ceph users and developers more ?
+>=20
+> Cheers
+>=20
 
-2) Will scope of project be to build an allocator on a simulator for
-SMR Drives? Or will I get actual HDDs to work with? In case of
-simulators, will the project involve building a simulator on disksim?
-
-3) Ideally, the benchmark should be to compare StupidAllocator scheme
-with a SmartAllocator scheme in terms of the following performance
-metrics:
-a) speed
-b) correctness
-c) fragmentation
-d) garbage collection efficiency
-
-are there any other metrics that we would like to measure the allocator for?
-
-Thanks and I look forward to working on this project. Please feel free
-to send out your comments/suggestions.
-
-Regards,
-
--- 
-Shehbaz Jaffer
-First Year Graduate Student
-Sir Edward S Rogers Sr Department of Electrical and Computer Engineering
-University of Toronto
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
