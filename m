@@ -1,104 +1,48 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Re: BlueStore deep-dive over bluejeans
-Date: Sun, 6 Mar 2016 11:34:16 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1603061132030.25897@cpach.fuggernut.com>
-References: <alpine.DEB.2.11.1602241447430.7555@cpach.fuggernut.com>,  <alpine.DEB.2.11.1602291600100.1904@cpach.fuggernut.com>,  <alpine.DEB.2.11.1603011014570.1904@cpach.fuggernut.com>,  <alpine.DEB.2.11.1603020834020.1904@cpach.fuggernut.com>,
- <alpine.DEB.2.11.1603020854510.1904@cpach.fuggernut.com>,  <56D7B8DB.5060203@redhat.com>,  <alpine.DEB.2.11.1603030819500.1904@cpach.fuggernut.com>,  <CABAwU-ZMQcB=9QuRjRwqdLiPDhFk68b8vXzSEwJ1UvYO=pDK-Q@mail.gmail.com>
- <20160306184642014525100@chinanetcenter.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: all OSDs crash at more or less the same time
+Date: Mon, 7 Mar 2016 00:37:59 +0100
+Message-ID: <56DCBF57.10008@digiware.nl>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1093869562-1457282058=:25897"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36908 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751250AbcCFQek (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 6 Mar 2016 11:34:40 -0500
-In-Reply-To: <20160306184642014525100@chinanetcenter.com>
+Received: from smtp.digiware.nl ([31.223.170.169]:63438 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751575AbcCFXiV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 6 Mar 2016 18:38:21 -0500
+Received: from rack1.digiware.nl (unknown [127.0.0.1])
+	by smtp.digiware.nl (Postfix) with ESMTP id 53AED153413
+	for <ceph-devel@vger.kernel.org>; Mon,  7 Mar 2016 00:38:16 +0100 (CET)
+Received: from [192.168.10.10] (asus [192.168.10.10])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.digiware.nl (Postfix) with ESMTPSA id 0895C153401
+	for <ceph-devel@vger.kernel.org>; Mon,  7 Mar 2016 00:38:00 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?GB2312?B?s8K+sg==?= <chj@chinanetcenter.com>
-Cc: huang jun <hjwsm1989@gmail.com>, Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
-
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-1093869562-1457282058=:25897
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
 Hi,
 
-On Sun, 6 Mar 2016, 陈静 wrote:
-> Hi Sage,
-> 
-> So BlueStore will rely on RocksDB a lot, which just remind me of some
-> experience regarding to LevelDB recovery and compaction some time ago.
-> 
-> We tried Ceph RGW 0.80, which had no Bucket Index Sharding feature. SSD
-> managed by FileStore is used for Bucket Index Pool.
-> After we put tens of millions of files into a bucket, LevelDB of the OSD
-> holding the corresponding bucket index object grew very big.
-> The OSD once crashed unexpectly. When we try to start the OSD again, it took
-> hours to fully get up.
-> We used pstack to observed what it was doing and noticed the OSD is busy in
-> recovering and compacting its LevelDB.
-> The recovering and compaction consumed a lot CPU and memory as well.
-> 
-> BlueStore seems to rely more on RocksDB, which is a variant of LevelDB.
-> Then when the number of objects in BlueStore is large, will it take even
-> more time for the OSD to start up (for recoverying and compaction) if it was
-> not shut down cleanly previously?
+While running cephtool-test-rados.sh "all of a sudden" the OSDs
+disapear, I had one of the logs open which contained at the end:
 
-In general, rocksdb/leveldb shouldn't need to compact on startup.  I'm not 
-sure what caused that in your situation.  We've seen a few leveldb bugs in 
-the past that prevented compaction from happening when it should; perhaps 
-it was one of those.
+    -2> 2016-03-06 21:56:02.073226 80569ed00  1 heartbeat_map is_healthy
+'OSD::osd_op_tp thread 0x806795200' had timed out after 15
+    -1> 2016-03-06 21:56:02.073248 80569ed00  1 heartbeat_map is_healthy
+'OSD::osd_op_tp thread 0x806795200' had suicide timed out after 150
+     0> 2016-03-06 21:56:02.113948 80569ed00 -1 common/HeartbeatMap.cc:
+In function 'bool ceph::HeartbeatMap::_check(const ceph::heartbeat_handle_d
+*, const char *, time_t)' thread 80569ed00 time 2016-03-06 21:56:02.073269
+common/HeartbeatMap.cc: 86: FAILED assert(0 == "hit suicide timeout")
 
-We did do some testing with rocksdb where we inflated the size to he db to 
-be very large and it performed pretty well.  We didn't try clearing large 
-swaths of the keyspace to test the compaction side of things, though.
+the monitor is still running. It claims the heartbeat_map is valid, but
+still it suicides??
 
-sage
+And what messages would prevent this from happening?
+Receiving heartbeats from other OSDs?
 
-> 
-> 
-> Thanks,
-> Jeegn
->  
->       From: huang jun
-> Date: 2016-03-05 18:41
-> To: Sage Weil
-> CC: Dan Mick; ceph-devel
-> Subject: Re: BlueStore deep-dive over bluejeans
-> where to get the ppt in the video?
->  
-> 2016-03-03 21:19 GMT+08:00 Sage Weil <sage@newdream.net>:
-> > On Wed, 2 Mar 2016, Dan Mick wrote:
-> >>
-> >> >     https://bluejeans.com/s/9dck/
-> >>
-> >> Can you set this to allow download?  I can't get it to play in the
-> >> bluejeans interface, but downloadable files usually work for me
-> >
-> > Fixed!
-> >
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->  
->  
->  
-> --
-> thanks
-> huangjun
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
---8323329-1093869562-1457282058=:25897--
+IF so how would a 2 OSD server even survive when its connection would be
+split for longer than 2,5 minute?
+
+--WjW
