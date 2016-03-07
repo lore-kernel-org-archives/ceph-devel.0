@@ -1,82 +1,43 @@
-From: Yi Huaijie <yihuaijiereal@gmail.com>
-Subject: [GSoC]Implement cache layer on top of userspace nvme driver. Inbox x
-Date: Mon, 7 Mar 2016 13:56:43 +0800
-Message-ID: <CA+Da5Jb-=jeNa+9J9_ftZgwB4FvEfbOXdiOLcY_JP9rTPh5oTw@mail.gmail.com>
+From: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>
+Subject: RE: Unable to build ceph: Ubuntu 15.04 Ceph master
+Date: Mon, 7 Mar 2016 07:13:48 +0000
+Message-ID: <a42b395322314a42baf54463bd3d9b2e@R01UKEXCASM115.r01.fujitsu.local>
+References: <CAPLK-i8OBSir0ad7whXp7pwNZ_nXhu1GB_G5okhqhzsH5pWzyA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:35158 "EHLO
-	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751798AbcCGF4o convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2016 00:56:44 -0500
-Received: by mail-vk0-f46.google.com with SMTP id e6so106701539vkh.2
-        for <ceph-devel@vger.kernel.org>; Sun, 06 Mar 2016 21:56:44 -0800 (PST)
+Received: from mail1.bemta3.messagelabs.com ([195.245.230.163]:15789 "EHLO
+	mail1.bemta3.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752025AbcCGHVL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2016 02:21:11 -0500
+In-Reply-To: <CAPLK-i8OBSir0ad7whXp7pwNZ_nXhu1GB_G5okhqhzsH5pWzyA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>, ceph-devel@vger.kernel.org
+To: Shehbaz Jaffer <shehbazjaffer007@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello,
-I am a first-year student for my Master Degree at Nanjing University,
-China. My research area focuses on distributed storage. Our team has
-been worked with a project on Ceph for a half year. I am very
-interested in your idea that implement cache layer on top of userspace
-nvme driver. Here is my understand of your idea.
-
-Ceph=E2=80=99s OSDS used to lay on filestore which uses the local POSIX=
- file
-system such XFS/BtrFS/EXT4. But it works poor for Ceph, so bluestore
-was designed to replace it.One major difference from filestore is that
-bluestore use rocksDB for managing metadata. RocksDB has ideal
-key/value interface, it support transactions, uses ordered
-enumeration, and can fast commits to log/journal. RocksDB also has
-common interface, we can always swap in another KB DB if we want. In
-bluestore rocksDB is used to save object metadata, write-ahead log,
-ceph key/value omap data and allocator metadata.
-
-At the bottom of the bluestore architecture is disk which can be HDD
-or SSD. On top of the disks is the driver layer which include kernel
-driver and userspace driver SPDK. With these drivers, the host
-provides a block device layer which was bluestore built on.
-
-SPDK is used to accelerate the speed of NVME SSD. NVME SSDs have very
-high speed, its IOPS can reaches millions times per second. If we use
-kernel driver, the system must switch between kernel and user mod
-frequently, and the CPU cost of interrupt can be very high. The result
-is that the kernel driver slow down the disk IOPS. SPDK runs in
-userspace and uses polling instead of interrupt
-
-Metadata cache is very critical for a better file system throughput,
-because metadata operations occupy more than half of the I/O.
-Currently bluestore has implemented kernel driver cache uses pagecache
-to accelerate metadata, userspace NVME driver lacks any sort of memory
-cache to help performance. So I apply this project to implement the
-userspace NVME cache.
-
-The implementation will uses the knowledge of SPDK=EF=BC=8CrocksDB and
-pagecache. The goal is to cache metadata saved in rocksDB using API
-provided by SPDK. Because rocksDB is a key-value storage that much
-like database, so we could use the cache strategy implemented by
-database such as SQLite. Fellow aspects are the most important we must
-consider:
-
-1=EF=BC=89Consistency, which is related to the correctness of the data.=
- We
-could use a dirty list to mark the pages in cache that have been
-modified, and make some operations to obtain the consistency.
-2=EF=BC=89hit rate, which is critical to the efficiency, high hit rate =
-gives
-high efficiency, hit rate is related to the policy of page
-replacement.
-3=EF=BC=89valid rate, which is concerned with the memory space use. It =
-is
-somehow related to policy of page replacement too.
-4=EF=BC=89What to cache. I think the memTable of rocksDB could server a=
-s the
-cache for a write operation. So the cache should focus on the metadata
-querry operation.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIFNoZWhiYXogSmFmZmVyDQo+IFNlbnQ6IEZyaWRheSwgTWFyY2ggMDQs
+IDIwMTYgMzo0MiBQTQ0KPiANCj4gDQo+IEkgaGF2ZSBjbG9uZWQgY2VwaCBmcm9tIGdpdCBtYXN0
+ZXIgYnJhbmNoLiBJIGFtIGdldHRpbmcgdGhlIGZvbGxvd2luZyBlcnJvcnMNCj4gd2hpbGUgYnVp
+bGQ6DQo+IA0KPiBbLi5dDQo+IA0KPiAgIENYWExEICAgIGNlcGgtZGVuY29kZXINCj4gcmd3L2Nl
+cGhfZGVuY29kZXItcmd3X2RlbmNvZGVyLm86IEluIGZ1bmN0aW9uDQo+IGBSR1dab25lR3JvdXA6
+OmdlbmVyYXRlX3Rlc3RfaW5zdGFuY2VzKHN0ZDo6bGlzdDxSR1dab25lR3JvdXAqLA0KPiBzdGQ6
+OmFsbG9jYXRvcjxSR1dab25lR3JvdXAqPiA+JiknOg0KPiAvaG9tZS9zaGVoYmF6L2dzb2MvY2Vw
+aC9jZXBoL3NyYy9yZ3cvcmd3X3JhZG9zLmg6MTA5NTogdW5kZWZpbmVkDQo+IHJlZmVyZW5jZSB0
+byBgdnRhYmxlIGZvciBSR1dab25lR3JvdXAnDQo+IFsuLl0NCj4gDQo+IEkgYWxzbyBmb3VuZCBh
+IHNpbWlsYXIgcmVwb3J0IGhlcmU6DQo+IA0KPiBodHRwOi8vY2VwaC5wcmVkaWN0b3Iub3JnLnBs
+L3Jnd192dGFibGUudHh0DQo+IA0KPiBCdXQgYSBzb2x1dGlvbiB0byB0aGUgcHJvYmxlbSBpcyBu
+b3QgcHJvdmlkZWQuDQoNClNvcnJ5IHRvIGJlIGxhdGUgdG8gcGFydHkuIEluIG15IGNhc2UsIEkg
+d2Fzbid0IHByb3ZpZGluZyAtLXdpdGgtcmFkb3NndyB0byBjb25maWd1cmUgc2NyaXB0ICphbmQq
+IEkgaGFkIG5vIGZjZ2kgYW5kIGZjZ2ktZGV2ZWwgKENlbnRPUyA2KSBpbnN0YWxsZWQgb24gYnVp
+bGQgbm9kZXMsIHdoaWNoIHdhcyBleHRyZW1lbHkgY29uZnVzaW5nIGZvciBtZSBzaW5jZSBpdCBi
+dWlsdCBmaW5lIGRheSBlYXJsaWVyIGFuZCBuZXh0IGRheSBvbmx5IG9uIG90aGVyIG5vZGUuIEkg
+YXNzdW1lZCBpdCB3YXMgc29tZXRoaW5nIG9uIG15IHNpZGUgc28gSSB3YXNuJ3Qgc2hhcmluZyBh
+bnkgZGV0YWlscy4gSW5zdGFsbGluZyBmY2dpIGFuZCBmY2dpLWRldmVsIGZpeGVkIHRoaW5ncyBm
+b3IgbWUsIGJ1dCBub3RlIHRoYXQncyBDZW50T1MgNi4NCg0KDQooSW4gdW5yZWxhdGVkIG5ld3Ms
+IGl0J3Mgc2NhcnkgdG8gc2VlIHRoYXQgYSBsaW5rIHNoYXJlZCBvbiBJUkMgY2hhbm5lbCBnZXRz
+IGluZGV4ZWQgYnkgR29vZ2xlIHNvIHF1aWNrbHkuLi4pDQoNCldpdGggYmVzdCByZWdhcmRzIC8g
+UG96ZHJhd2lhbQ0KUGlvdHIgRGHFgmVrDQoNCg==
