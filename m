@@ -1,62 +1,82 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: [ceph] what's going on with d_rehash() in splice_dentry()?
-Date: Mon, 7 Mar 2016 02:16:39 +0000
-Message-ID: <20160307021639.GR17997@ZenIV.linux.org.uk>
-References: <20160226174250.GA17997@ZenIV.linux.org.uk>
- <alpine.DEB.2.11.1603010946290.24758@cpach.fuggernut.com>
- <B17B70FF-4B76-4593-9D96-F0298F83AEB3@redhat.com>
+From: Yi Huaijie <yihuaijiereal@gmail.com>
+Subject: [GSoC]Implement cache layer on top of userspace nvme driver. Inbox x
+Date: Mon, 7 Mar 2016 13:56:43 +0800
+Message-ID: <CA+Da5Jb-=jeNa+9J9_ftZgwB4FvEfbOXdiOLcY_JP9rTPh5oTw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <B17B70FF-4B76-4593-9D96-F0298F83AEB3@redhat.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f46.google.com ([209.85.213.46]:35158 "EHLO
+	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751798AbcCGF4o convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2016 00:56:44 -0500
+Received: by mail-vk0-f46.google.com with SMTP id e6so106701539vkh.2
+        for <ceph-devel@vger.kernel.org>; Sun, 06 Mar 2016 21:56:44 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Haomai Wang <haomai@xsky.com>, ceph-devel@vger.kernel.org
 
-On Wed, Mar 02, 2016 at 11:00:01AM +0800, Yan, Zheng wrote:
+Hello,
+I am a first-year student for my Master Degree at Nanjing University,
+China. My research area focuses on distributed storage. Our team has
+been worked with a project on Ceph for a half year. I am very
+interested in your idea that implement cache layer on top of userspace
+nvme driver. Here is my understand of your idea.
 
-> > This code dates back to when Ceph was originally upstreamed, so the 
-> > history is murky, but I expect at that point I wanted to avoid hashing in 
-> > the no-lease case.  But I don't think it matters.  We should just remove 
-> > the prehash argument from splice_dentry entirely.
-> > 
-> > Zheng, does that sound right?
-> 
-> Yes. I think we can remove the d_rehash(dn) call and rehash parameter.
+Ceph=E2=80=99s OSDS used to lay on filestore which uses the local POSIX=
+ file
+system such XFS/BtrFS/EXT4. But it works poor for Ceph, so bluestore
+was designed to replace it.One major difference from filestore is that
+bluestore use rocksDB for managing metadata. RocksDB has ideal
+key/value interface, it support transactions, uses ordered
+enumeration, and can fast commits to log/journal. RocksDB also has
+common interface, we can always swap in another KB DB if we want. In
+bluestore rocksDB is used to save object metadata, write-ahead log,
+ceph key/value omap data and allocator metadata.
 
-Another question in the same general area:
-                /* null dentry? */
-                if (!rinfo->head->is_target) {
-                        dout("fill_trace null dentry\n");
-                        if (d_really_is_positive(dn)) {
-                                ceph_dir_clear_ordered(dir);
-                                dout("d_delete %p\n", dn);
-                                d_delete(dn);
-                        } else {
-                                dout("d_instantiate %p NULL\n", dn);
-                                d_instantiate(dn, NULL);
-                                if (have_lease && d_unhashed(dn))
-                                        d_rehash(dn);
-                                update_dentry_lease(dn, rinfo->dlease,
-                                                    session,
-                                                    req->r_request_started);
-                        }
-                        goto done;
-                }
-What's that d_instantiate() about?  We have just checked that it's
-negative; what's the point of setting ->d_inode to NULL again?  Would it
-be OK if we just do
-			} else {
-				if (have_lease && d_unhashed(dn))
-					d_add(dn, NULL);
-                                update_dentry_lease(dn, rinfo->dlease,
-                                                    session,
-                                                    req->r_request_started);
-                        }
-in there?  As an aside, tracking back to the originating fs method is
-painful as hell ;-/  I _think_ that rehash can be hit during ->lookup()
-returning a negative, but I wouldn't bet a dime on it not happening from
-other methods...  AFAICS, the change should be OK regardless of what
-it's been called from, but... _ouch_.  Is is documented anywhere public?
+At the bottom of the bluestore architecture is disk which can be HDD
+or SSD. On top of the disks is the driver layer which include kernel
+driver and userspace driver SPDK. With these drivers, the host
+provides a block device layer which was bluestore built on.
+
+SPDK is used to accelerate the speed of NVME SSD. NVME SSDs have very
+high speed, its IOPS can reaches millions times per second. If we use
+kernel driver, the system must switch between kernel and user mod
+frequently, and the CPU cost of interrupt can be very high. The result
+is that the kernel driver slow down the disk IOPS. SPDK runs in
+userspace and uses polling instead of interrupt
+
+Metadata cache is very critical for a better file system throughput,
+because metadata operations occupy more than half of the I/O.
+Currently bluestore has implemented kernel driver cache uses pagecache
+to accelerate metadata, userspace NVME driver lacks any sort of memory
+cache to help performance. So I apply this project to implement the
+userspace NVME cache.
+
+The implementation will uses the knowledge of SPDK=EF=BC=8CrocksDB and
+pagecache. The goal is to cache metadata saved in rocksDB using API
+provided by SPDK. Because rocksDB is a key-value storage that much
+like database, so we could use the cache strategy implemented by
+database such as SQLite. Fellow aspects are the most important we must
+consider:
+
+1=EF=BC=89Consistency, which is related to the correctness of the data.=
+ We
+could use a dirty list to mark the pages in cache that have been
+modified, and make some operations to obtain the consistency.
+2=EF=BC=89hit rate, which is critical to the efficiency, high hit rate =
+gives
+high efficiency, hit rate is related to the policy of page
+replacement.
+3=EF=BC=89valid rate, which is concerned with the memory space use. It =
+is
+somehow related to policy of page replacement too.
+4=EF=BC=89What to cache. I think the memTable of rocksDB could server a=
+s the
+cache for a write operation. So the cache should focus on the metadata
+querry operation.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
