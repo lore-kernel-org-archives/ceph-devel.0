@@ -1,36 +1,58 @@
-From: =?utf-8?B?Uml0dGVyIFPFgmF3b21pcg==?= <Slawomir.Ritter@dreamlab.pl>
-Subject: RE: [ceph-users] Problem: silently corrupted RadosGW objects caused
- by slow requests
-Date: Mon, 7 Mar 2016 14:34:23 +0100
-Message-ID: <156923D1D92AF640829D4E847271EDAE522A4700A1@MXMBON06.grupa.onet>
-References: <156923D1D92AF640829D4E847271EDAE522A46F435@MXMBON06.grupa.onet>
-	<CAMNMNTxs46Hcaq-ZJZfYfF5m8aL9ETNjtBKr8UrdAxZFM7E=nw@mail.gmail.com>
-	<156923D1D92AF640829D4E847271EDAE522A46FD66@MXMBON06.grupa.onet>
-	<robbat2-20160303T232148-550781944Z@orbis-terrarum.net>
-	<156923D1D92AF640829D4E847271EDAE522A46FF66@MXMBON06.grupa.onet>
- <CADRKj5QYiCWxqxQkhDsFET8CJEfJM9_X1XiEH1_Zcn0Z_jSkNQ@mail.gmail.com>
+From: Karol Mroz <kmroz@suse.com>
+Subject: master build failure with boost 1.60
+Date: Mon, 7 Mar 2016 15:49:44 +0100
+Message-ID: <20160307144944.GA21590@pxe-sup5.sup.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="GvXjxJ+pjyke8COw"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from onsmg01.portal.onet.pl ([213.180.147.237]:46259 "EHLO
-	onsmg01.portal.onet.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752401AbcCGNek (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2016 08:34:40 -0500
-In-Reply-To: <CADRKj5QYiCWxqxQkhDsFET8CJEfJM9_X1XiEH1_Zcn0Z_jSkNQ@mail.gmail.com>
-Content-Language: pl-PL
+Received: from smtp2.provo.novell.com ([137.65.250.81]:38134 "EHLO
+	smtp2.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752350AbcCGOtu (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Mon, 7 Mar 2016 09:49:50 -0500
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: "Robin H. Johnson" <robbat2@gentoo.org>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: ceph-devel@vger.kernel.org
 
-PiA+IFllcywNCj4gPg0KPiA+IGZpeCBmb3IgIzgyNjkgYWxzbyBoYXMgYmVlbiBpbmNsdWRlZCBp
-biBvdXIgdmVyc2lvbjogRHVtcGxpbmcgMC42Ny4xMS4NCj4gPiBHdXlzIGZyb20gIzEzNzY0IGFy
-ZSB1c2luZyBwYXRjaGVkIEhhbW1lciB2ZXJzaW9uDQo+IA0KPiBJIGRpZG4ndCBub3RpY2UgdGhh
-dCB5b3Ugd2VyZSBhY3R1YWxseSBydW5uaW5nIER1bXBsaW5nICh3aGljaCB3ZQ0KPiBoYXZlbid0
-IHN1cHBvcnRlZCBhbmQgYmFja3BvcnRlZCBmaXhlcyBmb3IgYSB3aGlsZSkuIEhlcmUncyBvbmUg
-aXNzdWUNCj4gdGhhdCB5b3UgbWlnaHQgaGF2ZSBoaXQ6DQo+IA0KPiBodHRwOi8vdHJhY2tlci5j
-ZXBoLmNvbS9pc3N1ZXMvMTE2MDQNCj4gDQo+IFllaHVkYQ0KWWVzLCBpdCBsb29rcyB2ZXJ5IHNp
-bWlsaWFyLiBXZSBoYWQgdG8gdXBncmFkZSwgcHJvYmFibHkgdG8gSGFtbWVyIExUUyA6KS4NCldl
-IHdpbGwgY2hlY2sgaXQgYWdhaW4gYWZ0ZXIgd2hvbGUgb3BlcmF0aW9uLiBUaG54IGEgbG90Lg0K
-DQotLQ0KU1INCg==
+
+--GvXjxJ+pjyke8COw
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi folks,
+
+We've recently hit a build failure on ceph master for which Abhishek has op=
+ened
+a bug: http://tracker.ceph.com/issues/14998.
+
+Our rolling distribution (openSUSE Tumbleweed) has pushed out boost 1.60
+which looks to be at the heart of the failure. Is boost 1.60 to be supporte=
+d in
+Jewel?
+
+Thanks!
+
+--=20
+Regards,
+Karol
+
+--GvXjxJ+pjyke8COw
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJW3ZUGAAoJECp28bThgzat+bwH/3LzjqXuWbJoG17E77+fvIJj
+AgNz7YV1ebV86f5PET7JaKtTiZXo2FS/C1PhFnxr0wXHDb/moOAg34uIXfFd+hph
+ud3J2RMpP1NMHJMwAqFNfZrhBWd4LOG1B75MGNUBDZusgCrC1YsEHkvvX82YnzSf
+AT6WGSOgza62Ss7vUaqA29cd4Ft5VqWdF3Y1SM5oooP8CftTVgtk71r9UC0jL1FS
+vPMhcPIkwvwv6d0lPnBEubGjPt5ahMr/lX5JmYqueq/p9qiRJ3vVlfEEsr/Gc1IF
+tL8Fg/Q88lWvLmpC16nxZ4+gCQdErqhumeZjEkZP7Dk7smUkqtREPakRSu5J5Pc=
+=cVeO
+-----END PGP SIGNATURE-----
+
+--GvXjxJ+pjyke8COw--
