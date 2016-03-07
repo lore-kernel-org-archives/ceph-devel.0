@@ -1,167 +1,521 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: master build failure with boost 1.60
-Date: Mon, 7 Mar 2016 15:06:25 -0500 (EST)
-Message-ID: <1066357419.61857221.1457381185429.JavaMail.zimbra@redhat.com>
-References: <20160307144944.GA21590@pxe-sup5.sup.suse.de> <56DDB0B0.2090005@suse.com> <CAANLjFqR2TDcuCQh=Avo5UyDNskjStPt5o_Jk3ehJ4Bhug1whg@mail.gmail.com> <1897896272.61850279.1457380603124.JavaMail.zimbra@redhat.com> <CAANLjFqgFzN+WvzdN9q27JmHE4kFh3SP+LMQEWfXXckRMGe_4A@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: New Defects reported by Coverity Scan for ceph
+Date: Mon, 7 Mar 2016 12:59:02 -0800
+Message-ID: <CAJ4mKGZ=onQwsaQxmFPO3x3P_03XeHdVDKvepHaaPVdYP7_63Q@mail.gmail.com>
+References: <56db1d779c20a_3499abd33094453@ss1435.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:59212 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752414AbcCGUG3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2016 15:06:29 -0500
-In-Reply-To: <CAANLjFqgFzN+WvzdN9q27JmHE4kFh3SP+LMQEWfXXckRMGe_4A@mail.gmail.com>
+Received: from mail-vk0-f45.google.com ([209.85.213.45]:34466 "EHLO
+	mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753099AbcCGU7D (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2016 15:59:03 -0500
+Received: by mail-vk0-f45.google.com with SMTP id e185so132013442vkb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Mar 2016 12:59:02 -0800 (PST)
+In-Reply-To: <56db1d779c20a_3499abd33094453@ss1435.mail>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>
-Cc: Abhishek Lekshmanan <abhishek@suse.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Robert,
+There's a lot of stuff here in cephfs.c. I gather this is
+auto-generated code from cython, but maybe look over the errors and
+see if there's something going on in the Cython input we're providing
+that would lead to these outcomes? :/
+-Greg
 
-Thanks for the clarification.  I wasn't aware of the new multimap interface.  I have been happy with the tree-based interfaces, however.
-
-Matt
-
------ Original Message -----
-> From: "Robert LeBlanc" <robert@leblancnet.us>
-> To: "Matt Benjamin" <mbenjamin@redhat.com>
-> Cc: "Abhishek Lekshmanan" <abhishek@suse.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
-> Sent: Monday, March 7, 2016 3:03:39 PM
-> Subject: Re: master build failure with boost 1.60
-> 
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
-> 
-> I was able to do what I needed to with avl_set/rbtree/avltree, just
-> http://www.boost.org/doc/libs/1_59_0/doc/html/intrusive/map_multimap.html
-> looks like it may provide a cleaner interface that would be closer to
-> the STL in C++. This was introduced in 1.59.
-> -----BEGIN PGP SIGNATURE-----
-> Version: Mailvelope v1.3.6
-> Comment: https://www.mailvelope.com
-> 
-> wsFcBAEBCAAQBQJW3d6RCRDmVDuy+mK58QAAXSAP/3gXRVAAuhVgoEmUnX6s
-> r+BrNqYoXZ5+lpXZbMNmZBfNeXKZSOeQW51Vjy4xHsYhi3nj29SDedwoc4Bq
-> DA+es5JN/8etfr3SZgyfA6DMnvsNpUT/OO1mSjpkiPsExG6lK4iVKf1Y/M9B
-> dXfHmeP3lVUMD08qgqzCgaYEoxQfI42tvF+PubcxfDp0OOq9/+SFD68YT+tL
-> PmA1BVjnCBtuPMmy4OzsbD7TFSdqr8rATUTW2TzkaxUMRN61oZnFqBwVjkj2
-> ZfdFtuZj1/W1+ddHnVbM0xz3asM7kUJUblPMGBXH+jVTr2Jq9/ftqB/fh3hS
-> 45QGSjET6KJOPd3W3S2Kqbccpf2UZAThPFLz1+oNCls3Efn/3sBOsbQJNNBr
-> tSq3nJKa7oUqDF0Fs2hRQzEzYu5MnV9dN8dmW9eZSs3tbTtcWVQjfYve1NP1
-> +udkXyPQtnc4YY5EvDi/Xn6Yoh6NHxkbw2hZa1WmEQEbTb3X4CBZHNKLXAxR
-> Yx1PW08UPQrdhxUwQ41khvcVlElx9DLPwGnMlZQzvF4wnuEPqBSFNCqB2Eeh
-> pEB81e5gnR2Qwx7oHywh2aZpTxf9ybUsQvaCBettqmSUB66N36V/3eGTfHQH
-> CDdMw02iBD6PpG/FNq6Nkyh7D5y8duz2zrN2rvD1gpMWcssFIhbcXzH1ba4S
-> VZhU
-> =FBbh
-> -----END PGP SIGNATURE-----
-> ----------------
-> Robert LeBlanc
-> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-> 
-> 
-> On Mon, Mar 7, 2016 at 12:56 PM, Matt Benjamin <mbenjamin@redhat.com> wrote:
-> > Hi Robert,
-> >
-> > What were you unable to do with Boost intrusive avl_set/rbtree/avltree in
-> > versions below 1.6?
-> >
-> > Matt
-> >
-> > ----- Original Message -----
-> >> From: "Robert LeBlanc" <robert@leblancnet.us>
-> >> To: "Abhishek Lekshmanan" <abhishek@suse.com>
-> >> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-> >> Sent: Monday, March 7, 2016 12:31:22 PM
-> >> Subject: Re: master build failure with boost 1.60
-> >>
-> >> -----BEGIN PGP SIGNED MESSAGE-----
-> >> Hash: SHA256
-> >>
-> >> If we use boost 1.60, we can use intrusive maps which would be a lot
-> >> easier in that code. I had to not use them to keep compatibility with
-> >> older versions. I'm surprised that it is broken in newer versions.
-> >> I'll see if I can figure out what is going wrong here.
-> >> -----BEGIN PGP SIGNATURE-----
-> >> Version: Mailvelope v1.3.6
-> >> Comment: https://www.mailvelope.com
-> >>
-> >> wsFcBAEBCAAQBQJW3brlCRDmVDuy+mK58QAAUkEQAK29Zc6W3IgBung03c1T
-> >> md86mP1i6uBqyA4oFTmM4r4CF5dCQRrrAHXSd/1cM9bcvFmsir1LAjEalKaP
-> >> f8P+lOPbHE8InQBe1b/pcS9vC2CaK8QeceONJBaEzlqwMaGFsIIFvlUd38jf
-> >> 7Az/GlfRL+34LxAnShXQQJNTy8U7qqGp4ugRZSVPz9QaZDOayArfv3mlwzpD
-> >> rzmXDWeq4JqGhtKdwlWiGdB6EF7t9BdbFzYFCcUyJ5v9G3kTMQJ7ROnv4Zu2
-> >> ZoPVKcQ0wnjwxQSZVLGnvw1sYHeO9vUItqaMDl3RjpQrjXx25FpNY/9NrInT
-> >> b14V/yEaDVyK1y85a2nLTwVVkRPq8GMXIJtvkCSV5sS2Zoo8Y85sX8SAL6qq
-> >> y/hn4Uq73T+CBGq3Gy6Key7VnvzGcq9EvVw+3UnMkaxdyZOAQy/ly0lYLjpF
-> >> SBw51h9ExPpl0pRACkkoa+64NeAlej3Zqk2c2EgB4+WGjuUhdSMxSmSmhLDw
-> >> +VYQhz/GMHB+M7AkNIW9Cgo/muCM5jbhkU6wbHB6fKvohpA23UwWXBsK6AU+
-> >> xjWJw0PuSYwpUsKYoD/U4F0YUDM39CQC6qpP1iCeVeptiuKzg7JWi0jh7myN
-> >> mkuSjPo90ypaLa3kioX69Hr9BcCTTZ82wMjn44A5e3PV8Tvict2CYmCua57U
-> >> Stp2
-> >> =DdLX
-> >> -----END PGP SIGNATURE-----
-> >> ----------------
-> >> Robert LeBlanc
-> >> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-> >>
-> >>
-> >> On Mon, Mar 7, 2016 at 9:47 AM, Abhishek Lekshmanan <abhishek@suse.com>
-> >> wrote:
-> >> >
-> >> >
-> >> > On 03/07/2016 03:49 PM, Karol Mroz wrote:
-> >> >> Hi folks,
-> >> >>
-> >> >> We've recently hit a build failure on ceph master for which Abhishek
-> >> >> has
-> >> >> opened
-> >> >> a bug: http://tracker.ceph.com/issues/14998.
-> >> >>
-> >> >> Our rolling distribution (openSUSE Tumbleweed) has pushed out boost
-> >> >> 1.60
-> >> >> which looks to be at the heart of the failure. Is boost 1.60 to be
-> >> >> supported in
-> >> >> Jewel?
-> >> >
-> >> > Reverting https://github.com/ceph/ceph/pull/7654 makes the build
-> >> > succeed, of course that is not the solution, but might indicate where we
-> >> > may need fixing
-> >> >
-> >> > Regards
-> >> > Abhishek
-> >> >
-> >> >> Thanks!
-> >> >>
-> >> >
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >
-> > --
-> > Matt Benjamin
-> > Red Hat, Inc.
-> > 315 West Huron Street, Suite 140A
-> > Ann Arbor, Michigan 48103
-> >
-> > http://www.redhat.com/en/technologies/storage
-> >
-> > tel.  734-707-0660
-> > fax.  734-769-8938
-> > cel.  734-216-5309
-> 
-
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+On Sat, Mar 5, 2016 at 9:55 AM,  <scan-admin@coverity.com> wrote:
+>
+> Hi,
+>
+> Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+>
+> 72 new defect(s) introduced to ceph found with Coverity Scan.
+> 29 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+>
+> New defect(s) Reported-by: Coverity Scan
+> Showing 20 of 72 defect(s)
+>
+>
+> ** CID 1355178:    (BAD_SHIFT)
+> /common/strtol.cc: 173 in strict_si_cast<int>(const char *, std::basic_string<char, std::char_traits<char>, std::allocator<char>>*)()
+> /common/strtol.cc: 173 in strict_si_cast<int>(const char *, std::basic_string<char, std::char_traits<char>, std::allocator<char>>*)()
+> /common/strtol.cc: 173 in strict_si_cast<int>(const char *, std::basic_string<char, std::char_traits<char>, std::allocator<char>>*)()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355178:    (BAD_SHIFT)
+> /common/strtol.cc: 173 in strict_si_cast<int>(const char *, std::basic_string<char, std::char_traits<char>, std::allocator<char>>*)()
+> 167         return 0;
+> 168       }
+> 169       if (ll < (long long)std::numeric_limits<T>::min() >> m) {
+> 170         *err = "strict_sistrtoll: value seems to be too small";
+> 171         return 0;
+> 172       }
+>>>>     CID 1355178:    (BAD_SHIFT)
+>>>>     In expression "0x7fffffff >> m", right shifting by more than 31 bits has undefined behavior.  The shift amount, "m", is 40.
+> 173       if (ll > std::numeric_limits<T>::max() >> m) {
+> 174         *err = "strict_sistrtoll: value seems to be too large";
+> 175         return 0;
+> 176
+> 177       }
+> 178       return (ll << m);
+> /common/strtol.cc: 173 in strict_si_cast<int>(const char *, std::basic_string<char, std::char_traits<char>, std::allocator<char>>*)()
+> 167         return 0;
+> 168       }
+> 169       if (ll < (long long)std::numeric_limits<T>::min() >> m) {
+> 170         *err = "strict_sistrtoll: value seems to be too small";
+> 171         return 0;
+> 172       }
+>>>>     CID 1355178:    (BAD_SHIFT)
+>>>>     In expression "0x7fffffff >> m", right shifting by more than 31 bits has undefined behavior.  The shift amount, "m", is 50.
+> 173       if (ll > std::numeric_limits<T>::max() >> m) {
+> 174         *err = "strict_sistrtoll: value seems to be too large";
+> 175         return 0;
+> 176
+> 177       }
+> 178       return (ll << m);
+> /common/strtol.cc: 173 in strict_si_cast<int>(const char *, std::basic_string<char, std::char_traits<char>, std::allocator<char>>*)()
+> 167         return 0;
+> 168       }
+> 169       if (ll < (long long)std::numeric_limits<T>::min() >> m) {
+> 170         *err = "strict_sistrtoll: value seems to be too small";
+> 171         return 0;
+> 172       }
+>>>>     CID 1355178:    (BAD_SHIFT)
+>>>>     In expression "0x7fffffff >> m", right shifting by more than 31 bits has undefined behavior.  The shift amount, "m", is 60.
+> 173       if (ll > std::numeric_limits<T>::max() >> m) {
+> 174         *err = "strict_sistrtoll: value seems to be too large";
+> 175         return 0;
+> 176
+> 177       }
+> 178       return (ll << m);
+>
+> ** CID 1355179:  Control flow issues  (DEADCODE)
+> /common/strtol.cc: 170 in strict_si_cast<unsigned long>(const char *, std::basic_string<char, std::char_traits<char>, std::allocator<char>>*)()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355179:  Control flow issues  (DEADCODE)
+> /common/strtol.cc: 170 in strict_si_cast<unsigned long>(const char *, std::basic_string<char, std::char_traits<char>, std::allocator<char>>*)()
+> 164       long long ll = strict_strtoll(s.c_str(), 10, err);
+> 165       if (ll < 0 && !std::numeric_limits<T>::is_signed) {
+> 166         *err = "strict_sistrtoll: value should not be negative";
+> 167         return 0;
+> 168       }
+> 169       if (ll < (long long)std::numeric_limits<T>::min() >> m) {
+>>>>     CID 1355179:  Control flow issues  (DEADCODE)
+>>>>     Execution cannot reach this statement: "(*err) = ("strict_sistrtoll...".
+> 170         *err = "strict_sistrtoll: value seems to be too small";
+> 171         return 0;
+> 172       }
+> 173       if (ll > std::numeric_limits<T>::max() >> m) {
+> 174         *err = "strict_sistrtoll: value seems to be too large";
+> 175         return 0;
+>
+> ** CID 1355180:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 1833 in __pyx_pw_6cephfs_1cstr()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355180:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 1833 in __pyx_pw_6cephfs_1cstr()
+> 1827           }
+> 1828           kw_args = PyDict_Size(__pyx_kwds);
+> 1829           switch (pos_args) {
+> 1830             case  0:
+> 1831             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_val)) != 0)) kw_args--;
+> 1832             else goto __pyx_L5_argtuple_error;
+>>>>     CID 1355180:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 1833             case  1:
+> 1834             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_name)) != 0)) kw_args--;
+> 1835             else {
+> 1836               __Pyx_RaiseArgtupleInvalid("cstr", 0, 2, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 1837             }
+> 1838             case  2:
+>
+> ** CID 1355181:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 1838 in __pyx_pw_6cephfs_1cstr()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355181:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 1838 in __pyx_pw_6cephfs_1cstr()
+> 1832             else goto __pyx_L5_argtuple_error;
+> 1833             case  1:
+> 1834             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_name)) != 0)) kw_args--;
+> 1835             else {
+> 1836               __Pyx_RaiseArgtupleInvalid("cstr", 0, 2, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 1837             }
+>>>>     CID 1355181:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 1838             case  2:
+> 1839             if (kw_args > 0) {
+> 1840               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_encoding);
+> 1841               if (value) { values[2] = value; kw_args--; }
+> 1842             }
+> 1843             case  3:
+>
+> ** CID 1355182:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 1843 in __pyx_pw_6cephfs_1cstr()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355182:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 1843 in __pyx_pw_6cephfs_1cstr()
+> 1837             }
+> 1838             case  2:
+> 1839             if (kw_args > 0) {
+> 1840               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_encoding);
+> 1841               if (value) { values[2] = value; kw_args--; }
+> 1842             }
+>>>>     CID 1355182:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 1843             case  3:
+> 1844             if (kw_args > 0) {
+> 1845               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_opt);
+> 1846               if (value) { values[3] = value; kw_args--; }
+> 1847             }
+> 1848           }
+>
+> ** CID 1355183:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2089 in __pyx_pw_6cephfs_3cstr_list()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355183:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2089 in __pyx_pw_6cephfs_3cstr_list()
+> 2083           }
+> 2084           kw_args = PyDict_Size(__pyx_kwds);
+> 2085           switch (pos_args) {
+> 2086             case  0:
+> 2087             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_list_str)) != 0)) kw_args--;
+> 2088             else goto __pyx_L5_argtuple_error;
+>>>>     CID 1355183:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 2089             case  1:
+> 2090             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_name)) != 0)) kw_args--;
+> 2091             else {
+> 2092               __Pyx_RaiseArgtupleInvalid("cstr_list", 0, 2, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 2093             }
+> 2094             case  2:
+>
+> ** CID 1355184:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2094 in __pyx_pw_6cephfs_3cstr_list()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355184:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2094 in __pyx_pw_6cephfs_3cstr_list()
+> 2088             else goto __pyx_L5_argtuple_error;
+> 2089             case  1:
+> 2090             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_name)) != 0)) kw_args--;
+> 2091             else {
+> 2092               __Pyx_RaiseArgtupleInvalid("cstr_list", 0, 2, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 2093             }
+>>>>     CID 1355184:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 2094             case  2:
+> 2095             if (kw_args > 0) {
+> 2096               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_encoding);
+> 2097               if (value) { values[2] = value; kw_args--; }
+> 2098             }
+> 2099           }
+>
+> ** CID 1355185:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2299 in __pyx_pw_6cephfs_5decode_cstr()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355185:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2299 in __pyx_pw_6cephfs_5decode_cstr()
+> 2293           }
+> 2294           kw_args = PyDict_Size(__pyx_kwds);
+> 2295           switch (pos_args) {
+> 2296             case  0:
+> 2297             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_val)) != 0)) kw_args--;
+> 2298             else goto __pyx_L5_argtuple_error;
+>>>>     CID 1355185:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 2299             case  1:
+> 2300             if (kw_args > 0) {
+> 2301               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_encoding);
+> 2302               if (value) { values[1] = value; kw_args--; }
+> 2303             }
+> 2304           }
+>
+> ** CID 1355186:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 4558 in __pyx_pw_6cephfs_9LibCephFS_17__exit__()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355186:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 4558 in __pyx_pw_6cephfs_9LibCephFS_17__exit__()
+> 4552           }
+> 4553           kw_args = PyDict_Size(__pyx_kwds);
+> 4554           switch (pos_args) {
+> 4555             case  0:
+> 4556             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_type)) != 0)) kw_args--;
+> 4557             else goto __pyx_L5_argtuple_error;
+>>>>     CID 1355186:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 4558             case  1:
+> 4559             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_value)) != 0)) kw_args--;
+> 4560             else {
+> 4561               __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 4562             }
+> 4563             case  2:
+>
+> ** CID 1355187:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 4563 in __pyx_pw_6cephfs_9LibCephFS_17__exit__()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355187:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 4563 in __pyx_pw_6cephfs_9LibCephFS_17__exit__()
+> 4557             else goto __pyx_L5_argtuple_error;
+> 4558             case  1:
+> 4559             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_value)) != 0)) kw_args--;
+> 4560             else {
+> 4561               __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 4562             }
+>>>>     CID 1355187:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 4563             case  2:
+> 4564             if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_traceback)) != 0)) kw_args--;
+> 4565             else {
+> 4566               __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 4567             }
+> 4568           }
+>
+> ** CID 1355188:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 5345 in __pyx_pw_6cephfs_9LibCephFS_25conf_set()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355188:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 5345 in __pyx_pw_6cephfs_9LibCephFS_25conf_set()
+> 5339           }
+> 5340           kw_args = PyDict_Size(__pyx_kwds);
+> 5341           switch (pos_args) {
+> 5342             case  0:
+> 5343             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_option)) != 0)) kw_args--;
+> 5344             else goto __pyx_L5_argtuple_error;
+>>>>     CID 1355188:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 5345             case  1:
+> 5346             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_val)) != 0)) kw_args--;
+> 5347             else {
+> 5348               __Pyx_RaiseArgtupleInvalid("conf_set", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 439; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 5349             }
+> 5350           }
+>
+> ** CID 1355189:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2874 in __pyx_pw_6cephfs_9LibCephFS_3__cinit__()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355189:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2874 in __pyx_pw_6cephfs_9LibCephFS_3__cinit__()
+> 2868           switch (pos_args) {
+> 2869             case  0:
+> 2870             if (kw_args > 0) {
+> 2871               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_conf);
+> 2872               if (value) { values[0] = value; kw_args--; }
+> 2873             }
+>>>>     CID 1355189:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 2874             case  1:
+> 2875             if (kw_args > 0) {
+> 2876               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_conffile);
+> 2877               if (value) { values[1] = value; kw_args--; }
+> 2878             }
+> 2879             case  2:
+>
+> ** CID 1355190:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2879 in __pyx_pw_6cephfs_9LibCephFS_3__cinit__()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355190:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2879 in __pyx_pw_6cephfs_9LibCephFS_3__cinit__()
+> 2873             }
+> 2874             case  1:
+> 2875             if (kw_args > 0) {
+> 2876               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_conffile);
+> 2877               if (value) { values[1] = value; kw_args--; }
+> 2878             }
+>>>>     CID 1355190:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 2879             case  2:
+> 2880             if (kw_args > 0) {
+> 2881               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_auth_id);
+> 2882               if (value) { values[2] = value; kw_args--; }
+> 2883             }
+> 2884             case  3:
+>
+> ** CID 1355191:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2884 in __pyx_pw_6cephfs_9LibCephFS_3__cinit__()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355191:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 2884 in __pyx_pw_6cephfs_9LibCephFS_3__cinit__()
+> 2878             }
+> 2879             case  2:
+> 2880             if (kw_args > 0) {
+> 2881               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_auth_id);
+> 2882               if (value) { values[2] = value; kw_args--; }
+> 2883             }
+>>>>     CID 1355191:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 2884             case  3:
+> 2885             if (kw_args > 0) {
+> 2886               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_rados_inst);
+> 2887               if (value) { values[3] = value; kw_args--; }
+> 2888             }
+> 2889           }
+>
+> ** CID 1355192:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 7401 in __pyx_pw_6cephfs_9LibCephFS_45mkdir()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355192:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 7401 in __pyx_pw_6cephfs_9LibCephFS_45mkdir()
+> 7395           }
+> 7396           kw_args = PyDict_Size(__pyx_kwds);
+> 7397           switch (pos_args) {
+> 7398             case  0:
+> 7399             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_path)) != 0)) kw_args--;
+> 7400             else goto __pyx_L5_argtuple_error;
+>>>>     CID 1355192:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 7401             case  1:
+> 7402             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_mode)) != 0)) kw_args--;
+> 7403             else {
+> 7404               __Pyx_RaiseArgtupleInvalid("mkdir", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 557; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 7405             }
+> 7406           }
+>
+> ** CID 1355193:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 7686 in __pyx_pw_6cephfs_9LibCephFS_47mkdirs()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355193:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 7686 in __pyx_pw_6cephfs_9LibCephFS_47mkdirs()
+> 7680           }
+> 7681           kw_args = PyDict_Size(__pyx_kwds);
+> 7682           switch (pos_args) {
+> 7683             case  0:
+> 7684             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_path)) != 0)) kw_args--;
+> 7685             else goto __pyx_L5_argtuple_error;
+>>>>     CID 1355193:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 7686             case  1:
+> 7687             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_mode)) != 0)) kw_args--;
+> 7688             else {
+> 7689               __Pyx_RaiseArgtupleInvalid("mkdirs", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 570; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 7690             }
+> 7691           }
+>
+> ** CID 1355194:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 8140 in __pyx_pw_6cephfs_9LibCephFS_51open()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355194:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 8140 in __pyx_pw_6cephfs_9LibCephFS_51open()
+> 8134           }
+> 8135           kw_args = PyDict_Size(__pyx_kwds);
+> 8136           switch (pos_args) {
+> 8137             case  0:
+> 8138             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_path)) != 0)) kw_args--;
+> 8139             else goto __pyx_L5_argtuple_error;
+>>>>     CID 1355194:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 8140             case  1:
+> 8141             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_flags)) != 0)) kw_args--;
+> 8142             else {
+> 8143               __Pyx_RaiseArgtupleInvalid("open", 0, 2, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 592; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 8144             }
+> 8145             case  2:
+>
+> ** CID 1355195:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 8145 in __pyx_pw_6cephfs_9LibCephFS_51open()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355195:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 8145 in __pyx_pw_6cephfs_9LibCephFS_51open()
+> 8139             else goto __pyx_L5_argtuple_error;
+> 8140             case  1:
+> 8141             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_flags)) != 0)) kw_args--;
+> 8142             else {
+> 8143               __Pyx_RaiseArgtupleInvalid("open", 0, 2, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 592; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 8144             }
+>>>>     CID 1355195:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 8145             case  2:
+> 8146             if (kw_args > 0) {
+> 8147               PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_mode);
+> 8148               if (value) { values[2] = value; kw_args--; }
+> 8149             }
+> 8150           }
+>
+> ** CID 1355196:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 8942 in __pyx_pw_6cephfs_9LibCephFS_55read()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355196:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 8942 in __pyx_pw_6cephfs_9LibCephFS_55read()
+> 8936           }
+> 8937           kw_args = PyDict_Size(__pyx_kwds);
+> 8938           switch (pos_args) {
+> 8939             case  0:
+> 8940             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_fd)) != 0)) kw_args--;
+> 8941             else goto __pyx_L5_argtuple_error;
+>>>>     CID 1355196:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 8942             case  1:
+> 8943             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_offset)) != 0)) kw_args--;
+> 8944             else {
+> 8945               __Pyx_RaiseArgtupleInvalid("read", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 635; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 8946             }
+> 8947             case  2:
+>
+> ** CID 1355197:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 8947 in __pyx_pw_6cephfs_9LibCephFS_55read()
+>
+>
+> ________________________________________________________________________________________________________
+> *** CID 1355197:  Control flow issues  (MISSING_BREAK)
+> /build/cephfs.c: 8947 in __pyx_pw_6cephfs_9LibCephFS_55read()
+> 8941             else goto __pyx_L5_argtuple_error;
+> 8942             case  1:
+> 8943             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_offset)) != 0)) kw_args--;
+> 8944             else {
+> 8945               __Pyx_RaiseArgtupleInvalid("read", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 635; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 8946             }
+>>>>     CID 1355197:  Control flow issues  (MISSING_BREAK)
+>>>>     The above case falls through to this one.
+> 8947             case  2:
+> 8948             if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_l)) != 0)) kw_args--;
+> 8949             else {
+> 8950               __Pyx_RaiseArgtupleInvalid("read", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 635; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+> 8951             }
+> 8952           }
+>
+>
+> ________________________________________________________________________________________________________
+> To view the defects in Coverity Scan visit, https://scan.coverity.com/projects/ceph?tab=overview
+>
+> To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
