@@ -1,48 +1,62 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: all OSDs crash at more or less the same time
-Date: Mon, 7 Mar 2016 00:37:59 +0100
-Message-ID: <56DCBF57.10008@digiware.nl>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: Re: [ceph] what's going on with d_rehash() in splice_dentry()?
+Date: Mon, 7 Mar 2016 02:16:39 +0000
+Message-ID: <20160307021639.GR17997@ZenIV.linux.org.uk>
+References: <20160226174250.GA17997@ZenIV.linux.org.uk>
+ <alpine.DEB.2.11.1603010946290.24758@cpach.fuggernut.com>
+ <B17B70FF-4B76-4593-9D96-F0298F83AEB3@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:63438 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751575AbcCFXiV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 6 Mar 2016 18:38:21 -0500
-Received: from rack1.digiware.nl (unknown [127.0.0.1])
-	by smtp.digiware.nl (Postfix) with ESMTP id 53AED153413
-	for <ceph-devel@vger.kernel.org>; Mon,  7 Mar 2016 00:38:16 +0100 (CET)
-Received: from [192.168.10.10] (asus [192.168.10.10])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.digiware.nl (Postfix) with ESMTPSA id 0895C153401
-	for <ceph-devel@vger.kernel.org>; Mon,  7 Mar 2016 00:38:00 +0100 (CET)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <B17B70FF-4B76-4593-9D96-F0298F83AEB3@redhat.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+On Wed, Mar 02, 2016 at 11:00:01AM +0800, Yan, Zheng wrote:
 
-While running cephtool-test-rados.sh "all of a sudden" the OSDs
-disapear, I had one of the logs open which contained at the end:
+> > This code dates back to when Ceph was originally upstreamed, so the 
+> > history is murky, but I expect at that point I wanted to avoid hashing in 
+> > the no-lease case.  But I don't think it matters.  We should just remove 
+> > the prehash argument from splice_dentry entirely.
+> > 
+> > Zheng, does that sound right?
+> 
+> Yes. I think we can remove the d_rehash(dn) call and rehash parameter.
 
-    -2> 2016-03-06 21:56:02.073226 80569ed00  1 heartbeat_map is_healthy
-'OSD::osd_op_tp thread 0x806795200' had timed out after 15
-    -1> 2016-03-06 21:56:02.073248 80569ed00  1 heartbeat_map is_healthy
-'OSD::osd_op_tp thread 0x806795200' had suicide timed out after 150
-     0> 2016-03-06 21:56:02.113948 80569ed00 -1 common/HeartbeatMap.cc:
-In function 'bool ceph::HeartbeatMap::_check(const ceph::heartbeat_handle_d
-*, const char *, time_t)' thread 80569ed00 time 2016-03-06 21:56:02.073269
-common/HeartbeatMap.cc: 86: FAILED assert(0 == "hit suicide timeout")
-
-the monitor is still running. It claims the heartbeat_map is valid, but
-still it suicides??
-
-And what messages would prevent this from happening?
-Receiving heartbeats from other OSDs?
-
-IF so how would a 2 OSD server even survive when its connection would be
-split for longer than 2,5 minute?
-
---WjW
+Another question in the same general area:
+                /* null dentry? */
+                if (!rinfo->head->is_target) {
+                        dout("fill_trace null dentry\n");
+                        if (d_really_is_positive(dn)) {
+                                ceph_dir_clear_ordered(dir);
+                                dout("d_delete %p\n", dn);
+                                d_delete(dn);
+                        } else {
+                                dout("d_instantiate %p NULL\n", dn);
+                                d_instantiate(dn, NULL);
+                                if (have_lease && d_unhashed(dn))
+                                        d_rehash(dn);
+                                update_dentry_lease(dn, rinfo->dlease,
+                                                    session,
+                                                    req->r_request_started);
+                        }
+                        goto done;
+                }
+What's that d_instantiate() about?  We have just checked that it's
+negative; what's the point of setting ->d_inode to NULL again?  Would it
+be OK if we just do
+			} else {
+				if (have_lease && d_unhashed(dn))
+					d_add(dn, NULL);
+                                update_dentry_lease(dn, rinfo->dlease,
+                                                    session,
+                                                    req->r_request_started);
+                        }
+in there?  As an aside, tracking back to the originating fs method is
+painful as hell ;-/  I _think_ that rehash can be hit during ->lookup()
+returning a negative, but I wouldn't bet a dime on it not happening from
+other methods...  AFAICS, the change should be OK regardless of what
+it's been called from, but... _ouch_.  Is is documented anywhere public?
