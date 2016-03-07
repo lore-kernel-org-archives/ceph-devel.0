@@ -1,80 +1,75 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
+From: Robert LeBlanc <robert@leblancnet.us>
 Subject: Re: master build failure with boost 1.60
-Date: Mon, 7 Mar 2016 17:47:44 +0100
-Message-ID: <56DDB0B0.2090005@suse.com>
+Date: Mon, 7 Mar 2016 10:31:22 -0700
+Message-ID: <CAANLjFqR2TDcuCQh=Avo5UyDNskjStPt5o_Jk3ehJ4Bhug1whg@mail.gmail.com>
 References: <20160307144944.GA21590@pxe-sup5.sup.suse.de>
+	<56DDB0B0.2090005@suse.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="rXNluPJPrCEJpxIlVCKDFjgTRGBQ48kp4"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:47972 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752418AbcCGQsA (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Mon, 7 Mar 2016 11:48:00 -0500
-In-Reply-To: <20160307144944.GA21590@pxe-sup5.sup.suse.de>
+Received: from mail-vk0-f41.google.com ([209.85.213.41]:33752 "EHLO
+	mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752316AbcCGRbX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2016 12:31:23 -0500
+Received: by mail-vk0-f41.google.com with SMTP id k1so108669144vkb.0
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Mar 2016 09:31:22 -0800 (PST)
+In-Reply-To: <56DDB0B0.2090005@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Abhishek Lekshmanan <abhishek@suse.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---rXNluPJPrCEJpxIlVCKDFjgTRGBQ48kp4
-Content-Type: multipart/mixed; boundary="XBmC4wvJD4Bq8J8ESv8wQbmX3u8ajpBLn"
-From: Abhishek Lekshmanan <abhishek@suse.com>
-To: ceph-devel@vger.kernel.org
-Message-ID: <56DDB0B0.2090005@suse.com>
-Subject: Re: master build failure with boost 1.60
-References: <20160307144944.GA21590@pxe-sup5.sup.suse.de>
-In-Reply-To: <20160307144944.GA21590@pxe-sup5.sup.suse.de>
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
---XBmC4wvJD4Bq8J8ESv8wQbmX3u8ajpBLn
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
-
-
-
-On 03/07/2016 03:49 PM, Karol Mroz wrote:
-> Hi folks,
->=20
-> We've recently hit a build failure on ceph master for which Abhishek ha=
-s opened
-> a bug: http://tracker.ceph.com/issues/14998.
->
-> Our rolling distribution (openSUSE Tumbleweed) has pushed out boost 1.6=
-0
-> which looks to be at the heart of the failure. Is boost 1.60 to be supp=
-orted in
-> Jewel?
-
-Reverting https://github.com/ceph/ceph/pull/7654 makes the build
-succeed, of course that is not the solution, but might indicate where we
-may need fixing
-
-Regards
-Abhishek
-
-> Thanks!
->=20
-
-
---XBmC4wvJD4Bq8J8ESv8wQbmX3u8ajpBLn--
-
---rXNluPJPrCEJpxIlVCKDFjgTRGBQ48kp4
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
+If we use boost 1.60, we can use intrusive maps which would be a lot
+easier in that code. I had to not use them to keep compatibility with
+older versions. I'm surprised that it is broken in newer versions.
+I'll see if I can figure out what is going wrong here.
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+Version: Mailvelope v1.3.6
+Comment: https://www.mailvelope.com
 
-iQEcBAEBCAAGBQJW3bC9AAoJEPnwZB8bZe1fpmAH/3BtBTt2xdEL6gjKpWA3s5XT
-oVfMtl4fMMhdymsi4hXZYRUSqiwXb2ch1/phR/9Qe8CDjOVvKcJ/E63uZLhc7gIH
-0U5iTiZ2fggSvR1/BeXUQSBF8x3qz0D5lX9eTXwhgwSsgLKtPock/djuAVt1/AQP
-y7Zc4UZ8LvwPxQe3hFIM54xwM9Fn32G+BWyHIkzpc80h5WoD4RFfxOvB3SDBtoKY
-cgzzN9Kwxnvrau0aeIsa1U2HQcawfgH8ygDK0JP7XHf82hWZdcKc0h4qFy7SbA1G
-5V685Dn2HzNKf2VquHImWAvs9q7Ta4CJyOrvOdb5JEkTzTUROHMqpK9oC6sBf8o=
-=kNFF
+wsFcBAEBCAAQBQJW3brlCRDmVDuy+mK58QAAUkEQAK29Zc6W3IgBung03c1T
+md86mP1i6uBqyA4oFTmM4r4CF5dCQRrrAHXSd/1cM9bcvFmsir1LAjEalKaP
+f8P+lOPbHE8InQBe1b/pcS9vC2CaK8QeceONJBaEzlqwMaGFsIIFvlUd38jf
+7Az/GlfRL+34LxAnShXQQJNTy8U7qqGp4ugRZSVPz9QaZDOayArfv3mlwzpD
+rzmXDWeq4JqGhtKdwlWiGdB6EF7t9BdbFzYFCcUyJ5v9G3kTMQJ7ROnv4Zu2
+ZoPVKcQ0wnjwxQSZVLGnvw1sYHeO9vUItqaMDl3RjpQrjXx25FpNY/9NrInT
+b14V/yEaDVyK1y85a2nLTwVVkRPq8GMXIJtvkCSV5sS2Zoo8Y85sX8SAL6qq
+y/hn4Uq73T+CBGq3Gy6Key7VnvzGcq9EvVw+3UnMkaxdyZOAQy/ly0lYLjpF
+SBw51h9ExPpl0pRACkkoa+64NeAlej3Zqk2c2EgB4+WGjuUhdSMxSmSmhLDw
++VYQhz/GMHB+M7AkNIW9Cgo/muCM5jbhkU6wbHB6fKvohpA23UwWXBsK6AU+
+xjWJw0PuSYwpUsKYoD/U4F0YUDM39CQC6qpP1iCeVeptiuKzg7JWi0jh7myN
+mkuSjPo90ypaLa3kioX69Hr9BcCTTZ82wMjn44A5e3PV8Tvict2CYmCua57U
+Stp2
+=DdLX
 -----END PGP SIGNATURE-----
+----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
 
---rXNluPJPrCEJpxIlVCKDFjgTRGBQ48kp4--
+
+On Mon, Mar 7, 2016 at 9:47 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
+>
+>
+> On 03/07/2016 03:49 PM, Karol Mroz wrote:
+>> Hi folks,
+>>
+>> We've recently hit a build failure on ceph master for which Abhishek has opened
+>> a bug: http://tracker.ceph.com/issues/14998.
+>>
+>> Our rolling distribution (openSUSE Tumbleweed) has pushed out boost 1.60
+>> which looks to be at the heart of the failure. Is boost 1.60 to be supported in
+>> Jewel?
+>
+> Reverting https://github.com/ceph/ceph/pull/7654 makes the build
+> succeed, of course that is not the solution, but might indicate where we
+> may need fixing
+>
+> Regards
+> Abhishek
+>
+>> Thanks!
+>>
+>
