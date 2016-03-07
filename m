@@ -1,43 +1,37 @@
-From: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>
-Subject: RE: Unable to build ceph: Ubuntu 15.04 Ceph master
-Date: Mon, 7 Mar 2016 07:13:48 +0000
-Message-ID: <a42b395322314a42baf54463bd3d9b2e@R01UKEXCASM115.r01.fujitsu.local>
-References: <CAPLK-i8OBSir0ad7whXp7pwNZ_nXhu1GB_G5okhqhzsH5pWzyA@mail.gmail.com>
+From: Ric Wheeler <rwheeler@redhat.com>
+Subject: Re: ceph-disk disk partition alignment
+Date: Mon, 7 Mar 2016 13:37:37 +0530
+Message-ID: <56DD36C9.9060406@redhat.com>
+References: <BN1PR02MB0555D538EB56A2908359F32F4A30@BN1PR02MB055.namprd02.prod.outlook.com>
+ <56CBEA15.4090309@dachary.org>
+ <BN1PR02MB0550FC810BB08A29F672683F4A40@BN1PR02MB055.namprd02.prod.outlook.com>
+ <56CBF2DB.10602@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail1.bemta3.messagelabs.com ([195.245.230.163]:15789 "EHLO
-	mail1.bemta3.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752025AbcCGHVL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2016 02:21:11 -0500
-In-Reply-To: <CAPLK-i8OBSir0ad7whXp7pwNZ_nXhu1GB_G5okhqhzsH5pWzyA@mail.gmail.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:54870 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751958AbcCGIHt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 7 Mar 2016 03:07:49 -0500
+In-Reply-To: <56CBF2DB.10602@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shehbaz Jaffer <shehbazjaffer007@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
-Z10gT24gQmVoYWxmIE9mIFNoZWhiYXogSmFmZmVyDQo+IFNlbnQ6IEZyaWRheSwgTWFyY2ggMDQs
-IDIwMTYgMzo0MiBQTQ0KPiANCj4gDQo+IEkgaGF2ZSBjbG9uZWQgY2VwaCBmcm9tIGdpdCBtYXN0
-ZXIgYnJhbmNoLiBJIGFtIGdldHRpbmcgdGhlIGZvbGxvd2luZyBlcnJvcnMNCj4gd2hpbGUgYnVp
-bGQ6DQo+IA0KPiBbLi5dDQo+IA0KPiAgIENYWExEICAgIGNlcGgtZGVuY29kZXINCj4gcmd3L2Nl
-cGhfZGVuY29kZXItcmd3X2RlbmNvZGVyLm86IEluIGZ1bmN0aW9uDQo+IGBSR1dab25lR3JvdXA6
-OmdlbmVyYXRlX3Rlc3RfaW5zdGFuY2VzKHN0ZDo6bGlzdDxSR1dab25lR3JvdXAqLA0KPiBzdGQ6
-OmFsbG9jYXRvcjxSR1dab25lR3JvdXAqPiA+JiknOg0KPiAvaG9tZS9zaGVoYmF6L2dzb2MvY2Vw
-aC9jZXBoL3NyYy9yZ3cvcmd3X3JhZG9zLmg6MTA5NTogdW5kZWZpbmVkDQo+IHJlZmVyZW5jZSB0
-byBgdnRhYmxlIGZvciBSR1dab25lR3JvdXAnDQo+IFsuLl0NCj4gDQo+IEkgYWxzbyBmb3VuZCBh
-IHNpbWlsYXIgcmVwb3J0IGhlcmU6DQo+IA0KPiBodHRwOi8vY2VwaC5wcmVkaWN0b3Iub3JnLnBs
-L3Jnd192dGFibGUudHh0DQo+IA0KPiBCdXQgYSBzb2x1dGlvbiB0byB0aGUgcHJvYmxlbSBpcyBu
-b3QgcHJvdmlkZWQuDQoNClNvcnJ5IHRvIGJlIGxhdGUgdG8gcGFydHkuIEluIG15IGNhc2UsIEkg
-d2Fzbid0IHByb3ZpZGluZyAtLXdpdGgtcmFkb3NndyB0byBjb25maWd1cmUgc2NyaXB0ICphbmQq
-IEkgaGFkIG5vIGZjZ2kgYW5kIGZjZ2ktZGV2ZWwgKENlbnRPUyA2KSBpbnN0YWxsZWQgb24gYnVp
-bGQgbm9kZXMsIHdoaWNoIHdhcyBleHRyZW1lbHkgY29uZnVzaW5nIGZvciBtZSBzaW5jZSBpdCBi
-dWlsdCBmaW5lIGRheSBlYXJsaWVyIGFuZCBuZXh0IGRheSBvbmx5IG9uIG90aGVyIG5vZGUuIEkg
-YXNzdW1lZCBpdCB3YXMgc29tZXRoaW5nIG9uIG15IHNpZGUgc28gSSB3YXNuJ3Qgc2hhcmluZyBh
-bnkgZGV0YWlscy4gSW5zdGFsbGluZyBmY2dpIGFuZCBmY2dpLWRldmVsIGZpeGVkIHRoaW5ncyBm
-b3IgbWUsIGJ1dCBub3RlIHRoYXQncyBDZW50T1MgNi4NCg0KDQooSW4gdW5yZWxhdGVkIG5ld3Ms
-IGl0J3Mgc2NhcnkgdG8gc2VlIHRoYXQgYSBsaW5rIHNoYXJlZCBvbiBJUkMgY2hhbm5lbCBnZXRz
-IGluZGV4ZWQgYnkgR29vZ2xlIHNvIHF1aWNrbHkuLi4pDQoNCldpdGggYmVzdCByZWdhcmRzIC8g
-UG96ZHJhd2lhbQ0KUGlvdHIgRGHFgmVrDQoNCg==
+On 02/23/2016 11:19 AM, Loic Dachary wrote:
+> Here it is http://tracker.ceph.com/issues/14842
+>
+> On 23/02/2016 12:24, Somnath Roy wrote:
+>> eph-deploy is creating data partition from sector 1 ignoring what sgdisk is recommending (256 in my disk). Basically, it should be aligned with physical sector size (reported in /sys/block/<device>/queue/physical_block_size). In my case it is 16K physical and 4K logical...256 is perfectly fine as sgdisk/fdisk internally decides.
+>>> Disk performance will be severely impacted because of partitioning this way from ceph-deploy ,
+
+I think that more modern partition tools handle alignment better (and handle the 
+modern partition types) - sfdisk and parted both are better than fdisk I believe.
+
+For RHEL & Fedora, we try hard to make sure that we use the advertised alignment 
+when we create a partition and default to an alignment on sector 2048 (1MB) if 
+it is not set by the device.
+
+Ric
+
