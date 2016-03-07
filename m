@@ -1,58 +1,55 @@
-From: Karol Mroz <kmroz@suse.com>
-Subject: master build failure with boost 1.60
-Date: Mon, 7 Mar 2016 15:49:44 +0100
-Message-ID: <20160307144944.GA21590@pxe-sup5.sup.suse.de>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: Re: [ceph] what's going on with d_rehash() in splice_dentry()?
+Date: Mon, 7 Mar 2016 14:56:16 +0000
+Message-ID: <20160307145616.GT17997@ZenIV.linux.org.uk>
+References: <20160226174250.GA17997@ZenIV.linux.org.uk>
+ <alpine.DEB.2.11.1603010946290.24758@cpach.fuggernut.com>
+ <B17B70FF-4B76-4593-9D96-F0298F83AEB3@redhat.com>
+ <20160307021639.GR17997@ZenIV.linux.org.uk>
+ <alpine.DEB.2.11.1603070615370.25897@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="GvXjxJ+pjyke8COw"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.provo.novell.com ([137.65.250.81]:38134 "EHLO
-	smtp2.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752350AbcCGOtu (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Mon, 7 Mar 2016 09:49:50 -0500
-Content-Disposition: inline
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-
---GvXjxJ+pjyke8COw
 Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <alpine.DEB.2.11.1603070615370.25897@cpach.fuggernut.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi folks,
+On Mon, Mar 07, 2016 at 06:25:13AM -0500, Sage Weil wrote:
 
-We've recently hit a build failure on ceph master for which Abhishek has op=
-ened
-a bug: http://tracker.ceph.com/issues/14998.
+> That looks okay, but changing d_rehash to d_add still means you're doing 
+> te d_instantiate(dn, NULL) in the d_unhashed case; is there a reason you 
+> changed that line?  Is the dentry_rcuwalk_invalidate in __d_instantiate is 
+> important before rehashing?
 
-Our rolling distribution (openSUSE Tumbleweed) has pushed out boost 1.60
-which looks to be at the heart of the failure. Is boost 1.60 to be supporte=
-d in
-Jewel?
+d_add() gets uninlined in my queue, along with some locking massage to avoid
+extra bouncing of ->d_lock we do for no good reason.  So that call is also
+going away.
 
-Thanks!
+> > As an aside, tracking back to the originating fs method is
+> > painful as hell ;-/  I _think_ that rehash can be hit during ->lookup()
+> > returning a negative, but I wouldn't bet a dime on it not happening from
+> > other methods...  AFAICS, the change should be OK regardless of what
+> > it's been called from, but... _ouch_.  Is is documented anywhere public?
+> 
+> It is a pain to follow, yes. FWIW this whole block is predicated in 
+> req->r_locked_dir being non-NULL (i.e., VFS holds dir->i_mutex), which is 
+> only true for lookup, create operations (mkdir/mknod/symlink/etc.), 
+> atomic_open, and the .get_name export op.  There's not much documentation 
+> beyond a description of the meaning of fields (e.g. r_locked_dir) in 
+> fs/ceph/mds_client.h ...
 
---=20
-Regards,
-Karol
+Yes.  Now consider the plans to make ->i_mutex an rwsem and weaken it for
+->lookup() (i.e. held only shared when it's held for lookup alone).  IOW,
+the aforementioned queue...  I would rather avoid d_rehash() in ->lookup()
+instances; the tricky part is that we want to avoid parallel lookups on
+the *same* name, so we need an "in parallel lookup" state for dentries and
+mechanism allowing to wait for it to be finished.  d_add()/d_splice_alias()
+on such a dentry would take it out of that state and I would rather
+avoid dealing with it in d_rehash()...
 
---GvXjxJ+pjyke8COw
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJW3ZUGAAoJECp28bThgzat+bwH/3LzjqXuWbJoG17E77+fvIJj
-AgNz7YV1ebV86f5PET7JaKtTiZXo2FS/C1PhFnxr0wXHDb/moOAg34uIXfFd+hph
-ud3J2RMpP1NMHJMwAqFNfZrhBWd4LOG1B75MGNUBDZusgCrC1YsEHkvvX82YnzSf
-AT6WGSOgza62Ss7vUaqA29cd4Ft5VqWdF3Y1SM5oooP8CftTVgtk71r9UC0jL1FS
-vPMhcPIkwvwv6d0lPnBEubGjPt5ahMr/lX5JmYqueq/p9qiRJ3vVlfEEsr/Gc1IF
-tL8Fg/Q88lWvLmpC16nxZ4+gCQdErqhumeZjEkZP7Dk7smUkqtREPakRSu5J5Pc=
-=cVeO
------END PGP SIGNATURE-----
-
---GvXjxJ+pjyke8COw--
+I was going to post the series last week, got sidetracked on various fun
+things I'd found (ecryptfs and lustre).  Hopefully will get all of that
+sorted out and the whole series posted for review tomorrow or on Wednesday...
