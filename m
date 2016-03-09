@@ -1,71 +1,55 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: civetweb, sts work
-Date: Wed, 9 Mar 2016 10:32:09 -0500 (EST)
-Message-ID: <1570763779.63222893.1457537529135.JavaMail.zimbra@redhat.com>
-References: <20160309083504.GA1862@degu.b.linuxbox.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 03/09/2016 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 9 Mar 2016 09:33:00 -0600
+Message-ID: <56E0422C.5050507@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:33986 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932847AbcCIPcK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Mar 2016 10:32:10 -0500
-In-Reply-To: <20160309083504.GA1862@degu.b.linuxbox.com>
+Received: from mx1.redhat.com ([209.132.183.28]:49652 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932847AbcCIPdD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 9 Mar 2016 10:33:03 -0500
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id 911A232D3D1
+	for <ceph-devel@vger.kernel.org>; Wed,  9 Mar 2016 15:33:02 +0000 (UTC)
+Received: from [10.3.112.38] (ovpn-112-38.phx2.redhat.com [10.3.112.38])
+	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u29FX0bU011532
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 9 Mar 2016 10:33:02 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Marcus Watts <mwatts@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Marcus,
+8AM PST as usual! No set discussion topics today.  Please feel free to 
+add your own!
 
-Can you pull up wip-rgw-sts-3 (it's last commit from upstream looks to be Feb. 26).
+Here's the links:
 
-Thanks!
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
 
-Matt
+To join the Meeting:
+https://bluejeans.com/268261044
 
------ Original Message -----
-> From: "Marcus Watts" <mwatts@redhat.com>
-> To: ceph-devel@vger.kernel.org
-> Sent: Wednesday, March 9, 2016 3:35:04 AM
-> Subject: civetweb, sts work
-> 
-> I've just pushed out two new ceph branches, and I pushed out
-> a revised copy of civetweb that these both use.
-> 
-> I've pushed my git branches to git@github.com:ceph/ceph.git
-> They are:
-> wip-openssl-2
-> 	( based on recentish master. )
-> 	ssl patches (should be the same as what's already in master)
-> 	+ "build out of tree" am changes (as described previously)
-> 	+ civetweb "ng" changes.
-> 		I've managed to build this with both cmake and configure.
-> 		I haven't had time to do any testing past that yet.
-> 		It "should" all work of course...
-> wip-rgw-sts-3
-> 	everything that's in wip-openssl-2
-> 	+ rgw-sts work.
-> 	includes polymorphic rgw error object
-> 	split out of some parts of rgw rest interface into objstore
-> 		+ "generic" bits. (sts isn't an object store)
-> 	basic sts encode/decode stuff.
-> 		I've managed to build this with both cmake and configure.
-> 		I haven't had time to do any testing past that yet.
-> 		All the basic bits should work.
-> 		The radosgw parts should work if I haven't broken them.
-> 		The sts parts are still missing a lot of functionality.
-> 
+To join via Browser:
+https://bluejeans.com/268261044/browser
 
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+To join with Lync:
+https://bluejeans.com/268261044/lync
 
-http://www.redhat.com/en/technologies/storage
 
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
