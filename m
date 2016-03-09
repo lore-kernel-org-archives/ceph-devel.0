@@ -1,49 +1,55 @@
-From: Gerard Braad <me@gbraad.nl>
-Subject: Re: [Qemu-devel] [PATCH] add CephFS support in VirtFS
-Date: Wed, 9 Mar 2016 11:10:39 +0800
-Message-ID: <CAGrH30W3Q3WaOX+BKwzac=V2HDmLtWAivgKs3LOJwHndCkgw2w@mail.gmail.com>
-References: <56C00B60.6000502@gmail.com>
-	<20160215091727.GB3105@redhat.com>
-	<56C421F6.1000102@gmail.com>
-	<20160217093716.GC30300@redhat.com>
-	<56C520B7.60907@gmail.com>
+From: Veronica Estrada Galinanes <veg@ucsc.edu>
+Subject: Criteria behind disk scrubbing policy
+Date: Wed, 9 Mar 2016 00:21:15 -0800
+Message-ID: <CAKiXLjenBAB76AJ9qirL5Ff_GDz6E3sGXUie90xrsqydUqFVTw@mail.gmail.com>
+Reply-To: veg@ucsc.edu
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f174.google.com ([209.85.213.174]:34723 "EHLO
-	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750802AbcCIDKk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Mar 2016 22:10:40 -0500
-Received: by mail-ig0-f174.google.com with SMTP id av4so5736049igc.1
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Mar 2016 19:10:40 -0800 (PST)
-In-Reply-To: <56C520B7.60907@gmail.com>
+Received: from mail-io0-f170.google.com ([209.85.223.170]:32903 "EHLO
+	mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751451AbcCIIVQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Mar 2016 03:21:16 -0500
+Received: by mail-io0-f170.google.com with SMTP id n190so57533491iof.0
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Mar 2016 00:21:15 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jevon Qiao <scaleqiao@gmail.com>
-Cc: "Daniel P. Berrange" <berrange@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, qemu-devel@nongnu.org, haomaiwang@gmail.com, mst@redhat.com, aneesh.kumar@linux.vnet.ibm.com, Sage Weil <sage@newdream.net>, gfarnum@redhat.com, gkurz@linux.vnet.ibm.com
+To: ceph-devel@vger.kernel.org
 
-Hi All,
+=46rom ceph website: "Deep scrubbing (weekly) reads the data and uses
+checksums to ensure data integrity.=E2=80=9D
 
+1. Why do you use "weekly" deep scrubbing? How many times a year one di=
+sk
+is scrubbed on average in a Ceph cluster? Schwartz* used three times pe=
+r
+year. =E2=80=9CInterestingly, we did not observe a further decrease in =
+data loss as
+we increased the scrubbing frequency from three to eleven times per yea=
+r;
+rather, a slight increase in data loss was noticed. This phenomenon com=
+es
+from the POH (power-on-hour) effect on drive reliability. Aggressive
+scrubbing requires more power cycles, adversely affecting drive reliabi=
+lity.
+"
 
-It has been a while since anyone responded to this thread, and I am
-quite interested in this functionality.
-What can be done this get this merged?
+2. Do you have different scrubbing policies according to the redundancy
+method? For example, more scrubs when using replication rather than era=
+sure
+coding?
 
-=46or the details, please see:
+*Schwarz, Thomas JE, et al. "Disk scrubbing in large archival storage
+systems." *Modeling, Analysis, and Simulation of Computer and
+Telecommunications Systems, 2004.(MASCOTS 2004). Proceedings. The IEEE
+Computer Society's 12th Annual International Symposium on*. IEEE, 2004.
 
-  http://thread.gmane.org/gmane.comp.emulators.qemu/393583
-  http://thread.gmane.org/gmane.comp.file-systems.ceph.devel/29913
-
-regards,
-
-
-Gerard
+Thanks,
 
 --=20
-Gerard Braad =E2=80=94 =E5=90=89=E6=8B=89=E5=BE=B7
-   F/OSS & IT Consultant in Beijing
-   http://gbraad.nl  gpg: 0x592CFE75
+
+Vero EG
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
