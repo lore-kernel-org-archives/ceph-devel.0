@@ -1,144 +1,98 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: BlueStore Performance issue
-Date: Wed, 9 Mar 2016 08:54:06 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1603090842140.14377@cpach.fuggernut.com>
-References: <CY1PR0201MB189788B82C09E5D1DF7BDEE2E8B30@CY1PR0201MB1897.namprd02.prod.outlook.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: Criteria behind disk scrubbing policy
+Date: Wed, 9 Mar 2016 14:59:12 +0100
+Message-ID: <CABZ+qq=E6a6P7=R82nwf5yEFO6o+GAeZ2Mem_XB+8Jp4DKZyJQ@mail.gmail.com>
+References: <CAKiXLjenBAB76AJ9qirL5Ff_GDz6E3sGXUie90xrsqydUqFVTw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41188 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752810AbcCINy1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 9 Mar 2016 08:54:27 -0500
-In-Reply-To: <CY1PR0201MB189788B82C09E5D1DF7BDEE2E8B30@CY1PR0201MB1897.namprd02.prod.outlook.com>
+Received: from mail-lb0-f179.google.com ([209.85.217.179]:33900 "EHLO
+	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750823AbcCIOAK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Mar 2016 09:00:10 -0500
+Received: by mail-lb0-f179.google.com with SMTP id xr8so64554181lbb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Mar 2016 06:00:09 -0800 (PST)
+Received: from mail-lb0-f181.google.com (mail-lb0-f181.google.com. [209.85.217.181])
+        by smtp.gmail.com with ESMTPSA id rx1sm1292048lbb.22.2016.03.09.05.59.58
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1/SSLv3 cipher=OTHER);
+        Wed, 09 Mar 2016 05:59:59 -0800 (PST)
+Received: by mail-lb0-f181.google.com with SMTP id xr8so64548280lbb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Mar 2016 05:59:58 -0800 (PST)
+In-Reply-To: <CAKiXLjenBAB76AJ9qirL5Ff_GDz6E3sGXUie90xrsqydUqFVTw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
+To: veg@ucsc.edu
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, 9 Mar 2016, Allen Samuels wrote:
-> We are in the process of evaluating the performance of the BlueStore 
-> when using ZetaScale in place of RocksDB. Currently, we see one major 
-> performance bottleneck that is dictated by the current implementation of 
-> BlueStore. We believe that this bottleneck is artificial and can be 
-> easily removed. Further, we believe that this will provide a performance 
-> improvement for both the BlueStore/ZetaScale as well as the 
-> BlueStore/RocksDB combinations.
-> 
-> We are currently implementing a revision of this area of the code and 
-> are looking for community comments and constructive criticism. It's also 
-> possible that we don't properly understand this code -- in which case an 
-> early course correction would be beneficial.
-> 
-> For this discussion, we consider the write-path of BlueStore to consist 
-> of 4 steps:
-> 
-> 1. Preparation and asynchronous initiation of data writes.
-> 2. Detection of asynchronous write completions
-> 3. KV transaction commit.
-> 4. WAL stuff.
-> 
-> Currently, stage 2 is performed by a single "aio_thread" for data block 
-> device, essentially one global thread. This thread waits for each I/O to 
-> complete. Once an I/O has completed, it checks to see if the associated 
-> transaction has any remaining I/O operations and if not, moves that 
-> transaction into the global kv_sync queue, waking up the kv_sync thread 
-> if needed.
-> 
-> Stage 3 is a single system-wide thread that removes transactions from 
-> the kv_sync queue and submits them to the KeyValueDB one at a time 
-> (synchronously).
+Hi,
 
-Note that it actually grabs all of the pending transactions at once, and 
-it submits them all asynchrnonously (doesn't wait for completeion), and 
-then submits a final blocking/synchronous transaction (with the wal 
-cleanup work) to wait for them to hit disk.
+On Wed, Mar 9, 2016 at 9:21 AM, Veronica Estrada Galinanes <veg@ucsc.ed=
+u> wrote:
+> From ceph website: "Deep scrubbing (weekly) reads the data and uses
+> checksums to ensure data integrity.=E2=80=9D
+>
+> 1. Why do you use "weekly" deep scrubbing? How many times a year one =
+disk
+> is scrubbed on average in a Ceph cluster? Schwartz* used three times =
+per
+> year. =E2=80=9CInterestingly, we did not observe a further decrease i=
+n data loss as
+> we increased the scrubbing frequency from three to eleven times per y=
+ear;
+> rather, a slight increase in data loss was noticed. This phenomenon c=
+omes
+> from the POH (power-on-hour) effect on drive reliability. Aggressive
+> scrubbing requires more power cycles, adversely affecting drive relia=
+bility.
+> "
 
-> Stage 3 is serious bottleneck in that it guarantees that you will never 
-> exceed QD=1 for your logging device. We believe there is no need to 
-> serialize the KV commit operations.
+Is power cycling relevant for modern enterprise drive? APM is disabled
+by default on all recent drives I've used.
 
-It's potentially a bottleneck, yes, but it's also what keeps the commit 
-rate self-throttling.  If we assume that there are generally lots of other 
-IOs in flight because every op isn't metadata-only the QD will be higher.  
-If it's a separate log device, though, yes.. it will have QD=1.  In those 
-situations, though, the log device is probably faster than the other 
-devices, and a shallow QD probably isn't going to limit throughput--just 
-marginally increase latency?
+And their model is not realistic for Ceph: "We varied the access rate
+between once per 102 hours (about 4 days) to once per 8103 hours."
 
-> We propose to modify this mechanism as follows:
-> 
-> Stage 2 will be performed by a separate pool of threads (each with an 
-> associated io completion context). During Stage 1, one thread is 
-> allocated from the pool for each transaction. The asynchronous data 
-> writes that are created for that transaction point to the newly 
-> allocated io completion context/thread.
-> 
-> Each of these I/O completion threads will now wait for all of the data 
-> writes associated with their individual transactions to be completed and 
-> then will synchronously commit to the KeyValueDB. Once the KV commit is 
-> completed, the completion handlers are invoked (possibly eliminating an 
-> extra thread switch for the synchronous completion callbacks) and then 
-> the transaction is destroyed or passed off to the existing WAL logic 
-> (which we believe can be eliminated -- but that's a discussion for 
-> another day :)).
-> 
-> This new mechanism has the effect of allowing 'N' simultaneous KV commit 
-> operations to be outstanding (N is the size of the completion thread 
-> pool). We believe that both ZetaScale and RocksDB will support much 
-> higher transaction rates in this situation, which should lead to 
-> significant performance improvement for small transactions.
-> 
-> There are two major changes that we are nervous about.
-> 
-> (1) Having multiple KV commits outstanding. We're certain that the 
-> underlying KV implementations will properly handle this but we're 
-> concerned that there might be hidden dependencies in the upper level OSD 
-> code that aren't apparent to us.
+With xfs/ext4 OSDs, if a random bit flip corrupts the master copy of
+an object, Ceph will happily serve that corrupted data until deep
+scrub notices the inconsistency between master and replicas.
+=46or this reason alone I prefer to deep scrub as often as possible
+(while keeping it transparent to the users).
 
-This is the crux of it.  And smooshing stage 2 + 3 together and doing the 
-kv commit synchronously from the io completion thread mostly amounts to 
-the same set of problems to solve.  And it mostly is the same as making
-bluestore_sync_transaction work.
+> 2. Do you have different scrubbing policies according to the redundan=
+cy
+> method? For example, more scrubs when using replication rather than e=
+rasure
+> coding?
 
-The problem is the freelist updates that happen during each _kv_thread 
-iteration.  Each txn that commits has to update the freelist atomically, 
-but the represetnation of that update is fundamentally ordered.  E.g., 
-if the freelist is
+Scrubbing is configured with the parameters here:
+   http://docs.ceph.com/docs/master/rados/configuration/osd-config-ref/=
+#scrubbing
 
-0~1000
+--=20
+Dan
 
-and two transactions allocate 0~50 and 50~50, if they commit in order the 
-updates would be
-
- delete 0, insert 50=950
- delete 50, insert 100=900
-
-but if the order reverses it'd be
-
- delete 0, insert 0=50, insert 100=900
- delete 0
-
-Just to make it work given the current representation you'd need to 
-serialize on a lock and submit only one txn at a time to ensure the 
-order.  That might avoid funneling through a single thread but doesn't 
-really change things otherwise.  To truly submit parallel transactions we 
-have to not care about their order, which means the freespace has to be 
-partitioned among the different commit threads and we need to be 
-allocating into different regions of the device (e.g., allocation groups 
-in XFS).
-
-It's possible, but a lot of complexity... are you sure it's going to make 
-a significant difference?  How fast does a device have to be before it 
-does?  We'd certainly never want to do this on a disk, but it would work 
-for solid state.  Even so, we'll need to be clever about balancing 
-freespace between regions.
- 
-> (2) Similar to (1), the handling of the completion callbacks is now 
-> parallelized -- with the same concerns.
-
-This shouldn't be a problem, as long as a given Sequencer always maps 
-to the same thread, and thus keeps its own requests ordered.
-
-sage
-
+>
+> *Schwarz, Thomas JE, et al. "Disk scrubbing in large archival storage
+> systems." *Modeling, Analysis, and Simulation of Computer and
+> Telecommunications Systems, 2004.(MASCOTS 2004). Proceedings. The IEE=
+E
+> Computer Society's 12th Annual International Symposium on*. IEEE, 200=
+4.
+>
+> Thanks,
+>
+> --
+>
+> Vero EG
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
