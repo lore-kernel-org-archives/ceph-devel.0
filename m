@@ -1,100 +1,74 @@
-From: Eric Blake <eblake@redhat.com>
-Subject: Re: [Qemu-devel] [PATCH] hw/9pfs: Add CephFS support in VirtFS
-Date: Wed, 9 Mar 2016 13:09:58 -0700
-Message-ID: <56E08316.7070805@redhat.com>
-References: <1456933303-1225-1-git-send-email-scaleqiao@gmail.com>
- <20160309200243.5b00eea7@bahia.lab.toulouse-stg.fr.ibm.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: default min_size for erasure pools
+Date: Wed, 9 Mar 2016 21:32:30 +0100
+Message-ID: <CABZ+qq=T29GL7qb7ruwYVkQmqF=XQSyha71_j-_nLf1YAbTSSw@mail.gmail.com>
+References: <CABZ+qqnLbXY97REQOMRuNc2n+-f_g21bwU2E39XN6tCVfM_nJw@mail.gmail.com>
+	<CAJ4mKGY2Y+_P3O20UKE36pNWdpRkWQNtnqMK9mbkYuCu=15LLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="sW1QBR5PMfPDfgI694v96IWJeUOP5JxRT"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45489 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S934080AbcCIUKB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 9 Mar 2016 15:10:01 -0500
-In-Reply-To: <20160309200243.5b00eea7@bahia.lab.toulouse-stg.fr.ibm.com>
+Received: from mail-lb0-f179.google.com ([209.85.217.179]:36219 "EHLO
+	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934070AbcCIUce (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Mar 2016 15:32:34 -0500
+Received: by mail-lb0-f179.google.com with SMTP id x1so82707555lbj.3
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Mar 2016 12:32:33 -0800 (PST)
+Received: from mail-lb0-f180.google.com (mail-lb0-f180.google.com. [209.85.217.180])
+        by smtp.gmail.com with ESMTPSA id f134sm40419lff.34.2016.03.09.12.32.30
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1/SSLv3 cipher=OTHER);
+        Wed, 09 Mar 2016 12:32:30 -0800 (PST)
+Received: by mail-lb0-f180.google.com with SMTP id x1so82706415lbj.3
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Mar 2016 12:32:30 -0800 (PST)
+In-Reply-To: <CAJ4mKGY2Y+_P3O20UKE36pNWdpRkWQNtnqMK9mbkYuCu=15LLw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Kurz <gkurz@linux.vnet.ibm.com>, Jevon Qiao <scaleqiao@gmail.com>
-Cc: haomaiwang@gmail.com, mst@redhat.com, qemu-devel@nongnu.org, aneesh.kumar@linux.vnet.ibm.com, sage@newdream.net, ceph-devel@vger.kernel.org, gfarnum@redhat.com
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---sW1QBR5PMfPDfgI694v96IWJeUOP5JxRT
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On 3/9/16, Gregory Farnum <gfarnum@redhat.com> wrote:
+> On Wed, Mar 9, 2016 at 6:25 AM, Dan van der Ster <dan@vanderster.com>
+> wrote:
+>> Hi,
+>>
+>> For replicated pools we default to min_size=2 when size=3
+>> (size-size/2) in order to avoid the split brain scenario, for example
+>> as described here:
+>> http://www.spinics.net/lists/ceph-devel/msg27008.html
+>>
+>> But for erasure pools we default to min_size=k which I think is a
+>> recipe for similar problems.
+>>
+>> Shouldn't we default to at least min_size=k+1??
+>>
+>> diff --git a/src/mon/OSDMonitor.cc b/src/mon/OSDMonitor.cc
+>> index 77e26de..5d51686 100644
+>> --- a/src/mon/OSDMonitor.cc
+>> +++ b/src/mon/OSDMonitor.cc
+>> @@ -4427,7 +4427,7 @@ int OSDMonitor::prepare_pool_size(const unsigned
+>> pool_type,
+>>        err = get_erasure_code(erasure_code_profile, &erasure_code, ss);
+>>        if (err == 0) {
+>>         *size = erasure_code->get_chunk_count();
+>> -       *min_size = erasure_code->get_data_chunk_count();
+>> +       *min_size = erasure_code->get_data_chunk_count() + 1;
+>>        }
+>>      }
+>>      break;
+>
+> Well, losing any OSDs at that point would be bad since it would become
+> inaccessible until you get that whole set back, but there's not really
+> any chance of serving up bad reads like Sam is worried about in the
+> ReplicatedPG case. (...at least, assuming you have more data chunks
+> than parity chunks.) Send in a PR on github?
+> -Greg
+>
 
-On 03/09/2016 12:02 PM, Greg Kurz wrote:
-> On Wed,  2 Mar 2016 23:41:43 +0800
-> Jevon Qiao <scaleqiao@gmail.com> wrote:
->=20
+Oops, that link discussed reads, but I'm more worried about writes.
+I.e. if we allow writes when only k osds are up, then one of the m
+down osds comes back and starts backfilling or recovery, but then one
+of the k osds that took writes goes down before recovery completes.
 
->> +}
->> +
->> +static int cephfs_readdir_r(FsContext *ctx, V9fsFidOpenState *fs,
->> +                            struct dirent *entry,
->> +                            struct dirent **result)
->> +{
->> +    int ret;
+PR incoming.
 
->> +   =20
->> +    return ret;
->=20
-> This function should behave like the original readdir_r() function from=
- the
-> C library, but it doesn't.
->=20
-
-readdir_r() is hopelessly broken.  POSIX is withdrawing it as such.
-http://austingroupbugs.net/view.php?id=3D696
-
-readdir() should be all the more any sane program needs, because it
-should already be thread-safe.
-
-> According to the the libcephfs.h header:
->=20
->  * @returns 1 if the next entry was filled in, 0 if the end of the dire=
-ctory stream was reached,
->  *          and a negative error code on failure.
->  */
-> int ceph_readdir_r(struct ceph_mount_info *cmount, struct ceph_dir_resu=
-lt *dirp, struct dirent *de);
->=20
-> and the readdir_r() manual page says:
->=20
->    The  readdir_r() function returns 0 on success.  On error, it return=
-s a
->    positive error number (listed under ERRORS).  If the end of the  dir=
-ec=E2=80=90
->    tory  stream  is  reached,  readdir_r()  returns 0, and returns NULL=
- in
->    *result.
-
-readdir_r() can silently overflow buffers, with no recourse.  Its use
-should not be encouraged.
-
---=20
-Eric Blake   eblake redhat com    +1-919-301-3266
-Libvirt virtualization library http://libvirt.org
-
-
---sW1QBR5PMfPDfgI694v96IWJeUOP5JxRT
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-Comment: Public key at http://people.redhat.com/eblake/eblake.gpg
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iQEcBAEBCAAGBQJW4IMWAAoJEKeha0olJ0NqFPgIAKKyw9G54zQYSgXAhCUqu+VL
-GR/jh3gB1g9b73iri6ZTJ9Lb3zZIEGGrjZ7+ctCKVp+hzId2WltVoTxhOVDYsGa1
-3Qwsxvs1h4mNnnHQs7d1XyIYiXQShTMNBXqxBbNpyMzWJ6/AE9NWWzsgbycIqWsP
-/7/Q8wwp6GHtx/JWCeo5RpiXEop0btQYMSkdGIYhdThMiV0gCUgSrS17XNhKVqro
-xiBXE/e70WHELtRLjLx6HbejXr4QT7o3RwHknZsHj6eeFtkrvdvbLwM7Q5XC2EpD
-yoYgVdWLix5GT+6UxIba+mCyEuT0RS2aCCojEGad6hKcnnl1OWN4SGhl17qb36Q=
-=qjCb
------END PGP SIGNATURE-----
-
---sW1QBR5PMfPDfgI694v96IWJeUOP5JxRT--
+.. Dan
