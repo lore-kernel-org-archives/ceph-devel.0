@@ -1,49 +1,54 @@
-From: Vineet Purswani <vineetcse813@gmail.com>
-Subject: Greetings Ceph Community : GSOC Queries
-Date: Wed, 9 Mar 2016 21:59:02 +0530
-Message-ID: <CAJXHLwDGYDy27XS7h0KwCJjC0tzEma9EFkiyJoOz6xS9D+2XMw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Vero Estrada Galinanes <veg@ucsc.edu>
+Subject: Re: Criteria behind disk scrubbing policy
+Date: Wed, 9 Mar 2016 10:34:07 -0800
+Message-ID: <CFA14F8E-3B3C-4594-BEB5-19C68983E377@ucsc.edu>
+References: <CAKiXLjenBAB76AJ9qirL5Ff_GDz6E3sGXUie90xrsqydUqFVTw@mail.gmail.com> <alpine.DEB.2.11.1603090857080.14377@cpach.fuggernut.com>
+Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2104\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f46.google.com ([209.85.218.46]:36299 "EHLO
-	mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933213AbcCIQ3C (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Mar 2016 11:29:02 -0500
-Received: by mail-oi0-f46.google.com with SMTP id r187so39418951oih.3
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Mar 2016 08:29:02 -0800 (PST)
+Received: from mail-pa0-f51.google.com ([209.85.220.51]:34933 "EHLO
+	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932624AbcCISe1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Mar 2016 13:34:27 -0500
+Received: by mail-pa0-f51.google.com with SMTP id td3so19532390pab.2
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Mar 2016 10:34:27 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1603090857080.14377@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-Greetings Ceph Community,
+Hi Sage,
+Thanks for your answers
+>=20
+> In Ceph clusters disks are generally never powered down.  It sounds l=
+ike=20
+> Schwarz et al were studying a different type of storage system.  In o=
+ur=20
+> case, it's all about how quickly you discover a defect and repair aro=
+und=20
+> it.
 
-My name is Vineet Purswani and I am a fourth year Computer Science
-MTech Integrated student at IIT Kanpur, India. I am interested in
-knowing more about a project listed on Ceph GSOC ideas page -
-Implement cache layer on top of userspace nvme driver
+Indeed, he was studying archival storage. I=E2=80=99m interested in bot=
+h system types.
+>=20
+> We do let you change the scrub intervals on a per-pool basis as well =
+(see=20
+> pool_opts in osd/osd_types.h), so you can adjust the policy based on =
+both=20
+> the pool type (replicated vs erasure coded) or the importance of the =
+data=20
+> it contains.
+>=20
 
-I have a great interest in Computer Systems, specifically operating
-systems, computer architecture and cloud computing. I did a project on
-compiler design, wherein I developed a Java compiler in python using
-PLY library. I have worked on NACHOS to test some of the scheduling
-algorithms, demand paging techniques, implemented condition variables
-and semaphores. I did an architecture project to get my hands on over
-cache hierarchy techniques and branch & target predictors. I am
-currently working on computer security projects, wherein I have done
-control hijacking, privilege separation, learnt about several symbolic
-execution techniques like DART, KLEE & EXE. I have a basic knowledge
-of compiler design, databases, functional programming, machine
-learning and computer security as well. You can find my work here:
-https://github.com/vineetpurswani
+That setting is exactly what I was expecting ceph should have. Do you h=
+ave any study done about choosing scrub intervals policy on replicated/=
+erasured pools?
 
-Kindly guide me as to how do I start working on this idea? Which bug
-fix/enhancement should I work on? Expectations in proposal?
-
-Kindly share any details that you would like to share or any questions
-that you may have for me regarding this GSOC project.
-
-Let me know what you think. Thanks a lot.
-
-Yours Sincerely
-Vineet Purswani
-IIT Kanpur
+Best,
+Vero--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
