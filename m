@@ -1,63 +1,156 @@
-From: Mike Christie <mchristi@redhat.com>
-Subject: [PATCH 0/2] ceph osd: initial VMware VAAI support
-Date: Thu, 10 Mar 2016 00:36:55 -0600
-Message-ID: <56E11607.8070200@redhat.com>
-References: <[PATCH 0/2] ceph osd: initial VMware VAAI support>
- <1457591672-17430-1-git-send-email-mchristi@redhat.com>
+From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Subject: RE: BlueStore Performance issue
+Date: Thu, 10 Mar 2016 08:46:06 +0000
+Message-ID: <6AA21C22F0A5DA478922644AD2EC308C37354FB4@SHSMSX101.ccr.corp.intel.com>
+References: <CY1PR0201MB189788B82C09E5D1DF7BDEE2E8B30@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1603090842140.14377@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42719 "EHLO mx1.redhat.com"
+Received: from mga14.intel.com ([192.55.52.115]:29525 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932794AbcCJGg5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 10 Mar 2016 01:36:57 -0500
-In-Reply-To: <1457591672-17430-1-git-send-email-mchristi@redhat.com>
+	id S1752819AbcCJIqW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Mar 2016 03:46:22 -0500
+In-Reply-To: <alpine.DEB.2.11.1603090842140.14377@cpach.fuggernut.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: ddiss@suse.de
+To: Sage Weil <sweil@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Sorry. Edited the wrong line in the --compose screen. Due to the lack of
-subject I guess it is going into some spam filters. Here is the mail:
 
-On 03/10/2016 12:34 AM, Mike Christie wrote:
-> The following patches made over the ceph master branch
-> implement OSD side support for VMware VAAI's Atomic Test
-> and Set (ATS) and Write Same (Zero) requests.
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Wednesday, March 9, 2016 9:54 PM
+> To: Allen Samuels <Allen.Samuels@sandisk.com>
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: BlueStore Performance issue
 > 
-> ATS is used for operations like locking and heartbeats. It
-> is implemented by as the SCSI COMPARE_AND_WRITE command which
-> requires the device to read N blocks, compare them to data
-> sent with the command, and if equal, write N blocks.
+> On Wed, 9 Mar 2016, Allen Samuels wrote:
+> > We are in the process of evaluating the performance of the BlueStore
+> > when using ZetaScale in place of RocksDB. Currently, we see one major
+> > performance bottleneck that is dictated by the current implementation
+> > of BlueStore. We believe that this bottleneck is artificial and can be
+> > easily removed. Further, we believe that this will provide a
+> > performance improvement for both the BlueStore/ZetaScale as well as
+> > the BlueStore/RocksDB combinations.
+> >
+> > We are currently implementing a revision of this area of the code and
+> > are looking for community comments and constructive criticism. It's
+> > also possible that we don't properly understand this code -- in which
+> > case an early course correction would be beneficial.
+> >
+> > For this discussion, we consider the write-path of BlueStore to
+> > consist of 4 steps:
+> >
+> > 1. Preparation and asynchronous initiation of data writes.
+> > 2. Detection of asynchronous write completions 3. KV transaction
+> > commit.
+> > 4. WAL stuff.
+> >
+> > Currently, stage 2 is performed by a single "aio_thread" for data
+> > block device, essentially one global thread. This thread waits for
+> > each I/O to complete. Once an I/O has completed, it checks to see if
+> > the associated transaction has any remaining I/O operations and if
+> > not, moves that transaction into the global kv_sync queue, waking up
+> > the kv_sync thread if needed.
+> >
+> > Stage 3 is a single system-wide thread that removes transactions from
+> > the kv_sync queue and submits them to the KeyValueDB one at a time
+> > (synchronously).
 > 
-> Zero is used to initialize blocks to zero. It is implemented
-> as the SCSI WRITE_SAME command which passes the device a
-> block's worth of data and has it write it multiple times.
+> Note that it actually grabs all of the pending transactions at once, and it
+> submits them all asynchrnonously (doesn't wait for completeion), and then
+> submits a final blocking/synchronous transaction (with the wal cleanup work) to
+> wait for them to hit disk.
 > 
-> This does not include support for XCOPY/extended copy. I
-> am still looking into this, but it seems it might be
-> difficult to support due to rbd being more tuned to cloning
-> entire devices. When we implement VASA, the cloneVirtualVolume
-> might be something we can support though.
+> > Stage 3 is serious bottleneck in that it guarantees that you will
+> > never exceed QD=1 for your logging device. We believe there is no need
+> > to serialize the KV commit operations.
 > 
-> More info on VAAI can be found here:
-> http://www.vmware.com/resources/techresources/10337
+> It's potentially a bottleneck, yes, but it's also what keeps the commit rate
+> self-throttling.  If we assume that there are generally lots of other IOs in flight
+> because every op isn't metadata-only the QD will be higher.
+> If it's a separate log device, though, yes.. it will have QD=1.  In those
+> situations, though, the log device is probably faster than the other devices, and
+> a shallow QD probably isn't going to limit throughput--just marginally increase
+> latency?
 > 
-> The krbd patches which use these requests are in vaai branch of
-> this tree:
-> https://github.com/mikechristie/linux-kernel
+> > We propose to modify this mechanism as follows:
+> >
+> > Stage 2 will be performed by a separate pool of threads (each with an
+> > associated io completion context). During Stage 1, one thread is
+> > allocated from the pool for each transaction. The asynchronous data
+> > writes that are created for that transaction point to the newly
+> > allocated io completion context/thread.
+> >
+> > Each of these I/O completion threads will now wait for all of the data
+> > writes associated with their individual transactions to be completed
+> > and then will synchronously commit to the KeyValueDB. Once the KV
+> > commit is completed, the completion handlers are invoked (possibly
+> > eliminating an extra thread switch for the synchronous completion
+> > callbacks) and then the transaction is destroyed or passed off to the
+> > existing WAL logic (which we believe can be eliminated -- but that's a
+> > discussion for another day :)).
+> >
+> > This new mechanism has the effect of allowing 'N' simultaneous KV
+> > commit operations to be outstanding (N is the size of the completion
+> > thread pool). We believe that both ZetaScale and RocksDB will support
+> > much higher transaction rates in this situation, which should lead to
+> > significant performance improvement for small transactions.
+> >
+> > There are two major changes that we are nervous about.
+> >
+> > (1) Having multiple KV commits outstanding. We're certain that the
+> > underlying KV implementations will properly handle this but we're
+> > concerned that there might be hidden dependencies in the upper level
+> > OSD code that aren't apparent to us.
 > 
-> I did not submit them in this thread, because they depend on other
-> patches that are still being reviewed upstream and I did not want
-> to waste people's time reviewing them if they change. These OSD side
-> patches should be ok to review and merge, because the op format 
-> and implemention should not change.
+> This is the crux of it.  And smooshing stage 2 + 3 together and doing the kv
+> commit synchronously from the io completion thread mostly amounts to the
+> same set of problems to solve.  And it mostly is the same as making
+> bluestore_sync_transaction work.
 > 
+> The problem is the freelist updates that happen during each _kv_thread
+> iteration.  Each txn that commits has to update the freelist atomically, but the
+> represetnation of that update is fundamentally ordered.  E.g., if the freelist is
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 0~1000
 > 
+> and two transactions allocate 0~50 and 50~50, if they commit in order the
+> updates would be
+> 
+>  delete 0, insert 50=950
+>  delete 50, insert 100=900
+> 
+> but if the order reverses it'd be
+> 
+>  delete 0, insert 0=50, insert 100=900
+>  delete 0
+> 
+> Just to make it work given the current representation you'd need to serialize on
+> a lock and submit only one txn at a time to ensure the order
+Hi sage, if for each _kv_thread, we get the release of transactions and submit in batch.
+Like :
+interval_set<uint64_t> released;
+allocator->queue_release(released) {
+	mutex(lock)
+	release_queue.push(released)
+	unmutex()
+}
+In Allocated, there is a thread to do release work
+Do_relase()
+{
+	List tmp;
+	Mutex(lock)
+	Tmp.swap(release_queue);
+	Unmutex(lock);
+	do_real_realse_work;
+}
 
+How about that?
+
+Thanks!
+ 
