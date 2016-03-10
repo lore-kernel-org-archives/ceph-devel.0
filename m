@@ -1,15 +1,15 @@
-From: Shinobu Kinjo <shinobu.kj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: "hzwulibin" <hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: New added OSD always down when full flag of osdmap
  is set
-Date: Thu, 10 Mar 2016 11:49:38 +0900
-Message-ID: <CAFdRU70zv2_g3c5fjYQA1Q0xu1sL0hGsiO2jpt9BDHZfDgKqGg@mail.gmail.com>
+Date: Thu, 10 Mar 2016 10:58:59 +0800
+Message-ID: <56E0E2EE.6030708@gmail.com>
 References: <56E0DDE6.1040807@gmail.com>
-Reply-To: skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+	<CAFdRU70zv2_g3c5fjYQA1Q0xu1sL0hGsiO2jpt9BDHZfDgKqGg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <56E0DDE6.1040807-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <CAFdRU70zv2_g3c5fjYQA1Q0xu1sL0hGsiO2jpt9BDHZfDgKqGg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,42 +19,33 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: hzwulibin <hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: skinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Mar 10, 2016 at 11:37 AM, hzwulibin <hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hi, cephers
->
-> Recently, i found we could not add new osd in cluster when the full flag is set in osdmap.
->
-> Shortly describe the scene here:
-> 1. Some osd are full, and the osdmap has full flag
-
-Are those OSDs usage really 100% which is not expected?
-
-> 2. Add new osd
-> 3. New osd service is running, but it's state always down
->
-> Here is the issue:
-> http://tracker.ceph.com/issues/15025
->
-> Anyone know it's a normal way or a bug here?
->
-> --------------
-> hzwulibin
-> 2016-03-10
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
-
-
--- 
-Email:
-shinobu-vYTEC60ixJUAvxtiuMwx3w@public.gmane.org
-GitHub:
-shinobu-x
-Blog:
-Life with Distributed Computational System based on OpenSource
+Tm8sIGp1c3QgOTglLg0KDQpBbm90aGVyIHNjZW5lLCBpZiBiYWNrZmlsbCB0b28gZnVsbCwgYWxz
+byBjb3VsZCBub3QgYWRkIHRoZSBvc2QgaW4gYW5kIHVwLg0KDQotLS0tLS0tLS0tLS0tLS0tLS0J
+CQkJIA0KaHp3dWxpYmluDQoyMDE2LTAzLTEwDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuWPkeS7tuS6uu+8mlNoaW5vYnUg
+S2luam8gPHNoaW5vYnUua2pAZ21haWwuY29tPg0K5Y+R6YCB5pel5pyf77yaMjAxNi0wMy0xMCAx
+MDo0OQ0K5pS25Lu25Lq677yaaHp3dWxpYmluDQrmioTpgIHvvJpjZXBoLWRldmVsLGNlcGgtdXNl
+cnMNCuS4u+mimO+8mlJlOiBbY2VwaC11c2Vyc10gTmV3IGFkZGVkIE9TRCBhbHdheXMgZG93biB3
+aGVuIGZ1bGwgZmxhZyBvZiBvc2RtYXANCiBpcyBzZXQNCg0KT24gVGh1LCBNYXIgMTAsIDIwMTYg
+YXQgMTE6MzcgQU0sIGh6d3VsaWJpbiA8aHp3dWxpYmluQGdtYWlsLmNvbT4gd3JvdGU6DQo+IEhp
+LCBjZXBoZXJzDQo+DQo+IFJlY2VudGx5LCBpIGZvdW5kIHdlIGNvdWxkIG5vdCBhZGQgbmV3IG9z
+ZCBpbiBjbHVzdGVyIHdoZW4gdGhlIGZ1bGwgZmxhZyBpcyBzZXQgaW4gb3NkbWFwLg0KPg0KPiBT
+aG9ydGx5IGRlc2NyaWJlIHRoZSBzY2VuZSBoZXJlOg0KPiAxLiBTb21lIG9zZCBhcmUgZnVsbCwg
+YW5kIHRoZSBvc2RtYXAgaGFzIGZ1bGwgZmxhZw0KDQpBcmUgdGhvc2UgT1NEcyB1c2FnZSByZWFs
+bHkgMTAwJSB3aGljaCBpcyBub3QgZXhwZWN0ZWQ/DQoNCj4gMi4gQWRkIG5ldyBvc2QNCj4gMy4g
+TmV3IG9zZCBzZXJ2aWNlIGlzIHJ1bm5pbmcsIGJ1dCBpdCdzIHN0YXRlIGFsd2F5cyBkb3duDQo+
+DQo+IEhlcmUgaXMgdGhlIGlzc3VlOg0KPiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMv
+MTUwMjUNCj4NCj4gQW55b25lIGtub3cgaXQncyBhIG5vcm1hbCB3YXkgb3IgYSBidWcgaGVyZT8N
+Cj4NCj4gLS0tLS0tLS0tLS0tLS0NCj4gaHp3dWxpYmluDQo+IDIwMTYtMDMtMTANCj4gX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4gY2VwaC11c2VycyBt
+YWlsaW5nIGxpc3QNCj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KPiBodHRwOi8vbGlzdHMu
+Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20NCg0KDQoNCi0tIA0KRW1h
+aWw6DQpzaGlub2J1QGxpbnV4LmNvbQ0KR2l0SHViOg0Kc2hpbm9idS14DQpCbG9nOg0KTGlmZSB3
+aXRoIERpc3RyaWJ1dGVkIENvbXB1dGF0aW9uYWwgU3lzdGVtIGJhc2VkIG9uIE9wZW5Tb3VyY2UN
+Cg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11
+c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMu
+Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
