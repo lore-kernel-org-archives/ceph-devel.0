@@ -1,88 +1,50 @@
-From: "hzwulibin" <hzwulibin@gmail.com>
-Subject: Re:  Re: [ceph-users] New added OSD always down when full flag of osdmap
- is set
-Date: Thu, 10 Mar 2016 11:44:30 +0800
-Message-ID: <56E0ED98.1050307@gmail.com>
-References: <56E0DDE6.1040807@gmail.com>
-	<CAFdRU70zv2_g3c5fjYQA1Q0xu1sL0hGsiO2jpt9BDHZfDgKqGg@mail.gmail.com>
-	<56E0E2EE.6030708@gmail.com>
-	<CAFdRU73G8Eoe3WE6wE_H61oWLRwnJOi9b1ZU18NcS_zYH61JzA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Mike Christie <mchristi@redhat.com>
+Subject: (unknown)
+Date: Thu, 10 Mar 2016 00:34:30 -0600
+Message-ID: <1457591672-17430-1-git-send-email-mchristi@redhat.com>
+References: <[PATCH 0/2] ceph osd: initial VMware VAAI support>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:34026 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932091AbcCJDod (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Mar 2016 22:44:33 -0500
-Received: by mail-pa0-f49.google.com with SMTP id fe3so40429386pab.1
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Mar 2016 19:44:33 -0800 (PST)
-In-Reply-To: <CAFdRU73G8Eoe3WE6wE_H61oWLRwnJOi9b1ZU18NcS_zYH61JzA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:42468 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751571AbcCJGef (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 10 Mar 2016 01:34:35 -0500
+Subject: 
+In-Reply-To: <[PATCH 0/2] ceph osd: initial VMware VAAI support>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: skinjo <skinjo@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: ceph-devel@vger.kernel.org
+Cc: ddiss@suse.de
 
-U3VyZSwgaGVyZSBpdCBpczoNCiMgY2VwaCBvc2QgdHJlZQ0KSUQgV0VJR0hUICBUWVBFIE5BTUUg
-ICAgICAgVVAvRE9XTiBSRVdFSUdIVCBQUklNQVJZLUFGRklOSVRZIA0KLTEgMC4wNDk5NyByb290
-IGRlZmF1bHQgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA0KLTIgMC4wNDk5
-NyAgICAgaG9zdCBjZXBoMDEgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA0KIDAg
-MC4wMDk5OSAgICAgICAgIG9zZC4wICAgICAgICB1cCAgMS4wMDAwMCAgICAgICAgICAxLjAwMDAw
-IA0KIDEgMC4wMDk5OSAgICAgICAgIG9zZC4xICAgICAgZG93biAgICAgICAgMCAgICAgICAgICAx
-LjAwMDAwIA0KIDMgMC4wMDk5OSAgICAgICAgIG9zZC4zICAgICAgICB1cCAgMS4wMDAwMCAgICAg
-ICAgICAxLjAwMDAwIA0KIDQgMC4wMDk5OSAgICAgICAgIG9zZC40ICAgICAgZG93biAgICAgICAg
-MCAgICAgICAgICAxLjAwMDAwIA0KIDIgMC4wMDk5OSAgICAgICAgIG9zZC4yICAgICAgZG93biAg
-ICAgICAgMCAgICAgICAgICAxLjAwMDAwIA0KDQoNCnJvb3RAY2VwaDAxOn4jIGNlcGggb3NkIGRm
-DQpJRCBXRUlHSFQgIFJFV0VJR0hUIFNJWkUgICBVU0UgICAgQVZBSUwgJVVTRSAgVkFSICANCiAw
-IDAuMDA5OTkgIDEuMDAwMDAgMTUzNDhNIDE0OTIwTSAgNDI4TSA5Ny4yMSAxLjAwIA0KIDEgMC4w
-MDk5OSAgICAgICAgMCAgICAgIDAgICAgICAwICAgICAwICAgICAwICAgIDAgDQogMyAwLjAwOTk5
-ICAxLjAwMDAwIDE1MzQ4TSAxNDkxOE0gIDQzME0gOTcuMTkgMS4wMCANCiA0IDAuMDA5OTkgICAg
-ICAgIDAgICAgICAwICAgICAgMCAgICAgMCAgICAgMCAgICAwIA0KIDIgMC4wMDk5OSAgICAgICAg
-MCAgICAgIDAgICAgICAwICAgICAwICAgICAwICAgIDAgDQogICAgICAgICAgICAgIFRPVEFMIDMw
-Njk3TSAyOTgzOU0gIDg1OE0gOTcuMjAgICAgICANCk1JTi9NQVggVkFSOiAwLzEuMDAgIFNURERF
-VjogMC4wMQ0KDQoNCnJvb3RAY2VwaDAxOn4jIGNlcGggZGYNCkdMT0JBTDoNCiAgICBTSVpFICAg
-ICAgIEFWQUlMICAgICBSQVcgVVNFRCAgICAgJVJBVyBVU0VEIA0KICAgIDMwNjk3TSAgICAgIDg1
-OE0gICAgICAgMjk4MzlNICAgICAgICAgOTcuMjAgDQpQT09MUzoNCiAgICBOQU1FICAgICBJRCAg
-ICAgVVNFRCAgICAgICAlVVNFRCAgICAgTUFYIEFWQUlMICAgICBPQkpFQ1RTIA0KICAgIHJiZCAg
-ICAgIDAgICAgICAxNTM2ME0gICAgIDUwLjA0ICAgICAgICAgMTA3ME0gICAgICAgIDM4NDIgDQoN
-Cg0KQW5kIHRoZSBzaXplKHJlcGxpY2FzKSBvZiB0aGUgcG9vbCBpcyAyLCBtaW5fc2l6ZSBpcyAx
-DQotLS0tLS0tLS0tLS0tLS0tLS0JCQkJIA0KaHp3dWxpYmluDQoyMDE2LTAzLTEwDQoNCi0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0N
-CuWPkeS7tuS6uu+8mlNoaW5vYnUgS2luam8gPHNoaW5vYnUua2pAZ21haWwuY29tPg0K5Y+R6YCB
-5pel5pyf77yaMjAxNi0wMy0xMCAxMToyOA0K5pS25Lu25Lq677yaaHp3dWxpYmluDQrmioTpgIHv
-vJpjZXBoLWRldmVsLGNlcGgtdXNlcnMNCuS4u+mimO+8mlJlOiBbY2VwaC11c2Vyc10gTmV3IGFk
-ZGVkIE9TRCBhbHdheXMgZG93biB3aGVuIGZ1bGwgZmxhZyBvZiBvc2RtYXANCiBpcyBzZXQNCg0K
-Q2FuIHlvdSBwcm92aWRlIHVzIHdpdGg6DQoNCiBzdWRvIGNlcGggb3NkIHRyZWUNCiBzdWRvIGNl
-cGggb3NkIGRmDQogc3VkbyBjZXBoIGRmDQoNCkNoZWVycywNClMNCg0KT24gVGh1LCBNYXIgMTAs
-IDIwMTYgYXQgMTE6NTggQU0sIGh6d3VsaWJpbiA8aHp3dWxpYmluQGdtYWlsLmNvbT4gd3JvdGU6
-DQo+IE5vLCBqdXN0IDk4JS4NCj4NCj4gQW5vdGhlciBzY2VuZSwgaWYgYmFja2ZpbGwgdG9vIGZ1
-bGwsIGFsc28gY291bGQgbm90IGFkZCB0aGUgb3NkIGluIGFuZCB1cC4NCj4NCj4gLS0tLS0tLS0t
-LS0tLS0tLS0tDQo+IGh6d3VsaWJpbg0KPiAyMDE2LTAzLTEwDQo+DQo+IC0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4g5Y+R5Lu2
-5Lq677yaU2hpbm9idSBLaW5qbyA8c2hpbm9idS5rakBnbWFpbC5jb20+DQo+IOWPkemAgeaXpeac
-n++8mjIwMTYtMDMtMTAgMTA6NDkNCj4g5pS25Lu25Lq677yaaHp3dWxpYmluDQo+IOaKhOmAge+8
-mmNlcGgtZGV2ZWwsY2VwaC11c2Vycw0KPiDkuLvpopjvvJpSZTogW2NlcGgtdXNlcnNdIE5ldyBh
-ZGRlZCBPU0QgYWx3YXlzIGRvd24gd2hlbiBmdWxsIGZsYWcgb2Ygb3NkbWFwDQo+ICBpcyBzZXQN
-Cj4NCj4gT24gVGh1LCBNYXIgMTAsIDIwMTYgYXQgMTE6MzcgQU0sIGh6d3VsaWJpbiA8aHp3dWxp
-YmluQGdtYWlsLmNvbT4gd3JvdGU6DQo+PiBIaSwgY2VwaGVycw0KPj4NCj4+IFJlY2VudGx5LCBp
-IGZvdW5kIHdlIGNvdWxkIG5vdCBhZGQgbmV3IG9zZCBpbiBjbHVzdGVyIHdoZW4gdGhlIGZ1bGwg
-ZmxhZyBpcyBzZXQgaW4gb3NkbWFwLg0KPj4NCj4+IFNob3J0bHkgZGVzY3JpYmUgdGhlIHNjZW5l
-IGhlcmU6DQo+PiAxLiBTb21lIG9zZCBhcmUgZnVsbCwgYW5kIHRoZSBvc2RtYXAgaGFzIGZ1bGwg
-ZmxhZw0KPg0KPiBBcmUgdGhvc2UgT1NEcyB1c2FnZSByZWFsbHkgMTAwJSB3aGljaCBpcyBub3Qg
-ZXhwZWN0ZWQ/DQo+DQo+PiAyLiBBZGQgbmV3IG9zZA0KPj4gMy4gTmV3IG9zZCBzZXJ2aWNlIGlz
-IHJ1bm5pbmcsIGJ1dCBpdCdzIHN0YXRlIGFsd2F5cyBkb3duDQo+Pg0KPj4gSGVyZSBpcyB0aGUg
-aXNzdWU6DQo+PiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMTUwMjUNCj4+DQo+PiBB
-bnlvbmUga25vdyBpdCdzIGEgbm9ybWFsIHdheSBvciBhIGJ1ZyBoZXJlPw0KPj4NCj4+IC0tLS0t
-LS0tLS0tLS0tDQo+PiBoend1bGliaW4NCj4+IDIwMTYtMDMtMTANCj4+IF9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+PiBjZXBoLXVzZXJzIG1haWxpbmcg
-bGlzdA0KPj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KPj4gaHR0cDovL2xpc3RzLmNlcGgu
-Y29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tDQo+DQo+DQo+DQo+IC0tDQo+IEVt
-YWlsOg0KPiBzaGlub2J1QGxpbnV4LmNvbQ0KPiBHaXRIdWI6DQo+IHNoaW5vYnUteA0KPiBCbG9n
-Og0KPiBMaWZlIHdpdGggRGlzdHJpYnV0ZWQgQ29tcHV0YXRpb25hbCBTeXN0ZW0gYmFzZWQgb24g
-T3BlblNvdXJjZQ0KPg0KPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fXw0KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdA0KPiBjZXBoLXVzZXJzQGxpc3RzLmNl
-cGguY29tDQo+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1j
-ZXBoLmNvbQ0KDQoNCg0KLS0gDQpFbWFpbDoNCnNoaW5vYnVAbGludXguY29tDQpHaXRIdWI6DQpz
-aGlub2J1LXgNCkJsb2c6DQpMaWZlIHdpdGggRGlzdHJpYnV0ZWQgQ29tcHV0YXRpb25hbCBTeXN0
-ZW0gYmFzZWQgb24gT3BlblNvdXJjZQ0KDQo=
+The following patches made over the ceph master branch
+implement OSD side support for VMware VAAI's Atomic Test
+and Set (ATS) and Write Same (Zero) requests.
+
+ATS is used for operations like locking and heartbeats. It
+is implemented by as the SCSI COMPARE_AND_WRITE command which
+requires the device to read N blocks, compare them to data
+sent with the command, and if equal, write N blocks.
+
+Zero is used to initialize blocks to zero. It is implemented
+as the SCSI WRITE_SAME command which passes the device a
+block's worth of data and has it write it multiple times.
+
+This does not include support for XCOPY/extended copy. I
+am still looking into this, but it seems it might be
+difficult to support due to rbd being more tuned to cloning
+entire devices. When we implement VASA, the cloneVirtualVolume
+might be something we can support though.
+
+More info on VAAI can be found here:
+http://www.vmware.com/resources/techresources/10337
+
+The krbd patches which use these requests are in vaai branch of
+this tree:
+https://github.com/mikechristie/linux-kernel
+
+I did not submit them in this thread, because they depend on other
+patches that are still being reviewed upstream and I did not want
+to waste people's time reviewing them if they change. These OSD side
+patches should be ok to review and merge, because the op format 
+and implemention should not change.
+
 
