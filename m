@@ -1,46 +1,33 @@
-From: Mike Christie <mchristi@redhat.com>
+From: David Disseldorp <ddiss@suse.de>
 Subject: Re: [PATCH 2/2] ceph osd: add support for new op cmpext
-Date: Thu, 10 Mar 2016 11:06:22 -0600
-Message-ID: <56E1A98E.6030405@redhat.com>
+Date: Thu, 10 Mar 2016 18:12:32 +0100
+Message-ID: <20160310181232.1e2cceee@g21.suse.de>
 References: <[PATCH 0/2] ceph osd: initial VMware VAAI support>
- <1457591672-17430-1-git-send-email-mchristi@redhat.com>
- <1457591672-17430-3-git-send-email-mchristi@redhat.com>
- <20160310130341.444c76af@g21.suse.de>
+	<1457591672-17430-1-git-send-email-mchristi@redhat.com>
+	<1457591672-17430-3-git-send-email-mchristi@redhat.com>
+	<20160310130341.444c76af@g21.suse.de>
+	<56E1A98E.6030405@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44943 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:59145 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752734AbcCJRGX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 10 Mar 2016 12:06:23 -0500
-In-Reply-To: <20160310130341.444c76af@g21.suse.de>
+	id S1753173AbcCJRMe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 10 Mar 2016 12:12:34 -0500
+In-Reply-To: <56E1A98E.6030405@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Disseldorp <ddiss@suse.de>
+To: Mike Christie <mchristi@redhat.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 03/10/2016 06:03 AM, David Disseldorp wrote:
-> Hi Mike,
-> 
-> On Thu, 10 Mar 2016 00:34:32 -0600, Mike Christie wrote:
-> 
->> This adds support for a new op cmpext. The request will read
->> extent.length bytes and compare them to extent.length bytes at
->> extent.offset on disk. If there is a miscompare the osd will return
->> -EILSEQ, and the mismatched buffer that was read.
->>
->> rbd will use this in a multi op request to implement the
->> SCSI COMPARE_AND_WRITE request which is used by VMware for
->> its atomic test and set request.
->>
->> v2:
->> - Merge David's tracing fixes.
->> - Instead of returning the mismatch offset and buffer on matching
->> failure just return the buffer. The client can figure out the offset
->> if it needs it.
-> 
-> What's your reason for dropping the mismatch offset?
+On Thu, 10 Mar 2016 11:06:22 -0600, Mike Christie wrote:
 
-I was not sure if anyone else was going to use it. I can add it back. It
-does not matter to me.
+> > What's your reason for dropping the mismatch offset?  
+> 
+> I was not sure if anyone else was going to use it. I can add it back. It
+> does not matter to me.
+
+Thanks - I'd prefer to keep it, given that it doesn't cost anything.
+
+Cheers, David
