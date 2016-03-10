@@ -1,51 +1,66 @@
-From: "hzwulibin" <hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: New added OSD always down when full flag of osdmap
- is set
-Date: Thu, 10 Mar 2016 10:58:59 +0800
-Message-ID: <56E0E2EE.6030708@gmail.com>
-References: <56E0DDE6.1040807@gmail.com>
-	<CAFdRU70zv2_g3c5fjYQA1Q0xu1sL0hGsiO2jpt9BDHZfDgKqGg@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: ceph: use fscache as a local presisent cache
+Date: Thu, 10 Mar 2016 11:26:17 +0800
+Message-ID: <CAAM7YAnOuxYuxEprfiwy522P2p0N=8DOebuYSo_UJCO+40zgag@mail.gmail.com>
+References: <20160309085452.GA4085@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAFdRU70zv2_g3c5fjYQA1Q0xu1sL0hGsiO2jpt9BDHZfDgKqGg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: skinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:35591 "EHLO
+	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934872AbcCJD0T (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Mar 2016 22:26:19 -0500
+Received: by mail-wm0-f43.google.com with SMTP id l68so11591183wml.0
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Mar 2016 19:26:18 -0800 (PST)
+In-Reply-To: <20160309085452.GA4085@mwanda>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Milosz Tanski <milosz@adfin.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Tm8sIGp1c3QgOTglLg0KDQpBbm90aGVyIHNjZW5lLCBpZiBiYWNrZmlsbCB0b28gZnVsbCwgYWxz
-byBjb3VsZCBub3QgYWRkIHRoZSBvc2QgaW4gYW5kIHVwLg0KDQotLS0tLS0tLS0tLS0tLS0tLS0J
-CQkJIA0KaHp3dWxpYmluDQoyMDE2LTAzLTEwDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuWPkeS7tuS6uu+8mlNoaW5vYnUg
-S2luam8gPHNoaW5vYnUua2pAZ21haWwuY29tPg0K5Y+R6YCB5pel5pyf77yaMjAxNi0wMy0xMCAx
-MDo0OQ0K5pS25Lu25Lq677yaaHp3dWxpYmluDQrmioTpgIHvvJpjZXBoLWRldmVsLGNlcGgtdXNl
-cnMNCuS4u+mimO+8mlJlOiBbY2VwaC11c2Vyc10gTmV3IGFkZGVkIE9TRCBhbHdheXMgZG93biB3
-aGVuIGZ1bGwgZmxhZyBvZiBvc2RtYXANCiBpcyBzZXQNCg0KT24gVGh1LCBNYXIgMTAsIDIwMTYg
-YXQgMTE6MzcgQU0sIGh6d3VsaWJpbiA8aHp3dWxpYmluQGdtYWlsLmNvbT4gd3JvdGU6DQo+IEhp
-LCBjZXBoZXJzDQo+DQo+IFJlY2VudGx5LCBpIGZvdW5kIHdlIGNvdWxkIG5vdCBhZGQgbmV3IG9z
-ZCBpbiBjbHVzdGVyIHdoZW4gdGhlIGZ1bGwgZmxhZyBpcyBzZXQgaW4gb3NkbWFwLg0KPg0KPiBT
-aG9ydGx5IGRlc2NyaWJlIHRoZSBzY2VuZSBoZXJlOg0KPiAxLiBTb21lIG9zZCBhcmUgZnVsbCwg
-YW5kIHRoZSBvc2RtYXAgaGFzIGZ1bGwgZmxhZw0KDQpBcmUgdGhvc2UgT1NEcyB1c2FnZSByZWFs
-bHkgMTAwJSB3aGljaCBpcyBub3QgZXhwZWN0ZWQ/DQoNCj4gMi4gQWRkIG5ldyBvc2QNCj4gMy4g
-TmV3IG9zZCBzZXJ2aWNlIGlzIHJ1bm5pbmcsIGJ1dCBpdCdzIHN0YXRlIGFsd2F5cyBkb3duDQo+
-DQo+IEhlcmUgaXMgdGhlIGlzc3VlOg0KPiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMv
-MTUwMjUNCj4NCj4gQW55b25lIGtub3cgaXQncyBhIG5vcm1hbCB3YXkgb3IgYSBidWcgaGVyZT8N
-Cj4NCj4gLS0tLS0tLS0tLS0tLS0NCj4gaHp3dWxpYmluDQo+IDIwMTYtMDMtMTANCj4gX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4gY2VwaC11c2VycyBt
-YWlsaW5nIGxpc3QNCj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KPiBodHRwOi8vbGlzdHMu
-Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20NCg0KDQoNCi0tIA0KRW1h
-aWw6DQpzaGlub2J1QGxpbnV4LmNvbQ0KR2l0SHViOg0Kc2hpbm9idS14DQpCbG9nOg0KTGlmZSB3
-aXRoIERpc3RyaWJ1dGVkIENvbXB1dGF0aW9uYWwgU3lzdGVtIGJhc2VkIG9uIE9wZW5Tb3VyY2UN
-Cg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11
-c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMu
-Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On Wed, Mar 9, 2016 at 4:54 PM, Dan Carpenter <dan.carpenter@oracle.com> wrote:
+> [ Hm...  I don't know why this has suddenly started warning now only.
+>   This check doesn't warn if it knows that the NULL check is not
+>   needed so potentially that was what prevented the warning before?
+>   -dan ]
+>
+> Hello Milosz Tanski,
+>
+> This is a semi-automatic email about new static checker warnings.
+>
+> The patch 99ccbd229cf7: "ceph: use fscache as a local presisent
+> cache" from Aug 21, 2013, leads to the following Smatch complaint:
+>
+> fs/ceph/addr.c:183 ceph_releasepage()
+>          error: we previously assumed 'page->mapping' could be null (see line 178)
+>
+> fs/ceph/addr.c
+>    177  {
+>    178          struct inode *inode = page->mapping ? page->mapping->host : NULL;
+>                                       ^^^^^^^^^^^^^
+> Check for NULL.
+
+page->mapping can not be NULL in this case.  I will remove the check
+
+
+Regards
+Yan, Zheng
+
+>
+>    179          dout("%p releasepage %p idx %lu\n", inode, page, page->index);
+>    180          WARN_ON(PageDirty(page));
+>    181
+>    182          /* Can we release the page from the cache? */
+>    183          if (!ceph_release_fscache_page(page, g))
+>                                                ^^^^
+> The patch adds a dereference inside the function call.
+>
+>    184                  return 0;
+>    185
+>
+> regards,
+> dan carpenter
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
