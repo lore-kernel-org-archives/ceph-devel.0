@@ -1,156 +1,112 @@
-From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Subject: RE: BlueStore Performance issue
-Date: Thu, 10 Mar 2016 08:46:06 +0000
-Message-ID: <6AA21C22F0A5DA478922644AD2EC308C37354FB4@SHSMSX101.ccr.corp.intel.com>
-References: <CY1PR0201MB189788B82C09E5D1DF7BDEE2E8B30@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1603090842140.14377@cpach.fuggernut.com>
+From: Greg Kurz <gkurz@linux.vnet.ibm.com>
+Subject: Re: [Qemu-devel] [PATCH] hw/9pfs: Add CephFS support in VirtFS
+Date: Thu, 10 Mar 2016 10:08:13 +0100
+Message-ID: <20160310100813.7b64ac08@bahia.lab.toulouse-stg.fr.ibm.com>
+References: <1456933303-1225-1-git-send-email-scaleqiao@gmail.com>
+	<20160309200243.5b00eea7@bahia.lab.toulouse-stg.fr.ibm.com>
+	<56E08316.7070805@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:29525 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752819AbcCJIqW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Mar 2016 03:46:22 -0500
-In-Reply-To: <alpine.DEB.2.11.1603090842140.14377@cpach.fuggernut.com>
-Content-Language: en-US
+Received: from e06smtp06.uk.ibm.com ([195.75.94.102]:42583 "EHLO
+	e06smtp06.uk.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753984AbcCJJI0 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Mar 2016 04:08:26 -0500
+Received: from localhost
+	by e06smtp06.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <ceph-devel@vger.kernel.org> from <gkurz@linux.vnet.ibm.com>;
+	Thu, 10 Mar 2016 09:08:24 -0000
+Received: from b06cxnps4075.portsmouth.uk.ibm.com (d06relay12.portsmouth.uk.ibm.com [9.149.109.197])
+	by d06dlp03.portsmouth.uk.ibm.com (Postfix) with ESMTP id 913491B08070
+	for <ceph-devel@vger.kernel.org>; Thu, 10 Mar 2016 09:08:47 +0000 (GMT)
+Received: from d06av04.portsmouth.uk.ibm.com (d06av04.portsmouth.uk.ibm.com [9.149.37.216])
+	by b06cxnps4075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id u2A98L9p49807394
+	for <ceph-devel@vger.kernel.org>; Thu, 10 Mar 2016 09:08:21 GMT
+Received: from d06av04.portsmouth.uk.ibm.com (localhost [127.0.0.1])
+	by d06av04.portsmouth.uk.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id u2A98IpW004135
+	for <ceph-devel@vger.kernel.org>; Thu, 10 Mar 2016 02:08:21 -0700
+In-Reply-To: <56E08316.7070805@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Eric Blake <eblake@redhat.com>
+Cc: Jevon Qiao <scaleqiao@gmail.com>, haomaiwang@gmail.com, mst@redhat.com, qemu-devel@nongnu.org, aneesh.kumar@linux.vnet.ibm.com, sage@newdream.net, ceph-devel@vger.kernel.org, gfarnum@redhat.com
 
+On Wed, 9 Mar 2016 13:09:58 -0700
+Eric Blake <eblake@redhat.com> wrote:
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Wednesday, March 9, 2016 9:54 PM
-> To: Allen Samuels <Allen.Samuels@sandisk.com>
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: BlueStore Performance issue
-> 
-> On Wed, 9 Mar 2016, Allen Samuels wrote:
-> > We are in the process of evaluating the performance of the BlueStore
-> > when using ZetaScale in place of RocksDB. Currently, we see one major
-> > performance bottleneck that is dictated by the current implementation
-> > of BlueStore. We believe that this bottleneck is artificial and can be
-> > easily removed. Further, we believe that this will provide a
-> > performance improvement for both the BlueStore/ZetaScale as well as
-> > the BlueStore/RocksDB combinations.
-> >
-> > We are currently implementing a revision of this area of the code and
-> > are looking for community comments and constructive criticism. It's
-> > also possible that we don't properly understand this code -- in which
-> > case an early course correction would be beneficial.
-> >
-> > For this discussion, we consider the write-path of BlueStore to
-> > consist of 4 steps:
-> >
-> > 1. Preparation and asynchronous initiation of data writes.
-> > 2. Detection of asynchronous write completions 3. KV transaction
-> > commit.
-> > 4. WAL stuff.
-> >
-> > Currently, stage 2 is performed by a single "aio_thread" for data
-> > block device, essentially one global thread. This thread waits for
-> > each I/O to complete. Once an I/O has completed, it checks to see if
-> > the associated transaction has any remaining I/O operations and if
-> > not, moves that transaction into the global kv_sync queue, waking up
-> > the kv_sync thread if needed.
-> >
-> > Stage 3 is a single system-wide thread that removes transactions from
-> > the kv_sync queue and submits them to the KeyValueDB one at a time
-> > (synchronously).
-> 
-> Note that it actually grabs all of the pending transactions at once, and it
-> submits them all asynchrnonously (doesn't wait for completeion), and then
-> submits a final blocking/synchronous transaction (with the wal cleanup work) to
-> wait for them to hit disk.
-> 
-> > Stage 3 is serious bottleneck in that it guarantees that you will
-> > never exceed QD=1 for your logging device. We believe there is no need
-> > to serialize the KV commit operations.
-> 
-> It's potentially a bottleneck, yes, but it's also what keeps the commit rate
-> self-throttling.  If we assume that there are generally lots of other IOs in flight
-> because every op isn't metadata-only the QD will be higher.
-> If it's a separate log device, though, yes.. it will have QD=1.  In those
-> situations, though, the log device is probably faster than the other devices, and
-> a shallow QD probably isn't going to limit throughput--just marginally increase
-> latency?
-> 
-> > We propose to modify this mechanism as follows:
-> >
-> > Stage 2 will be performed by a separate pool of threads (each with an
-> > associated io completion context). During Stage 1, one thread is
-> > allocated from the pool for each transaction. The asynchronous data
-> > writes that are created for that transaction point to the newly
-> > allocated io completion context/thread.
-> >
-> > Each of these I/O completion threads will now wait for all of the data
-> > writes associated with their individual transactions to be completed
-> > and then will synchronously commit to the KeyValueDB. Once the KV
-> > commit is completed, the completion handlers are invoked (possibly
-> > eliminating an extra thread switch for the synchronous completion
-> > callbacks) and then the transaction is destroyed or passed off to the
-> > existing WAL logic (which we believe can be eliminated -- but that's a
-> > discussion for another day :)).
-> >
-> > This new mechanism has the effect of allowing 'N' simultaneous KV
-> > commit operations to be outstanding (N is the size of the completion
-> > thread pool). We believe that both ZetaScale and RocksDB will support
-> > much higher transaction rates in this situation, which should lead to
-> > significant performance improvement for small transactions.
-> >
-> > There are two major changes that we are nervous about.
-> >
-> > (1) Having multiple KV commits outstanding. We're certain that the
-> > underlying KV implementations will properly handle this but we're
-> > concerned that there might be hidden dependencies in the upper level
-> > OSD code that aren't apparent to us.
-> 
-> This is the crux of it.  And smooshing stage 2 + 3 together and doing the kv
-> commit synchronously from the io completion thread mostly amounts to the
-> same set of problems to solve.  And it mostly is the same as making
-> bluestore_sync_transaction work.
-> 
-> The problem is the freelist updates that happen during each _kv_thread
-> iteration.  Each txn that commits has to update the freelist atomically, but the
-> represetnation of that update is fundamentally ordered.  E.g., if the freelist is
-> 
-> 0~1000
-> 
-> and two transactions allocate 0~50 and 50~50, if they commit in order the
-> updates would be
-> 
->  delete 0, insert 50=950
->  delete 50, insert 100=900
-> 
-> but if the order reverses it'd be
-> 
->  delete 0, insert 0=50, insert 100=900
->  delete 0
-> 
-> Just to make it work given the current representation you'd need to serialize on
-> a lock and submit only one txn at a time to ensure the order
-Hi sage, if for each _kv_thread, we get the release of transactions and submit in batch.
-Like :
-interval_set<uint64_t> released;
-allocator->queue_release(released) {
-	mutex(lock)
-	release_queue.push(released)
-	unmutex()
-}
-In Allocated, there is a thread to do release work
-Do_relase()
-{
-	List tmp;
-	Mutex(lock)
-	Tmp.swap(release_queue);
-	Unmutex(lock);
-	do_real_realse_work;
-}
+> On 03/09/2016 12:02 PM, Greg Kurz wrote:
+> > On Wed,  2 Mar 2016 23:41:43 +0800
+> > Jevon Qiao <scaleqiao@gmail.com> wrote:
+> >  =20
+>=20
+> >> +}
+> >> +
+> >> +static int cephfs_readdir_r(FsContext *ctx, V9fsFidOpenState *fs,
+> >> +                            struct dirent *entry,
+> >> +                            struct dirent **result)
+> >> +{
+> >> +    int ret; =20
+>=20
+> >> +   =20
+> >> +    return ret; =20
+> >=20
+> > This function should behave like the original readdir_r() function =
+from the
+> > C library, but it doesn't.
+> >  =20
+>=20
+> readdir_r() is hopelessly broken.  POSIX is withdrawing it as such.
+> http://austingroupbugs.net/view.php?id=3D696
+>=20
+> readdir() should be all the more any sane program needs, because it
+> should already be thread-safe.
+>=20
 
-How about that?
+I wasn't aware that readdir_r() was so badly broken. It is currently
+used here:
 
-Thanks!
- 
+hw/9pfs/9p-handle.c:    return readdir_r(fs->dir, entry, result);
+hw/9pfs/9p-local.c:    ret =3D readdir_r(fs->dir, entry, result);
+hw/9pfs/9p-proxy.c:    return readdir_r(fs->dir, entry, result);
+
+I'll see how we can move to readdir().
+
+> > According to the the libcephfs.h header:
+> >=20
+> >  * @returns 1 if the next entry was filled in, 0 if the end of the =
+directory stream was reached,
+> >  *          and a negative error code on failure.
+> >  */
+> > int ceph_readdir_r(struct ceph_mount_info *cmount, struct ceph_dir_=
+result *dirp, struct dirent *de);
+> >=20
+> > and the readdir_r() manual page says:
+> >=20
+> >    The  readdir_r() function returns 0 on success.  On error, it re=
+turns a
+> >    positive error number (listed under ERRORS).  If the end of the =
+ direc=E2=80=90
+> >    tory  stream  is  reached,  readdir_r()  returns 0, and returns =
+NULL in
+> >    *result. =20
+>=20
+> readdir_r() can silently overflow buffers, with no recourse.  Its use
+> should not be encouraged.
+>=20
+
+Sure... this being said, fsdev currently exposes a readdir_r operation,=
+ not
+a readdir one. Until we decide to change that, backends must follow the
+readdir_r() API.
+
+Cheers.
+
+--
+Greg
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
