@@ -1,66 +1,61 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: ceph: use fscache as a local presisent cache
-Date: Thu, 10 Mar 2016 11:26:17 +0800
-Message-ID: <CAAM7YAnOuxYuxEprfiwy522P2p0N=8DOebuYSo_UJCO+40zgag@mail.gmail.com>
-References: <20160309085452.GA4085@mwanda>
+From: Shinobu Kinjo <shinobu.kj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: New added OSD always down when full flag of osdmap
+ is set
+Date: Thu, 10 Mar 2016 12:28:34 +0900
+Message-ID: <CAFdRU73G8Eoe3WE6wE_H61oWLRwnJOi9b1ZU18NcS_zYH61JzA@mail.gmail.com>
+References: <56E0DDE6.1040807@gmail.com>
+	<CAFdRU70zv2_g3c5fjYQA1Q0xu1sL0hGsiO2jpt9BDHZfDgKqGg@mail.gmail.com>
+	<56E0E2EE.6030708@gmail.com>
+Reply-To: skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:35591 "EHLO
-	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934872AbcCJD0T (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Mar 2016 22:26:19 -0500
-Received: by mail-wm0-f43.google.com with SMTP id l68so11591183wml.0
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Mar 2016 19:26:18 -0800 (PST)
-In-Reply-To: <20160309085452.GA4085@mwanda>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Milosz Tanski <milosz@adfin.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <56E0E2EE.6030708-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: hzwulibin <hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Mar 9, 2016 at 4:54 PM, Dan Carpenter <dan.carpenter@oracle.com> wrote:
-> [ Hm...  I don't know why this has suddenly started warning now only.
->   This check doesn't warn if it knows that the NULL check is not
->   needed so potentially that was what prevented the warning before?
->   -dan ]
->
-> Hello Milosz Tanski,
->
-> This is a semi-automatic email about new static checker warnings.
->
-> The patch 99ccbd229cf7: "ceph: use fscache as a local presisent
-> cache" from Aug 21, 2013, leads to the following Smatch complaint:
->
-> fs/ceph/addr.c:183 ceph_releasepage()
->          error: we previously assumed 'page->mapping' could be null (see line 178)
->
-> fs/ceph/addr.c
->    177  {
->    178          struct inode *inode = page->mapping ? page->mapping->host : NULL;
->                                       ^^^^^^^^^^^^^
-> Check for NULL.
-
-page->mapping can not be NULL in this case.  I will remove the check
-
-
-Regards
-Yan, Zheng
-
->
->    179          dout("%p releasepage %p idx %lu\n", inode, page, page->index);
->    180          WARN_ON(PageDirty(page));
->    181
->    182          /* Can we release the page from the cache? */
->    183          if (!ceph_release_fscache_page(page, g))
->                                                ^^^^
-> The patch adds a dereference inside the function call.
->
->    184                  return 0;
->    185
->
-> regards,
-> dan carpenter
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Q2FuIHlvdSBwcm92aWRlIHVzIHdpdGg6Cgogc3VkbyBjZXBoIG9zZCB0cmVlCiBzdWRvIGNlcGgg
+b3NkIGRmCiBzdWRvIGNlcGggZGYKCkNoZWVycywKUwoKT24gVGh1LCBNYXIgMTAsIDIwMTYgYXQg
+MTE6NTggQU0sIGh6d3VsaWJpbiA8aHp3dWxpYmluQGdtYWlsLmNvbT4gd3JvdGU6Cj4gTm8sIGp1
+c3QgOTglLgo+Cj4gQW5vdGhlciBzY2VuZSwgaWYgYmFja2ZpbGwgdG9vIGZ1bGwsIGFsc28gY291
+bGQgbm90IGFkZCB0aGUgb3NkIGluIGFuZCB1cC4KPgo+IC0tLS0tLS0tLS0tLS0tLS0tLQo+IGh6
+d3VsaWJpbgo+IDIwMTYtMDMtMTAKPgo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiDlj5Hku7bkurrvvJpTaGlub2J1IEtpbmpv
+IDxzaGlub2J1LmtqQGdtYWlsLmNvbT4KPiDlj5HpgIHml6XmnJ/vvJoyMDE2LTAzLTEwIDEwOjQ5
+Cj4g5pS25Lu25Lq677yaaHp3dWxpYmluCj4g5oqE6YCB77yaY2VwaC1kZXZlbCxjZXBoLXVzZXJz
+Cj4g5Li76aKY77yaUmU6IFtjZXBoLXVzZXJzXSBOZXcgYWRkZWQgT1NEIGFsd2F5cyBkb3duIHdo
+ZW4gZnVsbCBmbGFnIG9mIG9zZG1hcAo+ICBpcyBzZXQKPgo+IE9uIFRodSwgTWFyIDEwLCAyMDE2
+IGF0IDExOjM3IEFNLCBoend1bGliaW4gPGh6d3VsaWJpbkBnbWFpbC5jb20+IHdyb3RlOgo+PiBI
+aSwgY2VwaGVycwo+Pgo+PiBSZWNlbnRseSwgaSBmb3VuZCB3ZSBjb3VsZCBub3QgYWRkIG5ldyBv
+c2QgaW4gY2x1c3RlciB3aGVuIHRoZSBmdWxsIGZsYWcgaXMgc2V0IGluIG9zZG1hcC4KPj4KPj4g
+U2hvcnRseSBkZXNjcmliZSB0aGUgc2NlbmUgaGVyZToKPj4gMS4gU29tZSBvc2QgYXJlIGZ1bGws
+IGFuZCB0aGUgb3NkbWFwIGhhcyBmdWxsIGZsYWcKPgo+IEFyZSB0aG9zZSBPU0RzIHVzYWdlIHJl
+YWxseSAxMDAlIHdoaWNoIGlzIG5vdCBleHBlY3RlZD8KPgo+PiAyLiBBZGQgbmV3IG9zZAo+PiAz
+LiBOZXcgb3NkIHNlcnZpY2UgaXMgcnVubmluZywgYnV0IGl0J3Mgc3RhdGUgYWx3YXlzIGRvd24K
+Pj4KPj4gSGVyZSBpcyB0aGUgaXNzdWU6Cj4+IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vl
+cy8xNTAyNQo+Pgo+PiBBbnlvbmUga25vdyBpdCdzIGEgbm9ybWFsIHdheSBvciBhIGJ1ZyBoZXJl
+Pwo+Pgo+PiAtLS0tLS0tLS0tLS0tLQo+PiBoend1bGliaW4KPj4gMjAxNi0wMy0xMAo+PiBfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+PiBjZXBoLXVzZXJz
+IG1haWxpbmcgbGlzdAo+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4+IGh0dHA6Ly9saXN0
+cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+Cj4KPgo+IC0tCj4g
+RW1haWw6Cj4gc2hpbm9idUBsaW51eC5jb20KPiBHaXRIdWI6Cj4gc2hpbm9idS14Cj4gQmxvZzoK
+PiBMaWZlIHdpdGggRGlzdHJpYnV0ZWQgQ29tcHV0YXRpb25hbCBTeXN0ZW0gYmFzZWQgb24gT3Bl
+blNvdXJjZQo+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20K
+PiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+CgoKLS0gCkVtYWlsOgpzaGlub2J1QGxpbnV4LmNvbQpHaXRIdWI6CnNoaW5vYnUteApCbG9nOgpM
+aWZlIHdpdGggRGlzdHJpYnV0ZWQgQ29tcHV0YXRpb25hbCBTeXN0ZW0gYmFzZWQgb24gT3BlblNv
+dXJjZQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBo
+LXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0
+cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
