@@ -1,61 +1,67 @@
-From: David Disseldorp <ddiss@suse.de>
-Subject: Re: [PATCH 0/2] ceph osd: initial VMware VAAI support
-Date: Fri, 11 Mar 2016 11:03:45 +0100
-Message-ID: <20160311110345.33d8028c@echidna.suse>
-References: <[PATCH 0/2] ceph osd: initial VMware VAAI support>
-	<1457591672-17430-1-git-send-email-mchristi@redhat.com>
-	<56E11607.8070200@redhat.com>
-	<20160310130423.1383631a@echidna.suse>
-	<56E1F912.1000509@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [GSoC 2016] ON-THE-WIRE ENCRYPTION SUPPORT
+Date: Fri, 11 Mar 2016 09:20:08 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1603110908280.14377@cpach.fuggernut.com>
+References: <CAEG8a3KgxDHU03JDccrU_h7S8GksO8hfM2tcxLak=R1tKBXfMA@mail.gmail.com> <CACJqLyYKhqGg6du8Z_HL7Lfemj_W3RMOBxE4C23khb9mKWEy+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:59790 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750864AbcCKKDr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 11 Mar 2016 05:03:47 -0500
-In-Reply-To: <56E1F912.1000509@redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:34166 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752540AbcCKOU3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Mar 2016 09:20:29 -0500
+In-Reply-To: <CACJqLyYKhqGg6du8Z_HL7Lfemj_W3RMOBxE4C23khb9mKWEy+g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>
-Cc: Mike Christie <mchristi@redhat.com>, ceph-devel@vger.kernel.org
+To: Haomai Wang <haomai@xsky.com>
+Cc: John Hunter <zhjwpku@gmail.com>, mwatts@redhat.com, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Josh,
-
-On Thu, 10 Mar 2016 14:45:38 -0800, Josh Durgin wrote:
-
-> On 03/10/2016 04:04 AM, David Disseldorp wrote:
-> > On Thu, 10 Mar 2016 00:36:55 -0600, Mike Christie wrote:
-> >
-> > ...
-> >>> This does not include support for XCOPY/extended copy. I
-> >>> am still looking into this, but it seems it might be
-> >>> difficult to support due to rbd being more tuned to cloning
-> >>> entire devices. When we implement VASA, the cloneVirtualVolume
-> >>> might be something we can support though.
-> >
-> > I suppose the src-and-dest-in-same-pg requirement would complicate
-> > things quite a bit, but wouldn't clonerange be an option for XCOPY
-> > offloads?
+On Fri, 11 Mar 2016, Haomai Wang wrote:
+> On Fri, Mar 11, 2016 at 1:38 PM, John Hunter <zhjwpku@gmail.com> wrote:
 > 
-> It's not a good fit, since with multiple clones putting data on the
-> same set of osds, the workload and space utilization gets skewed for
-> that set of osds compared to the rest of the cluster.
-> 
-> It also won't give you fast cloning - it's a full copy on xfs, and
-> you'd need to do one for every object affected.
+> > Hi sage,
+> >
+> > At a quick look at the ceph codebase, the cryptographic handshake is
+> > handled
+> > by the Pipe class(I might be wrong), it not using the openssl handshake
+> > and not
+> > using the openssl crypto library. I am wondering when we encrypt the actual
+> > data, are we going to implement our own encrypt functions?
+>
+> We could define a new feature in connection handshake, init side could take
+> a enanble/disable flag to make server side decided. If both side agreed
+> with encrypt, the connection can encrypt each message later or we need to
+> have a new encrypt  info exchange step into original handshake process.
 
-Currently the copy is being done on the LIO iSCSI gateway, so offloading
-any of that to the OSDs would save a lot of network traffic.
+Take a look at 
 
-Also as Ric mentioned, XFS has clone-range support coming, so Ceph's
-dedupe COW optimisations need not only be limited the Btrfs Filestore.
+	https://github.com/ceph/ceph/blob/master/src/msg/simple/Pipe.cc
 
-> Due to these limitations, lack of existing clonerange use, and the
-> complications it brings to the osd as the only op affecting more than
-> one object, we've talked about removing the clonerange op.
+The initial exchange is a ceph_msg_connect sent from client->server, and a 
+ceph_msg_connect_reply response.  The request includes the 
+cephx authorizer, and by the time we get the response, both client and 
+server share a session key (derived from the shared secret and a nonce) 
+that we can use to encrypt.
 
-Okay, fair enough. Thanks for the details.
+The features aren't encrypted, so in theory at MITM could twiddle those, 
+*but* they can't tamper with the cephx authorizer and response without 
+breaking the security handshake.  I think this may be broken in the 
+current handshake, actually, since we use the connection features to 
+decide whether to sign messages.  The features probably need to go in the 
+authorizer, or in something signed by the authorizer.
 
-Cheers, David
+Anyway, both sides know that the other supports encryption, if one of 
+them wants to encrypt, they can send a tag
+
+	https://github.com/ceph/ceph/blob/master/src/include/msgr.h#L77
+
+indicating that all further messages sent are encrypted.  A similar tag 
+(or the same tag) could request that the other end do the same.
+The bit I worry about here is that the other end may have already started 
+sending other messages before it gets the 'please encrypt outgoing 
+messages' tag.  So maybe we need to incorportate the request into the 
+authorizer itself so that it's part of the initial cephx handshake..
+
+What do you think?
+
+sage
