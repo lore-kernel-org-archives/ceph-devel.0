@@ -1,32 +1,63 @@
-From: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
-Subject: ObjectRecoveryInfo size in recover
-Date: Fri, 11 Mar 2016 11:32:07 +0800
-Message-ID: <CANE=7sWioj8-sAJm_4gJ1amLALSx=ZTxPO-=sYGRKxsnkbW3Qw@mail.gmail.com>
+From: Ric Wheeler <rwheeler@redhat.com>
+Subject: Re: [PATCH 0/2] ceph osd: initial VMware VAAI support
+Date: Fri, 11 Mar 2016 10:16:47 +0530
+Message-ID: <56E24DB7.6010302@redhat.com>
+References: <[PATCH 0/2] ceph osd: initial VMware VAAI support>
+ <1457591672-17430-1-git-send-email-mchristi@redhat.com>
+ <56E11607.8070200@redhat.com> <20160310130423.1383631a@echidna.suse>
+ <56E1F912.1000509@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:33303 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933456AbcCKDcJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Mar 2016 22:32:09 -0500
-Received: by mail-ob0-f174.google.com with SMTP id fz5so101517886obc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Mar 2016 19:32:08 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:55771 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932279AbcCKEqy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 10 Mar 2016 23:46:54 -0500
+In-Reply-To: <56E1F912.1000509@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>, David Disseldorp <ddiss@suse.de>, Mike Christie <mchristi@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-hi, all:
+On 03/11/2016 04:15 AM, Josh Durgin wrote:
+> On 03/10/2016 04:04 AM, David Disseldorp wrote:
+>> On Thu, 10 Mar 2016 00:36:55 -0600, Mike Christie wrote:
+>>
+>> ...
+>>>> This does not include support for XCOPY/extended copy. I
+>>>> am still looking into this, but it seems it might be
+>>>> difficult to support due to rbd being more tuned to cloning
+>>>> entire devices. When we implement VASA, the cloneVirtualVolume
+>>>> might be something we can support though.
+>>
+>> I suppose the src-and-dest-in-same-pg requirement would complicate
+>> things quite a bit, but wouldn't clonerange be an option for XCOPY
+>> offloads?
+>
+> It's not a good fit, since with multiple clones putting data on the
+> same set of osds, the workload and space utilization gets skewed for
+> that set of osds compared to the rest of the cluster.
+>
+> It also won't give you fast cloning - it's a full copy on xfs, and
+> you'd need to do one for every object affected.
 
-     When osd do recovery, the size of ObjectRecoveryInfo is different
-between push logic and pull logic. One uses stat size, and the other
-one uses object_info_t size.
+Note that XFS is working on reflink code at the moment and that the kernel 
+people are looking at new system calls that will allow copy offload generically.
 
-    If I do not misread, the stat size == object_info_t size,
-excluding ec case.
+Specifically, that will give XFS (and other file systems like btrfs) the ability 
+to do a zero data movement pseudo copy (copy on write version) of a file.
 
-    Why we use different logic between them?
+That would make this interesting I think to think about doing...
 
-
--- 
 Regards,
-Xinze Chi
+
+Ric
+
+>
+> Due to these limitations, lack of existing clonerange use, and the
+> complications it brings to the osd as the only op affecting more than
+> one object, we've talked about removing the clonerange op.
+>
+> Josh
+
