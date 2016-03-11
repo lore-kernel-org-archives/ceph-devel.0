@@ -1,82 +1,80 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Greetings Ceph Community : GSOC Queries
-Date: Fri, 11 Mar 2016 09:34:42 -0500 (EST)
-Message-ID: <alpine.DEB.2.11.1603110929380.14377@cpach.fuggernut.com>
-References: <CAJXHLwDGYDy27XS7h0KwCJjC0tzEma9EFkiyJoOz6xS9D+2XMw@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [GSoC2016] BlueStore SMR Support
+Date: Fri, 11 Mar 2016 09:50:06 -0500 (EST)
+Message-ID: <alpine.DEB.2.11.1603110942520.14377@cpach.fuggernut.com>
+References: <CAPLK-i83vpHT7CwoczKULwpvJ+-eMLdhxWUy6YwyE0wj27kiOw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34259 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932102AbcCKOfF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Mar 2016 09:35:05 -0500
-In-Reply-To: <CAJXHLwDGYDy27XS7h0KwCJjC0tzEma9EFkiyJoOz6xS9D+2XMw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:33942 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932119AbcCKOu1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 11 Mar 2016 09:50:27 -0500
+In-Reply-To: <CAPLK-i83vpHT7CwoczKULwpvJ+-eMLdhxWUy6YwyE0wj27kiOw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vineet Purswani <vineetcse813@gmail.com>
+To: Shehbaz Jaffer <shehbazjaffer007@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Vineet,
+Hi Shehbaz,
 
-On Wed, 9 Mar 2016, Vineet Purswani wrote:
-> Greetings Ceph Community,
+Sorry for the slow reply!  I'm just catching up on GSoC queries.
+
+On Fri, 4 Mar 2016, Shehbaz Jaffer wrote:
+> Hi All,
 > 
-> My name is Vineet Purswani and I am a fourth year Computer Science
-> MTech Integrated student at IIT Kanpur, India. I am interested in
-> knowing more about a project listed on Ceph GSOC ideas page -
-> Implement cache layer on top of userspace nvme driver
+> I am a 1st Year PhD student at University of Toronto. I am interested
+> in working on the SMR friendly allocator for Bluestore file system. I
+> am new to Ceph. But I am familiar with FS development in user space, and
+> SMR drives. I am currently going through Ceph codebase.
+> It looks like the allocator is very basic, hence the current name of
+> the block allocator:
+> os/bluestore/StupidAllocator.cc :-)
 
-This project relates to using the new BlueStore OSD backend on NVMe 
-devices with the SPDK kernel-bypass library.  When we use the kernel 
-block device (with normal HDDs, SSDs, or even NVMe without the SPDK 
-driver) we can just do buffered reads and writes from the block device 
-(i.e., not use O_DIRECT) and the kernel will cache things for us.  SPDK 
-doesn't have a cache, though, and in a few places in BlueStore we reply 
-on that cache.
+:)
 
-The goal of this project is to build a very efficient cache layer that we 
-can use in certain cases on top of the SPDK device.  The interface in 
-question is os/bluestore/BlockDevice.h (that's the abstract interface), 
-and the SPDK implementation of it is NVMEDevice.h.  For refernce the 
-KernelDevice.h is there too, although there isn't much to see there, 
-except that there are two read/write paths.. one that uses an O_DIRECT fd 
-with aio, and one that does normal buffered reads and writes.
+> Few initial questions:
+> 
+> 1) Will the project involve Drive managed SMR drives or Host Managed SMR 
+> drives?
 
-There is a performance-tuned bit of caching code in the tree at 
-os/memstore/PageSet.h that might be a useful starting point, although it 
-almost certainly needs to be adapted to be useful here.
+The goal is to make an allocator that will work with host managed SMR.  
+Presumably that will work just as well on host-aware SMR.
 
+A drive-managed SMR disk that doesn't tell us the zone layout is a bit of 
+a lost cause, I think.
+
+> 2) Will scope of project be to build an allocator on a simulator for
+> SMR Drives? Or will I get actual HDDs to work with? In case of
+> simulators, will the project involve building a simulator on disksim?
+
+I seem to remember hearing something about a dm module that simulated SMR, 
+but I'm not sure.  We may also be able to get some SMR disks to play 
+with--I'll reach out to our drive vendor friends.
+
+> 3) Ideally, the benchmark should be to compare StupidAllocator scheme
+> with a SmartAllocator scheme in terms of the following performance
+> metrics:
+> a) speed
+> b) correctness
+> c) fragmentation
+> d) garbage collection efficiency
+> 
+> are there any other metrics that we would like to measure the allocator for?
+
+That sounds about right, (b) being the first and most important step.
+
+Our only big idea here so far is that we probably want to put writes for 
+each PG in a distinct zone, as I suspect PG is thing we have that is most 
+closely correlated to object lifetime (because when the cluster does a 
+rebalance or repair, and entire PG's worth of objects will typically get 
+moved around).  That might mean a lot of open zones, though, and mean lots 
+of seeks on writes if new objects are randomly spread across PGs (as they 
+generally will be).  So we should probably explore other strategies as 
+well.
+
+> Thanks and I look forward to working on this project. Please feel free
+> to send out your comments/suggestions.
+
+Great!
 sage
-
-
-> I have a great interest in Computer Systems, specifically operating
-> systems, computer architecture and cloud computing. I did a project on
-> compiler design, wherein I developed a Java compiler in python using
-> PLY library. I have worked on NACHOS to test some of the scheduling
-> algorithms, demand paging techniques, implemented condition variables
-> and semaphores. I did an architecture project to get my hands on over
-> cache hierarchy techniques and branch & target predictors. I am
-> currently working on computer security projects, wherein I have done
-> control hijacking, privilege separation, learnt about several symbolic
-> execution techniques like DART, KLEE & EXE. I have a basic knowledge
-> of compiler design, databases, functional programming, machine
-> learning and computer security as well. You can find my work here:
-> https://github.com/vineetpurswani
-> 
-> Kindly guide me as to how do I start working on this idea? Which bug
-> fix/enhancement should I work on? Expectations in proposal?
-> 
-> Kindly share any details that you would like to share or any questions
-> that you may have for me regarding this GSOC project.
-> 
-> Let me know what you think. Thanks a lot.
-> 
-> Yours Sincerely
-> Vineet Purswani
-> IIT Kanpur
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
