@@ -1,62 +1,30 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: BlueStore Allocator.
-Date: Sat, 12 Mar 2016 05:55:48 +0000
-Message-ID: <CY1PR0201MB1897CCAA0A4F785E2E52CEB3E8B60@CY1PR0201MB1897.namprd02.prod.outlook.com>
-References: <CY1PR0201MB1897D954C262E37CDC98CD7FE8B50@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <7F65DCA1-634A-49F3-97C9-ACF0882A0292@ebay.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: dynamic filestore throttle doc
+Date: Sat, 12 Mar 2016 07:41:19 +0000
+Message-ID: <BN1PR02MB05592315BF964AFF3D241F9F4B60@BN1PR02MB055.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0079.outbound.protection.outlook.com ([157.56.110.79]:38448
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+Received: from mail-bl2on0077.outbound.protection.outlook.com ([65.55.169.77]:26272
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751059AbcCLFzx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 12 Mar 2016 00:55:53 -0500
-In-Reply-To: <7F65DCA1-634A-49F3-97C9-ACF0882A0292@ebay.com>
+	id S1750799AbcCLHlW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 12 Mar 2016 02:41:22 -0500
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Snyder, Emile" <emsnyder@ebay.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTbnlkZXIsIEVtaWxlIFttYWls
-dG86ZW1zbnlkZXJAZWJheS5jb21dDQo+IFNlbnQ6IEZyaWRheSwgTWFyY2ggMTEsIDIwMTYgMTo1
-OSBQTQ0KPiBUbzogQWxsZW4gU2FtdWVscyA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT4NCj4g
-Q2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBCbHVlU3RvcmUg
-QWxsb2NhdG9yLg0KPiANCj4gT24gMy8xMC8xNiwgNjowNiBQTSwgImNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBBbGxlbg0KPiBTYW11ZWxzIiA8Y2VwaC1kZXZl
-bC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mDQo+IEFsbGVuLlNhbXVlbHNAc2Fu
-ZGlzay5jb20+IHdyb3RlOg0KPiANCj4gPHNuaXA+DQo+ID4NCj4gPlRodXMgdGhlIHRvdGFsIGFs
-bG9jYXRvciBzeXN0ZW0gYmVjb21lczoNCj4gPg0KPiA+KDEpIEFuIGluLW1lbW9yeSBiaXRtYXAg
-dmVjdG9yIG9mIDRLIGJsb2NrcyAodGhpcyBpcyB0aGUgZXF1aXZhbGVudCBvZiB0aGUNCj4gRnJl
-ZUxpc3Qgb2YgdGhlIGN1cnJlbnQgZGVzaWduKS4NCj4gPigyKSBUaGUgYXV4aWxpYXJ5IHN0cnVj
-dHVyZXMgZGVzY3JpYmVkIGFib3ZlICh+MU1CIG9mIG1lbW9yeSBleHRyYSkuDQo+ID4oMykgQWxs
-b2NhdGlvbnMgc2V0IGJpdHMgaW4gdGhlIGJpdG1hcCBhdCB0aGUgdGltZSBvZiBhbGxvY2F0aW9u
-Lg0KPiA+KDQpIERlYWxsb2NhdGluZyBvcGVyYXRpb25zIGFyZSBkb25lIGFmdGVyIHRoZSBLViBj
-b21taXQuDQo+ID4oNSkgS1Yga2V5cyBiZWNvbWUgY2h1bmtzIG9mIHRoZSBiaXRtYXAgYW5kIGFy
-ZSBtYW5pcHVsYXRlZCBhdCB0aGUNCj4gaW5kaXZpZHVhbCBiaXQgbGV2ZWwgdmlhIHRoZSBtZXJn
-ZSBjYXBhYmlsaXR5IG9mIFJvY2tzREIgKHdoaWNoIHdlIHdvdWxkDQo+IGR1cGxpY2F0ZSBpbiBa
-ZXRhU2NhbGUpLg0KPiANCj4gSSB0YWtlIGl0IHlvdSBtZWFuIHRoZSBLViAqdmFsdWVzKiBiZWNv
-bWUgY2h1bmtzIG9mIHRoZSBmcmVlbGlzdCBiaXRtYXA/DQo+IFdoaWxlIHRoZSBrZXkgaXMuLi4g
-dGhlIGluZGV4IHRvIHRoZSBjaHVuayBvZiBiaXRtYXAgdGhlIHZhbHVlIGlzPyBTaW5jZSB0aGUN
-Cj4gbWVyZ2Ugb3BlcmF0aW9uIGlzIG1vZGlmeWluZyB0aGUgdmFsdWUgZm9yIGEgZ2l2ZW4ga2V5
-Lg0KDQpZZXMgYW5kIHllcy4gRXhhY3RseS4NCg0KPiANCj4gSG93IGFyZSB5b3UgZGVjaWRpbmcg
-dGhlIHNpemUgb2YgYml0bWFwIGNodW5rcyB0byB1c2U/DQoNCkdvb2QgcXVlc3Rpb24uIEkgdGhp
-bmsgdGhlcmUgYXJlIGEgY291cGxlIG9mIGNvbXBldGluZyBmYWN0b3JzLCBidXQgdGhhdCBpdCB3
-b24ndCBiZSBkaWZmaWN1bHQgdG8gZmluZCBhIGdvb2Qgc2l6ZS4gTm8gcmVhc29uIHRoYXQgdGhl
-IGNvZGUgd29uJ3QgYmUgcGFyYW1ldGVyaXplZCBzbyBhcyB0byBlYXNpbHkgYWxsb3cgc29tZSBl
-eHBlcmltZW50YXRpb24gYW5kIG1lYXN1cmVtZW50Lg0KDQpGYWN0b3JzIHRoYXQgc2VlbSByZWxl
-dmFudCB0byBtZSBhcmU6DQoNCigxKSBOb3Qgc28gbGFyZ2UgYXMgdG8gZXhwYW5kIHRoZSBLViB0
-cmFuc2FjdGlvbiBjb21taXQgc2l6ZSBpbnRvIGEgbGFyZ2VyIG51bWJlciBvZiBJL08ncyBvbiB0
-aGUgZGV2aWNlLiBJbiBvdGhlciB3b3JkcywgbWFrZSBpdCBzbWFsbC4gV2Ugc2hvdWxkIHByb2Jh
-Ymx5IHBsYW4gb24gYXQgbGVhc3QgdHdvIEtleXMgcGVyIHRyYW5zYWN0aW9uICgxIGFsbG9jLCAx
-IGZyZWUpDQooMikgTm90IHNvIHNtYWxsIGFzIHRvIHJlcXVpcmUgbXVsdGlwbGUga2V5cyB0byBi
-ZSBzcGVjaWZpZWQgYmVjYXVzZSB5b3VyIGNvbnRpZ3VvdXMgYWxsb2NhdGUgb3IgZnJlZSBub3cg
-c3BhbnMgbXVsdGlwbGUga2V5cy4NCigzKSBOb3Qgc28gbGFyZ2UgYXMgdG8gZHJhbWF0aWNhbGx5
-IGluY3JlYXNlIHRoZSBhbW91bnQgb2YgYmFja2dyb3VuZCBjb21wYWN0aW9uIGFjdGl2aXR5IG9m
-IFJvY2tzREIuIA0KDQpXaXRoIHRoYXQgc2FpZCwgbXkgZmlyc3QgZ3Vlc3Mgd291bGQgYmUgc29t
-ZXRoaW5nIHRoYXQgYWxsb3dzIDRNQiBhbGxvY2F0aW9ucyB0byBiZSB3aXRoaW4gYSBzaW5nbGUg
-S2V5LiBUaGF0IHdvdWxkIGJlIDJeMjIvMl4xMiA9PiAyXjEwIEJpdHMgPT4gMl43IEJ5dGVzLg0K
-DQpTbyBteSBmaXJzdCBndWVzcyBpcyAxMjggYnl0ZSB2YWx1ZXMuIFRoYXQgc2VlbXMgdG8gbWUg
-dG8gc2F0aXNmeSB0aGUgYWJvdmUgY3JpdGVyaWEuDQoNCj4gDQo+IC1FbWlsZSBTbnlkZXINCg==
+Hi,
+Here is the pull request for the doc explaining how to use it.
+
+https://github.com/ceph/ceph/pull/8069
+
+Please review.
+
+Thanks & Regards
+Somnath
+
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
