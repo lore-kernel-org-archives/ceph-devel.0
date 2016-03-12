@@ -1,92 +1,62 @@
-From: John Hunter <zhjwpku@gmail.com>
-Subject: Re: [GSoC 2016] ON-THE-WIRE ENCRYPTION SUPPORT
-Date: Sat, 12 Mar 2016 09:11:01 +0800
-Message-ID: <CAEG8a3LJMxFJ5Sf2L292mdDufhsX_w4ZJyLBPbgXrTZSdX4Pkw@mail.gmail.com>
-References: <CAEG8a3KgxDHU03JDccrU_h7S8GksO8hfM2tcxLak=R1tKBXfMA@mail.gmail.com>
-	<CACJqLyYKhqGg6du8Z_HL7Lfemj_W3RMOBxE4C23khb9mKWEy+g@mail.gmail.com>
-	<alpine.DEB.2.11.1603110908280.14377@cpach.fuggernut.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: BlueStore Allocator.
+Date: Sat, 12 Mar 2016 05:55:48 +0000
+Message-ID: <CY1PR0201MB1897CCAA0A4F785E2E52CEB3E8B60@CY1PR0201MB1897.namprd02.prod.outlook.com>
+References: <CY1PR0201MB1897D954C262E37CDC98CD7FE8B50@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <7F65DCA1-634A-49F3-97C9-ACF0882A0292@ebay.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f51.google.com ([209.85.213.51]:36436 "EHLO
-	mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751287AbcCLBLD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Mar 2016 20:11:03 -0500
-Received: by mail-vk0-f51.google.com with SMTP id c3so154046442vkb.3
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Mar 2016 17:11:02 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1603110908280.14377@cpach.fuggernut.com>
+Received: from mail-bn1on0079.outbound.protection.outlook.com ([157.56.110.79]:38448
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751059AbcCLFzx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 12 Mar 2016 00:55:53 -0500
+In-Reply-To: <7F65DCA1-634A-49F3-97C9-ACF0882A0292@ebay.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Haomai Wang <haomai@xsky.com>, mwatts@redhat.com, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Snyder, Emile" <emsnyder@ebay.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage, Haomai,
-
-I think we should put the encrytion request into the handshake, for
-this will make
-sure all the data will be encrypted after the request. AFAIK, openssl
-negotiate the
-cipher-suit(like ECDHE-ECDSA-AES256-SHA)  and the private key during the
-handshake stage before it sends real data, and the handshake is protected by
-the certificate.
-
-So what you said make sense to me, and seems that we use AES-128 to encrypt
-the real data, we don't need the openssl crypto library, forgive me my stupid
-question about openssl :).
-
-I need to spend some time to get familiar with cephx and other code in src/auth,
-and try to write a proposal when the student application peroid opens.
-
-If you have anything suggestion, I'd appreciated if you told me :)
-
-
-On Fri, Mar 11, 2016 at 10:20 PM, Sage Weil <sage@newdream.net> wrote:
-> On Fri, 11 Mar 2016, Haomai Wang wrote:
->> On Fri, Mar 11, 2016 at 1:38 PM, John Hunter <zhjwpku@gmail.com> wrote:
->>
->> > Hi sage,
->> >
->> > At a quick look at the ceph codebase, the cryptographic handshake is
->> > handled
->> > by the Pipe class(I might be wrong), it not using the openssl handshake
->> > and not
->> > using the openssl crypto library. I am wondering when we encrypt the actual
->> > data, are we going to implement our own encrypt functions?
->>
->> We could define a new feature in connection handshake, init side could take
->> a enanble/disable flag to make server side decided. If both side agreed
->> with encrypt, the connection can encrypt each message later or we need to
->> have a new encrypt  info exchange step into original handshake process.
->
-> Take a look at
->
->         https://github.com/ceph/ceph/blob/master/src/msg/simple/Pipe.cc
->
-> The initial exchange is a ceph_msg_connect sent from client->server, and a
-> ceph_msg_connect_reply response.  The request includes the
-> cephx authorizer, and by the time we get the response, both client and
-> server share a session key (derived from the shared secret and a nonce)
-> that we can use to encrypt.
->
-> The features aren't encrypted, so in theory at MITM could twiddle those,
-> *but* they can't tamper with the cephx authorizer and response without
-> breaking the security handshake.  I think this may be broken in the
-> current handshake, actually, since we use the connection features to
-> decide whether to sign messages.  The features probably need to go in the
-> authorizer, or in something signed by the authorizer.
->
-> Anyway, both sides know that the other supports encryption, if one of
-> them wants to encrypt, they can send a tag
->
->         https://github.com/ceph/ceph/blob/master/src/include/msgr.h#L77
->
-> indicating that all further messages sent are encrypted.  A similar tag
-> (or the same tag) could request that the other end do the same.
-> The bit I worry about here is that the other end may have already started
-> sending other messages before it gets the 'please encrypt outgoing
-> messages' tag.  So maybe we need to incorportate the request into the
-> authorizer itself so that it's part of the initial cephx handshake..
->
-> What do you think?
->
-> sage
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTbnlkZXIsIEVtaWxlIFttYWls
+dG86ZW1zbnlkZXJAZWJheS5jb21dDQo+IFNlbnQ6IEZyaWRheSwgTWFyY2ggMTEsIDIwMTYgMTo1
+OSBQTQ0KPiBUbzogQWxsZW4gU2FtdWVscyA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT4NCj4g
+Q2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBCbHVlU3RvcmUg
+QWxsb2NhdG9yLg0KPiANCj4gT24gMy8xMC8xNiwgNjowNiBQTSwgImNlcGgtZGV2ZWwtb3duZXJA
+dmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBBbGxlbg0KPiBTYW11ZWxzIiA8Y2VwaC1kZXZl
+bC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mDQo+IEFsbGVuLlNhbXVlbHNAc2Fu
+ZGlzay5jb20+IHdyb3RlOg0KPiANCj4gPHNuaXA+DQo+ID4NCj4gPlRodXMgdGhlIHRvdGFsIGFs
+bG9jYXRvciBzeXN0ZW0gYmVjb21lczoNCj4gPg0KPiA+KDEpIEFuIGluLW1lbW9yeSBiaXRtYXAg
+dmVjdG9yIG9mIDRLIGJsb2NrcyAodGhpcyBpcyB0aGUgZXF1aXZhbGVudCBvZiB0aGUNCj4gRnJl
+ZUxpc3Qgb2YgdGhlIGN1cnJlbnQgZGVzaWduKS4NCj4gPigyKSBUaGUgYXV4aWxpYXJ5IHN0cnVj
+dHVyZXMgZGVzY3JpYmVkIGFib3ZlICh+MU1CIG9mIG1lbW9yeSBleHRyYSkuDQo+ID4oMykgQWxs
+b2NhdGlvbnMgc2V0IGJpdHMgaW4gdGhlIGJpdG1hcCBhdCB0aGUgdGltZSBvZiBhbGxvY2F0aW9u
+Lg0KPiA+KDQpIERlYWxsb2NhdGluZyBvcGVyYXRpb25zIGFyZSBkb25lIGFmdGVyIHRoZSBLViBj
+b21taXQuDQo+ID4oNSkgS1Yga2V5cyBiZWNvbWUgY2h1bmtzIG9mIHRoZSBiaXRtYXAgYW5kIGFy
+ZSBtYW5pcHVsYXRlZCBhdCB0aGUNCj4gaW5kaXZpZHVhbCBiaXQgbGV2ZWwgdmlhIHRoZSBtZXJn
+ZSBjYXBhYmlsaXR5IG9mIFJvY2tzREIgKHdoaWNoIHdlIHdvdWxkDQo+IGR1cGxpY2F0ZSBpbiBa
+ZXRhU2NhbGUpLg0KPiANCj4gSSB0YWtlIGl0IHlvdSBtZWFuIHRoZSBLViAqdmFsdWVzKiBiZWNv
+bWUgY2h1bmtzIG9mIHRoZSBmcmVlbGlzdCBiaXRtYXA/DQo+IFdoaWxlIHRoZSBrZXkgaXMuLi4g
+dGhlIGluZGV4IHRvIHRoZSBjaHVuayBvZiBiaXRtYXAgdGhlIHZhbHVlIGlzPyBTaW5jZSB0aGUN
+Cj4gbWVyZ2Ugb3BlcmF0aW9uIGlzIG1vZGlmeWluZyB0aGUgdmFsdWUgZm9yIGEgZ2l2ZW4ga2V5
+Lg0KDQpZZXMgYW5kIHllcy4gRXhhY3RseS4NCg0KPiANCj4gSG93IGFyZSB5b3UgZGVjaWRpbmcg
+dGhlIHNpemUgb2YgYml0bWFwIGNodW5rcyB0byB1c2U/DQoNCkdvb2QgcXVlc3Rpb24uIEkgdGhp
+bmsgdGhlcmUgYXJlIGEgY291cGxlIG9mIGNvbXBldGluZyBmYWN0b3JzLCBidXQgdGhhdCBpdCB3
+b24ndCBiZSBkaWZmaWN1bHQgdG8gZmluZCBhIGdvb2Qgc2l6ZS4gTm8gcmVhc29uIHRoYXQgdGhl
+IGNvZGUgd29uJ3QgYmUgcGFyYW1ldGVyaXplZCBzbyBhcyB0byBlYXNpbHkgYWxsb3cgc29tZSBl
+eHBlcmltZW50YXRpb24gYW5kIG1lYXN1cmVtZW50Lg0KDQpGYWN0b3JzIHRoYXQgc2VlbSByZWxl
+dmFudCB0byBtZSBhcmU6DQoNCigxKSBOb3Qgc28gbGFyZ2UgYXMgdG8gZXhwYW5kIHRoZSBLViB0
+cmFuc2FjdGlvbiBjb21taXQgc2l6ZSBpbnRvIGEgbGFyZ2VyIG51bWJlciBvZiBJL08ncyBvbiB0
+aGUgZGV2aWNlLiBJbiBvdGhlciB3b3JkcywgbWFrZSBpdCBzbWFsbC4gV2Ugc2hvdWxkIHByb2Jh
+Ymx5IHBsYW4gb24gYXQgbGVhc3QgdHdvIEtleXMgcGVyIHRyYW5zYWN0aW9uICgxIGFsbG9jLCAx
+IGZyZWUpDQooMikgTm90IHNvIHNtYWxsIGFzIHRvIHJlcXVpcmUgbXVsdGlwbGUga2V5cyB0byBi
+ZSBzcGVjaWZpZWQgYmVjYXVzZSB5b3VyIGNvbnRpZ3VvdXMgYWxsb2NhdGUgb3IgZnJlZSBub3cg
+c3BhbnMgbXVsdGlwbGUga2V5cy4NCigzKSBOb3Qgc28gbGFyZ2UgYXMgdG8gZHJhbWF0aWNhbGx5
+IGluY3JlYXNlIHRoZSBhbW91bnQgb2YgYmFja2dyb3VuZCBjb21wYWN0aW9uIGFjdGl2aXR5IG9m
+IFJvY2tzREIuIA0KDQpXaXRoIHRoYXQgc2FpZCwgbXkgZmlyc3QgZ3Vlc3Mgd291bGQgYmUgc29t
+ZXRoaW5nIHRoYXQgYWxsb3dzIDRNQiBhbGxvY2F0aW9ucyB0byBiZSB3aXRoaW4gYSBzaW5nbGUg
+S2V5LiBUaGF0IHdvdWxkIGJlIDJeMjIvMl4xMiA9PiAyXjEwIEJpdHMgPT4gMl43IEJ5dGVzLg0K
+DQpTbyBteSBmaXJzdCBndWVzcyBpcyAxMjggYnl0ZSB2YWx1ZXMuIFRoYXQgc2VlbXMgdG8gbWUg
+dG8gc2F0aXNmeSB0aGUgYWJvdmUgY3JpdGVyaWEuDQoNCj4gDQo+IC1FbWlsZSBTbnlkZXINCg==
