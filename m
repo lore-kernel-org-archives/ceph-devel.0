@@ -1,39 +1,50 @@
-From: Giridhar Yasa <giridhar.yasa@flipkart.com>
-Subject: Re: [GSoC2016] BlueStore SMR Support
-Date: Sun, 13 Mar 2016 01:37:17 +0530
-Message-ID: <CAKP7xVyMGJO-8YjkqhhFPoiY_608ByKY8+c_Y=7W-tcmDBADsg@mail.gmail.com>
-References: <CAPLK-i83vpHT7CwoczKULwpvJ+-eMLdhxWUy6YwyE0wj27kiOw@mail.gmail.com>
-	<alpine.DEB.2.11.1603110942520.14377@cpach.fuggernut.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Geliang Tang <geliangtang@163.com>
+Subject: [PATCH 1/3] rbd: use KMEM_CACHE macro
+Date: Sun, 13 Mar 2016 15:18:37 +0800
+Message-ID: <9242267d62daeec8a0de5a1230f750ca486d62cd.1457853190.git.geliangtang@163.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f173.google.com ([209.85.214.173]:36576 "EHLO
-	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751664AbcCLUHS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 12 Mar 2016 15:07:18 -0500
-Received: by mail-ob0-f173.google.com with SMTP id m7so143122779obh.3
-        for <ceph-devel@vger.kernel.org>; Sat, 12 Mar 2016 12:07:17 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1603110942520.14377@cpach.fuggernut.com>
+Received: from m12-14.163.com ([220.181.12.14]:44061 "EHLO m12-14.163.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750769AbcCMHSu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 13 Mar 2016 03:18:50 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Shehbaz Jaffer <shehbazjaffer007@gmail.com>, ceph-devel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
+Cc: Geliang Tang <geliangtang@163.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Fri, Mar 11, 2016 at 8:20 PM, Sage Weil <sweil@redhat.com> wrote:
->
-> On Fri, 4 Mar 2016, Shehbaz Jaffer wrote:
->
-> > 2) Will scope of project be to build an allocator on a simulator for
-> > SMR Drives? Or will I get actual HDDs to work with? In case of
-> > simulators, will the project involve building a simulator on disksim?
->
-> I seem to remember hearing something about a dm module that simulated SMR,
-> but I'm not sure.  We may also be able to get some SMR disks to play
-> with--I'll reach out to our drive vendor friends.
+Use KMEM_CACHE() instead of kmem_cache_create() to simplify the code.
 
-Would that be https://github.com/hgst/libzbc from HGST?
+Signed-off-by: Geliang Tang <geliangtang@163.com>
+---
+ drivers/block/rbd.c | 10 ++--------
+ 1 file changed, 2 insertions(+), 8 deletions(-)
 
-Giridhar
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 4a87678..70eba86 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -5643,18 +5643,12 @@ static void rbd_sysfs_cleanup(void)
+ static int rbd_slab_init(void)
+ {
+ 	rbd_assert(!rbd_img_request_cache);
+-	rbd_img_request_cache = kmem_cache_create("rbd_img_request",
+-					sizeof (struct rbd_img_request),
+-					__alignof__(struct rbd_img_request),
+-					0, NULL);
++	rbd_img_request_cache = KMEM_CACHE(rbd_img_request, 0);
+ 	if (!rbd_img_request_cache)
+ 		return -ENOMEM;
+ 
+ 	rbd_assert(!rbd_obj_request_cache);
+-	rbd_obj_request_cache = kmem_cache_create("rbd_obj_request",
+-					sizeof (struct rbd_obj_request),
+-					__alignof__(struct rbd_obj_request),
+-					0, NULL);
++	rbd_obj_request_cache = KMEM_CACHE(rbd_obj_request, 0);
+ 	if (!rbd_obj_request_cache)
+ 		goto out_err;
+ 
+-- 
+2.5.0
 
---
-Giridhar Yasa | Flipkart Engineering | http://www.flipkart.com/
+
