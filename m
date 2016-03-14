@@ -1,75 +1,64 @@
-From: Tianshan Qu <qutianshan@gmail.com>
-Subject: Re: [ceph-users] A simple problem of log directory
-Date: Mon, 14 Mar 2016 15:26:32 +0800
-Message-ID: <2F9BD66E-1C2A-4F41-9831-4D96E1E63428@gmail.com>
+From: Wukongming <wu.kongming-vVzyEvZLFYE@public.gmane.org>
+Subject: =?gb2312?b?tPC4tDogIEEgc2ltcGxlIHByb2JsZW0gb2YgbG9n?=
+ =?gb2312?b?IGRpcmVjdG9yeQ==?=
+Date: Mon, 14 Mar 2016 07:30:35 +0000
+Message-ID: <47D132BF400BE64BAE6D71033F7D3D7503E093DE@H3CMLB14-EX.srv.huawei-3com.com>
 References: <47D132BF400BE64BAE6D71033F7D3D7503E0936B@H3CMLB14-EX.srv.huawei-3com.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
-Content-Type: text/plain; charset=gb2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f44.google.com ([209.85.220.44]:34806 "EHLO
-	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755080AbcCNH20 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Mar 2016 03:28:26 -0400
-Received: by mail-pa0-f44.google.com with SMTP id fe3so134900519pab.1
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Mar 2016 00:28:26 -0700 (PDT)
-In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D7503E0936B@H3CMLB14-EX.srv.huawei-3com.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Wukongming <wu.kongming@h3c.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+	<2F9BD66E-1C2A-4F41-9831-4D96E1E63428@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <2F9BD66E-1C2A-4F41-9831-4D96E1E63428-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Language: zh-CN
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Tianshan Qu <qutianshan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-try add log_file=3D/var/log/ceph/$name.log in [client] section
-
-> =D4=DA 2016=C4=EA3=D4=C214=C8=D5=A3=AC11:45=A3=ACWukongming <wu.kongm=
-ing@h3c.com> =D0=B4=B5=C0=A3=BA
->=20
-> Hi All
->=20
-> Here I want ceph to separate rbd,rgw,mds' logs into individual file. =
-I knew rgw's can be configured by adding comment[client.radosgw.***], b=
-ut useless to the other 2 module.
-> Is that 2(rbd,mds) configured?  Thank you!
->=20
-> ---------------------------------------------
-> wukongming ID: 12019
-> Tel=A3=BA0571-86760239
-> Dept=A3=BA2014 UIS2 ONEStor
->=20
->=20
-> ---------------------------------------------------------------------=
-----------------------------------------------------------------
-> =B1=BE=D3=CA=BC=FE=BC=B0=C6=E4=B8=BD=BC=FE=BA=AC=D3=D0=BA=BC=D6=DD=BB=
-=AA=C8=FD=CD=A8=D0=C5=BC=BC=CA=F5=D3=D0=CF=DE=B9=AB=CB=BE=B5=C4=B1=A3=C3=
-=DC=D0=C5=CF=A2=A3=AC=BD=F6=CF=DE=D3=DA=B7=A2=CB=CD=B8=F8=C9=CF=C3=E6=B5=
-=D8=D6=B7=D6=D0=C1=D0=B3=F6
-> =B5=C4=B8=F6=C8=CB=BB=F2=C8=BA=D7=E9=A1=A3=BD=FB=D6=B9=C8=CE=BA=CE=C6=
-=E4=CB=FB=C8=CB=D2=D4=C8=CE=BA=CE=D0=CE=CA=BD=CA=B9=D3=C3=A3=A8=B0=FC=C0=
-=A8=B5=AB=B2=BB=CF=DE=D3=DA=C8=AB=B2=BF=BB=F2=B2=BF=B7=D6=B5=D8=D0=B9=C2=
-=B6=A1=A2=B8=B4=D6=C6=A1=A2
-> =BB=F2=C9=A2=B7=A2=A3=A9=B1=BE=D3=CA=BC=FE=D6=D0=B5=C4=D0=C5=CF=A2=A1=
-=A3=C8=E7=B9=FB=C4=FA=B4=ED=CA=D5=C1=CB=B1=BE=D3=CA=BC=FE=A3=AC=C7=EB=C4=
-=FA=C1=A2=BC=B4=B5=E7=BB=B0=BB=F2=D3=CA=BC=FE=CD=A8=D6=AA=B7=A2=BC=FE=C8=
-=CB=B2=A2=C9=BE=B3=FD=B1=BE
-> =D3=CA=BC=FE=A3=A1
-> This e-mail and its attachments contain confidential information from=
- H3C, which is
-> intended only for the person or entity whose address is listed above.=
- Any use of the
-> information contained herein in any way (including, but not limited t=
-o, total or partial
-> disclosure, reproduction, or dissemination) by persons other than the=
- intended
-> recipient(s) is prohibited. If you receive this e-mail in error, plea=
-se notify the sender
-> by phone or email immediately and delete it!
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+U3RpbGwgY2Fubm90IHNlcGFyYXRlIFJiZCBsb2cgYW5kIG1kcyBsb2cuIA0KDQotLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCnd1a29uZ21pbmcgSUQ6IDEyMDE5
+DQpUZWyjujA1NzEtODY3NjAyMzkNCkRlcHSjujIwMTQgVUlTMiBPTkVTdG9yDQoNCg0KLS0tLS3T
+yrz+1K28/i0tLS0tDQq3orz+yMs6IFRpYW5zaGFuIFF1IFttYWlsdG86cXV0aWFuc2hhbkBnbWFp
+bC5jb21dIA0Kt6LLzcqxvOQ6IDIwMTbE6jPUwjE0yNUgMTU6MjcNCsrVvP7Iyzogd3Vrb25nbWlu
+ZyAxMjAxOSAoUkQpDQqzrcvNOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgY2VwaC11c2Vy
+c0BsaXN0cy5jZXBoLmNvbQ0K1vfM4jogUmU6IFtjZXBoLXVzZXJzXSBBIHNpbXBsZSBwcm9ibGVt
+IG9mIGxvZyBkaXJlY3RvcnkNCg0KdHJ5IGFkZCBsb2dfZmlsZT0vdmFyL2xvZy9jZXBoLyRuYW1l
+LmxvZyBpbiBbY2xpZW50XSBzZWN0aW9uDQoNCj4g1NogMjAxNsTqM9TCMTTI1aOsMTE6NDWjrFd1
+a29uZ21pbmcgPHd1LmtvbmdtaW5nQGgzYy5jb20+INC0tcCjug0KPiANCj4gSGkgQWxsDQo+IA0K
+PiBIZXJlIEkgd2FudCBjZXBoIHRvIHNlcGFyYXRlIHJiZCxyZ3csbWRzJyBsb2dzIGludG8gaW5k
+aXZpZHVhbCBmaWxlLiBJIGtuZXcgcmd3J3MgY2FuIGJlIGNvbmZpZ3VyZWQgYnkgYWRkaW5nIGNv
+bW1lbnRbY2xpZW50LnJhZG9zZ3cuKioqXSwgYnV0IHVzZWxlc3MgdG8gdGhlIG90aGVyIDIgbW9k
+dWxlLg0KPiBJcyB0aGF0IDIocmJkLG1kcykgY29uZmlndXJlZD8gIFRoYW5rIHlvdSENCj4gDQo+
+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiB3dWtvbmdt
+aW5nIElEOiAxMjAxOQ0KPiBUZWyjujA1NzEtODY3NjAyMzkNCj4gRGVwdKO6MjAxNCBVSVMyIE9O
+RVN0b3INCj4gDQo+IA0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiCxvtPKvP68sMbkuL28
+/rqs09C6vNbdu6rI/c2o0MW8vMr109DP3rmry761xLGjw9zQxc+io6y99s/e09q3osvNuPjJz8Pm
+tdjWt9bQwdCz9g0KPiC1xLj2yMu78si61+mho7371rnIzrrOxuTL+8jL0tTIzrrO0M7Kvcq508Oj
+qLD8wKi1q7K7z97T2sirsr+78rK/t9a12NC5wrahori01sahog0KPiC78smit6KjqbG+08q8/tbQ
+tcTQxc+ioaPI57n7xPq07crVwcuxvtPKvP6jrMfrxPrBory0tee7sLvy08q8/s2o1qq3orz+yMuy
+osm+s/2xvg0KPiDTyrz+o6ENCj4gVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250
+YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIA0KPiBIM0MsIHdoaWNoIGlzIGludGVu
+ZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgDQo+IGxp
+c3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBp
+biBhbnkgd2F5IA0KPiAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBh
+cnRpYWwgZGlzY2xvc3VyZSwgDQo+IHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkg
+cGVyc29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KPiByZWNpcGllbnQocykgaXMgcHJvaGli
+aXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIA0KPiBwbGVhc2Ugbm90
+aWZ5IHRoZSBzZW5kZXIgYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBp
+dCENCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4g
+Y2VwaC11c2VycyBtYWlsaW5nIGxpc3QNCj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KPiBo
+dHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20NCg0K
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2Vy
+cyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2Vw
+aC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
