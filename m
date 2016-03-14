@@ -1,69 +1,42 @@
-From: Ric Wheeler <rwheeler@redhat.com>
-Subject: Re: [GSoC2016] BlueStore SMR Support
-Date: Mon, 14 Mar 2016 13:27:39 -0400
-Message-ID: <56E6F48B.8000301@redhat.com>
-References: <CAPLK-i83vpHT7CwoczKULwpvJ+-eMLdhxWUy6YwyE0wj27kiOw@mail.gmail.com>
- <alpine.DEB.2.11.1603110942520.14377@cpach.fuggernut.com>
- <CAKP7xVyMGJO-8YjkqhhFPoiY_608ByKY8+c_Y=7W-tcmDBADsg@mail.gmail.com>
- <alpine.DEB.2.11.1603140816560.14377@cpach.fuggernut.com>
- <CAKP7xVzKuwy9sP2PqJ-sHT0cygj6byuVX62=oUgnVCNpjWaE9A@mail.gmail.com>
- <56E6BB02.6030801@redhat.com>
- <CAPLK-i_BpawhojAjWq6qCy-aEPgG-t-iT0w5tHEFrPvdvusm3A@mail.gmail.com>
+From: Jim Curtis <jicurtis@redhat.com>
+Subject: How to leverage ceph udev rules for containerized ceph
+Date: Mon, 14 Mar 2016 11:34:25 -0700
+Message-ID: <CAGEA57c3e1mSZE6869GQzA5DFZ5ZqdLO1beasUgg8Lzak+0xxg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35337 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751941AbcCNR2h (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 14 Mar 2016 13:28:37 -0400
-In-Reply-To: <CAPLK-i_BpawhojAjWq6qCy-aEPgG-t-iT0w5tHEFrPvdvusm3A@mail.gmail.com>
+Received: from mail-io0-f169.google.com ([209.85.223.169]:32910 "EHLO
+	mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752039AbcCNSee (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Mar 2016 14:34:34 -0400
+Received: by mail-io0-f169.google.com with SMTP id n190so233645412iof.0
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Mar 2016 11:34:33 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shehbaz Jaffer <shehbazjaffer007@gmail.com>
-Cc: Giridhar Yasa <giridhar.yasa@flipkart.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 03/14/2016 12:42 PM, Shehbaz Jaffer wrote:
-> Sorry for the late reply.
->
->>>>> Would that be https://github.com/hgst/libzbc from HGST?
-> Thanks Giridhar for the link.
->
-> Hi Rick,
->
->> Just keep in mind that different vendors have different behaviors - you will
->> need to tweak it I assume to make it act like the drive you are interested
->> in.
-> There is a T10 and T13 standardization for interfaces (ZBC and ZAC
-> standard). libzbc also follows these standards. From libzbc README
->
-> "libzbc implemention is compliant with the latest drafts of
-> the ZBC and ZAC standards defined by INCITS technical committee T10 and
-> T13 (respectively)."
->
-> I plan to keep the scope of the project such that the allocator will
-> interact with the libzbc interface in emulated mode which is T10 and
-> T13 standard compliant. Once the allocator works on libzbc emulated
-> mode, it can run on disks that support ZBC/ZAC commands. Again from
-> README.
->
-> "In addition to supporting ZBC and ZAC disks, libzbc also implements an
-> emulation mode allowing emulating the behavior of a host-managed zoned
-> disks using a regular file or a raw standard block device as backing
-> storage."
->
->   Is there any other vendor specific behaviour that I should consider?
->
-> Thanks,
-> Shehbaz
->
->
+Greeting ceph-devel,
 
-I think that following the spec is the right way to go. Last time we did a meet 
-up with all of the various SMR vendors, they still had a lot of differences in 
-how the devices actually worked though (number of zones, how to reset a zone, etc).
+We are working on a ceph containerization project within Red Hat.  We
+have recently released our RHEL-based ceph container docker image and
+now we are moving on to handling a feature limitation with that image.
 
-If the spec process works thought, this should all hopefully converge :)
+Specifically, the issue is that on our Atomic host, there is no ceph
+installed, so there are no ceph udev rules to trigger dynamic
+configuration of OSDs when a disk is plugged into the host.
 
-Ric
+What we would like to do is install our own set of ceph udev rules
+that would trigger the startup of our ceph docker container.  We would
+like to leverage the current implementation of the ceph udev rules to
+do this.
 
+Also, since ceph-disk and Ceph's udev rules are tightly coupled and
+ceph-disk creates systemd or upstart rules for OSD daemons, does it
+make sense to add hooks in ceph-disk to start up a containerized OSD
+daemons either in systemd or upstart?
+
+Can somebody in this community help us with this?
+
+Thanks,
+
+Jim C.
