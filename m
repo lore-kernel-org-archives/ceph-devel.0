@@ -1,39 +1,46 @@
-From: Wukongming <wu.kongming@h3c.com>
-Subject: A simple problem of log directory
-Date: Mon, 14 Mar 2016 03:45:10 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D7503E0936B@H3CMLB14-EX.srv.huawei-3com.com>
+From: Peng Tao <bergwolf@gmail.com>
+Subject: Re: Question about rbd layering kernel warning
+Date: Mon, 14 Mar 2016 15:16:26 +0800
+Message-ID: <CA+a=Yy6GoDCK0RqpBCsmcASwPuo=7N+rR3Rqn=4PSu7vjuqd-g@mail.gmail.com>
+References: <CA+a=Yy48ZQan3AKU_GrtOefaENaju5dKgrCaxxL-RBjq5VZg7g@mail.gmail.com>
+ <CAOi1vP_dW7V2G8zg2QL=qzhARqxYQRPSgq4BZfNQQLvob-abiw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:4659 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753158AbcCNDps (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 13 Mar 2016 23:45:48 -0400
-Content-Language: zh-CN
+Received: from mail-ig0-f181.google.com ([209.85.213.181]:33846 "EHLO
+	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751149AbcCNHQq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Mar 2016 03:16:46 -0400
+Received: by mail-ig0-f181.google.com with SMTP id av4so55430522igc.1
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Mar 2016 00:16:46 -0700 (PDT)
+In-Reply-To: <CAOi1vP_dW7V2G8zg2QL=qzhARqxYQRPSgq4BZfNQQLvob-abiw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>
 
-SGkgQWxsDQoNCkhlcmUgSSB3YW50IGNlcGggdG8gc2VwYXJhdGUgcmJkLHJndyxtZHMnIGxvZ3Mg
-aW50byBpbmRpdmlkdWFsIGZpbGUuIEkga25ldyByZ3cncyBjYW4gYmUgY29uZmlndXJlZCBieSBh
-ZGRpbmcgY29tbWVudFtjbGllbnQucmFkb3Nndy4qKipdLCBidXQgdXNlbGVzcyB0byB0aGUgb3Ro
-ZXIgMiBtb2R1bGUuDQpJcyB0aGF0IDIocmJkLG1kcykgY29uZmlndXJlZD8gIFRoYW5rIHlvdSEN
-Cg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQp3dWtvbmdt
-aW5nIElEOiAxMjAxOQ0KVGVso7owNTcxLTg2NzYwMjM5DQpEZXB0o7oyMDE0IFVJUzIgT05FU3Rv
-cg0KDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCrG+08q8/rywxuS4vbz+uqzT0Lq81t27qsj9zajQ
-xby8yvXT0M/euavLvrXEsaPD3NDFz6KjrL32z97T2reiy824+MnPw+a12Na31tDB0LP2DQq1xLj2
-yMu78si61+mho7371rnIzrrOxuTL+8jL0tTIzrrO0M7Kvcq508OjqLD8wKi1q7K7z97T2sirsr+7
-8rK/t9a12NC5wrahori01sahog0Ku/LJoreio6mxvtPKvP7W0LXE0MXPoqGjyOe5+8T6tO3K1cHL
-sb7Tyrz+o6zH68T6waK8tLXnu7C78tPKvP7NqNaqt6K8/sjLsqLJvrP9sb4NCtPKvP6joQ0KVGhp
-cyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1h
-dGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3Ig
-ZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZQ0KaW5m
-b3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3Qg
-bGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBv
-ciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQpyZWNp
-cGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJy
-b3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRl
-bHkgYW5kIGRlbGV0ZSBpdCENCg==
+On Sun, Mar 13, 2016 at 9:47 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
+> On Sun, Mar 13, 2016 at 12:45 PM, Peng Tao <bergwolf@gmail.com> wrote:
+>> Hi,
+>>
+>> The warning about rbd layering in kernel client code has been there
+>> for more than three years, since it was first activated by commit
+>> 770eba6e2 (rbd: activate support for layered images) in Oct 2012.
+>>
+>> Now users still get "WARNING: kernel layering is EXPERIMENTAL!" when
+>> mapping an image with parent. Is it time to just drop the warning? Or
+>> is there still stability concern in some cases?
+>
+> We certainly don't regard kernel layering as EXPERIMENTAL - any issue
+> with it will be treated the same as any other krbd issue, and I'm not
+> aware of any serious stability concerns with it, compared to the rest
+> of krbd.
+>
+> OTOH, we are working on adding support for object-map and deep-flatten
+> features for krbd, bringing a fair amount of new code and complexity
+> into the layering code path.  The plan was to merge those features and
+> drop this warning some time after that.
+Got it. Thanks a lot for the clarification.
+
+Cheers,
+Tao
