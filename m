@@ -1,64 +1,40 @@
-From: Wukongming <wu.kongming-vVzyEvZLFYE@public.gmane.org>
-Subject: =?gb2312?b?tPC4tDogIEEgc2ltcGxlIHByb2JsZW0gb2YgbG9n?=
- =?gb2312?b?IGRpcmVjdG9yeQ==?=
-Date: Mon, 14 Mar 2016 07:32:31 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D7503E093EE@H3CMLB14-EX.srv.huawei-3com.com>
-References: <47D132BF400BE64BAE6D71033F7D3D7503E0936B@H3CMLB14-EX.srv.huawei-3com.com>
-	<2F9BD66E-1C2A-4F41-9831-4D96E1E63428@gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [GSoC2016] BlueStore SMR Support
+Date: Mon, 14 Mar 2016 08:17:52 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1603140816560.14377@cpach.fuggernut.com>
+References: <CAPLK-i83vpHT7CwoczKULwpvJ+-eMLdhxWUy6YwyE0wj27kiOw@mail.gmail.com> <alpine.DEB.2.11.1603110942520.14377@cpach.fuggernut.com> <CAKP7xVyMGJO-8YjkqhhFPoiY_608ByKY8+c_Y=7W-tcmDBADsg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <2F9BD66E-1C2A-4F41-9831-4D96E1E63428-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Content-Language: zh-CN
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Tianshan Qu <qutianshan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:36831 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932148AbcCNMSL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 14 Mar 2016 08:18:11 -0400
+In-Reply-To: <CAKP7xVyMGJO-8YjkqhhFPoiY_608ByKY8+c_Y=7W-tcmDBADsg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Giridhar Yasa <giridhar.yasa@flipkart.com>
+Cc: Shehbaz Jaffer <shehbazjaffer007@gmail.com>, ceph-devel@vger.kernel.org
 
-T2gsIFNvcnJ5LCBJIG1pc3MgJG5hbWUsIGxldCBtZSB0cnkgZmlyc3QNCg0KLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQp3dWtvbmdtaW5nIElEOiAxMjAxOQ0K
-VGVso7owNTcxLTg2NzYwMjM5DQpEZXB0o7oyMDE0IFVJUzIgT05FU3Rvcg0KDQoNCi0tLS0t08q8
-/tStvP4tLS0tLQ0Kt6K8/sjLOiBUaWFuc2hhbiBRdSBbbWFpbHRvOnF1dGlhbnNoYW5AZ21haWwu
-Y29tXSANCreiy83KsbzkOiAyMDE2xOoz1MIxNMjVIDE1OjI3DQrK1bz+yMs6IHd1a29uZ21pbmcg
-MTIwMTkgKFJEKQ0Ks63LzTogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IGNlcGgtdXNlcnNA
-bGlzdHMuY2VwaC5jb20NCtb3zOI6IFJlOiBbY2VwaC11c2Vyc10gQSBzaW1wbGUgcHJvYmxlbSBv
-ZiBsb2cgZGlyZWN0b3J5DQoNCnRyeSBhZGQgbG9nX2ZpbGU9L3Zhci9sb2cvY2VwaC8kbmFtZS5s
-b2cgaW4gW2NsaWVudF0gc2VjdGlvbg0KDQo+INTaIDIwMTbE6jPUwjE0yNWjrDExOjQ1o6xXdWtv
-bmdtaW5nIDx3dS5rb25nbWluZ0BoM2MuY29tPiDQtLXAo7oNCj4gDQo+IEhpIEFsbA0KPiANCj4g
-SGVyZSBJIHdhbnQgY2VwaCB0byBzZXBhcmF0ZSByYmQscmd3LG1kcycgbG9ncyBpbnRvIGluZGl2
-aWR1YWwgZmlsZS4gSSBrbmV3IHJndydzIGNhbiBiZSBjb25maWd1cmVkIGJ5IGFkZGluZyBjb21t
-ZW50W2NsaWVudC5yYWRvc2d3LioqKl0sIGJ1dCB1c2VsZXNzIHRvIHRoZSBvdGhlciAyIG1vZHVs
-ZS4NCj4gSXMgdGhhdCAyKHJiZCxtZHMpIGNvbmZpZ3VyZWQ/ICBUaGFuayB5b3UhDQo+IA0KPiAt
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gd3Vrb25nbWlu
-ZyBJRDogMTIwMTkNCj4gVGVso7owNTcxLTg2NzYwMjM5DQo+IERlcHSjujIwMTQgVUlTMiBPTkVT
-dG9yDQo+IA0KPiANCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gsb7Tyrz+vLDG5Li9vP66
-rNPQurzW3buqyP3NqNDFvLzK9dPQz965q8u+tcSxo8Pc0MXPoqOsvfbP3tPat6LLzbj4yc/D5rXY
-1rfW0MHQs/YNCj4gtcS49sjLu/LIutfpoaO9+9a5yM66zsbky/vIy9LUyM66ztDOyr3KudPDo6iw
-/MCotauyu8/e09rIq7K/u/Kyv7fWtdjQucK2oaK4tNbGoaINCj4gu/LJoreio6mxvtPKvP7W0LXE
-0MXPoqGjyOe5+8T6tO3K1cHLsb7Tyrz+o6zH68T6waK8tLXnu7C78tPKvP7NqNaqt6K8/sjLsqLJ
-vrP9sb4NCj4g08q8/qOhDQo+IFRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFp
-biBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSANCj4gSDNDLCB3aGljaCBpcyBpbnRlbmRl
-ZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlzIA0KPiBsaXN0
-ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4gaW4g
-YW55IHdheSANCj4gKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0
-aWFsIGRpc2Nsb3N1cmUsIA0KPiByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBl
-cnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCj4gcmVjaXBpZW50KHMpIGlzIHByb2hpYml0
-ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCANCj4gcGxlYXNlIG5vdGlm
-eSB0aGUgc2VuZGVyIGJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQh
-DQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+IGNl
-cGgtdXNlcnMgbWFpbGluZyBsaXN0DQo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20NCj4gaHR0
-cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tDQoNCl9f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMg
-bWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGgu
-Y29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+On Sun, 13 Mar 2016, Giridhar Yasa wrote:
+> On Fri, Mar 11, 2016 at 8:20 PM, Sage Weil <sweil@redhat.com> wrote:
+> >
+> > On Fri, 4 Mar 2016, Shehbaz Jaffer wrote:
+> >
+> > > 2) Will scope of project be to build an allocator on a simulator for
+> > > SMR Drives? Or will I get actual HDDs to work with? In case of
+> > > simulators, will the project involve building a simulator on disksim?
+> >
+> > I seem to remember hearing something about a dm module that simulated SMR,
+> > but I'm not sure.  We may also be able to get some SMR disks to play
+> > with--I'll reach out to our drive vendor friends.
+> 
+> Would that be https://github.com/hgst/libzbc from HGST?
+
+Yes.
+
+I'm not sure about a disk simulator or actual drive availability, 
+though.
+
+sage
+
