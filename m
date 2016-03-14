@@ -1,188 +1,72 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Sun, 13 Mar 2016 10:40:37 -0700
-Message-ID: <56e5a61561b13_11afabd3309442f@ss1435.mail>
+From: Jevon Qiao <qiaojianfeng@unitedstack.com>
+Subject: Re: [PATCH] hw/9pfs: Add CephFS support in VirtFS
+Date: Mon, 14 Mar 2016 10:02:43 +0800
+Message-ID: <56E61BC3.1010505@unitedstack.com>
+References: <1456933303-1225-1-git-send-email-scaleqiao@gmail.com>
+	<20160309200243.5b00eea7@bahia.lab.toulouse-stg.fr.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtprelay.synopsys.com ([198.182.37.59]:60329 "EHLO
-	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751534AbcCMRkm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Mar 2016 13:40:42 -0400
-Received: from localhost.localdomain (static-208.69.177.245.nephosdns.com [208.69.177.245])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtprelay.synopsys.com (Postfix) with ESMTPS id 3055B1E05BA
-	for <ceph-devel@vger.kernel.org>; Sun, 13 Mar 2016 18:40:38 +0100 (CET)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
+In-Reply-To: <20160309200243.5b00eea7@bahia.lab.toulouse-stg.fr.ibm.com>
+List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
+List-Archive: <http://lists.nongnu.org/archive/html/qemu-devel>
+List-Post: <mailto:qemu-devel@nongnu.org>
+List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
+List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
+Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+To: Greg Kurz <gkurz@linux.vnet.ibm.com>
+Cc: haomaiwang@gmail.com, mst@redhat.com, qemu-devel@nongnu.org, aneesh.kumar@linux.vnet.ibm.com, sage@newdream.net, ceph-devel@vger.kernel.org, gfarnum@redhat.com
+List-Id: ceph-devel.vger.kernel.org
 
+Hi Greg,
 
-Hi,
+Thank you very much for reviewing the code, I've revised the code per 
+your comments, will post it later. Meanwhile, please see my answers to 
+your questions below.
+>
+>> +    }
+>> +    fs->dir = (DIR *)result;
+>> +    if (!fs->dir) {
+>> +        fprintf(stderr, "ceph_opendir return NULL for ceph_dir_result\n");
+> Hmm... is this a message for the QEMU user, so that she can fix something and
+> retry ? I suspect it is more for debugging purposes, in which case I'd rather
+> add a result argument to trace_cephfs_opendir_return() above.
+Actually, this message is mainly used for debugging.
+> And BTW, can ceph_opendir() return success without filling the structure ?
+I double checked the Ceph code, it can not. I've removed this error message.
+>> +
+>> +# hw/9pfs/9p-cephfs.c
+>> +cephfs_lstat_return(char *path, int stmode, int stuid, int stgid, int stsize, int ret) "path %s stmode %d stuid %d stgid %d stsize %d ret %d"
+>> +cephfs_readlink_return(char *path, int ret) "path %s ret %d"
+>> +cephfs_open_return(char *path, int flags, int mode, int fd) "path %s flags %d mode %d fd %d"
+>> +cephfs_opendir_return(char *path, int ret) "path %s ret %d"
+>> +cephfs_rewinddir(void *dir) "dir %p"
+>> +cephfs_telldir(void *dir) "dir %p"
+>> +cephfs_readdir_r_return(void *tmpent, void *entry, int ret) "tmpent %p entry %p ret %d"
+>> +cephfs_seekdir(void *dir, int off) "dir %p off %d"
+>> +cephfs_preadv(int iovcnt, int len) "iovcnt %d len %d"
+>> +cephfs_preadv_return(int iovcnt, int len, long ret) "iovcnt %d len %d ret %l"
+> ret %ld
+>
+>> +cephfs_pwritev(int iovcnt, int len, int offset) "iovcnt %d len %d offset %d"
+>> +cephfs_pwritev_return(int iovcnt, int len, int offset, long ret) "iovcnt %d len %d offset %d ret %l"cephfs_chmod(char *path, int fcmode) "path %s fcmode %d"
+> ret %ld for cephfs_pwritev_return() and missing newline before cephfs_chmod()
+>
+> I'm wondering if this patch was build tested before being posted to the list.
+Good catch. Yes, the code had been compiled and tested. However, it 
+seems the compiler will not report this error until the trace point is 
+used. Since 'cephfs_chmod' is not used in 9p-cephfs.c, so I just forget 
+to test it. That's why the error was not found. I've already removed 
+this trace point in the revision.
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
-
-6 new defect(s) introduced to ceph found with Coverity Scan.
-
-
-New defect(s) Reported-by: Coverity Scan
-Showing 6 of 6 defect(s)
-
-
-** CID 1352184:  Uninitialized members  (UNINIT_CTOR)
-/rgw/rgw_lib.h: 35 in rgw::RGWLib::RGWLib()()
-
-
-________________________________________________________________________________________________________
-*** CID 1352184:  Uninitialized members  (UNINIT_CTOR)
-/rgw/rgw_lib.h: 35 in rgw::RGWLib::RGWLib()()
-29         rgw::LDAPHelper* ldh;
-30         RGWREST rest; // XXX needed for RGWProcessEnv
-31         RGWRados* store;
-32     
-33       public:
-34         RGWLib() : fec(nullptr), fe(nullptr), olog(nullptr), store(nullptr)
->>>     CID 1352184:  Uninitialized members  (UNINIT_CTOR)
->>>     Non-static class member "ldh" is not initialized in this constructor nor in any functions that it calls.
-35           {}
-36         ~RGWLib() {}
-37     
-38         RGWRados* get_store() { return store; }
-39     
-40         RGWLibFrontend* get_fe() { return fe; }
-
-** CID 1355599:  Error handling issues  (CHECKED_RETURN)
-/rgw/rgw_token.h: 89 in rgw::RGWToken::RGWToken(const std::basic_string<char, std::char_traits<char>, std::allocator<char>>&)()
-
-
-________________________________________________________________________________________________________
-*** CID 1355599:  Error handling issues  (CHECKED_RETURN)
-/rgw/rgw_token.h: 89 in rgw::RGWToken::RGWToken(const std::basic_string<char, std::char_traits<char>, std::allocator<char>>&)()
-83         RGWToken(enum token_type _type, const std::string& _id,
-84     	     const std::string& _key)
-85           : type(_type), id(_id), key(_key) {};
-86     
-87         RGWToken(const string& json) {
-88           JSONParser p;
->>>     CID 1355599:  Error handling issues  (CHECKED_RETURN)
->>>     Calling "parse" without checking return value (as is done elsewhere 35 out of 36 times).
-89           p.parse(json.c_str(), json.length());
-90           JSONDecoder::decode_json(RGWToken::type_name, *this, &p);
-91         }
-92     
-93         void encode(bufferlist& bl) const {
-94           uint32_t ver = version();
-
-** CID 1355600:  Error handling issues  (UNCAUGHT_EXCEPT)
-/rgw/rgw_token.cc: 60 in main()
-
-
-________________________________________________________________________________________________________
-*** CID 1355600:  Error handling issues  (UNCAUGHT_EXCEPT)
-/rgw/rgw_token.cc: 60 in main()
-54            << std::endl;
-55       cout << "\t <token type> := ad | ldap" << std::endl;
-56       cout << "\n";
-57       generic_client_usage();
-58     }
-59     
->>>     CID 1355600:  Error handling issues  (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char **)" an exception of type "JSONDecoder::err" is thrown and never caught.
-60     int main(int argc, char **argv)
-61     {
-62       std::string val;
-63       vector<const char*> args;
-64       argv_to_vec(argc, (const char **)argv, args);
-65       env_to_vec(args);
-
-** CID 1355601:  Error handling issues  (UNCAUGHT_EXCEPT)
-/rgw/rgw_token.cc: 60 in main()
-
-
-________________________________________________________________________________________________________
-*** CID 1355601:  Error handling issues  (UNCAUGHT_EXCEPT)
-/rgw/rgw_token.cc: 60 in main()
-54            << std::endl;
-55       cout << "\t <token type> := ad | ldap" << std::endl;
-56       cout << "\n";
-57       generic_client_usage();
-58     }
-59     
->>>     CID 1355601:  Error handling issues  (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char **)" an exception of type "boost::bad_get" is thrown and never caught.
-60     int main(int argc, char **argv)
-61     {
-62       std::string val;
-63       vector<const char*> args;
-64       argv_to_vec(argc, (const char **)argv, args);
-65       env_to_vec(args);
-
-** CID 1355602:    (UNCAUGHT_EXCEPT)
-/rgw/rgw_token.cc: 60 in main()
-/rgw/rgw_token.cc: 60 in main()
-
-
-________________________________________________________________________________________________________
-*** CID 1355602:    (UNCAUGHT_EXCEPT)
-/rgw/rgw_token.cc: 60 in main()
-54            << std::endl;
-55       cout << "\t <token type> := ad | ldap" << std::endl;
-56       cout << "\n";
-57       generic_client_usage();
-58     }
-59     
->>>     CID 1355602:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-60     int main(int argc, char **argv)
-61     {
-62       std::string val;
-63       vector<const char*> args;
-64       argv_to_vec(argc, (const char **)argv, args);
-65       env_to_vec(args);
-/rgw/rgw_token.cc: 60 in main()
-54            << std::endl;
-55       cout << "\t <token type> := ad | ldap" << std::endl;
-56       cout << "\n";
-57       generic_client_usage();
-58     }
-59     
->>>     CID 1355602:    (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<std::ios_base::failure> >" is thrown and never caught.
-60     int main(int argc, char **argv)
-61     {
-62       std::string val;
-63       vector<const char*> args;
-64       argv_to_vec(argc, (const char **)argv, args);
-65       env_to_vec(args);
-
-** CID 1355603:  Control flow issues  (UNREACHABLE)
-/rgw/rgw_token.h: 65 in rgw::RGWToken::from_type(rgw::RGWToken::token_type)()
-
-
-________________________________________________________________________________________________________
-*** CID 1355603:  Control flow issues  (UNREACHABLE)
-/rgw/rgw_token.h: 65 in rgw::RGWToken::from_type(rgw::RGWToken::token_type)()
-59           case TOKEN_KEYSTONE:
-60     	return "keystone";
-61     	break;
-62           default:
-63     	return "none";
-64           };
->>>     CID 1355603:  Control flow issues  (UNREACHABLE)
->>>     This code cannot be reached: "return "none";".
-65           return "none";
-66         }
-67     
-68         token_type type;
-69         string id;
-70         string key;
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, https://scan.coverity.com/projects/ceph?tab=overview
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c
-
+Thanks,
+Jevon
+>> +cephfs_chmod_return(char *path, int fcmode, int ret) "path %s fcmode %d ret %d"
+>> +cephfs_mknod_return(char *path, int fcmode, uint32_t fcrdev, int ret) "path %s fcmode %d fcrdev %u ret %d"
+>> +cephfs_mkdir_return(char *path, int fcmode, int ret) " path %s fcmode %d ret %d"
+>> +cephfs_fstat_return(int fidtype, int fd, int stuid, int stgid, int stsize, int ret) "fidtype %d fd %d stuid %d stgid %d stsize %d ret %d"
+>> +cephfs_open2_return(char *path, int flags, int fcmode) "path %s flags %d fcmode %d"
