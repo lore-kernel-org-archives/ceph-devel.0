@@ -1,132 +1,66 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: How to leverage ceph udev rules for containerized ceph
-Date: Tue, 15 Mar 2016 07:38:45 +0100
-Message-ID: <56E7ADF5.4060106@dachary.org>
-References: <CAGEA57c3e1mSZE6869GQzA5DFZ5ZqdLO1beasUgg8Lzak+0xxg@mail.gmail.com>
- <56E7193C.50202@dachary.org>
- <CAGEA57d24BJgSxiJGryP=arC0Zn0TBpzGkMhWJ2JTMjD+KJoSA@mail.gmail.com>
+Subject: Publishing development releases
+Date: Tue, 15 Mar 2016 10:13:18 +0100
+Message-ID: <56E7D22E.2060701@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:49663 "EHLO
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:54219 "EHLO
 	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753805AbcCOGi5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Mar 2016 02:38:57 -0400
-In-Reply-To: <CAGEA57d24BJgSxiJGryP=arC0Zn0TBpzGkMhWJ2JTMjD+KJoSA@mail.gmail.com>
+	with ESMTP id S964881AbcCOJN3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Mar 2016 05:13:29 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Curtis <jicurtis@redhat.com>, "Chen, Huamin" <hchen@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Abhishek L <abhishek.lekshmanan@gmail.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Nathan Cutler <ncutler@suse.cz>, Martin Palma <martin@palma.bz>, "Chen, Xiaoxi" <xiaoxchen@ebay.com>, Vicente Cheng <freeze.bilsted@gmail.com>, Gaurav Bafna <bafnag@gmail.com>, Rajat Garg <rajatgarg.iitr@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+Hi Abhishek V, Abhishek L, Swami, Nathan, Gaurav, Rajat, Martin, Xiaoxi=
+, Vicente,
 
+A few weeks ago, 10.0.3 was tagged for release, but packages were not p=
+ublished and these packages were missed by the Ceph user base. We, the =
+members of the Stable Releases team, got to thinking how we could help.
 
-On 14/03/2016 21:28, Jim Curtis wrote:
-> Hi Loic,
->=20
-> The image is on the registry:
-> https://access.redhat.com/search/#/container-images?q=3Dceph&p=3D1&so=
-rt=3Drelevant&rows=3D12&srch=3Dany&documentKind=3DImageRepository
->=20
-> It can be pulled from:
->=20
-> registry.access.redhat.com/rhceph/rhceph-1.3-rhel7
+This led to an idea that was discussed on the mailing list[1] and durin=
+g CDM[2]. Since we were already building packages as a side effect of r=
+unning teuthology suites on OpenStack, this could be extended into a fu=
+ll-fledged release process that would:
 
-Thanks ! I don't know how to retrieve the Dockerfile that was used to c=
-reate this image from the registry, is there a command for this ?
+1. ensure that the community's demand for development releases is met
+2. complement, not replace, the existing package publication workflow
+3. be automated.
 
->=20
-> Huamin might also have some input on your comments.  I forgot to cc
-> him on my original message and I'm not sure if he is subscribed to th=
-e
-> list.
->=20
-> Jim C.
->=20
-> On Mon, Mar 14, 2016 at 1:04 PM, Loic Dachary <loic@dachary.org> wrot=
-e:
->> Hi Jim,
->>
->> On 14/03/2016 19:34, Jim Curtis wrote:
->>> Greeting ceph-devel,
->>>
->>> We are working on a ceph containerization project within Red Hat.  =
-We
->>> have recently released our RHEL-based ceph container docker image a=
-nd
->>> now we are moving on to handling a feature limitation with that ima=
-ge.
->>>
->>> Specifically, the issue is that on our Atomic host, there is no cep=
-h
->>> installed, so there are no ceph udev rules to trigger dynamic
->>> configuration of OSDs when a disk is plugged into the host.
->>
->> It would be convenient to have a standalone ceph-disk package (nativ=
-e or pypi) that includes udev rules and init scripts.
->>
->>> What we would like to do is install our own set of ceph udev rules
->>> that would trigger the startup of our ceph docker container.  We wo=
-uld
->>> like to leverage the current implementation of the ceph udev rules =
-to
->>> do this.
->>
->> Let say we allocate a new partition type for each existing partition=
- type[1] so that ceph-disk knows it should docker run ceph-osd instead =
-of running the ceph-osd daemon itself. If docker run ceph-osd has the s=
-ame set of arguments as the ceph-osd daemon, the only thing to adapt is=
- how the init system handles a container with a name instead of a daemo=
-n with a pid. Alternatively, ceph-disk could be instructed to delegate =
-running the ceph-osd daemon to docker instead of using an init system. =
-The later would make more sense to me because the semantic of an init s=
-ystem is not perfectly aligned with the docker run / stop semantic.
->>
->> What I'm not sure about is how a ceph-osd running within a container=
- can be instructed to use a given device. The only way I know is to exp=
-ose /dev with --privileged which is probably too much. Is --device=3D/d=
-ev/sdb:/dev/sdb:rwm enough ? Is it possible, in case we only need to gr=
-ant access to a partition used for journaling, to --device=3D/dev/sdc1:=
-/dev/sdc1 ?
->>
->>> Also, since ceph-disk and Ceph's udev rules are tightly coupled and
->>> ceph-disk creates systemd or upstart rules for OSD daemons, does it
->>> make sense to add hooks in ceph-disk to start up a containerized OS=
-D
->>> daemons either in systemd or upstart?
->>
->> Yes, but that would probably not be my first choice.
->>
->> Could you please provide the URL to the RHEL-based ceph container do=
-cker image you released recently ?
->>
->> Cheers
->>
->>>
->>> Can somebody in this community help us with this?
->>>
->>> Thanks,
->>>
->>> Jim C.
->>
->> [1] https://github.com/ceph/ceph/blob/master/udev/95-ceph-osd.rules#=
-L4 etc.
->>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+So I added a "release" subcommand to the ceph-workbench[3] tool we are =
+already using to automate various backporting tasks. The new subcommand=
+ is included in the latest ceph-workbench release, and works like this:
+
+             ceph-workbench release --suite buildpackages/any \
+                         --ceph jewel \
+                         --version 10.0.5 \
+                         --filter ubuntu_14.04,centos_7.2
+
+When it completes the packages can be uploaded to a permanent mirror si=
+milar to downloads.ceph.com.
+
+I believe we can commit to publish Ceph development releases with this =
+process. The "release" subcommand is relatively small (around 300 lines=
+ of code) and there are integration tests to help with its maintenance.=
+ There are enough of us to rotate the release duties so that it does no=
+t become too much of a burden for anyone.
+
+Since it's a decision that changes our focus and our workload, are you =
+OK with adding this activity to the scope of our team?
+
+Cheers
+
+[1] (Un)Stable release team http://www.spinics.net/lists/ceph-devel/msg=
+28887.html
+[2] publishing development and unsupported releases http://tracker.ceph=
+=2Ecom/projects/ceph/wiki/CDM_02-MAR-2016
+[3] ceph-workbench release merge request http://ceph-workbench.dachary.=
+org/root/ceph-workbench/merge_requests/43/diffs#9f3ebf1fc38506b66593397=
+f3baac514d515c496_231_232
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
