@@ -1,89 +1,49 @@
-From: Sage Weil <sage@newdream.net>
-Subject: RE: Adding compression support for bluestore.
-Date: Wed, 16 Mar 2016 15:29:40 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1603161528220.14377@cpach.fuggernut.com>
-References: <56C1FCF3.4030505@mirantis.com> <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com> <56C3BAA3.3070804@mirantis.com> <CY1PR0201MB1897E7F1DE04B5E4577B16EDE8A00@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1602220718380.13988@cpach.fuggernut.com> <56CDF40C.9060405@mirantis.com> <CY1PR0201MB1897BC7052AD6F7FB01DCAB4E8A50@CY1PR0201MB1897.namprd02.prod.outlook.com> <56D08E30.20308@mirantis.com> <alpine.DEB.2.11.1603151243030.32086@cpach.fuggernut.com>
- <56E9A727.1030400@mirantis.com> <BLUPR0201MB1890A352BFE71C1D74634ED2E88A0@BLUPR0201MB1890.namprd02.prod.outlook.com> <alpine.DEB.2.11.1603161512580.14377@cpach.fuggernut.com>
- <BLUPR0201MB1890E93107402D9E70C6C71FE88A0@BLUPR0201MB1890.namprd02.prod.outlook.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Bumping my jenkins builds to the wall in radable.sh
+Date: Wed, 16 Mar 2016 12:34:56 -0700
+Message-ID: <CAJ4mKGY0ev0Du5JXj1JJTCX5hgp=mui1VN+egBV_XUZYTdGy8A@mail.gmail.com>
+References: <56E9A585.9000309@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39920 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751621AbcCPT36 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Mar 2016 15:29:58 -0400
-In-Reply-To: <BLUPR0201MB1890E93107402D9E70C6C71FE88A0@BLUPR0201MB1890.namprd02.prod.outlook.com>
+Received: from mail-vk0-f50.google.com ([209.85.213.50]:35557 "EHLO
+	mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752004AbcCPTfA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Mar 2016 15:35:00 -0400
+Received: by mail-vk0-f50.google.com with SMTP id e6so75240633vkh.2
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Mar 2016 12:34:59 -0700 (PDT)
+In-Reply-To: <56E9A585.9000309@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>
 
-On Wed, 16 Mar 2016, Allen Samuels wrote:
-> As described earlier, we can easily afford the cost of setting 
-> min_alloc_size to 4KB. I don't see any advantage in handling the larger 
-> allocation sizes -- only disadvantages.
+On Wed, Mar 16, 2016 at 11:27 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>
+> ../ceph-object-corpus/archive/0.61.4-60-g24c59be/objects/RGWBucketEnt
+>
+> ../ceph-object-corpus/archive/0.61.4-60-g24c59be/objects/RGWBucketInfo
+> error: buffer::end_of_buffer
+> **** failed to decode
+> ../ceph-object-corpus/archive/0.61.4-60-g24c59be/objects/RGWBucketInfo/25f5ff183bba6da708243a0bbbe40a2e
+> ****
+> error: buffer::end_of_buffer
+> **** failed to decode
+> ../ceph-object-corpus/archive/0.61.4-60-g24c59be/objects/RGWBucketInfo/54f53e3e301071f48247d59272b27b53
+> ****
+>
+> ../ceph-object-corpus/archive/0.61.4-60-g24c59be/objects/rgw_bucket_pending_info
+>
+> "Just" a matter of rebase?
+> Or does it need more tinkering.
 
-That too.  The original motivation was driven by HDD behavior: if we have 
-a 4KB overwrite we're better off doing a WAL record and async overwrite 
-that allocating a new 4KB extent and overfragmenting the object.  But the 
-same thing can be accomplished as policy in _do_write without restricting 
-the size of allocations.
-
-This is all assuming we get the allocator/freelist memory under control, 
-which we need to do anyway.
-
-sage
-
-
-> 
-> Allen Samuels
-> Software Architect, Fellow, Systems and Software Solutions 
-> 
-> 2880 Junction Avenue, San Jose, CA 95134
-> T: +1 408 801 7030| M: +1 408 780 6416
-> allen.samuels@SanDisk.com
-> 
-> 
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sage@newdream.net]
-> > Sent: Wednesday, March 16, 2016 2:15 PM
-> > To: Allen Samuels <Allen.Samuels@sandisk.com>
-> > Cc: Igor Fedotov <ifedotov@mirantis.com>; ceph-devel <ceph-
-> > devel@vger.kernel.org>
-> > Subject: RE: Adding compression support for bluestore.
-> > 
-> > On Wed, 16 Mar 2016, Allen Samuels wrote:
-> > > > A potential issue with using WAL for compressed block overwrites is
-> > > > significant WAL data volume increase. IIUC currently WAL record can
-> > > > have up to 2*bluestore_min_alloc_size (i.e. 128K) client data per
-> > > > single write request
-> > > > - overlapped head and tail.
-> > > > In case of compressed blocks this will be up to
-> > > > 2*bluestore_max_compressed_block ( i.e. 8Mb ) as you can't simply
-> > > > overwrite fully overlapped extents - one should operate compression
-> > > > blocks now...
-> > > >
-> > > > Seems attractive otherwise...
-> > >
-> > > This is one of the fundamental tradeoffs with compression. When your
-> > compression block size exceeds the minimum I/O size you either have to
-> > consume time (RMW + uncompress/recompress) or you have to consume
-> > space (overlapping extents). Sage's current code essentially starts out by
-> > consuming space and then assumes in the background that he'll consume
-> > time to recover the space.
-> > > Of course if you set the compression block size equal to or smaller than the
-> > minimum I/O size you can avoid these problems -- but you create others
-> > (including poor compression, needing to track very small chunks of space,
-> > etc.) and nobody seriously believes that this is a viable alternative.
-> > 
-> > My inclination would be to set min_alloc_size to something smallish (if not
-> > 64KB, then 32KB perhaps) and the compression_block to something also
-> > reasonable (256KB or 512KB at most).  That means you lose some of the
-> > savings (on average, 1/2 of min_alloc_size) which is more significant if
-> > compression_block is not >> min_alloc_size, but it avoids the expensive
-> > r/m/w cases and big read + decompress for a small read request...
-> > 
-> > sage
-> 
-> 
+Well, ceph-object-corpus is a bunch of old encoded versions of our
+objects, and it's validating that current code is still capable of
+decoding them. 0.61.4 is pretty old but I *think* should still work
+(maybe check that your submodules are all up to date; maybe some of
+them got dropped?). Assuming that still works on Linux, it's not a
+rebase problem; I would guess maybe these types just never worked
+because it wasn't BSD cross-compatible until more recently. You might
+want to explore how they're failing exactly; obviously it's running
+out of data to decode but the *why* is interesting.
+-Greg
