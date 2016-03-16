@@ -1,36 +1,76 @@
-From: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>
-Subject: 03/16/2016 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 16 Mar 2016 15:15:09 +0000
-Message-ID: <50e29732a5b844eca1d3abbde6449bdb@R01UKEXCASM115.r01.fujitsu.local>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: v10.0.4 released
+Date: Wed, 16 Mar 2016 17:04:23 +0100
+Message-ID: <56E98407.2070902@dachary.org>
+References: <alpine.DEB.2.11.1603081634450.14358@cpach.fuggernut.com>
+ <56E95C3C.7080907@dachary.org>
+ <CADr68WZJiXKUp_0hD7Apd9zAifU1giAjrt9a+VJt_Knn0wNmLg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail1.bemta3.messagelabs.com ([195.245.230.175]:51121 "EHLO
-	mail1.bemta3.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932331AbcCPPPU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Mar 2016 11:15:20 -0400
-Received: from R01UKEXCASM113.r01.fujitsu.local (ex2k13_113.fs.fujitsu.com [10.183.43.169])
-	by mailhost1.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id u2GFEREY032456
-	(version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Wed, 16 Mar 2016 15:14:27 GMT
-Content-Language: en-US
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:55609 "EHLO
+	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752432AbcCPQE2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Mar 2016 12:04:28 -0400
+In-Reply-To: <CADr68WZJiXKUp_0hD7Apd9zAifU1giAjrt9a+VJt_Knn0wNmLg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jens Rosenboom <j.rosenboom@x-ion.de>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-VG8gcXVvdGUgTWFyaywgYXMgaGXigJlzIGhhdmluZyBtYWlsIGlzc3VlcyBhdCB0aGUgbW9tZW50
-Og0KDQrigJw4QU0gUFNUIGFzIHVzdWFsISANCg0KSGVyZSdzIHRoZSBsaW5rczoNCg0KRXRoZXJw
-YWQgVVJMOg0KaHR0cDovL3BhZC5jZXBoLmNvbS9wL3BlcmZvcm1hbmNlX3dlZWtseQ0KDQpUbyBq
-b2luIHRoZSBNZWV0aW5nOg0KaHR0cHM6Ly9ibHVlamVhbnMuY29tLzI2ODI2MTA0NA0KDQpUbyBq
-b2luIHZpYSBCcm93c2VyOg0KaHR0cHM6Ly9ibHVlamVhbnMuY29tLzI2ODI2MTA0NC9icm93c2Vy
-DQoNClRvIGpvaW4gd2l0aCBMeW5jOg0KaHR0cHM6Ly9ibHVlamVhbnMuY29tLzI2ODI2MTA0NC9s
-eW5jDQoNCg0KVG8gam9pbiB2aWEgUm9vbSBTeXN0ZW06DQpWaWRlbyBDb25mZXJlbmNpbmcgU3lz
-dGVtOiBiam4udmMgLW9yLSAxOTkuNDguMTUyLjE1MiBNZWV0aW5nIElEOiAyNjgyNjEwNDQNCg0K
-VG8gam9pbiB2aWEgUGhvbmU6DQoxKSBEaWFsOg0KwqDCoMKgwqDCoMKgwqDCoMKgwqAgKzEgNDA4
-IDc0MCA3MjU2DQrCoMKgwqDCoMKgwqDCoMKgwqDCoCArMSA4ODggMjQwIDI1NjAoVVMgVG9sbCBG
-cmVlKQ0KwqDCoMKgwqDCoMKgwqDCoMKgwqAgKzEgNDA4IDMxNyA5MjUzKEFsdGVybmF0ZSBOdW1i
-ZXIpDQrCoMKgwqDCoMKgwqDCoMKgwqDCoCAoc2VlIGFsbCBudW1iZXJzIC0gaHR0cDovL2JsdWVq
-ZWFucy5jb20vbnVtYmVycykNCjIpIEVudGVyIENvbmZlcmVuY2UgSUQ6IDI2ODI2MTA0NOKAnQ0K
-DQoNCldpdGggYmVzdCByZWdhcmRzIC8gUG96ZHJhd2lhbQ0KUGlvdHIgRGHFgmVrDQoNCg==
+Hi,
+
+On 16/03/2016 16:10, Jens Rosenboom wrote:
+> 2016-03-16 14:14 GMT+01:00 Loic Dachary <loic@dachary.org>:
+>> Hi,
+>>
+>> Because of a tiny mistake preventing deb packages to be built, v10.0=
+=2E5 was released shortly after v10.0.4 and is now the current developm=
+ent release. The Stable release team[0] collectively decided to help by=
+ publishing development packages[1], starting with v10.0.5.
+>>
+>> The packages for v10.0.5 are available at http://ceph-releases.dacha=
+ry.org/ which can be used as a replacement for http://download.ceph.com=
+/ for both http://download.ceph.com/rpm-testing and http://download.cep=
+h.com/debian-testing . The only difference is the key used to sign the =
+releases which can be imported with
+>>
+>>     wget -q -O- 'http://ceph-releases.dachary.org/release-key.asc' |=
+ sudo apt-key add -
+>>
+>> or
+>>
+>>     rpm --import http://ceph-releases.dachary.org/release-key.asc
+>>
+>> The instructions to install development packages found at http://doc=
+s.ceph.com/docs/master/install/get-packages/ can otherwise be applied w=
+ith no change.
+>=20
+> Will there be tarballs for 10.0.5? Ubuntu has built native packages
+> built for the upcoming Xenial LTS release, but IIUC they are still
+> stuck at 10.0.2 because there are no tarball releases for the newer
+> tags.
+
+The tarbal (as created by make dist from sources) from which the debian=
+ package was created is available at:
+
+http://ceph-releases.dachary.org/debian-testing/pool/main/c/ceph/ceph_1=
+0.0.5.orig.tar.gz
+
+and is also linked at:
+
+http://ceph-releases.dachary.org/tarballs/ceph-10.0.5.tar.gz
+http://ceph-releases.dachary.org/tarballs/ceph-10.0.5.tar.gz.sha256
+
+But the Ubuntu watch file do not point to this URL and won't find it.
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
