@@ -1,7 +1,7 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Adding compression support for bluestore.
-Date: Wed, 16 Mar 2016 21:34:15 +0300
-Message-ID: <56E9A727.1030400@mirantis.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: Adding compression support for bluestore.
+Date: Wed, 16 Mar 2016 19:02:30 +0000
+Message-ID: <BLUPR0201MB1890A352BFE71C1D74634ED2E88A0@BLUPR0201MB1890.namprd02.prod.outlook.com>
 References: <56C1FCF3.4030505@mirantis.com>
  <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com>
  <56C3BAA3.3070804@mirantis.com>
@@ -11,251 +11,266 @@ References: <56C1FCF3.4030505@mirantis.com>
  <CY1PR0201MB1897BC7052AD6F7FB01DCAB4E8A50@CY1PR0201MB1897.namprd02.prod.outlook.com>
  <56D08E30.20308@mirantis.com>
  <alpine.DEB.2.11.1603151243030.32086@cpach.fuggernut.com>
+ <56E9A727.1030400@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f46.google.com ([209.85.215.46]:36573 "EHLO
-	mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934941AbcCPSeK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Mar 2016 14:34:10 -0400
-Received: by mail-lf0-f46.google.com with SMTP id l83so25925079lfd.3
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Mar 2016 11:34:09 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1603151243030.32086@cpach.fuggernut.com>
+Received: from mail-by2on0074.outbound.protection.outlook.com ([207.46.100.74]:11070
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752216AbcCPTCd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Mar 2016 15:02:33 -0400
+In-Reply-To: <56E9A727.1030400@mirantis.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>, Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Sage, Allen,
-
-thanks a lot for your feedback.
-Please find my comments inline.
-
-On 15.03.2016 20:12, Sage Weil wrote:
-> On Fri, 26 Feb 2016, Igor Fedotov wrote:
->> Allen,
->> sounds good! Thank you.
->>
->> Please find the updated proposal below. It extends proposed Block Map to
->> contain "full tuple".
->> Some improvements and better algorithm overview were added as well.
->>
->> Preface:
->> Bluestore keeps object content using a set of dispersed extents aligned by 64K
->> (configurable param). It also permits gaps in object content i.e. it prevents
->> storage space allocation for object data regions unaffected by user writes.
->> A sort of following mapping is used for tracking stored object content
->> disposition (actual current implementation may differ but representation below
->> seems to be sufficient for our purposes):
->> Extent Map
->> {
->> < logical offset 0 -> extent 0 'physical' offset, extent 0 size >
->> ...
->> < logical offset N -> extent N 'physical' offset, extent N size >
->> }
->>
->>
->> Compression support approach:
->> The aim is to provide generic compression support allowing random object
->> read/write.
->> To do that compression engine to be placed (logically - actual implementation
->> may be discussed later) on top of bluestore to "intercept" read-write requests
->> and modify them as needed.
-> I think it is going to make the most sense to do the compression and
-> decompression in _do_write and _do_read (or helpers), within
-> bluestore--not in some layer that sits above it but communicates metadata
-> down to it.
-My original intention was to minimize bluestore modifications needed to 
-add compression support. Particularly this helps to avoid additional 
-bluestore complication.
-Another point for a segregation is a potential ability to move 
-compression engine out of store level to a pool one in the future. 
-Remember we still have 200% CPU utilization overhead for current 
-approach with replicated pools as each replica is compressed independently.
-Will proceed with monolithic design though...
->> The major idea is to split object content into variable sized logical blocks
->> that are compressed independently. Resulting block offsets and sizes depends
->> mostly on client writes spreading and block merging algorithm that compression
->> engine can provide. Maximum size of each block to be limited ( MAX_BLOCK_SIZE,
->> e.g. 4 Mb ) to prevent from huge block processing when handling
->> read/overwrites.
-> bluestore_max_compressed_block or similar -- it should be a configurable
-> value like everything else.
->   
-100% agree
->> Due to compression each block can potentially occupy smaller store space
->> comparing to its original size. Each block is addressed using original data
->> offset ( AKA 'logical offset' above ). After compression is applied each
->> compressed block is written using the existing bluestore infra. Updated write
->> request to the bluestore specifies the block's logical offset similar to the
->> one from the original request but data length can be reduced.
->> As a result stored object content:
->> a) Has gaps
->> b) Uses less space if compression was beneficial enough.
->>
->> To track compressed content additional block mapping to be introduced:
->> Block Map
->> {
->> < logical block offset, logical block size -> compression method, target
->> offset, compressed size >
->> ...
->> < logical block offset, logical block size -> compression method, target
->> offset, compressed size >
->> }
->> Note 1: Actually for the current proposal target offset is always equal to the
->> logical one. It's crucial that compression doesn't perform complete
->> address(offset) translation but simply brings "space saving holes" into
->> existing object content layout. This eliminates the need for significant
->> bluestore interface modifications.
-> I'm not sure I understand what the target offset field is needed for,
-> then.  In practice, this will mean expanding bluestore_extent_t to have
-> compression_type and decompressed_length fields.  The logical offset is
-> the key in the block_map map<>...
-Agree, target offset is probably redundant here
->> To effectively use store space one needs an additional ability from the
->> bluestore interface - release logical extent within object content as well as
->> underlying physical extents allocated for it. In fact current interface (Write
->> request) allows to "allocate" ( by writing data) logical extent while leaving
->> some of them "unallocated" (by omitting corresponding range). But there is no
->> release procedure - move extent to "unallocated" space. Please note - this is
->> mainly about logical extent - a region within object content. Means for
->> allocate/release physical extents (regions at block device) are present.
->> In case of compression such logical extent release is most probably paired
->> with writing to the same ( but reduced ) extent. And it looks like there is no
->> need for standalone "release" request. So the suggestion is to introduce
->> extended write request (WRITE+RELEASE) that releases specified logical extent
->> and writes new data block. The key parameters for the request are:
->> DATA2WRITE_LOFFSET, DATA2WRITE_SIZE, RELEASED_EXTENT_LOFFSET,
->> RELEASED_EXTENT_SIZE
->> where:
->> assert(DATA2WRITE_LOFFSET >= RELEASED_EXTENT_LOFFSET)
->> assert(RELEASED_EXTENT_LOFFSET + RELEASED_EXTENT_SIZE >= DATA2WRITE_LOFFSET +
->> DATA2WRITE_SIZE)
-> I'm not following this.  You can logically release a range with zero() (it
-> will mostly deallocate extents, but write zeros into a partial extent).
-> But it sounds like this is only needed if you want to manage the
-> compressed extents above BlueStore... which I think is going to be a more
-> difficult approach.
-Looks like I missed the ability to use zero() for extent release. Thus 
-there is no need to introduce additional write+release request for any 
-approach.
-
->   
->> Due to the fact that bluestore infrastructure tracks extents with some
->> granularity (bluestore_min_alloc_size, 64Kb by default)
->> RELEASED_EXTENT_LOFFSET & RELEASED_EXTENT_SIZE should by aligned at
->> bluestore_min_alloc_size boundary:
->> assert(RELEASED_EXTENT_LOFFSET % min_alloc_size == 0);
->> assert(RELEASED_EXTENT_SIZE % min_alloc_size == 0);
->>
->> As a result compression engine gains a responsibility to properly handle cases
->> when some blocks use the same bluestore allocation unit but aren't fully
->> adjacent (see below for details).
-> The rest of this is mostly about overwrite policy, which should be pretty
-> general regardless of where we implement.  I think the first and more
-> important thing to sort out though is where we do it.
->
-> My current thinking is that we do something like:
->
-> - add a bluestore_extent_t flag for FLAG_COMPRESSED
-> - add uncompressed_length and compression_alg fields
-> (- add a checksum field we are at it, I guess)
->
-> - in _do_write, when we are writing a new extent, we need to compress it
-> in memory (up to the max compression block), and feed that size into
-> _do_allocate so we know how much disk space to allocate.  this is probably
-> reasonably tricky to do, and handles just the simplest case (writing a new
-> extent to a new object, or appending to an existing one, and writing the
-> new data compressed).  The current _do_allocate interface and
-> responsibilities will probably need to change quite a bit here.
-sounds good so far
-> - define the general (partial) overwrite strategy.  I would like for this
-> to be part of the WAL strategy.  That is, we do the read/modify/write as
-> deferred work for the partial regions that overlap existing extents.
-> Then _do_wal_op would read the compressed extent, merge it with the new
-> piece, and write out the new (compressed) extents.  The problem is that
-> right now the WAL path *just* does IO--it doesn't do any kv
-> metadata updates, which would be required here to do the final allocation
-> (we won't know how big the resulting extent will be until we decompress
-> the old thing, merge it with the new thing, and recompress).
->
-> But, we need to address this anyway to support CRCs (where we will
-> similarly do a read/modify/write, calculate a new checksum, and need
-> to update the onode).  I think the answer here is just that the _do_wal_op
-> updates some in-memory-state attached to the wal operation that gets
-> applied when the wal entry is cleaned up in _kv_sync_thread (wal_cleaning
-> list).
->
-> Calling into the allocator in the WAL path will be more complicated than
-> just updating the checksum in the onode, but I think it's doable.
-Could you please name the issues for calling allocator in WAL path? 
-Proper locking? What else?
-A potential issue with using WAL for compressed block overwrites is 
-significant WAL data volume increase. IIUC currently WAL record can have 
-up to 2*bluestore_min_alloc_size (i.e. 128K) client data per single 
-write request - overlapped head and tail.
-In case of compressed blocks this will be up to 
-2*bluestore_max_compressed_block ( i.e. 8Mb ) as you can't simply 
-overwrite fully overlapped extents - one should operate compression 
-blocks now...
-
-Seems attractive otherwise...
->
-> The alternative is that we either
->
-> a) do the read side of the overwrite in the first phase of the op,
-> before we commit it.  That will mean a higher commit latency and will slow
-> down the pipeline, but would avoid the double-write of the overlap/wal
-> regions.  Or,
-This is probably the simplest approach without hidden caveats but 
-latency increase.
->
-> b) we could just leave the overwritten extents alone and structure the
-> block_map so that they are occluded.  This will 'leak' space for some
-> write patterns, but that might be okay given that we can come back later
-> and clean it up, or refine our strategy to be smarter.
-Just to clarify I understand the idea properly. Are you suggesting to 
-simply write out new block to a new extent and update block map (and 
-read procedure)  to use that new extent or remains of the overwritten 
-extents depending on the read offset? And overwritten extents are 
-preserved intact until they are fully hidden or some background cleanup 
-procedure merge them.
-If so I can see following pros and cons:
-+ write is faster
-- compressed data read is potentially slower as you might need to 
-decompress more compressed blocks.
-- space usage is higher
-- need for garbage collector i.e. additional complexity
-
-Thus the question is what use patterns are at foreground and should be 
-the most effective.
-IMO read performance and space saving are more important for the cases 
-where compression is needed.
-
-> What do you think?
->
-> It would be nice to choose a simpler strategy for the first pass that
-> handles a subset of write patterns (i.e., sequential writes, possibly
-> unaligned) that is still a step in the direction of the more robust
-> strategy we expect to implement after that.
->
-I'd probably agree but.... I don't see a good way how one can implement 
-compression for specific write patterns only.
-We need to either ensure that these patterns are used exclusively ( 
-append only / sequential only flags? ) or provide some means to fall 
-back to regular mode when inappropriate write occurs.
-Don't think both are good and/or easy enough.
-
-In this aspect my original proposal to have compression engine more or 
-less segregated from the bluestore seems more attractive - there is no 
-need to refactor bluestore internals in this case. One can easily start 
-using compression or drop it and fall back to the current code state. No 
-significant modifications in run-time data structures and algorithms....
-
-> sage
->
->
->
-Thanks,
-Igor
+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IElnb3IgRmVkb3RvdiBbbWFp
+bHRvOmlmZWRvdG92QG1pcmFudGlzLmNvbV0NCj4gU2VudDogV2VkbmVzZGF5LCBNYXJjaCAxNiwg
+MjAxNiAxOjM0IFBNDQo+IFRvOiBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0Pg0KPiBDYzog
+QWxsZW4gU2FtdWVscyA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT47IGNlcGgtZGV2ZWwgPGNl
+cGgtDQo+IGRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IEFkZGluZyBjb21w
+cmVzc2lvbiBzdXBwb3J0IGZvciBibHVlc3RvcmUuDQo+IA0KPiBTYWdlLCBBbGxlbiwNCj4gDQo+
+IHRoYW5rcyBhIGxvdCBmb3IgeW91ciBmZWVkYmFjay4NCj4gUGxlYXNlIGZpbmQgbXkgY29tbWVu
+dHMgaW5saW5lLg0KPiANCj4gT24gMTUuMDMuMjAxNiAyMDoxMiwgU2FnZSBXZWlsIHdyb3RlOg0K
+PiA+IE9uIEZyaSwgMjYgRmViIDIwMTYsIElnb3IgRmVkb3RvdiB3cm90ZToNCj4gPj4gQWxsZW4s
+DQo+ID4+IHNvdW5kcyBnb29kISBUaGFuayB5b3UuDQo+ID4+DQo+ID4+IFBsZWFzZSBmaW5kIHRo
+ZSB1cGRhdGVkIHByb3Bvc2FsIGJlbG93LiBJdCBleHRlbmRzIHByb3Bvc2VkIEJsb2NrIE1hcA0K
+PiA+PiB0byBjb250YWluICJmdWxsIHR1cGxlIi4NCj4gPj4gU29tZSBpbXByb3ZlbWVudHMgYW5k
+IGJldHRlciBhbGdvcml0aG0gb3ZlcnZpZXcgd2VyZSBhZGRlZCBhcyB3ZWxsLg0KPiA+Pg0KPiA+
+PiBQcmVmYWNlOg0KPiA+PiBCbHVlc3RvcmUga2VlcHMgb2JqZWN0IGNvbnRlbnQgdXNpbmcgYSBz
+ZXQgb2YgZGlzcGVyc2VkIGV4dGVudHMNCj4gPj4gYWxpZ25lZCBieSA2NEsgKGNvbmZpZ3VyYWJs
+ZSBwYXJhbSkuIEl0IGFsc28gcGVybWl0cyBnYXBzIGluIG9iamVjdA0KPiA+PiBjb250ZW50IGku
+ZS4gaXQgcHJldmVudHMgc3RvcmFnZSBzcGFjZSBhbGxvY2F0aW9uIGZvciBvYmplY3QgZGF0YSBy
+ZWdpb25zDQo+IHVuYWZmZWN0ZWQgYnkgdXNlciB3cml0ZXMuDQo+ID4+IEEgc29ydCBvZiBmb2xs
+b3dpbmcgbWFwcGluZyBpcyB1c2VkIGZvciB0cmFja2luZyBzdG9yZWQgb2JqZWN0DQo+ID4+IGNv
+bnRlbnQgZGlzcG9zaXRpb24gKGFjdHVhbCBjdXJyZW50IGltcGxlbWVudGF0aW9uIG1heSBkaWZm
+ZXIgYnV0DQo+ID4+IHJlcHJlc2VudGF0aW9uIGJlbG93IHNlZW1zIHRvIGJlIHN1ZmZpY2llbnQg
+Zm9yIG91ciBwdXJwb3Nlcyk6DQo+ID4+IEV4dGVudCBNYXANCj4gPj4gew0KPiA+PiA8IGxvZ2lj
+YWwgb2Zmc2V0IDAgLT4gZXh0ZW50IDAgJ3BoeXNpY2FsJyBvZmZzZXQsIGV4dGVudCAwIHNpemUg
+PiAuLi4NCj4gPj4gPCBsb2dpY2FsIG9mZnNldCBOIC0+IGV4dGVudCBOICdwaHlzaWNhbCcgb2Zm
+c2V0LCBleHRlbnQgTiBzaXplID4gfQ0KPiA+Pg0KPiA+Pg0KPiA+PiBDb21wcmVzc2lvbiBzdXBw
+b3J0IGFwcHJvYWNoOg0KPiA+PiBUaGUgYWltIGlzIHRvIHByb3ZpZGUgZ2VuZXJpYyBjb21wcmVz
+c2lvbiBzdXBwb3J0IGFsbG93aW5nIHJhbmRvbQ0KPiA+PiBvYmplY3QgcmVhZC93cml0ZS4NCj4g
+Pj4gVG8gZG8gdGhhdCBjb21wcmVzc2lvbiBlbmdpbmUgdG8gYmUgcGxhY2VkIChsb2dpY2FsbHkg
+LSBhY3R1YWwNCj4gPj4gaW1wbGVtZW50YXRpb24gbWF5IGJlIGRpc2N1c3NlZCBsYXRlcikgb24g
+dG9wIG9mIGJsdWVzdG9yZSB0bw0KPiA+PiAiaW50ZXJjZXB0IiByZWFkLXdyaXRlIHJlcXVlc3Rz
+IGFuZCBtb2RpZnkgdGhlbSBhcyBuZWVkZWQuDQo+ID4gSSB0aGluayBpdCBpcyBnb2luZyB0byBt
+YWtlIHRoZSBtb3N0IHNlbnNlIHRvIGRvIHRoZSBjb21wcmVzc2lvbiBhbmQNCj4gPiBkZWNvbXBy
+ZXNzaW9uIGluIF9kb193cml0ZSBhbmQgX2RvX3JlYWQgKG9yIGhlbHBlcnMpLCB3aXRoaW4NCj4g
+PiBibHVlc3RvcmUtLW5vdCBpbiBzb21lIGxheWVyIHRoYXQgc2l0cyBhYm92ZSBpdCBidXQgY29t
+bXVuaWNhdGVzDQo+ID4gbWV0YWRhdGEgZG93biB0byBpdC4NCj4gTXkgb3JpZ2luYWwgaW50ZW50
+aW9uIHdhcyB0byBtaW5pbWl6ZSBibHVlc3RvcmUgbW9kaWZpY2F0aW9ucyBuZWVkZWQgdG8gYWRk
+DQo+IGNvbXByZXNzaW9uIHN1cHBvcnQuIFBhcnRpY3VsYXJseSB0aGlzIGhlbHBzIHRvIGF2b2lk
+IGFkZGl0aW9uYWwgYmx1ZXN0b3JlDQo+IGNvbXBsaWNhdGlvbi4NCj4gQW5vdGhlciBwb2ludCBm
+b3IgYSBzZWdyZWdhdGlvbiBpcyBhIHBvdGVudGlhbCBhYmlsaXR5IHRvIG1vdmUgY29tcHJlc3Np
+b24NCj4gZW5naW5lIG91dCBvZiBzdG9yZSBsZXZlbCB0byBhIHBvb2wgb25lIGluIHRoZSBmdXR1
+cmUuDQo+IFJlbWVtYmVyIHdlIHN0aWxsIGhhdmUgMjAwJSBDUFUgdXRpbGl6YXRpb24gb3Zlcmhl
+YWQgZm9yIGN1cnJlbnQgYXBwcm9hY2gNCj4gd2l0aCByZXBsaWNhdGVkIHBvb2xzIGFzIGVhY2gg
+cmVwbGljYSBpcyBjb21wcmVzc2VkIGluZGVwZW5kZW50bHkuDQoNCk9uZSBhZHZhbnRhZ2Ugb2Yg
+dGhlIGN1cnJlbnQgc2NoZW1lIGlzIHRoYXQgeW91IGNhbiB1c2UgdGhlIHNhbWUgYmFzaWMgZmxv
+dyBmb3IgRUMgYW5kIHJlcGxpY2F0ZWQgcG9vbHMuIFRoZSBzY2hlbWUgdGhhdCB5b3UgcHJvcG9z
+ZSBtZWFucyB0aGF0IEVDIGNodW5raW5nIGJvdW5kYXJpZXMgYmVjb21lIGZsdWlkIGFuZCBkYXRh
+LXNlbnNpdGl2ZSAtLSBkZXN0cm95aW5nIHRoZSAic2VlayIgY2FwYWJpbGl0eSAoaS5lLiwgeW91
+IG5vIGxvbmdlciBrbm93IHdoaWNoIG5vZGUgaGFzIGFueSBnaXZlbiBsb2dpY2FsIGFkZHJlc3Mg
+d2l0aGluIHRoZSBvYmplY3QpLiBFc3NlbnRpYWxseSB5b3UnbGwgbmVlZCBhbiBlbnRpcmVseSBk
+aWZmZXJlbnQgYmFja2VuZCBmbG93IGZvciBFQyBwb29scyAoYXQgdGhpcyBsZXZlbCkgd2l0aCBh
+IGNvbXBsaWNhdGVkIG1ldGFkYXRhIG1hcHBpbmcgc2NoZW1lLiBUaGF0IHNlZW1zIE1VQ0ggbW9y
+ZSBjb21wbGljYXRlZCBhbmQgcnVuLXRpbWUgZXhwZW5zaXZlIHRvIG1lLg0KDQo+IFdpbGwgcHJv
+Y2VlZCB3aXRoIG1vbm9saXRoaWMgZGVzaWduIHRob3VnaC4uLg0KPiA+PiBUaGUgbWFqb3IgaWRl
+YSBpcyB0byBzcGxpdCBvYmplY3QgY29udGVudCBpbnRvIHZhcmlhYmxlIHNpemVkIGxvZ2ljYWwN
+Cj4gPj4gYmxvY2tzIHRoYXQgYXJlIGNvbXByZXNzZWQgaW5kZXBlbmRlbnRseS4gUmVzdWx0aW5n
+IGJsb2NrIG9mZnNldHMgYW5kDQo+ID4+IHNpemVzIGRlcGVuZHMgbW9zdGx5IG9uIGNsaWVudCB3
+cml0ZXMgc3ByZWFkaW5nIGFuZCBibG9jayBtZXJnaW5nDQo+ID4+IGFsZ29yaXRobSB0aGF0IGNv
+bXByZXNzaW9uIGVuZ2luZSBjYW4gcHJvdmlkZS4gTWF4aW11bSBzaXplIG9mIGVhY2gNCj4gPj4g
+YmxvY2sgdG8gYmUgbGltaXRlZCAoIE1BWF9CTE9DS19TSVpFLCBlLmcuIDQgTWIgKSB0byBwcmV2
+ZW50IGZyb20NCj4gPj4gaHVnZSBibG9jayBwcm9jZXNzaW5nIHdoZW4gaGFuZGxpbmcgcmVhZC9v
+dmVyd3JpdGVzLg0KPiA+IGJsdWVzdG9yZV9tYXhfY29tcHJlc3NlZF9ibG9jayBvciBzaW1pbGFy
+IC0tIGl0IHNob3VsZCBiZSBhDQo+ID4gY29uZmlndXJhYmxlIHZhbHVlIGxpa2UgZXZlcnl0aGlu
+ZyBlbHNlLg0KPiA+DQo+IDEwMCUgYWdyZWUNCj4gPj4gRHVlIHRvIGNvbXByZXNzaW9uIGVhY2gg
+YmxvY2sgY2FuIHBvdGVudGlhbGx5IG9jY3VweSBzbWFsbGVyIHN0b3JlDQo+ID4+IHNwYWNlIGNv
+bXBhcmluZyB0byBpdHMgb3JpZ2luYWwgc2l6ZS4gRWFjaCBibG9jayBpcyBhZGRyZXNzZWQgdXNp
+bmcNCj4gPj4gb3JpZ2luYWwgZGF0YSBvZmZzZXQgKCBBS0EgJ2xvZ2ljYWwgb2Zmc2V0JyBhYm92
+ZSApLiBBZnRlcg0KPiA+PiBjb21wcmVzc2lvbiBpcyBhcHBsaWVkIGVhY2ggY29tcHJlc3NlZCBi
+bG9jayBpcyB3cml0dGVuIHVzaW5nIHRoZQ0KPiA+PiBleGlzdGluZyBibHVlc3RvcmUgaW5mcmEu
+IFVwZGF0ZWQgd3JpdGUgcmVxdWVzdCB0byB0aGUgYmx1ZXN0b3JlDQo+ID4+IHNwZWNpZmllcyB0
+aGUgYmxvY2sncyBsb2dpY2FsIG9mZnNldCBzaW1pbGFyIHRvIHRoZSBvbmUgZnJvbSB0aGUgb3Jp
+Z2luYWwNCj4gcmVxdWVzdCBidXQgZGF0YSBsZW5ndGggY2FuIGJlIHJlZHVjZWQuDQo+ID4+IEFz
+IGEgcmVzdWx0IHN0b3JlZCBvYmplY3QgY29udGVudDoNCj4gPj4gYSkgSGFzIGdhcHMNCj4gPj4g
+YikgVXNlcyBsZXNzIHNwYWNlIGlmIGNvbXByZXNzaW9uIHdhcyBiZW5lZmljaWFsIGVub3VnaC4N
+Cj4gPj4NCj4gPj4gVG8gdHJhY2sgY29tcHJlc3NlZCBjb250ZW50IGFkZGl0aW9uYWwgYmxvY2sg
+bWFwcGluZyB0byBiZSBpbnRyb2R1Y2VkOg0KPiA+PiBCbG9jayBNYXANCj4gPj4gew0KPiA+PiA8
+IGxvZ2ljYWwgYmxvY2sgb2Zmc2V0LCBsb2dpY2FsIGJsb2NrIHNpemUgLT4gY29tcHJlc3Npb24g
+bWV0aG9kLA0KPiA+PiB0YXJnZXQgb2Zmc2V0LCBjb21wcmVzc2VkIHNpemUgPiAuLi4NCj4gPj4g
+PCBsb2dpY2FsIGJsb2NrIG9mZnNldCwgbG9naWNhbCBibG9jayBzaXplIC0+IGNvbXByZXNzaW9u
+IG1ldGhvZCwNCj4gPj4gdGFyZ2V0IG9mZnNldCwgY29tcHJlc3NlZCBzaXplID4gfSBOb3RlIDE6
+IEFjdHVhbGx5IGZvciB0aGUgY3VycmVudA0KPiA+PiBwcm9wb3NhbCB0YXJnZXQgb2Zmc2V0IGlz
+IGFsd2F5cyBlcXVhbCB0byB0aGUgbG9naWNhbCBvbmUuIEl0J3MNCj4gPj4gY3J1Y2lhbCB0aGF0
+IGNvbXByZXNzaW9uIGRvZXNuJ3QgcGVyZm9ybSBjb21wbGV0ZQ0KPiA+PiBhZGRyZXNzKG9mZnNl
+dCkgdHJhbnNsYXRpb24gYnV0IHNpbXBseSBicmluZ3MgInNwYWNlIHNhdmluZyBob2xlcyINCj4g
+Pj4gaW50byBleGlzdGluZyBvYmplY3QgY29udGVudCBsYXlvdXQuIFRoaXMgZWxpbWluYXRlcyB0
+aGUgbmVlZCBmb3INCj4gPj4gc2lnbmlmaWNhbnQgYmx1ZXN0b3JlIGludGVyZmFjZSBtb2RpZmlj
+YXRpb25zLg0KPiA+IEknbSBub3Qgc3VyZSBJIHVuZGVyc3RhbmQgd2hhdCB0aGUgdGFyZ2V0IG9m
+ZnNldCBmaWVsZCBpcyBuZWVkZWQgZm9yLA0KPiA+IHRoZW4uICBJbiBwcmFjdGljZSwgdGhpcyB3
+aWxsIG1lYW4gZXhwYW5kaW5nIGJsdWVzdG9yZV9leHRlbnRfdCB0bw0KPiA+IGhhdmUgY29tcHJl
+c3Npb25fdHlwZSBhbmQgZGVjb21wcmVzc2VkX2xlbmd0aCBmaWVsZHMuICBUaGUgbG9naWNhbA0K
+PiA+IG9mZnNldCBpcyB0aGUga2V5IGluIHRoZSBibG9ja19tYXAgbWFwPD4uLi4NCj4gQWdyZWUs
+IHRhcmdldCBvZmZzZXQgaXMgcHJvYmFibHkgcmVkdW5kYW50IGhlcmUNCj4gPj4gVG8gZWZmZWN0
+aXZlbHkgdXNlIHN0b3JlIHNwYWNlIG9uZSBuZWVkcyBhbiBhZGRpdGlvbmFsIGFiaWxpdHkgZnJv
+bQ0KPiA+PiB0aGUgYmx1ZXN0b3JlIGludGVyZmFjZSAtIHJlbGVhc2UgbG9naWNhbCBleHRlbnQg
+d2l0aGluIG9iamVjdA0KPiA+PiBjb250ZW50IGFzIHdlbGwgYXMgdW5kZXJseWluZyBwaHlzaWNh
+bCBleHRlbnRzIGFsbG9jYXRlZCBmb3IgaXQuIEluDQo+ID4+IGZhY3QgY3VycmVudCBpbnRlcmZh
+Y2UgKFdyaXRlDQo+ID4+IHJlcXVlc3QpIGFsbG93cyB0byAiYWxsb2NhdGUiICggYnkgd3JpdGlu
+ZyBkYXRhKSBsb2dpY2FsIGV4dGVudCB3aGlsZQ0KPiA+PiBsZWF2aW5nIHNvbWUgb2YgdGhlbSAi
+dW5hbGxvY2F0ZWQiIChieSBvbWl0dGluZyBjb3JyZXNwb25kaW5nIHJhbmdlKS4NCj4gPj4gQnV0
+IHRoZXJlIGlzIG5vIHJlbGVhc2UgcHJvY2VkdXJlIC0gbW92ZSBleHRlbnQgdG8gInVuYWxsb2Nh
+dGVkIg0KPiA+PiBzcGFjZS4gUGxlYXNlIG5vdGUgLSB0aGlzIGlzIG1haW5seSBhYm91dCBsb2dp
+Y2FsIGV4dGVudCAtIGEgcmVnaW9uDQo+ID4+IHdpdGhpbiBvYmplY3QgY29udGVudC4gTWVhbnMg
+Zm9yIGFsbG9jYXRlL3JlbGVhc2UgcGh5c2ljYWwgZXh0ZW50cw0KPiAocmVnaW9ucyBhdCBibG9j
+ayBkZXZpY2UpIGFyZSBwcmVzZW50Lg0KPiA+PiBJbiBjYXNlIG9mIGNvbXByZXNzaW9uIHN1Y2gg
+bG9naWNhbCBleHRlbnQgcmVsZWFzZSBpcyBtb3N0IHByb2JhYmx5DQo+ID4+IHBhaXJlZCB3aXRo
+IHdyaXRpbmcgdG8gdGhlIHNhbWUgKCBidXQgcmVkdWNlZCApIGV4dGVudC4gQW5kIGl0IGxvb2tz
+DQo+ID4+IGxpa2UgdGhlcmUgaXMgbm8gbmVlZCBmb3Igc3RhbmRhbG9uZSAicmVsZWFzZSIgcmVx
+dWVzdC4gU28gdGhlDQo+ID4+IHN1Z2dlc3Rpb24gaXMgdG8gaW50cm9kdWNlIGV4dGVuZGVkIHdy
+aXRlIHJlcXVlc3QgKFdSSVRFK1JFTEVBU0UpDQo+ID4+IHRoYXQgcmVsZWFzZXMgc3BlY2lmaWVk
+IGxvZ2ljYWwgZXh0ZW50IGFuZCB3cml0ZXMgbmV3IGRhdGEgYmxvY2suIFRoZSBrZXkNCj4gcGFy
+YW1ldGVycyBmb3IgdGhlIHJlcXVlc3QgYXJlOg0KPiA+PiBEQVRBMldSSVRFX0xPRkZTRVQsIERB
+VEEyV1JJVEVfU0laRSwgUkVMRUFTRURfRVhURU5UX0xPRkZTRVQsDQo+ID4+IFJFTEVBU0VEX0VY
+VEVOVF9TSVpFDQo+ID4+IHdoZXJlOg0KPiA+PiBhc3NlcnQoREFUQTJXUklURV9MT0ZGU0VUID49
+IFJFTEVBU0VEX0VYVEVOVF9MT0ZGU0VUKQ0KPiA+PiBhc3NlcnQoUkVMRUFTRURfRVhURU5UX0xP
+RkZTRVQgKyBSRUxFQVNFRF9FWFRFTlRfU0laRSA+PQ0KPiA+PiBEQVRBMldSSVRFX0xPRkZTRVQg
+Kw0KPiA+PiBEQVRBMldSSVRFX1NJWkUpDQo+ID4gSSdtIG5vdCBmb2xsb3dpbmcgdGhpcy4gIFlv
+dSBjYW4gbG9naWNhbGx5IHJlbGVhc2UgYSByYW5nZSB3aXRoIHplcm8oKQ0KPiA+IChpdCB3aWxs
+IG1vc3RseSBkZWFsbG9jYXRlIGV4dGVudHMsIGJ1dCB3cml0ZSB6ZXJvcyBpbnRvIGEgcGFydGlh
+bCBleHRlbnQpLg0KPiA+IEJ1dCBpdCBzb3VuZHMgbGlrZSB0aGlzIGlzIG9ubHkgbmVlZGVkIGlm
+IHlvdSB3YW50IHRvIG1hbmFnZSB0aGUNCj4gPiBjb21wcmVzc2VkIGV4dGVudHMgYWJvdmUgQmx1
+ZVN0b3JlLi4uIHdoaWNoIEkgdGhpbmsgaXMgZ29pbmcgdG8gYmUgYQ0KPiA+IG1vcmUgZGlmZmlj
+dWx0IGFwcHJvYWNoLg0KPiBMb29rcyBsaWtlIEkgbWlzc2VkIHRoZSBhYmlsaXR5IHRvIHVzZSB6
+ZXJvKCkgZm9yIGV4dGVudCByZWxlYXNlLiBUaHVzIHRoZXJlIGlzDQo+IG5vIG5lZWQgdG8gaW50
+cm9kdWNlIGFkZGl0aW9uYWwgd3JpdGUrcmVsZWFzZSByZXF1ZXN0IGZvciBhbnkgYXBwcm9hY2gu
+DQo+IA0KPiA+DQo+ID4+IER1ZSB0byB0aGUgZmFjdCB0aGF0IGJsdWVzdG9yZSBpbmZyYXN0cnVj
+dHVyZSB0cmFja3MgZXh0ZW50cyB3aXRoDQo+ID4+IHNvbWUgZ3JhbnVsYXJpdHkgKGJsdWVzdG9y
+ZV9taW5fYWxsb2Nfc2l6ZSwgNjRLYiBieSBkZWZhdWx0KQ0KPiA+PiBSRUxFQVNFRF9FWFRFTlRf
+TE9GRlNFVCAmIFJFTEVBU0VEX0VYVEVOVF9TSVpFIHNob3VsZCBieSBhbGlnbmVkDQo+IGF0DQo+
+ID4+IGJsdWVzdG9yZV9taW5fYWxsb2Nfc2l6ZSBib3VuZGFyeToNCj4gPj4gYXNzZXJ0KFJFTEVB
+U0VEX0VYVEVOVF9MT0ZGU0VUICUgbWluX2FsbG9jX3NpemUgPT0gMCk7DQo+ID4+IGFzc2VydChS
+RUxFQVNFRF9FWFRFTlRfU0laRSAlIG1pbl9hbGxvY19zaXplID09IDApOw0KPiA+Pg0KPiA+PiBB
+cyBhIHJlc3VsdCBjb21wcmVzc2lvbiBlbmdpbmUgZ2FpbnMgYSByZXNwb25zaWJpbGl0eSB0byBw
+cm9wZXJseQ0KPiA+PiBoYW5kbGUgY2FzZXMgd2hlbiBzb21lIGJsb2NrcyB1c2UgdGhlIHNhbWUg
+Ymx1ZXN0b3JlIGFsbG9jYXRpb24gdW5pdA0KPiA+PiBidXQgYXJlbid0IGZ1bGx5IGFkamFjZW50
+IChzZWUgYmVsb3cgZm9yIGRldGFpbHMpLg0KPiA+IFRoZSByZXN0IG9mIHRoaXMgaXMgbW9zdGx5
+IGFib3V0IG92ZXJ3cml0ZSBwb2xpY3ksIHdoaWNoIHNob3VsZCBiZQ0KPiA+IHByZXR0eSBnZW5l
+cmFsIHJlZ2FyZGxlc3Mgb2Ygd2hlcmUgd2UgaW1wbGVtZW50LiAgSSB0aGluayB0aGUgZmlyc3QN
+Cj4gPiBhbmQgbW9yZSBpbXBvcnRhbnQgdGhpbmcgdG8gc29ydCBvdXQgdGhvdWdoIGlzIHdoZXJl
+IHdlIGRvIGl0Lg0KPiA+DQo+ID4gTXkgY3VycmVudCB0aGlua2luZyBpcyB0aGF0IHdlIGRvIHNv
+bWV0aGluZyBsaWtlOg0KPiA+DQo+ID4gLSBhZGQgYSBibHVlc3RvcmVfZXh0ZW50X3QgZmxhZyBm
+b3IgRkxBR19DT01QUkVTU0VEDQo+ID4gLSBhZGQgdW5jb21wcmVzc2VkX2xlbmd0aCBhbmQgY29t
+cHJlc3Npb25fYWxnIGZpZWxkcw0KPiA+ICgtIGFkZCBhIGNoZWNrc3VtIGZpZWxkIHdlIGFyZSBh
+dCBpdCwgSSBndWVzcykNCj4gPg0KPiA+IC0gaW4gX2RvX3dyaXRlLCB3aGVuIHdlIGFyZSB3cml0
+aW5nIGEgbmV3IGV4dGVudCwgd2UgbmVlZCB0byBjb21wcmVzcw0KPiA+IGl0IGluIG1lbW9yeSAo
+dXAgdG8gdGhlIG1heCBjb21wcmVzc2lvbiBibG9jayksIGFuZCBmZWVkIHRoYXQgc2l6ZQ0KPiA+
+IGludG8gX2RvX2FsbG9jYXRlIHNvIHdlIGtub3cgaG93IG11Y2ggZGlzayBzcGFjZSB0byBhbGxv
+Y2F0ZS4gIHRoaXMgaXMNCj4gPiBwcm9iYWJseSByZWFzb25hYmx5IHRyaWNreSB0byBkbywgYW5k
+IGhhbmRsZXMganVzdCB0aGUgc2ltcGxlc3QgY2FzZQ0KPiA+ICh3cml0aW5nIGEgbmV3IGV4dGVu
+dCB0byBhIG5ldyBvYmplY3QsIG9yIGFwcGVuZGluZyB0byBhbiBleGlzdGluZw0KPiA+IG9uZSwg
+YW5kIHdyaXRpbmcgdGhlIG5ldyBkYXRhIGNvbXByZXNzZWQpLiAgVGhlIGN1cnJlbnQgX2RvX2Fs
+bG9jYXRlDQo+ID4gaW50ZXJmYWNlIGFuZCByZXNwb25zaWJpbGl0aWVzIHdpbGwgcHJvYmFibHkg
+bmVlZCB0byBjaGFuZ2UgcXVpdGUgYSBiaXQgaGVyZS4NCj4gc291bmRzIGdvb2Qgc28gZmFyDQo+
+ID4gLSBkZWZpbmUgdGhlIGdlbmVyYWwgKHBhcnRpYWwpIG92ZXJ3cml0ZSBzdHJhdGVneS4gIEkg
+d291bGQgbGlrZSBmb3INCj4gPiB0aGlzIHRvIGJlIHBhcnQgb2YgdGhlIFdBTCBzdHJhdGVneS4g
+IFRoYXQgaXMsIHdlIGRvIHRoZQ0KPiA+IHJlYWQvbW9kaWZ5L3dyaXRlIGFzIGRlZmVycmVkIHdv
+cmsgZm9yIHRoZSBwYXJ0aWFsIHJlZ2lvbnMgdGhhdCBvdmVybGFwDQo+IGV4aXN0aW5nIGV4dGVu
+dHMuDQo+ID4gVGhlbiBfZG9fd2FsX29wIHdvdWxkIHJlYWQgdGhlIGNvbXByZXNzZWQgZXh0ZW50
+LCBtZXJnZSBpdCB3aXRoIHRoZQ0KPiA+IG5ldyBwaWVjZSwgYW5kIHdyaXRlIG91dCB0aGUgbmV3
+IChjb21wcmVzc2VkKSBleHRlbnRzLiAgVGhlIHByb2JsZW0gaXMNCj4gPiB0aGF0IHJpZ2h0IG5v
+dyB0aGUgV0FMIHBhdGggKmp1c3QqIGRvZXMgSU8tLWl0IGRvZXNuJ3QgZG8gYW55IGt2DQo+ID4g
+bWV0YWRhdGEgdXBkYXRlcywgd2hpY2ggd291bGQgYmUgcmVxdWlyZWQgaGVyZSB0byBkbyB0aGUg
+ZmluYWwNCj4gPiBhbGxvY2F0aW9uICh3ZSB3b24ndCBrbm93IGhvdyBiaWcgdGhlIHJlc3VsdGlu
+ZyBleHRlbnQgd2lsbCBiZSB1bnRpbA0KPiA+IHdlIGRlY29tcHJlc3MgdGhlIG9sZCB0aGluZywg
+bWVyZ2UgaXQgd2l0aCB0aGUgbmV3IHRoaW5nLCBhbmQNCj4gcmVjb21wcmVzcykuDQo+ID4NCj4g
+PiBCdXQsIHdlIG5lZWQgdG8gYWRkcmVzcyB0aGlzIGFueXdheSB0byBzdXBwb3J0IENSQ3MgKHdo
+ZXJlIHdlIHdpbGwNCj4gPiBzaW1pbGFybHkgZG8gYSByZWFkL21vZGlmeS93cml0ZSwgY2FsY3Vs
+YXRlIGEgbmV3IGNoZWNrc3VtLCBhbmQgbmVlZA0KPiA+IHRvIHVwZGF0ZSB0aGUgb25vZGUpLiAg
+SSB0aGluayB0aGUgYW5zd2VyIGhlcmUgaXMganVzdCB0aGF0IHRoZQ0KPiA+IF9kb193YWxfb3Ag
+dXBkYXRlcyBzb21lIGluLW1lbW9yeS1zdGF0ZSBhdHRhY2hlZCB0byB0aGUgd2FsIG9wZXJhdGlv
+bg0KPiA+IHRoYXQgZ2V0cyBhcHBsaWVkIHdoZW4gdGhlIHdhbCBlbnRyeSBpcyBjbGVhbmVkIHVw
+IGluIF9rdl9zeW5jX3RocmVhZA0KPiA+ICh3YWxfY2xlYW5pbmcgbGlzdCkuDQo+ID4NCj4gPiBD
+YWxsaW5nIGludG8gdGhlIGFsbG9jYXRvciBpbiB0aGUgV0FMIHBhdGggd2lsbCBiZSBtb3JlIGNv
+bXBsaWNhdGVkDQo+ID4gdGhhbiBqdXN0IHVwZGF0aW5nIHRoZSBjaGVja3N1bSBpbiB0aGUgb25v
+ZGUsIGJ1dCBJIHRoaW5rIGl0J3MgZG9hYmxlLg0KPiBDb3VsZCB5b3UgcGxlYXNlIG5hbWUgdGhl
+IGlzc3VlcyBmb3IgY2FsbGluZyBhbGxvY2F0b3IgaW4gV0FMIHBhdGg/DQo+IFByb3BlciBsb2Nr
+aW5nPyBXaGF0IGVsc2U/DQoNCklmIHlvdSdyZSB1c2luZyBXQUwgZm9yIHRoZSBwYXJ0aWFsIG92
+ZXJ3cml0ZSBjYXNlLCBpLmUuLCB3aGVyZSB0aGUgV0FMIGxvZ2ljIGRvZXMgdGhlIFJNVyBhbmQg
+dW5jb21wcmVzcy9yZWNvbXByZXNzLCB0aGVuIHlvdSdsbCBoYXZlIHRvIGFsbG9jYXRlIHNwYWNl
+IGZvciB0aGUgZmluYWwgc3RyaXBlIGFmdGVyIHlvdSd2ZSBkb25lIHRoZSByZWNvbXByZXNzaW9u
+Lg0KDQo+IEEgcG90ZW50aWFsIGlzc3VlIHdpdGggdXNpbmcgV0FMIGZvciBjb21wcmVzc2VkIGJs
+b2NrIG92ZXJ3cml0ZXMgaXMNCj4gc2lnbmlmaWNhbnQgV0FMIGRhdGEgdm9sdW1lIGluY3JlYXNl
+LiBJSVVDIGN1cnJlbnRseSBXQUwgcmVjb3JkIGNhbiBoYXZlIHVwDQo+IHRvIDIqYmx1ZXN0b3Jl
+X21pbl9hbGxvY19zaXplIChpLmUuIDEyOEspIGNsaWVudCBkYXRhIHBlciBzaW5nbGUgd3JpdGUg
+cmVxdWVzdA0KPiAtIG92ZXJsYXBwZWQgaGVhZCBhbmQgdGFpbC4NCj4gSW4gY2FzZSBvZiBjb21w
+cmVzc2VkIGJsb2NrcyB0aGlzIHdpbGwgYmUgdXAgdG8NCj4gMipibHVlc3RvcmVfbWF4X2NvbXBy
+ZXNzZWRfYmxvY2sgKCBpLmUuIDhNYiApIGFzIHlvdSBjYW4ndCBzaW1wbHkNCj4gb3ZlcndyaXRl
+IGZ1bGx5IG92ZXJsYXBwZWQgZXh0ZW50cyAtIG9uZSBzaG91bGQgb3BlcmF0ZSBjb21wcmVzc2lv
+biBibG9ja3MNCj4gbm93Li4uDQo+IA0KPiBTZWVtcyBhdHRyYWN0aXZlIG90aGVyd2lzZS4uLg0K
+DQpUaGlzIGlzIG9uZSBvZiB0aGUgZnVuZGFtZW50YWwgdHJhZGVvZmZzIHdpdGggY29tcHJlc3Np
+b24uIFdoZW4geW91ciBjb21wcmVzc2lvbiBibG9jayBzaXplIGV4Y2VlZHMgdGhlIG1pbmltdW0g
+SS9PIHNpemUgeW91IGVpdGhlciBoYXZlIHRvIGNvbnN1bWUgdGltZSAoUk1XICsgdW5jb21wcmVz
+cy9yZWNvbXByZXNzKSBvciB5b3UgaGF2ZSB0byBjb25zdW1lIHNwYWNlIChvdmVybGFwcGluZyBl
+eHRlbnRzKS4gU2FnZSdzIGN1cnJlbnQgY29kZSBlc3NlbnRpYWxseSBzdGFydHMgb3V0IGJ5IGNv
+bnN1bWluZyBzcGFjZSBhbmQgdGhlbiBhc3N1bWVzIGluIHRoZSBiYWNrZ3JvdW5kIHRoYXQgaGUn
+bGwgY29uc3VtZSB0aW1lIHRvIHJlY292ZXIgdGhlIHNwYWNlLg0KT2YgY291cnNlIGlmIHlvdSBz
+ZXQgdGhlIGNvbXByZXNzaW9uIGJsb2NrIHNpemUgZXF1YWwgdG8gb3Igc21hbGxlciB0aGFuIHRo
+ZSBtaW5pbXVtIEkvTyBzaXplIHlvdSBjYW4gYXZvaWQgdGhlc2UgcHJvYmxlbXMgLS0gYnV0IHlv
+dSBjcmVhdGUgb3RoZXJzIChpbmNsdWRpbmcgcG9vciBjb21wcmVzc2lvbiwgbmVlZGluZyB0byB0
+cmFjayB2ZXJ5IHNtYWxsIGNodW5rcyBvZiBzcGFjZSwgZXRjLikgYW5kIG5vYm9keSBzZXJpb3Vz
+bHkgYmVsaWV2ZXMgdGhhdCB0aGlzIGlzIGEgdmlhYmxlIGFsdGVybmF0aXZlLiANCiANCj4gPg0K
+PiA+IFRoZSBhbHRlcm5hdGl2ZSBpcyB0aGF0IHdlIGVpdGhlcg0KPiA+DQo+ID4gYSkgZG8gdGhl
+IHJlYWQgc2lkZSBvZiB0aGUgb3ZlcndyaXRlIGluIHRoZSBmaXJzdCBwaGFzZSBvZiB0aGUgb3As
+DQo+ID4gYmVmb3JlIHdlIGNvbW1pdCBpdC4gIFRoYXQgd2lsbCBtZWFuIGEgaGlnaGVyIGNvbW1p
+dCBsYXRlbmN5IGFuZCB3aWxsDQo+ID4gc2xvdyBkb3duIHRoZSBwaXBlbGluZSwgYnV0IHdvdWxk
+IGF2b2lkIHRoZSBkb3VibGUtd3JpdGUgb2YgdGhlDQo+ID4gb3ZlcmxhcC93YWwgcmVnaW9ucy4g
+IE9yLA0KPiBUaGlzIGlzIHByb2JhYmx5IHRoZSBzaW1wbGVzdCBhcHByb2FjaCB3aXRob3V0IGhp
+ZGRlbiBjYXZlYXRzIGJ1dCBsYXRlbmN5DQo+IGluY3JlYXNlLg0KPiA+DQo+ID4gYikgd2UgY291
+bGQganVzdCBsZWF2ZSB0aGUgb3ZlcndyaXR0ZW4gZXh0ZW50cyBhbG9uZSBhbmQgc3RydWN0dXJl
+IHRoZQ0KPiA+IGJsb2NrX21hcCBzbyB0aGF0IHRoZXkgYXJlIG9jY2x1ZGVkLiAgVGhpcyB3aWxs
+ICdsZWFrJyBzcGFjZSBmb3Igc29tZQ0KPiA+IHdyaXRlIHBhdHRlcm5zLCBidXQgdGhhdCBtaWdo
+dCBiZSBva2F5IGdpdmVuIHRoYXQgd2UgY2FuIGNvbWUgYmFjaw0KPiA+IGxhdGVyIGFuZCBjbGVh
+biBpdCB1cCwgb3IgcmVmaW5lIG91ciBzdHJhdGVneSB0byBiZSBzbWFydGVyLg0KPiBKdXN0IHRv
+IGNsYXJpZnkgSSB1bmRlcnN0YW5kIHRoZSBpZGVhIHByb3Blcmx5LiBBcmUgeW91IHN1Z2dlc3Rp
+bmcgdG8gc2ltcGx5DQo+IHdyaXRlIG91dCBuZXcgYmxvY2sgdG8gYSBuZXcgZXh0ZW50IGFuZCB1
+cGRhdGUgYmxvY2sgbWFwIChhbmQgcmVhZA0KPiBwcm9jZWR1cmUpICB0byB1c2UgdGhhdCBuZXcg
+ZXh0ZW50IG9yIHJlbWFpbnMgb2YgdGhlIG92ZXJ3cml0dGVuIGV4dGVudHMNCj4gZGVwZW5kaW5n
+IG9uIHRoZSByZWFkIG9mZnNldD8gQW5kIG92ZXJ3cml0dGVuIGV4dGVudHMgYXJlIHByZXNlcnZl
+ZCBpbnRhY3QNCj4gdW50aWwgdGhleSBhcmUgZnVsbHkgaGlkZGVuIG9yIHNvbWUgYmFja2dyb3Vu
+ZCBjbGVhbnVwIHByb2NlZHVyZSBtZXJnZQ0KPiB0aGVtLg0KPiBJZiBzbyBJIGNhbiBzZWUgZm9s
+bG93aW5nIHByb3MgYW5kIGNvbnM6DQo+ICsgd3JpdGUgaXMgZmFzdGVyDQo+IC0gY29tcHJlc3Nl
+ZCBkYXRhIHJlYWQgaXMgcG90ZW50aWFsbHkgc2xvd2VyIGFzIHlvdSBtaWdodCBuZWVkIHRvDQo+
+IGRlY29tcHJlc3MgbW9yZSBjb21wcmVzc2VkIGJsb2Nrcy4NCj4gLSBzcGFjZSB1c2FnZSBpcyBo
+aWdoZXINCj4gLSBuZWVkIGZvciBnYXJiYWdlIGNvbGxlY3RvciBpLmUuIGFkZGl0aW9uYWwgY29t
+cGxleGl0eQ0KPiANCj4gVGh1cyB0aGUgcXVlc3Rpb24gaXMgd2hhdCB1c2UgcGF0dGVybnMgYXJl
+IGF0IGZvcmVncm91bmQgYW5kIHNob3VsZCBiZSB0aGUNCj4gbW9zdCBlZmZlY3RpdmUuDQo+IElN
+TyByZWFkIHBlcmZvcm1hbmNlIGFuZCBzcGFjZSBzYXZpbmcgYXJlIG1vcmUgaW1wb3J0YW50IGZv
+ciB0aGUgY2FzZXMNCj4gd2hlcmUgY29tcHJlc3Npb24gaXMgbmVlZGVkLg0KPiANCj4gPiBXaGF0
+IGRvIHlvdSB0aGluaz8NCj4gPg0KPiA+IEl0IHdvdWxkIGJlIG5pY2UgdG8gY2hvb3NlIGEgc2lt
+cGxlciBzdHJhdGVneSBmb3IgdGhlIGZpcnN0IHBhc3MgdGhhdA0KPiA+IGhhbmRsZXMgYSBzdWJz
+ZXQgb2Ygd3JpdGUgcGF0dGVybnMgKGkuZS4sIHNlcXVlbnRpYWwgd3JpdGVzLCBwb3NzaWJseQ0K
+PiA+IHVuYWxpZ25lZCkgdGhhdCBpcyBzdGlsbCBhIHN0ZXAgaW4gdGhlIGRpcmVjdGlvbiBvZiB0
+aGUgbW9yZSByb2J1c3QNCj4gPiBzdHJhdGVneSB3ZSBleHBlY3QgdG8gaW1wbGVtZW50IGFmdGVy
+IHRoYXQuDQo+ID4NCj4gSSdkIHByb2JhYmx5IGFncmVlIGJ1dC4uLi4gSSBkb24ndCBzZWUgYSBn
+b29kIHdheSBob3cgb25lIGNhbiBpbXBsZW1lbnQNCj4gY29tcHJlc3Npb24gZm9yIHNwZWNpZmlj
+IHdyaXRlIHBhdHRlcm5zIG9ubHkuDQo+IFdlIG5lZWQgdG8gZWl0aGVyIGVuc3VyZSB0aGF0IHRo
+ZXNlIHBhdHRlcm5zIGFyZSB1c2VkIGV4Y2x1c2l2ZWx5ICggYXBwZW5kDQo+IG9ubHkgLyBzZXF1
+ZW50aWFsIG9ubHkgZmxhZ3M/ICkgb3IgcHJvdmlkZSBzb21lIG1lYW5zIHRvIGZhbGwgYmFjayB0
+byByZWd1bGFyDQo+IG1vZGUgd2hlbiBpbmFwcHJvcHJpYXRlIHdyaXRlIG9jY3Vycy4NCj4gRG9u
+J3QgdGhpbmsgYm90aCBhcmUgZ29vZCBhbmQvb3IgZWFzeSBlbm91Z2guDQo+IA0KPiBJbiB0aGlz
+IGFzcGVjdCBteSBvcmlnaW5hbCBwcm9wb3NhbCB0byBoYXZlIGNvbXByZXNzaW9uIGVuZ2luZSBt
+b3JlIG9yIGxlc3MNCj4gc2VncmVnYXRlZCBmcm9tIHRoZSBibHVlc3RvcmUgc2VlbXMgbW9yZSBh
+dHRyYWN0aXZlIC0gdGhlcmUgaXMgbm8gbmVlZCB0bw0KPiByZWZhY3RvciBibHVlc3RvcmUgaW50
+ZXJuYWxzIGluIHRoaXMgY2FzZS4gT25lIGNhbiBlYXNpbHkgc3RhcnQgdXNpbmcNCj4gY29tcHJl
+c3Npb24gb3IgZHJvcCBpdCBhbmQgZmFsbCBiYWNrIHRvIHRoZSBjdXJyZW50IGNvZGUgc3RhdGUu
+IE5vIHNpZ25pZmljYW50DQo+IG1vZGlmaWNhdGlvbnMgaW4gcnVuLXRpbWUgZGF0YSBzdHJ1Y3R1
+cmVzIGFuZCBhbGdvcml0aG1zLi4uLg0KPiANCj4gPiBzYWdlDQo+ID4NCj4gPg0KPiA+DQo+IFRo
+YW5rcywNCj4gSWdvcg0K
