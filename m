@@ -1,81 +1,86 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: v10.0.4 released
-Date: Wed, 16 Mar 2016 14:14:36 +0100
-Message-ID: <56E95C3C.7080907@dachary.org>
-References: <alpine.DEB.2.11.1603081634450.14358@cpach.fuggernut.com>
+Subject: Re: Publishing development releases
+Date: Wed, 16 Mar 2016 14:20:52 +0100
+Message-ID: <56E95DB4.20006@dachary.org>
+References: <56E7D22E.2060701@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:56492 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966055AbcCPNOl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Mar 2016 09:14:41 -0400
-In-Reply-To: <alpine.DEB.2.11.1603081634450.14358@cpach.fuggernut.com>
+Received: from relay5-d.mail.gandi.net ([217.70.183.197]:38564 "EHLO
+	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965993AbcCPNU6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Mar 2016 09:20:58 -0400
+In-Reply-To: <56E7D22E.2060701@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
+To: Abhishek L <abhishek.lekshmanan@gmail.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Nathan Cutler <ncutler@suse.cz>, Martin Palma <martin@palma.bz>, "Chen, Xiaoxi" <xiaoxchen@ebay.com>, Vicente Cheng <freeze.bilsted@gmail.com>, Gaurav Bafna <bafnag@gmail.com>, Rajat Garg <rajatgarg.iitr@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 Hi,
 
-Because of a tiny mistake preventing deb packages to be built, v10.0.5 =
-was released shortly after v10.0.4 and is now the current development r=
-elease. The Stable release team[0] collectively decided to help by publ=
-ishing development packages[1], starting with v10.0.5.
+It looks like we have a majority in favor, let's do it :-)
 
-The packages for v10.0.5 are available at http://ceph-releases.dachary.=
-org/ which can be used as a replacement for http://download.ceph.com/ f=
-or both http://download.ceph.com/rpm-testing and http://download.ceph.c=
-om/debian-testing . The only difference is the key used to sign the rel=
-eases which can be imported with
-
-    wget -q -O- 'http://ceph-releases.dachary.org/release-key.asc' | su=
-do apt-key add -
-
-or=20
-
-    rpm --import http://ceph-releases.dachary.org/release-key.asc
-
-The instructions to install development packages found at http://docs.c=
-eph.com/docs/master/install/get-packages/ can otherwise be applied with=
- no change.
+I took the first round with the publication of 10.0.5. Our rotation sch=
+edule was updated to add 10.1.0 (the next development release) http://t=
+racker.ceph.com/projects/ceph-releases/wiki/HOWTO#Whos-who and I set my=
+self as a backup. If someone is willing to learn how to publish a dev r=
+elease, I'll be happy to explain. It is now documented at http://tracke=
+r.ceph.com/projects/ceph-releases/wiki/HOWTO_publish_a_release. There i=
+s no doubt things are missing but they can be fixed / documented as we =
+make progress.
 
 Cheers
 
-[0] Stable release team http://tracker.ceph.com/projects/ceph-releases/=
-wiki/HOWTO#Whos-who
-[1] Publishing development releases http://comments.gmane.org/gmane.com=
-p.file-systems.ceph.devel/30126
-
-On 08/03/2016 22:35, Sage Weil wrote:
-> This is the fourth and last development release before Jewel. The nex=
-t=20
-> release will be a release candidate with the final set of features. B=
-ig=20
-> items include RGW static website support, librbd journal framework, f=
-ixed=20
-> mon sync of config-key data, C++11 updates, and bluestore/kstore.
+On 15/03/2016 10:13, Loic Dachary wrote:
+> Hi Abhishek V, Abhishek L, Swami, Nathan, Gaurav, Rajat, Martin, Xiao=
+xi, Vicente,
 >=20
-> Note that, due to general developer busyness, we aren=E2=80=99t build=
-ing official=20
-> release packages for this dev release. You can fetch autobuilt gitbui=
-lder=20
-> packages from the usual location (http://gitbuilder.ceph.com).
+> A few weeks ago, 10.0.3 was tagged for release, but packages were not=
+ published and these packages were missed by the Ceph user base. We, th=
+e members of the Stable Releases team, got to thinking how we could hel=
+p.
 >=20
-> Notable Changes
-> ---------------
+> This led to an idea that was discussed on the mailing list[1] and dur=
+ing CDM[2]. Since we were already building packages as a side effect of=
+ running teuthology suites on OpenStack, this could be extended into a =
+full-fledged release process that would:
 >=20
->         http://ceph.com/releases/v10-0-4-released/
+> 1. ensure that the community's demand for development releases is met
+> 2. complement, not replace, the existing package publication workflow
+> 3. be automated.
 >=20
-> Getting Ceph
-> ------------
+> So I added a "release" subcommand to the ceph-workbench[3] tool we ar=
+e already using to automate various backporting tasks. The new subcomma=
+nd is included in the latest ceph-workbench release, and works like thi=
+s:
 >=20
-> * Git at git://github.com/ceph/ceph.git
-> * For packages, see http://ceph.com/docs/master/install/get-packages#=
-add-ceph-development
-> * For ceph-deploy, see http://ceph.com/docs/master/install/install-ce=
-ph-deploy
+>              ceph-workbench release --suite buildpackages/any \
+>                          --ceph jewel \
+>                          --version 10.0.5 \
+>                          --filter ubuntu_14.04,centos_7.2
 >=20
+> When it completes the packages can be uploaded to a permanent mirror =
+similar to downloads.ceph.com.
+>=20
+> I believe we can commit to publish Ceph development releases with thi=
+s process. The "release" subcommand is relatively small (around 300 lin=
+es of code) and there are integration tests to help with its maintenanc=
+e. There are enough of us to rotate the release duties so that it does =
+not become too much of a burden for anyone.
+>=20
+> Since it's a decision that changes our focus and our workload, are yo=
+u OK with adding this activity to the scope of our team?
+>=20
+> Cheers
+>=20
+> [1] (Un)Stable release team http://www.spinics.net/lists/ceph-devel/m=
+sg28887.html
+> [2] publishing development and unsupported releases http://tracker.ce=
+ph.com/projects/ceph/wiki/CDM_02-MAR-2016
+> [3] ceph-workbench release merge request http://ceph-workbench.dachar=
+y.org/root/ceph-workbench/merge_requests/43/diffs#9f3ebf1fc38506b665933=
+97f3baac514d515c496_231_232
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
