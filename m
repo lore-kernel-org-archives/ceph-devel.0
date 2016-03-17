@@ -1,75 +1,376 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Bumping my jenkins builds to the wall in radable.sh
-Date: Thu, 17 Mar 2016 10:29:40 +0100
-Message-ID: <56EA7904.4000807@digiware.nl>
-References: <56E9A585.9000309@digiware.nl>
- <CAJ4mKGY0ev0Du5JXj1JJTCX5hgp=mui1VN+egBV_XUZYTdGy8A@mail.gmail.com>
- <56E9BBD2.5050700@redhat.com>
- <CAJ4mKGbKaSt=r8ZFp+cX+11nB_gKdjMPgT1+2AeMm8G1Np830A@mail.gmail.com>
+Subject: Re: Adding compression support for bluestore.
+Date: Thu, 17 Mar 2016 11:01:00 +0100
+Message-ID: <56EA805C.1020001@digiware.nl>
+References: <56C1FCF3.4030505@mirantis.com>
+ <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com>
+ <56C3BAA3.3070804@mirantis.com>
+ <CY1PR0201MB1897E7F1DE04B5E4577B16EDE8A00@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1602220718380.13988@cpach.fuggernut.com>
+ <56CDF40C.9060405@mirantis.com>
+ <CY1PR0201MB1897BC7052AD6F7FB01DCAB4E8A50@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <56D08E30.20308@mirantis.com>
+ <alpine.DEB.2.11.1603151243030.32086@cpach.fuggernut.com>
+ <56E9A727.1030400@mirantis.com>
+ <alpine.DEB.2.11.1603161515360.14377@cpach.fuggernut.com>
+ <BLUPR0201MB1890D5927BA82CC2E7ED7132E88A0@BLUPR0201MB1890.namprd02.prod.outlook.com>
+ <CA+z5DsxA9_LLozFrDOtnVRc7FcvN7S8OF12zswQZ4q4ysK_0BA@mail.gmail.com>
+ <CA+z5DszDFj6d-=g9WWpfMOJCew=h7t2P4hOp0C7qei3=peTFZQ@mail.gmail.com>
+ <CY1PR0201MB189742A1CE7B4922F2667F1CE88B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:59448 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([31.223.170.169]:16556 "EHLO smtp.digiware.nl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932329AbcCQJ3t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 17 Mar 2016 05:29:49 -0400
-In-Reply-To: <CAJ4mKGbKaSt=r8ZFp+cX+11nB_gKdjMPgT1+2AeMm8G1Np830A@mail.gmail.com>
+	id S932920AbcCQL30 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 17 Mar 2016 07:29:26 -0400
+In-Reply-To: <CY1PR0201MB189742A1CE7B4922F2667F1CE88B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, Josh Durgin <jdurgin@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+To: Allen Samuels <Allen.Samuels@sandisk.com>, Blair Bethwaite <blair.bethwaite@gmail.com>, Igor Fedotov <ifedotov@mirantis.com>, Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 16-3-2016 21:06, Gregory Farnum wrote:
-> On Wed, Mar 16, 2016 at 1:02 PM, Josh Durgin <jdurgin@redhat.com> wrote:
->> On 03/16/2016 12:34 PM, Gregory Farnum wrote:
->>>
->>> On Wed, Mar 16, 2016 at 11:27 AM, Willem Jan Withagen <wjw@digiware.nl>
->>> wrote:
->>>>
->>>>
->>>> ../ceph-object-corpus/archive/0.61.4-60-g24c59be/objects/RGWBucketEnt
->>>>
->>>> ../ceph-object-corpus/archive/0.61.4-60-g24c59be/objects/RGWBucketInfo
->>>> error: buffer::end_of_buffer
->>>> **** failed to decode
->>>>
->>>> ../ceph-object-corpus/archive/0.61.4-60-g24c59be/objects/RGWBucketInfo/25f5ff183bba6da708243a0bbbe40a2e
->>>> ****
->>>> error: buffer::end_of_buffer
->>>> **** failed to decode
->>>>
->>>> ../ceph-object-corpus/archive/0.61.4-60-g24c59be/objects/RGWBucketInfo/54f53e3e301071f48247d59272b27b53
->>>> ****
->>>>
->>>>
->>>> ../ceph-object-corpus/archive/0.61.4-60-g24c59be/objects/rgw_bucket_pending_info
->>>>
->>>> "Just" a matter of rebase?
->>>> Or does it need more tinkering.
->>>
->>>
->>> Well, ceph-object-corpus is a bunch of old encoded versions of our
->>> objects, and it's validating that current code is still capable of
->>> decoding them. 0.61.4 is pretty old but I *think* should still work
->>> (maybe check that your submodules are all up to date; maybe some of
->>> them got dropped?). Assuming that still works on Linux, it's not a
->>> rebase problem; I would guess maybe these types just never worked
->>> because it wasn't BSD cross-compatible until more recently. You might
->>> want to explore how they're failing exactly; obviously it's running
->>> out of data to decode but the *why* is interesting.
->>
->>
->> It's broken on linux on master:
->>
->> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-tarball-trusty-amd64-basic/log.cgi?log=188644cb753fe304d941051b75b9eac49ede1086
->> https://jenkins.ceph.com/job/ceph-pull-requests/3220/console
->>
->> Probably snuck in while 'make check' was broken from the crush update.
+On 17-3-2016 04:21, Allen Samuels wrote:
+> No apology needed.
 >
-> Oh, and the very next commit after that is the fix, so yes, a rebase
-> should fix it. (Thanks Kefu+Casey!)
+> We've been totally focused on discussing the mechanism of
+> compression and really haven't started talking about policy or
+> statistics. We certainly can't be complete without addressing the
+> kinds of issues that you raise.
 >
+> All of the proposed compression architectures allow the ability to
+> selectively enable/disable compression (including presumably the
+> selection of specific algorithm and parameters) but there's been no
+> discussion of the specific ways to enable same. I've always imagined
+> a default per-pool compression setting that could be overridden on a
+> per-RADOS operation basis. This would allow the clients maximum
+> flexibility (RGW trivially can tell us when it's already compressed
+> the data, CephFS could have per-directory metadata, etc.) in
+> controlling compression, etc. Details are TBD.
+>
+> w.r.t. statistics, BlueStore will have high-precision compression
+> information at the end of each write operation. No reason why this
+> can't be reflected back up the RADOS operation chain for dynamic
+> control (as you describe). I would like to see this information be
+> accumulated and aggregated in order to provide static metrics also.
+> Things like compression ratios per-pool, etc.
+>
+> Clearly the implementation of compression is incomplete until these
+> are addressed.
 
-Rebased, and pushed....
-Lets see what that brings.
+Sorry for barging in, and perhaps with a lot off inappropriate informat=
+ion.
+It is just the old systems-architect popping up.
+
+This discussion resembles the discussion that runs in the ZFS
+community as well. And that discussion already runs for about the
+incarnation of ZFS, or at least as long as the 10 years I'm running ZFS=
+=2E
+And I'm aware that ZFS <> Ceph <> Bluestore, but I think that some less=
+ons
+can be  transposed. And BlueStore would be sort of store that I would
+otherwise use ZFS for.
+
+And if anything I've taken from these discussions is that compression i=
+s
+a totally unpredictable beast. It has a large factor of implement, try =
+and
+measure in it.
+
+To give the item that stuck most in my mind: Blocksize <> compression.
+
+ZFS used to make a big issue about proper aligning their huge 128Kb blo=
+cks
+with access patterns, but studies have turned out that "all worries=20
+evaporate"
+when using compression. The gain from "on the fly de/compression" is mo=
+re
+than the average penalty of misalignment. This starts to become even mo=
+re
+important when running things as MySQL with a 8kb or 16Kb access patter=
+n.
+
+They do not seem to worry about the efficiency of compressing too small
+blocks. Every ZFS-block is compressed on its own merits. So I guess tha=
+t
+compression dictionaries/trees are new and different for every block.
+
+The thing I would be curious about is the tradeoff compression <> laten=
+cy.
+Especially when compressing "stalls" the generation of acks back to wri=
+tters
+that data has been securely written, in combination with the possibilit=
+y of
+way much larger objects than just 128Kb.
+
+And to just add something practical to this: recently lz4 compression=20
+has made
+it into ZFS and has become the standard advice for compression.
+It is considered the most efficient tradeoff between compression effici=
+ency
+and cpu-cycle consumption, and it is supposed to keep up with the=20
+throughput
+that devices in the backingstore have. Not sure how that pans out with =
+a=20
+full
+SSD array, but opinions about that will be there soon as SSD are gettin=
+g=20
+cheap
+rapidly.
+
+There are plenty of choices:
+compression     on | off | lzjb | gzip | gzip-[1-9] | zle | lz4
+But using other compression algos is only recommended after due testing=
+=2E
+
+just my 2cts,
+--WjW
+
+>
+> Allen Samuels Software Architect, Fellow, Systems and Software
+> Solutions
+>
+> 2880 Junction Avenue, San Jose, CA 95134 T: +1 408 801 7030| M: +1
+> 408 780 6416 allen.samuels@SanDisk.com
+>
+>
+>> -----Original Message----- From: Blair Bethwaite
+>> [mailto:blair.bethwaite@gmail.com] Sent: Wednesday, March 16, 2016
+>> 5:57 PM To: Igor Fedotov <ifedotov@mirantis.com>; Allen Samuels
+>> <Allen.Samuels@sandisk.com>; Sage Weil <sage@newdream.net> Cc:
+>> ceph-devel <ceph-devel@vger.kernel.org> Subject: Re: Adding
+>> compression support for bluestore.
+>>
+>> This time without html (thanks gmail)!
+>>
+>> On 17 March 2016 at 09:43, Blair Bethwaite
+>> <blair.bethwaite@gmail.com> wrote:
+>>> Hi Igor, Allen, Sage,
+>>>
+>>> Apologies for the interjection into the technical back-and-forth
+>>> here, but I want to ask a question / make a request from the
+>>> user/operator perspective (possibly relevant to other advanced
+>>> bluestore features too)...
+>>>
+>>> Can a feature like this expose metrics (e.g., compression ratio)
+>>> back up to higher layers such as rados that could then be used
+>>> to automate use of the feature? As a user/operator implicit
+>>> compression support in the backend is exciting, but it's
+>>> something I'd want rados/librbd capable of toggling on/off
+>>> automatically based on a threshold (e.g., librbd could toggle
+>>> compression off at the image level if the first n rados objects
+>>> written/edited since turning compression on are compressed less
+>>> than c%) - this sort of thing would obviously help to avoid
+>>> unnecessary overheads and would cater to mixed use-cases (e.g.
+>>> cloud provider block storage) where in general the operator wants
+>>> compression on but has no idea what users are doing with their
+>>> internal filesystems, it'd also mesh nicely with any future
+>>> "distributed"-compression implemented at the librbd client-side
+>>> (which
+>> would again likely be an rbd toggle).
+>>>
+>>> Cheers,
+>>>
+>>> On 17 March 2016 at 06:41, Allen Samuels
+>>> <Allen.Samuels@sandisk.com>
+>> wrote:
+>>>>
+>>>>> -----Original Message----- From: Sage Weil
+>>>>> [mailto:sage@newdream.net] Sent: Wednesday, March 16, 2016
+>>>>> 2:28 PM To: Igor Fedotov <ifedotov@mirantis.com> Cc: Allen
+>>>>> Samuels <Allen.Samuels@sandisk.com>; ceph-devel <ceph-
+>>>>> devel@vger.kernel.org> Subject: Re: Adding compression
+>>>>> support for bluestore.
+>>>>>
+>>>>> On Wed, 16 Mar 2016, Igor Fedotov wrote:
+>>>>>> On 15.03.2016 20:12, Sage Weil wrote:
+>>>>>>> My current thinking is that we do something like:
+>>>>>>>
+>>>>>>> - add a bluestore_extent_t flag for FLAG_COMPRESSED -
+>>>>>>> add uncompressed_length and compression_alg fields (- add
+>>>>>>> a checksum field we are at it, I guess)
+>>>>>>>
+>>>>>>> - in _do_write, when we are writing a new extent, we
+>>>>>>> need to compress it in memory (up to the max compression
+>>>>>>> block), and feed that size into _do_allocate so we know
+>>>>>>> how much disk space to allocate.  this is probably
+>>>>>>> reasonably tricky to do, and handles just the simplest
+>>>>>>> case (writing a new extent to a new object, or appending
+>>>>>>> to an existing one, and writing the new data
+>> compressed).
+>>>>>>> The current _do_allocate interface and responsibilities
+>>>>>>> will probably need
+>>>>> to change quite a bit here.
+>>>>>> sounds good so far
+>>>>>>> - define the general (partial) overwrite strategy.  I
+>>>>>>> would like for this to be part of the WAL strategy.
+>>>>>>> That is, we do the read/modify/write as deferred work for
+>>>>>>> the partial regions that overlap
+>>>>> existing extents.
+>>>>>>> Then _do_wal_op would read the compressed extent, merge
+>>>>>>> it with the new piece, and write out the new
+>>>>>>> (compressed) extents.  The problem is that right now the
+>>>>>>> WAL path *just* does IO--it doesn't do any kv metadata
+>>>>>>> updates, which would be required here to do the final
+>>>>>>> allocation (we won't know how big the resulting extent
+>>>>>>> will be until we decompress the old thing, merge it with
+>>>>>>> the new thing, and
+>>>>> recompress).
+>>>>>>>
+>>>>>>> But, we need to address this anyway to support CRCs
+>>>>>>> (where we will similarly do a read/modify/write,
+>>>>>>> calculate a new checksum, and need to update the onode).
+>>>>>>> I think the answer here is just that the _do_wal_op
+>>>>>>> updates some in-memory-state attached to the wal
+>>>>>>> operation that gets applied when the wal entry is
+>>>>>>> cleaned up in _kv_sync_thread (wal_cleaning list).
+>>>>>>>
+>>>>>>> Calling into the allocator in the WAL path will be more
+>>>>>>> complicated than just updating the checksum in the
+>>>>>>> onode, but I think it's doable.
+>>>>>> Could you please name the issues for calling allocator in
+>>>>>> WAL path? Proper locking? What else?
+>>>>>
+>>>>> I think this bit isn't so bad... we need to add another
+>>>>> field to the in-memory wal_op struct that includes space
+>>>>> allocated in the WAL stage, and make sure that gets committed
+>>>>> by the kv thread for all of the wal_cleaning txc's.
+>>>>>
+>>>>>> A potential issue with using WAL for compressed block
+>>>>>> overwrites is significant WAL data volume increase. IIUC
+>>>>>> currently WAL record can have up to
+>>>>>> 2*bluestore_min_alloc_size (i.e. 128K) client data per
+>>>>>> single write request - overlapped head and tail. In case
+>>>>>> of compressed blocks this will be up to
+>>>>>> 2*bluestore_max_compressed_block ( i.e. 8Mb ) as you can't
+>>>>>> simply overwrite fully overlapped extents - one should
+>>>>>> operate compression
+>>>>> blocks now...
+>>>>>>
+>>>>>> Seems attractive otherwise...
+>>>>>
+>>>>> I think the way to address this is to make
+>>>>> bluestore_max_compressed_block *much* smaller.  Like, 4x or
+>>>>> 8x min_alloc_size, but no more.  That gives us a smallish
+>>>>> rounding error of "lost" efficiency, but keeps the size of
+>>>>> extents we have to read+decompress in the overwrite or small
+>>>>> read cases reasonable.
+>>>>>
+>>>>
+>>>> Yes, this is generally what people do.  It's very hard to have
+>>>> a large compression window without having the CPU times
+>>>> balloon up.
+>>>>
+>>>>> The tradeoff is the onode_t's block_map gets bigger... but
+>>>>> for a ~4MB it's still only 5-10 records, which sounds fine
+>>>>> to me.
+>>>>>
+>>>>>>> The alternative is that we either
+>>>>>>>
+>>>>>>> a) do the read side of the overwrite in the first phase
+>>>>>>> of the op, before we commit it.  That will mean a higher
+>>>>>>> commit latency and will slow down the pipeline, but
+>>>>>>> would avoid the double-write of the overlap/wal regions.
+>>>>>>> Or,
+>>>>>> This is probably the simplest approach without hidden
+>>>>>> caveats but latency increase.
+>>>>>>>
+>>>>>>> b) we could just leave the overwritten extents alone and
+>>>>>>>  structure the block_map so that they are occluded.
+>>>>>>> This will 'leak' space for some write patterns, but that
+>>>>>>> might be okay given that we can come back later and clean
+>>>>>>> it up, or refine our
+>> strategy to be smarter.
+>>>>>> Just to clarify I understand the idea properly. Are you
+>>>>>> suggesting to simply write out new block to a new extent
+>>>>>> and update block map (and read procedure) to use that new
+>>>>>> extent or remains of the overwritten extents depending on
+>>>>>> the read offset? And overwritten extents are preserved
+>>>>>> intact until they are fully hidden or some background
+>>>>>> cleanup
+>>>>> procedure merge them.
+>>>>>> If so I can see following pros and cons: + write is faster
+>>>>>>  - compressed data read is potentially slower as you might
+>>>>>> need to decompress more compressed blocks. - space usage
+>>>>>> is higher - need for garbage collector i.e. additional
+>>>>>> complexity
+>>>>>>
+>>>>>> Thus the question is what use patterns are at foreground
+>>>>>> and should be the most effective. IMO read performance and
+>>>>>> space saving are more important for the cases where
+>>>>>> compression is needed.
+>>>>>>
+>>>>>>> What do you think?
+>>>>>>>
+>>>>>>> It would be nice to choose a simpler strategy for the
+>>>>>>> first pass that handles a subset of write patterns
+>>>>>>> (i.e., sequential writes, possibly unaligned) that is
+>>>>>>> still a step in the direction of the more robust strategy
+>>>>>>> we expect to implement after that.
+>>>>>>>
+>>>>>> I'd probably agree but.... I don't see a good way how one
+>>>>>> can implement compression for specific write patterns only.
+>>>>>> We need to either ensure that these patterns are used
+>>>>>> exclusively ( append only / sequential only flags? ) or
+>>>>>> provide some means to fall back to regular mode when
+>>>>>> inappropriate write occurs. Don't think both are good
+>>>>>> and/or easy enough.
+>>>>>
+>>>>> Well, if we simply don't implement a garbage collector, then
+>>>>> for sequential+aligned writes we don't end up with stuff
+>>>>> that needs sequential+garbage collection.  Even the
+>>>>> sequential case might be doable if we make it possible to
+>>>>> fill the extent with a sequence of compressed strings (as
+>>>>> long as we haven't reached the compressed length, try to
+>>>>> restart the decompression stream).
+>>>>>
+>>>>>> In this aspect my original proposal to have compression
+>>>>>> engine more or less segregated from the bluestore seems
+>>>>>> more attractive - there is no need to refactor bluestore
+>>>>>> internals in this case. One can easily start using
+>>>>>> compression or drop it and fall back to the current code
+>>>>>> state. No significant modifications in run-time data
+>>>>>> structures and
+>>>>> algorithms....
+>>>>>
+>>>>> It sounds like in theory, but when I try to sort out how it
+>>>>> would actually work, it seems like you have to either expose
+>>>>> all of the block_map metadata up to this layer, at which
+>>>>> point you may as well do it down in BlueStore and have the
+>>>>> option of deferred WAL work, or you do something really
+>>>>> simple with fixed compression block sizes and get a weak
+>>>>> final result.  Not to mention the EC problems (although some
+>>>>> of that will go away when EC overwrites come along)...
+>>>>>
+>>>>> sage
+>>>> -- To unsubscribe from this list: send the line "unsubscribe
+>>>> ceph-devel" in the body of a message to
+>>>> majordomo@vger.kernel.org More
+>> majordomo
+>>>> info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>>
+>>>
+>>> -- Cheers, ~Blairo
+>>
+>>
+>>
+>> -- Cheers, ~Blairo
+> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=
+=EF=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=
+=BD=1E=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BD=
+j:+v=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!tml=3D
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
