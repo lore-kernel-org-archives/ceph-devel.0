@@ -1,376 +1,390 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Adding compression support for bluestore.
-Date: Thu, 17 Mar 2016 11:01:00 +0100
-Message-ID: <56EA805C.1020001@digiware.nl>
-References: <56C1FCF3.4030505@mirantis.com>
- <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com>
- <56C3BAA3.3070804@mirantis.com>
- <CY1PR0201MB1897E7F1DE04B5E4577B16EDE8A00@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1602220718380.13988@cpach.fuggernut.com>
- <56CDF40C.9060405@mirantis.com>
- <CY1PR0201MB1897BC7052AD6F7FB01DCAB4E8A50@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <56D08E30.20308@mirantis.com>
- <alpine.DEB.2.11.1603151243030.32086@cpach.fuggernut.com>
- <56E9A727.1030400@mirantis.com>
- <alpine.DEB.2.11.1603161515360.14377@cpach.fuggernut.com>
- <BLUPR0201MB1890D5927BA82CC2E7ED7132E88A0@BLUPR0201MB1890.namprd02.prod.outlook.com>
- <CA+z5DsxA9_LLozFrDOtnVRc7FcvN7S8OF12zswQZ4q4ysK_0BA@mail.gmail.com>
- <CA+z5DszDFj6d-=g9WWpfMOJCew=h7t2P4hOp0C7qei3=peTFZQ@mail.gmail.com>
- <CY1PR0201MB189742A1CE7B4922F2667F1CE88B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: data corruption with hammer
+Date: Thu, 17 Mar 2016 10:19:45 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1603171018330.14377@cpach.fuggernut.com>
+References: <CAK9wOaA8_qpK1hNxQmY+zapaEedypzKdrChPUNWL+g-8YwfabQ@mail.gmail.com>
+	<CAK9wOaA-o7ypB_O=vfgu=77zRt9HafWymBtsGt7zXpF53JY5Jg@mail.gmail.com>
+	<CAK9wOaCTW=KFQE_HN+hon=dG5kxTFFGW78KJ-7h4knqLjiA-ng@mail.gmail.com>
+	<def5db51.9Ro.9Gf.cC.1qX1QcBYq7@mailjet.com>
+	<alpine.DEB.2.11.1603170823330.14377@cpach.fuggernut.com>
+	<CAANLjFrabxuOkkWZrHS6ODmvG1Qx12Q1SeY8BUfQS-fKtOz=iw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:16556 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932920AbcCQL30 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 17 Mar 2016 07:29:26 -0400
-In-Reply-To: <CY1PR0201MB189742A1CE7B4922F2667F1CE88B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>, Blair Bethwaite <blair.bethwaite@gmail.com>, Igor Fedotov <ifedotov@mirantis.com>, Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-2105719689-1458224388=:14377"
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAANLjFrabxuOkkWZrHS6ODmvG1Qx12Q1SeY8BUfQS-fKtOz=iw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
+Cc: Robert LeBlanc <robert.leblanc-Kvon/JIRTjNl57MIdRCFDg@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, Nick Fisk <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, William Perkins <william.perkins-Kvon/JIRTjNl57MIdRCFDg@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 17-3-2016 04:21, Allen Samuels wrote:
-> No apology needed.
->
-> We've been totally focused on discussing the mechanism of
-> compression and really haven't started talking about policy or
-> statistics. We certainly can't be complete without addressing the
-> kinds of issues that you raise.
->
-> All of the proposed compression architectures allow the ability to
-> selectively enable/disable compression (including presumably the
-> selection of specific algorithm and parameters) but there's been no
-> discussion of the specific ways to enable same. I've always imagined
-> a default per-pool compression setting that could be overridden on a
-> per-RADOS operation basis. This would allow the clients maximum
-> flexibility (RGW trivially can tell us when it's already compressed
-> the data, CephFS could have per-directory metadata, etc.) in
-> controlling compression, etc. Details are TBD.
->
-> w.r.t. statistics, BlueStore will have high-precision compression
-> information at the end of each write operation. No reason why this
-> can't be reflected back up the RADOS operation chain for dynamic
-> control (as you describe). I would like to see this information be
-> accumulated and aggregated in order to provide static metrics also.
-> Things like compression ratios per-pool, etc.
->
-> Clearly the implementation of compression is incomplete until these
-> are addressed.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Sorry for barging in, and perhaps with a lot off inappropriate informat=
-ion.
-It is just the old systems-architect popping up.
+--8323329-2105719689-1458224388=:14377
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-This discussion resembles the discussion that runs in the ZFS
-community as well. And that discussion already runs for about the
-incarnation of ZFS, or at least as long as the 10 years I'm running ZFS=
-=2E
-And I'm aware that ZFS <> Ceph <> Bluestore, but I think that some less=
-ons
-can be  transposed. And BlueStore would be sort of store that I would
-otherwise use ZFS for.
-
-And if anything I've taken from these discussions is that compression i=
-s
-a totally unpredictable beast. It has a large factor of implement, try =
-and
-measure in it.
-
-To give the item that stuck most in my mind: Blocksize <> compression.
-
-ZFS used to make a big issue about proper aligning their huge 128Kb blo=
-cks
-with access patterns, but studies have turned out that "all worries=20
-evaporate"
-when using compression. The gain from "on the fly de/compression" is mo=
-re
-than the average penalty of misalignment. This starts to become even mo=
-re
-important when running things as MySQL with a 8kb or 16Kb access patter=
-n.
-
-They do not seem to worry about the efficiency of compressing too small
-blocks. Every ZFS-block is compressed on its own merits. So I guess tha=
-t
-compression dictionaries/trees are new and different for every block.
-
-The thing I would be curious about is the tradeoff compression <> laten=
-cy.
-Especially when compressing "stalls" the generation of acks back to wri=
-tters
-that data has been securely written, in combination with the possibilit=
-y of
-way much larger objects than just 128Kb.
-
-And to just add something practical to this: recently lz4 compression=20
-has made
-it into ZFS and has become the standard advice for compression.
-It is considered the most efficient tradeoff between compression effici=
-ency
-and cpu-cycle consumption, and it is supposed to keep up with the=20
-throughput
-that devices in the backingstore have. Not sure how that pans out with =
-a=20
-full
-SSD array, but opinions about that will be there soon as SSD are gettin=
-g=20
-cheap
-rapidly.
-
-There are plenty of choices:
-compression     on | off | lzjb | gzip | gzip-[1-9] | zle | lz4
-But using other compression algos is only recommended after due testing=
-=2E
-
-just my 2cts,
---WjW
-
->
-> Allen Samuels Software Architect, Fellow, Systems and Software
-> Solutions
->
-> 2880 Junction Avenue, San Jose, CA 95134 T: +1 408 801 7030| M: +1
-> 408 780 6416 allen.samuels@SanDisk.com
->
->
->> -----Original Message----- From: Blair Bethwaite
->> [mailto:blair.bethwaite@gmail.com] Sent: Wednesday, March 16, 2016
->> 5:57 PM To: Igor Fedotov <ifedotov@mirantis.com>; Allen Samuels
->> <Allen.Samuels@sandisk.com>; Sage Weil <sage@newdream.net> Cc:
->> ceph-devel <ceph-devel@vger.kernel.org> Subject: Re: Adding
->> compression support for bluestore.
->>
->> This time without html (thanks gmail)!
->>
->> On 17 March 2016 at 09:43, Blair Bethwaite
->> <blair.bethwaite@gmail.com> wrote:
->>> Hi Igor, Allen, Sage,
->>>
->>> Apologies for the interjection into the technical back-and-forth
->>> here, but I want to ask a question / make a request from the
->>> user/operator perspective (possibly relevant to other advanced
->>> bluestore features too)...
->>>
->>> Can a feature like this expose metrics (e.g., compression ratio)
->>> back up to higher layers such as rados that could then be used
->>> to automate use of the feature? As a user/operator implicit
->>> compression support in the backend is exciting, but it's
->>> something I'd want rados/librbd capable of toggling on/off
->>> automatically based on a threshold (e.g., librbd could toggle
->>> compression off at the image level if the first n rados objects
->>> written/edited since turning compression on are compressed less
->>> than c%) - this sort of thing would obviously help to avoid
->>> unnecessary overheads and would cater to mixed use-cases (e.g.
->>> cloud provider block storage) where in general the operator wants
->>> compression on but has no idea what users are doing with their
->>> internal filesystems, it'd also mesh nicely with any future
->>> "distributed"-compression implemented at the librbd client-side
->>> (which
->> would again likely be an rbd toggle).
->>>
->>> Cheers,
->>>
->>> On 17 March 2016 at 06:41, Allen Samuels
->>> <Allen.Samuels@sandisk.com>
->> wrote:
->>>>
->>>>> -----Original Message----- From: Sage Weil
->>>>> [mailto:sage@newdream.net] Sent: Wednesday, March 16, 2016
->>>>> 2:28 PM To: Igor Fedotov <ifedotov@mirantis.com> Cc: Allen
->>>>> Samuels <Allen.Samuels@sandisk.com>; ceph-devel <ceph-
->>>>> devel@vger.kernel.org> Subject: Re: Adding compression
->>>>> support for bluestore.
->>>>>
->>>>> On Wed, 16 Mar 2016, Igor Fedotov wrote:
->>>>>> On 15.03.2016 20:12, Sage Weil wrote:
->>>>>>> My current thinking is that we do something like:
->>>>>>>
->>>>>>> - add a bluestore_extent_t flag for FLAG_COMPRESSED -
->>>>>>> add uncompressed_length and compression_alg fields (- add
->>>>>>> a checksum field we are at it, I guess)
->>>>>>>
->>>>>>> - in _do_write, when we are writing a new extent, we
->>>>>>> need to compress it in memory (up to the max compression
->>>>>>> block), and feed that size into _do_allocate so we know
->>>>>>> how much disk space to allocate.  this is probably
->>>>>>> reasonably tricky to do, and handles just the simplest
->>>>>>> case (writing a new extent to a new object, or appending
->>>>>>> to an existing one, and writing the new data
->> compressed).
->>>>>>> The current _do_allocate interface and responsibilities
->>>>>>> will probably need
->>>>> to change quite a bit here.
->>>>>> sounds good so far
->>>>>>> - define the general (partial) overwrite strategy.  I
->>>>>>> would like for this to be part of the WAL strategy.
->>>>>>> That is, we do the read/modify/write as deferred work for
->>>>>>> the partial regions that overlap
->>>>> existing extents.
->>>>>>> Then _do_wal_op would read the compressed extent, merge
->>>>>>> it with the new piece, and write out the new
->>>>>>> (compressed) extents.  The problem is that right now the
->>>>>>> WAL path *just* does IO--it doesn't do any kv metadata
->>>>>>> updates, which would be required here to do the final
->>>>>>> allocation (we won't know how big the resulting extent
->>>>>>> will be until we decompress the old thing, merge it with
->>>>>>> the new thing, and
->>>>> recompress).
->>>>>>>
->>>>>>> But, we need to address this anyway to support CRCs
->>>>>>> (where we will similarly do a read/modify/write,
->>>>>>> calculate a new checksum, and need to update the onode).
->>>>>>> I think the answer here is just that the _do_wal_op
->>>>>>> updates some in-memory-state attached to the wal
->>>>>>> operation that gets applied when the wal entry is
->>>>>>> cleaned up in _kv_sync_thread (wal_cleaning list).
->>>>>>>
->>>>>>> Calling into the allocator in the WAL path will be more
->>>>>>> complicated than just updating the checksum in the
->>>>>>> onode, but I think it's doable.
->>>>>> Could you please name the issues for calling allocator in
->>>>>> WAL path? Proper locking? What else?
->>>>>
->>>>> I think this bit isn't so bad... we need to add another
->>>>> field to the in-memory wal_op struct that includes space
->>>>> allocated in the WAL stage, and make sure that gets committed
->>>>> by the kv thread for all of the wal_cleaning txc's.
->>>>>
->>>>>> A potential issue with using WAL for compressed block
->>>>>> overwrites is significant WAL data volume increase. IIUC
->>>>>> currently WAL record can have up to
->>>>>> 2*bluestore_min_alloc_size (i.e. 128K) client data per
->>>>>> single write request - overlapped head and tail. In case
->>>>>> of compressed blocks this will be up to
->>>>>> 2*bluestore_max_compressed_block ( i.e. 8Mb ) as you can't
->>>>>> simply overwrite fully overlapped extents - one should
->>>>>> operate compression
->>>>> blocks now...
->>>>>>
->>>>>> Seems attractive otherwise...
->>>>>
->>>>> I think the way to address this is to make
->>>>> bluestore_max_compressed_block *much* smaller.  Like, 4x or
->>>>> 8x min_alloc_size, but no more.  That gives us a smallish
->>>>> rounding error of "lost" efficiency, but keeps the size of
->>>>> extents we have to read+decompress in the overwrite or small
->>>>> read cases reasonable.
->>>>>
->>>>
->>>> Yes, this is generally what people do.  It's very hard to have
->>>> a large compression window without having the CPU times
->>>> balloon up.
->>>>
->>>>> The tradeoff is the onode_t's block_map gets bigger... but
->>>>> for a ~4MB it's still only 5-10 records, which sounds fine
->>>>> to me.
->>>>>
->>>>>>> The alternative is that we either
->>>>>>>
->>>>>>> a) do the read side of the overwrite in the first phase
->>>>>>> of the op, before we commit it.  That will mean a higher
->>>>>>> commit latency and will slow down the pipeline, but
->>>>>>> would avoid the double-write of the overlap/wal regions.
->>>>>>> Or,
->>>>>> This is probably the simplest approach without hidden
->>>>>> caveats but latency increase.
->>>>>>>
->>>>>>> b) we could just leave the overwritten extents alone and
->>>>>>>  structure the block_map so that they are occluded.
->>>>>>> This will 'leak' space for some write patterns, but that
->>>>>>> might be okay given that we can come back later and clean
->>>>>>> it up, or refine our
->> strategy to be smarter.
->>>>>> Just to clarify I understand the idea properly. Are you
->>>>>> suggesting to simply write out new block to a new extent
->>>>>> and update block map (and read procedure) to use that new
->>>>>> extent or remains of the overwritten extents depending on
->>>>>> the read offset? And overwritten extents are preserved
->>>>>> intact until they are fully hidden or some background
->>>>>> cleanup
->>>>> procedure merge them.
->>>>>> If so I can see following pros and cons: + write is faster
->>>>>>  - compressed data read is potentially slower as you might
->>>>>> need to decompress more compressed blocks. - space usage
->>>>>> is higher - need for garbage collector i.e. additional
->>>>>> complexity
->>>>>>
->>>>>> Thus the question is what use patterns are at foreground
->>>>>> and should be the most effective. IMO read performance and
->>>>>> space saving are more important for the cases where
->>>>>> compression is needed.
->>>>>>
->>>>>>> What do you think?
->>>>>>>
->>>>>>> It would be nice to choose a simpler strategy for the
->>>>>>> first pass that handles a subset of write patterns
->>>>>>> (i.e., sequential writes, possibly unaligned) that is
->>>>>>> still a step in the direction of the more robust strategy
->>>>>>> we expect to implement after that.
->>>>>>>
->>>>>> I'd probably agree but.... I don't see a good way how one
->>>>>> can implement compression for specific write patterns only.
->>>>>> We need to either ensure that these patterns are used
->>>>>> exclusively ( append only / sequential only flags? ) or
->>>>>> provide some means to fall back to regular mode when
->>>>>> inappropriate write occurs. Don't think both are good
->>>>>> and/or easy enough.
->>>>>
->>>>> Well, if we simply don't implement a garbage collector, then
->>>>> for sequential+aligned writes we don't end up with stuff
->>>>> that needs sequential+garbage collection.  Even the
->>>>> sequential case might be doable if we make it possible to
->>>>> fill the extent with a sequence of compressed strings (as
->>>>> long as we haven't reached the compressed length, try to
->>>>> restart the decompression stream).
->>>>>
->>>>>> In this aspect my original proposal to have compression
->>>>>> engine more or less segregated from the bluestore seems
->>>>>> more attractive - there is no need to refactor bluestore
->>>>>> internals in this case. One can easily start using
->>>>>> compression or drop it and fall back to the current code
->>>>>> state. No significant modifications in run-time data
->>>>>> structures and
->>>>> algorithms....
->>>>>
->>>>> It sounds like in theory, but when I try to sort out how it
->>>>> would actually work, it seems like you have to either expose
->>>>> all of the block_map metadata up to this layer, at which
->>>>> point you may as well do it down in BlueStore and have the
->>>>> option of deferred WAL work, or you do something really
->>>>> simple with fixed compression block sizes and get a weak
->>>>> final result.  Not to mention the EC problems (although some
->>>>> of that will go away when EC overwrites come along)...
->>>>>
->>>>> sage
->>>> -- To unsubscribe from this list: send the line "unsubscribe
->>>> ceph-devel" in the body of a message to
->>>> majordomo@vger.kernel.org More
->> majordomo
->>>> info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>>
->>> -- Cheers, ~Blairo
->>
->>
->>
->> -- Cheers, ~Blairo
-> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=
-=EF=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=
-=BD=1E=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BD=
-j:+v=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD=EF=BF=BD=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!tml=3D
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+On Thu, 17 Mar 2016, Robert LeBlanc wrote:
+> We are trying to figure out how to use rados bench to reproduce. Ceph
+> itself doesn't seem to think there is any corruption, but when you do a
+> verify inside the RBD, there is. Can rados bench verify the objects aft=
+er
+> they are written? It also seems to be primarily the filesystem metadata
+> that is corrupted. If we fsck the volume, there is missing data (put in=
+to
+> lost+found), but if it is there it is primarily OK. There only seems to=
+ be
+> a few cases where a file's contents are corrupted. I would suspect on a=
 n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> object boundary. We would have to look at blockinfo to map that out and=
+ see
+> if that is what is happening.
+
+'rados bench' doesn't do validation.  ceph_test_rados does, though--if yo=
+u=20
+can reproduce with that workload then it should be pretty easy to track=20
+down.
+
+Thanks!
+sage
+
+=20
+> We stopped all the IO and did put the tier in writeback mode with recen=
+cy
+> 1,  set the recency to 2 and started the test and there was corruption,=
+ so
+> it doesn't seem to be limited to changing the mode. I don't know how th=
+at
+> patch could cause the issue either. Unless there is a bug that reads fr=
+om
+> the back tier, but writes to cache tier, then the object gets promoted
+> wiping that last write, but then it seems like it should not be as much
+> corruption since the metadata should be in the cache pretty quick. We
+> usually evited the cache before each try so we should not be evicting o=
+n
+> writeback.
+>=20
+> Sent from a mobile device, please excuse any typos.
+> On Mar 17, 2016 6:26 AM, "Sage Weil" <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>=20
+> > On Thu, 17 Mar 2016, Nick Fisk wrote:
+> > > There is got to be something else going on here. All that PR does i=
+s to
+> > > potentially delay the promotion to hit_set_period*recency instead o=
+f
+> > > just doing it on the 2nd read regardless, it's got to be uncovering
+> > > another bug.
+> > >
+> > > Do you see the same problem if the cache is in writeback mode befor=
+e you
+> > > start the unpacking. Ie is it the switching mid operation which cau=
+ses
+> > > the problem? If it only happens mid operation, does it still occur =
+if
+> > > you pause IO when you make the switch?
+> > >
+> > > Do you also see this if you perform on a RBD mount, to rule out any
+> > > librbd/qemu weirdness?
+> > >
+> > > Do you know if it=E2=80=99s the actual data that is getting corrupt=
+ed or if it's
+> > > the FS metadata? I'm only wondering as unpacking should really only=
+ be
+> > > writing to each object a couple of times, whereas FS metadata could
+> > > potentially be being updated+read back lots of times for the same g=
+roup
+> > > of objects and ordering is very important.
+> > >
+> > > Thinking through it logically the only difference is that with rece=
+ncy=3D1
+> > > the object will be copied up to the cache tier, where recency=3D6 i=
+t will
+> > > be proxy read for a long time. If I had to guess I would say the is=
+sue
+> > > would lie somewhere in the proxy read + writeback<->forward logic.
+> >
+> > That seems reasonable.  Was switching from writeback -> forward alway=
+s
+> > part of the sequence that resulted in corruption?  Not that there is =
+a
+> > known ordering issue when switching to forward mode.  I wouldn't real=
+ly
+> > expect it to bite real users but it's possible..
+> >
+> >         http://tracker.ceph.com/issues/12814
+> >
+> > I've opened a ticket to track this:
+> >
+> >         http://tracker.ceph.com/issues/15171
+> >
+> > What would be *really* great is if you could reproduce this with a
+> > ceph_test_rados workload (from ceph-tests).  I.e., get ceph_test_rado=
+s
+> > running, and then find the sequence of operations that are sufficient=
+ to
+> > trigger a failure.
+> >
+> > sage
+> >
+> >
+> >
+> >  >
+> > >
+> > >
+> > > > -----Original Message-----
+> > > > From: ceph-users [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Be=
+half
+> > Of
+> > > > Mike Lovell
+> > > > Sent: 16 March 2016 23:23
+> > > > To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>; sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+> > > > Cc: Robert LeBlanc <robert.leblanc-Kvon/JIRTjNl57MIdRCFDg@public.gmane.org>; William Perkin=
+s
+> > > > <william.perkins-Kvon/JIRTjNl57MIdRCFDg@public.gmane.org>
+> > > > Subject: Re: [ceph-users] data corruption with hammer
+> > > >
+> > > > just got done with a test against a build of 0.94.6 minus the two
+> > commits that
+> > > > were backported in PR 7207. everything worked as it should with t=
+he
+> > cache-
+> > > > mode set to writeback and the min_read_recency_for_promote set to=
+ 2.
+> > > > assuming it works properly on master, there must be a commit that=
+ we're
+> > > > missing on the backport to support this properly.
+> > > >
+> > > > sage,
+> > > > i'm adding you to the recipients on this so hopefully you see it.=
+ the
+> > tl;dr
+> > > > version is that the backport of the cache recency fix to hammer
+> > doesn't work
+> > > > right and potentially corrupts data when
+> > > > the min_read_recency_for_promote is set to greater than 1.
+> > > >
+> > > > mike
+> > > >
+> > > > On Wed, Mar 16, 2016 at 4:41 PM, Mike Lovell
+> > > > <mike.lovell-Kvon/JIRTjNl57MIdRCFDg@public.gmane.org> wrote:
+> > > > robert and i have done some further investigation the past couple=
+ days
+> > on
+> > > > this. we have a test environment with a hard drive tier and an ss=
+d
+> > tier as a
+> > > > cache. several vms were created with volumes from the ceph cluste=
+r. i
+> > did a
+> > > > test in each guest where i un-tarred the linux kernel source mult=
+iple
+> > times
+> > > > and then did a md5sum check against all of the files in the resul=
+ting
+> > source
+> > > > tree. i started off with the monitors and osds running 0.94.5 and
+> > never saw
+> > > > any problems.
+> > > >
+> > > > a single node was then upgraded to 0.94.6 which has osds in both =
+the
+> > ssd and
+> > > > hard drive tier. i then proceeded to run the same test and, while=
+ the
+> > untar
+> > > > and md5sum operations were running, i changed the ssd tier cache-=
+mode
+> > > > from forward to writeback. almost immediately the vms started
+> > reporting io
+> > > > errors and odd data corruption. the remainder of the cluster was
+> > updated to
+> > > > 0.94.6, including the monitors, and the same thing happened.
+> > > >
+> > > > things were cleaned up and reset and then a test was run
+> > > > where min_read_recency_for_promote for the ssd cache pool was set=
+ to 1.
+> > > > we previously had it set to 6. there was never an error with the
+> > recency
+> > > > setting set to 1. i then tested with it set to 2 and it immediate=
+ly
+> > caused
+> > > > failures. we are currently thinking that it is related to the bac=
+kport
+> > of the fix
+> > > > for the recency promotion and are in progress of making a .6 buil=
+d
+> > without
+> > > > that backport to see if we can cause corruption. is anyone using =
+a
+> > version
+> > > > from after the original recency fix (PR 6702) with a cache tier i=
+n
+> > writeback
+> > > > mode? anyone have a similar problem?
+> > > >
+> > > > mike
+> > > >
+> > > > On Mon, Mar 14, 2016 at 8:51 PM, Mike Lovell
+> > > > <mike.lovell-Kvon/JIRTjNl57MIdRCFDg@public.gmane.org> wrote:
+> > > > something weird happened on one of the ceph clusters that i admin=
+ister
+> > > > tonight which resulted in virtual machines using rbd volumes seei=
+ng
+> > > > corruption in multiple forms.
+> > > >
+> > > > when everything was fine earlier in the day, the cluster was a nu=
+mber
+> > of
+> > > > storage nodes spread across 3 different roots in the crush map. t=
+he
+> > first
+> > > > bunch of storage nodes have both hard drives and ssds in them wit=
+h the
+> > hard
+> > > > drives in one root and the ssds in another. there is a pool for e=
+ach
+> > and the
+> > > > pool for the ssds is a cache tier for the hard drives. the last s=
+et of
+> > storage
+> > > > nodes were in a separate root with their own pool that is being u=
+sed
+> > for burn
+> > > > in testing.
+> > > >
+> > > > these nodes had run for a while with test traffic and we decided =
+to
+> > move
+> > > > them to the main root and pools. the main cluster is running 0.94=
+.5
+> > and the
+> > > > new nodes got 0.94.6 due to them getting configured after that wa=
+s
+> > > > released. i removed the test pool and did a ceph osd crush move t=
+o move
+> > > > the first node into the main cluster, the hard drives into the ro=
+ot
+> > for that tier
+> > > > of storage and the ssds into the root and pool for the cache tier=
+.
+> > each set was
+> > > > done about 45 minutes apart and they ran for a couple hours while
+> > > > performing backfill without any issue other than high load on the
+> > cluster.
+> > > >
+> > > > we normally run the ssd tier in the forward cache-mode due to the=
+ ssds
+> > we
+> > > > have not being able to keep up with the io of writeback. this res=
+ults
+> > in io on
+> > > > the hard drives slowing going up and performance of the cluster
+> > starting to
+> > > > suffer. about once a week, i change the cache-mode between writeb=
+ack
+> > and
+> > > > forward for short periods of time to promote actively used data t=
+o the
+> > cache
+> > > > tier. this moves io load from the hard drive tier to the ssd tier=
+ and
+> > has been
+> > > > done multiple times without issue. i normally don't do this while
+> > there are
+> > > > backfills or recoveries happening on the cluster but decided to g=
+o
+> > ahead
+> > > > while backfill was happening due to the high load.
+> > > >
+> > > > i tried this procedure to change the ssd cache-tier between write=
+back
+> > and
+> > > > forward cache-mode and things seemed okay from the ceph cluster. =
+about
+> > > > 10 minutes after the first attempt a changing the mode, vms using=
+ the
+> > ceph
+> > > > cluster for their storage started seeing corruption in multiple f=
+orms.
+> > the
+> > > > mode was flipped back and forth multiple times in that time frame=
+ and
+> > its
+> > > > unknown if the corruption was noticed with the first change or
+> > subsequent
+> > > > changes. the vms were having issues of filesystems having errors =
+and
+> > getting
+> > > > remounted RO and mysql databases seeing corruption (both myisam a=
+nd
+> > > > innodb). some of this was recoverable but on some filesystems the=
+re was
+> > > > corruption that lead to things like lots of data ending up in the
+> > lost+found and
+> > > > some of the databases were un-recoverable (backups are helping th=
+ere).
+> > > >
+> > > > i'm not sure what would have happened to cause this corruption. t=
+he
+> > libvirt
+> > > > logs for the qemu processes for the vms did not provide any outpu=
+t of
+> > > > problems from the ceph client code. it doesn't look like any of t=
+he
+> > qemu
+> > > > processes had crashed. also, it has now been several hours since =
+this
+> > > > happened with no additional corruption noticed by the vms. it doe=
+sn't
+> > > > appear that we had any corruption happen before i attempted the
+> > flipping of
+> > > > the ssd tier cache-mode.
+> > > >
+> > > > the only think i can think of that is different between this time
+> > doing this
+> > > > procedure vs previous attempts was that there was the one storage=
+ node
+> > > > running 0.94.6 where the remainder were running 0.94.5. is is pos=
+sible
+> > that
+> > > > something changed between these two releases that would have caus=
+ed
+> > > > problems with data consistency related to the cache tier? or
+> > otherwise? any
+> > > > other thoughts or suggestions?
+> > > >
+> > > > thanks in advance for any help you can provide.
+> > > >
+> > > > mike
+> > > >
+> > >
+> > >
+> > >
+> > >
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >
+> >
+>=20
+--8323329-2105719689-1458224388=:14377
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--8323329-2105719689-1458224388=:14377--
