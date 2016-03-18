@@ -1,101 +1,92 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: rbd_aio_flush cause guestos sync wirte poor iops?
-Date: Fri, 18 Mar 2016 08:02:37 -0400 (EDT)
-Message-ID: <1216780323.39858060.1458302557470.JavaMail.zimbra@redhat.com>
-References: <CAFU9Co=d-CstfhbiP3ztdpNTFp03SMGy8ciRw8xxBXkxw7TjRw@mail.gmail.com> <578851288.38782223.1458135450823.JavaMail.zimbra@redhat.com> <CAFU9Con=_qXF37XSre1Ep7Ji5MFKcVstQ9MfQPTk=+mvojcLvw@mail.gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Adding compression support for bluestore.
+Date: Fri, 18 Mar 2016 16:00:57 +0300
+Message-ID: <56EBFC09.1060008@mirantis.com>
+References: <56C1FCF3.4030505@mirantis.com>
+ <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com>
+ <56C3BAA3.3070804@mirantis.com>
+ <CY1PR0201MB1897E7F1DE04B5E4577B16EDE8A00@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1602220718380.13988@cpach.fuggernut.com>
+ <56CDF40C.9060405@mirantis.com>
+ <CY1PR0201MB1897BC7052AD6F7FB01DCAB4E8A50@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <56D08E30.20308@mirantis.com>
+ <alpine.DEB.2.11.1603151243030.32086@cpach.fuggernut.com>
+ <56E9A727.1030400@mirantis.com>
+ <BLUPR0201MB1890A352BFE71C1D74634ED2E88A0@BLUPR0201MB1890.namprd02.prod.outlook.com>
+ <56EAC579.9060208@mirantis.com>
+ <CY1PR0201MB18974651A4981E5F6889AFF7E88B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:46906 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752360AbcCRMCj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Mar 2016 08:02:39 -0400
-In-Reply-To: <CAFU9Con=_qXF37XSre1Ep7Ji5MFKcVstQ9MfQPTk=+mvojcLvw@mail.gmail.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:34177 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755387AbcCRNAx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Mar 2016 09:00:53 -0400
+Received: by mail-lb0-f174.google.com with SMTP id k12so87845024lbb.1
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Mar 2016 06:00:52 -0700 (PDT)
+In-Reply-To: <CY1PR0201MB18974651A4981E5F6889AFF7E88B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Huan Zhang <huan.zhang.jn@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-There isn't anything slow about the flush -- the flush will complete when your previous writes complete.  If it takes 2.5 ms for your OSDs to ACK a write as safely written to disk, you will only be able to issue ~400 sync writes per second.  
 
-The flush issues by your guest OS / QEMU to librbd is to designed to ensure that your previous write operations are safely committed to disk.  If flushes were ignored, your data would no longer be crash consistent.  This is nothing unique to RBD -- you would have the safe effect with a local disk as well.
 
--- 
+On 17.03.2016 18:28, Allen Samuels wrote:
+>> flow for EC and replicated pools. The scheme that you propose means that
+>> EC chunking boundaries become fluid and data-sensitive -- destroying the
+>> "seek" capability (i.e., you no longer know which node has any given logical
+>> address within the object). Essentially you'll need an entirely different
+>> backend flow for EC pools (at this level) with a complicated metadata
+>> mapping scheme. That seems MUCH more complicated and run-time
+>> expensive to me.
+>> Wouldn't agree with this statement.  Perhaps I improperly presented my
+>> ideas or missing something...
+>> IMHO current EC pool's write pattern is just a regular append only mode.
+> This is where we diverge. Sam and I worked out a blueprint for doing non append-only writes into EC pools (i.e., partial and/or complete overwrites).
+>
+> See https://github.com/athanatos/ceph/blob/wip-ec-overwrites/doc/dev/osd_internals/ec_overwrites.rst
+>
+> This allows all of the current restrictions in the usages of EC Pools to be eliminated, enabling all protocols to directly utilize EC pools.
+>
+> If you do compression BEFORE you do EC, then you have a real problem with landing your data across the different nodes of an EC stripe in the non-append case.
+>
+> BTW, it's BlueStore itself that enables this new capability to be implemented efficiently, it's very expensive to do this with FileStore (an additional full copy of the data is required, i.e., 3x write-amp on FileStore)
+>   
+Got it.  That's where we diverge:
+Actually speaking of compression layer segregation in this thread I 
+meant having it AFTER EC/Replicated pools and BEFORE the bluestore. Not 
+BEFORE pools ... IMO in my case such a layer is absolutely similar for 
+both replicated and EC pools as EC write patterns are always (for both 
+append only and overwrite modes) a subset of replicated pool one.
 
-Jason Dillaman 
+Anyway thanks a lot for your clarifications. I highly appreciate your 
+help...
 
------ Original Message -----
-> From: "Huan Zhang" <huan.zhang.jn@gmail.com>
-> To: "Jason Dillaman" <dillaman@redhat.com>
-> Cc: ceph-devel@vger.kernel.org, haomaiwang@gmail.com
-> Sent: Thursday, March 17, 2016 12:58:59 AM
-> Subject: Re: rbd_aio_flush cause guestos sync wirte poor iops?
-> 
-> Hi Jason & Haomai,
->     Thanks for reply  and explanation.
->     fio with ioengine=rbd fsync=1 within physical compute onde
-> performance is ok. similar to normal wirte(direct=1)
->     ceph --admin-daemon /var/run/ceph/rbd-41837.asok config show |
-> grep rbd_cache
->     "rbd_cache": "false"
-> 
->     As you mentioned, sync=1 within guestos will issue rbd_aio_flush.
-> so my question is:
->     1. why rbd_aio_flush is so poor even if rbd cache is off?
->     2. could we ignore the sync cache(rbd_aio_flush) instructed by the
-> guest OS if rbd cache is off?
-> 
-> 
-> 
-> 2016-03-16 21:37 GMT+08:00 Jason Dillaman <dillaman@redhat.com>:
-> > As previously mentioned [1], the fio rbd engine ignores the "sync" option.
-> > You need to use "fsync=1" to issue a flush after each write to simulate
-> > what "sync=1" is doing.  When running fio within a VM against an RBD
-> > image, QEMU is not issuing sync writes to RBD -- it's issuing AIO writes
-> > and a AIO flush (as instructed by the guest OS).  Looking at the man page
-> > for O_SYNC [2], which is what that fio option enables in supported
-> > engines, that flag will act "as though each write(2) was followed by a
-> > call to fsync(2)".
-> >
-> > [1]
-> > http://lists.ceph.com/pipermail/ceph-users-ceph.com/2016-February/007780.html
-> > [2] http://man7.org/linux/man-pages/man2/open.2.html
-> >
-> > --
-> >
-> > Jason Dillaman
-> >
-> >
-> > ----- Original Message -----
-> >> From: "Huan Zhang" <huan.zhang.jn@gmail.com>
-> >> To: ceph-devel@vger.kernel.org
-> >> Sent: Wednesday, March 16, 2016 12:52:33 AM
-> >> Subject: rbd_aio_flush cause guestos sync wirte poor iops?
-> >>
-> >> Hi,
-> >>    We test sync iops with fio sync=1 for database workloads in VM,
-> >> the backend is librbd and ceph (all SSD setup).'
-> >>    The result is sad to me. we only get ~400 IOPS sync randwrite with
-> >>    iodepth=1
-> >> to iodepth=32.
-> >>     But test in physical machine with fio ioengine=rbd sync=1, we can
-> >> reache ~35K IOPS.
-> >> seems the qemu rbd is the bottleneck.
-> >>
-> >>     qemu version is 2.1.2 with rbd_aio_flush patched.
-> >>     rbd cache is off, qemu cache=none.
-> >>
-> >>     IMHO, ceph use sync write for every write to disk, so
-> >> rbd_aio_flush can ignore the sync
-> >> cache command if rbd cache is off so that we can get higher
-> >> iops(similar to direct=1 write)
-> >> for sync=1 iops, right?
-> >>
-> >>    Very appreciated to get your reply!
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> 
+>
+>> And read pattern is partially random - EC reads data in arbitrary order at
+>> specific offsets only. As long as some layer is able to handle such patterns it's
+>> probably OK for EC pool. And I don't see any reasons why compression layer
+>> is unable to do that and what's the difference comparing to replicated pools.
+>> Actually my idea  about segregation was mainly about reusing existing
+>> bluestore rather than modifying it. Compression engine should somehow
+>> (e.g. by inheriting from bluestore and overriding _do_write/_do_read
+>> methods ) intercept write/read requests and maintain its OWN block
+>> management independent from bluestore one. Bluestore is left untouched
+>> and exposes its functionality ( via Read/Write handlers) AS-IS to the
+>> compression layer instead of pools. The key thing is that compressed blocks
+>> map and bluestore extents map use the same logical offset, i.e.
+>> if some compressed block starts at offset X it's written to bluestore at offset
+>> X too. But written block is shorter than original one and thus store space is
+>> saved.
+>> I would agree with the comment that this probably complicates metadata
+>> handling - compression layer metadata has to be handled similar to bluestore
+>> ones ( proper sync, WAL, transaction, etc). But I don't see any issues specific
+>> to EC here...
+>> Have I missed something?
+> No doubt the metadata gets more complicated in the presence of compression. Especially if we want to enable the sort of lazy partial-overwrite with background cleanup that seems to be the most desirable.
+Agree.
+
+Thanks,
+Igor
