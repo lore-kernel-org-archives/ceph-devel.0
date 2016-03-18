@@ -1,255 +1,118 @@
-From: VHPC 16 <vhpc.dist@gmail.com>
-Subject: CfP 11th Workshop on Virtualization in High-Performance Cloud
- Computing (VHPC '16)
-Date: Fri, 18 Mar 2016 16:31:35 +0100
-Message-ID: <CAF05tLNW+F62gtuQv_=f1u8NHsYEgXWPB54W5sjohM5qboSf6w@mail.gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Adding compression support for bluestore.
+Date: Fri, 18 Mar 2016 18:53:50 +0300
+Message-ID: <56EC248E.3060502@mirantis.com>
+References: <56C1FCF3.4030505@mirantis.com>
+ <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com>
+ <56C3BAA3.3070804@mirantis.com>
+ <CY1PR0201MB1897E7F1DE04B5E4577B16EDE8A00@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1602220718380.13988@cpach.fuggernut.com>
+ <56CDF40C.9060405@mirantis.com>
+ <CY1PR0201MB1897BC7052AD6F7FB01DCAB4E8A50@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <56D08E30.20308@mirantis.com>
+ <alpine.DEB.2.11.1603151243030.32086@cpach.fuggernut.com>
+ <56E9A727.1030400@mirantis.com>
+ <alpine.DEB.2.11.1603161515360.14377@cpach.fuggernut.com>
+ <56EACAAD.90002@mirantis.com>
+ <alpine.DEB.2.11.1603171123090.14377@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:36108 "EHLO
-	mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932589AbcCRPbg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Mar 2016 11:31:36 -0400
-Received: by mail-oi0-f47.google.com with SMTP id r187so91641777oih.3
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Mar 2016 08:31:35 -0700 (PDT)
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:36500 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756155AbcCRPxq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Mar 2016 11:53:46 -0400
+Received: by mail-lb0-f181.google.com with SMTP id qe11so36983003lbc.3
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Mar 2016 08:53:45 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1603171123090.14377@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-CfP 11th Workshop on Virtualization in High-Performance Cloud
-Computing (VHPC '16)
-
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-CALL FOR PAPERS
+To: Sage Weil <sage@newdream.net>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
 
-11th Workshop on Virtualization in High=C2=AD-Performance Cloud Computi=
-ng  (VHPC '16)
-held in conjunction with the International Supercomputing Conference -
-High Performance,
-June 19-23, 2016, Frankfurt, Germany.
 
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+On 17.03.2016 18:33, Sage Weil wrote:
+> I'd say "maybe". It's easy to say we should focus on read performance 
+> now, but as soon as we have "support for compression" everybody is 
+> going to want to turn it on on all of their clusters to spend less 
+> money on hard disks. That will definitely include RBD users, where 
+> write latency is very important. I'm hesitant to take an architectural 
+> direction that locks us in. With something layered over BlueStore I 
+> think we're forced to do it all in the initial phase; with the 
+> monolithic approach that integrates it into BlueStore's write path we 
+> have the option to do either one--perhaps based on the particular 
+> request or hints or whatever.
+>>>>> What do you think?
+>>>>>
+>>>>> It would be nice to choose a simpler strategy for the first pass that
+>>>>> handles a subset of write patterns (i.e., sequential writes, possibly
+>>>>> unaligned) that is still a step in the direction of the more robust
+>>>>> strategy we expect to implement after that.
+>>>>>
+>>>> I'd probably agree but.... I don't see a good way how one can implement
+>>>> compression for specific write patterns only.
+>>>> We need to either ensure that these patterns are used exclusively ( append
+>>>> only / sequential only flags? ) or provide some means to fall back to
+>>>> regular
+>>>> mode when inappropriate write occurs.
+>>>> Don't think both are good and/or easy enough.
+>>> Well, if we simply don't implement a garbage collector, then for
+>>> sequential+aligned writes we don't end up with stuff that needs garbage
+>>> collection.  Even the sequential case might be doable if we make it
+>>> possible to fill the extent with a sequence of compressed strings (as long
+>>> as we haven't reached the compressed length, try to restart the
+>>> decompression stream).
+>> It's still unclear to me if such specific patterns should be exclusively
+>> applied to the object. E.g. by using specific object creation mode mode.
+>> Or we should detect them automatically and be able to fall back to regular
+>> write ( i.e. disable compression )  when write doesn't conform to the
+>> supported pattern.
+> I think initially supporting only the append workload is a simple check
+> for whether the offset == the object size (and maybe whether it is
+> aligned).  No persistent flags or hints needed there.
+Well, but issues appear immediately after some overwrite request takes 
+place.
+How to handle overwrites? To do compression for the overwritten or not? 
+If not - we need some way to be able to merge compressed and 
+uncompressed blocks. And so on and so forth
+IMO it's hard (or even impossible) to apply compression for specific 
+write patterns only unless you prohibit other ones.
+We can support a subset of compression policies ( i.e. ways how we 
+resolve compression issues: RMW at init phase, lazy overwrite, WAL use, 
+etc ) but not a subset of write patterns.
 
-Date: June 23, 2016
-Workshop URL: http://vhpc.org
+>> And I'm not following the idea about "a sequence of compressed strings". Could
+>> you please elaborate?
+> Let's say we have 32KB compressed_blocks, and the client is doing 1000
+> byte appends.  We will allocate a 32 chunk on disk, and only fill it with
+> say ~500 bytes of compressed data.  When the next write comes around, we
+> could compress it too and append it to the block without decompressing the
+> previous string.
+>
+> By string I mean that each compression cycle looks something like
+>
+>   start(...)
+>   while (more data)
+>     compress_some_stuff(...)
+>   finish(...)
+>
+> i.e., there's a header and maybe a footer in the compressed string.  If we
+> are decompressing and the decompressor says "done" but there is more data
+> in our compressed block, we could repeat the process until we get to the
+> end of the compressed data.
+Got it, thanks for clarification
+> But it might not matter or be worth it.  If the compressed blocks are
+> smallish then decompressing, appending, and recompressing isn't going to
+> be that expensive anyway.  I'm mostly worried about small appends, e.g. by
+> rbd mirroring (imaging 4 KB writes + some metadata) or the MDS journal.
+That's mainly about small appends not small writes, right?
 
-Paper Submission Deadline: April 25, 2016
-
-
-Call for Papers
-
-Virtualization technologies constitute a key enabling factor for
-flexible resource
-management in modern data centers, and particularly in cloud environmen=
-ts.
-Cloud providers need to manage complex infrastructures in a seamless
-fashion to support
-the highly dynamic and heterogeneous workloads and hosted applications =
-customers
-deploy. Similarly, HPC environments have been increasingly adopting
-techniques that
-enable flexible management of vast computing and networking resources,
-close to marginal
-provisioning cost, which is unprecedented in the history of scientific
-and commercial
-computing.
-
-Various virtualization technologies contribute to the overall picture
-in different ways: machine
-virtualization, with its capability to enable consolidation of
-multiple under=C2=ADutilized servers with
-heterogeneous software and operating systems (OSes), and its
-capability to live=C2=AD-migrate a
-fully operating virtual machine (VM) with a very short downtime,
-enables novel and dynamic
-ways to manage physical servers; OS-=C2=ADlevel virtualization (i.e.,
-containerization), with its
-capability to isolate multiple user=C2=AD-space environments and to all=
-ow
-for their co=C2=ADexistence
-within the same OS kernel, promises to provide many of the advantages o=
-f machine
-virtualization with high levels of responsiveness and performance; I/O
-Virtualization allows
-physical NICs/HBAs to take traffic from multiple VMs or containers;
-network virtualization,
-with its capability to create logical network overlays that are
-independent of the underlying
-physical topology and IP addressing, provides the fundamental ground
-on top of which
-evolved network services can be realized with an unprecedented level
-of dynamicity and
-flexibility; the increasingly adopted paradigm of Software-=C2=ADDefine=
-d
-Networking (SDN)
-promises to extend this flexibility to the control and data planes of
-network paths.
-
-
-Topics of Interest
-
-The VHPC program committee solicits original, high-quality submissions
-related to
-virtualization across the entire software stack with a special focus
-on the intersection of HPC
-and the cloud. Topics include, but are not limited to:
-
-- Virtualization in supercomputing environments, HPC clusters, cloud
-HPC and grids
-- OS-level virtualization including container runtimes (Docker, rkt et =
-al.)
-- Lightweight compute node operating systems/VMMs
-- Optimizations of virtual machine monitor platforms, hypervisors
-- QoS and SLA in hypervisors and network virtualization
-- Cloud based network and system management for SDN and NFV
-- Management, deployment and monitoring of virtualized environments
-- Virtual per job / on-demand clusters and cloud bursting
-- Performance measurement, modelling and monitoring of
-virtualized/cloud workloads
-- Programming models for virtualized environments
-- Virtualization in data intensive computing and Big Data processing
-- Cloud reliability, fault-tolerance, high-availability and security
-- Heterogeneous virtualized environments, virtualized accelerators,
-GPUs and co-processors
-- Optimized communication libraries/protocols in the cloud and for HPC
-in the cloud
-- Topology management and optimization for distributed virtualized appl=
-ications
-- Adaptation of emerging HPC technologies (high performance networks,
-RDMA, etc..)
-- I/O and storage virtualization, virtualization aware file systems
-- Job scheduling/control/policy in virtualized environments
-- Checkpointing and migration of VM-based large compute jobs
-- Cloud frameworks and APIs
-- Energy-efficient / power-aware virtualization
-
-
-The Workshop on Virtualization in High=C2=AD-Performance Cloud Computin=
-g
-(VHPC) aims to
-bring together researchers and industrial practitioners facing the chal=
-lenges
-posed by virtualization in order to foster discussion, collaboration,
-mutual exchange
-of knowledge and experience, enabling research to ultimately provide no=
-vel
-solutions for virtualized computing systems of tomorrow.
-
-The workshop will be one day in length, composed of 20 min paper
-presentations, each
-followed by 10 min discussion sections, plus lightning talks that are
-limited to 5 minutes.
-Presentations may be accompanied by interactive demonstrations.
-
-Important Dates
-
-April 25, 2016 - Paper submission deadline
-May 30, 2016 Acceptance notification
-June 23, 2016 - Workshop Day
-July 25, 2016 - Camera-ready version due
-
-
-Chair
-
-Michael Alexander (chair), TU Wien, Austria
-Anastassios Nanos (co-=C2=ADchair), NTUA, Greece
-Balazs Gerofi (co-=C2=ADchair), RIKEN Advanced Institute for Computatio=
-nal
-Science, Japan
-
-
-Program committee
-
-Stergios Anastasiadis, University of Ioannina, Greece
-Costas Bekas, IBM Research, Switzerland
-Jakob Blomer, CERN
-Ron Brightwell, Sandia National Laboratories, USA
-Roberto Canonico, University of Napoli Federico II, Italy
-Julian Chesterfield, OnApp, UK
-Stephen Crago, USC ISI, USA
-Christoffer Dall, Columbia University, USA
-Patrick Dreher, MIT, USA
-Robert Futrick, Cycle Computing, USA
-Robert Gardner, University of Chicago, USA
-William Gardner, University of Guelph, Canada
-Wolfgang Gentzsch, UberCloud, USA
-Kyle Hale, Northwestern University, USA
-Marcus Hardt, Karlsruhe Institute of Technology, Germany
-Krishna Kant, Templte University, USA
-Romeo Kinzler, IBM, Switzerland
-Brian Kocoloski, University of Pittsburgh, USA
-Kornilios Kourtis, IBM Research, Switzerland
-Nectarios Koziris, National Technical University of Athens, Greece
-John Lange, University of Pittsburgh, USA
-Nikos Parlavantzas, IRISA, France
-Kevin Pendretti, Sandia National Laboratories, USA
-Che-Rung Roger Lee, National Tsing Hua University, Taiwan
-Giuseppe Lettieri, University of Pisa, Italy
-Qing Liu, Oak Ridge National Laboratory, USA
-Paul Mundt, Adaptant, Germany
-Amer Qouneh, University of Florida, USA
-Carlos Rea=C3=B1o, Technical University of Valencia, Spain
-Seetharami Seelam, IBM Research, USA
-Josh Simons, VMWare, USA
-Borja Sotomayor, University of Chicago, USA
-Dieter Suess, TU Wien, Austria
-Craig Stewart, Indiana University, USA
-Anata Tiwari, San Diego Supercomputer Center, USA
-Kurt Tutschku, Blekinge Institute of Technology, Sweden
-Amit Vadudevan, Carnegie Mellon University, USA
-Yasuhiro Watashiba, Osaka University, Japan
-Nicholas Wright, Lawrence Berkeley National Laboratory, USA
-Chao-Tung Yang, Tunghai University, Taiwan
-Gianluigi Zanetti, CRS4, Italy
-
-
-Paper Submission-Publication
-
-Papers submitted to the workshop will be reviewed by at least two
-members of the program committee and external reviewers. Submissions
-should include abstract, key words, the e-mail address of the
-corresponding author, and must not exceed 10 pages, including tables
-and figures at a main font size no smaller than 11 point. Submission
-of a paper should be regarded as a commitment that, should the paper
-be accepted, at least one of the authors will register and attend the
-conference to present the work.
-
-The format must be according to the Springer LNCS Style. Initial
-submissions are in PDF; authors of accepted papers will be requested
-to provide source files.
-
-=46ormat Guidelines:
-ftp://ftp.springer.de/pub/tex/latex/llncs/latex2e/llncs2e.zip
-
-Abstract, Paper Submission Link:
-https://edas.info/newPaper.php?c=3D21801
-
-
-Lightning Talks
-
-Lightning Talks are non-paper track, synoptical in nature and are
-strictly limited to 5 minutes.
-They can be used to gain early feedback on ongoing research, for
-demonstrations, to
-present research results, early research ideas, perspectives and
-positions of interest to the
-community. Submit abstract via the main submission link.
-
-
-General Information
-
-The workshop is one day in length and will be held in conjunction with
-the International
-Supercomputing Conference - High Performance (ISC) 2016, June 19-23,
-=46rankfurt, Germany.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+At this point I agree with Allen that we need variable policies to 
+handle compression. Most probably we wouldn't be able to create single 
+one that fits perfect for any write pattern.
+The only concern about that is the complexity of such a task...
+> sage
+Thanks,
+Igor
