@@ -1,29 +1,52 @@
-From: Jaze Lee <jazeltq@gmail.com>
-Subject: what's the default package for configure without any parameters?
-Date: Fri, 18 Mar 2016 11:29:09 +0800
-Message-ID: <CAKZcxgdGCFKA6r5pMxfnhT_5U7UbP=f0+PTqGbHqE_Wgcvw3qQ@mail.gmail.com>
+From: Yang Honggang <joseph.yang@xtaotech.com>
+Subject: RGW placement multi data pool support
+Date: Fri, 18 Mar 2016 19:07:09 +0800
+Message-ID: <56EBE15D.6020906@xtaotech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f178.google.com ([209.85.213.178]:35098 "EHLO
-	mail-ig0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752634AbcCRD3K convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Mar 2016 23:29:10 -0400
-Received: by mail-ig0-f178.google.com with SMTP id vf5so12683945igb.0
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Mar 2016 20:29:09 -0700 (PDT)
+Received: from m199-177.yeah.net ([123.58.177.199]:46909 "EHLO
+	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751042AbcCRLHO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Mar 2016 07:07:14 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Javen Wu <javen.wu@xtaotech.com>
 
-Hi, all
-   I run the ./configure without any parameter.How can i know the
-default configure options?
+Hello,
 
-Thanks
+In the current RGW implementation, only one =E2=80=98data pool=E2=80=99=
+ is allowed in the
+placement target. So the size of a bucket is limited by the backend poo=
+l
+size. We can add osds into the backend pool, but it would trigger PG da=
+ta
+rebalance. Also, we might have to do PG split when the OSD count is clo=
+se
+to the pre-defined PG number, however, it would trigger data rebalance =
+as
+well. We try to avoid data rebalance as many as we can by adding multip=
+le
+pools into one placement target. Then a scheduler between pools of a
+placement target is needed.
 
---=20
-=E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
+I have a immature proposal would like to discuss with you. We can exten=
+d
+placement's data pool to a pool list. When a new object is created thro=
+ugh
+RGW, we can choose one data pool from placement's data pool list. In or=
+der
+to do that, the pool ID need to be added into the bucket index for each
+object.
+
+How do you guys think?
+
+thx,
+
+Joseph
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
