@@ -1,54 +1,45 @@
-From: Yang Honggang <joseph.yang@xtaotech.com>
-Subject: RGW placement multi data pool support
-Date: Fri, 18 Mar 2016 19:07:09 +0800
-Message-ID: <56EBE15D.6020906@xtaotech.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: what's the default package for configure without any parameters?
+Date: Fri, 18 Mar 2016 12:43:31 +0100
+Message-ID: <56EBE9E3.3000808@digiware.nl>
+References: <CAKZcxgdGCFKA6r5pMxfnhT_5U7UbP=f0+PTqGbHqE_Wgcvw3qQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m199-177.yeah.net ([123.58.177.199]:46909 "EHLO
-	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751042AbcCRLHO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Mar 2016 07:07:14 -0400
+Received: from smtp.digiware.nl ([31.223.170.169]:58771 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750760AbcCRLnx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 18 Mar 2016 07:43:53 -0400
+In-Reply-To: <CAKZcxgdGCFKA6r5pMxfnhT_5U7UbP=f0+PTqGbHqE_Wgcvw3qQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Javen Wu <javen.wu@xtaotech.com>
+To: Jaze Lee <jazeltq@gmail.com>, ceph-devel@vger.kernel.org
 
-Hello,
+On 18-3-2016 04:29, Jaze Lee wrote:
+> Hi, all
+>     I run the ./configure without any parameter.How can i know the
+> default configure options?
 
-In the current RGW implementation, only one =E2=80=98data pool=E2=80=99=
- is allowed in the
-placement target. So the size of a bucket is limited by the backend poo=
-l
-size. We can add osds into the backend pool, but it would trigger PG da=
-ta
-rebalance. Also, we might have to do PG split when the OSD count is clo=
-se
-to the pre-defined PG number, however, it would trigger data rebalance =
-as
-well. We try to avoid data rebalance as many as we can by adding multip=
-le
-pools into one placement target. Then a scheduler between pools of a
-placement target is needed.
+You can run ./configure --help
 
-I have a immature proposal would like to discuss with you. We can exten=
-d
-placement's data pool to a pool list. When a new object is created thro=
-ugh
-RGW, we can choose one data pool from placement's data pool list. In or=
-der
-to do that, the pool ID need to be added into the bucket index for each
-object.
+Some options tell you what their default state is.
+The others I
 
-How do you guys think?
+Otherwise browse thru configure.ac looking for the line with "WITH_"on it.
+And the harder version just run it and examine the output.
 
-thx,
+I think that the S[] array in config.status could help.
+Options there are TRUE/FALSE and the combo like:
 
-Joseph
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+S["FREEBSD_FALSE"]=""
+S["FREEBSD_TRUE"]="#"
+
+Would indicate that this is not FreeBSD.
+And the WITH_ values are there also.
+
+--WjW
+
+
+
+
