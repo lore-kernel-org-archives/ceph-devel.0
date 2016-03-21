@@ -1,73 +1,121 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: object class capability semantics
-Date: Mon, 21 Mar 2016 12:54:50 -0700
-Message-ID: <CAJ4mKGa=-Caw8uQ+MXhsM-qW8fywk7a+ULfHoYruBoWv47NA+A@mail.gmail.com>
-References: <CAB2gnbVFypTbHREtJAb6od1bC9ZpRtCz04BHg=6Yqmi5eEtP2A@mail.gmail.com>
-	<CAJ4mKGY4VMk+dbF59RWmY+LkvG_26d-X0xADHFpYyZqOJnkNqA@mail.gmail.com>
-	<alpine.DEB.2.11.1603211527350.23875@cpach.fuggernut.com>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: Re: RGW placement multi data pool support
+Date: Mon, 21 Mar 2016 16:04:30 -0400 (EDT)
+Message-ID: <79716852.71877577.1458590670353.JavaMail.zimbra@redhat.com>
+References: <56EBE15D.6020906@xtaotech.com> <1575158130.71872660.1458590078846.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f49.google.com ([209.85.213.49]:33633 "EHLO
-	mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756398AbcCUTyv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Mar 2016 15:54:51 -0400
-Received: by mail-vk0-f49.google.com with SMTP id k1so228262360vkb.0
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Mar 2016 12:54:51 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1603211527350.23875@cpach.fuggernut.com>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:52851 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756474AbcCUUEb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Mar 2016 16:04:31 -0400
+In-Reply-To: <1575158130.71872660.1458590078846.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Noah Watkins <noahwatkins@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Samuel Just <sjust@redhat.com>
+To: Yang Honggang <joseph.yang@xtaotech.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Javen Wu <javen.wu@xtaotech.com>, Daniel Gryniewicz <dang@redhat.com>
 
-On Mon, Mar 21, 2016 at 12:30 PM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 21 Mar 2016, Gregory Farnum wrote:
->> On Mon, Mar 21, 2016 at 8:55 AM, Noah Watkins <noahwatkins@gmail.com> wrote:
->> > # Class Execute Capabilities
->> >
->> > Purpose: wire up class capabilities and add an option to specify the
->> > names of object classes are allowed to be used without explicit
->> > capabilities.
->> >
->> > ## Default Object Class List
->> >
->> > Format: `osd class default list = * | [class[ class[ ...]]`
->> >    1) * any class may be loaded
->> >    2) list of class names allowed
->> >
->> > Interpretation of this option is described below.
->> >
->> > ## Enabling Class Capabilities
->> >
->> > It looks like currently in OSDCap::is_capable() that 'x' and class
->> > read/write capabilities are checked. The first change would be to
->> > cross reference these checks with the `osd class default list` to
->> > ensure that the class is on the allowed list.
->>
->> Woah, no way. These are capabilities, and are additive. We and our
->> users are going to be very unhappy if the security meaning of one cap
->> changes depending on others.
->
-> I'm not following.  The meaning changes based on the config, not another
-> cap.
+(clarifying, this is refactoring specific to rgw by Dan, not cluster-le=
+vel placement)
 
-Ah, that is tickling my memory a little more and sounds better. I
-thought this was describing extra caps in the cephx ticket.
+----- Original Message -----
+> From: "Matt Benjamin" <mbenjamin@redhat.com>
+> To: "Yang Honggang" <joseph.yang@xtaotech.com>
+> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "Javen Wu" <javen.wu@x=
+taotech.com>, "Daniel Gryniewicz"
+> <dang@redhat.com>
+> Sent: Monday, March 21, 2016 3:54:38 PM
+> Subject: Re: RGW placement multi data pool support
+>=20
+> Hi,
+>=20
+> In-progress work (planned for Kraken) will make storage layout more c=
+leanly
+> abstract, and so should make this kind of thing less intrusive to bui=
+ld.
+>=20
+> Matt
+>=20
+> ----- Original Message -----
+> > From: "Yang Honggang" <joseph.yang@xtaotech.com>
+> > To: "ceph-devel" <ceph-devel@vger.kernel.org>
+> > Cc: "Javen Wu" <javen.wu@xtaotech.com>
+> > Sent: Friday, March 18, 2016 7:07:09 AM
+> > Subject: RGW placement multi data pool support
+> >=20
+> > Hello,
+> >=20
+> > In the current RGW implementation, only one =E2=80=98data pool=E2=80=
+=99 is allowed in the
+> > placement target. So the size of a bucket is limited by the backend=
+ pool
+> > size. We can add osds into the backend pool, but it would trigger P=
+G data
+> > rebalance. Also, we might have to do PG split when the OSD count is=
+ close
+> > to the pre-defined PG number, however, it would trigger data rebala=
+nce as
+> > well. We try to avoid data rebalance as many as we can by adding mu=
+ltiple
+> > pools into one placement target. Then a scheduler between pools of =
+a
+> > placement target is needed.
+> >=20
+> > I have a immature proposal would like to discuss with you. We can e=
+xtend
+> > placement's data pool to a pool list. When a new object is created =
+through
+> > RGW, we can choose one data pool from placement's data pool list. I=
+n order
+> > to do that, the pool ID need to be added into the bucket index for =
+each
+> > object.
+> >=20
+> > How do you guys think?
+> >=20
+> > thx,
+> >=20
+> > Joseph
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >=20
+>=20
+> --
+> Matt Benjamin
+> Red Hat, Inc.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+>=20
+> http://www.redhat.com/en/technologies/storage
+>=20
+> tel.  734-707-0660
+> fax.  734-769-8938
+> cel.  734-216-5309
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
 
->
->> So I take it you mean for those execute and load capabilities to be
->> applied to clients, not the OSD or class methods or something? In that
->> case we can just stick them as additional clauses within the class
->> cap, and I guess take the missing clause to be "all" or the default
->> set or something.
->
-> The problem is that 'x' means any class, but that was a bad idea on our
-> part.  Users should really specify which classes they mean going forward,
-> but for existing clusters that isn't being done, and we can't break
-> those, nor should we give them access to any random new class
-> that shows up on the system.
->
-> This changes it to mean 'any class in the configured list of default
-> classes, as specified by ceph.conf'...
+--=20
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
 
-Yeah.
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-707-0660
+fax.  734-769-8938
+cel.  734-216-5309
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
