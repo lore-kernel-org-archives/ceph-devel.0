@@ -1,53 +1,158 @@
-From: Xusangdi <xu.sangdi-vVzyEvZLFYE@public.gmane.org>
-Subject: About the NFS on RGW
-Date: Tue, 22 Mar 2016 12:12:41 +0000
-Message-ID: <FF8D83DAE5DF57468726B79904321E0603CC8967@H3CMLB14-EX.srv.huawei-3com.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: zh-CN
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "mbenjamin-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mbenjamin-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH v2 2/6] libceph: introduce reference counted string
+Date: Tue, 22 Mar 2016 21:57:03 +0800
+Message-ID: <040FA762-A7C8-47FE-A72B-03419C79C782@redhat.com>
+References: <1454742006-85706-1-git-send-email-zyan@redhat.com> <1454742006-85706-3-git-send-email-zyan@redhat.com> <CAOi1vP8SrL71Q34W4b_ZDUkTNyi-UtDstgrTjnjq9fGE=VMa_g@mail.gmail.com> <4C995660-CB5D-4E26-9947-988D65BEAA3A@redhat.com> <CAOi1vP-g9kj6B-Fmv7cBzjfrnoSrnGuVZyB+b0K-CmpLPd6xbw@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:58732 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753127AbcCVN5J convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2016 09:57:09 -0400
+In-Reply-To: <CAOi1vP-g9kj6B-Fmv7cBzjfrnoSrnGuVZyB+b0K-CmpLPd6xbw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
 
-SGkgTWF0dCAmIENlcGhlcnMsDQoNCkkgYW0gbG9va2luZyBmb3IgYWR2aXNlIG9uIHNldHRpbmcg
-dXAgYSBmaWxlIHN5c3RlbSBiYXNlZCBvbiBDZXBoLiBBcyBDZXBoRlMgaXMgbm90IHlldCBwcm9k
-dWN0aXZlIHJlYWR5KG9yIEkgbWlzc2VkIHNvbWUgYnJlYWt0aHJvdWdocz8pLCB0aGUgbmV3IE5G
-UyBvbiBSYWRvc0dXIHNob3VsZCBiZSBhIHByb21pc2luZyBhbHRlcm5hdGl2ZSwgZXNwZWNpYWxs
-eSBmb3IgbGFyZ2UgZmlsZXMsIHdoaWNoIGlzIHdoYXQgd2UgYXJlIG1vc3QgaW50ZXJlc3RlZCBp
-bi4gSG93ZXZlciwgYWZ0ZXIgc2VhcmNoaW5nIGFyb3VuZCB0aGUgQ2VwaCBkb2N1bWVudGF0aW9u
-IChodHRwOi8vZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci8pIGFuZCByZWNlbnQgY29tbXVuaXR5
-IG1haWxzLCBJIGNhbm5vdCBmaW5kIG11Y2ggaW5mb3JtYXRpb24gYWJvdXQgaXQuIENvdWxkIHlv
-dSBwbGVhc2UgcHJvdmlkZSBzb21lIGludHJvZHVjdGlvbiBhYm91dCB0aGUgbmV3IE5GUywgYW5k
-IChpZiBwb3NzaWJsZSkgYSByYXcgd2F5IHRvIHRyeSBpdD8gVGhhbmsgeW91IQ0KDQpSZWdhcmRz
-LA0KLS0tU2FuZHkNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuacrOmCruS7tuWPiuWFtumZhOS7tuWQ
-q+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaBr++8
-jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4reWIl+WHug0K55qE5Liq5Lq65oiW576k
-57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI5YyF5ous
-5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN5Yi244CBDQrmiJbmlaPl
-j5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzpgq7ku7bv
-vIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDpmaTmnKwN
-CumCruS7tu+8gQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZp
-ZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkgZm9y
-IHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkg
-dXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNs
-dWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3VyZSwg
-cmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhl
-IGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhp
-cyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUgb3Ig
-ZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCl9fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNl
-cnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
-LXVzZXJzLWNlcGguY29tCg==
+
+> On Mar 22, 2016, at 19:00, Ilya Dryomov <idryomov@gmail.com> wrote:
+>=20
+> On Tue, Mar 22, 2016 at 10:17 AM, Yan, Zheng <zyan@redhat.com> wrote:
+>>=20
+>>> On Mar 22, 2016, at 14:05, Ilya Dryomov <idryomov@gmail.com> wrote:
+>=20
+> [ snip ]
+>=20
+>>> Hi Zheng,
+>>>=20
+>>> A one and a half line commit message and an equally short cover let=
+ter
+>>> for a series such as this isn't enough.  I *happen* to know that th=
+e
+>>> basic use case for namespaces in cephfs is going to be restricting
+>>> users to different parts of the directory tree, with the enforcemen=
+t
+>>> happening in ceph on the server side, as opposed to in ceph on the
+>>> client side, but I would appreciate some details on what the actual
+>>> namespace names are going to be, whether it's user input or not,
+>>> whether there are plans to use namespaces for anything else, etc.
+>>>=20
+>>=20
+>> The namespace restriction you mentioned is for cephfs metadata. This
+>> namespace is restricting users to different namespaces in cephfs dat=
+a
+>> pool. (At present, the only way to restrict data access is, creating
+>> multiple cephfs data pools, restrict users to different data pool.
+>> Creating lost of pools is not efficient for the cluster)
+>=20
+> What about the namespace names, who is generating them, how long are
+> they going to be?  Please describe in detail how this is going to wor=
+k
+> for both data and metadata pools.
+
+=46or example, to restrict user foo to directory /foo_dir
+
+// create auth caps for user foo.
+ceph auth get-or-create client.foo mon 'allow r' mds 'allow r, allow rw=
+ path=3D/foo_dir' osd 'allow rw pool=3Ddata namespace=3Dfoo_ns=E2=80=99
+
+// mount cephfs by user admin
+mount -t ceph 10.0.0.1:/ /mnt/ceph_mount -o name=3Dadmin,secret=3Dxxxx
+
+// set directory=E2=80=99s layout.pool_namespace
+setfattr -n ceph.dir.pool_namespace -v foo_ns /mnt/ceph_mount/foo_dir
+
+Admin user chooses namespace name. In most cases, namespace name does n=
+ot change.=20
+
+>=20
+>>=20
+>>=20
+>>> I don't like the idea of sharing namespace name strings between lib=
+ceph
+>>> and ceph modules, especially with the strings themselves hosted in
+>>> libceph.  rbd has no use for namespaces, so libceph can live with
+>>> namespace names embedded into ceph_osd_request by value or with
+>>> a simple non-owning pointer, leaving reference counting to the outs=
+ide
+>>> modules, if one of the use cases is "one namespace with a long name=
+ for
+>>> the entire directory tree" or something close to it.
+>>>=20
+>>> I think the sharing infrastructure should be moved into cephfs, and
+>>> probably changed to share entire file layouts along the way.  I don=
+'t
+>>> know this code well enough to be sure, but it seems that by sharing
+>>> file layouts and making ci->i_layout an owning pointer you might be
+>>> able to piggy back on i_ceph_lock and considerably simplify the who=
+le
+>>> thing by dropping RCU and eliminating numerous get/put calls.
+>>=20
+>> RBD may use namespace later.
+>> http://tracker.ceph.com/projects/ceph/wiki/Rbd_-_namespace_support
+>=20
+> Well, compared to cephfs, it's hard to call that "using" - in that
+> case, there will only ever be one namespace per image.  My point is
+> it's never going to use the string sharing infrastructure and is fine
+> with a non-owning pointer to a string in the file layout field of the
+> in-memory rbd image header.
+>=20
+>>=20
+>> The reason I use RCU here is that ci->i_layout.pool_ns can change at
+>> any time. For the same reason, using non-owning pointer for namespac=
+e
+>> or entire layout is unfeasible. Using embedded namespace is not
+>> elegant either. When allocating ceph_osd_request, cephfs needs to
+>> lock i_ceph_lock, copy namespace to a temporary buffer, unlock
+>> i_ceph_lock, pass ci->i_layout and the temporary buffer to the
+>> ceph_osdc_xxx_request().
+>=20
+> Hmm, RCU doesn't protect you from pool_ns or other file layout fields
+> changing while the OSD request is in flight.  As used above, it allow=
+s
+> ceph_try_get_string() to not take any locks and that's it.
+
+Yes.  But not taking lock simplify the code a lot.  we don't need to lo=
+ck/unlock i_ceph_lock each time i_layout is used.
+
+>=20
+> Why exactly can't file layouts be shared?  ci->i_layout would become
+> reference counted and you would give libceph a pointer to the pool_ns
+> string (or entire layout) after bumping it.  It doesn't matter if
+> pool_ns or the rest of the layout changes due to a cap grant or revok=
+e
+> while libceph is servicing the OSD request: you would unlink it from
+> the tree but the bumped reference will keep the layout around, to be
+> put in the OSD request completion callback or so.  Layout lookup woul=
+d
+> have to happen in exactly two places: when newing an inode and handli=
+ng
+> cap grant/revoke, in other places you would simply bump the count on
+> the basis of already holding a valid pointer.  You wouldn't have to
+> unlink in the destructor, so no hassle with kref_get_unless_zero() an=
+d
+> no need for RCU, with i_ceph_lock providing the exclusion around the
+> tree.
+
+This means cephfs needs to set r_callback for all ceph_osd_request, cep=
+h_osd_request also needs a new field to store layout pointer. I don=E2=80=
+=99t think it=E2=80=99s better/simpler than reference counted namespace=
+ string.=20
+
+>=20
+> Like I said, I'm not familiar with the code in question at the
+> necessary level of detail, so feel free to destroy this, but I don't
+> see a problem.
+>=20
+> Thanks,
+>=20
+>                Ilya
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
