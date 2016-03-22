@@ -1,59 +1,71 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 2/2] ceph: use kmem_cache_zalloc
-Date: Tue, 22 Mar 2016 17:56:06 +0100
-Message-ID: <CAOi1vP-5yJVb9gdeg1emjZ-KPAeC2vNdyAO0ks5tiKGoWsmCZA@mail.gmail.com>
-References: <7073df70fbbebb7c1f658b8d2d616ef84a86ff92.1457853860.git.geliangtang@163.com>
-	<49f3c78fbd6b746048e16a7bc5aa2c4cb5722f8c.1457853860.git.geliangtang@163.com>
+Subject: Re: [PATCH 3/3] libceph: use KMEM_CACHE macro
+Date: Tue, 22 Mar 2016 17:58:00 +0100
+Message-ID: <CAOi1vP9UOwDKJG7hkpCxgCxXP6t3FO5z5PMSeZ8gKrf=w+_ddw@mail.gmail.com>
+References: <9242267d62daeec8a0de5a1230f750ca486d62cd.1457853190.git.geliangtang@163.com>
+	<a9c3e96ba6bf321ca13d9445d2770781fb7033cd.1457853190.git.geliangtang@163.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f196.google.com ([209.85.217.196]:35032 "EHLO
-	mail-lb0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751753AbcCVQ4I (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2016 12:56:08 -0400
-In-Reply-To: <49f3c78fbd6b746048e16a7bc5aa2c4cb5722f8c.1457853860.git.geliangtang@163.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <a9c3e96ba6bf321ca13d9445d2770781fb7033cd.1457853190.git.geliangtang@163.com>
+Sender: netdev-owner@vger.kernel.org
 To: Geliang Tang <geliangtang@163.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Sun, Mar 13, 2016 at 8:26 AM, Geliang Tang <geliangtang@163.com> wrote:
-> Use kmem_cache_zalloc() instead of kmem_cache_alloc() with flag GFP_ZERO.
+On Sun, Mar 13, 2016 at 8:18 AM, Geliang Tang <geliangtang@163.com> wrote:
+> Use KMEM_CACHE() instead of kmem_cache_create() to simplify the code.
 >
 > Signed-off-by: Geliang Tang <geliangtang@163.com>
 > ---
->  fs/ceph/dir.c  | 2 +-
->  fs/ceph/file.c | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
+>  net/ceph/messenger.c  | 10 ++--------
+>  net/ceph/osd_client.c |  5 +----
+>  2 files changed, 3 insertions(+), 12 deletions(-)
 >
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index fd11fb2..ba01851 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -38,7 +38,7 @@ int ceph_init_dentry(struct dentry *dentry)
->         if (dentry->d_fsdata)
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index 9382619..32c997e 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -235,18 +235,12 @@ static struct workqueue_struct *ceph_msgr_wq;
+>  static int ceph_msgr_slab_init(void)
+>  {
+>         BUG_ON(ceph_msg_cache);
+> -       ceph_msg_cache = kmem_cache_create("ceph_msg",
+> -                                       sizeof (struct ceph_msg),
+> -                                       __alignof__(struct ceph_msg), 0, NULL);
+> -
+> +       ceph_msg_cache = KMEM_CACHE(ceph_msg, 0);
+>         if (!ceph_msg_cache)
+>                 return -ENOMEM;
+>
+>         BUG_ON(ceph_msg_data_cache);
+> -       ceph_msg_data_cache = kmem_cache_create("ceph_msg_data",
+> -                                       sizeof (struct ceph_msg_data),
+> -                                       __alignof__(struct ceph_msg_data),
+> -                                       0, NULL);
+> +       ceph_msg_data_cache = KMEM_CACHE(ceph_msg_data, 0);
+>         if (ceph_msg_data_cache)
 >                 return 0;
 >
-> -       di = kmem_cache_alloc(ceph_dentry_cachep, GFP_KERNEL | __GFP_ZERO);
-> +       di = kmem_cache_zalloc(ceph_dentry_cachep, GFP_KERNEL);
->         if (!di)
->                 return -ENOMEM;          /* oh well */
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 5bc0537..7558855 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -2783,10 +2783,7 @@ EXPORT_SYMBOL(ceph_osdc_writepages);
+>  int ceph_osdc_setup(void)
+>  {
+>         BUG_ON(ceph_osd_request_cache);
+> -       ceph_osd_request_cache = kmem_cache_create("ceph_osd_request",
+> -                                       sizeof (struct ceph_osd_request),
+> -                                       __alignof__(struct ceph_osd_request),
+> -                                       0, NULL);
+> +       ceph_osd_request_cache = KMEM_CACHE(ceph_osd_request, 0);
 >
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index eb9028e..bb4950a 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -157,7 +157,7 @@ static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
->         case S_IFDIR:
->                 dout("init_file %p %p 0%o (regular)\n", inode, file,
->                      inode->i_mode);
-> -               cf = kmem_cache_alloc(ceph_file_cachep, GFP_KERNEL | __GFP_ZERO);
-> +               cf = kmem_cache_zalloc(ceph_file_cachep, GFP_KERNEL);
->                 if (cf == NULL) {
->                         ceph_put_fmode(ceph_inode(inode), fmode); /* clean up */
->                         return -ENOMEM;
+>         return ceph_osd_request_cache ? 0 : -ENOMEM;
+>  }
 
-Applied.
+Applied, with osd_client.c hunk dropped.  ceph_osd_request cache
+objects are not longer sizeof(struct ceph_osd_request).
 
 Thanks,
 
