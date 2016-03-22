@@ -1,54 +1,57 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 1/3] rbd: use KMEM_CACHE macro
-Date: Tue, 22 Mar 2016 17:55:43 +0100
-Message-ID: <CAOi1vP9aT=kS9KPoD4Asa+RMBCLS5rsk973JqdrG7ndSOqvqwg@mail.gmail.com>
-References: <9242267d62daeec8a0de5a1230f750ca486d62cd.1457853190.git.geliangtang@163.com>
+Subject: Re: [PATCH 2/2] ceph: use kmem_cache_zalloc
+Date: Tue, 22 Mar 2016 17:56:06 +0100
+Message-ID: <CAOi1vP-5yJVb9gdeg1emjZ-KPAeC2vNdyAO0ks5tiKGoWsmCZA@mail.gmail.com>
+References: <7073df70fbbebb7c1f658b8d2d616ef84a86ff92.1457853860.git.geliangtang@163.com>
+	<49f3c78fbd6b746048e16a7bc5aa2c4cb5722f8c.1457853860.git.geliangtang@163.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f68.google.com ([209.85.215.68]:36108 "EHLO
-	mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751242AbcCVQzp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2016 12:55:45 -0400
-In-Reply-To: <9242267d62daeec8a0de5a1230f750ca486d62cd.1457853190.git.geliangtang@163.com>
+Received: from mail-lb0-f196.google.com ([209.85.217.196]:35032 "EHLO
+	mail-lb0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751753AbcCVQ4I (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2016 12:56:08 -0400
+In-Reply-To: <49f3c78fbd6b746048e16a7bc5aa2c4cb5722f8c.1457853860.git.geliangtang@163.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Geliang Tang <geliangtang@163.com>
-Cc: Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Sun, Mar 13, 2016 at 8:17 AM, Geliang Tang <geliangtang@163.com> wrote:
-> Use KMEM_CACHE() instead of kmem_cache_create() to simplify the code.
+On Sun, Mar 13, 2016 at 8:26 AM, Geliang Tang <geliangtang@163.com> wrote:
+> Use kmem_cache_zalloc() instead of kmem_cache_alloc() with flag GFP_ZERO.
 >
 > Signed-off-by: Geliang Tang <geliangtang@163.com>
 > ---
->  drivers/block/rbd.c | 10 ++--------
->  1 file changed, 2 insertions(+), 8 deletions(-)
+>  fs/ceph/dir.c  | 2 +-
+>  fs/ceph/file.c | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 4a87678..70eba86 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -5643,18 +5643,12 @@ static void rbd_sysfs_cleanup(void)
->  static int rbd_slab_init(void)
->  {
->         rbd_assert(!rbd_img_request_cache);
-> -       rbd_img_request_cache = kmem_cache_create("rbd_img_request",
-> -                                       sizeof (struct rbd_img_request),
-> -                                       __alignof__(struct rbd_img_request),
-> -                                       0, NULL);
-> +       rbd_img_request_cache = KMEM_CACHE(rbd_img_request, 0);
->         if (!rbd_img_request_cache)
->                 return -ENOMEM;
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index fd11fb2..ba01851 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -38,7 +38,7 @@ int ceph_init_dentry(struct dentry *dentry)
+>         if (dentry->d_fsdata)
+>                 return 0;
 >
->         rbd_assert(!rbd_obj_request_cache);
-> -       rbd_obj_request_cache = kmem_cache_create("rbd_obj_request",
-> -                                       sizeof (struct rbd_obj_request),
-> -                                       __alignof__(struct rbd_obj_request),
-> -                                       0, NULL);
-> +       rbd_obj_request_cache = KMEM_CACHE(rbd_obj_request, 0);
->         if (!rbd_obj_request_cache)
->                 goto out_err;
+> -       di = kmem_cache_alloc(ceph_dentry_cachep, GFP_KERNEL | __GFP_ZERO);
+> +       di = kmem_cache_zalloc(ceph_dentry_cachep, GFP_KERNEL);
+>         if (!di)
+>                 return -ENOMEM;          /* oh well */
 >
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index eb9028e..bb4950a 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -157,7 +157,7 @@ static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
+>         case S_IFDIR:
+>                 dout("init_file %p %p 0%o (regular)\n", inode, file,
+>                      inode->i_mode);
+> -               cf = kmem_cache_alloc(ceph_file_cachep, GFP_KERNEL | __GFP_ZERO);
+> +               cf = kmem_cache_zalloc(ceph_file_cachep, GFP_KERNEL);
+>                 if (cf == NULL) {
+>                         ceph_put_fmode(ceph_inode(inode), fmode); /* clean up */
+>                         return -ENOMEM;
 
 Applied.
 
