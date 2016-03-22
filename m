@@ -1,71 +1,33 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 3/3] libceph: use KMEM_CACHE macro
-Date: Tue, 22 Mar 2016 17:58:00 +0100
-Message-ID: <CAOi1vP9UOwDKJG7hkpCxgCxXP6t3FO5z5PMSeZ8gKrf=w+_ddw@mail.gmail.com>
-References: <9242267d62daeec8a0de5a1230f750ca486d62cd.1457853190.git.geliangtang@163.com>
-	<a9c3e96ba6bf321ca13d9445d2770781fb7033cd.1457853190.git.geliangtang@163.com>
+Subject: Re: [ceph-users] About the NFS on RGW
+Date: Tue, 22 Mar 2016 18:03:54 +0100
+Message-ID: <CAOi1vP-ixe9BQoXjdGdeLQtooPjs2O23paQTeiSXWUTmMBpoMA@mail.gmail.com>
+References: <FF8D83DAE5DF57468726B79904321E0603CC8967@H3CMLB14-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <a9c3e96ba6bf321ca13d9445d2770781fb7033cd.1457853190.git.geliangtang@163.com>
-Sender: netdev-owner@vger.kernel.org
-To: Geliang Tang <geliangtang@163.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lb0-f182.google.com ([209.85.217.182]:33662 "EHLO
+	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752154AbcCVRD4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2016 13:03:56 -0400
+Received: by mail-lb0-f182.google.com with SMTP id oe12so170028099lbc.0
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Mar 2016 10:03:55 -0700 (PDT)
+In-Reply-To: <FF8D83DAE5DF57468726B79904321E0603CC8967@H3CMLB14-EX.srv.huawei-3com.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Xusangdi <xu.sangdi@h3c.com>
+Cc: "mbenjamin@redhat.com" <mbenjamin@redhat.com>, "ceph-users@ceph.com" <ceph-users@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sun, Mar 13, 2016 at 8:18 AM, Geliang Tang <geliangtang@163.com> wrote:
-> Use KMEM_CACHE() instead of kmem_cache_create() to simplify the code.
+On Tue, Mar 22, 2016 at 1:12 PM, Xusangdi <xu.sangdi@h3c.com> wrote:
+> Hi Matt & Cephers,
 >
-> Signed-off-by: Geliang Tang <geliangtang@163.com>
-> ---
->  net/ceph/messenger.c  | 10 ++--------
->  net/ceph/osd_client.c |  5 +----
->  2 files changed, 3 insertions(+), 12 deletions(-)
->
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 9382619..32c997e 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -235,18 +235,12 @@ static struct workqueue_struct *ceph_msgr_wq;
->  static int ceph_msgr_slab_init(void)
->  {
->         BUG_ON(ceph_msg_cache);
-> -       ceph_msg_cache = kmem_cache_create("ceph_msg",
-> -                                       sizeof (struct ceph_msg),
-> -                                       __alignof__(struct ceph_msg), 0, NULL);
-> -
-> +       ceph_msg_cache = KMEM_CACHE(ceph_msg, 0);
->         if (!ceph_msg_cache)
->                 return -ENOMEM;
->
->         BUG_ON(ceph_msg_data_cache);
-> -       ceph_msg_data_cache = kmem_cache_create("ceph_msg_data",
-> -                                       sizeof (struct ceph_msg_data),
-> -                                       __alignof__(struct ceph_msg_data),
-> -                                       0, NULL);
-> +       ceph_msg_data_cache = KMEM_CACHE(ceph_msg_data, 0);
->         if (ceph_msg_data_cache)
->                 return 0;
->
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 5bc0537..7558855 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -2783,10 +2783,7 @@ EXPORT_SYMBOL(ceph_osdc_writepages);
->  int ceph_osdc_setup(void)
->  {
->         BUG_ON(ceph_osd_request_cache);
-> -       ceph_osd_request_cache = kmem_cache_create("ceph_osd_request",
-> -                                       sizeof (struct ceph_osd_request),
-> -                                       __alignof__(struct ceph_osd_request),
-> -                                       0, NULL);
-> +       ceph_osd_request_cache = KMEM_CACHE(ceph_osd_request, 0);
->
->         return ceph_osd_request_cache ? 0 : -ENOMEM;
->  }
+> I am looking for advise on setting up a file system based on Ceph. As CephFS is not yet productive ready(or I missed some breakthroughs?), the new NFS on RadosGW should be a promising alternative, especially for large files, which is what we are most interested in. However, after searching around the Ceph documentation (http://docs.ceph.com/docs/master/) and recent community mails, I cannot find much information about it. Could you please provide some introduction about the new NFS, and (if possible) a raw way to try it? Thank you!
 
-Applied, with osd_client.c hunk dropped.  ceph_osd_request cache
-objects are not longer sizeof(struct ceph_osd_request).
+Note that CephFS is declared "stable, at last" in Jewel.  Not all
+functionality falls under that heading (e.g. no snapshots, for now),
+but if you want a file system based on Ceph, you really shouldn't be
+looking at NFS-on-RGW.
 
 Thanks,
 
