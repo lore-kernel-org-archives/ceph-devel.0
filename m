@@ -1,260 +1,208 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v2 3/6] libceph: rados pool namesapce support
-Date: Tue, 22 Mar 2016 07:11:24 +0100
-Message-ID: <CAOi1vP8pFnbLg_h9qFe_ftXb1z6xyEhwYOVkRVQuZ7z0hBemEA@mail.gmail.com>
-References: <1454742006-85706-1-git-send-email-zyan@redhat.com>
-	<1454742006-85706-4-git-send-email-zyan@redhat.com>
+From: Huan Zhang <huan.zhang.jn@gmail.com>
+Subject: Re: rbd_aio_flush cause guestos sync wirte poor iops?
+Date: Tue, 22 Mar 2016 14:53:41 +0800
+Message-ID: <CAFU9ComfUV+h3ZTp8oK1gZFejAuo9B4c+-RwVK5==SSQEkTAcQ@mail.gmail.com>
+References: <CAFU9Co=d-CstfhbiP3ztdpNTFp03SMGy8ciRw8xxBXkxw7TjRw@mail.gmail.com>
+	<578851288.38782223.1458135450823.JavaMail.zimbra@redhat.com>
+	<CAFU9Con=_qXF37XSre1Ep7Ji5MFKcVstQ9MfQPTk=+mvojcLvw@mail.gmail.com>
+	<1216780323.39858060.1458302557470.JavaMail.zimbra@redhat.com>
+	<CAFU9Co=c3osqqogjFurtZAReEN_QXmV9n00QGJ5y+R_=jh27aQ@mail.gmail.com>
+	<630315434.41021364.1458564978169.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f195.google.com ([209.85.217.195]:36516 "EHLO
-	mail-lb0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751111AbcCVGL0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2016 02:11:26 -0400
-Received: by mail-lb0-f195.google.com with SMTP id sx8so8442355lbb.3
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Mar 2016 23:11:25 -0700 (PDT)
-In-Reply-To: <1454742006-85706-4-git-send-email-zyan@redhat.com>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:33786 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751515AbcCVGxn convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2016 02:53:43 -0400
+Received: by mail-lb0-f181.google.com with SMTP id oe12so148529513lbc.0
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Mar 2016 23:53:42 -0700 (PDT)
+In-Reply-To: <630315434.41021364.1458564978169.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Sat, Feb 6, 2016 at 8:00 AM, Yan, Zheng <zyan@redhat.com> wrote:
-> Signed-off-by: Yan, Zheng <zyan@redhat.com>
-> ---
->  drivers/block/rbd.c          |  1 +
->  fs/ceph/inode.c              |  3 +++
->  include/linux/ceph/ceph_fs.h |  2 ++
->  include/linux/ceph/osdmap.h  |  2 ++
->  net/ceph/osd_client.c        | 37 ++++++++++++++++++++++++++-----------
->  net/ceph/osdmap.c            | 33 +++++++++++++++++++++++++++------
->  6 files changed, 61 insertions(+), 17 deletions(-)
+2016-03-21 20:56 GMT+08:00 Jason Dillaman <dillaman@redhat.com>:
+>> Let's take fsync in guestos as an example.
+>> scenario 1: write(buf) fsync()
+>> buf will be writted to page cache after write call return
+>> fsync will flush buf in page cache to disk cache(just like O_DIRECT) ,
+>> and then issue [sync cache] to guarantee data has been written to
+>> persisted disk medium
+>>
+>>
+>> scenario 2: write(buf, O_DIRECT) fsync()
+>> buf will be writted to disk cache, and then issue [sync cache] to
+>> guarantee data has been written to persisted disk medium
+>>
+>>
+>> For Ceph, it use sync write to journal, so there is no disk cache in
+>> ceph[rbd cache off],  if write return to guestos, all data will be
+>> persisted.
 >
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index b0bcb2d..0423493 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -4088,6 +4088,7 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
->         rbd_dev->layout.stripe_count = 1;
->         rbd_dev->layout.object_size = 1 << RBD_MAX_OBJ_ORDER;
->         rbd_dev->layout.pool_id = spec->pool_id;
-> +       RCU_INIT_POINTER(rbd_dev->layout.pool_ns, NULL);
+> This is not entirely correct.  While it's true that the FileStore OSD backend first writes the transaction to its journal before applying it to the backing disk, this is a design choice of that engine.  The forthcoming BlueStore, for example, doesn't suffer from the same double-write penalty as FileStore.
 >
->         /*
->          * If this is a mapping rbd_dev (as opposed to a parent one),
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index b0ad53d..3c220f1 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -396,6 +396,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
->         ci->i_symlink = NULL;
->
->         memset(&ci->i_dir_layout, 0, sizeof(ci->i_dir_layout));
-> +       RCU_INIT_POINTER(ci->i_layout.pool_ns, NULL);
->
->         ci->i_fragtree = RB_ROOT;
->         mutex_init(&ci->i_fragtree_mutex);
-> @@ -518,6 +519,8 @@ void ceph_destroy_inode(struct inode *inode)
->         if (ci->i_xattrs.prealloc_blob)
->                 ceph_buffer_put(ci->i_xattrs.prealloc_blob);
->
-> +       ceph_put_string(ci->i_layout.pool_ns);
-> +
->         call_rcu(&inode->i_rcu, ceph_i_callback);
->  }
->
-> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-> index 7d8728e..3858923 100644
-> --- a/include/linux/ceph/ceph_fs.h
-> +++ b/include/linux/ceph/ceph_fs.h
-> @@ -53,6 +53,7 @@ struct ceph_file_layout_legacy {
->         __le32 fl_pg_pool;      /* namespace, crush ruleset, rep level */
->  } __attribute__ ((packed));
->
-> +struct ceph_string;
->  /*
->   * ceph_file_layout - describe data layout for a file/inode
->   */
-> @@ -62,6 +63,7 @@ struct ceph_file_layout {
->         u32 stripe_count;  /* over this many objects */
->         u32 object_size;   /* until objects are this big */
->         s64 pool_id;        /* rados pool id */
-> +       struct ceph_string __rcu *pool_ns; /* rados pool namespace */
->  };
->
->  extern int ceph_file_layout_is_valid(const struct ceph_file_layout *layout);
-> diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
-> index e55c08b..3d59d6c 100644
-> --- a/include/linux/ceph/osdmap.h
-> +++ b/include/linux/ceph/osdmap.h
-> @@ -55,6 +55,7 @@ static inline bool ceph_can_shift_osds(struct ceph_pg_pool_info *pool)
->
->  struct ceph_object_locator {
->         s64 pool;
-> +       struct ceph_string *pool_ns;
->  };
->
->  /*
-> @@ -63,6 +64,7 @@ struct ceph_object_locator {
->   * (probably outdated: must be >= RBD_MAX_MD_NAME_LEN -- currently 100)
->   */
->  #define CEPH_MAX_OID_NAME_LEN 100
-> +#define CEPH_MAX_NAMESPACE_LEN 100
->
->  struct ceph_object_id {
->         char name[CEPH_MAX_OID_NAME_LEN];
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 450955e..68e7f68 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -339,6 +339,8 @@ static void ceph_osdc_release_request(struct kref *kref)
->                 kfree(req->r_ops);
->
->         ceph_put_snap_context(req->r_snapc);
-> +       ceph_put_string(req->r_base_oloc.pool_ns);
-> +
->         if (req->r_mempool)
->                 mempool_free(req, req->r_osdc->req_mempool);
->         else
-> @@ -388,6 +390,9 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
->         req->r_num_ops = 0;
->         req->r_max_ops = num_ops;
->
-> +       req->r_base_oloc.pool = -1;
-> +       req->r_target_oloc.pool = -1;
-> +
->         if (num_ops <= CEPH_OSD_INITIAL_OP) {
->                 req->r_ops = req->r_inline_ops;
->         } else {
-> @@ -409,9 +414,6 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
->         INIT_LIST_HEAD(&req->r_req_lru_item);
->         INIT_LIST_HEAD(&req->r_osd_item);
->
-> -       req->r_base_oloc.pool = -1;
-> -       req->r_target_oloc.pool = -1;
-> -
->         /* create reply message */
->         msg_size = OSD_OPREPLY_FRONT_LEN;
->         if (num_ops > CEPH_OSD_INITIAL_OP) {
-> @@ -433,7 +435,7 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
->
->         /* create request message; allow space for oid */
->         msg_size = 4 + 4 + 8 + 8 + 4 + 8;
-> -       msg_size += 2 + 4 + 8 + 4 + 4; /* oloc */
-> +       msg_size += 2 + 4 + 8 + 4 + 4 + 4 + CEPH_MAX_NAMESPACE_LEN; /* oloc */
->         msg_size += 1 + 8 + 4 + 4;     /* pg_t */
->         msg_size += 4 + CEPH_MAX_OID_NAME_LEN; /* oid */
->         msg_size += 2 + num_ops * sizeof(struct ceph_osd_op);
-> @@ -864,6 +866,7 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
->         }
->
->         req->r_base_oloc.pool = layout->pool_id;
-> +       req->r_base_oloc.pool_ns = ceph_try_get_string(layout->pool_ns);
->
->         snprintf(req->r_base_oid.name, sizeof(req->r_base_oid.name),
->                  "%llx.%08llx", vino.ino, objnum);
-> @@ -1719,10 +1722,10 @@ static int ceph_oloc_decode(void **p, void *end,
->         }
->
->         if (struct_v >= 5) {
-> -               len = ceph_decode_32(p);
-> -               if (len > 0) {
-> -                       pr_warn("ceph_object_locator::nspace is set\n");
-> -                       goto e_inval;
-> +               u32 ns_len = ceph_decode_32(p);
-> +               if (ns_len > 0) {
-> +                       ceph_decode_need(p, end, ns_len, e_inval);
-> +                       *p += ns_len;
->                 }
->         }
->
-> @@ -1907,7 +1910,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg)
->
->                 __unregister_request(osdc, req);
->
-> -               req->r_target_oloc = redir.oloc; /* struct */
-> +               req->r_target_oloc.pool = redir.oloc.pool;
->
->                 /*
->                  * Start redirect requests with nofail=true.  If
-> @@ -2459,6 +2462,7 @@ void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
->                                 struct timespec *mtime)
->  {
->         struct ceph_msg *msg = req->r_request;
-> +       struct ceph_string *pool_ns;
->         void *p;
->         size_t msg_size;
->         int flags = req->r_flags;
-> @@ -2483,14 +2487,25 @@ void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
->         req->r_request_reassert_version = p;
->         p += sizeof(struct ceph_eversion); /* will get filled in */
->
-> +       if (req->r_base_oloc.pool_ns)
-> +               pool_ns = req->r_base_oloc.pool_ns;
-> +       else
-> +               pool_ns = NULL;
-> +
->         /* oloc */
-> +       ceph_encode_8(&p, 5);
->         ceph_encode_8(&p, 4);
-> -       ceph_encode_8(&p, 4);
-> -       ceph_encode_32(&p, 8 + 4 + 4);
-> +       ceph_encode_32(&p, 8 + 4 + 4 + 4 + (pool_ns ? pool_ns->len : 0));
->         req->r_request_pool = p;
->         p += 8;
->         ceph_encode_32(&p, -1);  /* preferred */
->         ceph_encode_32(&p, 0);   /* key len */
-> +       if (pool_ns) {
-> +               ceph_encode_32(&p, pool_ns->len);
-> +               ceph_encode_copy(&p, pool_ns->str, pool_ns->len);
-> +       } else {
-> +               ceph_encode_32(&p, 0);
-> +       }
->
->         ceph_encode_8(&p, 1);
->         req->r_request_pgid = p;
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index f033ca5..f117848 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -1470,12 +1470,33 @@ int ceph_oloc_oid_to_pg(struct ceph_osdmap *osdmap,
->         if (!pi)
->                 return -EIO;
->
-> -       pg_out->pool = oloc->pool;
-> -       pg_out->seed = ceph_str_hash(pi->object_hash, oid->name,
-> -                                    oid->name_len);
-> -
-> -       dout("%s '%.*s' pgid %llu.%x\n", __func__, oid->name_len, oid->name,
-> -            pg_out->pool, pg_out->seed);
-> +       if (!oloc->pool_ns) {
-> +               pg_out->pool = oloc->pool;
-> +               pg_out->seed = ceph_str_hash(pi->object_hash, oid->name,
-> +                                            oid->name_len);
-> +               dout("%s '%.*s' pgid %llu.%x\n", __func__,
-> +                    oid->name_len, oid->name, pg_out->pool, pg_out->seed);
-> +       } else {
-> +               char stack_buf[256];
-> +               char *buf = stack_buf;
-> +               int nsl = oloc->pool_ns->len;
-> +               size_t total = nsl + 1 + oid->name_len;
-> +               if (total > sizeof(stack_buf)) {
-> +                       buf = kmalloc(total, GFP_NOFS);
-> +                       if (!buf)
-> +                               return -ENOMEM;
-> +               }
+> Using your disk medium analogy, for RBD the guest OS writes the data to the RBD disk and than issues a write barrier (as instructed by the guest OS application) to ensure that all in-flight writes are safely committed before proceeding.  Therefore, regardless of what the OSDs are doing, RBD still needs to respect the barrier (flush) the guest OS issued.  In the case of RBD, the flush just waits for the proceeding writes to complete (as ACKed by the OSDs).  If RBD ignored the barriers, your data would no longer be crash consistent since the data might not have even been transmitted to the OSDs yet, might have only hit one OSD (and if that OSD crashes, your data is lost since it hadn't been replicated to the other OSDs), etc.
 
-This ties into my question about how namespaces are going to be used
-and how long the namespace name is allowed to be.
+Very appreciated for explanation,.
+https://docs.fedoraproject.org/en-US/Fedora/14/html/Storage_Administration_Guide/writebarr.html#writebarrierswhyneed
+according to the redhat's explanation, writebarriers introduced by
+disk cache, os can not guarantee the write order if power loss. as my
+understand, looks like this:
+step0, fsync
+step1, write(O_Direct) to disk cache
+step2 , fsync() [sync cahce command for scsi]
+step3, write(O_Driect) to disk cache
+without step2, and power loss before the data of step1&step3 write
+back to persisted medium, the order of step1 and step3 are not
+guaranteed, no longer be crash consistent.
 
-CEPH_MAX_NAMESPACE_LEN is defined to 100 above, but that definition is
-removed in patch 5.  That needs fixing, and if the 100 char limit is
-real, then buf can just be
+As my understand, RBD processing [rbd cache=off] is not a disk cache
+from the guestos's perspective, because write(O_Direct) will not
+return if data has not been persistent in ceph backend store.
+fsync has no need to guarantee the flight-io in os kernel to be
+persistent but not disk cache. (except the data in page cache)
 
-    CEPH_MAX_OID_NAME_LEN + CEPH_MAX_NAMESPACE_LEN + 1
+In short, ceph has no disk cache[rbd cache=off], so we don't need
+wirte barrier here.
 
-with no need for a kmalloc().
+Very happy to adjust me here!
 
-Thanks,
+>
+>> sync cache in guestos issued by fsync can be safely ignored since
+>> write(O_DIRECT) or fsync can guarantee all data has been wirtten to
+>> persisted disk medium
+>> in ceph without rbd cache, right?
+>
+> The flush call in RBD is completes as soon as the OSDs acknowledge that the data is safe.  If it takes 2.5 milliseconds for the OSDs to ACK that the write is safe, you will only be able to achieve ~400 sync'ed IOPS.
+>
+> As discussed in the previous chain, there are ways some users have improved RBD to better accommodate database workloads.  Additionally, the forthcoming BlueStore engine already shows improvement for write-intensive applications.
+>
+>>
+>> BTW, rbd_aio_flush iops has significance impact to database
+>> workloads.(many sync cache calls in guestos),  that's why i'm asking
+>> for help.
+>
+> Yes -- write barriers will definitely slow down IO but they are a necessary evil to ensure crash consistency.
 
-                Ilya
+rbd block device kernel module has no performance issue for sync
+wirte. test both with fio ioengine=rbd fsync=1 and fio ioengine=libaio
+sync=1, hard to explain if rbd need flush.
+
+For BlueStore, if the write data is not persistent, we should add some
+rados api to flush backend cache to guarantee fsync semantics or we
+already has now?
+so if not, seems it's not the a design choice of that engine, the
+backend must guarantee the persistence?
+
+>
+>>
+>> Thanks.
+>>
+>>
+>> 2016-03-18 20:02 GMT+08:00 Jason Dillaman <dillaman@redhat.com>:
+>> > There isn't anything slow about the flush -- the flush will complete when
+>> > your previous writes complete.  If it takes 2.5 ms for your OSDs to ACK a
+>> > write as safely written to disk, you will only be able to issue ~400 sync
+>> > writes per second.
+>> >
+>> > The flush issues by your guest OS / QEMU to librbd is to designed to ensure
+>> > that your previous write operations are safely committed to disk.  If
+>> > flushes were ignored, your data would no longer be crash consistent.  This
+>> > is nothing unique to RBD -- you would have the safe effect with a local
+>> > disk as well.
+>> >
+>> > --
+>> >
+>> > Jason Dillaman
+>> >
+>> > ----- Original Message -----
+>> >> From: "Huan Zhang" <huan.zhang.jn@gmail.com>
+>> >> To: "Jason Dillaman" <dillaman@redhat.com>
+>> >> Cc: ceph-devel@vger.kernel.org, haomaiwang@gmail.com
+>> >> Sent: Thursday, March 17, 2016 12:58:59 AM
+>> >> Subject: Re: rbd_aio_flush cause guestos sync wirte poor iops?
+>> >>
+>> >> Hi Jason & Haomai,
+>> >>     Thanks for reply  and explanation.
+>> >>     fio with ioengine=rbd fsync=1 within physical compute onde
+>> >> performance is ok. similar to normal wirte(direct=1)
+>> >>     ceph --admin-daemon /var/run/ceph/rbd-41837.asok config show |
+>> >> grep rbd_cache
+>> >>     "rbd_cache": "false"
+>> >>
+>> >>     As you mentioned, sync=1 within guestos will issue rbd_aio_flush.
+>> >> so my question is:
+>> >>     1. why rbd_aio_flush is so poor even if rbd cache is off?
+>> >>     2. could we ignore the sync cache(rbd_aio_flush) instructed by the
+>> >> guest OS if rbd cache is off?
+>> >>
+>> >>
+>> >>
+>> >> 2016-03-16 21:37 GMT+08:00 Jason Dillaman <dillaman@redhat.com>:
+>> >> > As previously mentioned [1], the fio rbd engine ignores the "sync"
+>> >> > option.
+>> >> > You need to use "fsync=1" to issue a flush after each write to simulate
+>> >> > what "sync=1" is doing.  When running fio within a VM against an RBD
+>> >> > image, QEMU is not issuing sync writes to RBD -- it's issuing AIO writes
+>> >> > and a AIO flush (as instructed by the guest OS).  Looking at the man
+>> >> > page
+>> >> > for O_SYNC [2], which is what that fio option enables in supported
+>> >> > engines, that flag will act "as though each write(2) was followed by a
+>> >> > call to fsync(2)".
+>> >> >
+>> >> > [1]
+>> >> > http://lists.ceph.com/pipermail/ceph-users-ceph.com/2016-February/007780.html
+>> >> > [2] http://man7.org/linux/man-pages/man2/open.2.html
+>> >> >
+>> >> > --
+>> >> >
+>> >> > Jason Dillaman
+>> >> >
+>> >> >
+>> >> > ----- Original Message -----
+>> >> >> From: "Huan Zhang" <huan.zhang.jn@gmail.com>
+>> >> >> To: ceph-devel@vger.kernel.org
+>> >> >> Sent: Wednesday, March 16, 2016 12:52:33 AM
+>> >> >> Subject: rbd_aio_flush cause guestos sync wirte poor iops?
+>> >> >>
+>> >> >> Hi,
+>> >> >>    We test sync iops with fio sync=1 for database workloads in VM,
+>> >> >> the backend is librbd and ceph (all SSD setup).'
+>> >> >>    The result is sad to me. we only get ~400 IOPS sync randwrite with
+>> >> >>    iodepth=1
+>> >> >> to iodepth=32.
+>> >> >>     But test in physical machine with fio ioengine=rbd sync=1, we can
+>> >> >> reache ~35K IOPS.
+>> >> >> seems the qemu rbd is the bottleneck.
+>> >> >>
+>> >> >>     qemu version is 2.1.2 with rbd_aio_flush patched.
+>> >> >>     rbd cache is off, qemu cache=none.
+>> >> >>
+>> >> >>     IMHO, ceph use sync write for every write to disk, so
+>> >> >> rbd_aio_flush can ignore the sync
+>> >> >> cache command if rbd cache is off so that we can get higher
+>> >> >> iops(similar to direct=1 write)
+>> >> >> for sync=1 iops, right?
+>> >> >>
+>> >> >>    Very appreciated to get your reply!
+>> >> >> --
+>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> >> >> in
+>> >> >> the body of a message to majordomo@vger.kernel.org
+>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >> >>
+>> >>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+>
+>
+> --
+>
+> Jason Dillaman
