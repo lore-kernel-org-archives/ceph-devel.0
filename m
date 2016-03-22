@@ -1,158 +1,72 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v2 2/6] libceph: introduce reference counted string
-Date: Tue, 22 Mar 2016 21:57:03 +0800
-Message-ID: <040FA762-A7C8-47FE-A72B-03419C79C782@redhat.com>
-References: <1454742006-85706-1-git-send-email-zyan@redhat.com> <1454742006-85706-3-git-send-email-zyan@redhat.com> <CAOi1vP8SrL71Q34W4b_ZDUkTNyi-UtDstgrTjnjq9fGE=VMa_g@mail.gmail.com> <4C995660-CB5D-4E26-9947-988D65BEAA3A@redhat.com> <CAOi1vP-g9kj6B-Fmv7cBzjfrnoSrnGuVZyB+b0K-CmpLPd6xbw@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58732 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753127AbcCVN5J convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2016 09:57:09 -0400
-In-Reply-To: <CAOi1vP-g9kj6B-Fmv7cBzjfrnoSrnGuVZyB+b0K-CmpLPd6xbw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+From: Matt Benjamin <mbenjamin-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: About the NFS on RGW
+Date: Tue, 22 Mar 2016 10:11:41 -0400 (EDT)
+Message-ID: <1940893820.72362621.1458655901681.JavaMail.zimbra@redhat.com>
+References: <FF8D83DAE5DF57468726B79904321E0603CC8967@H3CMLB14-EX.srv.huawei-3com.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <FF8D83DAE5DF57468726B79904321E0603CC8967-LYFlsCYEEzr3cnzPNjVLboSsE/coCuR8pWgKQ6/u3Fg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Xusangdi <xu.sangdi-vVzyEvZLFYE@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-
-> On Mar 22, 2016, at 19:00, Ilya Dryomov <idryomov@gmail.com> wrote:
->=20
-> On Tue, Mar 22, 2016 at 10:17 AM, Yan, Zheng <zyan@redhat.com> wrote:
->>=20
->>> On Mar 22, 2016, at 14:05, Ilya Dryomov <idryomov@gmail.com> wrote:
->=20
-> [ snip ]
->=20
->>> Hi Zheng,
->>>=20
->>> A one and a half line commit message and an equally short cover let=
-ter
->>> for a series such as this isn't enough.  I *happen* to know that th=
-e
->>> basic use case for namespaces in cephfs is going to be restricting
->>> users to different parts of the directory tree, with the enforcemen=
-t
->>> happening in ceph on the server side, as opposed to in ceph on the
->>> client side, but I would appreciate some details on what the actual
->>> namespace names are going to be, whether it's user input or not,
->>> whether there are plans to use namespaces for anything else, etc.
->>>=20
->>=20
->> The namespace restriction you mentioned is for cephfs metadata. This
->> namespace is restricting users to different namespaces in cephfs dat=
-a
->> pool. (At present, the only way to restrict data access is, creating
->> multiple cephfs data pools, restrict users to different data pool.
->> Creating lost of pools is not efficient for the cluster)
->=20
-> What about the namespace names, who is generating them, how long are
-> they going to be?  Please describe in detail how this is going to wor=
-k
-> for both data and metadata pools.
-
-=46or example, to restrict user foo to directory /foo_dir
-
-// create auth caps for user foo.
-ceph auth get-or-create client.foo mon 'allow r' mds 'allow r, allow rw=
- path=3D/foo_dir' osd 'allow rw pool=3Ddata namespace=3Dfoo_ns=E2=80=99
-
-// mount cephfs by user admin
-mount -t ceph 10.0.0.1:/ /mnt/ceph_mount -o name=3Dadmin,secret=3Dxxxx
-
-// set directory=E2=80=99s layout.pool_namespace
-setfattr -n ceph.dir.pool_namespace -v foo_ns /mnt/ceph_mount/foo_dir
-
-Admin user chooses namespace name. In most cases, namespace name does n=
-ot change.=20
-
->=20
->>=20
->>=20
->>> I don't like the idea of sharing namespace name strings between lib=
-ceph
->>> and ceph modules, especially with the strings themselves hosted in
->>> libceph.  rbd has no use for namespaces, so libceph can live with
->>> namespace names embedded into ceph_osd_request by value or with
->>> a simple non-owning pointer, leaving reference counting to the outs=
-ide
->>> modules, if one of the use cases is "one namespace with a long name=
- for
->>> the entire directory tree" or something close to it.
->>>=20
->>> I think the sharing infrastructure should be moved into cephfs, and
->>> probably changed to share entire file layouts along the way.  I don=
-'t
->>> know this code well enough to be sure, but it seems that by sharing
->>> file layouts and making ci->i_layout an owning pointer you might be
->>> able to piggy back on i_ceph_lock and considerably simplify the who=
-le
->>> thing by dropping RCU and eliminating numerous get/put calls.
->>=20
->> RBD may use namespace later.
->> http://tracker.ceph.com/projects/ceph/wiki/Rbd_-_namespace_support
->=20
-> Well, compared to cephfs, it's hard to call that "using" - in that
-> case, there will only ever be one namespace per image.  My point is
-> it's never going to use the string sharing infrastructure and is fine
-> with a non-owning pointer to a string in the file layout field of the
-> in-memory rbd image header.
->=20
->>=20
->> The reason I use RCU here is that ci->i_layout.pool_ns can change at
->> any time. For the same reason, using non-owning pointer for namespac=
-e
->> or entire layout is unfeasible. Using embedded namespace is not
->> elegant either. When allocating ceph_osd_request, cephfs needs to
->> lock i_ceph_lock, copy namespace to a temporary buffer, unlock
->> i_ceph_lock, pass ci->i_layout and the temporary buffer to the
->> ceph_osdc_xxx_request().
->=20
-> Hmm, RCU doesn't protect you from pool_ns or other file layout fields
-> changing while the OSD request is in flight.  As used above, it allow=
-s
-> ceph_try_get_string() to not take any locks and that's it.
-
-Yes.  But not taking lock simplify the code a lot.  we don't need to lo=
-ck/unlock i_ceph_lock each time i_layout is used.
-
->=20
-> Why exactly can't file layouts be shared?  ci->i_layout would become
-> reference counted and you would give libceph a pointer to the pool_ns
-> string (or entire layout) after bumping it.  It doesn't matter if
-> pool_ns or the rest of the layout changes due to a cap grant or revok=
-e
-> while libceph is servicing the OSD request: you would unlink it from
-> the tree but the bumped reference will keep the layout around, to be
-> put in the OSD request completion callback or so.  Layout lookup woul=
-d
-> have to happen in exactly two places: when newing an inode and handli=
-ng
-> cap grant/revoke, in other places you would simply bump the count on
-> the basis of already holding a valid pointer.  You wouldn't have to
-> unlink in the destructor, so no hassle with kref_get_unless_zero() an=
-d
-> no need for RCU, with i_ceph_lock providing the exclusion around the
-> tree.
-
-This means cephfs needs to set r_callback for all ceph_osd_request, cep=
-h_osd_request also needs a new field to store layout pointer. I don=E2=80=
-=99t think it=E2=80=99s better/simpler than reference counted namespace=
- string.=20
-
->=20
-> Like I said, I'm not familiar with the code in question at the
-> necessary level of detail, so feel free to destroy this, but I don't
-> see a problem.
->=20
-> Thanks,
->=20
->                Ilya
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgWHVzYW5nZGksCgpORlMgb24gUkdXIGlzIG5vdCBpbnRlbmRlZCBhcyBhbiBhbHRlcm5hdGl2
+ZSB0byBDZXBoRlMuICBUaGUgYmFzaWMgaWRlYSBpcyB0byBleHBvc2UgdGhlIFMzIG5hbWVzcGFj
+ZSB1c2luZyBBbWF6b24ncyBwcmVmaXgrZGVsaW1pdGVyIGNvbnZlbnRpb24gKGRlbGltaXRlciBj
+dXJyZW50bHkgbGltaXRlZCB0byAnLycpLiAgV2UgdXNlIG9wZW5zIGZvciBhdG9taWNpdHksIHdo
+aWNoIGltcGxpZXMgTkZTdjQgKG9yIDQuMSkuICBJbiBhZGRpdGlvbiB0byBsaW1pdGF0aW9ucyBi
+eSBkZXNpZ24sIHRoZXJlIGFyZSBzb21lIGxpbWl0YXRpb25zIGluIEpld2VsLiAgRm9yIGV4YW1w
+bGUsIGNsaWVudHMgc2hvdWxkIHVzZSAob3IgZW11bGF0ZSkgc3luYyBtb3VudCBiZWhhdmlvci4g
+IEFsc28sIEkvTyBpcyBwcm94aWVkLS10aGF0IHJlc3RyaWN0aW9uIHNob3VsZCBiZSBsaWZ0ZWQg
+aW4gZnV0dXJlIHJlbGVhc2VzLiAgSSdsbCBwb3N0IGhlcmUgd2hlbiB3ZSBoYXZlIHNvbWUgdXNh
+Z2UgZG9jdW1lbnRhdGlvbiByZWFkeS4KCk1hdHQKCi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0t
+LS0KPiBGcm9tOiAiWHVzYW5nZGkiIDx4dS5zYW5nZGlAaDNjLmNvbT4KPiBUbzogbWJlbmphbWlu
+QHJlZGhhdC5jb20sIGNlcGgtdXNlcnNAY2VwaC5jb20KPiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtl
+cm5lbC5vcmcKPiBTZW50OiBUdWVzZGF5LCBNYXJjaCAyMiwgMjAxNiA4OjEyOjQxIEFNCj4gU3Vi
+amVjdDogQWJvdXQgdGhlIE5GUyBvbiBSR1cKPiAKPiBIaSBNYXR0ICYgQ2VwaGVycywKPiAKPiBJ
+IGFtIGxvb2tpbmcgZm9yIGFkdmlzZSBvbiBzZXR0aW5nIHVwIGEgZmlsZSBzeXN0ZW0gYmFzZWQg
+b24gQ2VwaC4gQXMgQ2VwaEZTCj4gaXMgbm90IHlldCBwcm9kdWN0aXZlIHJlYWR5KG9yIEkgbWlz
+c2VkIHNvbWUgYnJlYWt0aHJvdWdocz8pLCB0aGUgbmV3IE5GUyBvbgo+IFJhZG9zR1cgc2hvdWxk
+IGJlIGEgcHJvbWlzaW5nIGFsdGVybmF0aXZlLCBlc3BlY2lhbGx5IGZvciBsYXJnZSBmaWxlcywg
+d2hpY2gKPiBpcyB3aGF0IHdlIGFyZSBtb3N0IGludGVyZXN0ZWQgaW4uIEhvd2V2ZXIsIGFmdGVy
+IHNlYXJjaGluZyBhcm91bmQgdGhlIENlcGgKPiBkb2N1bWVudGF0aW9uIChodHRwOi8vZG9jcy5j
+ZXBoLmNvbS9kb2NzL21hc3Rlci8pIGFuZCByZWNlbnQgY29tbXVuaXR5Cj4gbWFpbHMsIEkgY2Fu
+bm90IGZpbmQgbXVjaCBpbmZvcm1hdGlvbiBhYm91dCBpdC4gQ291bGQgeW91IHBsZWFzZSBwcm92
+aWRlCj4gc29tZSBpbnRyb2R1Y3Rpb24gYWJvdXQgdGhlIG5ldyBORlMsIGFuZCAoaWYgcG9zc2li
+bGUpIGEgcmF3IHdheSB0byB0cnkgaXQ/Cj4gVGhhbmsgeW91IQo+IAo+IFJlZ2FyZHMsCj4gLS0t
+U2FuZHkKPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCj4g5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ
+5p2t5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF
+6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6Cj4g55qE5Liq5Lq65oiW576k57uE
+44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI5YyF5ous5L2G
+5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN5Yi244CBCj4g5oiW5pWj5Y+R
+77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu277yM
+6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pysCj4g
+6YKu5Lu277yBCj4gVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZp
+ZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywKPiB3aGljaCBpcwo+IGludGVuZGVkIG9ubHkg
+Zm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBB
+bnkgdXNlCj4gb2YgdGhlCj4gaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5
+IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwKPiBvciBwYXJ0aWFsCj4gZGlz
+Y2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVy
+IHRoYW4gdGhlCj4gaW50ZW5kZWQKPiByZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91
+IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZQo+IG5vdGlmeSB0aGUgc2VuZGVy
+Cj4gYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCEKPiAKCi0tIApN
+YXR0IEJlbmphbWluClJlZCBIYXQsIEluYy4KMzE1IFdlc3QgSHVyb24gU3RyZWV0LCBTdWl0ZSAx
+NDBBCkFubiBBcmJvciwgTWljaGlnYW4gNDgxMDMKCmh0dHA6Ly93d3cucmVkaGF0LmNvbS9lbi90
+ZWNobm9sb2dpZXMvc3RvcmFnZQoKdGVsLiAgNzM0LTcwNy0wNjYwCmZheC4gIDczNC03NjktODkz
+OApjZWwuICA3MzQtMjE2LTUzMDkKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBo
+LmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5j
+b20K
