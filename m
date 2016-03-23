@@ -1,42 +1,52 @@
-From: Douglas Fuller <dfuller@redhat.com>
-Subject: Re: [PATCH v2 2/6] libceph: introduce reference counted string
-Date: Wed, 23 Mar 2016 09:39:36 -0600
-Message-ID: <5D648505-7766-4D93-A94D-43703C560BE2@redhat.com>
-References: <1454742006-85706-1-git-send-email-zyan@redhat.com> <1454742006-85706-3-git-send-email-zyan@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.2 \(3112\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Re: [GSOC 2016]Shared proposal draft.
+Date: Wed, 23 Mar 2016 14:12:42 -0400
+Message-ID: <CAAZbbf2AA3bx8NhY8yZES-hpbf77uD0nOnN+Z+7cpaDkckV3-Q@mail.gmail.com>
+References: <CAAKF69pbbQ5H2kvgZb-qyExQZ7DTO8LZpqG4CbUboYJfLPR5ow@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f42.google.com ([209.85.213.42]:33041 "EHLO
-	mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755701AbcCWPjo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Mar 2016 11:39:44 -0400
-Received: by mail-vk0-f42.google.com with SMTP id k1so24410235vkb.0
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Mar 2016 08:39:44 -0700 (PDT)
-In-Reply-To: <1454742006-85706-3-git-send-email-zyan@redhat.com>
+Received: from mail-lf0-f41.google.com ([209.85.215.41]:35816 "EHLO
+	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755957AbcCWSMo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Mar 2016 14:12:44 -0400
+Received: by mail-lf0-f41.google.com with SMTP id q73so15129827lfe.2
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Mar 2016 11:12:43 -0700 (PDT)
+In-Reply-To: <CAAKF69pbbQ5H2kvgZb-qyExQZ7DTO8LZpqG4CbUboYJfLPR5ow@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, idryomov@gmail.com
+To: Sahithi R V <sahithi.rv1@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, dillaman@redhat.com
+
+Hey there,
+
+From my perspective (relatively non-technical) this looks like a great
+proposal. We just need to wait and see what else gets submitted and
+how many projects we are able to accept. Thanks for putting together
+such a wonderfully complete proposal.
 
 
-> +#define ceph_try_get_string(x)					\
-> +({								\
-> +	struct ceph_string *___str;				\
-> +	rcu_read_lock();					\
-> +	___str =3D rcu_dereference(x);				\
-> +	if (___str && !kref_get_unless_zero(&___str->kref))	\
-> +		___str =3D NULL;					\
-> +	rcu_read_unlock();					\
-> +	(___str);						\
 
-Isn=E2=80=99t this an unsafe use of __str? As I understand it, it could=
- be updated after rcu_read_unlock().
+On Wed, Mar 23, 2016 at 3:30 AM, Sahithi R V <sahithi.rv1@gmail.com> wrote:
+> Hello!
+>
+> I hope to work on the project, RBD-Mirror scale-out during the GSOC 2016.
+> I have shared my proposal draft  with Ceph, on the GSoC website.
+>
+> I will be very glad to receive any kind of feedback from the organization.
+>
+> Enthusiastically awaiting to work on the project!
+>
+> Thanks.
+> Sahithi R V.
 
-> +})
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
