@@ -1,241 +1,59 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v2 2/6] libceph: introduce reference counted string
-Date: Wed, 23 Mar 2016 11:37:11 +0800
-Message-ID: <CDD7EC25-57D8-4BD5-B8D0-41AAFC09EFA7@redhat.com>
-References: <1454742006-85706-1-git-send-email-zyan@redhat.com> <1454742006-85706-3-git-send-email-zyan@redhat.com> <CAOi1vP8SrL71Q34W4b_ZDUkTNyi-UtDstgrTjnjq9fGE=VMa_g@mail.gmail.com> <4C995660-CB5D-4E26-9947-988D65BEAA3A@redhat.com> <CAOi1vP-g9kj6B-Fmv7cBzjfrnoSrnGuVZyB+b0K-CmpLPd6xbw@mail.gmail.com> <040FA762-A7C8-47FE-A72B-03419C79C782@redhat.com> <CAOi1vP_v=iev1vQQrxGFYU2y7uTV1_imV5MkwqMgBQUCf2GnEg@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35312 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753727AbcCWDhY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2016 23:37:24 -0400
-In-Reply-To: <CAOi1vP_v=iev1vQQrxGFYU2y7uTV1_imV5MkwqMgBQUCf2GnEg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, Gregory Farnum <gfarnum@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+From: Chris Dunlop <chris-s239Etu9j1dPR4JQBCEnsQ@public.gmane.org>
+Subject: Re: v0.94.6 Hammer released
+Date: Wed, 23 Mar 2016 14:37:16 +1100
+Message-ID: <20160323033716.GA5156@onthe.net.au>
+References: <20160310000006.GA14061@onthe.net.au>
+	<20160316232029.GA22451@onthe.net.au>
+	<011EEA5C-6A6B-489B-AB20-6EDEE2F55AFE@ebay.com>
+	<20160317014314.GA25617@onthe.net.au>
+	<20160322224923.GA31017@onthe.net.au>
+	<56F1D1D3.8070207@dachary.org>
+	<20160322233932.GA32084@onthe.net.au>
+	<56F1DD3A.4000902@dachary.org> <20160323001200.GA1244@onthe.net.au>
+	<56F1E1D5.4080006@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <56F1E1D5.4080006-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+Cc: Wei-Chung Cheng <freeze.vicente.cheng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Chen, Xiaoxi" <xiaoxchen-ZuctOmHWJ9c@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
+On Wed, Mar 23, 2016 at 01:22:45AM +0100, Loic Dachary wrote:
+> On 23/03/2016 01:12, Chris Dunlop wrote:
+>> On Wed, Mar 23, 2016 at 01:03:06AM +0100, Loic Dachary wrote:
+>>> On 23/03/2016 00:39, Chris Dunlop wrote:
+>>>> "The old OS'es" that were being supported up to v0.94.5 includes debian
+>>>> wheezy. It would be quite surprising and unexpected to drop support for an
+>>>> OS in the middle of a stable series.
+>>>
+>>> I'm unsure if wheezy is among the old OS'es. It predates my involvement in the stable releases effort. I know for sure el6 and 12.04 are supported for 0.94.x. 
+>> 
+>> From http://download.ceph.com/debian-hammer/pool/main/c/ceph/
+>> 
+>> ceph-common_0.94.1-1~bpo70+1_i386.deb              15-Dec-2015 15:32            10217628
+>> ceph-common_0.94.3-1~bpo70+1_amd64.deb             19-Oct-2015 18:54             9818964
+>> ceph-common_0.94.4-1~bpo70+1_amd64.deb             26-Oct-2015 20:48             9868020
+>> ceph-common_0.94.5-1~bpo70+1_amd64.deb             15-Dec-2015 15:32             9868188
+>> 
+>> That's all debian wheezy.
+>> 
+>> (Huh. I'd never noticed 0.94.1 was i386 only!)
+>> 
+> 
+> Indeed. Were these packages created as a lucky side effect or because there was a commitment at some point ? I'm curious to know the answer as well :-)
 
-> On Mar 23, 2016, at 00:13, Ilya Dryomov <idryomov@gmail.com> wrote:
->=20
-> On Tue, Mar 22, 2016 at 2:57 PM, Yan, Zheng <zyan@redhat.com> wrote:
->>=20
->>> On Mar 22, 2016, at 19:00, Ilya Dryomov <idryomov@gmail.com> wrote:
->>>=20
->>> On Tue, Mar 22, 2016 at 10:17 AM, Yan, Zheng <zyan@redhat.com> wrot=
-e:
->>>>=20
->>>>> On Mar 22, 2016, at 14:05, Ilya Dryomov <idryomov@gmail.com> wrot=
-e:
->>>=20
->>> [ snip ]
->>>=20
->>>>> Hi Zheng,
->>>>>=20
->>>>> A one and a half line commit message and an equally short cover l=
-etter
->>>>> for a series such as this isn't enough.  I *happen* to know that =
-the
->>>>> basic use case for namespaces in cephfs is going to be restrictin=
-g
->>>>> users to different parts of the directory tree, with the enforcem=
-ent
->>>>> happening in ceph on the server side, as opposed to in ceph on th=
-e
->>>>> client side, but I would appreciate some details on what the actu=
-al
->>>>> namespace names are going to be, whether it's user input or not,
->>>>> whether there are plans to use namespaces for anything else, etc.
->>>>>=20
->>>>=20
->>>> The namespace restriction you mentioned is for cephfs metadata. Th=
-is
->>>> namespace is restricting users to different namespaces in cephfs d=
-ata
->>>> pool. (At present, the only way to restrict data access is, creati=
-ng
->>>> multiple cephfs data pools, restrict users to different data pool.
->>>> Creating lost of pools is not efficient for the cluster)
->>>=20
->>> What about the namespace names, who is generating them, how long ar=
-e
->>> they going to be?  Please describe in detail how this is going to w=
-ork
->>> for both data and metadata pools.
->>=20
->> For example, to restrict user foo to directory /foo_dir
->>=20
->> // create auth caps for user foo.
->> ceph auth get-or-create client.foo mon 'allow r' mds 'allow r, allow=
- rw path=3D/foo_dir' osd 'allow rw pool=3Ddata namespace=3Dfoo_ns=E2=80=
-=99
->>=20
->> // mount cephfs by user admin
->> mount -t ceph 10.0.0.1:/ /mnt/ceph_mount -o name=3Dadmin,secret=3Dxx=
-xx
->>=20
->> // set directory=E2=80=99s layout.pool_namespace
->> setfattr -n ceph.dir.pool_namespace -v foo_ns /mnt/ceph_mount/foo_di=
-r
->>=20
->> Admin user chooses namespace name. In most cases, namespace name doe=
-s not change.
->=20
-> Good, I guess limiting it to 100 chars (or maybe even a smaller
-> number) is sensible then.
->=20
->>=20
->>>=20
->>>>=20
->>>>=20
->>>>> I don't like the idea of sharing namespace name strings between l=
-ibceph
->>>>> and ceph modules, especially with the strings themselves hosted i=
-n
->>>>> libceph.  rbd has no use for namespaces, so libceph can live with
->>>>> namespace names embedded into ceph_osd_request by value or with
->>>>> a simple non-owning pointer, leaving reference counting to the ou=
-tside
->>>>> modules, if one of the use cases is "one namespace with a long na=
-me for
->>>>> the entire directory tree" or something close to it.
->>>>>=20
->>>>> I think the sharing infrastructure should be moved into cephfs, a=
-nd
->>>>> probably changed to share entire file layouts along the way.  I d=
-on't
->>>>> know this code well enough to be sure, but it seems that by shari=
-ng
->>>>> file layouts and making ci->i_layout an owning pointer you might =
-be
->>>>> able to piggy back on i_ceph_lock and considerably simplify the w=
-hole
->>>>> thing by dropping RCU and eliminating numerous get/put calls.
->>>>=20
->>>> RBD may use namespace later.
->>>> http://tracker.ceph.com/projects/ceph/wiki/Rbd_-_namespace_support
->>>=20
->>> Well, compared to cephfs, it's hard to call that "using" - in that
->>> case, there will only ever be one namespace per image.  My point is
->>> it's never going to use the string sharing infrastructure and is fi=
-ne
->>> with a non-owning pointer to a string in the file layout field of t=
-he
->>> in-memory rbd image header.
->>>=20
->>>>=20
->>>> The reason I use RCU here is that ci->i_layout.pool_ns can change =
-at
->>>> any time. For the same reason, using non-owning pointer for namesp=
-ace
->>>> or entire layout is unfeasible. Using embedded namespace is not
->>>> elegant either. When allocating ceph_osd_request, cephfs needs to
->>>> lock i_ceph_lock, copy namespace to a temporary buffer, unlock
->>>> i_ceph_lock, pass ci->i_layout and the temporary buffer to the
->>>> ceph_osdc_xxx_request().
->>>=20
->>> Hmm, RCU doesn't protect you from pool_ns or other file layout fiel=
-ds
->>> changing while the OSD request is in flight.  As used above, it all=
-ows
->>> ceph_try_get_string() to not take any locks and that's it.
->>=20
->> Yes.  But not taking lock simplify the code a lot.  we don't need to
->> lock/unlock i_ceph_lock each time i_layout is used.
->=20
-> I wouldn't call a bunch of rcu_dereference_* variants sprinkled aroun=
-d
-> the code base a simplification, but, more importantly, is keeping the
-> pool_ns pointer valid really all you need?  Shouldn't there be some
-> kind of synchronization around "OK, I'm switching to a new layout for
-> this inode"?  As it is, pool_ns is grabbed in ceph_osdc_new_request()=
-,
-> with two successive calls to ceph_osdc_new_request() potentially endi=
-ng
-> up with two different namespaces, e.g. ceph_uninline_data().
+Who would know?  Sage?  (cc'ed)
 
-There is synchronisation. When changing file layout, MDS revokes Frw ca=
-ps from client (block new read/write, for in-progress read/write). But =
-this synchronisation is not complete reliable when client session state=
- is toggled between stale and active.
-
->>>=20
->>> Why exactly can't file layouts be shared?  ci->i_layout would becom=
-e
->>> reference counted and you would give libceph a pointer to the pool_=
-ns
->>> string (or entire layout) after bumping it.  It doesn't matter if
->>> pool_ns or the rest of the layout changes due to a cap grant or rev=
-oke
->>> while libceph is servicing the OSD request: you would unlink it fro=
-m
->>> the tree but the bumped reference will keep the layout around, to b=
-e
->>> put in the OSD request completion callback or so.  Layout lookup wo=
-uld
->>> have to happen in exactly two places: when newing an inode and hand=
-ling
->>> cap grant/revoke, in other places you would simply bump the count o=
-n
->>> the basis of already holding a valid pointer.  You wouldn't have to
->>> unlink in the destructor, so no hassle with kref_get_unless_zero() =
-and
->>> no need for RCU, with i_ceph_lock providing the exclusion around th=
-e
->>> tree.
->>=20
->> This means cephfs needs to set r_callback for all ceph_osd_request,
->> ceph_osd_request also needs a new field to store layout pointer.
->> I don=E2=80=99t think it=E2=80=99s better/simpler than reference cou=
-nted namespace
->> string.
->=20
-> Not necessarily - you can put after ceph_osdc_wait_request() returns.
-> Somewhat unrelated, I'm working on refactoring osdc's handle_reply(),
-> and it'll probably be required that all OSD requests set one of the
-> callbacks, except for stateless fire-and-forget ones.
-
-=46or the r_callback case (no wait case), without saving a pointer in c=
-eph_osd_request, how can I know which layout to put?
-
->=20
-> Sharing ->i_layout as opposed to ->i_layout->pool_ns seemed sensible =
-to
-> me because a) it naturally hangs off of ceph inode and b) logically,
-> it is entire layouts and not just namespaces that are shared across t=
-he
-> directory tree.  If you think reference counted pool_ns strings are
-> better, I won't argue with that, but, with cephfs being the only user
-> of either solution, it'll have to live in fs/ceph.
-
-I=E2=80=99m OK with both approaches. When sharing i_layout, we need to =
-add a layout pointer to ceph_osd_request. After adding the layout point=
-er, why not let libceph release it when request finishes.=20
-
-> Separately, I think passing non-owning pool_ns pointers into libceph =
-is
-> worth exploring, but if that doesn't easily map onto cephfs lifetime =
-or
-> ownership rules, we will go with embedding namespace names by value i=
-nto
-> ceph_osd_request (or, rather, ceph_object_locator).
->=20
-
-As I stated in previous mail, embedded namespace is nightmare for cephf=
-s. Every time namespace is used,  cephfs needs to lock i_ceph_lock, cop=
-y namespace to a temporary buffer.
-
-Regards
-Yan, Zheng
-
-> Thanks,
->=20
->                Ilya
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Chris
