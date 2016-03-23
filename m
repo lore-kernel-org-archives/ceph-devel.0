@@ -1,70 +1,56 @@
-From: Bruce <bkmcfarland@earthlink.net>
-Subject: Re: RBD Utilization
-Date: Wed, 23 Mar 2016 07:28:02 -0700
-Message-ID: <56F2A7F2.7050103@earthlink.net>
-References: <1674621217.33764396.1458725323072.JavaMail.zimbra@redhat.com> <807270756.33765380.1458725728050.JavaMail.zimbra@redhat.com> <CANA9Uk4cME1cmPfk+a1kJ0=3C9p6uCNFgXxahNvz53sTkL=KHA@mail.gmail.com> <1749699911.33776369.1458729038657.JavaMail.zimbra@redhat.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 03/23/2016 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 23 Mar 2016 09:52:36 -0500
+Message-ID: <56F2ADB4.2000205@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from elasmtp-scoter.atl.sa.earthlink.net ([209.86.89.67]:53372 "EHLO
-	elasmtp-scoter.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753574AbcCWOeI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 23 Mar 2016 10:34:08 -0400
-In-Reply-To: <1749699911.33776369.1458729038657.JavaMail.zimbra@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:48982 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751119AbcCWOwi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 23 Mar 2016 10:52:38 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 5BC3E46210
+	for <ceph-devel@vger.kernel.org>; Wed, 23 Mar 2016 14:52:38 +0000 (UTC)
+Received: from [10.3.112.15] ([10.3.112.15])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u2NEqa5C003341
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 23 Mar 2016 10:52:37 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Anmol Babu <anbabu@redhat.com>, M Ranga Swami Reddy <swamireddy@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Team discussions around SDS management program (aka USM or RHS
-	Controller)" <sds-mgmt@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-What I like to do is create a pool for each rbd. Then using any of the 
-commands that provide per pool stats now also reflect each rbd.
+8AM PST as usual! IE in 10 minutes. :) Discussion topics today include 
+journal throttle testing, a possible timing issue in fio, and maybe 
+bluestore.  Please add your own!
 
-On 03/23/2016 03:30 AM, Anmol Babu wrote:
-> No ceph df gives utilizations of all pools right?
->
-> Although the default rbd pool has the name rbd, there's no restriction and/or indication to suggest a pool as containing block devices right?
->
-> So, I wanted a command or a way in general to find the space occupied by rbd's in the cluster
->
-> Thanks,
-> Anmol
->
-> ----- Original Message -----
-> From: "M Ranga Swami Reddy" <swamireddy@gmail.com>
-> To: "Anmol Babu" <anbabu@redhat.com>
-> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "Team discussions around SDS management program (aka USM or RHS Controller)" <sds-mgmt@redhat.com>
-> Sent: Wednesday, March 23, 2016 3:31:48 PM
-> Subject: Re: RBD Utilization
->
-> Try with:
->
-> ceph df       // will give better information on all pools used and
-> avail storage.
->
-> Thanks
-> Swami
->
-> On Wed, Mar 23, 2016 at 3:05 PM, Anmol Babu <anbabu@redhat.com> wrote:
->> Hi,
->>
->> I would like to know how much of my storage is rbd consumed.
->>
->> Is there a way I can get this info using some command?
->>
->> Awaiting your valuable response.
->>
->> Thanks,
->> Anmol
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Here's the links:
 
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
