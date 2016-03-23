@@ -1,54 +1,46 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Refuse OSD removal if still up or acting for PG
-Date: Wed, 23 Mar 2016 18:18:56 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1603231815540.9950@cpach.fuggernut.com>
-References: <246396009.130901.1458769575985.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
+From: Marcus Watts <mwatts@redhat.com>
+Subject: rgw + ssl
+Date: Wed, 23 Mar 2016 19:03:17 -0400
+Message-ID: <20160323230317.GB24692@degu.b.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38630 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750834AbcCWWTK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Mar 2016 18:19:10 -0400
-In-Reply-To: <246396009.130901.1458769575985.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
+Received: from mx1.redhat.com ([209.132.183.28]:53225 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753782AbcCWXDU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 23 Mar 2016 19:03:20 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id A427F64369
+	for <ceph-devel@vger.kernel.org>; Wed, 23 Mar 2016 23:03:19 +0000 (UTC)
+Received: from degu.b.linuxbox.com (vpn-58-63.rdu2.redhat.com [10.10.58.63])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u2NN3HXu012107
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 23 Mar 2016 19:03:19 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "wido@42on.com" <wido@42on.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Wed, 23 Mar 2016, wido@42on.com wrote:
-> Hi,
-> 
-> This week I got a call to recover a Ceph cluster where somebody ran 
-> 'ceph osd rm X' for OSDs which were still holding PGs.
-> 
-> He removed multiple OSDs and together they were all the replicas forma 
-> certain PG.
-> 
-> This raised the question: Should we refuse a rm for a OSD which is still 
-> up or acting for a PG?
-> 
-> If not, what would the use-case be for removing a OSD from the OSDMap 
-> when it is still up or acting?
-> 
-> I would say that recovery/backfill has to be finished before we allow an 
-> OSD to be removed.
+Just a small heads-up
 
-This seems reasonable, as longa  there is a --yes-i-really-mean-it flagt  
-to force it.
+I pushed a new branch
+	wip-rgw-openssl-2
+to civetweb today.  This contains a few small updates for SSL:
+9702fc5a	Replace + with , in civetweb port string.
+380af5c7	For civetweb: don't complain about trailing 's' on port number.
+736815b2	Document that radosgw now supports SSL.
+(all applied against a very recent copy of master.)
+	(This does not include the openssl-devel patches Matt was working on.)
 
-There are several options, though:
+I'll submit a PR for this once it builds on github.
 
-1- OSD must not be up.  Probably doesn't protect from much.
-2- OSD must not be in the up set for any OSD.  This will prevent you from 
-removing just one replica of a PG.
-3- OSD must not be the only up OSD (or, must not bring up set to < 
-min_size).
+The first patch makes it possible to run radosgw and cleanly support both
+SSL and non-SSL with one civetweb instance.
 
-Neither of these really tell you which OSDs the PG is stored on, though.  
-The mon doesn't actually know that--only the primary does.  Either we can 
-try to cram that info into pg_stat_t, or we can accept that we can't make 
-a precise condition and instead just settle on something simple.  Like 1 & 
-2?
+The second patch fixes a stupid complaint radosgw had been making
+about non-integer port strings.
 
-sage
+And the 3rd patch updates some of the documentation and should make
+it possible for people to actually use this.
+
+				-Marcus Watts
