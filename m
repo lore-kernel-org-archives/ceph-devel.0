@@ -1,53 +1,59 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: paddles read-only mirror
-Date: Wed, 23 Mar 2016 11:21:41 +0100
-Message-ID: <56F26E35.8030802@dachary.org>
+From: Anmol Babu <anbabu@redhat.com>
+Subject: Re: RBD Utilization
+Date: Wed, 23 Mar 2016 06:30:38 -0400 (EDT)
+Message-ID: <1749699911.33776369.1458729038657.JavaMail.zimbra@redhat.com>
+References: <1674621217.33764396.1458725323072.JavaMail.zimbra@redhat.com> <807270756.33765380.1458725728050.JavaMail.zimbra@redhat.com> <CANA9Uk4cME1cmPfk+a1kJ0=3C9p6uCNFgXxahNvz53sTkL=KHA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:60766 "EHLO
-	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754934AbcCWKVq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Mar 2016 06:21:46 -0400
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:53033 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754112AbcCWKak (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Mar 2016 06:30:40 -0400
+In-Reply-To: <CANA9Uk4cME1cmPfk+a1kJ0=3C9p6uCNFgXxahNvz53sTkL=KHA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zack Cerza <zack@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: M Ranga Swami Reddy <swamireddy@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Team discussions around SDS management program (aka USM or RHS
+	Controller)" <sds-mgmt@redhat.com>
 
-Hi Zack,
+No ceph df gives utilizations of all pools right?
 
-It would be very convenient to have a read-only public copy of the padd=
-les database. So that anyone can run a command like this:
+Although the default rbd pool has the name rbd, there's no restriction and/or indication to suggest a pool as containing block devices right?
 
-paddles=3Dpaddles.front.sepia.ceph.com
-run=3Dloic-2016-01-29_00:40:06-upgrade:hammer-hammer-backports---basic-=
-vps
-eval filter=3D$(curl --silent http://$paddles/runs/$run/ | jq '.jobs[] =
-| select(.status =3D=3D "dead" or .status =3D=3D "fail") | .description=
-' | while read description ; do echo -n $description, ; done | sed -e '=
-s/,$//')
+So, I wanted a command or a way in general to find the space occupied by rbd's in the cluster
 
-to schedule a run of failed jobs.
+Thanks,
+Anmol
 
-It could be done by activating continuous archiving of the pgsql wal (h=
-ttp://www.postgresql.org/docs/9.4/static/continuous-archiving.html) whi=
-ch can then be used to udpate the read-only copy. It is non intrusive f=
-or the running paddles and there is plenty of space to keep these.
+----- Original Message -----
+From: "M Ranga Swami Reddy" <swamireddy@gmail.com>
+To: "Anmol Babu" <anbabu@redhat.com>
+Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "Team discussions around SDS management program (aka USM or RHS Controller)" <sds-mgmt@redhat.com>
+Sent: Wednesday, March 23, 2016 3:31:48 PM
+Subject: Re: RBD Utilization
 
-ubuntu@pulpito:~$ hostname --fqdn
-pulpito.front.sepia.ceph.com
-ubuntu@pulpito:~$ df -h /
-=46ilesystem      Size  Used Avail Use% Mounted on
-/dev/sda1       351G  5.6G  328G   2% /
+Try with:
 
-Do you think that's something sensible ?
+ceph df       // will give better information on all pools used and
+avail storage.
 
-Cheers
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks
+Swami
+
+On Wed, Mar 23, 2016 at 3:05 PM, Anmol Babu <anbabu@redhat.com> wrote:
+> Hi,
+>
+> I would like to know how much of my storage is rbd consumed.
+>
+> Is there a way I can get this info using some command?
+>
+> Awaiting your valuable response.
+>
+> Thanks,
+> Anmol
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
