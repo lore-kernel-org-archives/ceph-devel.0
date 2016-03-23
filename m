@@ -1,27 +1,29 @@
-From: Sahithi R V <sahithi.rv1@gmail.com>
-Subject: [GSOC 2016]Shared proposal draft.
-Date: Wed, 23 Mar 2016 13:04:11 +0530
-Message-ID: <CAAKF69oKMisOE04uD0svunsh_zmbtvGA1bTa8ymU7gouRs1KcA@mail.gmail.com>
+From: Anmol Babu <anbabu@redhat.com>
+Subject: RBD Utilization
+Date: Wed, 23 Mar 2016 05:35:28 -0400 (EDT)
+Message-ID: <807270756.33765380.1458725728050.JavaMail.zimbra@redhat.com>
+References: <1674621217.33764396.1458725323072.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f172.google.com ([209.85.223.172]:33754 "EHLO
-	mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752518AbcCWHeM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Mar 2016 03:34:12 -0400
-Received: by mail-io0-f172.google.com with SMTP id c63so22640090iof.0
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Mar 2016 00:34:11 -0700 (PDT)
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:57271 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754151AbcCWJf2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Mar 2016 05:35:28 -0400
+In-Reply-To: <1674621217.33764396.1458725323072.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, "Team discussions around SDS management program (aka \"USM\" or \"RHS
+	Controller\")" <sds-mgmt@redhat.com>
 
-Hello!
+Hi,
 
-I hope to work on the project, RBD-Mirror scale-out during the GSOC 2016.
-I have shared my proposal draft  with Ceph, on the GSoC website.
+I would like to know how much of my storage is rbd consumed.
 
-I will be very glad to receive any kind of feedback from the organization.
+Is there a way I can get this info using some command?
 
-Enthusiastically awaiting to work on the project!
+Awaiting your valuable response.
 
-Thanks.
+Thanks,
+Anmol
