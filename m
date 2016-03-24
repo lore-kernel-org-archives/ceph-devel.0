@@ -1,468 +1,366 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Adding compression support for bluestore.
-Date: Thu, 24 Mar 2016 15:45:11 +0300
-Message-ID: <56F3E157.2090004@mirantis.com>
-References: <56C1FCF3.4030505@mirantis.com>
- <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com>
- <56C3BAA3.3070804@mirantis.com>
- <CY1PR0201MB1897E7F1DE04B5E4577B16EDE8A00@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1602220718380.13988@cpach.fuggernut.com>
- <56CDF40C.9060405@mirantis.com>
- <CY1PR0201MB1897BC7052AD6F7FB01DCAB4E8A50@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <56D08E30.20308@mirantis.com>
- <alpine.DEB.2.11.1603151243030.32086@cpach.fuggernut.com>
- <56E9A727.1030400@mirantis.com>
- <alpine.DEB.2.11.1603161515360.14377@cpach.fuggernut.com>
- <56EACAAD.90002@mirantis.com>
- <alpine.DEB.2.11.1603171123090.14377@cpach.fuggernut.com>
- <56EC248E.3060502@mirantis.com>
- <CY1PR0201MB1897035E6E09FE518ACC2DDCE88D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <56F013FB.4040002@mirantis.com>
- <alpine.DEB.2.11.1603211141560.23875@cpach.fuggernut.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH v2 2/6] libceph: introduce reference counted string
+Date: Thu, 24 Mar 2016 21:18:00 +0800
+Message-ID: <C4A3841F-3310-446D-9DC1-CEB2FE40CB4E@redhat.com>
+References: <1454742006-85706-1-git-send-email-zyan@redhat.com> <1454742006-85706-3-git-send-email-zyan@redhat.com> <CAOi1vP8SrL71Q34W4b_ZDUkTNyi-UtDstgrTjnjq9fGE=VMa_g@mail.gmail.com> <4C995660-CB5D-4E26-9947-988D65BEAA3A@redhat.com> <CAOi1vP-g9kj6B-Fmv7cBzjfrnoSrnGuVZyB+b0K-CmpLPd6xbw@mail.gmail.com> <040FA762-A7C8-47FE-A72B-03419C79C782@redhat.com> <CAOi1vP_v=iev1vQQrxGFYU2y7uTV1_imV5MkwqMgBQUCf2GnEg@mail.gmail.com> <CDD7EC25-57D8-4BD5-B8D0-41AAFC09EFA7@redhat.com> <CAOi1vP80kT5rE=pjefY09KByAj6upeb2zOG8BwkaXpziZfQJJw@mail.gmail.com> <21C799EB-4B5D-4F66-923F-FF52F0323146@redhat.com> <CAOi1vP9L7yN_RHHbMLK7Cwr84pBYgm8GpHFsygwUxj4Tpjabfg@mail.gmail.com> <A3CC3516-D528-4F4A-B1A9-3421844B1484@redhat.com> <CAOi1vP9E4S1yrWAwQ6KSKL07-xZwt301UBBq6Z5QOoR3L+0ycQ@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f178.google.com ([209.85.217.178]:34909 "EHLO
-	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750775AbcCXMpU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Mar 2016 08:45:20 -0400
-Received: by mail-lb0-f178.google.com with SMTP id bc4so29366585lbc.2
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Mar 2016 05:45:14 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1603211141560.23875@cpach.fuggernut.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39945 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751842AbcCXNSG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Mar 2016 09:18:06 -0400
+In-Reply-To: <CAOi1vP9E4S1yrWAwQ6KSKL07-xZwt301UBBq6Z5QOoR3L+0ycQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
-
-Sage, Allen et. al.
-
-Please find some follow-up on our discussion below.
-
-Your past and future comments are highly appreciated.
-
-WRITE/COMPRESSION POLICY and INTERNAL BLUESTORE STRUCTURES OVERVIEW.
-
-Used terminology:
-Extent - basic allocation unit. Variable in size, maximum size is 
-limited by lblock length (see below), alignment: min_alloc_unit param 
-(configurable, expected range: 4-64 Kb .
-Logical Block (lblock) - standalone traceable data unit. Min size 
-unspecified. Alignment unspecified. Max size limited by max_logical_unit 
-param (configurable, expected range: 128-512 Kb)
-
-Compression to be applied on per-extent basis.
-Multiple lblocks can refer specific region within a single extent.
-
-POTENTIAL COMPRESSION APPLICATION POLICIES
-
-1) Read/Merge/Write at initial commit phase. (RMW)
-General approach:
-New write request triggers partially overlapped lblock(s) 
-reading/decompression followed by their merge into a set of new lblocks. 
-Then compression is (optionally) applied. Resulting lblocks overwrite 
-existing ones.
-For non-overlapping/fully overlapped lblocks read/merge steps are simply 
-bypassed.
-- Read, merge and final compression take place prior to write commit ack 
-that can impact write operation latency.
-
-2) Deferred RMW for partial overlaps. (DRMW)
-General approach:
-Non-overlapping/fully overlapped lblocks handled similar to simple RMW.
-For partially overlapped lblocks one should use Write-Ahead Log to defer 
-RMW procedure until write commit ack return.
-- Write operation latency can still be high in some cases ( 
-non-overlapped/fully overlapped writes).
-- WAL can grow significantly.
-
-3) Writing new lblocks over new extents. (LBlock Bedding?)
-General approach:
-Write request creates new lblock(s) that use freshly allocated extents. 
-Overlapped regions within existing lblocks are occluded.
-Previously existing extents are preserved for some time (or while being 
-used) depending on the cleanup policy.
-Compression to be performed before write commit ack return.
-- Write operation latency is still affected by the compression.
-- Store space usage is usually higher.
-
-4) Background compression (BCOMP)
-General approach:
-Write request to be handled using any of the above policies (or their 
-combination) with no compression applied. Stored extents are compressed 
-by some background process independently from the client write flow.
-Merging new uncompressed lblock with already compressed one can be 
-tricky here.
-+ Write operation latency isn't affected by the compression.
-- Double disk write occurs
-
-To provide better user experience above-mentioned policies can be used 
-together depending on the write pattern.
-
-INTERNAL DATA STRUCTURES TO TRACK OBJECT CONTENT.
-
-To track object content we need to introduce following 2 collections:
-
-1) LBlock map:
-That's a logical offset mapping to a region within an extent:
-LOFFS -> {
-   EXTENT_REF       - reference to an underlying extent, e.g. pointer 
-for in-memory representation or extent ID for "on-disk" one
-   X_OFFS, X_LEN,   - region descriptor within an extent: relative 
-offset and region length
-   LFLAGS           - some associated flags for the lblock. Any usage???
-}
-
-2) Extent collection:
-Each entry describes an allocation unit within storage space. 
-Compression to be applied on per-extent basis thus extent's logical 
-volume can be greater than it's physical size.
-
-{
-   P_OFFS            - physical block address
-   SIZE              - actual stored data length
-   EFLAGS            - flags associated with the extent
-   COMPRESSION_ALG   - An applied compression algorithm id if any
-   CHECKSUM(s)       - Pre-/Post compression checksums. Use cases TBD.
-   REFCOUNT          - Number of references to this entry
-}
-
-The possible container for this collection can be a mapping: id -> 
-extent. It looks like such mapping is required during on-disk to 
-in-memory representation transform as smart pointer seems to be enough 
-for in-memory use.
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
 
 
-SAMPLE MAP TRANSFORMATION FOR LBLOCK BEDDING POLICY ( all values in Kb )
+> On Mar 24, 2016, at 18:26, Ilya Dryomov <idryomov@gmail.com> wrote:
+>=20
+> On Thu, Mar 24, 2016 at 3:33 AM, Yan, Zheng <zyan@redhat.com> wrote:
+>>=20
+>>> On Mar 24, 2016, at 03:27, Ilya Dryomov <idryomov@gmail.com> wrote:
+>>>=20
+>>> On Wed, Mar 23, 2016 at 2:02 PM, Yan, Zheng <zyan@redhat.com> wrote=
+:
+>>>>=20
+>>>>> On Mar 23, 2016, at 17:51, Ilya Dryomov <idryomov@gmail.com> wrot=
+e:
+>>>>>=20
+>>>>> On Wed, Mar 23, 2016 at 4:37 AM, Yan, Zheng <zyan@redhat.com> wro=
+te:
+>>>>>>=20
+>>>>>>> On Mar 23, 2016, at 00:13, Ilya Dryomov <idryomov@gmail.com> wr=
+ote:
+>>>>>>>=20
+>>>>>>> On Tue, Mar 22, 2016 at 2:57 PM, Yan, Zheng <zyan@redhat.com> w=
+rote:
+>>>>>>>>=20
+>>>>>>>>> On Mar 22, 2016, at 19:00, Ilya Dryomov <idryomov@gmail.com> =
+wrote:
+>>>>>>>>>=20
+>>>>>>>>> On Tue, Mar 22, 2016 at 10:17 AM, Yan, Zheng <zyan@redhat.com=
+> wrote:
+>>>>>>>>>>=20
+>>>>>>>>>>> On Mar 22, 2016, at 14:05, Ilya Dryomov <idryomov@gmail.com=
+> wrote:
+>>>>>>>>>=20
+>>>>>>>>> [ snip ]
+>>>>>>>>>=20
+>>>>>>>>>>> Hi Zheng,
+>>>>>>>>>>>=20
+>>>>>>>>>>> A one and a half line commit message and an equally short c=
+over letter
+>>>>>>>>>>> for a series such as this isn't enough.  I *happen* to know=
+ that the
+>>>>>>>>>>> basic use case for namespaces in cephfs is going to be rest=
+ricting
+>>>>>>>>>>> users to different parts of the directory tree, with the en=
+forcement
+>>>>>>>>>>> happening in ceph on the server side, as opposed to in ceph=
+ on the
+>>>>>>>>>>> client side, but I would appreciate some details on what th=
+e actual
+>>>>>>>>>>> namespace names are going to be, whether it's user input or=
+ not,
+>>>>>>>>>>> whether there are plans to use namespaces for anything else=
+, etc.
+>>>>>>>>>>>=20
+>>>>>>>>>>=20
+>>>>>>>>>> The namespace restriction you mentioned is for cephfs metada=
+ta. This
+>>>>>>>>>> namespace is restricting users to different namespaces in ce=
+phfs data
+>>>>>>>>>> pool. (At present, the only way to restrict data access is, =
+creating
+>>>>>>>>>> multiple cephfs data pools, restrict users to different data=
+ pool.
+>>>>>>>>>> Creating lost of pools is not efficient for the cluster)
+>>>>>>>>>=20
+>>>>>>>>> What about the namespace names, who is generating them, how l=
+ong are
+>>>>>>>>> they going to be?  Please describe in detail how this is goin=
+g to work
+>>>>>>>>> for both data and metadata pools.
+>>>>>>>>=20
+>>>>>>>> For example, to restrict user foo to directory /foo_dir
+>>>>>>>>=20
+>>>>>>>> // create auth caps for user foo.
+>>>>>>>> ceph auth get-or-create client.foo mon 'allow r' mds 'allow r,=
+ allow rw path=3D/foo_dir' osd 'allow rw pool=3Ddata namespace=3Dfoo_ns=
+=E2=80=99
+>>>>>>>>=20
+>>>>>>>> // mount cephfs by user admin
+>>>>>>>> mount -t ceph 10.0.0.1:/ /mnt/ceph_mount -o name=3Dadmin,secre=
+t=3Dxxxx
+>>>>>>>>=20
+>>>>>>>> // set directory=E2=80=99s layout.pool_namespace
+>>>>>>>> setfattr -n ceph.dir.pool_namespace -v foo_ns /mnt/ceph_mount/=
+foo_dir
+>>>>>>>>=20
+>>>>>>>> Admin user chooses namespace name. In most cases, namespace na=
+me does not change.
+>>>>>>>=20
+>>>>>>> Good, I guess limiting it to 100 chars (or maybe even a smaller
+>>>>>>> number) is sensible then.
+>>>>>>>=20
+>>>>>>>>=20
+>>>>>>>>>=20
+>>>>>>>>>>=20
+>>>>>>>>>>=20
+>>>>>>>>>>> I don't like the idea of sharing namespace name strings bet=
+ween libceph
+>>>>>>>>>>> and ceph modules, especially with the strings themselves ho=
+sted in
+>>>>>>>>>>> libceph.  rbd has no use for namespaces, so libceph can liv=
+e with
+>>>>>>>>>>> namespace names embedded into ceph_osd_request by value or =
+with
+>>>>>>>>>>> a simple non-owning pointer, leaving reference counting to =
+the outside
+>>>>>>>>>>> modules, if one of the use cases is "one namespace with a l=
+ong name for
+>>>>>>>>>>> the entire directory tree" or something close to it.
+>>>>>>>>>>>=20
+>>>>>>>>>>> I think the sharing infrastructure should be moved into cep=
+hfs, and
+>>>>>>>>>>> probably changed to share entire file layouts along the way=
+=2E  I don't
+>>>>>>>>>>> know this code well enough to be sure, but it seems that by=
+ sharing
+>>>>>>>>>>> file layouts and making ci->i_layout an owning pointer you =
+might be
+>>>>>>>>>>> able to piggy back on i_ceph_lock and considerably simplify=
+ the whole
+>>>>>>>>>>> thing by dropping RCU and eliminating numerous get/put call=
+s.
+>>>>>>>>>>=20
+>>>>>>>>>> RBD may use namespace later.
+>>>>>>>>>> http://tracker.ceph.com/projects/ceph/wiki/Rbd_-_namespace_s=
+upport
+>>>>>>>>>=20
+>>>>>>>>> Well, compared to cephfs, it's hard to call that "using" - in=
+ that
+>>>>>>>>> case, there will only ever be one namespace per image.  My po=
+int is
+>>>>>>>>> it's never going to use the string sharing infrastructure and=
+ is fine
+>>>>>>>>> with a non-owning pointer to a string in the file layout fiel=
+d of the
+>>>>>>>>> in-memory rbd image header.
+>>>>>>>>>=20
+>>>>>>>>>>=20
+>>>>>>>>>> The reason I use RCU here is that ci->i_layout.pool_ns can c=
+hange at
+>>>>>>>>>> any time. For the same reason, using non-owning pointer for =
+namespace
+>>>>>>>>>> or entire layout is unfeasible. Using embedded namespace is =
+not
+>>>>>>>>>> elegant either. When allocating ceph_osd_request, cephfs nee=
+ds to
+>>>>>>>>>> lock i_ceph_lock, copy namespace to a temporary buffer, unlo=
+ck
+>>>>>>>>>> i_ceph_lock, pass ci->i_layout and the temporary buffer to t=
+he
+>>>>>>>>>> ceph_osdc_xxx_request().
+>>>>>>>>>=20
+>>>>>>>>> Hmm, RCU doesn't protect you from pool_ns or other file layou=
+t fields
+>>>>>>>>> changing while the OSD request is in flight.  As used above, =
+it allows
+>>>>>>>>> ceph_try_get_string() to not take any locks and that's it.
+>>>>>>>>=20
+>>>>>>>> Yes.  But not taking lock simplify the code a lot.  we don't n=
+eed to
+>>>>>>>> lock/unlock i_ceph_lock each time i_layout is used.
+>>>>>>>=20
+>>>>>>> I wouldn't call a bunch of rcu_dereference_* variants sprinkled=
+ around
+>>>>>>> the code base a simplification, but, more importantly, is keepi=
+ng the
+>>>>>>> pool_ns pointer valid really all you need?  Shouldn't there be =
+some
+>>>>>>> kind of synchronization around "OK, I'm switching to a new layo=
+ut for
+>>>>>>> this inode"?  As it is, pool_ns is grabbed in ceph_osdc_new_req=
+uest(),
+>>>>>>> with two successive calls to ceph_osdc_new_request() potentiall=
+y ending
+>>>>>>> up with two different namespaces, e.g. ceph_uninline_data().
+>>>>>>=20
+>>>>>> There is synchronisation. When changing file layout, MDS revokes=
+ Frw caps from client (block new read/write, for in-progress read/write=
+). But this synchronisation is not complete reliable when client sessio=
+n state is toggled between stale and active.
+>>>>>=20
+>>>>> I have a bit of trouble parsing "block new read/write, for in-pro=
+gress
+>>>>> read/write".  So the client will stop issuing requests as soon as=
+ it
+>>>>> learns that it no longer has a cap, but what happens with the in-=
+flight
+>>>>> requests?
+>>>>=20
+>>>> When client know MDS is revoking Frw caps, it stops issuing new re=
+quest and waits for in-flight requests. After all in-flight requests co=
+mpletes, client releases Frw caps to MDS.
+>>>>=20
+>>>>>=20
+>>>>>>=20
+>>>>>>>>>=20
+>>>>>>>>> Why exactly can't file layouts be shared?  ci->i_layout would=
+ become
+>>>>>>>>> reference counted and you would give libceph a pointer to the=
+ pool_ns
+>>>>>>>>> string (or entire layout) after bumping it.  It doesn't matte=
+r if
+>>>>>>>>> pool_ns or the rest of the layout changes due to a cap grant =
+or revoke
+>>>>>>>>> while libceph is servicing the OSD request: you would unlink =
+it from
+>>>>>>>>> the tree but the bumped reference will keep the layout around=
+, to be
+>>>>>>>>> put in the OSD request completion callback or so.  Layout loo=
+kup would
+>>>>>>>>> have to happen in exactly two places: when newing an inode an=
+d handling
+>>>>>>>>> cap grant/revoke, in other places you would simply bump the c=
+ount on
+>>>>>>>>> the basis of already holding a valid pointer.  You wouldn't h=
+ave to
+>>>>>>>>> unlink in the destructor, so no hassle with kref_get_unless_z=
+ero() and
+>>>>>>>>> no need for RCU, with i_ceph_lock providing the exclusion aro=
+und the
+>>>>>>>>> tree.
+>>>>>>>>=20
+>>>>>>>> This means cephfs needs to set r_callback for all ceph_osd_req=
+uest,
+>>>>>>>> ceph_osd_request also needs a new field to store layout pointe=
+r.
+>>>>>>>> I don=E2=80=99t think it=E2=80=99s better/simpler than referen=
+ce counted namespace
+>>>>>>>> string.
+>>>>>>>=20
+>>>>>>> Not necessarily - you can put after ceph_osdc_wait_request() re=
+turns.
+>>>>>>> Somewhat unrelated, I'm working on refactoring osdc's handle_re=
+ply(),
+>>>>>>> and it'll probably be required that all OSD requests set one of=
+ the
+>>>>>>> callbacks, except for stateless fire-and-forget ones.
+>>>>>>=20
+>>>>>> For the r_callback case (no wait case), without saving a pointer=
+ in ceph_osd_request, how can I know which layout to put?
+>>>>>>=20
+>>>>>>>=20
+>>>>>>> Sharing ->i_layout as opposed to ->i_layout->pool_ns seemed sen=
+sible to
+>>>>>>> me because a) it naturally hangs off of ceph inode and b) logic=
+ally,
+>>>>>>> it is entire layouts and not just namespaces that are shared ac=
+ross the
+>>>>>>> directory tree.  If you think reference counted pool_ns strings=
+ are
+>>>>>>> better, I won't argue with that, but, with cephfs being the onl=
+y user
+>>>>>>> of either solution, it'll have to live in fs/ceph.
+>>>>>>=20
+>>>>>> I=E2=80=99m OK with both approaches. When sharing i_layout, we n=
+eed to add a layout pointer to ceph_osd_request. After adding the layou=
+t pointer, why not let libceph release it when request finishes.
+>>>>>>=20
+>>>>>>> Separately, I think passing non-owning pool_ns pointers into li=
+bceph is
+>>>>>>> worth exploring, but if that doesn't easily map onto cephfs lif=
+etime or
+>>>>>>> ownership rules, we will go with embedding namespace names by v=
+alue into
+>>>>>>> ceph_osd_request (or, rather, ceph_object_locator).
+>>>>>>>=20
+>>>>>>=20
+>>>>>> As I stated in previous mail, embedded namespace is nightmare fo=
+r cephfs. Every time namespace is used,  cephfs needs to lock i_ceph_lo=
+ck, copy namespace to a temporary buffer.
+>>>>>=20
+>>>>> So you are maintaining that all that is needed is to keep the mem=
+ory
+>>>>> valid and there is no locking around installing a new namespace f=
+or an
+>>>>> inode.  I didn't realize that when I suggested layout sharing, it=
+ makes
+>>>>> it much less attractive.
+>>>>=20
+>>>> Yes.  That=E2=80=99s the main reason I decided to use RCU.
+>>>=20
+>>> For the record, I don't think it's a good design and I doubt the
+>>> implementation is going to work reliably, but that's your call.
+>>>=20
+>>> Why would embedded namespaces in ceph_object_locator in libceph be
+>>> a nightmare for cephfs?  What do you refer to as a temporary buffer=
+?
+>>> This kind of copying already occurs: you grab a ceph_string with
+>>> ceph_try_get_string() in ceph_osdc_new_request() and it's copied in=
+to
+>>> the request message, as part of encoding.  How is grabbing ceph_str=
+ing
+>>> before calling into libceph and explicitly copying into object loca=
+tor
+>>> different?
+>>=20
+>> I mean not using reference-counted ceph_string.
+>>=20
+>>=20
+>> Yes, we can make cephfs code manage the reference counting, call cep=
+h_try_get_string() and ceph_put_string() each time we issue osd request=
+=2E But this approach requires more code/overhead for both ceph and lib=
+ceph (an extra parameter for ceph_osdc_xxx_request() functions, code th=
+at copies namespace to embedded buffer, lots of ceph_try_get_string()/c=
+eph_put_string() pair in cephfs code).  All of this is just for removin=
+g one ceph_try_get_string() call and two ceph_put_string() call in libc=
+eph. does it worth the effort, does it make libceph code cleaner=EF=BC=9F
+>=20
+> It'll be printed into the request after it's allocated, just like OID
+> is now, so e.g. ceph_osdc_alloc_request() won't need any changes.  Yo=
+u
+> may need to patch ceph_osdc_new_request(), but that's a cephfs-specif=
+ic
+> function and should probably be moved out of libceph.  You won't need
+> to add lots of get/put pairs in cephfs either - a single helper aroun=
+d
+> filling in an object locator would do it.
+>=20
+> The two disadvantages (extra strcpy() and larger OSD requests) are
+> real, but so are the benefits of modularity and keeping object locato=
+r
+> a simple value type.  I'm just trying to explore all available option=
+s.
 
-Config parameters:
-min_alloc_unit = 4
-max_logical_unit = 64
+I agree that it=E2=80=99s easy for us to explore both options if we mov=
+e ceph_osdc_new_request(), ceph_osdc_readpage and ceph_osdc_writepage i=
+nto fs/ceph directory,=20
 
---------------------------------------------------------
-****** Step 0 :
-->Write(0, 50), no compression
-->Write(100, 60), no compression
+>=20
+> TBH I still can't wrap my head around lockless layout/namespace point=
+er
+> updates and how that can ever work reliably=E2=80=A6
 
-Resulting maps:
-LBLOCK map ( OFFS: { EXT_REF, X_OFFS, X_LEN}  ):
-0:   {EO1, 0, 50}
-100: {EO2, 0, 60}
+see Documentation/RCU/rcuref.txt. How RCU is used in my code is similar=
+ to the second example.
 
-EXTENT map ( ID: { P_OFFS, SIZE, ALG, REFCOUNT}  ):
-EO1: { POFFS_1, 50, NONE, 1}   //totally allocated 52 Kb
-EO2: { POFFS_2, 60, NONE, 1}   //totally allocated 60 Kb
+Regards
+Yan, Zheng
 
 
-Where POFFS_1, POFFS_2 - physical addresses for allocated extents.
+> Thanks,
+>=20
+>                Ilya
 
-****** Step 1
-->Write(25, 100), compressed
-
-Resulting maps:
-LBLOCK map ( OFFS: { EXT_REF, X_OFFS, X_LEN}  ):
-0:     {EO1, 0, 25}
-25:    {EO3, 0, 64}   //compressed into 20K
-79:    {EO4, 0, 36}   //compressed into 15K
-125:   {EO2, 25, 35}
-
-EXTENT map ( ID: { P_OFFS, SIZE, ALG, REFCOUNT}  ):
-EO1: { POFFS_1, 50, NONE, 1}   //totally allocated 52 Kb
-EO2: { POFFS_2, 60, NONE, 1}   //totally allocated 60 Kb
-EO3: { POFFS_3, 20, ZLIB, 1}   //totally allocated 24 Kb
-EO4: { POFFS_4, 15, ZLIB, 1}   //totally allocated 16 Kb
-
-As one can see new entries at offset 25 & 79  have appeared and previous 
-entries have been altered (including the map key (100->125) for the last 
-entry).
-No physical extents reallocation took place though - just new ones (EO3 
-& EO4) have been allocated.
-Please note that client accessible data for block EO2 are actually 
-stored at P_OFFS_2 + X_OFF and have 35K only despite the fact that 
-extent has 60K total.
-The same for block EO1 - valid data length is 25K only.
-Extent EO3 actually stores 20K of compressed data corresponding to 64K 
-raw one.
-Extent EO4 actually stores 15K of compressed data corresponding to 36K 
-raw one.
-Single 100K write has been splitted into 2 lblocks to address 
-max_logical_unit constraint
-
-****** Step 2
-->Write(70, 65), no compression
-
-LBLOCK map ( OFFS: { EXT_REF, X_OFFS, X_LEN}  ):
-0:     {EO1, 0, 25}
-25:    {EO3, 0, 45}
-70:    {EO5, 0, 65}
--125:   {EO4, 36, 0} -> to be removed as it's totally overwritten ( see 
-X_LEN = 0 )
-135:   {EO2, 35, 25}
-
-EXTENT map ( ID: { P_OFFS, SIZE, ALG, REFCOUNT}  ):
-EO1: { POFFS_1, 50, NONE, 1}   //totally allocated 52 Kb
-EO2: { POFFS_2, 60, NONE, 1}   //totally allocated 60 Kb
-EO3: { POFFS_3, 20, ZLIB, 1}   //totally allocated 24 Kb
--EO4: { POFFS_4, 15, ZLIB, 0}  //totally allocated 16 Kb, can be 
-released as refcount = 0
-EO5: { POFFS_5, 65, NONE, 1}   //totally allocated 68 Kb
-
-Entry at at offset 25 entry has been altered and entry at offset 125 to 
-be removed. The latter can be done both immediately on map alteration 
-and by some background cleanup procedure.
-
-
-****** Step 3
-->Write(100, 60), compressed to 30K
-
-LBLOCK map ( OFFS: { EXT_REF, X_OFFS, X_LEN}  ):
-0:     {EO1, 0, 25}
-25:    {EO3, 0, 45}
-70:    {EO5, 0, 65}
-100:   {EO6, 0, 60}
--160:   {EO2, 60, 0} -> to be removed as it's totally overwritten ( see 
-X_LEN = 0 )
-
-EXTENT map ( ID: { P_OFFS, SIZE, ALG, REFCOUNT}  ):
-EO1: { POFFS_1, 50, NONE, 1}   //totally allocated 52 Kb
-EO2: { POFFS_2, 60, NONE, 1}   //totally allocated 60 Kb
-EO3: { POFFS_3, 20, ZLIB, 1}   //totally allocated 24 Kb
--EO5: { POFFS_5, 65, NONE, 0}  //totally allocated 68 Kb, can be 
-released as refcount = 0
-EO6: { POFFS_6, 30, ZLIB, 1}   //totally allocated 32 Kb
-
-Entry at offset 100 has been altered and entry at offset 160 to be removed.
-
-****** Step 4
-->Write(0, 25), no compression
-
-LBLOCK map ( OFFS: { EXT_REF, X_OFFS, X_LEN}  ):
-0:     {EO7, 0, 25}
--25:     {EO1, 25, 0}   -> to be removed
-25:    {EO3, 0, 45}
-70:    {EO5, 0, 65}
-100:   {EO6, 0, 60}
--160:   {EO2, 60, 0} -> to be removed as it's totally overwritten ( see 
-X_LEN = 0 )
-
-EXTENT map ( ID: { P_OFFS, SIZE, ALG, REFCOUNT}  ):
--EO1: { POFFS_1, 50, NONE, 1}   //totally allocated 52 Kb, can be 
-released as refcount = 0
-EO2: { POFFS_2, 60, NONE, 1}   //totally allocated 60 Kb
-EO3: { POFFS_3, 20, ZLIB, 1}   //totally allocated 24 Kb
-EO6: { POFFS_6, 30, ZLIB, 1}   //totally allocated 32 Kb
-EO7: { POFFS_7, 25, None, 1}   //totally allocated 38 Kb
-
-Entry at offset 0 has been overwritten and to be removed.
-
-IMPLMENTATION ROADMAP
-
-1) Refactor current Bluestore implementation to introduce the suggested 
-twin-structure design.
-This will support raw data READ/WRITE without compression. Major policy 
-to implement is lblock bedding.
-As an additional option DRMW to be implemented to provide a solution 
-equal to the current implementation. This might be useful for 
-performance comparison.
-
-2) Add basic compression support using lblock bedding policy.
-This will lack most of management/statistics features too.
-
-3) Add compression management/statistics. Design to be discussed.
-
-4) Add check sum support. Goals and design to be discussed.
-
-5) Add RMW/DRMW policies [OPTIONAL]
-
-6) Add background task support for compression/defragmentation/cleanup.
-
-
-Thanks,
-Igor.
-
-On 21.03.2016 18:50, Sage Weil wrote:
-> On Mon, 21 Mar 2016, Igor Fedotov wrote:
->> On 19.03.2016 6:14, Allen Samuels wrote:
->>> If we're going to both allow compression and delayed overwrite we simply
->>> have to handle the case where new data actually overlaps with previous data
->>> -- recursively. If I understand the current code, it handles exactly one
->>> layer of overlay which is always stored in KV store. We need to generalize
->>> this data structure. I'm going to outline a proposal, which If I get wrong,
->>> I beg forgiveness -- I'm not as familiar with this code as I would like,
->>> especially the ref-counted shared extent stuff. But I'm going to blindly
->>> dive in and assume that Sage will correct me when I go off the tracks -- and
->>> therefore end up learning how all of this stuff REALLY works.
->>>
->>> I propose that the current bluestore_extent_t and bluestore_overlay_t  be
->>> essentially unified into a single structure with a typemark to distinguish
->>> between being in KV store or in raw block storage. Here's an example: (for
->>> this discussion, BLOCK_SIZE is 4K and is the minimum physical I/O size).
->>>
->>> Struct bluestore_extent_t {
->>>      Uint64_t logical_size;			// size of data before any
->>> compression. MUST BE AN INTEGER MULTIPLE of BLOCK_SIZE (and != 0)
->>>      Uint64_t physical_size;                              // size of data on
->>> physical media (yes, this is unneeded when location == KV, the
->>> serialize/deserialize could compress this out --  but this is an unneeded
->>> optimization
->>>      Uint64_t location:1;                                    // values (in
->>> ENUM form) are "KV" and "BLOCK"
->>>      Uint64_t compression_alg:4;                  // compression algorithm...
->>>      Uint64_t otherflags:xx;                             // round it out.
->>>      Uint64_t media_address;                        // forms Key when
->>> location == KV block address when location == BLOCK
->>>      Vector<uint32_t> checksums;              // Media checksums. See
->>> commentary on this below.
->>> };
->>>
->>> This allows any amount of compressed or uncompressed data to be identified
->>> in either a KV key or a block store.
->>>
->> As promised please find a competing proposal for extent map structure. It can
->> be used for handling unaligned overlapping writes of both
->> compressed/uncompressed data. It seems it's applicable for any compression
->> policy but my primary intention was to allow overwrites that use totally
->> different extents without the touch to the existing(overwritten) ones. I.e.
->> that's what Sage explained this way some time ago:
->>
->> "b) we could just leave the overwritten extents alone and structure the
->> block_map so that they are occluded.  This will 'leak' space for some
->> write patterns, but that might be okay given that we can come back later
->> and clean it up, or refine our strategy to be smarter."
->>
->> Nevertheless the corresponding infrastructure seems to be applicable for
->> different use cases too.
->>
->> At first let's consider simple raw data overwrite case. No compression,
->> checksums, flags at this point for the sake of simplicity.
->> Block map entry to be defined as follows:
->> OFFS:  < EXT_OFFS, EXT_LEN, X_OFFS, X_LEN>
->> where
->> EXT_OFFS, EXT_LEN - allocated extent offset and size, AKA physical address and
->> size.
->> X_OFFS - relative offset within the block where valid (not overwritten) data
->> starts. Full data offset = OFFS + X_OFFS
->> X_LEN - valid data size.
->> Invariant: Block length == X_OFFS + X_LEN
->>
->> Let's consider sample block map transform:
->> --------------------------------------------------------
->> ****** Step 0 (two incoming writes of 50 Kb at offset 0 and 100K):
->> ->Write(0,50)
->> ->Write(100, 50)
->>
->> Resulting block map ( OFFS: {EXT_OFFS, EXT_LEN, X_OFFS, X_LEN}  ):
->> 0:      {EO1, 50, 0, 50}
->> 100: {EO2, 50, 0, 50}
->>
->> Where EO1, EO2 - physical addresses for allocated extents.
->> Two new entries have been inserted.
->>
->> ****** Step 1 ( overwrite that partially overlaps both existing blocks ):
->> ->Write(25,100)
->>
->> Resulting block map ( OFFS: {EXT_OFFS, EXT_LEN, X_OFFS, X_LEN}  ):
->> 0:      {EO1, 50, 0, 25}
->> 25:    {EO3, 100, 0, 100}
->> 125: {EO2, 50, 25, 25}
->>
->> As one can see new entry at offset 25 has appeared and previous entries have
->> been altered (including the map key (100->125) for the last entry). No
->> physical extents reallocation took place though - just a new one at E03 has
->> been allocated.
->> Please note that client accessible data for block EO2 are actually stored at
->> EO2 + X_OFF(=25) and have 25K only despite the fact that extent has 50K total.
->> The same for block EO1 - valid data length = 25K only.
->>
->>
->> ****** Step 2 ( overwrite that partially overlaps existing blocks once again):
->> ->Write(70, 65)
->>
->> Resulting block map ( OFFS: {EXT_OFFS, EXT_LEN, X_OFFS, X_LEN}  ):
->> 0:      {EO1, 50, 0, 25}
->> 25:    {EO3, 100, 0, 45}
->> 70:    {EO4, 65, 0, 65}
->> 135: {EO2, 50, 35, 15}
->>
->> Yet another new entry. Overlapped block entries at 25 & 125 were altered.
->>
->> ****** Step 3 ( overwrite that partially overlaps one block and totally
->> overwrite the last one):
->> ->Write(100, 60)
->>
->> Resulting block map ( OFFS: {EXT_OFFS, EXT_LEN, X_OFFS, X_LEN}  ):
->> 0:      {EO1, 50, 0, 25}
->> 25:    {EO3, 100, 0, 45}
->> 70:    {EO4, 65, 0, 35}
->> 100: {EO5, 60, 0, 60}
->> -140: {EO2, 50, 50, 0}  -> to be removed as it's totally overwritten ( see
->> X_LEN = 0 )
->>
->> Entry for EO4 have been altered and entry EO2 to be removed. The latter can be
->> done both immediately on map alteration and by some background cleanup
->> procedure.
->>
->> ****** Step 4 ( overwrite that totally overlap the first block):
->> ->Write(0, 25)
->>
->> Resulting block map ( OFFS: {EXT_OFFS, EXT_LEN, X_OFFS, X_LEN}  ):
->> 0:      {EO6, 25, 0, 25}
->> - 0:      {EO1, 50, 25, 0}  -> to be removed
->> 25:    {EO3, 100, 0, 45}
->> 70:    {EO4, 65, 0, 35}
->> 100: {EO5, 60, 0, 60}
->>
->> Entry for EO1 has been overwritten and to be removed.
->> --------------------------------------------------------------------------------------
->>
->> Extending this block map for compression is trivial - we need to introduce
->> compression algorithm flag to the map. And vary EXT_LEN (and actual physical
->> allocation) depending on the actual compression ratio.
->> E.g. with ratio=3 (60K reduced to 20K) the record from the last step turn into
->> :
->> 100: {EO5, 20, 0, 60}
->>
->> Other compression aspects handled by the corresponding policies ( e.g. when
->> perform the compression ( immediately, lazily or totally in background ) or
->> how to merge neighboring compressed blocks ) probably don't impact the
->> structure of the map entry - they just shuffle the entries.
-> This is much simpler!  There is one case we need to address that I don't
-> see above, though.  Consider,
->
-> - write 0~1048576, and compress it
-> - write 16384~4096
->
-> When we split the large extent into two pieces, the resulting extent map,
-> as per above, would be something like
->
-> 0:      {EO1, 1048576, 0, 4096, zlib}
-> 4096:   {E02, 16384, 0, 4096, uncompressed}
-> 16384:	{E01, 1048576, 20480, 1028096, zlib}
->
-> ...which is fine, except that it's the *same* compressed extent, which
-> means the code that decides that the physical extent is no longer
-> referenced and can be released needs to ensure that no other extents in
-> the map reference it.  I think that's an O(n) pass across the map when
-> releasing.
->
-> Also, if we add in checksums, then we'd be duplicating them in the two
-> instances that reference the raw extent.
->
-> I wonder if it makes sense to break this into two structures.. one that
-> lists the raw extents, and another that maps them into the logical space.
-> So that there is one record for {E01, 1048576, zlib, checksums}, and then
-> the block map is more like
->
-> 0:      {E0, 0, 4096}
-> 4096:   {E1, 0, 4096}
-> 16384:	{E0, 20480, 1028096}
->
-> and
->
-> 0: E01, 1048576, 0, 4096, zlib, checksums
-> 1: E02, 16384, 0, 4096, uncompressed, checksums
->
-> ?
->
-> sage
-
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
