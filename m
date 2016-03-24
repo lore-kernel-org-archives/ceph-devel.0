@@ -1,92 +1,96 @@
-From: lin zhou <hnuzhoulin2@gmail.com>
-Subject: Fwd: object unfound before finish backfill,up set diff from acting set
-Date: Thu, 24 Mar 2016 19:37:25 +0800
-Message-ID: <CAKO+7k00nQ5Vz9Ck0k969RSb0r0t_7BnBCYzw7j0_9Ks1Y63-Q@mail.gmail.com>
-References: <CAKO+7k0y2qu2U3PRG2=DB67OQGuFCDMpKxBfRqrT6H0LgQpu3A@mail.gmail.com>
+From: "Igor.Podoski@ts.fujitsu.com" <Igor.Podoski@ts.fujitsu.com>
+Subject: RE: Ceph watchdog-like thing to reduce IO block during process goes
+ down by abort()
+Date: Thu, 24 Mar 2016 11:47:20 +0000
+Message-ID: <6845351a143d41a3932b37efddcc1f75@R01UKEXCASM222.r01.fujitsu.local>
+References: <27d3bfba39234f83b8441abc4e9aea92@R01UKEXCASM222.r01.fujitsu.local>
+ <CACJqLyax9Nntz09qJF2E_jjtoVa2moJxzW5T42bHVFGLop31Ug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f43.google.com ([209.85.218.43]:33479 "EHLO
-	mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751321AbcCXLh0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Mar 2016 07:37:26 -0400
-Received: by mail-oi0-f43.google.com with SMTP id d205so56424727oia.0
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Mar 2016 04:37:25 -0700 (PDT)
-In-Reply-To: <CAKO+7k0y2qu2U3PRG2=DB67OQGuFCDMpKxBfRqrT6H0LgQpu3A@mail.gmail.com>
+Received: from mail1.bemta5.messagelabs.com ([195.245.231.138]:12337 "EHLO
+	mail1.bemta5.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750926AbcCXLrZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 24 Mar 2016 07:47:25 -0400
+In-Reply-To: <CACJqLyax9Nntz09qJF2E_jjtoVa2moJxzW5T42bHVFGLop31Ug@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,how to deal with unfound object.
-
-and command ceph pg 4.438 mark_unfound_lost revert/delete does not work.
-
-
-
----------- Forwarded message ----------
-From: lin zhou <hnuzhoulin2@gmail.com>
-Date: 2016-03-21 16:22 GMT+08:00
-Subject: object unfound before finish backfill,up set diff from acting set
-To: ceph-users@ceph.com
-
-
-Hi,guys
-
-my cluster face a network problem so it occur some error.after solve
-network problem.
-
-latency of some osds in one node is high,using ceph osd perf,which come to 3000+
-
-so I delete this osd from cluster,keep osd data device.
-after recover and backfill,then I face the problem describe in
-title.ceph health detail is :
-
-pg 4.438 is active+recovering+degraded+remapped, acting [7,11], 1 unfound
-pg 4.438 is stuck unclean for 135368.626141, current state
-active+recovering+degraded+remapped, last acting [7,11]
-recovery 1062/4842087 objects degraded (0.022%); 1/2028378 unfound (0.000%)
-
-root@node-67:~# ceph pg map 4.438
-osdmap e42522 pg 4.438 (4.438) -> up [34,20,30] acting [7,11]
-
-I can  see the pg data in deleted osd.6,which have some different with
-the existing osd.7 and osd.11
-can I copy the pg data to the new up set? ignore acting set?
-
-some info is below,the output of pg query is the attachment.
-
-
-root@node-67:~# ceph pg 4.438 list_missing
-{ "offset": { "oid": "",
-      "key": "",
-      "snapid": 0,
-      "hash": 0,
-      "max": 0,
-      "pool": -1,
-      "namespace": ""},
-  "num_missing": 1,
-  "num_unfound": 1,
-  "objects": [
-        { "oid": { "oid": "rbd_data.188b9163c78e9.00000000000015f2",
-              "key": "",
-              "snapid": -2,
-              "hash": 2427198520,
-              "max": 0,
-              "pool": 4,
-              "namespace": ""},
-          "need": "39188'2314230",
-          "have": "39174'2314229",
-          "locations": []}],
-
-rootceph pg 4.438 mark_unfound_lost revert
-Error EINVAL: pg has 1 unfound objects but we haven't probed all
-sources, not marking lost
-
-root@node-67:~# ceph pg 4.438 mark_unfound_lost delete
-Error EINVAL: pg has 1 unfound objects but we haven't probed all
-sources, not marking lost
-
-pg query output is
-:https://drive.google.com/file/d/0B08hG89CXoPbb2p0ZFc2OGRRQmpkcGVuZnoxNFJnQS05UDlv/view
--------------------------
-hnuzhoulin2@gmail.com
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRv
+Omhhb21haXdhbmdAZ21haWwuY29tXQ0KPiBTZW50OiBUaHVyc2RheSwgTWFyY2ggMjQsIDIwMTYg
+MTA6NDggQU0NCj4gVG86IFBvZG9za2ksIElnb3INCj4gQ2M6IGNlcGgtZGV2ZWwNCj4gU3ViamVj
+dDogUmU6IENlcGggd2F0Y2hkb2ctbGlrZSB0aGluZyB0byByZWR1Y2UgSU8gYmxvY2sgZHVyaW5n
+IHByb2Nlc3MgZ29lcw0KPiBkb3duIGJ5IGFib3J0KCkNCj4gDQo+IA0KPiANCj4gT24gVGh1LCBN
+YXIgMjQsIDIwMTYgYXQgMzowMCBQTSwgSWdvci5Qb2Rvc2tpQHRzLmZ1aml0c3UuY29tDQo+IDxJ
+Z29yLlBvZG9za2lAdHMuZnVqaXRzdS5jb20+IHdyb3RlOg0KPiA+IEhpIENlcGhlcnMhDQo+ID4N
+Cj4gPiBDdXJyZW50bHkgd2hlbiB3ZSBoYWQgYSBkaXNrIGZhaWx1cmUsIGFzc2VydCgpIGFuZCB0
+aGVuIGFib3J0KCkgd2FzDQo+IHRyaWdnZXJlZCBhbmQgcHJvY2VzcyB3YXMga2lsbGVkIChBQlJU
+KS4gT3RoZXIgb3NkcyB3aWxsIGV2ZW50dWFsbHkgbWFyaw0KPiBkZWFkIG9uZSBhcyBkb3duLCBi
+dXQgaXQgZGVwZW5kcyBvZiBoZWFydGJlYXQgc2V0dGluZ3MgYW5kIG1vbml0b3Igc2V0dGluZ3MN
+Cj4gKG1vbl9vc2RfbWluX2Rvd25fcmVwb3J0ZXJzL21vbl9vc2RfbWluX2Rvd25fcmVwb3J0cyku
+IER1cmluZw0KPiBkZWFkLW5vdC1tYXJrZWQtYXMtZG93biBvc2QgeW91IGNhbiBzZWUgYmxvY2tl
+ZCBJTyBkdXJpbmcgd3JpdGVzIGFuZA0KPiByZWFkcy4NCj4gPg0KPiA+IFJlY2VudGx5IEkndmUg
+bWFkZSBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvNzc0MCB3aGljaCBpcw0KPiBh
+Ym91dCBzZW5kaW5nIE1ha3JNZURvd24gbXNnIHRvIG1vbml0b3IganVzdCBiZWZvcmUgb3NkIGlz
+IGdvaW5nIGJ5ZS0NCj4gYnllLiBJdCBwcmV2ZW50cyBibG9ja2VkIElPIGluIGFib3ZlIGNhc2Us
+IGFuZCBhbnkgb3RoZXIgYXNzZXJ0IHRoYXQgaXMgbm90IG9uDQo+IG1lc3NhZ2Ugc2VuZGluZyBw
+YXRoLCBzbyBJIG5lZWQgbWVzc2VuZ2VyL3BpcGVzL2Nvbm5lY3Rpb25zIHdvcmtpbmcgZm9yDQo+
+IHRoaXMuIEkndmUgbWFkZSBzb21lIHRlc3QgYW5kIGl0IGxvb2tzIGdvb2QsIHdoZW4gSSBwdWxs
+IG91dCBkcml2ZSBmcm9tIG15DQo+IGNsdXN0ZXIgZHVyaW5nIHJhZG9zIGJlbmNoLCBJTyBibG9j
+a3MgZm9yIGxlc3MgdGhhbiAxIHNlY29uZCBvciBub3QgYXQgYWxsLA0KPiBwcmV2aW91c2x5IGl0
+IHdhcyA+IDEwIHNlYyAob24gbXkgY2x1c3RlciBzZXR0aW5ncykuDQo+ID4NCj4gPiBTYWdlIHBv
+aW50ZWQgbWUgdGhhdCBzb21lIHRpbWUgYWdvIHdhcyBzaW1pbGFyIFBSDQo+IGh0dHBzOi8vZ2l0
+aHViLmNvbS9jZXBoL2NlcGgvcHVsbC82NTE0IGFuZCB0aGVyZSB3YXMgYSB0aG91Z2h0IGFib3V0
+DQo+IGNlcGgtd2F0Y2hkb2cgcHJvY2VzcywgdGhhdCBjb3VsZCBtb25pdG9yIG9zZCdzIGFuZCBz
+ZW5kIGluZm8gZGlyZWN0bHkgdG8NCj4gbW9uaXRvciB3aGVuIHRoZXkgZGlzYXBwZWFyLiBUaGlz
+IHdvdWxkIHByZXZlbnQgYWxsIGFzc2VydCgpIGNhc2VzLCBhbmQNCj4gb3RoZXIgb25lcyBsaWtl
+IGtpbGwgLTkgb3Igc2ltaWxhci4NCj4gPg0KPiA+IEkgaGF2ZSBhIGZldyBpZGVhcyBob3cgc3Vj
+aCBmdW5jdGlvbmFsaXR5IGNvdWxkIGJlIGltcGxlbWVudGVkLCBzbyBteQ0KPiBxdWVzdGlvbiBp
+cyAtIGRvZXMgYW55IG9mIHlvdSBzdGFydGVkIGFscmVhZHkgZG9pbmcgc29tZXRoaW5nIHNpbWls
+YXI/DQo+ID4NCj4gPiBMZXQncyBoYXZlIGEgYnJhaW4gc3Rvcm0gYWJvdXQgaXQhDQo+ID4NCj4g
+PiBJZGVhcyBhYm91dCBpbXByb3ZpbmcgNzc0MC82NTE0IE1hcmtNZURvd24gaW50ZXJuYWwgbWVj
+aGFuaXNtOg0KPiA+IC0gSSB0aGluaywgSSBjb3VsZCBzZW5kIG1lc3NhZ2Ugd2l0aCBNYXJrTWVE
+b3duIHBheWxvYWQsIGJ1dCBpbiBhIHJhdw0KPiB3YXksIG5vdCB0aHJvdWdoIE1lc3NlbmdlciBw
+YXRoLiBUaGlzIGNvdWxkIGJlIGFzIGdvb2QgYXMgYmFkIGluIHRoaXMgY2FzZS4NCj4gDQo+IEkg
+dGhpbmsgd2Ugc3RpbGwgZ28gdGhvdWdoIG1zZ3IgcGF0aCBvciBhIHNwZWNmaWVkIGFwaT8gdXJn
+ZW50IG9yIG91dC1vZi1ib3VuZA0KPiBmbGFnPw0KDQpCdXQgd2UgbmVlZCBtZXNzZW5nZXIgaW5z
+dGFuY2UgaW4gYSBnb29kIHNoYXBlIGZvciBzZW5kaW5nIE1hcmtNZURvd24sIGlmIHdlIGdvdCBh
+c3NlcnQgaW4gdGhlIGNvcmUgb2YgbXNnciwgd2Ugd2lsbCBmYWlsIHRvIHNlbmQgYW55dGhpbmcu
+DQoNCj4gDQo+ID4gLSBJIGNvdWxkIHBva2Ugb3NkLW5laWdoYm9yIHRocm91Z2ggc2lnbmFsIGFu
+ZCBuZWlnaGJvciB3aWxsIHNlbmQNCj4gTWFyayhTaWduYWxTZW5kZXIpRG93biBtZXNzYWdlICh0
+aGlzIHdvbid0IHdvcmsgSWYgd2hvbGUgaGRkIGNvbnRyb2xsZXINCj4gd2lsbCBiZSBkb3duLCBh
+bGwgb3NkIHdpbGwgYmUgZGVhZCBpbiBuYXJyb3cgdGltZSB3aW5kb3cpLiBTbyBpdCdzIGxpa2Ug
+aW5zdGFudA0KPiBiYWQtaGVhbHRoIGhlYXJ0YmVhdCBtZXNzYWdlLiBTdGlsbCBkZXBlbmRzIG9m
+IE1lc3NlbmdlciBzZW5kIHBhdGggb2YNCj4gb3NkLW5laWdoYm9yLg0KPiANCj4gPg0KPiA+IEV4
+dGVybmFsIGNlcGgtd2F0Y2hkb2c6DQo+ID4gSnVzdCBsaWtlIFNhZ2Ugd3JvdGUNCj4gaHR0cHM6
+Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzY1MTQjaXNzdWVjb21tZW50LTE1OTM3Mjg0NSBP
+cg0KPiBzaW1pbGFyOiBlYWNoIG9zZCwgZHVyaW5nIHN0YXJ0IHBhc3NlcyBpdHMgb3duIFBJRCB0
+byBjZXBoLXdhdGNoZG9nIHByb2Nlc3MNCj4gdGhyb3VnaCBzaGFyZWQgbWVtb3J5L3NvY2tldC9u
+YW1lZCBwaXBlICh3aGF0ZXZlcikuIENlcGgtd2F0Y2hkb2cNCj4gY2hlY2tzIGlmIGN1cnJlbnQg
+UElEIGV4aXN0cywgYnkgY2hlY2tpbmcgY2hhbmdlcyBpbiAvcHJvYy9QSUQgb3INCj4gL3Byb2Mv
+UElEL2NtZCBkaXJlY3RvcnkvZmlsZSAobWF5YmUgSW5vdGlmeSBjb3VsZCBoYW5kbGUgdGhpcyku
+IFdoZW4gZmlsZSBvcg0KPiBmb2xkZXIgaXMgY2hhbmdlZChtaXNzaW5nKSBpdCBzZW5kcyBNYXJr
+VGhpc09zZERvd24gdG8gbW9uaXRvciBhbmQgdGhhdCdzDQo+IGFsbC4gQnV0IHRoaXMgd29uJ3Qg
+YmUgd2F0Y2hkb2cgc3RyaWN0LCByYXRoZXIgcHJvY2VzcyBkb3duIG5vdGlmeS4NCj4gDQo+IGl0
+IGxvb2tzIGEgbGl0dGxlIGNvbXBsZXhpdHkgYW5kIHJlZHVuZGFudCwgd2UgbmVlZCB0byBtYW5h
+Z2UgdGhlIGxpZmVjeWNsZSBvZg0KPiB3YXRjaGRvZyBpdHNlbGYsIGFuZCBpdCdzIG11Y2ggbGlr
+ZSBzeXN0ZW1kLi4uDQoNCk9rLCBzbyBiYWNrIHRvIHNsaWdodGx5IG1vZGlmaWVkIFNhZ2UgaWRl
+YToNCg0KT3NkIGJlZm9yZSBhYm9ydCgpIGNvdWxkIHdyaXRlIGl0cyBJRCAoZnJvbSAqKmFyZ3Yp
+IHRvIGNlcGgtd2F0Y2hkb2cgbmFtZWQgcGlwZS4gT25seSBvbmUgY291bGQgYmUgaGF6YXJkIGhl
+cmUgLSBjYXNlIHdoZW4gYWxsIG9zZCdzIHdhbnQgdG8gbm90aWZ5IHdhdGNoZG9nIGluIHRoZSBz
+YW1lIHRpbWUuIEFzIEkgd3JvdGUgYmVmb3JlIGl0IHdvdWxkIG5vdCBiZSBhICd3YXRjaGRvZycg
+cHJvY2VzcywgYnV0ICdwcm9jZXNzIGRvd24gbm90aWZ5Jywgc28gcXVlc3Rpb24gaXMgZG8gd2Ug
+bmVlZCB3YXRjaGRvZyBsaWtlIHRoaW5nIGZvciBzb21lIG90aGVyIHN0dWZmIChpbiB0aGUgZmVh
+dHVyZSkgb3IgcHJvY2VzcyBkb3duIG5vdGlmeSB3aWxsIGJlIHN1ZmZpY2llbnQ/DQoNCj4gDQo+
+ID4NCj4gPiBPciBtYXliZSBib3RoIHdheXMgUFI3NzQwICsgZXh0ZXJuYWwgPw0KPiA+DQo+ID4g
+UmVnYXJkcywNCj4gPiBJZ29yLg0KPiA+IC0tDQo+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
+IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+ID4gaW4gdGhl
+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZQ0KPiBt
+YWpvcmRvbW8NCj4gPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwNCj4gDQo+IA0KPiANCj4gLS0NCj4gDQo+IA0KPiBCZXN0IFJlZ2FyZHMsDQo+IA0K
+PiBXaGVhdA0KDQpSZWdhcmRzLA0KSWdvci4NCg==
