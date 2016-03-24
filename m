@@ -1,36 +1,92 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: RBD Utilization
-Date: Thu, 24 Mar 2016 12:37:06 +0100
-Message-ID: <CAOi1vP_rPQtC+ij0yFB4p7iwUNDT=24hKmU=wcF4YOC3G-rXew@mail.gmail.com>
-References: <1674621217.33764396.1458725323072.JavaMail.zimbra@redhat.com>
-	<807270756.33765380.1458725728050.JavaMail.zimbra@redhat.com>
-	<CANA9Uk4cME1cmPfk+a1kJ0=3C9p6uCNFgXxahNvz53sTkL=KHA@mail.gmail.com>
-	<1749699911.33776369.1458729038657.JavaMail.zimbra@redhat.com>
-	<56F2A7F2.7050103@earthlink.net>
+From: lin zhou <hnuzhoulin2@gmail.com>
+Subject: Fwd: object unfound before finish backfill,up set diff from acting set
+Date: Thu, 24 Mar 2016 19:37:25 +0800
+Message-ID: <CAKO+7k00nQ5Vz9Ck0k969RSb0r0t_7BnBCYzw7j0_9Ks1Y63-Q@mail.gmail.com>
+References: <CAKO+7k0y2qu2U3PRG2=DB67OQGuFCDMpKxBfRqrT6H0LgQpu3A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f67.google.com ([209.85.215.67]:36220 "EHLO
-	mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750735AbcCXLhI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Mar 2016 07:37:08 -0400
-Received: by mail-lf0-f67.google.com with SMTP id r8so3333581lfe.3
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Mar 2016 04:37:07 -0700 (PDT)
-In-Reply-To: <56F2A7F2.7050103@earthlink.net>
+Received: from mail-oi0-f43.google.com ([209.85.218.43]:33479 "EHLO
+	mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751321AbcCXLh0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Mar 2016 07:37:26 -0400
+Received: by mail-oi0-f43.google.com with SMTP id d205so56424727oia.0
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Mar 2016 04:37:25 -0700 (PDT)
+In-Reply-To: <CAKO+7k0y2qu2U3PRG2=DB67OQGuFCDMpKxBfRqrT6H0LgQpu3A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bruce <bkmcfarland@earthlink.net>
-Cc: Anmol Babu <anbabu@redhat.com>, M Ranga Swami Reddy <swamireddy@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "Team discussions around SDS management program (aka USM or RHS
-	Controller)" <sds-mgmt@redhat.com>
+To: ceph-devel@vger.kernel.org
 
-On Wed, Mar 23, 2016 at 3:28 PM, Bruce <bkmcfarland@earthlink.net> wrote:
-> What I like to do is create a pool for each rbd. Then using any of the
-> commands that provide per pool stats now also reflect each rbd.
+Hi,how to deal with unfound object.
 
-You should use "rbd du" for this.  RADOS pools have substantial
-cluster-wide overhead (a pool is basically a set of PGs), you do not
-want to create one pool per image.
+and command ceph pg 4.438 mark_unfound_lost revert/delete does not work.
 
-Thanks,
 
-                Ilya
+
+---------- Forwarded message ----------
+From: lin zhou <hnuzhoulin2@gmail.com>
+Date: 2016-03-21 16:22 GMT+08:00
+Subject: object unfound before finish backfill,up set diff from acting set
+To: ceph-users@ceph.com
+
+
+Hi,guys
+
+my cluster face a network problem so it occur some error.after solve
+network problem.
+
+latency of some osds in one node is high,using ceph osd perf,which come to 3000+
+
+so I delete this osd from cluster,keep osd data device.
+after recover and backfill,then I face the problem describe in
+title.ceph health detail is :
+
+pg 4.438 is active+recovering+degraded+remapped, acting [7,11], 1 unfound
+pg 4.438 is stuck unclean for 135368.626141, current state
+active+recovering+degraded+remapped, last acting [7,11]
+recovery 1062/4842087 objects degraded (0.022%); 1/2028378 unfound (0.000%)
+
+root@node-67:~# ceph pg map 4.438
+osdmap e42522 pg 4.438 (4.438) -> up [34,20,30] acting [7,11]
+
+I can  see the pg data in deleted osd.6,which have some different with
+the existing osd.7 and osd.11
+can I copy the pg data to the new up set? ignore acting set?
+
+some info is below,the output of pg query is the attachment.
+
+
+root@node-67:~# ceph pg 4.438 list_missing
+{ "offset": { "oid": "",
+      "key": "",
+      "snapid": 0,
+      "hash": 0,
+      "max": 0,
+      "pool": -1,
+      "namespace": ""},
+  "num_missing": 1,
+  "num_unfound": 1,
+  "objects": [
+        { "oid": { "oid": "rbd_data.188b9163c78e9.00000000000015f2",
+              "key": "",
+              "snapid": -2,
+              "hash": 2427198520,
+              "max": 0,
+              "pool": 4,
+              "namespace": ""},
+          "need": "39188'2314230",
+          "have": "39174'2314229",
+          "locations": []}],
+
+rootceph pg 4.438 mark_unfound_lost revert
+Error EINVAL: pg has 1 unfound objects but we haven't probed all
+sources, not marking lost
+
+root@node-67:~# ceph pg 4.438 mark_unfound_lost delete
+Error EINVAL: pg has 1 unfound objects but we haven't probed all
+sources, not marking lost
+
+pg query output is
+:https://drive.google.com/file/d/0B08hG89CXoPbb2p0ZFc2OGRRQmpkcGVuZnoxNFJnQS05UDlv/view
+-------------------------
+hnuzhoulin2@gmail.com
