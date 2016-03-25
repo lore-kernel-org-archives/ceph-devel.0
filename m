@@ -1,53 +1,87 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [GIT PULL] Ceph fixes for -rc7
-Date: Fri, 25 Mar 2016 10:34:20 +0100
-Message-ID: <CAOi1vP9j8RCucc9DLoFUOXyBrGuTbN10hnQ0CwOE-PK=_j=k=w@mail.gmail.com>
-References: <alpine.DEB.2.11.1603052045320.25897@cpach.fuggernut.com>
-	<87fuvfw6g9.fsf@notabene.neil.brown.name>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: BlueStore
+Date: Fri, 25 Mar 2016 08:45:30 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1603250840001.26068@cpach.fuggernut.com>
+References: <CY1PR0201MB18973994D4CD6F28980B1240E8820@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87fuvfw6g9.fsf@notabene.neil.brown.name>
-Sender: linux-kernel-owner@vger.kernel.org
-To: NeilBrown <neilb@suse.com>
-Cc: Sage Weil <sweil@redhat.com>, torvalds@linux-foundation.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:58002 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751379AbcCYMpn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 25 Mar 2016 08:45:43 -0400
+In-Reply-To: <CY1PR0201MB18973994D4CD6F28980B1240E8820@CY1PR0201MB1897.namprd02.prod.outlook.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, Mar 25, 2016 at 5:02 AM, NeilBrown <neilb@suse.com> wrote:
-> On Sun, Mar 06 2016, Sage Weil wrote:
->
->> Hi Linus,
->>
->> Please pull the following Ceph patch from
->>
->>   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
->>
->> This is a final commit we missed to align the protocol compatibility with
->> the feature bits.  It decodes a few extra fields in two different messages
->> and reports EIO when they are used (not yet supported).
->>
->> Thanks!
->> sage
->>
->>
->> ----------------------------------------------------------------
->> Yan, Zheng (1):
->>       ceph: initial CEPH_FEATURE_FS_FILE_LAYOUT_V2 support
->
-> Just wondering, but was CEPH_FEATURE_FS_FILE_LAYOUT_V2 supposed to have
-> exactly the same value as CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING (and
-> CEPH_FEATURE_CRUSH_TUNABLES5)??
+On Thu, 24 Mar 2016, Allen Samuels wrote:
+> Just wanted to drop a quick note and ask for some feedback.
+> 
+> We've been digging into the BlueStore code and there's a list of things that
+> we either missed, don't understand or believe need to be addressed before
+> BlueStore can be production ready.
+> 
+> (1) Block Allocator.
+> 
+> As I've described earlier, the memory performance of the current allocator
+> is a concern. IMO this MUST be fixed before production status.
 
-Yes, that was the point of getting it merged into -rc7.
+Agreed.  Let's make it a goal to settle on the approach by the end 
+of the hackathon next Friday.
 
-> Because when I backported this patch (and many others) to some ancient
-> enterprise kernel, it caused mounts to fail.  If it really is meant to
-> be the same value, then I must have some other backported issue to find
-> and fix.
+> (2) BlueFS Cache Memory Consumption
+> 
+> There doesn't appear to be a way to limit the memory consumption of cached
+> BlueFS files.
 
-It has to be backported in concert with changes that add support for
-the other two bits.  How did mount fail?
+The only data cache is the page cache address_space assocated with the 
+block device, which is handled by the kernel.  You're right that there 
+isn't a way to prevent it from consuming otherwise unused memory, but it 
+won't prevent that memory from being reclaimed and used by anything else, 
+so I don't think that is a problem.
 
-Thanks,
+Eventually we may need finer-grained control of the cache, but I don't 
+think we are anywhere close to that point yet...
 
-                Ilya
+> (3) BlueFS Journal Compaction
+> 
+> Current implementation periodically re-compacts the BlueFS journal (log) and
+> inhibits other write operations during this time. Not clear if this has a
+> significant impact on front-end latency or not.
+
+The plan has always been to make this an async process, but it wasn't 
+trivial enough to do in the first pass.  Some but not all of the 
+infrastructure is there.
+
+> (4) WAL Throttling
+> 
+> There doesn't appear to be a mechanism to limit the amount of outstanding
+> WAL data. Some limit is needed here.
+
+There are throttle_wal_{ops,bytes} throttles.  Nothing very sophisticated.  
+Sam and Somnath, we should revisit the overall throttling approach given 
+what you've learned with FileStore.
+
+> (5) Compression
+> 
+> While technically not required to make bluestore production ready. I think
+> there will be enough revision of the code and data structures in order to
+> support compression that we really really want to get this into BlueStore
+> before it goes "GA", so that we don't have to re-stabilize it.
+
+Agreed, and I would combine (5.5) Checksums with this as the data 
+structures and overall IO flow are essentially the same.
+
+> (6) Erasure Coding Overwrites
+> 
+> As previously documented, this feature requires support in BlueStore.
+> Fortunately, implementing support is easy and non-disruptive. Hence, one
+> might argue that it doesn't belong on this list.
+
+Yeah, this one should be quite straightforward.  We can add it sooner 
+rather than later, but there won't be any users (aside from the 
+unit/functional tests), so I'm fine waiting.
+
+sage
