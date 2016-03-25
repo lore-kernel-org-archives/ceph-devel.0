@@ -1,63 +1,85 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v2 2/6] libceph: introduce reference counted string
-Date: Fri, 25 Mar 2016 11:05:02 +0800
-Message-ID: <EFA5261C-F2CD-4D70-8F6F-40D7D48082D6@redhat.com>
-References: <1454742006-85706-1-git-send-email-zyan@redhat.com> <1454742006-85706-3-git-send-email-zyan@redhat.com> <CAOi1vP8SrL71Q34W4b_ZDUkTNyi-UtDstgrTjnjq9fGE=VMa_g@mail.gmail.com> <4C995660-CB5D-4E26-9947-988D65BEAA3A@redhat.com> <CAOi1vP-g9kj6B-Fmv7cBzjfrnoSrnGuVZyB+b0K-CmpLPd6xbw@mail.gmail.com> <040FA762-A7C8-47FE-A72B-03419C79C782@redhat.com> <CAOi1vP_v=iev1vQQrxGFYU2y7uTV1_imV5MkwqMgBQUCf2GnEg@mail.gmail.com> <CDD7EC25-57D8-4BD5-B8D0-41AAFC09EFA7@redhat.com> <CAOi1vP80kT5rE=pjefY09KByAj6upeb2zOG8BwkaXpziZfQJJw@mail.gmail.com> <21C799EB-4B5D-4F66-923F-FF52F0323146@redhat.com> <CAOi1vP9L7yN_RHHbMLK7Cwr84pBYgm8GpHFsygwUxj4Tpjabfg@mail.gmail.com> <A3CC3516-D528-4F4A-B1A9-3421844B1484@redhat.com> <CAOi1vP9E4S1yrWAwQ6KSKL07-xZwt301UBBq6Z5QOoR3L+0ycQ@mail.gmail.com> <C4A3841F-3310-446D-
- 9DC1-CEB2FE40CB4E@redhat.com> <CAOi1vP-vh5T4Z7eM__wc2a+sOJKy4UhQgtkfZw3aZkxFFSRdHQ@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40832 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752452AbcCYDFI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Mar 2016 23:05:08 -0400
-In-Reply-To: <CAOi1vP-vh5T4Z7eM__wc2a+sOJKy4UhQgtkfZw3aZkxFFSRdHQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+From: NeilBrown <neilb@suse.com>
+Subject: Re: [GIT PULL] Ceph fixes for -rc7
+Date: Fri, 25 Mar 2016 15:02:30 +1100
+Message-ID: <87fuvfw6g9.fsf@notabene.neil.brown.name>
+References: <alpine.DEB.2.11.1603052045320.25897@cpach.fuggernut.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; boundary="=-=-=";
+	micalg=pgp-sha256; protocol="application/pgp-signature"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <alpine.DEB.2.11.1603052045320.25897@cpach.fuggernut.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>, torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
+
+--=-=-=
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
+
+On Sun, Mar 06 2016, Sage Weil wrote:
+
+> Hi Linus,
+>
+> Please pull the following Ceph patch from
+>
+>   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-=
+linus
+>
+> This is a final commit we missed to align the protocol compatibility with=
+=20
+> the feature bits.  It decodes a few extra fields in two different message=
+s=20
+> and reports EIO when they are used (not yet supported).
+>
+> Thanks!
+> sage
+>
+>
+> ----------------------------------------------------------------
+> Yan, Zheng (1):
+>       ceph: initial CEPH_FEATURE_FS_FILE_LAYOUT_V2 support
+
+Just wondering, but was CEPH_FEATURE_FS_FILE_LAYOUT_V2 supposed to have
+exactly the same value as CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING (and
+CEPH_FEATURE_CRUSH_TUNABLES5)??
+Because when I backported this patch (and many others) to some ancient
+enterprise kernel, it caused mounts to fail.  If it really is meant to
+be the same value, then I must have some other backported issue to find
+and fix.
+
+Thanks,
+NeilBrown
 
 
-> On Mar 24, 2016, at 21:55, Ilya Dryomov <idryomov@gmail.com> wrote:
->=20
-> On Thu, Mar 24, 2016 at 2:18 PM, Yan, Zheng <zyan@redhat.com> wrote:
->>=20
->>> On Mar 24, 2016, at 18:26, Ilya Dryomov <idryomov@gmail.com> wrote:
->=20
-> [ snip ]
->=20
->>> TBH I still can't wrap my head around lockless layout/namespace poi=
-nter
->>> updates and how that can ever work reliably=E2=80=A6
->>=20
->> see Documentation/RCU/rcuref.txt. How RCU is used in my code is simi=
-lar to the second example.
->=20
-> It's the higher-level cephfs code and installing new namespaces in th=
-e
-> middle of whatever else that might be going on that I'm worried about=
-=2E
-> See my other mail, I'd like to hear what exactly is being achieved wi=
-th
-> this approach and have you considered reusing i_ceph_lock (or others,
-> of which there are plenty).
+>
+>  fs/ceph/addr.c                     |  4 ++++
+>  fs/ceph/caps.c                     | 27 ++++++++++++++++++++++++---
+>  fs/ceph/inode.c                    |  2 ++
+>  fs/ceph/mds_client.c               | 16 ++++++++++++++++
+>  fs/ceph/mds_client.h               |  1 +
+>  fs/ceph/super.h                    |  1 +
+>  include/linux/ceph/ceph_features.h |  1 +
+>  7 files changed, 49 insertions(+), 3 deletions(-)
 
-Updating namespace pointer is protected by i_ceph_lock, For read access=
- of the namespace, using i_ceph_lock does not provide any extra guarant=
-ee. This approach provides lockless access of namespace, it=E2=80=99s c=
-onvenient for functions that do not know=20
-i_ceph_lock.
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Regards
-Yan, Zheng
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
 
-> Thanks,
->=20
->                Ilya
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+iQIcBAEBCAAGBQJW9LhXAAoJEDnsnt1WYoG5UbsP/3kejOX7z23x1U2O5a429+Bu
+CMCR9HasYJqMojP9BY4VBU9o8EwW+8dXFI2qR9fhFQMCHgaqgiGZz1a8uaNmUW9v
+aBYFNgEKYK8nS+Dbl3ucatpdy3uuWgsqkZ+XBe1MWSXWV0Lrj1ELG/nuqRjQsT50
+Taa3WQjPUu9svvqTkzQpIueQMfzaK6tD5mvH2sBoNM8Nj/IW/bue9l8UG+nkafci
+zhWTN2sOunzqE8o3NNmWWkTJwylkBf58/RS2Ic2c+yNQ6xRDwiHcgob17JXqL0eE
+3f4xJw69Ovtuct+9NDcF3EfJjUeggRKafm7h1bsVG6FyLtpVO9o76vN/yS4zt/gN
+hffishe+/WGrkCCqzP4i0P6pnczgs7dvfRC14AGM/4l8IojUZaDj7lE1m8s6fimH
+4JHYOl/EbowO08Y+ZUiKsTfsAjDGQzOLR/buOSie9fQJjepCazT9AJPISvYSxJdK
+BwSAnL5fB0VqgXQ6+I02Ve4R1SDO0vvHLmPEeDQVGvNZaSqHhTRrnhVdTY21UlCX
+ZteTKTt0uE5TeRb+Upm0qMyVD+oGmsbX+nYDwXZTEX3r3LiIw0V30l1tSmA2R+vC
+g7inI3HQOfFkvI3qhrev9OBe+lDZsFB3q3PGWLk8U/8JGSs4KnTj0D+8An2SGGck
+oyyXMK3NmcO2xrRyj1YJ
+=JAJs
+-----END PGP SIGNATURE-----
+--=-=-=--
