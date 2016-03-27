@@ -1,35 +1,59 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [GIT PULL] Ceph updates for 4.6-rc1
-Date: Sat, 26 Mar 2016 15:54:35 -0700
-Message-ID: <CA+55aFyUUsKfHPxuYDs654vLPqOVudcPpyYfgp4UVmMfDXY_EQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1603252132500.29038@cpach.fuggernut.com>
-	<CA+55aFyXACVwL6inthTv=Orvp_6wDaA1c_BLvwJTYBORQTXa+w@mail.gmail.com>
-	<CAOi1vP_6RX8ZxZNfU2__FkfcOcgT49spHjWn8aGTOArRRNXpew@mail.gmail.com>
-	<CA+55aFyrep8hMApzYA4DyFgEoHc8o8KATTV=Jqf6-FgtLsqFOQ@mail.gmail.com>
-	<CAOi1vP-=j49SgV3cSGq2z4LijkcaD13nT98PynXL2Y8MRy0puw@mail.gmail.com>
-	<CA+55aFzwKpeuBLS5j+jyp_Zoh89edopgQNaC6GHBsx95Hza81A@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: configuring ansible apt-repository for i386
+Date: Sun, 27 Mar 2016 01:28:22 +0100
+Message-ID: <56F72926.8000402@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CA+55aFzwKpeuBLS5j+jyp_Zoh89edopgQNaC6GHBsx95Hza81A@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Sage Weil <sage@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:43894 "EHLO
+	relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754230AbcC0A22 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 26 Mar 2016 20:28:28 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Thierry Delamare <t.delamare@laposte.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sat, Mar 26, 2016 at 3:00 PM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
->
-> But dammit, when things come in at the very end of the merge window,
-> which makes me grumpy to begin with, AND it is then re-based, at that
-> point I'm not inclined to let things slide any more.
+Hi Thierry,
 
-Oh fudge it. I ended up pulling anyway, because this is the last thing
-pending in my queue, and I'm going to do -rc1 now.
+Running on an i386 host, ansible does the following:
 
-So against my "time to teach people a lesson" better judgement, I
-ended up being lax about it anyway.
+TASK: [testnode | Add local apt repos.] *******************************=
+******** ^M
 
-But next time..
+2016-03-27 00:16:20,737.737 INFO:teuthology.task.ansible.out:^[[0;33mch=
+anged: [target167114241144.teuthology] =3D> (item=3Ddeb http://gitbuild=
+er.ceph.com/libapache-mod-fastcgi-deb-trusty-x86_64-basic/ref/master/ t=
+rusty main) =3D> {"changed": true, "item": "deb http://gitbuilder.ceph.=
+com/libapache-mod-fastcgi-deb-trusty-x86_64-basic/ref/master/ trusty ma=
+in", "repo": "deb http://gitbuilder.ceph.com/libapache-mod-fastcgi-deb-=
+trusty-x86_64-basic/ref/master/ trusty main", "state": "present"}^[[0m
 
-            Linus
+where x86_64 should be i386. I traced that back to
+
+https://github.com/ceph/ceph-cm-ansible/blob/master/roles/testnode/task=
+s/apt/repos.yml#L52
+
+- name: Add local apt repos.
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+    update_cache: no=20
+    mode: 0644
+  with_items: apt_repos|list + common_apt_repos|list
+  register: local_apt_repos
+
+Do you know how I canfigure out where "item" (which is presumably the i=
+ncorrect http://gitbuilder.ceph.com/libapache-mod-fastcgi-deb-trusty-x8=
+6_64-basic/ref/master/ here) is set ?
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
