@@ -1,38 +1,40 @@
-From: Simon Leinen <simon.leinen-em26ZHiX79btRgLqZ5aouw@public.gmane.org>
-Subject: Re: v10.1.0 Jewel release candidate available
-Date: Mon, 28 Mar 2016 18:24:20 +0200
-Message-ID: <aaegaupo3v.fsf@switch.ch>
-References: <alpine.DEB.2.11.1603281029290.6074@cpach.fuggernut.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Fixes: lines in commit messages
+Date: Mon, 28 Mar 2016 09:29:04 -0700
+Message-ID: <CAJ4mKGajQc-c4=EGfoH9BUQ612GqJ3PSDSnPMbwz1kmqGm-YyA@mail.gmail.com>
+References: <56F95725.3040407@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1603281029290.6074-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org> (Sage
-	Weil's message of "Mon, 28 Mar 2016 11:28:14 -0400 (EDT)")
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f52.google.com ([209.85.213.52]:35163 "EHLO
+	mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754098AbcC1Q3G (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2016 12:29:06 -0400
+Received: by mail-vk0-f52.google.com with SMTP id e6so162225996vkh.2
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Mar 2016 09:29:05 -0700 (PDT)
+In-Reply-To: <56F95725.3040407@suse.cz>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Sage Weil writes:
-> The first release candidate for Jewel is now available!
+On Mon, Mar 28, 2016 at 9:09 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+> Greetings, Ceph developers:
+>
+> As the number of GitHub pull requests rises (currently in the 8000s), we are
+> starting have trouble with unrelated PRs getting closed automatically by the
+> "Fixes: #...." lines in PR descriptions and commit messages.
+>
+> For example, if you open PR#9534 that fixes tracker issue#8069, including a
+> line "Fixes: #8069" will cause PR#8069 to be closed - obviously, this is
+> wrong but it's the way GitHub works.
+>
+> Sage suggested that we work around this by referring to the tracker issue by
+> its full URL. I opened a PR changing SubmittingPatches to reflect this:
+>
+> https://github.com/ceph/ceph/pull/8312
+>
+> Any objections?
 
-Cool!
-
-[...]
-> Packages for aarch64 will also be posted shortly!
-
-According to the announcement, Ubuntu Xenial should now be supported
-instead of Precise; but I don't see Xenial packages on
-download.ceph.com.  Will those arrive, or should we get them from
-Canonical's Xenial repo?
--- 
-Simon.
+Sounds good to me. Truly depressing about GitHub, but sounds good.
+-Greg
