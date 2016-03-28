@@ -1,39 +1,43 @@
-From: Sage Weil <sage@redhat.com>
-Subject: v10.1.0 Jewel release candidate available
-Date: Mon, 28 Mar 2016 11:28:14 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1603281029290.6074@cpach.fuggernut.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Fixes: lines in commit messages
+Date: Mon, 28 Mar 2016 18:09:09 +0200
+Message-ID: <56F95725.3040407@suse.cz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34500 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752404AbcC1P20 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2016 11:28:26 -0400
+Received: from mx2.suse.de ([195.135.220.15]:47235 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753922AbcC1QJM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 28 Mar 2016 12:09:12 -0400
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id 7F288AC32
+	for <ceph-devel@vger.kernel.org>; Mon, 28 Mar 2016 16:09:09 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi everyone,
+Greetings, Ceph developers:
 
-The first release candidate for Jewel is now available!
+As the number of GitHub pull requests rises (currently in the 8000s), we 
+are starting have trouble with unrelated PRs getting closed 
+automatically by the "Fixes: #...." lines in PR descriptions and commit 
+messages.
 
-Jewel is the next major release of Ceph, and will be the foundation for 
-the next long-term stable release. There have been many major changes 
-since the Infernalis (9.2.x) and Hammer (0.94.x) releases, and the upgrade 
-process is non-trivial Please read these release notes carefully.
+For example, if you open PR#9534 that fixes tracker issue#8069, 
+including a line "Fixes: #8069" will cause PR#8069 to be closed - 
+obviously, this is wrong but it's the way GitHub works.
 
-	http://docs.ceph.com/docs/master/release-notes/#v10-1-0-jewel-release-candidate
+Sage suggested that we work around this by referring to the tracker 
+issue by its full URL. I opened a PR changing SubmittingPatches to 
+reflect this:
 
-The packages are in the new Jewel repos, so you can install it as you 
-would the eventual jewel release, e.g., with
+https://github.com/ceph/ceph/pull/8312
 
-	ceph-deploy install --stable jewel HOST
+Any objections?
 
-The upgrade tests are looking good, as are the general regression tests.  
-We hope to have another release candidate or the final release out 
-soon.
-
-Packages for aarch64 will also be posted shortly!
-
-Thanks!
-sage
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
