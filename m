@@ -1,68 +1,106 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [GIT PULL] Ceph fixes for -rc7
-Date: Mon, 28 Mar 2016 10:12:51 +0800
-Message-ID: <CAAM7YA=B1_3qD+dDOzuS4-0uQd=qN0Gqh66802ei47pEFHZG+g@mail.gmail.com>
-References: <alpine.DEB.2.11.1603052045320.25897@cpach.fuggernut.com>
-	<87fuvfw6g9.fsf@notabene.neil.brown.name>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Teuthology
+Date: Mon, 28 Mar 2016 13:17:00 +0200
+Message-ID: <56F912AC.40202@dachary.org>
+References: <CAPFmEhZ3BGag3BBx505UyhtYA3+PLFLDz=oDHheWKPQyoQyQYQ@mail.gmail.com>
+ <56F00270.5010901@dachary.org>
+ <CAPFmEhbbpwm2KS1FaCxzCXhnwAJ5TxcqDj2RsMLMnnNcOeWWkw@mail.gmail.com>
+ <56F900EE.90106@dachary.org>
+ <CAPFmEhYPFJR==JcgasQqwwDrA277DjXF4oe49utwHStjKkFq=w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:36846 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753229AbcC1CMx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Mar 2016 22:12:53 -0400
-In-Reply-To: <87fuvfw6g9.fsf@notabene.neil.brown.name>
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:50412 "EHLO
+	relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751444AbcC1LRH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2016 07:17:07 -0400
+In-Reply-To: <CAPFmEhYPFJR==JcgasQqwwDrA277DjXF4oe49utwHStjKkFq=w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: NeilBrown <neilb@suse.com>
-Cc: Sage Weil <sweil@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, ceph-devel <ceph-devel@vger.kernel.org>
+To: Herman Narkaytis <hnarkaytis@mirantis.com>
+Cc: Vitalii Solovei <vsolovei@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>, Maksym Shalamov <mshalamov@mirantis.com>, Thierry Delamare <t.delamare@laposte.net>
 
-On Fri, Mar 25, 2016 at 12:02 PM, NeilBrown <neilb@suse.com> wrote:
-> On Sun, Mar 06 2016, Sage Weil wrote:
->
->> Hi Linus,
->>
->> Please pull the following Ceph patch from
->>
->>   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
->>
->> This is a final commit we missed to align the protocol compatibility with
->> the feature bits.  It decodes a few extra fields in two different messages
->> and reports EIO when they are used (not yet supported).
->>
->> Thanks!
->> sage
->>
->>
->> ----------------------------------------------------------------
->> Yan, Zheng (1):
->>       ceph: initial CEPH_FEATURE_FS_FILE_LAYOUT_V2 support
->
-> Just wondering, but was CEPH_FEATURE_FS_FILE_LAYOUT_V2 supposed to have
-> exactly the same value as CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING (and
-> CEPH_FEATURE_CRUSH_TUNABLES5)??
-> Because when I backported this patch (and many others) to some ancient
-> enterprise kernel, it caused mounts to fail.  If it really is meant to
-> be the same value, then I must have some other backported issue to find
-> and fix.
+Hi Herman,
 
-Yes, it's mean to be some value. For the mount failure, please make
-sure the MDS is compiled from the newest ceph code.
+I recently succeeded (thanks to Thierry's help ;-) to install paddles u=
+sing ansible[1]. The playbook was developped recently by Zack. Even if =
+you don't otherwise use ansible, it's a better option than more complex=
+ instructions. And easier to maintain as you can rely on Andrew, Dan an=
+d Zack (and maybe others) to maintain the playbook. One thing that I li=
+ke (but is frowned upon by more seasoned ansible users) is to use ansib=
+le from the node where paddles is to be installed. For instance:
 
-Regards
-Yan, Zheng
+   ansible-playbook -i paddles, -c local paddles.yml
 
->
-> Thanks,
-> NeilBrown
->
->
->>
->>  fs/ceph/addr.c                     |  4 ++++
->>  fs/ceph/caps.c                     | 27 ++++++++++++++++++++++++---
->>  fs/ceph/inode.c                    |  2 ++
->>  fs/ceph/mds_client.c               | 16 ++++++++++++++++
->>  fs/ceph/mds_client.h               |  1 +
->>  fs/ceph/super.h                    |  1 +
->>  include/linux/ceph/ceph_features.h |  1 +
->>  7 files changed, 49 insertions(+), 3 deletions(-)
+I suppose the http://docs.ceph.com/teuthology/docs/LAB_SETUP.html docum=
+ent should be updated with this new recommended deployment method (the =
+main document is at https://github.com/ceph/teuthology/blob/master/docs=
+/LAB_SETUP.rst).
+
+Toward the end of your document, the "Submitting slave node" is where t=
+he I don't have any experience. But David Galloway and Dan Mick and may=
+be others do as they have deployed and configured all the hardware curr=
+ently in the sepia lab. It's a significant undertaking but is fortunate=
+ly well documented and all files you need are public.
+
+I chose an easier alternative which is to rely on an OpenStack cluster =
+to provision the resources required to run teuthology jobs[2].
+
+The last pitfall that comes to mind, and it's a significant one, is tha=
+t a number of teuthology jobs are sensitive to the infrastructure. For =
+instance, I recently worked around a paramiko bug that only showed on O=
+penStack although it is by no mean specific to OpenStack[3]. Fixing cep=
+h-qa-suite so that it does not break because the infrastructure is slow=
+er or faster, has 1G network or 10G, has fast or slow internet connecti=
+ons etc. is sometime non trivial. But for the most part it's easy and a=
+ little tedious: you just have to do it on a regular basis :-)
+
+My 2cts
+
+[1] installing paddles via ansible http://www.spinics.net/lists/ceph-de=
+vel/msg28974.html
+[2] OpenStack backend https://github.com/dachary/teuthology/tree/openst=
+ack#openstack-backend
+[3] openstack: SSHException: Key-exchange timed out http://tracker.ceph=
+=2Ecom/issues/15236
+
+On 28/03/2016 12:14, Herman Narkaytis wrote:
+> We intended to publish this instruction as public document, so feedba=
+ck from broader community would be valuable.
+>=20
+> HHN.
+>=20
+> On Mon, Mar 28, 2016 at 1:01 PM, Loic Dachary <loic@dachary.org <mail=
+to:loic@dachary.org>> wrote:
+>=20
+>     Hi,
+>=20
+>     On 28/03/2016 10:55, Herman Narkaytis wrote:
+>     > Loic,
+>     >   Below you will find a link on Teuthology deployment instructi=
+ons. I would be appreciated to get your feedback on it.
+>=20
+>     This is a precise and detailed documentation, very useful. Do you=
+ mind if I post my remarks about it with ceph-devel in cc ? Other devel=
+opers will certainly have interesting contributions to make.
+>=20
+>     >   https://docs.google.com/document/d/18MW0NAwEZB45lGgsgjpb4fFdi=
+8ope1YGr5OA-uvsIR8/edit
+>     >
+>     >   We are still figuring out how to deploy GitBuilder, but it sh=
+ould not be as hard as it was with Teuthology.
+>     > HHN.
+>=20
+>     :-)
+>=20
+>     Cheers
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
