@@ -1,74 +1,166 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v2 2/6] libceph: introduce reference counted string
-Date: Tue, 29 Mar 2016 10:29:52 +0800
-Message-ID: <AB521F65-0B61-4BEB-B284-7C70FD3909ED@redhat.com>
-References: <1454742006-85706-1-git-send-email-zyan@redhat.com> <1454742006-85706-3-git-send-email-zyan@redhat.com> <CAOi1vP8SrL71Q34W4b_ZDUkTNyi-UtDstgrTjnjq9fGE=VMa_g@mail.gmail.com> <4C995660-CB5D-4E26-9947-988D65BEAA3A@redhat.com> <CAOi1vP-g9kj6B-Fmv7cBzjfrnoSrnGuVZyB+b0K-CmpLPd6xbw@mail.gmail.com> <040FA762-A7C8-47FE-A72B-03419C79C782@redhat.com> <CAOi1vP_v=iev1vQQrxGFYU2y7uTV1_imV5MkwqMgBQUCf2GnEg@mail.gmail.com> <CDD7EC25-57D8-4BD5-B8D0-41AAFC09EFA7@redhat.com> <CAOi1vP80kT5rE=pjefY09KByAj6upeb2zOG8BwkaXpziZfQJJw@mail.gmail.com> <21C799EB-4B5D-4F66-923F-FF52F0323146@redhat.com> <CAOi1vP9L7yN_RHHbMLK7Cwr84pBYgm8GpHFsygwUxj4Tpjabfg@mail.gmail.com> <A3CC3516-D528-4F4A-B1A9-3421844B1484@redhat.com> <CAOi1vP9E4S1yrWAwQ6KSKL07-xZwt301UBBq6Z5QOoR3L+0ycQ@mail.gmail.com> <C4A3841F-3310-446D-
- 9DC1-CEB2FE40CB4E@redhat.com> <CAOi1vP-vh5T4Z7eM__wc2a+sOJKy4UhQgtkfZw3aZkxFFSRdHQ@mail.gmail.com> <EFA5261C-F2CD-4D70-8F6F-40D7D48082D6@redhat.com> <CAOi1vP96C_GheGTR248g2FnT+fgSVYAO95Wtia!
- JOLzhCLH2aHQ@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Igor.Podoski@ts.fujitsu.com" <Igor.Podoski@ts.fujitsu.com>
+Subject: RE: Ceph watchdog-like thing to reduce IO block during process goes
+ down by abort()
+Date: Tue, 29 Mar 2016 06:07:20 +0000
+Message-ID: <9939bca9f29e4dafadf5946cf4392a98@R01UKEXCASM222.r01.fujitsu.local>
+References: <27d3bfba39234f83b8441abc4e9aea92@R01UKEXCASM222.r01.fujitsu.local>
+ <CAOi1vP89OgUmvozXRO9cvNS-KYaSkBGQRkPS3UeNa2+kgAHkmA@mail.gmail.com>
+ <CAJ4mKGbDQEyRfeMskBwsTxK_qoJY_4GfGfFz1h1ht6h6E0xhSg@mail.gmail.com>
+ <CANP1eJFto2wEGaWt_dgys-cMQn_6t3wFrWwcURwkX0Y+HY_PKQ@mail.gmail.com>
+ <alpine.DEB.2.11.1603251109400.26068@cpach.fuggernut.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52963 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751185AbcC2CaA convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2016 22:30:00 -0400
-In-Reply-To: <CAOi1vP96C_GheGTR248g2FnT+fgSVYAO95WtiaJOLzhCLH2aHQ@mail.gmail.com>
+Received: from mail1.bemta3.messagelabs.com ([195.245.230.168]:10296 "EHLO
+	mail1.bemta3.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751999AbcC2GHm convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 29 Mar 2016 02:07:42 -0400
+In-Reply-To: <alpine.DEB.2.11.1603251109400.26068@cpach.fuggernut.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+To: Sage Weil <sweil@redhat.com>, Milosz Tanski <milosz@adfin.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Friday, March 25, 2016 4:13 PM
+> To: Milosz Tanski
+> Cc: Gregory Farnum; Ilya Dryomov; Podoski, Igor; ceph-devel
+> Subject: Re: Ceph watchdog-like thing to reduce IO block during process goes
+> down by abort()
+> 
+> On Fri, 25 Mar 2016, Milosz Tanski wrote:
+> > On Thu, Mar 24, 2016 at 4:25 PM, Gregory Farnum <gfarnum@redhat.com>
+> wrote:
+> > > On Thu, Mar 24, 2016 at 12:53 PM, Ilya Dryomov <idryomov@gmail.com>
+> wrote:
+> > >> On Thu, Mar 24, 2016 at 8:00 AM, Igor.Podoski@ts.fujitsu.com
+> > >> <Igor.Podoski@ts.fujitsu.com> wrote:
+> > >>> Hi Cephers!
+> > >>>
+> > >>> Currently when we had a disk failure, assert() and then abort() was
+> triggered and process was killed (ABRT). Other osds will eventually mark
+> dead one as down, but it depends of heartbeat settings and monitor settings
+> (mon_osd_min_down_reporters/mon_osd_min_down_reports). During
+> dead-not-marked-as-down osd you can see blocked IO during writes and
+> reads.
+> > >>>
+> > >>> Recently I've made https://github.com/ceph/ceph/pull/7740 which is
+> about sending MakrMeDown msg to monitor just before osd is going bye-
+> bye. It prevents blocked IO in above case, and any other assert that is not on
+> message sending path, so I need messenger/pipes/connections working for
+> this. I've made some test and it looks good, when I pull out drive from my
+> cluster during rados bench, IO blocks for less than 1 second or not at all,
+> previously it was > 10 sec (on my cluster settings).
+> > >>>
+> > >>> Sage pointed me that some time ago was similar PR
+> https://github.com/ceph/ceph/pull/6514 and there was a thought about
+> ceph-watchdog process, that could monitor osd's and send info directly to
+> monitor when they disappear. This would prevent all assert() cases, and
+> other ones like kill -9 or similar.
+> > >>>
+> > >>> I have a few ideas how such functionality could be implemented, so
+> my question is - does any of you started already doing something similar?
+> > >>>
+> > >>> Let's have a brain storm about it!
+> > >>>
+> > >>> Ideas about improving 7740/6514 MarkMeDown internal mechanism:
+> > >>> - I think, I could send message with MarkMeDown payload, but in a
+> raw way, not through Messenger path. This could be as good as bad in this
+> case.
+> > >>> - I could poke osd-neighbor through signal and neighbor will send
+> Mark(SignalSender)Down message (this won't work If whole hdd controller
+> will be down, all osd will be dead in narrow time window). So it's like instant
+> bad-health heartbeat message. Still depends of Messenger send path of
+> osd-neighbor.
+> > >>
+> > >>>
+> > >>> External ceph-watchdog:
+> > >>> Just like Sage wrote
+> https://github.com/ceph/ceph/pull/6514#issuecomment-159372845 Or
+> similar: each osd, during start passes its own PID to ceph-watchdog process
+> through shared memory/socket/named pipe (whatever). Ceph-watchdog
+> checks if current PID exists, by checking changes in /proc/PID or
+> /proc/PID/cmd directory/file (maybe Inotify could handle this). When file or
+> folder is changed(missing) it sends MarkThisOsdDown to monitor and that's
+> all. But this won't be watchdog strict, rather process down notify.
+> > >>>
+> > >>> Or maybe both ways PR7740 + external ?
+> > >>
+> > >> I'm not involved in any of this, but since you asked for a brain
+> > >> storm... ;)
+> > >>
+> > >> Is it worth bothering with the corrupted data structures case at all?
+> > >> Trying to handle it from within the aborting ceph-osd process is
+> > >> not a very easy thing to do ("raw way, not through Messenger",
+> > >> signals, etc) and if you do it wrong, you'd mask the original stack
+> > >> trace.  An external ceph-watchdog is yet another entity which has
+> > >> to be set up, maintained and accounted for.
+> > >>
+> > >> Why not just distinguish legitimate/expected errors which we check
+> > >> for but currently handle with assert(0) and the actual assert
+> > >> failures?  In the vast majority of cases that fall into the former
+> > >> bucket all of the internal data structures, including the
+> > >> messenger, will be in order and so we can send a MarkMeDown
+> message
+> > >> and fail gracefully.  Implementing it is just a matter of
+> > >> identifying those sites, but that's not a bad exercise to do even on its
+> own.
+> > >>
+> > >> The actual assert failures can abort() as they do now.  Any such
+> > >> failure is a serious bug and there's hopefully not too many of them
+> > >> to worry about shrinking the timeout to a minimum, unless there are
+> > >> hard numbers that prove otherwise, of course.  And if you kill -9
+> > >> your OSDs, you deserve to wait for MONs to catch up.  Am I missing
+> > >> any use cases here?
+> > >
+> > > This is something Sam and I have talked about in the past, but
+> > > apparently Sage didn't like that idea in
+> > > https://github.com/ceph/ceph/pull/6514 and suggested a daemon
+> > > watcher instead?
+> > > Personally I tend towards building that kind of functionality into
+> > > the daemon, although he's right it will never be quite as good at
+> > > catching all cases as an external manager. The upside is that we
+> > > don't have to worry about the failure cases between the two of them.
+> > > ;) -Greg
+> >
+> > There's no reason the watcher process can't be a child that's kicked
+> > off when the OSD startups. If there's a pipe between the two, when the
+> > parent goes away the child will get a EOF on reading from the pipe. On
+> > Linux you can also do a cute trick to have the child notified when
+> > parent quits using prctl(PR_SET_PDEATHSIG, SIG???).
+> 
+> That does simplify the startup/management piece, but it means one watcher
+> per OSD, and since we want the watcher to have an active mon session to
+> make the notification quick, it doubles the mon session load.
 
-> On Mar 29, 2016, at 03:37, Ilya Dryomov <idryomov@gmail.com> wrote:
->=20
-> On Fri, Mar 25, 2016 at 4:05 AM, Yan, Zheng <zyan@redhat.com> wrote:
->>=20
->>> On Mar 24, 2016, at 21:55, Ilya Dryomov <idryomov@gmail.com> wrote:
->>>=20
->>> On Thu, Mar 24, 2016 at 2:18 PM, Yan, Zheng <zyan@redhat.com> wrote=
-:
->>>>=20
->>>>> On Mar 24, 2016, at 18:26, Ilya Dryomov <idryomov@gmail.com> wrot=
-e:
->>>=20
->>> [ snip ]
->>>=20
->>>>> TBH I still can't wrap my head around lockless layout/namespace p=
-ointer
->>>>> updates and how that can ever work reliably=E2=80=A6
->>>>=20
->>>> see Documentation/RCU/rcuref.txt. How RCU is used in my code is si=
-milar to the second example.
->>>=20
->>> It's the higher-level cephfs code and installing new namespaces in =
-the
->>> middle of whatever else that might be going on that I'm worried abo=
-ut.
->>> See my other mail, I'd like to hear what exactly is being achieved =
-with
->>> this approach and have you considered reusing i_ceph_lock (or other=
-s,
->>> of which there are plenty).
->>=20
->> Updating namespace pointer is protected by i_ceph_lock, For read
->> access of the namespace, using i_ceph_lock does not provide any extr=
-a
->> guarantee. This approach provides lockless access of namespace, it=E2=
-=80=99s
->> convenient for functions that do not know i_ceph_lock.
->=20
-> Could you name some of these functions?
+We could also do it like this:
 
-ceph_osdc_{new_request,readpages,write pages}
+ceph-watchdog creates named pipe in /var/lib/ceph
 
->=20
-> Thanks,
->=20
->                Ilya
+osd before abort will:
+- open file
+- wite its own id 0,1,2...
+- close file
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ceph-watchdog:
+- waits for osd ids on named pipe
+- issues a mon_command()  e.g. cmd=[{"prefix": "osd down", "ids": ["1"]}]  to the monitor just like ceph osd down, this can be done by librados from C/python, already have small PoC in python for this, seems to work.
+
+Thanks to above we have one watcher per host, no connections from osd -> watchdog, but looking on the downsides:
+- we could hit open files limit
+- or anything else using open/write/close
+- multiple OSD's could write to pipe in the same time (maybe using small constant writes here won't be an issue, currently checking this)
+
+Regards,
+Igor.
+
+> Honestly I don't think the separate daemon is that much of an issue--it's a
+> systemd unit file and a pretty simple watchdog process.  The key
+> management and systemd enable/activate bit is the part that will be
+> annoying.
+> 
+> sage
+
