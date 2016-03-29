@@ -1,39 +1,33 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: blueprint: consistency groups
-Date: Tue, 29 Mar 2016 10:54:03 -0700
-Message-ID: <CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
-References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
-	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
-	<20160325071933.GA14634@gmail.com>
+From: Vincent JARDIN <vincent.jardin@6wind.com>
+Subject: Re: arm64 public OpenStack provider
+Date: Tue, 29 Mar 2016 21:32:44 +0200
+Message-ID: <56FAD85C.2060307@6wind.com>
+References: <56FA57E8.10705@dachary.org> <56FA9BE6.1020404@6wind.com>
+ <56FAB378.2010607@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:36152 "EHLO
-	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753352AbcC2RyF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2016 13:54:05 -0400
-Received: by mail-vk0-f46.google.com with SMTP id z68so29409026vkg.3
-        for <ceph-devel@vger.kernel.org>; Tue, 29 Mar 2016 10:54:04 -0700 (PDT)
-In-Reply-To: <20160325071933.GA14634@gmail.com>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:33900 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753971AbcC2TeL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2016 15:34:11 -0400
+Received: by mail-wm0-f46.google.com with SMTP id p65so154262489wmp.1
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Mar 2016 12:34:10 -0700 (PDT)
+In-Reply-To: <56FAB378.2010607@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <mgolub@mirantis.com>
-Cc: Victor Denisov <vdenisov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>, Jason Dillaman <dillaman@redhat.com>
+To: Loic Dachary <loic@dachary.org>, Florian Haas <florian@hastexo.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Mar 25, 2016 at 12:19 AM, Mykola Golub <mgolub@mirantis.com> wrote:
-> On Thu, Mar 24, 2016 at 03:38:25PM -0700, Gregory Farnum wrote:
->
->> Just to be clear, you know that you can use the same snapid for all
->> the images, right? (...although not if you're trying to allow CGs
->> across pools. Those will be a little harder.)
->
-> I think not allowing CGs across pools would be annoying limitation for
-> users. If a VM has several volumes for different purposes (e.g. small
-> but fast volume for applicatin data, and large but slow one for
-> backups) it is logical to have different pools for those.
+Le 29/03/2016 18:55, Loic Dachary a =C3=A9crit :
+> It's definitely the cheapest cloud I know. Last time I checked it did=
+ not support the OpenStack API though. Did that change recently ?
 
-This isn't impossible either. We do it with cache pools and backing
-pools sharing a set of snapids, for instance. But the default rules
-won't work, since a snapid is just a 64-bit counter and they're
-per-pool rather than cluster-global.
--Greg
+No, it does not. But your can do your own installation I guess.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
