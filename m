@@ -1,34 +1,43 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v2 2/6] libceph: introduce reference counted string
-Date: Tue, 29 Mar 2016 17:56:36 +0800
-Message-ID: <B4ADDB5D-8516-40D9-8485-BC9DC1C9B6C8@redhat.com>
-References: <1454742006-85706-1-git-send-email-zyan@redhat.com> <1454742006-85706-3-git-send-email-zyan@redhat.com> <CAOi1vP8SrL71Q34W4b_ZDUkTNyi-UtDstgrTjnjq9fGE=VMa_g@mail.gmail.com> <4C995660-CB5D-4E26-9947-988D65BEAA3A@redhat.com> <CAOi1vP-g9kj6B-Fmv7cBzjfrnoSrnGuVZyB+b0K-CmpLPd6xbw@mail.gmail.com> <040FA762-A7C8-47FE-A72B-03419C79C782@redhat.com> <CAOi1vP_v=iev1vQQrxGFYU2y7uTV1_imV5MkwqMgBQUCf2GnEg@mail.gmail.com> <CDD7EC25-57D8-4BD5-B8D0-41AAFC09EFA7@redhat.com> <CAOi1vP80kT5rE=pjefY09KByAj6upeb2zOG8BwkaXpziZfQJJw@mail.gmail.com> <21C799EB-4B5D-4F66-923F-FF52F0323146@redhat.com> <CAOi1vP9L7yN_RHHbMLK7Cwr84pBYgm8GpHFsygwUxj4Tpjabfg@mail.gmail.com> <A3CC3516-D528-4F4A-B1A9-3421844B1484@redhat.com> <CAOi1vP9E4S1yrWAwQ6KSKL07-xZwt301UBBq6Z5QOoR3L+0ycQ@mail.gmail.com> <C4A3841F-3310-446D-
- 9DC1-CEB2FE40CB4E@redhat.com> <CAOi1vP-vh5T4Z7eM__wc2a+sOJKy4UhQgtkfZw3aZkxFFSRdHQ@mail.gmail.com> <EFA5261C-F2CD-4D70-8F6F-40D7D48082D6@redhat.com> <CAOi1vP96C_GheGTR248g2FnT+fgSVYAO95Wtia!
- JOLzhCLH2aHQ@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+From: Loic Dachary <loic@dachary.org>
+Subject: arm64 public OpenStack provider
+Date: Tue, 29 Mar 2016 12:24:40 +0200
+Message-ID: <56FA57E8.10705@dachary.org>
+Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42111 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752005AbcC2J4m convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2016 05:56:42 -0400
-In-Reply-To: <CAOi1vP96C_GheGTR248g2FnT+fgSVYAO95WtiaJOLzhCLH2aHQ@mail.gmail.com>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:49295 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750984AbcC2KYs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2016 06:24:48 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+To: Florian Haas <florian@hastexo.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Here is code that share i_layout and embed namespace in osd_request.  B=
-ut the code is more complex and less less efficient. I strongly doubt i=
-t=E2=80=99s good design.=20
+Hi Florian,
 
-https://github.com/ceph/ceph-client/commits/wip-file-layout2 <https://g=
-ithub.com/ceph/ceph-client/commits/wip-file-layout2>
+Do you happen to know if there exists a public OpenStack provider where=
+ you can instantiate arm64 instances ? We're now able to run integratio=
+n tests on such a cluster and people with access to http://cloudlab.us =
+can benefit from that. I'm looking for an alternative so everyone can g=
+ive it a try.
 
-Regards
-Yan, Zheng
+An experiment at https://www.runabove.com/armcloud.xml may eventually l=
+ead to a publicly available service but the beta is currently closed (f=
+ully booked). Although we've been granted access, it's not a solution r=
+ight now.
 
+http://www.datacentred.co.uk/ no longer provides arm64 instances.
+
+A quick look at http://www.openstack.org/marketplace/public-clouds/ doe=
+s not show which architectures are available. I could go to each of the=
+m, one after the other, but I'm hoping you already know the answer :-)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
