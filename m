@@ -1,36 +1,46 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: --with-libxfs error on F23.
-Date: Wed, 30 Mar 2016 17:37:22 +0200
-Message-ID: <20160330153722.GA19902@lst.de>
-References: <87oa9xndeq.fsf@ira-t430.wakeful.net>
+From: Xiaoxi Chen <superdebuger@gmail.com>
+Subject: Re: [ceph-users] v10.1.0 Jewel release candidate available
+Date: Wed, 30 Mar 2016 23:49:58 +0800
+Message-ID: <CAEYCsVJPLv2X9Mj_eLzvFHvH6oZLwN80abCm-bM=-bCXcBJs_Q@mail.gmail.com>
+References: <alpine.DEB.2.11.1603281029290.6074@cpach.fuggernut.com>
+	<aaegaupo3v.fsf@switch.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from verein.lst.de ([213.95.11.211]:32832 "EHLO newverein.lst.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751107AbcC3PhZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 30 Mar 2016 11:37:25 -0400
-Content-Disposition: inline
-In-Reply-To: <87oa9xndeq.fsf@ira-t430.wakeful.net>
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:36200 "EHLO
+	mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752388AbcC3Pt7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 11:49:59 -0400
+Received: by mail-yw0-f195.google.com with SMTP id p65so7352068ywb.3
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Mar 2016 08:49:59 -0700 (PDT)
+In-Reply-To: <aaegaupo3v.fsf@switch.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ira Cooper <ira@wakeful.net>
-Cc: ceph-devel@vger.kernel.org, hch@lst.de
+To: Simon Leinen <simon.leinen@switch.ch>
+Cc: Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, ceph-maintainers@ceph.com
 
-On Tue, Mar 29, 2016 at 06:10:37PM -0400, Ira Cooper wrote:
-> ira@ira-t430:/usr/include/xfs
-> [/dev/pts/1](1002/0)$ ag off64_t
-> linux.h
-> 145:typedef off64_t		xfs_off_t;
-> 
-> off64_t isn't there by default.
+I am seeing package for precise in
+http://download.ceph.com/debian-jewel/dists/precise/,   is that
+by-accident or we plan to support precise for one more LTS?
 
-off64_t requires _LARGEFILE64_SOURCE on Linux/glibc which still likes
-to make applications not handle large file offsets and inodes by default,
-something which 4.4BSD solved 20 years ago.
+Or, in other word, is it safe for user in precise to upgrade to jewel?
 
-We have no intent in supporting non-large file applications in
-xfsprogs, so I think the right thing is to ensure that your configure
-checks defines _LARGEFILE64_SOURCE.  I'm pretty sure the applications
-actually already do that, and it's just the configure machinery that's
-lazy.
+2016-03-29 0:24 GMT+08:00 Simon Leinen <simon.leinen@switch.ch>:
+> Sage Weil writes:
+>> The first release candidate for Jewel is now available!
+>
+> Cool!
+>
+> [...]
+>> Packages for aarch64 will also be posted shortly!
+>
+> According to the announcement, Ubuntu Xenial should now be supported
+> instead of Precise; but I don't see Xenial packages on
+> download.ceph.com.  Will those arrive, or should we get them from
+> Canonical's Xenial repo?
+> --
+> Simon.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
