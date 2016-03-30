@@ -1,219 +1,140 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: make error while building ceph
-Date: Wed, 30 Mar 2016 15:18:10 -0700
-Message-ID: <56FC50A2.2070507@redhat.com>
-References: <CAPpuMWyW6jzG2TE=FRLdGAxP-OOBg3=WyCcw72DU79StsM2G7A@mail.gmail.com>
- <56D2D55C.7060603@dachary.org>
- <CAPpuMWyePM_TvmO1MHFRF=jQMw5KRqyy4FA3+QRU2pAq97UwSw@mail.gmail.com>
- <56D460AD.9070806@dachary.org>
- <CAPpuMWxo-qSeMyiv2eMNhbM-5=dp-+eQOxqvH_yZUNCenfDQUg@mail.gmail.com>
- <56D59D02.1050808@redhat.com>
- <CAPpuMWzZHMLSTRuWcvwbQLQ9hSj2+BufYLB5BTAys+0_KDHh4g@mail.gmail.com>
- <56D5F871.2040901@suse.cz>
- <CAPpuMWw6dO9SMwKciX-_GmnzbzU-jUh2RsjH1gjpWd_YvdikKA@mail.gmail.com>
- <56D6670F.9070803@redhat.com>
- <CAANLjFpFOJcHjtH+_Lb_mefZHbqnY-0n_da0_r1EiZ-iCi7n3g@mail.gmail.com>
- <CAPpuMWzdjoazHYMxUp2bSW18qpVZ9Rb1xgNeVZhzH9qtbW6DJA@mail.gmail.com>
- <CAPpuMWyH1ZHX9LptfHvd5xirGqD_BQkYU2jtL0ZLXBo0ycG6pQ@mail.gmail.com>
- <CALe9h7e0to34vtDV1xLjSOAT+OXAjTrqsjzsxq5uCakpEM-7eg@mail.gmail.com>
- <CAPpuMWwEaTyQE3nqV5mXiSGr3_wwg_dt1t+jzecd=R+nSjJbBg@mail.gmail.com>
- <CAPpuMWwcE0TQM+tGheWOJcxc+vRK+N36ipUVU1o=22D+Rh2XsA@mail.gmail.com>
- <CAB2gnbXVb1EXqmPgmFe8-ro3QrHc3Kq15zcrNHqOifKBBd+bfw@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Adding compression/checksum support for bluestore.
+Date: Wed, 30 Mar 2016 15:22:07 -0700
+Message-ID: <CAJ4mKGbP1u_Z6zdC1FGm0PDj44L1=pJct2r-vuj3NCf2SS=8yg@mail.gmail.com>
+References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
+	<alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56627 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754955AbcC3WSL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 30 Mar 2016 18:18:11 -0400
-In-Reply-To: <CAB2gnbXVb1EXqmPgmFe8-ro3QrHc3Kq15zcrNHqOifKBBd+bfw@mail.gmail.com>
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:34683 "EHLO
+	mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752085AbcC3WWI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 18:22:08 -0400
+Received: by mail-vk0-f48.google.com with SMTP id e185so80286442vkb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Mar 2016 15:22:08 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noahwatkins@gmail.com>, Jai <jai_97@rediffmail.com>
-Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 03/30/2016 01:59 PM, Noah Watkins wrote:
-> I hit this too in the latest jewel branch running vstart. This is the
-> patch I used but I'm not sure its the robust fix:
-
-That ceph.in change is unrelated to 'make install', but ceph.in for
-a vstart cluster was fixed yesterday in master, and now included in 
-jewel, by:
-
-e3ad07ba61efbbb9667e4ae87f070f3da7cf29e8
-a041e5c9413fd816bc2858509319fa469fa233e5
-
-Josh
-
-> diff --git a/src/ceph.in b/src/ceph.in
-> index 321dfae..c75f510 100755
-> --- a/src/ceph.in
-> +++ b/src/ceph.in
-> @@ -69,7 +69,7 @@ def respawn_in_path(lib_path, pybind_path, pythonlib_path):
->   def get_pythonlib_dir():
->       """Returns the name of a distutils build directory"""
->       import sysconfig
-> -    f = "lib.{platform}-{version[0]}.{version[1]}"
-> +    f = "build/lib.{platform}-{version[0]}.{version[1]}"
->       name = f.format(platform=sysconfig.get_platform(),
->                       version=sys.version_info)
->       return name
+On Wed, Mar 30, 2016 at 3:15 PM, Sage Weil <sage@newdream.net> wrote:
+> On Wed, 30 Mar 2016, Allen Samuels wrote:
+>> [snip]
+>>
+>> Time to talk about checksums.
+>>
+>> First let's divide the world into checksums for data and checksums for
+>> metadata -- and defer the discussion about checksums for metadata
+>> (important, but one at a time...)
+>>
+>> I believe it's a requirement that when checksums are enabled that 100%
+>> of data reads must be validated against their corresponding checksum.
+>> This leads you to conclude that you must store a checksum for each
+>> independently readable piece of data.
 >
-> On Wed, Mar 9, 2016 at 1:17 AM, Jai <jai_97@rediffmail.com> wrote:
->> I synced my tree with the latest to see if it would solve the install
->> problem with rados.  install gives me this error now --
+> +1
+>
+>> When compression is disabled, it's relatively straightforward -- there's
+>> a checksum for each 4K readable block of data. Presumably this is a
+>> simple vector stored in the pextent structure with one entry for each 4K
+>> block of data.
+>
+> Maybe.  If the object is known to be sequentail write and sequential read,
+> or even sequential write and random read but on a HDD-like medium, then we
+> can checksum on something like 128K (since it doesn't cost any more to
+> read 128k than 4k).  I think the checksum block size should be a
+> per-object property.  *Maybe* a pextent property, given that compression
+> is also entering the picture.
+>
+>> Things get more complicated when compression is enabled. At a minimum,
+>> you'll need a checksum for each blob of compressed data (I'm using blob
+>> here as unit of data put into the compressor, but what I really mean is
+>> the minimum amount of *decompressable* data). As I've pointed out
+>> before, many of the compression algorithms do their own checksum
+>> validation. For algorithms that don't do their own checksum we'll want
+>> one checksum to protect the block -- however, there's no reason that we
+>> can't implement this as one checksum for each 4K physical blob, the
+>> runtime cost is nearly equivalent and it will considerably simplify the
+>> code.
+>
+> I'm just worried about the size of metadata if we have 4k checksums but
+> have to read big extents anyway; cheaper to store a 4 byte checksum for
+> each compressed blob.
+
+I haven't followed the BlueStore discussion closely, but doesn't it
+still allow for data overwrites if they're small and the object block
+is large? I presume the goal of 4K instead of per-chunk checksums is
+to prevent turning those overwrites into a read-modify-write. (Is that
+sufficient?)
+-Greg
+
+>
+>> Thus I think we really end up with a single, simple design. The pextent
+>> structure contains a vector of checksums. Either that vector is empty
+>> (checksum disabled) OR there is a checksum for each 4K block of data
+>> (not this is NOT min_allocation size, it's minimum_read_size [if that's
+>> even a parameter or does the code assume 4K readable blocks? [or worse,
+>> 512 readable blocks?? -- if so, we'll need to cripple this]).
 >>
->> zipimport.ZipImportError: bad local file header in
->> /usr/lib/python2.7/site-packages/ceph_detect_init-1.0.1-py2.7.egg
->> make[4]: *** [ceph-detect-init-install-data] Error 1
+>> When compressing with a compression algorithm that does checksuming we
+>> can automatically suppress checksum generation. There should also be an
+>> administrative switch for this.
 >>
->> The archive appears to be corrupt. This archive is overwritten in the
->> install process.
->> Anyone seen this ?
->> --
->> Jai
+>> This allows the checksuming to be pretty much independent of compression
+>> -- which is nice :)
+>
+>
+>
+>> This got me thinking, we have another issue to discuss and resolve.
 >>
->> On Sat, Mar 5, 2016 at 12:14 AM, Jai <jai_97@rediffmail.com> wrote:
->>> In pybind/rados, install should run -- python setup.py install, but
->>> the make output only shows "build" inside pybind/rbd and pybind/rados.
->>> I'll need to figure out what options it should pass into this install
->>> command and run it manually. Another thing is to find out why
->>> src/Makefile doesn't call  rados-pybind-install-exec
->>>
->>> ---
->>>
->>> On Fri, Mar 4, 2016 at 4:23 PM, John Spray <jspray@redhat.com> wrote:
->>>> On Fri, Mar 4, 2016 at 9:58 AM, Jai <jai_97@rediffmail.com> wrote:
->>>>> after build and install, these commands are supposed to work - right ?
->>>>> I dont see a rados.py in the tree. I tried copying rados.pyx and .pxd
->>>>> to /usr/local/lib/python2.7/site-packages, but that didn't help. There
->>>>> was a bug reported on this a while ago, but don't know if it was
->>>>> fixed.
->>>>>
->>>>>
->>>>> ceph -v
->>>>> Traceback (most recent call last):
->>>>>    File "/usr/local/bin/ceph", line 108, in <module>
->>>>>      import rados
->>>>> ImportError: No module named rados
->>>>> [jai@localhost ceph]$ lsmod |grep ceph  --> nothing
->>>>
->>>> The module you're looking for is built into a rados.so file, in
->>>> src/pybind/build/ (this is a recent change in master)
->>>>
->>>> It is definitely getting installed in built RPM/deb packages, so
->>>> possibly something is going wrong here in the "make install" step in
->>>> your environment.  Make install should be running a "python setup.py
->>>> build install" type command line (see pybind/rados/Makefile.am
->>>> install-exec section): look for that in the output of make install and
->>>> see where it's putting your rados module.
->>>>
->>>> John
->>>>
->>>>>
->>>>> --
->>>>> Jai
->>>>>
->>>>> On Wed, Mar 2, 2016 at 12:10 PM, Jai <jai_97@rediffmail.com> wrote:
->>>>>> I guess I was able to build it (finally) with 4G and make -j 2 on the
->>>>>> centos 7 VM.
->>>>>>
->>>>>> ...
->>>>>> build succeeded, 2 warnings.
->>>>>>
->>>>>> --Jai
->>>>>>
->>>>>> On Wed, Mar 2, 2016 at 9:49 AM, Robert LeBlanc <robert@leblancnet.us> wrote:
->>>>>>> -----BEGIN PGP SIGNED MESSAGE-----
->>>>>>> Hash: SHA256
->>>>>>>
->>>>>>> I've seen compiling OSD take 4 GB of RAM, so you would be pretty tight
->>>>>>> on RAM, you would probably have to swap at that point. Most of the
->>>>>>> rest seems to be a lot less. You could try running 'make -j 4' and
->>>>>>> when it fails, run just straight 'make'.
->>>>>>> -----BEGIN PGP SIGNATURE-----
->>>>>>> Version: Mailvelope v1.3.6
->>>>>>> Comment: https://www.mailvelope.com
->>>>>>>
->>>>>>> wsFcBAEBCAAQBQJW1mnnCRDmVDuy+mK58QAA36oP/j2CQxSedg4HeQokJOQO
->>>>>>> nd6SPXuWAeHP4CGMmDTqbuDlKxQA5XRY9LhkmplidMvSVUpEq0gtfU4xj2TH
->>>>>>> Qsfb0QqCvZUfMWIFr+TFoFlFP+TS13+ckPca15zuSrD8hggskdB1b61LJCYr
->>>>>>> 5688RFG2n5wZdDID70h4wrFsrbiSkaa19VyF6j59W+CbiByy8soPCWf7UA83
->>>>>>> yVcRdtMrSMmBypJTO87SuOaYzZnV/6S+MZeL6IOSNs41d3yfOR7S0XjQj4D4
->>>>>>> ydCP/O5PEcU6xo8G4mvmqunjbMvzOS+aDLX7ZTtrN1d2JySDDRoNpZ3u5SzN
->>>>>>> /Z5/MdLa1D4POmj5d5s1/GSmNXryb3T2cwFqjHGRD2/9ptqa1uMCxlJeAt6A
->>>>>>> yOqNujQHavcOS3v30C/iErvHbHyy5zpdgJ3cIHmbXGcYE9gkPMGbQGEDIquk
->>>>>>> 8oyxa9hQwY8O9Vml2Cyp8S8ZwtqfeftCF+79Ve/rzvQj8M1Q+UPXiWy4o6Vm
->>>>>>> fNoRpjBB1HxXNKiXzIjHHna3T4ZnQCxohAdRzF9oYqWjeCvZdMw1GfBdhNam
->>>>>>> v7wA0tAItjngxWCBLu3TEDV8uwlnrnXb9TJuvyRVIR3XZxDQ4DRgFbeWqDco
->>>>>>> nZXklY55Aa9PMOwrqckPhiQmb6pw1+ga4iQMgBE2OdRr390QpIVoZR20Cxty
->>>>>>> dTXS
->>>>>>> =zt+g
->>>>>>> -----END PGP SIGNATURE-----
->>>>>>> ----------------
->>>>>>> Robert LeBlanc
->>>>>>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->>>>>>>
->>>>>>>
->>>>>>> On Tue, Mar 1, 2016 at 9:07 PM, David Zafman <dzafman@redhat.com> wrote:
->>>>>>>>
->>>>>>>> Jai,
->>>>>>>>
->>>>>>>> On my build machine with 8GB of RAM a make -j4 works fine.  So I don't see
->>>>>>>> why 4GB shouldn't handle a straight make.  YMMV
->>>>>>>>
->>>>>>>> David
->>>>>>>>
->>>>>>>>
->>>>>>>> On 3/1/16 6:59 PM, Jai wrote:
->>>>>>>>>
->>>>>>>>> I ve got 8G on my laptop - so I can retry with something less than
->>>>>>>>> that for the VM. Ive reinstalled Centos7 and gone back to gcc 4.8.5
->>>>>>>>> which is the default on centos 7.
->>>>>>>>> cmake - I ve tried it, got errors here too.
->>>>>>>>> --
->>>>>>>>> Jai
->>>>>>>>>
->>>>>>>>> On Wed, Mar 2, 2016 at 1:45 AM, Nathan Cutler <ncutler@suse.cz> wrote:
->>>>>>>>>>
->>>>>>>>>> On 03/01/2016 03:39 PM, Jai wrote:
->>>>>>>>>>>
->>>>>>>>>>> I saw one report of a RAM issue.
->>>>>>>>>>> I have 2G on the VM - and  it was hung for > half a day.
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>> I've found that compiling Ceph requires at least 8GB of RAM - anything
->>>>>>>>>> less
->>>>>>>>>> is a recipe for failure. I have not tried using cmake, though.
->>>>>>>>>>
->>>>>>>>>> --
->>>>>>>>>> Nathan Cutler
->>>>>>>>>> Software Engineer Distributed Storage
->>>>>>>>>> SUSE LINUX, s.r.o.
->>>>>>>>>> Tel.: +420 284 084 037
->>>>>>>>>
->>>>>>>>> --
->>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>>
->>>>>>>>
->>>>>>>> --
->>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> The scenario is when compression is enabled. Assume that we've taken a
+>> big blob of data and compressed it into a smaller blob. We then call the
+>> allocator for that blob. What do we do if the allocator can't find a
+>> CONTIGUOUS block of storage of that size??? In the non-compressed case,
+>> it's relatively easy to simply break it up into smaller chunks -- but
+>> that doesn't work well with compression.
+>>
+>> This isn't that unlikely a case, worse it could happen with shockingly
+>> high amounts of freespace (>>75%) with some pathological access
+>> patterns.
+>>
+>> There's really only two choices. You either fracture the logical data
+>> and recompress OR you modify the pextent data structure to handle this
+>> case. The later isn't terribly difficult to do, you just make the
+>> size/address values into a vector of pairs. The former scheme could be
+>> quite expensive CPU wise as you may end up fracturing and recompressing
+>> multiple times (granted, in a pathological case). The latter case adds
+>> space to each onode for a rare case. The space is recoverable with an
+>> optimized serialize/deserializer (in essence you could burn a flag to
+>> indicate when a vector of physical chunks/sizes is needed instead of the
+>> usual scalar pair).
+>>
+>> IMO, we should pursue the later scenario as it avoids the variable
+>> latency problem. I see the code/testing complexity of either choice as
+>> about the same.
+>
+> Hrm, I hadn't thought about this one.  :(
+>
+> What about a third option: we ask the allocator for the uncompressed size,
+> and *then* compress.  If it gives us something small, we will know then to
+> compress a smaller piece.  It just means that we'll be returning space
+> back to the allocator in the general case after we compress, which will
+> burn a bit of CPU, and may screw things up when lots of threads are
+> allocating in parallel and we hope to lay them out sequentially.
+>
+> Or, maybe we flip into this sort of pessimistic allocation mode only when
+> the amount of space above a certain size threshold is low.  With the
+> current binned allocator design this is trivial; it probably is pretty
+> easy with your bitmap-based approach as well with some minimal accounting.
+>
+> I really don't like the idea of making pextent's able to store fractions
+> of a compressed blob; it'll complicate the structures and code paths
+> significantly, and they'll be complex enough as it is. :(
+>
+> sage
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
