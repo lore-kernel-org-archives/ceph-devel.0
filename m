@@ -1,29 +1,36 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 03/30/2016 Weekly Ceph Performance Meeting Is Canceled!
-Date: Wed, 30 Mar 2016 09:43:40 -0500
-Message-ID: <56FBE61C.8070403@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: --with-libxfs error on F23.
+Date: Wed, 30 Mar 2016 17:37:22 +0200
+Message-ID: <20160330153722.GA19902@lst.de>
+References: <87oa9xndeq.fsf@ira-t430.wakeful.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37769 "EHLO mx1.redhat.com"
+Received: from verein.lst.de ([213.95.11.211]:32832 "EHLO newverein.lst.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753312AbcC3Onn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 30 Mar 2016 10:43:43 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id AE1D87F6A7
-	for <ceph-devel@vger.kernel.org>; Wed, 30 Mar 2016 14:43:42 +0000 (UTC)
-Received: from [10.3.112.78] (ovpn-112-78.phx2.redhat.com [10.3.112.78])
-	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u2UEheb2026802
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 30 Mar 2016 10:43:42 -0400
+	id S1751107AbcC3PhZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 30 Mar 2016 11:37:25 -0400
+Content-Disposition: inline
+In-Reply-To: <87oa9xndeq.fsf@ira-t430.wakeful.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ira Cooper <ira@wakeful.net>
+Cc: ceph-devel@vger.kernel.org, hch@lst.de
 
-Not much movement on performance PRs this week (lots of bug fixing for 
-Jewel!) and a lot of folks are on planes for the hackathon.  We'll meet 
-again next week.  Thanks guys!
+On Tue, Mar 29, 2016 at 06:10:37PM -0400, Ira Cooper wrote:
+> ira@ira-t430:/usr/include/xfs
+> [/dev/pts/1](1002/0)$ ag off64_t
+> linux.h
+> 145:typedef off64_t		xfs_off_t;
+> 
+> off64_t isn't there by default.
 
-Mark
+off64_t requires _LARGEFILE64_SOURCE on Linux/glibc which still likes
+to make applications not handle large file offsets and inodes by default,
+something which 4.4BSD solved 20 years ago.
+
+We have no intent in supporting non-large file applications in
+xfsprogs, so I think the right thing is to ensure that your configure
+checks defines _LARGEFILE64_SOURCE.  I'm pretty sure the applications
+actually already do that, and it's just the configure machinery that's
+lazy.
