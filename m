@@ -1,127 +1,90 @@
-From: NeilBrown <neilb@suse.com>
-Subject: Re: [GIT PULL] Ceph fixes for -rc7
-Date: Wed, 30 Mar 2016 13:40:20 +1100
-Message-ID: <87poucu1rf.fsf@notabene.neil.brown.name>
-References: <alpine.DEB.2.11.1603052045320.25897@cpach.fuggernut.com> <87fuvfw6g9.fsf@notabene.neil.brown.name> <CAOi1vP9j8RCucc9DLoFUOXyBrGuTbN10hnQ0CwOE-PK=_j=k=w@mail.gmail.com> <874mbovmlv.fsf@notabene.neil.brown.name> <CAAM7YA=voB_7HnbzZqBBqyu9AU1DYYgw297hWfzdH6JBU61X1w@mail.gmail.com>
+From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
+Subject: reads while 100% write
+Date: Wed, 30 Mar 2016 02:35:09 +0000
+Message-ID: <D320896C.C4F8%evgeniy.firsov@sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha256; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:50356 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753483AbcC3Ck3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 29 Mar 2016 22:40:29 -0400
-In-Reply-To: <CAAM7YA=voB_7HnbzZqBBqyu9AU1DYYgw297hWfzdH6JBU61X1w@mail.gmail.com>
+Received: from mail-bn1on0086.outbound.protection.outlook.com ([157.56.110.86]:30896
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751917AbcC3FIC convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 01:08:02 -0400
+Content-Language: en-US
+Content-ID: <4543C1FE25C21041ABFF289FEECDEF06@namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sweil@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
---=-=-=
-Content-Type: text/plain
+After pulling master branch on Friday I start seeing odd fio behavior, =
+I
+see a lot of reads while writing and very low performance no matter
+whether it read or write workload.
 
-On Wed, Mar 30 2016, Yan, Zheng wrote:
+Output from sequential 1M write:
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz
+avgqu-sz   await r_await w_await  svctm  %util
 
-> On Wed, Mar 30, 2016 at 8:24 AM, NeilBrown <neilb@suse.com> wrote:
->> On Fri, Mar 25 2016, Ilya Dryomov wrote:
->>
->>> On Fri, Mar 25, 2016 at 5:02 AM, NeilBrown <neilb@suse.com> wrote:
->>>> On Sun, Mar 06 2016, Sage Weil wrote:
->>>>
->>>>> Hi Linus,
->>>>>
->>>>> Please pull the following Ceph patch from
->>>>>
->>>>>   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
->>>>>
->>>>> This is a final commit we missed to align the protocol compatibility with
->>>>> the feature bits.  It decodes a few extra fields in two different messages
->>>>> and reports EIO when they are used (not yet supported).
->>>>>
->>>>> Thanks!
->>>>> sage
->>>>>
->>>>>
->>>>> ----------------------------------------------------------------
->>>>> Yan, Zheng (1):
->>>>>       ceph: initial CEPH_FEATURE_FS_FILE_LAYOUT_V2 support
->>>>
->>>> Just wondering, but was CEPH_FEATURE_FS_FILE_LAYOUT_V2 supposed to have
->>>> exactly the same value as CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING (and
->>>> CEPH_FEATURE_CRUSH_TUNABLES5)??
->>>
->>> Yes, that was the point of getting it merged into -rc7.
->>
->> I did wonder if that might be the case.
->>
->>>
->>>> Because when I backported this patch (and many others) to some ancient
->>>> enterprise kernel, it caused mounts to fail.  If it really is meant to
->>>> be the same value, then I must have some other backported issue to find
->>>> and fix.
->>>
->>> It has to be backported in concert with changes that add support for
->>> the other two bits.
->>
->> I have everything from fs/ceph and net/ceph as of 4.5, with adjustments
->> for different core code.
->>
->>>                      How did mount fail?
->>
->> "can't read superblock".
->> dmesg contains
->>
->> [   50.822479] libceph: client144098 fsid 2b73bc29-3e78-490a-8fc6-21da1bf901ba
->> [   50.823746] libceph: mon0 192.168.1.122:6789 session established
->> [   51.635312] ceph: problem parsing mds trace -5
->> [   51.635317] ceph: mds parse_reply err -5
->> [   51.635318] ceph: mdsc_handle_reply got corrupt reply mds0(tid:1)
->>
->> then a hex dump of header:, front: footer:
->>
->> Maybe my MDS is causing the problem?  It is based on v10.0.5 which
->> contains
->>
->> #define CEPH_FEATURE_CRUSH_TUNABLES5    (1ULL<<58) /* chooseleaf stable mode */
->> // duplicated since it was introduced at the same time as CEPH_FEATURE_CRUSH_TUN
->> #define CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING   (1ULL<<58) /* New, v7 encoding */
->>
->> in ceph_features.h  i.e. two features using bit 58, but not
->> FS_FILE_LAYOUT_V2
->>
->> Should I expect Linux 4.5 to work with ceph 10.0.5 ??
->
-> Sorry, cephfs in linux 4.5 does not work with 10.0.5. Please upgrade
-> to ceph 10.1.0
->
+sdd               0.00   409.00    0.00  364.00     0.00  3092.00    16=
+=2E99
+    0.28    0.78    0.00    0.78   0.76  27.60
+sde               0.00   242.00  365.00  363.00  2436.00  9680.00    33=
+=2E29
+    0.18    0.24    0.42    0.07   0.23  16.80
 
-Ahhh..  I do wonder at the point of feature flags if they don't let you
-run any client with any server...
-Is there a compatability matrix published somewhere?
-If I have to stay with 10.0.5 (I don't know yet), it is safe to use
-Linux-4.4 code?
 
-Thanks,
-NeilBrown
 
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
+block.db -> /dev/sdd
+block -> /dev/sde
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+health HEALTH_OK
+monmap e1: 1 mons at {a=3D127.0.0.1:6789/0}
+       election epoch 3, quorum 0 a
+osdmap e7: 1 osds: 1 up, 1 in
+       flags sortbitwise
+pgmap v24: 64 pgs, 1 pools, 577 MB data, 9152 objects
+       8210 MB used, 178 GB / 186 GB avail
+             64 active+clean
+client io 1550 kB/s rd, 9559 kB/s wr, 645 op/s rd, 387 op/s wr
 
-iQIcBAEBCAAGBQJW+zyUAAoJEDnsnt1WYoG5YyQP/jLy6cV5Mxk7W3kSb7fDAQ4e
-WLDpHH4CLRqRRKmdlqjh3jV6w3gLHA1lxe8OTWVqgQf6KZkc3K7v4E2tSAq8/yD/
-iDq6Sfpyxp2bZFjzqoPRdrv/QYsD56KvGdhWwMedkmoTXWB+FSZX67G7qtOacX9O
-d8kcGgXD331a36XbqRUEp5ZCSfYhk3pnmv6iC2bonmBPYB678Mq8+xL155GZbWFR
-C9FbaCLW0uqK8F9Fh72/KMMuUZy1xlsDry63/sYbXvrBq9uh/0uuir80iGmWikGp
-aNC/E7f0W/HoJ5DNsYwj5JKOh/Jj3xLiagcHEpildQIwejcvhaeWqCP8EZtvyj78
-2ooX+kWZ9R+eQVntSYniHb9h5TgQFgw4K06T3P6ObGXb0Smos8sElgSAvwoV8YzJ
-3cCOaXEMCoeuUwdVW1SX/4Cwf+FN3ox1rxtktGG4WBlNP1SAbKpM1j4G09+SW6Xb
-7aKoaerXPBICSTUSBEsttnAjGVMIyuBaiv0ZZbdKbUHkVHpYlx06znvWIG6auar3
-hxqp12sV1989enn/djhm4brvdX3qiuhC2edmWyZ50Lc3IOr01azlA5hTRI3NBuIA
-bhzHjnuzYL6dCf7tlJIBPdXFLtvluL86bBDJs/EatX2DMJ0gVQcgPBpMDXgA6WrB
-iW1sZsCZtnEBfth7NC9+
-=OUNk
------END PGP SIGNATURE-----
---=-=-=--
+
+While on earlier revision(c1e41af) everything looks as expected:
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz
+avgqu-sz   await r_await w_await  svctm  %util
+sdd               0.00  4910.00    0.00  680.00     0.00 22416.00    65=
+=2E93
+    1.05    1.55    0.00    1.55   1.18  80.00
+sde               0.00     0.00    0.00 3418.00     0.00 217612.00
+127.33    63.78   18.18    0.00   18.18   0.25  86.40
+
+Other observation, may be related to the issue, is that CPU load is
+imbalanced. Single =B3tp_osd_tp=B2 thread is 100% busy, while the rest =
+is idle.
+Looks like all load goes to single thread pool shard, earlier CPU was w=
+ell
+balanced.
+
+
+=8B
+Evgeniy
+
+
+
+PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above=
+=2E If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
