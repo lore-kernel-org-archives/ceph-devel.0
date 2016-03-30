@@ -1,121 +1,104 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: [GIT PULL] Ceph fixes for -rc7
-Date: Wed, 30 Mar 2016 11:09:50 -0700
-Message-ID: <CAJ4mKGZ0-yJdAnkHu-w2s8jenp30izyobQCov9wBvanbgDBpew@mail.gmail.com>
-References: <alpine.DEB.2.11.1603052045320.25897@cpach.fuggernut.com>
-	<87fuvfw6g9.fsf@notabene.neil.brown.name>
-	<CAOi1vP9j8RCucc9DLoFUOXyBrGuTbN10hnQ0CwOE-PK=_j=k=w@mail.gmail.com>
-	<874mbovmlv.fsf@notabene.neil.brown.name>
-	<CAAM7YA=voB_7HnbzZqBBqyu9AU1DYYgw297hWfzdH6JBU61X1w@mail.gmail.com>
-	<87poucu1rf.fsf@notabene.neil.brown.name>
-	<CAOi1vP-B7V5o0MdwmWe0FiwdFnyjv2B0SisL=BX3A3HXQ+JN-g@mail.gmail.com>
+From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
+Subject: Re: reads while 100% write
+Date: Wed, 30 Mar 2016 18:14:12 +0000
+Message-ID: <D3216565.C534%evgeniy.firsov@sandisk.com>
+References: <D320896C.C4F8%evgeniy.firsov@sandisk.com>
+ <alpine.DEB.2.11.1603300714580.22014@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP-B7V5o0MdwmWe0FiwdFnyjv2B0SisL=BX3A3HXQ+JN-g@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: NeilBrown <neilb@suse.com>, "Yan, Zheng" <ukernel@gmail.com>, Sage Weil <sweil@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bn1on0069.outbound.protection.outlook.com ([157.56.110.69]:13085
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753026AbcC3S3X (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 30 Mar 2016 14:29:23 -0400
+In-Reply-To: <alpine.DEB.2.11.1603300714580.22014@cpach.fuggernut.com>
+Content-Language: en-US
+Content-ID: <497124E826051E4A8B6EA21786DB8CD3@namprd02.prod.outlook.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 30, 2016 at 1:04 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> On Wed, Mar 30, 2016 at 4:40 AM, NeilBrown <neilb@suse.com> wrote:
->> On Wed, Mar 30 2016, Yan, Zheng wrote:
->>
->>> On Wed, Mar 30, 2016 at 8:24 AM, NeilBrown <neilb@suse.com> wrote:
->>>> On Fri, Mar 25 2016, Ilya Dryomov wrote:
->>>>
->>>>> On Fri, Mar 25, 2016 at 5:02 AM, NeilBrown <neilb@suse.com> wrote:
->>>>>> On Sun, Mar 06 2016, Sage Weil wrote:
->>>>>>
->>>>>>> Hi Linus,
->>>>>>>
->>>>>>> Please pull the following Ceph patch from
->>>>>>>
->>>>>>>   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
->>>>>>>
->>>>>>> This is a final commit we missed to align the protocol compatibility with
->>>>>>> the feature bits.  It decodes a few extra fields in two different messages
->>>>>>> and reports EIO when they are used (not yet supported).
->>>>>>>
->>>>>>> Thanks!
->>>>>>> sage
->>>>>>>
->>>>>>>
->>>>>>> ----------------------------------------------------------------
->>>>>>> Yan, Zheng (1):
->>>>>>>       ceph: initial CEPH_FEATURE_FS_FILE_LAYOUT_V2 support
->>>>>>
->>>>>> Just wondering, but was CEPH_FEATURE_FS_FILE_LAYOUT_V2 supposed to have
->>>>>> exactly the same value as CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING (and
->>>>>> CEPH_FEATURE_CRUSH_TUNABLES5)??
->>>>>
->>>>> Yes, that was the point of getting it merged into -rc7.
->>>>
->>>> I did wonder if that might be the case.
->>>>
->>>>>
->>>>>> Because when I backported this patch (and many others) to some ancient
->>>>>> enterprise kernel, it caused mounts to fail.  If it really is meant to
->>>>>> be the same value, then I must have some other backported issue to find
->>>>>> and fix.
->>>>>
->>>>> It has to be backported in concert with changes that add support for
->>>>> the other two bits.
->>>>
->>>> I have everything from fs/ceph and net/ceph as of 4.5, with adjustments
->>>> for different core code.
->>>>
->>>>>                      How did mount fail?
->>>>
->>>> "can't read superblock".
->>>> dmesg contains
->>>>
->>>> [   50.822479] libceph: client144098 fsid 2b73bc29-3e78-490a-8fc6-21da1bf901ba
->>>> [   50.823746] libceph: mon0 192.168.1.122:6789 session established
->>>> [   51.635312] ceph: problem parsing mds trace -5
->>>> [   51.635317] ceph: mds parse_reply err -5
->>>> [   51.635318] ceph: mdsc_handle_reply got corrupt reply mds0(tid:1)
->>>>
->>>> then a hex dump of header:, front: footer:
->>>>
->>>> Maybe my MDS is causing the problem?  It is based on v10.0.5 which
->>>> contains
->>>>
->>>> #define CEPH_FEATURE_CRUSH_TUNABLES5    (1ULL<<58) /* chooseleaf stable mode */
->>>> // duplicated since it was introduced at the same time as CEPH_FEATURE_CRUSH_TUN
->>>> #define CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING   (1ULL<<58) /* New, v7 encoding */
->>>>
->>>> in ceph_features.h  i.e. two features using bit 58, but not
->>>> FS_FILE_LAYOUT_V2
->>>>
->>>> Should I expect Linux 4.5 to work with ceph 10.0.5 ??
->>>
->>> Sorry, cephfs in linux 4.5 does not work with 10.0.5. Please upgrade
->>> to ceph 10.1.0
->>>
->>
->> Ahhh..  I do wonder at the point of feature flags if they don't let you
->> run any client with any server...
->> Is there a compatability matrix published somewhere?
->> If I have to stay with 10.0.5 (I don't know yet), it is safe to use
->> Linux-4.4 code?
->
-> 10.0.* are all development cuts, we didn't even built packages for
-> some of them.  10.1.0 is the first release candidate.  You can think of
-> 10.0.5 as a random pre-rc1 kernel snapshot, aimed at brave testers, so
-> you do want to upgrade.
->
-> The reason it doesn't work is those three features are all defined to
-> the same value, but two of them got added earlier in the 10.0.* cycle.
-> CEPH_FEATURE_FS_FILE_LAYOUT_V2 came in last, after 10.0.5.
-
-A little more specifically: these feature bits do let you run any
-client with any "real release" of Ceph that we expect not-testers to
-be using. They *usually* work on our dev releases as well, but we've
-gotten stingier about it as we come close to running out of feature
-bits and are trying to pack more of them into the same actual bits
-(we're working on freeing them up as well, but got started a little
-later than is comfortable), while coordinating code merges between a
-few different places. You got unlucky here.
--Greg
+VGhlc2UgYXJlIHN1c3BpY2lvdXMgbGluZXM6DQoNCjIwMTYtMDMtMzAgMTA6NTQ6MjMuMTQyMjA1
+IDdmMmU5MzNmZjcwMCAxMCBibHVlc3RvcmUoc3JjL2Rldi9vc2QwKSByZWFkDQowLmRfaGVhZCAj
+MDpiMDZiNWU4ZTo6OnJiZF9vYmplY3RfbWFwLjEwMDQ2YjhiNDU2NzpoZWFkIyA2MTQ0MDE4fjYw
+MTIgPQ0KNjAxMg0KMjAxNi0wMy0zMCAxMDo1NDoyMy4xNDIyNTIgN2YyZTkzM2ZmNzAwIDE1IGJs
+dWVzdG9yZShzcmMvZGV2L29zZDApIHJlYWQNCjAuZF9oZWFkICMwOmIwNmI1ZThlOjo6cmJkX29i
+amVjdF9tYXAuMTAwNDZiOGI0NTY3OmhlYWQjIDgyMTB+NDA5Ng0KMjAxNi0wMy0zMCAxMDo1NDoy
+My4xNDIyNjAgN2YyZTkzM2ZmNzAwIDIwIGJsdWVzdG9yZShzcmMvZGV2L29zZDApDQpfZG9fcmVh
+ZCA4MjEwfjQwOTYgc2l6ZSA2MTUwMDMwDQoyMDE2LTAzLTMwIDEwOjU0OjIzLjE0MjI2NyA3ZjJl
+OTMzZmY3MDAgIDUgYmRldihzcmMvZGV2L29zZDAvYmxvY2spIHJlYWQNCjgwMDM4NTQzMzZ+ODE5
+Mg0KMjAxNi0wMy0zMCAxMDo1NDoyMy4xNDI2MDkgN2YyZTkzM2ZmNzAwIDEwIGJsdWVzdG9yZShz
+cmMvZGV2L29zZDApIHJlYWQNCjAuZF9oZWFkICMwOmIwNmI1ZThlOjo6cmJkX29iamVjdF9tYXAu
+MTAwNDZiOGI0NTY3OmhlYWQjIDgyMTB+NDA5NiA9IDQwOTYNCjIwMTYtMDMtMzAgMTA6NTQ6MjMu
+MTQyODgyIDdmMmU5MzNmZjcwMCAxNSBibHVlc3RvcmUoc3JjL2Rldi9vc2QwKSBfd3JpdGUNCjAu
+ZF9oZWFkICMwOmIwNmI1ZThlOjo6cmJkX29iamVjdF9tYXAuMTAwNDZiOGI0NTY3OmhlYWQjIDgy
+MTB+NDA5Ng0KMjAxNi0wMy0zMCAxMDo1NDoyMy4xNDI4ODggN2YyZTkzM2ZmNzAwIDIwIGJsdWVz
+dG9yZShzcmMvZGV2L29zZDApDQpfZG9fd3JpdGUgIzA6YjA2YjVlOGU6OjpyYmRfb2JqZWN0X21h
+cC4xMDA0NmI4YjQ1Njc6aGVhZCMgODIxMH40MDk2IC0gaGF2ZQ0KNjE1MDAzMCBieXRlcyBpbiAx
+IGV4dGVudHMNCg0KTW9yZSBsb2dzIGhlcmU6IGh0dHA6Ly9wYXN0ZWJpbi5jb20vNzRXTHpGWXcN
+Cg0KDQoNCk9uIDMvMzAvMTYsIDQ6MTkgQU0sICJTYWdlIFdlaWwiIDxzYWdlQG5ld2RyZWFtLm5l
+dD4gd3JvdGU6DQoNCj5PbiBXZWQsIDMwIE1hciAyMDE2LCBFdmdlbml5IEZpcnNvdiB3cm90ZToN
+Cj4+IEFmdGVyIHB1bGxpbmcgbWFzdGVyIGJyYW5jaCBvbiBGcmlkYXkgSSBzdGFydCBzZWVpbmcg
+b2RkIGZpbyBiZWhhdmlvciwgSQ0KPj4gc2VlIGEgbG90IG9mIHJlYWRzIHdoaWxlIHdyaXRpbmcg
+YW5kIHZlcnkgbG93IHBlcmZvcm1hbmNlIG5vIG1hdHRlcg0KPj4gd2hldGhlciBpdCByZWFkIG9y
+IHdyaXRlIHdvcmtsb2FkLg0KPj4NCj4+IE91dHB1dCBmcm9tIHNlcXVlbnRpYWwgMU0gd3JpdGU6
+DQo+PiBEZXZpY2U6ICAgICAgICAgcnJxbS9zICAgd3JxbS9zICAgICByL3MgICAgIHcvcyAgICBy
+a0IvcyAgICB3a0Ivcw0KPj5hdmdycS1zeg0KPj4gYXZncXUtc3ogICBhd2FpdCByX2F3YWl0IHdf
+YXdhaXQgIHN2Y3RtICAldXRpbA0KPj4NCj4+IHNkZCAgICAgICAgICAgICAgIDAuMDAgICA0MDku
+MDAgICAgMC4wMCAgMzY0LjAwICAgICAwLjAwICAzMDkyLjAwDQo+PjE2Ljk5DQo+PiAgICAgMC4y
+OCAgICAwLjc4ICAgIDAuMDAgICAgMC43OCAgIDAuNzYgIDI3LjYwDQo+PiBzZGUgICAgICAgICAg
+ICAgICAwLjAwICAgMjQyLjAwICAzNjUuMDAgIDM2My4wMCAgMjQzNi4wMCAgOTY4MC4wMA0KPj4z
+My4yOQ0KPj4gICAgIDAuMTggICAgMC4yNCAgICAwLjQyICAgIDAuMDcgICAwLjIzICAxNi44MA0K
+Pj4NCj4+DQo+Pg0KPj4gYmxvY2suZGIgLT4gL2Rldi9zZGQNCj4+IGJsb2NrIC0+IC9kZXYvc2Rl
+DQo+Pg0KPj4gaGVhbHRoIEhFQUxUSF9PSw0KPj4gbW9ubWFwIGUxOiAxIG1vbnMgYXQge2E9MTI3
+LjAuMC4xOjY3ODkvMH0NCj4+ICAgICAgICBlbGVjdGlvbiBlcG9jaCAzLCBxdW9ydW0gMCBhDQo+
+PiBvc2RtYXAgZTc6IDEgb3NkczogMSB1cCwgMSBpbg0KPj4gICAgICAgIGZsYWdzIHNvcnRiaXR3
+aXNlDQo+PiBwZ21hcCB2MjQ6IDY0IHBncywgMSBwb29scywgNTc3IE1CIGRhdGEsIDkxNTIgb2Jq
+ZWN0cw0KPj4gICAgICAgIDgyMTAgTUIgdXNlZCwgMTc4IEdCIC8gMTg2IEdCIGF2YWlsDQo+PiAg
+ICAgICAgICAgICAgNjQgYWN0aXZlK2NsZWFuDQo+PiBjbGllbnQgaW8gMTU1MCBrQi9zIHJkLCA5
+NTU5IGtCL3Mgd3IsIDY0NSBvcC9zIHJkLCAzODcgb3AvcyB3cg0KPj4NCj4+DQo+PiBXaGlsZSBv
+biBlYXJsaWVyIHJldmlzaW9uKGMxZTQxYWYpIGV2ZXJ5dGhpbmcgbG9va3MgYXMgZXhwZWN0ZWQ6
+DQo+Pg0KPj4gRGV2aWNlOiAgICAgICAgIHJycW0vcyAgIHdycW0vcyAgICAgci9zICAgICB3L3Mg
+ICAgcmtCL3MgICAgd2tCL3MNCj4+YXZncnEtc3oNCj4+IGF2Z3F1LXN6ICAgYXdhaXQgcl9hd2Fp
+dCB3X2F3YWl0ICBzdmN0bSAgJXV0aWwNCj4+IHNkZCAgICAgICAgICAgICAgIDAuMDAgIDQ5MTAu
+MDAgICAgMC4wMCAgNjgwLjAwICAgICAwLjAwIDIyNDE2LjAwDQo+PjY1LjkzDQo+PiAgICAgMS4w
+NSAgICAxLjU1ICAgIDAuMDAgICAgMS41NSAgIDEuMTggIDgwLjAwDQo+PiBzZGUgICAgICAgICAg
+ICAgICAwLjAwICAgICAwLjAwICAgIDAuMDAgMzQxOC4wMCAgICAgMC4wMCAyMTc2MTIuMDANCj4+
+IDEyNy4zMyAgICA2My43OCAgIDE4LjE4ICAgIDAuMDAgICAxOC4xOCAgIDAuMjUgIDg2LjQwDQo+
+Pg0KPj4gT3RoZXIgb2JzZXJ2YXRpb24sIG1heSBiZSByZWxhdGVkIHRvIHRoZSBpc3N1ZSwgaXMg
+dGhhdCBDUFUgbG9hZCBpcw0KPj4gaW1iYWxhbmNlZC4gU2luZ2xlIMKzdHBfb3NkX3RwwrIgdGhy
+ZWFkIGlzIDEwMCUgYnVzeSwgd2hpbGUgdGhlIHJlc3QgaXMNCj4+aWRsZS4NCj4+IExvb2tzIGxp
+a2UgYWxsIGxvYWQgZ29lcyB0byBzaW5nbGUgdGhyZWFkIHBvb2wgc2hhcmQsIGVhcmxpZXIgQ1BV
+IHdhcw0KPj53ZWxsDQo+PiBiYWxhbmNlZC4NCj4NCj5IbW0uICBDYW4geW91IGNhcHR1cmUgYSBs
+b2cgd2l0aCBkZWJ1ZyBibHVlc3RvcmUgPSAyMCBhbmQgZGVidWcgYmRldiA9IDIwPw0KPg0KPlRo
+YW5rcyENCj5zYWdlDQo+DQo+DQo+Pg0KPj4NCj4+IOKAuQ0KPj4gRXZnZW5peQ0KPj4NCj4+DQo+
+Pg0KPj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVj
+dHJvbmljIG1haWwgbWVzc2FnZQ0KPj5pcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRo
+ZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4NCj4+SWYgdGhlIHJlYWRlciBv
+ZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUNCj4+
+aGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVy
+cm9yIGFuZCB0aGF0DQo+PmFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwg
+b3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMNCj4+c3RyaWN0bHkgcHJvaGliaXRlZC4gSWYg
+eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLA0KPj5wbGVhc2Ug
+bm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUp
+DQo+PmltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1l
+c3NhZ2UgaW4geW91cg0KPj5wb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0
+cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4gLS0NCj4+IFRvIHVuc3Vic2NyaWJlIGZyb20g
+dGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KPj4g
+dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4+IE1v
+cmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWlu
+Zm8uaHRtbA0KPj4NCj4+DQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVk
+IGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhl
+IHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSBy
+ZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3Ug
+YXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBp
+biBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24s
+IG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlv
+dSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlm
+eSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1l
+ZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGlu
+IHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBz
+dG9yZWQgY29waWVzKS4NCg==
