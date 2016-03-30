@@ -1,145 +1,276 @@
-From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
+From: Jason Dillaman <dillaman@redhat.com>
 Subject: Re: reads while 100% write
-Date: Wed, 30 Mar 2016 19:00:47 +0000
-Message-ID: <D3216CC1.C53E%evgeniy.firsov@sandisk.com>
-References: <D320896C.C4F8%evgeniy.firsov@sandisk.com>
- <alpine.DEB.2.11.1603300714580.22014@cpach.fuggernut.com>
- <D3216565.C534%evgeniy.firsov@sandisk.com>
- <1920245628.45592204.1459363024441.JavaMail.zimbra@redhat.com>
+Date: Wed, 30 Mar 2016 15:10:47 -0400 (EDT)
+Message-ID: <725823729.45650339.1459365047004.JavaMail.zimbra@redhat.com>
+References: <D320896C.C4F8%evgeniy.firsov@sandisk.com> <alpine.DEB.2.11.1603300714580.22014@cpach.fuggernut.com> <D3216565.C534%evgeniy.firsov@sandisk.com> <1920245628.45592204.1459363024441.JavaMail.zimbra@redhat.com> <D3216CC1.C53E%evgeniy.firsov@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0087.outbound.protection.outlook.com ([207.46.100.87]:64384
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752591AbcC3TAu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 30 Mar 2016 15:00:50 -0400
-In-Reply-To: <1920245628.45592204.1459363024441.JavaMail.zimbra@redhat.com>
-Content-Language: en-US
-Content-ID: <4CF978427B1AFA43AD1831EEA97076C0@namprd02.prod.outlook.com>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:42004 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752758AbcC3TKw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 15:10:52 -0400
+In-Reply-To: <D3216CC1.C53E%evgeniy.firsov@sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-MS41VCBpbiB0aGF0IHJ1bi4NCldpdGggMTUwRyBiZWhhdmlvciBpcyB0aGUgc2FtZS4gRXhjZXB0
-IGl0IHNheXMgIl9kb19yZWFkIDB+MTggc2l6ZSA2MTUwMzDigJ0NCmluc3RlYWQgb2YgNk0uDQoN
-CkFsc28gd2hlbiByYW5kb20gNGsgd3JpdGUgc3RhcnRzIHRoZXJlIGFyZSBtb3JlIHJlYWRzIHRo
-ZW4gd3JpdGVzOg0KDQpEZXZpY2U6ICAgICAgICAgcnJxbS9zICAgd3JxbS9zICAgICByL3MgICAg
-IHcvcyAgICBya0IvcyAgICB3a0IvcyBhdmdycS1zeg0KYXZncXUtc3ogICBhd2FpdCByX2F3YWl0
-IHdfYXdhaXQgIHN2Y3RtICAldXRpbA0KDQpzZGQgICAgICAgICAgICAgICAwLjAwICAxODg3LjAw
-ICAgIDAuMDAgIDM0NC4wMCAgICAgMC4wMCAgODkyNC4wMCAgICA1MS44OA0KICAgIDAuMzYgICAg
-MS4wNiAgICAwLjAwICAgIDEuMDYgICAwLjkxICAzMS4yMA0Kc2RlICAgICAgICAgICAgICAzMC4w
-MCAgICAgMC4wMCAgIDMwLjAwICA5NTcuMDAgMTgxMjAuMDAgIDM4MjguMDAgICAgNDQuNDcNCiAg
-ICAwLjI1ICAgIDAuMjYgICAgMy44NyAgICAwLjE0ICAgMC4xNyAgMTYuNDANCg0KTG9nczogaHR0
-cDovL3Bhc3RlYmluLmNvbS9nR3pmUjVleg0KDQoNCk9uIDMvMzAvMTYsIDExOjM3IEFNLCAiSmFz
-b24gRGlsbGFtYW4iIDxkaWxsYW1hbkByZWRoYXQuY29tPiB3cm90ZToNCg0KPkhvdyBsYXJnZSBp
-cyB5b3VyIFJCRCBpbWFnZT8gIDEwMCB0ZXJhYnl0ZXM/DQo+DQo+LS0NCj4NCj5KYXNvbiBEaWxs
-YW1hbg0KPg0KPg0KPi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0NCj4+IEZyb206ICJFdmdl
-bml5IEZpcnNvdiIgPEV2Z2VuaXkuRmlyc292QHNhbmRpc2suY29tPg0KPj4gVG86ICJTYWdlIFdl
-aWwiIDxzYWdlQG5ld2RyZWFtLm5ldD4NCj4+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
-Zw0KPj4gU2VudDogV2VkbmVzZGF5LCBNYXJjaCAzMCwgMjAxNiAyOjE0OjEyIFBNDQo+PiBTdWJq
-ZWN0OiBSZTogcmVhZHMgd2hpbGUgMTAwJSB3cml0ZQ0KPj4NCj4+IFRoZXNlIGFyZSBzdXNwaWNp
-b3VzIGxpbmVzOg0KPj4NCj4+IDIwMTYtMDMtMzAgMTA6NTQ6MjMuMTQyMjA1IDdmMmU5MzNmZjcw
-MCAxMCBibHVlc3RvcmUoc3JjL2Rldi9vc2QwKSByZWFkDQo+PiAwLmRfaGVhZCAjMDpiMDZiNWU4
-ZTo6OnJiZF9vYmplY3RfbWFwLjEwMDQ2YjhiNDU2NzpoZWFkIyA2MTQ0MDE4fjYwMTIgPQ0KPj4g
-NjAxMg0KPj4gMjAxNi0wMy0zMCAxMDo1NDoyMy4xNDIyNTIgN2YyZTkzM2ZmNzAwIDE1IGJsdWVz
-dG9yZShzcmMvZGV2L29zZDApIHJlYWQNCj4+IDAuZF9oZWFkICMwOmIwNmI1ZThlOjo6cmJkX29i
-amVjdF9tYXAuMTAwNDZiOGI0NTY3OmhlYWQjIDgyMTB+NDA5Ng0KPj4gMjAxNi0wMy0zMCAxMDo1
-NDoyMy4xNDIyNjAgN2YyZTkzM2ZmNzAwIDIwIGJsdWVzdG9yZShzcmMvZGV2L29zZDApDQo+PiBf
-ZG9fcmVhZCA4MjEwfjQwOTYgc2l6ZSA2MTUwMDMwDQo+PiAyMDE2LTAzLTMwIDEwOjU0OjIzLjE0
-MjI2NyA3ZjJlOTMzZmY3MDAgIDUgYmRldihzcmMvZGV2L29zZDAvYmxvY2spIHJlYWQNCj4+IDgw
-MDM4NTQzMzZ+ODE5Mg0KPj4gMjAxNi0wMy0zMCAxMDo1NDoyMy4xNDI2MDkgN2YyZTkzM2ZmNzAw
-IDEwIGJsdWVzdG9yZShzcmMvZGV2L29zZDApIHJlYWQNCj4+IDAuZF9oZWFkICMwOmIwNmI1ZThl
-Ojo6cmJkX29iamVjdF9tYXAuMTAwNDZiOGI0NTY3OmhlYWQjIDgyMTB+NDA5NiA9DQo+PjQwOTYN
-Cj4+IDIwMTYtMDMtMzAgMTA6NTQ6MjMuMTQyODgyIDdmMmU5MzNmZjcwMCAxNSBibHVlc3RvcmUo
-c3JjL2Rldi9vc2QwKQ0KPj5fd3JpdGUNCj4+IDAuZF9oZWFkICMwOmIwNmI1ZThlOjo6cmJkX29i
-amVjdF9tYXAuMTAwNDZiOGI0NTY3OmhlYWQjIDgyMTB+NDA5Ng0KPj4gMjAxNi0wMy0zMCAxMDo1
-NDoyMy4xNDI4ODggN2YyZTkzM2ZmNzAwIDIwIGJsdWVzdG9yZShzcmMvZGV2L29zZDApDQo+PiBf
-ZG9fd3JpdGUgIzA6YjA2YjVlOGU6OjpyYmRfb2JqZWN0X21hcC4xMDA0NmI4YjQ1Njc6aGVhZCMg
-ODIxMH40MDk2IC0NCj4+aGF2ZQ0KPj4gNjE1MDAzMCBieXRlcyBpbiAxIGV4dGVudHMNCj4+DQo+
-PiBNb3JlIGxvZ3MgaGVyZTogaHR0cDovL3Bhc3RlYmluLmNvbS83NFdMekZZdw0KPj4NCj4+DQo+
-Pg0KPj4gT24gMy8zMC8xNiwgNDoxOSBBTSwgIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0
-PiB3cm90ZToNCj4+DQo+PiA+T24gV2VkLCAzMCBNYXIgMjAxNiwgRXZnZW5peSBGaXJzb3Ygd3Jv
-dGU6DQo+PiA+PiBBZnRlciBwdWxsaW5nIG1hc3RlciBicmFuY2ggb24gRnJpZGF5IEkgc3RhcnQg
-c2VlaW5nIG9kZCBmaW8NCj4+YmVoYXZpb3IsIEkNCj4+ID4+IHNlZSBhIGxvdCBvZiByZWFkcyB3
-aGlsZSB3cml0aW5nIGFuZCB2ZXJ5IGxvdyBwZXJmb3JtYW5jZSBubyBtYXR0ZXINCj4+ID4+IHdo
-ZXRoZXIgaXQgcmVhZCBvciB3cml0ZSB3b3JrbG9hZC4NCj4+ID4+DQo+PiA+PiBPdXRwdXQgZnJv
-bSBzZXF1ZW50aWFsIDFNIHdyaXRlOg0KPj4gPj4gRGV2aWNlOiAgICAgICAgIHJycW0vcyAgIHdy
-cW0vcyAgICAgci9zICAgICB3L3MgICAgcmtCL3MgICAgd2tCL3MNCj4+ID4+YXZncnEtc3oNCj4+
-ID4+IGF2Z3F1LXN6ICAgYXdhaXQgcl9hd2FpdCB3X2F3YWl0ICBzdmN0bSAgJXV0aWwNCj4+ID4+
-DQo+PiA+PiBzZGQgICAgICAgICAgICAgICAwLjAwICAgNDA5LjAwICAgIDAuMDAgIDM2NC4wMCAg
-ICAgMC4wMCAgMzA5Mi4wMA0KPj4gPj4xNi45OQ0KPj4gPj4gICAgIDAuMjggICAgMC43OCAgICAw
-LjAwICAgIDAuNzggICAwLjc2ICAyNy42MA0KPj4gPj4gc2RlICAgICAgICAgICAgICAgMC4wMCAg
-IDI0Mi4wMCAgMzY1LjAwICAzNjMuMDAgIDI0MzYuMDAgIDk2ODAuMDANCj4+ID4+MzMuMjkNCj4+
-ID4+ICAgICAwLjE4ICAgIDAuMjQgICAgMC40MiAgICAwLjA3ICAgMC4yMyAgMTYuODANCj4+ID4+
-DQo+PiA+Pg0KPj4gPj4NCj4+ID4+IGJsb2NrLmRiIC0+IC9kZXYvc2RkDQo+PiA+PiBibG9jayAt
-PiAvZGV2L3NkZQ0KPj4gPj4NCj4+ID4+IGhlYWx0aCBIRUFMVEhfT0sNCj4+ID4+IG1vbm1hcCBl
-MTogMSBtb25zIGF0IHthPTEyNy4wLjAuMTo2Nzg5LzB9DQo+PiA+PiAgICAgICAgZWxlY3Rpb24g
-ZXBvY2ggMywgcXVvcnVtIDAgYQ0KPj4gPj4gb3NkbWFwIGU3OiAxIG9zZHM6IDEgdXAsIDEgaW4N
-Cj4+ID4+ICAgICAgICBmbGFncyBzb3J0Yml0d2lzZQ0KPj4gPj4gcGdtYXAgdjI0OiA2NCBwZ3Ms
-IDEgcG9vbHMsIDU3NyBNQiBkYXRhLCA5MTUyIG9iamVjdHMNCj4+ID4+ICAgICAgICA4MjEwIE1C
-IHVzZWQsIDE3OCBHQiAvIDE4NiBHQiBhdmFpbA0KPj4gPj4gICAgICAgICAgICAgIDY0IGFjdGl2
-ZStjbGVhbg0KPj4gPj4gY2xpZW50IGlvIDE1NTAga0IvcyByZCwgOTU1OSBrQi9zIHdyLCA2NDUg
-b3AvcyByZCwgMzg3IG9wL3Mgd3INCj4+ID4+DQo+PiA+Pg0KPj4gPj4gV2hpbGUgb24gZWFybGll
-ciByZXZpc2lvbihjMWU0MWFmKSBldmVyeXRoaW5nIGxvb2tzIGFzIGV4cGVjdGVkOg0KPj4gPj4N
-Cj4+ID4+IERldmljZTogICAgICAgICBycnFtL3MgICB3cnFtL3MgICAgIHIvcyAgICAgdy9zICAg
-IHJrQi9zICAgIHdrQi9zDQo+PiA+PmF2Z3JxLXN6DQo+PiA+PiBhdmdxdS1zeiAgIGF3YWl0IHJf
-YXdhaXQgd19hd2FpdCAgc3ZjdG0gICV1dGlsDQo+PiA+PiBzZGQgICAgICAgICAgICAgICAwLjAw
-ICA0OTEwLjAwICAgIDAuMDAgIDY4MC4wMCAgICAgMC4wMCAyMjQxNi4wMA0KPj4gPj42NS45Mw0K
-Pj4gPj4gICAgIDEuMDUgICAgMS41NSAgICAwLjAwICAgIDEuNTUgICAxLjE4ICA4MC4wMA0KPj4g
-Pj4gc2RlICAgICAgICAgICAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwIDM0MTguMDAgICAgIDAu
-MDAgMjE3NjEyLjAwDQo+PiA+PiAxMjcuMzMgICAgNjMuNzggICAxOC4xOCAgICAwLjAwICAgMTgu
-MTggICAwLjI1ICA4Ni40MA0KPj4gPj4NCj4+ID4+IE90aGVyIG9ic2VydmF0aW9uLCBtYXkgYmUg
-cmVsYXRlZCB0byB0aGUgaXNzdWUsIGlzIHRoYXQgQ1BVIGxvYWQgaXMNCj4+ID4+IGltYmFsYW5j
-ZWQuIFNpbmdsZSDCs3RwX29zZF90cMKyIHRocmVhZCBpcyAxMDAlIGJ1c3ksIHdoaWxlIHRoZSBy
-ZXN0IGlzDQo+PiA+PmlkbGUuDQo+PiA+PiBMb29rcyBsaWtlIGFsbCBsb2FkIGdvZXMgdG8gc2lu
-Z2xlIHRocmVhZCBwb29sIHNoYXJkLCBlYXJsaWVyIENQVSB3YXMNCj4+ID4+d2VsbA0KPj4gPj4g
-YmFsYW5jZWQuDQo+PiA+DQo+PiA+SG1tLiAgQ2FuIHlvdSBjYXB0dXJlIGEgbG9nIHdpdGggZGVi
-dWcgYmx1ZXN0b3JlID0gMjAgYW5kIGRlYnVnIGJkZXYgPQ0KPj4yMD8NCj4+ID4NCj4+ID5UaGFu
-a3MhDQo+PiA+c2FnZQ0KPj4gPg0KPj4gPg0KPj4gPj4NCj4+ID4+DQo+PiA+PiDigLkNCj4+ID4+
-IEV2Z2VuaXkNCj4+ID4+DQo+PiA+Pg0KPj4gPj4NCj4+ID4+IFBMRUFTRSBOT1RFOiBUaGUgaW5m
-b3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsDQo+Pm1lc3NhZ2UNCj4+
-ID4+aXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGll
-bnQocykgbmFtZWQNCj4+YWJvdmUuDQo+PiA+PklmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdl
-IGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlDQo+PiA+PmhlcmVieSBub3Rp
-ZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhh
-dA0KPj4gPj5hbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlp
-bmcgb2YgdGhpcyBtZXNzYWdlIGlzDQo+PiA+PnN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBo
-YXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwNCj4+ID4+cGxlYXNlIG5v
-dGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKQ0K
-Pj4gPj5pbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBt
-ZXNzYWdlIGluIHlvdXINCj4+ID4+cG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBl
-bGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4+ID4+IC0tDQo+PiA+PiBUbyB1bnN1YnNj
-cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUNCj4+Y2VwaC1k
-ZXZlbCIgaW4NCj4+ID4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5r
-ZXJuZWwub3JnDQo+PiA+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+ID4+DQo+PiA+Pg0KPj4NCj4+IFBMRUFTRSBO
-T1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1l
-c3NhZ2UNCj4+aXMNCj4+IGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0
-ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLg0KPj5JZiB0aGUNCj4+IHJlYWRlciBvZiB0aGlz
-IG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5DQo+
-PiBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBh
-bmQgdGhhdCBhbnkNCj4+cmV2aWV3LA0KPj4gZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBv
-ciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseQ0KPj4gcHJvaGliaXRlZC4gSWYg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2UNCj4+
-bm90aWZ5DQo+PiB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFi
-b3ZlKSBpbW1lZGlhdGVseSBhbmQNCj4+ZGVzdHJveQ0KPj4gYW55IGFuZCBhbGwgY29waWVzIG9m
-IHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZA0KPj5jb3BpZXMN
-Cj4+IG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4NCj4+Tu+/ve+/ve+/ve+/
-ve+/vXLvv73vv71577+977+977+9Yu+/vVjvv73vv73Hp3bvv71e77+9Kd66ey5u77+9K++/ve+/
-ve+/vXrvv71deu+/ve+/ve+/vXthee+/vcqH2pnvv70sau+/ve+/vWbvv73vv73vv71o77+977+9
-77+9eu+/ve+/vXfvv73vv73vv73vv73vv73vv71qOit2DQo+Pu+/ve+/ve+/vXfvv71q77+9be+/
-ve+/ve+/ve+/ve+/ve+/ve+/ve+/vXpaK++/ve+/vd2iaiLvv73vv70NCg0KUExFQVNFIE5PVEU6
-IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2Fn
-ZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVu
-dChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRo
-ZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhh
-dmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRp
-c3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMg
-c3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0
-aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUt
-bWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxs
-IGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQg
-Y29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0K
+Are you using the RBD default of 4MB object sizes or are you using some=
+thing much smaller like 64KB?  An object map of that size should be tra=
+cking up to 24,576,000 objects.  When you ran your test before, did you=
+ have the RBD object map disabled?  This definitely seems to be a use c=
+ase where the lack of a cache in front of BlueStore is hurting small IO=
+=2E
+
+--=20
+
+Jason Dillaman=20
+
+
+----- Original Message -----
+> From: "Evgeniy Firsov" <Evgeniy.Firsov@sandisk.com>
+> To: "Jason Dillaman" <dillaman@redhat.com>
+> Cc: "Sage Weil" <sage@newdream.net>, ceph-devel@vger.kernel.org
+> Sent: Wednesday, March 30, 2016 3:00:47 PM
+> Subject: Re: reads while 100% write
+>=20
+> 1.5T in that run.
+> With 150G behavior is the same. Except it says "_do_read 0~18 size 61=
+5030=E2=80=9D
+> instead of 6M.
+>=20
+> Also when random 4k write starts there are more reads then writes:
+>=20
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avg=
+rq-sz
+> avgqu-sz   await r_await w_await  svctm  %util
+>=20
+> sdd               0.00  1887.00    0.00  344.00     0.00  8924.00    =
+51.88
+>     0.36    1.06    0.00    1.06   0.91  31.20
+> sde              30.00     0.00   30.00  957.00 18120.00  3828.00    =
+44.47
+>     0.25    0.26    3.87    0.14   0.17  16.40
+>=20
+> Logs: http://pastebin.com/gGzfR5ez
+>=20
+>=20
+> On 3/30/16, 11:37 AM, "Jason Dillaman" <dillaman@redhat.com> wrote:
+>=20
+> >How large is your RBD image?  100 terabytes?
+> >
+> >--
+> >
+> >Jason Dillaman
+> >
+> >
+> >----- Original Message -----
+> >> From: "Evgeniy Firsov" <Evgeniy.Firsov@sandisk.com>
+> >> To: "Sage Weil" <sage@newdream.net>
+> >> Cc: ceph-devel@vger.kernel.org
+> >> Sent: Wednesday, March 30, 2016 2:14:12 PM
+> >> Subject: Re: reads while 100% write
+> >>
+> >> These are suspicious lines:
+> >>
+> >> 2016-03-30 10:54:23.142205 7f2e933ff700 10 bluestore(src/dev/osd0)=
+ read
+> >> 0.d_head #0:b06b5e8e:::rbd_object_map.10046b8b4567:head# 6144018~6=
+012 =3D
+> >> 6012
+> >> 2016-03-30 10:54:23.142252 7f2e933ff700 15 bluestore(src/dev/osd0)=
+ read
+> >> 0.d_head #0:b06b5e8e:::rbd_object_map.10046b8b4567:head# 8210~4096
+> >> 2016-03-30 10:54:23.142260 7f2e933ff700 20 bluestore(src/dev/osd0)
+> >> _do_read 8210~4096 size 6150030
+> >> 2016-03-30 10:54:23.142267 7f2e933ff700  5 bdev(src/dev/osd0/block=
+) read
+> >> 8003854336~8192
+> >> 2016-03-30 10:54:23.142609 7f2e933ff700 10 bluestore(src/dev/osd0)=
+ read
+> >> 0.d_head #0:b06b5e8e:::rbd_object_map.10046b8b4567:head# 8210~4096=
+ =3D
+> >>4096
+> >> 2016-03-30 10:54:23.142882 7f2e933ff700 15 bluestore(src/dev/osd0)
+> >>_write
+> >> 0.d_head #0:b06b5e8e:::rbd_object_map.10046b8b4567:head# 8210~4096
+> >> 2016-03-30 10:54:23.142888 7f2e933ff700 20 bluestore(src/dev/osd0)
+> >> _do_write #0:b06b5e8e:::rbd_object_map.10046b8b4567:head# 8210~409=
+6 -
+> >>have
+> >> 6150030 bytes in 1 extents
+> >>
+> >> More logs here: http://pastebin.com/74WLzFYw
+> >>
+> >>
+> >>
+> >> On 3/30/16, 4:19 AM, "Sage Weil" <sage@newdream.net> wrote:
+> >>
+> >> >On Wed, 30 Mar 2016, Evgeniy Firsov wrote:
+> >> >> After pulling master branch on Friday I start seeing odd fio
+> >>behavior, I
+> >> >> see a lot of reads while writing and very low performance no ma=
+tter
+> >> >> whether it read or write workload.
+> >> >>
+> >> >> Output from sequential 1M write:
+> >> >> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB=
+/s
+> >> >>avgrq-sz
+> >> >> avgqu-sz   await r_await w_await  svctm  %util
+> >> >>
+> >> >> sdd               0.00   409.00    0.00  364.00     0.00  3092.=
+00
+> >> >>16.99
+> >> >>     0.28    0.78    0.00    0.78   0.76  27.60
+> >> >> sde               0.00   242.00  365.00  363.00  2436.00  9680.=
+00
+> >> >>33.29
+> >> >>     0.18    0.24    0.42    0.07   0.23  16.80
+> >> >>
+> >> >>
+> >> >>
+> >> >> block.db -> /dev/sdd
+> >> >> block -> /dev/sde
+> >> >>
+> >> >> health HEALTH_OK
+> >> >> monmap e1: 1 mons at {a=3D127.0.0.1:6789/0}
+> >> >>        election epoch 3, quorum 0 a
+> >> >> osdmap e7: 1 osds: 1 up, 1 in
+> >> >>        flags sortbitwise
+> >> >> pgmap v24: 64 pgs, 1 pools, 577 MB data, 9152 objects
+> >> >>        8210 MB used, 178 GB / 186 GB avail
+> >> >>              64 active+clean
+> >> >> client io 1550 kB/s rd, 9559 kB/s wr, 645 op/s rd, 387 op/s wr
+> >> >>
+> >> >>
+> >> >> While on earlier revision(c1e41af) everything looks as expected=
+:
+> >> >>
+> >> >> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB=
+/s
+> >> >>avgrq-sz
+> >> >> avgqu-sz   await r_await w_await  svctm  %util
+> >> >> sdd               0.00  4910.00    0.00  680.00     0.00 22416.=
+00
+> >> >>65.93
+> >> >>     1.05    1.55    0.00    1.55   1.18  80.00
+> >> >> sde               0.00     0.00    0.00 3418.00     0.00 217612=
+=2E00
+> >> >> 127.33    63.78   18.18    0.00   18.18   0.25  86.40
+> >> >>
+> >> >> Other observation, may be related to the issue, is that CPU loa=
+d is
+> >> >> imbalanced. Single =C2=B3tp_osd_tp=C2=B2 thread is 100% busy, w=
+hile the rest is
+> >> >>idle.
+> >> >> Looks like all load goes to single thread pool shard, earlier C=
+PU was
+> >> >>well
+> >> >> balanced.
+> >> >
+> >> >Hmm.  Can you capture a log with debug bluestore =3D 20 and debug=
+ bdev =3D
+> >>20?
+> >> >
+> >> >Thanks!
+> >> >sage
+> >> >
+> >> >
+> >> >>
+> >> >>
+> >> >> =E2=80=B9
+> >> >> Evgeniy
+> >> >>
+> >> >>
+> >> >>
+> >> >> PLEASE NOTE: The information contained in this electronic mail
+> >>message
+> >> >>is intended only for the use of the designated recipient(s) name=
+d
+> >>above.
+> >> >>If the reader of this message is not the intended recipient, you=
+ are
+> >> >>hereby notified that you have received this message in error and=
+ that
+> >> >>any review, dissemination, distribution, or copying of this mess=
+age is
+> >> >>strictly prohibited. If you have received this communication in =
+error,
+> >> >>please notify the sender by telephone or e-mail (as shown above)
+> >> >>immediately and destroy any and all copies of this message in yo=
+ur
+> >> >>possession (whether hard copies or electronically stored copies)=
+=2E
+> >> >> --
+> >> >> To unsubscribe from this list: send the line "unsubscribe
+> >>ceph-devel" in
+> >> >> the body of a message to majordomo@vger.kernel.org
+> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.h=
+tml
+> >> >>
+> >> >>
+> >>
+> >> PLEASE NOTE: The information contained in this electronic mail mes=
+sage
+> >>is
+> >> intended only for the use of the designated recipient(s) named abo=
+ve.
+> >>If the
+> >> reader of this message is not the intended recipient, you are here=
+by
+> >> notified that you have received this message in error and that any
+> >>review,
+> >> dissemination, distribution, or copying of this message is strictl=
+y
+> >> prohibited. If you have received this communication in error, plea=
+se
+> >>notify
+> >> the sender by telephone or e-mail (as shown above) immediately and
+> >>destroy
+> >> any and all copies of this message in your possession (whether har=
+d
+> >>copies
+> >> or electronically stored copies).
+> >>
+> >>N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
+=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
+=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v
+> >>=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=
+=DD=A2j"=EF=BF=BD=EF=BF=BD
+>=20
+> PLEASE NOTE: The information contained in this electronic mail messag=
+e is
+> intended only for the use of the designated recipient(s) named above.=
+ If the
+> reader of this message is not the intended recipient, you are hereby
+> notified that you have received this message in error and that any re=
+view,
+> dissemination, distribution, or copying of this message is strictly
+> prohibited. If you have received this communication in error, please =
+notify
+> the sender by telephone or e-mail (as shown above) immediately and de=
+stroy
+> any and all copies of this message in your possession (whether hard c=
+opies
+> or electronically stored copies).
+> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
+=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
+=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=
+=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=
+=EF=BF=BD=EF=BF=BD
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
