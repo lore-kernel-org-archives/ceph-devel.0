@@ -1,60 +1,145 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: getting ready for jewel 10.2.1
-Date: Wed, 30 Mar 2016 11:47:38 -0700
-Message-ID: <CAJ4mKGYg++sGuqHQPkNa1GrVeDO=KFZNtp4FTYX=zOkrAbnFeQ@mail.gmail.com>
-References: <56FBAADF.3020407@dachary.org>
+From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
+Subject: Re: reads while 100% write
+Date: Wed, 30 Mar 2016 19:00:47 +0000
+Message-ID: <D3216CC1.C53E%evgeniy.firsov@sandisk.com>
+References: <D320896C.C4F8%evgeniy.firsov@sandisk.com>
+ <alpine.DEB.2.11.1603300714580.22014@cpach.fuggernut.com>
+ <D3216565.C534%evgeniy.firsov@sandisk.com>
+ <1920245628.45592204.1459363024441.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f41.google.com ([209.85.213.41]:34913 "EHLO
-	mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752236AbcC3Srk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 14:47:40 -0400
-Received: by mail-vk0-f41.google.com with SMTP id e6so73267172vkh.2
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Mar 2016 11:47:39 -0700 (PDT)
-In-Reply-To: <56FBAADF.3020407@dachary.org>
+Received: from mail-by2on0087.outbound.protection.outlook.com ([207.46.100.87]:64384
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752591AbcC3TAu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 30 Mar 2016 15:00:50 -0400
+In-Reply-To: <1920245628.45592204.1459363024441.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
+Content-ID: <4CF978427B1AFA43AD1831EEA97076C0@namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Abhishek Varshney <abhishek.varshney@flipkart.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 30, 2016 at 3:30 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi,
->
-> Now is a good time to get ready for jewel 10.2.1 and I created http://tracker.ceph.com/issues/15317 for that purpose. The goal is to be able to run as many suites as possible on OpenStack, so that we do not have to wait days (sometime a week) for runs to complete on Sepia. Best case scenario, all OpenStack specific problems are fixed by the time 10.2.1 is being prepared. Worst case scenario there is no time to fix issues and we keep using the sepia lab. I guess we'll end up somewhere in the middle : some suites will run fine on Openstack and we'll use sepia for others.
->
-> In a previous mail I voiced my concerns regarding the lack of interest of developers regarding teuthology job failures that are cause by variations in the infrastructure. I still have no clue how to convey my belief that it is important for teuthology jobs to succeed despite infrastructure variations. But instead of just giving up and do nothing, I will work on that for the rados suite and hope things will evolve in a good way. To be honest, figuring out http://tracker.ceph.com/issues/15236 and seeing a good run of the rados suite on jewel as a result renewed my motivation in that area :-)
-
-I think you've convinced us all it's important in the abstract; that's
-just very different from putting it on top of our list of priorities,
-especially since we alleviated many of our needs in the sepia lab.
-Beyond that, a lot of the issues we're seeing have very little to do
-with Ceph itself, or even the testing programs, and that can make it
-more difficult to get interested as we lack the necessary expertise. I
-spent some time trying to get disk sizes and things matched up (and I
-suddenly realize that never got merged), but some of the other odder
-issues we're having:
-
-http://tracker.ceph.com/issues/13980, in which we are failing to mount
-anything with nfs v3. This is a config file that needs to get updated;
-we do it for the sepia lab (probably in ansible?) but somehow that
-information isn't getting into the ovh slaves. (Or else it is in
-there, and there's something *else* broken.) If we are using a
-separate setup regimen for OpenStack than we are in the sepia lab
-there will be persistent breakage as new dependencies and
-environmental expectations get added to one and not the other. :/
-
-http://tracker.ceph.com/issues/13876, in which MPI is just failing to
-get any connections going. Why? No idea; there's a teuthology commit
-from you that's supposed to have opened up all the ports in the
-firewall (and it sure *looks* like it does do that, but I don't know
-how the rules work), but this works in sepia and inasmuch as we have
-debugging info sure looks like some kind of network blockage...
-
-So I think this isn't something that's going to get done properly
-unless somebody gets assigned to just make everything work in all the
-suites, who has the time to learn all the fiddly little bits. (Or we
-somehow take a break for it as a project. But I don't see that going
-well.) :/
--Greg
+MS41VCBpbiB0aGF0IHJ1bi4NCldpdGggMTUwRyBiZWhhdmlvciBpcyB0aGUgc2FtZS4gRXhjZXB0
+IGl0IHNheXMgIl9kb19yZWFkIDB+MTggc2l6ZSA2MTUwMzDigJ0NCmluc3RlYWQgb2YgNk0uDQoN
+CkFsc28gd2hlbiByYW5kb20gNGsgd3JpdGUgc3RhcnRzIHRoZXJlIGFyZSBtb3JlIHJlYWRzIHRo
+ZW4gd3JpdGVzOg0KDQpEZXZpY2U6ICAgICAgICAgcnJxbS9zICAgd3JxbS9zICAgICByL3MgICAg
+IHcvcyAgICBya0IvcyAgICB3a0IvcyBhdmdycS1zeg0KYXZncXUtc3ogICBhd2FpdCByX2F3YWl0
+IHdfYXdhaXQgIHN2Y3RtICAldXRpbA0KDQpzZGQgICAgICAgICAgICAgICAwLjAwICAxODg3LjAw
+ICAgIDAuMDAgIDM0NC4wMCAgICAgMC4wMCAgODkyNC4wMCAgICA1MS44OA0KICAgIDAuMzYgICAg
+MS4wNiAgICAwLjAwICAgIDEuMDYgICAwLjkxICAzMS4yMA0Kc2RlICAgICAgICAgICAgICAzMC4w
+MCAgICAgMC4wMCAgIDMwLjAwICA5NTcuMDAgMTgxMjAuMDAgIDM4MjguMDAgICAgNDQuNDcNCiAg
+ICAwLjI1ICAgIDAuMjYgICAgMy44NyAgICAwLjE0ICAgMC4xNyAgMTYuNDANCg0KTG9nczogaHR0
+cDovL3Bhc3RlYmluLmNvbS9nR3pmUjVleg0KDQoNCk9uIDMvMzAvMTYsIDExOjM3IEFNLCAiSmFz
+b24gRGlsbGFtYW4iIDxkaWxsYW1hbkByZWRoYXQuY29tPiB3cm90ZToNCg0KPkhvdyBsYXJnZSBp
+cyB5b3VyIFJCRCBpbWFnZT8gIDEwMCB0ZXJhYnl0ZXM/DQo+DQo+LS0NCj4NCj5KYXNvbiBEaWxs
+YW1hbg0KPg0KPg0KPi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0NCj4+IEZyb206ICJFdmdl
+bml5IEZpcnNvdiIgPEV2Z2VuaXkuRmlyc292QHNhbmRpc2suY29tPg0KPj4gVG86ICJTYWdlIFdl
+aWwiIDxzYWdlQG5ld2RyZWFtLm5ldD4NCj4+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+Zw0KPj4gU2VudDogV2VkbmVzZGF5LCBNYXJjaCAzMCwgMjAxNiAyOjE0OjEyIFBNDQo+PiBTdWJq
+ZWN0OiBSZTogcmVhZHMgd2hpbGUgMTAwJSB3cml0ZQ0KPj4NCj4+IFRoZXNlIGFyZSBzdXNwaWNp
+b3VzIGxpbmVzOg0KPj4NCj4+IDIwMTYtMDMtMzAgMTA6NTQ6MjMuMTQyMjA1IDdmMmU5MzNmZjcw
+MCAxMCBibHVlc3RvcmUoc3JjL2Rldi9vc2QwKSByZWFkDQo+PiAwLmRfaGVhZCAjMDpiMDZiNWU4
+ZTo6OnJiZF9vYmplY3RfbWFwLjEwMDQ2YjhiNDU2NzpoZWFkIyA2MTQ0MDE4fjYwMTIgPQ0KPj4g
+NjAxMg0KPj4gMjAxNi0wMy0zMCAxMDo1NDoyMy4xNDIyNTIgN2YyZTkzM2ZmNzAwIDE1IGJsdWVz
+dG9yZShzcmMvZGV2L29zZDApIHJlYWQNCj4+IDAuZF9oZWFkICMwOmIwNmI1ZThlOjo6cmJkX29i
+amVjdF9tYXAuMTAwNDZiOGI0NTY3OmhlYWQjIDgyMTB+NDA5Ng0KPj4gMjAxNi0wMy0zMCAxMDo1
+NDoyMy4xNDIyNjAgN2YyZTkzM2ZmNzAwIDIwIGJsdWVzdG9yZShzcmMvZGV2L29zZDApDQo+PiBf
+ZG9fcmVhZCA4MjEwfjQwOTYgc2l6ZSA2MTUwMDMwDQo+PiAyMDE2LTAzLTMwIDEwOjU0OjIzLjE0
+MjI2NyA3ZjJlOTMzZmY3MDAgIDUgYmRldihzcmMvZGV2L29zZDAvYmxvY2spIHJlYWQNCj4+IDgw
+MDM4NTQzMzZ+ODE5Mg0KPj4gMjAxNi0wMy0zMCAxMDo1NDoyMy4xNDI2MDkgN2YyZTkzM2ZmNzAw
+IDEwIGJsdWVzdG9yZShzcmMvZGV2L29zZDApIHJlYWQNCj4+IDAuZF9oZWFkICMwOmIwNmI1ZThl
+Ojo6cmJkX29iamVjdF9tYXAuMTAwNDZiOGI0NTY3OmhlYWQjIDgyMTB+NDA5NiA9DQo+PjQwOTYN
+Cj4+IDIwMTYtMDMtMzAgMTA6NTQ6MjMuMTQyODgyIDdmMmU5MzNmZjcwMCAxNSBibHVlc3RvcmUo
+c3JjL2Rldi9vc2QwKQ0KPj5fd3JpdGUNCj4+IDAuZF9oZWFkICMwOmIwNmI1ZThlOjo6cmJkX29i
+amVjdF9tYXAuMTAwNDZiOGI0NTY3OmhlYWQjIDgyMTB+NDA5Ng0KPj4gMjAxNi0wMy0zMCAxMDo1
+NDoyMy4xNDI4ODggN2YyZTkzM2ZmNzAwIDIwIGJsdWVzdG9yZShzcmMvZGV2L29zZDApDQo+PiBf
+ZG9fd3JpdGUgIzA6YjA2YjVlOGU6OjpyYmRfb2JqZWN0X21hcC4xMDA0NmI4YjQ1Njc6aGVhZCMg
+ODIxMH40MDk2IC0NCj4+aGF2ZQ0KPj4gNjE1MDAzMCBieXRlcyBpbiAxIGV4dGVudHMNCj4+DQo+
+PiBNb3JlIGxvZ3MgaGVyZTogaHR0cDovL3Bhc3RlYmluLmNvbS83NFdMekZZdw0KPj4NCj4+DQo+
+Pg0KPj4gT24gMy8zMC8xNiwgNDoxOSBBTSwgIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0
+PiB3cm90ZToNCj4+DQo+PiA+T24gV2VkLCAzMCBNYXIgMjAxNiwgRXZnZW5peSBGaXJzb3Ygd3Jv
+dGU6DQo+PiA+PiBBZnRlciBwdWxsaW5nIG1hc3RlciBicmFuY2ggb24gRnJpZGF5IEkgc3RhcnQg
+c2VlaW5nIG9kZCBmaW8NCj4+YmVoYXZpb3IsIEkNCj4+ID4+IHNlZSBhIGxvdCBvZiByZWFkcyB3
+aGlsZSB3cml0aW5nIGFuZCB2ZXJ5IGxvdyBwZXJmb3JtYW5jZSBubyBtYXR0ZXINCj4+ID4+IHdo
+ZXRoZXIgaXQgcmVhZCBvciB3cml0ZSB3b3JrbG9hZC4NCj4+ID4+DQo+PiA+PiBPdXRwdXQgZnJv
+bSBzZXF1ZW50aWFsIDFNIHdyaXRlOg0KPj4gPj4gRGV2aWNlOiAgICAgICAgIHJycW0vcyAgIHdy
+cW0vcyAgICAgci9zICAgICB3L3MgICAgcmtCL3MgICAgd2tCL3MNCj4+ID4+YXZncnEtc3oNCj4+
+ID4+IGF2Z3F1LXN6ICAgYXdhaXQgcl9hd2FpdCB3X2F3YWl0ICBzdmN0bSAgJXV0aWwNCj4+ID4+
+DQo+PiA+PiBzZGQgICAgICAgICAgICAgICAwLjAwICAgNDA5LjAwICAgIDAuMDAgIDM2NC4wMCAg
+ICAgMC4wMCAgMzA5Mi4wMA0KPj4gPj4xNi45OQ0KPj4gPj4gICAgIDAuMjggICAgMC43OCAgICAw
+LjAwICAgIDAuNzggICAwLjc2ICAyNy42MA0KPj4gPj4gc2RlICAgICAgICAgICAgICAgMC4wMCAg
+IDI0Mi4wMCAgMzY1LjAwICAzNjMuMDAgIDI0MzYuMDAgIDk2ODAuMDANCj4+ID4+MzMuMjkNCj4+
+ID4+ICAgICAwLjE4ICAgIDAuMjQgICAgMC40MiAgICAwLjA3ICAgMC4yMyAgMTYuODANCj4+ID4+
+DQo+PiA+Pg0KPj4gPj4NCj4+ID4+IGJsb2NrLmRiIC0+IC9kZXYvc2RkDQo+PiA+PiBibG9jayAt
+PiAvZGV2L3NkZQ0KPj4gPj4NCj4+ID4+IGhlYWx0aCBIRUFMVEhfT0sNCj4+ID4+IG1vbm1hcCBl
+MTogMSBtb25zIGF0IHthPTEyNy4wLjAuMTo2Nzg5LzB9DQo+PiA+PiAgICAgICAgZWxlY3Rpb24g
+ZXBvY2ggMywgcXVvcnVtIDAgYQ0KPj4gPj4gb3NkbWFwIGU3OiAxIG9zZHM6IDEgdXAsIDEgaW4N
+Cj4+ID4+ICAgICAgICBmbGFncyBzb3J0Yml0d2lzZQ0KPj4gPj4gcGdtYXAgdjI0OiA2NCBwZ3Ms
+IDEgcG9vbHMsIDU3NyBNQiBkYXRhLCA5MTUyIG9iamVjdHMNCj4+ID4+ICAgICAgICA4MjEwIE1C
+IHVzZWQsIDE3OCBHQiAvIDE4NiBHQiBhdmFpbA0KPj4gPj4gICAgICAgICAgICAgIDY0IGFjdGl2
+ZStjbGVhbg0KPj4gPj4gY2xpZW50IGlvIDE1NTAga0IvcyByZCwgOTU1OSBrQi9zIHdyLCA2NDUg
+b3AvcyByZCwgMzg3IG9wL3Mgd3INCj4+ID4+DQo+PiA+Pg0KPj4gPj4gV2hpbGUgb24gZWFybGll
+ciByZXZpc2lvbihjMWU0MWFmKSBldmVyeXRoaW5nIGxvb2tzIGFzIGV4cGVjdGVkOg0KPj4gPj4N
+Cj4+ID4+IERldmljZTogICAgICAgICBycnFtL3MgICB3cnFtL3MgICAgIHIvcyAgICAgdy9zICAg
+IHJrQi9zICAgIHdrQi9zDQo+PiA+PmF2Z3JxLXN6DQo+PiA+PiBhdmdxdS1zeiAgIGF3YWl0IHJf
+YXdhaXQgd19hd2FpdCAgc3ZjdG0gICV1dGlsDQo+PiA+PiBzZGQgICAgICAgICAgICAgICAwLjAw
+ICA0OTEwLjAwICAgIDAuMDAgIDY4MC4wMCAgICAgMC4wMCAyMjQxNi4wMA0KPj4gPj42NS45Mw0K
+Pj4gPj4gICAgIDEuMDUgICAgMS41NSAgICAwLjAwICAgIDEuNTUgICAxLjE4ICA4MC4wMA0KPj4g
+Pj4gc2RlICAgICAgICAgICAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwIDM0MTguMDAgICAgIDAu
+MDAgMjE3NjEyLjAwDQo+PiA+PiAxMjcuMzMgICAgNjMuNzggICAxOC4xOCAgICAwLjAwICAgMTgu
+MTggICAwLjI1ICA4Ni40MA0KPj4gPj4NCj4+ID4+IE90aGVyIG9ic2VydmF0aW9uLCBtYXkgYmUg
+cmVsYXRlZCB0byB0aGUgaXNzdWUsIGlzIHRoYXQgQ1BVIGxvYWQgaXMNCj4+ID4+IGltYmFsYW5j
+ZWQuIFNpbmdsZSDCs3RwX29zZF90cMKyIHRocmVhZCBpcyAxMDAlIGJ1c3ksIHdoaWxlIHRoZSBy
+ZXN0IGlzDQo+PiA+PmlkbGUuDQo+PiA+PiBMb29rcyBsaWtlIGFsbCBsb2FkIGdvZXMgdG8gc2lu
+Z2xlIHRocmVhZCBwb29sIHNoYXJkLCBlYXJsaWVyIENQVSB3YXMNCj4+ID4+d2VsbA0KPj4gPj4g
+YmFsYW5jZWQuDQo+PiA+DQo+PiA+SG1tLiAgQ2FuIHlvdSBjYXB0dXJlIGEgbG9nIHdpdGggZGVi
+dWcgYmx1ZXN0b3JlID0gMjAgYW5kIGRlYnVnIGJkZXYgPQ0KPj4yMD8NCj4+ID4NCj4+ID5UaGFu
+a3MhDQo+PiA+c2FnZQ0KPj4gPg0KPj4gPg0KPj4gPj4NCj4+ID4+DQo+PiA+PiDigLkNCj4+ID4+
+IEV2Z2VuaXkNCj4+ID4+DQo+PiA+Pg0KPj4gPj4NCj4+ID4+IFBMRUFTRSBOT1RFOiBUaGUgaW5m
+b3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsDQo+Pm1lc3NhZ2UNCj4+
+ID4+aXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGll
+bnQocykgbmFtZWQNCj4+YWJvdmUuDQo+PiA+PklmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdl
+IGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlDQo+PiA+PmhlcmVieSBub3Rp
+ZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhh
+dA0KPj4gPj5hbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlp
+bmcgb2YgdGhpcyBtZXNzYWdlIGlzDQo+PiA+PnN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBo
+YXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwNCj4+ID4+cGxlYXNlIG5v
+dGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKQ0K
+Pj4gPj5pbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBt
+ZXNzYWdlIGluIHlvdXINCj4+ID4+cG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBl
+bGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4+ID4+IC0tDQo+PiA+PiBUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUNCj4+Y2VwaC1k
+ZXZlbCIgaW4NCj4+ID4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5r
+ZXJuZWwub3JnDQo+PiA+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJu
+ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+ID4+DQo+PiA+Pg0KPj4NCj4+IFBMRUFTRSBO
+T1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1l
+c3NhZ2UNCj4+aXMNCj4+IGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0
+ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLg0KPj5JZiB0aGUNCj4+IHJlYWRlciBvZiB0aGlz
+IG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5DQo+
+PiBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBh
+bmQgdGhhdCBhbnkNCj4+cmV2aWV3LA0KPj4gZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBv
+ciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseQ0KPj4gcHJvaGliaXRlZC4gSWYg
+eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2UNCj4+
+bm90aWZ5DQo+PiB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFi
+b3ZlKSBpbW1lZGlhdGVseSBhbmQNCj4+ZGVzdHJveQ0KPj4gYW55IGFuZCBhbGwgY29waWVzIG9m
+IHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZA0KPj5jb3BpZXMN
+Cj4+IG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4NCj4+Tu+/ve+/ve+/ve+/
+ve+/vXLvv73vv71577+977+977+9Yu+/vVjvv73vv73Hp3bvv71e77+9Kd66ey5u77+9K++/ve+/
+ve+/vXrvv71deu+/ve+/ve+/vXthee+/vcqH2pnvv70sau+/ve+/vWbvv73vv73vv71o77+977+9
+77+9eu+/ve+/vXfvv73vv73vv73vv73vv73vv71qOit2DQo+Pu+/ve+/ve+/vXfvv71q77+9be+/
+ve+/ve+/ve+/ve+/ve+/ve+/ve+/vXpaK++/ve+/vd2iaiLvv73vv70NCg0KUExFQVNFIE5PVEU6
+IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2Fn
+ZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVu
+dChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRo
+ZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhh
+dmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRp
+c3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMg
+c3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0
+aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUt
+bWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxs
+IGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQg
+Y29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0K
