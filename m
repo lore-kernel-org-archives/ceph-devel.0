@@ -1,64 +1,90 @@
-From: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Subject: Re: getting ready for jewel 10.2.1
-Date: Wed, 30 Mar 2016 16:15:50 +0530
-Message-ID: <CAP3mxSywVh28G3nAgadt+3wZTcdaPJu7=FxNAGYJvnk0dj_5JA@mail.gmail.com>
-References: <56FBAADF.3020407@dachary.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: reads while 100% write
+Date: Wed, 30 Mar 2016 07:19:12 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1603300714580.22014@cpach.fuggernut.com>
+References: <D320896C.C4F8%evgeniy.firsov@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-131975210-1459336754=:22014"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f178.google.com ([209.85.161.178]:36749 "EHLO
-	mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750854AbcC3Kpv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 06:45:51 -0400
-Received: by mail-yw0-f178.google.com with SMTP id g3so52765148ywa.3
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Mar 2016 03:45:50 -0700 (PDT)
-In-Reply-To: <56FBAADF.3020407@dachary.org>
+Received: from cobra.newdream.net ([66.33.216.30]:47769 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751458AbcC3LTW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 07:19:22 -0400
+In-Reply-To: <D320896C.C4F8%evgeniy.firsov@sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Loic,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-On Wed, Mar 30, 2016 at 4:00 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi,
->
-> Now is a good time to get ready for jewel 10.2.1 and I created http:/=
-/tracker.ceph.com/issues/15317 for that purpose.
+--8323329-131975210-1459336754=:22014
+Content-Type: TEXT/PLAIN; charset=Windows-1252
+Content-Transfer-Encoding: 8BIT
 
-Thanks for creating the tracker issue.
+On Wed, 30 Mar 2016, Evgeniy Firsov wrote:
+> After pulling master branch on Friday I start seeing odd fio behavior, I
+> see a lot of reads while writing and very low performance no matter
+> whether it read or write workload.
+> 
+> Output from sequential 1M write:
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz
+> avgqu-sz   await r_await w_await  svctm  %util
+> 
+> sdd               0.00   409.00    0.00  364.00     0.00  3092.00    16.99
+>     0.28    0.78    0.00    0.78   0.76  27.60
+> sde               0.00   242.00  365.00  363.00  2436.00  9680.00    33.29
+>     0.18    0.24    0.42    0.07   0.23  16.80
+> 
+> 
+> 
+> block.db -> /dev/sdd
+> block -> /dev/sde
+> 
+> health HEALTH_OK
+> monmap e1: 1 mons at {a=127.0.0.1:6789/0}
+>        election epoch 3, quorum 0 a
+> osdmap e7: 1 osds: 1 up, 1 in
+>        flags sortbitwise
+> pgmap v24: 64 pgs, 1 pools, 577 MB data, 9152 objects
+>        8210 MB used, 178 GB / 186 GB avail
+>              64 active+clean
+> client io 1550 kB/s rd, 9559 kB/s wr, 645 op/s rd, 387 op/s wr
+> 
+> 
+> While on earlier revision(c1e41af) everything looks as expected:
+> 
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz
+> avgqu-sz   await r_await w_await  svctm  %util
+> sdd               0.00  4910.00    0.00  680.00     0.00 22416.00    65.93
+>     1.05    1.55    0.00    1.55   1.18  80.00
+> sde               0.00     0.00    0.00 3418.00     0.00 217612.00
+> 127.33    63.78   18.18    0.00   18.18   0.25  86.40
+> 
+> Other observation, may be related to the issue, is that CPU load is
+> imbalanced. Single ³tp_osd_tp² thread is 100% busy, while the rest is idle.
+> Looks like all load goes to single thread pool shard, earlier CPU was well
+> balanced.
 
-The goal is to be able to run as many suites as possible on OpenStack,
-so that we do not have to wait days (sometime a week) for runs to
-complete on Sepia. Best case scenario, all OpenStack specific problems
-are fixed by the time 10.2.1 is being prepared. Worst case scenario
-there is no time to fix issues and we keep using the sepia lab. I
-guess we'll end up somewhere in the middle : some suites will run fine
-on Openstack and we'll use sepia for others.
+Hmm.  Can you capture a log with debug bluestore = 20 and debug bdev = 20?
 
-Lets aim for the stars :)
+Thanks!
+sage
 
->
-> In a previous mail I voiced my concerns regarding the lack of interes=
-t of developers regarding teuthology job failures that are cause by var=
-iations in the infrastructure. I still have no clue how to convey my be=
-lief that it is important for teuthology jobs to succeed despite infras=
-tructure variations. But instead of just giving up and do nothing, I wi=
-ll work on that for the rados suite and hope things will evolve in a go=
-od way. To be honest, figuring out http://tracker.ceph.com/issues/15236=
- and seeing a good run of the rados suite on jewel as a result renewed =
-my motivation in that area :-)
->
-> Cheers
->
+
+> 
+> 
+> ‹
+> Evgeniy
+> 
+> 
+> 
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 > --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-Thanks
-Abhishek
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--8323329-131975210-1459336754=:22014--
