@@ -1,113 +1,61 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [GIT PULL] Ceph fixes for -rc7
-Date: Wed, 30 Mar 2016 10:04:15 +0200
-Message-ID: <CAOi1vP-B7V5o0MdwmWe0FiwdFnyjv2B0SisL=BX3A3HXQ+JN-g@mail.gmail.com>
-References: <alpine.DEB.2.11.1603052045320.25897@cpach.fuggernut.com>
-	<87fuvfw6g9.fsf@notabene.neil.brown.name>
-	<CAOi1vP9j8RCucc9DLoFUOXyBrGuTbN10hnQ0CwOE-PK=_j=k=w@mail.gmail.com>
-	<874mbovmlv.fsf@notabene.neil.brown.name>
-	<CAAM7YA=voB_7HnbzZqBBqyu9AU1DYYgw297hWfzdH6JBU61X1w@mail.gmail.com>
-	<87poucu1rf.fsf@notabene.neil.brown.name>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Virtualenv tests still nort running...
+Date: Wed, 30 Mar 2016 11:25:52 +0200
+Message-ID: <56FB9BA0.2060901@digiware.nl>
+References: <56FA67A8.6050809@digiware.nl> <56FA74F4.5040905@dachary.org>
+ <56FA9B5C.5060307@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87poucu1rf.fsf@notabene.neil.brown.name>
-Sender: linux-kernel-owner@vger.kernel.org
-To: NeilBrown <neilb@suse.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, Sage Weil <sweil@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([31.223.170.169]:23041 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750854AbcC3J0L (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 30 Mar 2016 05:26:11 -0400
+In-Reply-To: <56FA9B5C.5060307@digiware.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 30, 2016 at 4:40 AM, NeilBrown <neilb@suse.com> wrote:
-> On Wed, Mar 30 2016, Yan, Zheng wrote:
->
->> On Wed, Mar 30, 2016 at 8:24 AM, NeilBrown <neilb@suse.com> wrote:
->>> On Fri, Mar 25 2016, Ilya Dryomov wrote:
->>>
->>>> On Fri, Mar 25, 2016 at 5:02 AM, NeilBrown <neilb@suse.com> wrote:
->>>>> On Sun, Mar 06 2016, Sage Weil wrote:
->>>>>
->>>>>> Hi Linus,
->>>>>>
->>>>>> Please pull the following Ceph patch from
->>>>>>
->>>>>>   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
->>>>>>
->>>>>> This is a final commit we missed to align the protocol compatibility with
->>>>>> the feature bits.  It decodes a few extra fields in two different messages
->>>>>> and reports EIO when they are used (not yet supported).
->>>>>>
->>>>>> Thanks!
->>>>>> sage
->>>>>>
->>>>>>
->>>>>> ----------------------------------------------------------------
->>>>>> Yan, Zheng (1):
->>>>>>       ceph: initial CEPH_FEATURE_FS_FILE_LAYOUT_V2 support
->>>>>
->>>>> Just wondering, but was CEPH_FEATURE_FS_FILE_LAYOUT_V2 supposed to have
->>>>> exactly the same value as CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING (and
->>>>> CEPH_FEATURE_CRUSH_TUNABLES5)??
->>>>
->>>> Yes, that was the point of getting it merged into -rc7.
->>>
->>> I did wonder if that might be the case.
->>>
->>>>
->>>>> Because when I backported this patch (and many others) to some ancient
->>>>> enterprise kernel, it caused mounts to fail.  If it really is meant to
->>>>> be the same value, then I must have some other backported issue to find
->>>>> and fix.
->>>>
->>>> It has to be backported in concert with changes that add support for
->>>> the other two bits.
->>>
->>> I have everything from fs/ceph and net/ceph as of 4.5, with adjustments
->>> for different core code.
->>>
->>>>                      How did mount fail?
->>>
->>> "can't read superblock".
->>> dmesg contains
->>>
->>> [   50.822479] libceph: client144098 fsid 2b73bc29-3e78-490a-8fc6-21da1bf901ba
->>> [   50.823746] libceph: mon0 192.168.1.122:6789 session established
->>> [   51.635312] ceph: problem parsing mds trace -5
->>> [   51.635317] ceph: mds parse_reply err -5
->>> [   51.635318] ceph: mdsc_handle_reply got corrupt reply mds0(tid:1)
->>>
->>> then a hex dump of header:, front: footer:
->>>
->>> Maybe my MDS is causing the problem?  It is based on v10.0.5 which
->>> contains
->>>
->>> #define CEPH_FEATURE_CRUSH_TUNABLES5    (1ULL<<58) /* chooseleaf stable mode */
->>> // duplicated since it was introduced at the same time as CEPH_FEATURE_CRUSH_TUN
->>> #define CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING   (1ULL<<58) /* New, v7 encoding */
->>>
->>> in ceph_features.h  i.e. two features using bit 58, but not
->>> FS_FILE_LAYOUT_V2
->>>
->>> Should I expect Linux 4.5 to work with ceph 10.0.5 ??
+On 29-3-2016 17:12, Willem Jan Withagen wrote:
+> On 29-3-2016 14:28, Loic Dachary wrote:
+>> Hi Willem,
 >>
->> Sorry, cephfs in linux 4.5 does not work with 10.0.5. Please upgrade
->> to ceph 10.1.0
->>
->
-> Ahhh..  I do wonder at the point of feature flags if they don't let you
-> run any client with any server...
-> Is there a compatability matrix published somewhere?
-> If I have to stay with 10.0.5 (I don't know yet), it is safe to use
-> Linux-4.4 code?
+>> This has undergone various fixes all of them wrong in a context or
+>> another. The last of them is (hopefully ;-)
+>> https://github.com/ceph/ceph/pull/8320
+> 
+> Hi Loic,
+> 
+> I watched the discussion carefully, and was under the assemption that
+> everything was already merged. But I'll take your pull and see what happens.
 
-10.0.* are all development cuts, we didn't even built packages for
-some of them.  10.1.0 is the first release candidate.  You can think of
-10.0.5 as a random pre-rc1 kernel snapshot, aimed at brave testers, so
-you do want to upgrade.
+Hi Loic,
 
-The reason it doesn't work is those three features are all defined to
-the same value, but two of them got added earlier in the 10.0.* cycle.
-CEPH_FEATURE_FS_FILE_LAYOUT_V2 came in last, after 10.0.5.
+I saw that #8320 was merged and rebased. So running/compiling to see
+what brings.
 
-Thanks,
+There might be one change that you'd care to take along in this as well,
+which I have to keep my tests running ATM.
+Otherwise I'll just keep it in my patchset to the time to come.
 
-                Ilya
+--WjW
+
+: ${CEPH_DETECT_INIT_VIRTUALENV:=ceph-detect-init-virtualenv}
+
+case `uname` in
+ FreeBSD)
+    echo FreeBSD init system has not been integrated.
+    exit 0
+    ;;
+ *)
+    # run from the ceph-detect-init directory or from its parent
+    test -d ceph-detect-init && cd ceph-detect-init
+    source ${CEPH_DETECT_INIT_VIRTUALENV}/bin/activate
+    tox > ${CEPH_DETECT_INIT_VIRTUALENV}/tox.out 2>&1
+    status=$?
+    grep -v InterpreterNotFound < ${CEPH_DETECT_INIT_VIRTUALENV}/tox.out
+    exit $status
+    ;;
+esac
+
