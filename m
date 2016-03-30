@@ -1,43 +1,59 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Wed, 30 Mar 2016 16:03:37 -0700
-Message-ID: <CAJ4mKGaoSiyX8bHA22G00y=PbQUDs1j0BnrMj=o2rTycD9uAqQ@mail.gmail.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: Adding compression/checksum support for bluestore.
+Date: Wed, 30 Mar 2016 23:08:26 +0000
+Message-ID: <CY1PR0201MB189717EAA03FEF6F44C050FEE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
 References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
 	<alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
 	<CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
 	<alpine.DEB.2.11.1603301856470.22014@cpach.fuggernut.com>
+ <CAJ4mKGaoSiyX8bHA22G00y=PbQUDs1j0BnrMj=o2rTycD9uAqQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f49.google.com ([209.85.213.49]:35530 "EHLO
-	mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751827AbcC3XDi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 19:03:38 -0400
-Received: by mail-vk0-f49.google.com with SMTP id e6so81525024vkh.2
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Mar 2016 16:03:37 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1603301856470.22014@cpach.fuggernut.com>
+Received: from mail-bn1on0077.outbound.protection.outlook.com ([157.56.110.77]:19088
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750940AbcC3XI3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 30 Mar 2016 19:08:29 -0400
+In-Reply-To: <CAJ4mKGaoSiyX8bHA22G00y=PbQUDs1j0BnrMj=o2rTycD9uAqQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sage@newdream.net>
+Cc: Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 30, 2016 at 3:57 PM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 30 Mar 2016, Allen Samuels wrote:
->> One thing to also factor in is that if you increase the span of a
->> checksum, you degrade the quality of the checksum. So if you go with
->> 128K chunks of data you'll likely want to increase the checksum itself
->> from something beyond a CRC-32. Maybe somebody out there has a good way
->> of describing this quanitatively.
->
-> Good point.  FWIW, I think we should default to xxhash over crc32c:
->
->         https://github.com/Cyan4973/xxHash
->
-> Note that there is a 64-bit version that's faster on 64-bit procs.
-
-Random googling (...and StackOverflow) lead me to
-https://users.ece.cmu.edu/~koopman/roses/dsn04/koopman04_crc_poly_embedded.pdf,
-which only extends up to 2KB (with a crc16, which makes me think crc32
-can go a long way) but for anybody who actually reads it can probably
-be extended to larger block sizes without much difficulty.
--Greg
+V2hhdGV2ZXIgd2UgY2hvb3NlLCB3ZSdsbCBuZWVkIHRvIHByb3ZpZGUgc3BlY2lmaWMgZ3VpZGVs
+aW5lcyBzbyB0aGF0IHBlb3BsZSBjYW4gdW5kZXJzdGFuZCB3aGF0IGxldmVsIG9mIGRhdGEgaW50
+ZWdyaXR5IHRoZXkgYWN0dWFsbHkgaGF2ZS4gVGhleSdsbCBiZSBhYmxlIHRvIGdldCB0aGUgSFcg
+VUJFUiBmcm9tIHRoZWlyIHZlbmRvciwgYnV0IHRoZXkgd2lsbCBuZWVkIHNwZWNpZmljIGZvcm11
+bGFzLCBldGMuIHRvIHVuZGVyc3RhbmQgaG93IHRoZSB2YXJpb3VzIGJsb2NrLXNpemVzIGFuZCBh
+bGdvcml0aG1pYyBjaG9pY2VzIHlpZWxkIGEgc3lzdGVtLWxldmVsIG9mIFVCRVIuDQoNCg0KQWxs
+ZW4gU2FtdWVscw0KU29mdHdhcmUgQXJjaGl0ZWN0LCBGZWxsb3csIFN5c3RlbXMgYW5kIFNvZnR3
+YXJlIFNvbHV0aW9ucyANCg0KMjg4MCBKdW5jdGlvbiBBdmVudWUsIFNhbiBKb3NlLCBDQSA5NTEz
+NA0KVDogKzEgNDA4IDgwMSA3MDMwfCBNOiArMSA0MDggNzgwIDY0MTYNCmFsbGVuLnNhbXVlbHNA
+U2FuRGlzay5jb20NCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEdy
+ZWdvcnkgRmFybnVtIFttYWlsdG86Z2Zhcm51bUByZWRoYXQuY29tXQ0KPiBTZW50OiBXZWRuZXNk
+YXksIE1hcmNoIDMwLCAyMDE2IDQ6MDQgUE0NCj4gVG86IFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVh
+bS5uZXQ+DQo+IENjOiBBbGxlbiBTYW11ZWxzIDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPjsg
+SWdvciBGZWRvdG92DQo+IDxpZmVkb3RvdkBtaXJhbnRpcy5jb20+OyBjZXBoLWRldmVsIDxjZXBo
+LWRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IEFkZGluZyBjb21wcmVzc2lv
+bi9jaGVja3N1bSBzdXBwb3J0IGZvciBibHVlc3RvcmUuDQo+IA0KPiBPbiBXZWQsIE1hciAzMCwg
+MjAxNiBhdCAzOjU3IFBNLCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3cm90ZToNCj4g
+PiBPbiBXZWQsIDMwIE1hciAyMDE2LCBBbGxlbiBTYW11ZWxzIHdyb3RlOg0KPiA+PiBPbmUgdGhp
+bmcgdG8gYWxzbyBmYWN0b3IgaW4gaXMgdGhhdCBpZiB5b3UgaW5jcmVhc2UgdGhlIHNwYW4gb2Yg
+YQ0KPiA+PiBjaGVja3N1bSwgeW91IGRlZ3JhZGUgdGhlIHF1YWxpdHkgb2YgdGhlIGNoZWNrc3Vt
+LiBTbyBpZiB5b3UgZ28gd2l0aA0KPiA+PiAxMjhLIGNodW5rcyBvZiBkYXRhIHlvdSdsbCBsaWtl
+bHkgd2FudCB0byBpbmNyZWFzZSB0aGUgY2hlY2tzdW0NCj4gPj4gaXRzZWxmIGZyb20gc29tZXRo
+aW5nIGJleW9uZCBhIENSQy0zMi4gTWF5YmUgc29tZWJvZHkgb3V0IHRoZXJlIGhhcyBhDQo+ID4+
+IGdvb2Qgd2F5IG9mIGRlc2NyaWJpbmcgdGhpcyBxdWFuaXRhdGl2ZWx5Lg0KPiA+DQo+ID4gR29v
+ZCBwb2ludC4gIEZXSVcsIEkgdGhpbmsgd2Ugc2hvdWxkIGRlZmF1bHQgdG8geHhoYXNoIG92ZXIg
+Y3JjMzJjOg0KPiA+DQo+ID4gICAgICAgICBodHRwczovL2dpdGh1Yi5jb20vQ3lhbjQ5NzMveHhI
+YXNoDQo+ID4NCj4gPiBOb3RlIHRoYXQgdGhlcmUgaXMgYSA2NC1iaXQgdmVyc2lvbiB0aGF0J3Mg
+ZmFzdGVyIG9uIDY0LWJpdCBwcm9jcy4NCj4gDQo+IFJhbmRvbSBnb29nbGluZyAoLi4uYW5kIFN0
+YWNrT3ZlcmZsb3cpIGxlYWQgbWUgdG8NCj4gaHR0cHM6Ly91c2Vycy5lY2UuY211LmVkdS9+a29v
+cG1hbi9yb3Nlcy9kc24wNC9rb29wbWFuMDRfY3JjX3BvbHlfDQo+IGVtYmVkZGVkLnBkZiwNCj4g
+d2hpY2ggb25seSBleHRlbmRzIHVwIHRvIDJLQiAod2l0aCBhIGNyYzE2LCB3aGljaCBtYWtlcyBt
+ZSB0aGluayBjcmMzMiBjYW4NCj4gZ28gYSBsb25nIHdheSkgYnV0IGZvciBhbnlib2R5IHdobyBh
+Y3R1YWxseSByZWFkcyBpdCBjYW4gcHJvYmFibHkgYmUNCj4gZXh0ZW5kZWQgdG8gbGFyZ2VyIGJs
+b2NrIHNpemVzIHdpdGhvdXQgbXVjaCBkaWZmaWN1bHR5Lg0KPiAtR3JlZw0K
