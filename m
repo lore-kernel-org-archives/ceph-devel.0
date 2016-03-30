@@ -1,62 +1,48 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: [ceph-users] v10.1.0 Jewel release candidate available
-Date: Wed, 30 Mar 2016 15:18:13 -0400
-Message-ID: <CAC-Np1w8Lt+uPG9r7ZDGH7bC+ckRVmHTbGe5rG-ubkh=RNTNYg@mail.gmail.com>
-References: <alpine.DEB.2.11.1603281029290.6074@cpach.fuggernut.com>
-	<aaegaupo3v.fsf@switch.ch>
-	<CAEYCsVJPLv2X9Mj_eLzvFHvH6oZLwN80abCm-bM=-bCXcBJs_Q@mail.gmail.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: Adding compression/checksum support for bluestore.
+Date: Wed, 30 Mar 2016 19:46:30 +0000
+Message-ID: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:36926 "EHLO
-	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752085AbcC3TSP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 15:18:15 -0400
-Received: by mail-wm0-f43.google.com with SMTP id p65so85177237wmp.0
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Mar 2016 12:18:14 -0700 (PDT)
-In-Reply-To: <CAEYCsVJPLv2X9Mj_eLzvFHvH6oZLwN80abCm-bM=-bCXcBJs_Q@mail.gmail.com>
+Received: from mail-bn1on0057.outbound.protection.outlook.com ([157.56.110.57]:42640
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753919AbcC3Tqd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 15:46:33 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xiaoxi Chen <superdebuger@gmail.com>
-Cc: Simon Leinen <simon.leinen@switch.ch>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
+To: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 30, 2016 at 11:49 AM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
-> I am seeing package for precise in
-> http://download.ceph.com/debian-jewel/dists/precise/,   is that
-> by-accident or we plan to support precise for one more LTS?
+[snip]
 
-The configuration is there but there aren't any packages built for it:
+Time to talk about checksums.
 
-http://download.ceph.com/debian-jewel/pool/main/c/ceph/
+First let's divide the world into checksums for data and checksums for metadata -- and defer the discussion about checksums for metadata (important, but one at a time...)
 
-This is a side-effect of the readiness on our build system that will,
-by default, allow other distros to be configured to get included
-in the repo even if there aren't any actual binaries.
+I believe it's a requirement that when checksums are enabled that 100% of data reads must be validated against their corresponding checksum. This leads you to conclude that you must store a checksum for each independently readable piece of data. 
+
+When compression is disabled, it's relatively straightforward -- there's a checksum for each 4K readable block of data. Presumably this is a simple vector stored in the pextent structure with one entry for each 4K block of data.
+
+Things get more complicated when compression is enabled. At a minimum, you'll need a checksum for each blob of compressed data (I'm using blob here as unit of data put into the compressor, but what I really mean is the minimum amount of *decompressable* data). As I've pointed out before, many of the compression algorithms do their own checksum validation. For algorithms that don't do their own checksum we'll want one checksum to protect the block -- however, there's no reason that we can't implement this as one checksum for each 4K physical blob, the runtime cost is nearly equivalent and it will considerably simplify the code.
+
+Thus I think we really end up with a single, simple design. The pextent structure contains a vector of checksums. Either that vector is empty (checksum disabled) OR there is a checksum for each 4K block of data (not this is NOT min_allocation size, it's minimum_read_size [if that's even a parameter or does the code assume 4K readable blocks? [or worse, 512 readable blocks?? -- if so, we'll need to cripple this]).
+
+When compressing with a compression algorithm that does checksuming we can automatically suppress checksum generation. There should also be an administrative switch for this.
+
+This allows the checksuming to be pretty much independent of compression -- which is nice :)
+
+This got me thinking, we have another issue to discuss and resolve.
+
+The scenario is when compression is enabled. Assume that we've taken a big blob of data and compressed it into a smaller blob. We then call the allocator for that blob. What do we do if the allocator can't find a CONTIGUOUS block of storage of that size??? In the non-compressed case, it's relatively easy to simply break it up into smaller chunks -- but that doesn't work well with compression.
+
+This isn't that unlikely a case, worse it could happen with shockingly high amounts of freespace (>>75%) with some pathological access patterns.
+
+There's really only two choices. You either fracture the logical data and recompress OR you modify the pextent data structure to handle this case. The later isn't terribly difficult to do, you just make the size/address values into a vector of pairs. The former scheme could be quite expensive CPU wise as you may end up fracturing and recompressing multiple times (granted, in a pathological case). The latter case adds space to each onode for a rare case. The space is recoverable with an optimized serialize/deserializer (in essence you could burn a flag to indicate when a vector of physical chunks/sizes is needed instead of the usual scalar pair). 
+
+IMO, we should pursue the later scenario as it avoids the variable latency problem. I see the code/testing complexity of either choice as about the same.
 
 
->
-> Or, in other word, is it safe for user in precise to upgrade to jewel?
->
-> 2016-03-29 0:24 GMT+08:00 Simon Leinen <simon.leinen@switch.ch>:
->> Sage Weil writes:
->>> The first release candidate for Jewel is now available!
->>
->> Cool!
->>
->> [...]
->>> Packages for aarch64 will also be posted shortly!
->>
->> According to the announcement, Ubuntu Xenial should now be supported
->> instead of Precise; but I don't see Xenial packages on
->> download.ceph.com.  Will those arrive, or should we get them from
->> Canonical's Xenial repo?
->> --
->> Simon.
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
