@@ -1,166 +1,336 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: Adding compression/checksum support for bluestore.
-Date: Wed, 30 Mar 2016 22:32:06 +0000
-Message-ID: <CY1PR0201MB18978866EEBA1410E3883ABDE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
-References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: reads while 100% write
+Date: Wed, 30 Mar 2016 18:32:32 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1603301832130.22014@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1603301602060.22014@cpach.fuggernut.com> <1875425962.45682932.1459369785165.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1182415764-1459377155=:22014"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0077.outbound.protection.outlook.com ([207.46.100.77]:65248
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752883AbcC3WcI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 18:32:08 -0400
-In-Reply-To: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:60595 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753656AbcC3Wcm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Mar 2016 18:32:42 -0400
+In-Reply-To: <1875425962.45682932.1459369785165.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>, ceph-devel@vger.kernel.org
 
-> -----Original Message-----
-> From: Sage Weil [mailto:sage@newdream.net]
-> Sent: Wednesday, March 30, 2016 3:16 PM
-> To: Allen Samuels <Allen.Samuels@sandisk.com>
-> Cc: Igor Fedotov <ifedotov@mirantis.com>; ceph-devel <ceph-
-> devel@vger.kernel.org>
-> Subject: Re: Adding compression/checksum support for bluestore.
-> 
-> On Wed, 30 Mar 2016, Allen Samuels wrote:
-> > [snip]
-> >
-> > Time to talk about checksums.
-> >
-> > First let's divide the world into checksums for data and checksums for
-> > metadata -- and defer the discussion about checksums for metadata
-> > (important, but one at a time...)
-> >
-> > I believe it's a requirement that when checksums are enabled that 100%
-> > of data reads must be validated against their corresponding checksum.
-> > This leads you to conclude that you must store a checksum for each
-> > independently readable piece of data.
-> 
-> +1
-> 
-> > When compression is disabled, it's relatively straightforward --
-> > there's a checksum for each 4K readable block of data. Presumably this
-> > is a simple vector stored in the pextent structure with one entry for
-> > each 4K block of data.
-> 
-> Maybe.  If the object is known to be sequentail write and sequential read, or
-> even sequential write and random read but on a HDD-like medium, then we
-> can checksum on something like 128K (since it doesn't cost any more to read
-> 128k than 4k).  I think the checksum block size should be a per-object
-> property.  *Maybe* a pextent property, given that compression is also
-> entering the picture.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-In my book, there's nothing magical about 4K. I agree that there's no particular reason why 1 checksum == 4K of physical data. No reason that this can't be variable -- details of variability are TBD.
- 
+--8323329-1182415764-1459377155=:22014
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+Evgeniy,
+
+Do you mind repeating your test with this code applied?
+
+Thanks!
+sage
+
+
+On Wed, 30 Mar 2016, Jason Dillaman wrote:
+
+> Opened PR 8380 [1] to pass the WILLNEED flag for object map updates.
 > 
-> > Things get more complicated when compression is enabled. At a minimum,
-> > you'll need a checksum for each blob of compressed data (I'm using
-> > blob here as unit of data put into the compressor, but what I really
-> > mean is the minimum amount of *decompressable* data). As I've pointed
-> > out before, many of the compression algorithms do their own checksum
-> > validation. For algorithms that don't do their own checksum we'll want
-> > one checksum to protect the block -- however, there's no reason that
-> > we can't implement this as one checksum for each 4K physical blob, the
-> > runtime cost is nearly equivalent and it will considerably simplify
-> > the code.
+> [1] https://github.com/ceph/ceph/pull/8380
 > 
-> I'm just worried about the size of metadata if we have 4k checksums but
-> have to read big extents anyway; cheaper to store a 4 byte checksum for
-> each compressed blob.
+> -- 
 > 
-> > Thus I think we really end up with a single, simple design. The
-> > pextent structure contains a vector of checksums. Either that vector
-> > is empty (checksum disabled) OR there is a checksum for each 4K block
-> > of data (not this is NOT min_allocation size, it's minimum_read_size
-> > [if that's even a parameter or does the code assume 4K readable
-> > blocks? [or worse,
-> > 512 readable blocks?? -- if so, we'll need to cripple this]).
-> >
-> > When compressing with a compression algorithm that does checksuming
-> we
-> > can automatically suppress checksum generation. There should also be
-> > an administrative switch for this.
-> >
-> > This allows the checksuming to be pretty much independent of
-> > compression
-> > -- which is nice :)
+> Jason Dillaman 
 > 
 > 
+> ----- Original Message -----
+> > From: "Sage Weil" <sage@newdream.net>
+> > To: "Jason Dillaman" <dillaman@redhat.com>
+> > Cc: "Evgeniy Firsov" <Evgeniy.Firsov@sandisk.com>, ceph-devel@vger.kernel.org
+> > Sent: Wednesday, March 30, 2016 4:02:16 PM
+> > Subject: Re: reads while 100% write
+> > 
+> > On Wed, 30 Mar 2016, Jason Dillaman wrote:
+> > > This IO is being performed within an OSD class method.  I can add a new
+> > > cls_cxx_read2 method to accept cache hints and update the associated
+> > > object map methods.  Would this apply to writes as well?
+> > 
+> > Yeah, we'll want to hint them both.
+> > 
+> > s
+> > 
+> > > 
+> > > --
+> > > 
+> > > Jason Dillaman
+> > > 
+> > > 
+> > > ----- Original Message -----
+> > > > From: "Sage Weil" <sage@newdream.net>
+> > > > To: "Jason Dillaman" <dillaman@redhat.com>
+> > > > Cc: "Evgeniy Firsov" <Evgeniy.Firsov@sandisk.com>,
+> > > > ceph-devel@vger.kernel.org
+> > > > Sent: Wednesday, March 30, 2016 3:55:14 PM
+> > > > Subject: Re: reads while 100% write
+> > > > 
+> > > > On Wed, 30 Mar 2016, Jason Dillaman wrote:
+> > > > > Are you using the RBD default of 4MB object sizes or are you using
+> > > > > something much smaller like 64KB?  An object map of that size should be
+> > > > > tracking up to 24,576,000 objects.  When you ran your test before, did
+> > > > > you have the RBD object map disabled?  This definitely seems to be a
+> > > > > use
+> > > > > case where the lack of a cache in front of BlueStore is hurting small
+> > > > > IO.
+> > > > 
+> > > > Using the rados cache hint WILLNEED is probably appropriate here..
+> > > > 
+> > > > sage
+> > > > 
+> > > > > 
+> > > > > --
+> > > > > 
+> > > > > Jason Dillaman
+> > > > > 
+> > > > > 
+> > > > > ----- Original Message -----
+> > > > > > From: "Evgeniy Firsov" <Evgeniy.Firsov@sandisk.com>
+> > > > > > To: "Jason Dillaman" <dillaman@redhat.com>
+> > > > > > Cc: "Sage Weil" <sage@newdream.net>, ceph-devel@vger.kernel.org
+> > > > > > Sent: Wednesday, March 30, 2016 3:00:47 PM
+> > > > > > Subject: Re: reads while 100% write
+> > > > > > 
+> > > > > > 1.5T in that run.
+> > > > > > With 150G behavior is the same. Except it says "_do_read 0~18 size
+> > > > > > 615030”
+> > > > > > instead of 6M.
+> > > > > > 
+> > > > > > Also when random 4k write starts there are more reads then writes:
+> > > > > > 
+> > > > > > Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
+> > > > > > avgrq-sz
+> > > > > > avgqu-sz   await r_await w_await  svctm  %util
+> > > > > > 
+> > > > > > sdd               0.00  1887.00    0.00  344.00     0.00  8924.00
+> > > > > > 51.88
+> > > > > >     0.36    1.06    0.00    1.06   0.91  31.20
+> > > > > > sde              30.00     0.00   30.00  957.00 18120.00  3828.00
+> > > > > > 44.47
+> > > > > >     0.25    0.26    3.87    0.14   0.17  16.40
+> > > > > > 
+> > > > > > Logs: http://pastebin.com/gGzfR5ez
+> > > > > > 
+> > > > > > 
+> > > > > > On 3/30/16, 11:37 AM, "Jason Dillaman" <dillaman@redhat.com> wrote:
+> > > > > > 
+> > > > > > >How large is your RBD image?  100 terabytes?
+> > > > > > >
+> > > > > > >--
+> > > > > > >
+> > > > > > >Jason Dillaman
+> > > > > > >
+> > > > > > >
+> > > > > > >----- Original Message -----
+> > > > > > >> From: "Evgeniy Firsov" <Evgeniy.Firsov@sandisk.com>
+> > > > > > >> To: "Sage Weil" <sage@newdream.net>
+> > > > > > >> Cc: ceph-devel@vger.kernel.org
+> > > > > > >> Sent: Wednesday, March 30, 2016 2:14:12 PM
+> > > > > > >> Subject: Re: reads while 100% write
+> > > > > > >>
+> > > > > > >> These are suspicious lines:
+> > > > > > >>
+> > > > > > >> 2016-03-30 10:54:23.142205 7f2e933ff700 10 bluestore(src/dev/osd0)
+> > > > > > >> read
+> > > > > > >> 0.d_head #0:b06b5e8e:::rbd_object_map.10046b8b4567:head#
+> > > > > > >> 6144018~6012
+> > > > > > >> =
+> > > > > > >> 6012
+> > > > > > >> 2016-03-30 10:54:23.142252 7f2e933ff700 15 bluestore(src/dev/osd0)
+> > > > > > >> read
+> > > > > > >> 0.d_head #0:b06b5e8e:::rbd_object_map.10046b8b4567:head# 8210~4096
+> > > > > > >> 2016-03-30 10:54:23.142260 7f2e933ff700 20 bluestore(src/dev/osd0)
+> > > > > > >> _do_read 8210~4096 size 6150030
+> > > > > > >> 2016-03-30 10:54:23.142267 7f2e933ff700  5
+> > > > > > >> bdev(src/dev/osd0/block)
+> > > > > > >> read
+> > > > > > >> 8003854336~8192
+> > > > > > >> 2016-03-30 10:54:23.142609 7f2e933ff700 10 bluestore(src/dev/osd0)
+> > > > > > >> read
+> > > > > > >> 0.d_head #0:b06b5e8e:::rbd_object_map.10046b8b4567:head# 8210~4096
+> > > > > > >> =
+> > > > > > >>4096
+> > > > > > >> 2016-03-30 10:54:23.142882 7f2e933ff700 15 bluestore(src/dev/osd0)
+> > > > > > >>_write
+> > > > > > >> 0.d_head #0:b06b5e8e:::rbd_object_map.10046b8b4567:head# 8210~4096
+> > > > > > >> 2016-03-30 10:54:23.142888 7f2e933ff700 20 bluestore(src/dev/osd0)
+> > > > > > >> _do_write #0:b06b5e8e:::rbd_object_map.10046b8b4567:head#
+> > > > > > >> 8210~4096 -
+> > > > > > >>have
+> > > > > > >> 6150030 bytes in 1 extents
+> > > > > > >>
+> > > > > > >> More logs here: http://pastebin.com/74WLzFYw
+> > > > > > >>
+> > > > > > >>
+> > > > > > >>
+> > > > > > >> On 3/30/16, 4:19 AM, "Sage Weil" <sage@newdream.net> wrote:
+> > > > > > >>
+> > > > > > >> >On Wed, 30 Mar 2016, Evgeniy Firsov wrote:
+> > > > > > >> >> After pulling master branch on Friday I start seeing odd fio
+> > > > > > >>behavior, I
+> > > > > > >> >> see a lot of reads while writing and very low performance no
+> > > > > > >> >> matter
+> > > > > > >> >> whether it read or write workload.
+> > > > > > >> >>
+> > > > > > >> >> Output from sequential 1M write:
+> > > > > > >> >> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s
+> > > > > > >> >> wkB/s
+> > > > > > >> >>avgrq-sz
+> > > > > > >> >> avgqu-sz   await r_await w_await  svctm  %util
+> > > > > > >> >>
+> > > > > > >> >> sdd               0.00   409.00    0.00  364.00     0.00
+> > > > > > >> >> 3092.00
+> > > > > > >> >>16.99
+> > > > > > >> >>     0.28    0.78    0.00    0.78   0.76  27.60
+> > > > > > >> >> sde               0.00   242.00  365.00  363.00  2436.00
+> > > > > > >> >> 9680.00
+> > > > > > >> >>33.29
+> > > > > > >> >>     0.18    0.24    0.42    0.07   0.23  16.80
+> > > > > > >> >>
+> > > > > > >> >>
+> > > > > > >> >>
+> > > > > > >> >> block.db -> /dev/sdd
+> > > > > > >> >> block -> /dev/sde
+> > > > > > >> >>
+> > > > > > >> >> health HEALTH_OK
+> > > > > > >> >> monmap e1: 1 mons at {a=127.0.0.1:6789/0}
+> > > > > > >> >>        election epoch 3, quorum 0 a
+> > > > > > >> >> osdmap e7: 1 osds: 1 up, 1 in
+> > > > > > >> >>        flags sortbitwise
+> > > > > > >> >> pgmap v24: 64 pgs, 1 pools, 577 MB data, 9152 objects
+> > > > > > >> >>        8210 MB used, 178 GB / 186 GB avail
+> > > > > > >> >>              64 active+clean
+> > > > > > >> >> client io 1550 kB/s rd, 9559 kB/s wr, 645 op/s rd, 387 op/s wr
+> > > > > > >> >>
+> > > > > > >> >>
+> > > > > > >> >> While on earlier revision(c1e41af) everything looks as
+> > > > > > >> >> expected:
+> > > > > > >> >>
+> > > > > > >> >> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s
+> > > > > > >> >> wkB/s
+> > > > > > >> >>avgrq-sz
+> > > > > > >> >> avgqu-sz   await r_await w_await  svctm  %util
+> > > > > > >> >> sdd               0.00  4910.00    0.00  680.00     0.00
+> > > > > > >> >> 22416.00
+> > > > > > >> >>65.93
+> > > > > > >> >>     1.05    1.55    0.00    1.55   1.18  80.00
+> > > > > > >> >> sde               0.00     0.00    0.00 3418.00     0.00
+> > > > > > >> >> 217612.00
+> > > > > > >> >> 127.33    63.78   18.18    0.00   18.18   0.25  86.40
+> > > > > > >> >>
+> > > > > > >> >> Other observation, may be related to the issue, is that CPU
+> > > > > > >> >> load is
+> > > > > > >> >> imbalanced. Single ³tp_osd_tp² thread is 100% busy, while the
+> > > > > > >> >> rest
+> > > > > > >> >> is
+> > > > > > >> >>idle.
+> > > > > > >> >> Looks like all load goes to single thread pool shard, earlier
+> > > > > > >> >> CPU
+> > > > > > >> >> was
+> > > > > > >> >>well
+> > > > > > >> >> balanced.
+> > > > > > >> >
+> > > > > > >> >Hmm.  Can you capture a log with debug bluestore = 20 and debug
+> > > > > > >> >bdev
+> > > > > > >> >=
+> > > > > > >>20?
+> > > > > > >> >
+> > > > > > >> >Thanks!
+> > > > > > >> >sage
+> > > > > > >> >
+> > > > > > >> >
+> > > > > > >> >>
+> > > > > > >> >>
+> > > > > > >> >> ‹
+> > > > > > >> >> Evgeniy
+> > > > > > >> >>
+> > > > > > >> >>
+> > > > > > >> >>
+> > > > > > >> >> PLEASE NOTE: The information contained in this electronic mail
+> > > > > > >>message
+> > > > > > >> >>is intended only for the use of the designated recipient(s)
+> > > > > > >> >>named
+> > > > > > >>above.
+> > > > > > >> >>If the reader of this message is not the intended recipient, you
+> > > > > > >> >>are
+> > > > > > >> >>hereby notified that you have received this message in error and
+> > > > > > >> >>that
+> > > > > > >> >>any review, dissemination, distribution, or copying of this
+> > > > > > >> >>message
+> > > > > > >> >>is
+> > > > > > >> >>strictly prohibited. If you have received this communication in
+> > > > > > >> >>error,
+> > > > > > >> >>please notify the sender by telephone or e-mail (as shown above)
+> > > > > > >> >>immediately and destroy any and all copies of this message in
+> > > > > > >> >>your
+> > > > > > >> >>possession (whether hard copies or electronically stored
+> > > > > > >> >>copies).
+> > > > > > >> >> --
+> > > > > > >> >> To unsubscribe from this list: send the line "unsubscribe
+> > > > > > >>ceph-devel" in
+> > > > > > >> >> the body of a message to majordomo@vger.kernel.org
+> > > > > > >> >> More majordomo info at
+> > > > > > >> >> http://vger.kernel.org/majordomo-info.html
+> > > > > > >> >>
+> > > > > > >> >>
+> > > > > > >>
+> > > > > > >> PLEASE NOTE: The information contained in this electronic mail
+> > > > > > >> message
+> > > > > > >>is
+> > > > > > >> intended only for the use of the designated recipient(s) named
+> > > > > > >> above.
+> > > > > > >>If the
+> > > > > > >> reader of this message is not the intended recipient, you are
+> > > > > > >> hereby
+> > > > > > >> notified that you have received this message in error and that any
+> > > > > > >>review,
+> > > > > > >> dissemination, distribution, or copying of this message is
+> > > > > > >> strictly
+> > > > > > >> prohibited. If you have received this communication in error,
+> > > > > > >> please
+> > > > > > >>notify
+> > > > > > >> the sender by telephone or e-mail (as shown above) immediately and
+> > > > > > >>destroy
+> > > > > > >> any and all copies of this message in your possession (whether
+> > > > > > >> hard
+> > > > > > >>copies
+> > > > > > >> or electronically stored copies).
+> > > > > > >>
+> > > > > > >>N???????????????r??????y?????????b???X??????ǧv???^???)޺{.n???+?????????z???]z?????????{ay???ʇڙ???,j??????f?????????h?????????z??????w??????????????????j:+v
+> > > > > > >>?????????w???j???m????????????????????????zZ+??????ݢj"??????
+> > > > > > 
+> > > > > > PLEASE NOTE: The information contained in this electronic mail
+> > > > > > message is
+> > > > > > intended only for the use of the designated recipient(s) named above.
+> > > > > > If
+> > > > > > the
+> > > > > > reader of this message is not the intended recipient, you are hereby
+> > > > > > notified that you have received this message in error and that any
+> > > > > > review,
+> > > > > > dissemination, distribution, or copying of this message is strictly
+> > > > > > prohibited. If you have received this communication in error, please
+> > > > > > notify
+> > > > > > the sender by telephone or e-mail (as shown above) immediately and
+> > > > > > destroy
+> > > > > > any and all copies of this message in your possession (whether hard
+> > > > > > copies
+> > > > > > or electronically stored copies).
+> > > > > > N???????????????r??????y?????????b???X??????ǧv???^???)޺{.n???+?????????z???]z?????????{ay???ʇڙ???,j??????f?????????h?????????z??????w??????????????????j:+v?????????w???j???m????????????????????????zZ+??????ݢj"??????
+> > > > > 
+> > > > >
+> > > 
+> > >
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> > This got me thinking, we have another issue to discuss and resolve.
-> >
-> > The scenario is when compression is enabled. Assume that we've taken a
-> > big blob of data and compressed it into a smaller blob. We then call
-> > the allocator for that blob. What do we do if the allocator can't find
-> > a CONTIGUOUS block of storage of that size??? In the non-compressed
-> > case, it's relatively easy to simply break it up into smaller chunks
-> > -- but that doesn't work well with compression.
-> >
-> > This isn't that unlikely a case, worse it could happen with shockingly
-> > high amounts of freespace (>>75%) with some pathological access
-> > patterns.
-> >
-> > There's really only two choices. You either fracture the logical data
-> > and recompress OR you modify the pextent data structure to handle this
-> > case. The later isn't terribly difficult to do, you just make the
-> > size/address values into a vector of pairs. The former scheme could be
-> > quite expensive CPU wise as you may end up fracturing and
-> > recompressing multiple times (granted, in a pathological case). The
-> > latter case adds space to each onode for a rare case. The space is
-> > recoverable with an optimized serialize/deserializer (in essence you
-> > could burn a flag to indicate when a vector of physical chunks/sizes
-> > is needed instead of the usual scalar pair).
-> >
-> > IMO, we should pursue the later scenario as it avoids the variable
-> > latency problem. I see the code/testing complexity of either choice as
-> > about the same.
 > 
-> Hrm, I hadn't thought about this one.  :(
-> 
-> What about a third option: we ask the allocator for the uncompressed size,
-> and *then* compress.  If it gives us something small, we will know then to
-> compress a smaller piece.  It just means that we'll be returning space back to
-> the allocator in the general case after we compress, which will burn a bit of
-> CPU, and may screw things up when lots of threads are allocating in parallel
-> and we hope to lay them out sequentially.
-
-I'll need some convincing that this doesn't maximum fragmentation -- as well as all of the issues you cite.
-
-> 
-> Or, maybe we flip into this sort of pessimistic allocation mode only when the
-> amount of space above a certain size threshold is low.  With the current
-> binned allocator design this is trivial; it probably is pretty easy with your
-> bitmap-based approach as well with some minimal accounting.
-
-Yes, but I'm not ready to give up on a single algorithm with one operating mode -- easier to code and test. 
-
-> 
-> I really don't like the idea of making pextent's able to store fractions of a
-> compressed blob; it'll complicate the structures and code paths significantly,
-> and they'll be complex enough as it is. :(
-
-I agree about the fractional thing -- and I don't think that's a fair description of what I proposed.
-
-Here's a more evolved way to describe what I was proposing (refactoring some stuff).
-
-There are really THREE types of extents: lextent, cextent and pextent. 
-
-Lextent is as described above, a range of logical address that maps into a portion of a cextent.
-Pextent is a range of contiguous physical storage (address/size).
-Cextent is a blob of compressed data.
-
-A cextent contains some number of pextents. 
-
-When compression is disabled, there will only be a single cextent and you'll want a checksum per pextent.
-When compression is enabled, there will be one checksum per cextent and a vector of pextents (w/o checksums).
-
-I suspect that on the implementation level, you'll combined the serializer for cextent/pextent into a single blob -> this ends up with what I proposed earlier...
- 
-> 
-> sage
+--8323329-1182415764-1459377155=:22014--
