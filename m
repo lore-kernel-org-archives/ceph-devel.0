@@ -1,95 +1,141 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Adding compression support for bluestore.
-Date: Thu, 31 Mar 2016 17:56:18 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1603311746080.4670@cpach.fuggernut.com>
-References: <56C1FCF3.4030505@mirantis.com> <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com> <56C3BAA3.3070804@mirantis.com> <CY1PR0201MB1897E7F1DE04B5E4577B16EDE8A00@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1602220718380.13988@cpach.fuggernut.com> <56CDF40C.9060405@mirantis.com> <CY1PR0201MB1897BC7052AD6F7FB01DCAB4E8A50@CY1PR0201MB1897.namprd02.prod.outlook.com> <56D08E30.20308@mirantis.com> <alpine.DEB.2.11.1603151243030.32086@cpach.fuggernut.com>
- <56E9A727.1030400@mirantis.com> <alpine.DEB.2.11.1603161515360.14377@cpach.fuggernut.com> <56EACAAD.90002@mirantis.com> <alpine.DEB.2.11.1603171123090.14377@cpach.fuggernut.com> <56EC248E.3060502@mirantis.com> <CY1PR0201MB1897035E6E09FE518ACC2DDCE88D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <56F013FB.4040002@mirantis.com> <alpine.DEB.2.11.1603211141560.23875@cpach.fuggernut.com> <56F3E157.2090004@mirantis.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: getting ready for jewel 10.2.1
+Date: Fri, 1 Apr 2016 00:13:05 +0200
+Message-ID: <56FDA0F1.5000800@dachary.org>
+References: <56FBAADF.3020407@dachary.org>
+ <CAJ4mKGYg++sGuqHQPkNa1GrVeDO=KFZNtp4FTYX=zOkrAbnFeQ@mail.gmail.com>
+ <56FD34AC.1030501@dachary.org>
+ <CAJ4mKGZHyR3m7LVRuqv5jw19sGCWTStX+Sfbj6AkZr5byrrN1A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57914 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752003AbcCaV42 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2016 17:56:28 -0400
-In-Reply-To: <56F3E157.2090004@mirantis.com>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:58376 "EHLO
+	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757352AbcCaWNM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2016 18:13:12 -0400
+In-Reply-To: <CAJ4mKGZHyR3m7LVRuqv5jw19sGCWTStX+Sfbj6AkZr5byrrN1A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-How about this:
 
-// in the onode:
-map<uint64_t, bluestore_lextent_t> data_map;
-map<int, bluestore_blob_t> blob_map;
 
-// in the enode
-map<int, bluestore_blob_t> blob_map;
+On 31/03/2016 21:01, Gregory Farnum wrote:
+> On Thu, Mar 31, 2016 at 7:31 AM, Loic Dachary <loic@dachary.org> wrot=
+e:
+>> Hi Gregory,
+>>
+>> On 30/03/2016 20:47, Gregory Farnum wrote:
+>>> On Wed, Mar 30, 2016 at 3:30 AM, Loic Dachary <loic@dachary.org> wr=
+ote:
+>>>> Hi,
+>>>>
+>>>> Now is a good time to get ready for jewel 10.2.1 and I created htt=
+p://tracker.ceph.com/issues/15317 for that purpose. The goal is to be a=
+ble to run as many suites as possible on OpenStack, so that we do not h=
+ave to wait days (sometime a week) for runs to complete on Sepia. Best =
+case scenario, all OpenStack specific problems are fixed by the time 10=
+=2E2.1 is being prepared. Worst case scenario there is no time to fix i=
+ssues and we keep using the sepia lab. I guess we'll end up somewhere i=
+n the middle : some suites will run fine on Openstack and we'll use sep=
+ia for others.
+>>>>
+>>>> In a previous mail I voiced my concerns regarding the lack of inte=
+rest of developers regarding teuthology job failures that are cause by =
+variations in the infrastructure. I still have no clue how to convey my=
+ belief that it is important for teuthology jobs to succeed despite inf=
+rastructure variations. But instead of just giving up and do nothing, I=
+ will work on that for the rados suite and hope things will evolve in a=
+ good way. To be honest, figuring out http://tracker.ceph.com/issues/15=
+236 and seeing a good run of the rados suite on jewel as a result renew=
+ed my motivation in that area :-)
+>>>
+>>> I think you've convinced us all it's important in the abstract; tha=
+t's
+>>> just very different from putting it on top of our list of prioritie=
+s,
+>>> especially since we alleviated many of our needs in the sepia lab.
+>>> Beyond that, a lot of the issues we're seeing have very little to d=
+o
+>>> with Ceph itself, or even the testing programs, and that can make i=
+t
+>>> more difficult to get interested as we lack the necessary expertise=
+=2E I
+>>> spent some time trying to get disk sizes and things matched up (and=
+ I
+>>> suddenly realize that never got merged), but some of the other odde=
+r
+>>> issues we're having:
+>>>
+>>> http://tracker.ceph.com/issues/13980, in which we are failing to mo=
+unt
+>>> anything with nfs v3. This is a config file that needs to get updat=
+ed;
+>>> we do it for the sepia lab (probably in ansible?) but somehow that
+>>> information isn't getting into the ovh slaves. (Or else it is in
+>>> there, and there's something *else* broken.) If we are using a
+>>> separate setup regimen for OpenStack than we are in the sepia lab
+>>> there will be persistent breakage as new dependencies and
+>>> environmental expectations get added to one and not the other. :/
+>>
+>> ceph-cm-ansible does not have any OpenStack specific instructions. I=
+t's supposed to work exactly the same on both sepia and OpenStack. When=
+ teuthology provisions an OpenStack target, it does so in the same way =
+it provisions VPS in sepia. The only difference is that OpenStack uses =
+images that come from http://cloud.centos.org/centos/7/images/ etc., un=
+modified. The VPS images have sometime been modified. However, this has=
+ only been an issue once, over six months ago.
+>>
+>> On OVH the UDP ports were firewalled, and that created the problem. =
+I changed the firewall rules and I'm hopefull http://pulpito.ovh.sepia.=
+ceph.com:8081/loic-2016-03-31_14:10:18-knfs-jewel-testing-basic-opensta=
+ck/ will now pass.
+>>
+>>> http://tracker.ceph.com/issues/13876, in which MPI is just failing =
+to
+>>> get any connections going. Why? No idea; there's a teuthology commi=
+t
+>>> from you that's supposed to have opened up all the ports in the
+>>> firewall (and it sure *looks* like it does do that, but I don't kno=
+w
+>>> how the rules work), but this works in sepia and inasmuch as we hav=
+e
+>>> debugging info sure looks like some kind of network blockage...
+>>
+>> I opened the required port on the OVH lab. I don't think there is an=
+ ansible rule that does it but I'll ask Zack to be sure.
+>>
+>>> So I think this isn't something that's going to get done properly
+>>> unless somebody gets assigned to just make everything work in all t=
+he
+>>> suites, who has the time to learn all the fiddly little bits. (Or w=
+e
+>>> somehow take a break for it as a project. But I don't see that goin=
+g
+>>> well.) :/
+>>
+>> If you suspect an OpenStack specific problem, feel free to ping me. =
+There is a good chance I can help and together we can make teuthology h=
+appy with OpenStack :-)
+>=20
+> I really wasn't fishing with those, but hey! thanks so much for those=
+ fixes. :)
+>=20
+> Do we have any way to automate those kinds of things for external
+> users? It sounds like right now these are just some random things any
+> third party needs to know to do, or their tests will mysteriously
+> fail?
 
-struct bluestore_lextent_t {
-  enum {
-    FLAG_SHARED = 1,        ///< pextent lives in enode
-  };
+https://github.com/ceph/teuthology/pull/834/files automates that.
 
-  uint64_t logical_length;  ///< length of logical bytes we represent
-  uint32_t pextent_id;      ///< id of pextent in onode or enode
-  uint32_t x_off, x_len;    ///< relative portion of pextent with our data
-  uint32_t flags;           ///< FLAG_*
-};
+Cheers
 
-struct bluestore_pextent_t {
-  uint64_t offset;          ///< offset on disk
-  uint64_t length;          ///< length on disk
-};
-
-struct bluestore_blob_t {
-  enum {
-    CSUM_XXHASH32 = 1,
-    CSUM_XXHASH64 = 2,
-    CSUM_CRC32C = 3,
-    CSUM_CRC16 = 4,
-  };
-  enum {
-    FLAG_IMMUTABLE = 1,     ///< no overwrites allowed
-    FLAG_COMPRESSED = 2,    ///< extent is compressed; alg is in first byte of data
-  };
-  enum {
-    COMP_ZLIB = 1,
-    COMP_SNAPPY = 2,
-    COMP_LZO = 3,
-  };
-
-  vector<bluestore_pextent_t> extents;  ///< extents on disk
-  uint32_t logical_length;              ///< uncompressed length
-  uint32_t flags;                       ///< FLAG_*
-  uint8_t csum_type;                    ///< CSUM_*
-  uint8_t csum_block_order;
-  uint16_t num_refs;               ///< reference count (always 1 when in onode)
-  vector<char> csum_data;          ///< opaque vector of csum data
-
-  uint32_t get_ondisk_length() const {
-    uint32_t len = 0;
-    for (auto &p : extentes) {
-      len += p.length;
-    }
-    return len;
-  }
-
-  uint32_t get_csum_block_size() const {
-    return 1 << csum_block_order;
-  }
-  size_t get_csum_value_size() const {
-    switch (csum_type) {
-    case CSUM_XXHASH32: return 4;
-    case CSUM_XXHASH64: return 8;
-    case CSUM_CRC32C: return 4;
-    case CSUM_CRC16: return 2;
-    default: return 0;
-    }
-  }
-
-  // assert (ondisk_length / csum_block_size) * csum_value_size ==
-  // csum_data.length()
-};
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
