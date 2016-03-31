@@ -1,67 +1,69 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Thu, 31 Mar 2016 19:58:21 +0300
-Message-ID: <56FD572D.6070608@mirantis.com>
-References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Hard to debug problem with ceph_erasure_code
+Date: Thu, 31 Mar 2016 19:10:45 +0200
+Message-ID: <56FD5A15.1080507@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f179.google.com ([209.85.217.179]:35858 "EHLO
-	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752547AbcCaQ6Y (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2016 12:58:24 -0400
-Received: by mail-lb0-f179.google.com with SMTP id qe11so56230270lbc.3
-        for <ceph-devel@vger.kernel.org>; Thu, 31 Mar 2016 09:58:23 -0700 (PDT)
-In-Reply-To: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
+Received: from smtp.digiware.nl ([31.223.170.169]:14809 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752346AbcCaRLU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 31 Mar 2016 13:11:20 -0400
+Received: from rack1.digiware.nl (unknown [127.0.0.1])
+	by smtp.digiware.nl (Postfix) with ESMTP id 31809153416
+	for <ceph-devel@vger.kernel.org>; Thu, 31 Mar 2016 19:11:17 +0200 (CEST)
+Received: from [IPv6:2001:4cb8:3:1:301d:d194:f8e3:4290] (unknown [IPv6:2001:4cb8:3:1:301d:d194:f8e3:4290])
+	by smtp.digiware.nl (Postfix) with ESMTP id 19BAA1534C6
+	for <ceph-devel@vger.kernel.org>; Thu, 31 Mar 2016 19:10:55 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
+Hi,
 
+I have this problem that testing ceph_erasure_code sometimes crashes in:
 
-On 30.03.2016 22:46, Allen Samuels wrote:
-> [snip]
->
-> Time to talk about checksums.
->
-> First let's divide the world into checksums for data and checksums for metadata -- and defer the discussion about checksums for metadata (important, but one at a time...)
->
-> I believe it's a requirement that when checksums are enabled that 100% of data reads must be validated against their corresponding checksum. This leads you to conclude that you must store a checksum for each independently readable piece of data.
->
-> When compression is disabled, it's relatively straightforward -- there's a checksum for each 4K readable block of data. Presumably this is a simple vector stored in the pextent structure with one entry for each 4K block of data.
->
-> Things get more complicated when compression is enabled. At a minimum, you'll need a checksum for each blob of compressed data (I'm using blob here as unit of data put into the compressor, but what I really mean is the minimum amount of *decompressable* data). As I've pointed out before, many of the compression algorithms do their own checksum validation. For algorithms that don't do their own checksum we'll want one checksum to protect the block -- however, there's no reason that we can't implement this as one checksum for each 4K physical blob, the runtime cost is nearly equivalent and it will considerably simplify the code.
+	ceph_erasure_code --debug-osd 20 --plugin_exists jerasure
 
-> Thus I think we really end up with a single, simple design. The pextent structure contains a vector of checksums. Either that vector is empty (checksum disabled) OR there is a checksum for each 4K block of data (not this is NOT min_allocation size, it's minimum_read_size [if that's even a parameter or does the code assume 4K readable blocks? [or worse, 512 readable blocks?? -- if so, we'll need to cripple this]).
->
-> When compressing with a compression algorithm that does checksuming we can automatically suppress checksum generation. There should also be an administrative switch for this.
->
-> This allows the checksuming to be pretty much independent of compression -- which is nice :)
-Mostly agree.
+If I just run this in a while loop on the command line then it crashes 
+only once every few hundert runs.
+Running it in the testset it crashes just about every time.
 
-But I think we should consider compression algorithm as a black box and 
-rely on a standalone checksum verification only.
-And I suppose that the main purpose of the checksum validation at 
-bluestore level is to protect from HW failures. Thus we need to check 
-*physical* data. That is data before decompressing.
+The crash from the core is an invalid point in the assertion code I 
+added to log/Entry.h
 
-Another thing to consider is an ability to use introduced checksums for 
-scrubbing. One can probably extend objectstore interface to be able to 
-validate stored data without data sending back.
-I don't see such an option at the moment. Please correct me if I missed 
-that.
+#7  0x000000000077984d in ceph::log::Entry::hint_size (this=0x80405cf00) 
+at log/Entry.h:70
+70            assert( *m_exp_len != -1 );
+(gdb) l
+65        }
+66
+67        // function improves estimate for expected size of message
+68        void hint_size() {
+69          if (m_exp_len != NULL) {
+70            assert( *m_exp_len != -1 );
+71            assert( 0 <= *m_exp_len );
+72            assert( *m_exp_len <= 100000 );
+73            size_t size = m_streambuf.size();
+74            if (size > __atomic_load_n(m_exp_len, __ATOMIC_RELAXED)) {
+(gdb) p m_exp_len
+$1 = (size_t *) 0x8045ec5c0
+(gdb) p &m_exp_len
+$2 = (size_t **) 0x80405cf90
 
-> This got me thinking, we have another issue to discuss and resolve.
->
-> The scenario is when compression is enabled. Assume that we've taken a big blob of data and compressed it into a smaller blob. We then call the allocator for that blob. What do we do if the allocator can't find a CONTIGUOUS block of storage of that size??? In the non-compressed case, it's relatively easy to simply break it up into smaller chunks -- but that doesn't work well with compression.
->
-> This isn't that unlikely a case, worse it could happen with shockingly high amounts of freespace (>>75%) with some pathological access patterns.
->
-> There's really only two choices. You either fracture the logical data and recompress OR you modify the pextent data structure to handle this case. The later isn't terribly difficult to do, you just make the size/address values into a vector of pairs. The former scheme could be quite expensive CPU wise as you may end up fracturing and recompressing multiple times (granted, in a pathological case). The latter case adds space to each onode for a rare case. The space is recoverable with an optimized serialize/deserializer (in essence you could burn a flag to indicate when a vector of physical chunks/sizes is needed instead of the usual scalar pair).
->
-> IMO, we should pursue the later scenario as it avoids the variable latency problem. I see the code/testing complexity of either choice as about the same.
->
->
+the address in m_exp_len 0x8045ec5c0 is outside of the heap, and gives 
+an illegal access.
+And thus the program gets a SIGSEGV
 
+Now my problem is that I can run this under gdb and watch the memory. 
+But that rarely goes wrong.
+Running it from 'make recheck' goes wrong just about every time but it 
+will be hard to run that
+trhu gdb and actually catch the code that is writting the illegal 
+address into m_exp_len.
+
+Does anybody have suggestions as how to track/debug this?
+
+Thanx,
+--WjW
