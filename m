@@ -1,68 +1,81 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: Adding compression/checksum support for bluestore.
-Date: Thu, 31 Mar 2016 18:44:51 +0000
-Message-ID: <CY1PR0201MB1897EB20E2359AD3E0857700E8990@CY1PR0201MB1897.namprd02.prod.outlook.com>
-References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
- <56FD4FEC.4060000@mirantis.com>
- <CY1PR0201MB1897E7C6A58679883F375F60E8990@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <56FD5BE0.4040801@mirantis.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: getting ready for jewel 10.2.1
+Date: Thu, 31 Mar 2016 12:01:53 -0700
+Message-ID: <CAJ4mKGZHyR3m7LVRuqv5jw19sGCWTStX+Sfbj6AkZr5byrrN1A@mail.gmail.com>
+References: <56FBAADF.3020407@dachary.org>
+	<CAJ4mKGYg++sGuqHQPkNa1GrVeDO=KFZNtp4FTYX=zOkrAbnFeQ@mail.gmail.com>
+	<56FD34AC.1030501@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0068.outbound.protection.outlook.com ([65.55.169.68]:30450
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1758076AbcCaTAA convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2016 15:00:00 -0400
-In-Reply-To: <56FD5BE0.4040801@mirantis.com>
-Content-Language: en-US
+Received: from mail-vk0-f51.google.com ([209.85.213.51]:35829 "EHLO
+	mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752462AbcCaTBy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2016 15:01:54 -0400
+Received: by mail-vk0-f51.google.com with SMTP id e6so115365575vkh.2
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Mar 2016 12:01:53 -0700 (PDT)
+In-Reply-To: <56FD34AC.1030501@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-> -----Original Message-----
-> From: Igor Fedotov [mailto:ifedotov@mirantis.com]
-> Sent: Thursday, March 31, 2016 10:18 AM
-> To: Allen Samuels <Allen.Samuels@sandisk.com>; Sage Weil
-> <sage@newdream.net>
-> Cc: ceph-devel <ceph-devel@vger.kernel.org>
-> Subject: Re: Adding compression/checksum support for bluestore.
-> 
-> 
-> 
-> On 31.03.2016 19:32, Allen Samuels wrote:
-> >> But do we really need to store checksums as metadata? What's about
-> >> pre(post)fixing 4K-4(?) blob with the checksum and store this pair to
-> >> the disk. IMO we always need checksum values along with blob data
-> >> thus let's store and read them together. This immediately eliminates
-> >> the question about the granularity and corresponding overhead... Have
-> >> I missed something?
-> > If you store them inline with the data then nothing lines up on boundaries
-> that the HW designers expect and you end up doing things like extra-copying
-> of every data buffer. This will kill performance.
-> 
-> Perhaps you are right.
-> 
-> But not sure I fully understand what HW designers you mean here. Are you
-> considering the case when Ceph is embedded into some hardware and
-> incoming RW requests  always operate aligned data and supposed to have
-> the same alignment for data saved to disk?
+On Thu, Mar 31, 2016 at 7:31 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Gregory,
+>
+> On 30/03/2016 20:47, Gregory Farnum wrote:
+>> On Wed, Mar 30, 2016 at 3:30 AM, Loic Dachary <loic@dachary.org> wrote:
+>>> Hi,
+>>>
+>>> Now is a good time to get ready for jewel 10.2.1 and I created http://tracker.ceph.com/issues/15317 for that purpose. The goal is to be able to run as many suites as possible on OpenStack, so that we do not have to wait days (sometime a week) for runs to complete on Sepia. Best case scenario, all OpenStack specific problems are fixed by the time 10.2.1 is being prepared. Worst case scenario there is no time to fix issues and we keep using the sepia lab. I guess we'll end up somewhere in the middle : some suites will run fine on Openstack and we'll use sepia for others.
+>>>
+>>> In a previous mail I voiced my concerns regarding the lack of interest of developers regarding teuthology job failures that are cause by variations in the infrastructure. I still have no clue how to convey my belief that it is important for teuthology jobs to succeed despite infrastructure variations. But instead of just giving up and do nothing, I will work on that for the rados suite and hope things will evolve in a good way. To be honest, figuring out http://tracker.ceph.com/issues/15236 and seeing a good run of the rados suite on jewel as a result renewed my motivation in that area :-)
+>>
+>> I think you've convinced us all it's important in the abstract; that's
+>> just very different from putting it on top of our list of priorities,
+>> especially since we alleviated many of our needs in the sepia lab.
+>> Beyond that, a lot of the issues we're seeing have very little to do
+>> with Ceph itself, or even the testing programs, and that can make it
+>> more difficult to get interested as we lack the necessary expertise. I
+>> spent some time trying to get disk sizes and things matched up (and I
+>> suddenly realize that never got merged), but some of the other odder
+>> issues we're having:
+>>
+>> http://tracker.ceph.com/issues/13980, in which we are failing to mount
+>> anything with nfs v3. This is a config file that needs to get updated;
+>> we do it for the sepia lab (probably in ansible?) but somehow that
+>> information isn't getting into the ovh slaves. (Or else it is in
+>> there, and there's something *else* broken.) If we are using a
+>> separate setup regimen for OpenStack than we are in the sepia lab
+>> there will be persistent breakage as new dependencies and
+>> environmental expectations get added to one and not the other. :/
+>
+> ceph-cm-ansible does not have any OpenStack specific instructions. It's supposed to work exactly the same on both sepia and OpenStack. When teuthology provisions an OpenStack target, it does so in the same way it provisions VPS in sepia. The only difference is that OpenStack uses images that come from http://cloud.centos.org/centos/7/images/ etc., unmodified. The VPS images have sometime been modified. However, this has only been an issue once, over six months ago.
+>
+> On OVH the UDP ports were firewalled, and that created the problem. I changed the firewall rules and I'm hopefull http://pulpito.ovh.sepia.ceph.com:8081/loic-2016-03-31_14:10:18-knfs-jewel-testing-basic-openstack/ will now pass.
+>
+>> http://tracker.ceph.com/issues/13876, in which MPI is just failing to
+>> get any connections going. Why? No idea; there's a teuthology commit
+>> from you that's supposed to have opened up all the ports in the
+>> firewall (and it sure *looks* like it does do that, but I don't know
+>> how the rules work), but this works in sepia and inasmuch as we have
+>> debugging info sure looks like some kind of network blockage...
+>
+> I opened the required port on the OVH lab. I don't think there is an ansible rule that does it but I'll ask Zack to be sure.
+>
+>> So I think this isn't something that's going to get done properly
+>> unless somebody gets assigned to just make everything work in all the
+>> suites, who has the time to learn all the fiddly little bits. (Or we
+>> somehow take a break for it as a project. But I don't see that going
+>> well.) :/
+>
+> If you suspect an OpenStack specific problem, feel free to ping me. There is a good chance I can help and together we can make teuthology happy with OpenStack :-)
 
-Dig into the direct I/O stuff. You'll see all sorts of places where the data is required to be either 512-byte or page-aligned. This stems from the HW implementations of the HBA, SCSI, SATA HW. 
+I really wasn't fishing with those, but hey! thanks so much for those fixes. :)
 
-> 
-> IMHO proper data alignment in the incoming requests is a particular
-> case. Generally we don't have such a trait. Moreover compression
-> completely destroys it if any. Thus in many cases we can easily append
-> an additional data portion containing a checksum.
-> 
-> >
-> > If you store them in a separate place (not in metadata, not contiguous to
-> data) then you'll have a full extra I/O that might even move the head
-> (yikes!). Plus you'll have to deal with the RMW of these tiny things.
-> Agree - that's not an option.
-> > Putting them in the metadata is really the only viable option.
-
+Do we have any way to automate those kinds of things for external
+users? It sounds like right now these are just some random things any
+third party needs to know to do, or their tests will mysteriously
+fail?
+-Greg
