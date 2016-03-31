@@ -1,90 +1,123 @@
-From: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
 Subject: RE: Adding compression/checksum support for bluestore.
-Date: Thu, 31 Mar 2016 17:39:35 +0000
-Message-ID: <09ad1f6790ff4860b364c49b2a28269f@R01UKEXCASM115.r01.fujitsu.local>
+Date: Thu, 31 Mar 2016 18:38:05 +0000
+Message-ID: <CY1PR0201MB1897E34D0EADBF59212AE047E8990@CY1PR0201MB1897.namprd02.prod.outlook.com>
 References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
- <56FD4FEC.4060000@mirantis.com>
- <CY1PR0201MB1897E7C6A58679883F375F60E8990@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <56FD5BE0.4040801@mirantis.com>
+ <56FD572D.6070608@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail1.bemta5.messagelabs.com ([195.245.231.150]:21211 "EHLO
-	mail1.bemta5.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753225AbcCaRqZ convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 31 Mar 2016 13:46:25 -0400
-In-Reply-To: <56FD5BE0.4040801@mirantis.com>
+Received: from mail-bl2on0092.outbound.protection.outlook.com ([65.55.169.92]:39568
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752539AbcCaSiK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2016 14:38:10 -0400
+In-Reply-To: <56FD572D.6070608@mirantis.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>, Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Igor Fedotov
-> Sent: Thursday, March 31, 2016 7:18 PM
->=20
-> On 31.03.2016 19:32, Allen Samuels wrote:
-> >> But do we really need to store checksums as metadata? What's about
-> >> pre(post)fixing 4K-4(?) blob with the checksum and store this pair=
- to
-> >> the disk. IMO we always need checksum values along with blob data
-> >> thus let's store and read them together. This immediately eliminat=
-es
-> >> the question about the granularity and corresponding overhead... H=
-ave
-> >> I missed something?
-> > If you store them inline with the data then nothing lines up on bou=
-ndaries
-> that the HW designers expect and you end up doing things like extra-c=
-opying
-> of every data buffer. This will kill performance.
->=20
-> Perhaps you are right.
->=20
-> But not sure I fully understand what HW designers you mean here. Are =
-you
-> considering the case when Ceph is embedded into some hardware and
-> incoming RW requests  always operate aligned data and supposed to hav=
-e
-> the same alignment for data saved to disk?
+> From: Igor Fedotov [mailto:ifedotov@mirantis.com]
+> Sent: Thursday, March 31, 2016 9:58 AM
+> To: Allen Samuels <Allen.Samuels@sandisk.com>; Sage Weil
+> <sage@newdream.net>
+> Cc: ceph-devel <ceph-devel@vger.kernel.org>
+> Subject: Re: Adding compression/checksum support for bluestore.
+> 
+> 
+> 
+> On 30.03.2016 22:46, Allen Samuels wrote:
+> > [snip]
+> >
+> > Time to talk about checksums.
+> >
+> > First let's divide the world into checksums for data and checksums for
+> > metadata -- and defer the discussion about checksums for metadata
+> > (important, but one at a time...)
+> >
+> > I believe it's a requirement that when checksums are enabled that 100% of
+> data reads must be validated against their corresponding checksum. This
+> leads you to conclude that you must store a checksum for each
+> independently readable piece of data.
+> >
+> > When compression is disabled, it's relatively straightforward -- there's a
+> checksum for each 4K readable block of data. Presumably this is a simple
+> vector stored in the pextent structure with one entry for each 4K block of
+> data.
+> >
+> > Things get more complicated when compression is enabled. At a minimum,
+> you'll need a checksum for each blob of compressed data (I'm using blob
+> here as unit of data put into the compressor, but what I really mean is the
+> minimum amount of *decompressable* data). As I've pointed out before,
+> many of the compression algorithms do their own checksum validation. For
+> algorithms that don't do their own checksum we'll want one checksum to
+> protect the block -- however, there's no reason that we can't implement this
+> as one checksum for each 4K physical blob, the runtime cost is nearly
+> equivalent and it will considerably simplify the code.
+> 
+> > Thus I think we really end up with a single, simple design. The pextent
+> structure contains a vector of checksums. Either that vector is empty
+> (checksum disabled) OR there is a checksum for each 4K block of data (not
+> this is NOT min_allocation size, it's minimum_read_size [if that's even a
+> parameter or does the code assume 4K readable blocks? [or worse, 512
+> readable blocks?? -- if so, we'll need to cripple this]).
+> >
+> > When compressing with a compression algorithm that does checksuming
+> we can automatically suppress checksum generation. There should also be an
+> administrative switch for this.
+> >
+> > This allows the checksuming to be pretty much independent of
+> > compression -- which is nice :)
+> Mostly agree.
+> 
+> But I think we should consider compression algorithm as a black box and rely
+> on a standalone checksum verification only.
+> And I suppose that the main purpose of the checksum validation at bluestore
+> level is to protect from HW failures. Thus we need to check
+> *physical* data. That is data before decompressing.
 
-> IMHO proper data alignment in the incoming requests is a particular
-> case. Generally we don't have such a trait. Moreover compression
-> completely destroys it if any. Thus in many cases we can easily appen=
-d
-> an additional data portion containing a checksum.
+Not sure I agree. Provided that it's "safe" (see later), there's no real difference between checking the checksum on compressed data or on the decompressed data. By "safe" I mean that if corrupt data is decompressed I don't corrupt the environment (fault, array index out of bounds, ...).
 
-Devices - in general - store data in sectors (or blocks) of particular =
-sizes, with 512 bytes for most HDDs and 4096 bytes for many SSDs and ma=
-ny large capacity HDDs ("advanced-format", as one company calls it). Fo=
-r that reason, when you're doing direct I/O, you read/write in multiple=
-s of those sectors/blocks, and anything below that will result in bad p=
-erformance because you need to read entire sector anyway (no way to do =
-partial-sector read), discard any unnecessary data and realign to match=
- destination (or pad buffer with some value and write entire value, whi=
-ch means you need copy data from caller into that temp buffer before do=
-ing write).=20
-Putting checksum in front of data will prevent direct-to-destination re=
-ads (i.e. read(..dest, 4096)) and zero-copy write, because front of des=
-t will contain checksum - you'll need to read into temp buffer, move ch=
-ecksum into its storage and move actual data to destination which means=
- read and up to two memmoves. If you'll put checksum *past* data, you c=
-an read data directly into dest buffer, but you need to make sure that =
-dest buffer is sizeof(checksum) larger than consumer expects and finall=
-y move checksum somewhere else -- better, but bug-prone.
-Having checksums in separate storage may incur extra I/O (as Allen wrot=
-e), but removes both issues mentioned.
+However, when I think through the implementation of the code, I find it natural to do checksum generation/checking on the physical data (i.e, after compression and before decompression). So as long as we're doing the checksum we won't actually care whether the algorithm is "safe" or not....
 
-With best regards / Pozdrawiam
-Piotr Da=B3ek
+> 
+> Another thing to consider is an ability to use introduced checksums for
+> scrubbing. One can probably extend objectstore interface to be able to
+> validate stored data without data sending back.
+> I don't see such an option at the moment. Please correct me if I missed that.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+No need for that option. Just read the data check the return code (good or checksum failure) then discard the data. This is essentially exactly the same code-path as a "please validate the checksum" specialized opcode.
+
+> 
+> > This got me thinking, we have another issue to discuss and resolve.
+> >
+> > The scenario is when compression is enabled. Assume that we've taken a
+> big blob of data and compressed it into a smaller blob. We then call the
+> allocator for that blob. What do we do if the allocator can't find a
+> CONTIGUOUS block of storage of that size??? In the non-compressed case,
+> it's relatively easy to simply break it up into smaller chunks -- but that doesn't
+> work well with compression.
+> >
+> > This isn't that unlikely a case, worse it could happen with shockingly high
+> amounts of freespace (>>75%) with some pathological access patterns.
+> >
+> > There's really only two choices. You either fracture the logical data and
+> recompress OR you modify the pextent data structure to handle this case.
+> The later isn't terribly difficult to do, you just make the size/address values
+> into a vector of pairs. The former scheme could be quite expensive CPU wise
+> as you may end up fracturing and recompressing multiple times (granted, in a
+> pathological case). The latter case adds space to each onode for a rare case.
+> The space is recoverable with an optimized serialize/deserializer (in essence
+> you could burn a flag to indicate when a vector of physical chunks/sizes is
+> needed instead of the usual scalar pair).
+> >
+> > IMO, we should pursue the later scenario as it avoids the variable latency
+> problem. I see the code/testing complexity of either choice as about the
+> same.
+> >
+> >
+
