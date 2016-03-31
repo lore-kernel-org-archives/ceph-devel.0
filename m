@@ -1,69 +1,52 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Hard to debug problem with ceph_erasure_code
-Date: Thu, 31 Mar 2016 19:10:45 +0200
-Message-ID: <56FD5A15.1080507@digiware.nl>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Adding compression/checksum support for bluestore.
+Date: Thu, 31 Mar 2016 20:18:24 +0300
+Message-ID: <56FD5BE0.4040801@mirantis.com>
+References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
+ <56FD4FEC.4060000@mirantis.com>
+ <CY1PR0201MB1897E7C6A58679883F375F60E8990@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:14809 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752346AbcCaRLU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 31 Mar 2016 13:11:20 -0400
-Received: from rack1.digiware.nl (unknown [127.0.0.1])
-	by smtp.digiware.nl (Postfix) with ESMTP id 31809153416
-	for <ceph-devel@vger.kernel.org>; Thu, 31 Mar 2016 19:11:17 +0200 (CEST)
-Received: from [IPv6:2001:4cb8:3:1:301d:d194:f8e3:4290] (unknown [IPv6:2001:4cb8:3:1:301d:d194:f8e3:4290])
-	by smtp.digiware.nl (Postfix) with ESMTP id 19BAA1534C6
-	for <ceph-devel@vger.kernel.org>; Thu, 31 Mar 2016 19:10:55 +0200 (CEST)
+Received: from mail-lf0-f43.google.com ([209.85.215.43]:35566 "EHLO
+	mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751813AbcCaRS0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2016 13:18:26 -0400
+Received: by mail-lf0-f43.google.com with SMTP id k79so64254921lfb.2
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Mar 2016 10:18:26 -0700 (PDT)
+In-Reply-To: <CY1PR0201MB1897E7C6A58679883F375F60E8990@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
 
-I have this problem that testing ceph_erasure_code sometimes crashes in:
 
-	ceph_erasure_code --debug-osd 20 --plugin_exists jerasure
+On 31.03.2016 19:32, Allen Samuels wrote:
+>> But do we really need to store checksums as metadata? What's about 
+>> pre(post)fixing 4K-4(?) blob with the checksum and store this pair to 
+>> the disk. IMO we always need checksum values along with blob data 
+>> thus let's store and read them together. This immediately eliminates 
+>> the question about the granularity and corresponding overhead... Have 
+>> I missed something? 
+> If you store them inline with the data then nothing lines up on boundaries that the HW designers expect and you end up doing things like extra-copying of every data buffer. This will kill performance.
 
-If I just run this in a while loop on the command line then it crashes 
-only once every few hundert runs.
-Running it in the testset it crashes just about every time.
+Perhaps you are right.
 
-The crash from the core is an invalid point in the assertion code I 
-added to log/Entry.h
+But not sure I fully understand what HW designers you mean here. Are you 
+considering the case when Ceph is embedded into some hardware and 
+incoming RW requests  always operate aligned data and supposed to have 
+the same alignment for data saved to disk?
 
-#7  0x000000000077984d in ceph::log::Entry::hint_size (this=0x80405cf00) 
-at log/Entry.h:70
-70            assert( *m_exp_len != -1 );
-(gdb) l
-65        }
-66
-67        // function improves estimate for expected size of message
-68        void hint_size() {
-69          if (m_exp_len != NULL) {
-70            assert( *m_exp_len != -1 );
-71            assert( 0 <= *m_exp_len );
-72            assert( *m_exp_len <= 100000 );
-73            size_t size = m_streambuf.size();
-74            if (size > __atomic_load_n(m_exp_len, __ATOMIC_RELAXED)) {
-(gdb) p m_exp_len
-$1 = (size_t *) 0x8045ec5c0
-(gdb) p &m_exp_len
-$2 = (size_t **) 0x80405cf90
+IMHO proper data alignment in the incoming requests is a particular 
+case. Generally we don't have such a trait. Moreover compression 
+completely destroys it if any. Thus in many cases we can easily append 
+an additional data portion containing a checksum.
 
-the address in m_exp_len 0x8045ec5c0 is outside of the heap, and gives 
-an illegal access.
-And thus the program gets a SIGSEGV
+>
+> If you store them in a separate place (not in metadata, not contiguous to data) then you'll have a full extra I/O that might even move the head (yikes!). Plus you'll have to deal with the RMW of these tiny things.
+Agree - that's not an option.
+> Putting them in the metadata is really the only viable option.
 
-Now my problem is that I can run this under gdb and watch the memory. 
-But that rarely goes wrong.
-Running it from 'make recheck' goes wrong just about every time but it 
-will be hard to run that
-trhu gdb and actually catch the code that is writting the illegal 
-address into m_exp_len.
-
-Does anybody have suggestions as how to track/debug this?
-
-Thanx,
---WjW
