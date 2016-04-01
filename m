@@ -1,60 +1,61 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Fri, 1 Apr 2016 16:28:38 +1100
-Message-ID: <20160401052838.GA8044@onthe.net.au>
-References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
- <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160401035610.GA5671@onthe.net.au>
- <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: [PATCH] ceph-disk: s/prefered/preferred/
+Date: Fri, 1 Apr 2016 08:56:17 +0200
+Message-ID: <56FE1B91.2080108@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:49322 "EHLO
-	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754831AbcDAF2m (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2016 01:28:42 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
+Received: from mx2.suse.de ([195.135.220.15]:33527 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751280AbcDAG4T (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 1 Apr 2016 02:56:19 -0400
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id 2B745AAF1
+	for <ceph-devel@vger.kernel.org>; Fri,  1 Apr 2016 06:56:17 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Apr 01, 2016 at 12:56:48AM -0400, Sage Weil wrote:
-> On Fri, 1 Apr 2016, Chris Dunlop wrote:
->> On Wed, Mar 30, 2016 at 10:52:37PM +0000, Allen Samuels wrote:
->>> One thing to also factor in is that if you increase the span of a
->>> checksum, you degrade the quality of the checksum. So if you go with 128K
->>> chunks of data you'll likely want to increase the checksum itself from
->>> something beyond a CRC-32. Maybe somebody out there has a good way of
->>> describing this quanitatively.
->> 
->> I would have thought the "quality" of a checksum would be a function of how
->> many bits it is, and how evenly and randomly it's distributed, and unrelated
->> to the amount of data being checksummed.
->> 
->> I.e. if you have any amount of data covered by an N-bit evenly randomly
->> distributed checksum, and "something" goes wrong with the data (or the
->> checksum), the chance of the checksum still matching the data is 1 in 2^n.
-> 
-> Say there is some bit error rate per bit.  If you double the amount of 
-> data you're checksumming, then you'll see twice as many errors.  That 
-> means that even though your 32-bit checksum is right 2^32-1 times out of 
-> 2^32, you're twice as likely to hit that 1 in 2^32 chance of getting a 
-> correct checksum on wrong data.
+Hi,
 
-It seems to me, if we're talking about a single block of data protected by a
-32-bit checksum, it doesn't matter how many errors there are within the
-block, the chance of a false checksum match is still only 1 in 2^32.
+Please pull the following Ceph updates from this mail.
 
-If we're talking about a stream of checksummed blocks, where the stream is
-subject to some BER, then, yes, your chances of getting a false match go up.
-But that's still independent of the block size, rather it's a function of
-the number of possibly corrupt blocks.
+There is not much here, just some overdue proofreading.
 
-In fact, if you have a stream of data subject to some BER and split into
-checksummed blocks, the larger the blocks and thereby the lower the number
-of blocks, the lower the chance of a false match.
+This patch is based on a recent merge of the jewel tree to avoid 
+conflicts with a recent refactor.
 
-Chris
+Sincerely
+
+Signed-off-by: Nathan Cutler <ncutler@suse.cz>
+---
+  src/ceph-disk/ceph_disk/main.py | 4 ++--
+  1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/ceph-disk/ceph_disk/main.py 
+b/src/ceph-disk/ceph_disk/main.py
+index d0ec596..a137967 100755
+--- a/src/ceph-disk/ceph_disk/main.py
++++ b/src/ceph-disk/ceph_disk/main.py
+@@ -406,7 +406,7 @@ def command(arguments, **kwargs):
+      executable exists and raising a helpful error message
+      if it does not.
+
+-    .. note:: This should be the prefered way of calling 
+``subprocess.Popen``
++    .. note:: This should be the preferred way of calling 
+``subprocess.Popen``
+      since it provides the caller with the safety net of making sure that
+      executables *will* be found and will error nicely otherwise.
+
+@@ -429,7 +429,7 @@ def command_check_call(arguments):
+      Safely execute a ``subprocess.check_call`` call making sure that the
+      executable exists and raising a helpful error message if it does not.
+
+-    .. note:: This should be the prefered way of calling
++    .. note:: This should be the preferred way of calling
+      ``subprocess.check_call`` since it provides the caller with the 
+safety net
+      of making sure that executables *will* be found and will error nicely
+      otherwise.
