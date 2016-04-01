@@ -1,70 +1,87 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Fri, 1 Apr 2016 10:58:17 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
-References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com> <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com> <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160401035610.GA5671@onthe.net.au> <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com> <20160401052838.GA8044@onthe.net.au>
+Subject: Re: getting ready for jewel 10.2.1
+Date: Fri, 1 Apr 2016 11:18:19 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604011107430.22014@cpach.fuggernut.com>
+References: <56FBAADF.3020407@dachary.org> <CALe9h7d65pM08w8KWqo03zT09ny5MAkZgDacOdty97Y7ojCV+Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47708 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:48181 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752549AbcDAO61 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2016 10:58:27 -0400
-In-Reply-To: <20160401052838.GA8044@onthe.net.au>
+	with ESMTP id S932361AbcDAPS3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2016 11:18:29 -0400
+In-Reply-To: <CALe9h7d65pM08w8KWqo03zT09ny5MAkZgDacOdty97Y7ojCV+Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 1 Apr 2016, Chris Dunlop wrote:
-> On Fri, Apr 01, 2016 at 12:56:48AM -0400, Sage Weil wrote:
-> > On Fri, 1 Apr 2016, Chris Dunlop wrote:
-> >> On Wed, Mar 30, 2016 at 10:52:37PM +0000, Allen Samuels wrote:
-> >>> One thing to also factor in is that if you increase the span of a
-> >>> checksum, you degrade the quality of the checksum. So if you go with 128K
-> >>> chunks of data you'll likely want to increase the checksum itself from
-> >>> something beyond a CRC-32. Maybe somebody out there has a good way of
-> >>> describing this quanitatively.
-> >> 
-> >> I would have thought the "quality" of a checksum would be a function of how
-> >> many bits it is, and how evenly and randomly it's distributed, and unrelated
-> >> to the amount of data being checksummed.
-> >> 
-> >> I.e. if you have any amount of data covered by an N-bit evenly randomly
-> >> distributed checksum, and "something" goes wrong with the data (or the
-> >> checksum), the chance of the checksum still matching the data is 1 in 2^n.
-> > 
-> > Say there is some bit error rate per bit.  If you double the amount of 
-> > data you're checksumming, then you'll see twice as many errors.  That 
-> > means that even though your 32-bit checksum is right 2^32-1 times out of 
-> > 2^32, you're twice as likely to hit that 1 in 2^32 chance of getting a 
-> > correct checksum on wrong data.
+On Thu, 31 Mar 2016, John Spray wrote:
+> On Wed, Mar 30, 2016 at 11:30 AM, Loic Dachary <loic@dachary.org> wrote:
+> > Hi,
+> >
+> > Now is a good time to get ready for jewel 10.2.1 and I created 
+> > http://tracker.ceph.com/issues/15317 for that purpose. The goal is to 
+> > be able to run as many suites as possible on OpenStack, so that we do 
+> > not have to wait days (sometime a week) for runs to complete on Sepia. 
+> > Best case scenario, all OpenStack specific problems are fixed by the 
+> > time 10.2.1 is being prepared. Worst case scenario there is no time to 
+> > fix issues and we keep using the sepia lab. I guess we'll end up 
+> > somewhere in the middle : some suites will run fine on Openstack and 
+> > we'll use sepia for others.
+> >
+> > In a previous mail I voiced my concerns regarding the lack of interest 
+> > of developers regarding teuthology job failures that are cause by 
+> > variations in the infrastructure. I still have no clue how to convey 
+> > my belief that it is important for teuthology jobs to succeed despite 
+> > infrastructure variations. But instead of just giving up and do 
+> > nothing, I will work on that for the rados suite and hope things will 
+> > evolve in a good way. To be honest, figuring out 
+> > http://tracker.ceph.com/issues/15236 and seeing a good run of the 
+> > rados suite on jewel as a result renewed my motivation in that area 
+> > :-)
 > 
-> It seems to me, if we're talking about a single block of data protected by a
-> 32-bit checksum, it doesn't matter how many errors there are within the
-> block, the chance of a false checksum match is still only 1 in 2^32.
+> If I was dedicating time to working on lab infrastructure, I think I
+> would prioritise stabilising the existing sepia lab.  I still see
+> infrastructure issues (these day usually package install failures)
+> sprinkled all over the place, so I have to question the value of
+> spreading ourselves even more thinly by trying to handle multiple
+> environments with their different quirks.
 
-It's not a question of how many errors are in the block, it's a question 
-of whether there are more than 0 errors.  If the bit error rate is so low 
-it's 0, our probability of a false positive is 0, no matter how many 
-blocks there are.  So for a bit error rate of 10e-15, then it's 10e-15 * 
-1^-32.  But if there are 1000 bits in a block, it becomes 10e-12 * 1^-32.  
+I think we can't afford not to do both.  The problem with focusing only on 
+sepia is that it makes it prevents new contributors from testing their 
+code, and testing is one of the key pieces that preventing us from scaling 
+our overall development velocity.
 
-In other words, we're only rolling the checksum dice when there is 
-actually an error, and larger blocks are more likely to have errors.  If 
-your blocks were so large you were effectively guaranteed to have an error 
-in every one, then the effective false positive rate would be exactly the 
-checksum false positive rate (2^-32).
- 
-> If we're talking about a stream of checksummed blocks, where the stream is
-> subject to some BER, then, yes, your chances of getting a false match go up.
-> But that's still independent of the block size, rather it's a function of
-> the number of possibly corrupt blocks.
-> 
-> In fact, if you have a stream of data subject to some BER and split into
-> checksummed blocks, the larger the blocks and thereby the lower the number
-> of blocks, the lower the chance of a false match.
+Also, FWIW, Sam sank a couple days this week into improvements on the 
+sepia side that have eliminated almost all of the sepia package install 
+noise we've been seeing (at least on the rados suite).  With Jewel 
+stabilizing now is a good time to do the same with openstack.
 
+> I have nothing against the openstack work, it is a good tool, but I
+> don't think it was wise to just deploy it and expect other developers
+> to handle the issues.  I would have liked to see at least one passing
+> filesystem run on openstack before regular nightlies were scheduled on
+> it.  Maybe now that we have fixes for #13980 and #13876 we will see a
+> passing run, and can get more of a sense of how stable/unstable these
+> tests are in the openstack environment: I think it's likely that we
+> will continue to see timeouts/instability from the comparatively
+> underpowered nodes.
 
+The earlier transition to openstack left much to be desired, although to 
+be fair it would have been hard to do it all that differently given we 
+were forced out of Irvine by the sepia lab move.  In my view the main 
+lesson learned was that without everyone feeling invested in fixing the 
+issues to make the tests pass, the issues won't get fixed.  The lab folks 
+don't understand all of the tests and their weird issues, and the 
+developers are too busy with code to help debug them.
+
+I'd like to convince everyone that making openstack a reliable testing 
+environment is an importat strategic goal for the project as a whole, and 
+in everyone's best interests, and that right now (while we're focusing on 
+teuthology tests and waiting for the final blocking jewel bugs to be 
+squashed) is as good a time as any to dig into the remaining issues... 
+both with sepia *and* openstack.
+
+Is that reasonable?
 sage
