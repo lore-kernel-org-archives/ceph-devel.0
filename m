@@ -1,58 +1,63 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: ceph-disk improvements
-Date: Fri, 1 Apr 2016 11:36:17 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
+From: Kamal Mostafa <kamal@canonical.com>
+Subject: Re: [BUG] backport commit ebeec2ef4c in ubuntu-vivid.git break cephfs
+Date: Fri, 1 Apr 2016 08:59:34 -0700
+Message-ID: <20160401155934.GA569@whence.com>
+References: <90A03E70-2B8B-4C29-9655-A73D7D4523D5@redhat.com>
+ <20160331143921.GB18035@whence.com>
+ <87CCCB41-994B-4259-8883-001D88B7B893@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48995 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752811AbcDAPg0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 1 Apr 2016 11:36:26 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 72923C00EB28
-	for <ceph-devel@vger.kernel.org>; Fri,  1 Apr 2016 15:36:26 +0000 (UTC)
-Received: from cpach (ovpn-112-83.phx2.redhat.com [10.3.112.83])
-	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u31FaNjm013547
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Fri, 1 Apr 2016 11:36:24 -0400
+Received: from youngberry.canonical.com ([91.189.89.112]:48162 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752360AbcDAP7k (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2016 11:59:40 -0400
+Content-Disposition: inline
+In-Reply-To: <87CCCB41-994B-4259-8883-001D88B7B893@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: kernel-team@lists.ubuntu.com, Ceph Development <ceph-devel@vger.kernel.org>, Luis Henriques <luis.henriques@canonical.com>
 
-Hi all,
+On Fri, Apr 01, 2016 at 10:01:23AM +0800, Yan, Zheng wrote:
+> 
+> > On Mar 31, 2016, at 22:39, Kamal Mostafa <kamal@canonical.com> wrote:
+> > 
+> > On Thu, Mar 31, 2016 at 12:06:42PM +0800, Yan, Zheng wrote:
+> >> ubuntu-vivid git tree includes commit ebeec2ef4c (ceph: fix message
+> >> length computation), but does not contain backport for upstream commit
+> >> 1f041a89b4 (ceph: fix request time stamp encoding). This breaks cephfs
+> >> kernel driver completely. Please add the later commit to your git
+> >> tree.
+> >> 
+> >> Regards
+> >> Yan, Zheng
+> > 
+> > Hi Yan-
+> > 
+> > Thanks for letting us know about this.  If that patch is required for
+> > all trees that carry a backport of 777d738 (ceph: fix message length
+> > computation), then we'll need to apply 1f041a89b4 to:
+> 
+> yes, that patch is required for all trees include the back port 
+> 
+> > 
+> >  3.19.y-ckt (stable)
+> >  3.16.y-ckt (stable)
+> >  ubuntu-vivid
+> >  ubuntu-utopic
+> > 
+> > For our reference, can you point me to a bug report or email thread
+> > which discusses the breakage?
+> > 
+> http://tracker.ceph.com/issues/15302 <http://tracker.ceph.com/issues/15302>
 
-There are a couple of looming features for ceph-disk:
 
-1- Support for additional devices when using BlueStore.  There can be up 
-to three: the main device, a WAL/journal device (small, ~128MB, ideally 
-NVRAM), and a fast metadata device (as big as you have available; will be 
-used for internal metadata).
+Ok, I've filed this Launchpad bug to track the issue in the affected Ubuntu
+kernels: http://bugs.launchpad.net/bugs/1564950
 
-2- Support for setting up dm-cache, bcache, and/or FlashCache underneath 
-filestore or bluestore.
+We'll get the fix into the pipeline ASAP.
 
-The current syntax of
+Thanks again Yan!
 
- ceph-disk prepare [--dmcrypt] [--bluestore] DATADEV [JOURNALDEV]
-
-isn't terribly expressive.  For example, the journal device size is set 
-via a config option, not on the command line.  For bluestore, the metadata 
-device will probably want/need explicit user input so they can ensure it's 
-1/Nth of their SSD (if they have N HDDs to each SSD).
-
-And if we put dmcache in there, that partition will need to be sized too.
-
-Another consideration is that right now we don't play nice with LVM at 
-all.  Should we?  dm-cache is usually used in conjunction with LVM 
-(although it doesn't have to be).  Does LVM provide value?  Like, the 
-ability for users to add a second SSD to a box and migrate cache, wal, or 
-journal partitions around?
-
-I'm interested in hearing feedback on requirements, approaches, and 
-interfaces before we go too far down the road...
-
-Thanks!
-sage
+ -Kamal
