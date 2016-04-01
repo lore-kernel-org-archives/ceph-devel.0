@@ -1,92 +1,78 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Started developing a deduplication feature
-Date: Fri, 1 Apr 2016 17:31:24 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604011723500.22014@cpach.fuggernut.com>
-References: <8737r5w89m.fsf@uni-mainz.de>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: AddressSanitizer
+Date: Fri, 1 Apr 2016 15:19:44 -0700
+Message-ID: <CAJ4mKGZkq0hZObxQ1+ZOrbi8TaKrciqsAFoXuzS5JQ_qGb9N9A@mail.gmail.com>
+References: <56FE89BC.5040808@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54670 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751484AbcDAVbd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2016 17:31:33 -0400
-In-Reply-To: <8737r5w89m.fsf@uni-mainz.de>
+Received: from mail-vk0-f52.google.com ([209.85.213.52]:35670 "EHLO
+	mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752708AbcDAWTp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2016 18:19:45 -0400
+Received: by mail-vk0-f52.google.com with SMTP id e6so120343210vkh.2
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Apr 2016 15:19:45 -0700 (PDT)
+In-Reply-To: <56FE89BC.5040808@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Marcel Lauhoff <lauhoff@uni-mainz.de>
-Cc: ceph-devel@vger.kernel.org
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Marcel,
+On Fri, Apr 1, 2016 at 7:46 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> Hi
+>
+> In my search for reasons why I have crashes I started using
+> AddressSanitizer with Clang (since that is native included)
+> https://github.com/google/sanitizers/wiki/AddressSanitizer,
+>
+> Below the results which might indicate locations of possible trouble.
+> Would there be interest into looking into these further?
+> I know that some unitests under valgrind also complain about memory
+> leaks just because items are not properly free/deleted since they are
+> just tests.
+>
+> But the ceph-mon container-overflow and the .libs/ceph-dencoder double
+> free are parts of the tree that are used outside the tests.
+>
+> But I still have to find the flags to actually get the translation to
+> file codelines for this to be really useful.
+>
+> --WjW
+>
+>
+> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_isa+0x7fea8b)
+> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_plugin_isa+0x7e9d0b)
+> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec+0x8144cb)
+> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_all+0x8021ab)
+> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_thread+0x7fb78b)
+> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_arguments+0x7fd74b)
+> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_plugin_shec+0x7e98db)
+> SUMMARY: AddressSanitizer: heap-use-after-free
+> (/usr/srcs/Ceph/work/ceph/src/unittest_pglog+0x92722f)
+> SUMMARY: AddressSanitizer: dynamic-stack-buffer-overflow
+> (/usr/srcs/Ceph/work/ceph/src/unittest_lfnindex+0x8ee69f)
+> SUMMARY: AddressSanitizer: stack-buffer-overflow
+> (/usr/srcs/Ceph/work/ceph/src/unittest_utf8+0x5ff392)
+> SUMMARY: AddressSanitizer: container-overflow
+> (/usr/srcs/Ceph/work/ceph/src/ceph-mon+0xb591b1)
+> SUMMARY: AddressSanitizer: double-free
+> (/usr/srcs/Ceph/work/ceph/src/.libs/ceph-dencoder+0x8b1fcb)
 
-On Fri, 1 Apr 2016, Marcel Lauhoff wrote:
-> Hi Ceph,
-> 
-> deduplication has been discussed on the list a couple of times.
-> Over the next months I'll be working on a prototype.
-> 
-> In short: Use a content-addressed storage pool backed by a pool
-> acting as storage and distributed fingerprint index.
-> 
-> Two pools: (1) pool that does the content addressing, (2) storage / 
-> index pool.
-> 
-> OSDs in the first pool readdress and chuck/reassemble objects.
-> They then store the new objects/chunks in a second pool.
+This is interesting but I wouldn't spend much time on it without
+seeing the actual call paths. We get a lot of memory warnings in
+libraries that turn out to be issues only with shutdown, often because
+the memory checking tool doesn't understand or handle certain
+features.
 
-I think this is the right architecture for dedup in Ceph, and matches the 
-ideas we've been kicking around.
-
-> The first pool uses a new PG backend ("CAS Backend"),
-> while the second can use replication or erasure coding.
-> 
-> The CAS backend computes fingerprints for incoming objects and
-> stores the fingerprint <-> original object name mapping.
-> It then forwards the data to a storage pool, addressing the objects by
-> fingerprint (the content defined name).
-> 
-> The storage pool therefore serves as a distributed fingerprint index.
-> CRUSH selects the responsible OSDs. The OSDs know their objects.
-> 
-> Deduplication happens when two objects/chunks have the same
-> fingerprint.
-
-This is a little different, though.
-
-The plan so far has been to match this up with the next stage of tiering.  
-We'll add the ability for and object to be a 'redirect' and store a bit of 
-metadata indicating where to look next.  That might be a simple as "go 
-look in this cold RADOS pool over there," or a URL into another storage 
-system (e.g., a tape archive), or.. a complicated mapping of bytes to CAS 
-chunks in another rados pool.
-
-The original thought was that this would just be a regular ReplicatedPG, 
-not a new pool type.  I haven't thought about what we'd gain by having a 
-new pool type.  One thing we get by using the existing pool is that we're 
-not forced to do the demotion/dedup immediately--we can just store the 
-object normally, and dedup it later when we decide it's cold.
-
-For the CAS pool, the idea would be to use the refcount class, or 
-something like it, so that you'd say "write object $hash" and if the 
-object already exists it'd increment the ref count.  Similarly, when you 
-delete the logical object, you do a refcount 'put' on each chunk, and the 
-chunk would only go away when the last ref did too.  (In practice we need 
-to be careful to avoid leaked refs in the case of failures; this would 
-probably be done by having a 'deduping' and 'deleting' state on the 
-logical object and named references.
-
-> My current milestones:
-> - Develop CAS backend, fingerprinting, recipes store
-> - Support limited set of operations (like EC does)
-> - Support RBD (with/without Cache) and evaluate
-> - Add Chunking, Garbage Collection, ..
-> 
-> Currently I'm adding a new PG backend into the OSD code base. I'll
-> push the code the my github clone as soon as it does "something" :)
-
-This would be a good thing to discuss during the Ceph Developer Monthly 
-call next Wednesday:
-
-	http://tracker.ceph.com/projects/ceph/wiki/Planning
-	http://tracker.ceph.com/projects/ceph/wiki/CDM_06-APR-2016
-
-sage
+If it turns out to be real, there have been various efforts to enable
+more clang/llvm checking against the Ceph code base and this is
+another thing that could go in there. Or perhaps it could replace our
+valgrind runs in teuthology or something?
+-Greg
