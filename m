@@ -1,63 +1,97 @@
-From: Kamal Mostafa <kamal@canonical.com>
-Subject: Re: [BUG] backport commit ebeec2ef4c in ubuntu-vivid.git break cephfs
-Date: Fri, 1 Apr 2016 08:59:34 -0700
-Message-ID: <20160401155934.GA569@whence.com>
-References: <90A03E70-2B8B-4C29-9655-A73D7D4523D5@redhat.com>
- <20160331143921.GB18035@whence.com>
- <87CCCB41-994B-4259-8883-001D88B7B893@redhat.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: getting ready for jewel 10.2.1
+Date: Fri, 1 Apr 2016 17:19:47 +0100
+Message-ID: <CALe9h7fMNGxX=5sEVQickLA0vt1N0je=AUp1pQN9YkBJoaTSFg@mail.gmail.com>
+References: <56FBAADF.3020407@dachary.org> <CALe9h7d65pM08w8KWqo03zT09ny5MAkZgDacOdty97Y7ojCV+Q@mail.gmail.com>
+ <alpine.DEB.2.11.1604011107430.22014@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:48162 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752360AbcDAP7k (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2016 11:59:40 -0400
-Content-Disposition: inline
-In-Reply-To: <87CCCB41-994B-4259-8883-001D88B7B893@redhat.com>
+Received: from mail-oi0-f47.google.com ([209.85.218.47]:34660 "EHLO
+	mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752044AbcDAQUH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2016 12:20:07 -0400
+Received: by mail-oi0-f47.google.com with SMTP id o62so111996388oig.1
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Apr 2016 09:20:07 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1604011107430.22014@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: kernel-team@lists.ubuntu.com, Ceph Development <ceph-devel@vger.kernel.org>, Luis Henriques <luis.henriques@canonical.com>
+To: Sage Weil <sage@newdream.net>
+Cc: Loic Dachary <loic@dachary.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Apr 01, 2016 at 10:01:23AM +0800, Yan, Zheng wrote:
-> 
-> > On Mar 31, 2016, at 22:39, Kamal Mostafa <kamal@canonical.com> wrote:
-> > 
-> > On Thu, Mar 31, 2016 at 12:06:42PM +0800, Yan, Zheng wrote:
-> >> ubuntu-vivid git tree includes commit ebeec2ef4c (ceph: fix message
-> >> length computation), but does not contain backport for upstream commit
-> >> 1f041a89b4 (ceph: fix request time stamp encoding). This breaks cephfs
-> >> kernel driver completely. Please add the later commit to your git
-> >> tree.
-> >> 
-> >> Regards
-> >> Yan, Zheng
-> > 
-> > Hi Yan-
-> > 
-> > Thanks for letting us know about this.  If that patch is required for
-> > all trees that carry a backport of 777d738 (ceph: fix message length
-> > computation), then we'll need to apply 1f041a89b4 to:
-> 
-> yes, that patch is required for all trees include the back port 
-> 
-> > 
-> >  3.19.y-ckt (stable)
-> >  3.16.y-ckt (stable)
-> >  ubuntu-vivid
-> >  ubuntu-utopic
-> > 
-> > For our reference, can you point me to a bug report or email thread
-> > which discusses the breakage?
-> > 
-> http://tracker.ceph.com/issues/15302 <http://tracker.ceph.com/issues/15302>
+On Fri, Apr 1, 2016 at 4:18 PM, Sage Weil <sage@newdream.net> wrote:
+> On Thu, 31 Mar 2016, John Spray wrote:
+>> On Wed, Mar 30, 2016 at 11:30 AM, Loic Dachary <loic@dachary.org> wrote:
+>> > Hi,
+>> >
+>> > Now is a good time to get ready for jewel 10.2.1 and I created
+>> > http://tracker.ceph.com/issues/15317 for that purpose. The goal is to
+>> > be able to run as many suites as possible on OpenStack, so that we do
+>> > not have to wait days (sometime a week) for runs to complete on Sepia.
+>> > Best case scenario, all OpenStack specific problems are fixed by the
+>> > time 10.2.1 is being prepared. Worst case scenario there is no time to
+>> > fix issues and we keep using the sepia lab. I guess we'll end up
+>> > somewhere in the middle : some suites will run fine on Openstack and
+>> > we'll use sepia for others.
+>> >
+>> > In a previous mail I voiced my concerns regarding the lack of interest
+>> > of developers regarding teuthology job failures that are cause by
+>> > variations in the infrastructure. I still have no clue how to convey
+>> > my belief that it is important for teuthology jobs to succeed despite
+>> > infrastructure variations. But instead of just giving up and do
+>> > nothing, I will work on that for the rados suite and hope things will
+>> > evolve in a good way. To be honest, figuring out
+>> > http://tracker.ceph.com/issues/15236 and seeing a good run of the
+>> > rados suite on jewel as a result renewed my motivation in that area
+>> > :-)
+>>
+>> If I was dedicating time to working on lab infrastructure, I think I
+>> would prioritise stabilising the existing sepia lab.  I still see
+>> infrastructure issues (these day usually package install failures)
+>> sprinkled all over the place, so I have to question the value of
+>> spreading ourselves even more thinly by trying to handle multiple
+>> environments with their different quirks.
+>
+> I think we can't afford not to do both.  The problem with focusing only on
+> sepia is that it makes it prevents new contributors from testing their
+> code, and testing is one of the key pieces that preventing us from scaling
+> our overall development velocity.
+>
+> Also, FWIW, Sam sank a couple days this week into improvements on the
+> sepia side that have eliminated almost all of the sepia package install
+> noise we've been seeing (at least on the rados suite).  With Jewel
+> stabilizing now is a good time to do the same with openstack.
+>
+>> I have nothing against the openstack work, it is a good tool, but I
+>> don't think it was wise to just deploy it and expect other developers
+>> to handle the issues.  I would have liked to see at least one passing
+>> filesystem run on openstack before regular nightlies were scheduled on
+>> it.  Maybe now that we have fixes for #13980 and #13876 we will see a
+>> passing run, and can get more of a sense of how stable/unstable these
+>> tests are in the openstack environment: I think it's likely that we
+>> will continue to see timeouts/instability from the comparatively
+>> underpowered nodes.
+>
+> The earlier transition to openstack left much to be desired, although to
+> be fair it would have been hard to do it all that differently given we
+> were forced out of Irvine by the sepia lab move.  In my view the main
+> lesson learned was that without everyone feeling invested in fixing the
+> issues to make the tests pass, the issues won't get fixed.  The lab folks
+> don't understand all of the tests and their weird issues, and the
+> developers are too busy with code to help debug them.
+>
+> I'd like to convince everyone that making openstack a reliable testing
+> environment is an importat strategic goal for the project as a whole, and
+> in everyone's best interests, and that right now (while we're focusing on
+> teuthology tests and waiting for the final blocking jewel bugs to be
+> squashed) is as good a time as any to dig into the remaining issues...
+> both with sepia *and* openstack.
+>
+> Is that reasonable?
 
+OK -- if we are committed to doing both, then my opinions about
+priorities are kind of academic :-)  If we're all pulling in the same
+direction I think it's fine.
 
-Ok, I've filed this Launchpad bug to track the issue in the affected Ubuntu
-kernels: http://bugs.launchpad.net/bugs/1564950
-
-We'll get the fix into the pipeline ASAP.
-
-Thanks again Yan!
-
- -Kamal
+Cheers,
+John
