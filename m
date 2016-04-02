@@ -1,9 +1,8 @@
 From: Allen Samuels <Allen.Samuels@sandisk.com>
 Subject: RE: Adding compression/checksum support for bluestore.
-Date: Sat, 2 Apr 2016 05:38:23 +0000
-Message-ID: <CY1PR0201MB1897416E6B245E1FC2B9CEBEE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
-References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
+Date: Sat, 2 Apr 2016 05:48:01 +0000
+Message-ID: <CY1PR0201MB1897ECA95E25B14210CA047FE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
  <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
  <20160401035610.GA5671@onthe.net.au>
  <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
@@ -11,162 +10,90 @@ References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.p
  <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
  <20160401194912.GA18636@onthe.net.au>
  <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160402040736.GA22721@onthe.net.au>
+ <3E46E6C9-EFD2-49BD-9862-4C46D053A8D6@sandisk.com>
+ <CAJ4mKGaNPfpPbbNY+YVu1NDuVQ-gaS5fi2Pww7DSjsbGt-sbXg@mail.gmail.com>
+ <20160402050505.GA23763@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0065.outbound.protection.outlook.com ([157.56.111.65]:54848
+Received: from mail-bn1bon0091.outbound.protection.outlook.com ([157.56.111.91]:57695
 	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751002AbcDBFi0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Apr 2016 01:38:26 -0400
-In-Reply-To: <20160402040736.GA22721@onthe.net.au>
+	id S1751002AbcDBFsH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 2 Apr 2016 01:48:07 -0400
+In-Reply-To: <20160402050505.GA23763@onthe.net.au>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>
+To: Chris Dunlop <chris@onthe.net.au>, Gregory Farnum <gfarnum@redhat.com>
 Cc: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-> -----Original Message-----
-> From: Chris Dunlop [mailto:chris@onthe.net.au]
-> Sent: Friday, April 01, 2016 9:08 PM
-> To: Allen Samuels <Allen.Samuels@sandisk.com>
-> Cc: Sage Weil <sage@newdream.net>; Igor Fedotov
-> <ifedotov@mirantis.com>; ceph-devel <ceph-devel@vger.kernel.org>
-> Subject: Re: Adding compression/checksum support for bluestore.
-> 
-> On Fri, Apr 01, 2016 at 11:08:35PM +0000, Allen Samuels wrote:
-> >> -----Original Message-----
-> >> From: Chris Dunlop [mailto:chris@onthe.net.au]
-> >> Sent: Friday, April 01, 2016 12:49 PM
-> >> To: Sage Weil <sage@newdream.net>
-> >> Cc: Allen Samuels <Allen.Samuels@sandisk.com>; Igor Fedotov
-> >> <ifedotov@mirantis.com>; ceph-devel <ceph-devel@vger.kernel.org>
-> >> Subject: Re: Adding compression/checksum support for bluestore.
-> >>
-> >> On Fri, Apr 01, 2016 at 10:58:17AM -0400, Sage Weil wrote:
-> >>> On Fri, 1 Apr 2016, Chris Dunlop wrote:
-> >>>> On Fri, Apr 01, 2016 at 12:56:48AM -0400, Sage Weil wrote:
-> >>>>> On Fri, 1 Apr 2016, Chris Dunlop wrote:
-> >>>>>> On Wed, Mar 30, 2016 at 10:52:37PM +0000, Allen Samuels wrote:
-> >>>>>>> One thing to also factor in is that if you increase the span of
-> >>>>>>> a checksum, you degrade the quality of the checksum. So if you
-> >>>>>>> go with 128K chunks of data you'll likely want to increase the
-> >>>>>>> checksum itself from something beyond a CRC-32. Maybe
-> somebody
-> >>>>>>> out there has a good way of describing this quanitatively.
-> >>>>>>
-> >>>>>> I would have thought the "quality" of a checksum would be a
-> >>>>>> function of how many bits it is, and how evenly and randomly it's
-> >>>>>> distributed, and unrelated to the amount of data being
-> checksummed.
-> >>>>>>
-> >>>>>> I.e. if you have any amount of data covered by an N-bit evenly
-> >>>>>> randomly distributed checksum, and "something" goes wrong with
-> >>>>>> the data (or the checksum), the chance of the checksum still
-> >>>>>> matching the data is 1 in 2^n.
-> >>>>>
-> >>>>> Say there is some bit error rate per bit. If you double the amount
-> >>>>> of data you're checksumming, then you'll see twice as many errors.
-> >>>>> That means that even though your 32-bit checksum is right 2^32-1
-> >>>>> times out of 2^32, you're twice as likely to hit that 1 in 2^32
-> >>>>> chance of getting a correct checksum on wrong data.
-> >>>>
-> >>>> It seems to me, if we're talking about a single block of data
-> >>>> protected by a 32-bit checksum, it doesn't matter how many errors
-> >>>> there are within the block, the chance of a false checksum match is
-> >>>> still only 1 in 2^32.
-> >>>
-> >>> It's not a question of how many errors are in the block, it's a
-> >>> question of whether there are more than 0 errors. If the bit error
-> >>> rate is so low it's 0, our probability of a false positive is 0, no
-> >>> matter how many blocks there are. So for a bit error rate of 10e-15,
-> >>> then it's 10e-15 * 1^-32. But if there are 1000 bits in a block, it
-> >>> becomes 10e-12 * 1^-32.
-> >>>
-> >>> In other words, we're only rolling the checksum dice when there is
-> >>> actually an error, and larger blocks are more likely to have errors.
-> >>> If your blocks were so large you were effectively guaranteed to have
-> >>> an error in every one, then the effective false positive rate would
-> >>> be exactly the checksum false positive rate (2^-32).
-> >>
-> >> Good point, I hadn't thought about it like that. But that's the
-> >> "single block" case. On the other hand, a large storage system is the
-> >> same case as the stream of blocks: for a given storage (stream) size,
-> >> your chance of hitting an error is constant, regardless of the size
-> >> of the individual blocks within the storage. Then, if/when you hit an
-> >> error, the chance of getting a false positive on the checksum is a
-> >> function of the checksum bits and independent of the block size.
-> >
-> > I think we're getting confused about terminology. What matters isn't
-> > "blocks" but the ratio of bits of checksum to bits of data covered by
-> > that checksum. That ratio determines the BER of reading that data and
-> > hence the overall system. If you double the amount of data you need to
-> > add 1 bit of checksum to maintain the same BER.
-> 
-> The "blocks" we're talking about in this context are the data bits covered by
-> the checksum bits. I.e. we're talking about the same thing there.
-> 
-> But perhaps you're correct about confusion of terminology... we're talking
-> about checksums, not error correcting codes, right?
-> 
-> An ECC can fix errors and thus reduce the observable BER, and indeed the
-> more ECC bits you have, the lower the observable BER because a greater
-> range of errors can be fixed.
-> 
-> But checksums no effect on the BER. If you have an error, the checksum tells
-> you (hopefully!) "you have an error".
-> 
-> What I think we're talking about is, if you have an error, the probability of the
-> checksum unfortunately still matching, i.e. a false positive: you think you
-> have good data but it's actually crap. And that's a function of the number of
-> checksum bits, and unrelated to the number of data bits. Taken to extremes,
-> you could have a 5PB data system covered by a single 32 bit checksum, and
-> that's no more or less likely to give you a false positive than a 32 bit checksum
-> on a 4K block, and it doesn't change the BER at all.
-> 
-> That said, if you have to throw away 5PB of data and read it again because of
-> a checksum mismatch, your chances of getting another error during the
-> subsequent 5PB read are obviously much higher than your chances of getting
-> another error during a subsequent 4KB read.
-> 
-> Perhaps this is the effect you're thinking about? However this effect is a
-> function of the block size (== data bits) and is independent of the checksum
-> size.
-
-Here's how I'm thinking about it -- for better or for worse.
-
-The goal of the checksumming system is to be able to complete a read operation and to be able to make a statement about of the odds of the entire read chunk of data being actually correct, i.e., the odds of having zero undetectable uncorrected bit errors for each bit of data in the read operation (UUBER).
-
-A fixed size checksum reduces the odds for the entire operation by a fixed amount (i.e., 2^checksum-size assuming a good checksum algorithm). However, the HW UUBER is a per-bit quotation. Thus as you read more bits the odds of a UUBER go UP by the number of bits that you're reading. If we hold the number of checksum bits constant then this increased HW UUBER is only decreased by a fixed amount, Hence the net UUBER is degraded for larger reads as opposed to smaller reads (again for a fixed-size checksum).
-
-As you point out the odds of a UUBER for a 5PB read are much higher than the odds of a UUBER for a 4K read. My goal is to level that so that ANY read (i.e., EVERY read) has a UUBER that's below a fixed limit.
-
-That's why I believe that you have to design for a specific checksum-bit / data bit ratio.
-
-Does this make sense to you?
-
-
-> 
-> > I started this discussion in reaction to Sage's observation that we
-> > could reduce the checksum storage overhead by checksuming larger
-> > blocks. My point is that this will degrade the BER of system
-> > accordingly. That's neither good nor bad, but it's something that will
-> > matter to people. If you go from a 4K chunk of data with, say a 32-bit
-> > checksum to a 128K chunk of data with the same 32-bit checksum, then
-> > you simply have to accept that the BER is reduced by that ratio (4K /
-> > 128K) OR you have to move to checksum value that has 32 more bits in
-> > it (128K/4K). Whether that's acceptable is a user choice.
-> >
-> > I think it's good to parameterize the checksum algorithms and
-> > checksumming block size. All we need to do is to document the system
-> > level effects, etc., and give people guidance on how to connect these
-> > settings with the magnitude of data under management (which matters)
-> > and the HW UBER (which may vary A LOT from device to device).
-> 
-> I agree it's good to parametrize these aspects to provide people with choice.
-> However I also think it's important that people correctly understand the
-> choices being made.
-> 
-> Chris
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBDaHJpcyBEdW5sb3AgW21haWx0
+bzpjaHJpc0BvbnRoZS5uZXQuYXVdDQo+IFNlbnQ6IEZyaWRheSwgQXByaWwgMDEsIDIwMTYgMTA6
+MDUgUE0NCj4gVG86IEdyZWdvcnkgRmFybnVtIDxnZmFybnVtQHJlZGhhdC5jb20+DQo+IENjOiBB
+bGxlbiBTYW11ZWxzIDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPjsgU2FnZSBXZWlsDQo+IDxz
+YWdlQG5ld2RyZWFtLm5ldD47IElnb3IgRmVkb3RvdiA8aWZlZG90b3ZAbWlyYW50aXMuY29tPjsg
+Y2VwaC0NCj4gZGV2ZWwgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPiBTdWJqZWN0OiBS
+ZTogQWRkaW5nIGNvbXByZXNzaW9uL2NoZWNrc3VtIHN1cHBvcnQgZm9yIGJsdWVzdG9yZS4NCj4g
+DQo+IE9uIEZyaSwgQXByIDAxLCAyMDE2IGF0IDA3OjUxOjA3UE0gLTA3MDAsIEdyZWdvcnkgRmFy
+bnVtIHdyb3RlOg0KPiA+IE9uIEZyaSwgQXByIDEsIDIwMTYgYXQgNzoyMyBQTSwgQWxsZW4gU2Ft
+dWVscw0KPiA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT4gd3JvdGU6DQo+ID4+IFRhbGsgYWJv
+dXQgbWVudGFsIGZhaWx1cmVzLiBUaGUgZmlyc3Qgc3RhdGVtZW50IGlzIGNvcnJlY3QuIEl0J3Mg
+YWJvdXQgdGhlDQo+IHJhdGlvIG9mIGNoZWNrc3VtIHRvIGRhdGEgYml0cy4gQWZ0ZXIgdGhhdCBw
+bGVhc2UgaWdub3JlLiBJZiB5b3UgZG91YmxlIHRoZQ0KPiBkYXRhIHlvdSBuZWVkIHRvIGRvdWJs
+ZSB0aGUgY2hlY2tzdW0gYml0IHRvIG1haW50YWluIHRoZSBiZXIuDQo+ID4NCj4gPiBGb3JnaXZl
+IG1lIGlmIEknbSB3cm9uZyBoZXJlIOKAlCBJIGhhdmVuJ3QgZG9uZSBhbnl0aGluZyB3aXRoDQo+
+ID4gY2hlY2tzdW1taW5nIHNpbmNlIEkgZ3JhZHVhdGVkIGNvbGxlZ2Ug4oCUIGJ1dCBnb29kIGNo
+ZWNrc3VtbWluZyBpcw0KPiA+IGFib3V0IHByb2JhYmlsaXRpZXMgYW5kIHBlb3BsZSBzdWNrIGF0
+IGV2YWx1YXRpbmcgcHJvYmFiaWxpdHk6IEknbQ0KPiA+IHJlYWxseSBub3Qgc3VyZSBhbnkgb2Yg
+dGhlIGV4cGxhbmF0aW9ucyBnaXZlbiBpbiB0aGlzIHRocmVhZCBhcmUNCj4gPiByaWdodC4gQml0
+IGVycm9ycyBhcmVuJ3QgcmFuZG9tIGFuZCBpbiBnZW5lcmFsIGl0IHJlcXVpcmVzIGEgbG90IG1v
+cmUNCj4gPiB0aGFuIG9uZSBiaXQgZmxpcCB0byBjb2xsaWRlIGEgY2hlY2tzdW0sIHNvIEkgZG9u
+J3QgdGhpbmsgaXQncyBhDQo+ID4gbGluZWFyIHJlbGF0aW9uc2hpcCBiZXR3ZWVuIGJsb2NrIHNp
+emUgYW5kIGNoYW5jZSBvZiBlcnJvci4gRmluZGluZw0KPiANCj4gQSBzaW5nbGUgYml0IGZsaXAg
+Y2FuIGNlcnRhaW5seSByZXN1bHQgaW4gYSBjaGVja3N1bSBjb2xsaXNpb24sIHdpdGggdGhlIHNh
+bWUNCj4gY2hhbmNlIGFzIGFueSBvdGhlciBlcnJvciwgaS5lLiAxIGluIDJebnVtYmVyX29mX2No
+ZWNrc3VtX2JpdHMuDQo+IA0KPiBKdXN0IHRvIGNsYXJpZnk6IHRoZSBjaGFuY2Ugb2YgZW5jb3Vu
+dGVyaW5nIGFuIGVycm9yIGlzIGxpbmVhciB3aXRoIHRoZSBibG9jaw0KPiBzaXplLiBJJ20gY29u
+dGVuZGluZyB0aGUgY2hhbmNlIG9mIGVuY291bnRlcmluZyBhIGNoZWNrc3VtIGNvbGxpc2lvbiBh
+cyBhDQo+IHJlc3VsdCBvZiBlbmNvdW50ZXJpbmcgb25lIG9yIG1vcmUgZXJyb3JzIGlzIGluZGVw
+ZW5kZW50IG9mIHRoZSBibG9jayBzaXplLg0KPiANCj4gPiBjb2xsaXNpb25zIHdpdGggY3J5cHRv
+Z3JhcGhpYyBoYXNoZXMgaXMgaGFyZCEgR3JhbnRlZCBhIENSQyBpcyBhIGxvdA0KPiA+IHNpbXBs
+ZXIgdGhhbiBTSEExIG9yIHdoYXRldmVyLCBidXQgd2UgYWxzbyBhcmVuJ3QgZmFjaW5nIGFkdmVy
+c2FyaWVzDQo+ID4gd2l0aCBpdCwganVzdCByYW5kb20gY29ycnVwdGlvbi4gU28geWVzLCBhcyB5
+b3VyIGRhdGEgYmxvY2sgaW5jcmVhc2VzDQo+ID4gdGhlbiBuYXR1cmFsbHkgdGhlIG51bWJlciBv
+ZiBwb3NzaWJsZSBiaXQgcGF0dGVybnMgd2hpY2ggbWF0Y2ggdGhlDQo+ID4gc2FtZSBDUkMgaGF2
+ZSB0byBpbmNyZWFzZSDigJQgYnV0IHRoYXQgZG9lc24ndCBtZWFuIHlvdXIgb2RkcyBvZg0KPiA+
+IGFjdHVhbGx5ICpnZXR0aW5nKiB0aGF0IGJpdCBwYXR0ZXJuIGJ5IG1pc3Rha2UgaW5jcmVhc2Ug
+bGluZWFybHkuDQo+IA0KPiBBIChnb29kKSBjaGVja3N1bSBpcyBsaWtlIHJvbGxpbmcgYSAyXiJu
+dW1iZXIgb2YgYml0cyBpbiB0aGUgY2hlY2tzdW0iLXNpZGVkDQo+IGRpY2UgYWNyb3NzIGFuIHJv
+dWdoIHRhYmxlLCBpbiBhbiBpZGVhbCB3b3JsZCB3aGVyZSBldmVyeSBzaW5nbGUgcGFyYW1ldGVy
+IGlzDQo+IGtub3duLiBJZiB5b3UgbGF1bmNoIHlvdXIgZGljZSBpbiBwcmVjaXNlbHkgdGhlIHNh
+bWUgd2F5LCB0aGUgZGljZSB3aWxsDQo+IGJlaGF2ZSBleGFjdGx5IHRoZSBzYW1lIHdheSwgaGl0
+dGluZyB0aGUgc2FtZSBoaWxscyBhbmQgdmFsbGV5cyBpbiB0aGUgdGFibGUsDQo+IGFuZCBlbmQg
+dXAgaW4gcHJlY2lzZWx5IHRoZSBzYW1lIHNwb3Qgd2l0aCBwcmVjaXNlbHkgdGhlIHNhbWUgZmFj
+ZSBvbiB0b3AgLQ0KPiB5b3VyIGNoZWNrc3VtLiBUaGUgbnVtYmVyIG9mIGRhdGEgYml0cyBpcyBo
+b3cgaGFyZCB5b3Ugcm9sbCB0aGUgZGljZToNCj4gaG93IGZhciBpdCBnb2VzIGFuZCBtYW55IGhp
+bGxzIGFuZCB2YWxsZXlzIGl0IGhpdHMgYWxvbmcgdGhlIHdheS4NCj4gDQo+IE9uZSBvciBtb3Jl
+IGRhdGEgZXJyb3JzIChiaXQgZmxpcHMgb3Igd2hhdGV2ZXIpIGlzIHRoZW4gZXF1aXZhbGVudCB0
+byBjaGFuZ2luZw0KPiBvbmUgb3IgbW9yZSBvZiB0aGUgaGlsbHMgb3IgdmFsbGV5czogYSB2ZXJ5
+IHNtYWxsIGRpZmZlcmVuY2UsIGJ1dCBlbmNvdW50ZXJpbmcNCj4gdGhlIGRpZmZlcmVuY2UgcHV0
+cyB0aGUgZGljZSBvbiBhIGNvbXBsZXRlbHkgZGlmZmVyZW50IHBhdGgsIHRoZXJlYWZ0ZXINCj4g
+aGl0dGluZyBjb21wbGV0ZWx5IGRpZmZlcmVudCBoaWxscyBhbmQgdmFsbGV5cyB0byB0aGUgb3Jp
+Z2luYWwgcGF0aC4gQW5kIHdoaWNoDQo+IGZhY2UgaXMgb24gdG9wIHdoZW4geW91ciBkaWNlIHN0
+b3BzIGlzIGEgbWF0dGVyIG9mIGNoYW5jZSAod2VsbC4uLiBub3QgcmVhbGx5OiBpZg0KPiB5b3Ug
+ZGlkIGV4YWN0bHkgdGhlIHNhbWUgYWdhaW4sIGl0IHdvdWxkIGVuZCB1cCB0YWtpbmcgcHJlY2lz
+ZWx5IHRoZSBzYW1lDQo+IHBhdGggYW5kIHRoZSBzYW1lIGZhY2Ugd291bGQgYmUgb24gdG9wIHdo
+ZW4gaXQgc3RvcHMpLg0KPiANCj4gVGhlIHRoaW5nIGlzLCBpdCBkb2Vzbid0IG1hdHRlciBob3cg
+bWFueSBoaWxscyBhbmQgdmFsbGV5cyAoZGF0YSBiaXRzKSBpdCBoaXRzDQo+IGFsb25nIHRoZSB3
+YXk6IHRoZSBjaGFuY2Ugb2YgZ2V0dGluZyBhIHNwZWNpZmljIGZhY2UgdXAgaXMgYWx3YXlzIHRo
+ZSBzYW1lLCBpLmUuDQo+IDEgLyBudW1iZXJfb2ZfZmFjZXMgPT0gMSAvIDJebnVtYmVyX29mX2No
+ZWNrc3VtX2JpdHMuDQo+IA0KPiBDaHJpcw0KDQpJIHRoaW5rIHlvdSdyZSBkZWZpbmluZyBCRVIg
+YXMgdGhlIG9kZHMgb2YgYSByZWFkIG9wZXJhdGlvbiBzaWxlbnRseSBkZWxpdmVyaW5nIHdyb25n
+IGRhdGEuIFdoZXJlYXMgSSdtIGRlZmluaW5nIEJFUiBhcyB0aGUgb2RkcyBvZiBhbiBpbmRpdmlk
+dWFsIGJpdCBiZWluZyByZWFkIGluY29ycmVjdGx5LiBXaGVuIHdlIGhhdmUgYSBmYWxzZSBwb3Np
+dGl2ZSB5b3UgY291bnQgIjEiIGZhaWx1cmUgYnV0IEkgY291bnQgIkJsb2NrIiBudW1iZXIgb2Yg
+ZmFpbHVyZXMuDQoNCkknbSBub3QgY2xhaW1pbmcgdGhhdCBlaXRoZXIgb2YgdXMgaXMgImNvcnJl
+Y3QiLiBJJ20ganVzdCB0cnlpbmcgdW5kZXJzdGFuZCBvdXIgcG9zaXRpb25zLiANCg0KRG8geW91
+IGFncmVlIHdpdGggdGhpcz8NCg0KIA0K
