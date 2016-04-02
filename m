@@ -1,99 +1,72 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: Adding compression/checksum support for bluestore.
-Date: Sat, 2 Apr 2016 05:48:01 +0000
-Message-ID: <CY1PR0201MB1897ECA95E25B14210CA047FE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
-References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
- <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160401035610.GA5671@onthe.net.au>
- <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
- <20160401052838.GA8044@onthe.net.au>
- <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
- <20160401194912.GA18636@onthe.net.au>
- <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <3E46E6C9-EFD2-49BD-9862-4C46D053A8D6@sandisk.com>
- <CAJ4mKGaNPfpPbbNY+YVu1NDuVQ-gaS5fi2Pww7DSjsbGt-sbXg@mail.gmail.com>
- <20160402050505.GA23763@onthe.net.au>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: ceph-disk improvements
+Date: Sat, 2 Apr 2016 07:54:05 +0200 (CEST)
+Message-ID: <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0091.outbound.protection.outlook.com ([157.56.111.91]:57695
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751002AbcDBFsH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 2 Apr 2016 01:48:07 -0400
-In-Reply-To: <20160402050505.GA23763@onthe.net.au>
-Content-Language: en-US
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:36294 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751227AbcDBFyJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Apr 2016 01:54:09 -0400
+In-Reply-To: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>, Gregory Farnum <gfarnum@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBDaHJpcyBEdW5sb3AgW21haWx0
-bzpjaHJpc0BvbnRoZS5uZXQuYXVdDQo+IFNlbnQ6IEZyaWRheSwgQXByaWwgMDEsIDIwMTYgMTA6
-MDUgUE0NCj4gVG86IEdyZWdvcnkgRmFybnVtIDxnZmFybnVtQHJlZGhhdC5jb20+DQo+IENjOiBB
-bGxlbiBTYW11ZWxzIDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPjsgU2FnZSBXZWlsDQo+IDxz
-YWdlQG5ld2RyZWFtLm5ldD47IElnb3IgRmVkb3RvdiA8aWZlZG90b3ZAbWlyYW50aXMuY29tPjsg
-Y2VwaC0NCj4gZGV2ZWwgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPiBTdWJqZWN0OiBS
-ZTogQWRkaW5nIGNvbXByZXNzaW9uL2NoZWNrc3VtIHN1cHBvcnQgZm9yIGJsdWVzdG9yZS4NCj4g
-DQo+IE9uIEZyaSwgQXByIDAxLCAyMDE2IGF0IDA3OjUxOjA3UE0gLTA3MDAsIEdyZWdvcnkgRmFy
-bnVtIHdyb3RlOg0KPiA+IE9uIEZyaSwgQXByIDEsIDIwMTYgYXQgNzoyMyBQTSwgQWxsZW4gU2Ft
-dWVscw0KPiA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT4gd3JvdGU6DQo+ID4+IFRhbGsgYWJv
-dXQgbWVudGFsIGZhaWx1cmVzLiBUaGUgZmlyc3Qgc3RhdGVtZW50IGlzIGNvcnJlY3QuIEl0J3Mg
-YWJvdXQgdGhlDQo+IHJhdGlvIG9mIGNoZWNrc3VtIHRvIGRhdGEgYml0cy4gQWZ0ZXIgdGhhdCBw
-bGVhc2UgaWdub3JlLiBJZiB5b3UgZG91YmxlIHRoZQ0KPiBkYXRhIHlvdSBuZWVkIHRvIGRvdWJs
-ZSB0aGUgY2hlY2tzdW0gYml0IHRvIG1haW50YWluIHRoZSBiZXIuDQo+ID4NCj4gPiBGb3JnaXZl
-IG1lIGlmIEknbSB3cm9uZyBoZXJlIOKAlCBJIGhhdmVuJ3QgZG9uZSBhbnl0aGluZyB3aXRoDQo+
-ID4gY2hlY2tzdW1taW5nIHNpbmNlIEkgZ3JhZHVhdGVkIGNvbGxlZ2Ug4oCUIGJ1dCBnb29kIGNo
-ZWNrc3VtbWluZyBpcw0KPiA+IGFib3V0IHByb2JhYmlsaXRpZXMgYW5kIHBlb3BsZSBzdWNrIGF0
-IGV2YWx1YXRpbmcgcHJvYmFiaWxpdHk6IEknbQ0KPiA+IHJlYWxseSBub3Qgc3VyZSBhbnkgb2Yg
-dGhlIGV4cGxhbmF0aW9ucyBnaXZlbiBpbiB0aGlzIHRocmVhZCBhcmUNCj4gPiByaWdodC4gQml0
-IGVycm9ycyBhcmVuJ3QgcmFuZG9tIGFuZCBpbiBnZW5lcmFsIGl0IHJlcXVpcmVzIGEgbG90IG1v
-cmUNCj4gPiB0aGFuIG9uZSBiaXQgZmxpcCB0byBjb2xsaWRlIGEgY2hlY2tzdW0sIHNvIEkgZG9u
-J3QgdGhpbmsgaXQncyBhDQo+ID4gbGluZWFyIHJlbGF0aW9uc2hpcCBiZXR3ZWVuIGJsb2NrIHNp
-emUgYW5kIGNoYW5jZSBvZiBlcnJvci4gRmluZGluZw0KPiANCj4gQSBzaW5nbGUgYml0IGZsaXAg
-Y2FuIGNlcnRhaW5seSByZXN1bHQgaW4gYSBjaGVja3N1bSBjb2xsaXNpb24sIHdpdGggdGhlIHNh
-bWUNCj4gY2hhbmNlIGFzIGFueSBvdGhlciBlcnJvciwgaS5lLiAxIGluIDJebnVtYmVyX29mX2No
-ZWNrc3VtX2JpdHMuDQo+IA0KPiBKdXN0IHRvIGNsYXJpZnk6IHRoZSBjaGFuY2Ugb2YgZW5jb3Vu
-dGVyaW5nIGFuIGVycm9yIGlzIGxpbmVhciB3aXRoIHRoZSBibG9jaw0KPiBzaXplLiBJJ20gY29u
-dGVuZGluZyB0aGUgY2hhbmNlIG9mIGVuY291bnRlcmluZyBhIGNoZWNrc3VtIGNvbGxpc2lvbiBh
-cyBhDQo+IHJlc3VsdCBvZiBlbmNvdW50ZXJpbmcgb25lIG9yIG1vcmUgZXJyb3JzIGlzIGluZGVw
-ZW5kZW50IG9mIHRoZSBibG9jayBzaXplLg0KPiANCj4gPiBjb2xsaXNpb25zIHdpdGggY3J5cHRv
-Z3JhcGhpYyBoYXNoZXMgaXMgaGFyZCEgR3JhbnRlZCBhIENSQyBpcyBhIGxvdA0KPiA+IHNpbXBs
-ZXIgdGhhbiBTSEExIG9yIHdoYXRldmVyLCBidXQgd2UgYWxzbyBhcmVuJ3QgZmFjaW5nIGFkdmVy
-c2FyaWVzDQo+ID4gd2l0aCBpdCwganVzdCByYW5kb20gY29ycnVwdGlvbi4gU28geWVzLCBhcyB5
-b3VyIGRhdGEgYmxvY2sgaW5jcmVhc2VzDQo+ID4gdGhlbiBuYXR1cmFsbHkgdGhlIG51bWJlciBv
-ZiBwb3NzaWJsZSBiaXQgcGF0dGVybnMgd2hpY2ggbWF0Y2ggdGhlDQo+ID4gc2FtZSBDUkMgaGF2
-ZSB0byBpbmNyZWFzZSDigJQgYnV0IHRoYXQgZG9lc24ndCBtZWFuIHlvdXIgb2RkcyBvZg0KPiA+
-IGFjdHVhbGx5ICpnZXR0aW5nKiB0aGF0IGJpdCBwYXR0ZXJuIGJ5IG1pc3Rha2UgaW5jcmVhc2Ug
-bGluZWFybHkuDQo+IA0KPiBBIChnb29kKSBjaGVja3N1bSBpcyBsaWtlIHJvbGxpbmcgYSAyXiJu
-dW1iZXIgb2YgYml0cyBpbiB0aGUgY2hlY2tzdW0iLXNpZGVkDQo+IGRpY2UgYWNyb3NzIGFuIHJv
-dWdoIHRhYmxlLCBpbiBhbiBpZGVhbCB3b3JsZCB3aGVyZSBldmVyeSBzaW5nbGUgcGFyYW1ldGVy
-IGlzDQo+IGtub3duLiBJZiB5b3UgbGF1bmNoIHlvdXIgZGljZSBpbiBwcmVjaXNlbHkgdGhlIHNh
-bWUgd2F5LCB0aGUgZGljZSB3aWxsDQo+IGJlaGF2ZSBleGFjdGx5IHRoZSBzYW1lIHdheSwgaGl0
-dGluZyB0aGUgc2FtZSBoaWxscyBhbmQgdmFsbGV5cyBpbiB0aGUgdGFibGUsDQo+IGFuZCBlbmQg
-dXAgaW4gcHJlY2lzZWx5IHRoZSBzYW1lIHNwb3Qgd2l0aCBwcmVjaXNlbHkgdGhlIHNhbWUgZmFj
-ZSBvbiB0b3AgLQ0KPiB5b3VyIGNoZWNrc3VtLiBUaGUgbnVtYmVyIG9mIGRhdGEgYml0cyBpcyBo
-b3cgaGFyZCB5b3Ugcm9sbCB0aGUgZGljZToNCj4gaG93IGZhciBpdCBnb2VzIGFuZCBtYW55IGhp
-bGxzIGFuZCB2YWxsZXlzIGl0IGhpdHMgYWxvbmcgdGhlIHdheS4NCj4gDQo+IE9uZSBvciBtb3Jl
-IGRhdGEgZXJyb3JzIChiaXQgZmxpcHMgb3Igd2hhdGV2ZXIpIGlzIHRoZW4gZXF1aXZhbGVudCB0
-byBjaGFuZ2luZw0KPiBvbmUgb3IgbW9yZSBvZiB0aGUgaGlsbHMgb3IgdmFsbGV5czogYSB2ZXJ5
-IHNtYWxsIGRpZmZlcmVuY2UsIGJ1dCBlbmNvdW50ZXJpbmcNCj4gdGhlIGRpZmZlcmVuY2UgcHV0
-cyB0aGUgZGljZSBvbiBhIGNvbXBsZXRlbHkgZGlmZmVyZW50IHBhdGgsIHRoZXJlYWZ0ZXINCj4g
-aGl0dGluZyBjb21wbGV0ZWx5IGRpZmZlcmVudCBoaWxscyBhbmQgdmFsbGV5cyB0byB0aGUgb3Jp
-Z2luYWwgcGF0aC4gQW5kIHdoaWNoDQo+IGZhY2UgaXMgb24gdG9wIHdoZW4geW91ciBkaWNlIHN0
-b3BzIGlzIGEgbWF0dGVyIG9mIGNoYW5jZSAod2VsbC4uLiBub3QgcmVhbGx5OiBpZg0KPiB5b3Ug
-ZGlkIGV4YWN0bHkgdGhlIHNhbWUgYWdhaW4sIGl0IHdvdWxkIGVuZCB1cCB0YWtpbmcgcHJlY2lz
-ZWx5IHRoZSBzYW1lDQo+IHBhdGggYW5kIHRoZSBzYW1lIGZhY2Ugd291bGQgYmUgb24gdG9wIHdo
-ZW4gaXQgc3RvcHMpLg0KPiANCj4gVGhlIHRoaW5nIGlzLCBpdCBkb2Vzbid0IG1hdHRlciBob3cg
-bWFueSBoaWxscyBhbmQgdmFsbGV5cyAoZGF0YSBiaXRzKSBpdCBoaXRzDQo+IGFsb25nIHRoZSB3
-YXk6IHRoZSBjaGFuY2Ugb2YgZ2V0dGluZyBhIHNwZWNpZmljIGZhY2UgdXAgaXMgYWx3YXlzIHRo
-ZSBzYW1lLCBpLmUuDQo+IDEgLyBudW1iZXJfb2ZfZmFjZXMgPT0gMSAvIDJebnVtYmVyX29mX2No
-ZWNrc3VtX2JpdHMuDQo+IA0KPiBDaHJpcw0KDQpJIHRoaW5rIHlvdSdyZSBkZWZpbmluZyBCRVIg
-YXMgdGhlIG9kZHMgb2YgYSByZWFkIG9wZXJhdGlvbiBzaWxlbnRseSBkZWxpdmVyaW5nIHdyb25n
-IGRhdGEuIFdoZXJlYXMgSSdtIGRlZmluaW5nIEJFUiBhcyB0aGUgb2RkcyBvZiBhbiBpbmRpdmlk
-dWFsIGJpdCBiZWluZyByZWFkIGluY29ycmVjdGx5LiBXaGVuIHdlIGhhdmUgYSBmYWxzZSBwb3Np
-dGl2ZSB5b3UgY291bnQgIjEiIGZhaWx1cmUgYnV0IEkgY291bnQgIkJsb2NrIiBudW1iZXIgb2Yg
-ZmFpbHVyZXMuDQoNCkknbSBub3QgY2xhaW1pbmcgdGhhdCBlaXRoZXIgb2YgdXMgaXMgImNvcnJl
-Y3QiLiBJJ20ganVzdCB0cnlpbmcgdW5kZXJzdGFuZCBvdXIgcG9zaXRpb25zLiANCg0KRG8geW91
-IGFncmVlIHdpdGggdGhpcz8NCg0KIA0K
+
+> Op 1 april 2016 om 17:36 schreef Sage Weil <sweil@redhat.com>:
+> 
+> 
+> Hi all,
+> 
+> There are a couple of looming features for ceph-disk:
+> 
+> 1- Support for additional devices when using BlueStore.  There can be up 
+> to three: the main device, a WAL/journal device (small, ~128MB, ideally 
+> NVRAM), and a fast metadata device (as big as you have available; will be 
+> used for internal metadata).
+> 
+> 2- Support for setting up dm-cache, bcache, and/or FlashCache underneath 
+> filestore or bluestore.
+> 
+
+Keep in mind that you can't create a partition on a bcache device. So when using
+bcache, the journal has to be filebased and not a partition.
+
+If we add the flag --file-based-journal or --no-partitions we can create OSDs on
+both bcache and dm-cache.
+
+With BlueStore this becomes a problem since it requires the small (XFS)
+filesystem for it's metadata.
+
+Wido
+
+> The current syntax of
+> 
+>  ceph-disk prepare [--dmcrypt] [--bluestore] DATADEV [JOURNALDEV]
+> 
+> isn't terribly expressive.  For example, the journal device size is set 
+> via a config option, not on the command line.  For bluestore, the metadata 
+> device will probably want/need explicit user input so they can ensure it's 
+> 1/Nth of their SSD (if they have N HDDs to each SSD).
+> 
+> And if we put dmcache in there, that partition will need to be sized too.
+> 
+> Another consideration is that right now we don't play nice with LVM at 
+> all.  Should we?  dm-cache is usually used in conjunction with LVM 
+> (although it doesn't have to be).  Does LVM provide value?  Like, the 
+> ability for users to add a second SSD to a box and migrate cache, wal, or 
+> journal partitions around?
+> 
+> I'm interested in hearing feedback on requirements, approaches, and 
+> interfaces before we go too far down the road...
+> 
+> Thanks!
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
