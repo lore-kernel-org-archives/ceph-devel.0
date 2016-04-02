@@ -1,9 +1,8 @@
 From: Chris Dunlop <chris@onthe.net.au>
 Subject: Re: Adding compression/checksum support for bluestore.
-Date: Sat, 2 Apr 2016 15:07:37 +1100
-Message-ID: <20160402040736.GA22721@onthe.net.au>
-References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
+Date: Sat, 2 Apr 2016 16:05:05 +1100
+Message-ID: <20160402050505.GA23763@onthe.net.au>
+References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
  <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
  <20160401035610.GA5671@onthe.net.au>
  <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
@@ -11,135 +10,95 @@ References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.p
  <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
  <20160401194912.GA18636@onthe.net.au>
  <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <3E46E6C9-EFD2-49BD-9862-4C46D053A8D6@sandisk.com>
+ <CAJ4mKGaNPfpPbbNY+YVu1NDuVQ-gaS5fi2Pww7DSjsbGt-sbXg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:33565 "EHLO
+Received: from smtp1.onthe.net.au ([203.22.196.249]:37477 "EHLO
 	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750715AbcDBEHm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Apr 2016 00:07:42 -0400
+	with ESMTP id S1750887AbcDBFFJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Apr 2016 01:05:09 -0400
 Content-Disposition: inline
-In-Reply-To: <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+In-Reply-To: <CAJ4mKGaNPfpPbbNY+YVu1NDuVQ-gaS5fi2Pww7DSjsbGt-sbXg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Apr 01, 2016 at 11:08:35PM +0000, Allen Samuels wrote:
->> -----Original Message-----
->> From: Chris Dunlop [mailto:chris@onthe.net.au]
->> Sent: Friday, April 01, 2016 12:49 PM
->> To: Sage Weil <sage@newdream.net>
->> Cc: Allen Samuels <Allen.Samuels@sandisk.com>; Igor Fedotov
->> <ifedotov@mirantis.com>; ceph-devel <ceph-devel@vger.kernel.org>
->> Subject: Re: Adding compression/checksum support for bluestore.
->> 
->> On Fri, Apr 01, 2016 at 10:58:17AM -0400, Sage Weil wrote:
->>> On Fri, 1 Apr 2016, Chris Dunlop wrote:
->>>> On Fri, Apr 01, 2016 at 12:56:48AM -0400, Sage Weil wrote:
->>>>> On Fri, 1 Apr 2016, Chris Dunlop wrote:
->>>>>> On Wed, Mar 30, 2016 at 10:52:37PM +0000, Allen Samuels wrote:
->>>>>>> One thing to also factor in is that if you increase the span of a
->>>>>>> checksum, you degrade the quality of the checksum. So if you go with
->>>>>>> 128K chunks of data you'll likely want to increase the checksum
->>>>>>> itself from something beyond a CRC-32. Maybe somebody out there has
->>>>>>> a good way of describing this quanitatively.
->>>>>>
->>>>>> I would have thought the "quality" of a checksum would be a function
->>>>>> of how many bits it is, and how evenly and randomly it's distributed,
->>>>>> and unrelated to the amount of data being checksummed.
->>>>>>
->>>>>> I.e. if you have any amount of data covered by an N-bit evenly
->>>>>> randomly distributed checksum, and "something" goes wrong with the
->>>>>> data (or the checksum), the chance of the checksum still matching the
->>>>>> data is 1 in 2^n.
->>>>>
->>>>> Say there is some bit error rate per bit. If you double the amount of
->>>>> data you're checksumming, then you'll see twice as many errors. That
->>>>> means that even though your 32-bit checksum is right 2^32-1 times out
->>>>> of 2^32, you're twice as likely to hit that 1 in 2^32 chance of
->>>>> getting a correct checksum on wrong data.
->>>>
->>>> It seems to me, if we're talking about a single block of data protected
->>>> by a 32-bit checksum, it doesn't matter how many errors there are
->>>> within the block, the chance of a false checksum match is still
->>>> only 1 in 2^32.
->>>
->>> It's not a question of how many errors are in the block, it's a question
->>> of whether there are more than 0 errors. If the bit error rate is so
->>> low it's 0, our probability of a false positive is 0, no matter how many
->>> blocks there are. So for a bit error rate of 10e-15, then it's 10e-15 *
->>> 1^-32. But if there are 1000 bits in a block, it becomes 10e-12 *
->>> 1^-32.
->>>
->>> In other words, we're only rolling the checksum dice when there is
->>> actually an error, and larger blocks are more likely to have errors. If
->>> your blocks were so large you were effectively guaranteed to have an
->>> error in every one, then the effective false positive rate would be
->>> exactly the checksum false positive rate (2^-32).
->> 
->> Good point, I hadn't thought about it like that. But that's the "single
->> block" case. On the other hand, a large storage system is the same case
->> as the stream of blocks: for a given storage (stream) size, your chance
->> of hitting an error is constant, regardless of the size of the individual
->> blocks within the storage. Then, if/when you hit an error, the chance of
->> getting a false positive on the checksum is a function of the checksum
->> bits and independent of the block size.
-> 
-> I think we're getting confused about terminology. What matters isn't
-> "blocks" but the ratio of bits of checksum to bits of data covered by that
-> checksum. That ratio determines the BER of reading that data and hence the
-> overall system. If you double the amount of data you need to add 1 bit of
-> checksum to maintain the same BER.
+On Fri, Apr 01, 2016 at 07:51:07PM -0700, Gregory Farnum wrote:
+> On Fri, Apr 1, 2016 at 7:23 PM, Allen Samuels <Allen.Samuels@sandisk.=
+com> wrote:
+>> Talk about mental failures. The first statement is correct. It's abo=
+ut the ratio of checksum to data bits. After that please ignore. If you=
+ double the data you need to double the checksum bit to maintain the be=
+r.
+>=20
+> Forgive me if I'm wrong here =E2=80=94 I haven't done anything with
+> checksumming since I graduated college =E2=80=94 but good checksummin=
+g is
+> about probabilities and people suck at evaluating probability: I'm
+> really not sure any of the explanations given in this thread are
+> right. Bit errors aren't random and in general it requires a lot more
+> than one bit flip to collide a checksum, so I don't think it's a
+> linear relationship between block size and chance of error. Finding
 
-The "blocks" we're talking about in this context are the data bits covered
-by the checksum bits. I.e. we're talking about the same thing there.
+A single bit flip can certainly result in a checksum collision, with th=
+e
+same chance as any other error, i.e. 1 in 2^number_of_checksum_bits.
 
-But perhaps you're correct about confusion of terminology... we're talking
-about checksums, not error correcting codes, right?
-
-An ECC can fix errors and thus reduce the observable BER, and indeed the
-more ECC bits you have, the lower the observable BER because a greater range
-of errors can be fixed.
-
-But checksums no effect on the BER. If you have an error, the checksum tells
-you (hopefully!) "you have an error".
-
-What I think we're talking about is, if you have an error, the probability
-of the checksum unfortunately still matching, i.e. a false positive: you
-think you have good data but it's actually crap. And that's a function of
-the number of checksum bits, and unrelated to the number of data bits. Taken
-to extremes, you could have a 5PB data system covered by a single 32 bit
-checksum, and that's no more or less likely to give you a false positive
-than a 32 bit checksum on a 4K block, and it doesn't change the BER at all.
-
-That said, if you have to throw away 5PB of data and read it again because
-of a checksum mismatch, your chances of getting another error during the
-subsequent 5PB read are obviously much higher than your chances of getting
-another error during a subsequent 4KB read.
-
-Perhaps this is the effect you're thinking about? However this effect is a
-function of the block size (== data bits) and is independent of the checksum
+Just to clarify: the chance of encountering an error is linear with the
+block size. I'm contending the chance of encountering a checksum collis=
+ion
+as a result of encountering one or more errors is independent of the bl=
+ock
 size.
 
-> I started this discussion in reaction to Sage's observation that we could
-> reduce the checksum storage overhead by checksuming larger blocks. My
-> point is that this will degrade the BER of system accordingly. That's
-> neither good nor bad, but it's something that will matter to people. If
-> you go from a 4K chunk of data with, say a 32-bit checksum to a 128K chunk
-> of data with the same 32-bit checksum, then you simply have to accept that
-> the BER is reduced by that ratio (4K / 128K) OR you have to move to
-> checksum value that has 32 more bits in it (128K/4K). Whether that's
-> acceptable is a user choice.
->
-> I think it's good to parameterize the checksum algorithms and checksumming
-> block size. All we need to do is to document the system level effects,
-> etc., and give people guidance on how to connect these settings with the
-> magnitude of data under management (which matters) and the HW UBER (which
-> may vary A LOT from device to device).
+> collisions with cryptographic hashes is hard! Granted a CRC is a lot
+> simpler than SHA1 or whatever, but we also aren't facing adversaries
+> with it, just random corruption. So yes, as your data block increases
+> then naturally the number of possible bit patterns which match the
+> same CRC have to increase =E2=80=94 but that doesn't mean your odds o=
+f
+> actually *getting* that bit pattern by mistake increase linearly.
 
-I agree it's good to parametrize these aspects to provide people with
-choice. However I also think it's important that people correctly understand
-the choices being made. 
+A (good) checksum is like rolling a 2^"number of bits in the checksum"-=
+sided
+dice across an rough table, in an ideal world where every single parame=
+ter
+is known. If you launch your dice in precisely the same way, the dice w=
+ill
+behave exactly the same way, hitting the same hills and valleys in the
+table, and end up in precisely the same spot with precisely the same fa=
+ce on
+top - your checksum. The number of data bits is how hard you roll the d=
+ice:
+how far it goes and many hills and valleys it hits along the way.
+
+One or more data errors (bit flips or whatever) is then equivalent to
+changing one or more of the hills or valleys: a very small difference, =
+but
+encountering the difference puts the dice on a completely different pat=
+h,
+thereafter hitting completely different hills and valleys to the origin=
+al
+path. And which face is on top when your dice stops is a matter of chan=
+ce
+(well... not really: if you did exactly the same again, it would end up
+taking precisely the same path and the same face would be on top when i=
+t
+stops).
+
+The thing is, it doesn't matter how many hills and valleys (data bits) =
+it
+hits along the way: the chance of getting a specific face up is always =
+the
+same, i.e. 1 / number_of_faces =3D=3D 1 / 2^number_of_checksum_bits.
 
 Chris
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
