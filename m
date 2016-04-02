@@ -1,104 +1,90 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Sat, 2 Apr 2016 16:05:05 +1100
-Message-ID: <20160402050505.GA23763@onthe.net.au>
-References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
- <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160401035610.GA5671@onthe.net.au>
- <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
- <20160401052838.GA8044@onthe.net.au>
- <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
- <20160401194912.GA18636@onthe.net.au>
- <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <3E46E6C9-EFD2-49BD-9862-4C46D053A8D6@sandisk.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: Adding compression/checksum support for bluestore.
+Date: Sat, 2 Apr 2016 05:08:50 +0000
+Message-ID: <CY1PR0201MB189755CD944A2D63839068DCE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
+	<alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
+	<CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
+	<20160401035610.GA5671@onthe.net.au>
+	<alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
+	<20160401052838.GA8044@onthe.net.au>
+	<alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
+	<20160401194912.GA18636@onthe.net.au>
+	<CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+	<3E46E6C9-EFD2-49BD-9862-4C46D053A8D6@sandisk.com>
  <CAJ4mKGaNPfpPbbNY+YVu1NDuVQ-gaS5fi2Pww7DSjsbGt-sbXg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:37477 "EHLO
-	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750887AbcDBFFJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Apr 2016 01:05:09 -0400
-Content-Disposition: inline
+Received: from mail-bl2on0063.outbound.protection.outlook.com ([65.55.169.63]:40526
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750887AbcDBFIy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 2 Apr 2016 01:08:54 -0400
 In-Reply-To: <CAJ4mKGaNPfpPbbNY+YVu1NDuVQ-gaS5fi2Pww7DSjsbGt-sbXg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Chris Dunlop <chris@onthe.net.au>, Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Apr 01, 2016 at 07:51:07PM -0700, Gregory Farnum wrote:
-> On Fri, Apr 1, 2016 at 7:23 PM, Allen Samuels <Allen.Samuels@sandisk.=
-com> wrote:
->> Talk about mental failures. The first statement is correct. It's abo=
-ut the ratio of checksum to data bits. After that please ignore. If you=
- double the data you need to double the checksum bit to maintain the be=
-r.
->=20
-> Forgive me if I'm wrong here =E2=80=94 I haven't done anything with
-> checksumming since I graduated college =E2=80=94 but good checksummin=
-g is
-> about probabilities and people suck at evaluating probability: I'm
-> really not sure any of the explanations given in this thread are
-> right. Bit errors aren't random and in general it requires a lot more
-> than one bit flip to collide a checksum, so I don't think it's a
-> linear relationship between block size and chance of error. Finding
-
-A single bit flip can certainly result in a checksum collision, with th=
-e
-same chance as any other error, i.e. 1 in 2^number_of_checksum_bits.
-
-Just to clarify: the chance of encountering an error is linear with the
-block size. I'm contending the chance of encountering a checksum collis=
-ion
-as a result of encountering one or more errors is independent of the bl=
-ock
-size.
-
-> collisions with cryptographic hashes is hard! Granted a CRC is a lot
-> simpler than SHA1 or whatever, but we also aren't facing adversaries
-> with it, just random corruption. So yes, as your data block increases
-> then naturally the number of possible bit patterns which match the
-> same CRC have to increase =E2=80=94 but that doesn't mean your odds o=
-f
-> actually *getting* that bit pattern by mistake increase linearly.
-
-A (good) checksum is like rolling a 2^"number of bits in the checksum"-=
-sided
-dice across an rough table, in an ideal world where every single parame=
-ter
-is known. If you launch your dice in precisely the same way, the dice w=
-ill
-behave exactly the same way, hitting the same hills and valleys in the
-table, and end up in precisely the same spot with precisely the same fa=
-ce on
-top - your checksum. The number of data bits is how hard you roll the d=
-ice:
-how far it goes and many hills and valleys it hits along the way.
-
-One or more data errors (bit flips or whatever) is then equivalent to
-changing one or more of the hills or valleys: a very small difference, =
-but
-encountering the difference puts the dice on a completely different pat=
-h,
-thereafter hitting completely different hills and valleys to the origin=
-al
-path. And which face is on top when your dice stops is a matter of chan=
-ce
-(well... not really: if you did exactly the same again, it would end up
-taking precisely the same path and the same face would be on top when i=
-t
-stops).
-
-The thing is, it doesn't matter how many hills and valleys (data bits) =
-it
-hits along the way: the chance of getting a specific face up is always =
-the
-same, i.e. 1 / number_of_faces =3D=3D 1 / 2^number_of_checksum_bits.
-
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBHcmVnb3J5IEZhcm51bSBbbWFp
+bHRvOmdmYXJudW1AcmVkaGF0LmNvbV0NCj4gU2VudDogRnJpZGF5LCBBcHJpbCAwMSwgMjAxNiA3
+OjUxIFBNDQo+IFRvOiBBbGxlbiBTYW11ZWxzIDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPg0K
+PiBDYzogQ2hyaXMgRHVubG9wIDxjaHJpc0BvbnRoZS5uZXQuYXU+OyBTYWdlIFdlaWwgPHNhZ2VA
+bmV3ZHJlYW0ubmV0PjsNCj4gSWdvciBGZWRvdG92IDxpZmVkb3RvdkBtaXJhbnRpcy5jb20+OyBj
+ZXBoLWRldmVsIDxjZXBoLQ0KPiBkZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQo+IFN1YmplY3Q6IFJl
+OiBBZGRpbmcgY29tcHJlc3Npb24vY2hlY2tzdW0gc3VwcG9ydCBmb3IgYmx1ZXN0b3JlLg0KPiAN
+Cj4gT24gRnJpLCBBcHIgMSwgMjAxNiBhdCA3OjIzIFBNLCBBbGxlbiBTYW11ZWxzIDxBbGxlbi5T
+YW11ZWxzQHNhbmRpc2suY29tPg0KPiB3cm90ZToNCj4gPiBUYWxrIGFib3V0IG1lbnRhbCBmYWls
+dXJlcy4gVGhlIGZpcnN0IHN0YXRlbWVudCBpcyBjb3JyZWN0LiBJdCdzIGFib3V0IHRoZSByYXRp
+bw0KPiBvZiBjaGVja3N1bSB0byBkYXRhIGJpdHMuIEFmdGVyIHRoYXQgcGxlYXNlIGlnbm9yZS4g
+SWYgeW91IGRvdWJsZSB0aGUgZGF0YSB5b3UNCj4gbmVlZCB0byBkb3VibGUgdGhlIGNoZWNrc3Vt
+IGJpdCB0byBtYWludGFpbiB0aGUgYmVyLg0KPiANCj4gRm9yZ2l2ZSBtZSBpZiBJJ20gd3Jvbmcg
+aGVyZSDigJQgSSBoYXZlbid0IGRvbmUgYW55dGhpbmcgd2l0aCBjaGVja3N1bW1pbmcNCj4gc2lu
+Y2UgSSBncmFkdWF0ZWQgY29sbGVnZSDigJQgYnV0IGdvb2QgY2hlY2tzdW1taW5nIGlzIGFib3V0
+IHByb2JhYmlsaXRpZXMNCj4gYW5kIHBlb3BsZSBzdWNrIGF0IGV2YWx1YXRpbmcgcHJvYmFiaWxp
+dHk6IEknbSByZWFsbHkgbm90IHN1cmUgYW55IG9mIHRoZQ0KPiBleHBsYW5hdGlvbnMgZ2l2ZW4g
+aW4gdGhpcyB0aHJlYWQgYXJlIHJpZ2h0LiBCaXQgZXJyb3JzIGFyZW4ndCByYW5kb20gYW5kIGlu
+DQo+IGdlbmVyYWwgaXQgcmVxdWlyZXMgYSBsb3QgbW9yZSB0aGFuIG9uZSBiaXQgZmxpcCB0byBj
+b2xsaWRlIGEgY2hlY2tzdW0sIHNvIEkgZG9uJ3QNCj4gdGhpbmsgaXQncyBhIGxpbmVhciByZWxh
+dGlvbnNoaXAgYmV0d2VlbiBibG9jayBzaXplIGFuZCBjaGFuY2Ugb2YgZXJyb3IuIEZpbmRpbmcN
+Cj4gY29sbGlzaW9ucyB3aXRoIGNyeXB0b2dyYXBoaWMgaGFzaGVzIGlzIGhhcmQhIEdyYW50ZWQg
+YSBDUkMgaXMgYSBsb3Qgc2ltcGxlcg0KPiB0aGFuIFNIQTEgb3Igd2hhdGV2ZXIsIGJ1dCB3ZSBh
+bHNvIGFyZW4ndCBmYWNpbmcgYWR2ZXJzYXJpZXMgd2l0aCBpdCwganVzdA0KPiByYW5kb20gY29y
+cnVwdGlvbi4gU28geWVzLCBhcyB5b3VyIGRhdGEgYmxvY2sgaW5jcmVhc2VzIHRoZW4gbmF0dXJh
+bGx5IHRoZQ0KPiBudW1iZXIgb2YgcG9zc2libGUgYml0IHBhdHRlcm5zIHdoaWNoIG1hdGNoIHRo
+ZSBzYW1lIENSQyBoYXZlIHRvIGluY3JlYXNlDQo+IOKAlCBidXQgdGhhdCBkb2Vzbid0IG1lYW4g
+eW91ciBvZGRzIG9mIGFjdHVhbGx5ICpnZXR0aW5nKiB0aGF0IGJpdCBwYXR0ZXJuIGJ5DQo+IG1p
+c3Rha2UgaW5jcmVhc2UgbGluZWFybHkuDQoNCllvdSBhcmUgY29ycmVjdCB0aGF0IGJpdCBlcnJv
+cnMgYXJlbid0IGFjdHVhbGx5IHJhbmRvbSBhbmQgaXQncyBpbXBvcnRhbnQgdGhhdCB5b3VyIGFu
+YWx5c2lzIHRha2UgdGhpcyBpbnRvIGFjY291bnQuIEl0J3MgbXkgdW5kZXJzdGFuZGluZyB0aGF0
+IENSQyBmYW1pbHkgb2YgY29kZXMgdGFyZ2V0cyBhIGNvcnJlbGF0ZWQgYnVyc3QgZXJyb3IgbW9k
+ZSB0aGF0IGlzIGFwcHJvcHJpYXRlIGZvciBhIGJpdC1zZXJpYWwgbWVkaWEgbGlrZSBFdGhlcm5l
+dCBvciBhIEhhcmQgRHJpdmUuIEl0J3Mgbm90IGEgZ29vZCBjb2RlIGZvciBhIHBhcmFsbGVsIG1l
+ZGlhIGxpa2UgRmxhc2ggKHdoaWNoIGhhcyBhIHZlcnkgZGlmZmVyZW50IHNldCBvZiBlcnJvciBk
+aXN0cmlidXRpb25zKS4NCg0KT3VyIHByb2JsZW0gaXMgYSBiaXQgZGlmZmVyZW50IGFzIHdlJ3Jl
+IG9wZXJhdGluZyBkb3duc3RyZWFtIG9mIHRoZSBlcnJvciBjb3JyZWN0aW5nIGNvZGUgb24gdGhl
+IHVuZGVybHlpbmcgaGFyZHdhcmUuIFRoYXQgYW5hbHlzaXMgaXMgeWV0IGFnYWluIGRpZmZlcmVu
+dCBhbmQgd2FhYWFheSBvdXQgb2YgbXkgbGVhZ3VlLg0KDQpFc3NlbnRpYWxseSBvdXIgcHJvYmxl
+bSBpcyB0byBsb29rIGF0IHRoZSBwYXR0ZXJuIG9mIHVuZGV0ZWN0ZWQgQU5EIHVuY29ycmVjdGVk
+IGVycm9ycyB0aGF0IGNvbWUgYWZ0ZXIgdGhlIHVua25vd24gbWVkaWEgY29ycmVjdGluZyBjb2Rl
+LiBXaGlsZSBJJ20gc3VyZSB0aGF0IHRoaXMgZXJyb3IgaXNuJ3QgcmFuZG9tIC0tIEknbGwgYmV0
+IHRoYXQgdXNpbmcgYSByYW5kb20gYXBwcm94aW1hdGlvbiBtb2RlbCBpc24ndCB0b28gZmFyIG9m
+ZiBmcm9tIGFjY3VyYXRlLg0KDQpUeXBpY2FsIGVudGVycHJpc2UgY2xhc3Mgc3RvcmFnZSBkcml2
+ZXMgcHJvdmlkZSBhYm91dCBhIDEwZS0xNSBVQkVSICh1bmNvcnJlY3RhYmxlIGJpdCBlcnJvciBy
+YXRlKS4gVGhlIHVuZGV0ZWN0YWJsZSB1bmNvcnJlY3RhYmxlIChVVUJFUj8pIHJhdGUgd2lsbCBi
+ZSBzb21ld2hhdCBsZXNzIHRoYW4gdGhhdCAtLSBidXQgd2UgY2FuIHVzZSB0aGlzIHZhbHVlIGFz
+IGFuIHVwcGVyIGJvdW5kLiBUaGVuIGFwcGx5IHRoZSBleHRyYSBwcm90ZWN0aW9uIG9mIHdoYXRl
+dmVyIG51bWJlciBvZiBjaGVja3N1bSBiaXRzIHdlJ3JlIHByb3ZpZGluZyBhbmQgdGhlbiBtYXli
+ZSBndWFyZGJhbmQgdGhhdCBieSBhbm90aGVyIC41IHRvIDEgb3JkZXIgb2YgbWFnbml0dWRlIGFu
+ZCBJIHRoaW5rIHlvdSdsbCBoYXZlIGEgVVVCRVIgdGhhdCB5b3UgY2FuIGZlZWwgcHJldHR5IGdv
+b2QgYWJvdXQgKGZvciB0aGUgY29tYmluYXRpb24gY2hlY2tzdW0gYW5kIEhXIGNvbWJpbmF0aW9u
+KS4NCg0KSSB3aWxsIGdldCBzb21lIG1vcmUgaW5mb3JtYXRpb24gZnJvbSB0aGUgYWN0dWFsIEVD
+QyBleHBlcnRzIGFuZCB0cnkgdG8gZ2VuZXJhdGUgc29tZSBhY3R1YWwgY29tcHV0YXRpb25zIGhl
+cmUuIFN0YXkgdHVuZWQuLi4uDQoNCj4gDQo+IEkgc3BlbnQgYSBicmllZiB0aW1lIHRyeWluZyB0
+byByZWFkIHVwIG9uIEhhbW1pbmcgZGlzdGFuY2VzIGFuZCAibWluaW11bQ0KPiBkaXN0YW5jZSBz
+ZXBhcmFibGUiIHRvIHRyeSBhbmQgcmVtZW1iZXIvdW5kZXJzdGFuZCB0aGlzIGFuZCBpdCdzIGp1
+c3QNCj4gbWFraW5nIG15IGhlYWQgaHVydCwgc28gaG9wZWZ1bGx5IHNvbWVib2R5IHdpdGggdGhl
+IHJpZ2h0IG1hdGgNCj4gYmFja2dyb3VuZCBjYW4gY2hpbWUgaW4uDQo+IC1HcmVnDQo=
