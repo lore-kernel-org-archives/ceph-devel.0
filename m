@@ -1,62 +1,99 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Fri, 1 Apr 2016 19:51:07 -0700
-Message-ID: <CAJ4mKGaNPfpPbbNY+YVu1NDuVQ-gaS5fi2Pww7DSjsbGt-sbXg@mail.gmail.com>
-References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
-	<alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
-	<CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
-	<20160401035610.GA5671@onthe.net.au>
-	<alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
-	<20160401052838.GA8044@onthe.net.au>
-	<alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
-	<20160401194912.GA18636@onthe.net.au>
-	<CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
-	<3E46E6C9-EFD2-49BD-9862-4C46D053A8D6@sandisk.com>
+From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
+Subject: Re: AddressSanitizer
+Date: Sat, 2 Apr 2016 02:43:43 +0000
+Message-ID: <D3247E10.C746%evgeniy.firsov@sandisk.com>
+References: <56FE89BC.5040808@digiware.nl>
+ <CAJ4mKGZkq0hZObxQ1+ZOrbi8TaKrciqsAFoXuzS5JQ_qGb9N9A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:34579 "EHLO
-	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751243AbcDBCvJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2016 22:51:09 -0400
-Received: by mail-vk0-f46.google.com with SMTP id e185so124580286vkb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Apr 2016 19:51:08 -0700 (PDT)
-In-Reply-To: <3E46E6C9-EFD2-49BD-9862-4C46D053A8D6@sandisk.com>
+Received: from mail-by2on0073.outbound.protection.outlook.com ([207.46.100.73]:7591
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751183AbcDBC6q convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2016 22:58:46 -0400
+In-Reply-To: <CAJ4mKGZkq0hZObxQ1+ZOrbi8TaKrciqsAFoXuzS5JQ_qGb9N9A@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <78833A717A5DA84886F961CF5A0EDC35@namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Chris Dunlop <chris@onthe.net.au>, Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>, Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Apr 1, 2016 at 7:23 PM, Allen Samuels <Allen.Samuels@sandisk.co=
-m> wrote:
-> Talk about mental failures. The first statement is correct. It's abou=
-t the ratio of checksum to data bits. After that please ignore. If you =
-double the data you need to double the checksum bit to maintain the ber=
-=2E
+Actually GCC has it too(>=4.8) and its very good tool with MUCH lower
+overhead then Valgrind.
 
-=46orgive me if I'm wrong here =E2=80=94 I haven't done anything with
-checksumming since I graduated college =E2=80=94 but good checksumming =
-is
-about probabilities and people suck at evaluating probability: I'm
-really not sure any of the explanations given in this thread are
-right. Bit errors aren't random and in general it requires a lot more
-than one bit flip to collide a checksum, so I don't think it's a
-linear relationship between block size and chance of error. Finding
-collisions with cryptographic hashes is hard! Granted a CRC is a lot
-simpler than SHA1 or whatever, but we also aren't facing adversaries
-with it, just random corruption. So yes, as your data block increases
-then naturally the number of possible bit patterns which match the
-same CRC have to increase =E2=80=94 but that doesn't mean your odds of
-actually *getting* that bit pattern by mistake increase linearly.
+On 4/1/16, 3:19 PM, "ceph-devel-owner@vger.kernel.org on behalf of Gregory
+Farnum" <ceph-devel-owner@vger.kernel.org on behalf of gfarnum@redhat.com>
+wrote:
 
-I spent a brief time trying to read up on Hamming distances and
-"minimum distance separable" to try and remember/understand this and
-it's just making my head hurt, so hopefully somebody with the right
-math background can chime in.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>On Fri, Apr 1, 2016 at 7:46 AM, Willem Jan Withagen <wjw@digiware.nl>
+>wrote:
+>> Hi
+>>
+>> In my search for reasons why I have crashes I started using
+>> AddressSanitizer with Clang (since that is native included)
+>> https://github.com/google/sanitizers/wiki/AddressSanitizer,
+>>
+>> Below the results which might indicate locations of possible trouble.
+>> Would there be interest into looking into these further?
+>> I know that some unitests under valgrind also complain about memory
+>> leaks just because items are not properly free/deleted since they are
+>> just tests.
+>>
+>> But the ceph-mon container-overflow and the .libs/ceph-dencoder double
+>> free are parts of the tree that are used outside the tests.
+>>
+>> But I still have to find the flags to actually get the translation to
+>> file codelines for this to be really useful.
+>>
+>> --WjW
+>>
+>>
+>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_isa+0x7fea8b)
+>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_plugin_isa+0x7e9d0b)
+>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec+0x8144cb)
+>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_all+0x8021ab)
+>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>>
+>>(/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_thread+0x7fb78b)
+>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>>
+>>(/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_arguments+0x7fd7
+>>4b)
+>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>>
+>>(/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_plugin_shec+0x7e98db)
+>> SUMMARY: AddressSanitizer: heap-use-after-free
+>> (/usr/srcs/Ceph/work/ceph/src/unittest_pglog+0x92722f)
+>> SUMMARY: AddressSanitizer: dynamic-stack-buffer-overflow
+>> (/usr/srcs/Ceph/work/ceph/src/unittest_lfnindex+0x8ee69f)
+>> SUMMARY: AddressSanitizer: stack-buffer-overflow
+>> (/usr/srcs/Ceph/work/ceph/src/unittest_utf8+0x5ff392)
+>> SUMMARY: AddressSanitizer: container-overflow
+>> (/usr/srcs/Ceph/work/ceph/src/ceph-mon+0xb591b1)
+>> SUMMARY: AddressSanitizer: double-free
+>> (/usr/srcs/Ceph/work/ceph/src/.libs/ceph-dencoder+0x8b1fcb)
+>
+>This is interesting but I wouldn't spend much time on it without
+>seeing the actual call paths. We get a lot of memory warnings in
+>libraries that turn out to be issues only with shutdown, often because
+>the memory checking tool doesn't understand or handle certain
+>features.
+>
+>If it turns out to be real, there have been various efforts to enable
+>more clang/llvm checking against the Ceph code base and this is
+>another thing that could go in there. Or perhaps it could replace our
+>valgrind runs in teuthology or something?
+>-Greg
+>--
+>To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>the body of a message to majordomo@vger.kernel.org
+>More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
