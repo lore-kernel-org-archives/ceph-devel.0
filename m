@@ -1,81 +1,109 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Fri, 1 Apr 2016 23:18:05 -0700
-Message-ID: <CAJ4mKGYPyqy9tUJH8eUEHFAt25Sqm6uKQpr84ckwDERqsRxUKA@mail.gmail.com>
-References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
-	<CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
-	<20160401035610.GA5671@onthe.net.au>
-	<alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
-	<20160401052838.GA8044@onthe.net.au>
-	<alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
-	<20160401194912.GA18636@onthe.net.au>
-	<CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
-	<3E46E6C9-EFD2-49BD-9862-4C46D053A8D6@sandisk.com>
-	<CAJ4mKGaNPfpPbbNY+YVu1NDuVQ-gaS5fi2Pww7DSjsbGt-sbXg@mail.gmail.com>
-	<20160402050505.GA23763@onthe.net.au>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: ceph-disk improvements
+Date: Sat, 2 Apr 2016 10:52:58 +0200
+Message-ID: <56FF886A.3080406@dachary.org>
+References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
+ <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f51.google.com ([209.85.213.51]:35147 "EHLO
-	mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751341AbcDBGSH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Apr 2016 02:18:07 -0400
-Received: by mail-vk0-f51.google.com with SMTP id e6so127536675vkh.2
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Apr 2016 23:18:06 -0700 (PDT)
-In-Reply-To: <20160402050505.GA23763@onthe.net.au>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:58790 "EHLO
+	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751353AbcDBIxD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Apr 2016 04:53:03 -0400
+In-Reply-To: <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>, ceph-devel@vger.kernel.org
 
-On Fri, Apr 1, 2016 at 10:05 PM, Chris Dunlop <chris@onthe.net.au> wrot=
-e:
-> On Fri, Apr 01, 2016 at 07:51:07PM -0700, Gregory Farnum wrote:
->> On Fri, Apr 1, 2016 at 7:23 PM, Allen Samuels <Allen.Samuels@sandisk=
-=2Ecom> wrote:
->>> Talk about mental failures. The first statement is correct. It's ab=
-out the ratio of checksum to data bits. After that please ignore. If yo=
-u double the data you need to double the checksum bit to maintain the b=
-er.
+Hi Wido,
+
+On 02/04/2016 07:54, Wido den Hollander wrote:
+>=20
+>> Op 1 april 2016 om 17:36 schreef Sage Weil <sweil@redhat.com>:
 >>
->> Forgive me if I'm wrong here =E2=80=94 I haven't done anything with
->> checksumming since I graduated college =E2=80=94 but good checksummi=
-ng is
->> about probabilities and people suck at evaluating probability: I'm
->> really not sure any of the explanations given in this thread are
->> right. Bit errors aren't random and in general it requires a lot mor=
-e
->> than one bit flip to collide a checksum, so I don't think it's a
->> linear relationship between block size and chance of error. Finding
->
-> A single bit flip can certainly result in a checksum collision, with =
-the
-> same chance as any other error, i.e. 1 in 2^number_of_checksum_bits.
+>>
+>> Hi all,
+>>
+>> There are a couple of looming features for ceph-disk:
+>>
+>> 1- Support for additional devices when using BlueStore.  There can b=
+e up=20
+>> to three: the main device, a WAL/journal device (small, ~128MB, idea=
+lly=20
+>> NVRAM), and a fast metadata device (as big as you have available; wi=
+ll be=20
+>> used for internal metadata).
+>>
+>> 2- Support for setting up dm-cache, bcache, and/or FlashCache undern=
+eath=20
+>> filestore or bluestore.
+>>
+>=20
+> Keep in mind that you can't create a partition on a bcache device. So=
+ when using
+> bcache, the journal has to be filebased and not a partition.
 
-That's just not true. I'll quote from
-https://en.m.wikipedia.org/wiki/Cyclic_redundancy_check#Introduction
+Is this true of all bcache versions ( https://bcache.evilpiepirate.org/=
+ ) ? Or is it a planned feature ? Or is it never going to happen ?
 
-> Typically an n-bit CRC applied to a data block of arbitrary length wi=
-ll detect any single error burst not longer than n bits and will detect=
- a fraction 1 =E2=88=92 2^(=E2=88=92n) of all longer error bursts.
+Cheers
 
-And over (at least) the ranges they're designed for, it's even better:
-they provide guarantees about how many bits (in any combination or
-arrangement) must be flipped before they can have a false match. (It
-says "typically" because CRCs are a wide family and yes, you do have
-to select the right ones in the right ways in order to get the desired
-effects.)
+>=20
+> If we add the flag --file-based-journal or --no-partitions we can cre=
+ate OSDs on
+> both bcache and dm-cache.
+>=20
+> With BlueStore this becomes a problem since it requires the small (XF=
+S)
+> filesystem for it's metadata.
+>=20
+> Wido
+>=20
+>> The current syntax of
+>>
+>>  ceph-disk prepare [--dmcrypt] [--bluestore] DATADEV [JOURNALDEV]
+>>
+>> isn't terribly expressive.  For example, the journal device size is =
+set=20
+>> via a config option, not on the command line.  For bluestore, the me=
+tadata=20
+>> device will probably want/need explicit user input so they can ensur=
+e it's=20
+>> 1/Nth of their SSD (if they have N HDDs to each SSD).
+>>
+>> And if we put dmcache in there, that partition will need to be sized=
+ too.
+>>
+>> Another consideration is that right now we don't play nice with LVM =
+at=20
+>> all.  Should we?  dm-cache is usually used in conjunction with LVM=20
+>> (although it doesn't have to be).  Does LVM provide value?  Like, th=
+e=20
+>> ability for users to add a second SSD to a box and migrate cache, wa=
+l, or=20
+>> journal partitions around?
+>>
+>> I'm interested in hearing feedback on requirements, approaches, and=20
+>> interfaces before we go too far down the road...
+>>
+>> Thanks!
+>> sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
 
-As Allen says, flash may require something different, but it will be
-similar. Getting the people who actually understand this is definitely
-the way to go =E2=80=94 it's an active research field but I think over =
-the
-ranges we're interested in it's a solved problem. And certainly if we
-try and guess about things based on our intuition, we *will* get it
-wrong. So somebody interested in this feature set needs to go out and
-do the reading or talk to the right people, please! :)
--Greg
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
