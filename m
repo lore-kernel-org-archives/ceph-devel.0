@@ -1,99 +1,145 @@
-From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
-Subject: Re: AddressSanitizer
-Date: Sat, 2 Apr 2016 02:43:43 +0000
-Message-ID: <D3247E10.C746%evgeniy.firsov@sandisk.com>
-References: <56FE89BC.5040808@digiware.nl>
- <CAJ4mKGZkq0hZObxQ1+ZOrbi8TaKrciqsAFoXuzS5JQ_qGb9N9A@mail.gmail.com>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: Re: Adding compression/checksum support for bluestore.
+Date: Sat, 2 Apr 2016 15:07:37 +1100
+Message-ID: <20160402040736.GA22721@onthe.net.au>
+References: <CY1PR0201MB18975EBCBB7EC1291E57CBCCE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
+ <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <20160401035610.GA5671@onthe.net.au>
+ <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
+ <20160401052838.GA8044@onthe.net.au>
+ <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
+ <20160401194912.GA18636@onthe.net.au>
+ <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0073.outbound.protection.outlook.com ([207.46.100.73]:7591
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751183AbcDBC6q convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2016 22:58:46 -0400
-In-Reply-To: <CAJ4mKGZkq0hZObxQ1+ZOrbi8TaKrciqsAFoXuzS5JQ_qGb9N9A@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <78833A717A5DA84886F961CF5A0EDC35@namprd02.prod.outlook.com>
+Received: from smtp1.onthe.net.au ([203.22.196.249]:33565 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750715AbcDBEHm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Apr 2016 00:07:42 -0400
+Content-Disposition: inline
+In-Reply-To: <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Actually GCC has it too(>=4.8) and its very good tool with MUCH lower
-overhead then Valgrind.
+On Fri, Apr 01, 2016 at 11:08:35PM +0000, Allen Samuels wrote:
+>> -----Original Message-----
+>> From: Chris Dunlop [mailto:chris@onthe.net.au]
+>> Sent: Friday, April 01, 2016 12:49 PM
+>> To: Sage Weil <sage@newdream.net>
+>> Cc: Allen Samuels <Allen.Samuels@sandisk.com>; Igor Fedotov
+>> <ifedotov@mirantis.com>; ceph-devel <ceph-devel@vger.kernel.org>
+>> Subject: Re: Adding compression/checksum support for bluestore.
+>> 
+>> On Fri, Apr 01, 2016 at 10:58:17AM -0400, Sage Weil wrote:
+>>> On Fri, 1 Apr 2016, Chris Dunlop wrote:
+>>>> On Fri, Apr 01, 2016 at 12:56:48AM -0400, Sage Weil wrote:
+>>>>> On Fri, 1 Apr 2016, Chris Dunlop wrote:
+>>>>>> On Wed, Mar 30, 2016 at 10:52:37PM +0000, Allen Samuels wrote:
+>>>>>>> One thing to also factor in is that if you increase the span of a
+>>>>>>> checksum, you degrade the quality of the checksum. So if you go with
+>>>>>>> 128K chunks of data you'll likely want to increase the checksum
+>>>>>>> itself from something beyond a CRC-32. Maybe somebody out there has
+>>>>>>> a good way of describing this quanitatively.
+>>>>>>
+>>>>>> I would have thought the "quality" of a checksum would be a function
+>>>>>> of how many bits it is, and how evenly and randomly it's distributed,
+>>>>>> and unrelated to the amount of data being checksummed.
+>>>>>>
+>>>>>> I.e. if you have any amount of data covered by an N-bit evenly
+>>>>>> randomly distributed checksum, and "something" goes wrong with the
+>>>>>> data (or the checksum), the chance of the checksum still matching the
+>>>>>> data is 1 in 2^n.
+>>>>>
+>>>>> Say there is some bit error rate per bit. If you double the amount of
+>>>>> data you're checksumming, then you'll see twice as many errors. That
+>>>>> means that even though your 32-bit checksum is right 2^32-1 times out
+>>>>> of 2^32, you're twice as likely to hit that 1 in 2^32 chance of
+>>>>> getting a correct checksum on wrong data.
+>>>>
+>>>> It seems to me, if we're talking about a single block of data protected
+>>>> by a 32-bit checksum, it doesn't matter how many errors there are
+>>>> within the block, the chance of a false checksum match is still
+>>>> only 1 in 2^32.
+>>>
+>>> It's not a question of how many errors are in the block, it's a question
+>>> of whether there are more than 0 errors. If the bit error rate is so
+>>> low it's 0, our probability of a false positive is 0, no matter how many
+>>> blocks there are. So for a bit error rate of 10e-15, then it's 10e-15 *
+>>> 1^-32. But if there are 1000 bits in a block, it becomes 10e-12 *
+>>> 1^-32.
+>>>
+>>> In other words, we're only rolling the checksum dice when there is
+>>> actually an error, and larger blocks are more likely to have errors. If
+>>> your blocks were so large you were effectively guaranteed to have an
+>>> error in every one, then the effective false positive rate would be
+>>> exactly the checksum false positive rate (2^-32).
+>> 
+>> Good point, I hadn't thought about it like that. But that's the "single
+>> block" case. On the other hand, a large storage system is the same case
+>> as the stream of blocks: for a given storage (stream) size, your chance
+>> of hitting an error is constant, regardless of the size of the individual
+>> blocks within the storage. Then, if/when you hit an error, the chance of
+>> getting a false positive on the checksum is a function of the checksum
+>> bits and independent of the block size.
+> 
+> I think we're getting confused about terminology. What matters isn't
+> "blocks" but the ratio of bits of checksum to bits of data covered by that
+> checksum. That ratio determines the BER of reading that data and hence the
+> overall system. If you double the amount of data you need to add 1 bit of
+> checksum to maintain the same BER.
 
-On 4/1/16, 3:19 PM, "ceph-devel-owner@vger.kernel.org on behalf of Gregory
-Farnum" <ceph-devel-owner@vger.kernel.org on behalf of gfarnum@redhat.com>
-wrote:
+The "blocks" we're talking about in this context are the data bits covered
+by the checksum bits. I.e. we're talking about the same thing there.
 
->On Fri, Apr 1, 2016 at 7:46 AM, Willem Jan Withagen <wjw@digiware.nl>
->wrote:
->> Hi
->>
->> In my search for reasons why I have crashes I started using
->> AddressSanitizer with Clang (since that is native included)
->> https://github.com/google/sanitizers/wiki/AddressSanitizer,
->>
->> Below the results which might indicate locations of possible trouble.
->> Would there be interest into looking into these further?
->> I know that some unitests under valgrind also complain about memory
->> leaks just because items are not properly free/deleted since they are
->> just tests.
->>
->> But the ceph-mon container-overflow and the .libs/ceph-dencoder double
->> free are parts of the tree that are used outside the tests.
->>
->> But I still have to find the flags to actually get the translation to
->> file codelines for this to be really useful.
->>
->> --WjW
->>
->>
->> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
->> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_isa+0x7fea8b)
->> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
->> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_plugin_isa+0x7e9d0b)
->> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
->> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec+0x8144cb)
->> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
->> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_all+0x8021ab)
->> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
->>
->>(/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_thread+0x7fb78b)
->> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
->>
->>(/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_arguments+0x7fd7
->>4b)
->> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
->>
->>(/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_plugin_shec+0x7e98db)
->> SUMMARY: AddressSanitizer: heap-use-after-free
->> (/usr/srcs/Ceph/work/ceph/src/unittest_pglog+0x92722f)
->> SUMMARY: AddressSanitizer: dynamic-stack-buffer-overflow
->> (/usr/srcs/Ceph/work/ceph/src/unittest_lfnindex+0x8ee69f)
->> SUMMARY: AddressSanitizer: stack-buffer-overflow
->> (/usr/srcs/Ceph/work/ceph/src/unittest_utf8+0x5ff392)
->> SUMMARY: AddressSanitizer: container-overflow
->> (/usr/srcs/Ceph/work/ceph/src/ceph-mon+0xb591b1)
->> SUMMARY: AddressSanitizer: double-free
->> (/usr/srcs/Ceph/work/ceph/src/.libs/ceph-dencoder+0x8b1fcb)
+But perhaps you're correct about confusion of terminology... we're talking
+about checksums, not error correcting codes, right?
+
+An ECC can fix errors and thus reduce the observable BER, and indeed the
+more ECC bits you have, the lower the observable BER because a greater range
+of errors can be fixed.
+
+But checksums no effect on the BER. If you have an error, the checksum tells
+you (hopefully!) "you have an error".
+
+What I think we're talking about is, if you have an error, the probability
+of the checksum unfortunately still matching, i.e. a false positive: you
+think you have good data but it's actually crap. And that's a function of
+the number of checksum bits, and unrelated to the number of data bits. Taken
+to extremes, you could have a 5PB data system covered by a single 32 bit
+checksum, and that's no more or less likely to give you a false positive
+than a 32 bit checksum on a 4K block, and it doesn't change the BER at all.
+
+That said, if you have to throw away 5PB of data and read it again because
+of a checksum mismatch, your chances of getting another error during the
+subsequent 5PB read are obviously much higher than your chances of getting
+another error during a subsequent 4KB read.
+
+Perhaps this is the effect you're thinking about? However this effect is a
+function of the block size (== data bits) and is independent of the checksum
+size.
+
+> I started this discussion in reaction to Sage's observation that we could
+> reduce the checksum storage overhead by checksuming larger blocks. My
+> point is that this will degrade the BER of system accordingly. That's
+> neither good nor bad, but it's something that will matter to people. If
+> you go from a 4K chunk of data with, say a 32-bit checksum to a 128K chunk
+> of data with the same 32-bit checksum, then you simply have to accept that
+> the BER is reduced by that ratio (4K / 128K) OR you have to move to
+> checksum value that has 32 more bits in it (128K/4K). Whether that's
+> acceptable is a user choice.
 >
->This is interesting but I wouldn't spend much time on it without
->seeing the actual call paths. We get a lot of memory warnings in
->libraries that turn out to be issues only with shutdown, often because
->the memory checking tool doesn't understand or handle certain
->features.
->
->If it turns out to be real, there have been various efforts to enable
->more clang/llvm checking against the Ceph code base and this is
->another thing that could go in there. Or perhaps it could replace our
->valgrind runs in teuthology or something?
->-Greg
->--
->To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->the body of a message to majordomo@vger.kernel.org
->More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I think it's good to parameterize the checksum algorithms and checksumming
+> block size. All we need to do is to document the system level effects,
+> etc., and give people guidance on how to connect these settings with the
+> magnitude of data under management (which matters) and the HW UBER (which
+> may vary A LOT from device to device).
 
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+I agree it's good to parametrize these aspects to provide people with
+choice. However I also think it's important that people correctly understand
+the choices being made. 
+
+Chris
