@@ -1,111 +1,112 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph-disk improvements
-Date: Sat, 2 Apr 2016 10:52:58 +0200
-Message-ID: <56FF886A.3080406@dachary.org>
-References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
- <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: AddressSanitizer
+Date: Sat, 2 Apr 2016 11:20:15 +0200
+Message-ID: <56FF8ECF.5040708@digiware.nl>
+References: <56FE89BC.5040808@digiware.nl>
+ <CAJ4mKGZkq0hZObxQ1+ZOrbi8TaKrciqsAFoXuzS5JQ_qGb9N9A@mail.gmail.com>
+ <D3247E10.C746%evgeniy.firsov@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:58790 "EHLO
-	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751353AbcDBIxD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Apr 2016 04:53:03 -0400
-In-Reply-To: <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+Received: from smtp.digiware.nl ([31.223.170.169]:47261 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751353AbcDBJUb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 2 Apr 2016 05:20:31 -0400
+In-Reply-To: <D3247E10.C746%evgeniy.firsov@sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, ceph-devel@vger.kernel.org
+To: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Wido,
+On 2-4-2016 04:43, Evgeniy Firsov wrote:
+> Actually GCC has it too(>=4.8) and its very good tool with MUCH lower
+> overhead then Valgrind.
 
-On 02/04/2016 07:54, Wido den Hollander wrote:
->=20
->> Op 1 april 2016 om 17:36 schreef Sage Weil <sweil@redhat.com>:
->>
->>
->> Hi all,
->>
->> There are a couple of looming features for ceph-disk:
->>
->> 1- Support for additional devices when using BlueStore.  There can b=
-e up=20
->> to three: the main device, a WAL/journal device (small, ~128MB, idea=
-lly=20
->> NVRAM), and a fast metadata device (as big as you have available; wi=
-ll be=20
->> used for internal metadata).
->>
->> 2- Support for setting up dm-cache, bcache, and/or FlashCache undern=
-eath=20
->> filestore or bluestore.
->>
->=20
-> Keep in mind that you can't create a partition on a bcache device. So=
- when using
-> bcache, the journal has to be filebased and not a partition.
+That is correct.
 
-Is this true of all bcache versions ( https://bcache.evilpiepirate.org/=
- ) ? Or is it a planned feature ? Or is it never going to happen ?
+But I do agree with the Gregory that these tools output needs to be
+evaluated carefully. Otherwise it becomes a ghost chase for fault that
+are not important or worse: none existant.
 
-Cheers
+That said, running valgrind on some of the unittests already gives
+messages about leakage, but that is obviously due to not cleaning up
+after tests because it only runs onces.
 
->=20
-> If we add the flag --file-based-journal or --no-partitions we can cre=
-ate OSDs on
-> both bcache and dm-cache.
->=20
-> With BlueStore this becomes a problem since it requires the small (XF=
-S)
-> filesystem for it's metadata.
->=20
-> Wido
->=20
->> The current syntax of
+--WjW
+
+> On 4/1/16, 3:19 PM, "ceph-devel-owner@vger.kernel.org on behalf of Gregory
+> Farnum" <ceph-devel-owner@vger.kernel.org on behalf of gfarnum@redhat.com>
+> wrote:
+> 
+>> On Fri, Apr 1, 2016 at 7:46 AM, Willem Jan Withagen <wjw@digiware.nl>
+>> wrote:
+>>> Hi
+>>>
+>>> In my search for reasons why I have crashes I started using
+>>> AddressSanitizer with Clang (since that is native included)
+>>> https://github.com/google/sanitizers/wiki/AddressSanitizer,
+>>>
+>>> Below the results which might indicate locations of possible trouble.
+>>> Would there be interest into looking into these further?
+>>> I know that some unitests under valgrind also complain about memory
+>>> leaks just because items are not properly free/deleted since they are
+>>> just tests.
+>>>
+>>> But the ceph-mon container-overflow and the .libs/ceph-dencoder double
+>>> free are parts of the tree that are used outside the tests.
+>>>
+>>> But I still have to find the flags to actually get the translation to
+>>> file codelines for this to be really useful.
+>>>
+>>> --WjW
+>>>
+>>>
+>>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>>> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_isa+0x7fea8b)
+>>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>>> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_plugin_isa+0x7e9d0b)
+>>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>>> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec+0x8144cb)
+>>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>>> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_all+0x8021ab)
+>>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>>>
+>>> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_thread+0x7fb78b)
+>>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>>>
+>>> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_shec_arguments+0x7fd7
+>>> 4b)
+>>> SUMMARY: AddressSanitizer: alloc-dealloc-mismatch
+>>>
+>>> (/usr/srcs/Ceph/work/ceph/src/unittest_erasure_code_plugin_shec+0x7e98db)
+>>> SUMMARY: AddressSanitizer: heap-use-after-free
+>>> (/usr/srcs/Ceph/work/ceph/src/unittest_pglog+0x92722f)
+>>> SUMMARY: AddressSanitizer: dynamic-stack-buffer-overflow
+>>> (/usr/srcs/Ceph/work/ceph/src/unittest_lfnindex+0x8ee69f)
+>>> SUMMARY: AddressSanitizer: stack-buffer-overflow
+>>> (/usr/srcs/Ceph/work/ceph/src/unittest_utf8+0x5ff392)
+>>> SUMMARY: AddressSanitizer: container-overflow
+>>> (/usr/srcs/Ceph/work/ceph/src/ceph-mon+0xb591b1)
+>>> SUMMARY: AddressSanitizer: double-free
+>>> (/usr/srcs/Ceph/work/ceph/src/.libs/ceph-dencoder+0x8b1fcb)
 >>
->>  ceph-disk prepare [--dmcrypt] [--bluestore] DATADEV [JOURNALDEV]
+>> This is interesting but I wouldn't spend much time on it without
+>> seeing the actual call paths. We get a lot of memory warnings in
+>> libraries that turn out to be issues only with shutdown, often because
+>> the memory checking tool doesn't understand or handle certain
+>> features.
 >>
->> isn't terribly expressive.  For example, the journal device size is =
-set=20
->> via a config option, not on the command line.  For bluestore, the me=
-tadata=20
->> device will probably want/need explicit user input so they can ensur=
-e it's=20
->> 1/Nth of their SSD (if they have N HDDs to each SSD).
->>
->> And if we put dmcache in there, that partition will need to be sized=
- too.
->>
->> Another consideration is that right now we don't play nice with LVM =
-at=20
->> all.  Should we?  dm-cache is usually used in conjunction with LVM=20
->> (although it doesn't have to be).  Does LVM provide value?  Like, th=
-e=20
->> ability for users to add a second SSD to a box and migrate cache, wa=
-l, or=20
->> journal partitions around?
->>
->> I'm interested in hearing feedback on requirements, approaches, and=20
->> interfaces before we go too far down the road...
->>
->> Thanks!
->> sage
+>> If it turns out to be real, there have been various efforts to enable
+>> more clang/llvm checking against the Ceph code base and this is
+>> another thing that could go in there. Or perhaps it could replace our
+>> valgrind runs in teuthology or something?
+>> -Greg
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+> 
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> 
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
