@@ -1,77 +1,101 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Sun, 3 Apr 2016 09:27:22 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604030921090.19675@cpach.fuggernut.com>
-References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com> <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com> <20160401035610.GA5671@onthe.net.au> <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
- <20160401052838.GA8044@onthe.net.au> <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com> <20160401194912.GA18636@onthe.net.au> <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com> <3E46E6C9-EFD2-49BD-9862-4C46D053A8D6@sandisk.com>
- <CAJ4mKGaNPfpPbbNY+YVu1NDuVQ-gaS5fi2Pww7DSjsbGt-sbXg@mail.gmail.com> <20160402050505.GA23763@onthe.net.au> <CAJ4mKGYPyqy9tUJH8eUEHFAt25Sqm6uKQpr84ckwDERqsRxUKA@mail.gmail.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: How to improve erasure pool's delete performance
+Date: Sun, 3 Apr 2016 23:22:25 +0800
+Message-ID: <CABAwU-bbnYJPJxA7Za8b4w9Nv7Z6_678QCkPrk5_xNnqUGr_pA@mail.gmail.com>
+References: <CABAwU-a1kxbc=i564da=GAj11_5M-tKE6R2kP5vaX7Ga2F3g=w@mail.gmail.com>
+	<alpine.DEB.2.11.1604030906170.19675@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-762399859-1459690044=:19675"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33119 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751742AbcDCN1a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Apr 2016 09:27:30 -0400
-In-Reply-To: <CAJ4mKGYPyqy9tUJH8eUEHFAt25Sqm6uKQpr84ckwDERqsRxUKA@mail.gmail.com>
+Received: from mail-lb0-f177.google.com ([209.85.217.177]:36401 "EHLO
+	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751393AbcDCPW1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Apr 2016 11:22:27 -0400
+Received: by mail-lb0-f177.google.com with SMTP id qe11so125984712lbc.3
+        for <ceph-devel@vger.kernel.org>; Sun, 03 Apr 2016 08:22:26 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1604030906170.19675@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Chris Dunlop <chris@onthe.net.au>, Allen Samuels <Allen.Samuels@sandisk.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+yeah, bluestore is the best solution, the rename operation almost done
+in memory, so it's fast.
 
---8323329-762399859-1459690044=:19675
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 
-On Fri, 1 Apr 2016, Gregory Farnum wrote:
-> On Fri, Apr 1, 2016 at 10:05 PM, Chris Dunlop <chris@onthe.net.au> wrote:
-> > On Fri, Apr 01, 2016 at 07:51:07PM -0700, Gregory Farnum wrote:
-> >> On Fri, Apr 1, 2016 at 7:23 PM, Allen Samuels <Allen.Samuels@sandisk.com> wrote:
-> >>> Talk about mental failures. The first statement is correct. It's about the ratio of checksum to data bits. After that please ignore. If you double the data you need to double the checksum bit to maintain the ber.
-> >>
-> >> Forgive me if I'm wrong here — I haven't done anything with
-> >> checksumming since I graduated college — but good checksumming is
-> >> about probabilities and people suck at evaluating probability: I'm
-> >> really not sure any of the explanations given in this thread are
-> >> right. Bit errors aren't random and in general it requires a lot more
-> >> than one bit flip to collide a checksum, so I don't think it's a
-> >> linear relationship between block size and chance of error. Finding
-> >
-> > A single bit flip can certainly result in a checksum collision, with the
-> > same chance as any other error, i.e. 1 in 2^number_of_checksum_bits.
-> 
-> That's just not true. I'll quote from
-> https://en.m.wikipedia.org/wiki/Cyclic_redundancy_check#Introduction
-> 
-> > Typically an n-bit CRC applied to a data block of arbitrary length will detect any single error burst not longer than n bits and will detect a fraction 1 − 2^(−n) of all longer error bursts.
-> 
-> And over (at least) the ranges they're designed for, it's even better:
-> they provide guarantees about how many bits (in any combination or
-> arrangement) must be flipped before they can have a false match. (It
-> says "typically" because CRCs are a wide family and yes, you do have
-> to select the right ones in the right ways in order to get the desired
-> effects.)
+2016-04-03 21:07 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Sun, 3 Apr 2016, huang jun wrote:
+>> Hi, all
+>> Recently, we test deletion performance of erasure pool, and we found
+>> the delete op
+>> is pretty slow.
+>> We trace the code and found Delete op was converted to Rename in Fil=
+estore,
+>> It was implemented in function FileStore::_collection_move_rename(),
+>> it calls FileStore::_set_replay_guard function and
+>> FileStore::_close_replay_guard function,
+>> in these 2 function, do 3 fsyncs and 1 objectmap sync, which we thin=
+k
+>> spend the most time.
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> Envirnoment:
+>> ceph version: 0.94.5
+>> linux kernel: 3.18
+>> Test cluster: 1MON, 1MDS, 4OSD
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> We do some comparison tests:
+>> 1. sync omap + fd=EF=BC=88default)
+>> avg rename op used 0.883818s
+>> 2. only sync omap: 0.428431s
+>> 3. only sync fd: 0.400266s
+>> 4. dont sync: 0.00319648
+>> 5. do posix_fadvise(FADVISE_DONTNEED) after write, and sync omap + f=
+d: 0.855178s
+>> 6. use fdatasync to replace fsync, and sync omap + fd : 0.432659s
+>>
+>> As we can see, sync fd and sync objectmap use 50% of the total time =
+each.
+>> Compare 1 with 6, fdatasync uses 50% less time compared to fdatasync=
+,
+>> which means sync metadata spent more time than sync data.
+>> In FileStore::_set_replay_guard function and
+>> FileStore::_close_replay_guard function,
+>> it only set object's user.cephos.seq xattr, then do sync to let it d=
+urable.
+>>
+>> I have some questions:
+>> 1. Do we record the xattr(user.cephos.seq) to avoid replaying an old=
+er
+>> transaction?
+>
+> Yes, exactly.
+>
+>> 2. If dont do sync, we will get the best performance, is there any
+>> side effects? like: get data corrupted.
+>
+> Yes--we may replay incorrectly after a failure.  Unfortunately, not a=
+n
+> option.
+>
+> This problem goes away with BlueStore, so we only have to live with i=
+t
+> for a bit longer.  I don't think it's worth investing any effort into
+> addressing this with FileStore--we'll be unlikely to want to merge an=
+y
+> non-trivial change anyway.
+>
+> sage
 
-That's pretty cool.  I have a new respect for CRCs.  :)
- 
-> As Allen says, flash may require something different, but it will be
-> similar. Getting the people who actually understand this is definitely
-> the way to go — it's an active research field but I think over the
-> ranges we're interested in it's a solved problem. And certainly if we
-> try and guess about things based on our intuition, we *will* get it
-> wrong. So somebody interested in this feature set needs to go out and
-> do the reading or talk to the right people, please! :)
 
-Yep.  I was halfway through responding to Chris's last message when I 
-convinced myself that actually he was right (block size doesn't matter). 
-But I don't trust my intuition here anymore.  :/
 
-In any case, it seems like the way to proceed is to have a variable length 
-checksum_block_size, since we need that anyway for other reasons (e.g., 
-balancing minimum read size and read amplification for small IOs vs 
-metadata overhead).
-
-sage
---8323329-762399859-1459690044=:19675--
+--=20
+thanks
+huangjun
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
