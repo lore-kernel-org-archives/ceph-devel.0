@@ -1,72 +1,80 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: How to improve erasure pool's delete performance
-Date: Sun, 3 Apr 2016 14:40:09 +0800
-Message-ID: <CABAwU-a1kxbc=i564da=GAj11_5M-tKE6R2kP5vaX7Ga2F3g=w@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: ceph-disk improvements
+Date: Sun, 3 Apr 2016 08:59:41 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604030859210.19675@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com> <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f43.google.com ([209.85.215.43]:34917 "EHLO
-	mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751307AbcDCGkL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Apr 2016 02:40:11 -0400
-Received: by mail-lf0-f43.google.com with SMTP id c126so6852907lfb.2
-        for <ceph-devel@vger.kernel.org>; Sat, 02 Apr 2016 23:40:10 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:54442 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751172AbcDCM7u (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 3 Apr 2016 08:59:50 -0400
+In-Reply-To: <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi, all
-Recently, we test deletion performance of erasure pool, and we found
-the delete op
-is pretty slow.
-We trace the code and found Delete op was converted to Rename in Filest=
-ore,
-It was implemented in function FileStore::_collection_move_rename(),
-it calls FileStore::_set_replay_guard function and
-=46ileStore::_close_replay_guard function,
-in these 2 function, do 3 fsyncs and 1 objectmap sync, which we think
-spend the most time.
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-Envirnoment:
-ceph version: 0.94.5
-linux kernel: 3.18
-Test cluster: 1MON, 1MDS, 4OSD
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-We do some comparison tests:
-1. sync omap + fd=EF=BC=88default)
-avg rename op used 0.883818s
-2. only sync omap: 0.428431s
-3. only sync fd: 0.400266s
-4. dont sync: 0.00319648
-5. do posix_fadvise(FADVISE_DONTNEED) after write, and sync omap + fd: =
-0.855178s
-6. use fdatasync to replace fsync, and sync omap + fd : 0.432659s
+On Sat, 2 Apr 2016, Wido den Hollander wrote:
+> > Op 1 april 2016 om 17:36 schreef Sage Weil <sweil@redhat.com>:
+> > Hi all,
+> > 
+> > There are a couple of looming features for ceph-disk:
+> > 
+> > 1- Support for additional devices when using BlueStore.  There can be up 
+> > to three: the main device, a WAL/journal device (small, ~128MB, ideally 
+> > NVRAM), and a fast metadata device (as big as you have available; will be 
+> > used for internal metadata).
+> > 
+> > 2- Support for setting up dm-cache, bcache, and/or FlashCache underneath 
+> > filestore or bluestore.
+> > 
+> 
+> Keep in mind that you can't create a partition on a bcache device. So when using
+> bcache, the journal has to be filebased and not a partition.
 
-As we can see, sync fd and sync objectmap use 50% of the total time eac=
-h.
-Compare 1 with 6, fdatasync uses 50% less time compared to fdatasync,
-which means sync metadata spent more time than sync data.
-In FileStore::_set_replay_guard function and
-=46ileStore::_close_replay_guard function,
-it only set object's user.cephos.seq xattr, then do sync to let it dura=
-ble.
+Can you create a bcache device out of a partition, though?
 
-I have some questions:
-1. Do we record the xattr(user.cephos.seq) to avoid replaying an older
-transaction?
-2. If dont do sync, we will get the best performance, is there any
-side effects? like: get data corrupted.
+sage
 
-Any comments are welcome.
-
---=20
-thanks
-huangjun
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> If we add the flag --file-based-journal or --no-partitions we can create OSDs on
+> both bcache and dm-cache.
+> 
+> With BlueStore this becomes a problem since it requires the small (XFS)
+> filesystem for it's metadata.
+> 
+> Wido
+> 
+> > The current syntax of
+> > 
+> >  ceph-disk prepare [--dmcrypt] [--bluestore] DATADEV [JOURNALDEV]
+> > 
+> > isn't terribly expressive.  For example, the journal device size is set 
+> > via a config option, not on the command line.  For bluestore, the metadata 
+> > device will probably want/need explicit user input so they can ensure it's 
+> > 1/Nth of their SSD (if they have N HDDs to each SSD).
+> > 
+> > And if we put dmcache in there, that partition will need to be sized too.
+> > 
+> > Another consideration is that right now we don't play nice with LVM at 
+> > all.  Should we?  dm-cache is usually used in conjunction with LVM 
+> > (although it doesn't have to be).  Does LVM provide value?  Like, the 
+> > ability for users to add a second SSD to a box and migrate cache, wal, or 
+> > journal partitions around?
+> > 
+> > I'm interested in hearing feedback on requirements, approaches, and 
+> > interfaces before we go too far down the road...
+> > 
+> > Thanks!
+> > sage
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
