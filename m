@@ -1,118 +1,94 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Tue, 5 Apr 2016 01:00:42 +1000
-Message-ID: <20160404150042.GA25465@onthe.net.au>
-References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
- <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160401035610.GA5671@onthe.net.au>
- <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
- <20160401052838.GA8044@onthe.net.au>
- <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
- <20160401194912.GA18636@onthe.net.au>
- <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160402040736.GA22721@onthe.net.au>
- <CY1PR0201MB1897416E6B245E1FC2B9CEBEE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+From: Xiaoxi Chen <superdebuger@gmail.com>
+Subject: Very slow write speed in CephFS+ Fuse +Namespace
+Date: Mon, 4 Apr 2016 23:04:15 +0800
+Message-ID: <CAEYCsV+c-nNoJrMZbYbiBqhQ7L0qu94=VV23YyATEEEqwQLEgw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:55375 "EHLO
-	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752471AbcDDPAs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2016 11:00:48 -0400
-Content-Disposition: inline
-In-Reply-To: <CY1PR0201MB1897416E6B245E1FC2B9CEBEE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+Received: from mail-yw0-f171.google.com ([209.85.161.171]:33804 "EHLO
+	mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755447AbcDDPEV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2016 11:04:21 -0400
+Received: by mail-yw0-f171.google.com with SMTP id d68so117807200ywe.1
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Apr 2016 08:04:21 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@redhat.com>, gfarnum@redhat.com
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-[ Apologies for the tardy continuation of this... ]
+Hi,
 
-On Sat, Apr 02, 2016 at 05:38:23AM +0000, Allen Samuels wrote:
->> -----Original Message-----
->> From: Chris Dunlop [mailto:chris@onthe.net.au]
->> 
->> What I think we're talking about is, if you have an error, the probability of the
->> checksum unfortunately still matching, i.e. a false positive: you think you
->> have good data but it's actually crap. And that's a function of the number of
->> checksum bits, and unrelated to the number of data bits. Taken to extremes,
->> you could have a 5PB data system covered by a single 32 bit checksum, and
->> that's no more or less likely to give you a false positive than a 32 bit checksum
->> on a 4K block, and it doesn't change the BER at all.
->> 
->> That said, if you have to throw away 5PB of data and read it again because of
->> a checksum mismatch, your chances of getting another error during the
->> subsequent 5PB read are obviously much higher than your chances of getting
->> another error during a subsequent 4KB read.
->> 
->> Perhaps this is the effect you're thinking about? However this effect is a
->> function of the block size (== data bits) and is independent of the checksum
->> size.
-> 
-> Here's how I'm thinking about it -- for better or for worse.
-> 
-> The goal of the checksumming system is to be able to complete a read operation and to be able to make a statement about of the odds of the entire read chunk of data being actually correct, i.e., the odds of having zero undetectable uncorrected bit errors for each bit of data in the read operation (UUBER).
+    I am trying the rados namespace feature on CephFS over 10.1.0, it
+works well when I was using the admin keyring. But when I trying to
+lock user "cephFS.tenantA" to /tenantA, the writing speed is extremely
+slow.
 
-Agree.
+[Direct]
+root@slc5b03c-1gtn:/mnt# dd if=/dev/zero of=./test_big_file of=direct
+bs=1M count=20
+5+0 records in
+5+0 records out
+5242880 bytes (5.2 MB) copied, 30.2971 s, 173 kB/s
 
-> A fixed size checksum reduces the odds for the entire operation by a fixed amount (i.e., 2^checksum-size assuming a good checksum algorithm).
+[Buffer]
+root@slc5b03c-1gtn:/mnt# dd if=/dev/zero of=./test_big_file_2 bs=1M count=20
+20+0 records in
+20+0 records out
+20971520 bytes (21 MB) copied, 5.68805 s, 3.7 MB/s
 
-Agree.
 
-> However, the HW UUBER is a per-bit quotation.
+    cephFS.tenantA was created by:
+root@slc5b03c-2ucb:/mnt# ceph auth get-or-create client.cephFS.tenantA
+mon 'allow r' mds 'allow rw path=/tenantA' osd 'allow rw pool=mds_data
+namespace=tenantA'
+[client.cephFS.tenantA]
+key = AQAgeAJXhe7aORAAqx46SfsOqeZQue5XoBV8cQ==
 
-Agree.
+     the layout of /tenantA is:
+root@slc5b03c-2ucb:/mnt# getfattr -n ceph.dir.layout ./tenantA
+# file: tenantA
+ceph.dir.layout="stripe_unit=4194304 stripe_count=1
+object_size=4194304 pool=mds_data pool_namespace=tenantA"
 
-> Thus as you read more bits the odds of a UUBER go UP by the number of bits that you're reading.
 
-Disagree. The UUBER stays the same: it's a _rate_. The odds of an error
-certainly go up, but the error rate is still the same.
+     then try to mount via ceph-fuse like:
+root@slc5b03c-1gtn:~# ceph-fuse --id cephFS.tenantA --cluster
+slc07_ceph_02 --client_mountpoint /tenantA /mnt
+ceph-fuse[94654]: starting ceph client
+2016-04-04 07:42:28.096671 7f65000e2e80 -1 init, newargv =
+0x7f650a680f60 newargc=11
+ceph-fuse[94654]: starting fuse
 
-So then:
+   Note that, the writing speed with admin keyring looks good
+root@slc5b03c-2ucb:/mnt/tenantA# dd if=/dev/zero of=./try oflag=direct
+bs=1M count=20
+20+0 records in
+20+0 records out
+20971520 bytes (21 MB) copied, 0.432546 s, 48.5 MB/s
 
-> If we hold the number of checksum bits constant then this increased HW UUBER is only decreased by a fixed amount, Hence the net UUBER is degraded for larger reads as opposed to smaller reads (again for a fixed-size checksum).
->
-> As you point out the odds of a UUBER for a 5PB read are much higher than the odds of a UUBER for a 4K read. My goal is to level that so that ANY read (i.e., EVERY read) has a UUBER that's below a fixed limit.
-> 
-> That's why I believe that you have to design for a specific checksum-bit / data bit ratio.
-> 
-> Does this make sense to you?
+   And the layout works fine
+root@slc5b03c-1gtn:/mnt# rados ls --pool mds_data --namespace tenantA
+--id cephFS.tenantA --conf /etc/ceph/slc07_ceph_02.conf
+10000000009.00000000
+100000003f3.00000001
+100000003f4.00000000
+100000003f4.00000002
+100000003f3.00000000
+100000003f4.00000003
+100000003f4.00000004
+100000003f4.00000001
 
-Sorry, no, it doesn't :-(
 
-On Sat, Apr 02, 2016 at 05:48:01AM +0000, Allen Samuels wrote:
-> I think you're defining BER as the odds of a read operation silently
-> delivering wrong data. Whereas I'm defining BER as the odds of an
-> individual bit being read incorrectly. When we have a false positive you
-> count "1" failure but I count "Block" number of failures.
->
-> I'm not claiming that either of us is "correct". I'm just trying
-> understand our positions.
->
-> Do you agree with this?
+   Is that something bugly in ceph-fuse?
 
-I agree BER is the odds of an individual bit being read incorrectly
-(actually, for our purposes "delivered" rather than "read", taking into
-account potential errors in the transmission path). So, yes, the more bits
-in a block of data, the more likely you'll see one or more errors. (But the
-size of the block still doesn't change the BER, i.e. the chance of any
-specific bit being flipped.)
+root@slc5b03c-1gtn:~# dpkg -l | grep fuse
+ii  ceph-fuse                              10.1.0-1trusty
+     amd64        FUSE-based client for the Ceph distributed file
+system
+ii  fuse                                   2.9.2-4ubuntu4.14.04.1
+     amd64        Filesystem in Userspace
+ii  libfuse2:amd64                         2.9.2-4ubuntu4.14.04.1
+     amd64        Filesystem in Userspace (library)
 
-However, my point is, given one or more errors in a block of data, the
-chance of a checksum returning a false positive is a function of the size of
-the checksum and independent of the size of the data (and independent of the
-BER).
 
-Sure, as Sage said, the larger the block of data (and/or the larger the
-BER), the more likely you are to see an error, so the more likely you are to
-get unlucky and get a false positive in that block.
-
-However, for a given amount of data you have the same overall chance of
-getting errors (e.g. 5PB @ BER 1x10^-15 == 5 * 8 * 10^15 * 1 * 10^-15 == 40
-bit errors, on average) whether you're reading in small or large blocks, so
-once again we're back to the size of the checksum and not the size of the
-block telling us how likely it is we'll get a false positive when we get
-those errors.
-
-Chris
-
+-Xiaoxi
