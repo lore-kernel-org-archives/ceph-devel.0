@@ -1,7 +1,7 @@
 From: Igor Fedotov <ifedotov@mirantis.com>
 Subject: Re: Adding compression support for bluestore.
-Date: Mon, 4 Apr 2016 15:31:35 +0300
-Message-ID: <57025EA7.5040601@mirantis.com>
+Date: Mon, 4 Apr 2016 15:38:34 +0300
+Message-ID: <5702604A.50302@mirantis.com>
 References: <56C1FCF3.4030505@mirantis.com>
  <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com>
  <56C3BAA3.3070804@mirantis.com>
@@ -25,12 +25,12 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f171.google.com ([209.85.217.171]:35444 "EHLO
-	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751747AbcDDMbk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2016 08:31:40 -0400
-Received: by mail-lb0-f171.google.com with SMTP id bc4so158077683lbc.2
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Apr 2016 05:31:39 -0700 (PDT)
+Received: from mail-lb0-f178.google.com ([209.85.217.178]:33536 "EHLO
+	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751995AbcDDMij (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2016 08:38:39 -0400
+Received: by mail-lb0-f178.google.com with SMTP id u8so159163640lbk.0
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Apr 2016 05:38:38 -0700 (PDT)
 In-Reply-To: <alpine.DEB.2.11.1603311746080.4670@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -55,9 +55,10 @@ On 01.04.2016 0:56, Sage Weil wrote:
 >    };
 >
 >    uint64_t logical_length;  ///< length of logical bytes we represent
-No need for that field - x_len is exactly the same.
 >    uint32_t pextent_id;      ///< id of pextent in onode or enode
-blob_id as Allen already mentioned.
+And I'd prefer 64-bit integer for this field as 4 Gb overwrites can 
+overflow the corresponding counter. That's just 4Tb data written by 4K 
+blocks.
 
 >    uint32_t x_off, x_len;    ///< relative portion of pextent with our data
 >    uint32_t flags;           ///< FLAG_*
@@ -86,13 +87,6 @@ blob_id as Allen already mentioned.
 >    };
 >
 >    vector<bluestore_pextent_t> extents;  ///< extents on disk
-Major reasons to have a set of pextents instead of a single one are as 
-follows, right?
-1) To be able to handle the case Allen pointed out when we are unable to 
-allocate contiguous region during the writing.
-2) To be able to deallocate the blob partially, e.g. when it's partially 
-occluded.
-
 >    uint32_t logical_length;              ///< uncompressed length
 >    uint32_t flags;                       ///< FLAG_*
 >    uint8_t csum_type;                    ///< CSUM_*
@@ -111,9 +105,6 @@ occluded.
 >    uint32_t get_csum_block_size() const {
 >      return 1 << csum_block_order;
 >    }
-Shouldn't we try to maintain single pextent size equal (or aligned) to 
-this one?
-
 >    size_t get_csum_value_size() const {
 >      switch (csum_type) {
 >      case CSUM_XXHASH32: return 4;
