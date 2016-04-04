@@ -1,105 +1,130 @@
-From: "Igor.Podoski@ts.fujitsu.com" <Igor.Podoski@ts.fujitsu.com>
-Subject: RE: Ceph watchdog-like thing to reduce IO block during process goes
- down by abort()
-Date: Mon, 4 Apr 2016 12:29:23 +0000
-Message-ID: <80195f66349b4b8cb7daaf4bd8e30490@R01UKEXCASM222.r01.fujitsu.local>
-References: <27d3bfba39234f83b8441abc4e9aea92@R01UKEXCASM222.r01.fujitsu.local>
- <CAOi1vP89OgUmvozXRO9cvNS-KYaSkBGQRkPS3UeNa2+kgAHkmA@mail.gmail.com>
- <CAJ4mKGbDQEyRfeMskBwsTxK_qoJY_4GfGfFz1h1ht6h6E0xhSg@mail.gmail.com>
- <CANP1eJFto2wEGaWt_dgys-cMQn_6t3wFrWwcURwkX0Y+HY_PKQ@mail.gmail.com>
- <alpine.DEB.2.11.1603251109400.26068@cpach.fuggernut.com>
- <9939bca9f29e4dafadf5946cf4392a98@R01UKEXCASM222.r01.fujitsu.local>
- <6be5638226ba40f89bf9bdfb35fefe8e@R01UKEXCASM222.r01.fujitsu.local>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Adding compression support for bluestore.
+Date: Mon, 4 Apr 2016 15:31:35 +0300
+Message-ID: <57025EA7.5040601@mirantis.com>
+References: <56C1FCF3.4030505@mirantis.com>
+ <CACJqLyb=X1i7tsYeKOEJRdJEEMBGvgW817eY5Bo9YBXDszUDmw@mail.gmail.com>
+ <56C3BAA3.3070804@mirantis.com>
+ <CY1PR0201MB1897E7F1DE04B5E4577B16EDE8A00@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1602220718380.13988@cpach.fuggernut.com>
+ <56CDF40C.9060405@mirantis.com>
+ <CY1PR0201MB1897BC7052AD6F7FB01DCAB4E8A50@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <56D08E30.20308@mirantis.com>
+ <alpine.DEB.2.11.1603151243030.32086@cpach.fuggernut.com>
+ <56E9A727.1030400@mirantis.com>
+ <alpine.DEB.2.11.1603161515360.14377@cpach.fuggernut.com>
+ <56EACAAD.90002@mirantis.com>
+ <alpine.DEB.2.11.1603171123090.14377@cpach.fuggernut.com>
+ <56EC248E.3060502@mirantis.com>
+ <CY1PR0201MB1897035E6E09FE518ACC2DDCE88D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <56F013FB.4040002@mirantis.com>
+ <alpine.DEB.2.11.1603211141560.23875@cpach.fuggernut.com>
+ <56F3E157.2090004@mirantis.com>
+ <alpine.DEB.2.11.1603311746080.4670@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="Windows-1252"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail1.bemta3.messagelabs.com ([195.245.230.164]:31275 "EHLO
-	mail1.bemta3.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751747AbcDDM3u convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 4 Apr 2016 08:29:50 -0400
-Received: from R01UKEXCASM224.r01.fujitsu.local (ex2k13_224.fs.fujitsu.com [10.182.185.122])
-	by mailhost1.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id u34CTYZA007702
-	(version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Mon, 4 Apr 2016 13:29:38 +0100
-In-Reply-To: <6be5638226ba40f89bf9bdfb35fefe8e@R01UKEXCASM222.r01.fujitsu.local>
-Content-Language: en-US
+Received: from mail-lb0-f171.google.com ([209.85.217.171]:35444 "EHLO
+	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751747AbcDDMbk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2016 08:31:40 -0400
+Received: by mail-lb0-f171.google.com with SMTP id bc4so158077683lbc.2
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Apr 2016 05:31:39 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1603311746080.4670@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-
-Hello,
-
-First of all I wanted to thank you all for the discussion.
-
-Now, to sum up pros and cons:
-
-1. Separate watchdog process.
-Pros:
-- prevent of IO block at every case when OSD is going dead by abort(), kill -9, oom kill, whatever
-- will work with single hdd down and whole controller
-- no additional time to hold process in "bad" state
-
-Cons:
-- another process needs to be maintained/tested/documented, cephx keys, files etc.
-- additional startups scripts needs to be created/maintained...
-- new test needs to be written
-- need another connection to monitor (not good for small nodes with one hdd/osd)
-- additional open socket from every osd to watchdog  or open/write/close to named pipe before assert()
-
-2. ceph_abort_markmedown() before ceph_abort()
-Pros:
-- prevent IO block in most cases related with disk access
-- done in existing code, nothing new to maintain
-- assert cleanups, potential good place from where can gather statistics in the future
-- will work with single hdd down and whole controller
-
-Cons:
-- tests needs to be written (maybe extending existing ?)
-- can be done only in special places when connection to monitor is already been made and working
-- needs to be implemented mostly by hand
-- some places could be missed
-- some additional time to hold process in "bad" state, waiting for MarkMeDown ack
-
-If we go into ceph_abort_markmedown(),  this is basically cxwshawn's past PR 6514, so I would feel bad if I just redo it. He was first with this idea, maybe he could reopen it or somehow we'll do it together. I would like to have clear situation here.
+To: Sage Weil <sage@newdream.net>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
 
-Another idea:
-3. Use existing heartbeat for fast-mark dead OSD neighbor.
 
-The idea:
-When process goes dead, all sockets are closed, one from HB too. Then OSD::heartbeat_reset(..) is triggered (on other osd) to close old/reopen connections to dead one.
+On 01.04.2016 0:56, Sage Weil wrote:
+> How about this:
+>
+> // in the onode:
+> map<uint64_t, bluestore_lextent_t> data_map;
+> map<int, bluestore_blob_t> blob_map;
+>
+> // in the enode
+> map<int, bluestore_blob_t> blob_map;
+>
+> struct bluestore_lextent_t {
+>    enum {
+>      FLAG_SHARED = 1,        ///< pextent lives in enode
+>    };
+>
+>    uint64_t logical_length;  ///< length of logical bytes we represent
+No need for that field - x_len is exactly the same.
+>    uint32_t pextent_id;      ///< id of pextent in onode or enode
+blob_id as Allen already mentioned.
 
-When connection with HB peer was closed and that peer had the same address as we (the same node), we could send MOSDFailure() with out of grace time. This combined with "mon osd min down reporters" set to > 1, could mark the osd down immediately by its neighbors.
+>    uint32_t x_off, x_len;    ///< relative portion of pextent with our data
+>    uint32_t flags;           ///< FLAG_*
+> };
+>
+> struct bluestore_pextent_t {
+>    uint64_t offset;          ///< offset on disk
+>    uint64_t length;          ///< length on disk
+> };
+>
+> struct bluestore_blob_t {
+>    enum {
+>      CSUM_XXHASH32 = 1,
+>      CSUM_XXHASH64 = 2,
+>      CSUM_CRC32C = 3,
+>      CSUM_CRC16 = 4,
+>    };
+>    enum {
+>      FLAG_IMMUTABLE = 1,     ///< no overwrites allowed
+>      FLAG_COMPRESSED = 2,    ///< extent is compressed; alg is in first byte of data
+>    };
+>    enum {
+>      COMP_ZLIB = 1,
+>      COMP_SNAPPY = 2,
+>      COMP_LZO = 3,
+>    };
+>
+>    vector<bluestore_pextent_t> extents;  ///< extents on disk
+Major reasons to have a set of pextents instead of a single one are as 
+follows, right?
+1) To be able to handle the case Allen pointed out when we are unable to 
+allocate contiguous region during the writing.
+2) To be able to deallocate the blob partially, e.g. when it's partially 
+occluded.
 
-So this would change/speedup HB behavior only for local osds.
+>    uint32_t logical_length;              ///< uncompressed length
+>    uint32_t flags;                       ///< FLAG_*
+>    uint8_t csum_type;                    ///< CSUM_*
+>    uint8_t csum_block_order;
+>    uint16_t num_refs;               ///< reference count (always 1 when in onode)
+>    vector<char> csum_data;          ///< opaque vector of csum data
+>
+>    uint32_t get_ondisk_length() const {
+>      uint32_t len = 0;
+>      for (auto &p : extentes) {
+>        len += p.length;
+>      }
+>      return len;
+>    }
+>
+>    uint32_t get_csum_block_size() const {
+>      return 1 << csum_block_order;
+>    }
+Shouldn't we try to maintain single pextent size equal (or aligned) to 
+this one?
 
-The question is does it make sense? What would be the case, when all connections on HB from one osd will be closed/restarted, other than abort()/kill/shutdown. Firewall reconfiguration, too many open files/sockets, nf_contrack problem?
+>    size_t get_csum_value_size() const {
+>      switch (csum_type) {
+>      case CSUM_XXHASH32: return 4;
+>      case CSUM_XXHASH64: return 8;
+>      case CSUM_CRC32C: return 4;
+>      case CSUM_CRC16: return 2;
+>      default: return 0;
+>      }
+>    }
+>
+>    // assert (ondisk_length / csum_block_size) * csum_value_size ==
+>    // csum_data.length()
+> };
 
-If only one/some of those connections will be down (but less than osd min down reporters) and then recreated, osd will start sending new heartbeats and it won't be marked as down.
-
-Pros:
-- prevent of IO block at every case when OSD is going dead by abort(), kill -9, oom kill, whatever. BUT only with "mon osd min down reporters" set to proper value and other neighbor OSDs being alive.
-- done in one place in existing code
-- no additional time to hold process in "bad" state
-
-Cons:
-- test need to be written, or maybe existing HB or "min down reporters" could cover this?
-- "osd min down reporters" could be wrongly calculated
-- will work only when connection to monitor is already been made and working
-- messing/changing  already working HB infrastructure, which is tested and stable
-- could miss whole drive controller fail, since every osd will be down in small time window
-- won't work in environment with one osd per node
-- need local neighbors to work
-- if something goes wrong (caused by bad implementation of this idea) osd could flap in down/up state
-
-
-So ... where do we go from here?
-
-Looking on the most visible cons of 1 vs 2 is "maintenance" vs "process at bad state in some time".
-Most visible pros:  1 vs 2 is "all osd dead cases covered" vs "better asserts and error tracking"
-
-
-Regards,
-Igor.
