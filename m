@@ -1,107 +1,109 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: hackathon recap
-Date: Mon, 4 Apr 2016 13:38:12 -0400 (EDT)
-Message-ID: <368859258.3719263.1459791492611.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.11.1604040951240.19675@cpach.fuggernut.com> <CACJqLybuo97ho=NhDri-f5UxuPKw+-0ZTgs0=A=Orp1Yr=4C8A@mail.gmail.com> <alpine.DEB.2.11.1604041119580.19675@cpach.fuggernut.com> <CACJqLyZJx9xbqHsFn4CP3-8w=JBZ8i4fXN3LpYwbF51O=hjbHw@mail.gmail.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: Adding compression/checksum support for bluestore.
+Date: Mon, 4 Apr 2016 17:56:47 +0000
+Message-ID: <CY1PR0201MB1897D93BCB7D2CE2DAFACDCCE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+References: <20160401035610.GA5671@onthe.net.au>
+ <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
+ <20160401052838.GA8044@onthe.net.au>
+ <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
+ <20160401194912.GA18636@onthe.net.au>
+ <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <3E46E6C9-EFD2-49BD-9862-4C46D053A8D6@sandisk.com>
+ <CAJ4mKGaNPfpPbbNY+YVu1NDuVQ-gaS5fi2Pww7DSjsbGt-sbXg@mail.gmail.com>
+ <20160402050505.GA23763@onthe.net.au>
+ <CAJ4mKGYPyqy9tUJH8eUEHFAt25Sqm6uKQpr84ckwDERqsRxUKA@mail.gmail.com>
+ <20160404152657.GA25148@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:56756 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752058AbcDDRiO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2016 13:38:14 -0400
-In-Reply-To: <CACJqLyZJx9xbqHsFn4CP3-8w=JBZ8i4fXN3LpYwbF51O=hjbHw@mail.gmail.com>
+Received: from mail-by2on0098.outbound.protection.outlook.com ([207.46.100.98]:62391
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753517AbcDDR4t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 4 Apr 2016 13:56:49 -0400
+In-Reply-To: <20160404152657.GA25148@onthe.net.au>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Chris Dunlop <chris@onthe.net.au>, Gregory Farnum <gfarnum@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
-
------ Original Message -----
-> From: "Haomai Wang" <haomaiwang@gmail.com>
-> To: "Sage Weil" <sweil@redhat.com>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Monday, April 4, 2016 11:30:54 AM
-> Subject: Re: hackathon recap
-> 
-> On Mon, Apr 4, 2016 at 11:25 PM, Sage Weil <sweil@redhat.com> wrote:
-> > On Mon, 4 Apr 2016, Haomai Wang wrote:
-> >> > - Multi-stream SSDs and GC control APIs
-> >> >
-> >> > Jianjian presented about new APIs to contorl when the SSD is doing
-> >> > garbage
-> >> > collection (stop, start, start but suspend on IO) and streams to
-> >> > segregate
-> >> > writes into different erase blocks.
-> >>
-> >> Where these new apis from? for specified vendor?
-> >
-> > They are working their way through the standards bodies (for NVMe and
-> > SAS/SATA?).  The are probably available in some form from specific
-> > vendors (Samsung) now?
-> >
-> >> > - DPDK and SPDK
-> >> >
-> >> > We spent a lot of time going over some background about what DPDK and
-> >> > SPDK
-> >> > do and don't do.  Takeaways/questions include
-> >> >
-> >> >  - Which TCP stack are we using with Haomai's DPDK AsyncMessenger
-> >> > integration?  Should we support multiple options?
-> >>
-> >> yes, it will be a backend of AsyncMessenger. Just like impled options:
-> >> ms type = async
-> >> ms async transport type = dpdk
-> >> ms dpdk host ipv4 addr = 10.253.102.119
-> >> ms dpdk gateway ipv4 addr = 10.253.102.1
-> >> ms dpdk netmask ipv4 addr = 255.255.255.0
-> >>
-> >> these options will enable dpdk backend.
-> >>
-> >> Current, I don't find any problem between kernel tcp/ip stack with
-> >> dpdk userspace tcp/ip. Even passed test_msgr which injects lots of
-> >> errors.
-> >
-> > Which userspace tcp/ip stack is it?  Seastar?  ODP?
-> 
-> main part from seastar
-
-In ganesha upstream, there is interest in other stacks (mtcp, odp), and they have different capabilities and integration options.  Eventually, we'll want to flex this.
-
-> 
-> >
-> >> >  - How much benefit should we expect?  Current estimate (based on
-> >> > SanDisk's numbers) were that each op consumes around 250us of CPU time,
-> >> > about 80 of that is actual IO time on an NVMe device, and the max time
-> >> > we're likely to cut from bypassing the kernel block stack is on the
-> >> > order
-> >> > of 20-30us.  Successful users of DPDK/SPDK benefit mostly from
-> >> > restructuring the rest of the stack to avoid legacy threading models.
-
-Thats true.  Those reoganizations are critical in general.
-
-> >>
-> >> From now, because of some known bottlenecks need to solve. The most
-> >> advantage is combining dpdk and spdk which actually make
-> >> spdk(userspace nvme driver) effective. Because spdk still use poll
-> >> mode and require physical address while queuing io request. Without
-> >> dpdk, we always need to alloc a physical address aware memory and do
-> >> copy. With dpdk as network stack, we could use memory from NIC to SSD.
-> >> Thanks to the dpdk mbuf design, dpdk stack permit a lots of inflight
-> >> mbuf and alloc new memory if hungry.
-> >
-
-
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBDaHJpcyBEdW5sb3AgW21haWx0
+bzpjaHJpc0BvbnRoZS5uZXQuYXVdDQo+IFNlbnQ6IE1vbmRheSwgQXByaWwgMDQsIDIwMTYgODoy
+NyBBTQ0KPiBUbzogR3JlZ29yeSBGYXJudW0gPGdmYXJudW1AcmVkaGF0LmNvbT4NCj4gQ2M6IEFs
+bGVuIFNhbXVlbHMgPEFsbGVuLlNhbXVlbHNAc2FuZGlzay5jb20+OyBTYWdlIFdlaWwNCj4gPHNh
+Z2VAbmV3ZHJlYW0ubmV0PjsgSWdvciBGZWRvdG92IDxpZmVkb3RvdkBtaXJhbnRpcy5jb20+OyBj
+ZXBoLQ0KPiBkZXZlbCA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQo+IFN1YmplY3Q6IFJl
+OiBBZGRpbmcgY29tcHJlc3Npb24vY2hlY2tzdW0gc3VwcG9ydCBmb3IgYmx1ZXN0b3JlLg0KPiAN
+Cj4gT24gRnJpLCBBcHIgMDEsIDIwMTYgYXQgMTE6MTg6MDVQTSAtMDcwMCwgR3JlZ29yeSBGYXJu
+dW0gd3JvdGU6DQo+ID4gT24gRnJpLCBBcHIgMSwgMjAxNiBhdCAxMDowNSBQTSwgQ2hyaXMgRHVu
+bG9wIDxjaHJpc0BvbnRoZS5uZXQuYXU+IHdyb3RlOg0KPiA+PiBPbiBGcmksIEFwciAwMSwgMjAx
+NiBhdCAwNzo1MTowN1BNIC0wNzAwLCBHcmVnb3J5IEZhcm51bSB3cm90ZToNCj4gPj4+IEZvcmdp
+dmUgbWUgaWYgSSdtIHdyb25nIGhlcmUg4oCUIEkgaGF2ZW4ndCBkb25lIGFueXRoaW5nIHdpdGgN
+Cj4gPj4+IGNoZWNrc3VtbWluZyBzaW5jZSBJIGdyYWR1YXRlZCBjb2xsZWdlIOKAlCBidXQgZ29v
+ZCBjaGVja3N1bW1pbmcgaXMNCj4gPj4+IGFib3V0IHByb2JhYmlsaXRpZXMgYW5kIHBlb3BsZSBz
+dWNrIGF0IGV2YWx1YXRpbmcgcHJvYmFiaWxpdHk6IEknbQ0KPiA+Pj4gcmVhbGx5IG5vdCBzdXJl
+IGFueSBvZiB0aGUgZXhwbGFuYXRpb25zIGdpdmVuIGluIHRoaXMgdGhyZWFkIGFyZQ0KPiA+Pj4g
+cmlnaHQuIEJpdCBlcnJvcnMgYXJlbid0IHJhbmRvbSBhbmQgaW4gZ2VuZXJhbCBpdCByZXF1aXJl
+cyBhIGxvdA0KPiA+Pj4gbW9yZSB0aGFuIG9uZSBiaXQgZmxpcCB0byBjb2xsaWRlIGEgY2hlY2tz
+dW0sIHNvIEkgZG9uJ3QgdGhpbmsgaXQncw0KPiA+Pj4gYSBsaW5lYXIgcmVsYXRpb25zaGlwIGJl
+dHdlZW4gYmxvY2sgc2l6ZSBhbmQgY2hhbmNlIG9mIGVycm9yLg0KPiA+Pj4gRmluZGluZw0KPiA+
+Pg0KPiA+PiBBIHNpbmdsZSBiaXQgZmxpcCBjYW4gY2VydGFpbmx5IHJlc3VsdCBpbiBhIGNoZWNr
+c3VtIGNvbGxpc2lvbiwgd2l0aA0KPiA+PiB0aGUgc2FtZSBjaGFuY2UgYXMgYW55IG90aGVyIGVy
+cm9yLCBpLmUuIDEgaW4NCj4gMl5udW1iZXJfb2ZfY2hlY2tzdW1fYml0cy4NCj4gPg0KPiA+IFRo
+YXQncyBqdXN0IG5vdCB0cnVlLiBJJ2xsIHF1b3RlIGZyb20NCj4gPiBodHRwczovL2VuLm0ud2lr
+aXBlZGlhLm9yZy93aWtpL0N5Y2xpY19yZWR1bmRhbmN5X2NoZWNrI0ludHJvZHVjdGlvbg0KPiA+
+DQo+ID4+IFR5cGljYWxseSBhbiBuLWJpdCBDUkMgYXBwbGllZCB0byBhIGRhdGEgYmxvY2sgb2Yg
+YXJiaXRyYXJ5IGxlbmd0aCB3aWxsIGRldGVjdA0KPiBhbnkgc2luZ2xlIGVycm9yIGJ1cnN0IG5v
+dCBsb25nZXIgdGhhbiBuIGJpdHMgYW5kIHdpbGwgZGV0ZWN0IGEgZnJhY3Rpb24gMSDiiJINCj4g
+Ml4o4oiSbikgb2YgYWxsIGxvbmdlciBlcnJvciBidXJzdHMuDQo+IA0KPiBPdWNoLCBnb3QgbWUh
+IDotKQ0KPiANCj4gSW4gbXkgZGVmZW5zZSwgSSB3YXMgdGFsa2luZyBhYm91dCBjaGVja3N1bXMg
+aW4gZ2VuZXJhbCByYXRoZXIgdGhhbg0KPiBzcGVjaWZpY2FsbHkgQ1JDLiBCdXQgbm8sIEkgd2Fz
+bid0IGFjdHVhbGx5IGF3YXJlIHRoYXQgQ1JDcyBwcm92aWRlIGd1YXJhbnRlZWQNCj4gZGV0ZWN0
+aW9uIG9mIHNpbmdsZSBuLWJpdCBlcnJvciBidXJzdHMuDQo+IA0KPiBUaGF0IGNoYW5nZXMgbXkg
+Y29udGVudGlvbiB0aGF0IGJsb2NrIHNpemUgZG9lc24ndCBtYXR0ZXIuIE15IGNvbnRlbnRpb24N
+Cj4gd2FzIGJhc2VkIG9uIGEgKGdlbmVyaWMsIGdvb2QpIGNoZWNrc3VtIGJlaW5nIGVxdWFsbHkg
+Z29vZCBhdCBwaWNraW5nIHVwDQo+IG11bHRpcGxlIGVycm9ycyBhcyBzaW5nbGUgZXJyb3JzLiBI
+b3dldmVyIHRoaXMgcHJvcGVydHkgb2YgQ1JDcyBtZWFucyB0aGF0LCBpZg0KPiB5b3UgaGF2ZSBt
+dWx0aXBsZSBlcnJvcnMgZnVydGhlciBhcGFydCB0aGFuIHRoZSBuLWJpdHMgb2YgYSBDUkMgY2hl
+Y2tzdW0sDQo+IHlvdSBsb3NlIHlvdXIgZ3VhcmFudGVlIG9mIGRldGVjdGlvbiAoYWx0aG91Z2gg
+eW91IHN0aWxsIGhhdmUgYSB2ZXJ5LCB2ZXJ5DQo+IGdvb2QgY2hhbmNlIG9mIGRldGVjdGlvbiku
+IFNvIGluIGEgbGFyZ2VyIGJsb2NrIHlvdSdyZSBtb3JlIGxpa2VseSB0byBzZWUNCj4gYW5vdGhl
+ciBlcnJvciBmdXJ0aGVyIGF3YXksIGFuZCB0aHVzIG1vcmUgbGlrZWx5IHRvIGdldCBhbiB1bmRl
+dGVjdGVkIGVycm9yLg0KPiANCj4gV2VsbCwgSSd2ZSBsZWFybnQgc29tZXRoaW5nIQ0KPiANCj4g
+VGhhbmtzIGFsbCwgZm9yIHlvdXIgcGF0aWVuY2UuDQo+IA0KPiBDaHJpcw0KDQpJIHdvdWxkIGNv
+bnRlbmQgdGhhdCBDUkNzIGFyZSBwcm9iYWJseSBub3QgdGhlIGJlc3QgYWxnb3JpdGhtIGZvciB1
+cyB0byB1c2UuDQpDUkNzIGFyZSB0YXJnZXRlZCBhdCBidXJzdC1lcnJvciBkZXRlY3Rpb24gdG8g
+dGhlIGRldHJpbWVudCBvZiBvdGhlciBlcnJvciBwcm9maWxlcy4NCk91ciBlcnJvciBwcm9maWxl
+IGlzIGFsbW9zdCBjZXJ0YWlubHkgTk9UIGEgYnVyc3QtZXJyb3IgcHJvZmlsZS4gDQoNCigxKSBP
+dXIgcGh5c2ljYWwgbWVkaWEgcHJvZmlsZSB3aWxsIGJlIHdoYXQncyBOT1QgY2F1Z2h0IGJ5IHRo
+ZSBlcnJvciBjb3JyZWN0aW9uIHNjaGVtZSBhc3NvY2lhdGVkIHdpdGggdGhhdCBtZWRpYS4gSSBk
+b24ndCBrbm93IHdoYXQgdGhhdCBlcnJvciBwcm9maWxlIGxvb2tzIGxpa2UgYW5kIGl0IHByb2Jh
+Ymx5IHdvbid0IGJlIGNvbnN0YW50IGFjcm9zcyBkaWZmZXJlbnQgdHlwZXMgb2YgSFcgKGZvciBl
+eGFtcGxlLCB0aGVyZSBhcmUgc2V2ZXJhbCBkaWZmZXJlbnQgY2xhc3NlcyBvZiBlcnJvciBjb3Jy
+ZWN0aW5nIGFsZ29yaXRobXMgZm9yIGZsYXNoIC0tIHdoaWNoIGhhdmUgdmVyeSBkaWZmZXJlbnQg
+ZmFpbHVyZSBwcm9maWxlcykuIA0KDQooMikgT2Z0ZW4sIHRoZSBmYWlsdXJlIHdvbid0IGJlIEhX
+LCBidXQgYWN0dWFsbHkgU1csIGkuZS4sIHRoZSBlbnRpcmUgYmxvY2sgaXMganVzdCB3cm9uZy4g
+KGkuZS4sIGNvbnRyb2wgcGF0aCBlcnJvcikNCg0KSSBzdXNwZWN0IHRoYXQgYSBjcnlwdG9ncmFw
+aGljIGNoZWNrc3VtIGlzIHdoYXQgd2Ugd2FudCB0byB1c2UsIGkuZS4sIHNvbWV0aGluZyB0aGF0
+IHN0cml2ZXMgdG8gbWFrZSBlYWNoIGJpdCBldmVubHkgY29udHJpYnV0ZSB0byB0aGUgb3ZlcmFs
+bCBjaGVja3N1bS4NCg0KQnV0IHRoaXMgaXMgZWFzaWx5IHBhcmFtZXRlcml6ZWFibGUsIGFuZCB0
+cml2aWFsIHRvIHByb3ZpZGUgYSBudW1iZXIgb2YgdGhlbS4gUHJvYmFibHkgbm90IHdvcnRoIHRv
+byBtdWNoIGRpc2N1c3Npb24gbm93Lg0KDQo+IA0KPiA+IEFuZCBvdmVyIChhdCBsZWFzdCkgdGhl
+IHJhbmdlcyB0aGV5J3JlIGRlc2lnbmVkIGZvciwgaXQncyBldmVuIGJldHRlcjoNCj4gPiB0aGV5
+IHByb3ZpZGUgZ3VhcmFudGVlcyBhYm91dCBob3cgbWFueSBiaXRzIChpbiBhbnkgY29tYmluYXRp
+b24gb3INCj4gPiBhcnJhbmdlbWVudCkgbXVzdCBiZSBmbGlwcGVkIGJlZm9yZSB0aGV5IGNhbiBo
+YXZlIGEgZmFsc2UgbWF0Y2guIChJdA0KPiA+IHNheXMgInR5cGljYWxseSIgYmVjYXVzZSBDUkNz
+IGFyZSBhIHdpZGUgZmFtaWx5IGFuZCB5ZXMsIHlvdSBkbyBoYXZlDQo+ID4gdG8gc2VsZWN0IHRo
+ZSByaWdodCBvbmVzIGluIHRoZSByaWdodCB3YXlzIGluIG9yZGVyIHRvIGdldCB0aGUgZGVzaXJl
+ZA0KPiA+IGVmZmVjdHMuKQ0KPiA+DQo+ID4gQXMgQWxsZW4gc2F5cywgZmxhc2ggbWF5IHJlcXVp
+cmUgc29tZXRoaW5nIGRpZmZlcmVudCwgYnV0IGl0IHdpbGwgYmUNCj4gPiBzaW1pbGFyLiBHZXR0
+aW5nIHRoZSBwZW9wbGUgd2hvIGFjdHVhbGx5IHVuZGVyc3RhbmQgdGhpcyBpcyBkZWZpbml0ZWx5
+DQo+ID4gdGhlIHdheSB0byBnbyDigJQgaXQncyBhbiBhY3RpdmUgcmVzZWFyY2ggZmllbGQgYnV0
+IEkgdGhpbmsgb3ZlciB0aGUNCj4gPiByYW5nZXMgd2UncmUgaW50ZXJlc3RlZCBpbiBpdCdzIGEg
+c29sdmVkIHByb2JsZW0uIEFuZCBjZXJ0YWlubHkgaWYgd2UNCj4gPiB0cnkgYW5kIGd1ZXNzIGFi
+b3V0IHRoaW5ncyBiYXNlZCBvbiBvdXIgaW50dWl0aW9uLCB3ZSAqd2lsbCogZ2V0IGl0DQo+ID4g
+d3JvbmcuIFNvIHNvbWVib2R5IGludGVyZXN0ZWQgaW4gdGhpcyBmZWF0dXJlIHNldCBuZWVkcyB0
+byBnbyBvdXQgYW5kDQo+ID4gZG8gdGhlIHJlYWRpbmcgb3IgdGFsayB0byB0aGUgcmlnaHQgcGVv
+cGxlLCBwbGVhc2UhIDopIC1HcmVnDQo=
