@@ -1,42 +1,107 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Tue, 5 Apr 2016 01:51:25 +1000
-Message-ID: <20160404155125.GA26105@onthe.net.au>
-References: <20160401052838.GA8044@onthe.net.au>
- <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
- <20160401194912.GA18636@onthe.net.au>
- <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <3E46E6C9-EFD2-49BD-9862-4C46D053A8D6@sandisk.com>
- <CAJ4mKGaNPfpPbbNY+YVu1NDuVQ-gaS5fi2Pww7DSjsbGt-sbXg@mail.gmail.com>
- <20160402050505.GA23763@onthe.net.au>
- <CAJ4mKGYPyqy9tUJH8eUEHFAt25Sqm6uKQpr84ckwDERqsRxUKA@mail.gmail.com>
- <alpine.DEB.2.11.1604030921090.19675@cpach.fuggernut.com>
- <20160404153330.GB25148@onthe.net.au>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: Re: hackathon recap
+Date: Mon, 4 Apr 2016 13:38:12 -0400 (EDT)
+Message-ID: <368859258.3719263.1459791492611.JavaMail.zimbra@redhat.com>
+References: <alpine.DEB.2.11.1604040951240.19675@cpach.fuggernut.com> <CACJqLybuo97ho=NhDri-f5UxuPKw+-0ZTgs0=A=Orp1Yr=4C8A@mail.gmail.com> <alpine.DEB.2.11.1604041119580.19675@cpach.fuggernut.com> <CACJqLyZJx9xbqHsFn4CP3-8w=JBZ8i4fXN3LpYwbF51O=hjbHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:59079 "EHLO
-	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755439AbcDDPvd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2016 11:51:33 -0400
-Content-Disposition: inline
-In-Reply-To: <20160404153330.GB25148@onthe.net.au>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:56756 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752058AbcDDRiO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2016 13:38:14 -0400
+In-Reply-To: <CACJqLyZJx9xbqHsFn4CP3-8w=JBZ8i4fXN3LpYwbF51O=hjbHw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Marcel Lauhoff <lauhoff@uni-mainz.de>, Gregory Farnum <gfarnum@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-On Tue, Apr 05, 2016 at 01:33:30AM +1000, Chris Dunlop wrote:
-> On Sun, Apr 03, 2016 at 09:27:22AM -0400, Sage Weil wrote:
-> > In any case, it seems like the way to proceed is to have a variable length 
-> > checksum_block_size, since we need that anyway for other reasons (e.g., 
-> > balancing minimum read size and read amplification for small IOs vs 
-> > metadata overhead).
+Hi,
+
+----- Original Message -----
+> From: "Haomai Wang" <haomaiwang@gmail.com>
+> To: "Sage Weil" <sweil@redhat.com>
+> Cc: ceph-devel@vger.kernel.org
+> Sent: Monday, April 4, 2016 11:30:54 AM
+> Subject: Re: hackathon recap
 > 
-> Or a selectable checksum routine (like ZFS)? If going this way, the
-> checksum_type would determine the checksum_block_size.
+> On Mon, Apr 4, 2016 at 11:25 PM, Sage Weil <sweil@redhat.com> wrote:
+> > On Mon, 4 Apr 2016, Haomai Wang wrote:
+> >> > - Multi-stream SSDs and GC control APIs
+> >> >
+> >> > Jianjian presented about new APIs to contorl when the SSD is doing
+> >> > garbage
+> >> > collection (stop, start, start but suspend on IO) and streams to
+> >> > segregate
+> >> > writes into different erase blocks.
+> >>
+> >> Where these new apis from? for specified vendor?
+> >
+> > They are working their way through the standards bodies (for NVMe and
+> > SAS/SATA?).  The are probably available in some form from specific
+> > vendors (Samsung) now?
+> >
+> >> > - DPDK and SPDK
+> >> >
+> >> > We spent a lot of time going over some background about what DPDK and
+> >> > SPDK
+> >> > do and don't do.  Takeaways/questions include
+> >> >
+> >> >  - Which TCP stack are we using with Haomai's DPDK AsyncMessenger
+> >> > integration?  Should we support multiple options?
+> >>
+> >> yes, it will be a backend of AsyncMessenger. Just like impled options:
+> >> ms type = async
+> >> ms async transport type = dpdk
+> >> ms dpdk host ipv4 addr = 10.253.102.119
+> >> ms dpdk gateway ipv4 addr = 10.253.102.1
+> >> ms dpdk netmask ipv4 addr = 255.255.255.0
+> >>
+> >> these options will enable dpdk backend.
+> >>
+> >> Current, I don't find any problem between kernel tcp/ip stack with
+> >> dpdk userspace tcp/ip. Even passed test_msgr which injects lots of
+> >> errors.
+> >
+> > Which userspace tcp/ip stack is it?  Seastar?  ODP?
+> 
+> main part from seastar
 
-...and, also like ZFS, a cryptographic strength checksum could tie in with
-Marcel's deduplication effort.
+In ganesha upstream, there is interest in other stacks (mtcp, odp), and they have different capabilities and integration options.  Eventually, we'll want to flex this.
 
-Chris
+> 
+> >
+> >> >  - How much benefit should we expect?  Current estimate (based on
+> >> > SanDisk's numbers) were that each op consumes around 250us of CPU time,
+> >> > about 80 of that is actual IO time on an NVMe device, and the max time
+> >> > we're likely to cut from bypassing the kernel block stack is on the
+> >> > order
+> >> > of 20-30us.  Successful users of DPDK/SPDK benefit mostly from
+> >> > restructuring the rest of the stack to avoid legacy threading models.
+
+Thats true.  Those reoganizations are critical in general.
+
+> >>
+> >> From now, because of some known bottlenecks need to solve. The most
+> >> advantage is combining dpdk and spdk which actually make
+> >> spdk(userspace nvme driver) effective. Because spdk still use poll
+> >> mode and require physical address while queuing io request. Without
+> >> dpdk, we always need to alloc a physical address aware memory and do
+> >> copy. With dpdk as network stack, we could use memory from NIC to SSD.
+> >> Thanks to the dpdk mbuf design, dpdk stack permit a lots of inflight
+> >> mbuf and alloc new memory if hungry.
+> >
+
+
+-- 
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-707-0660
+fax.  734-769-8938
+cel.  734-216-5309
