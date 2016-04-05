@@ -1,68 +1,58 @@
-From: David Disseldorp <ddiss@suse.de>
-Subject: [PATCH] rbd: use GFP_NOIO consistently for request allocations
-Date: Tue,  5 Apr 2016 11:13:39 +0200
-Message-ID: <1459847619-27819-1-git-send-email-ddiss@suse.de>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: ceph-disk improvements
+Date: Tue, 5 Apr 2016 11:26:56 +0200
+Message-ID: <CAOi1vP_mnMP_n7xSPXgEycYRifja0k4LE7PBG7epL1uUNWjaJw@mail.gmail.com>
+References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
+	<2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+	<alpine.DEB.2.11.1604030859210.19675@cpach.fuggernut.com>
+	<1651492587.2194.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+	<CA+HUO7LfPzCvFzi59ydivYdkCcbrRqdQSJVjVZtuar6avND9tA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:50510 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757524AbcDEJNz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 5 Apr 2016 05:13:55 -0400
-Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id 8BC47ABB4
-	for <ceph-devel@vger.kernel.org>; Tue,  5 Apr 2016 09:13:52 +0000 (UTC)
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:35370 "EHLO
+	mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757868AbcDEJ05 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2016 05:26:57 -0400
+Received: by mail-lf0-f45.google.com with SMTP id c126so6060229lfb.2
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2016 02:26:57 -0700 (PDT)
+In-Reply-To: <CA+HUO7LfPzCvFzi59ydivYdkCcbrRqdQSJVjVZtuar6avND9tA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: David Disseldorp <ddiss@suse.de>
+To: Sebastien Han <shan@redhat.com>
+Cc: Wido den Hollander <wido@42on.com>, Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Samuel Yaple <sam@yaple.net>
 
-As of 5a60e87603c4c533492c515b7f62578189b03c9c, RBD object request
-allocations are made via rbd_obj_request_create() with GFP_NOIO.
-However, subsequent OSD request allocations in rbd_osd_req_create*()
-use GFP_ATOMIC.
+On Tue, Apr 5, 2016 at 10:30 AM, Sebastien Han <shan@redhat.com> wrote:
+> Wido, I just discussed that with Sam last week and it seems that
+> bcache allocates a minor of 1 when creating the device.
+> Sam ended up writing this:
+> https://yaple.net/2016/03/31/bcache-partitions-and-dkms/
+> The fix is not complex not sure why it is not part of bcache yet...
 
-With heavy page cache usage (e.g. OSDs running on same host as krbd
-client), rbd_osd_req_create() order-1 GFP_ATOMIC allocations have been
-observed to fail, where direct reclaim would have allowed GFP_NOIO
-allocations to succeed.
+I think it's just that no one complained loud enough.
 
-Suggested-by: Vlastimil Babka <vbabka@suse.cz>
-Suggested-by: Neil Brown <neilb@suse.com>
-Signed-off-by: David Disseldorp <ddiss@suse.de>
----
- drivers/block/rbd.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+>
+> Not sure if it's ceph-disk's job to do all of this with bcache though...
+> We might need to check with the bache guys what are their plans about this.
+> If this will go through at some point we might just wait, if not we
+> could implement the partition trick on ceph-disk.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 9c62344..94a1843 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1953,7 +1953,7 @@ static struct ceph_osd_request *rbd_osd_req_create(
- 
- 	osdc = &rbd_dev->rbd_client->client->osdc;
- 	osd_req = ceph_osdc_alloc_request(osdc, snapc, num_ops, false,
--					  GFP_ATOMIC);
-+					  GFP_NOIO);
- 	if (!osd_req)
- 		return NULL;	/* ENOMEM */
- 
-@@ -2002,7 +2002,7 @@ rbd_osd_req_create_copyup(struct rbd_obj_request *obj_request)
- 	rbd_dev = img_request->rbd_dev;
- 	osdc = &rbd_dev->rbd_client->client->osdc;
- 	osd_req = ceph_osdc_alloc_request(osdc, snapc, num_osd_ops,
--						false, GFP_ATOMIC);
-+						false, GFP_NOIO);
- 	if (!osd_req)
- 		return NULL;	/* ENOMEM */
- 
-@@ -2504,7 +2504,7 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
- 					bio_chain_clone_range(&bio_list,
- 								&bio_offset,
- 								clone_size,
--								GFP_ATOMIC);
-+								GFP_NOIO);
- 			if (!obj_request->bio_list)
- 				goto out_unwind;
- 		} else if (type == OBJ_REQUEST_PAGES) {
--- 
-2.6.2
+Making something like this go through shouldn't be a problem.  Sam's
+patch is a bit of quick hack though - it messes up bcache device IDs
+and also limits the number of partitions to 16.  Better to avoid
+another hard-coded constant, if possible.
 
+    # ls -lh /dev/bcache*
+    brw-rw---- 1 root disk 254,  0 Mar 31 20:17 /dev/bcache0
+    brw-rw---- 1 root disk 254,  1 Mar 31 20:17 /dev/bcache0p1
+    brw-rw---- 1 root disk 254, 16 Mar 31 20:17 /dev/bcache16
+    brw-rw---- 1 root disk 254, 17 Mar 31 20:17 /dev/bcache16p1
+    brw-rw---- 1 root disk 254, 32 Mar 31 20:17 /dev/bcache32
+    brw-rw---- 1 root disk 254, 33 Mar 31 20:17 /dev/bcache32p1
+
+We had to solve almost exactly this problem in rbd.  I can submit
+a patch for bcache if it helps ceph-disk in the long run.
+
+Thanks,
+
+                Ilya
