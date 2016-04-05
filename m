@@ -1,66 +1,80 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
+From: Sage Weil <sage@newdream.net>
 Subject: RE: Adding compression/checksum support for bluestore.
-Date: Tue, 5 Apr 2016 20:50:27 +0000
-Message-ID: <CY1PR0201MB1897166E1328EF7895DD8136E89E0@CY1PR0201MB1897.namprd02.prod.outlook.com>
-References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
- <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160401035610.GA5671@onthe.net.au>
- <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
- <20160401052838.GA8044@onthe.net.au>
- <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
- <20160401194912.GA18636@onthe.net.au>
- <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160402040736.GA22721@onthe.net.au>
- <CY1PR0201MB1897416E6B245E1FC2B9CEBEE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160404150042.GA25465@onthe.net.au>
- <CY1PR0201MB18973631BB493B8DCE1A5C4AE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <CABZ+qqkEMrWeQvgYC7eTsXvZY5zECaV7VC0nNiK8BfSSzfU+RQ@mail.gmail.com>
+Date: Tue, 5 Apr 2016 17:14:48 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604051710280.19675@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com> <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com> <20160401035610.GA5671@onthe.net.au> <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
+ <20160401052838.GA8044@onthe.net.au> <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com> <20160401194912.GA18636@onthe.net.au> <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com> <20160402040736.GA22721@onthe.net.au>
+ <CY1PR0201MB1897416E6B245E1FC2B9CEBEE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com> <20160404150042.GA25465@onthe.net.au> <CY1PR0201MB18973631BB493B8DCE1A5C4AE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com> <alpine.DEB.2.11.1604050828340.19675@cpach.fuggernut.com>
+ <CY1PR0201MB1897F3E8DD10367C398F6E95E89E0@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0072.outbound.protection.outlook.com ([157.56.110.72]:29328
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1759782AbcDEUuh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 5 Apr 2016 16:50:37 -0400
-In-Reply-To: <CABZ+qqkEMrWeQvgYC7eTsXvZY5zECaV7VC0nNiK8BfSSzfU+RQ@mail.gmail.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:44072 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759786AbcDEVO4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2016 17:14:56 -0400
+In-Reply-To: <CY1PR0201MB1897F3E8DD10367C398F6E95E89E0@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: Chris Dunlop <chris@onthe.net.au>, Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: Chris Dunlop <chris@onthe.net.au>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SWYgbWVzc2VuZ2VyIGlzIGRvaW5nIENSQy0zMiwgdGhlbiBpdCdzIHByb2JhYmx5IG5vdCB5aWVs
-ZGluZyBhcyBtdWNoIHZhbHVlIGFzIHlvdSB3b3VsZCBsaWtlLiBUaGF0J3MgYmVjYXVzZSB0aGUg
-TklDIGhhcyBBTFJFQURZIGRvbmUgYSBDUkMtMzIgb24gZGF0YSBvdmVyIHRoZSB3aXJlLiBEb2lu
-ZyB0aGUgZXh0cmEgQ1JDIGluIHNvZnR3YXJlIHdpbGwgY2VydGFpbmx5IGhlbHAgdmVyaWZ5IHRo
-YXQgdGhlIE5JQywgUENJZSBidXMsIERSQU0gc3lzdGVtIGlzIHdvcmtpbmcgd2VsbCAtLSBidXQg
-dGhlIHJlYWwgdmFsdWUgaXMgYW4gZW5kLXRvLWVuZCBpbnRlZ3JpdHkgY2hlY2sgb2YgdGhlIHNv
-ZnR3YXJlIChpLmUuLCBtb3N0IGxpa2VseSBmYWlsdXJlIGlzIGEgc29mdHdhcmUgZmFpbHVyZSku
-IFlvdSBkb24ndCBuZWVkIGEgQ1JDIGZvciB0aGF0LiBIb3dldmVyLCBDUkMgaXMgY2hlYXAgZW5v
-dWdoIG5vdCB0byB3b3JyeS4NCg0KQXMgZm9yIHNjcnViLCBpdCdzIGRpZmZlcmVudCAtLSBwcmVz
-dW1hYmx5IHlvdSdyZSBhbHJlYWR5IGRvd25zdHJlYW0gb2YgdGhlIEhXIEVDQyBhbmQgd2hhdGV2
-ZXIgc3Ryb25nIGNoZWNrc3VtcyB5b3UgcHV0IG9uIEJsdWVTdG9yZS4gVG90YWxseSBkaWZmZXJl
-bnQgZGlzY3Vzc2lvbi4gUGx1cywgbWFueSBvZiB0aGUgImZhaWx1cmUiIG1vZGVzIGhlcmUgYXJl
-bid0IGFjdHVhbCBmYWlsdXJlcy4gSW4gb3RoZXIgd29yZHMgc29tZSBvZiB0aGUgZmFpbHVyZXMg
-ZG9uJ3QgZGVsaXZlciBjb3JydXB0IGRhdGEsIHRoZXkganVzdCByZWJ1aWxkIGRhdGEgdGhhdCB3
-YXMgYWxyZWFkeSBnb29kIDopIA0KDQpBbGxlbiBTYW11ZWxzDQpTb2Z0d2FyZSBBcmNoaXRlY3Qs
-IEZlbGxvdywgU3lzdGVtcyBhbmQgU29mdHdhcmUgU29sdXRpb25zIA0KDQoyODgwIEp1bmN0aW9u
-IEF2ZW51ZSwgU2FuIEpvc2UsIENBIDk1MTM0DQpUOiArMSA0MDggODAxIDcwMzB8IE06ICsxIDQw
-OCA3ODAgNjQxNg0KYWxsZW4uc2FtdWVsc0BTYW5EaXNrLmNvbQ0KDQoNCj4gLS0tLS1PcmlnaW5h
-bCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogRGFuIHZhbiBkZXIgU3RlciBbbWFpbHRvOmRhbkB2YW5k
-ZXJzdGVyLmNvbV0NCj4gU2VudDogVHVlc2RheSwgQXByaWwgMDUsIDIwMTYgNTo1OCBBTQ0KPiBU
-bzogQWxsZW4gU2FtdWVscyA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT4NCj4gQ2M6IENocmlz
-IER1bmxvcCA8Y2hyaXNAb250aGUubmV0LmF1PjsgU2FnZSBXZWlsIDxzYWdlQG5ld2RyZWFtLm5l
-dD47DQo+IElnb3IgRmVkb3RvdiA8aWZlZG90b3ZAbWlyYW50aXMuY29tPjsgY2VwaC1kZXZlbCA8
-Y2VwaC0NCj4gZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPiBTdWJqZWN0OiBSZTogQWRkaW5nIGNv
-bXByZXNzaW9uL2NoZWNrc3VtIHN1cHBvcnQgZm9yIGJsdWVzdG9yZS4NCj4gDQo+IE9uIFR1ZSwg
-QXByIDUsIDIwMTYgYXQgMTo1OCBBTSwgQWxsZW4gU2FtdWVscw0KPiA8QWxsZW4uU2FtdWVsc0Bz
-YW5kaXNrLmNvbT4gd3JvdGU6DQo+ID4gSXQncyBub3cgY2xlYXIgdGhhdCBpZiB5b3UgZG91Ymxl
-IHRoZSBkYXRhIHNpemUsIHlvdSBuZWVkIHRvIGFkZCBvbmUgYml0IHRvDQo+IHlvdXIgY2hlY2tz
-dW0gdG8gY29tcGVuc2F0ZS4NCj4gDQo+IFNsaWdodCBwYXJlbnRoZXNpczogbGV0J3Mgbm90IGZv
-cmdldCB0aGF0IHRoZSBtZXNzZW5nZXIgYW5kIE9TRCBkZWVwIHNjcnVicw0KPiB1c2UgY3JjMzJj
-IGZvciBwb3RlbnRpYWxseSB2ZXJ5IGxhcmdlIGNodW5rcyBvZiBkYXRhLiBJZiBibHVlc3RvcmUg
-Z2V0cyBzdHJvbmcNCj4gY2hlY2tzdW1zIHdlIHNob3VsZCB0cnkgYmUgY29uc2lzdGVudCB0aHJv
-dWdob3V0IHRoZSBjb2RlIGJhc2UuDQo+IA0KPiAtLQ0KPiBEYW4NCg==
+On Tue, 5 Apr 2016, Allen Samuels wrote:
+> > -----Original Message-----
+> > From: Sage Weil [mailto:sage@newdream.net]
+> > Sent: Tuesday, April 05, 2016 5:36 AM
+> > To: Allen Samuels <Allen.Samuels@sandisk.com>
+> > Cc: Chris Dunlop <chris@onthe.net.au>; Igor Fedotov
+> > <ifedotov@mirantis.com>; ceph-devel <ceph-devel@vger.kernel.org>
+> > Subject: RE: Adding compression/checksum support for bluestore.
+> > 
+> > On Mon, 4 Apr 2016, Allen Samuels wrote:
+> > > But there's an approximation that gets the job done for us.
+> > >
+> > > When U is VERY SMALL (this will always be true for us :)).
+> > >
+> > > The you can approximate 1-(1-U)^D as D * U.  (for even modest values
+> > > of U (say 10-5), this is a very good approximation).
+> > >
+> > > Now the math is easy.
+> > >
+> > > The odds of failure for reading a block of size D is now D * U, with
+> > > checksum correction it becomes (D * U) / (2^C).
+> > >
+> > > It's now clear that if you double the data size, you need to add one
+> > > bit to your checksum to compensate.
+> > >
+> > > (Again, the actual math is less than 1 bit, but in the range we care
+> > > about 1 bit will always do it).
+> > >
+> > > Anyways, that's what we worked out.
+> > 
+> > D = block size, U = hw UBER, C = checksum.  Let's add N = number of bits you
+> > actually want to read.  In that case, we have to read (N / D) blocks of D bits,
+> > and we get
+> > 
+> > P(reading N bits and getting some bad data and not knowing it)
+> > 	= (D * U) / (2^C) * (N / D)
+> > 	= U * N / 2^C
+> > 
+> > and the D term (block size) disappears.  IIUC this is what Chris was originally
+> > getting at.  The block size affects the probability I get an error on one block,
+> > but if I am a user reading something, you don't care about block size--you
+> > care about how much data you want to read.  I think in that case it doesn't
+> > really matter (modulo rounding error, minimum read size, how precisely we
+> > can locate the error, etc.).
+> > 
+> > Is that right?
+> 
+> It's a "Bit Error Rate", not an "I/O error rate" -- it doesn't matter 
+> how you chunk of the bits into blocks and I/O operations.
+
+Right.  And you use it to calculate "The odds of failure for reading a 
+block of size D", but I'm saying that the user doesn't care about D (which 
+is an implementation detail).  They care about N, the amoutn of data they 
+want to read.  And when you calculate the probability of getting bad data 
+after reading *N* bits, it has nothing to do with D.
+
+Does that make sense?
+
+sage
