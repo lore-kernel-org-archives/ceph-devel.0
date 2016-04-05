@@ -1,186 +1,201 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: Adding compression/checksum support for bluestore.
-Date: Mon, 4 Apr 2016 23:58:17 +0000
-Message-ID: <CY1PR0201MB18973631BB493B8DCE1A5C4AE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
-References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
- <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160401035610.GA5671@onthe.net.au>
- <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
- <20160401052838.GA8044@onthe.net.au>
- <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
- <20160401194912.GA18636@onthe.net.au>
- <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160402040736.GA22721@onthe.net.au>
- <CY1PR0201MB1897416E6B245E1FC2B9CEBEE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160404150042.GA25465@onthe.net.au>
+From: Sebastien Han <shan@redhat.com>
+Subject: Re: ceph-disk improvements
+Date: Tue, 5 Apr 2016 10:30:05 +0200
+Message-ID: <CA+HUO7LfPzCvFzi59ydivYdkCcbrRqdQSJVjVZtuar6avND9tA@mail.gmail.com>
+References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
+ <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+ <alpine.DEB.2.11.1604030859210.19675@cpach.fuggernut.com> <1651492587.2194.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0063.outbound.protection.outlook.com ([65.55.169.63]:55295
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752250AbcDDX6U convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2016 19:58:20 -0400
-In-Reply-To: <20160404150042.GA25465@onthe.net.au>
-Content-Language: en-US
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:37053 "EHLO
+	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750946AbcDEIa0 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2016 04:30:26 -0400
+Received: by mail-wm0-f41.google.com with SMTP id n3so11216016wmn.0
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2016 01:30:25 -0700 (PDT)
+In-Reply-To: <1651492587.2194.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>
-Cc: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org, Samuel Yaple <sam@yaple.net>
 
-> -----Original Message-----
-> From: Chris Dunlop [mailto:chris@onthe.net.au]
-> Sent: Monday, April 04, 2016 8:01 AM
-> To: Allen Samuels <Allen.Samuels@sandisk.com>
-> Cc: Sage Weil <sage@newdream.net>; Igor Fedotov
-> <ifedotov@mirantis.com>; ceph-devel <ceph-devel@vger.kernel.org>
-> Subject: Re: Adding compression/checksum support for bluestore.
-> 
-> [ Apologies for the tardy continuation of this... ]
-> 
-> On Sat, Apr 02, 2016 at 05:38:23AM +0000, Allen Samuels wrote:
-> >> -----Original Message-----
-> >> From: Chris Dunlop [mailto:chris@onthe.net.au]
-> >>
-> >> What I think we're talking about is, if you have an error, the
-> >> probability of the checksum unfortunately still matching, i.e. a
-> >> false positive: you think you have good data but it's actually crap.
-> >> And that's a function of the number of checksum bits, and unrelated
-> >> to the number of data bits. Taken to extremes, you could have a 5PB
-> >> data system covered by a single 32 bit checksum, and that's no more
-> >> or less likely to give you a false positive than a 32 bit checksum on a 4K
-> block, and it doesn't change the BER at all.
-> >>
-> >> That said, if you have to throw away 5PB of data and read it again
-> >> because of a checksum mismatch, your chances of getting another error
-> >> during the subsequent 5PB read are obviously much higher than your
-> >> chances of getting another error during a subsequent 4KB read.
-> >>
-> >> Perhaps this is the effect you're thinking about? However this effect
-> >> is a function of the block size (== data bits) and is independent of
-> >> the checksum size.
-> >
-> > Here's how I'm thinking about it -- for better or for worse.
-> >
-> > The goal of the checksumming system is to be able to complete a read
-> operation and to be able to make a statement about of the odds of the
-> entire read chunk of data being actually correct, i.e., the odds of having zero
-> undetectable uncorrected bit errors for each bit of data in the read operation
-> (UUBER).
-> 
-> Agree.
-> 
-> > A fixed size checksum reduces the odds for the entire operation by a fixed
-> amount (i.e., 2^checksum-size assuming a good checksum algorithm).
-> 
-> Agree.
-> 
-> > However, the HW UUBER is a per-bit quotation.
-> 
-> Agree.
-> 
-> > Thus as you read more bits the odds of a UUBER go UP by the number of
-> bits that you're reading.
-> 
-> Disagree. The UUBER stays the same: it's a _rate_. The odds of an error
-> certainly go up, but the error rate is still the same.
+Wido, I just discussed that with Sam last week and it seems that
+bcache allocates a minor of 1 when creating the device.
+Sam ended up writing this:
+https://yaple.net/2016/03/31/bcache-partitions-and-dkms/
+The fix is not complex not sure why it is not part of bcache yet...
 
-So I talked to some HW people that understand this stuff better than me. Here's what we worked out:
+Not sure if it's ceph-disk's job to do all of this with bcache though..=
+=2E
+We might need to check with the bache guys what are their plans about t=
+his.
+If this will go through at some point we might just wait, if not we
+could implement the partition trick on ceph-disk.
 
-Before I start, I want to again point out that real-world errors are non-random. Errors in the media are subjected to error correcting algorithms that have distinct modes of operation and correction. It will absolutely NOT be the case that silent errors will be evenly distributed amongst the data words (this is a consequence of the ECC algorithms themselves, RS, BCH, LDPC, etc.). However, I'm going to assume that silent errors are random -- because we simply don't know what the right patterns are. Realistically, if you have a HW device with a UBER that's in the typical enterprise range -- say 10^-15, then the UUBER will be several orders of magnitude less than that. So if we use the HW UBER as the UUBER rate, we're more than safely guardbanding the non-random nature of the HW ECC algorithm
- s.
+In addition to that, ceph-disk could have a more general cache option
+where we could add "plugins" like bcache, dm-cache etc.
+Thanks!
 
-So, under the assumption that we are reading a block data of size "D", with a HW UBER of "U", then the odds of an UUBER in that block are:
 
-1 - (1 - U)^D).
+On Mon, Apr 4, 2016 at 3:04 PM, Wido den Hollander <wido@42on.com> wrot=
+e:
+>
+>> Op 3 april 2016 om 14:59 schreef Sage Weil <sweil@redhat.com>:
+>>
+>>
+>> On Sat, 2 Apr 2016, Wido den Hollander wrote:
+>> > > Op 1 april 2016 om 17:36 schreef Sage Weil <sweil@redhat.com>:
+>> > > Hi all,
+>> > >
+>> > > There are a couple of looming features for ceph-disk:
+>> > >
+>> > > 1- Support for additional devices when using BlueStore.  There c=
+an be up
+>> > > to three: the main device, a WAL/journal device (small, ~128MB, =
+ideally
+>> > > NVRAM), and a fast metadata device (as big as you have available=
+; will be
+>> > > used for internal metadata).
+>> > >
+>> > > 2- Support for setting up dm-cache, bcache, and/or FlashCache un=
+derneath
+>> > > filestore or bluestore.
+>> > >
+>> >
+>> > Keep in mind that you can't create a partition on a bcache device.=
+ So when
+>> > using
+>> > bcache, the journal has to be filebased and not a partition.
+>>
+>> Can you create a bcache device out of a partition, though?
+>>
+>
+> Yes. If you have /dev/sdb which is a SSD and /dev/sdc which is a disk=
+, you can
+> do:
+>
+> /dev/sdc can be used as a caching device:
+>
+> $ make-bcache -C /dev/sdb
+>
+> Now, you can partition /dev/sdc (the HDD):
+>
+> $ parted /dev/sdc mklabel gpt
+> $ parted /dev/sdc mkpart primary 2048s 10G
+> $ parted /dev/sdc mkpart primary 10G 100%
+> $ make-bcache -B /dev/sdc2
+>
+> Now you still have to attach /dev/bcache0 (which is /dev/sdc2) to /de=
+v/sdb by
+> echoing the UUID to /sys/block/bcache0/bcache/attach
+>
+> This is explained in a quick howto here:
+> https://wiki.archlinux.org/index.php/Bcache
+>
+> So for BlueStore this would work. A small, non-bcache, parition for X=
+=46S and
+> /dev/bcache0 for BlueStore directly.
+>
+> The question will be if you want ceph-disk to prepare bcache complete=
+ly, or ask
+> the user to provide a already configured device.
+>
+> $ ceph-disk prepare --bluestore --bcache /dev/sdc1:/dev/bcache0
+>
+> The first device will be the XFS partition with metadata and the seco=
+nd will be
+> data device.
+>
+> Wido
+>
+>> sage
+>>
+>> > If we add the flag --file-based-journal or --no-partitions we can =
+create
+>> > OSDs on
+>> > both bcache and dm-cache.
+>> >
+>> > With BlueStore this becomes a problem since it requires the small =
+(XFS)
+>> > filesystem for it's metadata.
+>> >
+>> > Wido
+>> >
+>> > > The current syntax of
+>> > >
+>> > >  ceph-disk prepare [--dmcrypt] [--bluestore] DATADEV [JOURNALDEV=
+]
+>> > >
+>> > > isn't terribly expressive.  For example, the journal device size=
+ is set
+>> > > via a config option, not on the command line.  For bluestore, th=
+e metadata
+>> > >
+>> > > device will probably want/need explicit user input so they can e=
+nsure it's
+>> > >
+>> > > 1/Nth of their SSD (if they have N HDDs to each SSD).
+>> > >
+>> > > And if we put dmcache in there, that partition will need to be s=
+ized too.
+>> > >
+>> > > Another consideration is that right now we don't play nice with =
+LVM at
+>> > > all.  Should we?  dm-cache is usually used in conjunction with L=
+VM
+>> > > (although it doesn't have to be).  Does LVM provide value?  Like=
+, the
+>> > > ability for users to add a second SSD to a box and migrate cache=
+, wal, or
+>> > > journal partitions around?
+>> > >
+>> > > I'm interested in hearing feedback on requirements, approaches, =
+and
+>> > > interfaces before we go too far down the road...
+>> > >
+>> > > Thanks!
+>> > > sage
+>> > > --
+>> > > To unsubscribe from this list: send the line "unsubscribe ceph-d=
+evel" in
+>> > > the body of a message to majordomo@vger.kernel.org
+>> > > More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
+ml
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >
+>> >
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Parsing this: 1-U is the odds of each bit being correct.
-Raising that to the power of D is what you get for a block of size "D" when the errors are uncorrelated (i.e., random). That's the equivalent of "D" independent trials of probability 1-U.
-The outer "1-" is to covert the odds of success back into the odds of failure.
 
-Now if we add a checksum of size "C", then we decrease the odds of failure by 2^C.
 
-So the overall probability of a failure for this read is:
+--=20
+Cheers
 
-(1 - (1-U)^D) / (2^C).
+=E2=80=93=E2=80=93=E2=80=93=E2=80=93=E2=80=93=E2=80=93
+S=C3=A9bastien Han
+Senior Cloud Architect
 
-Now, if we double the data size, it's clear that this expression gets larger, i.e., there's an increase in the odds of a failure.
+"Always give 100%. Unless you're giving blood."
 
-So the design question becomes: How much larger do I need to make C in order to guarantee that the new odds of failure are no greater than before we doubled the data size, i.e.,
-
-(1 - (1-U)^D) / (2^C) >= (1-(1-U)^2D) / (2^(C+Y))
-
-Sadly there's no closed form solution of this that's simple. (Plug it into Wolfram alpha if you want!)
-
-But there's an approximation that gets the job done for us.
-
-When U is VERY SMALL (this will always be true for us :)).
-
-The you can approximate 1-(1-U)^D as D * U.  (for even modest values of U (say 10-5), this is a very good approximation).
-
-Now the math is easy.
-
-The odds of failure for reading a block of size D is now D * U, with checksum correction it becomes (D * U) / (2^C).
-
-It's now clear that if you double the data size, you need to add one bit to your checksum to compensate.
-
-(Again, the actual math is less than 1 bit, but in the range we care about 1 bit will always do it).
-
-Anyways, that's what we worked out.
- 
-
-> 
-> So then:
-> 
-> > If we hold the number of checksum bits constant then this increased HW
-> UUBER is only decreased by a fixed amount, Hence the net UUBER is
-> degraded for larger reads as opposed to smaller reads (again for a fixed-size
-> checksum).
-> >
-> > As you point out the odds of a UUBER for a 5PB read are much higher than
-> the odds of a UUBER for a 4K read. My goal is to level that so that ANY read
-> (i.e., EVERY read) has a UUBER that's below a fixed limit.
-> >
-> > That's why I believe that you have to design for a specific checksum-bit /
-> data bit ratio.
-> >
-> > Does this make sense to you?
-> 
-> Sorry, no, it doesn't :-(
-> 
-> On Sat, Apr 02, 2016 at 05:48:01AM +0000, Allen Samuels wrote:
-> > I think you're defining BER as the odds of a read operation silently
-> > delivering wrong data. Whereas I'm defining BER as the odds of an
-> > individual bit being read incorrectly. When we have a false positive
-> > you count "1" failure but I count "Block" number of failures.
-> >
-> > I'm not claiming that either of us is "correct". I'm just trying
-> > understand our positions.
-> >
-> > Do you agree with this?
-> 
-> I agree BER is the odds of an individual bit being read incorrectly (actually, for
-> our purposes "delivered" rather than "read", taking into account potential
-> errors in the transmission path). So, yes, the more bits in a block of data, the
-> more likely you'll see one or more errors. (But the size of the block still
-> doesn't change the BER, i.e. the chance of any specific bit being flipped.)
-> 
-> However, my point is, given one or more errors in a block of data, the chance
-> of a checksum returning a false positive is a function of the size of the
-> checksum and independent of the size of the data (and independent of the
-> BER).
-> 
-> Sure, as Sage said, the larger the block of data (and/or the larger the BER),
-> the more likely you are to see an error, so the more likely you are to get
-> unlucky and get a false positive in that block.
-> 
-> However, for a given amount of data you have the same overall chance of
-> getting errors (e.g. 5PB @ BER 1x10^-15 == 5 * 8 * 10^15 * 1 * 10^-15 == 40
-> bit errors, on average) whether you're reading in small or large blocks, so
-> once again we're back to the size of the checksum and not the size of the
-> block telling us how likely it is we'll get a false positive when we get those
-> errors.
-> 
-> Chris
-
+Mail: seb@redhat.com
+Address: 11 bis, rue Roqu=C3=A9pine - 75008 Paris
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
