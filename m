@@ -1,85 +1,135 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph-disk improvements
-Date: Tue, 5 Apr 2016 12:21:41 +0200
-Message-ID: <570391B5.1050207@dachary.org>
-References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
- <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
- <alpine.DEB.2.11.1604030859210.19675@cpach.fuggernut.com>
- <1651492587.2194.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
- <CA+HUO7LfPzCvFzi59ydivYdkCcbrRqdQSJVjVZtuar6avND9tA@mail.gmail.com>
- <CAOi1vP_mnMP_n7xSPXgEycYRifja0k4LE7PBG7epL1uUNWjaJw@mail.gmail.com>
+From: Owen Synge <osynge@suse.com>
+Subject: mon daemon makes authentication side effects on startup
+Date: Tue, 5 Apr 2016 13:56:47 +0200
+Message-ID: <5703A7FF.2090002@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:35261 "EHLO
-	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756695AbcDEKVr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2016 06:21:47 -0400
-In-Reply-To: <CAOi1vP_mnMP_n7xSPXgEycYRifja0k4LE7PBG7epL1uUNWjaJw@mail.gmail.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:39141 "EHLO
+	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758021AbcDEL4o (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Tue, 5 Apr 2016 07:56:44 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, Sebastien Han <shan@redhat.com>
-Cc: Wido den Hollander <wido@42on.com>, Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Samuel Yaple <sam@yaple.net>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Ilya,
+Dear all,
 
-On 05/04/2016 11:26, Ilya Dryomov wrote:
-> On Tue, Apr 5, 2016 at 10:30 AM, Sebastien Han <shan@redhat.com> wrot=
-e:
->> Wido, I just discussed that with Sam last week and it seems that
->> bcache allocates a minor of 1 when creating the device.
->> Sam ended up writing this:
->> https://yaple.net/2016/03/31/bcache-partitions-and-dkms/
->> The fix is not complex not sure why it is not part of bcache yet...
->=20
-> I think it's just that no one complained loud enough.
->=20
->>
->> Not sure if it's ceph-disk's job to do all of this with bcache thoug=
-h...
->> We might need to check with the bache guys what are their plans abou=
-t this.
->> If this will go through at some point we might just wait, if not we
->> could implement the partition trick on ceph-disk.
->=20
-> Making something like this go through shouldn't be a problem.  Sam's
-> patch is a bit of quick hack though - it messes up bcache device IDs
-> and also limits the number of partitions to 16.  Better to avoid
-> another hard-coded constant, if possible.
->=20
->     # ls -lh /dev/bcache*
->     brw-rw---- 1 root disk 254,  0 Mar 31 20:17 /dev/bcache0
->     brw-rw---- 1 root disk 254,  1 Mar 31 20:17 /dev/bcache0p1
->     brw-rw---- 1 root disk 254, 16 Mar 31 20:17 /dev/bcache16
->     brw-rw---- 1 root disk 254, 17 Mar 31 20:17 /dev/bcache16p1
->     brw-rw---- 1 root disk 254, 32 Mar 31 20:17 /dev/bcache32
->     brw-rw---- 1 root disk 254, 33 Mar 31 20:17 /dev/bcache32p1
->=20
-> We had to solve almost exactly this problem in rbd.  I can submit
-> a patch for bcache if it helps ceph-disk in the long run.
+This is in my opinion is clearly a bug, but I raise it in the mailing
+list as I expect all admins of ceph will strongly agree, that this makes
+ceph simpler, but developers may feel that since it requires changes to
+more than one repo its not worth doing.
 
-It would help. Implementing a workaround in ceph-disk to compensate for=
- the fact that bcache does not support partitioning feels much better w=
-hen there is hope it will eventually be removed :-)
+When ever you start the mon demon as a side effect the admin, osd, rgw
+and mds keys are created as a side effect if the mds keyring is not
+existing.
 
-Cheers
+In the systemV and systemd init scripts (at least) we have a side
+effect, that should be removed in my opinion, (or worse in my
+alternatively correctly documented.)
 
->=20
-> Thanks,
->=20
->                 Ilya
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+This is a deployment layer violation, in my opinion, and it requires
+considerably more documentation, (and on my part also code) to keep this
+side effect than remove it.
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+usecases for removing this are:
+
+(0) A ceph cluster should be able to be installed in any order. With the
+current behavior if the mds, rgw, or osd nodes are deployed first (along
+with the boot strap keyrings), the mon created must have all keys for
+the admin, mds-bootstrap, rgw-bootstrap, and osd-boostrap deployed in
+the correct path before the mon can safely be started, even if the
+cluster does not need the mds or rgw service's.
+
+(1) It is unfriendly to configuration being stored on the configuration
+server as the server needs to be updated with the values from the
+configured node keys, when people might want to store these keys centrally.
+
+(2) Assuming the admin, rgw-bootstrap, mds-bootstrap and osd-boostrap
+keys are always installed on all mon nodes is clearly increasing the
+distribution of keys where they might not be needed. Hence reducing
+security.
+
+(3) Using the current model adds an extra complication that these keys
+then need to be distributed to each node from the configured node, if
+generated by starting the mon, and not from the configuration server.
+
+(4) If you wish to use a more devops approach, and generate keys
+explicitly all the keys must be installed on all mon nodes before the
+mon nodes are started.
+
+(4.1) As a side effect we need to document why admins need the
+mds-bootstrap keyring when they dont want this service it is confusing,
+and requires an unnecessary process of migrating all keys to the
+explicitly desired keys.
+
+(5) I am developing a simple python library to configure ceph on each
+node independently of all others, (think of it as a parallelism version
+of ceph-deploy that can be called by any config management system) but
+with the current side effect behavior starting the mon needs to fail if
+the mds-bootstrap keyring is not created on the mon nodes before
+starting the mon, otherwise we get ordering complications.
+
+(5) The side effect is confusing, as no one expects this side effect,
+hence this leads to ceph seeming complex to a first time user.
+
+(6) I feel it is the responsibility of configuration management not the
+mon demon to request creating these keys.
+
+(7) I dont think this is clearly documented, hence this leads to ceph
+seeming complex to a first time user.
+
+(8) As more services like mds and rgw get added to ceph the problem gets
+multiplied.
+
+(9) Adding one more step to the by hand installation will clarify the
+authentication process. This extra step would simply be:
+
+   /usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
+
+This is simpler and clearer than documenting the side effect.
+
+consequences:
+
+(1) Each configuration system which depends upon this behavior will need
+to be modified to call the single command on each mon:
+
+   /usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
+
+Here is a fix for ceph-deploy:
+
+https://github.com/SUSE/ceph-deploy/commit/58b030dbe0a964b32f1fbc9a3762e64dd74bf50c
+
+I assume other solutions will be easy to fix too.
+
+The systemd file in question, is
+"/usr/lib/systemd/system/ceph-create-keys@.service" and should be removed.
+
+This will simplify the salt configuration module documentation
+considerably, and if this is not done the salt module will need to add a
+requirement on the mds keyring being created before the mon can be created.
+
+the systemd file looks as follows:
+
+    [Unit]
+    Description=Ceph cluster key creator task
+
+    # the last key created is the mds bootstrap key -- look for that.
+    ConditionPathExists=!/var/lib/ceph/bootstrap-mds/ceph.keyring
+
+    [Service]
+    EnvironmentFile=-/etc/sysconfig/ceph
+    Environment=CLUSTER=ceph
+    ExecStart=/usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id %i
+
+as you can see the side effect is blocked if the file
+
+    /var/lib/ceph/bootstrap-mds/ceph.keyring
+
+already exists, which is just more to document.
+
+Hoping that you all agree
+
+Owen Synge
