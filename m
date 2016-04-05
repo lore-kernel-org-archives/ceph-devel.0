@@ -1,189 +1,64 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: mon daemon makes authentication side effects on startup
-Date: Tue, 5 Apr 2016 13:14:08 -0700
-Message-ID: <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com>
-References: <5703A7FF.2090002@suse.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [BUG] backport commit ebeec2ef4c in ubuntu-vivid.git break cephfs
+Date: Tue, 5 Apr 2016 22:32:14 +0200
+Message-ID: <CAOi1vP9wtdbZ+e9XTiJZSxBOY8uZHWAR6MbEQ8NiwE+akshotA@mail.gmail.com>
+References: <90A03E70-2B8B-4C29-9655-A73D7D4523D5@redhat.com>
+	<20160331143921.GB18035@whence.com>
+	<87CCCB41-994B-4259-8883-001D88B7B893@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:33566 "EHLO
-	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759270AbcDEUOJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2016 16:14:09 -0400
-Received: by mail-vk0-f46.google.com with SMTP id k1so32470268vkb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2016 13:14:09 -0700 (PDT)
-In-Reply-To: <5703A7FF.2090002@suse.com>
+Received: from mail-lb0-f194.google.com ([209.85.217.194]:36379 "EHLO
+	mail-lb0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750890AbcDEUcQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2016 16:32:16 -0400
+Received: by mail-lb0-f194.google.com with SMTP id q4so2150886lbq.3
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2016 13:32:15 -0700 (PDT)
+In-Reply-To: <87CCCB41-994B-4259-8883-001D88B7B893@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Owen Synge <osynge@suse.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zyan@redhat.com>, Sasha Levin <sasha.levin@oracle.com>
+Cc: Kamal Mostafa <kamal@canonical.com>, kernel-team@lists.ubuntu.com, Ceph Development <ceph-devel@vger.kernel.org>, Luis Henriques <luis.henriques@canonical.com>
 
-I think you're fundamentally understanding how these keys come into
-existence. They aren't generated randomly on the local monitor; it
-uses get-or-create in order to fetch them (and create them if they
-don't already exist).
+On Fri, Apr 1, 2016 at 4:01 AM, Yan, Zheng <zyan@redhat.com> wrote:
+>
+>> On Mar 31, 2016, at 22:39, Kamal Mostafa <kamal@canonical.com> wrote:
+>>
+>> On Thu, Mar 31, 2016 at 12:06:42PM +0800, Yan, Zheng wrote:
+>>> ubuntu-vivid git tree includes commit ebeec2ef4c (ceph: fix message
+>>> length computation), but does not contain backport for upstream commit
+>>> 1f041a89b4 (ceph: fix request time stamp encoding). This breaks cephfs
+>>> kernel driver completely. Please add the later commit to your git
+>>> tree.
+>>>
+>>> Regards
+>>> Yan, Zheng
+>>
+>> Hi Yan-
+>>
+>> Thanks for letting us know about this.  If that patch is required for
+>> all trees that carry a backport of 777d738 (ceph: fix message length
+>> computation), then we'll need to apply 1f041a89b4 to:
+>
+> yes, that patch is required for all trees include the back port
+>
+>>
+>>  3.19.y-ckt (stable)
+>>  3.16.y-ckt (stable)
+>>  ubuntu-vivid
+>>  ubuntu-utopic
+>>
+>> For our reference, can you point me to a bug report or email thread
+>> which discusses the breakage?
+>>
+> http://tracker.ceph.com/issues/15302 <http://tracker.ceph.com/issues/15302>
 
-So maybe it's difficult to pre-generate your own keys and plug them
-into the system (I don't remember where the initial values come from
-in standard deployment scenarios), but once they're set up you don't
-need to carefully install your values on all the monitor nodes =E2=80=94=
- they
-will fetch the correct values from the monitor cluster.
-The coordination problem here is not really any different than that of
-making sure your monitors are all part of the "mon initial members"
-config option, btw. Which you need to solve or else you're liable to
-have them coming up and creating independent monitor clusters and
-going haywire.
--Greg
+777d738a5e58 "Fixes" commit that went into 3.16, while 1f041a89b4f2
+went into 4.0.  This means 3.18 stable series is affected is well.
 
-On Tue, Apr 5, 2016 at 4:56 AM, Owen Synge <osynge@suse.com> wrote:
-> Dear all,
->
-> This is in my opinion is clearly a bug, but I raise it in the mailing
-> list as I expect all admins of ceph will strongly agree, that this ma=
-kes
-> ceph simpler, but developers may feel that since it requires changes =
-to
-> more than one repo its not worth doing.
->
-> When ever you start the mon demon as a side effect the admin, osd, rg=
-w
-> and mds keys are created as a side effect if the mds keyring is not
-> existing.
->
-> In the systemV and systemd init scripts (at least) we have a side
-> effect, that should be removed in my opinion, (or worse in my
-> alternatively correctly documented.)
->
-> This is a deployment layer violation, in my opinion, and it requires
-> considerably more documentation, (and on my part also code) to keep t=
-his
-> side effect than remove it.
->
-> usecases for removing this are:
->
-> (0) A ceph cluster should be able to be installed in any order. With =
-the
-> current behavior if the mds, rgw, or osd nodes are deployed first (al=
-ong
-> with the boot strap keyrings), the mon created must have all keys for
-> the admin, mds-bootstrap, rgw-bootstrap, and osd-boostrap deployed in
-> the correct path before the mon can safely be started, even if the
-> cluster does not need the mds or rgw service's.
->
-> (1) It is unfriendly to configuration being stored on the configurati=
-on
-> server as the server needs to be updated with the values from the
-> configured node keys, when people might want to store these keys cent=
-rally.
->
-> (2) Assuming the admin, rgw-bootstrap, mds-bootstrap and osd-boostrap
-> keys are always installed on all mon nodes is clearly increasing the
-> distribution of keys where they might not be needed. Hence reducing
-> security.
->
-> (3) Using the current model adds an extra complication that these key=
-s
-> then need to be distributed to each node from the configured node, if
-> generated by starting the mon, and not from the configuration server.
->
-> (4) If you wish to use a more devops approach, and generate keys
-> explicitly all the keys must be installed on all mon nodes before the
-> mon nodes are started.
->
-> (4.1) As a side effect we need to document why admins need the
-> mds-bootstrap keyring when they dont want this service it is confusin=
-g,
-> and requires an unnecessary process of migrating all keys to the
-> explicitly desired keys.
->
-> (5) I am developing a simple python library to configure ceph on each
-> node independently of all others, (think of it as a parallelism versi=
-on
-> of ceph-deploy that can be called by any config management system) bu=
-t
-> with the current side effect behavior starting the mon needs to fail =
-if
-> the mds-bootstrap keyring is not created on the mon nodes before
-> starting the mon, otherwise we get ordering complications.
->
-> (5) The side effect is confusing, as no one expects this side effect,
-> hence this leads to ceph seeming complex to a first time user.
->
-> (6) I feel it is the responsibility of configuration management not t=
-he
-> mon demon to request creating these keys.
->
-> (7) I dont think this is clearly documented, hence this leads to ceph
-> seeming complex to a first time user.
->
-> (8) As more services like mds and rgw get added to ceph the problem g=
-ets
-> multiplied.
->
-> (9) Adding one more step to the by hand installation will clarify the
-> authentication process. This extra step would simply be:
->
->    /usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
->
-> This is simpler and clearer than documenting the side effect.
->
-> consequences:
->
-> (1) Each configuration system which depends upon this behavior will n=
-eed
-> to be modified to call the single command on each mon:
->
->    /usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
->
-> Here is a fix for ceph-deploy:
->
-> https://github.com/SUSE/ceph-deploy/commit/58b030dbe0a964b32f1fbc9a37=
-62e64dd74bf50c
->
-> I assume other solutions will be easy to fix too.
->
-> The systemd file in question, is
-> "/usr/lib/systemd/system/ceph-create-keys@.service" and should be rem=
-oved.
->
-> This will simplify the salt configuration module documentation
-> considerably, and if this is not done the salt module will need to ad=
-d a
-> requirement on the mds keyring being created before the mon can be cr=
-eated.
->
-> the systemd file looks as follows:
->
->     [Unit]
->     Description=3DCeph cluster key creator task
->
->     # the last key created is the mds bootstrap key -- look for that.
->     ConditionPathExists=3D!/var/lib/ceph/bootstrap-mds/ceph.keyring
->
->     [Service]
->     EnvironmentFile=3D-/etc/sysconfig/ceph
->     Environment=3DCLUSTER=3Dceph
->     ExecStart=3D/usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id =
-%i
->
-> as you can see the side effect is blocked if the file
->
->     /var/lib/ceph/bootstrap-mds/ceph.keyring
->
-> already exists, which is just more to document.
->
-> Hoping that you all agree
->
-> Owen Synge
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Sasha, could you cherry-pick 1f041a89b4f2 ("ceph: fix request time
+stamp encoding")?
+
+Thanks,
+
+                Ilya
