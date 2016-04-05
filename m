@@ -1,64 +1,83 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [BUG] backport commit ebeec2ef4c in ubuntu-vivid.git break cephfs
-Date: Tue, 5 Apr 2016 22:32:14 +0200
-Message-ID: <CAOi1vP9wtdbZ+e9XTiJZSxBOY8uZHWAR6MbEQ8NiwE+akshotA@mail.gmail.com>
-References: <90A03E70-2B8B-4C29-9655-A73D7D4523D5@redhat.com>
-	<20160331143921.GB18035@whence.com>
-	<87CCCB41-994B-4259-8883-001D88B7B893@redhat.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: Adding compression/checksum support for bluestore.
+Date: Tue, 5 Apr 2016 20:41:47 +0000
+Message-ID: <CY1PR0201MB1897F3E8DD10367C398F6E95E89E0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
+ <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <20160401035610.GA5671@onthe.net.au>
+ <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
+ <20160401052838.GA8044@onthe.net.au>
+ <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
+ <20160401194912.GA18636@onthe.net.au>
+ <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <20160402040736.GA22721@onthe.net.au>
+ <CY1PR0201MB1897416E6B245E1FC2B9CEBEE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <20160404150042.GA25465@onthe.net.au>
+ <CY1PR0201MB18973631BB493B8DCE1A5C4AE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1604050828340.19675@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f194.google.com ([209.85.217.194]:36379 "EHLO
-	mail-lb0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750890AbcDEUcQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2016 16:32:16 -0400
-Received: by mail-lb0-f194.google.com with SMTP id q4so2150886lbq.3
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2016 13:32:15 -0700 (PDT)
-In-Reply-To: <87CCCB41-994B-4259-8883-001D88B7B893@redhat.com>
+Received: from mail-bn1on0065.outbound.protection.outlook.com ([157.56.110.65]:59712
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752476AbcDEUl4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2016 16:41:56 -0400
+In-Reply-To: <alpine.DEB.2.11.1604050828340.19675@cpach.fuggernut.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, Sasha Levin <sasha.levin@oracle.com>
-Cc: Kamal Mostafa <kamal@canonical.com>, kernel-team@lists.ubuntu.com, Ceph Development <ceph-devel@vger.kernel.org>, Luis Henriques <luis.henriques@canonical.com>
+To: Sage Weil <sage@newdream.net>
+Cc: Chris Dunlop <chris@onthe.net.au>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Apr 1, 2016 at 4:01 AM, Yan, Zheng <zyan@redhat.com> wrote:
->
->> On Mar 31, 2016, at 22:39, Kamal Mostafa <kamal@canonical.com> wrote:
->>
->> On Thu, Mar 31, 2016 at 12:06:42PM +0800, Yan, Zheng wrote:
->>> ubuntu-vivid git tree includes commit ebeec2ef4c (ceph: fix message
->>> length computation), but does not contain backport for upstream commit
->>> 1f041a89b4 (ceph: fix request time stamp encoding). This breaks cephfs
->>> kernel driver completely. Please add the later commit to your git
->>> tree.
->>>
->>> Regards
->>> Yan, Zheng
->>
->> Hi Yan-
->>
->> Thanks for letting us know about this.  If that patch is required for
->> all trees that carry a backport of 777d738 (ceph: fix message length
->> computation), then we'll need to apply 1f041a89b4 to:
->
-> yes, that patch is required for all trees include the back port
->
->>
->>  3.19.y-ckt (stable)
->>  3.16.y-ckt (stable)
->>  ubuntu-vivid
->>  ubuntu-utopic
->>
->> For our reference, can you point me to a bug report or email thread
->> which discusses the breakage?
->>
-> http://tracker.ceph.com/issues/15302 <http://tracker.ceph.com/issues/15302>
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@newdream.net]
+> Sent: Tuesday, April 05, 2016 5:36 AM
+> To: Allen Samuels <Allen.Samuels@sandisk.com>
+> Cc: Chris Dunlop <chris@onthe.net.au>; Igor Fedotov
+> <ifedotov@mirantis.com>; ceph-devel <ceph-devel@vger.kernel.org>
+> Subject: RE: Adding compression/checksum support for bluestore.
+> 
+> On Mon, 4 Apr 2016, Allen Samuels wrote:
+> > But there's an approximation that gets the job done for us.
+> >
+> > When U is VERY SMALL (this will always be true for us :)).
+> >
+> > The you can approximate 1-(1-U)^D as D * U.  (for even modest values
+> > of U (say 10-5), this is a very good approximation).
+> >
+> > Now the math is easy.
+> >
+> > The odds of failure for reading a block of size D is now D * U, with
+> > checksum correction it becomes (D * U) / (2^C).
+> >
+> > It's now clear that if you double the data size, you need to add one
+> > bit to your checksum to compensate.
+> >
+> > (Again, the actual math is less than 1 bit, but in the range we care
+> > about 1 bit will always do it).
+> >
+> > Anyways, that's what we worked out.
+> 
+> D = block size, U = hw UBER, C = checksum.  Let's add N = number of bits you
+> actually want to read.  In that case, we have to read (N / D) blocks of D bits,
+> and we get
+> 
+> P(reading N bits and getting some bad data and not knowing it)
+> 	= (D * U) / (2^C) * (N / D)
+> 	= U * N / 2^C
+> 
+> and the D term (block size) disappears.  IIUC this is what Chris was originally
+> getting at.  The block size affects the probability I get an error on one block,
+> but if I am a user reading something, you don't care about block size--you
+> care about how much data you want to read.  I think in that case it doesn't
+> really matter (modulo rounding error, minimum read size, how precisely we
+> can locate the error, etc.).
+> 
+> Is that right?
 
-777d738a5e58 "Fixes" commit that went into 3.16, while 1f041a89b4f2
-went into 4.0.  This means 3.18 stable series is affected is well.
+It's a "Bit Error Rate", not an "I/O error rate" -- it doesn't matter how you chunk of the bits into blocks and I/O operations.
 
-Sasha, could you cherry-pick 1f041a89b4f2 ("ceph: fix request time
-stamp encoding")?
-
-Thanks,
-
-                Ilya
+> 
+> sage
