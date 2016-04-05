@@ -1,135 +1,59 @@
-From: Owen Synge <osynge@suse.com>
-Subject: mon daemon makes authentication side effects on startup
-Date: Tue, 5 Apr 2016 13:56:47 +0200
-Message-ID: <5703A7FF.2090002@suse.com>
+From: Sage Weil <sage@newdream.net>
+Subject: RE: Adding compression/checksum support for bluestore.
+Date: Tue, 5 Apr 2016 08:35:43 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604050828340.19675@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com> <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com> <20160401035610.GA5671@onthe.net.au> <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
+ <20160401052838.GA8044@onthe.net.au> <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com> <20160401194912.GA18636@onthe.net.au> <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com> <20160402040736.GA22721@onthe.net.au>
+ <CY1PR0201MB1897416E6B245E1FC2B9CEBEE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com> <20160404150042.GA25465@onthe.net.au> <CY1PR0201MB18973631BB493B8DCE1A5C4AE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:39141 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758021AbcDEL4o (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Tue, 5 Apr 2016 07:56:44 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:37633 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751899AbcDEMfu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2016 08:35:50 -0400
+In-Reply-To: <CY1PR0201MB18973631BB493B8DCE1A5C4AE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: Chris Dunlop <chris@onthe.net.au>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Dear all,
+On Mon, 4 Apr 2016, Allen Samuels wrote:
+> But there's an approximation that gets the job done for us.
+> 
+> When U is VERY SMALL (this will always be true for us :)).
+> 
+> The you can approximate 1-(1-U)^D as D * U.  (for even modest values of 
+> U (say 10-5), this is a very good approximation).
+> 
+> Now the math is easy.
+> 
+> The odds of failure for reading a block of size D is now D * U, with 
+> checksum correction it becomes (D * U) / (2^C).
+>
+> It's now clear that if you double the data size, you need to add one bit 
+> to your checksum to compensate.
+> 
+> (Again, the actual math is less than 1 bit, but in the range we care 
+> about 1 bit will always do it).
+> 
+> Anyways, that's what we worked out.
 
-This is in my opinion is clearly a bug, but I raise it in the mailing
-list as I expect all admins of ceph will strongly agree, that this makes
-ceph simpler, but developers may feel that since it requires changes to
-more than one repo its not worth doing.
+D = block size, U = hw UBER, C = checksum.  Let's add N = number of bits 
+you actually want to read.  In that case, we have to read (N / D) blocks 
+of D bits, and we get
 
-When ever you start the mon demon as a side effect the admin, osd, rgw
-and mds keys are created as a side effect if the mds keyring is not
-existing.
+P(reading N bits and getting some bad data and not knowing it)
+	= (D * U) / (2^C) * (N / D)
+	= U * N / 2^C
 
-In the systemV and systemd init scripts (at least) we have a side
-effect, that should be removed in my opinion, (or worse in my
-alternatively correctly documented.)
+and the D term (block size) disappears.  IIUC this is what Chris was 
+originally getting at.  The block size affects the probability I get an 
+error on one block, but if I am a user reading something, you don't care 
+about block size--you care about how much data you want to read.  I think 
+in that case it doesn't really matter (modulo rounding error, minimum read 
+size, how precisely we can locate the error, etc.).
 
-This is a deployment layer violation, in my opinion, and it requires
-considerably more documentation, (and on my part also code) to keep this
-side effect than remove it.
+Is that right?
 
-usecases for removing this are:
-
-(0) A ceph cluster should be able to be installed in any order. With the
-current behavior if the mds, rgw, or osd nodes are deployed first (along
-with the boot strap keyrings), the mon created must have all keys for
-the admin, mds-bootstrap, rgw-bootstrap, and osd-boostrap deployed in
-the correct path before the mon can safely be started, even if the
-cluster does not need the mds or rgw service's.
-
-(1) It is unfriendly to configuration being stored on the configuration
-server as the server needs to be updated with the values from the
-configured node keys, when people might want to store these keys centrally.
-
-(2) Assuming the admin, rgw-bootstrap, mds-bootstrap and osd-boostrap
-keys are always installed on all mon nodes is clearly increasing the
-distribution of keys where they might not be needed. Hence reducing
-security.
-
-(3) Using the current model adds an extra complication that these keys
-then need to be distributed to each node from the configured node, if
-generated by starting the mon, and not from the configuration server.
-
-(4) If you wish to use a more devops approach, and generate keys
-explicitly all the keys must be installed on all mon nodes before the
-mon nodes are started.
-
-(4.1) As a side effect we need to document why admins need the
-mds-bootstrap keyring when they dont want this service it is confusing,
-and requires an unnecessary process of migrating all keys to the
-explicitly desired keys.
-
-(5) I am developing a simple python library to configure ceph on each
-node independently of all others, (think of it as a parallelism version
-of ceph-deploy that can be called by any config management system) but
-with the current side effect behavior starting the mon needs to fail if
-the mds-bootstrap keyring is not created on the mon nodes before
-starting the mon, otherwise we get ordering complications.
-
-(5) The side effect is confusing, as no one expects this side effect,
-hence this leads to ceph seeming complex to a first time user.
-
-(6) I feel it is the responsibility of configuration management not the
-mon demon to request creating these keys.
-
-(7) I dont think this is clearly documented, hence this leads to ceph
-seeming complex to a first time user.
-
-(8) As more services like mds and rgw get added to ceph the problem gets
-multiplied.
-
-(9) Adding one more step to the by hand installation will clarify the
-authentication process. This extra step would simply be:
-
-   /usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
-
-This is simpler and clearer than documenting the side effect.
-
-consequences:
-
-(1) Each configuration system which depends upon this behavior will need
-to be modified to call the single command on each mon:
-
-   /usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
-
-Here is a fix for ceph-deploy:
-
-https://github.com/SUSE/ceph-deploy/commit/58b030dbe0a964b32f1fbc9a3762e64dd74bf50c
-
-I assume other solutions will be easy to fix too.
-
-The systemd file in question, is
-"/usr/lib/systemd/system/ceph-create-keys@.service" and should be removed.
-
-This will simplify the salt configuration module documentation
-considerably, and if this is not done the salt module will need to add a
-requirement on the mds keyring being created before the mon can be created.
-
-the systemd file looks as follows:
-
-    [Unit]
-    Description=Ceph cluster key creator task
-
-    # the last key created is the mds bootstrap key -- look for that.
-    ConditionPathExists=!/var/lib/ceph/bootstrap-mds/ceph.keyring
-
-    [Service]
-    EnvironmentFile=-/etc/sysconfig/ceph
-    Environment=CLUSTER=ceph
-    ExecStart=/usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id %i
-
-as you can see the side effect is blocked if the file
-
-    /var/lib/ceph/bootstrap-mds/ceph.keyring
-
-already exists, which is just more to document.
-
-Hoping that you all agree
-
-Owen Synge
+sage
