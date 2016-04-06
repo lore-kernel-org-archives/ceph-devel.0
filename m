@@ -1,54 +1,336 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Wed, 6 Apr 2016 09:15:32 +0200
-Message-ID: <CABZ+qqmjbD_75X93Mef4pqHkYFyuEvrsOFXiJH=SJqYi=3BqEQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1603301806380.22014@cpach.fuggernut.com>
- <CY1PR0201MB189760F1BB3EB67EF216B71DE8980@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160401035610.GA5671@onthe.net.au> <alpine.DEB.2.11.1604010055050.22014@cpach.fuggernut.com>
- <20160401052838.GA8044@onthe.net.au> <alpine.DEB.2.11.1604011051480.22014@cpach.fuggernut.com>
- <20160401194912.GA18636@onthe.net.au> <CY1PR0201MB1897EE2E58FFF2FF3DFFFB55E89A0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160402040736.GA22721@onthe.net.au> <CY1PR0201MB1897416E6B245E1FC2B9CEBEE89B0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160404150042.GA25465@onthe.net.au> <CY1PR0201MB18973631BB493B8DCE1A5C4AE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <CABZ+qqkEMrWeQvgYC7eTsXvZY5zECaV7VC0nNiK8BfSSzfU+RQ@mail.gmail.com> <CY1PR0201MB1897166E1328EF7895DD8136E89E0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+From: Owen Synge <osynge@suse.com>
+Subject: The fundamental evil of "magic" in computing systems -> Was: mon
+ daemon makes authentication side effects on startup
+Date: Wed, 6 Apr 2016 10:23:08 +0200
+Message-ID: <5704C76C.2050408@suse.com>
+References: <5703A7FF.2090002@suse.com>
+ <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f45.google.com ([209.85.215.45]:35468 "EHLO
-	mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754572AbcDFHQR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2016 03:16:17 -0400
-Received: by mail-lf0-f45.google.com with SMTP id c126so27254103lfb.2
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Apr 2016 00:16:16 -0700 (PDT)
-Received: from mail-lb0-f182.google.com (mail-lb0-f182.google.com. [209.85.217.182])
-        by smtp.gmail.com with ESMTPSA id um4sm256640lbb.1.2016.04.06.00.16.12
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1/SSLv3 cipher=OTHER);
-        Wed, 06 Apr 2016 00:16:12 -0700 (PDT)
-Received: by mail-lb0-f182.google.com with SMTP id vo2so24016743lbb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Apr 2016 00:16:12 -0700 (PDT)
-In-Reply-To: <CY1PR0201MB1897166E1328EF7895DD8136E89E0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:45148 "EHLO
+	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754649AbcDFIX3 (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Wed, 6 Apr 2016 04:23:29 -0400
+In-Reply-To: <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Chris Dunlop <chris@onthe.net.au>, Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Apr 5, 2016 at 10:50 PM, Allen Samuels
-<Allen.Samuels@sandisk.com> wrote:
-> If messenger is doing CRC-32, then it's probably not yielding as much value as you would like. That's because the NIC has ALREADY done a CRC-32 on data over the wire. Doing the extra CRC in software will certainly help verify that the NIC, PCIe bus, DRAM system is working well -- but the real value is an end-to-end integrity check of the software (i.e., most likely failure is a software failure). You don't need a CRC for that. However, CRC is cheap enough not to worry.
+Dear Greg and others,
 
-It would depend in which layer the corruption was introduced. crc32 is
-in the ethernet frame, AFAIK. We've observed corrupted packets where
-the TCP checksum validated but the data was clearly corrupted [1].
-Ceph messenger crc32c helped in that case, but from this discussion
-it's not strong enough to detect all levels of corruptions in long
-messages.
+Thankyou for your very helpful email, as it completely misses my point,
+and that illustrate why this point is so important to be addressed.
 
-> As for scrub, it's different -- presumably you're already downstream of the HW ECC and whatever strong checksums you put on BlueStore. Totally different discussion. Plus, many of the "failure" modes here aren't actual failures. In other words some of the failures don't deliver corrupt data, they just rebuild data that was already good :)
+I am sure Greg has a deep understanding of this area. But I am pleased
+Greg missed my points from 0-9, Greg's assumption that it is lack of
+understanding on my part (which I am sure is common), clearly
+illustrates where this "magic" of the side effect of starting a mon
+demon becomes becomes "dark magic".
 
-I was referring to deep scrub of the non-bluestores. Perhaps FileStore
-deep-scrub needs to be stronger than crc32c.
+If you object to "magic" and "dark magic" in this email please
+substitute them with "side effect" and "negative consequences of side
+effects" respectively, and you get a more serious reply :)
 
--- Dan
+On 04/05/2016 10:14 PM, Gregory Farnum wrote:
+> I think you're fundamentally understanding how these keys come into
+> existence. They aren't generated randomly on the local monitor; it
+> uses get-or-create in order to fetch them (and create them if they
+> don't already exist).
 
-[1] http://cds.cern.ch/record/2026187/
+I have looked at this issue in depth, and general confusion in this are=
+a
+is indeed very common, so it is reasonable to expect everyone is
+confused by the same thing.
+
+In my experience it is "magic" that causes admins fear, as good admins,
+need to understand, because they need to understand the side effects of
+any "magic", in case the "magic" is "dark", and in this case it is with
+points (0) to (8) showing is indeed "dark magic".
+
+Lets be specific:
+
+=46etch and create are fundamentally different in side effects when doi=
+ng
+deployment. Lets be clear, when ceph does a "fetch" of a key, is not I
+believe and issue, but when ceph uses magic to "create" keys, it can
+often cause side effects. Hence the process to "create" a key should
+only occur when its asked to be done.
+
+The current get-or-create keyrings as a side effect of booting a mon
+makes many issues (points 0-8 may not be all the issues, just ones that
+spring to my mind). If the booting of a mon only did a fetch I would
+feel we could resolve all my point except (2) and (9) sadly a boot of a
+mon will also do a create keys where this "magic" starts to become very
+"dark" indeed.
+
+> So maybe it's difficult to pre-generate your own keys and plug them
+> into the system (I don't remember where the initial values come from
+> in standard deployment scenarios),
+
+See my reply to John as to how you can deploy ceph without ceph-create-=
+keys.
+
+> but once they're set up you don't
+> need to carefully install your values on all the monitor nodes =E2=80=
+=94 they
+> will fetch the correct values from the monitor cluster.
+
+I am objecting to the side effect of booting the mon and that process
+creating keys that where not asked for, potentially causing valid
+osd-bootstrap, rgw-bootstrap or mds-bootstrap to fail authentication as
+invalid ones have been created as a side effect of starting the mon dae=
+mons.
+
+> The coordination problem here is not really any different than that o=
+f
+> making sure your monitors are all part of the "mon initial members"
+> config option,=20
+
+You are forgetting that we also have osd-bootstrap, rgw-bootstrap or
+mds-bootstrap keys and these may be generated by some other tool than
+the mon, this is made much much harder to do by the mon init scripts
+without being asked explicitly to do so.
+
+> btw. Which you need to solve or else you're liable to
+> have them coming up and creating independent monitor clusters and
+> going haywire.
+> -Greg
+
+Not knowing what is happening is the enemy of understanding, and hence
+the creator of "magic". Often giving the "magic" a name, or making it
+explicit, causes enough understanding to remove it's "magic" properties=
+=2E
+Hence making all occurrences of key "create" (not "fetch") an explicit
+step rather than a side effect will go a great deal to address this iss=
+ue.
+
+So if creating keys was not a side effect of booting mons, we would hav=
+e
+not issue here, as anyone who is used to cluster automation, has good
+tools. These tools include chef, puppet, salt, and ansible, for cluster
+management ideally, but more manually we have tools to copy files such
+as rsync, scp, and tools to diagnose such issues such as checksums.
+
+  ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
+
+Having the above command separated from booting a mon actually avoids
+osd's rgw's and mds's going haywire if they are configured in parallel
+to the mon with keys from a source external to the mon, unless you
+either (a) build in a layer of cluster synchronization above ceph, such
+as ceph-deploy has done with its single threaded operation across a
+complete cluster, or (b) do lots of dirty "magic" to remove
+inconsistencies. Solution (a) is not good due to issue (0) amongst
+others, and (b) creates more "magic" which has to be very carefully
+designed to avoid it being "dark".
+
+Another way to remove this "magic" is to document "magic" in detail, an=
+d
+documenting this in this email is long and detailed, although Greg made
+a start, he missed out the very important part of why the mds-bootstrap
+keyring, is more important than is documented when if comes to deployin=
+g
+your cluster the first time. I will skip it for now, but I am happy to
+expand if needed.
+
+In this case I argue the "magic" can be removed by making the process o=
+f
+creating keys explicit. I would propose separating the "create" of  key=
+s
+from booting a mon is the least confusing and "magical" solution, with
+the least chance of causing trouble for admins.
+
+Thank you Greg for taking the time to reply, and please forgive me for
+using your reply to illustrate that the real problem is the "magic", an=
+d
+that "magic" removes understanding, hence knowledge of the "magic"
+having "dark" issues, as this is a fear inducing thing for an admin new
+to ceph.
+
+Best wishes,
+
+Owen
+
+> On Tue, Apr 5, 2016 at 4:56 AM, Owen Synge <osynge@suse.com> wrote:
+>> Dear all,
+>>
+>> This is in my opinion is clearly a bug, but I raise it in the mailin=
+g
+>> list as I expect all admins of ceph will strongly agree, that this m=
+akes
+>> ceph simpler, but developers may feel that since it requires changes=
+ to
+>> more than one repo its not worth doing.
+>>
+>> When ever you start the mon demon as a side effect the admin, osd, r=
+gw
+>> and mds keys are created as a side effect if the mds keyring is not
+>> existing.
+>>
+>> In the systemV and systemd init scripts (at least) we have a side
+>> effect, that should be removed in my opinion, (or worse in my
+>> alternatively correctly documented.)
+>>
+>> This is a deployment layer violation, in my opinion, and it requires
+>> considerably more documentation, (and on my part also code) to keep =
+this
+>> side effect than remove it.
+>>
+>> usecases for removing this are:
+>>
+>> (0) A ceph cluster should be able to be installed in any order. With=
+ the
+>> current behavior if the mds, rgw, or osd nodes are deployed first (a=
+long
+>> with the boot strap keyrings), the mon created must have all keys fo=
+r
+>> the admin, mds-bootstrap, rgw-bootstrap, and osd-boostrap deployed i=
+n
+>> the correct path before the mon can safely be started, even if the
+>> cluster does not need the mds or rgw service's.
+>>
+>> (1) It is unfriendly to configuration being stored on the configurat=
+ion
+>> server as the server needs to be updated with the values from the
+>> configured node keys, when people might want to store these keys cen=
+trally.
+>>
+>> (2) Assuming the admin, rgw-bootstrap, mds-bootstrap and osd-boostra=
+p
+>> keys are always installed on all mon nodes is clearly increasing the
+>> distribution of keys where they might not be needed. Hence reducing
+>> security.
+>>
+>> (3) Using the current model adds an extra complication that these ke=
+ys
+>> then need to be distributed to each node from the configured node, i=
+f
+>> generated by starting the mon, and not from the configuration server=
+=2E
+>>
+>> (4) If you wish to use a more devops approach, and generate keys
+>> explicitly all the keys must be installed on all mon nodes before th=
+e
+>> mon nodes are started.
+>>
+>> (4.1) As a side effect we need to document why admins need the
+>> mds-bootstrap keyring when they dont want this service it is confusi=
+ng,
+>> and requires an unnecessary process of migrating all keys to the
+>> explicitly desired keys.
+>>
+>> (5) I am developing a simple python library to configure ceph on eac=
+h
+>> node independently of all others, (think of it as a parallelism vers=
+ion
+>> of ceph-deploy that can be called by any config management system) b=
+ut
+>> with the current side effect behavior starting the mon needs to fail=
+ if
+>> the mds-bootstrap keyring is not created on the mon nodes before
+>> starting the mon, otherwise we get ordering complications.
+>>
+>> (5) The side effect is confusing, as no one expects this side effect=
+,
+>> hence this leads to ceph seeming complex to a first time user.
+>>
+>> (6) I feel it is the responsibility of configuration management not =
+the
+>> mon demon to request creating these keys.
+>>
+>> (7) I dont think this is clearly documented, hence this leads to cep=
+h
+>> seeming complex to a first time user.
+>>
+>> (8) As more services like mds and rgw get added to ceph the problem =
+gets
+>> multiplied.
+>>
+>> (9) Adding one more step to the by hand installation will clarify th=
+e
+>> authentication process. This extra step would simply be:
+>>
+>>    /usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
+>>
+>> This is simpler and clearer than documenting the side effect.
+>>
+>> consequences:
+>>
+>> (1) Each configuration system which depends upon this behavior will =
+need
+>> to be modified to call the single command on each mon:
+>>
+>>    /usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
+>>
+>> Here is a fix for ceph-deploy:
+>>
+>> https://github.com/SUSE/ceph-deploy/commit/58b030dbe0a964b32f1fbc9a3=
+762e64dd74bf50c
+>>
+>> I assume other solutions will be easy to fix too.
+>>
+>> The systemd file in question, is
+>> "/usr/lib/systemd/system/ceph-create-keys@.service" and should be re=
+moved.
+>>
+>> This will simplify the salt configuration module documentation
+>> considerably, and if this is not done the salt module will need to a=
+dd a
+>> requirement on the mds keyring being created before the mon can be c=
+reated.
+>>
+>> the systemd file looks as follows:
+>>
+>>     [Unit]
+>>     Description=3DCeph cluster key creator task
+>>
+>>     # the last key created is the mds bootstrap key -- look for that=
+=2E
+>>     ConditionPathExists=3D!/var/lib/ceph/bootstrap-mds/ceph.keyring
+>>
+>>     [Service]
+>>     EnvironmentFile=3D-/etc/sysconfig/ceph
+>>     Environment=3DCLUSTER=3Dceph
+>>     ExecStart=3D/usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id=
+ %i
+>>
+>> as you can see the side effect is blocked if the file
+>>
+>>     /var/lib/ceph/bootstrap-mds/ceph.keyring
+>>
+>> already exists, which is just more to document.
+>>
+>> Hoping that you all agree
+>>
+>> Owen Synge
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imend=C3=B6rffer,=
+ HRB
+21284 (AG
+N=C3=BCrnberg)
+
+Maxfeldstra=C3=9Fe 5
+
+90409 N=C3=BCrnberg
+
+Germany
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
