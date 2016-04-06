@@ -1,423 +1,77 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: arm64 qemu odd behavior
-Date: Wed, 6 Apr 2016 14:48:10 +0200
-Message-ID: <5705058A.1090502@dachary.org>
-References: <570188B5.3090102@dachary.org> <57018B78.10500@dachary.org>
- <57039085.6070905@dachary.org> <5703BE1B.2040805@dachary.org>
- <57040AB6.8010404@dachary.org>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph Dev Monthly
+Date: Wed, 6 Apr 2016 09:52:12 -0400
+Message-ID: <CAAZbbf2DEpZDY0Lz+J7MpaVnp6Wp5vrj6+mwf5E7AFTf6KH+bQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:46961 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932142AbcDFMsS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2016 08:48:18 -0400
-In-Reply-To: <57040AB6.8010404@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Palma <martin@palma.bz>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============1973890860=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Tried the following, it will take a few hours before it completes
+--===============1973890860==
+Content-Type: multipart/alternative; boundary=001a1141234ecafbc6052fd144f2
 
-a) get the kernel/initrd from https://www.runabove.com/armcloud.xml=20
+--001a1141234ecafbc6052fd144f2
+Content-Type: text/plain; charset=UTF-8
 
-openstack image save --file initrd.img-4.2.0-55598-g45f70e3 initrd.img-=
-4.2.0-55598-g45f70e3
-openstack image save --file vmlinuz-4.2.0-55598-g45f70e3 vmlinuz-4.2.0-=
-55598-g45f70e3
+Hey cephers,
 
-b) upload them to cloudlab
+Just a reminder that the monthly Ceph dev standup is today at 12:30p EST.
 
-(virtualenv)loic@fold:~/software/cloudlab/t$ openstack image create --d=
-isk-format=3Dari --container-format=3Dari  --private --file initrd.img-=
-4.2.0-55598-g45f70e3 initrd.img-4.2.0-55598-g45f70e3=20
-+------------------+---------------------------------------------------=
----+
-| Field            | Value                                             =
-   |
-+------------------+---------------------------------------------------=
----+
-| checksum         | b15a58d65a454f181ffc7dc186f89c37                  =
-   |
-| container_format | ari                                               =
-   |
-| created_at       | 2016-04-06T12:27:26Z                              =
-   |
-| disk_format      | ari                                               =
-   |
-| file             | /v2/images/06a8f36e-1c66-4753-99af-4585443e8885/fi=
-le |
-| id               | 06a8f36e-1c66-4753-99af-4585443e8885              =
-   |
-| min_disk         | 0                                                 =
-   |
-| min_ram          | 0                                                 =
-   |
-| name             | initrd.img-4.2.0-55598-g45f70e3                   =
-   |
-| owner            | a273f671b3524d09915a612482627d02                  =
-   |
-| protected        | False                                             =
-   |
-| schema           | /v2/schemas/image                                 =
-   |
-| size             | 16693684                                          =
-   |
-| status           | active                                            =
-   |
-| tags             |                                                   =
-   |
-| updated_at       | 2016-04-06T12:27:56Z                              =
-   |
-| virtual_size     | None                                              =
-   |
-| visibility       | private                                           =
-   |
-+------------------+---------------------------------------------------=
----+
-(virtualenv)loic@fold:~/software/cloudlab/t$ openstack image create --d=
-isk-format=3Daki --container-format=3Daki  --private --file vmlinuz-4.2=
-=2E0-55598-g45f70e3 vmlinuz-4.2.0-55598-g45f70e3=20
-+------------------+---------------------------------------------------=
----+
-| Field            | Value                                             =
-   |
-+------------------+---------------------------------------------------=
----+
-| checksum         | 5df618babf79b611fcec7ed6842b0013                  =
-   |
-| container_format | aki                                               =
-   |
-| created_at       | 2016-04-06T12:28:10Z                              =
-   |
-| disk_format      | aki                                               =
-   |
-| file             | /v2/images/26ec893a-8c30-49dd-a2fc-423c11270a2c/fi=
-le |
-| id               | 26ec893a-8c30-49dd-a2fc-423c11270a2c              =
-   |
-| min_disk         | 0                                                 =
-   |
-| min_ram          | 0                                                 =
-   |
-| name             | vmlinuz-4.2.0-55598-g45f70e3                      =
-   |
-| owner            | a273f671b3524d09915a612482627d02                  =
-   |
-| protected        | False                                             =
-   |
-| schema           | /v2/schemas/image                                 =
-   |
-| size             | 6354210                                           =
-   |
-| status           | active                                            =
-   |
-| tags             |                                                   =
-   |
-| updated_at       | 2016-04-06T12:28:21Z                              =
-   |
-| virtual_size     | None                                              =
-   |
-| visibility       | private                                           =
-   |
-+------------------+---------------------------------------------------=
----+
+http://wiki.ceph.com/Planning
 
-Replace the 3.13 kernel/initrd of the default image with the new 4.2 ke=
-rnel/initrd
-
-openstack image set --property kernel_id=3D26ec893a-8c30-49dd-a2fc-423c=
-11270a2c --property ramdisk_id=3D06a8f36e-1c66-4753-99af-4585443e8885 t=
-euthology-ubuntu-14.04-aarch64
-
-Tried it with
-
-openstack server create  --image 'teuthology-ubuntu-14.04-aarch64'  --f=
-lavor 'm1.small'  --nic net-id=3Dflat-lan-1-net --key-name teuthology-m=
-yself --wait try
-
-and it seems to work
-
-$ ssh -i /home/loic/.ceph-workbench/teuthology-myself.pem ubuntu@128.11=
-0.155.162=20
-Warning: Permanently added '128.110.155.162' (ECDSA) to the list of kno=
-wn hosts.
-Welcome to Ubuntu 14.04.1 LTS (GNU/Linux 4.2.0-55598-g45f70e3 aarch64)
-
- * Documentation:  https://help.ubuntu.com/
-
-The programs included with the Ubuntu system are free software;
-the exact distribution terms for each program are described in the
-individual files in /usr/share/doc/*/copyright.
-
-Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
-applicable law.
-
-ubuntu@try:~$ uname -a
-Linux try 4.2.0-55598-g45f70e3 #5 SMP Tue Feb 2 10:14:08 CET 2016 aarch=
-64 aarch64 aarch64 GNU/Linux
-
-Then started a suite with
-
-teuthology-openstack --verbose --teuthology-git-url http://github.com/d=
-achary/teuthology --teuthology-branch openstack --ceph-qa-suite-git-url=
- http://github.com/dachary/ceph-qa-suite --suite-branch wip-archs --key=
--filename ~/.ceph-workbench/teuthology-myself.pem --key-name teuthology=
--myself --ceph-git-url http://github.com/dachary/ceph --ceph wip-arm64-=
-jewel  --suite buildpackages/any --filter ubuntu_14.04_aarch64
-
-and waiting for results. I also noted that setup-basic-aarch64.sh from =
-the profile extensively tweaks the root file system. It does not seem t=
-o do so in ways that could explain the hang observed though, so ignore =
-that for now.
-
-Cheers
+If you are doing any work on Ceph you are highly encouraged to attend and
+give a brief status of your project. Thanks.
 
 
-On 05/04/2016 20:57, Loic Dachary wrote:
-> This is by far the best one :-)
->=20
-> ubuntu   21929  0.0  0.0   2080   768 pts/0    S+   12:24   0:00  |  =
-             \_ /usr/bin/make -f debian/rules build
-> ubuntu   24005  0.0  0.0   4456  3028 pts/0    S+   12:25   0:01  |  =
-                 \_ /bin/bash ./configure --prefix=3D/usr --localstated=
-ir=3D/var --sysconfdir=3D/etc --libexecdir=3D/usr/lib --with-ocf --with=
--nss --with-debug --enable-cephfs-java --with-librocksdb-static=3Dcheck=
- --build aarch64-linux-gnu --without-tcmalloc --without-cryptopp
-> ubuntu   25004  0.0  0.0   1760   312 pts/0    S+   12:25   0:00  |  =
-                     \_ sleep 1
-> root     28211  0.0  0.0  12844  3920 ?        Ss   18:54   0:00  \_ =
-sshd: ubuntu [priv]
->=20
-> ubuntu@localhost:~$ date
-> Tue Apr  5 18:56:41 UTC 2016
->=20
-> sleep 1 second is stuck for ... over 6 hours :-)
->=20
-> ubuntu@localhost:~$ sudo strace -p 25004
-> Process 25004 attached
-> restart_syscall(<... resuming interrupted call ...>
->=20
-> Definitely going to try another kernel.
->=20
-> On 05/04/2016 15:31, Loic Dachary wrote:
->> Caught the same problem again, strace shows futex also. I tried to g=
-db the process but ... that unblocked the situation.
->>
->> 2016-04-05 12:25:36,304.304 DEBUG:teuthology.misc:find: `/usr/lib/jv=
-m/java/': No such file or directory
->> 2016-04-05 12:25:36,307.307 DEBUG:teuthology.misc:find: `/usr/lib/jv=
-m/java-gcj/': No such file or directory
->> 2016-04-05 12:25:36,313.313 DEBUG:teuthology.misc:You have no CLASSP=
-ATH, I hope it is good
->> 2016-04-05 12:25:36,314.314 DEBUG:teuthology.misc:checking for javac=
-=2E.. javac
->> 2016-04-05 13:25:56,431.431 DEBUG:teuthology.misc:checking if javac =
-works... yes
->> 2016-04-05 13:25:56,432.432 DEBUG:teuthology.misc:checking for javah=
-=2E.. /usr/bin/javah
->> 2016-04-05 13:25:56,484.484 DEBUG:teuthology.misc:configure: WARNING=
-: unable to include <jni.h>
->>
->> see the one hour gap after "checking for javac". It's running a=20
->>
->> Linux teuthology 3.13.0-40-generic #69-Ubuntu SMP Thu Nov 13 19:05:4=
-4 UTC 2014 aarch64 aarch64 aarch64 GNU/Linux
->>
->> and since we've been told runabove had trouble with 3.13 and needed =
-at least 3.19 for things to work, I wonder if we're not experiencing th=
-e same kind of issues. I'm tempted to try and use runabove kernel (4.2 =
-recompiled by cavium) on cloudlab and see if that improves things.=20
->>
->> What do you think ?
->>
->> On 05/04/2016 12:16, Loic Dachary wrote:
->>> While installing packages on an arm64 virtual machine with 6 proc 2=
-4GB RAM today, it got stuck installing packages
->>>
->>> root      9299  0.0  0.0   5996  3984 pts/1    Ss+  09:24   0:01  |=
-                       \_ /usr/bin/dpkg --status-fd 23 --configure libe=
-xpat1:arm64 libgcrypt11:arm64 libtasn1-6:arm64 libgnutls26:arm64 libgnu=
-tls-openssl27:arm64 libmagic1:arm64 file:arm64 libssl1.0.0:arm64 libpyt=
-hon3.4-minimal:arm64 python3.4-minimal:arm64 libpython3.4-stdlib:arm64 =
-python3.4:arm64 libudev1:arm64 udev:arm64 bash-completion:all libasprin=
-tf0c2:arm64 libkrb5support0:arm64 libk5crypto3:arm64 libkrb5-3:arm64 li=
-bgssapi-krb5-2:arm64 libldap-2.4-2:arm64 libcurl3-gnutls:arm64 libsyste=
-md-daemon0:arm64 libapparmor1:arm64 libsystemd-login0:arm64 dbus:arm64 =
-systemd-shim:arm64 systemd-services:arm64 libpam-systemd:arm64 libparte=
-d0debian1:arm64 libpipeline1:arm64 libpolkit-gobject-1-0:arm64 libusb-1=
-=2E0-0:arm64 libxml2:arm64 bsdmainutils:arm64 man-db:arm64 ntfs-3g:arm6=
-4 libaio1:arm64 liblzo2-2:arm64 libnettle4:arm64 libarchive13:arm64 lib=
-asound2-data:all libasound2:arm64 libasyncns0:arm64 libatasmart4:arm64 =
-libatk
- 1
 
->  .
-> 0
->> -
->>>  d
->>> ata:all libatk1.0-0:arm64 libatspi2.0-0:arm64 libatk-bridge2.0-0:ar=
-m64 libgtk2.0-common:all fonts-dejavu-core:all fontconfig-config:all li=
-bfreetype6:arm64 libfontconfig1:arm64 libpixman-1-0:arm64 libxcb-render=
-0:arm64 libxcb-shm0:arm64 libxrender1:arm64 libcairo2:arm64 libavahi-co=
-mmon-data:arm64 libavahi-common3:arm64 libavahi-client3:arm64 libcups2:=
-arm64 libjpeg-turbo8:arm64 libjpeg8:arm64 libjasper1:arm64 libjbig0:arm=
-64 libtiff5:arm64 libgdk-pixbuf2.0-common:all libgdk-pixbuf2.0-0:arm64 =
-libthai-data:all libdatrie1:arm64 libthai0:arm64 fontconfig:arm64 libpa=
-ngo-1.0-0:arm64 libgraphite2-3:arm64 libharfbuzz0b:arm64 libpangoft2-1.=
-0-0:arm64 libpangocairo-1.0-0:arm64 libxcomposite1:arm64 libxfixes3:arm=
-64 libxcursor1:arm64 libxdamage1:arm64 libxi6:arm64 libxinerama1:arm64 =
-libxrandr2:arm64 libgtk2.0-0:arm64 libnspr4:arm64 libnss3-nssdb:all lib=
-nss3:arm64 tzdata-java:all java-common:all liblcms2-2:arm64 libpcsclite=
-1:arm64 libogg0:arm64 libflac8:arm64 libvorbis0a:arm64 libvorbisenc2:ar=
-m64=20
- l
+-- 
 
->  i
-> b
->> s
->>>  n
->>> dfile1:arm64 libpulse0:arm64 libsctp1:arm64 ca-certificates-java:al=
-l openjdk-7-jre-headless:arm64 default-jre-headless:arm64 libgif4:arm64=
- x11-common:all libxtst6:arm64 libglapi-mesa:arm64 libx11-xcb1:arm64 li=
-bxcb-dri2-0:arm64 libxcb-dri3-0:arm64 libxcb-glx0:arm64 libxcb-present0=
-:arm64 libxcb-sync1:arm64 libxshmfence1:arm64 libxxf86vm1:arm64 libgl1-=
-mesa-glx:arm64 libatk-wrapper-java:all libatk-wrapper-java-jni:arm64 op=
-enjdk-7-jre:arm64 default-jre:arm64 libavahi-glib1:arm64 libbonobo2-com=
-mon:all libidl-common:all libidl0:arm64 liborbit-2-0:arm64 liborbit2:ar=
-m64 libbonobo2-0:arm64 libboost-atomic1.54.0:arm64 libboost-system1.54.=
-0:arm64 libboost-chrono1.54.0:arm64 libboost-date-time1.54.0:arm64 libb=
-oost-iostreams1.54.0:arm64 libboost-program-options1.54.0:arm64 libboos=
-t-random1.54.0:arm64 libicu52:arm64 libboost-regex1.54.0:arm64 libboost=
--serialization1.54.0:arm64 libboost-thread1.54.0:arm64 libcairo-gobject=
-2:arm64 libltdl7:arm64 libtdb1:arm64 libvorbisfile3:arm64
->>> sound-theme-freedesktop:all libcanberra0:arm64 libcolord1:arm64 lib=
-croco3:arm64 libcurl3:arm64 libdconf1:arm64 libdrm-nouveau2:arm64 libdr=
-m-radeon1:arm64 libexif12:arm64 libfontenc1:arm64 gconf2-common:all lib=
-gconf-2-4:arm64 libvpx1:arm64 libxpm4:arm64 libgd3:arm64 libunistring0:=
-arm64 libgettextpo0:arm64 libgl1-mesa-dri:arm64 gconf-service-backend:a=
-rm64 gconf-service:arm64 psmisc:arm64 dbus-x11:arm64 gconf2:arm64 libgn=
-omevfs2-common:arm64 libgnomevfs2-0:arm64 libgnome2-common:all libgnome=
-2-bin:arm64 libgnome2-0:arm64 libgphoto2-port10:arm64 libgphoto2-6:arm6=
-4 libgssrpc4:arm64 dconf-service:arm64 dconf-gsettings-backend:arm64 li=
-bgtk-3-common:all libwayland-client0:arm64 libwayland-cursor0:arm64 lib=
-xkbcommon0:arm64 libgtk-3-0:arm64 libgudev-1.0-0:arm64 libice6:arm64 li=
-bieee1284-3:arm64 libkadm5clnt-mit9:arm64 libkdb5-7:arm64 libkadm5srv-m=
-it9:arm64 libsnappy1:arm64 libleveldb1:arm64 libpaper1:arm64 libpcrecpp=
-0:arm64 libpolkit-agent-1-0:arm64 libpolkit-backend-1-0:arm64 libpython=
-2.7-
- m
+Best Regards,
 
->  i
-> n
->> i
->>>  m
->>> al:arm64 python2.7-minimal:arm64 libpython2.7-stdlib:arm64 python2.=
-7:arm64 libpython2.7:arm64 libexpat1-dev:arm64 libpython2.7-dev:arm64 l=
-ibpython3.4:arm64 libreadline5:arm64 acl:arm64 libsane-common:arm64 lib=
-v4lcon
->>> root       659  0.0  0.0   4680  1548 pts/1    S+   09:27   0:00  |=
-                           \_ /bin/bash /var/lib/dpkg/info/ca-certifica=
-tes-java.postinst configure
->>> root       692  0.0  0.1 7712980 40988 pts/1   Sl+  09:27   0:01  |=
-                               \_ java -jar /usr/share/ca-certificates-=
-java/ca-certificates-java.jar -storepass changeit
->>>
->>> waited 45 minutes, no progress.
->>>
->>> $ sudo strace -p 692
->>> Process 692 attached
->>> futex(0x7f849f12c0, FUTEX_WAIT, 705, NULL^CProcess 692 detached
->>>  <detached ...>
->>>
->>> CPU / disk / network otherwise idle.
->>>
->>> Another clue :-)
->>>
->>> On 03/04/2016 23:30, Loic Dachary wrote:
->>>> While compiling with 6 proc
->>>>
->>>> $ cat /proc/cpuinfo
->>>> Processor	: AArch64 Processor rev 1 (aarch64)
->>>> processor	: 0
->>>> processor	: 1
->>>> processor	: 2
->>>> processor	: 3
->>>> processor	: 4
->>>> processor	: 5
->>>> Features	: fp asimd evtstrm
->>>> CPU implementer	: 0x50
->>>> CPU architecture: AArch64
->>>> CPU variant	: 0x0
->>>> CPU part	: 0x000
->>>> CPU revision	: 1
->>>>
->>>> Hardware	: linux,dummy-virt
->>>>
->>>> I noticed via htop that only 5 of them are in use during make -j6.=
- Processor 4 is not used. I'm not sure how / if that can be repeated.
->>>>
->>>> On 03/04/2016 23:18, Loic Dachary wrote:
->>>>> Hi Martin,
->>>>>
->>>>> In your quest to understand why the arm64 qemu sometimes hangs wh=
-en using as many processors as the host, maybe this will help.=20
->>>>>
->>>>> Today while watching an installation on an arm64 qemu machine, I =
-noticed it was stuck in setting up fontconfig. So I logged in the machi=
-ne, CPU was not busy, no IOwait either, a lot of free RAM. The host was=
- also mostly idle. I straced the process and saw it moving. Unfortunate=
-ly ( or maybe I was the cause of things starting to move on again ?) th=
-e font regeneration finished while I was observing and things seem to b=
-e going at a normal speed now.=20
->>>>>
->>>>> Note that there is almost a 2 hours gap between Setting up fontco=
-nfig and Regenerating fonts cache.
->>>>>
->>>>> Maybe the pattern we're sometime seeing (i.e. all blocked, not ev=
-en possible to ssh) is another case of the same issue ?
->>>>>
->>>>> I'm starting to think we should bring this discussion to some arm=
-64 mailing list or IRC channel but I don't know any.
->>>>>
->>>>> 2016-04-03 19:17:34,858.858 DEBUG:teuthology.misc:Setting up libg=
-dk-pixbuf2.0-0:arm64 (2.30.7-0ubuntu1.2) ...
->>>>> 2016-04-03 19:17:35,057.057 DEBUG:teuthology.misc:Setting up libt=
-hai-data (0.1.20-3) ...
->>>>> 2016-04-03 19:17:35,183.183 DEBUG:teuthology.misc:Setting up libd=
-atrie1:arm64 (0.2.8-1) ...
->>>>> 2016-04-03 19:17:35,350.350 DEBUG:teuthology.misc:Setting up libt=
-hai0:arm64 (0.1.20-3) ...
->>>>> 2016-04-03 19:17:35,546.546 DEBUG:teuthology.misc:Setting up font=
-config (2.11.0-0ubuntu4.1) ...
->>>>> 2016-04-03 21:09:52,094.094 DEBUG:teuthology.misc:Regenerating fo=
-nts cache... done.
->>>>> 2016-04-03 21:09:52,136.136 DEBUG:teuthology.misc:Setting up libp=
-ango-1.0-0:arm64 (1.36.3-1ubuntu1.1) ...
->>>>> 2016-04-03 21:09:52,303.303 DEBUG:teuthology.misc:Setting up libg=
-raphite2-3:arm64 (1.3.6-1ubuntu0.14.04.1) ...
->>>>> 2016-04-03 21:09:52,465.465 DEBUG:teuthology.misc:Setting up libh=
-arfbuzz0b:arm64 (0.9.27-1ubuntu1) ...
->>>>> 2016-04-03 21:09:52,641.641 DEBUG:teuthology.misc:Setting up libp=
-angoft2-1.0-0:arm64 (1.36.3-1ubuntu1.1) ...
->>>>> 2016-04-03 21:09:52,806.806 DEBUG:teuthology.misc:Setting up libp=
-angocairo-1.0-0:arm64 (1.36.3-1ubuntu1.1) ...
->>>>> 2016-04-03 21:09:52,971.971 DEBUG:teuthology.misc:Setting up libx=
-composite1:arm64 (1:0.4.4-1) ...
->>>>>
->>>>> Cheers
->>>>>
->>>>
->>>
->>
->=20
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--001a1141234ecafbc6052fd144f2
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Hey cephers,<div><br></div><div>Just a reminder that the m=
+onthly Ceph dev standup is today at 12:30p EST.=C2=A0</div><div><br></div><=
+div><a href=3D"http://wiki.ceph.com/Planning">http://wiki.ceph.com/Planning=
+</a></div><div><br></div><div>If you are doing any work on Ceph you are hig=
+hly encouraged to attend and give a brief status of your project. Thanks.</=
+div><div><br></div><div><br clear=3D"all"><div><br></div>-- <br><div class=
+=3D"gmail_signature"><div dir=3D"ltr"><div><br></div><div>Best Regards,</di=
+v><div><br></div><div>Patrick McGarry</div><div>Director Ceph Community || =
+Red Hat</div><div><a href=3D"http://ceph.com" target=3D"_blank">http://ceph=
+.com</a> =C2=A0|| =C2=A0<a href=3D"http://community.redhat.com" target=3D"_=
+blank">http://community.redhat.com</a></div><div>@scuttlemonkey || @ceph</d=
+iv></div></div>
+</div></div>
+
+--001a1141234ecafbc6052fd144f2--
+
+--===============1973890860==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1973890860==--
