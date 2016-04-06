@@ -1,373 +1,219 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: mon daemon makes authentication side effects on startup
-Date: Wed, 6 Apr 2016 01:18:07 +0200
-Message-ID: <570447AF.4060307@suse.com>
-References: <5703A7FF.2090002@suse.com>
- <CALe9h7fR3o2ixciazKO8B09aLjxCGCLwdfs9MMWi1u2EwY8Jzw@mail.gmail.com>
+From: Huan Zhang <huan.zhang.jn@gmail.com>
+Subject: Re: rbd_aio_flush cause guestos sync wirte poor iops?
+Date: Wed, 6 Apr 2016 12:02:45 +0800
+Message-ID: <CAFU9ConJT_s1bPzUuoJkA5SzwQH=BG8kFGQYtrBAmuuC15cDyA@mail.gmail.com>
+References: <CAFU9Co=d-CstfhbiP3ztdpNTFp03SMGy8ciRw8xxBXkxw7TjRw@mail.gmail.com>
+	<578851288.38782223.1458135450823.JavaMail.zimbra@redhat.com>
+	<CAFU9Con=_qXF37XSre1Ep7Ji5MFKcVstQ9MfQPTk=+mvojcLvw@mail.gmail.com>
+	<1216780323.39858060.1458302557470.JavaMail.zimbra@redhat.com>
+	<CAFU9Co=c3osqqogjFurtZAReEN_QXmV9n00QGJ5y+R_=jh27aQ@mail.gmail.com>
+	<630315434.41021364.1458564978169.JavaMail.zimbra@redhat.com>
+	<CAFU9ComfUV+h3ZTp8oK1gZFejAuo9B4c+-RwVK5==SSQEkTAcQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:44638 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752267AbcDEXSR (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Tue, 5 Apr 2016 19:18:17 -0400
-In-Reply-To: <CALe9h7fR3o2ixciazKO8B09aLjxCGCLwdfs9MMWi1u2EwY8Jzw@mail.gmail.com>
+Received: from mail-lf0-f41.google.com ([209.85.215.41]:34824 "EHLO
+	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750725AbcDFECr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2016 00:02:47 -0400
+Received: by mail-lf0-f41.google.com with SMTP id c126so24782685lfb.2
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2016 21:02:46 -0700 (PDT)
+In-Reply-To: <CAFU9ComfUV+h3ZTp8oK1gZFejAuo9B4c+-RwVK5==SSQEkTAcQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: yehuda@hq.newdream.net, sage@newdream.net
+Cc: ceph-devel@vger.kernel.org, Jason Dillaman <dillaman@redhat.com>
 
-Dear John,
+Introduce rbd kernel block driver designer Yehuda Sadeh for discuss.
 
-Thanks for the reply, I hope my answer does not sound to abrupt.
+hi Yehuda & Sage, how do you think about rbd_aio_flush to guarantee
+the crash consistent?
+Is it necessary to wait for all in-flight ios to complete if rbd cache is off?
 
-On 04/05/2016 08:35 PM, John Spray wrote:
-> On Tue, Apr 5, 2016 at 12:56 PM, Owen Synge <osynge@suse.com> wrote:
->> Dear all,
+How kernel rbd driver guarantee the crash consistent? seems there is
+no rbd_aio_flush like medthod.
+
+2016-03-22 14:53 GMT+08:00 Huan Zhang <huan.zhang.jn@gmail.com>:
+> 2016-03-21 20:56 GMT+08:00 Jason Dillaman <dillaman@redhat.com>:
+>>> Let's take fsync in guestos as an example.
+>>> scenario 1: write(buf) fsync()
+>>> buf will be writted to page cache after write call return
+>>> fsync will flush buf in page cache to disk cache(just like O_DIRECT) ,
+>>> and then issue [sync cache] to guarantee data has been written to
+>>> persisted disk medium
+>>>
+>>>
+>>> scenario 2: write(buf, O_DIRECT) fsync()
+>>> buf will be writted to disk cache, and then issue [sync cache] to
+>>> guarantee data has been written to persisted disk medium
+>>>
+>>>
+>>> For Ceph, it use sync write to journal, so there is no disk cache in
+>>> ceph[rbd cache off],  if write return to guestos, all data will be
+>>> persisted.
 >>
->> This is in my opinion is clearly a bug, but I raise it in the mailin=
-g
->> list as I expect all admins of ceph will strongly agree, that this m=
-akes
->> ceph simpler, but developers may feel that since it requires changes=
- to
->> more than one repo its not worth doing.
+>> This is not entirely correct.  While it's true that the FileStore OSD backend first writes the transaction to its journal before applying it to the backing disk, this is a design choice of that engine.  The forthcoming BlueStore, for example, doesn't suffer from the same double-write penalty as FileStore.
 >>
->> When ever you start the mon demon as a side effect the admin, osd, r=
-gw
->> and mds keys are created as a side effect if the mds keyring is not
->> existing.
+>> Using your disk medium analogy, for RBD the guest OS writes the data to the RBD disk and than issues a write barrier (as instructed by the guest OS application) to ensure that all in-flight writes are safely committed before proceeding.  Therefore, regardless of what the OSDs are doing, RBD still needs to respect the barrier (flush) the guest OS issued.  In the case of RBD, the flush just waits for the proceeding writes to complete (as ACKed by the OSDs).  If RBD ignored the barriers, your data would no longer be crash consistent since the data might not have even been transmitted to the OSDs yet, might have only hit one OSD (and if that OSD crashes, your data is lost since it hadn't been replicated to the other OSDs), etc.
+>
+> Very appreciated for explanation,.
+> https://docs.fedoraproject.org/en-US/Fedora/14/html/Storage_Administration_Guide/writebarr.html#writebarrierswhyneed
+> according to the redhat's explanation, writebarriers introduced by
+> disk cache, os can not guarantee the write order if power loss. as my
+> understand, looks like this:
+> step0, fsync
+> step1, write(O_Direct) to disk cache
+> step2 , fsync() [sync cahce command for scsi]
+> step3, write(O_Driect) to disk cache
+> without step2, and power loss before the data of step1&step3 write
+> back to persisted medium, the order of step1 and step3 are not
+> guaranteed, no longer be crash consistent.
+>
+> As my understand, RBD processing [rbd cache=off] is not a disk cache
+> from the guestos's perspective, because write(O_Direct) will not
+> return if data has not been persistent in ceph backend store.
+> fsync has no need to guarantee the flight-io in os kernel to be
+> persistent but not disk cache. (except the data in page cache)
+>
+> In short, ceph has no disk cache[rbd cache=off], so we don't need
+> wirte barrier here.
+>
+> Very happy to adjust me here!
+>
 >>
->> In the systemV and systemd init scripts (at least) we have a side
->> effect, that should be removed in my opinion, (or worse in my
->> alternatively correctly documented.)
+>>> sync cache in guestos issued by fsync can be safely ignored since
+>>> write(O_DIRECT) or fsync can guarantee all data has been wirtten to
+>>> persisted disk medium
+>>> in ceph without rbd cache, right?
 >>
->> This is a deployment layer violation, in my opinion, and it requires
->> considerably more documentation, (and on my part also code) to keep =
-this
->> side effect than remove it.
+>> The flush call in RBD is completes as soon as the OSDs acknowledge that the data is safe.  If it takes 2.5 milliseconds for the OSDs to ACK that the write is safe, you will only be able to achieve ~400 sync'ed IOPS.
 >>
->> usecases for removing this are:
+>> As discussed in the previous chain, there are ways some users have improved RBD to better accommodate database workloads.  Additionally, the forthcoming BlueStore engine already shows improvement for write-intensive applications.
 >>
->> (0) A ceph cluster should be able to be installed in any order. With=
- the
->> current behavior if the mds, rgw, or osd nodes are deployed first (a=
-long
->> with the boot strap keyrings), the mon created must have all keys fo=
-r
->> the admin, mds-bootstrap, rgw-bootstrap, and osd-boostrap deployed i=
-n
->> the correct path before the mon can safely be started, even if the
->> cluster does not need the mds or rgw service's.
+>>>
+>>> BTW, rbd_aio_flush iops has significance impact to database
+>>> workloads.(many sync cache calls in guestos),  that's why i'm asking
+>>> for help.
 >>
->> (1) It is unfriendly to configuration being stored on the configurat=
-ion
->> server as the server needs to be updated with the values from the
->> configured node keys, when people might want to store these keys cen=
-trally.
->=20
-> Is there anything stopping you from pre-generating all your keys
-> (including bootstrap etc) using ceph-authtool, and then including
-> those keys in the keyring file that you pass into mons when you creat=
-e
-> them?  That way, you could create your keys and store them in your
-> config management tool, all before starting any mons.
-
-Currently you can not use pre-generated keys and configure nodes in any
-order (point 0) using secrets from the configuration server (point 1)
-for brevity I skip other use cases. We can remove this restraint very
-simply, if we prevent ceph-create-keys being run on mon nodes at the
-booting stage of mon's by our choice of methods, which I propose is bes=
-t
-done by removing ceph-create-keys from the init scripts.
-
-To answer your question, yes, you can have a fully functioning cluster
-with pre-generated keys, without using ceph-create-keys at any stage.
-pre-generating all your keys and making a running cluster is possible
-and not very hard.
-
-What is needed is to create a "booting the mon keyring", by importing
-the mon and the admin keys. Then use this when creating the mon.
-
-=46or reference the two steps to set up the mon nodes are:
-
-(1) creating the boot key:
-
-ceph-authtool \
-  --create-keyring ${path_booting_keyring} \
-  --import-keyring ${path_mon_keyring}
-
-ceph-authtool \
-  ${path_booting_keyring} \
-  --import-keyring ${path_admin_keyring}
-
-(it seems you can also just concatenate both keyrings, but I expect
-using ceph-authtool is safer in the long term)
-
-(2) creating the mon:
-
-ceph-mon \
- --mkfs \
- -i ${hostname} \
- --monmap ${path_monmap}
- --keyring ${booting_key_path}
-
-=46or reference I also include the step of generating the admin and mon
-keyrings which can be done before configuring any service:
-
-(0) Creating admin and mon keys:
-
-ceph-authtool \
--n client.admin \
---create-keyring ${path_admin_keyring} \
---gen-key \
---cap mds 'allow *' \
---cap mon 'allow *' \
---cap osd 'allow *'
-
-ceph-authtool \
--n mon. \
---create-keyring ${path_mon_keyring} \
---gen-key \
---set-uid=3D0 \
---cap mon 'allow *'
-
->> (2) Assuming the admin, rgw-bootstrap, mds-bootstrap and osd-boostra=
-p
->> keys are always installed on all mon nodes is clearly increasing the
->> distribution of keys where they might not be needed. Hence reducing
->> security.
->=20
-> I think this is a bit of a subjective balance between security and
-> convenience.=20
-
-I do not agree the current behavior is convenient for the admin who run=
-s
-a ceph cluster.
-
-=46or the admin points (0), (1), (2), (3), (4), (4.1), (5), (6), (7) ar=
-e
-currently an issue, and lead to ceph being both mysterious and magical,
-with all the fear that gives an admin.
-
-Only if you are a developer of ceph, is the current behavior more
-convenient, but the convenience only extends to avoiding running one
-command in setting up your test environment namely running:
-
- ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
-
-Having this as a separate step to booting a mon adds clarity to the
-"magic", and is a simple one liner command line operation, which can be
-skipped when not wanted, rather than running under some conditions
-whenever you boot a mon as is the current behavior.
-
-> Currently we don't have to explain to folks how to get
-> their admin key into /etc/ceph, because it just pops out when the mon
-> starts.
-
-Yes, I object to the side effect "magic" and the consequences of the
-"magic", and this "magic" is completely undocumented, and that is far
-worse than not documenting a path.
-
-   ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
-
-You still would not have to explain the paths, if the above was a
-separate step, ie creating the keys, I would have no problem with this
-being a separate step, since their is an alternative as detailed above.
-
-Ideally I also feel the process I outlined should also be documented as
-an alternative to running ceph-create-keys.
-
-> The security sacrifice is small because the keys are
-> remaining in the same domain (same host, same UID) as the mon's
-> /var/lib, which is already a master key.
-
-I agree that the enhancement is security is small.
-
-In a high security environment, we could have the mon keyring deleted
-after startup, by the mon.
-
-I am not advocating this for anyone but the very security conscious, bu=
-t
-it is definitely possible that some ceph users with highly secure
-environments could find this desirable, assuming you can not run
-ceph-create-keys without access to the mon keyring, which I expect is
-true (but have not tested).
-
-Such an approach would be even more work with the current side effect o=
-f
-creating all the missing keys each time the mon boots.
-
-> For sites/systems that don't want to write out key files, it would be
-> straightforward to add a configuration option to ceph-create-keys so
-> that it would not write these out to disk.
-
-Agreed.
-
-But my objection is the side effect, of running ceph-create-keys on mon
-boot up, not that ceph-create-keys as a tool exists, or that the tool
-ceph-create-keys writes out all the keys, although having this as
-optional may be desirable for some deployments.
-
-> Once you had that option, and were also pre-generating all your keys
-> with ceph-authtool, I think you'd have the behaviour you wanted
-> without anyone else having to update for a change to the mon's defaul=
-t
-> behaviour.
-
-Thank you for trying hard to preserve the current behavior and address
-this issue, but no I don=E2=80=99t have the behavior I want for all the=
- other
-points I have raised.
-
-I accept only for point (2) your proposal of not writing the keys to
-disk, is a solution, but I caution that this potential solution is even
-more confusing than the current behavior, and my proposed solution of
-removing this step irrespective of writing to disk or not, from the boo=
-t
-up of a mon is much more intuitive for an admin coming to ceph.
-
-What I want is that booting a mon does not always run or under some
-conditions run, ceph-create-keys after booting in an automagical way.
-
-We still have a lot of use cases I have raised, as to why the current
-behavior is magical, and hence creates fear in system admins.
-
->=20
-> John
-
-Thank you for your reply.
-
-(I will get to Greg's kind reply tomorrow is its now 01:00 AM)
-
-Best wishes.
-
-Owen
-
->> (3) Using the current model adds an extra complication that these ke=
-ys
->> then need to be distributed to each node from the configured node, i=
-f
->> generated by starting the mon, and not from the configuration server=
-=2E
+>> Yes -- write barriers will definitely slow down IO but they are a necessary evil to ensure crash consistency.
+>
+> rbd block device kernel module has no performance issue for sync
+> wirte. test both with fio ioengine=rbd fsync=1 and fio ioengine=libaio
+> sync=1, hard to explain if rbd need flush.
+>
+> For BlueStore, if the write data is not persistent, we should add some
+> rados api to flush backend cache to guarantee fsync semantics or we
+> already has now?
+> so if not, seems it's not the a design choice of that engine, the
+> backend must guarantee the persistence?
+>
 >>
->> (4) If you wish to use a more devops approach, and generate keys
->> explicitly all the keys must be installed on all mon nodes before th=
-e
->> mon nodes are started.
+>>>
+>>> Thanks.
+>>>
+>>>
+>>> 2016-03-18 20:02 GMT+08:00 Jason Dillaman <dillaman@redhat.com>:
+>>> > There isn't anything slow about the flush -- the flush will complete when
+>>> > your previous writes complete.  If it takes 2.5 ms for your OSDs to ACK a
+>>> > write as safely written to disk, you will only be able to issue ~400 sync
+>>> > writes per second.
+>>> >
+>>> > The flush issues by your guest OS / QEMU to librbd is to designed to ensure
+>>> > that your previous write operations are safely committed to disk.  If
+>>> > flushes were ignored, your data would no longer be crash consistent.  This
+>>> > is nothing unique to RBD -- you would have the safe effect with a local
+>>> > disk as well.
+>>> >
+>>> > --
+>>> >
+>>> > Jason Dillaman
+>>> >
+>>> > ----- Original Message -----
+>>> >> From: "Huan Zhang" <huan.zhang.jn@gmail.com>
+>>> >> To: "Jason Dillaman" <dillaman@redhat.com>
+>>> >> Cc: ceph-devel@vger.kernel.org, haomaiwang@gmail.com
+>>> >> Sent: Thursday, March 17, 2016 12:58:59 AM
+>>> >> Subject: Re: rbd_aio_flush cause guestos sync wirte poor iops?
+>>> >>
+>>> >> Hi Jason & Haomai,
+>>> >>     Thanks for reply  and explanation.
+>>> >>     fio with ioengine=rbd fsync=1 within physical compute onde
+>>> >> performance is ok. similar to normal wirte(direct=1)
+>>> >>     ceph --admin-daemon /var/run/ceph/rbd-41837.asok config show |
+>>> >> grep rbd_cache
+>>> >>     "rbd_cache": "false"
+>>> >>
+>>> >>     As you mentioned, sync=1 within guestos will issue rbd_aio_flush.
+>>> >> so my question is:
+>>> >>     1. why rbd_aio_flush is so poor even if rbd cache is off?
+>>> >>     2. could we ignore the sync cache(rbd_aio_flush) instructed by the
+>>> >> guest OS if rbd cache is off?
+>>> >>
+>>> >>
+>>> >>
+>>> >> 2016-03-16 21:37 GMT+08:00 Jason Dillaman <dillaman@redhat.com>:
+>>> >> > As previously mentioned [1], the fio rbd engine ignores the "sync"
+>>> >> > option.
+>>> >> > You need to use "fsync=1" to issue a flush after each write to simulate
+>>> >> > what "sync=1" is doing.  When running fio within a VM against an RBD
+>>> >> > image, QEMU is not issuing sync writes to RBD -- it's issuing AIO writes
+>>> >> > and a AIO flush (as instructed by the guest OS).  Looking at the man
+>>> >> > page
+>>> >> > for O_SYNC [2], which is what that fio option enables in supported
+>>> >> > engines, that flag will act "as though each write(2) was followed by a
+>>> >> > call to fsync(2)".
+>>> >> >
+>>> >> > [1]
+>>> >> > http://lists.ceph.com/pipermail/ceph-users-ceph.com/2016-February/007780.html
+>>> >> > [2] http://man7.org/linux/man-pages/man2/open.2.html
+>>> >> >
+>>> >> > --
+>>> >> >
+>>> >> > Jason Dillaman
+>>> >> >
+>>> >> >
+>>> >> > ----- Original Message -----
+>>> >> >> From: "Huan Zhang" <huan.zhang.jn@gmail.com>
+>>> >> >> To: ceph-devel@vger.kernel.org
+>>> >> >> Sent: Wednesday, March 16, 2016 12:52:33 AM
+>>> >> >> Subject: rbd_aio_flush cause guestos sync wirte poor iops?
+>>> >> >>
+>>> >> >> Hi,
+>>> >> >>    We test sync iops with fio sync=1 for database workloads in VM,
+>>> >> >> the backend is librbd and ceph (all SSD setup).'
+>>> >> >>    The result is sad to me. we only get ~400 IOPS sync randwrite with
+>>> >> >>    iodepth=1
+>>> >> >> to iodepth=32.
+>>> >> >>     But test in physical machine with fio ioengine=rbd sync=1, we can
+>>> >> >> reache ~35K IOPS.
+>>> >> >> seems the qemu rbd is the bottleneck.
+>>> >> >>
+>>> >> >>     qemu version is 2.1.2 with rbd_aio_flush patched.
+>>> >> >>     rbd cache is off, qemu cache=none.
+>>> >> >>
+>>> >> >>     IMHO, ceph use sync write for every write to disk, so
+>>> >> >> rbd_aio_flush can ignore the sync
+>>> >> >> cache command if rbd cache is off so that we can get higher
+>>> >> >> iops(similar to direct=1 write)
+>>> >> >> for sync=1 iops, right?
+>>> >> >>
+>>> >> >>    Very appreciated to get your reply!
+>>> >> >> --
+>>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>> >> >> in
+>>> >> >> the body of a message to majordomo@vger.kernel.org
+>>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> >> >>
+>>> >>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
 >>
->> (4.1) As a side effect we need to document why admins need the
->> mds-bootstrap keyring when they dont want this service it is confusi=
-ng,
->> and requires an unnecessary process of migrating all keys to the
->> explicitly desired keys.
 >>
->> (5) I am developing a simple python library to configure ceph on eac=
-h
->> node independently of all others, (think of it as a parallelism vers=
-ion
->> of ceph-deploy that can be called by any config management system) b=
-ut
->> with the current side effect behavior starting the mon needs to fail=
- if
->> the mds-bootstrap keyring is not created on the mon nodes before
->> starting the mon, otherwise we get ordering complications.
 >>
->> (5) The side effect is confusing, as no one expects this side effect=
-,
->> hence this leads to ceph seeming complex to a first time user.
->>
->> (6) I feel it is the responsibility of configuration management not =
-the
->> mon demon to request creating these keys.
->>
->> (7) I dont think this is clearly documented, hence this leads to cep=
-h
->> seeming complex to a first time user.
->>
->> (8) As more services like mds and rgw get added to ceph the problem =
-gets
->> multiplied.
->>
->> (9) Adding one more step to the by hand installation will clarify th=
-e
->> authentication process. This extra step would simply be:
->>
->>    /usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
->>
->> This is simpler and clearer than documenting the side effect.
->>
->> consequences:
->>
->> (1) Each configuration system which depends upon this behavior will =
-need
->> to be modified to call the single command on each mon:
->>
->>    /usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
->>
->> Here is a fix for ceph-deploy:
->>
->> https://github.com/SUSE/ceph-deploy/commit/58b030dbe0a964b32f1fbc9a3=
-762e64dd74bf50c
->>
->> I assume other solutions will be easy to fix too.
->>
->> The systemd file in question, is
->> "/usr/lib/systemd/system/ceph-create-keys@.service" and should be re=
-moved.
->>
->> This will simplify the salt configuration module documentation
->> considerably, and if this is not done the salt module will need to a=
-dd a
->> requirement on the mds keyring being created before the mon can be c=
-reated.
->>
->> the systemd file looks as follows:
->>
->>     [Unit]
->>     Description=3DCeph cluster key creator task
->>
->>     # the last key created is the mds bootstrap key -- look for that=
-=2E
->>     ConditionPathExists=3D!/var/lib/ceph/bootstrap-mds/ceph.keyring
->>
->>     [Service]
->>     EnvironmentFile=3D-/etc/sysconfig/ceph
->>     Environment=3DCLUSTER=3Dceph
->>     ExecStart=3D/usr/sbin/ceph-create-keys --cluster ${CLUSTER} --id=
- %i
->>
->> as you can see the side effect is blocked if the file
->>
->>     /var/lib/ceph/bootstrap-mds/ceph.keyring
->>
->> already exists, which is just more to document.
->>
->> Hoping that you all agree
->>
->> Owen Synge
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imend=C3=B6rffer,=
- HRB
-21284 (AG
-N=C3=BCrnberg)
-
-Maxfeldstra=C3=9Fe 5
-
-90409 N=C3=BCrnberg
-
-Germany
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> Jason Dillaman
