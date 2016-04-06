@@ -1,34 +1,34 @@
-From: Jens Rosenboom <j.rosenboom@x-ion.de>
-Subject: Permissions for /run/ceph
-Date: Wed, 6 Apr 2016 16:01:33 +0200
-Message-ID: <CADr68WZ+A7YLb1OF7RdijqKMyD9em1jCuprgqXWAFB0810Go+g@mail.gmail.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Ceph Dev Monthly
+Date: Wed, 6 Apr 2016 10:02:02 -0400
+Message-ID: <CAAZbbf3zs5ATNJ6KkguMGm8d6WiASYV+H8UYyJ98fKUN+RWZVA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f178.google.com ([209.85.217.178]:34683 "EHLO
-	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750788AbcDFOBg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2016 10:01:36 -0400
-Received: by mail-lb0-f178.google.com with SMTP id vo2so30517302lbb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Apr 2016 07:01:35 -0700 (PDT)
+Received: from mail-lf0-f52.google.com ([209.85.215.52]:36712 "EHLO
+	mail-lf0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750719AbcDFOCJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2016 10:02:09 -0400
+Received: by mail-lf0-f52.google.com with SMTP id g184so34640268lfb.3
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Apr 2016 07:02:03 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+Hey cephers,
 
-in https://github.com/ceph/ceph/commit/3aa38bc07f84f452d70757585ef2620ee60ee227
-you changed the permissions from 0755 to 0770. The description of the
-commit only talks about making the directory group-writable, so I'm
-failing to see why this should not be world-readable anymore.
+Just a reminder that the monthly Ceph dev standup is today at 12:30p EST.
 
-In particular this breaks our monitoring, which tries to check things
-with a different user. That used to work earlier, because the sockets
-themselves are still 0755.
+http://wiki.ceph.com/Planning
 
-Was this just an oversight and you really meant to change it to 0775?
-Or is there some other argument that I am not seeing yet?
+If you are doing any work on Ceph you are highly encouraged to attend
+and give a brief status of your project. Thanks.
 
-Yours,
-Jens
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
