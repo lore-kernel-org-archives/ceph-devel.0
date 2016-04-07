@@ -1,227 +1,66 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: The fundamental evil of "magic" in computing systems -> Was: mon
- daemon makes authentication side effects on startup
-Date: Thu, 7 Apr 2016 13:44:43 +0200
-Message-ID: <5706482B.3020106@suse.com>
-References: <5703A7FF.2090002@suse.com>
- <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com>
- <5704C76C.2050408@suse.com>
- <CADr68WaVwWtkkiUcETECwP5GGEpN2eiZtTSJnghYDp2WR8kr3w@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: ceph-disk improvements
+Date: Thu, 7 Apr 2016 13:45:30 +0200
+Message-ID: <5706485A.80607@dachary.org>
+References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
+ <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+ <20160407092627.GE26235@suse.de>
+ <CA+HUO7+7v5NjiP-3+h-OMkez3L8MSRoo27+=HCdEc20ntW9=gw@mail.gmail.com>
+ <20160407105129.GG26235@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:35193 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755460AbcDGLpG (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Thu, 7 Apr 2016 07:45:06 -0400
-In-Reply-To: <CADr68WaVwWtkkiUcETECwP5GGEpN2eiZtTSJnghYDp2WR8kr3w@mail.gmail.com>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:37431 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755424AbcDGLpe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2016 07:45:34 -0400
+In-Reply-To: <20160407105129.GG26235@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jens Rosenboom <j.rosenboom@x-ion.de>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Lars Marowsky-Bree <lmb@suse.com>, ceph-devel@vger.kernel.org
 
+Hi Lars,
 
+There is some preliminary thoughts at http://tracker.ceph.com/issues/74=
+75.
 
-On 04/07/2016 09:49 AM, Jens Rosenboom wrote:
-> 2016-04-06 10:23 GMT+02:00 Owen Synge <osynge@suse.com>:
->> Dear Greg and others,
->>
->> Thankyou for your very helpful email, as it completely misses my poi=
-nt,
->> and that illustrate why this point is so important to be addressed.
->>
->> I am sure Greg has a deep understanding of this area. But I am pleas=
-ed
->> Greg missed my points from 0-9, Greg's assumption that it is lack of
->> understanding on my part (which I am sure is common), clearly
->> illustrates where this "magic" of the side effect of starting a mon
->> demon becomes becomes "dark magic".
->>
->> If you object to "magic" and "dark magic" in this email please
->> substitute them with "side effect" and "negative consequences of sid=
-e
->> effects" respectively, and you get a more serious reply :)
->>
->> On 04/05/2016 10:14 PM, Gregory Farnum wrote:
->>> I think you're fundamentally understanding how these keys come into
->>> existence. They aren't generated randomly on the local monitor; it
->>> uses get-or-create in order to fetch them (and create them if they
->>> don't already exist).
->>
->> I have looked at this issue in depth, and general confusion in this =
-area
->> is indeed very common, so it is reasonable to expect everyone is
->> confused by the same thing.
->>
->> In my experience it is "magic" that causes admins fear, as good admi=
-ns,
->> need to understand, because they need to understand the side effects=
- of
->> any "magic", in case the "magic" is "dark", and in this case it is w=
-ith
->> points (0) to (8) showing is indeed "dark magic".
->>
->> Lets be specific:
->>
->> Fetch and create are fundamentally different in side effects when do=
-ing
->> deployment. Lets be clear, when ceph does a "fetch" of a key, is not=
- I
->> believe and issue, but when ceph uses magic to "create" keys, it can
->> often cause side effects. Hence the process to "create" a key should
->> only occur when its asked to be done.
->>
->> The current get-or-create keyrings as a side effect of booting a mon
->> makes many issues (points 0-8 may not be all the issues, just ones t=
-hat
->> spring to my mind). If the booting of a mon only did a fetch I would
->> feel we could resolve all my point except (2) and (9) sadly a boot o=
-f a
->> mon will also do a create keys where this "magic" starts to become v=
-ery
->> "dark" indeed.
->>
->>> So maybe it's difficult to pre-generate your own keys and plug them
->>> into the system (I don't remember where the initial values come fro=
-m
->>> in standard deployment scenarios),
->>
->> See my reply to John as to how you can deploy ceph without ceph-crea=
-te-keys.
->>
->>> but once they're set up you don't
->>> need to carefully install your values on all the monitor nodes =E2=80=
-=94 they
->>> will fetch the correct values from the monitor cluster.
->>
->> I am objecting to the side effect of booting the mon and that proces=
-s
->> creating keys that where not asked for, potentially causing valid
->> osd-bootstrap, rgw-bootstrap or mds-bootstrap to fail authentication=
- as
->> invalid ones have been created as a side effect of starting the mon =
-daemons.
->>
->>> The coordination problem here is not really any different than that=
- of
->>> making sure your monitors are all part of the "mon initial members"
->>> config option,
->>
->> You are forgetting that we also have osd-bootstrap, rgw-bootstrap or
->> mds-bootstrap keys and these may be generated by some other tool tha=
-n
->> the mon, this is made much much harder to do by the mon init scripts
->> without being asked explicitly to do so.
->>
->>> btw. Which you need to solve or else you're liable to
->>> have them coming up and creating independent monitor clusters and
->>> going haywire.
->>> -Greg
->>
->> Not knowing what is happening is the enemy of understanding, and hen=
-ce
->> the creator of "magic". Often giving the "magic" a name, or making i=
+Cheers
+
+On 07/04/2016 12:51, Lars Marowsky-Bree wrote:
+> On 2016-04-07T12:31:21, Sebastien Han <shan@redhat.com> wrote:
+>=20
+>> One thing I'd like to see and I know we discussed that with Lo=EFc a
+>> while ago is ceph-disk being idempotent when it comes to the device
+>> preparation.
+>> Running "ceph-disk prepare" against a device should result in an exi=
 t
->> explicit, causes enough understanding to remove it's "magic" propert=
-ies.
->> Hence making all occurrences of key "create" (not "fetch") an explic=
-it
->> step rather than a side effect will go a great deal to address this =
-issue.
+>> 0 if the disk already has an OSD prepared on it (unless we do
+>> something like --force, which will then zap the disk).
+>> I had to implement this logic in ceph-ansible (and the guys from
+>> chef/puppet probably did the same), so now it's done but i'll be hap=
+py
+>> to leave ceph-disk doing it :).
 >>
->> So if creating keys was not a side effect of booting mons, we would =
-have
->> not issue here, as anyone who is used to cluster automation, has goo=
-d
->> tools. These tools include chef, puppet, salt, and ansible, for clus=
-ter
->> management ideally, but more manually we have tools to copy files su=
-ch
->> as rsync, scp, and tools to diagnose such issues such as checksums.
->>
->>   ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
->>
->> Having the above command separated from booting a mon actually avoid=
-s
->> osd's rgw's and mds's going haywire if they are configured in parall=
-el
->> to the mon with keys from a source external to the mon, unless you
->> either (a) build in a layer of cluster synchronization above ceph, s=
-uch
->> as ceph-deploy has done with its single threaded operation across a
->> complete cluster, or (b) do lots of dirty "magic" to remove
->> inconsistencies. Solution (a) is not good due to issue (0) amongst
->> others, and (b) creates more "magic" which has to be very carefully
->> designed to avoid it being "dark".
->>
->> Another way to remove this "magic" is to document "magic" in detail,=
- and
->> documenting this in this email is long and detailed, although Greg m=
-ade
->> a start, he missed out the very important part of why the mds-bootst=
-rap
->> keyring, is more important than is documented when if comes to deplo=
-ying
->> your cluster the first time. I will skip it for now, but I am happy =
-to
->> expand if needed.
->>
->> In this case I argue the "magic" can be removed by making the proces=
-s of
->> creating keys explicit. I would propose separating the "create" of  =
-keys
->> from booting a mon is the least confusing and "magical" solution, wi=
-th
->> the least chance of causing trouble for admins.
->>
->> Thank you Greg for taking the time to reply, and please forgive me f=
-or
->> using your reply to illustrate that the real problem is the "magic",=
- and
->> that "magic" removes understanding, hence knowledge of the "magic"
->> having "dark" issues, as this is a fear inducing thing for an admin =
-new
->> to ceph.
+>> Thoughts?
 >=20
-> Hi Owen,
+> Basically, +1.
 >=20
-> thanks for taking this up, I have been trying to get this issue fixed
-> in Ubuntu, not been aware that this was actually present in the
-> upstream code already, see
+> Owen (who works on salt-ceph) has a love/love relationship with the w=
+ord
+> "idempotent" as well.
 >=20
-> https://bugs.launchpad.net/ubuntu/+source/ceph/+bug/1563330
+> Note that it should probably only exit=3D0 if the OSD matches the cur=
+rent
+> fsid?
 >=20
-> So I strongly support your wish of being able to automatically deploy
-> a cluster, including all necessary credentials, without any
-> well-intended dark magic intervening.
 >=20
-> Yours,
->
-> --> Jens
-
-Thanks Jens,
-
-Your support in this is really valuable to know other people agree
-well-intended dark magic is an issue for automation.
-
-Best regards
-
-Owen
-
+> Regards,
+>     Lars
+>=20
 
 --=20
-SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imend=C3=B6rffer,=
- HRB
-21284 (AG
-N=C3=BCrnberg)
-
-Maxfeldstra=C3=9Fe 5
-
-90409 N=C3=BCrnberg
-
-Germany
+Lo=EFc Dachary, Artisan Logiciel Libre
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
