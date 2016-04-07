@@ -1,68 +1,85 @@
-From: Loic Dachary <loic@dachary.org>
+From: Alfredo Deza <adeza@redhat.com>
 Subject: Re: ceph-disk improvements
-Date: Thu, 7 Apr 2016 13:45:30 +0200
-Message-ID: <5706485A.80607@dachary.org>
+Date: Thu, 7 Apr 2016 08:10:23 -0400
+Message-ID: <CAC-Np1xvHWPSr44RMaS0wOSSxvXBYkcBjbCJSu0G9yGf-=9nWw@mail.gmail.com>
 References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
- <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
- <20160407092627.GE26235@suse.de>
- <CA+HUO7+7v5NjiP-3+h-OMkez3L8MSRoo27+=HCdEc20ntW9=gw@mail.gmail.com>
- <20160407105129.GG26235@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:37431 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755424AbcDGLpe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2016 07:45:34 -0400
-In-Reply-To: <20160407105129.GG26235@suse.de>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:33774 "EHLO
+	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755945AbcDGMKZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2016 08:10:25 -0400
+Received: by mail-wm0-f48.google.com with SMTP id f198so22585714wme.0
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Apr 2016 05:10:24 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lars Marowsky-Bree <lmb@suse.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Lars,
+On Fri, Apr 1, 2016 at 11:36 AM, Sage Weil <sweil@redhat.com> wrote:
+> Hi all,
+>
+> There are a couple of looming features for ceph-disk:
+>
+> 1- Support for additional devices when using BlueStore.  There can be up
+> to three: the main device, a WAL/journal device (small, ~128MB, ideally
+> NVRAM), and a fast metadata device (as big as you have available; will be
+> used for internal metadata).
+>
+> 2- Support for setting up dm-cache, bcache, and/or FlashCache underneath
+> filestore or bluestore.
+>
+> The current syntax of
+>
+>  ceph-disk prepare [--dmcrypt] [--bluestore] DATADEV [JOURNALDEV]
+>
+> isn't terribly expressive.  For example, the journal device size is set
+> via a config option, not on the command line.  For bluestore, the metadata
+> device will probably want/need explicit user input so they can ensure it's
+> 1/Nth of their SSD (if they have N HDDs to each SSD).
+>
+> And if we put dmcache in there, that partition will need to be sized too.
 
-There is some preliminary thoughts at http://tracker.ceph.com/issues/74=
-75.
+Sebastien's suggestion of allowing plugins for ceph-disk is ideal
+here, because it would allow to enable extra functionality
+(and possibly at a faster release pace) without interfering with the
+current syntax.
 
-Cheers
+Reusing your examples, a "bluestore" plugin could be a sub-command:
 
-On 07/04/2016 12:51, Lars Marowsky-Bree wrote:
-> On 2016-04-07T12:31:21, Sebastien Han <shan@redhat.com> wrote:
->=20
->> One thing I'd like to see and I know we discussed that with Lo=EFc a
->> while ago is ceph-disk being idempotent when it comes to the device
->> preparation.
->> Running "ceph-disk prepare" against a device should result in an exi=
-t
->> 0 if the disk already has an OSD prepared on it (unless we do
->> something like --force, which will then zap the disk).
->> I had to implement this logic in ceph-ansible (and the guys from
->> chef/puppet probably did the same), so now it's done but i'll be hap=
-py
->> to leave ceph-disk doing it :).
->>
->> Thoughts?
->=20
-> Basically, +1.
->=20
-> Owen (who works on salt-ceph) has a love/love relationship with the w=
-ord
-> "idempotent" as well.
->=20
-> Note that it should probably only exit=3D0 if the OSD matches the cur=
-rent
-> fsid?
->=20
->=20
-> Regards,
->     Lars
->=20
+    ceph-disk bluestore prepare [...]
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Device size, extra flags or overriding options would be clearly
+separated because of the subcommand. This would be the same
+case for dm-cache, bcache, or whatever comes next.
+
+>
+> Another consideration is that right now we don't play nice with LVM at
+> all.  Should we?  dm-cache is usually used in conjunction with LVM
+> (although it doesn't have to be).  Does LVM provide value?  Like, the
+> ability for users to add a second SSD to a box and migrate cache, wal, or
+> journal partitions around?
+
+One of the problematic corners of ceph-disk is that it tries to be
+helpful by trying to predict accurately sizes and partitions
+to make it simpler for a user. I would love to see ceph-disk be less
+flexible here and require actual full devices for an OSD and a
+separate
+device for a Journal, while starting to deprecate journal collocation
+and directory-osd.
+
+Going back to the plugin idea, LVM support could be enabled by a
+separate plugin and ceph-disk could stay lean.
+
+>
+> I'm interested in hearing feedback on requirements, approaches, and
+> interfaces before we go too far down the road...
+>
+> Thanks!
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
