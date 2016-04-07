@@ -1,85 +1,51 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: ceph-disk improvements
-Date: Thu, 7 Apr 2016 08:10:23 -0400
-Message-ID: <CAC-Np1xvHWPSr44RMaS0wOSSxvXBYkcBjbCJSu0G9yGf-=9nWw@mail.gmail.com>
-References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: The fundamental evil of "magic" in computing systems -> Was:
+ mon daemon makes authentication side effects on startup
+Date: Thu, 7 Apr 2016 08:26:53 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604070820560.19675@cpach.fuggernut.com>
+References: <5703A7FF.2090002@suse.com> <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com> <5704C76C.2050408@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:33774 "EHLO
-	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755945AbcDGMKZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2016 08:10:25 -0400
-Received: by mail-wm0-f48.google.com with SMTP id f198so22585714wme.0
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Apr 2016 05:10:24 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51784 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755472AbcDGM07 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Apr 2016 08:26:59 -0400
+In-Reply-To: <5704C76C.2050408@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Owen Synge <osynge@suse.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ldachary@redhat.com
 
-On Fri, Apr 1, 2016 at 11:36 AM, Sage Weil <sweil@redhat.com> wrote:
-> Hi all,
->
-> There are a couple of looming features for ceph-disk:
->
-> 1- Support for additional devices when using BlueStore.  There can be up
-> to three: the main device, a WAL/journal device (small, ~128MB, ideally
-> NVRAM), and a fast metadata device (as big as you have available; will be
-> used for internal metadata).
->
-> 2- Support for setting up dm-cache, bcache, and/or FlashCache underneath
-> filestore or bluestore.
->
-> The current syntax of
->
->  ceph-disk prepare [--dmcrypt] [--bluestore] DATADEV [JOURNALDEV]
->
-> isn't terribly expressive.  For example, the journal device size is set
-> via a config option, not on the command line.  For bluestore, the metadata
-> device will probably want/need explicit user input so they can ensure it's
-> 1/Nth of their SSD (if they have N HDDs to each SSD).
->
-> And if we put dmcache in there, that partition will need to be sized too.
+Hi Owen,
 
-Sebastien's suggestion of allowing plugins for ceph-disk is ideal
-here, because it would allow to enable extra functionality
-(and possibly at a faster release pace) without interfering with the
-current syntax.
+I never really liked ceph-create-keys either, but it simplified the 
+deployment process.  I have no problem with removing it as long as we make 
+sure the deployment process doesn't too much harder for ceph-deploy users.
 
-Reusing your examples, a "bluestore" plugin could be a sub-command:
+Right now, you have to do something like
 
-    ceph-disk bluestore prepare [...]
+ ceph-deploy create MON1 MON2 MON3
+ ceph-deploy install MON1 MON2 MON3
 
-Device size, extra flags or overriding options would be clearly
-separated because of the subcommand. This would be the same
-case for dm-cache, bcache, or whatever comes next.
+then manually
 
->
-> Another consideration is that right now we don't play nice with LVM at
-> all.  Should we?  dm-cache is usually used in conjunction with LVM
-> (although it doesn't have to be).  Does LVM provide value?  Like, the
-> ability for users to add a second SSD to a box and migrate cache, wal, or
-> journal partitions around?
+ ceph-deploy create MON1 MON2 MON3
+ ceph-deploy gatherkeys MON1
 
-One of the problematic corners of ceph-disk is that it tries to be
-helpful by trying to predict accurately sizes and partitions
-to make it simpler for a user. I would love to see ceph-disk be less
-flexible here and require actual full devices for an OSD and a
-separate
-device for a Journal, while starting to deprecate journal collocation
-and directory-osd.
+or, using the simplified step that was added later,
 
-Going back to the plugin idea, LVM support could be enabled by a
-separate plugin and ceph-disk could stay lean.
+ ceph-deploy mon create-initial
 
->
-> I'm interested in hearing feedback on requirements, approaches, and
-> interfaces before we go too far down the road...
->
-> Thanks!
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+How about we change the manual process to do
+
+ ceph-deploy create MON1 MON2 MON3
+ ceph-deploy createkeys MON1    # ceph-deploy bootstrap-keys create HOST ?
+ ceph-deploy gatherkeys MON1    # ceph-deploy bootstrap-keys gather HOST ?
+
+and the create-initial one to run ceph-create-keys manually?
+
+We'll need chef, ansible, puppet, and other recipes/playbooks/manifests to 
+be updated as well...
+
+sage
