@@ -1,76 +1,34 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: aarch64 conditional ansible stanza
-Date: Thu, 7 Apr 2016 16:07:32 +0200
-Message-ID: <570669A4.2010309@dachary.org>
-References: <5706025B.3080205@dachary.org> <5706679B.6030606@laposte.net>
+From: Sage Weil <sweil@redhat.com>
+Subject: [GIT PULL] Ceph fix for -rc3
+Date: Thu, 7 Apr 2016 10:14:08 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604071012330.19675@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from slow1-d.mail.gandi.net ([217.70.178.86]:49226 "EHLO
-	slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756192AbcDGOKG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2016 10:10:06 -0400
-In-Reply-To: <5706679B.6030606@laposte.net>
+Received: from mx1.redhat.com ([209.132.183.28]:46122 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751089AbcDGOOO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Apr 2016 10:14:14 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thierry Delamare <t.delamare@laposte.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: torvals@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 
+Hi Linus,
 
+Please pull the following Ceph RBD patch from
 
-On 07/04/2016 15:58, Thierry Delamare wrote:
->=20
->=20
-> On 04/07/2016 08:46 AM, Loic Dachary wrote:
->> Hi Thierry,
->>
->> In order to only install a template on architectures that are not aa=
-rch64, I changed
->>
->> - name: Add sources list
->>    template:
->>      dest: /etc/apt/sources.list
->>      src: "../../templates/apt/sources.list.{{ ansible_distribution_=
-release | lower }}"
->>      owner: root
->>      group: root
->>      mode: 0644
->>    register: sources
->>
->> into
->>
->> - name: Add sources list
->>    template:
->>      dest: /etc/apt/sources.list
->>      src: "../../templates/apt/sources.list.{{ ansible_distribution_=
-release | lower }}"
->>      owner: root
->>      group: root
->>      mode: 0644
->>    register: sources
->>    when: {{ansible_architecture}} !=3D aarch64
->>
->> Is there a better way to do that ?
-> Bonjour Loic,
->=20
-> Using when statement is the correct way to add conditions to a task,
-> but don't forget that the when clause contains a Jinja2 expression (n=
-ot like a module argument),
-> Thus the correct expression should rather be =C2=AB when: ansible_arc=
-hitecture !=3D 'aarch64' =C2=BB.
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
-Indeed, the previous attempt failed :-) Here is a more elaborate versio=
-n that also excludes some packages that are not available in the aarch6=
-4 repositories. How does that look ?
+This just fixes a few remaining memory allocations in RBD to use GFP_NOIO 
+instead of GFP_ATOMIC.
 
-https://github.com/ceph/ceph-cm-ansible/pull/224/commits/80e1cb2f368839=
-3f4238268a543e6c3ab19bae75
+Thanks!
+sage
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+----------------------------------------------------------------
+David Disseldorp (1):
+      rbd: use GFP_NOIO consistently for request allocations
+
+ drivers/block/rbd.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
