@@ -1,71 +1,65 @@
-From: Lars Marowsky-Bree <lmb@suse.com>
-Subject: Re: ceph-disk improvements
-Date: Thu, 7 Apr 2016 11:26:27 +0200
-Message-ID: <20160407092627.GE26235@suse.de>
-References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
- <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: Re: Adding compression/checksum support for bluestore.
+Date: Thu, 7 Apr 2016 19:51:57 +1000
+Message-ID: <20160407095157.GA23310@onthe.net.au>
+References: <CY1PR0201MB18973631BB493B8DCE1A5C4AE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1604050828340.19675@cpach.fuggernut.com>
+ <20160405151030.GA20891@onthe.net.au>
+ <20160406063849.GA5139@onthe.net.au>
+ <BLUPR0201MB18900E0ADCEA8C22D67DF444E89F0@BLUPR0201MB1890.namprd02.prod.outlook.com>
+ <20160406171702.GA5847@onthe.net.au>
+ <BLUPR0201MB18903C5D060F326FEC75F81FE89F0@BLUPR0201MB1890.namprd02.prod.outlook.com>
+ <20160407004307.GA15754@onthe.net.au>
+ <CY1PR0201MB18977F92B66A47AE41220AC7E8900@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <20160407025945.GA16081@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:56312 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751440AbcDGJ03 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 7 Apr 2016 05:26:29 -0400
-Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id C5C96ABC7
-	for <ceph-devel@vger.kernel.org>; Thu,  7 Apr 2016 09:26:26 +0000 (UTC)
+Received: from smtp1.onthe.net.au ([203.22.196.249]:42551 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755429AbcDGJwF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2016 05:52:05 -0400
 Content-Disposition: inline
-In-Reply-To: <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+In-Reply-To: <20160407025945.GA16081@onthe.net.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 2016-04-02T07:54:05, Wido den Hollander <wido@42on.com> wrote:
+On Thu, Apr 07, 2016 at 12:59:45PM +1000, Chris Dunlop wrote:
+> On Thu, Apr 07, 2016 at 12:52:48AM +0000, Allen Samuels wrote:
+> > So, what started this entire thread was Sage's suggestion that for HDD we
+> > would want to increase the size of the block under management. So if we
+> > assume something like a 32-bit checksum on a 128Kbyte block being read
+> > from 5ZB Then the odds become:
+> > 
+> > 1 - (2^-32 * (1-(10^-15))^(128 * 8 * 1024) - 2^-32 + 1) ^ ((5 * 8 * 10^21) / (4 * 8 * 1024))
+> >
+> > Which is 
+> > 
+> > 0.257715899051042299960931575773635333355380139960141052927
+> > 
+> > Which is 25%. A big jump ---> That's my point :)
+> 
+> Oops, you missed adjusting the second checksum term, it should be:
+> 
+> 1 - (2^-32 * (1-(10^-15))^(128 * 8 * 1024) - 2^-32 + 1) ^ ((5 * 8 * 10^21) / (128 * 8 * 1024))
+> = 0.009269991973796787500153031469968391191560327904558440721
+> 
+> ...which is different to the 4K block case starting at the 12th digit. I.e. not very different.
 
->=20
-> > Op 1 april 2016 om 17:36 schreef Sage Weil <sweil@redhat.com>:
-> >=20
-> >=20
-> > Hi all,
-> >=20
-> > There are a couple of looming features for ceph-disk:
-> >=20
-> > 1- Support for additional devices when using BlueStore.  There can =
-be up=20
-> > to three: the main device, a WAL/journal device (small, ~128MB, ide=
-ally=20
-> > NVRAM), and a fast metadata device (as big as you have available; w=
-ill be=20
-> > used for internal metadata).
-> >=20
-> > 2- Support for setting up dm-cache, bcache, and/or FlashCache under=
-neath=20
-> > filestore or bluestore.
-> >=20
->=20
-> Keep in mind that you can't create a partition on a bcache device. So=
- when using
-> bcache, the journal has to be filebased and not a partition.
+Oh, that's interesting, I didn't notice this before... truncating the
+results at the 12th decimal:
 
-Is there a point to running the journal on bcache? I see a point for
-bcache for the (potentially on HDD) actual data store - but the
-WAL/journal, would that not be directly on NVMe/PM/SSD (at the very
-least)? Without an intervening cache?
+0.009269991978 4K blocks
+0.009269991973 128K blocks 
 
+...we see the probability of getting bad data is slightly _higher_ with 4K
+blocks than with 128K blocks. I suspect this is because:
 
-Regards,
-    Lars
+On Fri, Apr 01, 2016 at 04:28:38PM +1100, Chris Dunlop wrote:
+> In fact, if you have a stream of data subject to some BER and split into
+> checksummed blocks, the larger the blocks and thereby the lower the number
+> of blocks, the lower the chance of a false match.
 
---=20
-Architect SDS, Distinguished Engineer
-SUSE Linux GmbH, GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton,=
- HRB 21284 (AG N=FCrnberg)
-"Experience is the name everyone gives to their mistakes." -- Oscar Wil=
-de
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Chris
