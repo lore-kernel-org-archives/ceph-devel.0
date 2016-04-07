@@ -1,78 +1,72 @@
-From: Thierry Delamare <t.delamare@laposte.net>
-Subject: Re: aarch64 conditional ansible stanza
-Date: Thu, 7 Apr 2016 15:58:51 +0200
-Message-ID: <5706679B.6030606@laposte.net>
-References: <5706025B.3080205@dachary.org>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: The fundamental evil of "magic" in computing systems -> Was:
+ mon daemon makes authentication side effects on startup
+Date: Thu, 7 Apr 2016 10:03:40 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604070959160.19675@cpach.fuggernut.com>
+References: <5703A7FF.2090002@suse.com> <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com> <5704C76C.2050408@suse.com> <alpine.DEB.2.11.1604070820560.19675@cpach.fuggernut.com> <570666AB.8090408@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtpoutz298.laposte.net ([178.22.154.198]:53714 "EHLO
-	smtp.laposte.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755557AbcDGN64 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2016 09:58:56 -0400
-Received: from smtp.laposte.net (localhost [127.0.0.1])
-	by lpn-prd-vrout010 (Postfix) with ESMTP id 4B9A245A1FF
-	for <ceph-devel@vger.kernel.org>; Thu,  7 Apr 2016 15:58:54 +0200 (CEST)
-Received: from lpn-prd-vrin001 (lpn-prd-vrin001.laposte [10.128.63.2])
-	by lpn-prd-vrout010 (Postfix) with ESMTP id 45DB145A1D8
-	for <ceph-devel@vger.kernel.org>; Thu,  7 Apr 2016 15:58:54 +0200 (CEST)
-Received: from lpn-prd-vrin001 (localhost [127.0.0.1])
-	by lpn-prd-vrin001 (Postfix) with ESMTP id 34E86365C16
-	for <ceph-devel@vger.kernel.org>; Thu,  7 Apr 2016 15:58:54 +0200 (CEST)
-In-Reply-To: <5706025B.3080205@dachary.org>
+Received: from mx1.redhat.com ([209.132.183.28]:42683 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751436AbcDGODq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Apr 2016 10:03:46 -0400
+In-Reply-To: <570666AB.8090408@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Owen Synge <osynge@suse.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ldachary@redhat.com
 
+On Thu, 7 Apr 2016, Owen Synge wrote:
+> Hi Sage,
+> 
+> On 04/07/2016 02:26 PM, Sage Weil wrote:
+> > Hi Owen,
+> > 
+> > I never really liked ceph-create-keys either, but it simplified the 
+> > deployment process.  
+> 
+> I would propose we do this in two stages.
+> 
+> (A) Remove calling the command from the init scripts as a side effect of
+> starting the mon.
+> 
+> This allows us to get most of the issues solved.
+> 
+> (B) Remove the command.
+> 
+> This is the long term goal, which is not as urgent in my opinion but
+> others may disagree.
 
+Works for me.  We just need to change ceph-deploy and get the other 
+install/deploy tool folks on board before A.
 
-On 04/07/2016 08:46 AM, Loic Dachary wrote:
-> Hi Thierry,
->
-> In order to only install a template on architectures that are not aar=
-ch64, I changed
->
-> - name: Add sources list
->    template:
->      dest: /etc/apt/sources.list
->      src: "../../templates/apt/sources.list.{{ ansible_distribution_r=
-elease | lower }}"
->      owner: root
->      group: root
->      mode: 0644
->    register: sources
->
-> into
->
-> - name: Add sources list
->    template:
->      dest: /etc/apt/sources.list
->      src: "../../templates/apt/sources.list.{{ ansible_distribution_r=
-elease | lower }}"
->      owner: root
->      group: root
->      mode: 0644
->    register: sources
->    when: {{ansible_architecture}} !=3D aarch64
->
-> Is there a better way to do that ?
-Bonjour Loic,
+> > I have no problem with removing it as long as we make
+> > sure the deployment process doesn't too much harder for ceph-deploy users.
+> 
+> The documentation for the manual process without using ceph-deploy will
+> need to be changed if we remove calling ceph-create-keys from the boot
+> scripts.
 
-Using when statement is the correct way to add conditions to a task,
-but don't forget that the when clause contains a Jinja2 expression (not=
-=20
-like a module argument),
-Thus the correct expression should rather be =C2=AB when:=20
-ansible_architecture !=3D 'aarch64' =C2=BB.
+Yeah.
 
-a+
+> For ceph-deploy users I think we should see if any changes to the
+> process are needed, the next question is will any be wanted?
 
+Actually, thinking about it a bit more, I don't think ceph-deploy usage 
+has to change at all.  The old way was
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ 1. ceph-create-keys creates and installs the keys on the mons
+ 2. ceph-deploy gatherkeys or create-initial slurps them up
+
+We can just change ceph-deploy so it creates and stores them locally, and 
+doesn't store them on the mons at all.  Users don't get the side-effect 
+that the mons have the keys installed, but that is arguably better anyway.
+
+> https://github.com/SUSE/ceph-deploy/commit/58b030dbe0a964b32f1fbc9a3762e64dd74bf50c
+
+Instead of this, it should do the same steps as ceph-create-keys (use the 
+mon. internal key to authenticate to create the admin and bootstrap 
+keys), but just write them to the local ceph-dpeloy work dir.
+
+sage
