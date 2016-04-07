@@ -1,43 +1,68 @@
-From: Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: v10.1.1 Jewel candidate released
-Date: Thu, 7 Apr 2016 14:14:25 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604071410170.21587@cpach.fuggernut.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: The fundamental evil of "magic" in computing systems -> Was: mon
+ daemon makes authentication side effects on startup
+Date: Thu, 7 Apr 2016 15:40:28 -0500
+Message-ID: <5706C5BC.4090006@redhat.com>
+References: <5703A7FF.2090002@suse.com>
+ <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com>
+ <5704C76C.2050408@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
-	<mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
-List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
-	<mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:34043 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757331AbcDGUkc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Apr 2016 16:40:32 -0400
+In-Reply-To: <5704C76C.2050408@suse.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Owen Synge <osynge@suse.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi all,
+On 04/06/2016 03:23 AM, Owen Synge wrote:
+> Dear Greg and others,
+>
+> Thankyou for your very helpful email, as it completely misses my point,
+> and that illustrate why this point is so important to be addressed.
+>
+> I am sure Greg has a deep understanding of this area. But I am pleased
+> Greg missed my points from 0-9, Greg's assumption that it is lack of
+> understanding on my part (which I am sure is common), clearly
+> illustrates where this "magic" of the side effect of starting a mon
+> demon becomes becomes "dark magic".
+>
+> If you object to "magic" and "dark magic" in this email please
+> substitute them with "side effect" and "negative consequences of side
+> effects" respectively, and you get a more serious reply :)
+>
 
-We've pushed 10.1.1, a second release candidate for Jewel.  This fixes 
-another round of bugs, and we are getting pretty close to a final release.  
-There are a few known issues to watch out for:
+FWIW, I wanted to chime in and say that anything we can do to generally 
+reduce instances of "dark magic" like this would be fantastic.
 
- - Old CephFS clusters will mangle the layouts with this release; the 
-fix was committed just after it was cut.  Wait for the next RC or the 
-release if you're upgrading a cluster that has a CephFS data pool as pool 
-0.
+Back when mkcephfs was retired a couple of years ago I had to decide 
+what I should replace it with in CBT.  Ultimately it was concern over 
+issues like this that lead me to utilize the underlying key/mon/osd 
+creation tools directly.  Your point about confusion is totally valid. 
+I use ceph-authtool and had only a vague idea that ceph-create-keys even 
+existed (and certainly didn't realize the behavior your describing).  I 
+create ceph clusters (using CBT) to test performance pretty much daily!
 
- - The upstart ceph-mds-all.conf file is missing.
+Looking at the documentation, it's pretty easy to miss what's going on:
 
-Also, this is the first release build that includes arm64/aarch64 packages 
-for Ubuntu Xenial 16.04.  Yay!  The CentOS7 builds are waiting on 
-the EPEL repos; hopefully that will happen soon.
+http://docs.ceph.com/docs/master/man/8/ceph-create-keys/
 
-Please review the release notes before trying:
+ceph-authtool is a little better documented:
 
-	http://docs.ceph.com/docs/master/release-notes/
+http://docs.ceph.com/docs/hammer/man/8/ceph-authtool/
 
-Thanks!
-sage
+It *is* scary when software behaves in mysterious ways.  It doesn't 
+invoke trust and it's not the kind of first impression to make with 
+already paranoid sysadmins (Being a paranoid ex-sysadmin myself).  I 
+think our heart was in the right place to try to reduce the number of 
+steps required in ceph-deploy, but it can't come at the expense of 
+introducing ambiguity and complexity like this.
+
+Anyway, that's my 2C.
+
+Mark
