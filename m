@@ -1,76 +1,104 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Adding compression/checksum support for bluestore.
-Date: Thu, 7 Apr 2016 11:51:56 +0200
-Message-ID: <57062DBC.5080105@digiware.nl>
-References: <20160404150042.GA25465@onthe.net.au>
- <CY1PR0201MB18973631BB493B8DCE1A5C4AE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1604050828340.19675@cpach.fuggernut.com>
- <20160405151030.GA20891@onthe.net.au> <20160406063849.GA5139@onthe.net.au>
- <BLUPR0201MB18900E0ADCEA8C22D67DF444E89F0@BLUPR0201MB1890.namprd02.prod.outlook.com>
- <20160406171702.GA5847@onthe.net.au>
- <BLUPR0201MB18903C5D060F326FEC75F81FE89F0@BLUPR0201MB1890.namprd02.prod.outlook.com>
- <20160407004307.GA15754@onthe.net.au>
- <CY1PR0201MB18977F92B66A47AE41220AC7E8900@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160407025945.GA16081@onthe.net.au>
+From: Sebastien Han <shan@redhat.com>
+Subject: Re: ceph-disk improvements
+Date: Thu, 7 Apr 2016 12:31:21 +0200
+Message-ID: <CA+HUO7+7v5NjiP-3+h-OMkez3L8MSRoo27+=HCdEc20ntW9=gw@mail.gmail.com>
+References: <alpine.DEB.2.11.1604011129360.22014@cpach.fuggernut.com>
+ <2041558235.2113.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+ <20160407092627.GE26235@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:36611 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755429AbcDGJwK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 7 Apr 2016 05:52:10 -0400
-In-Reply-To: <20160407025945.GA16081@onthe.net.au>
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:38013 "EHLO
+	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752204AbcDGKbm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2016 06:31:42 -0400
+Received: by mail-wm0-f47.google.com with SMTP id u206so80944866wme.1
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Apr 2016 03:31:41 -0700 (PDT)
+In-Reply-To: <20160407092627.GE26235@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>, Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Lars Marowsky-Bree <lmb@suse.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 7-4-2016 04:59, Chris Dunlop wrote:
-> On Thu, Apr 07, 2016 at 12:52:48AM +0000, Allen Samuels wrote:
->> So, what started this entire thread was Sage's suggestion that for HDD we
->> would want to increase the size of the block under management. So if we
->> assume something like a 32-bit checksum on a 128Kbyte block being read
->> from 5ZB Then the odds become:
->>
->> 1 - (2^-32 * (1-(10^-15))^(128 * 8 * 1024) - 2^-32 + 1) ^ ((5 * 8 * 10^21) / (4 * 8 * 1024))
->>
->> Which is
->>
->> 0.257715899051042299960931575773635333355380139960141052927
->>
->> Which is 25%. A big jump ---> That's my point :)
+One thing I'd like to see and I know we discussed that with Lo=C3=AFc a
+while ago is ceph-disk being idempotent when it comes to the device
+preparation.
+Running "ceph-disk prepare" against a device should result in an exit
+0 if the disk already has an OSD prepared on it (unless we do
+something like --force, which will then zap the disk).
+I had to implement this logic in ceph-ansible (and the guys from
+chef/puppet probably did the same), so now it's done but i'll be happy
+to leave ceph-disk doing it :).
+
+Thoughts?
+
+On Thu, Apr 7, 2016 at 11:26 AM, Lars Marowsky-Bree <lmb@suse.com> wrot=
+e:
+> On 2016-04-02T07:54:05, Wido den Hollander <wido@42on.com> wrote:
 >
-> Oops, you missed adjusting the second checksum term, it should be:
+>>
+>> > Op 1 april 2016 om 17:36 schreef Sage Weil <sweil@redhat.com>:
+>> >
+>> >
+>> > Hi all,
+>> >
+>> > There are a couple of looming features for ceph-disk:
+>> >
+>> > 1- Support for additional devices when using BlueStore.  There can=
+ be up
+>> > to three: the main device, a WAL/journal device (small, ~128MB, id=
+eally
+>> > NVRAM), and a fast metadata device (as big as you have available; =
+will be
+>> > used for internal metadata).
+>> >
+>> > 2- Support for setting up dm-cache, bcache, and/or FlashCache unde=
+rneath
+>> > filestore or bluestore.
+>> >
+>>
+>> Keep in mind that you can't create a partition on a bcache device. S=
+o when using
+>> bcache, the journal has to be filebased and not a partition.
 >
-> 1 - (2^-32 * (1-(10^-15))^(128 * 8 * 1024) - 2^-32 + 1) ^ ((5 * 8 * 10^21) / (128 * 8 * 1024))
-> = 0.009269991973796787500153031469968391191560327904558440721
+> Is there a point to running the journal on bcache? I see a point for
+> bcache for the (potentially on HDD) actual data store - but the
+> WAL/journal, would that not be directly on NVMe/PM/SSD (at the very
+> least)? Without an intervening cache?
 >
-> ...which is different to the 4K block case starting at the 12th digit. I.e. not very different.
 >
-> Which is my point! :)
-
-Sorry for posting something this vague, but my memory (and Google) is 
-playing games with me.
-
-I have not so recently read some articles about this when I was studying 
-ZFS which has a
-similar problem. Since it also aims for ZettaByte storage, and what I 
-took from that discussion
-is that most of the CRC32 checksumtypes are susceptible to bit-error 
-clustering. Which means that
-there is a bigger chance for a faulty block or set of error bits to go 
-undetected.
-
-Like I said, sorry for not being able to be more specific atm.
-
-The ZFS preferred checksum is fletcher4, also because of its speed.
-But others include: fletcher2 | fletcher4 | sha256 | sha512 | skein | edonr
-
-There is an article on Wikipedia that discusses Fletcher algorithms, 
-strength and weakness:
-https://en.wikipedia.org/wiki/Fletcher's_checksum
-
---WjW
+> Regards,
+>     Lars
+>
+> --
+> Architect SDS, Distinguished Engineer
+> SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham No=
+rton, HRB 21284 (AG N=C3=BCrnberg)
+> "Experience is the name everyone gives to their mistakes." -- Oscar W=
+ilde
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
+
+--=20
+Cheers
+
+=E2=80=93=E2=80=93=E2=80=93=E2=80=93=E2=80=93=E2=80=93
+S=C3=A9bastien Han
+Senior Cloud Architect
+
+"Always give 100%. Unless you're giving blood."
+
+Mail: seb@redhat.com
+Address: 11 bis, rue Roqu=C3=A9pine - 75008 Paris
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
