@@ -1,51 +1,68 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: The fundamental evil of "magic" in computing systems -> Was:
- mon daemon makes authentication side effects on startup
-Date: Thu, 7 Apr 2016 08:26:53 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604070820560.19675@cpach.fuggernut.com>
-References: <5703A7FF.2090002@suse.com> <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com> <5704C76C.2050408@suse.com>
+From: "Atchley, Scott" <atchleyes@ornl.gov>
+Subject: Re: Adding compression/checksum support for bluestore.
+Date: Thu, 7 Apr 2016 12:21:12 +0000
+Message-ID: <3E2B4A2A-04CA-45BB-9E45-C5A0EFA46A17@ornl.gov>
+References: <20160404150042.GA25465@onthe.net.au>
+ <CY1PR0201MB18973631BB493B8DCE1A5C4AE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1604050828340.19675@cpach.fuggernut.com>
+ <20160405151030.GA20891@onthe.net.au> <20160406063849.GA5139@onthe.net.au>
+ <BLUPR0201MB18900E0ADCEA8C22D67DF444E89F0@BLUPR0201MB1890.namprd02.prod.outlook.com>
+ <20160406171702.GA5847@onthe.net.au>
+ <BLUPR0201MB18903C5D060F326FEC75F81FE89F0@BLUPR0201MB1890.namprd02.prod.outlook.com>
+ <20160407004307.GA15754@onthe.net.au>
+ <CY1PR0201MB18977F92B66A47AE41220AC7E8900@CY1PR0201MB1897.namprd02.prod.outlook.com>
+ <20160407025945.GA16081@onthe.net.au> <57062DBC.5080105@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51784 "EHLO mx1.redhat.com"
+Received: from mta02.ornl.gov ([128.219.177.12]:40668 "EHLO mta02.ornl.gov"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755472AbcDGM07 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 7 Apr 2016 08:26:59 -0400
-In-Reply-To: <5704C76C.2050408@suse.com>
+	id S1755808AbcDGMbC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Apr 2016 08:31:02 -0400
+In-Reply-To: <57062DBC.5080105@digiware.nl>
+Content-Language: en-US
+Content-ID: <941CAE8B67A56A49ABA7FBA92C8ED1B8@ornl.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Owen Synge <osynge@suse.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ldachary@redhat.com
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Chris Dunlop <chris@onthe.net.au>, Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Owen,
-
-I never really liked ceph-create-keys either, but it simplified the 
-deployment process.  I have no problem with removing it as long as we make 
-sure the deployment process doesn't too much harder for ceph-deploy users.
-
-Right now, you have to do something like
-
- ceph-deploy create MON1 MON2 MON3
- ceph-deploy install MON1 MON2 MON3
-
-then manually
-
- ceph-deploy create MON1 MON2 MON3
- ceph-deploy gatherkeys MON1
-
-or, using the simplified step that was added later,
-
- ceph-deploy mon create-initial
-
-How about we change the manual process to do
-
- ceph-deploy create MON1 MON2 MON3
- ceph-deploy createkeys MON1    # ceph-deploy bootstrap-keys create HOST ?
- ceph-deploy gatherkeys MON1    # ceph-deploy bootstrap-keys gather HOST ?
-
-and the create-initial one to run ceph-create-keys manually?
-
-We'll need chef, ansible, puppet, and other recipes/playbooks/manifests to 
-be updated as well...
-
-sage
+PiBPbiBBcHIgNywgMjAxNiwgYXQgMjo1MSBBTSwgV2lsbGVtIEphbiBXaXRoYWdlbiA8d2p3QGRp
+Z2l3YXJlLm5sPiB3cm90ZToNCj4gDQo+IE9uIDctNC0yMDE2IDA0OjU5LCBDaHJpcyBEdW5sb3Ag
+d3JvdGU6DQo+PiBPbiBUaHUsIEFwciAwNywgMjAxNiBhdCAxMjo1Mjo0OEFNICswMDAwLCBBbGxl
+biBTYW11ZWxzIHdyb3RlOg0KPj4+IFNvLCB3aGF0IHN0YXJ0ZWQgdGhpcyBlbnRpcmUgdGhyZWFk
+IHdhcyBTYWdlJ3Mgc3VnZ2VzdGlvbiB0aGF0IGZvciBIREQgd2UNCj4+PiB3b3VsZCB3YW50IHRv
+IGluY3JlYXNlIHRoZSBzaXplIG9mIHRoZSBibG9jayB1bmRlciBtYW5hZ2VtZW50LiBTbyBpZiB3
+ZQ0KPj4+IGFzc3VtZSBzb21ldGhpbmcgbGlrZSBhIDMyLWJpdCBjaGVja3N1bSBvbiBhIDEyOEti
+eXRlIGJsb2NrIGJlaW5nIHJlYWQNCj4+PiBmcm9tIDVaQiBUaGVuIHRoZSBvZGRzIGJlY29tZToN
+Cj4+PiANCj4+PiAxIC0gKDJeLTMyICogKDEtKDEwXi0xNSkpXigxMjggKiA4ICogMTAyNCkgLSAy
+Xi0zMiArIDEpIF4gKCg1ICogOCAqIDEwXjIxKSAvICg0ICogOCAqIDEwMjQpKQ0KPj4+IA0KPj4+
+IFdoaWNoIGlzDQo+Pj4gDQo+Pj4gMC4yNTc3MTU4OTkwNTEwNDIyOTk5NjA5MzE1NzU3NzM2MzUz
+MzMzNTUzODAxMzk5NjAxNDEwNTI5MjcNCj4+PiANCj4+PiBXaGljaCBpcyAyNSUuIEEgYmlnIGp1
+bXAgLS0tPiBUaGF0J3MgbXkgcG9pbnQgOikNCj4+IA0KPj4gT29wcywgeW91IG1pc3NlZCBhZGp1
+c3RpbmcgdGhlIHNlY29uZCBjaGVja3N1bSB0ZXJtLCBpdCBzaG91bGQgYmU6DQo+PiANCj4+IDEg
+LSAoMl4tMzIgKiAoMS0oMTBeLTE1KSleKDEyOCAqIDggKiAxMDI0KSAtIDJeLTMyICsgMSkgXiAo
+KDUgKiA4ICogMTBeMjEpIC8gKDEyOCAqIDggKiAxMDI0KSkNCj4+ID0gMC4wMDkyNjk5OTE5NzM3
+OTY3ODc1MDAxNTMwMzE0Njk5NjgzOTExOTE1NjAzMjc5MDQ1NTg0NDA3MjENCj4+IA0KPj4gLi4u
+d2hpY2ggaXMgZGlmZmVyZW50IHRvIHRoZSA0SyBibG9jayBjYXNlIHN0YXJ0aW5nIGF0IHRoZSAx
+MnRoIGRpZ2l0LiBJLmUuIG5vdCB2ZXJ5IGRpZmZlcmVudC4NCj4+IA0KPj4gV2hpY2ggaXMgbXkg
+cG9pbnQhIDopDQo+IA0KPiBTb3JyeSBmb3IgcG9zdGluZyBzb21ldGhpbmcgdGhpcyB2YWd1ZSwg
+YnV0IG15IG1lbW9yeSAoYW5kIEdvb2dsZSkgaXMgcGxheWluZyBnYW1lcyB3aXRoIG1lLg0KPiAN
+Cj4gSSBoYXZlIG5vdCBzbyByZWNlbnRseSByZWFkIHNvbWUgYXJ0aWNsZXMgYWJvdXQgdGhpcyB3
+aGVuIEkgd2FzIHN0dWR5aW5nIFpGUyB3aGljaCBoYXMgYQ0KPiBzaW1pbGFyIHByb2JsZW0uIFNp
+bmNlIGl0IGFsc28gYWltcyBmb3IgWmV0dGFCeXRlIHN0b3JhZ2UsIGFuZCB3aGF0IEkgdG9vayBm
+cm9tIHRoYXQgZGlzY3Vzc2lvbg0KPiBpcyB0aGF0IG1vc3Qgb2YgdGhlIENSQzMyIGNoZWNrc3Vt
+dHlwZXMgYXJlIHN1c2NlcHRpYmxlIHRvIGJpdC1lcnJvciBjbHVzdGVyaW5nLiBXaGljaCBtZWFu
+cyB0aGF0DQo+IHRoZXJlIGlzIGEgYmlnZ2VyIGNoYW5jZSBmb3IgYSBmYXVsdHkgYmxvY2sgb3Ig
+c2V0IG9mIGVycm9yIGJpdHMgdG8gZ28gdW5kZXRlY3RlZC4NCj4gDQo+IExpa2UgSSBzYWlkLCBz
+b3JyeSBmb3Igbm90IGJlaW5nIGFibGUgdG8gYmUgbW9yZSBzcGVjaWZpYyBhdG0uDQo+IA0KPiBU
+aGUgWkZTIHByZWZlcnJlZCBjaGVja3N1bSBpcyBmbGV0Y2hlcjQsIGFsc28gYmVjYXVzZSBvZiBp
+dHMgc3BlZWQuDQo+IEJ1dCBvdGhlcnMgaW5jbHVkZTogZmxldGNoZXIyIHwgZmxldGNoZXI0IHwg
+c2hhMjU2IHwgc2hhNTEyIHwgc2tlaW4gfCBlZG9ucg0KPiANCj4gVGhlcmUgaXMgYW4gYXJ0aWNs
+ZSBvbiBXaWtpcGVkaWEgdGhhdCBkaXNjdXNzZXMgRmxldGNoZXIgYWxnb3JpdGhtcywgc3RyZW5n
+dGggYW5kIHdlYWtuZXNzOg0KPiBodHRwczovL2VuLndpa2lwZWRpYS5vcmcvd2lraS9GbGV0Y2hl
+cidzX2NoZWNrc3VtDQo+IA0KPiDigJRXalcNCg0KVGhpcyBaRlMgYmxvZyBoYXMgYW4gaW50ZXJl
+c3RpbmcgZGlzY3Vzc2lvbiBvZiB0cnVzdGluZyAob3Igbm90IHRydXN0aW5nKSBmbGV0Y2hlcjQ6
+DQoNCmh0dHBzOi8vYmxvZ3Mub3JhY2xlLmNvbS9ib253aWNrL2VudHJ5L3pmc19kZWR1cA0KDQpT
+Y290dA==
