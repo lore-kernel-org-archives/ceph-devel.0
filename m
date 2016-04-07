@@ -1,54 +1,194 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: aarch64 conditional ansible stanza
-Date: Thu, 7 Apr 2016 08:46:51 +0200
-Message-ID: <5706025B.3080205@dachary.org>
+From: Jens Rosenboom <j.rosenboom@x-ion.de>
+Subject: Re: The fundamental evil of "magic" in computing systems -> Was: mon
+ daemon makes authentication side effects on startup
+Date: Thu, 7 Apr 2016 09:49:02 +0200
+Message-ID: <CADr68WaVwWtkkiUcETECwP5GGEpN2eiZtTSJnghYDp2WR8kr3w@mail.gmail.com>
+References: <5703A7FF.2090002@suse.com>
+	<CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com>
+	<5704C76C.2050408@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:46354 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750784AbcDGGrB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2016 02:47:01 -0400
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:36576 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751260AbcDGHtG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2016 03:49:06 -0400
+Received: by mail-lb0-f173.google.com with SMTP id bk9so17386766lbc.3
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Apr 2016 00:49:04 -0700 (PDT)
+In-Reply-To: <5704C76C.2050408@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thierry Delamare <t.delamare@laposte.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Owen Synge <osynge@suse.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Thierry,
+2016-04-06 10:23 GMT+02:00 Owen Synge <osynge@suse.com>:
+> Dear Greg and others,
+>
+> Thankyou for your very helpful email, as it completely misses my poin=
+t,
+> and that illustrate why this point is so important to be addressed.
+>
+> I am sure Greg has a deep understanding of this area. But I am please=
+d
+> Greg missed my points from 0-9, Greg's assumption that it is lack of
+> understanding on my part (which I am sure is common), clearly
+> illustrates where this "magic" of the side effect of starting a mon
+> demon becomes becomes "dark magic".
+>
+> If you object to "magic" and "dark magic" in this email please
+> substitute them with "side effect" and "negative consequences of side
+> effects" respectively, and you get a more serious reply :)
+>
+> On 04/05/2016 10:14 PM, Gregory Farnum wrote:
+>> I think you're fundamentally understanding how these keys come into
+>> existence. They aren't generated randomly on the local monitor; it
+>> uses get-or-create in order to fetch them (and create them if they
+>> don't already exist).
+>
+> I have looked at this issue in depth, and general confusion in this a=
+rea
+> is indeed very common, so it is reasonable to expect everyone is
+> confused by the same thing.
+>
+> In my experience it is "magic" that causes admins fear, as good admin=
+s,
+> need to understand, because they need to understand the side effects =
+of
+> any "magic", in case the "magic" is "dark", and in this case it is wi=
+th
+> points (0) to (8) showing is indeed "dark magic".
+>
+> Lets be specific:
+>
+> Fetch and create are fundamentally different in side effects when doi=
+ng
+> deployment. Lets be clear, when ceph does a "fetch" of a key, is not =
+I
+> believe and issue, but when ceph uses magic to "create" keys, it can
+> often cause side effects. Hence the process to "create" a key should
+> only occur when its asked to be done.
+>
+> The current get-or-create keyrings as a side effect of booting a mon
+> makes many issues (points 0-8 may not be all the issues, just ones th=
+at
+> spring to my mind). If the booting of a mon only did a fetch I would
+> feel we could resolve all my point except (2) and (9) sadly a boot of=
+ a
+> mon will also do a create keys where this "magic" starts to become ve=
+ry
+> "dark" indeed.
+>
+>> So maybe it's difficult to pre-generate your own keys and plug them
+>> into the system (I don't remember where the initial values come from
+>> in standard deployment scenarios),
+>
+> See my reply to John as to how you can deploy ceph without ceph-creat=
+e-keys.
+>
+>> but once they're set up you don't
+>> need to carefully install your values on all the monitor nodes =E2=80=
+=94 they
+>> will fetch the correct values from the monitor cluster.
+>
+> I am objecting to the side effect of booting the mon and that process
+> creating keys that where not asked for, potentially causing valid
+> osd-bootstrap, rgw-bootstrap or mds-bootstrap to fail authentication =
+as
+> invalid ones have been created as a side effect of starting the mon d=
+aemons.
+>
+>> The coordination problem here is not really any different than that =
+of
+>> making sure your monitors are all part of the "mon initial members"
+>> config option,
+>
+> You are forgetting that we also have osd-bootstrap, rgw-bootstrap or
+> mds-bootstrap keys and these may be generated by some other tool than
+> the mon, this is made much much harder to do by the mon init scripts
+> without being asked explicitly to do so.
+>
+>> btw. Which you need to solve or else you're liable to
+>> have them coming up and creating independent monitor clusters and
+>> going haywire.
+>> -Greg
+>
+> Not knowing what is happening is the enemy of understanding, and henc=
+e
+> the creator of "magic". Often giving the "magic" a name, or making it
+> explicit, causes enough understanding to remove it's "magic" properti=
+es.
+> Hence making all occurrences of key "create" (not "fetch") an explici=
+t
+> step rather than a side effect will go a great deal to address this i=
+ssue.
+>
+> So if creating keys was not a side effect of booting mons, we would h=
+ave
+> not issue here, as anyone who is used to cluster automation, has good
+> tools. These tools include chef, puppet, salt, and ansible, for clust=
+er
+> management ideally, but more manually we have tools to copy files suc=
+h
+> as rsync, scp, and tools to diagnose such issues such as checksums.
+>
+>   ceph-create-keys --cluster ${CLUSTER} --id ${MON_NAME}
+>
+> Having the above command separated from booting a mon actually avoids
+> osd's rgw's and mds's going haywire if they are configured in paralle=
+l
+> to the mon with keys from a source external to the mon, unless you
+> either (a) build in a layer of cluster synchronization above ceph, su=
+ch
+> as ceph-deploy has done with its single threaded operation across a
+> complete cluster, or (b) do lots of dirty "magic" to remove
+> inconsistencies. Solution (a) is not good due to issue (0) amongst
+> others, and (b) creates more "magic" which has to be very carefully
+> designed to avoid it being "dark".
+>
+> Another way to remove this "magic" is to document "magic" in detail, =
+and
+> documenting this in this email is long and detailed, although Greg ma=
+de
+> a start, he missed out the very important part of why the mds-bootstr=
+ap
+> keyring, is more important than is documented when if comes to deploy=
+ing
+> your cluster the first time. I will skip it for now, but I am happy t=
+o
+> expand if needed.
+>
+> In this case I argue the "magic" can be removed by making the process=
+ of
+> creating keys explicit. I would propose separating the "create" of  k=
+eys
+> from booting a mon is the least confusing and "magical" solution, wit=
+h
+> the least chance of causing trouble for admins.
+>
+> Thank you Greg for taking the time to reply, and please forgive me fo=
+r
+> using your reply to illustrate that the real problem is the "magic", =
+and
+> that "magic" removes understanding, hence knowledge of the "magic"
+> having "dark" issues, as this is a fear inducing thing for an admin n=
+ew
+> to ceph.
 
-In order to only install a template on architectures that are not aarch=
-64, I changed
+Hi Owen,
 
-- name: Add sources list
-  template:
-    dest: /etc/apt/sources.list
-    src: "../../templates/apt/sources.list.{{ ansible_distribution_rele=
-ase | lower }}"
-    owner: root
-    group: root
-    mode: 0644
-  register: sources
+thanks for taking this up, I have been trying to get this issue fixed
+in Ubuntu, not been aware that this was actually present in the
+upstream code already, see
 
-into
+https://bugs.launchpad.net/ubuntu/+source/ceph/+bug/1563330
 
-- name: Add sources list
-  template:
-    dest: /etc/apt/sources.list
-    src: "../../templates/apt/sources.list.{{ ansible_distribution_rele=
-ase | lower }}"
-    owner: root
-    group: root
-    mode: 0644
-  register: sources
-  when: {{ansible_architecture}} !=3D aarch64
+So I strongly support your wish of being able to automatically deploy
+a cluster, including all necessary credentials, without any
+well-intended dark magic intervening.
 
-Is there a better way to do that ?
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Yours,
+Jens
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
