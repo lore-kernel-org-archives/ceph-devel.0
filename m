@@ -1,45 +1,52 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: releasing hammer v0.94.7 ?
-Date: Fri, 8 Apr 2016 08:43:47 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604080840170.19675@cpach.fuggernut.com>
-References: <57067073.9040200@dachary.org> <1755778347.2548.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 1/2] libceph: multiple filesystem support
+Date: Fri, 8 Apr 2016 08:11:33 -0500
+Message-ID: <5707AE05.2020407@ieee.org>
+References: <1460098226-69141-1-git-send-email-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58209 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758503AbcDHMnx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 8 Apr 2016 08:43:53 -0400
-In-Reply-To: <1755778347.2548.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:34343 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751924AbcDHNLy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2016 09:11:54 -0400
+Received: by mail-wm0-f45.google.com with SMTP id l6so64168196wml.1
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Apr 2016 06:11:54 -0700 (PDT)
+In-Reply-To: <1460098226-69141-1-git-send-email-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Loic Dachary <loic@dachary.org>, Nathan Cutler <ncutler@suse.cz>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com
 
-On Fri, 8 Apr 2016, Wido den Hollander wrote:
-> > Op 7 april 2016 om 16:36 schreef Loic Dachary <loic@dachary.org>:
-> > 
-> > Hi Sage,
-> > 
-> > Here are the issues that would be in hammer v0.94.7 if we decided to release
-> > it now: http://tracker.ceph.com/versions/511
-> > And here is the backport queue :
-> > http://tracker.ceph.com/projects/ceph/issues?query_id=78
-> > 
-> > Do you think it is time to cut the release and ask QE to start testing ?
-> > 
+On 04/08/2016 01:50 AM, Yan, Zheng wrote:
+> When accessing non-default filesystem, cephfs client subscribes to
+> "mdsmap.<id>". To support this, we can't use number to stand for
+> map name. Instead, we need to pass map name to ceph_monc_want_map().
+> Map name caller provided is saved in monc->subs[] and later encoded
+> in MON_SUBSCRIBE message.
 > 
-> As this might be the last Hammer release I wonder if we could fix this bug:
-> http://tracker.ceph.com/issues/15348
-
-Don't worry, it won't be the last one--we have at least another half 
-year left.
-
-> I already submitted a PR for it: https://github.com/ceph/ceph/pull/8441
+> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+> ---
+>  include/linux/ceph/mon_client.h | 23 +++++------
+>  net/ceph/debugfs.c              |  2 +-
+>  net/ceph/mon_client.c           | 87 +++++++++++++++++++++++++----------------
+>  3 files changed, 67 insertions(+), 45 deletions(-)
 > 
-> I backported it on a production cluster to Hammer and it works fine. Might be
-> something we can squeeze in?
+> diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
+> index e230e7e..4aa8b3c 100644
+> --- a/include/linux/ceph/mon_client.h
+> +++ b/include/linux/ceph/mon_client.h
+> @@ -55,6 +55,13 @@ struct ceph_mon_generic_request {
+>  	struct ceph_msg *reply;    /* and reply */
+>  };
+>  
+> +/* may subscribe to mdsmap.<int> */
+> +#define CEPH_SUB_MAP_MAXLEN 32
+> +
+> +#define CEPH_SUB_MONMAP "mommap"
 
-Can you add a test to s3-tests for this?
+s/mom/mon/
 
-sage
+That's all; this isn't a "real" review.	-Alex
+
