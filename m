@@ -1,232 +1,98 @@
-From: M Ranga Swami Reddy <swamireddy@gmail.com>
-Subject: v10.1.1 Contributor credits
-Date: Fri, 8 Apr 2016 02:39:49 +0530
-Message-ID: <CANA9Uk6xpb4mMXhq3j0ZwnEM42tkkk8dh7CnsoyOEVh8-hZoFA@mail.gmail.com>
+From: =?UTF-8?B?5byg5bmz?= <alan.zhang@linux.com>
+Subject: cephx disable to enable cause kernel bug
+Date: Fri, 8 Apr 2016 12:11:04 +0800
+Message-ID: <BLU436-SMTP13708EF493613240113CA7485910@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f54.google.com ([209.85.213.54]:33069 "EHLO
-	mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751673AbcDGVJv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2016 17:09:51 -0400
-Received: by mail-vk0-f54.google.com with SMTP id k1so115619537vkb.0
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Apr 2016 14:09:50 -0700 (PDT)
+Received: from blu004-omc4s23.hotmail.com ([65.55.111.162]:62430 "EHLO
+	BLU004-OMC4S23.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750758AbcDHEOw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2016 00:14:52 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sweil@redhat.com
 
-Hi Ceph,
+Hi,
 
-Here is a sorted list of authors and organizations who contributed to
-v10.1.1, by number of commits or reviews back to v10.1.0. The
-affiliation of
-authors to organizations can be updated by submitting a patch to
-https://github.com/ceph/ceph/blob/master/.organizationmap
+I change cephx  disable to enable, when restart ceph luster it will be cause some osd node host kernel panic.
+Maybe it is a bug.
 
-All commits are reviewed but the number of reviews is a fraction of
-the number of commits. More often than not, the reviewer(s) is only
-mentioned in the message of the merge although it means that all
-associated commits have been reviewed. If you are curious about how it
-is done, do checkout the wiki entry at
-http://tracker.ceph.com/projects/ceph/wiki/Ceph_contributors_list_maint=
-enance_guide
+OS: Ubuntu 14.04.4
+Kernel : 4.2.0-34-generic
+Ceph Version: 0.94.6 (e832001feaf8c176593e0325c8298e3f16dfb403)
 
-=3D=3D=3D
-Number of lines added and removed, by authors
-     1    5981 Jason Dillaman <dillaman@redhat.com>
-     2    2766 Sage Weil <sweil@redhat.com>
-     3     962 Ricardo Dias <rdias@suse.com>
-     4     831 Mykola Golub <mgolub@mirantis.com>
-     5     775 John Spray <jspray@redhat.com>
-     6     765 Loic Dachary <ldachary@redhat.com>
-     7     531 Samuel Just <sjust@redhat.com>
-     8     524 Matt Benjamin <mbenjamin@redhat.com>
-     9     481 Erwan Velu <erwan@redhat.com>
-    10     393 Yehuda Sadeh <ysadehwe@redhat.com>
-    11     254 Roi Dayan <roid@mellanox.com>
-    12     225 Nathan Cutler <ncutler@suse.com>
-    13     219 Kefu Chai <kchai@redhat.com>
-    14     209 Xie Xingguo <xie.xingguo@zte.com.cn>
-    15     187 Adam Kupczyk <akupczyk@mirantis.com>
-    16     154 Casey Bodley <cbodley@redhat.com>
-    17     143 Yan, Zheng <zyan@redhat.com>
-    18     127 Somnath Roy <somnath.roy@sandisk.com>
-    19     123 David Zafman <dzafman@redhat.com>
-    20      90 Song Baisen <song.baisen@zte.com.cn>
-    21      72 Ali Maredia <amaredia@redhat.com>
-    22      54 Abhishek Lekshmanan <abhishek@suse.com>
-    23      53 Marcus Watts <mwatts@redhat.com>
-    24      40 Ma Jianpeng <jianpeng.ma@intel.com>
-    25      38 Alexey Sheplyakov <asheplyakov@mirantis.com>
-    26      35 Zhiqiang Wang <zhiqiang@xsky.com>
-    27      33 Wido den Hollander <wido@42on.com>
-    28      32 runsisi <runsisi@hust.edu.cn>
-    29      29 Dongsheng Yang <dongsheng.yang@easystack.cn>
-    30      26 sunspot <sunspot0105@gmail.com>
-    31      22 Vikhyat Umrao <vumrao@redhat.com>
-    32      15 Xiaoxi Chen <xiaoxchen@ebay.com>
-    33      15 Richard W.M. Jones <rjones@redhat.com>
-    34      12 Xinze Chi <xinze@xsky.com>
-    35      12 Venky Shankar <vshankar@redhat.com>
-    36      12 Orit Wasserman <owasserm@redhat.com>
-    37      12 Dan Mick <dmick@redhat.com>
-    38      12 Brad Hubbard <bhubbard@redhat.com>
-    39      10 Wei Jin <wjin.cn@gmail.com>
-    40       8 Xiaowei Chen <chen.xiaowei@h3c.com>
-    41       8 Vitja Makarov <vitja.makarov@gmail.com>
-    42       8 John Coyle <dx9err@gmail.com>
-    43       8 Jenkins <jenkins@ceph.com>
-    44       6 Mehdi Abaakouk <sileht@redhat.com>
-    45       6 Josh Durgin <jdurgin@redhat.com>
-    46       5 Willem Jan Withagen <wjw@digiware.nl>
-    47       5 Haomai Wang <haomai@xsky.com>
-    48       4 scienceluo <luo.kexue@zte.com.cn>
-    49       4 Qiankun Zheng <zheng.qiankun@h3c.com>
-    50       2 Star Guo <star.guo@mevoco.com>
-    51       2 Robin H. Johnson <robin.johnson@dreamhost.com>
-    52       2 Qinghua Jin <qhjin_dev@163.com>
-    53       1 Ning Yao <yaoning@unitedstack.com>
-    54       1 Javier M. Mellid <jmunhoz@igalia.com>
-    55       1 Ira Cooper <ira@redhat.com>
+/var/log/syslog:
+Apr  8 11:41:30 mon01 kernel: [262666.476487] libceph: osd63 up
+Apr  8 11:41:30 mon01 kernel: [262666.476488] libceph: osd64 up
+Apr  8 11:41:30 mon01 kernel: [262666.476488] libceph: osd66 up
+Apr  8 11:41:30 mon01 kernel: [262666.476489] libceph: osd67 up
+Apr  8 11:41:30 mon01 kernel: [262666.476490] libceph: osd68 up
+Apr  8 11:41:30 mon01 kernel: [262666.476491] libceph: osd69 up
+Apr  8 11:41:30 mon01 kernel: [262666.476491] libceph: osd70 up
+Apr  8 11:41:30 mon01 kernel: [262666.476508] libceph: mon2 172.24.1.60:6789 session established
+Apr  8 11:41:35 mon01 kernel: [262671.341710] libceph: osd35 172.24.1.63:6820 socket closed (con state CONNECTING)
+Apr  8 11:41:39 mon01 kernel: [262671.478117] libceph: osd5 down
+Apr  8 11:41:39 mon01 kernel: [262671.478136] libceph: osd5 up
+Apr  8 11:41:39 mon01 kernel: [262671.478137] libceph: osd11 down
+Apr  8 11:41:39 mon01 kernel: [262671.478138] libceph: osd29 down
+Apr  8 11:41:39 mon01 kernel: [262671.478139] libceph: osd35 down
+Apr  8 11:41:39 mon01 kernel: [262671.478140] libceph: osd47 down
+Apr  8 11:41:39 mon01 kernel: [262671.478140] libceph: osd65 down
+Apr  8 11:41:39 mon01 kernel: [262671.478162] BUG: unable to handle kernel paging request at ffffebe000000000
+Apr  8 11:41:39 mon01 kernel: [262671.531460] IP: [<ffffffff811cd04a>] kfree+0x5a/0x130
+Apr  8 11:41:39 mon01 kernel: [262671.584334] PGD 0 
+Apr  8 11:41:39 mon01 kernel: [262671.635847] Oops: 0000 [#1] SMP 
+Apr  8 11:41:39 mon01 kernel: [262671.686779] Modules linked in: rbd libceph xfs libcrc32c iptable_filter ip_tables ip6table_filter ip6_tables x_tables x86_pkg_temp_thermal intel_powerclamp coretemp kvm_intel ipmi_ssif kvm ipmi_devintf crct10dif_pclmul crc32_pclmul aesni_intel aes_x86_64 lrw gf128mul glue_helper dcdbas ablk_helper cryptd mei_me sb_edac joydev input_leds lpc_ich wmi edac_core shpchp mei ipmi_si 8250_fintek ipmi_msghandler acpi_power_meter acpi_pad mac_hid bonding hid_generic usbhid hid ahci libahci igb i2c_algo_bit megaraid_sas dca ptp pps_core
+Apr  8 11:41:39 mon01 kernel: [262672.055841] CPU: 22 PID: 2961272 Comm: kworker/22:2 Not tainted 4.2.0-34-generic #39~14.04.1-Ubuntu
+Apr  8 11:41:39 mon01 kernel: [262672.162338] Hardware name: Dell Inc. PowerEdge R720/068CDY, BIOS 2.4.3 07/09/2014
+Apr  8 11:41:39 mon01 kernel: [262672.268937] Workqueue: ceph-msgr con_work [libceph]
+Apr  8 11:41:39 mon01 kernel: [262672.322290] task: ffff88081c2d0dc0 ti: ffff880149ae8000 task.ti: ffff880149ae8000
+Apr  8 11:41:39 mon01 kernel: [262672.428330] RIP: 0010:[<ffffffff811cd04a>]  [<ffffffff811cd04a>] kfree+0x5a/0x130
+Apr  8 11:41:39 mon01 kernel: [262672.535880] RSP: 0018:ffff880149aeba58  EFLAGS: 00010286
+Apr  8 11:41:39 mon01 kernel: [262672.589486] RAX: 000001e000000000 RBX: 0000000000000012 RCX: ffff8807e7461018
+Apr  8 11:41:39 mon01 kernel: [262672.695980] RDX: 000077ff80000000 RSI: ffff88081af2be04 RDI: 0000000000000012
+Apr  8 11:41:39 mon01 kernel: [262672.803668] RBP: ffff880149aeba78 R08: 0000000000000000 R09: 0000000000000000
+Apr  8 11:41:39 mon01 kernel: [262672.912299] R10: ffffebe000000000 R11: ffff880819a60e78 R12: ffff8800aec8df40
+Apr  8 11:41:39 mon01 kernel: [262673.021769] R13: ffffffffc035f70f R14: ffff8807e5b138e0 R15: ffff880da9785840
+Apr  8 11:41:39 mon01 kernel: [262673.131722] FS:  0000000000000000(0000) GS:ffff88081fac0000(0000) knlGS:0000000000000000
+Apr  8 11:41:39 mon01 kernel: [262673.245377] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+Apr  8 11:41:39 mon01 kernel: [262673.303281] CR2: ffffebe000000000 CR3: 0000000001c0d000 CR4: 00000000001406e0
+Apr  8 11:41:39 mon01 kernel: [262673.417556] Stack:
+Apr  8 11:41:39 mon01 kernel: [262673.472943]  ffff880149aeba88 ffff88081af2be04 ffff8800aec8df40 ffff88081af2be04
+Apr  8 11:41:39 mon01 kernel: [262673.583767]  ffff880149aeba98 ffffffffc035f70f ffff880149aebac8 ffff8800aec8df00
+Apr  8 11:41:39 mon01 kernel: [262673.694546]  ffff880149aebac8 ffffffffc035c89e ffff8807e5b138e0 ffff8805b047f800
+Apr  8 11:41:39 mon01 kernel: [262673.805230] Call Trace:
+Apr  8 11:41:39 mon01 kernel: [262673.859116]  [<ffffffffc035f70f>] ceph_x_destroy_authorizer+0x1f/0x50 [libceph]
+Apr  8 11:41:39 mon01 kernel: [262673.968705]  [<ffffffffc035c89e>] ceph_auth_destroy_authorizer+0x3e/0x60 [libceph]
+Apr  8 11:41:39 mon01 kernel: [262674.078852]  [<ffffffffc0352805>] put_osd+0x45/0x80 [libceph]
+Apr  8 11:41:39 mon01 kernel: [262674.134249]  [<ffffffffc035290e>] remove_osd+0xae/0x140 [libceph]
+Apr  8 11:41:39 mon01 kernel: [262674.189124]  [<ffffffffc0352aa3>] __reset_osd+0x103/0x150 [libceph]
+Apr  8 11:41:39 mon01 kernel: [262674.243749]  [<ffffffffc0354703>] kick_requests+0x223/0x460 [libceph]
+Apr  8 11:41:39 mon01 kernel: [262674.297485]  [<ffffffffc03559e2>] ceph_osdc_handle_map+0x282/0x5e0 [libceph]
+Apr  8 11:41:39 mon01 kernel: [262674.350813]  [<ffffffffc035022e>] dispatch+0x4e/0x720 [libceph]
+Apr  8 11:41:39 mon01 kernel: [262674.403312]  [<ffffffffc034bd91>] try_read+0x3d1/0x1090 [libceph]
+Apr  8 11:41:39 mon01 kernel: [262674.454712]  [<ffffffff810ab7c2>] ? dequeue_entity+0x152/0x690
+Apr  8 11:41:39 mon01 kernel: [262674.505096]  [<ffffffffc034cb1b>] con_work+0xcb/0x1300 [libceph]
+Apr  8 11:41:39 mon01 kernel: [262674.555104]  [<ffffffff8108fb3e>] process_one_work+0x14e/0x3d0
+Apr  8 11:41:39 mon01 kernel: [262674.604072]  [<ffffffff810901ea>] worker_thread+0x11a/0x470
+Apr  8 11:41:39 mon01 kernel: [262674.652187]  [<ffffffff810900d0>] ? rescuer_thread+0x310/0x310
+Apr  8 11:41:39 mon01 kernel: [262674.699022]  [<ffffffff810957a2>] kthread+0xd2/0xf0
+Apr  8 11:41:39 mon01 kernel: [262674.744494]  [<ffffffff810956d0>] ? kthread_create_on_node+0x1c0/0x1c0
+Apr  8 11:41:39 mon01 kernel: [262674.789543]  [<ffffffff817bd81f>] ret_from_fork+0x3f/0x70
+Apr  8 11:41:39 mon01 kernel: [262674.834094]  [<ffffffff810956d0>] ? kthread_create_on_node+0x1c0/0x1c0
+Apr  8 11:41:39 mon01 kernel: [262674.878868] Code: 00 00 00 80 ff 77 00 00 49 ba 00 00 00 00 00 ea ff ff 48 01 d8 48 0f 42 15 d4 6f a4 00 48 01 d0 48 c1 e8 0c 48 c1 e0 06 49 01 c2 <49> 8b 02 f6 c4 80 0f 85 b5 00 00 00 49 8b 02 a8 80 0f 84 89 00 
+Apr  8 11:41:39 mon01 kernel: [262675.015731] RIP  [<ffffffff811cd04a>] kfree+0x5a/0x130
+Apr  8 11:41:39 mon01 kernel: [262675.060095]  RSP <ffff880149aeba58>
+Apr  8 11:41:39 mon01 kernel: [262675.103075] CR2: ffffebe000000000
+Apr  8 11:41:39 mon01 kernel: [262675.208862] ---[ end trace 4bb1e8c377c75d32 ]---
 
-Number of lines added and removed, by organization
-     1   13086 Red Hat <contact@redhat.com>
-     2    1241 SUSE <contact@suse.com>
-     3    1056 Mirantis <contact@mirantis.com>
-     4     303 ZTE <contact@zte.com.cn>
-     5     254 Mellanox <contact@mellanox.com>
-     6     127 SanDisk <contact@sandisk.com>
-     7      54 Unaffiliated <no@organization.net>
-     8      52 XSky <contact@xsky.com>
-     9      40 Intel <contact@intel.com>
-    10      33 Wido 42on <contact@42on.com>
-    11      32 Huazhong University of Science and Technology
-<contact@hust.edu.cn>
-    12      29 Easystack <contact@easystack.cn>
-    13      15 Ebay <contact@ebay.com>
-    14      12 H3C <contact@h3c.com>
-    15       5 Digiware <contact@digiware.nl>
-    16       2 Mevoco <contact@mevoco.com>
-    17       2 DreamHost <contact@dreamhost.com>
-    18       1 UnitedStack <contact@unitedstack.com>
-    19       1 Igalia <contact@igalia.com>
 
-Commits, by authors
-     1       61 Sage Weil <sweil@redhat.com>
-     2       49 Jason Dillaman <dillaman@redhat.com>
-     3       35 John Spray <jspray@redhat.com>
-     4       28 Xie Xingguo <xie.xingguo@zte.com.cn>
-     5       23 Loic Dachary <ldachary@redhat.com>
-     6       17 Erwan Velu <erwan@redhat.com>
-     7       14 Kefu Chai <kchai@redhat.com>
-     8       13 Yehuda Sadeh <ysadehwe@redhat.com>
-     9       10 Samuel Just <sjust@redhat.com>
-    10       10 David Zafman <dzafman@redhat.com>
-    11        9 Nathan Cutler <ncutler@suse.com>
-    12        8 Ricardo Dias <rdias@suse.com>
-    13        7 Casey Bodley <cbodley@redhat.com>
-    14        6 Yan, Zheng <zyan@redhat.com>
-    15        6 Mykola Golub <mgolub@mirantis.com>
-    16        6 Ma Jianpeng <jianpeng.ma@intel.com>
-    17        6 Abhishek Lekshmanan <abhishek@suse.com>
-    18        3 Wido den Hollander <wido@42on.com>
-    19        3 Wei Jin <wjin.cn@gmail.com>
-    20        3 runsisi <runsisi@hust.edu.cn>
-    21        3 Roi Dayan <roid@mellanox.com>
-    22        3 Matt Benjamin <mbenjamin@redhat.com>
-    23        3 Dongsheng Yang <dongsheng.yang@easystack.cn>
-    24        3 Brad Hubbard <bhubbard@redhat.com>
-    25        2 Zhiqiang Wang <zhiqiang@xsky.com>
-    26        2 Vikhyat Umrao <vumrao@redhat.com>
-    27        2 Orit Wasserman <owasserm@redhat.com>
-    28        2 Josh Durgin <jdurgin@redhat.com>
-    29        2 Haomai Wang <haomai@xsky.com>
-    30        2 Dan Mick <dmick@redhat.com>
-    31        2 Adam Kupczyk <akupczyk@mirantis.com>
-    32        1 Xinze Chi <xinze@xsky.com>
-    33        1 Xiaoxi Chen <xiaoxchen@ebay.com>
-    34        1 Xiaowei Chen <chen.xiaowei@h3c.com>
-    35        1 Willem Jan Withagen <wjw@digiware.nl>
-    36        1 Vitja Makarov <vitja.makarov@gmail.com>
-    37        1 Venky Shankar <vshankar@redhat.com>
-    38        1 sunspot <sunspot0105@gmail.com>
-    39        1 Star Guo <star.guo@mevoco.com>
-    40        1 Song Baisen <song.baisen@zte.com.cn>
-    41        1 Somnath Roy <somnath.roy@sandisk.com>
-    42        1 scienceluo <luo.kexue@zte.com.cn>
-    43        1 Robin H. Johnson <robin.johnson@dreamhost.com>
-    44        1 Richard W.M. Jones <rjones@redhat.com>
-    45        1 Qinghua Jin <qhjin_dev@163.com>
-    46        1 Qiankun Zheng <zheng.qiankun@h3c.com>
-    47        1 Ning Yao <yaoning@unitedstack.com>
-    48        1 Mehdi Abaakouk <sileht@redhat.com>
-    49        1 Marcus Watts <mwatts@redhat.com>
-    50        1 John Coyle <dx9err@gmail.com>
-    51        1 Jenkins <jenkins@ceph.com>
-    52        1 Javier M. Mellid <jmunhoz@igalia.com>
-    53        1 Ira Cooper <ira@redhat.com>
-    54        1 Ali Maredia <amaredia@redhat.com>
-    55        1 Alexey Sheplyakov <asheplyakov@mirantis.com>
 
-Commits, by organizations
-     1      266 Red Hat <contact@redhat.com>
-     2       30 ZTE <contact@zte.com.cn>
-     3       23 SUSE <contact@suse.com>
-     4        9 Mirantis <contact@mirantis.com>
-     5        7 Unaffiliated <no@organization.net>
-     6        6 Intel <contact@intel.com>
-     7        5 XSky <contact@xsky.com>
-     8        3 Wido 42on <contact@42on.com>
-     9        3 Mellanox <contact@mellanox.com>
-    10        3 Huazhong University of Science and Technology
-<contact@hust.edu.cn>
-    11        3 Easystack <contact@easystack.cn>
-    12        2 H3C <contact@h3c.com>
-    13        1 UnitedStack <contact@unitedstack.com>
-    14        1 SanDisk <contact@sandisk.com>
-    15        1 Mevoco <contact@mevoco.com>
-    16        1 Igalia <contact@igalia.com>
-    17        1 Ebay <contact@ebay.com>
-    18        1 DreamHost <contact@dreamhost.com>
-    19        1 Digiware <contact@digiware.nl>
 
-Reviews, by authors (one review spans multiple commits)
-     1       25 Sage Weil <sweil@redhat.com>
-     2       21 Kefu Chai <kchai@redhat.com>
-     3       18 Josh Durgin <jdurgin@redhat.com>
-     4       10 Orit Wasserman <owasserm@redhat.com>
-     5       10 Jason Dillaman <dillaman@redhat.com>
-     6        7 Samuel Just <sjust@redhat.com>
-     7        7 Loic Dachary <ldachary@redhat.com>
-     8        5 Boris Ranto <branto@redhat.com>
-     9        4 Yehuda Sadeh <ysadehwe@redhat.com>
-    10        4 Greg Farnum <gfarnum@redhat.com>
-    11        3 Abhishek Lekshmanan <abhishek@suse.com>
-    12        2 Yan, Zheng <zyan@redhat.com>
-    13        2 Nathan Cutler <ncutler@suse.com>
-    14        2 John Spray <jspray@redhat.com>
-    15        2 Jo=C3=A3o Eduardo Lu=C3=ADs <joao@suse.de>
-    16        2 Casey Bodley <cbodley@redhat.com>
-    17        1 Yankun Li <liyankun@unitedstack.com>
-    18        1 Robert LeBlanc <robert.leblanc@endurance.com>
-    19        1 Haomai Wang <haomai@xsky.com>
-    20        1 David Zafman <dzafman@redhat.com>
-    21        1 Dan Mick <dmick@redhat.com>
+Very appreciated to get your reply!
 
-Reviews, by organizations (one review spans multiple commits)
-     1      119 Red Hat <contact@redhat.com>
-     2        6 SUSE <contact@suse.com>
-     3        1 XSky <contact@xsky.com>
-     4        1 UnitedStack <contact@unitedstack.com>
-     5        1 Reliance Jio Infocomm Ltd. <contact@ril.com>
-     6        1 Endurance International Group <contact@endurance.com>
-=3D=3D=3D
 
-Cheers
-Swami
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
