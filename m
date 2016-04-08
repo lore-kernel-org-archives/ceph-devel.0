@@ -1,63 +1,88 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Started developing a deduplication feature
-Date: Fri, 8 Apr 2016 11:18:25 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604081114200.19675@cpach.fuggernut.com>
-References: <8737r5w89m.fsf@uni-mainz.de> <alpine.DEB.2.11.1604011723500.22014@cpach.fuggernut.com> <87wpodv99m.fsf@uni-mainz.de> <871t6gkuuz.fsf@uni-mainz.de>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: RBD image name constraints
+Date: Fri, 8 Apr 2016 18:13:58 +0200
+Message-ID: <CAOi1vP_MPeS8n7_rMnufeFPMU2=sy3vudOjDonZ=Gk+dHKuGCg@mail.gmail.com>
+References: <5707A2C4.3030102@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50728 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753138AbcDHPSb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2016 11:18:31 -0400
-In-Reply-To: <871t6gkuuz.fsf@uni-mainz.de>
+Received: from mail-lf0-f46.google.com ([209.85.215.46]:36750 "EHLO
+	mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758144AbcDHQOA convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2016 12:14:00 -0400
+Received: by mail-lf0-f46.google.com with SMTP id g184so82915191lfb.3
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Apr 2016 09:13:59 -0700 (PDT)
+In-Reply-To: <5707A2C4.3030102@corp.ovh.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Marcel Lauhoff <lauhoff@uni-mainz.de>
-Cc: ceph-devel@vger.kernel.org
+To: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?= <bartlomiej.swiecki@corp.ovh.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 8 Apr 2016, Marcel Lauhoff wrote:
-> Hi list,
-> short recap of the dedup topic from the CDM on Wednesday:
-> 
-> The main change from the original mail is not to add a PG backend, but
-> rather use Object Redirects (Tiering v2).
+On Fri, Apr 8, 2016 at 2:23 PM, Bart=C5=82omiej =C5=9Awi=C4=99cki
+<bartlomiej.swiecki@corp.ovh.com> wrote:
+> Hi,
+>
+> What are constraints regarding names of RBD images? I tried to look i=
+t up
+> but without success.
 
-Let's call this 'Tiering v2', since it won't be based on redirects.  
-(These were extremely problematic in cache tiering because they prevent us 
-from maintaining an ordering; we now proxy ops instead.)
+I'm afraid this is something nobody ever paid enough attention to.
 
-Some point soonish we should recreate/update that old blueprint with the 
-new design.
+>
+> My tests show that maximum length is about 4089 bytes and the only fo=
+rbidden
+> characters are '\0' and '@' but didn't get deep enough into the code =
+to
+> figure out the length limit. Are my findings correct?
 
-> Another backend would have to implement its own replication for
-> recipes and increase the OSD code base just for dedup. Redirects are
-> useful beyond deduplication.
-> 
-> The CAS pool design was refined: An object class should handle the ref
-> counting and content addressing.
+There is an old define in the code base, but it's not enforced:
 
-cls_refcount might be sufficient here; if not it's probably a starting 
-point.
+    #define RBD_MAX_IMAGE_NAME_SIZE 96
 
-> The pool should also only
-> allow access through this object class to prevent collisions with
-> regular objects and support immutable objects.
+The kernel client, however, won't process object requests with names
+bigger than 100 chars.  Lifting this limitation wouldn't be hard, but
+so far I've only seen this raised once, by Jean-Tiare Le Bigot, also
+from OVH.
 
-We decided we can just do this via the cephx capabilities by granting 
-the client(s) access to the appropriate class only.
+Currently, with no enforcement from librbd, this comes down to how big
+RADOS object names can be, which depends on config options and even the
+choice of the data store - in case of ext4, you wouldn't get ~4k, for
+example.
 
-> There was also the idea of client-side deduplication by using metadata
-> that clients like RGW store. This would save the additional round trip
-> that object redirects add.
+>
+> I also think I've found a regression introduced in v10.0.1 regarding =
+pool /
+> image name constraints (introduced in
+> fa4e00f8c85603ed202bfef2f3be6086482fbbb2).
+>
+> In newer versions there's regex that's parsing image name passed to r=
+bd
+> command (in src/tools/rbd/Utils.cc, function: extract_spec):
+>
+>     "^(?:([^/@]+)/)?([^/@]+)(?:@([^/@]+))?$"
+>
+> It won't parse pool name with '@', image name with '/' nor snapshot n=
+ame
+> with '/', which was allowed in previous implementation based on strch=
+r.
 
-Presumably the (first) user here is radosgw, which is already writing more 
-or less immutable chunks and could easily dump them in a CAS pool instead 
-of a normal replicated pool.
+"spec" is a combination of pool, image and snapshot names:
 
-> I'll be working on the CAS pool first, since there
-> is ongoing refactoring in the ReplicatedPG code base. I'll work out a
-> more detailed design document for the CAS pool soon.
+    [pool/]image[@snap] # pool and snap are optional
 
-Sounds great.  Thanks, Marcel!
-sage
+I haven't looked at either of the versions in detail, but you can see
+how an image name with a '/' in it is a problem.
+
+Would you mind sharing some details on what you are doing?  If you have
+a layer of management software on top, it wouldn't be a bad idea to
+restrict things to a basic A-Za-z0-9+=3D or so and 96 chars in length.
+
+Thanks,
+
+                Ilya
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
