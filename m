@@ -1,106 +1,75 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH 2/2] ceph: multiple filesystem support
-Date: Fri,  8 Apr 2016 14:50:26 +0800
-Message-ID: <1460098226-69141-2-git-send-email-zyan@redhat.com>
-References: <1460098226-69141-1-git-send-email-zyan@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: releasing hammer v0.94.7 ?
+Date: Fri, 8 Apr 2016 09:40:24 +0200
+Message-ID: <57076068.9060004@dachary.org>
+References: <57067073.9040200@dachary.org>
+ <1755778347.2548.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56124 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753498AbcDHGuk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 8 Apr 2016 02:50:40 -0400
-In-Reply-To: <1460098226-69141-1-git-send-email-zyan@redhat.com>
+Received: from relay5-d.mail.gandi.net ([217.70.183.197]:59355 "EHLO
+	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754162AbcDHHkb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2016 03:40:31 -0400
+In-Reply-To: <1755778347.2548.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, "Yan, Zheng" <zyan@redhat.com>
+To: Wido den Hollander <wido@42on.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-To access non-default filesystem, we just need to subscribe to
-mdsmap.<MDS_NAMESPACE_ID> and add a new mount option for mds
-namespace id.
+Hi Wido,
 
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
----
- fs/ceph/super.c | 19 ++++++++++++++++++-
- fs/ceph/super.h |  1 +
- 2 files changed, 19 insertions(+), 1 deletion(-)
+On 08/04/2016 08:35, Wido den Hollander wrote:
+>=20
+>> Op 7 april 2016 om 16:36 schreef Loic Dachary <loic@dachary.org>:
+>>
+>>
+>> Hi Sage,
+>>
+>> Here are the issues that would be in hammer v0.94.7 if we decided to=
+ release
+>> it now: http://tracker.ceph.com/versions/511
+>> And here is the backport queue :
+>> http://tracker.ceph.com/projects/ceph/issues?query_id=3D78
+>>
+>> Do you think it is time to cut the release and ask QE to start testi=
+ng ?
+>>
+>=20
+> As this might be the last Hammer release I wonder if we could fix thi=
+s bug:
+> http://tracker.ceph.com/issues/15348
 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index c973043..7db4fd6 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -108,6 +108,7 @@ static int ceph_sync_fs(struct super_block *sb, int wait)
-  * mount options
-  */
- enum {
-+	Opt_mds_namespace,
- 	Opt_wsize,
- 	Opt_rsize,
- 	Opt_rasize,
-@@ -143,6 +144,7 @@ enum {
- };
- 
- static match_table_t fsopt_tokens = {
-+	{Opt_mds_namespace, "mds_namespace=%d"},
- 	{Opt_wsize, "wsize=%d"},
- 	{Opt_rsize, "rsize=%d"},
- 	{Opt_rasize, "rasize=%d"},
-@@ -212,6 +214,9 @@ static int parse_fsopt_token(char *c, void *private)
- 		break;
- 
- 		/* misc */
-+	case Opt_mds_namespace:
-+		fsopt->mds_namespace = intval;
-+		break;
- 	case Opt_wsize:
- 		fsopt->wsize = intval;
- 		break;
-@@ -367,6 +372,7 @@ static int parse_mount_options(struct ceph_mount_options **pfsopt,
- 	fsopt->max_readdir = CEPH_MAX_READDIR_DEFAULT;
- 	fsopt->max_readdir_bytes = CEPH_MAX_READDIR_BYTES_DEFAULT;
- 	fsopt->congestion_kb = default_congestion_kb();
-+	fsopt->mds_namespace = -1;
- 
- 	/*
- 	 * Distinguish the server list from the path in "dev_name".
-@@ -457,6 +463,8 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
- 		seq_puts(m, ",noacl");
- #endif
- 
-+	if (fsopt->mds_namespace >= 0)
-+		seq_printf(m, ",mds_namespace=%d", fsopt->mds_namespace);
- 	if (fsopt->wsize)
- 		seq_printf(m, ",wsize=%d", fsopt->wsize);
- 	if (fsopt->rsize != CEPH_RSIZE_DEFAULT)
-@@ -530,7 +538,16 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
- 		goto fail;
- 	}
- 	fsc->client->extra_mon_dispatch = extra_mon_dispatch;
--	ceph_monc_want_map(&fsc->client->monc, CEPH_SUB_MDSMAP, 0, true);
-+
-+	if (fsopt->mds_namespace < 0) {
-+		ceph_monc_want_map(&fsc->client->monc, CEPH_SUB_MDSMAP,
-+				   0, true);
-+	} else {
-+		char mdsmap[CEPH_SUB_MAP_MAXLEN];
-+		snprintf(mdsmap, sizeof(mdsmap), CEPH_SUB_MDSMAP".%d",
-+			 fsopt->mds_namespace);
-+		ceph_monc_want_map(&fsc->client->monc, mdsmap, 0, true);
-+	}
- 
- 	fsc->mount_options = fsopt;
- 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index c56ff5d..1aeba59 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -62,6 +62,7 @@ struct ceph_mount_options {
- 	int cap_release_safety;
- 	int max_readdir;       /* max readdir result (entires) */
- 	int max_readdir_bytes; /* max readdir result (bytes) */
-+	int mds_namespace;
- 
- 	/*
- 	 * everything above this point can be memcmp'd; everything below
--- 
-2.5.0
+This will not be the last hammer release.=20
 
+Once jewel is released, people will want to upgrade from hammer to jewe=
+l. This will uncover some problems (hopefully minor) that will need fix=
+ing and require a new hammer release. When jewel matures, more and more=
+ people will migrate to jewel: this will take a few months. Eventually,=
+ as it happened with firefly, the number of hammer clusters in producti=
+on will be reduced and the bug reports regarding upgrade and operations=
+ will be reduced in proportion. At some point there won't be much incen=
+tive to publish a new hammer release and they will be less and less fre=
+quent. Until it's decided to just stop. In http://docs.ceph.com/docs/ma=
+ster/releases/ I estimated it will happen around november this year, gi=
+ve or take a few months.
+
+> I already submitted a PR for it: https://github.com/ceph/ceph/pull/84=
+41
+>=20
+> I backported it on a production cluster to Hammer and it works fine. =
+Might be
+> something we can squeeze in?
+
+This is something you can certainly discuss with Yehuda :-)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
