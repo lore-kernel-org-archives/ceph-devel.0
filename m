@@ -1,87 +1,19 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: Adding compression/checksum support for bluestore.
-Date: Fri, 8 Apr 2016 23:16:37 +0000
-Message-ID: <CY1PR0201MB1897094C8C3CCE66927A0207E8910@CY1PR0201MB1897.namprd02.prod.outlook.com>
-References: <CY1PR0201MB18973631BB493B8DCE1A5C4AE89D0@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1604050828340.19675@cpach.fuggernut.com>
- <20160405151030.GA20891@onthe.net.au> <20160406063849.GA5139@onthe.net.au>
- <BLUPR0201MB18900E0ADCEA8C22D67DF444E89F0@BLUPR0201MB1890.namprd02.prod.outlook.com>
- <20160406171702.GA5847@onthe.net.au>
- <BLUPR0201MB18903C5D060F326FEC75F81FE89F0@BLUPR0201MB1890.namprd02.prod.outlook.com>
- <20160407004307.GA15754@onthe.net.au>
- <CY1PR0201MB18977F92B66A47AE41220AC7E8900@CY1PR0201MB1897.namprd02.prod.outlook.com>
- <20160407025945.GA16081@onthe.net.au> <20160407095157.GA23310@onthe.net.au>
+From: darlehen@info.com
+Subject: LOAN
+Date: Sat, 09 Apr 2016 03:32:39 +0530
+Message-ID: <20160408220040.BEC693B3596__45364.7443828688$1460193727$gmane$org@bescomm.terengganu.my>
+Reply-To: legacyassetgrougp@hotmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0058.outbound.protection.outlook.com ([65.55.169.58]:12896
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752449AbcDHXQl convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2016 19:16:41 -0400
-In-Reply-To: <20160407095157.GA23310@onthe.net.au>
-Content-Language: en-US
+Received: from bescomm.terengganu.my ([202.188.29.20]:35300 "EHLO
+	bescomm.terengganu.my" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751153AbcDIJWA convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Apr 2016 05:22:00 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>
-Cc: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Recipients <darlehen@info.com>
 
-> -----Original Message-----
-> From: Chris Dunlop [mailto:chris@onthe.net.au]
-> Sent: Thursday, April 07, 2016 2:52 AM
-> To: Allen Samuels <Allen.Samuels@sandisk.com>
-> Cc: Sage Weil <sage@newdream.net>; Igor Fedotov
-> <ifedotov@mirantis.com>; ceph-devel <ceph-devel@vger.kernel.org>
-> Subject: Re: Adding compression/checksum support for bluestore.
-> 
-> On Thu, Apr 07, 2016 at 12:59:45PM +1000, Chris Dunlop wrote:
-> > On Thu, Apr 07, 2016 at 12:52:48AM +0000, Allen Samuels wrote:
-> > > So, what started this entire thread was Sage's suggestion that for
-> > > HDD we would want to increase the size of the block under
-> > > management. So if we assume something like a 32-bit checksum on a
-> > > 128Kbyte block being read from 5ZB Then the odds become:
-> > >
-> > > 1 - (2^-32 * (1-(10^-15))^(128 * 8 * 1024) - 2^-32 + 1) ^ ((5 * 8 *
-> > > 10^21) / (4 * 8 * 1024))
-> > >
-> > > Which is
-> > >
-> > > 0.257715899051042299960931575773635333355380139960141052927
-> > >
-> > > Which is 25%. A big jump ---> That's my point :)
-> >
-> > Oops, you missed adjusting the second checksum term, it should be:
-
-Merde. Right.
-
-> >
-> > 1 - (2^-32 * (1-(10^-15))^(128 * 8 * 1024) - 2^-32 + 1) ^ ((5 * 8 *
-> > 10^21) / (128 * 8 * 1024)) =
-> > 0.009269991973796787500153031469968391191560327904558440721
-> >
-> > ...which is different to the 4K block case starting at the 12th digit. I.e. not
-> very different.
-> 
-> Oh, that's interesting, I didn't notice this before... truncating the results at
-> the 12th decimal:
-> 
-> 0.009269991978 4K blocks
-> 0.009269991973 128K blocks
-> 
-> ...we see the probability of getting bad data is slightly _higher_ with 4K blocks
-> than with 128K blocks. I suspect this is because:
-
-Yes, my analysis was incomplete because I was only looking at the error rate on a per I/O basis and not the effects at the system level of multiple I/O operations.
-
-Yes, as you increase the block size, you approach the checksum limit, i.e., 2^-32 as the probability.
-
-If we set D = N (in our example), the result becomes the checksum silent error rate. Basically, we're doing on one I/O which is almost certain to have error, but we have only a 2^-32 of a silent one slipping through, that's about 10^-10, much lower than .00926.....
- 
-> 
-> On Fri, Apr 01, 2016 at 04:28:38PM +1100, Chris Dunlop wrote:
-> > In fact, if you have a stream of data subject to some BER and split
-> > into checksummed blocks, the larger the blocks and thereby the lower
-> > the number of blocks, the lower the chance of a false match.
-> 
-> Chris
+Brauchen Sie einen Kredit? Wir bieten Darlehen in 2% gelten heute Kontakt mit uns auf: legacyassetgrougp@hotmail.com
