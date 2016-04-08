@@ -1,75 +1,87 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: releasing hammer v0.94.7 ?
-Date: Fri, 8 Apr 2016 09:40:24 +0200
-Message-ID: <57076068.9060004@dachary.org>
-References: <57067073.9040200@dachary.org>
- <1755778347.2548.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+From: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+Subject: Re: [Ceph-maintainers] v10.1.1 Jewel candidate released
+Date: Fri, 8 Apr 2016 13:16:12 +0200
+Message-ID: <570792FC.5010502@dachary.org>
+References: <alpine.DEB.2.11.1604071410170.21587@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:59355 "EHLO
-	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754162AbcDHHkb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2016 03:40:31 -0400
-In-Reply-To: <1755778347.2548.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1604071410170.21587-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Wido,
+Hi,
 
-On 08/04/2016 08:35, Wido den Hollander wrote:
->=20
->> Op 7 april 2016 om 16:36 schreef Loic Dachary <loic@dachary.org>:
->>
->>
->> Hi Sage,
->>
->> Here are the issues that would be in hammer v0.94.7 if we decided to=
- release
->> it now: http://tracker.ceph.com/versions/511
->> And here is the backport queue :
->> http://tracker.ceph.com/projects/ceph/issues?query_id=3D78
->>
->> Do you think it is time to cut the release and ask QE to start testi=
-ng ?
->>
->=20
-> As this might be the last Hammer release I wonder if we could fix thi=
-s bug:
-> http://tracker.ceph.com/issues/15348
+The notable changes since 10.1.0 are at:
 
-This will not be the last hammer release.=20
+http://docs.ceph.com/docs/master/release-notes/#v10-1-1
 
-Once jewel is released, people will want to upgrade from hammer to jewe=
-l. This will uncover some problems (hopefully minor) that will need fix=
-ing and require a new hammer release. When jewel matures, more and more=
- people will migrate to jewel: this will take a few months. Eventually,=
- as it happened with firefly, the number of hammer clusters in producti=
-on will be reduced and the bug reports regarding upgrade and operations=
- will be reduced in proportion. At some point there won't be much incen=
-tive to publish a new hammer release and they will be less and less fre=
-quent. Until it's decided to just stop. In http://docs.ceph.com/docs/ma=
-ster/releases/ I estimated it will happen around november this year, gi=
-ve or take a few months.
+and the Jewel release candidate information is at:
 
-> I already submitted a PR for it: https://github.com/ceph/ceph/pull/84=
-41
->=20
-> I backported it on a production cluster to Hammer and it works fine. =
-Might be
-> something we can squeeze in?
-
-This is something you can certainly discuss with Yehuda :-)
+http://docs.ceph.com/docs/master/release-notes/#v10-1-0-jewel-release-candi=
+date
 
 Cheers
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 07/04/2016 20:14, Sage Weil wrote:
+> Hi all,
+> =
+
+> We've pushed 10.1.1, a second release candidate for Jewel.  This fixes =
+
+> another round of bugs, and we are getting pretty close to a final release=
+.  =
+
+> There are a few known issues to watch out for:
+> =
+
+>  - Old CephFS clusters will mangle the layouts with this release; the =
+
+> fix was committed just after it was cut.  Wait for the next RC or the =
+
+> release if you're upgrading a cluster that has a CephFS data pool as pool =
+
+> 0.
+> =
+
+>  - The upstart ceph-mds-all.conf file is missing.
+> =
+
+> Also, this is the first release build that includes arm64/aarch64 package=
+s =
+
+> for Ubuntu Xenial 16.04.  Yay!  The CentOS7 builds are waiting on =
+
+> the EPEL repos; hopefully that will happen soon.
+> =
+
+> Please review the release notes before trying:
+> =
+
+> 	http://docs.ceph.com/docs/master/release-notes/
+> =
+
+> Thanks!
+> sage
+> =
+
+> _______________________________________________
+> Ceph-maintainers mailing list
+> Ceph-maintainers-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-maintainers-ceph.com
+> =
+
+
+-- =
+
+Lo=EFc Dachary, Artisan Logiciel Libre
