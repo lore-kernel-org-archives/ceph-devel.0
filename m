@@ -1,122 +1,60 @@
-From: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
-Subject: Re: Deprecating ext4 support
-Date: Tue, 12 Apr 2016 08:39:25 +0900
-Message-ID: <20160412083925.5106311d@batzmaru.gol.ad.jp>
+From: "Robin H. Johnson" <robbat2@gentoo.org>
+Subject: Re: [ceph-users] Deprecating ext4 support
+Date: Mon, 11 Apr 2016 23:54:32 +0000
+Message-ID: <robbat2-20160411T234525-979122476Z@orbis-terrarum.net>
 References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com>
+ <alpine.DEB.2.11.1604111742010.29593@cpach.fuggernut.com>
+ <570C1DBC.3040408@redhat.com>
+ <910987783.8526680.1460414949416.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1604111632520.13448-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.gentoo.org ([140.211.166.183]:52156 "EHLO smtp.gentoo.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755112AbcDKXyd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 11 Apr 2016 19:54:33 -0400
+Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp.gentoo.org (Postfix) with ESMTPS id 55C1A340BB4
+	for <ceph-devel@vger.kernel.org>; Mon, 11 Apr 2016 23:54:32 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <910987783.8526680.1460414949416.JavaMail.zimbra@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Shinobu Kinjo <skinjo@redhat.com>
+Cc: Mark Nelson <mnelson@redhat.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
 
-
-Hello,
-
-What a lovely missive to start off my working day...
-
-On Mon, 11 Apr 2016 17:39:37 -0400 (EDT) Sage Weil wrote:
-
-> Hi,
+On Mon, Apr 11, 2016 at 06:49:09PM -0400,  Shinobu Kinjo wrote:
+> Just to clarify to prevent any confusion.
 > 
-> ext4 has never been recommended, but we did test it.  
-Patently wrong, as Shinobu just pointed.
-
-Ext4 never was (especially recently) flogged as much as XFS, but it always
-was a recommended, supported filestorage filesystem, unlike the
-experimental BTRFS of ZFS. 
-And for various reasons people, including me, deployed it instead of XFS.
-
-> After Jewel is
-> out, we would like explicitly recommend *against* ext4 and stop testing
-> it.
+> Honestly I've never used ext4 as underlying filesystem for the Ceph cluster, but according to wiki [1], ext4 is recommended -;
 > 
-Changing your recommendations is fine, stopping testing/supporting it
-isn't. 
-People deployed Ext4 in good faith and can be expected to use it at least
-until their HW is up for replacement (4-5 years).
+> [1] https://en.wikipedia.org/wiki/Ceph_%28software%29
+Clearly somebody made a copy&paste error from the actual documentation.
 
-> Why:
-> 
-> Recently we discovered an issue with the long object name handling that
-> is not fixable without rewriting a significant chunk of FileStores
-> filename handling.  (There is a limit in the amount of xattr data ext4
-> can store in the inode, which causes problems in LFNIndex.)
-> 
-Is that also true if the Ext4 inode size is larger than default?
+Here's the docs on master and the recent LTS releases.
+http://docs.ceph.com/docs/firefly/rados/configuration/filesystem-recommendations/
+http://docs.ceph.com/docs/hammer/rados/configuration/filesystem-recommendations/
+http://docs.ceph.com/docs/master2/rados/configuration/filesystem-recommendations/
 
-> We *could* invest a ton of time rewriting this to fix, but it only
-> affects ext4, which we never recommended, and we plan to deprecate
-> FileStore once BlueStore is stable anyway, so it seems like a waste of
-> time that would be better spent elsewhere.
-> 
-If you (that is RH) is going to declare bluestore stable this year, I
-would be very surprised.
-Either way, dropping support before the successor is truly ready doesn't
-sit well with me.
+The documentation has NEVER recommended ext4.
+Here's a slice of all history for that file:
+http://dev.gentoo.org/~robbat2/ceph-history-of-filesystem-recommendations.patch
 
-Which brings me to the reasons why people would want to migrate (NOT
-talking about starting freshly) to bluestore.
+Generated with 
+$ git log -C -C -M -p ceph/master -- \
+	doc/rados/configuration/filesystem-recommendations.rst \
+	doc/config-cluster/file-system-recommendations.rst \
+	doc/config-cluster/file_system_recommendations.rst
 
-1. Will it be faster (IOPS) than filestore with SSD journals? 
-Don't think so, but feel free to prove me wrong.
+The very first version, back in 2012, said:
+> ``ext4`` is a poor file system choice if you intend to deploy the
+> RADOS Gateway or use snapshots on versions earlier than 0.45. 
 
-2. Will it be bit-rot proof? Note the deafening silence from the devs in
-this thread: 
-http://www.spinics.net/lists/ceph-users/msg26510.html
 
-> Also, by dropping ext4 test coverage in ceph-qa-suite, we can 
-> significantly improve time/coverage for FileStore on XFS and on
-> BlueStore.
-> 
-Really, isn't that fully automated?
-
-> The long file name handling is problematic anytime someone is storing 
-> rados objects with long names.  The primary user that does this is RGW, 
-> which means any RGW cluster using ext4 should recreate their OSDs to use 
-> XFS.  Other librados users could be affected too, though, like users 
-> with very long rbd image names (e.g., > 100 characters), or custom 
-> librados users.
-> 
-> How:
-> 
-> To make this change as visible as possible, the plan is to make ceph-osd 
-> refuse to start if the backend is unable to support the configured max 
-> object name (osd_max_object_name_len).  The OSD will complain that ext4 
-> cannot store such an object and refuse to start.  A user who is only
-> using RBD might decide they don't need long file names to work and can
-> adjust the osd_max_object_name_len setting to something small (say, 64)
-> and run successfully.  They would be taking a risk, though, because we
-> would like to stop testing on ext4.
-> 
-> Is this reasonable?  
-About as reasonable as dropping format 1 support, that is not at all.
-https://www.mail-archive.com/ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org/msg28070.html
-
-I'm officially only allowed to do (preventative) maintenance during weekend
-nights on our main production cluster. 
-That would mean 13 ruined weekends at the realistic rate of 1 OSD per
-night, so you can see where my lack of enthusiasm for OSD recreation comes
-from.
-
-> If there significant ext4 users that are unwilling
-> to recreate their OSDs, now would be the time to speak up.
-> 
-Consider that done.
-
-Christian
 -- 
-Christian Balzer        Network/Systems Engineer                
-chibi-FW+hd8ioUD0@public.gmane.org   	Global OnLine Japan/Rakuten Communications
-http://www.gol.com/
+Robin Hugh Johnson
+Gentoo Linux: Developer, Infrastructure Lead, Foundation Trustee
+E-Mail     : robbat2@gentoo.org
+GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
