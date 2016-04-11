@@ -1,15 +1,13 @@
-From: Lionel Bouton <lionel-subscription-WTamNBQcZIx7tPAFqOLdPg@public.gmane.org>
+From: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
 Subject: Re: Deprecating ext4 support
-Date: Tue, 12 Apr 2016 01:09:44 +0200
-Message-ID: <570C2EB8.2060207@bouton.name>
+Date: Tue, 12 Apr 2016 08:39:25 +0900
+Message-ID: <20160412083925.5106311d@batzmaru.gol.ad.jp>
 References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com>
-	<alpine.DEB.2.11.1604111742010.29593@cpach.fuggernut.com>
-	<570C1DBC.3040408@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <570C1DBC.3040408-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1604111632520.13448-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,62 +17,106 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+To: Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi,
 
-Le 11/04/2016 23:57, Mark Nelson a =E9crit :
-> [...]
-> To add to this on the performance side, we stopped doing regular
-> performance testing on ext4 (and btrfs) sometime back around when ICE
-> was released to focus specifically on filestore behavior on xfs. =
+Hello,
 
-> There were some cases at the time where ext4 was faster than xfs, but
-> not consistently so.  btrfs is often quite fast on fresh fs, but
-> degrades quickly due to fragmentation induced by cow with
-> small-writes-to-large-object workloads (IE RBD small writes).  If
-> btrfs auto-defrag is now safe to use in production it might be worth
-> looking at again, but probably not ext4.
+What a lovely missive to start off my working day...
 
-For BTRFS, autodefrag is probably not performance-safe (yet), at least
-with RBD access patterns. At least it wasn't in 4.1.9 when we tested it
-last time (the performance degraded slowly but surely over several weeks
-from an initially good performing filesystem to the point where we
-measured a 100% increase in average latencies and large spikes and
-stopped the experiment). I didn't see any patches on linux-btrfs since
-then (it might have benefited from other modifications, but the
-autodefrag algorithm wasn't reworked itself AFAIK).
-That's not an inherent problem of BTRFS but of the autodefrag
-implementation though. Deactivating autodefrag and reimplementing a
-basic, cautious defragmentation scheduler gave us noticeably better
-latencies with BTRFS vs XFS (~30% better) on the same hardware and
-workload long term (as in almost a year and countless full-disk rewrites
-on the same filesystems due to both normal writes and rebalancing with 3
-to 4 months of XFS and BTRFS OSDs coexisting for comparison purposes).
-I'll certainly remount a subset of our OSDs autodefrag as I did with
-4.1.9 when we will deploy 4.4.x or a later LTS kernel. So I might have
-more up to date information in the coming months. I don't plan to
-compare BTRFS to XFS anymore though : XFS only saves us from running our
-defragmentation scheduler, BTRFS is far more suited to our workload and
-we've seen constant improvements in behavior in the (arguably bumpy
-until late 3.19 versions) 3.16.x to 4.1.x road.
+On Mon, 11 Apr 2016 17:39:37 -0400 (EDT) Sage Weil wrote:
 
-Other things:
+> Hi,
+> 
+> ext4 has never been recommended, but we did test it.  
+Patently wrong, as Shinobu just pointed.
 
-* If the journal is not on a separate partition (SSD), it should
-definitely be re-created NoCoW to avoid unnecessary fragmentation. From
-memory : stop OSD, touch journal.new, chattr +C journal.new, dd
-if=3Djournal of=3Djournal.new (your dd options here for best perf/least
-amount of cache eviction), rm journal, mv journal.new journal, start OSD
-again.
-* filestore btrfs snap =3D false
-  is mandatory if you want consistent performance (at least on HDDs). It
-may not be felt with almost empty OSDs but performance hiccups appear if
-any non trivial amount of data is added to the filesystems.
-  IIRC, after debugging surprisingly the snapshot creation didn't seem
-to be the actual cause of the performance problems but the snapshot
-deletion... It's so bad that the default should probably be false and
-not true.
+Ext4 never was (especially recently) flogged as much as XFS, but it always
+was a recommended, supported filestorage filesystem, unlike the
+experimental BTRFS of ZFS. 
+And for various reasons people, including me, deployed it instead of XFS.
 
-Lionel
+> After Jewel is
+> out, we would like explicitly recommend *against* ext4 and stop testing
+> it.
+> 
+Changing your recommendations is fine, stopping testing/supporting it
+isn't. 
+People deployed Ext4 in good faith and can be expected to use it at least
+until their HW is up for replacement (4-5 years).
+
+> Why:
+> 
+> Recently we discovered an issue with the long object name handling that
+> is not fixable without rewriting a significant chunk of FileStores
+> filename handling.  (There is a limit in the amount of xattr data ext4
+> can store in the inode, which causes problems in LFNIndex.)
+> 
+Is that also true if the Ext4 inode size is larger than default?
+
+> We *could* invest a ton of time rewriting this to fix, but it only
+> affects ext4, which we never recommended, and we plan to deprecate
+> FileStore once BlueStore is stable anyway, so it seems like a waste of
+> time that would be better spent elsewhere.
+> 
+If you (that is RH) is going to declare bluestore stable this year, I
+would be very surprised.
+Either way, dropping support before the successor is truly ready doesn't
+sit well with me.
+
+Which brings me to the reasons why people would want to migrate (NOT
+talking about starting freshly) to bluestore.
+
+1. Will it be faster (IOPS) than filestore with SSD journals? 
+Don't think so, but feel free to prove me wrong.
+
+2. Will it be bit-rot proof? Note the deafening silence from the devs in
+this thread: 
+http://www.spinics.net/lists/ceph-users/msg26510.html
+
+> Also, by dropping ext4 test coverage in ceph-qa-suite, we can 
+> significantly improve time/coverage for FileStore on XFS and on
+> BlueStore.
+> 
+Really, isn't that fully automated?
+
+> The long file name handling is problematic anytime someone is storing 
+> rados objects with long names.  The primary user that does this is RGW, 
+> which means any RGW cluster using ext4 should recreate their OSDs to use 
+> XFS.  Other librados users could be affected too, though, like users 
+> with very long rbd image names (e.g., > 100 characters), or custom 
+> librados users.
+> 
+> How:
+> 
+> To make this change as visible as possible, the plan is to make ceph-osd 
+> refuse to start if the backend is unable to support the configured max 
+> object name (osd_max_object_name_len).  The OSD will complain that ext4 
+> cannot store such an object and refuse to start.  A user who is only
+> using RBD might decide they don't need long file names to work and can
+> adjust the osd_max_object_name_len setting to something small (say, 64)
+> and run successfully.  They would be taking a risk, though, because we
+> would like to stop testing on ext4.
+> 
+> Is this reasonable?  
+About as reasonable as dropping format 1 support, that is not at all.
+https://www.mail-archive.com/ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org/msg28070.html
+
+I'm officially only allowed to do (preventative) maintenance during weekend
+nights on our main production cluster. 
+That would mean 13 ruined weekends at the realistic rate of 1 OSD per
+night, so you can see where my lack of enthusiasm for OSD recreation comes
+from.
+
+> If there significant ext4 users that are unwilling
+> to recreate their OSDs, now would be the time to speak up.
+> 
+Consider that done.
+
+Christian
+-- 
+Christian Balzer        Network/Systems Engineer                
+chibi-FW+hd8ioUD0@public.gmane.org   	Global OnLine Japan/Rakuten Communications
+http://www.gol.com/
