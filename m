@@ -1,63 +1,87 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: releasing hammer v0.94.7 ?
-Date: Mon, 11 Apr 2016 09:30:01 +0200 (CEST)
-Message-ID: <615221452.2670.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
-References: <57067073.9040200@dachary.org>
- <1755778347.2548.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
- <alpine.DEB.2.11.1604080840170.19675@cpach.fuggernut.com>
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: Re: RBD image name constraints
+Date: Mon, 11 Apr 2016 12:37:05 +0300
+Message-ID: <20160411093703.GA17959@gmail.com>
+References: <5707A2C4.3030102@corp.ovh.com>
+ <20160408202919.GA8043@gmail.com>
+ <570B6436.9040109@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:49550 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750916AbcDKHaI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Apr 2016 03:30:08 -0400
-In-Reply-To: <alpine.DEB.2.11.1604080840170.19675@cpach.fuggernut.com>
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:34649 "EHLO
+	mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750739AbcDKJhI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Apr 2016 05:37:08 -0400
+Received: by mail-lf0-f49.google.com with SMTP id j11so148324938lfb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Apr 2016 02:37:07 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <570B6436.9040109@corp.ovh.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Nathan Cutler <ncutler@suse.cz>, Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: =?utf-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?= <bartlomiej.swiecki@corp.ovh.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Jason Dillaman <jdillama@redhat.com>, Josh Durgin <jdurgin@redhat.com>
 
+On Mon, Apr 11, 2016 at 10:45:42AM +0200, Bart=C5=82omiej =C5=9Awi=C4=99=
+cki wrote:
+>=20
+> On 04/08/2016 10:29 PM, Mykola Golub wrote:
+> >On Fri, Apr 08, 2016 at 02:23:32PM +0200, Bart=C5=82omiej =C5=9Awi=C4=
+=99cki wrote:
+> >
+> >>In newer versions there's regex that's parsing image name passed to=
+ rbd
+> >>command (in src/tools/rbd/Utils.cc, function: extract_spec):
+> >>
+> >>      "^(?:([^/@]+)/)?([^/@]+)(?:@([^/@]+))?$"
+> >>
+> >>It won't parse pool name with '@', image name with '/' nor snapshot=
+ name
+> >>with '/', which was allowed in previous implementation based on str=
+chr.
+> >And I would leave this limitation (if there were no real complains
+> >from users) because it could be really difficult to understand what =
+a
+> >spec that had e.g. two "@" meant.
+> Wouldn't that cause backward compatibility issues? I.e. if I've creat=
+ed
+> image name with '/' inside, I won't be able to do anything with it af=
+ter
+> upgrading to Jewel, even remove or rename it.
+>=20
+> >
+> >You can still bypass the limitation by using --pool, --image, and
+> >--snap options, and I would recommend to always use these in scripts
+> >instead of specs.
+> >
+> True, but even if I specify image name with --image argument it still=
+ goes
+> through rbd::utils::extract_spec function (or set_pool_image_name in =
+old
+> code) so there's no way to put there any raw name I want.
 
-> Op 8 april 2016 om 14:43 schreef Sage Weil <sweil@redhat.com>:
-> 
-> 
-> On Fri, 8 Apr 2016, Wido den Hollander wrote:
-> > > Op 7 april 2016 om 16:36 schreef Loic Dachary <loic@dachary.org>:
-> > > 
-> > > Hi Sage,
-> > > 
-> > > Here are the issues that would be in hammer v0.94.7 if we decided to
-> > > release
-> > > it now: http://tracker.ceph.com/versions/511
-> > > And here is the backport queue :
-> > > http://tracker.ceph.com/projects/ceph/issues?query_id=78
-> > > 
-> > > Do you think it is time to cut the release and ask QE to start testing ?
-> > > 
-> > 
-> > As this might be the last Hammer release I wonder if we could fix this bug:
-> > http://tracker.ceph.com/issues/15348
-> 
-> Don't worry, it won't be the last one--we have at least another half 
-> year left.
-> 
+Ah, it is rather unfortunate!
 
-Ok, great! In the meantime I created a PR for Hammer:
-https://github.com/ceph/ceph/pull/8528
+I expected that with --image argument you could only specify image
+name, but now I see we even have a comment in the code:
 
-> > I already submitted a PR for it: https://github.com/ceph/ceph/pull/8441
-> > 
-> > I backported it on a production cluster to Hammer and it works fine. Might
-> > be
-> > something we can squeeze in?
-> 
-> Can you add a test to s3-tests for this?
-> 
+    // despite the separate pool and snapshot name options,
+    // we can also specify them via the image option
 
-Good one. Never touched those before. I'll look into that.
+I would prefer if it was possible to specify only image name with
+--image argument, but I guess it would cause backward compatibility
+issues, so, the simplest solution may be to ease the regexp to:
 
-Wido
+  "^(?:([^/@]+)/)?([^@]+)(?:@([^@]+))?$" ?
 
-> sage
+Or may be even:
+
+  "^(?:([^/@]+)/)?([^@]+)(?:@(.+))?$" ?
+
+--=20
+Mykola Golub
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
