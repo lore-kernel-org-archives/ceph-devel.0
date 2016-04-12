@@ -1,37 +1,46 @@
-From: Marcel Lauhoff <lauhoff@uni-mainz.de>
-Subject: Re: Started developing a deduplication feature
-Date: Tue, 12 Apr 2016 11:35:17 +0200
-Message-ID: <87wpo3jhka.fsf@uni-mainz.de>
-References: <8737r5w89m.fsf@uni-mainz.de> <alpine.DEB.2.11.1604011723500.22014@cpach.fuggernut.com> <87wpodv99m.fsf@uni-mainz.de> <871t6gkuuz.fsf@uni-mainz.de> <CAFdRU72ebRqvdVaV81+RbW8FotHYdLkfoU3aX3kh2fN2tKhEXQ@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: A question on coredumps in unittests
+Date: Tue, 12 Apr 2016 11:38:41 +0200
+Message-ID: <570CC221.2040603@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailgate-02.zdv.uni-mainz.de ([134.93.178.246]:59061 "EHLO
-	mailgate-02.zdv.uni-mainz.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756693AbcDLJfc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 12 Apr 2016 05:35:32 -0400
-In-Reply-To: <CAFdRU72ebRqvdVaV81+RbW8FotHYdLkfoU3aX3kh2fN2tKhEXQ@mail.gmail.com>
+Received: from smtp.digiware.nl ([31.223.170.169]:31705 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756622AbcDLJis (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 Apr 2016 05:38:48 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: skinjo@redhat.com
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, loic@dachary.org
 
+Hi Loic,
 
-Shinobu Kinjo <shinobu.kj@gmail.com> writes:
+You have written a lot of the unittests, so it seems.
 
-> On Sat, Apr 9, 2016 at 12:01 AM, Marcel Lauhoff <lauhoff@uni-mainz.de> wrote:
->> I'll be working on the CAS pool first, since there
->> is ongoing refactoring in the ReplicatedPG code base. I'll work out a
->> more detailed design document for the CAS pool soon.
->
-> I will be able to test it against if you don't mind.
+I'm having the issue that under FreeBSD the cores are left behind from
+the EXPECT_DAETH tests.
+But under CentOS7 no cores are left behind.
+And 'ulimit -c unlimited' does not help to get cores
 
-Sounds good. What do you have in mind?
+Is there anything particular why this is the case...
+Google tests suggest that it is the programs responsability to cleanup
+after itself.
 
+And would there be any objections to adding code like:
 
-~irq0
---
-Marcel Lauhoff
-Mail: lauhoff@uni-mainz.de
-XMPP: mlauhoff@jabber.uni-mainz.de
+	ret = RUN_ALL_TESTS();
+	if (ret == 0) {
+		char core [30];
+		strncpy(core, argv[0], 19);
+		core[19] = '\0';
+		strcat(core, ".core");
+		::unlink(core);
+		free(core);
+	}
+	return ret;
+
+to the tests
+
+Thanx,
+--WjW
