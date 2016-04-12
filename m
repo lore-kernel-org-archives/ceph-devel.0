@@ -1,37 +1,43 @@
-From: "wido-fspyXLx8qC4@public.gmane.org" <wido-fspyXLx8qC4@public.gmane.org>
-Subject: Re: Deprecating ext4 support
-Date: Tue, 12 Apr 2016 23:22:17 +0200
-Message-ID: <1835638980.19867.1460496138202.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
-References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com>
-	<alpine.DEB.2.11.1604111742010.29593@cpach.fuggernut.com>
-	<4CD9DBC4-1A26-4C03-8DC6-BF36A1156611@schermer.cz>
-	<alpine.DEB.2.11.1604121345060.29593@cpach.fuggernut.com>
-	<8CF37229-17C6-4E49-A623-FB8933631F60@schermer.cz>
-	<alpine.DEB.2.11.1604121525020.29593@cpach.fuggernut.com>
-	<2CBEF339-052C-42D8-A6EA-5BA9C5B8DE9F@schermer.cz>
-	<alpine.DEB.2.11.1604121639590.29593@cpach.fuggernut.com>
-	<4f0f087c.9Ro.9Gf.hg.1qX1VyMOaD@mailjet.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <4f0f087c.9Ro.9Gf.hg.1qX1VyMOaD-ImYt9qTNe79BDgjK7y7TUQ@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Nick Fisk <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org>
-Cc: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+From: Jan Schermer <jan@schermer.cz>
+Subject: Re: [ceph-users] Deprecating ext4 support
+Date: Wed, 13 Apr 2016 01:12:43 +0200
+Message-ID: <591AEC08-0FDE-4E65-9E6E-17441BB9F2D6@schermer.cz>
+References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com> <alpine.DEB.2.11.1604111742010.29593@cpach.fuggernut.com> <4CD9DBC4-1A26-4C03-8DC6-BF36A1156611@schermer.cz> <alpine.DEB.2.11.1604121345060.29593@cpach.fuggernut.com> <8CF37229-17C6-4E49-A623-FB8933631F60@schermer.cz> <alpine.DEB.2.11.1604121525020.29593@cpach.fuggernut.com> <2CBEF339-052C-42D8-A6EA-5BA9C5B8DE9F@schermer.cz> <alpine.DEB.2.11.1604121639590.29593@cpach.fuggernut.com> <362740c3.9Ro.9Gf.hg.1qX1VyMOaE@mailjet.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:33773 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030410AbcDLXMr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2016 19:12:47 -0400
+Received: by mail-wm0-f46.google.com with SMTP id f198so206317310wme.0
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Apr 2016 16:12:46 -0700 (PDT)
+In-Reply-To: <362740c3.9Ro.9Gf.hg.1qX1VyMOaE@mailjet.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Nick Fisk <nick@fisk.me.uk>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, ceph-maintainers@ceph.com
+
+I apologise, I probably should have dialed down a bit.
+I'd like to personally apologise to Sage, for being so patient with my ranting.
+
+To be clear: We are so lucky to have Ceph. It was something we sorely needed and for the right price (free).
+It's was a dream come true to cloud providers - and it still is.
+
+However, working with it in production, spending much time getting to know how ceph works, what it does, and also seeing how and where it fails prompted my interest in where it's going, because big public clouds are one thing, traditional SMB/Small enterprise needs are another and that's where I feel it fails hard. So I tried prodding here on ML, watched performance talks (which, frankly, reinforced my confirmation bias) and hoped to see some hint of it getting bette. That for me equals simpler, faster, not reinventing the wheel. I truly don't see that and it makes me sad.
+
+You are talking about the big picture - Ceph for storing anything, new architecture - and it sounds cool. Given enough money and time it can materialise, I won't elaborate on that. I just hope you don't forget about the measly RBD users like me (I'd guesstimate a silent 90%+ majority, but no idea, hopefully the product manager has a better one) who are frustrated from the current design. I'd like to think I represent those users who used to solve HA with DRBD 10 years ago, who had to battle NFS shares with rsync and inotify scripts, who were the only people on-call every morning at 3AM when logrotate killed their IO, all while having to work with rotting hardware and no budget. We are still out there and there's nothing for us - RBD is not as fast, simple or reliable as DRBD, filesystem is
+  not as simple nor as fast as rsync, scrubbing still wakes us at 3AM...
+
+I'd very much like Ceph to be my storage system of choice in the future again, which is why I am so vocal with my opinions, and maybe truly selfish with my needs. I have not yet been convinced of the bright future, and -  being the sceptical^Wcynical monster I turned into - I expect everything which makes my spidey sense tingle to fail, as it usually does. But that's called confirmation bias, which can make my whole point moot I guess :)
+
+Jan 
 
 
 
-> Op 12 apr. 2016 om 23:09 heeft Nick Fisk <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org> het volgende geschreven:
+
+> On 12 Apr 2016, at 23:08, Nick Fisk <nick@fisk.me.uk> wrote:
 > 
 > Jan,
 > 
@@ -39,11 +45,6 @@ List-Id: ceph-devel.vger.kernel.org
 > of what Ceph offers, whereas RADOS is designed to offer a whole lot more,
 > which requires a lot more intelligence at the lower levels.
 > 
-
-I fully agree with your e-mail. I think the Ceph devvers have earned their respect over the years and they know what they are talking about.
-
-For years I have been wondering why there even was a POSIX filesystem underneath Ceph.
-
 > I must say I have found your attitude to both Sage and the Ceph project as a
 > whole over the last few emails quite disrespectful. I spend a lot of my time
 > trying to sell the benefits of open source, which centre on the openness of
@@ -78,15 +79,15 @@ For years I have been wondering why there even was a POSIX filesystem underneath
 > the future looks bright.
 > 
 >> -----Original Message-----
->> From: ceph-users [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Behalf Of
+>> From: ceph-users [mailto:ceph-users-bounces@lists.ceph.com] On Behalf Of
 >> Sage Weil
 >> Sent: 12 April 2016 21:48
->> To: Jan Schermer <jan-SB6/BxVxTjHtwjQa/ONI9g@public.gmane.org>
->> Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>; ceph-users <ceph-
->> users-Qp0mS5GaXlQ@public.gmane.org>; ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
+>> To: Jan Schermer <jan@schermer.cz>
+>> Cc: ceph-devel <ceph-devel@vger.kernel.org>; ceph-users <ceph-
+>> users@ceph.com>; ceph-maintainers@ceph.com
 >> Subject: Re: [ceph-users] Deprecating ext4 support
 >> 
->>> On Tue, 12 Apr 2016, Jan Schermer wrote:
+>> On Tue, 12 Apr 2016, Jan Schermer wrote:
 >>> Still the answer to most of your points from me is "but who needs that?"
 >>> Who needs to have exactly the same data in two separate objects
 >>> (replicas)? Ceph needs it because "consistency"?, but the app (VM
@@ -117,10 +118,7 @@ For years I have been wondering why there even was a POSIX filesystem underneath
 >> 
 >> _______________________________________________
 >> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> ceph-users@lists.ceph.com
 >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 > 
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
