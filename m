@@ -1,135 +1,100 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Re: BlueStore deep-dive over bluejeans
-Date: Tue, 12 Apr 2016 13:43:39 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604121339010.29593@cpach.fuggernut.com>
-References: <alpine.DEB.2.11.1602241447430.7555@cpach.fuggernut.com> <alpine.DEB.2.11.1602291600100.1904@cpach.fuggernut.com> <alpine.DEB.2.11.1603011014570.1904@cpach.fuggernut.com> <alpine.DEB.2.11.1603020834020.1904@cpach.fuggernut.com>
- <alpine.DEB.2.11.1603020854510.1904@cpach.fuggernut.com> <56D7B8DB.5060203@redhat.com> <alpine.DEB.2.11.1603030819500.1904@cpach.fuggernut.com> <CABAwU-ZMQcB=9QuRjRwqdLiPDhFk68b8vXzSEwJ1UvYO=pDK-Q@mail.gmail.com> <20160306184642014525100@chinanetcenter.com>
- <alpine.DEB.2.11.1603061132030.25897@cpach.fuggernut.com> <CAA-rZjb-m=nwVVfNwxbJcj6Spr5JQnJ+xhx5_EGVrYX4F2Wo3A@mail.gmail.com>
+Subject: Re: [ceph-users] Deprecating ext4 support
+Date: Tue, 12 Apr 2016 14:00:31 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604121345060.29593@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com> <alpine.DEB.2.11.1604111742010.29593@cpach.fuggernut.com> <4CD9DBC4-1A26-4C03-8DC6-BF36A1156611@schermer.cz>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1353370329-1460483022=:29593"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36448 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:36648 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757198AbcDLRnn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2016 13:43:43 -0400
-In-Reply-To: <CAA-rZjb-m=nwVVfNwxbJcj6Spr5JQnJ+xhx5_EGVrYX4F2Wo3A@mail.gmail.com>
+	with ESMTP id S1757242AbcDLSAe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2016 14:00:34 -0400
+In-Reply-To: <4CD9DBC4-1A26-4C03-8DC6-BF36A1156611@schermer.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chen kael <chenji.bupt@gmail.com>
-Cc: =?GB2312?B?s8K+sg==?= <chj@chinanetcenter.com>, huang jun <hjwsm1989@gmail.com>, Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Jan Schermer <jan@schermer.cz>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, ceph-maintainers@ceph.com
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Tue, 12 Apr 2016, Jan Schermer wrote:
+> I'd like to raise these points, then
+> 
+> 1) some people (like me) will never ever use XFS if they have a choice
+> given no choice, we will not use something that depends on XFS
+> 
+> 2) choice is always good
 
---8323329-1353370329-1460483022=:29593
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Okay!
 
-On Tue, 12 Apr 2016, chen kael wrote:
-> Hi,sage
-> I have a question, does small files smaller than min_alloc_size will
-> be store in RocksDB for ever? And  I am not quite clear about the
-> differences between overlay write which is set off by default and WAL
-> write.
+> 3) doesn't majority of Ceph users only care about RBD?
 
-A WAL write is included in the transaction written to rocksdb.  
-Once that commits, the IO (usually an overwrite) is immediately queued, 
-and the WAL record is removed from rocksdb during the next commit cycle.
+Probably that's true now.  We shouldn't recommend something that prevents 
+them from adding RGW to an existing cluster in the future, though.
 
-An overlay write is intended to stick around in rocksdb until some 
-threshold is reached (N overlay records), at which point all of the 
-IOs are done at once.
+> (Angry rant coming)
+> Even our last performance testing of Ceph (Infernalis) showed abysmal 
+> performance. The most damning sign is the consumption of CPU time at 
+> unprecedented rate. Was it faster than Dumpling? Slightly, but it ate 
+> more CPU also, so in effect it was not really "faster".
+> 
+> It would make *some* sense to only support ZFS or BTRFS because you can 
+> offload things like clones/snapshots and consistency to the filesystem - 
+> which would make the architecture much simpler and everything much 
+> faster. Instead you insist on XFS and reimplement everything in 
+> software. I always dismissed this because CPU time was ususally cheap, 
+> but in practice it simply doesn't work. You duplicate things that 
+> filesystems had solved for years now (namely crash consistency - though 
+> we have seen that fail as well), instead of letting them do their work 
+> and stripping the IO path to the bare necessity and letting someone 
+> smarter and faster handle that.
+> 
+> IMO, If Ceph was moving in the right direction there would be no 
+> "supported filesystem" debate, instead we'd be free to choose whatever 
+> is there that provides the guarantees we need from filesystem (which is 
+> usually every filesystem in the kernel) and Ceph would simply distribute 
+> our IO around with CRUSH.
+> 
+> Right now CRUSH (and in effect what it allows us to do with data) is 
+> _the_ reason people use Ceph, as there simply wasn't much else to use 
+> for distributed storage. This isn't true anymore and the alternatives 
+> are orders of magnitude faster and smaller.
 
-The overlay path wasn't fully updated after the most recent rewrite, and 
-prior to that didn't seem to make things any faster.  I'm not sure if it's 
-worth keeping around or not.  In theory it should help with spinning 
-disks, but in practice it doesn't seem to.
+This touched on pretty much every reason why we are ditching file 
+systems entirely and moving toward BlueStore.
 
+Local kernel file systems maintain their own internal consistency, but 
+they only provide what consistency promises the POSIX interface 
+does--which is almost nothing.  That's why every complicated data 
+structure (e.g., database) stored on a file system ever includes it's own 
+journal.  In our case, what POSIX provides isn't enough.  We can't even 
+update a file and it's xattr atomically, let alone the much more 
+complicated transitions we need to do.  We coudl "wing it" and hope for 
+the best, then do an expensive crawl and rsync of data on recovery, but we 
+chose very early on not to do that.  If you want a system that "just" 
+layers over an existing filesystem, try you can try Gluster (although note 
+that they have a different sort of pain with the ordering of xattr 
+updates, and are moving toward a model that looks more like Ceph's backend 
+in their next version).
+
+Offloading stuff to the file system doesn't save you CPU--it just makes 
+someone else responsible.  What does save you CPU is avoiding the 
+complexity you don't need (i.e., half of what the kernel file system is 
+doing, and everything we have to do to work around an ill-suited 
+interface) and instead implement exactly the set of features that we need 
+to get the job done.
+
+FileStore is slow, mostly because of the above, but also because it is an 
+old and not-very-enlightened design.  BlueStore is roughly 2x faster in 
+early testing.
+
+Finally, remember you *are* completely free to run Ceph on whatever file 
+system you want--and many do.  We just aren't going to test them all for 
+you and promise they will all work.  Remember that we have hit different 
+bugs in every single one we've tried. It's not as simple as saying they 
+just have to "provide the guarantees we need" given the complexity of the 
+interface, and almost every time we've tried to use "supported" APIs that 
+are remotely unusually (fallocate, zeroing extents... even xattrs) we've 
+hit bugs or undocumented limits and idiosyncrasies on one fs or another.
+
+Cheers-
 sage
-
-
-> 
-> 2016-03-07 0:34 GMT+08:00 Sage Weil <sage@newdream.net>:
-> > Hi,
-> >
-> > On Sun, 6 Mar 2016, 陈静 wrote:
-> >> Hi Sage,
-> >>
-> >> So BlueStore will rely on RocksDB a lot, which just remind me of some
-> >> experience regarding to LevelDB recovery and compaction some time ago.
-> >>
-> >> We tried Ceph RGW 0.80, which had no Bucket Index Sharding feature. SSD
-> >> managed by FileStore is used for Bucket Index Pool.
-> >> After we put tens of millions of files into a bucket, LevelDB of the OSD
-> >> holding the corresponding bucket index object grew very big.
-> >> The OSD once crashed unexpectly. When we try to start the OSD again, it took
-> >> hours to fully get up.
-> >> We used pstack to observed what it was doing and noticed the OSD is busy in
-> >> recovering and compacting its LevelDB.
-> >> The recovering and compaction consumed a lot CPU and memory as well.
-> >>
-> >> BlueStore seems to rely more on RocksDB, which is a variant of LevelDB.
-> >> Then when the number of objects in BlueStore is large, will it take even
-> >> more time for the OSD to start up (for recoverying and compaction) if it was
-> >> not shut down cleanly previously?
-> >
-> > In general, rocksdb/leveldb shouldn't need to compact on startup.  I'm not
-> > sure what caused that in your situation.  We've seen a few leveldb bugs in
-> > the past that prevented compaction from happening when it should; perhaps
-> > it was one of those.
-> >
-> > We did do some testing with rocksdb where we inflated the size to he db to
-> > be very large and it performed pretty well.  We didn't try clearing large
-> > swaths of the keyspace to test the compaction side of things, though.
-> >
-> > sage
-> >
-> >>
-> >>
-> >> Thanks,
-> >> Jeegn
-> >>
-> >>       From: huang jun
-> >> Date: 2016-03-05 18:41
-> >> To: Sage Weil
-> >> CC: Dan Mick; ceph-devel
-> >> Subject: Re: BlueStore deep-dive over bluejeans
-> >> where to get the ppt in the video?
-> >>
-> >> 2016-03-03 21:19 GMT+08:00 Sage Weil <sage@newdream.net>:
-> >> > On Wed, 2 Mar 2016, Dan Mick wrote:
-> >> >>
-> >> >> >     https://bluejeans.com/s/9dck/
-> >> >>
-> >> >> Can you set this to allow download?  I can't get it to play in the
-> >> >> bluejeans interface, but downloadable files usually work for me
-> >> >
-> >> > Fixed!
-> >> >
-> >> > sage
-> >> > --
-> >> > To unsubscribe from this list: send the line "unsubscribe
-> >> ceph-devel" in
-> >> > the body of a message to majordomo@vger.kernel.org
-> >> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> >>
-> >> --
-> >> thanks
-> >> huangjun
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> >> in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---8323329-1353370329-1460483022=:29593--
