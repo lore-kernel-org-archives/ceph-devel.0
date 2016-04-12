@@ -1,57 +1,45 @@
-From: Zhiqiang Wang <wonzhq@gmail.com>
-Subject: Re: Evict op on a watched object
-Date: Tue, 12 Apr 2016 14:56:25 +0800
-Message-ID: <CA+cZ7sgv3t2wP79EbNbyi6nMLxOHt61QFBTs-RuWL8kqWft-jw@mail.gmail.com>
-References: <CA+cZ7sid2YxNRcNzXS3CF=qPx3UWUw0jC0DaEpV9mxZ3E_piJw@mail.gmail.com>
-	<322414041.49670668.1460387920039.JavaMail.zimbra@redhat.com>
+From: Michael Metz-Martini | SpeedPartner GmbH <metz-nNLO/KQnRccYk8zSAXK5OQ@public.gmane.org>
+Subject: Re: Deprecating ext4 support
+Date: Tue, 12 Apr 2016 09:00:19 +0200
+Message-ID: <570C9D03.6020701@speedpartner.de>
+References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f175.google.com ([209.85.223.175]:35862 "EHLO
-	mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753915AbcDLG40 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2016 02:56:26 -0400
-Received: by mail-io0-f175.google.com with SMTP id u185so16515917iod.3
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Apr 2016 23:56:26 -0700 (PDT)
-In-Reply-To: <322414041.49670668.1460387920039.JavaMail.zimbra@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1604111632520.13448-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Thanks Jason.
+Hi,
 
-Looks like in the osd side, the only difference between 'watch' and
-'legacy watch' is whether 'will_ping' is set. Can we use this to check
-for 'legacy watch'? Or as we don't use 'legacy watch' any more, we
-just don't care about it?
+Am 11.04.2016 um 23:39 schrieb Sage Weil:
+> ext4 has never been recommended, but we did test it.  After Jewel is out, 
+> we would like explicitly recommend *against* ext4 and stop testing it.
+Hmmm. We're currently migrating away from xfs as we had some strange
+performance-issues which were resolved / got better by switching to
+ext4. We think this is related to our high number of objects (4358
+Mobjects according to ceph -s).
 
-(forgot to cc the mail list, sorry for the dup mails)
 
-2016-04-11 23:18 GMT+08:00 Jason Dillaman <dillaman@redhat.com>:
->> Currently it is not allowed to issue an evict op
->> (CEPH_OSD_OP_CACHE_EVICT) on an object which has watchers (e.g. the
->> rbd header). EBUSY is returned in this case. This leads to the the
->> flush-evict-all failure during removing a cache tier, something like
->> below:
->>
->> rbd_header.4fc06b8b4567
->> failed to evict /rbd_header.4fc06b8b4567: (16) Device or resource busy
->>
->> My question is that do we actually need to do so? The object in the
->> base pool should have the watcher information as well after the flush.
->> Probably we could remove this 'watcher' check to make flush-evict-all
->> happy?
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> I opened a ticket [1] a couple of months ago to address this issue.
->
-> [1] http://tracker.ceph.com/issues/14865
->
-> --
->
-> Jason Dillaman
+> Recently we discovered an issue with the long object name handling
+> that is not fixable without rewriting a significant chunk of
+> FileStores filename handling.  (There is a limit in the amount of
+> xattr data ext4 can store in the inode, which causes problems in
+> LFNIndex.)
+We're only using cephfs so we shouldn't be affected by your discovered
+bug, right?
+
+
+-- 
+Kind regards
+ Michael
