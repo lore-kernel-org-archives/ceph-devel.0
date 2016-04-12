@@ -1,69 +1,240 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: A question on coredumps in unittests
-Date: Tue, 12 Apr 2016 12:06:53 +0200
-Message-ID: <570CC8BD.7010406@digiware.nl>
-References: <570CC221.2040603@digiware.nl> <570CC7ED.4060405@dachary.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: [PATCH 1/3] ceph: Get rid of d_find_alias in ceph_set_acl
+Date: Tue, 12 Apr 2016 20:19:24 +0800
+Message-ID: <1460463566-75273-1-git-send-email-zyan@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:34274 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:54937 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756267AbcDLKHO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 12 Apr 2016 06:07:14 -0400
-In-Reply-To: <570CC7ED.4060405@dachary.org>
+	id S932759AbcDLMTi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 Apr 2016 08:19:38 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id B5F1147048
+	for <ceph-devel@vger.kernel.org>; Tue, 12 Apr 2016 12:19:37 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: agruenba@redhat.com, "Yan, Zheng" <zyan@redhat.com>
 
-On 12-4-2016 12:03, Loic Dachary wrote:
-> Hi,
->
-> IIRC there needs to be a pattern defined for where core are to be found. For instance teuthology/task/internal.py has                 'sudo', 'sysctl', '-w', 'kernel.core_pattern={adir}/coredump/%t.%p.core'.format(adir=archive_dir),
->
-> I hope that helps
+From: Andreas Gruenbacher <agruenba@redhat.com>
 
-Our local Linux Guru is out, so I can't harras him now, but this gives 
-me a pointer.
+Create a variant of ceph_setattr that takes an inode instead of a
+dentry.  Change __ceph_setxattr (and also __ceph_removexattr) to take an
+inode instead of a dentry.  Use those in ceph_set_acl so that we no
+longer need a dentry there.
 
-Any objections to adding the code below?
-(Even if only ifdefed for FreeBSD)
+Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+---
+ fs/ceph/acl.c   | 14 +++++---------
+ fs/ceph/inode.c | 16 ++++++++++------
+ fs/ceph/super.h |  4 ++--
+ fs/ceph/xattr.c | 28 ++++++++++++----------------
+ 4 files changed, 29 insertions(+), 33 deletions(-)
 
-It keep the directory pollution a bit down.
+diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
+index f197084..4b32f5f 100644
+--- a/fs/ceph/acl.c
++++ b/fs/ceph/acl.c
+@@ -88,7 +88,6 @@ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type)
+ 	char *value = NULL;
+ 	struct iattr newattrs;
+ 	umode_t new_mode = inode->i_mode, old_mode = inode->i_mode;
+-	struct dentry *dentry;
+ 
+ 	switch (type) {
+ 	case ACL_TYPE_ACCESS:
+@@ -126,29 +125,26 @@ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type)
+ 			goto out_free;
+ 	}
+ 
+-	dentry = d_find_alias(inode);
+ 	if (new_mode != old_mode) {
+ 		newattrs.ia_mode = new_mode;
+ 		newattrs.ia_valid = ATTR_MODE;
+-		ret = ceph_setattr(dentry, &newattrs);
++		ret = __ceph_setattr(inode, &newattrs);
+ 		if (ret)
+-			goto out_dput;
++			goto out_free;
+ 	}
+ 
+-	ret = __ceph_setxattr(dentry, name, value, size, 0);
++	ret = __ceph_setxattr(inode, name, value, size, 0);
+ 	if (ret) {
+ 		if (new_mode != old_mode) {
+ 			newattrs.ia_mode = old_mode;
+ 			newattrs.ia_valid = ATTR_MODE;
+-			ceph_setattr(dentry, &newattrs);
++			__ceph_setattr(inode, &newattrs);
+ 		}
+-		goto out_dput;
++		goto out_free;
+ 	}
+ 
+ 	ceph_set_cached_acl(inode, type, acl);
+ 
+-out_dput:
+-	dput(dentry);
+ out_free:
+ 	kfree(value);
+ out:
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 0e2f4ed..4839f48 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1792,16 +1792,12 @@ static const struct inode_operations ceph_symlink_iops = {
+ 	.removexattr = ceph_removexattr,
+ };
+ 
+-/*
+- * setattr
+- */
+-int ceph_setattr(struct dentry *dentry, struct iattr *attr)
++int __ceph_setattr(struct inode *inode, struct iattr *attr)
+ {
+-	struct inode *inode = d_inode(dentry);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	const unsigned int ia_valid = attr->ia_valid;
+ 	struct ceph_mds_request *req;
+-	struct ceph_mds_client *mdsc = ceph_sb_to_client(dentry->d_sb)->mdsc;
++	struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
+ 	struct ceph_cap_flush *prealloc_cf;
+ 	int issued;
+ 	int release = 0, dirtied = 0;
+@@ -2026,6 +2022,14 @@ out_put:
+ }
+ 
+ /*
++ * setattr
++ */
++int ceph_setattr(struct dentry *dentry, struct iattr *attr)
++{
++	return __ceph_setattr(d_inode(dentry), attr);
++}
++
++/*
+  * Verify that we have a lease on the given mask.  If not,
+  * do a getattr against an mds.
+  */
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index d8c6f6b..3dcaf51 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -786,6 +786,7 @@ static inline int ceph_do_getattr(struct inode *inode, int mask, bool force)
+ 	return __ceph_do_getattr(inode, NULL, mask, force);
+ }
+ extern int ceph_permission(struct inode *inode, int mask);
++extern int __ceph_setattr(struct inode *inode, struct iattr *attr);
+ extern int ceph_setattr(struct dentry *dentry, struct iattr *attr);
+ extern int ceph_getattr(struct vfsmount *mnt, struct dentry *dentry,
+ 			struct kstat *stat);
+@@ -793,9 +794,8 @@ extern int ceph_getattr(struct vfsmount *mnt, struct dentry *dentry,
+ /* xattr.c */
+ extern int ceph_setxattr(struct dentry *, const char *, const void *,
+ 			 size_t, int);
+-int __ceph_setxattr(struct dentry *, const char *, const void *, size_t, int);
++int __ceph_setxattr(struct inode *, const char *, const void *, size_t, int);
+ ssize_t __ceph_getxattr(struct inode *, const char *, void *, size_t);
+-int __ceph_removexattr(struct dentry *, const char *);
+ extern ssize_t ceph_getxattr(struct dentry *, const char *, void *, size_t);
+ extern ssize_t ceph_listxattr(struct dentry *, char *, size_t);
+ extern int ceph_removexattr(struct dentry *, const char *);
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index 4df24ce..f3bd667 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -898,11 +898,10 @@ out:
+ 	return err;
+ }
+ 
+-static int ceph_sync_setxattr(struct dentry *dentry, const char *name,
++static int ceph_sync_setxattr(struct inode *inode, const char *name,
+ 			      const char *value, size_t size, int flags)
+ {
+-	struct ceph_fs_client *fsc = ceph_sb_to_client(dentry->d_sb);
+-	struct inode *inode = d_inode(dentry);
++	struct ceph_fs_client *fsc = ceph_sb_to_client(inode->i_sb);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_mds_request *req;
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+@@ -960,13 +959,12 @@ out:
+ 	return err;
+ }
+ 
+-int __ceph_setxattr(struct dentry *dentry, const char *name,
++int __ceph_setxattr(struct inode *inode, const char *name,
+ 			const void *value, size_t size, int flags)
+ {
+-	struct inode *inode = d_inode(dentry);
+ 	struct ceph_vxattr *vxattr;
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+-	struct ceph_mds_client *mdsc = ceph_sb_to_client(dentry->d_sb)->mdsc;
++	struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
+ 	struct ceph_cap_flush *prealloc_cf = NULL;
+ 	int issued;
+ 	int err;
+@@ -1077,7 +1075,7 @@ do_sync_unlocked:
+ 				    "during filling trace\n", inode);
+ 		err = -EBUSY;
+ 	} else {
+-		err = ceph_sync_setxattr(dentry, name, value, size, flags);
++		err = ceph_sync_setxattr(inode, name, value, size, flags);
+ 	}
+ out:
+ 	ceph_free_cap_flush(prealloc_cf);
+@@ -1099,14 +1097,13 @@ int ceph_setxattr(struct dentry *dentry, const char *name,
+ 	if (size == 0)
+ 		value = "";  /* empty EA, do not remove */
+ 
+-	return __ceph_setxattr(dentry, name, value, size, flags);
++	return __ceph_setxattr(d_inode(dentry), name, value, size, flags);
+ }
+ 
+-static int ceph_send_removexattr(struct dentry *dentry, const char *name)
++static int ceph_send_removexattr(struct inode *inode, const char *name)
+ {
+-	struct ceph_fs_client *fsc = ceph_sb_to_client(dentry->d_sb);
++	struct ceph_fs_client *fsc = ceph_sb_to_client(inode->i_sb);
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+-	struct inode *inode = d_inode(dentry);
+ 	struct ceph_mds_request *req;
+ 	int err;
+ 
+@@ -1127,12 +1124,11 @@ static int ceph_send_removexattr(struct dentry *dentry, const char *name)
+ 	return err;
+ }
+ 
+-int __ceph_removexattr(struct dentry *dentry, const char *name)
++static int __ceph_removexattr(struct inode *inode, const char *name)
+ {
+-	struct inode *inode = d_inode(dentry);
+ 	struct ceph_vxattr *vxattr;
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+-	struct ceph_mds_client *mdsc = ceph_sb_to_client(dentry->d_sb)->mdsc;
++	struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
+ 	struct ceph_cap_flush *prealloc_cf = NULL;
+ 	int issued;
+ 	int err;
+@@ -1213,7 +1209,7 @@ do_sync_unlocked:
+ 	if (lock_snap_rwsem)
+ 		up_read(&mdsc->snap_rwsem);
+ 	ceph_free_cap_flush(prealloc_cf);
+-	err = ceph_send_removexattr(dentry, name);
++	err = ceph_send_removexattr(inode, name);
+ 	return err;
+ }
+ 
+@@ -1225,7 +1221,7 @@ int ceph_removexattr(struct dentry *dentry, const char *name)
+ 	if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
+ 		return generic_removexattr(dentry, name);
+ 
+-	return __ceph_removexattr(dentry, name);
++	return __ceph_removexattr(d_inode(dentry), name);
+ }
+ 
+ #ifdef CONFIG_SECURITY
+-- 
+2.5.0
 
---WjW
-
->
-> On 12/04/2016 11:38, Willem Jan Withagen wrote:
->> Hi Loic,
->>
->> You have written a lot of the unittests, so it seems.
->>
->> I'm having the issue that under FreeBSD the cores are left behind from
->> the EXPECT_DAETH tests.
->> But under CentOS7 no cores are left behind.
->> And 'ulimit -c unlimited' does not help to get cores
->>
->> Is there anything particular why this is the case...
->> Google tests suggest that it is the programs responsability to cleanup
->> after itself.
->>
->> And would there be any objections to adding code like:
->>
->>      ret = RUN_ALL_TESTS();
->>      if (ret == 0) {
->>          char core [30];
->>          strncpy(core, argv[0], 19);
->>          core[19] = '\0';
->>          strcat(core, ".core");
->>          ::unlink(core);
->>          free(core);
->>      }
->>      return ret;
->>
->> to the tests
->>
->> Thanx,
->> --WjW
->>
->
