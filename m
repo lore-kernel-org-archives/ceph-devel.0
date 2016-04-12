@@ -1,90 +1,47 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: RBD image name constraints
-Date: Tue, 12 Apr 2016 09:01:53 -0400 (EDT)
-Message-ID: <842665427.50033069.1460466113899.JavaMail.zimbra@redhat.com>
-References: <5707A2C4.3030102@corp.ovh.com> <20160408202919.GA8043@gmail.com> <570B6436.9040109@corp.ovh.com> <20160411093703.GA17959@gmail.com> <1377018242.49644766.1460384950765.JavaMail.zimbra@redhat.com> <CAOi1vP9a1qtB0RjbEuoj=Lwy99h32KRh6OArGQO-xzAZpOndUA@mail.gmail.com> <570CEACA.9020104@corp.ovh.com> <1738732185.2918.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+From: "Al-Natour, Lana" <Lana.Al-Natour@ccur.com>
+Subject: Everett Dolgner email
+Date: Tue, 12 Apr 2016 09:07:40 -0400
+Message-ID: <DE572BD6AB54274197EB766B6786C86F148A55D05E@GAMX07.iccur.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:40271 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756807AbcDLNCN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2016 09:02:13 -0400
-In-Reply-To: <1738732185.2918.160e133c-ee3f-4c6e-9b8b-e4d468651d78.open-xchange@ox.pcextreme.nl>
+Received: from webmail.ccur.com ([12.198.185.177]:1568 "EHLO webmail.ccur.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932221AbcDLNNK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 Apr 2016 09:13:10 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, =?utf-8?Q?Bart=C5=82omiej_=C5=9Awi=C4=99cki?= <bartlomiej.swiecki@corp.ovh.com>, Mykola Golub <mgolub@mirantis.com>, Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> > Op 12 april 2016 om 14:32 schreef Bart=C5=82omiej =C5=9Awi=C4=99cki
-> > <bartlomiej.swiecki@corp.ovh.com>:
-> >=20
-> >=20
-> >=20
-> > On 04/11/2016 05:08 PM, Ilya Dryomov wrote:
-> > > On Mon, Apr 11, 2016 at 4:29 PM, Jason Dillaman <dillaman@redhat.=
-com>
-> > > wrote:
-> > >
-> > >> It would probably make sense to relax it for non-create operatio=
-ns and
-> > >> use
-> > >> a strict regex for create/clone/import/rename operations.
-> > > I think it would also make sense to start enforcing a limit on th=
-e
-> > > length of the image name on create/clone/etc.  I'm not pushing fo=
-r it
-> > > to be 96 chars (although I do believe it'd be sensible), just tha=
-t we
-> > > don't want it to be RADOS - strlen("rbd_id.").
-> > >
-> > > Thanks,
-> > >
-> > >                  Ilya
-> > Sounds like a good plan to me, maybe we should also consider allowe=
-d
-> > character set? Non-ascii or control characters make little sense he=
-re too.
-> >=20
->=20
-> Seems like a sane thing to me:
->=20
-> a-z, A-Z, 0-9, -, _ and . are the characters you want to allow in a i=
-mage's
-> name. I can't think of anything more.
->=20
-> Wido
->=20
-> > Regards,
-> > Bartek
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
-All of this sounds good to me -- we should circulate a proposal in ceph=
--users before making any change.  Assuming we can reach a plan that doe=
-sn't break someone's Ceph deployment, this could be included as part of=
- the Kraken-release.
-
-Ilya -- just so that I am clear, is the current kernel limitation 96 ch=
-aracters minus the "rbd_id."-prefix (format 2) or ".rbd"-suffix (format=
- 1)?
-
---=20
-
-Jason Dillaman=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGVsbG8sIA0KDQpDb3VsZCBzb21lb25lIHBsZWFzZSBwb2ludCBtZSB0byB0aGUgcGVyc29uIGlu
+IGNoYXJnZSBvZiBhZGRpbmcvcmVtb3ZpbmcgZW1haWxzIGZyb20gdGhlIENlcGggRGV2ZWxvcG1l
+bnQgZ3JvdXA/IA0KRXZlcmV0dCBEb2xnbmVyIG5vIGxvbmdlciB3b3JrcyB3aXRoIENvbmN1cnJl
+bnQgYW5kIG5lZWRzIHRvIGJlIHJlbW92ZWQgZnJvbSB0aGUgbGlzdC4gDQoNClRoYW5rIHlvdSwg
+DQoNCkxhbmEgQWwtTmF0b3VyDQpBZG1pbmlzdHJhdGl2ZSBBc3Npc3RhbnQNCm86wqDCoMKgNDA0
+Ljk0OC4yMjk5DQplOsKgwqDCoGxhbmEuYWwtbmF0b3VyQGNjdXIuY29tDQoyMDEgMTdUaCBTdHJl
+ZXQgTlcsIFN0ZS4gNTQwLCBBdGxhbnRhLCBHQSAzMDM2Mw0KDQoNCkNPTkZJREVOVElBTElUWSBO
+T1RJQ0XCoMKgwqAgVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMg
+bWVzc2FnZSBpcyBsZWdhbGx5IHByaXZpbGVnZWQgYW5kIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlv
+biBpbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIHRvIHdob20gdGhlIG1lc3NhZ2UgaXMgYWRk
+cmVzc2VkLsKgIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5k
+ZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IGFueSBkaXNzZW1pbmF0
+aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHkgb2YgdGhpcyBlbGVjdHJvbmljIG1lc3NhZ2UgaXMg
+c3RyaWN0bHkgcHJvaGliaXRlZC7CoCBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGVsZWN0cm9u
+aWMgbWVzc2FnZSBpbiBlcnJvciwgcGxlYXNlIGltbWVkaWF0ZWx5IG5vdGlmeSB1cyBieSB0ZWxl
+cGhvbmUgYXQgNjc4LTI1OC00MTEyIG9yIGJ5IHJldHVybiBlbGVjdHJvbmljIG1lc3NhZ2UsIGFu
+ZCB0aGVuIGRlbGV0ZSB0aGlzIGVsZWN0cm9uaWMgbWVzc2FnZS7CoCBUaGFuayB5b3UuDQoNCi0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2Vy
+bmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhh
+bGYgT2YgTG9pYyBEYWNoYXJ5DQpTZW50OiBNb25kYXksIEFwcmlsIDExLCAyMDE2IDQ6NDUgUE0N
+ClRvOiBhcm1jbG91ZEBtbC5vdmgubmV0DQpDYzogQ2VwaCBEZXZlbG9wbWVudA0KU3ViamVjdDog
+Q2VudE9TIDcgYWFyY2g2NCBpbWFnZXMNCg0KSGksDQoNCkknZCBsaWtlIHRvIGdpdmUgdGhlIENl
+bnRPUyA3IGFhcmNoNjQgaW1hZ2UgYSB0cnkgKGh0dHA6Ly9taXJyb3IuY2VudG9zLm9yZy9hbHRh
+cmNoLzcvaXNvcy9hYXJjaDY0L0NlbnRPUy03LWFhcmNoNjQuaW1nLnh6KS4gSSB3b25kZXIgaWYg
+c29tZW9uZSBoYWQgYSBwcmV2aW91cyBleHBlcmllbmNlIGluIHRoaXMgYXJlYSA/DQoNCkNoZWVy
+cw0KDQotLQ0KTG/Dr2MgRGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KLS0NClRvIHVu
+c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
+LWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
+Lm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
+ZG9tby1pbmZvLmh0bWwNCg==
