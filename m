@@ -1,200 +1,168 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [ceph-users] Deprecating ext4 support
-Date: Mon, 11 Apr 2016 21:12:14 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604112046570.29593@cpach.fuggernut.com>
-References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com> <20160412083925.5106311d@batzmaru.gol.ad.jp>
+From: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Deprecating ext4 support
+Date: Mon, 11 Apr 2016 21:32:44 -0400 (EDT)
+Message-ID: <884852287.8598569.1460424764316.JavaMail.zimbra@redhat.com>
+References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com>
+	<20160412083925.5106311d@batzmaru.gol.ad.jp>
+	<alpine.DEB.2.11.1604112046570.29593@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1727901744-1460423537=:29593"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33910 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755399AbcDLBMS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 11 Apr 2016 21:12:18 -0400
-In-Reply-To: <20160412083925.5106311d@batzmaru.gol.ad.jp>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Balzer <chibi@gol.com>
-Cc: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1604112046570.29593-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-1727901744-1460423537=:29593
-Content-Type: TEXT/PLAIN; charset=ISO-8859-7
-Content-Transfer-Encoding: 8BIT
-
-On Tue, 12 Apr 2016, Christian Balzer wrote:
-> 
-> Hello,
-> 
-> What a lovely missive to start off my working day...
-> 
-> On Mon, 11 Apr 2016 17:39:37 -0400 (EDT) Sage Weil wrote:
-> 
-> > Hi,
-> > 
-> > ext4 has never been recommended, but we did test it.  
-> Patently wrong, as Shinobu just pointed.
-> 
-> Ext4 never was (especially recently) flogged as much as XFS, but it always
-> was a recommended, supported filestorage filesystem, unlike the
-> experimental BTRFS of ZFS. 
-> And for various reasons people, including me, deployed it instead of XFS.
-
-Greg definitely wins the prize for raising this as a major issue, then 
-(and for naming you as one of the major ext4 users).
-
-I was not aware that we were recommending ext4 anywhere.  FWIW, here's 
-what the docs currently say:
-
- Ceph OSD Daemons rely heavily upon the stability and performance of the 
- underlying filesystem.
-
- Note: We currently recommend XFS for production deployments. We recommend 
- btrfs for testing, development, and any non-critical deployments. We 
- believe that btrfs has the correct feature set and roadmap to serve Ceph 
- in the long-term, but XFS and ext4 provide the necessary stability for 
- today¢s deployments. btrfs development is proceeding rapidly: users should 
- be comfortable installing the latest released upstream kernels and be able 
- to track development activity for critical bug fixes.
-
- Ceph OSD Daemons depend on the Extended Attributes (XATTRs) of the 
- underlying file system for various forms of internal object state and 
- metadata. The underlying filesystem must provide sufficient capacity for 
- XATTRs. btrfs does not bound the total xattr metadata stored with a file. 
- XFS has a relatively large limit (64 KB) that most deployments won¢t 
- encounter, but the ext4 is too small to be usable.
-
-(http://docs.ceph.com/docs/master/rados/configuration/filesystem-recommendations/?highlight=ext4)
-
-Unfortunately that second paragraph, second sentence indirectly says ext4 
-is stable.  :( :(  I'll prepare a PR tomorrow to revise this whole section 
-based on the new information.
-
-If anyone knows of other docs that recommend ext4, please let me know!  
-They need to be updated.
-
-> > After Jewel is out, we would like explicitly recommend *against* ext4 
-> > and stop testing it.
-> > 
-> Changing your recommendations is fine, stopping testing/supporting it
-> isn't. 
-> People deployed Ext4 in good faith and can be expected to use it at least
-> until their HW is up for replacement (4-5 years).
-
-I agree, which is why I asked.
-
-And part of it depends on what it's being used for.  If there are major 
-users using ext4 for RGW then their deployments are at risk and they 
-should swap it out for data safety reasons alone.  (Or, we need to figure 
-out how to fix long object name support on ext4.)  On the other hand, if 
-the only ext4 users are using RBD only, then they can safely continue with 
-lower max object names, and upstream testing is important to let those 
-OSDs age out naturally.
-
-Does your cluster support RBD, RGW, or something else?
-
-> > Why:
-> > 
-> > Recently we discovered an issue with the long object name handling that
-> > is not fixable without rewriting a significant chunk of FileStores
-> > filename handling.  (There is a limit in the amount of xattr data ext4
-> > can store in the inode, which causes problems in LFNIndex.)
-> > 
-> Is that also true if the Ext4 inode size is larger than default?
-
-I'm not sure... Sam, do you know?  (It's somewhat academic, though, since 
-we can't change the inode size on existing file systems.)
- 
-> > We *could* invest a ton of time rewriting this to fix, but it only
-> > affects ext4, which we never recommended, and we plan to deprecate
-> > FileStore once BlueStore is stable anyway, so it seems like a waste of
-> > time that would be better spent elsewhere.
-> > 
-> If you (that is RH) is going to declare bluestore stable this year, I
-> would be very surprised.
-
-My hope is that it can be the *default* for L (next spring).  But we'll 
-see.
-
-> Either way, dropping support before the successor is truly ready doesn't
-> sit well with me.
-
-Yeah, I misspoke.  Once BlueStore is supported and the default, support 
-for FileStore won't be dropped immediately.  But we'll want to communicate 
-that eventually it will lose support.  How strongly that is messaged 
-probably depends on how confident we are in BlueStore at that point.  And 
-I confess I haven't thought much about how long "long enough" is yet.
-
-> Which brings me to the reasons why people would want to migrate (NOT
-> talking about starting freshly) to bluestore.
-> 
-> 1. Will it be faster (IOPS) than filestore with SSD journals? 
-> Don't think so, but feel free to prove me wrong.
-
-It will absolutely faster on the same hardware.  Whether BlueStore on HDD 
-only is faster than FileStore HDD + SSD journal will depend on the 
-workload.
-
-> 2. Will it be bit-rot proof? Note the deafening silence from the devs in
-> this thread: 
-> http://www.spinics.net/lists/ceph-users/msg26510.html
-
-I missed that thread, sorry.
-
-We (Mirantis, SanDisk, Red Hat) are currently working on checksum support 
-in BlueStore.  Part of the reason why BlueStore is the preferred path is 
-because we will probably never see full checksumming in ext4 or XFS.
-
-> > Also, by dropping ext4 test coverage in ceph-qa-suite, we can 
-> > significantly improve time/coverage for FileStore on XFS and on
-> > BlueStore.
-> > 
-> Really, isn't that fully automated?
-
-It is, but hardware and time are finite.  Fewer tests on FileStore+ext4 
-means more tests on FileStore+XFS or BlueStore.  But this is a minor 
-point.
-
-> > The long file name handling is problematic anytime someone is storing 
-> > rados objects with long names.  The primary user that does this is RGW, 
-> > which means any RGW cluster using ext4 should recreate their OSDs to use 
-> > XFS.  Other librados users could be affected too, though, like users 
-> > with very long rbd image names (e.g., > 100 characters), or custom 
-> > librados users.
-> > 
-> > How:
-> > 
-> > To make this change as visible as possible, the plan is to make ceph-osd 
-> > refuse to start if the backend is unable to support the configured max 
-> > object name (osd_max_object_name_len).  The OSD will complain that ext4 
-> > cannot store such an object and refuse to start.  A user who is only
-> > using RBD might decide they don't need long file names to work and can
-> > adjust the osd_max_object_name_len setting to something small (say, 64)
-> > and run successfully.  They would be taking a risk, though, because we
-> > would like to stop testing on ext4.
-> > 
-> > Is this reasonable?  
-> About as reasonable as dropping format 1 support, that is not at all.
-> https://www.mail-archive.com/ceph-users@lists.ceph.com/msg28070.html
-
-Fortunately nobody (to my knowledge) has suggested dropping format 1 
-support.  :)
-
-> I'm officially only allowed to do (preventative) maintenance during weekend
-> nights on our main production cluster. 
-> That would mean 13 ruined weekends at the realistic rate of 1 OSD per
-> night, so you can see where my lack of enthusiasm for OSD recreation comes
-> from.
-
-Yeah.  :(
-
-> > If there significant ext4 users that are unwilling
-> > to recreate their OSDs, now would be the time to speak up.
-> > 
-> Consider that done.
-
-Thank you for the feedback!
-
-sage
---8323329-1727901744-1460423537=:29593--
+SGkgU2FnZSwKClByb2JhYmx5IGl0IG1heSBiZSBiZXR0ZXIgdG8gbWVudGlvbiB0aGF0IHdlIG9u
+bHkgdXBkYXRlIG1hc3RlciBkb2N1bWVudCBvdGhlcndpc2Ugc29tZW9uZSBnZXRzIGNvbmZ1c2Vk
+IGFnYWluIFsxXS4KClsxXSBodHRwczovL2VuLndpa2lwZWRpYS5vcmcvd2lraS9DZXBoXyUyOHNv
+ZnR3YXJlJTI5CgpDaGVlcnMsClNoaW5vYnUKCi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0K
+RnJvbTogIlNhZ2UgV2VpbCIgPHN3ZWlsQHJlZGhhdC5jb20+ClRvOiAiQ2hyaXN0aWFuIEJhbHpl
+ciIgPGNoaWJpQGdvbC5jb20+CkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZywgY2VwaC11
+c2Vyc0BjZXBoLmNvbSwgY2VwaC1tYWludGFpbmVyc0BjZXBoLmNvbQpTZW50OiBUdWVzZGF5LCBB
+cHJpbCAxMiwgMjAxNiAxMDoxMjoxNCBBTQpTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIERlcHJl
+Y2F0aW5nIGV4dDQgc3VwcG9ydAoKT24gVHVlLCAxMiBBcHIgMjAxNiwgQ2hyaXN0aWFuIEJhbHpl
+ciB3cm90ZToKPiAKPiBIZWxsbywKPiAKPiBXaGF0IGEgbG92ZWx5IG1pc3NpdmUgdG8gc3RhcnQg
+b2ZmIG15IHdvcmtpbmcgZGF5Li4uCj4gCj4gT24gTW9uLCAxMSBBcHIgMjAxNiAxNzozOTozNyAt
+MDQwMCAoRURUKSBTYWdlIFdlaWwgd3JvdGU6Cj4gCj4gPiBIaSwKPiA+IAo+ID4gZXh0NCBoYXMg
+bmV2ZXIgYmVlbiByZWNvbW1lbmRlZCwgYnV0IHdlIGRpZCB0ZXN0IGl0LiAgCj4gUGF0ZW50bHkg
+d3JvbmcsIGFzIFNoaW5vYnUganVzdCBwb2ludGVkLgo+IAo+IEV4dDQgbmV2ZXIgd2FzIChlc3Bl
+Y2lhbGx5IHJlY2VudGx5KSBmbG9nZ2VkIGFzIG11Y2ggYXMgWEZTLCBidXQgaXQgYWx3YXlzCj4g
+d2FzIGEgcmVjb21tZW5kZWQsIHN1cHBvcnRlZCBmaWxlc3RvcmFnZSBmaWxlc3lzdGVtLCB1bmxp
+a2UgdGhlCj4gZXhwZXJpbWVudGFsIEJUUkZTIG9mIFpGUy4gCj4gQW5kIGZvciB2YXJpb3VzIHJl
+YXNvbnMgcGVvcGxlLCBpbmNsdWRpbmcgbWUsIGRlcGxveWVkIGl0IGluc3RlYWQgb2YgWEZTLgoK
+R3JlZyBkZWZpbml0ZWx5IHdpbnMgdGhlIHByaXplIGZvciByYWlzaW5nIHRoaXMgYXMgYSBtYWpv
+ciBpc3N1ZSwgdGhlbiAKKGFuZCBmb3IgbmFtaW5nIHlvdSBhcyBvbmUgb2YgdGhlIG1ham9yIGV4
+dDQgdXNlcnMpLgoKSSB3YXMgbm90IGF3YXJlIHRoYXQgd2Ugd2VyZSByZWNvbW1lbmRpbmcgZXh0
+NCBhbnl3aGVyZS4gIEZXSVcsIGhlcmUncyAKd2hhdCB0aGUgZG9jcyBjdXJyZW50bHkgc2F5OgoK
+IENlcGggT1NEIERhZW1vbnMgcmVseSBoZWF2aWx5IHVwb24gdGhlIHN0YWJpbGl0eSBhbmQgcGVy
+Zm9ybWFuY2Ugb2YgdGhlIAogdW5kZXJseWluZyBmaWxlc3lzdGVtLgoKIE5vdGU6IFdlIGN1cnJl
+bnRseSByZWNvbW1lbmQgWEZTIGZvciBwcm9kdWN0aW9uIGRlcGxveW1lbnRzLiBXZSByZWNvbW1l
+bmQgCiBidHJmcyBmb3IgdGVzdGluZywgZGV2ZWxvcG1lbnQsIGFuZCBhbnkgbm9uLWNyaXRpY2Fs
+IGRlcGxveW1lbnRzLiBXZSAKIGJlbGlldmUgdGhhdCBidHJmcyBoYXMgdGhlIGNvcnJlY3QgZmVh
+dHVyZSBzZXQgYW5kIHJvYWRtYXAgdG8gc2VydmUgQ2VwaCAKIGluIHRoZSBsb25nLXRlcm0sIGJ1
+dCBYRlMgYW5kIGV4dDQgcHJvdmlkZSB0aGUgbmVjZXNzYXJ5IHN0YWJpbGl0eSBmb3IgCiB0b2Rh
+eeKAmXMgZGVwbG95bWVudHMuIGJ0cmZzIGRldmVsb3BtZW50IGlzIHByb2NlZWRpbmcgcmFwaWRs
+eTogdXNlcnMgc2hvdWxkIAogYmUgY29tZm9ydGFibGUgaW5zdGFsbGluZyB0aGUgbGF0ZXN0IHJl
+bGVhc2VkIHVwc3RyZWFtIGtlcm5lbHMgYW5kIGJlIGFibGUgCiB0byB0cmFjayBkZXZlbG9wbWVu
+dCBhY3Rpdml0eSBmb3IgY3JpdGljYWwgYnVnIGZpeGVzLgoKIENlcGggT1NEIERhZW1vbnMgZGVw
+ZW5kIG9uIHRoZSBFeHRlbmRlZCBBdHRyaWJ1dGVzIChYQVRUUnMpIG9mIHRoZSAKIHVuZGVybHlp
+bmcgZmlsZSBzeXN0ZW0gZm9yIHZhcmlvdXMgZm9ybXMgb2YgaW50ZXJuYWwgb2JqZWN0IHN0YXRl
+IGFuZCAKIG1ldGFkYXRhLiBUaGUgdW5kZXJseWluZyBmaWxlc3lzdGVtIG11c3QgcHJvdmlkZSBz
+dWZmaWNpZW50IGNhcGFjaXR5IGZvciAKIFhBVFRScy4gYnRyZnMgZG9lcyBub3QgYm91bmQgdGhl
+IHRvdGFsIHhhdHRyIG1ldGFkYXRhIHN0b3JlZCB3aXRoIGEgZmlsZS4gCiBYRlMgaGFzIGEgcmVs
+YXRpdmVseSBsYXJnZSBsaW1pdCAoNjQgS0IpIHRoYXQgbW9zdCBkZXBsb3ltZW50cyB3b27igJl0
+IAogZW5jb3VudGVyLCBidXQgdGhlIGV4dDQgaXMgdG9vIHNtYWxsIHRvIGJlIHVzYWJsZS4KCiho
+dHRwOi8vZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci9yYWRvcy9jb25maWd1cmF0aW9uL2ZpbGVz
+eXN0ZW0tcmVjb21tZW5kYXRpb25zLz9oaWdobGlnaHQ9ZXh0NCkKClVuZm9ydHVuYXRlbHkgdGhh
+dCBzZWNvbmQgcGFyYWdyYXBoLCBzZWNvbmQgc2VudGVuY2UgaW5kaXJlY3RseSBzYXlzIGV4dDQg
+CmlzIHN0YWJsZS4gIDooIDooICBJJ2xsIHByZXBhcmUgYSBQUiB0b21vcnJvdyB0byByZXZpc2Ug
+dGhpcyB3aG9sZSBzZWN0aW9uIApiYXNlZCBvbiB0aGUgbmV3IGluZm9ybWF0aW9uLgoKSWYgYW55
+b25lIGtub3dzIG9mIG90aGVyIGRvY3MgdGhhdCByZWNvbW1lbmQgZXh0NCwgcGxlYXNlIGxldCBt
+ZSBrbm93ISAgClRoZXkgbmVlZCB0byBiZSB1cGRhdGVkLgoKPiA+IEFmdGVyIEpld2VsIGlzIG91
+dCwgd2Ugd291bGQgbGlrZSBleHBsaWNpdGx5IHJlY29tbWVuZCAqYWdhaW5zdCogZXh0NCAKPiA+
+IGFuZCBzdG9wIHRlc3RpbmcgaXQuCj4gPiAKPiBDaGFuZ2luZyB5b3VyIHJlY29tbWVuZGF0aW9u
+cyBpcyBmaW5lLCBzdG9wcGluZyB0ZXN0aW5nL3N1cHBvcnRpbmcgaXQKPiBpc24ndC4gCj4gUGVv
+cGxlIGRlcGxveWVkIEV4dDQgaW4gZ29vZCBmYWl0aCBhbmQgY2FuIGJlIGV4cGVjdGVkIHRvIHVz
+ZSBpdCBhdCBsZWFzdAo+IHVudGlsIHRoZWlyIEhXIGlzIHVwIGZvciByZXBsYWNlbWVudCAoNC01
+IHllYXJzKS4KCkkgYWdyZWUsIHdoaWNoIGlzIHdoeSBJIGFza2VkLgoKQW5kIHBhcnQgb2YgaXQg
+ZGVwZW5kcyBvbiB3aGF0IGl0J3MgYmVpbmcgdXNlZCBmb3IuICBJZiB0aGVyZSBhcmUgbWFqb3Ig
+CnVzZXJzIHVzaW5nIGV4dDQgZm9yIFJHVyB0aGVuIHRoZWlyIGRlcGxveW1lbnRzIGFyZSBhdCBy
+aXNrIGFuZCB0aGV5IApzaG91bGQgc3dhcCBpdCBvdXQgZm9yIGRhdGEgc2FmZXR5IHJlYXNvbnMg
+YWxvbmUuICAoT3IsIHdlIG5lZWQgdG8gZmlndXJlIApvdXQgaG93IHRvIGZpeCBsb25nIG9iamVj
+dCBuYW1lIHN1cHBvcnQgb24gZXh0NC4pICBPbiB0aGUgb3RoZXIgaGFuZCwgaWYgCnRoZSBvbmx5
+IGV4dDQgdXNlcnMgYXJlIHVzaW5nIFJCRCBvbmx5LCB0aGVuIHRoZXkgY2FuIHNhZmVseSBjb250
+aW51ZSB3aXRoIApsb3dlciBtYXggb2JqZWN0IG5hbWVzLCBhbmQgdXBzdHJlYW0gdGVzdGluZyBp
+cyBpbXBvcnRhbnQgdG8gbGV0IHRob3NlIApPU0RzIGFnZSBvdXQgbmF0dXJhbGx5LgoKRG9lcyB5
+b3VyIGNsdXN0ZXIgc3VwcG9ydCBSQkQsIFJHVywgb3Igc29tZXRoaW5nIGVsc2U/Cgo+ID4gV2h5
+Ogo+ID4gCj4gPiBSZWNlbnRseSB3ZSBkaXNjb3ZlcmVkIGFuIGlzc3VlIHdpdGggdGhlIGxvbmcg
+b2JqZWN0IG5hbWUgaGFuZGxpbmcgdGhhdAo+ID4gaXMgbm90IGZpeGFibGUgd2l0aG91dCByZXdy
+aXRpbmcgYSBzaWduaWZpY2FudCBjaHVuayBvZiBGaWxlU3RvcmVzCj4gPiBmaWxlbmFtZSBoYW5k
+bGluZy4gIChUaGVyZSBpcyBhIGxpbWl0IGluIHRoZSBhbW91bnQgb2YgeGF0dHIgZGF0YSBleHQ0
+Cj4gPiBjYW4gc3RvcmUgaW4gdGhlIGlub2RlLCB3aGljaCBjYXVzZXMgcHJvYmxlbXMgaW4gTEZO
+SW5kZXguKQo+ID4gCj4gSXMgdGhhdCBhbHNvIHRydWUgaWYgdGhlIEV4dDQgaW5vZGUgc2l6ZSBp
+cyBsYXJnZXIgdGhhbiBkZWZhdWx0PwoKSSdtIG5vdCBzdXJlLi4uIFNhbSwgZG8geW91IGtub3c/
+ICAoSXQncyBzb21ld2hhdCBhY2FkZW1pYywgdGhvdWdoLCBzaW5jZSAKd2UgY2FuJ3QgY2hhbmdl
+IHRoZSBpbm9kZSBzaXplIG9uIGV4aXN0aW5nIGZpbGUgc3lzdGVtcy4pCiAKPiA+IFdlICpjb3Vs
+ZCogaW52ZXN0IGEgdG9uIG9mIHRpbWUgcmV3cml0aW5nIHRoaXMgdG8gZml4LCBidXQgaXQgb25s
+eQo+ID4gYWZmZWN0cyBleHQ0LCB3aGljaCB3ZSBuZXZlciByZWNvbW1lbmRlZCwgYW5kIHdlIHBs
+YW4gdG8gZGVwcmVjYXRlCj4gPiBGaWxlU3RvcmUgb25jZSBCbHVlU3RvcmUgaXMgc3RhYmxlIGFu
+eXdheSwgc28gaXQgc2VlbXMgbGlrZSBhIHdhc3RlIG9mCj4gPiB0aW1lIHRoYXQgd291bGQgYmUg
+YmV0dGVyIHNwZW50IGVsc2V3aGVyZS4KPiA+IAo+IElmIHlvdSAodGhhdCBpcyBSSCkgaXMgZ29p
+bmcgdG8gZGVjbGFyZSBibHVlc3RvcmUgc3RhYmxlIHRoaXMgeWVhciwgSQo+IHdvdWxkIGJlIHZl
+cnkgc3VycHJpc2VkLgoKTXkgaG9wZSBpcyB0aGF0IGl0IGNhbiBiZSB0aGUgKmRlZmF1bHQqIGZv
+ciBMIChuZXh0IHNwcmluZykuICBCdXQgd2UnbGwgCnNlZS4KCj4gRWl0aGVyIHdheSwgZHJvcHBp
+bmcgc3VwcG9ydCBiZWZvcmUgdGhlIHN1Y2Nlc3NvciBpcyB0cnVseSByZWFkeSBkb2Vzbid0Cj4g
+c2l0IHdlbGwgd2l0aCBtZS4KClllYWgsIEkgbWlzc3Bva2UuICBPbmNlIEJsdWVTdG9yZSBpcyBz
+dXBwb3J0ZWQgYW5kIHRoZSBkZWZhdWx0LCBzdXBwb3J0IApmb3IgRmlsZVN0b3JlIHdvbid0IGJl
+IGRyb3BwZWQgaW1tZWRpYXRlbHkuICBCdXQgd2UnbGwgd2FudCB0byBjb21tdW5pY2F0ZSAKdGhh
+dCBldmVudHVhbGx5IGl0IHdpbGwgbG9zZSBzdXBwb3J0LiAgSG93IHN0cm9uZ2x5IHRoYXQgaXMg
+bWVzc2FnZWQgCnByb2JhYmx5IGRlcGVuZHMgb24gaG93IGNvbmZpZGVudCB3ZSBhcmUgaW4gQmx1
+ZVN0b3JlIGF0IHRoYXQgcG9pbnQuICBBbmQgCkkgY29uZmVzcyBJIGhhdmVuJ3QgdGhvdWdodCBt
+dWNoIGFib3V0IGhvdyBsb25nICJsb25nIGVub3VnaCIgaXMgeWV0LgoKPiBXaGljaCBicmluZ3Mg
+bWUgdG8gdGhlIHJlYXNvbnMgd2h5IHBlb3BsZSB3b3VsZCB3YW50IHRvIG1pZ3JhdGUgKE5PVAo+
+IHRhbGtpbmcgYWJvdXQgc3RhcnRpbmcgZnJlc2hseSkgdG8gYmx1ZXN0b3JlLgo+IAo+IDEuIFdp
+bGwgaXQgYmUgZmFzdGVyIChJT1BTKSB0aGFuIGZpbGVzdG9yZSB3aXRoIFNTRCBqb3VybmFscz8g
+Cj4gRG9uJ3QgdGhpbmsgc28sIGJ1dCBmZWVsIGZyZWUgdG8gcHJvdmUgbWUgd3JvbmcuCgpJdCB3
+aWxsIGFic29sdXRlbHkgZmFzdGVyIG9uIHRoZSBzYW1lIGhhcmR3YXJlLiAgV2hldGhlciBCbHVl
+U3RvcmUgb24gSEREIApvbmx5IGlzIGZhc3RlciB0aGFuIEZpbGVTdG9yZSBIREQgKyBTU0Qgam91
+cm5hbCB3aWxsIGRlcGVuZCBvbiB0aGUgCndvcmtsb2FkLgoKPiAyLiBXaWxsIGl0IGJlIGJpdC1y
+b3QgcHJvb2Y/IE5vdGUgdGhlIGRlYWZlbmluZyBzaWxlbmNlIGZyb20gdGhlIGRldnMgaW4KPiB0
+aGlzIHRocmVhZDogCj4gaHR0cDovL3d3dy5zcGluaWNzLm5ldC9saXN0cy9jZXBoLXVzZXJzL21z
+ZzI2NTEwLmh0bWwKCkkgbWlzc2VkIHRoYXQgdGhyZWFkLCBzb3JyeS4KCldlIChNaXJhbnRpcywg
+U2FuRGlzaywgUmVkIEhhdCkgYXJlIGN1cnJlbnRseSB3b3JraW5nIG9uIGNoZWNrc3VtIHN1cHBv
+cnQgCmluIEJsdWVTdG9yZS4gIFBhcnQgb2YgdGhlIHJlYXNvbiB3aHkgQmx1ZVN0b3JlIGlzIHRo
+ZSBwcmVmZXJyZWQgcGF0aCBpcyAKYmVjYXVzZSB3ZSB3aWxsIHByb2JhYmx5IG5ldmVyIHNlZSBm
+dWxsIGNoZWNrc3VtbWluZyBpbiBleHQ0IG9yIFhGUy4KCj4gPiBBbHNvLCBieSBkcm9wcGluZyBl
+eHQ0IHRlc3QgY292ZXJhZ2UgaW4gY2VwaC1xYS1zdWl0ZSwgd2UgY2FuIAo+ID4gc2lnbmlmaWNh
+bnRseSBpbXByb3ZlIHRpbWUvY292ZXJhZ2UgZm9yIEZpbGVTdG9yZSBvbiBYRlMgYW5kIG9uCj4g
+PiBCbHVlU3RvcmUuCj4gPiAKPiBSZWFsbHksIGlzbid0IHRoYXQgZnVsbHkgYXV0b21hdGVkPwoK
+SXQgaXMsIGJ1dCBoYXJkd2FyZSBhbmQgdGltZSBhcmUgZmluaXRlLiAgRmV3ZXIgdGVzdHMgb24g
+RmlsZVN0b3JlK2V4dDQgCm1lYW5zIG1vcmUgdGVzdHMgb24gRmlsZVN0b3JlK1hGUyBvciBCbHVl
+U3RvcmUuICBCdXQgdGhpcyBpcyBhIG1pbm9yIApwb2ludC4KCj4gPiBUaGUgbG9uZyBmaWxlIG5h
+bWUgaGFuZGxpbmcgaXMgcHJvYmxlbWF0aWMgYW55dGltZSBzb21lb25lIGlzIHN0b3JpbmcgCj4g
+PiByYWRvcyBvYmplY3RzIHdpdGggbG9uZyBuYW1lcy4gIFRoZSBwcmltYXJ5IHVzZXIgdGhhdCBk
+b2VzIHRoaXMgaXMgUkdXLCAKPiA+IHdoaWNoIG1lYW5zIGFueSBSR1cgY2x1c3RlciB1c2luZyBl
+eHQ0IHNob3VsZCByZWNyZWF0ZSB0aGVpciBPU0RzIHRvIHVzZSAKPiA+IFhGUy4gIE90aGVyIGxp
+YnJhZG9zIHVzZXJzIGNvdWxkIGJlIGFmZmVjdGVkIHRvbywgdGhvdWdoLCBsaWtlIHVzZXJzIAo+
+ID4gd2l0aCB2ZXJ5IGxvbmcgcmJkIGltYWdlIG5hbWVzIChlLmcuLCA+IDEwMCBjaGFyYWN0ZXJz
+KSwgb3IgY3VzdG9tIAo+ID4gbGlicmFkb3MgdXNlcnMuCj4gPiAKPiA+IEhvdzoKPiA+IAo+ID4g
+VG8gbWFrZSB0aGlzIGNoYW5nZSBhcyB2aXNpYmxlIGFzIHBvc3NpYmxlLCB0aGUgcGxhbiBpcyB0
+byBtYWtlIGNlcGgtb3NkIAo+ID4gcmVmdXNlIHRvIHN0YXJ0IGlmIHRoZSBiYWNrZW5kIGlzIHVu
+YWJsZSB0byBzdXBwb3J0IHRoZSBjb25maWd1cmVkIG1heCAKPiA+IG9iamVjdCBuYW1lIChvc2Rf
+bWF4X29iamVjdF9uYW1lX2xlbikuICBUaGUgT1NEIHdpbGwgY29tcGxhaW4gdGhhdCBleHQ0IAo+
+ID4gY2Fubm90IHN0b3JlIHN1Y2ggYW4gb2JqZWN0IGFuZCByZWZ1c2UgdG8gc3RhcnQuICBBIHVz
+ZXIgd2hvIGlzIG9ubHkKPiA+IHVzaW5nIFJCRCBtaWdodCBkZWNpZGUgdGhleSBkb24ndCBuZWVk
+IGxvbmcgZmlsZSBuYW1lcyB0byB3b3JrIGFuZCBjYW4KPiA+IGFkanVzdCB0aGUgb3NkX21heF9v
+YmplY3RfbmFtZV9sZW4gc2V0dGluZyB0byBzb21ldGhpbmcgc21hbGwgKHNheSwgNjQpCj4gPiBh
+bmQgcnVuIHN1Y2Nlc3NmdWxseS4gIFRoZXkgd291bGQgYmUgdGFraW5nIGEgcmlzaywgdGhvdWdo
+LCBiZWNhdXNlIHdlCj4gPiB3b3VsZCBsaWtlIHRvIHN0b3AgdGVzdGluZyBvbiBleHQ0Lgo+ID4g
+Cj4gPiBJcyB0aGlzIHJlYXNvbmFibGU/ICAKPiBBYm91dCBhcyByZWFzb25hYmxlIGFzIGRyb3Bw
+aW5nIGZvcm1hdCAxIHN1cHBvcnQsIHRoYXQgaXMgbm90IGF0IGFsbC4KPiBodHRwczovL3d3dy5t
+YWlsLWFyY2hpdmUuY29tL2NlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20vbXNnMjgwNzAuaHRtbAoK
+Rm9ydHVuYXRlbHkgbm9ib2R5ICh0byBteSBrbm93bGVkZ2UpIGhhcyBzdWdnZXN0ZWQgZHJvcHBp
+bmcgZm9ybWF0IDEgCnN1cHBvcnQuICA6KQoKPiBJJ20gb2ZmaWNpYWxseSBvbmx5IGFsbG93ZWQg
+dG8gZG8gKHByZXZlbnRhdGl2ZSkgbWFpbnRlbmFuY2UgZHVyaW5nIHdlZWtlbmQKPiBuaWdodHMg
+b24gb3VyIG1haW4gcHJvZHVjdGlvbiBjbHVzdGVyLiAKPiBUaGF0IHdvdWxkIG1lYW4gMTMgcnVp
+bmVkIHdlZWtlbmRzIGF0IHRoZSByZWFsaXN0aWMgcmF0ZSBvZiAxIE9TRCBwZXIKPiBuaWdodCwg
+c28geW91IGNhbiBzZWUgd2hlcmUgbXkgbGFjayBvZiBlbnRodXNpYXNtIGZvciBPU0QgcmVjcmVh
+dGlvbiBjb21lcwo+IGZyb20uCgpZZWFoLiAgOigKCj4gPiBJZiB0aGVyZSBzaWduaWZpY2FudCBl
+eHQ0IHVzZXJzIHRoYXQgYXJlIHVud2lsbGluZwo+ID4gdG8gcmVjcmVhdGUgdGhlaXIgT1NEcywg
+bm93IHdvdWxkIGJlIHRoZSB0aW1lIHRvIHNwZWFrIHVwLgo+ID4gCj4gQ29uc2lkZXIgdGhhdCBk
+b25lLgoKVGhhbmsgeW91IGZvciB0aGUgZmVlZGJhY2shCgpzYWdlCl9fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNl
+cGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
+aS9jZXBoLXVzZXJzLWNlcGguY29tCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2Vw
+aC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGgu
+Y29tCg==
