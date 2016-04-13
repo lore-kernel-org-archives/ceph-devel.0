@@ -1,61 +1,51 @@
-From: Michael Metz-Martini | SpeedPartner GmbH <metz@speedpartner.de>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: [ceph-users] Deprecating ext4 support
-Date: Wed, 13 Apr 2016 14:51:58 +0200
-Message-ID: <570E40EE.40202@speedpartner.de>
-References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com>
- <570C9D03.6020701@speedpartner.de>
- <20160413112930.49906f15@batzmaru.gol.ad.jp>
+Date: Wed, 13 Apr 2016 09:06:12 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604122137200.24055@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com> <alpine.DEB.2.11.1604111742010.29593@cpach.fuggernut.com> <4CD9DBC4-1A26-4C03-8DC6-BF36A1156611@schermer.cz> <alpine.DEB.2.11.1604121345060.29593@cpach.fuggernut.com>
+ <8CF37229-17C6-4E49-A623-FB8933631F60@schermer.cz> <alpine.DEB.2.11.1604121525020.29593@cpach.fuggernut.com> <2CBEF339-052C-42D8-A6EA-5BA9C5B8DE9F@schermer.cz> <alpine.DEB.2.11.1604121639590.29593@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.speedpartner.de ([91.184.32.3]:57406 "EHLO
-	mail.speedpartner.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757098AbcDMMwE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2016 08:52:04 -0400
-In-Reply-To: <20160413112930.49906f15@batzmaru.gol.ad.jp>
+Received: from cobra.newdream.net ([66.33.216.30]:45149 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758200AbcDMNGP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2016 09:06:15 -0400
+In-Reply-To: <alpine.DEB.2.11.1604121639590.29593@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Balzer <chibi@gol.com>, ceph-users@ceph.com
-Cc: Sage Weil <sage@redhat.com>, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com
+To: Jan Schermer <jan@schermer.cz>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-Hi,
+On Tue, 12 Apr 2016, Jan Schermer wrote:
+> Who needs to have exactly the same data in two separate objects 
+> (replicas)? Ceph needs it because "consistency"?, but the app (VM 
+> filesystem) is fine with whatever version because the flush didn't 
+> happen (if it did the contents would be the same).
 
-Am 13.04.2016 um 04:29 schrieb Christian Balzer:
-> On Tue, 12 Apr 2016 09:00:19 +0200 Michael Metz-Martini | SpeedPartner
-> GmbH wrote:
->> Am 11.04.2016 um 23:39 schrieb Sage Weil:
->>> ext4 has never been recommended, but we did test it.  After Jewel is
->>> out, we would like explicitly recommend *against* ext4 and stop
->>> testing it.
->> Hmmm. We're currently migrating away from xfs as we had some strange
->> performance-issues which were resolved / got better by switching to
->> ext4. We think this is related to our high number of objects (4358
->> Mobjects according to ceph -s).
-> It would be interesting to see on how this maps out to the OSDs/PGs.
-> I'd guess loads and loads of subdirectories per PG, which is probably where
-> Ext4 performs better than XFS.
-A simple ls -l takes "ages" on XFS while ext4 lists a directory
-immediately. According to our findings regarding XFS this seems to be
-"normal" behavior.
+While we're talking/thinking about this, here's a simple example of why 
+the simple solution (let the replicas be out of sync), which seems 
+reasonable at first, can blow up in your face.
 
-pool name       category                 KB      objects
-data            -                       3240   2265521646
-document_root   -                     577364        10150
-images          -                96197462245   2256616709
-metadata        -                    1150105     35903724
-queue           -                  542967346       173865
-raw             -                36875247450     13095410
+If a disk block contains A and you write B over the top of it and then 
+there is a failure (e.g. power loss before you issue a flush), it's okay 
+for the disk to contain either A or B.  In a replicated system, let's say 
+2x mirroring (call them R1 and R2), you might end up with B on R1 and A 
+on R2.  If you don't immediately clean it up, then at some point down the 
+line you might switch from reading R1 to reading R2 and the disk block 
+will go "back in time" (previously you read B, now you read A).  A 
+single disk/replica will never do that, and applications can break.
 
-total of 4736 pgs, 6 pools, 124 TB data, 4359 Mobjects
+For example, if the block in question is a journal block, we might see B 
+the first time (valid journal!), the do a bunch of work and 
+journal/write new stuff to the blocks that follow.  Then we lose 
+power again, lose R1, replay the journal, read A from R2, and stop journal 
+replay early... missing out on all the new stuff.  This can easily corrupt 
+a file system or database or whatever else.
 
-What would you like to see?
-tree? du per Directory?
+It might sound unlikely, but keep in mind that writes to these 
+all-important metadata and commit blocks are extremely frequent.  It's the 
+kind of thing you can usually get away with, until you don't, and then you 
+have a very bad day...
 
-As you can see we have one data-object in pool "data" per file saved
-somewhere else. I'm not sure what's this related to, but maybe this is a
-must by cephfs.
-
--- 
-Kind regards
- Michael Metz-Martini
+sage
