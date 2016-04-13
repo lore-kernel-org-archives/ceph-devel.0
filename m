@@ -1,67 +1,39 @@
-From: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Ceph Day Sunnyvale Presentations
-Date: Tue, 12 Apr 2016 23:56:01 -0400 (EDT)
-Message-ID: <1638204634.9581897.1460519761671.JavaMail.zimbra@redhat.com>
-References: <CAAZbbf0FKTCOrxBcdKCma+f2Z6faXocqt11p8v6urE-4hu9irA@mail.gmail.com>
-	<754505492.304458062.1460519131018.JavaMail.zimbra@oxygem.tv>
+From: M Ranga Swami Reddy <swamireddy@gmail.com>
+Subject: rdb - RAW image snapshot protected failed
+Date: Wed, 13 Apr 2016 12:35:24 +0530
+Message-ID: <CANA9Uk5WTSm89xwpCQfLkeJbJ9_gJ0enOs0MTYGssOsPsaUE6g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <754505492.304458062.1460519131018.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f50.google.com ([209.85.213.50]:33984 "EHLO
+	mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932760AbcDMHFZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2016 03:05:25 -0400
+Received: by mail-vk0-f50.google.com with SMTP id e185so57310813vkb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Apr 2016 00:05:25 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-users <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-QWxleGFuZHJlLAoKQmFzZWQgb24gZGlzY3Vzc2lvbiB3aXRoIHRoZW0gYXQgQ2VwaCBkYXkgaW4g
-VG9reW8gSlAsIHRoZXkgaGF2ZSB0aGVpciBvd24gZnJvemVuIHRoZSBDZXBoIHJlcG9zaXRvcnku
-CkFuZCB0aGV5J3ZlIGJlZW4gb3B0aW1pemluZyBjb2RlcyBieSB0aGVpciBvd24gdGVhbSB0byBt
-ZWV0IHRoZWlyIHJlcXVpcmVtZW50cy4KQUZBSUNUIHRoZXkgaGFkIG5vdCBkb25lIGFueSBkbyBQ
-Ui4gCgpDaGVlcnMsClNoaW5vYnUKCi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0KRnJvbTog
-IkFsZXhhbmRyZSBERVJVTUlFUiIgPGFkZXJ1bWllckBvZGlzby5jb20+ClRvOiAiUGF0cmljayBN
-Y0dhcnJ5IiA8cG1jZ2FycnlAcmVkaGF0LmNvbT4KQ2M6ICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZl
-bEB2Z2VyLmtlcm5lbC5vcmc+LCAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAY2VwaC5jb20+ClNl
-bnQ6IFdlZG5lc2RheSwgQXByaWwgMTMsIDIwMTYgMTI6NDU6MzEgUE0KU3ViamVjdDogUmU6IFtj
-ZXBoLXVzZXJzXSBDZXBoIERheSBTdW5ueXZhbGUgUHJlc2VudGF0aW9ucwoKSGksCgpJIHdhcyBy
-ZWFkaW5nIHRoaXMgcHJlc2VudGF0aW9uIGZyb20gU0sgdGVsZWNvbSBhYm91dCBmbGFzaCBvcHRp
-bWlzYXRpb25zCgpBRkNlcGg6IENlcGggUGVyZm9ybWFuY2UgQW5hbHlzaXMgJiBJbXByb3ZlbWVu
-dCBvbiBGbGFzaCBbU2xpZGVzXQpodHRwOi8vZnIuc2xpZGVzaGFyZS5uZXQvSW5rdGFua19DZXBo
-L2FmLWNlcGgtY2VwaC1wZXJmb3JtYW5jZS1hbmFseXNpcy1hbmQtaW1wcm92ZW1lbnQtb24tZmxh
-c2gKQnl1bmctU3UgUGFyaywgU0sgVGVsZWNvbQoKClRoZXkgc2VlbSB0byBoYXZlIG1hZGUgb3B0
-aW1pc2F0aW9ucyBpbiBjZXBoIGNvZGUuIElzIHRoZXJlIGFueSBwYXRjaGVzIHJlZmVyZW5jZSA/
-IChhcHBsaWVkIHRvIGluZmVybmFsaXMvamV3ZWwgPykKCgpUaGV5IHNlZW0gYWxzbyB0byBoYXZl
-IGRvbmUgY2VwaCBjb25maWcgdHVuaW5nIGFuZCBzeXN0ZW0gdHVubmluZywgYnV0IG5vIGNvbmZp
-ZyBkZXRhaWxzIGlzIHByb3ZpZGVkIDooCkl0IGNvdWxkIGJlIGdyZWF0IHRvIHNoYXJlIHdpdGgg
-dGhlIGNvbW11bml0eSA6KQoKUmVnYXJkcywKCkFsZXhhbmRyZQoKLS0tLS0gTWFpbCBvcmlnaW5h
-bCAtLS0tLQpEZTogIlBhdHJpY2sgTWNHYXJyeSIgPHBtY2dhcnJ5QHJlZGhhdC5jb20+CsOAOiAi
-Y2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgImNlcGgtdXNlcnMiIDxj
-ZXBoLXVzZXJzQGNlcGguY29tPgpFbnZvecOpOiBNZXJjcmVkaSA2IEF2cmlsIDIwMTYgMTg6MTg6
-MjgKT2JqZXQ6IFtjZXBoLXVzZXJzXSBDZXBoIERheSBTdW5ueXZhbGUgUHJlc2VudGF0aW9ucwoK
-SGV5IGNlcGhlcnMsIAoKSSBoYXZlIGFsbCBidXQgb25lIG9mIHRoZSBwcmVzZW50YXRpb25zIGZy
-b20gQ2VwaCBEYXkgU3Vubnl2YWxlLCBzbyAKcmF0aGVyIHRoYW4gd2FpdCBmb3IgYSBmdWxsIGhh
-bmQgSSB3ZW50IGFoZWFkIGFuZCBwb3N0ZWQgdGhlIGxpbmsgdG8gCnRoZSBzbGlkZXMgb24gdGhl
-IGV2ZW50IHBhZ2U6IAoKaHR0cDovL2NlcGguY29tL2NlcGhkYXlzL2NlcGgtZGF5LXN1bm55dmFs
-ZS8gCgpUaGUgdmlkZW9zIHByb2JhYmx5IHdvbnQgYmUgcHJvY2Vzc2VkIHVudGlsIGFmdGVyIG5l
-eHQgd2VlaywgYnV0IEnigJlsbCAKYWRkIHRob3NlIG9uY2Ugd2UgZ2V0IHRoZW0uIFRoYW5rcyB0
-byBhbGwgb2YgdGhlIHByZXNlbnRlcnMgYW5kIAphdHRlbmRlZXMgdGhhdCBtYWRlIHRoaXMgYW5v
-dGhlciBncmVhdCBldmVudC4gCgoKLS0gCgpCZXN0IFJlZ2FyZHMsIAoKUGF0cmljayBNY0dhcnJ5
-IApEaXJlY3RvciBDZXBoIENvbW11bml0eSB8fCBSZWQgSGF0IApodHRwOi8vY2VwaC5jb20gfHwg
-aHR0cDovL2NvbW11bml0eS5yZWRoYXQuY29tIApAc2N1dHRsZW1vbmtleSB8fCBAY2VwaCAKX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18gCmNlcGgtdXNlcnMg
-bWFpbGluZyBsaXN0IApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tIApodHRwOi8vbGlzdHMuY2Vw
-aC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20gCl9fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNl
-cGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
-aS9jZXBoLXVzZXJzLWNlcGguY29tCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2Vw
-aC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGgu
-Y29tCg==
+Hello,
+
+have imported a RAW image to rbd 'images' pool and created a snapshot
+from that image...when I tried to set the protected for this snapshot,
+its failing with below error.
+
+==
+bd --pool images snap  protect   --snap snap
+a88c6600-5781-475c-8806-9723a976425c rbd: protecting snap failed: (38)
+ Function not implemented 2016-04-13 06:47:11.879706 7f9697d4f780 -1
+librbd: snap_protect: image must  support layering
+==
+
+
+and an option to add as "--image-features layering", but its working
+with RAW foramat images..
+
+is there issue with RAW images?
+How to set the features layering for RAW images?
+
+Thanks
+Swami
