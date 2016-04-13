@@ -1,88 +1,55 @@
-From: Vasu Kulkarni <vakulkar@redhat.com>
-Subject: Re: ceph-qa-suite branching (merge it into ceph.git?)
-Date: Wed, 13 Apr 2016 11:57:12 -0700
-Message-ID: <CAKPXa=Zfpwa-dSk0hEmivpoTathcgG3D0kgmX+Bz8LZ0z_G_mQ@mail.gmail.com>
-References: <CALe9h7fp=qaio8npS0naXjCp9bbg-kkB6bXG9PcGXGftvD4puA@mail.gmail.com>
-	<CAKPXa=Y5rJ4ygM9Sdvys+86RwufnKopTOkMNdPHcpCh5bFbQ0w@mail.gmail.com>
-	<CAKPXa=a0vVU5t2wVvQ92FLz3T20Z_sr1J2PGPPVsA3=R7_2-Dw@mail.gmail.com>
-	<CAN=+7FXfDOP1KrbP-7qArVXyP8G1QjK+YY0phHgHajZ3fv4CyA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [Ceph-qa] ceph-qa-suite branching (merge it into ceph.git?)
+Date: Wed, 13 Apr 2016 15:00:04 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604131458180.29593@cpach.fuggernut.com>
+References: <CALe9h7fp=qaio8npS0naXjCp9bbg-kkB6bXG9PcGXGftvD4puA@mail.gmail.com> <570E4843.8000102@dachary.org> <CAJ4mKGZ72SOiFt_t+ErWBWuGLQSDMYGyKJDyFnRKpUGJ+oORUw@mail.gmail.com> <CALe9h7fmWL0TQxzjct2q26gUuX8z1D56w3QPFkbCK-AN2TTsjQ@mail.gmail.com>
+ <CAN=+7FVtCyDDOx-fHhgEfX=rdne32kG0bJ2UZnnRYt8xgC2iLA@mail.gmail.com> <alpine.DEB.2.11.1604131436160.29593@cpach.fuggernut.com> <CAJ4mKGYqESJxZNwbnxgv0oBER76L-R_Dr-=deo9ttmikNiJUDQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f178.google.com ([209.85.223.178]:34754 "EHLO
-	mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932221AbcDMS5O (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2016 14:57:14 -0400
-Received: by mail-io0-f178.google.com with SMTP id 2so81126953ioy.1
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Apr 2016 11:57:13 -0700 (PDT)
-In-Reply-To: <CAN=+7FXfDOP1KrbP-7qArVXyP8G1QjK+YY0phHgHajZ3fv4CyA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34120 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754835AbcDMTAH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 13 Apr 2016 15:00:07 -0400
+In-Reply-To: <CAJ4mKGYqESJxZNwbnxgv0oBER76L-R_Dr-=deo9ttmikNiJUDQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ceph-qa <ceph-qa@ceph.com>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>, ceph-qa <ceph-qa@ceph.com>, Samuel Just <sjust@redhat.com>
 
-+1 for "atomic" PR, this should solve the problem.
+On Wed, 13 Apr 2016, Gregory Farnum wrote:
+> On Wed, Apr 13, 2016 at 11:38 AM, Sage Weil <sweil@redhat.com> wrote:
+> > On Wed, 13 Apr 2016, Samuel Just wrote:
+> >> It also doesn't seem like it would actually present a problem in any case.
+> >
+> > The reason we didn't do this before was because we wanted to revise tests
+> > independently of the thing being tested.  But as John points out,
+> > specifying a test branch should accomplish that, at least for testing.
+> >
+> > It might be nice to preserve the ability specify an alternate repo with
+> > totally out-of-tree tests.  Maybe that can be done with a simple reorg of
+> > the repo, like putting everything under qa/, so that tasks/ and suites/
+> > don't appear at the top level (of ceph.git or ceph-qa-suite.git).
+> 
+> I shudder to suggest it, but would we get what we're really after by
+> including a ceph-qa-suite submodule in ceph.git, and having the
+> teuthology scheduling refer to that? Then we can update ceph-qa-suite
+> independently while still having an atomic switch for the tests that
+> goes into the same Ceph branch which makes the changes requiring them.
 
-On Wed, Apr 13, 2016 at 11:23 AM, Samuel Just <sjust@redhat.com> wrote:
-> This seems tidy to me.  I'd love to be able to merge a PR with it's
-> ceph-qa-suite PR "atomically".
-> -Sam
->
-> On Wed, Apr 13, 2016 at 11:10 AM, Vasu Kulkarni <vakulkar@redhat.com> wrote:
->> Sorry for spam, the first one was rejected due to text/html format.
->>
->> On Wed, Apr 13, 2016 at 3:52 AM, John Spray <jspray@redhat.com> wrote:
->>>
->>> Lately, we've instances where ceph.git and ceph-qa-suite.git got
->>> slightly out of sync, as we were adding new stuff and interface
->>> changes to ceph (especially in cephfs).
->>>
->>> We used to have two repos (ceph and teuthology), now we have three
->>> (ceph, ceph-qa-suite and teuthology).
->>
->>
->> we also have s3 suites in its own repo, we have big files in
->> ceph.com/qa which i believe is the right place.
->>
->>>
->>> Splitting tests out of
->>> teuthology was a good thing, but maybe they should have gone into the
->>> ceph tree instead of a new repo?  The ceph-qa-suite branching seems to
->>> pretty much mirror what we do with ceph, with master vs jewel etc.
->>>
->>> Historically we had a comparatively static set of workloads in the qa
->>> suite (e.g. kernel-untar-build, fsstresss, pjd), which didn't change
->>> much with ceph changes.  But these days we're adding much more
->>> detailed tests, so there's more effort to keep the two in sync.
->>>
->>> I would personally love to be able to have a single PR that contained
->>> my code and the tests for it.  What if after Jewel we pulled all of
->>> ceph-qa-suite into the ceph repo?
->>
->>
->> I understand the advantage of having same sha between builds and
->> tests, but how are we going to guarantee ceph-builds in different
->> places(one built on other than ceph.com) will have same sha?
->> why not move ceph tests from ceph.git into ceph-qa-suite,  Ideally
->> this is not an issue with any major release, jewel workunits are
->> supposed to work with jewel ceph,
->> only in rare cases it may cause some issue but easily fixable. All the
->> dev runs can point to any qa-sha using the cli option so much less of
->> an issue in rare case.
->>
->>>
->>> We could still enable folks running test changes without having to
->>> rebuild ceph packages: the suite sha1 selected when running a
->>> teuthology suite could still be different from that used for
->>> installing ceph, it's just that it would fetch that sha1 from the ceph
->>> repo instead of from a separate repo.
->>>
->>> John
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Not really.  The workflow for updating submodules is really painful.  
+Something like
+
+ - commit to sub.git
+ - push to branch in public sub.git
+ - commit to main.git updating submodule sha
+ - push to branch in main.git
+ ...
+ - merge main.git branch
+ - merge sub.git branch (if you remember)
+
+...and there are no "merge" semantics if there are racing sub.git updates.
+
+Submodules only really work for things that are infrequently updated...
+
+sage
