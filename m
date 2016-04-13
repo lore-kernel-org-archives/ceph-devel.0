@@ -1,127 +1,34 @@
-From: Vasu Kulkarni <vakulkar@redhat.com>
+From: Josh Durgin <jdurgin@redhat.com>
 Subject: Re: ceph-qa-suite branching (merge it into ceph.git?)
-Date: Wed, 13 Apr 2016 12:06:57 -0700
-Message-ID: <CAKPXa=YF7aP7EyYUH2zM0XaDdtOso8EKDKnFDf8o2Q8kREKDqQ@mail.gmail.com>
+Date: Wed, 13 Apr 2016 12:08:53 -0700
+Message-ID: <570E9945.6040401@redhat.com>
 References: <CALe9h7fp=qaio8npS0naXjCp9bbg-kkB6bXG9PcGXGftvD4puA@mail.gmail.com>
-	<CAKPXa=Y5rJ4ygM9Sdvys+86RwufnKopTOkMNdPHcpCh5bFbQ0w@mail.gmail.com>
-	<CALe9h7f3OFobvNscxMTmoSSkxf2PfG71wPqAJ8mTWEBKpGH3Dw@mail.gmail.com>
+ <CAKPXa=Y5rJ4ygM9Sdvys+86RwufnKopTOkMNdPHcpCh5bFbQ0w@mail.gmail.com>
+ <CALe9h7f3OFobvNscxMTmoSSkxf2PfG71wPqAJ8mTWEBKpGH3Dw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f171.google.com ([209.85.213.171]:36530 "EHLO
-	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754457AbcDMTHE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2016 15:07:04 -0400
-Received: by mail-ig0-f171.google.com with SMTP id f1so128964748igr.1
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Apr 2016 12:07:03 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:49409 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932148AbcDMTIz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 13 Apr 2016 15:08:55 -0400
 In-Reply-To: <CALe9h7f3OFobvNscxMTmoSSkxf2PfG71wPqAJ8mTWEBKpGH3Dw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
+To: John Spray <jspray@redhat.com>, Vasu Kulkarni <vakulkar@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, ceph-qa <ceph-qa@ceph.com>
 
-On Wed, Apr 13, 2016 at 11:46 AM, John Spray <jspray@redhat.com> wrote:
+On 04/13/2016 11:46 AM, John Spray wrote:
 > On Wed, Apr 13, 2016 at 7:02 PM, Vasu Kulkarni <vakulkar@redhat.com> wrote:
->>
->>
->> On Wed, Apr 13, 2016 at 3:52 AM, John Spray <jspray@redhat.com> wrote:
->>>
->>> Lately, we've instances where ceph.git and ceph-qa-suite.git got
->>> slightly out of sync, as we were adding new stuff and interface
->>> changes to ceph (especially in cephfs).
->>>
->>> We used to have two repos (ceph and teuthology), now we have three
->>> (ceph, ceph-qa-suite and teuthology).
->>
->>
 >> we also have s3 suites in its own repo, we have big files in ceph.com/qa
 >> which i believe is the right place.
 >
 > I'm a bit ignorant of the s3 tests, is there a particular reason they
 > live separately to the main ceph-qa-suite?
 
-Not sure, probably yehuda wanted to make it easier to test with
-Amazon::S3 and Ceph
+s3 tests are more generic. They run against other s3 implementations,
+and only a labeled subset work with rgw.
 
->
-> As for the stuff in ceph.com/qa, I of course am not suggesting putting
-> those bit binaries into the main git repo.  It is sort of annoying
-> that they live out there on a web server, but it's a separate issue
-> from the ceph/ceph-qa-suite one.
->
->>> Splitting tests out of
->>> teuthology was a good thing, but maybe they should have gone into the
->>> ceph tree instead of a new repo?  The ceph-qa-suite branching seems to
->>> pretty much mirror what we do with ceph, with master vs jewel etc.
->>>
->>> Historically we had a comparatively static set of workloads in the qa
->>> suite (e.g. kernel-untar-build, fsstresss, pjd), which didn't change
->>> much with ceph changes.  But these days we're adding much more
->>> detailed tests, so there's more effort to keep the two in sync.
->>>
->>> I would personally love to be able to have a single PR that contained
->>> my code and the tests for it.  What if after Jewel we pulled all of
->>> ceph-qa-suite into the ceph repo?
->>
->>
->> I understand the advantage of having same sha between builds and tests, but
->> how are we going to guarantee ceph-builds in different places(one built on
->> other than ceph.com) will have same sha?
->
-> The thing that needs to match is the sha1 of the ceph code you're
-> running, and the sha1 you use when pulling the code to test it with.
->
-> I believe you currently have a situation where you have a built RPM
-> but you're not sure what ceph sha1 it came from, so you're pulling
-> e.g. the jewel branch of ceph-qa-suite rather than a specific sha1.
-> That needs fixing independently of ceph/ceph-qa-suite separation: you
-> have to run the right revision of the tests, irrespective of where
-> they're getting pulled from.
->
-> Basically, anyone generating packages with versions that don't map to
-> a ceph sha1 will need to have a way of remembering what ceph sha1
-> their packages correspond to.  This is not a new requirement, it's the
-> same issue that was discussed on IRC recently.
->
->> why not move ceph tests from ceph.git into ceph-qa-suite,  Ideally this is
->> not an issue with any major release, jewel workunits are supposed to work
->> with jewel ceph,
->
-> That would not help, because you still have the same issue of changes
-> in ceph being out of step with changes in ceph-qa-suite.
->
-> I think your misconception here is to assume that running tests from
-> the same branch as the code is sufficient.  You need to run tests from
-> the same *revision*.  Otherwise, when I add a new test to reproduce a
-> bug, and fix the bug at the same time, then you will get failures if
-> you run the newer commit against the older code.
+Josh
 
-This one I think figured out, I agree it needs to match for those rare
-cases, but the option exists in teuthology
-with overrides, just need to have right override. So hopefully it
-shoudn't be an issue anymore.
-
-
->
-> John
->
->> only in rare cases it may cause some issue but easily fixable. All the dev
->> runs can point to any qa-sha using the cli option so much less of an issue
->> in rare case.
->
->
->
->>>
->>> We could still enable folks running test changes without having to
->>> rebuild ceph packages: the suite sha1 selected when running a
->>> teuthology suite could still be different from that used for
->>> installing ceph, it's just that it would fetch that sha1 from the ceph
->>> repo instead of from a separate repo.
->>>
->>> John
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
