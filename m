@@ -1,76 +1,43 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: Re: MADV_MERGEABLE for osdmaps etc...
-Date: Wed, 13 Apr 2016 14:06:22 +0200
-Message-ID: <CABZ+qqmDV6tY9d4Ci3o6UxZcJgEJZy9x2nQvt-=hw=L=7uuC8w@mail.gmail.com>
-References: <CABZ+qqkWELvQbpgxQ-chtsWTEEarGAsVN7t=7Tcm8+4zjQPopw@mail.gmail.com>
- <CAL-rCA3ZTzTO9G9V41a5CW5ug++OhxB1wrR_6Dw9U8nYi=5KZg@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [ceph-users] Deprecating ext4 support
+Date: Wed, 13 Apr 2016 08:30:52 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604130829000.29593@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com> <570C9D03.6020701@speedpartner.de> <20160413112930.49906f15@batzmaru.gol.ad.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f54.google.com ([209.85.215.54]:35903 "EHLO
-	mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751211AbcDMMHG convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2016 08:07:06 -0400
-Received: by mail-lf0-f54.google.com with SMTP id g184so66347457lfb.3
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Apr 2016 05:07:05 -0700 (PDT)
-Received: from mail-lf0-f54.google.com (mail-lf0-f54.google.com. [209.85.215.54])
-        by smtp.gmail.com with ESMTPSA id e66sm6174617lfg.23.2016.04.13.05.07.02
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1/SSLv3 cipher=OTHER);
-        Wed, 13 Apr 2016 05:07:02 -0700 (PDT)
-Received: by mail-lf0-f54.google.com with SMTP id e190so66561832lfe.0
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Apr 2016 05:07:02 -0700 (PDT)
-In-Reply-To: <CAL-rCA3ZTzTO9G9V41a5CW5ug++OhxB1wrR_6Dw9U8nYi=5KZg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:44897 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759195AbcDMMbA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2016 08:31:00 -0400
+In-Reply-To: <20160413112930.49906f15@batzmaru.gol.ad.jp>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?0K7RgNC40Lkg0KHQvtC60L7Qu9C+0LI=?= <funny.falcon@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Christian Balzer <chibi@gol.com>
+Cc: ceph-users@ceph.com, Michael Metz-Martini | SpeedPartner GmbH <metz@speedpartner.de>, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com
 
-Thanks for the quick reply.
-I'm trying anyway with this LD_PRELOAD hack: http://vleu.net/ksm_preloa=
-d/
-But I don't manage to start the osd (jewel) with that :( ... still tryi=
-ng.
+On Wed, 13 Apr 2016, Christian Balzer wrote:
+> > > Recently we discovered an issue with the long object name handling
+> > > that is not fixable without rewriting a significant chunk of
+> > > FileStores filename handling.  (There is a limit in the amount of
+> > > xattr data ext4 can store in the inode, which causes problems in
+> > > LFNIndex.)
+> > We're only using cephfs so we shouldn't be affected by your discovered
+> > bug, right?
+> > 
+> I don't use CephFS, but you should be able to tell this yourself by doing
+> a "rados -p <poolname> ls" on your data and metadata pools and see the
+> resulting name lengths.
+> However since you have so many objects, I'd do that on a test cluster, if
+> you have one. ^o^
+> If CephFS is using the same/similar hashing to create object names as it
+> does with RBD images I'd imagine you're OK.
 
--- dan
+All of CephFS's object names are short, like RBD's.
 
+For RBD, there is only one object per image that is long: rbd_id.$name.  
+As long as your RBD image names are "short" (a max length of 256 chars is 
+enough to make ext4 happy) you'll be fine.
 
-On Wed, Apr 13, 2016 at 1:22 PM, =D0=AE=D1=80=D0=B8=D0=B9 =D0=A1=D0=BE=D0=
-=BA=D0=BE=D0=BB=D0=BE=D0=B2 <funny.falcon@gmail.com> wrote:
-> Doubtfully they looks similar in memory now, cause they use a lot
-> std::map and std::strings,
-> and there is almost no possibility to guarantee memory layout.
->
-> 2016-04-13 12:59 GMT+03:00 Dan van der Ster <dan@vanderster.com>:
->> Hi ceph-devel,
->>
->> Did anyone ever consider using madvise MADV_MERGEABLE to enable kern=
-el
->> samepage merging for the ceph-osd? Typically this is used on kvm hos=
-ts
->> to dedupe the VM memories, but naively I was thinking that since our
->> osdmaps are duplicated (a few 100MB per daemon) we might profit as
->> well. Though, perhaps these maps are changing often enough that KSM
->> wouldn't help... no idea.
->>
->> Any thoughts here?
->>
->> -- Dan
->> CERN IT
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> With regards,
-> Sokolov Yura aka funny_falcon
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
+
