@@ -1,79 +1,43 @@
-From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Ceph Day Sunnyvale Presentations
-Date: Wed, 13 Apr 2016 12:11:10 +0200 (CEST)
-Message-ID: <1709620787.306483306.1460542270487.JavaMail.zimbra@oxygem.tv>
-References: <CAAZbbf0FKTCOrxBcdKCma+f2Z6faXocqt11p8v6urE-4hu9irA@mail.gmail.com>
-	<754505492.304458062.1460519131018.JavaMail.zimbra@oxygem.tv>
-	<1638204634.9581897.1460519761671.JavaMail.zimbra@redhat.com>
+From: John Spray <jspray@redhat.com>
+Subject: ceph-qa-suite branching (merge it into ceph.git?)
+Date: Wed, 13 Apr 2016 11:52:21 +0100
+Message-ID: <CALe9h7fp=qaio8npS0naXjCp9bbg-kkB6bXG9PcGXGftvD4puA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1638204634.9581897.1460519761671.JavaMail.zimbra-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, bspark8-AlITWu1pwT4@public.gmane.org
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-oi0-f42.google.com ([209.85.218.42]:35614 "EHLO
+	mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753348AbcDMKwm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2016 06:52:42 -0400
+Received: by mail-oi0-f42.google.com with SMTP id p188so58351965oih.2
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Apr 2016 03:52:42 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, ceph-qa <ceph-qa@ceph.com>
 
-Pj5CYXNlZCBvbiBkaXNjdXNzaW9uIHdpdGggdGhlbSBhdCBDZXBoIGRheSBpbiBUb2t5byBKUCwg
-dGhleSBoYXZlIHRoZWlyIG93biBmcm96ZW4gdGhlIENlcGggcmVwb3NpdG9yeS4gCj4+QW5kIHRo
-ZXkndmUgYmVlbiBvcHRpbWl6aW5nIGNvZGVzIGJ5IHRoZWlyIG93biB0ZWFtIHRvIG1lZXQgdGhl
-aXIgcmVxdWlyZW1lbnRzLiAKPj5BRkFJQ1QgdGhleSBoYWQgbm90IGRvbmUgYW55IGRvIFBSLgoK
-VGhhbmtzIGZvciB0aGUgaW5mbwoKQGNjIGJzcGFyazguc2suY29tIDogbWF5YmUgY2FuIHlvdSBn
-aXZlIHVzIG1vcmUgaW5mb3JtYXRpb25zID8KIAoKLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQpE
-ZTogIlNoaW5vYnUgS2luam8iIDxza2luam9AcmVkaGF0LmNvbT4Kw4A6ICJhZGVydW1pZXIiIDxh
-ZGVydW1pZXJAb2Rpc28uY29tPgpDYzogIlBhdHJpY2sgTWNHYXJyeSIgPHBtY2dhcnJ5QHJlZGhh
-dC5jb20+LCAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgImNlcGgt
-dXNlcnMiIDxjZXBoLXVzZXJzQGNlcGguY29tPgpFbnZvecOpOiBNZXJjcmVkaSAxMyBBdnJpbCAy
-MDE2IDA1OjU2OjAxCk9iamV0OiBSZTogW2NlcGgtdXNlcnNdIENlcGggRGF5IFN1bm55dmFsZSBQ
-cmVzZW50YXRpb25zCgpBbGV4YW5kcmUsIAoKQmFzZWQgb24gZGlzY3Vzc2lvbiB3aXRoIHRoZW0g
-YXQgQ2VwaCBkYXkgaW4gVG9reW8gSlAsIHRoZXkgaGF2ZSB0aGVpciBvd24gZnJvemVuIHRoZSBD
-ZXBoIHJlcG9zaXRvcnkuIApBbmQgdGhleSd2ZSBiZWVuIG9wdGltaXppbmcgY29kZXMgYnkgdGhl
-aXIgb3duIHRlYW0gdG8gbWVldCB0aGVpciByZXF1aXJlbWVudHMuIApBRkFJQ1QgdGhleSBoYWQg
-bm90IGRvbmUgYW55IGRvIFBSLiAKCkNoZWVycywgClNoaW5vYnUgCgotLS0tLSBPcmlnaW5hbCBN
-ZXNzYWdlIC0tLS0tIApGcm9tOiAiQWxleGFuZHJlIERFUlVNSUVSIiA8YWRlcnVtaWVyQG9kaXNv
-LmNvbT4gClRvOiAiUGF0cmljayBNY0dhcnJ5IiA8cG1jZ2FycnlAcmVkaGF0LmNvbT4gCkNjOiAi
-Y2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgImNlcGgtdXNlcnMiIDxj
-ZXBoLXVzZXJzQGNlcGguY29tPiAKU2VudDogV2VkbmVzZGF5LCBBcHJpbCAxMywgMjAxNiAxMjo0
-NTozMSBQTSAKU3ViamVjdDogUmU6IFtjZXBoLXVzZXJzXSBDZXBoIERheSBTdW5ueXZhbGUgUHJl
-c2VudGF0aW9ucyAKCkhpLCAKCkkgd2FzIHJlYWRpbmcgdGhpcyBwcmVzZW50YXRpb24gZnJvbSBT
-SyB0ZWxlY29tIGFib3V0IGZsYXNoIG9wdGltaXNhdGlvbnMgCgpBRkNlcGg6IENlcGggUGVyZm9y
-bWFuY2UgQW5hbHlzaXMgJiBJbXByb3ZlbWVudCBvbiBGbGFzaCBbU2xpZGVzXSAKaHR0cDovL2Zy
-LnNsaWRlc2hhcmUubmV0L0lua3RhbmtfQ2VwaC9hZi1jZXBoLWNlcGgtcGVyZm9ybWFuY2UtYW5h
-bHlzaXMtYW5kLWltcHJvdmVtZW50LW9uLWZsYXNoIApCeXVuZy1TdSBQYXJrLCBTSyBUZWxlY29t
-IAoKClRoZXkgc2VlbSB0byBoYXZlIG1hZGUgb3B0aW1pc2F0aW9ucyBpbiBjZXBoIGNvZGUuIElz
-IHRoZXJlIGFueSBwYXRjaGVzIHJlZmVyZW5jZSA/IChhcHBsaWVkIHRvIGluZmVybmFsaXMvamV3
-ZWwgPykgCgoKVGhleSBzZWVtIGFsc28gdG8gaGF2ZSBkb25lIGNlcGggY29uZmlnIHR1bmluZyBh
-bmQgc3lzdGVtIHR1bm5pbmcsIGJ1dCBubyBjb25maWcgZGV0YWlscyBpcyBwcm92aWRlZCA6KCAK
-SXQgY291bGQgYmUgZ3JlYXQgdG8gc2hhcmUgd2l0aCB0aGUgY29tbXVuaXR5IDopIAoKUmVnYXJk
-cywgCgpBbGV4YW5kcmUgCgotLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tIApEZTogIlBhdHJpY2sg
-TWNHYXJyeSIgPHBtY2dhcnJ5QHJlZGhhdC5jb20+IArDgDogImNlcGgtZGV2ZWwiIDxjZXBoLWRl
-dmVsQHZnZXIua2VybmVsLm9yZz4sICJjZXBoLXVzZXJzIiA8Y2VwaC11c2Vyc0BjZXBoLmNvbT4g
-CkVudm95w6k6IE1lcmNyZWRpIDYgQXZyaWwgMjAxNiAxODoxODoyOCAKT2JqZXQ6IFtjZXBoLXVz
-ZXJzXSBDZXBoIERheSBTdW5ueXZhbGUgUHJlc2VudGF0aW9ucyAKCkhleSBjZXBoZXJzLCAKCkkg
-aGF2ZSBhbGwgYnV0IG9uZSBvZiB0aGUgcHJlc2VudGF0aW9ucyBmcm9tIENlcGggRGF5IFN1bm55
-dmFsZSwgc28gCnJhdGhlciB0aGFuIHdhaXQgZm9yIGEgZnVsbCBoYW5kIEkgd2VudCBhaGVhZCBh
-bmQgcG9zdGVkIHRoZSBsaW5rIHRvIAp0aGUgc2xpZGVzIG9uIHRoZSBldmVudCBwYWdlOiAKCmh0
-dHA6Ly9jZXBoLmNvbS9jZXBoZGF5cy9jZXBoLWRheS1zdW5ueXZhbGUvIAoKVGhlIHZpZGVvcyBw
-cm9iYWJseSB3b250IGJlIHByb2Nlc3NlZCB1bnRpbCBhZnRlciBuZXh0IHdlZWssIGJ1dCBJ4oCZ
-bGwgCmFkZCB0aG9zZSBvbmNlIHdlIGdldCB0aGVtLiBUaGFua3MgdG8gYWxsIG9mIHRoZSBwcmVz
-ZW50ZXJzIGFuZCAKYXR0ZW5kZWVzIHRoYXQgbWFkZSB0aGlzIGFub3RoZXIgZ3JlYXQgZXZlbnQu
-IAoKCi0tIAoKQmVzdCBSZWdhcmRzLCAKClBhdHJpY2sgTWNHYXJyeSAKRGlyZWN0b3IgQ2VwaCBD
-b21tdW5pdHkgfHwgUmVkIEhhdCAKaHR0cDovL2NlcGguY29tIHx8IGh0dHA6Ly9jb21tdW5pdHku
-cmVkaGF0LmNvbSAKQHNjdXR0bGVtb25rZXkgfHwgQGNlcGggCl9fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fIApjZXBoLXVzZXJzIG1haWxpbmcgbGlzdCAKY2Vw
-aC11c2Vyc0BsaXN0cy5jZXBoLmNvbSAKaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
-aS9jZXBoLXVzZXJzLWNlcGguY29tIApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fXyAKY2VwaC11c2VycyBtYWlsaW5nIGxpc3QgCmNlcGgtdXNlcnNAbGlzdHMu
-Y2VwaC5jb20gCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1j
-ZXBoLmNvbSAKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-CmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDov
-L2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+Lately, we've instances where ceph.git and ceph-qa-suite.git got
+slightly out of sync, as we were adding new stuff and interface
+changes to ceph (especially in cephfs).
+
+We used to have two repos (ceph and teuthology), now we have three
+(ceph, ceph-qa-suite and teuthology).  Splitting tests out of
+teuthology was a good thing, but maybe they should have gone into the
+ceph tree instead of a new repo?  The ceph-qa-suite branching seems to
+pretty much mirror what we do with ceph, with master vs jewel etc.
+
+Historically we had a comparatively static set of workloads in the qa
+suite (e.g. kernel-untar-build, fsstresss, pjd), which didn't change
+much with ceph changes.  But these days we're adding much more
+detailed tests, so there's more effort to keep the two in sync.
+
+I would personally love to be able to have a single PR that contained
+my code and the tests for it.  What if after Jewel we pulled all of
+ceph-qa-suite into the ceph repo?
+
+We could still enable folks running test changes without having to
+rebuild ceph packages: the suite sha1 selected when running a
+teuthology suite could still be different from that used for
+installing ceph, it's just that it would fetch that sha1 from the ceph
+repo instead of from a separate repo.
+
+John
