@@ -1,72 +1,125 @@
-From: Shinobu Kinjo <shinobu.kj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: v10.1.2 Jewel release candidate release
-Date: Thu, 14 Apr 2016 19:58:33 +0900
-Message-ID: <CAFdRU71NizZRG2qzszG1gW0x+dRy9CHiTP1pS7oGB7MQtOWjcw@mail.gmail.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [ceph-users] v10.1.2 Jewel release candidate release
+Date: Thu, 14 Apr 2016 10:51:10 -0400
+Message-ID: <CANP1eJEPo5_64qx=r=YuXxWbkbSyYjpnQEx7SBZD6XZdqvSYsA@mail.gmail.com>
 References: <alpine.DEB.2.11.1604131753570.31812@cpach.fuggernut.com>
 	<CAJ4mKGa_APTdJzXR86_GjN141igBft=4JvY79EkS_ZkPbgcAVQ@mail.gmail.com>
 	<A3CAA6F7-8759-4C19-9DA1-0C6D066A3A8E@teralytics.ch>
 	<CALe9h7fS1KR87HK4h03fvDEGp6jF7w1g+8bCA2R0KwopzcdLGg@mail.gmail.com>
-Reply-To: skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CALe9h7fS1KR87HK4h03fvDEGp6jF7w1g+8bCA2R0KwopzcdLGg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-announce-Qp0mS5GaXlQ@public.gmane.org, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:35002 "EHLO
+	mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751973AbcDNOvM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Apr 2016 10:51:12 -0400
+Received: by mail-lf0-f49.google.com with SMTP id c126so111784505lfb.2
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Apr 2016 07:51:11 -0700 (PDT)
+In-Reply-To: <CALe9h7fS1KR87HK4h03fvDEGp6jF7w1g+8bCA2R0KwopzcdLGg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Vincenzo Pii <vincenzo.pii@teralytics.ch>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>, Sage Weil <sage@redhat.com>, ceph-announce@ceph.com
 
-T24gVGh1LCBBcHIgMTQsIDIwMTYgYXQgNzozMiBQTSwgSm9obiBTcHJheSA8anNwcmF5QHJlZGhh
-dC5jb20+IHdyb3RlOgo+IE9uIFRodSwgQXByIDE0LCAyMDE2IGF0IDg6MzEgQU0sIFZpbmNlbnpv
-IFBpaQo+IDx2aW5jZW56by5waWlAdGVyYWx5dGljcy5jaD4gd3JvdGU6Cj4+Cj4+IE9uIDE0IEFw
-ciAyMDE2LCBhdCAwMDowOSwgR3JlZ29yeSBGYXJudW0gPGdmYXJudW1AcmVkaGF0LmNvbT4gd3Jv
-dGU6Cj4+Cj4+IE9uIFdlZCwgQXByIDEzLCAyMDE2IGF0IDM6MDIgUE0sIFNhZ2UgV2VpbCA8c2Fn
-ZUByZWRoYXQuY29tPiB3cm90ZToKPj4KPj4gSGkgZXZlcnlvbmUsCj4+Cj4+IFRoZSB0aGlyZCAo
-YW5kIGxpa2VseSBmaW5hbCkgSmV3ZWwgcmVsZWFzZSBjYW5kaWRhdGUgaXMgb3V0LiAgV2UgaGF2
-ZSBhCj4+IHZlcnkgc21hbGwgbnVtYmVyIG9mIHJlbWFpbmluZyBibG9ja2VyIGlzc3VlcyBhbmQg
-YSBiaXQgb2YgZmluYWwgcG9saXNoCj4+IGJlZm9yZSB3ZSBwdWJsaXNoIEpld2VsIDEwLjIuMCwg
-cHJvYmFibHkgbmV4dCB3ZWVrLgo+Pgo+PiBUaGVyZSBhcmUgbm8ga25vd24gaXNzdWVzIHdpdGgg
-dGhpcyByZWxlYXNlIHRoYXQgYXJlIHNlcmlvdXMgZW5vdWdoIHRvCj4+IHdhcm4gYWJvdXQgaGVy
-ZS4gIEdyZWcgaXMgYWRkaW5nIHNvbWUgQ2VwaEZTIGNoZWNrcyBzbyB0aGF0IGFkbWlucyBkb24n
-dAo+PiBhY2NpZGVudGFsbHkgc3RhcnQgdXNpbmcgbGVzcy1zdGFibGUgZmVhdHVyZXMsCj4+Cj4+
-Cj4+IHMvaXMgYWRkaW5nL2hhcyBhZGRlZC8KPj4KPj4gICAgICAgIGh0dHA6Ly9kb2NzLmNlcGgu
-Y29tL2RvY3MvbWFzdGVyL3JlbGVhc2Utbm90ZXMvCj4+Cj4+Cj4+IEFzIG5vdGVkIGluIGFub3Ro
-ZXIgdGhyZWFkLCB0aGVyZSdzIHN0aWxsIGEgYmlnIENlcGhGUyB3YXJuaW5nIGluIHRoZQo+PiBv
-bmxpbmUgZG9jcy4gV2UnbGwgYmUgY2xlYW5pbmcgdGhvc2UgdXAsIHNpbmNlIHdlIG5vdyBoYXZl
-IHRoZQo+PiByZWNvdmVyeSB0b29scyB3ZSBkZXNpcmUhIFNvbWUgdGhpbmdzIGFyZSBrbm93biB0
-byBzdGlsbCBiZSBzbG93IG9yCj4+IHN1Yi1vcHRpbWFsLCBidXQgd2UgY29uc2lkZXIgQ2VwaEZT
-IHN0YWJsZSBhbmQgc2FmZSBhdCB0aGlzIHRpbWUgd2hlbgo+PiBydW4gaW4gdGhlIGRlZmF1bHQg
-c2luZ2xlLU1EUyBjb25maWd1cmF0aW9uLiAoSXQgd29uJ3QgbGV0IHlvdSBkbwo+PiBhbnl0aGlu
-ZyBiYWQgd2l0aG91dCB2ZXJ5IGV4cGxpY2l0bHkgc2V0dGluZyBmbGFncyBhbmQgYWNrbm93bGVk
-Z2luZwo+PiB0aGV5J3JlIGRhbmdlcm91cy4pCj4+IDopCj4+IC1HcmVnCj4+IF9fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4+IGNlcGgtdXNlcnMgbWFpbGlu
-ZyBsaXN0Cj4+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPj4gaHR0cDovL2xpc3RzLmNlcGgu
-Y29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4+Cj4+Cj4+IEhpIEdyZWcsCj4+
-Cj4+IEEgY2xhcmlmaWNhdGlvbjoKPj4KPj4gV2hlbiB5b3Ugc2F5IHRoYXQgdGhpbmdzIHdpbGwg
-YmUgc2FmZSBpbiDigJxzaW5nbGUtTURT4oCdIGNvbmZpZ3VyYXRpb24sIGRvIHlvdQo+PiBhbHNv
-IGV4Y2x1ZGUgdGhlIEhBIHNldHVwIHdpdGggb25lIGFjdGl2ZSBNRFMgYW5kIHNvbWUgcGFzc2l2
-ZSAoc3RhbmRieSkKPj4gb25lcz8gT3IgdGhpcyB3b3VsZCBiZSBzYWZlIGFzIHdlbGw/Cj4KPiBZ
-ZXMsIGhhdmluZyBzdGFuZGJ5cyBpcyBmaW5lIChpbmNsdWRpbmcgInN0YW5kYnkgcmVwbGF5IiBk
-YWVtb25zKS4gIFdlCgo+IHNob3VsZCByZWFsbHkgc2F5ICJzaW5nbGUgYWN0aXZlIE1EUyBjb25m
-aWd1cmF0aW9uIiwgYnV0IGl0J3MgYSBiaXQgb2YKClByZXR0eSBnb29kIGRlc2NyaXB0aW9uLgoK
-PiBhIG1vdXRoZnVsIQo+Cj4gSm9obgo+Cj4+Cj4+IFZpbmNlbnpvIFBpaSB8IFRFUkFMWVRJQ1MK
-Pj4gRGV2T3BzIEVuZ2luZWVyCj4+Cj4+Cj4+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fCj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4+IGNlcGgtdXNl
-cnNAbGlzdHMuY2VwaC5jb20KPj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9j
-ZXBoLXVzZXJzLWNlcGguY29tCj4+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX18KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNAbGlz
-dHMuY2VwaC5jb20KPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
-cnMtY2VwaC5jb20KCgoKLS0gCkVtYWlsOgpzaGlub2J1QGxpbnV4LmNvbQpHaXRIdWI6CnNoaW5v
-YnUteApCbG9nOgpMaWZlIHdpdGggRGlzdHJpYnV0ZWQgQ29tcHV0YXRpb25hbCBTeXN0ZW0gYmFz
-ZWQgb24gT3BlblNvdXJjZQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29t
-Cmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Thu, Apr 14, 2016 at 6:32 AM, John Spray <jspray@redhat.com> wrote:
+> On Thu, Apr 14, 2016 at 8:31 AM, Vincenzo Pii
+> <vincenzo.pii@teralytics.ch> wrote:
+>>
+>> On 14 Apr 2016, at 00:09, Gregory Farnum <gfarnum@redhat.com> wrote:
+>>
+>> On Wed, Apr 13, 2016 at 3:02 PM, Sage Weil <sage@redhat.com> wrote:
+>>
+>> Hi everyone,
+>>
+>> The third (and likely final) Jewel release candidate is out.  We hav=
+e a
+>> very small number of remaining blocker issues and a bit of final pol=
+ish
+>> before we publish Jewel 10.2.0, probably next week.
+>>
+>> There are no known issues with this release that are serious enough =
+to
+>> warn about here.  Greg is adding some CephFS checks so that admins d=
+on't
+>> accidentally start using less-stable features,
+>>
+>>
+>> s/is adding/has added/
+>>
+>>        http://docs.ceph.com/docs/master/release-notes/
+>>
+>>
+>> As noted in another thread, there's still a big CephFS warning in th=
+e
+>> online docs. We'll be cleaning those up, since we now have the
+>> recovery tools we desire! Some things are known to still be slow or
+>> sub-optimal, but we consider CephFS stable and safe at this time whe=
+n
+>> run in the default single-MDS configuration. (It won't let you do
+>> anything bad without very explicitly setting flags and acknowledging
+>> they're dangerous.)
+>> :)
+>> -Greg
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>
+>>
+>> Hi Greg,
+>>
+>> A clarification:
+>>
+>> When you say that things will be safe in =E2=80=9Csingle-MDS=E2=80=9D=
+ configuration, do you
+>> also exclude the HA setup with one active MDS and some passive (stan=
+dby)
+>> ones? Or this would be safe as well?
+>
+> Yes, having standbys is fine (including "standby replay" daemons).  W=
+e
+> should really say "single active MDS configuration", but it's a bit o=
+f
+> a mouthful!
+
+master - hot standby(s) is okay
+multi-master is not supported
+
+I feel like this is terminology that's more familiar (to me) from
+other systems (eg. databases).
+
+>
+> John
+>
+>>
+>> Vincenzo Pii | TERALYTICS
+>> DevOps Engineer
+>>
+>>
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+--=20
+Milosz Tanski
+CTO
+16 East 34th Street, 15th floor
+New York, NY 10016
+
+p: 646-253-9055
+e: milosz@adfin.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
