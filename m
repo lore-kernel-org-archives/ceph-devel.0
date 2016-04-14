@@ -1,57 +1,41 @@
-From: Christian Balzer <chibi@gol.com>
-Subject: Re: [ceph-users] Deprecating ext4 support
-Date: Thu, 14 Apr 2016 09:57:00 +0900
-Message-ID: <20160414095700.0905a422@batzmaru.gol.ad.jp>
-References: <alpine.DEB.2.11.1604111632520.13448@cpach.fuggernut.com>
-	<570C9D03.6020701@speedpartner.de>
-	<20160413112930.49906f15@batzmaru.gol.ad.jp>
-	<alpine.DEB.2.11.1604130829000.29593@cpach.fuggernut.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: cap mask differences for `Client::stat` vs `Client::fstat`
+Date: Thu, 14 Apr 2016 09:49:23 +0800
+Message-ID: <CAAM7YA=+4wjN0TJFrrBovzkxLGJp1ngqC-Y-2fgV_mywaJx2Uw@mail.gmail.com>
+References: <CAB2gnbUz9D9VWz6=PtDdAQ7u+hVWeHa3rz=5CypGAFLq-bSboA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.dentaku.gol.com ([203.216.5.72]:39974 "EHLO
-	smtp02.dentaku.gol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751666AbcDNA5H (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2016 20:57:07 -0400
-In-Reply-To: <alpine.DEB.2.11.1604130829000.29593@cpach.fuggernut.com>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:33397 "EHLO
+	mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752351AbcDNBtZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2016 21:49:25 -0400
+Received: by mail-wm0-f68.google.com with SMTP id y144so18621386wmd.0
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Apr 2016 18:49:24 -0700 (PDT)
+In-Reply-To: <CAB2gnbUz9D9VWz6=PtDdAQ7u+hVWeHa3rz=5CypGAFLq-bSboA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-users@ceph.com, Michael Metz-Martini | SpeedPartner GmbH <metz@speedpartner.de>, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com
+To: Noah Watkins <noahwatkins@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 13 Apr 2016 08:30:52 -0400 (EDT) Sage Weil wrote:
+On Thu, Apr 14, 2016 at 1:26 AM, Noah Watkins <noahwatkins@gmail.com> wrote:
+> In the libcephfs client it looks like both `Client::stat` and
+> `Client::lstat` use a default mask of CEPH_STAT_CAP_INODE_ALL and are
+> able to return immediately from `Client::_getattr` without making an
+> MDS request. However, `Client::fstat` uses hard-coded -1 as the cap
+> mask and always issues a MDS request. Is this the intended behavior,
+> and if so, what are different semantics of fstat that make this a
+> requirement?
 
-> On Wed, 13 Apr 2016, Christian Balzer wrote:
-> > > > Recently we discovered an issue with the long object name handling
-> > > > that is not fixable without rewriting a significant chunk of
-> > > > FileStores filename handling.  (There is a limit in the amount of
-> > > > xattr data ext4 can store in the inode, which causes problems in
-> > > > LFNIndex.)
-> > > We're only using cephfs so we shouldn't be affected by your
-> > > discovered bug, right?
-> > > 
-> > I don't use CephFS, but you should be able to tell this yourself by
-> > doing a "rados -p <poolname> ls" on your data and metadata pools and
-> > see the resulting name lengths.
-> > However since you have so many objects, I'd do that on a test cluster,
-> > if you have one. ^o^
-> > If CephFS is using the same/similar hashing to create object names as
-> > it does with RBD images I'd imagine you're OK.
-> 
-> All of CephFS's object names are short, like RBD's.
-> 
-Sweet!
+I think it's a bug, Client::fstat should use CEPH_STAT_CAP_INODE_ALL too.
 
-> For RBD, there is only one object per image that is long: rbd_id.$name.  
-> As long as your RBD image names are "short" (a max length of 256 chars
-> is enough to make ext4 happy) you'll be fine.
-> 
-No worries there, ganeti definitely creates them way shorter than that and
-IIRC so do Open(Stack/Nebula).
+Regards
+Yan, Zheng
 
-Christian
--- 
-Christian Balzer        Network/Systems Engineer                
-chibi@gol.com   	Global OnLine Japan/Rakuten Communications
-http://www.gol.com/
+>
+> Thanks,
+> Noah
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
