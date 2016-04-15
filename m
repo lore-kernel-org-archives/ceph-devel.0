@@ -1,49 +1,77 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: rados and the next hammer release v0.94.7
-Date: Fri, 15 Apr 2016 07:39:38 -0700
-Message-ID: <CAN=+7FXq-VSvqd3exWUB0fRSAg7DwSQgr4+dwe9n8oamDnBB2g@mail.gmail.com>
-References: <570B89A3.3030006@dachary.org>
-	<5710AAD2.90400@dachary.org>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore cluster example
+Date: Fri, 15 Apr 2016 15:21:28 +0000
+Message-ID: <BL2PR02MB2115A5146722474C58C741A4F4680@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <5710D936.9040507@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f181.google.com ([209.85.161.181]:33776 "EHLO
-	mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750756AbcDOOjk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Apr 2016 10:39:40 -0400
-Received: by mail-yw0-f181.google.com with SMTP id t10so138430450ywa.0
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 07:39:39 -0700 (PDT)
-In-Reply-To: <5710AAD2.90400@dachary.org>
+Received: from mail-bn1bon0072.outbound.protection.outlook.com ([157.56.111.72]:31456
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751137AbcDOPyX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 15 Apr 2016 11:54:23 -0400
+In-Reply-To: <5710D936.9040507@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>
+To: Mark Nelson <mnelson@redhat.com>, cbt <cbt@ceph.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Looks good to me.
--Sam
-
-On Fri, Apr 15, 2016 at 1:48 AM, Loic Dachary <loic@dachary.org> wrote:
-> Ping ?
->
-> On 11/04/2016 13:25, Loic Dachary wrote:
->> Hi Sam,
->>
->> The next hammer release as found at https://github.com/ceph/ceph/tre=
-e/hammer passed the rados suite (http://tracker.ceph.com/issues/14692#n=
-ote-51 and failed one test because of OpenStack specific issues but the=
- test passed in another suite with the same branch http://tracker.ceph.=
-com/issues/14692#note-45) and the upgrade suite (http://tracker.ceph.co=
-m/issues/14692#note-52). Do you think the hammer branch is ready for QE=
- to start their own round of testing ?
->>
->> Cheers
->>
->
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIE1hcmsgIQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1k
+ZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIu
+a2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIE1hcmsgTmVsc29uDQpTZW50OiBGcmlkYXksIEFwcmls
+IDE1LCAyMDE2IDU6MDYgQU0NClRvOiBjYnQNCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBCbHVl
+c3RvcmUgY2x1c3RlciBleGFtcGxlDQoNCkhpIGFsbCwNCg0KQSBjb3VwbGUgb2YgZm9sa3MgaGF2
+ZSBhc2tlZCBtZSBob3cgdG8gc2V0dXAgYmx1ZXN0b3JlIGNsdXN0ZXJzIGZvciBwZXJmb3JtYW5j
+ZSB0ZXN0aW5nLiAgSSBwZXJzb25hbGx5IGFtIHVzaW5nIGNidCBmb3IgdGhpcywgYnV0IHlvdSBz
+aG91bGQgYmUgYWJsZSB0byB1c2UgY2VwaC1kaXNrIHdpdGggc29tZSBvdGhlciBjbHVzdGVyIGNy
+ZWF0aW9uIG1ldGhvZCBhcyB3ZWxsLg0KDQpGb3IgQ0JULCB5b3UgcmVhbGx5IGRvbid0IG5lZWQg
+dG8gZG8gbXVjaC4gIEluIHRoZSBvbGQgbmV3c3RvcmUgZGF5cywgYSAiYmxvY2siIHN5bWxpbmsg
+bmVlZGVkIHRvIGJlIGNyZWF0ZWQgaW4gdGhlIG9zZCBkYXRhIGRpciB0byBsaW5rIHRvIHRoZSBu
+ZXcgYmxvY2sgZGV2aWNlLiAgQ0JUIGRpZCB0aGlzIHdoZW4gdGhlICJuZXdzdG9yZV9ibG9jazog
+VHJ1ZSIgb3B0aW9uIHdhcyBzZXQgaW4gdGhlIGNsdXN0ZXIgc2VjdGlvbiBvZiB0aGUgY2J0IHlh
+bWwgZmlsZS4gIFRoaXMgaXNuJ3QgcmVhbGx5IG5lZWRlZCBhbnltb3JlLCBhcyB5b3UgY2FuIG5v
+dyBzcGVjaWZ5IHRoZSBibG9jaywgZGIsIGFuZCB3YWwgZGV2aWNlcyBkaXJlY3RseSBpbiB5b3Vy
+IGNlcGguY29uZiBmaWxlLiAgSWYgeW91ciBwYXJ0aXRpb25zIGFyZSBzZXR1cCBwcm9wZXJseSB5
+b3UgY2FuIGNyZWF0ZSBibHVlc3RvcmUgY2x1c3RlcnMgd2l0aG91dCBoYXZpbmcgdG8gZG8gYW55
+dGhpbmcgYmV5b25kIGNoYW5naW5nIHRoZSBjZXBoLmNvbmYgZmlsZSAod2l0aCBjYnQgYXQgbGVh
+c3QpLg0KDQpIZXJlJ3MgYSB2ZXJ5IGJhc2ljIGV4YW1wbGU6DQoNCltnbG9iYWxdDQogICAgICAg
+ICBlbmFibGUgZXhwZXJpbWVudGFsIHVucmVjb3ZlcmFibGUgZGF0YSBjb3JydXB0aW5nIGZlYXR1
+cmVzID0gYmx1ZXN0b3JlIHJvY2tzZGINCiAgICAgICAgIG9zZCBvYmplY3RzdG9yZSA9IGJsdWVz
+dG9yZQ0KDQpbb3NkLjBdDQogICAgICAgICBob3N0ID0gaW5jZXJ0YTAxLmZyb250LnNlcGlhLmNl
+cGguY29tDQogICAgICAgICBvc2QgZGF0YSA9IC90bXAvY2J0L21udC9vc2QtZGV2aWNlLTAtZGF0
+YQ0KICAgICAgICAgYmx1ZXN0b3JlIGJsb2NrIHBhdGggPSAvZGV2L2Rpc2svYnktcGFydGxhYmVs
+L29zZC1kZXZpY2UtMC1ibG9jaw0KICAgICAgICAgYmx1ZXN0b3JlIGJsb2NrIGRiIHBhdGggPSAv
+ZGV2L2Rpc2svYnktcGFydGxhYmVsL29zZC1kZXZpY2UtMC1kYg0KICAgICAgICAgYmx1ZXN0b3Jl
+IGJsb2NrIHdhbCBwYXRoID0gL2Rldi9kaXNrL2J5LXBhcnRsYWJlbC9vc2QtZGV2aWNlLTAtd2Fs
+DQoNCg0KSGVyZSB3ZSBlbmFibGUgdGhlIGV4cGVyaW1lbnRhbCBibHVlc3RvcmUgYW5kIHJvY2tz
+ZGIgZmVhdHVyZXMsIHNldCB0aGUgb2JqZWN0c3RvcmUgdG8gYmx1ZXN0b3JlLCBhbmQgdGhlbiBp
+biB0aGUgT1NEIHNlY3Rpb25zIG1hbnVhbGx5IHNldCB0aGUgb3NkIGRhdGEsIGJsdWVzdG9yZSBi
+bG9jaywgYmx1ZXN0b3JlIGJsb2NrIGRiLCBhbmQgYmx1ZXN0b3JlIGJsb2NrIHdhbCBwYXRocy4g
+IFlvdSBtaWdodCBiZSB3b25kZXJpbmcgd2hhdCBhbGwgb2YgdGhlc2UgYXJlIGZvcjoNCg0Kb3Nk
+IGRhdGEgPC0tIHZlcnkgc21hbGwgZGlyZWN0b3J5IG9uIEZTIGZvciBib290c3RyYXBwaW5nIE9T
+RC4NCmJsdWVzdG9yZSBibG9jayA8LS0gd2hlcmUgdGhlIGFjdHVhbCBvYmplY3QgZGF0YSBsaXZl
+cyBibHVlc3RvcmUgYmxvY2sgZGIgcGF0aCA8LS0gd2hlcmUgcm9ja3NkYiBsaXZlcyBibHVlc3Rv
+cmUgYmxvY2sgd2FsIHBhdGggPC0tIHdoZXJlIHJvY2tzZGIgd3JpdGVhaGVhZCBsb2cgbGl2ZXMN
+Cg0KQW5kIHRoYXQncyBiYXNpY2FsbHkgaXQuICBJJ3ZlIHVwbG9hZGVkIGFuIGV4YW1wbGUgcGFy
+dGl0aW9uaW5nIHNjcmlwdCwgY2VwaC5jb25mIGZpbGUsIGFuZCBjYnQgeWFtbCBjb25maWd1cmF0
+aW9uIGZpbGUgYmFzZWQgb24gYWN0dWFsIHRlc3RzIEknbSBydW5uaW5nIHRvIHRoZSBleGFtcGxl
+cyBmb2xkZXIgdGhhdCBJJ3ZlIGFjdHVhbGx5IGJlZW4gdXNpbmcgZm9yIHRlc3RpbmcgaGVyZToN
+Cg0KaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2J0L3RyZWUvbWFzdGVyL2V4YW1wbGUvYmx1ZXN0
+b3JlDQoNClRoYW5rcywNCk1hcmsNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDog
+c2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBt
+ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBh
+dCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQpQTEVBU0UgTk9U
+RTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNz
+YWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBp
+ZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3Qg
+dGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3Ug
+aGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywg
+ZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBp
+cyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmlj
+YXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3Ig
+ZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBh
+bGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFy
+ZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo=
