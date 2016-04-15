@@ -1,77 +1,210 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore cluster example
-Date: Fri, 15 Apr 2016 15:21:28 +0000
-Message-ID: <BL2PR02MB2115A5146722474C58C741A4F4680@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <5710D936.9040507@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] rbd: fix rbd map vs notify races
+Date: Fri, 15 Apr 2016 19:26:04 +0200
+Message-ID: <1460741164-22850-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0072.outbound.protection.outlook.com ([157.56.111.72]:31456
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751137AbcDOPyX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 15 Apr 2016 11:54:23 -0400
-In-Reply-To: <5710D936.9040507@redhat.com>
-Content-Language: en-US
+Received: from mail-qg0-f50.google.com ([209.85.192.50]:35667 "EHLO
+	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752122AbcDOR0g (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Apr 2016 13:26:36 -0400
+Received: by mail-qg0-f50.google.com with SMTP id f105so84986829qge.2
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 10:26:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, cbt <cbt@ceph.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Josh Durgin <jdurgin@redhat.com>
 
-VGhhbmtzIE1hcmsgIQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1k
-ZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIu
-a2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIE1hcmsgTmVsc29uDQpTZW50OiBGcmlkYXksIEFwcmls
-IDE1LCAyMDE2IDU6MDYgQU0NClRvOiBjYnQNCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBCbHVl
-c3RvcmUgY2x1c3RlciBleGFtcGxlDQoNCkhpIGFsbCwNCg0KQSBjb3VwbGUgb2YgZm9sa3MgaGF2
-ZSBhc2tlZCBtZSBob3cgdG8gc2V0dXAgYmx1ZXN0b3JlIGNsdXN0ZXJzIGZvciBwZXJmb3JtYW5j
-ZSB0ZXN0aW5nLiAgSSBwZXJzb25hbGx5IGFtIHVzaW5nIGNidCBmb3IgdGhpcywgYnV0IHlvdSBz
-aG91bGQgYmUgYWJsZSB0byB1c2UgY2VwaC1kaXNrIHdpdGggc29tZSBvdGhlciBjbHVzdGVyIGNy
-ZWF0aW9uIG1ldGhvZCBhcyB3ZWxsLg0KDQpGb3IgQ0JULCB5b3UgcmVhbGx5IGRvbid0IG5lZWQg
-dG8gZG8gbXVjaC4gIEluIHRoZSBvbGQgbmV3c3RvcmUgZGF5cywgYSAiYmxvY2siIHN5bWxpbmsg
-bmVlZGVkIHRvIGJlIGNyZWF0ZWQgaW4gdGhlIG9zZCBkYXRhIGRpciB0byBsaW5rIHRvIHRoZSBu
-ZXcgYmxvY2sgZGV2aWNlLiAgQ0JUIGRpZCB0aGlzIHdoZW4gdGhlICJuZXdzdG9yZV9ibG9jazog
-VHJ1ZSIgb3B0aW9uIHdhcyBzZXQgaW4gdGhlIGNsdXN0ZXIgc2VjdGlvbiBvZiB0aGUgY2J0IHlh
-bWwgZmlsZS4gIFRoaXMgaXNuJ3QgcmVhbGx5IG5lZWRlZCBhbnltb3JlLCBhcyB5b3UgY2FuIG5v
-dyBzcGVjaWZ5IHRoZSBibG9jaywgZGIsIGFuZCB3YWwgZGV2aWNlcyBkaXJlY3RseSBpbiB5b3Vy
-IGNlcGguY29uZiBmaWxlLiAgSWYgeW91ciBwYXJ0aXRpb25zIGFyZSBzZXR1cCBwcm9wZXJseSB5
-b3UgY2FuIGNyZWF0ZSBibHVlc3RvcmUgY2x1c3RlcnMgd2l0aG91dCBoYXZpbmcgdG8gZG8gYW55
-dGhpbmcgYmV5b25kIGNoYW5naW5nIHRoZSBjZXBoLmNvbmYgZmlsZSAod2l0aCBjYnQgYXQgbGVh
-c3QpLg0KDQpIZXJlJ3MgYSB2ZXJ5IGJhc2ljIGV4YW1wbGU6DQoNCltnbG9iYWxdDQogICAgICAg
-ICBlbmFibGUgZXhwZXJpbWVudGFsIHVucmVjb3ZlcmFibGUgZGF0YSBjb3JydXB0aW5nIGZlYXR1
-cmVzID0gYmx1ZXN0b3JlIHJvY2tzZGINCiAgICAgICAgIG9zZCBvYmplY3RzdG9yZSA9IGJsdWVz
-dG9yZQ0KDQpbb3NkLjBdDQogICAgICAgICBob3N0ID0gaW5jZXJ0YTAxLmZyb250LnNlcGlhLmNl
-cGguY29tDQogICAgICAgICBvc2QgZGF0YSA9IC90bXAvY2J0L21udC9vc2QtZGV2aWNlLTAtZGF0
-YQ0KICAgICAgICAgYmx1ZXN0b3JlIGJsb2NrIHBhdGggPSAvZGV2L2Rpc2svYnktcGFydGxhYmVs
-L29zZC1kZXZpY2UtMC1ibG9jaw0KICAgICAgICAgYmx1ZXN0b3JlIGJsb2NrIGRiIHBhdGggPSAv
-ZGV2L2Rpc2svYnktcGFydGxhYmVsL29zZC1kZXZpY2UtMC1kYg0KICAgICAgICAgYmx1ZXN0b3Jl
-IGJsb2NrIHdhbCBwYXRoID0gL2Rldi9kaXNrL2J5LXBhcnRsYWJlbC9vc2QtZGV2aWNlLTAtd2Fs
-DQoNCg0KSGVyZSB3ZSBlbmFibGUgdGhlIGV4cGVyaW1lbnRhbCBibHVlc3RvcmUgYW5kIHJvY2tz
-ZGIgZmVhdHVyZXMsIHNldCB0aGUgb2JqZWN0c3RvcmUgdG8gYmx1ZXN0b3JlLCBhbmQgdGhlbiBp
-biB0aGUgT1NEIHNlY3Rpb25zIG1hbnVhbGx5IHNldCB0aGUgb3NkIGRhdGEsIGJsdWVzdG9yZSBi
-bG9jaywgYmx1ZXN0b3JlIGJsb2NrIGRiLCBhbmQgYmx1ZXN0b3JlIGJsb2NrIHdhbCBwYXRocy4g
-IFlvdSBtaWdodCBiZSB3b25kZXJpbmcgd2hhdCBhbGwgb2YgdGhlc2UgYXJlIGZvcjoNCg0Kb3Nk
-IGRhdGEgPC0tIHZlcnkgc21hbGwgZGlyZWN0b3J5IG9uIEZTIGZvciBib290c3RyYXBwaW5nIE9T
-RC4NCmJsdWVzdG9yZSBibG9jayA8LS0gd2hlcmUgdGhlIGFjdHVhbCBvYmplY3QgZGF0YSBsaXZl
-cyBibHVlc3RvcmUgYmxvY2sgZGIgcGF0aCA8LS0gd2hlcmUgcm9ja3NkYiBsaXZlcyBibHVlc3Rv
-cmUgYmxvY2sgd2FsIHBhdGggPC0tIHdoZXJlIHJvY2tzZGIgd3JpdGVhaGVhZCBsb2cgbGl2ZXMN
-Cg0KQW5kIHRoYXQncyBiYXNpY2FsbHkgaXQuICBJJ3ZlIHVwbG9hZGVkIGFuIGV4YW1wbGUgcGFy
-dGl0aW9uaW5nIHNjcmlwdCwgY2VwaC5jb25mIGZpbGUsIGFuZCBjYnQgeWFtbCBjb25maWd1cmF0
-aW9uIGZpbGUgYmFzZWQgb24gYWN0dWFsIHRlc3RzIEknbSBydW5uaW5nIHRvIHRoZSBleGFtcGxl
-cyBmb2xkZXIgdGhhdCBJJ3ZlIGFjdHVhbGx5IGJlZW4gdXNpbmcgZm9yIHRlc3RpbmcgaGVyZToN
-Cg0KaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2J0L3RyZWUvbWFzdGVyL2V4YW1wbGUvYmx1ZXN0
-b3JlDQoNClRoYW5rcywNCk1hcmsNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDog
-c2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBt
-ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBh
-dCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQpQTEVBU0UgTk9U
-RTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNz
-YWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBp
-ZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3Qg
-dGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3Ug
-aGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywg
-ZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBp
-cyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmlj
-YXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3Ig
-ZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBh
-bGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFy
-ZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo=
+A while ago, commit 9875201e1049 ("rbd: fix use-after free of
+rbd_dev->disk") fixed rbd unmap vs notify race by introducing
+an exported wrapper for flushing notifies and sticking it into
+do_rbd_remove().
+
+A similar problem exists on the rbd map path, though: the watch is
+registered in rbd_dev_image_probe(), while the disk is set up quite
+a few steps later, in rbd_dev_device_setup().  Nothing prevents
+a notify from coming in and crashing on a NULL rbd_dev->disk:
+
+    BUG: unable to handle kernel NULL pointer dereference at 0000000000000050
+    Call Trace:
+     [<ffffffffa0508344>] rbd_watch_cb+0x34/0x180 [rbd]
+     [<ffffffffa04bd290>] do_event_work+0x40/0xb0 [libceph]
+     [<ffffffff8109d5db>] process_one_work+0x17b/0x470
+     [<ffffffff8109e3ab>] worker_thread+0x11b/0x400
+     [<ffffffff8109e290>] ? rescuer_thread+0x400/0x400
+     [<ffffffff810a5acf>] kthread+0xcf/0xe0
+     [<ffffffff810b41b3>] ? finish_task_switch+0x53/0x170
+     [<ffffffff810a5a00>] ? kthread_create_on_node+0x140/0x140
+     [<ffffffff81645dd8>] ret_from_fork+0x58/0x90
+     [<ffffffff810a5a00>] ? kthread_create_on_node+0x140/0x140
+    RIP  [<ffffffffa050828a>] rbd_dev_refresh+0xfa/0x180 [rbd]
+
+If an error occurs during rbd map, we have to error out, potentially
+tearing down a watch.  Just like on rbd unmap, notifies have to be
+flushed, otherwise rbd_watch_cb() may end up trying to read in the
+image header after rbd_dev_image_release() has run:
+
+    Assertion failure in rbd_dev_header_info() at line 4722:
+
+     rbd_assert(rbd_image_format_valid(rbd_dev->image_format));
+
+    Call Trace:
+     [<ffffffff81cccee0>] ? rbd_parent_request_create+0x150/0x150
+     [<ffffffff81cd4e59>] rbd_dev_refresh+0x59/0x390
+     [<ffffffff81cd5229>] rbd_watch_cb+0x69/0x290
+     [<ffffffff81fde9bf>] do_event_work+0x10f/0x1c0
+     [<ffffffff81107799>] process_one_work+0x689/0x1a80
+     [<ffffffff811076f7>] ? process_one_work+0x5e7/0x1a80
+     [<ffffffff81132065>] ? finish_task_switch+0x225/0x640
+     [<ffffffff81107110>] ? pwq_dec_nr_in_flight+0x2b0/0x2b0
+     [<ffffffff81108c69>] worker_thread+0xd9/0x1320
+     [<ffffffff81108b90>] ? process_one_work+0x1a80/0x1a80
+     [<ffffffff8111b02d>] kthread+0x21d/0x2e0
+     [<ffffffff8111ae10>] ? kthread_stop+0x550/0x550
+     [<ffffffff82022802>] ret_from_fork+0x22/0x40
+     [<ffffffff8111ae10>] ? kthread_stop+0x550/0x550
+    RIP  [<ffffffff81ccd8f9>] rbd_dev_header_info+0xa19/0x1e30
+
+To fix this, a) check if RBD_DEV_FLAG_EXISTS is set before calling
+revalidate_disk(), b) move ceph_osdc_flush_notifies() call into
+rbd_dev_header_unwatch_sync() to cover rbd map error paths and c) turn
+header read-in into a critical section.  The latter also happens to
+take care of rbd map foo@bar vs rbd snap rm foo@bar race.
+
+Fixes: http://tracker.ceph.com/issues/15490
+
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 43 +++++++++++++++++++------------------------
+ 1 file changed, 19 insertions(+), 24 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 644940377954..9f1eb00b5e64 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -538,7 +538,6 @@ static int _rbd_dev_v2_snap_size(struct rbd_device *rbd_dev, u64 snap_id,
+ 				u8 *order, u64 *snap_size);
+ static int _rbd_dev_v2_snap_features(struct rbd_device *rbd_dev, u64 snap_id,
+ 		u64 *snap_features);
+-static u64 rbd_snap_id_by_name(struct rbd_device *rbd_dev, const char *name);
+ 
+ static int rbd_open(struct block_device *bdev, fmode_t mode)
+ {
+@@ -3127,9 +3126,6 @@ static void rbd_watch_cb(u64 ver, u64 notify_id, u8 opcode, void *data)
+ 	struct rbd_device *rbd_dev = (struct rbd_device *)data;
+ 	int ret;
+ 
+-	if (!rbd_dev)
+-		return;
+-
+ 	dout("%s: \"%s\" notify_id %llu opcode %u\n", __func__,
+ 		rbd_dev->header_name, (unsigned long long)notify_id,
+ 		(unsigned int)opcode);
+@@ -3263,6 +3259,9 @@ static void rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
+ 
+ 	ceph_osdc_cancel_event(rbd_dev->watch_event);
+ 	rbd_dev->watch_event = NULL;
++
++	dout("%s flushing notifies\n", __func__);
++	ceph_osdc_flush_notifies(&rbd_dev->rbd_client->client->osdc);
+ }
+ 
+ /*
+@@ -3642,21 +3641,14 @@ static void rbd_exists_validate(struct rbd_device *rbd_dev)
+ static void rbd_dev_update_size(struct rbd_device *rbd_dev)
+ {
+ 	sector_t size;
+-	bool removing;
+ 
+ 	/*
+-	 * Don't hold the lock while doing disk operations,
+-	 * or lock ordering will conflict with the bdev mutex via:
+-	 * rbd_add() -> blkdev_get() -> rbd_open()
++	 * If EXISTS is not set, rbd_dev->disk may be NULL, so don't
++	 * try to update its size.  If REMOVING is set, updating size
++	 * is just useless work since the device can't be opened.
+ 	 */
+-	spin_lock_irq(&rbd_dev->lock);
+-	removing = test_bit(RBD_DEV_FLAG_REMOVING, &rbd_dev->flags);
+-	spin_unlock_irq(&rbd_dev->lock);
+-	/*
+-	 * If the device is being removed, rbd_dev->disk has
+-	 * been destroyed, so don't try to update its size
+-	 */
+-	if (!removing) {
++	if (test_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags) &&
++	    !test_bit(RBD_DEV_FLAG_REMOVING, &rbd_dev->flags)) {
+ 		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
+ 		dout("setting size to %llu sectors", (unsigned long long)size);
+ 		set_capacity(rbd_dev->disk, size);
+@@ -5188,6 +5180,10 @@ out_err:
+ 	return ret;
+ }
+ 
++/*
++ * rbd_dev->header_rwsem must be locked for write and will be unlocked
++ * upon return.
++ */
+ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
+ {
+ 	int ret;
+@@ -5196,7 +5192,7 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
+ 
+ 	ret = rbd_dev_id_get(rbd_dev);
+ 	if (ret)
+-		return ret;
++		goto err_out_unlock;
+ 
+ 	BUILD_BUG_ON(DEV_NAME_LEN
+ 			< sizeof (RBD_DRV_NAME) + MAX_INT_FORMAT_WIDTH);
+@@ -5237,8 +5233,9 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
+ 	/* Everything's ready.  Announce the disk to the world. */
+ 
+ 	set_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
+-	add_disk(rbd_dev->disk);
++	up_write(&rbd_dev->header_rwsem);
+ 
++	add_disk(rbd_dev->disk);
+ 	pr_info("%s: added with size 0x%llx\n", rbd_dev->disk->disk_name,
+ 		(unsigned long long) rbd_dev->mapping.size);
+ 
+@@ -5253,6 +5250,8 @@ err_out_blkdev:
+ 		unregister_blkdev(rbd_dev->major, rbd_dev->name);
+ err_out_id:
+ 	rbd_dev_id_put(rbd_dev);
++err_out_unlock:
++	up_write(&rbd_dev->header_rwsem);
+ 	return ret;
+ }
+ 
+@@ -5443,6 +5442,7 @@ static ssize_t do_rbd_add(struct bus_type *bus,
+ 	spec = NULL;		/* rbd_dev now owns this */
+ 	rbd_opts = NULL;	/* rbd_dev now owns this */
+ 
++	down_write(&rbd_dev->header_rwsem);
+ 	rc = rbd_dev_image_probe(rbd_dev, 0);
+ 	if (rc < 0)
+ 		goto err_out_rbd_dev;
+@@ -5472,6 +5472,7 @@ out:
+ 	return rc;
+ 
+ err_out_rbd_dev:
++	up_write(&rbd_dev->header_rwsem);
+ 	rbd_dev_destroy(rbd_dev);
+ err_out_client:
+ 	rbd_put_client(rbdc);
+@@ -5578,12 +5579,6 @@ static ssize_t do_rbd_remove(struct bus_type *bus,
+ 		return ret;
+ 
+ 	rbd_dev_header_unwatch_sync(rbd_dev);
+-	/*
+-	 * flush remaining watch callbacks - these must be complete
+-	 * before the osd_client is shutdown
+-	 */
+-	dout("%s: flushing notifies", __func__);
+-	ceph_osdc_flush_notifies(&rbd_dev->rbd_client->client->osdc);
+ 
+ 	/*
+ 	 * Don't free anything from rbd_dev->disk until after all
+-- 
+2.4.3
+
