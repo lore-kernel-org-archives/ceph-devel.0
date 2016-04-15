@@ -1,44 +1,41 @@
 From: Greg Kurz <gkurz@linux.vnet.ibm.com>
 Subject: Re: [PATCH] hw/9pfs: Add CephFS support in VirtFS
-Date: Fri, 15 Apr 2016 14:01:03 +0200
-Message-ID: <20160415140103.1123bc83@bahia.huguette.org>
+Date: Fri, 15 Apr 2016 15:21:05 +0200
+Message-ID: <20160415152105.351ad4e6@bahia.huguette.org>
 References: <1457971368-1335-1-git-send-email-scaleqiao@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from e06smtp08.uk.ibm.com ([195.75.94.104]:51883 "EHLO
-	e06smtp08.uk.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751286AbcDOMMB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Apr 2016 08:12:01 -0400
+Received: from e06smtp09.uk.ibm.com ([195.75.94.105]:35677 "EHLO
+	e06smtp09.uk.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751137AbcDONVQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Apr 2016 09:21:16 -0400
 Received: from localhost
-	by e06smtp08.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	by e06smtp09.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
 	for <ceph-devel@vger.kernel.org> from <gkurz@linux.vnet.ibm.com>;
-	Fri, 15 Apr 2016 13:11:58 +0100
-Received: from b06cxnps3075.portsmouth.uk.ibm.com (d06relay10.portsmouth.uk.ibm.com [9.149.109.195])
-	by d06dlp02.portsmouth.uk.ibm.com (Postfix) with ESMTP id 8FD9821902E0
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 13:00:48 +0100 (BST)
-Received: from d06av02.portsmouth.uk.ibm.com (d06av02.portsmouth.uk.ibm.com [9.149.37.228])
-	by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id u3FC19Sc6029804
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 12:01:09 GMT
-Received: from d06av02.portsmouth.uk.ibm.com (localhost [127.0.0.1])
-	by d06av02.portsmouth.uk.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id u3FC183H010777
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 06:01:09 -0600
+	Fri, 15 Apr 2016 14:21:14 +0100
+Received: from b06cxnps3074.portsmouth.uk.ibm.com (d06relay09.portsmouth.uk.ibm.com [9.149.109.194])
+	by d06dlp02.portsmouth.uk.ibm.com (Postfix) with ESMTP id EF0D8219004D
+	for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 14:20:50 +0100 (BST)
+Received: from d06av08.portsmouth.uk.ibm.com (d06av08.portsmouth.uk.ibm.com [9.149.37.249])
+	by b06cxnps3074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id u3FDLCJj5308786
+	for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 13:21:12 GMT
+Received: from d06av08.portsmouth.uk.ibm.com (localhost [127.0.0.1])
+	by d06av08.portsmouth.uk.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id u3FDLBh1013467
+	for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 07:21:12 -0600
 In-Reply-To: <1457971368-1335-1-git-send-email-scaleqiao@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Jevon Qiao <scaleqiao@gmail.com>
 Cc: berrange@redhat.com, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, aneesh.kumar@linux.vnet.ibm.com, mst@redhat.com, sage@newdream.net, gfarnum@redhat.com, haomaiwang@gmail.com
 
-Hi Jevon,
-
-More findings in fsdev/qemu-fsdev.c and hw/9pfs/Makefile.objs, see below.
+One more nit in configure. See below.
 
 Cheers.
 
 --
 Greg
-
 
 On Tue, 15 Mar 2016 00:02:48 +0800
 Jevon Qiao <scaleqiao@gmail.com> wrote:
@@ -141,43 +138,10 @@ Jevon Qiao <scaleqiao@gmail.com> wrote:
 >  fi
 > +if test "$cephfs" = "yes" ; then
 > +  echo "CONFIG_CEPHFS=m" >> $config_host_mak
+
+I also had to turn this into CONFIG_CEPHFS=y to be able to build.
+
 > +  echo "CEPHFS_LIBS=$cephfs_libs" >> $config_host_mak
 > +fi
 > 
->  echo "CONFIG_COROUTINE_BACKEND=$coroutine" >> $config_host_mak
->  if test "$coroutine_pool" = "yes" ; then
-> diff --git a/fsdev/qemu-fsdev.c b/fsdev/qemu-fsdev.c
-> index bf7f0b0..7f07a2a 100644
-> --- a/fsdev/qemu-fsdev.c
-> +++ b/fsdev/qemu-fsdev.c
-> @@ -27,6 +27,7 @@ static FsDriverTable FsDrivers[] = {
->  #endif
->      { .name = "synth", .ops = &synth_ops},
->      { .name = "proxy", .ops = &proxy_ops},
-
-#ifdef CONFIG_CEPHFS
-
-> +    { .name = "cephfs", .ops = &cephfs_ops},
-
-#endif
-
->  };
-> 
-> [...]
-> diff --git a/hw/9pfs/Makefile.objs b/hw/9pfs/Makefile.objs
-> index da0ae0c..a77a6f4 100644
-> --- a/hw/9pfs/Makefile.objs
-> +++ b/hw/9pfs/Makefile.objs
-> @@ -5,5 +5,8 @@ common-obj-y += coth.o cofs.o codir.o cofile.o
->  common-obj-y += coxattr.o 9p-synth.o
->  common-obj-$(CONFIG_OPEN_BY_HANDLE) +=  9p-handle.o
->  common-obj-y += 9p-proxy.o
-> +common-obj-y += 9p-cephfs.o
-
-common-obj-$(CONFIG_CEPHFS) += 9p-cephfs.o
-
-> 
->  obj-y += virtio-9p-device.o
-> +
-> +9p-cephfs.o-libs := $(CEPHFS_LIBS)
 
