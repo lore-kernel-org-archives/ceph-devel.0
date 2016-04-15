@@ -1,57 +1,42 @@
-From: Tema williams <temawilliams22@gmail.com>
-Subject: WE NEED YOUR HELP URGENTLY.
-Date: Fri, 15 Apr 2016 10:35:29 +0200
-Message-ID: <CA+hOsCuhXt+PU3ubL5tTvCQ4DeneRwtxyVVbqZCMPDcYa7WxnA@mail.gmail.com>
-Reply-To: temawilliams18@yahoo.com
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: rados and the next hammer release v0.94.7
+Date: Fri, 15 Apr 2016 10:48:18 +0200
+Message-ID: <5710AAD2.90400@dachary.org>
+References: <570B89A3.3030006@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f193.google.com ([209.85.213.193]:36321 "EHLO
-	mail-ig0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752270AbcDOIff (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Apr 2016 04:35:35 -0400
-Received: by mail-ig0-f193.google.com with SMTP id kb1so2038093igb.3
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 01:35:30 -0700 (PDT)
+Received: from smtp26.services.sfr.fr ([93.17.128.1]:64465 "EHLO
+	smtp26.services.sfr.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751813AbcDOIsY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Apr 2016 04:48:24 -0400
+In-Reply-To: <570B89A3.3030006@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>
 
-Dear Sir/madam,
+Ping ?
 
-With due respect and to the glory of Almighty God whom we worship I
-call upon you to assist my family. Please Permit me to inform you of
-my desire of going into business relationship with you.
+On 11/04/2016 13:25, Loic Dachary wrote:
+> Hi Sam,
+>=20
+> The next hammer release as found at https://github.com/ceph/ceph/tree=
+/hammer passed the rados suite (http://tracker.ceph.com/issues/14692#no=
+te-51 and failed one test because of OpenStack specific issues but the =
+test passed in another suite with the same branch http://tracker.ceph.c=
+om/issues/14692#note-45) and the upgrade suite (http://tracker.ceph.com=
+/issues/14692#note-52). Do you think the hammer branch is ready for QE =
+to start their own round of testing ?
+>=20
+> Cheers
+>=20
 
-My name is Tema Williams,The only Son of late Chief PATRICK WILLIAMS.
-My father was a very wealthy cocoa merchant in Abidjan but we are from
-Sierra Leone
-After my Father death I and my Family move to South Africa as refugee.
-
-My father was poisoned to death by his business associates on one of
-their outings on a business trip. Before his death in a private
-hospital in Abidjan he secretly called me on his bed side and told me
-that he has the sum of ($12.000,000 MILLION US DOLLAR) kept with a
-security and finance company in South Africa.
-
-He also explained to me that it was because of this wealth that he was
-poisoned by his business associates,that I should seek for a
-beneficiary in any country of my choice where I will transfer this
-money and use it for investment.I am honorably seeking for your
-assistance to transfer our fund out of South Africa.Upon the
-successful transfer of this fund,we shall make arrangement for me,my
-mother and younger sister to come over to your country to further our
-Education and invest in a profitable business that you may suggest.
-
-More over,I am willing to offer you 20% of the total sum as
-compensation for your effort/input after the successful transfer of
-this fund into your nominated bank account overseas.
-
-As we depend on God, and with God all things are possible.
-Anticipating to hear from you today.
-
-Thanks and God bless.
-PLEASE CALL ME +27787597591
-
-Best regards,
-
-Tema Williams
-(for the family)
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
