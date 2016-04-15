@@ -1,65 +1,66 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
-Subject: Re: rgw: new multisite update
-Date: Fri, 15 Apr 2016 12:59:51 +0200
-Message-ID: <87lh4fyw60.fsf@suse.com>
-References: <CADRKj5ToZVUoP4qAro9ZnmTJTXS4vzMs++2S4-2Vk9U=_3pXwA@mail.gmail.com> <CADr68Wa6OrmMRp2Rp-uRMyZorEt7+nLv--=1B-DG0d2SS_9mog@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Bluestore cluster example
+Date: Fri, 15 Apr 2016 07:06:14 -0500
+Message-ID: <5710D936.9040507@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha256; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:54477 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751144AbcDOLAK (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Fri, 15 Apr 2016 07:00:10 -0400
-In-reply-to: <CADr68Wa6OrmMRp2Rp-uRMyZorEt7+nLv--=1B-DG0d2SS_9mog@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:49527 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751014AbcDOMGS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 15 Apr 2016 08:06:18 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jens Rosenboom <j.rosenboom@x-ion.de>
-Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: cbt <cbt@ceph.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
---=-=-=
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi all,
+
+A couple of folks have asked me how to setup bluestore clusters for 
+performance testing.  I personally am using cbt for this, but you should 
+be able to use ceph-disk with some other cluster creation method as well.
+
+For CBT, you really don't need to do much.  In the old newstore days, a 
+"block" symlink needed to be created in the osd data dir to link to the 
+new block device.  CBT did this when the "newstore_block: True" option 
+was set in the cluster section of the cbt yaml file.  This isn't really 
+needed anymore, as you can now specify the block, db, and wal devices 
+directly in your ceph.conf file.  If your partitions are setup properly 
+you can create bluestore clusters without having to do anything beyond 
+changing the ceph.conf file (with cbt at least).
+
+Here's a very basic example:
+
+[global]
+         enable experimental unrecoverable data corrupting features = 
+bluestore rocksdb
+         osd objectstore = bluestore
+
+[osd.0]
+         host = incerta01.front.sepia.ceph.com
+         osd data = /tmp/cbt/mnt/osd-device-0-data
+         bluestore block path = /dev/disk/by-partlabel/osd-device-0-block
+         bluestore block db path = /dev/disk/by-partlabel/osd-device-0-db
+         bluestore block wal path = /dev/disk/by-partlabel/osd-device-0-wal
 
 
-Jens Rosenboom writes:
+Here we enable the experimental bluestore and rocksdb features, set the 
+objectstore to bluestore, and then in the OSD sections manually set the 
+osd data, bluestore block, bluestore block db, and bluestore block wal 
+paths.  You might be wondering what all of these are for:
 
-> 2015-12-05 7:34 GMT+01:00 Yehuda Sadeh-Weinraub <yehuda@redhat.com>:
-> ...
->> We're aiming at having it in Jewel.
-> ...
->> Documentation is almost non existent.
->
-> So it looks like the code now is indeed in Jewel, but the
-> documentation still seems missing, implying that setting up a new RGW
-> deployment will only be possible for people who find this email, do
-> you intend to change that for the release? Or did I not search well
-> enough for updated docs?
+osd data <-- very small directory on FS for bootstrapping OSD.
+bluestore block <-- where the actual object data lives
+bluestore block db path <-- where rocksdb lives
+bluestore block wal path <-- where rocksdb writeahead log lives
 
-There is a PR for a basic doc on multisite at
-https://github.com/ceph/ceph/pull/8281 it is still awaiting review,
-hopefully should be merged soon
+And that's basically it.  I've uploaded an example partitioning script, 
+ceph.conf file, and cbt yaml configuration file based on actual tests 
+I'm running to the examples folder that I've actually been using for 
+testing here:
 
+https://github.com/ceph/cbt/tree/master/example/bluestore
 
-=2D-
-Abhishek Lekshmanan
-SUSE Linux GmbH
-GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton, HRB 21284 (AG N=
-=C3=BCrnberg)
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJXEMmoAAoJEPnwZB8bZe1fL6IIAK5Inkf5dgbox+NfdbIqoCo9
-7eKmi+yMMHUOOTsVC2EWLEnysm1Ewjal0hbsV4egiex2SD6Vj/FSQSvCFeLiOjeV
-cTElV+X+r8GNpQk17uCN3hVtez7mjHP9tg/x+ef4/6ZP+dJ+7BYABbKEZkyg5wKg
-MfBIrgHExoMqKsy0ZaW9cJSChL02tGpx8ME/7sY+ZkTx64Z9gpMcNLm4tAEO13Hr
-An8gre5FP5/G7H/+08UvcIYnXeGNgub1YtFewv5vazUTh0Ih9NtnfIUdfuXBQvbq
-X1Z4tds1Jg6K/0kL3dqJ39fWoFWBvxIE7K42p0W8m5ars8Ldn0J4nkOwrfDF4wY=
-=E0ub
------END PGP SIGNATURE-----
---=-=-=--
+Thanks,
+Mark
