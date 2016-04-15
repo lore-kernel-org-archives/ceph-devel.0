@@ -1,45 +1,27 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: Ann Arbor Team's Flexible I/O Proposals (Ceph Next)
-Date: Fri, 15 Apr 2016 18:12:33 -0400
-Message-ID: <20160415221233.GA6331@ultraspiritum.redhat.com>
-References: <20160415210536.GA16458@ultraspiritum.redhat.com>
- <CANP1eJHFQXjkUogms3hqP=cqvt4GJZ62LMsmjp9d2JR+jf_j_g@mail.gmail.com>
+From: =?utf-8?B?5ZaC5paZ6J665p2G?= <hqt@pankong.com.cn>
+Subject: =?utf-8?B?5ZaC5paZ6J665p2G?=
+Date: Sat, 16 Apr 2016 06:18:00 +0800
+Message-ID: <20160416061807043116@pankong.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38496 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751789AbcDOWMg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 15 Apr 2016 18:12:36 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id A0CC4C062C90
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 22:12:35 +0000 (UTC)
-Received: from ultraspiritum.redhat.com (ovpn-112-25.phx2.redhat.com [10.3.112.25])
-	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with SMTP id u3FMCY8C008279
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 18:12:35 -0400
-Content-Disposition: inline
-In-Reply-To: <CANP1eJHFQXjkUogms3hqP=cqvt4GJZ62LMsmjp9d2JR+jf_j_g@mail.gmail.com>
+Received: from [121.33.255.174] ([121.33.255.174]:1127 "EHLO pankong.com.cn"
+	rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1751242AbcDOW1I (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 15 Apr 2016 18:27:08 -0400
+Received: from rtw.niswuggkt by pankong.com.cn
+	(MDaemon PRO v9.5.1)
+	with ESMTP id md50000688653.msg
+	for <ceph-devel@vger.kernel.org>; Sat, 16 Apr 2016 06:18:35 +0800
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 15/04/2016, Milosz Tanski wrote:
-[snip]
-> As librados is today, it encapsulates it's own networking and event
-> code. This is pretty frustrating to apps that already have their own
-> eventloop that want to integrate it.
+5L2g55qE6ICB5pyL5Y+L6YKA5L2g5p2lUee+pDozNDMyNTc3NTkg5oqi57qi5YyFIOaKouenkuad
+gCDmiqJ2aXAg5LuA5LmI6YO96KaB5oqi44CC5aSq5Yi65r+A5LqG44CC5LiN6Z2g5omL5rCU5Y+q
+5ou85omL6YCfDQo=
 
-When you say integrating with an event loop, would being able to hand off a
-function or object to asynchronous calls that would then use whatever mechanism
-your event loop had for submitting events be sufficient?
 
-I'm not sure what you mean by networking in this case. Some means for the
-library to ask your client to set up or terminate a connection when it needs to
-talk to an OSD or monitor?
 
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
