@@ -1,53 +1,89 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: OSD set partitioning
-Date: Fri, 15 Apr 2016 20:52:58 -0400
-Message-ID: <20160416005257.GA6911@ultraspiritum.redhat.com>
-References: <20160415210536.GA16458@ultraspiritum.redhat.com>
- <1382159806.12350948.1460765279854.JavaMail.zimbra@redhat.com>
- <CAFdRU72-CyuFRodb-HoNrBHWZRV7Xj4Ki-yHvxHPKAZeZ213Wg@mail.gmail.com>
- <69053371.12352935.1460766884621.JavaMail.zimbra@redhat.com>
+From: Shinobu Kinjo <skinjo@redhat.com>
+Subject: Re: [Cbt] Bluestore cluster example
+Date: Fri, 15 Apr 2016 20:56:23 -0400 (EDT)
+Message-ID: <2128927538.12354620.1460768183247.JavaMail.zimbra@redhat.com>
+References: <5710D936.9040507@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42080 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752544AbcDPAxB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 15 Apr 2016 20:53:01 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 2C1EE80083
-	for <ceph-devel@vger.kernel.org>; Sat, 16 Apr 2016 00:53:00 +0000 (UTC)
-Received: from ultraspiritum.redhat.com (ovpn-112-25.phx2.redhat.com [10.3.112.25])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with SMTP id u3G0qwFQ015277
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 20:52:59 -0400
-Content-Disposition: inline
-In-Reply-To: <69053371.12352935.1460766884621.JavaMail.zimbra@redhat.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:59629 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753059AbcDPA4Z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Apr 2016 20:56:25 -0400
+In-Reply-To: <5710D936.9040507@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: cbt <cbt@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 15/04/2016, Shinobu Kinjo wrote:
-> Does multiple masters you mentioned here mean logical OSDs running in
-> one osd process described in # Interfaces #?
+Hi Mark,
 
-Those are two separate things. When I refer to 'multiple masters' I'm speaking
-of the monitor service.
+Just to clarify.
+When I build ceph cluster using vstart.sh adding --bluestore option, "osd objectstore" in global section still has filestore.
 
-Currently, Ceph has a single set of monitors that acts as a group. One is the
-master and the rest replicate all changes made by the master.
+Anything missing?
 
-Here, we propose having several groups of monitors, each group with its own
-master. Every group would be responsible for some subset of OSDs, determined by
-partitioning the space of OSD ids up between them.
+Cheers,
+Shinobu
 
-Each LogicalOSD would be tracked separately in the map. You should, in
-principle, be able to back up an LogicalOSD's store, move it to another machine,
-and load it into a process with a different set of LogicalOSDs the same way you
-can, now, move one ceph-osd process from one physical machine to another.
+----- Original Message -----
+From: "Mark Nelson" <mnelson@redhat.com>
+To: "cbt" <cbt@ceph.com>
+Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+Sent: Friday, April 15, 2016 9:06:14 PM
+Subject: [Cbt] Bluestore cluster example
+
+Hi all,
+
+A couple of folks have asked me how to setup bluestore clusters for 
+performance testing.  I personally am using cbt for this, but you should 
+be able to use ceph-disk with some other cluster creation method as well.
+
+For CBT, you really don't need to do much.  In the old newstore days, a 
+"block" symlink needed to be created in the osd data dir to link to the 
+new block device.  CBT did this when the "newstore_block: True" option 
+was set in the cluster section of the cbt yaml file.  This isn't really 
+needed anymore, as you can now specify the block, db, and wal devices 
+directly in your ceph.conf file.  If your partitions are setup properly 
+you can create bluestore clusters without having to do anything beyond 
+changing the ceph.conf file (with cbt at least).
+
+Here's a very basic example:
+
+[global]
+         enable experimental unrecoverable data corrupting features = 
+bluestore rocksdb
+         osd objectstore = bluestore
+
+[osd.0]
+         host = incerta01.front.sepia.ceph.com
+         osd data = /tmp/cbt/mnt/osd-device-0-data
+         bluestore block path = /dev/disk/by-partlabel/osd-device-0-block
+         bluestore block db path = /dev/disk/by-partlabel/osd-device-0-db
+         bluestore block wal path = /dev/disk/by-partlabel/osd-device-0-wal
 
 
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+Here we enable the experimental bluestore and rocksdb features, set the 
+objectstore to bluestore, and then in the OSD sections manually set the 
+osd data, bluestore block, bluestore block db, and bluestore block wal 
+paths.  You might be wondering what all of these are for:
+
+osd data <-- very small directory on FS for bootstrapping OSD.
+bluestore block <-- where the actual object data lives
+bluestore block db path <-- where rocksdb lives
+bluestore block wal path <-- where rocksdb writeahead log lives
+
+And that's basically it.  I've uploaded an example partitioning script, 
+ceph.conf file, and cbt yaml configuration file based on actual tests 
+I'm running to the examples folder that I've actually been using for 
+testing here:
+
+https://github.com/ceph/cbt/tree/master/example/bluestore
+
+Thanks,
+Mark
+_______________________________________________
+Cbt mailing list
+Cbt@lists.ceph.com
+http://lists.ceph.com/listinfo.cgi/cbt-ceph.com
