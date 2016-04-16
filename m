@@ -1,89 +1,64 @@
-From: Shinobu Kinjo <skinjo@redhat.com>
-Subject: Re: [Cbt] Bluestore cluster example
-Date: Fri, 15 Apr 2016 20:56:23 -0400 (EDT)
-Message-ID: <2128927538.12354620.1460768183247.JavaMail.zimbra@redhat.com>
-References: <5710D936.9040507@redhat.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: Sessions and Persistence
+Date: Fri, 15 Apr 2016 23:03:58 -0400
+Message-ID: <20160416030357.GA8173@ultraspiritum.redhat.com>
+References: <20160415210536.GA16458@ultraspiritum.redhat.com>
+ <CAJ4mKGbhPrFbMKJi_hKAP1rKzjnX8GqQGMP+m7C_io-m1VDquA@mail.gmail.com>
+ <20160415222936.GA6461@ultraspiritum.redhat.com>
+ <CAJ4mKGaM=3i_hDGcRZRNbme616O_ARQ0Z4HBZ8qBt-nxLTg-5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:59629 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753059AbcDPA4Z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Apr 2016 20:56:25 -0400
-In-Reply-To: <5710D936.9040507@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39307 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750880AbcDPDED (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 15 Apr 2016 23:04:03 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 781FA4DAF6
+	for <ceph-devel@vger.kernel.org>; Sat, 16 Apr 2016 03:04:00 +0000 (UTC)
+Received: from ultraspiritum.redhat.com (ovpn-112-25.phx2.redhat.com [10.3.112.25])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with SMTP id u3G33xkU012875
+	for <ceph-devel@vger.kernel.org>; Fri, 15 Apr 2016 23:03:59 -0400
+Content-Disposition: inline
+In-Reply-To: <CAJ4mKGaM=3i_hDGcRZRNbme616O_ARQ0Z4HBZ8qBt-nxLTg-5Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: cbt <cbt@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hi Mark,
+On 15/04/2016, Gregory Farnum wrote:
+[snip]
+> Well, I guess I don't have in-the-field information about the relative
+> prevalence of these scenarios. But we definitely can't include
+> features in RADOS that work "as long as you don't have acting set
+> changes". ;)
+[snip]
+> This is something I've suggested in the past, but I think it's at the
+> stage where somebody needs to write code demonstrating it is something
+> approaching performant. If it is, I don't think anybody opposes the
+> idea; if it's not, then throughput/IOP regressions are not a tradeoff
+> Sam/Sage are willing to make for this IIRC (and, though I am more
+> optimistic than I remember them being about our odds of success, I
+> suppose I'm not either).
 
-Just to clarify.
-When I build ceph cluster using vstart.sh adding --bluestore option, "osd objectstore" in global section still has filestore.
+All right, I realize the issue now. Since the target can change if the primary
+changes, the reply cache has to be not only persistent but replicated along a
+PG. This makes plumbing and expiring it more complicated. But, since the reply
+can be determined before sending the transaction down into the store, it
+should still be fundamentally doable in a way that shouldn't hurt performance. (A
+larger volume of data would need to be sent, but it should be sendable in the
+same write.)
 
-Anything missing?
+Obviously, testable code with a lack of performance regressions proclaims
+and speculation about performance waits for a half hour then rides public
+transportation, so I think we'll have to give this some thought and come
+up with a working prototype to demonstrate the point.
 
-Cheers,
-Shinobu
+So, I'll see if we can whip up a new description and a WIP branch on this
+topic before too long.
 
------ Original Message -----
-From: "Mark Nelson" <mnelson@redhat.com>
-To: "cbt" <cbt@ceph.com>
-Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-Sent: Friday, April 15, 2016 9:06:14 PM
-Subject: [Cbt] Bluestore cluster example
-
-Hi all,
-
-A couple of folks have asked me how to setup bluestore clusters for 
-performance testing.  I personally am using cbt for this, but you should 
-be able to use ceph-disk with some other cluster creation method as well.
-
-For CBT, you really don't need to do much.  In the old newstore days, a 
-"block" symlink needed to be created in the osd data dir to link to the 
-new block device.  CBT did this when the "newstore_block: True" option 
-was set in the cluster section of the cbt yaml file.  This isn't really 
-needed anymore, as you can now specify the block, db, and wal devices 
-directly in your ceph.conf file.  If your partitions are setup properly 
-you can create bluestore clusters without having to do anything beyond 
-changing the ceph.conf file (with cbt at least).
-
-Here's a very basic example:
-
-[global]
-         enable experimental unrecoverable data corrupting features = 
-bluestore rocksdb
-         osd objectstore = bluestore
-
-[osd.0]
-         host = incerta01.front.sepia.ceph.com
-         osd data = /tmp/cbt/mnt/osd-device-0-data
-         bluestore block path = /dev/disk/by-partlabel/osd-device-0-block
-         bluestore block db path = /dev/disk/by-partlabel/osd-device-0-db
-         bluestore block wal path = /dev/disk/by-partlabel/osd-device-0-wal
-
-
-Here we enable the experimental bluestore and rocksdb features, set the 
-objectstore to bluestore, and then in the OSD sections manually set the 
-osd data, bluestore block, bluestore block db, and bluestore block wal 
-paths.  You might be wondering what all of these are for:
-
-osd data <-- very small directory on FS for bootstrapping OSD.
-bluestore block <-- where the actual object data lives
-bluestore block db path <-- where rocksdb lives
-bluestore block wal path <-- where rocksdb writeahead log lives
-
-And that's basically it.  I've uploaded an example partitioning script, 
-ceph.conf file, and cbt yaml configuration file based on actual tests 
-I'm running to the examples folder that I've actually been using for 
-testing here:
-
-https://github.com/ceph/cbt/tree/master/example/bluestore
-
-Thanks,
-Mark
-_______________________________________________
-Cbt mailing list
-Cbt@lists.ceph.com
-http://lists.ceph.com/listinfo.cgi/cbt-ceph.com
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
