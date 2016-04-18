@@ -1,35 +1,39 @@
-From: M Ranga Swami Reddy <swamireddy@gmail.com>
-Subject: ceph health ERR
-Date: Mon, 18 Apr 2016 23:02:09 +0530
-Message-ID: <CANA9Uk7qaMvunV0cHOh71E6Enn5U+_c1f0nNbA419VA7hnhG4w@mail.gmail.com>
+From: =?UTF-8?B?0K7RgNC40Lkg0KHQvtC60L7Qu9C+0LI=?=
+	<funny.falcon@gmail.com>
+Subject: Re: Flexible placement
+Date: Mon, 18 Apr 2016 20:35:03 +0300
+Message-ID: <CAL-rCA3AfkSJ9VN_MyMjPyxwnYxECAh6_xrx1mW3BNT4yvhWew@mail.gmail.com>
+References: <alpine.DEB.2.11.1604172057000.4797@cpach.fuggernut.com>
+	<20160418170836.GB20078@ultraspiritum.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f50.google.com ([209.85.213.50]:34353 "EHLO
-	mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753159AbcDRRcK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2016 13:32:10 -0400
-Received: by mail-vk0-f50.google.com with SMTP id e185so228609795vkb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2016 10:32:10 -0700 (PDT)
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:36439 "EHLO
+	mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751047AbcDRRfG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2016 13:35:06 -0400
+Received: by mail-wm0-f66.google.com with SMTP id l6so26474310wml.3
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2016 10:35:05 -0700 (PDT)
+In-Reply-To: <20160418170836.GB20078@ultraspiritum.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hello,
+> However, part of the benefit of the NaCl-based Flexible Placement design is that
+> administrators can put in all sorts of weird things we've never thought of.
+> If we are to redesign some of our abstractions to support
+> it and other goals we want (which I think we must), it seems a shame
+> not to make them as flexible as we reasonably can
 
-I got the below ceph health error:
-===
+You suggests awful things. People fears flexibility. Ceph policies are
+really already flexible.
+Those couple of people that wish "super flexibility" are able to fork
+Ceph and implement their needs.
 
-ceph health detail
+Until several people explicitly asked for "super-puper" flexibility,
+that cannot be described with Crush,
+there is no need to do this "flexibility".
 
-HEALTH_ERR 1 pgs inconsistent; 1 scrub errors
-
-pg 40.27a is active+clean+inconsistent, acting [124,36,169]
-
-1 scrub errors
-==
-
-Is there way to fix the above error?? Please advice.
-
-Thanks
-Swami
+It is better focus effort on pushing down memory consumption,
+especially during recovery.
+It is much more desired feature.
