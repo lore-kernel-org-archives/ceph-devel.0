@@ -1,61 +1,32 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: some stuff for kraken
-Date: Mon, 18 Apr 2016 16:39:11 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604181631320.4803@cpach.fuggernut.com>
+From: Ali Maredia <amaredia@redhat.com>
+Subject: Running Test Scripts without CMake Environment Variables
+Date: Mon, 18 Apr 2016 17:53:34 -0400 (EDT)
+Message-ID: <545596550.14429240.1461016414390.JavaMail.zimbra@redhat.com>
+References: <75379254.14369376.1461010122306.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60192 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750849AbcDRUjQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 18 Apr 2016 16:39:16 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id B014485365
-	for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2016 20:39:09 +0000 (UTC)
-Received: from cpach ([10.3.112.6])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u3IKd7BF017520
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2016 16:39:09 -0400
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:59292 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751285AbcDRVxf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2016 17:53:35 -0400
+Received: from zmail26.collab.prod.int.phx2.redhat.com (zmail26.collab.prod.int.phx2.redhat.com [10.5.83.33])
+	by mx5-phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u3ILrYj0021939
+	for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2016 17:53:34 -0400
+In-Reply-To: <75379254.14369376.1461010122306.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Here are some of the small/medium size items I have on my list (so I don't 
-forget them).  There's also the bigger stuff (e.g., EC overwrites for RBD 
-etc.).
+Ceph community,
 
-cleanups
-- objectstore: remove deprecated collection attr methods
-- objectstore: object handles?
-- buffer: c_str(( -> data()
+Recently certain tests that are run in `make check` (one's that end in .sh and a handful of others) were changed to remove relative paths and hard coded directories (".libs" was littered throughout the codebase). 
 
-compat stuff
-- migrate to new IANA monitor port
-- wip-addr
+These test scripts pass when you run `make check` because of preset environment variables in CTest and in src/Makefile.am (CEPH_BIN, CEPH_ROOT, CEPH_LIB, CEPH_BUILD_DIR, etc.) that are meant to replace the relative paths from before. However running these tests by themselves after an autotools build without setting those variables before hand will result in failures. 
 
-ops
-- ceph-disk support for multiple bluestore devices
-- ceph-disk support for dm-cache, bcache, etc.
-- etcd for ceph config?
+I understand how these recent changes disrupt developers workflows and plan on issuing a fix that defines those environment variables according to which build system you build with ASAP.
 
-mon
-- initial ceph-mgr separation / calamari merge
-- kerberos auth?
-- mon public/admin/cluster network(s)
-
-rados
-- msgr on-the-wire encryption
-- crush weight anomaly
-- bluestore: checksums
-- bluestore: compression
-- bluestore: smr
-- pmstore?
-- dmclock
-
-rgw
-- storage pools
-- sts
-- compression?
-- encryption?
+Finally I strongly encourage developers to transition to using CMake and CTest (run ctest -V -R {test_name} from CMAKE_BINARY_DIR), and submit fixes and other contributions.
+ 
+-Ali
