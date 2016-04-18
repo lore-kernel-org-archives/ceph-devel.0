@@ -1,79 +1,98 @@
-From: Peter Rajnoha <prajnoha@redhat.com>
-Subject: 60-ceph-partuuid-workaround.rules
-Date: Mon, 18 Apr 2016 12:01:23 +0200
-Message-ID: <5714B073.6070809@redhat.com>
+From: Dong Wu <archer.wudong@gmail.com>
+Subject: osd start fail because encouter assert(oi.version == i->first) when read_log
+Date: Mon, 18 Apr 2016 20:18:02 +0800
+Message-ID: <CAAL-TMfnKPE0Fe2yxJ04t_m3EJUdFi4+oQ4C13XM58SK3xpO-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59228 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752044AbcDRKB0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 18 Apr 2016 06:01:26 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 56A674DAF6
-	for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2016 10:01:26 +0000 (UTC)
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:36052 "EHLO
+	mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751342AbcDRMSI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2016 08:18:08 -0400
+Received: by mail-vk0-f49.google.com with SMTP id c4so217427316vkb.3
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2016 05:18:02 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Loic Dachary <ldachary@redhat.com>, "Alasdair G. Kergon" <agk@redhat.com>, Zdenek Kabelac <zkabelac@redhat.com>
 
-Hi!
+Hi,
+My osd restart fail and here is dump messeage.
 
-I'm resending original mail to this list after initial
-discussion with Loic Dachary so others can chime in. Loic
-says these rules were there to workaround certain problems
-on Centos 6 only and that it can be discarded now.
+    -5> 2016-04-18 09:39:13.709885 7f608462d840 15
+filestore(/var/lib/ceph/osd/ceph-7) getattr
+3.1a1_head/eef429a1/rb.0.130ee9.6b8b4567.0000000019b7/head//3 '_'
+    -4> 2016-04-18 09:39:13.709928 7f608462d840 10
+filestore(/var/lib/ceph/osd/ceph-7) getattr
+3.1a1_head/eef429a1/rb.0.130ee9.6b8b4567.0000000019b7/head//3 '_' =
+252
+    -3> 2016-04-18 09:39:13.709937 7f608462d840 15 read_log  missing
+83830'1639861 (83830'1639860) modify
+eef429a1/rb.0.130ee9.6b8b4567.0000000019b7/head//3 by
+client.1491380.0:90267 2016-04-17 07:32:28.7
+    -2> 2016-04-18 09:39:13.709949 7f608462d840 15
+filestore(/var/lib/ceph/osd/ceph-7) getattr
+3.1a1_head/8835b1a1/rbd_header.3e01a6d9f226c/head//3 '_'
+    -1> 2016-04-18 09:39:13.709993 7f608462d840 10
+filestore(/var/lib/ceph/osd/ceph-7) getattr
+3.1a1_head/8835b1a1/rbd_header.3e01a6d9f226c/head//3 '_' = 593
+     0> 2016-04-18 09:39:13.712530 7f608462d840 -1 osd/PGLog.cc: In
+function 'static void PGLog::read_log(ObjectStore*, coll_t, coll_t,
+ghobject_t, const pg_info_t&, std::map<eversion_t, hobject_t>&, PGLog:
+osd/PGLog.cc: 979: FAILED assert(oi.version == i->first)
 
-Please, read original mail below:
+ ceph version 0.94.6-3-g6d41ecd (6d41ecd419e034002e5b46c541d663308c16e5e9)
+ 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+const*)+0x72) [0xcec4f2]
+ 2: (PGLog::read_log(ObjectStore*, coll_t, coll_t, ghobject_t,
+pg_info_t const&, std::map<eversion_t, hobject_t,
+std::less<eversion_t>, std::allocator<std::pair<eversion_t const,
+hobject_t> > >&, PGLog::Ind
+ 3: (PGLog::read_log(ObjectStore*, coll_t, coll_t, ghobject_t,
+pg_info_t const&, std::basic_ostringstream<char,
+std::char_traits<char>, std::allocator<char> >&)+0xdf) [0x93ba6f]
+ 4: (PG::read_state(ObjectStore*, ceph::buffer::list&)+0x127) [0x923987]
+ 5: (OSD::load_pgs()+0x8bb) [0x7f733b]
+ 6: (OSD::init()+0xdac) [0x7fbb2c]
+ 7: (main()+0x253e) [0x79e12e]
+ 8: (__libc_start_main()+0xf5) [0x7f6081c6e995]
+ 9: /usr/bin/ceph-osd() [0x7a41d7]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+needed to interpret this.
 
-===
+from the core message, i checked PGLog::read_log, it entered this
+code. can anyone tell me which situation will cause such a problem?
+and how can i repair this osd or just remove it? Thanks.
 
-We've just noticed 60-ceph-partuuid-workaround.rules.
-
-You added a patch some time ago which made these rules
-to be applied for DM devices too:
-
-
-https://github.com/ceph/ceph/commit/42ad86e14e352f2a3a33e774224f1789f268da83
-
-The problem we've spotted and hit recently is that
-these rules call blkid which opens all DM devices now
-on uevents. However, not all DM devices are suitable
-for scanning as they may not be prepared fully yet.
-We use various flags in DM (and its subsystems like LVM)
-to avoid these scans and for all the rules we don't manage,
-there's DM_UDEV_DISABLE_OTHER_RULES_FLAG that needs to
-be checked in these "foreign" rules before opening such
-DM device (which includes running blkid).
-
-Otherwise, we may end up with errors where some DM subsystem
-needs to close the device or do some initialization on this
-device before making it public by dropping the
-DM_UDEV_DISABLE_OTHER_RULES_FLAG. So we need to make sure
-these things are in sync - the scan can't be run on all DM
-devices, it's controlled via DM_UDEV_*_FLAG variables.
-
-Now, when it comes to the 60-ceph-partuuid-workaround.rules,
-why do we need that at all? I mean, the 60-persistent-storage.rules
-do not whitelist DM devices, so these rules are skipped anyway
-and it was that way since beginning, I think. Now, I see this
-comment in the 60-ceph-partuuid-workaround.rules:
-
-# this is a kludge installed by ceph to fix the /dev/disk/by-partuuid
-# symlinks on systems with old udev (< 180).  it's a stripped down
-# version of a newer 60-persistent-storage.rules file that hopefully
-# captures the same set of conditions for setting up those symlinks.
-
-So I need to get to the bottom of the problem which was
-resolved here. Feel free to point me to someone else if you're
-not the right person, but I need to understand what's behind
-these extra workaround rules so I can help to make it work
-correctly with DM devices.
-
-Thanks.
-
--- 
-Peter
+    for (map<eversion_t, hobject_t>::reverse_iterator i =
+           divergent_priors.rbegin();
+         i != divergent_priors.rend();
+         ++i) {
+      if (i->first <= info.last_complete) break;
+      if (i->second > info.last_backfill) continue;
+      if (did.count(i->second)) continue;
+      did.insert(i->second);
+      bufferlist bv;
+      int r = store->getattr(
+        pg_coll,
+        ghobject_t(i->second, ghobject_t::NO_GEN, info.pgid.shard),
+        OI_ATTR,
+        bv);
+      if (r >= 0) {
+        object_info_t oi(bv);
+        /**
+         * 1) we see this entry in the divergent priors mapping
+         * 2) we didn't see an entry for this object in the log
+         *
+         * From 1 & 2 we know that either the object does not exist
+         * or it is at the version specified in the divergent_priors
+         * map since the object would have been deleted atomically
+         * with the addition of the divergent_priors entry, an older
+         * version would not have been recovered, and a newer version
+         * would show up in the log above.
+         */
+        assert(oi.version == i->first);
+      } else {
+        dout(15) << "read_log  missing " << *i << dendl;
+        missing.add(i->second, i->first, eversion_t());
+      }
+    }
