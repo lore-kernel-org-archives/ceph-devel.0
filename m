@@ -1,39 +1,81 @@
-From: =?UTF-8?B?0K7RgNC40Lkg0KHQvtC60L7Qu9C+0LI=?=
-	<funny.falcon@gmail.com>
-Subject: Re: Flexible placement
-Date: Mon, 18 Apr 2016 20:35:03 +0300
-Message-ID: <CAL-rCA3AfkSJ9VN_MyMjPyxwnYxECAh6_xrx1mW3BNT4yvhWew@mail.gmail.com>
-References: <alpine.DEB.2.11.1604172057000.4797@cpach.fuggernut.com>
-	<20160418170836.GB20078@ultraspiritum.redhat.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: OSDMap partitioning
+Date: Mon, 18 Apr 2016 13:43:06 -0400
+Message-ID: <20160418174305.GA22875@ultraspiritum.redhat.com>
+References: <alpine.DEB.2.11.1604180945280.4797@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:36439 "EHLO
-	mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751047AbcDRRfG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2016 13:35:06 -0400
-Received: by mail-wm0-f66.google.com with SMTP id l6so26474310wml.3
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2016 10:35:05 -0700 (PDT)
-In-Reply-To: <20160418170836.GB20078@ultraspiritum.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:48889 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751863AbcDRRnI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 18 Apr 2016 13:43:08 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1604180945280.4797@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-> However, part of the benefit of the NaCl-based Flexible Placement design is that
-> administrators can put in all sorts of weird things we've never thought of.
-> If we are to redesign some of our abstractions to support
-> it and other goals we want (which I think we must), it seems a shame
-> not to make them as flexible as we reasonably can
+On 18/04/2016, Sage Weil wrote:
+> On Fri, 15 Apr 2016, Adam C. Emerson wrote: I'm not sure I'm
+> convinced.  The mon is doing way more than it should right now, but
+> we are about to rip all/most of the PGMonitor work out of ceph-mon
+> and move it into ceph-mgr. At that point, the OSDMap is a pretty
+> small burden for the mon to manage.  Even if we have clusters that
+> are 2 orders of magnitude larger (100,000 OSDs), that's maybe a
+> 100MB data structure at most.  Why do we need to partition it?
 
-You suggests awful things. People fears flexibility. Ceph policies are
-really already flexible.
-Those couple of people that wish "super flexibility" are able to fork
-Ceph and implement their needs.
+Clients keeping 100MB of state just to talk to the cluster seems a bit
+much to me, especially if we ever want anything embedded to be able to
+use it.
 
-Until several people explicitly asked for "super-puper" flexibility,
-that cannot be described with Crush,
-there is no need to do this "flexibility".
+Also, it's not just the size. One worry is how well the monitor will
+be able to hold up if we have a bunch of OSDs going up and down at a
+fast rate (which becomes a bit more likely the bigger our clusters get.)
 
-It is better focus effort on pushing down memory consumption,
-especially during recovery.
-It is much more desired feature.
+> I get that pools are heavyweight, but I think that derivse from the
+> fact that it is a *placement* function, and we *want* placement to
+> be an administrative property, not a tentant/user property that can
+> proliferate.  Placement should depend on the hardware that comprises
+> the cluster, and that doesn't change so quickly, and the scale does
+> not change quickly.  Tenants want to create their own workspaces to
+> do their thing, but I think needs to remain a slice within the
+> existing placement primitives so they do't have direct control.
+> e.g., rados namespaces, or something more powerful if we need it,
+> because we'll have anywhere from 1 tenant to a million tenants, and
+> we can't have them spamming the cluster placement topology.
+>
+> At least, I think that's true on the OSD side of things.  On the
+> client side, might make sense to limit the client's view to certain
+> pools.  Maybe.
+>
+> Anyway, assuming we have some tenant primitive (like namespace slice
+> of a pool), I don't see the motivation for the huge complexity of
+> breaking apart OSDMap.  What am I missing?
+
+Three things, I think. Please tell me if I'm missing anything obvious
+or getting anything wrong.
+
+First, the gigantic bullsey intersection between tennancy and
+placement would be cases where regulatory regimes or contracts require
+isolation. (The whole "My data can't be stored on the same disk as
+anyone else's data." thing.)
+
+Second, I've always been working under the assumption that placement
+is a function of workload as well as hardware. At least there's a lot
+of interesting space in the 'placement function choice'/'workload
+optimization' intersection.
+
+Third, I think Namespaces and Pools as you describe them miss a
+piece. Users almost always want to be able to make collections of
+objects that can be treated like a unit. Sure, RADOSGW can make
+buckets, but I don't think we want to base the fundamental design of
+our system around the idea that people will be using legacy protocols
+like S3.
+
+
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
