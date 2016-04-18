@@ -1,70 +1,45 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: New messages in OSD logs.
-Date: Mon, 18 Apr 2016 11:52:25 -0700
-Message-ID: <CAJ4mKGaq0-=mBCrNNDZoFwhM9zs_40KJJSkiHyj0apkH6W21hA@mail.gmail.com>
-References: <57121CDE.3010908@digiware.nl>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Flexible placement
+Date: Mon, 18 Apr 2016 14:57:39 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604181454160.4797@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1604172057000.4797@cpach.fuggernut.com> <20160418170836.GB20078@ultraspiritum.redhat.com> <alpine.DEB.2.11.1604181355330.4797@cpach.fuggernut.com> <20160418184755.GB22875@ultraspiritum.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f52.google.com ([209.85.213.52]:34333 "EHLO
-	mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750717AbcDRSw0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2016 14:52:26 -0400
-Received: by mail-vk0-f52.google.com with SMTP id e185so231364034vkb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2016 11:52:25 -0700 (PDT)
-In-Reply-To: <57121CDE.3010908@digiware.nl>
+Received: from cobra.newdream.net ([66.33.216.30]:57271 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751047AbcDRS5i (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2016 14:57:38 -0400
+In-Reply-To: <20160418184755.GB22875@ultraspiritum.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Sat, Apr 16, 2016 at 4:07 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
-> Hi
->
-> I've recently rebased my fork, and also upgrae FreeBSD to more recent code.
-> Now I'm running into this:
->
-> 2016-04-16 03:03:55.891466 805617000 -1
-> filestore(testdir/test-erasure-eio/0) WARNING: max attr value size (1024)
-> is smaller than osd_max_object_name_len (2048). Your backend filesystem
-> appears to not support attrs large enough
-> to handle the configured max rados name size. You may get unexpected
-> ENAMETOOLONG errors on rados operations or buggy behavior
->
-> and later on:
->
-> 2016-04-16 03:04:03.287073 805617000  2 osd.0 0 boot
-> 2016-04-16 03:04:03.287846 805617000 -1 osd.0 0 backend (filestore) is
-> unable to support max object name[space] le
-> n
-> 2016-04-16 03:04:03.287873 805617000 -1 osd.0 0    osd max object name len =
-> 2048
-> 2016-04-16 03:04:03.287894 805617000 -1 osd.0 0    osd max object namespace
-> len = 256
-> 2016-04-16 03:04:03.287931 805617000 -1 osd.0 0 (63) File name too long
-> 2016-04-16 03:04:03.303432 805617000  1 journal close
-> testdir/test-erasure-eio/0/journal
-> 2016-04-16 03:04:03.310280 805617000 -1 ^[[0;31m ** ERROR: osd init failed:
-> (63) File name too long^[[0m
->
-> And the OSD dies....
->
-> I guess that this has the do with the changes in the LFN modules, and is
-> also the reason for the debate about ext4 support.
->
-> Uptill now unittest_chain_xattr did work, but that now also fails.
-> But it fails in a strange way where it tries to delete attributes with
-> numerical ends that are certainly not in the attributes.
-> Maximum xattr name length in FreeBSD seems to be 256 chars, which wasn't a
-> problem yet.
->
-> So is there any chance of continuing on my "old" way to finish a first
-> version of the port?
->
-> Or am I just seeing things, and should I start looking at the FreeBSD side
-> of things?
+On Mon, 18 Apr 2016, Adam C. Emerson wrote:
+> > I think that in those cases, we let them use a wacky object -> PG
+> > mapping, and then have a linear/flat PG -> device mapping so they
+> > can still get some uniformity.
+> >
+> > This isn't completely general, but I'd want to see an example of
+> > something it can't express.  Maybe those entanglement erasure codes
+> > that Veronica was talking about at FAST?
+> >
+> > Or maybe the key step is to not assume the PG is a hash range, but
+> > instead consider it an arbitrary bucket in the pool.
+> 
+> Would the idea basically be in that case that we go from OID =>
+> WHATEVER => DEVICE LIST without putting too many constraints on what
+> 'WHATEVER' is?
 
-I didn't do this work, but I think you should be able to set
-osd_max_object_name_len and get things going. (I'm less sure about the
-unit test.)
--Greg
+Yeah, probably with the additional/implicit restriction that the OSD -> 
+WHATEVER mapping is fixed.  That way when a policy or topology change 
+happens, we do O(num WHATEVERs) remapping work.  It's the O(num objects) 
+part that is really problematic.
+
+(I would say fundamental, but you *could* imagine something where you know 
+the old and new mapping, and try both, or incrementall walk through them.. 
+but, man, it would be ugly.  At that point you're probably better of just 
+migrating objects from pool A to pool B.)
+
+sage
