@@ -1,257 +1,134 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Flexible placement
-Date: Mon, 18 Apr 2016 09:45:11 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604172057000.4797@cpach.fuggernut.com>
+Subject: OSDMap partitioning
+Date: Mon, 18 Apr 2016 10:00:18 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604180945280.4797@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54919 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:54995 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751692AbcDRNpL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2016 09:45:11 -0400
-Content-ID: <alpine.DEB.2.11.1604180926381.4797@cpach.fuggernut.com>
+	with ESMTP id S1751174AbcDROAS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2016 10:00:18 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Adam C. Emerson" <aemerson@redhat.com>
 Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
 On Fri, 15 Apr 2016, Adam C. Emerson wrote:
-> # Flexible Placement #
 > 
-> This is a large topic which should be discussed on its own, but it
-> motivates the interface designs below, so we shall briefly mention why
-> it's interesting.
+> # Map Partitioning #
 > 
-> CRUSH/PG is a fine placement system for several workloads, but it has
-> two well-known limitations.
+> There are two huge problems with scalability in Ceph.
+> 1.  The OSDMap knows too many things
+> 2.  A single monitor manages all updates of everything and replicates them to
+>     other monitors.
 > 
-> ## Motivation ##
+> ## Too Big to Not Fail ##
 > 
-> -   Data distribution can be much less uniform than one might like,
->     giving uneven use of disks. This has caused some Ceph developers
->     to experiment with Monte Carlo based placement algorithms.
-> -   Data distribution can be much more uniform than one would
->     like. This is the fundamental cause of Ceph's slow sequential read
->     performance. More generally, unrelated workloads contend
->     with each other due to a lack of affinity for related data. The effects are
->     especially pronounced on spinning disk (due to seek times), but
->     still exist on Flash (due to bus/network contention.)  This is a
->     tension between competing goods. CRUSH gains wide dispersion and
->     uniformity to defend against correlated failures but this imposes
->     a tradeoff.
+> The monitor map and MDS maps are fine. Each holds data needed to
+> locate servers and that's it. It would be very hard to put enough data
+> in them to cause problems. The OSD map however contains a trove of data that
+> must be updated serially in Paxos and propagated to every OSD,
+> monitor, MDS, and client in the cluster.
+> 
+> Pools are a notorious example. We can't create as many pools as users
+> would like. Pools are heavyweight, and while they depend on other
+> items in the OSD map (like erasure code profiles), it would be nice if
+> we divide them between several monitor clusters, each of which would
+> hold a subset of pools. We would need to make sure that clients had up
+> to date versions of whatever pools they are using along with the
+> status of the OSDs they're speaking to, but that's not
+> impossible. Likewise, we should split placement rules out of the OSD
+> map, especially once we get into larger numbers of potentially larger
+> Flexible Placement style functions.
+> 
+> Nodes should then only need to subscribe to the set of pools and
+> placement functions they need to access their data. Changes like these
+> should allow users to create the number of pools they want without
+> causing the cluster difficulty.
 
-If we're just talking about locality here, isn't this tradeoff already 
-available to the user by controlling the object size?  And/or setting the 
-placement key so that two objects are always placed together in the 
-cluster.
+I'm not sure I'm convinced.  The mon is doing way more than it should 
+right now, but we are about to rip all/most of the PGMonitor work out of 
+ceph-mon and move it into ceph-mgr. At that point, the OSDMap is a pretty 
+small burden for the mon to manage.  Even if we have clusters that are 2 
+orders of magnitude larger (100,000 OSDs), that's maybe a 100MB data 
+structure at most.  Why do we need to partition it?
 
-The non-uniformity is a real problem, but let's not assume it's the same 
-problem as flexible placement.  If you want linear striping, for exmaple, 
-that gives you a perfect distribution but it falls apart as soon as there 
-is any rebalancing.
+I get that pools are heavyweight, but I think that derivse from the fact 
+that it is a *placement* function, and we *want* placement to be an 
+administrative property, not a tentant/user property that can proliferate. 
+Placement should depend on the hardware that comprises the cluster, and 
+that doesn't change so quickly, and the scale does not change quickly.
+Tenants want to create their own workspaces to do their thing, but I think 
+needs to remain a slice within the existing placement primitives so they 
+do't have direct control.  e.g., rados namespaces, or something more 
+powerful if we need it, because we'll have anywhere from 1 tenant to a 
+million tenants, and we can't have them spamming the cluster 
+placement topology.
 
-Are there some concrete examples of what these flexible placements might 
-be?  I still don't see how they are different that PGs.  I.e., you can 
-split placement into two stages: mapping objects to PGs, and mapping PGs 
-to devices.  If both of those are pluggable, what does that not capture?
+At least, I think that's true on the OSD side of things.  On the client 
+side, might make sense to limit the client's view to certain pools.  
+Maybe.
 
-(You could map every object to a distinct set of devices, and this is 
-frequently suggested, but I don't think it is practical.  In a large 
-system, you'll have all-to-all replication streams, and *every* possible 
-coincident failure will lead to data loss.)
+Anyway, assuming we have some tenant primitive (like namespace slice of a 
+pool), I don't see the motivation for the huge complexity of breaking 
+apart OSDMap.  What am I missing?
 
-> ## Goal ##
+> ### Consistency ###
 > 
-> Ceph should support placement methods other than CRUSH/PG. Currently,
-> the OSD dispatches operations based on placement group ID, which will
-> need to be varied,
+> Partitioning makes consistency harder. A simple remedy might be to
+> stop referring to data by name or integer. An erasure code profile
+> should be specified by UUID and version. So should pools and placement
+> functions. When sending a request to the OSD, a client should send the
+> versions of the pool, the ruleset, and the OSDMap it used and the OSD
+> should check that all three are current.
 > 
-> We also need some way to get new types of functions into the cluster.
+> ## The OSD Set ##
 > 
-> ## Proposal ##
+> The complicating case here is the OSD status set.  Running this
+> through a single Paxos limits the number of OSDs that can coexist in a
+> cluster.  We ought split the set of OSDs between multiple masters to
+> distribute the load. Each 'Up' or 'Down' event is independent of
+> others, so all we require is that events get propagated into the
+> correct OSDs and primaries and followers act as they're supposed to.
 > 
-> Our proposal is, in a way, CRUSH taken to its logical
-> conclusion. Instead of distributing CRUSH rules, we propose to
-> distribute general computable functions from (oid, volume/dataset) pairs to
-> sequences of OSDs with their supporting data structures.  One of our
-> ongoing research projects has been an in-process executor for these
-> functions based on Google's NaCl. The benefits are:
-> -   Administrators can fine-tune placement functions to fit their
->     workloads well.
-> -   They can also experiment easily without having to recompile all of
->     Ceph and make heavy architectural changes.
-> -   Entirely new placement strategies can be deployed without having
->     to upgrade every machine in the cluster. Or any machine in the
->     cluster, once they've been upgraded to a Flexible Placement
->     capable version.
-> -   Possibilities for annealing and machine learning to gradually
->     adapt placement in response to load data become available
-> -   NaCl builds on LLVM which has a rich set of tools for optimizations
->     like partial evaluation.
-> -   NaCl is fast.
+> Versioning is a bigger problem here. We might have all masters
+> increment their version when one increments its version if that could
+> be managed without inefficiency. We might send a compound version with
+> `MOSDOp`s, but combining that with the compound version above might be
+> unwieldly. (Feedback on this issue would be greatly appreciated.)
+> 
+> ### Subscription ###
+> 
+> For a large number of OSDs, it would be nice if not everyone were
+> notified of all state changes.
+> 
+> For a pool whose placement rule spans only a subset of all OSDs,
+> clients using that pool should be able to subscribe to a subset of the
+> OSD set corresponding to that pool. This should be fairly easy so long
+> as the subset is explicit.
+> 
+> In the case of pools not providing an explicit subset, a monitor (or
+> perhaps a proxy in front of a set of monitors) could look at common
+> patterns of subscription requests and merge those with significant
+> overlap together, so as to give clients a subset without being
+> destroyed by the irresistible force of combinatorial explosion.
 
-NaCl sounds great.  It sounds like this still fits right into the object 
--> PG -> device list mapping strategy, though.
+The OSDMap sharing is gossip-based and (I think) lightweight.  
+OSDMap::Incrementals are small.  Is this really going to be a problem?
 
-> # Flexible Semantics #
-> 
-> Another motivating example. Originally, Ceph did replication and only
-> replication under a very specific consistency model. There has been
-> desire for more flexibility.
-> -   Erasure Coding. it still follows the Ceph consistency model
->     (though leaves out many operations) but is very different in
->     back-end dispatch, enough so that it inspired a major rewrite of
->     the OSD's bottom half.
-> -   Append-only immutable objects have been discussed.
-> -   Many people have asked for relaxed consistency to improve
->     performance. This is not be suitable for all workloads, but people
->     have repeatedly asked for the ability to set up low-latency,
->     relaxed-consistency volumes that still provide Ceph's ability to
->     easily use new storage and scale well.
-> -   Transactional storage. As mentioned above, cross-object
->     transactional semantics are a thing people may have desired.
 
-This would just be a new pool type, right?  We definitely need to clean up 
-the OSD :: PG interface(s) to enable it.
+Now, going in a somewhat tangential direction... what I *am* worried about 
+is the failure granularity.  Right now we have an up/down state for an 
+OSD, and all PG shards live or die together.  But it seems like we might 
+want to localize a failure to a PG, so that if we have some media error, 
+or we encounter some metadata corruption, we can fail a PG in isolation 
+without taking down the other ~99 on the device.  Having a 
+fail-pg-but-don't-crash mode of operation will also be really helpful when 
+we have multiple OSDs living within the same process.
 
-> # Interfaces #
-> 
-> Right now our class hierarchy is a bit of a mess. Eventually we'll do
-> something about `PG` and `ReplicatedPG`, refactor, support
-> asynchronous I/O, reduce lock contention, support in core affinity,
-> and build Jerusalem here in England's green and pleasant land.
-> 
-> While we're stringing up our bows of burning gold, we should support
-> non-PG based placement and flexible semantics. Right now, parts of the
-> PG and the OSD (since the OSD manages the collection of PGs, spins
-> them up, and manages thread pools shared by sets of PGs) are
-> intertwined. Thus, we need to abstract out both pieces.
-> 
-> As we also want to support having multiple "logical" OSDs running in a
-> single `ceph-osd` process, this would be a natural time to add that
-> capability.
-> 
-> Both these are sketches and should be considered a work in progress.
-> 
-> ## `DataSetInterface` ##
-> 
-> Here is a sketch of what a flexible abstraction based on PG could look
-> like, at least parts of one. Not being informed about Scrub,
-> Recovery, or Cache Tiering, having only focused on the object
-> operation path, we won't include those details here.
-> 
-> We also leave out functions called from the PG itself or other objects
-> invoked from ownstack.
-> 
-> ```c++
-> class DataSetInterface {
-> protected:
->   LogicalOSD& losd; // LogicalOSD is a means to have different
->                     // stores/semantics run in the same process.
-> 
->   MapPartRef curmap; // Subset of map relevant to this DSI
-> public:
->   // The OSD (things Up the Stack, generally) should not call 'lock'
->   // on us. If we have locking of some sort things down the stack that
->   // we have some relationship with (friend or whatever) could lock or
->   // unlock us, but that should not be baked in as part of the interface.
-> 
->   // Things like the info struct and details about loading the Place
->   // wouldn't actually be here. As there is an intimate relation
->   // between the LogicalOSD and an implementation of DataSetInterface (it
->   // holds all those loaded in memory and controls dispatch), they
->   // would not need to be part of the generic interface.
-> 
->   const coll_t coll; // The subdivision of the Store we control
-> 
->   // In the PG case we always know we're the primary or not for
->   // anything within the same pgid. That is not expected to be the
->   // case generally.
->   bool is_primary(const OpRequest&) = 0;
->   // No 'is_replica' since 'replica' may not be applicable
->   // generally. It's a bit off even in the erasure coded case.
->   bool is_acting(const OpRequest&) = 0;
->   bool is_inactive() = 0;
-> 
->  public:
->   // No identifier. The descendent will take that.
->   DataSetInterface(LogicalOSD& o, OSDMapRef curmap);
->   virtual ~DataSetInterface();
-> 
->   DataSetInterface(const DataSetInterface&) = delete;
->   DataSetInterface& operator =(const DataSetInterface&) = delete;
->   DataSetInterface(DataSetInterface&&) = delete;
->   DataSetInterface& operator =(DataSetInterface&&) = delete;
-> 
->   virtual void on_removal(ObjectStore::Transaction *t) = 0;
-> 
->   // Yes, there's no 'queue' and no 'do_op' or any of
->   // that. This is intentional. There's no dequeue or do_op because
->   // those functions are either called only by the PG currently OR
->   // they're called in OSD functions called by the PG as part of the
->   // thread switch. They should not be part of the public interface.
-> 
->   // There's no queue because we can either put queue here or we can
->   // put queue in LogicalOSD. (We could do both, but that seems bad to
->   // me.) If there is some combination of locking and checking that
->   // must be done before queueing an operation, it seems that it's
->   // better to do it in LogicalOSD so that it doesn't leak out and
->   // become part of the abstraction for other implementations.
-> };
-> ```
-> 
-> ## `LogicalOSD` ##
-> 
-> The OSD class itself (representing the single OSD process) should have
-> a map (*perhaps* a Boost.Intrusive.Set?) mapping OSD IDs to to
-> `LogicalOSD` instances.
-> 
-> ```c++
-> class LogicalOSD {
->   OSD& osd;
->   ObjectStore& store;
-> 
->   // Look up the DataSetInterface instance appropriate to the given
->   // OpRequest.
->   virtual future<DataSetInterface,int> get_place_for(const OpRequest&) = 0;
-> 
->   // Every logical OSD will have its own watchers as well as slot
->   // cache. Someone familiar with flow control should check this
->   // idea. Since LogicalOSDs will, ideally, share messengers we might
->   // want them to share the same slot cache. In that case we should
->   // just re-dimension watchers within Session
->   SessionRef session_for(const entity_name_t& name);
-> 
->   void queue(DataSetInterfaceRef&& pi, OpRequestRef&& to_queue);
->   void queue_front(DataSetInterfaceRef&& pi, OpRequestRef&& to_queue);
-> 
->   // Dequeue and the like are currently called in the PG itself and so
->   // have no place in the interface presented to the OSD.
-> 
->   void pause();
->   void resume();
->   void drain();
-> };
-> ```
+Perhaps that's just a map of PG states (that includes down), similar to 
+pg_temp, that gets bundled into the OSDMap...
 
-I was assuming that we'd just have multiple instances of the OSD class in 
-the same process (as we used to back in the early days with fakesyn for 
-testing).  Is there any real difference here except naming?  
-DataSetInterface still looks like PG (or whatever we name it), a minimal 
-interface for passing data and control (peering) messages down.
-
-This sounds like two basic points:
-
-1) Let's clean up the PG interface already.  Then we can add new pool 
-types that aren't primary-driven and/or pglog-based.  Class names will 
-shift around as part of this.
-
-2) Let's put many OSD's in the same process.  There will be some similar 
-naming changes.
-
-What I don't see is where this means we should move away from PG, or an 
-object -> PG -> device mapping strategy.  Am I missing something key, or 
-are we just using different words?
-
-Thanks!
 sage
+
