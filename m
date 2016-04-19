@@ -1,113 +1,92 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Running Test Scripts without CMake Environment Variables
-Date: Tue, 19 Apr 2016 19:57:16 +0200
-Message-ID: <5716717C.8000900@digiware.nl>
-References: <545596550.14429240.1461016414390.JavaMail.zimbra@redhat.com>
- <5715E72A.2040202@digiware.nl>
- <1402915173.14974375.1461074347967.JavaMail.zimbra@redhat.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: RGW Multisite delete wierdness
+Date: Tue, 19 Apr 2016 11:08:43 -0700
+Message-ID: <CADRKj5SUACKOQNXW21OHCE1BOVZ5Bva-czgN4QaeptkP=gbrxg@mail.gmail.com>
+References: <87zispoa07.fsf@suse.com>
+	<CADRKj5TpcOzavirV7M-s2s8hg+9yyHm3LUyV_Mw3eCDR3DLzSw@mail.gmail.com>
+	<86oa95lc1h.fsf@linux-stsn.suse>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:19032 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752918AbcDSR53 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 19 Apr 2016 13:57:29 -0400
-In-Reply-To: <1402915173.14974375.1461074347967.JavaMail.zimbra@redhat.com>
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:36570 "EHLO
+	mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932129AbcDSSIp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Apr 2016 14:08:45 -0400
+Received: by mail-vk0-f49.google.com with SMTP id n67so25990932vkf.3
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Apr 2016 11:08:44 -0700 (PDT)
+In-Reply-To: <86oa95lc1h.fsf@linux-stsn.suse>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjamin@redhat.com>
-Cc: Ali Maredia <amaredia@redhat.com>, ceph-devel@vger.kernel.org
+To: Abhishek L <abhishek.lekshmanan@gmail.com>
+Cc: Abhishek Lekshmanan <abhishek@suse.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On 19-4-2016 15:59, Matt Benjamin wrote:
-> Hi Willem,
-> 
-> What are the main barriers to using CMake on FreeBSD?  My only data
-> point about it is nfs-ganesha builds, but my understanding has been,
-> it's worked for that for a few years.
+On Tue, Apr 19, 2016 at 10:54 AM, Abhishek L
+<abhishek.lekshmanan@gmail.com> wrote:
+>
+> Yehuda Sadeh-Weinraub writes:
+>
+>> On Tue, Apr 19, 2016 at 9:10 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
+>>> Trying deleting objects & buckets from a secondary zone in a RGW
+>>> multisite configuration leads to some wierdness:
+>>>
+>>> 1. On deleting an object and the bucket immediately will mostly lead to
+>>> object and bucket getting deleted in the secondary zone, but since we
+>>> forward the bucket deletion to master only after we delete in secondary
+>>> it will fail with 409 (BucketNotEmpty) and gets reraised as a 500 to the
+>>> client. This _seems_ simple enough to fix if we forward the bucket
+>>> deletion request to master zone before attempting deletion locally,
+>>> (issue: http://tracker.ceph.com/issues/15540, possible fix: https://github.com/ceph/ceph/pull/8655)
+>>>
+>>
+>> Yeah, this looks good. We'll get it through testing.
+>>
+>>> 2. Deletion of objects themselves: deletion of objects themselves seems
+>>> to be a bit racy, deleting an object on a secondary zone succeeds,
+>>> listing the bucket seems to show an empty list, but gets populated with
+>>> the object again sometimes (this time with a newer timestamp), this is
+>>> not always guaranteed to be reproduce, but I've seen this often with
+>>> multipart uploads, as an eg:
+>>>
+>>> $ s3 -u list test-mp
+>>>                        Key                             Last Modified      Size
+>>> --------------------------------------------------  --------------------  -----
+>>> test.img                                            2016-04-19T13:00:17Z    40M
+>>> $ s3 -u delete test-mp/test.img
+>>> $ s3 -u list test-mp
+>>>                        Key                             Last Modified      Size
+>>> --------------------------------------------------  --------------------  -----
+>>> test.img                                            2016-04-19T13:00:45Z    40M
+>>> $ s3 -u delete test-mp/test.img # wait for a  min
+>>> $ s3 -us list test-mp
+>>> --------------------------------------------------  --------------------  -----
+>>> test.img                                            2016-04-19T13:01:52Z    40M
+>>>
+>>>
+>>> Mostly seeing log entries of this form in both the cases ie. where
+>>> delete object seems to be successfully delete in both master and
+>>> secondary zone and the case where it succeeds in master and fails in
+>>> secondary :
+>>>
+>>> 20 parsed entry: id=00000000027.27.2 iter->object=foo iter->instance= name=foo instance= ns=
+>>> 20 [inc sync] skipping object: dkr:d8e0ec3d-b3da-43f8-a99b-38a5b4941b6f.14113.2:-1/foo: non-complete operation
+>>> 20 parsed entry: id=00000000028.28.2 iter->object=foo iter->instance= name=foo instance= ns=
+>>> 20 [inc sync] skipping object: dkr:d8e0ec3d-b3da-43f8-a99b-38a5b4941b6f.14113.2:-1/foo: canceled operation
+>>>
+>>> Any ideas on this?
+>>>
+>>
+>> Do you have more than 2 zones syncing? Is it an object delete that
+>> came right after the object creation?
+>
+> Only 2 zones ie. one master and one secondary, req, on secondary. The delete came right after the
+> create though
 
-Hi Matt,
+There are two issues that I see here. One is that we sync an object,
+but end up with different mtime than the object's source. The second
+issue is that we shouldn't have synced that object.
 
-To name a few:
+There needs to be a check when syncing objects, to validate that we
+don't sync an object that originated from the current zone (by
+comparing the short zone id). We might be missing that.
 
-I did not understand that Cmake was the direction of Ceph when I started
-last November...
-
-When I started porting I got a few error messages from Cmake. And given
-the fact that I'm more familiar with (g)make and autobuild, I chose that
-route. I know Cmake exists, and that is about it. So that is again a
-tool/language to learn. Autobuild is also far from perfect, but whacking
-at it is relatively easy.
-
-It seemed to know little about Clang, if I remember correctly, but it is
-like 6 months ago.
-
-Before investing "porting"/migrating to another build tool I prefer to
-have at least a working testset. So my focus is mostly on that.
-
-So no real practical ones, just a matter of my current choices.
-
-But perhaps I should give it a try again and see what comes of it..
-
---WjW
-
-> Matt
-> 
-> ----- Original Message -----
->> From: "Willem Jan Withagen" <wjw@digiware.nl> To: "Ali Maredia"
->> <amaredia@redhat.com>, ceph-devel@vger.kernel.org Sent: Tuesday,
->> April 19, 2016 4:07:06 AM Subject: Re: Running Test Scripts without
->> CMake Environment Variables
->> 
->> On 18-4-2016 23:53, Ali Maredia wrote:
->>> Ceph community,
->>> 
->>> Recently certain tests that are run in `make check` (one's that
->>> end in .sh and a handful of others) were changed to remove
->>> relative paths and hard coded directories (".libs" was littered
->>> throughout the codebase).
->>> 
->>> These test scripts pass when you run `make check` because of
->>> preset environment variables in CTest and in src/Makefile.am
->>> (CEPH_BIN, CEPH_ROOT, CEPH_LIB, CEPH_BUILD_DIR, etc.) that are
->>> meant to replace the relative paths from before. However running
->>> these tests by themselves after an autotools build without
->>> setting those variables before hand will result in failures.
->>> 
->>> I understand how these recent changes disrupt developers
->>> workflows and plan on issuing a fix that defines those
->>> environment variables according to which build system you build
->>> with ASAP.
->>> 
->>> Finally I strongly encourage developers to transition to using
->>> CMake and CTest (run ctest -V -R {test_name} from
->>> CMAKE_BINARY_DIR), and submit fixes and other contributions.
->> 
->> Hi Ali,
->> 
->> I'm trying to get a port for FreeBSD working, and started from
->> make(gmake) because Cmake did not work that well when I started. 
->> And as such I do always follow the regular pattern and just use
->> the makefiles as they are. Just because running Make at the top
->> level is a rather long process. So I keep a script where I run the
->> tests that are still giving me faults. And it does complete
->> different things from what make does. Because make assuems that
->> things are going to complete with success, but in my case I'm
->> actually expecting things to go wrong. :) So then I start
->> collecting cores and logfiles for post-mortum analysis.
->> 
->> So I'd like to be able to run every test on its own. And even when
->> I would migrate to Cmake, I would still want to be able to do
->> that. So they even have to work if you do not use a build system,
->> it would be very nice if things are backwards compatible.
->> 
->> And yes, I also want to go to Cmake, because autobuild it an odd
->> bucket of bits, but preferably not right now.
->> 
->> Thanx, --WjW -- To unsubscribe from this list: send the line
->> "unsubscribe ceph-devel" in the body of a message to
->> majordomo@vger.kernel.org More majordomo info at
->> http://vger.kernel.org/majordomo-info.html
->> 
-> 
-
+Yehuda
