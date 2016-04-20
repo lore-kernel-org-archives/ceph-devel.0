@@ -1,148 +1,89 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: Running Test Scripts without CMake Environment Variables
-Date: Wed, 20 Apr 2016 00:12:20 -0400 (EDT)
-Message-ID: <386579066.15401424.1461125540382.JavaMail.zimbra@redhat.com>
-References: <545596550.14429240.1461016414390.JavaMail.zimbra@redhat.com> <5715E72A.2040202@digiware.nl> <1402915173.14974375.1461074347967.JavaMail.zimbra@redhat.com> <5716717C.8000900@digiware.nl>
+From: Erwan Velu <evelu@redhat.com>
+Subject: Re: New messages in OSD logs.
+Date: Wed, 20 Apr 2016 04:47:43 -0400 (EDT)
+Message-ID: <2067877477.80383590.1461142063409.JavaMail.zimbra@redhat.com>
+References: <57121CDE.3010908@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:46126 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752343AbcDTEMY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Apr 2016 00:12:24 -0400
-In-Reply-To: <5716717C.8000900@digiware.nl>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:48114 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933014AbcDTIrr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Apr 2016 04:47:47 -0400
+In-Reply-To: <57121CDE.3010908@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ali Maredia <amaredia@redhat.com>, ceph-devel@vger.kernel.org
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Willem,
+I have the exact same trace while running a test on teuthology.
 
-I think most devs now believe it's worth switching to cmake, mainly for build performance.
+----- Mail original -----
+De: "Willem Jan Withagen" <wjw@digiware.nl>
+=C3=80: "Ceph Development" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Samedi 16 Avril 2016 13:07:10
+Objet: New messages in OSD logs.
 
-I recall having issues compiling with Clang++ recently too--but for me, the issues seemed to be
-related to leveldb and rocksdb linkage.  I know that a number of us would like Clang++ builds
-to be generally supported, not something that you have to maintain yourself just for FreeBSD.
+Hi
 
-When you do experiment with cmake again, I'm sure folks will try to be helpful with
-specific issues.
+I've recently rebased my fork, and also upgrae FreeBSD to more recent c=
+ode.
+Now I'm running into this:
 
-Matt
+2016-04-16 03:03:55.891466 805617000 -1
+filestore(testdir/test-erasure-eio/0) WARNING: max attr value size (102=
+4)
+is smaller than osd_max_object_name_len (2048). Your backend filesystem
+appears to not support attrs large enough
+to handle the configured max rados name size. You may get unexpected
+ENAMETOOLONG errors on rados operations or buggy behavior
 
------ Original Message -----
-> From: "Willem Jan Withagen" <wjw@digiware.nl>
-> To: "Matt Benjamin" <mbenjamin@redhat.com>
-> Cc: "Ali Maredia" <amaredia@redhat.com>, ceph-devel@vger.kernel.org
-> Sent: Tuesday, April 19, 2016 1:57:16 PM
-> Subject: Re: Running Test Scripts without CMake Environment Variables
-> 
-> On 19-4-2016 15:59, Matt Benjamin wrote:
-> > Hi Willem,
-> > 
-> > What are the main barriers to using CMake on FreeBSD?  My only data
-> > point about it is nfs-ganesha builds, but my understanding has been,
-> > it's worked for that for a few years.
-> 
-> Hi Matt,
-> 
-> To name a few:
-> 
-> I did not understand that Cmake was the direction of Ceph when I started
-> last November...
-> 
-> When I started porting I got a few error messages from Cmake. And given
-> the fact that I'm more familiar with (g)make and autobuild, I chose that
-> route. I know Cmake exists, and that is about it. So that is again a
-> tool/language to learn. Autobuild is also far from perfect, but whacking
-> at it is relatively easy.
-> 
-> It seemed to know little about Clang, if I remember correctly, but it is
-> like 6 months ago.
-> 
-> Before investing "porting"/migrating to another build tool I prefer to
-> have at least a working testset. So my focus is mostly on that.
-> 
-> So no real practical ones, just a matter of my current choices.
-> 
-> But perhaps I should give it a try again and see what comes of it..
-> 
-> --WjW
-> 
-> > Matt
-> > 
-> > ----- Original Message -----
-> >> From: "Willem Jan Withagen" <wjw@digiware.nl> To: "Ali Maredia"
-> >> <amaredia@redhat.com>, ceph-devel@vger.kernel.org Sent: Tuesday,
-> >> April 19, 2016 4:07:06 AM Subject: Re: Running Test Scripts without
-> >> CMake Environment Variables
-> >> 
-> >> On 18-4-2016 23:53, Ali Maredia wrote:
-> >>> Ceph community,
-> >>> 
-> >>> Recently certain tests that are run in `make check` (one's that
-> >>> end in .sh and a handful of others) were changed to remove
-> >>> relative paths and hard coded directories (".libs" was littered
-> >>> throughout the codebase).
-> >>> 
-> >>> These test scripts pass when you run `make check` because of
-> >>> preset environment variables in CTest and in src/Makefile.am
-> >>> (CEPH_BIN, CEPH_ROOT, CEPH_LIB, CEPH_BUILD_DIR, etc.) that are
-> >>> meant to replace the relative paths from before. However running
-> >>> these tests by themselves after an autotools build without
-> >>> setting those variables before hand will result in failures.
-> >>> 
-> >>> I understand how these recent changes disrupt developers
-> >>> workflows and plan on issuing a fix that defines those
-> >>> environment variables according to which build system you build
-> >>> with ASAP.
-> >>> 
-> >>> Finally I strongly encourage developers to transition to using
-> >>> CMake and CTest (run ctest -V -R {test_name} from
-> >>> CMAKE_BINARY_DIR), and submit fixes and other contributions.
-> >> 
-> >> Hi Ali,
-> >> 
-> >> I'm trying to get a port for FreeBSD working, and started from
-> >> make(gmake) because Cmake did not work that well when I started.
-> >> And as such I do always follow the regular pattern and just use
-> >> the makefiles as they are. Just because running Make at the top
-> >> level is a rather long process. So I keep a script where I run the
-> >> tests that are still giving me faults. And it does complete
-> >> different things from what make does. Because make assuems that
-> >> things are going to complete with success, but in my case I'm
-> >> actually expecting things to go wrong. :) So then I start
-> >> collecting cores and logfiles for post-mortum analysis.
-> >> 
-> >> So I'd like to be able to run every test on its own. And even when
-> >> I would migrate to Cmake, I would still want to be able to do
-> >> that. So they even have to work if you do not use a build system,
-> >> it would be very nice if things are backwards compatible.
-> >> 
-> >> And yes, I also want to go to Cmake, because autobuild it an odd
-> >> bucket of bits, but preferably not right now.
-> >> 
-> >> Thanx, --WjW -- To unsubscribe from this list: send the line
-> >> "unsubscribe ceph-devel" in the body of a message to
-> >> majordomo@vger.kernel.org More majordomo info at
-> >> http://vger.kernel.org/majordomo-info.html
-> >> 
-> > 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+and later on:
 
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+2016-04-16 03:04:03.287073 805617000  2 osd.0 0 boot
+2016-04-16 03:04:03.287846 805617000 -1 osd.0 0 backend (filestore) is=20
+unable to support max object name[space] le
+n
+2016-04-16 03:04:03.287873 805617000 -1 osd.0 0    osd max object name=20
+len =3D 2048
+2016-04-16 03:04:03.287894 805617000 -1 osd.0 0    osd max object=20
+namespace len =3D 256
+2016-04-16 03:04:03.287931 805617000 -1 osd.0 0 (63) File name too long
+2016-04-16 03:04:03.303432 805617000  1 journal close=20
+testdir/test-erasure-eio/0/journal
+2016-04-16 03:04:03.310280 805617000 -1 ^[[0;31m ** ERROR: osd init=20
+failed: (63) File name too long^[[0m
 
-http://www.redhat.com/en/technologies/storage
+And the OSD dies....
 
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+I guess that this has the do with the changes in the LFN modules, and i=
+s=20
+also the reason for the debate about ext4 support.
+
+Uptill now unittest_chain_xattr did work, but that now also fails.
+But it fails in a strange way where it tries to delete attributes with=20
+numerical ends that are certainly not in the attributes.
+Maximum xattr name length in FreeBSD seems to be 256 chars, which wasn'=
+t=20
+a problem yet.
+
+So is there any chance of continuing on my "old" way to finish a first=20
+version of the port?
+
+Or am I just seeing things, and should I start looking at the FreeBSD=20
+side of things?
+
+
+Thanx,
+--WjW
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
