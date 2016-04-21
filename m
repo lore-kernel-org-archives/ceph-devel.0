@@ -1,33 +1,38 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [Ceph-community] v10.2.0 (Jewel) Contributor credits.
-Date: Thu, 21 Apr 2016 19:07:53 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604211904010.16393@cpach.fuggernut.com>
-References: <563FCB3C.5090207@objoo.org> <571936B5.4080808@objoo.org>
+From: Pete Zaitcev <zaitcev@redhat.com>
+Subject: Re: Queries on RGW Multitenancy
+Date: Thu, 21 Apr 2016 17:30:36 -0600
+Message-ID: <20160421173036.3d2b84d8@lembas.zaitcev.lan>
+References: <87shyggsur.fsf@suse.com>
+	<20160421155916.637a7e77@lembas.zaitcev.lan>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53711 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753003AbcDUXHv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2016 19:07:51 -0400
-In-Reply-To: <571936B5.4080808@objoo.org>
+Received: from mx1.redhat.com ([209.132.183.28]:36422 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751571AbcDUXai (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 21 Apr 2016 19:30:38 -0400
+In-Reply-To: <20160421155916.637a7e77@lembas.zaitcev.lan>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yann Dupont <yd@objoo.org>
-Cc: Ceph Community <ceph-community@lists.ceph.com>, ceph-devel@vger.kernel.org
+To: Abhishek Lekshmanan <abhishek@suse.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Radoslaw Zarzynski <rzarzynski@mirantis.com>
 
-On Thu, 21 Apr 2016, Yann Dupont wrote:
-> Hi Everybody,
+> On Wed, 20 Apr 2016 18:14:36 +0200
+> Abhishek Lekshmanan <abhishek@suse.com> wrote:
 > 
-> time flies and the new stable version of Ceph is already OUT, 
-> congratulations everyone !
+> > Are there any changes in the way bucket and object urls are used by
+> > clients after creating a user with a tenant? My understanding so far has
+> > been that the urls look the same for clients, and based on the
+> > credentials passed in, we determine the tenant for requests. Is this
+> > correct?  
+> 
+> Yes.
 
-A lot of really great work went into this release and I feel fortunate to 
-be working with such a great group of people. I'd like to acknowledge the 
-hard work of Alfredo Deza and Dan Mick in particular for getting Jewel 
-built, signed, and released, and in getting the infrastructure in place to 
-do our first ever release for arm64/aarch64.
+Sorry to reply to myself, but I need to elaborate. It's yes for the
+case of normal access within the tenant: everything stays as before.
+But, if you want to break out of the tenant, we have additional
+ways to do that which involve trick URLs or other breakouts,
+as discussed in the reply.
 
-Thank you, everyone!
-sage
-
+-- Pete
