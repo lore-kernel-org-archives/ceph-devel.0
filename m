@@ -1,134 +1,167 @@
-From: =?UTF-8?B?5bit5pm65YuH?= <xizhiyong18-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Ceph Day Sunnyvale Presentations
-Date: Thu, 21 Apr 2016 16:48:20 +0800
-Message-ID: <CAPBvRV8aWCMoZ0tQHB6ywvduf=DxnNwYRVj_7bN71Gq7GyjJ5A@mail.gmail.com>
-References: <CAAZbbf0FKTCOrxBcdKCma+f2Z6faXocqt11p8v6urE-4hu9irA@mail.gmail.com>
+From: Chandan Kumar Singh <chandan.kr.singh@gmail.com>
+Subject: Re: Mojette based Erasure Code is more performant than ISA-L or
+ Jerasure (or not)
+Date: Thu, 21 Apr 2016 14:39:04 +0530
+Message-ID: <CAOu2ZZUAtFmKc9RkpwwMY9s7_2n-YptaoUhPJbkf+crhAXgd7A@mail.gmail.com>
+References: <CAOu2ZZXx-no2EyDqd_D8SZp=qu-AALarxWd6=43qY-kTw7ZOow@mail.gmail.com>
+	<57177CF7.1090600@dachary.org>
+	<CAOu2ZZVWa7j2EmtfRjiTPvqJKckxRCOCjaHfeb+hAFZ=_a_JSg@mail.gmail.com>
+	<5717AEDB.8050707@dachary.org>
+	<CAOu2ZZWQrCAZ3Qg+KePQ-1By4BPpMcx1z2VR=m7vcNj1qFFdww@mail.gmail.com>
+	<5717B8A6.90503@dachary.org>
+	<CAOu2ZZVUg=SW_15f22tHD0XRwNftQ5+OHGgUza4-z1Y5=O=n2Q@mail.gmail.com>
+	<5717BEF3.6020403@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1736351532=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAAZbbf0FKTCOrxBcdKCma+f2Z6faXocqt11p8v6urE-4hu9irA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============1736351532==
-Content-Type: multipart/alternative; boundary=001a114851deb483f60530fac52d
-
---001a114851deb483f60530fac52d
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:34062 "EHLO
+	mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752144AbcDUJJG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2016 05:09:06 -0400
+Received: by mail-wm0-f68.google.com with SMTP id n3so19976081wmn.1
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Apr 2016 02:09:05 -0700 (PDT)
+In-Reply-To: <5717BEF3.6020403@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: ceph-devel@vger.kernel.org
 
-2016-04-07 0:18 GMT+08:00 Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+Well, there is no explicit explanation as to why "GF-Complete and
+Jerasure version 2.0 have been removed from web sites at the
+University of Tennessee and bitbucket.org." I might not even look for
+implicit reasons but what I do notice is that Plank mentions
+StreamScale's claims and expects users to be aware of it.
 
-> Hey cephers,
+On Wed, Apr 20, 2016 at 11:10 PM, Loic Dachary <loic@dachary.org> wrote=
+:
 >
-> I have all but one of the presentations from Ceph Day Sunnyvale, so
-> rather than wait for a full hand I went ahead and posted the link to
-> the slides on the event page:
 >
-> http://ceph.com/cephdays/ceph-day-sunnyvale/
-
-
-thanks for sharing the presentations.
-
+> On 21/04/2016 00:19, Chandan Kumar Singh wrote:
+>> There is a warning on Jim Plank's website
+>>
+>> http://web.eecs.utk.edu/~plank/plank/www/software.html
 >
+> Where in this page is it explained why (I quote the page) "GF-Complet=
+e and Jerasure version 2.0 have been removed from web sites at the Univ=
+ersity of Tennessee and bitbucket.org." ?
 >
-> The videos probably wont be processed until after next week, but I=E2=80=
-=99ll
-> add those once we get them. Thanks to all of the presenters and
-> attendees that made this another great event.
-
-
-Are the videos ready for sharing?
-
-
-
->
+>> and the following article
+>>
+>> https://www.techdirt.com/articles/20141115/07113529155/patent-troll-=
+kills-open-source-project-speeding-up-computation-erasure-codes.shtml
+>>
+>>
+>> On Wed, Apr 20, 2016 at 10:43 PM, Loic Dachary <loic@dachary.org> wr=
+ote:
+>>>
+>>>
+>>> On 20/04/2016 23:48, Chandan Kumar Singh wrote:
+>>>> Hi
+>>>>
+>>>> As expected, Your observation in interesting. I had just glanced
+>>>> through the paper initially but will go through it again. I starte=
+d
+>>>> looking at alternatives after reading about StreamScale Inc's clai=
+ms
+>>>> on jerasure. As of now, I suppose ISA is the best bet.
+>>>
+>>> Where did you read that StreamScale has claims on jerasure ? Again,=
+ the devil is in the details ;-)
+>>>
+>>>> On Wed, Apr 20, 2016 at 10:01 PM, Loic Dachary <loic@dachary.org> =
+wrote:
+>>>>>
+>>>>>
+>>>>> On 20/04/2016 20:10, Chandan Kumar Singh wrote:
+>>>>>> Hi
+>>>>>>
+>>>>>> Here is the link for the benchmark study :
+>>>>>> http://arxiv.org/pdf/1504.07038.pdf. Initially, the mailing list=
+ was
+>>>>>> blocking it because of HTML subparts.
+>>>>>
+>>>>> I meant that the first step would be to repeat the benchmark as d=
+escribed in the paper. Unless I missed something the details of how the=
+ results were obtained have not been published. It is enough to get jus=
+t one detail wrong and see significantly different results.
+>>>>>
+>>>>> Here is an example. From an implementor point of view, the perfor=
+mance difference that matters is when reading data that has not been da=
+maged (i.e. what happens 99.99% of the time). Mojette does not have sys=
+tematic code. What it means is that reading data always requires decodi=
+ng chunks. With systematic code, which is what jerasure / isa-l offer a=
+nd what Ceph uses, reading erasure coded data does not require decoding=
+=2E This is the Achilles' heel of this erasure code method. It is suppo=
+sed to be measured by the graph in figure 3. For instance the bottom of=
+ figure 3 states that ISA-L requires 640 cycles to read 8KB while Mojet=
+te requires 1750 when there is no erasure (i.e. no chunk lost). That ma=
+kes little sense to me as you don't need ISA-L at all to read the origi=
+nal 8KB (that's what systematic codes are good for). This detail would =
+need to be clarified before the experiment can be repeated.
+>>>>>
+>>>>> Mojette is definitely interesting and it would be nice to see Fre=
+e Software minded people working on it. There is a long way to go befor=
+e it's useable, but exploring new avenues is fascinating :-)
+>>>>>
+>>>>> Cheers
+>>>>>
+>>>>>> Regards
+>>>>>> Chandan
+>>>>>>
+>>>>>> On Wed, Apr 20, 2016 at 6:28 PM, Loic Dachary <loic@dachary.org>=
+ wrote:
+>>>>>>> Hi,
+>>>>>>>
+>>>>>>> On 20/04/2016 15:52, Chandan Kumar Singh wrote:
+>>>>>>>> Hi
+>>>>>>>>
+>>>>>>>> The authors of  Mojette Erasure Encoding claim that this EC ha=
+s higher
+>>>>>>>> performance than ISA-L and Jerasure and can be used for hot st=
+orage
+>>>>>>>> use cases. Their EC is used in open source RozoFS. What is you=
+r
+>>>>>>>> evaluation of it? It will be nice if it is available as anothe=
+r EC
+>>>>>>>> plugin.
+>>>>>>>
+>>>>>>> RozoFS is no longer developped (last commit was july last year)=
+=2E It would be nice to have an alternative implementation of the same =
+algorithm, well maintained. It's sad to see Free Software being frozen.=
+ But Free Software is never dead, all it needs is good will and a littl=
+e work to be resurected ! I've never seen any benchmark regarding perfo=
+rmances, that would be the first step.
+>>>>>>>
+>>>>>>> Cheers
+>>>>>>>
+>>>>>>> --
+>>>>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>>>>>>
+>>>>>>
+>>>>>
+>>>>> --
+>>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>>>
+>>>
+>>> --
+>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 >
 > --
->
-> Best Regards,
->
-> Patrick McGarry
-> Director Ceph Community || Red Hat
-> http://ceph.com  ||  http://community.redhat.com
-> @scuttlemonkey || @ceph
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
---001a114851deb483f60530fac52d
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><br><div class=3D"gmail_extra"><br><div class=3D"gmail_quo=
-te">2016-04-07 0:18 GMT+08:00 Patrick McGarry <span dir=3D"ltr">&lt;<a href=
-=3D"mailto:pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" target=3D"_blank">pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&g=
-t;</span>:<br><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px=
- 0.8ex;border-left-width:1px;border-left-color:rgb(204,204,204);border-left=
--style:solid;padding-left:1ex">Hey cephers,<br>
-<br>
-I have all but one of the presentations from Ceph Day Sunnyvale, so<br>
-rather than wait for a full hand I went ahead and posted the link to<br>
-the slides on the event page:<br>
-<br>
-<a href=3D"http://ceph.com/cephdays/ceph-day-sunnyvale/" rel=3D"noreferrer"=
- target=3D"_blank">http://ceph.com/cephdays/ceph-day-sunnyvale/</a></blockq=
-uote><div><br></div><div>thanks for sharing the presentations.=C2=A0</div><=
-blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-l=
-eft-width:1px;border-left-color:rgb(204,204,204);border-left-style:solid;pa=
-dding-left:1ex"><br>
-<br>
-The videos probably wont be processed until after next week, but I=E2=80=99=
-ll<br>
-add those once we get them. Thanks to all of the presenters and<br>
-attendees that made this another great event.</blockquote><div><br></div><d=
-iv>Are the videos ready for sharing?</div><div><br></div><div>=C2=A0</div><=
-blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-l=
-eft-width:1px;border-left-color:rgb(204,204,204);border-left-style:solid;pa=
-dding-left:1ex"><span class=3D""><font color=3D"#888888"><br>
-<br>
---<br>
-<br>
-Best Regards,<br>
-<br>
-Patrick McGarry<br>
-Director Ceph Community || Red Hat<br>
-<a href=3D"http://ceph.com" rel=3D"noreferrer" target=3D"_blank">http://cep=
-h.com</a>=C2=A0 ||=C2=A0 <a href=3D"http://community.redhat.com" rel=3D"nor=
-eferrer" target=3D"_blank">http://community.redhat.com</a><br>
-@scuttlemonkey || @ceph<br>
-_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
-br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
-oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
-ceph.com</a><br>
-</font></span></blockquote></div><br></div></div>
-
---001a114851deb483f60530fac52d--
-
---===============1736351532==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1736351532==--
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
