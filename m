@@ -1,59 +1,93 @@
-From: =?utf-8?B?5p2OIOWkqeelpQ==?= <lanceflee@msn.com>
-Subject: Re: HowTo use spdk as Bluestore block device in v10.2.0
-Date: Fri, 22 Apr 2016 12:43:55 +0000
-Message-ID: <PS1PR0401MB1499F35700266CEE600E43C2AA6F0@PS1PR0401MB1499.apcprd04.prod.outlook.com>
-References: <PS1PR0401MB149932A26F2B9D5893AF8A84AA6F0@PS1PR0401MB1499.apcprd04.prod.outlook.com>
- <CACJqLya_Uw4J43bhNeT2=Dv7OqVhMrff45d81t_Wu23xwwOatw@mail.gmail.com>
- <PS1PR0401MB149938000DBFFBAB9B320FFCAA6F0@PS1PR0401MB1499.apcprd04.prod.outlook.com>
- <HK2PR0401MB14918377A1A14B3702B8BE3DAA6F0@HK2PR0401MB1491.apcprd04.prod.outlook.com>
- <CACJqLyb6Yjz=PddFWxhOapMX3xJ-CQQ9zBMSuqQbicK1PrHFEA@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: New messages in OSD logs.
+Date: Fri, 22 Apr 2016 14:55:03 +0200
+Message-ID: <0db9f84b-b39f-ee31-82b8-e8cbecbfb953@digiware.nl>
+References: <57121CDE.3010908@digiware.nl>
+ <CAJ4mKGaq0-=mBCrNNDZoFwhM9zs_40KJJSkiHyj0apkH6W21hA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bay004-omc2s26.hotmail.com ([65.54.190.101]:50113 "EHLO
-	BAY004-OMC2S26.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751675AbcDVMoS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 22 Apr 2016 08:44:18 -0400
-In-Reply-To: <CACJqLyb6Yjz=PddFWxhOapMX3xJ-CQQ9zBMSuqQbicK1PrHFEA@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <8F4C2CA04C7DB04E99FEF7D73D1DFE57@apcprd04.prod.outlook.com>
+Received: from smtp.digiware.nl ([31.223.170.169]:22141 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753167AbcDVMzj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 22 Apr 2016 08:55:39 -0400
+In-Reply-To: <CAJ4mKGaq0-=mBCrNNDZoFwhM9zs_40KJJSkiHyj0apkH6W21hA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-DQpUaHghDQoNCkJUVywNCg0KV2UgaGF2ZSB0aG91Z2h0IGFib3V0IGlmIGl0IGlzIGEgd2FzdGUg
-dG8gcHV0IG9ubHkgMSBPU0Qgb24gYSB3aG9sZSBOVk1lDQpTU0QsIGVzcGVjaWFsbHkgYSBoaWdo
-LWVuZCBvbmUsIHN1Y2ggYXMgSW50ZWwgREMgUDM3MDAuDQoNCkFuZCB3ZSByZWFkIHNvbWUgc3Bk
-ayBjb2Rlcywgbm90aWNlZCB0aGF0IGl0IGlzIGJhbmQgd2l0aCBOVk1lIG5hbWVzcGFjZS4NCg0K
-VGhlb3JldGljYWxseSwgYSBOVk1lIFNTRCBjYW4gYmUgbXVsdGktbmFtZXNwYWNlcyBieSBwYXJ0
-aXRpb24gTEJBcy4gDQpFYWNoIG5hbWVzcGFjZSBoYXMgaXRzIG93biBTdWJtaXNzaW9uL0NvbXBs
-ZXRpb24gUXVldWVzLCBzbyBpdCB3b3VsZCB3b3JrIHdlbGwuDQoNCkJ1dCBub3csIHRvb2sgUDM3
-MDAgYXMgYW4gZXhhbXBsZSwgaXQgb25seSBzdXBwb3J0cyBOVk1lIHYxLjAsIGFuZCB0aGUgTmFt
-ZXNwYWNlIA0KTWFuYWdlbWVudCBDbWQgU2V0cyBpcyBub3Qgc3VwcG9ydGVkIHlldC4gSXQgd291
-bGQgYmUgZWFzaWVyIHRvIGNyZWF0ZSBuYW1lc3BhY2VzIHNvbWVkYXkuDQoNCg0KQW5kICJvcy9i
-bHVlc3RvcmUvTlZNRURldmljZXMuY2MiIGlkZW50aWZpZXMgMSBuYW1lc3BhY2UgcGVyIFNTRCB0
-b28uDQoNCkhvcGVzIHRvIHNlZSBtdWx0aS1uYW1lc3BhY2VzIHN1cHBvcnQgdG8gbWFrZSBmdWxs
-IHVzZSBvZiBTU0RzLg0KDQoNCg0KLS0gDQpCZXN0IFJlZ2FyZHMhDQoNCg0KDQoNCg0KDQoNCk9u
-IDQvMjIvMTYsIDIwOjAyLCAiSGFvbWFpIFdhbmciIDxoYW9tYWlAeHNreS5jb20+IHdyb3RlOg0K
-DQo+T24gRnJpLCBBcHIgMjIsIDIwMTYgYXQgNTo1MiBBTSwgTGkgVGlhbnhpYW5nIDxsYW5jZWZs
-ZWVAbXNuLmNvbT4gd3JvdGU6DQo+Pg0KPj4gU29ycnksDQo+PiBJIG1lYW4gdGhhdCB3ZSBoYXZl
-IHR3byBOVk1lIFNTRCBlYWNoIG5vZGUsb25lIGZvciBhIE9TRCwuIEJ1dCBvbmx5IDEgT1NEIGlz
-IHVwLg0KPj4NCj4+IEl0IHNlYW1zIHRoYXQgdGhlIGh1Z2VwYWdlcyBhcmUgYWxsIHRha2VuIGJ5
-IDEgc3BkayBpbnN0YW5jZSwgbm90aGluZyBsZWZ0IGZvciBhbm90aGVyLg0KPg0KPlllcCwgdGhp
-cyBpcyBwcm9icmVtLi4uLi4NCj4NCj53ZSBoYXZlIHR3byBvcHRpb25zIG5vdywgb25lIGlzIHVz
-ZSBkcGRrIG11bHRpIHByb2Nlc3MgdG8gbGV0IHR3bw0KPmNlcGgtb3NkIGF3YXJlLCBpdCBuZWVk
-IHNvbWUgY29kZXMuIGFub3RoZXIgaXMgd2FpdGluZyBmb3IgImZlZG9yYSBvc2QNCj5wcm9jZXNz
-IiBmZWF0dXJlIHdoaWNoIGlzIG1vcmUgc3VpdGFibGUuLi4uLi4NCj4NCj4+DQo+Pg0KPj4NCj4+
-DQo+PiAtLQ0KPj4gQmVzdCBSZWdhcmRzIQ0KPj4NCj4+DQo+Pg0KPj4NCj4+DQo+Pg0KPj4NCj4+
-DQo+Pg0KPj4NCj4+DQo+Pg0KPj4gT24gNC8yMi8xNiwgMTc6MjgsICLmnY4g5aSp56WlIiA8Y2Vw
-aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mIGxhbmNlZmxlZUBtc24u
-Y29tPiB3cm90ZToNCj4+DQo+Pj4xLiBGaXNydCBvZiBhbGwgLCAgJCB5dW0gcmVtb3ZlICBkcGRr
-LWRldmVsICBkcGRrIC15DQo+Pj4yLmdldCBkcGRrLTIuMi4wIHNvdXJjZSBjb2RlICwgYW5kIGNv
-bXBpbGUgaXQgYXMgc2hhcmVkIGxpYnJhcnksIEFzIGZvbGxvd3M6DQo+Pj4gICBhLiB2aW0gY29u
-ZmlnL2NvbW1vbl9saW51eGFwcCwgbW9kaWZ5ICJDT05GSUdfUlRFX0JVSUxEX1NIQVJFRF9MSUI9
-eSINCj4+PiAgIGIubWFrZSAgaW5zdGFsbCBUPXg4Nl82NC1uYXRpdmUtbGludXhhcHAtZ2NjIERF
-U1RESVI9L3Vzcg0KPj4+My5idWlsZCBjZXBoICAuL2NvbmZpZ3VyZSAtLXdpdGgtc3Bkaw0KPj4N
-Cg0K
+On 18-4-2016 20:52, Gregory Farnum wrote:
+> On Sat, Apr 16, 2016 at 4:07 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> Hi
+>>
+>> I've recently rebased my fork, and also upgrae FreeBSD to more recent code.
+>> Now I'm running into this:
+>>
+>> 2016-04-16 03:03:55.891466 805617000 -1
+>> filestore(testdir/test-erasure-eio/0) WARNING: max attr value size (1024)
+>> is smaller than osd_max_object_name_len (2048). Your backend filesystem
+>> appears to not support attrs large enough
+>> to handle the configured max rados name size. You may get unexpected
+>> ENAMETOOLONG errors on rados operations or buggy behavior
+>>
+>> and later on:
+>>
+>> 2016-04-16 03:04:03.287073 805617000  2 osd.0 0 boot
+>> 2016-04-16 03:04:03.287846 805617000 -1 osd.0 0 backend (filestore) is
+>> unable to support max object name[space] le
+>> n
+>> 2016-04-16 03:04:03.287873 805617000 -1 osd.0 0    osd max object name len =
+>> 2048
+>> 2016-04-16 03:04:03.287894 805617000 -1 osd.0 0    osd max object namespace
+>> len = 256
+>> 2016-04-16 03:04:03.287931 805617000 -1 osd.0 0 (63) File name too long
+>> 2016-04-16 03:04:03.303432 805617000  1 journal close
+>> testdir/test-erasure-eio/0/journal
+>> 2016-04-16 03:04:03.310280 805617000 -1 ^[[0;31m ** ERROR: osd init failed:
+>> (63) File name too long^[[0m
+>>
+>> And the OSD dies....
+>>
+>> I guess that this has the do with the changes in the LFN modules, and is
+>> also the reason for the debate about ext4 support.
+>>
+>> Uptill now unittest_chain_xattr did work, but that now also fails.
+>> But it fails in a strange way where it tries to delete attributes with
+>> numerical ends that are certainly not in the attributes.
+>> Maximum xattr name length in FreeBSD seems to be 256 chars, which wasn't a
+>> problem yet.
+>>
+>> So is there any chance of continuing on my "old" way to finish a first
+>> version of the port?
+>>
+>> Or am I just seeing things, and should I start looking at the FreeBSD side
+>> of things?
+> 
+> I didn't do this work, but I think you should be able to set
+> osd_max_object_name_len and get things going. (I'm less sure about the
+> unit test.)
+
+Hi,
+
+Wierd things are happening here as far as I can tell....
+
+linux/limits.h defines:
+#define XATTR_NAME_MAX   255 /* # chars in an extended attribute name */
+#define XATTR_SIZE_MAX 65536 /* size of an extended attribute value (64k) */
+#define XATTR_LIST_MAX 65536 /* size of extended attribute namelist (64k) */
+
+Which is exactly the same as is on FreeBSD:
+max namesize is 255 chars, content of attributes max 64K
+
+Even wrote some perl to actually test this. And it is true.
+
+So I'm not really understanding why the OSDs are complaining and dying
+on the basis of this. Linux OSDs should have the same problem... :(
+
+--WjW
+
+
+
+
