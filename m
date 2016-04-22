@@ -1,75 +1,59 @@
-From: Haomai Wang <haomai@xsky.com>
+From: =?utf-8?B?5p2OIOWkqeelpQ==?= <lanceflee@msn.com>
 Subject: Re: HowTo use spdk as Bluestore block device in v10.2.0
-Date: Fri, 22 Apr 2016 08:02:34 -0400
-Message-ID: <CACJqLyb6Yjz=PddFWxhOapMX3xJ-CQQ9zBMSuqQbicK1PrHFEA@mail.gmail.com>
+Date: Fri, 22 Apr 2016 12:43:55 +0000
+Message-ID: <PS1PR0401MB1499F35700266CEE600E43C2AA6F0@PS1PR0401MB1499.apcprd04.prod.outlook.com>
 References: <PS1PR0401MB149932A26F2B9D5893AF8A84AA6F0@PS1PR0401MB1499.apcprd04.prod.outlook.com>
-	<CACJqLya_Uw4J43bhNeT2=Dv7OqVhMrff45d81t_Wu23xwwOatw@mail.gmail.com>
-	<PS1PR0401MB149938000DBFFBAB9B320FFCAA6F0@PS1PR0401MB1499.apcprd04.prod.outlook.com>
-	<HK2PR0401MB14918377A1A14B3702B8BE3DAA6F0@HK2PR0401MB1491.apcprd04.prod.outlook.com>
+ <CACJqLya_Uw4J43bhNeT2=Dv7OqVhMrff45d81t_Wu23xwwOatw@mail.gmail.com>
+ <PS1PR0401MB149938000DBFFBAB9B320FFCAA6F0@PS1PR0401MB1499.apcprd04.prod.outlook.com>
+ <HK2PR0401MB14918377A1A14B3702B8BE3DAA6F0@HK2PR0401MB1491.apcprd04.prod.outlook.com>
+ <CACJqLyb6Yjz=PddFWxhOapMX3xJ-CQQ9zBMSuqQbicK1PrHFEA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-hk2apc01on0121.outbound.protection.outlook.com ([104.47.124.121]:46048
-	"EHLO APC01-HK2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752000AbcDVMCq convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Apr 2016 08:02:46 -0400
-Received: by mail-vk0-f53.google.com with SMTP id e185so132735075vkb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Apr 2016 05:02:42 -0700 (PDT)
-In-Reply-To: <HK2PR0401MB14918377A1A14B3702B8BE3DAA6F0@HK2PR0401MB1491.apcprd04.prod.outlook.com>
+Received: from bay004-omc2s26.hotmail.com ([65.54.190.101]:50113 "EHLO
+	BAY004-OMC2S26.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751675AbcDVMoS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 22 Apr 2016 08:44:18 -0400
+In-Reply-To: <CACJqLyb6Yjz=PddFWxhOapMX3xJ-CQQ9zBMSuqQbicK1PrHFEA@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <8F4C2CA04C7DB04E99FEF7D73D1DFE57@apcprd04.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Tianxiang <lanceflee@msn.com>
+To: Haomai Wang <haomai@xsky.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Apr 22, 2016 at 5:52 AM, Li Tianxiang <lanceflee@msn.com> wrote=
-:
->
-> Sorry,
-> I mean that we have two NVMe SSD each node,one for a OSD,. But only 1=
- OSD is up.
->
-> It seams that the hugepages are all taken by 1 spdk instance, nothing=
- left for another.
-
-Yep, this is probrem.....
-
-we have two options now, one is use dpdk multi process to let two
-ceph-osd aware, it need some codes. another is waiting for "fedora osd
-process" feature which is more suitable......
-
->
->
->
->
-> --
-> Best Regards!
->
->
->
->
->
->
->
->
->
->
->
->
-> On 4/22/16, 17:28, "=E6=9D=8E =E5=A4=A9=E7=A5=A5" <ceph-devel-owner@v=
-ger.kernel.org on behalf of lanceflee@msn.com> wrote:
->
->>1. Fisrt of all ,  $ yum remove  dpdk-devel  dpdk -y
->>2.get dpdk-2.2.0 source code , and compile it as shared library, As f=
-ollows:
->>   a. vim config/common_linuxapp, modify "CONFIG_RTE_BUILD_SHARED_LIB=
-=3Dy"
->>   b.make  install T=3Dx86_64-native-linuxapp-gcc DESTDIR=3D/usr
->>3.build ceph  ./configure --with-spdk
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQpUaHghDQoNCkJUVywNCg0KV2UgaGF2ZSB0aG91Z2h0IGFib3V0IGlmIGl0IGlzIGEgd2FzdGUg
+dG8gcHV0IG9ubHkgMSBPU0Qgb24gYSB3aG9sZSBOVk1lDQpTU0QsIGVzcGVjaWFsbHkgYSBoaWdo
+LWVuZCBvbmUsIHN1Y2ggYXMgSW50ZWwgREMgUDM3MDAuDQoNCkFuZCB3ZSByZWFkIHNvbWUgc3Bk
+ayBjb2Rlcywgbm90aWNlZCB0aGF0IGl0IGlzIGJhbmQgd2l0aCBOVk1lIG5hbWVzcGFjZS4NCg0K
+VGhlb3JldGljYWxseSwgYSBOVk1lIFNTRCBjYW4gYmUgbXVsdGktbmFtZXNwYWNlcyBieSBwYXJ0
+aXRpb24gTEJBcy4gDQpFYWNoIG5hbWVzcGFjZSBoYXMgaXRzIG93biBTdWJtaXNzaW9uL0NvbXBs
+ZXRpb24gUXVldWVzLCBzbyBpdCB3b3VsZCB3b3JrIHdlbGwuDQoNCkJ1dCBub3csIHRvb2sgUDM3
+MDAgYXMgYW4gZXhhbXBsZSwgaXQgb25seSBzdXBwb3J0cyBOVk1lIHYxLjAsIGFuZCB0aGUgTmFt
+ZXNwYWNlIA0KTWFuYWdlbWVudCBDbWQgU2V0cyBpcyBub3Qgc3VwcG9ydGVkIHlldC4gSXQgd291
+bGQgYmUgZWFzaWVyIHRvIGNyZWF0ZSBuYW1lc3BhY2VzIHNvbWVkYXkuDQoNCg0KQW5kICJvcy9i
+bHVlc3RvcmUvTlZNRURldmljZXMuY2MiIGlkZW50aWZpZXMgMSBuYW1lc3BhY2UgcGVyIFNTRCB0
+b28uDQoNCkhvcGVzIHRvIHNlZSBtdWx0aS1uYW1lc3BhY2VzIHN1cHBvcnQgdG8gbWFrZSBmdWxs
+IHVzZSBvZiBTU0RzLg0KDQoNCg0KLS0gDQpCZXN0IFJlZ2FyZHMhDQoNCg0KDQoNCg0KDQoNCk9u
+IDQvMjIvMTYsIDIwOjAyLCAiSGFvbWFpIFdhbmciIDxoYW9tYWlAeHNreS5jb20+IHdyb3RlOg0K
+DQo+T24gRnJpLCBBcHIgMjIsIDIwMTYgYXQgNTo1MiBBTSwgTGkgVGlhbnhpYW5nIDxsYW5jZWZs
+ZWVAbXNuLmNvbT4gd3JvdGU6DQo+Pg0KPj4gU29ycnksDQo+PiBJIG1lYW4gdGhhdCB3ZSBoYXZl
+IHR3byBOVk1lIFNTRCBlYWNoIG5vZGUsb25lIGZvciBhIE9TRCwuIEJ1dCBvbmx5IDEgT1NEIGlz
+IHVwLg0KPj4NCj4+IEl0IHNlYW1zIHRoYXQgdGhlIGh1Z2VwYWdlcyBhcmUgYWxsIHRha2VuIGJ5
+IDEgc3BkayBpbnN0YW5jZSwgbm90aGluZyBsZWZ0IGZvciBhbm90aGVyLg0KPg0KPlllcCwgdGhp
+cyBpcyBwcm9icmVtLi4uLi4NCj4NCj53ZSBoYXZlIHR3byBvcHRpb25zIG5vdywgb25lIGlzIHVz
+ZSBkcGRrIG11bHRpIHByb2Nlc3MgdG8gbGV0IHR3bw0KPmNlcGgtb3NkIGF3YXJlLCBpdCBuZWVk
+IHNvbWUgY29kZXMuIGFub3RoZXIgaXMgd2FpdGluZyBmb3IgImZlZG9yYSBvc2QNCj5wcm9jZXNz
+IiBmZWF0dXJlIHdoaWNoIGlzIG1vcmUgc3VpdGFibGUuLi4uLi4NCj4NCj4+DQo+Pg0KPj4NCj4+
+DQo+PiAtLQ0KPj4gQmVzdCBSZWdhcmRzIQ0KPj4NCj4+DQo+Pg0KPj4NCj4+DQo+Pg0KPj4NCj4+
+DQo+Pg0KPj4NCj4+DQo+Pg0KPj4gT24gNC8yMi8xNiwgMTc6MjgsICLmnY4g5aSp56WlIiA8Y2Vw
+aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mIGxhbmNlZmxlZUBtc24u
+Y29tPiB3cm90ZToNCj4+DQo+Pj4xLiBGaXNydCBvZiBhbGwgLCAgJCB5dW0gcmVtb3ZlICBkcGRr
+LWRldmVsICBkcGRrIC15DQo+Pj4yLmdldCBkcGRrLTIuMi4wIHNvdXJjZSBjb2RlICwgYW5kIGNv
+bXBpbGUgaXQgYXMgc2hhcmVkIGxpYnJhcnksIEFzIGZvbGxvd3M6DQo+Pj4gICBhLiB2aW0gY29u
+ZmlnL2NvbW1vbl9saW51eGFwcCwgbW9kaWZ5ICJDT05GSUdfUlRFX0JVSUxEX1NIQVJFRF9MSUI9
+eSINCj4+PiAgIGIubWFrZSAgaW5zdGFsbCBUPXg4Nl82NC1uYXRpdmUtbGludXhhcHAtZ2NjIERF
+U1RESVI9L3Vzcg0KPj4+My5idWlsZCBjZXBoICAuL2NvbmZpZ3VyZSAtLXdpdGgtc3Bkaw0KPj4N
+Cg0K
