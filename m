@@ -1,106 +1,83 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: RGW Multisite delete wierdness
-Date: Thu, 21 Apr 2016 17:40:35 -0700
-Message-ID: <CADRKj5SJVMzjbvMt7PkvdDxBq1+b1GoCNo7f23Jsf9434+0O-A@mail.gmail.com>
-References: <87zispoa07.fsf@suse.com>
-	<CADRKj5TpcOzavirV7M-s2s8hg+9yyHm3LUyV_Mw3eCDR3DLzSw@mail.gmail.com>
-	<86oa95lc1h.fsf@linux-stsn.suse>
-	<CADRKj5SUACKOQNXW21OHCE1BOVZ5Bva-czgN4QaeptkP=gbrxg@mail.gmail.com>
+From: =?utf-8?B?5p2OIOWkqeelpQ==?= <lanceflee@msn.com>
+Subject: HowTo use spdk as Bluestore block device in v10.2.0
+Date: Fri, 22 Apr 2016 03:29:39 +0000
+Message-ID: <PS1PR0401MB149932A26F2B9D5893AF8A84AA6F0@PS1PR0401MB1499.apcprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f53.google.com ([209.85.213.53]:36040 "EHLO
-	mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751485AbcDVAkg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2016 20:40:36 -0400
-Received: by mail-vk0-f53.google.com with SMTP id n67so103266859vkf.3
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Apr 2016 17:40:36 -0700 (PDT)
-In-Reply-To: <CADRKj5SUACKOQNXW21OHCE1BOVZ5Bva-czgN4QaeptkP=gbrxg@mail.gmail.com>
+Received: from blu004-omc4s25.hotmail.com ([65.55.111.164]:51002 "EHLO
+	BLU004-OMC4S25.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751872AbcDVDeu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 21 Apr 2016 23:34:50 -0400
+Content-Language: en-US
+Content-ID: <2FC9E74CF594C14C9B80A8D317808A73@apcprd04.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek.lekshmanan@gmail.com>
-Cc: Abhishek Lekshmanan <abhishek@suse.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Apr 19, 2016 at 11:08 AM, Yehuda Sadeh-Weinraub
-<yehuda@redhat.com> wrote:
-> On Tue, Apr 19, 2016 at 10:54 AM, Abhishek L
-> <abhishek.lekshmanan@gmail.com> wrote:
->>
->> Yehuda Sadeh-Weinraub writes:
->>
->>> On Tue, Apr 19, 2016 at 9:10 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
->>>> Trying deleting objects & buckets from a secondary zone in a RGW
->>>> multisite configuration leads to some wierdness:
->>>>
->>>> 1. On deleting an object and the bucket immediately will mostly lead to
->>>> object and bucket getting deleted in the secondary zone, but since we
->>>> forward the bucket deletion to master only after we delete in secondary
->>>> it will fail with 409 (BucketNotEmpty) and gets reraised as a 500 to the
->>>> client. This _seems_ simple enough to fix if we forward the bucket
->>>> deletion request to master zone before attempting deletion locally,
->>>> (issue: http://tracker.ceph.com/issues/15540, possible fix: https://github.com/ceph/ceph/pull/8655)
->>>>
->>>
->>> Yeah, this looks good. We'll get it through testing.
->>>
->>>> 2. Deletion of objects themselves: deletion of objects themselves seems
->>>> to be a bit racy, deleting an object on a secondary zone succeeds,
->>>> listing the bucket seems to show an empty list, but gets populated with
->>>> the object again sometimes (this time with a newer timestamp), this is
->>>> not always guaranteed to be reproduce, but I've seen this often with
->>>> multipart uploads, as an eg:
->>>>
->>>> $ s3 -u list test-mp
->>>>                        Key                             Last Modified      Size
->>>> --------------------------------------------------  --------------------  -----
->>>> test.img                                            2016-04-19T13:00:17Z    40M
->>>> $ s3 -u delete test-mp/test.img
->>>> $ s3 -u list test-mp
->>>>                        Key                             Last Modified      Size
->>>> --------------------------------------------------  --------------------  -----
->>>> test.img                                            2016-04-19T13:00:45Z    40M
->>>> $ s3 -u delete test-mp/test.img # wait for a  min
->>>> $ s3 -us list test-mp
->>>> --------------------------------------------------  --------------------  -----
->>>> test.img                                            2016-04-19T13:01:52Z    40M
->>>>
->>>>
->>>> Mostly seeing log entries of this form in both the cases ie. where
->>>> delete object seems to be successfully delete in both master and
->>>> secondary zone and the case where it succeeds in master and fails in
->>>> secondary :
->>>>
->>>> 20 parsed entry: id=00000000027.27.2 iter->object=foo iter->instance= name=foo instance= ns=
->>>> 20 [inc sync] skipping object: dkr:d8e0ec3d-b3da-43f8-a99b-38a5b4941b6f.14113.2:-1/foo: non-complete operation
->>>> 20 parsed entry: id=00000000028.28.2 iter->object=foo iter->instance= name=foo instance= ns=
->>>> 20 [inc sync] skipping object: dkr:d8e0ec3d-b3da-43f8-a99b-38a5b4941b6f.14113.2:-1/foo: canceled operation
->>>>
->>>> Any ideas on this?
->>>>
->>>
->>> Do you have more than 2 zones syncing? Is it an object delete that
->>> came right after the object creation?
->>
->> Only 2 zones ie. one master and one secondary, req, on secondary. The delete came right after the
->> create though
->
-> There are two issues that I see here. One is that we sync an object,
-> but end up with different mtime than the object's source. The second
-> issue is that we shouldn't have synced that object.
->
-> There needs to be a check when syncing objects, to validate that we
-> don't sync an object that originated from the current zone (by
-> comparing the short zone id). We might be missing that.
->
-
-For the first issue, see:
-https://github.com/ceph/ceph/pull/8685
-
-However, create that follows by a delete will still be a problem, as
-when we sync the object we check it against the source mtime is newer
-than the destination mtime. This is problematic with deletes, as these
-don't have mtime once the object is removed. I think the solution
-would be by using temporary tombstone objects (we already have the olh
-framework that can provide what we need), that we'll garbage collect.
-
-Yehuda
+DQpIaSxhbGw6DQoNCldoZW4gSSB0cmllZCB0byB1c2UgU1BESywgc29tZSBwcm9ibGVtcyBvY2N1
+cnJlZCBhcyBmb2xsb3dzLg0KDQpJdCBsb29rcyBsaWtlIHNvbWV0aGluZyBnb2VzIHdyb25nIGlu
+IExpYnMgb2YgZHBkay1kZXZlbA0KDQpNYXliZSB0aGUgc2FtZSBhcyBCVUcjMTUzODYgDQoNCkhv
+d1RvIGZpeCBpdD8gQW55IGhlbHA/DQoNCg0K4oCUDQogQmVzdCBSZWdhcmRzIQ0KDQoNCg0KRUFM
+OiBUU0MgZnJlcXVlbmN5IGlzIH4yMzk0NDU3IEtIeg0KRUFMOiBvcGVuIHNoYXJlZCBsaWIgL3Vz
+ci9saWI2NC9kcGRrLXBtZHMvbGlicnRlX3BtZF9peGdiZS5zby4xDQpFQUw6IC91c3IvbGliNjQv
+ZHBkay1wbWRzL2xpYnJ0ZV9wbWRfaXhnYmUuc28uMTogdW5kZWZpbmVkIHN5bWJvbDogcnRlX2V0
+aF9kZXZpY2VzDQpQQU5JQyBpbiBydGVfZWFsX2luaXQoKToNCkNhbm5vdCBpbml0IHBsdWdpbnMN
+Cjg6IFsvbGliNjQvbGliYy5zby42KGNsb25lKzB4NmQpIFsweDdmNDI4MDUxNTI4ZF1dDQo3OiBb
+L2xpYjY0L2xpYnB0aHJlYWQuc28uMCgrMHg3ZGM1KSBbMHg3ZjQyODFlODlkYzVdXQ0KNjogWy9s
+aWI2NC9saWJzdGRjKysuc28uNigrMHhiNTIyMCkgWzB4N2Y0MjgwZGFkMjIwXV0NCjU6IFsuL2Nl
+cGgtb3NkKCsweDc3ZjU4ZCkgWzB4N2Y0Mjg0NzQ3NThkXV0NCjQ6IFsuL2NlcGgtb3NkKCsweDc3
+ZWVlNSkgWzB4N2Y0Mjg0NzQ2ZWU1XV0NCjM6IFsvbGliNjQvbGlicnRlX2VhbC5zby4yKHJ0ZV9l
+YWxfaW5pdCsweGVjYikgWzB4N2Y0MjgzNmQ0ZjhiXV0NCjI6IFsvbGliNjQvbGlicnRlX2VhbC5z
+by4yKF9fcnRlX3BhbmljKzB4ZDApIFsweDdmNDI4MzZkMzQ2MF1dDQoxOiBbL2xpYjY0L2xpYnJ0
+ZV9lYWwuc28uMihydGVfZHVtcF9zdGFjaysweDJkKSBbMHg3ZjQyODM2ZGI1ZmRdXQ0KKioqIENh
+dWdodCBzaWduYWwgKEFib3J0ZWQpICoqDQogaW4gdGhyZWFkIDdmNDI3YzIyNjcwMCB0aHJlYWRf
+bmFtZTpjZXBoLW9zZA0KIGNlcGggdmVyc2lvbiAxMC4yLjAgKDNhOWZiYTIwZWM3NDM2OTliNjli
+ZDAxODFkZDZjNTRkYzAxYzY0YjkpDQogMTogKCgpKzB4OGZiMzQyKSBbMHg3ZjQyODQ4YzMzNDJd
+DQogMjogKCgpKzB4ZjEwMCkgWzB4N2Y0MjgxZTkxMTAwXQ0KIDM6IChnc2lnbmFsKCkrMHgzNykg
+WzB4N2Y0MjgwNDU0NWY3XQ0KIDQ6IChhYm9ydCgpKzB4MTQ4KSBbMHg3ZjQyODA0NTVjZThdDQog
+NTogKHJ0ZV9sb2coKSswKSBbMHg3ZjQyODM2ZDM0NmFdDQogNjogKHJ0ZV9lYWxfaW5pdCgpKzB4
+ZWNiKSBbMHg3ZjQyODM2ZDRmOGJdDQogNzogKCgpKzB4NzdlZWU1KSBbMHg3ZjQyODQ3NDZlZTVd
+DQogODogKCgpKzB4NzdmNThkKSBbMHg3ZjQyODQ3NDc1OGRdDQogOTogKCgpKzB4YjUyMjApIFsw
+eDdmNDI4MGRhZDIyMF0NCiAxMDogKCgpKzB4N2RjNSkgWzB4N2Y0MjgxZTg5ZGM1XQ0KIDExOiAo
+Y2xvbmUoKSsweDZkKSBbMHg3ZjQyODA1MTUyOGRdDQoyMDE2LTA0LTIyIDEwOjQ1OjMxLjM0NTMy
+NCA3ZjQyN2MyMjY3MDAgLTEgKioqIENhdWdodCBzaWduYWwgKEFib3J0ZWQpICoqDQogaW4gdGhy
+ZWFkIDdmNDI3YzIyNjcwMCB0aHJlYWRfbmFtZTpjZXBoLW9zZA0KDQogY2VwaCB2ZXJzaW9uIDEw
+LjIuMCAoM2E5ZmJhMjBlYzc0MzY5OWI2OWJkMDE4MWRkNmM1NGRjMDFjNjRiOSkNCiAxOiAoKCkr
+MHg4ZmIzNDIpIFsweDdmNDI4NDhjMzM0Ml0NCiAyOiAoKCkrMHhmMTAwKSBbMHg3ZjQyODFlOTEx
+MDBdDQogMzogKGdzaWduYWwoKSsweDM3KSBbMHg3ZjQyODA0NTQ1ZjddDQogNDogKGFib3J0KCkr
+MHgxNDgpIFsweDdmNDI4MDQ1NWNlOF0NCiA1OiAocnRlX2xvZygpKzApIFsweDdmNDI4MzZkMzQ2
+YV0NCiA2OiAocnRlX2VhbF9pbml0KCkrMHhlY2IpIFsweDdmNDI4MzZkNGY4Yl0NCiA3OiAoKCkr
+MHg3N2VlZTUpIFsweDdmNDI4NDc0NmVlNV0NCiA4OiAoKCkrMHg3N2Y1OGQpIFsweDdmNDI4NDc0
+NzU4ZF0NCiA5OiAoKCkrMHhiNTIyMCkgWzB4N2Y0MjgwZGFkMjIwXQ0KIDEwOiAoKCkrMHg3ZGM1
+KSBbMHg3ZjQyODFlODlkYzVdDQogMTE6IChjbG9uZSgpKzB4NmQpIFsweDdmNDI4MDUxNTI4ZF0N
+CiBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1
+dGFibGU+YCBpcyBuZWVkZWQgdG8gaW50ZXJwcmV0IHRoaXMuDQoNCiAgIC0yNT4gMjAxNi0wNC0y
+MiAxMDo0NToyOS44MTEwNDUgN2Y0MjgzZjljYjAwIC0xIFdBUk5JTkc6IHRoZSBmb2xsb3dpbmcg
+ZGFuZ2Vyb3VzIGFuZCBleHBlcmltZW50YWwgZmVhdHVyZXMgYXJlIGVuYWJsZWQ6IGJsdWVzdG9y
+ZSxyb2Nrc2RiDQogICAtMjQ+IDIwMTYtMDQtMjIgMTA6NDU6MjkuODExMjQ3IDdmNDI4M2Y5Y2Iw
+MCAtMSBXQVJOSU5HOiB0aGUgZm9sbG93aW5nIGRhbmdlcm91cyBhbmQgZXhwZXJpbWVudGFsIGZl
+YXR1cmVzIGFyZSBlbmFibGVkOiBibHVlc3RvcmUscm9ja3NkYg0KICAgLTIyPiAyMDE2LTA0LTIy
+IDEwOjQ1OjI5LjgxMTI4MiA3ZjQyODNmOWNiMDAgLTEgV0FSTklORzogZXhwZXJpbWVudGFsIGZl
+YXR1cmUgJ2JsdWVzdG9yZScgaXMgZW5hYmxlZA0KUGxlYXNlIGJlIGF3YXJlIHRoYXQgdGhpcyBm
+ZWF0dXJlIGlzIGV4cGVyaW1lbnRhbCwgdW50ZXN0ZWQsDQp1bnN1cHBvcnRlZCwgYW5kIG1heSBy
+ZXN1bHQgaW4gZGF0YSBjb3JydXB0aW9uLCBkYXRhIGxvc3MsDQphbmQvb3IgaXJyZXBhcmFibGUg
+ZGFtYWdlIHRvIHlvdXIgY2x1c3Rlci4gIERvIG5vdCB1c2UNCmZlYXR1cmUgd2l0aCBpbXBvcnRh
+bnQgZGF0YS4NCg0KICAgLTIxPiAyMDE2LTA0LTIyIDEwOjQ1OjI5LjgzMzg2NiA3ZjQyODNmOWNi
+MDAgLTEgV0FSTklORzogdGhlIGZvbGxvd2luZyBkYW5nZXJvdXMgYW5kIGV4cGVyaW1lbnRhbCBm
+ZWF0dXJlcyBhcmUgZW5hYmxlZDogYmx1ZXN0b3JlLHJvY2tzZGINCiAgICAtNT4gMjAxNi0wNC0y
+MiAxMDo0NToyOS44Njk4ODAgN2Y0MjgzZjljYjAwIC0xIGJsdWVzdG9yZSgvdmFyL2xvY2FsL29z
+ZDApIF9yZWFkX2ZzaWQgdW5wYXJzYWJsZSB1dWlkIA0KICAgICAwPiAyMDE2LTA0LTIyIDEwOjQ1
+OjMxLjM0NTMyNCA3ZjQyN2MyMjY3MDAgLTEgKioqIENhdWdodCBzaWduYWwgKEFib3J0ZWQpICoq
+DQogaW4gdGhyZWFkIDdmNDI3YzIyNjcwMCB0aHJlYWRfbmFtZTpjZXBoLW9zZA0KDQogY2VwaCB2
+ZXJzaW9uIDEwLjIuMCAoM2E5ZmJhMjBlYzc0MzY5OWI2OWJkMDE4MWRkNmM1NGRjMDFjNjRiOSkN
+CiAxOiAoKCkrMHg4ZmIzNDIpIFsweDdmNDI4NDhjMzM0Ml0NCiAyOiAoKCkrMHhmMTAwKSBbMHg3
+ZjQyODFlOTExMDBdDQogMzogKGdzaWduYWwoKSsweDM3KSBbMHg3ZjQyODA0NTQ1ZjddDQogNDog
+KGFib3J0KCkrMHgxNDgpIFsweDdmNDI4MDQ1NWNlOF0NCiA1OiAocnRlX2xvZygpKzApIFsweDdm
+NDI4MzZkMzQ2YV0NCiA2OiAocnRlX2VhbF9pbml0KCkrMHhlY2IpIFsweDdmNDI4MzZkNGY4Yl0N
+CiA3OiAoKCkrMHg3N2VlZTUpIFsweDdmNDI4NDc0NmVlNV0NCiA4OiAoKCkrMHg3N2Y1OGQpIFsw
+eDdmNDI4NDc0NzU4ZF0NCiA5OiAoKCkrMHhiNTIyMCkgWzB4N2Y0MjgwZGFkMjIwXQ0KIDEwOiAo
+KCkrMHg3ZGM1KSBbMHg3ZjQyODFlODlkYzVdDQogMTE6IChjbG9uZSgpKzB4NmQpIFsweDdmNDI4
+MDUxNTI4ZF0NCg0KDQo=
