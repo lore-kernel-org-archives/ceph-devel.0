@@ -1,93 +1,95 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Bluestore cluster example
-Date: Fri, 22 Apr 2016 10:57:31 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604221054320.8831@cpach.fuggernut.com>
-References: <5710D936.9040507@redhat.com> <CABZ+qqnnOta_Y4rCV8y=v8KKstr==OWa34ryBAOcEH56xSk4tA@mail.gmail.com> <alpine.DEB.2.11.1604221006350.8831@cpach.fuggernut.com> <CABZ+qqn38cPHwQ-X0d7FjdYtCgwObdUWsZysx3debMR7fi0t0w@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: New messages in OSD logs.
+Date: Fri, 22 Apr 2016 11:10:53 -0400
+Message-ID: <CAJ4mKGYYf9TWrMJyizg_pcNhqJ0kwpr-T3osyy0NKyoYS6d5Cg@mail.gmail.com>
+References: <57121CDE.3010908@digiware.nl>
+	<CAJ4mKGaq0-=mBCrNNDZoFwhM9zs_40KJJSkiHyj0apkH6W21hA@mail.gmail.com>
+	<0db9f84b-b39f-ee31-82b8-e8cbecbfb953@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35483 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754407AbcDVO52 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 22 Apr 2016 10:57:28 -0400
-In-Reply-To: <CABZ+qqn38cPHwQ-X0d7FjdYtCgwObdUWsZysx3debMR7fi0t0w@mail.gmail.com>
+Received: from mail-vk0-f51.google.com ([209.85.213.51]:36044 "EHLO
+	mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752171AbcDVPKy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Apr 2016 11:10:54 -0400
+Received: by mail-vk0-f51.google.com with SMTP id n67so122080406vkf.3
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Apr 2016 08:10:54 -0700 (PDT)
+In-Reply-To: <0db9f84b-b39f-ee31-82b8-e8cbecbfb953@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: Mark Nelson <mnelson@redhat.com>, cbt <cbt@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>, Samuel Just <sjust@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 22 Apr 2016, Dan van der Ster wrote:
-> On Fri, Apr 22, 2016 at 4:09 PM, Sage Weil <sweil@redhat.com> wrote:
-> > On Fri, 22 Apr 2016, Dan van der Ster wrote:
-> >> Hi Mark,
-> >>
-> >> On Fri, Apr 15, 2016 at 2:06 PM, Mark Nelson <mnelson@redhat.com> wrote:
-> >> > Hi all,
-> >> >
-> >> > A couple of folks have asked me how to setup bluestore clusters for
-> >> > performance testing.  I personally am using cbt for this, but you should be
-> >> > able to use ceph-disk with some other cluster creation method as well.
-> >> >
-> >> > For CBT, you really don't need to do much.  In the old newstore days, a
-> >> > "block" symlink needed to be created in the osd data dir to link to the new
-> >> > block device.  CBT did this when the "newstore_block: True" option was set
-> >> > in the cluster section of the cbt yaml file.  This isn't really needed
-> >> > anymore, as you can now specify the block, db, and wal devices directly in
-> >> > your ceph.conf file.  If your partitions are setup properly you can create
-> >> > bluestore clusters without having to do anything beyond changing the
-> >> > ceph.conf file (with cbt at least).
-> >> >
-> >> > Here's a very basic example:
-> >> >
-> >> > [global]
-> >> >         enable experimental unrecoverable data corrupting features =
-> >> > bluestore rocksdb
-> >> >         osd objectstore = bluestore
-> >> >
-> >> > [osd.0]
-> >> >         host = incerta01.front.sepia.ceph.com
-> >> >         osd data = /tmp/cbt/mnt/osd-device-0-data
-> >> >         bluestore block path = /dev/disk/by-partlabel/osd-device-0-block
-> >> >         bluestore block db path = /dev/disk/by-partlabel/osd-device-0-db
-> >> >         bluestore block wal path = /dev/disk/by-partlabel/osd-device-0-wal
-> >>
-> >> The db and wal paths are optional perf boosting things, right?
-> >
-> > Yeah.
-> >
-> >> If I do ceph-disk prepare --bluestore /dev/sdae, I get:
-> >>
-> >> /dev/sdae :
-> >>  /dev/sdae2 ceph block, for /dev/sdae1
-> >>  /dev/sdae1 ceph data, active, cluster ceph, osd.413, block /dev/sdae2
-> >
-> > Looks right!  ceph-disk isn't smart enough to set up the wal or db devices
-> > yet.
-> >
-> > The wal device should default to something like 128 MB.
-> >
-> > The db device would be whatever portion of an SSD you want to allocate to
-> > storing the bluestore metadata.  My guess is that we'll get further than
-> > we did with FileStore, so the old 1:4 or 1:5 rule of thumb might be more
-> > like 1:10, but who knows--this'll require some testing.
-> 
-> Cool, I'll start testing wal/db on SSDs with some new machines ~next week.
-> 
-> Just to clarify, if we give no wal, there is no wal, right?
-> But if we don't give a dedicated db device, where does the db go?
+On Fri, Apr 22, 2016 at 8:55 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 18-4-2016 20:52, Gregory Farnum wrote:
+>> On Sat, Apr 16, 2016 at 4:07 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>> Hi
+>>>
+>>> I've recently rebased my fork, and also upgrae FreeBSD to more recent code.
+>>> Now I'm running into this:
+>>>
+>>> 2016-04-16 03:03:55.891466 805617000 -1
+>>> filestore(testdir/test-erasure-eio/0) WARNING: max attr value size (1024)
+>>> is smaller than osd_max_object_name_len (2048). Your backend filesystem
+>>> appears to not support attrs large enough
+>>> to handle the configured max rados name size. You may get unexpected
+>>> ENAMETOOLONG errors on rados operations or buggy behavior
+>>>
+>>> and later on:
+>>>
+>>> 2016-04-16 03:04:03.287073 805617000  2 osd.0 0 boot
+>>> 2016-04-16 03:04:03.287846 805617000 -1 osd.0 0 backend (filestore) is
+>>> unable to support max object name[space] le
+>>> n
+>>> 2016-04-16 03:04:03.287873 805617000 -1 osd.0 0    osd max object name len =
+>>> 2048
+>>> 2016-04-16 03:04:03.287894 805617000 -1 osd.0 0    osd max object namespace
+>>> len = 256
+>>> 2016-04-16 03:04:03.287931 805617000 -1 osd.0 0 (63) File name too long
+>>> 2016-04-16 03:04:03.303432 805617000  1 journal close
+>>> testdir/test-erasure-eio/0/journal
+>>> 2016-04-16 03:04:03.310280 805617000 -1 ^[[0;31m ** ERROR: osd init failed:
+>>> (63) File name too long^[[0m
+>>>
+>>> And the OSD dies....
+>>>
+>>> I guess that this has the do with the changes in the LFN modules, and is
+>>> also the reason for the debate about ext4 support.
+>>>
+>>> Uptill now unittest_chain_xattr did work, but that now also fails.
+>>> But it fails in a strange way where it tries to delete attributes with
+>>> numerical ends that are certainly not in the attributes.
+>>> Maximum xattr name length in FreeBSD seems to be 256 chars, which wasn't a
+>>> problem yet.
+>>>
+>>> So is there any chance of continuing on my "old" way to finish a first
+>>> version of the port?
+>>>
+>>> Or am I just seeing things, and should I start looking at the FreeBSD side
+>>> of things?
+>>
+>> I didn't do this work, but I think you should be able to set
+>> osd_max_object_name_len and get things going. (I'm less sure about the
+>> unit test.)
+>
+> Hi,
+>
+> Wierd things are happening here as far as I can tell....
+>
+> linux/limits.h defines:
+> #define XATTR_NAME_MAX   255 /* # chars in an extended attribute name */
+> #define XATTR_SIZE_MAX 65536 /* size of an extended attribute value (64k) */
+> #define XATTR_LIST_MAX 65536 /* size of extended attribute namelist (64k) */
+>
+> Which is exactly the same as is on FreeBSD:
+> max namesize is 255 chars, content of attributes max 64K
+>
+> Even wrote some perl to actually test this. And it is true.
 
-There are always wal and db "files" from rocksdb, but if there aren't 
-separate devices they just end up on the main block device.
+Hmm, it's possible the Linux VFS and some FSes may grant more leniency
+about letting through long xattr names.
 
-> Also, bluestore being experimental in jewel -- I guess that means you
-> don't promise to support the current on disk format in kraken and
-> beyond?
-
-Correct.
-
-It's *possible* we will include upgrade/conversion code, but it'll sort of 
-depend on how much effort it is when it a format change comes along.
-
-The goal is that by kraken it will be stable.
-
-sage
+Like I said, if you check the patches responsible for these warnings
+you should be able to find the right config settings to bypass the
+problem.
+-Greg
