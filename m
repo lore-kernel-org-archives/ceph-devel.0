@@ -1,77 +1,59 @@
-From: Abhishek L <abhishek@suse.com>
-Subject: Re: Queries on RGW Multitenancy
-Date: Fri, 22 Apr 2016 19:36:40 +0200
-Message-ID: <86lh45lf4n.fsf@linux-stsn.suse>
-References: <87shyggsur.fsf@suse.com> <20160421155916.637a7e77@lembas.zaitcev.lan> <87bn517gfy.fsf@suse.com> <20160422112338.33bde8d2@lembas.zaitcev.lan>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: memcpy() avoidance using decode(bufferlist)
+Date: Fri, 22 Apr 2016 14:05:15 -0400
+Message-ID: <571A67DB.6010903@redhat.com>
+References: <20160422155355.06c5ef4c@echidna.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:41481 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932091AbcDVRg4 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Fri, 22 Apr 2016 13:36:56 -0400
-In-reply-to: <20160422112338.33bde8d2@lembas.zaitcev.lan>
+Received: from mail-ig0-f181.google.com ([209.85.213.181]:37478 "EHLO
+	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753844AbcDVSFR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Apr 2016 14:05:17 -0400
+Received: by mail-ig0-f181.google.com with SMTP id g8so23416096igr.0
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Apr 2016 11:05:17 -0700 (PDT)
+In-Reply-To: <20160422155355.06c5ef4c@echidna.suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Pete Zaitcev <zaitcev@redhat.com>
-Cc: Abhishek Lekshmanan <abhishek@suse.com>, ceph-devel <ceph-devel@vger.kernel.org>, Radoslaw Zarzynski <rzarzynski@mirantis.com>
+To: David Disseldorp <ddiss@suse.de>, ceph-devel@vger.kernel.org
 
 
-Pete Zaitcev writes:
 
-> On Fri, 22 Apr 2016 18:32:01 +0200
-> Abhishek Lekshmanan <abhishek@suse.com> wrote:
+On 04/22/2016 09:53 AM, David Disseldorp wrote:
+> Hi,
 >
->> > One problem remains, as you can guess: cross-tenant access while
->> > authenticated with Keystone. This is simply not implemented. We considered
->> > a couple of approaches, such as
->> >  - a special syntax, such as backslash "tenant\bucket"
->> >  - a new header "X-RGW-Tenant"
->> >  - a user attribute in Keystone (requires cooperation from Keystone)
->> >  - a separate endpoint in the Keystone catalog, possibly using regions
->> >
->> > Thanks for raising this issue. Honestly I gave up on finding an elegant
->> > solution for now, although tinkering with endpoints seems like a winner.
->> > I think Radoslaw liked it too. If you have ideas, by all means please
->> > propose them.  
->> 
->> I might be understanding this wrong, but since endpoints are an admin only
->> thing (to create), are you suggesting something like a different region
->> per tenant or so?
+> A question regarding bufferlist usage:
 >
-> I suggest having two endpoints: one traditional with /swift/v1 and another
-> with /swift/v1/%(tenant_id)s. The problem here is, client has to be told
-> to use one region or ther other, and the default is the old way.
-
-Ah ok,
+> I'm working on the cmpext librados C API, and want to decode the OSD
+> response directly into a (char *buf/size_t len) buffer provided by the
+> caller.
 >
->> Doesn't keystone returns the tenantid while authenticating (I could be
->> wrong), in which case we somehow enforce that the tenant-id for a user
->> created in rgw[1] if you're using keystone should match the ones used at
->> openstack and check for the value of tenant-id returned by keystone when
->> authenticating?
+> I figured this would be straightforward via:
+>    bl.push_back(buffer::create_static(buf, len));
+>    ...
+>    ::decode_nohead(iter.get_remaining(), bl, iter);
 >
-> I'll have to get back to you on this. When I considered using Keystone
-> tenant IDs, I was going to put dollars into them. It works, but but you
-> have to educate administartors to create users with a specific tenant ID.
-> None of the current tools support this.
-I was meaning more like when we create users in RGW, we specify the
---tenant with whatever keystone uuid was assigned for the user..but I
-forgot about the the whole keystone-tenant -> rgw-uid mapping thing, so
-the keystone tenant id is already stored as a RGW user id, we could
-potentially check the response against the value of uid, but then again
-creating the user for the first time in RGW will still be sort of a
-challenge.
-> They always let Keystone to select
-> the ID, and it uses a random UUID. Having them not matching was very useful
-> therefore. An operator just lets Keystone do its thing, then we use the
-> "name" instead of their ID, and use it in RGW as ID (clear as mud, right?).
-
-Yeah sure this could also work. 
+> However, the decoded data doesn't make it into buf, unless an extra copy
+> occurs via:
+>    bl.copy(0, bl.length(), buf);
 >
-> -- Pete
+> Any suggestions on a clean way to avoid the extra copy here?
+>
+> Cheers, David
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+Hi David,
 
--- 
-Abhishek
+The decode logic is appending data to the end of the given bufferlist, 
+which is why it's skipping over the buffer pointer that you provide. 
+Internally, buffer::list is allocating its own 'buffer::ptr 
+append_buffer' to batch these appends. This append_buffer is not 
+currently exposed by the interface, but if there was a way to provide 
+your own buffer::ptr from buffer::create_static(), you could 
+hypothetically use that to avoid the copy.
+
+Casey
