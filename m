@@ -1,100 +1,56 @@
-From: Li Tianxiang <lanceflee@msn.com>
-Subject: Re: Bluestore cluster example
-Date: Sat, 23 Apr 2016 04:51:20 +0000
-Message-ID: <PS1PR0401MB1499C9F93C2F3C62A2913F93AA600@PS1PR0401MB1499.apcprd04.prod.outlook.com>
-References: <5710D936.9040507@redhat.com>
- <CABZ+qqnnOta_Y4rCV8y=v8KKstr==OWa34ryBAOcEH56xSk4tA@mail.gmail.com>
- <alpine.DEB.2.11.1604221006350.8831@cpach.fuggernut.com>
- <CABZ+qqn38cPHwQ-X0d7FjdYtCgwObdUWsZysx3debMR7fi0t0w@mail.gmail.com>
- <alpine.DEB.2.11.1604221054320.8831@cpach.fuggernut.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: open the floodgates...
+Date: Sat, 23 Apr 2016 10:21:23 +0200
+Message-ID: <571B3083.5070606@suse.cz>
+References: <alpine.DEB.2.11.1604211432300.16393@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from snt004-omc1s21.hotmail.com ([65.55.90.32]:61829 "EHLO
-	SNT004-OMC1S21.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752161AbcDWEvZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 23 Apr 2016 00:51:25 -0400
-In-Reply-To: <alpine.DEB.2.11.1604221054320.8831@cpach.fuggernut.com>
-Content-Language: en-US
-Content-ID: <576F2E770CAF1B4393F0F5632B1746A0@apcprd04.prod.outlook.com>
+Received: from mx2.suse.de ([195.135.220.15]:46115 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751555AbcDWIV1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 23 Apr 2016 04:21:27 -0400
+In-Reply-To: <alpine.DEB.2.11.1604211432300.16393@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-Tm8gbmVlZCB0byBzcGVjaWZ5IHdhbCBhbmQgZGIgZGlzayBwYXRoLg0KDQpCdXQgSSBoYXZlIHJ1
-biBzb21lIGJhc2ljIGZpbyB0ZXN0cyBvbiB2MTAuMS4yLCB1c2luZyBhbGwgU1NEcyBlbnZpcm9u
-bWVudC4NCkl0IHNlZW1zIHRoZSByZXN1bHRzIG9mICBOT1QgZGVzcGVyYXRpbmcgdGhvc2UgZGV2
-aWNlcyAoYSB3aG9sZSBkaXNrKSBnZXQgbG93ZXINCnBlcmZvcm1hbmNlIHRoYW4gcGFydGl0aW9u
-aW5nIHRoZSBkaXNrIGFuZCBzcGVjaWZ5aW5nIGFsbCB0aGUgMyBkaXNrIHBhdGhzLg0KDQoNCiAN
-CiANCkZpbyAgICB8IHJhblJkLiA0ayB8cmFuZFd0LjRrIHwgc2VxUmQuNjRrIHxzZXFXdC42NGsN
-ClBhcnRlZCB8ICAgMSAgICAgICB8MSAgICAgICAgIHwgIDEgICAgICAgIHwxICAgDQpXaG9sZURp
-c2t8MC44OSAgICAgfDAuODggICAgICB8MC45OCAgICAgICB8MC45MA0KDQoNCg0KDQoNCkZ1cnRo
-ZXIgdGVzdHMgd2lsbCBiZSBkb25lIG9uIDEwLjIuMCBuZXh0IHdlZWsuDQoNCg0KLS0tLS0tLQ0K
-DQpPdXRsb29rIHdlYiBtYWlsIGlzIGFsd2F5cyByZWplY3RlZCBieSBNTCwgYW5ub3lpbmcgOigN
-Cg0KDQoNCi0tIA0KQmVzdCBSZWdhcmRzIQ0KDQoNCg0KDQoNCg0KDQoNCk9uIDQvMjIvMTYsIDIy
-OjU3LCAiU2FnZSBXZWlsIiA8Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVo
-YWxmIG9mIHN3ZWlsQHJlZGhhdC5jb20+IHdyb3RlOg0KDQo+T24gRnJpLCAyMiBBcHIgMjAxNiwg
-RGFuIHZhbiBkZXIgU3RlciB3cm90ZToNCj4+IE9uIEZyaSwgQXByIDIyLCAyMDE2IGF0IDQ6MDkg
-UE0sIFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6DQo+PiA+IE9uIEZyaSwgMjIg
-QXByIDIwMTYsIERhbiB2YW4gZGVyIFN0ZXIgd3JvdGU6DQo+PiA+PiBIaSBNYXJrLA0KPj4gPj4N
-Cj4+ID4+IE9uIEZyaSwgQXByIDE1LCAyMDE2IGF0IDI6MDYgUE0sIE1hcmsgTmVsc29uIDxtbmVs
-c29uQHJlZGhhdC5jb20+IHdyb3RlOg0KPj4gPj4gPiBIaSBhbGwsDQo+PiA+PiA+DQo+PiA+PiA+
-IEEgY291cGxlIG9mIGZvbGtzIGhhdmUgYXNrZWQgbWUgaG93IHRvIHNldHVwIGJsdWVzdG9yZSBj
-bHVzdGVycyBmb3INCj4+ID4+ID4gcGVyZm9ybWFuY2UgdGVzdGluZy4gIEkgcGVyc29uYWxseSBh
-bSB1c2luZyBjYnQgZm9yIHRoaXMsIGJ1dCB5b3Ugc2hvdWxkIGJlDQo+PiA+PiA+IGFibGUgdG8g
-dXNlIGNlcGgtZGlzayB3aXRoIHNvbWUgb3RoZXIgY2x1c3RlciBjcmVhdGlvbiBtZXRob2QgYXMg
-d2VsbC4NCj4+ID4+ID4NCj4+ID4+ID4gRm9yIENCVCwgeW91IHJlYWxseSBkb24ndCBuZWVkIHRv
-IGRvIG11Y2guICBJbiB0aGUgb2xkIG5ld3N0b3JlIGRheXMsIGENCj4+ID4+ID4gImJsb2NrIiBz
-eW1saW5rIG5lZWRlZCB0byBiZSBjcmVhdGVkIGluIHRoZSBvc2QgZGF0YSBkaXIgdG8gbGluayB0
-byB0aGUgbmV3DQo+PiA+PiA+IGJsb2NrIGRldmljZS4gIENCVCBkaWQgdGhpcyB3aGVuIHRoZSAi
-bmV3c3RvcmVfYmxvY2s6IFRydWUiIG9wdGlvbiB3YXMgc2V0DQo+PiA+PiA+IGluIHRoZSBjbHVz
-dGVyIHNlY3Rpb24gb2YgdGhlIGNidCB5YW1sIGZpbGUuICBUaGlzIGlzbid0IHJlYWxseSBuZWVk
-ZWQNCj4+ID4+ID4gYW55bW9yZSwgYXMgeW91IGNhbiBub3cgc3BlY2lmeSB0aGUgYmxvY2ssIGRi
-LCBhbmQgd2FsIGRldmljZXMgZGlyZWN0bHkgaW4NCj4+ID4+ID4geW91ciBjZXBoLmNvbmYgZmls
-ZS4gIElmIHlvdXIgcGFydGl0aW9ucyBhcmUgc2V0dXAgcHJvcGVybHkgeW91IGNhbiBjcmVhdGUN
-Cj4+ID4+ID4gYmx1ZXN0b3JlIGNsdXN0ZXJzIHdpdGhvdXQgaGF2aW5nIHRvIGRvIGFueXRoaW5n
-IGJleW9uZCBjaGFuZ2luZyB0aGUNCj4+ID4+ID4gY2VwaC5jb25mIGZpbGUgKHdpdGggY2J0IGF0
-IGxlYXN0KS4NCj4+ID4+ID4NCj4+ID4+ID4gSGVyZSdzIGEgdmVyeSBiYXNpYyBleGFtcGxlOg0K
-Pj4gPj4gPg0KPj4gPj4gPiBbZ2xvYmFsXQ0KPj4gPj4gPiAgICAgICAgIGVuYWJsZSBleHBlcmlt
-ZW50YWwgdW5yZWNvdmVyYWJsZSBkYXRhIGNvcnJ1cHRpbmcgZmVhdHVyZXMgPQ0KPj4gPj4gPiBi
-bHVlc3RvcmUgcm9ja3NkYg0KPj4gPj4gPiAgICAgICAgIG9zZCBvYmplY3RzdG9yZSA9IGJsdWVz
-dG9yZQ0KPj4gPj4gPg0KPj4gPj4gPiBbb3NkLjBdDQo+PiA+PiA+ICAgICAgICAgaG9zdCA9IGlu
-Y2VydGEwMS5mcm9udC5zZXBpYS5jZXBoLmNvbQ0KPj4gPj4gPiAgICAgICAgIG9zZCBkYXRhID0g
-L3RtcC9jYnQvbW50L29zZC1kZXZpY2UtMC1kYXRhDQo+PiA+PiA+ICAgICAgICAgYmx1ZXN0b3Jl
-IGJsb2NrIHBhdGggPSAvZGV2L2Rpc2svYnktcGFydGxhYmVsL29zZC1kZXZpY2UtMC1ibG9jaw0K
-Pj4gPj4gPiAgICAgICAgIGJsdWVzdG9yZSBibG9jayBkYiBwYXRoID0gL2Rldi9kaXNrL2J5LXBh
-cnRsYWJlbC9vc2QtZGV2aWNlLTAtZGINCj4+ID4+ID4gICAgICAgICBibHVlc3RvcmUgYmxvY2sg
-d2FsIHBhdGggPSAvZGV2L2Rpc2svYnktcGFydGxhYmVsL29zZC1kZXZpY2UtMC13YWwNCj4+ID4+
-DQo+PiA+PiBUaGUgZGIgYW5kIHdhbCBwYXRocyBhcmUgb3B0aW9uYWwgcGVyZiBib29zdGluZyB0
-aGluZ3MsIHJpZ2h0Pw0KPj4gPg0KPj4gPiBZZWFoLg0KPj4gPg0KPj4gPj4gSWYgSSBkbyBjZXBo
-LWRpc2sgcHJlcGFyZSAtLWJsdWVzdG9yZSAvZGV2L3NkYWUsIEkgZ2V0Og0KPj4gPj4NCj4+ID4+
-IC9kZXYvc2RhZSA6DQo+PiA+PiAgL2Rldi9zZGFlMiBjZXBoIGJsb2NrLCBmb3IgL2Rldi9zZGFl
-MQ0KPj4gPj4gIC9kZXYvc2RhZTEgY2VwaCBkYXRhLCBhY3RpdmUsIGNsdXN0ZXIgY2VwaCwgb3Nk
-LjQxMywgYmxvY2sgL2Rldi9zZGFlMg0KPj4gPg0KPj4gPiBMb29rcyByaWdodCEgIGNlcGgtZGlz
-ayBpc24ndCBzbWFydCBlbm91Z2ggdG8gc2V0IHVwIHRoZSB3YWwgb3IgZGIgZGV2aWNlcw0KPj4g
-PiB5ZXQuDQo+PiA+DQo+PiA+IFRoZSB3YWwgZGV2aWNlIHNob3VsZCBkZWZhdWx0IHRvIHNvbWV0
-aGluZyBsaWtlIDEyOCBNQi4NCj4+ID4NCj4+ID4gVGhlIGRiIGRldmljZSB3b3VsZCBiZSB3aGF0
-ZXZlciBwb3J0aW9uIG9mIGFuIFNTRCB5b3Ugd2FudCB0byBhbGxvY2F0ZSB0bw0KPj4gPiBzdG9y
-aW5nIHRoZSBibHVlc3RvcmUgbWV0YWRhdGEuICBNeSBndWVzcyBpcyB0aGF0IHdlJ2xsIGdldCBm
-dXJ0aGVyIHRoYW4NCj4+ID4gd2UgZGlkIHdpdGggRmlsZVN0b3JlLCBzbyB0aGUgb2xkIDE6NCBv
-ciAxOjUgcnVsZSBvZiB0aHVtYiBtaWdodCBiZSBtb3JlDQo+PiA+IGxpa2UgMToxMCwgYnV0IHdo
-byBrbm93cy0tdGhpcydsbCByZXF1aXJlIHNvbWUgdGVzdGluZy4NCj4+IA0KPj4gQ29vbCwgSSds
-bCBzdGFydCB0ZXN0aW5nIHdhbC9kYiBvbiBTU0RzIHdpdGggc29tZSBuZXcgbWFjaGluZXMgfm5l
-eHQgd2Vlay4NCj4+IA0KPj4gSnVzdCB0byBjbGFyaWZ5LCBpZiB3ZSBnaXZlIG5vIHdhbCwgdGhl
-cmUgaXMgbm8gd2FsLCByaWdodD8NCj4+IEJ1dCBpZiB3ZSBkb24ndCBnaXZlIGEgZGVkaWNhdGVk
-IGRiIGRldmljZSwgd2hlcmUgZG9lcyB0aGUgZGIgZ28/DQo+DQo+VGhlcmUgYXJlIGFsd2F5cyB3
-YWwgYW5kIGRiICJmaWxlcyIgZnJvbSByb2Nrc2RiLCBidXQgaWYgdGhlcmUgYXJlbid0IA0KPnNl
-cGFyYXRlIGRldmljZXMgdGhleSBqdXN0IGVuZCB1cCBvbiB0aGUgbWFpbiBibG9jayBkZXZpY2Uu
-DQo+DQo+PiBBbHNvLCBibHVlc3RvcmUgYmVpbmcgZXhwZXJpbWVudGFsIGluIGpld2VsIC0tIEkg
-Z3Vlc3MgdGhhdCBtZWFucyB5b3UNCj4+IGRvbid0IHByb21pc2UgdG8gc3VwcG9ydCB0aGUgY3Vy
-cmVudCBvbiBkaXNrIGZvcm1hdCBpbiBrcmFrZW4gYW5kDQo+PiBiZXlvbmQ/DQo+DQo+Q29ycmVj
-dC4NCj4NCj5JdCdzICpwb3NzaWJsZSogd2Ugd2lsbCBpbmNsdWRlIHVwZ3JhZGUvY29udmVyc2lv
-biBjb2RlLCBidXQgaXQnbGwgc29ydCBvZiANCj5kZXBlbmQgb24gaG93IG11Y2ggZWZmb3J0IGl0
-IGlzIHdoZW4gaXQgYSBmb3JtYXQgY2hhbmdlIGNvbWVzIGFsb25nLg0KPg0KPlRoZSBnb2FsIGlz
-IHRoYXQgYnkga3Jha2VuIGl0IHdpbGwgYmUgc3RhYmxlLg0KPg0KPnNhZ2UNCj4tLQ0KPlRvIHVu
-c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
-LWRldmVsIiBpbg0KPnRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJu
-ZWwub3JnDQo+TW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
-YWpvcmRvbW8taW5mby5odG1sDQoNCg==
+On 04/21/2016 09:03 PM, Sage Weil wrote:
+> and release the (pull requests with code destined for) kraken!
+>
+> One question: we moved from a 'next' branch to 'jewel' branch for the
+> development period to represent the 'frozen' bugfix branch before each
+> development checkpoint release.  Should we
+>
+> 1) Use a 'kraken' branch, just like we did with jewel.  After each dev
+> release, merge in the next lump of new stuff from master.\
+
+I've become accustomed to this, so it seems natural to me. Subjectively, +1
+
+> 2) Go back to a 'next' branch, like we did pre-jewel.
+
+No, thanks.
+
+> 3) Give up on the delayed dev checkpoint release thing we've been doing
+> (where we send bug fixes to next or kraken for 2 weeks before release) and
+> just release regular checkpoints of master (as 11.0.z).
+
+Though this delay introduces some complexity, we have it documented and 
+it serves a good purpose: i.e. making the dev checkpoint releases more 
+stable.
+
+> 4) Stop doing development checkpoint releases entirely and let testers
+> pull automated builds from gitbuilder or jenkins.
+
+Psychologically, the "imprimatur" of a checkpoint release is reassuring. 
+Perhaps more importantly, the granularity of point releases has 
+information value. You ask someone what version they are running - with 
+dev checkpoint releases they say "10.1.2". Without them, they would say 
+"4a2a6f72640d6b74a3bbd92798bb913ed380dcd4".
+
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
