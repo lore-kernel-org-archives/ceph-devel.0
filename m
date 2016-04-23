@@ -1,69 +1,100 @@
-From: Victor Denisov <vdenisov@mirantis.com>
-Subject: Re: blueprint: consistency groups
-Date: Fri, 22 Apr 2016 16:49:51 -0700
-Message-ID: <CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
-References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
-	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
-	<20160325071933.GA14634@gmail.com>
-	<CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
+From: Li Tianxiang <lanceflee@msn.com>
+Subject: Re: Bluestore cluster example
+Date: Sat, 23 Apr 2016 04:51:20 +0000
+Message-ID: <PS1PR0401MB1499C9F93C2F3C62A2913F93AA600@PS1PR0401MB1499.apcprd04.prod.outlook.com>
+References: <5710D936.9040507@redhat.com>
+ <CABZ+qqnnOta_Y4rCV8y=v8KKstr==OWa34ryBAOcEH56xSk4tA@mail.gmail.com>
+ <alpine.DEB.2.11.1604221006350.8831@cpach.fuggernut.com>
+ <CABZ+qqn38cPHwQ-X0d7FjdYtCgwObdUWsZysx3debMR7fi0t0w@mail.gmail.com>
+ <alpine.DEB.2.11.1604221054320.8831@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:33278 "EHLO
-	mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752494AbcDVXtw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Apr 2016 19:49:52 -0400
-Received: by mail-yw0-f170.google.com with SMTP id t10so138761768ywa.0
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Apr 2016 16:49:52 -0700 (PDT)
-In-Reply-To: <CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
+Received: from snt004-omc1s21.hotmail.com ([65.55.90.32]:61829 "EHLO
+	SNT004-OMC1S21.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752161AbcDWEvZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 23 Apr 2016 00:51:25 -0400
+In-Reply-To: <alpine.DEB.2.11.1604221054320.8831@cpach.fuggernut.com>
+Content-Language: en-US
+Content-ID: <576F2E770CAF1B4393F0F5632B1746A0@apcprd04.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>, Jason Dillaman <dillaman@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
-
-I have a question regarding implementation of the 'add image to
-consistency group' operation.
-Since it's a multi object operation while I'm adding an image
-reference to a consistency group the image itself can be deleted.
-By the time I start adding consistency group reference to the image,
-the image will be gone.
-So, I have to keep track of my current state of the operation in the
-consistency group.
-However if I the librbd client looses connection to the ceph cluster
-it all will end up in this partially updated state.
-It's not clear to who is responsible for picking up this state and
-cleaning it all up.
-
-Should it be a special operation that allows us to check consistency
-of all consistency groups?
-Is there any agent that is supposed to verify consistency of all rbd
-objects regularly?
-
-Please advise.
-
-Thanks in advance,
-Victor.
-
-P.S. Here is a link to the ether pad with the updated blue print:
-http://pad.ceph.com/p/consistency_groups
-
-On Tue, Mar 29, 2016 at 10:54 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> On Fri, Mar 25, 2016 at 12:19 AM, Mykola Golub <mgolub@mirantis.com> wrote:
->> On Thu, Mar 24, 2016 at 03:38:25PM -0700, Gregory Farnum wrote:
->>
->>> Just to be clear, you know that you can use the same snapid for all
->>> the images, right? (...although not if you're trying to allow CGs
->>> across pools. Those will be a little harder.)
->>
->> I think not allowing CGs across pools would be annoying limitation for
->> users. If a VM has several volumes for different purposes (e.g. small
->> but fast volume for applicatin data, and large but slow one for
->> backups) it is logical to have different pools for those.
->
-> This isn't impossible either. We do it with cache pools and backing
-> pools sharing a set of snapids, for instance. But the default rules
-> won't work, since a snapid is just a 64-bit counter and they're
-> per-pool rather than cluster-global.
-> -Greg
+Tm8gbmVlZCB0byBzcGVjaWZ5IHdhbCBhbmQgZGIgZGlzayBwYXRoLg0KDQpCdXQgSSBoYXZlIHJ1
+biBzb21lIGJhc2ljIGZpbyB0ZXN0cyBvbiB2MTAuMS4yLCB1c2luZyBhbGwgU1NEcyBlbnZpcm9u
+bWVudC4NCkl0IHNlZW1zIHRoZSByZXN1bHRzIG9mICBOT1QgZGVzcGVyYXRpbmcgdGhvc2UgZGV2
+aWNlcyAoYSB3aG9sZSBkaXNrKSBnZXQgbG93ZXINCnBlcmZvcm1hbmNlIHRoYW4gcGFydGl0aW9u
+aW5nIHRoZSBkaXNrIGFuZCBzcGVjaWZ5aW5nIGFsbCB0aGUgMyBkaXNrIHBhdGhzLg0KDQoNCiAN
+CiANCkZpbyAgICB8IHJhblJkLiA0ayB8cmFuZFd0LjRrIHwgc2VxUmQuNjRrIHxzZXFXdC42NGsN
+ClBhcnRlZCB8ICAgMSAgICAgICB8MSAgICAgICAgIHwgIDEgICAgICAgIHwxICAgDQpXaG9sZURp
+c2t8MC44OSAgICAgfDAuODggICAgICB8MC45OCAgICAgICB8MC45MA0KDQoNCg0KDQoNCkZ1cnRo
+ZXIgdGVzdHMgd2lsbCBiZSBkb25lIG9uIDEwLjIuMCBuZXh0IHdlZWsuDQoNCg0KLS0tLS0tLQ0K
+DQpPdXRsb29rIHdlYiBtYWlsIGlzIGFsd2F5cyByZWplY3RlZCBieSBNTCwgYW5ub3lpbmcgOigN
+Cg0KDQoNCi0tIA0KQmVzdCBSZWdhcmRzIQ0KDQoNCg0KDQoNCg0KDQoNCk9uIDQvMjIvMTYsIDIy
+OjU3LCAiU2FnZSBXZWlsIiA8Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVo
+YWxmIG9mIHN3ZWlsQHJlZGhhdC5jb20+IHdyb3RlOg0KDQo+T24gRnJpLCAyMiBBcHIgMjAxNiwg
+RGFuIHZhbiBkZXIgU3RlciB3cm90ZToNCj4+IE9uIEZyaSwgQXByIDIyLCAyMDE2IGF0IDQ6MDkg
+UE0sIFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6DQo+PiA+IE9uIEZyaSwgMjIg
+QXByIDIwMTYsIERhbiB2YW4gZGVyIFN0ZXIgd3JvdGU6DQo+PiA+PiBIaSBNYXJrLA0KPj4gPj4N
+Cj4+ID4+IE9uIEZyaSwgQXByIDE1LCAyMDE2IGF0IDI6MDYgUE0sIE1hcmsgTmVsc29uIDxtbmVs
+c29uQHJlZGhhdC5jb20+IHdyb3RlOg0KPj4gPj4gPiBIaSBhbGwsDQo+PiA+PiA+DQo+PiA+PiA+
+IEEgY291cGxlIG9mIGZvbGtzIGhhdmUgYXNrZWQgbWUgaG93IHRvIHNldHVwIGJsdWVzdG9yZSBj
+bHVzdGVycyBmb3INCj4+ID4+ID4gcGVyZm9ybWFuY2UgdGVzdGluZy4gIEkgcGVyc29uYWxseSBh
+bSB1c2luZyBjYnQgZm9yIHRoaXMsIGJ1dCB5b3Ugc2hvdWxkIGJlDQo+PiA+PiA+IGFibGUgdG8g
+dXNlIGNlcGgtZGlzayB3aXRoIHNvbWUgb3RoZXIgY2x1c3RlciBjcmVhdGlvbiBtZXRob2QgYXMg
+d2VsbC4NCj4+ID4+ID4NCj4+ID4+ID4gRm9yIENCVCwgeW91IHJlYWxseSBkb24ndCBuZWVkIHRv
+IGRvIG11Y2guICBJbiB0aGUgb2xkIG5ld3N0b3JlIGRheXMsIGENCj4+ID4+ID4gImJsb2NrIiBz
+eW1saW5rIG5lZWRlZCB0byBiZSBjcmVhdGVkIGluIHRoZSBvc2QgZGF0YSBkaXIgdG8gbGluayB0
+byB0aGUgbmV3DQo+PiA+PiA+IGJsb2NrIGRldmljZS4gIENCVCBkaWQgdGhpcyB3aGVuIHRoZSAi
+bmV3c3RvcmVfYmxvY2s6IFRydWUiIG9wdGlvbiB3YXMgc2V0DQo+PiA+PiA+IGluIHRoZSBjbHVz
+dGVyIHNlY3Rpb24gb2YgdGhlIGNidCB5YW1sIGZpbGUuICBUaGlzIGlzbid0IHJlYWxseSBuZWVk
+ZWQNCj4+ID4+ID4gYW55bW9yZSwgYXMgeW91IGNhbiBub3cgc3BlY2lmeSB0aGUgYmxvY2ssIGRi
+LCBhbmQgd2FsIGRldmljZXMgZGlyZWN0bHkgaW4NCj4+ID4+ID4geW91ciBjZXBoLmNvbmYgZmls
+ZS4gIElmIHlvdXIgcGFydGl0aW9ucyBhcmUgc2V0dXAgcHJvcGVybHkgeW91IGNhbiBjcmVhdGUN
+Cj4+ID4+ID4gYmx1ZXN0b3JlIGNsdXN0ZXJzIHdpdGhvdXQgaGF2aW5nIHRvIGRvIGFueXRoaW5n
+IGJleW9uZCBjaGFuZ2luZyB0aGUNCj4+ID4+ID4gY2VwaC5jb25mIGZpbGUgKHdpdGggY2J0IGF0
+IGxlYXN0KS4NCj4+ID4+ID4NCj4+ID4+ID4gSGVyZSdzIGEgdmVyeSBiYXNpYyBleGFtcGxlOg0K
+Pj4gPj4gPg0KPj4gPj4gPiBbZ2xvYmFsXQ0KPj4gPj4gPiAgICAgICAgIGVuYWJsZSBleHBlcmlt
+ZW50YWwgdW5yZWNvdmVyYWJsZSBkYXRhIGNvcnJ1cHRpbmcgZmVhdHVyZXMgPQ0KPj4gPj4gPiBi
+bHVlc3RvcmUgcm9ja3NkYg0KPj4gPj4gPiAgICAgICAgIG9zZCBvYmplY3RzdG9yZSA9IGJsdWVz
+dG9yZQ0KPj4gPj4gPg0KPj4gPj4gPiBbb3NkLjBdDQo+PiA+PiA+ICAgICAgICAgaG9zdCA9IGlu
+Y2VydGEwMS5mcm9udC5zZXBpYS5jZXBoLmNvbQ0KPj4gPj4gPiAgICAgICAgIG9zZCBkYXRhID0g
+L3RtcC9jYnQvbW50L29zZC1kZXZpY2UtMC1kYXRhDQo+PiA+PiA+ICAgICAgICAgYmx1ZXN0b3Jl
+IGJsb2NrIHBhdGggPSAvZGV2L2Rpc2svYnktcGFydGxhYmVsL29zZC1kZXZpY2UtMC1ibG9jaw0K
+Pj4gPj4gPiAgICAgICAgIGJsdWVzdG9yZSBibG9jayBkYiBwYXRoID0gL2Rldi9kaXNrL2J5LXBh
+cnRsYWJlbC9vc2QtZGV2aWNlLTAtZGINCj4+ID4+ID4gICAgICAgICBibHVlc3RvcmUgYmxvY2sg
+d2FsIHBhdGggPSAvZGV2L2Rpc2svYnktcGFydGxhYmVsL29zZC1kZXZpY2UtMC13YWwNCj4+ID4+
+DQo+PiA+PiBUaGUgZGIgYW5kIHdhbCBwYXRocyBhcmUgb3B0aW9uYWwgcGVyZiBib29zdGluZyB0
+aGluZ3MsIHJpZ2h0Pw0KPj4gPg0KPj4gPiBZZWFoLg0KPj4gPg0KPj4gPj4gSWYgSSBkbyBjZXBo
+LWRpc2sgcHJlcGFyZSAtLWJsdWVzdG9yZSAvZGV2L3NkYWUsIEkgZ2V0Og0KPj4gPj4NCj4+ID4+
+IC9kZXYvc2RhZSA6DQo+PiA+PiAgL2Rldi9zZGFlMiBjZXBoIGJsb2NrLCBmb3IgL2Rldi9zZGFl
+MQ0KPj4gPj4gIC9kZXYvc2RhZTEgY2VwaCBkYXRhLCBhY3RpdmUsIGNsdXN0ZXIgY2VwaCwgb3Nk
+LjQxMywgYmxvY2sgL2Rldi9zZGFlMg0KPj4gPg0KPj4gPiBMb29rcyByaWdodCEgIGNlcGgtZGlz
+ayBpc24ndCBzbWFydCBlbm91Z2ggdG8gc2V0IHVwIHRoZSB3YWwgb3IgZGIgZGV2aWNlcw0KPj4g
+PiB5ZXQuDQo+PiA+DQo+PiA+IFRoZSB3YWwgZGV2aWNlIHNob3VsZCBkZWZhdWx0IHRvIHNvbWV0
+aGluZyBsaWtlIDEyOCBNQi4NCj4+ID4NCj4+ID4gVGhlIGRiIGRldmljZSB3b3VsZCBiZSB3aGF0
+ZXZlciBwb3J0aW9uIG9mIGFuIFNTRCB5b3Ugd2FudCB0byBhbGxvY2F0ZSB0bw0KPj4gPiBzdG9y
+aW5nIHRoZSBibHVlc3RvcmUgbWV0YWRhdGEuICBNeSBndWVzcyBpcyB0aGF0IHdlJ2xsIGdldCBm
+dXJ0aGVyIHRoYW4NCj4+ID4gd2UgZGlkIHdpdGggRmlsZVN0b3JlLCBzbyB0aGUgb2xkIDE6NCBv
+ciAxOjUgcnVsZSBvZiB0aHVtYiBtaWdodCBiZSBtb3JlDQo+PiA+IGxpa2UgMToxMCwgYnV0IHdo
+byBrbm93cy0tdGhpcydsbCByZXF1aXJlIHNvbWUgdGVzdGluZy4NCj4+IA0KPj4gQ29vbCwgSSds
+bCBzdGFydCB0ZXN0aW5nIHdhbC9kYiBvbiBTU0RzIHdpdGggc29tZSBuZXcgbWFjaGluZXMgfm5l
+eHQgd2Vlay4NCj4+IA0KPj4gSnVzdCB0byBjbGFyaWZ5LCBpZiB3ZSBnaXZlIG5vIHdhbCwgdGhl
+cmUgaXMgbm8gd2FsLCByaWdodD8NCj4+IEJ1dCBpZiB3ZSBkb24ndCBnaXZlIGEgZGVkaWNhdGVk
+IGRiIGRldmljZSwgd2hlcmUgZG9lcyB0aGUgZGIgZ28/DQo+DQo+VGhlcmUgYXJlIGFsd2F5cyB3
+YWwgYW5kIGRiICJmaWxlcyIgZnJvbSByb2Nrc2RiLCBidXQgaWYgdGhlcmUgYXJlbid0IA0KPnNl
+cGFyYXRlIGRldmljZXMgdGhleSBqdXN0IGVuZCB1cCBvbiB0aGUgbWFpbiBibG9jayBkZXZpY2Uu
+DQo+DQo+PiBBbHNvLCBibHVlc3RvcmUgYmVpbmcgZXhwZXJpbWVudGFsIGluIGpld2VsIC0tIEkg
+Z3Vlc3MgdGhhdCBtZWFucyB5b3UNCj4+IGRvbid0IHByb21pc2UgdG8gc3VwcG9ydCB0aGUgY3Vy
+cmVudCBvbiBkaXNrIGZvcm1hdCBpbiBrcmFrZW4gYW5kDQo+PiBiZXlvbmQ/DQo+DQo+Q29ycmVj
+dC4NCj4NCj5JdCdzICpwb3NzaWJsZSogd2Ugd2lsbCBpbmNsdWRlIHVwZ3JhZGUvY29udmVyc2lv
+biBjb2RlLCBidXQgaXQnbGwgc29ydCBvZiANCj5kZXBlbmQgb24gaG93IG11Y2ggZWZmb3J0IGl0
+IGlzIHdoZW4gaXQgYSBmb3JtYXQgY2hhbmdlIGNvbWVzIGFsb25nLg0KPg0KPlRoZSBnb2FsIGlz
+IHRoYXQgYnkga3Jha2VuIGl0IHdpbGwgYmUgc3RhYmxlLg0KPg0KPnNhZ2UNCj4tLQ0KPlRvIHVu
+c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
+LWRldmVsIiBpbg0KPnRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJu
+ZWwub3JnDQo+TW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
+YWpvcmRvbW8taW5mby5odG1sDQoNCg==
