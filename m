@@ -1,163 +1,82 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
-Subject: Re: RGW Multisite delete wierdness
-Date: Mon, 25 Apr 2016 10:17:36 +0200
-Message-ID: <87a8ki6r1b.fsf@suse.com>
-References: <87zispoa07.fsf@suse.com> <CADRKj5TpcOzavirV7M-s2s8hg+9yyHm3LUyV_Mw3eCDR3DLzSw@mail.gmail.com> <86oa95lc1h.fsf@linux-stsn.suse> <CADRKj5SUACKOQNXW21OHCE1BOVZ5Bva-czgN4QaeptkP=gbrxg@mail.gmail.com> <CADRKj5SJVMzjbvMt7PkvdDxBq1+b1GoCNo7f23Jsf9434+0O-A@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: open the floodgates...
+Date: Mon, 25 Apr 2016 07:29:35 -0400
+Message-ID: <CAC-Np1xJYePN8gwZS=0saekSg2=d2s0KzTVfLXevK0+U8Kqt+w@mail.gmail.com>
+References: <alpine.DEB.2.11.1604211432300.16393@cpach.fuggernut.com>
+	<571B3083.5070606@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:52201 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753663AbcDYIRj (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Mon, 25 Apr 2016 04:17:39 -0400
-In-reply-to: <CADRKj5SJVMzjbvMt7PkvdDxBq1+b1GoCNo7f23Jsf9434+0O-A@mail.gmail.com>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:37836 "EHLO
+	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754296AbcDYL3g (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Apr 2016 07:29:36 -0400
+Received: by mail-wm0-f51.google.com with SMTP id n3so122370581wmn.0
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Apr 2016 04:29:36 -0700 (PDT)
+In-Reply-To: <571B3083.5070606@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-
-Yehuda Sadeh-Weinraub writes:
-
-> On Tue, Apr 19, 2016 at 11:08 AM, Yehuda Sadeh-Weinraub
-> <yehuda@redhat.com> wrote:
->> On Tue, Apr 19, 2016 at 10:54 AM, Abhishek L
->> <abhishek.lekshmanan@gmail.com> wrote:
->>>
->>> Yehuda Sadeh-Weinraub writes:
->>>
->>>> On Tue, Apr 19, 2016 at 9:10 AM, Abhishek Lekshmanan <abhishek@sus=
-e.com> wrote:
->>>>> Trying deleting objects & buckets from a secondary zone in a RGW
->>>>> multisite configuration leads to some wierdness:
->>>>>
->>>>> 1. On deleting an object and the bucket immediately will mostly l=
-ead to
->>>>> object and bucket getting deleted in the secondary zone, but sinc=
-e we
->>>>> forward the bucket deletion to master only after we delete in sec=
-ondary
->>>>> it will fail with 409 (BucketNotEmpty) and gets reraised as a 500=
- to the
->>>>> client. This _seems_ simple enough to fix if we forward the bucke=
-t
->>>>> deletion request to master zone before attempting deletion locall=
-y,
->>>>> (issue: http://tracker.ceph.com/issues/15540, possible fix: https=
-://github.com/ceph/ceph/pull/8655)
->>>>>
->>>>
->>>> Yeah, this looks good. We'll get it through testing.
->>>>
->>>>> 2. Deletion of objects themselves: deletion of objects themselves=
- seems
->>>>> to be a bit racy, deleting an object on a secondary zone succeeds=
-,
->>>>> listing the bucket seems to show an empty list, but gets populate=
-d with
->>>>> the object again sometimes (this time with a newer timestamp), th=
-is is
->>>>> not always guaranteed to be reproduce, but I've seen this often w=
-ith
->>>>> multipart uploads, as an eg:
->>>>>
->>>>> $ s3 -u list test-mp
->>>>>                        Key                             Last Modif=
-ied      Size
->>>>> --------------------------------------------------  -------------=
--------  -----
->>>>> test.img                                            2016-04-19T13=
-:00:17Z    40M
->>>>> $ s3 -u delete test-mp/test.img
->>>>> $ s3 -u list test-mp
->>>>>                        Key                             Last Modif=
-ied      Size
->>>>> --------------------------------------------------  -------------=
--------  -----
->>>>> test.img                                            2016-04-19T13=
-:00:45Z    40M
->>>>> $ s3 -u delete test-mp/test.img # wait for a  min
->>>>> $ s3 -us list test-mp
->>>>> --------------------------------------------------  -------------=
--------  -----
->>>>> test.img                                            2016-04-19T13=
-:01:52Z    40M
->>>>>
->>>>>
->>>>> Mostly seeing log entries of this form in both the cases ie. wher=
-e
->>>>> delete object seems to be successfully delete in both master and
->>>>> secondary zone and the case where it succeeds in master and fails=
- in
->>>>> secondary :
->>>>>
->>>>> 20 parsed entry: id=3D00000000027.27.2 iter->object=3Dfoo iter->i=
-nstance=3D name=3Dfoo instance=3D ns=3D
->>>>> 20 [inc sync] skipping object: dkr:d8e0ec3d-b3da-43f8-a99b-38a5b4=
-941b6f.14113.2:-1/foo: non-complete operation
->>>>> 20 parsed entry: id=3D00000000028.28.2 iter->object=3Dfoo iter->i=
-nstance=3D name=3Dfoo instance=3D ns=3D
->>>>> 20 [inc sync] skipping object: dkr:d8e0ec3d-b3da-43f8-a99b-38a5b4=
-941b6f.14113.2:-1/foo: canceled operation
->>>>>
->>>>> Any ideas on this?
->>>>>
->>>>
->>>> Do you have more than 2 zones syncing? Is it an object delete that
->>>> came right after the object creation?
->>>
->>> Only 2 zones ie. one master and one secondary, req, on secondary. T=
-he delete came right after the
->>> create though
+On Sat, Apr 23, 2016 at 4:21 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+> On 04/21/2016 09:03 PM, Sage Weil wrote:
 >>
->> There are two issues that I see here. One is that we sync an object,
->> but end up with different mtime than the object's source. The second
->> issue is that we shouldn't have synced that object.
+>> and release the (pull requests with code destined for) kraken!
 >>
->> There needs to be a check when syncing objects, to validate that we
->> don't sync an object that originated from the current zone (by
->> comparing the short zone id). We might be missing that.
+>> One question: we moved from a 'next' branch to 'jewel' branch for the
+>> development period to represent the 'frozen' bugfix branch before each
+>> development checkpoint release.  Should we
 >>
+>> 1) Use a 'kraken' branch, just like we did with jewel.  After each dev
+>> release, merge in the next lump of new stuff from master.\
 >
-> For the first issue, see:
-> https://github.com/ceph/ceph/pull/8685
 >
-> However, create that follows by a delete will still be a problem, as
-> when we sync the object we check it against the source mtime is newer
-> than the destination mtime. This is problematic with deletes, as thes=
-e
-> don't have mtime once the object is removed. I think the solution
-> would be by using temporary tombstone objects (we already have the ol=
-h
-> framework that can provide what we need), that we'll garbage collect.
+> I've become accustomed to this, so it seems natural to me. Subjectively, +1
+>
+>> 2) Go back to a 'next' branch, like we did pre-jewel.
+>
+>
+> No, thanks.
+>
+>> 3) Give up on the delayed dev checkpoint release thing we've been doing
+>> (where we send bug fixes to next or kraken for 2 weeks before release) and
+>> just release regular checkpoints of master (as 11.0.z).
+>
+>
+> Though this delay introduces some complexity, we have it documented and it
+> serves a good purpose: i.e. making the dev checkpoint releases more stable.
+>
+>> 4) Stop doing development checkpoint releases entirely and let testers
+>> pull automated builds from gitbuilder or jenkins.
+>
+>
+> Psychologically, the "imprimatur" of a checkpoint release is reassuring.
+> Perhaps more importantly, the granularity of point releases has information
+> value. You ask someone what version they are running - with dev checkpoint
+> releases they say "10.1.2". Without them, they would say
+> "4a2a6f72640d6b74a3bbd92798bb913ed380dcd4".
 
-=46urther information from logs if it helps:
+What about a middle ground: keep the checkpoint releases but automated
+like the gitbuilders: the releases would be incremental and
+have a release cadence that could be nightly/weekly/every-other-day.
 
-2016-04-19 17:00:45.539356 7fc99effd700  0 _send_request(): deleting ob=
-j=3Dtest-mp:test.img
-2016-04-19 17:00:45.539902 7fc99effd700 20 _send_request(): skipping ob=
-ject removal obj=3Dtest-mp:test.img (obj mtime=3D2016-04-19 17:00:26.0.=
-098255s, request timestamp=3D2016-04-19 17:00:17.0.395208s)
+This would also play nicely with #3 were we could already be cutting
+dev releases for 11.0.z
 
-This is what the master zone logs show, however the request timestamp
-logged here is the `If-Modified-Since` value from secondary zone when
-the actual object write was completed (and not the time when deletion
-was completed),  do we set the value of the deletion time anywhere else
-in the BI log
-
+Keeping releases coming from the actual release-named branch (e.g.
+'jewel') would help the current release process that bases the model
+around that
+idea (we have never cut a release from a 'next' or 'master' branch).
 
 >
-> Yehuda
-
-
---
-Abhishek Lekshmanan
-SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Nort=
-on, HRB 21284 (AG N=C3=BCrnberg)
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> Nathan Cutler
+> Software Engineer Distributed Storage
+> SUSE LINUX, s.r.o.
+> Tel.: +420 284 084 037
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
