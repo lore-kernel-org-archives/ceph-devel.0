@@ -1,116 +1,53 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: [PATCH 2/2] mm, debug: report when GFP_NO{FS,IO} is used explicitly from memalloc_no{fs,io}_{save,restore} context
-Date: Tue, 26 Apr 2016 13:56:12 +0200
-Message-ID: <1461671772-1269-3-git-send-email-mhocko@kernel.org>
-References: <1461671772-1269-1-git-send-email-mhocko@kernel.org>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1461671772-1269-1-git-send-email-mhocko@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, xfs@oss.sgi.com, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: blueprint: consistency groups
+Date: Tue, 26 Apr 2016 11:09:01 -0500
+Message-ID: <CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
+References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
+	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
+	<20160325071933.GA14634@gmail.com>
+	<CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
+	<CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
+	<CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
+	<CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
+Reply-To: dillaman@redhat.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qg0-f48.google.com ([209.85.192.48]:35257 "EHLO
+	mail-qg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751772AbcDZQJD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Apr 2016 12:09:03 -0400
+Received: by mail-qg0-f48.google.com with SMTP id f74so6903902qge.2
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Apr 2016 09:09:02 -0700 (PDT)
+In-Reply-To: <CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Victor Denisov <vdenisov@mirantis.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-From: Michal Hocko <mhocko@suse.com>
+> The problem that I see with this approach is: let's say we start
+> adding an image to a cg and the cg is in adding image state.
+> It either means that somebody is already adding an image to this cg or
+> somebody died while adding this image.
+> And we can't really understand it.
 
-THIS PATCH IS FOR TESTING ONLY AND NOT MEANT TO HIT LINUS TREE
+The metadata link from CG -> image should be in the "adding" state,
+not the entire CG.  There shouldn't be anything preventing
+concurrently adding two different images to a CG.
 
-It is desirable to reduce the direct GFP_NO{FS,IO} usage at minimum and
-prefer scope usage defined by memalloc_no{fs,io}_{save,restore} API.
+>
+> So, my suggestion is: normally the command fails if it finds the cg in
+> an unexpected state.
+> If the user adds flag --force then it picks up this unfinished
+> operation and completes it and then adds the new image.
+> How does that sound?
 
-Let's help this process and add a debugging tool to catch when an
-explicit allocation request for GFP_NO{FS,IO} is done from the scope
-context. The printed stacktrace should help to identify the caller
-and evaluate whether it can be changed to use a wider context or whether
-it is called from another potentially dangerous context which needs
-a scope protection as well.
+My concern w/ adding a "--force" command for this is that it can be
+abused.  Personally, I'd rather see that the API is robust enough to
+handle these partial states.  If an "add" fails, I should be able to
+repeat the "add" and have it work or run "remove" to have it clean up
+any intermediate state.
 
-The checks have to be enabled explicitly by debug_scope_gfp kernel
-command line parameter.
 
-Signed-off-by: Michal Hocko <mhocko@suse.com>
----
- mm/page_alloc.c | 56 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 56 insertions(+)
-
-diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-index 86bb5d6ddd7d..085d00280496 100644
---- a/mm/page_alloc.c
-+++ b/mm/page_alloc.c
-@@ -3750,6 +3750,61 @@ __alloc_pages_slowpath(gfp_t gfp_mask, unsigned int order,
- 	return page;
- }
- 
-+static bool debug_scope_gfp;
-+
-+static int __init enable_debug_scope_gfp(char *unused)
-+{
-+	debug_scope_gfp = true;
-+	return 0;
-+}
-+
-+/*
-+ * spit the stack trace if the given gfp_mask clears flags which are context
-+ * wide cleared. Such a caller can remove special flags clearing and rely on
-+ * the context wide mask.
-+ */
-+static inline void debug_scope_gfp_context(gfp_t gfp_mask)
-+{
-+	gfp_t restrict_mask;
-+
-+	if (likely(!debug_scope_gfp))
-+		return;
-+
-+	/* both NOFS, NOIO are irrelevant when direct reclaim is disabled */
-+	if (!(gfp_mask & __GFP_DIRECT_RECLAIM))
-+		return;
-+
-+	if (current->flags & PF_MEMALLOC_NOIO)
-+		restrict_mask = __GFP_IO;
-+	else if ((current->flags & PF_MEMALLOC_NOFS) && (gfp_mask & __GFP_IO))
-+		restrict_mask = __GFP_FS;
-+	else
-+		return;
-+
-+	if ((gfp_mask & restrict_mask) != restrict_mask) {
-+		/*
-+		 * If you see this this warning then the code does:
-+		 * memalloc_no{fs,io}_save()
-+		 * ...
-+		 *    foo()
-+		 *      alloc_page(GFP_NO{FS,IO})
-+		 * ...
-+		 * memalloc_no{fs,io}_restore()
-+		 *
-+		 * allocation which is unnecessary because the scope gfp
-+		 * context will do that for all allocation requests already.
-+		 * If foo() is called from multiple contexts then make sure other
-+		 * contexts are safe wrt. GFP_NO{FS,IO} semantic and either add
-+		 * scope protection into particular paths or change the gfp mask
-+		 * to GFP_KERNEL.
-+		 */
-+		pr_info("Unnecesarily specific gfp mask:%#x(%pGg) for the %s task wide context\n", gfp_mask, &gfp_mask,
-+				(current->flags & PF_MEMALLOC_NOIO)?"NOIO":"NOFS");
-+		dump_stack();
-+	}
-+}
-+early_param("debug_scope_gfp", enable_debug_scope_gfp);
-+
- /*
-  * This is the 'heart' of the zoned buddy allocator.
-  */
-@@ -3796,6 +3851,7 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order,
- 				ac.nodemask);
- 
- 	/* First allocation attempt */
-+	debug_scope_gfp_context(gfp_mask);
- 	page = get_page_from_freelist(alloc_mask, order, alloc_flags, &ac);
- 	if (likely(page))
- 		goto out;
 -- 
-2.8.0.rc3
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Jason
