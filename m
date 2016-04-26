@@ -1,142 +1,231 @@
-From: Stephen Lord <steve.p.lord@gmail.com>
-Subject: Re: [ceph-users] On-going Bluestore Performance Testing Results
-Date: Tue, 26 Apr 2016 14:48:29 -0500
-Message-ID: <F0E26E06-42ED-4948-A13C-C0AC4B73762E@gmail.com>
-References: <571A44D0.80704@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: RGW Multisite delete wierdness
+Date: Tue, 26 Apr 2016 15:21:47 -0700
+Message-ID: <CADRKj5T5LCcskumQpLN4KGDgV4p50r9v9X=TaYVFODeR7mdFhQ@mail.gmail.com>
+References: <87zispoa07.fsf@suse.com>
+	<CADRKj5TpcOzavirV7M-s2s8hg+9yyHm3LUyV_Mw3eCDR3DLzSw@mail.gmail.com>
+	<86oa95lc1h.fsf@linux-stsn.suse>
+	<CADRKj5SUACKOQNXW21OHCE1BOVZ5Bva-czgN4QaeptkP=gbrxg@mail.gmail.com>
+	<CADRKj5SJVMzjbvMt7PkvdDxBq1+b1GoCNo7f23Jsf9434+0O-A@mail.gmail.com>
+	<87a8ki6r1b.fsf@suse.com>
+	<CADRKj5QUA6gki5hy5HYfGej0AdWTV19xVWR8gAWCbHZq4HWzSg@mail.gmail.com>
+	<86k2jllbhs.fsf@linux-stsn.suse>
+	<87k2jks24h.fsf@suse.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f195.google.com ([209.85.213.195]:36056 "EHLO
-	mail-ig0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753237AbcDZTsc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Apr 2016 15:48:32 -0400
-Received: by mail-ig0-f195.google.com with SMTP id c3so3336609igl.3
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Apr 2016 12:48:31 -0700 (PDT)
-In-Reply-To: <571A44D0.80704@redhat.com>
+Received: from mail-yw0-f174.google.com ([209.85.161.174]:35874 "EHLO
+	mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752313AbcDZWVt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Apr 2016 18:21:49 -0400
+Received: by mail-yw0-f174.google.com with SMTP id o66so42336775ywc.3
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Apr 2016 15:21:48 -0700 (PDT)
+In-Reply-To: <87k2jks24h.fsf@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: "cbt@lists.ceph.com" <cbt@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Abhishek Lekshmanan <abhishek@suse.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-I have been looking at OSD performance using Bluestore from a different angle. This is all focused around latency of individual requests, not aggregate throughput.
+On Tue, Apr 26, 2016 at 10:37 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
+>
+> Abhishek L writes:
+>
+>> Yehuda Sadeh-Weinraub writes:
+>>
+>>> On Mon, Apr 25, 2016 at 1:17 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
+>>>>
+>>>> Yehuda Sadeh-Weinraub writes:
+>>>>
+>>>>> On Tue, Apr 19, 2016 at 11:08 AM, Yehuda Sadeh-Weinraub
+>>>>> <yehuda@redhat.com> wrote:
+>>>>>> On Tue, Apr 19, 2016 at 10:54 AM, Abhishek L
+>>>>>> <abhishek.lekshmanan@gmail.com> wrote:
+>>>>>>>
+>>>>>>> Yehuda Sadeh-Weinraub writes:
+>>>>>>>
+>>>>>>>> On Tue, Apr 19, 2016 at 9:10 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
+>>>>>>>>> Trying deleting objects & buckets from a secondary zone in a RGW
+>>>>>>>>> multisite configuration leads to some wierdness:
+>>>>>>>>>
+>>>>>>>>> 1. On deleting an object and the bucket immediately will mostly lead to
+>>>>>>>>> object and bucket getting deleted in the secondary zone, but since we
+>>>>>>>>> forward the bucket deletion to master only after we delete in secondary
+>>>>>>>>> it will fail with 409 (BucketNotEmpty) and gets reraised as a 500 to the
+>>>>>>>>> client. This _seems_ simple enough to fix if we forward the bucket
+>>>>>>>>> deletion request to master zone before attempting deletion locally,
+>>>>>>>>> (issue: http://tracker.ceph.com/issues/15540, possible fix: https://github.com/ceph/ceph/pull/8655)
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>> Yeah, this looks good. We'll get it through testing.
+>>>>>>>>
+>>>>>>>>> 2. Deletion of objects themselves: deletion of objects themselves seems
+>>>>>>>>> to be a bit racy, deleting an object on a secondary zone succeeds,
+>>>>>>>>> listing the bucket seems to show an empty list, but gets populated with
+>>>>>>>>> the object again sometimes (this time with a newer timestamp), this is
+>>>>>>>>> not always guaranteed to be reproduce, but I've seen this often with
+>>>>>>>>> multipart uploads, as an eg:
+>>>>>>>>>
+>>>>>>>>> $ s3 -u list test-mp
+>>>>>>>>>                        Key                             Last Modified      Size
+>>>>>>>>> --------------------------------------------------  --------------------  -----
+>>>>>>>>> test.img                                            2016-04-19T13:00:17Z    40M
+>>>>>>>>> $ s3 -u delete test-mp/test.img
+>>>>>>>>> $ s3 -u list test-mp
+>>>>>>>>>                        Key                             Last Modified      Size
+>>>>>>>>> --------------------------------------------------  --------------------  -----
+>>>>>>>>> test.img                                            2016-04-19T13:00:45Z    40M
+>>>>>>>>> $ s3 -u delete test-mp/test.img # wait for a  min
+>>>>>>>>> $ s3 -us list test-mp
+>>>>>>>>> --------------------------------------------------  --------------------  -----
+>>>>>>>>> test.img                                            2016-04-19T13:01:52Z    40M
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> Mostly seeing log entries of this form in both the cases ie. where
+>>>>>>>>> delete object seems to be successfully delete in both master and
+>>>>>>>>> secondary zone and the case where it succeeds in master and fails in
+>>>>>>>>> secondary :
+>>>>>>>>>
+>>>>>>>>> 20 parsed entry: id=00000000027.27.2 iter->object=foo iter->instance= name=foo instance= ns=
+>>>>>>>>> 20 [inc sync] skipping object: dkr:d8e0ec3d-b3da-43f8-a99b-38a5b4941b6f.14113.2:-1/foo: non-complete operation
+>>>>>>>>> 20 parsed entry: id=00000000028.28.2 iter->object=foo iter->instance= name=foo instance= ns=
+>>>>>>>>> 20 [inc sync] skipping object: dkr:d8e0ec3d-b3da-43f8-a99b-38a5b4941b6f.14113.2:-1/foo: canceled operation
+>>>>>>>>>
+>>>>>>>>> Any ideas on this?
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>> Do you have more than 2 zones syncing? Is it an object delete that
+>>>>>>>> came right after the object creation?
+>>>>>>>
+>>>>>>> Only 2 zones ie. one master and one secondary, req, on secondary. The delete came right after the
+>>>>>>> create though
+>>>>>>
+>>>>>> There are two issues that I see here. One is that we sync an object,
+>>>>>> but end up with different mtime than the object's source. The second
+>>>>>> issue is that we shouldn't have synced that object.
+>>>>>>
+>>>>>> There needs to be a check when syncing objects, to validate that we
+>>>>>> don't sync an object that originated from the current zone (by
+>>>>>> comparing the short zone id). We might be missing that.
+>>>>>>
+>>>>>
+>>>>> For the first issue, see:
+>>>>> https://github.com/ceph/ceph/pull/8685
+>>>>>
+>>>>> However, create that follows by a delete will still be a problem, as
+>>>>> when we sync the object we check it against the source mtime is newer
+>>>>> than the destination mtime. This is problematic with deletes, as these
+>>>>> don't have mtime once the object is removed. I think the solution
+>>>>> would be by using temporary tombstone objects (we already have the olh
+>>>>> framework that can provide what we need), that we'll garbage collect.
+>>>>
+>>>> Further information from logs if it helps:
+>>>>
+>>>> 2016-04-19 17:00:45.539356 7fc99effd700  0 _send_request(): deleting obj=test-mp:test.img
+>>>> 2016-04-19 17:00:45.539902 7fc99effd700 20 _send_request(): skipping object removal obj=test-mp:test.img (obj mtime=2016-04-19 17:00:26.0.098255s, request timestamp=2016-04-19 17:00:17.0.395208s)
+>>>>
+>>>> This is what the master zone logs show, however the request timestamp
+>>>> logged here is the `If-Modified-Since` value from secondary zone when
+>>>> the actual object write was completed (and not the time when deletion
+>>>> was completed),  do we set the value of the deletion time anywhere else
+>>>> in the BI log
+>>>>
+>>>>
+>>>
+>>> Did you apply PR 8685?
+>>>
+>>> Also, take a look at this:
+>>>
+>>> https://github.com/ceph/ceph/pull/8709
+>>>
+>>> With the new code we do store the object creation time in the delete
+>>> bucket index entry. That way we make sure we only sync object removal,
+>>> if the object was the same or older than the one that was actually
+>>> removed.
+>
+> Applied both PRs atop of master + 8655, basically now the object doesn't
+> resync back to the secondary zone after deletion which we observed
+> before.A create followed by an immediate delete succeeds delete in both the
+> zones almost every time.
+>
+> However allowing the object to sync to primary by introducing a delay,
+> for eg a script on secondary like:
+>
+> for i in {1..20}; do s3 -us put foobar/foo$i filename=test.img && sleep 3 && s3 -us delete foobar/foo$i;  done
+>
+> gives a empty list on the secondary zone, on the primary zone however it
+> looks like very few objects got actually deleted and others are still existing
+>
+> $ s3 -us list foobar
+> Content-Type: application/xml
+> Request-Id: tx000000000000000001db8-00571f9cdb-1015-us-east-1
+> Content-Length: 4713
+>                        Key                             Last Modified      Size
+> --------------------------------------------------  --------------------  -----
+> foo1                                                2016-04-26T14:24:25Z    87M
+> foo10                                               2016-04-26T14:27:28Z    87M
+> foo11                                               2016-04-26T14:27:50Z    87M
+> foo12                                               2016-04-26T14:28:12Z    87M
+> foo14                                               2016-04-26T14:28:48Z    87M
+> foo15                                               2016-04-26T14:29:09Z    87M
+> foo16                                               2016-04-26T14:29:30Z    87M
+> foo17                                               2016-04-26T14:29:51Z    87M
+> foo18                                               2016-04-26T14:30:12Z    87M
+> foo19                                               2016-04-26T14:30:33Z    87M
+> foo2                                                2016-04-26T14:24:47Z    87M
+> foo20                                               2016-04-26T14:30:54Z    87M
+> foo3                                                2016-04-26T14:25:07Z    87M
+> foo6                                                2016-04-26T14:26:05Z    87M
+> foo7                                                2016-04-26T14:26:24Z    87M
+> foo8                                                2016-04-26T14:26:47Z    87M
+> foo9                                                2016-04-26T14:27:07Z    87M
+>
+> Logs show this in case of failed deletes:
+> 2016-04-26 18:31:01.793673 7ff3f1ffb700 10 If-UnModified-Since: 2016-04-26 18:30:54.0.751623s Last-Modified: 0.000000
+> 2016-04-26 18:31:01.793716 7ff3f1ffb700 20 _send_request(): delete_obj() obj=foobar3:foo20 returned ret=-2
+>
+> In case of an object that succeeded deletion:
+> 2016-04-26 18:28:40.673885 7ff3f27fc700 10 If-UnModified-Since: 2016-04-26 18:28:30.0.510155s Last-Modified: 2016-04-26 18:28:30.510155
+>
+> More interesting log:
+> 2016-04-26 18:25:52.660674 7ff3cf7fe700 10 If-UnModified-Since: 2016-04-26 18:25:46.0.700052s Last-Modified: 0.000000
+> 2016-04-26 18:25:52.660698 7ff3cf7fe700 20 _send_request(): delete_obj() obj=foobar3:foo5 returned ret=-2
+> ...
+> 2016-04-26 18:25:59.341420 7ff3a67fc700 10 If-UnModified-Since: 2016-04-26 18:25:46.0.700052s Last-Modified: 2016-04-26 18:25:46.700052
+> [this was object foo5.. which was one of the objects that got deleted]
+>
+> Let me know if any other log info may be helpful (only debug rgw was
+> set, debug ms was 0)
 
-Using a micro benchmark which writes a 4 Mbyte object to an OSD and then reads it repeatedly. This test is repeatedly reading the same device content, so in theory, places minimal load on the device (at least in terms of using internal device caches).  I am running this on an Intel P3700 and over Mellanox 40Gb ethernet. The OSD system is running RHEL with this kernel:
+Yes, this would be great. If you could provide log with 'debug rgw =
+20' and 'debug ms = 1' it'd be helpful. I'm trying to reproduce the
+issue, and was able to get some bad behavior, but different than what
+you describe.
 
-3.10.0-327.13.1.el7.x86_64
+>
+> Possibly unrelated, a pkill radosgw sometimes used to throw an error
+> message with segfault, haven't seen this before though:
+> *** Caught signal (Segmentation fault) **
+>  in thread 7fdfbddfcb40 thread_name:radosgw
+>
 
-and the ceph code is rpms downloaded from download.ceph.org:
+Do you have a backtrace? I found an issue that might explain this one,
+but need a backtrace to validate.
 
-ceph version 10.2.0 (3a9fba20ec743699b69bd0181dd6c54dc01c64b9)
+Thanks,
+Yehuda
 
-Looking at the network traffic, I see about one request served per 8.5ms, this represents an aggregate data rate of 490 Mbytes/sec. Looking at network packets with tcpdump though, I see the complete response message being sent and acknowledged over tcp in about 2.5ms, the time from the last packet leaving the OSD host to the next request coming in is about 800 micro seconds, so the client is taking a little long to turn around when asking for more data. The network transmission rate is about 1.6 Gbytes/sec when data is moving. There is a stall of about 500us where no data is moving, so it looks like the tcp window is getting full at some point in there. I can push about 2.2 Gbytes/sec between these two hosts over netperf.
-
-Looking at OSD stats for one of these operations:
-
-        {
-            "description": "osd_op(client.4508.0:869 2.797e510b 2598\/object_0 [] snapc 0=[] ack+read+known_if_redirected e213)",
-            "initiated_at": "2016-04-26 08:54:38.938585",
-            "age": 34.420012,
-            "duration": 0.007323,
-            "type_data": [
-                "started",
-                {
-                    "client": "client.4508",
-                    "tid": 869
-                },
-                [
-                    {
-                        "time": "2016-04-26 08:54:38.938585",
-                        "event": "initiated"
-                    },
-                    {
-                        "time": "2016-04-26 08:54:38.938632",
-                        "event": "queued_for_pg"
-                    },
-                    {
-                        "time": "2016-04-26 08:54:38.938662",
-                        "event": "reached_pg"
-                    },
-                    {
-                        "time": "2016-04-26 08:54:38.938754",
-                        "event": "started"
-                    },
-                    {
-                        "time": "2016-04-26 08:54:38.945907",
-                        "event": "done"
-                    }
-                ]
-            ]
-        }
-
-And the operation latency:
-
-        "op_process_latency": {
-            "avgcount": 1003,
-            "sum": 5.259994928
-        },
-        "op_prepare_latency": {
-            "avgcount": 1003,
-            "sum": 5.270855977
-        },
-        "op_r": 1001,
-        "op_r_out_bytes": 4198498304,
-        "op_r_latency": {
-            "avgcount": 1001,
-            "sum": 5.321547421
-        },
-        "op_r_process_latency": {
-            "avgcount": 1001,
-            "sum": 5.243349956
-        },
-        "op_r_prepare_latency": {
-            "avgcount": 1001,
-            "sum": 5.269612380
-        },
-
-It appears that the network send time is not actually measured in operation latency - these counters are updated for an op before the network send happens. So the elapsed time of this operation, plus the elapsed time seen on the network, plus the time to get  new request in accounts for all of the time.
-
-So, why does it take this long to read 4 Mbytes from a device which can run significantly faster?
-
-Looking with blktrace, we can see that all the I/O for this data is coming from the device itself, there is no data caching in the OSD. So with bluestore, reading an object is going to hit physical media. This means OSD read speed is device limited, architecturally this somewhat makes sense in that ceph wants to cache on the edge close to clients. 
-
-The OSD I/O starts out by queuing all the requests, in 32 128Kbyte pieces (actually alignment is slightly off in my case and there is a short head and tail request), this takes 1.7ms, then the requests are issued and dispatched, this takes 61us, so not long at all. The requests then takes another 2.5ms to complete. So we have 4.2ms spent reading the data and a little less than 1G byte/sec.
-
-Looking at blktrace for the direct I/O read case, it takes 312 micro seconds to queue and dispatch all the requests, the first one comes back from the device in 400 micro seconds and we are completely done in 2.8 milliseconds total for a data rate of 1.5 Gbytes/sec which is about right.
-
-Observations here:
-
-1. Device I/O is not the most efficient here when observed in isolation from other requests. It would take several requests hitting an OSD in parallel to saturate the device and then the latency of individual operations is going to get longer still. Really hard to do predictive readahead here, in fact it is explicitly disabled. Seems to be a cost of the hash based placement of data.
-
-2. Reads requests are half duplex, no network data is moving when data is moving from disk, and no disk data is moving when data comes off the network. Writes are probably half duplex too. Probably would add considerably complexity to overlap these, and there are probably hard cases where a client gets half an object and then an error because the device failed. Also, dealing with multiplexing multiple overlapping replies over the same socket would be painful - is that something that has to be handled? I presume it is. 
-
-3. As a cache tier for reads this may not be a wonderful idea, you really want to get some cache memory into the stack there. 
-
-4. There is a bunch of handshaking involved in getting a request serviced. Using the kerneldevice module in bluestore it submits an I/O using aio and the completion handler thread has to run to discover it is done. This then has to wake up another thread to have it dispatch the reply message. I got lost in there, does that send the data directly, or use yet another thread to actually send the data?
-
-If I look at small requests, then a single client thread can get about 2000 read ops per second to an OSD. Object stat calls run about 3000 per second for objects known to be in memory. That could be faster but the data wrangling is where the bulk of the time is going.
-
-Seems like aio_read is a weak spot once devices are fast though.
-
-Higher CPU clock speed would help me here, but I never get more than 50% load on a single core running this test.
-
-Steve
-
-
-> On Apr 22, 2016, at 10:35 AM, Mark Nelson <mnelson@redhat.com> wrote:
-> 
-> Hi Guys,
-> 
-> Now that folks are starting to dig into bluestore with the Jewel release, I wanted to share some of our on-going performance test data. These are from 10.1.0, so almost, but not quite, Jewel.  Generally bluestore is looking very good on HDDs, but there are a couple of strange things to watch out for, especially with NVMe devices.  Mainly:
-> 
-> 1) in HDD+NVMe configurations performance increases dramatically when replacing the stock CentOS7 kernel with Kernel 4.5.1.
-> 
-> 2) In NVMe only configurations performance is often lower at middle-sized IOs.  Kernel 4.5.1 doesn't really help here.  In fact it seems to amplify both the cases where bluestore is faster and where it is slower.
-> 
-> 3) Medium sized sequential reads are where bluestore consistently tends to be slower than filestore.  It's not clear yet if this is simply due to Bluestore not doing read ahead at the OSD (ie being entirely dependent on client read ahead) or something else as well.
-> 
-> I wanted to post this so other folks have some ideas of what to look for as they do their own bluestore testing.  This data is shown as percentage differences vs filestore, but I can also release the raw throughput values if people are interested in those as well.
-> 
-> 
-
-
+> master sha1 before the patches was 25c2f5a793ff726facde236aa0c2dd78cf933c60
+>
+> Regards
+> Abhishek
+>>
+>> Hadn't applied the PR yet, I'll apply both and see if I can reproduce
+>> the issue again.
+>>>
+>>> Yehuda
+>>
+>> Thanks
+>> --
+>> Abhishek
+>
+>
