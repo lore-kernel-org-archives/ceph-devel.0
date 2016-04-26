@@ -1,41 +1,47 @@
-From: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Subject: rgw : inefficient bucket listing with max-keys URL parameter
-Date: Tue, 26 Apr 2016 15:48:10 +0530
-Message-ID: <CAP3mxSw_SAjd9wCcFWyVbwP=QzGBJghSKVvayfM4DdP2h2zPbg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:36465 "EHLO
-	mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751170AbcDZKSN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Apr 2016 06:18:13 -0400
-Received: by mail-yw0-f179.google.com with SMTP id o66so9694068ywc.3
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Apr 2016 03:18:12 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: [PATCH 0/2] scop GFP_NOFS api
+Date: Tue, 26 Apr 2016 13:56:10 +0200
+Message-ID: <1461671772-1269-1-git-send-email-mhocko@kernel.org>
+Return-path: <owner-linux-mm@kvack.org>
+Sender: owner-linux-mm@kvack.org
+To: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org
+Cc: Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, xfs@oss.sgi.com, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
 Hi,
+we have discussed this topic at LSF/MM this year. There was a general
+interest in the scope GFP_NOFS allocation context among some FS
+developers. For those who are not aware of the discussion or the issue
+I am trying to sort out (or at least start in that direction) please
+have a look at patch 1 which adds memalloc_nofs_{save,restore} api
+which basically copies what we have for the scope GFP_NOIO allocation
+context. I haven't converted any of the FS myself because that is way
+beyond my area of expertise but I would be happy to help with further
+changes on the MM front as well as in some more generic code paths.
 
-I came across an issue in rgw where bucket listing turns out to be
-quite slow when a low value is specified to the URL parameter
-<max-keys>. For example, the s3a hadoop connector species <max-keys>
-parameter to be 1 for a certain operation [1]. The expectation of the
-client here is to get result set with 1 value. Radosgw, in turn,
-percolates this value down to rados and fetches a key one by one in
-RGWRados::Bucket::List::list_objects function [2] before checking for
-delimiter etc. This turns out to be highly inefficient and thus the
-client faces time-outs.
+Dave had an idea on how to further improve the reclaim context to be
+less all-or-nothing wrt. GFP_NOFS. In short he was suggesting an opaque
+and FS specific cookie set in the FS allocation context and consumed
+by the FS reclaim context to allow doing some provably save actions
+that would be skipped due to GFP_NOFS normally.  I like this idea and
+I believe we can go that direction regardless of the approach taken here.
+Many filesystems simply need to cleanup their NOFS usage first before
+diving into a more complex changes.
 
-It would have been better if a config option could be provided to
-avoid such issues, like, a minimum readahead value for listing objects
-from rados.
+The patch 2 is a debugging aid which warns about explicit allocation
+requests from the scope context. This is should help to reduce the
+direct usage of the NOFS flags to bare minimum in favor of the scope
+API. It is not aimed to be merged upstream. I would hope Andrew took it
+into mmotm tree to give it linux-next exposure and allow developers to
+do further cleanups.  There is a new kernel command line parameter which
+has to be used for the debugging to be enabled.
 
-I have raised a PR for the above mentioned fix [3].
+I think the GFP_NOIO should be seeing the same clean up.
 
-[1] https://github.com/apache/hadoop/blob/trunk/hadoop-tools/hadoop-aws/src/main/java/org/apache/hadoop/fs/s3a/S3AFileSystem.java#L1012
-[2] https://github.com/ceph/ceph/blob/master/src/rgw/rgw_rados.cc#L4729
-[3] https://github.com/ceph/ceph/pull/8756
+Any feedback is highly appreciated.
 
-Thanks
-Abhishek
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
