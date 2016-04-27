@@ -1,42 +1,59 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 1.2/2] mm: introduce memalloc_nofs_{save,restore} API
-Date: Wed, 27 Apr 2016 15:07:12 +0200
-Message-ID: <20160427130712.GK2179@dhcp22.suse.cz>
-References: <1461671772-1269-2-git-send-email-mhocko@kernel.org>
- <1461758075-21815-1-git-send-email-mhocko@kernel.org>
- <1461758075-21815-2-git-send-email-mhocko@kernel.org>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 04/27/2016 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 27 Apr 2016 09:22:20 -0500
+Message-ID: <5720CB1C.20702@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <1461758075-21815-2-git-send-email-mhocko@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, xfs@oss.sgi.com, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:43537 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752509AbcD0OWY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 27 Apr 2016 10:22:24 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 8B5C88E3DA
+	for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2016 14:22:23 +0000 (UTC)
+Received: from [10.3.112.7] ([10.3.112.7])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u3REMKDS001957
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2016 10:22:23 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed 27-04-16 13:54:35, Michal Hocko wrote:
-> From: Michal Hocko <mhocko@suse.com>
-> 
+8AM PST as usual! Jewel has finally been released, Huzzah!  We're 
+starting to see some new PRs trickle in, old ones get updated, and have 
+some updated bluestore testing to go through.  Please feel free to add 
+your own discussion topics!
 
-Ups missed Dave's note about:
+Here's the links:
 
-> GFP_NOFS context is used for the following 4 reasons currently
-> 	- to prevent from deadlocks when the lock held by the allocation
-> 	  context would be needed during the memory reclaim
-> 	- to prevent from stack overflows during the reclaim because
-> 	  the allocation is performed from a deep context already
-> 	- to prevent lockups when the allocation context depends on
-> 	  other reclaimers to make a forward progress indirectly
-> 	- just in case because this would be safe from the fs POV
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
 
-	- silence lockdep false positives
--- 
-Michal Hocko
-SUSE Labs
+To join the Meeting:
+https://bluejeans.com/268261044
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
