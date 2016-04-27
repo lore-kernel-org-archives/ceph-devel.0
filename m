@@ -1,57 +1,59 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 1.2/2] mm: introduce memalloc_nofs_{save,restore} API
-Date: Wed, 27 Apr 2016 23:14:14 +0200
-Message-ID: <20160427211414.GA24919@dhcp22.suse.cz>
-References: <1461671772-1269-2-git-send-email-mhocko@kernel.org>
- <1461758075-21815-1-git-send-email-mhocko@kernel.org>
- <1461758075-21815-2-git-send-email-mhocko@kernel.org>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: [PATCH] rbd: report unsupported features to syslog
+Date: Wed, 27 Apr 2016 14:14:31 -0700
+Message-ID: <57212BB7.4040901@redhat.com>
+References: <1460748345-3717-1-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <reiserfs-devel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1461758075-21815-2-git-send-email-mhocko@kernel.org>
-Sender: reiserfs-devel-owner@vger.kernel.org
-To: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, xfs@oss.sgi.com, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:38401 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752653AbcD0VOc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 27 Apr 2016 17:14:32 -0400
+In-Reply-To: <1460748345-3717-1-git-send-email-idryomov@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
-OK, so the lockdep splats I was seeing [1] were much easier to fix than
-I originally thought. So the following should be folded into the
-original patch. I will send the full patch later on.
+On 04/15/2016 12:25 PM, Ilya Dryomov wrote:
+> ... instead of just returning an error.
+>
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 
-[1] http://lkml.kernel.org/r/20160427200927.GC22544@dhcp22.suse.cz
----
-From 1968c0a8ace4090a9deca8f4c1a206ee546e595a Mon Sep 17 00:00:00 2001
-From: Michal Hocko <mhocko@suse.com>
-Date: Wed, 27 Apr 2016 22:32:57 +0200
-Subject: [PATCH] fold me "mm: introduce memalloc_nofs_{save,restore} API"
+Reviewed-by: Josh Durgin <jdurgin@redhat.com>
 
-Lockdep infrastructure is hooked into early hot paths of the allocator
-so __lockdep_trace_alloc has to check for PF_MEMALLOC_NOFS directly and
-do not rely on current_gfp_context
+> ---
+>   drivers/block/rbd.c | 9 ++++++---
+>   1 file changed, 6 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 9f1eb00b5e64..78aca585e7e5 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -4184,7 +4184,7 @@ static int _rbd_dev_v2_snap_features(struct rbd_device *rbd_dev, u64 snap_id,
+>   		__le64 features;
+>   		__le64 incompat;
+>   	} __attribute__ ((packed)) features_buf = { 0 };
+> -	u64 incompat;
+> +	u64 unsup;
+>   	int ret;
+>
+>   	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
+> @@ -4197,9 +4197,12 @@ static int _rbd_dev_v2_snap_features(struct rbd_device *rbd_dev, u64 snap_id,
+>   	if (ret < sizeof (features_buf))
+>   		return -ERANGE;
+>
+> -	incompat = le64_to_cpu(features_buf.incompat);
+> -	if (incompat & ~RBD_FEATURES_SUPPORTED)
+> +	unsup = le64_to_cpu(features_buf.incompat) & ~RBD_FEATURES_SUPPORTED;
+> +	if (unsup) {
+> +		rbd_warn(rbd_dev, "image uses unsupported features: 0x%llx",
+> +			 unsup);
+>   		return -ENXIO;
+> +	}
+>
+>   	*snap_features = le64_to_cpu(features_buf.features);
+>
+>
 
-Signed-off-by: Michal Hocko <mhocko@suse.com>
-
----
- kernel/locking/lockdep.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/kernel/locking/lockdep.c b/kernel/locking/lockdep.c
-index 716547fdb873..f60124d0871c 100644
---- a/kernel/locking/lockdep.c
-+++ b/kernel/locking/lockdep.c
-@@ -2750,7 +2750,7 @@ static void __lockdep_trace_alloc(gfp_t gfp_mask, unsigned long flags)
- 		return;
- 
- 	/* We're only interested __GFP_FS allocations for now */
--	if (!(gfp_mask & __GFP_FS))
-+	if (!(gfp_mask & __GFP_FS) || (curr->flags & PF_MEMALLOC_NOFS))
- 		return;
- 
- 	/*
--- 
-2.8.0.rc3
-
--- 
-Michal Hocko
-SUSE Labs
