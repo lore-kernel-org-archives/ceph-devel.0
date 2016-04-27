@@ -1,42 +1,51 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: blueprint: consistency groups
-Date: Wed, 27 Apr 2016 12:50:19 -0500
-Message-ID: <CA+aFP1C7me+-dbXVrMgU0Qs9fX8_4ocC9v5orzy+c8tK30y08A@mail.gmail.com>
-References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
-	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
-	<20160325071933.GA14634@gmail.com>
-	<CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
-	<CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
-	<CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
-	<CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
-	<CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
-	<CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: [PATCH 1.1/2] xfs: abstract PF_FSTRANS to PF_MEMALLOC_NOFS
+Date: Wed, 27 Apr 2016 21:43:47 +0200
+Message-ID: <20160427194347.GA22544@dhcp22.suse.cz>
+References: <1461671772-1269-2-git-send-email-mhocko@kernel.org>
+ <1461758075-21815-1-git-send-email-mhocko@kernel.org>
+ <04798BA8-2157-4611-B4EA-B8BCBA88AEC3@dilger.ca>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f50.google.com ([209.85.220.50]:34645 "EHLO
-	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753384AbcD0RuU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2016 13:50:20 -0400
-Received: by mail-pa0-f50.google.com with SMTP id r5so22143239pag.1
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2016 10:50:20 -0700 (PDT)
-In-Reply-To: <CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Victor Denisov <vdenisov@mirantis.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <reiserfs-devel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <04798BA8-2157-4611-B4EA-B8BCBA88AEC3@dilger.ca>
+Sender: reiserfs-devel-owner@vger.kernel.org
+To: Andreas Dilger <adilger@dilger.ca>
+Cc: Linux MM <linux-mm@kvack.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel <cluster-devel@redhat.com>, Linux NFS Mailing List <linux-nfs@vger.kernel.org>, logfs@logfs.org, XFS Developers <xfs@oss.sgi.com>, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Apr 26, 2016 at 6:33 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
-> One quick question: is image id unique across all pools? I'm
-> referencing image using 'image_<image id>' key and then keeping pool
-> id in the omap value.
-> Is it safe?
+On Wed 27-04-16 11:41:51, Andreas Dilger wrote:
+> On Apr 27, 2016, at 5:54 AM, Michal Hocko <mhocko@kernel.org> wrote:
+[...]
+> > --- a/fs/xfs/kmem.c
+> > +++ b/fs/xfs/kmem.c
+> > @@ -80,13 +80,13 @@ kmem_zalloc_large(size_t size, xfs_km_flags_t flags)
+> > 	 * context via PF_MEMALLOC_NOIO to prevent memory reclaim re-entering
+> > 	 * the filesystem here and potentially deadlocking.
+> > 	 */
+> > -	if ((current->flags & PF_FSTRANS) || (flags & KM_NOFS))
+> > +	if ((current->flags & PF_MEMALLOC_NOFS) || (flags & KM_NOFS))
+> > 		noio_flag = memalloc_noio_save();
+> > 
+> > 	lflags = kmem_flags_convert(flags);
+> > 	ptr = __vmalloc(size, lflags | __GFP_HIGHMEM | __GFP_ZERO, PAGE_KERNEL);
+> > 
+> > -	if ((current->flags & PF_FSTRANS) || (flags & KM_NOFS))
+> > +	if ((current->flags & PF_MEMALLOC_NOFS) || (flags & KM_NOFS))
+> > 		memalloc_noio_restore(noio_flag);
+> 
+> Not really the fault of this patch, but it brings this nasty bit of code into
+> the light.  Is all of this machinery still needed given that __vmalloc() can
+> accept GFP flags?  If yes, wouldn't it be better to fix __vmalloc() to honor
+> the GFP flags instead of working around it in the filesystem code?
 
-
-No -- the image id is only guaranteed to be unique within the pool
-that owns the image.  You can use the pool id in combination with the
-image id to form a unique key.
-
+This is not that easy. __vmalloc can accept gfp flags but it doesn't
+honor __GFP_IO 100%. IIRC some paths like page table allocations are
+hardcoded GFP_KERNEL. Besides that I would like to have GFP_NOIO used
+via memalloc_noio_{save,restore} API as well for the similar reasons as
+GFP_NOFS - it is just easier to explain scope than particular code paths
+which might be shared.
 -- 
-Jason
+Michal Hocko
+SUSE Labs
