@@ -1,60 +1,67 @@
-From: Victor Denisov <vdenisov@mirantis.com>
-Subject: Re: blueprint: consistency groups
-Date: Tue, 26 Apr 2016 16:33:48 -0700
-Message-ID: <CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
-References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
-	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
-	<20160325071933.GA14634@gmail.com>
-	<CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
-	<CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
-	<CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
-	<CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
-	<CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: [PATCH 1/2] mm: add PF_MEMALLOC_NOFS
+Date: Wed, 27 Apr 2016 09:51:02 +0200
+Message-ID: <20160427075102.GB2179@dhcp22.suse.cz>
+References: <1461671772-1269-1-git-send-email-mhocko@kernel.org>
+ <1461671772-1269-2-git-send-email-mhocko@kernel.org>
+ <20160426230702.GG26977@dastard>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f182.google.com ([209.85.161.182]:35651 "EHLO
-	mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754429AbcDZXdt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Apr 2016 19:33:49 -0400
-Received: by mail-yw0-f182.google.com with SMTP id g133so40071583ywb.2
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Apr 2016 16:33:49 -0700 (PDT)
-In-Reply-To: <CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20160426230702.GG26977@dastard>
+Sender: owner-linux-mm@kvack.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, xfs@oss.sgi.com, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-I understand. I can do it.
-One quick question: is image id unique across all pools? I'm
-referencing image using 'image_<image id>' key and then keeping pool
-id in the omap value.
-Is it safe?
+On Wed 27-04-16 09:07:02, Dave Chinner wrote:
+> On Tue, Apr 26, 2016 at 01:56:11PM +0200, Michal Hocko wrote:
+> > From: Michal Hocko <mhocko@suse.com>
+> > 
+> > GFP_NOFS context is used for the following 4 reasons currently
+> > 	- to prevent from deadlocks when the lock held by the allocation
+> > 	  context would be needed during the memory reclaim
+> > 	- to prevent from stack overflows during the reclaim because
+> > 	  the allocation is performed from a deep context already
+> > 	- to prevent lockups when the allocation context depends on
+> > 	  other reclaimers to make a forward progress indirectly
+> > 	- just in case because this would be safe from the fs POV
+> 
+> - silencing lockdep false positives
+> 
+> > Introduce PF_MEMALLOC_NOFS task specific flag and memalloc_nofs_{save,restore}
+> > API to control the scope. This is basically copying
+> > memalloc_noio_{save,restore} API we have for other restricted allocation
+> > context GFP_NOIO.
+> > 
+> > Xfs has already had a similar functionality as PF_FSTRANS so let's just
+> > give it a more generic name and make it usable for others as well and
+> > move the GFP_NOFS context tracking to the page allocator. Xfs has its
+> > own accessor functions but let's keep them for now to reduce this patch
+> > as minimum.
+> 
+> Can you split this into two patches? The first simply does this:
+> 
+> #define PF_MEMALLOC_NOFS PF_FSTRANS
+> 
+> and changes only the XFS code to use PF_MEMALLOC_NOFS.
+> 
+> The second patch can then do the rest of the mm API changes that we
+> don't actually care about in XFS at all.  That way I can carry all
+> the XFS changes in the XFS tree and not have to worry about when
+> this stuff gets merged or conflicts with the rest of the work that
+> is being done to the mm/ code and whatever tree that eventually
+> lands in...
 
-On Tue, Apr 26, 2016 at 9:09 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->> The problem that I see with this approach is: let's say we start
->> adding an image to a cg and the cg is in adding image state.
->> It either means that somebody is already adding an image to this cg or
->> somebody died while adding this image.
->> And we can't really understand it.
->
-> The metadata link from CG -> image should be in the "adding" state,
-> not the entire CG.  There shouldn't be anything preventing
-> concurrently adding two different images to a CG.
->
->>
->> So, my suggestion is: normally the command fails if it finds the cg in
->> an unexpected state.
->> If the user adds flag --force then it picks up this unfinished
->> operation and completes it and then adds the new image.
->> How does that sound?
->
-> My concern w/ adding a "--force" command for this is that it can be
-> abused.  Personally, I'd rather see that the API is robust enough to
-> handle these partial states.  If an "add" fails, I should be able to
-> repeat the "add" and have it work or run "remove" to have it clean up
-> any intermediate state.
->
->
-> --
-> Jason
+Sure I will do that
+
+-- 
+Michal Hocko
+SUSE Labs
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
