@@ -1,82 +1,55 @@
-From: Douglas Fuller <dfuller@redhat.com>
-Subject: Re: [PATCH] rbd: report unsupported features to syslog
-Date: Thu, 28 Apr 2016 12:42:15 -0400
-Message-ID: <796104EE-5477-4AA9-84B7-FE79EFBAF277@redhat.com>
-References: <1460748345-3717-1-git-send-email-idryomov@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: blueprint: consistency groups
+Date: Thu, 28 Apr 2016 11:06:07 -0700
+Message-ID: <CA+hcxJT4DWgt8K8hc27KbkJK=DRePM18Zh=GPxtfR5afoxVP1w@mail.gmail.com>
+References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
+	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
+	<20160325071933.GA14634@gmail.com>
+	<CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
+	<CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
+	<CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
+	<CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
+	<CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
+	<CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
+	<CA+aFP1C7me+-dbXVrMgU0Qs9fX8_4ocC9v5orzy+c8tK30y08A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f47.google.com ([209.85.220.47]:33739 "EHLO
-	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752751AbcD1QmW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2016 12:42:22 -0400
-Received: by mail-pa0-f47.google.com with SMTP id zm5so37887664pac.0
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2016 09:42:20 -0700 (PDT)
-In-Reply-To: <1460748345-3717-1-git-send-email-idryomov@gmail.com>
+Received: from mail-yw0-f169.google.com ([209.85.161.169]:34526 "EHLO
+	mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750847AbcD1SGJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2016 14:06:09 -0400
+Received: by mail-yw0-f169.google.com with SMTP id j74so118313849ywg.1
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2016 11:06:08 -0700 (PDT)
+In-Reply-To: <CA+aFP1C7me+-dbXVrMgU0Qs9fX8_4ocC9v5orzy+c8tK30y08A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-Looks good to me.
+I created a pull request for preliminary review:
+https://github.com/ceph/ceph/pull/8816
+Please leave your comments if you have any. Currently it only has the
+following operations implemented:
 
-Reviewed-by: Douglas Fuller <dfuller@redhat.com>
+- create consistency group
+- remove consistency group
+- add image to consistency group
+- remove image from consistency group
+- list consistency groups
 
-Cheers,
-=E2=80=94Doug
 
-> On Apr 15, 2016, at 3:25 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
->=20
-> ... instead of just returning an error.
->=20
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
-> drivers/block/rbd.c | 9 ++++++---
-> 1 file changed, 6 insertions(+), 3 deletions(-)
->=20
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 9f1eb00b5e64..78aca585e7e5 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -4184,7 +4184,7 @@ static int _rbd_dev_v2_snap_features(struct rbd=
-_device *rbd_dev, u64 snap_id,
-> 		__le64 features;
-> 		__le64 incompat;
-> 	} __attribute__ ((packed)) features_buf =3D { 0 };
-> -	u64 incompat;
-> +	u64 unsup;
-> 	int ret;
->=20
-> 	ret =3D rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
-> @@ -4197,9 +4197,12 @@ static int _rbd_dev_v2_snap_features(struct rb=
-d_device *rbd_dev, u64 snap_id,
-> 	if (ret < sizeof (features_buf))
-> 		return -ERANGE;
->=20
-> -	incompat =3D le64_to_cpu(features_buf.incompat);
-> -	if (incompat & ~RBD_FEATURES_SUPPORTED)
-> +	unsup =3D le64_to_cpu(features_buf.incompat) & ~RBD_FEATURES_SUPPOR=
-TED;
-> +	if (unsup) {
-> +		rbd_warn(rbd_dev, "image uses unsupported features: 0x%llx",
-> +			 unsup);
-> 		return -ENXIO;
-> +	}
->=20
-> 	*snap_features =3D le64_to_cpu(features_buf.features);
->=20
-> --=20
-> 2.4.3
->=20
+On Wed, Apr 27, 2016 at 10:50 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+> On Tue, Apr 26, 2016 at 6:33 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>> One quick question: is image id unique across all pools? I'm
+>> referencing image using 'image_<image id>' key and then keeping pool
+>> id in the omap value.
+>> Is it safe?
+>
+>
+> No -- the image id is only guaranteed to be unique within the pool
+> that owns the image.  You can use the pool id in combination with the
+> image id to form a unique key.
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Jason
