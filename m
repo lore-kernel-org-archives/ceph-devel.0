@@ -1,53 +1,58 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: building boost statically
-Date: Thu, 28 Apr 2016 16:05:59 -0700
-Message-ID: <CADRKj5T5oJrrbhHDECFgkphejab6o=ApBQ7sHhpcuCWqYEL_Pg@mail.gmail.com>
-References: <alpine.DEB.2.11.1604281843520.25990@cpach.fuggernut.com>
+Date: Thu, 28 Apr 2016 19:14:15 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604281908430.25990@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1604281843520.25990@cpach.fuggernut.com> <robbat2-20160428T225021-424429122Z@orbis-terrarum.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f173.google.com ([209.85.161.173]:34360 "EHLO
-	mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751907AbcD1XGC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2016 19:06:02 -0400
-Received: by mail-yw0-f173.google.com with SMTP id j74so133280533ywg.1
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2016 16:06:00 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1604281843520.25990@cpach.fuggernut.com>
+Received: from cobra.newdream.net ([66.33.216.30]:39796 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752456AbcD1XOJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2016 19:14:09 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTPS id 2B1D38004B
+	for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2016 16:14:08 -0700 (PDT)
+In-Reply-To: <robbat2-20160428T225021-424429122Z@orbis-terrarum.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Dreyer, Ken" <kdreyer@redhat.com>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Apr 28, 2016 at 3:47 PM, Sage Weil <sweil@redhat.com> wrote:
-> Hi all,
+On Thu, 28 Apr 2016, Robin H. Johnson wrote:
+> On Thu, Apr 28, 2016 at 06:47:55PM -0400,  Sage Weil wrote:
+> > Hi all,
+> > 
+> > We'd really like to use the latest boost, mainly so that we can use 
+> > small_vector in a zillion places and avoid extra memory allocations.  The 
+> > distros, as always, are behind.
 >
-> We'd really like to use the latest boost, mainly so that we can use
-> small_vector in a zillion places and avoid extra memory allocations.  The
-> distros, as always, are behind.
+> From a distribution perspective, LESS static building is better, so this
+> proposal is a concern, but I do realize that the Gentoo/ArchLinux/CoreOS
+> perspective is very different than the Ubuntu LTS perspective.
+> 
+> What's the state of having a more-up-to-date Boost in things like Ubuntu
+> backports, so that you don't have the overhead of having to maintain
+> your own boost packages or statically link?
 >
-> The thoguht is to bring it in as yet another submodule, build it
-> statically (it's pretty fast), and link statically.  There are a handful
-> of places where the distro boost links dynamically.  For example, on
-> xenial, it's
->
-> libboost-iostreams1.58.0
-> libboost-program-options1.58.0
-> libboost-random1.58.0
-> libboost-system1.58.0
-> libboost-thread1.58.0
->
-> I'm not sure how we should deal with that.  We could simply link it
-> statically.  Alternatively, we could ship packages.. but if we do that we
-> might as well just conditionally build against the new features and then
-> build a full set of backported boost packages for the distros we care
-> about.
->
-> I'm not sure how to best proceed.  But it would be really great to get
-> access to new boost features like small_vector...
->
+> If support for statically linking a newer Boost is brought it, please,
+> please keep dynamic boost builds as fully supported, for distributions
+> that can keep up to date. As a bonus, at some point in the future, when
+> the slower distributions catch up, you might be able to escape the
+> static again.
 
-If we need to have it as a submodule then build it conditionally. Then
-make a decision per distro, whether we want to not use new
-functionality, or backport packages, or have it linked statically.
+Yeah, having the option to either build statically or dynamically against 
+an up-to-date distro is probably the right carrot/stick combination to 
+incentivize the distros to move to a newer boost.
 
-Yehuda
+Being able to conditionally not use the new stuff (e.g., typedef 
+small_vector<> back to vector<>) may or may not work well, depending on 
+which new thing we're trying to use.
+
+FWIW, we made the static -> dynamic transition with leveldb because the 
+distros complained and it was nothing but sadness--so so many hours wasted 
+chasing bugs in ancient distro versions of leveldb, and a huge matrix of 
+version possibilities that made it difficult to reproduce user issues.  I 
+can't tell if there was ever an instance where it actually gained us 
+anything (e.g., security update in leveldb), but I kind of doubt it.
+
+sage
