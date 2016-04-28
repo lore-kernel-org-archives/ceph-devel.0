@@ -1,23 +1,43 @@
-From: John Hunter <zhjwpku@gmail.com>
-Subject: test-suite Error
-Date: Thu, 28 Apr 2016 17:22:48 +0800
-Message-ID: <CAEG8a3+45dKiTF8aFTd9HhB1EQ4ZOpa_ULyXKS90F3O3rWvmdg@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: [GIT PULL] Ceph fixes for -rc6
+Date: Thu, 28 Apr 2016 10:08:57 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604281006521.25990@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f52.google.com ([209.85.213.52]:34357 "EHLO
-	mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751983AbcD1JWt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2016 05:22:49 -0400
-Received: by mail-vk0-f52.google.com with SMTP id m188so24426507vka.1
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2016 02:22:49 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-I run the ./run-make-chek.sh and got the Error.
+Hi Linus,
 
-I paste the src/test-suite.log here:
-http://paste.fedoraproject.org/360609/35027146/
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
-Not sure if I did something wrong.
+There is a lifecycle fix in the auth code, a fix for a narrow race 
+condition on map, and a helpful message in the log when there is a feature 
+mismatch (which happens frequently now that the default server-side 
+options have changed).
+
+Thanks!
+sage
+
+
+
+----------------------------------------------------------------
+Ilya Dryomov (3):
+      libceph: make authorizer destruction independent of ceph_auth_client
+      rbd: fix rbd map vs notify races
+      rbd: report unsupported features to syslog
+
+ drivers/block/rbd.c             | 52 +++++++++++++++---------------
+ fs/ceph/mds_client.c            |  6 ++--
+ include/linux/ceph/auth.h       | 10 +++---
+ include/linux/ceph/osd_client.h |  1 -
+ net/ceph/auth.c                 |  8 ++---
+ net/ceph/auth_none.c            | 71 ++++++++++++++++++++++-------------------
+ net/ceph/auth_none.h            |  3 +-
+ net/ceph/auth_x.c               | 21 ++++++------
+ net/ceph/auth_x.h               |  1 +
+ net/ceph/osd_client.c           |  6 ++--
+ 10 files changed, 87 insertions(+), 92 deletions(-)
