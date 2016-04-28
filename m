@@ -1,209 +1,115 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Help with understanding throttle.finish()
-Date: Thu, 28 Apr 2016 20:15:49 +0200
-Message-ID: <57225355.3040401@digiware.nl>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: Started developing a deduplication feature
+Date: Thu, 28 Apr 2016 21:08:49 +0000
+Message-ID: <BN3PR02MB12066770AEB734AEA5D42662E8650@BN3PR02MB1206.namprd02.prod.outlook.com>
+References: <8737r5w89m.fsf@uni-mainz.de>
+ <alpine.DEB.2.11.1604011723500.22014@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:55832 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751513AbcD1SQU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 28 Apr 2016 14:16:20 -0400
-Received: from rack1.digiware.nl (unknown [127.0.0.1])
-	by smtp.digiware.nl (Postfix) with ESMTP id 13E48153413
-	for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2016 20:16:17 +0200 (CEST)
-Received: from [IPv6:2001:4cb8:3:1:f473:542e:9337:7a5f] (unknown [IPv6:2001:4cb8:3:1:f473:542e:9337:7a5f])
-	by smtp.digiware.nl (Postfix) with ESMTP id 81181153401
-	for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2016 20:15:56 +0200 (CEST)
+Received: from mail-bn1bon0096.outbound.protection.outlook.com ([157.56.111.96]:65056
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753631AbcD1VI5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2016 17:08:57 -0400
+In-Reply-To: <alpine.DEB.2.11.1604011723500.22014@cpach.fuggernut.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, Marcel Lauhoff <lauhoff@uni-mainz.de>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Friday, April 01, 2016 4:31 PM
+> To: Marcel Lauhoff <lauhoff@uni-mainz.de>
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Started developing a deduplication feature
+> 
+> Hi Marcel,
+> 
+> On Fri, 1 Apr 2016, Marcel Lauhoff wrote:
+> > Hi Ceph,
+> >
+> > deduplication has been discussed on the list a couple of times.
+> > Over the next months I'll be working on a prototype.
+> >
+> > In short: Use a content-addressed storage pool backed by a pool acting
+> > as storage and distributed fingerprint index.
+> >
+> > Two pools: (1) pool that does the content addressing, (2) storage /
+> > index pool.
+> >
+> > OSDs in the first pool readdress and chuck/reassemble objects.
+> > They then store the new objects/chunks in a second pool.
+> 
+> I think this is the right architecture for dedup in Ceph, and matches the ideas
+> we've been kicking around.
+> 
+> > The first pool uses a new PG backend ("CAS Backend"), while the second
+> > can use replication or erasure coding.
+> >
+> > The CAS backend computes fingerprints for incoming objects and stores
+> > the fingerprint <-> original object name mapping.
+> > It then forwards the data to a storage pool, addressing the objects by
+> > fingerprint (the content defined name).
+> >
+> > The storage pool therefore serves as a distributed fingerprint index.
+> > CRUSH selects the responsible OSDs. The OSDs know their objects.
+> >
+> > Deduplication happens when two objects/chunks have the same
+> > fingerprint.
+> 
+> This is a little different, though.
+> 
+> The plan so far has been to match this up with the next stage of tiering.
+> We'll add the ability for and object to be a 'redirect' and store a bit of
+> metadata indicating where to look next.  That might be a simple as "go look in
+> this cold RADOS pool over there," or a URL into another storage system (e.g.,
+> a tape archive), or.. a complicated mapping of bytes to CAS chunks in another
+> rados pool.
+> 
+> The original thought was that this would just be a regular ReplicatedPG, not a
+> new pool type.  I haven't thought about what we'd gain by having a new pool
+> type.  One thing we get by using the existing pool is that we're not forced to
+> do the demotion/dedup immediately--we can just store the object normally,
+> and dedup it later when we decide it's cold.
 
-I'm running a rather simple setup on my FreeBSD port.
+To me, using a replicated pool to store the chunks significantly degrades the value of deduplication.
+Also, the usage of a standard RADOS object for each chunk will severely degrade performance for small chunk sizes at large data scales.
 
-function TEST_simple() {
-     # run the most simple config, and run a bechmark on it.
-     local dir=$1
+The advantage of a new pool type is that you can create a metadata structure that's better crafted to this use case and that uses erasure coding to really get the full value out of deduplication.
 
-     run_mon $dir a || return 1
-     run_osd $dir 0 || return 1
+Lots more work of course :(
 
-     #
-     # default values should work
-     #
-     ceph tell osd.0 bench || return 1
-
-}
-
-This in the end crashes with:
-     8059eec00 -1 FileStore: sync_entry timed out after 600 seconds.
-exactly 10 minutes after startup.
-This trhread does just about exactly nothing, it initialises the time, 
-and then traps after 10 minutes.
-# grep 8059eec00  testdir/osd-bench/osd.0.log
-2016-04-28 19:51:44.444689 8059eec00 -1 FileStore: sync_entry timed out 
-after 600 seconds.
-2016-04-28 19:51:44.487104 8059eec00 -1 os/filestore/FileStore.cc: In 
-function 'virtual void SyncEntryTimeout::finish(int)' thread 8059eec00 time
-
-I've augmented just about every line of code in src/os/filestore/File*.cc
-
-And I get as far as
-	throttle.flush()
-It seems to work the first time it gets called. That is, it returns.
-
-However the second time is "stalls" in the call
-	 throttle.put(to_put_bytes);
-after a number of itterations thru the while-loop.
-
-Below the code of Throttle::Flush and an sequence of the thread doing 
-the blocking call
-from the log where I've added mode debugging code.
-
-Does anybody have a clue as to continue from here?
-   Why does throttle.put not return?
-   Is it just throttleing too hard and not reorganising the queue?
-
---WjW
-
-Code:
-std::pair<uint64_t, uint64_t> JournalThrottle::flush(uint64_t mono_id)
-{
-   uint64_t to_put_bytes = 0;
-   uint64_t to_put_ops = 0;
-   std::pair<uint64_t, uint64_t> ret;
-   {
-     locker l(lock);
-     while (!journaled_ops.empty() &&
-            journaled_ops.front().first <= mono_id) {
-       to_put_bytes += journaled_ops.front().second;
-       to_put_ops++;
-       journaled_ops.pop_front();
-     }
-   }
-   throttle.put(to_put_bytes);
-   ret = make_pair(to_put_ops, to_put_bytes);
-   return ret;
-}
-
-Thread log:
-2016-04-28 19:41:43.231410 8059ec900 20 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) waiting for max_interval 5.000000
-2016-04-28 19:41:43.231438 8059ec900 20 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) started at: 2016-04-28 19:41:43.231436
-2016-04-28 19:41:44.395763 8059ec900 20 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) ended at: 2016-04-28 19:41:44.395758
-2016-04-28 19:41:44.395781 8059ec900 20 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) waited for 1
-2016-04-28 19:41:44.395789 8059ec900 20 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) woke after 1.164433
-2016-04-28 19:41:44.395795 8059ec900 10 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) 3726
-2016-04-28 19:41:44.395801 8059ec900 10 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) 3730
-2016-04-28 19:41:44.395806 8059ec900 10 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) 3733
-2016-04-28 19:41:44.400570 8059ec900 10 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) 3735 starting apply_manager.commit_start()
-2016-04-28 19:41:44.400584 8059ec900 10 journal commit_start 
-max_applied_seq 32, open_ops 0
-2016-04-28 19:41:44.400588 8059ec900 10 journal commit_start blocked, 
-all open_ops have completed
-2016-04-28 19:41:44.400591 8059ec900 10 journal commit_start committing 
-32, still blocked
-2016-04-28 19:41:44.400596 8059ec900 10 journal FileJournal commit_start
-2016-04-28 19:41:44.400599 8059ec900 10 journal commit_start 
-FULL_NOTFULL.  All good.
-2016-04-28 19:41:44.400602 8059ec900 10 journal 
-apply_manager.commit_start() returning 1
-2016-04-28 19:41:44.400605 8059ec900 10 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) 3738 done(true) apply_manager.commit_start()
-2016-04-28 19:41:44.400637 8059ec900 10 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) 3743
-2016-04-28 19:41:44.400643 8059ec900 10 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) 3745
-2016-04-28 19:41:44.400653 8059ec900 10 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) 3748
-2016-04-28 19:41:44.400673 8059ec900 10 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) 3750
-2016-04-28 19:41:44.400680 8059ec900 10 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) 3752
-2016-04-28 19:41:44.400685 8059ec900 15 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) committing 32
-2016-04-28 19:41:44.400701 8059ec900 10 journal commit_started 
-committing 32, unblocking
-2016-04-28 19:41:44.400728 8059ec900 20 filestore dbobjectmap: seq is 5
-2016-04-28 19:41:44.517112 8059ec900 15 
-genericfilestorebackend(testdir/osd-bench/0) syncfs: doing a full sync 
-(syncfs(2) if possible)
-2016-04-28 19:41:45.471870 8059ec900 10 filestore(testdir/osd-bench/0) 
-sync_entry(1:1) commit took 1.071257, interval was 2.240513
-2016-04-28 19:41:45.471885 8059ec900 10 journal commit_finish 238 thru 
-32 journal: 0x8058e5400
-2016-04-28 19:41:45.473683 8059ec900 15 journal committed_thru:1804 locked.
-2016-04-28 19:41:45.473697 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473701 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473705 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473707 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473710 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473747 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473750 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473753 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473756 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473758 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473761 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473763 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473767 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473772 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473775 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473777 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473779 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473781 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473784 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473786 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473788 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473797 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473800 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473803 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473806 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473809 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473811 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473814 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473817 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473819 8059ec900 10 throttle flush while 
-!journaled_ops.empty()
-2016-04-28 19:41:45.473822 8059ec900 10 throttle flush:63 calling 
-throttle.put()
-
+> 
+> For the CAS pool, the idea would be to use the refcount class, or something
+> like it, so that you'd say "write object $hash" and if the object already exists
+> it'd increment the ref count.  Similarly, when you delete the logical object,
+> you do a refcount 'put' on each chunk, and the chunk would only go away
+> when the last ref did too.  (In practice we need to be careful to avoid leaked
+> refs in the case of failures; this would probably be done by having a
+> 'deduping' and 'deleting' state on the logical object and named references.
+> 
+> > My current milestones:
+> > - Develop CAS backend, fingerprinting, recipes store
+> > - Support limited set of operations (like EC does)
+> > - Support RBD (with/without Cache) and evaluate
+> > - Add Chunking, Garbage Collection, ..
+> >
+> > Currently I'm adding a new PG backend into the OSD code base. I'll
+> > push the code the my github clone as soon as it does "something" :)
+> 
+> This would be a good thing to discuss during the Ceph Developer Monthly call
+> next Wednesday:
+> 
+> 	http://tracker.ceph.com/projects/ceph/wiki/Planning
+> 	http://tracker.ceph.com/projects/ceph/wiki/CDM_06-APR-2016
+> 
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
