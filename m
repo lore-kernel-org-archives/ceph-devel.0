@@ -1,32 +1,38 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: jewel selinux failures
-Date: Sat, 30 Apr 2016 21:32:13 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604302131300.26967@cpach.fuggernut.com>
+From: "Jared Flynn" <info@engineering-center.com>
+Subject: We Offer Loans.....Apply Now
+Date: Thu, 28 Apr 2016 04:08:36 +0200
+Message-ID: <201604280206.u3RMXdRB005346@mail.avo.ru>
+Reply-To: 2377137654@qq.com
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50619 "EHLO mx1.redhat.com"
+Received: from mail.avo.ru ([84.53.206.60]:45693 "EHLO mail.avo.ru"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751651AbcEABcH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 30 Apr 2016 21:32:07 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 846B83B72E
-	for <ceph-devel@vger.kernel.org>; Sun,  1 May 2016 01:32:05 +0000 (UTC)
+	id S1750891AbcEAGIQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 May 2016 02:08:16 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: branto@redhat.com
-Cc: ceph-devel@vger.kernel.org
+To: info@engineering-center.com
 
-Hi Boris,
+Your Attention Please,
 
-Do you know why these selinux failures are happening on the jewel branch?  
-I don't see any obvious differences from master, which doesn't seem to be 
-hitting these.
+We are presently giving out loans to interested persons at an affordable rate.
 
-http://pulpito.ceph.com/sage-2016-04-30_16:27:00-rados-jewel---basic-smithi/159724
+Do you need a loan to expand your business or you want a personal loan.
 
-Thanks!
-sage
+We offer all types of loans to investors,companies and individuals with a very loan interest rate.
 
+We offer Personal Loans, Car Loans, Home Loans, Student Loans, Business Loans, Investment loans, Debt Consolidation loans etc.with the help and assistance from our banks.
+
+Apply for your loan today and get an approved loan from our company.
+
+Get back to us for more details.( Email Us Here:  2377137654@qq.com  ).
+
+Regards,
+
+Jared Flynn, CFP, ChFC.
+Senior Consultant
+Registered Principal
+Email: 2377137654@qq.com
