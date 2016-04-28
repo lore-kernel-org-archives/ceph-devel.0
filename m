@@ -1,43 +1,41 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: [GIT PULL] Ceph fixes for -rc6
-Date: Thu, 28 Apr 2016 10:08:57 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1604281006521.25990@cpach.fuggernut.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: Jenkins is having iassues???
+Date: Thu, 28 Apr 2016 10:32:39 -0400
+Message-ID: <CAC-Np1y1fO5Gg1vnSZF53XW3+YKs53Z1NC=y=jBUA3Gd08Vw_Q@mail.gmail.com>
+References: <df4addf5-7731-073a-1107-ae756cf06e24@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:38100 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750785AbcD1Ocl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2016 10:32:41 -0400
+Received: by mail-wm0-f50.google.com with SMTP id g17so44824446wme.1
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2016 07:32:40 -0700 (PDT)
+In-Reply-To: <df4addf5-7731-073a-1107-ae756cf06e24@digiware.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Linus,
+On Wed, Apr 27, 2016 at 8:38 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> Hi
+>
+> Not sure why this change:
+> https://github.com/ceph/ceph/pull/8763
+>
+> Would fail so badly...
+> https://jenkins.ceph.com/job/ceph-pull-requests/4781/console
+>
+> Perhaps Jenkins was pulled from underneath it?
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+This doesn't look like it is Jenkins fault. It does have a bunch of
+PASSing tests.
 
-There is a lifecycle fix in the auth code, a fix for a narrow race 
-condition on map, and a helpful message in the log when there is a feature 
-mismatch (which happens frequently now that the default server-side 
-options have changed).
-
-Thanks!
-sage
-
-
-
-----------------------------------------------------------------
-Ilya Dryomov (3):
-      libceph: make authorizer destruction independent of ceph_auth_client
-      rbd: fix rbd map vs notify races
-      rbd: report unsupported features to syslog
-
- drivers/block/rbd.c             | 52 +++++++++++++++---------------
- fs/ceph/mds_client.c            |  6 ++--
- include/linux/ceph/auth.h       | 10 +++---
- include/linux/ceph/osd_client.h |  1 -
- net/ceph/auth.c                 |  8 ++---
- net/ceph/auth_none.c            | 71 ++++++++++++++++++++++-------------------
- net/ceph/auth_none.h            |  3 +-
- net/ceph/auth_x.c               | 21 ++++++------
- net/ceph/auth_x.h               |  1 +
- net/ceph/osd_client.c           |  6 ++--
- 10 files changed, 87 insertions(+), 92 deletions(-)
+Maybe someone else can chime in.
+>
+> --WjW
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
