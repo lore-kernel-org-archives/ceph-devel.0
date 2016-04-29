@@ -1,151 +1,159 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 0/2] scop GFP_NOFS api
-Date: Fri, 29 Apr 2016 14:04:18 +0200
-Message-ID: <20160429120418.GK21977@dhcp22.suse.cz>
-References: <1461671772-1269-1-git-send-email-mhocko@kernel.org>
- <8737q5ugcx.fsf@notabene.neil.brown.name>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: [ceph-users] Data still in OSD directories after removing
+Date: Fri, 29 Apr 2016 15:09:08 +0300
+Message-ID: <CABYiri-BgLZSzUmXWHeprDG0S5iNpzSZof56bsFWDbXwRG7FSg@mail.gmail.com>
+References: <1400578369.11397.9.camel@localhost> <1400667430.27385.4.camel@localhost>
+ <alpine.DEB.2.00.1405210818560.1689@cobra.newdream.net> <1400709806.24328.0.camel@asblu>
+ <537D50EA.9020901@inktank.com> <1400748999.10571.3.camel@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <reiserfs-devel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <8737q5ugcx.fsf@notabene.neil.brown.name>
-Sender: reiserfs-devel-owner@vger.kernel.org
-To: NeilBrown <mr@neil.brown.name>
-Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, xfs@oss.sgi.com, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:33421 "EHLO
+	mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753214AbcD2MJa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Apr 2016 08:09:30 -0400
+Received: by mail-lf0-f54.google.com with SMTP id y84so115965354lfc.0
+        for <ceph-devel@vger.kernel.org>; Fri, 29 Apr 2016 05:09:29 -0700 (PDT)
+In-Reply-To: <1400748999.10571.3.camel@localhost>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Olivier Bonvalet <ceph.list@daevel.fr>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, Josh Durgin <jdurgin@redhat.com>
 
-On Fri 29-04-16 15:35:42, NeilBrown wrote:
-> On Tue, Apr 26 2016, Michal Hocko wrote:
-> 
-> > Hi,
-> > we have discussed this topic at LSF/MM this year. There was a general
-> > interest in the scope GFP_NOFS allocation context among some FS
-> > developers. For those who are not aware of the discussion or the issue
-> > I am trying to sort out (or at least start in that direction) please
-> > have a look at patch 1 which adds memalloc_nofs_{save,restore} api
-> > which basically copies what we have for the scope GFP_NOIO allocation
-> > context. I haven't converted any of the FS myself because that is way
-> > beyond my area of expertise but I would be happy to help with further
-> > changes on the MM front as well as in some more generic code paths.
-> >
-> > Dave had an idea on how to further improve the reclaim context to be
-> > less all-or-nothing wrt. GFP_NOFS. In short he was suggesting an opaque
-> > and FS specific cookie set in the FS allocation context and consumed
-> > by the FS reclaim context to allow doing some provably save actions
-> > that would be skipped due to GFP_NOFS normally.  I like this idea and
-> > I believe we can go that direction regardless of the approach taken here.
-> > Many filesystems simply need to cleanup their NOFS usage first before
-> > diving into a more complex changes.>
-> 
-> This strikes me as over-engineering to work around an unnecessarily
-> burdensome interface.... but without details it is hard to be certain.
+On Thu, May 22, 2014 at 12:56 PM, Olivier Bonvalet <ceph.list@daevel.fr=
+> wrote:
 >
-> Exactly what things happen in "FS reclaim context" which may, or may
-> not, be safe depending on the specific FS allocation context?  Do they
-> need to happen at all?
+> Le mercredi 21 mai 2014 =C3=A0 18:20 -0700, Josh Durgin a =C3=A9crit =
+:
+>> On 05/21/2014 03:03 PM, Olivier Bonvalet wrote:
+>> > Le mercredi 21 mai 2014 =C3=A0 08:20 -0700, Sage Weil a =C3=A9crit=
+ :
+>> >> You're certain that that is the correct prefix for the rbd image =
+you
+>> >> removed?  Do you see the objects lists when you do 'rados -p rbd =
+ls - |
+>> >> grep <prefix>'?
+>> >
+>> > I'm pretty sure yes : since I didn't see a lot of space freed by t=
+he
+>> > "rbd snap purge" command, I looked at the RBD prefix before to do =
+the
+>> > "rbd rm" (it's not the first time I see that problem, but previous=
+ time
+>> > without the RBD prefix I was not able to check).
+>> >
+>> > So :
+>> > - "rados -p sas3copies ls - | grep rb.0.14bfb5a.238e1f29" return n=
+othing
+>> > at all
+>> > - # rados stat -p sas3copies rb.0.14bfb5a.238e1f29.00000002f026
+>> >   error stat-ing sas3copies/rb.0.14bfb5a.238e1f29.00000002f026: No=
+ such
+>> > file or directory
+>> > - # rados stat -p sas3copies rb.0.14bfb5a.238e1f29.000000000000
+>> >   error stat-ing sas3copies/rb.0.14bfb5a.238e1f29.000000000000: No=
+ such
+>> > file or directory
+>> > - # ls -al /var/lib/ceph/osd/ceph-67/current/9.1fe_head/DIR_E/DIR_=
+=46/DIR_1/DIR_7/rb.0.14bfb5a.238e1f29.00000002f026__a252_E68871FE__9
+>> > -rw-r--r-- 1 root root 4194304 oct.   8  2013 /var/lib/ceph/osd/ce=
+ph-67/current/9.1fe_head/DIR_E/DIR_F/DIR_1/DIR_7/rb.0.14bfb5a.238e1f29.=
+00000002f026__a252_E68871FE__9
+>> >
+>> >
+>> >> If the objects really are orphaned, teh way to clean them up is v=
+ia 'rados
+>> >> -p rbd rm <objectname>'.  I'd like to get to the bottom of how th=
+ey ended
+>> >> up that way first, though!
+>> >
+>> > I suppose the problem came from me, by doing CTRL+C while "rbd sna=
+p
+>> > purge $IMG".
+>> > "rados rm -p sas3copies rb.0.14bfb5a.238e1f29.00000002f026" don't =
+remove
+>> > thoses files, and just answer with a "No such file or directory".
+>>
+>> Those files are all for snapshots, which are removed by the osds
+>> asynchronously in a process called 'snap trimming'. There's no
+>> way to directly remove them via rados.
+>>
+>> Since you stopped 'rbd snap purge' partway through, it may
+>> have removed the reference to the snapshot before removing
+>> the snapshot itself.
+>>
+>> You can get a list of snapshot ids for the remaining objects
+>> via the 'rados listsnaps' command, and use
+>> rados_ioctx_selfmanaged_snap_remove() (no convenient wrapper
+>> unfortunately) on each of those snapshot ids to be sure they are all
+>> scheduled for asynchronous deletion.
+>>
+>> Josh
+>>
+>
+> Great : "rados listsnaps" see it :
+>         # rados listsnaps -p sas3copies rb.0.14bfb5a.238e1f29.0000000=
+2f026
+>         rb.0.14bfb5a.238e1f29.00000002f026:
+>         cloneid snaps   size    overlap
+>         41554   35746   4194304 []
+>
+> So, I have to write&compile a wrapper to
+> rados_ioctx_selfmanaged_snap_remove(), and find a way to obtain a lis=
+t
+> of all "orphan" objects ?
+>
+> I also try to recreate the object (rados put) then remove it (rados r=
+m),
+> but snapshots still here.
+>
+> Olivier
 
-Let me quote Dave Chinner from one of the emails discussed at LSFMM
-mailing list:
-: IMO, making GFP_NOFS "better" cannot be done with context-less flags
-: being passed through reclaim. If we want to prevent the recursive
-: self-deadlock case in an optimal manner, then we need to be able to
-: pass state down to reclaim so that page writeback and the shrinkers
-: can determine if they are likely to deadlock.
-: 
-: IOWs, I think we should stop thinking of GFP_NOFS as a *global*
-: directive to avoid recursion under any circumstance and instead
-: start thinking about it as a mechanism to avoid recursion in
-: specific reclaim contexts.
-: 
-: Something as simple as adding an opaque cookie (e.g. can hold a
-: superblock or inode pointer) to check against in writeback and
-: subsystem shrinkers would result in the vast majority of GFP_NOFS
-: contexts being able to reclaim from everything but the one context
-: that we *might* deadlock against.
-: 
-: e.g, if we then also check the PF_FSTRANS flag in XFS, we'll
-: still be able to reclaim clean inodes, buffers and write back
-: dirty pages that don't require transactions to complete under "don't
-: recurse" situations because we know it's transactions that we could
-: deadlock on in the direct reclaim context.
-: 
-: Note that this information could be added to the writeback_control
-: for page writeback, and it could be passed directly to shrinkers
-: in the shrink_control structures. The allocation paths might be a
-: little harder, but I suspect using the task struct for passing this
-: information into direct reclaim might be the easiest approach...
 
-> My research suggests that for most filesystems the only thing that
-> happens in reclaim context that is at all troublesome is the final
-> 'evict()' on an inode.  This needs to flush out dirty pages and sync the
-> inode to storage.  Some time ago we moved most dirty-page writeout out
-> of the reclaim context and into kswapd.  I think this was an excellent
-> advance in simplicity.
-> If we could similarly move evict() into kswapd (and I believe we can)
-> then most file systems would do nothing in reclaim context that
-> interferes with allocation context.
-> 
-> The exceptions include:
->  - nfs and any filesystem using fscache can block for up to 1 second
->    in ->releasepage().  They used to block waiting for some IO, but that
->    caused deadlocks and wasn't really needed.  I left the timeout because
->    it seemed likely that some throttling would help.  I suspect that a
->    careful analysis will show that there is sufficient throttling
->    elsewhere.
-> 
->  - xfs_qm_shrink_scan is nearly unique among shrinkers in that it waits
->    for IO so it can free some quotainfo things.  If it could be changed
->    to just schedule the IO without waiting for it then I think this
->    would be safe to be called in any FS allocation context.  It already
->    uses a 'trylock' in xfs_dqlock_nowait() to avoid deadlocking
->    if the lock is held.
-> 
-> I think you/we would end up with a much simpler system if instead of
-> focussing on the places where GFP_NOFS is used, we focus on places where
-> __GFP_FS is tested, and try to remove them.
+Hi,
 
-One think I have learned is that shrinkers can be really complex and
-getting rid of GFP_NOFS will be really hard so I would really like to
-start the easiest way possible and remove the direct usage and replace
-it by scope one which would at least _explain_ why it is needed. I think
-this is a reasonable _first_ step and a large step ahead because we have
-a good chance to get rid of a large number of those which were used
-"just because I wasn't sure and this should be safe, right?". I wouldn't
-be surprised if we end up with a very small number of both scope and
-direct usage in the end.
-
-I would also like to revisit generic inode/dentry shrinker and see
-whether it could be more __GFP_FS friendly. As you say many FS might
-even not depend on some FS internal locks so pushing GFP_FS check down
-the layers might make a lot of sense and allow to clean some [id]cache
-even for __GFP_FS context.
-
-> If we get rid of enough of them the remainder could just use __GFP_IO.
-> 
-> > The patch 2 is a debugging aid which warns about explicit allocation
-> > requests from the scope context. This is should help to reduce the
-> > direct usage of the NOFS flags to bare minimum in favor of the scope
-> > API. It is not aimed to be merged upstream. I would hope Andrew took it
-> > into mmotm tree to give it linux-next exposure and allow developers to
-> > do further cleanups.  There is a new kernel command line parameter which
-> > has to be used for the debugging to be enabled.
-> >
-> > I think the GFP_NOIO should be seeing the same clean up.
-> 
-> I think you are suggesting that use of GFP_NOIO should (largely) be
-> deprecated in favour of memalloc_noio_save().  I think I agree.
-
-Yes that was the idea.
-
-> Could we go a step further and deprecate GFP_ATOMIC in favour of some
-> in_atomic() test?  Maybe that is going too far.
-
-I am not really sure we need that and some GFP_NOWAIT usage is deliberate
-to perform an optimistic allocation with another fallback (e.g. higher order
-for performance reasons with single page fallback). So I think that nowait
-is a slightly different thing.
+there is a certainly an issue with (at least) old FileStore and
+snapshot chunks as they are getting completely unreferenced even for
+listsnaps example from above but are presented in omap and on
+filesystem after complete image and snapshot removal. Given the fact
+that the control flow has not been interrupted ever, e.g. snap
+deletion command was always been successful on exit either was image
+removal itself, what could be done for those poor data chunks? In fact
+this leakage on a long-scale runs like eight months in a given case
+could be quite problematic to handle, as orphans do consume almost as
+much data as the 'active' rest of the storage on selected OSDs. Since
+the chunks are still referenced in omap by some reason, they must not
+be deleted directly, so my question could be narrowed down to a
+possible existing workaround for this.
 
 Thanks!
--- 
-Michal Hocko
-SUSE Labs
+
+3.1b0_head$ find . -type f -name '*64ba14d3dd381*' -mtime +90
+=2E/DIR_0/DIR_B/DIR_1/DIR_1/rbd\udata.64ba14d3dd381.0000000000020dd7__2=
+3116_25FB11B0__3
+=2E/DIR_0/DIR_B/DIR_1/DIR_1/rbd\udata.64ba14d3dd381.0000000000020dd7__2=
+41e9_25FB11B0__3
+=2E/DIR_0/DIR_B/DIR_1/DIR_1/rbd\udata.64ba14d3dd381.0000000000020dd7__2=
+507f_25FB11B0__3
+=2E/DIR_0/DIR_B/DIR_1/DIR_1/rbd\udata.64ba14d3dd381.0000000000020dd7__2=
+5dfd_25FB11B0__3
+
+
+
+find . -type f -name '*64ba14d3dd381*snap*'
+=2E/DIR_0/DIR_B/DIR_1/DIR_1/rbd\udata.64ba14d3dd381.0000000000020dd7__s=
+napdir_25FB11B0__3
+=2E/DIR_0/DIR_B/DIR_1/DIR_2/DIR_3/rbd\udata.64ba14d3dd381.0000000000010=
+eb3__snapdir_2B8321B0__3
+=2E/DIR_0/DIR_B/DIR_1/DIR_4/DIR_6/rbd\udata.64ba14d3dd381.000000000001c=
+715__snapdir_F5D641B0__3
+=2E/DIR_0/DIR_B/DIR_1/DIR_4/DIR_9/rbd\udata.64ba14d3dd381.000000000002b=
+694__snapdir_CC4941B0__3
+=2E/DIR_0/DIR_B/DIR_1/DIR_5/DIR_9/rbd\udata.64ba14d3dd381.000000000001b=
+6f7__snapdir_08B951B0__3
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
