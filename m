@@ -1,75 +1,96 @@
-From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
-Subject: Re: ECONNREFUSED implies OSD definitely failed
-Date: Fri, 29 Apr 2016 09:46:39 +0200
-Message-ID: <20160429074639.GG26146@predictor>
-References: <alpine.DEB.2.11.1604221221000.8831@cpach.fuggernut.com>
- <20160428143251.GA1541@suse.de>
+From: Steven Whitehouse <swhiteho@redhat.com>
+Subject: Re: [Cluster-devel] [PATCH 0/2] scop GFP_NOFS api
+Date: Fri, 29 Apr 2016 11:20:33 +0100
+Message-ID: <57233571.50509@redhat.com>
+References: <1461671772-1269-1-git-send-email-mhocko@kernel.org>
+	<8737q5ugcx.fsf@notabene.neil.brown.name>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from predictor.org.pl ([185.5.97.54]:48396 "EHLO predictor.org.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752286AbcD2Hor (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 29 Apr 2016 03:44:47 -0400
-Content-Disposition: inline
-In-Reply-To: <20160428143251.GA1541@suse.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Lars Marowsky-Bree <lmb@suse.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <xfs-bounces@oss.sgi.com>
+In-Reply-To: <8737q5ugcx.fsf@notabene.neil.brown.name>
+List-Unsubscribe: <http://oss.sgi.com/mailman/options/xfs>,
+	<mailto:xfs-request@oss.sgi.com?subject=unsubscribe>
+List-Archive: <http://oss.sgi.com/pipermail/xfs>
+List-Post: <mailto:xfs@oss.sgi.com>
+List-Help: <mailto:xfs-request@oss.sgi.com?subject=help>
+List-Subscribe: <http://oss.sgi.com/mailman/listinfo/xfs>,
+	<mailto:xfs-request@oss.sgi.com?subject=subscribe>
+Errors-To: xfs-bounces@oss.sgi.com
+Sender: xfs-bounces@oss.sgi.com
+To: NeilBrown <mr@neil.brown.name>, Michal Hocko <mhocko@kernel.org>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org
+Cc: linux-nfs@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Theodore Ts'o <tytso@mit.edu>, logfs@logfs.org, linux-ntfs-dev@lists.sourceforge.net, xfs@oss.sgi.com, LKML <linux-kernel@vger.kernel.org>, reiserfs-devel@vger.kernel.org, cluster-devel <cluster-devel@redhat.com>, Chris Mason <clm@fb.com>, linux-mtd@lists.infradead.org, Jan Kara <jack@suse.cz>, Andrew Morton <akpm@linux-foundation.org>, linux-ext4@vger.kernel.org, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-afs@lists.infradead.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Apr 28, 2016 at 04:32:51PM +0200, Lars Marowsky-Bree wrote:
-> On 2016-04-22T12:24:52, Sage Weil <sweil@redhat.com> wrote:
->=20
-> > Piotr has a PR at
-> >=20
-> > 	https://github.com/ceph/ceph/pull/8558
-> >=20
-> > that changes the messenger and OSD logic so that if we get an ECONN=
-REFUSED=20
-> > trying to talk to another OSD we can definitively conclude that the=
- OSD is=20
-> > down/failed, without waiting for the normal heartbeat timeout.
-> >=20
-> > I think this is true in normal networking environments.  My only co=
-ncern=20
-> > is that there might be cases where the OSD isn't actually down and =
-some=20
-> > transient network issue could cause ECONNREFUSED.  Like... some=20
-> > firewally magic networky thing.  If a transient ECONNREFUSED was po=
-ssible,=20
-> > it could cause some ugly flapping.
-> >=20
-> > Can anyone think of something that might cause this?  Even if it is=
-=20
-> > something obscure, it means we should have a config option to disab=
-le this=20
-> > new behavior (we probably should anyway).
->=20
-> Exactly this - the system reconfiguring it's network interfaces and
-> firewall rules (in a suboptimal fashion; it should drop, not reject, =
-but
-> ...).
+Hi,
 
-I'm not convinced that we should care about this. I think that probabil=
-ity
-of (re)connect event occurrence during firewall reconfiguration is quit=
-e
-low.
-=20
-> Or a duplicate IP address (with a node that isn't running ceph-osd).
-> Again, not supposed to happen.
+On 29/04/16 06:35, NeilBrown wrote:
+> On Tue, Apr 26 2016, Michal Hocko wrote:
+>
+>> Hi,
+>> we have discussed this topic at LSF/MM this year. There was a general
+>> interest in the scope GFP_NOFS allocation context among some FS
+>> developers. For those who are not aware of the discussion or the issue
+>> I am trying to sort out (or at least start in that direction) please
+>> have a look at patch 1 which adds memalloc_nofs_{save,restore} api
+>> which basically copies what we have for the scope GFP_NOIO allocation
+>> context. I haven't converted any of the FS myself because that is way
+>> beyond my area of expertise but I would be happy to help with further
+>> changes on the MM front as well as in some more generic code paths.
+>>
+>> Dave had an idea on how to further improve the reclaim context to be
+>> less all-or-nothing wrt. GFP_NOFS. In short he was suggesting an opaque
+>> and FS specific cookie set in the FS allocation context and consumed
+>> by the FS reclaim context to allow doing some provably save actions
+>> that would be skipped due to GFP_NOFS normally.  I like this idea and
+>> I believe we can go that direction regardless of the approach taken here.
+>> Many filesystems simply need to cleanup their NOFS usage first before
+>> diving into a more complex changes.>
+> This strikes me as over-engineering to work around an unnecessarily
+> burdensome interface.... but without details it is hard to be certain.
+>
+> Exactly what things happen in "FS reclaim context" which may, or may
+> not, be safe depending on the specific FS allocation context?  Do they
+> need to happen at all?
+>
+> My research suggests that for most filesystems the only thing that
+> happens in reclaim context that is at all troublesome is the final
+> 'evict()' on an inode.  This needs to flush out dirty pages and sync the
+> inode to storage.  Some time ago we moved most dirty-page writeout out
+> of the reclaim context and into kswapd.  I think this was an excellent
+> advance in simplicity.
+> If we could similarly move evict() into kswapd (and I believe we can)
+> then most file systems would do nothing in reclaim context that
+> interferes with allocation context.
+evict() is an issue, but moving it into kswapd would be a potential 
+problem for GFS2. We already have a memory allocation issue when 
+recovery is taking place and memory is short. The code path is as follows:
 
-That will cause a lot of other things to fail, and having ceph-osd get
-downed faster gives a greater chance of getting someone's attention.=20
+  1. Inode is scheduled for eviction (which requires deallocation)
+  2. The glock is required in order to perform the deallocation, which 
+implies getting a DLM lock
+  3. Another node in the cluster fails, so needs recovery
+  4. When the DLM lock is requested, it gets blocked until recovery is 
+complete (for the failed node)
+  5. Recovery is performed using a userland fencing utility
+  6. Fencing requires memory and then blocks on the eviction
+  7. Deadlock (Fencing waiting on memory alloc, memory alloc waiting on 
+DLM lock, DLM lock waiting on fencing)
 
---=20
-Piotr Da=C5=82ek
-branch@predictor.org.pl
-http://blog.predictor.org.pl
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+It doesn't happen often, but we've been looking at the best place to 
+break that cycle, and one of the things we've been wondering is whether 
+we could avoid deallocation evictions from memory related contexts, or 
+at least make it async somehow.
+
+The issue is that it is not possible to know in advance whether an 
+eviction will result in mearly writing things back to disk (because the 
+inode is being dropped from cache, but still resides on disk) which is 
+easy to do, or whether it requires a full deallocation (n_link==0) which 
+may require significant resources and time,
+
+Steve.
+
+_______________________________________________
+xfs mailing list
+xfs@oss.sgi.com
+http://oss.sgi.com/mailman/listinfo/xfs
