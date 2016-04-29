@@ -1,30 +1,48 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: building boost statically
-Date: Fri, 29 Apr 2016 16:55:02 -0600
-Message-ID: <CALqRxCyQkBPF0t7RcYzhcFZCzEeviAyL+XeQU0Dr+An1Tx5s4Q@mail.gmail.com>
-References: <alpine.DEB.2.11.1604281843520.25990@cpach.fuggernut.com>
-	<CACJqLyYtBQ8N95BHSH48AD-XexCx+QU9XB8djvomH_rer1tn+w@mail.gmail.com>
+From: Jesse Williamson <jwilliamson@suse.com>
+Subject: Re. building boost statically
+Date: Fri, 29 Apr 2016 16:16:09 -0700 (PDT)
+Message-ID: <alpine.LSU.2.20.1604291354300.21305@ancalagon.suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; format=flowed; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f43.google.com ([209.85.213.43]:33070 "EHLO
-	mail-vk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751204AbcD2WzE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Apr 2016 18:55:04 -0400
-Received: by mail-vk0-f43.google.com with SMTP id o133so7483362vka.0
-        for <ceph-devel@vger.kernel.org>; Fri, 29 Apr 2016 15:55:02 -0700 (PDT)
-In-Reply-To: <CACJqLyYtBQ8N95BHSH48AD-XexCx+QU9XB8djvomH_rer1tn+w@mail.gmail.com>
+Received: from prv3-mh.provo.novell.com ([137.65.250.26]:36890 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752603AbcD2XQV (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Fri, 29 Apr 2016 19:16:21 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Apr 28, 2016 at 8:31 PM, Haomai Wang <haomai@xsky.com> wrote:
-> Yes, I'm always glad to see more deps removed!
+On Thu, 2016-04-28 at 18:47 -0400, Sage Weil wrote:
 
-It's not removed, it's just moved. The Ceph project will then be on
-the hook for all boost security updates.
+Hi folks,
 
-I think we should bundle less not more. Build times are already long enough...
+> We'd really like to use the latest boost, mainly so that we can use
+> small_vector in a zillion places and avoid extra memory allocations.
 
-- Ken
+There are other advantages to upgrading Boost as well, like optimizations 
+in libraries such as Spirit Classic and of course bugfixes. Since Boost is 
+free to make breaking changes across versions, having control over the 
+exact version we build against may benefit is in terms of stability as 
+well.
+
+Another idea: The "bcp" utility that comes with Boost allows you extract 
+modules from the rest of the tree, so if we have our own submodule we 
+don't necessarily even need to build everything. Finally, most of Boost is 
+header-only, so with the exception (ha-hah!) of the libraries you've 
+already mentioned I'd guess there's not a ton to do in terms of packaging.
+
+Another alternative is to add an autoconf configure option to target a 
+specific directory. (I'm looking at this now, actually-- it's easy to get 
+the top-level configure.ac to do this, but I'm not that great with 
+autoconf so the lower-level Makefile.am macros aren't showing up for me 
+quite yet.)
+
+I think that being able to link it dynamically makes the most sense-- 
+others have already mentioned the binary size issue, might as well nip 
+anything further in the bud if we can.
+
+That's my two bits,
+
+-Jesse
