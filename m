@@ -1,55 +1,38 @@
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 0/2] scop GFP_NOFS api
-Date: Sat, 30 Apr 2016 10:24:18 +1000
-Message-ID: <20160430002418.GP26977@dastard>
-References: <1461671772-1269-1-git-send-email-mhocko@kernel.org>
- <8737q5ugcx.fsf@notabene.neil.brown.name>
- <20160429120418.GK21977@dhcp22.suse.cz>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: building boost statically
+Date: Fri, 29 Apr 2016 21:43:30 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1604292137110.26967@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1604281843520.25990@cpach.fuggernut.com> <CACJqLyYtBQ8N95BHSH48AD-XexCx+QU9XB8djvomH_rer1tn+w@mail.gmail.com> <CALqRxCyQkBPF0t7RcYzhcFZCzEeviAyL+XeQU0Dr+An1Tx5s4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <reiserfs-devel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160429120418.GK21977@dhcp22.suse.cz>
-Sender: reiserfs-devel-owner@vger.kernel.org
-To: Michal Hocko <mhocko@kernel.org>
-Cc: NeilBrown <mr@neil.brown.name>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, xfs@oss.sgi.com, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:46831 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752650AbcD3BnX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Apr 2016 21:43:23 -0400
+In-Reply-To: <CALqRxCyQkBPF0t7RcYzhcFZCzEeviAyL+XeQU0Dr+An1Tx5s4Q@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Haomai Wang <haomai@xsky.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Apr 29, 2016 at 02:04:18PM +0200, Michal Hocko wrote:
-> I would also like to revisit generic inode/dentry shrinker and see
-> whether it could be more __GFP_FS friendly. As you say many FS might
-> even not depend on some FS internal locks so pushing GFP_FS check down
-> the layers might make a lot of sense and allow to clean some [id]cache
-> even for __GFP_FS context.
+On Fri, 29 Apr 2016, Ken Dreyer wrote:
+> On Thu, Apr 28, 2016 at 8:31 PM, Haomai Wang <haomai@xsky.com> wrote:
+> > Yes, I'm always glad to see more deps removed!
+> 
+> It's not removed, it's just moved. The Ceph project will then be on
+> the hook for all boost security updates.
+> 
+> I think we should bundle less not more.  Build times are already long enough...
 
-That's precisely my point about passing a context to the shrinker.
-It's recursion within a single superblock context that makes up the
-majority of cases GFP_NOFS is used for, so passing the superblock
-immediately allows for reclaim to run the superblock shrinker on
-every other superblock.
+If building separate packages and including them in all the repos is in 
+fact easier, that seems like the right choice.  Static linkage makes 
+development easier, but we can make do.
 
-We can refine it further from there, but I strongly suspect that
-further refinement is going to require filesystems to specifically
-configure the superblock shrinker.
+Whether it's static or dynamic, though, we're on the hook for updating the 
+packages for bugs or security update either way.  Unless we just give up 
+an wait for the distros to catch up, but I don't think that's a viable 
+option...
 
-e.g. in XFS, we can't allow evict() even on clean VFS inodes in a
-PF_FSTRANS context, because we may run a transaction on a clean
-VFS inode to prepare it for reclaim.  We can, however,
-allow the fs-specific shrinker callouts to run (i.e. call into
-.free_cached_objects) so that it can reclaim clean XFS inodes
-because that doesn't require transactions....
+sage
 
-i.e. the infrastructure I suggested we use is aimed directly at
-providing the mechanism required for finer-grained inode/dentry
-cache reclaim in contexts that it is currently disallowed
-completely. I was also implying that once the infrastructure to pass
-contexts is in place, I'd then make the changes to the generic
-superblock shrinker code to enable finer grained reclaim and
-optimise the XFS shrinkers to make use of it...
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
