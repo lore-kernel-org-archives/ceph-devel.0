@@ -1,64 +1,62 @@
-From: Zack Cerza <zack@redhat.com>
-Subject: Re: jewel selinux failures
-Date: Mon, 2 May 2016 15:23:27 -0600
-Message-ID: <CACk6FjkeJ9zGtyA=ai2B6=xS=nAkEbWk-ceg2-_Sk+HRy5k-MA@mail.gmail.com>
-References: <alpine.DEB.2.11.1604302131300.26967@cpach.fuggernut.com>
-	<1462172597.13876.120.camel@redhat.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: mon switch from leveldb to rocksdb
+Date: Mon, 2 May 2016 23:25:39 +0200 (CEST)
+Message-ID: <1707978395.1022.1462224339784@ox.pcextreme.nl>
+References: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:35174 "EHLO
-	mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754953AbcEBVX3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2016 17:23:29 -0400
-Received: by mail-lf0-f49.google.com with SMTP id j8so957082lfd.2
-        for <ceph-devel@vger.kernel.org>; Mon, 02 May 2016 14:23:28 -0700 (PDT)
-In-Reply-To: <1462172597.13876.120.camel@redhat.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:40321 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755061AbcEBVZo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2016 17:25:44 -0400
+In-Reply-To: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Boris Ranto <branto@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-Fixed here:
-https://github.com/ceph/teuthology/pull/852
 
-This was my fault. I'm adding pcp to our test infrastructure, and
-didn't anticipate (or reveal in my testing) that there would be
-selinux denials coming from it.
+> Op 2 mei 2016 om 20:49 schreef Sage Weil <sweil@redhat.com>:
+> 
+> 
+> We're thinking about switching the default backend on the mon from leveldb 
+> to rocksdb.  Rocksdb is better maintained, has a stronger feature set, is 
+> generally faster, and is linked statically, which means we won't be 
+> vulnerable to buggy distro packages.
+> 
+> There is one blocker, though.  Some distro leveldbs name the sst files 
+> with the .ldb suffix.  (Some don't; very annoying.)  There is a unit test 
+> in rocksdb that tries to verify that ldb is silently renamed to sst, 
+> and it passes, but the test is incomplete: the test failes to verify 
+> that ldb/sst files can actually be read, and it turns out only the 'check' 
+> path (not the normal open and read it path) handles ldb properly.
+> 
+> Anyway, once that works, rocksdb will magically upgrade from leveldb to 
+> rocksdb.  Note that once that happens you can't switch from rocksdb back 
+> to leveldb without recreating the mon.
+> 
+> Alternatively, we could not worry about upgrading existing leveldb 
+> instances and just make newly created mons default to rocksdb.
+> 
+> 1) Thoughts on moving to rocksdb in general?
+> 
+> 2) Importance of leveldb->rocksdb conversion?
+> 
 
-On Mon, May 2, 2016 at 1:03 AM, Boris Ranto <branto@redhat.com> wrote:
-> On Sat, 2016-04-30 at 21:32 -0400, Sage Weil wrote:
->> Hi Boris,
->>
->> Do you know why these selinux failures are happening on the jewel
->> branch?
->> I don't see any obvious differences from master, which doesn't seem
->> to be
->> hitting these.
->>
->> http://pulpito.ceph.com/sage-2016-04-30_16:27:00-rados-jewel---basic-
->> smithi/159724
->>
->> Thanks!
->> sage
->>
->
-> Hi Sage,
->
-> all of these are related to PCP (Performance Co-Pilot), not Ceph
-> directly. You can notice that source context (scontext) is always
->
-> pcp_pmlogger_t (or pcp_pmcd_t in one occurrence)
->
-> which refers to pmlogger (or pmcd daemon).
->
-> Maybe, someone have set-up PCP to measure performance of Ceph clusters?
-> I can't say much more as I'm not familiar with PCP. AFAIK, PCP is not a
-> dependency of Ceph so removing it should also make the denials
-> disappear.
->
-> -boris
->
+I would not touch this auto conversion at first. I know there is things to gain, but is it enough to gain that it might be worth while potentially corrupting monitors?
+
+Is it that LevelDB doesn't handle large cluster load for example? Imho the majority of Ceph clusters is still far below 500 OSDs.
+
+Personally I always try to stay away from touching the MONs datastore. Always feels a bit scary.
+
+Wido
+
+> 3) Anyone want to fix the ldb handling in rocksdb?
+> 
+> Thanks!
+> sage
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
