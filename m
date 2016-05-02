@@ -1,47 +1,61 @@
-From: Ramesh Chander <Ramesh.Chander@sandisk.com>
-Subject: Implementing bitmap based space allocator for BlueStore
-Date: Mon, 2 May 2016 06:08:21 +0000
-Message-ID: <BLUPR0201MB1809B0B51FF640A10869E0A285790@BLUPR0201MB1809.namprd02.prod.outlook.com>
+From: Boris Ranto <branto@redhat.com>
+Subject: Re: jewel selinux failures
+Date: Mon, 02 May 2016 09:03:17 +0200
+Message-ID: <1462172597.13876.120.camel@redhat.com>
+References: <alpine.DEB.2.11.1604302131300.26967@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0098.outbound.protection.outlook.com ([207.46.100.98]:32160
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750948AbcEBGIY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2016 02:08:24 -0400
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:38332 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751187AbcEBHDU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 2 May 2016 03:03:20 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 3CA418553B
+	for <ceph-devel@vger.kernel.org>; Mon,  2 May 2016 07:03:20 +0000 (UTC)
+In-Reply-To: <alpine.DEB.2.11.1604302131300.26967@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Ceph Developers,
+On Sat, 2016-04-30 at 21:32 -0400, Sage Weil wrote:
+> Hi Boris,
+>=20
+> Do you know why these selinux failures are happening on the jewel
+> branch?=C2=A0=C2=A0
+> I don't see any obvious differences from master, which doesn't seem
+> to be=C2=A0
+> hitting these.
+>=20
+> http://pulpito.ceph.com/sage-2016-04-30_16:27:00-rados-jewel---basic-
+> smithi/159724
+>=20
+> Thanks!
+> sage
+>=20
 
-I hope you all are doing great.
+Hi Sage,
 
-This is just a note that I am working on implementing bitmap based allocator for BlueStore.
+all of these are related to PCP (Performance Co-Pilot), not Ceph
+directly. You can notice that source context (scontext) is always
 
-The first level of details are below.
+pcp_pmlogger_t (or pcp_pmcd_t in one occurrence)
 
-Brief details of allocator:
------------------------------
+which refers to pmlogger (or pmcd daemon).
 
-I am planning to write a bitmap scanner to find N contiguous or non-contiguous blocks from a bitmap of storage space range assigned to allocator.
+Maybe, someone have set-up PCP to measure performance of Ceph clusters?
+I can't say much more as I'm not familiar with PCP. AFAIK, PCP is not a
+dependency of Ceph so removing it should also make the denials
+disappear.
 
-It will be following interfaces of Allocator class in Allocator.h.
+-boris
 
-The main idea behind it is to reduce memory foot print of allocator when using small blocks like 4K. It will also allow multiple thread to allocate concurrently.
-
-The logic divides the bitmap in to zones and multiple threads can be allocating from different zones at a time.
-This can be helpful in case of storage is at saturation and lot of scanning needs to be done to find free blocks.
-
-Scanning can/will be further made more intelligent keeping hierarchy of summary of space at different areas.
-
-Please let me know your thoughts on this.
-
--Regards,
-Ramesh Chander
-Sr. Staff Engineer
-Sandisk India
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
