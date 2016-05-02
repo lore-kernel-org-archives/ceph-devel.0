@@ -1,52 +1,32 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: mon switch from leveldb to rocksdb
-Date: Mon, 2 May 2016 14:49:11 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com>
+From: Howard Chu <hyc@symas.com>
+Subject: Re: mon switch from leveldb to rocksdb
+Date: Mon, 2 May 2016 20:00:44 +0100
+Message-ID: <5727A3DC.7070102@symas.com>
+References: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36549 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755089AbcEBStC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 2 May 2016 14:49:02 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 64DB862652
-	for <ceph-devel@vger.kernel.org>; Mon,  2 May 2016 18:49:02 +0000 (UTC)
-Received: from cpach ([10.3.112.6])
-	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u42Imx2A015960
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Mon, 2 May 2016 14:49:01 -0400
+Received: from zill.ext.symas.net ([69.43.206.106]:34894 "EHLO
+	zill.ext.symas.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755118AbcEBTSw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2016 15:18:52 -0400
+In-Reply-To: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-We're thinking about switching the default backend on the mon from leveldb 
-to rocksdb.  Rocksdb is better maintained, has a stronger feature set, is 
-generally faster, and is linked statically, which means we won't be 
-vulnerable to buggy distro packages.
+Sage Weil wrote:
+> 1) Thoughts on moving to rocksdb in general?
 
-There is one blocker, though.  Some distro leveldbs name the sst files 
-with the .ldb suffix.  (Some don't; very annoying.)  There is a unit test 
-in rocksdb that tries to verify that ldb is silently renamed to sst, 
-and it passes, but the test is incomplete: the test failes to verify 
-that ldb/sst files can actually be read, and it turns out only the 'check' 
-path (not the normal open and read it path) handles ldb properly.
+Are you actually prepared to undertake all of the measurement and tuning 
+required to make RocksDB actually work well? You're switching from an 
+(abandoned/unsupported) engine with only a handful of config parameters to one 
+with ~40-50 params, all of which have critical but unpredictable impact on 
+resource consumption and performance.
 
-Anyway, once that works, rocksdb will magically upgrade from leveldb to 
-rocksdb.  Note that once that happens you can't switch from rocksdb back 
-to leveldb without recreating the mon.
-
-Alternatively, we could not worry about upgrading existing leveldb 
-instances and just make newly created mons default to rocksdb.
-
-1) Thoughts on moving to rocksdb in general?
-
-2) Importance of leveldb->rocksdb conversion?
-
-3) Anyone want to fix the ldb handling in rocksdb?
-
-Thanks!
-sage
-
+-- 
+   -- Howard Chu
+   CTO, Symas Corp.           http://www.symas.com
+   Director, Highland Sun     http://highlandsun.com/hyc/
+   Chief Architect, OpenLDAP  http://www.openldap.org/project/
