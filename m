@@ -1,25 +1,40 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: running make check in the cloud, with locally attached SSD
-Date: Mon, 2 May 2016 10:57:23 +0200
-Message-ID: <57271673.1060009@dachary.org>
+From: Erwan Velu <evelu@redhat.com>
+Subject: Re: running make check in the cloud, with locally attached SSD
+Date: Mon, 2 May 2016 08:59:28 -0400 (EDT)
+Message-ID: <283381268.85200909.1462193968489.JavaMail.zimbra@redhat.com>
+References: <57271673.1060009@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp26.services.sfr.fr ([93.17.128.163]:64019 "EHLO
-	smtp26.services.sfr.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752231AbcEBI51 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2016 04:57:27 -0400
-Received: from [192.168.2.120] (LPuteaux-657-1-295-15.w90-63.abo.wanadoo.fr [90.63.253.15])
-	by msfrf2603.sfr.fr (SMTP Server) with ESMTP id CF7241C001016
-	for <ceph-devel@vger.kernel.org>; Mon,  2 May 2016 10:57:24 +0200 (CEST)
-Received: from [192.168.2.120] (LPuteaux-657-1-295-15.w90-63.abo.wanadoo.fr [90.63.253.15])	(using TLSv1
-	with cipher ECDHE-RSA-AES128-SHA (128/128 bits))	(No client certificate requested)	(Authenticated sender: loic.dachary@sfr.fr)
-	by msfrf2603.sfr.fr (SMTP Server) with ESMTPSA
-	for <ceph-devel@vger.kernel.org>; Mon,  2 May 2016 10:57:23 +0200 (CEST)
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:44667 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752126AbcEBM7b convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2016 08:59:31 -0400
+In-Reply-To: <57271673.1060009@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
+
+=46rom my last testing, we can also use hg-60 but building in /dev/shm =
+instead of the block storage.
+That usually saves up to 2mn of build time against a regular hg-60.
+The main isse for performance is not really the storage performance but=
+ the cpu one.
+
+I also noticed that using hg-60 is the most efficient platform as we re=
+ach a 93% of perf scalability.
+When running hg-120 we can go faster but the gain is not linear, we onl=
+y reach 50% of efficiency.
+That said, that's still a "make" (not make check) run in 8 minutes ... =
+which is nice.
+
+----- Mail original -----
+De: "Loic Dachary" <loic@dachary.org>
+=C3=80: "Ceph Development" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Lundi 2 Mai 2016 10:57:23
+Objet: running make check in the cloud, with locally attached SSD
 
 Hi,
 
@@ -122,6 +137,11 @@ Cheers
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
