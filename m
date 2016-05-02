@@ -1,48 +1,47 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: building boost statically
-Date: Sun, 1 May 2016 23:28:32 -0400
-Message-ID: <20160502032831.GA8719@ultraspiritum.redhat.com>
-References: <alpine.DEB.2.11.1604281843520.25990@cpach.fuggernut.com>
- <CACJqLyYtBQ8N95BHSH48AD-XexCx+QU9XB8djvomH_rer1tn+w@mail.gmail.com>
- <CALqRxCyQkBPF0t7RcYzhcFZCzEeviAyL+XeQU0Dr+An1Tx5s4Q@mail.gmail.com>
- <alpine.DEB.2.11.1604292137110.26967@cpach.fuggernut.com>
- <BN3PR02MB1206983484A635905E9B630BE8670@BN3PR02MB1206.namprd02.prod.outlook.com>
- <alpine.LSU.2.20.1605010807200.21305@ancalagon.suse.com>
- <alpine.DEB.2.11.1605011113510.26967@cpach.fuggernut.com>
+From: Ramesh Chander <Ramesh.Chander@sandisk.com>
+Subject: Implementing bitmap based space allocator for BlueStore
+Date: Mon, 2 May 2016 06:08:21 +0000
+Message-ID: <BLUPR0201MB1809B0B51FF640A10869E0A285790@BLUPR0201MB1809.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51757 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752736AbcEBD2j (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 1 May 2016 23:28:39 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1605011113510.26967@cpach.fuggernut.com>
+Received: from mail-by2on0098.outbound.protection.outlook.com ([207.46.100.98]:32160
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750948AbcEBGIY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2016 02:08:24 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Jesse Williamson <jwilliamson@suse.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Ken Dreyer <kdreyer@redhat.com>, Haomai Wang <haomai@xsky.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/05/2016, Sage Weil wrote:
-> Given that this is the only piece we want immediately (that i know of), 
-> that there would be significant work to either pull boost inline as a 
-> submodule *or* to build and ship a proper package, let's go the bcp route 
-> for now.
-> 
-> Jesse, is this something you can tackle?
-> 
+Hi Ceph Developers,
 
-I'm not sure if I like this idea. There are other places where I've
-wanted to use something newer than the boost on Trusty Tahr/RHEL7, like
-the newer intrusive_ptr. Some other people have mentioned wishing for
-newer boost functionality, too.
+I hope you all are doing great.
 
-If we're going to bundle anything at all, I'd rather we bundle the
-whole thing so we get the full advantage of trying to swallow the extra
-capacity. BCP sounds like we're signing up for just as much work and
-maintenance burden and doesn't give us the full benefit.
+This is just a note that I am working on implementing bitmap based allocator for BlueStore.
 
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+The first level of details are below.
+
+Brief details of allocator:
+-----------------------------
+
+I am planning to write a bitmap scanner to find N contiguous or non-contiguous blocks from a bitmap of storage space range assigned to allocator.
+
+It will be following interfaces of Allocator class in Allocator.h.
+
+The main idea behind it is to reduce memory foot print of allocator when using small blocks like 4K. It will also allow multiple thread to allocate concurrently.
+
+The logic divides the bitmap in to zones and multiple threads can be allocating from different zones at a time.
+This can be helpful in case of storage is at saturation and lot of scanning needs to be done to find free blocks.
+
+Scanning can/will be further made more intelligent keeping hierarchy of summary of space at different areas.
+
+Please let me know your thoughts on this.
+
+-Regards,
+Ramesh Chander
+Sr. Staff Engineer
+Sandisk India
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
