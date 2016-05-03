@@ -1,126 +1,122 @@
-From: NeilBrown <mr@neil.brown.name>
-Subject: Re: [PATCH 0/2] scop GFP_NOFS api
-Date: Wed, 04 May 2016 09:26:15 +1000
-Message-ID: <87futyd8q0.fsf@notabene.neil.brown.name>
-References: <1461671772-1269-1-git-send-email-mhocko@kernel.org> <8737q5ugcx.fsf@notabene.neil.brown.name> <20160429120418.GK21977@dhcp22.suse.cz> <87twiiu5gs.fsf@notabene.neil.brown.name> <20160503151312.GA4470@dhcp22.suse.cz>
+From: Ming Lin <minggr@gmail.com>
+Subject: Re: rocksdb related build error
+Date: Tue, 03 May 2016 16:28:27 -0700
+Message-ID: <1462318107.23609.3.camel@gmail.com>
+References: <CAF1ivSbg-n6o2_mHzCS_Y9rDZTD+ySess8TqOto-ox7MV012bA@mail.gmail.com>
+	 <alpine.DEB.2.11.1605030824500.26967@cpach.fuggernut.com>
+	 <CAF1ivSZ_wxv9SkGkpw3ry7Bt9+HYBse=BZ+WysPLPFD3we=fNw@mail.gmail.com>
+	 <20160503225852.GA17962@degu.b.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha256; protocol="application/pgp-signature"
-Return-path: <reiserfs-devel-owner@vger.kernel.org>
-In-Reply-To: <20160503151312.GA4470@dhcp22.suse.cz>
-Sender: reiserfs-devel-owner@vger.kernel.org
-To: Michal Hocko <mhocko@kernel.org>
-Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, xfs@oss.sgi.com, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pa0-f42.google.com ([209.85.220.42]:36137 "EHLO
+	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756345AbcECX23 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 19:28:29 -0400
+Received: by mail-pa0-f42.google.com with SMTP id bt5so16099511pac.3
+        for <ceph-devel@vger.kernel.org>; Tue, 03 May 2016 16:28:29 -0700 (PDT)
+In-Reply-To: <20160503225852.GA17962@degu.b.linuxbox.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Marcus Watts <mwatts@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, John Spray <john.spray@redhat.com>
 
---=-=-=
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+On Tue, 2016-05-03 at 18:58 -0400, Marcus Watts wrote:
+> On Tue, May 03, 2016 at 02:15:49PM -0700, Ming Lin wrote:
+> > On Tue, May 3, 2016 at 5:26 AM, Sage Weil <sage@newdream.net>
+> > wrote:
+> > > On Tue, 3 May 2016, Ming Lin wrote:
+> > > > Hi John,
+> > > >=20
+> > > > I got rocksdb related build error (commit bb7d9c15).
+> > > > Any hint to fix it?
+> > > >=20
+> > > > It's OK if I build in the ceph source tree.
+> > >=20
+> > > Out of tree builds don't work currently with autotools.
+> >=20
+> > I just learned a bit about autotools.
+> > https://en.wikipedia.org/wiki/GNU_Build_System
+> >=20
+> > Could you share what the problem is here to support out-of-tree
+> > build?
+> > I'll try to write a patch to fix it.
+>=20
+> I looked at this fairly recently.
+>=20
+> rocksdb comes with a cmake (only used for windows), and makefile
+> build.
+> The makefile build doesn't use autotools, it's just a gnu makefile.
+> gnu make does support out of tree builds, but the rocksdb file
+> doesn't
+> do that.=C2=A0=C2=A0So, it wants to find all its source wherever it's
+> installed,
+> and it puts all the .o's in the same place - So: no separate build
+> possible.
+> This is a problem for both automake & cmake.
+>=20
+> You could change the makefile to work "out of tree", but it won't
+> be pretty.=C2=A0=C2=A0Probably you would be adding some "VPATH" state=
+ments,
+> add -I as necessary, and you'd have to work within the structure
+> of the file which I think seemed a bit more complicated than
+> necessary.
 
-On Wed, May 04 2016, Michal Hocko wrote:
+Here is my quick hack. Just add ${srcdir}
+It's not real "out of tree" because rocksdb is still build in the tree
+actually.
 
-> Hi,
->
-> On Sun 01-05-16 07:55:31, NeilBrown wrote:
-> [...]
->> One particular problem with your process-context idea is that it isn't
->> inherited across threads.
->> Steve Whitehouse's example in gfs shows how allocation dependencies can
->> even cross into user space.
->
-> Hmm, I am still not sure I understand that example completely but making
-> a dependency between direct reclaim and userspace can hardly work.
-
-No it can't.  Specifically: if direct reclaim blocks on user-space that
-must be a problem.
-I think the point of this example is that some filesystem things can
-block on user-space in ways that are very hard to encode in with flags
-as they are multi-level indirect.
-So the conclusion (my conclusion) is that direct reclaim mustn't block.
-
-When I was working on deadlock avoidance in loop-back NFS I went down
-the path of adding GFP flags and extended the PF_FSTRANS flag and got it
-working (think) but no-one liked it.  It was way too intrusive.
-
-Some how I landed on the idea of making nfs_release_page non blocking
-and everything suddenly became much much simpler.  Problems evaporated.
-
-NFS has a distinct advantage here.  The "Close-to-open" cache semantic
-means that all dirty pages must be flushed on last close.  So when
-=2D>evict_inode is finally called there is nothing much to do - just free
-everything up.  So I could fix NFS without worrying about (or even
-noticing) evict_inode.
-
-
-> Especially when the direct reclaim might be sitting on top of hard to
-> guess pile of locks. So unless I've missed anything what Steve has
-> described is a clear NOFS context.
->
->> A more localized one that I have seen is that NFSv4 sometimes needs to
->> start up a state-management thread (particularly if the server
->> restarted).
->> It uses kthread_run(), which doesn't actually create the thread but asks
->> kthreadd to do it.  If NFS writeout is waiting for state management it
->> would need to make sure that kthreadd runs in allocation context to
->> avoid deadlock.
->> I feel that I've forgotten some important detail here and this might
->> have been fixed somehow, but the point still stands that the allocation
->> context can cross from thread to thread and can effectively become
->> anything and everything.
->
-> Not sure I understand your point here but relying on kthread_run
-> from GFP_NOFS context has always been deadlock prone with or without
-> scope GFP_NOFS semantic so I am not really sure I see your point
-> here. Similarly relying on a work item which doesn't have a dedicated
-> WQ_MEM_RECLAIM WQ is deadlock prone.  You simply shouldn't do that.
-
-The point is really that saying "You shouldn't do that" isn't much good
-when "that" is exactly what the fs developer wants to do and it seems to
-work and never triggers a warning.
-
-You can create lots of rules about what is or is not allowed, or
-you can make everything that it not explicit forbidden (ideally at
-compile time but possibly at runtime with might_sleep or lockdep),
-permitted.
-
-I prefer the latter.
-
->
->> It is OK to wait for memory to be freed.  It is not OK to wait for any
->> particular piece of memory to be freed because you don't always know who
->> is waiting for you, or who you really are waiting on to free that
->> memory.
->>=20
->> Whenever trying to free memory I think you need to do best-effort
->> without blocking.
->
-> I agree with that. Or at least you have to wait on something that is
-> _guaranteed_ to make a forward progress. I am not really that sure this
-> is easy to achieve with the current code base.
-
-I accept that it isn't "easy".  But I claim that it isn't particularly
-difficult either.
-
-NeilBrown
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIcBAEBCAAGBQJXKTOXAAoJEDnsnt1WYoG5eugQALaVi36cVlv3XUWoqQkoecRW
-Sh+gP4igqZwrsa+rKJ6N0SAKf2Ckg5hRnQ8pXs4gg+k8AtoQpEjRNqt0W6uCrMVz
-foj53Bwv0C/QYJiFUWxT+ExaA/iBp35HUkNpJZifwL5YYsWL1mRvVV4FINA5VpTV
-tSIAAIEM955RacQYX77m523pkH5oh4/SaZowW6u0sBi0jUCD1KsrD156mV61ah6L
-HCOzm1mMSaAxjDvFzu1dA2yz7Kjq5spqHZyYO47N+7ice7b0QHfvqFMS8beX2zzT
-5DMis1MWLrZOUhw6yej+hW3aQO9Ch1hOwRRu9E49T32FWuh9qEo9Ia79it6OI4/1
-xBCpqkhToiBDioB4H1NtF45qwEa8m4dyMYBGUfKyop8JlaUS/foMaK8uHS0xG1MO
-LICkLC7y/7l/N3GNQ1Ia3bLFdQJmHdOpZO1NbzlIbWMC9sV3r6KdlCeLoBC7GvF8
-eM8tAM4W4dXOSK/JMz/nsRXBCXvQgT1L9eXvwrKFmEkVGyXWGA+th3fCCexKNUP6
-ab5aas5pj9AseznwfOP3EYEhLRvPKSP8qeu6Wkezodwi/LIjb8v+Y9h96a46FbkA
-viFdp7ZWP/nQ3wQ4g0T89RdIX9zY8Xv+8yNbKaxmL4B6L5nI4mer4XaV63V36Qge
-/NBmt+ZGgYKghbndVHaz
-=zENk
------END PGP SIGNATURE-----
---=-=-=--
+diff --git a/src/kv/Makefile.am b/src/kv/Makefile.am
+index b876171..0dd754c 100644
+--- a/src/kv/Makefile.am
++++ b/src/kv/Makefile.am
+@@ -21,8 +21,8 @@ if FREEBSD
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0NPROC =3D sysctl =
+-n hw.ncpu
+=C2=A0endif
+=C2=A0rocksdb/librocksdb.a:
+-	cd rocksdb && CC=3D"${CC}" CXX=3D"${CXX}" EXTRA_CXXFLAGS=3D-fPIC PORT=
+ABLE=3D1 $(MAKE) -j$(shell ${NPROC}) static_lib
+-libkv_a_CXXFLAGS +=3D -I rocksdb/include -fPIC
++	cd ${srcdir}/rocksdb && CC=3D"${CC}" CXX=3D"${CXX}" EXTRA_CXXFLAGS=3D=
+-fPIC PORTABLE=3D1 $(MAKE) -j$(shell ${NPROC}) static_lib
++libkv_a_CXXFLAGS +=3D -I ${srcdir}/rocksdb/include -fPIC
+=C2=A0libkv_a_SOURCES +=3D kv/RocksDBStore.cc
+=C2=A0libkv_a_LIBADD +=3D rocksdb/librocksdb.a
+=C2=A0noinst_HEADERS +=3D kv/RocksDBStore.h
+diff --git a/src/os/Makefile.am b/src/os/Makefile.am
+index 6d22778..4305fe2 100644
+--- a/src/os/Makefile.am
++++ b/src/os/Makefile.am
+@@ -61,7 +61,7 @@ if WITH_LIBZFS
+=C2=A0libos_a_SOURCES +=3D os/filestore/ZFSFileStoreBackend.cc
+=C2=A0endif
+=C2=A0
+-libos_a_CXXFLAGS =3D ${AM_CXXFLAGS} -I rocksdb/include -fPIC
++libos_a_CXXFLAGS =3D ${AM_CXXFLAGS} -I ${srcdir}/rocksdb/include -fPIC
+=C2=A0libos_a_LIBADD =3D libos_types.a libkv.a
+=C2=A0noinst_LIBRARIES +=3D libos.a
+=C2=A0
+diff --git a/src/test/Makefile-server.am b/src/test/Makefile-server.am
+index fbb42e4..2aaa635 100644
+--- a/src/test/Makefile-server.am
++++ b/src/test/Makefile-server.am
+@@ -227,7 +227,7 @@ endif # WITH_OSD
+=C2=A0if WITH_SLIBROCKSDB
+=C2=A0unittest_rocksdb_option_static_SOURCES =3D test/objectstore/TestR=
+ocksdbOptionParse.cc
+=C2=A0unittest_rocksdb_option_static_LDADD =3D $(LIBOS) $(UNITTEST_LDAD=
+D) $(CEPH_GLOBAL)
+-unittest_rocksdb_option_static_CXXFLAGS =3D $(UNITTEST_CXXFLAGS) ${AM_=
+CXXFLAGS} ${LIBROCKSDB_CFLAGS} -I rocksdb/include
++unittest_rocksdb_option_static_CXXFLAGS =3D $(UNITTEST_CXXFLAGS) ${AM_=
+CXXFLAGS} ${LIBROCKSDB_CFLAGS} -I ${srcdir}/rocksdb/include
+=C2=A0check_TESTPROGRAMS +=3D unittest_rocksdb_option_static
+=C2=A0endif
+=C2=A0
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
