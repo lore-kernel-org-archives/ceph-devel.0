@@ -1,128 +1,169 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: building boost statically
-Date: Mon, 2 May 2016 21:14:35 -0400 (EDT)
-Message-ID: <2047671033.23980927.1462238075772.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.11.1604281843520.25990@cpach.fuggernut.com> <alpine.LSU.2.20.1605010807200.21305@ancalagon.suse.com> <alpine.DEB.2.11.1605011113510.26967@cpach.fuggernut.com> <20160502032831.GA8719@ultraspiritum.redhat.com> <alpine.LSU.2.20.1605020907510.21305@ancalagon.suse.com> <20160502161449.GA2654@ultraspiritum.redhat.com> <2129674447.23940924.1462230258123.JavaMail.zimbra@redhat.com> <alpine.LSU.2.20.1605021757210.21305@ancalagon.suse.com>
+From: =?utf-8?B?Q2FuIFpoYW5nKOW8oOeBvyk=?= <zhangcan-2SarAXORi/o@public.gmane.org>
+Subject: Re: Web based S3 client
+Date: Tue, 3 May 2016 02:33:04 +0000
+Message-ID: <BB527F38-6D27-4A42-BF36-5C2F7AB94D35@letv.com>
+References: <5BE0036A-2DF4-43F6-884C-C2B766836BC3@letv.com>
+	<CAGckRDp4n8GPy_Dqpfnbphc95DtwNB=Qr6s0ju-1A+qrXGq0Wg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/mixed; boundary="===============1928690082=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAGckRDp4n8GPy_Dqpfnbphc95DtwNB=Qr6s0ju-1A+qrXGq0Wg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: zh-CN
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: George Mihaiescu <lmihaiescu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+--===============1928690082==
+Content-Language: zh-CN
+Content-Type: multipart/alternative;
+	boundary="_000_BB527F386D274A42BF365C2F7AB94D35letvcom_"
+
+--_000_BB527F386D274A42BF365C2F7AB94D35letvcom_
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+
+SGkgR2VvcmdlLA0KDQpUaGUgZXJyb3IgaXMgYmVjYXVzZSB5b3VyIGJ1Y2tldCBgY29uc29uYW5j
+ZWAgaXNu4oCZdCBoYXZpbmcgQ09SUyBjb25maWd1cmVkLiBGb3Igc2VjdXJpdHkgaXNzdWVzLCBi
+cm93c2VycyBsaW1pdCBjcm9zcyBkb21haW4gYWNjZXNzZXMgYnkgZGVmYXVsdC4gSWYgeW91IGNy
+ZWF0ZSBhIGJ1Y2tldCB0aHJvdWdoIFNyZWUsIGl0IHdpbGwgY29uZmlndXJlIENPUlMgZm9yIHlv
+dSwgYnV0IGZvciBleGlzdGluZyBidWNrZXRzLCB0aGV5IGFyZSBsaWtlbHkgdG8gbm90IGhhdmlu
+ZyB0aG9zZSBjb25maWd1cmF0aW9ucy4gVG8gdW5kZXJzdGFuZCB3aHkgQ09SUyBjb25maWd1cmF0
+aW9uIGlzIG5lZWRlZCwgc2VlIGh0dHA6Ly9kb2NzLmF3cy5hbWF6b24uY29tL0FXU0phdmFTY3Jp
+cHRTREsvZ3VpZGUvYnJvd3Nlci1jb25maWd1cmluZy5odG1sI0Nyb3NzLU9yaWdpbl9SZXNvdXJj
+ZV9TaGFyaW5nX19DT1JTXyBmb3IgbW9yZSBkZXRhaWxzLg0KDQpMYXRlciBJIHdpbGwgd3JpdGUg
+YSBwYXRjaCB0byBoZWxwIGNvbmZpZ3VyZSBDT1JTIGZvciBleGlzdGluZyBidWNrZXRzLCBwbGVh
+c2Uga2VlcCBhIGV5ZSBvbiBodHRwczovL2dpdGh1Yi5jb20vY2Fubml1bS9TcmVlDQoNClRoZSBz
+dXBwb3J0IG9mIEFDTCBhbmQgYnVja2V0IGRldGFpbHMgYXJlIHVuZGVyIGNvbnNpZGVyYXRpb24s
+IGJ1dCByZW5hbWluZyBpcyBub3QgYW4gTygxKSBvcGVyYXRpb24gYXMgeW91IG1pZ2h0IGltYWdp
+bmUgaW4gczMgYW5kIHNob3VsZCBkZWZpbml0ZWx5IGJlIGF2b2lkZWQuDQoNCg0KQ2hlZXJzLA0K
+Q2FuIFpIQU5HDQoNCk9uIE1heSAzLCAyMDE2LCBhdCAwMDo0MSwgR2VvcmdlIE1paGFpZXNjdSA8
+bG1paGFpZXNjdUBnbWFpbC5jb208bWFpbHRvOmxtaWhhaWVzY3VAZ21haWwuY29tPj4gd3JvdGU6
+DQoNCkhpIENhbiwNCg0KSSBnYXZlIGl0IGEgdHJ5IGFuZCBJIGNhbiBzZWUgbXkgYnVja2V0cywg
+YnV0IEkgZ2V0IGFuIGVycm9yIChzZWUgYXR0YWNoZWQpIHdoZW4gdHJ5aW5nIHRvIHNlZSB0aGUg
+Y29udGVudHMgb2YgYW55IGJ1Y2tldC4NCg0KVGhlIGFwcGxpY2F0aW9uIGlzIHByZXR0eSBzaW1w
+bGlzdGljIG5vdywgYW5kIGl0IHdvdWxkIGJlIGdyZWF0IGlmIHN1cHBvcnQgZm9yIHRoZSBvYmpl
+Y3QgYW5kIHNpemUgY291bnQgd291bGQgYmUgYWRkZWQuIFRoZSBidWNrZXQgYWNjZXNzIHR5cGUg
+c2hvdWxkIGJlIGRpc3BsYXllZCAocHJpdmF0ZS9wdWJsaWMpIGFuZCByZW5hbWluZyBidWNrZXRz
+Lg0KDQoNClRoYW5rcywNCkdlb3JnZQ0KDQpPbiBUaHUsIEFwciAyOCwgMjAxNiBhdCAxMDoyOSBQ
+TSwgQ2FuIFpoYW5nKOW8oOeBvykgPHpoYW5nY2FuQGxlLmNvbTxtYWlsdG86emhhbmdjYW5AbGUu
+Y29tPj4gd3JvdGU6DQpIaSwNCg0KSW4gb3JkZXIgdG8gaGVscCBuZXcgdXNlcnMgdG8gZ2V0IGhh
+bmRzIG9uIFMzLCB3ZSBkZXZlbG9wZWQgYSB3ZWIgYmFzZWQgUzMgY2xpZW50IGNhbGxlZCDigJxT
+cmVl4oCdLCBhbmQgaG9wZSB0byBzZWUgaWYgaXQgY291bGQgYmVjb21lIHBhcnQgb2YgQ2VwaC4g
+Q3VycmVudGx5IHdlIGhvc3QgdGhlIHByb2plY3QgYXQ6DQoNCmh0dHBzOi8vZ2l0aHViLmNvbS9j
+YW5uaXVtL1NyZWUNCg0KVXNlcnMgY291bGQgdXNlIFNyZWUgdG8gbWFuYWdlIHRoZWlyIGZpbGVz
+IGluIGJyb3dzZXIsIHRocm91Z2ggQ2VwaOKAmXMgUzMgaW50ZXJmYWNlLiBJIHRoaW5rIGl04oCZ
+cyBtb3JlIGZyaWVuZGx5IGZvciBuZXcgdXNlcnMgdGhhbiBzM2NtZCwgYW5kIHdvdWxkIGhlbHAg
+Q2VwaCB0byBoaXQgbW9yZSB1c2Vycy4NCg0KQW55IHN1Z2dlc3Rpb25zIGFyZSB3ZWxjb21lZC4g
+SG9wZSB0byBzZWUgeW91ciByZXBsaWVzLg0KDQoNCkNoZWVycywNCkNhbiBaSEFORw0KDQpfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KY2VwaC11c2VycyBt
+YWlsaW5nIGxpc3QNCmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb208bWFpbHRvOmNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20+DQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgt
+dXNlcnMtY2VwaC5jb20NCg0KDQo8U3JlZV9lcnJvci5wbmc+DQoNCg==
+
+--_000_BB527F386D274A42BF365C2F7AB94D35letvcom_
+Content-Type: text/html; charset="utf-8"
+Content-ID: <E75C6B4B94EA224D9391CD1AB0AA528E-wlaCddgLkGg@public.gmane.org>
+Content-Transfer-Encoding: base64
+
+PGh0bWw+DQo8aGVhZD4NCjxtZXRhIGh0dHAtZXF1aXY9IkNvbnRlbnQtVHlwZSIgY29udGVudD0i
+dGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04Ij4NCjwvaGVhZD4NCjxib2R5IHN0eWxlPSJ3b3JkLXdy
+YXA6IGJyZWFrLXdvcmQ7IC13ZWJraXQtbmJzcC1tb2RlOiBzcGFjZTsgLXdlYmtpdC1saW5lLWJy
+ZWFrOiBhZnRlci13aGl0ZS1zcGFjZTsiIGNsYXNzPSIiPg0KPGRpdiBjbGFzcz0iIj5IaSBHZW9y
+Z2UsPC9kaXY+DQo8ZGl2IGNsYXNzPSIiPjxiciBjbGFzcz0iIj4NCjwvZGl2Pg0KPGRpdiBjbGFz
+cz0iIj5UaGUgZXJyb3IgaXMgYmVjYXVzZSB5b3VyIGJ1Y2tldCBgY29uc29uYW5jZWAgaXNu4oCZ
+dCBoYXZpbmcgQ09SUyBjb25maWd1cmVkLiBGb3Igc2VjdXJpdHkgaXNzdWVzLCBicm93c2VycyBs
+aW1pdCBjcm9zcyBkb21haW4gYWNjZXNzZXMgYnkgZGVmYXVsdC4gSWYgeW91IGNyZWF0ZSBhIGJ1
+Y2tldCB0aHJvdWdoIFNyZWUsIGl0IHdpbGwgY29uZmlndXJlIENPUlMgZm9yIHlvdSwgYnV0IGZv
+ciBleGlzdGluZyBidWNrZXRzLCB0aGV5DQogYXJlIGxpa2VseSB0byBub3QgaGF2aW5nIHRob3Nl
+IGNvbmZpZ3VyYXRpb25zLiBUbyB1bmRlcnN0YW5kIHdoeSBDT1JTIGNvbmZpZ3VyYXRpb24gaXMg
+bmVlZGVkLCBzZWUmbmJzcDs8YSBocmVmPSJodHRwOi8vZG9jcy5hd3MuYW1hem9uLmNvbS9BV1NK
+YXZhU2NyaXB0U0RLL2d1aWRlL2Jyb3dzZXItY29uZmlndXJpbmcuaHRtbCNDcm9zcy1PcmlnaW5f
+UmVzb3VyY2VfU2hhcmluZ19fQ09SU18iIGNsYXNzPSIiPmh0dHA6Ly9kb2NzLmF3cy5hbWF6b24u
+Y29tL0FXU0phdmFTY3JpcHRTREsvZ3VpZGUvYnJvd3Nlci1jb25maWd1cmluZy5odG1sI0Nyb3Nz
+LU9yaWdpbl9SZXNvdXJjZV9TaGFyaW5nX19DT1JTXzwvYT4mbmJzcDtmb3INCiBtb3JlIGRldGFp
+bHMuPC9kaXY+DQo8ZGl2IGNsYXNzPSIiPjxiciBjbGFzcz0iIj4NCjwvZGl2Pg0KPGRpdiBjbGFz
+cz0iIj5MYXRlciBJIHdpbGwgd3JpdGUgYSBwYXRjaCB0byBoZWxwIGNvbmZpZ3VyZSBDT1JTIGZv
+ciBleGlzdGluZyBidWNrZXRzLCBwbGVhc2Uga2VlcCBhIGV5ZSBvbiZuYnNwOzxhIGhyZWY9Imh0
+dHBzOi8vZ2l0aHViLmNvbS9jYW5uaXVtL1NyZWUiIHRhcmdldD0iX2JsYW5rIiBjbGFzcz0iIj5o
+dHRwczovL2dpdGh1Yi5jb20vY2Fubml1bS9TcmVlPC9hPjwvZGl2Pg0KPGRpdiBjbGFzcz0iIj48
+YnIgY2xhc3M9IiI+DQo8L2Rpdj4NCjxkaXYgY2xhc3M9IiI+VGhlIHN1cHBvcnQgb2YgQUNMIGFu
+ZCBidWNrZXQgZGV0YWlscyBhcmUgdW5kZXIgY29uc2lkZXJhdGlvbiwgYnV0IHJlbmFtaW5nIGlz
+IG5vdCBhbiBPKDEpIG9wZXJhdGlvbiBhcyB5b3UgbWlnaHQgaW1hZ2luZSBpbiBzMyBhbmQgc2hv
+dWxkIGRlZmluaXRlbHkgYmUgYXZvaWRlZC48L2Rpdj4NCjxkaXYgY2xhc3M9IiI+PGJyIGNsYXNz
+PSIiPg0KPC9kaXY+DQo8ZGl2IGNsYXNzPSIiPjxiciBjbGFzcz0iIj4NCjwvZGl2Pg0KPGRpdiBj
+bGFzcz0iIj5DaGVlcnMsPC9kaXY+DQo8ZGl2IGNsYXNzPSIiPkNhbiBaSEFORzwvZGl2Pg0KPGJy
+IGNsYXNzPSIiPg0KPGRpdj4NCjxibG9ja3F1b3RlIHR5cGU9ImNpdGUiIGNsYXNzPSIiPg0KPGRp
+diBjbGFzcz0iIj5PbiBNYXkgMywgMjAxNiwgYXQgMDA6NDEsIEdlb3JnZSBNaWhhaWVzY3UgJmx0
+OzxhIGhyZWY9Im1haWx0bzpsbWloYWllc2N1QGdtYWlsLmNvbSIgY2xhc3M9IiI+bG1paGFpZXNj
+dUBnbWFpbC5jb208L2E+Jmd0OyB3cm90ZTo8L2Rpdj4NCjxiciBjbGFzcz0iQXBwbGUtaW50ZXJj
+aGFuZ2UtbmV3bGluZSI+DQo8ZGl2IGNsYXNzPSIiPg0KPGRpdiBkaXI9Imx0ciIgY2xhc3M9IiI+
+DQo8ZGl2IGNsYXNzPSIiPg0KPGRpdiBjbGFzcz0iIj5IaSBDYW4sPGJyIGNsYXNzPSIiPg0KPGJy
+IGNsYXNzPSIiPg0KPC9kaXY+DQpJIGdhdmUgaXQgYSB0cnkgYW5kIEkgY2FuIHNlZSBteSBidWNr
+ZXRzLCBidXQgSSBnZXQgYW4gZXJyb3IgKHNlZSBhdHRhY2hlZCkgd2hlbiB0cnlpbmcgdG8gc2Vl
+IHRoZSBjb250ZW50cyBvZiBhbnkgYnVja2V0LjxiciBjbGFzcz0iIj4NCjxiciBjbGFzcz0iIj4N
+CjwvZGl2Pg0KPGRpdiBjbGFzcz0iIj5UaGUgYXBwbGljYXRpb24gaXMgcHJldHR5IHNpbXBsaXN0
+aWMgbm93LCBhbmQgaXQgd291bGQgYmUgZ3JlYXQgaWYgc3VwcG9ydCBmb3IgdGhlIG9iamVjdCBh
+bmQgc2l6ZSBjb3VudCB3b3VsZCBiZSBhZGRlZC4gVGhlIGJ1Y2tldCBhY2Nlc3MgdHlwZSBzaG91
+bGQgYmUgZGlzcGxheWVkIChwcml2YXRlL3B1YmxpYykgYW5kIHJlbmFtaW5nIGJ1Y2tldHMuPC9k
+aXY+DQo8ZGl2IGNsYXNzPSIiPjxiciBjbGFzcz0iIj4NCiZuYnNwOzxiciBjbGFzcz0iIj4NCjwv
+ZGl2Pg0KPGRpdiBjbGFzcz0iIj5UaGFua3MsPGJyIGNsYXNzPSIiPg0KPC9kaXY+DQo8ZGl2IGNs
+YXNzPSIiPkdlb3JnZTxiciBjbGFzcz0iIj4NCjwvZGl2Pg0KPC9kaXY+DQo8ZGl2IGNsYXNzPSJn
+bWFpbF9leHRyYSI+PGJyIGNsYXNzPSIiPg0KPGRpdiBjbGFzcz0iZ21haWxfcXVvdGUiPk9uIFRo
+dSwgQXByIDI4LCAyMDE2IGF0IDEwOjI5IFBNLCBDYW4gWmhhbmco5byg54G/KSA8c3BhbiBkaXI9
+Imx0ciIgY2xhc3M9IiI+DQombHQ7PGEgaHJlZj0ibWFpbHRvOnpoYW5nY2FuQGxlLmNvbSIgdGFy
+Z2V0PSJfYmxhbmsiIGNsYXNzPSIiPnpoYW5nY2FuQGxlLmNvbTwvYT4mZ3Q7PC9zcGFuPiB3cm90
+ZTo8YnIgY2xhc3M9IiI+DQo8YmxvY2txdW90ZSBjbGFzcz0iZ21haWxfcXVvdGUiIHN0eWxlPSJt
+YXJnaW46MCAwIDAgLjhleDtib3JkZXItbGVmdDoxcHggI2NjYyBzb2xpZDtwYWRkaW5nLWxlZnQ6
+MWV4Ij4NCjxkaXYgc3R5bGU9IndvcmQtd3JhcDpicmVhay13b3JkIiBjbGFzcz0iIj5IaSwNCjxk
+aXYgY2xhc3M9IiI+PGJyIGNsYXNzPSIiPg0KPC9kaXY+DQo8ZGl2IGNsYXNzPSIiPkluIG9yZGVy
+IHRvIGhlbHAgbmV3IHVzZXJzIHRvIGdldCBoYW5kcyBvbiBTMywgd2UgZGV2ZWxvcGVkIGEgd2Vi
+IGJhc2VkIFMzIGNsaWVudCBjYWxsZWQg4oCcU3JlZeKAnSwgYW5kIGhvcGUgdG8gc2VlIGlmIGl0
+IGNvdWxkIGJlY29tZSBwYXJ0IG9mIENlcGguIEN1cnJlbnRseSB3ZSBob3N0IHRoZSBwcm9qZWN0
+IGF0OjwvZGl2Pg0KPGRpdiBjbGFzcz0iIj48YnIgY2xhc3M9IiI+DQo8L2Rpdj4NCjxkaXYgY2xh
+c3M9IiI+PGEgaHJlZj0iaHR0cHM6Ly9naXRodWIuY29tL2Nhbm5pdW0vU3JlZSIgdGFyZ2V0PSJf
+YmxhbmsiIGNsYXNzPSIiPmh0dHBzOi8vZ2l0aHViLmNvbS9jYW5uaXVtL1NyZWU8L2E+PC9kaXY+
+DQo8ZGl2IGNsYXNzPSIiPjxiciBjbGFzcz0iIj4NCjwvZGl2Pg0KPGRpdiBjbGFzcz0iIj5Vc2Vy
+cyBjb3VsZCB1c2UgU3JlZSB0byBtYW5hZ2UgdGhlaXIgZmlsZXMgaW4gYnJvd3NlciwgdGhyb3Vn
+aCBDZXBo4oCZcyBTMyBpbnRlcmZhY2UuIEkgdGhpbmsgaXTigJlzIG1vcmUgZnJpZW5kbHkgZm9y
+IG5ldyB1c2VycyB0aGFuIHMzY21kLCBhbmQgd291bGQgaGVscCBDZXBoIHRvIGhpdCBtb3JlIHVz
+ZXJzLjwvZGl2Pg0KPGRpdiBjbGFzcz0iIj48YnIgY2xhc3M9IiI+DQo8L2Rpdj4NCjxkaXYgY2xh
+c3M9IiI+QW55IHN1Z2dlc3Rpb25zIGFyZSB3ZWxjb21lZC4gSG9wZSB0byBzZWUgeW91ciByZXBs
+aWVzLjwvZGl2Pg0KPGRpdiBjbGFzcz0iIj48YnIgY2xhc3M9IiI+DQo8L2Rpdj4NCjxkaXYgY2xh
+c3M9IiI+PGJyIGNsYXNzPSIiPg0KPC9kaXY+DQo8ZGl2IGNsYXNzPSIiPkNoZWVycyw8L2Rpdj4N
+CjxkaXYgY2xhc3M9IiI+Q2FuIFpIQU5HPC9kaXY+DQo8L2Rpdj4NCjxiciBjbGFzcz0iIj4NCl9f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fPGJyIGNsYXNzPSIi
+Pg0KY2VwaC11c2VycyBtYWlsaW5nIGxpc3Q8YnIgY2xhc3M9IiI+DQo8YSBocmVmPSJtYWlsdG86
+Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbSIgY2xhc3M9IiI+Y2VwaC11c2Vyc0BsaXN0cy5jZXBo
+LmNvbTwvYT48YnIgY2xhc3M9IiI+DQo8YSBocmVmPSJodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlz
+dGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20iIHJlbD0ibm9yZWZlcnJlciIgdGFyZ2V0PSJf
+YmxhbmsiIGNsYXNzPSIiPmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
+c2Vycy1jZXBoLmNvbTwvYT48YnIgY2xhc3M9IiI+DQo8YnIgY2xhc3M9IiI+DQo8L2Jsb2NrcXVv
+dGU+DQo8L2Rpdj4NCjxiciBjbGFzcz0iIj4NCjwvZGl2Pg0KPHNwYW4gaWQ9ImNpZDoxMjQ1OTky
+Ny0zMTY0LTQ5MzItOEU0Qi1FODFDODUwQjBGMjYiPiZsdDtTcmVlX2Vycm9yLnBuZyZndDs8L3Nw
+YW4+PC9kaXY+DQo8L2Jsb2NrcXVvdGU+DQo8L2Rpdj4NCjxiciBjbGFzcz0iIj4NCjwvYm9keT4N
+CjwvaHRtbD4NCg==
+
+--_000_BB527F386D274A42BF365C2F7AB94D35letvcom_--
+
+
+--===============1928690082==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:46722 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933200AbcECBQT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2016 21:16:19 -0400
-In-Reply-To: <alpine.LSU.2.20.1605021757210.21305@ancalagon.suse.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jesse Williamson <jwilliamson@suse.com>
-Cc: "Adam C. Emerson" <aemerson@redhat.com>, Sage Weil <sage@newdream.net>, Allen Samuels <Allen.Samuels@sandisk.com>, Ken Dreyer <kdreyer@redhat.com>, Haomai Wang <haomai@xsky.com>, ceph-devel@vger.kernel.org
+Content-Disposition: inline
 
-Hi Jesse,
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
------ Original Message -----
-> From: "Jesse Williamson" <jwilliamson@suse.com>
-> To: "Matt Benjamin" <mbenjamin@redhat.com>
-> Cc: "Adam C. Emerson" <aemerson@redhat.com>, "Sage Weil" <sage@newdream.net>, "Allen Samuels"
-> <Allen.Samuels@sandisk.com>, "Ken Dreyer" <kdreyer@redhat.com>, "Haomai Wang" <haomai@xsky.com>,
-> ceph-devel@vger.kernel.org
-> Sent: Monday, May 2, 2016 9:01:44 PM
-> Subject: Re: building boost statically
-> 
-> On Mon, 2 May 2016, Matt Benjamin wrote:
-> 
-> So, just a quick update here: I used bcp to extract boost containers. This
-> works nicely, but you end up with 1628 files. It's doing what it's
-> /supposed/ to do, since part of the purpose is to provide all the
-> dependencies (for example, Boost::MPL is used), but that seems like maybe
-> not what we want to do.
-
-Yes.  I experimented with this, but it didn't seem at all compact enough to be preferable to just building boost.  The latter, building just what Ceph uses from boost now, took less than a minute on a single core (i7).
-
-> 
-> Just using the boost/container headers is also possible, at a bit of risk
-> that if we try to build on a system where one of the dependencies is
-> incompatible in some way, Ceph won't build (perhaps a fairly low risk, but
-> I'm throwing it out there). If that risk is acceptable, then we wouldn't
-> have a large set of headers, but in effect would still be shipping our own
-> little mini-fork.
-
-I experimented with this also.  What I found was that the number of boost internal (including unexposed) dependencies is much larger than container.  This is a marvel of efficiency for the boost library internally, but isn't helpful for extracting a single like small_vector.  In particular, conflicts with an installed boost are many.
-
-> 
-> CMake looks like it has a module that can help us, and the general
-> direction during an IRC chat was that we should do this as part of the
-> move to cmake, rather than fidding with autoconf.
-
-That seems like a good idea.
-
-Matt
-
-> 
-> -Jesse
-> 
-> > Just wanted to ++ this.
-> >
-> > Matt
-> >
-> > ----- Original Message -----
-> >> From: "Adam C. Emerson" <aemerson@redhat.com>
-> >> To: "Jesse Williamson" <jwilliamson@suse.com>
-> >> Cc: "Sage Weil" <sage@newdream.net>, "Allen Samuels"
-> >> <Allen.Samuels@sandisk.com>, "Ken Dreyer" <kdreyer@redhat.com>,
-> >> "Haomai Wang" <haomai@xsky.com>, ceph-devel@vger.kernel.org
-> >> Sent: Monday, May 2, 2016 12:14:50 PM
-> >> Subject: Re: building boost statically
-> >>
-> >> On 02/05/2016, Jesse Williamson wrote:
-> >>> I think that in the long run, rather than bundling or using bcp, it would
-> >>> be
-> >>> nice to have cmake/autoconf let you point to the boost version you'd like
-> >>> to
-> >>> use.
-> >>
-> >> If we could manage it, that would be my ideal world. Rather than
-> >> making it A Submodule, say, if we could have cmake examine the system
-> >> boost to see what version it is and, if the version is greater than or
-> >> equal to the required version, just use it. Otherwise just fetch the
-> >> required version and build against it statically.
-> >>
-> >> --
-> >> Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-> >> IRC: Aemerson@{RedHat, OFTC, Freenode}
-> >> 0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >
-> > --
-> > Matt Benjamin
-> > Red Hat, Inc.
-> > 315 West Huron Street, Suite 140A
-> > Ann Arbor, Michigan 48103
-> >
-> > http://www.redhat.com/en/technologies/storage
-> >
-> > tel.  734-707-0660
-> > fax.  734-769-8938
-> > cel.  734-216-5309
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> >
-> 
-
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+--===============1928690082==--
