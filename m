@@ -1,57 +1,177 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: mon switch from leveldb to rocksdb
-Date: Tue, 3 May 2016 08:34:27 -0500
-Message-ID: <bee8107b-0d3e-3ebc-d029-ed27e0165137@redhat.com>
-References: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com>
- <5727A3DC.7070102@symas.com>
+From: Gaurav Bafna <bafnag@gmail.com>
+Subject: Bug in remapping of PG or config issue
+Date: Tue, 3 May 2016 19:40:49 +0530
+Message-ID: <CAPg135bi-XBdxQD64p0C6wNbXVXNuynvJYDPNMgTX4feF0xd5g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59018 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755643AbcECNea (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 3 May 2016 09:34:30 -0400
-In-Reply-To: <5727A3DC.7070102@symas.com>
+Received: from mail-oi0-f54.google.com ([209.85.218.54]:35662 "EHLO
+	mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755374AbcECOKu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 10:10:50 -0400
+Received: by mail-oi0-f54.google.com with SMTP id x19so26661268oix.2
+        for <ceph-devel@vger.kernel.org>; Tue, 03 May 2016 07:10:49 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Howard Chu <hyc@symas.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 05/02/2016 02:00 PM, Howard Chu wrote:
-> Sage Weil wrote:
->> 1) Thoughts on moving to rocksdb in general?
->
-> Are you actually prepared to undertake all of the measurement and tuning
-> required to make RocksDB actually work well? You're switching from an
-> (abandoned/unsupported) engine with only a handful of config parameters
-> to one with ~40-50 params, all of which have critical but unpredictable
-> impact on resource consumption and performance.
->
+Hi Cephers,
 
-You are absolutely correct, and there are definitely pitfalls we need to 
-watch out for with the number of tunables in rocksdb.  At least on the 
-performance side two of the big issues we've hit with leveldb compaction 
-related.  In some scenarios compaction happens slower than the number of 
-writes coming in resulting in ever-growing db sizes.  The other issue is 
-that compaction is single threaded and this can cause stalls and general 
-mayhem when things get really heavily loaded.  My hope is that if we do 
-go with rocksdb, even in a sub-optimally tuned state, we'll be better 
-off than we were with leveldb.
+In my dev-test cluster, after I kill 1 osd-daemon, the cluster never
+recovers fully. 9 PGs remain undersized for unknown reason. The issue
+is consistent. Every time I kill an osd, same PGs remain undersized.
 
-We did some very preliminary benchmarks a couple of years ago 
-(admittedly a too-small dataset size) basically comparing the (at the 
-time) stock ceph leveldb settings vs rocksdb.  On this set size, leveldb 
-looked much better for reads, but much worse for writes.  I suspect with 
-much larger data sets, the write issues will only compound with the 
-compaction issues and will start having a much bigger impact.
+After I restart that 1 osd deamon, the cluster recovers in no time .
+Or if I remove the osd, then also it recovers
 
-Indeed, if you look at the scatterplots for leveldb, you'll see a 
-regular set of high latency writes. In rocksdb we saw much better 
-looking write behavior, but overall reads were slower.  We didn't do any 
-real tuning to improve read performance in the leveled compaction tests, 
-but I think we'll be starting out in a much better place to improve them 
-than we are with leveldb.
+Size of all pools are 3 and min_size is 2.
 
-https://drive.google.com/file/d/0B2gTBZrkrnpZN3JFV3RZeVBPWlU/view?usp=sharing
+When I decrease the pool size to 2, the issue does not occur
 
-Mark
+Do you think that this might be a bug in Monitor Code or there is an
+issue in my Config ?
+
+
+
+
+Output of  "ceph -s"
+    cluster fac04d85-db48-4564-b821-deebda046261
+     health HEALTH_WARN
+            9 pgs degraded
+            9 pgs stuck degraded
+            9 pgs stuck unclean
+            9 pgs stuck undersized
+            9 pgs undersized
+            recovery 3327/195138 objects degraded (1.705%)
+            pool .users pg_num 512 > pgp_num 8
+     monmap e2: 2 mons at
+{dssmon2=10.140.13.13:6789/0,dssmonleader1=10.140.13.11:6789/0}
+            election epoch 1038, quorum 0,1 dssmonleader1,dssmon2
+     osdmap e857: 69 osds: 68 up, 68 in
+      pgmap v106601: 896 pgs, 9 pools, 435 MB data, 65047 objects
+            279 GB used, 247 TB / 247 TB avail
+            3327/195138 objects degraded (1.705%)
+                 887 active+clean
+                   9 active+undersized+degraded
+  client io 395 B/s rd, 0 B/s wr, 0 op/s
+
+ceph health detail output :
+
+HEALTH_WARN 9 pgs degraded; 9 pgs stuck degraded; 9 pgs stuck unclean;
+9 pgs stuck undersized; 9 pgs undersized; recovery 3327/195138 objects
+degraded (1.705%); pool .users pg_num 512 > pgp_num 8
+pg 7.a is stuck unclean for 322742.938959, current state
+active+undersized+degraded, last acting [38,2]
+pg 5.27 is stuck unclean for 322754.823455, current state
+active+undersized+degraded, last acting [26,19]
+pg 5.32 is stuck unclean for 322750.685684, current state
+active+undersized+degraded, last acting [39,19]
+pg 6.13 is stuck unclean for 322732.665345, current state
+active+undersized+degraded, last acting [30,16]
+pg 5.4e is stuck unclean for 331869.103538, current state
+active+undersized+degraded, last acting [16,38]
+pg 5.72 is stuck unclean for 331871.208948, current state
+active+undersized+degraded, last acting [16,49]
+pg 4.17 is stuck unclean for 331822.771240, current state
+active+undersized+degraded, last acting [47,20]
+pg 5.2c is stuck unclean for 323021.274535, current state
+active+undersized+degraded, last acting [47,18]
+pg 5.37 is stuck unclean for 323007.574395, current state
+active+undersized+degraded, last acting [43,1]
+pg 7.a is stuck undersized for 322487.284302, current state
+active+undersized+degraded, last acting [38,2]
+pg 5.27 is stuck undersized for 322487.287164, current state
+active+undersized+degraded, last acting [26,19]
+pg 5.32 is stuck undersized for 322487.285566, current state
+active+undersized+degraded, last acting [39,19]
+pg 6.13 is stuck undersized for 322487.287168, current state
+active+undersized+degraded, last acting [30,16]
+pg 5.4e is stuck undersized for 331351.476170, current state
+active+undersized+degraded, last acting [16,38]
+pg 5.72 is stuck undersized for 331351.475707, current state
+active+undersized+degraded, last acting [16,49]
+pg 4.17 is stuck undersized for 322487.280309, current state
+active+undersized+degraded, last acting [47,20]
+pg 5.2c is stuck undersized for 322487.286347, current state
+active+undersized+degraded, last acting [47,18]
+pg 5.37 is stuck undersized for 322487.280027, current state
+active+undersized+degraded, last acting [43,1]
+pg 7.a is stuck degraded for 322487.284340, current state
+active+undersized+degraded, last acting [38,2]
+pg 5.27 is stuck degraded for 322487.287202, current state
+active+undersized+degraded, last acting [26,19]
+pg 5.32 is stuck degraded for 322487.285604, current state
+active+undersized+degraded, last acting [39,19]
+pg 6.13 is stuck degraded for 322487.287207, current state
+active+undersized+degraded, last acting [30,16]
+pg 5.4e is stuck degraded for 331351.476209, current state
+active+undersized+degraded, last acting [16,38]
+pg 5.72 is stuck degraded for 331351.475746, current state
+active+undersized+degraded, last acting [16,49]
+pg 4.17 is stuck degraded for 322487.280348, current state
+active+undersized+degraded, last acting [47,20]
+pg 5.2c is stuck degraded for 322487.286386, current state
+active+undersized+degraded, last acting [47,18]
+pg 5.37 is stuck degraded for 322487.280066, current state
+active+undersized+degraded, last acting [43,1]
+pg 5.72 is active+undersized+degraded, acting [16,49]
+pg 5.4e is active+undersized+degraded, acting [16,38]
+pg 5.32 is active+undersized+degraded, acting [39,19]
+pg 5.37 is active+undersized+degraded, acting [43,1]
+pg 5.2c is active+undersized+degraded, acting [47,18]
+pg 5.27 is active+undersized+degraded, acting [26,19]
+pg 6.13 is active+undersized+degraded, acting [30,16]
+pg 4.17 is active+undersized+degraded, acting [47,20]
+pg 7.a is active+undersized+degraded, acting [38,2]
+recovery 3327/195138 objects degraded (1.705%)
+pool .users pg_num 512 > pgp_num 8
+
+
+My crush map is default.
+
+Ceph.conf is :
+
+[osd]
+osd mkfs type=xfs
+osd recovery threads=2
+osd disk thread ioprio class=idle
+osd disk thread ioprio priority=7
+osd journal=/var/lib/ceph/osd/ceph-$id/journal
+filestore flusher=False
+osd op num shards=3
+debug osd=5
+osd disk threads=2
+osd data=/var/lib/ceph/osd/ceph-$id
+osd op num threads per shard=5
+osd op threads=4
+keyring=/var/lib/ceph/osd/ceph-$id/keyring
+osd journal size=4096
+
+
+[global]
+filestore max sync interval=10
+auth cluster required=cephx
+osd pool default min size=3
+osd pool default size=3
+public network=10.140.13.0/26
+objecter inflight op_bytes=1073741824
+auth service required=cephx
+filestore min sync interval=1
+fsid=fac04d85-db48-4564-b821-deebda046261
+keyring=/etc/ceph/keyring
+cluster network=10.140.13.0/26
+auth client required=cephx
+filestore xattr use omap=True
+max open files=65536
+objecter inflight ops=2048
+osd pool default pg num=512
+log to syslog = true
+#err to syslog = true
+
+
+Complete pq query info at : http://pastebin.com/ZHB6M4PQ
+
+
+-- 
+Gaurav Bafna
+9540631400
