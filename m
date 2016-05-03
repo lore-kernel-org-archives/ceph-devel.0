@@ -1,76 +1,94 @@
-From: Victor Denisov <vdenisov@mirantis.com>
-Subject: Re: blueprint: consistency groups
-Date: Mon, 2 May 2016 17:26:04 -0700
-Message-ID: <CA+hcxJQGcDy96o0f9sEY8HwLXng9YzxsoKAhaaCuCDDhVbN76A@mail.gmail.com>
-References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
-	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
-	<20160325071933.GA14634@gmail.com>
-	<CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
-	<CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
-	<CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
-	<CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
-	<CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
-	<CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
-	<CA+aFP1C7me+-dbXVrMgU0Qs9fX8_4ocC9v5orzy+c8tK30y08A@mail.gmail.com>
-	<CA+hcxJT4DWgt8K8hc27KbkJK=DRePM18Zh=GPxtfR5afoxVP1w@mail.gmail.com>
+From: Jesse Williamson <jwilliamson@suse.com>
+Subject: Re: building boost statically
+Date: Mon, 2 May 2016 18:01:44 -0700 (PDT)
+Message-ID: <alpine.LSU.2.20.1605021757210.21305@ancalagon.suse.com>
+References: <alpine.DEB.2.11.1604281843520.25990@cpach.fuggernut.com> <alpine.DEB.2.11.1604292137110.26967@cpach.fuggernut.com> <BN3PR02MB1206983484A635905E9B630BE8670@BN3PR02MB1206.namprd02.prod.outlook.com> <alpine.LSU.2.20.1605010807200.21305@ancalagon.suse.com>
+ <alpine.DEB.2.11.1605011113510.26967@cpach.fuggernut.com> <20160502032831.GA8719@ultraspiritum.redhat.com> <alpine.LSU.2.20.1605020907510.21305@ancalagon.suse.com> <20160502161449.GA2654@ultraspiritum.redhat.com>
+ <2129674447.23940924.1462230258123.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII; format=flowed
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f176.google.com ([209.85.161.176]:34789 "EHLO
-	mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932578AbcECA0G (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2016 20:26:06 -0400
-Received: by mail-yw0-f176.google.com with SMTP id j74so4348227ywg.1
-        for <ceph-devel@vger.kernel.org>; Mon, 02 May 2016 17:26:05 -0700 (PDT)
-In-Reply-To: <CA+hcxJT4DWgt8K8hc27KbkJK=DRePM18Zh=GPxtfR5afoxVP1w@mail.gmail.com>
+Received: from prv3-mh.provo.novell.com ([137.65.250.26]:52017 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932452AbcECBBu (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Mon, 2 May 2016 21:01:50 -0400
+In-Reply-To: <2129674447.23940924.1462230258123.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: "Adam C. Emerson" <aemerson@redhat.com>, Sage Weil <sage@newdream.net>, Allen Samuels <Allen.Samuels@sandisk.com>, Ken Dreyer <kdreyer@redhat.com>, Haomai Wang <haomai@xsky.com>, ceph-devel@vger.kernel.org
 
-I have a question regarding the implementation of list images in a
-consistency group.
-For referencing images I use their ids and pool ids, since image's
-name and pool's name are subject to change.
-In order to list the images in a consistency group I have a function:
-cg_list_images.
-This function only returns ids and pool ids.
-I presume normally users would like to see names instead of ids.
-Everything in rbd class is written the way that it accepts ioctx.
-Which is a handle for accessing pool.
-It means(in my opinion) that everything in rbd class should accept
-ioctx. As such, I can't open another ioctx when I'm already inside rbd
-class.
-It leaves me no choice, but to implement image's name resolution in
-tools/rbd/action/ConsGrp.cc.
-In this case only command line users can have images' names, but not
-other services that use librbd library.
-Is it fine?
+On Mon, 2 May 2016, Matt Benjamin wrote:
 
-On Thu, Apr 28, 2016 at 11:06 AM, Victor Denisov <vdenisov@mirantis.com> wrote:
-> I created a pull request for preliminary review:
-> https://github.com/ceph/ceph/pull/8816
-> Please leave your comments if you have any. Currently it only has the
-> following operations implemented:
+So, just a quick update here: I used bcp to extract boost containers. This 
+works nicely, but you end up with 1628 files. It's doing what it's 
+/supposed/ to do, since part of the purpose is to provide all the 
+dependencies (for example, Boost::MPL is used), but that seems like maybe 
+not what we want to do.
+
+Just using the boost/container headers is also possible, at a bit of risk 
+that if we try to build on a system where one of the dependencies is 
+incompatible in some way, Ceph won't build (perhaps a fairly low risk, but 
+I'm throwing it out there). If that risk is acceptable, then we wouldn't 
+have a large set of headers, but in effect would still be shipping our own 
+little mini-fork.
+
+CMake looks like it has a module that can help us, and the general 
+direction during an IRC chat was that we should do this as part of the 
+move to cmake, rather than fidding with autoconf.
+
+-Jesse
+
+> Just wanted to ++ this.
 >
-> - create consistency group
-> - remove consistency group
-> - add image to consistency group
-> - remove image from consistency group
-> - list consistency groups
+> Matt
 >
->
-> On Wed, Apr 27, 2016 at 10:50 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->> On Tue, Apr 26, 2016 at 6:33 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>> One quick question: is image id unique across all pools? I'm
->>> referencing image using 'image_<image id>' key and then keeping pool
->>> id in the omap value.
->>> Is it safe?
+> ----- Original Message -----
+>> From: "Adam C. Emerson" <aemerson@redhat.com>
+>> To: "Jesse Williamson" <jwilliamson@suse.com>
+>> Cc: "Sage Weil" <sage@newdream.net>, "Allen Samuels" <Allen.Samuels@sandisk.com>, "Ken Dreyer" <kdreyer@redhat.com>,
+>> "Haomai Wang" <haomai@xsky.com>, ceph-devel@vger.kernel.org
+>> Sent: Monday, May 2, 2016 12:14:50 PM
+>> Subject: Re: building boost statically
 >>
+>> On 02/05/2016, Jesse Williamson wrote:
+>>> I think that in the long run, rather than bundling or using bcp, it would
+>>> be
+>>> nice to have cmake/autoconf let you point to the boost version you'd like
+>>> to
+>>> use.
 >>
->> No -- the image id is only guaranteed to be unique within the pool
->> that owns the image.  You can use the pool id in combination with the
->> image id to form a unique key.
+>> If we could manage it, that would be my ideal world. Rather than
+>> making it A Submodule, say, if we could have cmake examine the system
+>> boost to see what version it is and, if the version is greater than or
+>> equal to the required version, just use it. Otherwise just fetch the
+>> required version and build against it statically.
 >>
 >> --
->> Jason
+>> Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+>> IRC: Aemerson@{RedHat, OFTC, Freenode}
+>> 0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> -- 
+> Matt Benjamin
+> Red Hat, Inc.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+>
+> http://www.redhat.com/en/technologies/storage
+>
+> tel.  734-707-0660
+> fax.  734-769-8938
+> cel.  734-216-5309
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
