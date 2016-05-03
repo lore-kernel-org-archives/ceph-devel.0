@@ -1,84 +1,81 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: building boost statically
-Date: Tue, 3 May 2016 10:28:05 -0600
-Message-ID: <CAANLjFp-mBz3Rzuv6DDR6mdaCQ9Lf5GLaEd9Rk30--uQWQQ-ug@mail.gmail.com>
-References: <alpine.DEB.2.11.1604281843520.25990@cpach.fuggernut.com>
-	<CACJqLyYtBQ8N95BHSH48AD-XexCx+QU9XB8djvomH_rer1tn+w@mail.gmail.com>
-	<CALqRxCyQkBPF0t7RcYzhcFZCzEeviAyL+XeQU0Dr+An1Tx5s4Q@mail.gmail.com>
-	<alpine.DEB.2.11.1604292137110.26967@cpach.fuggernut.com>
-	<BN3PR02MB1206983484A635905E9B630BE8670@BN3PR02MB1206.namprd02.prod.outlook.com>
-	<alpine.LSU.2.20.1605010807200.21305@ancalagon.suse.com>
-	<alpine.DEB.2.11.1605011113510.26967@cpach.fuggernut.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: mon switch from leveldb to rocksdb
+Date: Tue, 3 May 2016 09:41:01 -0700
+Message-ID: <CAJ4mKGbsJBk_8N8tkmqhYOipXXQC-LdiV=XOZ8S22HCCXh8_OA@mail.gmail.com>
+References: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com>
+	<5727A3DC.7070102@symas.com>
+	<bee8107b-0d3e-3ebc-d029-ed27e0165137@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f51.google.com ([209.85.218.51]:33758 "EHLO
-	mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932543AbcECQ2G (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 12:28:06 -0400
-Received: by mail-oi0-f51.google.com with SMTP id v145so32732304oie.0
-        for <ceph-devel@vger.kernel.org>; Tue, 03 May 2016 09:28:06 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1605011113510.26967@cpach.fuggernut.com>
+Received: from mail-yw0-f179.google.com ([209.85.161.179]:36372 "EHLO
+	mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933972AbcECQlD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 12:41:03 -0400
+Received: by mail-yw0-f179.google.com with SMTP id o66so28125664ywc.3
+        for <ceph-devel@vger.kernel.org>; Tue, 03 May 2016 09:41:02 -0700 (PDT)
+In-Reply-To: <bee8107b-0d3e-3ebc-d029-ed27e0165137@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Jesse Williamson <jwilliamson@suse.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Ken Dreyer <kdreyer@redhat.com>, Haomai Wang <haomai@xsky.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: Howard Chu <hyc@symas.com>, Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
-
-I really wanted to use intrusive maps that was in boost 1.59 for the
-WPQ. So I think there are multiple places that could leverage the new
-boost features if it were available.
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.3.6
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJXKNGPCRDmVDuy+mK58QAAr3cP+wbXVtaBFTkvJQSAH+TQ
-5C8NOQcmph0Nmf/tL9byox8USML8OS4RiKh2EI6MnbRLa6ZrE65irnkBEXX3
-b+OM1JysNbLnyo+myTn7MEtGfjQCG4rsm0JtHX69cs35kLRtLdvRj7YTiWkf
-MWjt9nIuiLDWJH9TyhO9aBQp+t52m3u1Lxrl7XL9ie7vFq8eQp4yXvESvj9t
-5xawxNp3xaDLZHt48qA2kmuA1S9oqymqNWJU4yqeKqZY1OtGE1FN5bg1cn0d
-ApvuI250jyWEV0pjyp0T8Auq+E0x7+Fn52FRfyZzMNO3FeRzAMn+y2z8djT9
-XHf6j3Y/PAF9udASVguaUHPg4OnUihM+ffGmMCkSrpoNcc/cWRpB8bRyG/12
-UKbwwREYQ+UhENohoblkl3zTqn3E7891/d34mObcmZUQKy5i5i1l+wl33cZO
-NtXY/xC567kXAUv1zKEx+2bSUhQTtA4rJh7Kqrgk/lyJrNozRsK3lhQbucx7
-a45VA2GW9RqI9zX9GSiDDZiZinOMExcN+E+5DadsdeOPGqswE7lgmDF7BH0L
-TIJjnr+4r4vSQ+4/8OEHP05Gh5OZv5p/penzF+LCvkboYDDZGfwwbfbNE04P
-96An6l8Yf+L2XbhJfptR0155zjhyBRCvm8FK8M6O/3BckSDEC7IvYVMVgp1F
-RB99
-=SK2q
------END PGP SIGNATURE-----
-----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-
-
-On Sun, May 1, 2016 at 9:14 AM, Sage Weil <sage@newdream.net> wrote:
-> On Sun, 1 May 2016, Jesse Williamson wrote:
->> On Sat, 30 Apr 2016, Allen Samuels wrote:
+On Tue, May 3, 2016 at 6:34 AM, Mark Nelson <mnelson@redhat.com> wrote:
+> On 05/02/2016 02:00 PM, Howard Chu wrote:
 >>
->> > Let's not wait.
->> >
->> > As another option. If all we're looking for is "small_vector", then I looked
->> > at taking the equivalent out of the Folly library a while ago. It looked
->> > like it would be relatively easy to hack up the one header file to make it
->> > standalone.
+>> Sage Weil wrote:
+>>>
+>>> 1) Thoughts on moving to rocksdb in general?
 >>
->> There's a utility in boost, "bcp", that might be useful:
 >>
->> http://www.boost.org/doc/libs/1_60_0/tools/bcp/doc/html/index.html
+>> Are you actually prepared to undertake all of the measurement and tu=
+ning
+>> required to make RocksDB actually work well? You're switching from a=
+n
+>> (abandoned/unsupported) engine with only a handful of config paramet=
+ers
+>> to one with ~40-50 params, all of which have critical but unpredicta=
+ble
+>> impact on resource consumption and performance.
+>>
 >
-> Given that this is the only piece we want immediately (that i know of),
-> that there would be significant work to either pull boost inline as a
-> submodule *or* to build and ship a proper package, let's go the bcp route
-> for now.
+> You are absolutely correct, and there are definitely pitfalls we need=
+ to
+> watch out for with the number of tunables in rocksdb.  At least on th=
+e
+> performance side two of the big issues we've hit with leveldb compact=
+ion
+> related.  In some scenarios compaction happens slower than the number=
+ of
+> writes coming in resulting in ever-growing db sizes.  The other issue=
+ is
+> that compaction is single threaded and this can cause stalls and gene=
+ral
+> mayhem when things get really heavily loaded.  My hope is that if we =
+do go
+> with rocksdb, even in a sub-optimally tuned state, we'll be better of=
+f than
+> we were with leveldb.
 >
-> Jesse, is this something you can tackle?
->
-> Thanks!
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> We did some very preliminary benchmarks a couple of years ago (admitt=
+edly a
+> too-small dataset size) basically comparing the (at the time) stock c=
+eph
+> leveldb settings vs rocksdb.  On this set size, leveldb looked much b=
+etter
+> for reads, but much worse for writes.
+
+That's actually a bit troubling =E2=80=94 many of our monitor problems =
+have
+arisen from slow reads, rather than slow writes. I suspect we want to
+eliminate this before switching, if it's a concern.
+
+=2E..Although I think I did see a monitor caching layer go by, so maybe
+it's a moot point now?
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
