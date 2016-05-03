@@ -1,57 +1,57 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: trello backlog
-Date: Tue, 3 May 2016 09:29:18 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605030925310.26967@cpach.fuggernut.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: mon switch from leveldb to rocksdb
+Date: Tue, 3 May 2016 08:34:27 -0500
+Message-ID: <bee8107b-0d3e-3ebc-d029-ed27e0165137@redhat.com>
+References: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com>
+ <5727A3DC.7070102@symas.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60844 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59018 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755546AbcECN3K (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 3 May 2016 09:29:10 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 6F8ACC06C9E6
-	for <ceph-devel@vger.kernel.org>; Tue,  3 May 2016 13:29:09 +0000 (UTC)
-Received: from cpach ([10.3.112.6])
-	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u43DT6Xu012566
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Tue, 3 May 2016 09:29:08 -0400
+	id S1755643AbcECNea (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 3 May 2016 09:34:30 -0400
+In-Reply-To: <5727A3DC.7070102@symas.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Howard Chu <hyc@symas.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-Hi everyone,
+On 05/02/2016 02:00 PM, Howard Chu wrote:
+> Sage Weil wrote:
+>> 1) Thoughts on moving to rocksdb in general?
+>
+> Are you actually prepared to undertake all of the measurement and tuning
+> required to make RocksDB actually work well? You're switching from an
+> (abandoned/unsupported) engine with only a handful of config parameters
+> to one with ~40-50 params, all of which have critical but unpredictable
+> impact on resource consumption and performance.
+>
 
-We have a zillion tickets in tracker.ceph.com, but the interface is 
-frustrating enough and there is enough cruft there that it is no 
-particularly useful for keeping track of the important *high-level* 
-features we need to work on.  I find myself making ad hoc lists in random 
-places for my own personal use instead.
+You are absolutely correct, and there are definitely pitfalls we need to 
+watch out for with the number of tunables in rocksdb.  At least on the 
+performance side two of the big issues we've hit with leveldb compaction 
+related.  In some scenarios compaction happens slower than the number of 
+writes coming in resulting in ever-growing db sizes.  The other issue is 
+that compaction is single threaded and this can cause stalls and general 
+mayhem when things get really heavily loaded.  My hope is that if we do 
+go with rocksdb, even in a sub-optimally tuned state, we'll be better 
+off than we were with leveldb.
 
-In a similar vein, ages ago we tried to create a "chum bucket" with 
-bite-size introductory projects to help get users started contributing 
-code.  This fizzled out, I think mainly because the list was in its own 
-special place where developers don't look on a day to day basis, which 
-meant the list quickly aged and new ideas didn't get added as a matter of 
-course.
+We did some very preliminary benchmarks a couple of years ago 
+(admittedly a too-small dataset size) basically comparing the (at the 
+time) stock ceph leveldb settings vs rocksdb.  On this set size, leveldb 
+looked much better for reads, but much worse for writes.  I suspect with 
+much larger data sets, the write issues will only compound with the 
+compaction issues and will start having a much bigger impact.
 
-I'm hoping that we can address both issues by using a more friendly tool.  
-To that end, I created a trello board for the upstream ceph backlog.  It's 
-publicly readable and available at
+Indeed, if you look at the scatterplots for leveldb, you'll see a 
+regular set of high latency writes. In rocksdb we saw much better 
+looking write behavior, but overall reads were slower.  We didn't do any 
+real tuning to improve read performance in the leveled compaction tests, 
+but I think we'll be starting out in a much better place to improve them 
+than we are with leveldb.
 
-        https://trello.com/b/ugTc2QFH/ceph-backlog
+https://drive.google.com/file/d/0B2gTBZrkrnpZN3JFV3RZeVBPWlU/view?usp=sharing
 
-If you are an active developer, ping me and I'll send you an invite URL 
-to add you to the Ceph org (to get write access to the board).
-
-I'm not sure how helpful this will be, and I'm generally skeptical of tool 
-proliferation.  OTOH, trello is super-lightweight, and even if we only use 
-this for little stuff (like chum) I suspect it will be a win.
-
-We can also create other boards within the ceph org for other subprojects 
-that need more granular tracking (e.g., the transition to cmake, which is 
-currently tracked on an etherpad and in Ali's head).
-
-sage
+Mark
