@@ -1,215 +1,176 @@
-From: Gaurav Bafna <bafnag@gmail.com>
-Subject: Re: Bug in remapping of PG or config issue
-Date: Tue, 3 May 2016 20:05:09 +0530
-Message-ID: <CAPg135aqLNmWM5CAzcN3=uhw3s6xstWt6qD-ikbmqfosnbhLTQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bug in remapping of PG or config issue
+Date: Tue, 3 May 2016 14:47:45 +0000
+Message-ID: <BL2PR02MB21154E9D51C851F9EE6620BEF47A0@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <CAPg135bi-XBdxQD64p0C6wNbXVXNuynvJYDPNMgTX4feF0xd5g@mail.gmail.com>
 	<FA1EC2C4-2537-4031-88E9-6CABE1DD05B4@sandisk.com>
+ <CAPg135aqLNmWM5CAzcN3=uhw3s6xstWt6qD-ikbmqfosnbhLTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f54.google.com ([209.85.218.54]:33807 "EHLO
-	mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755495AbcECOfK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 10:35:10 -0400
-Received: by mail-oi0-f54.google.com with SMTP id k142so27831582oib.1
-        for <ceph-devel@vger.kernel.org>; Tue, 03 May 2016 07:35:10 -0700 (PDT)
-In-Reply-To: <FA1EC2C4-2537-4031-88E9-6CABE1DD05B4@sandisk.com>
+Received: from mail-bn1bon0059.outbound.protection.outlook.com ([157.56.111.59]:58912
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S933533AbcECPCD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 3 May 2016 11:02:03 -0400
+In-Reply-To: <CAPg135aqLNmWM5CAzcN3=uhw3s6xstWt6qD-ikbmqfosnbhLTQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Gaurav Bafna <bafnag@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Somnath,
-
-Thanks for your reply.
-
-Yes , I did wait.  The condition of the cluster is same for 2 days.
-The OSD was marked down and out. Out of many PGs (around 65)  on which
-that osd was on , only some (9) were not recovered .
-
-Thanks
-Gaurav
-
-On Tue, May 3, 2016 at 7:50 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> You need to wait sometime (configurable) before cluster makes the odd out to kick of recovery or you can manually make down osd out to start recovery..
-> This should be the behavior for pool size 2 as well, not sure how it started recovery instantly there..
->
-> Thanks & Regards
-> Somnath
->
-> Sent from my iPhone
->
->> On May 3, 2016, at 7:11 AM, Gaurav Bafna <bafnag@gmail.com> wrote:
->>
->> Hi Cephers,
->>
->> In my dev-test cluster, after I kill 1 osd-daemon, the cluster never
->> recovers fully. 9 PGs remain undersized for unknown reason. The issue
->> is consistent. Every time I kill an osd, same PGs remain undersized.
->>
->> After I restart that 1 osd deamon, the cluster recovers in no time .
->> Or if I remove the osd, then also it recovers
->>
->> Size of all pools are 3 and min_size is 2.
->>
->> When I decrease the pool size to 2, the issue does not occur
->>
->> Do you think that this might be a bug in Monitor Code or there is an
->> issue in my Config ?
->>
->>
->>
->>
->> Output of  "ceph -s"
->>    cluster fac04d85-db48-4564-b821-deebda046261
->>     health HEALTH_WARN
->>            9 pgs degraded
->>            9 pgs stuck degraded
->>            9 pgs stuck unclean
->>            9 pgs stuck undersized
->>            9 pgs undersized
->>            recovery 3327/195138 objects degraded (1.705%)
->>            pool .users pg_num 512 > pgp_num 8
->>     monmap e2: 2 mons at
->> {dssmon2=10.140.13.13:6789/0,dssmonleader1=10.140.13.11:6789/0}
->>            election epoch 1038, quorum 0,1 dssmonleader1,dssmon2
->>     osdmap e857: 69 osds: 68 up, 68 in
->>      pgmap v106601: 896 pgs, 9 pools, 435 MB data, 65047 objects
->>            279 GB used, 247 TB / 247 TB avail
->>            3327/195138 objects degraded (1.705%)
->>                 887 active+clean
->>                   9 active+undersized+degraded
->>  client io 395 B/s rd, 0 B/s wr, 0 op/s
->>
->> ceph health detail output :
->>
->> HEALTH_WARN 9 pgs degraded; 9 pgs stuck degraded; 9 pgs stuck unclean;
->> 9 pgs stuck undersized; 9 pgs undersized; recovery 3327/195138 objects
->> degraded (1.705%); pool .users pg_num 512 > pgp_num 8
->> pg 7.a is stuck unclean for 322742.938959, current state
->> active+undersized+degraded, last acting [38,2]
->> pg 5.27 is stuck unclean for 322754.823455, current state
->> active+undersized+degraded, last acting [26,19]
->> pg 5.32 is stuck unclean for 322750.685684, current state
->> active+undersized+degraded, last acting [39,19]
->> pg 6.13 is stuck unclean for 322732.665345, current state
->> active+undersized+degraded, last acting [30,16]
->> pg 5.4e is stuck unclean for 331869.103538, current state
->> active+undersized+degraded, last acting [16,38]
->> pg 5.72 is stuck unclean for 331871.208948, current state
->> active+undersized+degraded, last acting [16,49]
->> pg 4.17 is stuck unclean for 331822.771240, current state
->> active+undersized+degraded, last acting [47,20]
->> pg 5.2c is stuck unclean for 323021.274535, current state
->> active+undersized+degraded, last acting [47,18]
->> pg 5.37 is stuck unclean for 323007.574395, current state
->> active+undersized+degraded, last acting [43,1]
->> pg 7.a is stuck undersized for 322487.284302, current state
->> active+undersized+degraded, last acting [38,2]
->> pg 5.27 is stuck undersized for 322487.287164, current state
->> active+undersized+degraded, last acting [26,19]
->> pg 5.32 is stuck undersized for 322487.285566, current state
->> active+undersized+degraded, last acting [39,19]
->> pg 6.13 is stuck undersized for 322487.287168, current state
->> active+undersized+degraded, last acting [30,16]
->> pg 5.4e is stuck undersized for 331351.476170, current state
->> active+undersized+degraded, last acting [16,38]
->> pg 5.72 is stuck undersized for 331351.475707, current state
->> active+undersized+degraded, last acting [16,49]
->> pg 4.17 is stuck undersized for 322487.280309, current state
->> active+undersized+degraded, last acting [47,20]
->> pg 5.2c is stuck undersized for 322487.286347, current state
->> active+undersized+degraded, last acting [47,18]
->> pg 5.37 is stuck undersized for 322487.280027, current state
->> active+undersized+degraded, last acting [43,1]
->> pg 7.a is stuck degraded for 322487.284340, current state
->> active+undersized+degraded, last acting [38,2]
->> pg 5.27 is stuck degraded for 322487.287202, current state
->> active+undersized+degraded, last acting [26,19]
->> pg 5.32 is stuck degraded for 322487.285604, current state
->> active+undersized+degraded, last acting [39,19]
->> pg 6.13 is stuck degraded for 322487.287207, current state
->> active+undersized+degraded, last acting [30,16]
->> pg 5.4e is stuck degraded for 331351.476209, current state
->> active+undersized+degraded, last acting [16,38]
->> pg 5.72 is stuck degraded for 331351.475746, current state
->> active+undersized+degraded, last acting [16,49]
->> pg 4.17 is stuck degraded for 322487.280348, current state
->> active+undersized+degraded, last acting [47,20]
->> pg 5.2c is stuck degraded for 322487.286386, current state
->> active+undersized+degraded, last acting [47,18]
->> pg 5.37 is stuck degraded for 322487.280066, current state
->> active+undersized+degraded, last acting [43,1]
->> pg 5.72 is active+undersized+degraded, acting [16,49]
->> pg 5.4e is active+undersized+degraded, acting [16,38]
->> pg 5.32 is active+undersized+degraded, acting [39,19]
->> pg 5.37 is active+undersized+degraded, acting [43,1]
->> pg 5.2c is active+undersized+degraded, acting [47,18]
->> pg 5.27 is active+undersized+degraded, acting [26,19]
->> pg 6.13 is active+undersized+degraded, acting [30,16]
->> pg 4.17 is active+undersized+degraded, acting [47,20]
->> pg 7.a is active+undersized+degraded, acting [38,2]
->> recovery 3327/195138 objects degraded (1.705%)
->> pool .users pg_num 512 > pgp_num 8
->>
->>
->> My crush map is default.
->>
->> Ceph.conf is :
->>
->> [osd]
->> osd mkfs type=xfs
->> osd recovery threads=2
->> osd disk thread ioprio class=idle
->> osd disk thread ioprio priority=7
->> osd journal=/var/lib/ceph/osd/ceph-$id/journal
->> filestore flusher=False
->> osd op num shards=3
->> debug osd=5
->> osd disk threads=2
->> osd data=/var/lib/ceph/osd/ceph-$id
->> osd op num threads per shard=5
->> osd op threads=4
->> keyring=/var/lib/ceph/osd/ceph-$id/keyring
->> osd journal size=4096
->>
->>
->> [global]
->> filestore max sync interval=10
->> auth cluster required=cephx
->> osd pool default min size=3
->> osd pool default size=3
->> public network=10.140.13.0/26
->> objecter inflight op_bytes=1073741824
->> auth service required=cephx
->> filestore min sync interval=1
->> fsid=fac04d85-db48-4564-b821-deebda046261
->> keyring=/etc/ceph/keyring
->> cluster network=10.140.13.0/26
->> auth client required=cephx
->> filestore xattr use omap=True
->> max open files=65536
->> objecter inflight ops=2048
->> osd pool default pg num=512
->> log to syslog = true
->> #err to syslog = true
->>
->>
->> Complete pq query info at : http://pastebin.com/ZHB6M4PQ
->>
->>
->> --
->> Gaurav Bafna
->> 9540631400
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
-
-
--- 
-Gaurav Bafna
-9540631400
+T2hoLCBvay4uDQpUaGUgZm9sbG93aW5nIGNvbW1hbmRzIGdpdmluZyBhbnkgdXNlZnVsIGluZm9y
+bWF0aW9uIG91dCA/DQoNCkNlcGggaGVhbHRoIGRldGFpbA0KQ2VwaCBwZyBxdWVyeSANCg0KVGhh
+bmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJv
+bTogR2F1cmF2IEJhZm5hIFttYWlsdG86YmFmbmFnQGdtYWlsLmNvbV0gDQpTZW50OiBUdWVzZGF5
+LCBNYXkgMDMsIDIwMTYgNzozNSBBTQ0KVG86IFNvbW5hdGggUm95DQpDYzogY2VwaC1kZXZlbEB2
+Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBCdWcgaW4gcmVtYXBwaW5nIG9mIFBHIG9yIGNv
+bmZpZyBpc3N1ZQ0KDQpIaSBTb21uYXRoLA0KDQpUaGFua3MgZm9yIHlvdXIgcmVwbHkuDQoNClll
+cyAsIEkgZGlkIHdhaXQuICBUaGUgY29uZGl0aW9uIG9mIHRoZSBjbHVzdGVyIGlzIHNhbWUgZm9y
+IDIgZGF5cy4NClRoZSBPU0Qgd2FzIG1hcmtlZCBkb3duIGFuZCBvdXQuIE91dCBvZiBtYW55IFBH
+cyAoYXJvdW5kIDY1KSAgb24gd2hpY2ggdGhhdCBvc2Qgd2FzIG9uICwgb25seSBzb21lICg5KSB3
+ZXJlIG5vdCByZWNvdmVyZWQgLg0KDQpUaGFua3MNCkdhdXJhdg0KDQpPbiBUdWUsIE1heSAzLCAy
+MDE2IGF0IDc6NTAgUE0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3Jv
+dGU6DQo+IFlvdSBuZWVkIHRvIHdhaXQgc29tZXRpbWUgKGNvbmZpZ3VyYWJsZSkgYmVmb3JlIGNs
+dXN0ZXIgbWFrZXMgdGhlIG9kZCBvdXQgdG8ga2ljayBvZiByZWNvdmVyeSBvciB5b3UgY2FuIG1h
+bnVhbGx5IG1ha2UgZG93biBvc2Qgb3V0IHRvIHN0YXJ0IHJlY292ZXJ5Li4NCj4gVGhpcyBzaG91
+bGQgYmUgdGhlIGJlaGF2aW9yIGZvciBwb29sIHNpemUgMiBhcyB3ZWxsLCBub3Qgc3VyZSBob3cg
+aXQgc3RhcnRlZCByZWNvdmVyeSBpbnN0YW50bHkgdGhlcmUuLg0KPg0KPiBUaGFua3MgJiBSZWdh
+cmRzDQo+IFNvbW5hdGgNCj4NCj4gU2VudCBmcm9tIG15IGlQaG9uZQ0KPg0KPj4gT24gTWF5IDMs
+IDIwMTYsIGF0IDc6MTEgQU0sIEdhdXJhdiBCYWZuYSA8YmFmbmFnQGdtYWlsLmNvbT4gd3JvdGU6
+DQo+Pg0KPj4gSGkgQ2VwaGVycywNCj4+DQo+PiBJbiBteSBkZXYtdGVzdCBjbHVzdGVyLCBhZnRl
+ciBJIGtpbGwgMSBvc2QtZGFlbW9uLCB0aGUgY2x1c3RlciBuZXZlciANCj4+IHJlY292ZXJzIGZ1
+bGx5LiA5IFBHcyByZW1haW4gdW5kZXJzaXplZCBmb3IgdW5rbm93biByZWFzb24uIFRoZSBpc3N1
+ZSANCj4+IGlzIGNvbnNpc3RlbnQuIEV2ZXJ5IHRpbWUgSSBraWxsIGFuIG9zZCwgc2FtZSBQR3Mg
+cmVtYWluIHVuZGVyc2l6ZWQuDQo+Pg0KPj4gQWZ0ZXIgSSByZXN0YXJ0IHRoYXQgMSBvc2QgZGVh
+bW9uLCB0aGUgY2x1c3RlciByZWNvdmVycyBpbiBubyB0aW1lIC4NCj4+IE9yIGlmIEkgcmVtb3Zl
+IHRoZSBvc2QsIHRoZW4gYWxzbyBpdCByZWNvdmVycw0KPj4NCj4+IFNpemUgb2YgYWxsIHBvb2xz
+IGFyZSAzIGFuZCBtaW5fc2l6ZSBpcyAyLg0KPj4NCj4+IFdoZW4gSSBkZWNyZWFzZSB0aGUgcG9v
+bCBzaXplIHRvIDIsIHRoZSBpc3N1ZSBkb2VzIG5vdCBvY2N1cg0KPj4NCj4+IERvIHlvdSB0aGlu
+ayB0aGF0IHRoaXMgbWlnaHQgYmUgYSBidWcgaW4gTW9uaXRvciBDb2RlIG9yIHRoZXJlIGlzIGFu
+IA0KPj4gaXNzdWUgaW4gbXkgQ29uZmlnID8NCj4+DQo+Pg0KPj4NCj4+DQo+PiBPdXRwdXQgb2Yg
+ICJjZXBoIC1zIg0KPj4gICAgY2x1c3RlciBmYWMwNGQ4NS1kYjQ4LTQ1NjQtYjgyMS1kZWViZGEw
+NDYyNjENCj4+ICAgICBoZWFsdGggSEVBTFRIX1dBUk4NCj4+ICAgICAgICAgICAgOSBwZ3MgZGVn
+cmFkZWQNCj4+ICAgICAgICAgICAgOSBwZ3Mgc3R1Y2sgZGVncmFkZWQNCj4+ICAgICAgICAgICAg
+OSBwZ3Mgc3R1Y2sgdW5jbGVhbg0KPj4gICAgICAgICAgICA5IHBncyBzdHVjayB1bmRlcnNpemVk
+DQo+PiAgICAgICAgICAgIDkgcGdzIHVuZGVyc2l6ZWQNCj4+ICAgICAgICAgICAgcmVjb3Zlcnkg
+MzMyNy8xOTUxMzggb2JqZWN0cyBkZWdyYWRlZCAoMS43MDUlKQ0KPj4gICAgICAgICAgICBwb29s
+IC51c2VycyBwZ19udW0gNTEyID4gcGdwX251bSA4DQo+PiAgICAgbW9ubWFwIGUyOiAyIG1vbnMg
+YXQNCj4+IHtkc3Ntb24yPTEwLjE0MC4xMy4xMzo2Nzg5LzAsZHNzbW9ubGVhZGVyMT0xMC4xNDAu
+MTMuMTE6Njc4OS8wfQ0KPj4gICAgICAgICAgICBlbGVjdGlvbiBlcG9jaCAxMDM4LCBxdW9ydW0g
+MCwxIGRzc21vbmxlYWRlcjEsZHNzbW9uMg0KPj4gICAgIG9zZG1hcCBlODU3OiA2OSBvc2RzOiA2
+OCB1cCwgNjggaW4NCj4+ICAgICAgcGdtYXAgdjEwNjYwMTogODk2IHBncywgOSBwb29scywgNDM1
+IE1CIGRhdGEsIDY1MDQ3IG9iamVjdHMNCj4+ICAgICAgICAgICAgMjc5IEdCIHVzZWQsIDI0NyBU
+QiAvIDI0NyBUQiBhdmFpbA0KPj4gICAgICAgICAgICAzMzI3LzE5NTEzOCBvYmplY3RzIGRlZ3Jh
+ZGVkICgxLjcwNSUpDQo+PiAgICAgICAgICAgICAgICAgODg3IGFjdGl2ZStjbGVhbg0KPj4gICAg
+ICAgICAgICAgICAgICAgOSBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZCAgY2xpZW50IGlvIDM5
+NSBCL3MgcmQsIA0KPj4gMCBCL3Mgd3IsIDAgb3Avcw0KPj4NCj4+IGNlcGggaGVhbHRoIGRldGFp
+bCBvdXRwdXQgOg0KPj4NCj4+IEhFQUxUSF9XQVJOIDkgcGdzIGRlZ3JhZGVkOyA5IHBncyBzdHVj
+ayBkZWdyYWRlZDsgOSBwZ3Mgc3R1Y2sgDQo+PiB1bmNsZWFuOw0KPj4gOSBwZ3Mgc3R1Y2sgdW5k
+ZXJzaXplZDsgOSBwZ3MgdW5kZXJzaXplZDsgcmVjb3ZlcnkgMzMyNy8xOTUxMzggDQo+PiBvYmpl
+Y3RzIGRlZ3JhZGVkICgxLjcwNSUpOyBwb29sIC51c2VycyBwZ19udW0gNTEyID4gcGdwX251bSA4
+IHBnIDcuYSANCj4+IGlzIHN0dWNrIHVuY2xlYW4gZm9yIDMyMjc0Mi45Mzg5NTksIGN1cnJlbnQg
+c3RhdGUNCj4+IGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCBsYXN0IGFjdGluZyBbMzgsMl0N
+Cj4+IHBnIDUuMjcgaXMgc3R1Y2sgdW5jbGVhbiBmb3IgMzIyNzU0LjgyMzQ1NSwgY3VycmVudCBz
+dGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0aW5nIFsyNiwxOV0N
+Cj4+IHBnIDUuMzIgaXMgc3R1Y2sgdW5jbGVhbiBmb3IgMzIyNzUwLjY4NTY4NCwgY3VycmVudCBz
+dGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0aW5nIFszOSwxOV0N
+Cj4+IHBnIDYuMTMgaXMgc3R1Y2sgdW5jbGVhbiBmb3IgMzIyNzMyLjY2NTM0NSwgY3VycmVudCBz
+dGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0aW5nIFszMCwxNl0N
+Cj4+IHBnIDUuNGUgaXMgc3R1Y2sgdW5jbGVhbiBmb3IgMzMxODY5LjEwMzUzOCwgY3VycmVudCBz
+dGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0aW5nIFsxNiwzOF0N
+Cj4+IHBnIDUuNzIgaXMgc3R1Y2sgdW5jbGVhbiBmb3IgMzMxODcxLjIwODk0OCwgY3VycmVudCBz
+dGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0aW5nIFsxNiw0OV0N
+Cj4+IHBnIDQuMTcgaXMgc3R1Y2sgdW5jbGVhbiBmb3IgMzMxODIyLjc3MTI0MCwgY3VycmVudCBz
+dGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0aW5nIFs0NywyMF0N
+Cj4+IHBnIDUuMmMgaXMgc3R1Y2sgdW5jbGVhbiBmb3IgMzIzMDIxLjI3NDUzNSwgY3VycmVudCBz
+dGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0aW5nIFs0NywxOF0N
+Cj4+IHBnIDUuMzcgaXMgc3R1Y2sgdW5jbGVhbiBmb3IgMzIzMDA3LjU3NDM5NSwgY3VycmVudCBz
+dGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0aW5nIFs0MywxXQ0K
+Pj4gcGcgNy5hIGlzIHN0dWNrIHVuZGVyc2l6ZWQgZm9yIDMyMjQ4Ny4yODQzMDIsIGN1cnJlbnQg
+c3RhdGUNCj4+IGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCBsYXN0IGFjdGluZyBbMzgsMl0N
+Cj4+IHBnIDUuMjcgaXMgc3R1Y2sgdW5kZXJzaXplZCBmb3IgMzIyNDg3LjI4NzE2NCwgY3VycmVu
+dCBzdGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0aW5nIFsyNiwx
+OV0NCj4+IHBnIDUuMzIgaXMgc3R1Y2sgdW5kZXJzaXplZCBmb3IgMzIyNDg3LjI4NTU2NiwgY3Vy
+cmVudCBzdGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0aW5nIFsz
+OSwxOV0NCj4+IHBnIDYuMTMgaXMgc3R1Y2sgdW5kZXJzaXplZCBmb3IgMzIyNDg3LjI4NzE2OCwg
+Y3VycmVudCBzdGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0aW5n
+IFszMCwxNl0NCj4+IHBnIDUuNGUgaXMgc3R1Y2sgdW5kZXJzaXplZCBmb3IgMzMxMzUxLjQ3NjE3
+MCwgY3VycmVudCBzdGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3QgYWN0
+aW5nIFsxNiwzOF0NCj4+IHBnIDUuNzIgaXMgc3R1Y2sgdW5kZXJzaXplZCBmb3IgMzMxMzUxLjQ3
+NTcwNywgY3VycmVudCBzdGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxhc3Qg
+YWN0aW5nIFsxNiw0OV0NCj4+IHBnIDQuMTcgaXMgc3R1Y2sgdW5kZXJzaXplZCBmb3IgMzIyNDg3
+LjI4MDMwOSwgY3VycmVudCBzdGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGxh
+c3QgYWN0aW5nIFs0NywyMF0NCj4+IHBnIDUuMmMgaXMgc3R1Y2sgdW5kZXJzaXplZCBmb3IgMzIy
+NDg3LjI4NjM0NywgY3VycmVudCBzdGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQs
+IGxhc3QgYWN0aW5nIFs0NywxOF0NCj4+IHBnIDUuMzcgaXMgc3R1Y2sgdW5kZXJzaXplZCBmb3Ig
+MzIyNDg3LjI4MDAyNywgY3VycmVudCBzdGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFk
+ZWQsIGxhc3QgYWN0aW5nIFs0MywxXQ0KPj4gcGcgNy5hIGlzIHN0dWNrIGRlZ3JhZGVkIGZvciAz
+MjI0ODcuMjg0MzQwLCBjdXJyZW50IHN0YXRlDQo+PiBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRl
+ZCwgbGFzdCBhY3RpbmcgWzM4LDJdDQo+PiBwZyA1LjI3IGlzIHN0dWNrIGRlZ3JhZGVkIGZvciAz
+MjI0ODcuMjg3MjAyLCBjdXJyZW50IHN0YXRlDQo+PiBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRl
+ZCwgbGFzdCBhY3RpbmcgWzI2LDE5XQ0KPj4gcGcgNS4zMiBpcyBzdHVjayBkZWdyYWRlZCBmb3Ig
+MzIyNDg3LjI4NTYwNCwgY3VycmVudCBzdGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFk
+ZWQsIGxhc3QgYWN0aW5nIFszOSwxOV0NCj4+IHBnIDYuMTMgaXMgc3R1Y2sgZGVncmFkZWQgZm9y
+IDMyMjQ4Ny4yODcyMDcsIGN1cnJlbnQgc3RhdGUNCj4+IGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3Jh
+ZGVkLCBsYXN0IGFjdGluZyBbMzAsMTZdDQo+PiBwZyA1LjRlIGlzIHN0dWNrIGRlZ3JhZGVkIGZv
+ciAzMzEzNTEuNDc2MjA5LCBjdXJyZW50IHN0YXRlDQo+PiBhY3RpdmUrdW5kZXJzaXplZCtkZWdy
+YWRlZCwgbGFzdCBhY3RpbmcgWzE2LDM4XQ0KPj4gcGcgNS43MiBpcyBzdHVjayBkZWdyYWRlZCBm
+b3IgMzMxMzUxLjQ3NTc0NiwgY3VycmVudCBzdGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQrZGVn
+cmFkZWQsIGxhc3QgYWN0aW5nIFsxNiw0OV0NCj4+IHBnIDQuMTcgaXMgc3R1Y2sgZGVncmFkZWQg
+Zm9yIDMyMjQ4Ny4yODAzNDgsIGN1cnJlbnQgc3RhdGUNCj4+IGFjdGl2ZSt1bmRlcnNpemVkK2Rl
+Z3JhZGVkLCBsYXN0IGFjdGluZyBbNDcsMjBdDQo+PiBwZyA1LjJjIGlzIHN0dWNrIGRlZ3JhZGVk
+IGZvciAzMjI0ODcuMjg2Mzg2LCBjdXJyZW50IHN0YXRlDQo+PiBhY3RpdmUrdW5kZXJzaXplZCtk
+ZWdyYWRlZCwgbGFzdCBhY3RpbmcgWzQ3LDE4XQ0KPj4gcGcgNS4zNyBpcyBzdHVjayBkZWdyYWRl
+ZCBmb3IgMzIyNDg3LjI4MDA2NiwgY3VycmVudCBzdGF0ZQ0KPj4gYWN0aXZlK3VuZGVyc2l6ZWQr
+ZGVncmFkZWQsIGxhc3QgYWN0aW5nIFs0MywxXQ0KPj4gcGcgNS43MiBpcyBhY3RpdmUrdW5kZXJz
+aXplZCtkZWdyYWRlZCwgYWN0aW5nIFsxNiw0OV0gcGcgNS40ZSBpcyANCj4+IGFjdGl2ZSt1bmRl
+cnNpemVkK2RlZ3JhZGVkLCBhY3RpbmcgWzE2LDM4XSBwZyA1LjMyIGlzIA0KPj4gYWN0aXZlK3Vu
+ZGVyc2l6ZWQrZGVncmFkZWQsIGFjdGluZyBbMzksMTldIHBnIDUuMzcgaXMgDQo+PiBhY3RpdmUr
+dW5kZXJzaXplZCtkZWdyYWRlZCwgYWN0aW5nIFs0MywxXSBwZyA1LjJjIGlzIA0KPj4gYWN0aXZl
+K3VuZGVyc2l6ZWQrZGVncmFkZWQsIGFjdGluZyBbNDcsMThdIHBnIDUuMjcgaXMgDQo+PiBhY3Rp
+dmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgYWN0aW5nIFsyNiwxOV0gcGcgNi4xMyBpcyANCj4+IGFj
+dGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCBhY3RpbmcgWzMwLDE2XSBwZyA0LjE3IGlzIA0KPj4g
+YWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIGFjdGluZyBbNDcsMjBdIHBnIDcuYSBpcyANCj4+
+IGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCBhY3RpbmcgWzM4LDJdIHJlY292ZXJ5IDMzMjcv
+MTk1MTM4IA0KPj4gb2JqZWN0cyBkZWdyYWRlZCAoMS43MDUlKSBwb29sIC51c2VycyBwZ19udW0g
+NTEyID4gcGdwX251bSA4DQo+Pg0KPj4NCj4+IE15IGNydXNoIG1hcCBpcyBkZWZhdWx0Lg0KPj4N
+Cj4+IENlcGguY29uZiBpcyA6DQo+Pg0KPj4gW29zZF0NCj4+IG9zZCBta2ZzIHR5cGU9eGZzDQo+
+PiBvc2QgcmVjb3ZlcnkgdGhyZWFkcz0yDQo+PiBvc2QgZGlzayB0aHJlYWQgaW9wcmlvIGNsYXNz
+PWlkbGUNCj4+IG9zZCBkaXNrIHRocmVhZCBpb3ByaW8gcHJpb3JpdHk9Nw0KPj4gb3NkIGpvdXJu
+YWw9L3Zhci9saWIvY2VwaC9vc2QvY2VwaC0kaWQvam91cm5hbA0KPj4gZmlsZXN0b3JlIGZsdXNo
+ZXI9RmFsc2UNCj4+IG9zZCBvcCBudW0gc2hhcmRzPTMNCj4+IGRlYnVnIG9zZD01DQo+PiBvc2Qg
+ZGlzayB0aHJlYWRzPTINCj4+IG9zZCBkYXRhPS92YXIvbGliL2NlcGgvb3NkL2NlcGgtJGlkDQo+
+PiBvc2Qgb3AgbnVtIHRocmVhZHMgcGVyIHNoYXJkPTUNCj4+IG9zZCBvcCB0aHJlYWRzPTQNCj4+
+IGtleXJpbmc9L3Zhci9saWIvY2VwaC9vc2QvY2VwaC0kaWQva2V5cmluZw0KPj4gb3NkIGpvdXJu
+YWwgc2l6ZT00MDk2DQo+Pg0KPj4NCj4+IFtnbG9iYWxdDQo+PiBmaWxlc3RvcmUgbWF4IHN5bmMg
+aW50ZXJ2YWw9MTANCj4+IGF1dGggY2x1c3RlciByZXF1aXJlZD1jZXBoeA0KPj4gb3NkIHBvb2wg
+ZGVmYXVsdCBtaW4gc2l6ZT0zDQo+PiBvc2QgcG9vbCBkZWZhdWx0IHNpemU9Mw0KPj4gcHVibGlj
+IG5ldHdvcms9MTAuMTQwLjEzLjAvMjYNCj4+IG9iamVjdGVyIGluZmxpZ2h0IG9wX2J5dGVzPTEw
+NzM3NDE4MjQgYXV0aCBzZXJ2aWNlIHJlcXVpcmVkPWNlcGh4IA0KPj4gZmlsZXN0b3JlIG1pbiBz
+eW5jIGludGVydmFsPTENCj4+IGZzaWQ9ZmFjMDRkODUtZGI0OC00NTY0LWI4MjEtZGVlYmRhMDQ2
+MjYxDQo+PiBrZXlyaW5nPS9ldGMvY2VwaC9rZXlyaW5nDQo+PiBjbHVzdGVyIG5ldHdvcms9MTAu
+MTQwLjEzLjAvMjYNCj4+IGF1dGggY2xpZW50IHJlcXVpcmVkPWNlcGh4DQo+PiBmaWxlc3RvcmUg
+eGF0dHIgdXNlIG9tYXA9VHJ1ZQ0KPj4gbWF4IG9wZW4gZmlsZXM9NjU1MzYNCj4+IG9iamVjdGVy
+IGluZmxpZ2h0IG9wcz0yMDQ4DQo+PiBvc2QgcG9vbCBkZWZhdWx0IHBnIG51bT01MTINCj4+IGxv
+ZyB0byBzeXNsb2cgPSB0cnVlDQo+PiAjZXJyIHRvIHN5c2xvZyA9IHRydWUNCj4+DQo+Pg0KPj4g
+Q29tcGxldGUgcHEgcXVlcnkgaW5mbyBhdCA6IGh0dHA6Ly9wYXN0ZWJpbi5jb20vWkhCNk00UFEN
+Cj4+DQo+Pg0KPj4gLS0NCj4+IEdhdXJhdiBCYWZuYQ0KPj4gOTU0MDYzMTQwMA0KPj4gLS0NCj4+
+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
+ZSBjZXBoLWRldmVsIiANCj4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
+dmdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
+a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3Jt
+YXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5k
+ZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQg
+YWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQg
+cmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVk
+IHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9u
+LCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHBy
+b2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJv
+ciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNo
+b3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2Yg
+dGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBl
+bGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0KDQoNCi0tDQpHYXVyYXYgQmFmbmENCjk1
+NDA2MzE0MDANCg==
