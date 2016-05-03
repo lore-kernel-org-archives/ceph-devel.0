@@ -1,45 +1,27 @@
-From: Shinobu Kinjo <skinjo@redhat.com>
-Subject: Re: mon switch from leveldb to rocksdb
-Date: Tue, 3 May 2016 02:00:02 -0400 (EDT)
-Message-ID: <693203691.24062915.1462255202807.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com> <1707978395.1022.1462224339784@ox.pcextreme.nl> <CAFdRU70KCjhemzL2f2YLKotpVxyarag2WWkTQWny42v6q85dTA@mail.gmail.com> <alpine.DEB.2.11.1605021745510.26967@cpach.fuggernut.com> <06681238D8946F44A60AA400760A1CBF023447C8@SHSMSX103.ccr.corp.intel.com> <BL2PR02MB21152C53B868E3CF9763CD07F47A0@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: mon switch from leveldb to rocksdb
+Date: Tue, 3 May 2016 05:28:56 +0000
+Message-ID: <BL2PR02MB21152C53B868E3CF9763CD07F47A0@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com>
+ <1707978395.1022.1462224339784@ox.pcextreme.nl>
+ <CAFdRU70KCjhemzL2f2YLKotpVxyarag2WWkTQWny42v6q85dTA@mail.gmail.com>
+ <alpine.DEB.2.11.1605021745510.26967@cpach.fuggernut.com>
+ <06681238D8946F44A60AA400760A1CBF023447C8@SHSMSX103.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:36836 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932208AbcECGAP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 02:00:15 -0400
-In-Reply-To: <BL2PR02MB21152C53B868E3CF9763CD07F47A0@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from mail-bn1bon0055.outbound.protection.outlook.com ([157.56.111.55]:22323
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932252AbcECGDV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 02:03:21 -0400
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF023447C8@SHSMSX103.ccr.corp.intel.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Yuan Zhou <yuan.zhou@intel.com>, Sage Weil <sage@newdream.net>, Wido den Hollander <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
-
-> I think filestore is already supporting rocksdb as OMAP..
-
-If the RocksDB library is there, yes...
-
-What is really challenge in here to me is, as Sage mentioned:
-
-> if someone wants to convert, they can add/remove/replace mons in their cluster to get there.
-
-Maybe this is a related issue:
-
-https://github.com/facebook/rocksdb/issues/677
-
-What do you think?
-
-Cheers,
-Shinobu.
-
------ Original Message -----
-From: "Somnath Roy" <Somnath.Roy@sandisk.com>
-To: "Yuan Zhou" <yuan.zhou@intel.com>, "Sage Weil" <sage@newdream.net>, skinjo@redhat.com
-Cc: "Wido den Hollander" <wido@42on.com>, "Ceph Development" <ceph-devel@vger.kernel.org>
-Sent: Tuesday, May 3, 2016 2:28:56 PM
-Subject: RE: mon switch from leveldb to rocksdb
+To: "Zhou, Yuan" <yuan.zhou@intel.com>, Sage Weil <sage@newdream.net>, "skinjo@redhat.com" <skinjo@redhat.com>
+Cc: Wido den Hollander <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
 I think filestore is already supporting rocksdb as OMAP..
 
