@@ -1,134 +1,138 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: mon switch from leveldb to rocksdb
-Date: Tue, 3 May 2016 05:28:56 +0000
-Message-ID: <BL2PR02MB21152C53B868E3CF9763CD07F47A0@BL2PR02MB2115.namprd02.prod.outlook.com>
+Date: Tue, 3 May 2016 06:29:42 +0000
+Message-ID: <BL2PR02MB21154FFDA5DC5CA499D4F7CEF47A0@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com>
  <1707978395.1022.1462224339784@ox.pcextreme.nl>
  <CAFdRU70KCjhemzL2f2YLKotpVxyarag2WWkTQWny42v6q85dTA@mail.gmail.com>
  <alpine.DEB.2.11.1605021745510.26967@cpach.fuggernut.com>
  <06681238D8946F44A60AA400760A1CBF023447C8@SHSMSX103.ccr.corp.intel.com>
+ <BL2PR02MB21152C53B868E3CF9763CD07F47A0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <693203691.24062915.1462255202807.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0055.outbound.protection.outlook.com ([157.56.111.55]:22323
+Received: from mail-bn1bon0064.outbound.protection.outlook.com ([157.56.111.64]:26688
 	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932252AbcECGDV convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 02:03:21 -0400
-In-Reply-To: <06681238D8946F44A60AA400760A1CBF023447C8@SHSMSX103.ccr.corp.intel.com>
+	id S1751016AbcECGpj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 3 May 2016 02:45:39 -0400
+In-Reply-To: <693203691.24062915.1462255202807.JavaMail.zimbra@redhat.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Zhou, Yuan" <yuan.zhou@intel.com>, Sage Weil <sage@newdream.net>, "skinjo@redhat.com" <skinjo@redhat.com>
-Cc: Wido den Hollander <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Shinobu Kinjo <skinjo@redhat.com>
+Cc: Yuan Zhou <yuan.zhou@intel.com>, Sage Weil <sage@newdream.net>, Wido den Hollander <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-I think filestore is already supporting rocksdb as OMAP..
-
-Thanks & Regards
-Somnath
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Zhou, Yuan
-Sent: Monday, May 02, 2016 10:25 PM
-To: Sage Weil; skinjo@redhat.com
-Cc: Wido den Hollander; Ceph Development
-Subject: RE: mon switch from leveldb to rocksdb
-
-Hi Sage,
-
-how about the filestore_omap_backend? It's set to leveldb by default now. Would it be set to rocksdb also?
-
-thanks, -yuan
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-Sent: Tuesday, May 3, 2016 5:47 AM
-To: skinjo@redhat.com
-Cc: Wido den Hollander <wido@42on.com>; Ceph Development <ceph-devel@vger.kernel.org>
-Subject: Re: mon switch from leveldb to rocksdb
-
-On Tue, 3 May 2016, Shinobu Kinjo wrote:
-> If possible, it would be much better to make it pluggable so that we
-> select what we want.
-
-Yeah, that is the plan.  The mon_keyvaluedb will select leveldb or rocksdb.  We'd just switch the default over at some point, once we're satisfied with stability.
-
-After thinking about this some more I agree with Wido that the conversion isn't useful enough to bother with.  We can just make new mons use rocksdb, and if someone wants to convert, they can add/remove/replace mons in their cluster to get there.
-
-sage
-
-
-
->
-> On Tue, May 3, 2016 at 6:25 AM, Wido den Hollander <wido@42on.com> wrote:
-> >
-> >> Op 2 mei 2016 om 20:49 schreef Sage Weil <sweil@redhat.com>:
-> >>
-> >>
-> >> We're thinking about switching the default backend on the mon from
-> >> leveldb to rocksdb.  Rocksdb is better maintained, has a stronger
-> >> feature set, is generally faster, and is linked statically, which
-> >> means we won't be vulnerable to buggy distro packages.
-> >>
-> >> There is one blocker, though.  Some distro leveldbs name the sst
-> >> files with the .ldb suffix.  (Some don't; very annoying.)  There is
-> >> a unit test in rocksdb that tries to verify that ldb is silently
-> >> renamed to sst, and it passes, but the test is incomplete: the test
-> >> failes to verify that ldb/sst files can actually be read, and it turns out only the 'check'
-> >> path (not the normal open and read it path) handles ldb properly.
-> >>
-> >> Anyway, once that works, rocksdb will magically upgrade from
-> >> leveldb to rocksdb.  Note that once that happens you can't switch
-> >> from rocksdb back to leveldb without recreating the mon.
-> >>
-> >> Alternatively, we could not worry about upgrading existing leveldb
-> >> instances and just make newly created mons default to rocksdb.
-> >>
-> >> 1) Thoughts on moving to rocksdb in general?
-> >>
-> >> 2) Importance of leveldb->rocksdb conversion?
-> >>
-> >
-> > I would not touch this auto conversion at first. I know there is things to gain, but is it enough to gain that it might be worth while potentially corrupting monitors?
-> >
-> > Is it that LevelDB doesn't handle large cluster load for example? Imho the majority of Ceph clusters is still far below 500 OSDs.
-> >
-> > Personally I always try to stay away from touching the MONs datastore. Always feels a bit scary.
-> >
-> > Wido
-> >
-> >> 3) Anyone want to fix the ldb handling in rocksdb?
-> >>
-> >> Thanks!
-> >> sage
-> >>
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe
-> >> ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe
-> > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Email:
-> shinobu@linux.com
-> GitHub:
-> shinobu-x
-> Blog:
-> Life with Distributed Computational System based on OpenSource
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in the body of a message to majordomo@vger.kernel.org More majordomo
-> info at  http://vger.kernel.org/majordomo-info.html
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+WW91IG5lZWQgdG8gcmVjcmVhdGUgT1NEcyAobWtmcykgaW4gb3JkZXIgdG8gbW92ZSB0byByb2Nr
+c2RiLCBpdCBpcyBub3QgYSBzZWFtbGVzcyB0cmFuc2l0aW9uIGFzIHBlciBJIGtub3cuLg0KDQot
+LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogU2hpbm9idSBLaW5qbyBbbWFpbHRvOnNr
+aW5qb0ByZWRoYXQuY29tXSANClNlbnQ6IE1vbmRheSwgTWF5IDAyLCAyMDE2IDExOjAwIFBNDQpU
+bzogU29tbmF0aCBSb3kNCkNjOiBZdWFuIFpob3U7IFNhZ2UgV2VpbDsgV2lkbyBkZW4gSG9sbGFu
+ZGVyOyBDZXBoIERldmVsb3BtZW50DQpTdWJqZWN0OiBSZTogbW9uIHN3aXRjaCBmcm9tIGxldmVs
+ZGIgdG8gcm9ja3NkYg0KDQo+IEkgdGhpbmsgZmlsZXN0b3JlIGlzIGFscmVhZHkgc3VwcG9ydGlu
+ZyByb2Nrc2RiIGFzIE9NQVAuLg0KDQpJZiB0aGUgUm9ja3NEQiBsaWJyYXJ5IGlzIHRoZXJlLCB5
+ZXMuLi4NCg0KV2hhdCBpcyByZWFsbHkgY2hhbGxlbmdlIGluIGhlcmUgdG8gbWUgaXMsIGFzIFNh
+Z2UgbWVudGlvbmVkOg0KDQo+IGlmIHNvbWVvbmUgd2FudHMgdG8gY29udmVydCwgdGhleSBjYW4g
+YWRkL3JlbW92ZS9yZXBsYWNlIG1vbnMgaW4gdGhlaXIgY2x1c3RlciB0byBnZXQgdGhlcmUuDQoN
+Ck1heWJlIHRoaXMgaXMgYSByZWxhdGVkIGlzc3VlOg0KDQpodHRwczovL2dpdGh1Yi5jb20vZmFj
+ZWJvb2svcm9ja3NkYi9pc3N1ZXMvNjc3DQoNCldoYXQgZG8geW91IHRoaW5rPw0KDQpDaGVlcnMs
+DQpTaGlub2J1Lg0KDQotLS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0tDQpGcm9tOiAiU29tbmF0
+aCBSb3kiIDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4NClRvOiAiWXVhbiBaaG91IiA8eXVhbi56
+aG91QGludGVsLmNvbT4sICJTYWdlIFdlaWwiIDxzYWdlQG5ld2RyZWFtLm5ldD4sIHNraW5qb0By
+ZWRoYXQuY29tDQpDYzogIldpZG8gZGVuIEhvbGxhbmRlciIgPHdpZG9ANDJvbi5jb20+LCAiQ2Vw
+aCBEZXZlbG9wbWVudCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KU2VudDogVHVlc2Rh
+eSwgTWF5IDMsIDIwMTYgMjoyODo1NiBQTQ0KU3ViamVjdDogUkU6IG1vbiBzd2l0Y2ggZnJvbSBs
+ZXZlbGRiIHRvIHJvY2tzZGINCg0KSSB0aGluayBmaWxlc3RvcmUgaXMgYWxyZWFkeSBzdXBwb3J0
+aW5nIHJvY2tzZGIgYXMgT01BUC4uDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
+ZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFs
+ZiBPZiBaaG91LCBZdWFuDQpTZW50OiBNb25kYXksIE1heSAwMiwgMjAxNiAxMDoyNSBQTQ0KVG86
+IFNhZ2UgV2VpbDsgc2tpbmpvQHJlZGhhdC5jb20NCkNjOiBXaWRvIGRlbiBIb2xsYW5kZXI7IENl
+cGggRGV2ZWxvcG1lbnQNClN1YmplY3Q6IFJFOiBtb24gc3dpdGNoIGZyb20gbGV2ZWxkYiB0byBy
+b2Nrc2RiDQoNCkhpIFNhZ2UsDQoNCmhvdyBhYm91dCB0aGUgZmlsZXN0b3JlX29tYXBfYmFja2Vu
+ZD8gSXQncyBzZXQgdG8gbGV2ZWxkYiBieSBkZWZhdWx0IG5vdy4gV291bGQgaXQgYmUgc2V0IHRv
+IHJvY2tzZGIgYWxzbz8NCg0KdGhhbmtzLCAteXVhbg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
+LS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBo
+LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNhZ2UgV2VpbA0KU2Vu
+dDogVHVlc2RheSwgTWF5IDMsIDIwMTYgNTo0NyBBTQ0KVG86IHNraW5qb0ByZWRoYXQuY29tDQpD
+YzogV2lkbyBkZW4gSG9sbGFuZGVyIDx3aWRvQDQyb24uY29tPjsgQ2VwaCBEZXZlbG9wbWVudCA8
+Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQpTdWJqZWN0OiBSZTogbW9uIHN3aXRjaCBmcm9t
+IGxldmVsZGIgdG8gcm9ja3NkYg0KDQpPbiBUdWUsIDMgTWF5IDIwMTYsIFNoaW5vYnUgS2luam8g
+d3JvdGU6DQo+IElmIHBvc3NpYmxlLCBpdCB3b3VsZCBiZSBtdWNoIGJldHRlciB0byBtYWtlIGl0
+IHBsdWdnYWJsZSBzbyB0aGF0IHdlIA0KPiBzZWxlY3Qgd2hhdCB3ZSB3YW50Lg0KDQpZZWFoLCB0
+aGF0IGlzIHRoZSBwbGFuLiAgVGhlIG1vbl9rZXl2YWx1ZWRiIHdpbGwgc2VsZWN0IGxldmVsZGIg
+b3Igcm9ja3NkYi4gIFdlJ2QganVzdCBzd2l0Y2ggdGhlIGRlZmF1bHQgb3ZlciBhdCBzb21lIHBv
+aW50LCBvbmNlIHdlJ3JlIHNhdGlzZmllZCB3aXRoIHN0YWJpbGl0eS4NCg0KQWZ0ZXIgdGhpbmtp
+bmcgYWJvdXQgdGhpcyBzb21lIG1vcmUgSSBhZ3JlZSB3aXRoIFdpZG8gdGhhdCB0aGUgY29udmVy
+c2lvbiBpc24ndCB1c2VmdWwgZW5vdWdoIHRvIGJvdGhlciB3aXRoLiAgV2UgY2FuIGp1c3QgbWFr
+ZSBuZXcgbW9ucyB1c2Ugcm9ja3NkYiwgYW5kIGlmIHNvbWVvbmUgd2FudHMgdG8gY29udmVydCwg
+dGhleSBjYW4gYWRkL3JlbW92ZS9yZXBsYWNlIG1vbnMgaW4gdGhlaXIgY2x1c3RlciB0byBnZXQg
+dGhlcmUuDQoNCnNhZ2UNCg0KDQoNCj4NCj4gT24gVHVlLCBNYXkgMywgMjAxNiBhdCA2OjI1IEFN
+LCBXaWRvIGRlbiBIb2xsYW5kZXIgPHdpZG9ANDJvbi5jb20+IHdyb3RlOg0KPiA+DQo+ID4+IE9w
+IDIgbWVpIDIwMTYgb20gMjA6NDkgc2NocmVlZiBTYWdlIFdlaWwgPHN3ZWlsQHJlZGhhdC5jb20+
+Og0KPiA+Pg0KPiA+Pg0KPiA+PiBXZSdyZSB0aGlua2luZyBhYm91dCBzd2l0Y2hpbmcgdGhlIGRl
+ZmF1bHQgYmFja2VuZCBvbiB0aGUgbW9uIGZyb20gDQo+ID4+IGxldmVsZGIgdG8gcm9ja3NkYi4g
+IFJvY2tzZGIgaXMgYmV0dGVyIG1haW50YWluZWQsIGhhcyBhIHN0cm9uZ2VyIA0KPiA+PiBmZWF0
+dXJlIHNldCwgaXMgZ2VuZXJhbGx5IGZhc3RlciwgYW5kIGlzIGxpbmtlZCBzdGF0aWNhbGx5LCB3
+aGljaCANCj4gPj4gbWVhbnMgd2Ugd29uJ3QgYmUgdnVsbmVyYWJsZSB0byBidWdneSBkaXN0cm8g
+cGFja2FnZXMuDQo+ID4+DQo+ID4+IFRoZXJlIGlzIG9uZSBibG9ja2VyLCB0aG91Z2guICBTb21l
+IGRpc3RybyBsZXZlbGRicyBuYW1lIHRoZSBzc3QgDQo+ID4+IGZpbGVzIHdpdGggdGhlIC5sZGIg
+c3VmZml4LiAgKFNvbWUgZG9uJ3Q7IHZlcnkgYW5ub3lpbmcuKSAgVGhlcmUgaXMgDQo+ID4+IGEg
+dW5pdCB0ZXN0IGluIHJvY2tzZGIgdGhhdCB0cmllcyB0byB2ZXJpZnkgdGhhdCBsZGIgaXMgc2ls
+ZW50bHkgDQo+ID4+IHJlbmFtZWQgdG8gc3N0LCBhbmQgaXQgcGFzc2VzLCBidXQgdGhlIHRlc3Qg
+aXMgaW5jb21wbGV0ZTogdGhlIHRlc3QgDQo+ID4+IGZhaWxlcyB0byB2ZXJpZnkgdGhhdCBsZGIv
+c3N0IGZpbGVzIGNhbiBhY3R1YWxseSBiZSByZWFkLCBhbmQgaXQgdHVybnMgb3V0IG9ubHkgdGhl
+ICdjaGVjaycNCj4gPj4gcGF0aCAobm90IHRoZSBub3JtYWwgb3BlbiBhbmQgcmVhZCBpdCBwYXRo
+KSBoYW5kbGVzIGxkYiBwcm9wZXJseS4NCj4gPj4NCj4gPj4gQW55d2F5LCBvbmNlIHRoYXQgd29y
+a3MsIHJvY2tzZGIgd2lsbCBtYWdpY2FsbHkgdXBncmFkZSBmcm9tIA0KPiA+PiBsZXZlbGRiIHRv
+IHJvY2tzZGIuICBOb3RlIHRoYXQgb25jZSB0aGF0IGhhcHBlbnMgeW91IGNhbid0IHN3aXRjaCAN
+Cj4gPj4gZnJvbSByb2Nrc2RiIGJhY2sgdG8gbGV2ZWxkYiB3aXRob3V0IHJlY3JlYXRpbmcgdGhl
+IG1vbi4NCj4gPj4NCj4gPj4gQWx0ZXJuYXRpdmVseSwgd2UgY291bGQgbm90IHdvcnJ5IGFib3V0
+IHVwZ3JhZGluZyBleGlzdGluZyBsZXZlbGRiIA0KPiA+PiBpbnN0YW5jZXMgYW5kIGp1c3QgbWFr
+ZSBuZXdseSBjcmVhdGVkIG1vbnMgZGVmYXVsdCB0byByb2Nrc2RiLg0KPiA+Pg0KPiA+PiAxKSBU
+aG91Z2h0cyBvbiBtb3ZpbmcgdG8gcm9ja3NkYiBpbiBnZW5lcmFsPw0KPiA+Pg0KPiA+PiAyKSBJ
+bXBvcnRhbmNlIG9mIGxldmVsZGItPnJvY2tzZGIgY29udmVyc2lvbj8NCj4gPj4NCj4gPg0KPiA+
+IEkgd291bGQgbm90IHRvdWNoIHRoaXMgYXV0byBjb252ZXJzaW9uIGF0IGZpcnN0LiBJIGtub3cg
+dGhlcmUgaXMgdGhpbmdzIHRvIGdhaW4sIGJ1dCBpcyBpdCBlbm91Z2ggdG8gZ2FpbiB0aGF0IGl0
+IG1pZ2h0IGJlIHdvcnRoIHdoaWxlIHBvdGVudGlhbGx5IGNvcnJ1cHRpbmcgbW9uaXRvcnM/DQo+
+ID4NCj4gPiBJcyBpdCB0aGF0IExldmVsREIgZG9lc24ndCBoYW5kbGUgbGFyZ2UgY2x1c3RlciBs
+b2FkIGZvciBleGFtcGxlPyBJbWhvIHRoZSBtYWpvcml0eSBvZiBDZXBoIGNsdXN0ZXJzIGlzIHN0
+aWxsIGZhciBiZWxvdyA1MDAgT1NEcy4NCj4gPg0KPiA+IFBlcnNvbmFsbHkgSSBhbHdheXMgdHJ5
+IHRvIHN0YXkgYXdheSBmcm9tIHRvdWNoaW5nIHRoZSBNT05zIGRhdGFzdG9yZS4gQWx3YXlzIGZl
+ZWxzIGEgYml0IHNjYXJ5Lg0KPiA+DQo+ID4gV2lkbw0KPiA+DQo+ID4+IDMpIEFueW9uZSB3YW50
+IHRvIGZpeCB0aGUgbGRiIGhhbmRsaW5nIGluIHJvY2tzZGI/DQo+ID4+DQo+ID4+IFRoYW5rcyEN
+Cj4gPj4gc2FnZQ0KPiA+Pg0KPiA+PiAtLQ0KPiA+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
+bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgDQo+ID4+IGNlcGgtZGV2ZWwiIGluIHRo
+ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIA0KPiA+PiBN
+b3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwNCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
+IHRoZSBsaW5lICJ1bnN1YnNjcmliZSANCj4gPiBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBh
+IG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyANCj4gPiBNb3JlIG1ham9yZG9t
+byBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4N
+Cj4NCj4NCj4gLS0NCj4gRW1haWw6DQo+IHNoaW5vYnVAbGludXguY29tDQo+IEdpdEh1YjoNCj4g
+c2hpbm9idS14DQo+IEJsb2c6DQo+IExpZmUgd2l0aCBEaXN0cmlidXRlZCBDb21wdXRhdGlvbmFs
+IFN5c3RlbSBiYXNlZCBvbiBPcGVuU291cmNlDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20g
+dGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiBpbiB0
+aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1h
+am9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
+by5odG1sDQo+DQo+DQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
+IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
+byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6
+Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KLS0NClRvIHVuc3Vic2NyaWJl
+IGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBp
+biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
+IG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
+Lmh0bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxl
+Y3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUg
+ZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhp
+cyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBu
+b3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQg
+dGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcg
+b2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2Vp
+dmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVy
+IGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQg
+ZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vz
+c2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVz
+KS4NCg==
