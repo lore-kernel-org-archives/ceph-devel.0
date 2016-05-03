@@ -1,47 +1,130 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: blueprint: consistency groups
-Date: Tue, 3 May 2016 08:05:15 -0400
-Message-ID: <CA+aFP1AQzo7bO=e-Gd_sAtBWSYFgvji8isxuXFKDejaHAA+FuA@mail.gmail.com>
-References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
-	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
-	<20160325071933.GA14634@gmail.com>
-	<CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
-	<CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
-	<CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
-	<CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
-	<CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
-	<CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
-	<CA+aFP1C7me+-dbXVrMgU0Qs9fX8_4ocC9v5orzy+c8tK30y08A@mail.gmail.com>
-	<CA+hcxJT4DWgt8K8hc27KbkJK=DRePM18Zh=GPxtfR5afoxVP1w@mail.gmail.com>
-	<CA+hcxJQGcDy96o0f9sEY8HwLXng9YzxsoKAhaaCuCDDhVbN76A@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: mon switch from leveldb to rocksdb
+Date: Tue, 3 May 2016 08:24:00 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605030820570.26967@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1605021444320.26967@cpach.fuggernut.com> <1707978395.1022.1462224339784@ox.pcextreme.nl> <CAFdRU70KCjhemzL2f2YLKotpVxyarag2WWkTQWny42v6q85dTA@mail.gmail.com> <alpine.DEB.2.11.1605021745510.26967@cpach.fuggernut.com>
+ <06681238D8946F44A60AA400760A1CBF023447C8@SHSMSX103.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f47.google.com ([209.85.220.47]:34937 "EHLO
-	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750728AbcECMFQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 08:05:16 -0400
-Received: by mail-pa0-f47.google.com with SMTP id iv1so8829726pac.2
-        for <ceph-devel@vger.kernel.org>; Tue, 03 May 2016 05:05:15 -0700 (PDT)
-In-Reply-To: <CA+hcxJQGcDy96o0f9sEY8HwLXng9YzxsoKAhaaCuCDDhVbN76A@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39479 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750728AbcECMXw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 3 May 2016 08:23:52 -0400
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF023447C8@SHSMSX103.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Victor Denisov <vdenisov@mirantis.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: "Zhou, Yuan" <yuan.zhou@intel.com>
+Cc: "skinjo@redhat.com" <skinjo@redhat.com>, Wido den Hollander <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, May 2, 2016 at 8:26 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
-> As such, I can't open another ioctx when I'm already inside rbd
-> class.
+On Tue, 3 May 2016, Zhou, Yuan wrote:
+> Hi Sage, 
+> 
+> how about the filestore_omap_backend? It's set to leveldb by default 
+> now. Would it be set to rocksdb also?
 
-You actually can open a new IoCtx against a new pool -- we do this
-internally for journaling handling, scanning pools for children during
-the snapshot unprotect operation, opening a parent image of a clone,
-etc.   You can extract the "librados::Rados" object from the
-"librados::IoCtx" and then use "librados::Rados::ioctx_create2" to
-create a new IoCtx by pool id.
+I'd rather leave FileStore alone since it will eventually be deprecated.  
+It's also more sensitive to performance variation and we'd need to be a 
+lot more careful making any changes.
 
-Also agree with Mykola in that the API should return resolved image names.
+sage
 
--- 
-Jason
+
+
+> 
+> thanks, -yuan
+> 
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Tuesday, May 3, 2016 5:47 AM
+> To: skinjo@redhat.com
+> Cc: Wido den Hollander <wido@42on.com>; Ceph Development <ceph-devel@vger.kernel.org>
+> Subject: Re: mon switch from leveldb to rocksdb
+> 
+> On Tue, 3 May 2016, Shinobu Kinjo wrote:
+> > If possible, it would be much better to make it pluggable so that we 
+> > select what we want.
+> 
+> Yeah, that is the plan.  The mon_keyvaluedb will select leveldb or rocksdb.  We'd just switch the default over at some point, once we're satisfied with stability.
+> 
+> After thinking about this some more I agree with Wido that the conversion isn't useful enough to bother with.  We can just make new mons use rocksdb, and if someone wants to convert, they can add/remove/replace mons in their cluster to get there.
+> 
+> sage
+> 
+> 
+> 
+> > 
+> > On Tue, May 3, 2016 at 6:25 AM, Wido den Hollander <wido@42on.com> wrote:
+> > >
+> > >> Op 2 mei 2016 om 20:49 schreef Sage Weil <sweil@redhat.com>:
+> > >>
+> > >>
+> > >> We're thinking about switching the default backend on the mon from 
+> > >> leveldb to rocksdb.  Rocksdb is better maintained, has a stronger 
+> > >> feature set, is generally faster, and is linked statically, which 
+> > >> means we won't be vulnerable to buggy distro packages.
+> > >>
+> > >> There is one blocker, though.  Some distro leveldbs name the sst 
+> > >> files with the .ldb suffix.  (Some don't; very annoying.)  There is 
+> > >> a unit test in rocksdb that tries to verify that ldb is silently 
+> > >> renamed to sst, and it passes, but the test is incomplete: the test 
+> > >> failes to verify that ldb/sst files can actually be read, and it turns out only the 'check'
+> > >> path (not the normal open and read it path) handles ldb properly.
+> > >>
+> > >> Anyway, once that works, rocksdb will magically upgrade from 
+> > >> leveldb to rocksdb.  Note that once that happens you can't switch 
+> > >> from rocksdb back to leveldb without recreating the mon.
+> > >>
+> > >> Alternatively, we could not worry about upgrading existing leveldb 
+> > >> instances and just make newly created mons default to rocksdb.
+> > >>
+> > >> 1) Thoughts on moving to rocksdb in general?
+> > >>
+> > >> 2) Importance of leveldb->rocksdb conversion?
+> > >>
+> > >
+> > > I would not touch this auto conversion at first. I know there is things to gain, but is it enough to gain that it might be worth while potentially corrupting monitors?
+> > >
+> > > Is it that LevelDB doesn't handle large cluster load for example? Imho the majority of Ceph clusters is still far below 500 OSDs.
+> > >
+> > > Personally I always try to stay away from touching the MONs datastore. Always feels a bit scary.
+> > >
+> > > Wido
+> > >
+> > >> 3) Anyone want to fix the ldb handling in rocksdb?
+> > >>
+> > >> Thanks!
+> > >> sage
+> > >>
+> > >> --
+> > >> To unsubscribe from this list: send the line "unsubscribe 
+> > >> ceph-devel" in the body of a message to majordomo@vger.kernel.org 
+> > >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe 
+> > > ceph-devel" in the body of a message to majordomo@vger.kernel.org 
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> > 
+> > --
+> > Email:
+> > shinobu@linux.com
+> > GitHub:
+> > shinobu-x
+> > Blog:
+> > Life with Distributed Computational System based on OpenSource
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
