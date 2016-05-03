@@ -1,135 +1,89 @@
-From: "Handzik, Joseph" <joseph.t.handzik@hpe.com>
-Subject: RE: Introducing libstoragemgmt as a Ceph dependency
-Date: Tue, 3 May 2016 18:22:45 +0000
-Message-ID: <TU4PR84MB00326FE52F4342863273CFA4CC7A0@TU4PR84MB0032.NAMPRD84.PROD.OUTLOOK.COM>
-References: <TU4PR84MB0032768F74C89DF30F93BE0BCC7A0@TU4PR84MB0032.NAMPRD84.PROD.OUTLOOK.COM>
- <alpine.DEB.2.11.1605031412580.26967@cpach.fuggernut.com>
+From: Jianjian Huo-SSI <jianjian.huo@ssi.samsung.com>
+Subject: RE: rocksdb related build error
+Date: Tue, 03 May 2016 18:52:35 +0000
+Message-ID: <3F3468645DC82146857A5E1C91E23F4B1B2A0A73@SSIEXCH-MB3.ssi.samsung.com>
+References: <CAF1ivSbg-n6o2_mHzCS_Y9rDZTD+ySess8TqOto-ox7MV012bA@mail.gmail.com>
+ <alpine.DEB.2.11.1605030824500.26967@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0106.outbound.protection.outlook.com ([207.46.100.106]:24522
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932756AbcECSiJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 14:38:09 -0400
-In-Reply-To: <alpine.DEB.2.11.1605031412580.26967@cpach.fuggernut.com>
-Content-Language: en-US
+Received: from mailout4.w2.samsung.com ([211.189.100.14]:42423 "EHLO
+	usmailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934490AbcECTCk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 15:02:40 -0400
+Received: from uscpsbgex4.samsung.com
+ (u125.gpu85.samsung.co.kr [203.254.195.125]) by usmailout4.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0O6M00MD673O0550@usmailout4.samsung.com> for
+ ceph-devel@vger.kernel.org; Tue, 03 May 2016 14:52:36 -0400 (EDT)
+In-reply-to: <alpine.DEB.2.11.1605030824500.26967@cpach.fuggernut.com>
+Content-language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "tasleson@redhat.com" <tasleson@redhat.com>, Gris Ge <fge@redhat.com>
+To: Sage Weil <sage@newdream.net>, Ming Lin <minggr@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, John Spray <john.spray@redhat.com>
 
-Hey Sage,
+Hi Sage,
 
------Original Message-----
-=46rom: Sage Weil [mailto:sage@newdream.net]=20
-Sent: Tuesday, May 3, 2016 1:15 PM
-To: Handzik, Joseph <joseph.t.handzik@hpe.com>
-Cc: ceph-devel@vger.kernel.org; tasleson@redhat.com; Gris Ge <fge@redha=
-t.com>
-Subject: Re: Introducing libstoragemgmt as a Ceph dependency
+When we are going to pull in latest RocksDB release? We are still using code base from last year.
+RocksDB stops working with Bluestore after 6 hours writes, maybe it's related to old RocksDB code or recycled log files?
+http://tracker.ceph.com/issues/15600
 
-Hi Joseph,
+Jianjian
 
-On Tue, 3 May 2016, Handzik, Joseph wrote:
-> Hey ceph-devel,
->=20
-> Back around this time in 2015, I started asking questions about what=20
-> the Ceph community would expect around hardware integration with an=20
-> underlying storage system (my primary concern was blinking LEDs):
-> http://www.spinics.net/lists/ceph-devel/msg23404.html
->=20
-> I received some good feedback, which turned into this blueprint here:=
-=20
-> http://tracker.ceph.com/projects/ceph/wiki/Calamariapihardwarestorage
->=20
-> That set me down a windy path of pulling device paths for underlying=20
-> devices via the OSD, pulling metadata attributes for OSDs into=20
-> calamari, and eventually over to libstoragemgmt (Github link:
-> https://github.com/libstorage/libstoragemgmt).
->=20
-> libstoragemgmt covers what I perceived to be the initial requirements=
-=20
-> for an API to talk to underlying storage devices. It's vendor=20
-> agnostic, extensible, and provides C and python bindings. Over the=20
-> last 6 months or so, we've spent time in the libstoragemgmt source=20
-> adding a set of APIs that actually submit SCSI Enclosure Service=20
-> commands via C and python bindings. The first set of functionality=20
-> introduced was commands to enable and disable the IDENT and FAULT=20
-> LEDs. These APIs sit alongside the vendor-specific interfaces that=20
-> libstoragemgmt already provided (there's good support for Smart Array=
-=20
-> and MegaRAID, for example). We're working on NVMe support too, though=
-=20
-> that may slip out of the upcoming
-> 1.3 release.
->=20
-> My involvement in libstoragemgmt, as mentioned earlier, was with the=20
-> purpose of integrating better hardware monitoring and management=20
-> support into Ceph. I did some work on my own in a fork that I created=
-=20
-> of libstoragemgmt to integrate it into the Ceph cli that exists today=
-=20
-> (note that the APIs in upstream libstoragemgmt have changed, but the=20
-> code would be conceptually similar):
-> https://github.com/joehandzik/ceph/tree/wip-hw-mgmt-cli
-
-Blinky lights, yay!
-=20
-> John Spray has already mentioned to me that I should convert my=20
-> message interface to use "tell" commands instead, but aside from that=
-=20
-> I think this is roughly what a final pull would look like (with test=20
-> framework code). I have tested this on HPE hardware, so the concept=20
-> does work. All of this functionality will require an opt-in from the=20
-> user via a ceph.conf value (to tell Ceph what storage device they're=20
-> using). If the value is never set, the user will=A0 not be able to us=
-e these APIs.
->=20
-> I'm giving all the above for context, but what I really need to know=20
-> from the ceph-devel community is: Does anyone have any concerns with=20
-> adding libstoragemgmt as a Ceph dependency? It would only work for th=
-e=20
-> standard Linux flavors and distros (Rhel and Centos, OpenSuse and=20
-> SLES, Debian and Ubuntu). The features I'm adding would be no-ops or=20
-> disabled for other distros unless someone in the community finds a wa=
-y=20
-> to distribute libstoragemgmt for their operating environment or finds=
-=20
-> an adequate replacement for the functionality. It's also worth noting=
-=20
-> that I'm completely dependent on the previously mentioned 1.3 release=
-=20
-> of libstoragemgmt, which is why I've waited on this for a while (the=20
-> blueprint was initially intended for Jewel).
-
-The current distros upstream currently buidls on are:
-
- centos 7
- ubuntu 16.04
- ubuntu 14.04
- debian 8 (jessie)
-
-Other packages are all down downstream (e.g., opensuse and sles).
-
-Anyway, is libstoragemgt available for the above?
-
-[JH] - I'm seeing packages for both 16.04 and 14.04, along with Debian =
-Jessie and Centos7. I think my biggest challenge will be figuring out *=
-exactly* when the 1.3 release of libstoragemgmt is available for all th=
-ese distros. I don't plan to submit a pull until I can confirm that.
-
-We will presuambly want the build system to conditionally compile it ou=
-t with a flag in case it is not present or available, so we can also do=
- that as needed (e.g., on 14.04, which probably won't have it).
-
-[JH] - Can do, I agree that I want to give folks the option to compile =
-without it. Thanks!
-
-sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Tue, May 3, 2016 at 5:26 AM, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 3 May 2016, Ming Lin wrote:
+>> Hi John,
+>>
+>> I got rocksdb related build error (commit bb7d9c15).
+>> Any hint to fix it?
+>>
+>> It's OK if I build in the ceph source tree.
+>
+> Out of tree builds don't work currently with autotools.
+>
+> sage
+>
+>
+>> mlin@ssi:~/ceph$ ./autogen.sh
+>> ...
+>>
+>> mlin@ssi:~/ceph-build$ ../ceph/configure
+>> ...
+>>
+>> mlin@ssi:~/ceph-build$ make -j8
+>> ...
+>> make[3]: Entering directory `/home/mlin/ceph-build/src'
+>> cd rocksdb && CC="gcc" CXX="g++" EXTRA_CXXFLAGS=-fPIC PORTABLE=1 make
+>> -j8 static_lib
+>> /bin/bash: line 0: cd: rocksdb: No such file or directory
+>> make[3]: *** [rocksdb/librocksdb.a] Error 1
+>> make[3]: *** Waiting for unfinished jobs....
+>> make[3]: Leaving directory `/home/mlin/ceph-build/src'
+>> make[2]: *** [all-recursive] Error 1
+>> make[2]: Leaving directory `/home/mlin/ceph-build/src'
+>> make[1]: *** [all] Error 2
+>> make[1]: Leaving directory `/home/mlin/ceph-build/src'
+>> make: *** [all-recursive] Error 1
+>>
+>>
+>> mlin@ssi:~/ceph-build$ ls src/
+>> acconfig.h  client      crush         java             kv
+>>  log       mount     os        rbd_fuse    test
+>> arch        cls         erasure-code  journal          librados
+>>  Makefile  msg       osd       rbd_replay  tools
+>> auth        common      global        json_spirit      libradosstriper
+>>  mds       objclass  osdc      rgw         tracing
+>> civetweb    compressor  gmock         key_value_store  librbd
+>>  mon       ocf       perfglue  stamp-h1    xxHash
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
