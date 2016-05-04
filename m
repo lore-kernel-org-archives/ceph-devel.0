@@ -1,53 +1,70 @@
-From: Victor Denisov <vdenisov@mirantis.com>
-Subject: Re: trello backlog
-Date: Tue, 3 May 2016 16:37:04 -0700
-Message-ID: <CA+hcxJScAX+wEMFE4-JwJqNWow=zz-YkPWC0L4S01HVdRYhq-Q@mail.gmail.com>
-References: <alpine.DEB.2.11.1605030925310.26967@cpach.fuggernut.com>
-	<5728E2D8.4090900@suse.cz>
-	<alpine.DEB.2.11.1605031345310.26967@cpach.fuggernut.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: blueprint: consistency groups
+Date: Tue, 3 May 2016 20:29:51 -0400
+Message-ID: <CA+aFP1Awk0YZnW16JxOgfDeJFsuKPoN4jdrpr8dCdqUjhhD_Mw@mail.gmail.com>
+References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
+	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
+	<20160325071933.GA14634@gmail.com>
+	<CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
+	<CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
+	<CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
+	<CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
+	<CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
+	<CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
+	<CA+aFP1C7me+-dbXVrMgU0Qs9fX8_4ocC9v5orzy+c8tK30y08A@mail.gmail.com>
+	<CA+hcxJT4DWgt8K8hc27KbkJK=DRePM18Zh=GPxtfR5afoxVP1w@mail.gmail.com>
+	<CA+hcxJQGcDy96o0f9sEY8HwLXng9YzxsoKAhaaCuCDDhVbN76A@mail.gmail.com>
+	<CA+aFP1AQzo7bO=e-Gd_sAtBWSYFgvji8isxuXFKDejaHAA+FuA@mail.gmail.com>
+	<CA+hcxJRMcJFxYdscdwyvowjw_dNF6xoNzCHT1=oaznwGqY-4Rw@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:33876 "EHLO
-	mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756819AbcECXhF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 19:37:05 -0400
-Received: by mail-yw0-f179.google.com with SMTP id j74so47248300ywg.1
-        for <ceph-devel@vger.kernel.org>; Tue, 03 May 2016 16:37:04 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1605031345310.26967@cpach.fuggernut.com>
+Received: from mail-pf0-f179.google.com ([209.85.192.179]:34934 "EHLO
+	mail-pf0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756842AbcEDA3w (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2016 20:29:52 -0400
+Received: by mail-pf0-f179.google.com with SMTP id 77so17570178pfv.2
+        for <ceph-devel@vger.kernel.org>; Tue, 03 May 2016 17:29:52 -0700 (PDT)
+In-Reply-To: <CA+hcxJRMcJFxYdscdwyvowjw_dNF6xoNzCHT1=oaznwGqY-4Rw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Nathan Cutler <ncutler@suse.cz>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Victor Denisov <vdenisov@mirantis.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-I use trello for my personal projects. Here in Mirantis we use it a lot as well.
-Trello is a very neat product and has nice apps for phones.
-Can you send me the link for write access? I'll assign my task to me.
+You can use the explicit constructor of librados::Rados to convert
+from a librados::IoCtx [1].  Once you have the Rados object, use
+librados::Rados::ioctx_create2 to create a new librados::IoCtx [2].
+Here is the example from the snap unprotect state machine [3].
 
-On Tue, May 3, 2016 at 10:46 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 3 May 2016, Nathan Cutler wrote:
->> >          https://trello.com/b/ugTc2QFH/ceph-backlog
->>
->> ...
->>
->> > I'm not sure how helpful this will be, and I'm generally skeptical of tool
->> > proliferation.  OTOH, trello is super-lightweight, and even if we only use
->> > this for little stuff (like chum) I suspect it will be a win.
->>
->> +1 Personally I find trello to be quite useful - a lot of the functionality is
->> implemented in JavaScript so it runs in the browser and is very snappy. It
->> even sort-of works offline.
->>
->> I like the "chum bucket" aspect of it, but I don't see a "chum bucket" list on
->> the board. Should all of the cards be considered potential chum projects?
+[1] https://github.com/ceph/ceph/blob/master/src/include/rados/librados.hpp#L1145
+[2] https://github.com/ceph/ceph/blob/master/src/include/rados/librados.hpp#L1187
+[3] https://github.com/ceph/ceph/blob/master/src/librbd/operation/SnapshotUnprotectRequest.cc#L73
+
+On Tue, May 3, 2016 at 5:48 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+> Jason,
 >
-> My thought was to mark tasks with easy/medium/hard tags.  Green is
-> currently easy.  There's not much there yet, but hopefully it'll be easier
-> to add and manage such items...
+> Can you point me to a specific line of code where you reuse Rados?
+> I see that IoCtx only has reference to RadosClient not to Rados itself.
 >
-> sage
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> On Tue, May 3, 2016 at 5:05 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>> On Mon, May 2, 2016 at 8:26 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>> As such, I can't open another ioctx when I'm already inside rbd
+>>> class.
+>>
+>> You actually can open a new IoCtx against a new pool -- we do this
+>> internally for journaling handling, scanning pools for children during
+>> the snapshot unprotect operation, opening a parent image of a clone,
+>> etc.   You can extract the "librados::Rados" object from the
+>> "librados::IoCtx" and then use "librados::Rados::ioctx_create2" to
+>> create a new IoCtx by pool id.
+>>
+>> Also agree with Mykola in that the API should return resolved image names.
+>>
+>> --
+>> Jason
+
+
+
+-- 
+Jason
