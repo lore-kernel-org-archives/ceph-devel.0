@@ -1,50 +1,58 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Perhaps a missing dependancy in the makefiles
-Date: Wed, 4 May 2016 18:27:54 +0200
-Message-ID: <add58916-4482-936f-53f7-a79573fc9925@digiware.nl>
+Subject: ceph-disk broken????
+Date: Wed, 4 May 2016 22:44:15 +0200
+Message-ID: <5e9940d6-d9bb-e9b4-0af8-49e0f0cbb0f5@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:51650 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([31.223.170.169]:39577 "EHLO smtp.digiware.nl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751844AbcEDQk0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 4 May 2016 12:40:26 -0400
+	id S1752820AbcEDUos (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 4 May 2016 16:44:48 -0400
 Received: from rack1.digiware.nl (unknown [127.0.0.1])
-	by smtp.digiware.nl (Postfix) with ESMTP id B0D9D153431
-	for <ceph-devel@vger.kernel.org>; Wed,  4 May 2016 18:40:22 +0200 (CEST)
-Received: from [192.168.101.107] (unknown [176.74.240.1])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.digiware.nl (Postfix) with ESMTPSA id 5706F153402
-	for <ceph-devel@vger.kernel.org>; Wed,  4 May 2016 18:27:54 +0200 (CEST)
+	by smtp.digiware.nl (Postfix) with ESMTP id 324DC1534C6
+	for <ceph-devel@vger.kernel.org>; Wed,  4 May 2016 22:44:37 +0200 (CEST)
+Received: from [IPv6:2001:4cb8:3:1:595:cf6a:9232:788a] (unknown [IPv6:2001:4cb8:3:1:595:cf6a:9232:788a])
+	by smtp.digiware.nl (Postfix) with ESMTP id AA782153431
+	for <ceph-devel@vger.kernel.org>; Wed,  4 May 2016 22:44:18 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+Hi
 
-Everytime I run a parallel make on the full tree I get the following
-complaint:
-In file included from db/builder.cc:16:
-In file included from ./db/compaction_iterator.h:14:
-In file included from ./db/compaction.h:13:
-./util/mutable_cf_options.h:28:21: error: no member named
-'soft_pending_compaction_bytes_limit' in
-      'rocksdb::Options'; did you mean
-'hard_pending_compaction_bytes_limit'?
-            options.soft_pending_compaction_bytes_limit),
-                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    hard_pending_compaction_bytes_limit
+Setup:
+   Fresh VM with CentOS7
+   standard ceph/ceph clone
+   building with run-make-check.sh
+      So the dependancies are installed by install-deps.sh
 
-Then I just run along with a single threaded make, and everything
-completes just fine.
+I have several tests that fail with:
 
-So that is probably a missing dependency for either db/builder.cc, or
-./util/mutable_cf_options.h.
+  run_osd:  ceph-disk --statedir=testdir/osd-crush 
+--sysconfdir=testdir/osd-crush --prepend-to-path= prepare 
+testdir/osd-crush/0
+Traceback (most recent call last):
+   File "/tmp/ceph-disk-virtualenv/bin/ceph-disk", line 5, in <module>
+     from pkg_resources import load_entry_point
+   File 
+"/tmp/ceph-disk-virtualenv/lib/python2.7/site-packages/pkg_resources.py", 
+line 3007, in <module>
+     working_set.require(__requires__)
+   File 
+"/tmp/ceph-disk-virtualenv/lib/python2.7/site-packages/pkg_resources.py", 
+line 728, in require
+     needed = self.resolve(parse_requirements(requirements))
+   File 
+"/tmp/ceph-disk-virtualenv/lib/python2.7/site-packages/pkg_resources.py", 
+line 626, in resolve
+     raise DistributionNotFound(req)
+pkg_resources.DistributionNotFound: ceph-disk==1.0.0
 
-Suggestions on how to fix this?
+Looks like ceph-disk is not in the fresh install in tmp...
 
-Thanx,
+Ran into this with my development fork, but then also with a regular HEAD
+Did I miss something?
+
 --WjW
-
