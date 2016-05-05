@@ -1,26 +1,38 @@
-From: Gregory Farnum <gfarnum@redhat.com>
+From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
 Subject: Re: on-the-wire encryption, addrs, and cephx
-Date: Thu, 5 May 2016 11:25:30 -0700
-Message-ID: <CAJ4mKGaU_oB6QLGxUF5irPM4T9FOoN0Q=wRNWBXH0TS0GFMEQg@mail.gmail.com>
+Date: Thu, 5 May 2016 14:26:26 -0400
+Message-ID: <CAGbvivJtadH75PN-hbd6DNrYsTvHtp9SY=pEvoHH7XRTqTwoFw@mail.gmail.com>
 References: <alpine.DEB.2.11.1605050822230.15413@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:36556 "EHLO
-	mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753003AbcEESZb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 May 2016 14:25:31 -0400
-Received: by mail-yw0-f179.google.com with SMTP id o66so153798068ywc.3
-        for <ceph-devel@vger.kernel.org>; Thu, 05 May 2016 11:25:31 -0700 (PDT)
+Received: from mail-io0-f175.google.com ([209.85.223.175]:35196 "EHLO
+	mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751844AbcEES01 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 May 2016 14:26:27 -0400
+Received: by mail-io0-f175.google.com with SMTP id d62so92797994iof.2
+        for <ceph-devel@vger.kernel.org>; Thu, 05 May 2016 11:26:27 -0700 (PDT)
 In-Reply-To: <alpine.DEB.2.11.1605050822230.15413@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I'll try and evaluate this in more detail later, but for now...
+There is definitely lots of interest in securing the transport and
+making the entire protocol secure from end-to-end. Kerberos is a step
+up from cephx and has multi-vendor support.  Though I would caution
+against writing to a particular KRB5 API (MIT vs Heimdal, etc).
+Consider kerberos over GSSAPI for more portability and a standardized
+API.  If you are designing it from scratch, making the ceph side
+pluggable would also be good so it can be more adaptable if (or when)
+a more desirable auth/crypto system comes along.
 
-On Thu, May 5, 2016 at 5:57 AM, Sage Weil <sweil@redhat.com> wrote:
+Wyllys Ingersoll
+Keeper Technology, LLC
+
+
+
+On Thu, May 5, 2016 at 8:57 AM, Sage Weil <sweil@redhat.com> wrote:
 > Hi all,
 >
 > We had a call last night (Marcus, Haomai, Yehuda, our GSoC student Zhao,
@@ -105,19 +117,6 @@ On Thu, May 5, 2016 at 5:57 AM, Sage Weil <sweil@redhat.com> wrote:
 > There are a few questions:
 >
 > - Should we bother implementing v2 for SimpleMessenger?  I think no.
-
-I think we have to implement this for SimpleMessenger. I know we want
-to move to AsyncMessenger ASAP, but until we've resolved any top-line
-performance issues it won't be appropriate to deprecate the
-SimpleMessenger.
-
-And unless we really are doing a whole new wire protocol that doesn't
-need to be in any way compatible with other implementations (like,
-say, the kernel clients), it'll make us a lot more confident that it
-is appropriately backwards-compatible and works correctly to have the
-AsyncMessenger and SimpleMessenger speaking it to each other.
--Greg
-
 >
 > - Should we work on native kerberos as an auth type at the same time?  It
 > would be nice to do this while desiging the v2 protocol to ensure that we
