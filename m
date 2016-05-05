@@ -1,43 +1,85 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: Ceph Day Portland
-Date: Thu, 5 May 2016 09:11:03 -0400
-Message-ID: <CAAZbbf3dioVKqTFBFSZurkH2203bx3Nos0dDqSgp+etTs50Uhw@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: wip-addr-features
+Date: Thu, 5 May 2016 11:41:17 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605051043220.15518@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f46.google.com ([209.85.215.46]:33537 "EHLO
-	mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751345AbcEENLG convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 May 2016 09:11:06 -0400
-Received: by mail-lf0-f46.google.com with SMTP id y84so95759197lfc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 05 May 2016 06:11:04 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:39522 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753114AbcEEPlH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 5 May 2016 11:41:07 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+To: zhjwpku@gmail.com, ceph-devel@vger.kernel.org
 
-Hey cephers,
+Hi Zhao,
 
-We are just under two weeks away from Ceph Day Portland, hosted by
-Intel, and the schedule is now available. Don=E2=80=99t forget to get y=
-our
-tickets while they=E2=80=99re hot!
+We identified wip-addr as a desireable first step to fixing up the 
+messenger protocol.  It has a bunch of other nice benefits as well, like 
+being able to support both IPv4 and IPv6 in the same cluster.
 
-http://ceph.com/cephdays/ceph-day-portland/
+I started rebasing the branch this morning ran into a bunch of non-trivial 
+questions about how we should structure the entity_addr_t to support both 
+new address types (ipv4, ipv6, xio, etc.) *and* the a new on-wire 
+protocol.  But this is actually step 2...
 
-If you have any questions on timing or logistics feel free to let me
-know. See you in Portland!
+Step 1 is to just get the feature bits plumbed down to every bit of code 
+that encodes an entity_addr_t to send over the wire so that we will 
+know whether to encode using the new or legacy format.  To do that, I 
+pushed a simplified branch, wip-addr-features, to
 
---=20
+	https://github.com/liewegas/ceph/commits/wip-addr-features
 
-Best Regards,
+The are some prelim encoding patches, then a patch that makes 
+entity_addr_t and entity_inst_t *optionally* accept feature bits.  Let's 
+call it optional-features-patch.  This compiles cleanly, and allows either 
+an existing featureless encode
 
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  entity_addr_t foo;
+  ::encode(foo, bl);             // old way we need to eliminate
+
+or a featured encode
+
+  entity_addr_t foo;
+  ::encode(foo, bl, features);   // what we want
+
+compile.
+
+Then there's a patch that makes the old way not compile.  Let's call it 
+required-features-patch.  This will make the compiler spit out a million 
+errors for all the call sites that still need to be fixed.
+
+Finally, there is a 'wip' commit that fixes some but not all call sites.  
+This commit needs to be broken down into simple, individual changes that 
+can be tested and reviewed separately.
+
+The idea is to work with the require-features-patch applied to identify 
+remaining call sites that need features to encode entity_addr_t.  Create 
+small, contained patches that fix individual modules, call sites, or add 
+supporting infrastructure (like the changes that expose features to OSD 
+cls ops in objclass/*).
+
+Once there are several of those, remove the require-features-patch, and 
+make sure the changes are safe and clean and everything still works 
+properly.  We can merge these as we go to make incremental progress.
+
+Finally, once *everything* is fixed to pass features to addr encode sites, 
+the last commit will be the require-features-patch, and we can get it all 
+in master.
+
+That will lay the foundation so that we can change the entity_addr_t 
+encoding to support the new protocols and encoding, the entity_addrvec_t 
+type, and so on.
+
+(The plan is to replace most instnaces of entity_addr_t with 
+entity_addrvec_t--a list of addresses instead of a single one.  And make 
+entity_addrvec_t encoded with old features spit out the legacy addr with 
+the legacy entity_addr_t encoding so that old clients can still function.)
+
+We're all in #ceph-devel on irc.oftc.net--feel free to ask questions there 
+or on this email thread.  Or we can do another video conf session to go 
+through it.
+
+Thanks!
+sage
