@@ -1,46 +1,58 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: on-the-wire encryption, addrs, and cephx
-Date: Fri, 6 May 2016 12:11:05 -0400
-Message-ID: <20160506161105.GA23534@ultraspiritum>
-References: <alpine.DEB.2.11.1605050822230.15413@cpach.fuggernut.com>
- <CAJ4mKGaU_oB6QLGxUF5irPM4T9FOoN0Q=wRNWBXH0TS0GFMEQg@mail.gmail.com>
- <alpine.DEB.2.11.1605060823190.15518@cpach.fuggernut.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: QE validation hammer v0.94.7 finished (needs approval)
+Date: Fri, 6 May 2016 09:26:25 -0700
+Message-ID: <CAMMFjmFE6NTPA-DkTRubYPeyy+Qk0gHU_da3g97+zK9=Xm+DJA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:14805 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758697AbcEFQLH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 6 May 2016 12:11:07 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id EC8C780088
-	for <ceph-devel@vger.kernel.org>; Fri,  6 May 2016 16:11:06 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1605060823190.15518@cpach.fuggernut.com>
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:35682 "EHLO
+	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755528AbcEFQ01 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 May 2016 12:26:27 -0400
+Received: by mail-wm0-f47.google.com with SMTP id e201so64035024wme.0
+        for <ceph-devel@vger.kernel.org>; Fri, 06 May 2016 09:26:26 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-qa <ceph-qa@ceph.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sage@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>, "Dachary, Loic" <ldachary@redhat.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Gregory Farnum <gfarnum@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, Gregory Meno <gmeno@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>
 
-On 06/05/2016, Sage Weil wrote:
-[snip]
-> and we'll also need to keep the v1 protocol support around for a
-> long time (probably a couple years at least) for the benefit of old
-> clients.  And there's no reason anybody *has* to switch to the new
-> protocol unless they need the new features or improved security.
-[snip]
+Hello
 
-I can understand not wanting to force people to take a performance
-hit. However, it sounded, from your writeup, like even without
-encryption the new auth mechanism would be an improvement on the old
-one. Once we do get it working, tested, and performant, I'd suggest we
-might want to force users' hand on the issue and announce that the old
-mechanism will be removed in some upcoming version, rather than
-waiting for users to rotate older clients out over time.
+Detailed summary of the QE Validation can be found here
+http://tracker.ceph.com/issues/14692#note-61
 
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+The following suites were in scope of this point release testing:
+
+rados (subset 1/7)
+rbd
+rgw
+fs
+krbd
+kcephfs
+hadoop
+samba
+rest
+ceph-deploy
+upgrade/client-upgrade
+upgrade/dumpling-firefly-x (hammer)
+upgrade/firefly-x (hammer)
+upgrade/hammer
+upgrade/hammer-x (infernalis)
+powercycle
+
+Known issues (approved for release):
+
+fs:
+http://tracker.ceph.com/issues/14716 - (same as in v0.94.6 was
+approved by Greg, Josh)
+
+samba:
+http://tracker.ceph.com/issues/14714 - (same as in v0.94.6 was approved by Greg)
+
+krbd:
+see failed runs, Jason/Josh pls review and approve or suggest next steps.
+
+ceph-deploy:
+http://tracker.ceph.com/issues/14223 (same as in v0.94.6 was approved by Sage)
+
+Thx
+YuriW
