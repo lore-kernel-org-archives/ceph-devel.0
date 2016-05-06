@@ -1,70 +1,52 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: about rbd journaling
-Date: Fri, 6 May 2016 08:28:31 -0400
-Message-ID: <CA+aFP1BBZD2-1VojzMFw9_HXe2h0i31GaoiXdwJR=M2cWpwadQ@mail.gmail.com>
-References: <CAKZcxgd-1O64885PZ+tNJJrFNnvTx=uaA7aJi91Puv+KuqSGgw@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: on-the-wire encryption, addrs, and cephx
+Date: Fri, 6 May 2016 08:29:10 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605060823190.15518@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1605050822230.15413@cpach.fuggernut.com> <CAJ4mKGaU_oB6QLGxUF5irPM4T9FOoN0Q=wRNWBXH0TS0GFMEQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f174.google.com ([209.85.192.174]:34285 "EHLO
-	mail-pf0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757910AbcEFM2c convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 May 2016 08:28:32 -0400
-Received: by mail-pf0-f174.google.com with SMTP id y69so49150263pfb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 06 May 2016 05:28:32 -0700 (PDT)
-In-Reply-To: <CAKZcxgd-1O64885PZ+tNJJrFNnvTx=uaA7aJi91Puv+KuqSGgw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51789 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757910AbcEFM3B (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 May 2016 08:29:01 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id D925A15558
+	for <ceph-devel@vger.kernel.org>; Fri,  6 May 2016 12:29:00 +0000 (UTC)
+In-Reply-To: <CAJ4mKGaU_oB6QLGxUF5irPM4T9FOoN0Q=wRNWBXH0TS0GFMEQg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jaze Lee <jazeltq@gmail.com>
+To: Gregory Farnum <gfarnum@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-The rationale for requiring the data to be safely committed to the
-journal before permitting writes to the image itself is to ensure
-consistent state upon a crash/failure.  If, for example, the write
-modified the image and there was a failure before ensuring the journal
-entry was safely committed to disk, the replicated image would no
-longer be consistent with the source (since there would be no log of
-the change for the replicated image to replay).
+On Thu, 5 May 2016, Gregory Farnum wrote:
+> > There are a few questions:
+> >
+> > - Should we bother implementing v2 for SimpleMessenger?  I think no.
+> 
+> I think we have to implement this for SimpleMessenger. I know we want
+> to move to AsyncMessenger ASAP, but until we've resolved any top-line
+> performance issues it won't be appropriate to deprecate the
+> SimpleMessenger.
+> 
+> And unless we really are doing a whole new wire protocol that doesn't
+> need to be in any way compatible with other implementations (like,
+> say, the kernel clients), it'll make us a lot more confident that it
+> is appropriately backwards-compatible and works correctly to have the
+> AsyncMessenger and SimpleMessenger speaking it to each other.
 
-With the librbd cache enabled, we still immediately ACK the write to
-the client since read-after-write requests can be correctly satisfied
-by the cache.  The cache writeback for the affected extents will be
-blocked until the journal entry is safely stored -- so a flush would
-block until the journal event it safe on disk.
+Well, it won't be compatible at all--that's why the wip-addr and mon port 
+change are part of the plan.
 
-On Thu, May 5, 2016 at 11:17 PM, Jaze Lee <jazeltq@gmail.com> wrote:
-> Hi all,
->    I found the rbd journaling first send data to journal pool (in
-> append_io_event, and return a future
->   by journaler append) and then(when the append is safe) send to the
-> real data pool.
->    Can someone explain a little more on this. I do not why doing this=
-,
-> why not first to data pool,
->    then to the journal pool?  May be put data first in journal pool
-> will let the rbd-mirror sync first?
->
-> Thanks a lot
->
->
->
->
-> --
-> =E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+We'll need to keep SimpleMessenger around for along time, and we'll also 
+need to keep the v1 protocol support around for a long time (probably a 
+couple years at least) for the benefit of old clients.  And there's no 
+reason anybody *has* to switch to the new protocol unless they need the 
+new features or improved security.  If someone can't move to msg/async for 
+stability/performance reasons, they can just keep using SimpleMessenger 
+until they get resolved--that has to happen in the next cycle or two (vs 
+the years before we remove the old code).
 
-
-
---=20
-Jason
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
