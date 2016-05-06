@@ -1,159 +1,247 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: OSDs continuously crashing with v9.2.1
-Date: Fri, 6 May 2016 08:45:50 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605060842230.15518@cpach.fuggernut.com>
-References: <572C6C60.3090808@greenhost.nl>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Could be due to a race condition... Re: Help with understanding
+ throttle.finish()
+Date: Fri, 6 May 2016 17:29:33 +0200
+Message-ID: <8402c73a-d6c4-6ad7-453e-c100e7376e72@digiware.nl>
+References: <57225355.3040401@digiware.nl>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-574103004-1462538753=:15518"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55798 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932478AbcEFMpl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 May 2016 08:45:41 -0400
-In-Reply-To: <572C6C60.3090808@greenhost.nl>
+Received: from smtp.digiware.nl ([31.223.170.169]:45568 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757964AbcEFPaF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 May 2016 11:30:05 -0400
+Received: from rack1.digiware.nl (unknown [127.0.0.1])
+	by smtp.digiware.nl (Postfix) with ESMTP id 65F66153416
+	for <ceph-devel@vger.kernel.org>; Fri,  6 May 2016 17:30:01 +0200 (CEST)
+Received: from [IPv6:2001:4cb8:3:1:f45e:97a:9563:74af] (unknown [IPv6:2001:4cb8:3:1:f45e:97a:9563:74af])
+	by smtp.digiware.nl (Postfix) with ESMTP id AAACA153430
+	for <ceph-devel@vger.kernel.org>; Fri,  6 May 2016 17:29:39 +0200 (CEST)
+In-Reply-To: <57225355.3040401@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ana Aviles <ana@greenhost.nl>
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On 28-4-2016 20:15, Willem Jan Withagen wrote:
+> Hi,
+>
+> I'm running a rather simple setup on my FreeBSD port.
+>
+> function TEST_simple() {
+>     # run the most simple config, and run a bechmark on it.
+>     local dir=$1
+>
+>     run_mon $dir a || return 1
+>     run_osd $dir 0 || return 1
+>
+>     #
+>     # default values should work
+>     #
+>     ceph tell osd.0 bench || return 1
+>
+> }
+>
+> This in the end crashes with:
+>     8059eec00 -1 FileStore: sync_entry timed out after 600 seconds.
+> exactly 10 minutes after startup.
+> This trhread does just about exactly nothing, it initialises the time,
+> and then traps after 10 minutes.
+> # grep 8059eec00  testdir/osd-bench/osd.0.log
+> 2016-04-28 19:51:44.444689 8059eec00 -1 FileStore: sync_entry timed out
+> after 600 seconds.
+> 2016-04-28 19:51:44.487104 8059eec00 -1 os/filestore/FileStore.cc: In
+> function 'virtual void SyncEntryTimeout::finish(int)' thread 8059eec00 time
 
---8323329-574103004-1462538753=:15518
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Haven't made much progress with this problem.
+Rebases, but that does not bring any "fixes" in.
 
-On Fri, 6 May 2016, Ana Aviles wrote:
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA512
-> 
-> Hello,
-> 
-> We are currently experiencing an unstable cluster on a backup cluster,
-> we believe it is due to the latest Cephversion 9.2.1
-> (752b6a3020c3de74e07d2a8b4c5e48dab5a6b6fd). OSDs keep on crashing,
-> segfaulting, which eventually leads some of them to be down, or leave
-> the cluster on strange scenarios like having unfound objects.
-> 
-> [Fri May  6 09:45:09 2016] ceph-osd[17588]: segfault at 0 ip
-> 00007f2bbc5e692a sp 00007f2ba8905060 error 4 in
-> libtcmalloc.so.4.1.2[7f2bbc5c3000+43000]
-> [Fri May  6 09:45:09 2016] init: ceph-osd (ceph/72) main process (16509)
-> killed by SEGV signal
-> [Fri May  6 09:45:09 2016] init: ceph-osd (ceph/72) main process ended,
-> respawning
-> 
-> Our nodes run Ubuntu 14.04.4 LTS, and two of them Ceph version 9.2.0
-> (bb2ecea240f3a1d525bcb35670cb07bd1f0ca299) while the other two run ceph
-> version 9.2.1 (752b6a3020c3de74e07d2a8b4c5e48dab5a6b6fd). Only on
-> v.9.2.1. osds keep on segfaulting. On some of them we see:
-> 
-> ceph version 9.2.1 (752b6a3020c3de74e07d2a8b4c5e48dab5a6b6fd)
->  1: (()+0x7d1aca) [0x7f42100b3aca]
->  2: (()+0x10340) [0x7f420e7c6340]
->  3:
-> (tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
-> unsigned long, int)+0x103) [0x7f420e9f7923]
->  4:
-> (tcmalloc::ThreadCache::ListTooLong(tcmalloc::ThreadCache::FreeList*,
-> unsigned long)+0x1b) [0x7f420e9f79db]
->  5: (tc_free()+0x1f8) [0x7f420ea052c8]
->  6: (()+0x50451) [0x7f420e4cc451]
->  7: (PK11_FreeSlotList()+0x9) [0x7f420e4cc479]
->  8: (PK11_GetAllTokens()+0x1cc) [0x7f420e4cec5c]
->  9: (PK11_GetBestSlotMultipleWithAttributes()+0x23b) [0x7f420e4cf06b]
->  10: (PK11_GetBestSlot()+0x1f) [0x7f420e4cf0df]
->  11: (CryptoAES::get_key_handler(ceph::buffer::ptr const&,
-> std::string&)+0x1f4) [0x7f42100d3484]
->  12: (CryptoKey::_set_secret(int, ceph::buffer::ptr const&)+0xcc)
-> [0x7f42100d25fc]
->  13: (CryptoKey::decode(ceph::buffer::list::iterator&)+0xa2)
-> [0x7f42100d2922]
->  14: (void decode_decrypt_enc_bl<CephXServiceTicket>(CephContext*,
-> CephXServiceTicket&, CryptoKey, ceph::buffer::list&,
-> std::string&)+0x4a5) [0x7f42100c0f05]
->  15: (int decode_decrypt<CephXServiceTicket>(CephContext*,
-> CephXServiceTicket&, CryptoKey const&, ceph::buffer::list::iterator&,
-> std::string&)+0x1cf) [0x7f42100c12df]
->  16: (CephXTicketHandler::verify_service_ticket_reply(CryptoKey&,
-> ceph::buffer::list::iterator&)+0xdb) [0x7f42100bb5ab]
->  17: (CephXTicketManager::verify_service_ticket_reply(CryptoKey&,
-> ceph::buffer::list::iterator&)+0x122) [0x7f42100bd442]
->  18: (CephxClientHandler::handle_response(int,
-> ceph::buffer::list::iterator&)+0xef4) [0x7f421024a2b4]
->  19: (MonClient::handle_auth(MAuthReply*)+0xce) [0x7f421014589e]
->  20: (MonClient::ms_dispatch(Message*)+0x297) [0x7f4210147b27]
->  21: (DispatchQueue::entry()+0x63a) [0x7f421025683a]
->  22: (DispatchQueue::DispatchThread::entry()+0xd) [0x7f4210180ecd]
->  23: (()+0x8182) [0x7f420e7be182]
->  24: (clone()+0x6d) [0x7f420cb0547d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
-> 
-> Which is the same error reported 8 days ago
-> http://tracker.ceph.com/issues/15628
-> 
-> 
-> Here is the log of one of the down OSDs: http://pastebin.com/dcHKrE8f
-> 
-> Now we would like to downgrade to version 9.2.0 all nodes, since we keep
-> on having osds down and sometimes OSDs with corrupted metadata. However,
-> it looks like it is not possible to downgrade a Ceph version?
+An extra measure point in time.
+I've ran the OSD thru truss (aka strace in linux speak) and that does 
+complete.
 
-Our goal is to make downgrades within a stable series possible, but we 
-have not tested them for infernalis.
+Now what truss/strace does it augments kernel entry and exit with 
+monitoring code
+and as such it can (and will change) the micro-timing. Als a consequence 
+of that
+it could also order the way threads interact.
+It could very well be a difference between semantics in Locks/Mutexes 
+between
+Linux and FreeBSD, but I have not really found any suggestions to that 
+regard.
 
-There was one fix in the auth code that may affect this.  I pushed a 
-branch that backports it to infernalis and pushed a wip-auth-infernalis 
-branch. The packages should show up on gitbuilder.ceph.com in an hour or 
-so.  Can you give those a try?
+The fact that with truss/strace the osd does not generate a crash,
+(not even with: --filestore-commit-timeout=10)
+is in indication that I could very likely be either a deadlock or other 
+lock
+related issue that is hiding somewhere under the lid of the OSD.
 
-	http://gitbuilder.ceph.com/ceph-deb-trusty-x86_64-basic/ref/wip-auth-infernalis
+What are people using to analyze timing/locking/deadlocking issues in 
+the Cephcode?
 
-We haven't seen this crash at all in any of our testing.  :(
-
-> Besides that, we also have "wrong node!" messages on most of our osd
-> logs (on both nodes with v9.2.1 and v9.2.0). We don't know if it is
-> related, or if we should also have a look at that.
-> 
-> 2016-05-05 15:30:16.994946 7f7272cc3700  0 --
-> [2a00:c6c0:0:120::201]:6893/5870 >> [2a00:c6c0:0:120::202]:6807/10502
-> pipe(0x7f72cc272000 sd=24 :53006 s=1 pgs=309 cs=19 l=0
-> c=0x7f72d23f31e0).connect claims to be [2a00:c6c0:0:120::202]:6807/4013
-> not [2a00:c6c0:0:120::202]:6807/10502 - wrong node!
-
-These are harmless--they're just there because OSDs are restarting and 
-reusing some of the same ports.
-
-sage
+Thanx,
+--WjW
 
 
-> 
-> Thanks!
-> 
-> 
-> 
-> - -- 
-> Ana Avilés
-> Greenhost - sustainable hosting & digital security
-> E: ana@greenhost.nl
-> T: +31 20 4890444
-> W: https://greenhost.nl
-> -----BEGIN PGP SIGNATURE-----
-> 
-> iQEcBAEBCgAGBQJXLGxZAAoJEOUdSHwFo2bgT7IIAIMHE5x6Qhqn/nskuB1k2QJl
-> NWC/nR0Cmlc5OSEoAHu1fZKMtnP8XAfH+zW+MO7xNpgDks5zCZ0oLXPo9hYndGNN
-> yVgUMDcm7hw8saYiRumsEr84ER2Hsv7kMcAdEAFyt4IJ056WRUGduFBWmc6VkRx5
-> OtOqmlHKpnX+BW8UPGoNXD6JjmAog38+rUszdkQmn1WpvG+aBx/plQlcZXNnfIMM
-> mclsDzTkSO5LStVYSNaBfp7OpYiXwESVjz4X73ZnoTX61q0cOfL4W9Kvp+xeXfyV
-> RkRhPLXuffrX9bV5HVRE4zpexXy781o2ugAh5ZwCFgGSJgkRJM+IxA6OAqSo+Kg=
-> =sDhn
-> -----END PGP SIGNATURE-----
-> 
+> I've augmented just about every line of code in src/os/filestore/File*.cc
+>
+> And I get as far as
+>     throttle.flush()
+> It seems to work the first time it gets called. That is, it returns.
+>
+> However the second time is "stalls" in the call
+>      throttle.put(to_put_bytes);
+> after a number of itterations thru the while-loop.
+>
+> Below the code of Throttle::Flush and an sequence of the thread doing
+> the blocking call
+> from the log where I've added mode debugging code.
+>
+> Does anybody have a clue as to continue from here?
+>   Why does throttle.put not return?
+>   Is it just throttleing too hard and not reorganising the queue?
+>
+> --WjW
+>
+> Code:
+> std::pair<uint64_t, uint64_t> JournalThrottle::flush(uint64_t mono_id)
+> {
+>   uint64_t to_put_bytes = 0;
+>   uint64_t to_put_ops = 0;
+>   std::pair<uint64_t, uint64_t> ret;
+>   {
+>     locker l(lock);
+>     while (!journaled_ops.empty() &&
+>            journaled_ops.front().first <= mono_id) {
+>       to_put_bytes += journaled_ops.front().second;
+>       to_put_ops++;
+>       journaled_ops.pop_front();
+>     }
+>   }
+>   throttle.put(to_put_bytes);
+>   ret = make_pair(to_put_ops, to_put_bytes);
+>   return ret;
+> }
+>
+> Thread log:
+> 2016-04-28 19:41:43.231410 8059ec900 20 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) waiting for max_interval 5.000000
+> 2016-04-28 19:41:43.231438 8059ec900 20 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) started at: 2016-04-28 19:41:43.231436
+> 2016-04-28 19:41:44.395763 8059ec900 20 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) ended at: 2016-04-28 19:41:44.395758
+> 2016-04-28 19:41:44.395781 8059ec900 20 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) waited for 1
+> 2016-04-28 19:41:44.395789 8059ec900 20 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) woke after 1.164433
+> 2016-04-28 19:41:44.395795 8059ec900 10 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) 3726
+> 2016-04-28 19:41:44.395801 8059ec900 10 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) 3730
+> 2016-04-28 19:41:44.395806 8059ec900 10 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) 3733
+> 2016-04-28 19:41:44.400570 8059ec900 10 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) 3735 starting apply_manager.commit_start()
+> 2016-04-28 19:41:44.400584 8059ec900 10 journal commit_start
+> max_applied_seq 32, open_ops 0
+> 2016-04-28 19:41:44.400588 8059ec900 10 journal commit_start blocked,
+> all open_ops have completed
+> 2016-04-28 19:41:44.400591 8059ec900 10 journal commit_start committing
+> 32, still blocked
+> 2016-04-28 19:41:44.400596 8059ec900 10 journal FileJournal commit_start
+> 2016-04-28 19:41:44.400599 8059ec900 10 journal commit_start
+> FULL_NOTFULL.  All good.
+> 2016-04-28 19:41:44.400602 8059ec900 10 journal
+> apply_manager.commit_start() returning 1
+> 2016-04-28 19:41:44.400605 8059ec900 10 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) 3738 done(true) apply_manager.commit_start()
+> 2016-04-28 19:41:44.400637 8059ec900 10 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) 3743
+> 2016-04-28 19:41:44.400643 8059ec900 10 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) 3745
+> 2016-04-28 19:41:44.400653 8059ec900 10 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) 3748
+> 2016-04-28 19:41:44.400673 8059ec900 10 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) 3750
+> 2016-04-28 19:41:44.400680 8059ec900 10 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) 3752
+> 2016-04-28 19:41:44.400685 8059ec900 15 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) committing 32
+> 2016-04-28 19:41:44.400701 8059ec900 10 journal commit_started
+> committing 32, unblocking
+> 2016-04-28 19:41:44.400728 8059ec900 20 filestore dbobjectmap: seq is 5
+> 2016-04-28 19:41:44.517112 8059ec900 15
+> genericfilestorebackend(testdir/osd-bench/0) syncfs: doing a full sync
+> (syncfs(2) if possible)
+> 2016-04-28 19:41:45.471870 8059ec900 10 filestore(testdir/osd-bench/0)
+> sync_entry(1:1) commit took 1.071257, interval was 2.240513
+> 2016-04-28 19:41:45.471885 8059ec900 10 journal commit_finish 238 thru
+> 32 journal: 0x8058e5400
+> 2016-04-28 19:41:45.473683 8059ec900 15 journal committed_thru:1804 locked.
+> 2016-04-28 19:41:45.473697 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473701 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473705 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473707 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473710 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473747 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473750 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473753 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473756 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473758 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473761 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473763 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473767 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473772 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473775 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473777 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473779 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473781 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473784 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473786 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473788 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473797 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473800 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473803 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473806 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473809 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473811 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473814 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473817 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473819 8059ec900 10 throttle flush while
+> !journaled_ops.empty()
+> 2016-04-28 19:41:45.473822 8059ec900 10 throttle flush:63 calling
+> throttle.put()
+>
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---8323329-574103004-1462538753=:15518--
