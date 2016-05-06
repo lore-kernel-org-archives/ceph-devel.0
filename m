@@ -1,140 +1,249 @@
-From: Ana Aviles <ana@greenhost.nl>
-Subject: OSDs continuously crashing with v9.2.1
-Date: Fri, 6 May 2016 12:05:20 +0200
-Message-ID: <572C6C60.3090808@greenhost.nl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH v2 1/1] fs/ceph: make logical calculation functions return bool
+Date: Fri, 6 May 2016 19:01:23 +0800
+Message-ID: <EB309300-74FA-4655-906C-FB0CE7BB4DD0@redhat.com>
+References: <1458897519-19161-1-git-send-email-zhangzhuoyu@cmss.chinamobile.com> <000801d1a766$ea55cf50$bf016df0$@cmss.chinamobile.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smarthost1.greenhost.nl ([195.190.28.81]:36932 "EHLO
-	smarthost1.greenhost.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756399AbcEFKUv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 May 2016 06:20:51 -0400
-Received: from smtp.greenhost.nl ([213.108.104.138])
-	by smarthost1.greenhost.nl with esmtps (TLS1.0:DHE_RSA_AES_128_CBC_SHA1:16)
-	(Exim 4.72)
-	(envelope-from <ana@greenhost.nl>)
-	id 1aycdN-0005bH-FW
-	for ceph-devel@vger.kernel.org; Fri, 06 May 2016 12:05:21 +0200
+Received: from mx1.redhat.com ([209.132.183.28]:52308 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751686AbcEFLBc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 May 2016 07:01:32 -0400
+In-Reply-To: <000801d1a766$ea55cf50$bf016df0$@cmss.chinamobile.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Zhang Zhuoyu <zhangzhuoyu@cmss.chinamobile.com>
+Cc: ceph-devel@vger.kernel.org, sage@redhat.com, idryomov@gmail.com, linux-kernel@vger.kernel.org
 
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA512
+> On May 6, 2016, at 15:14, Zhang Zhuoyu <zhangzhuoyu@cmss.chinamobile.com> wrote:
+> 
+> Hi,  Yan, Viro
+> 
+> Any other comments on this updated version?
 
-Hello,
+applied (after removing the rados.h hunk)
 
-We are currently experiencing an unstable cluster on a backup cluster,
-we believe it is due to the latest Cephversion 9.2.1
-(752b6a3020c3de74e07d2a8b4c5e48dab5a6b6fd). OSDs keep on crashing,
-segfaulting, which eventually leads some of them to be down, or leave
-the cluster on strange scenarios like having unfound objects.
+Thanks
+Yan, Zheng
 
-[Fri May  6 09:45:09 2016] ceph-osd[17588]: segfault at 0 ip
-00007f2bbc5e692a sp 00007f2ba8905060 error 4 in
-libtcmalloc.so.4.1.2[7f2bbc5c3000+43000]
-[Fri May  6 09:45:09 2016] init: ceph-osd (ceph/72) main process (16509=
-)
-killed by SEGV signal
-[Fri May  6 09:45:09 2016] init: ceph-osd (ceph/72) main process ended,
-respawning
+> 
+> Zhuoyu
+> 
+>> -----Original Message-----
+>> From: hellozzy1988@126.com [mailto:hellozzy1988@126.com] On Behalf Of
+>> Zhang Zhuoyu
+>> Sent: Friday, March 25, 2016 5:19 PM
+>> To: ceph-devel@vger.kernel.org
+>> Cc: sage@redhat.com; zyan@redhat.com; idryomov@gmail.com; linux-
+>> kernel@vger.kernel.org; Zhang Zhuoyu
+>> <zhangzhuoyu@cmss.chinamobile.com>
+>> Subject: [PATCH v2 1/1] fs/ceph: make logical calculation functions return
+>> bool
+>> 
+>> This patch makes serverl logical caculation functions return bool to
+> improve
+>> readability due to these particular functions only using 0/1 as their
+> return
+>> value.
+>> 
+>> No functional change.
+>> --
+>> v2 changelog:
+>> ceph_ino_compare() is used by ilookup5, and ilookup5() wants function
+>> pointer int (*test)(struct inode *, void *), so let ceph_ino_compare()
+> keep its
+>> return value as int.
+>> 
+>> Signed-off-by: Zhang Zhuoyu <zhangzhuoyu@cmss.chinamobile.com>
+>> ---
+>> fs/ceph/cache.c                |  2 +-
+>> fs/ceph/dir.c                  |  2 +-
+>> include/linux/ceph/ceph_frag.h | 12 ++++++------
+>> include/linux/ceph/decode.h    |  2 +-
+>> include/linux/ceph/osdmap.h    |  6 +++---
+>> include/linux/ceph/rados.h     | 16 ++++++++--------
+>> net/ceph/ceph_common.c         |  2 +-
+>> 7 files changed, 21 insertions(+), 21 deletions(-)
+>> 
+>> diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c index 834f9f3..1f3a3f6
+> 100644
+>> --- a/fs/ceph/cache.c
+>> +++ b/fs/ceph/cache.c
+>> @@ -238,7 +238,7 @@ static void
+>> ceph_vfs_readpage_complete_unlock(struct page *page, void *data, int
+>> 	unlock_page(page);
+>> }
+>> 
+>> -static inline int cache_valid(struct ceph_inode_info *ci)
+>> +static inline bool cache_valid(struct ceph_inode_info *ci)
+>> {
+>> 	return ((ceph_caps_issued(ci) & CEPH_CAP_FILE_CACHE) &&
+>> 		(ci->i_fscache_gen == ci->i_rdcache_gen)); diff --git
+>> a/fs/ceph/dir.c b/fs/ceph/dir.c index 26be849..7eed41e 100644
+>> --- a/fs/ceph/dir.c
+>> +++ b/fs/ceph/dir.c
+>> @@ -584,7 +584,7 @@ struct dentry *ceph_finish_lookup(struct
+>> ceph_mds_request *req,
+>> 	return dentry;
+>> }
+>> 
+>> -static int is_root_ceph_dentry(struct inode *inode, struct dentry
+> *dentry)
+>> +static bool is_root_ceph_dentry(struct inode *inode, struct dentry
+>> +*dentry)
+>> {
+>> 	return ceph_ino(inode) == CEPH_INO_ROOT &&
+>> 		strncmp(dentry->d_name.name, ".ceph", 5) == 0; diff --git
+>> a/include/linux/ceph/ceph_frag.h b/include/linux/ceph/ceph_frag.h index
+>> 5babb8e..44e6067 100644
+>> --- a/include/linux/ceph/ceph_frag.h
+>> +++ b/include/linux/ceph/ceph_frag.h
+>> @@ -40,11 +40,11 @@ static inline __u32 ceph_frag_mask_shift(__u32 f)
+>> 	return 24 - ceph_frag_bits(f);
+>> }
+>> 
+>> -static inline int ceph_frag_contains_value(__u32 f, __u32 v)
+>> +static inline bool ceph_frag_contains_value(__u32 f, __u32 v)
+>> {
+>> 	return (v & ceph_frag_mask(f)) == ceph_frag_value(f);  } -static
+>> inline int ceph_frag_contains_frag(__u32 f, __u32 sub)
+>> +static inline bool ceph_frag_contains_frag(__u32 f, __u32 sub)
+>> {
+>> 	/* is sub as specific as us, and contained by us? */
+>> 	return ceph_frag_bits(sub) >= ceph_frag_bits(f) && @@ -56,12
+>> +56,12 @@ static inline __u32 ceph_frag_parent(__u32 f)
+>> 	return ceph_frag_make(ceph_frag_bits(f) - 1,
+>> 			 ceph_frag_value(f) & (ceph_frag_mask(f) << 1));  }
+> -
+>> static inline int ceph_frag_is_left_child(__u32 f)
+>> +static inline bool ceph_frag_is_left_child(__u32 f)
+>> {
+>> 	return ceph_frag_bits(f) > 0 &&
+>> 		(ceph_frag_value(f) & (0x1000000 >> ceph_frag_bits(f))) ==
+>> 0;  } -static inline int ceph_frag_is_right_child(__u32 f)
+>> +static inline bool ceph_frag_is_right_child(__u32 f)
+>> {
+>> 	return ceph_frag_bits(f) > 0 &&
+>> 		(ceph_frag_value(f) & (0x1000000 >> ceph_frag_bits(f))) ==
+>> 1; @@ -86,11 +86,11 @@ static inline __u32 ceph_frag_make_child(__u32 f,
+>> int by, int i)
+>> 	return ceph_frag_make(newbits,
+>> 			 ceph_frag_value(f) | (i << (24 - newbits)));  }
+> -static
+>> inline int ceph_frag_is_leftmost(__u32 f)
+>> +static inline bool ceph_frag_is_leftmost(__u32 f)
+>> {
+>> 	return ceph_frag_value(f) == 0;
+>> }
+>> -static inline int ceph_frag_is_rightmost(__u32 f)
+>> +static inline bool ceph_frag_is_rightmost(__u32 f)
+>> {
+>> 	return ceph_frag_value(f) == ceph_frag_mask(f);  } diff --git
+>> a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h index
+>> a6ef9cc..19e9932 100644
+>> --- a/include/linux/ceph/decode.h
+>> +++ b/include/linux/ceph/decode.h
+>> @@ -47,7 +47,7 @@ static inline void ceph_decode_copy(void **p, void *pv,
+>> size_t n)
+>> /*
+>>  * bounds check input.
+>>  */
+>> -static inline int ceph_has_room(void **p, void *end, size_t n)
+>> +static inline bool ceph_has_room(void **p, void *end, size_t n)
+>> {
+>> 	return end >= *p && n <= end - *p;
+>> }
+>> diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
+>> index 561ea89..bbf66b7 100644
+>> --- a/include/linux/ceph/osdmap.h
+>> +++ b/include/linux/ceph/osdmap.h
+>> @@ -137,19 +137,19 @@ static inline void ceph_oid_copy(struct
+>> ceph_object_id *dest,
+>> 	dest->name_len = src->name_len;
+>> }
+>> 
+>> -static inline int ceph_osd_exists(struct ceph_osdmap *map, int osd)
+>> +static inline bool ceph_osd_exists(struct ceph_osdmap *map, int osd)
+>> {
+>> 	return osd >= 0 && osd < map->max_osd &&
+>> 	       (map->osd_state[osd] & CEPH_OSD_EXISTS);  }
+>> 
+>> -static inline int ceph_osd_is_up(struct ceph_osdmap *map, int osd)
+>> +static inline bool ceph_osd_is_up(struct ceph_osdmap *map, int osd)
+>> {
+>> 	return ceph_osd_exists(map, osd) &&
+>> 	       (map->osd_state[osd] & CEPH_OSD_UP);  }
+>> 
+>> -static inline int ceph_osd_is_down(struct ceph_osdmap *map, int osd)
+>> +static inline bool ceph_osd_is_down(struct ceph_osdmap *map, int osd)
+>> {
+>> 	return !ceph_osd_is_up(map, osd);
+>> }
+>> diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h index
+>> 2f822dc..d6d4852 100644
+>> --- a/include/linux/ceph/rados.h
+>> +++ b/include/linux/ceph/rados.h
+>> @@ -313,36 +313,36 @@
+>> __CEPH_FORALL_OSD_OPS(GENERATE_ENUM_ENTRY)
+>> #undef GENERATE_ENUM_ENTRY
+>> };
+>> 
+>> -static inline int ceph_osd_op_type_lock(int op)
+>> +static inline bool ceph_osd_op_type_lock(int op)
+>> {
+>> 	return (op & CEPH_OSD_OP_TYPE) == CEPH_OSD_OP_TYPE_LOCK;  }
+>> -static inline int ceph_osd_op_type_data(int op)
+>> +static inline bool ceph_osd_op_type_data(int op)
+>> {
+>> 	return (op & CEPH_OSD_OP_TYPE) == CEPH_OSD_OP_TYPE_DATA;  }
+>> -static inline int ceph_osd_op_type_attr(int op)
+>> +static inline bool ceph_osd_op_type_attr(int op)
+>> {
+>> 	return (op & CEPH_OSD_OP_TYPE) == CEPH_OSD_OP_TYPE_ATTR;  }
+>> -static inline int ceph_osd_op_type_exec(int op)
+>> +static inline bool ceph_osd_op_type_exec(int op)
+>> {
+>> 	return (op & CEPH_OSD_OP_TYPE) == CEPH_OSD_OP_TYPE_EXEC;  }
+>> -static inline int ceph_osd_op_type_pg(int op)
+>> +static inline bool ceph_osd_op_type_pg(int op)
+>> {
+>> 	return (op & CEPH_OSD_OP_TYPE) == CEPH_OSD_OP_TYPE_PG;  } -
+>> static inline int ceph_osd_op_type_multi(int op)
+>> +static inline bool ceph_osd_op_type_multi(int op)
+>> {
+>> 	return (op & CEPH_OSD_OP_TYPE) == CEPH_OSD_OP_TYPE_MULTI;  }
+>> 
+>> -static inline int ceph_osd_op_mode_subop(int op)
+>> +static inline bool ceph_osd_op_mode_subop(int op)
+>> {
+>> 	return (op & CEPH_OSD_OP_MODE) ==
+>> CEPH_OSD_OP_MODE_SUB;  } -static inline int ceph_osd_op_mode_read(int
+>> op)
+>> +static inline bool ceph_osd_op_mode_read(int op)
+>> {
+>> 	return (op & CEPH_OSD_OP_MODE_RD) &&
+>> 		op != CEPH_OSD_OP_CALL;
+>> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c index
+>> 58fbfe1..81733c0 100644
+>> --- a/net/ceph/ceph_common.c
+>> +++ b/net/ceph/ceph_common.c
+>> @@ -559,7 +559,7 @@ EXPORT_SYMBOL(ceph_destroy_client);
+>> /*
+>>  * true if we have the mon map (and have thus joined the cluster)
+>>  */
+>> -static int have_mon_and_osd_map(struct ceph_client *client)
+>> +static bool have_mon_and_osd_map(struct ceph_client *client)
+>> {
+>> 	return client->monc.monmap && client->monc.monmap->epoch &&
+>> 	       client->osdc.osdmap && client->osdc.osdmap->epoch;
+>> --
+>> 1.8.3.1
+>> 
+> 
+> 
+> 
+> 
 
-Our nodes run Ubuntu 14.04.4 LTS, and two of them Ceph version 9.2.0
-(bb2ecea240f3a1d525bcb35670cb07bd1f0ca299) while the other two run ceph
-version 9.2.1 (752b6a3020c3de74e07d2a8b4c5e48dab5a6b6fd). Only on
-v.9.2.1. osds keep on segfaulting. On some of them we see:
-
-ceph version 9.2.1 (752b6a3020c3de74e07d2a8b4c5e48dab5a6b6fd)
- 1: (()+0x7d1aca) [0x7f42100b3aca]
- 2: (()+0x10340) [0x7f420e7c6340]
- 3:
-(tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::Fr=
-eeList*,
-unsigned long, int)+0x103) [0x7f420e9f7923]
- 4:
-(tcmalloc::ThreadCache::ListTooLong(tcmalloc::ThreadCache::FreeList*,
-unsigned long)+0x1b) [0x7f420e9f79db]
- 5: (tc_free()+0x1f8) [0x7f420ea052c8]
- 6: (()+0x50451) [0x7f420e4cc451]
- 7: (PK11_FreeSlotList()+0x9) [0x7f420e4cc479]
- 8: (PK11_GetAllTokens()+0x1cc) [0x7f420e4cec5c]
- 9: (PK11_GetBestSlotMultipleWithAttributes()+0x23b) [0x7f420e4cf06b]
- 10: (PK11_GetBestSlot()+0x1f) [0x7f420e4cf0df]
- 11: (CryptoAES::get_key_handler(ceph::buffer::ptr const&,
-std::string&)+0x1f4) [0x7f42100d3484]
- 12: (CryptoKey::_set_secret(int, ceph::buffer::ptr const&)+0xcc)
-[0x7f42100d25fc]
- 13: (CryptoKey::decode(ceph::buffer::list::iterator&)+0xa2)
-[0x7f42100d2922]
- 14: (void decode_decrypt_enc_bl<CephXServiceTicket>(CephContext*,
-CephXServiceTicket&, CryptoKey, ceph::buffer::list&,
-std::string&)+0x4a5) [0x7f42100c0f05]
- 15: (int decode_decrypt<CephXServiceTicket>(CephContext*,
-CephXServiceTicket&, CryptoKey const&, ceph::buffer::list::iterator&,
-std::string&)+0x1cf) [0x7f42100c12df]
- 16: (CephXTicketHandler::verify_service_ticket_reply(CryptoKey&,
-ceph::buffer::list::iterator&)+0xdb) [0x7f42100bb5ab]
- 17: (CephXTicketManager::verify_service_ticket_reply(CryptoKey&,
-ceph::buffer::list::iterator&)+0x122) [0x7f42100bd442]
- 18: (CephxClientHandler::handle_response(int,
-ceph::buffer::list::iterator&)+0xef4) [0x7f421024a2b4]
- 19: (MonClient::handle_auth(MAuthReply*)+0xce) [0x7f421014589e]
- 20: (MonClient::ms_dispatch(Message*)+0x297) [0x7f4210147b27]
- 21: (DispatchQueue::entry()+0x63a) [0x7f421025683a]
- 22: (DispatchQueue::DispatchThread::entry()+0xd) [0x7f4210180ecd]
- 23: (()+0x8182) [0x7f420e7be182]
- 24: (clone()+0x6d) [0x7f420cb0547d]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-
-Which is the same error reported 8 days ago
-http://tracker.ceph.com/issues/15628
-
-
-Here is the log of one of the down OSDs: http://pastebin.com/dcHKrE8f
-
-Now we would like to downgrade to version 9.2.0 all nodes, since we kee=
-p
-on having osds down and sometimes OSDs with corrupted metadata. However=
-,
-it looks like it is not possible to downgrade a Ceph version?
-
-Besides that, we also have "wrong node!" messages on most of our osd
-logs (on both nodes with v9.2.1 and v9.2.0). We don't know if it is
-related, or if we should also have a look at that.
-
-2016-05-05 15:30:16.994946 7f7272cc3700  0 --
-[2a00:c6c0:0:120::201]:6893/5870 >> [2a00:c6c0:0:120::202]:6807/10502
-pipe(0x7f72cc272000 sd=3D24 :53006 s=3D1 pgs=3D309 cs=3D19 l=3D0
-c=3D0x7f72d23f31e0).connect claims to be [2a00:c6c0:0:120::202]:6807/40=
-13
-not [2a00:c6c0:0:120::202]:6807/10502 - wrong node!
-
-Thanks!
-
-
-
-- --=20
-Ana Avil=C3=A9s
-Greenhost - sustainable hosting & digital security
-E: ana@greenhost.nl
-T: +31 20 4890444
-W: https://greenhost.nl
------BEGIN PGP SIGNATURE-----
-
-iQEcBAEBCgAGBQJXLGxZAAoJEOUdSHwFo2bgT7IIAIMHE5x6Qhqn/nskuB1k2QJl
-NWC/nR0Cmlc5OSEoAHu1fZKMtnP8XAfH+zW+MO7xNpgDks5zCZ0oLXPo9hYndGNN
-yVgUMDcm7hw8saYiRumsEr84ER2Hsv7kMcAdEAFyt4IJ056WRUGduFBWmc6VkRx5
-OtOqmlHKpnX+BW8UPGoNXD6JjmAog38+rUszdkQmn1WpvG+aBx/plQlcZXNnfIMM
-mclsDzTkSO5LStVYSNaBfp7OpYiXwESVjz4X73ZnoTX61q0cOfL4W9Kvp+xeXfyV
-RkRhPLXuffrX9bV5HVRE4zpexXy781o2ugAh5ZwCFgGSJgkRJM+IxA6OAqSo+Kg=3D
-=3DsDhn
------END PGP SIGNATURE-----
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
