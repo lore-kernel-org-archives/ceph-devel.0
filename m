@@ -1,247 +1,46 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Could be due to a race condition... Re: Help with understanding
- throttle.finish()
-Date: Fri, 6 May 2016 17:29:33 +0200
-Message-ID: <8402c73a-d6c4-6ad7-453e-c100e7376e72@digiware.nl>
-References: <57225355.3040401@digiware.nl>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: on-the-wire encryption, addrs, and cephx
+Date: Fri, 6 May 2016 12:11:05 -0400
+Message-ID: <20160506161105.GA23534@ultraspiritum>
+References: <alpine.DEB.2.11.1605050822230.15413@cpach.fuggernut.com>
+ <CAJ4mKGaU_oB6QLGxUF5irPM4T9FOoN0Q=wRNWBXH0TS0GFMEQg@mail.gmail.com>
+ <alpine.DEB.2.11.1605060823190.15518@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:45568 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:14805 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757964AbcEFPaF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 6 May 2016 11:30:05 -0400
-Received: from rack1.digiware.nl (unknown [127.0.0.1])
-	by smtp.digiware.nl (Postfix) with ESMTP id 65F66153416
-	for <ceph-devel@vger.kernel.org>; Fri,  6 May 2016 17:30:01 +0200 (CEST)
-Received: from [IPv6:2001:4cb8:3:1:f45e:97a:9563:74af] (unknown [IPv6:2001:4cb8:3:1:f45e:97a:9563:74af])
-	by smtp.digiware.nl (Postfix) with ESMTP id AAACA153430
-	for <ceph-devel@vger.kernel.org>; Fri,  6 May 2016 17:29:39 +0200 (CEST)
-In-Reply-To: <57225355.3040401@digiware.nl>
+	id S1758697AbcEFQLH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 May 2016 12:11:07 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id EC8C780088
+	for <ceph-devel@vger.kernel.org>; Fri,  6 May 2016 16:11:06 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1605060823190.15518@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 28-4-2016 20:15, Willem Jan Withagen wrote:
-> Hi,
->
-> I'm running a rather simple setup on my FreeBSD port.
->
-> function TEST_simple() {
->     # run the most simple config, and run a bechmark on it.
->     local dir=$1
->
->     run_mon $dir a || return 1
->     run_osd $dir 0 || return 1
->
->     #
->     # default values should work
->     #
->     ceph tell osd.0 bench || return 1
->
-> }
->
-> This in the end crashes with:
->     8059eec00 -1 FileStore: sync_entry timed out after 600 seconds.
-> exactly 10 minutes after startup.
-> This trhread does just about exactly nothing, it initialises the time,
-> and then traps after 10 minutes.
-> # grep 8059eec00  testdir/osd-bench/osd.0.log
-> 2016-04-28 19:51:44.444689 8059eec00 -1 FileStore: sync_entry timed out
-> after 600 seconds.
-> 2016-04-28 19:51:44.487104 8059eec00 -1 os/filestore/FileStore.cc: In
-> function 'virtual void SyncEntryTimeout::finish(int)' thread 8059eec00 time
+On 06/05/2016, Sage Weil wrote:
+[snip]
+> and we'll also need to keep the v1 protocol support around for a
+> long time (probably a couple years at least) for the benefit of old
+> clients.  And there's no reason anybody *has* to switch to the new
+> protocol unless they need the new features or improved security.
+[snip]
 
-Haven't made much progress with this problem.
-Rebases, but that does not bring any "fixes" in.
+I can understand not wanting to force people to take a performance
+hit. However, it sounded, from your writeup, like even without
+encryption the new auth mechanism would be an improvement on the old
+one. Once we do get it working, tested, and performant, I'd suggest we
+might want to force users' hand on the issue and announce that the old
+mechanism will be removed in some upcoming version, rather than
+waiting for users to rotate older clients out over time.
 
-An extra measure point in time.
-I've ran the OSD thru truss (aka strace in linux speak) and that does 
-complete.
-
-Now what truss/strace does it augments kernel entry and exit with 
-monitoring code
-and as such it can (and will change) the micro-timing. Als a consequence 
-of that
-it could also order the way threads interact.
-It could very well be a difference between semantics in Locks/Mutexes 
-between
-Linux and FreeBSD, but I have not really found any suggestions to that 
-regard.
-
-The fact that with truss/strace the osd does not generate a crash,
-(not even with: --filestore-commit-timeout=10)
-is in indication that I could very likely be either a deadlock or other 
-lock
-related issue that is hiding somewhere under the lid of the OSD.
-
-What are people using to analyze timing/locking/deadlocking issues in 
-the Cephcode?
-
-Thanx,
---WjW
-
-
-> I've augmented just about every line of code in src/os/filestore/File*.cc
->
-> And I get as far as
->     throttle.flush()
-> It seems to work the first time it gets called. That is, it returns.
->
-> However the second time is "stalls" in the call
->      throttle.put(to_put_bytes);
-> after a number of itterations thru the while-loop.
->
-> Below the code of Throttle::Flush and an sequence of the thread doing
-> the blocking call
-> from the log where I've added mode debugging code.
->
-> Does anybody have a clue as to continue from here?
->   Why does throttle.put not return?
->   Is it just throttleing too hard and not reorganising the queue?
->
-> --WjW
->
-> Code:
-> std::pair<uint64_t, uint64_t> JournalThrottle::flush(uint64_t mono_id)
-> {
->   uint64_t to_put_bytes = 0;
->   uint64_t to_put_ops = 0;
->   std::pair<uint64_t, uint64_t> ret;
->   {
->     locker l(lock);
->     while (!journaled_ops.empty() &&
->            journaled_ops.front().first <= mono_id) {
->       to_put_bytes += journaled_ops.front().second;
->       to_put_ops++;
->       journaled_ops.pop_front();
->     }
->   }
->   throttle.put(to_put_bytes);
->   ret = make_pair(to_put_ops, to_put_bytes);
->   return ret;
-> }
->
-> Thread log:
-> 2016-04-28 19:41:43.231410 8059ec900 20 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) waiting for max_interval 5.000000
-> 2016-04-28 19:41:43.231438 8059ec900 20 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) started at: 2016-04-28 19:41:43.231436
-> 2016-04-28 19:41:44.395763 8059ec900 20 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) ended at: 2016-04-28 19:41:44.395758
-> 2016-04-28 19:41:44.395781 8059ec900 20 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) waited for 1
-> 2016-04-28 19:41:44.395789 8059ec900 20 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) woke after 1.164433
-> 2016-04-28 19:41:44.395795 8059ec900 10 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) 3726
-> 2016-04-28 19:41:44.395801 8059ec900 10 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) 3730
-> 2016-04-28 19:41:44.395806 8059ec900 10 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) 3733
-> 2016-04-28 19:41:44.400570 8059ec900 10 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) 3735 starting apply_manager.commit_start()
-> 2016-04-28 19:41:44.400584 8059ec900 10 journal commit_start
-> max_applied_seq 32, open_ops 0
-> 2016-04-28 19:41:44.400588 8059ec900 10 journal commit_start blocked,
-> all open_ops have completed
-> 2016-04-28 19:41:44.400591 8059ec900 10 journal commit_start committing
-> 32, still blocked
-> 2016-04-28 19:41:44.400596 8059ec900 10 journal FileJournal commit_start
-> 2016-04-28 19:41:44.400599 8059ec900 10 journal commit_start
-> FULL_NOTFULL.  All good.
-> 2016-04-28 19:41:44.400602 8059ec900 10 journal
-> apply_manager.commit_start() returning 1
-> 2016-04-28 19:41:44.400605 8059ec900 10 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) 3738 done(true) apply_manager.commit_start()
-> 2016-04-28 19:41:44.400637 8059ec900 10 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) 3743
-> 2016-04-28 19:41:44.400643 8059ec900 10 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) 3745
-> 2016-04-28 19:41:44.400653 8059ec900 10 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) 3748
-> 2016-04-28 19:41:44.400673 8059ec900 10 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) 3750
-> 2016-04-28 19:41:44.400680 8059ec900 10 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) 3752
-> 2016-04-28 19:41:44.400685 8059ec900 15 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) committing 32
-> 2016-04-28 19:41:44.400701 8059ec900 10 journal commit_started
-> committing 32, unblocking
-> 2016-04-28 19:41:44.400728 8059ec900 20 filestore dbobjectmap: seq is 5
-> 2016-04-28 19:41:44.517112 8059ec900 15
-> genericfilestorebackend(testdir/osd-bench/0) syncfs: doing a full sync
-> (syncfs(2) if possible)
-> 2016-04-28 19:41:45.471870 8059ec900 10 filestore(testdir/osd-bench/0)
-> sync_entry(1:1) commit took 1.071257, interval was 2.240513
-> 2016-04-28 19:41:45.471885 8059ec900 10 journal commit_finish 238 thru
-> 32 journal: 0x8058e5400
-> 2016-04-28 19:41:45.473683 8059ec900 15 journal committed_thru:1804 locked.
-> 2016-04-28 19:41:45.473697 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473701 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473705 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473707 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473710 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473747 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473750 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473753 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473756 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473758 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473761 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473763 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473767 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473772 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473775 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473777 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473779 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473781 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473784 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473786 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473788 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473797 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473800 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473803 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473806 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473809 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473811 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473814 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473817 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473819 8059ec900 10 throttle flush while
-> !journaled_ops.empty()
-> 2016-04-28 19:41:45.473822 8059ec900 10 throttle flush:63 calling
-> throttle.put()
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
