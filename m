@@ -1,34 +1,26 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v2 1/1] fs/ceph: make logical calculation functions return bool
-Date: Fri, 6 May 2016 10:24:17 +0200
-Message-ID: <CAOi1vP-MPvoXVuaKyXAEdW2wjLhGJANMMjyBe8_P-07nQQ4Xxw@mail.gmail.com>
-References: <1458897519-19161-1-git-send-email-zhangzhuoyu@cmss.chinamobile.com>
-	<000801d1a766$ea55cf50$bf016df0$@cmss.chinamobile.com>
-	<A377484B-D4AB-4C83-ABE5-203CBEDBB4CD@redhat.com>
+From: M Ranga Swami Reddy <swamireddy@gmail.com>
+Subject: Adding new nodes to ceph cluster
+Date: Fri, 6 May 2016 14:06:31 +0530
+Message-ID: <CANA9Uk4Nw8P0f3j3Sz7N8Eoh5Rqm+6tRspSHQMHvs=Hq5jTHcQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <A377484B-D4AB-4C83-ABE5-203CBEDBB4CD@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: Zhang Zhuoyu <zhangzhuoyu@cmss.chinamobile.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, linux-kernel <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yw0-f178.google.com ([209.85.161.178]:33600 "EHLO
+	mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751928AbcEFIgc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 May 2016 04:36:32 -0400
+Received: by mail-yw0-f178.google.com with SMTP id t10so191977695ywa.0
+        for <ceph-devel@vger.kernel.org>; Fri, 06 May 2016 01:36:32 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-On Fri, May 6, 2016 at 9:24 AM, Yan, Zheng <zyan@redhat.com> wrote:
->
->> On May 6, 2016, at 15:14, Zhang Zhuoyu <zhangzhuoyu@cmss.chinamobile.com> wrote:
->>
->> Hi,  Yan, Viro
->>
->> Any other comments on this updated version?
->
-> I have no comment for the cephfs part.
->
-> Ilya, do you like the libceph part?
+Hi,
+I wanted to add 2 new nodes (21 OSDs per node) to the current ceph
+cluster (v 0.80.7).
 
-I'd leave off rados.h hunk - it's shared with userspace and those
-functions aren't used.  The rest is fine by me.
+What is best way doing the same without impacting the customers with
+no downtime (and not network impact due to rebalcing activity)?
 
-Thanks,
-
-                Ilya
+Thanks
+Swami
