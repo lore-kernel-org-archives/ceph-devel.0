@@ -1,56 +1,112 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Perhaps a missing dependancy in the makefiles
-Date: Fri, 6 May 2016 09:28:02 +0200
-Message-ID: <8106b460-2ae6-4202-ad61-6a98e4f3cbae@digiware.nl>
-References: <add58916-4482-936f-53f7-a79573fc9925@digiware.nl>
- <CAJE9aOO5bhVwGwBEDXEz+=uDx_nosV+F=NBmJv5qCcHiTSn8fw@mail.gmail.com>
+Subject: Re: ceph-disk broken????
+Date: Fri, 6 May 2016 09:34:37 +0200
+Message-ID: <bda59c5a-f957-3775-72b9-312c95849851@digiware.nl>
+References: <5e9940d6-d9bb-e9b4-0af8-49e0f0cbb0f5@digiware.nl>
+ <CAJE9aOM2HmZP79JumjD5+oAypye3fvFx-nfO1=uYjdg+_+z9Hw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:44241 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([31.223.170.169]:44852 "EHLO smtp.digiware.nl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757916AbcEFH2T (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 6 May 2016 03:28:19 -0400
-In-Reply-To: <CAJE9aOO5bhVwGwBEDXEz+=uDx_nosV+F=NBmJv5qCcHiTSn8fw@mail.gmail.com>
+	id S1751193AbcEFHeq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 May 2016 03:34:46 -0400
+In-Reply-To: <CAJE9aOM2HmZP79JumjD5+oAypye3fvFx-nfO1=uYjdg+_+z9Hw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: kefu chai <tchaikov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, ldachary@redhat.com
 
-On 6-5-2016 06:57, kefu chai wrote:
-> On Thu, May 5, 2016 at 12:27 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> Hi,
+On 6-5-2016 06:49, kefu chai wrote:
+> On Thu, May 5, 2016 at 4:44 AM, Willem Jan Withagen <wjw@digiware.nl>=
+ wrote:
+>> Hi
 >>
->> Everytime I run a parallel make on the full tree I get the following
->> complaint:
->> In file included from db/builder.cc:16:
->> In file included from ./db/compaction_iterator.h:14:
->> In file included from ./db/compaction.h:13:
->> ./util/mutable_cf_options.h:28:21: error: no member named
->> 'soft_pending_compaction_bytes_limit' in
->>       'rocksdb::Options'; did you mean
->> 'hard_pending_compaction_bytes_limit'?
->>             options.soft_pending_compaction_bytes_limit),
->>                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->>                     hard_pending_compaction_bytes_limit
+>> Setup:
+>>   Fresh VM with CentOS7
+>>   standard ceph/ceph clone
+>>   building with run-make-check.sh
+>>      So the dependancies are installed by install-deps.sh
 >>
->> Then I just run along with a single threaded make, and everything
->> completes just fine.
+>> I have several tests that fail with:
 >>
->> So that is probably a missing dependency for either db/builder.cc, or
->> ./util/mutable_cf_options.h.
->>
->> Suggestions on how to fix this?
+>>  run_osd:  ceph-disk --statedir=3Dtestdir/osd-crush
+>> --sysconfdir=3Dtestdir/osd-crush --prepend-to-path=3D prepare
+>> testdir/osd-crush/0
+>> Traceback (most recent call last):
+>>   File "/tmp/ceph-disk-virtualenv/bin/ceph-disk", line 5, in <module=
 >
-> Willem, not sure what is going on in your tree. but rocksdb::Options does
-> have this member variables: it is inherited from its parent class
-> ColumnFamilyOptions.
+>>     from pkg_resources import load_entry_point
+>>   File
+>> "/tmp/ceph-disk-virtualenv/lib/python2.7/site-packages/pkg_resources=
+=2Epy",
+>> line 3007, in <module>
+>>     working_set.require(__requires__)
+>>   File
+>> "/tmp/ceph-disk-virtualenv/lib/python2.7/site-packages/pkg_resources=
+=2Epy",
+>> line 728, in require
+>>     needed =3D self.resolve(parse_requirements(requirements))
+>>   File
+>> "/tmp/ceph-disk-virtualenv/lib/python2.7/site-packages/pkg_resources=
+=2Epy",
+>> line 626, in resolve
+>>     raise DistributionNotFound(req)
+>> pkg_resources.DistributionNotFound: ceph-disk=3D=3D1.0.0
+>>
+>> Looks like ceph-disk is not in the fresh install in tmp...
+>>
+>> Ran into this with my development fork, but then also with a regular=
+ HEAD
+>> Did I miss something?
+>
+> Willem, you are not missing anything. the problem you are facing is w=
+hat
+> happens in our jenkins sometimes. for example, see
+> https://jenkins.ceph.com/job/ceph-pull-requests/5222/consoleFull . Lo=
+=C3=AFc tried
+> to root cause this, and found that it only happens in rhel7.0.
 
-Oke, thanx for the confirmation.
+And FreeBSD... :(
+Could this be a PATH issue... I do remember adding a /usr/local/bin/=20
+path to
+ceph-disk.sh to get it to find python in the FreeBSD tree.
 
-Well the "joke" is that a next run continuing where it left off makes it to
-the end, without any hickups...
-And yes, a run on CentOS with the Ceph/Ceph tree does not have this problem.
-Perhaps that my packages installed rockdb throws dirt into the equation...
+--WjW
 
+diff --git a/src/ceph-disk/tests/ceph-disk.sh=20
+b/src/ceph-disk/tests/ceph-disk.sh
+index 60280c6..b1c4391 100755
+--- a/src/ceph-disk/tests/ceph-disk.sh
++++ b/src/ceph-disk/tests/ceph-disk.sh
+@@ -69,7 +69,7 @@ CEPH_DISK_ARGS+=3D" --statedir=3D$DIR"
+  CEPH_DISK_ARGS+=3D" --sysconfdir=3D$DIR"
+  CEPH_DISK_ARGS+=3D" --prepend-to-path=3D"
+  CEPH_DISK_ARGS+=3D" --verbose"
+-TIMEOUT=3D120
++TIMEOUT=3D300
+
+  cat=3D$(which cat)
+  timeout=3D$(which timeout)
+@@ -201,7 +201,7 @@ function test_path() {
+  }
+
+  function test_no_path() {
+-    ( export=20
+PATH=3D../ceph-detect-init/virtualenv/bin:virtualenv/bin:..:/usr/bin:/b=
+in=20
+; test_activate_dir ) || return 1
++    ( export=20
+PATH=3D../ceph-detect-init/virtualenv/bin:virtualenv/bin:..:/usr/bin:/b=
+in:/usr/local/bin=20
+; test_activate_dir ) || return 1
+  }
+
+  function run_timeout() {
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
