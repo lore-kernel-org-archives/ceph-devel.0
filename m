@@ -1,91 +1,87 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [Ceph-qa] QE validation hammer v0.94.7 finished (needs
- approval)
-Date: Fri, 6 May 2016 13:31:12 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605061331090.15518@cpach.fuggernut.com>
-References: <CAMMFjmFE6NTPA-DkTRubYPeyy+Qk0gHU_da3g97+zK9=Xm+DJA@mail.gmail.com> <CAOi1vP9g0asaad8=7EA+XJm19DuwBhA2x8qG1bpQ0M-eHBvVNw@mail.gmail.com> <CAMMFjmFo=jro5em66HrUXwH7Cug4vGerHWw8cQ0Bwi31LPM8EA@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Could be due to a race condition... Re: Help with understanding throttle.finish()
+Date: Fri, 6 May 2016 11:41:02 -0700
+Message-ID: <CAJ4mKGZDvFPAZmhF1c=b07=myW7-y+SgEONL1zyB+piV-r50Hg@mail.gmail.com>
+References: <57225355.3040401@digiware.nl>
+	<8402c73a-d6c4-6ad7-453e-c100e7376e72@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57158 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758212AbcEFRbD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 May 2016 13:31:03 -0400
-In-Reply-To: <CAMMFjmFo=jro5em66HrUXwH7Cug4vGerHWw8cQ0Bwi31LPM8EA@mail.gmail.com>
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:33810 "EHLO
+	mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758414AbcEFSlD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 May 2016 14:41:03 -0400
+Received: by mail-vk0-f49.google.com with SMTP id m188so446749vka.1
+        for <ceph-devel@vger.kernel.org>; Fri, 06 May 2016 11:41:02 -0700 (PDT)
+In-Reply-To: <8402c73a-d6c4-6ad7-453e-c100e7376e72@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, "Deza, Alfredo" <adeza@redhat.com>, Gregory Meno <gmeno@redhat.com>, ceph-qa <ceph-qa@ceph.com>, "Just, Samuel" <sjust@redhat.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Dachary, Loic" <ldachary@redhat.com>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 6 May 2016, Yuri Weinstein wrote:
-> Great thx !
-> 
-> Sage, assuming you are OK to re-use approvals from the previous hammer
-> point release we are ready to publish this release.
+On Fri, May 6, 2016 at 8:29 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 28-4-2016 20:15, Willem Jan Withagen wrote:
+>>
+>> Hi,
+>>
+>> I'm running a rather simple setup on my FreeBSD port.
+>>
+>> function TEST_simple() {
+>>     # run the most simple config, and run a bechmark on it.
+>>     local dir=$1
+>>
+>>     run_mon $dir a || return 1
+>>     run_osd $dir 0 || return 1
+>>
+>>     #
+>>     # default values should work
+>>     #
+>>     ceph tell osd.0 bench || return 1
+>>
+>> }
+>>
+>> This in the end crashes with:
+>>     8059eec00 -1 FileStore: sync_entry timed out after 600 seconds.
+>> exactly 10 minutes after startup.
+>> This trhread does just about exactly nothing, it initialises the time,
+>> and then traps after 10 minutes.
+>> # grep 8059eec00  testdir/osd-bench/osd.0.log
+>> 2016-04-28 19:51:44.444689 8059eec00 -1 FileStore: sync_entry timed out
+>> after 600 seconds.
+>> 2016-04-28 19:51:44.487104 8059eec00 -1 os/filestore/FileStore.cc: In
+>> function 'virtual void SyncEntryTimeout::finish(int)' thread 8059eec00
+>> time
+>
+>
+> Haven't made much progress with this problem.
+> Rebases, but that does not bring any "fixes" in.
+>
+> An extra measure point in time.
+> I've ran the OSD thru truss (aka strace in linux speak) and that does
+> complete.
+>
+> Now what truss/strace does it augments kernel entry and exit with monitoring
+> code
+> and as such it can (and will change) the micro-timing. Als a consequence of
+> that
+> it could also order the way threads interact.
+> It could very well be a difference between semantics in Locks/Mutexes
+> between
+> Linux and FreeBSD, but I have not really found any suggestions to that
+> regard.
+>
+> The fact that with truss/strace the osd does not generate a crash,
+> (not even with: --filestore-commit-timeout=10)
+> is in indication that I could very likely be either a deadlock or other lock
+> related issue that is hiding somewhere under the lid of the OSD.
+>
+> What are people using to analyze timing/locking/deadlocking issues in the
+> Cephcode?
 
-Yep!
-sage
+Our Mutex implementations have a custom lockdep built in. That should
+be checking for anything using those...
 
-> 
-> Alfredo FYI
-> 
-> Thx
-> YuriW
-> 
-> On Fri, May 6, 2016 at 10:13 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> > On Fri, May 6, 2016 at 6:26 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
-> >> Hello
-> >>
-> >> Detailed summary of the QE Validation can be found here
-> >> http://tracker.ceph.com/issues/14692#note-61
-> >>
-> >> The following suites were in scope of this point release testing:
-> >>
-> >> rados (subset 1/7)
-> >> rbd
-> >> rgw
-> >> fs
-> >> krbd
-> >> kcephfs
-> >> hadoop
-> >> samba
-> >> rest
-> >> ceph-deploy
-> >> upgrade/client-upgrade
-> >> upgrade/dumpling-firefly-x (hammer)
-> >> upgrade/firefly-x (hammer)
-> >> upgrade/hammer
-> >> upgrade/hammer-x (infernalis)
-> >> powercycle
-> >>
-> >> Known issues (approved for release):
-> >>
-> >> fs:
-> >> http://tracker.ceph.com/issues/14716 - (same as in v0.94.6 was
-> >> approved by Greg, Josh)
-> >>
-> >> samba:
-> >> http://tracker.ceph.com/issues/14714 - (same as in v0.94.6 was approved by Greg)
-> >>
-> >> krbd:
-> >> see failed runs, Jason/Josh pls review and approve or suggest next steps.
-> >
-> > krbd based on
-> >
-> >     http://pulpito.ovh.sepia.ceph.com:8081/teuthology-2016-04-24_18:06:02-krbd-hammer-testing-basic-openstack/
-> >
-> > looks OK to me - known xfstests failures, under-provisioned OSDs (97%
-> > full) and a huge-tickets failure.
-> >
-> > huge-tickets seems to be failing consistently on ovh, I'll investigate
-> > later.
-> >
-> > Thanks,
-> >
-> >                 Ilya
-> _______________________________________________
-> Ceph-qa mailing list
-> Ceph-qa@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-qa-ceph.com
-> 
-> 
+But I'd be inclined to just check exactly what the thread is doing. I
+think it's a lot more likely to be getting an unexpected syscall value
+and just sitting still or something.
+-Greg
