@@ -1,33 +1,40 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: on-the-wire encryption, addrs, and cephx
-Date: Thu, 5 May 2016 20:34:54 -0600
-Message-ID: <CALqRxCyDdUaL0RNWNS7r-ZtNYEbbvzaeGapkjXYit8kXb-q4zg@mail.gmail.com>
-References: <alpine.DEB.2.11.1605050822230.15413@cpach.fuggernut.com>
-	<CAGbvivJtadH75PN-hbd6DNrYsTvHtp9SY=pEvoHH7XRTqTwoFw@mail.gmail.com>
+From: Jaze Lee <jazeltq@gmail.com>
+Subject: about rbd journaling
+Date: Fri, 6 May 2016 11:17:42 +0800
+Message-ID: <CAKZcxgd-1O64885PZ+tNJJrFNnvTx=uaA7aJi91Puv+KuqSGgw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f171.google.com ([209.85.161.171]:33116 "EHLO
-	mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752560AbcEFCez (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 May 2016 22:34:55 -0400
-Received: by mail-yw0-f171.google.com with SMTP id t10so178456057ywa.0
-        for <ceph-devel@vger.kernel.org>; Thu, 05 May 2016 19:34:55 -0700 (PDT)
-In-Reply-To: <CAGbvivJtadH75PN-hbd6DNrYsTvHtp9SY=pEvoHH7XRTqTwoFw@mail.gmail.com>
+Received: from mail-io0-f177.google.com ([209.85.223.177]:34380 "EHLO
+	mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755970AbcEFDRo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 May 2016 23:17:44 -0400
+Received: by mail-io0-f177.google.com with SMTP id 190so103602656iow.1
+        for <ceph-devel@vger.kernel.org>; Thu, 05 May 2016 20:17:43 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Cc: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, May 5, 2016 at 12:26 PM, Wyllys Ingersoll
-<wyllys.ingersoll@keepertech.com> wrote:
-> Though I would caution
-> against writing to a particular KRB5 API (MIT vs Heimdal, etc).
+Hi all,
+   I found the rbd journaling first send data to journal pool (in
+append_io_event, and return a future
+  by journaler append) and then(when the append is safe) send to the
+real data pool.
+   Can someone explain a little more on this. I do not why doing this,
+why not first to data pool,
+   then to the journal pool?  May be put data first in journal pool
+will let the rbd-mirror sync first?
 
-This is off-topic, but I've worked on the Heimdal project a bit and I
-maintain the Heimdal packages in Fedora and EPEL, and I wouldn't
-recommend it for Ceph. Heimdal is nowhere near as actively developed
-as MIT. Debian is considering dropping it entirely because it has not
-seen a release in four years (https://bugs.debian.org/806274).
+Thanks a lot
 
-- Ken
+
+
+
+--=20
+=E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
