@@ -1,67 +1,33 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
+From: Ken Dreyer <kdreyer@redhat.com>
 Subject: Re: on-the-wire encryption, addrs, and cephx
-Date: Thu, 5 May 2016 15:44:34 -0400 (EDT)
-Message-ID: <757099045.26361700.1462477474700.JavaMail.zimbra@redhat.com>
+Date: Thu, 5 May 2016 20:34:54 -0600
+Message-ID: <CALqRxCyDdUaL0RNWNS7r-ZtNYEbbvzaeGapkjXYit8kXb-q4zg@mail.gmail.com>
 References: <alpine.DEB.2.11.1605050822230.15413@cpach.fuggernut.com>
+	<CAGbvivJtadH75PN-hbd6DNrYsTvHtp9SY=pEvoHH7XRTqTwoFw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:44553 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754846AbcEETof (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 May 2016 15:44:35 -0400
-In-Reply-To: <alpine.DEB.2.11.1605050822230.15413@cpach.fuggernut.com>
+Received: from mail-yw0-f171.google.com ([209.85.161.171]:33116 "EHLO
+	mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752560AbcEFCez (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 May 2016 22:34:55 -0400
+Received: by mail-yw0-f171.google.com with SMTP id t10so178456057ywa.0
+        for <ceph-devel@vger.kernel.org>; Thu, 05 May 2016 19:34:55 -0700 (PDT)
+In-Reply-To: <CAGbvivJtadH75PN-hbd6DNrYsTvHtp9SY=pEvoHH7XRTqTwoFw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Cc: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+On Thu, May 5, 2016 at 12:26 PM, Wyllys Ingersoll
+<wyllys.ingersoll@keepertech.com> wrote:
+> Though I would caution
+> against writing to a particular KRB5 API (MIT vs Heimdal, etc).
 
------ Original Message -----
-> From: "Sage Weil" <sweil@redhat.com>
-> To: ceph-devel@vger.kernel.org
-> Sent: Thursday, May 5, 2016 8:57:16 AM
-> Subject: on-the-wire encryption, addrs, and cephx
-> 
-> Hi all,
-> 
-> We had a call last night (Marcus, Haomai, Yehuda, our GSoC student Zhao,
-> and me) to discuss on-the-wire encryption.  
+This is off-topic, but I've worked on the Heimdal project a bit and I
+maintain the Heimdal packages in Fedora and EPEL, and I wouldn't
+recommend it for Ceph. Heimdal is nowhere near as actively developed
+as MIT. Debian is considering dropping it entirely because it has not
+seen a release in four years (https://bugs.debian.org/806274).
 
-<snip>
-
-> 
-> (We talked about whether just jumping into a Kerberos world wholesale
-> makes sense or would help here, and decided that although we could do what
-> cephx does with kerberos, doing so doesn't change any of the protocol
-> pieces--and in fact krb5 would effectivel slot in as an alternative,
-> pluggable auth mode next to cephx.  As we go through this process we
-> should verify that a native kerberos approach fits in properly.)
-
-<snip>
-
-> 
-> Comments, questions welcome!
-
-
-Seems like this is a great start.  I'm used to systems that emphasize Kerberos, and I'm glad we're revisiting where it covers or misses our requirements.
-
-Matt
-
-> 
-> sage
-> --
-
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+- Ken
