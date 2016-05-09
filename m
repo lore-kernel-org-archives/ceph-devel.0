@@ -1,100 +1,61 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Could be due to a race condition... Re: Help with understanding
- throttle.finish()
-Date: Mon, 9 May 2016 10:44:19 +0200
-Message-ID: <b34f7765-7db5-713d-5ed2-3374b0ec9872@digiware.nl>
-References: <57225355.3040401@digiware.nl>
- <8402c73a-d6c4-6ad7-453e-c100e7376e72@digiware.nl>
- <CAJ4mKGZDvFPAZmhF1c=b07=myW7-y+SgEONL1zyB+piV-r50Hg@mail.gmail.com>
- <828fd24d-f73d-42e6-69e0-d9f6c5811edd@digiware.nl>
+From: Naveen <Naveen.Chandrasekaran@radisys.com>
+Subject: Issuing custom IOCTLs to SCSI LLD
+Date: Mon, 9 May 2016 09:27:22 +0000 (UTC)
+Message-ID: <loom.20160509T111456-471@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:26856 "EHLO smtp.digiware.nl"
+Received: from plane.gmane.org ([80.91.229.3]:49041 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751536AbcEIIoc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 9 May 2016 04:44:32 -0400
-In-Reply-To: <828fd24d-f73d-42e6-69e0-d9f6c5811edd@digiware.nl>
+	id S1751047AbcEIJaI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 9 May 2016 05:30:08 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1azhVs-0000Ov-H1
+	for ceph-devel@vger.kernel.org; Mon, 09 May 2016 11:30:05 +0200
+Received: from 14.141.44.130.Static-Bangalore.tcl.net.in ([14.141.44.130.Static-Bangalore.tcl.net.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 09 May 2016 11:30:04 +0200
+Received: from Naveen.Chandrasekaran by 14.141.44.130.Static-Bangalore.tcl.net.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 09 May 2016 11:30:04 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 6-5-2016 23:04, Willem Jan Withagen wrote:
-> On 6-5-2016 20:41, Gregory Farnum wrote:
+Hi,
 
-Oke,
+I'm new to ceph and trying to find if on CentOS there is a way to issue 
+IOCTL or similar custom requests (other than fops request like OS issued 
+read/write requests) from ceph OSD/RBD to the underlying SCSI LLD. 
+From initial reading of docs it looks like in the I/O stack user/client 
+issued I/Os would reach the actual device as below:
 
-I'm going to need some help understanding some things...
+Client I/O req
+ VFS
+  ceph fs
+   Ceph OSD daemon
+     RBD
+      SCSI midlayer
+       SCSI LLD (say mpt3sas)
+         Disk
 
-I've taken the oversaturated test_backoff from test/common/Throttle.cc,
-since that one wasn't working as well. And I suspect that it might be
-for about the same/similar reason.
+Ref: 
+https://en.wikipedia.org/wiki/NVM_Express#/media/File:IO_stack_of_the_Li
+nux_kernel.svg
 
-I start 1 putter and one getter, and with certain parameters the test
-does not complete. When
-    expected_throughput * put_delay_per_count ~> 10 (max_multiple??)
-then the process get into a loop, I'm printing over and over:
-_get_delay return r > high_threshhold (queue is full): time = 0.0172
+My question is:
+The SCSI LLD would support both read /write entry points for I/O 
+requests issued by the filesystem/block I/O but they also support some
+custom requests using IOCTLs. So how can ceph support issuing of such 
+IOCTL requests to the device if user issues such request. Say for 
+example power cycling the drive etc. It can also be a passthro request 
+down to the device.
 
-Note that the parameters to test_backoff are:
-====
-//  double expected_throughput,
-    500,
-//  double max_multiple,
-    10,
-//  double put_delay_per_count,
-    0.025,
-====
+Appreciate the help and thanks in advance.
 
-And that loop is in BackoffThrottle::get, around line 390 (I have a lot
-of extra lines for annotation and tracing.)
-====
-  while (((start + delay) > std::chrono::system_clock::now()) ||
-         !((max == 0) || (current == 0) || ((current + c) <= max))) {
-    assert(ticket == waiters.begin());
-    (*ticket)->wait_until(l, start + delay);
-    delay = _get_delay(c);
-  }
-====
+thanks & regards,
+naveen
 
-The reason that this loop never completes is that it executed under the
-lock in the getter thread in test/common/Throttle.cc:test_backoff where
-it is executed under g.lock(). And the putter is held on the same lock,
-so nothing gets in or out.... Not a deadlock, but a live-lock.
-
-Thusfar the analysis.
-
-Now the question(s)....
-1) How do I break this livelock.
-1a) Should the extra while() { wait } loop actually be in
-BackoffThrottle:get without releasing the lock?
-
-2) The thread are called getter and putter.
-So I'd expect the getter to get messages from the list and the putter so
-write things to the list.
-
-Why does the getter:
-	while(!stop) {
-	    throttle.get(to_get);
-	    in_queue.push_back(to_get)
-	    assert(total <= max);
-	}
-And the putter:
-	while(!stop) {
-	    while(empty)
-		wait;
-	    c = in_queue.front();
-	    in_queue.pop();
-	    "wait time to queue some more"
-	    throttle.put(c)
-	}
-
-Am I getting it wrong around, and would I not expect the
-throttle.{get,put} to match the similar operations on the in_queue?
-
-And what is this c value that we retrieve from the in_queue that is then
-used to be put in the throttle???
-
---WjW
