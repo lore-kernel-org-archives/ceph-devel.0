@@ -1,54 +1,100 @@
-From: Jaze Lee <jazeltq@gmail.com>
-Subject: [devops] the service can not start correctly
-Date: Mon, 9 May 2016 14:54:09 +0800
-Message-ID: <CAKZcxgcjKju=BtbAL-9dFmRSYvv0hHk-D5=n0n=sfrxb80_+NA@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Could be due to a race condition... Re: Help with understanding
+ throttle.finish()
+Date: Mon, 9 May 2016 10:44:19 +0200
+Message-ID: <b34f7765-7db5-713d-5ed2-3374b0ec9872@digiware.nl>
+References: <57225355.3040401@digiware.nl>
+ <8402c73a-d6c4-6ad7-453e-c100e7376e72@digiware.nl>
+ <CAJ4mKGZDvFPAZmhF1c=b07=myW7-y+SgEONL1zyB+piV-r50Hg@mail.gmail.com>
+ <828fd24d-f73d-42e6-69e0-d9f6c5811edd@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f177.google.com ([209.85.213.177]:37792 "EHLO
-	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750948AbcEIGyK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 May 2016 02:54:10 -0400
-Received: by mail-ig0-f177.google.com with SMTP id s8so84739679ign.0
-        for <ceph-devel@vger.kernel.org>; Sun, 08 May 2016 23:54:10 -0700 (PDT)
+Received: from smtp.digiware.nl ([31.223.170.169]:26856 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751536AbcEIIoc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 9 May 2016 04:44:32 -0400
+In-Reply-To: <828fd24d-f73d-42e6-69e0-d9f6c5811edd@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-hi all
-   I test openstack/puppet-ceph to install ceph-10.2.0 and find that,
-when the mon can not start correctly.
+On 6-5-2016 23:04, Willem Jan Withagen wrote:
+> On 6-5-2016 20:41, Gregory Farnum wrote:
 
-   The puppet agent says that
+Oke,
 
- Error: Could not start Service[ceph-mon-study-4]: Execution of
-'service ceph start mon.study-4' returned 6: Redirecting to
-/bin/systemctl start  mon.study-4 ceph.service
+I'm going to need some help understanding some things...
 
+I've taken the oversaturated test_backoff from test/common/Throttle.cc,
+since that one wasn't working as well. And I suspect that it might be
+for about the same/similar reason.
 
+I start 1 putter and one getter, and with certain parameters the test
+does not complete. When
+    expected_throughput * put_delay_per_count ~> 10 (max_multiple??)
+then the process get into a loop, I'm printing over and over:
+_get_delay return r > high_threshhold (queue is full): time = 0.0172
 
-The command 'service ceph start mon.study-4' maps to 'systemctl start
-mon.study-4 ceph.service'
-I think here should be systemctl start ceph-mon@study-4.
+Note that the parameters to test_backoff are:
+====
+//  double expected_throughput,
+    500,
+//  double max_multiple,
+    10,
+//  double put_delay_per_count,
+    0.025,
+====
 
-May be the way i use puppet-ceph is not properly. If not, i think we
-should add some code
-to use systemctl directly rather than use the 'service start ....'.
+And that loop is in BackoffThrottle::get, around line 390 (I have a lot
+of extra lines for annotation and tracing.)
+====
+  while (((start + delay) > std::chrono::system_clock::now()) ||
+         !((max == 0) || (current == 0) || ((current + c) <= max))) {
+    assert(ticket == waiters.begin());
+    (*ticket)->wait_until(l, start + delay);
+    delay = _get_delay(c);
+  }
+====
 
-The code is here
-https://github.com/openstack/puppet-ceph/blob/master/manifests/mon.pp#L=
-90
+The reason that this loop never completes is that it executed under the
+lock in the getter thread in test/common/Throttle.cc:test_backoff where
+it is executed under g.lock(). And the putter is held on the same lock,
+so nothing gets in or out.... Not a deadlock, but a live-lock.
 
+Thusfar the analysis.
 
-Thank a lot.
+Now the question(s)....
+1) How do I break this livelock.
+1a) Should the extra while() { wait } loop actually be in
+BackoffThrottle:get without releasing the lock?
 
+2) The thread are called getter and putter.
+So I'd expect the getter to get messages from the list and the putter so
+write things to the list.
 
+Why does the getter:
+	while(!stop) {
+	    throttle.get(to_get);
+	    in_queue.push_back(to_get)
+	    assert(total <= max);
+	}
+And the putter:
+	while(!stop) {
+	    while(empty)
+		wait;
+	    c = in_queue.front();
+	    in_queue.pop();
+	    "wait time to queue some more"
+	    throttle.put(c)
+	}
 
---=20
-=E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Am I getting it wrong around, and would I not expect the
+throttle.{get,put} to match the similar operations on the in_queue?
+
+And what is this c value that we retrieve from the in_queue that is then
+used to be put in the throttle???
+
+--WjW
