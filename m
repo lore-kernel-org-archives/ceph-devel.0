@@ -1,64 +1,50 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Perhaps a missing dependancy in the makefiles
-Date: Mon, 9 May 2016 18:26:10 +0200
-Message-ID: <73845ecd-292b-351c-75ec-c8ca2f8241dc@digiware.nl>
-References: <add58916-4482-936f-53f7-a79573fc9925@digiware.nl>
- <CAJE9aOO5bhVwGwBEDXEz+=uDx_nosV+F=NBmJv5qCcHiTSn8fw@mail.gmail.com>
- <8106b460-2ae6-4202-ad61-6a98e4f3cbae@digiware.nl>
+From: Sage Weil <sweil@redhat.com>
+Subject: "1 hosts down" health warning?
+Date: Mon, 9 May 2016 12:36:52 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605091232040.1841@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:33881 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:38564 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750914AbcEIQ0l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 9 May 2016 12:26:41 -0400
-In-Reply-To: <8106b460-2ae6-4202-ad61-6a98e4f3cbae@digiware.nl>
+	id S1751210AbcEIQgk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 9 May 2016 12:36:40 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 9C0D12637
+	for <ceph-devel@vger.kernel.org>; Mon,  9 May 2016 16:36:39 +0000 (UTC)
+Received: from cpach ([10.3.112.6])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u49Gaba1007685
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Mon, 9 May 2016 12:36:39 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 6-5-2016 09:28, Willem Jan Withagen wrote:
-> On 6-5-2016 06:57, kefu chai wrote:
->> On Thu, May 5, 2016 at 12:27 AM, Willem Jan Withagen <wjw@digiware.nl>
->> wrote:
->>> Hi,
->>>
->>> Everytime I run a parallel make on the full tree I get the following
->>> complaint:
->>> In file included from db/builder.cc:16:
->>> In file included from ./db/compaction_iterator.h:14:
->>> In file included from ./db/compaction.h:13:
->>> ./util/mutable_cf_options.h:28:21: error: no member named
->>> 'soft_pending_compaction_bytes_limit' in
->>>       'rocksdb::Options'; did you mean
->>> 'hard_pending_compaction_bytes_limit'?
->>>             options.soft_pending_compaction_bytes_limit),
->>>                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->>>                     hard_pending_compaction_bytes_limit
->>>
->>> Then I just run along with a single threaded make, and everything
->>> completes just fine.
->>>
->>> So that is probably a missing dependency for either db/builder.cc, or
->>> ./util/mutable_cf_options.h.
->>>
->>> Suggestions on how to fix this?
->>
->> Willem, not sure what is going on in your tree. but rocksdb::Options does
->> have this member variables: it is inherited from its parent class
->> ColumnFamilyOptions.
-> 
-> Oke, thanx for the confirmation.
-> 
-> Well the "joke" is that a next run continuing where it left off makes it to
-> the end, without any hickups...
-> And yes, a run on CentOS with the Ceph/Ceph tree does not have this
-> problem.
-> Perhaps that my packages installed rockdb throws dirt into the equation...
+We have a feature (mon_osd_reporter_subtree_level = host) that makes it so 
+that if an entire host is down (or whatever the configured hierarchy 
+level is) the osds aren't automatically marked out after 5 minutes.
 
-It seems a fresh checkout "fixed" this.
+This is confusing on an actual cluster because you see something like
 
---WjW
+            48/5661 in osds are down
 
+bit it never clears.  It's not until you look at the ceph osd tree output 
+that you can see why they aren't getting marked out.
+
+It would be great if the health warning said something like
+
+            48/5661 in osds are down
+            1/142 hosts are down (accounting for 48/48 down osds)
+
+and the health detail said something like
+
+  host foo is down with 48 OSDs
+
+I think this would be pretty easy to implement given the mon is 
+already doing the subtree-based checks.
+
+Thoughts? Any takers?
+
+sage
