@@ -1,71 +1,64 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: [devops] the service can not start correctly
-Date: Mon, 9 May 2016 20:02:41 -0600
-Message-ID: <CALqRxCw4RBjgtT6tnFFgcEjmB=mHShoZxNkmxeygK6Li6PwwdA@mail.gmail.com>
-References: <CAKZcxgcjKju=BtbAL-9dFmRSYvv0hHk-D5=n0n=sfrxb80_+NA@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: "1 hosts down" health warning?
+Date: Tue, 10 May 2016 08:05:50 +0200 (CEST)
+Message-ID: <184215728.1353.1462860350329@ox.pcextreme.nl>
+References: <alpine.DEB.2.11.1605091232040.1841@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f42.google.com ([209.85.213.42]:33387 "EHLO
-	mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752752AbcEJCCn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 May 2016 22:02:43 -0400
-Received: by mail-vk0-f42.google.com with SMTP id o133so88681965vka.0
-        for <ceph-devel@vger.kernel.org>; Mon, 09 May 2016 19:02:42 -0700 (PDT)
-In-Reply-To: <CAKZcxgcjKju=BtbAL-9dFmRSYvv0hHk-D5=n0n=sfrxb80_+NA@mail.gmail.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:49389 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750741AbcEJGF4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 May 2016 02:05:56 -0400
+In-Reply-To: <alpine.DEB.2.11.1605091232040.1841@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jaze Lee <jazeltq@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-Hi Jaze,
 
-The Puppet code should be updated to do "systemctl start
-ceph-mon@study-4", as you suggest. It should not run "service <foo>"
-any more.
+> Op 9 mei 2016 om 18:36 schreef Sage Weil <sweil@redhat.com>:
+> 
+> 
+> We have a feature (mon_osd_reporter_subtree_level = host) that makes it so 
+> that if an entire host is down (or whatever the configured hierarchy 
+> level is) the osds aren't automatically marked out after 5 minutes.
+> 
+> This is confusing on an actual cluster because you see something like
+> 
+>             48/5661 in osds are down
+> 
+> bit it never clears.  It's not until you look at the ceph osd tree output 
+> that you can see why they aren't getting marked out.
+> 
+> It would be great if the health warning said something like
+> 
+>             48/5661 in osds are down
+>             1/142 hosts are down (accounting for 48/48 down osds)
+> 
+> and the health detail said something like
+> 
+>   host foo is down with 48 OSDs
+> 
+> I think this would be pretty easy to implement given the mon is 
+> already doing the subtree-based checks.
+> 
+> Thoughts? Any takers?
 
-- Ken
+Seems like a good thing to have. I wouldn't say 'host', since 'mon_osd_reporter_subtree_level' could be set to rack or row if you want to.
 
-On Mon, May 9, 2016 at 12:54 AM, Jaze Lee <jazeltq@gmail.com> wrote:
-> hi all
->    I test openstack/puppet-ceph to install ceph-10.2.0 and find that,
-> when the mon can not start correctly.
->
->    The puppet agent says that
->
->  Error: Could not start Service[ceph-mon-study-4]: Execution of
-> 'service ceph start mon.study-4' returned 6: Redirecting to
-> /bin/systemctl start  mon.study-4 ceph.service
->
->
->
-> The command 'service ceph start mon.study-4' maps to 'systemctl start
-> mon.study-4 ceph.service'
-> I think here should be systemctl start ceph-mon@study-4.
->
-> May be the way i use puppet-ceph is not properly. If not, i think we
-> should add some code
-> to use systemctl directly rather than use the 'service start ....'.
->
-> The code is here
-> https://github.com/openstack/puppet-ceph/blob/master/manifests/mon.pp=
-#L90
->
->
-> Thank a lot.
->
->
->
+Maybe:
+
+            480/6720 in osds are down
+            1/14 of CRUSH type 'rack' are down (accounting for 480/480 down osds)
+
+That seems more logical to me.
+
+Wido
+
+> 
+> sage
 > --
-> =E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
