@@ -1,82 +1,99 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: 2 related bluestore questions
-Date: Wed, 11 May 2016 09:10:43 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605110901551.15518@cpach.fuggernut.com>
-References: <alpine.DEB.2.11.1605091417590.336@cpach.fuggernut.com> <6168022b-e3c0-b8f2-e8c7-3b4b82f9dc6e@mirantis.com> <alpine.DEB.2.11.1605100841400.15518@cpach.fuggernut.com> <b6240191-0849-d60c-ebb6-147b5785e3e7@mirantis.com>
- <alpine.DEB.2.11.1605101121090.15518@cpach.fuggernut.com> <alpine.DEB.2.11.1605102105260.15518@cpach.fuggernut.com> <2b5ebbd8-3e89-1fff-37f1-c6eb00bdcb1a@mirantis.com>
+From: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Hammer vs Jewel librbd performance testing and git
+	bisection results
+Date: Wed, 11 May 2016 08:21:18 -0500
+Message-ID: <f9f54455-8348-42b7-153b-e38850eed5e1@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54461 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932107AbcEKNKb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 09:10:31 -0400
-In-Reply-To: <2b5ebbd8-3e89-1fff-37f1-c6eb00bdcb1a@mirantis.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: allen.samuels@sandisk.com, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "cbt-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <cbt-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 11 May 2016, Igor Fedotov wrote:
-> > I took a stab at a revised wal_op_t here:
-> > 
-> > 	https://github.com/liewegas/ceph/blob/wip-bluestore-write/src/os/bluestore/bluestore_types.h#L595-L605
-> > 
-> > This is enough to implement the basic wal overwrite case here:
-> > 
-> > 	https://github.com/liewegas/ceph/blob/wip-bluestore-write/src/os/bluestore/BlueStore.cc#L5522-L5578
-> > 
-> > It's overkill for that, but something like this ought to be sufficiently
-> > general to express the more complicated wal (and compaction/gc/cleanup)
-> > operations, where we are reading bits of data from lots of different
-> > previous blobs, verifying checksums, and then assembling the results into
-> > a new buffer that gets written somewhere else.  The read_extent_map and
-> > write_map offsets are logical offsets in a buffer we assemble and then
-> > write to b_off~b_len in the specific blob.  I didn't get to the _do_wal_op
-> > part that actually does it, but it would do the final write, csum
-> > calculation, and metadata update.  Probably... the allocation would happen
-> > then too, if the specified blob didn't already have pextents.  Tha way
-> > we can do compression at that stage as well?
-> > 
-> > What do you think?
-> Not completely sure that it's a good idea to have read stage description
-> stored in WAL record? Wouldn't that produce any conflicts/inconsistencies when
-> multiple WAL records deal with the same or close lextents and previous WAL
-> updates lextents to read. May be it's better to prepare such a description
-> exactly when WAL is applied? And WAL record to have just a basic write info?
+Hi Guys,
 
-Yeah, I think this is a problem.  I see two basic paths:
+we spent some time over the past week looking at hammer vs jewel RBD 
+performance in HDD only, HDD+NVMe journal, and NVMe cases with the 
+default filestore backend.  We ran into a number of issues during 
+testing and I don't want to get into everything, but we were eventually 
+able to get a good set of data out of fio's bandwidth and latency logs. 
+Fio's log sampling intervals were not uniform, but Jens has since 
+written an experimental patch for fio that fixes this which you can find 
+in this thread:
 
- - We do a wal flush before queueing a new wal event to avoid races like 
-this. Or perhaps we only do it when the wal event(s) touch the same 
-blob(s).  That's simple to reason about, but means that a series 
-of small IOs to the same object (or blob) will serialize the kv commit and 
-wal r/m/w operations.  (Note that this is no worse than the naive approach 
-of doing the read part up front, and it only happens when you have 
-successive wal ops on the same object (or blob)).
+http://www.spinics.net/lists/fio/msg04713.html
 
- - We describe the wal read-side in terms of the current onode state.  For 
-example, 'read object offset 0..100, use provided buffer for 100..4096, 
-overwrite block'.  That can be pipelined.  But there are other 
-operations that would require we flush the wal events, like a truncate or 
-zero or other write that clobbers that region of the object.  
-Maybe/hopefully in those cases we don't care (it no longer matters that 
-this wal event do the write we originally intended) but we'd need 
-to think pretty carefully about it.  FWIW, truncate already does an 
-o->flush().
+We ended up writing a parser that can work around this by reading 
+multiple fio bw/latency log files and getting aggregate data even 
+assuming non-uniform sample intervals.  This was briefly part of CBT, 
+but recently was included upstream in fio itself.  Armed with this, we 
+were able to get a seemingly accurate view of hammer vs jewel 
+performance across various IO sizes:
 
-> And for GC/cleanup process this becomes even more important as the task 
-> may be deferred for a while and lextent map may be significantly 
-> altered.
+https://docs.google.com/spreadsheets/d/1MK09ZXufTUCgqa9jVJFO-J9oZWMKn7SnKN7NJ45fzTE/edit?usp=sharing
 
-I get the feeling that the GC process can either (1) write new blobs in 
-new locations and do an atomic transition, without interacting with the 
-wal events at all, or (2) we just do the work once we committed to it. I 
-think the potential benefit of committing to do wal work and then changing 
-our mind is pretty small.
+The gist of this is that Jewel is faster than Hammer for many random 
+workloads (Read, Write, and Mixed).  There is one specific case where 
+performance degrades significantly: 64-128k sequential reads.  We 
+couldn't find anything obviously wrong with these tests, so we spent 
+some time running git bisects between hammer and jewel with the NVMe 
+test configuration (these tests were faster to setup/run than the HDD 
+setup).  We tested about 45 different commits with anywhere from 1-5 
+samples depending on how confident the results looked:
 
-> And I suppose blob id should be 2 not 1 here:
-> https://github.com/liewegas/ceph/blob/wip-bluestore-write/src/os/bluestore/BlueStore.cc#L5545
+https://docs.google.com/spreadsheets/d/1hbsyNM5pr-ZwBuR7lqnphEd-4kQUid0C9eRyta3ohOA/edit?usp=sharing
 
-Ah, yes, thanks!
-sage
+There are several commits of interest that have a noticeable effect on 
+128K sequential read performance:
+
+
+1) https://github.com/ceph/ceph/commit/3a7b5e3
+
+This commit was the first that introduced anywhere from a 0-10% 
+performance decrease in the 128K sequential read tests.  Primarily it 
+made performance lower on average and more variable.
+
+
+2) https://github.com/ceph/ceph/commit/c474ee42
+
+This commit had a very large impact, reducing performance by another 20-25%.
+
+
+3) https://github.com/ceph/ceph/commit/66e7464
+
+This was a fix that helped regain some of the performance loss due to 
+c474ee42, but didn't totally reclaim it.
+
+
+4) 218bc2d - b85a5fe
+
+Between commits 218bc2d and b85a5fe, there's a fair amount of 
+variability in the test results.  It's possible that some of the commits 
+here are having an effect on performance, but it's difficult to tell. 
+Might be worth more investigation after other bottlenecks are removed.
+
+
+5) https://github.com/ceph/ceph/commit/8aae868
+
+The new AioImageRequestWQ appears to be the cause of the most recent 
+large reduction in 128K sequential read performance.
+
+
+6) 8aae868 - 6f18f04
+
+There may be some additional small performance impacts in these commits, 
+though it's difficult to tell which ones since most of the bisects had 
+to be skipped due to ceph failing to compile.
+
+This is what we know so far, thank for reading. :)
+
+Mark
