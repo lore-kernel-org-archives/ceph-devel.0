@@ -1,82 +1,68 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: Hammer vs Jewel librbd performance testing and git bisection
- results
-Date: Wed, 11 May 2016 09:49:20 -0400 (EDT)
-Message-ID: <751229226.29976609.1462974560840.JavaMail.zimbra@redhat.com>
-References: <f9f54455-8348-42b7-153b-e38850eed5e1@redhat.com> <20160511133504.GB6902@predictor>
+From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Hammer vs Jewel librbd performance testing and git
+ bisection results
+Date: Wed, 11 May 2016 09:52:30 -0400
+Message-ID: <CA+aFP1BN=mpR-7xid=+vgz3rpSWkirthrYDPuEy-OkreVp=A-g@mail.gmail.com>
+References: <f9f54455-8348-42b7-153b-e38850eed5e1@redhat.com>
+Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:45309 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751693AbcEKNtY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 09:49:24 -0400
-In-Reply-To: <20160511133504.GB6902@predictor>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Piotr =?utf-8?Q?Da=C5=82ek?= <branch@predictor.org.pl>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <f9f54455-8348-42b7-153b-e38850eed5e1-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "cbt-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <cbt-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+Awesome work Mark!  Comments / questions inline below:
 
------ Original Message -----
-> From: "Piotr Da=C5=82ek" <branch@predictor.org.pl>
-> To: ceph-devel@vger.kernel.org
-> Sent: Wednesday, May 11, 2016 9:35:04 AM
-> Subject: Re: Hammer vs Jewel librbd performance testing and git bisec=
-tion results
->=20
-syNM5pr-ZwBuR7lqnphEd-4kQUid0C9eRyta3ohOA/edit?usp=3Dsharing
-> >=20
-> > There are several commits of interest that have a noticeable effect
-> > on 128K sequential read performance:
-> >=20
-> > [..]
-> > 2) https://github.com/ceph/ceph/commit/c474ee42
-> >=20
-> > This commit had a very large impact, reducing performance by anothe=
-r
-> > 20-25%.
->=20
-> https://github.com/ceph/ceph/commit/c474ee42#diff-254555dde8dcfb7fb90=
-8791ab8214b92R318
-> I would check if temporarily forcing unique_lock_name() to return its=
- arg
-> (or other constant) would change things. If so, probably a more effic=
-ient way
-> to construct unique lock name may be in order.
+On Wed, May 11, 2016 at 9:21 AM, Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> There are several commits of interest that have a noticeable effect on 128K
+> sequential read performance:
+>
+>
+> 1) https://github.com/ceph/ceph/commit/3a7b5e3
+>
+> This commit was the first that introduced anywhere from a 0-10% performance
+> decrease in the 128K sequential read tests.  Primarily it made performance
+> lower on average and more variable.
 
-++
+This one is surprising to me since this change is also in Hammer
+(cf6e1f50ea7b5c2fd6298be77c06ed4765d66611).  When you are performing
+the bisect, are you keeping the OSDs at the same version and only
+swapping out librbd?
 
-Naively, too, what unique_lock_name is doing amounts to:  1) creating e=
-xtra of [a small] std::string [better fixed, but not a likely root caus=
-e?] 2) using Utils::stringify to hook ostream operators in the type pas=
-sed in, and doing that on a new sstream;
+> 2) https://github.com/ceph/ceph/commit/c474ee42
+>
+> This commit had a very large impact, reducing performance by another 20-25%.
 
-Maybe we should look horizontally at either speeding up or finding alte=
-rnatives to stringify in other places?
+Definitely an area we should optimize given the number of
+AioCompletions that are constructed.
 
-Matt
+> 3) https://github.com/ceph/ceph/commit/66e7464
+>
+> This was a fix that helped regain some of the performance loss due to
+> c474ee42, but didn't totally reclaim it.
 
->=20
-> --
-> Piotr Da=C5=82ek
+Odd -- since that effectively reverted c474ee42 (unique_lock_name)
+within the IO path.
 
+> 5) https://github.com/ceph/ceph/commit/8aae868
+>
+> The new AioImageRequestWQ appears to be the cause of the most recent large
+> reduction in 128K sequential read performance.
 
---=20
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+We will have to investigate this -- AioImageRequestWQ is just a
+wrapper around the same work queue used in the Hammer release.
 
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Jason
