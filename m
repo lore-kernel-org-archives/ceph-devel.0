@@ -1,67 +1,75 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: blueprint: consistency groups
-Date: Wed, 11 May 2016 11:12:49 -0400
-Message-ID: <CA+aFP1CfOCy9pL=NWka=j=otb7rwO7W=ds-ggBMz0hVY=zj3-Q@mail.gmail.com>
-References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
-	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
-	<20160325071933.GA14634@gmail.com>
-	<CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
-	<CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
-	<CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
-	<CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
-	<CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
-	<CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
-	<CA+aFP1C7me+-dbXVrMgU0Qs9fX8_4ocC9v5orzy+c8tK30y08A@mail.gmail.com>
-	<CA+hcxJT4DWgt8K8hc27KbkJK=DRePM18Zh=GPxtfR5afoxVP1w@mail.gmail.com>
-	<CA+hcxJQGcDy96o0f9sEY8HwLXng9YzxsoKAhaaCuCDDhVbN76A@mail.gmail.com>
-	<CA+aFP1AQzo7bO=e-Gd_sAtBWSYFgvji8isxuXFKDejaHAA+FuA@mail.gmail.com>
-	<CA+hcxJRMcJFxYdscdwyvowjw_dNF6xoNzCHT1=oaznwGqY-4Rw@mail.gmail.com>
-	<CA+aFP1Awk0YZnW16JxOgfDeJFsuKPoN4jdrpr8dCdqUjhhD_Mw@mail.gmail.com>
-	<CA+hcxJTWZWUAUGr1gAZwEqLrGY9eJpzrF3+0H3wqaSjiY6-Faw@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
+Subject: Re: Hammer vs Jewel librbd performance testing and git bisection
+ results
+Date: Wed, 11 May 2016 17:22:32 +0200
+Message-ID: <20160511152232.GC6902@predictor>
+References: <f9f54455-8348-42b7-153b-e38850eed5e1@redhat.com>
+ <20160511133504.GB6902@predictor>
+ <751229226.29976609.1462974560840.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f175.google.com ([209.85.192.175]:36007 "EHLO
-	mail-pf0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751391AbcEKPMu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 11:12:50 -0400
-Received: by mail-pf0-f175.google.com with SMTP id c189so20380965pfb.3
-        for <ceph-devel@vger.kernel.org>; Wed, 11 May 2016 08:12:50 -0700 (PDT)
-In-Reply-To: <CA+hcxJTWZWUAUGr1gAZwEqLrGY9eJpzrF3+0H3wqaSjiY6-Faw@mail.gmail.com>
+Received: from predictor.org.pl ([185.5.97.54]:52842 "EHLO predictor.org.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932181AbcEKPU1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 May 2016 11:20:27 -0400
+Content-Disposition: inline
+In-Reply-To: <751229226.29976609.1462974560840.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Victor Denisov <vdenisov@mirantis.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, May 10, 2016 at 12:25 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
-> I was writing unit tests for create_cg function when I realized that
-> it wouldn't recover if we lost connection between
-> cls_client::dir_add_cg and create_cg object. If create_cg doesn't
-> happen then we are unable to repeat dir_add_cg.
-> However since I implemented create_cg operation after create_image
-> operation. create_image operation has the same issue.
+On Wed, May 11, 2016 at 09:49:20AM -0400, Matt Benjamin wrote:
+> > > syNM5pr-ZwBuR7lqnphEd-4kQUid0C9eRyta3ohOA/edit?usp=3Dsharing
+> > >=20
+> > > There are several commits of interest that have a noticeable effe=
+ct
+> > > on 128K sequential read performance:
+> > >=20
+> > > [..]
+> > > 2) https://github.com/ceph/ceph/commit/c474ee42
+> > >=20
+> > > This commit had a very large impact, reducing performance by anot=
+her
+> > > 20-25%.
+> >=20
+> > https://github.com/ceph/ceph/commit/c474ee42#diff-254555dde8dcfb7fb=
+908791ab8214b92R318
+> > I would check if temporarily forcing unique_lock_name() to return i=
+ts arg
+> > (or other constant) would change things. If so, probably a more eff=
+icient way
+> > to construct unique lock name may be in order.
+>=20
+> ++
+>=20
+> Naively, too, what unique_lock_name is doing amounts to:  1) creating=
+ extra of [a small] std::string [better fixed, but not a likely root ca=
+use?] 2) using Utils::stringify to hook ostream operators in the type p=
+assed in, and doing that on a new sstream;
+=20
+I don't thing "stringify" alone is a source of problems. This looks lik=
+e a
+convenience function to make object dumping easier, so no real point in
+changing it, rather than that...
 
-Correct - the recovery is to remove the image and re-create if you
-have a failure creating the image.  I think that is a valid solution
-to the consistency groups as well.
+> Maybe we should look horizontally at either speeding up or finding al=
+ternatives to stringify in other places?
 
-> So, my question is. Should I reimplement create_cg so that it can
-> recover from connection loss to the cluster or should I keep it the
-> same way create_image is implemented?
+=2E.. it's usage should be limited to non-performance-critical paths.
+In this particular case, probably checking for lockdep and refusing to =
+act=20
+when it is disabled sounds like the least intrusive way to fix
+things.
 
-There will not be an issue if the connection is lost -- there will
-only be an issue if the rbd CLI (or whatever else is using the librbd
-API) crashes / is stopped mid-operation.  I am fine with matching the
-create_image behavior because there is a recovery path.
-
-> Also, what is more preferable big pull request for all components of
-> the feature - CRUD for consistency groups and snapshots, or split it
-> into smaller pull requests - first merge CRUD operations then
-> implement snapshots?
-
-Smaller patchsets are easier to review, test, and merge (especially as
-review comments are addressed).
-
--- 
-Jason
+--=20
+Piotr Da=C5=82ek
+branch@predictor.org.pl
+http://blog.predictor.org.pl
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
