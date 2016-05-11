@@ -1,100 +1,134 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: 2 related bluestore questions
-Date: Wed, 11 May 2016 09:57:03 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605110951570.15518@cpach.fuggernut.com>
-References: <alpine.DEB.2.11.1605091417590.336@cpach.fuggernut.com> <6168022b-e3c0-b8f2-e8c7-3b4b82f9dc6e@mirantis.com> <alpine.DEB.2.11.1605100841400.15518@cpach.fuggernut.com> <b6240191-0849-d60c-ebb6-147b5785e3e7@mirantis.com>
- <alpine.DEB.2.11.1605101121090.15518@cpach.fuggernut.com> <alpine.DEB.2.11.1605102105260.15518@cpach.fuggernut.com> <2b5ebbd8-3e89-1fff-37f1-c6eb00bdcb1a@mirantis.com> <alpine.DEB.2.11.1605110901551.15518@cpach.fuggernut.com>
- <8b077a20-ace3-7824-4039-7b8e9adf88ce@mirantis.com>
+From: Ramesh Chander <Ramesh.Chander@sandisk.com>
+Subject: RE: Implementing bitmap based space allocator for BlueStore
+Date: Wed, 11 May 2016 13:52:51 +0000
+Message-ID: <CY1PR0201MB18200B12B2922C4324CD8D4185720@CY1PR0201MB1820.namprd02.prod.outlook.com>
+References: <BLUPR0201MB1809B0B51FF640A10869E0A285790@BLUPR0201MB1809.namprd02.prod.outlook.com>
+	<CY1PR0201MB1820941DBBE1FB7927F42D2185710@CY1PR0201MB1820.namprd02.prod.outlook.com>
+ <CANP1eJGy9bBvnW26PVb1ykimGLa3WO5s1WPyLp9_c6TNCye5bw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54757 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932628AbcEKN4u (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 09:56:50 -0400
-In-Reply-To: <8b077a20-ace3-7824-4039-7b8e9adf88ce@mirantis.com>
+Received: from mail-bl2on0088.outbound.protection.outlook.com ([65.55.169.88]:8640
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932901AbcEKNwz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 May 2016 09:52:55 -0400
+In-Reply-To: <CANP1eJGy9bBvnW26PVb1ykimGLa3WO5s1WPyLp9_c6TNCye5bw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: allen.samuels@sandisk.com, ceph-devel@vger.kernel.org
+To: Milosz Tanski <milosz@adfin.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, 11 May 2016, Igor Fedotov wrote:
-> On 11.05.2016 16:10, Sage Weil wrote:
-> > On Wed, 11 May 2016, Igor Fedotov wrote:
-> > > > I took a stab at a revised wal_op_t here:
-> > > > 
-> > > > 	https://github.com/liewegas/ceph/blob/wip-bluestore-write/src/os/bluestore/bluestore_types.h#L595-L605
-> > > > 
-> > > > This is enough to implement the basic wal overwrite case here:
-> > > > 
-> > > > 	https://github.com/liewegas/ceph/blob/wip-bluestore-write/src/os/bluestore/BlueStore.cc#L5522-L5578
-> > > > 
-> > > > It's overkill for that, but something like this ought to be sufficiently
-> > > > general to express the more complicated wal (and compaction/gc/cleanup)
-> > > > operations, where we are reading bits of data from lots of different
-> > > > previous blobs, verifying checksums, and then assembling the results
-> > > > into
-> > > > a new buffer that gets written somewhere else.  The read_extent_map and
-> > > > write_map offsets are logical offsets in a buffer we assemble and then
-> > > > write to b_off~b_len in the specific blob.  I didn't get to the
-> > > > _do_wal_op
-> > > > part that actually does it, but it would do the final write, csum
-> > > > calculation, and metadata update.  Probably... the allocation would
-> > > > happen
-> > > > then too, if the specified blob didn't already have pextents.  Tha way
-> > > > we can do compression at that stage as well?
-> > > > 
-> > > > What do you think?
-> > > Not completely sure that it's a good idea to have read stage description
-> > > stored in WAL record? Wouldn't that produce any conflicts/inconsistencies
-> > > when
-> > > multiple WAL records deal with the same or close lextents and previous WAL
-> > > updates lextents to read. May be it's better to prepare such a description
-> > > exactly when WAL is applied? And WAL record to have just a basic write
-> > > info?
-> > Yeah, I think this is a problem.  I see two basic paths:
-> > 
-> >   - We do a wal flush before queueing a new wal event to avoid races like
-> > this. Or perhaps we only do it when the wal event(s) touch the same
-> > blob(s).  That's simple to reason about, but means that a series
-> > of small IOs to the same object (or blob) will serialize the kv commit and
-> > wal r/m/w operations.  (Note that this is no worse than the naive approach
-> > of doing the read part up front, and it only happens when you have
-> > successive wal ops on the same object (or blob)).
-> > 
-> >   - We describe the wal read-side in terms of the current onode state.  For
-> > example, 'read object offset 0..100, use provided buffer for 100..4096,
-> > overwrite block'.  That can be pipelined.  But there are other
-> > operations that would require we flush the wal events, like a truncate or
-> > zero or other write that clobbers that region of the object.
-> > Maybe/hopefully in those cases we don't care (it no longer matters that
-> > this wal event do the write we originally intended) but we'd need
-> > to think pretty carefully about it.  FWIW, truncate already does an
-> > o->flush().
-> I'd prefer the second approach. Probably with some modification...
-> As far as I understand with the approach above you are trying to locate all
-> write logic at a single place and have WAL machinery as a straightforward
-> executor for already prepared tasks. Not sure this is beneficial enough. But
-> definitely it's more complex and error-prone. And potentially you will need
-> extend WAL machinery task description from time to time...
-> As an alternative one can eliminate that read description in WAL record at
-> all. Let's simply record what loffset we are going to write to and data
-> itself. Thus we have simple write request description.
-> And when WAL is applied corresponding code should determine how to do the
-> write properly using the current lextent/blob maps state. This way Write Op
-> apply can be just a regular write handling that performs sync RMW or any other
-> implementation depending on the current state, some policy, or whatever else
-> that fits the best at the specific moment.
-
-I like that way better!  We can just add a force_sync argument to 
-_do_write.  That also lets us trivially disable wal (by forcing sync w/ 
-a config option or whatever).
-
-The downside is that any logically conflicting request (an overlapping 
-write or truncate or zero) needs to drain the wal events, whereas with a 
-lower-level wal description there might be cases where we can ignore the 
-wal operation.  I suspect the trivial solution of o->flush() on 
-write/truncate/zero will be pretty visible in benchmarks.  Tracking 
-in-flight wal ops with an interval_set would probably work well enough.
-
-sage
+VGhhbmtzIE1pbG9zeiBmb3IgY29tbWVudC4NCg0KVW50aWwgSSBmaWd1cmUgb3V0IHdheSB0aGF0
+IHdvcmtzIGZvciBib3RoIG9yIGNsZWFuZXIgd2F5IG9mIHN1cHBvcnRpbmcgYm90aCwgSSB3aWxs
+IG1ha2UgZGVmYXVsdCBiaXRtYXAgMzJiaXRzIGFzIHRoYXQgc2VlbXMgb24gc2FmZXIgc2lkZSBh
+cyBvZiBub3cuDQoNCkJUVzogIEkgYW0gdXNpbmcgZ2NjIGluIGJ1aWxkIG1hY3JvcyBsaWtlIF9f
+c3luY19mZXRjaF9hbmRfYW5kIGV0Yy4NCg0KaHR0cHM6Ly9nY2MuZ251Lm9yZy9vbmxpbmVkb2Nz
+L2djYy00LjQuMy9nY2MvQXRvbWljLUJ1aWx0aW5zLmh0bWwNCg0KDQotUmVnYXJkcywNCiBSYW1l
+c2gNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IE1pbG9zeiBUYW5za2kgW21h
+aWx0bzptaWxvc3pAYWRmaW4uY29tXSANClNlbnQ6IFR1ZXNkYXksIE1heSAxMCwgMjAxNiAxMDow
+OSBQTQ0KVG86IFJhbWVzaCBDaGFuZGVyDQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcN
+ClN1YmplY3Q6IFJlOiBJbXBsZW1lbnRpbmcgYml0bWFwIGJhc2VkIHNwYWNlIGFsbG9jYXRvciBm
+b3IgQmx1ZVN0b3JlDQoNCk9uIFR1ZSwgTWF5IDEwLCAyMDE2IGF0IDY6MjAgQU0sIFJhbWVzaCBD
+aGFuZGVyIDxSYW1lc2guQ2hhbmRlckBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+DQo+IEhpIENlcGgg
+RGV2ZWxvcGVycywNCj4NCj4gVGhpcyBpcyByZXF1ZXN0IHRvIHJldmlldyBQUjoNCj4NCj4gaHR0
+cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzkwMzENCj4NCj4gaXMgZm9yIGJlbG93IG1l
+bnRpb25lZCBiaXRtYXAgYmFzZWQgYWxsb2NhdG9yIGluIEJsdWVTdG9yZS4NCj4NCj4gSW4gc2hv
+cnQgcGxlYXNlIHJldmlldyB0aGUgY29kZS4NCj4NCj4NCj4gRGV0YWlsczogKHNhbWUgbWVudGlv
+bmVkIGluIHB1bGwgcmVxdWVzdCkNCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tDQo+IFRoaXMgaXMgQml0bWFwIGJhc2VkIGFsbG9jYXRvciBmb3IgQmx1
+ZVN0b3JlLg0KPiBNb3RpdmF0aW9uOg0KPiAxLiBSZWR1Y3Rpb24gb2YgbWVtb3J5IGJ5IHVzaW5n
+IGp1c3Qgb25lIGJpdCBmb3Igc2luZ2xlIGJsb2NrIChhcyBjb21wYXJlZCB0byA4ICsgOCBieWVz
+IGluIGNhc2Ugb2YgZXh0ZW50IGJhc2VkIGFsbG9jYXRvcikuDQo+IDIuIENvbmN1cnJlbnQgYWxs
+b2NhdGlvbnMgdmlhIG11bHRpcGxlIHRocmVhZHMuDQo+DQo+IEl0IGV4cG9zZXMgbWFpbmx5IHRo
+ZXNlIGludGVyZmFjZXM6DQo+IDEuIEFsbG9jYXRlIGNvbnRpZ3VvdXMgYmxvY2tzLg0KPiAyLiBB
+bGxvY2F0ZSBub24tY29udGlndW91cyBibG9ja3MuDQo+IDMuIEZyZWUgYWxsb2NhdGVkIGJsb2Nr
+cy4NCj4gNC4gR2V0IFN0YXRpc3RpY3MgYWJvdXQgYWxsb2NhdG9yLg0KPg0KPiBJdCB3b3JrcyBp
+biB0d28gbW9kZXM6DQo+DQo+ICAgICBDb25jdXJyZW50Og0KPiAgICAgV2hlcmUgbXVsdGlwbGUg
+dGhyZWFkcyBjYW4gYmUgYWxsb2NhdGluZyBhdCBzYW1lIHRpbWUgaW4gZGlmZmVyZW50IHNwYWNl
+IHpvbmVzLiBUaGlzIGlzIHNwZWNpYWxseSBmb3IgZmFzdGVyIG1lZGlhIGxpa2UgU1NEcy4NCj4N
+Cj4gICAgIFNlcmlhbDoNCj4gICAgIE9ubHkgb25lIHRocmVhZCBjYW4gYmUgYWN0aXZlIGluc2lk
+ZSBiaXRtYXAgYWxsb2NhdG9yIGF0IGEgdGltZS4gVGhpcyBvbmUgaXMgbWFpbmx5IHRvIGtlZXAg
+cm90YXRpbmcgbWVkaWEgaW4gbWluZCBzaW5jZQ0KPiAgICAgY29uY3VycmVudCBhbGxvY2F0aW9u
+cyBjYW4gYWdncmF2YXRlIHJhbmRvbSB3cml0ZXMuDQo+DQo+IFRlc3QgUmFuOg0KPiAxLiBNYWtl
+IGNoZWNrLg0KPiAyLiBCYXNpYyByZWFkIHdyaXRlIG11bHRpLXRocmVhZGVkIHRlc3QgY2FzZXMg
+d2l0aCByZWNvdmVyeS4NCj4gMy4gRXhoYXVzdGl2ZSB1bml0IHRlc3QgY2FzZXMgZm9yIGNvcm5l
+ciBjYXNlcw0KPg0KPiBOZXh0IHN0ZXBzOg0KPiAxLiBDb21wbGV0ZSBzZXQgb2YgbXVsdGktdGhy
+ZWFkZWQgdGVzdCBjYXNlcy4NCj4gMi4gTW9yZSB0ZXN0IGNhc2VzIHRvIHByb3RlY3QgZnJvbSBz
+cGFjZSBsZWFrIGFuZCBjb3JydXB0aW9uIGluIEJsdWUgU3RvcmUuDQo+IDQuIFByb3ZpZGUgbW9y
+ZSBpbnRlbGxpZ2VudCBjb25maWd1cmFibGUgbGlrZSBab25lIHNpemUuDQo+IDUuIElmIHJlcXVp
+cmVkIG1ha2Ugc2Nhbm5pbmcgZmFzdGVyIG15IG9uZSBtb3JlIGxldmVsIGluIHN1bW1hcnkgaGll
+cmFyY2h5Lg0KPiA2LiBJZiByZXF1aXJlZCBtb3JlIHN0cmljdGVyIHJlc2VydmF0aW9ucyBndWFy
+YW50ZWUuDQo+DQo+IE92ZXIgQWxsIERlc2lnbiBPdmVydmlldzoNCj4NCj4gRnVsbCBzcGFjZSBp
+cyBkaXZpZGVkIGluIHRvIGZpeGVkIHNpemUgYnV0IGNvbmZpZ3VyYWJsZSB6b25lcy4gSXQgaXMg
+dGhlIHVuaXQgd2hlcmUgYXQgYSB0aW1lIHNpbmdsZSB0aHJlYWQgY2FuIGJlIGFjdGl2ZWx5IGFs
+bG9jYXRpbmcgZnJvbS4NCj4gQSB6b25lIGlzIHRoZW4gZnVydGhlciBkaXZpZGVkIGluIHRvIEJp
+dE1hcHMuIEVhY2ggYml0bWFwIGlzIDY0Yml0cyBoZW5jZSA2NCBibG9ja3MuDQoNCg0KTWF5YmUg
+Yml0bWFwcyBzaG91bGQgYmUgMzJiaXQ/IE5vdCBldmVyeSBwbGF0Zm9ybSBzdXBwb3J0cyBhdG9t
+aWMgb3BlcmF0aW9ucyBvbiA2NGJpdCBvcGVyYXRpb25zLiBJZiB5b3UncmUgdHJ5aW5nIHRyeWlu
+ZyB0byBsb2NraW5nIG9wZXJhdGlvbnMgdG8gZmluZCBhIGJsb2NrIGluIG11bHRpLXRocmVhZGVk
+IGNhc2UgdGhpcyBtaWdodCBtYXR0ZXIuDQo2NGJpdCBBUk0gaXMganVzdCByZWFsbHkgZ2Fpbmlu
+ZyBzdGVhbSwgYW5kIHRoZXJlJ3MgYWxzbyB0aGUgZmFuY3kgbmV3IGRyaXZlcyB0aGF0IGNhbiBy
+dW4gQ2VwaCBvbiB0aGUgZGV2aWNlLg0KDQpPbiA2NGJpdCBwbGF0Zm9ybXMgeW91IGNhbiBhbHdh
+eXMgb3B0aW1pemUgYnkgd29ya2luZyBvbiB0d28gYml0bWFwcyBhdCBhIHRpbWUuDQoNCj4NCj4g
+QWxsb2NhdGlvbjoNCj4NCj4gU3RhcnQgZnJvbSBhIG1hcmtlciBhbmQgc2NhbnMgZm9yIGNvbnRp
+Z3VvdXMgb3IgZGlzLWNvbnRpZ3VvdXMgZnJlZSBibG9ja3MgaW4gem9uZXMgb25lIGFmdGVyIGFu
+b3RoZXIgYW5kIGluIEJpdE1hcHMgb25lIGFmdGVyIGFub3RoZXIgd2l0aGluIGEgem9uZS4NCj4g
+SWYgd2hpbGUgc2NhbiBhIHpvbmUgaXMgZm91bmQgbG9ja2VkIGJ5IHNvbWVib2R5LCBpdCBzaW1w
+bGUgdHJpZXMgaW4gbmV4dCB6b25lLg0KPiBJZiB0d28gc2NhbnMgZG9lcyBub3QgZmluZCBhbnl0
+aGluZywgdGhlbiB0aGlyZCBzY2FuIGlzIHNlcmlhbCBhbmQgaXQgYmxvY2tzIG9uIGEgem9uZSBp
+ZiBpdCBpcyBsb2NrZWQgYnkgYW5vdGhlciB0aHJlYWQgdG8gYXZvaWQgcG9zc2liaWxpdHkgbWlz
+c2luZyBvbmx5IHpvbmVzIHRoYXQgaGF2ZSBzcGFjZS4NCj4NCj4gSW4gc2VyaWFsIG1vZGUgb2Yg
+YWxsb2NhdGlvbiwgaXQgYWx3YXlzIHRha2Ugc2luZ2xlIGxvY2sgb24gZnVsbCBhbGxvY2F0b3Ig
+YW5kIHNjYW5zIGZvciBmcmVlIHNwYWNlLg0KPg0KPiBJbiBjb250aWd1b3VzIGFsbG9jYXRpb24s
+IHRoZSBhbGxvY2F0aW9uIGlzIGVpdGhlciBmdWxmaWxsZWQgY29tcGxldGVseSBvciBub3RoaW5n
+IGlzIGFsbG9jYXRlZC4NCj4gSW4gY2FzZSBvZiBkaXMtY29udGlndW91cyBhbGxvY2F0aW9ucywg
+cGFydGlhbCByZXN1bHRzIGNhbiBiZSByZXR1cm5lZC4NCj4NCj4gRnJlZToNCj4gRnJlZSBkb2Vz
+IG5vdCB0YWtlIGFueSBsb2NrIG9uIHpvbmUgb3IgYXJlYSwgaXQgc2ltcGx5IGF0b21pY2FsbHkg
+dHdlYWtzIHRoZSBiaXRzLg0KPg0KPiBMaW1pdGF0aW9uczoNCj4NCj4gICAgIFNpbmdsZSBhbGxv
+Y2F0aW9uIGNhbm5vdCBleHRlbmQgYmV5b25kIGEgem9uZSBpbiBjb25jdXJyZW50IG1vZGUgKCBh
+cm91bmQgNjRNIGluIGN1cnJlbnQgNjRrIGNvbmZpZyBhbmQgZGVmYXVsdCB2YWx1ZSkuDQo+DQo+
+IC1SZWdhcmRzLA0KPiBSYW1lc2ggQ2hhbmRlcg0KPiBTci4gU3RhZ2cgU29mdHdhcmUgRW5naW5l
+ZXINCj4gU2FuZGlzaw0KPg0KPg0KPg0KPg0KPg0KPg0KPg0KPg0KPiAtLS0tLU9yaWdpbmFsIE1l
+c3NhZ2UtLS0tLQ0KPiBGcm9tOiBSYW1lc2ggQ2hhbmRlcg0KPiBTZW50OiBNb25kYXksIE1heSAw
+MiwgMjAxNiAxMTozOCBBTQ0KPiBUbzogJ2NlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnJw0KPiBT
+dWJqZWN0OiBJbXBsZW1lbnRpbmcgYml0bWFwIGJhc2VkIHNwYWNlIGFsbG9jYXRvciBmb3IgQmx1
+ZVN0b3JlDQo+DQo+IEhpIENlcGggRGV2ZWxvcGVycywNCj4NCj4gSSBob3BlIHlvdSBhbGwgYXJl
+IGRvaW5nIGdyZWF0Lg0KPg0KPiBUaGlzIGlzIGp1c3QgYSBub3RlIHRoYXQgSSBhbSB3b3JraW5n
+IG9uIGltcGxlbWVudGluZyBiaXRtYXAgYmFzZWQgYWxsb2NhdG9yIGZvciBCbHVlU3RvcmUuDQo+
+DQo+IFRoZSBmaXJzdCBsZXZlbCBvZiBkZXRhaWxzIGFyZSBiZWxvdy4NCj4NCj4gQnJpZWYgZGV0
+YWlscyBvZiBhbGxvY2F0b3I6DQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+DQo+
+IEkgYW0gcGxhbm5pbmcgdG8gd3JpdGUgYSBiaXRtYXAgc2Nhbm5lciB0byBmaW5kIE4gY29udGln
+dW91cyBvciBub24tY29udGlndW91cyBibG9ja3MgZnJvbSBhIGJpdG1hcCBvZiBzdG9yYWdlIHNw
+YWNlIHJhbmdlIGFzc2lnbmVkIHRvIGFsbG9jYXRvci4NCj4NCj4gSXQgd2lsbCBiZSBmb2xsb3dp
+bmcgaW50ZXJmYWNlcyBvZiBBbGxvY2F0b3IgY2xhc3MgaW4gQWxsb2NhdG9yLmguDQo+DQo+IFRo
+ZSBtYWluIGlkZWEgYmVoaW5kIGl0IGlzIHRvIHJlZHVjZSBtZW1vcnkgZm9vdCBwcmludCBvZiBh
+bGxvY2F0b3Igd2hlbiB1c2luZyBzbWFsbCBibG9ja3MgbGlrZSA0Sy4gSXQgd2lsbCBhbHNvIGFs
+bG93IG11bHRpcGxlIHRocmVhZCB0byBhbGxvY2F0ZSBjb25jdXJyZW50bHkuDQo+DQo+IFRoZSBs
+b2dpYyBkaXZpZGVzIHRoZSBiaXRtYXAgaW4gdG8gem9uZXMgYW5kIG11bHRpcGxlIHRocmVhZHMg
+Y2FuIGJlIGFsbG9jYXRpbmcgZnJvbSBkaWZmZXJlbnQgem9uZXMgYXQgYSB0aW1lLg0KPiBUaGlz
+IGNhbiBiZSBoZWxwZnVsIGluIGNhc2Ugb2Ygc3RvcmFnZSBpcyBhdCBzYXR1cmF0aW9uIGFuZCBs
+b3Qgb2Ygc2Nhbm5pbmcgbmVlZHMgdG8gYmUgZG9uZSB0byBmaW5kIGZyZWUgYmxvY2tzLg0KPg0K
+PiBTY2FubmluZyBjYW4vd2lsbCBiZSBmdXJ0aGVyIG1hZGUgbW9yZSBpbnRlbGxpZ2VudCBrZWVw
+aW5nIGhpZXJhcmNoeSBvZiBzdW1tYXJ5IG9mIHNwYWNlIGF0IGRpZmZlcmVudCBhcmVhcy4NCj4N
+Cj4gUGxlYXNlIGxldCBtZSBrbm93IHlvdXIgdGhvdWdodHMgb24gdGhpcy4NCj4NCj4gLVJlZ2Fy
+ZHMsDQo+IFJhbWVzaCBDaGFuZGVyDQo+IFNyLiBTdGFmZiBFbmdpbmVlcg0KPiBTYW5kaXNrIElu
+ZGlhDQo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxl
+Y3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUg
+ZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhp
+cyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBu
+b3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQg
+dGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcg
+b2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2Vp
+dmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVy
+IGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQg
+ZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vz
+c2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVz
+KS4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUg
+InVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
+bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0
+cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCg0KDQoNCi0tDQpNaWxv
+c3ogVGFuc2tpDQpDVE8NCjE2IEVhc3QgMzR0aCBTdHJlZXQsIDE1dGggZmxvb3INCk5ldyBZb3Jr
+LCBOWSAxMDAxNg0KDQpwOiA2NDYtMjUzLTkwNTUNCmU6IG1pbG9zekBhZGZpbi5jb20NCg==
