@@ -1,317 +1,202 @@
-From: Gonzalo Aguilar Delgado <gaguilar.delgado@gmail.com>
-Subject: Re: OSD will never become up. HEALTH_ERR
-Date: Wed, 11 May 2016 17:47:43 +0200
-Message-ID: <1462981663.4251.1.camel@gmail.com>
-References: <1462955827.13078.22.camel@gmail.com>
-	 <alpine.DEB.2.11.1605110855100.15518@cpach.fuggernut.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: Implementing bitmap based space allocator for BlueStore
+Date: Wed, 11 May 2016 12:06:05 -0400
+Message-ID: <CANP1eJGOdHadL_1Yhq0U5oEJ-a2Qi8GH9OjCp_SJb6hy6mAgaA@mail.gmail.com>
+References: <BLUPR0201MB1809B0B51FF640A10869E0A285790@BLUPR0201MB1809.namprd02.prod.outlook.com>
+	<CY1PR0201MB1820941DBBE1FB7927F42D2185710@CY1PR0201MB1820.namprd02.prod.outlook.com>
+	<CANP1eJGy9bBvnW26PVb1ykimGLa3WO5s1WPyLp9_c6TNCye5bw@mail.gmail.com>
+	<CY1PR0201MB18200B12B2922C4324CD8D4185720@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:35522 "EHLO
-	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752098AbcEKPrw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 11:47:52 -0400
-Received: by mail-wm0-f54.google.com with SMTP id e201so224656295wme.0
-        for <ceph-devel@vger.kernel.org>; Wed, 11 May 2016 08:47:51 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1605110855100.15518@cpach.fuggernut.com>
+Received: from mail-lf0-f51.google.com ([209.85.215.51]:36813 "EHLO
+	mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751308AbcEKQGH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 12:06:07 -0400
+Received: by mail-lf0-f51.google.com with SMTP id u64so54862140lff.3
+        for <ceph-devel@vger.kernel.org>; Wed, 11 May 2016 09:06:06 -0700 (PDT)
+In-Reply-To: <CY1PR0201MB18200B12B2922C4324CD8D4185720@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Ramesh Chander <Ramesh.Chander@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello Sage,=C2=A0
+On Wed, May 11, 2016 at 9:52 AM, Ramesh Chander
+<Ramesh.Chander@sandisk.com> wrote:
+> Thanks Milosz for comment.
+>
+> Until I figure out way that works for both or cleaner way of supporting both, I will make default bitmap 32bits as that seems on safer side as of now.
+>
+> BTW:  I am using gcc in build macros like __sync_fetch_and_and etc.
+>
+> https://gcc.gnu.org/onlinedocs/gcc-4.4.3/gcc/Atomic-Builtins.html
 
-Thank you al lot for answering. Ideed this was the problem. But it was
-strange as I told it booted from update without problems until the
-ceph-disk command on boot.=C2=A0
+Any reason for not using C+11 atomics? It seams to me as it would be
+more portable then relying on gcc extensions.
+http://en.cppreference.com/w/cpp/atomic/atomic/fetch_and . Boost
+Atomic can be used as a fallback.
+
+>
+>
+> -Regards,
+>  Ramesh
+>
+> -----Original Message-----
+> From: Milosz Tanski [mailto:milosz@adfin.com]
+> Sent: Tuesday, May 10, 2016 10:09 PM
+> To: Ramesh Chander
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Implementing bitmap based space allocator for BlueStore
+>
+> On Tue, May 10, 2016 at 6:20 AM, Ramesh Chander <Ramesh.Chander@sandisk.com> wrote:
+>>
+>> Hi Ceph Developers,
+>>
+>> This is request to review PR:
+>>
+>> https://github.com/ceph/ceph/pull/9031
+>>
+>> is for below mentioned bitmap based allocator in BlueStore.
+>>
+>> In short please review the code.
+>>
+>>
+>> Details: (same mentioned in pull request)
+>> ------------------------------------------------
+>> This is Bitmap based allocator for BlueStore.
+>> Motivation:
+>> 1. Reduction of memory by using just one bit for single block (as compared to 8 + 8 byes in case of extent based allocator).
+>> 2. Concurrent allocations via multiple threads.
+>>
+>> It exposes mainly these interfaces:
+>> 1. Allocate contiguous blocks.
+>> 2. Allocate non-contiguous blocks.
+>> 3. Free allocated blocks.
+>> 4. Get Statistics about allocator.
+>>
+>> It works in two modes:
+>>
+>>     Concurrent:
+>>     Where multiple threads can be allocating at same time in different space zones. This is specially for faster media like SSDs.
+>>
+>>     Serial:
+>>     Only one thread can be active inside bitmap allocator at a time. This one is mainly to keep rotating media in mind since
+>>     concurrent allocations can aggravate random writes.
+>>
+>> Test Ran:
+>> 1. Make check.
+>> 2. Basic read write multi-threaded test cases with recovery.
+>> 3. Exhaustive unit test cases for corner cases
+>>
+>> Next steps:
+>> 1. Complete set of multi-threaded test cases.
+>> 2. More test cases to protect from space leak and corruption in Blue Store.
+>> 4. Provide more intelligent configurable like Zone size.
+>> 5. If required make scanning faster my one more level in summary hierarchy.
+>> 6. If required more stricter reservations guarantee.
+>>
+>> Over All Design Overview:
+>>
+>> Full space is divided in to fixed size but configurable zones. It is the unit where at a time single thread can be actively allocating from.
+>> A zone is then further divided in to BitMaps. Each bitmap is 64bits hence 64 blocks.
+>
+>
+> Maybe bitmaps should be 32bit? Not every platform supports atomic operations on 64bit operations. If you're trying trying to locking operations to find a block in multi-threaded case this might matter.
+> 64bit ARM is just really gaining steam, and there's also the fancy new drives that can run Ceph on the device.
+>
+> On 64bit platforms you can always optimize by working on two bitmaps at a time.
+>
+>>
+>> Allocation:
+>>
+>> Start from a marker and scans for contiguous or dis-contiguous free blocks in zones one after another and in BitMaps one after another within a zone.
+>> If while scan a zone is found locked by somebody, it simple tries in next zone.
+>> If two scans does not find anything, then third scan is serial and it blocks on a zone if it is locked by another thread to avoid possibility missing only zones that have space.
+>>
+>> In serial mode of allocation, it always take single lock on full allocator and scans for free space.
+>>
+>> In contiguous allocation, the allocation is either fulfilled completely or nothing is allocated.
+>> In case of dis-contiguous allocations, partial results can be returned.
+>>
+>> Free:
+>> Free does not take any lock on zone or area, it simply atomically tweaks the bits.
+>>
+>> Limitations:
+>>
+>>     Single allocation cannot extend beyond a zone in concurrent mode ( around 64M in current 64k config and default value).
+>>
+>> -Regards,
+>> Ramesh Chander
+>> Sr. Stagg Software Engineer
+>> Sandisk
+>>
+>>
+>>
+>>
+>>
+>>
+>>
+>>
+>> -----Original Message-----
+>> From: Ramesh Chander
+>> Sent: Monday, May 02, 2016 11:38 AM
+>> To: 'ceph-devel@vger.kernel.org'
+>> Subject: Implementing bitmap based space allocator for BlueStore
+>>
+>> Hi Ceph Developers,
+>>
+>> I hope you all are doing great.
+>>
+>> This is just a note that I am working on implementing bitmap based allocator for BlueStore.
+>>
+>> The first level of details are below.
+>>
+>> Brief details of allocator:
+>> -----------------------------
+>>
+>> I am planning to write a bitmap scanner to find N contiguous or non-contiguous blocks from a bitmap of storage space range assigned to allocator.
+>>
+>> It will be following interfaces of Allocator class in Allocator.h.
+>>
+>> The main idea behind it is to reduce memory foot print of allocator when using small blocks like 4K. It will also allow multiple thread to allocate concurrently.
+>>
+>> The logic divides the bitmap in to zones and multiple threads can be allocating from different zones at a time.
+>> This can be helpful in case of storage is at saturation and lot of scanning needs to be done to find free blocks.
+>>
+>> Scanning can/will be further made more intelligent keeping hierarchy of summary of space at different areas.
+>>
+>> Please let me know your thoughts on this.
+>>
+>> -Regards,
+>> Ramesh Chander
+>> Sr. Staff Engineer
+>> Sandisk India
+>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+>
+> --
+> Milosz Tanski
+> CTO
+> 16 East 34th Street, 15th floor
+> New York, NY 10016
+>
+> p: 646-253-9055
+> e: milosz@adfin.com
 
 
-I was updating from Ubuntu 14.04 so quite old ceph. Yes.=C2=A0
 
-I posted what I did just in case another one has the same problem.=C2=A0
+-- 
+Milosz Tanski
+CTO
+16 East 34th Street, 15th floor
+New York, NY 10016
 
-Thank you a lot.
-
-On mi=C3=A9, 2016-05-11 at 08:55 -0400, Sage Weil wrote:
-> On Wed, 11 May 2016, Gonzalo Aguilar Delgado wrote:
-> > Hello,=C2=A0
-> >=C2=A0
-> > I just upgraded my cluster to the version 10.1.2 and it worked well
-> for
-> > a while until I saw that systemctl ceph-disk@dev-sdc1.service=C2=A0=
-was
-> > failed and I reruned it.
->=20
-> What version did you upgrade *from*?=C2=A0 If it was older than 0.94.=
-4
-> then=C2=A0
-> that is the problem.=C2=A0 Check for messages in /var/log/ceph/ceph.l=
-og.
->=20
-> Also, you probably want to use 10.2.0, not 10.1.2 (which was a
-> release=C2=A0
-> candidate).
->=20
-> sage
->=20
->=20
-> > From there the OSD stopped working.=C2=A0
-> >=C2=A0
-> > This is ubuntu 16.04.=C2=A0
-> >=C2=A0
-> > I connected to the IRC looking for help where people pointed me to
-> one
-> > or another place but none of the investigations helped to resolve.
-> >=C2=A0
-> > My configuration is rather simple:
-> >=C2=A0
-> > oot@red-compute:~# ceph osd tree
-> > ID WEIGHT=C2=A0 TYPE NAME=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 UP/DOWN REWEIGHT=
- PRIMARY-
-> AFFINITY=C2=A0
-> > -1 1.00000 root
-> default=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0
-> > -4 1.00000=C2=A0=C2=A0=C2=A0=C2=A0 rack rack-
-> 1=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-> > -2 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 host blu=
-e-
-> compute=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0
-> > =C2=A00 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0 osd.0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0 down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-> 1.00000=C2=A0
-> > =C2=A02 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0 osd.2=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0 down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-> 1.00000=C2=A0
-> > -3 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 host red=
--
-> compute=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0
-> > =C2=A01 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0 osd.1=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0 down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-> 1.00000=C2=A0
-> > =C2=A03 0.50000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0 osd.3=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 up=C2=A0 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-> 1.00000=C2=A0
-> > =C2=A04 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0 osd.4=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0 down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-> 1.00000=C2=A0
-> >=C2=A0
-> > It seems that all nodes are in preboot status. I was looking at the
-> > latests commits and it seems that there's a patch
-> > to make OSDs to wait for cluster to become healthy before
-> rejoining.
-> > Can this be the source of my problems?
-> >=C2=A0
-> > root@red-compute:/var/lib/ceph/osd/ceph-1# ceph daemon osd.1 status
-> > {
-> > =C2=A0=C2=A0=C2=A0 "cluster_fsid": "9028f4da-0d77-462b-be9b-dbdf7fa=
-57771",
-> > =C2=A0=C2=A0=C2=A0 "osd_fsid": "adf9890a-e680-48e4-82c6-e96f4ed5688=
-9",
-> > =C2=A0=C2=A0=C2=A0 "whoami": 1,
-> > =C2=A0=C2=A0=C2=A0 "state": "preboot",
-> > =C2=A0=C2=A0=C2=A0 "oldest_map": 1764,
-> > =C2=A0=C2=A0=C2=A0 "newest_map": 2504,
-> > =C2=A0=C2=A0=C2=A0 "num_pgs": 323
-> > }
-> >=C2=A0
-> > root@red-compute:/var/lib/ceph/osd/ceph-1# ceph daemon osd.3 status
-> > {
-> > =C2=A0=C2=A0=C2=A0 "cluster_fsid": "9028f4da-0d77-462b-be9b-dbdf7fa=
-57771",
-> > =C2=A0=C2=A0=C2=A0 "osd_fsid": "8dd085d4-0b50-4c80-a0ca-c5bc4ad972f=
-7",
-> > =C2=A0=C2=A0=C2=A0 "whoami": 3,
-> > =C2=A0=C2=A0=C2=A0 "state": "preboot",
-> > =C2=A0=C2=A0=C2=A0 "oldest_map": 1764,
-> > =C2=A0=C2=A0=C2=A0 "newest_map": 2504,
-> > =C2=A0=C2=A0=C2=A0 "num_pgs": 150
-> > }
-> >=C2=A0
-> > 3 is up and in.=C2=A0
-> >=C2=A0
-> >=C2=A0
-> > This is what I got sofar:
-> >=C2=A0
-> > Once upgraded I discovered that daemon runs under ceph. I just ran
-> > chown on ceph directories. and it worked.=C2=A0
-> > Firewall is fully disabled. Checked connectivity with nc and nmap.=C2=
-=A0
-> > Configuration seems to be right. I can post if you want.=C2=A0
-> > Enabling logging on OSD shows that for example osd.1 is
-> reconnecting
-> > all the time.
-> > 2016-05-10 14:35:48.199573 7f53e8f1a700=C2=A0 1 --=C2=A00.0.0.0:680=
-6/13962=C2=A0>>
-> :/0
-> > pipe(0x556f99413400 sd=3D84 :6806 s=3D0 pgs=3D0 cs=3D0 l=3D0
-> > c=3D0x556f993b3a80).accept sd=3D84=C2=A0172.16.0.119:35388/0
-> > =C2=A02016-05-10 14:35:48.199966 7f53e8f1a700=C2=A0 2
-> --=C2=A00.0.0.0:6806/13962=C2=A0>>
-> > :/0 pipe(0x556f99413400 sd=3D84 :6806 s=3D4 pgs=3D0 cs=3D0 l=3D0
-> > c=3D0x556f993b3a80).fault (0) Success
-> > =C2=A02016-05-10 14:35:48.200018 7f53fb941700=C2=A0 1 osd.1 2468
-> ms_handle_reset
-> > con 0x556f993b3a80 session 0
-> > OSD.3 goes ok because never left out because ceph restriction.
-> > I rebooted all services at once for it to have available all OSD at
-> the
-> > same time and don't mark it down. Don't work.=C2=A0
-> > I forced up from commandline. ceph osd in 1-5. They appear as in
-> for a
-> > while then out.
-> > We tried ceph-disk activate-all to boot everything. Don't work.
-> >=C2=A0
-> > The strange thing is that culster started worked just right after
-> > upgrade. But the systemctrl command broke both servers.=C2=A0
-> > root@blue-compute:~# ceph -w
-> > =C2=A0=C2=A0=C2=A0 cluster 9028f4da-0d77-462b-be9b-dbdf7fa57771
-> > =C2=A0=C2=A0=C2=A0=C2=A0 health HEALTH_ERR
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
-694 pgs are stuck inactive for more than 300 seconds
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
-694 pgs stale
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
-694 pgs stuck stale
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
-too many PGs per OSD (1528 > max 300)
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
-mds cluster is degraded
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
-crush map has straw_calc_version=3D0
-> > =C2=A0=C2=A0=C2=A0=C2=A0 monmap e10: 2 mons at {blue-compute=3D172.=
-16.0.119:6789/0,red-
-> > compute=3D172.16.0.100:6789/0}
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
-election epoch 3600, quorum 0,1 red-compute,blue-
-> compute
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 fsmap e673: 1/1/1 up {0:0=3Dblue-com=
-pute=3Dup:replay}
-> > =C2=A0=C2=A0=C2=A0=C2=A0 osdmap e2495: 5 osds: 1 up, 1 in; 5 remapp=
-ed pgs
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 pgmap v40765481: 764 pgs, 6 pools, 4=
-10 GB data, 103 kobjects
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
-87641 MB used, 212 GB / 297 GB avail
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0 694 stale+active+clean
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 70 active+clean
-> >=C2=A0
-> > 2016-05-10 17:03:55.822440 mon.0 [INF] HEALTH_ERR; 694 pgs are
-> stuck
-> > inactive for more than 300 seconds; 694 pgs stale; 694 pgs stuck
-> stale;
-> > too many PGs per OSD (1528 > max 300); mds cluster is degraded;
-> crush
-> > map has straw_calc_version=3D
-> > cat /etc/ceph/ceph.conf=C2=A0
-> > [global]
-> >=C2=A0
-> > fsid =3D 9028f4da-0d77-462b-be9b-dbdf7fa57771
-> > mon_initial_members =3D blue-compute, red-compute
-> > mon_host =3D 172.16.0.119, 172.16.0.100
-> > auth_cluster_required =3D cephx
-> > auth_service_required =3D cephx
-> > auth_client_required =3D cephx
-> > filestore_xattr_use_omap =3D true
-> > public_network =3D=C2=A0172.16.0.0/24
-> > osd_pool_default_pg_num =3D 100
-> > osd_pool_default_pgp_num =3D 100
-> > osd_pool_default_size =3D 2=C2=A0 # Write an object 3 times.
-> > osd_pool_default_min_size =3D 1 # Allow writing one copy in a
-> degraded
-> > state.
-> >=C2=A0
-> > ## Required upgrade
-> > osd max object name len =3D 256
-> > osd max object namespace len =3D 64
-> >=C2=A0
-> > [mon.]
-> >=C2=A0
-> > =C2=A0=C2=A0=C2=A0 debug mon =3D 9
-> > =C2=A0=C2=A0=C2=A0 caps mon =3D "allow *"
-> >=C2=A0
-> > Any help on this? Any clue of what's going wrong?
-> >=C2=A0
-> >=C2=A0
-> > I also see this, I don't know if it's related or not
-> >=C2=A0
-> > =3D> ceph-osd.admin.log <=3D=3D
-> > 2016-05-10 18:21:46.060278 7fa8f30cc8c0=C2=A0 0 ceph version 10.1.2
-> > (4a2a6f72640d6b74a3bbd92798bb913ed380dcd4), process ceph-osd, pid
-> 14135
-> > 2016-05-10 18:21:46.060460 7fa8f30cc8c0 -1 bluestore(/dev/sdc2)
-> > _read_bdev_label unable to decode label at offset 66:
-> > buffer::malformed_input: void
-> > bluestore_bdev_label_t::decode(ceph::buffer::list::iterator&)
-> decode
-> > past end of struct encoding
-> > 2016-05-10 18:21:46.062949 7fa8f30cc8c0=C2=A0 1 journal _open /dev/=
-sdc2
-> fd
-> > 4: 5367660544 bytes, block size 4096 bytes, directio =3D 0, aio =3D=
- 0
-> > 2016-05-10 18:21:46.062991 7fa8f30cc8c0=C2=A0 1 journal close /dev/=
-sdc2
-> > 2016-05-10 18:21:46.063026 7fa8f30cc8c0=C2=A0 0 probe_block_device_=
-fsid
-> > /dev/sdc2 is filestore, 119a9f4e-73d8-4a1f-877c-d60b01840c96
-> > 2016-05-10 18:21:47.072082 7eff735598c0=C2=A0 0 ceph version 10.1.2
-> > (4a2a6f72640d6b74a3bbd92798bb913ed380dcd4), process ceph-osd, pid
-> 14177
-> > 2016-05-10 18:21:47.072285 7eff735598c0 -1 bluestore(/dev/sdf2)
-> > _read_bdev_label unable to decode label at offset 66:
-> > buffer::malformed_input: void
-> > bluestore_bdev_label_t::decode(ceph::buffer::list::iterator&)
-> decode
-> > past end of struct encoding
-> > 2016-05-10 18:21:47.074799 7eff735598c0=C2=A0 1 journal _open /dev/=
-sdf2
-> fd
-> > 4: 5367660544 bytes, block size 4096 bytes, directio =3D 0, aio =3D=
- 0
-> > 2016-05-10 18:21:47.074844 7eff735598c0=C2=A0 1 journal close /dev/=
-sdf2
-> > 2016-05-10 18:21:47.074881 7eff735598c0=C2=A0 0 probe_block_device_=
-fsid
-> > /dev/sdf2 is filestore, fd069e6a-9a62-4286-99cb-d8a523bd946a
-> >=C2=A0
-> >=C2=A0
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-
-> devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at=C2=A0 http://vger.kernel.org/majordomo-info.=
-html
-> >=C2=A0
-> >=C2=A0
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+p: 646-253-9055
+e: milosz@adfin.com
