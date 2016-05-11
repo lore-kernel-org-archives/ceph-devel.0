@@ -1,7 +1,7 @@
 From: Igor Fedotov <ifedotov@mirantis.com>
 Subject: Re: 2 related bluestore questions
-Date: Wed, 11 May 2016 15:11:02 +0300
-Message-ID: <2b5ebbd8-3e89-1fff-37f1-c6eb00bdcb1a@mirantis.com>
+Date: Wed, 11 May 2016 15:39:24 +0300
+Message-ID: <89f6b406-848f-71c2-7f70-c64606a8e049@mirantis.com>
 References: <alpine.DEB.2.11.1605091417590.336@cpach.fuggernut.com>
  <6168022b-e3c0-b8f2-e8c7-3b4b82f9dc6e@mirantis.com>
  <alpine.DEB.2.11.1605100841400.15518@cpach.fuggernut.com>
@@ -12,19 +12,53 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f43.google.com ([209.85.215.43]:33845 "EHLO
-	mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751386AbcEKMLG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 08:11:06 -0400
-Received: by mail-lf0-f43.google.com with SMTP id m64so46957061lfd.1
-        for <ceph-devel@vger.kernel.org>; Wed, 11 May 2016 05:11:04 -0700 (PDT)
+Received: from mail-lf0-f51.google.com ([209.85.215.51]:35651 "EHLO
+	mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751360AbcEKMj1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 08:39:27 -0400
+Received: by mail-lf0-f51.google.com with SMTP id j8so47696426lfd.2
+        for <ceph-devel@vger.kernel.org>; Wed, 11 May 2016 05:39:27 -0700 (PDT)
 In-Reply-To: <alpine.DEB.2.11.1605102105260.15518@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: allen.samuels@sandisk.com, ceph-devel@vger.kernel.org
 
+Sage,
 
+thanks a lot for detailed overview.
+
+Below is a brief proposal on Extent Manager extension to support WAL.
+Please tell me what's your final decision its fortune? Are there any 
+plans to use it or we completely rebase to the code you are woring on. 
+Is there any sense for me to to continue working on it or I should 
+switch to something in your stream.
+
+Here is the idea that's pretty simple:
+1) Add new method(s)  to BlockOpInterface to add WAL record. EX to call 
+it when corresponding overwrite (or whatever other case) is detected.
+2) Add method(s) to ExtentManger to process WAL record. They are to be 
+called from _wal_apply/_do_wal_op and EM to perform corresponding RMW 
+tasks. It does that using other regular BlockOpInterface methods ( 
+read/write/allocate etc) thus Bluestore environment should be ready to 
+handle them during the WAL phase as it does during the initial write 
+hanlding one. But it looks like we need that anyway - EM doesn't create 
+any additional complexities here.
+
+And a couple of general notes on WAL apply handling that I realized 
+recently and we should probably care of.
+1) when WAL is applied on compressed blobs one should always allocate 
+and use a new blob. Even for the case when resulting buffer fit into the 
+existing blob. The rationale for that is that if we crash after the 
+write phase  we and before KV update we can't properly execute WAL 
+replay. Source data is altered and we are unable to repeat RMW.
+2) Similarly during WAL replay after the failure one should disable 
+checksum verification for existing data read if any. The rationale is 
+the same - we can crash after the write and before KV update thus 
+previous checksum in KV is invalid.
+
+Thanks,
+Igor.
 
 On 11.05.2016 4:10, Sage Weil wrote:
 > On Tue, 10 May 2016, Sage Weil wrote:
@@ -105,19 +139,7 @@ On 11.05.2016 4:10, Sage Weil wrote:
 > we can do compression at that stage as well?
 >
 > What do you think?
-Not completely sure that it's a good idea to have read stage description 
-stored in WAL record? Wouldn't that produce any 
-conflicts/inconsistencies when multiple WAL records deal with the same 
-or close lextents and previous WAL updates lextents to read. May be it's 
-better to prepare such a description exactly when WAL is applied? And 
-WAL record to have just a basic write info?
-
-And for GC/cleanup process this becomes even more important as the task 
-may be deferred for a while and lextent map may be significantly altered.
-
-And I suppose blob id should be 2 not 1 here:
-https://github.com/liewegas/ceph/blob/wip-bluestore-write/src/os/bluestore/BlueStore.cc#L5545
-
+>
 > sage
 >
 
