@@ -1,74 +1,51 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: Re: OSD shows UP while it's not
-Date: Wed, 11 May 2016 12:12:48 -0700
-Message-ID: <03d3a676-257a-afb9-3d5c-bdf03437054f@redhat.com>
-References: <1462965005.13078.29.camel@gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: blueprint: consistency groups
+Date: Wed, 11 May 2016 16:24:04 -0400
+Message-ID: <CA+aFP1AchQD6b-gm7Z4zijQfW8OMZJrrE8S2nLde2CE+VUjZew@mail.gmail.com>
+References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
+	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
+	<20160325071933.GA14634@gmail.com>
+	<CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
+	<CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
+	<CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
+	<CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
+	<CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
+	<CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
+	<CA+aFP1C7me+-dbXVrMgU0Qs9fX8_4ocC9v5orzy+c8tK30y08A@mail.gmail.com>
+	<CA+hcxJT4DWgt8K8hc27KbkJK=DRePM18Zh=GPxtfR5afoxVP1w@mail.gmail.com>
+	<CA+hcxJQGcDy96o0f9sEY8HwLXng9YzxsoKAhaaCuCDDhVbN76A@mail.gmail.com>
+	<CA+aFP1AQzo7bO=e-Gd_sAtBWSYFgvji8isxuXFKDejaHAA+FuA@mail.gmail.com>
+	<CA+hcxJRMcJFxYdscdwyvowjw_dNF6xoNzCHT1=oaznwGqY-4Rw@mail.gmail.com>
+	<CA+aFP1Awk0YZnW16JxOgfDeJFsuKPoN4jdrpr8dCdqUjhhD_Mw@mail.gmail.com>
+	<CA+hcxJTWZWUAUGr1gAZwEqLrGY9eJpzrF3+0H3wqaSjiY6-Faw@mail.gmail.com>
+	<CA+aFP1CfOCy9pL=NWka=j=otb7rwO7W=ds-ggBMz0hVY=zj3-Q@mail.gmail.com>
+	<CA+hcxJS9mBZL5wu0A2L_-3bAyvMb90qBaYo+cosqphUn0Dj9kQ@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57509 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932072AbcEKTMv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 May 2016 15:12:51 -0400
-In-Reply-To: <1462965005.13078.29.camel@gmail.com>
+Received: from mail-pa0-f51.google.com ([209.85.220.51]:33503 "EHLO
+	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751400AbcEKUYF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 16:24:05 -0400
+Received: by mail-pa0-f51.google.com with SMTP id xk12so21345459pac.0
+        for <ceph-devel@vger.kernel.org>; Wed, 11 May 2016 13:24:04 -0700 (PDT)
+In-Reply-To: <CA+hcxJS9mBZL5wu0A2L_-3bAyvMb90qBaYo+cosqphUn0Dj9kQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gonzalo Aguilar Delgado <gaguilar.delgado@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Victor Denisov <vdenisov@mirantis.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
+On Wed, May 11, 2016 at 2:44 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+> One more question. I see that remove operation for images can report
+> progress. Is it necessary for consistency groups?
 
-This is caused because once the last osd is down, there is nobody left 
-to tell the mon that it went down.
+It shouldn't be necessary for consistency groups.  The rationale for
+the progress callback for images is because it might require deleting
+tens of thousands of backing objects.  When you remove a consistency
+groups, we should ensure that all associated images have already been
+removed -- so it should be a quick (algorithmically speaking)
+operation.
 
-Try using "ceph osd down 3" to manually notify the mon and see if you 
-can do what you want.
-
-David
-
-On 5/11/16 4:10 AM, Gonzalo Aguilar Delgado wrote:
-> Hello,
->
-> I found I cannot out down all my OSDs from the cluster.
-> root@blue-compute:/var/log# ceph osd tree
-> ID WEIGHT  TYPE NAME                 UP/DOWN REWEIGHT PRIMARY-AFFINITY
-> -1 1.00000 root default
-> -4 1.00000     rack rack-1
-> -2 1.00000         host blue-compute
->   0 1.00000             osd.0            down        0          1.00000
->   2 1.00000             osd.2            down        0          1.00000
-> -3 1.00000         host red-compute
->   1 1.00000             osd.1            down        0          1.00000
->   3 0.50000             osd.3              up        0          1.00000
->   4 1.00000             osd.4            down        0          1.00000
->
->
->
->      osdmap e2516: 5 osds: 1 up, 0 in; 153 remapped pgs
->
->
->
-> osd.3 up   out weight 0 up_from 2424 up_thru 2442 down_at 2423
-> last_clean_interval [2361,2420) 172.16.0.100:6806/4554
-> 172.16.0.100:6807/4554 172.16.0.100:6808/4554 172.16.0.100:6809/4554
-> exists,up 8dd085d4-0b50-4c80-a0ca-c5bc4ad972f7
->
->
-> Everything is down. But 3 seems to be up. Why?
->
-> At OS level is also down.
->
-> root@red-compute:/var/log/ceph# ps ax | grep ceph
->   1937 ?        Ssl    0:00 /usr/bin/ceph-mon -f --cluster ceph --id
-> red-compute --setuser ceph --setgroup ceph
-> 27225 pts/0    S+     0:00 grep ceph
->
->
-> Why I cannot remove it?
->
->
-> Best regards,
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+-- 
+Jason
