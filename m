@@ -1,110 +1,123 @@
-From: Gonzalo Aguilar Delgado <gaguilar.delgado@gmail.com>
-Subject: OSD shows UP while it's not
-Date: Wed, 11 May 2016 13:10:05 +0200
-Message-ID: <1462965005.13078.29.camel@gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: 2 related bluestore questions
+Date: Wed, 11 May 2016 15:11:02 +0300
+Message-ID: <2b5ebbd8-3e89-1fff-37f1-c6eb00bdcb1a@mirantis.com>
+References: <alpine.DEB.2.11.1605091417590.336@cpach.fuggernut.com>
+ <6168022b-e3c0-b8f2-e8c7-3b4b82f9dc6e@mirantis.com>
+ <alpine.DEB.2.11.1605100841400.15518@cpach.fuggernut.com>
+ <b6240191-0849-d60c-ebb6-147b5785e3e7@mirantis.com>
+ <alpine.DEB.2.11.1605101121090.15518@cpach.fuggernut.com>
+ <alpine.DEB.2.11.1605102105260.15518@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:36980 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751348AbcEKLKN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 07:10:13 -0400
-Received: by mail-wm0-f47.google.com with SMTP id a17so76146412wme.0
-        for <ceph-devel@vger.kernel.org>; Wed, 11 May 2016 04:10:12 -0700 (PDT)
-Received: from laptop.cloud.level2crm.com (46.red-212-170-57.staticip.rima-tde.net. [212.170.57.46])
-        by smtp.gmail.com with ESMTPSA id u6sm7539532wjh.2.2016.05.11.04.10.10
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 11 May 2016 04:10:10 -0700 (PDT)
+Received: from mail-lf0-f43.google.com ([209.85.215.43]:33845 "EHLO
+	mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751386AbcEKMLG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 08:11:06 -0400
+Received: by mail-lf0-f43.google.com with SMTP id m64so46957061lfd.1
+        for <ceph-devel@vger.kernel.org>; Wed, 11 May 2016 05:11:04 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1605102105260.15518@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-
-Hello,=C2=A0
-
-I found I cannot out down all my OSDs from the cluster.
-root@blue-compute:/var/log# ceph osd tree
-ID WEIGHT=C2=A0=C2=A0TYPE NAME=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0UP/DOWN REW=
-EIGHT PRIMARY-AFFINITY=C2=A0
--1 1.00000 root default=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0
--4 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0rack rack-1=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
--2 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0host bl=
-ue-compute=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0
-=C2=A00 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0osd.0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A00=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A01.00=
-000=C2=A0
-=C2=A02 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0osd.2=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A00=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A01.00=
-000=C2=A0
--3 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0host re=
-d-compute=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0
-=C2=A01 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0osd.1=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A00=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A01.00=
-000=C2=A0
-=C2=A03 0.50000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0osd.3=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0up=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A00=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A01.00000=C2=A0
-=C2=A04 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0osd.4=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A00=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A01.00=
-000=C2=A0
+To: Sage Weil <sage@newdream.net>
+Cc: allen.samuels@sandisk.com, ceph-devel@vger.kernel.org
 
 
 
-=C2=A0 =C2=A0 osdmap e2516: 5 osds: 1 up, 0 in; 153 remapped pgs
+On 11.05.2016 4:10, Sage Weil wrote:
+> On Tue, 10 May 2016, Sage Weil wrote:
+>>>> Making the wal part of the consistency model is more complex, but it means
+>>>> we can (1) log our intent to overwrite atomically with the kv txn commit,
+>>>> and then (2) do the async overwrite.  It will get a bit more complex
+>>>> because we'll be doing metadata updates as part of the wal completion, but
+>>>> it's not a big step from where we are now, and I think the performance
+>>>> benefit will be worth it.
+>>> May I have some example how it's supposed to work please?
+>> At a high level,
+>>
+>> 1- prepare kv commit.  it includes a wal_op_t that describes a
+>> read/modify/write of a csum block within some existing blob.
+>> 2- commit the kv txn
+>> 3- do the wal read/modify/write
+>> 4- calculate new csum
+>> 5- in the wal 'cleanup' transaction (which removes the wal event),
+>> also update blob csum_data in the onode or bnode.
+>>
+>> In practice, I think we want to pass TransContext down from _wal_apply
+>> into _do_wal_op, and put modified onode or bnode in the txc dirty list.
+>> (We'll need to clear it after the current _txc_finalize call so that it
+>> doesn't have the first phase's dirty stuff still there.)  Then, in
+>> _kv_sync_thread, where the
+>>
+>>        // cleanup sync wal keys
+>>
+>> stuff is, we probably want to have a helper that captures the wal event
+>> removal *and* any other stuff we need to do.. like update onodes and
+>> bnodes.  It'll look similar to _txc_finalize, I think.
+>>
+>> Then the main piece is how to modify the bluestore_wal_op_t to describe
+>> which blob metadata we're modifying and how to do the
+>> whole read/modify/write operation.  I think
+>>
+>>   - we need to bundle the csum data for anything we read.  we can probably
+>> just put a blob_t in here, since it includes the extents and csum metadata
+>> all together.
+>>   - we need to describe where the blob exists (which onode or bnode owns
+>> it, and what its id is) so that do_wal_op can find it and update it.
+>>     * we might want to optimize the normal path so that we can use the
+>> in-memory copy without doing a lookup
+>>
+>> It probably means a mostly rewritten wal_op_t type.  I think the ops we
+>> need to capture are
+>>
+>>   - overwrite
+>>   - read / modify / write (e.g., partial blocks)
+>>   - read / modify / write (and update csum metadata)
+>>   - read / modify / compress / write (and update csum metadata)
+>>   - read / write elsewhere (e.g., the current copy op, used for cow)
+>>
+>> Since compression is thrown in there, we probably need to be able to
+>> allocate in the do_wal_op path too.  I think that'll be okay... it's
+>> making the wal finalize kv look more and more like the current
+>> txc_finalize.  That probably means if we're careful we can use the same
+>> code for both?
+>
+> I took a stab at a revised wal_op_t here:
+>
+> 	https://github.com/liewegas/ceph/blob/wip-bluestore-write/src/os/bluestore/bluestore_types.h#L595-L605
+>
+> This is enough to implement the basic wal overwrite case here:
+>
+> 	https://github.com/liewegas/ceph/blob/wip-bluestore-write/src/os/bluestore/BlueStore.cc#L5522-L5578
+>
+> It's overkill for that, but something like this ought to be sufficiently
+> general to express the more complicated wal (and compaction/gc/cleanup)
+> operations, where we are reading bits of data from lots of different
+> previous blobs, verifying checksums, and then assembling the results into
+> a new buffer that gets written somewhere else.  The read_extent_map and
+> write_map offsets are logical offsets in a buffer we assemble and then
+> write to b_off~b_len in the specific blob.  I didn't get to the _do_wal_op
+> part that actually does it, but it would do the final write, csum
+> calculation, and metadata update.  Probably... the allocation would happen
+> then too, if the specified blob didn't already have pextents.  Tha way
+> we can do compression at that stage as well?
+>
+> What do you think?
+Not completely sure that it's a good idea to have read stage description 
+stored in WAL record? Wouldn't that produce any 
+conflicts/inconsistencies when multiple WAL records deal with the same 
+or close lextents and previous WAL updates lextents to read. May be it's 
+better to prepare such a description exactly when WAL is applied? And 
+WAL record to have just a basic write info?
 
+And for GC/cleanup process this becomes even more important as the task 
+may be deferred for a while and lextent map may be significantly altered.
 
+And I suppose blob id should be 2 not 1 here:
+https://github.com/liewegas/ceph/blob/wip-bluestore-write/src/os/bluestore/BlueStore.cc#L5545
 
-osd.3 up=C2=A0=C2=A0=C2=A0out weight 0 up_from 2424 up_thru 2442 down_a=
-t 2423
-last_clean_interval [2361,2420) 172.16.0.100:6806/4554
-172.16.0.100:6807/4554 172.16.0.100:6808/4554 172.16.0.100:6809/4554
-exists,up 8dd085d4-0b50-4c80-a0ca-c5bc4ad972f7
+> sage
+>
 
-
-Everything is down. But 3 seems to be up. Why?
-
-At OS level is also down.
-
-root@red-compute:/var/log/ceph# ps ax | grep ceph
-=C2=A01937 ?=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0Ssl=C2=A0=C2=
-=A0=C2=A0=C2=A00:00 /usr/bin/ceph-mon -f --cluster ceph --id
-red-compute --setuser ceph --setgroup ceph
-27225 pts/0=C2=A0=C2=A0=C2=A0=C2=A0S+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A00:00=
- grep ceph
-
-
-Why I cannot remove it?
-
-
-Best regards,
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
