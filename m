@@ -1,68 +1,100 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Hammer vs Jewel librbd performance testing and git
- bisection results
-Date: Wed, 11 May 2016 09:52:30 -0400
-Message-ID: <CA+aFP1BN=mpR-7xid=+vgz3rpSWkirthrYDPuEy-OkreVp=A-g@mail.gmail.com>
-References: <f9f54455-8348-42b7-153b-e38850eed5e1@redhat.com>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: Sage Weil <sage@newdream.net>
+Subject: Re: 2 related bluestore questions
+Date: Wed, 11 May 2016 09:57:03 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605110951570.15518@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1605091417590.336@cpach.fuggernut.com> <6168022b-e3c0-b8f2-e8c7-3b4b82f9dc6e@mirantis.com> <alpine.DEB.2.11.1605100841400.15518@cpach.fuggernut.com> <b6240191-0849-d60c-ebb6-147b5785e3e7@mirantis.com>
+ <alpine.DEB.2.11.1605101121090.15518@cpach.fuggernut.com> <alpine.DEB.2.11.1605102105260.15518@cpach.fuggernut.com> <2b5ebbd8-3e89-1fff-37f1-c6eb00bdcb1a@mirantis.com> <alpine.DEB.2.11.1605110901551.15518@cpach.fuggernut.com>
+ <8b077a20-ace3-7824-4039-7b8e9adf88ce@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <f9f54455-8348-42b7-153b-e38850eed5e1-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "cbt-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <cbt-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:54757 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932628AbcEKN4u (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 09:56:50 -0400
+In-Reply-To: <8b077a20-ace3-7824-4039-7b8e9adf88ce@mirantis.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>
+Cc: allen.samuels@sandisk.com, ceph-devel@vger.kernel.org
 
-Awesome work Mark!  Comments / questions inline below:
+On Wed, 11 May 2016, Igor Fedotov wrote:
+> On 11.05.2016 16:10, Sage Weil wrote:
+> > On Wed, 11 May 2016, Igor Fedotov wrote:
+> > > > I took a stab at a revised wal_op_t here:
+> > > > 
+> > > > 	https://github.com/liewegas/ceph/blob/wip-bluestore-write/src/os/bluestore/bluestore_types.h#L595-L605
+> > > > 
+> > > > This is enough to implement the basic wal overwrite case here:
+> > > > 
+> > > > 	https://github.com/liewegas/ceph/blob/wip-bluestore-write/src/os/bluestore/BlueStore.cc#L5522-L5578
+> > > > 
+> > > > It's overkill for that, but something like this ought to be sufficiently
+> > > > general to express the more complicated wal (and compaction/gc/cleanup)
+> > > > operations, where we are reading bits of data from lots of different
+> > > > previous blobs, verifying checksums, and then assembling the results
+> > > > into
+> > > > a new buffer that gets written somewhere else.  The read_extent_map and
+> > > > write_map offsets are logical offsets in a buffer we assemble and then
+> > > > write to b_off~b_len in the specific blob.  I didn't get to the
+> > > > _do_wal_op
+> > > > part that actually does it, but it would do the final write, csum
+> > > > calculation, and metadata update.  Probably... the allocation would
+> > > > happen
+> > > > then too, if the specified blob didn't already have pextents.  Tha way
+> > > > we can do compression at that stage as well?
+> > > > 
+> > > > What do you think?
+> > > Not completely sure that it's a good idea to have read stage description
+> > > stored in WAL record? Wouldn't that produce any conflicts/inconsistencies
+> > > when
+> > > multiple WAL records deal with the same or close lextents and previous WAL
+> > > updates lextents to read. May be it's better to prepare such a description
+> > > exactly when WAL is applied? And WAL record to have just a basic write
+> > > info?
+> > Yeah, I think this is a problem.  I see two basic paths:
+> > 
+> >   - We do a wal flush before queueing a new wal event to avoid races like
+> > this. Or perhaps we only do it when the wal event(s) touch the same
+> > blob(s).  That's simple to reason about, but means that a series
+> > of small IOs to the same object (or blob) will serialize the kv commit and
+> > wal r/m/w operations.  (Note that this is no worse than the naive approach
+> > of doing the read part up front, and it only happens when you have
+> > successive wal ops on the same object (or blob)).
+> > 
+> >   - We describe the wal read-side in terms of the current onode state.  For
+> > example, 'read object offset 0..100, use provided buffer for 100..4096,
+> > overwrite block'.  That can be pipelined.  But there are other
+> > operations that would require we flush the wal events, like a truncate or
+> > zero or other write that clobbers that region of the object.
+> > Maybe/hopefully in those cases we don't care (it no longer matters that
+> > this wal event do the write we originally intended) but we'd need
+> > to think pretty carefully about it.  FWIW, truncate already does an
+> > o->flush().
+> I'd prefer the second approach. Probably with some modification...
+> As far as I understand with the approach above you are trying to locate all
+> write logic at a single place and have WAL machinery as a straightforward
+> executor for already prepared tasks. Not sure this is beneficial enough. But
+> definitely it's more complex and error-prone. And potentially you will need
+> extend WAL machinery task description from time to time...
+> As an alternative one can eliminate that read description in WAL record at
+> all. Let's simply record what loffset we are going to write to and data
+> itself. Thus we have simple write request description.
+> And when WAL is applied corresponding code should determine how to do the
+> write properly using the current lextent/blob maps state. This way Write Op
+> apply can be just a regular write handling that performs sync RMW or any other
+> implementation depending on the current state, some policy, or whatever else
+> that fits the best at the specific moment.
 
-On Wed, May 11, 2016 at 9:21 AM, Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> There are several commits of interest that have a noticeable effect on 128K
-> sequential read performance:
->
->
-> 1) https://github.com/ceph/ceph/commit/3a7b5e3
->
-> This commit was the first that introduced anywhere from a 0-10% performance
-> decrease in the 128K sequential read tests.  Primarily it made performance
-> lower on average and more variable.
+I like that way better!  We can just add a force_sync argument to 
+_do_write.  That also lets us trivially disable wal (by forcing sync w/ 
+a config option or whatever).
 
-This one is surprising to me since this change is also in Hammer
-(cf6e1f50ea7b5c2fd6298be77c06ed4765d66611).  When you are performing
-the bisect, are you keeping the OSDs at the same version and only
-swapping out librbd?
+The downside is that any logically conflicting request (an overlapping 
+write or truncate or zero) needs to drain the wal events, whereas with a 
+lower-level wal description there might be cases where we can ignore the 
+wal operation.  I suspect the trivial solution of o->flush() on 
+write/truncate/zero will be pretty visible in benchmarks.  Tracking 
+in-flight wal ops with an interval_set would probably work well enough.
 
-> 2) https://github.com/ceph/ceph/commit/c474ee42
->
-> This commit had a very large impact, reducing performance by another 20-25%.
-
-Definitely an area we should optimize given the number of
-AioCompletions that are constructed.
-
-> 3) https://github.com/ceph/ceph/commit/66e7464
->
-> This was a fix that helped regain some of the performance loss due to
-> c474ee42, but didn't totally reclaim it.
-
-Odd -- since that effectively reverted c474ee42 (unique_lock_name)
-within the IO path.
-
-> 5) https://github.com/ceph/ceph/commit/8aae868
->
-> The new AioImageRequestWQ appears to be the cause of the most recent large
-> reduction in 128K sequential read performance.
-
-We will have to investigate this -- AioImageRequestWQ is just a
-wrapper around the same work queue used in the Hammer release.
-
--- 
-Jason
+sage
