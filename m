@@ -1,134 +1,197 @@
-From: Ramesh Chander <Ramesh.Chander@sandisk.com>
+From: Sage Weil <sage@newdream.net>
 Subject: RE: Implementing bitmap based space allocator for BlueStore
-Date: Wed, 11 May 2016 13:52:51 +0000
-Message-ID: <CY1PR0201MB18200B12B2922C4324CD8D4185720@CY1PR0201MB1820.namprd02.prod.outlook.com>
-References: <BLUPR0201MB1809B0B51FF640A10869E0A285790@BLUPR0201MB1809.namprd02.prod.outlook.com>
-	<CY1PR0201MB1820941DBBE1FB7927F42D2185710@CY1PR0201MB1820.namprd02.prod.outlook.com>
- <CANP1eJGy9bBvnW26PVb1ykimGLa3WO5s1WPyLp9_c6TNCye5bw@mail.gmail.com>
+Date: Wed, 11 May 2016 10:06:01 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605111005020.15518@cpach.fuggernut.com>
+References: <BLUPR0201MB1809B0B51FF640A10869E0A285790@BLUPR0201MB1809.namprd02.prod.outlook.com> <CY1PR0201MB1820941DBBE1FB7927F42D2185710@CY1PR0201MB1820.namprd02.prod.outlook.com> <CANP1eJGy9bBvnW26PVb1ykimGLa3WO5s1WPyLp9_c6TNCye5bw@mail.gmail.com>
+ <CY1PR0201MB18200B12B2922C4324CD8D4185720@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-66803351-1462975563=:15518"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0088.outbound.protection.outlook.com ([65.55.169.88]:8640
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932901AbcEKNwz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 May 2016 09:52:55 -0400
-In-Reply-To: <CANP1eJGy9bBvnW26PVb1ykimGLa3WO5s1WPyLp9_c6TNCye5bw@mail.gmail.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:54816 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932162AbcEKOFt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 10:05:49 -0400
+In-Reply-To: <CY1PR0201MB18200B12B2922C4324CD8D4185720@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ramesh Chander <Ramesh.Chander@sandisk.com>
+Cc: Milosz Tanski <milosz@adfin.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIE1pbG9zeiBmb3IgY29tbWVudC4NCg0KVW50aWwgSSBmaWd1cmUgb3V0IHdheSB0aGF0
-IHdvcmtzIGZvciBib3RoIG9yIGNsZWFuZXIgd2F5IG9mIHN1cHBvcnRpbmcgYm90aCwgSSB3aWxs
-IG1ha2UgZGVmYXVsdCBiaXRtYXAgMzJiaXRzIGFzIHRoYXQgc2VlbXMgb24gc2FmZXIgc2lkZSBh
-cyBvZiBub3cuDQoNCkJUVzogIEkgYW0gdXNpbmcgZ2NjIGluIGJ1aWxkIG1hY3JvcyBsaWtlIF9f
-c3luY19mZXRjaF9hbmRfYW5kIGV0Yy4NCg0KaHR0cHM6Ly9nY2MuZ251Lm9yZy9vbmxpbmVkb2Nz
-L2djYy00LjQuMy9nY2MvQXRvbWljLUJ1aWx0aW5zLmh0bWwNCg0KDQotUmVnYXJkcywNCiBSYW1l
-c2gNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IE1pbG9zeiBUYW5za2kgW21h
-aWx0bzptaWxvc3pAYWRmaW4uY29tXSANClNlbnQ6IFR1ZXNkYXksIE1heSAxMCwgMjAxNiAxMDow
-OSBQTQ0KVG86IFJhbWVzaCBDaGFuZGVyDQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcN
-ClN1YmplY3Q6IFJlOiBJbXBsZW1lbnRpbmcgYml0bWFwIGJhc2VkIHNwYWNlIGFsbG9jYXRvciBm
-b3IgQmx1ZVN0b3JlDQoNCk9uIFR1ZSwgTWF5IDEwLCAyMDE2IGF0IDY6MjAgQU0sIFJhbWVzaCBD
-aGFuZGVyIDxSYW1lc2guQ2hhbmRlckBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+DQo+IEhpIENlcGgg
-RGV2ZWxvcGVycywNCj4NCj4gVGhpcyBpcyByZXF1ZXN0IHRvIHJldmlldyBQUjoNCj4NCj4gaHR0
-cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzkwMzENCj4NCj4gaXMgZm9yIGJlbG93IG1l
-bnRpb25lZCBiaXRtYXAgYmFzZWQgYWxsb2NhdG9yIGluIEJsdWVTdG9yZS4NCj4NCj4gSW4gc2hv
-cnQgcGxlYXNlIHJldmlldyB0aGUgY29kZS4NCj4NCj4NCj4gRGV0YWlsczogKHNhbWUgbWVudGlv
-bmVkIGluIHB1bGwgcmVxdWVzdCkNCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tDQo+IFRoaXMgaXMgQml0bWFwIGJhc2VkIGFsbG9jYXRvciBmb3IgQmx1
-ZVN0b3JlLg0KPiBNb3RpdmF0aW9uOg0KPiAxLiBSZWR1Y3Rpb24gb2YgbWVtb3J5IGJ5IHVzaW5n
-IGp1c3Qgb25lIGJpdCBmb3Igc2luZ2xlIGJsb2NrIChhcyBjb21wYXJlZCB0byA4ICsgOCBieWVz
-IGluIGNhc2Ugb2YgZXh0ZW50IGJhc2VkIGFsbG9jYXRvcikuDQo+IDIuIENvbmN1cnJlbnQgYWxs
-b2NhdGlvbnMgdmlhIG11bHRpcGxlIHRocmVhZHMuDQo+DQo+IEl0IGV4cG9zZXMgbWFpbmx5IHRo
-ZXNlIGludGVyZmFjZXM6DQo+IDEuIEFsbG9jYXRlIGNvbnRpZ3VvdXMgYmxvY2tzLg0KPiAyLiBB
-bGxvY2F0ZSBub24tY29udGlndW91cyBibG9ja3MuDQo+IDMuIEZyZWUgYWxsb2NhdGVkIGJsb2Nr
-cy4NCj4gNC4gR2V0IFN0YXRpc3RpY3MgYWJvdXQgYWxsb2NhdG9yLg0KPg0KPiBJdCB3b3JrcyBp
-biB0d28gbW9kZXM6DQo+DQo+ICAgICBDb25jdXJyZW50Og0KPiAgICAgV2hlcmUgbXVsdGlwbGUg
-dGhyZWFkcyBjYW4gYmUgYWxsb2NhdGluZyBhdCBzYW1lIHRpbWUgaW4gZGlmZmVyZW50IHNwYWNl
-IHpvbmVzLiBUaGlzIGlzIHNwZWNpYWxseSBmb3IgZmFzdGVyIG1lZGlhIGxpa2UgU1NEcy4NCj4N
-Cj4gICAgIFNlcmlhbDoNCj4gICAgIE9ubHkgb25lIHRocmVhZCBjYW4gYmUgYWN0aXZlIGluc2lk
-ZSBiaXRtYXAgYWxsb2NhdG9yIGF0IGEgdGltZS4gVGhpcyBvbmUgaXMgbWFpbmx5IHRvIGtlZXAg
-cm90YXRpbmcgbWVkaWEgaW4gbWluZCBzaW5jZQ0KPiAgICAgY29uY3VycmVudCBhbGxvY2F0aW9u
-cyBjYW4gYWdncmF2YXRlIHJhbmRvbSB3cml0ZXMuDQo+DQo+IFRlc3QgUmFuOg0KPiAxLiBNYWtl
-IGNoZWNrLg0KPiAyLiBCYXNpYyByZWFkIHdyaXRlIG11bHRpLXRocmVhZGVkIHRlc3QgY2FzZXMg
-d2l0aCByZWNvdmVyeS4NCj4gMy4gRXhoYXVzdGl2ZSB1bml0IHRlc3QgY2FzZXMgZm9yIGNvcm5l
-ciBjYXNlcw0KPg0KPiBOZXh0IHN0ZXBzOg0KPiAxLiBDb21wbGV0ZSBzZXQgb2YgbXVsdGktdGhy
-ZWFkZWQgdGVzdCBjYXNlcy4NCj4gMi4gTW9yZSB0ZXN0IGNhc2VzIHRvIHByb3RlY3QgZnJvbSBz
-cGFjZSBsZWFrIGFuZCBjb3JydXB0aW9uIGluIEJsdWUgU3RvcmUuDQo+IDQuIFByb3ZpZGUgbW9y
-ZSBpbnRlbGxpZ2VudCBjb25maWd1cmFibGUgbGlrZSBab25lIHNpemUuDQo+IDUuIElmIHJlcXVp
-cmVkIG1ha2Ugc2Nhbm5pbmcgZmFzdGVyIG15IG9uZSBtb3JlIGxldmVsIGluIHN1bW1hcnkgaGll
-cmFyY2h5Lg0KPiA2LiBJZiByZXF1aXJlZCBtb3JlIHN0cmljdGVyIHJlc2VydmF0aW9ucyBndWFy
-YW50ZWUuDQo+DQo+IE92ZXIgQWxsIERlc2lnbiBPdmVydmlldzoNCj4NCj4gRnVsbCBzcGFjZSBp
-cyBkaXZpZGVkIGluIHRvIGZpeGVkIHNpemUgYnV0IGNvbmZpZ3VyYWJsZSB6b25lcy4gSXQgaXMg
-dGhlIHVuaXQgd2hlcmUgYXQgYSB0aW1lIHNpbmdsZSB0aHJlYWQgY2FuIGJlIGFjdGl2ZWx5IGFs
-bG9jYXRpbmcgZnJvbS4NCj4gQSB6b25lIGlzIHRoZW4gZnVydGhlciBkaXZpZGVkIGluIHRvIEJp
-dE1hcHMuIEVhY2ggYml0bWFwIGlzIDY0Yml0cyBoZW5jZSA2NCBibG9ja3MuDQoNCg0KTWF5YmUg
-Yml0bWFwcyBzaG91bGQgYmUgMzJiaXQ/IE5vdCBldmVyeSBwbGF0Zm9ybSBzdXBwb3J0cyBhdG9t
-aWMgb3BlcmF0aW9ucyBvbiA2NGJpdCBvcGVyYXRpb25zLiBJZiB5b3UncmUgdHJ5aW5nIHRyeWlu
-ZyB0byBsb2NraW5nIG9wZXJhdGlvbnMgdG8gZmluZCBhIGJsb2NrIGluIG11bHRpLXRocmVhZGVk
-IGNhc2UgdGhpcyBtaWdodCBtYXR0ZXIuDQo2NGJpdCBBUk0gaXMganVzdCByZWFsbHkgZ2Fpbmlu
-ZyBzdGVhbSwgYW5kIHRoZXJlJ3MgYWxzbyB0aGUgZmFuY3kgbmV3IGRyaXZlcyB0aGF0IGNhbiBy
-dW4gQ2VwaCBvbiB0aGUgZGV2aWNlLg0KDQpPbiA2NGJpdCBwbGF0Zm9ybXMgeW91IGNhbiBhbHdh
-eXMgb3B0aW1pemUgYnkgd29ya2luZyBvbiB0d28gYml0bWFwcyBhdCBhIHRpbWUuDQoNCj4NCj4g
-QWxsb2NhdGlvbjoNCj4NCj4gU3RhcnQgZnJvbSBhIG1hcmtlciBhbmQgc2NhbnMgZm9yIGNvbnRp
-Z3VvdXMgb3IgZGlzLWNvbnRpZ3VvdXMgZnJlZSBibG9ja3MgaW4gem9uZXMgb25lIGFmdGVyIGFu
-b3RoZXIgYW5kIGluIEJpdE1hcHMgb25lIGFmdGVyIGFub3RoZXIgd2l0aGluIGEgem9uZS4NCj4g
-SWYgd2hpbGUgc2NhbiBhIHpvbmUgaXMgZm91bmQgbG9ja2VkIGJ5IHNvbWVib2R5LCBpdCBzaW1w
-bGUgdHJpZXMgaW4gbmV4dCB6b25lLg0KPiBJZiB0d28gc2NhbnMgZG9lcyBub3QgZmluZCBhbnl0
-aGluZywgdGhlbiB0aGlyZCBzY2FuIGlzIHNlcmlhbCBhbmQgaXQgYmxvY2tzIG9uIGEgem9uZSBp
-ZiBpdCBpcyBsb2NrZWQgYnkgYW5vdGhlciB0aHJlYWQgdG8gYXZvaWQgcG9zc2liaWxpdHkgbWlz
-c2luZyBvbmx5IHpvbmVzIHRoYXQgaGF2ZSBzcGFjZS4NCj4NCj4gSW4gc2VyaWFsIG1vZGUgb2Yg
-YWxsb2NhdGlvbiwgaXQgYWx3YXlzIHRha2Ugc2luZ2xlIGxvY2sgb24gZnVsbCBhbGxvY2F0b3Ig
-YW5kIHNjYW5zIGZvciBmcmVlIHNwYWNlLg0KPg0KPiBJbiBjb250aWd1b3VzIGFsbG9jYXRpb24s
-IHRoZSBhbGxvY2F0aW9uIGlzIGVpdGhlciBmdWxmaWxsZWQgY29tcGxldGVseSBvciBub3RoaW5n
-IGlzIGFsbG9jYXRlZC4NCj4gSW4gY2FzZSBvZiBkaXMtY29udGlndW91cyBhbGxvY2F0aW9ucywg
-cGFydGlhbCByZXN1bHRzIGNhbiBiZSByZXR1cm5lZC4NCj4NCj4gRnJlZToNCj4gRnJlZSBkb2Vz
-IG5vdCB0YWtlIGFueSBsb2NrIG9uIHpvbmUgb3IgYXJlYSwgaXQgc2ltcGx5IGF0b21pY2FsbHkg
-dHdlYWtzIHRoZSBiaXRzLg0KPg0KPiBMaW1pdGF0aW9uczoNCj4NCj4gICAgIFNpbmdsZSBhbGxv
-Y2F0aW9uIGNhbm5vdCBleHRlbmQgYmV5b25kIGEgem9uZSBpbiBjb25jdXJyZW50IG1vZGUgKCBh
-cm91bmQgNjRNIGluIGN1cnJlbnQgNjRrIGNvbmZpZyBhbmQgZGVmYXVsdCB2YWx1ZSkuDQo+DQo+
-IC1SZWdhcmRzLA0KPiBSYW1lc2ggQ2hhbmRlcg0KPiBTci4gU3RhZ2cgU29mdHdhcmUgRW5naW5l
-ZXINCj4gU2FuZGlzaw0KPg0KPg0KPg0KPg0KPg0KPg0KPg0KPg0KPiAtLS0tLU9yaWdpbmFsIE1l
-c3NhZ2UtLS0tLQ0KPiBGcm9tOiBSYW1lc2ggQ2hhbmRlcg0KPiBTZW50OiBNb25kYXksIE1heSAw
-MiwgMjAxNiAxMTozOCBBTQ0KPiBUbzogJ2NlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnJw0KPiBT
-dWJqZWN0OiBJbXBsZW1lbnRpbmcgYml0bWFwIGJhc2VkIHNwYWNlIGFsbG9jYXRvciBmb3IgQmx1
-ZVN0b3JlDQo+DQo+IEhpIENlcGggRGV2ZWxvcGVycywNCj4NCj4gSSBob3BlIHlvdSBhbGwgYXJl
-IGRvaW5nIGdyZWF0Lg0KPg0KPiBUaGlzIGlzIGp1c3QgYSBub3RlIHRoYXQgSSBhbSB3b3JraW5n
-IG9uIGltcGxlbWVudGluZyBiaXRtYXAgYmFzZWQgYWxsb2NhdG9yIGZvciBCbHVlU3RvcmUuDQo+
-DQo+IFRoZSBmaXJzdCBsZXZlbCBvZiBkZXRhaWxzIGFyZSBiZWxvdy4NCj4NCj4gQnJpZWYgZGV0
-YWlscyBvZiBhbGxvY2F0b3I6DQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+DQo+
-IEkgYW0gcGxhbm5pbmcgdG8gd3JpdGUgYSBiaXRtYXAgc2Nhbm5lciB0byBmaW5kIE4gY29udGln
-dW91cyBvciBub24tY29udGlndW91cyBibG9ja3MgZnJvbSBhIGJpdG1hcCBvZiBzdG9yYWdlIHNw
-YWNlIHJhbmdlIGFzc2lnbmVkIHRvIGFsbG9jYXRvci4NCj4NCj4gSXQgd2lsbCBiZSBmb2xsb3dp
-bmcgaW50ZXJmYWNlcyBvZiBBbGxvY2F0b3IgY2xhc3MgaW4gQWxsb2NhdG9yLmguDQo+DQo+IFRo
-ZSBtYWluIGlkZWEgYmVoaW5kIGl0IGlzIHRvIHJlZHVjZSBtZW1vcnkgZm9vdCBwcmludCBvZiBh
-bGxvY2F0b3Igd2hlbiB1c2luZyBzbWFsbCBibG9ja3MgbGlrZSA0Sy4gSXQgd2lsbCBhbHNvIGFs
-bG93IG11bHRpcGxlIHRocmVhZCB0byBhbGxvY2F0ZSBjb25jdXJyZW50bHkuDQo+DQo+IFRoZSBs
-b2dpYyBkaXZpZGVzIHRoZSBiaXRtYXAgaW4gdG8gem9uZXMgYW5kIG11bHRpcGxlIHRocmVhZHMg
-Y2FuIGJlIGFsbG9jYXRpbmcgZnJvbSBkaWZmZXJlbnQgem9uZXMgYXQgYSB0aW1lLg0KPiBUaGlz
-IGNhbiBiZSBoZWxwZnVsIGluIGNhc2Ugb2Ygc3RvcmFnZSBpcyBhdCBzYXR1cmF0aW9uIGFuZCBs
-b3Qgb2Ygc2Nhbm5pbmcgbmVlZHMgdG8gYmUgZG9uZSB0byBmaW5kIGZyZWUgYmxvY2tzLg0KPg0K
-PiBTY2FubmluZyBjYW4vd2lsbCBiZSBmdXJ0aGVyIG1hZGUgbW9yZSBpbnRlbGxpZ2VudCBrZWVw
-aW5nIGhpZXJhcmNoeSBvZiBzdW1tYXJ5IG9mIHNwYWNlIGF0IGRpZmZlcmVudCBhcmVhcy4NCj4N
-Cj4gUGxlYXNlIGxldCBtZSBrbm93IHlvdXIgdGhvdWdodHMgb24gdGhpcy4NCj4NCj4gLVJlZ2Fy
-ZHMsDQo+IFJhbWVzaCBDaGFuZGVyDQo+IFNyLiBTdGFmZiBFbmdpbmVlcg0KPiBTYW5kaXNrIElu
-ZGlhDQo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxl
-Y3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUg
-ZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhp
-cyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBu
-b3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQg
-dGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcg
-b2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2Vp
-dmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVy
-IGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQg
-ZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vz
-c2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVz
-KS4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUg
-InVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
-bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0
-cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCg0KDQoNCi0tDQpNaWxv
-c3ogVGFuc2tpDQpDVE8NCjE2IEVhc3QgMzR0aCBTdHJlZXQsIDE1dGggZmxvb3INCk5ldyBZb3Jr
-LCBOWSAxMDAxNg0KDQpwOiA2NDYtMjUzLTkwNTUNCmU6IG1pbG9zekBhZGZpbi5jb20NCg==
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-66803351-1462975563=:15518
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+On Wed, 11 May 2016, Ramesh Chander wrote:
+> Thanks Milosz for comment.
+> 
+> Until I figure out way that works for both or cleaner way of supporting 
+> both, I will make default bitmap 32bits as that seems on safer side as 
+> of now.
+
+It seems like you can just use 'unsigned long' (which should be the native 
+word length) and sizeof() where appropriate so that this sorted out on 
+its own at build time?
+
+sage
+
+> 
+> BTW:  I am using gcc in build macros like __sync_fetch_and_and etc.
+> 
+> https://gcc.gnu.org/onlinedocs/gcc-4.4.3/gcc/Atomic-Builtins.html
+> 
+> 
+> -Regards,
+>  Ramesh
+> 
+> -----Original Message-----
+> From: Milosz Tanski [mailto:milosz@adfin.com] 
+> Sent: Tuesday, May 10, 2016 10:09 PM
+> To: Ramesh Chander
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Implementing bitmap based space allocator for BlueStore
+> 
+> On Tue, May 10, 2016 at 6:20 AM, Ramesh Chander <Ramesh.Chander@sandisk.com> wrote:
+> >
+> > Hi Ceph Developers,
+> >
+> > This is request to review PR:
+> >
+> > https://github.com/ceph/ceph/pull/9031
+> >
+> > is for below mentioned bitmap based allocator in BlueStore.
+> >
+> > In short please review the code.
+> >
+> >
+> > Details: (same mentioned in pull request)
+> > ------------------------------------------------
+> > This is Bitmap based allocator for BlueStore.
+> > Motivation:
+> > 1. Reduction of memory by using just one bit for single block (as compared to 8 + 8 byes in case of extent based allocator).
+> > 2. Concurrent allocations via multiple threads.
+> >
+> > It exposes mainly these interfaces:
+> > 1. Allocate contiguous blocks.
+> > 2. Allocate non-contiguous blocks.
+> > 3. Free allocated blocks.
+> > 4. Get Statistics about allocator.
+> >
+> > It works in two modes:
+> >
+> >     Concurrent:
+> >     Where multiple threads can be allocating at same time in different space zones. This is specially for faster media like SSDs.
+> >
+> >     Serial:
+> >     Only one thread can be active inside bitmap allocator at a time. This one is mainly to keep rotating media in mind since
+> >     concurrent allocations can aggravate random writes.
+> >
+> > Test Ran:
+> > 1. Make check.
+> > 2. Basic read write multi-threaded test cases with recovery.
+> > 3. Exhaustive unit test cases for corner cases
+> >
+> > Next steps:
+> > 1. Complete set of multi-threaded test cases.
+> > 2. More test cases to protect from space leak and corruption in Blue Store.
+> > 4. Provide more intelligent configurable like Zone size.
+> > 5. If required make scanning faster my one more level in summary hierarchy.
+> > 6. If required more stricter reservations guarantee.
+> >
+> > Over All Design Overview:
+> >
+> > Full space is divided in to fixed size but configurable zones. It is the unit where at a time single thread can be actively allocating from.
+> > A zone is then further divided in to BitMaps. Each bitmap is 64bits hence 64 blocks.
+> 
+> 
+> Maybe bitmaps should be 32bit? Not every platform supports atomic operations on 64bit operations. If you're trying trying to locking operations to find a block in multi-threaded case this might matter.
+> 64bit ARM is just really gaining steam, and there's also the fancy new drives that can run Ceph on the device.
+> 
+> On 64bit platforms you can always optimize by working on two bitmaps at a time.
+> 
+> >
+> > Allocation:
+> >
+> > Start from a marker and scans for contiguous or dis-contiguous free blocks in zones one after another and in BitMaps one after another within a zone.
+> > If while scan a zone is found locked by somebody, it simple tries in next zone.
+> > If two scans does not find anything, then third scan is serial and it blocks on a zone if it is locked by another thread to avoid possibility missing only zones that have space.
+> >
+> > In serial mode of allocation, it always take single lock on full allocator and scans for free space.
+> >
+> > In contiguous allocation, the allocation is either fulfilled completely or nothing is allocated.
+> > In case of dis-contiguous allocations, partial results can be returned.
+> >
+> > Free:
+> > Free does not take any lock on zone or area, it simply atomically tweaks the bits.
+> >
+> > Limitations:
+> >
+> >     Single allocation cannot extend beyond a zone in concurrent mode ( around 64M in current 64k config and default value).
+> >
+> > -Regards,
+> > Ramesh Chander
+> > Sr. Stagg Software Engineer
+> > Sandisk
+> >
+> >
+> >
+> >
+> >
+> >
+> >
+> >
+> > -----Original Message-----
+> > From: Ramesh Chander
+> > Sent: Monday, May 02, 2016 11:38 AM
+> > To: 'ceph-devel@vger.kernel.org'
+> > Subject: Implementing bitmap based space allocator for BlueStore
+> >
+> > Hi Ceph Developers,
+> >
+> > I hope you all are doing great.
+> >
+> > This is just a note that I am working on implementing bitmap based allocator for BlueStore.
+> >
+> > The first level of details are below.
+> >
+> > Brief details of allocator:
+> > -----------------------------
+> >
+> > I am planning to write a bitmap scanner to find N contiguous or non-contiguous blocks from a bitmap of storage space range assigned to allocator.
+> >
+> > It will be following interfaces of Allocator class in Allocator.h.
+> >
+> > The main idea behind it is to reduce memory foot print of allocator when using small blocks like 4K. It will also allow multiple thread to allocate concurrently.
+> >
+> > The logic divides the bitmap in to zones and multiple threads can be allocating from different zones at a time.
+> > This can be helpful in case of storage is at saturation and lot of scanning needs to be done to find free blocks.
+> >
+> > Scanning can/will be further made more intelligent keeping hierarchy of summary of space at different areas.
+> >
+> > Please let me know your thoughts on this.
+> >
+> > -Regards,
+> > Ramesh Chander
+> > Sr. Staff Engineer
+> > Sandisk India
+> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+> 
+> --
+> Milosz Tanski
+> CTO
+> 16 East 34th Street, 15th floor
+> New York, NY 10016
+> 
+> p: 646-253-9055
+> e: milosz@adfin.com
+> N?????r??y??????X??ǧv???)޺{.n?????z?]z????ay?ʇڙ??j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+--8323329-66803351-1462975563=:15518--
