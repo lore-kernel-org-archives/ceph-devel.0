@@ -1,118 +1,110 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Could be due to a race condition... Re: Help with understanding
- throttle.finish()
-Date: Wed, 11 May 2016 11:46:16 +0200
-Message-ID: <e599f4b3-738c-6419-6397-317ad9178ac9@digiware.nl>
-References: <57225355.3040401@digiware.nl>
- <8402c73a-d6c4-6ad7-453e-c100e7376e72@digiware.nl>
- <CAJ4mKGZDvFPAZmhF1c=b07=myW7-y+SgEONL1zyB+piV-r50Hg@mail.gmail.com>
- <828fd24d-f73d-42e6-69e0-d9f6c5811edd@digiware.nl>
- <b34f7765-7db5-713d-5ed2-3374b0ec9872@digiware.nl>
+From: Gonzalo Aguilar Delgado <gaguilar.delgado@gmail.com>
+Subject: OSD shows UP while it's not
+Date: Wed, 11 May 2016 13:10:05 +0200
+Message-ID: <1462965005.13078.29.camel@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:61544 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751565AbcEKJqX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 May 2016 05:46:23 -0400
-In-Reply-To: <b34f7765-7db5-713d-5ed2-3374b0ec9872@digiware.nl>
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:36980 "EHLO
+	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751348AbcEKLKN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 07:10:13 -0400
+Received: by mail-wm0-f47.google.com with SMTP id a17so76146412wme.0
+        for <ceph-devel@vger.kernel.org>; Wed, 11 May 2016 04:10:12 -0700 (PDT)
+Received: from laptop.cloud.level2crm.com (46.red-212-170-57.staticip.rima-tde.net. [212.170.57.46])
+        by smtp.gmail.com with ESMTPSA id u6sm7539532wjh.2.2016.05.11.04.10.10
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 11 May 2016 04:10:10 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 9-5-2016 10:44, Willem Jan Withagen wrote:
-> On 6-5-2016 23:04, Willem Jan Withagen wrote:
->> On 6-5-2016 20:41, Gregory Farnum wrote:
+Hello,=C2=A0
 
-Hi Greg,
+I found I cannot out down all my OSDs from the cluster.
+root@blue-compute:/var/log# ceph osd tree
+ID WEIGHT=C2=A0=C2=A0TYPE NAME=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0UP/DOWN REW=
+EIGHT PRIMARY-AFFINITY=C2=A0
+-1 1.00000 root default=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0
+-4 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0rack rack-1=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
+-2 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0host bl=
+ue-compute=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0
+=C2=A00 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0osd.0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A00=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A01.00=
+000=C2=A0
+=C2=A02 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0osd.2=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A00=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A01.00=
+000=C2=A0
+-3 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0host re=
+d-compute=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0
+=C2=A01 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0osd.1=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A00=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A01.00=
+000=C2=A0
+=C2=A03 0.50000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0osd.3=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0up=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A00=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A01.00000=C2=A0
+=C2=A04 1.00000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0osd.4=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0down=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A00=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A01.00=
+000=C2=A0
 
-If you are not the one to ask about the Throttle stuff, would you know
-anybody else I could ask this question.
-Because the more runs I make, the more it seems like it is a livelock.
 
-I'm now going to do the annotated runs on Linux as well, and try and
-find out why it doesn't happen there.
 
---WjW
+=C2=A0 =C2=A0 osdmap e2516: 5 osds: 1 up, 0 in; 153 remapped pgs
 
-> Oke,
->
-> I'm going to need some help understanding some things...
->
-> I've taken the oversaturated test_backoff from test/common/Throttle.cc,
-> since that one wasn't working as well. And I suspect that it might be
-> for about the same/similar reason.
->
-> I start 1 putter and one getter, and with certain parameters the test
-> does not complete. When
->     expected_throughput * put_delay_per_count ~> 10 (max_multiple??)
-> then the process get into a loop, I'm printing over and over:
-> _get_delay return r > high_threshhold (queue is full): time = 0.0172
->
-> Note that the parameters to test_backoff are:
-> ====
-> //  double expected_throughput,
->     500,
-> //  double max_multiple,
->     10,
-> //  double put_delay_per_count,
->     0.025,
-> ====
->
-> And that loop is in BackoffThrottle::get, around line 390 (I have a lot
-> of extra lines for annotation and tracing.)
-> ====
->   while (((start + delay) > std::chrono::system_clock::now()) ||
->          !((max == 0) || (current == 0) || ((current + c) <= max))) {
->     assert(ticket == waiters.begin());
->     (*ticket)->wait_until(l, start + delay);
->     delay = _get_delay(c);
->   }
-> ====
->
-> The reason that this loop never completes is that it executed under the
-> lock in the getter thread in test/common/Throttle.cc:test_backoff where
-> it is executed under g.lock(). And the putter is held on the same lock,
-> so nothing gets in or out.... Not a deadlock, but a live-lock.
->
-> Thusfar the analysis.
->
-> Now the question(s)....
-> 1) How do I break this livelock.
-> 1a) Should the extra while() { wait } loop actually be in
-> BackoffThrottle:get without releasing the lock?
->
-> 2) The thread are called getter and putter.
-> So I'd expect the getter to get messages from the list and the putter so
-> write things to the list.
->
-> Why does the getter:
-> 	while(!stop) {
-> 	    throttle.get(to_get);
-> 	    in_queue.push_back(to_get)
-> 	    assert(total <= max);
-> 	}
-> And the putter:
-> 	while(!stop) {
-> 	    while(empty)
-> 		wait;
-> 	    c = in_queue.front();
-> 	    in_queue.pop();
-> 	    "wait time to queue some more"
-> 	    throttle.put(c)
-> 	}
->
-> Am I getting it wrong around, and would I not expect the
-> throttle.{get,put} to match the similar operations on the in_queue?
->
-> And what is this c value that we retrieve from the in_queue that is then
-> used to be put in the throttle???
->
-> --WjW
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+
+
+osd.3 up=C2=A0=C2=A0=C2=A0out weight 0 up_from 2424 up_thru 2442 down_a=
+t 2423
+last_clean_interval [2361,2420) 172.16.0.100:6806/4554
+172.16.0.100:6807/4554 172.16.0.100:6808/4554 172.16.0.100:6809/4554
+exists,up 8dd085d4-0b50-4c80-a0ca-c5bc4ad972f7
+
+
+Everything is down. But 3 seems to be up. Why?
+
+At OS level is also down.
+
+root@red-compute:/var/log/ceph# ps ax | grep ceph
+=C2=A01937 ?=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0Ssl=C2=A0=C2=
+=A0=C2=A0=C2=A00:00 /usr/bin/ceph-mon -f --cluster ceph --id
+red-compute --setuser ceph --setgroup ceph
+27225 pts/0=C2=A0=C2=A0=C2=A0=C2=A0S+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A00:00=
+ grep ceph
+
+
+Why I cannot remove it?
+
+
+Best regards,
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
