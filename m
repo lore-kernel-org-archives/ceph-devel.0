@@ -1,87 +1,80 @@
-From: Ana Aviles <ana@greenhost.nl>
-Subject: Unfound objects and inconsistent reports
-Date: Wed, 11 May 2016 15:46:07 +0200
-Message-ID: <5733379F.5080800@greenhost.nl>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: Re: Hammer vs Jewel librbd performance testing and git bisection
+ results
+Date: Wed, 11 May 2016 09:49:20 -0400 (EDT)
+Message-ID: <751229226.29976609.1462974560840.JavaMail.zimbra@redhat.com>
+References: <f9f54455-8348-42b7-153b-e38850eed5e1@redhat.com> <20160511133504.GB6902@predictor>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smarthost1.greenhost.nl ([195.190.28.81]:59984 "EHLO
-	smarthost1.greenhost.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751721AbcEKNqL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 09:46:11 -0400
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:45309 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751693AbcEKNtY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2016 09:49:24 -0400
+In-Reply-To: <20160511133504.GB6902@predictor>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users@ceph.com, ceph-devel@vger.kernel.org
+To: Piotr =?utf-8?Q?Da=C5=82ek?= <branch@predictor.org.pl>
+Cc: ceph-devel@vger.kernel.org
 
-Hello everyone,
+Hi,
 
-We experienced a strange scenario last week of unfound objects and
-inconsistent reports from ceph tools. We solved it with the help from
-Sage, and we wanted to share our experience and to see if it can be of
-any use for developers too.
+----- Original Message -----
+> From: "Piotr Da=C5=82ek" <branch@predictor.org.pl>
+> To: ceph-devel@vger.kernel.org
+> Sent: Wednesday, May 11, 2016 9:35:04 AM
+> Subject: Re: Hammer vs Jewel librbd performance testing and git bisec=
+tion results
+>=20
+syNM5pr-ZwBuR7lqnphEd-4kQUid0C9eRyta3ohOA/edit?usp=3Dsharing
+> >=20
+> > There are several commits of interest that have a noticeable effect
+> > on 128K sequential read performance:
+> >=20
+> > [..]
+> > 2) https://github.com/ceph/ceph/commit/c474ee42
+> >=20
+> > This commit had a very large impact, reducing performance by anothe=
+r
+> > 20-25%.
+>=20
+> https://github.com/ceph/ceph/commit/c474ee42#diff-254555dde8dcfb7fb90=
+8791ab8214b92R318
+> I would check if temporarily forcing unique_lock_name() to return its=
+ arg
+> (or other constant) would change things. If so, probably a more effic=
+ient way
+> to construct unique lock name may be in order.
 
-After OSDs segfaulting randomly, our cluster ended up with one OSD down
-and unfound objects, probably due to a combination of inopportune
-crashes. We tried to start that OSD again, but it crashed when reading =
-a
-specific PG from the log. here: http://pastebin.com/u9WFJnMR
+++
 
-Sage pointed that it looked like some metadata was corrupted. Funny
-thing is that, that PG didn't belong to that OSD anymore. Once we made
-sure it didn't belong to that OSD, we removed the PG from that OSD.
+Naively, too, what unique_lock_name is doing amounts to:  1) creating e=
+xtra of [a small] std::string [better fixed, but not a likely root caus=
+e?] 2) using Utils::stringify to hook ostream operators in the type pas=
+sed in, and doing that on a new sstream;
 
-ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-51/ --pgid
-2.1fd --op remove --journal-path /var/lib/ceph/osd/ceph-51/journal
+Maybe we should look horizontally at either speeding up or finding alte=
+rnatives to stringify in other places?
 
-We had to repeat this procedure for other PGs on that same OSD, as it
-kept on crashing on startup. Finally the OSD was up and in, but the
-recovery process was stuck with 10 unfound objects. We deleted marking
-them as lost in their PGs doing:
+Matt
 
-ceph pg 2.481 mark_unfound_lost delete
+>=20
+> --
+> Piotr Da=C5=82ek
 
-Right after that, recovery was successfully completed but ceph reports
-were a bit inconsistent. ceph -s was reporting 7 unfound objects, while
-ceph health detail didn't report which PGs those unfound objects
-belonged to. Sage pointed us to ceph pg dump, that indeed showed which
-PGs owned those objects (in all PGs, the crashed OSD was a member).
-However, when we listed missing objects on those PGs, they reported non=
-e:
-
-{
-    "offset": {
-        "oid": "",
-        "key": "",
-        "snapid": 0,
-        "hash": 0,
-        "max": 0,
-        "pool": -9223372036854775808,
-        "namespace": ""
-    },
-    "num_missing": 0,
-    "num_unfound": 0,
-    "objects": [],
-    "more": 0
-}
-
-Then we decided to restart the OSDs on those PGs, and the unfound
-objects disappear from ceph -s report.
-
-It may be important to mention that we had four nodes running the OSDs.
-Two nodes with v9.2.0 and another with v9.2.1. Our OSDs were crashing
-apparently because of an issue on v9.2.1. We shared this on the
-ceph-devel list, that were very helpful solving this
-(http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/31123).
-
-Greetings,
 
 --=20
-Ana Avil=C3=A9s
-Greenhost - sustainable hosting & digital security
-E: ana@greenhost.nl
-T: +31 20 4890444
-W: https://greenhost.nl
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-707-0660
+fax.  734-769-8938
+cel.  734-216-5309
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
