@@ -1,154 +1,160 @@
-From: Ramesh Chander <Ramesh.Chander@sandisk.com>
-Subject: RE: Implementing bitmap based space allocator for BlueStore
-Date: Thu, 12 May 2016 16:04:34 +0000
-Message-ID: <CY1PR0201MB1820AFE62D83C31E89BB083B85730@CY1PR0201MB1820.namprd02.prod.outlook.com>
-References: <BLUPR0201MB1809B0B51FF640A10869E0A285790@BLUPR0201MB1809.namprd02.prod.outlook.com>
-	<CY1PR0201MB1820941DBBE1FB7927F42D2185710@CY1PR0201MB1820.namprd02.prod.outlook.com>
-	<CANP1eJGy9bBvnW26PVb1ykimGLa3WO5s1WPyLp9_c6TNCye5bw@mail.gmail.com>
-	<CY1PR0201MB18200B12B2922C4324CD8D4185720@CY1PR0201MB1820.namprd02.prod.outlook.com>
- <CANP1eJGOdHadL_1Yhq0U5oEJ-a2Qi8GH9OjCp_SJb6hy6mAgaA@mail.gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: 2 related bluestore questions
+Date: Thu, 12 May 2016 19:37:02 +0300
+Message-ID: <3403dbbc-9bf9-733f-1d4e-df66b5a2373d@mirantis.com>
+References: <alpine.DEB.2.11.1605091417590.336@cpach.fuggernut.com>
+ <6168022b-e3c0-b8f2-e8c7-3b4b82f9dc6e@mirantis.com>
+ <alpine.DEB.2.11.1605100841400.15518@cpach.fuggernut.com>
+ <b6240191-0849-d60c-ebb6-147b5785e3e7@mirantis.com>
+ <alpine.DEB.2.11.1605101121090.15518@cpach.fuggernut.com>
+ <alpine.DEB.2.11.1605102105260.15518@cpach.fuggernut.com>
+ <2b5ebbd8-3e89-1fff-37f1-c6eb00bdcb1a@mirantis.com>
+ <alpine.DEB.2.11.1605110901551.15518@cpach.fuggernut.com>
+ <8b077a20-ace3-7824-4039-7b8e9adf88ce@mirantis.com>
+ <alpine.DEB.2.11.1605110951570.15518@cpach.fuggernut.com>
+ <alpine.DEB.2.11.1605111636390.15518@cpach.fuggernut.com>
+ <BLUPR0201MB152437E90BED4AE3CA22310EE8720@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1605112249580.23446@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bn0100.outbound.protection.outlook.com ([157.56.110.100]:2592
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751857AbcELQEi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 12 May 2016 12:04:38 -0400
-In-Reply-To: <CANP1eJGOdHadL_1Yhq0U5oEJ-a2Qi8GH9OjCp_SJb6hy6mAgaA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-lb0-f177.google.com ([209.85.217.177]:34822 "EHLO
+	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751675AbcELQhG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 May 2016 12:37:06 -0400
+Received: by mail-lb0-f177.google.com with SMTP id ww9so5477291lbc.2
+        for <ceph-devel@vger.kernel.org>; Thu, 12 May 2016 09:37:04 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1605112249580.23446@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
+To: Sage Weil <sage@newdream.net>, Allen Samuels <Allen.Samuels@sandisk.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIGZvciBsaW5rLg0KSSBhbSBqdXN0IGdldHRpbmcgY29tZm9ydGFibGUgd2l0aCBDKysg
-Y29uc3RydWN0cy4gDQpJbiBuZXh0IHZlcnNpb24gSSBjaGFuZ2VzIGFsbCB0byBzdGQ6OiB2ZXJz
-aW9uLg0KDQotUmFtZXNoIA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogTWls
-b3N6IFRhbnNraSBbbWFpbHRvOm1pbG9zekBhZGZpbi5jb21dIA0KU2VudDogV2VkbmVzZGF5LCBN
-YXkgMTEsIDIwMTYgOTozNiBQTQ0KVG86IFJhbWVzaCBDaGFuZGVyDQpDYzogY2VwaC1kZXZlbEB2
-Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBJbXBsZW1lbnRpbmcgYml0bWFwIGJhc2VkIHNw
-YWNlIGFsbG9jYXRvciBmb3IgQmx1ZVN0b3JlDQoNCk9uIFdlZCwgTWF5IDExLCAyMDE2IGF0IDk6
-NTIgQU0sIFJhbWVzaCBDaGFuZGVyIDxSYW1lc2guQ2hhbmRlckBzYW5kaXNrLmNvbT4gd3JvdGU6
-DQo+IFRoYW5rcyBNaWxvc3ogZm9yIGNvbW1lbnQuDQo+DQo+IFVudGlsIEkgZmlndXJlIG91dCB3
-YXkgdGhhdCB3b3JrcyBmb3IgYm90aCBvciBjbGVhbmVyIHdheSBvZiBzdXBwb3J0aW5nIGJvdGgs
-IEkgd2lsbCBtYWtlIGRlZmF1bHQgYml0bWFwIDMyYml0cyBhcyB0aGF0IHNlZW1zIG9uIHNhZmVy
-IHNpZGUgYXMgb2Ygbm93Lg0KPg0KPiBCVFc6ICBJIGFtIHVzaW5nIGdjYyBpbiBidWlsZCBtYWNy
-b3MgbGlrZSBfX3N5bmNfZmV0Y2hfYW5kX2FuZCBldGMuDQo+DQo+IGh0dHBzOi8vZ2NjLmdudS5v
-cmcvb25saW5lZG9jcy9nY2MtNC40LjMvZ2NjL0F0b21pYy1CdWlsdGlucy5odG1sDQoNCkFueSBy
-ZWFzb24gZm9yIG5vdCB1c2luZyBDKzExIGF0b21pY3M/IEl0IHNlYW1zIHRvIG1lIGFzIGl0IHdv
-dWxkIGJlIG1vcmUgcG9ydGFibGUgdGhlbiByZWx5aW5nIG9uIGdjYyBleHRlbnNpb25zLg0KaHR0
-cDovL2VuLmNwcHJlZmVyZW5jZS5jb20vdy9jcHAvYXRvbWljL2F0b21pYy9mZXRjaF9hbmQgLiBC
-b29zdCBBdG9taWMgY2FuIGJlIHVzZWQgYXMgYSBmYWxsYmFjay4NCg0KPg0KPg0KPiAtUmVnYXJk
-cywNCj4gIFJhbWVzaA0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBN
-aWxvc3ogVGFuc2tpIFttYWlsdG86bWlsb3N6QGFkZmluLmNvbV0NCj4gU2VudDogVHVlc2RheSwg
-TWF5IDEwLCAyMDE2IDEwOjA5IFBNDQo+IFRvOiBSYW1lc2ggQ2hhbmRlcg0KPiBDYzogY2VwaC1k
-ZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IEltcGxlbWVudGluZyBiaXRtYXAg
-YmFzZWQgc3BhY2UgYWxsb2NhdG9yIGZvciBCbHVlU3RvcmUNCj4NCj4gT24gVHVlLCBNYXkgMTAs
-IDIwMTYgYXQgNjoyMCBBTSwgUmFtZXNoIENoYW5kZXIgPFJhbWVzaC5DaGFuZGVyQHNhbmRpc2su
-Y29tPiB3cm90ZToNCj4+DQo+PiBIaSBDZXBoIERldmVsb3BlcnMsDQo+Pg0KPj4gVGhpcyBpcyBy
-ZXF1ZXN0IHRvIHJldmlldyBQUjoNCj4+DQo+PiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBo
-L3B1bGwvOTAzMQ0KPj4NCj4+IGlzIGZvciBiZWxvdyBtZW50aW9uZWQgYml0bWFwIGJhc2VkIGFs
-bG9jYXRvciBpbiBCbHVlU3RvcmUuDQo+Pg0KPj4gSW4gc2hvcnQgcGxlYXNlIHJldmlldyB0aGUg
-Y29kZS4NCj4+DQo+Pg0KPj4gRGV0YWlsczogKHNhbWUgbWVudGlvbmVkIGluIHB1bGwgcmVxdWVz
-dCkNCj4+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K
-Pj4gVGhpcyBpcyBCaXRtYXAgYmFzZWQgYWxsb2NhdG9yIGZvciBCbHVlU3RvcmUuDQo+PiBNb3Rp
-dmF0aW9uOg0KPj4gMS4gUmVkdWN0aW9uIG9mIG1lbW9yeSBieSB1c2luZyBqdXN0IG9uZSBiaXQg
-Zm9yIHNpbmdsZSBibG9jayAoYXMgY29tcGFyZWQgdG8gOCArIDggYnllcyBpbiBjYXNlIG9mIGV4
-dGVudCBiYXNlZCBhbGxvY2F0b3IpLg0KPj4gMi4gQ29uY3VycmVudCBhbGxvY2F0aW9ucyB2aWEg
-bXVsdGlwbGUgdGhyZWFkcy4NCj4+DQo+PiBJdCBleHBvc2VzIG1haW5seSB0aGVzZSBpbnRlcmZh
-Y2VzOg0KPj4gMS4gQWxsb2NhdGUgY29udGlndW91cyBibG9ja3MuDQo+PiAyLiBBbGxvY2F0ZSBu
-b24tY29udGlndW91cyBibG9ja3MuDQo+PiAzLiBGcmVlIGFsbG9jYXRlZCBibG9ja3MuDQo+PiA0
-LiBHZXQgU3RhdGlzdGljcyBhYm91dCBhbGxvY2F0b3IuDQo+Pg0KPj4gSXQgd29ya3MgaW4gdHdv
-IG1vZGVzOg0KPj4NCj4+ICAgICBDb25jdXJyZW50Og0KPj4gICAgIFdoZXJlIG11bHRpcGxlIHRo
-cmVhZHMgY2FuIGJlIGFsbG9jYXRpbmcgYXQgc2FtZSB0aW1lIGluIGRpZmZlcmVudCBzcGFjZSB6
-b25lcy4gVGhpcyBpcyBzcGVjaWFsbHkgZm9yIGZhc3RlciBtZWRpYSBsaWtlIFNTRHMuDQo+Pg0K
-Pj4gICAgIFNlcmlhbDoNCj4+ICAgICBPbmx5IG9uZSB0aHJlYWQgY2FuIGJlIGFjdGl2ZSBpbnNp
-ZGUgYml0bWFwIGFsbG9jYXRvciBhdCBhIHRpbWUuIFRoaXMgb25lIGlzIG1haW5seSB0byBrZWVw
-IHJvdGF0aW5nIG1lZGlhIGluIG1pbmQgc2luY2UNCj4+ICAgICBjb25jdXJyZW50IGFsbG9jYXRp
-b25zIGNhbiBhZ2dyYXZhdGUgcmFuZG9tIHdyaXRlcy4NCj4+DQo+PiBUZXN0IFJhbjoNCj4+IDEu
-IE1ha2UgY2hlY2suDQo+PiAyLiBCYXNpYyByZWFkIHdyaXRlIG11bHRpLXRocmVhZGVkIHRlc3Qg
-Y2FzZXMgd2l0aCByZWNvdmVyeS4NCj4+IDMuIEV4aGF1c3RpdmUgdW5pdCB0ZXN0IGNhc2VzIGZv
-ciBjb3JuZXIgY2FzZXMNCj4+DQo+PiBOZXh0IHN0ZXBzOg0KPj4gMS4gQ29tcGxldGUgc2V0IG9m
-IG11bHRpLXRocmVhZGVkIHRlc3QgY2FzZXMuDQo+PiAyLiBNb3JlIHRlc3QgY2FzZXMgdG8gcHJv
-dGVjdCBmcm9tIHNwYWNlIGxlYWsgYW5kIGNvcnJ1cHRpb24gaW4gQmx1ZSBTdG9yZS4NCj4+IDQu
-IFByb3ZpZGUgbW9yZSBpbnRlbGxpZ2VudCBjb25maWd1cmFibGUgbGlrZSBab25lIHNpemUuDQo+
-PiA1LiBJZiByZXF1aXJlZCBtYWtlIHNjYW5uaW5nIGZhc3RlciBteSBvbmUgbW9yZSBsZXZlbCBp
-biBzdW1tYXJ5IGhpZXJhcmNoeS4NCj4+IDYuIElmIHJlcXVpcmVkIG1vcmUgc3RyaWN0ZXIgcmVz
-ZXJ2YXRpb25zIGd1YXJhbnRlZS4NCj4+DQo+PiBPdmVyIEFsbCBEZXNpZ24gT3ZlcnZpZXc6DQo+
-Pg0KPj4gRnVsbCBzcGFjZSBpcyBkaXZpZGVkIGluIHRvIGZpeGVkIHNpemUgYnV0IGNvbmZpZ3Vy
-YWJsZSB6b25lcy4gSXQgaXMgdGhlIHVuaXQgd2hlcmUgYXQgYSB0aW1lIHNpbmdsZSB0aHJlYWQg
-Y2FuIGJlIGFjdGl2ZWx5IGFsbG9jYXRpbmcgZnJvbS4NCj4+IEEgem9uZSBpcyB0aGVuIGZ1cnRo
-ZXIgZGl2aWRlZCBpbiB0byBCaXRNYXBzLiBFYWNoIGJpdG1hcCBpcyA2NGJpdHMgaGVuY2UgNjQg
-YmxvY2tzLg0KPg0KPg0KPiBNYXliZSBiaXRtYXBzIHNob3VsZCBiZSAzMmJpdD8gTm90IGV2ZXJ5
-IHBsYXRmb3JtIHN1cHBvcnRzIGF0b21pYyBvcGVyYXRpb25zIG9uIDY0Yml0IG9wZXJhdGlvbnMu
-IElmIHlvdSdyZSB0cnlpbmcgdHJ5aW5nIHRvIGxvY2tpbmcgb3BlcmF0aW9ucyB0byBmaW5kIGEg
-YmxvY2sgaW4gbXVsdGktdGhyZWFkZWQgY2FzZSB0aGlzIG1pZ2h0IG1hdHRlci4NCj4gNjRiaXQg
-QVJNIGlzIGp1c3QgcmVhbGx5IGdhaW5pbmcgc3RlYW0sIGFuZCB0aGVyZSdzIGFsc28gdGhlIGZh
-bmN5IG5ldyBkcml2ZXMgdGhhdCBjYW4gcnVuIENlcGggb24gdGhlIGRldmljZS4NCj4NCj4gT24g
-NjRiaXQgcGxhdGZvcm1zIHlvdSBjYW4gYWx3YXlzIG9wdGltaXplIGJ5IHdvcmtpbmcgb24gdHdv
-IGJpdG1hcHMgYXQgYSB0aW1lLg0KPg0KPj4NCj4+IEFsbG9jYXRpb246DQo+Pg0KPj4gU3RhcnQg
-ZnJvbSBhIG1hcmtlciBhbmQgc2NhbnMgZm9yIGNvbnRpZ3VvdXMgb3IgZGlzLWNvbnRpZ3VvdXMg
-ZnJlZSBibG9ja3MgaW4gem9uZXMgb25lIGFmdGVyIGFub3RoZXIgYW5kIGluIEJpdE1hcHMgb25l
-IGFmdGVyIGFub3RoZXIgd2l0aGluIGEgem9uZS4NCj4+IElmIHdoaWxlIHNjYW4gYSB6b25lIGlz
-IGZvdW5kIGxvY2tlZCBieSBzb21lYm9keSwgaXQgc2ltcGxlIHRyaWVzIGluIG5leHQgem9uZS4N
-Cj4+IElmIHR3byBzY2FucyBkb2VzIG5vdCBmaW5kIGFueXRoaW5nLCB0aGVuIHRoaXJkIHNjYW4g
-aXMgc2VyaWFsIGFuZCBpdCBibG9ja3Mgb24gYSB6b25lIGlmIGl0IGlzIGxvY2tlZCBieSBhbm90
-aGVyIHRocmVhZCB0byBhdm9pZCBwb3NzaWJpbGl0eSBtaXNzaW5nIG9ubHkgem9uZXMgdGhhdCBo
-YXZlIHNwYWNlLg0KPj4NCj4+IEluIHNlcmlhbCBtb2RlIG9mIGFsbG9jYXRpb24sIGl0IGFsd2F5
-cyB0YWtlIHNpbmdsZSBsb2NrIG9uIGZ1bGwgYWxsb2NhdG9yIGFuZCBzY2FucyBmb3IgZnJlZSBz
-cGFjZS4NCj4+DQo+PiBJbiBjb250aWd1b3VzIGFsbG9jYXRpb24sIHRoZSBhbGxvY2F0aW9uIGlz
-IGVpdGhlciBmdWxmaWxsZWQgY29tcGxldGVseSBvciBub3RoaW5nIGlzIGFsbG9jYXRlZC4NCj4+
-IEluIGNhc2Ugb2YgZGlzLWNvbnRpZ3VvdXMgYWxsb2NhdGlvbnMsIHBhcnRpYWwgcmVzdWx0cyBj
-YW4gYmUgcmV0dXJuZWQuDQo+Pg0KPj4gRnJlZToNCj4+IEZyZWUgZG9lcyBub3QgdGFrZSBhbnkg
-bG9jayBvbiB6b25lIG9yIGFyZWEsIGl0IHNpbXBseSBhdG9taWNhbGx5IHR3ZWFrcyB0aGUgYml0
-cy4NCj4+DQo+PiBMaW1pdGF0aW9uczoNCj4+DQo+PiAgICAgU2luZ2xlIGFsbG9jYXRpb24gY2Fu
-bm90IGV4dGVuZCBiZXlvbmQgYSB6b25lIGluIGNvbmN1cnJlbnQgbW9kZSAoIGFyb3VuZCA2NE0g
-aW4gY3VycmVudCA2NGsgY29uZmlnIGFuZCBkZWZhdWx0IHZhbHVlKS4NCj4+DQo+PiAtUmVnYXJk
-cywNCj4+IFJhbWVzaCBDaGFuZGVyDQo+PiBTci4gU3RhZ2cgU29mdHdhcmUgRW5naW5lZXINCj4+
-IFNhbmRpc2sNCj4+DQo+Pg0KPj4NCj4+DQo+Pg0KPj4NCj4+DQo+Pg0KPj4gLS0tLS1PcmlnaW5h
-bCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IFJhbWVzaCBDaGFuZGVyDQo+PiBTZW50OiBNb25kYXks
-IE1heSAwMiwgMjAxNiAxMTozOCBBTQ0KPj4gVG86ICdjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
-ZycNCj4+IFN1YmplY3Q6IEltcGxlbWVudGluZyBiaXRtYXAgYmFzZWQgc3BhY2UgYWxsb2NhdG9y
-IGZvciBCbHVlU3RvcmUNCj4+DQo+PiBIaSBDZXBoIERldmVsb3BlcnMsDQo+Pg0KPj4gSSBob3Bl
-IHlvdSBhbGwgYXJlIGRvaW5nIGdyZWF0Lg0KPj4NCj4+IFRoaXMgaXMganVzdCBhIG5vdGUgdGhh
-dCBJIGFtIHdvcmtpbmcgb24gaW1wbGVtZW50aW5nIGJpdG1hcCBiYXNlZCBhbGxvY2F0b3IgZm9y
-IEJsdWVTdG9yZS4NCj4+DQo+PiBUaGUgZmlyc3QgbGV2ZWwgb2YgZGV0YWlscyBhcmUgYmVsb3cu
-DQo+Pg0KPj4gQnJpZWYgZGV0YWlscyBvZiBhbGxvY2F0b3I6DQo+PiAtLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLQ0KPj4NCj4+IEkgYW0gcGxhbm5pbmcgdG8gd3JpdGUgYSBiaXRtYXAgc2Nh
-bm5lciB0byBmaW5kIE4gY29udGlndW91cyBvciBub24tY29udGlndW91cyBibG9ja3MgZnJvbSBh
-IGJpdG1hcCBvZiBzdG9yYWdlIHNwYWNlIHJhbmdlIGFzc2lnbmVkIHRvIGFsbG9jYXRvci4NCj4+
-DQo+PiBJdCB3aWxsIGJlIGZvbGxvd2luZyBpbnRlcmZhY2VzIG9mIEFsbG9jYXRvciBjbGFzcyBp
-biBBbGxvY2F0b3IuaC4NCj4+DQo+PiBUaGUgbWFpbiBpZGVhIGJlaGluZCBpdCBpcyB0byByZWR1
-Y2UgbWVtb3J5IGZvb3QgcHJpbnQgb2YgYWxsb2NhdG9yIHdoZW4gdXNpbmcgc21hbGwgYmxvY2tz
-IGxpa2UgNEsuIEl0IHdpbGwgYWxzbyBhbGxvdyBtdWx0aXBsZSB0aHJlYWQgdG8gYWxsb2NhdGUg
-Y29uY3VycmVudGx5Lg0KPj4NCj4+IFRoZSBsb2dpYyBkaXZpZGVzIHRoZSBiaXRtYXAgaW4gdG8g
-em9uZXMgYW5kIG11bHRpcGxlIHRocmVhZHMgY2FuIGJlIGFsbG9jYXRpbmcgZnJvbSBkaWZmZXJl
-bnQgem9uZXMgYXQgYSB0aW1lLg0KPj4gVGhpcyBjYW4gYmUgaGVscGZ1bCBpbiBjYXNlIG9mIHN0
-b3JhZ2UgaXMgYXQgc2F0dXJhdGlvbiBhbmQgbG90IG9mIHNjYW5uaW5nIG5lZWRzIHRvIGJlIGRv
-bmUgdG8gZmluZCBmcmVlIGJsb2Nrcy4NCj4+DQo+PiBTY2FubmluZyBjYW4vd2lsbCBiZSBmdXJ0
-aGVyIG1hZGUgbW9yZSBpbnRlbGxpZ2VudCBrZWVwaW5nIGhpZXJhcmNoeSBvZiBzdW1tYXJ5IG9m
-IHNwYWNlIGF0IGRpZmZlcmVudCBhcmVhcy4NCj4+DQo+PiBQbGVhc2UgbGV0IG1lIGtub3cgeW91
-ciB0aG91Z2h0cyBvbiB0aGlzLg0KPj4NCj4+IC1SZWdhcmRzLA0KPj4gUmFtZXNoIENoYW5kZXIN
-Cj4+IFNyLiBTdGFmZiBFbmdpbmVlcg0KPj4gU2FuZGlzayBJbmRpYQ0KPj4gUExFQVNFIE5PVEU6
-IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2Fn
-ZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVu
-dChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRo
-ZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhh
-dmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRp
-c3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMg
-c3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0
-aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUt
-bWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxs
-IGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQg
-Y29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4gLS0NCj4+IFRvIHVu
-c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
-LWRldmVsIg0KPj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
-cm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+PiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwu
-b3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4NCj4NCj4NCj4NCj4gLS0NCj4gTWlsb3N6IFRhbnNr
-aQ0KPiBDVE8NCj4gMTYgRWFzdCAzNHRoIFN0cmVldCwgMTV0aCBmbG9vcg0KPiBOZXcgWW9yaywg
-TlkgMTAwMTYNCj4NCj4gcDogNjQ2LTI1My05MDU1DQo+IGU6IG1pbG9zekBhZGZpbi5jb20NCg0K
-DQoNCi0tDQpNaWxvc3ogVGFuc2tpDQpDVE8NCjE2IEVhc3QgMzR0aCBTdHJlZXQsIDE1dGggZmxv
-b3INCk5ldyBZb3JrLCBOWSAxMDAxNg0KDQpwOiA2NDYtMjUzLTkwNTUNCmU6IG1pbG9zekBhZGZp
-bi5jb20NCg==
+Yet another potential issue with WAL I can imagine:
+
+Let's have some small write going to WAL followed by an larger aligned 
+overwrite to the same extent that bypasses WAL. Is it possible if the 
+first write is processed later and overwrites the second one? I think so.
+
+This way we can probably come to the conclusion that all requests should 
+be processed in-sequence. One should prohibit multiple flows for 
+requests processing as this may eliminate their order.
+
+Yeah - I'm attacking WAL concept this way...
+
+
+Thanks,
+Igor
+
+On 12.05.2016 5:58, Sage Weil wrote:
+> On Wed, 11 May 2016, Allen Samuels wrote:
+>> Sorry, still on vacation and I haven't really wrapped my head around
+>> everything that's being discussed. However, w.r.t. wal operations, I
+>> would strongly favor an approach that minimizes the amount of "future"
+>> operations that are recorded (which I'll call intentions -- i.e.,
+>> non-binding hints about extra work that needs to get done). Much of the
+>> complexity here is because the intentions -- after being recorded --
+>> will need to be altered based on subsequent operations. Hence every
+>> write operation will need to digest the historical intentions and
+>> potentially update them -- this is VERY complex, potentially much more
+>> complex than code that simply examines the current state and
+>> re-determines the correct next operation (i.e., de-wal, gc, etc.)
+>>
+>> Additional complexity arises because you're recording two sets of state
+>> that require consistency checking -- in my experience, this road leads
+>> to perdition....
+> I agree is has to be something manageable that we can reason about.  I
+> think the question for me is mostly about which path minimizes the
+> complexity while still getting us a reasonable level of performance.
+>
+> I had one new thought, see below...
+>
+>>>> The downside is that any logically conflicting request (an overlapping
+>>>> write or truncate or zero) needs to drain the wal events, whereas with
+>>>> a lower-level wal description there might be cases where we can ignore
+>>>> the wal operation.  I suspect the trivial solution of o->flush() on
+>>>> write/truncate/zero will be pretty visible in benchmarks.  Tracking
+>>>> in-flight wal ops with an interval_set would probably work well enough.
+>>> Hmm, I'm not sure this will pan out.  The main problem is that if we call back
+>>> into the write code (with a sync flag), we will have to do write IO, and this
+>>> wreaks havoc on our otherwise (mostly) orderly state machine.
+>>> I think it can be done if we build in a similar guard like _txc_finish_io so that
+>>> we wait for the wal events to also complete IO in order before committing
+>>> them.  I think.
+>>>
+>>> But the other problem is the checksum thing that came up in another thread,
+>>> where the read-side of a read/modify/write might fail teh checksum because
+>>> the wal write hit disk but the kv portion didn't commit. I see a few options:
+>>>
+>>>   1) If there are checksums and we're doing a sub-block overwrite, we have to
+>>> write/cow it elsewhere.  This probably means min_alloc_size cow operations
+>>> for small writes.  In which case we needn't bother doing a wal even in the
+>>> first place--the whole point is to enable an overwrite.
+>>>
+>>>   2) We do loose checksum validation that will accept either the old checksum
+>>> or the expected new checksum for the read stage.  This handles these two
+>>> crash cases:
+>>>
+>>>   * kv commit of op + wal event
+>>>     <crash here, or>
+>>>   * do wal io (completely)
+>>>     <crash before cleaning up wal event>
+>>>   * kv cleanup of wal event
+>>>
+>>> but not the case where we only partially complete the wal io.  Which means
+>>> there is a small probability is "corrupt" ourselves on crash (not really corrupt,
+>>> but confuse ourselves such that we refuse to replay the wal events on
+>>> startup).
+>>>
+>>>   3) Same as 2, but simply warn if we fail that read-side checksum on replay.
+>>> This basically introduces a *very* small window which could allow an ondisk
+>>> corruption to get absorbed into our checksum.  This could just be #2 + a
+>>> config option so we warn instead of erroring out.
+>>>
+>>>   4) Same as 2, but we try every combination of old and new data on
+>>> block/sector boundaries to find a valid checksum on the read-side.
+>>>
+>>> I think #1 is a non-starter because it turns a 4K write into a 64K read + seek +
+>>> 64K write on an HDD.  Or forces us to run with min_alloc_size=4K on HDD,
+>>> which would risk very bad fragmentation.
+>>>
+>>> Which makes we want #3 (initially) and then #4.  But... if we do the "wal is
+>>> just a logical write", that means this weird replay handling logic creeps into
+>>> the normal write path.
+>>>
+>>> I'm currently leaning toward keeping the wal events special (lower-level), but
+>>> doing what we can to make it work with the same mid- to low-level helper
+>>> functions (for reading and verifying blobs, etc.).
+> It occured to me that this checksum consistency issue only comes up when
+> we are updating something that is smaller than the csum block size.  And
+> the real source of the problem is that you have a sequence of
+>
+>   1- journal intent (kv wal item)
+>   2- do read io
+>   3- verify csum
+>   4- do write io
+>   5- cancel intent (remove kv wal item)
+>
+> If we have an order like
+>
+>   1- do read io
+>   2- journal intent for entire csum chunk (kv wal item)
+>   3- do write io
+>   4- cancel intent
+>
+> Then the issue goes away.  And I'm thinking if the csum chunk is big
+> enough that the #2 step is too big of a wal item to perform well, then the
+> problem is your choice of csum block size, not the approach.  I.e., use a
+> 4kb csum block size for rbd images, and use large blocks (128k, 512k,
+> whatever) only for things that never see random overwrites (rgw data).
+>
+> If that is good enough, then it might also mean that we can make the wal
+> operations never do reads--just (over)writes, further simplifying things
+> on that end.  In the jewel bluestore the only times we do reads is for
+> partial block updates (do we really care about these?  a buffer cache
+> could absorb them when it matters) and for copy/cow operations post-clone
+> (which i think are simple enough to be deal with separately).
+>
+> sage
+
