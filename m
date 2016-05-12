@@ -1,117 +1,154 @@
-From: "Handzik, Joseph" <joseph.t.handzik@hpe.com>
-Subject: Re: Issuing custom IOCTLs to SCSI LLD
-Date: Thu, 12 May 2016 13:38:22 +0000
-Message-ID: <98A1E741-0CAC-49CB-9701-18932EA6381B@hpe.com>
-References: <loom.20160509T111456-471@post.gmane.org>
- <loom.20160511T061343-334@post.gmane.org>
- <alpine.DEB.2.11.1605110839390.15518@cpach.fuggernut.com>
- <loom.20160512T112356-917@post.gmane.org>
- <alpine.DEB.2.11.1605120832420.23446@cpach.fuggernut.com>,<CALe9h7fbdA5zPyva4CUSv0Mp+oG8AvCyd4bQeB2Nf4mnEfZ_jA@mail.gmail.com>
+From: Ramesh Chander <Ramesh.Chander@sandisk.com>
+Subject: RE: Implementing bitmap based space allocator for BlueStore
+Date: Thu, 12 May 2016 16:04:34 +0000
+Message-ID: <CY1PR0201MB1820AFE62D83C31E89BB083B85730@CY1PR0201MB1820.namprd02.prod.outlook.com>
+References: <BLUPR0201MB1809B0B51FF640A10869E0A285790@BLUPR0201MB1809.namprd02.prod.outlook.com>
+	<CY1PR0201MB1820941DBBE1FB7927F42D2185710@CY1PR0201MB1820.namprd02.prod.outlook.com>
+	<CANP1eJGy9bBvnW26PVb1ykimGLa3WO5s1WPyLp9_c6TNCye5bw@mail.gmail.com>
+	<CY1PR0201MB18200B12B2922C4324CD8D4185720@CY1PR0201MB1820.namprd02.prod.outlook.com>
+ <CANP1eJGOdHadL_1Yhq0U5oEJ-a2Qi8GH9OjCp_SJb6hy6mAgaA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0137.outbound.protection.outlook.com ([65.55.169.137]:26599
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+Received: from mail-bn1bn0100.outbound.protection.outlook.com ([157.56.110.100]:2592
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751491AbcELPL0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 May 2016 11:11:26 -0400
-In-Reply-To: <CALe9h7fbdA5zPyva4CUSv0Mp+oG8AvCyd4bQeB2Nf4mnEfZ_jA@mail.gmail.com>
+	id S1751857AbcELQEi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 12 May 2016 12:04:38 -0400
+In-Reply-To: <CANP1eJGOdHadL_1Yhq0U5oEJ-a2Qi8GH9OjCp_SJb6hy6mAgaA@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, Naveen <Naveen.Chandrasekaran@radisys.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I was intentionally staying quiet to hear other opinions, but I agree that the same mechanisms I'm building for LED operations could extend here (within Ceph of we want it to, but at the very least in libstoragemgmt).
-
-Naveen, if you have interest in helping push this along I'd encourage you to voice your interest over on the libstoragemgmt GitHub: https://github.com/libstorage/libstoragemgmt
-
-Joe
-
-> On May 12, 2016, at 8:22 AM, John Spray <jspray@redhat.com> wrote:
-> 
->> On Thu, May 12, 2016 at 1:37 PM, Sage Weil <sage@newdream.net> wrote:
->>> On Thu, 12 May 2016, Naveen wrote:
->>> Sage Weil <sage <at> newdream.net> writes:
->>> 
->>> 
->>>>>> My question is:
->>>>>> The SCSI LLD would support both read /write entry points for I/O
->>>>>> requests issued by the filesystem/block I/O but they also support
->>> some
->>>>>> custom requests using IOCTLs. So how can ceph support issuing of
->>> such
->>>>>> IOCTL requests to the device if user issues such request. Say for
->>>>>> example power cycling the drive etc. It can also be a passthro
->>> request
->>>>>> down to the device.
->>>> 
->>>> Can you give an example of such an operation?
->>>> 
->>>> In general, any operation is generalized at the librados level.
->>>> For example, in order to get write same and cmpxchg block operations,
->>> we
->>>> added librados operations with similar semantics and implement them
->>> there.
->>>> It is unlikely that passing a complex operation down to the SCSI layer
->>>> will work in unison with the other steps involved in committing
->>>> an operation (e.g., updating metadata indicating the object
->>>> version has changed).
->>>> 
->>>> sage
->>>> 
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in
->>>> the body of a message to majordomo <at> vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> 
->>> Thanks for the response Sage. Example IOCTL operations would be like
->>> downloading a new FW to the drive/HBA, task management requests like
->>> Hard reset, power cycling the drive, issue a SAS/SMP/STP pass thro
->>> command to the drive for querying etc. All these would have to be
->>> initiated and go through ceph (if supported) and not bypassing it.
->> 
->> Ah.  I think these kind of management functions should be performed while
->> the ceph-osd daemon for that drive is offline.  We would probably want
->> some hardware management layer that coexists with ceph or that perhaps has
->> some minimal integration with the ceph osds to do this sort of thing.
->> It's not something that a client (user) would initiate, though.
-> 
-> This is all pretty relevant to Joe Handzik's stuff:
-> https://github.com/joehandzik/ceph/commits/wip-hw-mgmt-cli
-> http://www.spinics.net/lists/ceph-devel/msg30126.html
-> 
-> The idea there though is to enable passing libstoragemgmt calls
-> through the OSD, as opposed to arbitrary SCSI operations.
-> 
-> Although libstoragemgmt is fairly young, I'm a fan of the idea that we
-> could use it internally within Ceph, and then have the same tools/libs
-> used by out-of-ceph management platforms when they want to do
-> equivalent stuff while the OSD is offline.
-> 
-> John
-> 
-> 
->>> I asked a related question in another post too: Can a physical disk
->>> (/dev/sda1) assigned to a ceph OSD object be continued to used by other
->>> apps in the system to issue I/O directly via (/dev/sda1) interface? Does
->>> ceph prevent it, as such operations may corrupt data?
->> 
->> It depends on what privileges the other app has.  If it's root or user
->> ceph, it can step all over the disk (and the rest of the system) and wreak
->> havoc.  With the current backend, we are storing data as files, so you
->> could have other apps using other directories on the file system--this is
->> generally a bad idea for real deployments, though, as performance and disk
->> utilization will be unpredictable.
->> 
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIGZvciBsaW5rLg0KSSBhbSBqdXN0IGdldHRpbmcgY29tZm9ydGFibGUgd2l0aCBDKysg
+Y29uc3RydWN0cy4gDQpJbiBuZXh0IHZlcnNpb24gSSBjaGFuZ2VzIGFsbCB0byBzdGQ6OiB2ZXJz
+aW9uLg0KDQotUmFtZXNoIA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogTWls
+b3N6IFRhbnNraSBbbWFpbHRvOm1pbG9zekBhZGZpbi5jb21dIA0KU2VudDogV2VkbmVzZGF5LCBN
+YXkgMTEsIDIwMTYgOTozNiBQTQ0KVG86IFJhbWVzaCBDaGFuZGVyDQpDYzogY2VwaC1kZXZlbEB2
+Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBJbXBsZW1lbnRpbmcgYml0bWFwIGJhc2VkIHNw
+YWNlIGFsbG9jYXRvciBmb3IgQmx1ZVN0b3JlDQoNCk9uIFdlZCwgTWF5IDExLCAyMDE2IGF0IDk6
+NTIgQU0sIFJhbWVzaCBDaGFuZGVyIDxSYW1lc2guQ2hhbmRlckBzYW5kaXNrLmNvbT4gd3JvdGU6
+DQo+IFRoYW5rcyBNaWxvc3ogZm9yIGNvbW1lbnQuDQo+DQo+IFVudGlsIEkgZmlndXJlIG91dCB3
+YXkgdGhhdCB3b3JrcyBmb3IgYm90aCBvciBjbGVhbmVyIHdheSBvZiBzdXBwb3J0aW5nIGJvdGgs
+IEkgd2lsbCBtYWtlIGRlZmF1bHQgYml0bWFwIDMyYml0cyBhcyB0aGF0IHNlZW1zIG9uIHNhZmVy
+IHNpZGUgYXMgb2Ygbm93Lg0KPg0KPiBCVFc6ICBJIGFtIHVzaW5nIGdjYyBpbiBidWlsZCBtYWNy
+b3MgbGlrZSBfX3N5bmNfZmV0Y2hfYW5kX2FuZCBldGMuDQo+DQo+IGh0dHBzOi8vZ2NjLmdudS5v
+cmcvb25saW5lZG9jcy9nY2MtNC40LjMvZ2NjL0F0b21pYy1CdWlsdGlucy5odG1sDQoNCkFueSBy
+ZWFzb24gZm9yIG5vdCB1c2luZyBDKzExIGF0b21pY3M/IEl0IHNlYW1zIHRvIG1lIGFzIGl0IHdv
+dWxkIGJlIG1vcmUgcG9ydGFibGUgdGhlbiByZWx5aW5nIG9uIGdjYyBleHRlbnNpb25zLg0KaHR0
+cDovL2VuLmNwcHJlZmVyZW5jZS5jb20vdy9jcHAvYXRvbWljL2F0b21pYy9mZXRjaF9hbmQgLiBC
+b29zdCBBdG9taWMgY2FuIGJlIHVzZWQgYXMgYSBmYWxsYmFjay4NCg0KPg0KPg0KPiAtUmVnYXJk
+cywNCj4gIFJhbWVzaA0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBN
+aWxvc3ogVGFuc2tpIFttYWlsdG86bWlsb3N6QGFkZmluLmNvbV0NCj4gU2VudDogVHVlc2RheSwg
+TWF5IDEwLCAyMDE2IDEwOjA5IFBNDQo+IFRvOiBSYW1lc2ggQ2hhbmRlcg0KPiBDYzogY2VwaC1k
+ZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IEltcGxlbWVudGluZyBiaXRtYXAg
+YmFzZWQgc3BhY2UgYWxsb2NhdG9yIGZvciBCbHVlU3RvcmUNCj4NCj4gT24gVHVlLCBNYXkgMTAs
+IDIwMTYgYXQgNjoyMCBBTSwgUmFtZXNoIENoYW5kZXIgPFJhbWVzaC5DaGFuZGVyQHNhbmRpc2su
+Y29tPiB3cm90ZToNCj4+DQo+PiBIaSBDZXBoIERldmVsb3BlcnMsDQo+Pg0KPj4gVGhpcyBpcyBy
+ZXF1ZXN0IHRvIHJldmlldyBQUjoNCj4+DQo+PiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBo
+L3B1bGwvOTAzMQ0KPj4NCj4+IGlzIGZvciBiZWxvdyBtZW50aW9uZWQgYml0bWFwIGJhc2VkIGFs
+bG9jYXRvciBpbiBCbHVlU3RvcmUuDQo+Pg0KPj4gSW4gc2hvcnQgcGxlYXNlIHJldmlldyB0aGUg
+Y29kZS4NCj4+DQo+Pg0KPj4gRGV0YWlsczogKHNhbWUgbWVudGlvbmVkIGluIHB1bGwgcmVxdWVz
+dCkNCj4+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K
+Pj4gVGhpcyBpcyBCaXRtYXAgYmFzZWQgYWxsb2NhdG9yIGZvciBCbHVlU3RvcmUuDQo+PiBNb3Rp
+dmF0aW9uOg0KPj4gMS4gUmVkdWN0aW9uIG9mIG1lbW9yeSBieSB1c2luZyBqdXN0IG9uZSBiaXQg
+Zm9yIHNpbmdsZSBibG9jayAoYXMgY29tcGFyZWQgdG8gOCArIDggYnllcyBpbiBjYXNlIG9mIGV4
+dGVudCBiYXNlZCBhbGxvY2F0b3IpLg0KPj4gMi4gQ29uY3VycmVudCBhbGxvY2F0aW9ucyB2aWEg
+bXVsdGlwbGUgdGhyZWFkcy4NCj4+DQo+PiBJdCBleHBvc2VzIG1haW5seSB0aGVzZSBpbnRlcmZh
+Y2VzOg0KPj4gMS4gQWxsb2NhdGUgY29udGlndW91cyBibG9ja3MuDQo+PiAyLiBBbGxvY2F0ZSBu
+b24tY29udGlndW91cyBibG9ja3MuDQo+PiAzLiBGcmVlIGFsbG9jYXRlZCBibG9ja3MuDQo+PiA0
+LiBHZXQgU3RhdGlzdGljcyBhYm91dCBhbGxvY2F0b3IuDQo+Pg0KPj4gSXQgd29ya3MgaW4gdHdv
+IG1vZGVzOg0KPj4NCj4+ICAgICBDb25jdXJyZW50Og0KPj4gICAgIFdoZXJlIG11bHRpcGxlIHRo
+cmVhZHMgY2FuIGJlIGFsbG9jYXRpbmcgYXQgc2FtZSB0aW1lIGluIGRpZmZlcmVudCBzcGFjZSB6
+b25lcy4gVGhpcyBpcyBzcGVjaWFsbHkgZm9yIGZhc3RlciBtZWRpYSBsaWtlIFNTRHMuDQo+Pg0K
+Pj4gICAgIFNlcmlhbDoNCj4+ICAgICBPbmx5IG9uZSB0aHJlYWQgY2FuIGJlIGFjdGl2ZSBpbnNp
+ZGUgYml0bWFwIGFsbG9jYXRvciBhdCBhIHRpbWUuIFRoaXMgb25lIGlzIG1haW5seSB0byBrZWVw
+IHJvdGF0aW5nIG1lZGlhIGluIG1pbmQgc2luY2UNCj4+ICAgICBjb25jdXJyZW50IGFsbG9jYXRp
+b25zIGNhbiBhZ2dyYXZhdGUgcmFuZG9tIHdyaXRlcy4NCj4+DQo+PiBUZXN0IFJhbjoNCj4+IDEu
+IE1ha2UgY2hlY2suDQo+PiAyLiBCYXNpYyByZWFkIHdyaXRlIG11bHRpLXRocmVhZGVkIHRlc3Qg
+Y2FzZXMgd2l0aCByZWNvdmVyeS4NCj4+IDMuIEV4aGF1c3RpdmUgdW5pdCB0ZXN0IGNhc2VzIGZv
+ciBjb3JuZXIgY2FzZXMNCj4+DQo+PiBOZXh0IHN0ZXBzOg0KPj4gMS4gQ29tcGxldGUgc2V0IG9m
+IG11bHRpLXRocmVhZGVkIHRlc3QgY2FzZXMuDQo+PiAyLiBNb3JlIHRlc3QgY2FzZXMgdG8gcHJv
+dGVjdCBmcm9tIHNwYWNlIGxlYWsgYW5kIGNvcnJ1cHRpb24gaW4gQmx1ZSBTdG9yZS4NCj4+IDQu
+IFByb3ZpZGUgbW9yZSBpbnRlbGxpZ2VudCBjb25maWd1cmFibGUgbGlrZSBab25lIHNpemUuDQo+
+PiA1LiBJZiByZXF1aXJlZCBtYWtlIHNjYW5uaW5nIGZhc3RlciBteSBvbmUgbW9yZSBsZXZlbCBp
+biBzdW1tYXJ5IGhpZXJhcmNoeS4NCj4+IDYuIElmIHJlcXVpcmVkIG1vcmUgc3RyaWN0ZXIgcmVz
+ZXJ2YXRpb25zIGd1YXJhbnRlZS4NCj4+DQo+PiBPdmVyIEFsbCBEZXNpZ24gT3ZlcnZpZXc6DQo+
+Pg0KPj4gRnVsbCBzcGFjZSBpcyBkaXZpZGVkIGluIHRvIGZpeGVkIHNpemUgYnV0IGNvbmZpZ3Vy
+YWJsZSB6b25lcy4gSXQgaXMgdGhlIHVuaXQgd2hlcmUgYXQgYSB0aW1lIHNpbmdsZSB0aHJlYWQg
+Y2FuIGJlIGFjdGl2ZWx5IGFsbG9jYXRpbmcgZnJvbS4NCj4+IEEgem9uZSBpcyB0aGVuIGZ1cnRo
+ZXIgZGl2aWRlZCBpbiB0byBCaXRNYXBzLiBFYWNoIGJpdG1hcCBpcyA2NGJpdHMgaGVuY2UgNjQg
+YmxvY2tzLg0KPg0KPg0KPiBNYXliZSBiaXRtYXBzIHNob3VsZCBiZSAzMmJpdD8gTm90IGV2ZXJ5
+IHBsYXRmb3JtIHN1cHBvcnRzIGF0b21pYyBvcGVyYXRpb25zIG9uIDY0Yml0IG9wZXJhdGlvbnMu
+IElmIHlvdSdyZSB0cnlpbmcgdHJ5aW5nIHRvIGxvY2tpbmcgb3BlcmF0aW9ucyB0byBmaW5kIGEg
+YmxvY2sgaW4gbXVsdGktdGhyZWFkZWQgY2FzZSB0aGlzIG1pZ2h0IG1hdHRlci4NCj4gNjRiaXQg
+QVJNIGlzIGp1c3QgcmVhbGx5IGdhaW5pbmcgc3RlYW0sIGFuZCB0aGVyZSdzIGFsc28gdGhlIGZh
+bmN5IG5ldyBkcml2ZXMgdGhhdCBjYW4gcnVuIENlcGggb24gdGhlIGRldmljZS4NCj4NCj4gT24g
+NjRiaXQgcGxhdGZvcm1zIHlvdSBjYW4gYWx3YXlzIG9wdGltaXplIGJ5IHdvcmtpbmcgb24gdHdv
+IGJpdG1hcHMgYXQgYSB0aW1lLg0KPg0KPj4NCj4+IEFsbG9jYXRpb246DQo+Pg0KPj4gU3RhcnQg
+ZnJvbSBhIG1hcmtlciBhbmQgc2NhbnMgZm9yIGNvbnRpZ3VvdXMgb3IgZGlzLWNvbnRpZ3VvdXMg
+ZnJlZSBibG9ja3MgaW4gem9uZXMgb25lIGFmdGVyIGFub3RoZXIgYW5kIGluIEJpdE1hcHMgb25l
+IGFmdGVyIGFub3RoZXIgd2l0aGluIGEgem9uZS4NCj4+IElmIHdoaWxlIHNjYW4gYSB6b25lIGlz
+IGZvdW5kIGxvY2tlZCBieSBzb21lYm9keSwgaXQgc2ltcGxlIHRyaWVzIGluIG5leHQgem9uZS4N
+Cj4+IElmIHR3byBzY2FucyBkb2VzIG5vdCBmaW5kIGFueXRoaW5nLCB0aGVuIHRoaXJkIHNjYW4g
+aXMgc2VyaWFsIGFuZCBpdCBibG9ja3Mgb24gYSB6b25lIGlmIGl0IGlzIGxvY2tlZCBieSBhbm90
+aGVyIHRocmVhZCB0byBhdm9pZCBwb3NzaWJpbGl0eSBtaXNzaW5nIG9ubHkgem9uZXMgdGhhdCBo
+YXZlIHNwYWNlLg0KPj4NCj4+IEluIHNlcmlhbCBtb2RlIG9mIGFsbG9jYXRpb24sIGl0IGFsd2F5
+cyB0YWtlIHNpbmdsZSBsb2NrIG9uIGZ1bGwgYWxsb2NhdG9yIGFuZCBzY2FucyBmb3IgZnJlZSBz
+cGFjZS4NCj4+DQo+PiBJbiBjb250aWd1b3VzIGFsbG9jYXRpb24sIHRoZSBhbGxvY2F0aW9uIGlz
+IGVpdGhlciBmdWxmaWxsZWQgY29tcGxldGVseSBvciBub3RoaW5nIGlzIGFsbG9jYXRlZC4NCj4+
+IEluIGNhc2Ugb2YgZGlzLWNvbnRpZ3VvdXMgYWxsb2NhdGlvbnMsIHBhcnRpYWwgcmVzdWx0cyBj
+YW4gYmUgcmV0dXJuZWQuDQo+Pg0KPj4gRnJlZToNCj4+IEZyZWUgZG9lcyBub3QgdGFrZSBhbnkg
+bG9jayBvbiB6b25lIG9yIGFyZWEsIGl0IHNpbXBseSBhdG9taWNhbGx5IHR3ZWFrcyB0aGUgYml0
+cy4NCj4+DQo+PiBMaW1pdGF0aW9uczoNCj4+DQo+PiAgICAgU2luZ2xlIGFsbG9jYXRpb24gY2Fu
+bm90IGV4dGVuZCBiZXlvbmQgYSB6b25lIGluIGNvbmN1cnJlbnQgbW9kZSAoIGFyb3VuZCA2NE0g
+aW4gY3VycmVudCA2NGsgY29uZmlnIGFuZCBkZWZhdWx0IHZhbHVlKS4NCj4+DQo+PiAtUmVnYXJk
+cywNCj4+IFJhbWVzaCBDaGFuZGVyDQo+PiBTci4gU3RhZ2cgU29mdHdhcmUgRW5naW5lZXINCj4+
+IFNhbmRpc2sNCj4+DQo+Pg0KPj4NCj4+DQo+Pg0KPj4NCj4+DQo+Pg0KPj4gLS0tLS1PcmlnaW5h
+bCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IFJhbWVzaCBDaGFuZGVyDQo+PiBTZW50OiBNb25kYXks
+IE1heSAwMiwgMjAxNiAxMTozOCBBTQ0KPj4gVG86ICdjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+ZycNCj4+IFN1YmplY3Q6IEltcGxlbWVudGluZyBiaXRtYXAgYmFzZWQgc3BhY2UgYWxsb2NhdG9y
+IGZvciBCbHVlU3RvcmUNCj4+DQo+PiBIaSBDZXBoIERldmVsb3BlcnMsDQo+Pg0KPj4gSSBob3Bl
+IHlvdSBhbGwgYXJlIGRvaW5nIGdyZWF0Lg0KPj4NCj4+IFRoaXMgaXMganVzdCBhIG5vdGUgdGhh
+dCBJIGFtIHdvcmtpbmcgb24gaW1wbGVtZW50aW5nIGJpdG1hcCBiYXNlZCBhbGxvY2F0b3IgZm9y
+IEJsdWVTdG9yZS4NCj4+DQo+PiBUaGUgZmlyc3QgbGV2ZWwgb2YgZGV0YWlscyBhcmUgYmVsb3cu
+DQo+Pg0KPj4gQnJpZWYgZGV0YWlscyBvZiBhbGxvY2F0b3I6DQo+PiAtLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLQ0KPj4NCj4+IEkgYW0gcGxhbm5pbmcgdG8gd3JpdGUgYSBiaXRtYXAgc2Nh
+bm5lciB0byBmaW5kIE4gY29udGlndW91cyBvciBub24tY29udGlndW91cyBibG9ja3MgZnJvbSBh
+IGJpdG1hcCBvZiBzdG9yYWdlIHNwYWNlIHJhbmdlIGFzc2lnbmVkIHRvIGFsbG9jYXRvci4NCj4+
+DQo+PiBJdCB3aWxsIGJlIGZvbGxvd2luZyBpbnRlcmZhY2VzIG9mIEFsbG9jYXRvciBjbGFzcyBp
+biBBbGxvY2F0b3IuaC4NCj4+DQo+PiBUaGUgbWFpbiBpZGVhIGJlaGluZCBpdCBpcyB0byByZWR1
+Y2UgbWVtb3J5IGZvb3QgcHJpbnQgb2YgYWxsb2NhdG9yIHdoZW4gdXNpbmcgc21hbGwgYmxvY2tz
+IGxpa2UgNEsuIEl0IHdpbGwgYWxzbyBhbGxvdyBtdWx0aXBsZSB0aHJlYWQgdG8gYWxsb2NhdGUg
+Y29uY3VycmVudGx5Lg0KPj4NCj4+IFRoZSBsb2dpYyBkaXZpZGVzIHRoZSBiaXRtYXAgaW4gdG8g
+em9uZXMgYW5kIG11bHRpcGxlIHRocmVhZHMgY2FuIGJlIGFsbG9jYXRpbmcgZnJvbSBkaWZmZXJl
+bnQgem9uZXMgYXQgYSB0aW1lLg0KPj4gVGhpcyBjYW4gYmUgaGVscGZ1bCBpbiBjYXNlIG9mIHN0
+b3JhZ2UgaXMgYXQgc2F0dXJhdGlvbiBhbmQgbG90IG9mIHNjYW5uaW5nIG5lZWRzIHRvIGJlIGRv
+bmUgdG8gZmluZCBmcmVlIGJsb2Nrcy4NCj4+DQo+PiBTY2FubmluZyBjYW4vd2lsbCBiZSBmdXJ0
+aGVyIG1hZGUgbW9yZSBpbnRlbGxpZ2VudCBrZWVwaW5nIGhpZXJhcmNoeSBvZiBzdW1tYXJ5IG9m
+IHNwYWNlIGF0IGRpZmZlcmVudCBhcmVhcy4NCj4+DQo+PiBQbGVhc2UgbGV0IG1lIGtub3cgeW91
+ciB0aG91Z2h0cyBvbiB0aGlzLg0KPj4NCj4+IC1SZWdhcmRzLA0KPj4gUmFtZXNoIENoYW5kZXIN
+Cj4+IFNyLiBTdGFmZiBFbmdpbmVlcg0KPj4gU2FuZGlzayBJbmRpYQ0KPj4gUExFQVNFIE5PVEU6
+IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2Fn
+ZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVu
+dChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRo
+ZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhh
+dmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRp
+c3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMg
+c3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0
+aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUt
+bWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxs
+IGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQg
+Y29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4gLS0NCj4+IFRvIHVu
+c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
+LWRldmVsIg0KPj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
+cm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+PiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwu
+b3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4NCj4NCj4NCj4NCj4gLS0NCj4gTWlsb3N6IFRhbnNr
+aQ0KPiBDVE8NCj4gMTYgRWFzdCAzNHRoIFN0cmVldCwgMTV0aCBmbG9vcg0KPiBOZXcgWW9yaywg
+TlkgMTAwMTYNCj4NCj4gcDogNjQ2LTI1My05MDU1DQo+IGU6IG1pbG9zekBhZGZpbi5jb20NCg0K
+DQoNCi0tDQpNaWxvc3ogVGFuc2tpDQpDVE8NCjE2IEVhc3QgMzR0aCBTdHJlZXQsIDE1dGggZmxv
+b3INCk5ldyBZb3JrLCBOWSAxMDAxNg0KDQpwOiA2NDYtMjUzLTkwNTUNCmU6IG1pbG9zekBhZGZp
+bi5jb20NCg==
