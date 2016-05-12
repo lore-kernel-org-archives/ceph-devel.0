@@ -1,80 +1,80 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [GSOC] Bluestore SMR Support
-Date: Thu, 12 May 2016 08:29:46 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605120825260.23446@cpach.fuggernut.com>
-References: <CAPLK-i_BhD9fDFPucg9N6RW8F7N-sfmz81fa_YzOf3Hi+TWkXg@mail.gmail.com> <alpine.DEB.2.11.1604240848580.8831@cpach.fuggernut.com> <CAPLK-i83V8EsaotfM3CVWfyFJYMQvFaD0B3ofLBN=4TVFDr4+Q@mail.gmail.com> <alpine.DEB.2.11.1604251321280.25990@cpach.fuggernut.com>
- <CAPLK-i8AoAWNDbGrBVewFR=dQqB3Z=y_9Cab5F4jDoF3NJ-rwQ@mail.gmail.com> <BN3PR02MB12063D84EB4598ABBCB55FE8E8620@BN3PR02MB1206.namprd02.prod.outlook.com> <CAPLK-i8TBKTZitbWLvMAwyVLVpCj12GL41ZB_eoMvHKitd3QGg@mail.gmail.com> <alpine.DEB.2.11.1605101105170.15518@cpach.fuggernut.com>
- <CAPLK-i_N7yseOVndAdCELTzTTrpBQ05aXb4SRKX_P2Lgng2yuQ@mail.gmail.com> <alpine.DEB.2.11.1605110844530.15518@cpach.fuggernut.com> <CAPLK-i_gqbieDJ2ESUgi_t9hU-hwts2dfnCJhYg9Ug_uyepNEw@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Issuing custom IOCTLs to SCSI LLD
+Date: Thu, 12 May 2016 08:37:01 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605120832420.23446@cpach.fuggernut.com>
+References: <loom.20160509T111456-471@post.gmane.org> <loom.20160511T061343-334@post.gmane.org> <alpine.DEB.2.11.1605110839390.15518@cpach.fuggernut.com> <loom.20160512T112356-917@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1064200188-1463056189=:23446"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44575 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932121AbcELM3e (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 12 May 2016 08:29:34 -0400
-In-Reply-To: <CAPLK-i_gqbieDJ2ESUgi_t9hU-hwts2dfnCJhYg9Ug_uyepNEw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:60694 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751713AbcELMgt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 May 2016 08:36:49 -0400
+In-Reply-To: <loom.20160512T112356-917@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shehbaz Jaffer <shehbazjaffer007@gmail.com>
-Cc: Allen Samuels <allen.samuels@sandisk.com>, ceph-devel@vger.kernel.org
+To: Naveen <Naveen.Chandrasekaran@radisys.com>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-1064200188-1463056189=:23446
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-
-On Thu, 12 May 2016, Shehbaz Jaffer wrote:
-> Hi Sage,
+On Thu, 12 May 2016, Naveen wrote:
+> Sage Weil <sage <at> newdream.net> writes:
 > 
-> > Hmm, good question.  My assumption was that even a drive-managed drive 
-> > would expose the zone layout via libzbc, such that we can control IO 
-> > to avoid any remapping machinery in the drive.  
 > 
-> A drive managed SMR drive will not expose Zone information to Host, 
-> so libzbc would have failed to run ZBC/ZAC commands. However the drive
-> that has been shipped is fortunately not drive managed, but host aware!
-
-Ah, perfect!
-
-> > Does libzbc recognize the drive?
+> > > > My question is:
+> > > > The SCSI LLD would support both read /write entry points for I/O 
+> > > > requests issued by the filesystem/block I/O but they also support 
+> some
+> > > > custom requests using IOCTLs. So how can ceph support issuing of 
+> such 
+> > > > IOCTL requests to the device if user issues such request. Say for 
+> > > > example power cycling the drive etc. It can also be a passthro 
+> request 
+> > > > down to the device.
+> > 
+> > Can you give an example of such an operation?
+> > 
+> > In general, any operation is generalized at the librados level. 
+> > For example, in order to get write same and cmpxchg block operations, 
+> we 
+> > added librados operations with similar semantics and implement them 
+> there.  
+> > It is unlikely that passing a complex operation down to the SCSI layer 
+> > will work in unison with the other steps involved in committing 
+> > an operation (e.g., updating metadata indicating the object 
+> > version has changed).
+> > 
+> > sage
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in
+> > the body of a message to majordomo <at> vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
 > 
-> Yes!
-> I am able to detect zones and run libzbc tests on these drives. 
-> If we do random writes or do not abide by zone 
-> rules, the writes will be serialized internally which works to our
-> advantage.
-> 
-> This is what one of the zbc_info command from libzbc gives me:
-> 
-> $ sudo zbc_info /dev/sg1
-> Device /dev/sg1: ATA ST8000AS0022-1WL SN01 
->     ATA ZAC interface, Host-aware disk model
->     15628053168 logical blocks of 512 B
->     1953506646 physical blocks of 4096 B
->     8001.563 GB capacity
+> Thanks for the response Sage. Example IOCTL operations would be like 
+> downloading a new FW to the drive/HBA, task management requests like 
+> Hard reset, power cycling the drive, issue a SAS/SMP/STP pass thro 
+> command to the drive for querying etc. All these would have to be 
+> initiated and go through ceph (if supported) and not bypassing it.
 
-Yay!  Does zbc it describe the region/size of the drive that is random 
-access too?
+Ah.  I think these kind of management functions should be performed while 
+the ceph-osd daemon for that drive is offline.  We would probably want 
+some hardware management layer that coexists with ceph or that perhaps has 
+some minimal integration with the ceph osds to do this sort of thing.  
+It's not something that a client (user) would initiate, though.
+ 
+> I asked a related question in another post too: Can a physical disk 
+> (/dev/sda1) assigned to a ceph OSD object be continued to used by other 
+> apps in the system to issue I/O directly via (/dev/sda1) interface? Does 
+> ceph prevent it, as such operations may corrupt data?
 
-> A detailed version of libzbc tests can be viewed here: 
-> http://tracker.ceph.com/projects/ceph/wiki/BlueStore_SMR_Support_GSOC_2016_
-> Progress_Report
+It depends on what privileges the other app has.  If it's root or user 
+ceph, it can step all over the disk (and the rest of the system) and wreak 
+havoc.  With the current backend, we are storing data as files, so you 
+could have other apps using other directories on the file system--this is 
+generally a bad idea for real deployments, though, as performance and disk 
+utilization will be unpredictable.
 
-What are the failed tests 010 and 011 about?
-
-> I can successfully query zones, the current write pointer, zone size, 
-> offset and so on.  In terms of next steps, I am running into some 
-> permission issues with Ceph setup,  and I am working on resolving them.
-
-Ping any of us in #ceph-devel with any questions.
-
-> I am also following a commit by Ramesh (Sandisk) for bitmap allocator.  
-> Once the setup is done, I think I will first run the Bluestore stupid 
-> allocator and do some performance benchmarks. Then I can explore how we 
-> can make things better. Please let me know if this approach sounds good.
-
-Yep, that sounds good!
 sage
---8323329-1064200188-1463056189=:23446--
