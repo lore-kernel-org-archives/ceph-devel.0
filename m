@@ -1,116 +1,104 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: The fundamental evil of "magic" in computing systems -> Was:
- mon daemon makes authentication side effects on startup
-Date: Thu, 12 May 2016 09:06:33 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605120905220.23446@cpach.fuggernut.com>
-References: <5703A7FF.2090002@suse.com> <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com> <5704C76C.2050408@suse.com> <alpine.DEB.2.11.1604070820560.19675@cpach.fuggernut.com> <570666AB.8090408@suse.com> <alpine.DEB.2.11.1604070959160.19675@cpach.fuggernut.com>
- <57067F56.2000705@suse.com> <alpine.DEB.2.11.1604071143000.19675@cpach.fuggernut.com> <57081B3A.20601@suse.com> <570BAC52.4070404@suse.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Issuing custom IOCTLs to SCSI LLD
+Date: Thu, 12 May 2016 14:21:03 +0100
+Message-ID: <CALe9h7fbdA5zPyva4CUSv0Mp+oG8AvCyd4bQeB2Nf4mnEfZ_jA@mail.gmail.com>
+References: <loom.20160509T111456-471@post.gmane.org> <loom.20160511T061343-334@post.gmane.org>
+ <alpine.DEB.2.11.1605110839390.15518@cpach.fuggernut.com> <loom.20160512T112356-917@post.gmane.org>
+ <alpine.DEB.2.11.1605120832420.23446@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-955801097-1463058396=:23446"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42047 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751929AbcELNGV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 12 May 2016 09:06:21 -0400
-In-Reply-To: <570BAC52.4070404@suse.com>
+Received: from mail-oi0-f45.google.com ([209.85.218.45]:36400 "EHLO
+	mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752691AbcELNV3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 May 2016 09:21:29 -0400
+Received: by mail-oi0-f45.google.com with SMTP id x201so118963493oif.3
+        for <ceph-devel@vger.kernel.org>; Thu, 12 May 2016 06:21:29 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1605120832420.23446@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Owen Synge <osynge@suse.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ldachary@redhat.com
+To: Sage Weil <sage@newdream.net>
+Cc: Naveen <Naveen.Chandrasekaran@radisys.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Thu, May 12, 2016 at 1:37 PM, Sage Weil <sage@newdream.net> wrote:
+> On Thu, 12 May 2016, Naveen wrote:
+>> Sage Weil <sage <at> newdream.net> writes:
+>>
+>>
+>> > > > My question is:
+>> > > > The SCSI LLD would support both read /write entry points for I/O
+>> > > > requests issued by the filesystem/block I/O but they also support
+>> some
+>> > > > custom requests using IOCTLs. So how can ceph support issuing of
+>> such
+>> > > > IOCTL requests to the device if user issues such request. Say for
+>> > > > example power cycling the drive etc. It can also be a passthro
+>> request
+>> > > > down to the device.
+>> >
+>> > Can you give an example of such an operation?
+>> >
+>> > In general, any operation is generalized at the librados level.
+>> > For example, in order to get write same and cmpxchg block operations,
+>> we
+>> > added librados operations with similar semantics and implement them
+>> there.
+>> > It is unlikely that passing a complex operation down to the SCSI layer
+>> > will work in unison with the other steps involved in committing
+>> > an operation (e.g., updating metadata indicating the object
+>> > version has changed).
+>> >
+>> > sage
+>> >
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in
+>> > the body of a message to majordomo <at> vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >
+>> >
+>>
+>> Thanks for the response Sage. Example IOCTL operations would be like
+>> downloading a new FW to the drive/HBA, task management requests like
+>> Hard reset, power cycling the drive, issue a SAS/SMP/STP pass thro
+>> command to the drive for querying etc. All these would have to be
+>> initiated and go through ceph (if supported) and not bypassing it.
+>
+> Ah.  I think these kind of management functions should be performed while
+> the ceph-osd daemon for that drive is offline.  We would probably want
+> some hardware management layer that coexists with ceph or that perhaps has
+> some minimal integration with the ceph osds to do this sort of thing.
+> It's not something that a client (user) would initiate, though.
 
---8323329-955801097-1463058396=:23446
-Content-Type: TEXT/PLAIN; charset=windows-1252
-Content-Transfer-Encoding: 8BIT
+This is all pretty relevant to Joe Handzik's stuff:
+https://github.com/joehandzik/ceph/commits/wip-hw-mgmt-cli
+http://www.spinics.net/lists/ceph-devel/msg30126.html
 
-On Mon, 11 Apr 2016, Owen Synge wrote:
-> On 04/08/2016 10:57 PM, Owen Synge wrote:
-> > On 04/07/2016 05:43 PM, Sage Weil wrote:
-> >> On Thu, 7 Apr 2016, Owen Synge wrote:
-> >>> On 04/07/2016 04:03 PM, Sage Weil wrote:
-> >>>> On Thu, 7 Apr 2016, Owen Synge wrote:
-> >>>>> Hi Sage,
-> >>>>>
-> >>>>> On 04/07/2016 02:26 PM, Sage Weil wrote:
-> >>>>>> Hi Owen,
-> >>>>>>
-> >>>>>> I never really liked ceph-create-keys either, but it simplified the 
-> >>>>>> deployment process.  
-> >>>>>
-> >>>>> I would propose we do this in two stages.
-> >>>>>
-> >>>>> (A) Remove calling the command from the init scripts as a side effect of
-> >>>>> starting the mon.
-> >>>>>
-> >>>>> This allows us to get most of the issues solved.
-> >>>>>
-> >>>>> (B) Remove the command.
-> >>>>>
-> >>>>> This is the long term goal, which is not as urgent in my opinion but
-> >>>>> others may disagree.
-> >>>>
-> >>>> Works for me.  We just need to change ceph-deploy and get the other 
-> >>>> install/deploy tool folks on board before A.
-> >>>
-> >>> Are you intending to get this into Jewel?
-> >>>
-> >>> I had assumed this would only be done on master, and only come into the
-> >>> next release.
-> >>
-> >> Yeah, too late for jewel.
-> >>
-> >>> As a change to master I felt that we could just do (A) as soon as
-> >>> ceph-deploy works without the mon boot up scripts calling
-> >>> ceph-create-keys, ideally without having  ceph-create-keys in
-> >>> ceph-deploy's process.
-> >>>
-> >>> We can then file bugs as needed against other install processes that
-> >>> depend on ceph-create-keys, and they can test against master.
-> >>
-> >> That works for me.
-> >>
-> >> sage
-> > 
-> > Great,
-> > 
-> > I have a fix, that is tested and working for ceph-deploy without
-> > depending upon ceph-create-keys based upon a rewrite of the method
-> > 
-> >   ceph-deploy gatherkeys mon-node-01 mon-node-02 mon-node-03
-> > 
-> > Works nicely for the old and new methods, and seems to have little
-> > impact apart from no new keys are wrote to disk on the mon nodes. OSD's
-> > and rgw can be deployed without change, (I haven’t tested mds)
-> > 
-> > Previous behavior with the admin keys being deployed can be achieved
-> > simply by executing:
-> > 
-> >   ceph-deploy admin mon-node-01 mon-node-02 mon-node-03
-> > 
-> > If we definitely what to enforce the admin code being persisted on all
-> > mon nodes can be changed later, but I think its cleaner if we do not.
-> > 
-> > I will submit a PR on Monday.
-> 
-> ceph-deploy bug raised:
-> 
-> http://tracker.ceph.com/issues/15451
-> 
-> PR submitted:
-> 
-> https://github.com/ceph/ceph-deploy/pull/393
+The idea there though is to enable passing libstoragemgmt calls
+through the OSD, as opposed to arbitrary SCSI operations.
 
-Hey Owen-
+Although libstoragemgmt is fairly young, I'm a fan of the idea that we
+could use it internally within Ceph, and then have the same tools/libs
+used by out-of-ceph management platforms when they want to do
+equivalent stuff while the OSD is offline.
 
-Now that jewel is out, now would be a good time to make this change.  The 
-ceph-deploy pr looks basically ready to go, minus a doc piece and a run 
-through the ceph-deploy suite.  Yuri can probably handle the 
-latter.
+John
 
-Then we can do the ceph.git changes to kill the ceph-create-keys task...
 
-sage
-
---8323329-955801097-1463058396=:23446--
+>> I asked a related question in another post too: Can a physical disk
+>> (/dev/sda1) assigned to a ceph OSD object be continued to used by other
+>> apps in the system to issue I/O directly via (/dev/sda1) interface? Does
+>> ceph prevent it, as such operations may corrupt data?
+>
+> It depends on what privileges the other app has.  If it's root or user
+> ceph, it can step all over the disk (and the rest of the system) and wreak
+> havoc.  With the current backend, we are storing data as files, so you
+> could have other apps using other directories on the file system--this is
+> generally a bad idea for real deployments, though, as performance and disk
+> utilization will be unpredictable.
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
