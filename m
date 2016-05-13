@@ -1,122 +1,91 @@
-From: Shehbaz Jaffer <shehbazjaffer007@gmail.com>
-Subject: Re: [GSOC] Bluestore SMR Support
-Date: Fri, 13 May 2016 00:07:25 -0400
-Message-ID: <CAPLK-i_uUjhZkN0PasY+f7ufG8_amxeuE-dtqdyAKQtP8ueQGg@mail.gmail.com>
-References: <CAPLK-i_BhD9fDFPucg9N6RW8F7N-sfmz81fa_YzOf3Hi+TWkXg@mail.gmail.com>
-	<alpine.DEB.2.11.1604240848580.8831@cpach.fuggernut.com>
-	<CAPLK-i83V8EsaotfM3CVWfyFJYMQvFaD0B3ofLBN=4TVFDr4+Q@mail.gmail.com>
-	<alpine.DEB.2.11.1604251321280.25990@cpach.fuggernut.com>
-	<CAPLK-i8AoAWNDbGrBVewFR=dQqB3Z=y_9Cab5F4jDoF3NJ-rwQ@mail.gmail.com>
-	<BN3PR02MB12063D84EB4598ABBCB55FE8E8620@BN3PR02MB1206.namprd02.prod.outlook.com>
-	<CAPLK-i8TBKTZitbWLvMAwyVLVpCj12GL41ZB_eoMvHKitd3QGg@mail.gmail.com>
-	<alpine.DEB.2.11.1605101105170.15518@cpach.fuggernut.com>
-	<CAPLK-i_N7yseOVndAdCELTzTTrpBQ05aXb4SRKX_P2Lgng2yuQ@mail.gmail.com>
-	<alpine.DEB.2.11.1605110844530.15518@cpach.fuggernut.com>
-	<CAPLK-i_gqbieDJ2ESUgi_t9hU-hwts2dfnCJhYg9Ug_uyepNEw@mail.gmail.com>
-	<alpine.DEB.2.11.1605120825260.23446@cpach.fuggernut.com>
+From: Jiankun Yu <yujiankun@gmail.com>
+Subject: Fwd: FW: "1 hosts down" health warning?
+Date: Fri, 13 May 2016 18:09:41 +0800
+Message-ID: <CAOFQTQLHMuCZCMnbY=O8GXdE9_SaHfRgm1X6Y1XEkHFmVYfp=g@mail.gmail.com>
+References: <alpine.DEB.2.11.1605091232040.1841@cpach.fuggernut.com>
+	<184215728.1353.1462860350329@ox.pcextreme.nl>
+	<alpine.DEB.2.11.1605100809380.15518@cpach.fuggernut.com>
+	<CAE7zfpNCuz1z2SpUfTLuyYZOXRtuDpcYkGtdh8NcH+eM7mbh8g@mail.gmail.com>
+	<0F5BA49776CB7C4E95E7E581BEF5C2FC93CD00@PHX-EXRDA-S22.corp.ebay.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:36428 "EHLO
-	mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752042AbcEMEH0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 May 2016 00:07:26 -0400
-Received: by mail-yw0-f170.google.com with SMTP id o66so104312111ywc.3
-        for <ceph-devel@vger.kernel.org>; Thu, 12 May 2016 21:07:25 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1605120825260.23446@cpach.fuggernut.com>
+Received: from mail-ig0-f181.google.com ([209.85.213.181]:35797 "EHLO
+	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751743AbcEMKJn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 May 2016 06:09:43 -0400
+Received: by mail-ig0-f181.google.com with SMTP id bi2so9038183igb.0
+        for <ceph-devel@vger.kernel.org>; Fri, 13 May 2016 03:09:42 -0700 (PDT)
+In-Reply-To: <0F5BA49776CB7C4E95E7E581BEF5C2FC93CD00@PHX-EXRDA-S22.corp.ebay.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Allen Samuels <allen.samuels@sandisk.com>, ceph-devel@vger.kernel.org
+To: sweil@redhat.com, wido@42on.com
+Cc: ceph-devel@vger.kernel.org
 
-Hi Sage,
+Hi:
 
-> Does zbc it describe the region/size of the drive that is random access too?
-
-Yes, Here is a summary of the drive:
-
-Size of Disk : 8 TB
-Total number of Zones : 29,809.  each zone size = 256 MB
-Conventional zones : 16 GB (64 zones, located at the very start LBA of
-the disk). We can do random writes on these zones.
-Write-preferred zones : rest of the disk
-
-Optimal number of open sequential write preferred zones: 128 (we can
-do 128 multi-threaded writes here)
-Optimal number of non-sequentially written sequential write preferred
-zones: 8 (maximum non-sequential zones that could be written randomly
-to get optimal performance)
-
-> What are the failed tests 010 and 011 about?
-
-The tests correspond to reporting zones in SCSI device. There seems to
-be a problem with ASCQ (Additional Sense Code Qualifier) checks for
-the SCSI device. Since the drive is ATA, it probably does not abide by
-SCSI interface. I am not 100 percent sure, so I have raised an issue
-with libzbc here:
-https://github.com/hgst/libzbc/issues/16
+I can take this task.
 
 
-On Thu, May 12, 2016 at 8:29 AM, Sage Weil <sweil@redhat.com> wrote:
->
-> On Thu, 12 May 2016, Shehbaz Jaffer wrote:
-> > Hi Sage,
+
+From: Sage Weil <sweil@redhat.com>
+Date: Tue, May 10, 2016 at 8:11 PM
+Subject: Re: "1 hosts down" health warning?
+To: Wido den Hollander <wido@42on.com>
+Cc: ceph-devel@vger.kernel.org
+
+
+On Tue, 10 May 2016, Wido den Hollander wrote:
+> > Op 9 mei 2016 om 18:36 schreef Sage Weil <sweil@redhat.com>:
 > >
-> > > Hmm, good question.  My assumption was that even a drive-managed drive
-> > > would expose the zone layout via libzbc, such that we can control IO
-> > > to avoid any remapping machinery in the drive.
 > >
-> > A drive managed SMR drive will not expose Zone information to Host,
-> > so libzbc would have failed to run ZBC/ZAC commands. However the drive
-> > that has been shipped is fortunately not drive managed, but host aware!
->
-> Ah, perfect!
->
-> > > Does libzbc recognize the drive?
+> > We have a feature (mon_osd_reporter_subtree_level = host) that makes it so
+> > that if an entire host is down (or whatever the configured hierarchy
+> > level is) the osds aren't automatically marked out after 5 minutes.
 > >
-> > Yes!
-> > I am able to detect zones and run libzbc tests on these drives.
-> > If we do random writes or do not abide by zone
-> > rules, the writes will be serialized internally which works to our
-> > advantage.
+> > This is confusing on an actual cluster because you see something like
 > >
-> > This is what one of the zbc_info command from libzbc gives me:
+> >             48/5661 in osds are down
 > >
-> > $ sudo zbc_info /dev/sg1
-> > Device /dev/sg1: ATA ST8000AS0022-1WL SN01
-> >     ATA ZAC interface, Host-aware disk model
-> >     15628053168 logical blocks of 512 B
-> >     1953506646 physical blocks of 4096 B
-> >     8001.563 GB capacity
+> > bit it never clears.  It's not until you look at the ceph osd tree output
+> > that you can see why they aren't getting marked out.
+> >
+> > It would be great if the health warning said something like
+> >
+> >             48/5661 in osds are down
+> >             1/142 hosts are down (accounting for 48/48 down osds)
+> >
+> > and the health detail said something like
+> >
+> >   host foo is down with 48 OSDs
+> >
+> > I think this would be pretty easy to implement given the mon is
+> > already doing the subtree-based checks.
+> >
+> > Thoughts? Any takers?
 >
-> Yay!  Does zbc it describe the region/size of the drive that is random
-> access too?
+> Seems like a good thing to have. I wouldn't say 'host', since
+> 'mon_osd_reporter_subtree_level' could be set to rack or row if you want
+> to.
 >
-> > A detailed version of libzbc tests can be viewed here:
-> > http://tracker.ceph.com/projects/ceph/wiki/BlueStore_SMR_Support_GSOC_2016_
-> > Progress_Report
+> Maybe:
 >
-> What are the failed tests 010 and 011 about?
->
-> > I can successfully query zones, the current write pointer, zone size,
-> > offset and so on.  In terms of next steps, I am running into some
-> > permission issues with Ceph setup,  and I am working on resolving them.
->
-> Ping any of us in #ceph-devel with any questions.
->
-> > I am also following a commit by Ramesh (Sandisk) for bitmap allocator.
-> > Once the setup is done, I think I will first run the Bluestore stupid
-> > allocator and do some performance benchmarks. Then I can explore how we
-> > can make things better. Please let me know if this approach sounds good.
->
-> Yep, that sounds good!
-> sage
+>             480/6720 in osds are down
+>             1/14 of CRUSH type 'rack' are down (accounting for 480/480 down osds)
+
+Yeah.  I was thinking it'd be
+
+             1/14 ${type}s are down (accounting for 480/480 down osds)
+
+e.g.,
+
+             1/14 racks are down (accounting for 480/480 down osds)
+
+just because concise is usually better.
 
 
-
-
--- 
-Shehbaz Jaffer
-First Year Graduate Student
-Sir Edward S Rogers Sr Department of Electrical and Computer Engineering
-University of Toronto
+sage
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
