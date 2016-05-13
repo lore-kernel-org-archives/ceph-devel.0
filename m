@@ -1,105 +1,42 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: ceph osd on shared storage
-Date: Fri, 13 May 2016 18:55:11 +0000
-Message-ID: <BL2PR02MB21159E31CDC571C3165E8E43F4740@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <CY1PR02MB21239C991F3F277CC542DA47F4740@CY1PR02MB2123.namprd02.prod.outlook.com>
-	<47dc190c.9Ro.9Gf.dg.1onb2kibe1@mailjet.com>
-	<BL2PR02MB2115CF808611949471806B80F4740@BL2PR02MB2115.namprd02.prod.outlook.com>
- <CAJ4mKGbcyzAra8T9+YFxFwjJM94WZUCsj_5bC2A4YSXi1xfJ2g@mail.gmail.com>
+Subject: Master build is failing
+Date: Fri, 13 May 2016 23:31:21 +0000
+Message-ID: <BL2PR02MB2115B805EEA98B7D98B81913F4740@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0091.outbound.protection.outlook.com ([207.46.100.91]:47687
+Received: from mail-by2on0062.outbound.protection.outlook.com ([207.46.100.62]:30992
 	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753060AbcEMSzU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 13 May 2016 14:55:20 -0400
-In-Reply-To: <CAJ4mKGbcyzAra8T9+YFxFwjJM94WZUCsj_5bC2A4YSXi1xfJ2g@mail.gmail.com>
+	id S1753601AbcEMXbZ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 May 2016 19:31:25 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: "nick@fisk.me.uk" <nick@fisk.me.uk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIEdyZWcgIQ0KVGhlIENSVVNIIG1hcCBwb2ludCBJIGNvbXBsZXRlbHkgZm9yZ290ICwg
-ZmFpbHVyZSBkb21haW4gb24gT1NEIHdpbGwgbm90IGJlIGFjY2VwdGFibGUgOi0oDQoNClJlZ2Fy
-ZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEdyZWdvcnkg
-RmFybnVtIFttYWlsdG86Z2Zhcm51bUByZWRoYXQuY29tXSANClNlbnQ6IEZyaWRheSwgTWF5IDEz
-LCAyMDE2IDExOjM0IEFNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBuaWNrQGZpc2subWUudWs7IGNl
-cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogY2VwaCBvc2Qgb24gc2hhcmVk
-IHN0b3JhZ2UNCg0KT24gRnJpLCBNYXkgMTMsIDIwMTYgYXQgNzoyMyBBTSwgU29tbmF0aCBSb3kg
-PFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4gWWVhaCBwcm9iYWJseS4uDQo+IFRo
-ZSB3aG9sZSByZWFzb24gSSBhbSBmb3JjZWQgdG8gdGhpbmsgdGhpcyB3YXkgYmVjYXVzZSBwZW9w
-bGUgKG5vdCANCj4gZmFtaWxpYXIgd2l0aCBjZXBoKSBhcmUgYXNraW5nIGlmIHlvdSBoYXZlIGZ1
-bGx5IHNoYXJlZCBzdG9yYWdlIHdoeSBhIA0KPiBub2RlIGZhaWx1cmUgd2lsbCB0cmlnZ2VyIHJl
-Y292ZXJ5IHNpbmNlIHN0b3JhZ2UgaXMgZmluZSwgd2hpY2ggSSANCj4gYmVsaWV2ZSBpcyBtYWtl
-IHNlbnNlLi4gOi0pDQoNClRoaXMgZG9lcyBtYWtlIHNvbWUgc2Vuc2UsIGJ1dCBDZXBoIGlzIHJl
-YWxseSBkZXNpZ25lZCBmb3Igc2hhcmVkLW5vdGhpbmcgaGFyZHdhcmUuIFNvIGFueWJvZHkgc2Vs
-bGluZyBhIHNoYXJlZC1kaXNrIHN5c3RlbSB3aXRoIENlcGggcHJvYmFibHkgd2FudHMgdG8gaW1w
-bGVtZW50IHRoaXMgc3R1ZmYsIGJ1dCBub25lIG9mIHRoZSB1cHN0cmVhbSBtYW5hZ2VtZW50IGlz
-IGRlc2lnbmVkIHRvIGJlIGZyaWVuZGx5IGZvciBpdCAoZXhjZXB0IGZvciB0aGUgcG9ydGFiaWxp
-dHkgb2YgT1NEcyEpLg0KDQpJIGltYWdpbmUgeW91J2QgZGVzaWduYXRlIENSVVNIIG1hcHMgaW4g
-dGVybXMgb2YgYmFja2luZyBkcml2ZXMgaW5zdGVhZCBvZiBPU0QgaG9zdHMsIHNvIHRoYXQgbW92
-aW5nIHRoZSBkcml2ZXMgZG9lc24ndCBjaGFuZ2UgdGhlIG1hcHBpbmdzIGF0IGFsbC4gQW5kIHRo
-ZW4gZG8gYXMgc3VnZ2VzdGVkIHdpdGggdGhlIHByb2Nlc3MgbWFuYWdlbWVudC4NCi1HcmVnDQoN
-Cj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTmljayBGaXNrIFttYWls
-dG86bmlja0BmaXNrLm1lLnVrXQ0KPiBTZW50OiBGcmlkYXksIE1heSAxMywgMjAxNiAxOjQzIEFN
-DQo+IFRvOiBTb21uYXRoIFJveTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVj
-dDogUkU6IGNlcGggb3NkIG9uIHNoYXJlZCBzdG9yYWdlDQo+DQo+DQo+DQo+PiAtLS0tLU9yaWdp
-bmFsIE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5v
-cmcgW21haWx0bzpjZXBoLWRldmVsLSANCj4+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVo
-YWxmIE9mIFNvbW5hdGggUm95DQo+PiBTZW50OiAxMyBNYXkgMjAxNiAwMzozNg0KPj4gVG86IGNl
-cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+PiBTdWJqZWN0OiBjZXBoIG9zZCBvbiBzaGFyZWQg
-c3RvcmFnZQ0KPj4NCj4+IEhpLA0KPj4gSSBoYXZlIGEgc3RvcmFnZSBhcnJheSB0aGF0IGlzIHNo
-YXJlZCBiZXR3ZWVuIHNheSA0IGhvc3RzLiBFYWNoIGhvc3QgDQo+PiBjYW4gc2VlIGFsbCB0aGUg
-ZHJpdmVzIGFuZCB0aGF0J3Mgd2h5IHRyeWluZyB0byBtb3VudCBPU0RzIGNvbmZpZ3VyZWQgdG8g
-dGhlIGRyaXZlcy4NCj4+IEVuZCByZXN1bHQgaXMgbm90IGdvb2QuDQo+PiBJIHdhbnQgYSBzcGVj
-aWZpYyBPU0QgdG8gY29tZSB1cCBvbiBhIHNwZWNpZmljIGhvc3QgZXZlbiBpZiBhIGhvc3QgaXMg
-DQo+PiBzZWVpbmcgYWxsIHRoZSBkcml2ZXMgb24gYSBjaGFzc2lzLiBJcyB0aGVyZSBhbnkgd2F5
-IGluIHRoZSBjZXBoIA0KPj4gZGVwbG95bWVudCBzY3JpcHQgc28gdGhhdCBJIGNhbiBhZGRyZXNz
-IHRoaXMgPw0KPj4gVGhpcyB3aWxsIGJlIHZlcnkgaGVscGZ1bCBpbiBjYXNlIG9mIHNoYXJlZCBz
-dG9yYWdlIG1vZGVsIGluIHRoZSBmb2xsb3dpbmcgd2F5Lg0KPj4NCj4+IDEuIFRvZGF5IGlmIHdl
-IGRvIGEgem9uZSAoSFcgb3IgU1cpIGFuZCBhdHRhY2ggc29tZSBzZXQgb2YgT1NEcyB0byBhIA0K
-Pj4gcGFydGljdWxhciBob3N0ICwgdGhhdCBob3N0IGRvd24gT1NEcyB3aWxsIGJlIGluYWNjZXNz
-aWJsZSBhbmQgDQo+PiByZWNvdmVyeSB3aWxsIGtpY2sgb2ZmIGV2ZW4gaWYgc3RvcmFnZSBpcyBq
-dXN0IGZpbmUuDQo+Pg0KPj4gMi4gQnV0LCBpbiB0aGUgc2hhcmVkIG1vZGVsIHdlIGNhbiBoYXZl
-IGFuIGV4dGVybmFsIGFnZW50IHRoYXQgY2FuIA0KPj4gZGV0ZWN0IGhvc3QgZmFpbHVyZSBhbmQg
-Y2FuIG1ha2UgdGhlIHNhbWUgT1NEIHBvcCB1cCBvbiB0aGUgb3RoZXIgYXZhaWxhYmxlIGhvc3Qu
-DQo+Pg0KPj4gMy4gT25jZSB0aGUgZmF1bHR5IGhvc3QgaXMgcmVwbGFjZWQsIHNhbWUgT1NEIGNh
-biBnbyBiYWNrIHRvIG9sZCBob3N0Lg0KPj4NCj4+IDQuIFRoaXMgd2lsbCBzYXZlIGEgbG90IG9m
-IHRpbWUgY2x1c3RlciB3aWxsIGJlIHNwZW5kaW5nIG9uIHJlY292ZXJ5IG90aGVyd2lzZS4NCj4+
-DQo+PiBJIGtub3cgdGhlcmUgYXJlIHNvbWUgZGV2IGVmZm9ydCByZXF1aXJlZCAsIGJ1dCwgaXMg
-dGhpcyBzb3VuZCBzYW5lIA0KPj4gYW5kIHdvcnRoIGFuIGVmZm9ydCA/DQo+PiBBbnkgZmVlZGJh
-Y2sgaXMgbXVjaCBhcHByZWNpYXRlZC4NCj4NCj4gVG8gbWUgaXQgc291bmRzIGxpa2UgeW91IHdv
-dWxkIHN0b3AgdXNpbmcgdWRldiB0byBhdXRvIG1vdW50IHRoZSBkaXNrcyBhbmQgcmVseSBvbiBz
-b21ldGhpbmcgbGlrZSBwYWNlbWFrZXIgdG8gbW91bnQgdGhlIEZTIGFuZCBzdGFydCB0aGUgT1NE
-J3MuIFdpdGhvdXQgcGFjZW1ha2VyIGNvbnRyb2xsaW5nIHRoZSBmZW5jaW5nLCB0aGVyZSBhcmUg
-cHJvYmFibHkgdG9vIG1hbnkgdGhpbmdzIHRoYXQgY2FuIGdvIHdyb25nLg0KPg0KPj4NCj4+IFRo
-YW5rcyAmIFJlZ2FyZHMNCj4+IFNvbW5hdGgNCj4+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRp
-b24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIA0KPj4gbWVzc2FnZSBpcyBpbnRl
-bmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSANCj4+
-IG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGlu
-dGVuZGVkIA0KPj4gcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBo
-YXZlIHJlY2VpdmVkIHRoaXMgDQo+PiBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZp
-ZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgDQo+PiBjb3B5aW5nIG9mIHRoaXMg
-bWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCANCj4+
-IHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5
-IHRlbGVwaG9uZSBvciANCj4+IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFu
-ZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiANCj4+IHRoaXMgbWVzc2FnZSBpbiB5b3Vy
-IHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVk
-IGNvcGllcykuDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
-dGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1l
-c3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGlu
-Zm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+DQo+IFBM
-RUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBt
-YWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRl
-ZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdl
-IGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0
-aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkg
-cmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBt
-ZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMg
-Y29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVw
-aG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBh
-bnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hl
-dGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
+Hi,
+The current master is failing with the following error.
+
+libkv.a(libkv_a-RocksDBStore.o): In function `RocksDBStore::_test_init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)':
+/root/ceph-master/src/kv/RocksDBStore.cc:323: undefined reference to `rocksdb::DB::Open(rocksdb::Options const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, rocksdb::DB**)'
+libkv.a(libkv_a-RocksDBStore.o): In function `RocksDBStore::check_omap_dir(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&)':
+/root/ceph-master/src/kv/RocksDBStore.cc:625: undefined reference to `rocksdb::DB::Open(rocksdb::Options const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, rocksdb::DB**)'
+libkv.a(libkv_a-RocksDBStore.o): In function `RocksDBStore::ParseOptionsFromString(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rocksdb::Options&)':
+/root/ceph-master/src/kv/RocksDBStore.cc:188: undefined reference to `rocksdb::GetOptionsFromString(rocksdb::Options const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, rocksdb::Options*)'
+/root/ceph-master/src/kv/RocksDBStore.cc:193: undefined reference to `rocksdb::Status::ToString[abi:cxx11]() const'
+libkv.a(libkv_a-RocksDBStore.o): In function `RocksDBStore::do_open(std::ostream&, bool)':
+/root/ceph-master/src/kv/RocksDBStore.cc:291: undefined reference to `rocksdb::DB::Open(rocksdb::Options const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, rocksdb::DB**)'
+/root/ceph-master/src/kv/RocksDBStore.cc:293: undefined reference to `rocksdb::Status::ToString[abi:cxx11]() const'
+libkv.a(libkv_a-RocksDBStore.o):(.data.rel.ro._ZTVN12RocksDBStore19MergeOperatorRouterE[_ZTVN12RocksDBStore19MergeOperatorRouterE]+0x20): undefined reference to `rocksdb::AssociativeMergeOperator::FullMerge(rocksdb::Slice const&, rocksdb::Slice const*, std::deque<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, rocksdb::Logger*) const'
+libkv.a(libkv_a-RocksDBStore.o):(.data.rel.ro._ZTVN12RocksDBStore19MergeOperatorRouterE[_ZTVN12RocksDBStore19MergeOperatorRouterE]+0x28): undefined reference to `rocksdb::AssociativeMergeOperator::PartialMerge(rocksdb::Slice const&, rocksdb::Slice const&, rocksdb::Slice const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, rocksdb::Logger*) const'
+libkv.a(libkv_a-RocksDBStore.o):(.data.rel.ro._ZTVN12RocksDBStore19MergeOperatorRouterE[_ZTVN12RocksDBStore19MergeOperatorRouterE]+0x30): undefined reference to `rocksdb::MergeOperator::PartialMergeMulti(rocksdb::Slice const&, std::deque<rocksdb::Slice, std::allocator<rocksdb::Slice> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, rocksdb::Logger*) const'
+collect2: error: ld returned 1 exit status
+Makefile:16425: recipe for target 'ceph_test_object_map' failed
+make[3]: *** [ceph_test_object_map] Error 1
+libos.a(libos_a-BlueRocksEnv.o):(.data.rel.ro._ZTV12BlueRocksEnv[_ZTV12BlueRocksEnv]+0x130): undefined reference to `rocksdb::Env::GenerateUniqueId[abi:cxx11]()'
+
+Thanks & Regards
+Somnath
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
