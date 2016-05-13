@@ -1,46 +1,84 @@
-From: Sage Weil <sage@redhat.com>
-Subject: v0.94.7 Hammer released
-Date: Fri, 13 May 2016 10:21:51 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605131020340.20416@cpach.fuggernut.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: ceph osd on shared storage
+Date: Fri, 13 May 2016 14:23:14 +0000
+Message-ID: <BL2PR02MB2115CF808611949471806B80F4740@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <CY1PR02MB21239C991F3F277CC542DA47F4740@CY1PR02MB2123.namprd02.prod.outlook.com>
+ <47dc190c.9Ro.9Gf.dg.1onb2kibe1@mailjet.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-474563023-1463149311=:20416"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40219 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752208AbcEMOVh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 May 2016 10:21:37 -0400
+Received: from mail-by2on0062.outbound.protection.outlook.com ([207.46.100.62]:31392
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753246AbcEMOXR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 13 May 2016 10:23:17 -0400
+In-Reply-To: <47dc190c.9Ro.9Gf.dg.1onb2kibe1@mailjet.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
+To: "nick@fisk.me.uk" <nick@fisk.me.uk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-474563023-1463149311=:20416
-Content-Type: TEXT/PLAIN; charset=ISO-8859-7
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-This Hammer point release fixes several minor bugs. It also includes a=20
-backport of an improved =A1ceph osd reweight-by-utilization=A2 command for=
-=20
-handling OSDs with higher-than-average utilizations.
-
-We recommend that all hammer v0.94.x users upgrade.
-
-For more detailed information, see the release announcement at
-
-=09http://ceph.com/releases/v0-94-7-hammer-released/
-
-or the complete changelog at
-
-=09http://docs.ceph.com/docs/master/_downloads/v0.94.6.txt
-
-Getting Ceph
-------------
-
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-0.94.7.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-dep=
-loy
---8323329-474563023-1463149311=:20416--
+WWVhaCBwcm9iYWJseS4uDQpUaGUgd2hvbGUgcmVhc29uIEkgYW0gZm9yY2VkIHRvIHRoaW5rIHRo
+aXMgd2F5IGJlY2F1c2UgcGVvcGxlIChub3QgZmFtaWxpYXIgd2l0aCBjZXBoKSBhcmUgYXNraW5n
+IGlmIHlvdSBoYXZlIGZ1bGx5IHNoYXJlZCBzdG9yYWdlIHdoeSBhIG5vZGUgZmFpbHVyZSB3aWxs
+IHRyaWdnZXIgcmVjb3Zlcnkgc2luY2Ugc3RvcmFnZSBpcyBmaW5lLCB3aGljaCBJIGJlbGlldmUg
+aXMgbWFrZSBzZW5zZS4uIDotKQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTog
+TmljayBGaXNrIFttYWlsdG86bmlja0BmaXNrLm1lLnVrXQ0KU2VudDogRnJpZGF5LCBNYXkgMTMs
+IDIwMTYgMTo0MyBBTQ0KVG86IFNvbW5hdGggUm95OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+Zw0KU3ViamVjdDogUkU6IGNlcGggb3NkIG9uIHNoYXJlZCBzdG9yYWdlDQoNCg0KDQo+IC0tLS0t
+T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
+ZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBC
+ZWhhbGYgT2YgU29tbmF0aCBSb3kNCj4gU2VudDogMTMgTWF5IDIwMTYgMDM6MzYNCj4gVG86IGNl
+cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IGNlcGggb3NkIG9uIHNoYXJlZCBz
+dG9yYWdlDQo+DQo+IEhpLA0KPiBJIGhhdmUgYSBzdG9yYWdlIGFycmF5IHRoYXQgaXMgc2hhcmVk
+IGJldHdlZW4gc2F5IDQgaG9zdHMuIEVhY2ggaG9zdA0KPiBjYW4gc2VlIGFsbCB0aGUgZHJpdmVz
+IGFuZCB0aGF0J3Mgd2h5IHRyeWluZyB0byBtb3VudCBPU0RzIGNvbmZpZ3VyZWQgdG8gdGhlIGRy
+aXZlcy4NCj4gRW5kIHJlc3VsdCBpcyBub3QgZ29vZC4NCj4gSSB3YW50IGEgc3BlY2lmaWMgT1NE
+IHRvIGNvbWUgdXAgb24gYSBzcGVjaWZpYyBob3N0IGV2ZW4gaWYgYSBob3N0IGlzDQo+IHNlZWlu
+ZyBhbGwgdGhlIGRyaXZlcyBvbiBhIGNoYXNzaXMuIElzIHRoZXJlIGFueSB3YXkgaW4gdGhlIGNl
+cGgNCj4gZGVwbG95bWVudCBzY3JpcHQgc28gdGhhdCBJIGNhbiBhZGRyZXNzIHRoaXMgPw0KPiBU
+aGlzIHdpbGwgYmUgdmVyeSBoZWxwZnVsIGluIGNhc2Ugb2Ygc2hhcmVkIHN0b3JhZ2UgbW9kZWwg
+aW4gdGhlIGZvbGxvd2luZyB3YXkuDQo+DQo+IDEuIFRvZGF5IGlmIHdlIGRvIGEgem9uZSAoSFcg
+b3IgU1cpIGFuZCBhdHRhY2ggc29tZSBzZXQgb2YgT1NEcyB0byBhDQo+IHBhcnRpY3VsYXIgaG9z
+dCAsIHRoYXQgaG9zdCBkb3duIE9TRHMgd2lsbCBiZSBpbmFjY2Vzc2libGUgYW5kDQo+IHJlY292
+ZXJ5IHdpbGwga2ljayBvZmYgZXZlbiBpZiBzdG9yYWdlIGlzIGp1c3QgZmluZS4NCj4NCj4gMi4g
+QnV0LCBpbiB0aGUgc2hhcmVkIG1vZGVsIHdlIGNhbiBoYXZlIGFuIGV4dGVybmFsIGFnZW50IHRo
+YXQgY2FuDQo+IGRldGVjdCBob3N0IGZhaWx1cmUgYW5kIGNhbiBtYWtlIHRoZSBzYW1lIE9TRCBw
+b3AgdXAgb24gdGhlIG90aGVyIGF2YWlsYWJsZSBob3N0Lg0KPg0KPiAzLiBPbmNlIHRoZSBmYXVs
+dHkgaG9zdCBpcyByZXBsYWNlZCwgc2FtZSBPU0QgY2FuIGdvIGJhY2sgdG8gb2xkIGhvc3QuDQo+
+DQo+IDQuIFRoaXMgd2lsbCBzYXZlIGEgbG90IG9mIHRpbWUgY2x1c3RlciB3aWxsIGJlIHNwZW5k
+aW5nIG9uIHJlY292ZXJ5IG90aGVyd2lzZS4NCj4NCj4gSSBrbm93IHRoZXJlIGFyZSBzb21lIGRl
+diBlZmZvcnQgcmVxdWlyZWQgLCBidXQsIGlzIHRoaXMgc291bmQgc2FuZQ0KPiBhbmQgd29ydGgg
+YW4gZWZmb3J0ID8NCj4gQW55IGZlZWRiYWNrIGlzIG11Y2ggYXBwcmVjaWF0ZWQuDQoNClRvIG1l
+IGl0IHNvdW5kcyBsaWtlIHlvdSB3b3VsZCBzdG9wIHVzaW5nIHVkZXYgdG8gYXV0byBtb3VudCB0
+aGUgZGlza3MgYW5kIHJlbHkgb24gc29tZXRoaW5nIGxpa2UgcGFjZW1ha2VyIHRvIG1vdW50IHRo
+ZSBGUyBhbmQgc3RhcnQgdGhlIE9TRCdzLiBXaXRob3V0IHBhY2VtYWtlciBjb250cm9sbGluZyB0
+aGUgZmVuY2luZywgdGhlcmUgYXJlIHByb2JhYmx5IHRvbyBtYW55IHRoaW5ncyB0aGF0IGNhbiBn
+byB3cm9uZy4NCg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4gUExFQVNFIE5P
+VEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVz
+c2FnZQ0KPiBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJl
+Y2lwaWVudChzKSBuYW1lZA0KPiBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2Ug
+aXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsDQo+IHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVk
+IHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yDQo+IGFuZCB0aGF0
+IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0
+aGlzDQo+IG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2
+ZWQgdGhpcw0KPiBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5k
+ZXIgYnkgdGVsZXBob25lIG9yDQo+IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5
+IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZg0KPiB0aGlzIG1lc3NhZ2UgaW4geW91
+ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3Jl
+ZCBjb3BpZXMpLg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0
+aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNz
+YWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4gaW5mbyBh
+dCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KUExFQVNFIE5P
+VEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVz
+c2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lw
+aWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90
+IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91
+IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcs
+IGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2Ug
+aXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5p
+Y2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9y
+IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQg
+YWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhh
+cmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0K
