@@ -1,98 +1,105 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: ceph osd on shared storage
-Date: Fri, 13 May 2016 11:34:28 -0700
-Message-ID: <CAJ4mKGbcyzAra8T9+YFxFwjJM94WZUCsj_5bC2A4YSXi1xfJ2g@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: ceph osd on shared storage
+Date: Fri, 13 May 2016 18:55:11 +0000
+Message-ID: <BL2PR02MB21159E31CDC571C3165E8E43F4740@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <CY1PR02MB21239C991F3F277CC542DA47F4740@CY1PR02MB2123.namprd02.prod.outlook.com>
 	<47dc190c.9Ro.9Gf.dg.1onb2kibe1@mailjet.com>
 	<BL2PR02MB2115CF808611949471806B80F4740@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <CAJ4mKGbcyzAra8T9+YFxFwjJM94WZUCsj_5bC2A4YSXi1xfJ2g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f42.google.com ([209.85.213.42]:32779 "EHLO
-	mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752559AbcEMSe3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 May 2016 14:34:29 -0400
-Received: by mail-vk0-f42.google.com with SMTP id o133so147802279vka.0
-        for <ceph-devel@vger.kernel.org>; Fri, 13 May 2016 11:34:29 -0700 (PDT)
-In-Reply-To: <BL2PR02MB2115CF808611949471806B80F4740@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from mail-by2on0091.outbound.protection.outlook.com ([207.46.100.91]:47687
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753060AbcEMSzU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 13 May 2016 14:55:20 -0400
+In-Reply-To: <CAJ4mKGbcyzAra8T9+YFxFwjJM94WZUCsj_5bC2A4YSXi1xfJ2g@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Gregory Farnum <gfarnum@redhat.com>
 Cc: "nick@fisk.me.uk" <nick@fisk.me.uk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, May 13, 2016 at 7:23 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Yeah probably..
-> The whole reason I am forced to think this way because people (not familiar with ceph) are asking if you have fully shared storage why a node failure will trigger recovery since storage is fine, which I believe is make sense.. :-)
-
-This does make some sense, but Ceph is really designed for
-shared-nothing hardware. So anybody selling a shared-disk system with
-Ceph probably wants to implement this stuff, but none of the upstream
-management is designed to be friendly for it (except for the
-portability of OSDs!).
-
-I imagine you'd designate CRUSH maps in terms of backing drives
-instead of OSD hosts, so that moving the drives doesn't change the
-mappings at all. And then do as suggested with the process management.
--Greg
-
->
-> -----Original Message-----
-> From: Nick Fisk [mailto:nick@fisk.me.uk]
-> Sent: Friday, May 13, 2016 1:43 AM
-> To: Somnath Roy; ceph-devel@vger.kernel.org
-> Subject: RE: ceph osd on shared storage
->
->
->
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->> owner@vger.kernel.org] On Behalf Of Somnath Roy
->> Sent: 13 May 2016 03:36
->> To: ceph-devel@vger.kernel.org
->> Subject: ceph osd on shared storage
->>
->> Hi,
->> I have a storage array that is shared between say 4 hosts. Each host
->> can see all the drives and that's why trying to mount OSDs configured to the drives.
->> End result is not good.
->> I want a specific OSD to come up on a specific host even if a host is
->> seeing all the drives on a chassis. Is there any way in the ceph
->> deployment script so that I can address this ?
->> This will be very helpful in case of shared storage model in the following way.
->>
->> 1. Today if we do a zone (HW or SW) and attach some set of OSDs to a
->> particular host , that host down OSDs will be inaccessible and
->> recovery will kick off even if storage is just fine.
->>
->> 2. But, in the shared model we can have an external agent that can
->> detect host failure and can make the same OSD pop up on the other available host.
->>
->> 3. Once the faulty host is replaced, same OSD can go back to old host.
->>
->> 4. This will save a lot of time cluster will be spending on recovery otherwise.
->>
->> I know there are some dev effort required , but, is this sound sane
->> and worth an effort ?
->> Any feedback is much appreciated.
->
-> To me it sounds like you would stop using udev to auto mount the disks and rely on something like pacemaker to mount the FS and start the OSD's. Without pacemaker controlling the fencing, there are probably too many things that can go wrong.
->
->>
->> Thanks & Regards
->> Somnath
->> PLEASE NOTE: The information contained in this electronic mail message
->> is intended only for the use of the designated recipient(s) named
->> above. If the reader of this message is not the intended recipient,
->> you are hereby notified that you have received this message in error
->> and that any review, dissemination, distribution, or copying of this
->> message is strictly prohibited. If you have received this
->> communication in error, please notify the sender by telephone or
->> e-mail (as shown above) immediately and destroy any and all copies of
->> this message in your possession (whether hard copies or electronically stored copies).
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at http://vger.kernel.org/majordomo-info.html
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+VGhhbmtzIEdyZWcgIQ0KVGhlIENSVVNIIG1hcCBwb2ludCBJIGNvbXBsZXRlbHkgZm9yZ290ICwg
+ZmFpbHVyZSBkb21haW4gb24gT1NEIHdpbGwgbm90IGJlIGFjY2VwdGFibGUgOi0oDQoNClJlZ2Fy
+ZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEdyZWdvcnkg
+RmFybnVtIFttYWlsdG86Z2Zhcm51bUByZWRoYXQuY29tXSANClNlbnQ6IEZyaWRheSwgTWF5IDEz
+LCAyMDE2IDExOjM0IEFNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBuaWNrQGZpc2subWUudWs7IGNl
+cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogY2VwaCBvc2Qgb24gc2hhcmVk
+IHN0b3JhZ2UNCg0KT24gRnJpLCBNYXkgMTMsIDIwMTYgYXQgNzoyMyBBTSwgU29tbmF0aCBSb3kg
+PFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4gWWVhaCBwcm9iYWJseS4uDQo+IFRo
+ZSB3aG9sZSByZWFzb24gSSBhbSBmb3JjZWQgdG8gdGhpbmsgdGhpcyB3YXkgYmVjYXVzZSBwZW9w
+bGUgKG5vdCANCj4gZmFtaWxpYXIgd2l0aCBjZXBoKSBhcmUgYXNraW5nIGlmIHlvdSBoYXZlIGZ1
+bGx5IHNoYXJlZCBzdG9yYWdlIHdoeSBhIA0KPiBub2RlIGZhaWx1cmUgd2lsbCB0cmlnZ2VyIHJl
+Y292ZXJ5IHNpbmNlIHN0b3JhZ2UgaXMgZmluZSwgd2hpY2ggSSANCj4gYmVsaWV2ZSBpcyBtYWtl
+IHNlbnNlLi4gOi0pDQoNClRoaXMgZG9lcyBtYWtlIHNvbWUgc2Vuc2UsIGJ1dCBDZXBoIGlzIHJl
+YWxseSBkZXNpZ25lZCBmb3Igc2hhcmVkLW5vdGhpbmcgaGFyZHdhcmUuIFNvIGFueWJvZHkgc2Vs
+bGluZyBhIHNoYXJlZC1kaXNrIHN5c3RlbSB3aXRoIENlcGggcHJvYmFibHkgd2FudHMgdG8gaW1w
+bGVtZW50IHRoaXMgc3R1ZmYsIGJ1dCBub25lIG9mIHRoZSB1cHN0cmVhbSBtYW5hZ2VtZW50IGlz
+IGRlc2lnbmVkIHRvIGJlIGZyaWVuZGx5IGZvciBpdCAoZXhjZXB0IGZvciB0aGUgcG9ydGFiaWxp
+dHkgb2YgT1NEcyEpLg0KDQpJIGltYWdpbmUgeW91J2QgZGVzaWduYXRlIENSVVNIIG1hcHMgaW4g
+dGVybXMgb2YgYmFja2luZyBkcml2ZXMgaW5zdGVhZCBvZiBPU0QgaG9zdHMsIHNvIHRoYXQgbW92
+aW5nIHRoZSBkcml2ZXMgZG9lc24ndCBjaGFuZ2UgdGhlIG1hcHBpbmdzIGF0IGFsbC4gQW5kIHRo
+ZW4gZG8gYXMgc3VnZ2VzdGVkIHdpdGggdGhlIHByb2Nlc3MgbWFuYWdlbWVudC4NCi1HcmVnDQoN
+Cj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTmljayBGaXNrIFttYWls
+dG86bmlja0BmaXNrLm1lLnVrXQ0KPiBTZW50OiBGcmlkYXksIE1heSAxMywgMjAxNiAxOjQzIEFN
+DQo+IFRvOiBTb21uYXRoIFJveTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVj
+dDogUkU6IGNlcGggb3NkIG9uIHNoYXJlZCBzdG9yYWdlDQo+DQo+DQo+DQo+PiAtLS0tLU9yaWdp
+bmFsIE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5v
+cmcgW21haWx0bzpjZXBoLWRldmVsLSANCj4+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVo
+YWxmIE9mIFNvbW5hdGggUm95DQo+PiBTZW50OiAxMyBNYXkgMjAxNiAwMzozNg0KPj4gVG86IGNl
+cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+PiBTdWJqZWN0OiBjZXBoIG9zZCBvbiBzaGFyZWQg
+c3RvcmFnZQ0KPj4NCj4+IEhpLA0KPj4gSSBoYXZlIGEgc3RvcmFnZSBhcnJheSB0aGF0IGlzIHNo
+YXJlZCBiZXR3ZWVuIHNheSA0IGhvc3RzLiBFYWNoIGhvc3QgDQo+PiBjYW4gc2VlIGFsbCB0aGUg
+ZHJpdmVzIGFuZCB0aGF0J3Mgd2h5IHRyeWluZyB0byBtb3VudCBPU0RzIGNvbmZpZ3VyZWQgdG8g
+dGhlIGRyaXZlcy4NCj4+IEVuZCByZXN1bHQgaXMgbm90IGdvb2QuDQo+PiBJIHdhbnQgYSBzcGVj
+aWZpYyBPU0QgdG8gY29tZSB1cCBvbiBhIHNwZWNpZmljIGhvc3QgZXZlbiBpZiBhIGhvc3QgaXMg
+DQo+PiBzZWVpbmcgYWxsIHRoZSBkcml2ZXMgb24gYSBjaGFzc2lzLiBJcyB0aGVyZSBhbnkgd2F5
+IGluIHRoZSBjZXBoIA0KPj4gZGVwbG95bWVudCBzY3JpcHQgc28gdGhhdCBJIGNhbiBhZGRyZXNz
+IHRoaXMgPw0KPj4gVGhpcyB3aWxsIGJlIHZlcnkgaGVscGZ1bCBpbiBjYXNlIG9mIHNoYXJlZCBz
+dG9yYWdlIG1vZGVsIGluIHRoZSBmb2xsb3dpbmcgd2F5Lg0KPj4NCj4+IDEuIFRvZGF5IGlmIHdl
+IGRvIGEgem9uZSAoSFcgb3IgU1cpIGFuZCBhdHRhY2ggc29tZSBzZXQgb2YgT1NEcyB0byBhIA0K
+Pj4gcGFydGljdWxhciBob3N0ICwgdGhhdCBob3N0IGRvd24gT1NEcyB3aWxsIGJlIGluYWNjZXNz
+aWJsZSBhbmQgDQo+PiByZWNvdmVyeSB3aWxsIGtpY2sgb2ZmIGV2ZW4gaWYgc3RvcmFnZSBpcyBq
+dXN0IGZpbmUuDQo+Pg0KPj4gMi4gQnV0LCBpbiB0aGUgc2hhcmVkIG1vZGVsIHdlIGNhbiBoYXZl
+IGFuIGV4dGVybmFsIGFnZW50IHRoYXQgY2FuIA0KPj4gZGV0ZWN0IGhvc3QgZmFpbHVyZSBhbmQg
+Y2FuIG1ha2UgdGhlIHNhbWUgT1NEIHBvcCB1cCBvbiB0aGUgb3RoZXIgYXZhaWxhYmxlIGhvc3Qu
+DQo+Pg0KPj4gMy4gT25jZSB0aGUgZmF1bHR5IGhvc3QgaXMgcmVwbGFjZWQsIHNhbWUgT1NEIGNh
+biBnbyBiYWNrIHRvIG9sZCBob3N0Lg0KPj4NCj4+IDQuIFRoaXMgd2lsbCBzYXZlIGEgbG90IG9m
+IHRpbWUgY2x1c3RlciB3aWxsIGJlIHNwZW5kaW5nIG9uIHJlY292ZXJ5IG90aGVyd2lzZS4NCj4+
+DQo+PiBJIGtub3cgdGhlcmUgYXJlIHNvbWUgZGV2IGVmZm9ydCByZXF1aXJlZCAsIGJ1dCwgaXMg
+dGhpcyBzb3VuZCBzYW5lIA0KPj4gYW5kIHdvcnRoIGFuIGVmZm9ydCA/DQo+PiBBbnkgZmVlZGJh
+Y2sgaXMgbXVjaCBhcHByZWNpYXRlZC4NCj4NCj4gVG8gbWUgaXQgc291bmRzIGxpa2UgeW91IHdv
+dWxkIHN0b3AgdXNpbmcgdWRldiB0byBhdXRvIG1vdW50IHRoZSBkaXNrcyBhbmQgcmVseSBvbiBz
+b21ldGhpbmcgbGlrZSBwYWNlbWFrZXIgdG8gbW91bnQgdGhlIEZTIGFuZCBzdGFydCB0aGUgT1NE
+J3MuIFdpdGhvdXQgcGFjZW1ha2VyIGNvbnRyb2xsaW5nIHRoZSBmZW5jaW5nLCB0aGVyZSBhcmUg
+cHJvYmFibHkgdG9vIG1hbnkgdGhpbmdzIHRoYXQgY2FuIGdvIHdyb25nLg0KPg0KPj4NCj4+IFRo
+YW5rcyAmIFJlZ2FyZHMNCj4+IFNvbW5hdGgNCj4+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRp
+b24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIA0KPj4gbWVzc2FnZSBpcyBpbnRl
+bmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSANCj4+
+IG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGlu
+dGVuZGVkIA0KPj4gcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBo
+YXZlIHJlY2VpdmVkIHRoaXMgDQo+PiBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZp
+ZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgDQo+PiBjb3B5aW5nIG9mIHRoaXMg
+bWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCANCj4+
+IHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5
+IHRlbGVwaG9uZSBvciANCj4+IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFu
+ZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiANCj4+IHRoaXMgbWVzc2FnZSBpbiB5b3Vy
+IHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVk
+IGNvcGllcykuDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
+dGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1l
+c3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGlu
+Zm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+DQo+IFBM
+RUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBt
+YWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRl
+ZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdl
+IGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0
+aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkg
+cmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBt
+ZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMg
+Y29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVw
+aG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBh
+bnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hl
+dGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
