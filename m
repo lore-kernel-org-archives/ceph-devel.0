@@ -1,84 +1,89 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: ceph osd on shared storage
-Date: Fri, 13 May 2016 14:23:14 +0000
-Message-ID: <BL2PR02MB2115CF808611949471806B80F4740@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <CY1PR02MB21239C991F3F277CC542DA47F4740@CY1PR02MB2123.namprd02.prod.outlook.com>
- <47dc190c.9Ro.9Gf.dg.1onb2kibe1@mailjet.com>
+From: Naveen <Naveen.Chandrasekaran@radisys.com>
+Subject: Re: Issuing custom IOCTLs to SCSI LLD
+Date: Fri, 13 May 2016 15:01:43 +0000 (UTC)
+Message-ID: <loom.20160513T165650-666@post.gmane.org>
+References: <loom.20160509T111456-471@post.gmane.org> <loom.20160511T061343-334@post.gmane.org> <alpine.DEB.2.11.1605110839390.15518@cpach.fuggernut.com> <loom.20160512T112356-917@post.gmane.org> <alpine.DEB.2.11.1605120832420.23446@cpach.fuggernut.com>,<CALe9h7fbdA5zPyva4CUSv0Mp+oG8AvCyd4bQeB2Nf4mnEfZ_jA@mail.gmail.com> <98A1E741-0CAC-49CB-9701-18932EA6381B@hpe.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0062.outbound.protection.outlook.com ([207.46.100.62]:31392
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753246AbcEMOXR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 13 May 2016 10:23:17 -0400
-In-Reply-To: <47dc190c.9Ro.9Gf.dg.1onb2kibe1@mailjet.com>
-Content-Language: en-US
+Received: from plane.gmane.org ([80.91.229.3]:46863 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752412AbcEMPCH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 13 May 2016 11:02:07 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1b1EbG-0000Qm-II
+	for ceph-devel@vger.kernel.org; Fri, 13 May 2016 17:01:59 +0200
+Received: from 51.136-broadband.acttv.in ([51.136-broadband.acttv.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 13 May 2016 17:01:58 +0200
+Received: from Naveen.Chandrasekaran by 51.136-broadband.acttv.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 13 May 2016 17:01:58 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "nick@fisk.me.uk" <nick@fisk.me.uk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-WWVhaCBwcm9iYWJseS4uDQpUaGUgd2hvbGUgcmVhc29uIEkgYW0gZm9yY2VkIHRvIHRoaW5rIHRo
-aXMgd2F5IGJlY2F1c2UgcGVvcGxlIChub3QgZmFtaWxpYXIgd2l0aCBjZXBoKSBhcmUgYXNraW5n
-IGlmIHlvdSBoYXZlIGZ1bGx5IHNoYXJlZCBzdG9yYWdlIHdoeSBhIG5vZGUgZmFpbHVyZSB3aWxs
-IHRyaWdnZXIgcmVjb3Zlcnkgc2luY2Ugc3RvcmFnZSBpcyBmaW5lLCB3aGljaCBJIGJlbGlldmUg
-aXMgbWFrZSBzZW5zZS4uIDotKQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTog
-TmljayBGaXNrIFttYWlsdG86bmlja0BmaXNrLm1lLnVrXQ0KU2VudDogRnJpZGF5LCBNYXkgMTMs
-IDIwMTYgMTo0MyBBTQ0KVG86IFNvbW5hdGggUm95OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
-Zw0KU3ViamVjdDogUkU6IGNlcGggb3NkIG9uIHNoYXJlZCBzdG9yYWdlDQoNCg0KDQo+IC0tLS0t
-T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
-ZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBC
-ZWhhbGYgT2YgU29tbmF0aCBSb3kNCj4gU2VudDogMTMgTWF5IDIwMTYgMDM6MzYNCj4gVG86IGNl
-cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IGNlcGggb3NkIG9uIHNoYXJlZCBz
-dG9yYWdlDQo+DQo+IEhpLA0KPiBJIGhhdmUgYSBzdG9yYWdlIGFycmF5IHRoYXQgaXMgc2hhcmVk
-IGJldHdlZW4gc2F5IDQgaG9zdHMuIEVhY2ggaG9zdA0KPiBjYW4gc2VlIGFsbCB0aGUgZHJpdmVz
-IGFuZCB0aGF0J3Mgd2h5IHRyeWluZyB0byBtb3VudCBPU0RzIGNvbmZpZ3VyZWQgdG8gdGhlIGRy
-aXZlcy4NCj4gRW5kIHJlc3VsdCBpcyBub3QgZ29vZC4NCj4gSSB3YW50IGEgc3BlY2lmaWMgT1NE
-IHRvIGNvbWUgdXAgb24gYSBzcGVjaWZpYyBob3N0IGV2ZW4gaWYgYSBob3N0IGlzDQo+IHNlZWlu
-ZyBhbGwgdGhlIGRyaXZlcyBvbiBhIGNoYXNzaXMuIElzIHRoZXJlIGFueSB3YXkgaW4gdGhlIGNl
-cGgNCj4gZGVwbG95bWVudCBzY3JpcHQgc28gdGhhdCBJIGNhbiBhZGRyZXNzIHRoaXMgPw0KPiBU
-aGlzIHdpbGwgYmUgdmVyeSBoZWxwZnVsIGluIGNhc2Ugb2Ygc2hhcmVkIHN0b3JhZ2UgbW9kZWwg
-aW4gdGhlIGZvbGxvd2luZyB3YXkuDQo+DQo+IDEuIFRvZGF5IGlmIHdlIGRvIGEgem9uZSAoSFcg
-b3IgU1cpIGFuZCBhdHRhY2ggc29tZSBzZXQgb2YgT1NEcyB0byBhDQo+IHBhcnRpY3VsYXIgaG9z
-dCAsIHRoYXQgaG9zdCBkb3duIE9TRHMgd2lsbCBiZSBpbmFjY2Vzc2libGUgYW5kDQo+IHJlY292
-ZXJ5IHdpbGwga2ljayBvZmYgZXZlbiBpZiBzdG9yYWdlIGlzIGp1c3QgZmluZS4NCj4NCj4gMi4g
-QnV0LCBpbiB0aGUgc2hhcmVkIG1vZGVsIHdlIGNhbiBoYXZlIGFuIGV4dGVybmFsIGFnZW50IHRo
-YXQgY2FuDQo+IGRldGVjdCBob3N0IGZhaWx1cmUgYW5kIGNhbiBtYWtlIHRoZSBzYW1lIE9TRCBw
-b3AgdXAgb24gdGhlIG90aGVyIGF2YWlsYWJsZSBob3N0Lg0KPg0KPiAzLiBPbmNlIHRoZSBmYXVs
-dHkgaG9zdCBpcyByZXBsYWNlZCwgc2FtZSBPU0QgY2FuIGdvIGJhY2sgdG8gb2xkIGhvc3QuDQo+
-DQo+IDQuIFRoaXMgd2lsbCBzYXZlIGEgbG90IG9mIHRpbWUgY2x1c3RlciB3aWxsIGJlIHNwZW5k
-aW5nIG9uIHJlY292ZXJ5IG90aGVyd2lzZS4NCj4NCj4gSSBrbm93IHRoZXJlIGFyZSBzb21lIGRl
-diBlZmZvcnQgcmVxdWlyZWQgLCBidXQsIGlzIHRoaXMgc291bmQgc2FuZQ0KPiBhbmQgd29ydGgg
-YW4gZWZmb3J0ID8NCj4gQW55IGZlZWRiYWNrIGlzIG11Y2ggYXBwcmVjaWF0ZWQuDQoNClRvIG1l
-IGl0IHNvdW5kcyBsaWtlIHlvdSB3b3VsZCBzdG9wIHVzaW5nIHVkZXYgdG8gYXV0byBtb3VudCB0
-aGUgZGlza3MgYW5kIHJlbHkgb24gc29tZXRoaW5nIGxpa2UgcGFjZW1ha2VyIHRvIG1vdW50IHRo
-ZSBGUyBhbmQgc3RhcnQgdGhlIE9TRCdzLiBXaXRob3V0IHBhY2VtYWtlciBjb250cm9sbGluZyB0
-aGUgZmVuY2luZywgdGhlcmUgYXJlIHByb2JhYmx5IHRvbyBtYW55IHRoaW5ncyB0aGF0IGNhbiBn
-byB3cm9uZy4NCg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4gUExFQVNFIE5P
-VEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVz
-c2FnZQ0KPiBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJl
-Y2lwaWVudChzKSBuYW1lZA0KPiBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2Ug
-aXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsDQo+IHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVk
-IHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yDQo+IGFuZCB0aGF0
-IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0
-aGlzDQo+IG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2
-ZWQgdGhpcw0KPiBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5k
-ZXIgYnkgdGVsZXBob25lIG9yDQo+IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5
-IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZg0KPiB0aGlzIG1lc3NhZ2UgaW4geW91
-ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3Jl
-ZCBjb3BpZXMpLg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0
-aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNz
-YWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4gaW5mbyBh
-dCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KUExFQVNFIE5P
-VEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVz
-c2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lw
-aWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90
-IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91
-IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcs
-IGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2Ug
-aXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5p
-Y2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9y
-IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQg
-YWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhh
-cmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0K
+Handzik, Joseph <joseph.t.handzik <at> hpe.com> writes:
+
+> 
+> I was intentionally staying quiet to hear other opinions, but I agree 
+that the same mechanisms I'm building
+> for LED operations could extend here (within Ceph of we want it to, 
+but at the very least in libstoragemgmt).
+> 
+> Naveen, if you have interest in helping push this along I'd encourage 
+you to voice your interest over on the
+> libstoragemgmt GitHub: https://github.com/libstorage/libstoragemgmt
+> 
+> Joe
+> 
+> > 
+> > This is all pretty relevant to Joe Handzik's stuff:
+> > https://github.com/joehandzik/ceph/commits/wip-hw-mgmt-cli
+> > http://www.spinics.net/lists/ceph-devel/msg30126.html
+> > 
+> > The idea there though is to enable passing libstoragemgmt calls
+> > through the OSD, as opposed to arbitrary SCSI operations.
+> > 
+> > Although libstoragemgmt is fairly young, I'm a fan of the idea that 
+we
+> > could use it internally within Ceph, and then have the same 
+tools/libs
+> > used by out-of-ceph management platforms when they want to do
+> > equivalent stuff while the OSD is offline.
+> > 
+> > John
+> > 
+> > 
+> >>> I asked a related question in another post too: Can a physical 
+disk
+> >>> (/dev/sda1) assigned to a ceph OSD object be continued to used by 
+other
+> >>> apps in the system to issue I/O directly via (/dev/sda1) 
+interface? Does
+> >>> ceph prevent it, as such operations may corrupt data?
+> >> 
+> >> It depends on what privileges the other app has.  If it's root or 
+user
+> >> ceph, it can step all over the disk (and the rest of the system) 
+and wreak
+> >> havoc.  With the current backend, we are storing data as files, so 
+you
+> >> could have other apps using other directories on the file system--
+this is
+> >> generally a bad idea for real deployments, though, as performance 
+and disk
+> >> utilization will be unpredictable.
+> >> 
+> >> sage
+
+Thanks everyone for the inputs and clarifications. Looks like 
+libstoragemgmt is key to lot of these feature. Will explore that next 
+and add if any questions in the git.
+
+thanks,
+naveen
+
