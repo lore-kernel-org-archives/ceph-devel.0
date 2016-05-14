@@ -1,42 +1,47 @@
-From: Junwang Zhao <zhjwpku@gmail.com>
-Subject: Re: [on-the-wire]Can not pass 'make check'
-Date: Sat, 14 May 2016 09:56:41 +0800
-Message-ID: <CAEG8a3+ZBRLSA+Sg7ZkdQ-zJjsOciPVASTxPWnt5ETXu-HMZ0g@mail.gmail.com>
-References: <CAEG8a3KwK1nMbmFm2WFjNPuFaET22yeafJJG29YddWkUdh00PQ@mail.gmail.com>
-	<CACJqLyaJLJcbcQJBNGJz_vLQ4r4iAS33q-SnDiwuQTNpUMNEdQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Master build is failing
+Date: Sat, 14 May 2016 08:09:26 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605140809020.14730@cpach.fuggernut.com>
+References: <BL2PR02MB2115B805EEA98B7D98B81913F4740@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f68.google.com ([209.85.213.68]:33246 "EHLO
-	mail-vk0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753440AbcENB4n (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 May 2016 21:56:43 -0400
-Received: by mail-vk0-f68.google.com with SMTP id s184so14388791vkb.0
-        for <ceph-devel@vger.kernel.org>; Fri, 13 May 2016 18:56:42 -0700 (PDT)
-In-Reply-To: <CACJqLyaJLJcbcQJBNGJz_vLQ4r4iAS33q-SnDiwuQTNpUMNEdQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:45269 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751848AbcENMJR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 14 May 2016 08:09:17 -0400
+In-Reply-To: <BL2PR02MB2115B805EEA98B7D98B81913F4740@BL2PR02MB2115.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: "Sage A. Weil" <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Sure,
-I will move on, thanks!
+On Fri, 13 May 2016, Somnath Roy wrote:
+> Hi,
+> The current master is failing with the following error.
+> 
+> libkv.a(libkv_a-RocksDBStore.o): In function `RocksDBStore::_test_init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)':
+> /root/ceph-master/src/kv/RocksDBStore.cc:323: undefined reference to `rocksdb::DB::Open(rocksdb::Options const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, rocksdb::DB**)'
+> libkv.a(libkv_a-RocksDBStore.o): In function `RocksDBStore::check_omap_dir(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&)':
+> /root/ceph-master/src/kv/RocksDBStore.cc:625: undefined reference to `rocksdb::DB::Open(rocksdb::Options const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, rocksdb::DB**)'
+> libkv.a(libkv_a-RocksDBStore.o): In function `RocksDBStore::ParseOptionsFromString(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rocksdb::Options&)':
+> /root/ceph-master/src/kv/RocksDBStore.cc:188: undefined reference to `rocksdb::GetOptionsFromString(rocksdb::Options const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, rocksdb::Options*)'
+> /root/ceph-master/src/kv/RocksDBStore.cc:193: undefined reference to `rocksdb::Status::ToString[abi:cxx11]() const'
+> libkv.a(libkv_a-RocksDBStore.o): In function `RocksDBStore::do_open(std::ostream&, bool)':
+> /root/ceph-master/src/kv/RocksDBStore.cc:291: undefined reference to `rocksdb::DB::Open(rocksdb::Options const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, rocksdb::DB**)'
+> /root/ceph-master/src/kv/RocksDBStore.cc:293: undefined reference to `rocksdb::Status::ToString[abi:cxx11]() const'
+> libkv.a(libkv_a-RocksDBStore.o):(.data.rel.ro._ZTVN12RocksDBStore19MergeOperatorRouterE[_ZTVN12RocksDBStore19MergeOperatorRouterE]+0x20): undefined reference to `rocksdb::AssociativeMergeOperator::FullMerge(rocksdb::Slice const&, rocksdb::Slice const*, std::deque<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, rocksdb::Logger*) const'
+> libkv.a(libkv_a-RocksDBStore.o):(.data.rel.ro._ZTVN12RocksDBStore19MergeOperatorRouterE[_ZTVN12RocksDBStore19MergeOperatorRouterE]+0x28): undefined reference to `rocksdb::AssociativeMergeOperator::PartialMerge(rocksdb::Slice const&, rocksdb::Slice const&, rocksdb::Slice const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, rocksdb::Logger*) const'
+> libkv.a(libkv_a-RocksDBStore.o):(.data.rel.ro._ZTVN12RocksDBStore19MergeOperatorRouterE[_ZTVN12RocksDBStore19MergeOperatorRouterE]+0x30): undefined reference to `rocksdb::MergeOperator::PartialMergeMulti(rocksdb::Slice const&, std::deque<rocksdb::Slice, std::allocator<rocksdb::Slice> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, rocksdb::Logger*) const'
+> collect2: error: ld returned 1 exit status
+> Makefile:16425: recipe for target 'ceph_test_object_map' failed
+> make[3]: *** [ceph_test_object_map] Error 1
+> libos.a(libos_a-BlueRocksEnv.o):(.data.rel.ro._ZTV12BlueRocksEnv[_ZTV12BlueRocksEnv]+0x130): undefined reference to `rocksdb::Env::GenerateUniqueId[abi:cxx11]()'
 
-On Sat, May 14, 2016 at 9:44 AM, Haomai Wang <haomai@xsky.com> wrote:
-> On Sat, May 14, 2016 at 9:26 AM, Junwang Zhao <zhjwpku@gmail.com> wrote:
->> Hi Sage, Haomai,
->>
->> I am trying to test this patch[1], which I have modified after Sage's comments,
->> I rebased this branch to the ceph/master yestoday, it can build but 'make check'
->> got some 'FAIL' and stuck at some point hardly move on, see the attachment.
->
-> Although I'm not sure the reason should be related to env, I think
-> it's not caused by your commits.
->
-> Go ahead:-)
->
->
->>
->> Need some help, thanks!
->>
->> [1]https://github.com/zhjwpku/ceph/commit/6d3c429de80c23afb2612f01536ef6140fe5d3c2
+My guess is that
+
+ cd rocksdb ; make clean ; cd .. ; make
+
+will clear it up.
+
+sage
