@@ -1,24 +1,31 @@
-From: Dan van der Ster <dvanders@gmail.com>
+From: Dan van der Ster <dan@vanderster.com>
 Subject: Re: [ceph-users] reweight-by-utilization warning
-Date: Sun, 15 May 2016 18:38:00 +0200
-Message-ID: <CABZ+qq=bGec92+bH_x0BPYtdV1yjjfQzXuCtdrnY-oZ-s9BPrg@mail.gmail.com>
+Date: Sun, 15 May 2016 18:42:26 +0200
+Message-ID: <CABZ+qqmzFiT5WKiOeR7Z48TKrM+nKN5k-m1t1RAFPHEWPrPPTg@mail.gmail.com>
 References: <CA+z5DsxSQCVTC6deY91BuDPoGZc9rqzt6SG2vovy+vk3R1A9eA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:36283 "EHLO
-	mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754336AbcEOQim (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 May 2016 12:38:42 -0400
-Received: by mail-lf0-f49.google.com with SMTP id u64so109122062lff.3
-        for <ceph-devel@vger.kernel.org>; Sun, 15 May 2016 09:38:41 -0700 (PDT)
+Received: from mail-lf0-f41.google.com ([209.85.215.41]:36795 "EHLO
+	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754277AbcEOQnJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 May 2016 12:43:09 -0400
+Received: by mail-lf0-f41.google.com with SMTP id u64so109145981lff.3
+        for <ceph-devel@vger.kernel.org>; Sun, 15 May 2016 09:43:08 -0700 (PDT)
+Received: from mail-lb0-f174.google.com (mail-lb0-f174.google.com. [209.85.217.174])
+        by smtp.gmail.com with ESMTPSA id n8sm4524094lbc.17.2016.05.15.09.43.06
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1/SSLv3 cipher=OTHER);
+        Sun, 15 May 2016 09:43:06 -0700 (PDT)
+Received: by mail-lb0-f174.google.com with SMTP id jj5so43157931lbc.0
+        for <ceph-devel@vger.kernel.org>; Sun, 15 May 2016 09:43:06 -0700 (PDT)
 In-Reply-To: <CA+z5DsxSQCVTC6deY91BuDPoGZc9rqzt6SG2vovy+vk3R1A9eA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Blair Bethwaite <blair.bethwaite@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-Hi Blaire!
+Hi Blaire! (re-copying to list)
 
 The good news is that the functionality of that python script is now
 available natively in jewel and has been backported to hammer 0.96.7.
@@ -36,8 +43,9 @@ Hope that helps!
 
 Dan
 
-On 15 May 2016 4:09 pm, "Blair Bethwaite" <blair.bethwaite@gmail.com> wrote:
->
+
+On Sun, May 15, 2016 at 4:09 PM, Blair Bethwaite
+<blair.bethwaite@gmail.com> wrote:
 > Hi all,
 >
 > IMHO reweight-by-utilization should come with some sort of warning, it
