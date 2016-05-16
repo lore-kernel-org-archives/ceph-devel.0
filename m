@@ -1,42 +1,35 @@
-From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Subject: Re: v0.94.7 Hammer released
-Date: Mon, 16 May 2016 09:40:37 +0200
-Message-ID: <CABZ+qq=kbOPL1LinKbvSX2biY1L8hWVmgLwYwNv2MH3_iv7f7w@mail.gmail.com>
-References: <alpine.DEB.2.11.1605131020340.20416@cpach.fuggernut.com>
-	<20160516062008.GA11172@onthe.net.au>
+From: Junwang Zhao <zhjwpku@gmail.com>
+Subject: [wip-addr-features] make sure I am doing the right thing
+Date: Mon, 16 May 2016 16:30:16 +0800
+Message-ID: <CAEG8a3LQuro2zXu90im0aQ58XxdGLDQvLxnjkJ+Rd8C6k70QVw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <20160516062008.GA11172-s239Etu9j1dPR4JQBCEnsQ@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Chris Dunlop <chris-s239Etu9j1dPR4JQBCEnsQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f67.google.com ([209.85.213.67]:35949 "EHLO
+	mail-vk0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752230AbcEPIaR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 May 2016 04:30:17 -0400
+Received: by mail-vk0-f67.google.com with SMTP id c189so19891938vkb.3
+        for <ceph-devel@vger.kernel.org>; Mon, 16 May 2016 01:30:17 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Sage A. Weil" <sweil@redhat.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-T24gTW9uLCBNYXkgMTYsIDIwMTYgYXQgODoyMCBBTSwgQ2hyaXMgRHVubG9wIDxjaHJpc0BvbnRo
-ZS5uZXQuYXU+IHdyb3RlOgo+IE9uIEZyaSwgTWF5IDEzLCAyMDE2IGF0IDEwOjIxOjUxQU0gLTA0
-MDAsIFNhZ2UgV2VpbCB3cm90ZToKPj4gVGhpcyBIYW1tZXIgcG9pbnQgcmVsZWFzZSBmaXhlcyBz
-ZXZlcmFsIG1pbm9yIGJ1Z3MuIEl0IGFsc28gaW5jbHVkZXMgYQo+PiBiYWNrcG9ydCBvZiBhbiBp
-bXByb3ZlZCDigJhjZXBoIG9zZCByZXdlaWdodC1ieS11dGlsaXphdGlvbuKAmSBjb21tYW5kIGZv
-cgo+PiBoYW5kbGluZyBPU0RzIHdpdGggaGlnaGVyLXRoYW4tYXZlcmFnZSB1dGlsaXphdGlvbnMu
-Cj4+Cj4+IFdlIHJlY29tbWVuZCB0aGF0IGFsbCBoYW1tZXIgdjAuOTQueCB1c2VycyB1cGdyYWRl
-Lgo+Cj4gUGVyIGh0dHA6Ly9kb3dubG9hZC5jZXBoLmNvbS9kZWJpYW4taGFtbWVyL3Bvb2wvbWFp
-bi9jL2NlcGgvCj4KPiBjZXBoLWNvbW1vbl8wLjk0LjctMXRydXN0eV9hbWQ2NC5kZWIgICAgMTEt
-TWF5LTIwMTYgMTY6MDggIDU5NTk4NzYKPiBjZXBoLWNvbW1vbl8wLjk0LjctMXhlbmlhbF9hbWQ2
-NC5kZWIgICAgMTEtTWF5LTIwMTYgMTU6NTQgIDYwMzcyMzYKPiBjZXBoLWNvbW1vbl8wLjk0Ljct
-MXhlbmlhbF9hcm02NC5kZWIgICAgMTEtTWF5LTIwMTYgMTY6MDYgIDU4NDM3MjIKPiBjZXBoLWNv
-bW1vbl8wLjk0LjctMX5icG84MCsxX2FtZDY0LmRlYiAgMTEtTWF5LTIwMTYgMTY6MDggIDYwMjgw
-MzYKPgo+IE9uY2UgYWdhaW4sIG5vIGRlYmlhbiB3aGVlenkgKH5icG83MCkgdmVyc2lvbj8KPgo+
-IFVidW50dSBQcmVjaXNlIG1pc3NlZCBvdXQgdGhpcyB0aW1lIHRvby4KCmVsNiBpcyBhbHNvIG1p
-c3NpbmcuCgotLSBkYW4KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpo
-dHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+Hi Sage, Haomai,
+
+I am working on the require-features-patch, I use 'make' to see the conflicts,
+and change the code to fit the required-feature-patch, [1] is a huge patch
+that I am still working on, it has not been finished. I really need to check
+with you whether I am doing it right, since it seems the errors are endless.
+
+There are some comments where I am not sure in the patch, like 'not sure'.
+
+I didn't split this huge patch into small ones, I am not sure is that a must, if
+yes, I will split it into small ones.
+
+Any comments and critisize are welcomed.
+
+[1]https://github.com/zhjwpku/ceph/commit/706ea2eca3bf8849bd4c2ff0cd9757318c6bbb14
+
+Thanks!
+Zhao
