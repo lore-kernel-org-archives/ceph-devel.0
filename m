@@ -1,36 +1,45 @@
-From: Sage Weil <sage@redhat.com>
-Subject: v10.2.1 Jewel released
-Date: Mon, 16 May 2016 09:11:34 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605160910080.2730@cpach.fuggernut.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: wip-bluestore-write
+Date: Mon, 16 May 2016 09:20:00 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605160913150.30956@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54055 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752705AbcEPNLT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 May 2016 09:11:19 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:37374 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753225AbcEPNTp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 16 May 2016 09:19:45 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
+To: ifedotov@mirantis.com
+Cc: ceph-devel@vger.kernel.org
 
-This is the first bugfix release for Jewel. It contains several annoying 
-packaging and init system fixes and a range of important bugfixes across 
-RBD, RGW, and CephFS.
+I merged your last two PRs and pushed an updated branch.  The test fails 
+now due to an operation like transaction(write 0~5, write 10~5) where the 
+second write wants to read the block in order to write a full block/chunk, 
+but the first write's data obviously isn't off to disk yet.  The missing 
+piece is a buffer cache, which we want anyway so that we can
 
-We recommend that all v10.2.x users upgrade.
+- handle cases like this
+- drop the hacky tail_cache code
+- cache data in ram (when we have an fadvise hint, or for some other 
+reason decide it's a good idea)
 
-For more detailed information, see the release notes at
+I have a really basic initial version pushed that just handles the write 
+path (buffers initalling in writing state, then clean once io hits 
+device).  We just need to make _do_read use it (Igor?) and add some basic 
+trimming.  (And eventually decide how we want to do trimming in general.. 
+presumably we want a global LRU instead of the simple per-object thing 
+that's there now.)
 
-	http://docs.ceph.com/docs/master/release-notes/#v10-2-1-jewel
+Once that is working, I think the write path will be pretty complete, and 
+we can turn our attention to the compression/checksum decisions (when to 
+compress, how big should the chunks be, etc.) and performance.  See this 
+PR:
 
-or the complete changelog at
+	https://github.com/ceph/ceph/pull/6208
 
-	http://docs.ceph.com/docs/master/_downloads/v10.2.1.txt
+I also coded up a new _clone that'll do COW, but I haven't tested it yet.
 
-Getting Ceph
-------------
+sage
 
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-10.2.1.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
