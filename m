@@ -1,51 +1,46 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Fwd: How does EC pools support thousands of xattrs (XFS) but no
- omaps?
-Date: Tue, 17 May 2016 16:41:22 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605171639590.30956@cpach.fuggernut.com>
-References: <CAOu2ZZUT8hqUmatSWTX7RxzhS1oo_5R0NmZ49+k0D91QPHTOjQ@mail.gmail.com> <CAOu2ZZXBYeCUGhz5RpePsP6CVvh0r2d+FJHT7iHHt=RxuEPznA@mail.gmail.com> <alpine.DEB.2.11.1605170950410.30956@cpach.fuggernut.com>
- <CAOu2ZZXs+iMyCLuNubn7jYDf4858wDyGFFuk+sac6Z-CHpMGDA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: TCP_NODELAY patch
+Date: Tue, 17 May 2016 20:27:04 +0000
+Message-ID: <BL2PR02MB21152D3AB6535DB599245352F4480@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB2115F428EB5C19C7F0173868F4480@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <CAOi1vP_EL5P5XzK5quhd-io7-x3j=G+P8g-=OLu_13dFufEsLA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34812 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751804AbcEQUlM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2016 16:41:12 -0400
-In-Reply-To: <CAOu2ZZXs+iMyCLuNubn7jYDf4858wDyGFFuk+sac6Z-CHpMGDA@mail.gmail.com>
+Received: from mail-by2on0093.outbound.protection.outlook.com ([207.46.100.93]:8613
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751119AbcEQUmx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 17 May 2016 16:42:53 -0400
+In-Reply-To: <CAOi1vP_EL5P5XzK5quhd-io7-x3j=G+P8g-=OLu_13dFufEsLA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chandan Kumar Singh <chandan.kr.singh@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 17 May 2016, Chandan Kumar Singh wrote:
-> Thanks. Why are omaps not allowed for objects in EC pools?
-
-Because it doesn't make much sense to erasure code small key=value pairs 
-over lots of nodes.  Values are too small to be individually encoded 
-sensibly, and packing them together would require a layer of complexity.  
-It could presumably be done, but we didn't do it, and have yet to hear 
-from someone who really needs it.
-
-sage
-
-
-
-> 
-> On Tue, May 17, 2016 at 7:22 PM, Sage Weil <sage@newdream.net> wrote:
-> > On Tue, 17 May 2016, Chandan Kumar Singh wrote:
-> >> Hi
-> >>
-> >> While migrating to EC pools, I came to know that it does not support
-> >> omaps but it allows thousands of xattrs (XFS). Are these xattrs being
-> >> stored in a key-value store or in XFS file system?
-> >
-> > They are stored in XFS, until there are more than a handful, after which
-> > point they get stored in leveldb.  But they are *also* stored in every pg
-> > log event that modifies the object, so you should definitely not (ab)use
-> > xattrs the way you would use omap and expect the system to behave/perform!
-> > They are meant to be small and few.
-> >
-> > sage
-> 
-> 
+VGhhbmtzIElseWEgIQ0KDQpSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQpGcm9tOiBJbHlhIERyeW9tb3YgW21haWx0bzppZHJ5b21vdkBnbWFpbC5jb21dDQpT
+ZW50OiBUdWVzZGF5LCBNYXkgMTcsIDIwMTYgMToyNiBQTQ0KVG86IFNvbW5hdGggUm95DQpDYzog
+Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBUQ1BfTk9ERUxBWSBwYXRj
+aA0KDQpPbiBUdWUsIE1heSAxNywgMjAxNiBhdCA4OjA1IFBNLCBTb21uYXRoIFJveSA8U29tbmF0
+aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBIaSBJbHlhLA0KPiBDb3VsZCB5b3UgcGxlYXNl
+IGxldCB1cyBrbm93IGF0IHdoYXQgdXBzdHJlYW0ga2VybmVsIHZlcnNpb24gdGhlIFRDUF9OT0RF
+TEFZIGtyYmQgcGF0Y2ggd2VudCBpbiA/DQo+IElzIGl0IHRoZXJlIGluIFJIRUwgNy4yIGFuZCBV
+YnVudHUgMTYuMDQgTFRTID8NCg0KSXQgd2VudCBpbnRvIDQuMC4gIElJUkMgMTYuMDQgTFRTIGlz
+IGJhc2VkIG9uIDQuNCwgc28geWVzIHRvIGJvdGguDQoNCllvdSBjYW4gY2hlY2sgaXQgeW91cnNl
+bGYgd2l0aCByYmQgbWFwIC1vIHRjcF9ub2RlbGF5IDxpbWFnZW5hbWU+Lg0KSWYgaXQgZG9lc24n
+dCBmYWlsIHdpdGggImxpYmNlcGg6IGJhZCBvcHRpb24gLi4uIiBpbiB0aGUgZG1lc2csIGl0J3Mg
+dGhlcmUuDQoNClRoYW5rcywNCg0KICAgICAgICAgICAgICAgIElseWENClBMRUFTRSBOT1RFOiBU
+aGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2Ug
+aXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQo
+cykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUg
+aW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZl
+IHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNz
+ZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0
+cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlv
+biBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1h
+aWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBj
+b3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNv
+cGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
