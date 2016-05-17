@@ -1,78 +1,151 @@
-From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Subject: Re: v0.94.7 Hammer released
-Date: Tue, 17 May 2016 14:07:21 +0200
-Message-ID: <CABZ+qqn3QdDuvjEmodLnXTkDMK7wJiOq3A_wF7-N2zeGV+hv5A@mail.gmail.com>
+From: Christian Balzer <chibi@gol.com>
+Subject: Re: [ceph-users] v0.94.7 Hammer released
+Date: Tue, 17 May 2016 21:14:35 +0900
+Message-ID: <20160517211435.052df0cb@batzmaru.gol.ad.jp>
 References: <alpine.DEB.2.11.1605131020340.20416@cpach.fuggernut.com>
 	<CABZ+qq=PUoA8rObv+TwT_NO9nRJnQA4xXOrKKdCp=5Q42Y9pNg@mail.gmail.com>
 	<alpine.DEB.2.11.1605170754590.30956@cpach.fuggernut.com>
+	<CABZ+qqn3QdDuvjEmodLnXTkDMK7wJiOq3A_wF7-N2zeGV+hv5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1605170754590.30956-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp02.dentaku.gol.com ([203.216.5.72]:37864 "EHLO
+	smtp02.dentaku.gol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932571AbcEQMOm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2016 08:14:42 -0400
+In-Reply-To: <CABZ+qqn3QdDuvjEmodLnXTkDMK7wJiOq3A_wF7-N2zeGV+hv5A@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-T24gVHVlLCBNYXkgMTcsIDIwMTYgYXQgMTo1NiBQTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQu
-Y29tPiB3cm90ZToKPiBPbiBUdWUsIDE3IE1heSAyMDE2LCBEYW4gdmFuIGRlciBTdGVyIHdyb3Rl
-Ogo+PiBIaSBTYWdlIGV0IGFsLAo+Pgo+PiBJJ20gdXBkYXRpbmcgb3VyIHByZS1wcm9kIGNsdXN0
-ZXIgZnJvbSAwLjk0LjYgdG8gMC45NC43IGFuZCBhZnRlcgo+PiB1cGdyYWRpbmcgdGhlIGNlcGgt
-bW9uJ3MgSSdtIGdldHRpbmcgbG9hZHMgb2Ygd2FybmluZ3MgbGlrZToKPj4KPj4gMjAxNi0wNS0x
-NyAxMDowMToyOS4zMTQ3ODUgb3NkLjc2IFtXUk5dIGZhaWxlZCB0byBlbmNvZGUgbWFwIGUxMDMx
-MTYKPj4gd2l0aCBleHBlY3RlZCBjcmMKPj4KPj4gSSd2ZSBzZWVuIHRoYXQgZXJyb3IgaXMgd2hp
-dGVsaXN0ZWQgaW4gdGhlIHFhLXN1aXRlOgo+PiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBo
-LXFhLXN1aXRlL3B1bGwvNjAyL2ZpbGVzCj4+Cj4+IElzIGl0IHJlYWxseSBoYXJtbGVzcz8gKFRo
-aXMgaXMgdGhlIGZpcnN0IHRpbWUgSSd2ZSBzZWVuIHN1Y2ggYSB3YXJuaW5nKS4KPgo+IEFyZSB5
-b3Ugc3VyZSB5b3Ugd2VyZSB1cGdyYWRpbmcgZnJvbSB2MC45NC42PwoKQWJzb2x1dGVseS4gSSBm
-aXJzdCB1cGRhdGVkIHRoZSBtb25zLCB3aGljaCBJIHJlc3RhcnRlZCBpbnRvIHF1b3J1bQp3aXRo
-IDAuOTYuNy4gVGhlbiBhbnkgY2hhbmdlcyB0byB0aGUgb3NkbWFwIHRyaWdnZXJlZCB0aGUgZmFp
-bGVkIHRvCmVuY29kZSB3YXJuaW5nLgpUaGUgdXBncmFkZSBzZXF1ZW5jZSB3ZW50IGxpa2UgdGhp
-czoKClVwZGF0ZSBtb25zIDAuOTQuNiB0byAwLjk0LjcsIHJlc3RhcnQsIHF1b3J1bS4gTm8gd2Fy
-bmluZ3MuClVwZGF0ZSBtZHMncyAwLjk0LjYgdG8gMC45NC43LCByZXN0YXJ0LiBXYXJuaW5ncyBm
-cm9tIH5hbGwgb3Nkcy4KVXBkYXRlIG9zZHMgMC45NC42IHRvIDAuOTQuNywgcmVzdGFydCBob3N0
-IGJ5IGhvc3QuIFRoZSAwLjk0LjYgb3NkcwpwcmludGVkIHdhcm5pbmdzLCB0aGUgbmV3IE9TRHMg
-ZGlkIG5vdC4KCj4gSSBkb24ndCBzZWUgYW55dGhpbmcgdGhhdAo+IHdvdWxkIHRyaWdnZXIgdGhl
-c2Ugd2FybmluZ3MgZ29pbmcgZnJvbSAuNiB0byAuNywgd2hpY2ggaXMgc3RyYW5nZS4KCkNvdWxk
-IHRoZSBvc2RtYXAgR01UIGhpdHNldCBjaGFuZ2VzIGhhdmUgY2F1c2VkIGl0PyBDb21taXRzIE1h
-ciAyNCBoZXJlOgoKICAgaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9jb21wYXJlL3YwLjk0
-LjYuLi52MC45NC43P2V4cGFuZD0xCgo+IFRoYXQgc2FpZCwgdGhlIGVycm9ycyBhcmUgZ2VuZXJh
-bGx5IGhhcm1sZXNzLS1pdCBqdXN0IG1lYW5zIHRoZSBtb25pdG9ycwo+IGFyZSBydW5uaW5nIGEg
-ZGlmZmVyZW50IHZlcnNpb24gb2YgdGhlIGNvZGUgYW5kIHRoZSBPU0RzIGFyZSBwdWxsaW5nIG1h
-cHMKPiBkaXJlY3RseSBmcm9tIGEgbW9uIHRvIGVuc3VyZSB0aGV5IGFyZSBhbGwgaW4gc3luYy4g
-IEl0J3Mgbm9ybWFsIGR1cmluZwo+IG1hbnkgdXBncmFkZXMsIGJ1dCBub3QgZXhwZWN0ZWQgZm9y
-IHRoaXMgcGFydGljdWxhciBqdW1wLi4uCgpUaGVuIEknbSBjdXJpb3VzIGlmIG90aGVycyBhcmUg
-Z2V0dGluZyB0aGlzIGZyb20gMC45NC42IHRvIDAuOTQuNy4KRm9yIG5vdyBJJ20gd2FpdGluZyB0
-byB1cGRhdGUgb3VyIHByb2QgY2x1c3Rlci4KClRoYW5rcyEKCkRhbgoKCj4KPiBzYWdlCj4KPgo+
-Cj4KPj4gVGhhbmtzIGluIGFkdmFuY2UhCj4+Cj4+IERhbgo+Pgo+Pgo+Pgo+Pgo+PiBPbiBGcmks
-IE1heSAxMywgMjAxNiBhdCA0OjIxIFBNLCBTYWdlIFdlaWwgPHNhZ2VAcmVkaGF0LmNvbT4gd3Jv
-dGU6Cj4+ID4gVGhpcyBIYW1tZXIgcG9pbnQgcmVsZWFzZSBmaXhlcyBzZXZlcmFsIG1pbm9yIGJ1
-Z3MuIEl0IGFsc28gaW5jbHVkZXMgYQo+PiA+IGJhY2twb3J0IG9mIGFuIGltcHJvdmVkIOKAmGNl
-cGggb3NkIHJld2VpZ2h0LWJ5LXV0aWxpemF0aW9u4oCZIGNvbW1hbmQgZm9yCj4+ID4gaGFuZGxp
-bmcgT1NEcyB3aXRoIGhpZ2hlci10aGFuLWF2ZXJhZ2UgdXRpbGl6YXRpb25zLgo+PiA+Cj4+ID4g
-V2UgcmVjb21tZW5kIHRoYXQgYWxsIGhhbW1lciB2MC45NC54IHVzZXJzIHVwZ3JhZGUuCj4+ID4K
-Pj4gPiBGb3IgbW9yZSBkZXRhaWxlZCBpbmZvcm1hdGlvbiwgc2VlIHRoZSByZWxlYXNlIGFubm91
-bmNlbWVudCBhdAo+PiA+Cj4+ID4gICAgICAgICBodHRwOi8vY2VwaC5jb20vcmVsZWFzZXMvdjAt
-OTQtNy1oYW1tZXItcmVsZWFzZWQvCj4+ID4KPj4gPiBvciB0aGUgY29tcGxldGUgY2hhbmdlbG9n
-IGF0Cj4+ID4KPj4gPiAgICAgICAgIGh0dHA6Ly9kb2NzLmNlcGguY29tL2RvY3MvbWFzdGVyL19k
-b3dubG9hZHMvdjAuOTQuNi50eHQKPj4gPgo+PiA+IEdldHRpbmcgQ2VwaAo+PiA+IC0tLS0tLS0t
-LS0tLQo+PiA+Cj4+ID4gKiBHaXQgYXQgZ2l0Oi8vZ2l0aHViLmNvbS9jZXBoL2NlcGguZ2l0Cj4+
-ID4gKiBUYXJiYWxsIGF0IGh0dHA6Ly9kb3dubG9hZC5jZXBoLmNvbS90YXJiYWxscy9jZXBoLTAu
-OTQuNy50YXIuZ3oKPj4gPiAqIEZvciBwYWNrYWdlcywgc2VlIGh0dHA6Ly9jZXBoLmNvbS9kb2Nz
-L21hc3Rlci9pbnN0YWxsL2dldC1wYWNrYWdlcwo+PiA+ICogRm9yIGNlcGgtZGVwbG95LCBzZWUg
-aHR0cDovL2NlcGguY29tL2RvY3MvbWFzdGVyL2luc3RhbGwvaW5zdGFsbC1jZXBoLWRlcGxveQo+
-PiA+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4+ID4g
-Y2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPj4gPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4+
-ID4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29t
-Cj4+ID4KPj4KPj4KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRw
-Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+
+Hello,
+
+for the record, I did the exact same sequence (no MDS) on my test clust=
+er=20
+with exactly the same results.
+
+Didn't report it as I assumed it to be a more noisy (but harmless)
+upgrade artifact.
+
+Christian
+
+On Tue, 17 May 2016 14:07:21 +0200 Dan van der Ster wrote:
+
+> On Tue, May 17, 2016 at 1:56 PM, Sage Weil <sweil@redhat.com> wrote:
+> > On Tue, 17 May 2016, Dan van der Ster wrote:
+> >> Hi Sage et al,
+> >>
+> >> I'm updating our pre-prod cluster from 0.94.6 to 0.94.7 and after
+> >> upgrading the ceph-mon's I'm getting loads of warnings like:
+> >>
+> >> 2016-05-17 10:01:29.314785 osd.76 [WRN] failed to encode map e1031=
+16
+> >> with expected crc
+> >>
+> >> I've seen that error is whitelisted in the qa-suite:
+> >> https://github.com/ceph/ceph-qa-suite/pull/602/files
+> >>
+> >> Is it really harmless? (This is the first time I've seen such a
+> >> warning).
+> >
+> > Are you sure you were upgrading from v0.94.6?
+>=20
+> Absolutely. I first updated the mons, which I restarted into quorum
+> with 0.96.7. Then any changes to the osdmap triggered the failed to
+> encode warning.
+> The upgrade sequence went like this:
+>=20
+> Update mons 0.94.6 to 0.94.7, restart, quorum. No warnings.
+> Update mds's 0.94.6 to 0.94.7, restart. Warnings from ~all osds.
+> Update osds 0.94.6 to 0.94.7, restart host by host. The 0.94.6 osds
+> printed warnings, the new OSDs did not.
+>=20
+> > I don't see anything that
+> > would trigger these warnings going from .6 to .7, which is strange.
+>=20
+> Could the osdmap GMT hitset changes have caused it? Commits Mar 24 he=
+re:
+>=20
+>    https://github.com/ceph/ceph/compare/v0.94.6...v0.94.7?expand=3D1
+>=20
+> > That said, the errors are generally harmless--it just means the
+> > monitors are running a different version of the code and the OSDs a=
+re
+> > pulling maps directly from a mon to ensure they are all in sync.  I=
+t's
+> > normal during many upgrades, but not expected for this particular
+> > jump...
+>=20
+> Then I'm curious if others are getting this from 0.94.6 to 0.94.7.
+> For now I'm waiting to update our prod cluster.
+>=20
+> Thanks!
+>=20
+> Dan
+>=20
+>=20
+> >
+> > sage
+> >
+> >
+> >
+> >
+> >> Thanks in advance!
+> >>
+> >> Dan
+> >>
+> >>
+> >>
+> >>
+> >> On Fri, May 13, 2016 at 4:21 PM, Sage Weil <sage@redhat.com> wrote=
+:
+> >> > This Hammer point release fixes several minor bugs. It also
+> >> > includes a backport of an improved =E2=80=98ceph osd
+> >> > reweight-by-utilization=E2=80=99 command for handling OSDs with
+> >> > higher-than-average utilizations.
+> >> >
+> >> > We recommend that all hammer v0.94.x users upgrade.
+> >> >
+> >> > For more detailed information, see the release announcement at
+> >> >
+> >> >         http://ceph.com/releases/v0-94-7-hammer-released/
+> >> >
+> >> > or the complete changelog at
+> >> >
+> >> >         http://docs.ceph.com/docs/master/_downloads/v0.94.6.txt
+> >> >
+> >> > Getting Ceph
+> >> > ------------
+> >> >
+> >> > * Git at git://github.com/ceph/ceph.git
+> >> > * Tarball at http://download.ceph.com/tarballs/ceph-0.94.7.tar.g=
+z
+> >> > * For packages, see http://ceph.com/docs/master/install/get-pack=
+ages
+> >> > * For ceph-deploy, see
+> >> > http://ceph.com/docs/master/install/install-ceph-deploy
+> >> > _______________________________________________ ceph-users maili=
+ng
+> >> > list ceph-users@lists.ceph.com
+> >> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >> >
+> >>
+> >>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+
+--=20
+Christian Balzer        Network/Systems Engineer               =20
+chibi@gol.com   	Global OnLine Japan/Rakuten Communications
+http://www.gol.com/
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
