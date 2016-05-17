@@ -1,34 +1,51 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: TCP_NODELAY patch
-Date: Tue, 17 May 2016 22:25:42 +0200
-Message-ID: <CAOi1vP_EL5P5XzK5quhd-io7-x3j=G+P8g-=OLu_13dFufEsLA@mail.gmail.com>
-References: <BL2PR02MB2115F428EB5C19C7F0173868F4480@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Fwd: How does EC pools support thousands of xattrs (XFS) but no
+ omaps?
+Date: Tue, 17 May 2016 16:41:22 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605171639590.30956@cpach.fuggernut.com>
+References: <CAOu2ZZUT8hqUmatSWTX7RxzhS1oo_5R0NmZ49+k0D91QPHTOjQ@mail.gmail.com> <CAOu2ZZXBYeCUGhz5RpePsP6CVvh0r2d+FJHT7iHHt=RxuEPznA@mail.gmail.com> <alpine.DEB.2.11.1605170950410.30956@cpach.fuggernut.com>
+ <CAOu2ZZXs+iMyCLuNubn7jYDf4858wDyGFFuk+sac6Z-CHpMGDA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f51.google.com ([209.85.213.51]:33845 "EHLO
-	mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750869AbcEQUZo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2016 16:25:44 -0400
-Received: by mail-vk0-f51.google.com with SMTP id c189so35382647vkb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 17 May 2016 13:25:43 -0700 (PDT)
-In-Reply-To: <BL2PR02MB2115F428EB5C19C7F0173868F4480@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from cobra.newdream.net ([66.33.216.30]:34812 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751804AbcEQUlM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2016 16:41:12 -0400
+In-Reply-To: <CAOu2ZZXs+iMyCLuNubn7jYDf4858wDyGFFuk+sac6Z-CHpMGDA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Chandan Kumar Singh <chandan.kr.singh@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, May 17, 2016 at 8:05 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Hi Ilya,
-> Could you please let us know at what upstream kernel version the TCP_NODELAY krbd patch went in ?
-> Is it there in RHEL 7.2 and Ubuntu 16.04 LTS ?
+On Tue, 17 May 2016, Chandan Kumar Singh wrote:
+> Thanks. Why are omaps not allowed for objects in EC pools?
 
-It went into 4.0.  IIRC 16.04 LTS is based on 4.4, so yes to both.
+Because it doesn't make much sense to erasure code small key=value pairs 
+over lots of nodes.  Values are too small to be individually encoded 
+sensibly, and packing them together would require a layer of complexity.  
+It could presumably be done, but we didn't do it, and have yet to hear 
+from someone who really needs it.
 
-You can check it yourself with rbd map -o tcp_nodelay <imagename>.
-If it doesn't fail with "libceph: bad option ..." in the dmesg, it's
-there.
+sage
 
-Thanks,
 
-                Ilya
+
+> 
+> On Tue, May 17, 2016 at 7:22 PM, Sage Weil <sage@newdream.net> wrote:
+> > On Tue, 17 May 2016, Chandan Kumar Singh wrote:
+> >> Hi
+> >>
+> >> While migrating to EC pools, I came to know that it does not support
+> >> omaps but it allows thousands of xattrs (XFS). Are these xattrs being
+> >> stored in a key-value store or in XFS file system?
+> >
+> > They are stored in XFS, until there are more than a handful, after which
+> > point they get stored in leveldb.  But they are *also* stored in every pg
+> > log event that modifies the object, so you should definitely not (ab)use
+> > xattrs the way you would use omap and expect the system to behave/perform!
+> > They are meant to be small and few.
+> >
+> > sage
+> 
+> 
