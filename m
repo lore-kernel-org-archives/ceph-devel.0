@@ -1,52 +1,64 @@
-From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Subject: Re: v0.94.7 Hammer released
-Date: Tue, 17 May 2016 10:04:41 +0200
-Message-ID: <CABZ+qq=PUoA8rObv+TwT_NO9nRJnQA4xXOrKKdCp=5Q42Y9pNg@mail.gmail.com>
-References: <alpine.DEB.2.11.1605131020340.20416@cpach.fuggernut.com>
+From: Junwang Zhao <zhjwpku@gmail.com>
+Subject: Re: [wip-addr-features] make sure I am doing the right thing
+Date: Tue, 17 May 2016 17:34:40 +0800
+Message-ID: <CAEG8a3KPFfuFfM2TDyY11A0XD=fvGEmm=TP2Y_ZvZfWYTREAzw@mail.gmail.com>
+References: <CAEG8a3LQuro2zXu90im0aQ58XxdGLDQvLxnjkJ+Rd8C6k70QVw@mail.gmail.com>
+	<alpine.DEB.2.11.1605160446150.30956@cpach.fuggernut.com>
+	<alpine.DEB.2.11.1605161228390.30956@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1605131020340.20416-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f66.google.com ([209.85.213.66]:35108 "EHLO
+	mail-vk0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751122AbcEQJel (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2016 05:34:41 -0400
+Received: by mail-vk0-f66.google.com with SMTP id e126so1426143vkb.2
+        for <ceph-devel@vger.kernel.org>; Tue, 17 May 2016 02:34:41 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1605161228390.30956@cpach.fuggernut.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgU2FnZSBldCBhbCwKCkknbSB1cGRhdGluZyBvdXIgcHJlLXByb2QgY2x1c3RlciBmcm9tIDAu
-OTQuNiB0byAwLjk0LjcgYW5kIGFmdGVyCnVwZ3JhZGluZyB0aGUgY2VwaC1tb24ncyBJJ20gZ2V0
-dGluZyBsb2FkcyBvZiB3YXJuaW5ncyBsaWtlOgoKMjAxNi0wNS0xNyAxMDowMToyOS4zMTQ3ODUg
-b3NkLjc2IFtXUk5dIGZhaWxlZCB0byBlbmNvZGUgbWFwIGUxMDMxMTYKd2l0aCBleHBlY3RlZCBj
-cmMKCkkndmUgc2VlbiB0aGF0IGVycm9yIGlzIHdoaXRlbGlzdGVkIGluIHRoZSBxYS1zdWl0ZToK
-aHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC1xYS1zdWl0ZS9wdWxsLzYwMi9maWxlcwoKSXMg
-aXQgcmVhbGx5IGhhcm1sZXNzPyAoVGhpcyBpcyB0aGUgZmlyc3QgdGltZSBJJ3ZlIHNlZW4gc3Vj
-aCBhIHdhcm5pbmcpLgoKVGhhbmtzIGluIGFkdmFuY2UhCgpEYW4KCgoKCk9uIEZyaSwgTWF5IDEz
-LCAyMDE2IGF0IDQ6MjEgUE0sIFNhZ2UgV2VpbCA8c2FnZUByZWRoYXQuY29tPiB3cm90ZToKPiBU
-aGlzIEhhbW1lciBwb2ludCByZWxlYXNlIGZpeGVzIHNldmVyYWwgbWlub3IgYnVncy4gSXQgYWxz
-byBpbmNsdWRlcyBhCj4gYmFja3BvcnQgb2YgYW4gaW1wcm92ZWQg4oCYY2VwaCBvc2QgcmV3ZWln
-aHQtYnktdXRpbGl6YXRpb27igJkgY29tbWFuZCBmb3IKPiBoYW5kbGluZyBPU0RzIHdpdGggaGln
-aGVyLXRoYW4tYXZlcmFnZSB1dGlsaXphdGlvbnMuCj4KPiBXZSByZWNvbW1lbmQgdGhhdCBhbGwg
-aGFtbWVyIHYwLjk0LnggdXNlcnMgdXBncmFkZS4KPgo+IEZvciBtb3JlIGRldGFpbGVkIGluZm9y
-bWF0aW9uLCBzZWUgdGhlIHJlbGVhc2UgYW5ub3VuY2VtZW50IGF0Cj4KPiAgICAgICAgIGh0dHA6
-Ly9jZXBoLmNvbS9yZWxlYXNlcy92MC05NC03LWhhbW1lci1yZWxlYXNlZC8KPgo+IG9yIHRoZSBj
-b21wbGV0ZSBjaGFuZ2Vsb2cgYXQKPgo+ICAgICAgICAgaHR0cDovL2RvY3MuY2VwaC5jb20vZG9j
-cy9tYXN0ZXIvX2Rvd25sb2Fkcy92MC45NC42LnR4dAo+Cj4gR2V0dGluZyBDZXBoCj4gLS0tLS0t
-LS0tLS0tCj4KPiAqIEdpdCBhdCBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2VwaC5naXQKPiAqIFRh
-cmJhbGwgYXQgaHR0cDovL2Rvd25sb2FkLmNlcGguY29tL3RhcmJhbGxzL2NlcGgtMC45NC43LnRh
-ci5nego+ICogRm9yIHBhY2thZ2VzLCBzZWUgaHR0cDovL2NlcGguY29tL2RvY3MvbWFzdGVyL2lu
-c3RhbGwvZ2V0LXBhY2thZ2VzCj4gKiBGb3IgY2VwaC1kZXBsb3ksIHNlZSBodHRwOi8vY2VwaC5j
-b20vZG9jcy9tYXN0ZXIvaW5zdGFsbC9pbnN0YWxsLWNlcGgtZGVwbG95Cj4gX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiBjZXBoLXVzZXJzIG1haWxpbmcg
-bGlzdAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiBodHRwOi8vbGlzdHMuY2VwaC5jb20v
-bGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KPgpfX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVz
-ZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
-aC11c2Vycy1jZXBoLmNvbQo=
+Hi Sage,
+
+Check this[1], we should I do next, entity_addrvec_t ?
+
+[1] https://github.com/zhjwpku/ceph/commits/wip-addr-work
+
+On Tue, May 17, 2016 at 12:29 AM, Sage Weil <sage@newdream.net> wrote:
+> On Mon, 16 May 2016, Sage Weil wrote:
+>> Hi Junwang,
+>>
+>> On Mon, 16 May 2016, Junwang Zhao wrote:
+>> > Hi Sage, Haomai,
+>> >
+>> > I am working on the require-features-patch, I use 'make' to see the conflicts,
+>> > and change the code to fit the required-feature-patch, [1] is a huge patch
+>> > that I am still working on, it has not been finished. I really need to check
+>> > with you whether I am doing it right, since it seems the errors are endless.
+>> >
+>> > There are some comments where I am not sure in the patch, like 'not sure'.
+>>
+>> I skimmed through this and it looks mostly right, but I see a few cases
+>> where features aren't needed, e.g. cls_refcount_get in
+>> cls_refcount_client.cc (there's no addr being encoded in
+>> cls_refcount_get_op, so no need to make the encoding featureful).
+>>
+>> > I didn't split this huge patch into small ones, I am not sure is that a
+>> > must, if yes, I will split it into small ones.
+>>
+>> The end result needs to be a series of small patches, but that doesn't
+>> have to happen right away.  I think it might be useful to do a few small
+>> sets of changes first just to show what the goal is, though.
+>>
+>> I will take the patch below and pull a few sample changes out so you can
+>> see.  Traveling at the moment, but I'll have something pushed today (that
+>> is also rebased on top of the latest wip-addr-cleanup branch).
+>
+> I went on a bit of a binge and have a wip-addr-work branch that is mostly
+> there.  The last thing (I think) is updating msg/simple and msg/async.
+> These ones should explicitly encode with features 0 since the protocol is
+> defined in terms of the legacy encoding.
+>
+> sage
