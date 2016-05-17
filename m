@@ -1,53 +1,78 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [wip-addr-features] make sure I am doing the right thing
-Date: Mon, 16 May 2016 12:29:45 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605161228390.30956@cpach.fuggernut.com>
-References: <CAEG8a3LQuro2zXu90im0aQ58XxdGLDQvLxnjkJ+Rd8C6k70QVw@mail.gmail.com> <alpine.DEB.2.11.1605160446150.30956@cpach.fuggernut.com>
+From: Karsten Heymann <karsten.heymann@gmail.com>
+Subject: Re: [ceph-users] v10.2.1 Jewel released
+Date: Tue, 17 May 2016 07:14:40 +0200
+Message-ID: <CAL017hCBz01LFsg4PbVtPwdbQs=WL=qEw_GGmO5sHE4SUC+9hg@mail.gmail.com>
+References: <alpine.DEB.2.11.1605160910080.2730@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54998 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754245AbcEPQ3a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 May 2016 12:29:30 -0400
-In-Reply-To: <alpine.DEB.2.11.1605160446150.30956@cpach.fuggernut.com>
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35441 "EHLO
+	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750918AbcEQFPL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2016 01:15:11 -0400
+Received: by mail-wm0-f67.google.com with SMTP id e201so1656650wme.2
+        for <ceph-devel@vger.kernel.org>; Mon, 16 May 2016 22:15:10 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1605160910080.2730@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Junwang Zhao <zhjwpku@gmail.com>
-Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@redhat.com>
+Cc: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com
 
-On Mon, 16 May 2016, Sage Weil wrote:
-> Hi Junwang,
-> 
-> On Mon, 16 May 2016, Junwang Zhao wrote:
-> > Hi Sage, Haomai,
-> > 
-> > I am working on the require-features-patch, I use 'make' to see the conflicts,
-> > and change the code to fit the required-feature-patch, [1] is a huge patch
-> > that I am still working on, it has not been finished. I really need to check
-> > with you whether I am doing it right, since it seems the errors are endless.
-> > 
-> > There are some comments where I am not sure in the patch, like 'not sure'.
-> 
-> I skimmed through this and it looks mostly right, but I see a few cases 
-> where features aren't needed, e.g. cls_refcount_get in 
-> cls_refcount_client.cc (there's no addr being encoded in 
-> cls_refcount_get_op, so no need to make the encoding featureful).
->  
-> > I didn't split this huge patch into small ones, I am not sure is that a 
-> > must, if yes, I will split it into small ones.
-> 
-> The end result needs to be a series of small patches, but that doesn't 
-> have to happen right away.  I think it might be useful to do a few small 
-> sets of changes first just to show what the goal is, though.
-> 
-> I will take the patch below and pull a few sample changes out so you can 
-> see.  Traveling at the moment, but I'll have something pushed today (that 
-> is also rebased on top of the latest wip-addr-cleanup branch).
+Hi Sage,
 
-I went on a bit of a binge and have a wip-addr-work branch that is mostly 
-there.  The last thing (I think) is updating msg/simple and msg/async.  
-These ones should explicitly encode with features 0 since the protocol is 
-defined in terms of the legacy encoding.
+the updated debian packages are *still* missing ceph-{mon,osd}.target.
+Was it intentional to release the point release without the fix?
 
-sage
+root@ceph-cap1-01:~# apt-show-versions | grep ^ceph | sort
+ceph:amd64/jessie 10.2.1-1~bpo80+1 uptodate
+ceph-base:amd64/jessie 10.2.1-1~bpo80+1 uptodate
+ceph-common:amd64/jessie 10.2.1-1~bpo80+1 uptodate
+ceph-dash:all 0.1 installed: No available version in archive
+ceph-deploy:all/jessie 1.5.33 uptodate
+ceph-fs-common:amd64/jessie 10.2.1-1~bpo80+1 uptodate
+ceph-fuse:amd64/jessie 10.2.1-1~bpo80+1 uptodate
+ceph-mds:amd64/jessie 10.2.1-1~bpo80+1 uptodate
+ceph-mon:amd64/jessie 10.2.1-1~bpo80+1 uptodate
+ceph-osd:amd64/jessie 10.2.1-1~bpo80+1 uptodate
+root@ceph-cap1-01:~# dpkg -S /lib/systemd/system/ceph*target
+dpkg-query: no path found matching pattern /lib/systemd/system/ceph-mon.target
+dpkg-query: no path found matching pattern /lib/systemd/system/ceph-osd.target
+ceph-common: /lib/systemd/system/ceph.target
+root@ceph-cap1-01:~# grep ceph-mon.target /lib/systemd/system/ceph*
+/lib/systemd/system/ceph-mon@.service:PartOf=ceph-mon.target
+/lib/systemd/system/ceph-mon@.service:WantedBy=ceph-mon.target
+root@ceph-cap1-01:~# grep ceph-osd.target /lib/systemd/system/ceph*
+/lib/systemd/system/ceph-osd@.service:PartOf=ceph-osd.target
+/lib/systemd/system/ceph-osd@.service:WantedBy=ceph-osd.target
+
+Relevant PR: https://github.com/ceph/ceph/pull/8815
+
+Best regards
+Karsten
+
+2016-05-16 15:11 GMT+02:00 Sage Weil <sage@redhat.com>:
+> This is the first bugfix release for Jewel. It contains several annoying
+> packaging and init system fixes and a range of important bugfixes across
+> RBD, RGW, and CephFS.
+>
+> We recommend that all v10.2.x users upgrade.
+>
+> For more detailed information, see the release notes at
+>
+>         http://docs.ceph.com/docs/master/release-notes/#v10-2-1-jewel
+>
+> or the complete changelog at
+>
+>         http://docs.ceph.com/docs/master/_downloads/v10.2.1.txt
+>
+> Getting Ceph
+> ------------
+>
+> * Git at git://github.com/ceph/ceph.git
+> * Tarball at http://download.ceph.com/tarballs/ceph-10.2.1.tar.gz
+> * For packages, see http://ceph.com/docs/master/install/get-packages
+> * For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
