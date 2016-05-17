@@ -1,64 +1,89 @@
-From: Junwang Zhao <zhjwpku@gmail.com>
-Subject: Re: [wip-addr-features] make sure I am doing the right thing
-Date: Tue, 17 May 2016 17:34:40 +0800
-Message-ID: <CAEG8a3KPFfuFfM2TDyY11A0XD=fvGEmm=TP2Y_ZvZfWYTREAzw@mail.gmail.com>
-References: <CAEG8a3LQuro2zXu90im0aQ58XxdGLDQvLxnjkJ+Rd8C6k70QVw@mail.gmail.com>
-	<alpine.DEB.2.11.1605160446150.30956@cpach.fuggernut.com>
-	<alpine.DEB.2.11.1605161228390.30956@cpach.fuggernut.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [ceph-users] v0.94.7 Hammer released
+Date: Tue, 17 May 2016 07:56:13 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605170754590.30956@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1605131020340.20416@cpach.fuggernut.com> <CABZ+qq=PUoA8rObv+TwT_NO9nRJnQA4xXOrKKdCp=5Q42Y9pNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1255029369-1463486176=:30956"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f66.google.com ([209.85.213.66]:35108 "EHLO
-	mail-vk0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751122AbcEQJel (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2016 05:34:41 -0400
-Received: by mail-vk0-f66.google.com with SMTP id e126so1426143vkb.2
-        for <ceph-devel@vger.kernel.org>; Tue, 17 May 2016 02:34:41 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1605161228390.30956@cpach.fuggernut.com>
+Received: from mx1.redhat.com ([209.132.183.28]:44950 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752240AbcEQLz7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 17 May 2016 07:55:59 -0400
+In-Reply-To: <CABZ+qq=PUoA8rObv+TwT_NO9nRJnQA4xXOrKKdCp=5Q42Y9pNg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-Hi Sage,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Check this[1], we should I do next, entity_addrvec_t ?
+--8323329-1255029369-1463486176=:30956
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
-[1] https://github.com/zhjwpku/ceph/commits/wip-addr-work
+On Tue, 17 May 2016, Dan van der Ster wrote:
+> Hi Sage et al,
+> 
+> I'm updating our pre-prod cluster from 0.94.6 to 0.94.7 and after
+> upgrading the ceph-mon's I'm getting loads of warnings like:
+> 
+> 2016-05-17 10:01:29.314785 osd.76 [WRN] failed to encode map e103116
+> with expected crc
+> 
+> I've seen that error is whitelisted in the qa-suite:
+> https://github.com/ceph/ceph-qa-suite/pull/602/files
+> 
+> Is it really harmless? (This is the first time I've seen such a warning).
 
-On Tue, May 17, 2016 at 12:29 AM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 16 May 2016, Sage Weil wrote:
->> Hi Junwang,
->>
->> On Mon, 16 May 2016, Junwang Zhao wrote:
->> > Hi Sage, Haomai,
->> >
->> > I am working on the require-features-patch, I use 'make' to see the conflicts,
->> > and change the code to fit the required-feature-patch, [1] is a huge patch
->> > that I am still working on, it has not been finished. I really need to check
->> > with you whether I am doing it right, since it seems the errors are endless.
->> >
->> > There are some comments where I am not sure in the patch, like 'not sure'.
->>
->> I skimmed through this and it looks mostly right, but I see a few cases
->> where features aren't needed, e.g. cls_refcount_get in
->> cls_refcount_client.cc (there's no addr being encoded in
->> cls_refcount_get_op, so no need to make the encoding featureful).
->>
->> > I didn't split this huge patch into small ones, I am not sure is that a
->> > must, if yes, I will split it into small ones.
->>
->> The end result needs to be a series of small patches, but that doesn't
->> have to happen right away.  I think it might be useful to do a few small
->> sets of changes first just to show what the goal is, though.
->>
->> I will take the patch below and pull a few sample changes out so you can
->> see.  Traveling at the moment, but I'll have something pushed today (that
->> is also rebased on top of the latest wip-addr-cleanup branch).
->
-> I went on a bit of a binge and have a wip-addr-work branch that is mostly
-> there.  The last thing (I think) is updating msg/simple and msg/async.
-> These ones should explicitly encode with features 0 since the protocol is
-> defined in terms of the legacy encoding.
->
-> sage
+Are you sure you were upgrading from v0.94.6?  I don't see anything that 
+would trigger these warnings going from .6 to .7, which is strange.
+
+That said, the errors are generally harmless--it just means the monitors 
+are running a different version of the code and the OSDs are pulling maps 
+directly from a mon to ensure they are all in sync.  It's normal during 
+many upgrades, but not expected for this particular jump...
+
+sage
+
+
+
+
+> Thanks in advance!
+> 
+> Dan
+> 
+> 
+> 
+> 
+> On Fri, May 13, 2016 at 4:21 PM, Sage Weil <sage@redhat.com> wrote:
+> > This Hammer point release fixes several minor bugs. It also includes a
+> > backport of an improved ‘ceph osd reweight-by-utilization’ command for
+> > handling OSDs with higher-than-average utilizations.
+> >
+> > We recommend that all hammer v0.94.x users upgrade.
+> >
+> > For more detailed information, see the release announcement at
+> >
+> >         http://ceph.com/releases/v0-94-7-hammer-released/
+> >
+> > or the complete changelog at
+> >
+> >         http://docs.ceph.com/docs/master/_downloads/v0.94.6.txt
+> >
+> > Getting Ceph
+> > ------------
+> >
+> > * Git at git://github.com/ceph/ceph.git
+> > * Tarball at http://download.ceph.com/tarballs/ceph-0.94.7.tar.gz
+> > * For packages, see http://ceph.com/docs/master/install/get-packages
+> > * For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users@lists.ceph.com
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >
+> 
+> 
+--8323329-1255029369-1463486176=:30956--
