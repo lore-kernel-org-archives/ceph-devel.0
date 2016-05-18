@@ -1,70 +1,58 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: Cache Layer on NVME driver
-Date: Wed, 18 May 2016 21:32:31 +0800
-Message-ID: <CACJqLyab+rX4e2eu3oaC-DdX-OCaBCWiM_tt79KV8Dr6ZRfL4w@mail.gmail.com>
-References: <CAFjGuFRBqX8CibKVA=Uu7J0cO3DXsLrA1_FVP_LBriKTLgQr3g@mail.gmail.com>
-	<CACJqLyYGwhymjaVSoAGArPmPzFBmUHRrjGAtiQXKr6gEv_ZsSw@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 05/18/2016 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 18 May 2016 09:36:15 -0500
+Message-ID: <f5481f49-d445-f1f7-b380-8c0c76575418@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-hk2apc01on0108.outbound.protection.outlook.com ([104.47.124.108]:30259
-	"EHLO APC01-HK2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751062AbcERNcm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 18 May 2016 09:32:42 -0400
-Received: by mail-vk0-f41.google.com with SMTP id s184so60920830vkb.3
-        for <ceph-devel@vger.kernel.org>; Wed, 18 May 2016 06:32:37 -0700 (PDT)
-In-Reply-To: <CACJqLyYGwhymjaVSoAGArPmPzFBmUHRrjGAtiQXKr6gEv_ZsSw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:42270 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753137AbcEROgS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 18 May 2016 10:36:18 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 4B9B37F0A3
+	for <ceph-devel@vger.kernel.org>; Wed, 18 May 2016 14:36:17 +0000 (UTC)
+Received: from [10.3.112.86] (ovpn-112-86.phx2.redhat.com [10.3.112.86])
+	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u4IEaFST008670
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 18 May 2016 10:36:16 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Rajath Shashidhara <rajath.shashidhara@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Rajath,
+8AM PST as usual! Topics include a small hammer vs jewel performance 
+update and discussion on filestore directory split/merge threshold 
+behavior.  Please feel free to add your own!
 
-We are glad to see your passion, from my view, sage is planning to
-implement a userspace cache in bluestore itself. Like
-(https://github.com/ceph/ceph/commit/b9ac31afe5a162176f019baa25348014a77f6ab8#commitcomment-17488250).
+Here's the links:
 
-I guess the cache won't be a generic cache interface. Instead it will
-be bound to specified needed object. So sage may give a brief?
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
 
-On Wed, May 18, 2016 at 9:32 PM, Haomai Wang <haomai@xsky.com> wrote:
->
->
-> On Wed, May 18, 2016 at 2:44 PM, Rajath Shashidhara
-> <rajath.shashidhara@gmail.com> wrote:
->>
->> Hello,
->>
->> I was a GSoC'16 applicant for the project "Implementing Cache layer on
->> top of NVME Driver". Unfortunately, I was not selected for the
->> internship.
->
->
-> Hi Rajath,
->
-> We are glad to see your passion, from my view, sage is planning to implement
-> a userspace cache in bluestore itself. Like
-> (https://github.com/ceph/ceph/commit/b9ac31afe5a162176f019baa25348014a77f6ab8#commitcomment-17488250).
->
-> I guess the cache won't be a generic cache interface. Instead it will be
-> bound to specified needed object. So sage may give a brief?
->
->>
->>
->> However, I would be interested in working on the project as an
->> independent contributor to Ceph.
->> I am expecting to receive the necessary support from Ceph developer
->> community.
->>
->> In case I missed out any important details in my project proposal or I
->> have the wrong understanding of the project, please help me figure out
->> the details.
->>
->> Looking forward to contribute!
->>
->> Thank you,
->> Rajath Shashidhara
->
->
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+              +1 408 740 7256
+              +1 888 240 2560(US Toll Free)
+              +1 408 317 9253(Alternate Number)
+              (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
