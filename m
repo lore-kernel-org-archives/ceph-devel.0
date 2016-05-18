@@ -1,55 +1,70 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Update on ceph-mgr
-Date: Wed, 18 May 2016 12:26:30 +0100
-Message-ID: <CALe9h7fDcEOv8XLzsL64xzo6LY_okSFUtJ10QPaJWcXyi6uOzA@mail.gmail.com>
-References: <CALe9h7fCyrZGPqcymcsRiHwVMaTUP26c8xmQO6QAy6XkfVO27w@mail.gmail.com>
- <295874104.352.1463569858689@ox.pcextreme.nl> <CALe9h7cg=FtP7s_V-OgmxSwwfJSi4fAH90-ehLnMXU3PxdRqRQ@mail.gmail.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: Cache Layer on NVME driver
+Date: Wed, 18 May 2016 21:32:31 +0800
+Message-ID: <CACJqLyab+rX4e2eu3oaC-DdX-OCaBCWiM_tt79KV8Dr6ZRfL4w@mail.gmail.com>
+References: <CAFjGuFRBqX8CibKVA=Uu7J0cO3DXsLrA1_FVP_LBriKTLgQr3g@mail.gmail.com>
+	<CACJqLyYGwhymjaVSoAGArPmPzFBmUHRrjGAtiQXKr6gEv_ZsSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f51.google.com ([209.85.218.51]:35919 "EHLO
-	mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750795AbcERL0u (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 May 2016 07:26:50 -0400
-Received: by mail-oi0-f51.google.com with SMTP id x201so71186010oif.3
-        for <ceph-devel@vger.kernel.org>; Wed, 18 May 2016 04:26:50 -0700 (PDT)
-In-Reply-To: <CALe9h7cg=FtP7s_V-OgmxSwwfJSi4fAH90-ehLnMXU3PxdRqRQ@mail.gmail.com>
+Received: from mail-hk2apc01on0108.outbound.protection.outlook.com ([104.47.124.108]:30259
+	"EHLO APC01-HK2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751062AbcERNcm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 18 May 2016 09:32:42 -0400
+Received: by mail-vk0-f41.google.com with SMTP id s184so60920830vkb.3
+        for <ceph-devel@vger.kernel.org>; Wed, 18 May 2016 06:32:37 -0700 (PDT)
+In-Reply-To: <CACJqLyYGwhymjaVSoAGArPmPzFBmUHRrjGAtiQXKr6gEv_ZsSw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Rajath Shashidhara <rajath.shashidhara@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, May 18, 2016 at 12:21 PM, John Spray <jspray@redhat.com> wrote:
-> On Wed, May 18, 2016 at 12:10 PM, Wido den Hollander <wido@42on.com> wrote:
->>
->> So is the idea that when you install 'ceph-mon' you get the API by default?
->
-> No, it's a separate service.
+Hi Rajath,
 
-...although I should add that it would be a default part of ceph
-releases, and I expect many people would just put a ceph-mgr instance
-alongside each ceph-mon instance.
+We are glad to see your passion, from my view, sage is planning to
+implement a userspace cache in bluestore itself. Like
+(https://github.com/ceph/ceph/commit/b9ac31afe5a162176f019baa25348014a77f6ab8#commitcomment-17488250).
 
+I guess the cache won't be a generic cache interface. Instead it will
+be bound to specified needed object. So sage may give a brief?
+
+On Wed, May 18, 2016 at 9:32 PM, Haomai Wang <haomai@xsky.com> wrote:
 >
->> Having a REST API for Ceph enabled at all times or with a simple click would be great for integrations with for example Salt.
+>
+> On Wed, May 18, 2016 at 2:44 PM, Rajath Shashidhara
+> <rajath.shashidhara@gmail.com> wrote:
 >>
->> And why do you need HA at all, the API mainly talks to the mon, right?
->
-> ceph-mgr will talk to mons, but it will also talk directly to other
-> daemons, for e.g. gathering statistics.  Check out the earlier
-> discussions on where this fits in and what it's for:
->
-> http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/28944
-> 1:51:00 here: https://www.youtube.com/watch?v=0gIqgxrmrJw
->
-> Cheers,
-> John
->
->> Wido
+>> Hello,
 >>
->>> Cheers,
->>> John
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> I was a GSoC'16 applicant for the project "Implementing Cache layer on
+>> top of NVME Driver". Unfortunately, I was not selected for the
+>> internship.
+>
+>
+> Hi Rajath,
+>
+> We are glad to see your passion, from my view, sage is planning to implement
+> a userspace cache in bluestore itself. Like
+> (https://github.com/ceph/ceph/commit/b9ac31afe5a162176f019baa25348014a77f6ab8#commitcomment-17488250).
+>
+> I guess the cache won't be a generic cache interface. Instead it will be
+> bound to specified needed object. So sage may give a brief?
+>
+>>
+>>
+>> However, I would be interested in working on the project as an
+>> independent contributor to Ceph.
+>> I am expecting to receive the necessary support from Ceph developer
+>> community.
+>>
+>> In case I missed out any important details in my project proposal or I
+>> have the wrong understanding of the project, please help me figure out
+>> the details.
+>>
+>> Looking forward to contribute!
+>>
+>> Thank you,
+>> Rajath Shashidhara
+>
+>
