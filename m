@@ -1,76 +1,75 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 1/6] libceph: make ceph_osdc_put_request() accept NULL
-Date: Thu, 19 May 2016 16:06:37 +0200
-Message-ID: <1463666802-25140-2-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 4/6] libceph: change how osd_op_reply message size is calculated
+Date: Thu, 19 May 2016 16:06:40 +0200
+Message-ID: <1463666802-25140-5-git-send-email-idryomov@gmail.com>
 References: <1463666802-25140-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35839 "EHLO
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:36459 "EHLO
 	mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754776AbcESOHI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 10:07:08 -0400
-Received: by mail-wm0-f66.google.com with SMTP id s63so6789865wme.2
-        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 07:07:07 -0700 (PDT)
+	with ESMTP id S1754988AbcESOHL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 10:07:11 -0400
+Received: by mail-wm0-f66.google.com with SMTP id w143so21258926wmw.3
+        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 07:07:10 -0700 (PDT)
 Received: from localhost.localdomain (ip-94-112-165-81.net.upcbroadband.cz. [94.112.165.81])
-        by smtp.gmail.com with ESMTPSA id b124sm3586833wmb.1.2016.05.19.07.07.06
+        by smtp.gmail.com with ESMTPSA id b124sm3586833wmb.1.2016.05.19.07.07.08
         for <ceph-devel@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 19 May 2016 07:07:06 -0700 (PDT)
+        Thu, 19 May 2016 07:07:09 -0700 (PDT)
 In-Reply-To: <1463666802-25140-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
+For a message pool message, preallocate a page, just like we do for
+osd_op.  For a normal message, take ceph_object_id into account and
+don't bother subtracting CEPH_OSD_SLAB_OPS ceph_osd_ops.
+
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- fs/ceph/addr.c        | 9 +++------
- net/ceph/osd_client.c | 8 +++++---
- 2 files changed, 8 insertions(+), 9 deletions(-)
+ net/ceph/osd_client.c | 14 ++++----------
+ 1 file changed, 4 insertions(+), 10 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 4801571f51cb..3e61fc8bb371 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1099,8 +1099,7 @@ release_pvec_pages:
- 		mapping->writeback_index = index;
- 
- out:
--	if (req)
--		ceph_osdc_put_request(req);
-+	ceph_osdc_put_request(req);
- 	ceph_put_snap_context(snapc);
- 	dout("writepages done, rc = %d\n", rc);
- 	return rc;
-@@ -1824,10 +1823,8 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci, u32 pool)
- out_unlock:
- 	up_write(&mdsc->pool_perm_rwsem);
- 
--	if (rd_req)
--		ceph_osdc_put_request(rd_req);
--	if (wr_req)
--		ceph_osdc_put_request(wr_req);
-+	ceph_osdc_put_request(rd_req);
-+	ceph_osdc_put_request(wr_req);
- out:
- 	if (!err)
- 		err = have;
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 40a53a70efdf..cacce9e35f08 100644
+index d66dacc9d0d4..75e27bd3d372 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -354,9 +354,11 @@ EXPORT_SYMBOL(ceph_osdc_get_request);
+@@ -19,7 +19,6 @@
+ #include <linux/ceph/auth.h>
+ #include <linux/ceph/pagelist.h>
  
- void ceph_osdc_put_request(struct ceph_osd_request *req)
- {
--	dout("%s %p (was %d)\n", __func__, req,
--	     atomic_read(&req->r_kref.refcount));
--	kref_put(&req->r_kref, ceph_osdc_release_request);
-+	if (req) {
-+		dout("%s %p (was %d)\n", __func__, req,
-+		     atomic_read(&req->r_kref.refcount));
-+		kref_put(&req->r_kref, ceph_osdc_release_request);
-+	}
- }
- EXPORT_SYMBOL(ceph_osdc_put_request);
+-#define OSD_OP_FRONT_LEN	4096
+ #define OSD_OPREPLY_FRONT_LEN	512
+ 
+ static struct kmem_cache	*ceph_osd_request_cache;
+@@ -440,11 +439,8 @@ int ceph_osdc_alloc_messages(struct ceph_osd_request *req, gfp_t gfp)
+ 
+ 	/* create reply message */
+ 	msg_size = OSD_OPREPLY_FRONT_LEN;
+-	if (req->r_num_ops > CEPH_OSD_SLAB_OPS) {
+-		/* ceph_osd_op and rval */
+-		msg_size += (req->r_num_ops - CEPH_OSD_SLAB_OPS) *
+-			    (sizeof(struct ceph_osd_op) + 4);
+-	}
++	msg_size += req->r_base_oid.name_len;
++	msg_size += req->r_num_ops * sizeof(struct ceph_osd_op);
+ 
+ 	if (req->r_mempool)
+ 		msg = ceph_msgpool_get(&osdc->msgpool_op_reply, 0);
+@@ -2702,13 +2698,11 @@ int ceph_osdc_init(struct ceph_osd_client *osdc, struct ceph_client *client)
+ 		goto out;
+ 
+ 	err = ceph_msgpool_init(&osdc->msgpool_op, CEPH_MSG_OSD_OP,
+-				OSD_OP_FRONT_LEN, 10, true,
+-				"osd_op");
++				PAGE_SIZE, 10, true, "osd_op");
+ 	if (err < 0)
+ 		goto out_mempool;
+ 	err = ceph_msgpool_init(&osdc->msgpool_op_reply, CEPH_MSG_OSD_OPREPLY,
+-				OSD_OPREPLY_FRONT_LEN, 10, true,
+-				"osd_op_reply");
++				PAGE_SIZE, 10, true, "osd_op_reply");
+ 	if (err < 0)
+ 		goto out_msgpool;
  
 -- 
 2.4.3
