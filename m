@@ -1,65 +1,77 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 0/6] libceph: get rid of CEPH_MAX_OID_NAME_LEN limit
-Date: Thu, 19 May 2016 16:06:36 +0200
-Message-ID: <1463666802-25140-1-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 1/6] libceph: make ceph_osdc_put_request() accept NULL
+Date: Thu, 19 May 2016 16:06:37 +0200
+Message-ID: <1463666802-25140-2-git-send-email-idryomov@gmail.com>
+References: <1463666802-25140-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:33571 "EHLO
-	mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754985AbcESOHM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 10:07:12 -0400
-Received: by mail-wm0-f68.google.com with SMTP id r12so21356592wme.0
-        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 07:07:12 -0700 (PDT)
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:35839 "EHLO
+	mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754776AbcESOHI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 10:07:08 -0400
+Received: by mail-wm0-f66.google.com with SMTP id s63so6789865wme.2
+        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 07:07:07 -0700 (PDT)
 Received: from localhost.localdomain (ip-94-112-165-81.net.upcbroadband.cz. [94.112.165.81])
-        by smtp.gmail.com with ESMTPSA id b124sm3586833wmb.1.2016.05.19.07.07.05
+        by smtp.gmail.com with ESMTPSA id b124sm3586833wmb.1.2016.05.19.07.07.06
         for <ceph-devel@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 19 May 2016 07:07:05 -0700 (PDT)
+        Thu, 19 May 2016 07:07:06 -0700 (PDT)
+In-Reply-To: <1463666802-25140-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hello,
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ fs/ceph/addr.c        | 9 +++------
+ net/ceph/osd_client.c | 8 +++++---
+ 2 files changed, 8 insertions(+), 9 deletions(-)
 
-I pushed wip-oid, to get rid of the annoying CEPH_MAX_OID_NAME_LEN
-limit on the length of an object name that libceph can work with, which
-translated into the limit of ~100 chars on the length of an rbd image
-name.  The new image name limit is ~4000 chars.  (The exact number
-depends on how many mon IPs and map options were specified - mons
-+ options + image name string must fit into a single page.)
-
-We should define a sensible limit and start enforcing it on rbd
-create/clone/etc and on open/rbd map.  Limits from the lower layers
-
-   4096 - strlen(".rbd") on create for format 1
-   4096 - strlen("rbd_id.") on create for format 2
-   ~4000 on map
-
-aren't something we want to rely on or support.
-
-Thanks,
-
-                Ilya
-
-
-Ilya Dryomov (6):
-  libceph: make ceph_osdc_put_request() accept NULL
-  libceph: grab snapc in ceph_osdc_alloc_request()
-  libceph: move message allocation out of ceph_osdc_alloc_request()
-  libceph: change how osd_op_reply message size is calculated
-  libceph: variable-sized ceph_object_id
-  rbd: use header_oid instead of header_name
-
- drivers/block/rbd.c             |  83 ++++++++++++++-------------
- fs/ceph/addr.c                  |  23 ++++----
- fs/ceph/file.c                  |   9 ++-
- fs/ceph/ioctl.c                 |   2 +-
- include/linux/ceph/osd_client.h |   1 +
- include/linux/ceph/osdmap.h     |  62 ++++++++++++---------
- net/ceph/debugfs.c              |   2 +-
- net/ceph/osd_client.c           | 120 ++++++++++++++++++++++------------------
- net/ceph/osdmap.c               |  93 ++++++++++++++++++++++++++++++-
- 9 files changed, 266 insertions(+), 129 deletions(-)
-
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 4801571f51cb..3e61fc8bb371 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1099,8 +1099,7 @@ release_pvec_pages:
+ 		mapping->writeback_index = index;
+ 
+ out:
+-	if (req)
+-		ceph_osdc_put_request(req);
++	ceph_osdc_put_request(req);
+ 	ceph_put_snap_context(snapc);
+ 	dout("writepages done, rc = %d\n", rc);
+ 	return rc;
+@@ -1824,10 +1823,8 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci, u32 pool)
+ out_unlock:
+ 	up_write(&mdsc->pool_perm_rwsem);
+ 
+-	if (rd_req)
+-		ceph_osdc_put_request(rd_req);
+-	if (wr_req)
+-		ceph_osdc_put_request(wr_req);
++	ceph_osdc_put_request(rd_req);
++	ceph_osdc_put_request(wr_req);
+ out:
+ 	if (!err)
+ 		err = have;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 40a53a70efdf..cacce9e35f08 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -354,9 +354,11 @@ EXPORT_SYMBOL(ceph_osdc_get_request);
+ 
+ void ceph_osdc_put_request(struct ceph_osd_request *req)
+ {
+-	dout("%s %p (was %d)\n", __func__, req,
+-	     atomic_read(&req->r_kref.refcount));
+-	kref_put(&req->r_kref, ceph_osdc_release_request);
++	if (req) {
++		dout("%s %p (was %d)\n", __func__, req,
++		     atomic_read(&req->r_kref.refcount));
++		kref_put(&req->r_kref, ceph_osdc_release_request);
++	}
+ }
+ EXPORT_SYMBOL(ceph_osdc_put_request);
+ 
 -- 
 2.4.3
 
