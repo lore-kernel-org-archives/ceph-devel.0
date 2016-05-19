@@ -1,67 +1,186 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: =?UTF-8?B?UmU6IOetlOWkjTogW2NlcGgvY2VwaF0gV2lwIGFkZCBmbGFzaGNhY2hlICgjODc3Myk=?=
-Date: Thu, 19 May 2016 12:58:49 -0400
-Message-ID: <CANP1eJGUyw8YpmbKV7PQmDa7CD3ucY2u_GT9f-phFYQRB3idSg@mail.gmail.com>
-References: <ceph/ceph/pull/8773@github.com>
-	<ceph/ceph/pull/8773/c217543554@github.com>
-	<3858597F7658604DB90E3F60F716249C047A8EB8@H3CMLB12-EX.srv.huawei-3com.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Initial proposal for bluestore compression control and statistics
+Date: Thu, 19 May 2016 20:27:02 +0300
+Message-ID: <2ec0367c-ea9e-469e-4a80-b2a242c84f0f@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f50.google.com ([209.85.215.50]:33896 "EHLO
-	mail-lf0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754637AbcESQ6v convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 12:58:51 -0400
-Received: by mail-lf0-f50.google.com with SMTP id m64so39714835lfd.1
-        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 09:58:50 -0700 (PDT)
-In-Reply-To: <3858597F7658604DB90E3F60F716249C047A8EB8@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:36401 "EHLO
+	mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753433AbcESR1I (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 13:27:08 -0400
+Received: by mail-lf0-f45.google.com with SMTP id e130so5216687lfe.3
+        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 10:27:07 -0700 (PDT)
+Received: from [127.0.0.1] ([91.218.144.129])
+        by smtp.googlemail.com with ESMTPSA id jn5sm2518780lbc.24.2016.05.19.10.27.04
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1/SSLv3 cipher=OTHER);
+        Thu, 19 May 2016 10:27:05 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Houlinfei <hou.linfei@h3c.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, May 19, 2016 at 7:51 AM, Houlinfei <hou.linfei@h3c.com> wrote:
->
->
-> Hi, the main ceph-disk interface added is part of the prepare. We add=
- fcache, fcache_size, fcache-uuid optional arguments. These are the onl=
-y external interface. When you want to use flashcache, you must specify=
- flashcache disk and flashcache size such as
-> ceph-disk prepare --fcache /dev/sdc --fcache_size 10 /dev/sda.
-> I think we could add bcache and dm-cache in the same way if needed. W=
-hat do you think?
->
-> =E5=8F=91=E4=BB=B6=E4=BA=BA: Sage Weil [mailto:notifications@github.c=
-om]
-> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2016=E5=B9=B45=E6=9C=887=E6=97=A5=
- 3:58
-> =E6=94=B6=E4=BB=B6=E4=BA=BA: ceph/ceph
-> =E6=8A=84=E9=80=81: houlinfei 11802 (RD); Author
-> =E4=B8=BB=E9=A2=98: Re: [ceph/ceph] Wip add flashcache (#8773)
->
-> I think we want to make this more generic so that we can layer in any=
- caching option (flashcache, bcache, dm-cache). Can you send an email t=
-o ceph-devel with the proposed ceph-disk interface change so we can get=
- feedback and settle one the approach? Thanks!
+Hi cephers,
+
+please find my initial proposal with regard to bluestore compression 
+control and related statistics.
+
+Any comments/thoughts are highly appreciated.
+
+==================================================================
+
+COMPRESSION CONTROL OPTIONS
+
+One can see following means to control  compression at BlueStore level.
+
+1) Per-store setting to enable/disable compression and specify default 
+compression method
+
+bluestore_compression = <zlib | snappy> / <force | optional | disable>
+
+E.g.
+
+bluestore_compression = zlib/force
+
+The first token denotes default/applied compression algorithm.
+The second one:
+
+'force' - enables compression for any objects
+
+'optional' - burden the caller with the need to enable compression by 
+different means (see below)
+
+'disable' - unconditionally disables any compression for the store.
+
+This option is definitely useful for testing/debugging and has probably 
+limited use in production.
 
 
-I think it's important to think about how these block caching
-solutions handle O_DIRECT. Bluestore uses O_DIRECT + libaio which
-bypasses the normal kernel (page) caches. I actually don't know the
-answer to it but I think it's valuable to figure out if any of the
-above are bypassed in the O_DIRECT case.
+2) Per-object compression specification. One should be able to 
+enable/disable compression for specific object.
 
---=20
-Milosz Tanski
-CTO
-16 East 34th Street, 15th floor
-New York, NY 10016
+Following sub-option can be provided:
 
-p: 646-253-9055
-e: milosz@adfin.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+   a) Specify compression mode (along with disablement option) at object 
+creation
+
+   b) Specify compression mode at arbitrary moment via specific 
+method/ioctl call. Compression to be applied for subsequent write requests
+
+   c) Force object compression/decompression at arbitrary moment via 
+specific method/ioctl call. Existing object content to be 
+compressed/decompressed and appropriate mode to be set for subsequent 
+write requests.
+
+   d) Disable compression for short-lived objects if corresponding hint 
+has been provided via set_alloc_hint2 call. See PR at 
+https://github.com/ceph/ceph/pull/6208/files/306c5e148cd2f538b3b6c8c2a1a3d5f38ef8e15a#r63775941
+
+Along with specific compression algorithm one should be able to specify 
+default algorithm selection. E.g. user can specify 'default' compression 
+for an object instead of specific 'zlib' or 'snappy' value.
+
+This way one can avoid the need to care about the proper algorithm 
+selection for each object.
+
+Default algorithm to be taken from the store setting (see above)
+
+Such an option provides pretty good level of flexibility. Upper level 
+can introduce additional logic to control compression this way, e.g. 
+enable/disable it for specific pools or dynamically control depending on 
+how compressible object content is.
+
+3) Per-write request compression control.
+
+This option provides the highest level of flexibility but is probably an 
+overkill.
+
+Any rationales to have it?
+
+==================================================================
+
+PER-STORE STATISTICS
+
+Following statistics parameters to be introduced on per-store basis:
+
+1) Allocated - total amount of data in allocated blobs
+
+2) Stored - actual amount of stored object content, i.e. sum of all 
+objects uncompressed content
+
+3) StoredCompressed - amount of stored compressed data
+
+4) StoredCompressedOriginal - original amount of stored compressed data
+
+5) CompressionProcessed - amount of data processed by the compression. 
+This differ from 'StoredCompressed' as some data can be finally stored 
+uncompressed or removed. Also potentially the parameter can be reset by 
+some means.
+
+6) CompressOpsCount - amount of compression operations completed. The 
+parameter can be reset by some means.
+
+7) CompressTime - amount of time spent for compression. The parameter 
+can be reset by some means.
+
+8) WriteOpsCount - amount of write operations completed. The parameter 
+can be reset by some means.
+
+9) WriteTime - amount of time spent for write requests processing. The 
+parameter can be reset by some means.
+
+10) WrittenTotal - amount of written data.
+
+11) DecompressionProcessed - amount of data processed by decompression. 
+The parameter can be reset by some means.
+
+12) DecompressOpsCount - amount of decompression operations completed. 
+The parameter can be reset by some means.
+
+13) DecompressTime - amount of time spent for compression. The parameter 
+can be reset by some means.
+
+14) ReadOpsCount - amount of read operations completed. The parameter 
+can be reset by some means.
+
+15) ReadTime - amount of time spent for read requests processing. The 
+parameter can be reset by some means.
+
+16) ReadTotal - amount of read data. The parameter can be reset by some 
+means.
+
+Handling parameters 11)-16) can be a bit tricky as we might want to 
+avoid KV updates during reading. Thus we need some means to periodically 
+store these parameters or just track them in-memory.
+
+==================================================================
+
+PER-OBJECT STATISTICS NOTES
+
+It might be useful to have per-object statistics similar to the above 
+mentioned per-store one. This way upper level can revise compression 
+results and adjust the process accordingly.
+
+The drawbacks are onode footprint increase and additional complexities 
+for read op handling though.
+
+If collected per-object statistics should be retrieved by using specific 
+method/ioctl.
+
+Perhaps we can introduce some object creation flag ( or extend 
+alloc_hints or provide an ioctl ) to enable statistics collection for 
+specific objects only?
+
+Any thought on the need for that?
+
+==================================================================
+
+ADDITIONAL NOTES
+
+1) It seems helpful to introduce additional means to indicate 
+NO-MORE_WRITES event from upper level to BlueStore. This way one 
+provides a hint that allows bluestore to trigger some background 
+optimization on the object, e.g. garbage collection, defragmentation, etc.
+
+
