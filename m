@@ -1,70 +1,68 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: Cache Layer on NVME driver
-Date: Thu, 19 May 2016 15:08:25 +0800
-Message-ID: <CACJqLyaM-emU0t6VUuqzwiSK_iZo0DkG_J+LJef756x__2bZPw@mail.gmail.com>
-References: <CAFjGuFRBqX8CibKVA=Uu7J0cO3DXsLrA1_FVP_LBriKTLgQr3g@mail.gmail.com>
-	<CACJqLyYGwhymjaVSoAGArPmPzFBmUHRrjGAtiQXKr6gEv_ZsSw@mail.gmail.com>
-	<CACJqLyab+rX4e2eu3oaC-DdX-OCaBCWiM_tt79KV8Dr6ZRfL4w@mail.gmail.com>
-	<alpine.DEB.2.11.1605181311080.30956@cpach.fuggernut.com>
-	<3F3468645DC82146857A5E1C91E23F4B1B2A2780@SSIEXCH-MB3.ssi.samsung.com>
-	<alpine.DEB.2.11.1605190242200.30956@cpach.fuggernut.com>
+From: "hzwulibin" <hzwulibin@gmail.com>
+Subject: Re:  No Ceph Recovery : Is it a bug ?
+Date: Thu, 19 May 2016 15:45:55 +0800
+Message-ID: <573D6F2D.6060306@gmail.com>
+References: <CAPg135a2YdLrMspcGdLbkx-fWvh30VJ3J4Y=hKSMAxDzosd+KQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sg2apc01on0105.outbound.protection.outlook.com ([104.47.125.105]:10656
-	"EHLO APC01-SG2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753849AbcESHIk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 May 2016 03:08:40 -0400
-Received: by mail-vk0-f51.google.com with SMTP id y2so20803848vka.3
-        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 00:08:35 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1605190242200.30956@cpach.fuggernut.com>
+Received: from mail-pa0-f67.google.com ([209.85.220.67]:36848 "EHLO
+	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753914AbcESHp5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 03:45:57 -0400
+Received: by mail-pa0-f67.google.com with SMTP id xm6so7064172pab.3
+        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 00:45:56 -0700 (PDT)
+In-Reply-To: <CAPg135a2YdLrMspcGdLbkx-fWvh30VJ3J4Y=hKSMAxDzosd+KQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Jianjian Huo <jianjian.huo@samsung.com>, Rajath Shashidhara <rajath.shashidhara@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gaurav Bafna <bafnag@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-I think jianjian refer to
-this(https://github.com/ceph/ceph/blob/master/src/kv/RocksDBStore.cc#L285)
+T0ssIGNhbiB5b3Ugc2hvdyB0aGUgdGhvc2UgaW5mb3M6DQoxLiBjZXBoIG9zZCB0cmVlDQoyLiBj
+ZXBoIHBnIGR1bXBfc3R1Y2sNCjMuIGNydXNoIG1hcCBhbmQgcnVsZXMNCg0KDQotLS0tLS0tLS0t
+LS0tLS0tLS0JCQkJIA0KaHp3dWxpYmluDQoyMDE2LTA1LTE5DQoNCi0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuWPkeS7tuS6uu+8
+mkdhdXJhdiBCYWZuYSA8YmFmbmFnQGdtYWlsLmNvbT4NCuWPkemAgeaXpeacn++8mjIwMTYtMDUt
+MTkgMjA6MzANCuaUtuS7tuS6uu+8mmNlcGgtZGV2ZWwNCuaKhOmAge+8mg0K5Li76aKY77yaTm8g
+Q2VwaCBSZWNvdmVyeSA6IElzIGl0IGEgYnVnID8NCg0KSGkgQ2VwaGVycyAsDQoNCkluIG91ciBw
+cm9kdWN0aW9uIGNsdXN0ZXIgYXQgUmVsaWFuY2UgSmlvLCB3aGVuIGFzIG9zZCBnb2VzIGNvcnJ1
+cHQNCmFuZCBjcmFzaGVzLCBDbHVzdGVyIHJlbWFpbnMgdW5oZWFsdGh5IGV2ZW4gYWZ0ZXIgNCBo
+b3Vycy4NCg0KICAgIGNsdXN0ZXIgZmFjMDRkODUtZGI0OC00NTY0LWI4MjEtZGVlYmRhMDQ2MjYx
+DQogICAgIGhlYWx0aCBIRUFMVEhfV0FSTg0KICAgICAgICAgICAgNjU4IHBncyBkZWdyYWRlZA0K
+ICAgICAgICAgICAgNjU4IHBncyBzdHVjayBkZWdyYWRlZA0KICAgICAgICAgICAgNjg4IHBncyBz
+dHVjayB1bmNsZWFuDQogICAgICAgICAgICA2NTggcGdzIHN0dWNrIHVuZGVyc2l6ZWQNCiAgICAg
+ICAgICAgIDY1OCBwZ3MgdW5kZXJzaXplZA0KICAgICAgICAgICAgcmVjb3ZlcnkgMzA2NC8xOTgx
+MzA4IG9iamVjdHMgZGVncmFkZWQgKDAuMTU1JSkNCiAgICAgICAgICAgIHJlY292ZXJ5IDEyNC8x
+OTgxMzA4IG9iamVjdHMgbWlzcGxhY2VkICgwLjAwNiUpDQogICAgIG1vbm1hcCBlMTE6IDExIG1v
+bnMgYXQNCntkc3Ntb24yPTEwLjE0MC4yMDguMjI0OjY3ODkvMCxkc3Ntb24zPTEwLjE0MC4yMDgu
+MjI1OjY3ODkvMCxkc3Ntb24zMT0xMC4xMzUuMzguMTQxOjY3ODkvMCxkc3Ntb24zMj0xMC4xMzUu
+MzguMTQyOjY3ODkvMCxkc3Ntb24zMz0xMC4xMzUuMzguMTQzOjY3ODkvMCxkc3Ntb24zND0xMC4x
+MzUuMzguMTQ0OjY3ODkvMCxkc3Ntb24zNT0xMC4xMzUuMzguMTQ1OjY3ODkvMCxkc3Ntb240PTEw
+LjE0MC4yMDguMjI2OjY3ODkvMCxkc3Ntb241PTEwLjE0MC4yMDguMjI3OjY3ODkvMCxkc3Ntb242
+PTEwLjE0MC4yMDguMjI4OjY3ODkvMCxkc3Ntb25sZWFkZXIxPTEwLjE0MC4yMDguMjIzOjY3ODkv
+MH0NCiAgICAgICAgICAgIGVsZWN0aW9uIGVwb2NoIDc5MiwgcXVvcnVtIDAsMSwyLDMsNCw1LDYs
+Nyw4LDksMTANCmRzc21vbjMxLGRzc21vbjMyLGRzc21vbjMzLGRzc21vbjM0LGRzc21vbjM1LGRz
+c21vbmxlYWRlcjEsZHNzbW9uMixkc3Ntb24zLGRzc21vbjQsZHNzbW9uNSxkc3Ntb242DQogICAg
+IG9zZG1hcCBlODc3ODogMjc3NCBvc2RzOiAyNzQ2IHVwLCAyNzQ2IGluOyAzMCByZW1hcHBlZCBw
+Z3MNCiAgICAgIHBnbWFwIHYyNzQwOTU3OiA3NTY4MCBwZ3MsIDExIHBvb2xzLCAzODYgR0IgZGF0
+YSwgMzIyIGtvYmplY3RzDQogICAgICAgICAgICAxNjI4OCBHQiB1c2VkLCAxNDI5OSBUQiAvIDE0
+MzE1IFRCIGF2YWlsDQogICAgICAgICAgICAzMDY0LzE5ODEzMDggb2JqZWN0cyBkZWdyYWRlZCAo
+MC4xNTUlKQ0KICAgICAgICAgICAgMTI0LzE5ODEzMDggb2JqZWN0cyBtaXNwbGFjZWQgKDAuMDA2
+JSkNCiAgICAgICAgICAgICAgIDc0OTkyIGFjdGl2ZStjbGVhbg0KICAgICAgICAgICAgICAgICA2
+NTggYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQNCiAgICAgICAgICAgICAgICAgIDMwIGFjdGl2
+ZStyZW1hcHBlZA0KICBjbGllbnQgaW8gMTIzOTQgQi9zIHJkLCAxNyBvcC9zDQoNCldpdGggMTIg
+b3NkIGFyZSBkb3duIGR1ZSB0byBIL1cgZmFpbHVyZSwgYW5kIGhhdmluZyByZXBsaWNhdGlvbiBm
+YWN0b3INCjYgLCB0aGUgY2x1c3RlciBzaG91bGQgaGF2ZSByZWNvdmVyZWQgLCBidXQgaXQgaXMg
+bm90IHJlY292ZXJpbmcuDQoNCldoZW4gSSBraWxsIGFuIG9zZCBkYWVtb24sIGl0IHJlY292ZXJz
+IHF1aWNrbHkuIEFueSBpZGVhcyB3aHkgdGhlIFBHcw0KYXJlIHJlbWFpbmluZyB1bmRlcnNpemVk
+ID8NCg0KV2hhdCBjb3VsZCBiZSB0aGUgZGlmZmVyZW5jZSBiZXR3ZWVuIHR3byBzY2VuYXJpb25z
+IDoNCg0KMS4gT1NEIGRvd24gZHVlIHRvIEgvVyBmYWlsdXJlLg0KMi4gT1NEIGRhZW1vbiBraWxs
+ZWQgLg0KDQpXaGVuIEkgcmVtb3ZlIHRoZSAxMiBvc2RzIGZyb20gdGhlIGNydXNobWFwIG1hbnVh
+bGx5IG9yIGRvIGNlcGggb3NkDQpjcnVzaCByZW1vdmUgZm9yIHRob3NlIG9zZHMsIHRoZSBjbHVz
+dGVyIHJlY292ZXJzIGp1c3QgZmluZS4NCg0KSSBoYXZlIG1haWxlZCB0aGlzIG9uIENlcGgtVXNl
+cnMgYnV0IGZvdW5kIG5vIHNvbHV0aW9uLiBIZW5jZSBhc2tpbmcNCm9uIHRoaXMgTUwgLg0KDQpU
+aGFua3MNCkdhdXJhdg0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KdGhlIGJvZHkgb2YgYSBtZXNzYWdl
+IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0
+dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQo=
 
-On Thu, May 19, 2016 at 2:43 PM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 18 May 2016, Jianjian Huo wrote:
->> On Wed, May 18, 2016 at 10:19 AM, Sage Weil <sage@newdream.net> wrote:
->> >
->> > Hi Rajath!
->> >
->> > Great to hear you're interested in working with us outside of GSoC!
->> >
->> > On Wed, 18 May 2016, Haomai Wang wrote:
->> > > Hi Rajath,
->> > >
->> > > We are glad to see your passion, from my view, sage is planning to
->> > > implement a userspace cache in bluestore itself. Like
->> > > (https://github.com/ceph/ceph/commit/b9ac31afe5a162176f019baa25348014a77f6ab8#commitcomment-17488250).
->> > >
->> > > I guess the cache won't be a generic cache interface. Instead it will
->> > > be bound to specified needed object. So sage may give a brief?
->> >
->> > Part of the reason why this project wasn't at the top of our list (we got
->> > fewer slots than we had projects) was because the BlueStore code is in
->> > flux and moving quite quickly.  For the BlueStore side, we are building a
->> > simple buffer cache that is tied to an Onode (in-memory per-object
->> > metadata structure) and integrated tightly with the read and write IO
->> > paths.  This will eliminate our use of the block device buffer cache for
->> > user/object data.
->> >
->> > The other half of the picture, though, is the BlueFS layer that is
->> > consumed by rocksdb: it also needs caching in order for rocksdb to perform
->> > at all.  My hope is that the code we write for the use data can be re-used
->> > here as well, but it is still evolving.
->>
->> When Bluestore moves away from kernel cache to its own buffer cache, RocksDB can use its own buffer cache as well.
->> RocksDB has this size configurable block cache to cache uncompressed data blocks, it can serve as buffer cache,
->> since Bluestore don't compress meta data in RocksDB.
->
-> What options control this?  I was having trouble finding it the last time
-> I looked.  We should switch it now (and use unbuffered IO from BlueFS) if
-> we can.
->
-> Thanks!
-> sage
