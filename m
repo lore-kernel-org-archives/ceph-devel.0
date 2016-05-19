@@ -1,205 +1,129 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: new scrub and repair discussion
-Date: Thu, 19 May 2016 21:09:40 +0800
-Message-ID: <CAJE9aOMDLyfOVn-n18m3Ftqc3G=N-71we9qiUuhBSX+qnJBF9Q@mail.gmail.com>
-References: <CA+cZ7sioiiEVVC0G9fkU1iF8J4hAPRuYYhOQ=5pgtg-n3q-iPw@mail.gmail.com>
-	<CAJE9aOOrh6LwTAawAOkFZwH+r5VVDUdMBaynxg4VMwpGqDPRJA@mail.gmail.com>
+From: Junwang Zhao <zhjwpku@gmail.com>
+Subject: Re: [wip-addr-features] make sure I am doing the right thing
+Date: Thu, 19 May 2016 21:54:20 +0800
+Message-ID: <CAEG8a3JBbfs_15+Ypsm24jAM7Od+BcCR8HoO1o9Sq2mtnmu6mA@mail.gmail.com>
+References: <CAEG8a3LQuro2zXu90im0aQ58XxdGLDQvLxnjkJ+Rd8C6k70QVw@mail.gmail.com>
+	<alpine.DEB.2.11.1605160446150.30956@cpach.fuggernut.com>
+	<alpine.DEB.2.11.1605161228390.30956@cpach.fuggernut.com>
+	<CAEG8a3KPFfuFfM2TDyY11A0XD=fvGEmm=TP2Y_ZvZfWYTREAzw@mail.gmail.com>
+	<alpine.DEB.2.11.1605181637080.30956@cpach.fuggernut.com>
+	<CAEG8a3KCYaCUAmdw8i=-BZKHVN4DJ4gK3RAzSf5q9cA2xXEr=Q@mail.gmail.com>
+	<alpine.DEB.2.11.1605190806040.980@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f182.google.com ([209.85.161.182]:36200 "EHLO
-	mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754140AbcESNJm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 09:09:42 -0400
-Received: by mail-yw0-f182.google.com with SMTP id x189so77039654ywe.3
-        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 06:09:41 -0700 (PDT)
-In-Reply-To: <CAJE9aOOrh6LwTAawAOkFZwH+r5VVDUdMBaynxg4VMwpGqDPRJA@mail.gmail.com>
+Received: from mail-vk0-f45.google.com ([209.85.213.45]:33492 "EHLO
+	mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932419AbcESNyV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 09:54:21 -0400
+Received: by mail-vk0-f45.google.com with SMTP id z184so103737392vkg.0
+        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 06:54:21 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1605190806040.980@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-hi cephers,
+Hi, Sage,
 
-I'd like to keep you guys posted on the progress of the scrub/repair
-feature. And also want to valuable comments/suggestions on it from
-you! Now, I am working on the repair-write API for the scrub/repair
-feature.
+Check [1] when you got some time, sorry to bother :)
 
-the API looks like:
+[1]https://github.com/zhjwpku/ceph/commit/8934f038fdf28156038770e601e4a27f7a684390
 
-    /**
-     * Rewrite the object with the replica hosted by specified osd
-     *
-     * @param osd from which OSD we will copy the data
-     * @param version the version of rewritten object
-     * @param what the flags indicating what we will copy
-     */
-    int repair_copy(const std::string& oid, uint64_t version, uint32_t
-what, int32_t osd, uint32_t epoch);
-
-in which,
-- `version` is the version of the object you expect to be repairing in
-case of a racing write;
-- `what` is an OR'ed flags of follow enum:
-- `epoch` like the other scrub/repairing APIs, epoch indicating the
-scrub interval is passed in.
-
-struct repair_copy_t {
-  enum {
-    DATA =3D 1 << 0,
-    OMAP =3D 1 << 1,
-    ATTR =3D 1 << 2,
-  };
-};
-
-a new REPAIR_COPY OSD op is introduced to enable the OSD side to copy
-the shard/replica from specified source OSD to the acting set. and the
-machinery of copy_from is reused to implement this feature. so after
-rewriting the object, a version is increased, so that possibly corrupt
-copies on down OSDs will get fixed naturally.
-
-for the code, see
-- https://github.com/ceph/ceph/pull/9203
-
-for the draft design, see
-- http://tracker.ceph.com/issues/13508
-- http://pad.ceph.com/p/scrub_repair
-
-the API for fixing snapset will be added later.
-
-On Wed, Nov 11, 2015 at 11:43 PM, kefu chai <tchaikov@gmail.com> wrote:
-> On Wed, Nov 11, 2015 at 10:43 PM, =E7=8E=8B=E5=BF=97=E5=BC=BA <wonzhq=
-@gmail.com> wrote:
->> 2015-11-11 19:44 GMT+08:00 kefu chai <tchaikov@gmail.com>:
->>> currently, scrub and repair are pretty primitive. there are several
->>> improvements which need to be made:
->>>
->>> - user should be able to initialize scrub of a PG or an object
->>>     - int scrub(pg_t, AioCompletion*)
->>>     - int scrub(const string& pool, const string& nspace, const
->>> string& locator, const string& oid, AioCompletion*)
->>> - we need a way to query the result of the most recent scrub on a p=
-g.
->>>     - int get_inconsistent_pools(set<uint64_t>* pools);
->>>     - int get_inconsistent_pgs(uint64_t pool, paged<pg_t>* pgs);
->>>     - int get_inconsistent(pg_t pgid, epoch_t* cur_interval,
->>> paged<inconsistent_t>*)
->>> - the user should be able to query the content of the replica/shard
->>> objects in the event of an inconsistency.
->>>     - operate_on_shard(epoch_t interval, pg_shard_t pg_shard,
->>> ObjectReadOperation *op, bool allow_inconsistent)
->>> - the user should be able to perform following fixes using a new
->>> aio_operate_scrub(
->>>                                           const std::string& oid,
->>>                                           shard_id_t shard,
->>>                                           AioCompletion *c,
->>>                                           ObjectWriteOperation *op)
->>>     - specify which replica to use for repairing a content inconsis=
-tency
->>>     - delete an object if it can't exist
->>>     - write_full
->>>     - omap_set
->>>     - setattrs
->>> - the user should be able to repair snapset and object_info_t
->>>     - ObjectWriteOperation::repair_snapset(...)
->>>         - set/remove any property/attributes, for example,
->>>             - to reset snapset.clone_overlap
->>>             - to set snapset.clone_size
->>>             - to reset the digests in object_info_t,
->>> - repair will create a new version so that possibly corrupted copie=
-s
->>> on down OSDs will get fixed naturally.
->>>
+On Thu, May 19, 2016 at 8:08 PM, Sage Weil <sage@newdream.net> wrote:
+> On Thu, 19 May 2016, Junwang Zhao wrote:
+>> Hi Sage, Haomai,
+>> Please check [1] and give some feedback, I am not sure about
+>> 52436ded943b8f567adb584c50b789431b788a85
 >>
->> I think this exposes too much things to the user. Usually a user
->> doesn't have knowledges like this. If we make it too much complicate=
-d,
->> no one will use it at the end.
+>> [1] https://github.com/zhjwpku/ceph/commits/wip-addr-work
 >
-> well, i tend to agree with you to some degree. this is a set of very =
-low
-> level APIs exposed to user, but we will accompany them with some
-> ready-to-use policies to repair the typical inconsistencies. like the
-> sample code attached at the end of this mail. but the point here is
-> that we will not burden the OSD daemon will all of these complicated
-> logic to fix and repair things. and let the magic happen out side of
-> the ceph-osd in a more flexible way. for the advanced users, if they
-> want to explore the possibilities to fix the inconsistencies in their=
- own
-> way, they won't be disappointed also.
+> Great! I made several suggestions, and I have a question for everyone:
+> what should we do if we have a "new" addr (say, for the v2 msgr protocol)
+> and we need to encode it for a client that doesn't have the ADDR2 feature?
+> Right now we are still stuffing the sockaddr_storage in their with
+> whatever sockaddr data we have, but it is indistinguishable from a legacy
+> address.  Perhaps it sould encode as blank?  (e.g., entity_addr_t())? Or
+> blank, except with a magic nonce (0xffffffff maybe) so that you can tell
+> that it is non-blank but not terribly useful/usable?
 >
+> sage
+>
+>
+>
+>> > Thanks!
 >>
->>> so librados will offer enough information and facilities, with whic=
-h a
->>> smart librados client/script will be able to fix the inconsistencie=
-s
->>> found in the scrub.
->>>
->>> as an example, if we run into a data inconsistency where the 3
->>> replicas failed to agree with each other after performing a deep
->>> scrub. probably we'd like to have an election to get the auth copy.
->>> following pseudo code explains how we will implement this using the
->>> new rados APIs for scrub and repair.
->>>
->>>      # something is not necessarily better than nothing
->>>      rados.aio_scrub(pg, completion)
->>>      completion.wait_for_complete()
->>>      for pool in rados.get_inconsistent_pools():
->>>           for pg in rados.get_inconsistent_pgs(pool):
->>>                # rados.get_inconsistent_pgs() throws if "epoch" exp=
-ires
->>>
->>>                for oid, inconsistent in rados.get_inconsistent_pgs(=
-pg,
->>> epoch).items():
->>>                     if inconsistent.is_data_digest_mismatch():
->>>                          votes =3D defaultdict(int)
->>>                          for osd, shard_info in inconsistent.shards=
-:
->>>                               votes[shard_info.object_info.data_dig=
-est] +=3D 1
->>>                          digest, _ =3D mavotes, key=3Doperator.item=
-getter(1))
->>>                          auth_copy =3D None
->>>                          for osd, shard_info in inconsistent.shards=
-=2Eitems():
->>>                               if shard_info.object_info.data_digest=
- =3D=3D digest:
->>>                                    auth_copy =3D osd
->>>                                    break
->>>                          repair_op =3D librados.ObjectWriteOperatio=
-n()
->>>                          repair_op.repair_pick(auth_copy,
->>> inconsistent.ver, epoch)
->>>                          rados.aio_operate_scrub(oid, repair_op)
->>>
->>> this plan was also discussed in the infernalis CDS. see
->>> http://tracker.ceph.com/projects/ceph/wiki/Osd_-_Scrub_and_Repair.
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Regards
-> Kefu Chai
-
-
-
---=20
-Regards
-Kefu Chai
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> On Thu, May 19, 2016 at 4:44 AM, Sage Weil <sage@newdream.net> wrote:
+>> > On Tue, 17 May 2016, Junwang Zhao wrote:
+>> >> Hi Sage,
+>> >>
+>> >> Check this[1], we should I do next, entity_addrvec_t ?
+>> >>
+>> >> [1] https://github.com/zhjwpku/ceph/commits/wip-addr-work
+>> >
+>> > Looks good!  I opened the PR
+>> >
+>> >         https://github.com/ceph/ceph/pull/9184
+>> >
+>> > for review and test.
+>> >
+>> > The next step is just to make a new entity_addr_t encoding that is more
+>> > compact and uses an ADDR2 feature.  One commit that defines the new
+>> > feature, then one commit that changes the entity_addr_t encode/decode,
+>> > somewhat like in c728926a86e1410f959011d24700bb07bad1dc2c.  I would use
+>> > the new get_sockaddr_len() method for elen, though.
+>> >
+>> > Also, the TYPE_ definitions should really be TYPE_LEGACY = 1, not the
+>> > transport version (IP version), which is already covered by the sa_family
+>> > field in the sockaddr.  I think that makes sense...
+>> >
+>> > A third commit would then add the entity_addrvec_t type, similar to what
+>> > is in that same commit.  It should also add the type to
+>> > test/encoding/types.h.
+>> >
+>> > Thanks!
+>> > sage
+>> >
+>> >
+>> >
+>> >>
+>> >> On Tue, May 17, 2016 at 12:29 AM, Sage Weil <sage@newdream.net> wrote:
+>> >> > On Mon, 16 May 2016, Sage Weil wrote:
+>> >> >> Hi Junwang,
+>> >> >>
+>> >> >> On Mon, 16 May 2016, Junwang Zhao wrote:
+>> >> >> > Hi Sage, Haomai,
+>> >> >> >
+>> >> >> > I am working on the require-features-patch, I use 'make' to see the conflicts,
+>> >> >> > and change the code to fit the required-feature-patch, [1] is a huge patch
+>> >> >> > that I am still working on, it has not been finished. I really need to check
+>> >> >> > with you whether I am doing it right, since it seems the errors are endless.
+>> >> >> >
+>> >> >> > There are some comments where I am not sure in the patch, like 'not sure'.
+>> >> >>
+>> >> >> I skimmed through this and it looks mostly right, but I see a few cases
+>> >> >> where features aren't needed, e.g. cls_refcount_get in
+>> >> >> cls_refcount_client.cc (there's no addr being encoded in
+>> >> >> cls_refcount_get_op, so no need to make the encoding featureful).
+>> >> >>
+>> >> >> > I didn't split this huge patch into small ones, I am not sure is that a
+>> >> >> > must, if yes, I will split it into small ones.
+>> >> >>
+>> >> >> The end result needs to be a series of small patches, but that doesn't
+>> >> >> have to happen right away.  I think it might be useful to do a few small
+>> >> >> sets of changes first just to show what the goal is, though.
+>> >> >>
+>> >> >> I will take the patch below and pull a few sample changes out so you can
+>> >> >> see.  Traveling at the moment, but I'll have something pushed today (that
+>> >> >> is also rebased on top of the latest wip-addr-cleanup branch).
+>> >> >
+>> >> > I went on a bit of a binge and have a wip-addr-work branch that is mostly
+>> >> > there.  The last thing (I think) is updating msg/simple and msg/async.
+>> >> > These ones should explicitly encode with features 0 since the protocol is
+>> >> > defined in terms of the legacy encoding.
+>> >> >
+>> >> > sage
+>> >>
+>> >>
+>>
+>>
