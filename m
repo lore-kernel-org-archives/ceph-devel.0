@@ -1,68 +1,53 @@
-From: "hzwulibin" <hzwulibin@gmail.com>
-Subject: Re:  No Ceph Recovery : Is it a bug ?
-Date: Thu, 19 May 2016 15:45:55 +0800
-Message-ID: <573D6F2D.6060306@gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: No Ceph Recovery : Is it a bug ?
+Date: Thu, 19 May 2016 03:47:14 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605190343450.980@cpach.fuggernut.com>
 References: <CAPg135a2YdLrMspcGdLbkx-fWvh30VJ3J4Y=hKSMAxDzosd+KQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f67.google.com ([209.85.220.67]:36848 "EHLO
-	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753914AbcESHp5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 03:45:57 -0400
-Received: by mail-pa0-f67.google.com with SMTP id xm6so7064172pab.3
-        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 00:45:56 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:43924 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752617AbcESHq6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 03:46:58 -0400
 In-Reply-To: <CAPg135a2YdLrMspcGdLbkx-fWvh30VJ3J4Y=hKSMAxDzosd+KQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gaurav Bafna <bafnag@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gaurav Bafna <bafnag@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-T0ssIGNhbiB5b3Ugc2hvdyB0aGUgdGhvc2UgaW5mb3M6DQoxLiBjZXBoIG9zZCB0cmVlDQoyLiBj
-ZXBoIHBnIGR1bXBfc3R1Y2sNCjMuIGNydXNoIG1hcCBhbmQgcnVsZXMNCg0KDQotLS0tLS0tLS0t
-LS0tLS0tLS0JCQkJIA0KaHp3dWxpYmluDQoyMDE2LTA1LTE5DQoNCi0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuWPkeS7tuS6uu+8
-mkdhdXJhdiBCYWZuYSA8YmFmbmFnQGdtYWlsLmNvbT4NCuWPkemAgeaXpeacn++8mjIwMTYtMDUt
-MTkgMjA6MzANCuaUtuS7tuS6uu+8mmNlcGgtZGV2ZWwNCuaKhOmAge+8mg0K5Li76aKY77yaTm8g
-Q2VwaCBSZWNvdmVyeSA6IElzIGl0IGEgYnVnID8NCg0KSGkgQ2VwaGVycyAsDQoNCkluIG91ciBw
-cm9kdWN0aW9uIGNsdXN0ZXIgYXQgUmVsaWFuY2UgSmlvLCB3aGVuIGFzIG9zZCBnb2VzIGNvcnJ1
-cHQNCmFuZCBjcmFzaGVzLCBDbHVzdGVyIHJlbWFpbnMgdW5oZWFsdGh5IGV2ZW4gYWZ0ZXIgNCBo
-b3Vycy4NCg0KICAgIGNsdXN0ZXIgZmFjMDRkODUtZGI0OC00NTY0LWI4MjEtZGVlYmRhMDQ2MjYx
-DQogICAgIGhlYWx0aCBIRUFMVEhfV0FSTg0KICAgICAgICAgICAgNjU4IHBncyBkZWdyYWRlZA0K
-ICAgICAgICAgICAgNjU4IHBncyBzdHVjayBkZWdyYWRlZA0KICAgICAgICAgICAgNjg4IHBncyBz
-dHVjayB1bmNsZWFuDQogICAgICAgICAgICA2NTggcGdzIHN0dWNrIHVuZGVyc2l6ZWQNCiAgICAg
-ICAgICAgIDY1OCBwZ3MgdW5kZXJzaXplZA0KICAgICAgICAgICAgcmVjb3ZlcnkgMzA2NC8xOTgx
-MzA4IG9iamVjdHMgZGVncmFkZWQgKDAuMTU1JSkNCiAgICAgICAgICAgIHJlY292ZXJ5IDEyNC8x
-OTgxMzA4IG9iamVjdHMgbWlzcGxhY2VkICgwLjAwNiUpDQogICAgIG1vbm1hcCBlMTE6IDExIG1v
-bnMgYXQNCntkc3Ntb24yPTEwLjE0MC4yMDguMjI0OjY3ODkvMCxkc3Ntb24zPTEwLjE0MC4yMDgu
-MjI1OjY3ODkvMCxkc3Ntb24zMT0xMC4xMzUuMzguMTQxOjY3ODkvMCxkc3Ntb24zMj0xMC4xMzUu
-MzguMTQyOjY3ODkvMCxkc3Ntb24zMz0xMC4xMzUuMzguMTQzOjY3ODkvMCxkc3Ntb24zND0xMC4x
-MzUuMzguMTQ0OjY3ODkvMCxkc3Ntb24zNT0xMC4xMzUuMzguMTQ1OjY3ODkvMCxkc3Ntb240PTEw
-LjE0MC4yMDguMjI2OjY3ODkvMCxkc3Ntb241PTEwLjE0MC4yMDguMjI3OjY3ODkvMCxkc3Ntb242
-PTEwLjE0MC4yMDguMjI4OjY3ODkvMCxkc3Ntb25sZWFkZXIxPTEwLjE0MC4yMDguMjIzOjY3ODkv
-MH0NCiAgICAgICAgICAgIGVsZWN0aW9uIGVwb2NoIDc5MiwgcXVvcnVtIDAsMSwyLDMsNCw1LDYs
-Nyw4LDksMTANCmRzc21vbjMxLGRzc21vbjMyLGRzc21vbjMzLGRzc21vbjM0LGRzc21vbjM1LGRz
-c21vbmxlYWRlcjEsZHNzbW9uMixkc3Ntb24zLGRzc21vbjQsZHNzbW9uNSxkc3Ntb242DQogICAg
-IG9zZG1hcCBlODc3ODogMjc3NCBvc2RzOiAyNzQ2IHVwLCAyNzQ2IGluOyAzMCByZW1hcHBlZCBw
-Z3MNCiAgICAgIHBnbWFwIHYyNzQwOTU3OiA3NTY4MCBwZ3MsIDExIHBvb2xzLCAzODYgR0IgZGF0
-YSwgMzIyIGtvYmplY3RzDQogICAgICAgICAgICAxNjI4OCBHQiB1c2VkLCAxNDI5OSBUQiAvIDE0
-MzE1IFRCIGF2YWlsDQogICAgICAgICAgICAzMDY0LzE5ODEzMDggb2JqZWN0cyBkZWdyYWRlZCAo
-MC4xNTUlKQ0KICAgICAgICAgICAgMTI0LzE5ODEzMDggb2JqZWN0cyBtaXNwbGFjZWQgKDAuMDA2
-JSkNCiAgICAgICAgICAgICAgIDc0OTkyIGFjdGl2ZStjbGVhbg0KICAgICAgICAgICAgICAgICA2
-NTggYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQNCiAgICAgICAgICAgICAgICAgIDMwIGFjdGl2
-ZStyZW1hcHBlZA0KICBjbGllbnQgaW8gMTIzOTQgQi9zIHJkLCAxNyBvcC9zDQoNCldpdGggMTIg
-b3NkIGFyZSBkb3duIGR1ZSB0byBIL1cgZmFpbHVyZSwgYW5kIGhhdmluZyByZXBsaWNhdGlvbiBm
-YWN0b3INCjYgLCB0aGUgY2x1c3RlciBzaG91bGQgaGF2ZSByZWNvdmVyZWQgLCBidXQgaXQgaXMg
-bm90IHJlY292ZXJpbmcuDQoNCldoZW4gSSBraWxsIGFuIG9zZCBkYWVtb24sIGl0IHJlY292ZXJz
-IHF1aWNrbHkuIEFueSBpZGVhcyB3aHkgdGhlIFBHcw0KYXJlIHJlbWFpbmluZyB1bmRlcnNpemVk
-ID8NCg0KV2hhdCBjb3VsZCBiZSB0aGUgZGlmZmVyZW5jZSBiZXR3ZWVuIHR3byBzY2VuYXJpb25z
-IDoNCg0KMS4gT1NEIGRvd24gZHVlIHRvIEgvVyBmYWlsdXJlLg0KMi4gT1NEIGRhZW1vbiBraWxs
-ZWQgLg0KDQpXaGVuIEkgcmVtb3ZlIHRoZSAxMiBvc2RzIGZyb20gdGhlIGNydXNobWFwIG1hbnVh
-bGx5IG9yIGRvIGNlcGggb3NkDQpjcnVzaCByZW1vdmUgZm9yIHRob3NlIG9zZHMsIHRoZSBjbHVz
-dGVyIHJlY292ZXJzIGp1c3QgZmluZS4NCg0KSSBoYXZlIG1haWxlZCB0aGlzIG9uIENlcGgtVXNl
-cnMgYnV0IGZvdW5kIG5vIHNvbHV0aW9uLiBIZW5jZSBhc2tpbmcNCm9uIHRoaXMgTUwgLg0KDQpU
-aGFua3MNCkdhdXJhdg0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
-ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KdGhlIGJvZHkgb2YgYSBtZXNzYWdl
-IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0
-dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQo=
+On Thu, 19 May 2016, Gaurav Bafna wrote:
+> Hi Cephers ,
+> 
+> In our production cluster at Reliance Jio, when as osd goes corrupt
+> and crashes, Cluster remains unhealthy even after 4 hours.
+> 
+>     cluster fac04d85-db48-4564-b821-deebda046261
+>      health HEALTH_WARN
+>             658 pgs degraded
+>             658 pgs stuck degraded
+>             688 pgs stuck unclean
+>             658 pgs stuck undersized
+>             658 pgs undersized
+              ^^^ this...
 
+>             recovery 3064/1981308 objects degraded (0.155%)
+>             recovery 124/1981308 objects misplaced (0.006%)
+>      monmap e11: 11 mons at
+> {dssmon2=10.140.208.224:6789/0,dssmon3=10.140.208.225:6789/0,dssmon31=10.135.38.141:6789/0,dssmon32=10.135.38.142:6789/0,dssmon33=10.135.38.143:6789/0,dssmon34=10.135.38.144:6789/0,dssmon35=10.135.38.145:6789/0,dssmon4=10.140.208.226:6789/0,dssmon5=10.140.208.227:6789/0,dssmon6=10.140.208.228:6789/0,dssmonleader1=10.140.208.223:6789/0}
+>             election epoch 792, quorum 0,1,2,3,4,5,6,7,8,9,10
+> dssmon31,dssmon32,dssmon33,dssmon34,dssmon35,dssmonleader1,dssmon2,dssmon3,dssmon4,dssmon5,dssmon6
+>      osdmap e8778: 2774 osds: 2746 up, 2746 in; 30 remapped pgs
+                               doesn't match this ^^
+
+which makes it look like a problem with OSDs reporting PG state to the 
+mon.  The fact that an OSD restarts supports that theory.
+
+What version is this?  A bunch of the osd -> mon pg reporting code was 
+recently rewritten (between infernalis and jewel), so the new code is 
+hopefully more robust.  (OTOH, it is also new, so we may have missed 
+something.)
+
+Nice big cluster!
+
+sage
