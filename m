@@ -1,140 +1,73 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: No Ceph Recovery : Is it a bug ?
-Date: Thu, 19 May 2016 14:37:23 +0000
-Message-ID: <BL2PR02MB211569FDA3B75F72B2F15EB1F44A0@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <CAPg135a2YdLrMspcGdLbkx-fWvh30VJ3J4Y=hKSMAxDzosd+KQ@mail.gmail.com>
-	<alpine.DEB.2.11.1605190343450.980@cpach.fuggernut.com>
-	<CAPg135bLWLMetYan5HGjaUA-mTcXRdbsuuNRQCgzeDZwAAg1NA@mail.gmail.com>
-	<alpine.DEB.2.11.1605190559060.980@cpach.fuggernut.com>
- <CAPg135aBmU2jM2FfN4ysjZ5689y7Q8RyOx7-42Bp7oONnbHsfA@mail.gmail.com>
+From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Maximum RBD image name length
+Date: Thu, 19 May 2016 11:51:52 -0400
+Message-ID: <CA+aFP1CRtwa=rOqafGRdBe1ei5cVeSA60E3aBCgEFjMygntBEg@mail.gmail.com>
+Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0063.outbound.protection.outlook.com ([157.56.111.63]:7875
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754353AbcESOh0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 May 2016 10:37:26 -0400
-In-Reply-To: <CAPg135aBmU2jM2FfN4ysjZ5689y7Q8RyOx7-42Bp7oONnbHsfA@mail.gmail.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gaurav Bafna <bafnag@gmail.com>, Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0028575803=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-PDwgY2hvb3NlbGVhZl92YXJ5X3IgPSAwDQoNCk1lYW5pbmcgeW91IGFyZSBub3QgcnVubmluZyB3
-aXRoIEhhbW1lciB0dW5hYmxlcy4NCldlIHNhdyBzb21ldGltZXMgT1NEIHN0dWNrIGFuZCBub3Qg
-cmVjb3ZlcmluZyBiZWNhdXNlIG9mIHRoaXMuIE1heSBiZSB0aGlzIGNvdWxkIGJlIGFuIGlzc3Vl
-ICwgU2FnZSA/DQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBN
-ZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWls
-dG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBHYXVyYXYg
-QmFmbmENClNlbnQ6IFRodXJzZGF5LCBNYXkgMTksIDIwMTYgMzo0MSBBTQ0KVG86IFNhZ2UgV2Vp
-bA0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogTm8gQ2VwaCBS
-ZWNvdmVyeSA6IElzIGl0IGEgYnVnID8NCg0KT24gVGh1LCBNYXkgMTksIDIwMTYgYXQgMzozNCBQ
-TSwgU2FnZSBXZWlsIDxzYWdlQG5ld2RyZWFtLm5ldD4gd3JvdGU6DQo+IE9uIFRodSwgMTkgTWF5
-IDIwMTYsIEdhdXJhdiBCYWZuYSB3cm90ZToNCj4+IEhpIFNhZ2UgJiBoend1bGliaW4NCj4+DQo+
-PiBNYW55IHRoYW5rcyBmb3IgeW91ciByZXBseSA6KQ0KPj4NCj4+IENlcGggb3NkIHRyZWUgOiBo
-dHRwOi8vcGFzdGViaW4uY29tLzNjQzhicmNGDQo+Pg0KPj4gQ3J1c2htYXAgOiBodHRwOi8vcGFz
-dGViaW4uY29tL0syQk5TSHlzDQo+DQo+IENhbiB5b3UgcGFzdGUgdGhlIG91dHB1dCBmcm9tDQo+
-DQo+ICBjZXBoIG9zZCBjcnVzaCBzaG93LXR1bmFibGVzDQoNCnsNCiAgICAiY2hvb3NlX2xvY2Fs
-X3RyaWVzIjogMCwNCiAgICAiY2hvb3NlX2xvY2FsX2ZhbGxiYWNrX3RyaWVzIjogMCwNCiAgICAi
-Y2hvb3NlX3RvdGFsX3RyaWVzIjogNTAsDQogICAgImNob29zZWxlYWZfZGVzY2VuZF9vbmNlIjog
-MSwNCiAgICAiY2hvb3NlbGVhZl92YXJ5X3IiOiAwLA0KICAgICJzdHJhd19jYWxjX3ZlcnNpb24i
-OiAxLA0KICAgICJhbGxvd2VkX2J1Y2tldF9hbGdzIjogMjIsDQogICAgInByb2ZpbGUiOiAidW5r
-bm93biIsDQogICAgIm9wdGltYWxfdHVuYWJsZXMiOiAwLA0KICAgICJsZWdhY3lfdHVuYWJsZXMi
-OiAwLA0KICAgICJyZXF1aXJlX2ZlYXR1cmVfdHVuYWJsZXMiOiAxLA0KICAgICJyZXF1aXJlX2Zl
-YXR1cmVfdHVuYWJsZXMyIjogMSwNCiAgICAicmVxdWlyZV9mZWF0dXJlX3R1bmFibGVzMyI6IDAs
-DQogICAgImhhc192Ml9ydWxlcyI6IDAsDQogICAgImhhc192M19ydWxlcyI6IDAsDQogICAgImhh
-c192NF9idWNrZXRzIjogMA0KfQ0KDQoNCj4NCj4+IFNpbmNlIEkgcmVtb3ZlZCB0aGUgMTIgb3Nk
-cyBmcm9tIHRoZSBjcnVzaCBtYXAsIHRoZXJlIGFyZSBubyBtb3JlIHN0dWNrIFBHcyAuDQo+DQo+
-IEhtbS4uLg0KPg0KPj4gVmVyc2lvbiA6IEhhbW1lciAwLjk0LjUuICAgIERvIHlvdSB0aGluayBp
-dCBjYW4ganVzdCBiZSBhIHJlcG9ydGluZw0KPj4gaXNzdWUgPyBUaGUgb3NkcyB0aGF0IHdlbnQg
-ZG93biBoYWQgYXJvdW5kIDMwMCBQR3MgbWFwcGVkIHRvIHRoZW0gb3V0DQo+PiBvZiB3aGljaCBp
-dCB3YXMgcHJpbWFyeSBmb3IgMCAuIFdlIGhhdmUgdHdvIElEQ3MuIEFsbCB0aGUgcHJpbWFyeSBh
-cmUNCj4+IGluIG9uZSBJREMgb25seSBmb3Igbm93Lg0KPj4NCj4+IFNhZ2UsIEkgZGlkIG5vdCBn
-ZXQgeW9yIGZpcnN0IHBvaW50LiBXaGF0IGlzIG5vdCBtYXRjaGluZyA/ICBJbiBvdXINCj4+IGNs
-dXN0ZXIgdGhlcmUgd2VyZSAyNzU4IHJ1bm5pbmcgb3NkcyBiZWZvcmUgdGhlIDEyIG9zZCBjcmFz
-aCAuIEFmdGVyDQo+PiB0aGF0IGV2ZW50ICwgdGhlcmUgd2VyZSAyNzQ2IG9zZHMgbGVmdC4NCj4+
-DQo+PiBQRyBTdGF0IGZvciB5b3VyIHJlZmVyZW5jZSA6ICAgdjM3MzMxMzY6IDc1NjgwIHBnczog
-NzU2ODANCj4+IGFjdGl2ZStjbGVhbjsgNDA5IEdCIGRhdGEsIDE2NzQ1IEdCIHVzZWQsIDE0Mjk5
-IFRCIC8gMTQzMTUgVEIgYXZhaWw7DQo+PiA0NDMgQi9zIHdyLCAwIG9wL3MNCj4+DQo+PiBBbHNv
-LCBJIGhhdmUgc2VlbiB0aGlzIGlzc3VlIDMgdGltZXMgd2l0aCBvdXIgY2x1c3Rlci4gRXZlbiB3
-aGVuIDENCj4+IG9zZCBnb2VzIGRvd24gaW4gSURDMSBvciBJREMyLCBzb21lIFBHIGFsd2F5cyBy
-ZW1haW4gdW5kZXJzaXplZC4gSSBhbQ0KPj4gc3VyZSB0aGlzIGlzc3VlIHdpbGwgY29tZSB1cCBv
-bmNlIGFnYWluIC4gU28gY2FuIHlvdSB0ZWxsIG1lIHdoYXQNCj4+IHRoaW5ncyBzaG91bGQgSSBs
-b29rIHdoZW4gYW4gT1NEIGdvZXMgZG93biBuZXh0IHRpbWUgPw0KPj4NCj4+IFdoZW4gSSBtYW51
-YWxseSBzdG9wIGFuIG9zZCBkYWVtb24gaW4gSURDMSBvciBJREMyIGJ5IHJ1bm5pbmcsDQo+PiAv
-ZXRjL2luaXQuZC9jZXBoICBzdG9wIG9zZC54ICwgdGhlIGNsdXN0ZXIgcmVjb3ZlcnMgbmljZWx5
-LiBUaGF0IGlzDQo+PiB3aGF0IG1ha2luZyB0aGUgaXNzdWUgc28gY29tcGxleC4NCj4NCj4gSGVy
-ZSB5b3Ugc2F5IHJlc3RhcnRpbmcgYW4gT1NEIHdhcyBlbm91Z2ggdG8gY2xlYXIgdGhlIHByb2Js
-ZW0sIGJ1dA0KPiBhYm92ZSB5b3Ugc2F5IHlvdSBhbHNvIHJlbW92ZWQgdGhlIGRvd24gT1NEcyBm
-cm9tIHRoZSBDUlVTSCBtYXAuICBDYW4NCj4geW91IGJlIGNsZWFyIGFib3V0IHdoZW4gdGhlIFBH
-cyBzdG9wcGVkIGJlaW5nIHVuZGVyc2l6ZWQ/DQoNCkkgZGlkbid0IHJlc3RhcnQgdGhlIE9TRCBh
-cyB0aGUgZGlzayB3YXMgZ29uZSBiYWQuIFdoZW4gSSByZW1vdmVkIGZyb20gY3J1c2ggbWFwLCB0
-aGUgUEdzIHN0b3BwZWQgYmVpbmcgdW5kZXJzaXplZC4NCg0KDQo+DQo+IEkgY2FuJ3QgdGVsbCBm
-cm9tIHRoaXMgaW5mb3JtYXRpb24gd2hldGhlciBpdCBpcyBhIHJlcG9ydGluZyBpc3N1ZSBvcg0K
-PiB3aGV0aGVyIENSVVNIIHRvIGRvIGEgcHJvcGVyIG1hcHBpbmcgb24gdGhpcyBjbHVzdGVyLg0K
-Pg0KPiBJZiB5b3UgY2FuIHJlcHJvZHVjZSB0aGlzLCB0aGVyZSBhcmUgYSBmZXcgdGhpbmdzIHRv
-IGRvOg0KPg0KPiAxKSBHcmFiIGEgY29weSBvZiB0aGUgT1NEIG1hcDoNCj4NCj4gICBnZXQgb3Nk
-IGdldG1hcCAtbyBvc2RtYXANCj4NCj4gMikgR2V0IGEgbGlzdCBvZiB1bmRlcnNpemVkIHBnczoN
-Cj4NCj4gIGNlcGggcGcgbHMgdW5kZXJzaXplZCA+IHBncy50eHQNCj4NCj4gMykgcXVlcnkgb25l
-IG9mIHRoZSB1bmRlcnNpemVkIHBnczoNCj4NCj4gIHRhaWwgcGdzLnR4dA0KPiAgY2VwaCB0ZWxs
-IDxvbmUgb2YgdGhlIHBnaWRzPiBxdWVyeSA+IHF1ZXJ5LnR4dA0KPg0KPiA0KSBTaGFyZSB0aGUg
-cmVzdWx0IHdpdGggdXMNCj4NCj4gIGNlcGgtcG9zdC1maWxlIG9zZG1hcCBwZ3MudHh0IHF1ZXJ5
-LnR4dA0KPg0KPiAob3IgYXR0YWNoIGl0IHRvIGFuIGVtYWlsKS4NCg0KU3VyZS4gSSB3aWxsIGRv
-IHRoYXQgdGhlICBuZXh0IHRpbWUgaXQgb2NjdXJzLg0KDQpWZXJ5IGdyYXRlZnVsIGZvciB5b3Vy
-IGhlbHAsDQpHYXVyYXYNCj4NCj4gVGhhbmtzIQ0KPiBzYWdlDQo+DQo+DQo+DQo+Pg0KPj4gSXQg
-aXMgYSBiaWcgY2x1c3RlciBhbmQgd2UgaGF2ZSBqdXN0IHN0YXJ0ZWQgLiBXZSB3aWxsIG5lZWQg
-dGhlDQo+PiBjb21tdW5pdHkgaGVscCB0byBtYWtlIGl0IHJ1biBzbW9vdGhseSBhbmQgZXhwYW5k
-IGZ1cnRoZXIgOikNCj4+DQo+PiBUaGFua3MNCj4+IEdhdXJhdg0KPj4NCj4+IE9uIFRodSwgTWF5
-IDE5LCAyMDE2IGF0IDE6MTcgUE0sIFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+IHdyb3Rl
-Og0KPj4gPiBPbiBUaHUsIDE5IE1heSAyMDE2LCBHYXVyYXYgQmFmbmEgd3JvdGU6DQo+PiA+PiBI
-aSBDZXBoZXJzICwNCj4+ID4+DQo+PiA+PiBJbiBvdXIgcHJvZHVjdGlvbiBjbHVzdGVyIGF0IFJl
-bGlhbmNlIEppbywgd2hlbiBhcyBvc2QgZ29lcw0KPj4gPj4gY29ycnVwdCBhbmQgY3Jhc2hlcywg
-Q2x1c3RlciByZW1haW5zIHVuaGVhbHRoeSBldmVuIGFmdGVyIDQgaG91cnMuDQo+PiA+Pg0KPj4g
-Pj4gICAgIGNsdXN0ZXIgZmFjMDRkODUtZGI0OC00NTY0LWI4MjEtZGVlYmRhMDQ2MjYxDQo+PiA+
-PiAgICAgIGhlYWx0aCBIRUFMVEhfV0FSTg0KPj4gPj4gICAgICAgICAgICAgNjU4IHBncyBkZWdy
-YWRlZA0KPj4gPj4gICAgICAgICAgICAgNjU4IHBncyBzdHVjayBkZWdyYWRlZA0KPj4gPj4gICAg
-ICAgICAgICAgNjg4IHBncyBzdHVjayB1bmNsZWFuDQo+PiA+PiAgICAgICAgICAgICA2NTggcGdz
-IHN0dWNrIHVuZGVyc2l6ZWQNCj4+ID4+ICAgICAgICAgICAgIDY1OCBwZ3MgdW5kZXJzaXplZA0K
-Pj4gPiAgICAgICAgICAgICAgIF5eXiB0aGlzLi4uDQo+PiA+DQo+PiA+PiAgICAgICAgICAgICBy
-ZWNvdmVyeSAzMDY0LzE5ODEzMDggb2JqZWN0cyBkZWdyYWRlZCAoMC4xNTUlKQ0KPj4gPj4gICAg
-ICAgICAgICAgcmVjb3ZlcnkgMTI0LzE5ODEzMDggb2JqZWN0cyBtaXNwbGFjZWQgKDAuMDA2JSkN
-Cj4+ID4+ICAgICAgbW9ubWFwIGUxMTogMTEgbW9ucyBhdA0KPj4gPj4ge2Rzc21vbjI9MTAuMTQw
-LjIwOC4yMjQ6Njc4OS8wLGRzc21vbjM9MTAuMTQwLjIwOC4yMjU6Njc4OS8wLGRzc21vbjMxPTEw
-LjEzNS4zOC4xNDE6Njc4OS8wLGRzc21vbjMyPTEwLjEzNS4zOC4xNDI6Njc4OS8wLGRzc21vbjMz
-PTEwLjEzNS4zOC4xNDM6Njc4OS8wLGRzc21vbjM0PTEwLjEzNS4zOC4xNDQ6Njc4OS8wLGRzc21v
-bjM1PTEwLjEzNS4zOC4xNDU6Njc4OS8wLGRzc21vbjQ9MTAuMTQwLjIwOC4yMjY6Njc4OS8wLGRz
-c21vbjU9MTAuMTQwLjIwOC4yMjc6Njc4OS8wLGRzc21vbjY9MTAuMTQwLjIwOC4yMjg6Njc4OS8w
-LGRzc21vbmxlYWRlcjE9MTAuMTQwLjIwOC4yMjM6Njc4OS8wfQ0KPj4gPj4gICAgICAgICAgICAg
-ZWxlY3Rpb24gZXBvY2ggNzkyLCBxdW9ydW0gMCwxLDIsMyw0LDUsNiw3LDgsOSwxMA0KPj4gPj4g
-ZHNzbW9uMzEsZHNzbW9uMzIsZHNzbW9uMzMsZHNzbW9uMzQsZHNzbW9uMzUsZHNzbW9ubGVhZGVy
-MSxkc3Ntb24yLGRzc21vbjMsZHNzbW9uNCxkc3Ntb241LGRzc21vbjYNCj4+ID4+ICAgICAgb3Nk
-bWFwIGU4Nzc4OiAyNzc0IG9zZHM6IDI3NDYgdXAsIDI3NDYgaW47IDMwIHJlbWFwcGVkIHBncw0K
-Pj4gPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZG9lc24ndCBtYXRjaCB0aGlzIF5e
-DQo+PiA+DQo+PiA+IHdoaWNoIG1ha2VzIGl0IGxvb2sgbGlrZSBhIHByb2JsZW0gd2l0aCBPU0Rz
-IHJlcG9ydGluZyBQRyBzdGF0ZSB0bw0KPj4gPiB0aGUgbW9uLiAgVGhlIGZhY3QgdGhhdCBhbiBP
-U0QgcmVzdGFydHMgc3VwcG9ydHMgdGhhdCB0aGVvcnkuDQo+PiA+DQo+PiA+IFdoYXQgdmVyc2lv
-biBpcyB0aGlzPyAgQSBidW5jaCBvZiB0aGUgb3NkIC0+IG1vbiBwZyByZXBvcnRpbmcgY29kZQ0K
-Pj4gPiB3YXMgcmVjZW50bHkgcmV3cml0dGVuIChiZXR3ZWVuIGluZmVybmFsaXMgYW5kIGpld2Vs
-KSwgc28gdGhlIG5ldw0KPj4gPiBjb2RlIGlzIGhvcGVmdWxseSBtb3JlIHJvYnVzdC4gIChPVE9I
-LCBpdCBpcyBhbHNvIG5ldywgc28gd2UgbWF5DQo+PiA+IGhhdmUgbWlzc2VkDQo+PiA+IHNvbWV0
-aGluZy4pDQo+PiA+DQo+PiA+IE5pY2UgYmlnIGNsdXN0ZXIhDQo+PiA+DQo+PiA+IHNhZ2UNCj4+
-DQo+Pg0KPj4NCj4+IC0tDQo+PiBHYXVyYXYgQmFmbmENCj4+IDk1NDA2MzE0MDANCj4+DQo+Pg0K
-DQoNCg0KLS0NCkdhdXJhdiBCYWZuYQ0KOTU0MDYzMTQwMA0KLS0NClRvIHVuc3Vic2NyaWJlIGZy
-b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0
-aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1h
-am9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ry
-b25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVz
-aWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBt
-ZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3Rp
-ZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhh
-dCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2Yg
-dGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVk
-IHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5
-IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVz
-dHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lv
-biAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4N
-Cg==
+--===============0028575803==
+Content-Type: multipart/alternative; boundary=485b395e7de7ee47f2053333f3a5
+
+--485b395e7de7ee47f2053333f3a5
+Content-Type: text/plain; charset=UTF-8
+
+As of today, neither the rbd CLI nor librbd imposes any limit on the
+maximum length of an RBD image name, whereas krbd has roughly a 100
+character limit and the OSDs have a default object name limit of roughly
+2000 characters. While there is a patch under review to increase the krbd
+limit, it would still be bounded to a maximum in the low thousands of
+characters.
+
+Starting with the Kraken release, we would like to add validation for a
+sensible maximum image name length when creating new images .  I am looking
+for feedback from any users who require very long RBD image names (>100
+characters) to help guide this limit.
+
+Thanks,
+
+-- 
+Jason
+
+--485b395e7de7ee47f2053333f3a5
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div>As of today, neither the rbd CLI nor librbd imposes a=
+ny limit on the maximum length of an RBD image name, whereas krbd has rough=
+ly a 100 character limit and the OSDs have a default object name limit of r=
+oughly 2000 characters. While there is a patch under review to increase the=
+ krbd limit, it would still be bounded to a maximum in the low thousands of=
+ characters.=C2=A0</div><div><br></div><div>Starting with the Kraken releas=
+e, we would like to add validation for a sensible maximum image name length=
+ when creating new images .=C2=A0 I am looking for feedback from any users =
+who require very long RBD image names (&gt;100 characters) to help guide th=
+is limit.</div><div><br></div><div>Thanks,</div><div><div><br>-- <br>Jason<=
+br></div></div></div>
+
+--485b395e7de7ee47f2053333f3a5--
+
+--===============0028575803==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0028575803==--
