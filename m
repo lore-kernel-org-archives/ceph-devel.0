@@ -1,102 +1,119 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Weekly performance meeting APAC time?
-Date: Wed, 18 May 2016 21:01:35 -0500
-Message-ID: <8f78c158-0d55-b821-2201-599c06652650@redhat.com>
-References: <ee2c9a43-7303-55cd-8f23-bed502444ff3@redhat.com>
- <20160518190828.GC22208@predictor>
- <09a57ed5-d9b4-d599-ddd3-a3b3496dd9c5@redhat.com>
- <104170944.77164509.1463621856704.JavaMail.zimbra@redhat.com>
+From: Jianjian Huo <jianjian.huo@samsung.com>
+Subject: RE: Cache Layer on NVME driver
+Date: Thu, 19 May 2016 02:39:44 +0000
+Message-ID: <3F3468645DC82146857A5E1C91E23F4B1B2A2893@SSIEXCH-MB3.ssi.samsung.com>
+References: <CAFjGuFRBqX8CibKVA=Uu7J0cO3DXsLrA1_FVP_LBriKTLgQr3g@mail.gmail.com>
+ <CACJqLyYGwhymjaVSoAGArPmPzFBmUHRrjGAtiQXKr6gEv_ZsSw@mail.gmail.com>
+ <CACJqLyab+rX4e2eu3oaC-DdX-OCaBCWiM_tt79KV8Dr6ZRfL4w@mail.gmail.com>
+ <alpine.DEB.2.11.1605181311080.30956@cpach.fuggernut.com>
+ <3F3468645DC82146857A5E1C91E23F4B1B2A2780@SSIEXCH-MB3.ssi.samsung.com>
+ <CACJqLyYVNtK7+9HtGSt=UihCMaBou7QfAernxk0kfC3ss7wYUw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58021 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751761AbcESCBj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 18 May 2016 22:01:39 -0400
-In-Reply-To: <104170944.77164509.1463621856704.JavaMail.zimbra@redhat.com>
+Received: from mailout2.w2.samsung.com ([211.189.100.12]:22512 "EHLO
+	usmailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750790AbcESCjt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 May 2016 22:39:49 -0400
+Received: from uscpsbgex1.samsung.com
+ (u122.gpu85.samsung.co.kr [203.254.195.122]) by mailout2.w2.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0O7E00NW3KQA2030@mailout2.w2.samsung.com> for
+ ceph-devel@vger.kernel.org; Wed, 18 May 2016 22:39:46 -0400 (EDT)
+In-reply-to: <CACJqLyYVNtK7+9HtGSt=UihCMaBou7QfAernxk0kfC3ss7wYUw@mail.gmail.com>
+Content-language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: =?UTF-8?Q?Piotr_Da=c5=82ek?= <branch@predictor.org.pl>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomai@xsky.com>
+Cc: Sage Weil <sage@newdream.net>, Rajath Shashidhara <rajath.shashidhara@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-
-On 05/18/2016 08:37 PM, Brad Hubbard wrote:
-> ----- Original Message -----
->> From: "Mark Nelson" <mnelson@redhat.com>
->> To: "Piotr Da=C5=82ek" <branch@predictor.org.pl>
->> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
->> Sent: Thursday, 19 May, 2016 7:18:14 AM
->> Subject: Re: Weekly performance meeting APAC time?
->>
->> On 05/18/2016 02:08 PM, Piotr Da=C5=82ek wrote:
->>> On Wed, May 18, 2016 at 11:41:36AM -0500, Mark Nelson wrote:
->>>> Josh mentioned at today's performance meeting that the current
->>>> 8:00AM PST time is inconvenient for some folks he's talked with th=
-at
->>>> live in the APAC region who would like to attend.  I'd like to fin=
-d
->>>> out how many other folks feel this way as well?  Would folks be
->>>> interested in staggering the meeting every other week with somethi=
-ng
->>>> like a 6:00PM PST (9:00AM Beijing) next day) time?
->>>
->>> This means 3:00 AM for everyone in CET and 2:00 AM in GMT... Well,
->>> cant't satisfy everyone I guess.
->>>
->>
->> Yeah, that's what I'm concerned about.  Even if we did it, it would =
-only
->> be every other week.  First I want to see how many people respond sa=
-ying
->> they would even like this change though.
->
-> I was actually the driver behind this I think. Primarily I just wante=
-d to
-> discuss a project I'm working on and get some feedback from the perf =
-team. The
-> regular scheduled meeting is at 0100 my time so I raised that as a bi=
-t of an
-> issue (soft, I know :) ). I think any modification to the meeting tim=
-e though
-> needs to be proportional so maybe 1 in 4 is more appropriate? I guess=
- it
-> depends on the level of interest here in the APAC region which you ar=
-e trying
-> to gauge. For me this is probably more of a one off than an ongoing c=
-ommitment
-> to attending the meeting.
->
-> While we are at it I noticed that http://pad.ceph.com/p/performance_w=
-eekly
-> does not seem to include any recordings from this year although each =
-meeting
-> entry says "See recording...". Are these archived somewhere else or m=
-aybe the
-> dates are incorrect?
-
-Embarrassingly I'm rather behind on updating it.  I haven't found a way=
-=20
-in bluejeans to make the recordings plublic by default.
-
-Mark
-
->
-> Cheers,
-> Brad
->
->>
->> Mark
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQpPbiBXZWQsIE1heSAxOCwgMjAxNiBhdCA2OjM1IFBNLCBIYW9tYWkgV2FuZyA8aGFvbWFpQHhz
+a3kuY29tPiB3cm90ZToNCj4gT24gVGh1LCBNYXkgMTksIDIwMTYgYXQgNzo1MCBBTSwgSmlhbmpp
+YW4gSHVvIDxqaWFuamlhbi5odW9Ac2Ftc3VuZy5jb20+IHdyb3RlOg0KPj4NCj4+IE9uIFdlZCwg
+TWF5IDE4LCAyMDE2IGF0IDEwOjE5IEFNLCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3
+cm90ZToNCj4+Pg0KPj4+IEhpIFJhamF0aCENCj4+Pg0KPj4+IEdyZWF0IHRvIGhlYXIgeW91J3Jl
+IGludGVyZXN0ZWQgaW4gd29ya2luZyB3aXRoIHVzIG91dHNpZGUgb2YgR1NvQyENCj4+Pg0KPj4+
+IE9uIFdlZCwgMTggTWF5IDIwMTYsIEhhb21haSBXYW5nIHdyb3RlOg0KPj4+ID4gSGkgUmFqYXRo
+LA0KPj4+ID4NCj4+PiA+IFdlIGFyZSBnbGFkIHRvIHNlZSB5b3VyIHBhc3Npb24sIGZyb20gbXkg
+dmlldywgc2FnZSBpcyBwbGFubmluZyB0bw0KPj4+ID4gaW1wbGVtZW50IGEgdXNlcnNwYWNlIGNh
+Y2hlIGluIGJsdWVzdG9yZSBpdHNlbGYuIExpa2UNCj4+PiA+IChodHRwczovL2dpdGh1Yi5jb20v
+Y2VwaC9jZXBoL2NvbW1pdC9iOWFjMzFhZmU1YTE2MjE3NmYwMTliYWEyNTM0ODAxNGE3N2Y2YWI4
+I2NvbW1pdGNvbW1lbnQtMTc0ODgyNTApLg0KPj4+ID4NCj4+PiA+IEkgZ3Vlc3MgdGhlIGNhY2hl
+IHdvbid0IGJlIGEgZ2VuZXJpYyBjYWNoZSBpbnRlcmZhY2UuIEluc3RlYWQgaXQgd2lsbA0KPj4+
+ID4gYmUgYm91bmQgdG8gc3BlY2lmaWVkIG5lZWRlZCBvYmplY3QuIFNvIHNhZ2UgbWF5IGdpdmUg
+YSBicmllZj8NCj4+Pg0KPj4+IFBhcnQgb2YgdGhlIHJlYXNvbiB3aHkgdGhpcyBwcm9qZWN0IHdh
+c24ndCBhdCB0aGUgdG9wIG9mIG91ciBsaXN0ICh3ZSBnb3QNCj4+PiBmZXdlciBzbG90cyB0aGFu
+IHdlIGhhZCBwcm9qZWN0cykgd2FzIGJlY2F1c2UgdGhlIEJsdWVTdG9yZSBjb2RlIGlzIGluDQo+
+Pj4gZmx1eCBhbmQgbW92aW5nIHF1aXRlIHF1aWNrbHkuICBGb3IgdGhlIEJsdWVTdG9yZSBzaWRl
+LCB3ZSBhcmUgYnVpbGRpbmcgYQ0KPj4+IHNpbXBsZSBidWZmZXIgY2FjaGUgdGhhdCBpcyB0aWVk
+IHRvIGFuIE9ub2RlIChpbi1tZW1vcnkgcGVyLW9iamVjdA0KPj4+IG1ldGFkYXRhIHN0cnVjdHVy
+ZSkgYW5kIGludGVncmF0ZWQgdGlnaHRseSB3aXRoIHRoZSByZWFkIGFuZCB3cml0ZSBJTw0KPj4+
+IHBhdGhzLiAgVGhpcyB3aWxsIGVsaW1pbmF0ZSBvdXIgdXNlIG9mIHRoZSBibG9jayBkZXZpY2Ug
+YnVmZmVyIGNhY2hlIGZvcg0KPj4+IHVzZXIvb2JqZWN0IGRhdGEuDQo+Pj4NCj4+PiBUaGUgb3Ro
+ZXIgaGFsZiBvZiB0aGUgcGljdHVyZSwgdGhvdWdoLCBpcyB0aGUgQmx1ZUZTIGxheWVyIHRoYXQg
+aXMNCj4+PiBjb25zdW1lZCBieSByb2Nrc2RiOiBpdCBhbHNvIG5lZWRzIGNhY2hpbmcgaW4gb3Jk
+ZXIgZm9yIHJvY2tzZGIgdG8gcGVyZm9ybQ0KPj4+IGF0IGFsbC4gIE15IGhvcGUgaXMgdGhhdCB0
+aGUgY29kZSB3ZSB3cml0ZSBmb3IgdGhlIHVzZSBkYXRhIGNhbiBiZSByZS11c2VkDQo+Pj4gaGVy
+ZSBhcyB3ZWxsLCBidXQgaXQgaXMgc3RpbGwgZXZvbHZpbmcuDQo+Pg0KPj4gV2hlbiBCbHVlc3Rv
+cmUgbW92ZXMgYXdheSBmcm9tIGtlcm5lbCBjYWNoZSB0byBpdHMgb3duIGJ1ZmZlciBjYWNoZSwg
+Um9ja3NEQiBjYW4gdXNlIGl0cyBvd24gYnVmZmVyIGNhY2hlIGFzIHdlbGwuDQo+PiBSb2Nrc0RC
+IGhhcyB0aGlzIHNpemUgY29uZmlndXJhYmxlIGJsb2NrIGNhY2hlIHRvIGNhY2hlIHVuY29tcHJl
+c3NlZCBkYXRhIGJsb2NrcywgaXQgY2FuIHNlcnZlIGFzIGJ1ZmZlciBjYWNoZSwNCj4+IHNpbmNl
+IEJsdWVzdG9yZSBkb24ndCBjb21wcmVzcyBtZXRhIGRhdGEgaW4gUm9ja3NEQi4NCj4NCj4gQWN0
+dWFsbHkgdGhpcyBpcyBub3QgYmVoYXZpb3JlZCBhcyBleHBlY3RlZC4gRnJvbSBteSBsYXN0IG52
+bWVkZXZpY2UNCj4gYmVuY2htYXJrLCBsb3RzIG9mIHJlYWQgc3RpbGwgZ28gZG93biBkZXZpY2Ug
+aW5zdGVhZCBvZiBjYWNoaW5nIGJ5DQo+IHJvY2tzZGIgd2hlbiBJIHNldCBhIHZlcnkgbGFyZ2Ug
+YmxvY2sgY2FjaGUuIEkgZ3Vlc3MgdGhlcmUgZXhpc3RzIHNvbWUNCj4gZ2FwcyBiZXR3ZWVuIG91
+ciB1c2FnZXMgYW5kIHJvY2tzZGIgaW1wbGVtZW50YXRpb24NCg0KV2hhdCAga2luZCBvZiB3b3Jr
+bG9hZCBkaWQgeW91IHVzZSBmb3IgdGhhdCBiZW5jaG1hcmtpbmcsIDEwMCUgcmVhZD8NCg0KPg0K
+Pj4NCj4+IEppYW5qaWFuDQo+Pj4NCj4+PiBUaGUgbWFpbiBtaXNzaW5nIHBpZWNlIEknZCBzYXkg
+aXMgYSB3YXkgdG8gc3RyaW5nIEJ1ZmZlciBvYmplY3RzIHRvZ2V0aGVyDQo+Pj4gaW4gYSBnbG9i
+YWwoaXNoKSBMUlUgKG9yIHNldCBvZiBMUlVzLCBvciB3aGF0ZXZlciB3ZSBuZWVkIGZvciB0aGUg
+Y2FjaGluZw0KPj4+IHBvbGljeSB0aGF0IG1ha2VzIHNlbnNlKSBzbyB0aGF0IHRyaW1taW5nIGNh
+biBiZSBkb25lIHNhZmVseSBhbmQNCj4+PiBlZmZpY2llbnRseS4gIFJpZ2h0IG5vdyB0aGUgY29k
+ZSBpcyBsb2NrLWZyZWUgYmVjYXVzZSBlYWNoIE9ub2RlIGlzIG9ubHkNCj4+PiB0b3VjaGVkIHVu
+ZGVyIHRoZSBjb2xsZWN0aW9uIHJ3bG9jaywgYnV0IGluIG9yZGVyIHRvIGRvIHRyaW1taW5nIHdl
+IG5lZWQNCj4+PiB0byBiZSBhYmxlIHRvIHJlYXAgY29sZCBidWZmZXJzIGZyb20gYSBnbG9iYWwg
+Y29udGV4dC4NCj4+Pg0KPj4+IEFueXdheSwgdGhlcmUgaXMgbm8gY2xlYXIgb3IgcmVhZHkgYW5z
+d2VyIGhlcmUgeWV0LCBidXQgd2UgYXJlIHJlYWR5IHRvDQo+Pj4gZGlzY3VzcyBkZXNpZ24vYXBw
+cm9hY2ggaGVyZSBvbiB0aGUgbGlzdCwgYW5kIHdlbGNvbWUgeW91ciBpbnB1dCAoYW5kDQo+Pj4g
+cG90ZW50aWFsbHksIGNvbnRyaWJ1dGlvbnMgdG8gZGV2ZWxvcG1lbnQhKS4NCj4+Pg0KPj4+IHNh
+Z2UNCj4+Pg0KPj4+DQo+Pj4gPg0KPj4+ID4gT24gV2VkLCBNYXkgMTgsIDIwMTYgYXQgOTozMiBQ
+TSwgSGFvbWFpIFdhbmcgPGhhb21haUB4c2t5LmNvbT4gd3JvdGU6DQo+Pj4gPiA+DQo+Pj4gPiA+
+DQo+Pj4gPiA+IE9uIFdlZCwgTWF5IDE4LCAyMDE2IGF0IDI6NDQgUE0sIFJhamF0aCBTaGFzaGlk
+aGFyYQ0KPj4+ID4gPiA8cmFqYXRoLnNoYXNoaWRoYXJhQGdtYWlsLmNvbT4gd3JvdGU6DQo+Pj4g
+PiA+Pg0KPj4+ID4gPj4gSGVsbG8sDQo+Pj4gPiA+Pg0KPj4+ID4gPj4gSSB3YXMgYSBHU29DJzE2
+IGFwcGxpY2FudCBmb3IgdGhlIHByb2plY3QgIkltcGxlbWVudGluZyBDYWNoZSBsYXllciBvbg0K
+Pj4+ID4gPj4gdG9wIG9mIE5WTUUgRHJpdmVyIi4gVW5mb3J0dW5hdGVseSwgSSB3YXMgbm90IHNl
+bGVjdGVkIGZvciB0aGUNCj4+PiA+ID4+IGludGVybnNoaXAuDQo+Pj4gPiA+DQo+Pj4gPiA+DQo+
+Pj4gPiA+IEhpIFJhamF0aCwNCj4+PiA+ID4NCj4+PiA+ID4gV2UgYXJlIGdsYWQgdG8gc2VlIHlv
+dXIgcGFzc2lvbiwgZnJvbSBteSB2aWV3LCBzYWdlIGlzIHBsYW5uaW5nIHRvIGltcGxlbWVudA0K
+Pj4+ID4gPiBhIHVzZXJzcGFjZSBjYWNoZSBpbiBibHVlc3RvcmUgaXRzZWxmLiBMaWtlDQo+Pj4g
+PiA+IChodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL2NvbW1pdC9iOWFjMzFhZmU1YTE2MjE3
+NmYwMTliYWEyNTM0ODAxNGE3N2Y2YWI4I2NvbW1pdGNvbW1lbnQtMTc0ODgyNTApLg0KPj4+ID4g
+Pg0KPj4+ID4gPiBJIGd1ZXNzIHRoZSBjYWNoZSB3b24ndCBiZSBhIGdlbmVyaWMgY2FjaGUgaW50
+ZXJmYWNlLiBJbnN0ZWFkIGl0IHdpbGwgYmUNCj4+PiA+ID4gYm91bmQgdG8gc3BlY2lmaWVkIG5l
+ZWRlZCBvYmplY3QuIFNvIHNhZ2UgbWF5IGdpdmUgYSBicmllZj8NCj4+PiA+ID4NCj4+PiA+ID4+
+DQo+Pj4gPiA+Pg0KPj4+ID4gPj4gSG93ZXZlciwgSSB3b3VsZCBiZSBpbnRlcmVzdGVkIGluIHdv
+cmtpbmcgb24gdGhlIHByb2plY3QgYXMgYW4NCj4+PiA+ID4+IGluZGVwZW5kZW50IGNvbnRyaWJ1
+dG9yIHRvIENlcGguDQo+Pj4gPiA+PiBJIGFtIGV4cGVjdGluZyB0byByZWNlaXZlIHRoZSBuZWNl
+c3Nhcnkgc3VwcG9ydCBmcm9tIENlcGggZGV2ZWxvcGVyDQo+Pj4gPiA+PiBjb21tdW5pdHkuDQo+
+Pj4gPiA+Pg0KPj4+ID4gPj4gSW4gY2FzZSBJIG1pc3NlZCBvdXQgYW55IGltcG9ydGFudCBkZXRh
+aWxzIGluIG15IHByb2plY3QgcHJvcG9zYWwgb3IgSQ0KPj4+ID4gPj4gaGF2ZSB0aGUgd3Jvbmcg
+dW5kZXJzdGFuZGluZyBvZiB0aGUgcHJvamVjdCwgcGxlYXNlIGhlbHAgbWUgZmlndXJlIG91dA0K
+Pj4+ID4gPj4gdGhlIGRldGFpbHMuDQo+Pj4gPiA+Pg0KPj4+ID4gPj4gTG9va2luZyBmb3J3YXJk
+IHRvIGNvbnRyaWJ1dGUhDQo+Pj4gPiA+Pg0KPj4+ID4gPj4gVGhhbmsgeW91LA0KPj4+ID4gPj4g
+UmFqYXRoIFNoYXNoaWRoYXJhDQo+Pj4gPiA+DQo+Pj4gPiA+DQo+Pj4gPiAtLQ0KPj4+ID4gVG8g
+dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
+cGgtZGV2ZWwiIGluDQo+Pj4gPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZw0KPj4+ID4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
+a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+Pj4gPg0KPj4+ID4NCj4+PiAtLQ0KPj4+
+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
+ZSBjZXBoLWRldmVsIiBpbg0KPj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
+dmdlci5rZXJuZWwub3JnDQo+Pj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
+a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZy
+b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0K
+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBN
+b3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwNCg==
