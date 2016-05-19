@@ -1,150 +1,87 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: Cache Layer on NVME driver
-Date: Thu, 19 May 2016 13:34:43 +0800
-Message-ID: <CACJqLyb6R8G6n9r7au_aLBMrSBvGSrb6+Fc-jZtAKNMRgZFHqw@mail.gmail.com>
-References: <CAFjGuFRBqX8CibKVA=Uu7J0cO3DXsLrA1_FVP_LBriKTLgQr3g@mail.gmail.com>
-	<CACJqLyYGwhymjaVSoAGArPmPzFBmUHRrjGAtiQXKr6gEv_ZsSw@mail.gmail.com>
-	<CACJqLyab+rX4e2eu3oaC-DdX-OCaBCWiM_tt79KV8Dr6ZRfL4w@mail.gmail.com>
-	<alpine.DEB.2.11.1605181311080.30956@cpach.fuggernut.com>
-	<3F3468645DC82146857A5E1C91E23F4B1B2A2780@SSIEXCH-MB3.ssi.samsung.com>
-	<CACJqLyYVNtK7+9HtGSt=UihCMaBou7QfAernxk0kfC3ss7wYUw@mail.gmail.com>
-	<3F3468645DC82146857A5E1C91E23F4B1B2A2893@SSIEXCH-MB3.ssi.samsung.com>
-	<CACJqLybTLvcF9QHpLRoZUuUg+KLfyokOEzsOW7+OsRgn_W5UGw@mail.gmail.com>
+From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
+Subject: Re: Weekly performance meeting APAC time?
+Date: Thu, 19 May 2016 08:16:59 +0200
+Message-ID: <20160519061659.GD22208@predictor>
+References: <ee2c9a43-7303-55cd-8f23-bed502444ff3@redhat.com>
+ <20160518190828.GC22208@predictor>
+ <09a57ed5-d9b4-d599-ddd3-a3b3496dd9c5@redhat.com>
+ <104170944.77164509.1463621856704.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-hk2apc01on0122.outbound.protection.outlook.com ([104.47.124.122]:51134
-	"EHLO APC01-HK2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751672AbcESFey (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 May 2016 01:34:54 -0400
-Received: by mail-vk0-f53.google.com with SMTP id c189so89569102vkb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 18 May 2016 22:34:49 -0700 (PDT)
-In-Reply-To: <CACJqLybTLvcF9QHpLRoZUuUg+KLfyokOEzsOW7+OsRgn_W5UGw@mail.gmail.com>
+Received: from predictor.org.pl ([185.5.97.54]:36705 "EHLO predictor.org.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750764AbcESGOs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 May 2016 02:14:48 -0400
+Content-Disposition: inline
+In-Reply-To: <104170944.77164509.1463621856704.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jianjian Huo <jianjian.huo@samsung.com>
-Cc: Sage Weil <sage@newdream.net>, Rajath Shashidhara <rajath.shashidhara@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-sorry, 100% rw
+On Wed, May 18, 2016 at 09:37:36PM -0400, Brad Hubbard wrote:
+> ----- Original Message -----
+> > On 05/18/2016 02:08 PM, Piotr Da=C5=82ek wrote:
+> > > On Wed, May 18, 2016 at 11:41:36AM -0500, Mark Nelson wrote:
+> > >> Josh mentioned at today's performance meeting that the current
+> > >> 8:00AM PST time is inconvenient for some folks he's talked with =
+that
+> > >> live in the APAC region who would like to attend.  I'd like to f=
+ind
+> > >> out how many other folks feel this way as well?  Would folks be
+> > >> interested in staggering the meeting every other week with somet=
+hing
+> > >> like a 6:00PM PST (9:00AM Beijing) next day) time?
+> > >
+> > > This means 3:00 AM for everyone in CET and 2:00 AM in GMT... Well=
+,
+> > > cant't satisfy everyone I guess.
+> > >
+> >=20
+> > Yeah, that's what I'm concerned about.  Even if we did it, it would=
+ only
+> > be every other week.  First I want to see how many people respond s=
+aying
+> > they would even like this change though.
+>=20
+> I was actually the driver behind this I think. Primarily I just wante=
+d to
+> discuss a project I'm working on and get some feedback from the perf =
+team. The
+> regular scheduled meeting is at 0100 my time so I raised that as a bi=
+t of an
+> issue (soft, I know :) ). I think any modification to the meeting tim=
+e though
+> needs to be proportional so maybe 1 in 4 is more appropriate? I guess=
+ it
+> depends on the level of interest here in the APAC region which you ar=
+e trying
+> to gauge. For me this is probably more of a one off than an ongoing c=
+ommitment
+> to attending the meeting.
+>=20
+> While we are at it I noticed that http://pad.ceph.com/p/performance_w=
+eekly
+> does not seem to include any recordings from this year although each =
+meeting
+> entry says "See recording...". Are these archived somewhere else or m=
+aybe the
+> dates are incorrect?
 
-On Thu, May 19, 2016 at 1:34 PM, Haomai Wang <haomai@xsky.com> wrote:
-> 100%, because of it's a small rbd image. all metadata should be cached.
->
-> On Thu, May 19, 2016 at 10:39 AM, Jianjian Huo <jianjian.huo@samsung.com> wrote:
->>
->> On Wed, May 18, 2016 at 6:35 PM, Haomai Wang <haomai@xsky.com> wrote:
->>> On Thu, May 19, 2016 at 7:50 AM, Jianjian Huo <jianjian.huo@samsung.com> wrote:
->>>>
->>>> On Wed, May 18, 2016 at 10:19 AM, Sage Weil <sage@newdream.net> wrote:
->>>>>
->>>>> Hi Rajath!
->>>>>
->>>>> Great to hear you're interested in working with us outside of GSoC!
->>>>>
->>>>> On Wed, 18 May 2016, Haomai Wang wrote:
->>>>> > Hi Rajath,
->>>>> >
->>>>> > We are glad to see your passion, from my view, sage is planning to
->>>>> > implement a userspace cache in bluestore itself. Like
->>>>> > (https://github.com/ceph/ceph/commit/b9ac31afe5a162176f019baa25348014a77f6ab8#commitcomment-17488250).
->>>>> >
->>>>> > I guess the cache won't be a generic cache interface. Instead it will
->>>>> > be bound to specified needed object. So sage may give a brief?
->>>>>
->>>>> Part of the reason why this project wasn't at the top of our list (we got
->>>>> fewer slots than we had projects) was because the BlueStore code is in
->>>>> flux and moving quite quickly.  For the BlueStore side, we are building a
->>>>> simple buffer cache that is tied to an Onode (in-memory per-object
->>>>> metadata structure) and integrated tightly with the read and write IO
->>>>> paths.  This will eliminate our use of the block device buffer cache for
->>>>> user/object data.
->>>>>
->>>>> The other half of the picture, though, is the BlueFS layer that is
->>>>> consumed by rocksdb: it also needs caching in order for rocksdb to perform
->>>>> at all.  My hope is that the code we write for the use data can be re-used
->>>>> here as well, but it is still evolving.
->>>>
->>>> When Bluestore moves away from kernel cache to its own buffer cache, RocksDB can use its own buffer cache as well.
->>>> RocksDB has this size configurable block cache to cache uncompressed data blocks, it can serve as buffer cache,
->>>> since Bluestore don't compress meta data in RocksDB.
->>>
->>> Actually this is not behaviored as expected. From my last nvmedevice
->>> benchmark, lots of read still go down device instead of caching by
->>> rocksdb when I set a very large block cache. I guess there exists some
->>> gaps between our usages and rocksdb implementation
->>
->> What  kind of workload did you use for that benchmarking, 100% read?
->>
->>>
->>>>
->>>> Jianjian
->>>>>
->>>>> The main missing piece I'd say is a way to string Buffer objects together
->>>>> in a global(ish) LRU (or set of LRUs, or whatever we need for the caching
->>>>> policy that makes sense) so that trimming can be done safely and
->>>>> efficiently.  Right now the code is lock-free because each Onode is only
->>>>> touched under the collection rwlock, but in order to do trimming we need
->>>>> to be able to reap cold buffers from a global context.
->>>>>
->>>>> Anyway, there is no clear or ready answer here yet, but we are ready to
->>>>> discuss design/approach here on the list, and welcome your input (and
->>>>> potentially, contributions to development!).
->>>>>
->>>>> sage
->>>>>
->>>>>
->>>>> >
->>>>> > On Wed, May 18, 2016 at 9:32 PM, Haomai Wang <haomai@xsky.com> wrote:
->>>>> > >
->>>>> > >
->>>>> > > On Wed, May 18, 2016 at 2:44 PM, Rajath Shashidhara
->>>>> > > <rajath.shashidhara@gmail.com> wrote:
->>>>> > >>
->>>>> > >> Hello,
->>>>> > >>
->>>>> > >> I was a GSoC'16 applicant for the project "Implementing Cache layer on
->>>>> > >> top of NVME Driver". Unfortunately, I was not selected for the
->>>>> > >> internship.
->>>>> > >
->>>>> > >
->>>>> > > Hi Rajath,
->>>>> > >
->>>>> > > We are glad to see your passion, from my view, sage is planning to implement
->>>>> > > a userspace cache in bluestore itself. Like
->>>>> > > (https://github.com/ceph/ceph/commit/b9ac31afe5a162176f019baa25348014a77f6ab8#commitcomment-17488250).
->>>>> > >
->>>>> > > I guess the cache won't be a generic cache interface. Instead it will be
->>>>> > > bound to specified needed object. So sage may give a brief?
->>>>> > >
->>>>> > >>
->>>>> > >>
->>>>> > >> However, I would be interested in working on the project as an
->>>>> > >> independent contributor to Ceph.
->>>>> > >> I am expecting to receive the necessary support from Ceph developer
->>>>> > >> community.
->>>>> > >>
->>>>> > >> In case I missed out any important details in my project proposal or I
->>>>> > >> have the wrong understanding of the project, please help me figure out
->>>>> > >> the details.
->>>>> > >>
->>>>> > >> Looking forward to contribute!
->>>>> > >>
->>>>> > >> Thank you,
->>>>> > >> Rajath Shashidhara
->>>>> > >
->>>>> > >
->>>>> > --
->>>>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> > the body of a message to majordomo@vger.kernel.org
->>>>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>> >
->>>>> >
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Same here. As I'm no longer able to attend a perf meeting every week, h=
+aving
+recording available would be a huge help and would make the meeting sch=
+edule
+a non-issue (any discussions could be continued on next meeting(s) and/=
+or
+mailing list/IRC).=20
+
+--=20
+Piotr Da=C5=82ek
+branch@predictor.org.pl
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
