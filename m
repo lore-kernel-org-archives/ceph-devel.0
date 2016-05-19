@@ -1,128 +1,90 @@
-From: Jianjian Huo <jianjian.huo@samsung.com>
-Subject: RE: Cache Layer on NVME driver
-Date: Wed, 18 May 2016 23:50:26 +0000
-Message-ID: <3F3468645DC82146857A5E1C91E23F4B1B2A2780@SSIEXCH-MB3.ssi.samsung.com>
-References: <CAFjGuFRBqX8CibKVA=Uu7J0cO3DXsLrA1_FVP_LBriKTLgQr3g@mail.gmail.com>
- <CACJqLyYGwhymjaVSoAGArPmPzFBmUHRrjGAtiQXKr6gEv_ZsSw@mail.gmail.com>
- <CACJqLyab+rX4e2eu3oaC-DdX-OCaBCWiM_tt79KV8Dr6ZRfL4w@mail.gmail.com>
- <alpine.DEB.2.11.1605181311080.30956@cpach.fuggernut.com>
+From: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Subject: Re: Weekly performance meeting APAC time?
+Date: Thu, 19 May 2016 08:36:49 +0800
+Message-ID: <CANE=7sVnxNwN6fuUpJWEPwuGsHgO9ZWo6_mobg9DAuor0iHxTQ@mail.gmail.com>
+References: <ee2c9a43-7303-55cd-8f23-bed502444ff3@redhat.com>
+	<20160518190828.GC22208@predictor>
+	<09a57ed5-d9b4-d599-ddd3-a3b3496dd9c5@redhat.com>
+	<CAFdRU71n+80QvQv26er3fUUEAJY9ZRn3+qAf8VZR97OzX=GwLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailout1.w2.samsung.com ([211.189.100.11]:26181 "EHLO
-	usmailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751081AbcESAAc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 May 2016 20:00:32 -0400
-Received: from uscpsbgex4.samsung.com
- (u125.gpu85.samsung.co.kr [203.254.195.125]) by mailout1.w2.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0O7E007TNCW3V650@mailout1.w2.samsung.com> for
- ceph-devel@vger.kernel.org; Wed, 18 May 2016 19:50:28 -0400 (EDT)
-In-reply-to: <alpine.DEB.2.11.1605181311080.30956@cpach.fuggernut.com>
-Content-language: en-US
+Received: from mail-oi0-f50.google.com ([209.85.218.50]:33808 "EHLO
+	mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751050AbcESAgu convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 May 2016 20:36:50 -0400
+Received: by mail-oi0-f50.google.com with SMTP id k142so104637841oib.1
+        for <ceph-devel@vger.kernel.org>; Wed, 18 May 2016 17:36:49 -0700 (PDT)
+In-Reply-To: <CAFdRU71n+80QvQv26er3fUUEAJY9ZRn3+qAf8VZR97OzX=GwLw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Haomai Wang <haomai@xsky.com>
-Cc: Rajath Shashidhara <rajath.shashidhara@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Shinobu Kinjo <skinjo@redhat.com>
+Cc: Mark Nelson <mnelson@redhat.com>, =?UTF-8?B?UGlvdHIgRGHFgmVr?= <branch@predictor.org.pl>, ceph-devel <ceph-devel@vger.kernel.org>
 
+6:00PM PST is good for me!
 
-On Wed, May 18, 2016 at 10:19 AM, Sage Weil <sage@newdream.net> wrote:
+2016-05-19 5:56 GMT+08:00 Shinobu Kinjo <shinobu.kj@gmail.com>:
+> Hi Mark,
 >
-> Hi Rajath!
+> On Thu, May 19, 2016 at 6:18 AM, Mark Nelson <mnelson@redhat.com> wro=
+te:
+>> On 05/18/2016 02:08 PM, Piotr Da=C5=82ek wrote:
+>>>
+>>> On Wed, May 18, 2016 at 11:41:36AM -0500, Mark Nelson wrote:
+>>>>
+>>>> Josh mentioned at today's performance meeting that the current
+>>>> 8:00AM PST time is inconvenient for some folks he's talked with th=
+at
+>>>> live in the APAC region who would like to attend.  I'd like to fin=
+d
+>>>> out how many other folks feel this way as well?  Would folks be
+>>>> interested in staggering the meeting every other week with somethi=
+ng
+>>>> like a 6:00PM PST (9:00AM Beijing) next day) time?
+>>>
+>>>
+>>> This means 3:00 AM for everyone in CET and 2:00 AM in GMT... Well,
+>>> cant't satisfy everyone I guess.
 >
-> Great to hear you're interested in working with us outside of GSoC!
+> That's not good for everyone.
+> But count on me!
 >
-> On Wed, 18 May 2016, Haomai Wang wrote:
-> > Hi Rajath,
-> >
-> > We are glad to see your passion, from my view, sage is planning to
-> > implement a userspace cache in bluestore itself. Like
-> > (https://github.com/ceph/ceph/commit/b9ac31afe5a162176f019baa25348014a77f6ab8#commitcomment-17488250).
-> >
-> > I guess the cache won't be a generic cache interface. Instead it will
-> > be bound to specified needed object. So sage may give a brief?
->
-> Part of the reason why this project wasn't at the top of our list (we got
-> fewer slots than we had projects) was because the BlueStore code is in
-> flux and moving quite quickly.  For the BlueStore side, we are building a
-> simple buffer cache that is tied to an Onode (in-memory per-object
-> metadata structure) and integrated tightly with the read and write IO
-> paths.  This will eliminate our use of the block device buffer cache for
-> user/object data.
->
-> The other half of the picture, though, is the BlueFS layer that is
-> consumed by rocksdb: it also needs caching in order for rocksdb to perform
-> at all.  My hope is that the code we write for the use data can be re-used
-> here as well, but it is still evolving.
-
-When Bluestore moves away from kernel cache to its own buffer cache, RocksDB can use its own buffer cache as well. 
-RocksDB has this size configurable block cache to cache uncompressed data blocks, it can serve as buffer cache, 
-since Bluestore don't compress meta data in RocksDB.
-
-Jianjian
->
-> The main missing piece I'd say is a way to string Buffer objects together
-> in a global(ish) LRU (or set of LRUs, or whatever we need for the caching
-> policy that makes sense) so that trimming can be done safely and
-> efficiently.  Right now the code is lock-free because each Onode is only
-> touched under the collection rwlock, but in order to do trimming we need
-> to be able to reap cold buffers from a global context.
->
-> Anyway, there is no clear or ready answer here yet, but we are ready to
-> discuss design/approach here on the list, and welcome your input (and
-> potentially, contributions to development!).
->
-> sage
+>>>
+>>
+>> Yeah, that's what I'm concerned about.  Even if we did it, it would =
+only be
+>> every other week.  First I want to see how many people respond sayin=
+g they
+>> would even like this change though.
+>>
+>> Mark
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 >
-> >
-> > On Wed, May 18, 2016 at 9:32 PM, Haomai Wang <haomai@xsky.com> wrote:
-> > >
-> > >
-> > > On Wed, May 18, 2016 at 2:44 PM, Rajath Shashidhara
-> > > <rajath.shashidhara@gmail.com> wrote:
-> > >>
-> > >> Hello,
-> > >>
-> > >> I was a GSoC'16 applicant for the project "Implementing Cache layer on
-> > >> top of NVME Driver". Unfortunately, I was not selected for the
-> > >> internship.
-> > >
-> > >
-> > > Hi Rajath,
-> > >
-> > > We are glad to see your passion, from my view, sage is planning to implement
-> > > a userspace cache in bluestore itself. Like
-> > > (https://github.com/ceph/ceph/commit/b9ac31afe5a162176f019baa25348014a77f6ab8#commitcomment-17488250).
-> > >
-> > > I guess the cache won't be a generic cache interface. Instead it will be
-> > > bound to specified needed object. So sage may give a brief?
-> > >
-> > >>
-> > >>
-> > >> However, I would be interested in working on the project as an
-> > >> independent contributor to Ceph.
-> > >> I am expecting to receive the necessary support from Ceph developer
-> > >> community.
-> > >>
-> > >> In case I missed out any important details in my project proposal or I
-> > >> have the wrong understanding of the project, please help me figure out
-> > >> the details.
-> > >>
-> > >> Looking forward to contribute!
-> > >>
-> > >> Thank you,
-> > >> Rajath Shashidhara
-> > >
-> > >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> >
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> Email:
+> shinobu@linux.com
+> shinobu@redhat.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+--=20
+Regards,
+Xinze Chi
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
