@@ -1,135 +1,67 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [wip-addr-features] make sure I am doing the right thing
-Date: Thu, 19 May 2016 12:08:54 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605191206250.980@cpach.fuggernut.com>
-References: <CAEG8a3LQuro2zXu90im0aQ58XxdGLDQvLxnjkJ+Rd8C6k70QVw@mail.gmail.com> <alpine.DEB.2.11.1605160446150.30956@cpach.fuggernut.com> <alpine.DEB.2.11.1605161228390.30956@cpach.fuggernut.com> <CAEG8a3KPFfuFfM2TDyY11A0XD=fvGEmm=TP2Y_ZvZfWYTREAzw@mail.gmail.com>
- <alpine.DEB.2.11.1605181637080.30956@cpach.fuggernut.com> <CAEG8a3KCYaCUAmdw8i=-BZKHVN4DJ4gK3RAzSf5q9cA2xXEr=Q@mail.gmail.com> <alpine.DEB.2.11.1605190806040.980@cpach.fuggernut.com> <CAEG8a3JBbfs_15+Ypsm24jAM7Od+BcCR8HoO1o9Sq2mtnmu6mA@mail.gmail.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: =?UTF-8?B?UmU6IOetlOWkjTogW2NlcGgvY2VwaF0gV2lwIGFkZCBmbGFzaGNhY2hlICgjODc3Myk=?=
+Date: Thu, 19 May 2016 12:58:49 -0400
+Message-ID: <CANP1eJGUyw8YpmbKV7PQmDa7CD3ucY2u_GT9f-phFYQRB3idSg@mail.gmail.com>
+References: <ceph/ceph/pull/8773@github.com>
+	<ceph/ceph/pull/8773/c217543554@github.com>
+	<3858597F7658604DB90E3F60F716249C047A8EB8@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46427 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751760AbcESQIi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 12:08:38 -0400
-In-Reply-To: <CAEG8a3JBbfs_15+Ypsm24jAM7Od+BcCR8HoO1o9Sq2mtnmu6mA@mail.gmail.com>
+Received: from mail-lf0-f50.google.com ([209.85.215.50]:33896 "EHLO
+	mail-lf0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754637AbcESQ6v convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 12:58:51 -0400
+Received: by mail-lf0-f50.google.com with SMTP id m64so39714835lfd.1
+        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 09:58:50 -0700 (PDT)
+In-Reply-To: <3858597F7658604DB90E3F60F716249C047A8EB8@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Junwang Zhao <zhjwpku@gmail.com>
-Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Houlinfei <hou.linfei@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 19 May 2016, Junwang Zhao wrote:
-> Hi, Sage,
-> 
-> Check [1] when you got some time, sorry to bother :)
+On Thu, May 19, 2016 at 7:51 AM, Houlinfei <hou.linfei@h3c.com> wrote:
+>
+>
+> Hi, the main ceph-disk interface added is part of the prepare. We add=
+ fcache, fcache_size, fcache-uuid optional arguments. These are the onl=
+y external interface. When you want to use flashcache, you must specify=
+ flashcache disk and flashcache size such as
+> ceph-disk prepare --fcache /dev/sdc --fcache_size 10 /dev/sda.
+> I think we could add bcache and dm-cache in the same way if needed. W=
+hat do you think?
+>
+> =E5=8F=91=E4=BB=B6=E4=BA=BA: Sage Weil [mailto:notifications@github.c=
+om]
+> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2016=E5=B9=B45=E6=9C=887=E6=97=A5=
+ 3:58
+> =E6=94=B6=E4=BB=B6=E4=BA=BA: ceph/ceph
+> =E6=8A=84=E9=80=81: houlinfei 11802 (RD); Author
+> =E4=B8=BB=E9=A2=98: Re: [ceph/ceph] Wip add flashcache (#8773)
+>
+> I think we want to make this more generic so that we can layer in any=
+ caching option (flashcache, bcache, dm-cache). Can you send an email t=
+o ceph-devel with the proposed ceph-disk interface change so we can get=
+ feedback and settle one the approach? Thanks!
 
-That's what I'm here for!  :)
 
-> [1]https://github.com/zhjwpku/ceph/commit/8934f038fdf28156038770e601e4a27f7a684390
+I think it's important to think about how these block caching
+solutions handle O_DIRECT. Bluestore uses O_DIRECT + libaio which
+bypasses the normal kernel (page) caches. I actually don't know the
+answer to it but I think it's valuable to figure out if any of the
+above are bypassed in the O_DIRECT case.
 
-It looks right to me, although I think we still want to follow up with a 
-change to address my point below.
+--=20
+Milosz Tanski
+CTO
+16 East 34th Street, 15th floor
+New York, NY 10016
 
-Thanks!
-sage
-
-
-> 
-> On Thu, May 19, 2016 at 8:08 PM, Sage Weil <sage@newdream.net> wrote:
-> > On Thu, 19 May 2016, Junwang Zhao wrote:
-> >> Hi Sage, Haomai,
-> >> Please check [1] and give some feedback, I am not sure about
-> >> 52436ded943b8f567adb584c50b789431b788a85
-> >>
-> >> [1] https://github.com/zhjwpku/ceph/commits/wip-addr-work
-> >
-> > Great! I made several suggestions, and I have a question for everyone:
-> > what should we do if we have a "new" addr (say, for the v2 msgr protocol)
-> > and we need to encode it for a client that doesn't have the ADDR2 feature?
-> > Right now we are still stuffing the sockaddr_storage in their with
-> > whatever sockaddr data we have, but it is indistinguishable from a legacy
-> > address.  Perhaps it sould encode as blank?  (e.g., entity_addr_t())? Or
-> > blank, except with a magic nonce (0xffffffff maybe) so that you can tell
-> > that it is non-blank but not terribly useful/usable?
-> >
-> > sage
-> >
-> >
-> >
-> >> > Thanks!
-> >>
-> >> On Thu, May 19, 2016 at 4:44 AM, Sage Weil <sage@newdream.net> wrote:
-> >> > On Tue, 17 May 2016, Junwang Zhao wrote:
-> >> >> Hi Sage,
-> >> >>
-> >> >> Check this[1], we should I do next, entity_addrvec_t ?
-> >> >>
-> >> >> [1] https://github.com/zhjwpku/ceph/commits/wip-addr-work
-> >> >
-> >> > Looks good!  I opened the PR
-> >> >
-> >> >         https://github.com/ceph/ceph/pull/9184
-> >> >
-> >> > for review and test.
-> >> >
-> >> > The next step is just to make a new entity_addr_t encoding that is more
-> >> > compact and uses an ADDR2 feature.  One commit that defines the new
-> >> > feature, then one commit that changes the entity_addr_t encode/decode,
-> >> > somewhat like in c728926a86e1410f959011d24700bb07bad1dc2c.  I would use
-> >> > the new get_sockaddr_len() method for elen, though.
-> >> >
-> >> > Also, the TYPE_ definitions should really be TYPE_LEGACY = 1, not the
-> >> > transport version (IP version), which is already covered by the sa_family
-> >> > field in the sockaddr.  I think that makes sense...
-> >> >
-> >> > A third commit would then add the entity_addrvec_t type, similar to what
-> >> > is in that same commit.  It should also add the type to
-> >> > test/encoding/types.h.
-> >> >
-> >> > Thanks!
-> >> > sage
-> >> >
-> >> >
-> >> >
-> >> >>
-> >> >> On Tue, May 17, 2016 at 12:29 AM, Sage Weil <sage@newdream.net> wrote:
-> >> >> > On Mon, 16 May 2016, Sage Weil wrote:
-> >> >> >> Hi Junwang,
-> >> >> >>
-> >> >> >> On Mon, 16 May 2016, Junwang Zhao wrote:
-> >> >> >> > Hi Sage, Haomai,
-> >> >> >> >
-> >> >> >> > I am working on the require-features-patch, I use 'make' to see the conflicts,
-> >> >> >> > and change the code to fit the required-feature-patch, [1] is a huge patch
-> >> >> >> > that I am still working on, it has not been finished. I really need to check
-> >> >> >> > with you whether I am doing it right, since it seems the errors are endless.
-> >> >> >> >
-> >> >> >> > There are some comments where I am not sure in the patch, like 'not sure'.
-> >> >> >>
-> >> >> >> I skimmed through this and it looks mostly right, but I see a few cases
-> >> >> >> where features aren't needed, e.g. cls_refcount_get in
-> >> >> >> cls_refcount_client.cc (there's no addr being encoded in
-> >> >> >> cls_refcount_get_op, so no need to make the encoding featureful).
-> >> >> >>
-> >> >> >> > I didn't split this huge patch into small ones, I am not sure is that a
-> >> >> >> > must, if yes, I will split it into small ones.
-> >> >> >>
-> >> >> >> The end result needs to be a series of small patches, but that doesn't
-> >> >> >> have to happen right away.  I think it might be useful to do a few small
-> >> >> >> sets of changes first just to show what the goal is, though.
-> >> >> >>
-> >> >> >> I will take the patch below and pull a few sample changes out so you can
-> >> >> >> see.  Traveling at the moment, but I'll have something pushed today (that
-> >> >> >> is also rebased on top of the latest wip-addr-cleanup branch).
-> >> >> >
-> >> >> > I went on a bit of a binge and have a wip-addr-work branch that is mostly
-> >> >> > there.  The last thing (I think) is updating msg/simple and msg/async.
-> >> >> > These ones should explicitly encode with features 0 since the protocol is
-> >> >> > defined in terms of the legacy encoding.
-> >> >> >
-> >> >> > sage
-> >> >>
-> >> >>
-> >>
-> >>
-> 
-> 
+p: 646-253-9055
+e: milosz@adfin.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
