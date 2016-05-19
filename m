@@ -1,65 +1,70 @@
-From: Gaurav Bafna <bafnag@gmail.com>
-Subject: No Ceph Recovery : Is it a bug ?
-Date: Thu, 19 May 2016 12:30:23 +0530
-Message-ID: <CAPg135a2YdLrMspcGdLbkx-fWvh30VJ3J4Y=hKSMAxDzosd+KQ@mail.gmail.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: Cache Layer on NVME driver
+Date: Thu, 19 May 2016 15:08:25 +0800
+Message-ID: <CACJqLyaM-emU0t6VUuqzwiSK_iZo0DkG_J+LJef756x__2bZPw@mail.gmail.com>
+References: <CAFjGuFRBqX8CibKVA=Uu7J0cO3DXsLrA1_FVP_LBriKTLgQr3g@mail.gmail.com>
+	<CACJqLyYGwhymjaVSoAGArPmPzFBmUHRrjGAtiQXKr6gEv_ZsSw@mail.gmail.com>
+	<CACJqLyab+rX4e2eu3oaC-DdX-OCaBCWiM_tt79KV8Dr6ZRfL4w@mail.gmail.com>
+	<alpine.DEB.2.11.1605181311080.30956@cpach.fuggernut.com>
+	<3F3468645DC82146857A5E1C91E23F4B1B2A2780@SSIEXCH-MB3.ssi.samsung.com>
+	<alpine.DEB.2.11.1605190242200.30956@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f49.google.com ([209.85.218.49]:35437 "EHLO
-	mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751362AbcESHAY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 03:00:24 -0400
-Received: by mail-oi0-f49.google.com with SMTP id x19so114465218oix.2
-        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 00:00:24 -0700 (PDT)
+Received: from mail-sg2apc01on0105.outbound.protection.outlook.com ([104.47.125.105]:10656
+	"EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753849AbcESHIk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 May 2016 03:08:40 -0400
+Received: by mail-vk0-f51.google.com with SMTP id y2so20803848vka.3
+        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 00:08:35 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1605190242200.30956@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Jianjian Huo <jianjian.huo@samsung.com>, Rajath Shashidhara <rajath.shashidhara@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Cephers ,
+I think jianjian refer to
+this(https://github.com/ceph/ceph/blob/master/src/kv/RocksDBStore.cc#L285)
 
-In our production cluster at Reliance Jio, when as osd goes corrupt
-and crashes, Cluster remains unhealthy even after 4 hours.
-
-    cluster fac04d85-db48-4564-b821-deebda046261
-     health HEALTH_WARN
-            658 pgs degraded
-            658 pgs stuck degraded
-            688 pgs stuck unclean
-            658 pgs stuck undersized
-            658 pgs undersized
-            recovery 3064/1981308 objects degraded (0.155%)
-            recovery 124/1981308 objects misplaced (0.006%)
-     monmap e11: 11 mons at
-{dssmon2=10.140.208.224:6789/0,dssmon3=10.140.208.225:6789/0,dssmon31=10.135.38.141:6789/0,dssmon32=10.135.38.142:6789/0,dssmon33=10.135.38.143:6789/0,dssmon34=10.135.38.144:6789/0,dssmon35=10.135.38.145:6789/0,dssmon4=10.140.208.226:6789/0,dssmon5=10.140.208.227:6789/0,dssmon6=10.140.208.228:6789/0,dssmonleader1=10.140.208.223:6789/0}
-            election epoch 792, quorum 0,1,2,3,4,5,6,7,8,9,10
-dssmon31,dssmon32,dssmon33,dssmon34,dssmon35,dssmonleader1,dssmon2,dssmon3,dssmon4,dssmon5,dssmon6
-     osdmap e8778: 2774 osds: 2746 up, 2746 in; 30 remapped pgs
-      pgmap v2740957: 75680 pgs, 11 pools, 386 GB data, 322 kobjects
-            16288 GB used, 14299 TB / 14315 TB avail
-            3064/1981308 objects degraded (0.155%)
-            124/1981308 objects misplaced (0.006%)
-               74992 active+clean
-                 658 active+undersized+degraded
-                  30 active+remapped
-  client io 12394 B/s rd, 17 op/s
-
-With 12 osd are down due to H/W failure, and having replication factor
-6 , the cluster should have recovered , but it is not recovering.
-
-When I kill an osd daemon, it recovers quickly. Any ideas why the PGs
-are remaining undersized ?
-
-What could be the difference between two scenarions :
-
-1. OSD down due to H/W failure.
-2. OSD daemon killed .
-
-When I remove the 12 osds from the crushmap manually or do ceph osd
-crush remove for those osds, the cluster recovers just fine.
-
-I have mailed this on Ceph-Users but found no solution. Hence asking
-on this ML .
-
-Thanks
-Gaurav
+On Thu, May 19, 2016 at 2:43 PM, Sage Weil <sage@newdream.net> wrote:
+> On Wed, 18 May 2016, Jianjian Huo wrote:
+>> On Wed, May 18, 2016 at 10:19 AM, Sage Weil <sage@newdream.net> wrote:
+>> >
+>> > Hi Rajath!
+>> >
+>> > Great to hear you're interested in working with us outside of GSoC!
+>> >
+>> > On Wed, 18 May 2016, Haomai Wang wrote:
+>> > > Hi Rajath,
+>> > >
+>> > > We are glad to see your passion, from my view, sage is planning to
+>> > > implement a userspace cache in bluestore itself. Like
+>> > > (https://github.com/ceph/ceph/commit/b9ac31afe5a162176f019baa25348014a77f6ab8#commitcomment-17488250).
+>> > >
+>> > > I guess the cache won't be a generic cache interface. Instead it will
+>> > > be bound to specified needed object. So sage may give a brief?
+>> >
+>> > Part of the reason why this project wasn't at the top of our list (we got
+>> > fewer slots than we had projects) was because the BlueStore code is in
+>> > flux and moving quite quickly.  For the BlueStore side, we are building a
+>> > simple buffer cache that is tied to an Onode (in-memory per-object
+>> > metadata structure) and integrated tightly with the read and write IO
+>> > paths.  This will eliminate our use of the block device buffer cache for
+>> > user/object data.
+>> >
+>> > The other half of the picture, though, is the BlueFS layer that is
+>> > consumed by rocksdb: it also needs caching in order for rocksdb to perform
+>> > at all.  My hope is that the code we write for the use data can be re-used
+>> > here as well, but it is still evolving.
+>>
+>> When Bluestore moves away from kernel cache to its own buffer cache, RocksDB can use its own buffer cache as well.
+>> RocksDB has this size configurable block cache to cache uncompressed data blocks, it can serve as buffer cache,
+>> since Bluestore don't compress meta data in RocksDB.
+>
+> What options control this?  I was having trouble finding it the last time
+> I looked.  We should switch it now (and use unbuffered IO from BlueFS) if
+> we can.
+>
+> Thanks!
+> sage
