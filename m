@@ -1,94 +1,131 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: Min alloc size according to media type
-Date: Thu, 19 May 2016 20:29:47 +0000
-Message-ID: <BLUPR0201MB1524D22BDBA93E7F438D4382E84A0@BLUPR0201MB1524.namprd02.prod.outlook.com>
-References: <CY1PR0201MB182075171B6FCA64CF104097854A0@CY1PR0201MB1820.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1605191515090.6221@cpach.fuggernut.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Initial proposal for bluestore compression control and
+ statistics
+Date: Thu, 19 May 2016 16:52:45 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605191649270.6221@cpach.fuggernut.com>
+References: <2ec0367c-ea9e-469e-4a80-b2a242c84f0f@mirantis.com> <alpine.DEB.2.11.1605191520270.6221@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0081.outbound.protection.outlook.com ([65.55.169.81]:33849
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S933159AbcESUo5 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 16:44:57 -0400
-In-Reply-To: <alpine.DEB.2.11.1605191515090.6221@cpach.fuggernut.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:48414 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751942AbcESUw3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 16:52:29 -0400
+In-Reply-To: <alpine.DEB.2.11.1605191520270.6221@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Ramesh Chander <Ramesh.Chander@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Thursday, May 19, 2016 12:20 PM
-> To: Ramesh Chander <Ramesh.Chander@sandisk.com>
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: Min alloc size according to media type
+On Thu, 19 May 2016, Sage Weil wrote:
+> On Thu, 19 May 2016, Igor Fedotov wrote:
+> > Hi cephers,
+> > 
+> > please find my initial proposal with regard to bluestore compression control
+> > and related statistics.
+> > 
+> > Any comments/thoughts are highly appreciated.
+> > 
+> > ==================================================================
+> > 
+> > COMPRESSION CONTROL OPTIONS
+> > 
+> > One can see following means to control  compression at BlueStore level.
+> > 
+> > 1) Per-store setting to enable/disable compression and specify default
+> > compression method
+> > 
+> > bluestore_compression = <zlib | snappy> / <force | optional | disable>
+> > 
+> > E.g.
+> > 
+> > bluestore_compression = zlib/force
+> > 
+> > The first token denotes default/applied compression algorithm.
+> > The second one:
+> > 
+> > 'force' - enables compression for any objects
+> > 
+> > 'optional' - burden the caller with the need to enable compression by
+> > different means (see below)
+> > 
+> > 'disable' - unconditionally disables any compression for the store.
+> > 
+> > This option is definitely useful for testing/debugging and has probably
+> > limited use in production.
 > 
-> On Thu, 19 May 2016, Ramesh Chander wrote:
-> > Hi Sage,
-> >
-> > I am doing changes in Bluestore related to minimum allocation size
-> > according to ssd and hdd. This change involves:
-> >
-> > 1. There are three min alloc sizes now:
-> >                 a. min_alloc_size: old one, default changed to 0
-> >                 b. min_alloc_size_hdd: for rotational media, default 64k
-> >                 c. min_alloc_size_ssd: for ssd, default 4k.
-> >
-> > 2. Making changes in BlockDevice to maintain its own min_alloc_size.
-> > It allows to maintain different min_alloc_size for different devices.
-> >
-> > 3. Making changes in allocator(stupid, bitmap) interfaces to take
-> > min_alloc_size from the corresponding devices.
+> Do we need the 'disable' option?  i.e., is there any difference between
 > 
-> This makes sense if some devices are hdd and some are ssd (e.g., main vs
-> db/wal), but in practice the only separation currently possible is to have a
-> separate device for WAL and for rocksdb, both of which hare managed by
-> bluefs and not bluestore directly.  Ane bluefs currently has a min_alloc_size
-> of 1MB since all files are generally big (usually 4MB each), there are no
-> random writes, etc.
+>  bluestore compression = snappy/disable
 > 
-> Unless we want to make bluestore smart enough to push object data on a
-> fast device (i.e., do ssd/hdd tiering internally), I'm not sure we need per-
-> device min_alloc_size.
+> and
+> 
+>  bluestore compression =
+> 
+> Also, since we don't need to list multiple algorithms, we can probably 
+> just simplify this to be
+> 
+>  bluestore compression algorithm = snappy
+> 
+> and then
+> 
+>  bluestore compression = force | optional | disable
+> 
+> or maybe just
+> 
+>  bluestore compression force = true/false
+>  bluestore compression allow = true/false
+> 
+> with a check that prevents nonsensical (force + allow).  Right now we 
+> don't have a enum config option type (although we perhaps should).
+> 
+> > 2) Per-object compression specification. One should be able to enable/disable
+> > compression for specific object.
+> > 
+> > Following sub-option can be provided:
+> > 
+> >   a) Specify compression mode (along with disablement option) at object
+> > creation
+> > 
+> >   b) Specify compression mode at arbitrary moment via specific method/ioctl
+> > call. Compression to be applied for subsequent write requests
+> > 
+> >   c) Force object compression/decompression at arbitrary moment via specific
+> > method/ioctl call. Existing object content to be compressed/decompressed and
+> > appropriate mode to be set for subsequent write requests.
+> > 
+> >   d) Disable compression for short-lived objects if corresponding hint has
+> > been provided via set_alloc_hint2 call. See PR at
+> > https://github.com/ceph/ceph/pull/6208/files/306c5e148cd2f538b3b6c8c2a1a3d5f38ef8e15a#r63775941
+> 
+> I think a, b, and d can be address by adding two hints to the 
+> set_alloc_hint2 operation:
+> 
+>  COMPRESSIBLE
+>  INCOMPRESSBILE
+> 
+> The first would attempt compression if bluestore compression = allow, and 
+> the second would not try even if compression = force.
+> 
+> Alternatively, we could have
+> 
+>  bluestore compression = force | aggressive | passive | disable
+> 
+> where aggressive would try unless INCOMPRESSIBLE and passive would not try 
+> unless COMPRESSIBLE.
+> 
+> I would make the SHORTLIVED inference an independent heuristic that is 
+> optional, and basically makes SHORTLIVED => INCOMPRESSIBLE and LONGLIVED 
+> => COMPRESSIBLE.
 
-I think this is / will be valuable -- in the future. I don't see that this item significantly simplifies the future problem.
+One other thought: might we want to take LONGLIVED + IMMUTABLE or 
+APPEND_ONLY to mean we should use a different, more space-efficient codec?  
+While using some fast and cheap (e.g., snappy) for everything else?
 
-> 
-> > I have following questions regarding this parameter and use of it in
-> > bluestore:
-> >
-> > 1. I assume this parameter is transient and does not have effect on
-> > different values (say changed from 4k to 64k or vice versa) across
-> > reboots or different ceph versions?
-> >                 Is it ondisk anywhere in metadata or in freelist manager
-> >                 in direct or indirect manner? Because having on disk
-> >                 presence could cause confusions by having new options
-> >                 when existing users move to build with this change.
-> 
-> Currently it is transient everywhere, and so far I've been trying to keep it that
-> way.  However, we might want to change this: if we make min_alloc_size
-> fixed at mkfs time, we could possibly collapse down the size of the allocation
-> bitmap(s) by a factor of 16 on HDD (1 bit per min_alloc_size instead of per
-> block).  I'm not sure that it's worth it, though... thoughts?
+Maybe an additional option
 
-Collapsing the bitmap provides little DRAM savings and probably not much CPU time savings (though some additional (low risk) coding might be required to make this statement true), so I don't see much point in it.
-Seems like extra complexity with little value.
+ bluestore compression longlived algorithm = zlib
 
-> 
-> > 2. While figuring out the min_alloc_size for devices, I give
-> > preferences to old config parameter so that existing configs
-> >                 are not changed by this code change. Is this right or
-> > this is not required?
-> 
-> Don't worry about legacy at all since bluestore has no users.  :)
-> 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+to go along with bluestore_compression_algorithm...
+
+sage
