@@ -1,119 +1,122 @@
-From: Jianjian Huo <jianjian.huo@samsung.com>
-Subject: RE: Cache Layer on NVME driver
-Date: Thu, 19 May 2016 02:39:44 +0000
-Message-ID: <3F3468645DC82146857A5E1C91E23F4B1B2A2893@SSIEXCH-MB3.ssi.samsung.com>
-References: <CAFjGuFRBqX8CibKVA=Uu7J0cO3DXsLrA1_FVP_LBriKTLgQr3g@mail.gmail.com>
- <CACJqLyYGwhymjaVSoAGArPmPzFBmUHRrjGAtiQXKr6gEv_ZsSw@mail.gmail.com>
- <CACJqLyab+rX4e2eu3oaC-DdX-OCaBCWiM_tt79KV8Dr6ZRfL4w@mail.gmail.com>
- <alpine.DEB.2.11.1605181311080.30956@cpach.fuggernut.com>
- <3F3468645DC82146857A5E1C91E23F4B1B2A2780@SSIEXCH-MB3.ssi.samsung.com>
- <CACJqLyYVNtK7+9HtGSt=UihCMaBou7QfAernxk0kfC3ss7wYUw@mail.gmail.com>
+From: Christian Balzer <chibi@gol.com>
+Subject: Re: [ceph-users] mark out vs crush weight 0
+Date: Thu, 19 May 2016 11:57:07 +0900
+Message-ID: <20160519115707.123d3597@batzmaru.gol.ad.jp>
+References: <alpine.DEB.2.11.1605181713350.30956@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailout2.w2.samsung.com ([211.189.100.12]:22512 "EHLO
-	usmailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750790AbcESCjt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 May 2016 22:39:49 -0400
-Received: from uscpsbgex1.samsung.com
- (u122.gpu85.samsung.co.kr [203.254.195.122]) by mailout2.w2.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0O7E00NW3KQA2030@mailout2.w2.samsung.com> for
- ceph-devel@vger.kernel.org; Wed, 18 May 2016 22:39:46 -0400 (EDT)
-In-reply-to: <CACJqLyYVNtK7+9HtGSt=UihCMaBou7QfAernxk0kfC3ss7wYUw@mail.gmail.com>
-Content-language: en-US
+Received: from smtp02.dentaku.gol.com ([203.216.5.72]:42081 "EHLO
+	smtp02.dentaku.gol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751085AbcESC5M (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 May 2016 22:57:12 -0400
+In-Reply-To: <alpine.DEB.2.11.1605181713350.30956@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: Sage Weil <sage@newdream.net>, Rajath Shashidhara <rajath.shashidhara@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-DQpPbiBXZWQsIE1heSAxOCwgMjAxNiBhdCA2OjM1IFBNLCBIYW9tYWkgV2FuZyA8aGFvbWFpQHhz
-a3kuY29tPiB3cm90ZToNCj4gT24gVGh1LCBNYXkgMTksIDIwMTYgYXQgNzo1MCBBTSwgSmlhbmpp
-YW4gSHVvIDxqaWFuamlhbi5odW9Ac2Ftc3VuZy5jb20+IHdyb3RlOg0KPj4NCj4+IE9uIFdlZCwg
-TWF5IDE4LCAyMDE2IGF0IDEwOjE5IEFNLCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3
-cm90ZToNCj4+Pg0KPj4+IEhpIFJhamF0aCENCj4+Pg0KPj4+IEdyZWF0IHRvIGhlYXIgeW91J3Jl
-IGludGVyZXN0ZWQgaW4gd29ya2luZyB3aXRoIHVzIG91dHNpZGUgb2YgR1NvQyENCj4+Pg0KPj4+
-IE9uIFdlZCwgMTggTWF5IDIwMTYsIEhhb21haSBXYW5nIHdyb3RlOg0KPj4+ID4gSGkgUmFqYXRo
-LA0KPj4+ID4NCj4+PiA+IFdlIGFyZSBnbGFkIHRvIHNlZSB5b3VyIHBhc3Npb24sIGZyb20gbXkg
-dmlldywgc2FnZSBpcyBwbGFubmluZyB0bw0KPj4+ID4gaW1wbGVtZW50IGEgdXNlcnNwYWNlIGNh
-Y2hlIGluIGJsdWVzdG9yZSBpdHNlbGYuIExpa2UNCj4+PiA+IChodHRwczovL2dpdGh1Yi5jb20v
-Y2VwaC9jZXBoL2NvbW1pdC9iOWFjMzFhZmU1YTE2MjE3NmYwMTliYWEyNTM0ODAxNGE3N2Y2YWI4
-I2NvbW1pdGNvbW1lbnQtMTc0ODgyNTApLg0KPj4+ID4NCj4+PiA+IEkgZ3Vlc3MgdGhlIGNhY2hl
-IHdvbid0IGJlIGEgZ2VuZXJpYyBjYWNoZSBpbnRlcmZhY2UuIEluc3RlYWQgaXQgd2lsbA0KPj4+
-ID4gYmUgYm91bmQgdG8gc3BlY2lmaWVkIG5lZWRlZCBvYmplY3QuIFNvIHNhZ2UgbWF5IGdpdmUg
-YSBicmllZj8NCj4+Pg0KPj4+IFBhcnQgb2YgdGhlIHJlYXNvbiB3aHkgdGhpcyBwcm9qZWN0IHdh
-c24ndCBhdCB0aGUgdG9wIG9mIG91ciBsaXN0ICh3ZSBnb3QNCj4+PiBmZXdlciBzbG90cyB0aGFu
-IHdlIGhhZCBwcm9qZWN0cykgd2FzIGJlY2F1c2UgdGhlIEJsdWVTdG9yZSBjb2RlIGlzIGluDQo+
-Pj4gZmx1eCBhbmQgbW92aW5nIHF1aXRlIHF1aWNrbHkuICBGb3IgdGhlIEJsdWVTdG9yZSBzaWRl
-LCB3ZSBhcmUgYnVpbGRpbmcgYQ0KPj4+IHNpbXBsZSBidWZmZXIgY2FjaGUgdGhhdCBpcyB0aWVk
-IHRvIGFuIE9ub2RlIChpbi1tZW1vcnkgcGVyLW9iamVjdA0KPj4+IG1ldGFkYXRhIHN0cnVjdHVy
-ZSkgYW5kIGludGVncmF0ZWQgdGlnaHRseSB3aXRoIHRoZSByZWFkIGFuZCB3cml0ZSBJTw0KPj4+
-IHBhdGhzLiAgVGhpcyB3aWxsIGVsaW1pbmF0ZSBvdXIgdXNlIG9mIHRoZSBibG9jayBkZXZpY2Ug
-YnVmZmVyIGNhY2hlIGZvcg0KPj4+IHVzZXIvb2JqZWN0IGRhdGEuDQo+Pj4NCj4+PiBUaGUgb3Ro
-ZXIgaGFsZiBvZiB0aGUgcGljdHVyZSwgdGhvdWdoLCBpcyB0aGUgQmx1ZUZTIGxheWVyIHRoYXQg
-aXMNCj4+PiBjb25zdW1lZCBieSByb2Nrc2RiOiBpdCBhbHNvIG5lZWRzIGNhY2hpbmcgaW4gb3Jk
-ZXIgZm9yIHJvY2tzZGIgdG8gcGVyZm9ybQ0KPj4+IGF0IGFsbC4gIE15IGhvcGUgaXMgdGhhdCB0
-aGUgY29kZSB3ZSB3cml0ZSBmb3IgdGhlIHVzZSBkYXRhIGNhbiBiZSByZS11c2VkDQo+Pj4gaGVy
-ZSBhcyB3ZWxsLCBidXQgaXQgaXMgc3RpbGwgZXZvbHZpbmcuDQo+Pg0KPj4gV2hlbiBCbHVlc3Rv
-cmUgbW92ZXMgYXdheSBmcm9tIGtlcm5lbCBjYWNoZSB0byBpdHMgb3duIGJ1ZmZlciBjYWNoZSwg
-Um9ja3NEQiBjYW4gdXNlIGl0cyBvd24gYnVmZmVyIGNhY2hlIGFzIHdlbGwuDQo+PiBSb2Nrc0RC
-IGhhcyB0aGlzIHNpemUgY29uZmlndXJhYmxlIGJsb2NrIGNhY2hlIHRvIGNhY2hlIHVuY29tcHJl
-c3NlZCBkYXRhIGJsb2NrcywgaXQgY2FuIHNlcnZlIGFzIGJ1ZmZlciBjYWNoZSwNCj4+IHNpbmNl
-IEJsdWVzdG9yZSBkb24ndCBjb21wcmVzcyBtZXRhIGRhdGEgaW4gUm9ja3NEQi4NCj4NCj4gQWN0
-dWFsbHkgdGhpcyBpcyBub3QgYmVoYXZpb3JlZCBhcyBleHBlY3RlZC4gRnJvbSBteSBsYXN0IG52
-bWVkZXZpY2UNCj4gYmVuY2htYXJrLCBsb3RzIG9mIHJlYWQgc3RpbGwgZ28gZG93biBkZXZpY2Ug
-aW5zdGVhZCBvZiBjYWNoaW5nIGJ5DQo+IHJvY2tzZGIgd2hlbiBJIHNldCBhIHZlcnkgbGFyZ2Ug
-YmxvY2sgY2FjaGUuIEkgZ3Vlc3MgdGhlcmUgZXhpc3RzIHNvbWUNCj4gZ2FwcyBiZXR3ZWVuIG91
-ciB1c2FnZXMgYW5kIHJvY2tzZGIgaW1wbGVtZW50YXRpb24NCg0KV2hhdCAga2luZCBvZiB3b3Jr
-bG9hZCBkaWQgeW91IHVzZSBmb3IgdGhhdCBiZW5jaG1hcmtpbmcsIDEwMCUgcmVhZD8NCg0KPg0K
-Pj4NCj4+IEppYW5qaWFuDQo+Pj4NCj4+PiBUaGUgbWFpbiBtaXNzaW5nIHBpZWNlIEknZCBzYXkg
-aXMgYSB3YXkgdG8gc3RyaW5nIEJ1ZmZlciBvYmplY3RzIHRvZ2V0aGVyDQo+Pj4gaW4gYSBnbG9i
-YWwoaXNoKSBMUlUgKG9yIHNldCBvZiBMUlVzLCBvciB3aGF0ZXZlciB3ZSBuZWVkIGZvciB0aGUg
-Y2FjaGluZw0KPj4+IHBvbGljeSB0aGF0IG1ha2VzIHNlbnNlKSBzbyB0aGF0IHRyaW1taW5nIGNh
-biBiZSBkb25lIHNhZmVseSBhbmQNCj4+PiBlZmZpY2llbnRseS4gIFJpZ2h0IG5vdyB0aGUgY29k
-ZSBpcyBsb2NrLWZyZWUgYmVjYXVzZSBlYWNoIE9ub2RlIGlzIG9ubHkNCj4+PiB0b3VjaGVkIHVu
-ZGVyIHRoZSBjb2xsZWN0aW9uIHJ3bG9jaywgYnV0IGluIG9yZGVyIHRvIGRvIHRyaW1taW5nIHdl
-IG5lZWQNCj4+PiB0byBiZSBhYmxlIHRvIHJlYXAgY29sZCBidWZmZXJzIGZyb20gYSBnbG9iYWwg
-Y29udGV4dC4NCj4+Pg0KPj4+IEFueXdheSwgdGhlcmUgaXMgbm8gY2xlYXIgb3IgcmVhZHkgYW5z
-d2VyIGhlcmUgeWV0LCBidXQgd2UgYXJlIHJlYWR5IHRvDQo+Pj4gZGlzY3VzcyBkZXNpZ24vYXBw
-cm9hY2ggaGVyZSBvbiB0aGUgbGlzdCwgYW5kIHdlbGNvbWUgeW91ciBpbnB1dCAoYW5kDQo+Pj4g
-cG90ZW50aWFsbHksIGNvbnRyaWJ1dGlvbnMgdG8gZGV2ZWxvcG1lbnQhKS4NCj4+Pg0KPj4+IHNh
-Z2UNCj4+Pg0KPj4+DQo+Pj4gPg0KPj4+ID4gT24gV2VkLCBNYXkgMTgsIDIwMTYgYXQgOTozMiBQ
-TSwgSGFvbWFpIFdhbmcgPGhhb21haUB4c2t5LmNvbT4gd3JvdGU6DQo+Pj4gPiA+DQo+Pj4gPiA+
-DQo+Pj4gPiA+IE9uIFdlZCwgTWF5IDE4LCAyMDE2IGF0IDI6NDQgUE0sIFJhamF0aCBTaGFzaGlk
-aGFyYQ0KPj4+ID4gPiA8cmFqYXRoLnNoYXNoaWRoYXJhQGdtYWlsLmNvbT4gd3JvdGU6DQo+Pj4g
-PiA+Pg0KPj4+ID4gPj4gSGVsbG8sDQo+Pj4gPiA+Pg0KPj4+ID4gPj4gSSB3YXMgYSBHU29DJzE2
-IGFwcGxpY2FudCBmb3IgdGhlIHByb2plY3QgIkltcGxlbWVudGluZyBDYWNoZSBsYXllciBvbg0K
-Pj4+ID4gPj4gdG9wIG9mIE5WTUUgRHJpdmVyIi4gVW5mb3J0dW5hdGVseSwgSSB3YXMgbm90IHNl
-bGVjdGVkIGZvciB0aGUNCj4+PiA+ID4+IGludGVybnNoaXAuDQo+Pj4gPiA+DQo+Pj4gPiA+DQo+
-Pj4gPiA+IEhpIFJhamF0aCwNCj4+PiA+ID4NCj4+PiA+ID4gV2UgYXJlIGdsYWQgdG8gc2VlIHlv
-dXIgcGFzc2lvbiwgZnJvbSBteSB2aWV3LCBzYWdlIGlzIHBsYW5uaW5nIHRvIGltcGxlbWVudA0K
-Pj4+ID4gPiBhIHVzZXJzcGFjZSBjYWNoZSBpbiBibHVlc3RvcmUgaXRzZWxmLiBMaWtlDQo+Pj4g
-PiA+IChodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL2NvbW1pdC9iOWFjMzFhZmU1YTE2MjE3
-NmYwMTliYWEyNTM0ODAxNGE3N2Y2YWI4I2NvbW1pdGNvbW1lbnQtMTc0ODgyNTApLg0KPj4+ID4g
-Pg0KPj4+ID4gPiBJIGd1ZXNzIHRoZSBjYWNoZSB3b24ndCBiZSBhIGdlbmVyaWMgY2FjaGUgaW50
-ZXJmYWNlLiBJbnN0ZWFkIGl0IHdpbGwgYmUNCj4+PiA+ID4gYm91bmQgdG8gc3BlY2lmaWVkIG5l
-ZWRlZCBvYmplY3QuIFNvIHNhZ2UgbWF5IGdpdmUgYSBicmllZj8NCj4+PiA+ID4NCj4+PiA+ID4+
-DQo+Pj4gPiA+Pg0KPj4+ID4gPj4gSG93ZXZlciwgSSB3b3VsZCBiZSBpbnRlcmVzdGVkIGluIHdv
-cmtpbmcgb24gdGhlIHByb2plY3QgYXMgYW4NCj4+PiA+ID4+IGluZGVwZW5kZW50IGNvbnRyaWJ1
-dG9yIHRvIENlcGguDQo+Pj4gPiA+PiBJIGFtIGV4cGVjdGluZyB0byByZWNlaXZlIHRoZSBuZWNl
-c3Nhcnkgc3VwcG9ydCBmcm9tIENlcGggZGV2ZWxvcGVyDQo+Pj4gPiA+PiBjb21tdW5pdHkuDQo+
-Pj4gPiA+Pg0KPj4+ID4gPj4gSW4gY2FzZSBJIG1pc3NlZCBvdXQgYW55IGltcG9ydGFudCBkZXRh
-aWxzIGluIG15IHByb2plY3QgcHJvcG9zYWwgb3IgSQ0KPj4+ID4gPj4gaGF2ZSB0aGUgd3Jvbmcg
-dW5kZXJzdGFuZGluZyBvZiB0aGUgcHJvamVjdCwgcGxlYXNlIGhlbHAgbWUgZmlndXJlIG91dA0K
-Pj4+ID4gPj4gdGhlIGRldGFpbHMuDQo+Pj4gPiA+Pg0KPj4+ID4gPj4gTG9va2luZyBmb3J3YXJk
-IHRvIGNvbnRyaWJ1dGUhDQo+Pj4gPiA+Pg0KPj4+ID4gPj4gVGhhbmsgeW91LA0KPj4+ID4gPj4g
-UmFqYXRoIFNoYXNoaWRoYXJhDQo+Pj4gPiA+DQo+Pj4gPiA+DQo+Pj4gPiAtLQ0KPj4+ID4gVG8g
-dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
-cGgtZGV2ZWwiIGluDQo+Pj4gPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZw0KPj4+ID4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
-a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+Pj4gPg0KPj4+ID4NCj4+PiAtLQ0KPj4+
-IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
-ZSBjZXBoLWRldmVsIiBpbg0KPj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
-dmdlci5rZXJuZWwub3JnDQo+Pj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
-a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZy
-b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0K
-PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBN
-b3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
-bmZvLmh0bWwNCg==
+
+Hello Sage,
+
+On Wed, 18 May 2016 17:23:00 -0400 (EDT) Sage Weil wrote:
+
+> Currently, after an OSD has been down for 5 minutes, we mark the OSD 
+> "out", whic redistributes the data to other OSDs in the cluster.  If the 
+> OSD comes back up, it marks the OSD back in (with the same reweight
+> value, usually 1.0).
+> 
+> The good thing about marking OSDs out is that exactly the amount of data 
+> on the OSD moves.  (Well, pretty close.)  It is uniformly distributed 
+> across all other devices.
+> 
+Others have commented already on how improve your initial suggestion
+(retaining CRUSH weights) etc.
+Let me butt in here with an even more invasive but impact reducing
+suggestion.
+
+Your "good thing" up there is good as far as total data movement goes, but
+it still can unduly impact client performance when one OSD becomes both
+the target and source of data movement at the same time during
+backfill/recovery. 
+
+So how about upping the ante with the (of course optional) concept of a
+"spare OSD" per node?
+People are already used to the concept, it also makes a full cluster
+situation massively more unlikely. 
+
+So expanding on the concept below, lets say we have one spare OSD per node
+by default. 
+It's on a disk of the same size or larger than all the other OSDs in the
+node, it is fully prepared but has no ID yet. 
+
+So we're experiencing an OSD failure and it's about to be set out by the
+MON, lets consider this sequence (OSD X is the dead, S the spare one:
+
+1. Set nobackfill/norecovery
+2. OSD X gets weighted 0
+3. OSD X gets set out
+4. OSD S gets activated with the original weight of X and its ID.
+5. Unset nobackfill/norecovery
+
+Now data will flow only to the new OSD, other OSDs will not be subject to
+simultaneous reads and writes by backfills. 
+
+Of course in case there is no spare available (not replaced yet or
+multiple OSD failures), Ceph can go ahead and do it's usual thing,
+hopefully enhanced by the logic below.
+
+Alternatively, instead of just limiting the number of backfills per OSD
+make them directionally aware, that is don't allow concurrent read and
+write backfills on the same OSD.
+
+Regards,
+
+Christian
+> The bad thing is that if the OSD really is dead, and you remove it from 
+> the cluster, or replace it and recreate the new OSD with a new OSD id, 
+> there is a second data migration that sucks data out of the part of the 
+> crush tree where the removed OSD was.  This move is non-optimal: if the 
+> drive is size X, some data "moves" from the dead OSD to other N OSDs on 
+> the host (X/N to each), and the same amount of data (X) moves off the
+> host (uniformly coming from all N+1 drives it used to live on).  The
+> same thing happens at the layer up: some data will move from the host to
+> peer hosts in the rack, and the same amount will move out of the rack.
+> This is a byproduct of CRUSH's hierarchical placement.
+> 
+> If the lifecycle is to let drives fail, mark them out, and leave them 
+> there forever in the 'out' state, then the current behavior is fine, 
+> although over time you'll have lot sof dead+out osds that slow things
+> down marginally.
+> 
+> If the procedure is to replace dead OSDs and re-use the same OSD id,
+> then this also works fine.  Unfortunately the tools don't make this easy
+> (that I know of).
+> 
+> But if the procedure is to remove dead OSDs, or to remove dead OSDs and 
+> recreate new OSDs in their place, probably with a fresh OSD id, then you 
+> get this extra movement.  In that case, I'm wondering if we should allow 
+> the mons to *instead* se the crush weight to 0 after the osd is down for 
+> too long.  For that to work we need to set a flag so that if the OSD
+> comes back up it'll restore the old crush weight (or more likely make
+> the normal osd startup crush location update do so with the OSDs
+> advertised capacity).  Is it sensible?
+> 
+> And/or, anybody have a good idea how the tools can/should be changed to 
+> make the osd replacement re-use the osd id?
+> 
+> sage
+> 
+> 
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+
+
+-- 
+Christian Balzer        Network/Systems Engineer                
+chibi@gol.com   	Global OnLine Japan/Rakuten Communications
+http://www.gol.com/
