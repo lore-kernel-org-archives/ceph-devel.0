@@ -1,98 +1,104 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Update on ceph-mgr
-Date: Thu, 19 May 2016 12:40:48 +0100
-Message-ID: <CALe9h7fi0vW6eEHcxPNG6rkKi9-CHvi4GnvM4VLuc0tJNw98Tg@mail.gmail.com>
-References: <CALe9h7fCyrZGPqcymcsRiHwVMaTUP26c8xmQO6QAy6XkfVO27w@mail.gmail.com>
- <573DA0DB.30203@suse.com>
+From: Junwang Zhao <zhjwpku@gmail.com>
+Subject: Re: [wip-addr-features] make sure I am doing the right thing
+Date: Thu, 19 May 2016 19:45:12 +0800
+Message-ID: <CAEG8a3KCYaCUAmdw8i=-BZKHVN4DJ4gK3RAzSf5q9cA2xXEr=Q@mail.gmail.com>
+References: <CAEG8a3LQuro2zXu90im0aQ58XxdGLDQvLxnjkJ+Rd8C6k70QVw@mail.gmail.com>
+	<alpine.DEB.2.11.1605160446150.30956@cpach.fuggernut.com>
+	<alpine.DEB.2.11.1605161228390.30956@cpach.fuggernut.com>
+	<CAEG8a3KPFfuFfM2TDyY11A0XD=fvGEmm=TP2Y_ZvZfWYTREAzw@mail.gmail.com>
+	<alpine.DEB.2.11.1605181637080.30956@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:35332 "EHLO
-	mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754544AbcESLlM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 07:41:12 -0400
-Received: by mail-oi0-f47.google.com with SMTP id x19so123687157oix.2
-        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 04:41:11 -0700 (PDT)
-In-Reply-To: <573DA0DB.30203@suse.com>
+Received: from mail-vk0-f53.google.com ([209.85.213.53]:35715 "EHLO
+	mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754037AbcESLpO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 07:45:14 -0400
+Received: by mail-vk0-f53.google.com with SMTP id f66so99194710vkh.2
+        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 04:45:13 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1605181637080.30956@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tim Serong <tserong@suse.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, May 19, 2016 at 12:17 PM, Tim Serong <tserong@suse.com> wrote:
-> On 05/18/2016 09:02 PM, John Spray wrote:
->> Hi all,
+Hi Sage, Haomai,
+Please check [1] and give some feedback, I am not sure about
+52436ded943b8f567adb584c50b789431b788a85
+
+[1] https://github.com/zhjwpku/ceph/commits/wip-addr-work
+
+Thanks!
+
+On Thu, May 19, 2016 at 4:44 AM, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 17 May 2016, Junwang Zhao wrote:
+>> Hi Sage,
 >>
->> For those who are interested, I wanted to give a quick update on the
->> recently-started ceph-mgr work.  This is all still very changeable,
->> but now that some code exists I'm putting it out there.
+>> Check this[1], we should I do next, entity_addrvec_t ?
 >>
->> Firstly, here it is: https://github.com/jcsp/ceph/tree/wip-ceph-mgr
+>> [1] https://github.com/zhjwpku/ceph/commits/wip-addr-work
+>
+> Looks good!  I opened the PR
+>
+>         https://github.com/ceph/ceph/pull/9184
+>
+> for review and test.
+>
+> The next step is just to make a new entity_addr_t encoding that is more
+> compact and uses an ADDR2 feature.  One commit that defines the new
+> feature, then one commit that changes the entity_addr_t encode/decode,
+> somewhat like in c728926a86e1410f959011d24700bb07bad1dc2c.  I would use
+> the new get_sockaddr_len() method for elen, though.
+>
+> Also, the TYPE_ definitions should really be TYPE_LEGACY = 1, not the
+> transport version (IP version), which is already covered by the sa_family
+> field in the sockaddr.  I think that makes sense...
+>
+> A third commit would then add the entity_addrvec_t type, similar to what
+> is in that same commit.  It should also add the type to
+> test/encoding/types.h.
+>
+> Thanks!
+> sage
+>
+>
+>
 >>
->> [...]
+>> On Tue, May 17, 2016 at 12:29 AM, Sage Weil <sage@newdream.net> wrote:
+>> > On Mon, 16 May 2016, Sage Weil wrote:
+>> >> Hi Junwang,
+>> >>
+>> >> On Mon, 16 May 2016, Junwang Zhao wrote:
+>> >> > Hi Sage, Haomai,
+>> >> >
+>> >> > I am working on the require-features-patch, I use 'make' to see the conflicts,
+>> >> > and change the code to fit the required-feature-patch, [1] is a huge patch
+>> >> > that I am still working on, it has not been finished. I really need to check
+>> >> > with you whether I am doing it right, since it seems the errors are endless.
+>> >> >
+>> >> > There are some comments where I am not sure in the patch, like 'not sure'.
+>> >>
+>> >> I skimmed through this and it looks mostly right, but I see a few cases
+>> >> where features aren't needed, e.g. cls_refcount_get in
+>> >> cls_refcount_client.cc (there's no addr being encoded in
+>> >> cls_refcount_get_op, so no need to make the encoding featureful).
+>> >>
+>> >> > I didn't split this huge patch into small ones, I am not sure is that a
+>> >> > must, if yes, I will split it into small ones.
+>> >>
+>> >> The end result needs to be a series of small patches, but that doesn't
+>> >> have to happen right away.  I think it might be useful to do a few small
+>> >> sets of changes first just to show what the goal is, though.
+>> >>
+>> >> I will take the patch below and pull a few sample changes out so you can
+>> >> see.  Traveling at the moment, but I'll have something pushed today (that
+>> >> is also rebased on top of the latest wip-addr-cleanup branch).
+>> >
+>> > I went on a bit of a binge and have a wip-addr-work branch that is mostly
+>> > there.  The last thing (I think) is updating msg/simple and msg/async.
+>> > These ones should explicitly encode with features 0 since the protocol is
+>> > defined in terms of the legacy encoding.
+>> >
+>> > sage
 >>
->> To play with this:
->>  1. Build your tree with cmake
->>  2. make ceph-mgr
->>  3. CALAMARI_CONFIG=<whereever>/ceph/src/pybind/mgr/calamari.conf
->> PYTHONPATH=env/lib/python2.7/site-packages bin/ceph-mgr -f
->>  4. Point your browser at e.g.
->> http://localhost:8002/api/v2/cluster/osd and witness that you get
->> calamari-like API output
->
-> Just for fun, I decided to play.  I built from a clone of your
-> wip-ceph-mgr branch, then grabbed a ceph.conf and admin keyring from an
-> existing Jewel cluster, dumped them in build/, and ran:
->
-> PYTHONPATH=../src/pybind/mgr
-> CALAMARI_CONFIG=../src/pybind/mgr/calamari.conf ./bin/ceph-mgr
-> --keyring=./ceph.client.admin.keyring --log-file=client.log
->
-> This immediately aborted with an assertion failure:
->
->   /ceph/src/mgr/Mgr.cc: 241: FAILED assert(mds_cmd.r == 0)
-
-Yeah, you're not in general going to be able to run this against an
-older-versioned Ceph cluster; there are already mon changes (such as
-improving the metadata commands) and there will also be more extensive
-additions to all the services to enable them to talk to the mgr.  This
-is going to be new functionality all around, as opposed to a new thing
-that can sit on older clusters.
-
-> I suspect the "mds metadata" command might want an MDS name.  Throwing
-> caution to the wind I commented out that assert, and the mon_cmd.r
-> assert as well (see attached patch), and got a bit further, but then it
-> failed with:
->
->   ImportError: No module named rest_framework
->
-> TL;DR: I had to install pythond-datetime, django 1.8 and
-> djangorestframework.  The latter I let be the latest version available
-> via `pip install` (3.3.3).
->
-> I had earlier tried Django 1.9, which I randomly happened to have
-> installed, but that failed with:
->
-> RuntimeError(u"Model class django.contrib.auth.models.Permission doesn't
-> declare an explicit app_label and isn't in an application in
-> INSTALLED_APPS.",)
->
-> (Django 1.6 is no good either, BTW: AttributeError: 'module' object has
-> no attribute 'UUIDField')
->
-> Anyway, after all that, I can in fact get a nice looking chunk of JSON
-> out of http://localhost:8002/api/v2/cluster/osd :)
-
-Awesome!
-
-John
-
->
-> Regards,
->
-> Tim
-> --
-> Tim Serong
-> Senior Clustering Engineer
-> SUSE
-> tserong@suse.com
+>>
