@@ -1,45 +1,56 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: changing roles
-Date: Fri, 20 May 2016 23:27:08 +0800
-Message-ID: <CACJqLybNLTuByy9WogT6KS47OmziiO0MKmhhJEk1OJuaCBf=qQ@mail.gmail.com>
+From: "James (Fei) Liu" <james.liu@samsung.com>
+Subject: RE: changing roles
+Date: Fri, 20 May 2016 15:28:30 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C0561E2301@SSIEXCH-MB3.ssi.samsung.com>
 References: <CAJ4mKGYL0QZvwCc4vAke6qgzktEVwNvWQDX9b86Vvprswv-0Bw@mail.gmail.com>
+ <CACJqLybNLTuByy9WogT6KS47OmziiO0MKmhhJEk1OJuaCBf=qQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-hk2apc01on0132.outbound.protection.outlook.com ([104.47.124.132]:50220
-	"EHLO APC01-HK2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751589AbcETP12 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 20 May 2016 11:27:28 -0400
-Received: by mail-vk0-f52.google.com with SMTP id f66so147978495vkh.2
-        for <ceph-devel@vger.kernel.org>; Fri, 20 May 2016 08:27:17 -0700 (PDT)
-In-Reply-To: <CAJ4mKGYL0QZvwCc4vAke6qgzktEVwNvWQDX9b86Vvprswv-0Bw@mail.gmail.com>
+Received: from mailout4.w2.samsung.com ([211.189.100.14]:40842 "EHLO
+	usmailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752564AbcETPij (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 May 2016 11:38:39 -0400
+Received: from uscpsbgex4.samsung.com
+ (u125.gpu85.samsung.co.kr [203.254.195.125]) by usmailout4.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0O7H00L3XEZNVG10@usmailout4.samsung.com> for
+ ceph-devel@vger.kernel.org; Fri, 20 May 2016 11:28:35 -0400 (EDT)
+In-reply-to: <CACJqLybNLTuByy9WogT6KS47OmziiO0MKmhhJEk1OJuaCBf=qQ@mail.gmail.com>
+Content-language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
+To: Haomai Wang <haomai@xsky.com>, Gregory Farnum <gfarnum@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Thanks Greg!
-
-On Fri, May 20, 2016 at 10:09 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> Hi everyone,
->
-> I'm very pleased to finally see CephFS in a stable state and being
-> deployed by real users! But after several years of working as the tech
-> lead on CephFS I'm ready to pass the leadership role on to someone
-> else.  I'll continue to work on CephFS, but am excited to spend more
-> time on design and implementation over maintainer duties, and gain
-> some flexibility when it comes to picking up other problems within
-> Ceph.
->
-> My choice to replace me as tech lead is John Spray.  He's been doing
-> terrific work since he's joined the team, showing both sound technical
-> judgement and a strong ability to work with contributors; I couldn't
-> trust anybody more with the role. His ideas have been instrumental to
-> helping the community of developers, testers, and especially real
-> users expand. I look forward to seeing this process continue!
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+R3JlYXQgSm9iLCBHcmVnLg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2Vw
+aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQpTZW50OiBGcmlkYXksIE1h
+eSAyMCwgMjAxNiA4OjI3IEFNDQpUbzogR3JlZ29yeSBGYXJudW0NCkNjOiBjZXBoLWRldmVsDQpT
+dWJqZWN0OiBSZTogY2hhbmdpbmcgcm9sZXMNCg0KVGhhbmtzIEdyZWchDQoNCk9uIEZyaSwgTWF5
+IDIwLCAyMDE2IGF0IDEwOjA5IFBNLCBHcmVnb3J5IEZhcm51bSA8Z2Zhcm51bUByZWRoYXQuY29t
+PiB3cm90ZToNCj4gSGkgZXZlcnlvbmUsDQo+DQo+IEknbSB2ZXJ5IHBsZWFzZWQgdG8gZmluYWxs
+eSBzZWUgQ2VwaEZTIGluIGEgc3RhYmxlIHN0YXRlIGFuZCBiZWluZyANCj4gZGVwbG95ZWQgYnkg
+cmVhbCB1c2VycyEgQnV0IGFmdGVyIHNldmVyYWwgeWVhcnMgb2Ygd29ya2luZyBhcyB0aGUgdGVj
+aCANCj4gbGVhZCBvbiBDZXBoRlMgSSdtIHJlYWR5IHRvIHBhc3MgdGhlIGxlYWRlcnNoaXAgcm9s
+ZSBvbiB0byBzb21lb25lIA0KPiBlbHNlLiAgSSdsbCBjb250aW51ZSB0byB3b3JrIG9uIENlcGhG
+UywgYnV0IGFtIGV4Y2l0ZWQgdG8gc3BlbmQgbW9yZSANCj4gdGltZSBvbiBkZXNpZ24gYW5kIGlt
+cGxlbWVudGF0aW9uIG92ZXIgbWFpbnRhaW5lciBkdXRpZXMsIGFuZCBnYWluIA0KPiBzb21lIGZs
+ZXhpYmlsaXR5IHdoZW4gaXQgY29tZXMgdG8gcGlja2luZyB1cCBvdGhlciBwcm9ibGVtcyB3aXRo
+aW4gDQo+IENlcGguDQo+DQo+IE15IGNob2ljZSB0byByZXBsYWNlIG1lIGFzIHRlY2ggbGVhZCBp
+cyBKb2huIFNwcmF5LiAgSGUncyBiZWVuIGRvaW5nIA0KPiB0ZXJyaWZpYyB3b3JrIHNpbmNlIGhl
+J3Mgam9pbmVkIHRoZSB0ZWFtLCBzaG93aW5nIGJvdGggc291bmQgdGVjaG5pY2FsIA0KPiBqdWRn
+ZW1lbnQgYW5kIGEgc3Ryb25nIGFiaWxpdHkgdG8gd29yayB3aXRoIGNvbnRyaWJ1dG9yczsgSSBj
+b3VsZG4ndCANCj4gdHJ1c3QgYW55Ym9keSBtb3JlIHdpdGggdGhlIHJvbGUuIEhpcyBpZGVhcyBo
+YXZlIGJlZW4gaW5zdHJ1bWVudGFsIHRvIA0KPiBoZWxwaW5nIHRoZSBjb21tdW5pdHkgb2YgZGV2
+ZWxvcGVycywgdGVzdGVycywgYW5kIGVzcGVjaWFsbHkgcmVhbCANCj4gdXNlcnMgZXhwYW5kLiBJ
+IGxvb2sgZm9yd2FyZCB0byBzZWVpbmcgdGhpcyBwcm9jZXNzIGNvbnRpbnVlIQ0KPiAtR3JlZw0K
+PiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
+dWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpv
+cmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8v
+dmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCi0tDQpUbyB1bnN1YnNjcmliZSBm
+cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4g
+dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBt
+YWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5o
+dG1sDQo=
