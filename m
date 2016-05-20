@@ -1,207 +1,149 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Min alloc size according to media type
-Date: Fri, 20 May 2016 08:24:53 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605200824350.6221@cpach.fuggernut.com>
-References: <CY1PR0201MB182075171B6FCA64CF104097854A0@CY1PR0201MB1820.namprd02.prod.outlook.com> <alpine.DEB.2.11.1605191515090.6221@cpach.fuggernut.com> <BLUPR0201MB1524D22BDBA93E7F438D4382E84A0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <CY1PR0201MB1820EC5C25417E8F1EA1CF1E854B0@CY1PR0201MB1820.namprd02.prod.outlook.com> <alpine.DEB.2.11.1605200604440.6221@cpach.fuggernut.com> <4047211f-426c-69eb-2028-893d5197511a@redhat.com>
+From: Owen Synge <osynge@suse.com>
+Subject: Re: The fundamental evil of "magic" in computing systems -> Was: mon
+ daemon makes authentication side effects on startup
+Date: Fri, 20 May 2016 15:01:19 +0200
+Message-ID: <573F0A9F.6000704@suse.com>
+References: <5703A7FF.2090002@suse.com>
+ <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com>
+ <5704C76C.2050408@suse.com>
+ <alpine.DEB.2.11.1604070820560.19675@cpach.fuggernut.com>
+ <570666AB.8090408@suse.com>
+ <alpine.DEB.2.11.1604070959160.19675@cpach.fuggernut.com>
+ <57067F56.2000705@suse.com>
+ <alpine.DEB.2.11.1604071143000.19675@cpach.fuggernut.com>
+ <57081B3A.20601@suse.com> <570BAC52.4070404@suse.com>
+ <alpine.DEB.2.11.1605120905220.23446@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52062 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932526AbcETMYg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 May 2016 08:24:36 -0400
-In-Reply-To: <4047211f-426c-69eb-2028-893d5197511a@redhat.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:42647 "EHLO
+	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752075AbcETNBv (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Fri, 20 May 2016 09:01:51 -0400
+In-Reply-To: <alpine.DEB.2.11.1605120905220.23446@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>, Allen Samuels <Allen.Samuels@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ldachary@redhat.com
 
-On Fri, 20 May 2016, Mark Nelson wrote:
-> On 05/20/2016 05:08 AM, Sage Weil wrote:
-> > On Fri, 20 May 2016, Ramesh Chander wrote:
-> > > Thanks Sage and Allen,
-> > > 
-> > > > > Unless we want to make bluestore smart enough to push object data on a
-> > > > > fast device (i.e., do ssd/hdd tiering internally), I'm not sure we
-> > > > > need per- device min_alloc_size.
-> > > 
-> > > If we make it per block device even it becomes more simpler to set it on
-> > > device open time and read it whenever required.
-> > > 
-> > > Most of the places we are already reading block device from
-> > > bdev->get_block_size(), this new one also goes with it.
-> > > 
-> > > I think the gc_conf->* are read only parameters , to circumvent it I need
-> > > to set this info at BlueStore structure or globally somewhere.
-> > > 
-> > > Whatever you suggest is fine.
-> > 
-> > FWIW the github.com/liewebas/wip-bluestore-write branch already moves
-> > block_size and min_alloc_size ot BlueStore class members so that it's not
-> > always pulling them out of g_conf and bdev.
-> > 
-> > > > > Don't worry about legacy at all since bluestore has no users.  :)
-> > > 
-> > > That simplifies it and I can simply remove it. Or do we still need to
-> > > keep the old parameter around and make that take precedence over two new
-> > > ones? I mean old option is applicable to both so we need to break tie
-> > > between new specific and old general parameter.
-> > 
-> > I think having bluestore_min_alloc_size, bluestore_min_alloc_size_hdd, and
-> > bluestore_min_alloc_size_ssd still makes it easier to change for users.
-> > It'll only go in one bit of code that updates the BlueStore min_alloc_size
-> > member.
-> 
-> If we really want to go down this road, would it make sense to create storage
-> class templates rather than global configuration parameters? Presumably you
-> might want different compression, read ahead, or writeback caching depending
-> on the device class as well.
+On 05/12/2016 03:06 PM, Sage Weil wrote:
+> On Mon, 11 Apr 2016, Owen Synge wrote:
+>> On 04/08/2016 10:57 PM, Owen Synge wrote:
+>>> On 04/07/2016 05:43 PM, Sage Weil wrote:
+>>>> On Thu, 7 Apr 2016, Owen Synge wrote:
+>>>>> On 04/07/2016 04:03 PM, Sage Weil wrote:
+>>>>>> On Thu, 7 Apr 2016, Owen Synge wrote:
+>>>>>>> Hi Sage,
+>>>>>>>
+>>>>>>> On 04/07/2016 02:26 PM, Sage Weil wrote:
+>>>>>>>> Hi Owen,
+>>>>>>>>
+>>>>>>>> I never really liked ceph-create-keys either, but it simplifie=
+d the=20
+>>>>>>>> deployment process. =20
+>>>>>>>
+>>>>>>> I would propose we do this in two stages.
+>>>>>>>
+>>>>>>> (A) Remove calling the command from the init scripts as a side =
+effect of
+>>>>>>> starting the mon.
+>>>>>>>
+>>>>>>> This allows us to get most of the issues solved.
+>>>>>>>
+>>>>>>> (B) Remove the command.
+>>>>>>>
+>>>>>>> This is the long term goal, which is not as urgent in my opinio=
+n but
+>>>>>>> others may disagree.
+>>>>>>
+>>>>>> Works for me.  We just need to change ceph-deploy and get the ot=
+her=20
+>>>>>> install/deploy tool folks on board before A.
+>>>>>
+>>>>> Are you intending to get this into Jewel?
+>>>>>
+>>>>> I had assumed this would only be done on master, and only come in=
+to the
+>>>>> next release.
+>>>>
+>>>> Yeah, too late for jewel.
+>>>>
+>>>>> As a change to master I felt that we could just do (A) as soon as
+>>>>> ceph-deploy works without the mon boot up scripts calling
+>>>>> ceph-create-keys, ideally without having  ceph-create-keys in
+>>>>> ceph-deploy's process.
+>>>>>
+>>>>> We can then file bugs as needed against other install processes t=
+hat
+>>>>> depend on ceph-create-keys, and they can test against master.
+>>>>
+>>>> That works for me.
+>>>>
+>>>> sage
+>>>
+>>> Great,
+>>>
+>>> I have a fix, that is tested and working for ceph-deploy without
+>>> depending upon ceph-create-keys based upon a rewrite of the method
+>>>
+>>>   ceph-deploy gatherkeys mon-node-01 mon-node-02 mon-node-03
+>>>
+>>> Works nicely for the old and new methods, and seems to have little
+>>> impact apart from no new keys are wrote to disk on the mon nodes. O=
+SD's
+>>> and rgw can be deployed without change, (I haven=92t tested mds)
+>>>
+>>> Previous behavior with the admin keys being deployed can be achieve=
+d
+>>> simply by executing:
+>>>
+>>>   ceph-deploy admin mon-node-01 mon-node-02 mon-node-03
+>>>
+>>> If we definitely what to enforce the admin code being persisted on =
+all
+>>> mon nodes can be changed later, but I think its cleaner if we do no=
+t.
+>>>
+>>> I will submit a PR on Monday.
+>>
+>> ceph-deploy bug raised:
+>>
+>> http://tracker.ceph.com/issues/15451
+>>
+>> PR submitted:
+>>
+>> https://github.com/ceph/ceph-deploy/pull/393
+>=20
+> Hey Owen-
+>=20
+> Now that jewel is out, now would be a good time to make this change. =
+ The=20
+> ceph-deploy pr looks basically ready to go, minus a doc piece and a r=
+un=20
+> through the ceph-deploy suite.  Yuri can probably handle the=20
+> latter.
+>=20
+> Then we can do the ceph.git changes to kill the ceph-create-keys task=
+=2E..
 
-That sounds appealing.  How would it work?
+Dear Sage,
 
-sage
+Sorry for the delay, I had a big pile of downstream work and test suite
+development to do for my salt work, I have now added some documentation=
+=2E
+
+I hope Yuri can do the latter as I really dont know "the ceph-deploy su=
+ite".
+
+Best wishes
+
+Owen
 
 
-> 
-> Mark
-> 
-> > 
-> > Perhaps you can base this PR on the wip-bluestore-write branch.  It's
-> > getting rebased still frequently but I think it's less than a
-> > week away from being mergeable.
-> > 
-> > > > > Currently it is transient everywhere, and so far I've been trying to
-> > > > > keep it that way.  However, we might want to change this: if we make
-> > > > > min_alloc_size fixed at mkfs time, we could possibly collapse down the
-> > > > > size of the allocation
-> > > > > bitmap(s) by a factor of 16 on HDD (1 bit per min_alloc_size instead
-> > > > > of per block).  I'm not sure that it's worth it, though... thoughts?
-> > > > Collapsing the bitmap provides little DRAM savings and probably not much
-> > > > CPU time savings (though some additional (low risk) coding might be
-> > > > required to make this statement true), so I don't see much point in it.
-> > > Seems like extra complexity with little value.
-> > > 
-> > > I think as long as our min alloc size does reduce from previous value or
-> > > our bitmap vector has bit per minimum possible value of min_alloc_size,
-> > > we are good.  But as Allen said , we will not have significant saving
-> > > from this as fasr as cost (cpu and dram) is concerned.
-> > 
-> > Yeah, let's not worry about it then.
-> > 
-> > sage
-> > 
-> > 
-> > 
-> > > 
-> > > -Ramesh Chander
-> > > 
-> > > 
-> > > -----Original Message-----
-> > > From: Allen Samuels
-> > > Sent: Friday, May 20, 2016 2:00 AM
-> > > To: Sage Weil; Ramesh Chander
-> > > Cc: ceph-devel@vger.kernel.org
-> > > Subject: RE: Min alloc size according to media type
-> > > 
-> > > > -----Original Message-----
-> > > > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> > > > owner@vger.kernel.org] On Behalf Of Sage Weil
-> > > > Sent: Thursday, May 19, 2016 12:20 PM
-> > > > To: Ramesh Chander <Ramesh.Chander@sandisk.com>
-> > > > Cc: ceph-devel@vger.kernel.org
-> > > > Subject: Re: Min alloc size according to media type
-> > > > 
-> > > > On Thu, 19 May 2016, Ramesh Chander wrote:
-> > > > > Hi Sage,
-> > > > > 
-> > > > > I am doing changes in Bluestore related to minimum allocation size
-> > > > > according to ssd and hdd. This change involves:
-> > > > > 
-> > > > > 1. There are three min alloc sizes now:
-> > > > >                 a. min_alloc_size: old one, default changed to 0
-> > > > >                 b. min_alloc_size_hdd: for rotational media, default
-> > > > > 64k
-> > > > >                 c. min_alloc_size_ssd: for ssd, default 4k.
-> > > > > 
-> > > > > 2. Making changes in BlockDevice to maintain its own min_alloc_size.
-> > > > > It allows to maintain different min_alloc_size for different devices.
-> > > > > 
-> > > > > 3. Making changes in allocator(stupid, bitmap) interfaces to take
-> > > > > min_alloc_size from the corresponding devices.
-> > > > 
-> > > > This makes sense if some devices are hdd and some are ssd (e.g., main
-> > > > vs db/wal), but in practice the only separation currently possible is
-> > > > to have a separate device for WAL and for rocksdb, both of which hare
-> > > > managed by bluefs and not bluestore directly.  Ane bluefs currently
-> > > > has a min_alloc_size of 1MB since all files are generally big (usually
-> > > > 4MB each), there are no random writes, etc.
-> > > > 
-> > > > Unless we want to make bluestore smart enough to push object data on a
-> > > > fast device (i.e., do ssd/hdd tiering internally), I'm not sure we
-> > > > need per- device min_alloc_size.
-> > > 
-> > > I think this is / will be valuable -- in the future. I don't see that this
-> > > item significantly simplifies the future problem.
-> > > 
-> > > 
-> > > > 
-> > > > > I have following questions regarding this parameter and use of it in
-> > > > > bluestore:
-> > > > > 
-> > > > > 1. I assume this parameter is transient and does not have effect on
-> > > > > different values (say changed from 4k to 64k or vice versa) across
-> > > > > reboots or different ceph versions?
-> > > > >                 Is it ondisk anywhere in metadata or in freelist
-> > > > > manager
-> > > > >                 in direct or indirect manner? Because having on disk
-> > > > >                 presence could cause confusions by having new options
-> > > > >                 when existing users move to build with this change.
-> > > > 
-> > > > Currently it is transient everywhere, and so far I've been trying to
-> > > > keep it that way.  However, we might want to change this: if we make
-> > > > min_alloc_size fixed at mkfs time, we could possibly collapse down the
-> > > > size of the allocation
-> > > > bitmap(s) by a factor of 16 on HDD (1 bit per min_alloc_size instead
-> > > > of per block).  I'm not sure that it's worth it, though... thoughts?
-> > > 
-> > > Collapsing the bitmap provides little DRAM savings and probably not much
-> > > CPU time savings (though some additional (low risk) coding might be
-> > > required to make this statement true), so I don't see much point in it.
-> > > Seems like extra complexity with little value.
-> > > 
-> > > > 
-> > > > > 2. While figuring out the min_alloc_size for devices, I give
-> > > > > preferences to old config parameter so that existing configs
-> > > > >                 are not changed by this code change. Is this right
-> > > > > or this is not required?
-> > > > 
-> > > > Don't worry about legacy at all since bluestore has no users.  :)
-> > > > 
-> > > > sage
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > > > info at http://vger.kernel.org/majordomo-info.html
-> > > PLEASE NOTE: The information contained in this electronic mail message is
-> > > intended only for the use of the designated recipient(s) named above. If
-> > > the reader of this message is not the intended recipient, you are hereby
-> > > notified that you have received this message in error and that any review,
-> > > dissemination, distribution, or copying of this message is strictly
-> > > prohibited. If you have received this communication in error, please
-> > > notify the sender by telephone or e-mail (as shown above) immediately and
-> > > destroy any and all copies of this message in your possession (whether
-> > > hard copies or electronically stored copies).
-> > > 
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
