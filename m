@@ -1,34 +1,55 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: changing roles
-Date: Fri, 20 May 2016 07:09:32 -0700
-Message-ID: <CAJ4mKGYL0QZvwCc4vAke6qgzktEVwNvWQDX9b86Vvprswv-0Bw@mail.gmail.com>
+From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
+Subject: Re: Initial proposal for bluestore compression control and statistics
+Date: Fri, 20 May 2016 16:14:00 +0200
+Message-ID: <20160520141400.GA5041@predictor>
+References: <2ec0367c-ea9e-469e-4a80-b2a242c84f0f@mirantis.com>
+ <20160519175708.GE22208@predictor>
+ <4c89f7ee-bff1-8a9a-096a-c9459aba992b@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:35377 "EHLO
-	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751614AbcETOJe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 May 2016 10:09:34 -0400
-Received: by mail-vk0-f46.google.com with SMTP id f66so144959978vkh.2
-        for <ceph-devel@vger.kernel.org>; Fri, 20 May 2016 07:09:33 -0700 (PDT)
+Received: from predictor.org.pl ([185.5.97.54]:60073 "EHLO predictor.org.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750937AbcETOLs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 20 May 2016 10:11:48 -0400
+Content-Disposition: inline
+In-Reply-To: <4c89f7ee-bff1-8a9a-096a-c9459aba992b@mirantis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi everyone,
+On Fri, May 20, 2016 at 04:52:18PM +0300, Igor Fedotov wrote:
+>=20
+> On 19.05.2016 20:57, Piotr Da=C5=82ek wrote:
+> >I would also add ability to set minimum acceptable compression ratio=
+,
+> >with at least two options (any and no-expand). "Any" would store com=
+pressed
+> >objects regardless how well they've compressed and "No-expand" would=
+ store
+> >object in compressed format only if compressed size is smaller than
+> >uncompressed size.
+>
+> Why do we need "Any" option? Isn't "No-expand" enough?
 
-I'm very pleased to finally see CephFS in a stable state and being
-deployed by real users! But after several years of working as the tech
-lead on CephFS I'm ready to pass the leadership role on to someone
-else.  I'll continue to work on CephFS, but am excited to spend more
-time on design and implementation over maintainer duties, and gain
-some flexibility when it comes to picking up other problems within
-Ceph.
+=46or example, when someone wants to benchmark Bluestore compression in=
+ worst case
+scenario, or when someone wants to use compression as data-masking tech=
+nique. And
+finally, "no-expand" implies additional code in compressor/decompressor=
+ code
+path and this option would go around it.=20
+(Not particularly practical uses, but there might be someone who finds =
+this
+useful... and it's not difficult to do in code).
 
-My choice to replace me as tech lead is John Spray.  He's been doing
-terrific work since he's joined the team, showing both sound technical
-judgement and a strong ability to work with contributors; I couldn't
-trust anybody more with the role. His ideas have been instrumental to
-helping the community of developers, testers, and especially real
-users expand. I look forward to seeing this process continue!
--Greg
+--=20
+Piotr Da=C5=82ek
+branch@predictor.org.pl
+http://blog.predictor.org.pl
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
