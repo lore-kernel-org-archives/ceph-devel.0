@@ -1,146 +1,144 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: The fundamental evil of "magic" in computing systems -> Was: mon
- daemon makes authentication side effects on startup
-Date: Fri, 20 May 2016 15:01:19 +0200
-Message-ID: <573F0A9F.6000704@suse.com>
-References: <5703A7FF.2090002@suse.com>
- <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com>
- <5704C76C.2050408@suse.com>
- <alpine.DEB.2.11.1604070820560.19675@cpach.fuggernut.com>
- <570666AB.8090408@suse.com>
- <alpine.DEB.2.11.1604070959160.19675@cpach.fuggernut.com>
- <57067F56.2000705@suse.com>
- <alpine.DEB.2.11.1604071143000.19675@cpach.fuggernut.com>
- <57081B3A.20601@suse.com> <570BAC52.4070404@suse.com>
- <alpine.DEB.2.11.1605120905220.23446@cpach.fuggernut.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Initial proposal for bluestore compression control and statistics
+Date: Fri, 20 May 2016 16:52:18 +0300
+Message-ID: <4c89f7ee-bff1-8a9a-096a-c9459aba992b@mirantis.com>
+References: <2ec0367c-ea9e-469e-4a80-b2a242c84f0f@mirantis.com>
+ <20160519175708.GE22208@predictor>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:42647 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752075AbcETNBv (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Fri, 20 May 2016 09:01:51 -0400
-In-Reply-To: <alpine.DEB.2.11.1605120905220.23446@cpach.fuggernut.com>
+Received: from mail-lf0-f46.google.com ([209.85.215.46]:35648 "EHLO
+	mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753080AbcETNwW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 May 2016 09:52:22 -0400
+Received: by mail-lf0-f46.google.com with SMTP id e126so24450179lfg.2
+        for <ceph-devel@vger.kernel.org>; Fri, 20 May 2016 06:52:21 -0700 (PDT)
+In-Reply-To: <20160519175708.GE22208@predictor>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ldachary@redhat.com
+To: =?UTF-8?Q?Piotr_Da=c5=82ek?= <branch@predictor.org.pl>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 05/12/2016 03:06 PM, Sage Weil wrote:
-> On Mon, 11 Apr 2016, Owen Synge wrote:
->> On 04/08/2016 10:57 PM, Owen Synge wrote:
->>> On 04/07/2016 05:43 PM, Sage Weil wrote:
->>>> On Thu, 7 Apr 2016, Owen Synge wrote:
->>>>> On 04/07/2016 04:03 PM, Sage Weil wrote:
->>>>>> On Thu, 7 Apr 2016, Owen Synge wrote:
->>>>>>> Hi Sage,
->>>>>>>
->>>>>>> On 04/07/2016 02:26 PM, Sage Weil wrote:
->>>>>>>> Hi Owen,
->>>>>>>>
->>>>>>>> I never really liked ceph-create-keys either, but it simplifie=
-d the=20
->>>>>>>> deployment process. =20
->>>>>>>
->>>>>>> I would propose we do this in two stages.
->>>>>>>
->>>>>>> (A) Remove calling the command from the init scripts as a side =
-effect of
->>>>>>> starting the mon.
->>>>>>>
->>>>>>> This allows us to get most of the issues solved.
->>>>>>>
->>>>>>> (B) Remove the command.
->>>>>>>
->>>>>>> This is the long term goal, which is not as urgent in my opinio=
-n but
->>>>>>> others may disagree.
->>>>>>
->>>>>> Works for me.  We just need to change ceph-deploy and get the ot=
-her=20
->>>>>> install/deploy tool folks on board before A.
->>>>>
->>>>> Are you intending to get this into Jewel?
->>>>>
->>>>> I had assumed this would only be done on master, and only come in=
-to the
->>>>> next release.
->>>>
->>>> Yeah, too late for jewel.
->>>>
->>>>> As a change to master I felt that we could just do (A) as soon as
->>>>> ceph-deploy works without the mon boot up scripts calling
->>>>> ceph-create-keys, ideally without having  ceph-create-keys in
->>>>> ceph-deploy's process.
->>>>>
->>>>> We can then file bugs as needed against other install processes t=
-hat
->>>>> depend on ceph-create-keys, and they can test against master.
->>>>
->>>> That works for me.
->>>>
->>>> sage
->>>
->>> Great,
->>>
->>> I have a fix, that is tested and working for ceph-deploy without
->>> depending upon ceph-create-keys based upon a rewrite of the method
->>>
->>>   ceph-deploy gatherkeys mon-node-01 mon-node-02 mon-node-03
->>>
->>> Works nicely for the old and new methods, and seems to have little
->>> impact apart from no new keys are wrote to disk on the mon nodes. O=
-SD's
->>> and rgw can be deployed without change, (I haven=92t tested mds)
->>>
->>> Previous behavior with the admin keys being deployed can be achieve=
-d
->>> simply by executing:
->>>
->>>   ceph-deploy admin mon-node-01 mon-node-02 mon-node-03
->>>
->>> If we definitely what to enforce the admin code being persisted on =
-all
->>> mon nodes can be changed later, but I think its cleaner if we do no=
-t.
->>>
->>> I will submit a PR on Monday.
+
+
+On 19.05.2016 20:57, Piotr Da=C5=82ek wrote:
+> On Thu, May 19, 2016 at 08:27:02PM +0300, Igor Fedotov wrote:
+>> Hi cephers,
 >>
->> ceph-deploy bug raised:
+>> please find my initial proposal with regard to bluestore compression
+>> control and related statistics.
 >>
->> http://tracker.ceph.com/issues/15451
+>> Any comments/thoughts are highly appreciated.
 >>
->> PR submitted:
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
 >>
->> https://github.com/ceph/ceph-deploy/pull/393
->=20
-> Hey Owen-
->=20
-> Now that jewel is out, now would be a good time to make this change. =
- The=20
-> ceph-deploy pr looks basically ready to go, minus a doc piece and a r=
-un=20
-> through the ceph-deploy suite.  Yuri can probably handle the=20
-> latter.
->=20
-> Then we can do the ceph.git changes to kill the ceph-create-keys task=
-=2E..
-
-Dear Sage,
-
-Sorry for the delay, I had a big pile of downstream work and test suite
-development to do for my salt work, I have now added some documentation=
-=2E
-
-I hope Yuri can do the latter as I really dont know "the ceph-deploy su=
-ite".
-
-Best wishes
-
-Owen
-
+>> COMPRESSION CONTROL OPTIONS
+>>
+>> One can see following means to control  compression at BlueStore lev=
+el.
+>>
+>> 1) Per-store setting to enable/disable compression and specify
+>> default compression method
+>>
+>> bluestore_compression =3D <zlib | snappy> / <force | optional | disa=
+ble>
+>>
+>> E.g.
+>>
+>> bluestore_compression =3D zlib/force
+>>
+>> The first token denotes default/applied compression algorithm.
+>> The second one:
+>>
+>> 'force' - enables compression for any objects
+>>
+>> 'optional' - burden the caller with the need to enable compression
+>> by different means (see below)
+>>
+>> 'disable' - unconditionally disables any compression for the store.
+>>
+>> This option is definitely useful for testing/debugging and has
+>> probably limited use in production.
+> If one uses Ceph for storage of pre-compressed data, having an option=
+ to
+> disable additional (Ceph-side) compression would be desireable, at le=
+ast on
+> per-Ceph level, but at least per-pool setting would be better.
+> Regarding optional - see below.
+>
+>> 2) Per-object compression specification. One should be able to
+>> enable/disable compression for specific object.
+>>
+>> Following sub-option can be provided:
+>>
+>>    a) Specify compression mode (along with disablement option) at
+>> object creation
+>>
+>>    b) Specify compression mode at arbitrary moment via specific
+>> method/ioctl call. Compression to be applied for subsequent write
+>> requests
+>>
+>>    c) Force object compression/decompression at arbitrary moment via
+>> specific method/ioctl call. Existing object content to be
+>> compressed/decompressed and appropriate mode to be set for
+>> subsequent write requests.
+>>
+>>    d) Disable compression for short-lived objects if corresponding
+>> hint has been provided via set_alloc_hint2 call. See PR at https://g=
+ithub.com/ceph/ceph/pull/6208/files/306c5e148cd2f538b3b6c8c2a1a3d5f38ef=
+8e15a#r63775941
+>>
+>> Along with specific compression algorithm one should be able to
+>> specify default algorithm selection. E.g. user can specify 'default'
+>> compression for an object instead of specific 'zlib' or 'snappy'
+>> value.
+>>
+>> This way one can avoid the need to care about the proper algorithm
+>> selection for each object.
+>>
+>> Default algorithm to be taken from the store setting (see above)
+>>
+>> Such an option provides pretty good level of flexibility. Upper
+>> level can introduce additional logic to control compression this
+>> way, e.g. enable/disable it for specific pools or dynamically
+>> control depending on how compressible object content is.
+> I would also add ability to set minimum acceptable compression ratio,
+> with at least two options (any and no-expand). "Any" would store comp=
+ressed
+> objects regardless how well they've compressed and "No-expand" would =
+store
+> object in compressed format only if compressed size is smaller than
+> uncompressed size.
+Why do we need "Any" option? Isn't "No-expand" enough?
+>   For zlib, this is more than possible (see "Maximum
+> expansion factor" at http://www.zlib.net/zlib_tech.html) and storing
+> doubly-compressed data will yield higher cpu and memory usage while
+> accessing object *and* more storage being utilized. Additional option=
+ (set
+> in percentage or bytes) specifying actual minimum acceptable compress=
+ion
+> ratio would improve on this idea further, and for example, improve re=
+ad
+> performance on large images (tens of gigabytes) that were compressed =
+by only
+> few hundred megabytes.
+Sounds good.
+>
+>> 3) Per-write request compression control.
+>>
+>> This option provides the highest level of flexibility but is
+>> probably an overkill.
+>>
+>> Any rationales to have it?
+> See above. If we're going to have per-block compression flag, then wr=
+iting
+> compressed format data only if the compression actually shrunk the da=
+ta
+> would improve read performance later.
+>
 
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
