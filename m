@@ -1,131 +1,162 @@
-From: Junwang Zhao <zhjwpku@gmail.com>
-Subject: Re: [wip-addr-features] make sure I am doing the right thing
-Date: Fri, 20 May 2016 11:15:41 +0800
-Message-ID: <CAEG8a3KhoaGXRQ43ywHUvzWujNqx2B2V_ZdHzzdyUGEFRqirGw@mail.gmail.com>
-References: <CAEG8a3LQuro2zXu90im0aQ58XxdGLDQvLxnjkJ+Rd8C6k70QVw@mail.gmail.com>
-	<alpine.DEB.2.11.1605160446150.30956@cpach.fuggernut.com>
-	<alpine.DEB.2.11.1605161228390.30956@cpach.fuggernut.com>
-	<CAEG8a3KPFfuFfM2TDyY11A0XD=fvGEmm=TP2Y_ZvZfWYTREAzw@mail.gmail.com>
-	<alpine.DEB.2.11.1605181637080.30956@cpach.fuggernut.com>
-	<CAEG8a3KCYaCUAmdw8i=-BZKHVN4DJ4gK3RAzSf5q9cA2xXEr=Q@mail.gmail.com>
-	<alpine.DEB.2.11.1605190806040.980@cpach.fuggernut.com>
+From: Sage Weil <sage@newdream.net>
+Subject: RE: Min alloc size according to media type
+Date: Fri, 20 May 2016 06:08:42 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605200604440.6221@cpach.fuggernut.com>
+References: <CY1PR0201MB182075171B6FCA64CF104097854A0@CY1PR0201MB1820.namprd02.prod.outlook.com> <alpine.DEB.2.11.1605191515090.6221@cpach.fuggernut.com> <BLUPR0201MB1524D22BDBA93E7F438D4382E84A0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <CY1PR0201MB1820EC5C25417E8F1EA1CF1E854B0@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f42.google.com ([209.85.213.42]:36598 "EHLO
-	mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753270AbcETDPn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2016 23:15:43 -0400
-Received: by mail-vk0-f42.google.com with SMTP id y2so57371181vka.3
-        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2016 20:15:42 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1605190806040.980@cpach.fuggernut.com>
+Received: from cobra.newdream.net ([66.33.216.30]:51484 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751971AbcETKIZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 May 2016 06:08:25 -0400
+In-Reply-To: <CY1PR0201MB1820EC5C25417E8F1EA1CF1E854B0@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ramesh Chander <Ramesh.Chander@sandisk.com>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, May 19, 2016 at 8:08 PM, Sage Weil <sage@newdream.net> wrote:
-> On Thu, 19 May 2016, Junwang Zhao wrote:
->> Hi Sage, Haomai,
->> Please check [1] and give some feedback, I am not sure about
->> 52436ded943b8f567adb584c50b789431b788a85
->>
->> [1] https://github.com/zhjwpku/ceph/commits/wip-addr-work
->
-> Great! I made several suggestions, and I have a question for everyone:
-> what should we do if we have a "new" addr (say, for the v2 msgr protocol)
-> and we need to encode it for a client that doesn't have the ADDR2 feature?
-> Right now we are still stuffing the sockaddr_storage in their with
-> whatever sockaddr data we have, but it is indistinguishable from a legacy
-> address.  Perhaps it sould encode as blank?  (e.g., entity_addr_t())? Or
-> blank, except with a magic nonce (0xffffffff maybe) so that you can tell
-> that it is non-blank but not terribly useful/usable?
->
-I don't quite get this, can you explain this more specific? I now consider the
-first encoded __u32 as the distinguish flag for the client to identify legacy
-or not, a little bit confused :(
+On Fri, 20 May 2016, Ramesh Chander wrote:
+> Thanks Sage and Allen,
+> 
+> >> Unless we want to make bluestore smart enough to push object data on a
+> >> fast device (i.e., do ssd/hdd tiering internally), I'm not sure we
+> >> need per- device min_alloc_size.
+> 
+> If we make it per block device even it becomes more simpler to set it on device open time and read it whenever required.
+> 
+> Most of the places we are already reading block device from bdev->get_block_size(), this new one also goes with it.
+> 
+> I think the gc_conf->* are read only parameters , to circumvent it I need to set this info at BlueStore structure or globally somewhere.
+> 
+> Whatever you suggest is fine.
 
-BTW, i have add entity_addrvec_t[1], you may want to have a look.
+FWIW the github.com/liewebas/wip-bluestore-write branch already moves 
+block_size and min_alloc_size ot BlueStore class members so that it's not 
+always pulling them out of g_conf and bdev.
 
-[1] https://github.com/zhjwpku/ceph/commits/wip-addr-work
+> >> Don't worry about legacy at all since bluestore has no users.  :)
+> 
+> That simplifies it and I can simply remove it. Or do we still need to 
+> keep the old parameter around and make that take precedence over two new 
+> ones? I mean old option is applicable to both so we need to break tie 
+> between new specific and old general parameter.
 
-> sage
->
->
->
->> > Thanks!
->>
->> On Thu, May 19, 2016 at 4:44 AM, Sage Weil <sage@newdream.net> wrote:
->> > On Tue, 17 May 2016, Junwang Zhao wrote:
->> >> Hi Sage,
->> >>
->> >> Check this[1], we should I do next, entity_addrvec_t ?
->> >>
->> >> [1] https://github.com/zhjwpku/ceph/commits/wip-addr-work
->> >
->> > Looks good!  I opened the PR
->> >
->> >         https://github.com/ceph/ceph/pull/9184
->> >
->> > for review and test.
->> >
->> > The next step is just to make a new entity_addr_t encoding that is more
->> > compact and uses an ADDR2 feature.  One commit that defines the new
->> > feature, then one commit that changes the entity_addr_t encode/decode,
->> > somewhat like in c728926a86e1410f959011d24700bb07bad1dc2c.  I would use
->> > the new get_sockaddr_len() method for elen, though.
->> >
->> > Also, the TYPE_ definitions should really be TYPE_LEGACY = 1, not the
->> > transport version (IP version), which is already covered by the sa_family
->> > field in the sockaddr.  I think that makes sense...
->> >
->> > A third commit would then add the entity_addrvec_t type, similar to what
->> > is in that same commit.  It should also add the type to
->> > test/encoding/types.h.
->> >
->> > Thanks!
->> > sage
->> >
->> >
->> >
->> >>
->> >> On Tue, May 17, 2016 at 12:29 AM, Sage Weil <sage@newdream.net> wrote:
->> >> > On Mon, 16 May 2016, Sage Weil wrote:
->> >> >> Hi Junwang,
->> >> >>
->> >> >> On Mon, 16 May 2016, Junwang Zhao wrote:
->> >> >> > Hi Sage, Haomai,
->> >> >> >
->> >> >> > I am working on the require-features-patch, I use 'make' to see the conflicts,
->> >> >> > and change the code to fit the required-feature-patch, [1] is a huge patch
->> >> >> > that I am still working on, it has not been finished. I really need to check
->> >> >> > with you whether I am doing it right, since it seems the errors are endless.
->> >> >> >
->> >> >> > There are some comments where I am not sure in the patch, like 'not sure'.
->> >> >>
->> >> >> I skimmed through this and it looks mostly right, but I see a few cases
->> >> >> where features aren't needed, e.g. cls_refcount_get in
->> >> >> cls_refcount_client.cc (there's no addr being encoded in
->> >> >> cls_refcount_get_op, so no need to make the encoding featureful).
->> >> >>
->> >> >> > I didn't split this huge patch into small ones, I am not sure is that a
->> >> >> > must, if yes, I will split it into small ones.
->> >> >>
->> >> >> The end result needs to be a series of small patches, but that doesn't
->> >> >> have to happen right away.  I think it might be useful to do a few small
->> >> >> sets of changes first just to show what the goal is, though.
->> >> >>
->> >> >> I will take the patch below and pull a few sample changes out so you can
->> >> >> see.  Traveling at the moment, but I'll have something pushed today (that
->> >> >> is also rebased on top of the latest wip-addr-cleanup branch).
->> >> >
->> >> > I went on a bit of a binge and have a wip-addr-work branch that is mostly
->> >> > there.  The last thing (I think) is updating msg/simple and msg/async.
->> >> > These ones should explicitly encode with features 0 since the protocol is
->> >> > defined in terms of the legacy encoding.
->> >> >
->> >> > sage
->> >>
->> >>
->>
->>
+I think having bluestore_min_alloc_size, bluestore_min_alloc_size_hdd, and 
+bluestore_min_alloc_size_ssd still makes it easier to change for users.  
+It'll only go in one bit of code that updates the BlueStore min_alloc_size 
+member.
+
+Perhaps you can base this PR on the wip-bluestore-write branch.  It's 
+getting rebased still frequently but I think it's less than a 
+week away from being mergeable.
+
+> > > Currently it is transient everywhere, and so far I've been trying to
+> >> keep it that way.  However, we might want to change this: if we make
+> >> min_alloc_size fixed at mkfs time, we could possibly collapse down the
+> > >size of the allocation
+> > >bitmap(s) by a factor of 16 on HDD (1 bit per min_alloc_size instead
+> > >of per block).  I'm not sure that it's worth it, though... thoughts?
+> > Collapsing the bitmap provides little DRAM savings and probably not much CPU time savings (though some additional (low risk) coding might be required to make this statement true), so I don't see much point in it.
+> Seems like extra complexity with little value.
+> 
+> I think as long as our min alloc size does reduce from previous value or 
+> our bitmap vector has bit per minimum possible value of min_alloc_size, 
+> we are good.  But as Allen said , we will not have significant saving 
+> from this as fasr as cost (cpu and dram) is concerned.
+
+Yeah, let's not worry about it then.
+
+sage
+
+
+
+> 
+> -Ramesh Chander
+> 
+> 
+> -----Original Message-----
+> From: Allen Samuels
+> Sent: Friday, May 20, 2016 2:00 AM
+> To: Sage Weil; Ramesh Chander
+> Cc: ceph-devel@vger.kernel.org
+> Subject: RE: Min alloc size according to media type
+> 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> > owner@vger.kernel.org] On Behalf Of Sage Weil
+> > Sent: Thursday, May 19, 2016 12:20 PM
+> > To: Ramesh Chander <Ramesh.Chander@sandisk.com>
+> > Cc: ceph-devel@vger.kernel.org
+> > Subject: Re: Min alloc size according to media type
+> >
+> > On Thu, 19 May 2016, Ramesh Chander wrote:
+> > > Hi Sage,
+> > >
+> > > I am doing changes in Bluestore related to minimum allocation size
+> > > according to ssd and hdd. This change involves:
+> > >
+> > > 1. There are three min alloc sizes now:
+> > >                 a. min_alloc_size: old one, default changed to 0
+> > >                 b. min_alloc_size_hdd: for rotational media, default 64k
+> > >                 c. min_alloc_size_ssd: for ssd, default 4k.
+> > >
+> > > 2. Making changes in BlockDevice to maintain its own min_alloc_size.
+> > > It allows to maintain different min_alloc_size for different devices.
+> > >
+> > > 3. Making changes in allocator(stupid, bitmap) interfaces to take
+> > > min_alloc_size from the corresponding devices.
+> >
+> > This makes sense if some devices are hdd and some are ssd (e.g., main
+> > vs db/wal), but in practice the only separation currently possible is
+> > to have a separate device for WAL and for rocksdb, both of which hare
+> > managed by bluefs and not bluestore directly.  Ane bluefs currently
+> > has a min_alloc_size of 1MB since all files are generally big (usually
+> > 4MB each), there are no random writes, etc.
+> >
+> > Unless we want to make bluestore smart enough to push object data on a
+> > fast device (i.e., do ssd/hdd tiering internally), I'm not sure we
+> > need per- device min_alloc_size.
+> 
+> I think this is / will be valuable -- in the future. I don't see that this item significantly simplifies the future problem.
+> 
+> 
+> >
+> > > I have following questions regarding this parameter and use of it in
+> > > bluestore:
+> > >
+> > > 1. I assume this parameter is transient and does not have effect on
+> > > different values (say changed from 4k to 64k or vice versa) across
+> > > reboots or different ceph versions?
+> > >                 Is it ondisk anywhere in metadata or in freelist manager
+> > >                 in direct or indirect manner? Because having on disk
+> > >                 presence could cause confusions by having new options
+> > >                 when existing users move to build with this change.
+> >
+> > Currently it is transient everywhere, and so far I've been trying to
+> > keep it that way.  However, we might want to change this: if we make
+> > min_alloc_size fixed at mkfs time, we could possibly collapse down the
+> > size of the allocation
+> > bitmap(s) by a factor of 16 on HDD (1 bit per min_alloc_size instead
+> > of per block).  I'm not sure that it's worth it, though... thoughts?
+> 
+> Collapsing the bitmap provides little DRAM savings and probably not much CPU time savings (though some additional (low risk) coding might be required to make this statement true), so I don't see much point in it.
+> Seems like extra complexity with little value.
+> 
+> >
+> > > 2. While figuring out the min_alloc_size for devices, I give
+> > > preferences to old config parameter so that existing configs
+> > >                 are not changed by this code change. Is this right
+> > > or this is not required?
+> >
+> > Don't worry about legacy at all since bluestore has no users.  :)
+> >
+> > sage
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at http://vger.kernel.org/majordomo-info.html
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> 
+> 
