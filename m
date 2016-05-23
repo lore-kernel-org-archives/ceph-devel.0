@@ -1,43 +1,33 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: not able to run src/ceph any longer
-Date: Mon, 23 May 2016 01:10:00 +0200
-Message-ID: <c6296508-10eb-f78a-f0e1-6bac2d1be6ea@digiware.nl>
+From: Tim Serong <tserong@suse.com>
+Subject: For calamari <= 1.3.x, ceph.client.admin.keyring on all nodes, or
+ just mons?
+Date: Mon, 23 May 2016 11:58:06 +1000
+Message-ID: <574263AE.3010401@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([31.223.170.169]:56351 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752583AbcEVXKL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 22 May 2016 19:10:11 -0400
-Received: from rack1.digiware.nl (unknown [127.0.0.1])
-	by smtp.digiware.nl (Postfix) with ESMTP id 303D81534DD
-	for <ceph-devel@vger.kernel.org>; Mon, 23 May 2016 01:10:05 +0200 (CEST)
-Received: from [192.168.10.10] (asus [192.168.10.10])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.digiware.nl (Postfix) with ESMTPSA id 7ACCB15340D
-	for <ceph-devel@vger.kernel.org>; Mon, 23 May 2016 01:09:59 +0200 (CEST)
+Received: from victor.provo.novell.com ([137.65.250.26]:40146 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752740AbcEWB6N (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Sun, 22 May 2016 21:58:13 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Hi All,
 
-When the testscripts try to run src/ceph I get:
+Quick question: for Calamari <= 1.3.x, the ceph salt module that does
+cluster heartbeats and whatnot needs
+/etc/ceph/ceph.client.admin.keyring.  Does that need to exist on all
+cluster nodes, or only on the MONs?
 
-*** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
-Traceback (most recent call last):
-  File "src/ceph", line 118, in <module>
-    import rados
-ImportError: /usr/srcs/Ceph/work/ceph/src/.libs/librados.so.2: Undefined
-symbol "g_ceph_context"
+Thanks,
 
-which is in libglobal, but if I try to link that to librados I'm just
-getting nothing but dubble definitions and errors.
-
-Where have things gone wrong for me?
-How should "import rados" get the g_ceph_context?
-
-Thanx
---WjW
+Tim
+-- 
+Tim Serong
+Senior Clustering Engineer
+SUSE
+tserong@suse.com
