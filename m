@@ -1,21 +1,21 @@
 From: Loic Dachary <loic@dachary.org>
 Subject: parted behavior change between 3.1 and 3.2
-Date: Mon, 23 May 2016 09:41:32 +0200
-Message-ID: <5742B42C.7050000@dachary.org>
+Date: Mon, 23 May 2016 11:04:52 +0200
+Message-ID: <5742C7B4.30007@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:33080 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753179AbcEWHli (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 May 2016 03:41:38 -0400
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:42602 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932267AbcEWJF1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 May 2016 05:05:27 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Phillip Susi <psusi@ubuntu.com>
+To: "Brian C. Lane" <bcl@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Philip,
+Hi Brian,
 
 In the context of the Ceph ( http://ceph.com/ ) project, I'm trying to =
 figure out why parted 3.2 fixes a problem that shows in 3.1 [1]. In a n=
