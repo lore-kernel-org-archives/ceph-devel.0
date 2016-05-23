@@ -1,87 +1,51 @@
-From: Shinobu Kinjo <shinobu.kj@gmail.com>
-Subject: Re: new scrub and repair discussion
-Date: Mon, 23 May 2016 12:54:54 +0900
-Message-ID: <CAFdRU71uu+jzZ_OkZ8ppR94GUE1yWi1DR7LCJGTw5DR7reMR=Q@mail.gmail.com>
-References: <CAJE9aOMW9REHMc8b3o63CwxN2doY0O3pU+QcWrErKZMvwVtznw@mail.gmail.com>
-Reply-To: skinjo@redhat.com
+From: Tomy Cheru <Tomy.Cheru@sandisk.com>
+Subject: RE: not able to run src/ceph any longer
+Date: Mon, 23 May 2016 04:10:19 +0000
+Message-ID: <CO1PR02MB15969B16BE9ECF2C0A4A07B944E0@CO1PR02MB159.namprd02.prod.outlook.com>
+References: <c6296508-10eb-f78a-f0e1-6bac2d1be6ea@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f48.google.com ([209.85.214.48]:35752 "EHLO
-	mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750704AbcEWECO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 May 2016 00:02:14 -0400
-Received: by mail-it0-f48.google.com with SMTP id z189so20064402itg.0
-        for <ceph-devel@vger.kernel.org>; Sun, 22 May 2016 21:02:13 -0700 (PDT)
-In-Reply-To: <CAJE9aOMW9REHMc8b3o63CwxN2doY0O3pU+QcWrErKZMvwVtznw@mail.gmail.com>
+Received: from mail-by2on0096.outbound.protection.outlook.com ([207.46.100.96]:55712
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752756AbcEWGlv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 23 May 2016 02:41:51 -0400
+In-Reply-To: <c6296508-10eb-f78a-f0e1-6bac2d1be6ea@digiware.nl>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Nov 11, 2015 at 8:44 PM, kefu chai <tchaikov@gmail.com> wrote:
-> currently, scrub and repair are pretty primitive. there are several
-> improvements which need to be made:
->
-[snip]
-> - repair will create a new version so that possibly corrupted copies
-> on down OSDs will get fixed naturally.
-
-If this new feature is executed by end users manually, it may be
-better to implement dry-run mechanism so that the above process could
-be skipped, and end users initialize scrub process with more
-information, and maybe more safely.
-
-Make sense?
-
-Cheers,
-Shinobu
-
->
-> so librados will offer enough information and facilities, with which a
-> smart librados client/script will be able to fix the inconsistencies
-> found in the scrub.
->
-> as an example, if we run into a data inconsistency where the 3
-> replicas failed to agree with each other after performing a deep
-> scrub. probably we'd like to have an election to get the auth copy.
-> following pseudo code explains how we will implement this using the
-> new rados APIs for scrub and repair.
->
->      # something is not necessarily better than nothing
->      rados.aio_scrub(pg, completion)
->      completion.wait_for_complete()
->      for pool in rados.get_inconsistent_pools():
->           for pg in rados.get_inconsistent_pgs(pool):
->                # rados.get_inconsistent_pgs() throws if "epoch" expires
->
->                for oid, inconsistent in rados.get_inconsistent_pgs(pg,
-> epoch).items():
->                     if inconsistent.is_data_digest_mismatch():
->                          votes = defaultdict(int)
->                          for osd, shard_info in inconsistent.shards:
->                               votes[shard_info.object_info.data_digest] += 1
->                          digest, _ = mavotes, key=operator.itemgetter(1))
->                          auth_copy = None
->                          for osd, shard_info in inconsistent.shards.items():
->                               if shard_info.object_info.data_digest == digest:
->                                    auth_copy = osd
->                                    break
->                          repair_op = librados.ObjectWriteOperation()
->                          repair_op.repair_pick(auth_copy,
-> inconsistent.ver, epoch)
->                          rados.aio_operate_scrub(oid, repair_op)
->
-> this plan was also discussed in the infernalis CDS. see
-> http://tracker.ceph.com/projects/ceph/wiki/Osd_-_Scrub_and_Repair.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Email:
-shinobu@linux.com
-shinobu@redhat.com
+VHJ5ICJleHBvcnQgTERfTElCUkFSWV9QQVRIPS91c3Ivc3Jjcy9DZXBoL3dvcmsvY2VwaC9zcmMi
+DQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
+biBCZWhhbGYgT2YgV2lsbGVtIEphbiBXaXRoYWdlbg0KU2VudDogTW9uZGF5LCBNYXkgMjMsIDIw
+MTYgNDo0MCBBTQ0KVG86IENlcGggRGV2ZWxvcG1lbnQgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnPg0KU3ViamVjdDogbm90IGFibGUgdG8gcnVuIHNyYy9jZXBoIGFueSBsb25nZXINCg0KSGks
+DQoNCldoZW4gdGhlIHRlc3RzY3JpcHRzIHRyeSB0byBydW4gc3JjL2NlcGggSSBnZXQ6DQoNCioq
+KiBERVZFTE9QRVIgTU9ERTogc2V0dGluZyBQQVRILCBQWVRIT05QQVRIIGFuZCBMRF9MSUJSQVJZ
+X1BBVEggKioqIFRyYWNlYmFjayAobW9zdCByZWNlbnQgY2FsbCBsYXN0KToNCiAgRmlsZSAic3Jj
+L2NlcGgiLCBsaW5lIDExOCwgaW4gPG1vZHVsZT4NCiAgICBpbXBvcnQgcmFkb3MNCkltcG9ydEVy
+cm9yOiAvdXNyL3NyY3MvQ2VwaC93b3JrL2NlcGgvc3JjLy5saWJzL2xpYnJhZG9zLnNvLjI6IFVu
+ZGVmaW5lZCBzeW1ib2wgImdfY2VwaF9jb250ZXh0Ig0KDQp3aGljaCBpcyBpbiBsaWJnbG9iYWws
+IGJ1dCBpZiBJIHRyeSB0byBsaW5rIHRoYXQgdG8gbGlicmFkb3MgSSdtIGp1c3QgZ2V0dGluZyBu
+b3RoaW5nIGJ1dCBkdWJibGUgZGVmaW5pdGlvbnMgYW5kIGVycm9ycy4NCg0KV2hlcmUgaGF2ZSB0
+aGluZ3MgZ29uZSB3cm9uZyBmb3IgbWU/DQpIb3cgc2hvdWxkICJpbXBvcnQgcmFkb3MiIGdldCB0
+aGUgZ19jZXBoX2NvbnRleHQ/DQoNClRoYW54DQotLVdqVw0KLS0NClRvIHVuc3Vic2NyaWJlIGZy
+b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0
+aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1h
+am9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
+bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ry
+b25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVz
+aWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBt
+ZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3Rp
+ZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhh
+dCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2Yg
+dGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVk
+IHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5
+IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVz
+dHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lv
+biAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4N
+Cg==
