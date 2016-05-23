@@ -1,74 +1,40 @@
-From: Houlinfei <hou.linfei@h3c.com>
-Subject: =?utf-8?B?562U5aSNOiDnrZTlpI06IFtjZXBoL2NlcGhdIFdpcCBhZGQgZmxhc2hjYWNo?=
- =?utf-8?Q?e_(#8773)?=
-Date: Mon, 23 May 2016 07:04:49 +0000
-Message-ID: <3858597F7658604DB90E3F60F716249C047AB27D@H3CMLB12-EX.srv.huawei-3com.com>
-References: <ceph/ceph/pull/8773@github.com>
-	<ceph/ceph/pull/8773/c217543554@github.com>
-	<3858597F7658604DB90E3F60F716249C047A8EB8@H3CMLB12-EX.srv.huawei-3com.com>
- <CANP1eJGUyw8YpmbKV7PQmDa7CD3ucY2u_GT9f-phFYQRB3idSg@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: parted behavior change between 3.1 and 3.2
+Date: Mon, 23 May 2016 09:41:32 +0200
+Message-ID: <5742B42C.7050000@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [60.191.123.56] ([60.191.123.56]:1263 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753021AbcEWHHn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 23 May 2016 03:07:43 -0400
-In-Reply-To: <CANP1eJGUyw8YpmbKV7PQmDa7CD3ucY2u_GT9f-phFYQRB3idSg@mail.gmail.com>
-Content-Language: zh-CN
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:33080 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753179AbcEWHli (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 May 2016 03:41:38 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Phillip Susi <psusi@ubuntu.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-DQpoaSwgU2FnZSwgSSBjb3VsZG4ndCBzZWUgeW91ciByZXBseSwgSSBkaWRuJ3QgYWRkIHRoZSBm
-bGFzaGNhY2hlIHV1aWQgaW4gdGhlIFBUWVBFIGluIHRoaXMgY29tbWl0LiBIb3cgYWJvdXQgSSBj
-b21taXQgYSBuZXcgdGhhdCBhZGQgdGhlIGZsYXNoY2FjaGUgdXVpZCBpbiB0aGUgUFRZUEUgc3Vj
-aCBhcyBqb3VybmFsPw0KDQotLS0tLemCruS7tuWOn+S7ti0tLS0tDQrlj5Hku7bkuro6IE1pbG9z
-eiBUYW5za2kgW21haWx0bzptaWxvc3pAYWRmaW4uY29tXQ0K5Y+R6YCB5pe26Ze0OiAyMDE25bm0
-NeaciDIw5pelIDA6NTkNCuaUtuS7tuS6ujogaG91bGluZmVpIDExODAyIChSRCkNCuaKhOmAgTog
-Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCuS4u+mimDogUmU6IOetlOWkjTogW2NlcGgvY2Vw
-aF0gV2lwIGFkZCBmbGFzaGNhY2hlICgjODc3MykNCg0KT24gVGh1LCBNYXkgMTksIDIwMTYgYXQg
-Nzo1MSBBTSwgSG91bGluZmVpIDxob3UubGluZmVpQGgzYy5jb20+IHdyb3RlOg0KPg0KPg0KPiBI
-aSwgdGhlIG1haW4gY2VwaC1kaXNrIGludGVyZmFjZSBhZGRlZCBpcyBwYXJ0IG9mIHRoZSBwcmVw
-YXJlLiBXZSBhZGQNCj4gZmNhY2hlLCBmY2FjaGVfc2l6ZSwgZmNhY2hlLXV1aWQgb3B0aW9uYWwg
-YXJndW1lbnRzLiBUaGVzZSBhcmUgdGhlIG9ubHkgZXh0ZXJuYWwgaW50ZXJmYWNlLiBXaGVuIHlv
-dSB3YW50IHRvIHVzZSBmbGFzaGNhY2hlLCB5b3UgbXVzdCBzcGVjaWZ5IGZsYXNoY2FjaGUgZGlz
-ayBhbmQgZmxhc2hjYWNoZSBzaXplIHN1Y2ggYXMgY2VwaC1kaXNrIHByZXBhcmUgLS1mY2FjaGUg
-L2Rldi9zZGMgLS1mY2FjaGVfc2l6ZSAxMCAvZGV2L3NkYS4NCj4gSSB0aGluayB3ZSBjb3VsZCBh
-ZGQgYmNhY2hlIGFuZCBkbS1jYWNoZSBpbiB0aGUgc2FtZSB3YXkgaWYgbmVlZGVkLiBXaGF0IGRv
-IHlvdSB0aGluaz8NCj4NCj4g5Y+R5Lu25Lq6OiBTYWdlIFdlaWwgW21haWx0bzpub3RpZmljYXRp
-b25zQGdpdGh1Yi5jb21dDQo+IOWPkemAgeaXtumXtDogMjAxNuW5tDXmnIg35pelIDM6NTgNCj4g
-5pS25Lu25Lq6OiBjZXBoL2NlcGgNCj4g5oqE6YCBOiBob3VsaW5mZWkgMTE4MDIgKFJEKTsgQXV0
-aG9yDQo+IOS4u+mimDogUmU6IFtjZXBoL2NlcGhdIFdpcCBhZGQgZmxhc2hjYWNoZSAoIzg3NzMp
-DQo+DQo+IEkgdGhpbmsgd2Ugd2FudCB0byBtYWtlIHRoaXMgbW9yZSBnZW5lcmljIHNvIHRoYXQg
-d2UgY2FuIGxheWVyIGluIGFueSBjYWNoaW5nIG9wdGlvbiAoZmxhc2hjYWNoZSwgYmNhY2hlLCBk
-bS1jYWNoZSkuIENhbiB5b3Ugc2VuZCBhbiBlbWFpbCB0byBjZXBoLWRldmVsIHdpdGggdGhlIHBy
-b3Bvc2VkIGNlcGgtZGlzayBpbnRlcmZhY2UgY2hhbmdlIHNvIHdlIGNhbiBnZXQgZmVlZGJhY2sg
-YW5kIHNldHRsZSBvbmUgdGhlIGFwcHJvYWNoPyBUaGFua3MhDQoNCg0KSSB0aGluayBpdCdzIGlt
-cG9ydGFudCB0byB0aGluayBhYm91dCBob3cgdGhlc2UgYmxvY2sgY2FjaGluZyBzb2x1dGlvbnMg
-aGFuZGxlIE9fRElSRUNULiBCbHVlc3RvcmUgdXNlcyBPX0RJUkVDVCArIGxpYmFpbyB3aGljaCBi
-eXBhc3NlcyB0aGUgbm9ybWFsIGtlcm5lbCAocGFnZSkgY2FjaGVzLiBJIGFjdHVhbGx5IGRvbid0
-IGtub3cgdGhlIGFuc3dlciB0byBpdCBidXQgSSB0aGluayBpdCdzIHZhbHVhYmxlIHRvIGZpZ3Vy
-ZSBvdXQgaWYgYW55IG9mIHRoZSBhYm92ZSBhcmUgYnlwYXNzZWQgaW4gdGhlIE9fRElSRUNUIGNh
-c2UuDQoNCi0tDQpNaWxvc3ogVGFuc2tpDQpDVE8NCjE2IEVhc3QgMzR0aCBTdHJlZXQsIDE1dGgg
-Zmxvb3INCk5ldyBZb3JrLCBOWSAxMDAxNg0KDQpwOiA2NDYtMjUzLTkwNTUNCmU6IG1pbG9zekBh
-ZGZpbi5jb20NCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuacrOmCruS7tuWPiuWFtumZhOS7tuWQq+ac
-ieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaBr++8jOS7
-hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4reWIl+WHug0K55qE5Liq5Lq65oiW576k57uE
-44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI5YyF5ous5L2G
-5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN5Yi244CBDQrmiJbmlaPlj5Hv
-vInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzpgq7ku7bvvIzo
-r7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDpmaTmnKwNCumC
-ruS7tu+8gQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVu
-dGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkgZm9yIHRo
-ZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNl
-IG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRp
-bmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3VyZSwgcmVw
-cm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGlu
-dGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBl
-LW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUgb3IgZW1h
-aWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCg==
+Hi Philip,
+
+In the context of the Ceph ( http://ceph.com/ ) project, I'm trying to =
+figure out why parted 3.2 fixes a problem that shows in 3.1 [1]. In a n=
+utshell, calling partprobe sometime fails with "device busy" with 3.1 a=
+nd when using 3.2 that never happens (all things are the same, only par=
+ted changes). I took a look at the commits in http://git.savannah.gnu.o=
+rg/cgit/parted.git/log/ but I didn't see a commit that would explain su=
+ch a behavior change.
+
+Any pointer or idea you may have would be greatly appreciated :-)
+
+Cheers
+
+[1] partprobe intermittent issues during ceph-disk prepare http://track=
+er.ceph.com/issues/15176
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
