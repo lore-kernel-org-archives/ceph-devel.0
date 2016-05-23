@@ -1,33 +1,87 @@
-From: Tim Serong <tserong@suse.com>
-Subject: For calamari <= 1.3.x, ceph.client.admin.keyring on all nodes, or
- just mons?
-Date: Mon, 23 May 2016 11:58:06 +1000
-Message-ID: <574263AE.3010401@suse.com>
+From: Shinobu Kinjo <shinobu.kj@gmail.com>
+Subject: Re: new scrub and repair discussion
+Date: Mon, 23 May 2016 12:54:54 +0900
+Message-ID: <CAFdRU71uu+jzZ_OkZ8ppR94GUE1yWi1DR7LCJGTw5DR7reMR=Q@mail.gmail.com>
+References: <CAJE9aOMW9REHMc8b3o63CwxN2doY0O3pU+QcWrErKZMvwVtznw@mail.gmail.com>
+Reply-To: skinjo@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:40146 "EHLO
-	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752740AbcEWB6N (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Sun, 22 May 2016 21:58:13 -0400
+Received: from mail-it0-f48.google.com ([209.85.214.48]:35752 "EHLO
+	mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750704AbcEWECO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 May 2016 00:02:14 -0400
+Received: by mail-it0-f48.google.com with SMTP id z189so20064402itg.0
+        for <ceph-devel@vger.kernel.org>; Sun, 22 May 2016 21:02:13 -0700 (PDT)
+In-Reply-To: <CAJE9aOMW9REHMc8b3o63CwxN2doY0O3pU+QcWrErKZMvwVtznw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi All,
+On Wed, Nov 11, 2015 at 8:44 PM, kefu chai <tchaikov@gmail.com> wrote:
+> currently, scrub and repair are pretty primitive. there are several
+> improvements which need to be made:
+>
+[snip]
+> - repair will create a new version so that possibly corrupted copies
+> on down OSDs will get fixed naturally.
 
-Quick question: for Calamari <= 1.3.x, the ceph salt module that does
-cluster heartbeats and whatnot needs
-/etc/ceph/ceph.client.admin.keyring.  Does that need to exist on all
-cluster nodes, or only on the MONs?
+If this new feature is executed by end users manually, it may be
+better to implement dry-run mechanism so that the above process could
+be skipped, and end users initialize scrub process with more
+information, and maybe more safely.
 
-Thanks,
+Make sense?
 
-Tim
+Cheers,
+Shinobu
+
+>
+> so librados will offer enough information and facilities, with which a
+> smart librados client/script will be able to fix the inconsistencies
+> found in the scrub.
+>
+> as an example, if we run into a data inconsistency where the 3
+> replicas failed to agree with each other after performing a deep
+> scrub. probably we'd like to have an election to get the auth copy.
+> following pseudo code explains how we will implement this using the
+> new rados APIs for scrub and repair.
+>
+>      # something is not necessarily better than nothing
+>      rados.aio_scrub(pg, completion)
+>      completion.wait_for_complete()
+>      for pool in rados.get_inconsistent_pools():
+>           for pg in rados.get_inconsistent_pgs(pool):
+>                # rados.get_inconsistent_pgs() throws if "epoch" expires
+>
+>                for oid, inconsistent in rados.get_inconsistent_pgs(pg,
+> epoch).items():
+>                     if inconsistent.is_data_digest_mismatch():
+>                          votes = defaultdict(int)
+>                          for osd, shard_info in inconsistent.shards:
+>                               votes[shard_info.object_info.data_digest] += 1
+>                          digest, _ = mavotes, key=operator.itemgetter(1))
+>                          auth_copy = None
+>                          for osd, shard_info in inconsistent.shards.items():
+>                               if shard_info.object_info.data_digest == digest:
+>                                    auth_copy = osd
+>                                    break
+>                          repair_op = librados.ObjectWriteOperation()
+>                          repair_op.repair_pick(auth_copy,
+> inconsistent.ver, epoch)
+>                          rados.aio_operate_scrub(oid, repair_op)
+>
+> this plan was also discussed in the infernalis CDS. see
+> http://tracker.ceph.com/projects/ceph/wiki/Osd_-_Scrub_and_Repair.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
 -- 
-Tim Serong
-Senior Clustering Engineer
-SUSE
-tserong@suse.com
+Email:
+shinobu@linux.com
+shinobu@redhat.com
