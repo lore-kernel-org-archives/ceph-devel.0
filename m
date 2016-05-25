@@ -1,121 +1,165 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: blueprint: consistency groups
-Date: Wed, 25 May 2016 01:30:13 -0400
-Message-ID: <CA+aFP1AziFsEJmm3qdCvvfuqnUFPDOW5Ce9VxY0DVMbMy+Y4PQ@mail.gmail.com>
-References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
-	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
-	<20160325071933.GA14634@gmail.com>
-	<CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
-	<CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
-	<CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
-	<CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
-	<CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
-	<CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
-	<CA+aFP1C7me+-dbXVrMgU0Qs9fX8_4ocC9v5orzy+c8tK30y08A@mail.gmail.com>
-	<CA+hcxJT4DWgt8K8hc27KbkJK=DRePM18Zh=GPxtfR5afoxVP1w@mail.gmail.com>
-	<CA+hcxJQGcDy96o0f9sEY8HwLXng9YzxsoKAhaaCuCDDhVbN76A@mail.gmail.com>
-	<CA+aFP1AQzo7bO=e-Gd_sAtBWSYFgvji8isxuXFKDejaHAA+FuA@mail.gmail.com>
-	<CA+hcxJRMcJFxYdscdwyvowjw_dNF6xoNzCHT1=oaznwGqY-4Rw@mail.gmail.com>
-	<CA+aFP1Awk0YZnW16JxOgfDeJFsuKPoN4jdrpr8dCdqUjhhD_Mw@mail.gmail.com>
-	<CA+hcxJTWZWUAUGr1gAZwEqLrGY9eJpzrF3+0H3wqaSjiY6-Faw@mail.gmail.com>
-	<CA+aFP1CfOCy9pL=NWka=j=otb7rwO7W=ds-ggBMz0hVY=zj3-Q@mail.gmail.com>
-	<CA+hcxJS9mBZL5wu0A2L_-3bAyvMb90qBaYo+cosqphUn0Dj9kQ@mail.gmail.com>
-	<CA+aFP1AchQD6b-gm7Z4zijQfW8OMZJrrE8S2nLde2CE+VUjZew@mail.gmail.com>
-	<CA+hcxJQAC7m5mRXhGfL0Fu8erWFb--GstHzOYO-swJNLWXPhHw@mail.gmail.com>
-	<CA+aFP1CVs-_KWWUOdnP7=rFbghpNHTrrfuLPkVw9RtX03eAUKw@mail.gmail.com>
-	<CA+hcxJQhE13ftC7TQ2PdBQwd=_xurRGsuJHTi736r+n0kx_UeQ@mail.gmail.com>
-	<CA+hcxJTTZn8y=kuSFnWbem01XaOUa3D8LDh=25ds6r+qD318vA@mail.gmail.com>
-	<CA+aFP1DzwBkZ5Yo2p2nXvn5KbgniizH1saq4eHx9UDA9JC8UEw@mail.gmail.com>
-	<CA+hcxJR5BTVoogj3caBm9pYR9S4SVqtP815nFHHQK4t89a0Gsg@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Owen Synge <osynge@suse.com>
+Subject: Re: The fundamental evil of "magic" in computing systems -> Was: mon
+ daemon makes authentication side effects on startup
+Date: Wed, 25 May 2016 12:21:59 +0200
+Message-ID: <57457CC7.1080809@suse.com>
+References: <5703A7FF.2090002@suse.com>
+ <CAJ4mKGZ=jXt-szAEchxerW6iBAngpa9Rd1i-mSY_BLWXPJ7aOw@mail.gmail.com>
+ <5704C76C.2050408@suse.com>
+ <alpine.DEB.2.11.1604070820560.19675@cpach.fuggernut.com>
+ <570666AB.8090408@suse.com>
+ <alpine.DEB.2.11.1604070959160.19675@cpach.fuggernut.com>
+ <57067F56.2000705@suse.com>
+ <alpine.DEB.2.11.1604071143000.19675@cpach.fuggernut.com>
+ <57081B3A.20601@suse.com> <570BAC52.4070404@suse.com>
+ <alpine.DEB.2.11.1605120905220.23446@cpach.fuggernut.com>
+ <573F0A9F.6000704@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f47.google.com ([209.85.220.47]:32796 "EHLO
-	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751015AbcEYFaP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2016 01:30:15 -0400
-Received: by mail-pa0-f47.google.com with SMTP id xk12so14011405pac.0
-        for <ceph-devel@vger.kernel.org>; Tue, 24 May 2016 22:30:14 -0700 (PDT)
-In-Reply-To: <CA+hcxJR5BTVoogj3caBm9pYR9S4SVqtP815nFHHQK4t89a0Gsg@mail.gmail.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:45938 "EHLO
+	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750899AbcEYKWb (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Wed, 25 May 2016 06:22:31 -0400
+In-Reply-To: <573F0A9F.6000704@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Victor Denisov <vdenisov@mirantis.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ldachary@redhat.com
 
-The current PR is at approximately 2500 lines -- it would be nice to
-have a PR under 1000 changed lines in a perfect world.  The trouble
-with larger PR is that after you address comments, I have to re-read
-it all again.  The smaller the PR, the faster it can be reviewed and
-merged.  If changes depend on another PR, you can always
-non-fast-forward merge the other PR branch into your dependent PR
-branch so that it's clear what needs to be reviewed.
-
-On Tue, May 24, 2016 at 6:42 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
-> Yes, I'm working on splitting it into small logically separated commits.
-> My current PR is for CRUD operations only(create, remove, add image,
-> remove image, show info).
-> Do you want even a smaller PR or this one is small enough?
->
-> Thanks,
-> V.
->
-> On Mon, May 23, 2016 at 7:39 PM, Jason Dillaman <jdillama@redhat.com> wrote:
->> Definitely want to ensure that it cleanly merges with master.  I would
->> also request, if at all possible, that you break it into individual
->> PRs of concrete sub-tasks for implementing consistency groups for ease
->> of review.  Have individual commits for each step of implementing the
->> task would also help (i.e. squash related commits, fix style issues or
->> bugs in the commit that introduced them, etc).
->>
->> On Mon, May 23, 2016 at 6:43 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>> Never mind. I just realized that it will be easier to build it on top
->>> of the latest master in any case.
+On 05/20/2016 03:01 PM, Owen Synge wrote:
+> On 05/12/2016 03:06 PM, Sage Weil wrote:
+>> On Mon, 11 Apr 2016, Owen Synge wrote:
+>>> On 04/08/2016 10:57 PM, Owen Synge wrote:
+>>>> On 04/07/2016 05:43 PM, Sage Weil wrote:
+>>>>> On Thu, 7 Apr 2016, Owen Synge wrote:
+>>>>>> On 04/07/2016 04:03 PM, Sage Weil wrote:
+>>>>>>> On Thu, 7 Apr 2016, Owen Synge wrote:
+>>>>>>>> Hi Sage,
+>>>>>>>>
+>>>>>>>> On 04/07/2016 02:26 PM, Sage Weil wrote:
+>>>>>>>>> Hi Owen,
+>>>>>>>>>
+>>>>>>>>> I never really liked ceph-create-keys either, but it simplifi=
+ed the=20
+>>>>>>>>> deployment process. =20
+>>>>>>>>
+>>>>>>>> I would propose we do this in two stages.
+>>>>>>>>
+>>>>>>>> (A) Remove calling the command from the init scripts as a side=
+ effect of
+>>>>>>>> starting the mon.
+>>>>>>>>
+>>>>>>>> This allows us to get most of the issues solved.
+>>>>>>>>
+>>>>>>>> (B) Remove the command.
+>>>>>>>>
+>>>>>>>> This is the long term goal, which is not as urgent in my opini=
+on but
+>>>>>>>> others may disagree.
+>>>>>>>
+>>>>>>> Works for me.  We just need to change ceph-deploy and get the o=
+ther=20
+>>>>>>> install/deploy tool folks on board before A.
+>>>>>>
+>>>>>> Are you intending to get this into Jewel?
+>>>>>>
+>>>>>> I had assumed this would only be done on master, and only come i=
+nto the
+>>>>>> next release.
+>>>>>
+>>>>> Yeah, too late for jewel.
+>>>>>
+>>>>>> As a change to master I felt that we could just do (A) as soon a=
+s
+>>>>>> ceph-deploy works without the mon boot up scripts calling
+>>>>>> ceph-create-keys, ideally without having  ceph-create-keys in
+>>>>>> ceph-deploy's process.
+>>>>>>
+>>>>>> We can then file bugs as needed against other install processes =
+that
+>>>>>> depend on ceph-create-keys, and they can test against master.
+>>>>>
+>>>>> That works for me.
+>>>>>
+>>>>> sage
+>>>>
+>>>> Great,
+>>>>
+>>>> I have a fix, that is tested and working for ceph-deploy without
+>>>> depending upon ceph-create-keys based upon a rewrite of the method
+>>>>
+>>>>   ceph-deploy gatherkeys mon-node-01 mon-node-02 mon-node-03
+>>>>
+>>>> Works nicely for the old and new methods, and seems to have little
+>>>> impact apart from no new keys are wrote to disk on the mon nodes. =
+OSD's
+>>>> and rgw can be deployed without change, (I haven=E2=80=99t tested =
+mds)
+>>>>
+>>>> Previous behavior with the admin keys being deployed can be achiev=
+ed
+>>>> simply by executing:
+>>>>
+>>>>   ceph-deploy admin mon-node-01 mon-node-02 mon-node-03
+>>>>
+>>>> If we definitely what to enforce the admin code being persisted on=
+ all
+>>>> mon nodes can be changed later, but I think its cleaner if we do n=
+ot.
+>>>>
+>>>> I will submit a PR on Monday.
 >>>
->>> On Mon, May 23, 2016 at 8:32 AM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>> Jason,
->>>>
->>>> Do you prefer pull requests to be rebased on top of the latest master
->>>> or should I keep it where I started the development?
->>>>
->>>> Thanks,
->>>> V.
->>>>
->>>> On Mon, May 16, 2016 at 8:48 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>>>> On Thu, May 12, 2016 at 10:45 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>>>> Jason,
->>>>>>
->>>>>> Do you have any opinion regarding deleting images that are in a
->>>>>> consistency group?
->>>>>>
->>>>>> Should we delete them as well as the references in the consistency
->>>>>> group they belong to or should we prohibit deleting images that are in
->>>>>> a consistency group?
->>>>>>
->>>>>> V.
->>>>>>
->>>>>
->>>>> Right now, if an image has a snapshot we required you to remove all
->>>>> snapshots before removing the image.  Along those lines, if an image
->>>>> is in a consistency group and the consistency group has snapshots, the
->>>>> user wouldn't be able to remove the image since it has snapshots nor
->>>>> should the user be able to remove the snapshots associated with the
->>>>> consistency group. In this case, the user would be forced to
->>>>> dissociate the image from the group before attempting to delete it.
->>>>> Therefore, just to keep the actions consistent, you might as well
->>>>> force the user to dissociate an image from the consistency group even
->>>>> if the image doesn't have snapshots.
->>>>>
->>>>>
->>>>> --
->>>>> Jason
+>>> ceph-deploy bug raised:
+>>>
+>>> http://tracker.ceph.com/issues/15451
+>>>
+>>> PR submitted:
+>>>
+>>> https://github.com/ceph/ceph-deploy/pull/393
 >>
+>> Hey Owen-
 >>
+>> Now that jewel is out, now would be a good time to make this change.=
+  The=20
+>> ceph-deploy pr looks basically ready to go, minus a doc piece and a =
+run=20
+>> through the ceph-deploy suite.  Yuri can probably handle the=20
+>> latter.
 >>
->> --
->> Jason
+>> Then we can do the ceph.git changes to kill the ceph-create-keys tas=
+k...
+>=20
+> Dear Sage,
+>=20
+> Sorry for the delay, I had a big pile of downstream work and test sui=
+te
+> development to do for my salt work, I have now added some documentati=
+on.
+>=20
+> I hope Yuri can do the latter as I really dont know "the ceph-deploy =
+suite".
+
+Great news ceph-deploy master now has the PR merged in so that
+ceph-deploy can now work without any magic involved with ceph-create-ke=
+ys.
+
+I will now make a patch to ceph proper to remove ceph-create-keys from
+the init scripts. Hopefully this will move things forward and we can ge=
+t
+this patch merged relatively quickly.
+
+Please let me know if I am doing anything wrong.
+
+Best regards
+
+Owen
 
 
-
--- 
-Jason
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
