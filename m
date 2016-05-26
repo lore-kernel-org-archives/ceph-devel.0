@@ -1,150 +1,217 @@
-From: Shehbaz Jaffer <shehbazjaffer007@gmail.com>
-Subject: Re: SMR Benchmarking Results
-Date: Thu, 26 May 2016 13:28:14 -0400
-Message-ID: <CAPLK-i9=r0hb=N=+OaVft1gCbrd5s=7-gyuGdg7w6ocEN_wDBA@mail.gmail.com>
-References: <CAPLK-i8DKcHtNuv5T1jua=5sp3Fxxb+LwdTdUSpvxqRNj7AMhA@mail.gmail.com>
-	<alpine.DEB.2.11.1605260831190.6221@cpach.fuggernut.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Severe performance degradation with jewel rbd image
+Date: Thu, 26 May 2016 17:47:34 +0000
+Message-ID: <BL2PR02MB2115D73ED758ADC9C52729A6F4410@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB2115AA33422B53D2C0B65E7AF4400@BL2PR02MB2115.namprd02.prod.outlook.com>
+	<CA+aFP1B_+TqDLNzxpvNYCz_3-Wsc4HAHUtKLzoJ+xUvqNHE0NQ@mail.gmail.com>
+	<BL2PR02MB21158B4F676CFDF982E52704F4400@BL2PR02MB2115.namprd02.prod.outlook.com>
+	<CA+aFP1DsqsTxgy4cXqJSRADqOYa2QsA8UUVTNUuA2__GHm0BFw@mail.gmail.com>
+	<BL2PR02MB21154CCDABC8037F9D63DA7AF4410@BL2PR02MB2115.namprd02.prod.outlook.com>
+	<CA+aFP1DapnzYpBDowdTjMVfrUcBSQy0tvYOEDM7QJJSy-kmPuw@mail.gmail.com>
+	<BL2PR02MB2115791B5D2A2D163F7A2AEFF4410@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <CA+aFP1DdPYWhRCeJ2buc7Gsz+gmti2BA4=7qoQHWP_Zi1_KyNQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:33551 "EHLO
-	mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754597AbcEZR2Q (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2016 13:28:16 -0400
-Received: by mail-yw0-f179.google.com with SMTP id h19so83276220ywc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 26 May 2016 10:28:15 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1605260831190.6221@cpach.fuggernut.com>
+Received: from mail-by2on0080.outbound.protection.outlook.com ([207.46.100.80]:15336
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750727AbcEZRri (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 May 2016 13:47:38 -0400
+In-Reply-To: <CA+aFP1DdPYWhRCeJ2buc7Gsz+gmti2BA4=7qoQHWP_Zi1_KyNQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Allen Samuels <allen.samuels@sandisk.com>, ceph-devel@vger.kernel.org
+To: "dillaman@redhat.com" <dillaman@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage,
-
-> It seems like for this to be an apples-apples comparison, the dd test
-> should be writing 256MB extents (in 1mb writes) at random offsets on the
-> disk, as compared to the ZBC workload that opens zones and writes
-> them to the proper zone offsets.
-
-dd also writes sequentally to the disk. I can see specific zones being
-filled when I issue a dd command with "seek" parameter. Recall from
-previous mail, the conventional zone (random read write portion of the
-disk) is located at the start of the disk. in order to make sure dd
-was writing to shingled area, I seek to specific shingled zone of disk
-and perform writes. I can see specific zones being filled sequentially
-with zbc_report_zones command.
-
-However unlike zbc_open command, where zone gets opened explicitly -
-for dd command, the zone gets opened implicitly - and I think this
-might be causing some form of performance inefficiency. I dont know if
-it is relevant, but when I issue zbc_write, I can hear the disk head
-making a distinctive noise as compared to normal dd command. A fair
-understanding of implicit and explicit writes should help us
-understand why we are getting a performance drop.
-
-> I am thinking that since the target use case for these drives is object
-> storage, we need to come up with a workload that reflects what we expect
-> to see there.  I'm thinking something like:
->
->  - 99% write, 1% random delete (or something similarly skewed)
->  - mostly large (4mb) objects, with a few small ones mixed in
->  - occasional 'pg migration' events, where ~1% of all objects get deleted.
-
-Thanks, I'll try to design workloads based on the above description.
-
-> I think we should check with our friends at Seagate and ask how this
-> really works.  I don't really understand why there should be a limit to
-> the number open zones at all... it seems like there should just be a
-> position/offset for each zone, and as long as we write to it, all should
-> be well...
-
-Sure, I will reach out to them.
-
-Thanks,
-Shehbaz
-
-On Thu, May 26, 2016 at 8:40 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Thu, 26 May 2016, Shehbaz Jaffer wrote:
->> Hi Sage,
->>
->> I have been working on benchmarking SMR Drives using libzbc. It
->> appears that issuing ZBC commands for zone aware host is more
->> inefficient as compared to normal copy operations using 'dd' command.
->>
->> I created a 256 MB file and placed it in memory (so that we do not
->> have data fetch overheads). I copy this file repeatedly on a Host
->> Aware SMR drive in 2 scenarios :
->>
->> a) dd - I use dumb dd that takes 1MB chunks of file and keeps copying
->> the file to SMR drive for <writeSize> bytes. Note that dd does not
->> take the zones into consideration.
->>
->> b) SMR_aware_copy - This copy takes file chunks 1MB in size, but
->> issues ZBC commands to open each zone, write 256 MB data to the zone,
->> close the zone, and then move to another zone till <writeSize> bytes
->> have been written.
->
-> It seems like for this to be an apples-apples comparison, the dd test
-> should be writing 256MB extents (in 1mb writes) at random offsets on the
-> disk, as compared to the ZBC workload that opens zones and writes
-> them to the proper zone offsets.
->
->> performance results for 1GB, 10GB write sizes are 5x slower with "zone
->> aware" writing, as compared to normal dd writing:
->>
->> writeSize (in GB)     dd time (in min:sec)     smr_aware_copy (in min:sec)
->> 1 GB                              0:7                                0:34
->> 10 GB                            1:11                              6:41
->> 50 GB                            5:51                               NA
->> 100 GB                          11:42                             NA
->>
->> (all writes were followed by sync command)
->>
->> I was trying to see if there is an internal cache of some sort in the
->> Host Aware SMR drive, which probably serializes all writes up to
->> certain extent for dd command, but the time for writes using the dd
->> command for up to 100GB follow a linear pattern. I will try to see if
->> we hit a bottleneck with dd for larger file sizes or unaligned writes.
->>
->> Followup questions:
->> --------------------------
->>
->> a) I think we should have some workload traces or patterns so that we
->> can benchmark SMR drives and make allocator more SMR friendly. In
->> particular -
->> i) size of files,
->> ii) alignment of files
->> iii) % read / write/ delete workloads
->> iv) degree of parallelism in writing.
->
-> I am thinking that since the target use case for these drives is object
-> storage, we need to come up with a workload that reflects what we expect
-> to see there.  I'm thinking something like:
->
->  - 99% write, 1% random delete (or something similarly skewed)
->  - mostly large (4mb) objects, with a few small ones mixed in
->  - occasional 'pg migration' events, where ~1% of all objects get deleted.
->
->> b) SMR Drive has a notion of parallel writes - i.e. multiple zones can
->> be kept open and written to simultaneously. I do not think there are
->> multiple heads involved but internally there is some form of
->> "efficient parallel write to zone" mechanism in SMR. I am thinking
->> about this because when we query SMR drive information, it shows that
->> most effieicnt number of zones can be parallelly kept open = 128 .
->> Maybe this is something that we can take advantage of?
->
-> I think we should check with our friends at Seagate and ask how this
-> really works.  I don't really understand why there should be a limit to
-> the number open zones at all... it seems like there should just be a
-> position/offset for each zone, and as long as we write to it, all should
-> be well...
->
-> sage
-
-
-
--- 
-Shehbaz Jaffer
-First Year Graduate Student
-Sir Edward S Rogers Sr Department of Electrical and Computer Engineering
-University of Toronto
+VGhhbmtzIEphc29uICwgaXQgaGVscHMgIQ0KT25lIHF1ZXN0aW9uICwgaWYgSSBkaXNhYmxlIGV4
+Y2x1c2l2ZSBsb2NrIChhbmQgdGh1cyBvdGhlciBmZWF0dXJlcykgZHVyaW5nIGNyZWF0aW9uIGNh
+biBJIGVuYWJsZSBpdCBvbiB0aGUgc2FtZSBpbWFnZSBpbiBmdXR1cmUgaWYgbmVlZGVkIHdpdGhv
+dXQgYW55IGRpc3J1cHRpb24gPw0KDQpSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwg
+TWVzc2FnZS0tLS0tDQpGcm9tOiBKYXNvbiBEaWxsYW1hbiBbbWFpbHRvOmpkaWxsYW1hQHJlZGhh
+dC5jb21dIA0KU2VudDogVGh1cnNkYXksIE1heSAyNiwgMjAxNiA2OjI5IEFNDQpUbzogU29tbmF0
+aCBSb3kNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IFNldmVy
+ZSBwZXJmb3JtYW5jZSBkZWdyYWRhdGlvbiB3aXRoIGpld2VsIHJiZCBpbWFnZQ0KDQpJIGNyZWF0
+ZSBhIHRpY2tldCBbMV0gYSB3aGlsZSBhZ28gdG8gaW1wcm92ZSB0aGUgZG9jdW1lbnRhdGlvbiBv
+ZiBSQkQgaW1hZ2UgZmVhdHVyZXMuICBUaGUgdGlja2V0IGlzIHN0aWxsIG9wZW4gYnV0IEkganVz
+dCBhZGRlZCBzb21lIHZlcmJpYWdlIGFzIGEgY29tbWVudCB0byB0aGUgdGlja2V0IGluIHRoZSBt
+ZWFudGltZS4NCg0KWzFdIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xNTAwMA0KDQpP
+biBUaHUsIE1heSAyNiwgMjAxNiBhdCAxMjoxOSBBTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95
+QHNhbmRpc2suY29tPiB3cm90ZToNCj4gVGhhbmtzIEphc29uICENCj4gTXkgYmFkLCBJIHRob3Vn
+aHQgZXhjbHVzaXZlIGxvY2sgaXMgdG8gbWFpbnRhaW4gdGhlIGNvbnNpc3RlbmN5Lg0KPiBJIHRo
+aW5rIHRoZSBmZWF0dXJlcyBsaWtlIG9iamVjdG1hcCAsIGZhc3QtZGlmZiAsIGRlZXAtZmxhdHRl
+biwgam91cm5hbGluZyBjb3VsZCBub3QgYmUgZW5hYmxlZCBpZiBJIGRpc2FibGUgZXhjbHVzaXZl
+IGxvY2sgPw0KPiBDb3VsZCB5b3UgcGxlYXNlIGdpdmUgYSBvbmUgbGluZXIgb3IgcG9pbnQgbWUg
+dG8gdGhlIGRvYyB3aGVyZSBJIGNhbiBmaW5kIHdoYXQgdGhlIGZlYXR1cmVzIGxpa2Ugb2JqZWN0
+bWFwICwgZmFzdC1kaWZmICwgZGVlcC1mbGF0dGVuIGRvZXMgPw0KPg0KPiBUaGFua3MgJiBSZWdh
+cmRzDQo+IFNvbW5hdGgNCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTog
+SmFzb24gRGlsbGFtYW4gW21haWx0bzpqZGlsbGFtYUByZWRoYXQuY29tXQ0KPiBTZW50OiBXZWRu
+ZXNkYXksIE1heSAyNSwgMjAxNiA4OjUzIFBNDQo+IFRvOiBTb21uYXRoIFJveQ0KPiBDYzogY2Vw
+aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IFNldmVyZSBwZXJmb3JtYW5j
+ZSBkZWdyYWRhdGlvbiB3aXRoIGpld2VsIHJiZCBpbWFnZQ0KPg0KPiBGb3IgbXVsdGktY2xpZW50
+LCBzaW5nbGUtaW1hZ2UsIHlvdSBzaG91bGQgYmUgdXNpbmcgdGhlICItLWltYWdlLXNoYXJlZCIg
+b3B0aW9uIHdoZW4gY3JlYXRpbmcgdGhlIGltYWdlIChvciBqdXN0IGRpc2FibGUgZXhjbHVzaXZl
+LWxvY2sgYWZ0ZXIgdGhlIGZhY3QpIHNpbmNlIHRoZSBleHBlY3RlZCB1c2UgY2FzZSBvZiBleGNs
+dXNpdmUtbG9jayBpcyBzaW5nbGUgY2xpZW50LCBzaW5nbGUgaW1hZ2UgKGUuZy4gc2luZ2xlIFFF
+TVUgcHJvY2VzcyB0aGF0IGNhbiBsaXZlLW1pZ3JhdGUgdG8gYSBuZXcgaG9zdCBidXQgYm90aCBo
+b3N0cyB3b24ndCBiZSB3cml0aW5nIGNvbmN1cnJlbnRseSkuDQo+DQo+IFJlZ2FyZGxlc3Mgb2Yg
+d2hldGhlciBvciBub3QgeW91IHVzZSBleGNsdXNpdmUtbG9jayBvciBub3QsIHdoZW4geW91IGhh
+dmUgbXVsdGlwbGUgY2xpZW50cyBjb25jdXJyZW50bHkgd3JpdGluZyB0byB0aGUgc2FtZSBpbWFn
+ZSwgdGhlIG5lY2Vzc2FyeSBjb29yZGluYXRpb24gdG8gcHJvdmlkZSBjb25zaXN0ZW5jeSBuZWVk
+cyB0byBiZSBwcm92aWRlZCBhdCB0aGUgYXBwbGljYXRpb24gbGF5ZXIgKGkuZS4gdXNlIGEgY2x1
+c3RlcmVkIGZpbGVzeXN0ZW0gb24gdG9wIG9mIGEgc2luZ2xlIFJCRCBpbWFnZSB3aGVuIGJlaW5n
+IG1hbmlwdWxhdGVkIGJ5IG11bHRpcGxlIGNsaWVudHMgY29uY3VycmVudGx5KS4NCj4NCj4gT24g
+V2VkLCBNYXkgMjUsIDIwMTYgYXQgMTE6MzkgUE0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBz
+YW5kaXNrLmNvbT4gd3JvdGU6DQo+PiBKYXNvbiwNCj4+IE15IHVzZSBjYXNlIGlzIHRvIGZpbmQg
+b3V0IGhvdyBtdWNoIHdyaXRlIHBlcmZvcm1hbmNlIEkgY2FuIGV4dHJhY3Qgb3V0IG9mIGEgc2lu
+Z2xlIHJiZCBpbWFnZS4NCj4+IEkgZG9uJ3Qgd2FudCB0byB1c2UgIC0taW1hZ2Utc2hhcmVkIGFz
+IHdyaXRlcyB3aWxsIGJlIGluY29uc2lzdGVudCANCj4+IHRoZW4gKD8pIEl0IHNlZW1zIHJ1bm5p
+bmcgYSBzaW5nbGUgZmlvIGpvYiB3aXRoIGhpZ2ggUUQgaXMgdGhlIG9ubHkgb3B0aW9uID8NCj4+
+IEFsc28sIEkgYmVsaWV2ZSB0aGUgZ29hbCBzaG91bGQgYmUgYXQgbGVhc3QgZ2V0dGluZyB0aGUg
+c2ltaWxhciBhZ2dyZWdhdGVkIHRocm91Z2hwdXQgbGlrZSBzaW5nbGUgY2xpZW50L3NpbmdsZSBp
+bWFnZSBpbiBjYXNlIG9mIG11bHRpIGNsaWVudC9zaW5nbGUgaW1hZ2UgKGluZGl2aWR1YWwgY2xp
+ZW50IHdpbGwgZ2V0IGxlc3MgYW5kIHRoYXQncyBmaW5lKS4NCj4+IExldCBtZSBrbm93IGlmIEkg
+YW0gbWlzc2luZyBhbnl0aGluZy4NCj4+DQo+PiBUaGFua3MgJiBSZWdhcmRzDQo+PiBTb21uYXRo
+DQo+Pg0KPj4NCj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+PiBGcm9tOiBKYXNvbiBE
+aWxsYW1hbiBbbWFpbHRvOmpkaWxsYW1hQHJlZGhhdC5jb21dDQo+PiBTZW50OiBXZWRuZXNkYXks
+IE1heSAyNSwgMjAxNiA1OjUxIFBNDQo+PiBUbzogU29tbmF0aCBSb3kNCj4+IENjOiBjZXBoLWRl
+dmVsQHZnZXIua2VybmVsLm9yZw0KPj4gU3ViamVjdDogUmU6IFNldmVyZSBwZXJmb3JtYW5jZSBk
+ZWdyYWRhdGlvbiB3aXRoIGpld2VsIHJiZCBpbWFnZQ0KPj4NCj4+IEFyZSB5b3UgYXR0ZW1wdGlu
+ZyB0byB0ZXN0IGEgcGFydGljdWxhciB1c2UtY2FzZSB3aGVyZSB5b3Ugd291bGQgaGF2ZSBtdWx0
+aXBsZSBjbGllbnRzIGNvbm5lY3RlZCB0byBhIHNpbmdsZSBSQkQgaW1hZ2U/ICBUaGUgcmJkIENM
+SSBoYXMgYSAiLS1pbWFnZS1zaGFyZWQiIG9wdGlvbiB3aGVuIGNyZWF0aW5nL2Nsb25pbmcgaW1h
+Z2VzIGFzIGEgc2hvcnRjdXQgdG8gZWFzaWx5IGRpc2FibGUgdGhlIGV4Y2x1c2l2ZSBsb2NrLCBv
+YmplY3QtbWFwLCBmYXN0LWRpZmYsIGFuZCBqb3VybmFsaW5nIGZlYXR1cmVzIGZvciBzdWNoIHNp
+dHVhdGlvbnMuIFlvdSBjb3VsZCBhbHNvIHNwZWNpZnkgYSBkaWZmZXJlbnQgYHJiZG5hbWVgIHBl
+ciBqb2IgdG8gc2ltdWxhdGUgbXVsdGlwbGUgY2xpZW50cyBhY2Nlc3NpbmcgbXVsdGlwbGUgaW1h
+Z2VzIChpbnN0ZWFkIG9mIG11bHRpcGxlIGNsaWVudHMgc2hhcmluZyB0aGUgc2FtZSBpbWFnZSku
+DQo+Pg0KPj4gSSBoYXZlIHRvIGJlIGhvbmVzdCwgSSBhbSBhY3R1YWxseSBwcmV0dHkgaW1wcmVz
+c2VkIGJ5IHlvdXIgOEsgSU9QUyB3aGVuIHlvdSBoYXZlIG11bHRpcGxlIGNsaWVudHMgZmlnaHRp
+bmcgb3ZlciB0aGUgZXhjbHVzaXZlIGxvY2sgc2luY2UgYWNxdWlyaW5nIHRoZSBsb2NrIHJlcXVp
+cmVzIGludGVyLWNsaWVudCBjb29wZXJhdGl2ZSBjb29yZGluYXRpb24gdG8gcmVxdWVzdC9yZWxl
+YXNlL2FjcXVpcmUgdGhlIGxvY2sgZnJvbSB0aGUgY3VycmVudCBvd25lciBhbmQgYW55IGNsaWVu
+dCB3aXRob3V0IHRoZSBsb2NrIGhhcyBhbGwgd3JpdGVzIGJsb2NrZWQuDQo+Pg0KPj4NCj4+IE9u
+IFdlZCwgTWF5IDI1LCAyMDE2IGF0IDc6MDggUE0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBz
+YW5kaXNrLmNvbT4gd3JvdGU6DQo+Pj4gSGkgSmFzb24sDQo+Pj4gWWVzLCBJIGFtIHJ1bm5pbmcg
+b24gc2luZ2xlIGltYWdlIGJ1dCB3aXRoIG11bHRpcGxlIGZpbyBqb2JzICh3aXRoIG51bWpvYnMg
+PSAxMCBpbiB0aGUgZmlvIHBhcmFtZXRlcikgLiBJIGV4cGVjdGVkIHRoYXQgdGhpcyBleGNsdXNp
+dmUgbG9jayBpcyBsb2NraW5nIGJldHdlZW4gdGhlIGpvYnMgYW5kIHRoYXQncyB3aHkgSSBoYXZl
+IHBvc3RlZCB0aGUgc2luZ2xlIGpvYiByZXN1bHQuIFNpbmdsZSBqb2IgcmVzdWx0IGlzICpub3Qg
+ZGVncmFkaW5nKi4NCj4+PiBCdXQsIHdlIG5lZWQgbnVtam9iIGFuZCBRRCBjb21iaW5hdGlvbiB0
+byBleHRyYWN0IG1vc3QgcGVyZm9ybWFuY2UgZnJvbSBhbiBpbWFnZSB3aXRoIGZpby1yYmQuIEEg
+c2luZ2xlIGxpYnJiZCBpbnN0YW5jZSBwZXJmb3JtYW5jZSBzZWVtcyB0byBiZSBzdHVjayBhdCA0
+MEsgYW5kIHdlIGNhbid0IHNjYWxlIHRoaXMgaW1hZ2UgdXAgd2l0aG91dCBydW5uaW5nIG11bHRp
+cGxlIGxpYnJiZCBpbnN0YW5jZXMgb24gdGhpcyBpbiBwYXJhbGxlbC4NCj4+PiAxNlggcGVyZm9y
+bWFuY2UgZGVncmFkYXRpb24gYmVjYXVzZSBvZiB0aGlzIGxvY2sgc2VlbXMgdmVyeSBkZXN0cnVj
+dGl2ZS4NCj4+Pg0KPj4+IFRoYW5rcyAmIFJlZ2FyZHMNCj4+PiBTb21uYXRoDQo+Pj4NCj4+PiAt
+LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4+IEZyb206IEphc29uIERpbGxhbWFuIFttYWls
+dG86amRpbGxhbWFAcmVkaGF0LmNvbV0NCj4+PiBTZW50OiBXZWRuZXNkYXksIE1heSAyNSwgMjAx
+NiAzOjQ3IFBNDQo+Pj4gVG86IFNvbW5hdGggUm95DQo+Pj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5r
+ZXJuZWwub3JnDQo+Pj4gU3ViamVjdDogUmU6IFNldmVyZSBwZXJmb3JtYW5jZSBkZWdyYWRhdGlv
+biB3aXRoIGpld2VsIHJiZCBpbWFnZQ0KPj4+DQo+Pj4gSnVzdCB0byBlbGltaW5hdGUgdGhlIG1v
+c3Qgc3RyYWlnaHRmb3J3YXJkIGV4cGxhbmF0aW9uLCBhcmUgeW91IHJ1bm5pbmcgbXVsdGlwbGUg
+ZmlvIGpvYnMgYWdhaW5zdCB0aGUgc2FtZSBpbWFnZSBjb25jdXJyZW50bHk/ICBJZiB0aGUgZXhj
+bHVzaXZlIGxvY2sgaGFkIHRvIHBpbmctcG9uZyBiYWNrLWFuZC1mb3J0aCBiZXR3ZWVuIGNsaWVu
+dHMsIHRoYXQgd291bGQgY2VydGFpbmx5IGV4cGxhaW4gdGhlIHNldmVyZSBwZXJmb3JtYW5jZSBw
+ZW5hbHR5Lg0KPj4+DQo+Pj4gT3RoZXJ3aXNlLCB0aGUgZXhjbHVzaXZlIGxvY2sgaXMgbm90IGlu
+IHRoZSBJTyBwYXRoIG9uY2UgdGhlIGNsaWVudCBoYXMgYWNxdWlyZWQgdGhlIGV4Y2x1c2l2ZSBs
+b2NrLiAgSWYgeW91IGFyZSBzZWVpbmcgYSBwZXJmb3JtYW5jZSBwZW5hbHR5IGZvciBhIHNpbmds
+ZS1jbGllbnQgc2NlbmFyaW8gd2l0aCBleGNsdXNpdmUgbG9jayBlbmFibGVkLCB0aGlzIGlzIHNv
+bWV0aGluZyB3ZSBoYXZlbid0IHNlZW4gYW5kIHdpbGwgaGF2ZSB0byBpbnZlc3RpZ2F0ZSBBU0FQ
+Lg0KPj4+DQo+Pj4gVGhhbmtzLA0KPj4+DQo+Pj4gT24gV2VkLCBNYXkgMjUsIDIwMTYgYXQgNDo0
+OCBQTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4+Pj4g
+SGkgTWFyay9Kb3NoLA0KPj4+PiBBcyBJIG1lbnRpb25lZCBpbiB0aGUgcGVyZm9ybWFuY2UgbWVl
+dGluZyB0b2RheSAsIGlmIHdlIGNyZWF0ZSByYmQgaW1hZ2Ugd2l0aCBkZWZhdWx0ICdyYmQgY3Jl
+YXRlJyBjb21tYW5kIGluIGpld2VsICwgdGhlIGluZGl2aWR1YWwgaW1hZ2UgcGVyZm9ybWFuY2Ug
+Zm9yIDRrIFJXIGlzIG5vdCBzY2FsaW5nIHVwIHdlbGwuIEJ1dCwgbXVsdGlwbGUgb2YgcmJkIGlt
+YWdlcyBydW5uaW5nIGluIHBhcmFsbGVsIGFnZ3JlZ2F0ZWQgdGhyb3VnaHB1dCBpcyBzY2FsaW5n
+Lg0KPj4+PiBGb3IgdGhlIHNhbWUgUUQgYW5kIG51bWpvYiBjb21iaW5hdGlvbiwgaW1hZ2UgY3Jl
+YXRlZCB3aXRoIGltYWdlIGZvcm1hdCAxIChhbmQgd2l0aCBoYW1tZXIgbGlrZSByYmRfZGVmYXVs
+dF9mZWF0dXJlcyA9IDMpIGlzIHByb2R1Y2luZyAqMTZYKiBtb3JlIHBlcmZvcm1hbmNlLiBJIGRp
+ZCBzb21lIGRpZ2dpbmcgYW5kIGhlcmUgaXMgbXkgZmluZGluZ3MuDQo+Pj4+DQo+Pj4+IFNldHVw
+Og0KPj4+PiAtLS0tLS0tLQ0KPj4+Pg0KPj4+PiAzMiBvc2RzIChhbGwgU1NEKSBvdmVyIDQgbm9k
+ZXMuIFBvb2wgc2l6ZSA9IDIgLCBtaW5fc2l6ZSA9IDEuDQo+Pj4+DQo+Pj4+IHJvb3RAc3Rvcm1l
+YXAtMTp+IyBjZXBoIC1zDQo+Pj4+ICAgICBjbHVzdGVyIGRiMGZlYmYxLWQyYjAtNGY4ZC04ZjIw
+LTQzNzMxYzEzNDc2Mw0KPj4+PiAgICAgIGhlYWx0aCBIRUFMVEhfV0FSTg0KPj4+PiAgICAgICAg
+ICAgICBub3NjcnViLG5vZGVlcC1zY3J1Yixzb3J0Yml0d2lzZSBmbGFnKHMpIHNldA0KPj4+PiAg
+ICAgIG1vbm1hcCBlMTogMSBtb25zIGF0IHthPTEwLjYwLjE5NC4xMDo2Nzg5LzB9DQo+Pj4+ICAg
+ICAgICAgICAgIGVsZWN0aW9uIGVwb2NoIDUsIHF1b3J1bSAwIGENCj4+Pj4gICAgICBvc2RtYXAg
+ZTEzOTogMzIgb3NkczogMzIgdXAsIDMyIGluDQo+Pj4+ICAgICAgICAgICAgIGZsYWdzIG5vc2Ny
+dWIsbm9kZWVwLXNjcnViLHNvcnRiaXR3aXNlDQo+Pj4+ICAgICAgIHBnbWFwIHYyMDUzMjogMjUw
+MCBwZ3MsIDEgcG9vbHMsIDc0MjEgR0IgZGF0YSwgMTg1NSBrb2JqZWN0cw0KPj4+PiAgICAgICAg
+ICAgICAxNDg1MCBHQiB1c2VkLCAyMDggVEIgLyAyMjMgVEIgYXZhaWwNCj4+Pj4gICAgICAgICAg
+ICAgICAgIDI1MDAgYWN0aXZlK2NsZWFuDQo+Pj4+DQo+Pj4+IElPIHByb2ZpbGUgOiBGaW8gcmJk
+IHdpdGggUUQgMTI4IGFuZCBudW1qb2IgPSAxMCByYmQgY2FjaGUgaXMgDQo+Pj4+IGRpc2FibGVk
+Lg0KPj4+Pg0KPj4+PiBSZXN1bHQ6DQo+Pj4+IC0tLS0tLS0tDQo+Pj4+IHJvb3RAc3Rvcm1lYXAt
+MTp+IyByYmQgaW5mbyByZWNvdmVyeV90ZXN0L3JiZF9kZWdyYWRhdGlvbiByYmQgaW1hZ2UNCj4+
+Pj4gJ3JiZF9kZWdyYWRhdGlvbic6DQo+Pj4+ICAgICAgICAgc2l6ZSAxOTUzIEdCIGluIDUwMDAw
+MCBvYmplY3RzDQo+Pj4+ICAgICAgICAgb3JkZXIgMjIgKDQwOTYga0Igb2JqZWN0cykNCj4+Pj4g
+ICAgICAgICBibG9ja19uYW1lX3ByZWZpeDogcmIuMC41ZjVmLjZiOGI0NTY3DQo+Pj4+ICAgICAg
+ICAgZm9ybWF0OiAxDQo+Pj4+DQo+Pj4+IE9uIHRoZSBhYm92ZSBpbWFnZSB3aXRoIGZvcm1hdCAx
+IGl0IGlzIGdpdmluZyAqfjEwMksgaW9wcyoNCj4+Pj4NCj4+Pj4gcm9vdEBzdG9ybWVhcC0xOn4j
+IHJiZCBpbmZvDQo+Pj4+IHJlY292ZXJ5X3Rlc3QvcmJkX2RlZ3JhZGF0aW9uX3dpdGhfaGFtbWVy
+X2ZlYXR1cmVzDQo+Pj4+IHJiZCBpbWFnZSAncmJkX2RlZ3JhZGF0aW9uX3dpdGhfaGFtbWVyX2Zl
+YXR1cmVzJzoNCj4+Pj4gICAgICAgICBzaXplIDE5NSBHQiBpbiA1MDAwMCBvYmplY3RzDQo+Pj4+
+ICAgICAgICAgb3JkZXIgMjIgKDQwOTYga0Igb2JqZWN0cykNCj4+Pj4gICAgICAgICBibG9ja19u
+YW1lX3ByZWZpeDogcmJkX2RhdGEuNWY4ZDZiOGI0NTY3DQo+Pj4+ICAgICAgICAgZm9ybWF0OiAy
+DQo+Pj4+ICAgICAgICAgZmVhdHVyZXM6IGxheWVyaW5nDQo+Pj4+ICAgICAgICAgZmxhZ3M6DQo+
+Pj4+DQo+Pj4+IE9uIHRoZSBhYm92ZSBpbWFnZSB3aXRoIGhhbW1lciByYmQgZmVhdHVyZXMgb24g
+LCBpdCBpcyBnaXZpbmcgDQo+Pj4+ICp+MTA1Sw0KPj4+PiBpb3BzKg0KPj4+Pg0KPj4+PiByb290
+QHN0b3JtZWFwLTE6fiMgcmJkIGluZm8gcmVjb3ZlcnlfdGVzdC9yYmRfZGVncmFkYXRpb25fd2l0
+aF83DQo+Pj4+IHJiZCBpbWFnZSAncmJkX2RlZ3JhZGF0aW9uX3dpdGhfNyc6DQo+Pj4+ICAgICAg
+ICAgc2l6ZSAxOTUgR0IgaW4gNTAwMDAgb2JqZWN0cw0KPj4+PiAgICAgICAgIG9yZGVyIDIyICg0
+MDk2IGtCIG9iamVjdHMpDQo+Pj4+ICAgICAgICAgYmxvY2tfbmFtZV9wcmVmaXg6IHJiZF9kYXRh
+LjVmZDg2YjhiNDU2Nw0KPj4+PiAgICAgICAgIGZvcm1hdDogMg0KPj4+PiAgICAgICAgIGZlYXR1
+cmVzOiBsYXllcmluZywgZXhjbHVzaXZlLWxvY2sNCj4+Pj4gICAgICAgICBmbGFnczoNCj4+Pj4N
+Cj4+Pj4gT24gdGhlIGFib3ZlIGltYWdlIHdpdGggZmVhdHVyZSA3IChleGNsdXNpdmUgbG9jayBm
+ZWF0dXJlIG9uKSAsIGl0IA0KPj4+PiBpcyBnaXZpbmcgKn44SyBpb3BzKi4uLlNvLCA+MTJYIGRl
+Z3JhZGF0aW9uDQo+Pj4+DQo+Pj4+IFRyaWVkIHdpdGggc2luZ2xlIG51bWpvYiBhbmQgUUQgPSAx
+MjggLCBwZXJmb3JtYW5jZSBidW1wZWQgdXAgdGlsbCB+NDBLLi5GdXJ0aGVyIGluY3JlYXNpbmcg
+UUQgLCBwZXJmb3JtYW5jZSBpcyBub3QgZ29pbmcgdXAuDQo+Pj4+DQo+Pj4+DQo+Pj4+IHJvb3RA
+c3Rvcm1lYXAtMTp+IyByYmQgaW5mbyByZWNvdmVyeV90ZXN0L3JiZF9kZWdyYWRhdGlvbl93aXRo
+XzE1DQo+Pj4+IHJiZCBpbWFnZSAncmJkX2RlZ3JhZGF0aW9uX3dpdGhfMTUnOg0KPj4+PiAgICAg
+ICAgIHNpemUgMTk1IEdCIGluIDUwMDAwIG9iamVjdHMNCj4+Pj4gICAgICAgICBvcmRlciAyMiAo
+NDA5NiBrQiBvYmplY3RzKQ0KPj4+PiAgICAgICAgIGJsb2NrX25hbWVfcHJlZml4OiByYmRfZGF0
+YS41ZmFiNmI4YjQ1NjcNCj4+Pj4gICAgICAgICBmb3JtYXQ6IDINCj4+Pj4gICAgICAgICBmZWF0
+dXJlczogbGF5ZXJpbmcsIGV4Y2x1c2l2ZS1sb2NrLCBvYmplY3QtbWFwDQo+Pj4+ICAgICAgICAg
+ZmxhZ3M6DQo+Pj4+DQo+Pj4+IE9uIHRoZSBhYm92ZSBpbWFnZSB3aXRoIGZlYXR1cmUgMTUgKGV4
+Y2x1c2l2ZSBsb2NrLCBvYmplY3QgbWFwIA0KPj4+PiBmZWF0dXJlDQo+Pj4+IG9uKSAsIGl0IGlz
+IGdpdmluZyAqfjhLIGlvcHMqLi4uU28sID4xMlggZGVncmFkYXRpb24NCj4+Pj4NCj4+Pj4gVHJp
+ZWQgd2l0aCBzaW5nbGUgbnVtam9iIGFuZCBRRCA9IDEyOCAsIHBlcmZvcm1hbmNlIGJ1bXBlZCB1
+cCB0aWxsIH40MEsuLkZ1cnRoZXIgaW5jcmVhc2luZyBRRCAsIHBlcmZvcm1hbmNlIGlzIG5vdCBn
+b2luZyB1cC4NCj4+Pj4NCj4+Pj4NCj4+Pj4gcm9vdEBzdG9ybWVhcC0xOn4jIHJiZCBpbmZvIHJl
+Y292ZXJ5X3Rlc3QvY2VwaF9yZWNvdmVyeV9pbWdfMSByYmQgDQo+Pj4+IGltYWdlICdjZXBoX3Jl
+Y292ZXJ5X2ltZ18xJzoNCj4+Pj4gICAgICAgICBzaXplIDQ4ODIgR0IgaW4gMTI1MDAwMCBvYmpl
+Y3RzDQo+Pj4+ICAgICAgICAgb3JkZXIgMjIgKDQwOTYga0Igb2JqZWN0cykNCj4+Pj4gICAgICAg
+ICBibG9ja19uYW1lX3ByZWZpeDogcmJkX2RhdGEuMzcxYjZiOGI0NTY3DQo+Pj4+ICAgICAgICAg
+Zm9ybWF0OiAyDQo+Pj4+ICAgICAgICAgZmVhdHVyZXM6IGxheWVyaW5nLCBleGNsdXNpdmUtbG9j
+aywgb2JqZWN0LW1hcCwgZmFzdC1kaWZmLCBkZWVwLWZsYXR0ZW4NCj4+Pj4gICAgICAgICBmbGFn
+czoNCj4+Pj4NCj4+Pj4gT24gdGhlIGFib3ZlIGltYWdlIHdpdGggZmVhdHVyZSA2MSAoSmV3ZWwg
+ZGVmYXVsdCkgLCBpdCBpcyBnaXZpbmcgDQo+Pj4+ICp+NksgaW9wcyouLi5TbywgKj4xNlgqIGRl
+Z3JhZGF0aW9uDQo+Pj4+DQo+Pj4+IFRyaWVkIHdpdGggc2luZ2xlIG51bWpvYiBhbmQgUUQgPSAx
+MjggLCBwZXJmb3JtYW5jZSBidW1wZWQgdXAgdGlsbCB+MzVLLi5GdXJ0aGVyIGluY3JlYXNpbmcg
+UUQgLCBwZXJmb3JtYW5jZSBpcyBub3QgZ29pbmcgdXAuDQo+Pj4+DQo+Pj4+IFN1bW1hcnkgOg0K
+Pj4+PiAtLS0tLS0tLS0tLS0NCj4+Pj4NCj4+Pj4gMS4gSXQgc2VlbXMgZXhjbHVzaXZlIGxvY2sg
+ZmVhdHVyZSBpcyBkZWdyYWRpbmcgcGVyZm9ybWFuY2UuDQo+Pj4+DQo+Pj4+IDIuIEl0IGlzIGRl
+Z3JhZGluZyBhIGJpdCBmdXJ0aGVyIG9uIGVuYWJsaW5nIGZhc3QtZGlmZiwgDQo+Pj4+IGRlZXAt
+ZmxhdHRlbg0KPj4+Pg0KPj4+Pg0KPj4+PiBMZXQgbWUga25vdyBpZiB5b3UgbmVlZCBtb3JlIGlu
+Zm9ybWF0aW9uIG9uIHRoaXMuDQo+Pj4+DQo+Pj4+IFRoYW5rcyAmIFJlZ2FyZHMNCj4+Pj4gU29t
+bmF0aA0KPj4+Pg0KPj4+Pg0KPj4+PiBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRh
+aW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9y
+IHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0
+aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwg
+eW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3Nh
+Z2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0
+aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJ
+ZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBu
+b3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkg
+aW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2Fn
+ZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2Fs
+bHkgc3RvcmVkIGNvcGllcykuDQo+Pj4+IC0tDQo+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
+cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPj4+PiBpbiB0
+aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIA0K
+Pj4+PiBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
+aW5mby5odG1sDQo+Pj4NCj4+Pg0KPj4+DQo+Pj4gLS0NCj4+PiBKYXNvbg0KPj4NCj4+DQo+PiAt
+LQ0KPj4gSmFzb24NCj4NCj4NCj4NCj4gLS0NCj4gSmFzb24NCg0KDQoNCi0tDQpKYXNvbg0K
