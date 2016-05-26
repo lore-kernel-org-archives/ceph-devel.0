@@ -1,274 +1,151 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Severe performance degradation with jewel rbd image
-Date: Thu, 26 May 2016 14:17:16 -0400
-Message-ID: <CA+aFP1BH-sJE1e8BsTwS3s9D-246dYQoBrhTtAtauJFRi+G5jw@mail.gmail.com>
-References: <BL2PR02MB2115AA33422B53D2C0B65E7AF4400@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1B_+TqDLNzxpvNYCz_3-Wsc4HAHUtKLzoJ+xUvqNHE0NQ@mail.gmail.com>
-	<BL2PR02MB21158B4F676CFDF982E52704F4400@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1DsqsTxgy4cXqJSRADqOYa2QsA8UUVTNUuA2__GHm0BFw@mail.gmail.com>
-	<BL2PR02MB21154CCDABC8037F9D63DA7AF4410@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1DapnzYpBDowdTjMVfrUcBSQy0tvYOEDM7QJJSy-kmPuw@mail.gmail.com>
-	<BL2PR02MB2115791B5D2A2D163F7A2AEFF4410@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1DdPYWhRCeJ2buc7Gsz+gmti2BA4=7qoQHWP_Zi1_KyNQ@mail.gmail.com>
-	<BL2PR02MB2115D73ED758ADC9C52729A6F4410@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CAN=+7FVX5WecZZ=2dj1vSeFC=WCBvJkO5Esi+UuTT+_2=aiX9A@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Sage Weil <sweil@redhat.com>
+Subject: [GIT PULL] Ceph updates for 4.7-rc1
+Date: Thu, 26 May 2016 14:18:03 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605261035390.6221@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:34834 "EHLO
-	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754298AbcEZSRR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2016 14:17:17 -0400
-Received: by mail-pa0-f41.google.com with SMTP id fy7so15411899pac.2
-        for <ceph-devel@vger.kernel.org>; Thu, 26 May 2016 11:17:17 -0700 (PDT)
-In-Reply-To: <CAN=+7FVX5WecZZ=2dj1vSeFC=WCBvJkO5Esi+UuTT+_2=aiX9A@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Correct -- by default exclusive lock, object map, fast-diff, and
-deep-flatten will be enabled starting with Jewel for all new images.
-The exclusive lock, object map, fast-diff, and deep-flatten features
-are to be used for single-client, single-image use-cases.  Only object
-map and fast-diff are in the IO path (fast-diff is an extension to the
-object map).
+Hi Linus,
 
-I agree with Haomai that we need to address the bottlenecks that are
-capping single-client performance to ~40K IOPS.  It would be great to
-eventually see an incoming message be able to be processed from the
-messenger all the way to the librbd AIO callback without unnecessary
-contexts switches, extra queuing, etc.
+Please pull the following Ceph updates from
 
-On Thu, May 26, 2016 at 2:02 PM, Samuel Just <sjust@redhat.com> wrote:
-> It should be noted that many users *will* have the lock enabled since
-> (iirc, Jason, correct me if I'm wrong), it's there to support some
-> important features and typical cloud users are 1 client/image users.
-> If you benchmark without it, it may skew your results.
-> -Sam
->
-> On Thu, May 26, 2016 at 10:47 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> Thanks Jason , it helps !
->> One question , if I disable exclusive lock (and thus other features) during creation can I enable it on the same image in future if needed without any disruption ?
->>
->> Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Jason Dillaman [mailto:jdillama@redhat.com]
->> Sent: Thursday, May 26, 2016 6:29 AM
->> To: Somnath Roy
->> Cc: ceph-devel@vger.kernel.org
->> Subject: Re: Severe performance degradation with jewel rbd image
->>
->> I create a ticket [1] a while ago to improve the documentation of RBD image features.  The ticket is still open but I just added some verbiage as a comment to the ticket in the meantime.
->>
->> [1] http://tracker.ceph.com/issues/15000
->>
->> On Thu, May 26, 2016 at 12:19 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->>> Thanks Jason !
->>> My bad, I thought exclusive lock is to maintain the consistency.
->>> I think the features like objectmap , fast-diff , deep-flatten, journaling could not be enabled if I disable exclusive lock ?
->>> Could you please give a one liner or point me to the doc where I can find what the features like objectmap , fast-diff , deep-flatten does ?
->>>
->>> Thanks & Regards
->>> Somnath
->>>
->>> -----Original Message-----
->>> From: Jason Dillaman [mailto:jdillama@redhat.com]
->>> Sent: Wednesday, May 25, 2016 8:53 PM
->>> To: Somnath Roy
->>> Cc: ceph-devel@vger.kernel.org
->>> Subject: Re: Severe performance degradation with jewel rbd image
->>>
->>> For multi-client, single-image, you should be using the "--image-shared" option when creating the image (or just disable exclusive-lock after the fact) since the expected use case of exclusive-lock is single client, single image (e.g. single QEMU process that can live-migrate to a new host but both hosts won't be writing concurrently).
->>>
->>> Regardless of whether or not you use exclusive-lock or not, when you have multiple clients concurrently writing to the same image, the necessary coordination to provide consistency needs to be provided at the application layer (i.e. use a clustered filesystem on top of a single RBD image when being manipulated by multiple clients concurrently).
->>>
->>> On Wed, May 25, 2016 at 11:39 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->>>> Jason,
->>>> My use case is to find out how much write performance I can extract out of a single rbd image.
->>>> I don't want to use  --image-shared as writes will be inconsistent
->>>> then (?) It seems running a single fio job with high QD is the only option ?
->>>> Also, I believe the goal should be at least getting the similar aggregated throughput like single client/single image in case of multi client/single image (individual client will get less and that's fine).
->>>> Let me know if I am missing anything.
->>>>
->>>> Thanks & Regards
->>>> Somnath
->>>>
->>>>
->>>> -----Original Message-----
->>>> From: Jason Dillaman [mailto:jdillama@redhat.com]
->>>> Sent: Wednesday, May 25, 2016 5:51 PM
->>>> To: Somnath Roy
->>>> Cc: ceph-devel@vger.kernel.org
->>>> Subject: Re: Severe performance degradation with jewel rbd image
->>>>
->>>> Are you attempting to test a particular use-case where you would have multiple clients connected to a single RBD image?  The rbd CLI has a "--image-shared" option when creating/cloning images as a shortcut to easily disable the exclusive lock, object-map, fast-diff, and journaling features for such situations. You could also specify a different `rbdname` per job to simulate multiple clients accessing multiple images (instead of multiple clients sharing the same image).
->>>>
->>>> I have to be honest, I am actually pretty impressed by your 8K IOPS when you have multiple clients fighting over the exclusive lock since acquiring the lock requires inter-client cooperative coordination to request/release/acquire the lock from the current owner and any client without the lock has all writes blocked.
->>>>
->>>>
->>>> On Wed, May 25, 2016 at 7:08 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->>>>> Hi Jason,
->>>>> Yes, I am running on single image but with multiple fio jobs (with numjobs = 10 in the fio parameter) . I expected that this exclusive lock is locking between the jobs and that's why I have posted the single job result. Single job result is *not degrading*.
->>>>> But, we need numjob and QD combination to extract most performance from an image with fio-rbd. A single librbd instance performance seems to be stuck at 40K and we can't scale this image up without running multiple librbd instances on this in parallel.
->>>>> 16X performance degradation because of this lock seems very destructive.
->>>>>
->>>>> Thanks & Regards
->>>>> Somnath
->>>>>
->>>>> -----Original Message-----
->>>>> From: Jason Dillaman [mailto:jdillama@redhat.com]
->>>>> Sent: Wednesday, May 25, 2016 3:47 PM
->>>>> To: Somnath Roy
->>>>> Cc: ceph-devel@vger.kernel.org
->>>>> Subject: Re: Severe performance degradation with jewel rbd image
->>>>>
->>>>> Just to eliminate the most straightforward explanation, are you running multiple fio jobs against the same image concurrently?  If the exclusive lock had to ping-pong back-and-forth between clients, that would certainly explain the severe performance penalty.
->>>>>
->>>>> Otherwise, the exclusive lock is not in the IO path once the client has acquired the exclusive lock.  If you are seeing a performance penalty for a single-client scenario with exclusive lock enabled, this is something we haven't seen and will have to investigate ASAP.
->>>>>
->>>>> Thanks,
->>>>>
->>>>> On Wed, May 25, 2016 at 4:48 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->>>>>> Hi Mark/Josh,
->>>>>> As I mentioned in the performance meeting today , if we create rbd image with default 'rbd create' command in jewel , the individual image performance for 4k RW is not scaling up well. But, multiple of rbd images running in parallel aggregated throughput is scaling.
->>>>>> For the same QD and numjob combination, image created with image format 1 (and with hammer like rbd_default_features = 3) is producing *16X* more performance. I did some digging and here is my findings.
->>>>>>
->>>>>> Setup:
->>>>>> --------
->>>>>>
->>>>>> 32 osds (all SSD) over 4 nodes. Pool size = 2 , min_size = 1.
->>>>>>
->>>>>> root@stormeap-1:~# ceph -s
->>>>>>     cluster db0febf1-d2b0-4f8d-8f20-43731c134763
->>>>>>      health HEALTH_WARN
->>>>>>             noscrub,nodeep-scrub,sortbitwise flag(s) set
->>>>>>      monmap e1: 1 mons at {a=10.60.194.10:6789/0}
->>>>>>             election epoch 5, quorum 0 a
->>>>>>      osdmap e139: 32 osds: 32 up, 32 in
->>>>>>             flags noscrub,nodeep-scrub,sortbitwise
->>>>>>       pgmap v20532: 2500 pgs, 1 pools, 7421 GB data, 1855 kobjects
->>>>>>             14850 GB used, 208 TB / 223 TB avail
->>>>>>                 2500 active+clean
->>>>>>
->>>>>> IO profile : Fio rbd with QD 128 and numjob = 10 rbd cache is
->>>>>> disabled.
->>>>>>
->>>>>> Result:
->>>>>> --------
->>>>>> root@stormeap-1:~# rbd info recovery_test/rbd_degradation rbd image
->>>>>> 'rbd_degradation':
->>>>>>         size 1953 GB in 500000 objects
->>>>>>         order 22 (4096 kB objects)
->>>>>>         block_name_prefix: rb.0.5f5f.6b8b4567
->>>>>>         format: 1
->>>>>>
->>>>>> On the above image with format 1 it is giving *~102K iops*
->>>>>>
->>>>>> root@stormeap-1:~# rbd info
->>>>>> recovery_test/rbd_degradation_with_hammer_features
->>>>>> rbd image 'rbd_degradation_with_hammer_features':
->>>>>>         size 195 GB in 50000 objects
->>>>>>         order 22 (4096 kB objects)
->>>>>>         block_name_prefix: rbd_data.5f8d6b8b4567
->>>>>>         format: 2
->>>>>>         features: layering
->>>>>>         flags:
->>>>>>
->>>>>> On the above image with hammer rbd features on , it is giving
->>>>>> *~105K
->>>>>> iops*
->>>>>>
->>>>>> root@stormeap-1:~# rbd info recovery_test/rbd_degradation_with_7
->>>>>> rbd image 'rbd_degradation_with_7':
->>>>>>         size 195 GB in 50000 objects
->>>>>>         order 22 (4096 kB objects)
->>>>>>         block_name_prefix: rbd_data.5fd86b8b4567
->>>>>>         format: 2
->>>>>>         features: layering, exclusive-lock
->>>>>>         flags:
->>>>>>
->>>>>> On the above image with feature 7 (exclusive lock feature on) , it
->>>>>> is giving *~8K iops*...So, >12X degradation
->>>>>>
->>>>>> Tried with single numjob and QD = 128 , performance bumped up till ~40K..Further increasing QD , performance is not going up.
->>>>>>
->>>>>>
->>>>>> root@stormeap-1:~# rbd info recovery_test/rbd_degradation_with_15
->>>>>> rbd image 'rbd_degradation_with_15':
->>>>>>         size 195 GB in 50000 objects
->>>>>>         order 22 (4096 kB objects)
->>>>>>         block_name_prefix: rbd_data.5fab6b8b4567
->>>>>>         format: 2
->>>>>>         features: layering, exclusive-lock, object-map
->>>>>>         flags:
->>>>>>
->>>>>> On the above image with feature 15 (exclusive lock, object map
->>>>>> feature
->>>>>> on) , it is giving *~8K iops*...So, >12X degradation
->>>>>>
->>>>>> Tried with single numjob and QD = 128 , performance bumped up till ~40K..Further increasing QD , performance is not going up.
->>>>>>
->>>>>>
->>>>>> root@stormeap-1:~# rbd info recovery_test/ceph_recovery_img_1 rbd
->>>>>> image 'ceph_recovery_img_1':
->>>>>>         size 4882 GB in 1250000 objects
->>>>>>         order 22 (4096 kB objects)
->>>>>>         block_name_prefix: rbd_data.371b6b8b4567
->>>>>>         format: 2
->>>>>>         features: layering, exclusive-lock, object-map, fast-diff, deep-flatten
->>>>>>         flags:
->>>>>>
->>>>>> On the above image with feature 61 (Jewel default) , it is giving
->>>>>> *~6K iops*...So, *>16X* degradation
->>>>>>
->>>>>> Tried with single numjob and QD = 128 , performance bumped up till ~35K..Further increasing QD , performance is not going up.
->>>>>>
->>>>>> Summary :
->>>>>> ------------
->>>>>>
->>>>>> 1. It seems exclusive lock feature is degrading performance.
->>>>>>
->>>>>> 2. It is degrading a bit further on enabling fast-diff,
->>>>>> deep-flatten
->>>>>>
->>>>>>
->>>>>> Let me know if you need more information on this.
->>>>>>
->>>>>> Thanks & Regards
->>>>>> Somnath
->>>>>>
->>>>>>
->>>>>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>>> in the body of a message to majordomo@vger.kernel.org More
->>>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>>
->>>>>
->>>>> --
->>>>> Jason
->>>>
->>>>
->>>> --
->>>> Jason
->>>
->>>
->>>
->>> --
->>> Jason
->>
->>
->>
->> --
->> Jason
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+
+This changeset has a few main parts:
+
+ * Ilya has finished a huge refactoring effort to sync up the client-side 
+logic in libceph with the user-space client code, which has evolved 
+significantly over the last couple years, with lots of additional 
+behaviors (e.g., how requests are handled when cluster is full and 
+transitions from full to non-full).  This structure of the code is more 
+closely aligned with userspace now such that it will be much easier to 
+maintain going forward when behavior changes take place.  There are some 
+locking improvements bundled in as well.
+
+ * Zheng adds multi-filesystem support (multiple namespaces within the 
+same Ceph cluster)
+
+ * Zheng has changed the readdir offsets and directory enumeration so that 
+dentry offsets are hash-based and therefore stable across directory 
+fragmentation events on the MDS.
+
+ * Zheng has a smorgasbord of bug fixes across fs/ceph.
+
+Thanks!
+sage
 
 
 
--- 
-Jason
+----------------------------------------------------------------
+Ilya Dryomov (40):
+      rbd: get/put img_request in rbd_img_request_submit()
+      libceph: make ceph_osdc_put_request() accept NULL
+      libceph: grab snapc in ceph_osdc_alloc_request()
+      libceph: move message allocation out of ceph_osdc_alloc_request()
+      libceph: change how osd_op_reply message size is calculated
+      libceph: variable-sized ceph_object_id
+      rbd: use header_oid instead of header_name
+      libceph: nuke unused fields and functions
+      libceph: open-code remove_{all,old}_osds()
+      libceph: DEFINE_RB_FUNCS macro
+      libceph: fix ceph_eversion encoding
+      libceph: rename ceph_oloc_oid_to_pg()
+      libceph: ceph_osds, ceph_pg_to_up_acting_osds()
+      libceph: rename ceph_calc_pg_primary()
+      libceph: make pgid_cmp() global
+      libceph: pi->min_size, pi->last_force_request_resend
+      libceph: introduce ceph_osd_request_target, calc_target()
+      libceph: switch to calc_target(), part 1
+      libceph: switch to calc_target(), part 2
+      libceph: drop msg argument from ceph_osdc_callback_t
+      libceph: redo callbacks and factor out MOSDOpReply decoding
+      libceph: move schedule_delayed_work() in ceph_osdc_init()
+      libceph: schedule tick from ceph_osdc_init()
+      libceph: allocate dummy osdmap in ceph_osdc_init()
+      libceph: handle_one_map()
+      libceph: osd_init() and osd_cleanup()
+      libceph: allocate ceph_osd with GFP_NOFAIL
+      libceph: protect osdc->osd_lru list with a spinlock
+      libceph: a major OSD client update
+      libceph: request_init() and request_release_checks()
+      libceph: wait_request_timeout()
+      rbd: rbd_dev_header_unwatch_sync() variant
+      libceph, rbd: ceph_osd_linger_request, watch/notify v2
+      libceph: support for sending notifies
+      libceph: support for checking on status of watch
+      libceph: async MON client generic requests
+      libceph: pool deletion detection
+      libceph: take osdc->lock in osdmap_show() and dump flags in hex
+      libceph: replace ceph_monc_request_next_osdmap()
+      libceph: support for subscribing to "mdsmap.<id>" maps
+
+Yan, Zheng (30):
+      ceph: multiple filesystem support
+      ceph: CEPH_FEATURE_MDSENC support
+      ceph: renew caps for read/write if mds session got killed.
+      ceph: don't call truncate_pagecache in ceph_writepages_start
+      ceph: don't show symlink target in debugfs/mdsc
+      ceph: report mount root in session metadata
+      ceph: use CEPH_MDS_OP_RMXATTR request to remove xattr
+      ceph: search cache postion for dcache readdir
+      ceph: remove unnecessary checks in __dcache_readdir
+      ceph: simplify 'offset in frag'
+      ceph: define struct for dir entry in readdir reply
+      ceph: define 'end/complete' in readdir reply as bit flags
+      ceph: record 'offset' for each entry of readdir result
+      ceph: don't forbid marking directory complete after forward seek
+      ceph: using hash value to compose dentry offset
+      ceph: fix inode reference leak
+      ceph: don't assume frag tree splits in mds reply are sorted
+      ceph: fix dir_auth check in ceph_fill_dirfrag()
+      ceph: keep leaf frag when updating fragtree
+      ceph: improve fragtree change detection
+      ceph: tolerate bad i_size for symlink inode
+      ceph: block non-fatal signals for fault/page_mkwrite
+      ceph: make fault/page_mkwrite return VM_FAULT_OOM for -ENOMEM
+      ceph: handle -EAGAIN returned by ceph_update_writeable_page()
+      libceph: make ceph_osdc_wait_request() uninterruptible
+      ceph: make ceph_update_writeable_page() uninterruptible
+      ceph: handle interrupted ceph_writepage()
+      ceph: SetPageError() for writeback pages if writepages fails
+      ceph: don't use truncate_pagecache() to invalidate read cache
+      ceph: fix wake_up_session_cb()
+
+Zhang Zhuoyu (1):
+      ceph: make logical calculation functions return bool
+
+ drivers/block/rbd.c             |  305 +--
+ fs/ceph/addr.c                  |  214 +-
+ fs/ceph/cache.c                 |    2 +-
+ fs/ceph/caps.c                  |   51 +-
+ fs/ceph/debugfs.c               |    2 +-
+ fs/ceph/dir.c                   |  376 ++--
+ fs/ceph/file.c                  |   89 +-
+ fs/ceph/inode.c                 |  159 +-
+ fs/ceph/ioctl.c                 |   14 +-
+ fs/ceph/mds_client.c            |  140 +-
+ fs/ceph/mds_client.h            |   17 +-
+ fs/ceph/mdsmap.c                |   43 +-
+ fs/ceph/super.c                 |   47 +-
+ fs/ceph/super.h                 |   12 +-
+ fs/ceph/xattr.c                 |   25 +-
+ include/linux/ceph/ceph_frag.h  |    4 +-
+ include/linux/ceph/ceph_fs.h    |   20 +-
+ include/linux/ceph/decode.h     |    2 +-
+ include/linux/ceph/libceph.h    |   57 +
+ include/linux/ceph/mon_client.h |   23 +-
+ include/linux/ceph/osd_client.h |  231 ++-
+ include/linux/ceph/osdmap.h     |  158 +-
+ include/linux/ceph/rados.h      |   34 +-
+ net/ceph/ceph_common.c          |    2 +-
+ net/ceph/ceph_strings.c         |   16 +
+ net/ceph/debugfs.c              |  147 +-
+ net/ceph/mon_client.c           |  393 ++--
+ net/ceph/osd_client.c           | 4074 +++++++++++++++++++++++++--------------
+ net/ceph/osdmap.c               |  651 +++++--
+ 29 files changed, 4779 insertions(+), 2529 deletions(-)
