@@ -1,44 +1,92 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [GIT PULL] Ceph updates for 4.7-rc1
-Date: Thu, 26 May 2016 17:46:49 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605261718560.6221@cpach.fuggernut.com>
-References: <alpine.DEB.2.11.1605261035390.6221@cpach.fuggernut.com> <CA+55aFz=U2rdLDOm=wHmS2UkmFqtx+PB--7K7B8uJtBza3dP4A@mail.gmail.com> <CA+55aFx=v0SYBURwJbFNdPW0nGpzJrVO2b0BcqJEonZedizm2A@mail.gmail.com>
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 1/5] xfs: Propagate dentry down to inode_change_ok()
+Date: Fri, 27 May 2016 07:53:04 +1000
+Message-ID: <20160526215304.GO21200@dastard>
+References: <1464279600-13009-1-git-send-email-jack@suse.cz>
+ <1464279600-13009-2-git-send-email-jack@suse.cz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CA+55aFx=v0SYBURwJbFNdPW0nGpzJrVO2b0BcqJEonZedizm2A@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1464279600-13009-2-git-send-email-jack@suse.cz>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: Al Viro <viro@ZenIV.linux.org.uk>, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, xfs@oss.sgi.com
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 26 May 2016, Linus Torvalds wrote:
-> On Thu, May 26, 2016 at 11:31 AM, Linus Torvalds
-> <torvalds@linux-foundation.org> wrote:
-> >
-> > Pulled and then immediately unpulled again.
-> 
-> .. and having thought it over, I ended up re-pulling again, so now
-> it's going through my build test.
-> 
-> Consider this discussion a strong encouragement to *not* do this in
-> the future - sending me pull requests at the end of the merge window
-> without them having been in linux-next is a no-no, unless those pull
-> requests are small and trivial (or have fixes that I'd pull even
-> outside the merge window, of course).
+On Thu, May 26, 2016 at 06:19:56PM +0200, Jan Kara wrote:
+> To avoid clearing of capabilities or security related extended
+> attributes too early, inode_change_ok() will need to take dentry instead
+> of inode. Propagate dentry down to functions calling inode_change_ok().
+> This is rather straightforward except for xfs_set_mode() function which
+> does not have dentry easily available. Luckily that function does not
+> call inode_change_ok() anyway so we just have to do a little dance with
+> function prototypes.
 
-Thank you!  We'll be sure we include things in -next well beforehand next 
-time around, especially if it's a big diff like this one.
+The idea behind the change is good, but I think the little dance
+could be improved as it makes the layering of the code seem weirdly
+unbalanced to me. e.g.
 
-One point of clarification, though: in the past I've squashed down fixes 
-discovered during testing if the branch hasn't hit a stable tree yet 
-(e.g., your tree).  AIUI this is(was?) standard procedure for things in 
--next.  Do you want us to avoid squashing if we are creeping up on pull 
-request time, or are you primarily interested in, say, seeing that what 
-has been in -next for a while is substantially the same as what you pull, 
-and has perhaps been there unmodified for at least a few days?  Or would 
-you rather see fixup patches if we identify issues in the last few days of 
-testing?
+xfs_vn_setattr()
+  xfs_vn_setattr_size()		<<<< inode_change_ok() here
 
-Thanks-
-sage
+xfs_vn_setattr()
+  xfs_vn_setattr_nonsize()	<<<< inode_change_ok() here
+    xfs_setattr_nonsize()
+
+xfs_vn_setattr()
+  xfs_vn_setattr_size()
+    xfs_vn_setattr_nonsize()	<<<< inode_change_ok() here
+      xfs_setattr_nonsize()
+
+And to be more confusing, the externally callable functions for the
+rest of the XFS code are now xfs_vn_setattr_size() and
+xfs_setattr_nonsize() which now have different calling context
+limitations.
+
+I think adding a little symmetric make sense. i.e:
+
+xfs_vn_change_ok(dentry, iattr)
+{
++	if (mp->m_flags & XFS_MOUNT_RDONLY)
++		return -EROFS;
++
++	if (XFS_FORCED_SHUTDOWN(mp))
++		return -EIO;
++
++	error = inode_change_ok(inode, iattr);
++	if (error)
++		return error;
++
+}
+
+xfs_vn_setattr_size(d, i)
+{
+	xfs_vn_change_ok(d, i)
+	xfs_setattr_size(ip, i)
+}
+
+xfs_vn_setattr_nonsize(d, i)
+{
+	xfs_vn_change_ok(d, i)
+	xfs_setattr_nonsize(ip, i)
+}
+
+xfs_vn_setattr(d, i)
+{
+	xfs_vn_change_ok(d, i)
+	<rest of xfs_vn_setattr unchanged>
+}
+
+And remove the inode_change_ok() code from xfs_setattr_size and
+xfs_setattr_nonsize() completely.  You've already done this with
+xfs_vn_setattr_nonsize() - it just needs to be made symmetric to
+keep a clean layering between VFS interfaces and internal XFS
+interfaces...
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
