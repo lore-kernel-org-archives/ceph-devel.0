@@ -1,7 +1,7 @@
-From: Jason Dillaman <jdillama@redhat.com>
+From: Victor Denisov <vdenisov@mirantis.com>
 Subject: Re: blueprint: consistency groups
-Date: Wed, 25 May 2016 20:53:46 -0400
-Message-ID: <CA+aFP1Cp3HVGUidOW6-NxWGWGT0RSvF8c_H62ZsMvj+AUVktLg@mail.gmail.com>
+Date: Wed, 25 May 2016 18:01:08 -0700
+Message-ID: <CA+hcxJSh5JUKdQ4vOo8x-MywR+3smR+BgMtma33Cv76tw+bszw@mail.gmail.com>
 References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
 	<CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
 	<20160325071933.GA14634@gmail.com>
@@ -29,118 +29,124 @@ References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
 	<CA+hcxJR5BTVoogj3caBm9pYR9S4SVqtP815nFHHQK4t89a0Gsg@mail.gmail.com>
 	<CA+aFP1AziFsEJmm3qdCvvfuqnUFPDOW5Ce9VxY0DVMbMy+Y4PQ@mail.gmail.com>
 	<CA+hcxJRTV7yiVNWJdHpz74VhgTOJih3YeOJCuMVErZ54oJf0mQ@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+	<CA+aFP1Cp3HVGUidOW6-NxWGWGT0RSvF8c_H62ZsMvj+AUVktLg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:33591 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752718AbcEZAxr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2016 20:53:47 -0400
-Received: by mail-pa0-f42.google.com with SMTP id xk12so23893013pac.0
-        for <ceph-devel@vger.kernel.org>; Wed, 25 May 2016 17:53:47 -0700 (PDT)
-In-Reply-To: <CA+hcxJRTV7yiVNWJdHpz74VhgTOJih3YeOJCuMVErZ54oJf0mQ@mail.gmail.com>
+Received: from mail-yw0-f177.google.com ([209.85.161.177]:33179 "EHLO
+	mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752754AbcEZBBJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2016 21:01:09 -0400
+Received: by mail-yw0-f177.google.com with SMTP id h19so63076920ywc.0
+        for <ceph-devel@vger.kernel.org>; Wed, 25 May 2016 18:01:09 -0700 (PDT)
+In-Reply-To: <CA+aFP1Cp3HVGUidOW6-NxWGWGT0RSvF8c_H62ZsMvj+AUVktLg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Victor Denisov <vdenisov@mirantis.com>
+To: Jason Dillaman <dillaman@redhat.com>
 Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Perfect.  I prefer to have the PR's commits reflect the clean
-end-state of the change instead of having multiple "tweak" commits
-fixing code review comments.  Therefore, a rebase to address the
-comment in its associated comment and force push is the desired
-process.
+Here is the link to my pull request with operations on consistency
+groups only: create cg, remove cg, list cgs.
 
-On Wed, May 25, 2016 at 5:34 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
-> I this case I case create a separate pull request for consistency
-> group's operations only(create, remove, list).
-> Another pull request will be: add image to cg, remove image, list images.
+https://github.com/ceph/ceph/pull/9333
+
+On Wed, May 25, 2016 at 5:53 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+> Perfect.  I prefer to have the PR's commits reflect the clean
+> end-state of the change instead of having multiple "tweak" commits
+> fixing code review comments.  Therefore, a rebase to address the
+> comment in its associated comment and force push is the desired
+> process.
 >
-> One more question. How do you prefer comments to be addressed, as an
-> additional commit to the pull request or amend the corresponding
-> commit?
->
-> V.
->
-> On Tue, May 24, 2016 at 10:30 PM, Jason Dillaman <jdillama@redhat.com> wrote:
->> The current PR is at approximately 2500 lines -- it would be nice to
->> have a PR under 1000 changed lines in a perfect world.  The trouble
->> with larger PR is that after you address comments, I have to re-read
->> it all again.  The smaller the PR, the faster it can be reviewed and
->> merged.  If changes depend on another PR, you can always
->> non-fast-forward merge the other PR branch into your dependent PR
->> branch so that it's clear what needs to be reviewed.
+> On Wed, May 25, 2016 at 5:34 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>> I this case I case create a separate pull request for consistency
+>> group's operations only(create, remove, list).
+>> Another pull request will be: add image to cg, remove image, list images.
 >>
->> On Tue, May 24, 2016 at 6:42 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>> Yes, I'm working on splitting it into small logically separated commits.
->>> My current PR is for CRUD operations only(create, remove, add image,
->>> remove image, show info).
->>> Do you want even a smaller PR or this one is small enough?
+>> One more question. How do you prefer comments to be addressed, as an
+>> additional commit to the pull request or amend the corresponding
+>> commit?
+>>
+>> V.
+>>
+>> On Tue, May 24, 2016 at 10:30 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>> The current PR is at approximately 2500 lines -- it would be nice to
+>>> have a PR under 1000 changed lines in a perfect world.  The trouble
+>>> with larger PR is that after you address comments, I have to re-read
+>>> it all again.  The smaller the PR, the faster it can be reviewed and
+>>> merged.  If changes depend on another PR, you can always
+>>> non-fast-forward merge the other PR branch into your dependent PR
+>>> branch so that it's clear what needs to be reviewed.
 >>>
->>> Thanks,
->>> V.
->>>
->>> On Mon, May 23, 2016 at 7:39 PM, Jason Dillaman <jdillama@redhat.com> wrote:
->>>> Definitely want to ensure that it cleanly merges with master.  I would
->>>> also request, if at all possible, that you break it into individual
->>>> PRs of concrete sub-tasks for implementing consistency groups for ease
->>>> of review.  Have individual commits for each step of implementing the
->>>> task would also help (i.e. squash related commits, fix style issues or
->>>> bugs in the commit that introduced them, etc).
+>>> On Tue, May 24, 2016 at 6:42 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>> Yes, I'm working on splitting it into small logically separated commits.
+>>>> My current PR is for CRUD operations only(create, remove, add image,
+>>>> remove image, show info).
+>>>> Do you want even a smaller PR or this one is small enough?
 >>>>
->>>> On Mon, May 23, 2016 at 6:43 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>>> Never mind. I just realized that it will be easier to build it on top
->>>>> of the latest master in any case.
+>>>> Thanks,
+>>>> V.
+>>>>
+>>>> On Mon, May 23, 2016 at 7:39 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>> Definitely want to ensure that it cleanly merges with master.  I would
+>>>>> also request, if at all possible, that you break it into individual
+>>>>> PRs of concrete sub-tasks for implementing consistency groups for ease
+>>>>> of review.  Have individual commits for each step of implementing the
+>>>>> task would also help (i.e. squash related commits, fix style issues or
+>>>>> bugs in the commit that introduced them, etc).
 >>>>>
->>>>> On Mon, May 23, 2016 at 8:32 AM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>>>> Jason,
+>>>>> On Mon, May 23, 2016 at 6:43 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>> Never mind. I just realized that it will be easier to build it on top
+>>>>>> of the latest master in any case.
 >>>>>>
->>>>>> Do you prefer pull requests to be rebased on top of the latest master
->>>>>> or should I keep it where I started the development?
->>>>>>
->>>>>> Thanks,
->>>>>> V.
->>>>>>
->>>>>> On Mon, May 16, 2016 at 8:48 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>>>>>> On Thu, May 12, 2016 at 10:45 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>>>>>> Jason,
->>>>>>>>
->>>>>>>> Do you have any opinion regarding deleting images that are in a
->>>>>>>> consistency group?
->>>>>>>>
->>>>>>>> Should we delete them as well as the references in the consistency
->>>>>>>> group they belong to or should we prohibit deleting images that are in
->>>>>>>> a consistency group?
->>>>>>>>
->>>>>>>> V.
->>>>>>>>
+>>>>>> On Mon, May 23, 2016 at 8:32 AM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>> Jason,
 >>>>>>>
->>>>>>> Right now, if an image has a snapshot we required you to remove all
->>>>>>> snapshots before removing the image.  Along those lines, if an image
->>>>>>> is in a consistency group and the consistency group has snapshots, the
->>>>>>> user wouldn't be able to remove the image since it has snapshots nor
->>>>>>> should the user be able to remove the snapshots associated with the
->>>>>>> consistency group. In this case, the user would be forced to
->>>>>>> dissociate the image from the group before attempting to delete it.
->>>>>>> Therefore, just to keep the actions consistent, you might as well
->>>>>>> force the user to dissociate an image from the consistency group even
->>>>>>> if the image doesn't have snapshots.
+>>>>>>> Do you prefer pull requests to be rebased on top of the latest master
+>>>>>>> or should I keep it where I started the development?
 >>>>>>>
+>>>>>>> Thanks,
+>>>>>>> V.
 >>>>>>>
->>>>>>> --
->>>>>>> Jason
->>>>
->>>>
->>>>
->>>> --
->>>> Jason
->>
->>
->>
->> --
->> Jason
-
-
-
--- 
-Jason
+>>>>>>> On Mon, May 16, 2016 at 8:48 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>>>> On Thu, May 12, 2016 at 10:45 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>>> Jason,
+>>>>>>>>>
+>>>>>>>>> Do you have any opinion regarding deleting images that are in a
+>>>>>>>>> consistency group?
+>>>>>>>>>
+>>>>>>>>> Should we delete them as well as the references in the consistency
+>>>>>>>>> group they belong to or should we prohibit deleting images that are in
+>>>>>>>>> a consistency group?
+>>>>>>>>>
+>>>>>>>>> V.
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>> Right now, if an image has a snapshot we required you to remove all
+>>>>>>>> snapshots before removing the image.  Along those lines, if an image
+>>>>>>>> is in a consistency group and the consistency group has snapshots, the
+>>>>>>>> user wouldn't be able to remove the image since it has snapshots nor
+>>>>>>>> should the user be able to remove the snapshots associated with the
+>>>>>>>> consistency group. In this case, the user would be forced to
+>>>>>>>> dissociate the image from the group before attempting to delete it.
+>>>>>>>> Therefore, just to keep the actions consistent, you might as well
+>>>>>>>> force the user to dissociate an image from the consistency group even
+>>>>>>>> if the image doesn't have snapshots.
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> --
+>>>>>>>> Jason
+>>>>>
+>>>>>
+>>>>>
+>>>>> --
+>>>>> Jason
+>>>
+>>>
+>>>
+>>> --
+>>> Jason
+>
+>
+>
+> --
+> Jason
