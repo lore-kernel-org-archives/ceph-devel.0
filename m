@@ -1,169 +1,147 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: Re: BlueFS compact log
-Date: Thu, 26 May 2016 15:11:33 +0000
-Message-ID: <BLUPR0201MB19088D22100300FC04E7DFD3E2410@BLUPR0201MB1908.namprd02.prod.outlook.com>
-References: <BLUPR0201MB1908C286194EF1137370DA1BE2480@BLUPR0201MB1908.namprd02.prod.outlook.com>
- <BLUPR0201MB19086F0B353548BEE93C7AF5E2410@BLUPR0201MB1908.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1605261015460.6221@cpach.fuggernut.com>
+From: Shehbaz Jaffer <shehbazjaffer007@gmail.com>
+Subject: Re: SMR Benchmarking Results
+Date: Thu, 26 May 2016 13:17:37 -0400
+Message-ID: <CAPLK-i9+AEjn7SdnpGgqKf28r=A3O22w7Saw5Wi5-pkhvYJYXQ@mail.gmail.com>
+References: <CAPLK-i8DKcHtNuv5T1jua=5sp3Fxxb+LwdTdUSpvxqRNj7AMhA@mail.gmail.com>
+	<BLUPR0201MB1524D83DDA25FD1F836C62D4E8410@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0065.outbound.protection.outlook.com ([157.56.111.65]:41101
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753400AbcEZQpo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2016 12:45:44 -0400
-Content-Language: en-US
+Received: from mail-yw0-f177.google.com ([209.85.161.177]:33416 "EHLO
+	mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752431AbcEZRRi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2016 13:17:38 -0400
+Received: by mail-yw0-f177.google.com with SMTP id h19so83001065ywc.0
+        for <ceph-devel@vger.kernel.org>; Thu, 26 May 2016 10:17:38 -0700 (PDT)
+In-Reply-To: <BLUPR0201MB1524D83DDA25FD1F836C62D4E8410@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thursday 26 May 2016 08:02 PM, Sage Weil wrote:
-> Hi Varada,
+Hi Allen,
+
+I ran the SMR zone_open and zone_close commands to see what the
+overhead was. zone_open and zone_close only take up 3% of the total
+time, The rest of the time is consumed while zone_write is taking
+place.
+
+                    (open-close)  (open-write-close)
+40 zones  -  11.8 secs        6 min 41 secs
+400 zones - 1min 52 secs            NA
+
+I looked at zbc_write command, it takes a chunk of file into a
+temporary buffer (whose size is 1MB for my experiment) and writes it
+to disk. I assume dd also works this way, taking block size (bs
+parameter) number of bytes in memory at a time and writing to disk. I
+think with this information we can infer that most of the time
+consumed is in writing to disk.
+
+I observed a difference in the way zone was being opened while doing
+"dd write" and "SMR aware zbc_write". for dd write, the zone is
+"implicitly opened", and data is written to it. for zbc writes, when
+we issue a zone_open command, the zone is "explicitly opened",
+followed by a write, followed by zone_close.
+
+looking at documentation of SMR support for ext4 here:
+https://github.com/Seagate/SMR_FS-EXT4 , it seems Implicit open zones
+are those zones that the drive can close on its own. explicit zones
+cannot be closed on their own - and needs to be closed by explicit
+commands like zbc_close.
+
+From initial experiments it seems that implicitly opened zones perform
+better that explicitly opened zones. Probably we will see a difference
+in performance when the drive hits the maximum number of implicitly
+open zones, when it will internally start closing zones - in that case
+we will need smarter zone management - where I feel explicit zone
+open/close commands will help.
+
+Thanks,
+Shehbaz
+
+On Thu, May 26, 2016 at 1:20 AM, Allen Samuels
+<Allen.Samuels@sandisk.com> wrote:
+> Sounds like the zone open and/or close commands are triggering I/O operations.
 >
-> Sorry, I missed your earlier message.  Also adding ceph-devel cc.
+> Just as an experiment, how long does it take to open and close a bunch of zones with NO data being written to them?
 >
-> On Thu, 26 May 2016, Varada Kari wrote:
+>
+> Allen Samuels
+> SanDisk |a Western Digital brand
+> 2880 Junction Avenue, San Jose, CA 95134
+> T: +1 408 801 7030| M: +1 408 780 6416
+> allen.samuels@SanDisk.com
+>
+>
+>> -----Original Message-----
+>> From: Shehbaz Jaffer [mailto:shehbazjaffer007@gmail.com]
+>> Sent: Wednesday, May 25, 2016 9:44 PM
+>> To: Sage Weil <sweil@redhat.com>
+>> Cc: Allen Samuels <Allen.Samuels@sandisk.com>; ceph-
+>> devel@vger.kernel.org
+>> Subject: SMR Benchmarking Results
+>>
 >> Hi Sage,
 >>
->> I figured out some more gaps in my implementation, but the idea what is
->> proposed is the same.
->> Now i am thinking about adding some throttling and crash recovery
->> aspects to it.
+>> I have been working on benchmarking SMR Drives using libzbc. It appears
+>> that issuing ZBC commands for zone aware host is more inefficient as
+>> compared to normal copy operations using 'dd' command.
 >>
->> Sorry for the delay in responding, been pulled some other tasks. trying
->> to get basic implementation
->> ready, will get back to you soon on this.
+>> I created a 256 MB file and placed it in memory (so that we do not have data
+>> fetch overheads). I copy this file repeatedly on a Host Aware SMR drive in 2
+>> scenarios :
 >>
->> Varada
+>> a) dd - I use dumb dd that takes 1MB chunks of file and keeps copying the file
+>> to SMR drive for <writeSize> bytes. Note that dd does not take the zones
+>> into consideration.
 >>
->> On Tuesday 17 May 2016 06:15 PM, Varada Kari wrote:
->>> Hi Sage,
->>>
->>> Regrading the task to remove to compact the log in BlueFS, i am thinking
->>> of the following approach. Please correct me if i had missed anything in
->>> understanding.
->>> Once i have some more understanding on the approach and some kind of
->>> implementation ready will send it to ceph-devel for review on the proposal.
->>>
->>> Approach 1:
->>>
->>>
->>> Thinking of implementing as a double buffered system.
->>>
->>> 1. Inode 1, will serve as a log file. There will be active and passive
->>> shadow files as per bluefs_log_compact_min_size(16MB)
->>> 2. BlueFS::_maybe_compact_log() will find out if we have to compact the
->>> log, by looking at the active log file.
->>> 3. If needs compactoin, switch to other log file and start merging the
->>> contents from passive file to ino 1.
->>> 4. Will create a compaction thread, where it can run in background.
->>>
->>>
->>> tasks to handle:
->>>
->>> 1. get_total and get_free, have to consult both the files along with
->>> actual log file.
->>> 2. Any crash in between, on reboot, have to merge the contents to
->>> log_file(ino 1), and replay the log before any decision is made.
->>>
->>> Thinking of adding fsck as part of the change to verify my logic.
->>> Hope i am thinking in correct lines about the problem.
-> A few comments, mostly in reverse...
->
-> There is no need for an explicit fsck function because all the metadata is
-> loaded into RAM (and can/should be verified) on mount.  Most of the
-> metadata is implicitly validated at that point (e.g., when the allocator
-> freelist is fabricated based on what isn't explicitly referenced by
-> fnodes).  If there's anything we can validate that we aren't, we should
-> just add it there.
->
-> I don't quite understand the 'double-buffer' idea above.  I don't think
-> there is any need to have a separate fnode for the compaction because the
-> metadata is in RAM and will be implicitly thrown out if we crash and
-> restart (because no persisted fnode references the space we were using).
->
-> I think the process looks like this...
->
-> 1. Decide we need to compact.  This can be a simple heuristic that
-> compares the estimated space we need (number of fnodes * some average
-> size) vs the actual log size.  I think this is already in place.
->
-> 2. Allocate a new extent to continue the log, and then log an event
-> that jumps the log write position to the new extent.  At this point, the
-> old extent(s) won't be written to, and reflect everything should compact.
-My idea is also same here, instead thought of having a new fnode as a
-shadow file where
-the contents can grow till it reaches the threshold to merge back to the
-actual log file.
-So that we can release the lock and let the write operations proceed as
-usual. And backing file
-can be compacted by a background thread. will have a more grangular lock
-to work on the log file.
-Wanted to have couple of reserved fnodes, so that we can ping-pong
-between them and compact
-the log in parallel.
-
-As this includes more writes back to the backend device, thought of
-having some throttling on the
-compactor and front end io.
-
-> [simple version]
-> 3. While still holding the lock, encode a bufferlist that dumps all of the
-> in-memory fnodes and names.  This will become the new beginning of the
-> log.  The last event will jump to the log continuation extent from #2.
->
-> 4. Drop the lock so that writes can continue.
-what if we crash here? super block contains the old log info and new
-extent will have the information
-which is not been flushed to disk.
-> 5. Queue a write to a new extent for the new beginnging of the log.  Wait
-> for it to commit and flush.
->
-> 6. Retake the lock.
->
-> 7. Update the log_fnode to splice in the new beginning.  Queue an io to
-> update the superblock.  Drop the lock.
->
-> 8. Wait for things to flush.  Retake the lock, and release the old log
-> beginnging extents to the allocator for reuse.
->
->
-> This does the log compaction in-memory with the lock held.  I think it'll
-> be really complex to do it without the lock, so I'm inclined not to worry
-> about that at this point.  I don't think it will stall bluefs for
-> long--the IO is generally the slow part.
->
-> This is a bit wonky in that we might have a superblock fnode
-> that is newer than what is in the log.  I think we just need to
-> update the _replay case so that f->fnode only updates if the version
-> is newer.  We might also have a case where teh superblock fnode references
-> the old uncompacted log, and a new log event at teh end updates the log
-> fnode to reference the new space.  That's also okay for replay, *if* we
-> force a superblock update on replay.  We can just do that
-> unconditionally.  (Mostly it doesn't matter... i.e. the superblock might
-> have log fnode v2 that has one extent, and as the log grows we log fnodes
-> that add new extents.  Replay completes and all is well even though the
-> superblock's fnode is super old--it's still enough to get started
-> reading the log.  But with compaction we might deallocate and clobber what
-> the old thing referenced... so just updating the superblock after replay
-> cleans up if we crashed before #8 happened above.
-i was thinking of keeping the same logic of _reply and didn't think of
-updating the super block,
-Instead wanted merge the contents all the log files and compact them.
-Your idea will simply all that
-logic. Will go through and come back if i have questions.
+>> b) SMR_aware_copy - This copy takes file chunks 1MB in size, but issues ZBC
+>> commands to open each zone, write 256 MB data to the zone, close the
+>> zone, and then move to another zone till <writeSize> bytes have been
+>> written.
+>>
+>> performance results for 1GB, 10GB write sizes are 5x slower with "zone
+>> aware" writing, as compared to normal dd writing:
+>>
+>> writeSize (in GB)     dd time (in min:sec)     smr_aware_copy (in min:sec)
+>> 1 GB                              0:7                                0:34
+>> 10 GB                            1:11                              6:41
+>> 50 GB                            5:51                               NA
+>> 100 GB                          11:42                             NA
+>>
+>> (all writes were followed by sync command)
+>>
+>> I was trying to see if there is an internal cache of some sort in the Host Aware
+>> SMR drive, which probably serializes all writes up to certain extent for dd
+>> command, but the time for writes using the dd command for up to 100GB
+>> follow a linear pattern. I will try to see if we hit a bottleneck with dd for larger
+>> file sizes or unaligned writes.
+>>
+>> Followup questions:
+>> --------------------------
+>>
+>> a) I think we should have some workload traces or patterns so that we can
+>> benchmark SMR drives and make allocator more SMR friendly. In particular -
+>> i) size of files,
+>> ii) alignment of files
+>> iii) % read / write/ delete workloads
+>> iv) degree of parallelism in writing.
+>>
+>> b) SMR Drive has a notion of parallel writes - i.e. multiple zones can be kept
+>> open and written to simultaneously. I do not think there are multiple heads
+>> involved but internally there is some form of "efficient parallel write to zone"
+>> mechanism in SMR. I am thinking about this because when we query SMR
+>> drive information, it shows that most effieicnt number of zones can be
+>> parallelly kept open = 128 .
+>> Maybe this is something that we can take advantage of?
+>>
+>> Thanks and Regards,
+>> Shehbaz
 
 
-Varada
->
-> That's what I've been thinking, at least--let me know if you have
-> another/better idea!  Happy to talk over video chat if that helps.
->
-> sage
->
->
 
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+-- 
+Shehbaz Jaffer
+First Year Graduate Student
+Sir Edward S Rogers Sr Department of Electrical and Computer Engineering
+University of Toronto
