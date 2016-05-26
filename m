@@ -1,167 +1,168 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: Severe performance degradation with jewel rbd image
-Date: Thu, 26 May 2016 10:01:25 +0800
-Message-ID: <CACJqLyYSQZ7KALDHKKrxrO2aYgGS+69GyZr=xoCT-a-CAGN8DQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Severe performance degradation with jewel rbd image
+Date: Thu, 26 May 2016 03:39:24 +0000
+Message-ID: <BL2PR02MB21154CCDABC8037F9D63DA7AF4410@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <BL2PR02MB2115AA33422B53D2C0B65E7AF4400@BL2PR02MB2115.namprd02.prod.outlook.com>
 	<CA+aFP1B_+TqDLNzxpvNYCz_3-Wsc4HAHUtKLzoJ+xUvqNHE0NQ@mail.gmail.com>
 	<BL2PR02MB21158B4F676CFDF982E52704F4400@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <CA+aFP1DsqsTxgy4cXqJSRADqOYa2QsA8UUVTNUuA2__GHm0BFw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pu1apc01on0101.outbound.protection.outlook.com ([104.47.126.101]:57520
-	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+Received: from mail-bn1bon0060.outbound.protection.outlook.com ([157.56.111.60]:15364
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752619AbcEZCBl convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2016 22:01:41 -0400
-Received: by mail-vk0-f44.google.com with SMTP id r140so84636433vkf.0
-        for <ceph-devel@vger.kernel.org>; Wed, 25 May 2016 19:01:33 -0700 (PDT)
-In-Reply-To: <BL2PR02MB21158B4F676CFDF982E52704F4400@BL2PR02MB2115.namprd02.prod.outlook.com>
+	id S1752821AbcEZDj2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 25 May 2016 23:39:28 -0400
+In-Reply-To: <CA+aFP1DsqsTxgy4cXqJSRADqOYa2QsA8UUVTNUuA2__GHm0BFw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: "dillaman@redhat.com" <dillaman@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "dillaman@redhat.com" <dillaman@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-For the current design, I think we should target to improve the single
-librbd instance performance. From my past experience, the bottleneck
-will be radosclient finisher and objecter session lock.
-
-On Thu, May 26, 2016 at 7:08 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Hi Jason,
-> Yes, I am running on single image but with multiple fio jobs (with numjobs = 10 in the fio parameter) . I expected that this exclusive lock is locking between the jobs and that's why I have posted the single job result. Single job result is *not degrading*.
-> But, we need numjob and QD combination to extract most performance from an image with fio-rbd. A single librbd instance performance seems to be stuck at 40K and we can't scale this image up without running multiple librbd instances on this in parallel.
-> 16X performance degradation because of this lock seems very destructive.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Jason Dillaman [mailto:jdillama@redhat.com]
-> Sent: Wednesday, May 25, 2016 3:47 PM
-> To: Somnath Roy
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: Severe performance degradation with jewel rbd image
->
-> Just to eliminate the most straightforward explanation, are you running multiple fio jobs against the same image concurrently?  If the exclusive lock had to ping-pong back-and-forth between clients, that would certainly explain the severe performance penalty.
->
-> Otherwise, the exclusive lock is not in the IO path once the client has acquired the exclusive lock.  If you are seeing a performance penalty for a single-client scenario with exclusive lock enabled, this is something we haven't seen and will have to investigate ASAP.
->
-> Thanks,
->
-> On Wed, May 25, 2016 at 4:48 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> Hi Mark/Josh,
->> As I mentioned in the performance meeting today , if we create rbd image with default 'rbd create' command in jewel , the individual image performance for 4k RW is not scaling up well. But, multiple of rbd images running in parallel aggregated throughput is scaling.
->> For the same QD and numjob combination, image created with image format 1 (and with hammer like rbd_default_features = 3) is producing *16X* more performance. I did some digging and here is my findings.
->>
->> Setup:
->> --------
->>
->> 32 osds (all SSD) over 4 nodes. Pool size = 2 , min_size = 1.
->>
->> root@stormeap-1:~# ceph -s
->>     cluster db0febf1-d2b0-4f8d-8f20-43731c134763
->>      health HEALTH_WARN
->>             noscrub,nodeep-scrub,sortbitwise flag(s) set
->>      monmap e1: 1 mons at {a=10.60.194.10:6789/0}
->>             election epoch 5, quorum 0 a
->>      osdmap e139: 32 osds: 32 up, 32 in
->>             flags noscrub,nodeep-scrub,sortbitwise
->>       pgmap v20532: 2500 pgs, 1 pools, 7421 GB data, 1855 kobjects
->>             14850 GB used, 208 TB / 223 TB avail
->>                 2500 active+clean
->>
->> IO profile : Fio rbd with QD 128 and numjob = 10 rbd cache is
->> disabled.
->>
->> Result:
->> --------
->> root@stormeap-1:~# rbd info recovery_test/rbd_degradation rbd image
->> 'rbd_degradation':
->>         size 1953 GB in 500000 objects
->>         order 22 (4096 kB objects)
->>         block_name_prefix: rb.0.5f5f.6b8b4567
->>         format: 1
->>
->> On the above image with format 1 it is giving *~102K iops*
->>
->> root@stormeap-1:~# rbd info
->> recovery_test/rbd_degradation_with_hammer_features
->> rbd image 'rbd_degradation_with_hammer_features':
->>         size 195 GB in 50000 objects
->>         order 22 (4096 kB objects)
->>         block_name_prefix: rbd_data.5f8d6b8b4567
->>         format: 2
->>         features: layering
->>         flags:
->>
->> On the above image with hammer rbd features on , it is giving *~105K
->> iops*
->>
->> root@stormeap-1:~# rbd info recovery_test/rbd_degradation_with_7
->> rbd image 'rbd_degradation_with_7':
->>         size 195 GB in 50000 objects
->>         order 22 (4096 kB objects)
->>         block_name_prefix: rbd_data.5fd86b8b4567
->>         format: 2
->>         features: layering, exclusive-lock
->>         flags:
->>
->> On the above image with feature 7 (exclusive lock feature on) , it is
->> giving *~8K iops*...So, >12X degradation
->>
->> Tried with single numjob and QD = 128 , performance bumped up till ~40K..Further increasing QD , performance is not going up.
->>
->>
->> root@stormeap-1:~# rbd info recovery_test/rbd_degradation_with_15
->> rbd image 'rbd_degradation_with_15':
->>         size 195 GB in 50000 objects
->>         order 22 (4096 kB objects)
->>         block_name_prefix: rbd_data.5fab6b8b4567
->>         format: 2
->>         features: layering, exclusive-lock, object-map
->>         flags:
->>
->> On the above image with feature 15 (exclusive lock, object map feature
->> on) , it is giving *~8K iops*...So, >12X degradation
->>
->> Tried with single numjob and QD = 128 , performance bumped up till ~40K..Further increasing QD , performance is not going up.
->>
->>
->> root@stormeap-1:~# rbd info recovery_test/ceph_recovery_img_1 rbd
->> image 'ceph_recovery_img_1':
->>         size 4882 GB in 1250000 objects
->>         order 22 (4096 kB objects)
->>         block_name_prefix: rbd_data.371b6b8b4567
->>         format: 2
->>         features: layering, exclusive-lock, object-map, fast-diff, deep-flatten
->>         flags:
->>
->> On the above image with feature 61 (Jewel default) , it is giving *~6K
->> iops*...So, *>16X* degradation
->>
->> Tried with single numjob and QD = 128 , performance bumped up till ~35K..Further increasing QD , performance is not going up.
->>
->> Summary :
->> ------------
->>
->> 1. It seems exclusive lock feature is degrading performance.
->>
->> 2. It is degrading a bit further on enabling fast-diff, deep-flatten
->>
->>
->> Let me know if you need more information on this.
->>
->> Thanks & Regards
->> Somnath
->>
->>
->> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Jason
+SmFzb24sDQpNeSB1c2UgY2FzZSBpcyB0byBmaW5kIG91dCBob3cgbXVjaCB3cml0ZSBwZXJmb3Jt
+YW5jZSBJIGNhbiBleHRyYWN0IG91dCBvZiBhIHNpbmdsZSByYmQgaW1hZ2UuIA0KSSBkb24ndCB3
+YW50IHRvIHVzZSAgLS1pbWFnZS1zaGFyZWQgYXMgd3JpdGVzIHdpbGwgYmUgaW5jb25zaXN0ZW50
+IHRoZW4gKD8pDQpJdCBzZWVtcyBydW5uaW5nIGEgc2luZ2xlIGZpbyBqb2Igd2l0aCBoaWdoIFFE
+IGlzIHRoZSBvbmx5IG9wdGlvbiA/DQpBbHNvLCBJIGJlbGlldmUgdGhlIGdvYWwgc2hvdWxkIGJl
+IGF0IGxlYXN0IGdldHRpbmcgdGhlIHNpbWlsYXIgYWdncmVnYXRlZCB0aHJvdWdocHV0IGxpa2Ug
+c2luZ2xlIGNsaWVudC9zaW5nbGUgaW1hZ2UgaW4gY2FzZSBvZiBtdWx0aSBjbGllbnQvc2luZ2xl
+IGltYWdlIChpbmRpdmlkdWFsIGNsaWVudCB3aWxsIGdldCBsZXNzIGFuZCB0aGF0J3MgZmluZSku
+DQpMZXQgbWUga25vdyBpZiBJIGFtIG1pc3NpbmcgYW55dGhpbmcuDQoNClRoYW5rcyAmIFJlZ2Fy
+ZHMNClNvbW5hdGgNCg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogSmFzb24g
+RGlsbGFtYW4gW21haWx0bzpqZGlsbGFtYUByZWRoYXQuY29tXSANClNlbnQ6IFdlZG5lc2RheSwg
+TWF5IDI1LCAyMDE2IDU6NTEgUE0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IGNlcGgtZGV2ZWxAdmdl
+ci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogU2V2ZXJlIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9u
+IHdpdGggamV3ZWwgcmJkIGltYWdlDQoNCkFyZSB5b3UgYXR0ZW1wdGluZyB0byB0ZXN0IGEgcGFy
+dGljdWxhciB1c2UtY2FzZSB3aGVyZSB5b3Ugd291bGQgaGF2ZSBtdWx0aXBsZSBjbGllbnRzIGNv
+bm5lY3RlZCB0byBhIHNpbmdsZSBSQkQgaW1hZ2U/ICBUaGUgcmJkIENMSSBoYXMgYSAiLS1pbWFn
+ZS1zaGFyZWQiIG9wdGlvbiB3aGVuIGNyZWF0aW5nL2Nsb25pbmcgaW1hZ2VzIGFzIGEgc2hvcnRj
+dXQgdG8gZWFzaWx5IGRpc2FibGUgdGhlIGV4Y2x1c2l2ZSBsb2NrLCBvYmplY3QtbWFwLCBmYXN0
+LWRpZmYsIGFuZCBqb3VybmFsaW5nIGZlYXR1cmVzIGZvciBzdWNoIHNpdHVhdGlvbnMuIFlvdSBj
+b3VsZCBhbHNvIHNwZWNpZnkgYSBkaWZmZXJlbnQgYHJiZG5hbWVgIHBlciBqb2IgdG8gc2ltdWxh
+dGUgbXVsdGlwbGUgY2xpZW50cyBhY2Nlc3NpbmcgbXVsdGlwbGUgaW1hZ2VzIChpbnN0ZWFkIG9m
+IG11bHRpcGxlIGNsaWVudHMgc2hhcmluZyB0aGUgc2FtZSBpbWFnZSkuDQoNCkkgaGF2ZSB0byBi
+ZSBob25lc3QsIEkgYW0gYWN0dWFsbHkgcHJldHR5IGltcHJlc3NlZCBieSB5b3VyIDhLIElPUFMg
+d2hlbiB5b3UgaGF2ZSBtdWx0aXBsZSBjbGllbnRzIGZpZ2h0aW5nIG92ZXIgdGhlIGV4Y2x1c2l2
+ZSBsb2NrIHNpbmNlIGFjcXVpcmluZyB0aGUgbG9jayByZXF1aXJlcyBpbnRlci1jbGllbnQgY29v
+cGVyYXRpdmUgY29vcmRpbmF0aW9uIHRvIHJlcXVlc3QvcmVsZWFzZS9hY3F1aXJlIHRoZSBsb2Nr
+IGZyb20gdGhlIGN1cnJlbnQgb3duZXIgYW5kIGFueSBjbGllbnQgd2l0aG91dCB0aGUgbG9jayBo
+YXMgYWxsIHdyaXRlcyBibG9ja2VkLg0KDQoNCk9uIFdlZCwgTWF5IDI1LCAyMDE2IGF0IDc6MDgg
+UE0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEhpIEph
+c29uLA0KPiBZZXMsIEkgYW0gcnVubmluZyBvbiBzaW5nbGUgaW1hZ2UgYnV0IHdpdGggbXVsdGlw
+bGUgZmlvIGpvYnMgKHdpdGggbnVtam9icyA9IDEwIGluIHRoZSBmaW8gcGFyYW1ldGVyKSAuIEkg
+ZXhwZWN0ZWQgdGhhdCB0aGlzIGV4Y2x1c2l2ZSBsb2NrIGlzIGxvY2tpbmcgYmV0d2VlbiB0aGUg
+am9icyBhbmQgdGhhdCdzIHdoeSBJIGhhdmUgcG9zdGVkIHRoZSBzaW5nbGUgam9iIHJlc3VsdC4g
+U2luZ2xlIGpvYiByZXN1bHQgaXMgKm5vdCBkZWdyYWRpbmcqLg0KPiBCdXQsIHdlIG5lZWQgbnVt
+am9iIGFuZCBRRCBjb21iaW5hdGlvbiB0byBleHRyYWN0IG1vc3QgcGVyZm9ybWFuY2UgZnJvbSBh
+biBpbWFnZSB3aXRoIGZpby1yYmQuIEEgc2luZ2xlIGxpYnJiZCBpbnN0YW5jZSBwZXJmb3JtYW5j
+ZSBzZWVtcyB0byBiZSBzdHVjayBhdCA0MEsgYW5kIHdlIGNhbid0IHNjYWxlIHRoaXMgaW1hZ2Ug
+dXAgd2l0aG91dCBydW5uaW5nIG11bHRpcGxlIGxpYnJiZCBpbnN0YW5jZXMgb24gdGhpcyBpbiBw
+YXJhbGxlbC4NCj4gMTZYIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGJlY2F1c2Ugb2YgdGhpcyBs
+b2NrIHNlZW1zIHZlcnkgZGVzdHJ1Y3RpdmUuDQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29t
+bmF0aA0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBKYXNvbiBEaWxs
+YW1hbiBbbWFpbHRvOmpkaWxsYW1hQHJlZGhhdC5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgTWF5
+IDI1LCAyMDE2IDM6NDcgUE0NCj4gVG86IFNvbW5hdGggUm95DQo+IENjOiBjZXBoLWRldmVsQHZn
+ZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogU2V2ZXJlIHBlcmZvcm1hbmNlIGRlZ3JhZGF0
+aW9uIHdpdGggamV3ZWwgcmJkIGltYWdlDQo+DQo+IEp1c3QgdG8gZWxpbWluYXRlIHRoZSBtb3N0
+IHN0cmFpZ2h0Zm9yd2FyZCBleHBsYW5hdGlvbiwgYXJlIHlvdSBydW5uaW5nIG11bHRpcGxlIGZp
+byBqb2JzIGFnYWluc3QgdGhlIHNhbWUgaW1hZ2UgY29uY3VycmVudGx5PyAgSWYgdGhlIGV4Y2x1
+c2l2ZSBsb2NrIGhhZCB0byBwaW5nLXBvbmcgYmFjay1hbmQtZm9ydGggYmV0d2VlbiBjbGllbnRz
+LCB0aGF0IHdvdWxkIGNlcnRhaW5seSBleHBsYWluIHRoZSBzZXZlcmUgcGVyZm9ybWFuY2UgcGVu
+YWx0eS4NCj4NCj4gT3RoZXJ3aXNlLCB0aGUgZXhjbHVzaXZlIGxvY2sgaXMgbm90IGluIHRoZSBJ
+TyBwYXRoIG9uY2UgdGhlIGNsaWVudCBoYXMgYWNxdWlyZWQgdGhlIGV4Y2x1c2l2ZSBsb2NrLiAg
+SWYgeW91IGFyZSBzZWVpbmcgYSBwZXJmb3JtYW5jZSBwZW5hbHR5IGZvciBhIHNpbmdsZS1jbGll
+bnQgc2NlbmFyaW8gd2l0aCBleGNsdXNpdmUgbG9jayBlbmFibGVkLCB0aGlzIGlzIHNvbWV0aGlu
+ZyB3ZSBoYXZlbid0IHNlZW4gYW5kIHdpbGwgaGF2ZSB0byBpbnZlc3RpZ2F0ZSBBU0FQLg0KPg0K
+PiBUaGFua3MsDQo+DQo+IE9uIFdlZCwgTWF5IDI1LCAyMDE2IGF0IDQ6NDggUE0sIFNvbW5hdGgg
+Um95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+PiBIaSBNYXJrL0pvc2gsDQo+
+PiBBcyBJIG1lbnRpb25lZCBpbiB0aGUgcGVyZm9ybWFuY2UgbWVldGluZyB0b2RheSAsIGlmIHdl
+IGNyZWF0ZSByYmQgaW1hZ2Ugd2l0aCBkZWZhdWx0ICdyYmQgY3JlYXRlJyBjb21tYW5kIGluIGpl
+d2VsICwgdGhlIGluZGl2aWR1YWwgaW1hZ2UgcGVyZm9ybWFuY2UgZm9yIDRrIFJXIGlzIG5vdCBz
+Y2FsaW5nIHVwIHdlbGwuIEJ1dCwgbXVsdGlwbGUgb2YgcmJkIGltYWdlcyBydW5uaW5nIGluIHBh
+cmFsbGVsIGFnZ3JlZ2F0ZWQgdGhyb3VnaHB1dCBpcyBzY2FsaW5nLg0KPj4gRm9yIHRoZSBzYW1l
+IFFEIGFuZCBudW1qb2IgY29tYmluYXRpb24sIGltYWdlIGNyZWF0ZWQgd2l0aCBpbWFnZSBmb3Jt
+YXQgMSAoYW5kIHdpdGggaGFtbWVyIGxpa2UgcmJkX2RlZmF1bHRfZmVhdHVyZXMgPSAzKSBpcyBw
+cm9kdWNpbmcgKjE2WCogbW9yZSBwZXJmb3JtYW5jZS4gSSBkaWQgc29tZSBkaWdnaW5nIGFuZCBo
+ZXJlIGlzIG15IGZpbmRpbmdzLg0KPj4NCj4+IFNldHVwOg0KPj4gLS0tLS0tLS0NCj4+DQo+PiAz
+MiBvc2RzIChhbGwgU1NEKSBvdmVyIDQgbm9kZXMuIFBvb2wgc2l6ZSA9IDIgLCBtaW5fc2l6ZSA9
+IDEuDQo+Pg0KPj4gcm9vdEBzdG9ybWVhcC0xOn4jIGNlcGggLXMNCj4+ICAgICBjbHVzdGVyIGRi
+MGZlYmYxLWQyYjAtNGY4ZC04ZjIwLTQzNzMxYzEzNDc2Mw0KPj4gICAgICBoZWFsdGggSEVBTFRI
+X1dBUk4NCj4+ICAgICAgICAgICAgIG5vc2NydWIsbm9kZWVwLXNjcnViLHNvcnRiaXR3aXNlIGZs
+YWcocykgc2V0DQo+PiAgICAgIG1vbm1hcCBlMTogMSBtb25zIGF0IHthPTEwLjYwLjE5NC4xMDo2
+Nzg5LzB9DQo+PiAgICAgICAgICAgICBlbGVjdGlvbiBlcG9jaCA1LCBxdW9ydW0gMCBhDQo+PiAg
+ICAgIG9zZG1hcCBlMTM5OiAzMiBvc2RzOiAzMiB1cCwgMzIgaW4NCj4+ICAgICAgICAgICAgIGZs
+YWdzIG5vc2NydWIsbm9kZWVwLXNjcnViLHNvcnRiaXR3aXNlDQo+PiAgICAgICBwZ21hcCB2MjA1
+MzI6IDI1MDAgcGdzLCAxIHBvb2xzLCA3NDIxIEdCIGRhdGEsIDE4NTUga29iamVjdHMNCj4+ICAg
+ICAgICAgICAgIDE0ODUwIEdCIHVzZWQsIDIwOCBUQiAvIDIyMyBUQiBhdmFpbA0KPj4gICAgICAg
+ICAgICAgICAgIDI1MDAgYWN0aXZlK2NsZWFuDQo+Pg0KPj4gSU8gcHJvZmlsZSA6IEZpbyByYmQg
+d2l0aCBRRCAxMjggYW5kIG51bWpvYiA9IDEwIHJiZCBjYWNoZSBpcyANCj4+IGRpc2FibGVkLg0K
+Pj4NCj4+IFJlc3VsdDoNCj4+IC0tLS0tLS0tDQo+PiByb290QHN0b3JtZWFwLTE6fiMgcmJkIGlu
+Zm8gcmVjb3ZlcnlfdGVzdC9yYmRfZGVncmFkYXRpb24gcmJkIGltYWdlDQo+PiAncmJkX2RlZ3Jh
+ZGF0aW9uJzoNCj4+ICAgICAgICAgc2l6ZSAxOTUzIEdCIGluIDUwMDAwMCBvYmplY3RzDQo+PiAg
+ICAgICAgIG9yZGVyIDIyICg0MDk2IGtCIG9iamVjdHMpDQo+PiAgICAgICAgIGJsb2NrX25hbWVf
+cHJlZml4OiByYi4wLjVmNWYuNmI4YjQ1NjcNCj4+ICAgICAgICAgZm9ybWF0OiAxDQo+Pg0KPj4g
+T24gdGhlIGFib3ZlIGltYWdlIHdpdGggZm9ybWF0IDEgaXQgaXMgZ2l2aW5nICp+MTAySyBpb3Bz
+Kg0KPj4NCj4+IHJvb3RAc3Rvcm1lYXAtMTp+IyByYmQgaW5mbw0KPj4gcmVjb3ZlcnlfdGVzdC9y
+YmRfZGVncmFkYXRpb25fd2l0aF9oYW1tZXJfZmVhdHVyZXMNCj4+IHJiZCBpbWFnZSAncmJkX2Rl
+Z3JhZGF0aW9uX3dpdGhfaGFtbWVyX2ZlYXR1cmVzJzoNCj4+ICAgICAgICAgc2l6ZSAxOTUgR0Ig
+aW4gNTAwMDAgb2JqZWN0cw0KPj4gICAgICAgICBvcmRlciAyMiAoNDA5NiBrQiBvYmplY3RzKQ0K
+Pj4gICAgICAgICBibG9ja19uYW1lX3ByZWZpeDogcmJkX2RhdGEuNWY4ZDZiOGI0NTY3DQo+PiAg
+ICAgICAgIGZvcm1hdDogMg0KPj4gICAgICAgICBmZWF0dXJlczogbGF5ZXJpbmcNCj4+ICAgICAg
+ICAgZmxhZ3M6DQo+Pg0KPj4gT24gdGhlIGFib3ZlIGltYWdlIHdpdGggaGFtbWVyIHJiZCBmZWF0
+dXJlcyBvbiAsIGl0IGlzIGdpdmluZyAqfjEwNUsNCj4+IGlvcHMqDQo+Pg0KPj4gcm9vdEBzdG9y
+bWVhcC0xOn4jIHJiZCBpbmZvIHJlY292ZXJ5X3Rlc3QvcmJkX2RlZ3JhZGF0aW9uX3dpdGhfNw0K
+Pj4gcmJkIGltYWdlICdyYmRfZGVncmFkYXRpb25fd2l0aF83JzoNCj4+ICAgICAgICAgc2l6ZSAx
+OTUgR0IgaW4gNTAwMDAgb2JqZWN0cw0KPj4gICAgICAgICBvcmRlciAyMiAoNDA5NiBrQiBvYmpl
+Y3RzKQ0KPj4gICAgICAgICBibG9ja19uYW1lX3ByZWZpeDogcmJkX2RhdGEuNWZkODZiOGI0NTY3
+DQo+PiAgICAgICAgIGZvcm1hdDogMg0KPj4gICAgICAgICBmZWF0dXJlczogbGF5ZXJpbmcsIGV4
+Y2x1c2l2ZS1sb2NrDQo+PiAgICAgICAgIGZsYWdzOg0KPj4NCj4+IE9uIHRoZSBhYm92ZSBpbWFn
+ZSB3aXRoIGZlYXR1cmUgNyAoZXhjbHVzaXZlIGxvY2sgZmVhdHVyZSBvbikgLCBpdCBpcyANCj4+
+IGdpdmluZyAqfjhLIGlvcHMqLi4uU28sID4xMlggZGVncmFkYXRpb24NCj4+DQo+PiBUcmllZCB3
+aXRoIHNpbmdsZSBudW1qb2IgYW5kIFFEID0gMTI4ICwgcGVyZm9ybWFuY2UgYnVtcGVkIHVwIHRp
+bGwgfjQwSy4uRnVydGhlciBpbmNyZWFzaW5nIFFEICwgcGVyZm9ybWFuY2UgaXMgbm90IGdvaW5n
+IHVwLg0KPj4NCj4+DQo+PiByb290QHN0b3JtZWFwLTE6fiMgcmJkIGluZm8gcmVjb3ZlcnlfdGVz
+dC9yYmRfZGVncmFkYXRpb25fd2l0aF8xNQ0KPj4gcmJkIGltYWdlICdyYmRfZGVncmFkYXRpb25f
+d2l0aF8xNSc6DQo+PiAgICAgICAgIHNpemUgMTk1IEdCIGluIDUwMDAwIG9iamVjdHMNCj4+ICAg
+ICAgICAgb3JkZXIgMjIgKDQwOTYga0Igb2JqZWN0cykNCj4+ICAgICAgICAgYmxvY2tfbmFtZV9w
+cmVmaXg6IHJiZF9kYXRhLjVmYWI2YjhiNDU2Nw0KPj4gICAgICAgICBmb3JtYXQ6IDINCj4+ICAg
+ICAgICAgZmVhdHVyZXM6IGxheWVyaW5nLCBleGNsdXNpdmUtbG9jaywgb2JqZWN0LW1hcA0KPj4g
+ICAgICAgICBmbGFnczoNCj4+DQo+PiBPbiB0aGUgYWJvdmUgaW1hZ2Ugd2l0aCBmZWF0dXJlIDE1
+IChleGNsdXNpdmUgbG9jaywgb2JqZWN0IG1hcCANCj4+IGZlYXR1cmUNCj4+IG9uKSAsIGl0IGlz
+IGdpdmluZyAqfjhLIGlvcHMqLi4uU28sID4xMlggZGVncmFkYXRpb24NCj4+DQo+PiBUcmllZCB3
+aXRoIHNpbmdsZSBudW1qb2IgYW5kIFFEID0gMTI4ICwgcGVyZm9ybWFuY2UgYnVtcGVkIHVwIHRp
+bGwgfjQwSy4uRnVydGhlciBpbmNyZWFzaW5nIFFEICwgcGVyZm9ybWFuY2UgaXMgbm90IGdvaW5n
+IHVwLg0KPj4NCj4+DQo+PiByb290QHN0b3JtZWFwLTE6fiMgcmJkIGluZm8gcmVjb3ZlcnlfdGVz
+dC9jZXBoX3JlY292ZXJ5X2ltZ18xIHJiZCANCj4+IGltYWdlICdjZXBoX3JlY292ZXJ5X2ltZ18x
+JzoNCj4+ICAgICAgICAgc2l6ZSA0ODgyIEdCIGluIDEyNTAwMDAgb2JqZWN0cw0KPj4gICAgICAg
+ICBvcmRlciAyMiAoNDA5NiBrQiBvYmplY3RzKQ0KPj4gICAgICAgICBibG9ja19uYW1lX3ByZWZp
+eDogcmJkX2RhdGEuMzcxYjZiOGI0NTY3DQo+PiAgICAgICAgIGZvcm1hdDogMg0KPj4gICAgICAg
+ICBmZWF0dXJlczogbGF5ZXJpbmcsIGV4Y2x1c2l2ZS1sb2NrLCBvYmplY3QtbWFwLCBmYXN0LWRp
+ZmYsIGRlZXAtZmxhdHRlbg0KPj4gICAgICAgICBmbGFnczoNCj4+DQo+PiBPbiB0aGUgYWJvdmUg
+aW1hZ2Ugd2l0aCBmZWF0dXJlIDYxIChKZXdlbCBkZWZhdWx0KSAsIGl0IGlzIGdpdmluZyANCj4+
+ICp+NksgaW9wcyouLi5TbywgKj4xNlgqIGRlZ3JhZGF0aW9uDQo+Pg0KPj4gVHJpZWQgd2l0aCBz
+aW5nbGUgbnVtam9iIGFuZCBRRCA9IDEyOCAsIHBlcmZvcm1hbmNlIGJ1bXBlZCB1cCB0aWxsIH4z
+NUsuLkZ1cnRoZXIgaW5jcmVhc2luZyBRRCAsIHBlcmZvcm1hbmNlIGlzIG5vdCBnb2luZyB1cC4N
+Cj4+DQo+PiBTdW1tYXJ5IDoNCj4+IC0tLS0tLS0tLS0tLQ0KPj4NCj4+IDEuIEl0IHNlZW1zIGV4
+Y2x1c2l2ZSBsb2NrIGZlYXR1cmUgaXMgZGVncmFkaW5nIHBlcmZvcm1hbmNlLg0KPj4NCj4+IDIu
+IEl0IGlzIGRlZ3JhZGluZyBhIGJpdCBmdXJ0aGVyIG9uIGVuYWJsaW5nIGZhc3QtZGlmZiwgZGVl
+cC1mbGF0dGVuDQo+Pg0KPj4NCj4+IExldCBtZSBrbm93IGlmIHlvdSBuZWVkIG1vcmUgaW5mb3Jt
+YXRpb24gb24gdGhpcy4NCj4+DQo+PiBUaGFua3MgJiBSZWdhcmRzDQo+PiBTb21uYXRoDQo+Pg0K
+Pj4NCj4+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxl
+Y3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUg
+ZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhp
+cyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBu
+b3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQg
+dGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcg
+b2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2Vp
+dmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVy
+IGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQg
+ZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vz
+c2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVz
+KS4NCj4+IC0tDQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
+ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
+byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPj4gaW5mbyBhdCAg
+aHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+DQo+DQo+DQo+IC0t
+DQo+IEphc29uDQoNCg0KLS0NCkphc29uDQo=
