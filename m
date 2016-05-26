@@ -1,253 +1,102 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: Severe performance degradation with jewel rbd image
-Date: Thu, 26 May 2016 11:02:09 -0700
-Message-ID: <CAN=+7FVX5WecZZ=2dj1vSeFC=WCBvJkO5Esi+UuTT+_2=aiX9A@mail.gmail.com>
-References: <BL2PR02MB2115AA33422B53D2C0B65E7AF4400@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1B_+TqDLNzxpvNYCz_3-Wsc4HAHUtKLzoJ+xUvqNHE0NQ@mail.gmail.com>
-	<BL2PR02MB21158B4F676CFDF982E52704F4400@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1DsqsTxgy4cXqJSRADqOYa2QsA8UUVTNUuA2__GHm0BFw@mail.gmail.com>
-	<BL2PR02MB21154CCDABC8037F9D63DA7AF4410@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1DapnzYpBDowdTjMVfrUcBSQy0tvYOEDM7QJJSy-kmPuw@mail.gmail.com>
-	<BL2PR02MB2115791B5D2A2D163F7A2AEFF4410@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1DdPYWhRCeJ2buc7Gsz+gmti2BA4=7qoQHWP_Zi1_KyNQ@mail.gmail.com>
-	<BL2PR02MB2115D73ED758ADC9C52729A6F4410@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: msgr2 protocol
+Date: Thu, 26 May 2016 14:17:37 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f180.google.com ([209.85.220.180]:32769 "EHLO
-	mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754225AbcEZSCL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2016 14:02:11 -0400
-Received: by mail-qk0-f180.google.com with SMTP id n63so63517752qkf.0
-        for <ceph-devel@vger.kernel.org>; Thu, 26 May 2016 11:02:10 -0700 (PDT)
-In-Reply-To: <BL2PR02MB2115D73ED758ADC9C52729A6F4410@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52343 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750939AbcEZSRQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 May 2016 14:17:16 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 1D1B84944D
+	for <ceph-devel@vger.kernel.org>; Thu, 26 May 2016 18:17:16 +0000 (UTC)
+Received: from cpach (ovpn-112-33.phx2.redhat.com [10.3.112.33])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u4QIHD8p030470
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Thu, 26 May 2016 14:17:15 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: "dillaman@redhat.com" <dillaman@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-It should be noted that many users *will* have the lock enabled since
-(iirc, Jason, correct me if I'm wrong), it's there to support some
-important features and typical cloud users are 1 client/image users.
-If you benchmark without it, it may skew your results.
--Sam
+I wrote up a basic proposal for the new msgr2 protocol:
 
-On Thu, May 26, 2016 at 10:47 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Thanks Jason , it helps !
-> One question , if I disable exclusive lock (and thus other features) during creation can I enable it on the same image in future if needed without any disruption ?
->
-> Regards
-> Somnath
->
-> -----Original Message-----
-> From: Jason Dillaman [mailto:jdillama@redhat.com]
-> Sent: Thursday, May 26, 2016 6:29 AM
-> To: Somnath Roy
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: Severe performance degradation with jewel rbd image
->
-> I create a ticket [1] a while ago to improve the documentation of RBD image features.  The ticket is still open but I just added some verbiage as a comment to the ticket in the meantime.
->
-> [1] http://tracker.ceph.com/issues/15000
->
-> On Thu, May 26, 2016 at 12:19 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> Thanks Jason !
->> My bad, I thought exclusive lock is to maintain the consistency.
->> I think the features like objectmap , fast-diff , deep-flatten, journaling could not be enabled if I disable exclusive lock ?
->> Could you please give a one liner or point me to the doc where I can find what the features like objectmap , fast-diff , deep-flatten does ?
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Jason Dillaman [mailto:jdillama@redhat.com]
->> Sent: Wednesday, May 25, 2016 8:53 PM
->> To: Somnath Roy
->> Cc: ceph-devel@vger.kernel.org
->> Subject: Re: Severe performance degradation with jewel rbd image
->>
->> For multi-client, single-image, you should be using the "--image-shared" option when creating the image (or just disable exclusive-lock after the fact) since the expected use case of exclusive-lock is single client, single image (e.g. single QEMU process that can live-migrate to a new host but both hosts won't be writing concurrently).
->>
->> Regardless of whether or not you use exclusive-lock or not, when you have multiple clients concurrently writing to the same image, the necessary coordination to provide consistency needs to be provided at the application layer (i.e. use a clustered filesystem on top of a single RBD image when being manipulated by multiple clients concurrently).
->>
->> On Wed, May 25, 2016 at 11:39 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->>> Jason,
->>> My use case is to find out how much write performance I can extract out of a single rbd image.
->>> I don't want to use  --image-shared as writes will be inconsistent
->>> then (?) It seems running a single fio job with high QD is the only option ?
->>> Also, I believe the goal should be at least getting the similar aggregated throughput like single client/single image in case of multi client/single image (individual client will get less and that's fine).
->>> Let me know if I am missing anything.
->>>
->>> Thanks & Regards
->>> Somnath
->>>
->>>
->>> -----Original Message-----
->>> From: Jason Dillaman [mailto:jdillama@redhat.com]
->>> Sent: Wednesday, May 25, 2016 5:51 PM
->>> To: Somnath Roy
->>> Cc: ceph-devel@vger.kernel.org
->>> Subject: Re: Severe performance degradation with jewel rbd image
->>>
->>> Are you attempting to test a particular use-case where you would have multiple clients connected to a single RBD image?  The rbd CLI has a "--image-shared" option when creating/cloning images as a shortcut to easily disable the exclusive lock, object-map, fast-diff, and journaling features for such situations. You could also specify a different `rbdname` per job to simulate multiple clients accessing multiple images (instead of multiple clients sharing the same image).
->>>
->>> I have to be honest, I am actually pretty impressed by your 8K IOPS when you have multiple clients fighting over the exclusive lock since acquiring the lock requires inter-client cooperative coordination to request/release/acquire the lock from the current owner and any client without the lock has all writes blocked.
->>>
->>>
->>> On Wed, May 25, 2016 at 7:08 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->>>> Hi Jason,
->>>> Yes, I am running on single image but with multiple fio jobs (with numjobs = 10 in the fio parameter) . I expected that this exclusive lock is locking between the jobs and that's why I have posted the single job result. Single job result is *not degrading*.
->>>> But, we need numjob and QD combination to extract most performance from an image with fio-rbd. A single librbd instance performance seems to be stuck at 40K and we can't scale this image up without running multiple librbd instances on this in parallel.
->>>> 16X performance degradation because of this lock seems very destructive.
->>>>
->>>> Thanks & Regards
->>>> Somnath
->>>>
->>>> -----Original Message-----
->>>> From: Jason Dillaman [mailto:jdillama@redhat.com]
->>>> Sent: Wednesday, May 25, 2016 3:47 PM
->>>> To: Somnath Roy
->>>> Cc: ceph-devel@vger.kernel.org
->>>> Subject: Re: Severe performance degradation with jewel rbd image
->>>>
->>>> Just to eliminate the most straightforward explanation, are you running multiple fio jobs against the same image concurrently?  If the exclusive lock had to ping-pong back-and-forth between clients, that would certainly explain the severe performance penalty.
->>>>
->>>> Otherwise, the exclusive lock is not in the IO path once the client has acquired the exclusive lock.  If you are seeing a performance penalty for a single-client scenario with exclusive lock enabled, this is something we haven't seen and will have to investigate ASAP.
->>>>
->>>> Thanks,
->>>>
->>>> On Wed, May 25, 2016 at 4:48 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->>>>> Hi Mark/Josh,
->>>>> As I mentioned in the performance meeting today , if we create rbd image with default 'rbd create' command in jewel , the individual image performance for 4k RW is not scaling up well. But, multiple of rbd images running in parallel aggregated throughput is scaling.
->>>>> For the same QD and numjob combination, image created with image format 1 (and with hammer like rbd_default_features = 3) is producing *16X* more performance. I did some digging and here is my findings.
->>>>>
->>>>> Setup:
->>>>> --------
->>>>>
->>>>> 32 osds (all SSD) over 4 nodes. Pool size = 2 , min_size = 1.
->>>>>
->>>>> root@stormeap-1:~# ceph -s
->>>>>     cluster db0febf1-d2b0-4f8d-8f20-43731c134763
->>>>>      health HEALTH_WARN
->>>>>             noscrub,nodeep-scrub,sortbitwise flag(s) set
->>>>>      monmap e1: 1 mons at {a=10.60.194.10:6789/0}
->>>>>             election epoch 5, quorum 0 a
->>>>>      osdmap e139: 32 osds: 32 up, 32 in
->>>>>             flags noscrub,nodeep-scrub,sortbitwise
->>>>>       pgmap v20532: 2500 pgs, 1 pools, 7421 GB data, 1855 kobjects
->>>>>             14850 GB used, 208 TB / 223 TB avail
->>>>>                 2500 active+clean
->>>>>
->>>>> IO profile : Fio rbd with QD 128 and numjob = 10 rbd cache is
->>>>> disabled.
->>>>>
->>>>> Result:
->>>>> --------
->>>>> root@stormeap-1:~# rbd info recovery_test/rbd_degradation rbd image
->>>>> 'rbd_degradation':
->>>>>         size 1953 GB in 500000 objects
->>>>>         order 22 (4096 kB objects)
->>>>>         block_name_prefix: rb.0.5f5f.6b8b4567
->>>>>         format: 1
->>>>>
->>>>> On the above image with format 1 it is giving *~102K iops*
->>>>>
->>>>> root@stormeap-1:~# rbd info
->>>>> recovery_test/rbd_degradation_with_hammer_features
->>>>> rbd image 'rbd_degradation_with_hammer_features':
->>>>>         size 195 GB in 50000 objects
->>>>>         order 22 (4096 kB objects)
->>>>>         block_name_prefix: rbd_data.5f8d6b8b4567
->>>>>         format: 2
->>>>>         features: layering
->>>>>         flags:
->>>>>
->>>>> On the above image with hammer rbd features on , it is giving
->>>>> *~105K
->>>>> iops*
->>>>>
->>>>> root@stormeap-1:~# rbd info recovery_test/rbd_degradation_with_7
->>>>> rbd image 'rbd_degradation_with_7':
->>>>>         size 195 GB in 50000 objects
->>>>>         order 22 (4096 kB objects)
->>>>>         block_name_prefix: rbd_data.5fd86b8b4567
->>>>>         format: 2
->>>>>         features: layering, exclusive-lock
->>>>>         flags:
->>>>>
->>>>> On the above image with feature 7 (exclusive lock feature on) , it
->>>>> is giving *~8K iops*...So, >12X degradation
->>>>>
->>>>> Tried with single numjob and QD = 128 , performance bumped up till ~40K..Further increasing QD , performance is not going up.
->>>>>
->>>>>
->>>>> root@stormeap-1:~# rbd info recovery_test/rbd_degradation_with_15
->>>>> rbd image 'rbd_degradation_with_15':
->>>>>         size 195 GB in 50000 objects
->>>>>         order 22 (4096 kB objects)
->>>>>         block_name_prefix: rbd_data.5fab6b8b4567
->>>>>         format: 2
->>>>>         features: layering, exclusive-lock, object-map
->>>>>         flags:
->>>>>
->>>>> On the above image with feature 15 (exclusive lock, object map
->>>>> feature
->>>>> on) , it is giving *~8K iops*...So, >12X degradation
->>>>>
->>>>> Tried with single numjob and QD = 128 , performance bumped up till ~40K..Further increasing QD , performance is not going up.
->>>>>
->>>>>
->>>>> root@stormeap-1:~# rbd info recovery_test/ceph_recovery_img_1 rbd
->>>>> image 'ceph_recovery_img_1':
->>>>>         size 4882 GB in 1250000 objects
->>>>>         order 22 (4096 kB objects)
->>>>>         block_name_prefix: rbd_data.371b6b8b4567
->>>>>         format: 2
->>>>>         features: layering, exclusive-lock, object-map, fast-diff, deep-flatten
->>>>>         flags:
->>>>>
->>>>> On the above image with feature 61 (Jewel default) , it is giving
->>>>> *~6K iops*...So, *>16X* degradation
->>>>>
->>>>> Tried with single numjob and QD = 128 , performance bumped up till ~35K..Further increasing QD , performance is not going up.
->>>>>
->>>>> Summary :
->>>>> ------------
->>>>>
->>>>> 1. It seems exclusive lock feature is degrading performance.
->>>>>
->>>>> 2. It is degrading a bit further on enabling fast-diff,
->>>>> deep-flatten
->>>>>
->>>>>
->>>>> Let me know if you need more information on this.
->>>>>
->>>>> Thanks & Regards
->>>>> Somnath
->>>>>
->>>>>
->>>>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>> in the body of a message to majordomo@vger.kernel.org More
->>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>>
->>>> --
->>>> Jason
->>>
->>>
->>> --
->>> Jason
->>
->>
->>
->> --
->> Jason
->
->
->
-> --
-> Jason
+	http://pad.ceph.com/p/msgr2
+
+It is pretty similar to the current protocol, with a few key changes:
+
+1. The initial banner has a version number for protocl features supported 
+and required.  This will allow optional behavior later.  The current 
+protocol doesn't allow this (the banner string is fixed and has to match 
+verbatim).
+
+2. The auth handshake is a low-level msgr exchange now.  This more or less 
+matches the MAuth and MAuthReply exchange with the mon.  Also, the 
+authenticator/ticket presentation for established clients can be sent here 
+as part of this exchange, instead of as part of the msg_connect and 
+msg_connect_reply exchnage.
+
+3. The identification of peers during connect is moved to the TAG_IDENT 
+stage.  This way it could happen after authentication and/or encryption, 
+if we like.  (Not sure it matters.)
+
+4. Signatures are a separate message now that follows the previous 
+message.  If a message doesn't have a signature that follows, it is 
+dropped.  Once authenticated we can sign all the other handshake exchanges 
+(TAG_IDENT, etc.) as well as the messages themselves.
+
+5. The reconnect behavior for stateful connections is a separate 
+exchange. This keeps the stateless connections free of clutter.
+
+6. A few changes in the auth_none and cephx integratoin will be needed.  
+For example, all the current stubs assume that authentication happens over 
+MAuth message and authorization happens in an authorizer blob in 
+ceph_msg_connect.  Now both are part of TAG_AUTH_REQUEST, so we'll need to 
+multiplex the cephx message blobs. Also, because the IDENT exchanges 
+happens later, we may need to pass additional info in the auth handshake 
+messages (like the peer type, or whatever else is needed).
+
+7. Lots of messages can go either way, and I tried ot avoid a strict 
+request/response model so that things could be pipelined, and we'd spend a 
+minimal amount of time waiting for a response from the other end.  For 
+example,
+
+C:
+ initiates connection
+S:
+ accepts connection
+ -> banner
+ -> TAG_AUTH_METHODS
+C:
+ -> banner
+ -> TAG_AUTH_SET_METHOD
+ -> TAG_AUTH_AUTH_REQUEST
+S:
+ -> TAG_AUTH_REPLY
+C:
+ -> TAG_ENCRYPT_BEGIN
+ -> TAG_IDENT
+ -> TAG_SIGNATURE
+S:
+ -> TAG_ENCRYPT_BEGIN
+ -> TAG_IDENT
+ -> TAG_SIGNATURE
+C:
+ -> TAG_START
+ -> TAG_SIGNATURE
+ -> TAG_MSG
+ -> TAG_SIGNATURE
+    ...
+S:
+ -> TAG_MSG
+ -> TAG_SIGNATURE
+    ...
+
+Comments, please!  The exhange is a bit less structured as far as who 
+sends what message, with the idea that we could pipeline a lot of it, but 
+it may end up being too ambiguous.  Let me know what you think...
+
+sage
