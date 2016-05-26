@@ -1,86 +1,83 @@
 From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 2/5] ceph: Propagate dentry down to inode_change_ok()
-Date: Thu, 26 May 2016 18:19:57 +0200
-Message-ID: <1464279600-13009-3-git-send-email-jack@suse.cz>
+Subject: [PATCH 5/5] fs: Avoid premature clearing of capabilities
+Date: Thu, 26 May 2016 18:20:00 +0200
+Message-ID: <1464279600-13009-6-git-send-email-jack@suse.cz>
 References: <1464279600-13009-1-git-send-email-jack@suse.cz>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:54486 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:54501 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754532AbcEZQUK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 May 2016 12:20:10 -0400
+	id S1754559AbcEZQUL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 May 2016 12:20:11 -0400
 In-Reply-To: <1464279600-13009-1-git-send-email-jack@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Al Viro <viro@ZenIV.linux.org.uk>
 Cc: linux-fsdevel@vger.kernel.org, xfs@oss.sgi.com, ceph-devel@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, Jan Kara <jack@suse.cz>
 
-To avoid clearing of capabilities or security related extended
-attributes too early, inode_change_ok() will need to take dentry instead
-of inode. ceph_setattr() has the dentry easily available but
-__ceph_setattr() is also called from ceph_set_acl() where dentry is not
-easily available. Luckily that call path does not need inode_change_ok()
-to be called anyway. So reorganize functions a bit so that
-inode_change_ok() is called only from paths where dentry is available.
+Currently, notify_change() clears capabilities or IMA attributes by
+calling security_inode_killpriv() before calling into ->setattr. Thus it
+happens before any other permission checks in inode_change_ok() and user
+is thus allowed to trigger clearing of capabilities or IMA attributes
+for any file he can look up e.g. by calling chown for that file. This is
+unexpected and can lead to user DoSing a system.
 
+Fix the problem by calling security_inode_killpriv() at the end of
+inode_change_ok() instead of from notify_change(). At that moment we are
+sure user has permissions to do the requested change.
+
+References: CVE-2015-1350
 Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- fs/ceph/acl.c   |  5 +++++
- fs/ceph/inode.c | 19 +++++++++++--------
- 2 files changed, 16 insertions(+), 8 deletions(-)
+ fs/attr.c | 20 ++++++++++++++------
+ 1 file changed, 14 insertions(+), 6 deletions(-)
 
-diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
-index 013151d50069..a2cedfde75eb 100644
---- a/fs/ceph/acl.c
-+++ b/fs/ceph/acl.c
-@@ -127,6 +127,11 @@ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type)
- 			goto out_free;
+diff --git a/fs/attr.c b/fs/attr.c
+index ee758afc1695..8d9698eda636 100644
+--- a/fs/attr.c
++++ b/fs/attr.c
+@@ -47,7 +47,7 @@ int setattr_prepare(struct dentry *dentry, struct iattr *attr)
+ 
+ 	/* If force is set do it anyway. */
+ 	if (ia_valid & ATTR_FORCE)
+-		return 0;
++		goto kill_priv;
+ 
+ 	/* Make sure a caller can chown. */
+ 	if ((ia_valid & ATTR_UID) &&
+@@ -80,6 +80,16 @@ int setattr_prepare(struct dentry *dentry, struct iattr *attr)
+ 			return -EPERM;
  	}
  
-+	if (ceph_snap(inode) != CEPH_NOSNAP) {
-+		ret = -EROFS;
-+		goto out_free;
++kill_priv:
++	/* User has permission for the change */
++	if (ia_valid & ATTR_KILL_PRIV) {
++		int error;
++
++		error = security_inode_killpriv(dentry);
++		if (error)
++			return error;
 +	}
 +
- 	if (new_mode != old_mode) {
- 		newattrs.ia_mode = new_mode;
- 		newattrs.ia_valid = ATTR_MODE;
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index e669cfa9d793..29873cbd6b2b 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1791,13 +1791,6 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
- 	int inode_dirty_flags = 0;
- 	bool lock_snap_rwsem = false;
- 
--	if (ceph_snap(inode) != CEPH_NOSNAP)
--		return -EROFS;
--
--	err = inode_change_ok(inode, attr);
--	if (err != 0)
--		return err;
--
- 	prealloc_cf = ceph_alloc_cap_flush();
- 	if (!prealloc_cf)
- 		return -ENOMEM;
-@@ -2011,7 +2004,17 @@ out_put:
-  */
- int ceph_setattr(struct dentry *dentry, struct iattr *attr)
- {
--	return __ceph_setattr(d_inode(dentry), attr);
-+	struct inode *inode = d_inode(dentry);
-+	int err;
-+
-+	if (ceph_snap(inode) != CEPH_NOSNAP)
-+		return -EROFS;
-+
-+	err = inode_change_ok(inode, attr);
-+	if (err != 0)
-+		return err;
-+
-+	return __ceph_setattr(inode, attr);
+ 	return 0;
  }
+ EXPORT_SYMBOL(setattr_prepare);
+@@ -220,13 +230,11 @@ int notify_change(struct dentry * dentry, struct iattr * attr, struct inode **de
+ 	if (!(ia_valid & ATTR_MTIME_SET))
+ 		attr->ia_mtime = now;
+ 	if (ia_valid & ATTR_KILL_PRIV) {
+-		attr->ia_valid &= ~ATTR_KILL_PRIV;
+-		ia_valid &= ~ATTR_KILL_PRIV;
+ 		error = security_inode_need_killpriv(dentry);
+-		if (error > 0)
+-			error = security_inode_killpriv(dentry);
+-		if (error)
++		if (error < 0)
+ 			return error;
++		if (error == 0)
++			ia_valid = attr->ia_valid &= ~ATTR_KILL_PRIV;
+ 	}
  
- /*
+ 	/*
 -- 
 2.6.6
 
