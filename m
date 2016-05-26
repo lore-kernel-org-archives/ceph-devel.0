@@ -1,36 +1,41 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Severe performance degradation with jewel rbd image
-Date: Thu, 26 May 2016 14:52:26 -0400
-Message-ID: <CA+aFP1CqwRC8-EqPb0vTktQG0XViS8NO5TUg6BG9z0ooDPgbbw@mail.gmail.com>
-References: <BL2PR02MB2115AA33422B53D2C0B65E7AF4400@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1B_+TqDLNzxpvNYCz_3-Wsc4HAHUtKLzoJ+xUvqNHE0NQ@mail.gmail.com>
-	<BL2PR02MB21158B4F676CFDF982E52704F4400@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1DsqsTxgy4cXqJSRADqOYa2QsA8UUVTNUuA2__GHm0BFw@mail.gmail.com>
-	<BL2PR02MB21154CCDABC8037F9D63DA7AF4410@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1DapnzYpBDowdTjMVfrUcBSQy0tvYOEDM7QJJSy-kmPuw@mail.gmail.com>
-	<BL2PR02MB2115791B5D2A2D163F7A2AEFF4410@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+aFP1DdPYWhRCeJ2buc7Gsz+gmti2BA4=7qoQHWP_Zi1_KyNQ@mail.gmail.com>
-	<BL2PR02MB2115D73ED758ADC9C52729A6F4410@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CAN=+7FVX5WecZZ=2dj1vSeFC=WCBvJkO5Esi+UuTT+_2=aiX9A@mail.gmail.com>
-	<CA+aFP1BH-sJE1e8BsTwS3s9D-246dYQoBrhTtAtauJFRi+G5jw@mail.gmail.com>
-	<BL2PR02MB2115FA285EA269AB9D536FF0F4410@BL2PR02MB2115.namprd02.prod.outlook.com>
-Reply-To: dillaman@redhat.com
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [GIT PULL] Ceph updates for 4.7-rc1
+Date: Thu, 26 May 2016 15:02:37 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605261446230.6221@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1605261035390.6221@cpach.fuggernut.com> <CA+55aFz=U2rdLDOm=wHmS2UkmFqtx+PB--7K7B8uJtBza3dP4A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f181.google.com ([209.85.192.181]:36101 "EHLO
-	mail-pf0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754361AbcEZSw1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2016 14:52:27 -0400
-Received: by mail-pf0-f181.google.com with SMTP id f144so20323533pfa.3
-        for <ceph-devel@vger.kernel.org>; Thu, 26 May 2016 11:52:26 -0700 (PDT)
-In-Reply-To: <BL2PR02MB2115FA285EA269AB9D536FF0F4410@BL2PR02MB2115.namprd02.prod.outlook.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CA+55aFz=U2rdLDOm=wHmS2UkmFqtx+PB--7K7B8uJtBza3dP4A@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-You can dynamically enable/disable exclusive-lock, object-map,
-fast-diff, and journaling after the image is created via  "rbd feature
-disable <image-spec> <feature>".  The deep-flatten feature can be
-disabled-only via the same CLI.
+On Thu, 26 May 2016, Linus Torvalds wrote:
+> On Thu, May 26, 2016 at 11:18 AM, Sage Weil <sweil@redhat.com> wrote:
+> >
+> > Please pull the following Ceph updates from
+> 
+> Why was that branch rebased yesterday?
+> 
+> What has been in next, if anything?
+> 
+> And if something has been in next, why was _that_ not sent to me?
+
+The branch was assembled in its current form yesterday and is included in 
+today's -next:
+
+	https://git.kernel.org/cgit/linux/kernel/git/next/linux-next.git/commit/?id=e536030934aebf049fe6aaebc58dd37aeee21840
+
+The same commit went through our internal testing last night, and we've 
+been testing the code for the better part of a week internally.
+
+If you want it to bake longer in -next first, let us know.  We're not 
+causing merge conflicts, and there isn't -next-based ceph testing that I'm 
+aware of going on outside of our own QA environment, so I'm not sure how 
+valuable it is, but I'm happy to delay before sending a pull request if 
+that's what you want to see.
+
+Thanks-
+sage
