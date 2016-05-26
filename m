@@ -1,79 +1,31 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: SMR Benchmarking Results
-Date: Thu, 26 May 2016 05:20:31 +0000
-Message-ID: <BLUPR0201MB1524D83DDA25FD1F836C62D4E8410@BLUPR0201MB1524.namprd02.prod.outlook.com>
-References: <CAPLK-i8DKcHtNuv5T1jua=5sp3Fxxb+LwdTdUSpvxqRNj7AMhA@mail.gmail.com>
+From: Zhiqiang Wang <wonzhq@gmail.com>
+Subject: Snap handling in the cache tiering case
+Date: Thu, 26 May 2016 14:40:08 +0800
+Message-ID: <CA+cZ7sjxwa=AZYiQEQA7Han97QcuCSYKZqt_RNwG9Z5N2BTQ3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0078.outbound.protection.outlook.com ([65.55.169.78]:28587
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750780AbcEZFgY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 May 2016 01:36:24 -0400
-In-Reply-To: <CAPLK-i8DKcHtNuv5T1jua=5sp3Fxxb+LwdTdUSpvxqRNj7AMhA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-it0-f41.google.com ([209.85.214.41]:36991 "EHLO
+	mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753057AbcEZGqQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2016 02:46:16 -0400
+Received: by mail-it0-f41.google.com with SMTP id z123so41679251itg.0
+        for <ceph-devel@vger.kernel.org>; Wed, 25 May 2016 23:46:16 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shehbaz Jaffer <shehbazjaffer007@gmail.com>, Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-U291bmRzIGxpa2UgdGhlIHpvbmUgb3BlbiBhbmQvb3IgY2xvc2UgY29tbWFuZHMgYXJlIHRyaWdn
-ZXJpbmcgSS9PIG9wZXJhdGlvbnMuDQoNCkp1c3QgYXMgYW4gZXhwZXJpbWVudCwgaG93IGxvbmcg
-ZG9lcyBpdCB0YWtlIHRvIG9wZW4gYW5kIGNsb3NlIGEgYnVuY2ggb2Ygem9uZXMgd2l0aCBOTyBk
-YXRhIGJlaW5nIHdyaXR0ZW4gdG8gdGhlbT8NCg0KDQpBbGxlbiBTYW11ZWxzDQpTYW5EaXNrIHxh
-IFdlc3Rlcm4gRGlnaXRhbCBicmFuZA0KMjg4MCBKdW5jdGlvbiBBdmVudWUsIFNhbiBKb3NlLCBD
-QSA5NTEzNA0KVDogKzEgNDA4IDgwMSA3MDMwfCBNOiArMSA0MDggNzgwIDY0MTYNCmFsbGVuLnNh
-bXVlbHNAU2FuRGlzay5jb20NCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZy
-b206IFNoZWhiYXogSmFmZmVyIFttYWlsdG86c2hlaGJhemphZmZlcjAwN0BnbWFpbC5jb21dDQo+
-IFNlbnQ6IFdlZG5lc2RheSwgTWF5IDI1LCAyMDE2IDk6NDQgUE0NCj4gVG86IFNhZ2UgV2VpbCA8
-c3dlaWxAcmVkaGF0LmNvbT4NCj4gQ2M6IEFsbGVuIFNhbXVlbHMgPEFsbGVuLlNhbXVlbHNAc2Fu
-ZGlzay5jb20+OyBjZXBoLQ0KPiBkZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogU01S
-IEJlbmNobWFya2luZyBSZXN1bHRzDQo+IA0KPiBIaSBTYWdlLA0KPiANCj4gSSBoYXZlIGJlZW4g
-d29ya2luZyBvbiBiZW5jaG1hcmtpbmcgU01SIERyaXZlcyB1c2luZyBsaWJ6YmMuIEl0IGFwcGVh
-cnMNCj4gdGhhdCBpc3N1aW5nIFpCQyBjb21tYW5kcyBmb3Igem9uZSBhd2FyZSBob3N0IGlzIG1v
-cmUgaW5lZmZpY2llbnQgYXMNCj4gY29tcGFyZWQgdG8gbm9ybWFsIGNvcHkgb3BlcmF0aW9ucyB1
-c2luZyAnZGQnIGNvbW1hbmQuDQo+IA0KPiBJIGNyZWF0ZWQgYSAyNTYgTUIgZmlsZSBhbmQgcGxh
-Y2VkIGl0IGluIG1lbW9yeSAoc28gdGhhdCB3ZSBkbyBub3QgaGF2ZSBkYXRhDQo+IGZldGNoIG92
-ZXJoZWFkcykuIEkgY29weSB0aGlzIGZpbGUgcmVwZWF0ZWRseSBvbiBhIEhvc3QgQXdhcmUgU01S
-IGRyaXZlIGluIDINCj4gc2NlbmFyaW9zIDoNCj4gDQo+IGEpIGRkIC0gSSB1c2UgZHVtYiBkZCB0
-aGF0IHRha2VzIDFNQiBjaHVua3Mgb2YgZmlsZSBhbmQga2VlcHMgY29weWluZyB0aGUgZmlsZQ0K
-PiB0byBTTVIgZHJpdmUgZm9yIDx3cml0ZVNpemU+IGJ5dGVzLiBOb3RlIHRoYXQgZGQgZG9lcyBu
-b3QgdGFrZSB0aGUgem9uZXMNCj4gaW50byBjb25zaWRlcmF0aW9uLg0KPiANCj4gYikgU01SX2F3
-YXJlX2NvcHkgLSBUaGlzIGNvcHkgdGFrZXMgZmlsZSBjaHVua3MgMU1CIGluIHNpemUsIGJ1dCBp
-c3N1ZXMgWkJDDQo+IGNvbW1hbmRzIHRvIG9wZW4gZWFjaCB6b25lLCB3cml0ZSAyNTYgTUIgZGF0
-YSB0byB0aGUgem9uZSwgY2xvc2UgdGhlDQo+IHpvbmUsIGFuZCB0aGVuIG1vdmUgdG8gYW5vdGhl
-ciB6b25lIHRpbGwgPHdyaXRlU2l6ZT4gYnl0ZXMgaGF2ZSBiZWVuDQo+IHdyaXR0ZW4uDQo+IA0K
-PiBwZXJmb3JtYW5jZSByZXN1bHRzIGZvciAxR0IsIDEwR0Igd3JpdGUgc2l6ZXMgYXJlIDV4IHNs
-b3dlciB3aXRoICJ6b25lDQo+IGF3YXJlIiB3cml0aW5nLCBhcyBjb21wYXJlZCB0byBub3JtYWwg
-ZGQgd3JpdGluZzoNCj4gDQo+IHdyaXRlU2l6ZSAoaW4gR0IpICAgICBkZCB0aW1lIChpbiBtaW46
-c2VjKSAgICAgc21yX2F3YXJlX2NvcHkgKGluIG1pbjpzZWMpDQo+IDEgR0IgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAwOjcgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDA6MzQN
-Cj4gMTAgR0IgICAgICAgICAgICAgICAgICAgICAgICAgICAgMToxMSAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgIDY6NDENCj4gNTAgR0IgICAgICAgICAgICAgICAgICAgICAgICAgICAgNTo1
-MSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBOQQ0KPiAxMDAgR0IgICAgICAgICAgICAg
-ICAgICAgICAgICAgIDExOjQyICAgICAgICAgICAgICAgICAgICAgICAgICAgICBOQQ0KPiANCj4g
-KGFsbCB3cml0ZXMgd2VyZSBmb2xsb3dlZCBieSBzeW5jIGNvbW1hbmQpDQo+IA0KPiBJIHdhcyB0
-cnlpbmcgdG8gc2VlIGlmIHRoZXJlIGlzIGFuIGludGVybmFsIGNhY2hlIG9mIHNvbWUgc29ydCBp
-biB0aGUgSG9zdCBBd2FyZQ0KPiBTTVIgZHJpdmUsIHdoaWNoIHByb2JhYmx5IHNlcmlhbGl6ZXMg
-YWxsIHdyaXRlcyB1cCB0byBjZXJ0YWluIGV4dGVudCBmb3IgZGQNCj4gY29tbWFuZCwgYnV0IHRo
-ZSB0aW1lIGZvciB3cml0ZXMgdXNpbmcgdGhlIGRkIGNvbW1hbmQgZm9yIHVwIHRvIDEwMEdCDQo+
-IGZvbGxvdyBhIGxpbmVhciBwYXR0ZXJuLiBJIHdpbGwgdHJ5IHRvIHNlZSBpZiB3ZSBoaXQgYSBi
-b3R0bGVuZWNrIHdpdGggZGQgZm9yIGxhcmdlcg0KPiBmaWxlIHNpemVzIG9yIHVuYWxpZ25lZCB3
-cml0ZXMuDQo+IA0KPiBGb2xsb3d1cCBxdWVzdGlvbnM6DQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tDQo+IA0KPiBhKSBJIHRoaW5rIHdlIHNob3VsZCBoYXZlIHNvbWUgd29ya2xvYWQgdHJh
-Y2VzIG9yIHBhdHRlcm5zIHNvIHRoYXQgd2UgY2FuDQo+IGJlbmNobWFyayBTTVIgZHJpdmVzIGFu
-ZCBtYWtlIGFsbG9jYXRvciBtb3JlIFNNUiBmcmllbmRseS4gSW4gcGFydGljdWxhciAtDQo+IGkp
-IHNpemUgb2YgZmlsZXMsDQo+IGlpKSBhbGlnbm1lbnQgb2YgZmlsZXMNCj4gaWlpKSAlIHJlYWQg
-LyB3cml0ZS8gZGVsZXRlIHdvcmtsb2Fkcw0KPiBpdikgZGVncmVlIG9mIHBhcmFsbGVsaXNtIGlu
-IHdyaXRpbmcuDQo+IA0KPiBiKSBTTVIgRHJpdmUgaGFzIGEgbm90aW9uIG9mIHBhcmFsbGVsIHdy
-aXRlcyAtIGkuZS4gbXVsdGlwbGUgem9uZXMgY2FuIGJlIGtlcHQNCj4gb3BlbiBhbmQgd3JpdHRl
-biB0byBzaW11bHRhbmVvdXNseS4gSSBkbyBub3QgdGhpbmsgdGhlcmUgYXJlIG11bHRpcGxlIGhl
-YWRzDQo+IGludm9sdmVkIGJ1dCBpbnRlcm5hbGx5IHRoZXJlIGlzIHNvbWUgZm9ybSBvZiAiZWZm
-aWNpZW50IHBhcmFsbGVsIHdyaXRlIHRvIHpvbmUiDQo+IG1lY2hhbmlzbSBpbiBTTVIuIEkgYW0g
-dGhpbmtpbmcgYWJvdXQgdGhpcyBiZWNhdXNlIHdoZW4gd2UgcXVlcnkgU01SDQo+IGRyaXZlIGlu
-Zm9ybWF0aW9uLCBpdCBzaG93cyB0aGF0IG1vc3QgZWZmaWVpY250IG51bWJlciBvZiB6b25lcyBj
-YW4gYmUNCj4gcGFyYWxsZWxseSBrZXB0IG9wZW4gPSAxMjggLg0KPiBNYXliZSB0aGlzIGlzIHNv
-bWV0aGluZyB0aGF0IHdlIGNhbiB0YWtlIGFkdmFudGFnZSBvZj8NCj4gDQo+IFRoYW5rcyBhbmQg
-UmVnYXJkcywNCj4gU2hlaGJheg0K
+Hi all,
+
+In the current implementation, the base pool's snap info is well
+propagated to the cache pool. However, this is not vice verse. When
+creating a pool snap on the cache pool, this information is not shared
+with the base. And it could potentially be overwritten by the later
+snap operations on the base pool. Should we allow pool snap operations
+on the cache pool?
+
+Another question is that is it safe to clear all the snap infos on the
+cache pool when removing the cache tiering? This seems ok to me if the
+base and cache pools' snap infos are identical. I'm asking this
+because if the snap infos are not cleared on the cache pool, it
+prevents us from using this pool as a cache pool again.
