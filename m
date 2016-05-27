@@ -1,100 +1,165 @@
-From: Jianjian Huo <jianjian.huo@samsung.com>
-Subject: RE: bluestore cache
-Date: Fri, 27 May 2016 03:38:43 +0000
-Message-ID: <3F3468645DC82146857A5E1C91E23F4B1B2A3A33@SSIEXCH-MB3.ssi.samsung.com>
-References: <alpine.DEB.2.11.1605261503240.6221@cpach.fuggernut.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: msgr2 protocol
+Date: Fri, 27 May 2016 12:41:35 +0800
+Message-ID: <CACJqLyYbpFQynVcBFO4E254bvH5R05DvTAw+vfu68ptwa7oSZA@mail.gmail.com>
+References: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailout2.w2.samsung.com ([211.189.100.12]:24714 "EHLO
-	usmailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932168AbcE0Dir convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2016 23:38:47 -0400
-Received: from uscpsbgex4.samsung.com
- (u125.gpu85.samsung.co.kr [203.254.195.125]) by mailout2.w2.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0O7T009WGGSKOW40@mailout2.w2.samsung.com> for
- ceph-devel@vger.kernel.org; Thu, 26 May 2016 23:38:44 -0400 (EDT)
-In-reply-to: <alpine.DEB.2.11.1605261503240.6221@cpach.fuggernut.com>
-Content-language: en-US
+Received: from mail-pu1apc01on0110.outbound.protection.outlook.com ([104.47.126.110]:45705
+	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753845AbcE0Elu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 27 May 2016 00:41:50 -0400
+Received: by mail-vk0-f46.google.com with SMTP id k1so73859038vka.3
+        for <ceph-devel@vger.kernel.org>; Thu, 26 May 2016 21:41:46 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On Fri, May 27, 2016 at 2:17 AM, Sage Weil <sweil@redhat.com> wrote:
+> I wrote up a basic proposal for the new msgr2 protocol:
+>
+>         http://pad.ceph.com/p/msgr2
+>
+> It is pretty similar to the current protocol, with a few key changes:
+>
+> 1. The initial banner has a version number for protocl features supported
+> and required.  This will allow optional behavior later.  The current
+> protocol doesn't allow this (the banner string is fixed and has to match
+> verbatim).
 
+Does msgrv2 need to talk with v1peer? Or we just reject this handshake?
 
-On Thu, May 26, 2016 at 12:27 PM, Sage Weil <sweil@redhat.com> wrote:
-> Previously we were relying on the block device cache when appropriate
-> (when a rados hint indicated we should, usually), but that is unreliable
-> for annoying O_DIRECT reasons.  We also need an explicit cache to cope
-> with some of the read/modify/write cases with compression and checksum
-> block/chunk sizes.
->
-> A basic cache is in place that is attached to each Onode, and maps the
-> logical object bytes to buffers.  We also have a per-collection onode
-> cache.  Currently the only trimming of data happens when onodes are
-> trimmed, and we control that using a coarse per-collection num_onodes
-> knob.
->
-> There are two basic questions:
->
-> 1. First, should we stick with a logical extent -> buffer mapping, or move
-> to a blob -> blob extent mapping.  The former is simpler and attaches to
-> the onode cache, which we also have to fix trimming for anyway.  On the
-> other hand, when we clone an object (usually a head object to a snapshot),
-> the cache doesn't follow.  Moving to a blob-based scheme would work better
-> in that regard, but probably means that we have another object
-> (bluestore_blob_t) whose lifecycle we need to manage.
->
-> I'm inclined to stick with the current scheme since reads from just-cloned
-> snaps probably aren't too frequent, at least until we have a better
-> idea how to do the lifecycle with the simpler (current) model.
->
-> 2. Second, we need to trim the buffers.  The per-collection onode cache is
-> nice because the LRU is local to the collection and already protected by
-> existing locks, which avoids complicated locking in the trim path that
-> we'd get from a global LRU.  On the other hand, it's clearly suboptimal:
-> some pools will get more IO than others and we want to apportion our cache
-> resources more fairly.
->
-> My hope is that we can do both using a scheme that has collection-local
-> LRU (or ARC or some other cache policy) for onodes and buffers, and then
-> have a global view of what proportion of the cache a collection is
-> entitled to and drive our trimming against that.  This won't be super
-> precise, but I wouldn't even if we fudge where the "perfect"
-> per-collection cache size is by say 30% I wouldn't expect to see a huge
-> cache hit range change over that range (unless your cache is already
-> pretty undersized).
->
-> Anyway, a simple way to estimate a collections portion of the total might
-> be to have a periodic global epoch counter that increments every, say, 10
-> seconds.  Then we could ops globally and per collection.  When the epoch
-> rolls over, we look at our previous epoch count vs the global count and
-> use that ratio to size our per-collection cache.  Since this doesn't have
-> to be super-precise we can get clever with atomic and per-cpu variables if
-> we need to on the global count.
->
-> Within a collection, we're under the same collection lock, so a simple lru
-> or onodes and buffers ought to suffice.  I think we want something better
-> than just a straight-LRU, though: some data is hinted WILLNEED, and
-> buffers we hit in cache twice should get bumped up higher than stuff we
-> just read off of disk.  The MDS uses a simple 2-level LRU list; I suspect
-> something like MQ might be a better choice for us, but this is probably a
-> secondary issue.. we can optimize this independently once we have the
-> overall approach sorted out.
->
-> Anyway, I guess what I'm looking for is feedback on (1) above, and whether
-> per-collection caches with periodic size calibration (based on workload)
-> sounds reasonable.
+If we reject v1, is it possible give our a chance to reset message version?
 
-Very good design, sharded cache without additional locks, adapts to different workloads. One benefit this logical extent caching doesn't have but blob caching has, if data set compression rate is high, then blob caching will use less RAM? also users tend to use more PGs on SSD deployment, will per collection cache use more CPU cycles with too many PGs?
-
-Jianjian
 >
-> Thanks!
+> 2. The auth handshake is a low-level msgr exchange now.  This more or less
+> matches the MAuth and MAuthReply exchange with the mon.  Also, the
+> authenticator/ticket presentation for established clients can be sent here
+> as part of this exchange, instead of as part of the msg_connect and
+> msg_connect_reply exchnage.
+
+S: TAG_AUTH_METHODS          # list methods
+    __le32 num_methods;
+    __le32 methods[num_methods];   // CEPH_AUTH_{NONE, CEPHX}
+
+From my view, it looks we need to force a method instead of letting
+peer side select? What's use case that we allow client side to decide
+method?
+
+>
+> 3. The identification of peers during connect is moved to the TAG_IDENT
+> stage.  This way it could happen after authentication and/or encryption,
+> if we like.  (Not sure it matters.)
+
+C or S: TAG_ENCRYPT_BEGIN    # signal that all subsequent traffic will
+be encrypted
+
+__le32 len
+
+<method specific payload>
+
+do we also need encrypt info handshake? like key/algorithm?
+
+>
+> 4. Signatures are a separate message now that follows the previous
+> message.  If a message doesn't have a signature that follows, it is
+> dropped.  Once authenticated we can sign all the other handshake exchanges
+> (TAG_IDENT, etc.) as well as the messages themselves.
+>
+> 5. The reconnect behavior for stateful connections is a separate
+> exchange. This keeps the stateless connections free of clutter.
+
+It will be a big task ......
+
+>
+> 6. A few changes in the auth_none and cephx integratoin will be needed.
+> For example, all the current stubs assume that authentication happens over
+> MAuth message and authorization happens in an authorizer blob in
+> ceph_msg_connect.  Now both are part of TAG_AUTH_REQUEST, so we'll need to
+> multiplex the cephx message blobs. Also, because the IDENT exchanges
+> happens later, we may need to pass additional info in the auth handshake
+> messages (like the peer type, or whatever else is needed).
+
+Hmm, only need peer type? if address is needed, IDENT stage must
+happen before auth
+
+>
+> 7. Lots of messages can go either way, and I tried ot avoid a strict
+> request/response model so that things could be pipelined, and we'd spend a
+> minimal amount of time waiting for a response from the other end.  For
+> example,
+>
+> C:
+>  initiates connection
+> S:
+>  accepts connection
+>  -> banner
+>  -> TAG_AUTH_METHODS
+> C:
+>  -> banner
+>  -> TAG_AUTH_SET_METHOD
+>  -> TAG_AUTH_AUTH_REQUEST
+> S:
+>  -> TAG_AUTH_REPLY
+> C:
+>  -> TAG_ENCRYPT_BEGIN
+>  -> TAG_IDENT
+>  -> TAG_SIGNATURE
+> S:
+>  -> TAG_ENCRYPT_BEGIN
+>  -> TAG_IDENT
+>  -> TAG_SIGNATURE
+> C:
+>  -> TAG_START
+>  -> TAG_SIGNATURE
+>  -> TAG_MSG
+>  -> TAG_SIGNATURE
+>     ...
+> S:
+>  -> TAG_MSG
+>  -> TAG_SIGNATURE
+>     ...
+>
+> Comments, please!  The exhange is a bit less structured as far as who
+> sends what message, with the idea that we could pipeline a lot of it, but
+> it may end up being too ambiguous.  Let me know what you think...
+
+we may also change ceph_msg_header/ceph_msg_footer :
+
+struct ceph_msg_header {
+__le64 seq;       /* message seq# for this session */
+__le64 tid;       /* transaction id */
+__le16 type;      /* message type */
+__le16 priority;  /* priority.  higher value == higher priority */
+__le16 version;   /* version of message encoding */
+
+__le32 front_len; /* bytes in main payload */
+__le32 middle_len;/* bytes in middle payload */
+__le32 data_len;  /* bytes of data payload */
+__le16 data_off;  /* sender: include full offset;
+    receiver: mask against ~PAGE_MASK */
+
+struct ceph_entity_name src;
+
+/* oldest code we think can decode this.  unknown if zero. */
+__le16 compat_version;
+__le16 reserved;
+__le32 crc;       /* header crc32c */
+} __attribute__ ((packed));
+
+we may drop middle_len, src thing.
+
+And could we drop footer and move crc to header? Because for each
+message, we always add a system call for footer since it can't be
+prefetched in userspace memory. Most of rpc impl only add a header to
+actual data.
+
+>
 > sage
->
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
