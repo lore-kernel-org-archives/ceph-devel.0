@@ -1,336 +1,106 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 1/5] xfs: Propagate dentry down to inode_change_ok()
-Date: Fri, 27 May 2016 18:12:33 +0200
-Message-ID: <20160527161233.GE21780@quack2.suse.cz>
-References: <1464279600-13009-1-git-send-email-jack@suse.cz>
- <1464279600-13009-2-git-send-email-jack@suse.cz>
- <20160526215304.GO21200@dastard>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: bluestore cache
+Date: Fri, 27 May 2016 10:09:24 -0700
+Message-ID: <CAJ4mKGb3TaOggHMGJP+YScXesLE+zPomJQn6KEjgVf8Uh2d=RQ@mail.gmail.com>
+References: <alpine.DEB.2.11.1605261503240.6221@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="6TrnltStXW4iwmi0"
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160526215304.GO21200@dastard>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Jan Kara <jack@suse.cz>, Al Viro <viro@ZenIV.linux.org.uk>, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, xfs@oss.sgi.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f44.google.com ([209.85.213.44]:35095 "EHLO
+	mail-vk0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753688AbcE0RJZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 May 2016 13:09:25 -0400
+Received: by mail-vk0-f44.google.com with SMTP id f66so151673598vkh.2
+        for <ceph-devel@vger.kernel.org>; Fri, 27 May 2016 10:09:25 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1605261503240.6221@cpach.fuggernut.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+On Thu, May 26, 2016 at 12:27 PM, Sage Weil <sweil@redhat.com> wrote:
+> Previously we were relying on the block device cache when appropriate
+> (when a rados hint indicated we should, usually), but that is unreliable
+> for annoying O_DIRECT reasons.  We also need an explicit cache to cope
+> with some of the read/modify/write cases with compression and checksum
+> block/chunk sizes.
+>
+> A basic cache is in place that is attached to each Onode, and maps the
+> logical object bytes to buffers.  We also have a per-collection onode
+> cache.  Currently the only trimming of data happens when onodes are
+> trimmed, and we control that using a coarse per-collection num_onodes
+> knob.
+>
+> There are two basic questions:
+>
+> 1. First, should we stick with a logical extent -> buffer mapping, or move
+> to a blob -> blob extent mapping.  The former is simpler and attaches to
+> the onode cache, which we also have to fix trimming for anyway.  On the
+> other hand, when we clone an object (usually a head object to a snapshot),
+> the cache doesn't follow.  Moving to a blob-based scheme would work better
+> in that regard, but probably means that we have another object
+> (bluestore_blob_t) whose lifecycle we need to manage.
+>
+> I'm inclined to stick with the current scheme since reads from just-cloned
+> snaps probably aren't too frequent, at least until we have a better
+> idea how to do the lifecycle with the simpler (current) model.
+>
+> 2. Second, we need to trim the buffers.  The per-collection onode cache is
+> nice because the LRU is local to the collection and already protected by
+> existing locks, which avoids complicated locking in the trim path that
+> we'd get from a global LRU.  On the other hand, it's clearly suboptimal:
+> some pools will get more IO than others and we want to apportion our cache
+> resources more fairly.
+>
+> My hope is that we can do both using a scheme that has collection-local
+> LRU (or ARC or some other cache policy) for onodes and buffers, and then
+> have a global view of what proportion of the cache a collection is
+> entitled to and drive our trimming against that.  This won't be super
+> precise, but I wouldn't even if we fudge where the "perfect"
+> per-collection cache size is by say 30% I wouldn't expect to see a huge
+> cache hit range change over that range (unless your cache is already
+> pretty undersized).
+>
+> Anyway, a simple way to estimate a collections portion of the total might
+> be to have a periodic global epoch counter that increments every, say, 10
+> seconds.  Then we could ops globally and per collection.  When the epoch
+> rolls over, we look at our previous epoch count vs the global count and
+> use that ratio to size our per-collection cache.  Since this doesn't have
+> to be super-precise we can get clever with atomic and per-cpu variables if
+> we need to on the global count.
 
 
---6TrnltStXW4iwmi0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+I'm a little concerned about this due to the nature of some of our IO
+patterns. Maybe it's not a problem within the levels you're talking
+about, but consider:
+1) RGW cluster, in which the index pool gets a hugely disproportionate
+number of ops in comparison to its actual size (at least for writes)
+2) RBD cluster, in which you can expect a golden master pool to get a
+lot of reads but have much less total data compared to the user block
+device pools.
 
-On Fri 27-05-16 07:53:04, Dave Chinner wrote:
-> On Thu, May 26, 2016 at 06:19:56PM +0200, Jan Kara wrote:
-> > To avoid clearing of capabilities or security related extended
-> > attributes too early, inode_change_ok() will need to take dentry instead
-> > of inode. Propagate dentry down to functions calling inode_change_ok().
-> > This is rather straightforward except for xfs_set_mode() function which
-> > does not have dentry easily available. Luckily that function does not
-> > call inode_change_ok() anyway so we just have to do a little dance with
-> > function prototypes.
-> 
-> The idea behind the change is good, but I think the little dance
-> could be improved as it makes the layering of the code seem weirdly
-> unbalanced to me. e.g.
-> 
-> xfs_vn_setattr()
->   xfs_vn_setattr_size()		<<<< inode_change_ok() here
-> 
-> xfs_vn_setattr()
->   xfs_vn_setattr_nonsize()	<<<< inode_change_ok() here
->     xfs_setattr_nonsize()
-> 
-> xfs_vn_setattr()
->   xfs_vn_setattr_size()
->     xfs_vn_setattr_nonsize()	<<<< inode_change_ok() here
->       xfs_setattr_nonsize()
-> 
-> And to be more confusing, the externally callable functions for the
-> rest of the XFS code are now xfs_vn_setattr_size() and
-> xfs_setattr_nonsize() which now have different calling context
-> limitations.
-> 
-> I think adding a little symmetric make sense. i.e:
-> 
-> xfs_vn_change_ok(dentry, iattr)
-> {
-> +	if (mp->m_flags & XFS_MOUNT_RDONLY)
-> +		return -EROFS;
-> +
-> +	if (XFS_FORCED_SHUTDOWN(mp))
-> +		return -EIO;
-> +
-> +	error = inode_change_ok(inode, iattr);
-> +	if (error)
-> +		return error;
-> +
-> }
-> 
-> xfs_vn_setattr_size(d, i)
-> {
-> 	xfs_vn_change_ok(d, i)
-> 	xfs_setattr_size(ip, i)
-> }
-> 
-> xfs_vn_setattr_nonsize(d, i)
-> {
-> 	xfs_vn_change_ok(d, i)
-> 	xfs_setattr_nonsize(ip, i)
-> }
-> 
-> xfs_vn_setattr(d, i)
-> {
-> 	xfs_vn_change_ok(d, i)
-> 	<rest of xfs_vn_setattr unchanged>
-> }
-> 
-> And remove the inode_change_ok() code from xfs_setattr_size and
-> xfs_setattr_nonsize() completely.  You've already done this with
-> xfs_vn_setattr_nonsize() - it just needs to be made symmetric to
-> keep a clean layering between VFS interfaces and internal XFS
-> interfaces...
+A system that naively allocates cache space based on proportion of ops
+is going to perform pretty badly.
+-Greg
 
-Ok, something like attached patch?
-
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
-
---6TrnltStXW4iwmi0
-Content-Type: text/x-patch; charset=us-ascii
-Content-Disposition: attachment; filename="0001-xfs-Propagate-dentry-down-to-inode_change_ok.patch"
-
-From 163d931793395f4d19c9f55cae1168d3f7cc26ba Mon Sep 17 00:00:00 2001
-From: Jan Kara <jack@suse.cz>
-Date: Thu, 26 May 2016 14:46:43 +0200
-Subject: [PATCH] xfs: Propagate dentry down to inode_change_ok()
-
-To avoid clearing of capabilities or security related extended
-attributes too early, inode_change_ok() will need to take dentry instead
-of inode. Propagate dentry down to functions calling inode_change_ok().
-This is rather straightforward except for xfs_set_mode() function which
-does not have dentry easily available. Luckily that function does not
-call inode_change_ok() anyway so we just have to do a little dance with
-function prototypes.
-
-Signed-off-by: Jan Kara <jack@suse.cz>
----
- fs/xfs/xfs_file.c  |  2 +-
- fs/xfs/xfs_inode.c |  2 +-
- fs/xfs/xfs_ioctl.c |  2 +-
- fs/xfs/xfs_iops.c  | 94 ++++++++++++++++++++++++++++++++++++------------------
- fs/xfs/xfs_iops.h  |  3 +-
- 5 files changed, 68 insertions(+), 35 deletions(-)
-
-diff --git a/fs/xfs/xfs_file.c b/fs/xfs/xfs_file.c
-index 85ce3032f815..b562cc5faae1 100644
---- a/fs/xfs/xfs_file.c
-+++ b/fs/xfs/xfs_file.c
-@@ -1024,7 +1024,7 @@ xfs_file_fallocate(
- 
- 		iattr.ia_valid = ATTR_SIZE;
- 		iattr.ia_size = new_size;
--		error = xfs_setattr_size(ip, &iattr);
-+		error = xfs_vn_setattr_size(file_dentry(file), &iattr);
- 		if (error)
- 			goto out_unlock;
- 	}
-diff --git a/fs/xfs/xfs_inode.c b/fs/xfs/xfs_inode.c
-index 96f606deee31..6adfc757d8c6 100644
---- a/fs/xfs/xfs_inode.c
-+++ b/fs/xfs/xfs_inode.c
-@@ -1724,7 +1724,7 @@ xfs_inactive_truncate(
- 	/*
- 	 * Log the inode size first to prevent stale data exposure in the event
- 	 * of a system crash before the truncate completes. See the related
--	 * comment in xfs_setattr_size() for details.
-+	 * comment in xfs_vn_setattr_size() for details.
- 	 */
- 	ip->i_d.di_size = 0;
- 	xfs_trans_log_inode(tp, ip, XFS_ILOG_CORE);
-diff --git a/fs/xfs/xfs_ioctl.c b/fs/xfs/xfs_ioctl.c
-index bcb6c19ce3ea..1d441bfacf59 100644
---- a/fs/xfs/xfs_ioctl.c
-+++ b/fs/xfs/xfs_ioctl.c
-@@ -731,7 +731,7 @@ xfs_ioc_space(
- 		iattr.ia_valid = ATTR_SIZE;
- 		iattr.ia_size = bf->l_start;
- 
--		error = xfs_setattr_size(ip, &iattr);
-+		error = xfs_vn_setattr_size(file_dentry(filp), &iattr);
- 		break;
- 	default:
- 		ASSERT(0);
-diff --git a/fs/xfs/xfs_iops.c b/fs/xfs/xfs_iops.c
-index fb7dc61f4a29..9e40c1c5dfe6 100644
---- a/fs/xfs/xfs_iops.c
-+++ b/fs/xfs/xfs_iops.c
-@@ -527,6 +527,30 @@ xfs_setattr_time(
- 		inode->i_mtime = iattr->ia_mtime;
- }
- 
-+static int
-+xfs_vn_change_ok(
-+	struct dentry	*dentry,
-+	struct iattr	*iattr)
-+{
-+	struct inode		*inode = d_inode(dentry);
-+	struct xfs_inode	*ip = XFS_I(inode);
-+	struct xfs_mount	*mp = ip->i_mount;
-+
-+	if (mp->m_flags & XFS_MOUNT_RDONLY)
-+		return -EROFS;
-+
-+	if (XFS_FORCED_SHUTDOWN(mp))
-+		return -EIO;
-+
-+	return inode_change_ok(inode, iattr);
-+}
-+
-+/*
-+ * Set non-size attributes of an inode.
-+ *
-+ * Caution: The caller of this function is responsible for calling
-+ * inode_change_ok() or otherwise verifying the change is fine.
-+ */
- int
- xfs_setattr_nonsize(
- 	struct xfs_inode	*ip,
-@@ -543,21 +567,6 @@ xfs_setattr_nonsize(
- 	struct xfs_dquot	*udqp = NULL, *gdqp = NULL;
- 	struct xfs_dquot	*olddquot1 = NULL, *olddquot2 = NULL;
- 
--	trace_xfs_setattr(ip);
--
--	/* If acls are being inherited, we already have this checked */
--	if (!(flags & XFS_ATTR_NOACL)) {
--		if (mp->m_flags & XFS_MOUNT_RDONLY)
--			return -EROFS;
--
--		if (XFS_FORCED_SHUTDOWN(mp))
--			return -EIO;
--
--		error = inode_change_ok(inode, iattr);
--		if (error)
--			return error;
--	}
--
- 	ASSERT((mask & ATTR_SIZE) == 0);
- 
- 	/*
-@@ -731,8 +740,27 @@ out_trans_cancel:
- 	return error;
- }
- 
-+int
-+xfs_vn_setattr_nonsize(
-+	struct dentry		*dentry,
-+	struct iattr		*iattr)
-+{
-+	struct xfs_inode	*ip = XFS_I(d_inode(dentry));
-+	int error;
-+
-+	trace_xfs_setattr(ip);
-+
-+	error = xfs_vn_change_ok(dentry, iattr);
-+	if (error)
-+		return error;
-+	return xfs_setattr_nonsize(ip, iattr, 0);
-+}
-+
- /*
-  * Truncate file.  Must have write permission and not be a directory.
-+ *
-+ * Caution: The caller of this function is responsible for calling
-+ * inode_change_ok() or otherwise verifying the change is fine.
-  */
- int
- xfs_setattr_size(
-@@ -747,18 +775,6 @@ xfs_setattr_size(
- 	uint			lock_flags = 0;
- 	bool			did_zeroing = false;
- 
--	trace_xfs_setattr(ip);
--
--	if (mp->m_flags & XFS_MOUNT_RDONLY)
--		return -EROFS;
--
--	if (XFS_FORCED_SHUTDOWN(mp))
--		return -EIO;
--
--	error = inode_change_ok(inode, iattr);
--	if (error)
--		return error;
--
- 	ASSERT(xfs_isilocked(ip, XFS_IOLOCK_EXCL));
- 	ASSERT(xfs_isilocked(ip, XFS_MMAPLOCK_EXCL));
- 	ASSERT(S_ISREG(inode->i_mode));
-@@ -931,16 +947,32 @@ out_trans_cancel:
- 	goto out_unlock;
- }
- 
-+int
-+xfs_vn_setattr_size(
-+	struct dentry		*dentry,
-+	struct iattr		*iattr)
-+{
-+	struct xfs_inode	*ip = XFS_I(d_inode(dentry));
-+	int error;
-+
-+	trace_xfs_setattr(ip);
-+
-+	error = xfs_vn_change_ok(dentry, iattr);
-+	if (error)
-+		return error;
-+	return xfs_setattr_size(ip, iattr);
-+}
-+
- STATIC int
- xfs_vn_setattr(
- 	struct dentry		*dentry,
- 	struct iattr		*iattr)
- {
--	struct xfs_inode	*ip = XFS_I(d_inode(dentry));
- 	int			error;
- 
- 	if (iattr->ia_valid & ATTR_SIZE) {
--		uint		iolock = XFS_IOLOCK_EXCL;
-+		struct xfs_inode	*ip = XFS_I(d_inode(dentry));
-+		uint			iolock = XFS_IOLOCK_EXCL;
- 
- 		xfs_ilock(ip, iolock);
- 		error = xfs_break_layouts(d_inode(dentry), &iolock, true);
-@@ -948,11 +980,11 @@ xfs_vn_setattr(
- 			xfs_ilock(ip, XFS_MMAPLOCK_EXCL);
- 			iolock |= XFS_MMAPLOCK_EXCL;
- 
--			error = xfs_setattr_size(ip, iattr);
-+			error = xfs_vn_setattr_size(dentry, iattr);
- 		}
- 		xfs_iunlock(ip, iolock);
- 	} else {
--		error = xfs_setattr_nonsize(ip, iattr, 0);
-+		error = xfs_vn_setattr_nonsize(dentry, iattr);
- 	}
- 
- 	return error;
-diff --git a/fs/xfs/xfs_iops.h b/fs/xfs/xfs_iops.h
-index a0f84abb0d09..0259a383721a 100644
---- a/fs/xfs/xfs_iops.h
-+++ b/fs/xfs/xfs_iops.h
-@@ -33,6 +33,7 @@ extern ssize_t xfs_vn_listxattr(struct dentry *, char *data, size_t size);
- extern void xfs_setattr_time(struct xfs_inode *ip, struct iattr *iattr);
- extern int xfs_setattr_nonsize(struct xfs_inode *ip, struct iattr *vap,
- 			       int flags);
--extern int xfs_setattr_size(struct xfs_inode *ip, struct iattr *vap);
-+extern int xfs_vn_setattr_nonsize(struct dentry *dentry, struct iattr *vap);
-+extern int xfs_vn_setattr_size(struct dentry *dentry, struct iattr *vap);
- 
- #endif /* __XFS_IOPS_H__ */
--- 
-2.6.6
-
-
---6TrnltStXW4iwmi0--
+>
+> Within a collection, we're under the same collection lock, so a simple lru
+> or onodes and buffers ought to suffice.  I think we want something better
+> than just a straight-LRU, though: some data is hinted WILLNEED, and
+> buffers we hit in cache twice should get bumped up higher than stuff we
+> just read off of disk.  The MDS uses a simple 2-level LRU list; I suspect
+> something like MQ might be a better choice for us, but this is probably a
+> secondary issue.. we can optimize this independently once we have the
+> overall approach sorted out.
+>
+> Anyway, I guess what I'm looking for is feedback on (1) above, and whether
+> per-collection caches with periodic size calibration (based on workload)
+> sounds reasonable.
+>
+> Thanks!
+> sage
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
