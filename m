@@ -1,92 +1,63 @@
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/5] xfs: Propagate dentry down to inode_change_ok()
-Date: Fri, 27 May 2016 07:53:04 +1000
-Message-ID: <20160526215304.GO21200@dastard>
-References: <1464279600-13009-1-git-send-email-jack@suse.cz>
- <1464279600-13009-2-git-send-email-jack@suse.cz>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [GIT PULL] Ceph updates for 4.7-rc1
+Date: Thu, 26 May 2016 19:16:54 -0700
+Message-ID: <CA+55aFybKvJPwi4M0FWRe_MVc1NTSDX==23adSGRYFauAEnGYw@mail.gmail.com>
+References: <alpine.DEB.2.11.1605261035390.6221@cpach.fuggernut.com>
+	<CA+55aFz=U2rdLDOm=wHmS2UkmFqtx+PB--7K7B8uJtBza3dP4A@mail.gmail.com>
+	<CA+55aFx=v0SYBURwJbFNdPW0nGpzJrVO2b0BcqJEonZedizm2A@mail.gmail.com>
+	<alpine.DEB.2.11.1605261718560.6221@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1464279600-13009-2-git-send-email-jack@suse.cz>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: Al Viro <viro@ZenIV.linux.org.uk>, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, xfs@oss.sgi.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <alpine.DEB.2.11.1605261718560.6221@cpach.fuggernut.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, May 26, 2016 at 06:19:56PM +0200, Jan Kara wrote:
-> To avoid clearing of capabilities or security related extended
-> attributes too early, inode_change_ok() will need to take dentry instead
-> of inode. Propagate dentry down to functions calling inode_change_ok().
-> This is rather straightforward except for xfs_set_mode() function which
-> does not have dentry easily available. Luckily that function does not
-> call inode_change_ok() anyway so we just have to do a little dance with
-> function prototypes.
+On Thu, May 26, 2016 at 2:46 PM, Sage Weil <sweil@redhat.com> wrote:
+>
+> One point of clarification, though: in the past I've squashed down fixes
+> discovered during testing if the branch hasn't hit a stable tree yet
+> (e.g., your tree).  AIUI this is(was?) standard procedure for things in
+> -next.
 
-The idea behind the change is good, but I think the little dance
-could be improved as it makes the layering of the code seem weirdly
-unbalanced to me. e.g.
+Yes, rebasing with good reason is acceptable for branches that don't
+have anybody else depend on them.
 
-xfs_vn_setattr()
-  xfs_vn_setattr_size()		<<<< inode_change_ok() here
+Adn the "good reason" ends up being a judgement call. If the merge
+window hasn't even started yet, the "good" reason may not even be very
+great, and might might be "oh, I screwed up the commit message, so
+let's make the history look good".
 
-xfs_vn_setattr()
-  xfs_vn_setattr_nonsize()	<<<< inode_change_ok() here
-    xfs_setattr_nonsize()
+If it's already inside the merge window, you should aim for having
+increasingly higher barriers to rebasing your tree, and strive to
+generally try to avoid it.
 
-xfs_vn_setattr()
-  xfs_vn_setattr_size()
-    xfs_vn_setattr_nonsize()	<<<< inode_change_ok() here
-      xfs_setattr_nonsize()
+If it's about something mostly cosmetic and the merge windoe has
+opened or is just about to, leave it be.
 
-And to be more confusing, the externally callable functions for the
-rest of the XFS code are now xfs_vn_setattr_size() and
-xfs_setattr_nonsize() which now have different calling context
-limitations.
+On the other hand, if it's really nasty problem and seriously will
+hurt people who try to bisect - even if you have fixed the problem
+then later in the history - you might choose to do it to not be in the
+situation that people who use "git bisect" to find another bug will
+then be left with data corruption or something like that because of a
+major bug in the middle of the development history.
 
-I think adding a little symmetric make sense. i.e:
+And in between those two extremes of "cosmetic" and "nasty data
+corruption bug" there is obviously a graduation of issues. There can't
+be any completely black-and-white rules.
 
-xfs_vn_change_ok(dentry, iattr)
-{
-+	if (mp->m_flags & XFS_MOUNT_RDONLY)
-+		return -EROFS;
-+
-+	if (XFS_FORCED_SHUTDOWN(mp))
-+		return -EIO;
-+
-+	error = inode_change_ok(inode, iattr);
-+	if (error)
-+		return error;
-+
-}
+But the corollary to that is that if you really had a major bug that
+you feld had to be fixed not just at the tip, but going back, then you
+then shouldn't immediately send the end result to me. Because you just
+fixed something critical (by definition, if you chose to do it just
+before you would have wanted to send to me), so now you need to retest
+things.
 
-xfs_vn_setattr_size(d, i)
-{
-	xfs_vn_change_ok(d, i)
-	xfs_setattr_size(ip, i)
-}
+So rebasing isn't some absolute wrong thing. Sometimes rebasing is
+simply the right thing to do. For example, maybe I don't get the same
+commits that were in -next, but I would have still seen that the code
+was there.
 
-xfs_vn_setattr_nonsize(d, i)
-{
-	xfs_vn_change_ok(d, i)
-	xfs_setattr_nonsize(ip, i)
-}
-
-xfs_vn_setattr(d, i)
-{
-	xfs_vn_change_ok(d, i)
-	<rest of xfs_vn_setattr unchanged>
-}
-
-And remove the inode_change_ok() code from xfs_setattr_size and
-xfs_setattr_nonsize() completely.  You've already done this with
-xfs_vn_setattr_nonsize() - it just needs to be made symmetric to
-keep a clean layering between VFS interfaces and internal XFS
-interfaces...
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+              Linus
