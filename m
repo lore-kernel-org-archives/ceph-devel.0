@@ -1,50 +1,65 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: Severe performance degradation with jewel rbd image
-Date: Sat, 28 May 2016 09:29:15 +0200 (CEST)
-Message-ID: <417572431.751254216.1464420555984.JavaMail.zimbra@oxygem.tv>
-References: <BL2PR02MB2115AA33422B53D2C0B65E7AF4400@BL2PR02MB2115.namprd02.prod.outlook.com> <BL2PR02MB2115791B5D2A2D163F7A2AEFF4410@BL2PR02MB2115.namprd02.prod.outlook.com> <CA+aFP1DdPYWhRCeJ2buc7Gsz+gmti2BA4=7qoQHWP_Zi1_KyNQ@mail.gmail.com> <BL2PR02MB2115D73ED758ADC9C52729A6F4410@BL2PR02MB2115.namprd02.prod.outlook.com> <CAN=+7FVX5WecZZ=2dj1vSeFC=WCBvJkO5Esi+UuTT+_2=aiX9A@mail.gmail.com> <CA+aFP1BH-sJE1e8BsTwS3s9D-246dYQoBrhTtAtauJFRi+G5jw@mail.gmail.com> <BL2PR02MB2115FA285EA269AB9D536FF0F4410@BL2PR02MB2115.namprd02.prod.outlook.com> <CA+aFP1CqwRC8-EqPb0vTktQG0XViS8NO5TUg6BG9z0ooDPgbbw@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Severe performance degradation with jewel rbd image
+Date: Sat, 28 May 2016 16:23:48 +0000
+Message-ID: <BL2PR02MB21153FB5894E727A1B462EBCF4430@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB2115AA33422B53D2C0B65E7AF4400@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <BL2PR02MB2115791B5D2A2D163F7A2AEFF4410@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <CA+aFP1DdPYWhRCeJ2buc7Gsz+gmti2BA4=7qoQHWP_Zi1_KyNQ@mail.gmail.com>
+ <BL2PR02MB2115D73ED758ADC9C52729A6F4410@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <CAN=+7FVX5WecZZ=2dj1vSeFC=WCBvJkO5Esi+UuTT+_2=aiX9A@mail.gmail.com>
+ <CA+aFP1BH-sJE1e8BsTwS3s9D-246dYQoBrhTtAtauJFRi+G5jw@mail.gmail.com>
+ <BL2PR02MB2115FA285EA269AB9D536FF0F4410@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <CA+aFP1CqwRC8-EqPb0vTktQG0XViS8NO5TUg6BG9z0ooDPgbbw@mail.gmail.com>
+ <417572431.751254216.1464420555984.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.211.110]:54421 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750701AbcE1H3T convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 May 2016 03:29:19 -0400
-In-Reply-To: <CA+aFP1CqwRC8-EqPb0vTktQG0XViS8NO5TUg6BG9z0ooDPgbbw@mail.gmail.com>
+Received: from mail-bn1on0054.outbound.protection.outlook.com ([157.56.110.54]:6896
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752970AbcE1QXv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 28 May 2016 12:23:51 -0400
+In-Reply-To: <417572431.751254216.1464420555984.JavaMail.zimbra@oxygem.tv>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Samuel Just <sjust@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Alexandre DERUMIER <aderumier@odiso.com>, "dillaman@redhat.com" <dillaman@redhat.com>
+Cc: Samuel Just <sjust@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
-
-qemu should have soon multithreaded disk access support (multi queues +=
- multi iothreads)
-
-https://lists.gnu.org/archive/html/qemu-devel/2016-05/msg05023.html
-
-Do you think it'll work with exclusive-lock ?
-
------ Mail original -----
-De: "Jason Dillaman" <jdillama@redhat.com>
-=C3=80: "Somnath Roy" <Somnath.Roy@sandisk.com>
-Cc: "Samuel Just" <sjust@redhat.com>, "ceph-devel" <ceph-devel@vger.ker=
-nel.org>
-Envoy=C3=A9: Jeudi 26 Mai 2016 20:52:26
-Objet: Re: Severe performance degradation with jewel rbd image
-
-You can dynamically enable/disable exclusive-lock, object-map,=20
-fast-diff, and journaling after the image is created via "rbd feature=20
-disable <image-spec> <feature>". The deep-flatten feature can be=20
-disabled-only via the same CLI.=20
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n=20
-the body of a message to majordomo@vger.kernel.org=20
-More majordomo info at http://vger.kernel.org/majordomo-info.html=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SSB0aGluayB5b3UgbmVlZCB0byBkaXNhYmxlIGV4Y2x1c2l2ZSBsb2NrIG5vdyBleHBsaWNpdGx5
+IChzaW5jZSBpdCBpcyBkZWZhdWx0ICdvbicgaW4gSmV3ZWwpIG90aGVyd2lzZSB5b3UgbmVlZCB0
+byBsaXZlIHdpdGggc2V2ZXJlIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGlzIEkgbWVudGlvbmVk
+Lg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
+LS0tDQpGcm9tOiBBbGV4YW5kcmUgREVSVU1JRVIgW21haWx0bzphZGVydW1pZXJAb2Rpc28uY29t
+XQ0KU2VudDogU2F0dXJkYXksIE1heSAyOCwgMjAxNiAxMjoyOSBBTQ0KVG86IGRpbGxhbWFuQHJl
+ZGhhdC5jb20NCkNjOiBTb21uYXRoIFJveTsgU2FtdWVsIEp1c3Q7IGNlcGgtZGV2ZWwNClN1Ympl
+Y3Q6IFJlOiBTZXZlcmUgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gd2l0aCBqZXdlbCByYmQgaW1h
+Z2UNCg0KSGksDQoNCnFlbXUgc2hvdWxkIGhhdmUgc29vbiBtdWx0aXRocmVhZGVkIGRpc2sgYWNj
+ZXNzIHN1cHBvcnQgKG11bHRpIHF1ZXVlcyArIG11bHRpIGlvdGhyZWFkcykNCg0KaHR0cHM6Ly9s
+aXN0cy5nbnUub3JnL2FyY2hpdmUvaHRtbC9xZW11LWRldmVsLzIwMTYtMDUvbXNnMDUwMjMuaHRt
+bA0KDQpEbyB5b3UgdGhpbmsgaXQnbGwgd29yayB3aXRoIGV4Y2x1c2l2ZS1sb2NrID8NCg0KLS0t
+LS0gTWFpbCBvcmlnaW5hbCAtLS0tLQ0KRGU6ICJKYXNvbiBEaWxsYW1hbiIgPGpkaWxsYW1hQHJl
+ZGhhdC5jb20+DQrDgDogIlNvbW5hdGggUm95IiA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+DQpD
+YzogIlNhbXVlbCBKdXN0IiA8c2p1c3RAcmVkaGF0LmNvbT4sICJjZXBoLWRldmVsIiA8Y2VwaC1k
+ZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQpFbnZvecOpOiBKZXVkaSAyNiBNYWkgMjAxNiAyMDo1Mjoy
+Ng0KT2JqZXQ6IFJlOiBTZXZlcmUgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gd2l0aCBqZXdlbCBy
+YmQgaW1hZ2UNCg0KWW91IGNhbiBkeW5hbWljYWxseSBlbmFibGUvZGlzYWJsZSBleGNsdXNpdmUt
+bG9jaywgb2JqZWN0LW1hcCwgZmFzdC1kaWZmLCBhbmQgam91cm5hbGluZyBhZnRlciB0aGUgaW1h
+Z2UgaXMgY3JlYXRlZCB2aWEgInJiZCBmZWF0dXJlIGRpc2FibGUgPGltYWdlLXNwZWM+IDxmZWF0
+dXJlPiIuIFRoZSBkZWVwLWZsYXR0ZW4gZmVhdHVyZSBjYW4gYmUgZGlzYWJsZWQtb25seSB2aWEg
+dGhlIHNhbWUgQ0xJLg0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2Ug
+dG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0IGh0dHA6
+Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KUExFQVNFIE5PVEU6IFRoZSBp
+bmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBp
+bnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBu
+YW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRl
+bmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVj
+ZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWlu
+YXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0
+bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGlu
+IGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAo
+YXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGll
+cyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVz
+IG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0K
