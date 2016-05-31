@@ -1,101 +1,150 @@
-From: Jianjian Huo <jianjian.huo@samsung.com>
-Subject: RE: RocksDB Incorrect API Usage
-Date: Tue, 31 May 2016 18:08:37 +0000
-Message-ID: <3F3468645DC82146857A5E1C91E23F4B1B2A3EE1@SSIEXCH-MB3.ssi.samsung.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: RocksDB Incorrect API Usage
+Date: Wed, 1 Jun 2016 02:12:49 +0800
+Message-ID: <CACJqLybKJo+otdX0SU8uOqa6N6POJ-Wgb19SrFmzsE_94Eo2gA@mail.gmail.com>
 References: <CACJqLyYtHkeQ+jSNi7JPJzRb6wfCcNAuCSr_YyTwdqA_kzzP_g@mail.gmail.com>
+	<3F3468645DC82146857A5E1C91E23F4B1B2A3EE1@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailout1.w2.samsung.com ([211.189.100.11]:48286 "EHLO
-	usmailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755236AbcEaSIk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 May 2016 14:08:40 -0400
-Received: from uscpsbgex1.samsung.com
- (u122.gpu85.samsung.co.kr [203.254.195.122]) by mailout1.w2.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0O8100H3VZQELO60@mailout1.w2.samsung.com> for
- ceph-devel@vger.kernel.org; Tue, 31 May 2016 14:08:38 -0400 (EDT)
-In-reply-to: <CACJqLyYtHkeQ+jSNi7JPJzRb6wfCcNAuCSr_YyTwdqA_kzzP_g@mail.gmail.com>
-Content-language: en-US
+Received: from mail-pu1apc01on0105.outbound.protection.outlook.com ([104.47.126.105]:7205
+	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755731AbcEaSNG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 31 May 2016 14:13:06 -0400
+Received: by mail-vk0-f43.google.com with SMTP id d127so112464232vkh.2
+        for <ceph-devel@vger.kernel.org>; Tue, 31 May 2016 11:13:01 -0700 (PDT)
+In-Reply-To: <3F3468645DC82146857A5E1C91E23F4B1B2A3EE1@SSIEXCH-MB3.ssi.samsung.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>, Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jianjian Huo <jianjian.huo@samsung.com>
+Cc: Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgSGFvbWFpLA0KDQpJIG5vdGljZWQgdGhpcyBhcyB3ZWxsLCBhbmQgbWFkZSBzYW1lIGNoYW5n
-ZXMgdG8gUm9ja3NEQlN0b3JlIGluIHRoaXMgUFIgbGFzdCB3ZWVrOg0KaHR0cHM6Ly9naXRodWIu
-Y29tL2NlcGgvY2VwaC9wdWxsLzkyMTUNCg0KT25lIHRoaW5nIHdoaWNoIGlzIGV2ZW4gd29yc2Us
-ICBzZWVrIHdpbGwgYnlwYXNzIHJvdyBjYWNoZSwgc28ga3YgcGFpcnMgd29uJ3QgYmUgYWJsZSB0
-byBiZSBjYWNoZWQgaW4gcm93IGNhY2hlLg0KSSBhbSB3b3JraW5nIHRvIGJlbmNobWFyayB0aGUg
-cGVyZm9ybWFuY2UgaW1wYWN0LCB3aWxsIHB1Ymxpc2ggdGhlIHJlc3VsdHMgYWZ0ZXIgSSBhbSBk
-b25lIHRoaXMgd2Vlay4NCg0KSmlhbmppYW4NCg0KT24gVHVlLCBNYXkgMzEsIDIwMTYgYXQgOTo0
-OSBBTSwgSGFvbWFpIFdhbmcgPGhhb21haUB4c2t5LmNvbT4gd3JvdGU6DQo+IEhpIFNhZ2UgYW5k
-IE1hcmssDQo+DQo+IEFzIG1lbnRpb25lZCBpbiBCbHVlU3RvcmUgc3RhbmR1cCwgSSBmb3VuZCBy
-b2Nrc2RiIGl0ZXJhdG9yICpTZWVrKg0KPiB3b24ndCB1c2UgYmxvb20gZmlsdGVyIGxpa2UgKkdl
-dCouDQo+DQo+ICpHZXQqIGltcGw6IGl0IHdpbGwgbG9vayBhdCBmaWx0ZXIgZmlyc3RseQ0KPiBo
-dHRwczovL2dpdGh1Yi5jb20vZmFjZWJvb2svcm9ja3NkYi9ibG9iL21hc3Rlci90YWJsZS9ibG9j
-a19iYXNlZF90YWJsZV9yZWFkZXIuY2MjTDEzNjkNCj4NCj4gSXRlcmF0b3IgKlNlZWsqOiBpdCB3
-aWxsIGRvIGJpbmFyeSBzZWFyY2gsIGJ5IGRlZmF1bHQgd2UgZG9uJ3Qgc3BlY2lmeQ0KPiBwcmVm
-aXggZmVhdHVyZShodHRwczovL2dpdGh1Yi5jb20vZmFjZWJvb2svcm9ja3NkYi93aWtpL1ByZWZp
-eC1TZWVrLUFQSS1DaGFuZ2VzKS4NCj4gaHR0cHM6Ly9naXRodWIuY29tL2ZhY2Vib29rL3JvY2tz
-ZGIvYmxvYi9tYXN0ZXIvdGFibGUvYmxvY2suY2MjTDk0DQo+DQo+IFNvIEkgdXNlIGEgc2ltcGxl
-IHRlc3RzOg0KPg0KPiAuL2RiX2JlbmNoIC1udW0gMTAwMDAwMDAgIC1iZW5jaG1hcmtzIGZpbGxi
-YXRjaA0KPiBmaWxsIHRoZSBkYiBmaXJzdGx5IHdpdGggMTAwMHcgcmVjb3Jkcy4NCj4NCj4gLi9k
-Yl9iZW5jaCAtdXNlX2V4aXN0aW5nX2RiICAtYmVuY2htYXJrcyByZWFkcmFuZG9tZmFzdA0KPiBy
-ZWFkcmFuZG9tZmFzdCBjYXNlIHdpbGwgdXNlICpHZXQqIEFQSSB0byByZXRyaXZlIGRhdGENCj4N
-Cj4gW3Jvb3RAaHVudGVyLW5vZGUyIHJvY2tzZGJdIyAuL2RiX2JlbmNoIC11c2VfZXhpc3Rpbmdf
-ZGIgIC1iZW5jaG1hcmtzDQo+IHJlYWRyYW5kb21mYXN0DQo+DQo+IExldmVsREI6ICAgIHZlcnNp
-b24gNC4zDQo+IERhdGU6ICAgICAgIFdlZCBKdW4gIDEgMDA6Mjk6MTYgMjAxNg0KPiBDUFU6ICAg
-ICAgICAzMiAqIEludGVsKFIpIFhlb24oUikgQ1BVIEU1LTI2ODAgMCBAIDIuNzBHSHoNCj4gQ1BV
-Q2FjaGU6ICAgMjA0ODAgS0INCj4gS2V5czogICAgICAgMTYgYnl0ZXMgZWFjaA0KPiBWYWx1ZXM6
-ICAgICAxMDAgYnl0ZXMgZWFjaCAoNTAgYnl0ZXMgYWZ0ZXIgY29tcHJlc3Npb24pDQo+IEVudHJp
-ZXM6ICAgIDEwMDAwMDANCj4gUHJlZml4OiAgICAwIGJ5dGVzDQo+IEtleXMgcGVyIHByZWZpeDog
-ICAgMA0KPiBSYXdTaXplOiAgICAxMTAuNiBNQiAoZXN0aW1hdGVkKQ0KPiBGaWxlU2l6ZTogICA2
-Mi45IE1CIChlc3RpbWF0ZWQpDQo+IFdyaXRlcyBwZXIgc2Vjb25kOiAwDQo+IENvbXByZXNzaW9u
-OiBTbmFwcHkNCj4gTWVtdGFibGVyZXA6IHNraXBfbGlzdA0KPiBQZXJmIExldmVsOiAwDQo+IFdB
-Uk5JTkc6IEFzc2VydGlvbnMgYXJlIGVuYWJsZWQ7IGJlbmNobWFya3MgdW5uZWNlc3NhcmlseSBz
-bG93DQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K
-PiBEQiBwYXRoOiBbL3RtcC9yb2Nrc2RidGVzdC0wL2RiYmVuY2hdDQo+IHJlYWRyYW5kb21mYXN0
-IDogICAgICAgNC41NzAgbWljcm9zL29wIDIxODgwNiBvcHMvc2VjOyAoMTAwMDEwMCBvZg0KPiAx
-MDAwMTAwIGZvdW5kLCBpc3N1ZWQgNDY2Mzkgbm9uLWV4aXN0IGtleXMpDQo+DQo+ID09PT09PT09
-PT09PT09PT09PT09PT09PT09PQ0KPiB0aGVuIEkgbW9kaWZ5IHJlYWRyYW5kb21mYXN0IHRvIHVz
-ZSBJdGVyYXRvciBBUElbMF06DQo+DQo+IFtyb290QGh1bnRlci1ub2RlMiByb2Nrc2RiXSMgLi9k
-Yl9iZW5jaCAtdXNlX2V4aXN0aW5nX2RiICAtYmVuY2htYXJrcw0KPiByZWFkcmFuZG9tZmFzdA0K
-PiBMZXZlbERCOiAgICB2ZXJzaW9uIDQuMw0KPiBEYXRlOiAgICAgICBXZWQgSnVuICAxIDAwOjMz
-OjAzIDIwMTYNCj4gQ1BVOiAgICAgICAgMzIgKiBJbnRlbChSKSBYZW9uKFIpIENQVSBFNS0yNjgw
-IDAgQCAyLjcwR0h6DQo+IENQVUNhY2hlOiAgIDIwNDgwIEtCDQo+IEtleXM6ICAgICAgIDE2IGJ5
-dGVzIGVhY2gNCj4gVmFsdWVzOiAgICAgMTAwIGJ5dGVzIGVhY2ggKDUwIGJ5dGVzIGFmdGVyIGNv
-bXByZXNzaW9uKQ0KPiBFbnRyaWVzOiAgICAxMDAwMDAwDQo+IFByZWZpeDogICAgMCBieXRlcw0K
-PiBLZXlzIHBlciBwcmVmaXg6ICAgIDANCj4gUmF3U2l6ZTogICAgMTEwLjYgTUIgKGVzdGltYXRl
-ZCkNCj4gRmlsZVNpemU6ICAgNjIuOSBNQiAoZXN0aW1hdGVkKQ0KPiBXcml0ZXMgcGVyIHNlY29u
-ZDogMA0KPiBDb21wcmVzc2lvbjogU25hcHB5DQo+IE1lbXRhYmxlcmVwOiBza2lwX2xpc3QNCj4g
-UGVyZiBMZXZlbDogMA0KPiBXQVJOSU5HOiBBc3NlcnRpb25zIGFyZSBlbmFibGVkOyBiZW5jaG1h
-cmtzIHVubmVjZXNzYXJpbHkgc2xvdw0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0NCj4gREIgcGF0aDogWy90bXAvcm9ja3NkYnRlc3QtMC9kYmJlbmNo
-XQ0KPiByZWFkcmFuZG9tZmFzdCA6ICAgICAgNDUuMTg4IG1pY3Jvcy9vcCAyMjEyOSBvcHMvc2Vj
-OyAoMTAwMDEwMCBvZg0KPiAxMDAwMTAwIGZvdW5kLCBpc3N1ZWQgNDY2Mzkgbm9uLWV4aXN0IGtl
-eXMpDQo+DQo+DQo+IDQ1LjE4IHVzL29wIHZzIDQuNTd1cy9vcCENCj4NCj4gVGhlIHRlc3QgY2Fu
-IGJlIHJlcGVhdGVkIGFuZCBlYXN5IHRvIGRvISBQbHogY29ycmVjdCBpZiBJJ20gZG9pbmcNCj4g
-Zm9vbGlzaCB0aGluZyBJJ20gbm90IGF3YXJlLi4NCj4NCj4gU28gSSBwcm9wb3NhbCB0aGlzIFBS
-OiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvOTQxMQ0KPg0KPiBXZSBzdGlsbCBj
-YW4gbWFrZSBmdXJ0aGVyIGltcHJvdmVtZW50cyBieSBzY2FubmluZyBhbGwgaXRlcmF0ZSB1c2Fn
-ZQ0KPiB0byBtYWtlIGl0IGJldHRlciENCj4NCj4gWzBdOg0KPiAtLS0gYS9kYi9kYl9iZW5jaC5j
-Yw0KPiArKysgYi9kYi9kYl9iZW5jaC5jYw0KPiBAQCAtMjkyMywxNCArMjkyMywxMiBAQCBjbGFz
-cyBCZW5jaG1hcmsgew0KPiAgICAgICAgICBpbnQ2NF90IGtleV9yYW5kID0gdGhyZWFkLT5yYW5k
-Lk5leHQoKSAmIChwb3QgLSAxKTsNCj4gICAgICAgICAgR2VuZXJhdGVLZXlGcm9tSW50KGtleV9y
-YW5kLCBGTEFHU19udW0sICZrZXkpOw0KPiAgICAgICAgICArK3JlYWQ7DQo+IC0gICAgICAgIGF1
-dG8gc3RhdHVzID0gZGItPkdldChvcHRpb25zLCBrZXksICZ2YWx1ZSk7DQo+IC0gICAgICAgIGlm
-IChzdGF0dXMub2soKSkgew0KPiAtICAgICAgICAgICsrZm91bmQ7DQo+IC0gICAgICAgIH0gZWxz
-ZSBpZiAoIXN0YXR1cy5Jc05vdEZvdW5kKCkpIHsNCj4gLSAgICAgICAgICBmcHJpbnRmKHN0ZGVy
-ciwgIkdldCByZXR1cm5lZCBhbiBlcnJvcjogJXNcbiIsDQo+IC0gICAgICAgICAgICAgICAgICBz
-dGF0dXMuVG9TdHJpbmcoKS5jX3N0cigpKTsNCj4gLSAgICAgICAgICBhYm9ydCgpOw0KPiAtICAg
-ICAgICB9DQo+ICsgICAgICAgIEl0ZXJhdG9yKiBpdGVyID0gZGItPk5ld0l0ZXJhdG9yKG9wdGlv
-bnMpOw0KPiArICAgICAgaXRlci0+U2VlayhrZXkpOw0KPiArICAgICAgaWYgKGl0ZXItPlZhbGlk
-KCkgJiYgaXRlci0+a2V5KCkuY29tcGFyZShrZXkpID09IDApIHsNCj4gKyAgICAgICAgZm91bmQr
-KzsNCj4gKyAgICAgIH0NCj4gKw0KPiAgICAgICAgICBpZiAoa2V5X3JhbmQgPj0gRkxBR1NfbnVt
-KSB7DQo+ICAgICAgICAgICAgKytub25leGlzdDsNCj4gICAgICAgICAgfQ0KPiAtLQ0KPiBUbyB1
-bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2Vw
-aC1kZXZlbCIgaW4NCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
-cm5lbC5vcmcNCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9y
-Zy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+On Wed, Jun 1, 2016 at 2:08 AM, Jianjian Huo <jianjian.huo@samsung.com> wrote:
+> Hi Haomai,
+>
+> I noticed this as well, and made same changes to RocksDBStore in this PR last week:
+> https://github.com/ceph/ceph/pull/9215
+>
+> One thing which is even worse,  seek will bypass row cache, so kv pairs won't be able to be cached in row cache.
+> I am working to benchmark the performance impact, will publish the results after I am done this week.
+
+Oh, cool! I think you can cherry-pick my another leveldb fix.
+
+BTW, do you pay an attention to prefix seek api? I think it will be
+more suitable than column family in ceph case. If we can have
+well-defined prefix rule, we can make most of range query cheaper!
+
+>
+> Jianjian
+>
+> On Tue, May 31, 2016 at 9:49 AM, Haomai Wang <haomai@xsky.com> wrote:
+>> Hi Sage and Mark,
+>>
+>> As mentioned in BlueStore standup, I found rocksdb iterator *Seek*
+>> won't use bloom filter like *Get*.
+>>
+>> *Get* impl: it will look at filter firstly
+>> https://github.com/facebook/rocksdb/blob/master/table/block_based_table_reader.cc#L1369
+>>
+>> Iterator *Seek*: it will do binary search, by default we don't specify
+>> prefix feature(https://github.com/facebook/rocksdb/wiki/Prefix-Seek-API-Changes).
+>> https://github.com/facebook/rocksdb/blob/master/table/block.cc#L94
+>>
+>> So I use a simple tests:
+>>
+>> ./db_bench -num 10000000  -benchmarks fillbatch
+>> fill the db firstly with 1000w records.
+>>
+>> ./db_bench -use_existing_db  -benchmarks readrandomfast
+>> readrandomfast case will use *Get* API to retrive data
+>>
+>> [root@hunter-node2 rocksdb]# ./db_bench -use_existing_db  -benchmarks
+>> readrandomfast
+>>
+>> LevelDB:    version 4.3
+>> Date:       Wed Jun  1 00:29:16 2016
+>> CPU:        32 * Intel(R) Xeon(R) CPU E5-2680 0 @ 2.70GHz
+>> CPUCache:   20480 KB
+>> Keys:       16 bytes each
+>> Values:     100 bytes each (50 bytes after compression)
+>> Entries:    1000000
+>> Prefix:    0 bytes
+>> Keys per prefix:    0
+>> RawSize:    110.6 MB (estimated)
+>> FileSize:   62.9 MB (estimated)
+>> Writes per second: 0
+>> Compression: Snappy
+>> Memtablerep: skip_list
+>> Perf Level: 0
+>> WARNING: Assertions are enabled; benchmarks unnecessarily slow
+>> ------------------------------------------------
+>> DB path: [/tmp/rocksdbtest-0/dbbench]
+>> readrandomfast :       4.570 micros/op 218806 ops/sec; (1000100 of
+>> 1000100 found, issued 46639 non-exist keys)
+>>
+>> ===========================
+>> then I modify readrandomfast to use Iterator API[0]:
+>>
+>> [root@hunter-node2 rocksdb]# ./db_bench -use_existing_db  -benchmarks
+>> readrandomfast
+>> LevelDB:    version 4.3
+>> Date:       Wed Jun  1 00:33:03 2016
+>> CPU:        32 * Intel(R) Xeon(R) CPU E5-2680 0 @ 2.70GHz
+>> CPUCache:   20480 KB
+>> Keys:       16 bytes each
+>> Values:     100 bytes each (50 bytes after compression)
+>> Entries:    1000000
+>> Prefix:    0 bytes
+>> Keys per prefix:    0
+>> RawSize:    110.6 MB (estimated)
+>> FileSize:   62.9 MB (estimated)
+>> Writes per second: 0
+>> Compression: Snappy
+>> Memtablerep: skip_list
+>> Perf Level: 0
+>> WARNING: Assertions are enabled; benchmarks unnecessarily slow
+>> ------------------------------------------------
+>> DB path: [/tmp/rocksdbtest-0/dbbench]
+>> readrandomfast :      45.188 micros/op 22129 ops/sec; (1000100 of
+>> 1000100 found, issued 46639 non-exist keys)
+>>
+>>
+>> 45.18 us/op vs 4.57us/op!
+>>
+>> The test can be repeated and easy to do! Plz correct if I'm doing
+>> foolish thing I'm not aware..
+>>
+>> So I proposal this PR: https://github.com/ceph/ceph/pull/9411
+>>
+>> We still can make further improvements by scanning all iterate usage
+>> to make it better!
+>>
+>> [0]:
+>> --- a/db/db_bench.cc
+>> +++ b/db/db_bench.cc
+>> @@ -2923,14 +2923,12 @@ class Benchmark {
+>>          int64_t key_rand = thread->rand.Next() & (pot - 1);
+>>          GenerateKeyFromInt(key_rand, FLAGS_num, &key);
+>>          ++read;
+>> -        auto status = db->Get(options, key, &value);
+>> -        if (status.ok()) {
+>> -          ++found;
+>> -        } else if (!status.IsNotFound()) {
+>> -          fprintf(stderr, "Get returned an error: %s\n",
+>> -                  status.ToString().c_str());
+>> -          abort();
+>> -        }
+>> +        Iterator* iter = db->NewIterator(options);
+>> +      iter->Seek(key);
+>> +      if (iter->Valid() && iter->key().compare(key) == 0) {
+>> +        found++;
+>> +      }
+>> +
+>>          if (key_rand >= FLAGS_num) {
+>>            ++nonexist;
+>>          }
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
