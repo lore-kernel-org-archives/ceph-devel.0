@@ -1,44 +1,49 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Sizes of attributes and attributenames....
-Date: Tue, 31 May 2016 08:55:46 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605310854550.6221@cpach.fuggernut.com>
-References: <eeeec6f0-3aff-e1e1-8e85-5e7922fa2e15@digiware.nl>
+Subject: Re: Random thought: adding a tracker custom field for feature/"topic"
+ (separate to category/component)
+Date: Tue, 31 May 2016 09:03:42 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1605310859020.6221@cpach.fuggernut.com>
+References: <CALe9h7eLOBYq+AHQU_kiB97NaPSg5Fmj90xSK7xyqLK8_TOa_w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59155 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:59221 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752026AbcEaMzZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 May 2016 08:55:25 -0400
-In-Reply-To: <eeeec6f0-3aff-e1e1-8e85-5e7922fa2e15@digiware.nl>
+	with ESMTP id S1752505AbcEaNDU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 May 2016 09:03:20 -0400
+In-Reply-To: <CALe9h7eLOBYq+AHQU_kiB97NaPSg5Fmj90xSK7xyqLK8_TOa_w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>, ldachary@redhat.com
+To: John Spray <jspray@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 31 May 2016, Willem Jan Withagen wrote:
+On Tue, 31 May 2016, John Spray wrote:
+> Hi all,
 > 
-> Hi,
+> Currently we have "Category", which is sort of a mixture of physical
+> components (e.g. MDS, OSD, client, librados) and higher level
+> features/topics.
 > 
-> I'm getting bitten in tests/ceph-disk.sh by.
+> Lots of tickets actually refer to both a feature and a component, for
+> example in cephfs we have lots of tickets related to FSCK, and some of
+> them are MDS changes while some are tool changes.  Currently we sort
+> of work around this by prefacing things to subjects.
 > 
->  2 osd.0 0 boot
-> -1 osd.0 0 backend (filestore) is unable to support max object
-> name[space] len
-> -1 osd.0 0    osd max object name len = 2048
-> -1 osd.0 0    osd max object namespace len = 256
-> -1 osd.0 0 (63) File name too long
->  1 journal close test-ceph-disk/dir/journal
-> -1  ** ERROR: osd init failed: (63) File name too long	
+> I'm thinking that maybe we need two fields, one saying which component
+> (i.e. which subdir in the git tree), and one giving a higher level
+> category (which I'm imagining calling "topics").
 > 
-> And it seems that I did have this fixed in one run or another, but now
-> it raises it scary head again.
-> Now I think it is posible to fix this by starting vstart -short, but
-> that does not cut it with other tests, so it seems.
+> In a CephFS context, examples of components would be MDS, client,
+> ceph-fuse, libcephfs, libcephfs-python, cephfs-volume-client, kernel
+> client, hadoop plugin, samba plugin, ganesha plugin, tools,
+> MDSMonitor, qa-suite.
+> 
+> ...whereas topics would be features that affect multiple components
+> like: multi-mds, multi-fs, snapshots, fsck.
+> 
+> Thoughts?
 
-I think we either need to do --short unconditionally for the make check 
-vstart tests, or have an environment variable that does it conditionally.  
-I'm inclined to do it unconditionally...  Loic, does that seem 
-reasonable?  That way make check can work reliably on ext4.
+Sounds good to me! This might be slighly tricky to set up in redmine (not 
+sure if 'categories' is special or not).
 
 sage
