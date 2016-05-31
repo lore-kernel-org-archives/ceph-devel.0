@@ -1,22 +1,33 @@
-From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
+From: Erwan Velu <evelu@redhat.com>
 Subject: Re: Little update on the build platform
-Date: Tue, 31 May 2016 19:58:56 +0200
-Message-ID: <20160531175856.GD20357@predictor>
-References: <1236727659.97766119.1464716235552.JavaMail.zimbra@redhat.com>
- <902296593.97770947.1464716952266.JavaMail.zimbra@redhat.com>
+Date: Tue, 31 May 2016 14:02:49 -0400 (EDT)
+Message-ID: <1322819826.97774670.1464717769627.JavaMail.zimbra@redhat.com>
+References: <1236727659.97766119.1464716235552.JavaMail.zimbra@redhat.com> <902296593.97770947.1464716952266.JavaMail.zimbra@redhat.com> <20160531175856.GD20357@predictor>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from predictor.org.pl ([185.5.97.54]:53944 "EHLO predictor.org.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752864AbcEaR4e (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 31 May 2016 13:56:34 -0400
-Content-Disposition: inline
-In-Reply-To: <902296593.97770947.1464716952266.JavaMail.zimbra@redhat.com>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:48630 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752864AbcEaSCx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 May 2016 14:02:53 -0400
+In-Reply-To: <20160531175856.GD20357@predictor>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Piotr =?utf-8?Q?Da=C5=82ek?= <branch@predictor.org.pl>
+Cc: ceph-devel@vger.kernel.org
+
+That's pretty easy for a human to determine if a PR does affect the cod=
+e.
+If we'd like to automate that, that would mean having a list of files k=
+nown not to need triggering a rebuild and updating that list everytime =
+a new file is added/retired.
+
+----- Mail original -----
+De: "Piotr Da=C5=82ek" <branch@predictor.org.pl>
+=C3=80: ceph-devel@vger.kernel.org
+Envoy=C3=A9: Mardi 31 Mai 2016 19:58:56
+Objet: Re: Little update on the build platform
 
 On Tue, May 31, 2016 at 01:49:12PM -0400, Erwan Velu wrote:
 > Hi folks,
@@ -51,6 +62,11 @@ for example https://github.com/ceph/ceph/pull/9389)?=20
 Piotr Da=C5=82ek
 branch@predictor.org.pl
 http://blog.predictor.org.pl
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
