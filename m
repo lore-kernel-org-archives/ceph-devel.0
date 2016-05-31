@@ -1,49 +1,43 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Random thought: adding a tracker custom field for feature/"topic"
- (separate to category/component)
-Date: Tue, 31 May 2016 09:03:42 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1605310859020.6221@cpach.fuggernut.com>
-References: <CALe9h7eLOBYq+AHQU_kiB97NaPSg5Fmj90xSK7xyqLK8_TOa_w@mail.gmail.com>
+From: Junwang Zhao <zhjwpku@gmail.com>
+Subject: [GSoC] wrong patch "msg: change entity_addr_t encode/decode"
+Date: Tue, 31 May 2016 21:04:45 +0800
+Message-ID: <CAEG8a3JF2t1hkHY2MQK5DVwbOy3VGZUNuB-uF5mOzBSO8xhQeg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59221 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752505AbcEaNDU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 May 2016 09:03:20 -0400
-In-Reply-To: <CALe9h7eLOBYq+AHQU_kiB97NaPSg5Fmj90xSK7xyqLK8_TOa_w@mail.gmail.com>
+Received: from mail-vk0-f67.google.com ([209.85.213.67]:33306 "EHLO
+	mail-vk0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752026AbcEaNEq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 May 2016 09:04:46 -0400
+Received: by mail-vk0-f67.google.com with SMTP id m81so22403472vka.0
+        for <ceph-devel@vger.kernel.org>; Tue, 31 May 2016 06:04:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Sage A. Weil" <sweil@redhat.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 31 May 2016, John Spray wrote:
-> Hi all,
-> 
-> Currently we have "Category", which is sort of a mixture of physical
-> components (e.g. MDS, OSD, client, librados) and higher level
-> features/topics.
-> 
-> Lots of tickets actually refer to both a feature and a component, for
-> example in cephfs we have lots of tickets related to FSCK, and some of
-> them are MDS changes while some are tool changes.  Currently we sort
-> of work around this by prefacing things to subjects.
-> 
-> I'm thinking that maybe we need two fields, one saying which component
-> (i.e. which subdir in the git tree), and one giving a higher level
-> category (which I'm imagining calling "topics").
-> 
-> In a CephFS context, examples of components would be MDS, client,
-> ceph-fuse, libcephfs, libcephfs-python, cephfs-volume-client, kernel
-> client, hadoop plugin, samba plugin, ganesha plugin, tools,
-> MDSMonitor, qa-suite.
-> 
-> ...whereas topics would be features that affect multiple components
-> like: multi-mds, multi-fs, snapshots, fsck.
-> 
-> Thoughts?
+Hi Sage & Haomai,
 
-Sounds good to me! This might be slighly tricky to set up in redmine (not 
-sure if 'categories' is special or not).
+I try to run './vstart.sh -d -x -n' to test the patches today, I got
+some error like 'wrong node', after some work, I found the
+error was introduced by this patch[0]. I change the code to
+use the legacy decode and encode, but got stuck somewhere.
 
-sage
+--- a/src/msg/msg_types.h
++++ b/src/msg/msg_types.h
+@@ -371,7 +371,7 @@ struct entity_addr_t {
+   // broader study
+
+   void encode(bufferlist& bl, uint64_t features) const {
+-    if ((features & CEPH_FEATURE_MSG_ADDR2) == 0) {
++    if ((features & CEPH_FEATURE_MSG_ADDR2) != 0) {
+       ::encode((__u32)0, bl);
+       ::encode(nonce, bl);
+       sockaddr_storage ss = get_sockaddr_storage();
+
+
+Can you please see the patch again and give some comments?
+
+[0]https://github.com/zhjwpku/ceph/commit/8934f038fdf28156038770e601e4a27f7a684390
+
+Thanks,
+Zhao
