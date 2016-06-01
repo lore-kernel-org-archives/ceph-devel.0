@@ -1,183 +1,215 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: RocksDB Incorrect API Usage
-Date: Wed, 1 Jun 2016 13:46:26 +0000
-Message-ID: <BLUPR0201MB152417B6F3D59DB3985AE2DAE8470@BLUPR0201MB1524.namprd02.prod.outlook.com>
-References: <CACJqLyYtHkeQ+jSNi7JPJzRb6wfCcNAuCSr_YyTwdqA_kzzP_g@mail.gmail.com>
- <3F3468645DC82146857A5E1C91E23F4B1B2A3EE1@SSIEXCH-MB3.ssi.samsung.com>
- <CACJqLybKJo+otdX0SU8uOqa6N6POJ-Wgb19SrFmzsE_94Eo2gA@mail.gmail.com>
- <3F3468645DC82146857A5E1C91E23F4B1B2A3FA5@SSIEXCH-MB3.ssi.samsung.com>
- <CACJqLyY=5oFP+5i3KLdCcYO5N9pze69ke7mqb1kX6q9KwbBZww@mail.gmail.com>
- <BLUPR0201MB15248430F768B4711B72F288E8470@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <3F3468645DC82146857A5E1C91E23F4B1B2A4264@SSIEXCH-MB3.ssi.samsung.com>
- <BLUPR0201MB190816E6BDFADBA59DC13D17E2470@BLUPR0201MB1908.namprd02.prod.outlook.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: Message sequence overflow
+Date: Wed, 1 Jun 2016 10:22:43 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606011019090.6221@cpach.fuggernut.com>
+References: <CAAM7YA=3T_Gh6ZQQN3EgaxOw+JzQoP+9WuPWBWBhTSDBS4AZew@mail.gmail.com>
+	<alpine.DEB.2.11.1606010847240.6221@cpach.fuggernut.com>
+	<CAAM7YA=xU+Ovxf-QU6ruRKGhWS88-d0UaX1AbcR9oCLbEi9_jg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0054.outbound.protection.outlook.com ([157.56.111.54]:34297
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751808AbcFAOC1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 1 Jun 2016 10:02:27 -0400
-In-Reply-To: <BLUPR0201MB190816E6BDFADBA59DC13D17E2470@BLUPR0201MB1908.namprd02.prod.outlook.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Varada Kari <Varada.Kari@sandisk.com>, Jianjian Huo <jianjian.huo@samsung.com>, Haomai Wang <haomai@xsky.com>
-Cc: Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1860278122-1464790966=:6221"
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAAM7YA=xU+Ovxf-QU6ruRKGhWS88-d0UaX1AbcR9oCLbEi9_jg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, James Webb <jamesw-pKHY6dePtwZBDgjK7y7TUQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBWYXJhZGEgS2FyaQ0KPiBTZW50
-OiBUdWVzZGF5LCBNYXkgMzEsIDIwMTYgODozOCBQTQ0KPiBUbzogSmlhbmppYW4gSHVvIDxqaWFu
-amlhbi5odW9Ac2Ftc3VuZy5jb20+OyBBbGxlbiBTYW11ZWxzDQo+IDxBbGxlbi5TYW11ZWxzQHNh
-bmRpc2suY29tPjsgSGFvbWFpIFdhbmcgPGhhb21haUB4c2t5LmNvbT4NCj4gQ2M6IFNhZ2UgV2Vp
-bCA8c3dlaWxAcmVkaGF0LmNvbT47IE1hcmsgTmVsc29uIDxtbmVsc29uQHJlZGhhdC5jb20+Ow0K
-PiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogUm9ja3NEQiBJbmNv
-cnJlY3QgQVBJIFVzYWdlDQo+IA0KPiANCj4gDQo+IE9uIFdlZG5lc2RheSAwMSBKdW5lIDIwMTYg
-MDg6NTQgQU0sIEppYW5qaWFuIEh1byB3cm90ZToNCj4gPiBIaSBBbGxlbiwNCj4gPg0KPiA+IE9u
-IFR1ZSwgTWF5IDMxLCAyMDE2IGF0IDc6NTIgUE0sIEFsbGVuIFNhbXVlbHMNCj4gPEFsbGVuLlNh
-bXVlbHNAc2FuZGlzay5jb20+IHdyb3RlOg0KPiA+Pj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
-LS0NCj4gPj4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86
-Y2VwaC1kZXZlbC0NCj4gPj4+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEhh
-b21haSBXYW5nDQo+ID4+PiBTZW50OiBUdWVzZGF5LCBNYXkgMzEsIDIwMTYgNzozOCBQTQ0KPiA+
-Pj4gVG86IEppYW5qaWFuIEh1byA8amlhbmppYW4uaHVvQHNhbXN1bmcuY29tPg0KPiA+Pj4gQ2M6
-IFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT47IE1hcmsgTmVsc29uDQo+IDxtbmVsc29uQHJl
-ZGhhdC5jb20+Ow0KPiA+Pj4gY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gPj4+IFN1Ympl
-Y3Q6IFJlOiBSb2Nrc0RCIEluY29ycmVjdCBBUEkgVXNhZ2UNCj4gPj4+DQo+ID4+PiBPbiBXZWQs
-IEp1biAxLCAyMDE2IGF0IDM6NDAgQU0sIEppYW5qaWFuIEh1bw0KPiA+Pj4gPGppYW5qaWFuLmh1
-b0BzYW1zdW5nLmNvbT4NCj4gPj4+IHdyb3RlOg0KPiA+Pj4+IE9uIFR1ZSwgTWF5IDMxLCAyMDE2
-IGF0IDExOjEyIEFNLCBIYW9tYWkgV2FuZyA8aGFvbWFpQHhza3kuY29tPg0KPiA+Pj4gd3JvdGU6
-DQo+ID4+Pj4+IE9uIFdlZCwgSnVuIDEsIDIwMTYgYXQgMjowOCBBTSwgSmlhbmppYW4gSHVvDQo+
-ID4+PiA8amlhbmppYW4uaHVvQHNhbXN1bmcuY29tPiB3cm90ZToNCj4gPj4+Pj4+IEhpIEhhb21h
-aSwNCj4gPj4+Pj4+DQo+ID4+Pj4+PiBJIG5vdGljZWQgdGhpcyBhcyB3ZWxsLCBhbmQgbWFkZSBz
-YW1lIGNoYW5nZXMgdG8gUm9ja3NEQlN0b3JlIGluDQo+ID4+Pj4+PiB0aGlzIFBSDQo+ID4+PiBs
-YXN0IHdlZWs6DQo+ID4+Pj4+PiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvOTIx
-NQ0KPiA+Pj4+Pj4NCj4gPj4+Pj4+IE9uZSB0aGluZyB3aGljaCBpcyBldmVuIHdvcnNlLCAgc2Vl
-ayB3aWxsIGJ5cGFzcyByb3cgY2FjaGUsIHNvIGt2DQo+ID4+Pj4+PiBwYWlycw0KPiA+Pj4gd29u
-J3QgYmUgYWJsZSB0byBiZSBjYWNoZWQgaW4gcm93IGNhY2hlLg0KPiA+Pj4+Pj4gSSBhbSB3b3Jr
-aW5nIHRvIGJlbmNobWFyayB0aGUgcGVyZm9ybWFuY2UgaW1wYWN0LCB3aWxsIHB1Ymxpc2gNCj4g
-Pj4+Pj4+IHRoZQ0KPiA+Pj4gcmVzdWx0cyBhZnRlciBJIGFtIGRvbmUgdGhpcyB3ZWVrLg0KPiA+
-Pj4+PiBPaCwgY29vbCEgSSB0aGluayB5b3UgY2FuIGNoZXJyeS1waWNrIG15IGFub3RoZXIgbGV2
-ZWxkYiBmaXguDQo+ID4+Pj4gTm8gcHJvYmxlbSwgSSB3aWxsIGRvIHRoYXQuDQo+ID4+Pj4+IEJU
-VywgZG8geW91IHBheSBhbiBhdHRlbnRpb24gdG8gcHJlZml4IHNlZWsgYXBpPyBJIHRoaW5rIGl0
-IHdpbGwNCj4gPj4+Pj4gYmUgbW9yZSBzdWl0YWJsZSB0aGFuIGNvbHVtbiBmYW1pbHkgaW4gY2Vw
-aCBjYXNlLiBJZiB3ZSBjYW4gaGF2ZQ0KPiA+Pj4+PiB3ZWxsLWRlZmluZWQgcHJlZml4IHJ1bGUs
-IHdlIGNhbiBtYWtlIG1vc3Qgb2YgcmFuZ2UgcXVlcnkgY2hlYXBlciENCj4gPj4+PiBXaGVuIGtl
-eXMgd2l0aCBzYW1lIHByZWZpeCBhcmUgc3RvcmVkIGluIHRoZWlyIG93biBTU1QgZmlsZXMoQ0YN
-Cj4gPj4+PiBjYXNlKSwNCj4gPj4+IGV2ZW4gc2Vla2luZyB3aXRob3V0IHByZWZpeCB3aWxsIGJl
-IGZhc3RlciB0aGFuIHNlZWtpbmcgd2l0aCBwcmVmaXgNCj4gPj4+IGJ1dCBtaXhlZCB3aXRoIGRp
-ZmZlcmVudCBwcmVmaXhlZCBrZXlzPw0KPiA+Pj4NCj4gPj4+IEZyb20gbXkgY3VycmVudCB2aWV3
-LCBwcmVmaXggY291bGQgYmUgbW9yZSBmbGV4aWJsZS4gRm9yIGV4YW1wbGUsDQo+ID4+PiBlYWNo
-IHJndyBidWNrZXQgaW5kZXggY291bGQgdXNlIG9uZSBwcmVmaXggdG8gbWFrZSBlYWNoIGJ1Y2tl
-dCBpbmRleA0KPiA+Pj4gb2JqZWN0IHNlZWsgc2VwYXJhdGVkLiBGb3IgQ0YsIGl0IHdvdWxkIGJl
-IHRvbyBoZWF2cnkuDQo+ID4+IFRoaXMgbWlnaHQgY2F1c2Ugb3RoZXIgcHJvYmxlbXMuIFdvdWxk
-IGl0IGRyYW1hdGljYWxseSBpbmNyZWFzZSB0aGUNCj4gPj4gbnVtYmVyIG9mIGZpbGVzIHRoYXQg
-Qmx1ZUZTIG5lZWRzIHRvIG1hbmFnZT8gSWYgc28sIHRoYXQgbWlnaHQNCj4gPj4gZWZmZWN0aXZl
-bHkgYnJlYWsgdGhhdCBjb2RlIHRvbyAob2YgY291cnNlIGl0J3MgZml4YWJsZSBhbHNvIDopKQ0K
-PiA+IFRoYW5rcyBmb3IgYnJpbmdpbmcgdXAgdGhpcyBpc3N1ZS4gV2hhdCdzIGN1cnJlbnQgbGlt
-aXQgb2YgbnVtYmVyIG9mIGZpbGVzIGZvcg0KPiBCbHVlRlMsIGZyb20geW91ciBleHBlcmllbmNl
-Pw0KPiA+IEppYW5qaWFuDQo+IFRoZXJlIGlzIG5vIGxpbWl0IHJpZ2h0IG5vdywgZm5vZGUgaW5v
-IGlzIGEgdW5pdDY0X3QuICBEaXJlY3RvcnkgaXMgYSByZWYgY291bnRlZA0KPiBvYmplY3QgY29u
-dGFpbnMgYSBmaWxlIG1hcC4gQXMgdGhlIG51bWJlciBvZiBpbm9kZXMgZ3JvdywgZmlsZV9tYXAg
-d2lsbCBncm93LA0KPiB3aWxsIGNvbnN1bWUgbW9yZSBtZW1vcnkuDQo+IA0KPiBWYXJhZGENCg0K
-VGVjaG5pY2FsbHkgY29ycmVjdCwgbXkgY29uY2VybiBpcyBvbmUgb2YgcGVyZm9ybWFuY2UgZm9y
-IEJsdWVGUyBqb3VybmFsIGNvbXBhY3Rpb24uDQogDQo+ID4+Pj4gSSBhbSBub3Qgc3VyZSB3aGF0
-IG9wdGltaXphdGlvbiBwcmVmaXggc2VlayB3aWxsIHVzZSBpbnRlcm5hbGx5IGZvcg0KPiA+Pj4+
-IGJsb2NrDQo+ID4+PiBiYXNlZCBmb3JtYXQsIGJ1dCB0byBtZSwgaXQncyBoYXJkIHRvIGJlYXQg
-dGhlIGNhc2Ugd2hlbiB5b3Ugb25seQ0KPiA+Pj4gaGF2ZSBvbmUgcHJlZml4ZWQga2V5cyBzdG9y
-ZWQgc2VwYXJhdGVseS4NCj4gPj4+Pj4+IEppYW5qaWFuDQo+ID4+Pj4+Pg0KPiA+Pj4+Pj4gT24g
-VHVlLCBNYXkgMzEsIDIwMTYgYXQgOTo0OSBBTSwgSGFvbWFpIFdhbmcNCj4gPGhhb21haUB4c2t5
-LmNvbT4NCj4gPj4+IHdyb3RlOg0KPiA+Pj4+Pj4+IEhpIFNhZ2UgYW5kIE1hcmssDQo+ID4+Pj4+
-Pj4NCj4gPj4+Pj4+PiBBcyBtZW50aW9uZWQgaW4gQmx1ZVN0b3JlIHN0YW5kdXAsIEkgZm91bmQg
-cm9ja3NkYiBpdGVyYXRvcg0KPiA+Pj4+Pj4+ICpTZWVrKiB3b24ndCB1c2UgYmxvb20gZmlsdGVy
-IGxpa2UgKkdldCouDQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+PiAqR2V0KiBpbXBsOiBpdCB3aWxsIGxv
-b2sgYXQgZmlsdGVyIGZpcnN0bHkNCj4gPj4+Pj4+Pg0KPiA+Pj4NCj4gaHR0cHM6Ly9naXRodWIu
-Y29tL2ZhY2Vib29rL3JvY2tzZGIvYmxvYi9tYXN0ZXIvdGFibGUvYmxvY2tfYmFzZWRfdA0KPiA+
-Pj4+Pj4+IGFibGVfcmVhZGVyLmNjI0wxMzY5DQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+PiBJdGVyYXRv
-ciAqU2Vlayo6IGl0IHdpbGwgZG8gYmluYXJ5IHNlYXJjaCwgYnkgZGVmYXVsdCB3ZSBkb24ndA0K
-PiA+Pj4+Pj4+IHNwZWNpZnkgcHJlZml4DQo+ID4+PiBmZWF0dXJlKGh0dHBzOi8vZ2l0aHViLmNv
-bS9mYWNlYm9vay9yb2Nrc2RiL3dpa2kvUHJlZml4LVNlZWstQVBJLQ0KPiA+Pj4gQ2hhbmdlcyku
-DQo+ID4+Pj4+Pj4NCj4gaHR0cHM6Ly9naXRodWIuY29tL2ZhY2Vib29rL3JvY2tzZGIvYmxvYi9t
-YXN0ZXIvdGFibGUvYmxvY2suY2MjTA0KPiA+Pj4+Pj4+IDk0DQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+
-PiBTbyBJIHVzZSBhIHNpbXBsZSB0ZXN0czoNCj4gPj4+Pj4+Pg0KPiA+Pj4+Pj4+IC4vZGJfYmVu
-Y2ggLW51bSAxMDAwMDAwMCAgLWJlbmNobWFya3MgZmlsbGJhdGNoIGZpbGwgdGhlIGRiDQo+ID4+
-Pj4+Pj4gZmlyc3RseSB3aXRoIDEwMDB3IHJlY29yZHMuDQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+PiAu
-L2RiX2JlbmNoIC11c2VfZXhpc3RpbmdfZGIgIC1iZW5jaG1hcmtzIHJlYWRyYW5kb21mYXN0DQo+
-ID4+Pj4+Pj4gcmVhZHJhbmRvbWZhc3QgY2FzZSB3aWxsIHVzZSAqR2V0KiBBUEkgdG8gcmV0cml2
-ZSBkYXRhDQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+PiBbcm9vdEBodW50ZXItbm9kZTIgcm9ja3NkYl0j
-IC4vZGJfYmVuY2ggLXVzZV9leGlzdGluZ19kYg0KPiA+Pj4+Pj4+IC1iZW5jaG1hcmtzIHJlYWRy
-YW5kb21mYXN0DQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+PiBMZXZlbERCOiAgICB2ZXJzaW9uIDQuMw0K
-PiA+Pj4+Pj4+IERhdGU6ICAgICAgIFdlZCBKdW4gIDEgMDA6Mjk6MTYgMjAxNg0KPiA+Pj4+Pj4+
-IENQVTogICAgICAgIDMyICogSW50ZWwoUikgWGVvbihSKSBDUFUgRTUtMjY4MCAwIEAgMi43MEdI
-eg0KPiA+Pj4+Pj4+IENQVUNhY2hlOiAgIDIwNDgwIEtCDQo+ID4+Pj4+Pj4gS2V5czogICAgICAg
-MTYgYnl0ZXMgZWFjaA0KPiA+Pj4+Pj4+IFZhbHVlczogICAgIDEwMCBieXRlcyBlYWNoICg1MCBi
-eXRlcyBhZnRlciBjb21wcmVzc2lvbikNCj4gPj4+Pj4+PiBFbnRyaWVzOiAgICAxMDAwMDAwDQo+
-ID4+Pj4+Pj4gUHJlZml4OiAgICAwIGJ5dGVzDQo+ID4+Pj4+Pj4gS2V5cyBwZXIgcHJlZml4OiAg
-ICAwDQo+ID4+Pj4+Pj4gUmF3U2l6ZTogICAgMTEwLjYgTUIgKGVzdGltYXRlZCkNCj4gPj4+Pj4+
-PiBGaWxlU2l6ZTogICA2Mi45IE1CIChlc3RpbWF0ZWQpDQo+ID4+Pj4+Pj4gV3JpdGVzIHBlciBz
-ZWNvbmQ6IDANCj4gPj4+Pj4+PiBDb21wcmVzc2lvbjogU25hcHB5DQo+ID4+Pj4+Pj4gTWVtdGFi
-bGVyZXA6IHNraXBfbGlzdA0KPiA+Pj4+Pj4+IFBlcmYgTGV2ZWw6IDANCj4gPj4+Pj4+PiBXQVJO
-SU5HOiBBc3NlcnRpb25zIGFyZSBlbmFibGVkOyBiZW5jaG1hcmtzIHVubmVjZXNzYXJpbHkgc2xv
-dw0KPiA+Pj4+Pj4+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLQ0KPiA+Pj4+Pj4+IERCIHBhdGg6IFsvdG1wL3JvY2tzZGJ0ZXN0LTAvZGJiZW5jaF0NCj4g
-Pj4+Pj4+PiByZWFkcmFuZG9tZmFzdCA6ICAgICAgIDQuNTcwIG1pY3Jvcy9vcCAyMTg4MDYgb3Bz
-L3NlYzsgKDEwMDAxMDAgb2YNCj4gPj4+Pj4+PiAxMDAwMTAwIGZvdW5kLCBpc3N1ZWQgNDY2Mzkg
-bm9uLWV4aXN0IGtleXMpDQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+PiA9PT09PT09PT09PT09PT09PT09
-PT09PT09PT0NCj4gPj4+Pj4+PiB0aGVuIEkgbW9kaWZ5IHJlYWRyYW5kb21mYXN0IHRvIHVzZSBJ
-dGVyYXRvciBBUElbMF06DQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+PiBbcm9vdEBodW50ZXItbm9kZTIg
-cm9ja3NkYl0jIC4vZGJfYmVuY2ggLXVzZV9leGlzdGluZ19kYg0KPiA+Pj4+Pj4+IC1iZW5jaG1h
-cmtzIHJlYWRyYW5kb21mYXN0DQo+ID4+Pj4+Pj4gTGV2ZWxEQjogICAgdmVyc2lvbiA0LjMNCj4g
-Pj4+Pj4+PiBEYXRlOiAgICAgICBXZWQgSnVuICAxIDAwOjMzOjAzIDIwMTYNCj4gPj4+Pj4+PiBD
-UFU6ICAgICAgICAzMiAqIEludGVsKFIpIFhlb24oUikgQ1BVIEU1LTI2ODAgMCBAIDIuNzBHSHoN
-Cj4gPj4+Pj4+PiBDUFVDYWNoZTogICAyMDQ4MCBLQg0KPiA+Pj4+Pj4+IEtleXM6ICAgICAgIDE2
-IGJ5dGVzIGVhY2gNCj4gPj4+Pj4+PiBWYWx1ZXM6ICAgICAxMDAgYnl0ZXMgZWFjaCAoNTAgYnl0
-ZXMgYWZ0ZXIgY29tcHJlc3Npb24pDQo+ID4+Pj4+Pj4gRW50cmllczogICAgMTAwMDAwMA0KPiA+
-Pj4+Pj4+IFByZWZpeDogICAgMCBieXRlcw0KPiA+Pj4+Pj4+IEtleXMgcGVyIHByZWZpeDogICAg
-MA0KPiA+Pj4+Pj4+IFJhd1NpemU6ICAgIDExMC42IE1CIChlc3RpbWF0ZWQpDQo+ID4+Pj4+Pj4g
-RmlsZVNpemU6ICAgNjIuOSBNQiAoZXN0aW1hdGVkKQ0KPiA+Pj4+Pj4+IFdyaXRlcyBwZXIgc2Vj
-b25kOiAwDQo+ID4+Pj4+Pj4gQ29tcHJlc3Npb246IFNuYXBweQ0KPiA+Pj4+Pj4+IE1lbXRhYmxl
-cmVwOiBza2lwX2xpc3QNCj4gPj4+Pj4+PiBQZXJmIExldmVsOiAwDQo+ID4+Pj4+Pj4gV0FSTklO
-RzogQXNzZXJ0aW9ucyBhcmUgZW5hYmxlZDsgYmVuY2htYXJrcyB1bm5lY2Vzc2FyaWx5IHNsb3cN
-Cj4gPj4+Pj4+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0NCj4gPj4+Pj4+PiBEQiBwYXRoOiBbL3RtcC9yb2Nrc2RidGVzdC0wL2RiYmVuY2hdDQo+ID4+
-Pj4+Pj4gcmVhZHJhbmRvbWZhc3QgOiAgICAgIDQ1LjE4OCBtaWNyb3Mvb3AgMjIxMjkgb3BzL3Nl
-YzsgKDEwMDAxMDAgb2YNCj4gPj4+Pj4+PiAxMDAwMTAwIGZvdW5kLCBpc3N1ZWQgNDY2Mzkgbm9u
-LWV4aXN0IGtleXMpDQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+Pg0KPiA+Pj4+Pj4+IDQ1LjE4IHVzL29w
-IHZzIDQuNTd1cy9vcCENCj4gPj4+Pj4+Pg0KPiA+Pj4+Pj4+IFRoZSB0ZXN0IGNhbiBiZSByZXBl
-YXRlZCBhbmQgZWFzeSB0byBkbyEgUGx6IGNvcnJlY3QgaWYgSSdtDQo+ID4+Pj4+Pj4gZG9pbmcg
-Zm9vbGlzaCB0aGluZyBJJ20gbm90IGF3YXJlLi4NCj4gPj4+Pj4+Pg0KPiA+Pj4+Pj4+IFNvIEkg
-cHJvcG9zYWwgdGhpcyBQUjogaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzk0MTEN
-Cj4gPj4+Pj4+Pg0KPiA+Pj4+Pj4+IFdlIHN0aWxsIGNhbiBtYWtlIGZ1cnRoZXIgaW1wcm92ZW1l
-bnRzIGJ5IHNjYW5uaW5nIGFsbCBpdGVyYXRlDQo+ID4+Pj4+Pj4gdXNhZ2UgdG8gbWFrZSBpdCBi
-ZXR0ZXIhDQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+PiBbMF06DQo+ID4+Pj4+Pj4gLS0tIGEvZGIvZGJf
-YmVuY2guY2MNCj4gPj4+Pj4+PiArKysgYi9kYi9kYl9iZW5jaC5jYw0KPiA+Pj4+Pj4+IEBAIC0y
-OTIzLDE0ICsyOTIzLDEyIEBAIGNsYXNzIEJlbmNobWFyayB7DQo+ID4+Pj4+Pj4gICAgICAgICAg
-aW50NjRfdCBrZXlfcmFuZCA9IHRocmVhZC0+cmFuZC5OZXh0KCkgJiAocG90IC0gMSk7DQo+ID4+
-Pj4+Pj4gICAgICAgICAgR2VuZXJhdGVLZXlGcm9tSW50KGtleV9yYW5kLCBGTEFHU19udW0sICZr
-ZXkpOw0KPiA+Pj4+Pj4+ICAgICAgICAgICsrcmVhZDsNCj4gPj4+Pj4+PiAtICAgICAgICBhdXRv
-IHN0YXR1cyA9IGRiLT5HZXQob3B0aW9ucywga2V5LCAmdmFsdWUpOw0KPiA+Pj4+Pj4+IC0gICAg
-ICAgIGlmIChzdGF0dXMub2soKSkgew0KPiA+Pj4+Pj4+IC0gICAgICAgICAgKytmb3VuZDsNCj4g
-Pj4+Pj4+PiAtICAgICAgICB9IGVsc2UgaWYgKCFzdGF0dXMuSXNOb3RGb3VuZCgpKSB7DQo+ID4+
-Pj4+Pj4gLSAgICAgICAgICBmcHJpbnRmKHN0ZGVyciwgIkdldCByZXR1cm5lZCBhbiBlcnJvcjog
-JXNcbiIsDQo+ID4+Pj4+Pj4gLSAgICAgICAgICAgICAgICAgIHN0YXR1cy5Ub1N0cmluZygpLmNf
-c3RyKCkpOw0KPiA+Pj4+Pj4+IC0gICAgICAgICAgYWJvcnQoKTsNCj4gPj4+Pj4+PiAtICAgICAg
-ICB9DQo+ID4+Pj4+Pj4gKyAgICAgICAgSXRlcmF0b3IqIGl0ZXIgPSBkYi0+TmV3SXRlcmF0b3Io
-b3B0aW9ucyk7DQo+ID4+Pj4+Pj4gKyAgICAgIGl0ZXItPlNlZWsoa2V5KTsNCj4gPj4+Pj4+PiAr
-ICAgICAgaWYgKGl0ZXItPlZhbGlkKCkgJiYgaXRlci0+a2V5KCkuY29tcGFyZShrZXkpID09IDAp
-IHsNCj4gPj4+Pj4+PiArICAgICAgICBmb3VuZCsrOw0KPiA+Pj4+Pj4+ICsgICAgICB9DQo+ID4+
-Pj4+Pj4gKw0KPiA+Pj4+Pj4+ICAgICAgICAgIGlmIChrZXlfcmFuZCA+PSBGTEFHU19udW0pIHsN
-Cj4gPj4+Pj4+PiAgICAgICAgICAgICsrbm9uZXhpc3Q7DQo+ID4+Pj4+Pj4gICAgICAgICAgfQ0K
-PiA+Pj4+Pj4+IC0tDQo+ID4+Pj4+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
-bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlDQo+ID4+Pj4+Pj4gY2VwaC1kZXZlbCIgaW4gdGhlIGJv
-ZHkgb2YgYSBtZXNzYWdlIHRvDQo+ID4+Pj4+Pj4gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBN
-b3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+ID4+Pj4+Pj4gaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
-YWpvcmRvbW8taW5mby5odG1sDQo+ID4+Pj4+IC0tDQo+ID4+Pj4+IFRvIHVuc3Vic2NyaWJlIGZy
-b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+
-Pj4+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9y
-ZyBNb3JlDQo+ID4+PiBtYWpvcmRvbW8NCj4gPj4+Pj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
-bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4+PiAtLQ0KPiA+Pj4gVG8gdW5zdWJzY3Jp
-YmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlDQo+ID4+PiBjZXBo
-LWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
-Lm9yZw0KPiA+Pj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwub3Jn
-L21ham9yZG9tby1pbmZvLmh0bWwNCj4gPiBOICAgICByICB5ICAgYiBYICDHp3YgXiAp3rp7Lm4g
-KyAgIHogXXogICB7YXkgyofamSAsaiAgZiAgIGggICB6ICB3ICAgICAgag0KPiA+IDordiAgIHcg
-aiBtICAgICAgICB6WisgICAgIN2iaiIgICEgaQ0KDQo=
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-1860278122-1464790966=:6221
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+On Wed, 1 Jun 2016, Yan, Zheng wrote:
+> On Wed, Jun 1, 2016 at 8:49 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+> > On Wed, 1 Jun 2016, Yan, Zheng wrote:
+> >> On Wed, Jun 1, 2016 at 6:15 AM, James Webb <jamesw-pKHY6dePtwZBDgjK7y7TUQ@public.gmane.org> wrot=
+e:
+> >> > Dear ceph-users...
+> >> >
+> >> > My team runs an internal buildfarm using ceph as a backend storage=
+ platform. We=E2=80=99ve recently upgraded to Jewel and are having reliab=
+ility issues that we need some help with.
+> >> >
+> >> > Our infrastructure is the following:
+> >> > - We use CEPH/CEPHFS (10.2.1)
+> >> > - We have 3 mons and 6 storage servers with a total of 36 OSDs (~4=
+160 PGs).
+> >> > - We use enterprise SSDs for everything including journals
+> >> > - We have one main mds and one standby mds.
+> >> > - We are using ceph kernel client to mount cephfs.
+> >> > - We have upgrade to Ubuntu 16.04 (4.4.0-22-generic kernel)
+> >> > - We are using a kernel NFS to serve NFS clients from a ceph mount=
+ (~ 32 nfs threads. 0 swappiness)
+> >> > - These are physical machines with 8 cores & 32GB memory
+> >> >
+> >> > On a regular basis, we lose all IO via ceph FS. We=E2=80=99re stil=
+l trying to isolate the issue but it surfaces as an issue between MDS and=
+ ceph client.
+> >> > We can=E2=80=99t tell if our our NFS server is overwhelming the MD=
+S or if this is some unrelated issue. Tuning NFS server has not solved ou=
+r issues.
+> >> > So far our only recovery has been to fail the MDS and then restart=
+ our NFS. Any help or advice will be appreciated on the CEPH side of thin=
+gs.
+> >> > I=E2=80=99m pretty sure we=E2=80=99re running with default tuning =
+of CEPH MDS configuration parameters.
+> >> >
+> >> >
+> >> > Here are the relevant log entries.
+> >> >
+> >> > From my primary MDS server, I start seeing these entries start to =
+pile up:
+> >> >
+> >> > 2016-05-31 14:34:07.091117 7f9f2eb87700  0 log_channel(cluster) lo=
+g [WRN] : client.4283066 isn't responding to mclientcaps(revoke), ino 100=
+00004491 pending pAsLsXsFsxcrwb issued pAsxLsXsxFsxcrwb, sent 63.877480 s=
+econds ago\
+> >> > 2016-05-31 14:34:07.091129 7f9f2eb87700  0 log_channel(cluster) lo=
+g [WRN] : client.4283066 isn't responding to mclientcaps(revoke), ino 100=
+00005ddf pending pAsLsXsFsxcrwb issued pAsxLsXsxFsxcrwb, sent 63.877382 s=
+econds ago\
+> >> > 2016-05-31 14:34:07.091133 7f9f2eb87700  0 log_channel(cluster) lo=
+g [WRN] : client.4283066 isn't responding to mclientcaps(revoke), ino 100=
+00000a2a pending pAsLsXsFsxcrwb issued pAsxLsXsxFsxcrwb, sent 63.877356 s=
+econds ago
+> >> >
+> >> > From my NFS server, I see these entries from dmesg also start pili=
+ng up:
+> >> > [Tue May 31 14:33:09 2016] libceph: skipping mds0 X.X.X.195:6800 s=
+eq 0 expected 4294967296
+> >> > [Tue May 31 14:33:09 2016] libceph: skipping mds0 X.X.X.195:6800 s=
+eq 1 expected 4294967296
+> >> > [Tue May 31 14:33:09 2016] libceph: skipping mds0 X.X.X.195:6800 s=
+eq 2 expected 4294967296
+> >> >
+> >>
+> >> 4294967296 is 0x100000000, this looks like sequence  overflow.
+> >>
+> >> In src/msg/Message.h:
+> >>
+> >> class Message {
+> >> ...
+> >>   unsigned get_seq() const { return header.seq; }
+> >>   void set_seq(unsigned s) { header.seq =3D s; }
+> >> ...
+> >> }
+> >>
+> >> in src/msg/simple/Pipe.cc
+> >>
+> >> class Pipe {
+> >> ...
+> >>   __u32 get_out_seq() { return out_seq; }
+> >> ...
+> >> }
+> >>
+> >> Is this bug or intentional ?
+> >
+> > That's a bug.  The seq values are intended to be 32 bits.
+> >
+> > (We should also be using the ceph_cmp_seq (IIRC) helper for any inequ=
+ality
+> > checks, which does a sloppy comparison so that a 31-bit signed differ=
+ence
+> > is used to determine > or <.  It sounds like in this case we're just
+> > failing an equality check, though.)
+> >
+>=20
+> struct ceph_msg_header {
+>         __le64 seq;       /* message seq# for this session */
+>         ...
+> }
+>=20
+> you means we should leave the upper 32-bits unused?
+
+Oh, hmm. I'm confusing this with the cap seq (which is 32 bits). =20
+
+I think we can safely go either way.. the question is which path is=20
+easier.  If we move to 32 bits used on the kernel side, will userspace=20
+also need to be patched to make reconnect work?  That unsigned get_seq()=20
+is only 32-bits wide.
+
+If we go with 64 bits, userspace still needs to be fixed to change that=20
+unsigned to uint64_t.
+
+What do you think?
+sage
+
+
+>=20
+>=20
+> > sage
+> >
+> >
+> >> Regards
+> >> Yan, Zheng
+> >>
+> >>
+> >> > Next, we find something like this on one of the OSDs.:
+> >> > 2016-05-31 14:34:44.130279 mon.0 XX.XX.XX.188:6789/0 1272184 : clu=
+ster [INF] HEALTH_WARN; mds0: Client storage-nfs-01 failing to respond to=
+ capability release
+> >> >
+> >> > Finally, I am seeing consistent HEALTH_WARN in my status regarding=
+ trimming which I am not sure if it is related:
+> >> >
+> >> > cluster XXXXXXXX-bd8f-4091-bed3-8586fd0d6b46
+> >> >      health HEALTH_WARN
+> >> >             mds0: Behind on trimming (67/30)
+> >> >      monmap e3: 3 mons at {storage02=3DX.X.X.190:6789/0,storage03=3D=
+X.X.X.189:6789/0,storage04=3DX.X.X.188:6789/0}
+> >> >             election epoch 206, quorum 0,1,2 storage04,storage03,s=
+torage02
+> >> >       fsmap e74879: 1/1/1 up {0=3Dcephfs-03=3Dup:active}, 1 up:sta=
+ndby
+> >> >      osdmap e65516: 36 osds: 36 up, 36 in
+> >> >       pgmap v15435732: 4160 pgs, 3 pools, 37539 GB data, 9611 kobj=
+ects
+> >> >             75117 GB used, 53591 GB / 125 TB avail
+> >> >                 4160 active+clean
+> >> >   client io 334 MB/s rd, 319 MB/s wr, 5839 op/s rd, 4848 op/s wr
+> >> >
+> >> >
+> >> > Regards,
+> >> > James Webb
+> >> > DevOps Engineer, Engineering Tools
+> >> > Unity Technologies
+> >> > _______________________________________________
+> >> > ceph-users mailing list
+> >> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+> >> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--8323329-1860278122-1464790966=:6221
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--8323329-1860278122-1464790966=:6221--
