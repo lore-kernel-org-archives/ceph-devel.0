@@ -1,96 +1,122 @@
-From: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Message sequence overflow
-Date: Wed, 1 Jun 2016 16:49:41 +0800
-Message-ID: <CAAM7YA=3T_Gh6ZQQN3EgaxOw+JzQoP+9WuPWBWBhTSDBS4AZew@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [ceph-users] Message sequence overflow
+Date: Wed, 1 Jun 2016 12:20:53 +0200
+Message-ID: <CAOi1vP_FXC1VgduxJif0TzmDfOyX9KSbNcwgvdi64FOjNE6pnQ@mail.gmail.com>
+References: <CAAM7YA=3T_Gh6ZQQN3EgaxOw+JzQoP+9WuPWBWBhTSDBS4AZew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, James Webb <jamesw-pKHY6dePtwZBDgjK7y7TUQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f68.google.com ([209.85.213.68]:33805 "EHLO
+	mail-vk0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751700AbcFAKUy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Jun 2016 06:20:54 -0400
+Received: by mail-vk0-f68.google.com with SMTP id a6so2385845vkg.1
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Jun 2016 03:20:54 -0700 (PDT)
+In-Reply-To: <CAAM7YA=3T_Gh6ZQQN3EgaxOw+JzQoP+9WuPWBWBhTSDBS4AZew@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, James Webb <jamesw@unity3d.com>, Sage Weil <sage@redhat.com>
 
-T24gV2VkLCBKdW4gMSwgMjAxNiBhdCA2OjE1IEFNLCBKYW1lcyBXZWJiIDxqYW1lc3dAdW5pdHkz
-ZC5jb20+IHdyb3RlOgo+IERlYXIgY2VwaC11c2Vycy4uLgo+Cj4gTXkgdGVhbSBydW5zIGFuIGlu
-dGVybmFsIGJ1aWxkZmFybSB1c2luZyBjZXBoIGFzIGEgYmFja2VuZCBzdG9yYWdlIHBsYXRmb3Jt
-LiBXZeKAmXZlIHJlY2VudGx5IHVwZ3JhZGVkIHRvIEpld2VsIGFuZCBhcmUgaGF2aW5nIHJlbGlh
-YmlsaXR5IGlzc3VlcyB0aGF0IHdlIG5lZWQgc29tZSBoZWxwIHdpdGguCj4KPiBPdXIgaW5mcmFz
-dHJ1Y3R1cmUgaXMgdGhlIGZvbGxvd2luZzoKPiAtIFdlIHVzZSBDRVBIL0NFUEhGUyAoMTAuMi4x
-KQo+IC0gV2UgaGF2ZSAzIG1vbnMgYW5kIDYgc3RvcmFnZSBzZXJ2ZXJzIHdpdGggYSB0b3RhbCBv
-ZiAzNiBPU0RzICh+NDE2MCBQR3MpLgo+IC0gV2UgdXNlIGVudGVycHJpc2UgU1NEcyBmb3IgZXZl
-cnl0aGluZyBpbmNsdWRpbmcgam91cm5hbHMKPiAtIFdlIGhhdmUgb25lIG1haW4gbWRzIGFuZCBv
-bmUgc3RhbmRieSBtZHMuCj4gLSBXZSBhcmUgdXNpbmcgY2VwaCBrZXJuZWwgY2xpZW50IHRvIG1v
-dW50IGNlcGhmcy4KPiAtIFdlIGhhdmUgdXBncmFkZSB0byBVYnVudHUgMTYuMDQgKDQuNC4wLTIy
-LWdlbmVyaWMga2VybmVsKQo+IC0gV2UgYXJlIHVzaW5nIGEga2VybmVsIE5GUyB0byBzZXJ2ZSBO
-RlMgY2xpZW50cyBmcm9tIGEgY2VwaCBtb3VudCAofiAzMiBuZnMgdGhyZWFkcy4gMCBzd2FwcGlu
-ZXNzKQo+IC0gVGhlc2UgYXJlIHBoeXNpY2FsIG1hY2hpbmVzIHdpdGggOCBjb3JlcyAmIDMyR0Ig
-bWVtb3J5Cj4KPiBPbiBhIHJlZ3VsYXIgYmFzaXMsIHdlIGxvc2UgYWxsIElPIHZpYSBjZXBoIEZT
-LiBXZeKAmXJlIHN0aWxsIHRyeWluZyB0byBpc29sYXRlIHRoZSBpc3N1ZSBidXQgaXQgc3VyZmFj
-ZXMgYXMgYW4gaXNzdWUgYmV0d2VlbiBNRFMgYW5kIGNlcGggY2xpZW50Lgo+IFdlIGNhbuKAmXQg
-dGVsbCBpZiBvdXIgb3VyIE5GUyBzZXJ2ZXIgaXMgb3ZlcndoZWxtaW5nIHRoZSBNRFMgb3IgaWYg
-dGhpcyBpcyBzb21lIHVucmVsYXRlZCBpc3N1ZS4gVHVuaW5nIE5GUyBzZXJ2ZXIgaGFzIG5vdCBz
-b2x2ZWQgb3VyIGlzc3Vlcy4KPiBTbyBmYXIgb3VyIG9ubHkgcmVjb3ZlcnkgaGFzIGJlZW4gdG8g
-ZmFpbCB0aGUgTURTIGFuZCB0aGVuIHJlc3RhcnQgb3VyIE5GUy4gQW55IGhlbHAgb3IgYWR2aWNl
-IHdpbGwgYmUgYXBwcmVjaWF0ZWQgb24gdGhlIENFUEggc2lkZSBvZiB0aGluZ3MuCj4gSeKAmW0g
-cHJldHR5IHN1cmUgd2XigJlyZSBydW5uaW5nIHdpdGggZGVmYXVsdCB0dW5pbmcgb2YgQ0VQSCBN
-RFMgY29uZmlndXJhdGlvbiBwYXJhbWV0ZXJzLgo+Cj4KPiBIZXJlIGFyZSB0aGUgcmVsZXZhbnQg
-bG9nIGVudHJpZXMuCj4KPiBGcm9tIG15IHByaW1hcnkgTURTIHNlcnZlciwgSSBzdGFydCBzZWVp
-bmcgdGhlc2UgZW50cmllcyBzdGFydCB0byBwaWxlIHVwOgo+Cj4gMjAxNi0wNS0zMSAxNDozNDow
-Ny4wOTExMTcgN2Y5ZjJlYjg3NzAwICAwIGxvZ19jaGFubmVsKGNsdXN0ZXIpIGxvZyBbV1JOXSA6
-IGNsaWVudC40MjgzMDY2IGlzbid0IHJlc3BvbmRpbmcgdG8gbWNsaWVudGNhcHMocmV2b2tlKSwg
-aW5vIDEwMDAwMDA0NDkxIHBlbmRpbmcgcEFzTHNYc0ZzeGNyd2IgaXNzdWVkIHBBc3hMc1hzeEZz
-eGNyd2IsIHNlbnQgNjMuODc3NDgwIHNlY29uZHMgYWdvXAo+IDIwMTYtMDUtMzEgMTQ6MzQ6MDcu
-MDkxMTI5IDdmOWYyZWI4NzcwMCAgMCBsb2dfY2hhbm5lbChjbHVzdGVyKSBsb2cgW1dSTl0gOiBj
-bGllbnQuNDI4MzA2NiBpc24ndCByZXNwb25kaW5nIHRvIG1jbGllbnRjYXBzKHJldm9rZSksIGlu
-byAxMDAwMDAwNWRkZiBwZW5kaW5nIHBBc0xzWHNGc3hjcndiIGlzc3VlZCBwQXN4THNYc3hGc3hj
-cndiLCBzZW50IDYzLjg3NzM4MiBzZWNvbmRzIGFnb1wKPiAyMDE2LTA1LTMxIDE0OjM0OjA3LjA5
-MTEzMyA3ZjlmMmViODc3MDAgIDAgbG9nX2NoYW5uZWwoY2x1c3RlcikgbG9nIFtXUk5dIDogY2xp
-ZW50LjQyODMwNjYgaXNuJ3QgcmVzcG9uZGluZyB0byBtY2xpZW50Y2FwcyhyZXZva2UpLCBpbm8g
-MTAwMDAwMDBhMmEgcGVuZGluZyBwQXNMc1hzRnN4Y3J3YiBpc3N1ZWQgcEFzeExzWHN4RnN4Y3J3
-Yiwgc2VudCA2My44NzczNTYgc2Vjb25kcyBhZ28KPgo+IEZyb20gbXkgTkZTIHNlcnZlciwgSSBz
-ZWUgdGhlc2UgZW50cmllcyBmcm9tIGRtZXNnIGFsc28gc3RhcnQgcGlsaW5nIHVwOgo+IFtUdWUg
-TWF5IDMxIDE0OjMzOjA5IDIwMTZdIGxpYmNlcGg6IHNraXBwaW5nIG1kczAgWC5YLlguMTk1OjY4
-MDAgc2VxIDAgZXhwZWN0ZWQgNDI5NDk2NzI5Ngo+IFtUdWUgTWF5IDMxIDE0OjMzOjA5IDIwMTZd
-IGxpYmNlcGg6IHNraXBwaW5nIG1kczAgWC5YLlguMTk1OjY4MDAgc2VxIDEgZXhwZWN0ZWQgNDI5
-NDk2NzI5Ngo+IFtUdWUgTWF5IDMxIDE0OjMzOjA5IDIwMTZdIGxpYmNlcGg6IHNraXBwaW5nIG1k
-czAgWC5YLlguMTk1OjY4MDAgc2VxIDIgZXhwZWN0ZWQgNDI5NDk2NzI5Ngo+Cgo0Mjk0OTY3Mjk2
-IGlzIDB4MTAwMDAwMDAwLCB0aGlzIGxvb2tzIGxpa2Ugc2VxdWVuY2UgIG92ZXJmbG93LgoKSW4g
-c3JjL21zZy9NZXNzYWdlLmg6CgpjbGFzcyBNZXNzYWdlIHsKLi4uCiAgdW5zaWduZWQgZ2V0X3Nl
-cSgpIGNvbnN0IHsgcmV0dXJuIGhlYWRlci5zZXE7IH0KICB2b2lkIHNldF9zZXEodW5zaWduZWQg
-cykgeyBoZWFkZXIuc2VxID0gczsgfQouLi4KfQoKaW4gc3JjL21zZy9zaW1wbGUvUGlwZS5jYwoK
-Y2xhc3MgUGlwZSB7Ci4uLgogIF9fdTMyIGdldF9vdXRfc2VxKCkgeyByZXR1cm4gb3V0X3NlcTsg
-fQouLi4KfQoKSXMgdGhpcyBidWcgb3IgaW50ZW50aW9uYWwgPwoKUmVnYXJkcwpZYW4sIFpoZW5n
-CgoKPiBOZXh0LCB3ZSBmaW5kIHNvbWV0aGluZyBsaWtlIHRoaXMgb24gb25lIG9mIHRoZSBPU0Rz
-LjoKPiAyMDE2LTA1LTMxIDE0OjM0OjQ0LjEzMDI3OSBtb24uMCBYWC5YWC5YWC4xODg6Njc4OS8w
-IDEyNzIxODQgOiBjbHVzdGVyIFtJTkZdIEhFQUxUSF9XQVJOOyBtZHMwOiBDbGllbnQgc3RvcmFn
-ZS1uZnMtMDEgZmFpbGluZyB0byByZXNwb25kIHRvIGNhcGFiaWxpdHkgcmVsZWFzZQo+Cj4gRmlu
-YWxseSwgSSBhbSBzZWVpbmcgY29uc2lzdGVudCBIRUFMVEhfV0FSTiBpbiBteSBzdGF0dXMgcmVn
-YXJkaW5nIHRyaW1taW5nIHdoaWNoIEkgYW0gbm90IHN1cmUgaWYgaXQgaXMgcmVsYXRlZDoKPgo+
-IGNsdXN0ZXIgWFhYWFhYWFgtYmQ4Zi00MDkxLWJlZDMtODU4NmZkMGQ2YjQ2Cj4gICAgICBoZWFs
-dGggSEVBTFRIX1dBUk4KPiAgICAgICAgICAgICBtZHMwOiBCZWhpbmQgb24gdHJpbW1pbmcgKDY3
-LzMwKQo+ICAgICAgbW9ubWFwIGUzOiAzIG1vbnMgYXQge3N0b3JhZ2UwMj1YLlguWC4xOTA6Njc4
-OS8wLHN0b3JhZ2UwMz1YLlguWC4xODk6Njc4OS8wLHN0b3JhZ2UwND1YLlguWC4xODg6Njc4OS8w
-fQo+ICAgICAgICAgICAgIGVsZWN0aW9uIGVwb2NoIDIwNiwgcXVvcnVtIDAsMSwyIHN0b3JhZ2Uw
-NCxzdG9yYWdlMDMsc3RvcmFnZTAyCj4gICAgICAgZnNtYXAgZTc0ODc5OiAxLzEvMSB1cCB7MD1j
-ZXBoZnMtMDM9dXA6YWN0aXZlfSwgMSB1cDpzdGFuZGJ5Cj4gICAgICBvc2RtYXAgZTY1NTE2OiAz
-NiBvc2RzOiAzNiB1cCwgMzYgaW4KPiAgICAgICBwZ21hcCB2MTU0MzU3MzI6IDQxNjAgcGdzLCAz
-IHBvb2xzLCAzNzUzOSBHQiBkYXRhLCA5NjExIGtvYmplY3RzCj4gICAgICAgICAgICAgNzUxMTcg
-R0IgdXNlZCwgNTM1OTEgR0IgLyAxMjUgVEIgYXZhaWwKPiAgICAgICAgICAgICAgICAgNDE2MCBh
-Y3RpdmUrY2xlYW4KPiAgIGNsaWVudCBpbyAzMzQgTUIvcyByZCwgMzE5IE1CL3Mgd3IsIDU4Mzkg
-b3AvcyByZCwgNDg0OCBvcC9zIHdyCj4KPgo+IFJlZ2FyZHMsCj4gSmFtZXMgV2ViYgo+IERldk9w
-cyBFbmdpbmVlciwgRW5naW5lZXJpbmcgVG9vbHMKPiBVbml0eSBUZWNobm9sb2dpZXMKPiBfX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+IGNlcGgtdXNlcnMg
-bWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IGh0dHA6Ly9saXN0cy5j
-ZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQpfX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApj
-ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5j
-Z2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+> On Wed, Jun 1, 2016 at 6:15 AM, James Webb <jamesw@unity3d.com> wrote=
+:
+>> Dear ceph-users...
+>>
+>> My team runs an internal buildfarm using ceph as a backend storage p=
+latform. We=E2=80=99ve recently upgraded to Jewel and are having reliab=
+ility issues that we need some help with.
+>>
+>> Our infrastructure is the following:
+>> - We use CEPH/CEPHFS (10.2.1)
+>> - We have 3 mons and 6 storage servers with a total of 36 OSDs (~416=
+0 PGs).
+>> - We use enterprise SSDs for everything including journals
+>> - We have one main mds and one standby mds.
+>> - We are using ceph kernel client to mount cephfs.
+>> - We have upgrade to Ubuntu 16.04 (4.4.0-22-generic kernel)
+>> - We are using a kernel NFS to serve NFS clients from a ceph mount (=
+~ 32 nfs threads. 0 swappiness)
+>> - These are physical machines with 8 cores & 32GB memory
+>>
+>> On a regular basis, we lose all IO via ceph FS. We=E2=80=99re still =
+trying to isolate the issue but it surfaces as an issue between MDS and=
+ ceph client.
+>> We can=E2=80=99t tell if our our NFS server is overwhelming the MDS =
+or if this is some unrelated issue. Tuning NFS server has not solved ou=
+r issues.
+>> So far our only recovery has been to fail the MDS and then restart o=
+ur NFS. Any help or advice will be appreciated on the CEPH side of thin=
+gs.
+>> I=E2=80=99m pretty sure we=E2=80=99re running with default tuning of=
+ CEPH MDS configuration parameters.
+>>
+>>
+>> Here are the relevant log entries.
+>>
+>> From my primary MDS server, I start seeing these entries start to pi=
+le up:
+>>
+>> 2016-05-31 14:34:07.091117 7f9f2eb87700  0 log_channel(cluster) log =
+[WRN] : client.4283066 isn't responding to mclientcaps(revoke), ino 100=
+00004491 pending pAsLsXsFsxcrwb issued pAsxLsXsxFsxcrwb, sent 63.877480=
+ seconds ago\
+>> 2016-05-31 14:34:07.091129 7f9f2eb87700  0 log_channel(cluster) log =
+[WRN] : client.4283066 isn't responding to mclientcaps(revoke), ino 100=
+00005ddf pending pAsLsXsFsxcrwb issued pAsxLsXsxFsxcrwb, sent 63.877382=
+ seconds ago\
+>> 2016-05-31 14:34:07.091133 7f9f2eb87700  0 log_channel(cluster) log =
+[WRN] : client.4283066 isn't responding to mclientcaps(revoke), ino 100=
+00000a2a pending pAsLsXsFsxcrwb issued pAsxLsXsxFsxcrwb, sent 63.877356=
+ seconds ago
+>>
+>> From my NFS server, I see these entries from dmesg also start piling=
+ up:
+>> [Tue May 31 14:33:09 2016] libceph: skipping mds0 X.X.X.195:6800 seq=
+ 0 expected 4294967296
+>> [Tue May 31 14:33:09 2016] libceph: skipping mds0 X.X.X.195:6800 seq=
+ 1 expected 4294967296
+>> [Tue May 31 14:33:09 2016] libceph: skipping mds0 X.X.X.195:6800 seq=
+ 2 expected 4294967296
+>>
+>
+> 4294967296 is 0x100000000, this looks like sequence  overflow.
+>
+> In src/msg/Message.h:
+>
+> class Message {
+> ...
+>   unsigned get_seq() const { return header.seq; }
+>   void set_seq(unsigned s) { header.seq =3D s; }
+> ...
+> }
+>
+> in src/msg/simple/Pipe.cc
+>
+> class Pipe {
+> ...
+>   __u32 get_out_seq() { return out_seq; }
+> ...
+> }
+>
+> Is this bug or intentional ?
+
+Hrm, I think this a bug^Woversight.  Sage's commit 9731226228dd
+("convert more types in ceph_fs.h to __le* notation") from early 2008
+changed ceph_msg_header's seq from __u32 to __le64 and also changed
+dout()s in the kernel from %d to %lld, so the 32 -> 64 switch seems
+like it was intentional.  Message::get/set_seq() remained unsigned...
+
+The question is which do we fix now - changing the kernel client to
+wrap at 32 would be less of a hassle and easier in terms of backporting=
+,
+but the problem is really in the userspace messenger.  Sage?
+
+Thanks,
+
+                Ilya
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
