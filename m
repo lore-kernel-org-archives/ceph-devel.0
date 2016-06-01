@@ -1,215 +1,197 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: Message sequence overflow
-Date: Wed, 1 Jun 2016 10:22:43 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606011019090.6221@cpach.fuggernut.com>
-References: <CAAM7YA=3T_Gh6ZQQN3EgaxOw+JzQoP+9WuPWBWBhTSDBS4AZew@mail.gmail.com>
-	<alpine.DEB.2.11.1606010847240.6221@cpach.fuggernut.com>
-	<CAAM7YA=xU+Ovxf-QU6ruRKGhWS88-d0UaX1AbcR9oCLbEi9_jg@mail.gmail.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: Re: RocksDB Incorrect API Usage
+Date: Wed, 1 Jun 2016 14:24:44 +0000
+Message-ID: <BLUPR0201MB1908445AEA6C867D24E23CDAE2470@BLUPR0201MB1908.namprd02.prod.outlook.com>
+References: <CACJqLyYtHkeQ+jSNi7JPJzRb6wfCcNAuCSr_YyTwdqA_kzzP_g@mail.gmail.com>
+ <3F3468645DC82146857A5E1C91E23F4B1B2A3EE1@SSIEXCH-MB3.ssi.samsung.com>
+ <CACJqLybKJo+otdX0SU8uOqa6N6POJ-Wgb19SrFmzsE_94Eo2gA@mail.gmail.com>
+ <3F3468645DC82146857A5E1C91E23F4B1B2A3FA5@SSIEXCH-MB3.ssi.samsung.com>
+ <CACJqLyY=5oFP+5i3KLdCcYO5N9pze69ke7mqb1kX6q9KwbBZww@mail.gmail.com>
+ <BLUPR0201MB15248430F768B4711B72F288E8470@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <3F3468645DC82146857A5E1C91E23F4B1B2A4264@SSIEXCH-MB3.ssi.samsung.com>
+ <BLUPR0201MB190816E6BDFADBA59DC13D17E2470@BLUPR0201MB1908.namprd02.prod.outlook.com>
+ <BLUPR0201MB152417B6F3D59DB3985AE2DAE8470@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1860278122-1464790966=:6221"
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAAM7YA=xU+Ovxf-QU6ruRKGhWS88-d0UaX1AbcR9oCLbEi9_jg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, James Webb <jamesw-pKHY6dePtwZBDgjK7y7TUQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bn1bon0085.outbound.protection.outlook.com ([157.56.111.85]:49408
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751648AbcFAOYr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 1 Jun 2016 10:24:47 -0400
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>, Jianjian Huo <jianjian.huo@samsung.com>, Haomai Wang <haomai@xsky.com>
+Cc: Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-1860278122-1464790966=:6221
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-On Wed, 1 Jun 2016, Yan, Zheng wrote:
-> On Wed, Jun 1, 2016 at 8:49 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> > On Wed, 1 Jun 2016, Yan, Zheng wrote:
-> >> On Wed, Jun 1, 2016 at 6:15 AM, James Webb <jamesw-pKHY6dePtwZBDgjK7y7TUQ@public.gmane.org> wrot=
-e:
-> >> > Dear ceph-users...
-> >> >
-> >> > My team runs an internal buildfarm using ceph as a backend storage=
- platform. We=E2=80=99ve recently upgraded to Jewel and are having reliab=
-ility issues that we need some help with.
-> >> >
-> >> > Our infrastructure is the following:
-> >> > - We use CEPH/CEPHFS (10.2.1)
-> >> > - We have 3 mons and 6 storage servers with a total of 36 OSDs (~4=
-160 PGs).
-> >> > - We use enterprise SSDs for everything including journals
-> >> > - We have one main mds and one standby mds.
-> >> > - We are using ceph kernel client to mount cephfs.
-> >> > - We have upgrade to Ubuntu 16.04 (4.4.0-22-generic kernel)
-> >> > - We are using a kernel NFS to serve NFS clients from a ceph mount=
- (~ 32 nfs threads. 0 swappiness)
-> >> > - These are physical machines with 8 cores & 32GB memory
-> >> >
-> >> > On a regular basis, we lose all IO via ceph FS. We=E2=80=99re stil=
-l trying to isolate the issue but it surfaces as an issue between MDS and=
- ceph client.
-> >> > We can=E2=80=99t tell if our our NFS server is overwhelming the MD=
-S or if this is some unrelated issue. Tuning NFS server has not solved ou=
-r issues.
-> >> > So far our only recovery has been to fail the MDS and then restart=
- our NFS. Any help or advice will be appreciated on the CEPH side of thin=
-gs.
-> >> > I=E2=80=99m pretty sure we=E2=80=99re running with default tuning =
-of CEPH MDS configuration parameters.
-> >> >
-> >> >
-> >> > Here are the relevant log entries.
-> >> >
-> >> > From my primary MDS server, I start seeing these entries start to =
-pile up:
-> >> >
-> >> > 2016-05-31 14:34:07.091117 7f9f2eb87700  0 log_channel(cluster) lo=
-g [WRN] : client.4283066 isn't responding to mclientcaps(revoke), ino 100=
-00004491 pending pAsLsXsFsxcrwb issued pAsxLsXsxFsxcrwb, sent 63.877480 s=
-econds ago\
-> >> > 2016-05-31 14:34:07.091129 7f9f2eb87700  0 log_channel(cluster) lo=
-g [WRN] : client.4283066 isn't responding to mclientcaps(revoke), ino 100=
-00005ddf pending pAsLsXsFsxcrwb issued pAsxLsXsxFsxcrwb, sent 63.877382 s=
-econds ago\
-> >> > 2016-05-31 14:34:07.091133 7f9f2eb87700  0 log_channel(cluster) lo=
-g [WRN] : client.4283066 isn't responding to mclientcaps(revoke), ino 100=
-00000a2a pending pAsLsXsFsxcrwb issued pAsxLsXsxFsxcrwb, sent 63.877356 s=
-econds ago
-> >> >
-> >> > From my NFS server, I see these entries from dmesg also start pili=
-ng up:
-> >> > [Tue May 31 14:33:09 2016] libceph: skipping mds0 X.X.X.195:6800 s=
-eq 0 expected 4294967296
-> >> > [Tue May 31 14:33:09 2016] libceph: skipping mds0 X.X.X.195:6800 s=
-eq 1 expected 4294967296
-> >> > [Tue May 31 14:33:09 2016] libceph: skipping mds0 X.X.X.195:6800 s=
-eq 2 expected 4294967296
-> >> >
-> >>
-> >> 4294967296 is 0x100000000, this looks like sequence  overflow.
-> >>
-> >> In src/msg/Message.h:
-> >>
-> >> class Message {
-> >> ...
-> >>   unsigned get_seq() const { return header.seq; }
-> >>   void set_seq(unsigned s) { header.seq =3D s; }
-> >> ...
-> >> }
-> >>
-> >> in src/msg/simple/Pipe.cc
-> >>
-> >> class Pipe {
-> >> ...
-> >>   __u32 get_out_seq() { return out_seq; }
-> >> ...
-> >> }
-> >>
-> >> Is this bug or intentional ?
-> >
-> > That's a bug.  The seq values are intended to be 32 bits.
-> >
-> > (We should also be using the ceph_cmp_seq (IIRC) helper for any inequ=
-ality
-> > checks, which does a sloppy comparison so that a 31-bit signed differ=
-ence
-> > is used to determine > or <.  It sounds like in this case we're just
-> > failing an equality check, though.)
-> >
->=20
-> struct ceph_msg_header {
->         __le64 seq;       /* message seq# for this session */
->         ...
-> }
->=20
-> you means we should leave the upper 32-bits unused?
-
-Oh, hmm. I'm confusing this with the cap seq (which is 32 bits). =20
-
-I think we can safely go either way.. the question is which path is=20
-easier.  If we move to 32 bits used on the kernel side, will userspace=20
-also need to be patched to make reconnect work?  That unsigned get_seq()=20
-is only 32-bits wide.
-
-If we go with 64 bits, userspace still needs to be fixed to change that=20
-unsigned to uint64_t.
-
-What do you think?
-sage
-
-
->=20
->=20
-> > sage
-> >
-> >
-> >> Regards
-> >> Yan, Zheng
-> >>
-> >>
-> >> > Next, we find something like this on one of the OSDs.:
-> >> > 2016-05-31 14:34:44.130279 mon.0 XX.XX.XX.188:6789/0 1272184 : clu=
-ster [INF] HEALTH_WARN; mds0: Client storage-nfs-01 failing to respond to=
- capability release
-> >> >
-> >> > Finally, I am seeing consistent HEALTH_WARN in my status regarding=
- trimming which I am not sure if it is related:
-> >> >
-> >> > cluster XXXXXXXX-bd8f-4091-bed3-8586fd0d6b46
-> >> >      health HEALTH_WARN
-> >> >             mds0: Behind on trimming (67/30)
-> >> >      monmap e3: 3 mons at {storage02=3DX.X.X.190:6789/0,storage03=3D=
-X.X.X.189:6789/0,storage04=3DX.X.X.188:6789/0}
-> >> >             election epoch 206, quorum 0,1,2 storage04,storage03,s=
-torage02
-> >> >       fsmap e74879: 1/1/1 up {0=3Dcephfs-03=3Dup:active}, 1 up:sta=
-ndby
-> >> >      osdmap e65516: 36 osds: 36 up, 36 in
-> >> >       pgmap v15435732: 4160 pgs, 3 pools, 37539 GB data, 9611 kobj=
-ects
-> >> >             75117 GB used, 53591 GB / 125 TB avail
-> >> >                 4160 active+clean
-> >> >   client io 334 MB/s rd, 319 MB/s wr, 5839 op/s rd, 4848 op/s wr
-> >> >
-> >> >
-> >> > Regards,
-> >> > James Webb
-> >> > DevOps Engineer, Engineering Tools
-> >> > Unity Technologies
-> >> > _______________________________________________
-> >> > ceph-users mailing list
-> >> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> >> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
-> >> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---8323329-1860278122-1464790966=:6221
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---8323329-1860278122-1464790966=:6221--
+DQoNCk9uIFdlZG5lc2RheSAwMSBKdW5lIDIwMTYgMDc6MTYgUE0sIEFsbGVuIFNhbXVlbHMgd3Jv
+dGU6DQo+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogVmFyYWRhIEthcmkN
+Cj4+IFNlbnQ6IFR1ZXNkYXksIE1heSAzMSwgMjAxNiA4OjM4IFBNDQo+PiBUbzogSmlhbmppYW4g
+SHVvIDxqaWFuamlhbi5odW9Ac2Ftc3VuZy5jb20+OyBBbGxlbiBTYW11ZWxzDQo+PiA8QWxsZW4u
+U2FtdWVsc0BzYW5kaXNrLmNvbT47IEhhb21haSBXYW5nIDxoYW9tYWlAeHNreS5jb20+DQo+PiBD
+YzogU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPjsgTWFyayBOZWxzb24gPG1uZWxzb25AcmVk
+aGF0LmNvbT47DQo+PiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPj4gU3ViamVjdDogUmU6
+IFJvY2tzREIgSW5jb3JyZWN0IEFQSSBVc2FnZQ0KPj4NCj4+DQo+Pg0KPj4gT24gV2VkbmVzZGF5
+IDAxIEp1bmUgMjAxNiAwODo1NCBBTSwgSmlhbmppYW4gSHVvIHdyb3RlOg0KPj4+IEhpIEFsbGVu
+LA0KPj4+DQo+Pj4gT24gVHVlLCBNYXkgMzEsIDIwMTYgYXQgNzo1MiBQTSwgQWxsZW4gU2FtdWVs
+cw0KPj4gPEFsbGVuLlNhbXVlbHNAc2FuZGlzay5jb20+IHdyb3RlOg0KPj4+Pj4gLS0tLS1Pcmln
+aW5hbCBNZXNzYWdlLS0tLS0NCj4+Pj4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
+ZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4+Pj4+IG93bmVyQHZnZXIua2VybmVsLm9yZ10g
+T24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQo+Pj4+PiBTZW50OiBUdWVzZGF5LCBNYXkgMzEsIDIw
+MTYgNzozOCBQTQ0KPj4+Pj4gVG86IEppYW5qaWFuIEh1byA8amlhbmppYW4uaHVvQHNhbXN1bmcu
+Y29tPg0KPj4+Pj4gQ2M6IFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT47IE1hcmsgTmVsc29u
+DQo+PiA8bW5lbHNvbkByZWRoYXQuY29tPjsNCj4+Pj4+IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnDQo+Pj4+PiBTdWJqZWN0OiBSZTogUm9ja3NEQiBJbmNvcnJlY3QgQVBJIFVzYWdlDQo+Pj4+
+Pg0KPj4+Pj4gT24gV2VkLCBKdW4gMSwgMjAxNiBhdCAzOjQwIEFNLCBKaWFuamlhbiBIdW8NCj4+
+Pj4+IDxqaWFuamlhbi5odW9Ac2Ftc3VuZy5jb20+DQo+Pj4+PiB3cm90ZToNCj4+Pj4+PiBPbiBU
+dWUsIE1heSAzMSwgMjAxNiBhdCAxMToxMiBBTSwgSGFvbWFpIFdhbmcgPGhhb21haUB4c2t5LmNv
+bT4NCj4+Pj4+IHdyb3RlOg0KPj4+Pj4+PiBPbiBXZWQsIEp1biAxLCAyMDE2IGF0IDI6MDggQU0s
+IEppYW5qaWFuIEh1bw0KPj4+Pj4gPGppYW5qaWFuLmh1b0BzYW1zdW5nLmNvbT4gd3JvdGU6DQo+
+Pj4+Pj4+PiBIaSBIYW9tYWksDQo+Pj4+Pj4+Pg0KPj4+Pj4+Pj4gSSBub3RpY2VkIHRoaXMgYXMg
+d2VsbCwgYW5kIG1hZGUgc2FtZSBjaGFuZ2VzIHRvIFJvY2tzREJTdG9yZSBpbg0KPj4+Pj4+Pj4g
+dGhpcyBQUg0KPj4+Pj4gbGFzdCB3ZWVrOg0KPj4+Pj4+Pj4gaHR0cHM6Ly9naXRodWIuY29tL2Nl
+cGgvY2VwaC9wdWxsLzkyMTUNCj4+Pj4+Pj4+DQo+Pj4+Pj4+PiBPbmUgdGhpbmcgd2hpY2ggaXMg
+ZXZlbiB3b3JzZSwgIHNlZWsgd2lsbCBieXBhc3Mgcm93IGNhY2hlLCBzbyBrdg0KPj4+Pj4+Pj4g
+cGFpcnMNCj4+Pj4+IHdvbid0IGJlIGFibGUgdG8gYmUgY2FjaGVkIGluIHJvdyBjYWNoZS4NCj4+
+Pj4+Pj4+IEkgYW0gd29ya2luZyB0byBiZW5jaG1hcmsgdGhlIHBlcmZvcm1hbmNlIGltcGFjdCwg
+d2lsbCBwdWJsaXNoDQo+Pj4+Pj4+PiB0aGUNCj4+Pj4+IHJlc3VsdHMgYWZ0ZXIgSSBhbSBkb25l
+IHRoaXMgd2Vlay4NCj4+Pj4+Pj4gT2gsIGNvb2whIEkgdGhpbmsgeW91IGNhbiBjaGVycnktcGlj
+ayBteSBhbm90aGVyIGxldmVsZGIgZml4Lg0KPj4+Pj4+IE5vIHByb2JsZW0sIEkgd2lsbCBkbyB0
+aGF0Lg0KPj4+Pj4+PiBCVFcsIGRvIHlvdSBwYXkgYW4gYXR0ZW50aW9uIHRvIHByZWZpeCBzZWVr
+IGFwaT8gSSB0aGluayBpdCB3aWxsDQo+Pj4+Pj4+IGJlIG1vcmUgc3VpdGFibGUgdGhhbiBjb2x1
+bW4gZmFtaWx5IGluIGNlcGggY2FzZS4gSWYgd2UgY2FuIGhhdmUNCj4+Pj4+Pj4gd2VsbC1kZWZp
+bmVkIHByZWZpeCBydWxlLCB3ZSBjYW4gbWFrZSBtb3N0IG9mIHJhbmdlIHF1ZXJ5IGNoZWFwZXIh
+DQo+Pj4+Pj4gV2hlbiBrZXlzIHdpdGggc2FtZSBwcmVmaXggYXJlIHN0b3JlZCBpbiB0aGVpciBv
+d24gU1NUIGZpbGVzKENGDQo+Pj4+Pj4gY2FzZSksDQo+Pj4+PiBldmVuIHNlZWtpbmcgd2l0aG91
+dCBwcmVmaXggd2lsbCBiZSBmYXN0ZXIgdGhhbiBzZWVraW5nIHdpdGggcHJlZml4DQo+Pj4+PiBi
+dXQgbWl4ZWQgd2l0aCBkaWZmZXJlbnQgcHJlZml4ZWQga2V5cz8NCj4+Pj4+DQo+Pj4+PiBGcm9t
+IG15IGN1cnJlbnQgdmlldywgcHJlZml4IGNvdWxkIGJlIG1vcmUgZmxleGlibGUuIEZvciBleGFt
+cGxlLA0KPj4+Pj4gZWFjaCByZ3cgYnVja2V0IGluZGV4IGNvdWxkIHVzZSBvbmUgcHJlZml4IHRv
+IG1ha2UgZWFjaCBidWNrZXQgaW5kZXgNCj4+Pj4+IG9iamVjdCBzZWVrIHNlcGFyYXRlZC4gRm9y
+IENGLCBpdCB3b3VsZCBiZSB0b28gaGVhdnJ5Lg0KPj4+PiBUaGlzIG1pZ2h0IGNhdXNlIG90aGVy
+IHByb2JsZW1zLiBXb3VsZCBpdCBkcmFtYXRpY2FsbHkgaW5jcmVhc2UgdGhlDQo+Pj4+IG51bWJl
+ciBvZiBmaWxlcyB0aGF0IEJsdWVGUyBuZWVkcyB0byBtYW5hZ2U/IElmIHNvLCB0aGF0IG1pZ2h0
+DQo+Pj4+IGVmZmVjdGl2ZWx5IGJyZWFrIHRoYXQgY29kZSB0b28gKG9mIGNvdXJzZSBpdCdzIGZp
+eGFibGUgYWxzbyA6KSkNCj4+PiBUaGFua3MgZm9yIGJyaW5naW5nIHVwIHRoaXMgaXNzdWUuIFdo
+YXQncyBjdXJyZW50IGxpbWl0IG9mIG51bWJlciBvZiBmaWxlcyBmb3INCj4+IEJsdWVGUywgZnJv
+bSB5b3VyIGV4cGVyaWVuY2U/DQo+Pj4gSmlhbmppYW4NCj4+IFRoZXJlIGlzIG5vIGxpbWl0IHJp
+Z2h0IG5vdywgZm5vZGUgaW5vIGlzIGEgdW5pdDY0X3QuICBEaXJlY3RvcnkgaXMgYSByZWYgY291
+bnRlZA0KPj4gb2JqZWN0IGNvbnRhaW5zIGEgZmlsZSBtYXAuIEFzIHRoZSBudW1iZXIgb2YgaW5v
+ZGVzIGdyb3csIGZpbGVfbWFwIHdpbGwgZ3JvdywNCj4+IHdpbGwgY29uc3VtZSBtb3JlIG1lbW9y
+eS4NCj4+DQo+PiBWYXJhZGENCj4gVGVjaG5pY2FsbHkgY29ycmVjdCwgbXkgY29uY2VybiBpcyBv
+bmUgb2YgcGVyZm9ybWFuY2UgZm9yIEJsdWVGUyBqb3VybmFsIGNvbXBhY3Rpb24uDQo+DQpZZXMu
+IEkgYW0gd29ya2luZyBvbiBvcHRpbWl6aW5nIHRoZSBsYXRlbmN5IHBhcnQgZHVyaW5nIHRoZSBj
+b21wYWN0aW9uLg0KDQpWYXJhZGENCj4+Pj4+PiBJIGFtIG5vdCBzdXJlIHdoYXQgb3B0aW1pemF0
+aW9uIHByZWZpeCBzZWVrIHdpbGwgdXNlIGludGVybmFsbHkgZm9yDQo+Pj4+Pj4gYmxvY2sNCj4+
+Pj4+IGJhc2VkIGZvcm1hdCwgYnV0IHRvIG1lLCBpdCdzIGhhcmQgdG8gYmVhdCB0aGUgY2FzZSB3
+aGVuIHlvdSBvbmx5DQo+Pj4+PiBoYXZlIG9uZSBwcmVmaXhlZCBrZXlzIHN0b3JlZCBzZXBhcmF0
+ZWx5Lg0KPj4+Pj4+Pj4gSmlhbmppYW4NCj4+Pj4+Pj4+DQo+Pj4+Pj4+PiBPbiBUdWUsIE1heSAz
+MSwgMjAxNiBhdCA5OjQ5IEFNLCBIYW9tYWkgV2FuZw0KPj4gPGhhb21haUB4c2t5LmNvbT4NCj4+
+Pj4+IHdyb3RlOg0KPj4+Pj4+Pj4+IEhpIFNhZ2UgYW5kIE1hcmssDQo+Pj4+Pj4+Pj4NCj4+Pj4+
+Pj4+PiBBcyBtZW50aW9uZWQgaW4gQmx1ZVN0b3JlIHN0YW5kdXAsIEkgZm91bmQgcm9ja3NkYiBp
+dGVyYXRvcg0KPj4+Pj4+Pj4+ICpTZWVrKiB3b24ndCB1c2UgYmxvb20gZmlsdGVyIGxpa2UgKkdl
+dCouDQo+Pj4+Pj4+Pj4NCj4+Pj4+Pj4+PiAqR2V0KiBpbXBsOiBpdCB3aWxsIGxvb2sgYXQgZmls
+dGVyIGZpcnN0bHkNCj4+Pj4+Pj4+Pg0KPj4gaHR0cHM6Ly9naXRodWIuY29tL2ZhY2Vib29rL3Jv
+Y2tzZGIvYmxvYi9tYXN0ZXIvdGFibGUvYmxvY2tfYmFzZWRfdA0KPj4+Pj4+Pj4+IGFibGVfcmVh
+ZGVyLmNjI0wxMzY5DQo+Pj4+Pj4+Pj4NCj4+Pj4+Pj4+PiBJdGVyYXRvciAqU2Vlayo6IGl0IHdp
+bGwgZG8gYmluYXJ5IHNlYXJjaCwgYnkgZGVmYXVsdCB3ZSBkb24ndA0KPj4+Pj4+Pj4+IHNwZWNp
+ZnkgcHJlZml4DQo+Pj4+PiBmZWF0dXJlKGh0dHBzOi8vZ2l0aHViLmNvbS9mYWNlYm9vay9yb2Nr
+c2RiL3dpa2kvUHJlZml4LVNlZWstQVBJLQ0KPj4+Pj4gQ2hhbmdlcykuDQo+PiBodHRwczovL2dp
+dGh1Yi5jb20vZmFjZWJvb2svcm9ja3NkYi9ibG9iL21hc3Rlci90YWJsZS9ibG9jay5jYyNMDQo+
+Pj4+Pj4+Pj4gOTQNCj4+Pj4+Pj4+Pg0KPj4+Pj4+Pj4+IFNvIEkgdXNlIGEgc2ltcGxlIHRlc3Rz
+Og0KPj4+Pj4+Pj4+DQo+Pj4+Pj4+Pj4gLi9kYl9iZW5jaCAtbnVtIDEwMDAwMDAwICAtYmVuY2ht
+YXJrcyBmaWxsYmF0Y2ggZmlsbCB0aGUgZGINCj4+Pj4+Pj4+PiBmaXJzdGx5IHdpdGggMTAwMHcg
+cmVjb3Jkcy4NCj4+Pj4+Pj4+Pg0KPj4+Pj4+Pj4+IC4vZGJfYmVuY2ggLXVzZV9leGlzdGluZ19k
+YiAgLWJlbmNobWFya3MgcmVhZHJhbmRvbWZhc3QNCj4+Pj4+Pj4+PiByZWFkcmFuZG9tZmFzdCBj
+YXNlIHdpbGwgdXNlICpHZXQqIEFQSSB0byByZXRyaXZlIGRhdGENCj4+Pj4+Pj4+Pg0KPj4+Pj4+
+Pj4+IFtyb290QGh1bnRlci1ub2RlMiByb2Nrc2RiXSMgLi9kYl9iZW5jaCAtdXNlX2V4aXN0aW5n
+X2RiDQo+Pj4+Pj4+Pj4gLWJlbmNobWFya3MgcmVhZHJhbmRvbWZhc3QNCj4+Pj4+Pj4+Pg0KPj4+
+Pj4+Pj4+IExldmVsREI6ICAgIHZlcnNpb24gNC4zDQo+Pj4+Pj4+Pj4gRGF0ZTogICAgICAgV2Vk
+IEp1biAgMSAwMDoyOToxNiAyMDE2DQo+Pj4+Pj4+Pj4gQ1BVOiAgICAgICAgMzIgKiBJbnRlbChS
+KSBYZW9uKFIpIENQVSBFNS0yNjgwIDAgQCAyLjcwR0h6DQo+Pj4+Pj4+Pj4gQ1BVQ2FjaGU6ICAg
+MjA0ODAgS0INCj4+Pj4+Pj4+PiBLZXlzOiAgICAgICAxNiBieXRlcyBlYWNoDQo+Pj4+Pj4+Pj4g
+VmFsdWVzOiAgICAgMTAwIGJ5dGVzIGVhY2ggKDUwIGJ5dGVzIGFmdGVyIGNvbXByZXNzaW9uKQ0K
+Pj4+Pj4+Pj4+IEVudHJpZXM6ICAgIDEwMDAwMDANCj4+Pj4+Pj4+PiBQcmVmaXg6ICAgIDAgYnl0
+ZXMNCj4+Pj4+Pj4+PiBLZXlzIHBlciBwcmVmaXg6ICAgIDANCj4+Pj4+Pj4+PiBSYXdTaXplOiAg
+ICAxMTAuNiBNQiAoZXN0aW1hdGVkKQ0KPj4+Pj4+Pj4+IEZpbGVTaXplOiAgIDYyLjkgTUIgKGVz
+dGltYXRlZCkNCj4+Pj4+Pj4+PiBXcml0ZXMgcGVyIHNlY29uZDogMA0KPj4+Pj4+Pj4+IENvbXBy
+ZXNzaW9uOiBTbmFwcHkNCj4+Pj4+Pj4+PiBNZW10YWJsZXJlcDogc2tpcF9saXN0DQo+Pj4+Pj4+
+Pj4gUGVyZiBMZXZlbDogMA0KPj4+Pj4+Pj4+IFdBUk5JTkc6IEFzc2VydGlvbnMgYXJlIGVuYWJs
+ZWQ7IGJlbmNobWFya3MgdW5uZWNlc3NhcmlseSBzbG93DQo+Pj4+Pj4+Pj4gLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+Pj4+Pj4+Pj4gREIgcGF0aDog
+Wy90bXAvcm9ja3NkYnRlc3QtMC9kYmJlbmNoXQ0KPj4+Pj4+Pj4+IHJlYWRyYW5kb21mYXN0IDog
+ICAgICAgNC41NzAgbWljcm9zL29wIDIxODgwNiBvcHMvc2VjOyAoMTAwMDEwMCBvZg0KPj4+Pj4+
+Pj4+IDEwMDAxMDAgZm91bmQsIGlzc3VlZCA0NjYzOSBub24tZXhpc3Qga2V5cykNCj4+Pj4+Pj4+
+Pg0KPj4+Pj4+Pj4+ID09PT09PT09PT09PT09PT09PT09PT09PT09PQ0KPj4+Pj4+Pj4+IHRoZW4g
+SSBtb2RpZnkgcmVhZHJhbmRvbWZhc3QgdG8gdXNlIEl0ZXJhdG9yIEFQSVswXToNCj4+Pj4+Pj4+
+Pg0KPj4+Pj4+Pj4+IFtyb290QGh1bnRlci1ub2RlMiByb2Nrc2RiXSMgLi9kYl9iZW5jaCAtdXNl
+X2V4aXN0aW5nX2RiDQo+Pj4+Pj4+Pj4gLWJlbmNobWFya3MgcmVhZHJhbmRvbWZhc3QNCj4+Pj4+
+Pj4+PiBMZXZlbERCOiAgICB2ZXJzaW9uIDQuMw0KPj4+Pj4+Pj4+IERhdGU6ICAgICAgIFdlZCBK
+dW4gIDEgMDA6MzM6MDMgMjAxNg0KPj4+Pj4+Pj4+IENQVTogICAgICAgIDMyICogSW50ZWwoUikg
+WGVvbihSKSBDUFUgRTUtMjY4MCAwIEAgMi43MEdIeg0KPj4+Pj4+Pj4+IENQVUNhY2hlOiAgIDIw
+NDgwIEtCDQo+Pj4+Pj4+Pj4gS2V5czogICAgICAgMTYgYnl0ZXMgZWFjaA0KPj4+Pj4+Pj4+IFZh
+bHVlczogICAgIDEwMCBieXRlcyBlYWNoICg1MCBieXRlcyBhZnRlciBjb21wcmVzc2lvbikNCj4+
+Pj4+Pj4+PiBFbnRyaWVzOiAgICAxMDAwMDAwDQo+Pj4+Pj4+Pj4gUHJlZml4OiAgICAwIGJ5dGVz
+DQo+Pj4+Pj4+Pj4gS2V5cyBwZXIgcHJlZml4OiAgICAwDQo+Pj4+Pj4+Pj4gUmF3U2l6ZTogICAg
+MTEwLjYgTUIgKGVzdGltYXRlZCkNCj4+Pj4+Pj4+PiBGaWxlU2l6ZTogICA2Mi45IE1CIChlc3Rp
+bWF0ZWQpDQo+Pj4+Pj4+Pj4gV3JpdGVzIHBlciBzZWNvbmQ6IDANCj4+Pj4+Pj4+PiBDb21wcmVz
+c2lvbjogU25hcHB5DQo+Pj4+Pj4+Pj4gTWVtdGFibGVyZXA6IHNraXBfbGlzdA0KPj4+Pj4+Pj4+
+IFBlcmYgTGV2ZWw6IDANCj4+Pj4+Pj4+PiBXQVJOSU5HOiBBc3NlcnRpb25zIGFyZSBlbmFibGVk
+OyBiZW5jaG1hcmtzIHVubmVjZXNzYXJpbHkgc2xvdw0KPj4+Pj4+Pj4+IC0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPj4+Pj4+Pj4+IERCIHBhdGg6IFsv
+dG1wL3JvY2tzZGJ0ZXN0LTAvZGJiZW5jaF0NCj4+Pj4+Pj4+PiByZWFkcmFuZG9tZmFzdCA6ICAg
+ICAgNDUuMTg4IG1pY3Jvcy9vcCAyMjEyOSBvcHMvc2VjOyAoMTAwMDEwMCBvZg0KPj4+Pj4+Pj4+
+IDEwMDAxMDAgZm91bmQsIGlzc3VlZCA0NjYzOSBub24tZXhpc3Qga2V5cykNCj4+Pj4+Pj4+Pg0K
+Pj4+Pj4+Pj4+DQo+Pj4+Pj4+Pj4gNDUuMTggdXMvb3AgdnMgNC41N3VzL29wIQ0KPj4+Pj4+Pj4+
+DQo+Pj4+Pj4+Pj4gVGhlIHRlc3QgY2FuIGJlIHJlcGVhdGVkIGFuZCBlYXN5IHRvIGRvISBQbHog
+Y29ycmVjdCBpZiBJJ20NCj4+Pj4+Pj4+PiBkb2luZyBmb29saXNoIHRoaW5nIEknbSBub3QgYXdh
+cmUuLg0KPj4+Pj4+Pj4+DQo+Pj4+Pj4+Pj4gU28gSSBwcm9wb3NhbCB0aGlzIFBSOiBodHRwczov
+L2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvOTQxMQ0KPj4+Pj4+Pj4+DQo+Pj4+Pj4+Pj4gV2Ug
+c3RpbGwgY2FuIG1ha2UgZnVydGhlciBpbXByb3ZlbWVudHMgYnkgc2Nhbm5pbmcgYWxsIGl0ZXJh
+dGUNCj4+Pj4+Pj4+PiB1c2FnZSB0byBtYWtlIGl0IGJldHRlciENCj4+Pj4+Pj4+Pg0KPj4+Pj4+
+Pj4+IFswXToNCj4+Pj4+Pj4+PiAtLS0gYS9kYi9kYl9iZW5jaC5jYw0KPj4+Pj4+Pj4+ICsrKyBi
+L2RiL2RiX2JlbmNoLmNjDQo+Pj4+Pj4+Pj4gQEAgLTI5MjMsMTQgKzI5MjMsMTIgQEAgY2xhc3Mg
+QmVuY2htYXJrIHsNCj4+Pj4+Pj4+PiAgICAgICAgICBpbnQ2NF90IGtleV9yYW5kID0gdGhyZWFk
+LT5yYW5kLk5leHQoKSAmIChwb3QgLSAxKTsNCj4+Pj4+Pj4+PiAgICAgICAgICBHZW5lcmF0ZUtl
+eUZyb21JbnQoa2V5X3JhbmQsIEZMQUdTX251bSwgJmtleSk7DQo+Pj4+Pj4+Pj4gICAgICAgICAg
+KytyZWFkOw0KPj4+Pj4+Pj4+IC0gICAgICAgIGF1dG8gc3RhdHVzID0gZGItPkdldChvcHRpb25z
+LCBrZXksICZ2YWx1ZSk7DQo+Pj4+Pj4+Pj4gLSAgICAgICAgaWYgKHN0YXR1cy5vaygpKSB7DQo+
+Pj4+Pj4+Pj4gLSAgICAgICAgICArK2ZvdW5kOw0KPj4+Pj4+Pj4+IC0gICAgICAgIH0gZWxzZSBp
+ZiAoIXN0YXR1cy5Jc05vdEZvdW5kKCkpIHsNCj4+Pj4+Pj4+PiAtICAgICAgICAgIGZwcmludGYo
+c3RkZXJyLCAiR2V0IHJldHVybmVkIGFuIGVycm9yOiAlc1xuIiwNCj4+Pj4+Pj4+PiAtICAgICAg
+ICAgICAgICAgICAgc3RhdHVzLlRvU3RyaW5nKCkuY19zdHIoKSk7DQo+Pj4+Pj4+Pj4gLSAgICAg
+ICAgICBhYm9ydCgpOw0KPj4+Pj4+Pj4+IC0gICAgICAgIH0NCj4+Pj4+Pj4+PiArICAgICAgICBJ
+dGVyYXRvciogaXRlciA9IGRiLT5OZXdJdGVyYXRvcihvcHRpb25zKTsNCj4+Pj4+Pj4+PiArICAg
+ICAgaXRlci0+U2VlayhrZXkpOw0KPj4+Pj4+Pj4+ICsgICAgICBpZiAoaXRlci0+VmFsaWQoKSAm
+JiBpdGVyLT5rZXkoKS5jb21wYXJlKGtleSkgPT0gMCkgew0KPj4+Pj4+Pj4+ICsgICAgICAgIGZv
+dW5kKys7DQo+Pj4+Pj4+Pj4gKyAgICAgIH0NCj4+Pj4+Pj4+PiArDQo+Pj4+Pj4+Pj4gICAgICAg
+ICAgaWYgKGtleV9yYW5kID49IEZMQUdTX251bSkgew0KPj4+Pj4+Pj4+ICAgICAgICAgICAgKytu
+b25leGlzdDsNCj4+Pj4+Pj4+PiAgICAgICAgICB9DQo+Pj4+Pj4+Pj4gLS0NCj4+Pj4+Pj4+PiBU
+byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUN
+Cj4+Pj4+Pj4+PiBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8NCj4+Pj4+
+Pj4+PiBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQNCj4+
+Pj4+Pj4+PiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+Pj4+
+Pj4gLS0NCj4+Pj4+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxp
+bmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+Pj4+Pj4+IGluIHRoZSBib2R5IG9mIGEgbWVz
+c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4+Pj4+IG1ham9yZG9tbw0K
+Pj4+Pj4+PiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
+bWwNCj4+Pj4+IC0tDQo+Pj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0
+aGUgbGluZSAidW5zdWJzY3JpYmUNCj4+Pj4+IGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+Pj4+PiBNb3JlIG1ham9yZG9t
+byBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4+
+IE4gICAgIHIgIHkgICBiIFggIMendiBeICneunsubiArICAgeiBdeiAgIHtheSDKh9qZICxqICBm
+ICAgaCAgIHogIHcgICAgICBqDQo+Pj4gOit2ICAgdyBqIG0gICAgICAgIHpaKyAgICAg3aJqIiAg
+ISBpDQo+DQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMg
+ZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0
+aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2Yg
+dGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVi
+eSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBh
+bmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlp
+bmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJl
+Y2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2Vu
+ZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBh
+bmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9z
+c2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29w
+aWVzKS4NCg==
