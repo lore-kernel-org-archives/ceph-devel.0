@@ -1,169 +1,151 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: RocksDB Incorrect API Usage
-Date: Wed, 1 Jun 2016 10:38:23 +0800
-Message-ID: <CACJqLyY=5oFP+5i3KLdCcYO5N9pze69ke7mqb1kX6q9KwbBZww@mail.gmail.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: RocksDB Incorrect API Usage
+Date: Wed, 1 Jun 2016 02:52:23 +0000
+Message-ID: <BLUPR0201MB15248430F768B4711B72F288E8470@BLUPR0201MB1524.namprd02.prod.outlook.com>
 References: <CACJqLyYtHkeQ+jSNi7JPJzRb6wfCcNAuCSr_YyTwdqA_kzzP_g@mail.gmail.com>
 	<3F3468645DC82146857A5E1C91E23F4B1B2A3EE1@SSIEXCH-MB3.ssi.samsung.com>
 	<CACJqLybKJo+otdX0SU8uOqa6N6POJ-Wgb19SrFmzsE_94Eo2gA@mail.gmail.com>
 	<3F3468645DC82146857A5E1C91E23F4B1B2A3FA5@SSIEXCH-MB3.ssi.samsung.com>
+ <CACJqLyY=5oFP+5i3KLdCcYO5N9pze69ke7mqb1kX6q9KwbBZww@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-hk2apc01on0112.outbound.protection.outlook.com ([104.47.124.112]:47360
-	"EHLO APC01-HK2-obe.outbound.protection.outlook.com"
+Received: from mail-bl2on0094.outbound.protection.outlook.com ([65.55.169.94]:55665
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751287AbcFACig (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 31 May 2016 22:38:36 -0400
-Received: by mail-vk0-f51.google.com with SMTP id c189so8559591vkb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 31 May 2016 19:38:31 -0700 (PDT)
-In-Reply-To: <3F3468645DC82146857A5E1C91E23F4B1B2A3FA5@SSIEXCH-MB3.ssi.samsung.com>
+	id S1755697AbcFACw0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 31 May 2016 22:52:26 -0400
+In-Reply-To: <CACJqLyY=5oFP+5i3KLdCcYO5N9pze69ke7mqb1kX6q9KwbBZww@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jianjian Huo <jianjian.huo@samsung.com>
+To: Haomai Wang <haomai@xsky.com>, Jianjian Huo <jianjian.huo@samsung.com>
 Cc: Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jun 1, 2016 at 3:40 AM, Jianjian Huo <jianjian.huo@samsung.com> wrote:
->
-> On Tue, May 31, 2016 at 11:12 AM, Haomai Wang <haomai@xsky.com> wrote:
->> On Wed, Jun 1, 2016 at 2:08 AM, Jianjian Huo <jianjian.huo@samsung.com> wrote:
->>> Hi Haomai,
->>>
->>> I noticed this as well, and made same changes to RocksDBStore in this PR last week:
->>> https://github.com/ceph/ceph/pull/9215
->>>
->>> One thing which is even worse,  seek will bypass row cache, so kv pairs won't be able to be cached in row cache.
->>> I am working to benchmark the performance impact, will publish the results after I am done this week.
->>
->> Oh, cool! I think you can cherry-pick my another leveldb fix.
->
-> No problem, I will do that.
->>
->> BTW, do you pay an attention to prefix seek api? I think it will be
->> more suitable than column family in ceph case. If we can have
->> well-defined prefix rule, we can make most of range query cheaper!
->
-> When keys with same prefix are stored in their own SST files(CF case), even seeking without prefix will be faster than seeking with prefix but mixed with different prefixed keys?
-
-From my current view, prefix could be more flexible. For example, each
-rgw bucket index could use one prefix to make each bucket index object
-seek separated. For CF, it would be too heavry.
-
-> I am not sure what optimization prefix seek will use internally for block based format, but to me, it's hard to beat the case when you only have one prefixed keys stored separately.
->>
->>>
->>> Jianjian
->>>
->>> On Tue, May 31, 2016 at 9:49 AM, Haomai Wang <haomai@xsky.com> wrote:
->>>> Hi Sage and Mark,
->>>>
->>>> As mentioned in BlueStore standup, I found rocksdb iterator *Seek*
->>>> won't use bloom filter like *Get*.
->>>>
->>>> *Get* impl: it will look at filter firstly
->>>> https://github.com/facebook/rocksdb/blob/master/table/block_based_table_reader.cc#L1369
->>>>
->>>> Iterator *Seek*: it will do binary search, by default we don't specify
->>>> prefix feature(https://github.com/facebook/rocksdb/wiki/Prefix-Seek-API-Changes).
->>>> https://github.com/facebook/rocksdb/blob/master/table/block.cc#L94
->>>>
->>>> So I use a simple tests:
->>>>
->>>> ./db_bench -num 10000000  -benchmarks fillbatch
->>>> fill the db firstly with 1000w records.
->>>>
->>>> ./db_bench -use_existing_db  -benchmarks readrandomfast
->>>> readrandomfast case will use *Get* API to retrive data
->>>>
->>>> [root@hunter-node2 rocksdb]# ./db_bench -use_existing_db  -benchmarks
->>>> readrandomfast
->>>>
->>>> LevelDB:    version 4.3
->>>> Date:       Wed Jun  1 00:29:16 2016
->>>> CPU:        32 * Intel(R) Xeon(R) CPU E5-2680 0 @ 2.70GHz
->>>> CPUCache:   20480 KB
->>>> Keys:       16 bytes each
->>>> Values:     100 bytes each (50 bytes after compression)
->>>> Entries:    1000000
->>>> Prefix:    0 bytes
->>>> Keys per prefix:    0
->>>> RawSize:    110.6 MB (estimated)
->>>> FileSize:   62.9 MB (estimated)
->>>> Writes per second: 0
->>>> Compression: Snappy
->>>> Memtablerep: skip_list
->>>> Perf Level: 0
->>>> WARNING: Assertions are enabled; benchmarks unnecessarily slow
->>>> ------------------------------------------------
->>>> DB path: [/tmp/rocksdbtest-0/dbbench]
->>>> readrandomfast :       4.570 micros/op 218806 ops/sec; (1000100 of
->>>> 1000100 found, issued 46639 non-exist keys)
->>>>
->>>> ===========================
->>>> then I modify readrandomfast to use Iterator API[0]:
->>>>
->>>> [root@hunter-node2 rocksdb]# ./db_bench -use_existing_db  -benchmarks
->>>> readrandomfast
->>>> LevelDB:    version 4.3
->>>> Date:       Wed Jun  1 00:33:03 2016
->>>> CPU:        32 * Intel(R) Xeon(R) CPU E5-2680 0 @ 2.70GHz
->>>> CPUCache:   20480 KB
->>>> Keys:       16 bytes each
->>>> Values:     100 bytes each (50 bytes after compression)
->>>> Entries:    1000000
->>>> Prefix:    0 bytes
->>>> Keys per prefix:    0
->>>> RawSize:    110.6 MB (estimated)
->>>> FileSize:   62.9 MB (estimated)
->>>> Writes per second: 0
->>>> Compression: Snappy
->>>> Memtablerep: skip_list
->>>> Perf Level: 0
->>>> WARNING: Assertions are enabled; benchmarks unnecessarily slow
->>>> ------------------------------------------------
->>>> DB path: [/tmp/rocksdbtest-0/dbbench]
->>>> readrandomfast :      45.188 micros/op 22129 ops/sec; (1000100 of
->>>> 1000100 found, issued 46639 non-exist keys)
->>>>
->>>>
->>>> 45.18 us/op vs 4.57us/op!
->>>>
->>>> The test can be repeated and easy to do! Plz correct if I'm doing
->>>> foolish thing I'm not aware..
->>>>
->>>> So I proposal this PR: https://github.com/ceph/ceph/pull/9411
->>>>
->>>> We still can make further improvements by scanning all iterate usage
->>>> to make it better!
->>>>
->>>> [0]:
->>>> --- a/db/db_bench.cc
->>>> +++ b/db/db_bench.cc
->>>> @@ -2923,14 +2923,12 @@ class Benchmark {
->>>>          int64_t key_rand = thread->rand.Next() & (pot - 1);
->>>>          GenerateKeyFromInt(key_rand, FLAGS_num, &key);
->>>>          ++read;
->>>> -        auto status = db->Get(options, key, &value);
->>>> -        if (status.ok()) {
->>>> -          ++found;
->>>> -        } else if (!status.IsNotFound()) {
->>>> -          fprintf(stderr, "Get returned an error: %s\n",
->>>> -                  status.ToString().c_str());
->>>> -          abort();
->>>> -        }
->>>> +        Iterator* iter = db->NewIterator(options);
->>>> +      iter->Seek(key);
->>>> +      if (iter->Valid() && iter->key().compare(key) == 0) {
->>>> +        found++;
->>>> +      }
->>>> +
->>>>          if (key_rand >= FLAGS_num) {
->>>>            ++nonexist;
->>>>          }
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQo+IFNlbnQ6IFR1ZXNkYXksIE1heSAzMSwgMjAx
+NiA3OjM4IFBNDQo+IFRvOiBKaWFuamlhbiBIdW8gPGppYW5qaWFuLmh1b0BzYW1zdW5nLmNvbT4N
+Cj4gQ2M6IFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT47IE1hcmsgTmVsc29uIDxtbmVsc29u
+QHJlZGhhdC5jb20+Ow0KPiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBS
+ZTogUm9ja3NEQiBJbmNvcnJlY3QgQVBJIFVzYWdlDQo+IA0KPiBPbiBXZWQsIEp1biAxLCAyMDE2
+IGF0IDM6NDAgQU0sIEppYW5qaWFuIEh1byA8amlhbmppYW4uaHVvQHNhbXN1bmcuY29tPg0KPiB3
+cm90ZToNCj4gPg0KPiA+IE9uIFR1ZSwgTWF5IDMxLCAyMDE2IGF0IDExOjEyIEFNLCBIYW9tYWkg
+V2FuZyA8aGFvbWFpQHhza3kuY29tPg0KPiB3cm90ZToNCj4gPj4gT24gV2VkLCBKdW4gMSwgMjAx
+NiBhdCAyOjA4IEFNLCBKaWFuamlhbiBIdW8NCj4gPGppYW5qaWFuLmh1b0BzYW1zdW5nLmNvbT4g
+d3JvdGU6DQo+ID4+PiBIaSBIYW9tYWksDQo+ID4+Pg0KPiA+Pj4gSSBub3RpY2VkIHRoaXMgYXMg
+d2VsbCwgYW5kIG1hZGUgc2FtZSBjaGFuZ2VzIHRvIFJvY2tzREJTdG9yZSBpbiB0aGlzIFBSDQo+
+IGxhc3Qgd2VlazoNCj4gPj4+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC85MjE1
+DQo+ID4+Pg0KPiA+Pj4gT25lIHRoaW5nIHdoaWNoIGlzIGV2ZW4gd29yc2UsICBzZWVrIHdpbGwg
+YnlwYXNzIHJvdyBjYWNoZSwgc28ga3YgcGFpcnMNCj4gd29uJ3QgYmUgYWJsZSB0byBiZSBjYWNo
+ZWQgaW4gcm93IGNhY2hlLg0KPiA+Pj4gSSBhbSB3b3JraW5nIHRvIGJlbmNobWFyayB0aGUgcGVy
+Zm9ybWFuY2UgaW1wYWN0LCB3aWxsIHB1Ymxpc2ggdGhlDQo+IHJlc3VsdHMgYWZ0ZXIgSSBhbSBk
+b25lIHRoaXMgd2Vlay4NCj4gPj4NCj4gPj4gT2gsIGNvb2whIEkgdGhpbmsgeW91IGNhbiBjaGVy
+cnktcGljayBteSBhbm90aGVyIGxldmVsZGIgZml4Lg0KPiA+DQo+ID4gTm8gcHJvYmxlbSwgSSB3
+aWxsIGRvIHRoYXQuDQo+ID4+DQo+ID4+IEJUVywgZG8geW91IHBheSBhbiBhdHRlbnRpb24gdG8g
+cHJlZml4IHNlZWsgYXBpPyBJIHRoaW5rIGl0IHdpbGwgYmUNCj4gPj4gbW9yZSBzdWl0YWJsZSB0
+aGFuIGNvbHVtbiBmYW1pbHkgaW4gY2VwaCBjYXNlLiBJZiB3ZSBjYW4gaGF2ZQ0KPiA+PiB3ZWxs
+LWRlZmluZWQgcHJlZml4IHJ1bGUsIHdlIGNhbiBtYWtlIG1vc3Qgb2YgcmFuZ2UgcXVlcnkgY2hl
+YXBlciENCj4gPg0KPiA+IFdoZW4ga2V5cyB3aXRoIHNhbWUgcHJlZml4IGFyZSBzdG9yZWQgaW4g
+dGhlaXIgb3duIFNTVCBmaWxlcyhDRiBjYXNlKSwNCj4gZXZlbiBzZWVraW5nIHdpdGhvdXQgcHJl
+Zml4IHdpbGwgYmUgZmFzdGVyIHRoYW4gc2Vla2luZyB3aXRoIHByZWZpeCBidXQgbWl4ZWQNCj4g
+d2l0aCBkaWZmZXJlbnQgcHJlZml4ZWQga2V5cz8NCj4gDQo+IEZyb20gbXkgY3VycmVudCB2aWV3
+LCBwcmVmaXggY291bGQgYmUgbW9yZSBmbGV4aWJsZS4gRm9yIGV4YW1wbGUsIGVhY2ggcmd3DQo+
+IGJ1Y2tldCBpbmRleCBjb3VsZCB1c2Ugb25lIHByZWZpeCB0byBtYWtlIGVhY2ggYnVja2V0IGlu
+ZGV4IG9iamVjdCBzZWVrDQo+IHNlcGFyYXRlZC4gRm9yIENGLCBpdCB3b3VsZCBiZSB0b28gaGVh
+dnJ5Lg0KDQpUaGlzIG1pZ2h0IGNhdXNlIG90aGVyIHByb2JsZW1zLiBXb3VsZCBpdCBkcmFtYXRp
+Y2FsbHkgaW5jcmVhc2UgdGhlIG51bWJlciBvZiBmaWxlcyB0aGF0IEJsdWVGUyBuZWVkcyB0byBt
+YW5hZ2U/IElmIHNvLCB0aGF0IG1pZ2h0IGVmZmVjdGl2ZWx5IGJyZWFrIHRoYXQgY29kZSB0b28g
+KG9mIGNvdXJzZSBpdCdzIGZpeGFibGUgYWxzbyA6KSkNCj4gDQo+ID4gSSBhbSBub3Qgc3VyZSB3
+aGF0IG9wdGltaXphdGlvbiBwcmVmaXggc2VlayB3aWxsIHVzZSBpbnRlcm5hbGx5IGZvciBibG9j
+aw0KPiBiYXNlZCBmb3JtYXQsIGJ1dCB0byBtZSwgaXQncyBoYXJkIHRvIGJlYXQgdGhlIGNhc2Ug
+d2hlbiB5b3Ugb25seSBoYXZlIG9uZQ0KPiBwcmVmaXhlZCBrZXlzIHN0b3JlZCBzZXBhcmF0ZWx5
+Lg0KPiA+Pg0KPiA+Pj4NCj4gPj4+IEppYW5qaWFuDQo+ID4+Pg0KPiA+Pj4gT24gVHVlLCBNYXkg
+MzEsIDIwMTYgYXQgOTo0OSBBTSwgSGFvbWFpIFdhbmcgPGhhb21haUB4c2t5LmNvbT4NCj4gd3Jv
+dGU6DQo+ID4+Pj4gSGkgU2FnZSBhbmQgTWFyaywNCj4gPj4+Pg0KPiA+Pj4+IEFzIG1lbnRpb25l
+ZCBpbiBCbHVlU3RvcmUgc3RhbmR1cCwgSSBmb3VuZCByb2Nrc2RiIGl0ZXJhdG9yICpTZWVrKg0K
+PiA+Pj4+IHdvbid0IHVzZSBibG9vbSBmaWx0ZXIgbGlrZSAqR2V0Ki4NCj4gPj4+Pg0KPiA+Pj4+
+ICpHZXQqIGltcGw6IGl0IHdpbGwgbG9vayBhdCBmaWx0ZXIgZmlyc3RseQ0KPiA+Pj4+DQo+IGh0
+dHBzOi8vZ2l0aHViLmNvbS9mYWNlYm9vay9yb2Nrc2RiL2Jsb2IvbWFzdGVyL3RhYmxlL2Jsb2Nr
+X2Jhc2VkX3QNCj4gPj4+PiBhYmxlX3JlYWRlci5jYyNMMTM2OQ0KPiA+Pj4+DQo+ID4+Pj4gSXRl
+cmF0b3IgKlNlZWsqOiBpdCB3aWxsIGRvIGJpbmFyeSBzZWFyY2gsIGJ5IGRlZmF1bHQgd2UgZG9u
+J3QNCj4gPj4+PiBzcGVjaWZ5IHByZWZpeA0KPiBmZWF0dXJlKGh0dHBzOi8vZ2l0aHViLmNvbS9m
+YWNlYm9vay9yb2Nrc2RiL3dpa2kvUHJlZml4LVNlZWstQVBJLQ0KPiBDaGFuZ2VzKS4NCj4gPj4+
+PiBodHRwczovL2dpdGh1Yi5jb20vZmFjZWJvb2svcm9ja3NkYi9ibG9iL21hc3Rlci90YWJsZS9i
+bG9jay5jYyNMOTQNCj4gPj4+Pg0KPiA+Pj4+IFNvIEkgdXNlIGEgc2ltcGxlIHRlc3RzOg0KPiA+
+Pj4+DQo+ID4+Pj4gLi9kYl9iZW5jaCAtbnVtIDEwMDAwMDAwICAtYmVuY2htYXJrcyBmaWxsYmF0
+Y2ggZmlsbCB0aGUgZGIgZmlyc3RseQ0KPiA+Pj4+IHdpdGggMTAwMHcgcmVjb3Jkcy4NCj4gPj4+
+Pg0KPiA+Pj4+IC4vZGJfYmVuY2ggLXVzZV9leGlzdGluZ19kYiAgLWJlbmNobWFya3MgcmVhZHJh
+bmRvbWZhc3QNCj4gPj4+PiByZWFkcmFuZG9tZmFzdCBjYXNlIHdpbGwgdXNlICpHZXQqIEFQSSB0
+byByZXRyaXZlIGRhdGENCj4gPj4+Pg0KPiA+Pj4+IFtyb290QGh1bnRlci1ub2RlMiByb2Nrc2Ri
+XSMgLi9kYl9iZW5jaCAtdXNlX2V4aXN0aW5nX2RiDQo+ID4+Pj4gLWJlbmNobWFya3MgcmVhZHJh
+bmRvbWZhc3QNCj4gPj4+Pg0KPiA+Pj4+IExldmVsREI6ICAgIHZlcnNpb24gNC4zDQo+ID4+Pj4g
+RGF0ZTogICAgICAgV2VkIEp1biAgMSAwMDoyOToxNiAyMDE2DQo+ID4+Pj4gQ1BVOiAgICAgICAg
+MzIgKiBJbnRlbChSKSBYZW9uKFIpIENQVSBFNS0yNjgwIDAgQCAyLjcwR0h6DQo+ID4+Pj4gQ1BV
+Q2FjaGU6ICAgMjA0ODAgS0INCj4gPj4+PiBLZXlzOiAgICAgICAxNiBieXRlcyBlYWNoDQo+ID4+
+Pj4gVmFsdWVzOiAgICAgMTAwIGJ5dGVzIGVhY2ggKDUwIGJ5dGVzIGFmdGVyIGNvbXByZXNzaW9u
+KQ0KPiA+Pj4+IEVudHJpZXM6ICAgIDEwMDAwMDANCj4gPj4+PiBQcmVmaXg6ICAgIDAgYnl0ZXMN
+Cj4gPj4+PiBLZXlzIHBlciBwcmVmaXg6ICAgIDANCj4gPj4+PiBSYXdTaXplOiAgICAxMTAuNiBN
+QiAoZXN0aW1hdGVkKQ0KPiA+Pj4+IEZpbGVTaXplOiAgIDYyLjkgTUIgKGVzdGltYXRlZCkNCj4g
+Pj4+PiBXcml0ZXMgcGVyIHNlY29uZDogMA0KPiA+Pj4+IENvbXByZXNzaW9uOiBTbmFwcHkNCj4g
+Pj4+PiBNZW10YWJsZXJlcDogc2tpcF9saXN0DQo+ID4+Pj4gUGVyZiBMZXZlbDogMA0KPiA+Pj4+
+IFdBUk5JTkc6IEFzc2VydGlvbnMgYXJlIGVuYWJsZWQ7IGJlbmNobWFya3MgdW5uZWNlc3Nhcmls
+eSBzbG93DQo+ID4+Pj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tDQo+ID4+Pj4gREIgcGF0aDogWy90bXAvcm9ja3NkYnRlc3QtMC9kYmJlbmNoXQ0KPiA+
+Pj4+IHJlYWRyYW5kb21mYXN0IDogICAgICAgNC41NzAgbWljcm9zL29wIDIxODgwNiBvcHMvc2Vj
+OyAoMTAwMDEwMCBvZg0KPiA+Pj4+IDEwMDAxMDAgZm91bmQsIGlzc3VlZCA0NjYzOSBub24tZXhp
+c3Qga2V5cykNCj4gPj4+Pg0KPiA+Pj4+ID09PT09PT09PT09PT09PT09PT09PT09PT09PQ0KPiA+
+Pj4+IHRoZW4gSSBtb2RpZnkgcmVhZHJhbmRvbWZhc3QgdG8gdXNlIEl0ZXJhdG9yIEFQSVswXToN
+Cj4gPj4+Pg0KPiA+Pj4+IFtyb290QGh1bnRlci1ub2RlMiByb2Nrc2RiXSMgLi9kYl9iZW5jaCAt
+dXNlX2V4aXN0aW5nX2RiDQo+ID4+Pj4gLWJlbmNobWFya3MgcmVhZHJhbmRvbWZhc3QNCj4gPj4+
+PiBMZXZlbERCOiAgICB2ZXJzaW9uIDQuMw0KPiA+Pj4+IERhdGU6ICAgICAgIFdlZCBKdW4gIDEg
+MDA6MzM6MDMgMjAxNg0KPiA+Pj4+IENQVTogICAgICAgIDMyICogSW50ZWwoUikgWGVvbihSKSBD
+UFUgRTUtMjY4MCAwIEAgMi43MEdIeg0KPiA+Pj4+IENQVUNhY2hlOiAgIDIwNDgwIEtCDQo+ID4+
+Pj4gS2V5czogICAgICAgMTYgYnl0ZXMgZWFjaA0KPiA+Pj4+IFZhbHVlczogICAgIDEwMCBieXRl
+cyBlYWNoICg1MCBieXRlcyBhZnRlciBjb21wcmVzc2lvbikNCj4gPj4+PiBFbnRyaWVzOiAgICAx
+MDAwMDAwDQo+ID4+Pj4gUHJlZml4OiAgICAwIGJ5dGVzDQo+ID4+Pj4gS2V5cyBwZXIgcHJlZml4
+OiAgICAwDQo+ID4+Pj4gUmF3U2l6ZTogICAgMTEwLjYgTUIgKGVzdGltYXRlZCkNCj4gPj4+PiBG
+aWxlU2l6ZTogICA2Mi45IE1CIChlc3RpbWF0ZWQpDQo+ID4+Pj4gV3JpdGVzIHBlciBzZWNvbmQ6
+IDANCj4gPj4+PiBDb21wcmVzc2lvbjogU25hcHB5DQo+ID4+Pj4gTWVtdGFibGVyZXA6IHNraXBf
+bGlzdA0KPiA+Pj4+IFBlcmYgTGV2ZWw6IDANCj4gPj4+PiBXQVJOSU5HOiBBc3NlcnRpb25zIGFy
+ZSBlbmFibGVkOyBiZW5jaG1hcmtzIHVubmVjZXNzYXJpbHkgc2xvdw0KPiA+Pj4+IC0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiA+Pj4+IERCIHBhdGg6
+IFsvdG1wL3JvY2tzZGJ0ZXN0LTAvZGJiZW5jaF0NCj4gPj4+PiByZWFkcmFuZG9tZmFzdCA6ICAg
+ICAgNDUuMTg4IG1pY3Jvcy9vcCAyMjEyOSBvcHMvc2VjOyAoMTAwMDEwMCBvZg0KPiA+Pj4+IDEw
+MDAxMDAgZm91bmQsIGlzc3VlZCA0NjYzOSBub24tZXhpc3Qga2V5cykNCj4gPj4+Pg0KPiA+Pj4+
+DQo+ID4+Pj4gNDUuMTggdXMvb3AgdnMgNC41N3VzL29wIQ0KPiA+Pj4+DQo+ID4+Pj4gVGhlIHRl
+c3QgY2FuIGJlIHJlcGVhdGVkIGFuZCBlYXN5IHRvIGRvISBQbHogY29ycmVjdCBpZiBJJ20gZG9p
+bmcNCj4gPj4+PiBmb29saXNoIHRoaW5nIEknbSBub3QgYXdhcmUuLg0KPiA+Pj4+DQo+ID4+Pj4g
+U28gSSBwcm9wb3NhbCB0aGlzIFBSOiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwv
+OTQxMQ0KPiA+Pj4+DQo+ID4+Pj4gV2Ugc3RpbGwgY2FuIG1ha2UgZnVydGhlciBpbXByb3ZlbWVu
+dHMgYnkgc2Nhbm5pbmcgYWxsIGl0ZXJhdGUNCj4gPj4+PiB1c2FnZSB0byBtYWtlIGl0IGJldHRl
+ciENCj4gPj4+Pg0KPiA+Pj4+IFswXToNCj4gPj4+PiAtLS0gYS9kYi9kYl9iZW5jaC5jYw0KPiA+
+Pj4+ICsrKyBiL2RiL2RiX2JlbmNoLmNjDQo+ID4+Pj4gQEAgLTI5MjMsMTQgKzI5MjMsMTIgQEAg
+Y2xhc3MgQmVuY2htYXJrIHsNCj4gPj4+PiAgICAgICAgICBpbnQ2NF90IGtleV9yYW5kID0gdGhy
+ZWFkLT5yYW5kLk5leHQoKSAmIChwb3QgLSAxKTsNCj4gPj4+PiAgICAgICAgICBHZW5lcmF0ZUtl
+eUZyb21JbnQoa2V5X3JhbmQsIEZMQUdTX251bSwgJmtleSk7DQo+ID4+Pj4gICAgICAgICAgKyty
+ZWFkOw0KPiA+Pj4+IC0gICAgICAgIGF1dG8gc3RhdHVzID0gZGItPkdldChvcHRpb25zLCBrZXks
+ICZ2YWx1ZSk7DQo+ID4+Pj4gLSAgICAgICAgaWYgKHN0YXR1cy5vaygpKSB7DQo+ID4+Pj4gLSAg
+ICAgICAgICArK2ZvdW5kOw0KPiA+Pj4+IC0gICAgICAgIH0gZWxzZSBpZiAoIXN0YXR1cy5Jc05v
+dEZvdW5kKCkpIHsNCj4gPj4+PiAtICAgICAgICAgIGZwcmludGYoc3RkZXJyLCAiR2V0IHJldHVy
+bmVkIGFuIGVycm9yOiAlc1xuIiwNCj4gPj4+PiAtICAgICAgICAgICAgICAgICAgc3RhdHVzLlRv
+U3RyaW5nKCkuY19zdHIoKSk7DQo+ID4+Pj4gLSAgICAgICAgICBhYm9ydCgpOw0KPiA+Pj4+IC0g
+ICAgICAgIH0NCj4gPj4+PiArICAgICAgICBJdGVyYXRvciogaXRlciA9IGRiLT5OZXdJdGVyYXRv
+cihvcHRpb25zKTsNCj4gPj4+PiArICAgICAgaXRlci0+U2VlayhrZXkpOw0KPiA+Pj4+ICsgICAg
+ICBpZiAoaXRlci0+VmFsaWQoKSAmJiBpdGVyLT5rZXkoKS5jb21wYXJlKGtleSkgPT0gMCkgew0K
+PiA+Pj4+ICsgICAgICAgIGZvdW5kKys7DQo+ID4+Pj4gKyAgICAgIH0NCj4gPj4+PiArDQo+ID4+
+Pj4gICAgICAgICAgaWYgKGtleV9yYW5kID49IEZMQUdTX251bSkgew0KPiA+Pj4+ICAgICAgICAg
+ICAgKytub25leGlzdDsNCj4gPj4+PiAgICAgICAgICB9DQo+ID4+Pj4gLS0NCj4gPj4+PiBUbyB1
+bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUNCj4g
+Pj4+PiBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZw0KPiA+Pj4+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2Vy
+Lmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiA+PiAtLQ0KPiA+PiBUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
+bCINCj4gPj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5l
+bC5vcmcgTW9yZQ0KPiBtYWpvcmRvbW8NCj4gPj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVs
+Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
+cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUNCj4g
+Ym9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9y
+ZG9tbyBpbmZvIGF0DQo+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
+bA0K
