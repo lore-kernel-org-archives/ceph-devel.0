@@ -1,17 +1,17 @@
 From: Gregory Farnum <gfarnum@redhat.com>
 Subject: Re: msgr2 protocol
-Date: Thu, 2 Jun 2016 11:11:40 -0700
-Message-ID: <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com>
+Date: Thu, 2 Jun 2016 11:16:15 -0700
+Message-ID: <CAJ4mKGZ99J=12pcYznV4EE3icKshN9TSJ55rPxD34Q05JtOjGw@mail.gmail.com>
 References: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f49.google.com ([209.85.213.49]:34460 "EHLO
-	mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161484AbcFBSLm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 14:11:42 -0400
-Received: by mail-vk0-f49.google.com with SMTP id c189so82391167vkb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2016 11:11:42 -0700 (PDT)
+Received: from mail-vk0-f42.google.com ([209.85.213.42]:36763 "EHLO
+	mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932392AbcFBSQR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 14:16:17 -0400
+Received: by mail-vk0-f42.google.com with SMTP id a6so82376455vkg.3
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2016 11:16:16 -0700 (PDT)
 In-Reply-To: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -39,23 +39,6 @@ On Thu, May 26, 2016 at 11:17 AM, Sage Weil <sweil@redhat.com> wrote:
 > 3. The identification of peers during connect is moved to the TAG_IDENT
 > stage.  This way it could happen after authentication and/or encryption,
 > if we like.  (Not sure it matters.)
-
-Hmm, reading this through I'm actually confused about how we do
-authentication before we identify ourselves.
-
-Going back to the fast reconnects again (in which we allow a client to
-submit all the reconnect data at once and submit a message without
-waiting for a response from the server), we'd need to be able to
-re-use the previous session key during the authentication phase but
-for that to make any sense it would need to have supplied the
-identifying cookie.
-
-Were you thinking that with cephx, it would use the cluster key to
-generate a "blind" session key, saying it's allowed to talk, and then
-use that session key to do identification and share the cephx bundle?
--Greg
-
-
 >
 > 4. Signatures are a separate message now that follows the previous
 > message.  If a message doesn't have a signature that follows, it is
@@ -103,6 +86,11 @@ use that session key to do identification and share the cephx bundle?
 >  -> TAG_SIGNATURE
 >  -> TAG_MSG
 >  -> TAG_SIGNATURE
+
+And this bit isn't actually true any more based on that doc; the
+signature is embedded in the "frame" concept. (Which I think is good
+since it avoids predictable data bits an adversary can attack on!)
+
 >     ...
 > S:
 >  -> TAG_MSG
