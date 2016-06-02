@@ -1,63 +1,133 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: RGW Multisite delete wierdness
-Date: Thu, 2 Jun 2016 06:09:17 -0700
-Message-ID: <CADRKj5Rd6pqGRA7fN=xR1eFKJzpf7f-X-ZMm-frrZMp_3FAf1w@mail.gmail.com>
-References: <87zispoa07.fsf@suse.com>
-	<CADRKj5TpcOzavirV7M-s2s8hg+9yyHm3LUyV_Mw3eCDR3DLzSw@mail.gmail.com>
-	<86oa95lc1h.fsf@linux-stsn.suse>
-	<CADRKj5SUACKOQNXW21OHCE1BOVZ5Bva-czgN4QaeptkP=gbrxg@mail.gmail.com>
-	<CADRKj5SJVMzjbvMt7PkvdDxBq1+b1GoCNo7f23Jsf9434+0O-A@mail.gmail.com>
-	<87a8ki6r1b.fsf@suse.com>
-	<CADRKj5QUA6gki5hy5HYfGej0AdWTV19xVWR8gAWCbHZq4HWzSg@mail.gmail.com>
-	<86k2jllbhs.fsf@linux-stsn.suse>
-	<87k2jks24h.fsf@suse.com>
-	<CADRKj5T5LCcskumQpLN4KGDgV4p50r9v9X=TaYVFODeR7mdFhQ@mail.gmail.com>
-	<CADRKj5T8hDWeSsK=u8sjRthokD+kN3B+uuKiwpRSdR7KvY-fQQ@mail.gmail.com>
-	<86inz2lt0t.fsf@linux-stsn.suse>
-	<CADRKj5TOucJhNt5zcVsKjRQVfrqQwhY2TuHq=uUF9EB-SeukkQ@mail.gmail.com>
-	<CADRKj5Rjd9kKQqxKwhJnnJhuE0aHfRL_ytYuNS4uxbW336hQAw@mail.gmail.com>
-	<878tyq7fcu.fsf@suse.com>
-	<CADRKj5RRcV=iw2hTSMRWsK+GShCnygwJEMWcA36v-jnKRDahdg@mail.gmail.com>
-	<877fe77nih.fsf@suse.com>
+From: Orit Wasserman <owasserm@redhat.com>
+Subject: Re: rgw: object null version delete
+Date: Thu, 2 Jun 2016 15:17:19 +0200
+Message-ID: <CABo9giRBZKOBER1p83gwNjA_6E20XJuGcmrpdn+QPPkNKNug=A@mail.gmail.com>
+References: <574FFA9E.7060100@xtaotech.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f47.google.com ([209.85.213.47]:36611 "EHLO
-	mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751293AbcFBNJT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 09:09:19 -0400
-Received: by mail-vk0-f47.google.com with SMTP id a6so69587773vkg.3
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2016 06:09:18 -0700 (PDT)
-In-Reply-To: <877fe77nih.fsf@suse.com>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:37698 "EHLO
+	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932123AbcFBNRV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 09:17:21 -0400
+Received: by mail-wm0-f42.google.com with SMTP id z87so69352344wmh.0
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2016 06:17:20 -0700 (PDT)
+In-Reply-To: <574FFA9E.7060100@xtaotech.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Lekshmanan <abhishek@suse.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Yang Joseph <joseph.yang@xtaotech.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Javen Wu <javen.wu@xtaotech.com>
 
-On Thu, Jun 2, 2016 at 6:01 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
-> [..]
-> Yehuda Sadeh-Weinraub writes:
->>
->> Yes, that would be a normal behaviour. The primary should not have
->> concurrent sync operations on the same object if object has not
->> completed previous sync operations. Looking at the log it really seems
->> that we don't identify the concurrent sync operation on the same
->> object. This should have been fixed by commit
->> edea6d58dd25995bcc1ed4fc5be6f72ce4a6835a. Can you try to verify what
->> went wrong there (whether can_do_op() returned true and why)?
->
-> Looked into this a bit, can_do_op() has returned true for the case when
-> primary issues a Fetch (or GET) and when a delete is issued,(even though
-> the Fetch is still not complete yet) by putting a debug log around when
-> we clear the keys, both the delete op and the get op creates and deletes
-> the same key successfully.
->
-> Which makes me suspect, that different instances of
-> RGWBucketIncSyncShardMarkerTrack are at play here, leading to different
-> independent values for key_to_marker. Is that possible?
->
-Shouldn't happen, but maybe something went wrong. Try adding some more
-info to the log message to see if that's the case.
+The fix is being backported to hammer:
+http://tracker.ceph.com/issues/15254
 
-Thanks,
-Yehuda
+On Thu, Jun 2, 2016 at 11:21 AM, Yang Joseph <joseph.yang@xtaotech.com> wrote:
+> Hello,
+>
+> Radosgw version Hammer (0.94.5) can not delete a null version key which
+> created before
+> turn on bucket versioning[1]. And its value can still be accessed. In order
+> to
+> solve this problem, I applied the changes of [2]. But sometimes the test
+> case
+> can pass, sometimes not.
+>
+> For all my osd daemons, I set breakpoints at
+> rgw_bucket_unlink_instance/rgw_bucket_read_olh_log.
+> I noticed that a failed case's unlink/read_olh_log requests never reached
+> osd side.
+>
+> How to fix this problem? Any suggestions?
+>
+> Thx,
+>
+> joseph
+>
+> ref:
+>
+> [1] How to reproduce the bug:
+>
+>     - create bucket
+>     - put key AAA
+>     - turn on bucket versioning
+>     - read AAA // expect 404
+>     - delete AAA
+>     - delete bucket
+>
+> [2] hammer: rgw: convert plain object to versioned (with null version) when
+> removing #8755
+> https://github.com/ceph/ceph/pull/8755/commits/12cf255eb2ae666afb29df40d61de754257f7f28?diff=split
+>
+> [3] bilog
+>
+> # radosgw-admin bilog list --bucket=4e00f488-28a1-11e6-a9e6-002590ae43ca
+> --cluster rgwltt
+> [
+>     {
+>         "op_id": "00000000001.77.2",
+>         "op_tag": "rgwltt-rgwltt.6547.113",
+>         "op": "write",
+>         "object": "4e1274ec-28a1-11e6-a9e6-002590ae43ca",
+>         "instance": "",
+>         "state": "pending",
+>         "index_ver": 1,
+>         "timestamp": "0.000000",
+>         "ver": {
+>             "pool": -1,
+>             "epoch": 0
+>         },
+>         "versioned": false
+>     },
+>     {
+>         "op_id": "00000000002.78.3",
+>         "op_tag": "rgwltt-rgwltt.6547.113",
+>         "op": "write",
+>         "object": "4e1274ec-28a1-11e6-a9e6-002590ae43ca",
+>         "instance": "",
+>         "state": "complete",
+>         "index_ver": 2,
+>         "timestamp": "2016-06-02 09:06:34.000000Z",
+>         "ver": {
+>             "pool": 15,
+>             "epoch": 17
+>         },
+>         "versioned": false
+>     },
+>     {
+>         "op_id": "00000000003.79.5",
+>         "op_tag": "00000000574ff71azhrp4zx1y11qcsv2",
+>         "op": "unlink_instance",
+>         "object": "4e1274ec-28a1-11e6-a9e6-002590ae43ca",
+>         "instance": "",
+>         "state": "complete",
+>         "index_ver": 3,
+>         "timestamp": "2016-06-02 09:06:34.787122Z",
+>         "ver": {
+>             "pool": -1,
+>             "epoch": 2
+>         },
+>         "versioned": true
+>     },
+>     {
+>         "op_id": "00000000004.80.5",
+>         "op_tag": "00000000574ff71cgeeopd12arjscnds",
+>         "op": "unlink_instance",
+>         "object": "4e1274ec-28a1-11e6-a9e6-002590ae43ca",
+>         "instance": "",
+>         "state": "complete",
+>         "index_ver": 4,
+>         "timestamp": "2016-06-02 09:06:36.760707Z",
+>         "ver": {
+>             "pool": -1,
+>             "epoch": 3
+>         },
+>         "versioned": true
+>     }
+>
+> ]
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
