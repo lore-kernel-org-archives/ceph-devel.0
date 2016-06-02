@@ -1,52 +1,44 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Lose allocation hint attribute after recovery or backfill
-Date: Thu, 2 Jun 2016 19:01:48 +0800
-Message-ID: <CALZt5jzdVMgZo7jxw9oxDJHUiQ72j1ubKN7=CP1cE7uX0+u+OA@mail.gmail.com>
+From: chris holcombe <chris.holcombe@canonical.com>
+Subject: Re: Encryption for data at rest support
+Date: Thu, 2 Jun 2016 05:31:26 -0700
+Message-ID: <5750271E.10102@canonical.com>
+References: <CANA9Uk6d+MTomL+7rQzRVUHHLWpE_WyEVL5BzpNRLrn-Xe8zJw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:36424 "EHLO
-	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932124AbcFBLBu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 07:01:50 -0400
-Received: by mail-wm0-f54.google.com with SMTP id n184so73954680wmn.1
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2016 04:01:49 -0700 (PDT)
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:33707 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752017AbcFBMbv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 08:31:51 -0400
+Received: by mail-pa0-f46.google.com with SMTP id um11so5608244pab.0
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2016 05:31:50 -0700 (PDT)
+In-Reply-To: <CANA9Uk6d+MTomL+7rQzRVUHHLWpE_WyEVL5BzpNRLrn-Xe8zJw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: M Ranga Swami Reddy <swamireddy@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-Hi, Sage
+Hi Swami,
 
-Currently, allocation hint is set into filesystem fsxattr, like XFS.
-Or directly assign to onode_t in Blustore and Kstore.
-It works as expected normally.  However, if the cluster begins to
-recovering or backfilling object. Those recovered object will lose
-allocation hint fsxattr forever. This means if a cluster experienced
-osd up/down flapping, then those kind of hot accessed object will not
-have the allocation hint xattr any more.
-As a result, those objects will not be fully written (1M/4M)
-eventually become fragmented. This will also happen if an object is
-truncated (become of enabling qume discard option).
+Yes ceph supports encryption at rest using dmcrypt.  The docs are here:
+http://docs.ceph.com/docs/jewel/rados/deployment/ceph-deploy-osd/
 
-Therefore, we may want to preserve the allocation hint fsxattr during
-recovery, there are two alternatives to do this.
-1. issue set_alloc_hint with the current object size during recovery, like
-    t->set_alloc_hint(cid, oid,  expected_object_size, expected_object_size)
-    but it would be a problem for us to retrieve the
-expected_object_size. For a block image, it may be object_size in
-image metadata.
+My team has integrated this functionality into the ceph-osd charm also
+if you'd like to try that out: https://jujucharms.com/ceph-osd/xenial/2
+When combined with the ceph-mon charm you're up and running fast :)
 
-2. So I would like to directly transfer the information of hint
-fsxattr to the recovered object. Also, I find that a new param flags
-will be used to indicated whether the data will be compressed.
-So I propose a PR Like this:
-https://github.com/ceph/ceph/pull/9452
+-Chris
 
-I think the issue may not be related to BlueStore or KStore because of
-the allocation hint attribute can be overwritten in later
-set_allocation_hint Ops?
-
-
-
-Regards
-Ning Yao
+On 06/02/2016 03:57 AM, M Ranga Swami Reddy wrote:
+> Hello,
+> 
+> Can you please share if the ceph supports the "data at rest" functionality?
+> If yes, how can I achieve this? Please share any docs available.
+> 
+> Thanks
+> Swami
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
