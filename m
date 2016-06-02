@@ -1,52 +1,78 @@
-From: M Ranga Swami Reddy <swamireddy@gmail.com>
-Subject: Re: Encryption for data at rest support
-Date: Thu, 2 Jun 2016 22:22:50 +0530
-Message-ID: <CANA9Uk65Zb5ezWuW2J4aC0mwb_XjgNa=R9mS7OXLWjAVxCoSgg@mail.gmail.com>
-References: <CANA9Uk6d+MTomL+7rQzRVUHHLWpE_WyEVL5BzpNRLrn-Xe8zJw@mail.gmail.com>
-	<5750271E.10102@canonical.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [GSoC] wrong patch "msg: change entity_addr_t encode/decode"
+Date: Thu, 2 Jun 2016 13:04:03 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606021238150.6221@cpach.fuggernut.com>
+References: <CAEG8a3JF2t1hkHY2MQK5DVwbOy3VGZUNuB-uF5mOzBSO8xhQeg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f48.google.com ([209.85.218.48]:34082 "EHLO
-	mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161355AbcFBQwv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 12:52:51 -0400
-Received: by mail-oi0-f48.google.com with SMTP id e72so86753404oib.1
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2016 09:52:51 -0700 (PDT)
-In-Reply-To: <5750271E.10102@canonical.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51012 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932588AbcFBRDl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 2 Jun 2016 13:03:41 -0400
+In-Reply-To: <CAEG8a3JF2t1hkHY2MQK5DVwbOy3VGZUNuB-uF5mOzBSO8xhQeg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chris holcombe <chris.holcombe@canonical.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: Junwang Zhao <zhjwpku@gmail.com>
+Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Thank you Chris for the details.
+Hi Zhao,
 
-Thanks
-Swami
+On Tue, 31 May 2016, Junwang Zhao wrote:
+> Hi Sage & Haomai,
+> 
+> I try to run './vstart.sh -d -x -n' to test the patches today, I got
+> some error like 'wrong node', after some work, I found the
+> error was introduced by this patch[0]. I change the code to
+> use the legacy decode and encode, but got stuck somewhere.
+> 
+> --- a/src/msg/msg_types.h
+> +++ b/src/msg/msg_types.h
+> @@ -371,7 +371,7 @@ struct entity_addr_t {
+>    // broader study
+> 
+>    void encode(bufferlist& bl, uint64_t features) const {
+> -    if ((features & CEPH_FEATURE_MSG_ADDR2) == 0) {
+> +    if ((features & CEPH_FEATURE_MSG_ADDR2) != 0) {
+>        ::encode((__u32)0, bl);
+>        ::encode(nonce, bl);
+>        sockaddr_storage ss = get_sockaddr_storage();
+> 
+> 
+> Can you please see the patch again and give some comments?
+> 
+> [0]https://github.com/zhjwpku/ceph/commit/8934f038fdf28156038770e601e4a27f7a684390
 
-On Thu, Jun 2, 2016 at 6:01 PM, chris holcombe
-<chris.holcombe@canonical.com> wrote:
-> Hi Swami,
->
-> Yes ceph supports encryption at rest using dmcrypt.  The docs are here:
-> http://docs.ceph.com/docs/jewel/rados/deployment/ceph-deploy-osd/
->
-> My team has integrated this functionality into the ceph-osd charm also
-> if you'd like to try that out: https://jujucharms.com/ceph-osd/xenial/2
-> When combined with the ceph-mon charm you're up and running fast :)
->
-> -Chris
->
-> On 06/02/2016 03:57 AM, M Ranga Swami Reddy wrote:
->> Hello,
->>
->> Can you please share if the ceph supports the "data at rest" functionality?
->> If yes, how can I achieve this? Please share any docs available.
->>
->> Thanks
->> Swami
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+This was enough to make things work fo rme:
+
+diff --git a/src/msg/msg_types.h b/src/msg/msg_types.h
+index 9c521e6..0da0614 100644
+--- a/src/msg/msg_types.h
++++ b/src/msg/msg_types.h
+@@ -199,8 +199,7 @@ WRITE_CLASS_ENCODER(ceph_sockaddr_storage)
+ 
+ struct entity_addr_t {
+   typedef enum {
+-    TYPE_NONE = 0,
+-    TYPE_LEGACY = 1,
++    TYPE_LEGACY = 0,
+   } type_t;
+ 
+   __u32 type;
+@@ -211,7 +210,7 @@ struct entity_addr_t {
+     sockaddr_in6 sin6;
+   } u;
+ 
+-  entity_addr_t() : type(0), nonce(0) { 
++  entity_addr_t() : type(TYPE_LEGACY), nonce(0) {
+     memset(&u, 0, sizeof(u));
+   }
+   explicit entity_addr_t(const ceph_entity_addr &o) {
+
+but I think this is not the right fix.  I think we still want 
+TYPE_NONE, TYPE_LEGACY, and (soon) TYPE_MSGR2, and that the core problem 
+is places that are creating addrs aren't setting the type properly.  Going 
+to play with this a bit...
+
+sage
+
