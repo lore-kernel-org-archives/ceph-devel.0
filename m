@@ -1,7 +1,7 @@
 From: "Yan, Zheng" <ukernel@gmail.com>
 Subject: Re: [ceph-users] Message sequence overflow
-Date: Thu, 2 Jun 2016 17:50:06 +0800
-Message-ID: <CAAM7YAmnUPyoTTNSd2RUyyoFra96acK-VmAXe868zN0fyL0=8w@mail.gmail.com>
+Date: Thu, 2 Jun 2016 17:51:42 +0800
+Message-ID: <CAAM7YAm-y_3y1AKcN1tA1=b91AzrJSwfe12gPMUvOzEEuhm=Wg@mail.gmail.com>
 References: <CAAM7YA=3T_Gh6ZQQN3EgaxOw+JzQoP+9WuPWBWBhTSDBS4AZew@mail.gmail.com>
 	<alpine.DEB.2.11.1606010847240.6221@cpach.fuggernut.com>
 	<CAAM7YA=xU+Ovxf-QU6ruRKGhWS88-d0UaX1AbcR9oCLbEi9_jg@mail.gmail.com>
@@ -12,12 +12,12 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f65.google.com ([209.85.213.65]:36297 "EHLO
-	mail-vk0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932086AbcFBJuI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 05:50:08 -0400
-Received: by mail-vk0-f65.google.com with SMTP id c189so7512620vkb.3
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2016 02:50:07 -0700 (PDT)
+Received: from mail-vk0-f68.google.com ([209.85.213.68]:33922 "EHLO
+	mail-vk0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932312AbcFBJvn convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 05:51:43 -0400
+Received: by mail-vk0-f68.google.com with SMTP id a6so7522510vkg.1
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2016 02:51:43 -0700 (PDT)
 In-Reply-To: <CAOi1vP9UxJfOoN=DM+Wsf4kTdHideNN_usygw2GKVkzLtSwFrQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -204,15 +204,16 @@ e
 ng
 > to trip over.
 
-The user space code never increates in_seq. Instead it assigns
+
+The user space code never increases in_seq. Instead, it assigns
 m->get_seq() to in_seq. If m->get_seq() return 32-bits value, the
 upper 32-bits of in_seq are always zero.
 
 I did some tests (set the initial value of out_seq to 0xffffff00) . It
 seems that the user space code also starts to malfunction when the seq
-overflows. There is code compares
-{newly_acked_seq, out_seq}, {in_seq, in_seq_acked}, but it does not
-take the overflow into consideration.
+overflows. There are codes that compare {newly_acked_seq, out_seq},
+{in_seq, in_seq_acked}, but they do not take the overflow into
+consideration.
 
 Besides, I found that Pipe::randomize_out_seq() never randomizes the ou=
 t_seq.
