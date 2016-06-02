@@ -1,140 +1,122 @@
-From: Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Message sequence overflow
-Date: Thu, 2 Jun 2016 11:13:15 +0200
-Message-ID: <CAOi1vP9UxJfOoN=DM+Wsf4kTdHideNN_usygw2GKVkzLtSwFrQ@mail.gmail.com>
-References: <CAAM7YA=3T_Gh6ZQQN3EgaxOw+JzQoP+9WuPWBWBhTSDBS4AZew@mail.gmail.com>
-	<alpine.DEB.2.11.1606010847240.6221@cpach.fuggernut.com>
-	<CAAM7YA=xU+Ovxf-QU6ruRKGhWS88-d0UaX1AbcR9oCLbEi9_jg@mail.gmail.com>
-	<alpine.DEB.2.11.1606011019090.6221@cpach.fuggernut.com>
-	<CAAM7YAmzpqAoh0TuVj0zCXPgrM=0BjfbwD+C3rJa=0CKwmRhAA@mail.gmail.com>
+From: Yang Joseph <joseph.yang@xtaotech.com>
+Subject: rgw: object null version delete
+Date: Thu, 2 Jun 2016 17:21:34 +0800
+Message-ID: <574FFA9E.7060100@xtaotech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAAM7YAmzpqAoh0TuVj0zCXPgrM=0BjfbwD+C3rJa=0CKwmRhAA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, James Webb <jamesw-pKHY6dePtwZBDgjK7y7TUQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from m109-177.yeah.net ([123.58.177.109]:44056 "EHLO
+	m109-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932164AbcFBJVp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 05:21:45 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Javen Wu <javen.wu@xtaotech.com>
 
-T24gVGh1LCBKdW4gMiwgMjAxNiBhdCA0OjQ2IEFNLCBZYW4sIFpoZW5nIDx1a2VybmVsQGdtYWls
-LmNvbT4gd3JvdGU6Cj4gT24gV2VkLCBKdW4gMSwgMjAxNiBhdCAxMDoyMiBQTSwgU2FnZSBXZWls
-IDxzYWdlQG5ld2RyZWFtLm5ldD4gd3JvdGU6Cj4+IE9uIFdlZCwgMSBKdW4gMjAxNiwgWWFuLCBa
-aGVuZyB3cm90ZToKPj4+IE9uIFdlZCwgSnVuIDEsIDIwMTYgYXQgODo0OSBQTSwgU2FnZSBXZWls
-IDxzYWdlQG5ld2RyZWFtLm5ldD4gd3JvdGU6Cj4+PiA+IE9uIFdlZCwgMSBKdW4gMjAxNiwgWWFu
-LCBaaGVuZyB3cm90ZToKPj4+ID4+IE9uIFdlZCwgSnVuIDEsIDIwMTYgYXQgNjoxNSBBTSwgSmFt
-ZXMgV2ViYiA8amFtZXN3QHVuaXR5M2QuY29tPiB3cm90ZToKPj4+ID4+ID4gRGVhciBjZXBoLXVz
-ZXJzLi4uCj4+PiA+PiA+Cj4+PiA+PiA+IE15IHRlYW0gcnVucyBhbiBpbnRlcm5hbCBidWlsZGZh
-cm0gdXNpbmcgY2VwaCBhcyBhIGJhY2tlbmQgc3RvcmFnZSBwbGF0Zm9ybS4gV2XigJl2ZSByZWNl
-bnRseSB1cGdyYWRlZCB0byBKZXdlbCBhbmQgYXJlIGhhdmluZyByZWxpYWJpbGl0eSBpc3N1ZXMg
-dGhhdCB3ZSBuZWVkIHNvbWUgaGVscCB3aXRoLgo+Pj4gPj4gPgo+Pj4gPj4gPiBPdXIgaW5mcmFz
-dHJ1Y3R1cmUgaXMgdGhlIGZvbGxvd2luZzoKPj4+ID4+ID4gLSBXZSB1c2UgQ0VQSC9DRVBIRlMg
-KDEwLjIuMSkKPj4+ID4+ID4gLSBXZSBoYXZlIDMgbW9ucyBhbmQgNiBzdG9yYWdlIHNlcnZlcnMg
-d2l0aCBhIHRvdGFsIG9mIDM2IE9TRHMgKH40MTYwIFBHcykuCj4+PiA+PiA+IC0gV2UgdXNlIGVu
-dGVycHJpc2UgU1NEcyBmb3IgZXZlcnl0aGluZyBpbmNsdWRpbmcgam91cm5hbHMKPj4+ID4+ID4g
-LSBXZSBoYXZlIG9uZSBtYWluIG1kcyBhbmQgb25lIHN0YW5kYnkgbWRzLgo+Pj4gPj4gPiAtIFdl
-IGFyZSB1c2luZyBjZXBoIGtlcm5lbCBjbGllbnQgdG8gbW91bnQgY2VwaGZzLgo+Pj4gPj4gPiAt
-IFdlIGhhdmUgdXBncmFkZSB0byBVYnVudHUgMTYuMDQgKDQuNC4wLTIyLWdlbmVyaWMga2VybmVs
-KQo+Pj4gPj4gPiAtIFdlIGFyZSB1c2luZyBhIGtlcm5lbCBORlMgdG8gc2VydmUgTkZTIGNsaWVu
-dHMgZnJvbSBhIGNlcGggbW91bnQgKH4gMzIgbmZzIHRocmVhZHMuIDAgc3dhcHBpbmVzcykKPj4+
-ID4+ID4gLSBUaGVzZSBhcmUgcGh5c2ljYWwgbWFjaGluZXMgd2l0aCA4IGNvcmVzICYgMzJHQiBt
-ZW1vcnkKPj4+ID4+ID4KPj4+ID4+ID4gT24gYSByZWd1bGFyIGJhc2lzLCB3ZSBsb3NlIGFsbCBJ
-TyB2aWEgY2VwaCBGUy4gV2XigJlyZSBzdGlsbCB0cnlpbmcgdG8gaXNvbGF0ZSB0aGUgaXNzdWUg
-YnV0IGl0IHN1cmZhY2VzIGFzIGFuIGlzc3VlIGJldHdlZW4gTURTIGFuZCBjZXBoIGNsaWVudC4K
-Pj4+ID4+ID4gV2UgY2Fu4oCZdCB0ZWxsIGlmIG91ciBvdXIgTkZTIHNlcnZlciBpcyBvdmVyd2hl
-bG1pbmcgdGhlIE1EUyBvciBpZiB0aGlzIGlzIHNvbWUgdW5yZWxhdGVkIGlzc3VlLiBUdW5pbmcg
-TkZTIHNlcnZlciBoYXMgbm90IHNvbHZlZCBvdXIgaXNzdWVzLgo+Pj4gPj4gPiBTbyBmYXIgb3Vy
-IG9ubHkgcmVjb3ZlcnkgaGFzIGJlZW4gdG8gZmFpbCB0aGUgTURTIGFuZCB0aGVuIHJlc3RhcnQg
-b3VyIE5GUy4gQW55IGhlbHAgb3IgYWR2aWNlIHdpbGwgYmUgYXBwcmVjaWF0ZWQgb24gdGhlIENF
-UEggc2lkZSBvZiB0aGluZ3MuCj4+PiA+PiA+IEnigJltIHByZXR0eSBzdXJlIHdl4oCZcmUgcnVu
-bmluZyB3aXRoIGRlZmF1bHQgdHVuaW5nIG9mIENFUEggTURTIGNvbmZpZ3VyYXRpb24gcGFyYW1l
-dGVycy4KPj4+ID4+ID4KPj4+ID4+ID4KPj4+ID4+ID4gSGVyZSBhcmUgdGhlIHJlbGV2YW50IGxv
-ZyBlbnRyaWVzLgo+Pj4gPj4gPgo+Pj4gPj4gPiBGcm9tIG15IHByaW1hcnkgTURTIHNlcnZlciwg
-SSBzdGFydCBzZWVpbmcgdGhlc2UgZW50cmllcyBzdGFydCB0byBwaWxlIHVwOgo+Pj4gPj4gPgo+
-Pj4gPj4gPiAyMDE2LTA1LTMxIDE0OjM0OjA3LjA5MTExNyA3ZjlmMmViODc3MDAgIDAgbG9nX2No
-YW5uZWwoY2x1c3RlcikgbG9nIFtXUk5dIDogY2xpZW50LjQyODMwNjYgaXNuJ3QgcmVzcG9uZGlu
-ZyB0byBtY2xpZW50Y2FwcyhyZXZva2UpLCBpbm8gMTAwMDAwMDQ0OTEgcGVuZGluZyBwQXNMc1hz
-RnN4Y3J3YiBpc3N1ZWQgcEFzeExzWHN4RnN4Y3J3Yiwgc2VudCA2My44Nzc0ODAgc2Vjb25kcyBh
-Z29cCj4+PiA+PiA+IDIwMTYtMDUtMzEgMTQ6MzQ6MDcuMDkxMTI5IDdmOWYyZWI4NzcwMCAgMCBs
-b2dfY2hhbm5lbChjbHVzdGVyKSBsb2cgW1dSTl0gOiBjbGllbnQuNDI4MzA2NiBpc24ndCByZXNw
-b25kaW5nIHRvIG1jbGllbnRjYXBzKHJldm9rZSksIGlubyAxMDAwMDAwNWRkZiBwZW5kaW5nIHBB
-c0xzWHNGc3hjcndiIGlzc3VlZCBwQXN4THNYc3hGc3hjcndiLCBzZW50IDYzLjg3NzM4MiBzZWNv
-bmRzIGFnb1wKPj4+ID4+ID4gMjAxNi0wNS0zMSAxNDozNDowNy4wOTExMzMgN2Y5ZjJlYjg3NzAw
-ICAwIGxvZ19jaGFubmVsKGNsdXN0ZXIpIGxvZyBbV1JOXSA6IGNsaWVudC40MjgzMDY2IGlzbid0
-IHJlc3BvbmRpbmcgdG8gbWNsaWVudGNhcHMocmV2b2tlKSwgaW5vIDEwMDAwMDAwYTJhIHBlbmRp
-bmcgcEFzTHNYc0ZzeGNyd2IgaXNzdWVkIHBBc3hMc1hzeEZzeGNyd2IsIHNlbnQgNjMuODc3MzU2
-IHNlY29uZHMgYWdvCj4+PiA+PiA+Cj4+PiA+PiA+IEZyb20gbXkgTkZTIHNlcnZlciwgSSBzZWUg
-dGhlc2UgZW50cmllcyBmcm9tIGRtZXNnIGFsc28gc3RhcnQgcGlsaW5nIHVwOgo+Pj4gPj4gPiBb
-VHVlIE1heSAzMSAxNDozMzowOSAyMDE2XSBsaWJjZXBoOiBza2lwcGluZyBtZHMwIFguWC5YLjE5
-NTo2ODAwIHNlcSAwIGV4cGVjdGVkIDQyOTQ5NjcyOTYKPj4+ID4+ID4gW1R1ZSBNYXkgMzEgMTQ6
-MzM6MDkgMjAxNl0gbGliY2VwaDogc2tpcHBpbmcgbWRzMCBYLlguWC4xOTU6NjgwMCBzZXEgMSBl
-eHBlY3RlZCA0Mjk0OTY3Mjk2Cj4+PiA+PiA+IFtUdWUgTWF5IDMxIDE0OjMzOjA5IDIwMTZdIGxp
-YmNlcGg6IHNraXBwaW5nIG1kczAgWC5YLlguMTk1OjY4MDAgc2VxIDIgZXhwZWN0ZWQgNDI5NDk2
-NzI5Ngo+Pj4gPj4gPgo+Pj4gPj4KPj4+ID4+IDQyOTQ5NjcyOTYgaXMgMHgxMDAwMDAwMDAsIHRo
-aXMgbG9va3MgbGlrZSBzZXF1ZW5jZSAgb3ZlcmZsb3cuCj4+PiA+Pgo+Pj4gPj4gSW4gc3JjL21z
-Zy9NZXNzYWdlLmg6Cj4+PiA+Pgo+Pj4gPj4gY2xhc3MgTWVzc2FnZSB7Cj4+PiA+PiAuLi4KPj4+
-ID4+ICAgdW5zaWduZWQgZ2V0X3NlcSgpIGNvbnN0IHsgcmV0dXJuIGhlYWRlci5zZXE7IH0KPj4+
-ID4+ICAgdm9pZCBzZXRfc2VxKHVuc2lnbmVkIHMpIHsgaGVhZGVyLnNlcSA9IHM7IH0KPj4+ID4+
-IC4uLgo+Pj4gPj4gfQo+Pj4gPj4KPj4+ID4+IGluIHNyYy9tc2cvc2ltcGxlL1BpcGUuY2MKPj4+
-ID4+Cj4+PiA+PiBjbGFzcyBQaXBlIHsKPj4+ID4+IC4uLgo+Pj4gPj4gICBfX3UzMiBnZXRfb3V0
-X3NlcSgpIHsgcmV0dXJuIG91dF9zZXE7IH0KPj4+ID4+IC4uLgo+Pj4gPj4gfQo+Pj4gPj4KPj4+
-ID4+IElzIHRoaXMgYnVnIG9yIGludGVudGlvbmFsID8KPj4+ID4KPj4+ID4gVGhhdCdzIGEgYnVn
-LiAgVGhlIHNlcSB2YWx1ZXMgYXJlIGludGVuZGVkIHRvIGJlIDMyIGJpdHMuCj4+PiA+Cj4+PiA+
-IChXZSBzaG91bGQgYWxzbyBiZSB1c2luZyB0aGUgY2VwaF9jbXBfc2VxIChJSVJDKSBoZWxwZXIg
-Zm9yIGFueSBpbmVxdWFsaXR5Cj4+PiA+IGNoZWNrcywgd2hpY2ggZG9lcyBhIHNsb3BweSBjb21w
-YXJpc29uIHNvIHRoYXQgYSAzMS1iaXQgc2lnbmVkIGRpZmZlcmVuY2UKPj4+ID4gaXMgdXNlZCB0
-byBkZXRlcm1pbmUgPiBvciA8LiAgSXQgc291bmRzIGxpa2UgaW4gdGhpcyBjYXNlIHdlJ3JlIGp1
-c3QKPj4+ID4gZmFpbGluZyBhbiBlcXVhbGl0eSBjaGVjaywgdGhvdWdoLikKPj4+ID4KPj4+Cj4+
-PiBzdHJ1Y3QgY2VwaF9tc2dfaGVhZGVyIHsKPj4+ICAgICAgICAgX19sZTY0IHNlcTsgICAgICAg
-LyogbWVzc2FnZSBzZXEjIGZvciB0aGlzIHNlc3Npb24gKi8KPj4+ICAgICAgICAgLi4uCj4+PiB9
-Cj4+Pgo+Pj4geW91IG1lYW5zIHdlIHNob3VsZCBsZWF2ZSB0aGUgdXBwZXIgMzItYml0cyB1bnVz
-ZWQ/Cj4+Cj4+IE9oLCBobW0uIEknbSBjb25mdXNpbmcgdGhpcyB3aXRoIHRoZSBjYXAgc2VxICh3
-aGljaCBpcyAzMiBiaXRzKS4KPj4KPj4gSSB0aGluayB3ZSBjYW4gc2FmZWx5IGdvIGVpdGhlciB3
-YXkuLiB0aGUgcXVlc3Rpb24gaXMgd2hpY2ggcGF0aCBpcwo+PiBlYXNpZXIuICBJZiB3ZSBtb3Zl
-IHRvIDMyIGJpdHMgdXNlZCBvbiB0aGUga2VybmVsIHNpZGUsIHdpbGwgdXNlcnNwYWNlCj4+IGFs
-c28gbmVlZCB0byBiZSBwYXRjaGVkIHRvIG1ha2UgcmVjb25uZWN0IHdvcms/ICBUaGF0IHVuc2ln
-bmVkIGdldF9zZXEoKQo+PiBpcyBvbmx5IDMyLWJpdHMgd2lkZS4KPgo+IEkgZG9uJ3QgdGhpbmsg
-dXNlcnNwYWNlIG5lZWQgdG8gYmUgcGF0Y2hlZC4KPgo+Pgo+PiBJZiB3ZSBnbyB3aXRoIDY0IGJp
-dHMsIHVzZXJzcGFjZSBzdGlsbCBuZWVkcyB0byBiZSBmaXhlZCB0byBjaGFuZ2UgdGhhdAo+PiB1
-bnNpZ25lZCB0byB1aW50NjRfdC4KPj4KPj4gV2hhdCBkbyB5b3UgdGhpbms/Cj4+IHNhZ2UKPj4K
-Pgo+IEkgbGlrZSB0aGUgNjQgYml0cyBhcHByb2FjaC4gSGVyZSBpcyB1c2Vyc3BhY2UgY29kZSB0
-aGF0IGNoZWNrcwo+IG1lc3NhZ2Ugc2VxdWVuY2UuCj4KPiBQaXBlOjpyZWFkZXIoKSB7Cj4KPiAu
-Li4KPiAgICAgICBpZiAobS0+Z2V0X3NlcSgpIDw9IGluX3NlcSkgewo+ICAgICAgICAgbGRvdXQo
-bXNnci0+Y2N0LDApIDw8ICJyZWFkZXIgZ290IG9sZCBtZXNzYWdlICIKPiAgICAgICAgICAgICAg
-ICAgPDwgbS0+Z2V0X3NlcSgpIDw8ICIgPD0gIiA8PCBpbl9zZXEgPDwgIiAiIDw8IG0gPDwgIiAi
-IDw8ICptCj4gICAgICAgICAgICAgICAgIDw8ICIsIGRpc2NhcmRpbmciIDw8IGRlbmRsOwo+Cj4g
-ICAgICAgICBtc2dyLT5kaXNwYXRjaF90aHJvdHRsZV9yZWxlYXNlKG0tPmdldF9kaXNwYXRjaF90
-aHJvdHRsZV9zaXplKCkpOwo+ICAgICAgICAgbS0+cHV0KCk7Cj4KPiAgICAgICAgIGlmIChjb25u
-ZWN0aW9uX3N0YXRlLT5oYXNfZmVhdHVyZShDRVBIX0ZFQVRVUkVfUkVDT05ORUNUX1NFUSkgJiYK
-PiAgICAgICAgICAgICBtc2dyLT5jY3QtPl9jb25mLT5tc19kaWVfb25fb2xkX21lc3NhZ2UpCj4g
-ICAgICAgICAgIGFzc2VydCgwID09ICJvbGQgbXNncyBkZXNwaXRlIHJlY29ubmVjdF9zZXEgZmVh
-dHVyZSIpOwo+ICAgICAgICAgY29udGludWU7Cj4gICAgICAgfQo+ICAgICAgIGlmIChtLT5nZXRf
-c2VxKCkgPiBpbl9zZXEgKyAxKSB7Cj4gICAgICAgICBsZG91dChtc2dyLT5jY3QsMCkgPDwgInJl
-YWRlciBtaXNzZWQgbWVzc2FnZT8gIHNraXBwZWQgZnJvbSBzZXEgIgo+ICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgIDw8IGluX3NlcSA8PCAiIHRvICIgPDwgbS0+Z2V0X3NlcSgpIDw8IGRlbmRs
-Owo+ICAgICAgICAgaWYgKG1zZ3ItPmNjdC0+X2NvbmYtPm1zX2RpZV9vbl9za2lwcGVkX21lc3Nh
-Z2UpCj4gICAgICAgICAgIGFzc2VydCgwID09ICJza2lwcGVkIGluY29taW5nIHNlcSIpOwo+ICAg
-ICAgIH0KPiAgICAgICBtLT5zZXRfY29ubmVjdGlvbihjb25uZWN0aW9uX3N0YXRlLmdldCgpKTsK
-PiAgICAgICAvLyBub3RlIGxhc3QgcmVjZWl2ZWQgbWVzc2FnZS4KPiAgICAgICBpbl9zZXEgPSBt
-LT5nZXRfc2VxKCk7Cj4gLi4uCj4gfQo+Cj4gTG9va3MgbGlrZSB0aGUgY29kZSB3b3JrcyBwZXJm
-ZWN0bHkgd2hlbiB0aGUgdHdvIGVuZHMgb2YgY29ubmVjdGlvbgo+IGhhdmUgZGlmZmVyZW50IGJp
-dHMuIFdlIGRvbid0IG5lZWQgdG8gd29ycnkgYWJvdXQgdGhlIGNoYW5nZSBicmVha3MKPiBpbnRl
-cm9wZXJhYmlsaXR5IGJldHdlZW4gcGF0Y2hlZCB1c2Vyc3BhY2UgYW5kIHVuLXBhdGNoZWQgdXNl
-cnNwYWNlLgoKQXJlIHlvdSBzdXJlPyAgSXQgc2VlbXMgdG8gbWUgdGhhdCBpZiB0aGF0IHdlcmUg
-dHJ1ZSwgd2Ugd291bGRuJ3QgaGF2ZQp0aGlzIHRocmVhZCBpbiB0aGUgZmlyc3QgcGxhY2UuICBB
-biB1bnBhdGNoZWQgbS0+Z2V0X3NlcSgpIGluCgogICAgaWYgKG0tPmdldF9zZXEoKSA8PSBpbl9z
-ZXEpIHsKCndvdWxkIHRydW5jYXRlIGFuZCB0aGUgIm9sZCBtZXNzYWdlIiBicmFuY2ggd291bGQg
-YmUgdGFrZW4uICBUaGUgc2FtZQpnb2VzIGZvciB0aGUgdW5wYXRjaGVkIG0tPnNldF9zZXEoKSAt
-IHRoZSBvdGhlciAocGF0Y2hlZCkgc2lkZSBpcyBnb2luZwp0byB0cmlwIG92ZXIuCgpUaGFua3Ms
-CgogICAgICAgICAgICAgICAgSWx5YQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNl
-cGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBo
-LmNvbQo=
+Hello,
+
+Radosgw version Hammer (0.94.5) can not delete a null version key which 
+created before
+turn on bucket versioning[1]. And its value can still be accessed. In 
+order to
+solve this problem, I applied the changes of [2]. But sometimes the test 
+case
+can pass, sometimes not.
+
+For all my osd daemons, I set breakpoints at 
+rgw_bucket_unlink_instance/rgw_bucket_read_olh_log.
+I noticed that a failed case's unlink/read_olh_log requests never 
+reached osd side.
+
+How to fix this problem? Any suggestions?
+
+Thx,
+
+joseph
+
+ref:
+
+[1] How to reproduce the bug:
+
+     - create bucket
+     - put key AAA
+     - turn on bucket versioning
+     - read AAA // expect 404
+     - delete AAA
+     - delete bucket
+
+[2] hammer: rgw: convert plain object to versioned (with null version) 
+when removing #8755 
+https://github.com/ceph/ceph/pull/8755/commits/12cf255eb2ae666afb29df40d61de754257f7f28?diff=split
+
+[3] bilog
+
+# radosgw-admin bilog list --bucket=4e00f488-28a1-11e6-a9e6-002590ae43ca 
+--cluster rgwltt
+[
+     {
+         "op_id": "00000000001.77.2",
+         "op_tag": "rgwltt-rgwltt.6547.113",
+         "op": "write",
+         "object": "4e1274ec-28a1-11e6-a9e6-002590ae43ca",
+         "instance": "",
+         "state": "pending",
+         "index_ver": 1,
+         "timestamp": "0.000000",
+         "ver": {
+             "pool": -1,
+             "epoch": 0
+         },
+         "versioned": false
+     },
+     {
+         "op_id": "00000000002.78.3",
+         "op_tag": "rgwltt-rgwltt.6547.113",
+         "op": "write",
+         "object": "4e1274ec-28a1-11e6-a9e6-002590ae43ca",
+         "instance": "",
+         "state": "complete",
+         "index_ver": 2,
+         "timestamp": "2016-06-02 09:06:34.000000Z",
+         "ver": {
+             "pool": 15,
+             "epoch": 17
+         },
+         "versioned": false
+     },
+     {
+         "op_id": "00000000003.79.5",
+         "op_tag": "00000000574ff71azhrp4zx1y11qcsv2",
+         "op": "unlink_instance",
+         "object": "4e1274ec-28a1-11e6-a9e6-002590ae43ca",
+         "instance": "",
+         "state": "complete",
+         "index_ver": 3,
+         "timestamp": "2016-06-02 09:06:34.787122Z",
+         "ver": {
+             "pool": -1,
+             "epoch": 2
+         },
+         "versioned": true
+     },
+     {
+         "op_id": "00000000004.80.5",
+         "op_tag": "00000000574ff71cgeeopd12arjscnds",
+         "op": "unlink_instance",
+         "object": "4e1274ec-28a1-11e6-a9e6-002590ae43ca",
+         "instance": "",
+         "state": "complete",
+         "index_ver": 4,
+         "timestamp": "2016-06-02 09:06:36.760707Z",
+         "ver": {
+             "pool": -1,
+             "epoch": 3
+         },
+         "versioned": true
+     }
+
+]
+
+
