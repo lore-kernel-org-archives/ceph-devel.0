@@ -1,65 +1,191 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Lose allocation hint attribute after recovery or backfill
-Date: Thu, 2 Jun 2016 09:21:07 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606020919050.6221@cpach.fuggernut.com>
-References: <CALZt5jzdVMgZo7jxw9oxDJHUiQ72j1ubKN7=CP1cE7uX0+u+OA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: msgr2 protocol
+Date: Thu, 2 Jun 2016 11:43:57 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606021137190.6221@cpach.fuggernut.com>
+References: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com> <CADRKj5T7bqCLU+Sua60EYS-Ah2-SiRtMCDccKru_aANfiyijaA@mail.gmail.com> <alpine.DEB.2.11.1605271333350.4873@cpach.fuggernut.com>
+ <CADRKj5QYePLm0Kr241DiiHFy8Sf=G5CMh0OLNyowFR5TZSbXoA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44596 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750744AbcFBNUo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 09:20:44 -0400
-In-Reply-To: <CALZt5jzdVMgZo7jxw9oxDJHUiQ72j1ubKN7=CP1cE7uX0+u+OA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:53255 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1161826AbcFBPne (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 2 Jun 2016 11:43:34 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 1C7B964070
+	for <ceph-devel@vger.kernel.org>; Thu,  2 Jun 2016 15:43:34 +0000 (UTC)
+In-Reply-To: <CADRKj5QYePLm0Kr241DiiHFy8Sf=G5CMh0OLNyowFR5TZSbXoA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ning Yao <zay11022@gmail.com>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 2 Jun 2016, Ning Yao wrote:
-> Hi, Sage
-> 
-> Currently, allocation hint is set into filesystem fsxattr, like XFS.
-> Or directly assign to onode_t in Blustore and Kstore.
-> It works as expected normally.  However, if the cluster begins to
-> recovering or backfilling object. Those recovered object will lose
-> allocation hint fsxattr forever. This means if a cluster experienced
-> osd up/down flapping, then those kind of hot accessed object will not
-> have the allocation hint xattr any more.
-> As a result, those objects will not be fully written (1M/4M)
-> eventually become fragmented. This will also happen if an object is
-> truncated (become of enabling qume discard option).
-> 
-> Therefore, we may want to preserve the allocation hint fsxattr during
-> recovery, there are two alternatives to do this.
-> 1. issue set_alloc_hint with the current object size during recovery, like
->     t->set_alloc_hint(cid, oid,  expected_object_size, expected_object_size)
->     but it would be a problem for us to retrieve the
-> expected_object_size. For a block image, it may be object_size in
-> image metadata.
-> 
-> 2. So I would like to directly transfer the information of hint
-> fsxattr to the recovered object. Also, I find that a new param flags
-> will be used to indicated whether the data will be compressed.
-> So I propose a PR Like this:
-> https://github.com/ceph/ceph/pull/9452
-> 
-> I think the issue may not be related to BlueStore or KStore because of
-> the allocation hint attribute can be overwritten in later
-> set_allocation_hint Ops?
+Based on the discussion during CDM yesterday I wrote up a nicer-looking 
+spec of the protocol in rst:
 
-Good catch!
+	https://github.com/ceph/ceph/pull/9461
 
-It seems like we have two choices...
+Please let me know if this looks right.  I have two questions:
 
-1) get_alloc_hint (like in your PR) in ObjectStore interface.
+1. Is TAG_START is really necessary?  I guess it doesn't hurt, and makes 
+it easy to add flags later.
 
-2) Store the alloc hint parameters in the object_info_t so the OSD 
-remembers them independently and they can be set during recovery.
-
-I'm partial to #2 because it means we still preserve the metadata while 
-allowing the ObjectStore implementations to ignore the hint if they so 
-choose.  There are new hints, for example, that FileStore/XFS won't store 
-at all.
+2. We don't explicitly have anything here that indicates a session is 
+stateless or stateful.  Currently this is determined by the Policy stuff 
+on either end and the peers just happen to agree.  Setting/asserting 
+it explicitly has part of the handshake seems like a good idea.  Maybe a 
+flags field in the TAG_IDENT message, with a flags for lossy/lossess, 
+whether we initiate connections (true for client or p2p servers)?
 
 sage
+
+
+On Sat, 28 May 2016, Yehuda Sadeh-Weinraub wrote:
+
+> On Fri, May 27, 2016 at 10:37 AM, Sage Weil <sweil@redhat.com> wrote:
+> > On Fri, 27 May 2016, Yehuda Sadeh-Weinraub wrote:
+> >> On Thu, May 26, 2016 at 11:17 AM, Sage Weil <sweil@redhat.com> wrote:
+> >> > I wrote up a basic proposal for the new msgr2 protocol:
+> >> >
+> >> >         http://pad.ceph.com/p/msgr2
+> >> >
+> >> > It is pretty similar to the current protocol, with a few key changes:
+> >> >
+> >> > 1. The initial banner has a version number for protocl features supported
+> >> > and required.  This will allow optional behavior later.  The current
+> >> > protocol doesn't allow this (the banner string is fixed and has to match
+> >> > verbatim).
+> >> >
+> >> > 2. The auth handshake is a low-level msgr exchange now.  This more or less
+> >> > matches the MAuth and MAuthReply exchange with the mon.  Also, the
+> >> > authenticator/ticket presentation for established clients can be sent here
+> >> > as part of this exchange, instead of as part of the msg_connect and
+> >> > msg_connect_reply exchnage.
+> >> >
+> >> > 3. The identification of peers during connect is moved to the TAG_IDENT
+> >> > stage.  This way it could happen after authentication and/or encryption,
+> >> > if we like.  (Not sure it matters.)
+> >> >
+> >> > 4. Signatures are a separate message now that follows the previous
+> >> > message.  If a message doesn't have a signature that follows, it is
+> >> > dropped.  Once authenticated we can sign all the other handshake exchanges
+> >> > (TAG_IDENT, etc.) as well as the messages themselves.
+> >> >
+> >>
+> >> Is there a reason why the signature needs to be a separate message? It
+> >> would add extra overhead, and it seems to me that it would complicate
+> >> implementation (in terms of message state and such).
+> >
+> > It doesn't have to be--I was just wanting to keep things simple.  We could
+> > similarly make it part of the underlying format, e.g.,
+> >
+> >  tag byte
+> >  8 byte signature
+> >  payload
+> 
+> signature should come after payload, but yeah. Might need to define
+> extended envelope to allow future extensions.
+> 
+> >
+> > or whatever.  That's basically the same thing, except we save 1 byte.
+> >
+> >> > 5. The reconnect behavior for stateful connections is a separate
+> >> > exchange. This keeps the stateless connections free of clutter.
+> >> >
+> >> > 6. A few changes in the auth_none and cephx integratoin will be needed.
+> >> > For example, all the current stubs assume that authentication happens over
+> >> > MAuth message and authorization happens in an authorizer blob in
+> >> > ceph_msg_connect.  Now both are part of TAG_AUTH_REQUEST, so we'll need to
+> >> > multiplex the cephx message blobs. Also, because the IDENT exchanges
+> >> > happens later, we may need to pass additional info in the auth handshake
+> >> > messages (like the peer type, or whatever else is needed).
+> >> >
+> >> > 7. Lots of messages can go either way, and I tried ot avoid a strict
+> >> > request/response model so that things could be pipelined, and we'd spend a
+> >> > minimal amount of time waiting for a response from the other end.  For
+> >> > example,
+> >> >
+> >> > C:
+> >> >  initiates connection
+> >> > S:
+> >> >  accepts connection
+> >> >  -> banner
+> >> >  -> TAG_AUTH_METHODS
+> >> > C:
+> >> >  -> banner
+> >> >  -> TAG_AUTH_SET_METHOD
+> >> >  -> TAG_AUTH_AUTH_REQUEST
+> >> > S:
+> >> >  -> TAG_AUTH_REPLY
+> >> > C:
+> >> >  -> TAG_ENCRYPT_BEGIN
+> >> >  -> TAG_IDENT
+> >> >  -> TAG_SIGNATURE
+> >>
+> >> Can we have the client start authenticating with some predetermined
+> >> auth params, and resort to having the server responding with
+> >> AUTH_METHODS only if it doesn't support the method selected by the
+> >> client. Even if not having it preconfigured, the auth method usually
+> >> doesn't change across connection instances, so we can have the client
+> >> cache that info per server. That would then be something like this:
+> >>
+> >> a first connection:
+> >>
+> >> C:
+> >>  initiates connection
+> >>  -> banner
+> >>  -> TAG_AUTH_GET_METHODS <-- be explicit
+> >>  -> TAG_AUTH_SET_METHOD  <-- opportunistically trying a specific
+> >> method type anyway
+> >>  -> TAG_AUTH_AUTH_REQUEST
+> >>
+> >> S:
+> >>  accepts connection
+> >>  -> banner
+> >>  -> TAG_AUTH_REPLY
+> >>
+> >>
+> >> a followup connection:
+> >>
+> >>
+> >> C:
+> >>  initiates connection
+> >>  -> banner
+> >>  -> TAG_AUTH_SET_METHOD
+> >>  -> TAG_AUTH_AUTH_REQUEST
+> >>
+> >> S:
+> >>  accepts connection
+> >>  -> banner
+> >>  -> TAG_AUTH_REPLY
+> >
+> > Yeah.. of even just make the initial connection try it's preferred method
+> > and only do the GET_METHODS if it is rejected.
+> >
+> 
+> Right. In any case, the protocol should enable this flexibility.
+> 
+> 
+> > If you do a connect and immediately write a few bytes to teh TCP stream,
+> > does that actaully translate to fewer packets?  I was guessing that the
+> > server writing the first bytes of the exchange would be fine but if it
+> > speeds things up for the client to optimistically start the exchange too
+> > we may as well...
+> >
+> 
+> While haven't really looked at it recently, I don't think it'd be
+> possible to embed data with the SYN packet using the plain vanilla tcp
+> implementation. However, I believe that doing connect() and sending
+> data immediately following it should improve things, specifically if
+> doing async connect (as with the async messenger), but this still
+> needs to be proven.
+> 
+> Yehuda
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
