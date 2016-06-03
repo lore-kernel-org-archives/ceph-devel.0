@@ -1,84 +1,66 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
-Subject: Re: RGW Multisite delete wierdness
-Date: Fri, 03 Jun 2016 11:16:12 +0200
-Message-ID: <87inxqaazn.fsf@suse.com>
-References: <87zispoa07.fsf@suse.com> <CADRKj5TpcOzavirV7M-s2s8hg+9yyHm3LUyV_Mw3eCDR3DLzSw@mail.gmail.com> <86oa95lc1h.fsf@linux-stsn.suse> <CADRKj5SUACKOQNXW21OHCE1BOVZ5Bva-czgN4QaeptkP=gbrxg@mail.gmail.com> <CADRKj5SJVMzjbvMt7PkvdDxBq1+b1GoCNo7f23Jsf9434+0O-A@mail.gmail.com> <87a8ki6r1b.fsf@suse.com> <CADRKj5QUA6gki5hy5HYfGej0AdWTV19xVWR8gAWCbHZq4HWzSg@mail.gmail.com> <86k2jllbhs.fsf@linux-stsn.suse> <87k2jks24h.fsf@suse.com> <CADRKj5T5LCcskumQpLN4KGDgV4p50r9v9X=TaYVFODeR7mdFhQ@mail.gmail.com> <CADRKj5T8hDWeSsK=u8sjRthokD+kN3B+uuKiwpRSdR7KvY-fQQ@mail.gmail.com> <86inz2lt0t.fsf@linux-stsn.suse> <CADRKj5TOucJhNt5zcVsKjRQVfrqQwhY2TuHq=uUF9EB-SeukkQ@mail.gmail.com> <CADRKj5Rjd9kKQqxKwhJnnJhuE0aHfRL_ytYuNS4uxbW336hQAw@mail.gmail.com> <878tyq7fcu.fsf@suse.com> <CADRKj5RRcV=iw2hTSMRWsK+GShCnygw
- JEMWcA36v-jnKRDahdg@mail.gmail.com> <877fe77nih.fsf@suse.com> <CADRKj5Rd6pqGRA7fN=xR1eFKJzpf7f-X-ZMm-frrZMp_3FAf1w@mail.gmail.com> <87k2i6ad7q.fsf@suse.com> <CADRKj5SMz1xe+9yQuc71g4+OiQ_qC=TC3srW8LrKBF_GmmFPvQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Fresh deploy Ceph (Jewel) failed because the ceph OSD deamon is
+ not activated
+Date: Fri, 3 Jun 2016 08:25:52 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606030825210.6221@cpach.fuggernut.com>
+References: <CAOCf4A=8WiBpmYV9NBFyQ639TpHxN74h3O6sT1UqMPiopaY5zQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:35093 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751202AbcFCJQP (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Fri, 3 Jun 2016 05:16:15 -0400
-In-reply-to: <CADRKj5SMz1xe+9yQuc71g4+OiQ_qC=TC3srW8LrKBF_GmmFPvQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:50427 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751485AbcFCMZ3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Jun 2016 08:25:29 -0400
+In-Reply-To: <CAOCf4A=8WiBpmYV9NBFyQ639TpHxN74h3O6sT1UqMPiopaY5zQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: Abhishek Lekshmanan <abhishek@suse.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: Tone Zhang <tone.zhang@linaro.org>
+Cc: ceph-devel@vger.kernel.org
+
+On Fri, 3 Jun 2016, Tone Zhang wrote:
+> Hello all,
+> 
+> I fresh deployed Ceph within 3 ceph nodes according to the manual
+> http://docs.ceph.com/docs/master/start/quick-ceph-deploy/.
+> Ceph version is Jewel (ceph version 10.2.1
+> (3a66dd4f30852819c1bdaa8ec23c795d4ad77269)).
+> Ubuntu 16.04 is used in each node.
+> After run the command "ceph-deploy osd activate", there is warning
+> reported, following an ERROR, ENAMETOOLONG. After check in each ceph
+> OSD node, the ceph osd daemon is not start up.
+
+This probably happened because you deployed the OSD on ext4.  We should 
+probably remove that option (or add a warning) to ceph-deploy.
+
+sage
 
 
-Yehuda Sadeh-Weinraub writes:
-
-> On Fri, Jun 3, 2016 at 1:28 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
->>
->> Yehuda Sadeh-Weinraub writes:
->>
->>> On Thu, Jun 2, 2016 at 6:01 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
->>>> [..]
->>>> Yehuda Sadeh-Weinraub writes:
->>>>>
->>>>> Yes, that would be a normal behaviour. The primary should not have
->>>>> concurrent sync operations on the same object if object has not
->>>>> completed previous sync operations. Looking at the log it really seems
->>>>> that we don't identify the concurrent sync operation on the same
->>>>> object. This should have been fixed by commit
->>>>> edea6d58dd25995bcc1ed4fc5be6f72ce4a6835a. Can you try to verify what
->>>>> went wrong there (whether can_do_op() returned true and why)?
->>>>
->>>> Looked into this a bit, can_do_op() has returned true for the case when
->>>> primary issues a Fetch (or GET) and when a delete is issued,(even though
->>>> the Fetch is still not complete yet) by putting a debug log around when
->>>> we clear the keys, both the delete op and the get op creates and deletes
->>>> the same key successfully.
->>>>
->>>> Which makes me suspect, that different instances of
->>>> RGWBucketIncSyncShardMarkerTrack are at play here, leading to different
->>>> independent values for key_to_marker. Is that possible?
->>>>
->>> Shouldn't happen, but maybe something went wrong. Try adding some more
->>> info to the log message to see if that's the case.
->>
->> I just added a debug log whenever a new instance of
->> RGWBucketIncSyncShardMarkerTrack was created, and when we check/delete
->> keys, in all cases, ie. when a GET was called and/or when a DELETE was
->> called, it was a newer instance of marker_tracker that was being invoked.
->> Also a few lines before always showed this:
->>
->> incremental_sync(): async update notification: mybucket:62bc922d-f295-4067-ae36-e23e2f231aad.24099.1:-1
->>
->> which seems to be called whenever we're creating a new SingleEntry CR?
->> (the value of modified_iter was the same in every case)
->>
->> Also looking at the cases where the deletion succeeded in the secondary
->> zone, it seemed here too can_do_op had succeeded every time, the
->> difference was in this case either the Object GET came from the remote
->> site after original site had already processed the DELETE or in other
->> cases, the GET in remote site was processed in time before the DELETE.
->>
->>
->
-> Can you provide the log? I'm still not sure how you'd have different
-> tracker markers for the same bucket instance, as we take a lease to
-> prevent concurrent updates to the same bucket shard. This should
-> happen in the async updates too.
-
-id: c24eed72-47d4-452c-8d0e-86d96be8fff1
-
-radosgw.8001.log is the master (and in this case the remote site)
-
->
-> Yehuda
-
-
+> 
+> According to the installation manual, the below options are not mandatory:
+> filestore_max_xattr_value_size_XXX
+> osd_max_object_name_len
+> 
+> In the source code, the value of filestore_max_xattr_value_size_XXX
+> should be over the value of osd_max_object_name_len, otherwise the
+> error, ENAMETOOLONG, will be reported.
+> 
+> logical if the options are not mandatory, I think the OSD daemon
+> should NOT be blocked.
+> So it should be one bug. Right?
+> I can reproduce the problem in Jewel and in the source code building
+> from the latest master branch (version is
+> 9661bbbbd7d0f03095039184f8ed9fb92855d576).
+> Now the question is that is it one bug? Is there any history behind?
+> If it is a bug, I'd like to fix it.
+> What's you opinion? Any suggestion?
+> I have created one bug to track the issue http://tracker.ceph.com/issues/16070.
+> Thanks.
+> 
+> Br,
+> Tone ZHANG
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
