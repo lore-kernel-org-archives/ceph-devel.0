@@ -1,68 +1,49 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: Shall we remove static libraries from *-dev debian pacakges?
-Date: Fri, 3 Jun 2016 13:39:53 -0400
-Message-ID: <20160603173953.GA27895@ultraspiritum.eng.arb.redhat.com>
-References: <CAJE9aOMma9roYzaTnPE7WdSf4s93QDqTvy6N87YcMgRuyQiR4w@mail.gmail.com>
+Date: Fri, 3 Jun 2016 13:43:24 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606031342460.6221@cpach.fuggernut.com>
+References: <CAJE9aOMma9roYzaTnPE7WdSf4s93QDqTvy6N87YcMgRuyQiR4w@mail.gmail.com> <20160603173953.GA27895@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58108 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751735AbcFCRkR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 3 Jun 2016 13:40:17 -0400
-Content-Disposition: inline
-In-Reply-To: <CAJE9aOMma9roYzaTnPE7WdSf4s93QDqTvy6N87YcMgRuyQiR4w@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:51907 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932426AbcFCRnC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Jun 2016 13:43:02 -0400
+In-Reply-To: <20160603173953.GA27895@ultraspiritum.eng.arb.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: kefu chai <tchaikov@gmail.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On 04/06/2016, kefu chai wrote:
-> Hi Cephers,
->
-> As your know, we are trying to ditch autotools and moving to the cmake
-> building system. Currently, we ship both static (.a) and shared
-> libraries (.so) and their .la files in
-> lib{rbd,rgw,rados,cephfs,radosstriper}-dev debian packages, but only
-> package the shared libraries in rpm packages. When working on the
-> cmake, I find it's a little bit tricky to prepare both static and
-> shared libraries in cmake, see [1].
+On Fri, 3 Jun 2016, Adam C. Emerson wrote:
+> On 04/06/2016, kefu chai wrote:
+> > Hi Cephers,
+> >
+> > As your know, we are trying to ditch autotools and moving to the cmake
+> > building system. Currently, we ship both static (.a) and shared
+> > libraries (.so) and their .la files in
+> > lib{rbd,rgw,rados,cephfs,radosstriper}-dev debian packages, but only
+> > package the shared libraries in rpm packages. When working on the
+> > cmake, I find it's a little bit tricky to prepare both static and
+> > shared libraries in cmake, see [1].
+> > 
+> > So questions:
+> > 
+> > - Is it fine if we don't ship static libraries any more in the *-dev
+> > .deb packages just like .rpms?
 > 
-> So questions:
+> Debian policy does not, to my understanding, require us to provide
+> static libraries. It demands only that if we have them they should be
+> in the -devel package.
 > 
-> - Is it fine if we don't ship static libraries any more in the *-dev
-> .deb packages just like .rpms?
+> All other things being equal I have a soft preference to ship static
+> libraries.
+> 
+> All other things are not equal.
 
-Debian policy does not, to my understanding, require us to provide
-static libraries. It demands only that if we have them they should be
-in the -devel package.
+I'm also happy to drop the static libraries if it makes life easier.  We 
+can also do the work to add them back later if there is a compelling need.  
+That seems pretty unlikely!
 
-All other things being equal I have a soft preference to ship static
-libraries.
-
-All other things are not equal.
-
-Our static library is not a /good/ static library. We produce,
-broadly, one object file per /topic/. This means any user of our
-static library would link in a great deal of code even if it called
-only a few functions.  If we want an efficient static library, we need
-to shatter many of our source files into directories in which each
-file would contain roughly one function. (Interdependence might
-require more for some.)
-
-I don't think static linking is important enough to justify the time
-and bother If some users demand it was, we could reconsider. If a
-developer passionately wanted to support static linking I'd be in
-favor of letting them.
-
-> - What about the .la files? can we remove them also when switching
->   to cmake?
-
-.la files are worthless: libtool's analog of what badly trained dog
-leaves on the carpet. Most unkind things one could say about libtool
-are true. Devil take it, with all its bookkeeping detritus to follow.
-
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+sage
