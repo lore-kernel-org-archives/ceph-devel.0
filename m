@@ -1,130 +1,141 @@
-From: Sharath Gururaj <sharath.g@flipkart.com>
+From: Sage Weil <sweil@redhat.com>
 Subject: Re: OOM on OSDS with erasure coding
-Date: Sat, 4 Jun 2016 01:40:04 +0530
-Message-ID: <CAAwxMGKuy4iZ-4bYnDZF=zYhNVYOFQasZc+v48tq2g=+nJuRUw@mail.gmail.com>
-References: <CAAwxMGJ2YMKOJUsvPif1HB4vmbQBZdxrNfQA=BeW6R4sy1EC_Q@mail.gmail.com>
- <CAJE9aOPuTDOgtXjj7kmj1+Vs=T-Mzs5dCQ08pu8g7evp2CZu9g@mail.gmail.com>
- <CAAwxMGKC_0qazS0eRw5D06+S=Uv2RuPk8quth-kAymMs=+kgTg@mail.gmail.com> <CAN=+7FVUiHBpsQ_vVGv1OpBthYUQCwiKs+VkrRdCvA2Zmjb9Fw@mail.gmail.com>
+Date: Fri, 3 Jun 2016 16:45:30 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606031644160.6221@cpach.fuggernut.com>
+References: <CAAwxMGJ2YMKOJUsvPif1HB4vmbQBZdxrNfQA=BeW6R4sy1EC_Q@mail.gmail.com> <CAJE9aOPuTDOgtXjj7kmj1+Vs=T-Mzs5dCQ08pu8g7evp2CZu9g@mail.gmail.com> <CAAwxMGKC_0qazS0eRw5D06+S=Uv2RuPk8quth-kAymMs=+kgTg@mail.gmail.com> <CAN=+7FVUiHBpsQ_vVGv1OpBthYUQCwiKs+VkrRdCvA2Zmjb9Fw@mail.gmail.com>
+ <CAAwxMGKuy4iZ-4bYnDZF=zYhNVYOFQasZc+v48tq2g=+nJuRUw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f50.google.com ([209.85.218.50]:35182 "EHLO
-	mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932578AbcFCUKY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Jun 2016 16:10:24 -0400
-Received: by mail-oi0-f50.google.com with SMTP id w184so143723676oiw.2
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Jun 2016 13:10:24 -0700 (PDT)
-In-Reply-To: <CAN=+7FVUiHBpsQ_vVGv1OpBthYUQCwiKs+VkrRdCvA2Zmjb9Fw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:54886 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1422691AbcFCUpH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 3 Jun 2016 16:45:07 -0400
+In-Reply-To: <CAAwxMGKuy4iZ-4bYnDZF=zYhNVYOFQasZc+v48tq2g=+nJuRUw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sharath Gururaj <sharath.g@flipkart.com>
+Cc: Samuel Just <sjust@redhat.com>, kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks Samuel,
+On Sat, 4 Jun 2016, Sharath Gururaj wrote:
+> Thanks Samuel,
+> 
+> But how did you arrive at the number 1.3k per shard osd?
+> we have ~17k pgs and 192 osds, giving ~88 PGs per osd.
 
-But how did you arrive at the number 1.3k per shard osd?
-we have ~17k pgs and 192 osds, giving ~88 PGs per osd.
+Each logical PG has k + m shards, so
 
+	17000 * 15 / 192 = 1328
 
+sage
 
-On Sat, Jun 4, 2016 at 1:24 AM, Samuel Just <sjust@redhat.com> wrote:
-> Oh, actually, I think the problem is simply that you have 1.3k pg
-> shards/osd.  We suggest more like 200.  Indeed, the main user of
-> memory for a particular pg is the pg log, so it makes sense that that
-> is where most of the memory would be allocated.  You can probably live
-> with fewer entries/pg: try adjusting osd_min_pg_log_entries and
-> osd_max_pg_log_entries (defaults are 3000 and 10000) down by a factor
-> of 10.
-> -Sam
->
-> On Fri, Jun 3, 2016 at 12:08 PM, Sharath Gururaj <sharath.g@flipkart.com> wrote:
->> Hi Kefu,
->>
->> I haven't tried the latest hammer.
->> Is there any pg_log related fixes that have been applied?
->>
->> After a little more digging, our current suspicion is that the pg_log
->> is growing in proportion to the number of file chunks in each OSD.
->> since we have k=10, m=5 (total 15 chunks for each rados object), the
->> memory usage has become quite high.
->>
->> Could you tell a little bit about the implementation/lifecycle of the PGLog?
->> When are they trimmed? Are there any settings to control how much of
->> it is kept in memory?
->>
->> Thanks
->> Sharath
->>
->> On Fri, Jun 3, 2016 at 10:34 PM, kefu chai <tchaikov@gmail.com> wrote:
->>> On Thu, Jun 2, 2016 at 2:23 PM, Sharath Gururaj <sharath.g@flipkart.com> wrote:
->>>> Hi All,
->>>>
->>>> We are testing an erasure coded ceph cluster fronted by rados gateway.
->>>> Recently many osds are going down due to out-of-memory.
->>>> Here are the details.
->>>>
->>>> Description of the cluster:
->>>> ====================
->>>> ceph version 0.94.2 (hammer)
->>>
->>> Sharath, have you tried the latest hammer (v0.94.7)? does it also have
->>> this issue?
->>>
->>>> 32 hosts, 6 disks (osds) per host so 32*6 = 192 osds
->>>> 17024 pgs, 15 pools, 107 TB data, 57616 kobjects
->>>> 167 TB used, 508 TB / 675 TB available
->>>> erasure coding reed-solomon-van with k=10, m=5
->>>> We are using rgw as client. erasure coded only for the .rgw.buckets pool
->>>> rest of the rgw metadata/index pools are replicated with size=3
->>>>
->>>> The Problem
->>>> ==========
->>>> We ran a load test against this cluster. The load test simply writes
->>>> 4.5 MB sized objects through a locust test cluster.
->>>> We observed very low throughput with saturation on disk iops.
->>>> We reasoned that this is because rgw stripe width is 4MB,
->>>> which results in the osds splitting it into 4MB/k = 400kb chunks,
->>>> which leads to random io behaviour.
->>>>
->>>> To mitigate this, we changed rgw stripe width to 40 MB (so that, after
->>>> chunking, the object sizes become 40/k = 4MB) and we modified the load
->>>> test to upload 40 MB objects.
->>>>
->>>> Now we observed a more serious problem.
->>>> A lot of OSDs across different hosts started getting killed by OOM killer.
->>>> We saw that the memory usage of OSDs were huge. ~10G per OSDs.
->>>> For comparison, we have a different replicated cluster with a lot more
->>>> data where OSD memory usage is ~600MB.
->>>>
->>>> At this point, we stopped the load test, and tried to restart the
->>>> individual OSDs.
->>>> Even without load, the OSD memory size grows to ~11G
->>>>
->>>> We ran the tcmalloc heap profiler against an OSD. Here is the graph
->>>> generated by google-pprof.
->>>> http://s33.postimg.org/5w48sr3an/mygif.gif
->>>>
->>>>
->>>> The graph seems to indicate that most of the memory is being allocated
->>>> by PGLog::readLog
->>>> Is this expected behaviour? Is there some setting that allows us to
->>>> control this?
->>>>
->>>> Please let us know further steps we can take to fix the problem.
->>>>
->>>> Thanks
->>>> Sharath
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>> --
->>> Regards
->>> Kefu Chai
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+> On Sat, Jun 4, 2016 at 1:24 AM, Samuel Just <sjust@redhat.com> wrote:
+> > Oh, actually, I think the problem is simply that you have 1.3k pg
+> > shards/osd.  We suggest more like 200.  Indeed, the main user of
+> > memory for a particular pg is the pg log, so it makes sense that that
+> > is where most of the memory would be allocated.  You can probably live
+> > with fewer entries/pg: try adjusting osd_min_pg_log_entries and
+> > osd_max_pg_log_entries (defaults are 3000 and 10000) down by a factor
+> > of 10.
+> > -Sam
+> >
+> > On Fri, Jun 3, 2016 at 12:08 PM, Sharath Gururaj <sharath.g@flipkart.com> wrote:
+> >> Hi Kefu,
+> >>
+> >> I haven't tried the latest hammer.
+> >> Is there any pg_log related fixes that have been applied?
+> >>
+> >> After a little more digging, our current suspicion is that the pg_log
+> >> is growing in proportion to the number of file chunks in each OSD.
+> >> since we have k=10, m=5 (total 15 chunks for each rados object), the
+> >> memory usage has become quite high.
+> >>
+> >> Could you tell a little bit about the implementation/lifecycle of the PGLog?
+> >> When are they trimmed? Are there any settings to control how much of
+> >> it is kept in memory?
+> >>
+> >> Thanks
+> >> Sharath
+> >>
+> >> On Fri, Jun 3, 2016 at 10:34 PM, kefu chai <tchaikov@gmail.com> wrote:
+> >>> On Thu, Jun 2, 2016 at 2:23 PM, Sharath Gururaj <sharath.g@flipkart.com> wrote:
+> >>>> Hi All,
+> >>>>
+> >>>> We are testing an erasure coded ceph cluster fronted by rados gateway.
+> >>>> Recently many osds are going down due to out-of-memory.
+> >>>> Here are the details.
+> >>>>
+> >>>> Description of the cluster:
+> >>>> ====================
+> >>>> ceph version 0.94.2 (hammer)
+> >>>
+> >>> Sharath, have you tried the latest hammer (v0.94.7)? does it also have
+> >>> this issue?
+> >>>
+> >>>> 32 hosts, 6 disks (osds) per host so 32*6 = 192 osds
+> >>>> 17024 pgs, 15 pools, 107 TB data, 57616 kobjects
+> >>>> 167 TB used, 508 TB / 675 TB available
+> >>>> erasure coding reed-solomon-van with k=10, m=5
+> >>>> We are using rgw as client. erasure coded only for the .rgw.buckets pool
+> >>>> rest of the rgw metadata/index pools are replicated with size=3
+> >>>>
+> >>>> The Problem
+> >>>> ==========
+> >>>> We ran a load test against this cluster. The load test simply writes
+> >>>> 4.5 MB sized objects through a locust test cluster.
+> >>>> We observed very low throughput with saturation on disk iops.
+> >>>> We reasoned that this is because rgw stripe width is 4MB,
+> >>>> which results in the osds splitting it into 4MB/k = 400kb chunks,
+> >>>> which leads to random io behaviour.
+> >>>>
+> >>>> To mitigate this, we changed rgw stripe width to 40 MB (so that, after
+> >>>> chunking, the object sizes become 40/k = 4MB) and we modified the load
+> >>>> test to upload 40 MB objects.
+> >>>>
+> >>>> Now we observed a more serious problem.
+> >>>> A lot of OSDs across different hosts started getting killed by OOM killer.
+> >>>> We saw that the memory usage of OSDs were huge. ~10G per OSDs.
+> >>>> For comparison, we have a different replicated cluster with a lot more
+> >>>> data where OSD memory usage is ~600MB.
+> >>>>
+> >>>> At this point, we stopped the load test, and tried to restart the
+> >>>> individual OSDs.
+> >>>> Even without load, the OSD memory size grows to ~11G
+> >>>>
+> >>>> We ran the tcmalloc heap profiler against an OSD. Here is the graph
+> >>>> generated by google-pprof.
+> >>>> http://s33.postimg.org/5w48sr3an/mygif.gif
+> >>>>
+> >>>>
+> >>>> The graph seems to indicate that most of the memory is being allocated
+> >>>> by PGLog::readLog
+> >>>> Is this expected behaviour? Is there some setting that allows us to
+> >>>> control this?
+> >>>>
+> >>>> Please let us know further steps we can take to fix the problem.
+> >>>>
+> >>>> Thanks
+> >>>> Sharath
+> >>>> --
+> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >>>> the body of a message to majordomo@vger.kernel.org
+> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>
+> >>>
+> >>>
+> >>> --
+> >>> Regards
+> >>> Kefu Chai
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
