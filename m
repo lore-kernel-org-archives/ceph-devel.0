@@ -1,58 +1,68 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: msgr2 protocol
-Date: Sat, 4 Jun 2016 01:35:20 +0800
-Message-ID: <CACJqLya8rdipTW9hAikgyyDAWTFeTuqOizvDQSY88L_QnzeKFQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com>
- <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com>
- <alpine.DEB.2.11.1606021416510.6221@cpach.fuggernut.com> <CAJ4mKGaWx8m4Zh_f6tQWe9ows77HHyMmv5y52Rr-5Q-ob_N1Yg@mail.gmail.com>
- <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com> <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com>
- <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: Shall we remove static libraries from *-dev debian pacakges?
+Date: Fri, 3 Jun 2016 13:39:53 -0400
+Message-ID: <20160603173953.GA27895@ultraspiritum.eng.arb.redhat.com>
+References: <CAJE9aOMma9roYzaTnPE7WdSf4s93QDqTvy6N87YcMgRuyQiR4w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pu1apc01on0104.outbound.protection.outlook.com ([104.47.126.104]:6240
-	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932119AbcFCRfh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 3 Jun 2016 13:35:37 -0400
-Received: by mail-vk0-f47.google.com with SMTP id a6so123934334vkg.3
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Jun 2016 10:35:31 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com>
+Received: from mx1.redhat.com ([209.132.183.28]:58108 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751735AbcFCRkR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 3 Jun 2016 13:40:17 -0400
+Content-Disposition: inline
+In-Reply-To: <CAJE9aOMma9roYzaTnPE7WdSf4s93QDqTvy6N87YcMgRuyQiR4w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Marcus Watts <mwatts@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Sat, Jun 4, 2016 at 1:33 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Sat, 4 Jun 2016, Haomai Wang wrote:
->> On Fri, Jun 3, 2016 at 9:24 PM, Sage Weil <sweil@redhat.com> wrote:
->> > I updated the PR with an additional commit that simplifies the
->> > confounder.  It seems like we only need the confoudner at teh beginning of
->> > the session, not for every message, since the signature and encryption
->> > state is chained from the previous frame.  Is that right?
->> >
->> >         https://github.com/ceph/ceph/pull/9461/commits/45766fed1864733c5216a7b50f11cce256338170
->> >
->> > Full PR:
->> >
->> >         https://github.com/ceph/ceph/pull/9461
->> >
->> > --
->> >
->> > Also, I just realized that now might be a good time to address the ability
->> > to multiplex different endpoints (sessions) into the same connection.  We
->> > could add it later with the msgr feature bits, but it'll probably be
->> > simpler not to have to support two variants of the protocol.  On the other
->> > hand, it's a lot more complicated.  :(
->>
->> What's the use case? different session shares the same connection? Do
->> you mean different messenger instance will share the same connection
->> pool?
+On 04/06/2016, kefu chai wrote:
+> Hi Cephers,
 >
-> Many OSD's in the same unix process, sharing the same messenger connection
-> pool, eventually using SPDK/DPDK.
+> As your know, we are trying to ditch autotools and moving to the cmake
+> building system. Currently, we ship both static (.a) and shared
+> libraries (.so) and their .la files in
+> lib{rbd,rgw,rados,cephfs,radosstriper}-dev debian packages, but only
+> package the shared libraries in rpm packages. When working on the
+> cmake, I find it's a little bit tricky to prepare both static and
+> shared libraries in cmake, see [1].
+> 
+> So questions:
+> 
+> - Is it fine if we don't ship static libraries any more in the *-dev
+> .deb packages just like .rpms?
 
-OH, great to push this!
+Debian policy does not, to my understanding, require us to provide
+static libraries. It demands only that if we have them they should be
+in the -devel package.
 
->
-> sage
+All other things being equal I have a soft preference to ship static
+libraries.
+
+All other things are not equal.
+
+Our static library is not a /good/ static library. We produce,
+broadly, one object file per /topic/. This means any user of our
+static library would link in a great deal of code even if it called
+only a few functions.  If we want an efficient static library, we need
+to shatter many of our source files into directories in which each
+file would contain roughly one function. (Interdependence might
+require more for some.)
+
+I don't think static linking is important enough to justify the time
+and bother If some users demand it was, we could reconsider. If a
+developer passionately wanted to support static linking I'd be in
+favor of letting them.
+
+> - What about the .la files? can we remove them also when switching
+>   to cmake?
+
+.la files are worthless: libtool's analog of what badly trained dog
+leaves on the carpet. Most unkind things one could say about libtool
+are true. Devil take it, with all its bookkeeping detritus to follow.
+
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
