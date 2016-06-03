@@ -1,43 +1,26 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+From: Abhishek Lekshmanan <abhishek@suse.com>
 Subject: Re: RGW Multisite delete wierdness
-Date: Fri, 3 Jun 2016 02:09:15 -0700
-Message-ID: <CADRKj5SG0=_A8PNU98cKVqc6hVUowYza89PxZ35O5ytJxM60BQ@mail.gmail.com>
-References: <87zispoa07.fsf@suse.com>
-	<CADRKj5TpcOzavirV7M-s2s8hg+9yyHm3LUyV_Mw3eCDR3DLzSw@mail.gmail.com>
-	<86oa95lc1h.fsf@linux-stsn.suse>
-	<CADRKj5SUACKOQNXW21OHCE1BOVZ5Bva-czgN4QaeptkP=gbrxg@mail.gmail.com>
-	<CADRKj5SJVMzjbvMt7PkvdDxBq1+b1GoCNo7f23Jsf9434+0O-A@mail.gmail.com>
-	<87a8ki6r1b.fsf@suse.com>
-	<CADRKj5QUA6gki5hy5HYfGej0AdWTV19xVWR8gAWCbHZq4HWzSg@mail.gmail.com>
-	<86k2jllbhs.fsf@linux-stsn.suse>
-	<87k2jks24h.fsf@suse.com>
-	<CADRKj5T5LCcskumQpLN4KGDgV4p50r9v9X=TaYVFODeR7mdFhQ@mail.gmail.com>
-	<CADRKj5T8hDWeSsK=u8sjRthokD+kN3B+uuKiwpRSdR7KvY-fQQ@mail.gmail.com>
-	<86inz2lt0t.fsf@linux-stsn.suse>
-	<CADRKj5TOucJhNt5zcVsKjRQVfrqQwhY2TuHq=uUF9EB-SeukkQ@mail.gmail.com>
-	<CADRKj5Rjd9kKQqxKwhJnnJhuE0aHfRL_ytYuNS4uxbW336hQAw@mail.gmail.com>
-	<878tyq7fcu.fsf@suse.com>
-	<CADRKj5RRcV=iw2hTSMRWsK+GShCnygwJEMWcA36v-jnKRDahdg@mail.gmail.com>
-	<877fe77nih.fsf@suse.com>
-	<CADRKj5Rd6pqGRA7fN=xR1eFKJzpf7f-X-ZMm-frrZMp_3FAf1w@mail.gmail.com>
-	<87k2i6ad7q.fsf@suse.com>
-	<CADRKj5SMz1xe+9yQuc71g4+OiQ_qC=TC3srW8LrKBF_GmmFPvQ@mail.gmail.com>
+Date: Fri, 03 Jun 2016 11:16:12 +0200
+Message-ID: <87inxqaazn.fsf@suse.com>
+References: <87zispoa07.fsf@suse.com> <CADRKj5TpcOzavirV7M-s2s8hg+9yyHm3LUyV_Mw3eCDR3DLzSw@mail.gmail.com> <86oa95lc1h.fsf@linux-stsn.suse> <CADRKj5SUACKOQNXW21OHCE1BOVZ5Bva-czgN4QaeptkP=gbrxg@mail.gmail.com> <CADRKj5SJVMzjbvMt7PkvdDxBq1+b1GoCNo7f23Jsf9434+0O-A@mail.gmail.com> <87a8ki6r1b.fsf@suse.com> <CADRKj5QUA6gki5hy5HYfGej0AdWTV19xVWR8gAWCbHZq4HWzSg@mail.gmail.com> <86k2jllbhs.fsf@linux-stsn.suse> <87k2jks24h.fsf@suse.com> <CADRKj5T5LCcskumQpLN4KGDgV4p50r9v9X=TaYVFODeR7mdFhQ@mail.gmail.com> <CADRKj5T8hDWeSsK=u8sjRthokD+kN3B+uuKiwpRSdR7KvY-fQQ@mail.gmail.com> <86inz2lt0t.fsf@linux-stsn.suse> <CADRKj5TOucJhNt5zcVsKjRQVfrqQwhY2TuHq=uUF9EB-SeukkQ@mail.gmail.com> <CADRKj5Rjd9kKQqxKwhJnnJhuE0aHfRL_ytYuNS4uxbW336hQAw@mail.gmail.com> <878tyq7fcu.fsf@suse.com> <CADRKj5RRcV=iw2hTSMRWsK+GShCnygw
+ JEMWcA36v-jnKRDahdg@mail.gmail.com> <877fe77nih.fsf@suse.com> <CADRKj5Rd6pqGRA7fN=xR1eFKJzpf7f-X-ZMm-frrZMp_3FAf1w@mail.gmail.com> <87k2i6ad7q.fsf@suse.com> <CADRKj5SMz1xe+9yQuc71g4+OiQ_qC=TC3srW8LrKBF_GmmFPvQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f44.google.com ([209.85.213.44]:32976 "EHLO
-	mail-vk0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932302AbcFCJJR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Jun 2016 05:09:17 -0400
-Received: by mail-vk0-f44.google.com with SMTP id r140so106436119vkf.0
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Jun 2016 02:09:16 -0700 (PDT)
-In-Reply-To: <CADRKj5SMz1xe+9yQuc71g4+OiQ_qC=TC3srW8LrKBF_GmmFPvQ@mail.gmail.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:35093 "EHLO
+	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751202AbcFCJQP (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Fri, 3 Jun 2016 05:16:15 -0400
+In-reply-to: <CADRKj5SMz1xe+9yQuc71g4+OiQ_qC=TC3srW8LrKBF_GmmFPvQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Lekshmanan <abhishek@suse.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Abhishek Lekshmanan <abhishek@suse.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Fri, Jun 3, 2016 at 2:00 AM, Yehuda Sadeh-Weinraub <yehuda@redhat.com> wrote:
+
+Yehuda Sadeh-Weinraub writes:
+
 > On Fri, Jun 3, 2016 at 1:28 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
 >>
 >> Yehuda Sadeh-Weinraub writes:
@@ -90,10 +73,12 @@ On Fri, Jun 3, 2016 at 2:00 AM, Yehuda Sadeh-Weinraub <yehuda@redhat.com> wrote:
 > tracker markers for the same bucket instance, as we take a lease to
 > prevent concurrent updates to the same bucket shard. This should
 > happen in the async updates too.
+
+id: c24eed72-47d4-452c-8d0e-86d96be8fff1
+
+radosgw.8001.log is the master (and in this case the remote site)
+
 >
+> Yehuda
 
-Also, try this:
-https://github.com/yehudasa/ceph/commit/b00096207e5fb2b1d7591a59a8012ec458bcde4b
 
-Thanks,
-Yehuda
