@@ -1,66 +1,58 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Fresh deploy Ceph (Jewel) failed because the ceph OSD deamon is
- not activated
-Date: Fri, 3 Jun 2016 08:25:52 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606030825210.6221@cpach.fuggernut.com>
-References: <CAOCf4A=8WiBpmYV9NBFyQ639TpHxN74h3O6sT1UqMPiopaY5zQ@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: [GIT PULL] Ceph fixes for -rc2
+Date: Fri, 3 Jun 2016 08:48:57 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606030835310.6221@cpach.fuggernut.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50427 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751485AbcFCMZ3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Jun 2016 08:25:29 -0400
-In-Reply-To: <CAOCf4A=8WiBpmYV9NBFyQ639TpHxN74h3O6sT1UqMPiopaY5zQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Tone Zhang <tone.zhang@linaro.org>
-Cc: ceph-devel@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 3 Jun 2016, Tone Zhang wrote:
-> Hello all,
-> 
-> I fresh deployed Ceph within 3 ceph nodes according to the manual
-> http://docs.ceph.com/docs/master/start/quick-ceph-deploy/.
-> Ceph version is Jewel (ceph version 10.2.1
-> (3a66dd4f30852819c1bdaa8ec23c795d4ad77269)).
-> Ubuntu 16.04 is used in each node.
-> After run the command "ceph-deploy osd activate", there is warning
-> reported, following an ERROR, ENAMETOOLONG. After check in each ceph
-> OSD node, the ceph osd daemon is not start up.
+Hi Linus,
 
-This probably happened because you deployed the OSD on ext4.  We should 
-probably remove that option (or add a warning) to ceph-deploy.
+Please pull the following Ceph fixes from
 
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+
+We have a few follow-up fixes for the libceph refactor from Ilya, and then 
+some cephfs + fscache fixes from Zheng.  The first two FS-Cache patches 
+are acked by David Howells and deemed trivial enough to go through our 
+tree.  The rest fix some issues with the ceph fscache handling (disable 
+cache for inodes opened for write, and simplify the revalidation logic 
+accordingly, dropping the now-unnecessary work queue).
+
+Thanks!
 sage
 
 
-> 
-> According to the installation manual, the below options are not mandatory:
-> filestore_max_xattr_value_size_XXX
-> osd_max_object_name_len
-> 
-> In the source code, the value of filestore_max_xattr_value_size_XXX
-> should be over the value of osd_max_object_name_len, otherwise the
-> error, ENAMETOOLONG, will be reported.
-> 
-> logical if the options are not mandatory, I think the OSD daemon
-> should NOT be blocked.
-> So it should be one bug. Right?
-> I can reproduce the problem in Jewel and in the source code building
-> from the latest master branch (version is
-> 9661bbbbd7d0f03095039184f8ed9fb92855d576).
-> Now the question is that is it one bug? Is there any history behind?
-> If it is a bug, I'd like to fix it.
-> What's you opinion? Any suggestion?
-> I have created one bug to track the issue http://tracker.ceph.com/issues/16070.
-> Thanks.
-> 
-> Br,
-> Tone ZHANG
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+----------------------------------------------------------------
+Ilya Dryomov (3):
+      libceph: change ceph_osdmap_flag() to take osdc
+      libceph: put request only if it's done in handle_reply()
+      libceph: use %s instead of %pE in dout()s
+
+Yan, Zheng (7):
+      FS-Cache: wake write waiter after invalidating writes
+      FS-Cache: make check_consistency callback return int
+      ceph: call __fscache_uncache_page() if readpages fails
+      ceph: avoid unnecessary fscache invalidation/revlidation
+      ceph: disable fscache when inode is opened for write
+      ceph: improve fscache revalidation
+      ceph: use i_version to check validity of fscache
+
+ fs/cachefiles/interface.c       |   2 +-
+ fs/ceph/addr.c                  |   6 +-
+ fs/ceph/cache.c                 | 141 +++++++++++++++++-----------------------
+ fs/ceph/cache.h                 |  44 ++++++++-----
+ fs/ceph/caps.c                  |  23 +++----
+ fs/ceph/file.c                  |  27 ++------
+ fs/ceph/super.h                 |   4 +-
+ fs/fscache/page.c               |   2 +
+ include/linux/ceph/osd_client.h |   5 ++
+ include/linux/ceph/osdmap.h     |   5 --
+ include/linux/fscache-cache.h   |   2 +-
+ net/ceph/osd_client.c           |  51 +++++++--------
+ net/ceph/osdmap.c               |   4 +-
+ 13 files changed, 138 insertions(+), 178 deletions(-)
