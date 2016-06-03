@@ -1,27 +1,68 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: jewel upgrade and sortbitwise
-Date: Thu, 2 Jun 2016 20:39:34 -0700
-Message-ID: <CAN=+7FWd5c=ZrD2WQXKtkzr4-Q=-nWQRrEKf-w7OFpTioOrB2A@mail.gmail.com>
+From: Abhishek Lekshmanan <abhishek@suse.com>
+Subject: Re: RGW Multisite delete wierdness
+Date: Fri, 03 Jun 2016 10:28:09 +0200
+Message-ID: <87k2i6ad7q.fsf@suse.com>
+References: <87zispoa07.fsf@suse.com> <CADRKj5TpcOzavirV7M-s2s8hg+9yyHm3LUyV_Mw3eCDR3DLzSw@mail.gmail.com> <86oa95lc1h.fsf@linux-stsn.suse> <CADRKj5SUACKOQNXW21OHCE1BOVZ5Bva-czgN4QaeptkP=gbrxg@mail.gmail.com> <CADRKj5SJVMzjbvMt7PkvdDxBq1+b1GoCNo7f23Jsf9434+0O-A@mail.gmail.com> <87a8ki6r1b.fsf@suse.com> <CADRKj5QUA6gki5hy5HYfGej0AdWTV19xVWR8gAWCbHZq4HWzSg@mail.gmail.com> <86k2jllbhs.fsf@linux-stsn.suse> <87k2jks24h.fsf@suse.com> <CADRKj5T5LCcskumQpLN4KGDgV4p50r9v9X=TaYVFODeR7mdFhQ@mail.gmail.com> <CADRKj5T8hDWeSsK=u8sjRthokD+kN3B+uuKiwpRSdR7KvY-fQQ@mail.gmail.com> <86inz2lt0t.fsf@linux-stsn.suse> <CADRKj5TOucJhNt5zcVsKjRQVfrqQwhY2TuHq=uUF9EB-SeukkQ@mail.gmail.com> <CADRKj5Rjd9kKQqxKwhJnnJhuE0aHfRL_ytYuNS4uxbW336hQAw@mail.gmail.com> <878tyq7fcu.fsf@suse.com> <CADRKj5RRcV=iw2hTSMRWsK+GShCnygw
+ JEMWcA36v-jnKRDahdg@mail.gmail.com> <877fe77nih.fsf@suse.com> <CADRKj5Rd6pqGRA7fN=xR1eFKJzpf7f-X-ZMm-frrZMp_3FAf1w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:36431 "EHLO
-	mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751035AbcFCDjg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2016 23:39:36 -0400
-Received: by mail-qk0-f176.google.com with SMTP id i187so42853958qkd.3
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2016 20:39:35 -0700 (PDT)
+Received: from smtp.nue.novell.com ([195.135.221.5]:49095 "EHLO
+	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932150AbcFCI2f (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Fri, 3 Jun 2016 04:28:35 -0400
+In-reply-to: <CADRKj5Rd6pqGRA7fN=xR1eFKJzpf7f-X-ZMm-frrZMp_3FAf1w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Abhishek Lekshmanan <abhishek@suse.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Due to http://tracker.ceph.com/issues/16113, it would be best to avoid
-setting the sortbitwise flag on jewel clusters upgraded from previous
-versions until we get a point release out with a fix.
 
-The symptom is that setting the sortbitwise flag on a jewel cluster
-upgraded from a previous version can result in some pgs reporting
-spurious unfound objects.  Unsetting sortbitwise should cause the PGs
-to go back to normal.  Clusters created at jewel don't need to worry
-about this.
--Sam
+Yehuda Sadeh-Weinraub writes:
+
+> On Thu, Jun 2, 2016 at 6:01 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
+>> [..]
+>> Yehuda Sadeh-Weinraub writes:
+>>>
+>>> Yes, that would be a normal behaviour. The primary should not have
+>>> concurrent sync operations on the same object if object has not
+>>> completed previous sync operations. Looking at the log it really seems
+>>> that we don't identify the concurrent sync operation on the same
+>>> object. This should have been fixed by commit
+>>> edea6d58dd25995bcc1ed4fc5be6f72ce4a6835a. Can you try to verify what
+>>> went wrong there (whether can_do_op() returned true and why)?
+>>
+>> Looked into this a bit, can_do_op() has returned true for the case when
+>> primary issues a Fetch (or GET) and when a delete is issued,(even though
+>> the Fetch is still not complete yet) by putting a debug log around when
+>> we clear the keys, both the delete op and the get op creates and deletes
+>> the same key successfully.
+>>
+>> Which makes me suspect, that different instances of
+>> RGWBucketIncSyncShardMarkerTrack are at play here, leading to different
+>> independent values for key_to_marker. Is that possible?
+>>
+> Shouldn't happen, but maybe something went wrong. Try adding some more
+> info to the log message to see if that's the case.
+
+I just added a debug log whenever a new instance of
+RGWBucketIncSyncShardMarkerTrack was created, and when we check/delete
+keys, in all cases, ie. when a GET was called and/or when a DELETE was
+called, it was a newer instance of marker_tracker that was being invoked.
+Also a few lines before always showed this:
+
+incremental_sync(): async update notification: mybucket:62bc922d-f295-4067-ae36-e23e2f231aad.24099.1:-1
+
+which seems to be called whenever we're creating a new SingleEntry CR?
+(the value of modified_iter was the same in every case)
+
+Also looking at the cases where the deletion succeeded in the secondary
+zone, it seemed here too can_do_op had succeeded every time, the
+difference was in this case either the Object GET came from the remote
+site after original site had already processed the DELETE or in other
+cases, the GET in remote site was processed in time before the DELETE.
+
+
+--
+Abhishek
