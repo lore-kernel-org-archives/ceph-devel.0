@@ -1,141 +1,154 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: OOM on OSDS with erasure coding
-Date: Fri, 3 Jun 2016 16:45:30 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606031644160.6221@cpach.fuggernut.com>
-References: <CAAwxMGJ2YMKOJUsvPif1HB4vmbQBZdxrNfQA=BeW6R4sy1EC_Q@mail.gmail.com> <CAJE9aOPuTDOgtXjj7kmj1+Vs=T-Mzs5dCQ08pu8g7evp2CZu9g@mail.gmail.com> <CAAwxMGKC_0qazS0eRw5D06+S=Uv2RuPk8quth-kAymMs=+kgTg@mail.gmail.com> <CAN=+7FVUiHBpsQ_vVGv1OpBthYUQCwiKs+VkrRdCvA2Zmjb9Fw@mail.gmail.com>
- <CAAwxMGKuy4iZ-4bYnDZF=zYhNVYOFQasZc+v48tq2g=+nJuRUw@mail.gmail.com>
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: blueprint: consistency groups
+Date: Fri, 3 Jun 2016 17:33:41 -0700
+Message-ID: <CA+hcxJTe--mXncCPVMQJnY01zT2hOWQJGYYtx9_kpqcmrP9H=w@mail.gmail.com>
+References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
+ <CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
+ <20160325071933.GA14634@gmail.com> <CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
+ <CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
+ <CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
+ <CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
+ <CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
+ <CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
+ <CA+aFP1C7me+-dbXVrMgU0Qs9fX8_4ocC9v5orzy+c8tK30y08A@mail.gmail.com>
+ <CA+hcxJT4DWgt8K8hc27KbkJK=DRePM18Zh=GPxtfR5afoxVP1w@mail.gmail.com>
+ <CA+hcxJQGcDy96o0f9sEY8HwLXng9YzxsoKAhaaCuCDDhVbN76A@mail.gmail.com>
+ <CA+aFP1AQzo7bO=e-Gd_sAtBWSYFgvji8isxuXFKDejaHAA+FuA@mail.gmail.com>
+ <CA+hcxJRMcJFxYdscdwyvowjw_dNF6xoNzCHT1=oaznwGqY-4Rw@mail.gmail.com>
+ <CA+aFP1Awk0YZnW16JxOgfDeJFsuKPoN4jdrpr8dCdqUjhhD_Mw@mail.gmail.com>
+ <CA+hcxJTWZWUAUGr1gAZwEqLrGY9eJpzrF3+0H3wqaSjiY6-Faw@mail.gmail.com>
+ <CA+aFP1CfOCy9pL=NWka=j=otb7rwO7W=ds-ggBMz0hVY=zj3-Q@mail.gmail.com>
+ <CA+hcxJS9mBZL5wu0A2L_-3bAyvMb90qBaYo+cosqphUn0Dj9kQ@mail.gmail.com>
+ <CA+aFP1AchQD6b-gm7Z4zijQfW8OMZJrrE8S2nLde2CE+VUjZew@mail.gmail.com>
+ <CA+hcxJQAC7m5mRXhGfL0Fu8erWFb--GstHzOYO-swJNLWXPhHw@mail.gmail.com>
+ <CA+aFP1CVs-_KWWUOdnP7=rFbghpNHTrrfuLPkVw9RtX03eAUKw@mail.gmail.com>
+ <CA+hcxJQhE13ftC7TQ2PdBQwd=_xurRGsuJHTi736r+n0kx_UeQ@mail.gmail.com>
+ <CA+hcxJTTZn8y=kuSFnWbem01XaOUa3D8LDh=25ds6r+qD318vA@mail.gmail.com>
+ <CA+aFP1DzwBkZ5Yo2p2nXvn5KbgniizH1saq4eHx9UDA9JC8UEw@mail.gmail.com>
+ <CA+hcxJR5BTVoogj3caBm9pYR9S4SVqtP815nFHHQK4t89a0Gsg@mail.gmail.com>
+ <CA+aFP1AziFsEJmm3qdCvvfuqnUFPDOW5Ce9VxY0DVMbMy+Y4PQ@mail.gmail.com>
+ <CA+hcxJRTV7yiVNWJdHpz74VhgTOJih3YeOJCuMVErZ54oJf0mQ@mail.gmail.com>
+ <CA+aFP1Cp3HVGUidOW6-NxWGWGT0RSvF8c_H62ZsMvj+AUVktLg@mail.gmail.com> <CA+hcxJSh5JUKdQ4vOo8x-MywR+3smR+BgMtma33Cv76tw+bszw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54886 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1422691AbcFCUpH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 3 Jun 2016 16:45:07 -0400
-In-Reply-To: <CAAwxMGKuy4iZ-4bYnDZF=zYhNVYOFQasZc+v48tq2g=+nJuRUw@mail.gmail.com>
+Received: from mail-yw0-f174.google.com ([209.85.161.174]:33791 "EHLO
+	mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750726AbcFDAdp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Jun 2016 20:33:45 -0400
+Received: by mail-yw0-f174.google.com with SMTP id h19so95486937ywc.0
+        for <ceph-devel@vger.kernel.org>; Fri, 03 Jun 2016 17:33:44 -0700 (PDT)
+In-Reply-To: <CA+hcxJSh5JUKdQ4vOo8x-MywR+3smR+BgMtma33Cv76tw+bszw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sharath Gururaj <sharath.g@flipkart.com>
-Cc: Samuel Just <sjust@redhat.com>, kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sat, 4 Jun 2016, Sharath Gururaj wrote:
-> Thanks Samuel,
-> 
-> But how did you arrive at the number 1.3k per shard osd?
-> we have ~17k pgs and 192 osds, giving ~88 PGs per osd.
+Just updated the pull request with all fixes. Please review one more time.
 
-Each logical PG has k + m shards, so
-
-	17000 * 15 / 192 = 1328
-
-sage
-
-> 
-> 
-> 
-> On Sat, Jun 4, 2016 at 1:24 AM, Samuel Just <sjust@redhat.com> wrote:
-> > Oh, actually, I think the problem is simply that you have 1.3k pg
-> > shards/osd.  We suggest more like 200.  Indeed, the main user of
-> > memory for a particular pg is the pg log, so it makes sense that that
-> > is where most of the memory would be allocated.  You can probably live
-> > with fewer entries/pg: try adjusting osd_min_pg_log_entries and
-> > osd_max_pg_log_entries (defaults are 3000 and 10000) down by a factor
-> > of 10.
-> > -Sam
-> >
-> > On Fri, Jun 3, 2016 at 12:08 PM, Sharath Gururaj <sharath.g@flipkart.com> wrote:
-> >> Hi Kefu,
-> >>
-> >> I haven't tried the latest hammer.
-> >> Is there any pg_log related fixes that have been applied?
-> >>
-> >> After a little more digging, our current suspicion is that the pg_log
-> >> is growing in proportion to the number of file chunks in each OSD.
-> >> since we have k=10, m=5 (total 15 chunks for each rados object), the
-> >> memory usage has become quite high.
-> >>
-> >> Could you tell a little bit about the implementation/lifecycle of the PGLog?
-> >> When are they trimmed? Are there any settings to control how much of
-> >> it is kept in memory?
-> >>
-> >> Thanks
-> >> Sharath
-> >>
-> >> On Fri, Jun 3, 2016 at 10:34 PM, kefu chai <tchaikov@gmail.com> wrote:
-> >>> On Thu, Jun 2, 2016 at 2:23 PM, Sharath Gururaj <sharath.g@flipkart.com> wrote:
-> >>>> Hi All,
-> >>>>
-> >>>> We are testing an erasure coded ceph cluster fronted by rados gateway.
-> >>>> Recently many osds are going down due to out-of-memory.
-> >>>> Here are the details.
-> >>>>
-> >>>> Description of the cluster:
-> >>>> ====================
-> >>>> ceph version 0.94.2 (hammer)
-> >>>
-> >>> Sharath, have you tried the latest hammer (v0.94.7)? does it also have
-> >>> this issue?
-> >>>
-> >>>> 32 hosts, 6 disks (osds) per host so 32*6 = 192 osds
-> >>>> 17024 pgs, 15 pools, 107 TB data, 57616 kobjects
-> >>>> 167 TB used, 508 TB / 675 TB available
-> >>>> erasure coding reed-solomon-van with k=10, m=5
-> >>>> We are using rgw as client. erasure coded only for the .rgw.buckets pool
-> >>>> rest of the rgw metadata/index pools are replicated with size=3
-> >>>>
-> >>>> The Problem
-> >>>> ==========
-> >>>> We ran a load test against this cluster. The load test simply writes
-> >>>> 4.5 MB sized objects through a locust test cluster.
-> >>>> We observed very low throughput with saturation on disk iops.
-> >>>> We reasoned that this is because rgw stripe width is 4MB,
-> >>>> which results in the osds splitting it into 4MB/k = 400kb chunks,
-> >>>> which leads to random io behaviour.
-> >>>>
-> >>>> To mitigate this, we changed rgw stripe width to 40 MB (so that, after
-> >>>> chunking, the object sizes become 40/k = 4MB) and we modified the load
-> >>>> test to upload 40 MB objects.
-> >>>>
-> >>>> Now we observed a more serious problem.
-> >>>> A lot of OSDs across different hosts started getting killed by OOM killer.
-> >>>> We saw that the memory usage of OSDs were huge. ~10G per OSDs.
-> >>>> For comparison, we have a different replicated cluster with a lot more
-> >>>> data where OSD memory usage is ~600MB.
-> >>>>
-> >>>> At this point, we stopped the load test, and tried to restart the
-> >>>> individual OSDs.
-> >>>> Even without load, the OSD memory size grows to ~11G
-> >>>>
-> >>>> We ran the tcmalloc heap profiler against an OSD. Here is the graph
-> >>>> generated by google-pprof.
-> >>>> http://s33.postimg.org/5w48sr3an/mygif.gif
-> >>>>
-> >>>>
-> >>>> The graph seems to indicate that most of the memory is being allocated
-> >>>> by PGLog::readLog
-> >>>> Is this expected behaviour? Is there some setting that allows us to
-> >>>> control this?
-> >>>>
-> >>>> Please let us know further steps we can take to fix the problem.
-> >>>>
-> >>>> Thanks
-> >>>> Sharath
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>>> the body of a message to majordomo@vger.kernel.org
-> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>
-> >>>
-> >>>
-> >>> --
-> >>> Regards
-> >>> Kefu Chai
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Wed, May 25, 2016 at 6:01 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+> Here is the link to my pull request with operations on consistency
+> groups only: create cg, remove cg, list cgs.
+>
+> https://github.com/ceph/ceph/pull/9333
+>
+> On Wed, May 25, 2016 at 5:53 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>> Perfect.  I prefer to have the PR's commits reflect the clean
+>> end-state of the change instead of having multiple "tweak" commits
+>> fixing code review comments.  Therefore, a rebase to address the
+>> comment in its associated comment and force push is the desired
+>> process.
+>>
+>> On Wed, May 25, 2016 at 5:34 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>> I this case I case create a separate pull request for consistency
+>>> group's operations only(create, remove, list).
+>>> Another pull request will be: add image to cg, remove image, list images.
+>>>
+>>> One more question. How do you prefer comments to be addressed, as an
+>>> additional commit to the pull request or amend the corresponding
+>>> commit?
+>>>
+>>> V.
+>>>
+>>> On Tue, May 24, 2016 at 10:30 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>> The current PR is at approximately 2500 lines -- it would be nice to
+>>>> have a PR under 1000 changed lines in a perfect world.  The trouble
+>>>> with larger PR is that after you address comments, I have to re-read
+>>>> it all again.  The smaller the PR, the faster it can be reviewed and
+>>>> merged.  If changes depend on another PR, you can always
+>>>> non-fast-forward merge the other PR branch into your dependent PR
+>>>> branch so that it's clear what needs to be reviewed.
+>>>>
+>>>> On Tue, May 24, 2016 at 6:42 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>> Yes, I'm working on splitting it into small logically separated commits.
+>>>>> My current PR is for CRUD operations only(create, remove, add image,
+>>>>> remove image, show info).
+>>>>> Do you want even a smaller PR or this one is small enough?
+>>>>>
+>>>>> Thanks,
+>>>>> V.
+>>>>>
+>>>>> On Mon, May 23, 2016 at 7:39 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>> Definitely want to ensure that it cleanly merges with master.  I would
+>>>>>> also request, if at all possible, that you break it into individual
+>>>>>> PRs of concrete sub-tasks for implementing consistency groups for ease
+>>>>>> of review.  Have individual commits for each step of implementing the
+>>>>>> task would also help (i.e. squash related commits, fix style issues or
+>>>>>> bugs in the commit that introduced them, etc).
+>>>>>>
+>>>>>> On Mon, May 23, 2016 at 6:43 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>> Never mind. I just realized that it will be easier to build it on top
+>>>>>>> of the latest master in any case.
+>>>>>>>
+>>>>>>> On Mon, May 23, 2016 at 8:32 AM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>> Jason,
+>>>>>>>>
+>>>>>>>> Do you prefer pull requests to be rebased on top of the latest master
+>>>>>>>> or should I keep it where I started the development?
+>>>>>>>>
+>>>>>>>> Thanks,
+>>>>>>>> V.
+>>>>>>>>
+>>>>>>>> On Mon, May 16, 2016 at 8:48 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>>>>> On Thu, May 12, 2016 at 10:45 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>>>> Jason,
+>>>>>>>>>>
+>>>>>>>>>> Do you have any opinion regarding deleting images that are in a
+>>>>>>>>>> consistency group?
+>>>>>>>>>>
+>>>>>>>>>> Should we delete them as well as the references in the consistency
+>>>>>>>>>> group they belong to or should we prohibit deleting images that are in
+>>>>>>>>>> a consistency group?
+>>>>>>>>>>
+>>>>>>>>>> V.
+>>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> Right now, if an image has a snapshot we required you to remove all
+>>>>>>>>> snapshots before removing the image.  Along those lines, if an image
+>>>>>>>>> is in a consistency group and the consistency group has snapshots, the
+>>>>>>>>> user wouldn't be able to remove the image since it has snapshots nor
+>>>>>>>>> should the user be able to remove the snapshots associated with the
+>>>>>>>>> consistency group. In this case, the user would be forced to
+>>>>>>>>> dissociate the image from the group before attempting to delete it.
+>>>>>>>>> Therefore, just to keep the actions consistent, you might as well
+>>>>>>>>> force the user to dissociate an image from the consistency group even
+>>>>>>>>> if the image doesn't have snapshots.
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> --
+>>>>>>>>> Jason
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> --
+>>>>>> Jason
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> Jason
+>>
+>>
+>>
+>> --
+>> Jason
