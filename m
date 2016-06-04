@@ -1,79 +1,49 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore crash in mkfs
-Date: Sat, 4 Jun 2016 07:57:17 +0000
-Message-ID: <BL2PR02MB2115840732283AC0927974AEF45A0@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <BL2PR02MB21151DAE1DAF64B6CC74D01FF45A0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <CAB=cV2Tp9ASRHxLSw5H3K=4PbrxrFkF4sARsfDRxDVqJpQ8ZHg@mail.gmail.com>
+From: Wei Jin <wjin.cn@gmail.com>
+Subject: Re: Does mon skew really matters?
+Date: Sat, 4 Jun 2016 18:17:46 +0800
+Message-ID: <CAPpSHbW_bz9b-+BUmX+hJJodh-hF428-2KA9UZ3mcNOUR303gQ@mail.gmail.com>
+References: <CALZt5jypeXGhVhhjur8dpC5KPDqFN-HRC+HbUzOEmVtzO6N1vQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0091.outbound.protection.outlook.com ([157.56.110.91]:29664
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750761AbcFDH5U (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 4 Jun 2016 03:57:20 -0400
-In-Reply-To: <CAB=cV2Tp9ASRHxLSw5H3K=4PbrxrFkF4sARsfDRxDVqJpQ8ZHg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qg0-f45.google.com ([209.85.192.45]:35940 "EHLO
+	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750809AbcFDKRs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 4 Jun 2016 06:17:48 -0400
+Received: by mail-qg0-f45.google.com with SMTP id q32so22793585qgq.3
+        for <ceph-devel@vger.kernel.org>; Sat, 04 Jun 2016 03:17:47 -0700 (PDT)
+In-Reply-To: <CALZt5jypeXGhVhhjur8dpC5KPDqFN-HRC+HbUzOEmVtzO6N1vQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jianjian Huo <samuel.huo@gmail.com>
-Cc: "Sage Weil (sage@newdream.net)" <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ning Yao <zay11022@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-U2FtZSBjb25mIGZpbGUgd29ya2VkIGZvciBtZSBzb21ldGltZXMgYmFjay4gSSB0aGluayBkYiBw
-YXRoL3dhbCBwYXRoIGlzIG9wdGlvbmFsIGFuZCBpZiB5b3UgZG9uJ3QgbWVudGlvbiBhbnl0aGlu
-ZywgaXQgd2lsbCBjb2V4aXN0IG9uIHRoZSBibG9jayBwYXJ0aXRpb24uDQpOb3Qgc3VyZSBpZiB0
-aGlzIGlzIHNvbWV0aGluZyBjaGFuZ2VkIHJlY2VudGx5IHRob3VnaC4uDQpUaGUgdHJhY2UgaXMg
-YWxzbyBub3QgY29tcGxhaW5pbmcgYWJvdXQgZGIgcGF0aCAsIGl0IGlzIGdldHRpbmcgYSBzZWcg
-ZmF1bHQgd2hpbGUgcGFyc2luZyByb2Nrc2RiIG9wdGlvbi4gDQoNClRoYW5rcyAmIFJlZ2FyZHMN
-ClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEppYW5qaWFuIEh1
-byBbbWFpbHRvOnNhbXVlbC5odW9AZ21haWwuY29tXSANClNlbnQ6IEZyaWRheSwgSnVuZSAwMywg
-MjAxNiA5OjI5IFBNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBTYWdlIFdlaWwgKHNhZ2VAbmV3ZHJl
-YW0ubmV0KTsgY2VwaC1kZXZlbA0KU3ViamVjdDogUmU6IEJsdWVzdG9yZSBjcmFzaCBpbiBta2Zz
-DQoNCk9uIEZyaSwgSnVuIDMsIDIwMTYgYXQgNzoxNiBQTSwgU29tbmF0aCBSb3kgPFNvbW5hdGgu
-Um95QHNhbmRpc2suY29tPiB3cm90ZToNCj4gU2FnZSwNCj4gTGF0ZXN0IGNvZGUgaW4gQmx1ZXN0
-b3JlIGlzIGNyYXNoaW5nIG9uIG1lIGR1cmluZyBta2ZzLiBIZXJlIGlzIHRoZSBkdW1wLg0KPg0K
-PiBjZXBoIHZlcnNpb24gMTAuMi4wLTE4MDktZ2FjOGM0MGYgDQo+IChhYzhjNDBmM2UzMjU3NTE3
-ZjcxZDJhZjhiZDI2ZGNkMjY0ODg3YjdmKQ0KPiAgMTogKCgpKzB4OTllNjVlKSBbMHg1NWNmNTI2
-MzU2NWVdDQo+ICAyOiAoKCkrMHgxMTNkMCkgWzB4N2YzMjM1MjZmM2QwXQ0KPiAgMzogDQo+IChy
-b2Nrc2RiOjpDb2x1bW5GYW1pbHlPcHRpb25zOjpDb2x1bW5GYW1pbHlPcHRpb25zKHJvY2tzZGI6
-Ok9wdGlvbnMgDQo+IGNvbnN0JikrMHg1OSkgWzB4NTVjZjUyNWQ0Y2U5XQ0KPiAgNDogKHJvY2tz
-ZGI6OkdldE9wdGlvbnNGcm9tU3RyaW5nKHJvY2tzZGI6Ok9wdGlvbnMgY29uc3QmLCANCj4gc3Rk
-OjpfX2N4eDExOjpiYXNpY19zdHJpbmc8Y2hhciwgc3RkOjpjaGFyX3RyYWl0czxjaGFyPiwgDQo+
-IHN0ZDo6YWxsb2NhdG9yPGNoYXI+ID4gY29uc3QmLCByb2Nrc2RiOjpPcHRpb25zKikrMHgxNWEp
-IA0KPiBbMHg1NWNmNTI1ZGM3NGFdDQo+ICA1OiANCj4gKFJvY2tzREJTdG9yZTo6UGFyc2VPcHRp
-b25zRnJvbVN0cmluZyhzdGQ6Ol9fY3h4MTE6OmJhc2ljX3N0cmluZzxjaGFyLCANCj4gc3RkOjpj
-aGFyX3RyYWl0czxjaGFyPiwgc3RkOjphbGxvY2F0b3I8Y2hhcj4gPiwgDQo+IHJvY2tzZGI6Ok9w
-dGlvbnMmKSsweDIyZSkgWzB4NTVjZjUyNGY1OGJlXQ0KPiAgNjogKFJvY2tzREJTdG9yZTo6aW5p
-dChzdGQ6Ol9fY3h4MTE6OmJhc2ljX3N0cmluZzxjaGFyLCANCj4gc3RkOjpjaGFyX3RyYWl0czxj
-aGFyPiwgc3RkOjphbGxvY2F0b3I8Y2hhcj4gPikrMHg3NykgWzB4NTVjZjUyNGY1ZjE3XQ0KPiAg
-NzogKEJsdWVTdG9yZTo6X29wZW5fZGIoYm9vbCkrMHgyNzQpIFsweDU1Y2Y1MjM0YjllNF0NCj4g
-IDg6IChCbHVlU3RvcmU6Om1rZnMoKSsweDg5OSkgWzB4NTVjZjUyMzYxYWQ5XQ0KPiAgOTogKE9T
-RDo6bWtmcyhDZXBoQ29udGV4dCosIE9iamVjdFN0b3JlKiwgDQo+IHN0ZDo6X19jeHgxMTo6YmFz
-aWNfc3RyaW5nPGNoYXIsIHN0ZDo6Y2hhcl90cmFpdHM8Y2hhcj4sIA0KPiBzdGQ6OmFsbG9jYXRv
-cjxjaGFyPiA+IGNvbnN0JiwgdXVpZF9kLCBpbnQpKzB4MTE3KSBbMHg1NWNmNTIwMDE0MjddDQo+
-ICAxMDogKG1haW4oKSsweDEwMDMpIFsweDU1Y2Y1MWY5ZjJlM10NCj4gIDExOiAoX19saWJjX3N0
-YXJ0X21haW4oKSsweGYwKSBbMHg3ZjMyMzMxZmE4MzBdDQo+ICAxMjogKF9zdGFydCgpKzB4Mjkp
-IFsweDU1Y2Y1MWZlMjcxOV0NCj4gIE5PVEU6IGEgY29weSBvZiB0aGUgZXhlY3V0YWJsZSwgb3Ig
-YG9iamR1bXAgLXJkUyA8ZXhlY3V0YWJsZT5gIGlzIG5lZWRlZCB0byBpbnRlcnByZXQgdGhpcy4N
-Cj4NCj4NCj4gSSBhbSB1c2luZyB0aGUgZm9sbG93aW5nIG9wdGlvbiA6DQo+DQo+ICAgICAgICBk
-ZXZzID0gL2Rldi9zZGIxDQo+ICAgICAgICBibHVlc3RvcmVfYmxvY2tfcGF0aCA9IC9kZXYvc2Ri
-Mg0KPg0KPiBBbSBJIG1pc3NpbmcgYW55dGhpbmcgPw0KDQpUaGlzIGlzIHdoYXQgTWFyayBwb3N0
-ZWQgbGFzdCB0aW1lLCB5b3UgZm9yZ290IGRiIHBhdGg/DQpodHRwczovL2dpdGh1Yi5jb20vY2Vw
-aC9jYnQvYmxvYi9tYXN0ZXIvZXhhbXBsZS9ibHVlc3RvcmUvY2VwaC5jb25mLmJsdWVzdG9yZV9l
-eGFtcGxlDQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29tbmF0aA0KPiBQTEVBU0UgTk9URTog
-VGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdl
-IGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50
-KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhl
-IGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2
-ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlz
-c2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBz
-dHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRp
-b24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1t
-YWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwg
-Y29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBj
-b3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+IC0tDQo+IFRvIHVuc3Vi
-c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRl
-dmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5l
-bC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcv
-bWFqb3Jkb21vLWluZm8uaHRtbA0K
+In my opinion, if clock drift is too heavy, the lease protocol inside
+paxos won't work. Lease may be timeout and then triggers monitor to
+bootstrap.
+
+You could try to shift clock back on the leader node to see what will happen.
+
+Time check mechanism gives us warning message so that we may take
+actions if possible before things getting worse.
+
+On Sat, Jun 4, 2016 at 12:06 PM, Ning Yao <zay11022@gmail.com> wrote:
+> Hi, all
+>
+> I find that even if I have mon clock skew warning, under most cases,
+> my cluster still can work properly as expected.
+>
+> I go through the code in mon but do not find any related issue without
+> time_check() to update whether clock skew periodically.
+>
+> can any one tell what is the design purpose of the clock skew between
+> mon and when it will really matter the cluster?
+>
+> Thanks a lots!
+>
+> Regards
+> Ning Yao
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
