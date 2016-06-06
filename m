@@ -1,111 +1,48 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore crash in mkfs
-Date: Mon, 6 Jun 2016 16:38:17 +0000
-Message-ID: <BL2PR02MB2115B14E1C58431AF24E7697F45C0@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <BL2PR02MB21151DAE1DAF64B6CC74D01FF45A0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <CAB=cV2Tp9ASRHxLSw5H3K=4PbrxrFkF4sARsfDRxDVqJpQ8ZHg@mail.gmail.com>
- <BL2PR02MB2115840732283AC0927974AEF45A0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1606042235220.6221@cpach.fuggernut.com>
- <A1E209ED-AE9D-4C72-AFA9-B80AF9CDA280@sandisk.com>
- <6545776f-0836-3199-c6f7-4625113f5d75@redhat.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: June Ceph Tech Talks (OpenATTIC / Bluestore)
+Date: Mon, 6 Jun 2016 15:56:12 -0400
+Message-ID: <CAAZbbf2KmFDw6eA63DB+_sSVNVWjzRiT3p8Zcqtq4r4AoSgT3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0088.outbound.protection.outlook.com ([157.56.111.88]:36088
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750878AbcFFQiW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 6 Jun 2016 12:38:22 -0400
-In-Reply-To: <6545776f-0836-3199-c6f7-4625113f5d75@redhat.com>
-Content-Language: en-US
+Received: from mail-yw0-f170.google.com ([209.85.161.170]:33226 "EHLO
+	mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751174AbcFFT4O convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Jun 2016 15:56:14 -0400
+Received: by mail-yw0-f170.google.com with SMTP id h19so150571557ywc.0
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Jun 2016 12:56:13 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Sage Weil <sage@newdream.net>
-Cc: Jianjian Huo <samuel.huo@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-VGhhbmtzIE1hcmsgZm9yIGNvbmZpcm1pbmcgdGhpcyAhDQpNYXkgYmUgd2UgcHVsbGVkIGxhdGVz
-dCByb2Nrc2RiIHRoYXQgYXJlIGNhdXNpbmcgc29tZSBpbmNvbXBhdGliaWxpdHkgb24gb3B0aW9u
-IHBhcnNpbmcgPw0KDQpSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
-LS0tDQpGcm9tOiBNYXJrIE5lbHNvbiBbbWFpbHRvOm1uZWxzb25AcmVkaGF0LmNvbV0gDQpTZW50
-OiBNb25kYXksIEp1bmUgMDYsIDIwMTYgOTozNSBBTQ0KVG86IFNvbW5hdGggUm95OyBTYWdlIFdl
-aWwNCkNjOiBKaWFuamlhbiBIdW87IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBCbHVlc3RvcmUg
-Y3Jhc2ggaW4gbWtmcw0KDQpJJ20gaGl0dGluZyB0aGlzIGFmdGVyIHVwZ3JhZGluZyB0byBtYXN0
-ZXIuICBQcm9iYWJseSBzb21ldGhpbmcgdGhhdCBnb3QgbWVyZ2VkIG9uIHRoZSAybmQgb3IgM3Jk
-LiAgSSdsbCBzZWUgaWYgSSBjYW4gdHJhY2sgaXQgZG93bi4NCg0KTWFyaw0KDQpPbiAwNi8wNC8y
-MDE2IDA5OjQxIFBNLCBTb21uYXRoIFJveSB3cm90ZToNCj4gSGVyZSBpcyB0aGUgc3RlcHMgSSBk
-aWQuLg0KPiAxLiBHaXQgcHVsbA0KPiAyLiBNYWtlIGNsZWFuDQo+IDMuIERvX2F1dG9nZW4gLWog
-bzMNCj4gNC4gTWFrZSBpbnN0YWxsDQo+IDUuIE1rY2VwaGZzIHRvIGluc3RhbGwsIEkgc3RpbGwg
-cHJlZmVyIGl08J+Yig0KPg0KPiBJIHdpbGwgZGVidWcgbW9yZSBhbmQgdXBkYXRlDQo+DQo+IFRo
-YW5rcyAmIFJlZ2FyZHMNCj4gU29tbmF0aA0KPg0KPiBTZW50IGZyb20gbXkgaVBob25lDQo+DQo+
-PiBPbiBKdW4gNCwgMjAxNiwgYXQgNzozNSBQTSwgU2FnZSBXZWlsIDxzYWdlQG5ld2RyZWFtLm5l
-dD4gd3JvdGU6DQo+Pg0KPj4+IE9uIFNhdCwgNCBKdW4gMjAxNiwgU29tbmF0aCBSb3kgd3JvdGU6
-DQo+Pj4gU2FtZSBjb25mIGZpbGUgd29ya2VkIGZvciBtZSBzb21ldGltZXMgYmFjay4gSSB0aGlu
-ayBkYiBwYXRoL3dhbCBwYXRoIGlzIG9wdGlvbmFsIGFuZCBpZiB5b3UgZG9uJ3QgbWVudGlvbiBh
-bnl0aGluZywgaXQgd2lsbCBjb2V4aXN0IG9uIHRoZSBibG9jayBwYXJ0aXRpb24uDQo+Pj4gTm90
-IHN1cmUgaWYgdGhpcyBpcyBzb21ldGhpbmcgY2hhbmdlZCByZWNlbnRseSB0aG91Z2guLg0KPj4+
-IFRoZSB0cmFjZSBpcyBhbHNvIG5vdCBjb21wbGFpbmluZyBhYm91dCBkYiBwYXRoICwgaXQgaXMg
-Z2V0dGluZyBhIHNlZyBmYXVsdCB3aGlsZSBwYXJzaW5nIHJvY2tzZGIgb3B0aW9uLg0KPj4NCj4+
-IEhtbSwgSSBoYXZlbid0IHNlZW4gdGhpcy4NCj4+DQo+PiBOb3RlIHRoYXQgeW91IGRvbid0IG5l
-ZWQgJ2RldnMnLiAgQW5kIHlvdSdyZSByaWdodCB0aGF0IGp1c3QgDQo+PiBzcGVjaWZ5aW5nIHRo
-ZSBibG9jayBwYXRoIGlzIGVub3VnaC4gIElmIHlvdSdyZSBkb2luZyBhIG1hbnVhbCBidWlsZCwg
-DQo+PiBpcyBpdCBwb3NzaWJsZSB5b3UncmUgZHluYW1pY2FsbHkgbGlua2luZyByb2Nrc2RiIG9y
-IHNvbWV0aGluZz8NCj4+DQo+PiBzYWdlDQo+Pg0KPj4+DQo+Pj4gVGhhbmtzICYgUmVnYXJkcw0K
-Pj4+IFNvbW5hdGgNCj4+Pg0KPj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+Pj4gRnJv
-bTogSmlhbmppYW4gSHVvIFttYWlsdG86c2FtdWVsLmh1b0BnbWFpbC5jb21dDQo+Pj4gU2VudDog
-RnJpZGF5LCBKdW5lIDAzLCAyMDE2IDk6MjkgUE0NCj4+PiBUbzogU29tbmF0aCBSb3kNCj4+PiBD
-YzogU2FnZSBXZWlsIChzYWdlQG5ld2RyZWFtLm5ldCk7IGNlcGgtZGV2ZWwNCj4+PiBTdWJqZWN0
-OiBSZTogQmx1ZXN0b3JlIGNyYXNoIGluIG1rZnMNCj4+Pg0KPj4+PiBPbiBGcmksIEp1biAzLCAy
-MDE2IGF0IDc6MTYgUE0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3Jv
-dGU6DQo+Pj4+IFNhZ2UsDQo+Pj4+IExhdGVzdCBjb2RlIGluIEJsdWVzdG9yZSBpcyBjcmFzaGlu
-ZyBvbiBtZSBkdXJpbmcgbWtmcy4gSGVyZSBpcyB0aGUgZHVtcC4NCj4+Pj4NCj4+Pj4gY2VwaCB2
-ZXJzaW9uIDEwLjIuMC0xODA5LWdhYzhjNDBmDQo+Pj4+IChhYzhjNDBmM2UzMjU3NTE3ZjcxZDJh
-ZjhiZDI2ZGNkMjY0ODg3YjdmKQ0KPj4+PiAxOiAoKCkrMHg5OWU2NWUpIFsweDU1Y2Y1MjYzNTY1
-ZV0NCj4+Pj4gMjogKCgpKzB4MTEzZDApIFsweDdmMzIzNTI2ZjNkMF0NCj4+Pj4gMzoNCj4+Pj4g
-KHJvY2tzZGI6OkNvbHVtbkZhbWlseU9wdGlvbnM6OkNvbHVtbkZhbWlseU9wdGlvbnMocm9ja3Nk
-Yjo6T3B0aW9ucw0KPj4+PiBjb25zdCYpKzB4NTkpIFsweDU1Y2Y1MjVkNGNlOV0NCj4+Pj4gNDog
-KHJvY2tzZGI6OkdldE9wdGlvbnNGcm9tU3RyaW5nKHJvY2tzZGI6Ok9wdGlvbnMgY29uc3QmLCAN
-Cj4+Pj4gc3RkOjpfX2N4eDExOjpiYXNpY19zdHJpbmc8Y2hhciwgc3RkOjpjaGFyX3RyYWl0czxj
-aGFyPiwgDQo+Pj4+IHN0ZDo6YWxsb2NhdG9yPGNoYXI+ID4gY29uc3QmLCByb2Nrc2RiOjpPcHRp
-b25zKikrMHgxNWEpIA0KPj4+PiBbMHg1NWNmNTI1ZGM3NGFdDQo+Pj4+IDU6DQo+Pj4+IChSb2Nr
-c0RCU3RvcmU6OlBhcnNlT3B0aW9uc0Zyb21TdHJpbmcoc3RkOjpfX2N4eDExOjpiYXNpY19zdHJp
-bmc8Y2gNCj4+Pj4gYXIsIHN0ZDo6Y2hhcl90cmFpdHM8Y2hhcj4sIHN0ZDo6YWxsb2NhdG9yPGNo
-YXI+ID4sDQo+Pj4+IHJvY2tzZGI6Ok9wdGlvbnMmKSsweDIyZSkgWzB4NTVjZjUyNGY1OGJlXQ0K
-Pj4+PiA2OiAoUm9ja3NEQlN0b3JlOjppbml0KHN0ZDo6X19jeHgxMTo6YmFzaWNfc3RyaW5nPGNo
-YXIsDQo+Pj4+IHN0ZDo6Y2hhcl90cmFpdHM8Y2hhcj4sIHN0ZDo6YWxsb2NhdG9yPGNoYXI+ID4p
-KzB4NzcpIA0KPj4+PiBbMHg1NWNmNTI0ZjVmMTddDQo+Pj4+IDc6IChCbHVlU3RvcmU6Ol9vcGVu
-X2RiKGJvb2wpKzB4Mjc0KSBbMHg1NWNmNTIzNGI5ZTRdDQo+Pj4+IDg6IChCbHVlU3RvcmU6Om1r
-ZnMoKSsweDg5OSkgWzB4NTVjZjUyMzYxYWQ5XQ0KPj4+PiA5OiAoT1NEOjpta2ZzKENlcGhDb250
-ZXh0KiwgT2JqZWN0U3RvcmUqLCANCj4+Pj4gc3RkOjpfX2N4eDExOjpiYXNpY19zdHJpbmc8Y2hh
-ciwgc3RkOjpjaGFyX3RyYWl0czxjaGFyPiwgDQo+Pj4+IHN0ZDo6YWxsb2NhdG9yPGNoYXI+ID4g
-Y29uc3QmLCB1dWlkX2QsIGludCkrMHgxMTcpIFsweDU1Y2Y1MjAwMTQyN10NCj4+Pj4gMTA6ICht
-YWluKCkrMHgxMDAzKSBbMHg1NWNmNTFmOWYyZTNdDQo+Pj4+IDExOiAoX19saWJjX3N0YXJ0X21h
-aW4oKSsweGYwKSBbMHg3ZjMyMzMxZmE4MzBdDQo+Pj4+IDEyOiAoX3N0YXJ0KCkrMHgyOSkgWzB4
-NTVjZjUxZmUyNzE5XQ0KPj4+PiBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBv
-YmpkdW1wIC1yZFMgPGV4ZWN1dGFibGU+YCBpcyBuZWVkZWQgdG8gaW50ZXJwcmV0IHRoaXMuDQo+
-Pj4+DQo+Pj4+DQo+Pj4+IEkgYW0gdXNpbmcgdGhlIGZvbGxvd2luZyBvcHRpb24gOg0KPj4+Pg0K
-Pj4+PiAgICAgICBkZXZzID0gL2Rldi9zZGIxDQo+Pj4+ICAgICAgIGJsdWVzdG9yZV9ibG9ja19w
-YXRoID0gL2Rldi9zZGIyDQo+Pj4+DQo+Pj4+IEFtIEkgbWlzc2luZyBhbnl0aGluZyA/DQo+Pj4N
-Cj4+PiBUaGlzIGlzIHdoYXQgTWFyayBwb3N0ZWQgbGFzdCB0aW1lLCB5b3UgZm9yZ290IGRiIHBh
-dGg/DQo+Pj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2J0L2Jsb2IvbWFzdGVyL2V4YW1wbGUv
-Ymx1ZXN0b3JlL2NlcGguY29uZi4NCj4+PiBibHVlc3RvcmVfZXhhbXBsZQ0KPj4+Pg0KPj4+PiBU
-aGFua3MgJiBSZWdhcmRzDQo+Pj4+IFNvbW5hdGgNCj4+Pj4gUExFQVNFIE5PVEU6IFRoZSBpbmZv
-cm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRl
-bmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1l
-ZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRl
-ZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2
-ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRp
-b24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkg
-cHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVy
-cm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMg
-c2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBv
-ZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9y
-IGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4+PiAtLQ0KPj4+PiBUbyB1bnN1YnNj
-cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
-bCINCj4+Pj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5l
-bC5vcmcgTW9yZSANCj4+Pj4gbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
-cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4+IE4/Pz8/P3I/P3k/Pz8/Pz9YPz/Hp3Y/Pz8p3rp7
-Lm4/Pz8/P3o/XXo/Pz8/YXk/IMqH2pk/P2ogPz9mPz8/aD8/Pz8/IA0KPj4+ID93Pz8/ID8/P2o6
-K3Y/Pz93Pz8/Pz8/Pz8gPz8/P3paKz8/Pz8/Pz9qIj8/Pz9pDQo+IE4gICAgIHIgIHkgICBiIFgg
-IMendiBeICneunsubiArICAgeiBdeiAgIHtheSAdyofamSAsaiAgIGYgICBoICAgeiAeIHcgICAN
-CiAgIGo6K3YgICB3IGogbSAgICAgICAgIHpaKyAgICAg3aJqIiAgIXRtbD0NCj4NCg==
+Hey cephers,
+
+So we have gone from not having a Ceph Tech Talk this month=E2=80=A6to =
+having
+two! As a part of our regularly scheduled Ceph Tech Talk series, Lenz
+Grimmer from OpenATTIC will be talking about the architecture of their
+management/GUI solution, which will also include a live demo.
+
+As a special added bonus, Sage wanted to do a deep dive into the
+Bluestore architecture/roadmap and give people the opportunity to ask
+questions. So we=E2=80=99ll ALSO be having a Ceph Tech Talk on the 21st=
+ @ 4p
+EDT. For all details, including the dial-in information you can see
+the Ceph Tech Talk page.
+
+http://ceph.com/ceph-tech-talks/
+
+--=20
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
