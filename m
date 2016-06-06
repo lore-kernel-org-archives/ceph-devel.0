@@ -1,62 +1,75 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: Shall we remove static libraries from *-dev debian pacakges?
-Date: Mon, 6 Jun 2016 11:59:26 +0800
-Message-ID: <CAJE9aOMurCMg-r4_LPjGPYQTUmLpU0tA5fMjLaPfK8XHoV51-Q@mail.gmail.com>
-References: <CAJE9aOMma9roYzaTnPE7WdSf4s93QDqTvy6N87YcMgRuyQiR4w@mail.gmail.com>
- <20160603173953.GA27895@ultraspiritum.eng.arb.redhat.com> <alpine.DEB.2.11.1606031342460.6221@cpach.fuggernut.com>
+From: Junwang Zhao <zhjwpku@gmail.com>
+Subject: Re: msgr2 protocol
+Date: Mon, 6 Jun 2016 16:23:12 +0800
+Message-ID: <CAEG8a3KKtw122rY1kt3DMw_9y87ivK7FO1h0LbhoWn05mUD8Tg@mail.gmail.com>
+References: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com>
+ <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com>
+ <alpine.DEB.2.11.1606021416510.6221@cpach.fuggernut.com> <CAJ4mKGaWx8m4Zh_f6tQWe9ows77HHyMmv5y52Rr-5Q-ob_N1Yg@mail.gmail.com>
+ <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com> <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com>
+ <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com> <CACJqLya8rdipTW9hAikgyyDAWTFeTuqOizvDQSY88L_QnzeKFQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:36271 "EHLO
-	mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752536AbcFFD72 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Jun 2016 23:59:28 -0400
-Received: by mail-yw0-f170.google.com with SMTP id x189so129785583ywe.3
-        for <ceph-devel@vger.kernel.org>; Sun, 05 Jun 2016 20:59:28 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1606031342460.6221@cpach.fuggernut.com>
+Received: from mail-vk0-f52.google.com ([209.85.213.52]:34486 "EHLO
+	mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751409AbcFFIXO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Jun 2016 04:23:14 -0400
+Received: by mail-vk0-f52.google.com with SMTP id e4so53190301vkb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Jun 2016 01:23:13 -0700 (PDT)
+In-Reply-To: <CACJqLya8rdipTW9hAikgyyDAWTFeTuqOizvDQSY88L_QnzeKFQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "Adam C. Emerson" <aemerson@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomai@xsky.com>
+Cc: Sage Weil <sweil@redhat.com>, Marcus Watts <mwatts@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Thanks Adam and Sage! As a follow-up, I posted
-https://github.com/ceph/ceph/pull/9476.
+Hi,
 
-On Sat, Jun 4, 2016 at 1:43 AM, Sage Weil <sage@newdream.net> wrote:
-> On Fri, 3 Jun 2016, Adam C. Emerson wrote:
->> On 04/06/2016, kefu chai wrote:
->> > Hi Cephers,
->> >
->> > As your know, we are trying to ditch autotools and moving to the cmake
->> > building system. Currently, we ship both static (.a) and shared
->> > libraries (.so) and their .la files in
->> > lib{rbd,rgw,rados,cephfs,radosstriper}-dev debian packages, but only
->> > package the shared libraries in rpm packages. When working on the
->> > cmake, I find it's a little bit tricky to prepare both static and
->> > shared libraries in cmake, see [1].
->> >
->> > So questions:
->> >
->> > - Is it fine if we don't ship static libraries any more in the *-dev
->> > .deb packages just like .rpms?
+My understanding is that before the protocol msgr2 begins, each party
+already has it's own secrete key, and it's public key has been known by
+it's peer, and they have alreay shared the session key that will be used
+by encryption/decryption.
+
+The secrete key will be used by signature, and the public key will be
+used to identify.
+
+I am not sure about the whole key exchange part, is that done by cephx?
+
+
+On Sat, Jun 4, 2016 at 1:35 AM, Haomai Wang <haomai@xsky.com> wrote:
+> On Sat, Jun 4, 2016 at 1:33 AM, Sage Weil <sweil@redhat.com> wrote:
+>> On Sat, 4 Jun 2016, Haomai Wang wrote:
+>>> On Fri, Jun 3, 2016 at 9:24 PM, Sage Weil <sweil@redhat.com> wrote:
+>>> > I updated the PR with an additional commit that simplifies the
+>>> > confounder.  It seems like we only need the confoudner at teh beginning of
+>>> > the session, not for every message, since the signature and encryption
+>>> > state is chained from the previous frame.  Is that right?
+>>> >
+>>> >         https://github.com/ceph/ceph/pull/9461/commits/45766fed1864733c5216a7b50f11cce256338170
+>>> >
+>>> > Full PR:
+>>> >
+>>> >         https://github.com/ceph/ceph/pull/9461
+>>> >
+>>> > --
+>>> >
+>>> > Also, I just realized that now might be a good time to address the ability
+>>> > to multiplex different endpoints (sessions) into the same connection.  We
+>>> > could add it later with the msgr feature bits, but it'll probably be
+>>> > simpler not to have to support two variants of the protocol.  On the other
+>>> > hand, it's a lot more complicated.  :(
+>>>
+>>> What's the use case? different session shares the same connection? Do
+>>> you mean different messenger instance will share the same connection
+>>> pool?
 >>
->> Debian policy does not, to my understanding, require us to provide
->> static libraries. It demands only that if we have them they should be
->> in the -devel package.
->>
->> All other things being equal I have a soft preference to ship static
->> libraries.
->>
->> All other things are not equal.
+>> Many OSD's in the same unix process, sharing the same messenger connection
+>> pool, eventually using SPDK/DPDK.
 >
-> I'm also happy to drop the static libraries if it makes life easier.  We
-> can also do the work to add them back later if there is a compelling need.
-> That seems pretty unlikely!
+> OH, great to push this!
 >
-> sage
-
-
-
--- 
-Regards
-Kefu Chai
+>>
+>> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
