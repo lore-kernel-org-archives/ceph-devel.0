@@ -1,95 +1,62 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: Re: Bluestore crash in mkfs
-Date: Sun, 5 Jun 2016 02:41:04 +0000
-Message-ID: <A1E209ED-AE9D-4C72-AFA9-B80AF9CDA280@sandisk.com>
-References: <BL2PR02MB21151DAE1DAF64B6CC74D01FF45A0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <CAB=cV2Tp9ASRHxLSw5H3K=4PbrxrFkF4sARsfDRxDVqJpQ8ZHg@mail.gmail.com>
- <BL2PR02MB2115840732283AC0927974AEF45A0@BL2PR02MB2115.namprd02.prod.outlook.com>,<alpine.DEB.2.11.1606042235220.6221@cpach.fuggernut.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Shall we remove static libraries from *-dev debian pacakges?
+Date: Mon, 6 Jun 2016 11:59:26 +0800
+Message-ID: <CAJE9aOMurCMg-r4_LPjGPYQTUmLpU0tA5fMjLaPfK8XHoV51-Q@mail.gmail.com>
+References: <CAJE9aOMma9roYzaTnPE7WdSf4s93QDqTvy6N87YcMgRuyQiR4w@mail.gmail.com>
+ <20160603173953.GA27895@ultraspiritum.eng.arb.redhat.com> <alpine.DEB.2.11.1606031342460.6221@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0097.outbound.protection.outlook.com ([157.56.110.97]:65344
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751325AbcFEClI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 4 Jun 2016 22:41:08 -0400
-In-Reply-To: <alpine.DEB.2.11.1606042235220.6221@cpach.fuggernut.com>
-Content-Language: en-US
+Received: from mail-yw0-f170.google.com ([209.85.161.170]:36271 "EHLO
+	mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752536AbcFFD72 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Jun 2016 23:59:28 -0400
+Received: by mail-yw0-f170.google.com with SMTP id x189so129785583ywe.3
+        for <ceph-devel@vger.kernel.org>; Sun, 05 Jun 2016 20:59:28 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1606031342460.6221@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: Jianjian Huo <samuel.huo@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: "Adam C. Emerson" <aemerson@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-SGVyZSBpcyB0aGUgc3RlcHMgSSBkaWQuLg0KMS4gR2l0IHB1bGwNCjIuIE1ha2UgY2xlYW4NCjMu
-IERvX2F1dG9nZW4gLWogbzMNCjQuIE1ha2UgaW5zdGFsbA0KNS4gTWtjZXBoZnMgdG8gaW5zdGFs
-bCwgSSBzdGlsbCBwcmVmZXIgaXTwn5iKDQoNCkkgd2lsbCBkZWJ1ZyBtb3JlIGFuZCB1cGRhdGUN
-Cg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQpTZW50IGZyb20gbXkgaVBob25lDQoNCj4g
-T24gSnVuIDQsIDIwMTYsIGF0IDc6MzUgUE0sIFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+
-IHdyb3RlOg0KPiANCj4+IE9uIFNhdCwgNCBKdW4gMjAxNiwgU29tbmF0aCBSb3kgd3JvdGU6DQo+
-PiBTYW1lIGNvbmYgZmlsZSB3b3JrZWQgZm9yIG1lIHNvbWV0aW1lcyBiYWNrLiBJIHRoaW5rIGRi
-IHBhdGgvd2FsIHBhdGggaXMgb3B0aW9uYWwgYW5kIGlmIHlvdSBkb24ndCBtZW50aW9uIGFueXRo
-aW5nLCBpdCB3aWxsIGNvZXhpc3Qgb24gdGhlIGJsb2NrIHBhcnRpdGlvbi4NCj4+IE5vdCBzdXJl
-IGlmIHRoaXMgaXMgc29tZXRoaW5nIGNoYW5nZWQgcmVjZW50bHkgdGhvdWdoLi4NCj4+IFRoZSB0
-cmFjZSBpcyBhbHNvIG5vdCBjb21wbGFpbmluZyBhYm91dCBkYiBwYXRoICwgaXQgaXMgZ2V0dGlu
-ZyBhIHNlZyBmYXVsdCB3aGlsZSBwYXJzaW5nIHJvY2tzZGIgb3B0aW9uLg0KPiANCj4gSG1tLCBJ
-IGhhdmVuJ3Qgc2VlbiB0aGlzLg0KPiANCj4gTm90ZSB0aGF0IHlvdSBkb24ndCBuZWVkICdkZXZz
-Jy4gIEFuZCB5b3UncmUgcmlnaHQgdGhhdCBqdXN0IHNwZWNpZnlpbmcgDQo+IHRoZSBibG9jayBw
-YXRoIGlzIGVub3VnaC4gIElmIHlvdSdyZSBkb2luZyBhIG1hbnVhbCBidWlsZCwgaXMgaXQgDQo+
-IHBvc3NpYmxlIHlvdSdyZSBkeW5hbWljYWxseSBsaW5raW5nIHJvY2tzZGIgb3Igc29tZXRoaW5n
-Pw0KPiANCj4gc2FnZQ0KPiANCj4+IA0KPj4gVGhhbmtzICYgUmVnYXJkcw0KPj4gU29tbmF0aA0K
-Pj4gDQo+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogSmlhbmppYW4gSHVv
-IFttYWlsdG86c2FtdWVsLmh1b0BnbWFpbC5jb21dIA0KPj4gU2VudDogRnJpZGF5LCBKdW5lIDAz
-LCAyMDE2IDk6MjkgUE0NCj4+IFRvOiBTb21uYXRoIFJveQ0KPj4gQ2M6IFNhZ2UgV2VpbCAoc2Fn
-ZUBuZXdkcmVhbS5uZXQpOyBjZXBoLWRldmVsDQo+PiBTdWJqZWN0OiBSZTogQmx1ZXN0b3JlIGNy
-YXNoIGluIG1rZnMNCj4+IA0KPj4+IE9uIEZyaSwgSnVuIDMsIDIwMTYgYXQgNzoxNiBQTSwgU29t
-bmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4+PiBTYWdlLA0KPj4+
-IExhdGVzdCBjb2RlIGluIEJsdWVzdG9yZSBpcyBjcmFzaGluZyBvbiBtZSBkdXJpbmcgbWtmcy4g
-SGVyZSBpcyB0aGUgZHVtcC4NCj4+PiANCj4+PiBjZXBoIHZlcnNpb24gMTAuMi4wLTE4MDktZ2Fj
-OGM0MGYgDQo+Pj4gKGFjOGM0MGYzZTMyNTc1MTdmNzFkMmFmOGJkMjZkY2QyNjQ4ODdiN2YpDQo+
-Pj4gMTogKCgpKzB4OTllNjVlKSBbMHg1NWNmNTI2MzU2NWVdDQo+Pj4gMjogKCgpKzB4MTEzZDAp
-IFsweDdmMzIzNTI2ZjNkMF0NCj4+PiAzOiANCj4+PiAocm9ja3NkYjo6Q29sdW1uRmFtaWx5T3B0
-aW9uczo6Q29sdW1uRmFtaWx5T3B0aW9ucyhyb2Nrc2RiOjpPcHRpb25zIA0KPj4+IGNvbnN0Jikr
-MHg1OSkgWzB4NTVjZjUyNWQ0Y2U5XQ0KPj4+IDQ6IChyb2Nrc2RiOjpHZXRPcHRpb25zRnJvbVN0
-cmluZyhyb2Nrc2RiOjpPcHRpb25zIGNvbnN0JiwgDQo+Pj4gc3RkOjpfX2N4eDExOjpiYXNpY19z
-dHJpbmc8Y2hhciwgc3RkOjpjaGFyX3RyYWl0czxjaGFyPiwgDQo+Pj4gc3RkOjphbGxvY2F0b3I8
-Y2hhcj4gPiBjb25zdCYsIHJvY2tzZGI6Ok9wdGlvbnMqKSsweDE1YSkgDQo+Pj4gWzB4NTVjZjUy
-NWRjNzRhXQ0KPj4+IDU6IA0KPj4+IChSb2Nrc0RCU3RvcmU6OlBhcnNlT3B0aW9uc0Zyb21TdHJp
-bmcoc3RkOjpfX2N4eDExOjpiYXNpY19zdHJpbmc8Y2hhciwgDQo+Pj4gc3RkOjpjaGFyX3RyYWl0
-czxjaGFyPiwgc3RkOjphbGxvY2F0b3I8Y2hhcj4gPiwgDQo+Pj4gcm9ja3NkYjo6T3B0aW9ucyYp
-KzB4MjJlKSBbMHg1NWNmNTI0ZjU4YmVdDQo+Pj4gNjogKFJvY2tzREJTdG9yZTo6aW5pdChzdGQ6
-Ol9fY3h4MTE6OmJhc2ljX3N0cmluZzxjaGFyLCANCj4+PiBzdGQ6OmNoYXJfdHJhaXRzPGNoYXI+
-LCBzdGQ6OmFsbG9jYXRvcjxjaGFyPiA+KSsweDc3KSBbMHg1NWNmNTI0ZjVmMTddDQo+Pj4gNzog
-KEJsdWVTdG9yZTo6X29wZW5fZGIoYm9vbCkrMHgyNzQpIFsweDU1Y2Y1MjM0YjllNF0NCj4+PiA4
-OiAoQmx1ZVN0b3JlOjpta2ZzKCkrMHg4OTkpIFsweDU1Y2Y1MjM2MWFkOV0NCj4+PiA5OiAoT1NE
-Ojpta2ZzKENlcGhDb250ZXh0KiwgT2JqZWN0U3RvcmUqLCANCj4+PiBzdGQ6Ol9fY3h4MTE6OmJh
-c2ljX3N0cmluZzxjaGFyLCBzdGQ6OmNoYXJfdHJhaXRzPGNoYXI+LCANCj4+PiBzdGQ6OmFsbG9j
-YXRvcjxjaGFyPiA+IGNvbnN0JiwgdXVpZF9kLCBpbnQpKzB4MTE3KSBbMHg1NWNmNTIwMDE0Mjdd
-DQo+Pj4gMTA6IChtYWluKCkrMHgxMDAzKSBbMHg1NWNmNTFmOWYyZTNdDQo+Pj4gMTE6IChfX2xp
-YmNfc3RhcnRfbWFpbigpKzB4ZjApIFsweDdmMzIzMzFmYTgzMF0NCj4+PiAxMjogKF9zdGFydCgp
-KzB4MjkpIFsweDU1Y2Y1MWZlMjcxOV0NCj4+PiBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFi
-bGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1dGFibGU+YCBpcyBuZWVkZWQgdG8gaW50ZXJwcmV0
-IHRoaXMuDQo+Pj4gDQo+Pj4gDQo+Pj4gSSBhbSB1c2luZyB0aGUgZm9sbG93aW5nIG9wdGlvbiA6
-DQo+Pj4gDQo+Pj4gICAgICAgZGV2cyA9IC9kZXYvc2RiMQ0KPj4+ICAgICAgIGJsdWVzdG9yZV9i
-bG9ja19wYXRoID0gL2Rldi9zZGIyDQo+Pj4gDQo+Pj4gQW0gSSBtaXNzaW5nIGFueXRoaW5nID8N
-Cj4+IA0KPj4gVGhpcyBpcyB3aGF0IE1hcmsgcG9zdGVkIGxhc3QgdGltZSwgeW91IGZvcmdvdCBk
-YiBwYXRoPw0KPj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2J0L2Jsb2IvbWFzdGVyL2V4YW1w
-bGUvYmx1ZXN0b3JlL2NlcGguY29uZi5ibHVlc3RvcmVfZXhhbXBsZQ0KPj4+IA0KPj4+IFRoYW5r
-cyAmIFJlZ2FyZHMNCj4+PiBTb21uYXRoDQo+Pj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlv
-biBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBv
-bmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92
-ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNp
-cGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
-cyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRp
-c3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGli
-aXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBw
-bGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24g
-YWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlz
-IG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0
-cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4+IC0tDQo+Pj4gVG8gdW5zdWJzY3JpYmUgZnJv
-bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPj4+
-IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1v
-cmUgbWFqb3Jkb21vIA0KPj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0KPj4gTj8/Pz8/cj8/eT8/Pz8/P1g/P8endj8/Pyneunsubj8/Pz8/ej9d
-ej8/Pz9heT8gyofamT8/aiA/P2Y/Pz9oPz8/Pz8gP3c/Pz8gPz8/ajordj8/P3c/Pz8/Pz8/PyA/
-Pz8/elorPz8/Pz8/P2oiPz8/P2kNCg==
+Thanks Adam and Sage! As a follow-up, I posted
+https://github.com/ceph/ceph/pull/9476.
+
+On Sat, Jun 4, 2016 at 1:43 AM, Sage Weil <sage@newdream.net> wrote:
+> On Fri, 3 Jun 2016, Adam C. Emerson wrote:
+>> On 04/06/2016, kefu chai wrote:
+>> > Hi Cephers,
+>> >
+>> > As your know, we are trying to ditch autotools and moving to the cmake
+>> > building system. Currently, we ship both static (.a) and shared
+>> > libraries (.so) and their .la files in
+>> > lib{rbd,rgw,rados,cephfs,radosstriper}-dev debian packages, but only
+>> > package the shared libraries in rpm packages. When working on the
+>> > cmake, I find it's a little bit tricky to prepare both static and
+>> > shared libraries in cmake, see [1].
+>> >
+>> > So questions:
+>> >
+>> > - Is it fine if we don't ship static libraries any more in the *-dev
+>> > .deb packages just like .rpms?
+>>
+>> Debian policy does not, to my understanding, require us to provide
+>> static libraries. It demands only that if we have them they should be
+>> in the -devel package.
+>>
+>> All other things being equal I have a soft preference to ship static
+>> libraries.
+>>
+>> All other things are not equal.
+>
+> I'm also happy to drop the static libraries if it makes life easier.  We
+> can also do the work to add them back later if there is a compelling need.
+> That seems pretty unlikely!
+>
+> sage
+
+
+
+-- 
+Regards
+Kefu Chai
