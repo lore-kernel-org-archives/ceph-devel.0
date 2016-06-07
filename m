@@ -1,236 +1,47 @@
-From: Corentin Bonneton <list-Ir4F46R2WEs@public.gmane.org>
-Subject: Re: un-even data filled on OSDs
-Date: Tue, 7 Jun 2016 15:52:38 +0200
-Message-ID: <1F4849EF-DC23-468C-9008-7F1CCEE50F36@titin.fr>
-References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com>
-	<alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com>
-	<CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com>
-	<alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com>
-	<CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
-	<alpine.DEB.2.11.1606070921430.6221@cpach.fuggernut.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: multipart/mixed; boundary="===============1161597136=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1606070921430.6221-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
-
---===============1161597136==
-Content-Type: multipart/alternative; boundary="Apple-Mail=_3ED17459-A8FA-488B-A0E2-B45D95902F9A"
-
-
---Apple-Mail=_3ED17459-A8FA-488B-A0E2-B45D95902F9A
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=utf-8
-
-Hello,
-You how much your PG pools since he first saw you have left too big.
-
---
-Cordialement,
-Corentin BONNETON
-
-
-> Le 7 juin 2016 =C3=A0 15:21, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> a =C3=A9crit =
-:
->=20
-> On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
->> OK, understood...
->> To fix the nearfull warn, I am reducing the weight of a specific OSD,
->> which filled >85%..
->> Is this work-around advisable?
->=20
-> Sure.  This is what reweight-by-utilization does for you, but=20
-> automatically.
->=20
-> sage
->=20
->>=20
->> Thanks
->> Swami
->>=20
->> On Tue, Jun 7, 2016 at 6:37 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
->>> On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
->>>> Hi Sage,
->>>>> Jewel and the latest hammer point release have an improved
->>>>> reweight-by-utilization (ceph osd test-reweight-by-utilization ... =
-to dry
->>>>> run) to correct this.
->>>>=20
->>>> Thank you....But not planning to upgrade the cluster soon.
->>>> So, in this case - are there any tunable options will help? like
->>>> "crush tunable optimal" or so?
->>>> OR any other configuration options change will help?
->>>=20
->>> Firefly also has reweight-by-utilization... it's just a bit less =
-friendly
->>> than the newer versions.  CRUSH tunables don't generally help here =
-unless
->>> you have lots of OSDs that are down+out.
->>>=20
->>> Note that firefly is no longer supported.
->>>=20
->>> sage
->>>=20
->>>=20
->>>>=20
->>>>=20
->>>> Thanks
->>>> Swami
->>>>=20
->>>>=20
->>>> On Tue, Jun 7, 2016 at 6:00 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> =
-wrote:
->>>>> On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
->>>>>> Hello,
->>>>>> I have aorund 100 OSDs in my ceph cluster. In this a few OSDs =
-filled
->>>>>> with >85% of data and few OSDs filled with ~60%-70% of data.
->>>>>>=20
->>>>>> Any reason why the unevenly OSDs filling happned? do I need to =
-any
->>>>>> tweaks on configuration to fix the above? Please advise.
->>>>>>=20
->>>>>> PS: Ceph version is - 0.80.7
->>>>>=20
->>>>> Jewel and the latest hammer point release have an improved
->>>>> reweight-by-utilization (ceph osd test-reweight-by-utilization ... =
-to dry
->>>>> run) to correct this.
->>>>>=20
->>>>> sage
->>>>>=20
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe =
-ceph-devel" in
->>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>=20
->>>>=20
->>=20
->>=20
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
-
---Apple-Mail=_3ED17459-A8FA-488B-A0E2-B45D95902F9A
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/html;
-	charset=utf-8
-
-<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html =
-charset=3Dutf-8"></head><body style=3D"word-wrap: break-word; =
--webkit-nbsp-mode: space; -webkit-line-break: after-white-space;" =
-class=3D""><div class=3D"">Hello,</div><div class=3D"">You how much your =
-PG pools since he first saw you have left too big.</div><div =
-class=3D""><br class=3D""></div><div class=3D"">
-<div style=3D"color: rgb(0, 0, 0); letter-spacing: normal; orphans: =
-auto; text-align: start; text-indent: 0px; text-transform: none; =
-white-space: normal; widows: auto; word-spacing: 0px; =
--webkit-text-stroke-width: 0px; word-wrap: break-word; =
--webkit-nbsp-mode: space; -webkit-line-break: after-white-space;" =
-class=3D""><div style=3D"color: rgb(0, 0, 0); letter-spacing: normal; =
-orphans: auto; text-align: start; text-indent: 0px; text-transform: =
-none; white-space: normal; widows: auto; word-spacing: 0px; =
--webkit-text-stroke-width: 0px; word-wrap: break-word; =
--webkit-nbsp-mode: space; -webkit-line-break: after-white-space;" =
-class=3D""><div style=3D"color: rgb(0, 0, 0); letter-spacing: normal; =
-orphans: auto; text-align: start; text-indent: 0px; text-transform: =
-none; white-space: normal; widows: auto; word-spacing: 0px; =
--webkit-text-stroke-width: 0px; word-wrap: break-word; =
--webkit-nbsp-mode: space; -webkit-line-break: after-white-space;" =
-class=3D""><div class=3D"">--</div><div class=3D"">Cordialement,</div><div=
- class=3D"">Corentin BONNETON</div><div class=3D""><br =
-class=3D""></div></div></div></div>
-</div>
-<br class=3D""><div style=3D""><blockquote type=3D"cite" class=3D""><div =
-class=3D"">Le 7 juin 2016 =C3=A0 15:21, Sage Weil &lt;<a =
-href=3D"mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org" class=3D"">sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org</a>&gt; a =
-=C3=A9crit :</div><br class=3D"Apple-interchange-newline"><div =
-class=3D""><div class=3D"">On Tue, 7 Jun 2016, M Ranga Swami Reddy =
-wrote:<br class=3D""><blockquote type=3D"cite" class=3D"">OK, =
-understood...<br class=3D"">To fix the nearfull warn, I am reducing the =
-weight of a specific OSD,<br class=3D"">which filled &gt;85%..<br =
-class=3D"">Is this work-around advisable?<br class=3D""></blockquote><br =
-class=3D"">Sure. &nbsp;This is what reweight-by-utilization does for =
-you, but <br class=3D"">automatically.<br class=3D""><br =
-class=3D"">sage<br class=3D""><br class=3D""><blockquote type=3D"cite" =
-class=3D""><br class=3D"">Thanks<br class=3D"">Swami<br class=3D""><br =
-class=3D"">On Tue, Jun 7, 2016 at 6:37 PM, Sage Weil &lt;<a =
-href=3D"mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org" class=3D"">sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org</a>&gt; =
-wrote:<br class=3D""><blockquote type=3D"cite" class=3D"">On Tue, 7 Jun =
-2016, M Ranga Swami Reddy wrote:<br class=3D""><blockquote type=3D"cite" =
-class=3D"">Hi Sage,<br class=3D""><blockquote type=3D"cite" =
-class=3D"">Jewel and the latest hammer point release have an improved<br =
-class=3D"">reweight-by-utilization (ceph osd =
-test-reweight-by-utilization ... to dry<br class=3D"">run) to correct =
-this.<br class=3D""></blockquote><br class=3D"">Thank you....But not =
-planning to upgrade the cluster soon.<br class=3D"">So, in this case - =
-are there any tunable options will help? like<br class=3D"">"crush =
-tunable optimal" or so?<br class=3D"">OR any other configuration options =
-change will help?<br class=3D""></blockquote><br class=3D"">Firefly also =
-has reweight-by-utilization... it's just a bit less friendly<br =
-class=3D"">than the newer versions. &nbsp;CRUSH tunables don't generally =
-help here unless<br class=3D"">you have lots of OSDs that are =
-down+out.<br class=3D""><br class=3D"">Note that firefly is no longer =
-supported.<br class=3D""><br class=3D"">sage<br class=3D""><br =
-class=3D""><br class=3D""><blockquote type=3D"cite" class=3D""><br =
-class=3D""><br class=3D"">Thanks<br class=3D"">Swami<br class=3D""><br =
-class=3D""><br class=3D"">On Tue, Jun 7, 2016 at 6:00 PM, Sage Weil =
-&lt;<a href=3D"mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org" =
-class=3D"">sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org</a>&gt; wrote:<br class=3D""><blockquote =
-type=3D"cite" class=3D"">On Tue, 7 Jun 2016, M Ranga Swami Reddy =
-wrote:<br class=3D""><blockquote type=3D"cite" class=3D"">Hello,<br =
-class=3D"">I have aorund 100 OSDs in my ceph cluster. In this a few OSDs =
-filled<br class=3D"">with &gt;85% of data and few OSDs filled with =
-~60%-70% of data.<br class=3D""><br class=3D"">Any reason why the =
-unevenly OSDs filling happned? do I need to any<br class=3D"">tweaks on =
-configuration to fix the above? Please advise.<br class=3D""><br =
-class=3D"">PS: Ceph version is - 0.80.7<br class=3D""></blockquote><br =
-class=3D"">Jewel and the latest hammer point release have an improved<br =
-class=3D"">reweight-by-utilization (ceph osd =
-test-reweight-by-utilization ... to dry<br class=3D"">run) to correct =
-this.<br class=3D""><br class=3D"">sage<br class=3D""><br =
-class=3D""></blockquote>--<br class=3D"">To unsubscribe from this list: =
-send the line "unsubscribe ceph-devel" in<br class=3D"">the body of a =
-message to <a href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" =
-class=3D"">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br class=3D"">More majordomo =
-info at &nbsp;<a href=3D"http://vger.kernel.org/majordomo-info.html" =
-class=3D"">http://vger.kernel.org/majordomo-info.html</a><br =
-class=3D""><br class=3D""><br class=3D""></blockquote></blockquote><br =
-class=3D""><br =
-class=3D""></blockquote>_______________________________________________<br=
- class=3D"">ceph-users mailing list<br class=3D""><a =
-href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" =
-class=3D"">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br =
-class=3D"">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com<br =
-class=3D""></div></div></blockquote></div><br class=3D""></body></html>=
-
---Apple-Mail=_3ED17459-A8FA-488B-A0E2-B45D95902F9A--
-
---===============1161597136==
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Anybody else hitting this panic in latest master with bluestore?
+Date: Tue, 7 Jun 2016 14:23:07 +0000
+Message-ID: <BL2PR02MB2115DE873C6CC9FCC0C3454CF45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <CY1PR0201MB1820F45DA0E891966F2CBC42855D0@CY1PR0201MB1820.namprd02.prod.outlook.com>
+ <BL2PR02MB2115D774BB2D4CFC43F8C847F45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <8dd167e2-89c2-84dc-fee1-216be0dc6392@redhat.com>
+ <alpine.DEB.2.11.1606070903500.6221@cpach.fuggernut.com>
+Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bn1on0095.outbound.protection.outlook.com ([157.56.110.95]:60628
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755133AbcFGOXL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 10:23:11 -0400
+In-Reply-To: <alpine.DEB.2.11.1606070903500.6221@cpach.fuggernut.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, Mark Nelson <mnelson@redhat.com>
+Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Sage,
+I did a global 'make clean' before build, isn't that sufficient ? Still need to go to rocksdb folder and clean ?
 
---===============1161597136==--
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net]
+Sent: Tuesday, June 07, 2016 6:06 AM
+To: Mark Nelson
+Cc: Somnath Roy; Ramesh Chander; ceph-devel
+Subject: Re: Anybody else hitting this panic in latest master with bluestore?
+
+On Tue, 7 Jun 2016, Mark Nelson wrote:
+> I believe this is due to the rocksdb submodule update in PR #9466.
+> I'm working on tracking down the commit in rocksdb that's causing it.
+
+Is it possible that the problem is that your build *didn't* update rocksdb?
+
+The ceph makefile isn't smart enough to notice changes in the rocksdb/ dir and rebuild.  You have to 'cd rocksdb ; make clean ; cd ..' after the submodule updates to get a fresh build.
+
+Maybe you didn't do that, and some of the ceph code is build using the new headers and data structures that don't match the previously compiled rocksdb code?
+
+sage
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
