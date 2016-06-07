@@ -1,80 +1,86 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: new scrub and repair discussion
-Date: Tue, 7 Jun 2016 21:13:27 +0800
-Message-ID: <CAJE9aOPp2m38Rr7DjccHSzOVSwGipp4Hr4wVdnVpg-Utq01=hg@mail.gmail.com>
-References: <CA+cZ7sioiiEVVC0G9fkU1iF8J4hAPRuYYhOQ=5pgtg-n3q-iPw@mail.gmail.com>
- <CAJE9aOOrh6LwTAawAOkFZwH+r5VVDUdMBaynxg4VMwpGqDPRJA@mail.gmail.com>
- <CAJE9aOMDLyfOVn-n18m3Ftqc3G=N-71we9qiUuhBSX+qnJBF9Q@mail.gmail.com>
- <CAN=+7FVsVFW_omt2P6HgNsCGtOh25mnOpnqCRfctY+wRrWvyrw@mail.gmail.com>
- <CAJE9aONjDEt3vUAEYJc_oBwcv8LUy-iWA0mMtY3-EvkyrFBXCg@mail.gmail.com> <CAN=+7FVA-H1oxpS7p-sZVQobPmJwoiV0hUO8ugNTB-2M-OiSwg@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: un-even data filled on OSDs
+Date: Tue, 7 Jun 2016 09:21:58 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606070921430.6221@cpach.fuggernut.com>
+References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com> <alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com> <CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com> <alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com>
+ <CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:33312 "EHLO
-	mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752023AbcFGNN3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 09:13:29 -0400
-Received: by mail-yw0-f179.google.com with SMTP id h19so169098495ywc.0
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2016 06:13:29 -0700 (PDT)
-In-Reply-To: <CAN=+7FVA-H1oxpS7p-sZVQobPmJwoiV0hUO8ugNTB-2M-OiSwg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:43387 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932163AbcFGNVd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 09:21:33 -0400
+In-Reply-To: <CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: M Ranga Swami Reddy <swamireddy@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-On Thu, May 26, 2016 at 1:37 AM, Samuel Just <sjust@redhat.com> wrote:
-> On Fri, May 20, 2016 at 4:30 AM, kefu chai <tchaikov@gmail.com> wrote:
->> On Fri, May 20, 2016 at 1:55 AM, Samuel Just <sjust@redhat.com> wrote:
->>> How would this work for an ec pool?  Maybe the osd argument should be
->>> a set of valid peers?
->>
->> maybe in the case of ec pool, we should ignore the osd argument.
->>
->> <quote from="http://pad.ceph.com/p/scrub_repair">
->> david points out that for EC pools, don't allow incorrect shards to be
->> selected as correct
->> - admin might decide to delete an object if it can't exist
->> - similar to unfound object case
->> - repair should have a use-your-best-judgement flag -- mandatory for
->> ec (if not deleting the object)
->> - for ec, if we want to read a shard, need to specify the shard id as
->> well since an osd might have two shards
->>   - request would indicate the shard
->> </quote>
->>
->> because the ec subread does not return the payload if the size or the
->> digest fails to match, and instead, an EIO is returned. on the primary
->> side, ECBackend::handle_sub_read_reply() will send more subread ops to
->> the shard(s) which is yet used if it is unable to reconstruct the
->> requested extent with shards already returned. if we want to
->> explicitly exclude the "bad" shards from being used, maybe the
->> simplest way is to remove it before calling repair-copy. and we can
->> offer an API for removing a shard. but I doubt that we need to do
->> this. as the chance of having a corrupted shard whose checksum matches
->> with its digest stored in its object-info xattr,  is very small. and
->> maybe we fix a corrupted shard in ec pool by reading the impacted
->> object, and then overwriting the original copy with the reconstructed
->> one from the good shards.
->
-> I think it would be simpler to just allow the repair_write call to
-> specify a set of bad shards.  For replicated pools, we simply choose
-> one which is not in that set.  For EC pools, we use that information
-> to avoid bad shards.
+On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
+> OK, understood...
+> To fix the nearfull warn, I am reducing the weight of a specific OSD,
+> which filled >85%..
+> Is this work-around advisable?
 
-for the replicated pool, will choose a random replica from the acting set
-as long as it's not listed in the black list as the authenticated copy of the
-repair.
+Sure.  This is what reweight-by-utilization does for you, but 
+automatically.
 
-for the ec pool, the OSD does not return shards with wrong digest at all
-when handling sub read requests. so we should ignore the digest mismatch
-error when reading shards. because:
- - we mark a shard inconsistent if its digest does not match with the
-one stored in the shard's hash_info. (please note that each shard has
-the digests of all shards of that object).
- - the user could put the consistent shard reported by
-list-inconsistent-obj into the blacklist. it's a little bit scary
-though.
+sage
 
--- 
-Regards
-Kefu Chai
+> 
+> Thanks
+> Swami
+> 
+> On Tue, Jun 7, 2016 at 6:37 PM, Sage Weil <sage@newdream.net> wrote:
+> > On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
+> >> Hi Sage,
+> >> >Jewel and the latest hammer point release have an improved
+> >> >reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
+> >> > run) to correct this.
+> >>
+> >> Thank you....But not planning to upgrade the cluster soon.
+> >> So, in this case - are there any tunable options will help? like
+> >> "crush tunable optimal" or so?
+> >> OR any other configuration options change will help?
+> >
+> > Firefly also has reweight-by-utilization... it's just a bit less friendly
+> > than the newer versions.  CRUSH tunables don't generally help here unless
+> > you have lots of OSDs that are down+out.
+> >
+> > Note that firefly is no longer supported.
+> >
+> > sage
+> >
+> >
+> >>
+> >>
+> >> Thanks
+> >> Swami
+> >>
+> >>
+> >> On Tue, Jun 7, 2016 at 6:00 PM, Sage Weil <sage@newdream.net> wrote:
+> >> > On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
+> >> >> Hello,
+> >> >> I have aorund 100 OSDs in my ceph cluster. In this a few OSDs filled
+> >> >> with >85% of data and few OSDs filled with ~60%-70% of data.
+> >> >>
+> >> >> Any reason why the unevenly OSDs filling happned? do I need to any
+> >> >> tweaks on configuration to fix the above? Please advise.
+> >> >>
+> >> >> PS: Ceph version is - 0.80.7
+> >> >
+> >> > Jewel and the latest hammer point release have an improved
+> >> > reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
+> >> > run) to correct this.
+> >> >
+> >> > sage
+> >> >
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> 
+> 
