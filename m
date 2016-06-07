@@ -1,65 +1,35 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: new scrub and repair discussion
-Date: Tue, 7 Jun 2016 09:03:23 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606070900330.6221@cpach.fuggernut.com>
-References: <CA+cZ7sioiiEVVC0G9fkU1iF8J4hAPRuYYhOQ=5pgtg-n3q-iPw@mail.gmail.com> <CAJE9aOOrh6LwTAawAOkFZwH+r5VVDUdMBaynxg4VMwpGqDPRJA@mail.gmail.com> <CAJE9aOMDLyfOVn-n18m3Ftqc3G=N-71we9qiUuhBSX+qnJBF9Q@mail.gmail.com> <CABZ+qqm5cxnHWJ_ZWm1qXgV_SBiwX7Zfr2fvbNrNfWc289xNGQ@mail.gmail.com>
- <CAJE9aOOa4yQ2wAHhVotog-Nvr9gQNBpwpiAwC1HXT3QLL_QJgA@mail.gmail.com>
+Subject: Re: Anybody else hitting this panic in latest master with
+ bluestore?
+Date: Tue, 7 Jun 2016 09:05:43 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606070903500.6221@cpach.fuggernut.com>
+References: <CY1PR0201MB1820F45DA0E891966F2CBC42855D0@CY1PR0201MB1820.namprd02.prod.outlook.com> <BL2PR02MB2115D774BB2D4CFC43F8C847F45D0@BL2PR02MB2115.namprd02.prod.outlook.com> <8dd167e2-89c2-84dc-fee1-216be0dc6392@redhat.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43264 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:43280 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755155AbcFGNC7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 09:02:59 -0400
-In-Reply-To: <CAJE9aOOa4yQ2wAHhVotog-Nvr9gQNBpwpiAwC1HXT3QLL_QJgA@mail.gmail.com>
+	with ESMTP id S1755102AbcFGNFS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 09:05:18 -0400
+In-Reply-To: <8dd167e2-89c2-84dc-fee1-216be0dc6392@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Dan van der Ster <dan@vanderster.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Ramesh Chander <Ramesh.Chander@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 7 Jun 2016, kefu chai wrote:
-> Dan, your comments are more like feature requests related to current
-> scrub, instead to the
-> new scrub/repair feature design. reply inlined.
-> 
-> On Fri, May 27, 2016 at 8:03 PM, Dan van der Ster <dan@vanderster.com> wrote:
-> > Hi all,
-> >
-> > I have some high-level feedback for scrub/repair. Apologies if some of
-> > these are already taken into account.
-> >
-> > 1. ceph pg cancel-scrub <pgid>: For a variety of reasons it would be
-> > useful to be able to cancel an ongoing (deep-)scrub on a PG. The
-> > no(deep-)scrub flags work more like a pause, but today if I want to
-> > stop a scrub it requires an OSD to be restarted.
-> 
-> it's a feature request. we did have this feature in rados API before, but it was
-> not exposed by the rados cli, and hence removed. if you'd like to get it back,
-> maybe you could file an issue over tracker?
-> 
-> > 2. ceph pg scrub/deep-scrub/repair often do not start because the
-> > master OSD cannot get a reservation on all the replica/EC-part OSDs
-> > (due to osd max scrubs). It is possible using some strange gymnastics
-> > to force PG to start repairing/scrubbing immediately, but those are
-> > not intuitive. IMHO, ceph pg scrub/deep-scrub/repair <pgid> should
-> > start immediately regardless of the 'osd max scrubs' value.
-> 
-> i think it's more a design decision.
+On Tue, 7 Jun 2016, Mark Nelson wrote:
+> I believe this is due to the rocksdb submodule update in PR #9466.  I'm
+> working on tracking down the commit in rocksdb that's causing it.
 
-My concern with this one is that lots of people have written their own 
-scrub scheduling scripts (e.g., because of scheduling problems in the 
-past).  I'd favor adding a --force-now option or separate command for an 
-immediate scrub.
+Is it possible that the problem is that your build *didn't* update 
+rocksdb?
 
-> > 5. Do we even need the shallow scrub functionality? I'm very curious
-> > how many problems that shallow scrubbing finds IRL compared with
-> > deep-scrubbing. Does ceph track these stats independently?
-> 
-> i don't have any numbers to support your theory or against it. but i think
-> having a light-weight scrub is necessary.
+The ceph makefile isn't smart enough to notice changes in the rocksdb/ dir 
+and rebuild.  You have to 'cd rocksdb ; make clean ; cd ..' after the 
+submodule updates to get a fresh build.
 
-The lightweight scrub mostly catches replication/recovery bugs.  It's 
-useful enough just as a testing/development tool.  I'm not sure that it is 
-as useful for users, though...
+Maybe you didn't do that, and some of the ceph code is build using the new 
+headers and data structures that don't match the previously compiled 
+rocksdb code?
 
 sage
