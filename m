@@ -1,60 +1,65 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Current Progress of librados rocksdb backend (06/06/2016)
-Date: Tue, 7 Jun 2016 08:57:03 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606070834340.6221@cpach.fuggernut.com>
-References: <CAGC6CocQHiK_-88=YDbRb=uSSqCaNpuRTcULRR8zL2T-EO3n+w@mail.gmail.com> <alpine.DEB.2.11.1606061613590.6221@cpach.fuggernut.com> <CAGC6Coe-DWjdQUcba1W4d1AdR7L7EkoamQLP496=u9S_F=517g@mail.gmail.com> <alpine.DEB.2.11.1606061631360.6221@cpach.fuggernut.com>
- <CAGC6Cod84CFTEtLuww7EYSPK4zkp912D+8iU8-xwxr492ZHM0Q@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: new scrub and repair discussion
+Date: Tue, 7 Jun 2016 09:03:23 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606070900330.6221@cpach.fuggernut.com>
+References: <CA+cZ7sioiiEVVC0G9fkU1iF8J4hAPRuYYhOQ=5pgtg-n3q-iPw@mail.gmail.com> <CAJE9aOOrh6LwTAawAOkFZwH+r5VVDUdMBaynxg4VMwpGqDPRJA@mail.gmail.com> <CAJE9aOMDLyfOVn-n18m3Ftqc3G=N-71we9qiUuhBSX+qnJBF9Q@mail.gmail.com> <CABZ+qqm5cxnHWJ_ZWm1qXgV_SBiwX7Zfr2fvbNrNfWc289xNGQ@mail.gmail.com>
+ <CAJE9aOOa4yQ2wAHhVotog-Nvr9gQNBpwpiAwC1HXT3QLL_QJgA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1969970302-1465304225=:6221"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60583 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754983AbcFGM4h (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 7 Jun 2016 08:56:37 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 535EC85541
-	for <ceph-devel@vger.kernel.org>; Tue,  7 Jun 2016 12:56:37 +0000 (UTC)
-In-Reply-To: <CAGC6Cod84CFTEtLuww7EYSPK4zkp912D+8iU8-xwxr492ZHM0Q@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:43264 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755155AbcFGNC7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 09:02:59 -0400
+In-Reply-To: <CAJE9aOOa4yQ2wAHhVotog-Nvr9gQNBpwpiAwC1HXT3QLL_QJgA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ryne Li <rli@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: kefu chai <tchaikov@gmail.com>
+Cc: Dan van der Ster <dan@vanderster.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-1969970302-1465304225=:6221
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-
-[Copying ceph-devel so that interest parties can take a look]
-
-On Tue, 7 Jun 2016, Ryne Li wrote:
-> Hi Sage,
-> Most code is in following file,
+On Tue, 7 Jun 2016, kefu chai wrote:
+> Dan, your comments are more like feature requests related to current
+> scrub, instead to the
+> new scrub/repair feature design. reply inlined.
 > 
->     https://github.com/ryneli/rocksdb/blob/master/utilities/env_librados.cc
+> On Fri, May 27, 2016 at 8:03 PM, Dan van der Ster <dan@vanderster.com> wrote:
+> > Hi all,
+> >
+> > I have some high-level feedback for scrub/repair. Apologies if some of
+> > these are already taken into account.
+> >
+> > 1. ceph pg cancel-scrub <pgid>: For a variety of reasons it would be
+> > useful to be able to cancel an ongoing (deep-)scrub on a PG. The
+> > no(deep-)scrub flags work more like a pause, but today if I want to
+> > stop a scrub it requires an OSD to be restarted.
 > 
-> Test code is in file,
+> it's a feature request. we did have this feature in rados API before, but it was
+> not exposed by the rados cli, and hence removed. if you'd like to get it back,
+> maybe you could file an issue over tracker?
 > 
->    https://github.com/ryneli/rocksdb/blob/master/utilities/env_librados_test
-> .cc
+> > 2. ceph pg scrub/deep-scrub/repair often do not start because the
+> > master OSD cannot get a reservation on all the replica/EC-part OSDs
+> > (due to osd max scrubs). It is possible using some strange gymnastics
+> > to force PG to start repairing/scrubbing immediately, but those are
+> > not intuitive. IMHO, ceph pg scrub/deep-scrub/repair <pgid> should
+> > start immediately regardless of the 'osd max scrubs' value.
+> 
+> i think it's more a design decision.
 
-This is great!  I opened a PR against our rocksdb repo just so I could 
-comment on the code:
+My concern with this one is that lots of people have written their own 
+scrub scheduling scripts (e.g., because of scheduling problems in the 
+past).  I'd favor adding a --force-now option or separate command for an 
+immediate scrub.
 
-	https://github.com/ceph/rocksdb/pull/8
+> > 5. Do we even need the shallow scrub functionality? I'm very curious
+> > how many problems that shallow scrubbing finds IRL compared with
+> > deep-scrubbing. Does ceph track these stats independently?
+> 
+> i don't have any numbers to support your theory or against it. but i think
+> having a light-weight scrub is necessary.
 
-I made a bunch of comments.  This looks like a great start!
-
-My main question is what the purpose of the xattr functions is.  I don't 
-see any callers, and I think an omap object for the directory mapping 
-should be sufficient.
-
-It looks like there are a bunch of Makefile changes in that commit that 
-probably don't need to be included?
+The lightweight scrub mostly catches replication/recovery bugs.  It's 
+useful enough just as a testing/development tool.  I'm not sure that it is 
+as useful for users, though...
 
 sage
---8323329-1969970302-1465304225=:6221--
