@@ -1,36 +1,49 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Anybody else hitting this panic in latest master with bluestore?
-Date: Tue, 7 Jun 2016 12:57:12 -0500
-Message-ID: <3c72bdf4-cdfc-42f6-e73f-e0100958b103@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Anybody else hitting this panic in latest master with bluestore?
+Date: Tue, 7 Jun 2016 18:05:47 +0000
+Message-ID: <BL2PR02MB2115DE38B988FE6C7B86884EF45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <CY1PR0201MB1820F45DA0E891966F2CBC42855D0@CY1PR0201MB1820.namprd02.prod.outlook.com>
  <BL2PR02MB2115D774BB2D4CFC43F8C847F45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
  <8dd167e2-89c2-84dc-fee1-216be0dc6392@redhat.com>
  <alpine.DEB.2.11.1606070903500.6221@cpach.fuggernut.com>
  <BL2PR02MB2115DE873C6CC9FCC0C3454CF45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <3c72bdf4-cdfc-42f6-e73f-e0100958b103@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44142 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1161260AbcFGR5Q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 7 Jun 2016 13:57:16 -0400
-In-Reply-To: <BL2PR02MB2115DE873C6CC9FCC0C3454CF45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from mail-bl2on0059.outbound.protection.outlook.com ([65.55.169.59]:61371
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1161260AbcFGSGB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 14:06:01 -0400
+In-Reply-To: <3c72bdf4-cdfc-42f6-e73f-e0100958b103@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@newdream.net>
+To: Mark Nelson <mnelson@redhat.com>, Sage Weil <sage@newdream.net>
 Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+I will try now and let you know.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Mark Nelson [mailto:mnelson@redhat.com] 
+Sent: Tuesday, June 07, 2016 10:57 AM
+To: Somnath Roy; Sage Weil
+Cc: Ramesh Chander; ceph-devel
+Subject: Re: Anybody else hitting this panic in latest master with bluestore?
 
 Hi Somnath,
 
-Did Sage's suggestion fix it for you?  In my tests rocksdb wasn't 
-building properly after an upstream commit to detect when jemalloc isn't 
+Did Sage's suggestion fix it for you?  In my tests rocksdb wasn't building properly after an upstream commit to detect when jemalloc isn't
 present:
 
 https://github.com/facebook/rocksdb/commit/0850bc514737a64dc8ca13de8510fcad4756616a
 
-I've submitted a fix that is now in master.  If you clean the rocksdb 
-folder and try again with current master I believe it should work for you.
+I've submitted a fix that is now in master.  If you clean the rocksdb folder and try again with current master I believe it should work for you.
 
 Thanks,
 Mark
