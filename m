@@ -1,15 +1,19 @@
-From: Markus Blank-Burian <burian-iYtK5bfT9M8b1SvskN2V4Q@public.gmane.org>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: un-even data filled on OSDs
-Date: Tue, 7 Jun 2016 17:11:17 +0200
-Message-ID: <DUB403-EAS83F104088C40DDED40FB02D55D0@phx.gbl>
-References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com>	<alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com>	<CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com>	<alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com>	<CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
+Date: Tue, 7 Jun 2016 22:15:27 +0530
+Message-ID: <CANA9Uk5e0apfRYeRDp9B8=ea7Wb=Cvn+oOhPETuLKRp5_qiGjg@mail.gmail.com>
+References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com>
+	<alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com>
+	<CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com>
+	<alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com>
+	<CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
 	<alpine.DEB.2.11.1606070921430.6221@cpach.fuggernut.com>
+	<1F4849EF-DC23-468C-9008-7F1CCEE50F36@titin.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1606070921430.6221-Wo5lQnKln9t9PHm/lf2LFUEOCMrvLtNR@public.gmane.org>
-Content-Language: de
+In-Reply-To: <1F4849EF-DC23-468C-9008-7F1CCEE50F36-Ir4F46R2WEs@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,105 +23,54 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: 'Sage Weil' <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, 'M Ranga Swami Reddy' <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: 'ceph-devel' <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, 'ceph-users' <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Corentin Bonneton <list-Ir4F46R2WEs@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hello Sage,
-
-are there any development plans to improve PG distribution to OSDs? 
-
-We use CephFS on Infernalis and objects are distributed very well across the
-PGs. But the automatic PG distribution creates large fluctuations, even in the
-simplest case for same-sized OSDs and a flat hierarchy using 3x replication.
-Testing with crushtool, we would need an unreasonable high number of PG/OSD to
-have a nearly-flat distribution.
-Reweighting the PGs with "ceph osd reweight" helped for our cache-pool since it
-has a flat hierarchy (one OSD/host). The EC pool on the other hand has a
-hierarchy with around 2-4 OSDs (1-4TB / OSD) per host and redundancy is
-distributed across hosts (6-8TB / host). I assume, there would be no way around
-tuning the host weights in the crush map in this case?
-
-Markus
-
------Original Message-----
-From: ceph-users [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Behalf Of Sage
-Weil
-Sent: Dienstag, 7. Juni 2016 15:22
-To: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>; ceph-users
-<ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Subject: Re: [ceph-users] un-even data filled on OSDs
-
-On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
-> OK, understood...
-> To fix the nearfull warn, I am reducing the weight of a specific OSD, 
-> which filled >85%..
-> Is this work-around advisable?
-
-Sure.  This is what reweight-by-utilization does for you, but automatically.
-
-sage
-
-> 
-> Thanks
-> Swami
-> 
-> On Tue, Jun 7, 2016 at 6:37 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> > On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
-> >> Hi Sage,
-> >> >Jewel and the latest hammer point release have an improved 
-> >> >reweight-by-utilization (ceph osd test-reweight-by-utilization ... 
-> >> >to dry
-> >> > run) to correct this.
-> >>
-> >> Thank you....But not planning to upgrade the cluster soon.
-> >> So, in this case - are there any tunable options will help? like 
-> >> "crush tunable optimal" or so?
-> >> OR any other configuration options change will help?
-> >
-> > Firefly also has reweight-by-utilization... it's just a bit less 
-> > friendly than the newer versions.  CRUSH tunables don't generally 
-> > help here unless you have lots of OSDs that are down+out.
-> >
-> > Note that firefly is no longer supported.
-> >
-> > sage
-> >
-> >
-> >>
-> >>
-> >> Thanks
-> >> Swami
-> >>
-> >>
-> >> On Tue, Jun 7, 2016 at 6:00 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> >> > On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
-> >> >> Hello,
-> >> >> I have aorund 100 OSDs in my ceph cluster. In this a few OSDs 
-> >> >> filled with >85% of data and few OSDs filled with ~60%-70% of data.
-> >> >>
-> >> >> Any reason why the unevenly OSDs filling happned? do I need to 
-> >> >> any tweaks on configuration to fix the above? Please advise.
-> >> >>
-> >> >> PS: Ceph version is - 0.80.7
-> >> >
-> >> > Jewel and the latest hammer point release have an improved 
-> >> > reweight-by-utilization (ceph osd test-reweight-by-utilization 
-> >> > ... to dry
-> >> > run) to correct this.
-> >> >
-> >> > sage
-> >> >
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe 
-> >> ceph-devel" in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org 
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> 
-> 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+SW4gbXkgY2x1c3RlcjoKIDM1MSBPU0RzIHdpdGggc2FtZSBzaXplIGFuZCA4MTkyIHBncyBwZXIg
+cG9vbC4gQW5kIDYwJSBSQVcgc3BhY2UgdXNlZC4KClRoYW5rcwpTd2FtaQoKCk9uIFR1ZSwgSnVu
+IDcsIDIwMTYgYXQgNzoyMiBQTSwgQ29yZW50aW4gQm9ubmV0b24gPGxpc3RAdGl0aW4uZnI+IHdy
+b3RlOgo+IEhlbGxvLAo+IFlvdSBob3cgbXVjaCB5b3VyIFBHIHBvb2xzIHNpbmNlIGhlIGZpcnN0
+IHNhdyB5b3UgaGF2ZSBsZWZ0IHRvbyBiaWcuCj4KPiAtLQo+IENvcmRpYWxlbWVudCwKPiBDb3Jl
+bnRpbiBCT05ORVRPTgo+Cj4KPiBMZSA3IGp1aW4gMjAxNiDDoCAxNToyMSwgU2FnZSBXZWlsIDxz
+YWdlQG5ld2RyZWFtLm5ldD4gYSDDqWNyaXQgOgo+Cj4gT24gVHVlLCA3IEp1biAyMDE2LCBNIFJh
+bmdhIFN3YW1pIFJlZGR5IHdyb3RlOgo+Cj4gT0ssIHVuZGVyc3Rvb2QuLi4KPiBUbyBmaXggdGhl
+IG5lYXJmdWxsIHdhcm4sIEkgYW0gcmVkdWNpbmcgdGhlIHdlaWdodCBvZiBhIHNwZWNpZmljIE9T
+RCwKPiB3aGljaCBmaWxsZWQgPjg1JS4uCj4gSXMgdGhpcyB3b3JrLWFyb3VuZCBhZHZpc2FibGU/
+Cj4KPgo+IFN1cmUuICBUaGlzIGlzIHdoYXQgcmV3ZWlnaHQtYnktdXRpbGl6YXRpb24gZG9lcyBm
+b3IgeW91LCBidXQKPiBhdXRvbWF0aWNhbGx5Lgo+Cj4gc2FnZQo+Cj4KPiBUaGFua3MKPiBTd2Ft
+aQo+Cj4gT24gVHVlLCBKdW4gNywgMjAxNiBhdCA2OjM3IFBNLCBTYWdlIFdlaWwgPHNhZ2VAbmV3
+ZHJlYW0ubmV0PiB3cm90ZToKPgo+IE9uIFR1ZSwgNyBKdW4gMjAxNiwgTSBSYW5nYSBTd2FtaSBS
+ZWRkeSB3cm90ZToKPgo+IEhpIFNhZ2UsCj4KPiBKZXdlbCBhbmQgdGhlIGxhdGVzdCBoYW1tZXIg
+cG9pbnQgcmVsZWFzZSBoYXZlIGFuIGltcHJvdmVkCj4gcmV3ZWlnaHQtYnktdXRpbGl6YXRpb24g
+KGNlcGggb3NkIHRlc3QtcmV3ZWlnaHQtYnktdXRpbGl6YXRpb24gLi4uIHRvIGRyeQo+IHJ1bikg
+dG8gY29ycmVjdCB0aGlzLgo+Cj4KPiBUaGFuayB5b3UuLi4uQnV0IG5vdCBwbGFubmluZyB0byB1
+cGdyYWRlIHRoZSBjbHVzdGVyIHNvb24uCj4gU28sIGluIHRoaXMgY2FzZSAtIGFyZSB0aGVyZSBh
+bnkgdHVuYWJsZSBvcHRpb25zIHdpbGwgaGVscD8gbGlrZQo+ICJjcnVzaCB0dW5hYmxlIG9wdGlt
+YWwiIG9yIHNvPwo+IE9SIGFueSBvdGhlciBjb25maWd1cmF0aW9uIG9wdGlvbnMgY2hhbmdlIHdp
+bGwgaGVscD8KPgo+Cj4gRmlyZWZseSBhbHNvIGhhcyByZXdlaWdodC1ieS11dGlsaXphdGlvbi4u
+LiBpdCdzIGp1c3QgYSBiaXQgbGVzcyBmcmllbmRseQo+IHRoYW4gdGhlIG5ld2VyIHZlcnNpb25z
+LiAgQ1JVU0ggdHVuYWJsZXMgZG9uJ3QgZ2VuZXJhbGx5IGhlbHAgaGVyZSB1bmxlc3MKPiB5b3Ug
+aGF2ZSBsb3RzIG9mIE9TRHMgdGhhdCBhcmUgZG93bitvdXQuCj4KPiBOb3RlIHRoYXQgZmlyZWZs
+eSBpcyBubyBsb25nZXIgc3VwcG9ydGVkLgo+Cj4gc2FnZQo+Cj4KPgo+Cj4gVGhhbmtzCj4gU3dh
+bWkKPgo+Cj4gT24gVHVlLCBKdW4gNywgMjAxNiBhdCA2OjAwIFBNLCBTYWdlIFdlaWwgPHNhZ2VA
+bmV3ZHJlYW0ubmV0PiB3cm90ZToKPgo+IE9uIFR1ZSwgNyBKdW4gMjAxNiwgTSBSYW5nYSBTd2Ft
+aSBSZWRkeSB3cm90ZToKPgo+IEhlbGxvLAo+IEkgaGF2ZSBhb3J1bmQgMTAwIE9TRHMgaW4gbXkg
+Y2VwaCBjbHVzdGVyLiBJbiB0aGlzIGEgZmV3IE9TRHMgZmlsbGVkCj4gd2l0aCA+ODUlIG9mIGRh
+dGEgYW5kIGZldyBPU0RzIGZpbGxlZCB3aXRoIH42MCUtNzAlIG9mIGRhdGEuCj4KPiBBbnkgcmVh
+c29uIHdoeSB0aGUgdW5ldmVubHkgT1NEcyBmaWxsaW5nIGhhcHBuZWQ/IGRvIEkgbmVlZCB0byBh
+bnkKPiB0d2Vha3Mgb24gY29uZmlndXJhdGlvbiB0byBmaXggdGhlIGFib3ZlPyBQbGVhc2UgYWR2
+aXNlLgo+Cj4gUFM6IENlcGggdmVyc2lvbiBpcyAtIDAuODAuNwo+Cj4KPiBKZXdlbCBhbmQgdGhl
+IGxhdGVzdCBoYW1tZXIgcG9pbnQgcmVsZWFzZSBoYXZlIGFuIGltcHJvdmVkCj4gcmV3ZWlnaHQt
+YnktdXRpbGl6YXRpb24gKGNlcGggb3NkIHRlc3QtcmV3ZWlnaHQtYnktdXRpbGl6YXRpb24gLi4u
+IHRvIGRyeQo+IHJ1bikgdG8gY29ycmVjdCB0aGlzLgo+Cj4gc2FnZQo+Cj4gLS0KPiBUbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
+ZXZlbCIgaW4KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
+Lm9yZwo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
+b3Jkb21vLWluZm8uaHRtbAo+Cj4KPgo+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX18KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20KPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgt
+dXNlcnMtY2VwaC5jb20KPgo+Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5j
+b20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29t
+Cg==
