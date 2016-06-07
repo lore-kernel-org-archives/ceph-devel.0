@@ -1,76 +1,62 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: un-even data filled on OSDs
-Date: Tue, 7 Jun 2016 22:15:27 +0530
-Message-ID: <CANA9Uk5e0apfRYeRDp9B8=ea7Wb=Cvn+oOhPETuLKRp5_qiGjg@mail.gmail.com>
-References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com>
-	<alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com>
-	<CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com>
-	<alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com>
-	<CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
-	<alpine.DEB.2.11.1606070921430.6221@cpach.fuggernut.com>
-	<1F4849EF-DC23-468C-9008-7F1CCEE50F36@titin.fr>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: Anybody else hitting this panic in latest master with bluestore?
+Date: Tue, 7 Jun 2016 12:57:12 -0500
+Message-ID: <3c72bdf4-cdfc-42f6-e73f-e0100958b103@redhat.com>
+References: <CY1PR0201MB1820F45DA0E891966F2CBC42855D0@CY1PR0201MB1820.namprd02.prod.outlook.com>
+ <BL2PR02MB2115D774BB2D4CFC43F8C847F45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <8dd167e2-89c2-84dc-fee1-216be0dc6392@redhat.com>
+ <alpine.DEB.2.11.1606070903500.6221@cpach.fuggernut.com>
+ <BL2PR02MB2115DE873C6CC9FCC0C3454CF45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1F4849EF-DC23-468C-9008-7F1CCEE50F36-Ir4F46R2WEs@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Corentin Bonneton <list-Ir4F46R2WEs@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:44142 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1161260AbcFGR5Q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 7 Jun 2016 13:57:16 -0400
+In-Reply-To: <BL2PR02MB2115DE873C6CC9FCC0C3454CF45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@newdream.net>
+Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SW4gbXkgY2x1c3RlcjoKIDM1MSBPU0RzIHdpdGggc2FtZSBzaXplIGFuZCA4MTkyIHBncyBwZXIg
-cG9vbC4gQW5kIDYwJSBSQVcgc3BhY2UgdXNlZC4KClRoYW5rcwpTd2FtaQoKCk9uIFR1ZSwgSnVu
-IDcsIDIwMTYgYXQgNzoyMiBQTSwgQ29yZW50aW4gQm9ubmV0b24gPGxpc3RAdGl0aW4uZnI+IHdy
-b3RlOgo+IEhlbGxvLAo+IFlvdSBob3cgbXVjaCB5b3VyIFBHIHBvb2xzIHNpbmNlIGhlIGZpcnN0
-IHNhdyB5b3UgaGF2ZSBsZWZ0IHRvbyBiaWcuCj4KPiAtLQo+IENvcmRpYWxlbWVudCwKPiBDb3Jl
-bnRpbiBCT05ORVRPTgo+Cj4KPiBMZSA3IGp1aW4gMjAxNiDDoCAxNToyMSwgU2FnZSBXZWlsIDxz
-YWdlQG5ld2RyZWFtLm5ldD4gYSDDqWNyaXQgOgo+Cj4gT24gVHVlLCA3IEp1biAyMDE2LCBNIFJh
-bmdhIFN3YW1pIFJlZGR5IHdyb3RlOgo+Cj4gT0ssIHVuZGVyc3Rvb2QuLi4KPiBUbyBmaXggdGhl
-IG5lYXJmdWxsIHdhcm4sIEkgYW0gcmVkdWNpbmcgdGhlIHdlaWdodCBvZiBhIHNwZWNpZmljIE9T
-RCwKPiB3aGljaCBmaWxsZWQgPjg1JS4uCj4gSXMgdGhpcyB3b3JrLWFyb3VuZCBhZHZpc2FibGU/
-Cj4KPgo+IFN1cmUuICBUaGlzIGlzIHdoYXQgcmV3ZWlnaHQtYnktdXRpbGl6YXRpb24gZG9lcyBm
-b3IgeW91LCBidXQKPiBhdXRvbWF0aWNhbGx5Lgo+Cj4gc2FnZQo+Cj4KPiBUaGFua3MKPiBTd2Ft
-aQo+Cj4gT24gVHVlLCBKdW4gNywgMjAxNiBhdCA2OjM3IFBNLCBTYWdlIFdlaWwgPHNhZ2VAbmV3
-ZHJlYW0ubmV0PiB3cm90ZToKPgo+IE9uIFR1ZSwgNyBKdW4gMjAxNiwgTSBSYW5nYSBTd2FtaSBS
-ZWRkeSB3cm90ZToKPgo+IEhpIFNhZ2UsCj4KPiBKZXdlbCBhbmQgdGhlIGxhdGVzdCBoYW1tZXIg
-cG9pbnQgcmVsZWFzZSBoYXZlIGFuIGltcHJvdmVkCj4gcmV3ZWlnaHQtYnktdXRpbGl6YXRpb24g
-KGNlcGggb3NkIHRlc3QtcmV3ZWlnaHQtYnktdXRpbGl6YXRpb24gLi4uIHRvIGRyeQo+IHJ1bikg
-dG8gY29ycmVjdCB0aGlzLgo+Cj4KPiBUaGFuayB5b3UuLi4uQnV0IG5vdCBwbGFubmluZyB0byB1
-cGdyYWRlIHRoZSBjbHVzdGVyIHNvb24uCj4gU28sIGluIHRoaXMgY2FzZSAtIGFyZSB0aGVyZSBh
-bnkgdHVuYWJsZSBvcHRpb25zIHdpbGwgaGVscD8gbGlrZQo+ICJjcnVzaCB0dW5hYmxlIG9wdGlt
-YWwiIG9yIHNvPwo+IE9SIGFueSBvdGhlciBjb25maWd1cmF0aW9uIG9wdGlvbnMgY2hhbmdlIHdp
-bGwgaGVscD8KPgo+Cj4gRmlyZWZseSBhbHNvIGhhcyByZXdlaWdodC1ieS11dGlsaXphdGlvbi4u
-LiBpdCdzIGp1c3QgYSBiaXQgbGVzcyBmcmllbmRseQo+IHRoYW4gdGhlIG5ld2VyIHZlcnNpb25z
-LiAgQ1JVU0ggdHVuYWJsZXMgZG9uJ3QgZ2VuZXJhbGx5IGhlbHAgaGVyZSB1bmxlc3MKPiB5b3Ug
-aGF2ZSBsb3RzIG9mIE9TRHMgdGhhdCBhcmUgZG93bitvdXQuCj4KPiBOb3RlIHRoYXQgZmlyZWZs
-eSBpcyBubyBsb25nZXIgc3VwcG9ydGVkLgo+Cj4gc2FnZQo+Cj4KPgo+Cj4gVGhhbmtzCj4gU3dh
-bWkKPgo+Cj4gT24gVHVlLCBKdW4gNywgMjAxNiBhdCA2OjAwIFBNLCBTYWdlIFdlaWwgPHNhZ2VA
-bmV3ZHJlYW0ubmV0PiB3cm90ZToKPgo+IE9uIFR1ZSwgNyBKdW4gMjAxNiwgTSBSYW5nYSBTd2Ft
-aSBSZWRkeSB3cm90ZToKPgo+IEhlbGxvLAo+IEkgaGF2ZSBhb3J1bmQgMTAwIE9TRHMgaW4gbXkg
-Y2VwaCBjbHVzdGVyLiBJbiB0aGlzIGEgZmV3IE9TRHMgZmlsbGVkCj4gd2l0aCA+ODUlIG9mIGRh
-dGEgYW5kIGZldyBPU0RzIGZpbGxlZCB3aXRoIH42MCUtNzAlIG9mIGRhdGEuCj4KPiBBbnkgcmVh
-c29uIHdoeSB0aGUgdW5ldmVubHkgT1NEcyBmaWxsaW5nIGhhcHBuZWQ/IGRvIEkgbmVlZCB0byBh
-bnkKPiB0d2Vha3Mgb24gY29uZmlndXJhdGlvbiB0byBmaXggdGhlIGFib3ZlPyBQbGVhc2UgYWR2
-aXNlLgo+Cj4gUFM6IENlcGggdmVyc2lvbiBpcyAtIDAuODAuNwo+Cj4KPiBKZXdlbCBhbmQgdGhl
-IGxhdGVzdCBoYW1tZXIgcG9pbnQgcmVsZWFzZSBoYXZlIGFuIGltcHJvdmVkCj4gcmV3ZWlnaHQt
-YnktdXRpbGl6YXRpb24gKGNlcGggb3NkIHRlc3QtcmV3ZWlnaHQtYnktdXRpbGl6YXRpb24gLi4u
-IHRvIGRyeQo+IHJ1bikgdG8gY29ycmVjdCB0aGlzLgo+Cj4gc2FnZQo+Cj4gLS0KPiBUbyB1bnN1
-YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
-ZXZlbCIgaW4KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
-Lm9yZwo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
-b3Jkb21vLWluZm8uaHRtbAo+Cj4KPgo+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNA
-bGlzdHMuY2VwaC5jb20KPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgt
-dXNlcnMtY2VwaC5jb20KPgo+Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5j
-b20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29t
-Cg==
+Hi Somnath,
+
+Did Sage's suggestion fix it for you?  In my tests rocksdb wasn't 
+building properly after an upstream commit to detect when jemalloc isn't 
+present:
+
+https://github.com/facebook/rocksdb/commit/0850bc514737a64dc8ca13de8510fcad4756616a
+
+I've submitted a fix that is now in master.  If you clean the rocksdb 
+folder and try again with current master I believe it should work for you.
+
+Thanks,
+Mark
+
+On 06/07/2016 09:23 AM, Somnath Roy wrote:
+> Sage,
+> I did a global 'make clean' before build, isn't that sufficient ? Still need to go to rocksdb folder and clean ?
+>
+>
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@newdream.net]
+> Sent: Tuesday, June 07, 2016 6:06 AM
+> To: Mark Nelson
+> Cc: Somnath Roy; Ramesh Chander; ceph-devel
+> Subject: Re: Anybody else hitting this panic in latest master with bluestore?
+>
+> On Tue, 7 Jun 2016, Mark Nelson wrote:
+>> I believe this is due to the rocksdb submodule update in PR #9466.
+>> I'm working on tracking down the commit in rocksdb that's causing it.
+>
+> Is it possible that the problem is that your build *didn't* update rocksdb?
+>
+> The ceph makefile isn't smart enough to notice changes in the rocksdb/ dir and rebuild.  You have to 'cd rocksdb ; make clean ; cd ..' after the submodule updates to get a fresh build.
+>
+> Maybe you didn't do that, and some of the ceph code is build using the new headers and data structures that don't match the previously compiled rocksdb code?
+>
+> sage
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
