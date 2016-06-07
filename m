@@ -1,35 +1,74 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Anybody else hitting this panic in latest master with
- bluestore?
-Date: Tue, 7 Jun 2016 09:05:43 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606070903500.6221@cpach.fuggernut.com>
-References: <CY1PR0201MB1820F45DA0E891966F2CBC42855D0@CY1PR0201MB1820.namprd02.prod.outlook.com> <BL2PR02MB2115D774BB2D4CFC43F8C847F45D0@BL2PR02MB2115.namprd02.prod.outlook.com> <8dd167e2-89c2-84dc-fee1-216be0dc6392@redhat.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: un-even data filled on OSDs
+Date: Tue, 7 Jun 2016 09:07:04 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com>
+References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com>
+	<alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com>
+	<CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43280 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755102AbcFGNFS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 09:05:18 -0400
-In-Reply-To: <8dd167e2-89c2-84dc-fee1-216be0dc6392@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Ramesh Chander <Ramesh.Chander@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, 7 Jun 2016, Mark Nelson wrote:
-> I believe this is due to the rocksdb submodule update in PR #9466.  I'm
-> working on tracking down the commit in rocksdb that's causing it.
+On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
+> Hi Sage,
+> >Jewel and the latest hammer point release have an improved
+> >reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
+> > run) to correct this.
+> 
+> Thank you....But not planning to upgrade the cluster soon.
+> So, in this case - are there any tunable options will help? like
+> "crush tunable optimal" or so?
+> OR any other configuration options change will help?
 
-Is it possible that the problem is that your build *didn't* update 
-rocksdb?
+Firefly also has reweight-by-utilization... it's just a bit less friendly 
+than the newer versions.  CRUSH tunables don't generally help here unless 
+you have lots of OSDs that are down+out.
 
-The ceph makefile isn't smart enough to notice changes in the rocksdb/ dir 
-and rebuild.  You have to 'cd rocksdb ; make clean ; cd ..' after the 
-submodule updates to get a fresh build.
-
-Maybe you didn't do that, and some of the ceph code is build using the new 
-headers and data structures that don't match the previously compiled 
-rocksdb code?
+Note that firefly is no longer supported.
 
 sage
+
+
+> 
+> 
+> Thanks
+> Swami
+> 
+> 
+> On Tue, Jun 7, 2016 at 6:00 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+> > On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
+> >> Hello,
+> >> I have aorund 100 OSDs in my ceph cluster. In this a few OSDs filled
+> >> with >85% of data and few OSDs filled with ~60%-70% of data.
+> >>
+> >> Any reason why the unevenly OSDs filling happned? do I need to any
+> >> tweaks on configuration to fix the above? Please advise.
+> >>
+> >> PS: Ceph version is - 0.80.7
+> >
+> > Jewel and the latest hammer point release have an improved
+> > reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
+> > run) to correct this.
+> >
+> > sage
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
