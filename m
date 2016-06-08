@@ -1,77 +1,99 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: unfound object problem
-Date: Tue, 7 Jun 2016 17:18:52 -0700
-Message-ID: <CAN=+7FUT_2w_QY0T8VZC3tdNkX6mUfmyvv6Sbo9_ZMn-Duht8A@mail.gmail.com>
-References: <CAKE=UQJxaZPms82=qZeceSCW2+okmSPVGJ12ML0gd2JPW2uEEQ@mail.gmail.com>
-	<CAJ4mKGZ9aWdDpoHeJ5cebxVn=j-vs9t2SnNBJHYYTHh-5b1E-g@mail.gmail.com>
-	<CAN=+7FVBf+gu03XX3nNzff5LzKVmj8-3NxDRPXO_D13gS0m+LQ@mail.gmail.com>
-	<CAKE=UQL=tdRv8CTjST9Ysw-K4_RXppWMWXFLFKdY=eTB_G9frw@mail.gmail.com>
-	<CAN=+7FXCyBUJaQA7=xe-1Rf5LgUy-9MoRQC8hR=OVrjdEcSFqg@mail.gmail.com>
+From: Blair Bethwaite <blair.bethwaite@gmail.com>
+Subject: Re: un-even data filled on OSDs
+Date: Wed, 8 Jun 2016 11:05:21 +1000
+Message-ID: <CA+z5DsznXSZQ2TQ9y3D0rj-fU4Yi=8GNOW89ZmwvHkvQada4cg@mail.gmail.com>
+References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com>
+ <alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com> <CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com>
+ <alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com> <CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f176.google.com ([209.85.216.176]:36166 "EHLO
-	mail-qt0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751375AbcFHAZZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 20:25:25 -0400
-Received: by mail-qt0-f176.google.com with SMTP id 37so21193241qtc.3
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2016 17:25:25 -0700 (PDT)
-In-Reply-To: <CAN=+7FXCyBUJaQA7=xe-1Rf5LgUy-9MoRQC8hR=OVrjdEcSFqg@mail.gmail.com>
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:36035 "EHLO
+	mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754055AbcFHBFm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 21:05:42 -0400
+Received: by mail-vk0-f49.google.com with SMTP id g67so4984025vkb.3
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2016 18:05:42 -0700 (PDT)
+In-Reply-To: <CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Rui Xie <jerry.xr86@gmail.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: M Ranga Swami Reddy <swamireddy@gmail.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-http://tracker.ceph.com/issues/16185
+Swami,
 
-So, it does seem to be a bug, and I've got a fix.  However, it's not
-clear to me that it would result in an unfound object.  It seems like
-it would result in a pg which should be down being allowed to peer or
-an actually unfound object being erroneously considered ok.  I'm not
-sure you've diagnosed the original issue correctly.  If you can
-reproduce, you should enable logging (debug osd = 20, debug filestore
-= 20, debug ms = 1) and go through the logs more carefully.
--Sam
+Try https://github.com/cernceph/ceph-scripts/blob/master/tools/crush-reweight-by-utilization.py,
+that'll work with Firefly and allow you to only tune down weight of a
+specific number of overfull OSDs.
 
-On Tue, Jun 7, 2016 at 7:52 AM, Samuel Just <sjust@redhat.com> wrote:
-> That does sound like a bug, I'll try to take a look today.
-> -Sam
+Cheers,
+
+On 7 June 2016 at 23:11, M Ranga Swami Reddy <swamireddy@gmail.com> wrote:
+> OK, understood...
+> To fix the nearfull warn, I am reducing the weight of a specific OSD,
+> which filled >85%..
+> Is this work-around advisable?
 >
-> On Mon, Jun 6, 2016 at 9:21 PM, Rui Xie <jerry.xr86@gmail.com> wrote:
->> Hi Sam
->>
->> we do not check pgtemp  map_epoch in preprocess_pgtemp and prepare_pgtemp.
->> old pgtemp messages with smaller map_epoch are prapared, and update
->> up_thru to smaller version.
->>
->> a lot of duplicate pgtemp messages there.
->>
->> 2016-06-07 6:07 GMT+08:00 Samuel Just <sjust@redhat.com>:
->>> I don't quite understand...  Can you explain the sequence of events in
->>> more detail?
->>> -Sam
+> Thanks
+> Swami
+>
+> On Tue, Jun 7, 2016 at 6:37 PM, Sage Weil <sage@newdream.net> wrote:
+>> On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
+>>> Hi Sage,
+>>> >Jewel and the latest hammer point release have an improved
+>>> >reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
+>>> > run) to correct this.
 >>>
->>> On Mon, Jun 6, 2016 at 2:14 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
->>>> On Sun, May 29, 2016 at 8:58 PM, Rui Xie <jerry.xr86@gmail.com> wrote:
->>>>> Hi
->>>>>
->>>>> I found an unfound object problem in my test environment (hammer).
->>>>> I suspect the reason is the wrong update of up_thru.
->>>>>
->>>>> from osdmap, the up_thru become smaller than before at an epoch.  some
->>>>> old PGTemp messages with smaller epoch are prepared and executed, and
->>>>> change the up_thru to smaller epoch.
->>>>> maybe_went_rw is wrong for that interval.
->>>>>
->>>>> I think prepare_pgtemp should not change up_thru if it is smaller than
->>>>> current, and duplicated PGTemp messages not be sent ?
->>>>>
->>>>> Is this a bug or something wrong for me?
->>>>>
->>>>> Thanks !
->>>>
->>>> I'm not sure if this came out of the same place or not, but Sam was
->>>> just talking last week about an issue with pgtemp updates that is at
->>>> least close to this bug. That one was resolved in the OSDMonitor, if
->>>> those are the up_thru locations you're talking about. :)
->>>> -Greg
+>>> Thank you....But not planning to upgrade the cluster soon.
+>>> So, in this case - are there any tunable options will help? like
+>>> "crush tunable optimal" or so?
+>>> OR any other configuration options change will help?
+>>
+>> Firefly also has reweight-by-utilization... it's just a bit less friendly
+>> than the newer versions.  CRUSH tunables don't generally help here unless
+>> you have lots of OSDs that are down+out.
+>>
+>> Note that firefly is no longer supported.
+>>
+>> sage
+>>
+>>
+>>>
+>>>
+>>> Thanks
+>>> Swami
+>>>
+>>>
+>>> On Tue, Jun 7, 2016 at 6:00 PM, Sage Weil <sage@newdream.net> wrote:
+>>> > On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
+>>> >> Hello,
+>>> >> I have aorund 100 OSDs in my ceph cluster. In this a few OSDs filled
+>>> >> with >85% of data and few OSDs filled with ~60%-70% of data.
+>>> >>
+>>> >> Any reason why the unevenly OSDs filling happned? do I need to any
+>>> >> tweaks on configuration to fix the above? Please advise.
+>>> >>
+>>> >> PS: Ceph version is - 0.80.7
+>>> >
+>>> > Jewel and the latest hammer point release have an improved
+>>> > reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
+>>> > run) to correct this.
+>>> >
+>>> > sage
+>>> >
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Cheers,
+~Blairo
