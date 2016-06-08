@@ -1,34 +1,107 @@
-From: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Subject: Re: jewel PRs
-Date: Wed, 8 Jun 2016 10:05:56 +0530
-Message-ID: <CAP3mxSxbT6Ex7Z70dBEsCL-02K9TzHkk7LPAG6fSAYOo_L6oYw@mail.gmail.com>
-References: <CAN=+7FUh9ahiYRtYvfQ=1yxURNekYYm_-5HgwgTO7KkV7ih7JA@mail.gmail.com>
+From: M Ranga Swami Reddy <swamireddy@gmail.com>
+Subject: Re: un-even data filled on OSDs
+Date: Wed, 8 Jun 2016 10:34:36 +0530
+Message-ID: <CANA9Uk7rNtfLrO+oT8XbfxaRdX0psPmcRHcNOKYvQ0UCrTGc=g@mail.gmail.com>
+References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com>
+ <alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com> <CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com>
+ <alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com> <CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
+ <CA+z5DsznXSZQ2TQ9y3D0rj-fU4Yi=8GNOW89ZmwvHkvQada4cg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f172.google.com ([209.85.161.172]:36808 "EHLO
-	mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751608AbcFHEf6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2016 00:35:58 -0400
-Received: by mail-yw0-f172.google.com with SMTP id x189so189813978ywe.3
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2016 21:35:57 -0700 (PDT)
-In-Reply-To: <CAN=+7FUh9ahiYRtYvfQ=1yxURNekYYm_-5HgwgTO7KkV7ih7JA@mail.gmail.com>
+Received: from mail-oi0-f47.google.com ([209.85.218.47]:35938 "EHLO
+	mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932596AbcFHFEi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2016 01:04:38 -0400
+Received: by mail-oi0-f47.google.com with SMTP id p204so115235963oih.3
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2016 22:04:38 -0700 (PDT)
+In-Reply-To: <CA+z5DsznXSZQ2TQ9y3D0rj-fU4Yi=8GNOW89ZmwvHkvQada4cg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Blair Bethwaite <blair.bethwaite@gmail.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-Hi,
-
-The integration and upgrade tests are not yet over on them. Here is
-the backport status : http://tracker.ceph.com/issues/15988. I would
-work with Loic and prioritize working on them.
+Blair - Thanks for the script...Btw, is this script has option for dry run?
 
 Thanks
-Abhishek
+Swami
 
-On Wed, Jun 8, 2016 at 12:06 AM, Samuel Just <sjust@redhat.com> wrote:
+On Wed, Jun 8, 2016 at 6:35 AM, Blair Bethwaite
+<blair.bethwaite@gmail.com> wrote:
+> Swami,
 >
-> We're trying to get a jewel point release out this week.  Are the
-> Jewel PRs in github tested, or are they still in need of testing?
-> -Sam
+> Try https://github.com/cernceph/ceph-scripts/blob/master/tools/crush-reweight-by-utilization.py,
+> that'll work with Firefly and allow you to only tune down weight of a
+> specific number of overfull OSDs.
+>
+> Cheers,
+>
+> On 7 June 2016 at 23:11, M Ranga Swami Reddy <swamireddy@gmail.com> wrote:
+>> OK, understood...
+>> To fix the nearfull warn, I am reducing the weight of a specific OSD,
+>> which filled >85%..
+>> Is this work-around advisable?
+>>
+>> Thanks
+>> Swami
+>>
+>> On Tue, Jun 7, 2016 at 6:37 PM, Sage Weil <sage@newdream.net> wrote:
+>>> On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
+>>>> Hi Sage,
+>>>> >Jewel and the latest hammer point release have an improved
+>>>> >reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
+>>>> > run) to correct this.
+>>>>
+>>>> Thank you....But not planning to upgrade the cluster soon.
+>>>> So, in this case - are there any tunable options will help? like
+>>>> "crush tunable optimal" or so?
+>>>> OR any other configuration options change will help?
+>>>
+>>> Firefly also has reweight-by-utilization... it's just a bit less friendly
+>>> than the newer versions.  CRUSH tunables don't generally help here unless
+>>> you have lots of OSDs that are down+out.
+>>>
+>>> Note that firefly is no longer supported.
+>>>
+>>> sage
+>>>
+>>>
+>>>>
+>>>>
+>>>> Thanks
+>>>> Swami
+>>>>
+>>>>
+>>>> On Tue, Jun 7, 2016 at 6:00 PM, Sage Weil <sage@newdream.net> wrote:
+>>>> > On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
+>>>> >> Hello,
+>>>> >> I have aorund 100 OSDs in my ceph cluster. In this a few OSDs filled
+>>>> >> with >85% of data and few OSDs filled with ~60%-70% of data.
+>>>> >>
+>>>> >> Any reason why the unevenly OSDs filling happned? do I need to any
+>>>> >> tweaks on configuration to fix the above? Please advise.
+>>>> >>
+>>>> >> PS: Ceph version is - 0.80.7
+>>>> >
+>>>> > Jewel and the latest hammer point release have an improved
+>>>> > reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
+>>>> > run) to correct this.
+>>>> >
+>>>> > sage
+>>>> >
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Cheers,
+> ~Blairo
