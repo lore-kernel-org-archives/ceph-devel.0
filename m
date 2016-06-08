@@ -1,58 +1,88 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 06/08/2016 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 8 Jun 2016 09:57:46 -0500
-Message-ID: <b8e9447a-23e7-3294-8130-d227ea4e28cd@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Understanding mon space usage during recovery
+Date: Wed, 8 Jun 2016 08:33:23 -0700
+Message-ID: <CAJ4mKGZTHQYXXgRgWaoiLViX6Z6x0NtjE9-N3tJdR8M2BUvqQg@mail.gmail.com>
+References: <5757E47A.2010203@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45811 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753394AbcFHO5t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 8 Jun 2016 10:57:49 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id AC522C04B307
-	for <ceph-devel@vger.kernel.org>; Wed,  8 Jun 2016 14:57:48 +0000 (UTC)
-Received: from [10.3.112.94] (ovpn-112-94.phx2.redhat.com [10.3.112.94])
-	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u58EvkRD021990
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 8 Jun 2016 10:57:48 -0400
+Received: from mail-vk0-f45.google.com ([209.85.213.45]:33825 "EHLO
+	mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754810AbcFHPdY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2016 11:33:24 -0400
+Received: by mail-vk0-f45.google.com with SMTP id e4so16396423vkb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 08 Jun 2016 08:33:24 -0700 (PDT)
+In-Reply-To: <5757E47A.2010203@corp.ovh.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?= <bartlomiej.swiecki@corp.ovh.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-8AM PST as usual! (that's in 4 minutes!) Topics include Joe Mario's 
-cacheline testing, bluestore performance update, and possibly more. 
-Please feel free to add your own!
+On Wed, Jun 8, 2016 at 2:25 AM, Bart=C5=82omiej =C5=9Awi=C4=99cki
+<bartlomiej.swiecki@corp.ovh.com> wrote:
+> Hi,
+>
+> I was recently trying to understand the growth of mon disk space usag=
+e
+> during recovery in one of our clusters,
+> wanted to know whether we could reduce disk usage somehow or if we ju=
+st have
+> to prepare more space for our mons.
+> Cluster is 0.94.6, just over 300 OSDs. Leveldb compaction does reduce=
+ space
+> usage but it quickly grows back
+> to the previous usage. What I found out is that most of the leveldb d=
+ata is
+> used by osdmap history.
+>
+> For each osdmap version leveldb contains both full and incremental en=
+try so
+> I was thinking if we really need to
+> store full osdmaps for all versions? If we're having incremental chan=
+ges for
+> every version anyway, wouldn't it be
+> sufficient to keep first full version only and then recover any futur=
+e ones
+> by applying incrementals?
 
-Here's the links:
+Maybe not; we've gone back and forth on this but I think we ended up
+learning that reconstructing them was just annoying in terms of
+needing to read all the extra keys.
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
+>
+> I was also trying to understand how ceph figures out the range of osd=
+map
+> versions to keep. After analyzing the code
+> I thought the obvious answer was in PGMap::calc_min_last_epoch_clean(=
+) - In
+> case of our production cluster,
+> the difference between min and max clean epochs was around 30k during
+> recovery, size of one full osdmap blob
+> in leveldb is around 250k.
 
-To join the Meeting:
-https://bluejeans.com/268261044
+Yeah, there's not a lot that can be done about this directly. 30k maps
+is an awful lot though; you probably have other issues happening in
+your OSDs (or monitors?).
 
-To join via Browser:
-https://bluejeans.com/268261044/browser
+>
+> I also tried to test this on my dev cluster where I could run gdb (15=
+ OSD, 4
+> OSD nearfull and lots of misplaced objects).
+> What I found out is that execution in OSDmonitor::get_trim_to() almos=
+t never
+> jumped inside the first 'if'.
+> mon->pgmon()->is_readable() returns false, I did debug it once and it=
+ was a
+> result of false returned by Paxos::is_lease_valid().
 
-To join with Lync:
-https://bluejeans.com/268261044/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-               +1 408 740 7256
-               +1 888 240 2560(US Toll Free)
-               +1 408 317 9253(Alternate Number)
-               (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
+Okay, that's bad. If your lease isn't valid, then the monitors are
+getting so bogged down that they're timing out the leases and
+temporarily breaking quorum. You should figure out if this is a load
+issue or a result of clock skew issues or something.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
