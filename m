@@ -1,134 +1,277 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: un-even data filled on OSDs
-Date: Wed, 8 Jun 2016 10:39:46 +0530
-Message-ID: <CANA9Uk5Ks1KT+Osb7QW8uLtbAG57ZYF=qj6cR7bLG7XVXAjWjw@mail.gmail.com>
-References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com>
-	<alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com>
-	<CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com>
-	<alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com>
-	<CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
-	<CA+z5DsznXSZQ2TQ9y3D0rj-fU4Yi=8GNOW89ZmwvHkvQada4cg@mail.gmail.com>
-	<CANA9Uk7rNtfLrO+oT8XbfxaRdX0psPmcRHcNOKYvQ0UCrTGc=g@mail.gmail.com>
-	<CA+z5DsxrovFX6GGmcfWAhNm69fb3s4-M6wMSR1u5vzdV8LTSSg@mail.gmail.com>
+From: Ramesh Chander <Ramesh.Chander@sandisk.com>
+Subject: RE: Anybody else hitting this panic in latest master with bluestore?
+Date: Wed, 8 Jun 2016 06:00:36 +0000
+Message-ID: <CY1PR0201MB1820E102714DC4B1CF3CF4F6855E0@CY1PR0201MB1820.namprd02.prod.outlook.com>
+References: <CY1PR0201MB1820F45DA0E891966F2CBC42855D0@CY1PR0201MB1820.namprd02.prod.outlook.com>
+ <BL2PR02MB2115D774BB2D4CFC43F8C847F45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <8dd167e2-89c2-84dc-fee1-216be0dc6392@redhat.com>
+ <alpine.DEB.2.11.1606070903500.6221@cpach.fuggernut.com>
+ <BL2PR02MB2115DE873C6CC9FCC0C3454CF45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <3c72bdf4-cdfc-42f6-e73f-e0100958b103@redhat.com>
+  <BL2PR02MB2115E130DCA950ED976C4C47F45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <BL2PR02MB211574EA5B952C1141E06A81F45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+z5DsxrovFX6GGmcfWAhNm69fb3s4-M6wMSR1u5vzdV8LTSSg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=koi8-r
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-by2on0053.outbound.protection.outlook.com ([207.46.100.53]:43392
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1161420AbcFHGAk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2016 02:00:40 -0400
+In-Reply-To: <BL2PR02MB211574EA5B952C1141E06A81F45D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Thats great.. Will try this..
+Hi Somnath,
 
-Thanks
-Swami
+I think setting 4k block size is done intentionally.
 
-On Wed, Jun 8, 2016 at 10:38 AM, Blair Bethwaite
-<blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> It runs by default in dry-run mode, which IMHO opinion should be the
-> default for operations like this. IIRC you add "-d -r" to make it
-> actually apply the re-weighting.
+127
+128   // Operate as though the block size is 4 KB.  The backing file
+129   // blksize doesn't strictly matter except that some file systems =
+may
+130   // require a read/modify/write if we write something smaller than
+131   // it.
+132   block_size =3D g_conf->bdev_block_size;
+133   if (block_size !=3D (unsigned)st.st_blksize) {
+134     dout(1) << __func__ << " backing device/file reports st_blksize=
+ "
+135       << st.st_blksize << ", using bdev_block_size "
+136       << block_size << " anyway" << dendl;
+137   }
+138
+
+Other than more fragmentation we should not see any issue by taking blo=
+ck size as 4k instead of 512. At least I am not aware of.
+
+How to reproduce it? I can have a look.
+
+-Ramesh
+
+> -----Original Message-----
+> From: Somnath Roy
+> Sent: Wednesday, June 08, 2016 5:04 AM
+> To: Somnath Roy; Mark Nelson; Sage Weil
+> Cc: Ramesh Chander; ceph-devel
+> Subject: RE: Anybody else hitting this panic in latest master with bl=
+uestore?
 >
-> Cheers,
+> Ok , I think I found out what is happening in my environment. This dr=
+ive is
+> formatted with 512 logical block size.
+> BitMap allocator is by default is working with 4K block size and the =
+calculation
+> is breaking (?). I have reformatted the device with 4K and it worked =
+fine.
+> I don't think taking this logical block size parameter as user input =
+may not be
+> *wise*.
+> Since OS needs that all devices is advertising the correct logical bl=
+ock size
+> here.
 >
-> On 8 June 2016 at 15:04, M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> Blair - Thanks for the script...Btw, is this script has option for dry run?
->>
->> Thanks
->> Swami
->>
->> On Wed, Jun 8, 2016 at 6:35 AM, Blair Bethwaite
->> <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>> Swami,
->>>
->>> Try https://github.com/cernceph/ceph-scripts/blob/master/tools/crush-reweight-by-utilization.py,
->>> that'll work with Firefly and allow you to only tune down weight of a
->>> specific number of overfull OSDs.
->>>
->>> Cheers,
->>>
->>> On 7 June 2016 at 23:11, M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>>> OK, understood...
->>>> To fix the nearfull warn, I am reducing the weight of a specific OSD,
->>>> which filled >85%..
->>>> Is this work-around advisable?
->>>>
->>>> Thanks
->>>> Swami
->>>>
->>>> On Tue, Jun 7, 2016 at 6:37 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
->>>>> On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
->>>>>> Hi Sage,
->>>>>> >Jewel and the latest hammer point release have an improved
->>>>>> >reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
->>>>>> > run) to correct this.
->>>>>>
->>>>>> Thank you....But not planning to upgrade the cluster soon.
->>>>>> So, in this case - are there any tunable options will help? like
->>>>>> "crush tunable optimal" or so?
->>>>>> OR any other configuration options change will help?
->>>>>
->>>>> Firefly also has reweight-by-utilization... it's just a bit less friendly
->>>>> than the newer versions.  CRUSH tunables don't generally help here unless
->>>>> you have lots of OSDs that are down+out.
->>>>>
->>>>> Note that firefly is no longer supported.
->>>>>
->>>>> sage
->>>>>
->>>>>
->>>>>>
->>>>>>
->>>>>> Thanks
->>>>>> Swami
->>>>>>
->>>>>>
->>>>>> On Tue, Jun 7, 2016 at 6:00 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
->>>>>> > On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
->>>>>> >> Hello,
->>>>>> >> I have aorund 100 OSDs in my ceph cluster. In this a few OSDs filled
->>>>>> >> with >85% of data and few OSDs filled with ~60%-70% of data.
->>>>>> >>
->>>>>> >> Any reason why the unevenly OSDs filling happned? do I need to any
->>>>>> >> tweaks on configuration to fix the above? Please advise.
->>>>>> >>
->>>>>> >> PS: Ceph version is - 0.80.7
->>>>>> >
->>>>>> > Jewel and the latest hammer point release have an improved
->>>>>> > reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
->>>>>> > run) to correct this.
->>>>>> >
->>>>>> > sage
->>>>>> >
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>
->>>>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>> --
->>> Cheers,
->>> ~Blairo
+> /sys/block/sdb/queue/logical_block_size
+>
+> Allocator needs to read the correct size from the above location.
+> Sage/Ramesh ?
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Somnath Roy
+> Sent: Tuesday, June 07, 2016 1:12 PM
+> To: Mark Nelson; Sage Weil
+> Cc: Ramesh Chander; ceph-devel
+> Subject: RE: Anybody else hitting this panic in latest master with bl=
+uestore?
+>
+> Mark/Sage,
+> That problem seems to be gone. BTW, rocksdb folder is not cleaned wit=
+h
+> 'make clean'. I took latest master and manually clean rocksdb folder =
+as you
+> suggested..
+> But, now I am hitting the following crash in some of my drives. It se=
+ems to be
+> related to block alignment.
+>
+>      0> 2016-06-07 11:50:12.353375 7f5c0fe938c0 -1
+> os/bluestore/BitmapFreelistManager.cc: In function 'void
+> BitmapFreelistManager::_xor(uint64_t, uint64_t, KeyValueDB::Transacti=
+on)'
+> thread 7f5c0fe938c0 time 2016-06-07 11:50:12.349722
+> os/bluestore/BitmapFreelistManager.cc: 477: FAILED assert((offset &
+> block_mask) =3D=3D offset)
+>
+>  ceph version 10.2.0-2021-g55cb608
+> (55cb608f63787f7969514ad0d7222da68ab84d88)
+>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> const*)+0x80) [0x5652219dd0a0]
+>  2: (BitmapFreelistManager::_xor(unsigned long, unsigned long,
+> std::shared_ptr<KeyValueDB::TransactionImpl>)+0x12ed) [0x5652216af96d=
+]
+>  3: (BitmapFreelistManager::create(unsigned long,
+> std::shared_ptr<KeyValueDB::TransactionImpl>)+0x33f) [0x5652216b034f]
+>  4: (BlueStore::_open_fm(bool)+0xcd3) [0x565221596683]
+>  5: (BlueStore::mkfs()+0x8b9) [0x5652215d89b9]
+>  6: (OSD::mkfs(CephContext*, ObjectStore*,
+> std::__cxx11::basic_string<char, std::char_traits<char>, std::allocat=
+or<char>
+> > const&, uuid_d, int)+0x117) [0x5652212776c7]
+>  7: (main()+0x1003) [0x565221209533]
+>  8: (__libc_start_main()+0xf0) [0x7f5c0c8f7830]
+>  9: (_start()+0x29) [0x5652212588b9]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
+eded
+> to interpret this.
+>
+> Here is my disk partitions..
+>
+> Osd.15 on /dev/sdi crashed..
 >
 >
+> sdi       8:128  0     7T  0 disk
+> =86=80sdi1    8:129  0    10G  0 part /var/lib/ceph/osd/ceph-15
+> =84=80sdi2    8:130  0     7T  0 part
+> nvme0n1 259:0    0  15.4G  0 disk
+> root@emsnode11:~/ceph-master/src# fdisk /dev/sdi
 >
+> Welcome to fdisk (util-linux 2.27.1).
+> Changes will remain in memory only, until you decide to write them.
+> Be careful before using the write command.
+>
+>
+> Command (m for help): p
+> Disk /dev/sdi: 7 TiB, 7681501126656 bytes, 15002931888 sectors
+> Units: sectors of 1 * 512 =3D 512 bytes
+> Sector size (logical/physical): 512 bytes / 16384 bytes I/O size
+> (minimum/optimal): 16384 bytes / 16384 bytes Disklabel type: gpt Disk
+> identifier: 4A3182B9-23EA-441A-A113-FE904E81BF3E
+>
+> Device        Start         End     Sectors Size Type
+> /dev/sdi1      2048    20973567    20971520  10G Linux filesystem
+> /dev/sdi2  20973568 15002931854 14981958287   7T Linux filesystem
+>
+> Seems to be aligned properly , what alignment bitmap allocator is loo=
+king for
+> (Ramesh ?).
+> I will debug further and update.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Somnath Roy
+> Sent: Tuesday, June 07, 2016 11:06 AM
+> To: 'Mark Nelson'; Sage Weil
+> Cc: Ramesh Chander; ceph-devel
+> Subject: RE: Anybody else hitting this panic in latest master with bl=
+uestore?
+>
+> I will try now and let you know.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Mark Nelson [mailto:mnelson@redhat.com]
+> Sent: Tuesday, June 07, 2016 10:57 AM
+> To: Somnath Roy; Sage Weil
+> Cc: Ramesh Chander; ceph-devel
+> Subject: Re: Anybody else hitting this panic in latest master with bl=
+uestore?
+>
+> Hi Somnath,
+>
+> Did Sage's suggestion fix it for you?  In my tests rocksdb wasn't bui=
+lding
+> properly after an upstream commit to detect when jemalloc isn't
+> present:
+>
+> https://github.com/facebook/rocksdb/commit/0850bc514737a64dc8ca13de8
+> 510fcad4756616a
+>
+> I've submitted a fix that is now in master.  If you clean the rocksdb=
+ folder and
+> try again with current master I believe it should work for you.
+>
+> Thanks,
+> Mark
+>
+> On 06/07/2016 09:23 AM, Somnath Roy wrote:
+> > Sage,
+> > I did a global 'make clean' before build, isn't that sufficient ? S=
+till need to go
+> to rocksdb folder and clean ?
+> >
+> >
+> > -----Original Message-----
+> > From: Sage Weil [mailto:sage@newdream.net]
+> > Sent: Tuesday, June 07, 2016 6:06 AM
+> > To: Mark Nelson
+> > Cc: Somnath Roy; Ramesh Chander; ceph-devel
+> > Subject: Re: Anybody else hitting this panic in latest master with =
+bluestore?
+> >
+> > On Tue, 7 Jun 2016, Mark Nelson wrote:
+> >> I believe this is due to the rocksdb submodule update in PR #9466.
+> >> I'm working on tracking down the commit in rocksdb that's causing =
+it.
+> >
+> > Is it possible that the problem is that your build *didn't* update =
+rocksdb?
+> >
+> > The ceph makefile isn't smart enough to notice changes in the rocks=
+db/ dir
+> and rebuild.  You have to 'cd rocksdb ; make clean ; cd ..' after the=
+ submodule
+> updates to get a fresh build.
+> >
+> > Maybe you didn't do that, and some of the ceph code is build using =
+the
+> new headers and data structures that don't match the previously compi=
+led
+> rocksdb code?
+> >
+> > sage
+> > PLEASE NOTE: The information contained in this electronic mail mess=
+age is
+> intended only for the use of the designated recipient(s) named above.=
+ If the
+> reader of this message is not the intended recipient, you are hereby =
+notified
+> that you have received this message in error and that any review,
+> dissemination, distribution, or copying of this message is strictly p=
+rohibited. If
+> you have received this communication in error, please notify the send=
+er by
+> telephone or e-mail (as shown above) immediately and destroy any and =
+all
+> copies of this message in your possession (whether hard copies or
+> electronically stored copies).
+> >
 > --
-> Cheers,
-> ~Blairo
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
+PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above=
+=2E If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
