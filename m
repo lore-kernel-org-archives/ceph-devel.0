@@ -1,64 +1,77 @@
-From: Muminul Islam Russell <misla011@fiu.edu>
-Subject: Jewel build for CentOS 6
-Date: Tue, 7 Jun 2016 17:13:12 -0700
-Message-ID: <CAK=B8ybVb0=Z7FM1LOPA-Dp1kGZjPn3nBbDg1hf+SkC50ir+Lw@mail.gmail.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: unfound object problem
+Date: Tue, 7 Jun 2016 17:18:52 -0700
+Message-ID: <CAN=+7FUT_2w_QY0T8VZC3tdNkX6mUfmyvv6Sbo9_ZMn-Duht8A@mail.gmail.com>
+References: <CAKE=UQJxaZPms82=qZeceSCW2+okmSPVGJ12ML0gd2JPW2uEEQ@mail.gmail.com>
+	<CAJ4mKGZ9aWdDpoHeJ5cebxVn=j-vs9t2SnNBJHYYTHh-5b1E-g@mail.gmail.com>
+	<CAN=+7FVBf+gu03XX3nNzff5LzKVmj8-3NxDRPXO_D13gS0m+LQ@mail.gmail.com>
+	<CAKE=UQL=tdRv8CTjST9Ysw-K4_RXppWMWXFLFKdY=eTB_G9frw@mail.gmail.com>
+	<CAN=+7FXCyBUJaQA7=xe-1Rf5LgUy-9MoRQC8hR=OVrjdEcSFqg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:35773 "EHLO
-	mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753652AbcFHANN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 20:13:13 -0400
-Received: by mail-qk0-f171.google.com with SMTP id p22so50057797qka.2
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2016 17:13:13 -0700 (PDT)
+Received: from mail-qt0-f176.google.com ([209.85.216.176]:36166 "EHLO
+	mail-qt0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751375AbcFHAZZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2016 20:25:25 -0400
+Received: by mail-qt0-f176.google.com with SMTP id 37so21193241qtc.3
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2016 17:25:25 -0700 (PDT)
+In-Reply-To: <CAN=+7FXCyBUJaQA7=xe-1Rf5LgUy-9MoRQC8hR=OVrjdEcSFqg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Rui Xie <jerry.xr86@gmail.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello Cephers,
+http://tracker.ceph.com/issues/16185
 
-I was trying to build Jewel for Centos 6 for personal purpose. I fixed
-couple of things and at the end I got the following error. Please let
-me know if anyone have any idea how to fix this issue.
+So, it does seem to be a bug, and I've got a fix.  However, it's not
+clear to me that it would result in an unfound object.  It seems like
+it would result in a pg which should be down being allowed to peer or
+an actually unfound object being erroneously considered ok.  I'm not
+sure you've diagnosed the original issue correctly.  If you can
+reproduce, you should enable logging (debug osd = 20, debug filestore
+= 20, debug ms = 1) and go through the logs more carefully.
+-Sam
 
--------
-writing... rbd-mirror.8 { } rbdmap.8 { } ceph-detect-init.8 { }
-ceph-rest-api.8 { } osdmaptool.8 { } ceph-rbdnamer.8 { }
-ceph-create-keys.8 { } ceph-disk.8 { } cephfs.8 { } ceph.8 { }
-monmaptool.8 { } ceph-deploy.8 { } ceph-debugpack.8 { }
-ceph-dencoder.8 { } rbd-nbd.8 { } mount.ceph.8 { } radosgw-admin.8 { }
-ceph-fuse.8 { } ceph-authtool.8 { } ceph-run.8 { } librados-config.8 {
-} ceph-clsinfo.8 { } ceph-post-file.8 { } ceph-mds.8 { } ceph-osd.8 {
-} ceph-syn.8 { } crushtool.8 { } rbd-fuse.8 { } radosgw.8 { }
-ceph-conf.8 { } ceph-mon.8 { } rados.8 { } rbd-replay-many.8 { }
-rbd-replay-prep.8 { } rbd.8 { } rbd-replay.8 { }
-build succeeded.
-make[1]: Leaving directory `/root/rpmbuild/BUILD/ceph-10.2.1/man'
-Making all in doc
-make[1]: Entering directory `/root/rpmbuild/BUILD/ceph-10.2.1/doc'
-make[1]: Nothing to be done for `all'.
-make[1]: Leaving directory `/root/rpmbuild/BUILD/ceph-10.2.1/doc'
-Making all in systemd
-make[1]: Entering directory `/root/rpmbuild/BUILD/ceph-10.2.1/systemd'
-make[1]: Nothing to be done for `all'.
-make[1]: Leaving directory `/root/rpmbuild/BUILD/ceph-10.2.1/systemd'
-Making all in selinux
-make[1]: Entering directory `/root/rpmbuild/BUILD/ceph-10.2.1/selinux'
-make -j1 -f /usr/share/selinux/devel/Makefile ceph.pp
-make[2]: Entering directory `/root/rpmbuild/BUILD/ceph-10.2.1/selinux'
-make[2]: warning: -jN forced in submake: disabling jobserver mode.
-Compiling targeted ceph module
-/usr/bin/checkmodule:  loading policy configuration from tmp/ceph.tmp
-ceph.te":109:ERROR 'syntax error' at token 'fsadm_manage_pid' on line 15485:
-
-fsadm_manage_pid(ceph_t)
-/usr/bin/checkmodule:  error(s) encountered while parsing configuration
-make[2]: *** [tmp/ceph.mod] Error 1
-make[2]: Leaving directory `/root/rpmbuild/BUILD/ceph-10.2.1/selinux'
-make[1]: *** [ceph.pp] Error 2
-make[1]: Leaving directory `/root/rpmbuild/BUILD/ceph-10.2.1/selinux'
-make: *** [all-recursive] Error 1
-error: Bad exit status from /var/tmp/rpm-tmp.pInRWe (%build
-
---
-Russell
+On Tue, Jun 7, 2016 at 7:52 AM, Samuel Just <sjust@redhat.com> wrote:
+> That does sound like a bug, I'll try to take a look today.
+> -Sam
+>
+> On Mon, Jun 6, 2016 at 9:21 PM, Rui Xie <jerry.xr86@gmail.com> wrote:
+>> Hi Sam
+>>
+>> we do not check pgtemp  map_epoch in preprocess_pgtemp and prepare_pgtemp.
+>> old pgtemp messages with smaller map_epoch are prapared, and update
+>> up_thru to smaller version.
+>>
+>> a lot of duplicate pgtemp messages there.
+>>
+>> 2016-06-07 6:07 GMT+08:00 Samuel Just <sjust@redhat.com>:
+>>> I don't quite understand...  Can you explain the sequence of events in
+>>> more detail?
+>>> -Sam
+>>>
+>>> On Mon, Jun 6, 2016 at 2:14 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+>>>> On Sun, May 29, 2016 at 8:58 PM, Rui Xie <jerry.xr86@gmail.com> wrote:
+>>>>> Hi
+>>>>>
+>>>>> I found an unfound object problem in my test environment (hammer).
+>>>>> I suspect the reason is the wrong update of up_thru.
+>>>>>
+>>>>> from osdmap, the up_thru become smaller than before at an epoch.  some
+>>>>> old PGTemp messages with smaller epoch are prepared and executed, and
+>>>>> change the up_thru to smaller epoch.
+>>>>> maybe_went_rw is wrong for that interval.
+>>>>>
+>>>>> I think prepare_pgtemp should not change up_thru if it is smaller than
+>>>>> current, and duplicated PGTemp messages not be sent ?
+>>>>>
+>>>>> Is this a bug or something wrong for me?
+>>>>>
+>>>>> Thanks !
+>>>>
+>>>> I'm not sure if this came out of the same place or not, but Sam was
+>>>> just talking last week about an issue with pgtemp updates that is at
+>>>> least close to this bug. That one was resolved in the OSDMonitor, if
+>>>> those are the up_thru locations you're talking about. :)
+>>>> -Greg
