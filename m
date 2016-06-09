@@ -1,162 +1,158 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [GSoC] wrong patch "msg: change entity_addr_t encode/decode"
-Date: Thu, 9 Jun 2016 12:10:01 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606091205290.32559@cpach.fuggernut.com>
-References: <CAEG8a3JF2t1hkHY2MQK5DVwbOy3VGZUNuB-uF5mOzBSO8xhQeg@mail.gmail.com> <alpine.DEB.2.11.1606021238150.6221@cpach.fuggernut.com> <alpine.DEB.2.11.1606021343480.6221@cpach.fuggernut.com> <CAEG8a3+6YycUH6Hm6w3g_XeWPBfTYGf3KiNG0Ujw=FsPr+WaZQ@mail.gmail.com>
- <CAEG8a3Lwwe2htBbc=+D9hYn4SJnO04H83gKRqED0M4+fzpg+oQ@mail.gmail.com>
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: blueprint: consistency groups
+Date: Thu, 9 Jun 2016 16:23:29 -0700
+Message-ID: <CA+hcxJTvkQUyERc49N05sz0uHm7v_Fbf=dDdjoDfiJuzxijJcA@mail.gmail.com>
+References: <CA+hcxJQqbi_oCMF+0=fgQ6-=W1k-KPw6Y_3pZZnXKe01=Z-dhQ@mail.gmail.com>
+ <CAJ4mKGYHno0u4z8PkUz0gL9voeBPQCPP+TSroEQRy2+26H+WHQ@mail.gmail.com>
+ <20160325071933.GA14634@gmail.com> <CAJ4mKGZHd1Bm558woz=2Agd-x7sDkQmarwQfZUkwSWAcmOb8ew@mail.gmail.com>
+ <CA+hcxJS+-HsTKpbASkWqr-gR8N6zF1k-pyWh8eQZCCC7sHCiLg@mail.gmail.com>
+ <CA+aFP1CnKvVJrWDmKhpziu5otOV73HC5gnUsgZ8+oDW+708Rag@mail.gmail.com>
+ <CA+hcxJSnUg1grhdBgOQPRcPK57VyW2Nyg9Rv6whZ3rj1ZoGU_Q@mail.gmail.com>
+ <CA+aFP1CPc-aExqfNL671Zr6ectLH9aUEScmKveBn8rPCmJDLtA@mail.gmail.com>
+ <CA+hcxJTsPnVyF5Jvic+hDGgR=9CRZNzcwA6sAZzNxnm5x1J=kg@mail.gmail.com>
+ <CA+aFP1C7me+-dbXVrMgU0Qs9fX8_4ocC9v5orzy+c8tK30y08A@mail.gmail.com>
+ <CA+hcxJT4DWgt8K8hc27KbkJK=DRePM18Zh=GPxtfR5afoxVP1w@mail.gmail.com>
+ <CA+hcxJQGcDy96o0f9sEY8HwLXng9YzxsoKAhaaCuCDDhVbN76A@mail.gmail.com>
+ <CA+aFP1AQzo7bO=e-Gd_sAtBWSYFgvji8isxuXFKDejaHAA+FuA@mail.gmail.com>
+ <CA+hcxJRMcJFxYdscdwyvowjw_dNF6xoNzCHT1=oaznwGqY-4Rw@mail.gmail.com>
+ <CA+aFP1Awk0YZnW16JxOgfDeJFsuKPoN4jdrpr8dCdqUjhhD_Mw@mail.gmail.com>
+ <CA+hcxJTWZWUAUGr1gAZwEqLrGY9eJpzrF3+0H3wqaSjiY6-Faw@mail.gmail.com>
+ <CA+aFP1CfOCy9pL=NWka=j=otb7rwO7W=ds-ggBMz0hVY=zj3-Q@mail.gmail.com>
+ <CA+hcxJS9mBZL5wu0A2L_-3bAyvMb90qBaYo+cosqphUn0Dj9kQ@mail.gmail.com>
+ <CA+aFP1AchQD6b-gm7Z4zijQfW8OMZJrrE8S2nLde2CE+VUjZew@mail.gmail.com>
+ <CA+hcxJQAC7m5mRXhGfL0Fu8erWFb--GstHzOYO-swJNLWXPhHw@mail.gmail.com>
+ <CA+aFP1CVs-_KWWUOdnP7=rFbghpNHTrrfuLPkVw9RtX03eAUKw@mail.gmail.com>
+ <CA+hcxJQhE13ftC7TQ2PdBQwd=_xurRGsuJHTi736r+n0kx_UeQ@mail.gmail.com>
+ <CA+hcxJTTZn8y=kuSFnWbem01XaOUa3D8LDh=25ds6r+qD318vA@mail.gmail.com>
+ <CA+aFP1DzwBkZ5Yo2p2nXvn5KbgniizH1saq4eHx9UDA9JC8UEw@mail.gmail.com>
+ <CA+hcxJR5BTVoogj3caBm9pYR9S4SVqtP815nFHHQK4t89a0Gsg@mail.gmail.com>
+ <CA+aFP1AziFsEJmm3qdCvvfuqnUFPDOW5Ce9VxY0DVMbMy+Y4PQ@mail.gmail.com>
+ <CA+hcxJRTV7yiVNWJdHpz74VhgTOJih3YeOJCuMVErZ54oJf0mQ@mail.gmail.com>
+ <CA+aFP1Cp3HVGUidOW6-NxWGWGT0RSvF8c_H62ZsMvj+AUVktLg@mail.gmail.com>
+ <CA+hcxJSh5JUKdQ4vOo8x-MywR+3smR+BgMtma33Cv76tw+bszw@mail.gmail.com> <CA+hcxJTe--mXncCPVMQJnY01zT2hOWQJGYYtx9_kpqcmrP9H=w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57030 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751168AbcFIQJh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2016 12:09:37 -0400
-In-Reply-To: <CAEG8a3Lwwe2htBbc=+D9hYn4SJnO04H83gKRqED0M4+fzpg+oQ@mail.gmail.com>
+Received: from mail-yw0-f180.google.com ([209.85.161.180]:33221 "EHLO
+	mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751560AbcFIXXb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2016 19:23:31 -0400
+Received: by mail-yw0-f180.google.com with SMTP id g20so52229426ywb.0
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jun 2016 16:23:31 -0700 (PDT)
+In-Reply-To: <CA+hcxJTe--mXncCPVMQJnY01zT2hOWQJGYYtx9_kpqcmrP9H=w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Junwang Zhao <zhjwpku@gmail.com>
-Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 8 Jun 2016, Junwang Zhao wrote:
-> Hi Sage,
-> 
-> Write some unittest, but seems not right, see [0], give some comments
-> please, I use `cout` to print the value, but I don't know where to see them.
-> 
-> I got a lot of other "FAIL" in the wip-addr-more branch, like:
->   ceph-detect-init/run-tox.sh
->   ceph-disk/run-tox.sh
->   test/run-rbd-unit-tests.sh
-> I am wondering is this because my working environment? My laptop
-> is really not very powerful, "i5-3210M CPU, 8G memory" :(
-> make check is quite slow.
-> 
-> [0] https://github.com/zhjwpku/ceph/commit/e15a240d56c2b67a8b0906dc80650a91bff1518f
+Another version of PR is available addressing the latest three comments.
 
-I'm traveling today and not able to replicate this yet--I'll take a look 
-tomorrow.
-
-In the meantime, though, it doesn't look like your new tests are doing 
-quite what I think we need them to.  I think the important cases are:
-
-1- make sure that any encoded entity_addr_t can be decoded as a 
-entity_addrvec_t, with size 1, where item 0 matches the addr.  Can use the 
-existing arrays of addrs to parse to test this.
-
-2- make sure that in all of those cases, if we encode the entity_addrvec_t 
-with features 0, and decode as an entity_addr_t, we get back the same 
-entity_addr_t.
-
-3- the addrvec size > 1 cases:
-
-- populate an addrvec with multiple addrs where one is legacy and others 
-are not, and ensure that encoding with features 0 and decoding as an addr 
-gives back the legacy item.
-
-- multiple legacy addrs with features 0 should encode the first one in the 
-list
-
-- a vec with all non-legacy addrs encoded with features 0 and decoded as 
-addr should give back an addr that is not entity_addr_t() but is 
-unusable/bogus.
-
-4- the empty addrvec case:
-
-- encode with features 0 and decoding as addr should give back 
-entity_addr_t().
-
-I think that's it?
-
-sage
-
-
-> 
-> On Mon, Jun 6, 2016 at 4:28 PM, Junwang Zhao <zhjwpku@gmail.com> wrote:
-> > Hi, Sage,
-> >
-> > Sorry I did not see your reply util now, I will work on it.
-> >
-> > Thanks!
-> > Zhao
-> >
-> > On Fri, Jun 3, 2016 at 1:46 AM, Sage Weil <sage@newdream.net> wrote:
-> >> On Thu, 2 Jun 2016, Sage Weil wrote:
-> >>> Hi Zhao,
-> >>>
-> >>> On Tue, 31 May 2016, Junwang Zhao wrote:
-> >>> > Hi Sage & Haomai,
-> >>> >
-> >>> > I try to run './vstart.sh -d -x -n' to test the patches today, I got
-> >>> > some error like 'wrong node', after some work, I found the
-> >>> > error was introduced by this patch[0]. I change the code to
-> >>> > use the legacy decode and encode, but got stuck somewhere.
-> >>> >
-> >>> > --- a/src/msg/msg_types.h
-> >>> > +++ b/src/msg/msg_types.h
-> >>> > @@ -371,7 +371,7 @@ struct entity_addr_t {
-> >>> >    // broader study
-> >>> >
-> >>> >    void encode(bufferlist& bl, uint64_t features) const {
-> >>> > -    if ((features & CEPH_FEATURE_MSG_ADDR2) == 0) {
-> >>> > +    if ((features & CEPH_FEATURE_MSG_ADDR2) != 0) {
-> >>> >        ::encode((__u32)0, bl);
-> >>> >        ::encode(nonce, bl);
-> >>> >        sockaddr_storage ss = get_sockaddr_storage();
-> >>> >
-> >>> >
-> >>> > Can you please see the patch again and give some comments?
-> >>> >
-> >>> > [0]https://github.com/zhjwpku/ceph/commit/8934f038fdf28156038770e601e4a27f7a684390
-> >>>
-> >>> This was enough to make things work fo rme:
-> >>>
-> >>> diff --git a/src/msg/msg_types.h b/src/msg/msg_types.h
-> >>> index 9c521e6..0da0614 100644
-> >>> --- a/src/msg/msg_types.h
-> >>> +++ b/src/msg/msg_types.h
-> >>> @@ -199,8 +199,7 @@ WRITE_CLASS_ENCODER(ceph_sockaddr_storage)
-> >>>
-> >>>  struct entity_addr_t {
-> >>>    typedef enum {
-> >>> -    TYPE_NONE = 0,
-> >>> -    TYPE_LEGACY = 1,
-> >>> +    TYPE_LEGACY = 0,
-> >>>    } type_t;
-> >>>
-> >>>    __u32 type;
-> >>> @@ -211,7 +210,7 @@ struct entity_addr_t {
-> >>>      sockaddr_in6 sin6;
-> >>>    } u;
-> >>>
-> >>> -  entity_addr_t() : type(0), nonce(0) {
-> >>> +  entity_addr_t() : type(TYPE_LEGACY), nonce(0) {
-> >>>      memset(&u, 0, sizeof(u));
-> >>>    }
-> >>>    explicit entity_addr_t(const ceph_entity_addr &o) {
-> >>>
-> >>> but I think this is not the right fix.  I think we still want
-> >>> TYPE_NONE, TYPE_LEGACY, and (soon) TYPE_MSGR2, and that the core problem
-> >>> is places that are creating addrs aren't setting the type properly.  Going
-> >>> to play with this a bit...
-> >>
-> >> I pushed a wip-addr-more branch:
-> >>
-> >>         https://github.com/liewegas/ceph/commits/wip-addr-more
-> >>
-> >> This fixes the parser to take type prefixes, default to legacy, and
-> >> changes entity_addr_t() so that it renders are "-" instead of ":/0" (which
-> >> was weird anyway).
-> >>
-> >> I think what we need next are some unit tests in test/test_addrs.cc that
-> >> do things like encode a entity_addr_t with no features, decode as
-> >> entity_addrvec_t, or construct varous addrvecs, encode with no features,
-> >> an ensure a decode to entity_addr_t gives back the right addr from the
-> >> list.
-> >>
-> >> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Fri, Jun 3, 2016 at 5:33 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+> Just updated the pull request with all fixes. Please review one more time.
+>
+> On Wed, May 25, 2016 at 6:01 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>> Here is the link to my pull request with operations on consistency
+>> groups only: create cg, remove cg, list cgs.
+>>
+>> https://github.com/ceph/ceph/pull/9333
+>>
+>> On Wed, May 25, 2016 at 5:53 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>> Perfect.  I prefer to have the PR's commits reflect the clean
+>>> end-state of the change instead of having multiple "tweak" commits
+>>> fixing code review comments.  Therefore, a rebase to address the
+>>> comment in its associated comment and force push is the desired
+>>> process.
+>>>
+>>> On Wed, May 25, 2016 at 5:34 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>> I this case I case create a separate pull request for consistency
+>>>> group's operations only(create, remove, list).
+>>>> Another pull request will be: add image to cg, remove image, list images.
+>>>>
+>>>> One more question. How do you prefer comments to be addressed, as an
+>>>> additional commit to the pull request or amend the corresponding
+>>>> commit?
+>>>>
+>>>> V.
+>>>>
+>>>> On Tue, May 24, 2016 at 10:30 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>> The current PR is at approximately 2500 lines -- it would be nice to
+>>>>> have a PR under 1000 changed lines in a perfect world.  The trouble
+>>>>> with larger PR is that after you address comments, I have to re-read
+>>>>> it all again.  The smaller the PR, the faster it can be reviewed and
+>>>>> merged.  If changes depend on another PR, you can always
+>>>>> non-fast-forward merge the other PR branch into your dependent PR
+>>>>> branch so that it's clear what needs to be reviewed.
+>>>>>
+>>>>> On Tue, May 24, 2016 at 6:42 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>> Yes, I'm working on splitting it into small logically separated commits.
+>>>>>> My current PR is for CRUD operations only(create, remove, add image,
+>>>>>> remove image, show info).
+>>>>>> Do you want even a smaller PR or this one is small enough?
+>>>>>>
+>>>>>> Thanks,
+>>>>>> V.
+>>>>>>
+>>>>>> On Mon, May 23, 2016 at 7:39 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>>> Definitely want to ensure that it cleanly merges with master.  I would
+>>>>>>> also request, if at all possible, that you break it into individual
+>>>>>>> PRs of concrete sub-tasks for implementing consistency groups for ease
+>>>>>>> of review.  Have individual commits for each step of implementing the
+>>>>>>> task would also help (i.e. squash related commits, fix style issues or
+>>>>>>> bugs in the commit that introduced them, etc).
+>>>>>>>
+>>>>>>> On Mon, May 23, 2016 at 6:43 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>> Never mind. I just realized that it will be easier to build it on top
+>>>>>>>> of the latest master in any case.
+>>>>>>>>
+>>>>>>>> On Mon, May 23, 2016 at 8:32 AM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>>> Jason,
+>>>>>>>>>
+>>>>>>>>> Do you prefer pull requests to be rebased on top of the latest master
+>>>>>>>>> or should I keep it where I started the development?
+>>>>>>>>>
+>>>>>>>>> Thanks,
+>>>>>>>>> V.
+>>>>>>>>>
+>>>>>>>>> On Mon, May 16, 2016 at 8:48 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>>>>>> On Thu, May 12, 2016 at 10:45 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>>>>> Jason,
+>>>>>>>>>>>
+>>>>>>>>>>> Do you have any opinion regarding deleting images that are in a
+>>>>>>>>>>> consistency group?
+>>>>>>>>>>>
+>>>>>>>>>>> Should we delete them as well as the references in the consistency
+>>>>>>>>>>> group they belong to or should we prohibit deleting images that are in
+>>>>>>>>>>> a consistency group?
+>>>>>>>>>>>
+>>>>>>>>>>> V.
+>>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> Right now, if an image has a snapshot we required you to remove all
+>>>>>>>>>> snapshots before removing the image.  Along those lines, if an image
+>>>>>>>>>> is in a consistency group and the consistency group has snapshots, the
+>>>>>>>>>> user wouldn't be able to remove the image since it has snapshots nor
+>>>>>>>>>> should the user be able to remove the snapshots associated with the
+>>>>>>>>>> consistency group. In this case, the user would be forced to
+>>>>>>>>>> dissociate the image from the group before attempting to delete it.
+>>>>>>>>>> Therefore, just to keep the actions consistent, you might as well
+>>>>>>>>>> force the user to dissociate an image from the consistency group even
+>>>>>>>>>> if the image doesn't have snapshots.
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> --
+>>>>>>>>>> Jason
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>> --
+>>>>>>> Jason
+>>>>>
+>>>>>
+>>>>>
+>>>>> --
+>>>>> Jason
+>>>
+>>>
+>>>
+>>> --
+>>> Jason
