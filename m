@@ -1,130 +1,134 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Current Progress of librados rocksdb backend (06/06/2016)
-Date: Thu, 9 Jun 2016 11:00:47 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606091026440.23732@cpach.fuggernut.com>
-References: <CAGC6CocQHiK_-88=YDbRb=uSSqCaNpuRTcULRR8zL2T-EO3n+w@mail.gmail.com> <alpine.DEB.2.11.1606061613590.6221@cpach.fuggernut.com> <CAGC6Coe-DWjdQUcba1W4d1AdR7L7EkoamQLP496=u9S_F=517g@mail.gmail.com> <alpine.DEB.2.11.1606061631360.6221@cpach.fuggernut.com>
- <CAGC6Cod84CFTEtLuww7EYSPK4zkp912D+8iU8-xwxr492ZHM0Q@mail.gmail.com> <alpine.DEB.2.11.1606070834340.6221@cpach.fuggernut.com> <CAGC6Cod-XJ04K9j5CnsDAJ7PwWuGOVhw-W+WToEFkw5_bo2MNg@mail.gmail.com>
- <CAGC6Coe-RVBh7nq+f_AxDFBD6ECWM7=hkSN6+4F67WZ5gnEw3w@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: RocksDB tuning
+Date: Thu, 9 Jun 2016 15:23:04 +0000
+Message-ID: <BL2PR02MB2115BD376A32CF2B6E54ABABF45F0@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <D37DE46C.5743E%manavalan.krishnan@sandisk.com>
+ <BLUPR0201MB1524D8A9D42F7C50646D0AE8E85E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <a3216e58-d591-50ae-f2f2-0cbb7cdaa7bb@redhat.com>
+ <fb82e615-0762-0843-9a9f-cbc4686e35ba@redhat.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-352937784-1465484450=:23732"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59345 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751469AbcFIPAV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 9 Jun 2016 11:00:21 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id DB703155BA
-	for <ceph-devel@vger.kernel.org>; Thu,  9 Jun 2016 15:00:20 +0000 (UTC)
-In-Reply-To: <CAGC6Coe-RVBh7nq+f_AxDFBD6ECWM7=hkSN6+4F67WZ5gnEw3w@mail.gmail.com>
+Received: from mail-bl2on0093.outbound.protection.outlook.com ([65.55.169.93]:4896
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752042AbcFIPXJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2016 11:23:09 -0400
+In-Reply-To: <fb82e615-0762-0843-9a9f-cbc4686e35ba@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ryne Li <rli@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Mark Nelson <mnelson@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Manavalan Krishnan <Manavalan.Krishnan@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Mark,
+As we discussed, it seems there is ~5X write amp on the system with 4K RW. Considering the amount of data going into rocksdb (and thus kicking of compaction so fast and degrading performance drastically) , it seems it is still writing WAL (?)..I used the following rocksdb option for faster background compaction as well hoping it can keep up with upcoming writes and writes won't be stalling. But, eventually, after a min or so, it is stalling io..
 
---8323329-352937784-1465484450=:23732
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+bluestore_rocksdb_options = "compression=kNoCompression,max_write_buffer_number=16,min_write_buffer_number_to_merge=3,recycle_log_file_num=16,compaction_style=kCompactionStyleLevel,write_buffer_size=67108864,target_file_size_base=67108864,max_background_compactions=31,level0_file_num_compaction_trigger=8,level0_slowdown_writes_trigger=32,level0_stop_writes_trigger=64,num_levels=4,max_bytes_for_level_base=536870912,max_bytes_for_level_multiplier=8,compaction_threads=32,flusher_threads=8"
 
-Many comments on your PR.  It looks like it's in a pretty reasonble state 
-for doing some testing.  Are you able to run rocksdb on top of it yet, or 
-are you just running the unit tests?
+I will try to debug what is going on there..
 
-Please rebase on current ceph/rocksdb master, e.g.
+Thanks & Regards
+Somnath
 
- git remote add cephrocksdb git@github.com:ceph/rocksdb
- git fetch cephrocksdb
- git rebase HEAD^^ --onto cephrocksdb/master
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Thursday, June 09, 2016 6:46 AM
+To: Allen Samuels; Manavalan Krishnan; Ceph Development
+Subject: Re: RocksDB tuning
 
-sage
+On 06/09/2016 08:37 AM, Mark Nelson wrote:
+> Hi Allen,
+>
+> On a somewhat related note, I wanted to mention that I had forgotten
+> that chhabaremesh's min_alloc_size commit for different media types
+> was committed into master:
+>
+> https://github.com/ceph/ceph/commit/8185f2d356911274ca679614611dc335e3
+> efd187
+>
+>
+> IE those tests appear to already have been using a 4K min alloc size
+> due to non-rotational NVMe media.  I went back and verified that
+> explicitly changing the min_alloc size (in fact all of them to be
+> sure) to 4k does not change the behavior from graphs I showed
+> yesterday.  The rocksdb compaction stalls due to excessive reads
+> appear (at least on the
+> surface) to be due to metadata traffic during heavy small random writes.
 
+Sorry, this was worded poorly.  Traffic due to compaction of metadata (ie not leaked WAL data) during small random writes.
 
+Mark
 
-On Wed, 8 Jun 2016, Ryne Li wrote:
-
-> Hi Sage,
-> Thank you so much for your advises, especially the IO_CTX pointer one. It is
-> really helpful. I have revised my code according to your comments.
-> Generally, I finished all your comments except distinguishing Flush() and
-> Sync(). Main changes list as follow,
-> 
->   - change copy of IO_CTX in file handler object to IO_CTX pointer
->   - remove xattr functions
->   - change split function to adapt RocksDB's 2-level structure (dir/file)
->   - add buffer to writable file handler
->   - correct Makefile
-> 
-> By the way, I accidentally forcibly push my modification. So the diff
-> between current version and last version can't reflect my latest
-> modification. Sorry for the inconvenience.
-> 
-> Following is the link to latest version of my code:
-> 
->   https://github.com/ryneli/rocksdb/blob/master/utilities/env_librados.cc
-> 
-> Yours,
-> 
-> Ryne
-> 
-> On Tue, Jun 7, 2016 at 9:19 AM, Ryne Li <rli@redhat.com> wrote:
->       Hi Sage,
-> Thank you for your comments and advises. It is really helpful. I will
-> revise my code according to your comments.
-> 
-> I didn't find omap api at the beginning. So I used these xattr api
-> instead. I will remove these functions later.
-> 
-> Useless Makefile changes may be caused my careless commit. Sorry about
-> that.
-> 
-> Yours,
-> 
-> Ryne
-> 
-> On Tue, Jun 7, 2016 at 8:57 AM, Sage Weil <sweil@redhat.com> wrote:
->       [Copying ceph-devel so that interest parties can take a
->       look]
-> 
->       On Tue, 7 Jun 2016, Ryne Li wrote:
->       > Hi Sage,
->       > Most code is in following file,
->       >
->       >  
->         https://github.com/ryneli/rocksdb/blob/master/utilities/env_librados.cc
->       >
->       > Test code is in file,
->       >
->       >   https://github.com/ryneli/rocksdb/blob/master/utilities/env_librados_tes
->       t
->       > .cc
-> 
->       This is great!  I opened a PR against our rocksdb repo
->       just so I could
->       comment on the code:
-> 
->               https://github.com/ceph/rocksdb/pull/8
-> 
->       I made a bunch of comments.  This looks like a great
->       start!
-> 
->       My main question is what the purpose of the xattr
->       functions is.  I don't
->       see any callers, and I think an omap object for the
->       directory mapping
->       should be sufficient.
-> 
->       It looks like there are a bunch of Makefile changes in
->       that commit that
->       probably don't need to be included?
-> 
->       sage
-> 
-> 
-> 
-> 
-> 
---8323329-352937784-1465484450=:23732--
+>
+> Mark
+>
+> On 06/08/2016 06:52 PM, Allen Samuels wrote:
+>> Let's make a patch that creates actual Ceph parameters for these
+>> things so that we don't have to edit the source code in the future.
+>>
+>>
+>> Allen Samuels
+>> SanDisk |a Western Digital brand
+>> 2880 Junction Avenue, San Jose, CA 95134
+>> T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
+>>
+>>
+>>> -----Original Message-----
+>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>>> owner@vger.kernel.org] On Behalf Of Manavalan Krishnan
+>>> Sent: Wednesday, June 08, 2016 3:10 PM
+>>> To: Mark Nelson <mnelson@redhat.com>; Ceph Development <ceph-
+>>> devel@vger.kernel.org>
+>>> Subject: RocksDB tuning
+>>>
+>>> Hi Mark
+>>>
+>>> Here are the tunings that we used to avoid the IOPs choppiness caused by
+>>> rocksdb compaction.
+>>>
+>>> We need to add the following options in src/kv/RocksDBStore.cc before
+>>> rocksdb::DB::Open in RocksDBStore::do_open opt.IncreaseParallelism(16);
+>>>   opt.OptimizeLevelStyleCompaction(512 * 1024 * 1024);
+>>>
+>>>
+>>>
+>>> Thanks
+>>> Mana
+>>>
+>>>
+>>>>
+>>>
+>>> PLEASE NOTE: The information contained in this electronic mail
+>>> message is
+>>> intended only for the use of the designated recipient(s) named above.
+>>> If the
+>>> reader of this message is not the intended recipient, you are hereby
+>>> notified
+>>> that you have received this message in error and that any review,
+>>> dissemination, distribution, or copying of this message is strictly
+>>> prohibited. If
+>>> you have received this communication in error, please notify the
+>>> sender by
+>>> telephone or e-mail (as shown above) immediately and destroy any and all
+>>> copies of this message in your possession (whether hard copies or
+>>> electronically stored copies).
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>> in the
+>>> body of a message to majordomo@vger.kernel.org More majordomo info at
+>>> http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
