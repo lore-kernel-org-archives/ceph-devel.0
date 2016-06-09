@@ -1,55 +1,132 @@
-From: Deepa Dinamani <deepa.kernel@gmail.com>
-Subject: [PATCH 20/21] libceph: Replace CURRENT_TIME with
-	ktime_get_real_ts
-Date: Wed,  8 Jun 2016 22:05:04 -0700
-Message-ID: <1465448705-25055-21-git-send-email-deepa.kernel@gmail.com>
-References: <1465448705-25055-1-git-send-email-deepa.kernel@gmail.com>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: un-even data filled on OSDs
+Date: Thu, 9 Jun 2016 15:50:49 +0530
+Message-ID: <CANA9Uk48oQ7sjd614LzYy=7HxYfmO8qZxoQCC62wYeOdsBPFeg@mail.gmail.com>
+References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com>
+	<alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com>
+	<CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com>
+	<alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com>
+	<CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
+	<CA+z5DsznXSZQ2TQ9y3D0rj-fU4Yi=8GNOW89ZmwvHkvQada4cg@mail.gmail.com>
+	<CANA9Uk7rNtfLrO+oT8XbfxaRdX0psPmcRHcNOKYvQ0UCrTGc=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <y2038-bounces@lists.linaro.org>
-In-Reply-To: <1465448705-25055-1-git-send-email-deepa.kernel@gmail.com>
-List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/y2038/>
-List-Post: <mailto:y2038@lists.linaro.org>
-List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
-List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=subscribe>
-Errors-To: y2038-bounces@lists.linaro.org
-Sender: "Y2038" <y2038-bounces@lists.linaro.org>
-To: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Sage Weil <sage@redhat.com>, Arnd Bergmann <arnd@arndb.de>, y2038@lists.linaro.org, ceph-devel@vger.kernel.org, "Yan,
- Zheng" <zyan@redhat.com>, Al Viro <viro@zeniv.linux.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Linus Torvalds <torvalds@linux-foundation.org>, Ilya Dryomov <idryomov@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CANA9Uk7rNtfLrO+oT8XbfxaRdX0psPmcRHcNOKYvQ0UCrTGc=g@mail.gmail.com>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Q1VSUkVOVF9USU1FIGlzIG5vdCB5MjAzOCBzYWZlLgpUaGUgbWFjcm8gd2lsbCBiZSBkZWxldGVk
-IGFuZCBhbGwgdGhlIHJlZmVyZW5jZXMgdG8gaXQKd2lsbCBiZSByZXBsYWNlZCBieSBrdGltZV9n
-ZXRfKiBhcGlzLgoKc3RydWN0IHRpbWVzcGVjIGlzIGFsc28gbm90IHkyMDM4IHNhZmUuClJldGFp
-biB0aW1lc3BlYyBmb3IgdGltZXN0YW1wIHJlcHJlc2VudGF0aW9uIGhlcmUgYXMgY2VwaAp1c2Vz
-IGl0IGludGVybmFsbHkgZXZlcnl3aGVyZS4KVGhlc2UgcmVmZXJlbmNlcyB3aWxsIGJlIGNoYW5n
-ZWQgdG8gdXNlIHN0cnVjdCB0aW1lc3BlYzY0CmluIGEgc2VwYXJhdGUgcGF0Y2guCgpTaWduZWQt
-b2ZmLWJ5OiBEZWVwYSBEaW5hbWFuaSA8ZGVlcGEua2VybmVsQGdtYWlsLmNvbT4KQ2M6ICJZYW4s
-IFpoZW5nIiA8enlhbkByZWRoYXQuY29tPgpDYzogU2FnZSBXZWlsIDxzYWdlQHJlZGhhdC5jb20+
-CkNjOiBJbHlhIERyeW9tb3YgPGlkcnlvbW92QGdtYWlsLmNvbT4KQ2M6IGNlcGgtZGV2ZWxAdmdl
-ci5rZXJuZWwub3JnCi0tLQogbmV0L2NlcGgvb3NkX2NsaWVudC5jIHwgNCArKy0tCiAxIGZpbGUg
-Y2hhbmdlZCwgMiBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL25l
-dC9jZXBoL29zZF9jbGllbnQuYyBiL25ldC9jZXBoL29zZF9jbGllbnQuYwppbmRleCA4OTQ2OTU5
-Li40NGViMmQwIDEwMDY0NAotLS0gYS9uZXQvY2VwaC9vc2RfY2xpZW50LmMKKysrIGIvbmV0L2Nl
-cGgvb3NkX2NsaWVudC5jCkBAIC0zNTY3LDcgKzM1NjcsNyBAQCBjZXBoX29zZGNfd2F0Y2goc3Ry
-dWN0IGNlcGhfb3NkX2NsaWVudCAqb3NkYywKIAljZXBoX29pZF9jb3B5KCZscmVxLT50LmJhc2Vf
-b2lkLCBvaWQpOwogCWNlcGhfb2xvY19jb3B5KCZscmVxLT50LmJhc2Vfb2xvYywgb2xvYyk7CiAJ
-bHJlcS0+dC5mbGFncyA9IENFUEhfT1NEX0ZMQUdfV1JJVEUgfCBDRVBIX09TRF9GTEFHX09ORElT
-SzsKLQlscmVxLT5tdGltZSA9IENVUlJFTlRfVElNRTsKKwlrdGltZV9nZXRfcmVhbF90cygmbHJl
-cS0+bXRpbWUpOwogCiAJbHJlcS0+cmVnX3JlcSA9IGFsbG9jX2xpbmdlcl9yZXF1ZXN0KGxyZXEp
-OwogCWlmICghbHJlcS0+cmVnX3JlcSkgewpAQCAtMzYyNSw3ICszNjI1LDcgQEAgaW50IGNlcGhf
-b3NkY191bndhdGNoKHN0cnVjdCBjZXBoX29zZF9jbGllbnQgKm9zZGMsCiAJY2VwaF9vaWRfY29w
-eSgmcmVxLT5yX2Jhc2Vfb2lkLCAmbHJlcS0+dC5iYXNlX29pZCk7CiAJY2VwaF9vbG9jX2NvcHko
-JnJlcS0+cl9iYXNlX29sb2MsICZscmVxLT50LmJhc2Vfb2xvYyk7CiAJcmVxLT5yX2ZsYWdzID0g
-Q0VQSF9PU0RfRkxBR19XUklURSB8IENFUEhfT1NEX0ZMQUdfT05ESVNLOwotCXJlcS0+cl9tdGlt
-ZSA9IENVUlJFTlRfVElNRTsKKwlrdGltZV9nZXRfcmVhbF90cygmcmVxLT5yX210aW1lKTsKIAlv
-c2RfcmVxX29wX3dhdGNoX2luaXQocmVxLCAwLCBscmVxLT5saW5nZXJfaWQsCiAJCQkgICAgICBD
-RVBIX09TRF9XQVRDSF9PUF9VTldBVENIKTsKIAotLSAKMS45LjEKCl9fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClkyMDM4IG1haWxpbmcgbGlzdApZMjAzOEBs
-aXN0cy5saW5hcm8ub3JnCmh0dHBzOi8vbGlzdHMubGluYXJvLm9yZy9tYWlsbWFuL2xpc3RpbmZv
-L3kyMDM4Cg==
+Hi Blari,
+I ran the script and results are below:
+==
+./crush-reweight-by-utilization.py
+average_util: 0.587024, overload_util: 0.704429, underload_util: 0.587024.
+reweighted:
+43 (0.852690 >= 0.704429) [1.000000 -> 0.950000]
+238 (0.845154 >= 0.704429) [1.000000 -> 0.950000]
+104 (0.827908 >= 0.704429) [1.000000 -> 0.950000]
+173 (0.817063 >= 0.704429) [1.000000 -> 0.950000]
+==
+
+is the above scripts says to reweight 43 -> 0.95?
+
+Thanks
+Swami
+
+On Wed, Jun 8, 2016 at 10:34 AM, M Ranga Swami Reddy
+<swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Blair - Thanks for the script...Btw, is this script has option for dry run?
+>
+> Thanks
+> Swami
+>
+> On Wed, Jun 8, 2016 at 6:35 AM, Blair Bethwaite
+> <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>> Swami,
+>>
+>> Try https://github.com/cernceph/ceph-scripts/blob/master/tools/crush-reweight-by-utilization.py,
+>> that'll work with Firefly and allow you to only tune down weight of a
+>> specific number of overfull OSDs.
+>>
+>> Cheers,
+>>
+>> On 7 June 2016 at 23:11, M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>>> OK, understood...
+>>> To fix the nearfull warn, I am reducing the weight of a specific OSD,
+>>> which filled >85%..
+>>> Is this work-around advisable?
+>>>
+>>> Thanks
+>>> Swami
+>>>
+>>> On Tue, Jun 7, 2016 at 6:37 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+>>>> On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
+>>>>> Hi Sage,
+>>>>> >Jewel and the latest hammer point release have an improved
+>>>>> >reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
+>>>>> > run) to correct this.
+>>>>>
+>>>>> Thank you....But not planning to upgrade the cluster soon.
+>>>>> So, in this case - are there any tunable options will help? like
+>>>>> "crush tunable optimal" or so?
+>>>>> OR any other configuration options change will help?
+>>>>
+>>>> Firefly also has reweight-by-utilization... it's just a bit less friendly
+>>>> than the newer versions.  CRUSH tunables don't generally help here unless
+>>>> you have lots of OSDs that are down+out.
+>>>>
+>>>> Note that firefly is no longer supported.
+>>>>
+>>>> sage
+>>>>
+>>>>
+>>>>>
+>>>>>
+>>>>> Thanks
+>>>>> Swami
+>>>>>
+>>>>>
+>>>>> On Tue, Jun 7, 2016 at 6:00 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+>>>>> > On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
+>>>>> >> Hello,
+>>>>> >> I have aorund 100 OSDs in my ceph cluster. In this a few OSDs filled
+>>>>> >> with >85% of data and few OSDs filled with ~60%-70% of data.
+>>>>> >>
+>>>>> >> Any reason why the unevenly OSDs filling happned? do I need to any
+>>>>> >> tweaks on configuration to fix the above? Please advise.
+>>>>> >>
+>>>>> >> PS: Ceph version is - 0.80.7
+>>>>> >
+>>>>> > Jewel and the latest hammer point release have an improved
+>>>>> > reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
+>>>>> > run) to correct this.
+>>>>> >
+>>>>> > sage
+>>>>> >
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>> --
+>> Cheers,
+>> ~Blairo
