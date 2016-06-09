@@ -1,60 +1,55 @@
 From: Deepa Dinamani <deepa.kernel@gmail.com>
-Subject: [PATCH 19/21] libceph: Remove CURRENT_TIME references
-Date: Wed,  8 Jun 2016 22:05:03 -0700
-Message-ID: <1465448705-25055-20-git-send-email-deepa.kernel@gmail.com>
+Subject: [PATCH 20/21] libceph: Replace CURRENT_TIME with
+	ktime_get_real_ts
+Date: Wed,  8 Jun 2016 22:05:04 -0700
+Message-ID: <1465448705-25055-21-git-send-email-deepa.kernel@gmail.com>
 References: <1465448705-25055-1-git-send-email-deepa.kernel@gmail.com>
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <y2038-bounces@lists.linaro.org>
 In-Reply-To: <1465448705-25055-1-git-send-email-deepa.kernel@gmail.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
+List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/y2038/>
+List-Post: <mailto:y2038@lists.linaro.org>
+List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
+List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=subscribe>
+Errors-To: y2038-bounces@lists.linaro.org
+Sender: "Y2038" <y2038-bounces@lists.linaro.org>
 To: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Thomas Gleixner <tglx@linutronix.de>, Al Viro <viro@zeniv.linux.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, y2038@lists.linaro.org, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@redhat.com>, Arnd Bergmann <arnd@arndb.de>, y2038@lists.linaro.org, ceph-devel@vger.kernel.org, "Yan,
+ Zheng" <zyan@redhat.com>, Al Viro <viro@zeniv.linux.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Linus Torvalds <torvalds@linux-foundation.org>, Ilya Dryomov <idryomov@gmail.com>
 List-Id: ceph-devel.vger.kernel.org
 
-CURRENT_TIME is not y2038 safe.
-The macro will be deleted and all the references to it
-will be replaced by ktime_get_* apis.
-
-struct timespec is also not y2038 safe.
-Retain timespec for timestamp representation here as ceph
-uses it internally everywhere.
-These references will be changed to use struct timespec64
-in a separate patch.
-
-Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>
-Cc: Sage Weil <sage@redhat.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org
----
- net/ceph/messenger.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
-
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index a550289..1825eed 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -1366,8 +1366,9 @@ static void prepare_write_keepalive(struct ceph_connection *con)
- 	dout("prepare_write_keepalive %p\n", con);
- 	con_out_kvec_reset(con);
- 	if (con->peer_features & CEPH_FEATURE_MSGR_KEEPALIVE2) {
--		struct timespec now = CURRENT_TIME;
-+		struct timespec now;
- 
-+		ktime_get_real_ts(&now);
- 		con_out_kvec_add(con, sizeof(tag_keepalive2), &tag_keepalive2);
- 		ceph_encode_timespec(&con->out_temp_keepalive2, &now);
- 		con_out_kvec_add(con, sizeof(con->out_temp_keepalive2),
-@@ -3149,8 +3150,9 @@ bool ceph_con_keepalive_expired(struct ceph_connection *con,
- {
- 	if (interval > 0 &&
- 	    (con->peer_features & CEPH_FEATURE_MSGR_KEEPALIVE2)) {
--		struct timespec now = CURRENT_TIME;
-+		struct timespec now;
- 		struct timespec ts;
-+		ktime_get_real_ts(&now);
- 		jiffies_to_timespec(interval, &ts);
- 		ts = timespec_add(con->last_keepalive_ack, ts);
- 		return timespec_compare(&now, &ts) >= 0;
--- 
-1.9.1
-
+Q1VSUkVOVF9USU1FIGlzIG5vdCB5MjAzOCBzYWZlLgpUaGUgbWFjcm8gd2lsbCBiZSBkZWxldGVk
+IGFuZCBhbGwgdGhlIHJlZmVyZW5jZXMgdG8gaXQKd2lsbCBiZSByZXBsYWNlZCBieSBrdGltZV9n
+ZXRfKiBhcGlzLgoKc3RydWN0IHRpbWVzcGVjIGlzIGFsc28gbm90IHkyMDM4IHNhZmUuClJldGFp
+biB0aW1lc3BlYyBmb3IgdGltZXN0YW1wIHJlcHJlc2VudGF0aW9uIGhlcmUgYXMgY2VwaAp1c2Vz
+IGl0IGludGVybmFsbHkgZXZlcnl3aGVyZS4KVGhlc2UgcmVmZXJlbmNlcyB3aWxsIGJlIGNoYW5n
+ZWQgdG8gdXNlIHN0cnVjdCB0aW1lc3BlYzY0CmluIGEgc2VwYXJhdGUgcGF0Y2guCgpTaWduZWQt
+b2ZmLWJ5OiBEZWVwYSBEaW5hbWFuaSA8ZGVlcGEua2VybmVsQGdtYWlsLmNvbT4KQ2M6ICJZYW4s
+IFpoZW5nIiA8enlhbkByZWRoYXQuY29tPgpDYzogU2FnZSBXZWlsIDxzYWdlQHJlZGhhdC5jb20+
+CkNjOiBJbHlhIERyeW9tb3YgPGlkcnlvbW92QGdtYWlsLmNvbT4KQ2M6IGNlcGgtZGV2ZWxAdmdl
+ci5rZXJuZWwub3JnCi0tLQogbmV0L2NlcGgvb3NkX2NsaWVudC5jIHwgNCArKy0tCiAxIGZpbGUg
+Y2hhbmdlZCwgMiBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL25l
+dC9jZXBoL29zZF9jbGllbnQuYyBiL25ldC9jZXBoL29zZF9jbGllbnQuYwppbmRleCA4OTQ2OTU5
+Li40NGViMmQwIDEwMDY0NAotLS0gYS9uZXQvY2VwaC9vc2RfY2xpZW50LmMKKysrIGIvbmV0L2Nl
+cGgvb3NkX2NsaWVudC5jCkBAIC0zNTY3LDcgKzM1NjcsNyBAQCBjZXBoX29zZGNfd2F0Y2goc3Ry
+dWN0IGNlcGhfb3NkX2NsaWVudCAqb3NkYywKIAljZXBoX29pZF9jb3B5KCZscmVxLT50LmJhc2Vf
+b2lkLCBvaWQpOwogCWNlcGhfb2xvY19jb3B5KCZscmVxLT50LmJhc2Vfb2xvYywgb2xvYyk7CiAJ
+bHJlcS0+dC5mbGFncyA9IENFUEhfT1NEX0ZMQUdfV1JJVEUgfCBDRVBIX09TRF9GTEFHX09ORElT
+SzsKLQlscmVxLT5tdGltZSA9IENVUlJFTlRfVElNRTsKKwlrdGltZV9nZXRfcmVhbF90cygmbHJl
+cS0+bXRpbWUpOwogCiAJbHJlcS0+cmVnX3JlcSA9IGFsbG9jX2xpbmdlcl9yZXF1ZXN0KGxyZXEp
+OwogCWlmICghbHJlcS0+cmVnX3JlcSkgewpAQCAtMzYyNSw3ICszNjI1LDcgQEAgaW50IGNlcGhf
+b3NkY191bndhdGNoKHN0cnVjdCBjZXBoX29zZF9jbGllbnQgKm9zZGMsCiAJY2VwaF9vaWRfY29w
+eSgmcmVxLT5yX2Jhc2Vfb2lkLCAmbHJlcS0+dC5iYXNlX29pZCk7CiAJY2VwaF9vbG9jX2NvcHko
+JnJlcS0+cl9iYXNlX29sb2MsICZscmVxLT50LmJhc2Vfb2xvYyk7CiAJcmVxLT5yX2ZsYWdzID0g
+Q0VQSF9PU0RfRkxBR19XUklURSB8IENFUEhfT1NEX0ZMQUdfT05ESVNLOwotCXJlcS0+cl9tdGlt
+ZSA9IENVUlJFTlRfVElNRTsKKwlrdGltZV9nZXRfcmVhbF90cygmcmVxLT5yX210aW1lKTsKIAlv
+c2RfcmVxX29wX3dhdGNoX2luaXQocmVxLCAwLCBscmVxLT5saW5nZXJfaWQsCiAJCQkgICAgICBD
+RVBIX09TRF9XQVRDSF9PUF9VTldBVENIKTsKIAotLSAKMS45LjEKCl9fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClkyMDM4IG1haWxpbmcgbGlzdApZMjAzOEBs
+aXN0cy5saW5hcm8ub3JnCmh0dHBzOi8vbGlzdHMubGluYXJvLm9yZy9tYWlsbWFuL2xpc3RpbmZv
+L3kyMDM4Cg==
