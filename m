@@ -1,7 +1,7 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: RocksDB tuning
-Date: Thu, 9 Jun 2016 01:20:43 +0000
-Message-ID: <BL2PR02MB21154F454C61D9FD034FCF9AF45F0@BL2PR02MB2115.namprd02.prod.outlook.com>
+Date: Thu, 9 Jun 2016 03:59:48 +0000
+Message-ID: <BL2PR02MB211546C343EA171E3937F3BBF45F0@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <D37DE46C.5743E%manavalan.krishnan@sandisk.com>
  <BLUPR0201MB1524D8A9D42F7C50646D0AE8E85E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
  <3F3468645DC82146857A5E1C91E23F4B1BCCC4BA@SSIEXCH-MB3.ssi.samsung.com>
@@ -13,16 +13,27 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0063.outbound.protection.outlook.com ([157.56.111.63]:22608
+Received: from mail-bn1bon0059.outbound.protection.outlook.com ([157.56.111.59]:53763
 	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1161097AbcFIBUr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2016 21:20:47 -0400
-In-Reply-To: <0c174666-de02-36ae-fcb9-196ffa824330@redhat.com>
+	id S1752400AbcFID74 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2016 23:59:56 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Mark Nelson <mnelson@redhat.com>, Jianjian Huo <jianjian.huo@samsung.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Manavalan Krishnan <Manavalan.Krishnan@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+
+Mark,
+Options are setting properly with ',' , I must be missing something..Anyways...
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Somnath Roy 
+Sent: Wednesday, June 08, 2016 6:21 PM
+To: 'Mark Nelson'; Jianjian Huo; Allen Samuels; Manavalan Krishnan; Ceph Development
+Subject: RE: RocksDB tuning
 
 Mark,
 I think increasing compact_threads/flusher_threads should work as we are handling that from our code.
@@ -43,7 +54,7 @@ Thanks & Regards
 Somnath
 
 -----Original Message-----
-From: Mark Nelson [mailto:mnelson@redhat.com] 
+From: Mark Nelson [mailto:mnelson@redhat.com]
 Sent: Wednesday, June 08, 2016 6:12 PM
 To: Somnath Roy; Jianjian Huo; Allen Samuels; Manavalan Krishnan; Ceph Development
 Subject: Re: RocksDB tuning
