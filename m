@@ -1,166 +1,90 @@
-From: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: un-even data filled on OSDs
-Date: Thu, 9 Jun 2016 22:20:41 +1000
-Message-ID: <CA+z5DszvAcwTO=9smdqjrLWexWGkYmjA0tE6yKVn79ezr0FVmg@mail.gmail.com>
-References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com>
-	<alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com>
-	<CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com>
-	<alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com>
-	<CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
-	<CA+z5DsznXSZQ2TQ9y3D0rj-fU4Yi=8GNOW89ZmwvHkvQada4cg@mail.gmail.com>
-	<CANA9Uk7rNtfLrO+oT8XbfxaRdX0psPmcRHcNOKYvQ0UCrTGc=g@mail.gmail.com>
-	<CANA9Uk48oQ7sjd614LzYy=7HxYfmO8qZxoQCC62wYeOdsBPFeg@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: RocksDB tuning
+Date: Thu, 9 Jun 2016 08:37:46 -0500
+Message-ID: <a3216e58-d591-50ae-f2f2-0cbb7cdaa7bb@redhat.com>
+References: <D37DE46C.5743E%manavalan.krishnan@sandisk.com>
+ <BLUPR0201MB1524D8A9D42F7C50646D0AE8E85E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANA9Uk48oQ7sjd614LzYy=7HxYfmO8qZxoQCC62wYeOdsBPFeg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:57125 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751168AbcFINhu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 9 Jun 2016 09:37:50 -0400
+In-Reply-To: <BLUPR0201MB1524D8A9D42F7C50646D0AE8E85E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>, Manavalan Krishnan <Manavalan.Krishnan@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Swami,
+Hi Allen,
 
-Run it with the help option for more context:
-"./crush-reweight-by-utilization.py --help". In your example below
-it's reporting to you what changes it would make to your OSD reweight
-values based on the default option settings (because you didn't
-specify any options). To make the script actually apply those weight
-changes you need the "-d -r" or "--doit --really" flags.
+On a somewhat related note, I wanted to mention that I had forgotten 
+that chhabaremesh's min_alloc_size commit for different media types was 
+committed into master:
 
-If you want to get an idea of the impact that the weight changes will
-have before actually starting to move data then I suggest setting
-norecover and nobackfill (ceph osd set ...) on your cluster before
-making the weight changes, you can then examine "ceph -s" output
-(looking at "objects misplaced" to determine the scale of recovery
-required. Unset the flags once ready to start or back-out the reweight
-settings if you change your mind. You'll also want to lower these
-recovery and backfill tunables to reduce impact to client I/O (and if
-possible do not do this reweight change during peak I/O hours):
-ceph tell osd.* injectargs '--osd-max-backfills 1'
-ceph tell osd.* injectargs '--osd-max-recovery-threads 1'
-ceph tell osd.* injectargs '--osd-recovery-op-priority 1'
-ceph tell osd.* injectargs '--osd-client-op-priority 63'
-ceph tell osd.* injectargs '--osd-recovery-max-active 1'
+https://github.com/ceph/ceph/commit/8185f2d356911274ca679614611dc335e3efd187
 
-Cheers,
+IE those tests appear to already have been using a 4K min alloc size due 
+to non-rotational NVMe media.  I went back and verified that explicitly 
+changing the min_alloc size (in fact all of them to be sure) to 4k does 
+not change the behavior from graphs I showed yesterday.  The rocksdb 
+compaction stalls due to excessive reads appear (at least on the 
+surface) to be due to metadata traffic during heavy small random writes.
 
-On 9 June 2016 at 20:20, M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hi Blari,
-> I ran the script and results are below:
-> ==
-> ./crush-reweight-by-utilization.py
-> average_util: 0.587024, overload_util: 0.704429, underload_util: 0.587024.
-> reweighted:
-> 43 (0.852690 >= 0.704429) [1.000000 -> 0.950000]
-> 238 (0.845154 >= 0.704429) [1.000000 -> 0.950000]
-> 104 (0.827908 >= 0.704429) [1.000000 -> 0.950000]
-> 173 (0.817063 >= 0.704429) [1.000000 -> 0.950000]
-> ==
+Mark
+
+On 06/08/2016 06:52 PM, Allen Samuels wrote:
+> Let's make a patch that creates actual Ceph parameters for these things so that we don't have to edit the source code in the future.
 >
-> is the above scripts says to reweight 43 -> 0.95?
 >
-> Thanks
-> Swami
+> Allen Samuels
+> SanDisk |a Western Digital brand
+> 2880 Junction Avenue, San Jose, CA 95134
+> T: +1 408 801 7030| M: +1 408 780 6416
+> allen.samuels@SanDisk.com
 >
-> On Wed, Jun 8, 2016 at 10:34 AM, M Ranga Swami Reddy
-> <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> Blair - Thanks for the script...Btw, is this script has option for dry run?
+>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>> owner@vger.kernel.org] On Behalf Of Manavalan Krishnan
+>> Sent: Wednesday, June 08, 2016 3:10 PM
+>> To: Mark Nelson <mnelson@redhat.com>; Ceph Development <ceph-
+>> devel@vger.kernel.org>
+>> Subject: RocksDB tuning
+>>
+>> Hi Mark
+>>
+>> Here are the tunings that we used to avoid the IOPs choppiness caused by
+>> rocksdb compaction.
+>>
+>> We need to add the following options in src/kv/RocksDBStore.cc before
+>> rocksdb::DB::Open in RocksDBStore::do_open opt.IncreaseParallelism(16);
+>>   opt.OptimizeLevelStyleCompaction(512 * 1024 * 1024);
+>>
+>>
 >>
 >> Thanks
->> Swami
+>> Mana
 >>
->> On Wed, Jun 8, 2016 at 6:35 AM, Blair Bethwaite
->> <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>> Swami,
+>>
 >>>
->>> Try https://github.com/cernceph/ceph-scripts/blob/master/tools/crush-reweight-by-utilization.py,
->>> that'll work with Firefly and allow you to only tune down weight of a
->>> specific number of overfull OSDs.
->>>
->>> Cheers,
->>>
->>> On 7 June 2016 at 23:11, M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>>> OK, understood...
->>>> To fix the nearfull warn, I am reducing the weight of a specific OSD,
->>>> which filled >85%..
->>>> Is this work-around advisable?
->>>>
->>>> Thanks
->>>> Swami
->>>>
->>>> On Tue, Jun 7, 2016 at 6:37 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
->>>>> On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
->>>>>> Hi Sage,
->>>>>> >Jewel and the latest hammer point release have an improved
->>>>>> >reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
->>>>>> > run) to correct this.
->>>>>>
->>>>>> Thank you....But not planning to upgrade the cluster soon.
->>>>>> So, in this case - are there any tunable options will help? like
->>>>>> "crush tunable optimal" or so?
->>>>>> OR any other configuration options change will help?
->>>>>
->>>>> Firefly also has reweight-by-utilization... it's just a bit less friendly
->>>>> than the newer versions.  CRUSH tunables don't generally help here unless
->>>>> you have lots of OSDs that are down+out.
->>>>>
->>>>> Note that firefly is no longer supported.
->>>>>
->>>>> sage
->>>>>
->>>>>
->>>>>>
->>>>>>
->>>>>> Thanks
->>>>>> Swami
->>>>>>
->>>>>>
->>>>>> On Tue, Jun 7, 2016 at 6:00 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
->>>>>> > On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
->>>>>> >> Hello,
->>>>>> >> I have aorund 100 OSDs in my ceph cluster. In this a few OSDs filled
->>>>>> >> with >85% of data and few OSDs filled with ~60%-70% of data.
->>>>>> >>
->>>>>> >> Any reason why the unevenly OSDs filling happned? do I need to any
->>>>>> >> tweaks on configuration to fix the above? Please advise.
->>>>>> >>
->>>>>> >> PS: Ceph version is - 0.80.7
->>>>>> >
->>>>>> > Jewel and the latest hammer point release have an improved
->>>>>> > reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
->>>>>> > run) to correct this.
->>>>>> >
->>>>>> > sage
->>>>>> >
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>
->>>>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>> --
->>> Cheers,
->>> ~Blairo
-
-
-
--- 
-Cheers,
-~Blairo
+>>
+>> PLEASE NOTE: The information contained in this electronic mail message is
+>> intended only for the use of the designated recipient(s) named above. If the
+>> reader of this message is not the intended recipient, you are hereby notified
+>> that you have received this message in error and that any review,
+>> dissemination, distribution, or copying of this message is strictly prohibited. If
+>> you have received this communication in error, please notify the sender by
+>> telephone or e-mail (as shown above) immediately and destroy any and all
+>> copies of this message in your possession (whether hard copies or
+>> electronically stored copies).
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+>> body of a message to majordomo@vger.kernel.org More majordomo info at
+>> http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
