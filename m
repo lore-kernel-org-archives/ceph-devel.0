@@ -1,17 +1,17 @@
 From: Sage Weil <sage@newdream.net>
 Subject: Re: [GSoC] wrong patch "msg: change entity_addr_t encode/decode"
-Date: Fri, 10 Jun 2016 13:05:49 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606101305230.6221@cpach.fuggernut.com>
+Date: Fri, 10 Jun 2016 13:07:41 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606101305530.6221@cpach.fuggernut.com>
 References: <CAEG8a3JF2t1hkHY2MQK5DVwbOy3VGZUNuB-uF5mOzBSO8xhQeg@mail.gmail.com> <alpine.DEB.2.11.1606021238150.6221@cpach.fuggernut.com> <alpine.DEB.2.11.1606021343480.6221@cpach.fuggernut.com> <CAEG8a3+6YycUH6Hm6w3g_XeWPBfTYGf3KiNG0Ujw=FsPr+WaZQ@mail.gmail.com>
  <CAEG8a3Lwwe2htBbc=+D9hYn4SJnO04H83gKRqED0M4+fzpg+oQ@mail.gmail.com> <alpine.DEB.2.11.1606091205290.32559@cpach.fuggernut.com> <CAEG8a3KW+259oAWHVsRJOH2UK6skVHa-0-6C72xVt5F+Eh5Kyw@mail.gmail.com>
  <CAEG8a3KhOwMgZDfnbHyRsHwPrW8uDs4_8mmvU_73MVUzRQeRCA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35183 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:35195 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752347AbcFJRF2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 13:05:28 -0400
+	with ESMTP id S1750975AbcFJRHQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 13:07:16 -0400
 In-Reply-To: <CAEG8a3KhOwMgZDfnbHyRsHwPrW8uDs4_8mmvU_73MVUzRQeRCA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -28,13 +28,12 @@ On Fri, 10 Jun 2016, Junwang Zhao wrote:
 > 
 > [0]https://github.com/zhjwpku/ceph/commit/e7307deae01fd6b675350fdae9c493eae04fdde9
 
-The output of any make check test is found at $test_name.log.  In this 
-case, unittest_addrs.log.  But you probably just want to
-
- make unittest_addrs && ./unittest_addrs
+I fixed a problem in the messengesr that was breaking the addr learning, 
+and thus a bunch of the unit tests that try to run test clusters.  I also 
+rebased it on master.  Pushed an updated wip-addr-more to my git tree 
+(liewegas/ceph)!
 
 sage
-
 
 > 
 > Thanks,
