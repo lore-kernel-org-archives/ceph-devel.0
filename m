@@ -1,46 +1,60 @@
-From: Sage Weil <sweil@redhat.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
 Subject: Re: A Transformation of our Global Context
-Date: Fri, 10 Jun 2016 16:53:13 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606101651280.6221@cpach.fuggernut.com>
-References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com> <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com> <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com> <CAJ4mKGaSyKN+_52-+CSKhFXsL2WE+5T_Z6egpbBNaJvGs4a-Og@mail.gmail.com>
- <20160610201543.GC29233@ultraspiritum.eng.arb.redhat.com> <alpine.DEB.2.11.1606101638520.6221@cpach.fuggernut.com> <20160610204549.GB7952@ultraspiritum.eng.arb.redhat.com>
+Date: Fri, 10 Jun 2016 17:04:33 -0400
+Message-ID: <20160610210433.GA16959@ultraspiritum.eng.arb.redhat.com>
+References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com>
+ <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com>
+ <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
+ <CAJ4mKGaSyKN+_52-+CSKhFXsL2WE+5T_Z6egpbBNaJvGs4a-Og@mail.gmail.com>
+ <alpine.DEB.2.11.1606101616210.6221@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40113 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59547 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752910AbcFJUwq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 10 Jun 2016 16:52:46 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 20B36461C1
-	for <ceph-devel@vger.kernel.org>; Fri, 10 Jun 2016 20:52:46 +0000 (UTC)
-In-Reply-To: <20160610204549.GB7952@ultraspiritum.eng.arb.redhat.com>
+	id S1751918AbcFJVFH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 Jun 2016 17:05:07 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1606101616210.6221@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Adam C. Emerson" <aemerson@redhat.com>
+To: Sage Weil <sage@newdream.net>
 Cc: Gregory Farnum <gfarnum@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Fri, 10 Jun 2016, Adam C. Emerson wrote:
-> On 10/06/2016, Sage Weil wrote:
-> > FWIW the time thing is a bit of a red herring.  The only reason time takes 
-> > cct is for the configuration clock skew.  That was added for debugging 
-> > purposes but has never (to my knowledge) been used.  I'd be happy to rip 
-> > it out.
-> 
-> I wasn't aware of that. I'd asked once if the clock skew debug option
-> was really important (back with the original time patch) and was told
-> it was. The person I was talking to might have thought I was talking
-> about monitor clock skew or something.
+On 10/06/2016, Sage Weil wrote:
+> I think the crux of the issue is the debug/logging code.  Almost all
+> the other uses of cct are related to config options that are
+> per-cluster.
 
-Ah, there is *one* teuthology test that sets this:
+That is correct. I thought we might pull some things like (like the
+Crypto stuff) while we were at it but that was more "As long as I'm
+here anyway I might as well see if there's anything more to do..."
 
-$ git grep clock\ offset | cat
-suites/rados/multimon/tasks/mon_clock_with_skews.yaml:        clock offset: 10
+> And with logging... it seems like even this is really a per-cluster
+> (well, per entity) thing.  Sorting through a log file that combines
+> output from two different objecters sounds horrific, and when we
+> cram multiple OSDs into one process, we're going to want them to
+> still feed into different log files.
 
-I'd be quite happy to drop this test, or kludge around it some other way 
-(e.g., put a mon on a different host and change the system time), if it 
-saves us as much code churn as I suspect it will...
+This is a good point that I had not considered. Though, I'm not sure
+if the un-separated case is that much better. I think part of the
+savings we would want from multi-OSD work (at least in principle) is
+to be able to have them share messengers and other overhead. In that
+case giving each OSD its own fully fledged CephContext doesn't make
+sense, I don't think.
 
-sage
+Some form of sterring might work, perhaps making the log system smart
+enough to shove things around based on subsystem or an entity
+identifier or something.
+
+> How bad is the cct plumbing patch?  I fear this might still be the
+> best path forward...
+
+It's not great? Really at all. I wrote it and I don't like it. I
+could pull it up and smack it into shape and make sure it passes tests
+if it were necessary.
+
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
