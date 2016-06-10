@@ -1,79 +1,96 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: A Transformation of our Global Context
-Date: Fri, 10 Jun 2016 20:28:23 +0000
-Message-ID: <BLUPR0201MB152410CE52AA744E1631F6AFE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
-References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com>
- <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com>
- <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: A Transformation of our Global Context
+Date: Fri, 10 Jun 2016 16:38:24 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606101616210.6221@cpach.fuggernut.com>
+References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com> <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com> <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
+ <CAJ4mKGaSyKN+_52-+CSKhFXsL2WE+5T_Z6egpbBNaJvGs4a-Og@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1359184222-1465591106=:6221"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0062.outbound.protection.outlook.com ([207.46.100.62]:3232
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751801AbcFJU21 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 10 Jun 2016 16:28:27 -0400
-In-Reply-To: <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:36484 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751919AbcFJUh6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 16:37:58 -0400
+In-Reply-To: <CAJ4mKGaSyKN+_52-+CSKhFXsL2WE+5T_Z6egpbBNaJvGs4a-Og@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Adam C. Emerson" <aemerson@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
+To: Gregory Farnum <gfarnum@redhat.com>
 Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
-Z10gT24gQmVoYWxmIE9mIEFkYW0gQy4gRW1lcnNvbg0KPiBTZW50OiBGcmlkYXksIEp1bmUgMTAs
-IDIwMTYgMTI6NTkgUE0NCj4gVG86IEdyZWdvcnkgRmFybnVtIDxnZmFybnVtQHJlZGhhdC5jb20+
-DQo+IENjOiBUaGUgU2FjcmVkIE9yZGVyIG9mIHRoZSBTcXVpZCBDeWJlcm5ldGljIDxjZXBoLWRl
-dmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IEEgVHJhbnNmb3JtYXRpb24gb2Yg
-b3VyIEdsb2JhbCBDb250ZXh0DQo+IA0KPiBPbiAxMC8wNi8yMDE2LCBHcmVnb3J5IEZhcm51bSB3
-cm90ZToNCj4gPiBNYXliZSBJJ20gbWlzdW5kZXJzdGFuZGluZyB0aGUgc2NvcGUgb2Ygd2hhdCB5
-b3UncmUgcHJvcG9zaW5nLCBidXQgSQ0KPiA+IGRvbid0IHRoaW5rIHRoaXMgaXMgYSBnb29kIHJl
-YXNvbiB0byBnbyB0aHJvdWdoIHRoaXMgd29yayByaWdodCBub3cuDQo+ID4gTG90cyBvZiB0aGlu
-Z3MgdGhhdCBzZWVtIHByb2Nlc3Mtc3BlY2lmaWMgdHVybiBvdXQgdG8gYmUgZXNzZW50aWFsbHkN
-Cj4gPiBjbHVzdGVyIHByb3BlcnRpZXMsIGRlc3BpdGUgYmVpbmcgY29uZmlndXJhYmxlIG9uIGJv
-dGggZW5kcywgYW5kIHdpbGwNCj4gPiBuZWVkIHRvIGJlIHJlZmVyZW5jZWQgZnJvbSBhbGwgb3Zl
-ciB0aGUgc3RhY2suIEFuZCBpbiBnZW5lcmFsIGlmIHdlJ3JlDQo+ID4gYWRkcmVzc2luZyBtdWx0
-aXBsZSBDZXBoIGNsdXN0ZXJzIHdpdGhpbiBhIHV0aWxpdHkgd2Ugd2FudCBhIGZ1bGwNCj4gPiBS
-YWRvc0NsaWVudCBldGMgZm9yIGVhY2ggY2x1c3Rlciwgc28gdGhlIHNwbGl0IGRvZXNuJ3QgZG8g
-dXMgbXVjaCBnb29kDQo+ID4gb24gaXRzIG93biwgZG9lcyBpdD8gKElmIHdlIGRvbid0IHdhbnQg
-c2VwYXJhdGUgYWRtaW4gc29ja2V0cyBmb3IgZWFjaA0KPiA+IG9uZSwgd2UnZCBuZWVkIHRvIGV4
-dGVuZCBhbGwgb2YgdGhvc2UgaW50ZXJmYWNlcyB0byBzdXBwb3J0IHR3bw0KPiA+IGVudHJpZXMg
-Zm9yIHRoZSBzYW1lIHR5cGUgb2YgdGhpbmcsIGV0YykNCj4gDQo+IEZpbmRpbmcgb3V0IGV4YWN0
-bHkgd2hpY2ggdGhpbmdzIGFyZSBwcm9jZXNzIHNwZWNpZmljIGlzIG9uZSByZWFzb24gSSdtDQo+
-IHNvbGljaXRpbmcgZm9yIGZlZWRiYWNrLiBBZG1pblNvY2tldCBkb2Vzbid0IGhhdmUgdG8gYmUg
-aW5jbHVkZWQuIFJlYWxseSwgSQ0KPiB0aGluayB3ZSdkIGdldCBhIGxvdCBvZiBiZW5lZml0IGlm
-IHdlIG1hZGUgSlVTVCBzb21lIGRlYnVnIG9wdGlvbnMgYW5kIGRvdXQNCj4gc3VwcG9ydCBwcm9j
-ZXNzIHNwZWNpZmljIGFuZCByZWZhY3RvcmVkIGl0IHRoYXQgd2F5LiBPdGhlciB0aGluZ3MgY291
-bGQgbW92ZQ0KPiBsYXRlciBvbiBpZiBwZW9wbGUgd2FudGVkIHRoZW0gdG8gYnV0IHdvdWxkbid0
-IGhhdmUgdG8uDQo+IA0KPiANCj4gPiBJZiB0aGlzIGlzIHlvdXIgYWN0dWFsIGdvYWwsIEkgdGhp
-bmsgdGhlIHVuYXBwZWFsaW5nIHdvcmsgb2YgcmVwbGFjaW5nDQo+ID4gZ19jZXBoX2NvbnRleHQg
-d2l0aCBhIENlcGhDb250ZXh0ICpjY3QgaXMgdGhlIHdheSB0byBnbyDigJQgd2UnZCBuZWVkIHRv
-DQo+ID4gZG8gdGhpcyBtdWNoIHRvIHN1cHBvcnQgbXVsdGlwbGUgQ2x1c3RlckNvbnRleHRzIHdp
-dGhpbiBhIHByb2Nlc3MNCj4gPiBhbnl3YXkuIE9uY2Ugd2UgaGF2ZSBhIG1vdGl2YXRpbmcgdXNl
-IGNhc2UgZm9yIHNwbGl0dGluZyBzdHVmZiB1cCwgd2UNCj4gPiBjYW4gYWRkcmVzcyB0aGF0LiBC
-dXQgaWYgd2UgdHJ5IGFuZCBkbyBhIGdlbmVyaWMgc29sdXRpb24gaXQnbGwgYmUNCj4gPiBtdWNo
-IG1vcmUgZGlmZmljdWx0LCBhbmQgcHJvYmFibHkgd2lsbCBtaXNzIHNvbWUga2V5IHBvaW50cyB3
-ZSBkb24ndA0KPiA+IHJ1biBpbnRvIHVudGlsIHRyeWluZyB0byBtYWtlIHVzZSBvZiBpdC4NCj4g
-Pg0KPiA+IEFtIEkgbWlzc2luZyBzb21ldGhpbmc/DQo+ID4gLUdyZWcNCj4gDQo+IEkgaGF2ZSBi
-ZWVuIHdvcmtpbmcgb24gdGhlIHVuYXBwZWFsaW5nIHdvcmsgb2YgcmVwbGFjaW5nIGdfY2VwaF9j
-b250ZXh0DQo+IHdpdGggQ2VwaENvbnRleHQqIGNjdC4gSXQncyBub3QganVzdCB1bmFwcGVhbGlu
-ZyB3b3JrLCBpdCBlbmRzIHVwIHdpaHQgYQ0KPiByZXN1bHQgdWdseSBlbm91Z2ggSSBkb24ndCB0
-aGluayBJJ2Qgd2FudCB0byBtZXJnZSBpdCBpZiBzb21lb25lIHByZXNlbnRlZCBpdA0KPiB0byBt
-ZS4gSXQncyB2ZXJ5IGludmFzaXZlIGluIHRoYXQgaXQgY2hhbmdlcyBhIHdob2xlIGxvdCBvZiBl
-dmVyeXRoaW5nLiBUaGUgc3BsaXQNCj4gd291bGQgQUxTTyBjaGFuZ2UgYSB3aG9sZSBsb3Qgb2Yg
-ZXZlcnl0aGluZywgYnV0IGxpa2VseSBsZXNzLiBZb3Ugd291bGQgYXQNCj4gbGVhc3QgYmUgYWJs
-ZSB0byBhdm9pZCBjaGFuZ2luZyB0aGUgY29uc3RydWN0b3JzIG9mIGEgd2hpbGUgYnVuY2ggb2YN
-Cj4gdW5yZWxhdGVkIHRoaW5ncyBqdXN0IHRvIHBhc3MgYSB2YXJpYWJsZSBpbiB0aGF0IG9ubHkg
-c29tZSBtZW1iZXIgc2V2ZXJhbA0KPiBjbGFzc2VzIGluIGNhcmVzIGFib3V0IHNvIGl0IGNhbiBs
-b2cgYSBtZXNzYWdlLg0KDQpIYXZlIHlvdSBjb25zaWRlcmVkIHRocmVhZGxvY2FsIHN0b3JhZ2Ug
-Zm9yIHRoaXM/IEkgc3VzcGVjdCBpdCdzIGEgKm11Y2gqIGVhc2llciB3YXkgdG8gZ28uIFZlcnkg
-bGl0dGxlIHNvdXJjZSBjb2RlIHdpbGwgbmVlZCBtb2RpZmljYXRpb24uDQoNCj4gDQo+IA0KPiAt
-LQ0KPiBTZW5pb3IgU29mdHdhcmUgRW5naW5lZXIgICAgICAgICAgIFJlZCBIYXQgU3RvcmFnZSwg
-QW5uIEFyYm9yLCBNSSwgVVMNCj4gSVJDOiBBZW1lcnNvbkB7UmVkSGF0LCBPRlRDLCBGcmVlbm9k
-ZX0NCj4gMHg4MEY3NTQ0QjkwRURCRkI5IEU3MDcgODZCQSAwQzFCIDYyQ0MgMTUyQyAgN0MxMiA4
-MEY3IDU0NEIgOTBFRCBCRkI5DQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
-OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUNCj4gYm9keSBv
-ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBp
-bmZvIGF0DQo+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-1359184222-1465591106=:6221
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+On Fri, 10 Jun 2016, Gregory Farnum wrote:
+> On Fri, Jun 10, 2016 at 12:58 PM, Adam C. Emerson <aemerson@redhat.com> wrote:
+> > On 10/06/2016, Gregory Farnum wrote:
+> >> Maybe I'm misunderstanding the scope of what you're proposing, but I
+> >> don't think this is a good reason to go through this work right now.
+> >> Lots of things that seem process-specific turn out to be essentially
+> >> cluster properties, despite being configurable on both ends, and will
+> >> need to be referenced from all over the stack. And in general if we're
+> >> addressing multiple Ceph clusters within a utility we want a full
+> >> RadosClient etc for each cluster, so the split doesn't do us much good
+> >> on its own, does it? (If we don't want separate admin sockets for each
+> >> one, we'd need to extend all of those interfaces to support two
+> >> entries for the same type of thing, etc)
+> >
+> > Finding out exactly which things are process specific is one reason
+> > I'm soliciting for feedback. AdminSocket doesn't have to be
+> > included. Really, I think we'd get a lot of benefit if we made JUST
+> > some debug options and dout support process specific and refactored it
+> > that way. Other things could move later on if people wanted them to
+> > but wouldn't have to.
+> >
+> >
+> >> If this is your actual goal, I think the unappealing work of replacing
+> >> g_ceph_context with a CephContext *cct is the way to go — we'd need to
+> >> do this much to support multiple ClusterContexts within a process
+> >> anyway. Once we have a motivating use case for splitting stuff up, we
+> >> can address that. But if we try and do a generic solution it'll be
+> >> much more difficult, and probably will miss some key points we don't
+> >> run into until trying to make use of it.
+> >>
+> >> Am I missing something?
+> >> -Greg
+> >
+> > I have been working on the unappealing work of replacing
+> > g_ceph_context with CephContext* cct. It's not just unappealing work,
+> > it ends up wiht a result ugly enough I don't think I'd want to merge
+> > it if someone presented it to me. It's very invasive in that it
+> > changes a whole lot of everything. The split would ALSO change a whole
+> > lot of everything, but likely less. You would at least be able to
+> > avoid changing the constructors of a while bunch of unrelated things
+> > just to pass a variable in that only some member several classes in
+> > cares about so it can log a message.
+> 
+> So you want everything to stay with/go back to having a global member
+> for the ProcessContext?
+> I'm surprised it needs to find its way into so many random things;
+> most objects have references to their parent that let them go back to
+> the MDSRank/OSD/whatever main class there is.
+
+I think the crux of the issue is the debug/logging code.  Almost all the 
+other uses of cct are related to config options that are per-cluster.
+
+And with logging... it seems like even this is really a per-cluster (well, 
+per entity) thing.  Sorting through a log file that combines output from 
+two different objecters sounds horrific, and when we cram multiple
+OSDs into one process, we're going to want them to still feed into 
+different log files.  (And pid files. And admin sockets.)
+
+There are a few things that really are process-bound (like the crypto 
+libraries) and are obvious candidates, but I think even those we have to 
+be careful with; using globals for anything that is dynamically linked 
+(i.e., included in librados or libcommon) is generally a big no-no.  IIRC 
+lockdep is the main place where we break that rule (for better or for 
+worse).
+
+How bad is the cct plumbing patch?  I fear this might still be the best 
+path forward...
+
+sage
+--8323329-1359184222-1465591106=:6221--
