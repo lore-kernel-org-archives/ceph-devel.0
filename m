@@ -1,7 +1,7 @@
 From: Allen Samuels <Allen.Samuels@sandisk.com>
 Subject: RE: RocksDB tuning
-Date: Fri, 10 Jun 2016 14:56:37 +0000
-Message-ID: <BLUPR0201MB152410E1F967AFFE0B1FD225E8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Date: Fri, 10 Jun 2016 14:57:32 +0000
+Message-ID: <BLUPR0201MB1524D36741665F05BCB8AC0EE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
 References: <D37DE46C.5743E%manavalan.krishnan@sandisk.com>
  <BLUPR0201MB1524D8A9D42F7C50646D0AE8E85E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
  <a3216e58-d591-50ae-f2f2-0cbb7cdaa7bb@redhat.com>
@@ -15,17 +15,25 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0099.outbound.protection.outlook.com ([157.56.110.99]:53600
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+Received: from mail-bl2on0092.outbound.protection.outlook.com ([65.55.169.92]:29616
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752173AbcFJO4l convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 10:56:41 -0400
+	id S1752331AbcFJO5g convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 10:57:36 -0400
 In-Reply-To: <alpine.DEB.2.11.1606101052190.6221@cpach.fuggernut.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
 Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, Manavalan Krishnan <Manavalan.Krishnan@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+
+Oh, and use 16-bit checksums :)
+
+Allen Samuels
+SanDisk |a Western Digital brand
+2880 Junction Avenue, Milpitas, CA 95134
+T: +1 408 801 7030| M: +1 408 780 6416
+allen.samuels@SanDisk.com
 
 
 > -----Original Message-----
@@ -79,9 +87,6 @@ Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, Man
 > it's big enough to really help.  Also we'd lose locality, would need a second
 > get to load csum metadata on read, etc.  :/  I don't really have any good ideas
 > here.
-
-Reduce the RBD stripe size from 4MB to something smaller. 
-
 > 
 > sage
 > 
