@@ -1,55 +1,79 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: A Transformation of our Global Context
-Date: Fri, 10 Jun 2016 16:15:43 -0400
-Message-ID: <20160610201543.GC29233@ultraspiritum.eng.arb.redhat.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: A Transformation of our Global Context
+Date: Fri, 10 Jun 2016 20:28:23 +0000
+Message-ID: <BLUPR0201MB152410CE52AA744E1631F6AFE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
 References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com>
  <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com>
  <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
- <CAJ4mKGaSyKN+_52-+CSKhFXsL2WE+5T_Z6egpbBNaJvGs4a-Og@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36420 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932571AbcFJUQR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 10 Jun 2016 16:16:17 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id B286B72083
-	for <ceph-devel@vger.kernel.org>; Fri, 10 Jun 2016 20:16:16 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <CAJ4mKGaSyKN+_52-+CSKhFXsL2WE+5T_Z6egpbBNaJvGs4a-Og@mail.gmail.com>
+Received: from mail-by2on0062.outbound.protection.outlook.com ([207.46.100.62]:3232
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751801AbcFJU21 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 Jun 2016 16:28:27 -0400
+In-Reply-To: <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
+To: "Adam C. Emerson" <aemerson@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
 Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On 10/06/2016, Gregory Farnum wrote:
-> So you want everything to stay with/go back to having a global member
-> for the ProcessContext?
-
-Precisely. I want a ProcessContext to handle dout and the like in
-libcommon (since it doesn't vary by cluster I don't think there's any
-reason to restrict it to libglobal/daemon/whatever) and let everything
-else be passed in.
-
-> I'm surprised it needs to find its way into so many random things;
-> most objects have references to their parent that let them go back to
-> the MDSRank/OSD/whatever main class there is.
-
-A lot of them do have a link back to the main class but a lot
-don't. A lot of 'light weight' data classes in the MDS for example
-don't have a link back to anything but still need g_ceph_context to
-tell time or dout something. A lot of callbacks do that, too. other
-places they link back but the cct is protected (which I just switched
-to public in my version, but it isn't ideal.)
-
-After having tried to do it I think having a fairly minimal (process
-specific) part that's global in libcommon and the rest that Isn't
-Global Anywhere is much less disruptive.
-
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIEFkYW0gQy4gRW1lcnNvbg0KPiBTZW50OiBGcmlkYXksIEp1bmUgMTAs
+IDIwMTYgMTI6NTkgUE0NCj4gVG86IEdyZWdvcnkgRmFybnVtIDxnZmFybnVtQHJlZGhhdC5jb20+
+DQo+IENjOiBUaGUgU2FjcmVkIE9yZGVyIG9mIHRoZSBTcXVpZCBDeWJlcm5ldGljIDxjZXBoLWRl
+dmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IEEgVHJhbnNmb3JtYXRpb24gb2Yg
+b3VyIEdsb2JhbCBDb250ZXh0DQo+IA0KPiBPbiAxMC8wNi8yMDE2LCBHcmVnb3J5IEZhcm51bSB3
+cm90ZToNCj4gPiBNYXliZSBJJ20gbWlzdW5kZXJzdGFuZGluZyB0aGUgc2NvcGUgb2Ygd2hhdCB5
+b3UncmUgcHJvcG9zaW5nLCBidXQgSQ0KPiA+IGRvbid0IHRoaW5rIHRoaXMgaXMgYSBnb29kIHJl
+YXNvbiB0byBnbyB0aHJvdWdoIHRoaXMgd29yayByaWdodCBub3cuDQo+ID4gTG90cyBvZiB0aGlu
+Z3MgdGhhdCBzZWVtIHByb2Nlc3Mtc3BlY2lmaWMgdHVybiBvdXQgdG8gYmUgZXNzZW50aWFsbHkN
+Cj4gPiBjbHVzdGVyIHByb3BlcnRpZXMsIGRlc3BpdGUgYmVpbmcgY29uZmlndXJhYmxlIG9uIGJv
+dGggZW5kcywgYW5kIHdpbGwNCj4gPiBuZWVkIHRvIGJlIHJlZmVyZW5jZWQgZnJvbSBhbGwgb3Zl
+ciB0aGUgc3RhY2suIEFuZCBpbiBnZW5lcmFsIGlmIHdlJ3JlDQo+ID4gYWRkcmVzc2luZyBtdWx0
+aXBsZSBDZXBoIGNsdXN0ZXJzIHdpdGhpbiBhIHV0aWxpdHkgd2Ugd2FudCBhIGZ1bGwNCj4gPiBS
+YWRvc0NsaWVudCBldGMgZm9yIGVhY2ggY2x1c3Rlciwgc28gdGhlIHNwbGl0IGRvZXNuJ3QgZG8g
+dXMgbXVjaCBnb29kDQo+ID4gb24gaXRzIG93biwgZG9lcyBpdD8gKElmIHdlIGRvbid0IHdhbnQg
+c2VwYXJhdGUgYWRtaW4gc29ja2V0cyBmb3IgZWFjaA0KPiA+IG9uZSwgd2UnZCBuZWVkIHRvIGV4
+dGVuZCBhbGwgb2YgdGhvc2UgaW50ZXJmYWNlcyB0byBzdXBwb3J0IHR3bw0KPiA+IGVudHJpZXMg
+Zm9yIHRoZSBzYW1lIHR5cGUgb2YgdGhpbmcsIGV0YykNCj4gDQo+IEZpbmRpbmcgb3V0IGV4YWN0
+bHkgd2hpY2ggdGhpbmdzIGFyZSBwcm9jZXNzIHNwZWNpZmljIGlzIG9uZSByZWFzb24gSSdtDQo+
+IHNvbGljaXRpbmcgZm9yIGZlZWRiYWNrLiBBZG1pblNvY2tldCBkb2Vzbid0IGhhdmUgdG8gYmUg
+aW5jbHVkZWQuIFJlYWxseSwgSQ0KPiB0aGluayB3ZSdkIGdldCBhIGxvdCBvZiBiZW5lZml0IGlm
+IHdlIG1hZGUgSlVTVCBzb21lIGRlYnVnIG9wdGlvbnMgYW5kIGRvdXQNCj4gc3VwcG9ydCBwcm9j
+ZXNzIHNwZWNpZmljIGFuZCByZWZhY3RvcmVkIGl0IHRoYXQgd2F5LiBPdGhlciB0aGluZ3MgY291
+bGQgbW92ZQ0KPiBsYXRlciBvbiBpZiBwZW9wbGUgd2FudGVkIHRoZW0gdG8gYnV0IHdvdWxkbid0
+IGhhdmUgdG8uDQo+IA0KPiANCj4gPiBJZiB0aGlzIGlzIHlvdXIgYWN0dWFsIGdvYWwsIEkgdGhp
+bmsgdGhlIHVuYXBwZWFsaW5nIHdvcmsgb2YgcmVwbGFjaW5nDQo+ID4gZ19jZXBoX2NvbnRleHQg
+d2l0aCBhIENlcGhDb250ZXh0ICpjY3QgaXMgdGhlIHdheSB0byBnbyDigJQgd2UnZCBuZWVkIHRv
+DQo+ID4gZG8gdGhpcyBtdWNoIHRvIHN1cHBvcnQgbXVsdGlwbGUgQ2x1c3RlckNvbnRleHRzIHdp
+dGhpbiBhIHByb2Nlc3MNCj4gPiBhbnl3YXkuIE9uY2Ugd2UgaGF2ZSBhIG1vdGl2YXRpbmcgdXNl
+IGNhc2UgZm9yIHNwbGl0dGluZyBzdHVmZiB1cCwgd2UNCj4gPiBjYW4gYWRkcmVzcyB0aGF0LiBC
+dXQgaWYgd2UgdHJ5IGFuZCBkbyBhIGdlbmVyaWMgc29sdXRpb24gaXQnbGwgYmUNCj4gPiBtdWNo
+IG1vcmUgZGlmZmljdWx0LCBhbmQgcHJvYmFibHkgd2lsbCBtaXNzIHNvbWUga2V5IHBvaW50cyB3
+ZSBkb24ndA0KPiA+IHJ1biBpbnRvIHVudGlsIHRyeWluZyB0byBtYWtlIHVzZSBvZiBpdC4NCj4g
+Pg0KPiA+IEFtIEkgbWlzc2luZyBzb21ldGhpbmc/DQo+ID4gLUdyZWcNCj4gDQo+IEkgaGF2ZSBi
+ZWVuIHdvcmtpbmcgb24gdGhlIHVuYXBwZWFsaW5nIHdvcmsgb2YgcmVwbGFjaW5nIGdfY2VwaF9j
+b250ZXh0DQo+IHdpdGggQ2VwaENvbnRleHQqIGNjdC4gSXQncyBub3QganVzdCB1bmFwcGVhbGlu
+ZyB3b3JrLCBpdCBlbmRzIHVwIHdpaHQgYQ0KPiByZXN1bHQgdWdseSBlbm91Z2ggSSBkb24ndCB0
+aGluayBJJ2Qgd2FudCB0byBtZXJnZSBpdCBpZiBzb21lb25lIHByZXNlbnRlZCBpdA0KPiB0byBt
+ZS4gSXQncyB2ZXJ5IGludmFzaXZlIGluIHRoYXQgaXQgY2hhbmdlcyBhIHdob2xlIGxvdCBvZiBl
+dmVyeXRoaW5nLiBUaGUgc3BsaXQNCj4gd291bGQgQUxTTyBjaGFuZ2UgYSB3aG9sZSBsb3Qgb2Yg
+ZXZlcnl0aGluZywgYnV0IGxpa2VseSBsZXNzLiBZb3Ugd291bGQgYXQNCj4gbGVhc3QgYmUgYWJs
+ZSB0byBhdm9pZCBjaGFuZ2luZyB0aGUgY29uc3RydWN0b3JzIG9mIGEgd2hpbGUgYnVuY2ggb2YN
+Cj4gdW5yZWxhdGVkIHRoaW5ncyBqdXN0IHRvIHBhc3MgYSB2YXJpYWJsZSBpbiB0aGF0IG9ubHkg
+c29tZSBtZW1iZXIgc2V2ZXJhbA0KPiBjbGFzc2VzIGluIGNhcmVzIGFib3V0IHNvIGl0IGNhbiBs
+b2cgYSBtZXNzYWdlLg0KDQpIYXZlIHlvdSBjb25zaWRlcmVkIHRocmVhZGxvY2FsIHN0b3JhZ2Ug
+Zm9yIHRoaXM/IEkgc3VzcGVjdCBpdCdzIGEgKm11Y2gqIGVhc2llciB3YXkgdG8gZ28uIFZlcnkg
+bGl0dGxlIHNvdXJjZSBjb2RlIHdpbGwgbmVlZCBtb2RpZmljYXRpb24uDQoNCj4gDQo+IA0KPiAt
+LQ0KPiBTZW5pb3IgU29mdHdhcmUgRW5naW5lZXIgICAgICAgICAgIFJlZCBIYXQgU3RvcmFnZSwg
+QW5uIEFyYm9yLCBNSSwgVVMNCj4gSVJDOiBBZW1lcnNvbkB7UmVkSGF0LCBPRlRDLCBGcmVlbm9k
+ZX0NCj4gMHg4MEY3NTQ0QjkwRURCRkI5IEU3MDcgODZCQSAwQzFCIDYyQ0MgMTUyQyAgN0MxMiA4
+MEY3IDU0NEIgOTBFRCBCRkI5DQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
+OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUNCj4gYm9keSBv
+ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBp
+bmZvIGF0DQo+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
