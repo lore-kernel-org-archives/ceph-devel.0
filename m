@@ -1,61 +1,79 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: A Transformation of our Global Context
-Date: Fri, 10 Jun 2016 18:51:38 -0400
-Message-ID: <20160610225138.GA17481@ultraspiritum.eng.arb.redhat.com>
-References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com>
- <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com>
- <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
- <CAJ4mKGaSyKN+_52-+CSKhFXsL2WE+5T_Z6egpbBNaJvGs4a-Og@mail.gmail.com>
- <alpine.DEB.2.11.1606101616210.6221@cpach.fuggernut.com>
- <20160610210433.GA16959@ultraspiritum.eng.arb.redhat.com>
- <alpine.DEB.2.11.1606101716180.6221@cpach.fuggernut.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [GIT PULL] Ceph updates for 4.7-rc1
+Date: Sat, 11 Jun 2016 01:04:21 +0200
+Message-ID: <3311445.Ou5N5TeFZc@wuerfel>
+References: <alpine.DEB.2.11.1605261035390.6221@cpach.fuggernut.com> <3724610.gtEplKGO6B@wuerfel> <CA+55aFxOZSKjePXaCrB=WDdEr1kxXMCEwonfBODbmk=9x-p0CA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51336 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752555AbcFJWwM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 10 Jun 2016 18:52:12 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1606101716180.6221@cpach.fuggernut.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Gregory Farnum <gfarnum@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CA+55aFxOZSKjePXaCrB=WDdEr1kxXMCEwonfBODbmk=9x-p0CA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Sage Weil <sweil@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On 10/06/2016, Sage Weil wrote:
-> The messengers aren't tied to CephContext, so I don't think this changes 
+On Friday, June 10, 2016 2:32:21 PM CEST Linus Torvalds wrote:
+> On Fri, Jun 10, 2016 at 1:42 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> >
+> > What I see is that this one exported symbol has a __crc of a different
+> > type from all the others:
+> >
+> > $ nm net/ceph/mon_client.o | grep __crc
+> > 48c2e16e A __crc_ceph_monc_get_version
+> > 2360d633 A __crc_ceph_monc_get_version_async
+> > 0c50a10a A __crc_ceph_monc_got_map
+> >          w __crc_ceph_monc_do_statfs
+> 
+> A lower-case 'w' in a symbol list just means that it's a local weak
+> symbol (with a upper-case 'A' meaning it's an absolute global).
+> 
+> Afaik, that simply means that it never got resolved, and genksyms
+> never generated that absolute value for it.
+> 
+> As to _why_ that happens, that's more than I can guess. We've had
+> problems with genksyms before, and it tends to be hard to debug.
+> 
+> Is it 100% reliable for you? Because the most common problem has been
+> issues with subtle build races, where just causing a re-build will fix
+> it.
 
-I'd thought each Messenger had a CephContext of its own and you'd want it to
-line up with that of the person calling it if you're interested in making sure
-logs go in the wrong places
+In a few thousand randconfig builds, this is the only symbol I ever
+see the problem with, and I always see it with the same configurations
+after rebuilding dozens of times, including with different compiler
+versions (I only tried arm-gcc-4.9, arm-gcc-6.1 and x86-gcc-5.3, but
+that seems to cover a wide range).
 
-> things in that regard.  I'm guessing we'll end up with something where 
-> each entity has a thing that implements the Messenger interface but many 
-> of those are sharing all their resources behind the scenes (thread pools, 
-> multiplexing their connections, etc.).  We'll have to figure out how the 
-> config options related to messenger itself are handled, but I think that 
-> oddity needs to be done explicitly anyway.  We wouldn't for instance, want 
-> to assume that all clusters in the same process must share the same 
-> messenger options.  (Maybe we invent an entity that governs the shared 
-> resources (process.NNN) and somehow direct config options/admin socket 
-> commands/whatever toward that?  Who knows.)
+> Your config doesn't work for me, when I do
+> 
+>    cp ~/genksyms-config.txt .config
+>    make ARCH=i386 oldconfig
+> 
+> I get something else than what you had. I tried with both current -git
+> and the commit you pinpointed, so I don't know how you generated that
+> config file..
 
-That's also true, you can replumb things a fair bit.
+I had not tried building the entire kernel on x86, and indeed I don't
+see the warning there either, but I do see this one weak symbol in my
+configuration:
 
-> Is it pushed somewhere?  Maybe much of the pain is related to the clock 
-> thing...
+arm-soc/obj-x86$ nm vmlinux | grep __crc | grep -w 'w'
+         w __crc_ceph_monc_do_statfs
 
-https://github.com/adamemerson/ceph/tree/wip-g_ceph_context-exterminate
+Also, the .config I first uploaded was based on my randconfig tree
+that has some other changes to avoid all existing warnings. I've
+done a 'make oldconfig' on your current HEAD now and put that
+on http://pastebin.com/raw/EJBaG0FV just to make sure we have an
+identical configuration.
 
-There's more to be done on it, but that's what's there. The Clock thing might
-help some, but the logging does seem to kill us.
+The respective ARM .config file does produce the warning on
+mainline, and I've uploaded that to http://pastebin.com/3NRSFSdr
+I generated the x86 configuration by starting with this one
+and running 'make olddefconfig ARCH=x86' on it.
 
-It ended up becoming much more of a time sink than I expected it to so even if
-we do end up going that route I need to do other things before I put much more
-work into it. (I'm going to look at that reweighting bug for one thing.)
+I have found 15 more random configurations with the same symptom
+now, and about 50 configurations with CONFIG_CEPH_FS=m that
+don't show it, so I can mine the configurations for more hints
+next week to see what influences it.
 
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+	Arnd
