@@ -1,43 +1,43 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: RocksDB tuning
-Date: Fri, 10 Jun 2016 13:55:05 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606101352550.6221@cpach.fuggernut.com>
-References: <D37DE46C.5743E%manavalan.krishnan@sandisk.com> <BLUPR0201MB1524D8A9D42F7C50646D0AE8E85E0@BLUPR0201MB1524.namprd02.prod.outlook.com> <a3216e58-d591-50ae-f2f2-0cbb7cdaa7bb@redhat.com> <fb82e615-0762-0843-9a9f-cbc4686e35ba@redhat.com>
- <BL2PR02MB2115BD376A32CF2B6E54ABABF45F0@BL2PR02MB2115.namprd02.prod.outlook.com> <BL2PR02MB2115DF8FF9EF7CF822C838BAF4500@BL2PR02MB2115.namprd02.prod.outlook.com> <alpine.DEB.2.11.1606100533300.6221@cpach.fuggernut.com>
- <BLUPR0201MB15246B72324C2D633EBCB21AE8500@BLUPR0201MB1524.namprd02.prod.outlook.com> <alpine.DEB.2.11.1606101052190.6221@cpach.fuggernut.com> <BLUPR0201MB1524D36741665F05BCB8AC0EE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: increase default debug level
+Date: Fri, 10 Jun 2016 11:02:50 -0700
+Message-ID: <CAJ4mKGZ+-cK_wL3+oufi8+fwBo5VQN9E8i_Ku=85G2Qhq6gPMQ@mail.gmail.com>
+References: <CAKPXa=biYbvnupYKdTcQRBfAiK2e8HNBqbrvQ15VtEZg99fWrg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52747 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751225AbcFJRyj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 10 Jun 2016 13:54:39 -0400
-In-Reply-To: <BLUPR0201MB1524D36741665F05BCB8AC0EE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Received: from mail-vk0-f52.google.com ([209.85.213.52]:36141 "EHLO
+	mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751494AbcFJSCw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 14:02:52 -0400
+Received: by mail-vk0-f52.google.com with SMTP id g67so107552765vkb.3
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Jun 2016 11:02:51 -0700 (PDT)
+In-Reply-To: <CAKPXa=biYbvnupYKdTcQRBfAiK2e8HNBqbrvQ15VtEZg99fWrg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, Manavalan Krishnan <Manavalan.Krishnan@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Vasu Kulkarni <vakulkar@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 10 Jun 2016, Allen Samuels wrote:
-> Oh, and use 16-bit checksums :)
+On Friday, June 10, 2016, Vasu Kulkarni <vakulkar@redhat.com> wrote:
+>
+> I am trying to check if it makes sense to set the default ceph debug
+> level for daemons to something higher from the current levels, this
+> might cause huge log files but with log rotate and size restrictions
+> it can be still be at a manageable levels,  Setting higher debug
+> output will save time when there is an hard to recreate issue and the
+> logs generated first time would provide more info for root cause.
+>
+> for example:
+>
+> debug osd = 20
+> debug filestore = 20
+> debug ms = 1
 
-csum_type xxhash32, 0.576609s seconds, 4655.42 MB/sec
-csum_type xxhash64, 0.306633s seconds, 8754.29 MB/sec
-csum_type crc32c, 0.176754s seconds, 15187 MB/sec
-csum_type crc32c_16, 0.172195s seconds, 15589 MB/sec
-csum_type crc32c_8, 0.137655s seconds, 19500.6 MB/sec
-csum_type crc16, 8.32507s seconds, 322.442 MB/sec
-csum_type crc16_8, 8.29444s seconds, 323.633 MB/sec
-
-on my dev box.  See
-
-	https://github.com/ceph/ceph/pull/9632
-
-(This is based on other stuff that's not merged; only the last few patches 
-there are relevant).
-
-I think we should drop the crc16 and just stick with low bits of crc32c, 
-since it's way faster... I'm pretty sure even without the intel 
-instructions.
-
-sage
+Higher log levels dramatically reduce performance and the size of the
+log files (even with rotation) can be difficult to handle in
+production environments. Those settings are definitely not suitable,
+and I think the ones we have right now are appropriate (at least, the
+numbers are). We run with other defaults in many of our testing
+environments (although not all; we need coverage at the production
+speed!).
+-Greg
