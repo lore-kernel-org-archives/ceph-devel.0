@@ -1,178 +1,93 @@
-From: Junwang Zhao <zhjwpku@gmail.com>
-Subject: Re: [GSoC] wrong patch "msg: change entity_addr_t encode/decode"
-Date: Fri, 10 Jun 2016 10:37:46 +0800
-Message-ID: <CAEG8a3KW+259oAWHVsRJOH2UK6skVHa-0-6C72xVt5F+Eh5Kyw@mail.gmail.com>
-References: <CAEG8a3JF2t1hkHY2MQK5DVwbOy3VGZUNuB-uF5mOzBSO8xhQeg@mail.gmail.com>
- <alpine.DEB.2.11.1606021238150.6221@cpach.fuggernut.com> <alpine.DEB.2.11.1606021343480.6221@cpach.fuggernut.com>
- <CAEG8a3+6YycUH6Hm6w3g_XeWPBfTYGf3KiNG0Ujw=FsPr+WaZQ@mail.gmail.com>
- <CAEG8a3Lwwe2htBbc=+D9hYn4SJnO04H83gKRqED0M4+fzpg+oQ@mail.gmail.com> <alpine.DEB.2.11.1606091205290.32559@cpach.fuggernut.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: Mojette based Erasure Code is more performant than ISA-L or
+ Jerasure
+Date: Fri, 10 Jun 2016 05:31:08 +0200 (CEST)
+Message-ID: <462511107.786164040.1465529468615.JavaMail.zimbra@oxygem.tv>
+References: <CAOu2ZZXx-no2EyDqd_D8SZp=qu-AALarxWd6=43qY-kTw7ZOow@mail.gmail.com> <57177CF7.1090600@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f65.google.com ([209.85.213.65]:34761 "EHLO
-	mail-vk0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932110AbcFJChs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2016 22:37:48 -0400
-Received: by mail-vk0-f65.google.com with SMTP id a126so9224514vkb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Jun 2016 19:37:47 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1606091205290.32559@cpach.fuggernut.com>
+Received: from mailpro.odiso.net ([89.248.211.110]:54318 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750994AbcFJDbM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2016 23:31:12 -0400
+In-Reply-To: <57177CF7.1090600@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Chandan Kumar Singh <chandan.kr.singh@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+Hi Loic,
 
-I have go a little bit further, the cases you mentioned really make sense,
-please see [0] and make some comments, I am still not good at writting
-the unittest.
+>>RozoFS is no longer developped (last commit was july last year)
 
-[0]https://github.com/zhjwpku/ceph/commit/4da16085a650f1dd0b743560836fdf213507d3b4
+Seem that they have released rozofs 2.0 the 21th april 2016
+https://github.com/rozofs/rozofs/releases
 
-Thanks!
-Zhao
+and they are activity in the git since then.
 
-On Fri, Jun 10, 2016 at 12:10 AM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 8 Jun 2016, Junwang Zhao wrote:
->> Hi Sage,
->>
->> Write some unittest, but seems not right, see [0], give some comments
->> please, I use `cout` to print the value, but I don't know where to see them.
->>
->> I got a lot of other "FAIL" in the wip-addr-more branch, like:
->>   ceph-detect-init/run-tox.sh
->>   ceph-disk/run-tox.sh
->>   test/run-rbd-unit-tests.sh
->> I am wondering is this because my working environment? My laptop
->> is really not very powerful, "i5-3210M CPU, 8G memory" :(
->> make check is quite slow.
->>
->> [0] https://github.com/zhjwpku/ceph/commit/e15a240d56c2b67a8b0906dc80650a91bff1518f
->
-> I'm traveling today and not able to replicate this yet--I'll take a look
-> tomorrow.
->
-> In the meantime, though, it doesn't look like your new tests are doing
-> quite what I think we need them to.  I think the important cases are:
->
-> 1- make sure that any encoded entity_addr_t can be decoded as a
-> entity_addrvec_t, with size 1, where item 0 matches the addr.  Can use the
-> existing arrays of addrs to parse to test this.
->
-> 2- make sure that in all of those cases, if we encode the entity_addrvec_t
-> with features 0, and decode as an entity_addr_t, we get back the same
-> entity_addr_t.
->
-> 3- the addrvec size > 1 cases:
->
-> - populate an addrvec with multiple addrs where one is legacy and others
-> are not, and ensure that encoding with features 0 and decoding as an addr
-> gives back the legacy item.
->
-> - multiple legacy addrs with features 0 should encode the first one in the
-> list
->
-> - a vec with all non-legacy addrs encoded with features 0 and decoded as
-> addr should give back an addr that is not entity_addr_t() but is
-> unusable/bogus.
->
-> 4- the empty addrvec case:
->
-> - encode with features 0 and decoding as addr should give back
-> entity_addr_t().
->
-> I think that's it?
->
-> sage
->
->
->>
->> On Mon, Jun 6, 2016 at 4:28 PM, Junwang Zhao <zhjwpku@gmail.com> wrote:
->> > Hi, Sage,
->> >
->> > Sorry I did not see your reply util now, I will work on it.
->> >
->> > Thanks!
->> > Zhao
->> >
->> > On Fri, Jun 3, 2016 at 1:46 AM, Sage Weil <sage@newdream.net> wrote:
->> >> On Thu, 2 Jun 2016, Sage Weil wrote:
->> >>> Hi Zhao,
->> >>>
->> >>> On Tue, 31 May 2016, Junwang Zhao wrote:
->> >>> > Hi Sage & Haomai,
->> >>> >
->> >>> > I try to run './vstart.sh -d -x -n' to test the patches today, I got
->> >>> > some error like 'wrong node', after some work, I found the
->> >>> > error was introduced by this patch[0]. I change the code to
->> >>> > use the legacy decode and encode, but got stuck somewhere.
->> >>> >
->> >>> > --- a/src/msg/msg_types.h
->> >>> > +++ b/src/msg/msg_types.h
->> >>> > @@ -371,7 +371,7 @@ struct entity_addr_t {
->> >>> >    // broader study
->> >>> >
->> >>> >    void encode(bufferlist& bl, uint64_t features) const {
->> >>> > -    if ((features & CEPH_FEATURE_MSG_ADDR2) == 0) {
->> >>> > +    if ((features & CEPH_FEATURE_MSG_ADDR2) != 0) {
->> >>> >        ::encode((__u32)0, bl);
->> >>> >        ::encode(nonce, bl);
->> >>> >        sockaddr_storage ss = get_sockaddr_storage();
->> >>> >
->> >>> >
->> >>> > Can you please see the patch again and give some comments?
->> >>> >
->> >>> > [0]https://github.com/zhjwpku/ceph/commit/8934f038fdf28156038770e601e4a27f7a684390
->> >>>
->> >>> This was enough to make things work fo rme:
->> >>>
->> >>> diff --git a/src/msg/msg_types.h b/src/msg/msg_types.h
->> >>> index 9c521e6..0da0614 100644
->> >>> --- a/src/msg/msg_types.h
->> >>> +++ b/src/msg/msg_types.h
->> >>> @@ -199,8 +199,7 @@ WRITE_CLASS_ENCODER(ceph_sockaddr_storage)
->> >>>
->> >>>  struct entity_addr_t {
->> >>>    typedef enum {
->> >>> -    TYPE_NONE = 0,
->> >>> -    TYPE_LEGACY = 1,
->> >>> +    TYPE_LEGACY = 0,
->> >>>    } type_t;
->> >>>
->> >>>    __u32 type;
->> >>> @@ -211,7 +210,7 @@ struct entity_addr_t {
->> >>>      sockaddr_in6 sin6;
->> >>>    } u;
->> >>>
->> >>> -  entity_addr_t() : type(0), nonce(0) {
->> >>> +  entity_addr_t() : type(TYPE_LEGACY), nonce(0) {
->> >>>      memset(&u, 0, sizeof(u));
->> >>>    }
->> >>>    explicit entity_addr_t(const ceph_entity_addr &o) {
->> >>>
->> >>> but I think this is not the right fix.  I think we still want
->> >>> TYPE_NONE, TYPE_LEGACY, and (soon) TYPE_MSGR2, and that the core problem
->> >>> is places that are creating addrs aren't setting the type properly.  Going
->> >>> to play with this a bit...
->> >>
->> >> I pushed a wip-addr-more branch:
->> >>
->> >>         https://github.com/liewegas/ceph/commits/wip-addr-more
->> >>
->> >> This fixes the parser to take type prefixes, default to legacy, and
->> >> changes entity_addr_t() so that it renders are "-" instead of ":/0" (which
->> >> was weird anyway).
->> >>
->> >> I think what we need next are some unit tests in test/test_addrs.cc that
->> >> do things like encode a entity_addr_t with no features, decode as
->> >> entity_addrvec_t, or construct varous addrvecs, encode with no features,
->> >> an ensure a decode to entity_addr_t gives back the right addr from the
->> >> list.
->> >>
->> >> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+
+I don't think the project is dead, because they are doing a lot of comm=
+ercial communication recently
+
+
+http://www.theregister.co.uk/2015/12/01/rozo_aiming_to_fill_scaleout_na=
+s_object_scalability_gap/
+
+with a roadmap up to 2017.
+
+v2.1 Jun 2016 =E2=80=93 Fast indexing, versioning, metadata re-use on f=
+ile deletion*
+v2.2 Dec 2016 =E2=80=93 Per-directory snapshots (possibly), storage QoS=
+ (possible throttling)
+V2.3 Jun 2017 =E2=80=93 Fast disk encryption, SSD caching
+
+
+Regards,
+
+Alexandre
+
+
+----- Mail original -----
+De: "Loic Dachary" <loic@dachary.org>
+=C3=80: "Chandan Kumar Singh" <chandan.kr.singh@gmail.com>, "ceph-devel=
+" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Mercredi 20 Avril 2016 14:58:31
+Objet: Re: Mojette based Erasure Code is more performant than ISA-L or =
+Jerasure
+
+Hi,=20
+
+On 20/04/2016 15:52, Chandan Kumar Singh wrote:=20
+> Hi=20
+>=20
+> The authors of Mojette Erasure Encoding claim that this EC has higher=
+=20
+> performance than ISA-L and Jerasure and can be used for hot storage=20
+> use cases. Their EC is used in open source RozoFS. What is your=20
+> evaluation of it? It will be nice if it is available as another EC=20
+> plugin.=20
+
+RozoFS is no longer developped (last commit was july last year). It wou=
+ld be nice to have an alternative implementation of the same algorithm,=
+ well maintained. It's sad to see Free Software being frozen. But Free =
+Software is never dead, all it needs is good will and a little work to =
+be resurected ! I've never seen any benchmark regarding performances, t=
+hat would be the first step.=20
+
+Cheers=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre=20
+
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
