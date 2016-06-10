@@ -1,65 +1,78 @@
 From: Alexandre DERUMIER <aderumier@odiso.com>
 Subject: Re: Mojette based Erasure Code is more performant than ISA-L or
  Jerasure
-Date: Fri, 10 Jun 2016 05:31:08 +0200 (CEST)
-Message-ID: <462511107.786164040.1465529468615.JavaMail.zimbra@oxygem.tv>
-References: <CAOu2ZZXx-no2EyDqd_D8SZp=qu-AALarxWd6=43qY-kTw7ZOow@mail.gmail.com> <57177CF7.1090600@dachary.org>
+Date: Fri, 10 Jun 2016 06:06:03 +0200 (CEST)
+Message-ID: <711784903.786182263.1465531563144.JavaMail.zimbra@oxygem.tv>
+References: <CAOu2ZZXx-no2EyDqd_D8SZp=qu-AALarxWd6=43qY-kTw7ZOow@mail.gmail.com> <57518551.2030604@polytech.univ-nantes.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.211.110]:54318 "EHLO
+Received: from mailpro.odiso.net ([89.248.211.110]:56734 "EHLO
 	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750994AbcFJDbM convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2016 23:31:12 -0400
-In-Reply-To: <57177CF7.1090600@dachary.org>
+	with ESMTP id S1750710AbcFJEGG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 00:06:06 -0400
+In-Reply-To: <57518551.2030604@polytech.univ-nantes.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
+To: =?utf-8?Q?Beno=C3=AEt?= Parrein <benoit.parrein@polytech.univ-nantes.fr>
 Cc: Chandan Kumar Singh <chandan.kr.singh@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Loic,
+>>We compared to CephFS (in replication mode) and outperform it.=20
+>>Particularly, in random I/Os where the 4KB (or 8KB) blocks structure =
+is=20
+>>well suited for Rozo.=20
 
->>RozoFS is no longer developped (last commit was july last year)
+I have found your paper here
 
-Seem that they have released rozofs 2.0 the 21th april 2016
-https://github.com/rozofs/rozofs/releases
+https://departements.telecom-bretagne.eu/data/elec/SITES/PublicElec/Ben=
+oitParrein_interGDR.pdf
 
-and they are activity in the git since then.
+100k 4k randread, an 80k 4k iops randwrite, not too bad with 4 nodes !=20
 
-
-I don't think the project is dead, because they are doing a lot of comm=
-ercial communication recently
-
-
-http://www.theregister.co.uk/2015/12/01/rozo_aiming_to_fill_scaleout_na=
-s_object_scalability_gap/
-
-with a roadmap up to 2017.
-
-v2.1 Jun 2016 =E2=80=93 Fast indexing, versioning, metadata re-use on f=
-ile deletion*
-v2.2 Dec 2016 =E2=80=93 Per-directory snapshots (possibly), storage QoS=
- (possible throttling)
-V2.3 Jun 2017 =E2=80=93 Fast disk encryption, SSD caching
+What was the bottleneck ? cpu ?
 
 
-Regards,
-
-Alexandre
 
 
 ----- Mail original -----
-De: "Loic Dachary" <loic@dachary.org>
+De: "Beno=C3=AEt Parrein" <benoit.parrein@polytech.univ-nantes.fr>
 =C3=80: "Chandan Kumar Singh" <chandan.kr.singh@gmail.com>, "ceph-devel=
 " <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Mercredi 20 Avril 2016 14:58:31
+Envoy=C3=A9: Vendredi 3 Juin 2016 15:25:37
 Objet: Re: Mojette based Erasure Code is more performant than ISA-L or =
 Jerasure
 
-Hi,=20
+Hi Chandan,=20
 
-On 20/04/2016 15:52, Chandan Kumar Singh wrote:=20
+thanks you for your post=20
+
+indeed we observe in our experiment that Mojette erasure coding has=20
+better performance than ISA-L (thanks to the discrete geometry and=20
+Mojette transform). A systematic/standard version exists. It is a paten=
+t=20
+(as couples of erasure coding). We are few cycles above memcopy=20
+instructions.=20
+A paper is currently under revision and will appear soon on this.=20
+
+Moreover RozoFS is alive! see on github https://github.com/rozofs/rozof=
+s=20
+(last commit 6 days ago).=20
+8 peoples are working daily to improve this fully posix DFS which is=20
+today the only one on the earth erasure coding based (at our best=20
+knowledge).=20
+We compared to CephFS (in replication mode) and outperform it.=20
+Particularly, in random I/Os where the 4KB (or 8KB) blocks structure is=
+=20
+well suited for Rozo.=20
+Same. A paper will appear soon on this point.=20
+
+Best regards=20
+bparrein, University of Nantes=20
+
+
+
+Le 20/04/2016 10:52, Chandan Kumar Singh a =C3=A9crit :=20
 > Hi=20
 >=20
 > The authors of Mojette Erasure Encoding claim that this EC has higher=
@@ -68,18 +81,23 @@ On 20/04/2016 15:52, Chandan Kumar Singh wrote:=20
 > use cases. Their EC is used in open source RozoFS. What is your=20
 > evaluation of it? It will be nice if it is available as another EC=20
 > plugin.=20
-
-RozoFS is no longer developped (last commit was july last year). It wou=
-ld be nice to have an alternative implementation of the same algorithm,=
- well maintained. It's sad to see Free Software being frozen. But Free =
-Software is never dead, all it needs is good will and a little work to =
-be resurected ! I've never seen any benchmark regarding performances, t=
-hat would be the first step.=20
-
-Cheers=20
+>=20
+> Regards=20
+> Chandan=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in=20
+> the body of a message to majordomo@vger.kernel.org=20
+> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+>=20
 
 --=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre=20
+----------------=20
+Beno=C3=AEt Parrein=20
+Ma=C3=AEtre de Conf=C3=A9rences (HDR)=20
+Universit=C3=A9 de Nantes (Polytech Nantes), laboratoire IRCCyN=20
+web: http://www.irccyn.ec-nantes.fr/~parrein/=20
+tel: +33(0)240683050=20
 
 --=20
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
