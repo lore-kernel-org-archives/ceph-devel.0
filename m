@@ -1,7 +1,7 @@
 From: Allen Samuels <Allen.Samuels@sandisk.com>
 Subject: RE: RocksDB tuning
-Date: Fri, 10 Jun 2016 14:57:32 +0000
-Message-ID: <BLUPR0201MB1524D36741665F05BCB8AC0EE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Date: Fri, 10 Jun 2016 15:06:10 +0000
+Message-ID: <BLUPR0201MB15247A41BDD4C4D49FD7AA8AE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
 References: <D37DE46C.5743E%manavalan.krishnan@sandisk.com>
  <BLUPR0201MB1524D8A9D42F7C50646D0AE8E85E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
  <a3216e58-d591-50ae-f2f2-0cbb7cdaa7bb@redhat.com>
@@ -15,26 +15,17 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0092.outbound.protection.outlook.com ([65.55.169.92]:29616
+Received: from mail-bl2on0063.outbound.protection.outlook.com ([65.55.169.63]:16323
 	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752331AbcFJO5g convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 10:57:36 -0400
+	id S932099AbcFJPGN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 11:06:13 -0400
 In-Reply-To: <alpine.DEB.2.11.1606101052190.6221@cpach.fuggernut.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
 Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, Manavalan Krishnan <Manavalan.Krishnan@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
-
-Oh, and use 16-bit checksums :)
-
-Allen Samuels
-SanDisk |a Western Digital brand
-2880 Junction Avenue, Milpitas, CA 95134
-T: +1 408 801 7030| M: +1 408 780 6416
-allen.samuels@SanDisk.com
-
 
 > -----Original Message-----
 > From: Sage Weil [mailto:sweil@redhat.com]
@@ -80,6 +71,9 @@ allen.samuels@SanDisk.com
 > small part of the ~5K somnath saw.  If his objects are 4MB then 4KB of it
 > (80%) is the csum_data vector, which is a flat vector of
 > u32 values that are presumably not very compressible.
+
+I don't think that's what Somnath is seeing (obviously some data here will sharpen up our speculations). But in his use case, I believe that he has a separate blob and pextent for each 4K write (since it's been subjected to random 4K overwrites), that means somewhere in the data structures at least one address and one length for each of the 4K blocks (and likely much more in the lextent and blob maps as you alluded to above). The encoding of just this information alone is larger than the checksum data.
+
 > 
 > We could perhaps break these into a separate key or keyspace.. That'll give
 > rocksdb a bit more computation work to do (for a custom merge operator,
