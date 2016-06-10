@@ -1,52 +1,50 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [GIT PULL] Ceph updates for 4.7-rc1
-Date: Fri, 10 Jun 2016 14:32:21 -0700
-Message-ID: <CA+55aFxOZSKjePXaCrB=WDdEr1kxXMCEwonfBODbmk=9x-p0CA@mail.gmail.com>
-References: <alpine.DEB.2.11.1605261035390.6221@cpach.fuggernut.com> <3724610.gtEplKGO6B@wuerfel>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: A Transformation of our Global Context
+Date: Fri, 10 Jun 2016 22:38:35 +0000
+Message-ID: <BLUPR0201MB152467C60C23D726D93C10BAE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
+References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com>
+ <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com>
+ <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
+ <BLUPR0201MB152410CE52AA744E1631F6AFE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <20160610204302.GA7952@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f68.google.com ([209.85.218.68]:36344 "EHLO
-	mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751943AbcFJVcW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 17:32:22 -0400
-In-Reply-To: <3724610.gtEplKGO6B@wuerfel>
+Received: from mail-bn1bon0079.outbound.protection.outlook.com ([157.56.111.79]:47206
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752347AbcFJWim (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 Jun 2016 18:38:42 -0400
+In-Reply-To: <20160610204302.GA7952@ultraspiritum.eng.arb.redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Sage Weil <sweil@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>
+To: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Fri, Jun 10, 2016 at 1:42 PM, Arnd Bergmann <arnd@arndb.de> wrote:
->
-> What I see is that this one exported symbol has a __crc of a different
-> type from all the others:
->
-> $ nm net/ceph/mon_client.o | grep __crc
-> 48c2e16e A __crc_ceph_monc_get_version
-> 2360d633 A __crc_ceph_monc_get_version_async
-> 0c50a10a A __crc_ceph_monc_got_map
->          w __crc_ceph_monc_do_statfs
-
-A lower-case 'w' in a symbol list just means that it's a local weak
-symbol (with a upper-case 'A' meaning it's an absolute global).
-
-Afaik, that simply means that it never got resolved, and genksyms
-never generated that absolute value for it.
-
-As to _why_ that happens, that's more than I can guess. We've had
-problems with genksyms before, and it tends to be hard to debug.
-
-Is it 100% reliable for you? Because the most common problem has been
-issues with subtle build races, where just causing a re-build will fix
-it.
-
-Your config doesn't work for me, when I do
-
-   cp ~/genksyms-config.txt .config
-   make ARCH=i386 oldconfig
-
-I get something else than what you had. I tried with both current -git
-and the commit you pinpointed, so I don't know how you generated that
-config file..
-
-        Linus
+Tm90IHN1cmUgd2h5IHlvdSdkIHdhbnQgdG8gUmFkb3NDbGllbnQgaW5zdGFuY2VzIHRvIHNoYXJl
+IG91dGdvaW5nIHRocmVhZHMgZXRjLiBTZWVtcyBsaWtlIGEgYmFkIGlkZWEgdG8gbWUuDQoNCg0K
+QWxsZW4gU2FtdWVscw0KU2FuRGlzayB8YSBXZXN0ZXJuIERpZ2l0YWwgYnJhbmQNCjI4ODAgSnVu
+Y3Rpb24gQXZlbnVlLCBTYW4gSm9zZSwgQ0EgOTUxMzQNClQ6ICsxIDQwOCA4MDEgNzAzMHwgTTog
+KzEgNDA4IDc4MCA2NDE2DQphbGxlbi5zYW11ZWxzQFNhbkRpc2suY29tDQoNCg0KPiAtLS0tLU9y
+aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBZGFtIEMuIEVtZXJzb24gW21haWx0bzphZW1l
+cnNvbkByZWRoYXQuY29tXQ0KPiBTZW50OiBGcmlkYXksIEp1bmUgMTAsIDIwMTYgMTo0MyBQTQ0K
+PiBUbzogQWxsZW4gU2FtdWVscyA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT4NCj4gQ2M6IEdy
+ZWdvcnkgRmFybnVtIDxnZmFybnVtQHJlZGhhdC5jb20+OyBUaGUgU2FjcmVkIE9yZGVyIG9mIHRo
+ZSBTcXVpZA0KPiBDeWJlcm5ldGljIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3Vi
+amVjdDogUmU6IEEgVHJhbnNmb3JtYXRpb24gb2Ygb3VyIEdsb2JhbCBDb250ZXh0DQo+IA0KPiBP
+biAxMC8wNi8yMDE2LCBBbGxlbiBTYW11ZWxzIHdyb3RlOg0KPiA+IEhhdmUgeW91IGNvbnNpZGVy
+ZWQgdGhyZWFkbG9jYWwgc3RvcmFnZSBmb3IgdGhpcz8gSSBzdXNwZWN0IGl0J3MgYQ0KPiA+ICpt
+dWNoKiBlYXNpZXIgd2F5IHRvIGdvLiBWZXJ5IGxpdHRsZSBzb3VyY2UgY29kZSB3aWxsIG5lZWQg
+bW9kaWZpY2F0aW9uLg0KPiANCj4gSSB0aG91Z2h0IGFib3V0IGl0IGJyaWVmbHksIGJ1dCBJIGRv
+bid0IHRoaW5rIGl0IHdvdWxkIHdvcmsgZm9yIHRvb2xzIHRoYXQgc3Bhd24NCj4gdHdvIFJhZG9z
+Q2xpZW50cyBlYWNoIHBvaW50aW5nIHRvIGEgZGlmZmVyZW50IGNsdXN0ZXIuIFdoaWxlIGVhY2gg
+d291bGQNCj4gbGF1bmNoIHRocmVhZHMgb2YgaXRzIG93biwgdGhleSdkIGJvdGggc2hhcmUgdGhl
+IGFwcGxpY2F0aW9uIHRocmVhZHMgZm9yDQo+IG91dGdvaW5nIG9wZXJhdGlvbnMgKGF0IGxlYXN0
+IHVudGlsIHRoZXkgaGl0IHRoZSBtZXNzZW5nZXIpLiBTbyBJIHRoaW5rIHdlJ2QNCj4gc3RpbGwg
+bmVlZCB0byB0ZWFzZSBhcGFydCB0aGUgY2xhc3Mgc29tZXdoYXQgdG8gbWFrZSB0aHJlYWQgbG9j
+YWwgc3RvcmFnZQ0KPiB3b3JrLg0KPiANCj4gLS0NCj4gU2VuaW9yIFNvZnR3YXJlIEVuZ2luZWVy
+ICAgICAgICAgICBSZWQgSGF0IFN0b3JhZ2UsIEFubiBBcmJvciwgTUksIFVTDQo+IElSQzogQWVt
+ZXJzb25Ae1JlZEhhdCwgT0ZUQywgRnJlZW5vZGV9DQo+IDB4ODBGNzU0NEI5MEVEQkZCOSBFNzA3
+IDg2QkEgMEMxQiA2MkNDIDE1MkMgIDdDMTIgODBGNyA1NDRCIDkwRUQgQkZCOQ0K
