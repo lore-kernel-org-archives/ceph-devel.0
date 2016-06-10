@@ -1,198 +1,125 @@
-From: M Ranga Swami Reddy <swamireddy@gmail.com>
-Subject: Re: un-even data filled on OSDs
-Date: Fri, 10 Jun 2016 13:48:33 +0530
-Message-ID: <CANA9Uk4VBJN1xFtUyBPX9gFXe_ivkYZw8Y8Fhk8Thq8=11bi+Q@mail.gmail.com>
-References: <CANA9Uk4NH7H4kQjEzeNp26bvar5DRWvnNdPff-wCJDRfb1be_A@mail.gmail.com>
- <alpine.DEB.2.11.1606070830160.6221@cpach.fuggernut.com> <CANA9Uk6YXFpAyp+jUgq7Cc9nRwR4Ha=UO-0nPrEAxy8A_GxGNA@mail.gmail.com>
- <alpine.DEB.2.11.1606070905590.6221@cpach.fuggernut.com> <CANA9Uk7aQrom4HEWJHSUjJeY7ywK8KZ0pmdsoY6dwHf4HhPBWg@mail.gmail.com>
- <CA+z5DsznXSZQ2TQ9y3D0rj-fU4Yi=8GNOW89ZmwvHkvQada4cg@mail.gmail.com>
- <CANA9Uk7rNtfLrO+oT8XbfxaRdX0psPmcRHcNOKYvQ0UCrTGc=g@mail.gmail.com>
- <CANA9Uk48oQ7sjd614LzYy=7HxYfmO8qZxoQCC62wYeOdsBPFeg@mail.gmail.com>
- <CA+z5DszvAcwTO=9smdqjrLWexWGkYmjA0tE6yKVn79ezr0FVmg@mail.gmail.com>
- <CANA9Uk4Bddii2vBgExF3tM9hs2CByefep8mpUZpHKFCyzEFyXg@mail.gmail.com> <CA+z5DszOHS8z9SzNyDXwU2=cPy3T0PkqEgV_xfmbrGu2nVFBjg@mail.gmail.com>
+From: Marcus Watts <mwatts@redhat.com>
+Subject: Re: msgr2 protocol
+Date: Fri, 10 Jun 2016 04:31:45 -0400
+Message-ID: <20160610083145.GD23426@degu.eng.arb.redhat.com>
+References: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com>
+ <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com>
+ <alpine.DEB.2.11.1606021416510.6221@cpach.fuggernut.com>
+ <CAJ4mKGaWx8m4Zh_f6tQWe9ows77HHyMmv5y52Rr-5Q-ob_N1Yg@mail.gmail.com>
+ <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com>
+ <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com>
+ <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com>
+ <CACJqLya8rdipTW9hAikgyyDAWTFeTuqOizvDQSY88L_QnzeKFQ@mail.gmail.com>
+ <CAEG8a3KKtw122rY1kt3DMw_9y87ivK7FO1h0LbhoWn05mUD8Tg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f43.google.com ([209.85.218.43]:35698 "EHLO
-	mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751068AbcFJISf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 04:18:35 -0400
-Received: by mail-oi0-f43.google.com with SMTP id w5so22657433oib.2
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Jun 2016 01:18:34 -0700 (PDT)
-In-Reply-To: <CA+z5DszOHS8z9SzNyDXwU2=cPy3T0PkqEgV_xfmbrGu2nVFBjg@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34020 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751593AbcFJIbt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 Jun 2016 04:31:49 -0400
+Content-Disposition: inline
+In-Reply-To: <CAEG8a3KKtw122rY1kt3DMw_9y87ivK7FO1h0LbhoWn05mUD8Tg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Blair Bethwaite <blair.bethwaite@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: Junwang Zhao <zhjwpku@gmail.com>
+Cc: Haomai Wang <haomai@xsky.com>, Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Thanks Blair. Yes, will plan to upgrade my cluster.
+Sorry for the delay reviewing this; got a bit snowed with some
+rush hammer things.
 
-Thanks
-Swami
+So my comments here are of msgr2
+as of 20160610.
 
-On Fri, Jun 10, 2016 at 7:40 AM, Blair Bethwaite
-<blair.bethwaite@gmail.com> wrote:
-> Hi Swami,
->
-> That's a known issue, which I believe is much improved in Jewel thanks
-> to a priority queue added somewhere in the OSD op path (I think). If I
-> were you I'd be planning to get off Firefly and upgrade.
->
-> Cheers,
->
-> On 10 June 2016 at 12:08, M Ranga Swami Reddy <swamireddy@gmail.com> wrote:
->> Blair - Thanks for the details. I used to set the low priority for
->> recovery during the rebalance/recovery activity.
->> Even though I set the recovery_priority as 5 (instead of 1) and
->> client-op_priority set as 63, some of my customers complained that
->> their VMs are not reachable for a few mins/secs during the reblancing
->> task. Not sure, these low priority configurations are doing the job as
->> its.
->>
->> Thanks
->> Swami
->>
->> On Thu, Jun 9, 2016 at 5:50 PM, Blair Bethwaite
->> <blair.bethwaite@gmail.com> wrote:
->>> Swami,
->>>
->>> Run it with the help option for more context:
->>> "./crush-reweight-by-utilization.py --help". In your example below
->>> it's reporting to you what changes it would make to your OSD reweight
->>> values based on the default option settings (because you didn't
->>> specify any options). To make the script actually apply those weight
->>> changes you need the "-d -r" or "--doit --really" flags.
->>>
->>> If you want to get an idea of the impact that the weight changes will
->>> have before actually starting to move data then I suggest setting
->>> norecover and nobackfill (ceph osd set ...) on your cluster before
->>> making the weight changes, you can then examine "ceph -s" output
->>> (looking at "objects misplaced" to determine the scale of recovery
->>> required. Unset the flags once ready to start or back-out the reweight
->>> settings if you change your mind. You'll also want to lower these
->>> recovery and backfill tunables to reduce impact to client I/O (and if
->>> possible do not do this reweight change during peak I/O hours):
->>> ceph tell osd.* injectargs '--osd-max-backfills 1'
->>> ceph tell osd.* injectargs '--osd-max-recovery-threads 1'
->>> ceph tell osd.* injectargs '--osd-recovery-op-priority 1'
->>> ceph tell osd.* injectargs '--osd-client-op-priority 63'
->>> ceph tell osd.* injectargs '--osd-recovery-max-active 1'
->>>
->>> Cheers,
->>>
->>> On 9 June 2016 at 20:20, M Ranga Swami Reddy <swamireddy@gmail.com> wrote:
->>>> Hi Blari,
->>>> I ran the script and results are below:
->>>> ==
->>>> ./crush-reweight-by-utilization.py
->>>> average_util: 0.587024, overload_util: 0.704429, underload_util: 0.587024.
->>>> reweighted:
->>>> 43 (0.852690 >= 0.704429) [1.000000 -> 0.950000]
->>>> 238 (0.845154 >= 0.704429) [1.000000 -> 0.950000]
->>>> 104 (0.827908 >= 0.704429) [1.000000 -> 0.950000]
->>>> 173 (0.817063 >= 0.704429) [1.000000 -> 0.950000]
->>>> ==
->>>>
->>>> is the above scripts says to reweight 43 -> 0.95?
->>>>
->>>> Thanks
->>>> Swami
->>>>
->>>> On Wed, Jun 8, 2016 at 10:34 AM, M Ranga Swami Reddy
->>>> <swamireddy@gmail.com> wrote:
->>>>> Blair - Thanks for the script...Btw, is this script has option for dry run?
->>>>>
->>>>> Thanks
->>>>> Swami
->>>>>
->>>>> On Wed, Jun 8, 2016 at 6:35 AM, Blair Bethwaite
->>>>> <blair.bethwaite@gmail.com> wrote:
->>>>>> Swami,
->>>>>>
->>>>>> Try https://github.com/cernceph/ceph-scripts/blob/master/tools/crush-reweight-by-utilization.py,
->>>>>> that'll work with Firefly and allow you to only tune down weight of a
->>>>>> specific number of overfull OSDs.
->>>>>>
->>>>>> Cheers,
->>>>>>
->>>>>> On 7 June 2016 at 23:11, M Ranga Swami Reddy <swamireddy@gmail.com> wrote:
->>>>>>> OK, understood...
->>>>>>> To fix the nearfull warn, I am reducing the weight of a specific OSD,
->>>>>>> which filled >85%..
->>>>>>> Is this work-around advisable?
->>>>>>>
->>>>>>> Thanks
->>>>>>> Swami
->>>>>>>
->>>>>>> On Tue, Jun 7, 2016 at 6:37 PM, Sage Weil <sage@newdream.net> wrote:
->>>>>>>> On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
->>>>>>>>> Hi Sage,
->>>>>>>>> >Jewel and the latest hammer point release have an improved
->>>>>>>>> >reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
->>>>>>>>> > run) to correct this.
->>>>>>>>>
->>>>>>>>> Thank you....But not planning to upgrade the cluster soon.
->>>>>>>>> So, in this case - are there any tunable options will help? like
->>>>>>>>> "crush tunable optimal" or so?
->>>>>>>>> OR any other configuration options change will help?
->>>>>>>>
->>>>>>>> Firefly also has reweight-by-utilization... it's just a bit less friendly
->>>>>>>> than the newer versions.  CRUSH tunables don't generally help here unless
->>>>>>>> you have lots of OSDs that are down+out.
->>>>>>>>
->>>>>>>> Note that firefly is no longer supported.
->>>>>>>>
->>>>>>>> sage
->>>>>>>>
->>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> Thanks
->>>>>>>>> Swami
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> On Tue, Jun 7, 2016 at 6:00 PM, Sage Weil <sage@newdream.net> wrote:
->>>>>>>>> > On Tue, 7 Jun 2016, M Ranga Swami Reddy wrote:
->>>>>>>>> >> Hello,
->>>>>>>>> >> I have aorund 100 OSDs in my ceph cluster. In this a few OSDs filled
->>>>>>>>> >> with >85% of data and few OSDs filled with ~60%-70% of data.
->>>>>>>>> >>
->>>>>>>>> >> Any reason why the unevenly OSDs filling happned? do I need to any
->>>>>>>>> >> tweaks on configuration to fix the above? Please advise.
->>>>>>>>> >>
->>>>>>>>> >> PS: Ceph version is - 0.80.7
->>>>>>>>> >
->>>>>>>>> > Jewel and the latest hammer point release have an improved
->>>>>>>>> > reweight-by-utilization (ceph osd test-reweight-by-utilization ... to dry
->>>>>>>>> > run) to correct this.
->>>>>>>>> >
->>>>>>>>> > sage
->>>>>>>>> >
->>>>>>>>> --
->>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>>>
->>>>>>>>>
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>
->>>>>>
->>>>>>
->>>>>> --
->>>>>> Cheers,
->>>>>> ~Blairo
->>>
->>>
->>>
->>> --
->>> Cheers,
->>> ~Blairo
->
->
->
-> --
-> Cheers,
-> ~Blairo
+1. 
+banner phase.
+bitmask- should allow for >64 bits (even though we should avoid that)
+
+2.
+session handshake & message exchange
+w/ confounder >= block_size, cbc-cts -- there's no need to send pad bytes.
+	[ cts, ciphertext stealing, is a simple modification of cbc to
+	not send some bytes which turn out to to be unnecessary; does
+	not hurt security, see
+		https://en.wikipedia.org/wiki/Ciphertext_stealing	]
+
+3.
+authentication, "tag_auth_reply".
+method specific payload need not *resend* feature bits, needs
+merely to sign them.
+
+4.
+authentication
+S/c/ auth_methods, set_method, etc.
+really hope these don't each need to be separate roundtrips.
+perhaps something like,
+sequence:
+	C->S, S->C:
+		num_methods,{type,tag,paylen,payload}[num_methods]
+			where
+				tag: byte: enum{ continue, accept, info, reject}
+		at most one method can say "accept", and that message
+		concludes the auth negotiation for that side (if the other
+		end doesn't agree, it can reject the connection.)
+		if a method needs internal state/sequence data, it
+		must be part of the payload for that method.
+	each side must send one of these with "accept" before
+	it can send anything else; all messages sent after "accept"
+	must be encrypted &etc. (so in that sense equiv to
+	your TAG_ENCRYPT_BEGIN).
+	an "info" method can be sent w/ any exchange, can
+	communicate add'l info that might be useful in that phase or later.
+	"info" needs to be signed somehow by any successful auth sequence (how?).
+	reject should include error message, code(?).  is not signed.
+	positively terminates that method, but not the auth sequence
+	(another method might succeed).  Neither side should use
+	that method thereafter, & attempts to do so should be treated
+	as a fatal connection error by the other side.
+	If no method indicates "continue" or "accept", that is a
+	connection fatal error.
+
+	one method type can be the "fast reconnect".
+
+5.
+message flow handshake.
+I think this can be folded into the authentication
+flow I outlined previously.  Definitly should not be
+N back & forth's.
+
+6.
+so the stuff winds up secured by the authentication sequence needs to include:
+	auth sequence
+	initial features
+	final sequence number
+	that side's identity.
+
+7.
+> From: Junwang Zhao <zhjwpku@gmail.com>
+> My understanding is that before the protocol msgr2 begins, each party
+> already has it's own secrete key, and it's public key has been known by
+> it's peer, and they have alreay shared the session key that will be used
+> by encryption/decryption.
+> 
+> The secrete key will be used by signature, and the public key will be
+> used to identify.
+
+2 main forms of encryption:
+	symmetric:	single secret key known to both ends: used for
+			both encryption & decrytion.
+	public key:	2 keys: public & private.  public key can be shared,
+			private key is knonw to only one end.
+			a variety of algorithms including public key encryption,
+			signing with the private key, or generating shared
+			secrets.  In many cases the public key/private keys
+			only used to derive or protect a secret key that is
+			then used with ordinary symmetric encryption.
+
+Ceph currently onhly does symmetric encryption.  So there are no public keys.
+(cephx.  See,
+	http://docs.ceph.com/docs/jewel/dev/cephx_protocol/	)
+
+We'd like to do interesting things with public keys in the future.
+So we want a sufficiently flexible algorithm that we can plug
+such use in without redoing everything.
+
+					-Marcus Watts
