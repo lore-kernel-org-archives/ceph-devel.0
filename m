@@ -1,46 +1,90 @@
-From: Sage Weil <sage@newdream.net>
+From: Sage Weil <sweil@redhat.com>
 Subject: Re: msgr2 protocol
-Date: Fri, 10 Jun 2016 06:48:33 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606100637310.6221@cpach.fuggernut.com>
+Date: Fri, 10 Jun 2016 07:04:36 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606100649010.6221@cpach.fuggernut.com>
 References: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com> <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com> <alpine.DEB.2.11.1606021416510.6221@cpach.fuggernut.com> <CAJ4mKGaWx8m4Zh_f6tQWe9ows77HHyMmv5y52Rr-5Q-ob_N1Yg@mail.gmail.com>
- <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com> <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com> <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com> <CACJqLya8rdipTW9hAikgyyDAWTFeTuqOizvDQSY88L_QnzeKFQ@mail.gmail.com>
- <CAEG8a3KKtw122rY1kt3DMw_9y87ivK7FO1h0LbhoWn05mUD8Tg@mail.gmail.com> <20160610083145.GD23426@degu.eng.arb.redhat.com>
+ <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com> <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com> <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com> <CAJ4mKGbyCiWbuwGxhGu_ohf7vxNqVqgf4XQQpQ7eg-tP-YO+gg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33565 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751419AbcFJKsH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 06:48:07 -0400
-In-Reply-To: <20160610083145.GD23426@degu.eng.arb.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:33273 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752737AbcFJLEM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 Jun 2016 07:04:12 -0400
+In-Reply-To: <CAJ4mKGbyCiWbuwGxhGu_ohf7vxNqVqgf4XQQpQ7eg-tP-YO+gg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Marcus Watts <mwatts@redhat.com>
-Cc: Junwang Zhao <zhjwpku@gmail.com>, Haomai Wang <haomai@xsky.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Haomai Wang <haomai@xsky.com>, Marcus Watts <mwatts@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-I forgot to address this in the last message:
+On Mon, 6 Jun 2016, Gregory Farnum wrote:
+> On Fri, Jun 3, 2016 at 10:33 AM, Sage Weil <sweil@redhat.com> wrote:
+> > On Sat, 4 Jun 2016, Haomai Wang wrote:
+> >> On Fri, Jun 3, 2016 at 9:24 PM, Sage Weil <sweil@redhat.com> wrote:
+> >> > I updated the PR with an additional commit that simplifies the
+> >> > confounder.  It seems like we only need the confoudner at teh beginning of
+> >> > the session, not for every message, since the signature and encryption
+> >> > state is chained from the previous frame.  Is that right?
+> >> >
+> >> >         https://github.com/ceph/ceph/pull/9461/commits/45766fed1864733c5216a7b50f11cce256338170
+> >> >
+> >> > Full PR:
+> >> >
+> >> >         https://github.com/ceph/ceph/pull/9461
+> >> >
+> >> > --
+> >> >
+> >> > Also, I just realized that now might be a good time to address the ability
+> >> > to multiplex different endpoints (sessions) into the same connection.  We
+> >> > could add it later with the msgr feature bits, but it'll probably be
+> >> > simpler not to have to support two variants of the protocol.  On the other
+> >> > hand, it's a lot more complicated.  :(
+> >>
+> >> What's the use case? different session shares the same connection? Do
+> >> you mean different messenger instance will share the same connection
+> >> pool?
+> >
+> > Many OSD's in the same unix process, sharing the same messenger connection
+> > pool, eventually using SPDK/DPDK.
+> 
+> Oof, yes, if we want to make that happen it should be in this design phase.
+> 
+> So, what features do we want/need to include here? Is it just the
+> ability to send messages which represent different entities on a tag
+> basis? Full streams with their own encryption settings?
+> Do we want to do interleaving on some block size, or do
+> messages/streams on a full frame basis?
+> 
+> I've thought about these some and am mixed-to-clueless on these, but
+> we need some targets.
 
-On Fri, 10 Jun 2016, Marcus Watts wrote:
-> 2.
-> session handshake & message exchange
-> w/ confounder >= block_size, cbc-cts -- there's no need to send pad bytes.
-> 	[ cts, ciphertext stealing, is a simple modification of cbc to
-> 	not send some bytes which turn out to to be unnecessary; does
-> 	not hurt security, see
-> 		https://en.wikipedia.org/wiki/Ciphertext_stealing	]
+I tried to spec this out (see latest wip-msgr2 commit,
 
-If we knew that we would always know when the end of a payload was 
-coming before we got to that last encryption block, we could skip the 
-padding, but it would be complex and fragile.  The key requirement is 
-that we want to be able to flush data over the wire and have the 
-other end process it at any message boundary.  And the receiver would 
-need to know that it should do it's ciphertext stealing thing when it has 
-only read a fraction of that last block off the wire.
+	https://github.com/liewegas/ceph/commit/wip-msgr2
 
-IMO just specifying the block_size as an auth method attributes simplifies 
-everything: we don't have to write code to do the ciphertext stealing, and 
-we can more or less blindly read data off the wire in chunks that we know 
-can be decrypted.  It costs a few extra bytes, per frame, but I think the 
-performance and simplicity win is more than worth it.
+Basically a single connection just multiplexes multiple streams, and 
+everything we talked about before (except for the banner) is per-stream.  
+Each frame has a stream id, frame length, and then the rest is the 
+same.
+
+It mostly works, but there is one thing to point out: if we do 
+this, the encryption happens within a stream, not the outer framing 
+protocol.  That means that the size of frames is no longer secret.  This 
+could probably already be inferred by packet boundaries and timing in most 
+circumstances, so I don't think it's a problem, but it's worth 
+pointing out.  You can also tell which frames belong to which stream, but 
+that would also be true if they were over separate connections, so I don't 
+think that matters either.
+
+The end goal of this is that:
+
+ - a single process could most many entities (OSDs is the target)
+ - entities could come and go, independent of the connection lifecycle
+ - things like mark_down would terminate streams.  I think this would be 
+just be a TAG_CLOSE message inside a given stream.
+
+How the implementation's Messenger objects would be instantiated and 
+handle the sharing of connections is not important at this layer, as far 
+as I can tell.  I can imagine a couple different options that seem fine.
 
 sage
