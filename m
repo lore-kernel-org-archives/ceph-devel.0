@@ -1,50 +1,37 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: A Transformation of our Global Context
-Date: Fri, 10 Jun 2016 22:38:35 +0000
-Message-ID: <BLUPR0201MB152467C60C23D726D93C10BAE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: A Transformation of our Global Context
+Date: Fri, 10 Jun 2016 18:44:55 -0400
+Message-ID: <20160610224454.GA17244@ultraspiritum.eng.arb.redhat.com>
 References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com>
  <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com>
  <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
  <BLUPR0201MB152410CE52AA744E1631F6AFE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
  <20160610204302.GA7952@ultraspiritum.eng.arb.redhat.com>
+ <BLUPR0201MB152467C60C23D726D93C10BAE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0079.outbound.protection.outlook.com ([157.56.111.79]:47206
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752347AbcFJWim (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 10 Jun 2016 18:38:42 -0400
-In-Reply-To: <20160610204302.GA7952@ultraspiritum.eng.arb.redhat.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:47622 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751985AbcFJWp3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 Jun 2016 18:45:29 -0400
+Content-Disposition: inline
+In-Reply-To: <BLUPR0201MB152467C60C23D726D93C10BAE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Adam C. Emerson" <aemerson@redhat.com>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
 Cc: Gregory Farnum <gfarnum@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Tm90IHN1cmUgd2h5IHlvdSdkIHdhbnQgdG8gUmFkb3NDbGllbnQgaW5zdGFuY2VzIHRvIHNoYXJl
-IG91dGdvaW5nIHRocmVhZHMgZXRjLiBTZWVtcyBsaWtlIGEgYmFkIGlkZWEgdG8gbWUuDQoNCg0K
-QWxsZW4gU2FtdWVscw0KU2FuRGlzayB8YSBXZXN0ZXJuIERpZ2l0YWwgYnJhbmQNCjI4ODAgSnVu
-Y3Rpb24gQXZlbnVlLCBTYW4gSm9zZSwgQ0EgOTUxMzQNClQ6ICsxIDQwOCA4MDEgNzAzMHwgTTog
-KzEgNDA4IDc4MCA2NDE2DQphbGxlbi5zYW11ZWxzQFNhbkRpc2suY29tDQoNCg0KPiAtLS0tLU9y
-aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBZGFtIEMuIEVtZXJzb24gW21haWx0bzphZW1l
-cnNvbkByZWRoYXQuY29tXQ0KPiBTZW50OiBGcmlkYXksIEp1bmUgMTAsIDIwMTYgMTo0MyBQTQ0K
-PiBUbzogQWxsZW4gU2FtdWVscyA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT4NCj4gQ2M6IEdy
-ZWdvcnkgRmFybnVtIDxnZmFybnVtQHJlZGhhdC5jb20+OyBUaGUgU2FjcmVkIE9yZGVyIG9mIHRo
-ZSBTcXVpZA0KPiBDeWJlcm5ldGljIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3Vi
-amVjdDogUmU6IEEgVHJhbnNmb3JtYXRpb24gb2Ygb3VyIEdsb2JhbCBDb250ZXh0DQo+IA0KPiBP
-biAxMC8wNi8yMDE2LCBBbGxlbiBTYW11ZWxzIHdyb3RlOg0KPiA+IEhhdmUgeW91IGNvbnNpZGVy
-ZWQgdGhyZWFkbG9jYWwgc3RvcmFnZSBmb3IgdGhpcz8gSSBzdXNwZWN0IGl0J3MgYQ0KPiA+ICpt
-dWNoKiBlYXNpZXIgd2F5IHRvIGdvLiBWZXJ5IGxpdHRsZSBzb3VyY2UgY29kZSB3aWxsIG5lZWQg
-bW9kaWZpY2F0aW9uLg0KPiANCj4gSSB0aG91Z2h0IGFib3V0IGl0IGJyaWVmbHksIGJ1dCBJIGRv
-bid0IHRoaW5rIGl0IHdvdWxkIHdvcmsgZm9yIHRvb2xzIHRoYXQgc3Bhd24NCj4gdHdvIFJhZG9z
-Q2xpZW50cyBlYWNoIHBvaW50aW5nIHRvIGEgZGlmZmVyZW50IGNsdXN0ZXIuIFdoaWxlIGVhY2gg
-d291bGQNCj4gbGF1bmNoIHRocmVhZHMgb2YgaXRzIG93biwgdGhleSdkIGJvdGggc2hhcmUgdGhl
-IGFwcGxpY2F0aW9uIHRocmVhZHMgZm9yDQo+IG91dGdvaW5nIG9wZXJhdGlvbnMgKGF0IGxlYXN0
-IHVudGlsIHRoZXkgaGl0IHRoZSBtZXNzZW5nZXIpLiBTbyBJIHRoaW5rIHdlJ2QNCj4gc3RpbGwg
-bmVlZCB0byB0ZWFzZSBhcGFydCB0aGUgY2xhc3Mgc29tZXdoYXQgdG8gbWFrZSB0aHJlYWQgbG9j
-YWwgc3RvcmFnZQ0KPiB3b3JrLg0KPiANCj4gLS0NCj4gU2VuaW9yIFNvZnR3YXJlIEVuZ2luZWVy
-ICAgICAgICAgICBSZWQgSGF0IFN0b3JhZ2UsIEFubiBBcmJvciwgTUksIFVTDQo+IElSQzogQWVt
-ZXJzb25Ae1JlZEhhdCwgT0ZUQywgRnJlZW5vZGV9DQo+IDB4ODBGNzU0NEI5MEVEQkZCOSBFNzA3
-IDg2QkEgMEMxQiA2MkNDIDE1MkMgIDdDMTIgODBGNyA1NDRCIDkwRUQgQkZCOQ0K
+On 10/06/2016, Allen Samuels wrote:
+> Not sure why you'd want to RadosClient instances to share outgoing threads etc. Seems like a bad idea to me.
+
+No, I meant that when I, as an application, say to write an object, everything
+happens in my (the application's) down through objecter until we hit the
+messenger. So it's not that I /want/ them to share threds, it's just that they
+do on the outgoing operation path. (And having them not do so would involve a
+bunch of overhead.)
+
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
