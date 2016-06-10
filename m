@@ -1,67 +1,37 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [GIT PULL] Ceph updates for 4.7-rc1
-Date: Fri, 10 Jun 2016 22:42:51 +0200
-Message-ID: <3724610.gtEplKGO6B@wuerfel>
-References: <alpine.DEB.2.11.1605261035390.6221@cpach.fuggernut.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: A Transformation of our Global Context
+Date: Fri, 10 Jun 2016 16:43:02 -0400
+Message-ID: <20160610204302.GA7952@ultraspiritum.eng.arb.redhat.com>
+References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com>
+ <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com>
+ <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
+ <BLUPR0201MB152410CE52AA744E1631F6AFE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <alpine.DEB.2.11.1605261035390.6221@cpach.fuggernut.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sweil@redhat.com>
-Cc: torvalds@linux-foundation.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:55703 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932376AbcFJUng (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 Jun 2016 16:43:36 -0400
+Content-Disposition: inline
+In-Reply-To: <BLUPR0201MB152410CE52AA744E1631F6AFE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Thursday, May 26, 2016 2:18:03 PM CEST Sage Weil wrote:
-> Hi Linus,
-> 
-> Please pull the following Ceph updates from
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
-> 
-> This changeset has a few main parts:
-> 
->  * Ilya has finished a huge refactoring effort to sync up the client-side 
-> logic in libceph with the user-space client code, which has evolved 
-> significantly over the last couple years, with lots of additional 
-> behaviors (e.g., how requests are handled when cluster is full and 
-> transitions from full to non-full).  This structure of the code is more 
-> closely aligned with userspace now such that it will be much easier to 
-> maintain going forward when behavior changes take place.  There are some 
-> locking improvements bundled in as well.
+On 10/06/2016, Allen Samuels wrote:
+> Have you considered threadlocal storage for this? I suspect it's a
+> *much* easier way to go. Very little source code will need modification.
 
-I'm getting a warning in some ARM randconfig build:
+I thought about it briefly, but I don't think it would work for tools
+that spawn two RadosClients each pointing to a different cluster. While
+each would launch threads of its own, they'd both share the application
+threads for outgoing operations (at least until they hit the messenger). So I
+think we'd still need to tease apart the class somewhat to make thread local
+storage work.
 
-WARNING: "ceph_monc_do_statfs" [fs/ceph/ceph.ko] has no CRC!                                             
-
-I have bisected this down to this particular commit fcd00b68bbe:
- 
-> ----------------------------------------------------------------
-> Ilya Dryomov (40):
->       libceph: DEFINE_RB_FUNCS macro
-
-but I have no idea how the change relates to the symptom though.
-
-What I see is that this one exported symbol has a __crc of a different
-type from all the others:
-
-$ nm net/ceph/mon_client.o | grep __crc
-48c2e16e A __crc_ceph_monc_get_version
-2360d633 A __crc_ceph_monc_get_version_async
-0c50a10a A __crc_ceph_monc_got_map
-         w __crc_ceph_monc_do_statfs
-b63e5cf5 A __crc_ceph_monc_init
-c4602476 A __crc_ceph_monc_open_session
-5e6fd15f A __crc_ceph_monc_renew_subs
-53a9ed7f A __crc_ceph_monc_stop
-33a329fa A __crc_ceph_monc_validate_auth
-34010ef9 A __crc_ceph_monc_wait_osdmap
-29c50846 A __crc_ceph_monc_want_map
-
-I only see this in some rare randconfig builds and have not figured out
-which options are required, but I have also been able to reproduce it on
-an x86 config and have uploaded the .config file to 
-http://pastebin.com/raw/Dsrtfbcs 
-
-	Arnd
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
