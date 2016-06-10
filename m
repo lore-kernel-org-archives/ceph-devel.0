@@ -1,90 +1,78 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: msgr2 protocol
-Date: Fri, 10 Jun 2016 07:04:36 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606100649010.6221@cpach.fuggernut.com>
-References: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com> <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com> <alpine.DEB.2.11.1606021416510.6221@cpach.fuggernut.com> <CAJ4mKGaWx8m4Zh_f6tQWe9ows77HHyMmv5y52Rr-5Q-ob_N1Yg@mail.gmail.com>
- <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com> <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com> <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com> <CAJ4mKGbyCiWbuwGxhGu_ohf7vxNqVqgf4XQQpQ7eg-tP-YO+gg@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: libcephfs-java bindings built but not showing up in debian repository
+Date: Fri, 10 Jun 2016 08:15:38 -0400
+Message-ID: <CAC-Np1y-1=rBJOeAM2Z6bxEaXSYBMOJUwFvHdbExYypXiqfdwQ@mail.gmail.com>
+References: <CAB2gnbXwbVghGQac9N_s820iG+M19xucvLi7DJOAaZrNjhoCyA@mail.gmail.com>
+	<CAJ4mKGZk_W2d-ZGZSsdV0kHv8QVjpq4Ev98dRPL+o=RZoQ-8=A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33273 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752737AbcFJLEM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 10 Jun 2016 07:04:12 -0400
-In-Reply-To: <CAJ4mKGbyCiWbuwGxhGu_ohf7vxNqVqgf4XQQpQ7eg-tP-YO+gg@mail.gmail.com>
+Received: from mail-oi0-f46.google.com ([209.85.218.46]:36677 "EHLO
+	mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932102AbcFJMPk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 08:15:40 -0400
+Received: by mail-oi0-f46.google.com with SMTP id p204so109020877oih.3
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Jun 2016 05:15:39 -0700 (PDT)
+In-Reply-To: <CAJ4mKGZk_W2d-ZGZSsdV0kHv8QVjpq4Ev98dRPL+o=RZoQ-8=A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Haomai Wang <haomai@xsky.com>, Marcus Watts <mwatts@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Noah Watkins <noahwatkins@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Dan Mick <dmick@redhat.com>, Beocat KSU <mozes@ksu.edu>
 
-On Mon, 6 Jun 2016, Gregory Farnum wrote:
-> On Fri, Jun 3, 2016 at 10:33 AM, Sage Weil <sweil@redhat.com> wrote:
-> > On Sat, 4 Jun 2016, Haomai Wang wrote:
-> >> On Fri, Jun 3, 2016 at 9:24 PM, Sage Weil <sweil@redhat.com> wrote:
-> >> > I updated the PR with an additional commit that simplifies the
-> >> > confounder.  It seems like we only need the confoudner at teh beginning of
-> >> > the session, not for every message, since the signature and encryption
-> >> > state is chained from the previous frame.  Is that right?
-> >> >
-> >> >         https://github.com/ceph/ceph/pull/9461/commits/45766fed1864733c5216a7b50f11cce256338170
-> >> >
-> >> > Full PR:
-> >> >
-> >> >         https://github.com/ceph/ceph/pull/9461
-> >> >
-> >> > --
-> >> >
-> >> > Also, I just realized that now might be a good time to address the ability
-> >> > to multiplex different endpoints (sessions) into the same connection.  We
-> >> > could add it later with the msgr feature bits, but it'll probably be
-> >> > simpler not to have to support two variants of the protocol.  On the other
-> >> > hand, it's a lot more complicated.  :(
-> >>
-> >> What's the use case? different session shares the same connection? Do
-> >> you mean different messenger instance will share the same connection
-> >> pool?
-> >
-> > Many OSD's in the same unix process, sharing the same messenger connection
-> > pool, eventually using SPDK/DPDK.
-> 
-> Oof, yes, if we want to make that happen it should be in this design phase.
-> 
-> So, what features do we want/need to include here? Is it just the
-> ability to send messages which represent different entities on a tag
-> basis? Full streams with their own encryption settings?
-> Do we want to do interleaving on some block size, or do
-> messages/streams on a full frame basis?
-> 
-> I've thought about these some and am mixed-to-clueless on these, but
-> we need some targets.
+On Thu, Jun 9, 2016 at 8:50 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> On Thu, Jun 9, 2016 at 4:29 PM, Noah Watkins <noahwatkins@gmail.com> wrote:
+>> I'm trying to track down why the Java Debian packages are not showing
+>> up in the Jewel repository:
+>>
+>> Looking in the repository for jewel I see the JNI bindings deb:
+>>
+>>    http://download.ceph.com/debian-jewel/pool/main/c/ceph/
+>>    libcephfs-jni_10.2.1-1trusty_amd64.deb 13-May-2016 23:53 20368086
+>>
+>> but not the deb file containing the Java bits (libcephfs-java).
+>
+> Hmm, that's the official release packages, which I think aren't
+> produced using all the same stuff as the gitbuilders. Does
+> libcephfs-java get built the same way as the JNI bindings? I know we
+> have a separate gitbuilder for Hadoop JARs...
 
-I tried to spec this out (see latest wip-msgr2 commit,
+The release packages are not produced using the same process as gitbuilders.
 
-	https://github.com/liewegas/ceph/commit/wip-msgr2
+This is an example output of Trusty building Jewel:
 
-Basically a single connection just multiplexes multiple streams, and 
-everything we talked about before (except for the banner) is per-stream.  
-Each frame has a stream id, frame length, and then the rest is the 
-same.
+    https://jenkins.ceph.com/job/ceph-build/ARCH=x86_64,DIST=trusty,MACHINE_SIZE=huge/133/consoleFull
 
-It mostly works, but there is one thing to point out: if we do 
-this, the encryption happens within a stream, not the outer framing 
-protocol.  That means that the size of frames is no longer secret.  This 
-could probably already be inferred by packet boundaries and timing in most 
-circumstances, so I don't think it's a problem, but it's worth 
-pointing out.  You can also tell which frames belong to which stream, but 
-that would also be true if they were over separate connections, so I don't 
-think that matters either.
+At the end of the build, the process looks for files in:
+`release/$VERSION` which in the previous case would be
+`release/10.2.2`
 
-The end goal of this is that:
+All binaries are placed there and that is what ends up being consumed.
 
- - a single process could most many entities (OSDs is the target)
- - entities could come and go, independent of the connection lifecycle
- - things like mark_down would terminate streams.  I think this would be 
-just be a TAG_CLOSE message inside a given stream.
+This is the actual file that builds debs for upstream releases:
 
-How the implementation's Messenger objects would be instantiated and 
-handle the sharing of connections is not important at this layer, as far 
-as I can tell.  I can imagine a couple different options that seem fine.
+    https://github.com/ceph/ceph-build/blob/master/ceph-build/build/build_deb
 
-sage
+The part that actually calls pbuilder to produce the binaries and then
+copy them to our centralized binary store is:
+
+    https://github.com/ceph/ceph-build/blob/master/ceph-build/build/build_deb#L165-L194
+
+
+>
+> -Greg
+>
+>> However, it looks like the gitbuilder is producing them:
+>>
+>>    http://gitbuilder.ceph.com/ceph-deb-trusty-x86_64-basic/ref/jewel/pool/main/c/ceph/
+>>    ===> libcephfs-java_10.2.1-135-g50143ed-1trusty_all.deb2016-06-09 15:191.0M
+>>    libcephfs-jni_10.2.1-135-g50143ed-1trusty_amd64.deb2016-06-09 15:1919M
+>>
+>> I grepped around the autobuilders and don't see any special cases for
+>> Java. Any clues?
+>>
+>> Thanks,
+>> Noah
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
