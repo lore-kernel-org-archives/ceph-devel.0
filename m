@@ -1,79 +1,57 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [GIT PULL] Ceph updates for 4.7-rc1
-Date: Sat, 11 Jun 2016 01:04:21 +0200
-Message-ID: <3311445.Ou5N5TeFZc@wuerfel>
-References: <alpine.DEB.2.11.1605261035390.6221@cpach.fuggernut.com> <3724610.gtEplKGO6B@wuerfel> <CA+55aFxOZSKjePXaCrB=WDdEr1kxXMCEwonfBODbmk=9x-p0CA@mail.gmail.com>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: A Transformation of our Global Context
+Date: Sat, 11 Jun 2016 00:57:23 +0100
+Message-ID: <575B53E3.90102@suse.de>
+References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com>
+ <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com>
+ <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
+ <CAJ4mKGaSyKN+_52-+CSKhFXsL2WE+5T_Z6egpbBNaJvGs4a-Og@mail.gmail.com>
+ <20160610201543.GC29233@ultraspiritum.eng.arb.redhat.com>
+ <alpine.DEB.2.11.1606101638520.6221@cpach.fuggernut.com>
+ <20160610204549.GB7952@ultraspiritum.eng.arb.redhat.com>
+ <alpine.DEB.2.11.1606101651280.6221@cpach.fuggernut.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CA+55aFxOZSKjePXaCrB=WDdEr1kxXMCEwonfBODbmk=9x-p0CA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Sage Weil <sweil@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:56455 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750888AbcFJX50 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 Jun 2016 19:57:26 -0400
+In-Reply-To: <alpine.DEB.2.11.1606101651280.6221@cpach.fuggernut.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, "Adam C. Emerson" <aemerson@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Friday, June 10, 2016 2:32:21 PM CEST Linus Torvalds wrote:
-> On Fri, Jun 10, 2016 at 1:42 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> >
-> > What I see is that this one exported symbol has a __crc of a different
-> > type from all the others:
-> >
-> > $ nm net/ceph/mon_client.o | grep __crc
-> > 48c2e16e A __crc_ceph_monc_get_version
-> > 2360d633 A __crc_ceph_monc_get_version_async
-> > 0c50a10a A __crc_ceph_monc_got_map
-> >          w __crc_ceph_monc_do_statfs
-> 
-> A lower-case 'w' in a symbol list just means that it's a local weak
-> symbol (with a upper-case 'A' meaning it's an absolute global).
-> 
-> Afaik, that simply means that it never got resolved, and genksyms
-> never generated that absolute value for it.
-> 
-> As to _why_ that happens, that's more than I can guess. We've had
-> problems with genksyms before, and it tends to be hard to debug.
-> 
-> Is it 100% reliable for you? Because the most common problem has been
-> issues with subtle build races, where just causing a re-build will fix
-> it.
+On 06/10/2016 09:53 PM, Sage Weil wrote:
+> On Fri, 10 Jun 2016, Adam C. Emerson wrote:
+>> On 10/06/2016, Sage Weil wrote:
+>>> FWIW the time thing is a bit of a red herring.  The only reason time takes
+>>> cct is for the configuration clock skew.  That was added for debugging
+>>> purposes but has never (to my knowledge) been used.  I'd be happy to rip
+>>> it out.
+>>
+>> I wasn't aware of that. I'd asked once if the clock skew debug option
+>> was really important (back with the original time patch) and was told
+>> it was. The person I was talking to might have thought I was talking
+>> about monitor clock skew or something.
+>
+> Ah, there is *one* teuthology test that sets this:
+>
+> $ git grep clock\ offset | cat
+> suites/rados/multimon/tasks/mon_clock_with_skews.yaml:        clock offset: 10
+>
+> I'd be quite happy to drop this test, or kludge around it some other way
+> (e.g., put a mon on a different host and change the system time), if it
+> saves us as much code churn as I suspect it will...
 
-In a few thousand randconfig builds, this is the only symbol I ever
-see the problem with, and I always see it with the same configurations
-after rebuilding dozens of times, including with different compiler
-versions (I only tried arm-gcc-4.9, arm-gcc-6.1 and x86-gcc-5.3, but
-that seems to cover a wide range).
+i've been hacking a mon debug interface via the ceph tool to test 
+features and do all sorts of nasty things (provided a given experimental 
+feature is enabled and the user is really, really sure about it), and I 
+think we could then use it to test clock skews just as well. It'd be a 
+matter of telling a given monitor to just skew the response to the 
+leader during the timecheck round.
 
-> Your config doesn't work for me, when I do
-> 
->    cp ~/genksyms-config.txt .config
->    make ARCH=i386 oldconfig
-> 
-> I get something else than what you had. I tried with both current -git
-> and the commit you pinpointed, so I don't know how you generated that
-> config file..
+   -Joao
 
-I had not tried building the entire kernel on x86, and indeed I don't
-see the warning there either, but I do see this one weak symbol in my
-configuration:
-
-arm-soc/obj-x86$ nm vmlinux | grep __crc | grep -w 'w'
-         w __crc_ceph_monc_do_statfs
-
-Also, the .config I first uploaded was based on my randconfig tree
-that has some other changes to avoid all existing warnings. I've
-done a 'make oldconfig' on your current HEAD now and put that
-on http://pastebin.com/raw/EJBaG0FV just to make sure we have an
-identical configuration.
-
-The respective ARM .config file does produce the warning on
-mainline, and I've uploaded that to http://pastebin.com/3NRSFSdr
-I generated the x86 configuration by starting with this one
-and running 'make olddefconfig ARCH=x86' on it.
-
-I have found 15 more random configurations with the same symptom
-now, and about 50 configurations with CONFIG_CEPH_FS=m that
-don't show it, so I can mine the configurations for more hints
-next week to see what influences it.
-
-	Arnd
