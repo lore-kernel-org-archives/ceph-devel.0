@@ -1,167 +1,100 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: RocksDB tuning
-Date: Fri, 10 Jun 2016 05:34:36 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606100533300.6221@cpach.fuggernut.com>
-References: <D37DE46C.5743E%manavalan.krishnan@sandisk.com> <BLUPR0201MB1524D8A9D42F7C50646D0AE8E85E0@BLUPR0201MB1524.namprd02.prod.outlook.com> <a3216e58-d591-50ae-f2f2-0cbb7cdaa7bb@redhat.com> <fb82e615-0762-0843-9a9f-cbc4686e35ba@redhat.com>
- <BL2PR02MB2115BD376A32CF2B6E54ABABF45F0@BL2PR02MB2115.namprd02.prod.outlook.com> <BL2PR02MB2115DF8FF9EF7CF822C838BAF4500@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?=
+	<bartlomiej.swiecki@corp.ovh.com>
+Subject: Re: Understanding mon space usage during recovery
+Date: Fri, 10 Jun 2016 10:58:28 +0200
+Message-ID: <575A8134.5020808@corp.ovh.com>
+References: <5757E47A.2010203@corp.ovh.com>
+ <CAJ4mKGZTHQYXXgRgWaoiLViX6Z6x0NtjE9-N3tJdR8M2BUvqQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52853 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752908AbcFJJeL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 10 Jun 2016 05:34:11 -0400
-In-Reply-To: <BL2PR02MB2115DF8FF9EF7CF822C838BAF4500@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from 6.mo175.mail-out.ovh.net ([46.105.47.107]:34197 "EHLO
+	6.mo175.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752908AbcFJJeZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 05:34:25 -0400
+In-Reply-To: <CAJ4mKGZTHQYXXgRgWaoiLViX6Z6x0NtjE9-N3tJdR8M2BUvqQg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Mark Nelson <mnelson@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Manavalan Krishnan <Manavalan.Krishnan@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 10 Jun 2016, Somnath Roy wrote:
-> Sage/Mark,
-> I debugged the code and it seems there is no WAL write going on and working as expected. But, in the process, I found that onode size it is writing to my environment ~7K !! See this debug print.
-> 
-> 2016-06-09 15:49:24.710149 7f7732fe3700 20 bluestore(/var/lib/ceph/osd/ceph-0)   onode #1:7d3c6423:::rbd_data.10186b8b4567.0000000000070cd4:head# is 7518
-> 
-> This explains why so much data going to rocksdb I guess. Once compaction 
-> kicks in iops I am getting is *30 times* slower.
-> 
-> I have 15 osds on 8TB drives and I have created 4TB rbd image 
-> preconditioned with 1M. I was running 4K RW test.
+Thanks for hints, replied inline.
 
-The onode is big because of the csum metdata.  Try setting 'bluestore csum 
-type = none' and see if that is the entire reason or if something else 
-is going on.
-
-We may need to reconsider the way this is stored.
-
+On 06/08/2016 05:33 PM, Gregory Farnum wrote:
+> On Wed, Jun 8, 2016 at 2:25 AM, Bart=C5=82omiej =C5=9Awi=C4=99cki
+> <bartlomiej.swiecki@corp.ovh.com> wrote:
+>> Hi,
+>>
+>> I was recently trying to understand the growth of mon disk space usa=
+ge
+>> during recovery in one of our clusters,
+>> wanted to know whether we could reduce disk usage somehow or if we j=
+ust have
+>> to prepare more space for our mons.
+>> Cluster is 0.94.6, just over 300 OSDs. Leveldb compaction does reduc=
+e space
+>> usage but it quickly grows back
+>> to the previous usage. What I found out is that most of the leveldb =
+data is
+>> used by osdmap history.
+>>
+>> For each osdmap version leveldb contains both full and incremental e=
+ntry so
+>> I was thinking if we really need to
+>> store full osdmaps for all versions? If we're having incremental cha=
+nges for
+>> every version anyway, wouldn't it be
+>> sufficient to keep first full version only and then recover any futu=
+re ones
+>> by applying incrementals?
+> Maybe not; we've gone back and forth on this but I think we ended up
+> learning that reconstructing them was just annoying in terms of
+> needing to read all the extra keys.
+I think we can't get away reserving more space to mons then.
+>> I was also trying to understand how ceph figures out the range of os=
+dmap
+>> versions to keep. After analyzing the code
+>> I thought the obvious answer was in PGMap::calc_min_last_epoch_clean=
+() - In
+>> case of our production cluster,
+>> the difference between min and max clean epochs was around 30k durin=
+g
+>> recovery, size of one full osdmap blob
+>> in leveldb is around 250k.
+> Yeah, there's not a lot that can be done about this directly. 30k map=
 s
+> is an awful lot though; you probably have other issues happening in
+> your OSDs (or monitors?).
+There were no other issues but it takes more than a day to finish=20
+rebalancing
+the cluster. That would mean new osdmap would have to get created once =
+every
+3 seconds - is that possible? What events could cause upgrade of osdmap=
+?
+The cluster had noscrub and nodeep-scrub set to speedup the recovery.
+>> I also tried to test this on my dev cluster where I could run gdb (1=
+5 OSD, 4
+>> OSD nearfull and lots of misplaced objects).
+>> What I found out is that execution in OSDmonitor::get_trim_to() almo=
+st never
+>> jumped inside the first 'if'.
+>> mon->pgmon()->is_readable() returns false, I did debug it once and i=
+t was a
+>> result of false returned by Paxos::is_lease_valid().
+> Okay, that's bad. If your lease isn't valid, then the monitors are
+> getting so bogged down that they're timing out the leases and
+> temporarily breaking quorum. You should figure out if this is a load
+> issue or a result of clock skew issues or something.
+> -Greg
+I'll try to get some more details on that. I'm running dedicated NTP=20
+server to
+sync all nodes so I guess clock skew is not an issue here.
 
-
-
-
-> 
-> Thanks & Regards
-> Somnath
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
-> Sent: Thursday, June 09, 2016 8:23 AM
-> To: Mark Nelson; Allen Samuels; Manavalan Krishnan; Ceph Development
-> Subject: RE: RocksDB tuning
-> 
-> Mark,
-> As we discussed, it seems there is ~5X write amp on the system with 4K RW. Considering the amount of data going into rocksdb (and thus kicking of compaction so fast and degrading performance drastically) , it seems it is still writing WAL (?)..I used the following rocksdb option for faster background compaction as well hoping it can keep up with upcoming writes and writes won't be stalling. But, eventually, after a min or so, it is stalling io..
-> 
-> bluestore_rocksdb_options = "compression=kNoCompression,max_write_buffer_number=16,min_write_buffer_number_to_merge=3,recycle_log_file_num=16,compaction_style=kCompactionStyleLevel,write_buffer_size=67108864,target_file_size_base=67108864,max_background_compactions=31,level0_file_num_compaction_trigger=8,level0_slowdown_writes_trigger=32,level0_stop_writes_trigger=64,num_levels=4,max_bytes_for_level_base=536870912,max_bytes_for_level_multiplier=8,compaction_threads=32,flusher_threads=8"
-> 
-> I will try to debug what is going on there..
-> 
-> Thanks & Regards
-> Somnath
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-> Sent: Thursday, June 09, 2016 6:46 AM
-> To: Allen Samuels; Manavalan Krishnan; Ceph Development
-> Subject: Re: RocksDB tuning
-> 
-> On 06/09/2016 08:37 AM, Mark Nelson wrote:
-> > Hi Allen,
-> >
-> > On a somewhat related note, I wanted to mention that I had forgotten 
-> > that chhabaremesh's min_alloc_size commit for different media types 
-> > was committed into master:
-> >
-> > https://github.com/ceph/ceph/commit/8185f2d356911274ca679614611dc335e3
-> > efd187
-> >
-> >
-> > IE those tests appear to already have been using a 4K min alloc size 
-> > due to non-rotational NVMe media.  I went back and verified that 
-> > explicitly changing the min_alloc size (in fact all of them to be
-> > sure) to 4k does not change the behavior from graphs I showed 
-> > yesterday.  The rocksdb compaction stalls due to excessive reads 
-> > appear (at least on the
-> > surface) to be due to metadata traffic during heavy small random writes.
-> 
-> Sorry, this was worded poorly.  Traffic due to compaction of metadata (ie not leaked WAL data) during small random writes.
-> 
-> Mark
-> 
-> >
-> > Mark
-> >
-> > On 06/08/2016 06:52 PM, Allen Samuels wrote:
-> >> Let's make a patch that creates actual Ceph parameters for these 
-> >> things so that we don't have to edit the source code in the future.
-> >>
-> >>
-> >> Allen Samuels
-> >> SanDisk |a Western Digital brand
-> >> 2880 Junction Avenue, San Jose, CA 95134
-> >> T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
-> >>
-> >>
-> >>> -----Original Message-----
-> >>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel- 
-> >>> owner@vger.kernel.org] On Behalf Of Manavalan Krishnan
-> >>> Sent: Wednesday, June 08, 2016 3:10 PM
-> >>> To: Mark Nelson <mnelson@redhat.com>; Ceph Development <ceph- 
-> >>> devel@vger.kernel.org>
-> >>> Subject: RocksDB tuning
-> >>>
-> >>> Hi Mark
-> >>>
-> >>> Here are the tunings that we used to avoid the IOPs choppiness 
-> >>> caused by rocksdb compaction.
-> >>>
-> >>> We need to add the following options in src/kv/RocksDBStore.cc 
-> >>> before rocksdb::DB::Open in RocksDBStore::do_open opt.IncreaseParallelism(16);
-> >>>   opt.OptimizeLevelStyleCompaction(512 * 1024 * 1024);
-> >>>
-> >>>
-> >>>
-> >>> Thanks
-> >>> Mana
-> >>>
-> >>>
-> >>>>
-> >>>
-> >>> PLEASE NOTE: The information contained in this electronic mail 
-> >>> message is intended only for the use of the designated recipient(s) 
-> >>> named above.
-> >>> If the
-> >>> reader of this message is not the intended recipient, you are hereby 
-> >>> notified that you have received this message in error and that any 
-> >>> review, dissemination, distribution, or copying of this message is 
-> >>> strictly prohibited. If you have received this communication in 
-> >>> error, please notify the sender by telephone or e-mail (as shown 
-> >>> above) immediately and destroy any and all copies of this message in 
-> >>> your possession (whether hard copies or electronically stored 
-> >>> copies).
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> >>> in the
-> >>> body of a message to majordomo@vger.kernel.org More majordomo info 
-> >>> at http://vger.kernel.org/majordomo-info.html
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> >> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> >> info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Bartek
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
