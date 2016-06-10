@@ -1,155 +1,69 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: msgr2 protocol
-Date: Fri, 10 Jun 2016 17:15:22 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606101658530.6221@cpach.fuggernut.com>
-References: <alpine.DEB.2.11.1605261358330.6221@cpach.fuggernut.com> <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com> <alpine.DEB.2.11.1606021416510.6221@cpach.fuggernut.com> <CAJ4mKGaWx8m4Zh_f6tQWe9ows77HHyMmv5y52Rr-5Q-ob_N1Yg@mail.gmail.com>
- <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com> <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com> <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com> <CAJ4mKGbyCiWbuwGxhGu_ohf7vxNqVqgf4XQQpQ7eg-tP-YO+gg@mail.gmail.com>
- <alpine.DEB.2.11.1606100649010.6221@cpach.fuggernut.com> <20160610190510.GA18999@degu.eng.arb.redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: A Transformation of our Global Context
+Date: Fri, 10 Jun 2016 17:20:51 -0400 (EDT)
+Message-ID: <alpine.DEB.2.11.1606101716180.6221@cpach.fuggernut.com>
+References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com> <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com> <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com> <CAJ4mKGaSyKN+_52-+CSKhFXsL2WE+5T_Z6egpbBNaJvGs4a-Og@mail.gmail.com>
+ <alpine.DEB.2.11.1606101616210.6221@cpach.fuggernut.com> <20160610210433.GA16959@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40221 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751868AbcFJVO4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 10 Jun 2016 17:14:56 -0400
-In-Reply-To: <20160610190510.GA18999@degu.eng.arb.redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:36781 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751868AbcFJVUZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jun 2016 17:20:25 -0400
+In-Reply-To: <20160610210433.GA16959@ultraspiritum.eng.arb.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Marcus Watts <mwatts@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Haomai Wang <haomai@xsky.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Fri, 10 Jun 2016, Marcus Watts wrote:
-> I'm going to try to respond to several messages with this one message...
+On Fri, 10 Jun 2016, Adam C. Emerson wrote:
+> On 10/06/2016, Sage Weil wrote:
+> > I think the crux of the issue is the debug/logging code.  Almost all
+> > the other uses of cct are related to config options that are
+> > per-cluster.
 > 
-> 1. bitmask
-> 2. authentication.
-> 3. final sequence
-> 4. confounder
-> 5. encryption per message or per connection?
+> That is correct. I thought we might pull some things like (like the
+> Crypto stuff) while we were at it but that was more "As long as I'm
+> here anyway I might as well see if there's anything more to do..."
 > 
-> ____ 1. bitmask
-> banner phase - bitmask.
+> > And with logging... it seems like even this is really a per-cluster
+> > (well, per entity) thing.  Sorting through a log file that combines
+> > output from two different objecters sounds horrific, and when we
+> > cram multiple OSDs into one process, we're going to want them to
+> > still feed into different log files.
 > 
-> hex digits will work fine for the protocol - but
-> can't just use %llx %llx for parsing - when parsing for required, should
-> reject for any non-zero hex digits above word size; for supported should
-> ignore hex digits above word size.
+> This is a good point that I had not considered. Though, I'm not sure
+> if the un-separated case is that much better. I think part of the
+> savings we would want from multi-OSD work (at least in principle) is
+> to be able to have them share messengers and other overhead. In that
+> case giving each OSD its own fully fledged CephContext doesn't make
+> sense, I don't think.
 
-+1
+The messengers aren't tied to CephContext, so I don't think this changes 
+things in that regard.  I'm guessing we'll end up with something where 
+each entity has a thing that implements the Messenger interface but many 
+of those are sharing all their resources behind the scenes (thread pools, 
+multiplexing their connections, etc.).  We'll have to figure out how the 
+config options related to messenger itself are handled, but I think that 
+oddity needs to be done explicitly anyway.  We wouldn't for instance, want 
+to assume that all clusters in the same process must share the same 
+messenger options.  (Maybe we invent an entity that governs the shared 
+resources (process.NNN) and somehow direct config options/admin socket 
+commands/whatever toward that?  Who knows.)
 
-> ____ 2. authentication.
-> We're already talking about 2 methods:
-> "initial connect"
-> "reconnect".
-> the client doesn't know when it tries to reconnect if the
-> server will accept a reconnect.  being able to say :
-> 	c->s
-> 		continue: reconnect
-> 		continue: new_connect: phase 1
-> then either
-> 	s->c
-> 		accept: reconnect
-> or
-> 	s->c
-> 		reject: reconnect: no data
-> 		continue: new connect phase 2
+> Some form of sterring might work, perhaps making the log system smart
+> enough to shove things around based on subsystem or an entity
+> identifier or something.
 > 
-> means 1 fewer round trips.
-
-If the reconnect isn't accepted we fail hard (call a reset method and 
-close the connection) so we can just plow forward with one method or the 
-other, I think.
-
-> if the ident & feature exchange can be done at the same time (being
-> careful to make sure they're part of the signing process) I think that's
-> a further win.
+> > How bad is the cct plumbing patch?  I fear this might still be the
+> > best path forward...
 > 
-> Optimizing round trips is particularly important for high latency
-> connections.
-> 
-> I don't think the client has any business sending
-> a "set method" message before it sees the server's
-> "banner" - so there's already another round trip there.
+> It's not great? Really at all. I wrote it and I don't like it. I
+> could pull it up and smack it into shape and make sure it passes tests
+> if it were necessary.
 
-The set method should be part of the base feature set, so the only risk is 
-that we connect to something that isn't ceph.  I'm not sure we care if 
-we're rude to another service on our port or not.  If we have to be 
-polite, though, I guess there isn't much way around it.
+Is it pushed somewhere?  Maybe much of the pain is related to the clock 
+thing...
 
-Anyway, I think we're okay here.
-
-> ____ 3. final sequence
-> "final sequence"
-> sorry, bad wording.
-> for a reconnect: last sequence number from previous connection.
-> (for a new connect after a reconnect: probably the client should be
-> setting this to its remembered last value even if the server doesn't
-> remember that value.)
-
-Gotcha.
-
-> ____ 4. confounder
-> (but see next point too)
-> The confounder is really a lower-level feature of the encryption.
-> So it has to be per-message.  It needs to be part of the message hash,
-> but should not be visible past that.  With cbc mode, encryption looks like;
-> 	given plaintext p[0..n]
-> 	to encrypt,
-> 		c[0] = e(p[0])
-> 		c[n] = e(c[n-1] ^ p[n])
-> 	to decrypt,
-> 		p[0] = d(c[0])
-> 		p[n] = d(c[n]) ^ c[n^1]
-> by making p[0] be a "random" value - that ensures for each
-> message all c[n] are likely unique, including the hash.
-> If p[0] were a set value, then c[0]
-> becomes a fixed value and further values of c[x] become
-> more deterministic as well.  That allows a bad guy to build up
-> a dictionary of p[x] -> c[x] even without knowing the key,
-> and we really don't want to give bad guys that capability.
-> 
-> ____ 5. encryption per message or per connection?
-> 
-> You're thinking of doing encryption over the entire byte stream
-> not having framing outside.  Ah!.  Interesting...
-
-Actually, over the entire stream, but with framing surrounding pieces.  So 
-the c[n-1] will either be from c[0] (confounder during auth_done) or the 
-perhaps the previous frame/message.  The framing has to be clear because 
-different streams (converstaions between osds/clients/whatever) may be 
-governed by different authentication and crypto keys/options/etc.
-
-> Well, you certainly don't need extra confounders past the start
-> of your encryption.  That can be (more or less) a one time thing.
-> You will definitely need some sort of block flushing/padding
-> thing between messages.  I imagine you'll want something like:
-> 	size message hash(size+message) padding-to-block
-
-Can you look at the padding described in the doc to see if it's 
-sufficient?  Basically there is a block_size and sig_size.  Payloads are 
-padded out to block_size for simplicity in the cipher, and sig_size is the 
-size of the signature (if present--i.e., not encrypted) after that.
-
-> And you will want to have some sort of notion
-> that such connections are size limited - "do not encrypt more than N
-> bytes on a connection".  You probably should have some sort of
-> "new key every N bytes" notion over smaller byte ranges in addition.
-> (wouldn't hurt to do a new confounder for each new key too.)
-
-This isn't something cephx does.  The session keys do rotate every so 
-often already (30m-1h?), but established connections aren't currently 
-forced to reauthenticate.  If that's a short enough timespan it's probably 
-an easyish change. If that's still too long, I think we can layer on 
-session rekeying later when we get around to improving the auth methods 
-themselves (e.g., maybe probably replacing cephx with something based on 
-krb5).
-
-
-Greg, Haomai, I think wip-msgr2 is in decent shape.  Want to take a final 
-look before I merged?
-
-	https://github.com/ceph/ceph/pull/9461/files
-
-Thanks!
 sage
-
