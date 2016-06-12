@@ -1,67 +1,114 @@
-From: Marcus Watts <mwatts@redhat.com>
-Subject: Re: msgr2 protocol
-Date: Sat, 11 Jun 2016 19:05:03 -0400
-Message-ID: <20160611230503.GA18268@degu.eng.arb.redhat.com>
-References: <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com>
- <alpine.DEB.2.11.1606021416510.6221@cpach.fuggernut.com>
- <CAJ4mKGaWx8m4Zh_f6tQWe9ows77HHyMmv5y52Rr-5Q-ob_N1Yg@mail.gmail.com>
- <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com>
- <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com>
- <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com>
- <CAJ4mKGbyCiWbuwGxhGu_ohf7vxNqVqgf4XQQpQ7eg-tP-YO+gg@mail.gmail.com>
- <alpine.DEB.2.11.1606100649010.6221@cpach.fuggernut.com>
- <20160610190510.GA18999@degu.eng.arb.redhat.com>
- <alpine.DEB.2.11.1606101658530.6221@cpach.fuggernut.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: van <chaofanyu@owtware.com>
+Subject: Re: Does mon skew really matters?
+Date: Sun, 12 Jun 2016 14:25:06 +0800
+Message-ID: <C9D4F5AC-A41F-49B2-B1D5-BCE3AC9C52BC@owtware.com>
+References: <CALZt5jypeXGhVhhjur8dpC5KPDqFN-HRC+HbUzOEmVtzO6N1vQ@mail.gmail.com> <CAPpSHbW_bz9b-+BUmX+hJJodh-hF428-2KA9UZ3mcNOUR303gQ@mail.gmail.com> <alpine.DEB.2.11.1606042234410.6221@cpach.fuggernut.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.1 \(3096.5\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52831 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752110AbcFKXFH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 11 Jun 2016 19:05:07 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1606101658530.6221@cpach.fuggernut.com>
+Received: from [180.166.44.171] ([180.166.44.171]:43079 "EHLO
+	owshcpma01.owtware.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751242AbcFLGZX convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 12 Jun 2016 02:25:23 -0400
+In-Reply-To: <alpine.DEB.2.11.1606042234410.6221@cpach.fuggernut.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Haomai Wang <haomai@xsky.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Wei Jin <wjin.cn@gmail.com>, Ning Yao <zay11022@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-If the client doesn't look at "features" before it sends stuff, it
-will not be able to be very smart about taking advantage of some
-future better method.  In fact, there isn't much advantage
-to the server sending anything early - it could just as easily
-wait until after it's seen the clients request.
+Can I ask why the default drift allowed (50 milliseconds) is so small ?=
+ .
 
-Failing hard & retrying on a failed reconnect is going to be slower.
-On the bright side, at least it shouldn't happen often.
 
-If you're sending encryption (w/ different auth or keys) from several
-different streams, how are you planning to indicate which bits
-go with which scheme?, and which bits are you planning to encrypt
-and which not?  
+It seems that the default monitor lease is about 5 seconds. And auth ti=
+cket expiration time should also be more than 5 seconds.
 
-Byte count limits.  Basically, you don't want collisions because
-of duplicated keys or data.  This depends on your crypto system,
-so, for instance, you should not encrypt with one key more than
-	aes, cbc	about 2^68 bytes
-	aes, ctr	exactly 2^128 bytes
-more generally, this depends on mode, blocksize, ...
-This applies across *all* uses of the key - and so you would
-generally want to use the session key directly as little as possible.
-(in particular, using the session key for ctr directly would be very very bad.)
 
-If you've got multiple streams going already, you should be able
-to include a fairly simple rekey method with little effort.
-For instance, as part of the method, you could,
-	up front as part of the method
-		send a per-stream key encrypted under the shared secret.
-	prepend to the first data sent in a payload
-		byte limit, stream key #0 (encrypted under the per-stream key)
-		then encrypt the next N bytes with stream key #0
-	when the byte limit is reached, prepend to the
-		next data sent in a payload
-		byte limit, stream key #1 (encrypted under the per-stream key)
-		then encrypt the next N bytes with stream key #1
-	&etc.
+In my practice, even if I=E2=80=99m using NTP, I still got clock skew w=
+arnings from time to time.
 
-					-Marcus Watts
+
+Can I just increase the mon_clock_drift_allowed to 1 second?
+
+
+I assume the impact is when the monitor quorum issue a new voting (one =
+of the monitors is down), there might be two leaders simultaneously wor=
+king in one second instead of 50 milliseconds ?
+
+How to measure the impact if I increase the mon_clock_drift_allowed to =
+one second?
+
+
+van
+chaofanyu@owtware.com
+
+
+
+> On Jun 5, 2016, at 10:35 AM, Sage Weil <sage@newdream.net> wrote:
+>=20
+> On Sat, 4 Jun 2016, Wei Jin wrote:
+>> In my opinion, if clock drift is too heavy, the lease protocol insid=
+e
+>> paxos won't work. Lease may be timeout and then triggers monitor to
+>> bootstrap.
+>=20
+> Exactly.
+>=20
+>> You could try to shift clock back on the leader node to see what wil=
+l happen.
+>>=20
+>> Time check mechanism gives us warning message so that we may take
+>> actions if possible before things getting worse.
+>=20
+> You can also get into situations where the clients loop trying to get=
+ a=20
+> new ticket because the one they are issued appears to be expired.
+>=20
+> sage
+>=20
+>>=20
+>> On Sat, Jun 4, 2016 at 12:06 PM, Ning Yao <zay11022@gmail.com> wrote=
+:
+>>> Hi, all
+>>>=20
+>>> I find that even if I have mon clock skew warning, under most cases=
+,
+>>> my cluster still can work properly as expected.
+>>>=20
+>>> I go through the code in mon but do not find any related issue with=
+out
+>>> time_check() to update whether clock skew periodically.
+>>>=20
+>>> can any one tell what is the design purpose of the clock skew betwe=
+en
+>>> mon and when it will really matter the cluster?
+>>>=20
+>>> Thanks a lots!
+>>>=20
+>>> Regards
+>>> Ning Yao
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>=20
+>>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
