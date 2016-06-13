@@ -1,84 +1,49 @@
 From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: Jewel build for CentOS 6
-Date: Mon, 13 Jun 2016 09:39:17 -0600
-Message-ID: <CALqRxCx2DxYhxCiiB-x-2isqi0Fd8R5u=ChT+6Z_r_pima4h8Q@mail.gmail.com>
-References: <CAK=B8ybVb0=Z7FM1LOPA-Dp1kGZjPn3nBbDg1hf+SkC50ir+Lw@mail.gmail.com>
+Subject: Re: Little update on the build platform
+Date: Mon, 13 Jun 2016 09:41:43 -0600
+Message-ID: <CALqRxCz-_pfdbVmbQ-hUEYG0EZR4MrELB1k81UB9j08Evk_Qow@mail.gmail.com>
+References: <902296593.97770947.1464716952266.JavaMail.zimbra@redhat.com>
+	<574FEA29.7040508@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f44.google.com ([209.85.213.44]:36182 "EHLO
-	mail-vk0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1423867AbcFMPjX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jun 2016 11:39:23 -0400
-Received: by mail-vk0-f44.google.com with SMTP id u64so72564734vkf.3
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Jun 2016 08:39:23 -0700 (PDT)
-In-Reply-To: <CAK=B8ybVb0=Z7FM1LOPA-Dp1kGZjPn3nBbDg1hf+SkC50ir+Lw@mail.gmail.com>
+Received: from mail-vk0-f50.google.com ([209.85.213.50]:33746 "EHLO
+	mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1424217AbcFMPlo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jun 2016 11:41:44 -0400
+Received: by mail-vk0-f50.google.com with SMTP id d185so59847264vkg.0
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jun 2016 08:41:44 -0700 (PDT)
+In-Reply-To: <574FEA29.7040508@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Muminul Islam Russell <misla011@fiu.edu>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Erwan Velu <evelu@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-You really should upgrade to CentOS 7, particularly with such a
-fast-moving project as Ceph :) The time required to stabilize a 10.2.1
-build on el6 probably outweighs the time required to migrate OS
-versions.
-
-That said, if you really want to get el6 builds working, you'll
-probably want to patch out SELinux support, disable debug package
-generation in the RPM, and use a newer GCC.
-
-- Ken
-
-
-On Tue, Jun 7, 2016 at 6:13 PM, Muminul Islam Russell <misla011@fiu.edu> wrote:
-> Hello Cephers,
+On Thu, Jun 2, 2016 at 2:11 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+>> - An diagnosis helper is now in place to spot known build failures  :
+>> A list of common issues have been entered (like gcc or jenkins failures,
+>> segfaults, etc...)
+>> A typical output looks like :
+>> https://jenkins.ceph.com/job/ceph-pull-requests/6448/
 >
-> I was trying to build Jewel for Centos 6 for personal purpose. I fixed
-> couple of things and at the end I got the following error. Please let
-> me know if anyone have any idea how to fix this issue.
 >
-> -------
-> writing... rbd-mirror.8 { } rbdmap.8 { } ceph-detect-init.8 { }
-> ceph-rest-api.8 { } osdmaptool.8 { } ceph-rbdnamer.8 { }
-> ceph-create-keys.8 { } ceph-disk.8 { } cephfs.8 { } ceph.8 { }
-> monmaptool.8 { } ceph-deploy.8 { } ceph-debugpack.8 { }
-> ceph-dencoder.8 { } rbd-nbd.8 { } mount.ceph.8 { } radosgw-admin.8 { }
-> ceph-fuse.8 { } ceph-authtool.8 { } ceph-run.8 { } librados-config.8 {
-> } ceph-clsinfo.8 { } ceph-post-file.8 { } ceph-mds.8 { } ceph-osd.8 {
-> } ceph-syn.8 { } crushtool.8 { } rbd-fuse.8 { } radosgw.8 { }
-> ceph-conf.8 { } ceph-mon.8 { } rados.8 { } rbd-replay-many.8 { }
-> rbd-replay-prep.8 { } rbd.8 { } rbd-replay.8 { }
-> build succeeded.
-> make[1]: Leaving directory `/root/rpmbuild/BUILD/ceph-10.2.1/man'
-> Making all in doc
-> make[1]: Entering directory `/root/rpmbuild/BUILD/ceph-10.2.1/doc'
-> make[1]: Nothing to be done for `all'.
-> make[1]: Leaving directory `/root/rpmbuild/BUILD/ceph-10.2.1/doc'
-> Making all in systemd
-> make[1]: Entering directory `/root/rpmbuild/BUILD/ceph-10.2.1/systemd'
-> make[1]: Nothing to be done for `all'.
-> make[1]: Leaving directory `/root/rpmbuild/BUILD/ceph-10.2.1/systemd'
-> Making all in selinux
-> make[1]: Entering directory `/root/rpmbuild/BUILD/ceph-10.2.1/selinux'
-> make -j1 -f /usr/share/selinux/devel/Makefile ceph.pp
-> make[2]: Entering directory `/root/rpmbuild/BUILD/ceph-10.2.1/selinux'
-> make[2]: warning: -jN forced in submake: disabling jobserver mode.
-> Compiling targeted ceph module
-> /usr/bin/checkmodule:  loading policy configuration from tmp/ceph.tmp
-> ceph.te":109:ERROR 'syntax error' at token 'fsadm_manage_pid' on line 15485:
+> Thanks, guys, this looks like an excellent improvement.
 >
-> fsadm_manage_pid(ceph_t)
-> /usr/bin/checkmodule:  error(s) encountered while parsing configuration
-> make[2]: *** [tmp/ceph.mod] Error 1
-> make[2]: Leaving directory `/root/rpmbuild/BUILD/ceph-10.2.1/selinux'
-> make[1]: *** [ceph.pp] Error 2
-> make[1]: Leaving directory `/root/rpmbuild/BUILD/ceph-10.2.1/selinux'
-> make: *** [all-recursive] Error 1
-> error: Bad exit status from /var/tmp/rpm-tmp.pInRWe (%build
+> Now I have a PR with failing make check and it appears that Jenkins is aware
+> of the failures:
 >
-> --
-> Russell
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> https://jenkins.ceph.com/job/ceph-pull-requests/6550/consoleFull#17782142537ba86caa-bd6c-4071-8005-3f6d80f92e07
+>
+> The two recognized failures are highlighted in red:
+>
+> FATAL: java.io.IOException: Unexpected termination of the channel
+>
+> java.lang.NullPointerException: no workspace from node
+> hudson.slaves.DumbSlave[158.69.84.81+trusty_huge__c69f129f-3dff-46c2-9bd4-d14364fcb62f]
+> which is computer hudson.slaves.SlaveComputer@1957dd58 and has channel null
+>
+> But I don't know what to do about them? Do we have documentation of the
+> common failure cases and what can be done to fix them?
+
+This sounds like a network issue in OVH (cloud provider where Jenkins
+is hosted)?
