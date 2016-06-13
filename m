@@ -1,93 +1,52 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: msgr2 protocol
-Date: Sun, 12 Jun 2016 19:59:20 -0400 (EDT)
-Message-ID: <alpine.DEB.2.11.1606121950490.32559@cpach.fuggernut.com>
-References: <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com> <alpine.DEB.2.11.1606021416510.6221@cpach.fuggernut.com> <CAJ4mKGaWx8m4Zh_f6tQWe9ows77HHyMmv5y52Rr-5Q-ob_N1Yg@mail.gmail.com> <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com>
- <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com> <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com> <CAJ4mKGbyCiWbuwGxhGu_ohf7vxNqVqgf4XQQpQ7eg-tP-YO+gg@mail.gmail.com> <alpine.DEB.2.11.1606100649010.6221@cpach.fuggernut.com>
- <20160610190510.GA18999@degu.eng.arb.redhat.com> <alpine.DEB.2.11.1606101658530.6221@cpach.fuggernut.com> <20160611230503.GA18268@degu.eng.arb.redhat.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38852 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753389AbcFLX6z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 12 Jun 2016 19:58:55 -0400
-In-Reply-To: <20160611230503.GA18268@degu.eng.arb.redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Marcus Watts <mwatts@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Haomai Wang <haomai@xsky.com>, ceph-devel <ceph-devel@vger.kernel.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] ceph: fix symbol versioning for ceph_monc_do_statfs
+Date: Mon, 13 Jun 2016 15:04:56 +0200
+Message-ID: <1465823125-171114-1-git-send-email-arnd@arndb.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sage@redhat.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Jan Beulich <jbeulich@suse.com>, Michal Marek <mmarek@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Alex Elder <elder@linaro.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Sat, 11 Jun 2016, Marcus Watts wrote:
-> If the client doesn't look at "features" before it sends stuff, it
-> will not be able to be very smart about taking advantage of some
-> future better method.  In fact, there isn't much advantage
-> to the server sending anything early - it could just as easily
-> wait until after it's seen the clients request.
-> 
-> Failing hard & retrying on a failed reconnect is going to be slower.
-> On the bright side, at least it shouldn't happen often.
+The genksyms helper in the kernel cannot parse a type definition
+like "typeof(((type *)0)->keyfld)" that is used in the DEFINE_RB_FUNCS
+helper, causing the following EXPORT_SYMBOL() statement to be ignored
+when computing the crcs, and triggering a warning about this:
 
-Yep.  Well, I think it is the client's (limited choice).  If it needs to 
-know the server features, it needs to either wait for them, or make some 
-optimistic choice and be prepared to pay the cost of a mistake.  We should 
-give the client choice, though, if we can.
+WARNING: "ceph_monc_do_statfs" [fs/ceph/ceph.ko] has no CRC
 
-> If you're sending encryption (w/ different auth or keys) from several
-> different streams, how are you planning to indicate which bits
-> go with which scheme?, and which bits are you planning to encrypt
-> and which not?  
+To work around the problem, we can rewrite the type to reference
+an undefined 'extern' symbol instead of a NULL pointer. This is
+evidently ok for genksyms, and it no longer complains about the
+line when calling it with 'genksyms -w'.
 
-This is what he stream ids are for, and why the outer portion of the frame 
-is unencrypted.  See
+I've looked briefly into extending genksyms instead, but it seems
+really hard to do. Jan Beulich introduced basic support for 'typeof'
+a while ago in dc53324060f3 ("genksyms: fix typeof() handling"),
+but that is not sufficient for the expression we have here.
 
-	https://github.com/ceph/ceph/pull/9461/files#diff-83789b4be697d82eedbcbe330c44b436R68
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Fixes: fcd00b68bbe2 ("libceph: DEFINE_RB_FUNCS macro")
+Cc: Jan Beulich <jbeulich@suse.com>
+Cc: Michal Marek <mmarek@suse.cz>
+---
+ include/linux/ceph/libceph.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
- +  stream_id (le32)
- +  frame_len (le32)
- +  tag (TAG_* byte)
- +  payload
- +  [payload padding -- only present after stream auth phase]
- +  [signature -- only present after stream auth phase]
-
-The tag and payload (and padding) would be encrypted or signed, but not 
-the stream id and frame_len.
-
-> Byte count limits.  Basically, you don't want collisions because
-> of duplicated keys or data.  This depends on your crypto system,
-> so, for instance, you should not encrypt with one key more than
-> 	aes, cbc	about 2^68 bytes
-> 	aes, ctr	exactly 2^128 bytes
-> more generally, this depends on mode, blocksize, ...
-> This applies across *all* uses of the key - and so you would
-> generally want to use the session key directly as little as possible.
-> (in particular, using the session key for ctr directly would be very very bad.)
-> 
-> If you've got multiple streams going already, you should be able
-> to include a fairly simple rekey method with little effort.
-> For instance, as part of the method, you could,
-> 	up front as part of the method
-> 		send a per-stream key encrypted under the shared secret.
-> 	prepend to the first data sent in a payload
-> 		byte limit, stream key #0 (encrypted under the per-stream key)
-> 		then encrypt the next N bytes with stream key #0
-> 	when the byte limit is reached, prepend to the
-> 		next data sent in a payload
-> 		byte limit, stream key #1 (encrypted under the per-stream key)
-> 		then encrypt the next N bytes with stream key #1
-> 	&etc.
-
-Good idea.  If I understand correctly, it means that the session_key is 
-only used to send the new/next random encryption key, and if we make the 
-byte limit part of the initial protocol we get the rotation we need.  It 
-might be simpler to do it as a frame limit instead of byte limit, and 
-assume max-length frames (2^32 bytes).  We could still be super 
-conservative and rotate the encryption key every 2^16 messages or 
-something...?  And rotating the key on frame boundaries should be much 
-simpler to implement.
-
-Anyway, that part can be defined a bit later, I think.
-
-Thanks!
-sage
-
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index 690985daad1c..6b79a6ba39ca 100644
+--- a/include/linux/ceph/libceph.h
++++ b/include/linux/ceph/libceph.h
+@@ -214,8 +214,9 @@ static void erase_##name(struct rb_root *root, type *t)			\
+ }
+ 
+ #define DEFINE_RB_LOOKUP_FUNC(name, type, keyfld, nodefld)		\
++extern type __lookup_##name##_key;					\
+ static type *lookup_##name(struct rb_root *root,			\
+-			   typeof(((type *)0)->keyfld) key)		\
++			   typeof(__lookup_##name##_key.keyfld) key)	\
+ {									\
+ 	struct rb_node *n = root->rb_node;				\
+ 									\
+-- 
+2.7.0
