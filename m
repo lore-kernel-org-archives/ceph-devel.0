@@ -1,63 +1,106 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: master build failing
-Date: Tue, 14 Jun 2016 16:30:06 +0800
-Message-ID: <CAJE9aOP9ZF5NMHchpTy_dzwLTaTjjxbpdU0MSGJ_iKfNdX+PQg@mail.gmail.com>
-References: <CY1PR0201MB18209702FEAD607B802AC66985530@CY1PR0201MB1820.namprd02.prod.outlook.com>
+From: Orit Wasserman <owasserm@redhat.com>
+Subject: Re: rgw: object listing hangs on versioned bucket
+Date: Tue, 14 Jun 2016 12:21:41 +0200
+Message-ID: <CABo9giRxyYpazw5qv=rb07z3br=X1SH4B946GAYGyXrOj22yyw@mail.gmail.com>
+References: <574FFA9E.7060100@xtaotech.com>
+	<ff7d8bc1-993c-04cb-be63-d782d09f6ecd@jp.fujitsu.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:36444 "EHLO
-	mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750735AbcFNIaH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jun 2016 04:30:07 -0400
-Received: by mail-yw0-f179.google.com with SMTP id v137so46531301ywa.3
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Jun 2016 01:30:07 -0700 (PDT)
-In-Reply-To: <CY1PR0201MB18209702FEAD607B802AC66985530@CY1PR0201MB1820.namprd02.prod.outlook.com>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:37931 "EHLO
+	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752470AbcFNKVm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jun 2016 06:21:42 -0400
+Received: by mail-wm0-f53.google.com with SMTP id m124so115930275wme.1
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Jun 2016 03:21:42 -0700 (PDT)
+In-Reply-To: <ff7d8bc1-993c-04cb-be63-d782d09f6ecd@jp.fujitsu.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ramesh Chander <Ramesh.Chander@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>, dl-storm-dev <dl-storm-dev@sandisk.com>
+To: KIMURA Osamu <kimura.osamu@jp.fujitsu.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>
 
-On Tue, Jun 14, 2016 at 2:09 AM, Ramesh Chander
-<Ramesh.Chander@sandisk.com> wrote:
-> Getting these linker errors:
->
-> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_impl.cc:583: undefined reference to `malloc_stats_print'
-> collect2: error: ld returned 1 exit status
-> make[3]: *** [ceph_test_objectstore_workloadgen] Error 1
-> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
-> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_impl.cc:583: undefined reference to `malloc_stats_print'
-> collect2: error: ld returned 1 exit status
-> make[3]: *** [ceph_test_objectstore] Error 1
-> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
-> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_impl.cc:583: undefined reference to `malloc_stats_print'
-> collect2: error: ld returned 1 exit status
-> make[3]: *** [ceph_xattr_bench] Error 1
-> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
-> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_impl.cc:583: undefined reference to `malloc_stats_print'
-> collect2: error: ld returned 1 exit status
-> make[3]: *** [ceph_test_filejournal] Error 1
->
-> last time Mark did something to fix it.
->
-> I tried make clean in rocksdb directory as well, still same error.
+It could be a different problem, can you open a new issue?
 
-did you uninstall jemalloc after configure or cmake? maybe you can
-check the make_config.mk under rocksdb directory? are you using cmake
-or automake?
+Thanks,
+Orit
 
-
+On Tue, Jun 14, 2016 at 5:13 AM, KIMURA Osamu
+<kimura.osamu@jp.fujitsu.com> wrote:
+> Hello,
 >
-> -Ramesh Chander
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> An our customer got a problem on RADOSGW.
+> The customer tried to list objects on a versioned bucket with S3 API,
+> then they got 500 server error due to FastCGI timeout.
+> RGW's internal listing process continued over the night (approx 10hou=
+rs)
+> until they restarted the RGW. Please see attached radosgw log.
+>
+> The behavior seems to be similar to bug#12913, but they are using
+> v0.94.6 of RGW. The bug should be resolved in the version.
+> http://tracker.ceph.com/issues/12913
+>
+> As we can find in the log, RGW repeatedly tried to get information
+> for a specific object (testfile1896.txt).
+>
+> The object has null version and another version as bellow.
+> Yes, versioning of the bucket was enabled after some objects had been
+> put in the bucket.
+>
+> Similar condition can be found in bug#15243, but the fix only affects
+> to deletion.
+> http://tracker.ceph.com/issues/15243
+>
+> Are there any problem remained in versioned object with null version?
+>
+>
+> Regards,
+> KIMURA
+>
+> ----------------------
+> <?xml version=3D"1.0" encoding=3D"UTF-8"?>
+> <ListVersionsResult xmlns=3D"http://s3.amazonaws.com/doc/2006-03-01/"=
+>
+>  <Name>hojo-bucket-02</Name>
+>  <Prefix>testfile1896.txt</Prefix>
+>  <KeyMarker></KeyMarker>
+>  <MaxKeys>1000</MaxKeys>
+>  <IsTruncated>false</IsTruncated>
+>  <Version>
+>   <Key>testfile1896.txt</Key>
+>   <VersionId>2MSeTpZoDSqt2nTk1oYHZNmF1e84C.1</VersionId>
+>   <IsLatest>true</IsLatest>
+>   <LastModified>2016-05-30T08:39:52.000Z</LastModified>
+>   <ETag>&quot;1d24c7924b9798bb9064dcb043b3d989&quot;</ETag>
+>   <Size>3152</Size>
+>   <StorageClass>STANDARD</StorageClass>
+>   <Owner>
+>    <ID>XXXXXXXX</ID>
+>    <DisplayName>XXXXXXXX</DisplayName>
+>   </Owner>
+>  </Version>
+>  <Version>
+>   <Key>testfile1896.txt</Key>
+>   <VersionId>null</VersionId>
+>   <IsLatest>false</IsLatest>
+>   <LastModified>2016-05-30T02:43:22.000Z</LastModified>
+>   <ETag>&quot;20a4fc4c12598089a8937496a5eba67e&quot;</ETag>
+>   <Size>3052</Size>
+>   <StorageClass>STANDARD</StorageClass>
+>   <Owner>
+>    <ID>XXXXXXXX</ID>
+>    <DisplayName>XXXXXXXX</DisplayName>
+>   </Owner>
+>  </Version>
+> </ListVersionsResult>
+>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Regards
-Kefu Chai
+> KIMURA Osamu / =E6=9C=A8=E6=9D=91 =E4=BF=AE
+> Engineering Department, Storage Development Division,
+> Data Center Platform Business Unit, FUJITSU LIMITED
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
