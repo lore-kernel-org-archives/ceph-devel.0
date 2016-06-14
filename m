@@ -1,9 +1,8 @@
 From: Igor Fedotov <ifedotov@mirantis.com>
 Subject: Re: RocksDB tuning
-Date: Tue, 14 Jun 2016 14:07:48 +0300
-Message-ID: <5b255c4f-58a2-034b-e2cb-1aa28b1ea217@mirantis.com>
+Date: Tue, 14 Jun 2016 14:11:40 +0300
+Message-ID: <590339cd-0f92-ef5d-b46f-04d1f45bea76@mirantis.com>
 References: <D37DE46C.5743E%manavalan.krishnan@sandisk.com>
- <a3216e58-d591-50ae-f2f2-0cbb7cdaa7bb@redhat.com>
  <fb82e615-0762-0843-9a9f-cbc4686e35ba@redhat.com>
  <BL2PR02MB2115BD376A32CF2B6E54ABABF45F0@BL2PR02MB2115.namprd02.prod.outlook.com>
  <BL2PR02MB2115DF8FF9EF7CF822C838BAF4500@BL2PR02MB2115.namprd02.prod.outlook.com>
@@ -16,31 +15,52 @@ References: <D37DE46C.5743E%manavalan.krishnan@sandisk.com>
  <9b9e6fb5-250c-0b8e-b356-f0814103bcc5@mirantis.com>
  <BLUPR0201MB1524B3804817815A542A44EBE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
  <393863fe-933c-738b-79b6-8338bc94b240@mirantis.com>
- <alpine.DEB.2.11.1606101415320.6221@cpach.fuggernut.com>
+ <BLUPR0201MB1524D54B8769C4928407C36BE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f45.google.com ([209.85.215.45]:35425 "EHLO
-	mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750985AbcFNLH4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jun 2016 07:07:56 -0400
-Received: by mail-lf0-f45.google.com with SMTP id u74so102034458lff.2
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Jun 2016 04:07:55 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1606101415320.6221@cpach.fuggernut.com>
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:34569 "EHLO
+	mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751140AbcFNLLr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jun 2016 07:11:47 -0400
+Received: by mail-lf0-f49.google.com with SMTP id j7so78183676lfg.1
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Jun 2016 04:11:46 -0700 (PDT)
+In-Reply-To: <BLUPR0201MB1524D54B8769C4928407C36BE8500@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, Manavalan Krishnan <Manavalan.Krishnan@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sweil@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Mark Nelson <mnelson@redhat.com>, Manavalan Krishnan <Manavalan.Krishnan@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+
+I was talking about my local environment where I ran the test case. I 
+have min 64K for the blob here. Hence I assume max 64 blobs per 4M.
 
 
-
-On 10.06.2016 21:18, Sage Weil wrote:
-> On Fri, 10 Jun 2016, Igor Fedotov wrote:
+On 10.06.2016 20:13, Allen Samuels wrote:
+> What's the assumption that suggests a limit of 64 blobs / 4MB ? Are you assuming a 64K blobsize?? That certainly won't be the case for flash.
+>
+>
+> Allen Samuels
+> SanDisk |a Western Digital brand
+> 2880 Junction Avenue, San Jose, CA 95134
+> T: +1 408 801 7030| M: +1 408 780 6416
+> allen.samuels@SanDisk.com
+>
+>
+>> -----Original Message-----
+>> From: Igor Fedotov [mailto:ifedotov@mirantis.com]
+>> Sent: Friday, June 10, 2016 9:51 AM
+>> To: Allen Samuels <Allen.Samuels@sandisk.com>; Sage Weil
+>> <sweil@redhat.com>; Somnath Roy <Somnath.Roy@sandisk.com>
+>> Cc: Mark Nelson <mnelson@redhat.com>; Manavalan Krishnan
+>> <Manavalan.Krishnan@sandisk.com>; Ceph Development <ceph-
+>> devel@vger.kernel.org>
+>> Subject: Re: RocksDB tuning
+>>
 >> An update:
 >>
->> I found that my previous results were invalid - SyntheticWorkloadState had an
->> odd swap for offset > len case... Made a brief fix.
+>> I found that my previous results were invalid - SyntheticWorkloadState had
+>> an odd swap for offset > len case... Made a brief fix.
 >>
 >> Now onode size with csum raises up to 38K, without csum - 28K.
 >>
@@ -52,30 +72,9 @@ On 10.06.2016 21:18, Sage Weil wrote:
 >>
 >> Potentially we shouldn't have >64 blobs per 4M thus looks like some issues in
 >> the write path...
-> Synthetic randomly twiddles alloc hints, which means some of those
-> blobs are probably getting compressed.  I suspect if you set 'bluestore
-> compression = none' it'll drop back down to 64.
-This result are for compression = none and write block size limited to 
-4K. And no ops besides writes - I made appropriate changes for Synthetic 
-Generator and created a different test case.
-Moreover I saw an odd swap in SyntheticWorkloadState::write()
-...
-if (offset > len)
-       swap(offset, len);
-that effectively limited the range affected by writes during this test 
-case. Removing the swap caused a failure of the existing SynteticTest. 
-Still investigating...
->
-> There is still a problem with compression, though.  I think the write path
-> should look at whether we are obscuring an existing blob with more than N
-> layers (where N is probably 2?) and if so do a read+write 'compaction' to
-> flatten it.  That (or something like it) should get us a ~2x bound on the
-> worst case lextent count (in this case ~128)...
->
-> sage
->
->> And CSum vs. NoCsum differenct looks pretty consistent - 170 blobs * 4 byte *
->> 16 values = 10880
+>>
+>> And CSum vs. NoCsum differenct looks pretty consistent - 170 blobs * 4 byte
+>> * 16 values = 10880
 >>
 >> Branch's @github been updated with corresponding fixes.
 >>
@@ -84,25 +83,21 @@ Still investigating...
 >>
 >> On 10.06.2016 19:06, Allen Samuels wrote:
 >>> Let's see, 4MB is 2^22 bytes. If we storage a checksum for each 2^12 bytes
->>> that's 2^10 checksums at 2^2 bytes each is 2^12 bytes.
->>>
->>> So with optimal encoding, the checksum baggage shouldn't be more than 4KB
->>> per oNode.
->>>
+>> that's 2^10 checksums at 2^2 bytes each is 2^12 bytes.
+>>> So with optimal encoding, the checksum baggage shouldn't be more than
+>> 4KB per oNode.
 >>> But you're seeing 13K as the upper bound on the onode size.
 >>>
 >>> In the worst case, you'll need at least another block address (8 bytes
->>> currently) and length (another 8 bytes) [though as I point out, the length
->>> is something that can be optimized out] So worst case, this encoding would
->>> be an addition 16KB per onode.
->>>
+>> currently) and length (another 8 bytes) [though as I point out, the length is
+>> something that can be optimized out] So worst case, this encoding would be
+>> an addition 16KB per onode.
 >>> I suspect you're not at the worst-case yet :)
 >>>
 >>> Allen Samuels
 >>> SanDisk |a Western Digital brand
 >>> 2880 Junction Avenue, Milpitas, CA 95134
->>> T: +1 408 801 7030| M: +1 408 780 6416
->>> allen.samuels@SanDisk.com
+>>> T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
 >>>
 >>>
 >>>> -----Original Message-----
@@ -120,8 +115,7 @@ Still investigating...
 >>>> writes to 4M object.
 >>>>
 >>>> With default settings ( crc32c + 4K block) onode size varies from 2K to
->>>> ~13K
->>>>
+>> ~13K
 >>>> with disabled crc it's ~500 - 1300 bytes.
 >>>>
 >>>>
@@ -170,11 +164,11 @@ Still investigating...
 >>>>>>     42  14  35   5   0   4| 143M  852M| 216M  150M|   0     0 >
 >>>>>> For example, what last entry is saying that system (with 8 osds) is
 >>>> receiving 216M of data over network and in response to that it is writing
->>>> total
->>>> of 852M of data and reading 143M of data. At this time FIO on client side
->>>> is
+>> total
+>>>> of 852M of data and reading 143M of data. At this time FIO on client side is
 >>>> reporting ~35K 4K RW iops.
->>>>>> Now, after a min or so, the throughput goes down to barely 1K from FIO
+>>>>>> Now, after a min or so, the throughput goes down to barely 1K from
+>> FIO
 >>>> (and very bumpy) and here is the 'dstat' snippet at that time..
 >>>>>> ----total-cpu-usage---- -dsk/total- -net/total- ---paging-->
 >>>>>> usr sys idl wai hiq siq| read  writ| recv  send|  in   out >
@@ -183,8 +177,8 @@ Still investigating...
 >>>>>>      3   1  82  13   0   0| 217M   63M|6403k 4306k|   0     0 >
 >>>>>>      2   1  83  14   0   0| 226M   54M|2126k 1497k|   0     0 >
 >>>>>>
->>>>>> So, system is barely receiving anything (~2M) but still writing ~54M
->>>>>> of data
+>>>>>> So, system is barely receiving anything (~2M) but still writing ~54M of
+>> data
 >>>> and reading 226M of data from disk.
 >>>>>> After killing fio script , here is the 'dstat' output..
 >>>>>>
@@ -196,10 +190,10 @@ Still investigating...
 >>>>>>      2   1  85  12   0   0| 206M   78M|  21k   20k|   0     0 >
 >>>>>>
 >>>>>> Not receiving anything from client but still writing 78M of data and
->>>>>> 206M
+>> 206M
 >>>> of read.
->>>>>> Clearly, it is an effect of rocksdb compaction that stalling IO and
->>>>>> even if we
+>>>>>> Clearly, it is an effect of rocksdb compaction that stalling IO and even if
+>> we
 >>>> increased compaction thread (and other tuning), compaction is not able to
 >>>> keep up with incoming IO.
 >>>>>> Thanks & Regards
@@ -209,7 +203,8 @@ Still investigating...
 >>>>>> From: Allen Samuels
 >>>>>> Sent: Friday, June 10, 2016 8:06 AM
 >>>>>> To: Sage Weil
->>>>>> Cc: Somnath Roy; Mark Nelson; Manavalan Krishnan; Ceph Development
+>>>>>> Cc: Somnath Roy; Mark Nelson; Manavalan Krishnan; Ceph
+>> Development
 >>>>>> Subject: RE: RocksDB tuning
 >>>>>>
 >>>>>>> -----Original Message-----
@@ -226,54 +221,49 @@ Still investigating...
 >>>>>>>> Checksums are definitely a part of the problem, but I suspect the
 >>>>>>>> smaller part of the problem. This particular use-case (random 4K
 >>>>>>>> overwrites without the WAL stuff) is the worst-case from an
->>>>>>>> encoding perspective and highlights the inefficiency in the
->>>>>>>> current
+>>>>>>>> encoding perspective and highlights the inefficiency in the current
 >>>> code.
 >>>>>>>> As has been discussed earlier, a specialized encode/decode
 >>>>>>>> implementation for these data structures is clearly called for.
 >>>>>>>>
->>>>>>>> IMO, you'll be able to cut the size of this by AT LEAST a factor
->>>>>>>> of
+>>>>>>>> IMO, you'll be able to cut the size of this by AT LEAST a factor of
 >>>>>>>> 3 or
 >>>>>>>> 4 without a lot of effort. The price will be somewhat increase CPU
 >>>>>>>> cost for the serialize/deserialize operation.
 >>>>>>>>
 >>>>>>>> If you think of this as an application-specific data compression
->>>>>>>> problem, here is a short list of potential compression
->>>>>>>> opportunities.
+>>>>>>>> problem, here is a short list of potential compression opportunities.
 >>>>>>>>
 >>>>>>>> (1) Encoded sizes and offsets are 8-byte byte values, converting
 >>>>>>>> these too
 >>>>>>> block values will drop 9 or 12 bits from each value. Also, the
 >>>>>>> ranges for these values is usually only 2^22 -- often much less.
 >>>>>>> Meaning that there's 3-5 bytes of zeros at the top of each word that
->>>>>>> can
+>> can
 >>>> be dropped.
 >>>>>>>> (2) Encoded device addresses are often less than 2^32, meaning
 >>>>>>>> there's 3-4
 >>>>>>> bytes of zeros at the top of each word that can be dropped.
->>>>>>>>     (3) Encoded offsets and sizes are often exactly "1" block,
->>>>>>>> clever
+>>>>>>>>     (3) Encoded offsets and sizes are often exactly "1" block, clever
 >>>>>>>> choices of
 >>>>>>> formatting can eliminate these entirely.
 >>>>>>>> IMO, an optimized encoded form of the extent table will be around
 >>>>>>>> 1/4 of the current encoding (for this use-case) and will likely
->>>>>>>> result in an Onode that's only 1/3 of the size that Somnath is
->>>>>>>> seeing.
+>>>>>>>> result in an Onode that's only 1/3 of the size that Somnath is seeing.
 >>>>>>> That will be true for the lextent and blob extent maps.  I'm
 >>>>>>> guessing this is a small part of the ~5K somnath saw.  If his
 >>>>>>> objects are 4MB then 4KB of it
 >>>>>>> (80%) is the csum_data vector, which is a flat vector of
 >>>>>>> u32 values that are presumably not very compressible.
 >>>>>> I don't think that's what Somnath is seeing (obviously some data here
->>>>>> will
+>> will
 >>>> sharpen up our speculations). But in his use case, I believe that he has a
 >>>> separate blob and pextent for each 4K write (since it's been subjected to
 >>>> random 4K overwrites), that means somewhere in the data structures at
 >>>> least one address and one length for each of the 4K blocks (and likely
->>>> much
+>> much
 >>>> more in the lextent and blob maps as you alluded to above). The encoding
->>>> of
+>> of
 >>>> just this information alone is larger than the checksum data.
 >>>>>>> We could perhaps break these into a separate key or keyspace..
 >>>>>>> That'll give rocksdb a bit more computation work to do (for a custom
@@ -304,11 +294,9 @@ Still investigating...
 >>>>>>>>>
 >>>>>>>>> On Fri, 10 Jun 2016, Somnath Roy wrote:
 >>>>>>>>>> Sage/Mark,
->>>>>>>>>> I debugged the code and it seems there is no WAL write going
->>>>>>>>>> on
+>>>>>>>>>> I debugged the code and it seems there is no WAL write going on
 >>>>>>>>>> and
->>>>>>>>> working as expected. But, in the process, I found that onode
->>>>>>>>> size
+>>>>>>>>> working as expected. But, in the process, I found that onode size
 >>>>>>>>> it is
 >>>>>>> writing
 >>>>>>>>> to my environment ~7K !! See this debug print.
@@ -324,8 +312,7 @@ Still investigating...
 >>>>>>>>> The onode is big because of the csum metdata.  Try setting
 >>>>>>>>> 'bluestore
 >>>>>>> csum
->>>>>>>>> type = none' and see if that is the entire reason or if
->>>>>>>>> something
+>>>>>>>>> type = none' and see if that is the entire reason or if something
 >>>>>>>>> else is
 >>>>>>> going
 >>>>>>>>> on.
@@ -342,7 +329,8 @@ Still investigating...
 >>>>>>>>>>
 >>>>>>>>>> -----Original Message-----
 >>>>>>>>>> From: ceph-devel-owner@vger.kernel.org
->>>>>>>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath
+>>>>>>>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of
+>> Somnath
 >>>>>>> Roy
 >>>>>>>>>> Sent: Thursday, June 09, 2016 8:23 AM
 >>>>>>>>>> To: Mark Nelson; Allen Samuels; Manavalan Krishnan; Ceph
@@ -360,22 +348,20 @@ Still investigating...
 >>>>>>> still
 >>>>>>>>> writing WAL (?)..I used the following rocksdb option for faster
 >>>>>>> background
->>>>>>>>> compaction as well hoping it can keep up with upcoming writes
->>>>>>>>> and
+>>>>>>>>> compaction as well hoping it can keep up with upcoming writes and
 >>>>>>> writes
->>>>>>>>> won't be stalling. But, eventually, after a min or so, it is
->>>>>>>>> stalling io..
+>>>>>>>>> won't be stalling. But, eventually, after a min or so, it is stalling io..
 >>>>>>>>>> bluestore_rocksdb_options =
->>>> "compression=kNoCompression,max_write_buffer_number=16,min_write_
->>>> buffer_number_to_merge=3,recycle_log_file_num=16,compaction_style=k
->>>>>>> CompactionStyleLevel,write_buffer_size=67108864,target_file_size_bas
+>> "compression=kNoCompression,max_write_buffer_number=16,min_write_
+>> buffer_number_to_merge=3,recycle_log_file_num=16,compaction_style=k
+>> CompactionStyleLevel,write_buffer_size=67108864,target_file_size_bas
 >>>>>>> e=6
 >>>>>>>
->>>> 7108864,max_background_compactions=31,level0_file_num_compaction_tri
+>> 7108864,max_background_compactions=31,level0_file_num_compaction_tri
 >>>> gger=8,level0_slowdown_writes_trigger=32,level0_stop_writes_trigger=
 >>>>>>> 64,
 >>>>>>>
->>>> num_levels=4,max_bytes_for_level_base=536870912,max_bytes_for_level
+>> num_levels=4,max_bytes_for_level_base=536870912,max_bytes_for_level
 >>>>>>>>> _multiplier=8,compaction_threads=32,flusher_threads=8"
 >>>>>>>>>> I will try to debug what is going on there..
 >>>>>>>>>>
@@ -395,30 +381,25 @@ Still investigating...
 >>>>>>>>>>>
 >>>>>>>>>>> On a somewhat related note, I wanted to mention that I had
 >>>>>>> forgotten
->>>>>>>>>>> that chhabaremesh's min_alloc_size commit for different
->>>>>>>>>>> media
+>>>>>>>>>>> that chhabaremesh's min_alloc_size commit for different media
 >>>>>>>>>>> types was committed into master:
 >>>>>>>>>>>
 >>>>>>>>>>>
->>>> https://github.com/ceph/ceph/commit/8185f2d356911274ca679614611dc335
+>> https://github.com/ceph/ceph/commit/8185f2d356911274ca679614611dc335
 >>>>>>>>>>> e3
 >>>>>>>>>>> efd187
 >>>>>>>>>>>
 >>>>>>>>>>>
->>>>>>>>>>> IE those tests appear to already have been using a 4K min
->>>>>>>>>>> alloc
+>>>>>>>>>>> IE those tests appear to already have been using a 4K min alloc
 >>>>>>>>>>> size due to non-rotational NVMe media.  I went back and
->>>>>>>>>>> verified
->>>>>>>>>>> that explicitly changing the min_alloc size (in fact all of
->>>>>>>>>>> them
+>> verified
+>>>>>>>>>>> that explicitly changing the min_alloc size (in fact all of them
 >>>>>>>>>>> to be
->>>>>>>>>>> sure) to 4k does not change the behavior from graphs I
->>>>>>>>>>> showed
->>>>>>>>>>> yesterday.  The rocksdb compaction stalls due to excessive
->>>>>>>>>>> reads
+>>>>>>>>>>> sure) to 4k does not change the behavior from graphs I showed
+>>>>>>>>>>> yesterday.  The rocksdb compaction stalls due to excessive reads
 >>>>>>>>>>> appear (at least on the
 >>>>>>>>>>> surface) to be due to metadata traffic during heavy small
->>>>>>>>>>> random
+>> random
 >>>>>>> writes.
 >>>>>>>>>> Sorry, this was worded poorly.  Traffic due to compaction of
 >>>>>>>>>> metadata
@@ -430,8 +411,8 @@ Still investigating...
 >>>>>>>>>>>
 >>>>>>>>>>> On 06/08/2016 06:52 PM, Allen Samuels wrote:
 >>>>>>>>>>>> Let's make a patch that creates actual Ceph parameters for
->>>>>>>>>>>> these things so that we don't have to edit the source code
->>>>>>>>>>>> in the
+>>>>>>>>>>>> these things so that we don't have to edit the source code in
+>> the
 >>>> future.
 >>>>>>>>>>>> Allen Samuels
 >>>>>>>>>>>> SanDisk |a Western Digital brand
@@ -441,11 +422,12 @@ Still investigating...
 >>>>>>>>>>>>
 >>>>>>>>>>>>
 >>>>>>>>>>>>> -----Original Message-----
->>>>>>>>>>>>> From: ceph-devel-owner@vger.kernel.org
->>>>>>>>>>>>> [mailto:ceph-devel-
+>>>>>>>>>>>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-
+>> devel-
 >>>>>>>>>>>>> owner@vger.kernel.org] On Behalf Of Manavalan Krishnan
 >>>>>>>>>>>>> Sent: Wednesday, June 08, 2016 3:10 PM
->>>>>>>>>>>>> To: Mark Nelson <mnelson@redhat.com>; Ceph Development
+>>>>>>>>>>>>> To: Mark Nelson <mnelson@redhat.com>; Ceph
+>> Development
 >>>>>>> <ceph-
 >>>>>>>>>>>>> devel@vger.kernel.org>
 >>>>>>>>>>>>> Subject: RocksDB tuning
@@ -453,11 +435,11 @@ Still investigating...
 >>>>>>>>>>>>> Hi Mark
 >>>>>>>>>>>>>
 >>>>>>>>>>>>> Here are the tunings that we used to avoid the IOPs
->>>>>>>>>>>>> choppiness
+>> choppiness
 >>>>>>>>>>>>> caused by rocksdb compaction.
 >>>>>>>>>>>>>
 >>>>>>>>>>>>> We need to add the following options in
->>>>>>>>>>>>> src/kv/RocksDBStore.cc
+>> src/kv/RocksDBStore.cc
 >>>>>>>>>>>>> before rocksdb::DB::Open in RocksDBStore::do_open
 >>>>>>>>> opt.IncreaseParallelism(16);
 >>>>>>>>>>>>>      opt.OptimizeLevelStyleCompaction(512 * 1024 * 1024);
@@ -468,28 +450,22 @@ Still investigating...
 >>>>>>>>>>>>> Mana
 >>>>>>>>>>>>>
 >>>>>>>>>>>>>
->>>>>>>>>>>>> PLEASE NOTE: The information contained in this
->>>>>>>>>>>>> electronic mail
+>>>>>>>>>>>>> PLEASE NOTE: The information contained in this electronic
+>> mail
 >>>>>>>>>>>>> message is intended only for the use of the designated
 >>>>>>>>>>>>> recipient(s) named above.
 >>>>>>>>>>>>> If the
->>>>>>>>>>>>> reader of this message is not the intended recipient,
->>>>>>>>>>>>> you are
->>>>>>>>>>>>> hereby notified that you have received this message in
->>>>>>>>>>>>> error
->>>>>>>>>>>>> and that any review, dissemination, distribution, or
->>>>>>>>>>>>> copying
->>>>>>>>>>>>> of this message is strictly prohibited. If you have
->>>>>>>>>>>>> received
+>>>>>>>>>>>>> reader of this message is not the intended recipient, you are
+>>>>>>>>>>>>> hereby notified that you have received this message in error
+>>>>>>>>>>>>> and that any review, dissemination, distribution, or copying
+>>>>>>>>>>>>> of this message is strictly prohibited. If you have received
 >>>>>>>>>>>>> this communication in error, please notify the sender by
 >>>>>>>>>>>>> telephone or e-mail (as shown
->>>>>>>>>>>>> above) immediately and destroy any and all copies of
->>>>>>>>>>>>> this
+>>>>>>>>>>>>> above) immediately and destroy any and all copies of this
 >>>>>>>>>>>>> message in your possession (whether hard copies or
 >>>>>>>>>>>>> electronically stored copies).
 >>>>>>>>>>>>> --
->>>>>>>>>>>>> To unsubscribe from this list: send the line
->>>>>>>>>>>>> "unsubscribe
+>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe
 >>>>>>>>>>>>> ceph-
 >>>>>>> devel"
 >>>>>>>>>>>>> in the
@@ -498,23 +474,20 @@ Still investigating...
 >>>>>>>>> info
 >>>>>>>>>>>>> at http://vger.kernel.org/majordomo-info.html
 >>>>>>>>>>>> --
->>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>>>>>>>>> ceph-
+>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-
 >>>> devel"
 >>>>>>>>>>>> in the body of a message to majordomo@vger.kernel.org More
->>>>>>>>>>>> majordomo info at
->>>>>>>>>>>> http://vger.kernel.org/majordomo-info.html
->>>>>>>>>>>>
+>>>>>>>>>>>> majordomo info at  http://vger.kernel.org/majordomo-
+>> info.html
 >>>>>>>>>>> --
->>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>>>>>>>> ceph-
+>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-
 >>>> devel"
 >>>>>>>>>>> in the body of a message to majordomo@vger.kernel.org More
 >>>>>>>>> majordomo
 >>>>>>>>>>> info at  http://vger.kernel.org/majordomo-info.html
 >>>>>>>>>> --
->>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>>>>>>> ceph-devel"
+>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-
+>> devel"
 >>>>>>>>>> in the body of a message to majordomo@vger.kernel.org More
 >>>>>>>>> majordomo
 >>>>>>>>>> info at  http://vger.kernel.org/majordomo-info.html
@@ -527,29 +500,28 @@ Still investigating...
 >>>>>>>>> reader of this message is not the intended recipient, you are
 >>>>>>>>> hereby
 >>>>>>> notified
->>>>>>>>> that you have received this message in error and that any
->>>>>>>>> review,
+>>>>>>>>> that you have received this message in error and that any review,
 >>>>>>>>> dissemination, distribution, or copying of this message is
 >>>>>>>>> strictly
 >>>>>>> prohibited. If
 >>>>>>>>> you have received this communication in error, please notify the
 >>>>>>>>> sender
 >>>>>>> by
->>>>>>>>> telephone or e-mail (as shown above) immediately and destroy any
+>>>>>>>>> telephone or e-mail (as shown above) immediately and destroy
+>> any
 >>>>>>>>> and
 >>>>>>> all
->>>>>>>>> copies of this message in your possession (whether hard copies
->>>>>>>>> or
+>>>>>>>>> copies of this message in your possession (whether hard copies or
 >>>>>>>>> electronically stored copies).
 >>>>>>>>>> --
->>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>>>>>>> ceph-devel"
+>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-
+>> devel"
 >>>>>>>>>> in the body of a message to majordomo@vger.kernel.org More
 >>>>>>>>> majordomo
 >>>>>>>>>> info at  http://vger.kernel.org/majordomo-info.html
 >>>>>>>>>> --
->>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>>>>>>> ceph-devel"
+>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-
+>> devel"
 >>>>>>>>>> in the body of a message to majordomo@vger.kernel.org More
 >>>>>>>>> majordomo
 >>>>>>>>>> info at  http://vger.kernel.org/majordomo-info.html
@@ -557,21 +529,24 @@ Still investigating...
 >>>>>>>>>>
 >>>>>>>> --
 >>>>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>>>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org
->>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>> ceph-devel" in the body of a message to
+>> majordomo@vger.kernel.org
+>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-
+>> info.html
 >>>>>>>>
->>>>>>>>
->>>>>> PLEASE NOTE: The information contained in this electronic mail message
->>>>>> is
+>>>>>> PLEASE NOTE: The information contained in this electronic mail
+>> message is
 >>>> intended only for the use of the designated recipient(s) named above. If
->>>> the
+>> the
 >>>> reader of this message is not the intended recipient, you are hereby
->>>> notified
+>> notified
 >>>> that you have received this message in error and that any review,
 >>>> dissemination, distribution, or copying of this message is strictly
->>>> prohibited. If
->>>> you have received this communication in error, please notify the sender by
->>>> telephone or e-mail (as shown above) immediately and destroy any and all
+>> prohibited. If
+>>>> you have received this communication in error, please notify the sender
+>> by
+>>>> telephone or e-mail (as shown above) immediately and destroy any and
+>> all
 >>>> copies of this message in your possession (whether hard copies or
 >>>> electronically stored copies).
 >>>>> --
@@ -579,10 +554,4 @@ Still investigating...
 >>>>> in the body of a message to majordomo@vger.kernel.org More
 >>>> majordomo
 >>>>> info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
 
