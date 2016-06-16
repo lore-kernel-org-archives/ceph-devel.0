@@ -1,30 +1,30 @@
-From: John Spray <jspray@redhat.com>
+From: Haomai Wang <haomai@xsky.com>
 Subject: Re: New ceph cluster on jewel always stuck on pg creating
-Date: Thu, 16 Jun 2016 14:46:29 +0100
-Message-ID: <CALe9h7dpCphY79nQK+ttVh+Z=ttTcn8vq1oj1tyW1dVNVHSkXQ@mail.gmail.com>
+Date: Thu, 16 Jun 2016 21:47:45 +0800
+Message-ID: <CACJqLybrnnr3EVeghtbKhNCTMykzJZ9R9GGC2vLO_XSu-vqe4w@mail.gmail.com>
 References: <a7742e93-af91-9be9-7824-e829be38c94a@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f51.google.com ([209.85.218.51]:36523 "EHLO
-	mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752079AbcFPNqw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jun 2016 09:46:52 -0400
-Received: by mail-oi0-f51.google.com with SMTP id p204so69687440oih.3
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2016 06:46:52 -0700 (PDT)
+Received: from mail-pu1apc01on0107.outbound.protection.outlook.com ([104.47.126.107]:7200
+	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754655AbcFPNsA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 16 Jun 2016 09:48:00 -0400
+Received: by mail-yw0-f176.google.com with SMTP id z186so43151453ywd.2
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2016 06:47:54 -0700 (PDT)
 In-Reply-To: <a7742e93-af91-9be9-7824-e829be38c94a@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Mihai Vintila <unixro@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Have you by any chance put all three OSDs on the same node, or on
-three VMs with the same hostname?  PGs will get stuck at 'creating' if
-they can't be properly placed across OSDs.
+I think it's a default ceph.conf?
 
-John
+could you add debug_osd=10/10 and debug_filestore=10/10 and restart to
+see the logs?
 
-On Thu, Jun 16, 2016 at 2:43 PM, Mihai Vintila <unixro@gmail.com> wrote:
+On Thu, Jun 16, 2016 at 9:43 PM, Mihai Vintila <unixro@gmail.com> wrote:
 > Hi all,
 >
 > I'm trying to test Ceph but seems that whatever i do i can't manage to
@@ -667,36 +667,3 @@ On Thu, Jun 16, 2016 at 2:43 PM, Mihai Vintila <unixro@gmail.com> wrote:
 > 4.63    0       0       0       0       0       0       0 0       creating
 > 2016-06-16 16:00:17.449900      0'0 0:0     []      -1      []      -1
 > 0'0     2016-06-16 16:00:17.449900      0'0     2016-06-16 16:00:17.449900
-> 4.62    0       0       0       0       0       0       0 0       creating
-> 2016-06-16 16:00:17.449899      0'0 0:0     []      -1      []      -1
-> 0'0     2016-06-16 16:00:17.449899      0'0     2016-06-16 16:00:17.449899
-> 4.61    0       0       0       0       0       0       0 0       creating
-> 2016-06-16 16:00:17.449899      0'0 0:0     []      -1      []      -1
-> 0'0     2016-06-16 16:00:17.449899      0'0     2016-06-16 16:00:17.449899
-> 4.60    0       0       0       0       0       0       0 0       creating
-> 2016-06-16 16:00:17.449898      0'0 0:0     []      -1      []      -1
-> 0'0     2016-06-16 16:00:17.449898      0'0     2016-06-16 16:00:17.449898
-> 4.5f    0       0       0       0       0       0       0 0       creating
-> 2016-06-16 16:00:17.449897      0'0 0:0     []      -1      []      -1
-> 0'0     2016-06-16 16:00:17.449897      0'0     2016-06-16 16:00:17.449897
-> 4.5e    0       0       0       0       0       0       0 0       creating
-> 2016-06-16 16:00:17.449896      0'0 0:0     []      -1      []      -1
-> 0'0     2016-06-16 16:00:17.449896      0'0     2016-06-16 16:00:17.449896
-> 4.5d    0       0       0       0       0       0       0 0       creating
-> 2016-06-16 16:00:17.449895      0'0 0:0     []      -1      []      -1
-> 0'0     2016-06-16 16:00:17.449895      0'0     2016-06-16 16:00:17.449895
-> 4.5c    0       0       0       0       0       0       0 0       creating
-> 2016-06-16 16:00:17.449894      0'0 0:0     []      -1      []      -1
-> 0'0     2016-06-16 16:00:17.449894      0'0     2016-06-16 16:00:17.449894
-> 4.5b    0       0       0       0       0       0       0 0       creating
-> 2016-06-16 16:00:17.449893      0'0 0:0     []      -1      []      -1
-> 0'0     2016-06-16 16:00:17.449893      0'0     2016-06-16 16:00:17.449893
-> 4.5a    0       0       0       0       0       0       0 0       creating
-> 2016-06-16 16:00:17.449893      0'0 0:0     []      -1      []      -1
-> 0'0     2016-06-16 16:00:17.449893      0'0     2016-06-16 16:00:17.449893
-> 4.59    0       0       0       0       0       0       0 0       creating
-> 2016-06-16 16:00:17.449892      0'0 0:0     []      -1      []      -1
-> 0'0     2016-06-16 16:00:17.449892      0'0     2016-06-16 16:00:17.449892
-> 4.58    0       0       0       0       0       0       0 0       creating
-> 2016-06-16 16:00:17.449891      0'0 0:0     []      -1      []      -1
-> 0'0     2016-06-16 16:00:17.449891      0'0     2016-06-16 16:00:17.449891
