@@ -1,60 +1,61 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: AsyncMessenger maturity
-Date: Thu, 16 Jun 2016 09:45:32 +0800
-Message-ID: <CACJqLyYuTDKobwLjSCEmY4Kk+AsiAaX06AX1M6dieBfObBbAuw@mail.gmail.com>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: RE: AsyncMessenger maturity
+Date: Thu, 16 Jun 2016 06:41:50 +0000
+Message-ID: <DB5PR05MB1607D49E703EFE7A6C4ACBA0A9560@DB5PR05MB1607.eurprd05.prod.outlook.com>
 References: <DB5PR05MB160725A2A9228123780F67CFA9550@DB5PR05MB1607.eurprd05.prod.outlook.com>
  <alpine.DEB.2.11.1606151412450.6221@cpach.fuggernut.com>
+ <CACJqLyYuTDKobwLjSCEmY4Kk+AsiAaX06AX1M6dieBfObBbAuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pu1apc01on0114.outbound.protection.outlook.com ([104.47.126.114]:20608
-	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+Received: from mail-am1on0100.outbound.protection.outlook.com ([157.56.112.100]:42816
+	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753224AbcFPBpq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 15 Jun 2016 21:45:46 -0400
-Received: by mail-yw0-f181.google.com with SMTP id c72so30277925ywb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Jun 2016 18:45:40 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1606151412450.6221@cpach.fuggernut.com>
+	id S1751300AbcFPGly (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 16 Jun 2016 02:41:54 -0400
+In-Reply-To: <CACJqLyYuTDKobwLjSCEmY4Kk+AsiAaX06AX1M6dieBfObBbAuw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Avner Ben Hanoch <avnerb@mellanox.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomai@xsky.com>, Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Jun 16, 2016 at 2:16 AM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 15 Jun 2016, Avner Ben Hanoch wrote:
->> Hi All,
->>
->> I tried to evaluate AsyncMessenger (together with its sub classes) and I
->> found its code great in my eyes. Still, when using it at runtime, Ceph
->> will warn you that this module is dangerous.
->
-> In jewel we've removed the 'experimental' flag.  Upgrade!
->
->> *I have two questions:*
->> 1. Considering pros and cons, are there any cons when using
->> AsyncMessenger instead of SimpleMessenger (like stability, or cpu/memory
->> consumption, .)
->
-> Less CPU, fewer threads, nicer code.
->
->> 2. I am considering a variant of AsyncMessenger that might require that
->> both sides will be same messenger, I wonder, is it possible to use
->> AsyncMessenger for private network between OSDs only and to remain with
->> SimpleMessenger for all other messengers (for example, by just changing
->> the lines that creates the 6 Messengers in ceph_osd.cc::main)
->
-> It's the same protocol as SimpleMessenger, so there is no need to run
-> SimpleMessenger at all.  (You can't currently use two types in the same
-> process, but I don't think there's any need to.)
-
-Recently we tested on a ~70 osds cluster used as rgw case. We can
-obverse ~20% performance improvement compared to simple while do
-cosbench benchmark. I'm not sure the actual reason now, but I guess in
-a resource-limited env, async behavior much better.
-
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Q29vbCEgVGhhbmtzIQ0KDQpBc3luYyBjb2RlIGxvb2tzIHJlYWxseSBhcHJvcHJpYXRlIHdpdGgg
+dGhhdCBmaW5kaW5ncy4NCg0KVGhhbmsgeW91IHZlcnkgbXVjaCBmb3IgdGhpcyBmYW50YXN0aWMg
+bW9kdWxlLiAgSSBsaWtlZCBpdCBvbiBmaXJzdCBzaWdodCENCg0KQXZuZXINCg0KDQotLS0tLU9y
+aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWlAeHNr
+eS5jb21dIA0KU2VudDogVGh1cnNkYXksIEp1bmUgMTYsIDIwMTYgMDQ6NDYNClRvOiBTYWdlIFdl
+aWwgPHNhZ2VAbmV3ZHJlYW0ubmV0Pg0KQ2M6IEF2bmVyIEJlbiBIYW5vY2ggPGF2bmVyYkBtZWxs
+YW5veC5jb20+OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IEFzeW5j
+TWVzc2VuZ2VyIG1hdHVyaXR5DQoNCk9uIFRodSwgSnVuIDE2LCAyMDE2IGF0IDI6MTYgQU0sIFNh
+Z2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+IHdyb3RlOg0KPiBPbiBXZWQsIDE1IEp1biAyMDE2
+LCBBdm5lciBCZW4gSGFub2NoIHdyb3RlOg0KPj4gSGkgQWxsLA0KPj4NCj4+IEkgdHJpZWQgdG8g
+ZXZhbHVhdGUgQXN5bmNNZXNzZW5nZXIgKHRvZ2V0aGVyIHdpdGggaXRzIHN1YiBjbGFzc2VzKSAN
+Cj4+IGFuZCBJIGZvdW5kIGl0cyBjb2RlIGdyZWF0IGluIG15IGV5ZXMuIFN0aWxsLCB3aGVuIHVz
+aW5nIGl0IGF0IA0KPj4gcnVudGltZSwgQ2VwaCB3aWxsIHdhcm4geW91IHRoYXQgdGhpcyBtb2R1
+bGUgaXMgZGFuZ2Vyb3VzLg0KPg0KPiBJbiBqZXdlbCB3ZSd2ZSByZW1vdmVkIHRoZSAnZXhwZXJp
+bWVudGFsJyBmbGFnLiAgVXBncmFkZSENCj4NCj4+ICpJIGhhdmUgdHdvIHF1ZXN0aW9uczoqDQo+
+PiAxLiBDb25zaWRlcmluZyBwcm9zIGFuZCBjb25zLCBhcmUgdGhlcmUgYW55IGNvbnMgd2hlbiB1
+c2luZyANCj4+IEFzeW5jTWVzc2VuZ2VyIGluc3RlYWQgb2YgU2ltcGxlTWVzc2VuZ2VyIChsaWtl
+IHN0YWJpbGl0eSwgb3IgDQo+PiBjcHUvbWVtb3J5IGNvbnN1bXB0aW9uLCAuKQ0KPg0KPiBMZXNz
+IENQVSwgZmV3ZXIgdGhyZWFkcywgbmljZXIgY29kZS4NCj4NCj4+IDIuIEkgYW0gY29uc2lkZXJp
+bmcgYSB2YXJpYW50IG9mIEFzeW5jTWVzc2VuZ2VyIHRoYXQgbWlnaHQgcmVxdWlyZSANCj4+IHRo
+YXQgYm90aCBzaWRlcyB3aWxsIGJlIHNhbWUgbWVzc2VuZ2VyLCBJIHdvbmRlciwgaXMgaXQgcG9z
+c2libGUgdG8gDQo+PiB1c2UgQXN5bmNNZXNzZW5nZXIgZm9yIHByaXZhdGUgbmV0d29yayBiZXR3
+ZWVuIE9TRHMgb25seSBhbmQgdG8gDQo+PiByZW1haW4gd2l0aCBTaW1wbGVNZXNzZW5nZXIgZm9y
+IGFsbCBvdGhlciBtZXNzZW5nZXJzIChmb3IgZXhhbXBsZSwgYnkgDQo+PiBqdXN0IGNoYW5naW5n
+IHRoZSBsaW5lcyB0aGF0IGNyZWF0ZXMgdGhlIDYgTWVzc2VuZ2VycyBpbiANCj4+IGNlcGhfb3Nk
+LmNjOjptYWluKQ0KPg0KPiBJdCdzIHRoZSBzYW1lIHByb3RvY29sIGFzIFNpbXBsZU1lc3Nlbmdl
+ciwgc28gdGhlcmUgaXMgbm8gbmVlZCB0byBydW4gDQo+IFNpbXBsZU1lc3NlbmdlciBhdCBhbGwu
+ICAoWW91IGNhbid0IGN1cnJlbnRseSB1c2UgdHdvIHR5cGVzIGluIHRoZSANCj4gc2FtZSBwcm9j
+ZXNzLCBidXQgSSBkb24ndCB0aGluayB0aGVyZSdzIGFueSBuZWVkIHRvLikNCg0KUmVjZW50bHkg
+d2UgdGVzdGVkIG9uIGEgfjcwIG9zZHMgY2x1c3RlciB1c2VkIGFzIHJndyBjYXNlLiBXZSBjYW4g
+b2J2ZXJzZSB+MjAlIHBlcmZvcm1hbmNlIGltcHJvdmVtZW50IGNvbXBhcmVkIHRvIHNpbXBsZSB3
+aGlsZSBkbyBjb3NiZW5jaCBiZW5jaG1hcmsuIEknbSBub3Qgc3VyZSB0aGUgYWN0dWFsIHJlYXNv
+biBub3csIGJ1dCBJIGd1ZXNzIGluIGEgcmVzb3VyY2UtbGltaXRlZCBlbnYsIGFzeW5jIGJlaGF2
+aW9yIG11Y2ggYmV0dGVyLg0KDQo+DQo+IHNhZ2UNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJv
+bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBp
+biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
+IG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
+aW5mby5odG1sDQo=
