@@ -1,37 +1,57 @@
-From: Wade Holler <wade.holler@gmail.com>
-Subject: Dramatic performance drop at certain number of objects in pool
-Date: Thu, 16 Jun 2016 08:14:57 -0400
-Message-ID: <CA+e22ScW-YrDE0mPABSuiDbDpKL=gYZXv6t2hK8RJxYuMaVLHg@mail.gmail.com>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: RE: considering AsyncMessenger variant over RDS (RDMA and/or TCP)
+Date: Thu, 16 Jun 2016 12:30:08 +0000
+Message-ID: <DB5PR05MB1607BC316B76C1ED41220676A9560@DB5PR05MB1607.eurprd05.prod.outlook.com>
+References: <DB5PR05MB160730A88C01615EC3ED3B98A9560@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <CACJqLyYpc+tQw55x=cKPfzx4xRNC3fm3-i9pjkasr=Fipqz_sw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:35828 "EHLO
-	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753846AbcFPMO7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jun 2016 08:14:59 -0400
-Received: by mail-oi0-f52.google.com with SMTP id w5so65584751oib.2
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2016 05:14:58 -0700 (PDT)
+Received: from mail-am1on0097.outbound.protection.outlook.com ([157.56.112.97]:26466
+	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751275AbcFPMpg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 16 Jun 2016 08:45:36 -0400
+In-Reply-To: <CACJqLyYpc+tQw55x=cKPfzx4xRNC3fm3-i9pjkasr=Fipqz_sw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Haomai Wang <haomai@xsky.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi All,
-
-I have a repeatable condition when the object count in a pool gets to
-320-330 million the object write time dramatically and almost
-instantly increases as much as 10X, exhibited by fs_apply_latency
-going from 10ms to 100s of ms.
-
-Can someone point me in a direction / have an explanation ?
-
-I can add a new pool and it performs normally.
-
-Config is generally
-3 Nodes 24 physical core each, 768GB Ram each, 16 OSD / node , all SSD
-with NVME for journals. Centos 7.2, XFS
-
-Jewell is the release; inserting objects with librados via some Python
-test code.
-
-Best Regards
-Wade
+SGkgSGFvbWFpLA0KDQpJIGRpZG4ndCB1bmRlcnN0YW5kIHdoaWNoIFJETUEgQVBJIHRoZSBvdGhl
+ciBndXkgaXMgdXNpbmcuICBJcyBpdCByZG1hX2NtLCBBY2NlbGlvLCBvdGhlcj8NCg0KQWxzbywg
+aXMgdGhlcmUgYW4gZXN0aW1hdGlvbiB3aGVuIHdpbGwgaXQgYmUgcG9zc2libGUgdG8gZG93bmxv
+YWQgYW5kIHVzZSBpdCBmcm9tIHlvdXIgYnJhbmNoIChldmVuIGJlZm9yZSBpdCBpcyBmb3JtYWxs
+eSBtZXJnZWQgaW50byBDZXBoKT8NCg0KSW4gdGhpcyB0aHJlYWQgSSBhc2tlZCBhYm91dCAqUkRT
+KiBvdmVyIFJETUEgaHR0cDovL2xpbnV4LmRpZS5uZXQvbWFuLzcvcmRzIHNpbmNlIFJEUyBBUEkg
+aXMgdmVyeSBjbG9zZSB0byBUQ1Agc29ja2V0IEFQSS4gIERvIHlvdSB0aGluayB0aGlzIGlzIG5l
+ZWRlZCBpbiBhZGRpdGlvbiB0byB5b3VyIHdvcms/DQoNClRJQSwNCiBBdm5lcg0KDQotLS0tLU9y
+aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWlAeHNr
+eS5jb21dIA0KU2VudDogVGh1cnNkYXksIEp1bmUgMTYsIDIwMTYgMTU6MDcNClRvOiBBdm5lciBC
+ZW4gSGFub2NoIDxhdm5lcmJAbWVsbGFub3guY29tPg0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJu
+ZWwub3JnDQpTdWJqZWN0OiBSZTogY29uc2lkZXJpbmcgQXN5bmNNZXNzZW5nZXIgdmFyaWFudCBv
+dmVyIFJEUyAoUkRNQSBhbmQvb3IgVENQKQ0KDQpPbiBUaHUsIEp1biAxNiwgMjAxNiBhdCA3OjMx
+IFBNLCBBdm5lciBCZW4gSGFub2NoIDxhdm5lcmJAbWVsbGFub3guY29tPiB3cm90ZToNCj4gSGkg
+YWxsLA0KPg0KPiBJIGFtIGF0IGEgcHJlbGltaW5hcnkgcGhhc2Ugb2YgY29uc2lkZXJpbmcgd3Jp
+dGluZyBvZiBhbiBhZGRpdGlvbmFsIG9wdGlvbmFsIE1lc3NlbmdlciBiYXNlZCBvbiBSRFMgLSBS
+ZWxpYWJsZSBEYXRhZ3JhbSBTb2NrZXRzIHRlY2hub2xvZ3kgLg0KPg0KPiBZb3UgbWF5IGxlYXJu
+IGFib3V0IFJEUyBoZXJlOg0KPiAgICAgaHR0cDovL2xpbnV4LmRpZS5uZXQvbWFuLzcvcmRzDQo+
+ICAgICBodHRwczovL3d3dy5rZXJuZWwub3JnL2RvYy9Eb2N1bWVudGF0aW9uL25ldHdvcmtpbmcv
+cmRzLnR4dA0KPiAgICAgDQo+IGh0dHBzOi8vb3NzLm9yYWNsZS5jb20vcGlwZXJtYWlsL3Jkcy1k
+ZXZlbC8yMDA3LU5vdmVtYmVyLzAwMDIyOC5odG1sDQo+DQo+IFNpbmNlLCBSRFMgc3VwcG9ydHMg
+c29ja2V0IEFQSSwgaXQgc2hvdWxkIGJlIHJlbGF0aXZlbHkgc2ltcGxlIHRvIGNyZWF0ZSBBc3lu
+Y01lc3NlbmdlciB2YXJpYW50IHRoYXQgaXMgYmFzZWQgb24gUkRTIHNvY2tldHMgaW5zdGVhZCBv
+ZiBUQ1Agc29ja2V0cyAodGhvdWdoLCBSRFMgaXMgZGF0YWdyYW0gb3JpZW50ZWQgYW5kIG5vdCBz
+dHJlYW0gb3JpZW50ZWQpLg0KPg0KPiBRdWVzdGlvbnM6DQo+ICAgICAxLiBEbyB5b3Uga25vdyBp
+ZiBzb21lYm9keSBpcyBhbHJlYWR5IHdvcmtpbmcgb24gdGhpcyBzdWJqZWN0Pw0KDQpFeGFjdGx5
+LCBzaW5jZSBJIGhhdmUgYWJzdHJhY3RlZCB0aGUgYXN5bmNtZXNzZW5nZXIgYmFja2VuZCBmcmFt
+ZXdvcmsuDQpJIGltcGxlbWVudCB0aGUgZHBkayBiYWNrZW5kLiBUaGVuIGFub3RoZXIgZ3V5IGlz
+IHdvcmtpbmcgb24gbmF0aXZlIHJkbWEgYmFja2VuZC4gQmVjYXVzZSBhIGxvdCBvZiBhc3luYyBt
+ZXNzZW5nZXIgY2hhbmdlcyBpcyBwZW5kaW5nIG9uIG1lcmdlIHF1ZXVlIG9uZSBieSBvbmUsIHdl
+IG5lZWQgc29tZSB0aW1lIHRvIHdhaXQgZm9yIHRoaXMgZnJhbWV3b3JrIG1vcmUgY2xlYXIuDQoN
+Cj4gICAgIDIuIERvIHlvdSBoYXZlIGFueSBjb21tZW50cyBmb3IgbWU/DQo+DQo+IFRJQSwNCj4g
+ICBBdm5lcg0KPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0
+aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVz
+c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZv
+IGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
