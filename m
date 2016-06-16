@@ -1,35 +1,36 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: AsyncMessenger maturity
-Date: Thu, 16 Jun 2016 03:45:29 -0500
-Message-ID: <1351ac7a-468c-47b1-5ce2-38ce10f81404@redhat.com>
-References: <DB5PR05MB160725A2A9228123780F67CFA9550@DB5PR05MB1607.eurprd05.prod.outlook.com>
- <alpine.DEB.2.11.1606151412450.6221@cpach.fuggernut.com>
- <CACJqLyYuTDKobwLjSCEmY4Kk+AsiAaX06AX1M6dieBfObBbAuw@mail.gmail.com>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: considering AsyncMessenger variant over RDS (RDMA and/or TCP)
+Date: Thu, 16 Jun 2016 11:31:49 +0000
+Message-ID: <DB5PR05MB160730A88C01615EC3ED3B98A9560@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43617 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751619AbcFPIpi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 16 Jun 2016 04:45:38 -0400
-In-Reply-To: <CACJqLyYuTDKobwLjSCEmY4Kk+AsiAaX06AX1M6dieBfObBbAuw@mail.gmail.com>
+Received: from mail-am1on0059.outbound.protection.outlook.com ([157.56.112.59]:44486
+	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753256AbcFPLqU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jun 2016 07:46:20 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>, Sage Weil <sage@newdream.net>
-Cc: Avner Ben Hanoch <avnerb@mellanox.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Hi all,
 
-> Recently we tested on a ~70 osds cluster used as rgw case. We can
-> obverse ~20% performance improvement compared to simple while do
-> cosbench benchmark. I'm not sure the actual reason now, but I guess in
-> a resource-limited env, async behavior much better.
->
+I am at a preliminary phase of considering writing of an additional optional Messenger based on RDS - Reliable Datagram Sockets technology .
 
-I've noticed that async messenger especially does much better when the 
-memory allocator is not specifically optimized.  When it is, sometimes 
-simplemessenger did better in my old tests.  I need to retest now though 
-to see if that is still the case.  It's good to hear you are seeing 
-better performance with async messenger now!
+You may learn about RDS here:
+    http://linux.die.net/man/7/rds
+    https://www.kernel.org/doc/Documentation/networking/rds.txt
+    https://oss.oracle.com/pipermail/rds-devel/2007-November/000228.html
 
-Mark
+Since, RDS supports socket API, it should be relatively simple to create AsyncMessenger variant that is based on RDS sockets instead of TCP sockets (though, RDS is datagram oriented and not stream oriented).
+
+Questions:
+    1. Do you know if somebody is already working on this subject?
+    2. Do you have any comments for me?
+
+TIA,
+  Avner
+
