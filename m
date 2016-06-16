@@ -1,69 +1,85 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: ceph-create-keys: mds "allow *" vs "mds allow"
-Date: Thu, 16 Jun 2016 16:10:17 +0100
-Message-ID: <CALe9h7d_xWZ0WAZNYfTXJaf9afpc7OHkruy5RV6=P5BD2Aq-+Q@mail.gmail.com>
-References: <1866707938.418.1466087949783@webmail.proxmox.com>
+From: Wade Holler <wade.holler@gmail.com>
+Subject: Re: Dramatic performance drop at certain number of objects in pool
+Date: Thu, 16 Jun 2016 12:08:31 -0400
+Message-ID: <CA+e22Sf+=0t868AbAdh_NU3prVxEVzAriTpBG9THajbT5Q4X1g@mail.gmail.com>
+References: <CA+e22ScW-YrDE0mPABSuiDbDpKL=gYZXv6t2hK8RJxYuMaVLHg@mail.gmail.com>
+ <1450235390.2134.1466084299677@ox.pcextreme.nl> <CA+e22Seqy-0rQTDt7PhYmYBsUrqqdWiN2QcyBt1RYz6QrBRtPg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f42.google.com ([209.85.218.42]:33937 "EHLO
-	mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754047AbcFPPKj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jun 2016 11:10:39 -0400
-Received: by mail-oi0-f42.google.com with SMTP id d132so73838096oig.1
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2016 08:10:38 -0700 (PDT)
-In-Reply-To: <1866707938.418.1466087949783@webmail.proxmox.com>
+Received: from mail-oi0-f44.google.com ([209.85.218.44]:35283 "EHLO
+	mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754177AbcFPQIc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jun 2016 12:08:32 -0400
+Received: by mail-oi0-f44.google.com with SMTP id w5so76650787oib.2
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2016 09:08:32 -0700 (PDT)
+In-Reply-To: <CA+e22Seqy-0rQTDt7PhYmYBsUrqqdWiN2QcyBt1RYz6QrBRtPg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Fabian_Gr=C3=BCnbichler?= <f.gruenbichler@proxmox.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Dietmar Maurer <dietmar@proxmox.com>
+To: Wido den Hollander <wido@42on.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Jun 16, 2016 at 3:39 PM, Fabian Gr=C3=BCnbichler
-<f.gruenbichler@proxmox.com> wrote:
-> Hello,
->
-> we already filed an issue over at Redmine (http://tracker.ceph.com/is=
-sues/16255), but since this is more of a question than bug report, I wi=
-ll repeat it here (and hope to get more insight ;))
->
-> The ceph documentation for monitor bootstrapping (http://tracker.ceph=
-=2Ecom/issues/16255) says to create the client.admin key with (among ot=
-her things) "--cap mds 'allow'" (while the cap for mon and osd is set t=
-o 'allow *', note the added ' *'). All our existing (users') ceph insta=
-llations are setup with keyrings following this documentation, which wo=
-rked find under Hammer.
->
-> Recently (in Jewel?), ceph-create-keys was changed to call "ceph auth=
- get-or-create" with "mon 'allow *'" (again, note the added ' *'): http=
-s://github.com/ceph/ceph/commit/c7e905e7e232a973abf7c6fa71a2ffbad7aa0ff=
-d
->
-> This is not only inconsistent with the current documentation, but als=
-o breaks all the existing installations/keyrings, because get-or-create=
- will neither get nor create if the keyring exists, but the caps don't =
-match.
->
-> Any pointers on how to remedy this situation? I could not find any in=
-formation in the release notes (e.g., for a potential upgrade path) and=
- either the change or the documentation seems to be wrong.
+Ok.  Of the 202 pgs on this example OSD,
 
-You can avoid this issue by leaving the admin key in place in
-/etc/ceph on your mon nodes.  More detail in the ticket.
+65 of them have around ~160k files
+137 ( the rest ) -have around ~80k files
 
-Cheers,
-John
 
-> Regards,
-> Fabian
+
+On Thu, Jun 16, 2016 at 10:47 AM, Wade Holler <wade.holler@gmail.com> wrote:
+> Wido,
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I am walking an Example OSD now and counting the files. 3096 PGs for this pool.
+> So far file counts inside the pool.pg_head directories are all coming
+> in around ~80k.
+>
+> Is this an issue ?
+>
+> I will report back with all pg_head file counts in this example OSD
+> once it finishes.
+>
+> Best Regards,
+> Wade
+>
+>
+> On Thu, Jun 16, 2016 at 9:38 AM, Wido den Hollander <wido@42on.com> wrote:
+>>
+>>> Op 16 juni 2016 om 14:14 schreef Wade Holler <wade.holler@gmail.com>:
+>>>
+>>>
+>>> Hi All,
+>>>
+>>> I have a repeatable condition when the object count in a pool gets to
+>>> 320-330 million the object write time dramatically and almost
+>>> instantly increases as much as 10X, exhibited by fs_apply_latency
+>>> going from 10ms to 100s of ms.
+>>>
+>>
+>> My first guess is the filestore splitting and the amount of files per directory.
+>>
+>> You have 3*16=48 OSDs, is that correct? With roughly 100 PGs per OSD you have let's say 4800 PGs in total?
+>>
+>> That means you have ~66k objects per PG.
+>>
+>>> Can someone point me in a direction / have an explanation ?
+>>
+>> If you take a look at one of the OSDs, are there a huge amount of files in a single directory? Look inside the 'current' directory on that OSDs.
+>>
+>> Wido
+>>
+>>>
+>>> I can add a new pool and it performs normally.
+>>>
+>>> Config is generally
+>>> 3 Nodes 24 physical core each, 768GB Ram each, 16 OSD / node , all SSD
+>>> with NVME for journals. Centos 7.2, XFS
+>>>
+>>> Jewell is the release; inserting objects with librados via some Python
+>>> test code.
+>>>
+>>> Best Regards
+>>> Wade
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
