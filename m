@@ -1,70 +1,33 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: encoding
-Date: Fri, 17 Jun 2016 20:16:55 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1606172013230.22717@piezo.us.to>
-References: <BLUPR0201MB1524E3853169E4292D16F710E8570@BLUPR0201MB1524.namprd02.prod.outlook.com> <alpine.DEB.2.11.1606171657530.21827@piezo.us.to> <BLUPR0201MB15247981D954A0180454544CE8570@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1606171749150.22717@piezo.us.to> <BLUPR0201MB152438F87027D1C1496930F4E8570@BLUPR0201MB1524.namprd02.prod.outlook.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: FW: Encoding schemes
+Date: Fri, 17 Jun 2016 20:29:17 +0000
+Message-ID: <BLUPR0201MB1524707795FDD626321BB040E8570@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39778 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753302AbcFQUQ5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 17 Jun 2016 16:16:57 -0400
-In-Reply-To: <BLUPR0201MB152438F87027D1C1496930F4E8570@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Received: from mail-bl2on0072.outbound.protection.outlook.com ([65.55.169.72]:55647
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752061AbcFQU3T convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jun 2016 16:29:19 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, 17 Jun 2016, Allen Samuels wrote:
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sweil@redhat.com]
-> > Sent: Friday, June 17, 2016 10:55 AM
-> > To: Allen Samuels <Allen.Samuels@sandisk.com>
-> > Cc: ceph-devel@vger.kernel.org
-> > Subject: RE: encoding
-> > 
-> > On Fri, 17 Jun 2016, Allen Samuels wrote:
-> > > I'm just trying to work the encoding size.
-> > >
-> > > Igor has point out that unused could be replaced by a bitmap and
-> > > suggested that it could be quite small (4 or 8 bytes) -- though he
-> > > cites some particular examples about it being "small".
-> > >
-> > > Do we actually need a full bitmap? Might not a simple left-off pointer
-> > > be almost as good?
-> > 
-> > He's right that it's only useful for a min_alloc_size'd blob, where we expect
-> > teh bitmap to be about 16 bits.  We could have a left/right boundary that
-> > encodes into 8 bits (two 0..15 values) that would probably capture 70% of the
-> > performance benefit and save one byte.  I'm inclined to go for a bitmap for
-> > now, though...
-> > 
-> > > w.r.t. ref_map. The comment in the code suggests that it will always
-> > > be empty for a non-shared blob. If that's correct perhaps it's not a
-> > > big deal.
-> > 
-> > That was the original thought, but it didn't end up being the case.  We could
-> > write a non-trivial chunk of code to rebuild that info at runtime from the
-> > lextent map, but I'd put that pretty far down on the list too.
-> > Instead, we can probably take advantage of the fact that most of the ref
-> > counts will be 1 or 0 and combine those ~2 bits into a more efficent record_t
-> > encoding.  This should be sequenced after the first pass of varint encodings,
-> > though, which I'm partway through stabilizing.
-> > Should have a PR by Monday.
-> 
-> With some deeper thinking, it seems to me that the 
-> rebuild-ref-map-on-deserialize is pretty trivial. Isn't it just a walk 
-> of the lextent map and for each entry a corresponding call to add_ref 
-> for that referenced blob (assuming add_ref correctly combines 
-> overlapping references)????
+I have a deeper question about bufferlist. Essentially, I have a specific pattern that I want to implement and there are a couple of options about how to orchestrate the bufferlists. I'm looking for an opinion on the best choice.
 
-You're exactly right.
+Naturally, ::encode is the still the theme of the day. I've been thinking about an alternate approach to the encoding problem that approaches it more globally than the per-field, incremental approach that you're looking at.
 
-We encode the "blob map" and append it to the encoded onode or put it in 
-the bnode key.  I think we just need to make 2 variations of encode (to 
-elide the ref_map), and to make the onode decode case rebuild it as you 
-say.
+Specifically, thinks like the # of low-order bits being zero (512, 4K, block sizes...) are really more efficiently encoded globally. Also, the size of an LBA address is more efficiently coded locally (and decoded!).
 
-sage
+The major problem with these techniques is that you have to encode the shift values earlier in the buffer from the actual data values. Meaning that EITHER you know the value ahead of time (from, say device information, or config parameters) OR you have to scan the data to determine the correct value.
+
+I've been thinking about a third/hybrid scheme, wherein you assume a large value, start to encode the data and then backtrack (i.e., abandon and restart) if you discover that your assumed value is incorrect.
+
+One pattern to do this is the do the encode into a separate bufferlist. If the encode fails you can bufferlist::clear (or delete and recreate) and restart. Once you've succeeded you append then the new buffer to the original buffer.
+
+The other pattern is to somehow mark the original buffer (bufferlist::size) when you start and then if you fail, you trim (resize) the original buffer back to the mark point. Once you succeeded you're done.
+
+Which do you think would be faster?
