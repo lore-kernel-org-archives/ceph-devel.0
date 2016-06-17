@@ -1,50 +1,53 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: using discard from qemu guest when snapshot exist, fill the rbd
- layer with zeroes and use more space
-Date: Fri, 17 Jun 2016 09:21:53 -0400
-Message-ID: <CA+aFP1A9a5ZEUzsJ_4_dRd_Ok7Ob4yk6PjaQNnrwWQbUmK6V3w@mail.gmail.com>
-References: <1498621012.13671278.1466154654173.JavaMail.zimbra@oxygem.tv>
-Reply-To: dillaman@redhat.com
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Want to present at FISL Brazil?
+Date: Fri, 17 Jun 2016 10:06:49 -0400
+Message-ID: <CAAZbbf1-zS8S_cFXq7wkNRnGN-JifXoRmRVsB4iKo22L3ufrCA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:35534 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753559AbcFQNVy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jun 2016 09:21:54 -0400
-Received: by mail-pa0-f54.google.com with SMTP id hl6so28595011pac.2
-        for <ceph-devel@vger.kernel.org>; Fri, 17 Jun 2016 06:21:53 -0700 (PDT)
-In-Reply-To: <1498621012.13671278.1466154654173.JavaMail.zimbra@oxygem.tv>
+Received: from mail-yw0-f178.google.com ([209.85.161.178]:35100 "EHLO
+	mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933441AbcFQOGu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jun 2016 10:06:50 -0400
+Received: by mail-yw0-f178.google.com with SMTP id z186so72364104ywd.2
+        for <ceph-devel@vger.kernel.org>; Fri, 17 Jun 2016 07:06:50 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>, board@lists.ceph.com
 
-There is a "rbd_skip_partial_discard" configuration option which can
-be set to true.  When enabled, discard will avoid zeroing holes if the
-discard extent is in the middle of an object.
+Hey cephers,
 
-On Fri, Jun 17, 2016 at 5:10 AM, Alexandre DERUMIER <aderumier@odiso.com> wrote:
-> Hi,
->
-> I'm using fstrim inside my qemu guests to remove unused space from the rbd storage.
->
-> This is working fine, but I just notice that if a snapshot exist,
->
-> It just do the reverse, it's filling the snasphot with zeroes, and the total cluster space is growing.
->
-> It's is possible to avoid that ?
->
->
-> Regards,
->
-> Alexandre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+As a part of my budget this year I am starting the process of raising
+awareness around Ceph in the LATAM region. One of the things I am
+starting with is having the Ceph Community sponsor FISL in Porto
+Alegre, Brazil (13-16 July).
 
+Thankfully our sponsorship negotiations we have been blessed with an
+unexpected additional speaking slot. Rather than monopolize this
+within the confines of Red Hat, I wanted to extend an offer to the
+community to come present and socialize at the booth with us. If
+anyone is interested please let me know as soon as humanly possible.
 
+Speaking slots appear to be ~1hr and the talk can be anything
+Ceph-related. If you are interested please send me:
+
+1) Name
+2) Org
+3) Talk Title
+4) Abstract
+5) Speaker Bio
+
+US citizens, keep in mind the visa process for Brazil is quite
+onerous, so it may be costly in both time and money to get it
+processed in time.
+
+Thanks!
 
 -- 
-Jason
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
