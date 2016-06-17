@@ -1,50 +1,38 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: How to propose plugin, which uses external lib
-Date: Sat, 18 Jun 2016 00:04:09 +0800
-Message-ID: <CACJqLybFf2G3jQjY5LBnsFtxsbeJ-L3V=+TbeR8h0Y9t_LsmOA@mail.gmail.com>
-References: <CAONhiy5cg+fX-A49shN9FLREpigiTO18vk7t9anM_ZK9Czc5cQ@mail.gmail.com>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Slack-IRC integration
+Date: Fri, 17 Jun 2016 12:40:19 -0400
+Message-ID: <CAAZbbf05G66rTF-33oyaMkfCVExfUZTGY23HSSfz83MHLuu8fQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-hk2apc01on0110.outbound.protection.outlook.com ([104.47.124.110]:60256
-	"EHLO APC01-HK2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753517AbcFQQEe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 17 Jun 2016 12:04:34 -0400
-Received: by mail-yw0-f175.google.com with SMTP id b75so16847336ywe.1
-        for <ceph-devel@vger.kernel.org>; Fri, 17 Jun 2016 09:04:17 -0700 (PDT)
-In-Reply-To: <CAONhiy5cg+fX-A49shN9FLREpigiTO18vk7t9anM_ZK9Czc5cQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alyona Kiselyova <akiselyova@mirantis.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Cool, I guess it should be behavior better than others in intel platform.
-
-On Fri, Jun 17, 2016 at 11:51 PM, Alyona Kiselyova
-<akiselyova@mirantis.com> wrote:
-> Hi,
-> I would like to propose a new compression plugin, which is based on
-> Isa-l open source library
-> (https://github.com/01org/isa-l/tree/master/igzip). I already have a
-> code - https://github.com/Ved-vampir/ceph/tree/wip_isal_plugin/src/compressor/isal.
-> I see, that there are erasure-code plugin, based on isa-l too. As I
-> see, library code is not loaded as submodule repo, like some others.
-> But if I'm right, I think, it's not the best way to use external code.
-
-Sorry, why it's not a best way?
-
-> The question is, what is the right way to use external library in my case?
-
-I think maybe we could make the whole
-repo(https://github.com/01org/isa-l) as submodule and make each dir
-used by different compoent?
-
-> Thanks!
-> -------------------------------
-> Best regards,
-> Alyona Kiseleva
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGV5IGNlcGhlcnMsCgpGb3IgdGhvc2Ugd2hvIGhhdmUgYmVlbiBhc2tpbmcgZm9yIGFuIG9mZmlj
+aWFsIENlcGggU2xhY2sgY2hhbm5lbCwgd2UKbm93IGhhdmUgYSBicmlkZ2UgYmV0d2VlbiAjY2Vw
+aC8jY2VwaC1kZXZlbCBhbmQgY29ycmVzcG9uZGluZyBTbGFjawpjaGFubmVscy4KCmh0dHBzOi8v
+Y2VwaC1zdG9yYWdlLnNsYWNrLmNvbS9zaWdudXAKClJpZ2h0IG5vdyB0aGUgZW1haWwgZG9tYWlu
+cyB0aGF0IHdpbGwgYXV0by1hY2NlcHQgcmVnaXN0cmF0aW9uIGFyZQpyZWxhdGl2ZWx5IGxpbWl0
+ZWQsIGJ1dCBhbnkgc2xhY2sgbWVtYmVyIGNhbiBpbnZpdGUgeW91LiBJZiB5b3Ugd291bGQKbGlr
+ZSB0byB1c2UgU2xhY2sgZmVlbCBmcmVlIHRvIGFzayBpbiAjY2VwaCAvICNjZXBoLWRldmVsLCBv
+ciBqdXN0CnJlcGx5IHRvIHRoaXMgZW1haWwgYW5kIEnigJlsbCBnZXQgeW91IGFkZGVkLgoKQXMg
+YSBub3RlLCB3ZSB3aWxsIG5vdCBiZSBtb3ZpbmcgYXdheSBmcm9tIGFuIG9wZW4gcGxhdGZvcm0g
+bGlrZSBJUkMsCnRoaXMgaXMganVzdCBleHRlbmRpbmcgb3VyIGNvbW11bmljYXRpb24gY2hhbm5l
+bHMgdG8gYWxsb3cgYSBicm9hZGVyCmF1ZGllbmNlIHRvIHBhcnRpY2lwYXRlIGlmIHRoZXkgc28g
+Y2hvb3NlLiBJZiB5b3UgaGF2ZSBxdWVzdGlvbnMgb3IKY29uY2VybnMgcGxlYXNlIGZlZWwgZnJl
+ZSB0byBjb250YWN0IG1lLiBUaGFua3MuCgoKLS0gCgpCZXN0IFJlZ2FyZHMsCgpQYXRyaWNrIE1j
+R2FycnkKRGlyZWN0b3IgQ2VwaCBDb21tdW5pdHkgfHwgUmVkIEhhdApodHRwOi8vY2VwaC5jb20g
+IHx8ICBodHRwOi8vY29tbXVuaXR5LnJlZGhhdC5jb20KQHNjdXR0bGVtb25rZXkgfHwgQGNlcGgK
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2Vy
+cyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2Vw
+aC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
