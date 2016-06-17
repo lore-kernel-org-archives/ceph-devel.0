@@ -1,55 +1,57 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: How to propose plugin, which uses external lib
-Date: Fri, 17 Jun 2016 16:47:41 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1606171644370.27611@piezo.novalocal>
-References: <CAONhiy5cg+fX-A49shN9FLREpigiTO18vk7t9anM_ZK9Czc5cQ@mail.gmail.com> <CACJqLybFf2G3jQjY5LBnsFtxsbeJ-L3V=+TbeR8h0Y9t_LsmOA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: encoding
+Date: Fri, 17 Jun 2016 17:02:48 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1606171657530.21827@piezo.us.to>
+References: <BLUPR0201MB1524E3853169E4292D16F710E8570@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1582906287-1466182970=:21827"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from batalion.com ([64.111.99.127]:49606 "EHLO localhost.localdomain"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751768AbcFQQrn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 17 Jun 2016 12:47:43 -0400
-In-Reply-To: <CACJqLybFf2G3jQjY5LBnsFtxsbeJ-L3V=+TbeR8h0Y9t_LsmOA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52012 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755554AbcFQRC4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 17 Jun 2016 13:02:56 -0400
+In-Reply-To: <BLUPR0201MB1524E3853169E4292D16F710E8570@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: Alyona Kiselyova <akiselyova@mirantis.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Sat, 18 Jun 2016, Haomai Wang wrote:
-> Cool, I guess it should be behavior better than others in intel platform.
-> 
-> On Fri, Jun 17, 2016 at 11:51 PM, Alyona Kiselyova
-> <akiselyova@mirantis.com> wrote:
-> > Hi,
-> > I would like to propose a new compression plugin, which is based on
-> > Isa-l open source library
-> > (https://github.com/01org/isa-l/tree/master/igzip). I already have a
-> > code - https://github.com/Ved-vampir/ceph/tree/wip_isal_plugin/src/compressor/isal.
-> > I see, that there are erasure-code plugin, based on isa-l too. As I
-> > see, library code is not loaded as submodule repo, like some others.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-In this case, I assume the inflate/deflate encoding is compatible with 
-zlib.  If that's the case, I think we don't want to treat this as a 
-different compression type, but rather as an optimized 
-implementation of the same type.
+--8323329-1582906287-1466182970=:21827
+Content-Type: TEXT/PLAIN; charset=ISO-8859-7
+Content-Transfer-Encoding: 8BIT
 
-Not sure the best way to do that, though.  The simplest would probably be 
-to make the ZlibCompressor either use zlib or isal based on an option 
-and/or processor type.
+On Fri, 17 Jun 2016, Allen Samuels wrote:
+> I don¢t understand the ref_map and unused stuff. What is their purpose?
 
-> > But if I'm right, I think, it's not the best way to use external code.
-> 
-> Sorry, why it's not a best way?
-> 
-> > The question is, what is the right way to use external library in my case?
-> 
-> I think maybe we could make the whole
-> repo(https://github.com/01org/isa-l) as submodule and make each dir
-> used by different compoent?
+ref_map:
 
-In the crc case we just copied the relevant asm files into the ceph repo.  
-That's probably not the best path, though.  I think we had to make some 
-minor changes to make them build, too.  :/
+We allocate blobs and write uncompressed data in.  Later, we logically 
+overwrite part of that reference, such that our big 1MB allocation only 
+has part of it referenced.  When that happens we want to release the 
+unreferenced part back to the allocator for use by something else.  
+ref_map lets us do that, which some additional complexity that counts 
+references (from multiple clones).
+
+unused:
+
+We might allocate a full min_alloc_size but only write one block into it.  
+If we do another small write in an adjacent block, we want to write 
+into the existing blob.  In order to do that without with a WAL event, we 
+need to know that the block isn't currently referenced by anything.  
+ref_map isn't quite sufficient for this because we don't have a 
+complicated commit/persist lifecycle sequence on update, and we need to 
+make sure the *committed* state has no references before we can safely 
+overwrite a block.
+
+After pondering this a while I decided that would be very complex to 
+implement that, with marginal benefit, and in reality this mostly matters 
+for newly-allocated but never-written blobs... hence unused.  I decided we 
+don't care the case when you partially occlude part of a blob (but less 
+that min_alloc_size so it wasn't released back to the allocator) and 
+*then* also do a small overwrite such that the space could be reused.
 
 sage
+--8323329-1582906287-1466182970=:21827--
