@@ -1,7 +1,7 @@
 From: Allen Samuels <Allen.Samuels@sandisk.com>
 Subject: RE: encoding
-Date: Fri, 17 Jun 2016 18:25:48 +0000
-Message-ID: <BLUPR0201MB152427CDA1DE7D6F1C635DD3E8570@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Date: Fri, 17 Jun 2016 18:53:03 +0000
+Message-ID: <BLUPR0201MB152438F87027D1C1496930F4E8570@BLUPR0201MB1524.namprd02.prod.outlook.com>
 References: <BLUPR0201MB1524E3853169E4292D16F710E8570@BLUPR0201MB1524.namprd02.prod.outlook.com>
  <alpine.DEB.2.11.1606171657530.21827@piezo.us.to>
  <BLUPR0201MB15247981D954A0180454544CE8570@BLUPR0201MB1524.namprd02.prod.outlook.com>
@@ -10,11 +10,11 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-7
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0085.outbound.protection.outlook.com ([157.56.111.85]:11424
+Received: from mail-bn1bon0083.outbound.protection.outlook.com ([157.56.111.83]:57193
 	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932139AbcFQS0Y convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jun 2016 14:26:24 -0400
+	id S1752337AbcFQTIa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jun 2016 15:08:30 -0400
 In-Reply-To: <alpine.DEB.2.11.1606171749150.22717@piezo.us.to>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
@@ -49,10 +49,6 @@ that
 > performance benefit and save one byte.  I'm inclined to go for a bitm=
 ap for
 > now, though...
-
-=46ine, but let's be sure that the bitmap size is either variable sized=
- (cheaply) OR sized sufficient to cover the expected range of use-cases=
-/sizes for the next several years.
 >=20
 > > w.r.t. ref_map. The comment in the code suggests that it will alway=
 s
@@ -74,9 +70,12 @@ codings,
 > though, which I'm partway through stabilizing.
 > Should have a PR by Monday.
 
-Sounds to me like the "rebuild" approach on a known-not-shared blob is =
-really the way to go. The offsets in the map will be waaay more expensi=
-ve than the values.
+With some deeper thinking, it seems to me that the rebuild-ref-map-on-d=
+eserialize is pretty trivial. Isn't it just a walk of the lextent map a=
+nd for each entry a corresponding call to add_ref for that referenced b=
+lob (assuming add_ref correctly combines overlapping references)????
+
+
 >=20
 > sage
 >=20
