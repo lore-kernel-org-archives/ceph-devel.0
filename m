@@ -1,48 +1,75 @@
-From: info@innovami.it
-Subject: Claim your award prize
-Date: Thu, 16 Jun 2016 15:10:52 -0400
-Message-ID: <201606161910.u5GJ6Ict024514@mx1.acantho.net>
-Reply-To: cisco.net@aol.com
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: considering AsyncMessenger variant over RDS (RDMA and/or TCP)
+Date: Fri, 17 Jun 2016 10:49:14 +0800
+Message-ID: <CACJqLyYEQBYGnVMC+7ba_Vp-cP2daDZL=YQyoQBkPCjCOWm9Tw@mail.gmail.com>
+References: <DB5PR05MB160730A88C01615EC3ED3B98A9560@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <CACJqLyYpc+tQw55x=cKPfzx4xRNC3fm3-i9pjkasr=Fipqz_sw@mail.gmail.com> <DB5PR05MB1607BC316B76C1ED41220676A9560@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.acantho.net ([213.174.182.194]:39610 "EHLO mx1.acantho.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754113AbcFQBXV convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jun 2016 21:23:21 -0400
-Received: (from root@localhost)
-	by mx1.acantho.net (8.14.3/8.13.4/Debian-3sarge1) id u5GNJYBl013508
-	for <ceph-devel@vger.kernel.org>; Fri, 17 Jun 2016 01:19:34 +0200
-Received: from [192.168.0.177] (as5300-2-135.cnt.entelchile.net [164.77.43.145])
-	(authenticated bits=0)
-	by mx1.acantho.net (8.14.9/8.13.4/Debian-3sarge1) with ESMTP id u5GJ6Ict024514
-	for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2016 21:10:46 +0200
-Content-Description: Mail message body
+Received: from mail-pu1apc01on0132.outbound.protection.outlook.com ([104.47.126.132]:57915
+	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754466AbcFQCt1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 16 Jun 2016 22:49:27 -0400
+Received: by mail-yw0-f172.google.com with SMTP id z186so60631740ywd.2
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2016 19:49:22 -0700 (PDT)
+In-Reply-To: <DB5PR05MB1607BC316B76C1ED41220676A9560@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Avner Ben Hanoch <avnerb@mellanox.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Ref Number: PLA74-4521EK
-Batch Number: ZLAT-ENGINE2016
+On Thu, Jun 16, 2016 at 8:30 PM, Avner Ben Hanoch <avnerb@mellanox.com> wrote:
+> Hi Haomai,
+>
+> I didn't understand which RDMA API the other guy is using.  Is it rdma_cm, Accelio, other?
 
-Dear internet user,
+ibverbs/rdma_cm
 
-We congratulate you over your success in the following official publica=
-tion of results of the e-mail electronic online sweepstakes organized b=
-y Micro Soft in collaboration with Cisco software held on the 15th June=
- 2016. Your email ID has won the total sum of =E2=82=AC500,000.00 (Five=
- Hundred Thousand Euro)during the electronic e-mail online power draws =
-for interenet users.
+>
+> Also, is there an estimation when will it be possible to download and use it from your branch (even before it is formally merged into Ceph)?
+>
+> In this thread I asked about *RDS* over RDMA http://linux.die.net/man/7/rds since RDS API is very close to TCP socket API.  Do you think this is needed in addition to your work?
 
-The claim agent will attend to your claim upon the reciept of your resp=
-ons.
+I don't know the status of RDS and which open source project is using RDS?
 
-Regards,
-Marjolein van Meerkerk,
-Secretary
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> TIA,
+>  Avner
+>
+> -----Original Message-----
+> From: Haomai Wang [mailto:haomai@xsky.com]
+> Sent: Thursday, June 16, 2016 15:07
+> To: Avner Ben Hanoch <avnerb@mellanox.com>
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: considering AsyncMessenger variant over RDS (RDMA and/or TCP)
+>
+> On Thu, Jun 16, 2016 at 7:31 PM, Avner Ben Hanoch <avnerb@mellanox.com> wrote:
+>> Hi all,
+>>
+>> I am at a preliminary phase of considering writing of an additional optional Messenger based on RDS - Reliable Datagram Sockets technology .
+>>
+>> You may learn about RDS here:
+>>     http://linux.die.net/man/7/rds
+>>     https://www.kernel.org/doc/Documentation/networking/rds.txt
+>>
+>> https://oss.oracle.com/pipermail/rds-devel/2007-November/000228.html
+>>
+>> Since, RDS supports socket API, it should be relatively simple to create AsyncMessenger variant that is based on RDS sockets instead of TCP sockets (though, RDS is datagram oriented and not stream oriented).
+>>
+>> Questions:
+>>     1. Do you know if somebody is already working on this subject?
+>
+> Exactly, since I have abstracted the asyncmessenger backend framework.
+> I implement the dpdk backend. Then another guy is working on native rdma backend. Because a lot of async messenger changes is pending on merge queue one by one, we need some time to wait for this framework more clear.
+>
+>>     2. Do you have any comments for me?
+>>
+>> TIA,
+>>   Avner
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
