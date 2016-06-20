@@ -1,54 +1,104 @@
-From: Deepa Dinamani <deepa.kernel@gmail.com>
-Subject: [PATCH v2 22/24] fs: ceph: Replace current_fs_time for
-	request stamp
-Date: Sun, 19 Jun 2016 17:27:21 -0700
-Message-ID: <1466382443-11063-23-git-send-email-deepa.kernel@gmail.com>
-References: <1466382443-11063-1-git-send-email-deepa.kernel@gmail.com>
+From: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
+Subject: Re: Dramatic performance drop at certain number of
+ objects in pool
+Date: Mon, 20 Jun 2016 09:52:29 +0900
+Message-ID: <20160620095229.5291bdc6@batzmaru.gol.ad.jp>
+References: <CA+e22ScW-YrDE0mPABSuiDbDpKL=gYZXv6t2hK8RJxYuMaVLHg@mail.gmail.com>
+	<1450235390.2134.1466084299677@ox.pcextreme.nl>
+	<CA+z5DszqHuevkAF3W01R=7AAeqVcyuHZTX0+bAvThgihvOjwuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <y2038-bounces@lists.linaro.org>
-In-Reply-To: <1466382443-11063-1-git-send-email-deepa.kernel@gmail.com>
-List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/y2038/>
-List-Post: <mailto:y2038@lists.linaro.org>
-List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
-List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=subscribe>
-Errors-To: y2038-bounces@lists.linaro.org
-Sender: "Y2038" <y2038-bounces@lists.linaro.org>
-To: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: tytso@mit.edu, Sage Weil <sage@redhat.com>, arnd@arndb.de, y2038@lists.linaro.org, ceph-devel@vger.kernel.org, "Yan,
- Zheng" <zyan@redhat.com>, viro@zeniv.linux.org.uk, tglx@linutronix.de, torvalds@linux-foundation.org, Ilya Dryomov <idryomov@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CA+z5DszqHuevkAF3W01R=7AAeqVcyuHZTX0+bAvThgihvOjwuA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-VGhlIGN1cnJlbnRfZnNfdGltZSgpIGFwaSBpcyBiZWluZyBjaGFuZ2VkIHRvIHVzZSB2ZnMKc3Ry
-dWN0IGlub2RlKiBhcyBhbiBhcmd1bWVudCBpbnN0ZWFkIG9mIHN0cnVjdCBzdXBlcl9ibG9jayou
-CgpTZXQgdGhlIG5ldyBtZHMgY2xpZW50IHJlcXVlc3Qgcl9zdGFtcCBmaWVsZCB1c2luZwprdGlt
-ZV9nZXRfcmVhbF90cygpIGluc3RlYWQgb2YgdXNpbmcgY3VycmVudF9mc190aW1lKCkuCgpBbHNv
-LCBzaW5jZSByX3N0YW1wIGlzIHVzZWQgYXMgbXRpbWUgb24gdGhlIHNlcnZlciwgdXNlCnRpbWVz
-cGVjX3RydW5jKCkgdG8gdHJ1bmNhdGUgdGhlIHRpbWVzdGFtcCwgdXNpbmcgdGhlIHJpZ2h0Cmdy
-YW51bGFyaXR5IGZyb20gdGhlIHN1cGVyYmxvY2suCgpUaGlzIGFwaSB3aWxsIGJlIHRyYW5zaXRp
-b25lZCB0byBiZSB5MjAzOCBzYWZlIGFsb25nCndpdGggdmZzLgoKU2lnbmVkLW9mZi1ieTogRGVl
-cGEgRGluYW1hbmkgPGRlZXBhLmtlcm5lbEBnbWFpbC5jb20+CkNjOiAiWWFuLCBaaGVuZyIgPHp5
-YW5AcmVkaGF0LmNvbT4KQ2M6IFNhZ2UgV2VpbCA8c2FnZUByZWRoYXQuY29tPgpDYzogSWx5YSBE
-cnlvbW92IDxpZHJ5b21vdkBnbWFpbC5jb20+CkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
-ZwotLS0KIGZzL2NlcGgvbWRzX2NsaWVudC5jIHwgNCArKystCiAxIGZpbGUgY2hhbmdlZCwgMyBp
-bnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pCgpkaWZmIC0tZ2l0IGEvZnMvY2VwaC9tZHNfY2xp
-ZW50LmMgYi9mcy9jZXBoL21kc19jbGllbnQuYwppbmRleCAyMTAzYjgyLi5jNmNhZTdhIDEwMDY0
-NAotLS0gYS9mcy9jZXBoL21kc19jbGllbnQuYworKysgYi9mcy9jZXBoL21kc19jbGllbnQuYwpA
-QCAtMTY5Nyw2ICsxNjk3LDcgQEAgc3RydWN0IGNlcGhfbWRzX3JlcXVlc3QgKgogY2VwaF9tZHNj
-X2NyZWF0ZV9yZXF1ZXN0KHN0cnVjdCBjZXBoX21kc19jbGllbnQgKm1kc2MsIGludCBvcCwgaW50
-IG1vZGUpCiB7CiAJc3RydWN0IGNlcGhfbWRzX3JlcXVlc3QgKnJlcSA9IGt6YWxsb2Moc2l6ZW9m
-KCpyZXEpLCBHRlBfTk9GUyk7CisJc3RydWN0IHRpbWVzcGVjIHRzOwogCiAJaWYgKCFyZXEpCiAJ
-CXJldHVybiBFUlJfUFRSKC1FTk9NRU0pOwpAQCAtMTcxNSw3ICsxNzE2LDggQEAgY2VwaF9tZHNj
-X2NyZWF0ZV9yZXF1ZXN0KHN0cnVjdCBjZXBoX21kc19jbGllbnQgKm1kc2MsIGludCBvcCwgaW50
-IG1vZGUpCiAJaW5pdF9jb21wbGV0aW9uKCZyZXEtPnJfc2FmZV9jb21wbGV0aW9uKTsKIAlJTklU
-X0xJU1RfSEVBRCgmcmVxLT5yX3Vuc2FmZV9pdGVtKTsKIAotCXJlcS0+cl9zdGFtcCA9IGN1cnJl
-bnRfZnNfdGltZShtZHNjLT5mc2MtPnNiKTsKKwlrdGltZV9nZXRfcmVhbF90cygmdHMpOworCXJl
-cS0+cl9zdGFtcCA9IHRpbWVzcGVjX3RydW5jKHRzLCBtZHNjLT5mc2MtPnNiLT5zX3RpbWVfZ3Jh
-bik7CiAKIAlyZXEtPnJfb3AgPSBvcDsKIAlyZXEtPnJfZGlyZWN0X21vZGUgPSBtb2RlOwotLSAK
-MS45LjEKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClky
-MDM4IG1haWxpbmcgbGlzdApZMjAzOEBsaXN0cy5saW5hcm8ub3JnCmh0dHBzOi8vbGlzdHMubGlu
-YXJvLm9yZy9tYWlsbWFuL2xpc3RpbmZvL3kyMDM4Cg==
+
+Hello Blair,
+
+On Mon, 20 Jun 2016 09:21:27 +1000 Blair Bethwaite wrote:
+
+> Hi Wade,
+> 
+> (Apologies for the slowness - AFK for the weekend).
+> 
+> On 16 June 2016 at 23:38, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org> wrote:
+> >
+> >> Op 16 juni 2016 om 14:14 schreef Wade Holler <wade.holler-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+> >>
+> >>
+> >> Hi All,
+> >>
+> >> I have a repeatable condition when the object count in a pool gets to
+> >> 320-330 million the object write time dramatically and almost
+> >> instantly increases as much as 10X, exhibited by fs_apply_latency
+> >> going from 10ms to 100s of ms.
+> >>r filestore
+> >
+> > My first guess is the filestore splitting and the amount of files per
+> > directory.
+> 
+> I concur with Wido and suggest you try upping your filestore split and
+> merge threshold config values.
+>
+This is probably a good idea but as mentioned/suggested below, it would
+be something that eventually settle down in a new equilibrium.
+Something I don't think is happening here. 
+ 
+> I've seen this issue a number of times now with write heavy workload,
+> and would love to at least write some docs about it, because it must
+> happen to a lot of users running RBD workloads on largish drives.
+> However, I'm not sure how to definitively diagnose the issue and
+> pinpoint the problem. The gist of the issue is the number of files
+> and/or directories on your OSD filesystems, at some system dependent
+> threshold you get to a point where you can no longer sufficiently
+> cache inodes and/or dentrys, so IOs on those files(ystems) have to
+> incur extra disk IOPS to read the filesystem structure from disk (I
+> believe that's the small read IO you're seeing, and unfortunately it
+> seems to effectively choke writes - we've seen all sorts of related
+> slow request issues). If you watch your xfs stats you'll likely get
+> further confirmation. In my experience xs_dir_lookups balloons (which
+> means directory lookups are missing cache and going to disk).
+> 
+> What I'm not clear on is whether there are two different pathologies
+> at play here, i.e., specifically dentry cache issues versus inode
+> cache issues. In the former case making Ceph's directory structure
+> shallower with more files per directory may help (or perhaps
+> increasing the number of PGs - more top-level directories), but in the
+> latter case you're likely to need various system tuning (lower vfs
+> cache pressure, more memory?, fewer files (larger object size))
+> depending on your workload.
+> 
+I can very much confirm this from the days when on my main production
+cluster all 1024 PGs (but only about 6GB of data and 1.6 million objects)
+were on just 4 OSDs (25TB each).
+
+Once SLAB ran out of steam and couldn't hold all the respective entries
+(Ext4 here, but same diff), things became very slow.
+
+My litmus test is that a "ls -R /var/lib/ceph/osd/ceph-nn/ >/dev/null"
+should be pretty much instantaneous and not having to access the disk at
+all.
+
+More RAM and proper tuning as well as smaller OSDs are all ways forward to
+alleviate/prevent this issue.
+
+It would be interesting to see/know how bluestore fares in this kind of
+scenario.
+
+Christian
+-- 
+Christian Balzer        Network/Systems Engineer                
+chibi-FW+hd8ioUD0@public.gmane.org   	Global OnLine Japan/Rakuten Communications
+http://www.gol.com/
