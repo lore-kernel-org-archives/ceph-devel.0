@@ -1,118 +1,71 @@
-From: Wade Holler <wade.holler-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Dramatic performance drop at certain number of
-	objects in pool
-Date: Mon, 20 Jun 2016 18:48:18 +0000
-Message-ID: <CA+e22Sc3iY5Lvp4oGwJ_wwpJsOJsWdB1thaHWEAuYP=bbGHAeg@mail.gmail.com>
-References: <CA+e22ScW-YrDE0mPABSuiDbDpKL=gYZXv6t2hK8RJxYuMaVLHg@mail.gmail.com>
-	<1450235390.2134.1466084299677@ox.pcextreme.nl>
-	<CA+z5DszqHuevkAF3W01R=7AAeqVcyuHZTX0+bAvThgihvOjwuA@mail.gmail.com>
-	<CA+z5Dsy4tbyiL71C8CQCTQ66tY1=9thSWdNA4BSn6=tNfGUE6w@mail.gmail.com>
+From: Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v2 00/24] Delete CURRENT_TIME and
+	CURRENT_TIME_SEC macros
+Date: Mon, 20 Jun 2016 11:58:31 -0700
+Message-ID: <CABeXuvpzRy=qccBqq70iT_W9EGSfcpAjfyqkayUTT01F8Ghh5g@mail.gmail.com>
+References: <1466382443-11063-1-git-send-email-deepa.kernel@gmail.com>
+	<CA+55aFzK2K-7UeQRsWR7ooNHMMbtMFRAF60byR1Gvmbf9XWhbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1853677841=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+z5Dsy4tbyiL71C8CQCTQ66tY1=9thSWdNA4BSn6=tNfGUE6w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+In-Reply-To: <CA+55aFzK2K-7UeQRsWR7ooNHMMbtMFRAF60byR1Gvmbf9XWhbA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Dave Kleikamp <shaggy-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, jfs-discussion-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Trond Myklebust <trond.myklebust-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, "adilger.kernel-m1MBpc4rdrD3fQ9qLvQP4Q@public.gmane.org" <adilger.kernel-m1MBpc4rdrD3fQ9qLvQP4Q@public.gmane.org>, Brian Uchino <buchino-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "James E.J. Bottomley" <jejb-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, Paul Moore <paul-r2n+y4ga6xFZroRs9YW3xA@public.gmane.org>, Linux SCSI List <linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, y2038 Mailman List <y2038-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>, Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Changman Lee <cm224.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Mark Fasheh <mfasheh-IBi9RG/b67k@public.gmane.org>, Suma Ramars <sramars-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, Jaegeuk Kim <jaegeuk@>
 List-Id: ceph-devel.vger.kernel.org
 
---===============1853677841==
-Content-Type: multipart/alternative; boundary=001a113e3a8c67552b0535ba2635
-
---001a113e3a8c67552b0535ba2635
-Content-Type: text/plain; charset=UTF-8
-
-Thanks everyone for your replies.  I sincerely appreciate it. We are
-testing with different pg_num and filestore_split_multiple settings.  Early
-indications are .... well not great. Regardless it is nice to understand
-the symptoms better so we try to design around it.
-
-Best Regards,
-Wade
-
-
-On Mon, Jun 20, 2016 at 2:32 AM Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-wrote:
-
-> On 20 June 2016 at 09:21, Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> wrote:
-> > slow request issues). If you watch your xfs stats you'll likely get
-> > further confirmation. In my experience xs_dir_lookups balloons (which
-> > means directory lookups are missing cache and going to disk).
+> This version now looks ok to me.
 >
-> Murphy's a bitch. Today we upgraded a cluster to latest Hammer in
-> preparation for Jewel/RHCS2. Turns out when we last hit this very
-> problem we had only ephemerally set the new filestore merge/split
-> values - oops. Here's what started happening when we upgraded and
-> restarted a bunch of OSDs:
+> I do have a comment (or maybe just a RFD) for future work.
 >
-> https://au-east.erc.monash.edu.au/swift/v1/public/grafana-ceph-xs_dir_lookup.png
+> It does strike me that once we actually change over the inode times to
+> use timespec64, the calling conventions are going to be fairly
+> horrendous on most 32-bit architectures.
 >
-> Seemed to cause lots of slow requests :-/. We corrected it about
-> 12:30, then still took a while to settle.
+> Gcc handles 8-byte structure returns (on most architectures) by
+> returning them as two 32-bit registers (%edx:%eax on x86). But once it
+> is timespec64, that will no longer be the case, and the calling
+> convention will end up using a pointer to the local stack instead.
 >
-> --
-> Cheers,
-> ~Blairo
+> So for 32-bit code generation, we *may* want to introduce a new model of doing
 >
+>     set_inode_time(inode, ATTR_ATIME | ATTR_MTIME);
+>
+> which basically just does
+>
+>     inode->i_atime = inode->i_mtime = current_time(inode);
+>
+> but with a much easier calling convention on 32-bit architectures.
 
---001a113e3a8c67552b0535ba2635
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Arnd and I had discussed something like this before.
+But, for entirely different reasons:
 
-<div dir=3D"ltr">Thanks everyone for your replies.=C2=A0 I sincerely apprec=
-iate it. We are testing with different pg_num and filestore_split_multiple =
-settings.=C2=A0 Early indications are .... well not great. Regardless it is=
- nice to understand the symptoms better so we try to design around it.<div>=
-<br></div><div>Best Regards,</div><div>Wade</div><div><br></div></div><br><=
-div class=3D"gmail_quote"><div dir=3D"ltr">On Mon, Jun 20, 2016 at 2:32 AM =
-Blair Bethwaite &lt;<a href=3D"mailto:blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">blair.beth=
-waite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" s=
-tyle=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">On 2=
-0 June 2016 at 09:21, Blair Bethwaite &lt;<a href=3D"mailto:blair.bethwaite=
-@gmail.com" target=3D"_blank">blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br>
-&gt; slow request issues). If you watch your xfs stats you&#39;ll likely ge=
-t<br>
-&gt; further confirmation. In my experience xs_dir_lookups balloons (which<=
-br>
-&gt; means directory lookups are missing cache and going to disk).<br>
-<br>
-Murphy&#39;s a bitch. Today we upgraded a cluster to latest Hammer in<br>
-preparation for Jewel/RHCS2. Turns out when we last hit this very<br>
-problem we had only ephemerally set the new filestore merge/split<br>
-values - oops. Here&#39;s what started happening when we upgraded and<br>
-restarted a bunch of OSDs:<br>
-<a href=3D"https://au-east.erc.monash.edu.au/swift/v1/public/grafana-ceph-x=
-s_dir_lookup.png" rel=3D"noreferrer" target=3D"_blank">https://au-east.erc.=
-monash.edu.au/swift/v1/public/grafana-ceph-xs_dir_lookup.png</a><br>
-<br>
-Seemed to cause lots of slow requests :-/. We corrected it about<br>
-12:30, then still took a while to settle.<br>
-<br>
---<br>
-Cheers,<br>
-~Blairo<br>
-</blockquote></div>
+Having the set_inode_time() like you suggest will also help switching
+of vfs inode times to timespec64.
+We were suggesting all the accesses to inode time be abstracted
+through something like inode_set_time().
+Arnd also had suggested a split representation of fields in the struct
+inode as well which led to space savings
+as well. And, having the split representation also meant no more
+direct assignments:
 
---001a113e3a8c67552b0535ba2635--
+https://lkml.org/lkml/2016/1/7/20
 
---===============1853677841==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+This in general will be similar to setattr_copy(), but only sets times
+rather than other attributes as well.
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+If this is what is preferred, then the patches to change vfs to use
+timespec64 could make use of this and will
+need to be refactored. So maybe it would be good to discuss before I
+post those patches.
 
---===============1853677841==--
+-Deepa
