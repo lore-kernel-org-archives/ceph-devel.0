@@ -1,65 +1,52 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: [PATCH v2 21/24] libceph: Replace CURRENT_TIME with
- ktime_get_real_ts
-Date: Mon, 20 Jun 2016 10:33:37 +0200
-Message-ID: <936f4df1-dfb9-1906-019e-8f82b8e950eb@digiware.nl>
-References: <1466382443-11063-1-git-send-email-deepa.kernel@gmail.com>
- <1466382443-11063-22-git-send-email-deepa.kernel@gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: determining client and server on a connection
+Date: Mon, 20 Jun 2016 07:21:09 -0400
+Message-ID: <1466421669.4297.13.camel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from static.ip-176-74-240-009.signet.nl ([176.74.240.9]:49463 "EHLO
-	smtp.digiware.nl" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
-	with ESMTP id S1751660AbcFTIeD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jun 2016 04:34:03 -0400
-In-Reply-To: <1466382443-11063-22-git-send-email-deepa.kernel@gmail.com>
+Received: from mail-yw0-f170.google.com ([209.85.161.170]:33052 "EHLO
+	mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752441AbcFTLVN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jun 2016 07:21:13 -0400
+Received: by mail-yw0-f170.google.com with SMTP id v77so14675931ywg.0
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Jun 2016 04:21:12 -0700 (PDT)
+Received: from ceres.poochiereds.net ([2606:a000:1125:4074:1a5e:fff:fe12:8671])
+        by smtp.gmail.com with ESMTPSA id b7sm31717747ywf.45.2016.06.20.04.21.11
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Mon, 20 Jun 2016 04:21:11 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Deepa Dinamani <deepa.kernel@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 20-6-2016 02:27, Deepa Dinamani wrote:
-> CURRENT_TIME is not y2038 safe.
-> The macro will be deleted and all the references to it
-> will be replaced by ktime_get_* apis.
-> 
-> struct timespec is also not y2038 safe.
-> Retain timespec for timestamp representation here as ceph
-> uses it internally everywhere.
-> These references will be changed to use struct timespec64
-> in a separate patch.
-> 
-> Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
-> Cc: "Yan, Zheng" <zyan@redhat.com>
-> Cc: Sage Weil <sage@redhat.com>
-> Cc: Ilya Dryomov <idryomov@gmail.com>
-> Cc: ceph-devel@vger.kernel.org
-> ---
->  net/ceph/messenger.c  | 6 ++++--
->  net/ceph/osd_client.c | 4 ++--
->  2 files changed, 6 insertions(+), 4 deletions(-)
+Hi! I'm just getting started working with ceph, and decided to tackle
+fixing up the wireshark dissector which isn't working properly when you
+use the kernel's fs client.
 
-Hi Deepa,
+This page says that the server always sends its banner first:
 
-Although I applaud 64-bit timestamps,
-the ktime_get_* api seems to be a Linux only API.
+    http://docs.ceph.com/docs/master/dev/network-protocol/?highlight=protocol
 
-So IF ever things need to be the least bit portable, I suggest wrapping
-these routines into a class of itself. So that porting confines itself
-to only that class. (plus/minus hairy semantic details)
+...but that's not true with the Linux kernel client. The client and
+server send their banners and addresses concurrently, and the client
+often gets there first. The wireshark dissector relies on the server
+sending its banner first however, so it quickly mixes the two up and
+things go south from there.
 
-For what is now committed the change is not really that big.
+Given the way the protocol works, the only way I can see to reliably
+determine client and server is to read enough bytes to get to the
+client's address when the server sends it, and see whether it matches
+the receiver's address/port.
 
-On the other hand, I 'll have to start figuring out if FreeBSD really
-does do 64bit timestamps...
+Is there a simpler way to do this that I'm missing?
 
-So I would welcome a more elaborate description of the problem (it seems
-that Linux is going 64bit in its inodes??) and what is being fixed and
-how. So that in the porting case not only the code will be the source to
-figure out what is going on.
+Also, it looks like this shouldn't be a problem for the msgr2 protocol
+since the initial exchange doesn't involve sending addresses. Is that
+the case?
 
-Thanx,
---WjW
-
+Thanks,
+-- 
+Jeff Layton <jlayton@redhat.com>
 
