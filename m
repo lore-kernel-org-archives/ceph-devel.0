@@ -1,39 +1,65 @@
-From: Blair Bethwaite <blair.bethwaite@gmail.com>
-Subject: Re: Dramatic performance drop at certain number of objects in pool
-Date: Mon, 20 Jun 2016 16:32:22 +1000
-Message-ID: <CA+z5Dsy4tbyiL71C8CQCTQ66tY1=9thSWdNA4BSn6=tNfGUE6w@mail.gmail.com>
-References: <CA+e22ScW-YrDE0mPABSuiDbDpKL=gYZXv6t2hK8RJxYuMaVLHg@mail.gmail.com>
- <1450235390.2134.1466084299677@ox.pcextreme.nl> <CA+z5DszqHuevkAF3W01R=7AAeqVcyuHZTX0+bAvThgihvOjwuA@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: [PATCH v2 21/24] libceph: Replace CURRENT_TIME with
+ ktime_get_real_ts
+Date: Mon, 20 Jun 2016 10:33:37 +0200
+Message-ID: <936f4df1-dfb9-1906-019e-8f82b8e950eb@digiware.nl>
+References: <1466382443-11063-1-git-send-email-deepa.kernel@gmail.com>
+ <1466382443-11063-22-git-send-email-deepa.kernel@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f50.google.com ([209.85.213.50]:33133 "EHLO
-	mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751812AbcFTGcn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jun 2016 02:32:43 -0400
-Received: by mail-vk0-f50.google.com with SMTP id d185so183842775vkg.0
-        for <ceph-devel@vger.kernel.org>; Sun, 19 Jun 2016 23:32:42 -0700 (PDT)
-In-Reply-To: <CA+z5DszqHuevkAF3W01R=7AAeqVcyuHZTX0+bAvThgihvOjwuA@mail.gmail.com>
+Received: from static.ip-176-74-240-009.signet.nl ([176.74.240.9]:49463 "EHLO
+	smtp.digiware.nl" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1751660AbcFTIeD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jun 2016 04:34:03 -0400
+In-Reply-To: <1466382443-11063-22-git-send-email-deepa.kernel@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, Wade Holler <wade.holler@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Deepa Dinamani <deepa.kernel@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 20 June 2016 at 09:21, Blair Bethwaite <blair.bethwaite@gmail.com> wrote:
-> slow request issues). If you watch your xfs stats you'll likely get
-> further confirmation. In my experience xs_dir_lookups balloons (which
-> means directory lookups are missing cache and going to disk).
+On 20-6-2016 02:27, Deepa Dinamani wrote:
+> CURRENT_TIME is not y2038 safe.
+> The macro will be deleted and all the references to it
+> will be replaced by ktime_get_* apis.
+> 
+> struct timespec is also not y2038 safe.
+> Retain timespec for timestamp representation here as ceph
+> uses it internally everywhere.
+> These references will be changed to use struct timespec64
+> in a separate patch.
+> 
+> Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
+> Cc: "Yan, Zheng" <zyan@redhat.com>
+> Cc: Sage Weil <sage@redhat.com>
+> Cc: Ilya Dryomov <idryomov@gmail.com>
+> Cc: ceph-devel@vger.kernel.org
+> ---
+>  net/ceph/messenger.c  | 6 ++++--
+>  net/ceph/osd_client.c | 4 ++--
+>  2 files changed, 6 insertions(+), 4 deletions(-)
 
-Murphy's a bitch. Today we upgraded a cluster to latest Hammer in
-preparation for Jewel/RHCS2. Turns out when we last hit this very
-problem we had only ephemerally set the new filestore merge/split
-values - oops. Here's what started happening when we upgraded and
-restarted a bunch of OSDs:
-https://au-east.erc.monash.edu.au/swift/v1/public/grafana-ceph-xs_dir_lookup.png
+Hi Deepa,
 
-Seemed to cause lots of slow requests :-/. We corrected it about
-12:30, then still took a while to settle.
+Although I applaud 64-bit timestamps,
+the ktime_get_* api seems to be a Linux only API.
 
--- 
-Cheers,
-~Blairo
+So IF ever things need to be the least bit portable, I suggest wrapping
+these routines into a class of itself. So that porting confines itself
+to only that class. (plus/minus hairy semantic details)
+
+For what is now committed the change is not really that big.
+
+On the other hand, I 'll have to start figuring out if FreeBSD really
+does do 64bit timestamps...
+
+So I would welcome a more elaborate description of the problem (it seems
+that Linux is going 64bit in its inodes??) and what is being fixed and
+how. So that in the porting case not only the code will be the source to
+figure out what is going on.
+
+Thanx,
+--WjW
+
+
