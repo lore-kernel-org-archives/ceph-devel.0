@@ -1,104 +1,67 @@
-From: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
-Subject: Re: Dramatic performance drop at certain number of
- objects in pool
-Date: Mon, 20 Jun 2016 09:52:29 +0900
-Message-ID: <20160620095229.5291bdc6@batzmaru.gol.ad.jp>
-References: <CA+e22ScW-YrDE0mPABSuiDbDpKL=gYZXv6t2hK8RJxYuMaVLHg@mail.gmail.com>
-	<1450235390.2134.1466084299677@ox.pcextreme.nl>
-	<CA+z5DszqHuevkAF3W01R=7AAeqVcyuHZTX0+bAvThgihvOjwuA@mail.gmail.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: Not matching event states in ./msg/async/AsyncConnection.cc
+Date: Mon, 20 Jun 2016 10:40:05 +0800
+Message-ID: <CACJqLybigDaq4qbjMQKxw9n=jUMK-7-BtBjhwaNJ7PQoEFS32A@mail.gmail.com>
+References: <9a8eed32-29a8-7540-bb24-b1d36325feb9@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+z5DszqHuevkAF3W01R=7AAeqVcyuHZTX0+bAvThgihvOjwuA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-sg2apc01on0095.outbound.protection.outlook.com ([104.47.125.95]:42816
+	"EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751936AbcFTCzn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 19 Jun 2016 22:55:43 -0400
+Received: by mail-yw0-f169.google.com with SMTP id v77so6890285ywg.0
+        for <ceph-devel@vger.kernel.org>; Sun, 19 Jun 2016 19:40:13 -0700 (PDT)
+In-Reply-To: <9a8eed32-29a8-7540-bb24-b1d36325feb9@digiware.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-
-Hello Blair,
-
-On Mon, 20 Jun 2016 09:21:27 +1000 Blair Bethwaite wrote:
-
-> Hi Wade,
-> 
-> (Apologies for the slowness - AFK for the weekend).
-> 
-> On 16 June 2016 at 23:38, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org> wrote:
-> >
-> >> Op 16 juni 2016 om 14:14 schreef Wade Holler <wade.holler-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
-> >>
-> >>
-> >> Hi All,
-> >>
-> >> I have a repeatable condition when the object count in a pool gets to
-> >> 320-330 million the object write time dramatically and almost
-> >> instantly increases as much as 10X, exhibited by fs_apply_latency
-> >> going from 10ms to 100s of ms.
-> >>r filestore
-> >
-> > My first guess is the filestore splitting and the amount of files per
-> > directory.
-> 
-> I concur with Wido and suggest you try upping your filestore split and
-> merge threshold config values.
+On Mon, Jun 20, 2016 at 5:28 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> Hi,
 >
-This is probably a good idea but as mentioned/suggested below, it would
-be something that eventually settle down in a new equilibrium.
-Something I don't think is happening here. 
- 
-> I've seen this issue a number of times now with write heavy workload,
-> and would love to at least write some docs about it, because it must
-> happen to a lot of users running RBD workloads on largish drives.
-> However, I'm not sure how to definitively diagnose the issue and
-> pinpoint the problem. The gist of the issue is the number of files
-> and/or directories on your OSD filesystems, at some system dependent
-> threshold you get to a point where you can no longer sufficiently
-> cache inodes and/or dentrys, so IOs on those files(ystems) have to
-> incur extra disk IOPS to read the filesystem structure from disk (I
-> believe that's the small read IO you're seeing, and unfortunately it
-> seems to effectively choke writes - we've seen all sorts of related
-> slow request issues). If you watch your xfs stats you'll likely get
-> further confirmation. In my experience xs_dir_lookups balloons (which
-> means directory lookups are missing cache and going to disk).
-> 
-> What I'm not clear on is whether there are two different pathologies
-> at play here, i.e., specifically dentry cache issues versus inode
-> cache issues. In the former case making Ceph's directory structure
-> shallower with more files per directory may help (or perhaps
-> increasing the number of PGs - more top-level directories), but in the
-> latter case you're likely to need various system tuning (lower vfs
-> cache pressure, more memory?, fewer files (larger object size))
-> depending on your workload.
-> 
-I can very much confirm this from the days when on my main production
-cluster all 1024 PGs (but only about 6GB of data and 1.6 million objects)
-were on just 4 OSDs (25TB each).
+> I 've just rebased, but now I'm getting BUG warnings in del_event()
+> calls. And I suspect that it is because of the snippet below...
+>
+> In STATE_CONNECTING EVENT_READABLE is set on sd, but we try a bit latter
+> to remove EVENT_WRITABLE. Which abort since asserts were added to the
+> kevent code.
+>
+> Could it be that in STATE_CONNECTING_RE EVENT_READABLE needs to be removed?
 
-Once SLAB ran out of steam and couldn't hold all the respective entries
-(Ext4 here, but same diff), things became very slow.
+https://github.com/ceph/ceph/pull/9086/commits/a74ce419133881ff8618733a0501c4a47e1368e3
 
-My litmus test is that a "ls -R /var/lib/ceph/osd/ceph-nn/ >/dev/null"
-should be pretty much instantaneous and not having to access the disk at
-all.
 
-More RAM and proper tuning as well as smaller OSDs are all ways forward to
-alleviate/prevent this issue.
-
-It would be interesting to see/know how bluestore fares in this kind of
-scenario.
-
-Christian
--- 
-Christian Balzer        Network/Systems Engineer                
-chibi-FW+hd8ioUD0@public.gmane.org   	Global OnLine Japan/Rakuten Communications
-http://www.gol.com/
+>
+> --WjW
+>
+>
+> ./msg/async/AsyncConnection.cc at line 1014
+>     case STATE_CONNECTING_RE:
+>       {
+>         r = net.reconnect(get_peer_addr(), sd);
+>         if (r < 0) {
+>           ldout(async_msgr->cct, 1) << __func__ << " reconnect failed "
+> << dendl;
+>           goto fail;
+>         } else if (r > 0) {
+>           ldout(async_msgr->cct, 10) << __func__ << " nonblock connect
+> inprogress" << dendl;
+>           center->create_file_event(sd, EVENT_WRITABLE, read_handler);
+>           break;
+>         }
+>
+>       lderr(async_msgr->cct) << __func__ << ":" <<__LINE__
+>         << " delete_file_event(" << sd << ", EVENT_WRITABLE)"
+>         << dendl;
+>         center->delete_file_event(sd, EVENT_WRITABLE);
+>         state = STATE_CONNECTING_WAIT_BANNER;
+>         break;
+>       }
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
