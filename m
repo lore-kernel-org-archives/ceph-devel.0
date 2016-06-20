@@ -1,67 +1,39 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: Not matching event states in ./msg/async/AsyncConnection.cc
-Date: Mon, 20 Jun 2016 10:40:05 +0800
-Message-ID: <CACJqLybigDaq4qbjMQKxw9n=jUMK-7-BtBjhwaNJ7PQoEFS32A@mail.gmail.com>
-References: <9a8eed32-29a8-7540-bb24-b1d36325feb9@digiware.nl>
+From: Blair Bethwaite <blair.bethwaite@gmail.com>
+Subject: Re: Dramatic performance drop at certain number of objects in pool
+Date: Mon, 20 Jun 2016 16:32:22 +1000
+Message-ID: <CA+z5Dsy4tbyiL71C8CQCTQ66tY1=9thSWdNA4BSn6=tNfGUE6w@mail.gmail.com>
+References: <CA+e22ScW-YrDE0mPABSuiDbDpKL=gYZXv6t2hK8RJxYuMaVLHg@mail.gmail.com>
+ <1450235390.2134.1466084299677@ox.pcextreme.nl> <CA+z5DszqHuevkAF3W01R=7AAeqVcyuHZTX0+bAvThgihvOjwuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sg2apc01on0095.outbound.protection.outlook.com ([104.47.125.95]:42816
-	"EHLO APC01-SG2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751936AbcFTCzn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 19 Jun 2016 22:55:43 -0400
-Received: by mail-yw0-f169.google.com with SMTP id v77so6890285ywg.0
-        for <ceph-devel@vger.kernel.org>; Sun, 19 Jun 2016 19:40:13 -0700 (PDT)
-In-Reply-To: <9a8eed32-29a8-7540-bb24-b1d36325feb9@digiware.nl>
+Received: from mail-vk0-f50.google.com ([209.85.213.50]:33133 "EHLO
+	mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751812AbcFTGcn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jun 2016 02:32:43 -0400
+Received: by mail-vk0-f50.google.com with SMTP id d185so183842775vkg.0
+        for <ceph-devel@vger.kernel.org>; Sun, 19 Jun 2016 23:32:42 -0700 (PDT)
+In-Reply-To: <CA+z5DszqHuevkAF3W01R=7AAeqVcyuHZTX0+bAvThgihvOjwuA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>, Wade Holler <wade.holler@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-On Mon, Jun 20, 2016 at 5:28 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
-> Hi,
->
-> I 've just rebased, but now I'm getting BUG warnings in del_event()
-> calls. And I suspect that it is because of the snippet below...
->
-> In STATE_CONNECTING EVENT_READABLE is set on sd, but we try a bit latter
-> to remove EVENT_WRITABLE. Which abort since asserts were added to the
-> kevent code.
->
-> Could it be that in STATE_CONNECTING_RE EVENT_READABLE needs to be removed?
+On 20 June 2016 at 09:21, Blair Bethwaite <blair.bethwaite@gmail.com> wrote:
+> slow request issues). If you watch your xfs stats you'll likely get
+> further confirmation. In my experience xs_dir_lookups balloons (which
+> means directory lookups are missing cache and going to disk).
 
-https://github.com/ceph/ceph/pull/9086/commits/a74ce419133881ff8618733a0501c4a47e1368e3
+Murphy's a bitch. Today we upgraded a cluster to latest Hammer in
+preparation for Jewel/RHCS2. Turns out when we last hit this very
+problem we had only ephemerally set the new filestore merge/split
+values - oops. Here's what started happening when we upgraded and
+restarted a bunch of OSDs:
+https://au-east.erc.monash.edu.au/swift/v1/public/grafana-ceph-xs_dir_lookup.png
 
+Seemed to cause lots of slow requests :-/. We corrected it about
+12:30, then still took a while to settle.
 
->
-> --WjW
->
->
-> ./msg/async/AsyncConnection.cc at line 1014
->     case STATE_CONNECTING_RE:
->       {
->         r = net.reconnect(get_peer_addr(), sd);
->         if (r < 0) {
->           ldout(async_msgr->cct, 1) << __func__ << " reconnect failed "
-> << dendl;
->           goto fail;
->         } else if (r > 0) {
->           ldout(async_msgr->cct, 10) << __func__ << " nonblock connect
-> inprogress" << dendl;
->           center->create_file_event(sd, EVENT_WRITABLE, read_handler);
->           break;
->         }
->
->       lderr(async_msgr->cct) << __func__ << ":" <<__LINE__
->         << " delete_file_event(" << sd << ", EVENT_WRITABLE)"
->         << dendl;
->         center->delete_file_event(sd, EVENT_WRITABLE);
->         state = STATE_CONNECTING_WAIT_BANNER;
->         break;
->       }
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Cheers,
+~Blairo
