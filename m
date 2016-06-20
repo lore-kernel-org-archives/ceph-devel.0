@@ -1,32 +1,51 @@
-From: Kevan Rehm <krehm@cray.com>
-Subject: ceph-10.2.2.tar.gz on download.ceph.com doesn't compile --with xio
-Date: Mon, 20 Jun 2016 13:25:53 +0000
-Message-ID: <D38D5910.AC501%krehm@cray.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: zero length write fro store_test to bluestore
+Date: Mon, 20 Jun 2016 16:50:47 +0300
+Message-ID: <e175ac33-0398-2154-6edd-6ee932509c8c@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from esa2.cray.iphmx.com ([68.232.143.164]:24864 "EHLO
-	esa2.cray.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754334AbcFTNfF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jun 2016 09:35:05 -0400
-Content-Language: en-US
-Content-ID: <3B4566933E3726428845D6CE4035ED6F@namprd11.prod.outlook.com>
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:33309 "EHLO
+	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752932AbcFTN6a (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jun 2016 09:58:30 -0400
+Received: by mail-lf0-f47.google.com with SMTP id f6so38296851lfg.0
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Jun 2016 06:56:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
 
-Greetings,
+Hi All,
 
-I did a 
-        wget http://download.ceph.com/tarballs/ceph-10.2.2.tar.gz
+I'm hitting the following issue while running Synthetic test case (from 
+store_test.cc) against bluestore:
 
-and then tried to build rpms using "rpmbuild -ba --with xio ceph.spec" but
-the build fails, the include file src/messages/MNop.h is missing in the
-tarball.  I copied in a version from the ceph master on github, and it's
-compiling now, but I don't know if the code will work when I install the
-rpms.   Does anyone know?   Should I open an Issue for the missing file in
-the tarball?
+store_test asserts on read data mismatch when read happens after the 
+zero-length write above object boundary.
 
-Thanks, Kevan
+Test case assumes all the data between the old and new object boundaries 
+are filled with zeros. But current bluestore write path implementation 
+simply discards zero-length writes and hence doesn't raise object size. 
+As a result subsequent read doesn't return anything above the old boundary.
+
+The question is what's the proper fix for that:
+
+1) Ignore zero-length writes in the test case and do not increase object 
+size/fill content on them.
+
+or
+
+2) Increase object content size on such writes in the bluestore.
+
+Thanks,
+
+Igor
+
+
+
+
+
+
+
 
