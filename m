@@ -1,164 +1,72 @@
-From: Jeff Layton <jlayton@poochiereds.net>
-Subject: [wireshark PATCH] ceph: distingush between client and server by checking for a second entity_addr_t
-Date: Tue, 21 Jun 2016 08:09:51 -0400
-Message-ID: <1466510991-7830-1-git-send-email-jlayton@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: udev events on a disk, at boot time
+Date: Tue, 21 Jun 2016 16:35:04 +0200
+Message-ID: <57695098.50403@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f194.google.com ([209.85.161.194]:33218 "EHLO
-	mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751380AbcFUMZj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jun 2016 08:25:39 -0400
-Received: by mail-yw0-f194.google.com with SMTP id i12so1539021ywa.0
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Jun 2016 05:25:38 -0700 (PDT)
-Received: from tlielax.poochiereds.net ([2606:a000:1125:4074:3a60:77ff:fe93:a95d])
-        by smtp.googlemail.com with ESMTPSA id q7sm27665623ywg.16.2016.06.21.05.09.56
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1/SSLv3 cipher=OTHER);
-        Tue, 21 Jun 2016 05:09:57 -0700 (PDT)
+Received: from slow1-d.mail.gandi.net ([217.70.178.86]:51315 "EHLO
+	slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752083AbcFUOfH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jun 2016 10:35:07 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This has been uploaded for review to the wireshark project, but I wanted
-to send it here to get more ceph developer eyes on it. The wireshark
-review request is here:
+Hi Ilya,
 
-    https://code.wireshark.org/review/#/c/16043/
+On Debian Jessie 8.5 which has
 
-The current ceph dissector assumes that the server will always send its
-initial connection negotiation first, but that's not necessarily the
-case, especially with the kernel client which sends its banner as soon
-as the socket is created.
+root@000000000000:/home/ubuntu# uname -a
+Linux 000000000000.teuthology 3.16.0-4-amd64 #1 SMP Debian 3.16.7-ckt25=
+-2 (2016-04-08) x86_64 GNU/Linux
+root@000000000000:/home/ubuntu# udevadm --version
+215
 
-So, we need a better mechanism to determine which end is client and
-which is the server. The server sends its own address and then the
-address of the client, but the client only sends its own address. We
-can determine whether the initial negotiation message is from the client
-or server by looking at the data after the first entity addr and seeing
-whether it also looks like an entity addr.
+it looks like there are no udev ADD events at boot time and the OSD do =
+not activate. After booting, if the disk is removed and re-added (via o=
+penstack server volume add / remove for instance), the OSD comes up as =
+expected, which confirms the udev rules and the OSD are good.
 
-This patch takes that approach. It just grabs the address family from
-the second address and sees whether it's IPv4 or IPv6. If it's not one
-of those, then it assumes that it's not an entity_addr_t at all and is
-therefore a request from the client.
+This can be worked around by running ceph-disk activate-all which scans=
+ all disks when run from /etc/init/ceph-osd-all-starter.conf at boot ti=
+me. The workaround requires that /dev/disk/by-parttypeuuid is populated=
+[1] and this can be done by installing the 60-ceph-partuuid-workaround.=
+rules [2] file.
 
-We could go farther and try to verify the port and address as well, but
-that's probably overkill. The address family is at the same offset as
-the host_type field in the client's Connect request, but it's big endian
-and the host_type is little endian. As long as we don't end up with
-host_types that are 0x200 or 0xA00, this scheme should be OK.
+Before trying to workaround the problem, I'd like to understand what is=
+ the difference with CentOS 7.2 which has
 
-Change-Id: I161d02da86d978272eff95497c6df66766b02ebc
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
----
- epan/dissectors/packet-ceph.c | 76 ++++++++++++++++++++++++++++++-------------
- 1 file changed, 54 insertions(+), 22 deletions(-)
+# uname -a
+Linux target167114254243.teuthology 3.10.0-327.el7.x86_64 #1 SMP Thu No=
+v 19 22:10:57 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
+# udevadm --version
+219
 
-diff --git a/epan/dissectors/packet-ceph.c b/epan/dissectors/packet-ceph.c
-index 41a2f31f8ac7..044b6fb533ed 100644
---- a/epan/dissectors/packet-ceph.c
-+++ b/epan/dissectors/packet-ceph.c
-@@ -1545,30 +1545,29 @@ c_pkt_data_init(c_pkt_data *d, packet_info *pinfo, guint off)
- 	if (!d->convd) /* New conversation. */
- 	{
- 		d->convd = c_conv_data_new();
--
--		/* Note: Server sends banner first. */
--
--		copy_address_wmem(wmem_file_scope(), &d->convd->server.addr, &pinfo->src);
--		d->convd->server.port = pinfo->srcport;
--		copy_address_wmem(wmem_file_scope(), &d->convd->client.addr, &pinfo->dst);
--		d->convd->client.port = pinfo->destport;
- 		conversation_add_proto_data(d->conv, proto_ceph, d->convd);
- 	}
- 
--	/*** Set up src and dst pointers correctly. ***/
--	if (addresses_equal(&d->convd->client.addr, &pinfo->src) &&
--	    d->convd->client.port == pinfo->srcport)
--	{
--		d->src = &d->convd->client;
--		d->dst = &d->convd->server;
--	}
--	else
--	{
--		d->src = &d->convd->server;
--		d->dst = &d->convd->client;
-+	/*
-+	 * Set up src and dst pointers correctly, if the client port is
-+	 * already set. Otherwise, we need to wait until we have enough
-+	 * data to determine which is which.
-+	 */
-+	if (d->convd->client.port != 0xFFFF) {
-+		if (addresses_equal(&d->convd->client.addr, &pinfo->src) &&
-+		    d->convd->client.port == pinfo->srcport)
-+		{
-+			d->src = &d->convd->client;
-+			d->dst = &d->convd->server;
-+		}
-+		else
-+		{
-+			d->src = &d->convd->server;
-+			d->dst = &d->convd->client;
-+		}
-+		DISSECTOR_ASSERT(d->src);
-+		DISSECTOR_ASSERT(d->dst);
- 	}
--	DISSECTOR_ASSERT(d->src);
--	DISSECTOR_ASSERT(d->dst);
- 
- 	c_header_init(&d->header);
- 	d->item_root = NULL;
-@@ -6918,8 +6917,41 @@ guint c_dissect_pdu(proto_tree *root,
- }
- 
- static
--guint c_pdu_end(tvbuff_t *tvb, guint off, c_pkt_data *data)
-+guint c_pdu_end(tvbuff_t *tvb, packet_info *pinfo, guint off, c_pkt_data *data)
- {
-+	c_inet	af;
-+
-+	/*
-+	 * If we don't already know, then figure out which end of the
-+	 * connection is the client. It's icky, but the only way to know is to
-+	 * see whether the info after the first entity_addr_t looks like
-+	 * another entity_addr_t.
-+	 */
-+	if (data->convd->client.port == 0xFFFF) {
-+		if (!tvb_bytes_exist(tvb, off, C_BANNER_SIZE + C_SIZE_ENTITY_ADDR + 8 + 2))
-+			return C_NEEDMORE;
-+
-+		/* We have enough to determine client vs. server */
-+		af = (c_inet)tvb_get_ntohs(tvb, off + C_BANNER_SIZE + C_SIZE_ENTITY_ADDR + 8);
-+		if (af != C_IPv4 && af != C_IPv6) {
-+			/* Client */
-+			copy_address_wmem(wmem_file_scope(), &data->convd->client.addr, &pinfo->src);
-+			data->convd->client.port = pinfo->srcport;
-+			copy_address_wmem(wmem_file_scope(), &data->convd->server.addr, &pinfo->dst);
-+			data->convd->server.port = pinfo->destport;
-+			data->src = &data->convd->client;
-+			data->dst = &data->convd->server;
-+		} else {
-+			/* Server */
-+			copy_address_wmem(wmem_file_scope(), &data->convd->server.addr, &pinfo->src);
-+			data->convd->server.port = pinfo->srcport;
-+			copy_address_wmem(wmem_file_scope(), &data->convd->client.addr, &pinfo->dst);
-+			data->convd->client.port = pinfo->destport;
-+			data->src = &data->convd->server;
-+			data->dst = &data->convd->client;
-+		}
-+	}
-+
- 	switch (data->src->state)
- 	{
- 	case C_STATE_NEW:
-@@ -7010,7 +7042,7 @@ int dissect_ceph(tvbuff_t *tvb, packet_info *pinfo,
- 		if (off)
- 			c_pkt_data_save(&data, pinfo, off);
- 
--		offt = c_pdu_end(tvb, off, &data);
-+		offt = c_pdu_end(tvb, pinfo, off, &data);
- 		if (offt == C_INVALID)
- 		{
- 			return 0;
--- 
-2.5.5
+and correctly fires the ADD events at boot time.
 
+A CentOS 7(minor version unknown) user reported the same problem as Deb=
+ian Jessie 8.5 but I don't have information about the udev version nor =
+the kernel version. I suspect this behavior has more to do with the ude=
+v + kernel version combination than with the distribution.
+
+I've not actually traced the udev events at boot time because I'm not s=
+ure how to do that. Hopefully you have an idea about why this is happen=
+ing. Otherwise I'll try to collect hard evidence.
+
+Cheers
+
+[1] https://github.com/ceph/ceph/blob/master/src/ceph-disk/ceph_disk/ma=
+in.py#L3737
+[2] https://github.com/ceph/ceph/blob/infernalis/udev/60-ceph-partuuid-=
+workaround.rules
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
