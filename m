@@ -1,38 +1,69 @@
-From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Bluestore Backend Tech Talk
-Date: Tue, 21 Jun 2016 15:50:45 -0400
-Message-ID: <CAAZbbf2hxFaou2YFRYBfKg_CkyxJiU_+fJicF+X8qvvDkfnbzw@mail.gmail.com>
+From: Michael Wyraz <michael@wyraz.de>
+Subject: Problems with cephfs, rsync and xattr because cephfs internal xattrs
+ are exposed to clients.
+Date: Tue, 21 Jun 2016 22:34:08 +0200
+Message-ID: <5769A4C0.70905@wyraz.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from vpsprod2.wyraz.de ([188.68.49.93]:39227 "EHLO mail.wyraz.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750731AbcFUVAy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 21 Jun 2016 17:00:54 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mail.wyraz.de (Postfix) with ESMTP id DD8118E5E8
+	for <ceph-devel@vger.kernel.org>; Tue, 21 Jun 2016 22:34:28 +0200 (CEST)
+Received: from mail.wyraz.de ([127.0.0.1])
+	by localhost (mail.wyraz.de [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id cw4rM915t6Ks for <ceph-devel@vger.kernel.org>;
+	Tue, 21 Jun 2016 22:34:09 +0200 (CEST)
+Received: from [192.168.1.178] (p57851CFB.dip0.t-ipconnect.de [87.133.28.251])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by mail.wyraz.de (Postfix) with ESMTPSA
+	for <ceph-devel@vger.kernel.org>; Tue, 21 Jun 2016 22:34:09 +0200 (CEST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hey cephers,
+Hi,
 
-Just a reminder, the Bluestore backend Ceph Tech Talk by Sage is going
-to be starting in ~10m. Feel free to dial in and ask questions.
-Thanks.
+I do rsync based backups against a cephfs. If I do sync xattrs, rsync 
+tries to delete ceph-internal xattrs (e.g. ceph.dir.entries) which fails 
+with an error. xattrs does not get synchronized in this case.
+IMO the problem is, that ceph's internal attributes are exposed to the 
+mounted fileystem (I can do "getfattr -n ceph.dir.entries *" on the 
+mounted cephfs and get results). So rsync sees these xattrs and tries to 
+remove it.
 
-http://ceph.com/ceph-tech-talks/
+Example output:
 
+    rsync: rsync_xal_set:
+    lremovexattr(""/backups/2016-05-31_00-09-32/etc/acpi/events"","ceph.dir.entries")
+    failed: Operation not supported (95)
+    rsync: rsync_xal_set:
+    lremovexattr(""/backups/2016-05-31_00-09-32/etc/acpi/events"","ceph.dir.files")
+    failed: Operation not supported (95)
+    rsync: rsync_xal_set:
+    lremovexattr(""/backups/2016-05-31_00-09-32/etc/acpi/events"","ceph.dir.subdirs")
+    failed: Operation not supported (95)
+    rsync: rsync_xal_set:
+    lremovexattr(""/backups/2016-05-31_00-09-32/etc/acpi/events"","ceph.dir.rentries")
+    failed: Operation not supported (95)
+    rsync: rsync_xal_set:
+    lremovexattr(""/backups/2016-05-31_00-09-32/etc/acpi/events"","ceph.dir.rfiles")
+    failed: Operation not supported (95)
+    rsync: rsync_xal_set:
+    lremovexattr(""/backups/2016-05-31_00-09-32/etc/acpi/events"","ceph.dir.rsubdirs")
+    failed: Operation not supported (95)
+    rsync: rsync_xal_set:
+    lremovexattr(""/backups/2016-05-31_00-09-32/etc/acpi/events"","ceph.dir.rbytes")
+    failed: Operation not supported (95)
+    rsync: rsync_xal_set:
+    lremovexattr(""/backups/2016-05-31_00-09-32/etc/acpi/events"","ceph.dir.rctime")
+    failed: Operation not supported (95)
 
+Kind regards,
+Michael.
 
--- 
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
