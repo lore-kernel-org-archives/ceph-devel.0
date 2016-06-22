@@ -1,83 +1,85 @@
-From: Andrei Mikhailovsky <andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org>
-Subject: Re: cluster down during backfilling,
- Jewel tunables and client IO optimisations
-Date: Wed, 22 Jun 2016 17:49:10 +0100 (BST)
-Message-ID: <275551237.136659.1466614150398.JavaMail.zimbra@arhont.com>
-References: <848514758.3747.1466265852627.JavaMail.zimbra@arhont.com>
-	<31cbf96d-c79e-1e7d-19fd-df9e2d2a748f@ip-interactive.de>
-	<1456968003.98467.1466423640703.JavaMail.zimbra@arhont.com>
-	<nk92c8$knq$1@ger.gmane.org>
-	<CAJ4mKGb28W-jPK7Z7wMzm7fC8Q5YPmqr+PeGS=Bz7jky4GfxuA@mail.gmail.com>
-	<nke15p$u9f$1@ger.gmane.org>
-	<829216253.136015.1466610890998.JavaMail.zimbra@arhont.com>
-	<nked8c$elu$1@ger.gmane.org>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: plugin infra issues
+Date: Wed, 22 Jun 2016 17:04:10 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1606221701330.21827@piezo.us.to>
+References: <2b706ff1-6082-e99f-135c-7d6b02a237ce@mirantis.com> <alpine.DEB.2.11.1606221557160.21827@piezo.us.to> <284db414-5822-7392-67bf-25e1a530a243@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <nked8c$elu$1@ger.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Daniel Swarbrick <daniel.swarbrick-EIkl63zCoXaH+58JC4qpiA@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:36114 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751768AbcFVREN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 22 Jun 2016 13:04:13 -0400
+In-Reply-To: <284db414-5822-7392-67bf-25e1a530a243@mirantis.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>
+Cc: ceph-devel@vger.kernel.org, amaredia@redhat.com
 
-Hi Daniel,
+[adding ceph-devel]
 
-Many thanks, I will keep this in mind while performing the updates in the future.
+On Wed, 22 Jun 2016, Igor Fedotov wrote:
+> Well, having ceph.conf helps a bit. But PluginRegistry::load still appends
+> plugin type (i.e. "/compressor") to the path. Hence it wouldn't work on a
+> clean build IMHO...
+> Another point - I'm not sure if that's a good practice to require config file
+> to run the tests. IMO it's preferable to have they working properly as-is.
 
-Note to documentation manager - perhaps it makes sens to add this solution as a note/tip to the Upgrade section of the release notes?
+I think the solution to this shoudl focus on the cmake developer workflow.  
+Build is in ceph.git/build/, stuff goes in lib/, and the default build 
+should set the default ceph lib path to ./lib.  Or, have do_cmake.sh 
+create a ceph.conf that sets these paths in a build/ceph.conf file.  
+Either way, we should make sure the recommended and documented developer 
+workflow (building and running via vstart, running unit tests, etc.) works 
+well out of the box...
+
+Ali, does that sound like the right way to go?
+
+sage
 
 
-Andrei
-
------ Original Message -----
-> From: "Daniel Swarbrick" <daniel.swarbrick-EIkl63zCoXaH+58JC4qpiA@public.gmane.org>
-> To: "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-> Cc: "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-> Sent: Wednesday, 22 June, 2016 17:09:48
-> Subject: Re: [ceph-users] cluster down during backfilling, Jewel tunables and client IO optimisations
-
-> On 22/06/16 17:54, Andrei Mikhailovsky wrote:
->> Hi Daniel,
->> 
->> Many thanks for your useful tests and your results.
->> 
->> How much IO wait do you have on your client vms? Has it significantly increased
->> or not?
->> 
 > 
-> Hi Andrei,
 > 
-> Bearing in mind that this cluster is tiny (four nodes, each with four
-> OSDs), our metrics may not be that meaningful. However, on a VM that is
-> running ElasticSearch, collecting logs from Graylog, we're seeing no
-> more than about 5% iowait for a 5s period, and most of the time it's
-> below 1%. This VM is really not writing a lot of data though.
+> On 22.06.2016 18:57, Sage Weil wrote:
+> > It works for me because my ./ceph.conf specifies the right dir.  If you
+> > run vstart.sh this will get set up.
+> > 
+> > 
+> > On Wed, 22 Jun 2016, Igor Fedotov wrote:
+> > 
+> > > Hi Sage,
+> > > 
+> > > as I mentioned during the syncup I faced some issues when running
+> > > ceph_test_objectstore. Namely BluestoreStatFSTest fails.
+> > > 
+> > > The root cause is that it's unable to load snappy compressor plugin after
+> > > your
+> > > recent cleanup. Now store_test attempts to do the load from
+> > > /usr/local/lib...
+> > > folder only while previously it tried .libs/compressor one as well.
+> > > 
+> > > Additionally there are some other test cases that use the same mechanics
+> > > to
+> > > locate plugin as the one you removed from store_test. Here they are:
+> > > 
+> > > test/common/test_async_compressor.cc
+> > > 
+> > > test/compressor/test_compression_plugin.cc
+> > > 
+> > > test/compressor/test_compression_plugin_snappy.cc
+> > > 
+> > > test/compressor/test_compression_plugin_zlib.cc
+> > > 
+> > > 
+> > > Hence the question is what's your suggestion about resolving that? As for
+> > > me
+> > > I'd prefer to be able to use .libs for testing somehow...
+> > > 
+> > > 
+> > > Thanks,
+> > > 
+> > > Igor.
+> > > 
+> > > 
 > 
-> The cluster as a whole is peaking at only about 1200 write op/s,
-> according to ceph -w.
 > 
-> Executing a "sync" in a VM does of course have a noticeable delay due to
-> the recovery happening in the background, but nothing is waiting for IO
-> long enough to trigger the kernel's 120s timer / warning.
-> 
-> The recovery has been running for about four hours now, and is down to
-> 20% misplaced objects. So far we have not had any clients block
-> indefinitely, so I think the migration of VMs to Jewel-capable
-> hypervisors did the trick.
-> 
-> Best,
-> Daniel
-> 
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
