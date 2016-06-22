@@ -1,67 +1,26 @@
-From: Yang X <yx888sd-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Use of legacy bobtail tunables and potential
-	performance impact to "jewel"?
-Date: Wed, 22 Jun 2016 10:37:04 -0700
-Message-ID: <CADhmVNWnew7TxUK1DYYRwnj+QNbRs=wQrUC_2x7+DR0cUU3U9Q@mail.gmail.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: http://tracker.ceph.com/issues/16416
+Date: Wed, 22 Jun 2016 10:31:07 -0700
+Message-ID: <CAN=+7FWZ+Lr3VsgqBJbeVKOFqF67jQ1N5nFX9xCWDEvQAcZ8dA@mail.gmail.com>
+References: <CAN=+7FXx6YMjeGUPuHgRGP+YMbwr19HD+A49SniDOHBNy-HNhQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1538456873=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-Qp0mS5GaXlQ@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
---===============1538456873==
-Content-Type: multipart/alternative; boundary=001a113951b0c83c0a0535e16260
-
---001a113951b0c83c0a0535e16260
 Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:36521 "EHLO
+	mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751415AbcFVRbJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Jun 2016 13:31:09 -0400
+Received: by mail-qk0-f171.google.com with SMTP id p10so74681513qke.3
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Jun 2016 10:31:08 -0700 (PDT)
+In-Reply-To: <CAN=+7FXx6YMjeGUPuHgRGP+YMbwr19HD+A49SniDOHBNy-HNhQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Wang, Haomai" <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Our ceph client is using bobtail legacy tunable and in particular,
-"chooseleaf_vary_r" is set to 0.
+http://tracker.ceph.com/issues/16418 also, I think.
+-Sam
 
-My question is how it would impact CRUSH and hence performance in deploying
-"jewel" on the server side and also the experimental "bluestore" backend.
-
-Does it only affect data placement or does it actually would not find
-mapping for certain objects and thus cause error?
-
-Thanks in advance,
-
-Yang
-
---001a113951b0c83c0a0535e16260
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Our ceph client is using bobtail legacy tunable and in par=
-ticular, &quot;chooseleaf_vary_r&quot; is set to 0.<div><br></div><div>My q=
-uestion is how it would impact CRUSH and hence performance in deploying &qu=
-ot;jewel&quot; on the server side and also the experimental &quot;bluestore=
-&quot; backend.</div><div><br></div><div>Does it only affect data placement=
- or does it actually would not find mapping for certain objects and thus ca=
-use error?=C2=A0</div><div><br></div><div>Thanks in advance,</div><div><br>=
-</div><div>Yang</div><div><br></div></div>
-
---001a113951b0c83c0a0535e16260--
-
---===============1538456873==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1538456873==--
+On Wed, Jun 22, 2016 at 9:45 AM, Samuel Just <sjust@redhat.com> wrote:
+> I think this may be due to an async messenger thing, can you take a look?
+> -sam
