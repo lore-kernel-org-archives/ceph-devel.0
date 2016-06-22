@@ -1,41 +1,48 @@
 From: Michael Wyraz <michael@wyraz.de>
-Subject: Status of cephfs / multiple mds
-Date: Wed, 22 Jun 2016 07:00:33 +0200
-Message-ID: <576A1B71.6030300@wyraz.de>
+Subject: mount.cephfs with domain name and multiple ip addresses
+Date: Wed, 22 Jun 2016 07:31:41 +0200
+Message-ID: <576A22BD.1000901@wyraz.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from vpsprod2.wyraz.de ([188.68.49.93]:51833 "EHLO mail.wyraz.de"
+Received: from vpsprod2.wyraz.de ([188.68.49.93]:53361 "EHLO mail.wyraz.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750748AbcFVFBZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Jun 2016 01:01:25 -0400
+	id S1751445AbcFVFzU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 22 Jun 2016 01:55:20 -0400
 Received: from localhost (localhost [127.0.0.1])
-	by mail.wyraz.de (Postfix) with ESMTP id 8AC998EDE3
-	for <ceph-devel@vger.kernel.org>; Wed, 22 Jun 2016 07:00:54 +0200 (CEST)
+	by mail.wyraz.de (Postfix) with ESMTP id F184B8EE64
+	for <ceph-devel@vger.kernel.org>; Wed, 22 Jun 2016 07:31:41 +0200 (CEST)
 Received: from mail.wyraz.de ([127.0.0.1])
 	by localhost (mail.wyraz.de [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id chZWS70nuQeI for <ceph-devel@vger.kernel.org>;
-	Wed, 22 Jun 2016 07:00:34 +0200 (CEST)
+	with ESMTP id J0SilXCjJ0jc for <ceph-devel@vger.kernel.org>;
+	Wed, 22 Jun 2016 07:31:41 +0200 (CEST)
 Received: from [192.168.10.10] (p50992bfa.dip0.t-ipconnect.de [80.153.43.250])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
 	by mail.wyraz.de (Postfix) with ESMTPSA
-	for <ceph-devel@vger.kernel.org>; Wed, 22 Jun 2016 07:00:34 +0200 (CEST)
+	for <ceph-devel@vger.kernel.org>; Wed, 22 Jun 2016 07:31:41 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Hello,
 
-I'm curious what is the current state of the stability of cephfs when
-using multiple mds and/or snapshots. It seems that the "Early Adaptors"
-documentation has not changed since hammer, about 1 year ago. We have 2
-major releases and many releases meanwhile. SO probably things have
-changed and there is more experience. Is it save now to run cephfs with
-more than 1 active mds?
+I have multiple ceph monitor nodes and one domain name that has an a
+record for each node. I use this record in my fstab, e.g.:
+
+    mon.mycephcluster.com:6789:/ /backups/ ceph _netdev
+
+In /proc/mounts, I can see all IPs for mon.mycephcluster.com, e.g.:
+
+    1.1.1.1:6789,2.2.2.2:6789,2.2.2.2:6789:/ /backups ceph
+    rw,relatime,acl 0 0
+
+This works perfect and is a really good thing because it makes
+adding/removing nodes much more easy. What I'd like to know is if this
+is intended behaviour (in this case it should be documented in the
+manpage) or if this could have unexpected side effects.
 
 Kind regards,
 Michael.
-
 
