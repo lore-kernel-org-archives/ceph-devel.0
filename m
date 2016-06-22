@@ -1,90 +1,68 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: new gitbuilder system outline
-Date: Wed, 22 Jun 2016 08:45:52 -0700
-Message-ID: <CAN=+7FX4qEqU9_BHjJSK_5i2r1Hjsk7tCVD7T6nB3VBCVLXsRA@mail.gmail.com>
-References: <CAEPMp+6vB+EO9f_HvoxobsuPJhE11HBUOHTts9YdaZsxHAhfhw@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [Y2038] [PATCH v2 00/24] Delete CURRENT_TIME and CURRENT_TIME_SEC
+ macros
+Date: Wed, 22 Jun 2016 17:49:48 +0200
+Message-ID: <5119217.EGiBXE3Be4@wuerfel>
+References: <1466382443-11063-1-git-send-email-deepa.kernel@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f172.google.com ([209.85.220.172]:35718 "EHLO
-	mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751146AbcFVPqt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Jun 2016 11:46:49 -0400
-Received: by mail-qk0-f172.google.com with SMTP id c73so70410281qkg.2
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Jun 2016 08:45:53 -0700 (PDT)
-In-Reply-To: <CAEPMp+6vB+EO9f_HvoxobsuPJhE11HBUOHTts9YdaZsxHAhfhw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Andrew Schoen <aschoen@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+In-Reply-To: <1466382443-11063-1-git-send-email-deepa.kernel@gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: y2038@lists.linaro.org, tglx@linutronix.de, linux-ext4@vger.kernel.org, jbacik@fb.com
+Cc: shaggy@kernel.org, jfs-discussion@lists.sourceforge.net, trond.myklebust@primarydata.com, adrian.hunter@intel.com, clm@fb.com, adilger.kernel@dilger.ca, Deepa Dinamani <deepa.kernel@gmail.com>, sfrench@samba.org, jejb@linux.vnet.ibm.com, paul@paul-moore.com, linux-scsi@vger.kernel.org, cm224.lee@samsung.com, mfasheh@suse.com, linux-nfs@vger.kernel.org, john.stultz@linaro.org, viro@zeniv.linux.org.uk, dsterba@suse.com, jaegeuk@kernel.org, ceph-devel@vger.kernel.org, jlbec@evilplan.org, sramars@cisco.com, elder@kernel.org, tytso@mit.edu, sage@redhat.com, martin.petersen@oracle.com, gregkh@linuxfoundation.org, hiralpat@cisco.com, linux-kernel@vger.kernel.org, eparis@redhat.com, linux-f2fs-devel@lists.sourceforge.net, zyan@redhat.com, linux-audit@redhat.com, linux-btrfs@vger.kernel.org, jack@suse.com, linux-fsdevel@vger.kernel.org, linux-mtd@lists.infradead.org, torvalds@lin
+List-Id: ceph-devel.vger.kernel.org
 
-Sounds great!
--Sam
+On Sunday, June 19, 2016 5:26:59 PM CEST Deepa Dinamani wrote:
+> The series is aimed at getting rid of CURRENT_TIME and CURRENT_TIME_SEC macros.
+> The macros are not y2038 safe. There is no plan to transition them into being
+> y2038 safe.
+> ktime_get_* api's can be used in their place. And, these are y2038 safe.
+> 
+> Thanks to Arnd Bergmann for all the guidance and discussions.
+> 
+> Patches 2-4 were mostly generated using coccinelle scripts.
+> 
+> All filesystem timestamps use current_fs_time() for right granularity as
+> mentioned in the respective commit texts of patches. This has a changed
+> signature, renamed to current_time() and moved to the fs/inode.c.
+> 
+> This series also serves as a preparatory series to transition vfs to 64 bit
+> timestamps as outlined here: https://lkml.org/lkml/2016/2/12/104 .
+> 
+> As per Linus's suggestion in https://lkml.org/lkml/2016/5/24/663 , all the
+> inode timestamp changes have been squashed into a single patch. Also,
+> current_time() now is used as a single generic vfs filesystem timestamp api.
+> It also takes struct inode* as argument instead of struct super_block*.
+> Posting all patches together in a bigger series so that the big picture is
+> clear.
+> 
+> As per the suggestion in https://lwn.net/Articles/672598/, CURRENT_TIME macro
+> bug fixes are being handled in a series separate from transitioning vfs to use.
 
-On Wed, Jun 22, 2016 at 8:32 AM, Andrew Schoen <aschoen@redhat.com> wrote:
-> All,
->
-> As you may or may not know Alfredo and I have been working on
-> designing a new system to replace the gitbuilders. I wanted to send
-> out an outline of what we're thinking to gather review and feedback.
-> We're hoping this new system will be able to produce a test build much
-> faster than the current solution and scale easily as the ceph core
-> team grows.
->
-> Components of the new gitbuilder system.
->
-> - Jenkins
->   - responsible for building ceph and uploading the binaries to chacra
->   - provides an interface to initiate builds
->   - provides authentication and authorization on who can initiate builds
->
-> - Chacra
->   - responsible for storage of the binaries and repo creation
->   - can be scaled horizontally by creating new nodes and registering
-> them with Shaman
->
-> - Shaman
->   - responsible for coordination between the chacra nodes.
->   - responsible for acting as a load balancer for all the chacra
-> nodes. This is so  jenkins can know which node to upload binaries to
-> and to allow for the ability for    chacra nodes to scale
-> horizontally.
->   - responsible for answering questions about the availability of ceph
-> repos. (i.e. What is the latest sha1 I can test for the master branch
-> on xenial, trusty and centos7? Is sha1 X built for xenial?)
->   - provides metadata about ceph repositories,
->
-> - Mita
->   - responsible for creating new jenkins slaves.
->   - responsible for tearing down unused jenkins slaves.
->
-> - Prado
->   - responsible for provisioning of new jenkins slaves
->
-> Basic workflow of a "gitbuilder like" ceph build, from initiation to
-> repo ready for use:
->
-> - Jenkins build initiated
->   - By sha1 or branch
->   - upstream release or dev release (gitbuilder build)
->   - provide list of distros
-> - Jenkins performs the build
-> - Jenkins asks Shaman which chacra instance to upload binaries to
->   - Shaman will know all the chacra nodes and will provide them for
-> use in a round robin fashion by use of an api endpoint.
-> - Jenkins uploads binaries to chacra instance given by shaman
-> - When repo creation is queued, chacra will ping shaman to notify it
-> that a repo has been requested.
-> - When repo creation starts, chacra will ping shaman with that status.
-> - If repo creation fails, chacra will notify shaman.
-> - If repo creation succeeds, chacra will notify shaman.
-> - Shaman can be queried for status of the repos by ref, sha1 or distro.
->   - Shaman can answer questions like, "What is the latest sha1 I can
-> use for the master branch on trusty, xenial and centos7?"
->
-> Best,
-> Andrew
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I've looked in detail at all the patches in this version now, and while
+overall everything is fine, I found that two patches cannot be part of the
+series because of the dependency on the patch that John already took (adding
+time64_to_tm), but I think that's ok because we just need to change over
+all the users of CURRENT_TIME and CURRENT_TIME_SEC that assign to inode
+timestamps in order to prepare for the type change, the other ones
+can be changed later.
+
+I also found a few things that could be done differently to make the
+later conversion slightly easier, but it's also possible that I missed
+part of your bigger plan for those files, and none of them seem important.
+
+	Arnd
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
