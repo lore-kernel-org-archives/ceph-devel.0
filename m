@@ -1,182 +1,42 @@
-From: Sage Weil <sage@newdream.net>
-Subject: RE: issue in ceph_test_objectstore
-Date: Thu, 23 Jun 2016 16:36:12 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1606231635580.3223@piezo.us.to>
-References: <CY1PR0201MB182017D403FA8C2F71C723F9852D0@CY1PR0201MB1820.namprd02.prod.outlook.com> <alpine.DEB.2.11.1606231631150.3223@piezo.us.to> <CY1PR0201MB1820348C5DC4511698935E86852D0@CY1PR0201MB1820.namprd02.prod.outlook.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Ceph Tech Talks: Bluestore
+Date: Thu, 23 Jun 2016 13:06:07 -0400
+Message-ID: <CAAZbbf0Xj=g2t6LhUckGvUUR4-=FMyCq7nFnPLezEaXzAO1GrQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57423 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751900AbcFWQgQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2016 12:36:16 -0400
-In-Reply-To: <CY1PR0201MB1820348C5DC4511698935E86852D0@CY1PR0201MB1820.namprd02.prod.outlook.com>
+Received: from mail-yw0-f177.google.com ([209.85.161.177]:36652 "EHLO
+	mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751010AbcFWRGJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2016 13:06:09 -0400
+Received: by mail-yw0-f177.google.com with SMTP id b72so77488045ywa.3
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Jun 2016 10:06:08 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ramesh Chander <Ramesh.Chander@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-What commit are you on, and what arguments are you passing to 
-ceph_test_objectstore?  I can't seem to hit it
+Hey cephers,
 
-On Thu, 23 Jun 2016, Ramesh Chander wrote:
+If you missed Tuesday=E2=80=99s Ceph Tech Talk by Sage on the new Blues=
+tore
+backend for Ceph, it is now available on Youtube:
+https://youtu.be/kuacS4jw5pM
 
-> Thanks Sage,
-> 
-> Yes snappy error no more there with workaround.
-> 
-> But issue still hit.
-> 
-> -Ramesh
-> 
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sage@newdream.net]
-> > Sent: Thursday, June 23, 2016 10:02 PM
-> > To: Ramesh Chander
-> > Cc: ceph-devel
-> > Subject: Re: issue in ceph_test_objectstore
-> >
-> > On Thu, 23 Jun 2016, Ramesh Chander wrote:
-> > > I am hitting this issue when running ceph_test_objectstore with bluestore
-> > without bluefs.
-> > >
-> > > Known issue or something wrong in configuration?
-> >
-> > I haven't seen it.  trying to reproduce now.
-> >
-> > > One suspicion is error of not able to find libsnappy.
-> >
-> > run ./vstart.sh -d -n -x -l
-> >
-> > and control-c out of it, or ./stop.sh when it's done.  the plugin error should go
-> > away.
-> >
-> >
-> > >
-> > > ----------------------------------
-> > >
-> > >
-> > > 2016-06-23 21:20:01.340312 7ffff7fdd680  1 bluestore(store_test_temp_dir)
-> > _open_db opened rocksdb path store_test_temp_dir/db options
-> > compression=kNoCompression,max_write_buffer_number=16,min_write_b
-> > uffer_number_to_merge=3,recycle_log_file_num=16
-> > > 2016-06-23 21:20:01.340367 7ffff7fdd680  1 freelist init
-> > > [New Thread 0x7fffe2ffd700 (LWP 30859)]
-> > > 2016-06-23 21:20:01.341445 7ffff35ac700 -1
-> > bdev(store_test_temp_dir/block) _aio_thread got (4) Interrupted system
-> > call
-> > > [New Thread 0x7fffe37fe700 (LWP 30860)]
-> > > 2016-06-23 21:20:01.342552 7ffff35ac700 -1
-> > bdev(store_test_temp_dir/block) _aio_thread got (4) Interrupted system
-> > call
-> > > 2016-06-23 21:20:01.342624 7ffff7fdd680 -1 load failed
-> > dlopen(/usr/local/lib/ceph/compressor/libceph_snappy.so):
-> > /usr/local/lib/ceph/compressor/libceph_snappy.so: cannot open shared
-> > object file: No such file or directory
-> > > Creating collection meta
-> > > 2016-06-23 21:20:01.342633 7ffff7fdd680 -1 create cannot load compressor
-> > of type snappy
-> > > 2016-06-23 21:20:01.342634 7ffff7fdd680 -1
-> > bluestore(store_test_temp_dir) _set_compression unable to initialize
-> > snappy compressor
-> > > Creating object #-1:68309cac:::Object 1:head#
-> > > Remove then create
-> > > Remove then create
-> > > Append Full overwrite
-> > > Partial overwrite
-> > > 00000000  61 62 63 61 62 63 64 65  64 65                    |abcabcdede|
-> > > 0000000a
-> > > Truncate + hole
-> > > Reverse fill-in
-> > > 00000000  61 62 63 64 65 66 67 68  69 6a                    |abcdefghij|
-> > > 0000000a
-> > > larger overwrite
-> > > 00000000  61 62 63 64 65 30 31 32  33 34 30 31 32 33 34 30
-> > |abcde01234012340|
-> > > 00000010  31 32 33 34 30 31 32 33  34 61 62 63 64 65 30 31
-> > |123401234abcde01|
-> > > 00000020  32 33 34 30 31 32 33 34  30 31 32 33 34 30 31 32
-> > |2340123401234012|
-> > > 00000030  33 34 61 62 63 64 65 30  31 32 33 34 30 31 32 33
-> > |34abcde012340123|
-> > > 00000040  34 30 31 32 33 34 30 31  32 33 34 61 62 63 64 65
-> > |40123401234abcde|
-> > > 00000050  30 31 32 33 34 30 31 32  33 34 30 31 32 33 34 30
-> > |0123401234012340|
-> > > 00000060  31 32 33 34                                       |1234|
-> > > 00000064
-> > > 00000000  61 62 63 64 65 30 31 32  33 34 30 31 32 33 34 30
-> > |abcde01234012340|
-> > > 00000010  31 32 33 34 30 31 32 33  34 61 62 63 64 65 30 31
-> > |123401234abcde01|
-> > > 00000020  32 33 34 30 31 32 33 34  30 31 32 33 34 30 31 32
-> > |2340123401234012|
-> > > 00000030  33 34 61 62 63 64 65 30  31 32 33 34 30 31 32 33
-> > |34abcde012340123|
-> > > 00000040  34 30 31 32 33 34 30 31  32 33 34 61 62 63 64 65
-> > |40123401234abcde|
-> > > 00000050  30 31 32 33 34 30 31 32  33 34 30 31 32 33 34 30
-> > |0123401234012340|
-> > > 00000060  31 32 33 34                                       |1234|
-> > > 00000064
-> > >
-> > > Write unaligned csum, stage 2
-> > > Cleaning
-> > > 2016-06-23 21:20:01.351634 7ffff7fdd680  1 bluestore(store_test_temp_dir)
-> > umount
-> > >
-> > > Program received signal SIGFPE, Arithmetic exception.
-> > > [Switching to Thread 0x7fffe37fe700 (LWP 30860)]
-> > > 0x0000555555879b00 in BlueStore::TwoQCache::trim
-> > (this=0x55555e428ab0, onode_max=500, buffer_max=2000000) at
-> > os/bluestore/BlueStore.cc:674
-> > > 674         uint64_t kin = buffer_max / avg_buffer_size / 2;
-> > > (gdb) bt
-> > > #0  0x0000555555879b00 in BlueStore::TwoQCache::trim
-> > (this=0x55555e428ab0, onode_max=500, buffer_max=2000000) at
-> > os/bluestore/BlueStore.cc:674
-> > > #1  0x000055555585b4fd in BlueStore::_osr_reap_done
-> > (this=this@entry=0x55555e428f40, osr=osr@entry=0x55555e327d30) at
-> > os/bluestore/BlueStore.cc:4672
-> > > #2  0x0000555555861c44 in BlueStore::_txc_finish
-> > (this=this@entry=0x55555e428f40, txc=txc@entry=0x55555e44c8b0) at
-> > os/bluestore/BlueStore.cc:4642
-> > > #3  0x0000555555871d1a in BlueStore::_txc_state_proc
-> > (this=this@entry=0x55555e428f40, txc=0x55555e44c8b0) at
-> > os/bluestore/BlueStore.cc:4499
-> > > #4  0x000055555587de4f in BlueStore::_kv_sync_thread
-> > (this=0x55555e428f40) at os/bluestore/BlueStore.cc:4816
-> > > #5  0x00005555558abcbd in BlueStore::KVSyncThread::entry
-> > (this=<optimized out>) at os/bluestore/BlueStore.h:1120
-> > > #6  0x00007ffff64b2182 in start_thread (arg=0x7fffe37fe700) at
-> > pthread_create.c:312
-> > > #7  0x00007ffff4ccf47d in clone () at
-> > ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
-> > >
-> > >
-> > >
-> > > -Regards,
-> > >  Ramesh Chander
-> > >
-> > > PLEASE NOTE: The information contained in this electronic mail message is
-> > intended only for the use of the designated recipient(s) named above. If the
-> > reader of this message is not the intended recipient, you are hereby notified
-> > that you have received this message in error and that any review,
-> > dissemination, distribution, or copying of this message is strictly prohibited. If
-> > you have received this communication in error, please notify the sender by
-> > telephone or e-mail (as shown above) immediately and destroy any and all
-> > copies of this message in your possession (whether hard copies or
-> > electronically stored copies).
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > >
-> > >
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+We love it when our community shares what they are doing, so if you
+would like to give a Ceph Tech Talk in the future, please drop me a
+line. Thanks.
+
+--=20
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
