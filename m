@@ -1,98 +1,148 @@
-From: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
-Subject: Re: Dramatic performance drop at certain number of
- objects in pool
-Date: Thu, 23 Jun 2016 12:38:49 +0900
-Message-ID: <20160623123849.46012d94@batzmaru.gol.ad.jp>
-References: <CA+e22ScW-YrDE0mPABSuiDbDpKL=gYZXv6t2hK8RJxYuMaVLHg@mail.gmail.com>
-	<1450235390.2134.1466084299677@ox.pcextreme.nl>
-	<CA+z5DszqHuevkAF3W01R=7AAeqVcyuHZTX0+bAvThgihvOjwuA@mail.gmail.com>
-	<CA+z5Dsy4tbyiL71C8CQCTQ66tY1=9thSWdNA4BSn6=tNfGUE6w@mail.gmail.com>
-	<CA+e22Sc3iY5Lvp4oGwJ_wwpJsOJsWdB1thaHWEAuYP=bbGHAeg@mail.gmail.com>
-	<D38DCB57.131AE%warren.wang@walmart.com>
-	<20160621075856.3ad471d1@batzmaru.gol.ad.jp>
-	<CA+e22SdrwRHmAD=67MpVtUXVyCOmidcoUXrANZVeDJc2tcJfnQ@mail.gmail.com>
-	<CA+z5Dswx7V_HsiQ8TyhXmzJ70-D6kTQrfi8am7wMZOJVzsLerw@mail.gmail.com>
-	<20160623113717.446a1f9d@batzmaru.gol.ad.jp>
-	<CA+z5DszcLqV32NnWeuu+WsRZoZwM493Jfy7WcSpVtaDyArwFAQ@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: [PATCH v2 21/24] libceph: Replace CURRENT_TIME with
+ ktime_get_real_ts
+Date: Thu, 23 Jun 2016 09:01:27 +0200
+Message-ID: <ded6018e-7ea6-656f-7719-621ea57fe9dc@digiware.nl>
+References: <1466382443-11063-1-git-send-email-deepa.kernel@gmail.com>
+ <1466382443-11063-22-git-send-email-deepa.kernel@gmail.com>
+ <936f4df1-dfb9-1906-019e-8f82b8e950eb@digiware.nl>
+ <CABeXuvr80F+3sBnVgTNL80V3HX+DZHhDNQ47JP7AQ0j5oSUFQQ@mail.gmail.com>
+ <5724718b-3071-cb79-11d1-aa558c75bd54@digiware.nl>
+ <CABeXuvrqqKiY8wNzz81-d60CGMruAcBUBupfJ-Z=_aNYPM9Vaw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+z5DszcLqV32NnWeuu+WsRZoZwM493Jfy7WcSpVtaDyArwFAQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Wade Holler <wade.holler-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from static.ip-176-74-240-009.signet.nl ([176.74.240.9]:43833 "EHLO
+	smtp.digiware.nl" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1751590AbcFWHCI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2016 03:02:08 -0400
+In-Reply-To: <CABeXuvrqqKiY8wNzz81-d60CGMruAcBUBupfJ-Z=_aNYPM9Vaw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Deepa Dinamani <deepa.kernel@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
 
-
-Hello Blair, hello Wade (see below),
-
-On Thu, 23 Jun 2016 12:55:17 +1000 Blair Bethwaite wrote:
-
-> On 23 June 2016 at 12:37, Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org> wrote:
-> > Case in point, my main cluster (RBD images only) with 18 5+TB OSDs on 3
-> > servers (64GB RAM each) has 1.8 million 4MB RBD objects using about 7%
-> > of the available space.
-> > Don't think I could hit this problem before running out of space.
+On 23-6-2016 02:17, Deepa Dinamani wrote:
+>>> Adding Arnd, as he is the overall y2038 project lead.
+>>>
+>>>>> CURRENT_TIME is not y2038 safe.
+>>>>> The macro will be deleted and all the references to it
+>>>>> will be replaced by ktime_get_* apis.
+>>>>>
+>>>>> struct timespec is also not y2038 safe.
+>>>>> Retain timespec for timestamp representation here as ceph
+>>>>> uses it internally everywhere.
+>>>>> These references will be changed to use struct timespec64
+>>>>> in a separate patch.
+>>>> Hi Deepa,
+>>>>
+>>>> Although I applaud 64-bit timestamps,
+>>>> the ktime_get_* api seems to be a Linux only API.
+>>>> So IF ever things need to be the least bit portable, I suggest wrapping
+>>>> these routines into a class of itself. So that porting confines itself
+>>>> to only that class. (plus/minus hairy semantic details)
+>>>
+>>> ktime_get_* apis just return 64 bit timestamps.
+>>> They are the equivalent of CURRENT_TIME.
+>>> Did you have a wrapper for CURRENT_TIME?
+>>>
+>>> Are these concerns about all of ceph kernel code or just that the libceph
+>>> is expected to be portable?
+>>>
+>>>> For what is now committed the change is not really that big.
+>>>>
+>>>> On the other hand, I 'll have to start figuring out if FreeBSD really
+>>>> does do 64bit timestamps...
+>>>
+>>> From what I can see here:
+>>> http://fxr.watson.org/fxr/ident?im=10;i=__time_t,
+>>>
+>>> FreeBSD time_t is already 64 bit long.
+>>> So it supports 64 bit timestamps already.
+>>
+>> Yup, I look a bit further into it. After your mail I started diging into
+>> my memory and realised that 64bit times are quite some time on FreeBSD.
+>> And wrote even a small test to be sure...
+>>
+>> #include <stdio.h>
+>> #include <time.h>
+>> #include <sys/stat.h>
+>> #include <sys/timespec.h>
+>>
+>> struct stat s;
+>> struct itimerspec t;
+>>
+>> int main () {
+>>         printf( "Size of __time_t: %lu bytes\n", sizeof(__time_t));
+>>         printf( "Size of st_atim: %lu bytes\n", sizeof(s.st_atim));
+>>         printf( "Size of timespec: %lu bytes\n", sizeof(t.it_interval));
+>>
+>> }
+>> [~/Src/c-code] wjw > print_time_t_size
+>> Size of __time_t: 8 bytes
+>> Size of st_atim: 16 bytes
+>> Size of timespec: 16 bytes
+>>
+>> So FreeBSD is good.
+>>
+>>>
+>>>> So I would welcome a more elaborate description of the problem (it seems
+>>>> that Linux is going 64bit in its inodes??) and what is being fixed and
+>>>> how. So that in the porting case not only the code will be the source to
+>>>> figure out what is going on.
+>>>
+>>> Yes, all inode timestamps are going to be switched over to use timespec64 i.e.,
+>>> 64 bit timestamps.
+>>> We will switch over just the vfs layer: struct inode, struct attr and
+>>> struct kstat.
+>>> End filesystems such as ceph will still use timespec at this time.
+>>> So whenever they access vfs timestamps, they will go through conversion apis:
+>>> timespec64_to_timespec() / timespec_to_timespec64().
+>>>
+>>> My reference tree is https://github.com/deepa-hub/vfs/tree/y2038 .
+>>>
+>>> This gives you an overall idea of the changes.
+>>> Only a few names have to be updated according to review discussions.
+>>> But, you can see what the end filesystems will look like after the vfs
+>>> switch-over.
+>>>
+>>> The problem with ceph is really that the timestamps sent over wire use the same
+>>> encode/ decode function calls whether the timestamp is related to files or not.
+>>> I'm not sure what the plan for wire protocol is here. As Sage
+>>> suggested on the thread:
+>>> http://www.spinics.net/lists/ceph-devel/msg28960.html , you could
+>>> interpret time values as u32.
+>>
+>> I've seen the discussion here but for the time being chose to ignore
+>> that, since whatever would come from it
+>>>
+>>> After this, porting to BSD should be straight forward.
+>>> Then, you can substitute nanotime() for ktime_get_real_ts64()?:
+>>> http://fxr.watson.org/fxr/source/kern/kern_tc.c?im=3#L387,938
+>>
+>> So that is more or less why I suggest to make into a (small) class.
+>> Otherwise there are going to be wraped into ifdef's.
+>> You could even put it just in a *.h file, and than a good compiler would
+>> do the optimisation, and clean-out one call set, and inline.
 > 
-> Perhaps. However ~30TB per server is pretty low with present HDD
-> sizes. 
-These are in fact 24 3TB HDDs per server, but in 6 RAID10s with 4 HDDs
-each.
-
->In the pool on our large cluster where we've seen this issue we
-> have 24x 4TB OSDs per server, and we first hit the problem in pre-prod
-> testing at about 20% usage (with default 4MB objects). We went to 40 /
-> 8. Then as I reported the other day we hit the issue again at
-> somewhere around 50% usage. Now we're at 50 / 12.
+> I'm not sure what you mean by class here.
+> Could you elaborate?
 > 
-High density storage servers have a number of other gotchas and tuning
-requirements, I'd consider this simply another one.
+> ktime apis are not available in the userspace and the changes here are
+> only relevant to linux kernel.
 
-As for increasing the default RBD object size, I'd be weary about
-performance impacts, especially if you ever are going to have a cache-tier.
+'mmm,
 
-If there is no cache-tier in your future for certain, striping might
-counteract larger objects.
+I was certain that I saw the ktime api calls in Ceph code.
+ktime_get_real_ts() is used in a few of the Ceph-modules to replace
+CURRENT_TIME. Perhaps that is not really part of the ktime API??
 
-> The boxes mentioned above are a couple of years old. Today we're
-> buying 2RU servers with 128TB in them (16x 8TB)!
-> 
-As people including me noticed and noted, large OSDs are pushing things,
-in more ways than just this issues.
+eg.:
+-	osd_req->r_mtime = CURRENT_TIME;
++	ktime_get_real_ts(&osd_req->r_mtime);
 
-I know very well how attractive it is from a cost and rack space (also
-a cost factor of course) perspective to build dense storage nodes, but
-most people need more IOPS than storage space and that's were smaller,
-faster OSDs are better suited, as pointed out in the Ceph docs for a long
-time.
+Having this wrapped in a separate class or routine would make porting a
+nobrainer. Other OSes just need to augment this one routine.
 
-> Replacing our current NAS on RBD setup with CephFS is now starting to
-> scare me...
-> 
-If this is going to happen when Bluestore is stable, this _particular_
-problem should be a non-issue hopefully.
-I'm sure Murphy will find other amusing ways to keep us entertained
-and high-stressed, though.
-If nothing else, CephFS would scare me more than a by now well known
-problem that can be tuned away.
-
-
-A question/request for Wade, would it be possible to reformat your OSDs
-with Ext4 (I know deprecated, but if you know what you're doing...), BTRFS?
-I'm wondering if either doesn't exhibit this behavior or if so at a
-different point?
-
-Christian
--- 
-Christian Balzer        Network/Systems Engineer                
-chibi-FW+hd8ioUD0@public.gmane.org   	Global OnLine Japan/Rakuten Communications
-http://www.gol.com/
+--WjW
