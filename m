@@ -1,148 +1,49 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: [PATCH v2 21/24] libceph: Replace CURRENT_TIME with
- ktime_get_real_ts
-Date: Thu, 23 Jun 2016 09:01:27 +0200
-Message-ID: <ded6018e-7ea6-656f-7719-621ea57fe9dc@digiware.nl>
-References: <1466382443-11063-1-git-send-email-deepa.kernel@gmail.com>
- <1466382443-11063-22-git-send-email-deepa.kernel@gmail.com>
- <936f4df1-dfb9-1906-019e-8f82b8e950eb@digiware.nl>
- <CABeXuvr80F+3sBnVgTNL80V3HX+DZHhDNQ47JP7AQ0j5oSUFQQ@mail.gmail.com>
- <5724718b-3071-cb79-11d1-aa558c75bd54@digiware.nl>
- <CABeXuvrqqKiY8wNzz81-d60CGMruAcBUBupfJ-Z=_aNYPM9Vaw@mail.gmail.com>
+Subject: Re: Not matching event states in ./msg/async/AsyncConnection.cc
+Date: Thu, 23 Jun 2016 09:22:29 +0200
+Message-ID: <0cb2f18c-a7e1-7a20-fab6-c4206e8a4aec@digiware.nl>
+References: <0a8a87d5-777c-7e78-0400-cf1978217928@digiware.nl>
+ <a95dcbdc-2447-076a-516d-bb717d58ca0c@digiware.nl>
+ <CACJqLyYq5vBMokPwdG_D=4qPAOp0tDyMe07gzOZWS6K-61J0nA@mail.gmail.com>
+ <1fef436f-c122-e66d-59c9-257bc2360722@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from static.ip-176-74-240-009.signet.nl ([176.74.240.9]:43833 "EHLO
+Received: from static.ip-176-74-240-009.signet.nl ([176.74.240.9]:45110 "EHLO
 	smtp.digiware.nl" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
-	with ESMTP id S1751590AbcFWHCI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2016 03:02:08 -0400
-In-Reply-To: <CABeXuvrqqKiY8wNzz81-d60CGMruAcBUBupfJ-Z=_aNYPM9Vaw@mail.gmail.com>
+	with ESMTP id S1751122AbcFWHWs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2016 03:22:48 -0400
+In-Reply-To: <1fef436f-c122-e66d-59c9-257bc2360722@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Deepa Dinamani <deepa.kernel@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
+To: Haomai Wang <haomai@xsky.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 23-6-2016 02:17, Deepa Dinamani wrote:
->>> Adding Arnd, as he is the overall y2038 project lead.
->>>
->>>>> CURRENT_TIME is not y2038 safe.
->>>>> The macro will be deleted and all the references to it
->>>>> will be replaced by ktime_get_* apis.
->>>>>
->>>>> struct timespec is also not y2038 safe.
->>>>> Retain timespec for timestamp representation here as ceph
->>>>> uses it internally everywhere.
->>>>> These references will be changed to use struct timespec64
->>>>> in a separate patch.
->>>> Hi Deepa,
->>>>
->>>> Although I applaud 64-bit timestamps,
->>>> the ktime_get_* api seems to be a Linux only API.
->>>> So IF ever things need to be the least bit portable, I suggest wrapping
->>>> these routines into a class of itself. So that porting confines itself
->>>> to only that class. (plus/minus hairy semantic details)
->>>
->>> ktime_get_* apis just return 64 bit timestamps.
->>> They are the equivalent of CURRENT_TIME.
->>> Did you have a wrapper for CURRENT_TIME?
->>>
->>> Are these concerns about all of ceph kernel code or just that the libceph
->>> is expected to be portable?
->>>
->>>> For what is now committed the change is not really that big.
->>>>
->>>> On the other hand, I 'll have to start figuring out if FreeBSD really
->>>> does do 64bit timestamps...
->>>
->>> From what I can see here:
->>> http://fxr.watson.org/fxr/ident?im=10;i=__time_t,
->>>
->>> FreeBSD time_t is already 64 bit long.
->>> So it supports 64 bit timestamps already.
+On 23-6-2016 00:16, Willem Jan Withagen wrote:
+> On 22-6-2016 16:36, Haomai Wang wrote:
+>> Oh, sorry. I still realize you are testing on kqueue event backend.
 >>
->> Yup, I look a bit further into it. After your mail I started diging into
->> my memory and realised that 64bit times are quite some time on FreeBSD.
->> And wrote even a small test to be sure...
+>> I submit a pr to fix this. plz help to verify whether it works for you
+>> since I don't have bsd handy...
 >>
->> #include <stdio.h>
->> #include <time.h>
->> #include <sys/stat.h>
->> #include <sys/timespec.h>
->>
->> struct stat s;
->> struct itimerspec t;
->>
->> int main () {
->>         printf( "Size of __time_t: %lu bytes\n", sizeof(__time_t));
->>         printf( "Size of st_atim: %lu bytes\n", sizeof(s.st_atim));
->>         printf( "Size of timespec: %lu bytes\n", sizeof(t.it_interval));
->>
->> }
->> [~/Src/c-code] wjw > print_time_t_size
->> Size of __time_t: 8 bytes
->> Size of st_atim: 16 bytes
->> Size of timespec: 16 bytes
->>
->> So FreeBSD is good.
->>
->>>
->>>> So I would welcome a more elaborate description of the problem (it seems
->>>> that Linux is going 64bit in its inodes??) and what is being fixed and
->>>> how. So that in the porting case not only the code will be the source to
->>>> figure out what is going on.
->>>
->>> Yes, all inode timestamps are going to be switched over to use timespec64 i.e.,
->>> 64 bit timestamps.
->>> We will switch over just the vfs layer: struct inode, struct attr and
->>> struct kstat.
->>> End filesystems such as ceph will still use timespec at this time.
->>> So whenever they access vfs timestamps, they will go through conversion apis:
->>> timespec64_to_timespec() / timespec_to_timespec64().
->>>
->>> My reference tree is https://github.com/deepa-hub/vfs/tree/y2038 .
->>>
->>> This gives you an overall idea of the changes.
->>> Only a few names have to be updated according to review discussions.
->>> But, you can see what the end filesystems will look like after the vfs
->>> switch-over.
->>>
->>> The problem with ceph is really that the timestamps sent over wire use the same
->>> encode/ decode function calls whether the timestamp is related to files or not.
->>> I'm not sure what the plan for wire protocol is here. As Sage
->>> suggested on the thread:
->>> http://www.spinics.net/lists/ceph-devel/msg28960.html , you could
->>> interpret time values as u32.
->>
->> I've seen the discussion here but for the time being chose to ignore
->> that, since whatever would come from it
->>>
->>> After this, porting to BSD should be straight forward.
->>> Then, you can substitute nanotime() for ktime_get_real_ts64()?:
->>> http://fxr.watson.org/fxr/source/kern/kern_tc.c?im=3#L387,938
->>
->> So that is more or less why I suggest to make into a (small) class.
->> Otherwise there are going to be wraped into ifdef's.
->> You could even put it just in a *.h file, and than a good compiler would
->> do the optimisation, and clean-out one call set, and inline.
+>> https://github.com/ceph/ceph/pull/9869
 > 
-> I'm not sure what you mean by class here.
-> Could you elaborate?
-> 
-> ktime apis are not available in the userspace and the changes here are
-> only relevant to linux kernel.
+> I think add_event needs about the same treatment.
+> Trying, Testing ATM....
 
-'mmm,
+errgh, not quite...
 
-I was certain that I saw the ktime api calls in Ceph code.
-ktime_get_real_ts() is used in a few of the Ceph-modules to replace
-CURRENT_TIME. Perhaps that is not really part of the ktime API??
+It also generates errors when trying to delete EVFILT_READ (mask=2) from
+an eventfilter that has both READ and WRITE set (mask=3).
+Next to that the ms_async_messenger threads seem to be busy_waiting
+looping and loading a full CPU core per thread.
 
-eg.:
--	osd_req->r_mtime = CURRENT_TIME;
-+	ktime_get_real_ts(&osd_req->r_mtime);
+So I think I need some testing code to see what the requirements of
+kqueue actually are, compared to what async_messenger does.
 
-Having this wrapped in a separate class or routine would make porting a
-nobrainer. Other OSes just need to augment this one routine.
+Could be that if we want to go from (READ|WRITE) to either READ or WRITE
+the event needs to be deleted first and than added anew.
 
 --WjW
+
