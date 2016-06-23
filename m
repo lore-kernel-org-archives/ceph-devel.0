@@ -1,18 +1,18 @@
 From: Igor Fedotov <ifedotov@mirantis.com>
 Subject: Re: issue in ceph_test_objectstore
-Date: Thu, 23 Jun 2016 19:07:52 +0300
-Message-ID: <abcef1b6-319d-d08a-3030-b0e340e6cf0f@mirantis.com>
+Date: Thu, 23 Jun 2016 19:13:23 +0300
+Message-ID: <2c155e21-3c96-45fe-a132-249f0e974aee@mirantis.com>
 References: <CY1PR0201MB182017D403FA8C2F71C723F9852D0@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f44.google.com ([209.85.215.44]:34024 "EHLO
-	mail-lf0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750876AbcFWQIB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2016 12:08:01 -0400
-Received: by mail-lf0-f44.google.com with SMTP id h129so99232552lfh.1
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Jun 2016 09:07:55 -0700 (PDT)
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:35419 "EHLO
+	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750919AbcFWQNZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2016 12:13:25 -0400
+Received: by mail-lf0-f47.google.com with SMTP id l188so98112976lfe.2
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Jun 2016 09:13:24 -0700 (PDT)
 In-Reply-To: <CY1PR0201MB182017D403FA8C2F71C723F9852D0@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -20,38 +20,19 @@ To: Ramesh Chander <Ramesh.Chander@sandisk.com>, ceph-devel <ceph-devel@vger.ker
 
 Ramesh,
 
-This relates to the topic raised here yesterday - see "plugin infra 
-issues" topic. The question is still open though.
+correcting myself...
 
-The workaround I use is to create a conf file and set "plugin dir" to 
-'.libs":
+the workaround I mentioned is for snappy lookup issue fix.
 
-[global]
-...
+But it looks like your failure is at unrelated area: see 
+BlueStore::TwoQCache
 
-plugin dir = .libs
-
-=================================
-
-and apply the patch below:
-
-diff --git a/src/common/PluginRegistry.cc b/src/common/PluginRegistry.cc
-index fb02d4a..f527940 100644
---- a/src/common/PluginRegistry.cc
-+++ b/src/common/PluginRegistry.cc
-@@ -138,7 +138,7 @@ int PluginRegistry::load(const std::string &type,
-    assert(lock.is_locked());
-    ldout(cct, 1) << __func__ << " " << type << " " << name << dendl;
-
--  std::string fname = cct->_conf->plugin_dir + "/" + type + "/" 
-PLUGIN_PREFIX
-+  std::string fname = cct->_conf->plugin_dir + "/" + PLUGIN_PREFIX
-      + name + PLUGIN_SUFFIX;
-    void *library = dlopen(fname.c_str(), RTLD_NOW);
-    if (!library) {
+This is a new code Sage merged recently. Most probably there is some 
+issue there. Will try to run the test cases against updated code base soon.
 
 
-
+Thanks,
+Igor
 
 On 23.06.2016 18:53, Ramesh Chander wrote:
 > I am hitting this issue when running ceph_test_objectstore with bluestore without bluefs.
