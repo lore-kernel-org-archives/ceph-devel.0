@@ -1,36 +1,31 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: fix spelling mistake: "resgister" -> "register"
-Date: Fri, 24 Jun 2016 10:15:14 +0800
-Message-ID: <359E95D9-1643-49E8-BDBC-23CCA7B047DE@redhat.com>
-References: <1466689524-1836-1-git-send-email-colin.king@canonical.com> <1466697671.1847.5.camel@perches.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1466697671.1847.5.camel@perches.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Colin King <colin.king@canonical.com>, Joe Perches <joe@perches.com>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Tahaa Karim <tahaalibra@gmail.com>
+Subject: interested in doing project
+Date: Fri, 24 Jun 2016 11:33:58 +0530
+Message-ID: <CAJ4+m1gfC5u0qRv3gWtZsPJC=yG-XcHQaYXLoKAYUjceA0xDrA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f50.google.com ([209.85.213.50]:35107 "EHLO
+	mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751249AbcFXGEA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jun 2016 02:04:00 -0400
+Received: by mail-vk0-f50.google.com with SMTP id j2so137327752vkg.2
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Jun 2016 23:03:59 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
+Hey
 
-> On Jun 24, 2016, at 00:01, Joe Perches <joe@perches.com> wrote:
-> 
-> On Thu, 2016-06-23 at 14:45 +0100, Colin King wrote:
->> trivial fix to spelling mistake in pr_err message
-> []
->> diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
-> []
->> @@ -71,7 +71,7 @@ int ceph_fscache_register_fs(struct ceph_fs_client* fsc)
->>  					      &ceph_fscache_fsid_object_def,
->>  					      fsc, true);
->>  	if (!fsc->fscache)
->> -		pr_err("Unable to resgister fsid: %p fscache cookie", fsc);
->> +		pr_err("Unable to register fsid: %p fscache cookie", fsc);
-> 
-> Could change to "cookie\n" to avoid possible interleaving
-> from other messages too.
+I am a student and i have just entered my final year of college.
+During this year we are required to complete a project in a group of 4
+students. Now i have a group and we are very interested in ceph
+project and are willing to work.
 
-Applied , thanks
+we are very interested in ceph and our faculty are also looking
+forward to it. It will be very helpful if any one can provide some
+help with selection of a project and can help provide assistance as an
+coordinator/mentor.
 
-Yan, Zheng
+Thank You
+Tahaa Karim
