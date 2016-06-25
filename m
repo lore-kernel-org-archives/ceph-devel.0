@@ -1,7 +1,7 @@
 From: Deepa Dinamani <deepa.kernel@gmail.com>
-Subject: [PATCH v3 21/24] libceph: Replace CURRENT_TIME with ktime_get_real_ts
-Date: Sat, 25 Jun 2016 14:37:45 -0700
-Message-ID: <1466890668-23400-22-git-send-email-deepa.kernel@gmail.com>
+Subject: [PATCH v3 22/24] fs: ceph: Replace current_fs_time for request stamp
+Date: Sat, 25 Jun 2016 14:37:46 -0700
+Message-ID: <1466890668-23400-23-git-send-email-deepa.kernel@gmail.com>
 References: <1466890668-23400-1-git-send-email-deepa.kernel@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1466890668-23400-1-git-send-email-deepa.kernel@gmail.com>
@@ -10,15 +10,18 @@ To: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: arnd@arndb.de, tglx@linutronix.de, torvalds@linux-foundation.org, tytso@mit.edu, viro@zeniv.linux.org.uk, y2038@lists.linaro.org, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-CURRENT_TIME is not y2038 safe.
-The macro will be deleted and all the references to it
-will be replaced by ktime_get_* apis.
+The current_fs_time() api is being changed to use vfs
+struct inode* as an argument instead of struct super_block*.
 
-struct timespec is also not y2038 safe.
-Retain timespec for timestamp representation here as ceph
-uses it internally everywhere.
-These references will be changed to use struct timespec64
-in a separate patch.
+Set the new mds client request r_stamp field using
+ktime_get_real_ts() instead of using current_fs_time().
+
+Also, since r_stamp is used as mtime on the server, use
+timespec_trunc() to truncate the timestamp, using the right
+granularity from the superblock.
+
+This api will be transitioned to be y2038 safe along
+with vfs.
 
 Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
 Cc: "Yan, Zheng" <zyan@redhat.com>
@@ -26,57 +29,30 @@ Cc: Sage Weil <sage@redhat.com>
 Cc: Ilya Dryomov <idryomov@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 ---
- net/ceph/messenger.c  | 6 ++++--
- net/ceph/osd_client.c | 4 ++--
- 2 files changed, 6 insertions(+), 4 deletions(-)
+ fs/ceph/mds_client.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index a550289..1825eed 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -1366,8 +1366,9 @@ static void prepare_write_keepalive(struct ceph_connection *con)
- 	dout("prepare_write_keepalive %p\n", con);
- 	con_out_kvec_reset(con);
- 	if (con->peer_features & CEPH_FEATURE_MSGR_KEEPALIVE2) {
--		struct timespec now = CURRENT_TIME;
-+		struct timespec now;
- 
-+		ktime_get_real_ts(&now);
- 		con_out_kvec_add(con, sizeof(tag_keepalive2), &tag_keepalive2);
- 		ceph_encode_timespec(&con->out_temp_keepalive2, &now);
- 		con_out_kvec_add(con, sizeof(con->out_temp_keepalive2),
-@@ -3149,8 +3150,9 @@ bool ceph_con_keepalive_expired(struct ceph_connection *con,
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 2103b82..c6cae7a 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1697,6 +1697,7 @@ struct ceph_mds_request *
+ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
  {
- 	if (interval > 0 &&
- 	    (con->peer_features & CEPH_FEATURE_MSGR_KEEPALIVE2)) {
--		struct timespec now = CURRENT_TIME;
-+		struct timespec now;
- 		struct timespec ts;
-+		ktime_get_real_ts(&now);
- 		jiffies_to_timespec(interval, &ts);
- 		ts = timespec_add(con->last_keepalive_ack, ts);
- 		return timespec_compare(&now, &ts) >= 0;
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 8946959..44eb2d0 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -3567,7 +3567,7 @@ ceph_osdc_watch(struct ceph_osd_client *osdc,
- 	ceph_oid_copy(&lreq->t.base_oid, oid);
- 	ceph_oloc_copy(&lreq->t.base_oloc, oloc);
- 	lreq->t.flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK;
--	lreq->mtime = CURRENT_TIME;
-+	ktime_get_real_ts(&lreq->mtime);
+ 	struct ceph_mds_request *req = kzalloc(sizeof(*req), GFP_NOFS);
++	struct timespec ts;
  
- 	lreq->reg_req = alloc_linger_request(lreq);
- 	if (!lreq->reg_req) {
-@@ -3625,7 +3625,7 @@ int ceph_osdc_unwatch(struct ceph_osd_client *osdc,
- 	ceph_oid_copy(&req->r_base_oid, &lreq->t.base_oid);
- 	ceph_oloc_copy(&req->r_base_oloc, &lreq->t.base_oloc);
- 	req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK;
--	req->r_mtime = CURRENT_TIME;
-+	ktime_get_real_ts(&req->r_mtime);
- 	osd_req_op_watch_init(req, 0, lreq->linger_id,
- 			      CEPH_OSD_WATCH_OP_UNWATCH);
+ 	if (!req)
+ 		return ERR_PTR(-ENOMEM);
+@@ -1715,7 +1716,8 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+ 	init_completion(&req->r_safe_completion);
+ 	INIT_LIST_HEAD(&req->r_unsafe_item);
  
+-	req->r_stamp = current_fs_time(mdsc->fsc->sb);
++	ktime_get_real_ts(&ts);
++	req->r_stamp = timespec_trunc(ts, mdsc->fsc->sb->s_time_gran);
+ 
+ 	req->r_op = op;
+ 	req->r_direct_mode = mode;
 -- 
 1.9.1
