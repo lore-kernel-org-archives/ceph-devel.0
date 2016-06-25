@@ -1,466 +1,325 @@
-From: Christian Balzer <chibi@gol.com>
-Subject: Re: [ceph-users] Dramatic performance drop at certain number of
- objects in pool
-Date: Sat, 25 Jun 2016 12:07:29 +0900
-Message-ID: <20160625120729.25cddd76@batzmaru.gol.ad.jp>
-References: <CA+e22ScW-YrDE0mPABSuiDbDpKL=gYZXv6t2hK8RJxYuMaVLHg@mail.gmail.com>
-	<CA+z5Dsy4tbyiL71C8CQCTQ66tY1=9thSWdNA4BSn6=tNfGUE6w@mail.gmail.com>
-	<CA+e22Sc3iY5Lvp4oGwJ_wwpJsOJsWdB1thaHWEAuYP=bbGHAeg@mail.gmail.com>
-	<D38DCB57.131AE%warren.wang@walmart.com>
-	<20160621075856.3ad471d1@batzmaru.gol.ad.jp>
-	<CA+e22SdrwRHmAD=67MpVtUXVyCOmidcoUXrANZVeDJc2tcJfnQ@mail.gmail.com>
-	<CA+z5Dswx7V_HsiQ8TyhXmzJ70-D6kTQrfi8am7wMZOJVzsLerw@mail.gmail.com>
-	<CA+e22SfaiBUQ9Wanay6_oji9t7131o67B2oDtaEW_zXwqCJfbQ@mail.gmail.com>
-	<D391D1A4.145D6%warren.wang@walmart.com>
-	<BL2PR02MB2115BD5C173011A0CB92F964F42D0@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<20160624090806.1246b1ff@batzmaru.gol.ad.jp>
-	<BL2PR02MB21153E31C8C9206120947A3FF42E0@BL2PR02MB2115.namprd02.prod.outlook.com>
-	<CA+e22SdmGJVzJX9+63T41UGsfFcxs9R=xZqniQyTgu-yG=h0cA@mail.gmail.com>
-	<D392D6EB.146C6%warren.wang@walmart.com>
-	<CA+e22SdyRuVmBqRahz3sgyLSbWFPssj0+7QHcUChBeyM860Z-Q@mail.gmail.com>
+From: Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH v3 00/24] Delete CURRENT_TIME_SEC and replace
+	current_fs_time()
+Date: Sat, 25 Jun 2016 14:37:24 -0700
+Message-ID: <1466890668-23400-1-git-send-email-deepa.kernel@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.dentaku.gol.com ([203.216.5.72]:50539 "EHLO
-	smtp02.dentaku.gol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751531AbcFYDHn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jun 2016 23:07:43 -0400
-In-Reply-To: <CA+e22SdyRuVmBqRahz3sgyLSbWFPssj0+7QHcUChBeyM860Z-Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Wade Holler <wade.holler@gmail.com>
-Cc: Warren Wang - ISD <Warren.Wang@walmart.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Blair Bethwaite <blair.bethwaite@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: shaggy-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, jfs-discussion-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, trond.myklebust-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org, clm-b10kYP2dOMg@public.gmane.org, adilger.kernel-m1MBpc4rdrD3fQ9qLvQP4Q@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, paul-r2n+y4ga6xFZroRs9YW3xA@public.gmane.org, sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, y2038-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cm224.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, mfasheh-IBi9RG/b67k@public.gmane.org, john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, dsterba-IBi9RG/b67k@public.gmane.org, jaegeuk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, elder-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tytso-3s7WtUTddSA@public.gmane.org, dedekind1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, jbacik-b10kYP2dOMg@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, eparis-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org, linux-audit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, jack-IBi9RG/b67k@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org, torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, anna.schumaker-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org, linux-btrfs-u79uwXL29Tb/PtFMR13I2A@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
+The series is aimed at getting rid of CURRENT_TIME, CURRENT_TIME_SEC macros
+and replacing current_fs_time() with current_time().
+The macros are not y2038 safe. There is no plan to transition them into being
+y2038 safe.
+ktime_get_* api's can be used in their place. And, these are y2038 safe.
 
-Hello,
+CURRENT_TIME will be deleted after 4.8 rc1 as there is a dependency function
+time64_to_tm() for one of the CURRENT_TIME occurance.
 
-On Fri, 24 Jun 2016 15:45:52 -0400 Wade Holler wrote:
+Thanks to Arnd Bergmann for all the guidance and discussions.
 
-> Not reasonable as you say :
->=20
-> vm.min_free_kbytes =3D 90112
->
-Yeah, my nodes with IB adapters all have that set to at least 512MB, 1G=
-B
-if they're over 64GB.
-=20
-> we're in recovery post expansion (48->54 OSDs) right now but free -t =
-is:
->=20
-> #free -t
->=20
-=46ree can be very misleading when it comes to the actual state of thin=
-gs
-with regards to memory fragmentation.
+Patches 3-5 were mostly generated using coccinelle.
 
-Take a look at "cat /proc/buddyinfo" and read up on linux memory
-fragmentation.
-Also this:
-https://www.mail-archive.com/ceph-users@lists.ceph.com/msg22214.html
+All filesystem timestamps use current_fs_time() for right granularity as
+mentioned in the respective commit texts of patches. This has a changed
+signature, renamed to current_time() and moved to the fs/inode.c.
 
-Christian
+This series also serves as a preparatory series to transition vfs to 64 bit
+timestamps as outlined here: https://lkml.org/lkml/2016/2/12/104 .
 
->               total        used        free      shared  buff/cache
-> available
->=20
-> Mem:      693097104   378383384    36870080      369292   277843640
-> 250931372
->=20
-> Swap:       1048572         956     1047616
->=20
-> Total:    694145676   378384340    37917696
->=20
->=20
-> On Fri, Jun 24, 2016 at 12:24 PM, Warren Wang - ISD
-> <Warren.Wang@walmart.com> wrote:
-> > Oops, that reminds me, do you have min_free_kbytes set to something
-> > reasonable like at least 2-4GB?
-> >
-> > Warren Wang
-> >
-> >
-> >
-> > On 6/24/16, 10:23 AM, "Wade Holler" <wade.holler@gmail.com> wrote:
-> >
-> >>On the vm.vfs_cace_pressure =3D 1 :   We had this initially and I s=
-till
-> >>think it is the best choice for most configs.  However with our lar=
-ge
-> >>memory footprint, vfs_cache_pressure=3D1 increased the likelihood o=
-f
-> >>hitting an issue where our write response time would double; then a
-> >>drop of caches would return response time to normal.  I don't claim=
- to
-> >>totally understand this and I only have speculation at the moment.
-> >>Again thanks for this suggestion, I do think it is best for boxes t=
-hat
-> >>don't have very large memory.
-> >>
-> >>@ Christian - reformatting to btrfs or ext4 is an option in my test
-> >>cluster.  I thought about that but needed to sort xfs first. (thats
-> >>what production will run right now) You all have helped me do that =
-and
-> >>thank you again.  I will circle back and test btrfs under the same
-> >>conditions.  I suspect that it will behave similarly but it's only =
-a
-> >>day and half's work or so to test.
-> >>
-> >>Best Regards,
-> >>Wade
-> >>
-> >>
-> >>On Thu, Jun 23, 2016 at 8:09 PM, Somnath Roy <Somnath.Roy@sandisk.c=
-om>
-> >>wrote:
-> >>> Oops , typo , 128 GB :-)...
-> >>>
-> >>> -----Original Message-----
-> >>> From: Christian Balzer [mailto:chibi@gol.com]
-> >>> Sent: Thursday, June 23, 2016 5:08 PM
-> >>> To: ceph-users@lists.ceph.com
-> >>> Cc: Somnath Roy; Warren Wang - ISD; Wade Holler; Blair Bethwaite;
-> >>> Ceph
-> >>>Development
-> >>> Subject: Re: [ceph-users] Dramatic performance drop at certain nu=
-mber
-> >>>of objects in pool
-> >>>
-> >>>
-> >>> Hello,
-> >>>
-> >>> On Thu, 23 Jun 2016 22:24:59 +0000 Somnath Roy wrote:
-> >>>
-> >>>> Or even vm.vfs_cache_pressure =3D 0 if you have sufficient memor=
-y to
-> >>>> *pin* inode/dentries in memory. We are using that for long now (=
-with
-> >>>> 128 TB node memory) and it seems helping specially for the rando=
-m
-> >>>> write workload and saving xattrs read in between.
-> >>>>
-> >>> 128TB node memory, really?
-> >>> Can I have some of those, too? ^o^
-> >>> And here I was thinking that Wade's 660GB machines were on the
-> >>>excessive side.
-> >>>
-> >>> There's something to be said (and optimized) when your storage no=
-des
-> >>>have the same or more RAM as your compute nodes...
-> >>>
-> >>> As for Warren, well spotted.
-> >>> I personally use vm.vfs_cache_pressure =3D 1, this avoids the pot=
-ential
-> >>>fireworks if your memory is really needed elsewhere, while keeping
-> >>>things in memory normally.
-> >>>
-> >>> Christian
-> >>>
-> >>>> Thanks & Regards
-> >>>> Somnath
-> >>>>
-> >>>> -----Original Message-----
-> >>>> From: ceph-users [mailto:ceph-users-bounces@lists.ceph.com] On
-> >>>> Behalf Of Warren Wang - ISD Sent: Thursday, June 23, 2016 3:09 P=
-M
-> >>>> To: Wade Holler; Blair Bethwaite
-> >>>> Cc: Ceph Development; ceph-users@lists.ceph.com
-> >>>> Subject: Re: [ceph-users] Dramatic performance drop at certain
-> >>>> number of objects in pool
-> >>>>
-> >>>> vm.vfs_cache_pressure =3D 100
-> >>>>
-> >>>> Go the other direction on that. You=E6=98=93ll want to keep it l=
-ow to help
-> >>>> keep inode/dentry info in memory. We use 10, and haven=E6=98=93t=
- had a
-> >>>> problem.
-> >>>>
-> >>>>
-> >>>> Warren Wang
-> >>>>
-> >>>>
-> >>>>
-> >>>>
-> >>>> On 6/22/16, 9:41 PM, "Wade Holler" <wade.holler@gmail.com> wrote=
-:
-> >>>>
-> >>>> >Blairo,
-> >>>> >
-> >>>> >We'll speak in pre-replication numbers, replication for this po=
-ol
-> >>>> >is
-> >>>>3.
-> >>>> >
-> >>>> >23.3 Million Objects / OSD
-> >>>> >pg_num 2048
-> >>>> >16 OSDs / Server
-> >>>> >3 Servers
-> >>>> >660 GB RAM Total, 179 GB Used (free -t) / Server vm.swappiness =
-=3D 1
-> >>>> >vm.vfs_cache_pressure =3D 100
-> >>>> >
-> >>>> >Workload is native librados with python.  ALL 4k objects.
-> >>>> >
-> >>>> >Best Regards,
-> >>>> >Wade
-> >>>> >
-> >>>> >
-> >>>> >On Wed, Jun 22, 2016 at 9:33 PM, Blair Bethwaite
-> >>>> ><blair.bethwaite@gmail.com> wrote:
-> >>>> >> Wade, good to know.
-> >>>> >>
-> >>>> >> For the record, what does this work out to roughly per OSD? A=
-nd
-> >>>> >> how much RAM and how many PGs per OSD do you have?
-> >>>> >>
-> >>>> >> What's your workload? I wonder whether for certain workloads
-> >>>> >> (e.g. RBD) it's better to increase default object size somewh=
-at
-> >>>> >> before pushing the split/merge up a lot...
-> >>>> >>
-> >>>> >> Cheers,
-> >>>> >>
-> >>>> >> On 23 June 2016 at 11:26, Wade Holler <wade.holler@gmail.com>
-> >>>> >> wrote:
-> >>>> >>> Based on everyones suggestions; The first modification to 50=
- /
-> >>>> >>> 16 enabled our config to get to ~645Mill objects before the
-> >>>> >>> behavior in question was observed (~330 was the previous
-> >>>> >>> ceiling). Subsequent modification to 50 / 24 has enabled us =
-to
-> >>>> >>> get to 1.1 Billion+
-> >>>> >>>
-> >>>> >>> Thank you all very much for your support and assistance.
-> >>>> >>>
-> >>>> >>> Best Regards,
-> >>>> >>> Wade
-> >>>> >>>
-> >>>> >>>
-> >>>> >>> On Mon, Jun 20, 2016 at 6:58 PM, Christian Balzer
-> >>>> >>> <chibi@gol.com>
-> >>>> >>>wrote:
-> >>>> >>>>
-> >>>> >>>> Hello,
-> >>>> >>>>
-> >>>> >>>> On Mon, 20 Jun 2016 20:47:32 +0000 Warren Wang - ISD wrote:
-> >>>> >>>>
-> >>>> >>>>> Sorry, late to the party here. I agree, up the merge and s=
-plit
-> >>>> >>>>>thresholds. We're as high as 50/12. I chimed in on an RH ti=
-cket
-> >>>> >>>>>here.
-> >>>> >>>>> One of those things you just have to find out as an operat=
-or
-> >>>> >>>>>since it's  not well documented :(
-> >>>> >>>>>
-> >>>> >>>>> https://bugzilla.redhat.com/show_bug.cgi?id=3D1219974
-> >>>> >>>>>
-> >>>> >>>>> We have over 200 million objects in this cluster, and it's
-> >>>> >>>>> still
-> >>>> >>>>>doing  over 15000 write IOPS all day long with 302 spinning
-> >>>> >>>>>drives
-> >>>> >>>>>+ SATA SSD  journals. Having enough memory and dropping you=
-r
-> >>>> >>>>>vfs_cache_pressure  should also help.
-> >>>> >>>>>
-> >>>> >>>> Indeed.
-> >>>> >>>>
-> >>>> >>>> Since it was asked in that bug report and also my first
-> >>>> >>>>suspicion, it  would probably be good time to clarify that i=
-t
-> >>>> >>>>isn't the splits that cause  the performance degradation, bu=
-t
-> >>>> >>>>the resulting inflation of dir entries  and exhaustion of SL=
-AB
-> >>>> >>>>and thus having to go to disk for things that  normally woul=
-d
-> >>>> >>>>be in
-> >>>>memory.
-> >>>> >>>>
-> >>>> >>>> Looking at Blair's graph from yesterday pretty much makes t=
-hat
-> >>>> >>>>clear, a  purely split caused degradation should have relent=
-ed
-> >>>> >>>>much quicker.
-> >>>> >>>>
-> >>>> >>>>
-> >>>> >>>>> Keep in mind that if you change the values, it won't take
-> >>>> >>>>> effect immediately. It only merges them back if the direct=
-ory
-> >>>> >>>>> is under the calculated threshold and a write occurs (mayb=
-e a
-> >>>> >>>>> read, I forget).
-> >>>> >>>>>
-> >>>> >>>> If it's a read a plain scrub might do the trick.
-> >>>> >>>>
-> >>>> >>>> Christian
-> >>>> >>>>> Warren
-> >>>> >>>>>
-> >>>> >>>>>
-> >>>> >>>>> From: ceph-users
-> >>>> >>>>>
-> >>>>
-> >>>>>>>>><ceph-users-bounces@lists.ceph.com<mailto:ceph-users-bounces=
-@lists.
-> >>>> >>>>>cep
-> >>>> >>>>>h.com>>
-> >>>> >>>>> on behalf of Wade Holler
-> >>>> >>>>> <wade.holler@gmail.com<mailto:wade.holler@gmail.com>> Date=
-:
-> >>>> >>>>>Monday, June  20, 2016 at 2:48 PM To: Blair Bethwaite
-> >>>> >>>>><blair.bethwaite@gmail.com<mailto:blair.bethwaite@gmail.com=
->>,
-> >>>> >>>>>Wido den  Hollander <wido@42on.com<mailto:wido@42on.com>> C=
-c:
-> >>>> >>>>>Ceph Development
-> >>>> >>>>><ceph-devel@vger.kernel.org<mailto:ceph-devel@vger.kernel.o=
-rg>>,
-> >>>> >>>>> "ceph-users@lists.ceph.com<mailto:ceph-users@lists.ceph.co=
-m>"
-> >>>> >>>>> <ceph-users@lists.ceph.com<mailto:ceph-users@lists.ceph.co=
-m>>
-> >>>> >>>>>Subject:
-> >>>> >>>>> Re: [ceph-users] Dramatic performance drop at certain numb=
-er
-> >>>> >>>>> of
-> >>>> >>>>>objects  in pool
-> >>>> >>>>>
-> >>>> >>>>> Thanks everyone for your replies.  I sincerely appreciate =
-it.
-> >>>> >>>>> We are testing with different pg_num and
-> >>>> >>>>> filestore_split_multiple settings. Early indications are .=
-=2E..
-> >>>> >>>>> well not great. Regardless it is nice to understand the
-> >>>> >>>>> symptoms better so we try to design around it.
-> >>>> >>>>>
-> >>>> >>>>> Best Regards,
-> >>>> >>>>> Wade
-> >>>> >>>>>
-> >>>> >>>>>
-> >>>> >>>>> On Mon, Jun 20, 2016 at 2:32 AM Blair Bethwaite
-> >>>> >>>>><blair.bethwaite@gmail.com<mailto:blair.bethwaite@gmail.com=
->>
-> >>>>wrote:
-> >>>> >>>>>On
-> >>>> >>>>> 20 June 2016 at 09:21, Blair Bethwaite
-> >>>> >>>>><blair.bethwaite@gmail.com<mailto:blair.bethwaite@gmail.com=
->>
-> >>>>wrote:
-> >>>> >>>>> > slow request issues). If you watch your xfs stats you'll
-> >>>> >>>>> > likely get further confirmation. In my experience
-> >>>> >>>>> > xs_dir_lookups balloons
-> >>>> >>>>>(which
-> >>>> >>>>> > means directory lookups are missing cache and going to
-> >>>> >>>>> > disk).
-> >>>> >>>>>
-> >>>> >>>>> Murphy's a bitch. Today we upgraded a cluster to latest Ha=
-mmer
-> >>>> >>>>> in preparation for Jewel/RHCS2. Turns out when we last hit
-> >>>> >>>>> this very problem we had only ephemerally set the new
-> >>>> >>>>> filestore merge/split values - oops. Here's what started
-> >>>> >>>>> happening when we upgraded and restarted a bunch of OSDs:
-> >>>> >>>>>
-> >>>> >>>>>https://au-east.erc.monash.edu.au/swift/v1/public/grafana-c=
-eph-xs
-> >>>> >>>>>_d
-> >>>> >>>>>ir_
-> >>>> >>>>>lookup.png
-> >>>> >>>>>
-> >>>> >>>>> Seemed to cause lots of slow requests :-/. We corrected it
-> >>>> >>>>> about 12:30, then still took a while to settle.
-> >>>> >>>>>
-> >>>> >>>>> --
-> >>>> >>>>> Cheers,
-> >>>> >>>>> ~Blairo
-> >>>> >>>>>
-> >>>> >>>>> This email and any files transmitted with it are confident=
-ial
-> >>>> >>>>>and intended solely for the individual or entity to whom th=
-ey
-> >>>> >>>>>are addressed.
-> >>>> >>>>> If you have received this email in error destroy it
-> >>>> >>>>> immediately.
-> >>>> >>>>>***  Walmart Confidential ***
-> >>>> >>>>
-> >>>> >>>>
-> >>>> >>>> --
-> >>>> >>>> Christian Balzer        Network/Systems Engineer
-> >>>> >>>> chibi@gol.com           Global OnLine Japan/Rakuten
-> >>>> >>>> Communications http://www.gol.com/
-> >>>> >>
-> >>>> >>
-> >>>> >>
-> >>>> >> --
-> >>>> >> Cheers,
-> >>>> >> ~Blairo
-> >>>>
-> >>>> This email and any files transmitted with it are confidential an=
-d
-> >>>> intended solely for the individual or entity to whom they are
-> >>>>addressed.
-> >>>> If you have received this email in error destroy it immediately.=
- ***
-> >>>> Walmart Confidential ***
-> >>>> _______________________________________________
-> >>>> ceph-users mailing list ceph-users@lists.ceph.com
-> >>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com PLEASE NO=
-TE:
-> >>>> The information contained in this electronic mail message is
-> >>>> intended only for the use of the designated recipient(s) named
-> >>>> above. If the reader of this message is not the intended recipie=
-nt,
-> >>>> you are hereby notified that you have received this message in
-> >>>> error and that any review, dissemination, distribution, or copyi=
-ng
-> >>>> of this message is strictly prohibited. If you have received thi=
-s
-> >>>> communication in error, please notify the sender by telephone or
-> >>>> e-mail (as shown above) immediately and destroy any and all copi=
-es
-> >>>> of this message in your possession (whether hard copies or
-> >>>> electronically stored copies).
-> >>>> _______________________________________________ ceph-users maili=
-ng
-> >>>> list ceph-users@lists.ceph.com
-> >>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> >>>>
-> >>>
-> >>>
-> >>> --
-> >>> Christian Balzer        Network/Systems Engineer
-> >>> chibi@gol.com   Global OnLine Japan/Rakuten Communications
-> >>> http://www.gol.com/
-> >>> PLEASE NOTE: The information contained in this electronic mail
-> >>> message
-> >>>is intended only for the use of the designated recipient(s) named
-> >>>above. If the reader of this message is not the intended recipient=
-,
-> >>>you are hereby notified that you have received this message in err=
-or
-> >>>and that any review, dissemination, distribution, or copying of th=
-is
-> >>>message is strictly prohibited. If you have received this
-> >>>communication in error, please notify the sender by telephone or
-> >>>e-mail (as shown above) immediately and destroy any and all copies=
- of
-> >>>this message in your possession (whether hard copies or
-> >>>electronically stored copies).
-> >
-> >
-> > This email and any files transmitted with it are confidential and
-> > intended solely for the individual or entity to whom they are
-> > addressed. If you have received this email in error destroy it
-> > immediately. *** Walmart Confidential ***
->=20
+As per Linus's suggestion in https://lkml.org/lkml/2016/5/24/663 , all the
+inode timestamp changes have been squashed into a single patch. Also,
+current_time() now is used as a single generic vfs filesystem timestamp api.
+It also takes struct inode* as argument instead of struct super_block*.
+Posting all patches together in a bigger series so that the big picture is
+clear.
 
+As per the suggestion in https://lwn.net/Articles/672598/, CURRENT_TIME macro
+bug fixes are being handled in a series separate from transitioning vfs to use.
 
---=20
-Christian Balzer        Network/Systems Engineer               =20
-chibi@gol.com   	Global OnLine Japan/Rakuten Communications
-http://www.gol.com/
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Changes since v2:
+* Fix buildbot error for uninitalized sb in inode.
+* Minor fixes according to Arnd's comments.
+* Leave out the fnic and deletion of CURRENT_TIME to be submitted after 4.8 rc1.
+
+Deepa Dinamani (24):
+  vfs: Add current_time() api
+  fs: proc: Delete inode time initializations in proc_alloc_inode()
+  fs: Replace CURRENT_TIME with current_time() for inode timestamps
+  fs: Replace CURRENT_TIME_SEC with current_time() for inode timestamps
+  fs: Replace current_fs_time() with current_time()
+  fs: jfs: Replace CURRENT_TIME_SEC by current_time()
+  fs: ext4: Use current_time() for inode timestamps
+  fs: ubifs: Replace CURRENT_TIME_SEC with current_time
+  fs: btrfs: Use ktime_get_real_ts for root ctime
+  fs: udf: Replace CURRENT_TIME with current_time()
+  fs: cifs: Replace CURRENT_TIME by current_time()
+  fs: cifs: Replace CURRENT_TIME with ktime_get_real_ts()
+  fs: cifs: Replace CURRENT_TIME by get_seconds
+  fs: f2fs: Use ktime_get_real_seconds for sit_info times
+  drivers: staging: lustre: Replace CURRENT_TIME with current_time()
+  fs: ocfs2: Use time64_t to represent orphan scan times
+  fs: ocfs2: Replace CURRENT_TIME with ktime_get_real_seconds()
+  audit: Use timespec64 to represent audit timestamps
+  fs: nfs: Make nfs boot time y2038 safe
+  block: Replace CURRENT_TIME with ktime_get_real_ts
+  libceph: Replace CURRENT_TIME with ktime_get_real_ts
+  fs: ceph: Replace current_fs_time for request stamp
+  time: Delete current_fs_time() function
+  time: Delete CURRENT_TIME_SEC
+
+ arch/powerpc/platforms/cell/spufs/inode.c          |  2 +-
+ arch/s390/hypfs/inode.c                            |  4 +--
+ drivers/block/rbd.c                                |  2 +-
+ drivers/char/sonypi.c                              |  2 +-
+ drivers/infiniband/hw/qib/qib_fs.c                 |  2 +-
+ drivers/misc/ibmasm/ibmasmfs.c                     |  2 +-
+ drivers/oprofile/oprofilefs.c                      |  2 +-
+ drivers/platform/x86/sony-laptop.c                 |  2 +-
+ drivers/staging/lustre/lustre/llite/llite_lib.c    | 16 ++++++------
+ drivers/staging/lustre/lustre/llite/namei.c        |  4 +--
+ drivers/staging/lustre/lustre/mdc/mdc_reint.c      |  6 ++---
+ .../lustre/lustre/obdclass/linux/linux-obdo.c      |  6 ++---
+ drivers/staging/lustre/lustre/obdclass/obdo.c      |  6 ++---
+ drivers/staging/lustre/lustre/osc/osc_io.c         |  2 +-
+ drivers/usb/core/devio.c                           | 18 +++++++-------
+ drivers/usb/gadget/function/f_fs.c                 |  8 +++---
+ drivers/usb/gadget/legacy/inode.c                  |  2 +-
+ fs/9p/vfs_inode.c                                  |  2 +-
+ fs/adfs/inode.c                                    |  2 +-
+ fs/affs/amigaffs.c                                 |  6 ++---
+ fs/affs/inode.c                                    |  2 +-
+ fs/attr.c                                          |  2 +-
+ fs/autofs4/inode.c                                 |  2 +-
+ fs/autofs4/root.c                                  |  6 ++---
+ fs/bad_inode.c                                     |  2 +-
+ fs/bfs/dir.c                                       | 14 +++++------
+ fs/binfmt_misc.c                                   |  2 +-
+ fs/btrfs/file.c                                    |  6 ++---
+ fs/btrfs/inode.c                                   | 22 ++++++++--------
+ fs/btrfs/ioctl.c                                   |  8 +++---
+ fs/btrfs/root-tree.c                               |  3 ++-
+ fs/btrfs/transaction.c                             |  4 +--
+ fs/btrfs/xattr.c                                   |  2 +-
+ fs/ceph/file.c                                     |  4 +--
+ fs/ceph/inode.c                                    |  2 +-
+ fs/ceph/mds_client.c                               |  4 ++-
+ fs/ceph/xattr.c                                    |  2 +-
+ fs/cifs/cifsencrypt.c                              |  4 ++-
+ fs/cifs/cifssmb.c                                  | 10 ++++----
+ fs/cifs/file.c                                     |  4 +--
+ fs/cifs/inode.c                                    | 28 +++++++++++----------
+ fs/coda/dir.c                                      |  2 +-
+ fs/coda/file.c                                     |  2 +-
+ fs/coda/inode.c                                    |  2 +-
+ fs/configfs/inode.c                                |  6 ++---
+ fs/debugfs/inode.c                                 |  2 +-
+ fs/devpts/inode.c                                  |  6 ++---
+ fs/efivarfs/inode.c                                |  2 +-
+ fs/exofs/dir.c                                     |  6 ++---
+ fs/exofs/inode.c                                   |  4 +--
+ fs/exofs/namei.c                                   |  6 ++---
+ fs/ext2/acl.c                                      |  2 +-
+ fs/ext2/dir.c                                      |  6 ++---
+ fs/ext2/ialloc.c                                   |  2 +-
+ fs/ext2/inode.c                                    |  4 +--
+ fs/ext2/ioctl.c                                    |  4 +--
+ fs/ext2/namei.c                                    |  6 ++---
+ fs/ext2/super.c                                    |  2 +-
+ fs/ext2/xattr.c                                    |  2 +-
+ fs/ext4/acl.c                                      |  2 +-
+ fs/ext4/ext4.h                                     |  6 -----
+ fs/ext4/extents.c                                  | 10 ++++----
+ fs/ext4/ialloc.c                                   |  2 +-
+ fs/ext4/inline.c                                   |  4 +--
+ fs/ext4/inode.c                                    |  6 ++---
+ fs/ext4/ioctl.c                                    |  8 +++---
+ fs/ext4/namei.c                                    | 24 ++++++++++--------
+ fs/ext4/super.c                                    |  2 +-
+ fs/ext4/xattr.c                                    |  2 +-
+ fs/f2fs/dir.c                                      |  8 +++---
+ fs/f2fs/file.c                                     |  8 +++---
+ fs/f2fs/inline.c                                   |  2 +-
+ fs/f2fs/namei.c                                    | 12 ++++-----
+ fs/f2fs/segment.c                                  |  2 +-
+ fs/f2fs/segment.h                                  |  5 ++--
+ fs/f2fs/xattr.c                                    |  2 +-
+ fs/fat/dir.c                                       |  2 +-
+ fs/fat/file.c                                      |  6 ++---
+ fs/fat/inode.c                                     |  2 +-
+ fs/fat/namei_msdos.c                               | 12 ++++-----
+ fs/fat/namei_vfat.c                                | 10 ++++----
+ fs/fuse/control.c                                  |  2 +-
+ fs/fuse/dir.c                                      |  2 +-
+ fs/gfs2/bmap.c                                     |  8 +++---
+ fs/gfs2/dir.c                                      | 12 ++++-----
+ fs/gfs2/inode.c                                    |  8 +++---
+ fs/gfs2/quota.c                                    |  2 +-
+ fs/gfs2/xattr.c                                    |  8 +++---
+ fs/hfs/catalog.c                                   |  8 +++---
+ fs/hfs/dir.c                                       |  2 +-
+ fs/hfs/inode.c                                     |  2 +-
+ fs/hfsplus/catalog.c                               |  8 +++---
+ fs/hfsplus/dir.c                                   |  6 ++---
+ fs/hfsplus/inode.c                                 |  2 +-
+ fs/hfsplus/ioctl.c                                 |  2 +-
+ fs/hugetlbfs/inode.c                               | 10 ++++----
+ fs/inode.c                                         | 29 +++++++++++++++++++---
+ fs/jffs2/acl.c                                     |  2 +-
+ fs/jffs2/fs.c                                      |  2 +-
+ fs/jfs/acl.c                                       |  2 +-
+ fs/jfs/inode.c                                     |  2 +-
+ fs/jfs/ioctl.c                                     |  2 +-
+ fs/jfs/jfs_inode.c                                 |  2 +-
+ fs/jfs/namei.c                                     | 24 +++++++++---------
+ fs/jfs/super.c                                     |  2 +-
+ fs/jfs/xattr.c                                     |  2 +-
+ fs/kernfs/inode.c                                  |  2 +-
+ fs/libfs.c                                         | 14 +++++------
+ fs/locks.c                                         |  2 +-
+ fs/logfs/dir.c                                     |  6 ++---
+ fs/logfs/file.c                                    |  2 +-
+ fs/logfs/inode.c                                   |  4 +--
+ fs/logfs/readwrite.c                               |  4 +--
+ fs/minix/bitmap.c                                  |  2 +-
+ fs/minix/dir.c                                     |  6 ++---
+ fs/minix/itree_common.c                            |  4 +--
+ fs/minix/namei.c                                   |  4 +--
+ fs/nfs/client.c                                    |  2 +-
+ fs/nfs/netns.h                                     |  2 +-
+ fs/nfs/nfs4proc.c                                  | 10 +++++---
+ fs/nfs/nfs4xdr.c                                   |  2 +-
+ fs/nfsd/blocklayout.c                              |  2 +-
+ fs/nilfs2/dir.c                                    |  6 ++---
+ fs/nilfs2/inode.c                                  |  4 +--
+ fs/nilfs2/ioctl.c                                  |  2 +-
+ fs/nilfs2/namei.c                                  |  6 ++---
+ fs/nsfs.c                                          |  2 +-
+ fs/ntfs/inode.c                                    |  2 +-
+ fs/ntfs/mft.c                                      |  2 +-
+ fs/ocfs2/acl.c                                     |  2 +-
+ fs/ocfs2/alloc.c                                   |  2 +-
+ fs/ocfs2/aops.c                                    |  2 +-
+ fs/ocfs2/cluster/heartbeat.c                       |  2 +-
+ fs/ocfs2/dir.c                                     |  4 +--
+ fs/ocfs2/dlmfs/dlmfs.c                             |  4 +--
+ fs/ocfs2/file.c                                    | 12 ++++-----
+ fs/ocfs2/inode.c                                   |  2 +-
+ fs/ocfs2/journal.c                                 |  4 +--
+ fs/ocfs2/move_extents.c                            |  2 +-
+ fs/ocfs2/namei.c                                   | 16 ++++++------
+ fs/ocfs2/ocfs2.h                                   |  2 +-
+ fs/ocfs2/refcounttree.c                            |  4 +--
+ fs/ocfs2/super.c                                   |  2 +-
+ fs/ocfs2/xattr.c                                   |  2 +-
+ fs/omfs/dir.c                                      |  4 +--
+ fs/omfs/inode.c                                    |  2 +-
+ fs/openpromfs/inode.c                              |  2 +-
+ fs/orangefs/file.c                                 |  2 +-
+ fs/orangefs/inode.c                                |  2 +-
+ fs/orangefs/namei.c                                | 10 ++++----
+ fs/pipe.c                                          |  2 +-
+ fs/posix_acl.c                                     |  2 +-
+ fs/proc/base.c                                     |  2 +-
+ fs/proc/inode.c                                    |  3 +--
+ fs/proc/proc_sysctl.c                              |  2 +-
+ fs/proc/self.c                                     |  2 +-
+ fs/proc/thread_self.c                              |  2 +-
+ fs/pstore/inode.c                                  |  2 +-
+ fs/ramfs/inode.c                                   |  6 ++---
+ fs/reiserfs/inode.c                                |  2 +-
+ fs/reiserfs/ioctl.c                                |  4 +--
+ fs/reiserfs/namei.c                                | 12 ++++-----
+ fs/reiserfs/stree.c                                |  8 +++---
+ fs/reiserfs/super.c                                |  2 +-
+ fs/reiserfs/xattr.c                                |  6 ++---
+ fs/reiserfs/xattr_acl.c                            |  2 +-
+ fs/sysv/dir.c                                      |  6 ++---
+ fs/sysv/ialloc.c                                   |  2 +-
+ fs/sysv/itree.c                                    |  4 +--
+ fs/sysv/namei.c                                    |  4 +--
+ fs/tracefs/inode.c                                 |  2 +-
+ fs/ubifs/dir.c                                     | 10 ++++----
+ fs/ubifs/file.c                                    | 12 ++++-----
+ fs/ubifs/ioctl.c                                   |  2 +-
+ fs/ubifs/misc.h                                    | 10 --------
+ fs/ubifs/sb.c                                      | 14 ++++++++---
+ fs/ubifs/xattr.c                                   |  6 ++---
+ fs/udf/ialloc.c                                    |  2 +-
+ fs/udf/inode.c                                     |  4 +--
+ fs/udf/namei.c                                     | 20 +++++++--------
+ fs/udf/super.c                                     |  9 ++++---
+ fs/ufs/dir.c                                       |  6 ++---
+ fs/ufs/ialloc.c                                    |  8 +++---
+ fs/ufs/inode.c                                     |  6 ++---
+ fs/ufs/namei.c                                     |  6 ++---
+ fs/xfs/xfs_acl.c                                   |  2 +-
+ fs/xfs/xfs_inode.c                                 |  2 +-
+ fs/xfs/xfs_iops.c                                  |  2 +-
+ fs/xfs/xfs_trans_inode.c                           |  2 +-
+ include/linux/audit.h                              |  4 +--
+ include/linux/fs.h                                 |  2 +-
+ include/linux/time.h                               |  1 -
+ ipc/mqueue.c                                       | 18 +++++++-------
+ kernel/audit.c                                     | 10 ++++----
+ kernel/audit.h                                     |  2 +-
+ kernel/auditsc.c                                   |  6 ++---
+ kernel/bpf/inode.c                                 |  2 +-
+ kernel/time/time.c                                 | 14 -----------
+ mm/shmem.c                                         | 20 +++++++--------
+ net/ceph/messenger.c                               |  6 +++--
+ net/ceph/osd_client.c                              |  4 +--
+ net/sunrpc/rpc_pipe.c                              |  2 +-
+ security/inode.c                                   |  2 +-
+ security/selinux/selinuxfs.c                       |  2 +-
+ 204 files changed, 536 insertions(+), 518 deletions(-)
+
+-- 
+1.9.1
+
+Cc: adilger.kernel-m1MBpc4rdrD3fQ9qLvQP4Q@public.gmane.org
+Cc: adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: anna.schumaker-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: clm-b10kYP2dOMg@public.gmane.org
+Cc: cm224.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org
+Cc: dedekind1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Cc: dsterba-IBi9RG/b67k@public.gmane.org
+Cc: elder-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: eparis-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org
+Cc: idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Cc: jack-IBi9RG/b67k@public.gmane.org
+Cc: jaegeuk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: jbacik-b10kYP2dOMg@public.gmane.org
+Cc: jfs-discussion-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+Cc: jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org
+Cc: john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: linux-audit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+Cc: linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Cc: mfasheh-IBi9RG/b67k@public.gmane.org
+Cc: ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org
+Cc: paul-r2n+y4ga6xFZroRs9YW3xA@public.gmane.org
+Cc: sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org
+Cc: shaggy-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: trond.myklebust-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org
+Cc: zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
