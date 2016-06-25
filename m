@@ -1,11 +1,9 @@
-From: Wade Holler <wade.holler-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Dramatic performance drop at certain number of
+From: Christian Balzer <chibi@gol.com>
+Subject: Re: [ceph-users] Dramatic performance drop at certain number of
  objects in pool
-Date: Fri, 24 Jun 2016 15:45:52 -0400
-Message-ID: <CA+e22SdyRuVmBqRahz3sgyLSbWFPssj0+7QHcUChBeyM860Z-Q@mail.gmail.com>
+Date: Sat, 25 Jun 2016 12:07:29 +0900
+Message-ID: <20160625120729.25cddd76@batzmaru.gol.ad.jp>
 References: <CA+e22ScW-YrDE0mPABSuiDbDpKL=gYZXv6t2hK8RJxYuMaVLHg@mail.gmail.com>
-	<1450235390.2134.1466084299677@ox.pcextreme.nl>
-	<CA+z5DszqHuevkAF3W01R=7AAeqVcyuHZTX0+bAvThgihvOjwuA@mail.gmail.com>
 	<CA+z5Dsy4tbyiL71C8CQCTQ66tY1=9thSWdNA4BSn6=tNfGUE6w@mail.gmail.com>
 	<CA+e22Sc3iY5Lvp4oGwJ_wwpJsOJsWdB1thaHWEAuYP=bbGHAeg@mail.gmail.com>
 	<D38DCB57.131AE%warren.wang@walmart.com>
@@ -19,241 +17,450 @@ References: <CA+e22ScW-YrDE0mPABSuiDbDpKL=gYZXv6t2hK8RJxYuMaVLHg@mail.gmail.com>
 	<BL2PR02MB21153E31C8C9206120947A3FF42E0@BL2PR02MB2115.namprd02.prod.outlook.com>
 	<CA+e22SdmGJVzJX9+63T41UGsfFcxs9R=xZqniQyTgu-yG=h0cA@mail.gmail.com>
 	<D392D6EB.146C6%warren.wang@walmart.com>
+	<CA+e22SdyRuVmBqRahz3sgyLSbWFPssj0+7QHcUChBeyM860Z-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <D392D6EB.146C6%warren.wang-dFwxUrggiyBBDgjK7y7TUQ@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Warren Wang - ISD <Warren.Wang-dFwxUrggiyBBDgjK7y7TUQ@public.gmane.org>
-Cc: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp02.dentaku.gol.com ([203.216.5.72]:50539 "EHLO
+	smtp02.dentaku.gol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751531AbcFYDHn convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jun 2016 23:07:43 -0400
+In-Reply-To: <CA+e22SdyRuVmBqRahz3sgyLSbWFPssj0+7QHcUChBeyM860Z-Q@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Wade Holler <wade.holler@gmail.com>
+Cc: Warren Wang - ISD <Warren.Wang@walmart.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Blair Bethwaite <blair.bethwaite@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Tm90IHJlYXNvbmFibGUgYXMgeW91IHNheSA6Cgp2bS5taW5fZnJlZV9rYnl0ZXMgPSA5MDExMgoK
-d2UncmUgaW4gcmVjb3ZlcnkgcG9zdCBleHBhbnNpb24gKDQ4LT41NCBPU0RzKSByaWdodCBub3cg
-YnV0IGZyZWUgLXQgaXM6CgojZnJlZSAtdAoKICAgICAgICAgICAgICB0b3RhbCAgICAgICAgdXNl
-ZCAgICAgICAgZnJlZSAgICAgIHNoYXJlZCAgYnVmZi9jYWNoZSAgIGF2YWlsYWJsZQoKTWVtOiAg
-ICAgIDY5MzA5NzEwNCAgIDM3ODM4MzM4NCAgICAzNjg3MDA4MCAgICAgIDM2OTI5MiAgIDI3Nzg0
-MzY0MCAgIDI1MDkzMTM3MgoKU3dhcDogICAgICAgMTA0ODU3MiAgICAgICAgIDk1NiAgICAgMTA0
-NzYxNgoKVG90YWw6ICAgIDY5NDE0NTY3NiAgIDM3ODM4NDM0MCAgICAzNzkxNzY5NgoKCk9uIEZy
-aSwgSnVuIDI0LCAyMDE2IGF0IDEyOjI0IFBNLCBXYXJyZW4gV2FuZyAtIElTRAo8V2FycmVuLldh
-bmdAd2FsbWFydC5jb20+IHdyb3RlOgo+IE9vcHMsIHRoYXQgcmVtaW5kcyBtZSwgZG8geW91IGhh
-dmUgbWluX2ZyZWVfa2J5dGVzIHNldCB0byBzb21ldGhpbmcKPiByZWFzb25hYmxlIGxpa2UgYXQg
-bGVhc3QgMi00R0I/Cj4KPiBXYXJyZW4gV2FuZwo+Cj4KPgo+IE9uIDYvMjQvMTYsIDEwOjIzIEFN
-LCAiV2FkZSBIb2xsZXIiIDx3YWRlLmhvbGxlckBnbWFpbC5jb20+IHdyb3RlOgo+Cj4+T24gdGhl
-IHZtLnZmc19jYWNlX3ByZXNzdXJlID0gMSA6ICAgV2UgaGFkIHRoaXMgaW5pdGlhbGx5IGFuZCBJ
-IHN0aWxsCj4+dGhpbmsgaXQgaXMgdGhlIGJlc3QgY2hvaWNlIGZvciBtb3N0IGNvbmZpZ3MuICBI
-b3dldmVyIHdpdGggb3VyIGxhcmdlCj4+bWVtb3J5IGZvb3RwcmludCwgdmZzX2NhY2hlX3ByZXNz
-dXJlPTEgaW5jcmVhc2VkIHRoZSBsaWtlbGlob29kIG9mCj4+aGl0dGluZyBhbiBpc3N1ZSB3aGVy
-ZSBvdXIgd3JpdGUgcmVzcG9uc2UgdGltZSB3b3VsZCBkb3VibGU7IHRoZW4gYQo+PmRyb3Agb2Yg
-Y2FjaGVzIHdvdWxkIHJldHVybiByZXNwb25zZSB0aW1lIHRvIG5vcm1hbC4gIEkgZG9uJ3QgY2xh
-aW0gdG8KPj50b3RhbGx5IHVuZGVyc3RhbmQgdGhpcyBhbmQgSSBvbmx5IGhhdmUgc3BlY3VsYXRp
-b24gYXQgdGhlIG1vbWVudC4KPj5BZ2FpbiB0aGFua3MgZm9yIHRoaXMgc3VnZ2VzdGlvbiwgSSBk
-byB0aGluayBpdCBpcyBiZXN0IGZvciBib3hlcyB0aGF0Cj4+ZG9uJ3QgaGF2ZSB2ZXJ5IGxhcmdl
-IG1lbW9yeS4KPj4KPj5AIENocmlzdGlhbiAtIHJlZm9ybWF0dGluZyB0byBidHJmcyBvciBleHQ0
-IGlzIGFuIG9wdGlvbiBpbiBteSB0ZXN0Cj4+Y2x1c3Rlci4gIEkgdGhvdWdodCBhYm91dCB0aGF0
-IGJ1dCBuZWVkZWQgdG8gc29ydCB4ZnMgZmlyc3QuICh0aGF0cwo+PndoYXQgcHJvZHVjdGlvbiB3
-aWxsIHJ1biByaWdodCBub3cpIFlvdSBhbGwgaGF2ZSBoZWxwZWQgbWUgZG8gdGhhdCBhbmQKPj50
-aGFuayB5b3UgYWdhaW4uICBJIHdpbGwgY2lyY2xlIGJhY2sgYW5kIHRlc3QgYnRyZnMgdW5kZXIg
-dGhlIHNhbWUKPj5jb25kaXRpb25zLiAgSSBzdXNwZWN0IHRoYXQgaXQgd2lsbCBiZWhhdmUgc2lt
-aWxhcmx5IGJ1dCBpdCdzIG9ubHkgYQo+PmRheSBhbmQgaGFsZidzIHdvcmsgb3Igc28gdG8gdGVz
-dC4KPj4KPj5CZXN0IFJlZ2FyZHMsCj4+V2FkZQo+Pgo+Pgo+Pk9uIFRodSwgSnVuIDIzLCAyMDE2
-IGF0IDg6MDkgUE0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4KPj53cm90
-ZToKPj4+IE9vcHMgLCB0eXBvICwgMTI4IEdCIDotKS4uLgo+Pj4KPj4+IC0tLS0tT3JpZ2luYWwg
-TWVzc2FnZS0tLS0tCj4+PiBGcm9tOiBDaHJpc3RpYW4gQmFsemVyIFttYWlsdG86Y2hpYmlAZ29s
-LmNvbV0KPj4+IFNlbnQ6IFRodXJzZGF5LCBKdW5lIDIzLCAyMDE2IDU6MDggUE0KPj4+IFRvOiBj
-ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4+PiBDYzogU29tbmF0aCBSb3k7IFdhcnJlbiBXYW5n
-IC0gSVNEOyBXYWRlIEhvbGxlcjsgQmxhaXIgQmV0aHdhaXRlOyBDZXBoCj4+PkRldmVsb3BtZW50
-Cj4+PiBTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIERyYW1hdGljIHBlcmZvcm1hbmNlIGRyb3Ag
-YXQgY2VydGFpbiBudW1iZXIKPj4+b2Ygb2JqZWN0cyBpbiBwb29sCj4+Pgo+Pj4KPj4+IEhlbGxv
-LAo+Pj4KPj4+IE9uIFRodSwgMjMgSnVuIDIwMTYgMjI6MjQ6NTkgKzAwMDAgU29tbmF0aCBSb3kg
-d3JvdGU6Cj4+Pgo+Pj4+IE9yIGV2ZW4gdm0udmZzX2NhY2hlX3ByZXNzdXJlID0gMCBpZiB5b3Ug
-aGF2ZSBzdWZmaWNpZW50IG1lbW9yeSB0bwo+Pj4+ICpwaW4qIGlub2RlL2RlbnRyaWVzIGluIG1l
-bW9yeS4gV2UgYXJlIHVzaW5nIHRoYXQgZm9yIGxvbmcgbm93ICh3aXRoCj4+Pj4gMTI4IFRCIG5v
-ZGUgbWVtb3J5KSBhbmQgaXQgc2VlbXMgaGVscGluZyBzcGVjaWFsbHkgZm9yIHRoZSByYW5kb20K
-Pj4+PiB3cml0ZSB3b3JrbG9hZCBhbmQgc2F2aW5nIHhhdHRycyByZWFkIGluIGJldHdlZW4uCj4+
-Pj4KPj4+IDEyOFRCIG5vZGUgbWVtb3J5LCByZWFsbHk/Cj4+PiBDYW4gSSBoYXZlIHNvbWUgb2Yg
-dGhvc2UsIHRvbz8gXm9eCj4+PiBBbmQgaGVyZSBJIHdhcyB0aGlua2luZyB0aGF0IFdhZGUncyA2
-NjBHQiBtYWNoaW5lcyB3ZXJlIG9uIHRoZQo+Pj5leGNlc3NpdmUgc2lkZS4KPj4+Cj4+PiBUaGVy
-ZSdzIHNvbWV0aGluZyB0byBiZSBzYWlkIChhbmQgb3B0aW1pemVkKSB3aGVuIHlvdXIgc3RvcmFn
-ZSBub2Rlcwo+Pj5oYXZlIHRoZSBzYW1lIG9yIG1vcmUgUkFNIGFzIHlvdXIgY29tcHV0ZSBub2Rl
-cy4uLgo+Pj4KPj4+IEFzIGZvciBXYXJyZW4sIHdlbGwgc3BvdHRlZC4KPj4+IEkgcGVyc29uYWxs
-eSB1c2Ugdm0udmZzX2NhY2hlX3ByZXNzdXJlID0gMSwgdGhpcyBhdm9pZHMgdGhlIHBvdGVudGlh
-bAo+Pj5maXJld29ya3MgaWYgeW91ciBtZW1vcnkgaXMgcmVhbGx5IG5lZWRlZCBlbHNld2hlcmUs
-IHdoaWxlIGtlZXBpbmcKPj4+dGhpbmdzIGluIG1lbW9yeSBub3JtYWxseS4KPj4+Cj4+PiBDaHJp
-c3RpYW4KPj4+Cj4+Pj4gVGhhbmtzICYgUmVnYXJkcwo+Pj4+IFNvbW5hdGgKPj4+Pgo+Pj4+IC0t
-LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tCj4+Pj4gRnJvbTogY2VwaC11c2VycyBbbWFpbHRvOmNl
-cGgtdXNlcnMtYm91bmNlc0BsaXN0cy5jZXBoLmNvbV0gT24gQmVoYWxmCj4+Pj4gT2YgV2FycmVu
-IFdhbmcgLSBJU0QgU2VudDogVGh1cnNkYXksIEp1bmUgMjMsIDIwMTYgMzowOSBQTQo+Pj4+IFRv
-OiBXYWRlIEhvbGxlcjsgQmxhaXIgQmV0aHdhaXRlCj4+Pj4gQ2M6IENlcGggRGV2ZWxvcG1lbnQ7
-IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPj4+PiBTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNd
-IERyYW1hdGljIHBlcmZvcm1hbmNlIGRyb3AgYXQgY2VydGFpbiBudW1iZXIKPj4+PiBvZiBvYmpl
-Y3RzIGluIHBvb2wKPj4+Pgo+Pj4+IHZtLnZmc19jYWNoZV9wcmVzc3VyZSA9IDEwMAo+Pj4+Cj4+
-Pj4gR28gdGhlIG90aGVyIGRpcmVjdGlvbiBvbiB0aGF0LiBZb3XmmJNsbCB3YW50IHRvIGtlZXAg
-aXQgbG93IHRvIGhlbHAKPj4+PiBrZWVwIGlub2RlL2RlbnRyeSBpbmZvIGluIG1lbW9yeS4gV2Ug
-dXNlIDEwLCBhbmQgaGF2ZW7mmJN0IGhhZCBhIHByb2JsZW0uCj4+Pj4KPj4+Pgo+Pj4+IFdhcnJl
-biBXYW5nCj4+Pj4KPj4+Pgo+Pj4+Cj4+Pj4KPj4+PiBPbiA2LzIyLzE2LCA5OjQxIFBNLCAiV2Fk
-ZSBIb2xsZXIiIDx3YWRlLmhvbGxlckBnbWFpbC5jb20+IHdyb3RlOgo+Pj4+Cj4+Pj4gPkJsYWly
-bywKPj4+PiA+Cj4+Pj4gPldlJ2xsIHNwZWFrIGluIHByZS1yZXBsaWNhdGlvbiBudW1iZXJzLCBy
-ZXBsaWNhdGlvbiBmb3IgdGhpcyBwb29sIGlzCj4+Pj4zLgo+Pj4+ID4KPj4+PiA+MjMuMyBNaWxs
-aW9uIE9iamVjdHMgLyBPU0QKPj4+PiA+cGdfbnVtIDIwNDgKPj4+PiA+MTYgT1NEcyAvIFNlcnZl
-cgo+Pj4+ID4zIFNlcnZlcnMKPj4+PiA+NjYwIEdCIFJBTSBUb3RhbCwgMTc5IEdCIFVzZWQgKGZy
-ZWUgLXQpIC8gU2VydmVyIHZtLnN3YXBwaW5lc3MgPSAxCj4+Pj4gPnZtLnZmc19jYWNoZV9wcmVz
-c3VyZSA9IDEwMAo+Pj4+ID4KPj4+PiA+V29ya2xvYWQgaXMgbmF0aXZlIGxpYnJhZG9zIHdpdGgg
-cHl0aG9uLiAgQUxMIDRrIG9iamVjdHMuCj4+Pj4gPgo+Pj4+ID5CZXN0IFJlZ2FyZHMsCj4+Pj4g
-PldhZGUKPj4+PiA+Cj4+Pj4gPgo+Pj4+ID5PbiBXZWQsIEp1biAyMiwgMjAxNiBhdCA5OjMzIFBN
-LCBCbGFpciBCZXRod2FpdGUKPj4+PiA+PGJsYWlyLmJldGh3YWl0ZUBnbWFpbC5jb20+IHdyb3Rl
-Ogo+Pj4+ID4+IFdhZGUsIGdvb2QgdG8ga25vdy4KPj4+PiA+Pgo+Pj4+ID4+IEZvciB0aGUgcmVj
-b3JkLCB3aGF0IGRvZXMgdGhpcyB3b3JrIG91dCB0byByb3VnaGx5IHBlciBPU0Q/IEFuZCBob3cK
-Pj4+PiA+PiBtdWNoIFJBTSBhbmQgaG93IG1hbnkgUEdzIHBlciBPU0QgZG8geW91IGhhdmU/Cj4+
-Pj4gPj4KPj4+PiA+PiBXaGF0J3MgeW91ciB3b3JrbG9hZD8gSSB3b25kZXIgd2hldGhlciBmb3Ig
-Y2VydGFpbiB3b3JrbG9hZHMgKGUuZy4KPj4+PiA+PiBSQkQpIGl0J3MgYmV0dGVyIHRvIGluY3Jl
-YXNlIGRlZmF1bHQgb2JqZWN0IHNpemUgc29tZXdoYXQgYmVmb3JlCj4+Pj4gPj4gcHVzaGluZyB0
-aGUgc3BsaXQvbWVyZ2UgdXAgYSBsb3QuLi4KPj4+PiA+Pgo+Pj4+ID4+IENoZWVycywKPj4+PiA+
-Pgo+Pj4+ID4+IE9uIDIzIEp1bmUgMjAxNiBhdCAxMToyNiwgV2FkZSBIb2xsZXIgPHdhZGUuaG9s
-bGVyQGdtYWlsLmNvbT4gd3JvdGU6Cj4+Pj4gPj4+IEJhc2VkIG9uIGV2ZXJ5b25lcyBzdWdnZXN0
-aW9uczsgVGhlIGZpcnN0IG1vZGlmaWNhdGlvbiB0byA1MCAvIDE2Cj4+Pj4gPj4+IGVuYWJsZWQg
-b3VyIGNvbmZpZyB0byBnZXQgdG8gfjY0NU1pbGwgb2JqZWN0cyBiZWZvcmUgdGhlIGJlaGF2aW9y
-Cj4+Pj4gPj4+IGluIHF1ZXN0aW9uIHdhcyBvYnNlcnZlZCAofjMzMCB3YXMgdGhlIHByZXZpb3Vz
-IGNlaWxpbmcpLgo+Pj4+ID4+PiBTdWJzZXF1ZW50IG1vZGlmaWNhdGlvbiB0byA1MCAvIDI0IGhh
-cyBlbmFibGVkIHVzIHRvIGdldCB0byAxLjEKPj4+PiA+Pj4gQmlsbGlvbisKPj4+PiA+Pj4KPj4+
-PiA+Pj4gVGhhbmsgeW91IGFsbCB2ZXJ5IG11Y2ggZm9yIHlvdXIgc3VwcG9ydCBhbmQgYXNzaXN0
-YW5jZS4KPj4+PiA+Pj4KPj4+PiA+Pj4gQmVzdCBSZWdhcmRzLAo+Pj4+ID4+PiBXYWRlCj4+Pj4g
-Pj4+Cj4+Pj4gPj4+Cj4+Pj4gPj4+IE9uIE1vbiwgSnVuIDIwLCAyMDE2IGF0IDY6NTggUE0sIENo
-cmlzdGlhbiBCYWx6ZXIgPGNoaWJpQGdvbC5jb20+Cj4+Pj4gPj4+d3JvdGU6Cj4+Pj4gPj4+Pgo+
-Pj4+ID4+Pj4gSGVsbG8sCj4+Pj4gPj4+Pgo+Pj4+ID4+Pj4gT24gTW9uLCAyMCBKdW4gMjAxNiAy
-MDo0NzozMiArMDAwMCBXYXJyZW4gV2FuZyAtIElTRCB3cm90ZToKPj4+PiA+Pj4+Cj4+Pj4gPj4+
-Pj4gU29ycnksIGxhdGUgdG8gdGhlIHBhcnR5IGhlcmUuIEkgYWdyZWUsIHVwIHRoZSBtZXJnZSBh
-bmQgc3BsaXQKPj4+PiA+Pj4+PnRocmVzaG9sZHMuIFdlJ3JlIGFzIGhpZ2ggYXMgNTAvMTIuIEkg
-Y2hpbWVkIGluIG9uIGFuIFJIIHRpY2tldAo+Pj4+ID4+Pj4+aGVyZS4KPj4+PiA+Pj4+PiBPbmUg
-b2YgdGhvc2UgdGhpbmdzIHlvdSBqdXN0IGhhdmUgdG8gZmluZCBvdXQgYXMgYW4gb3BlcmF0b3IK
-Pj4+PiA+Pj4+PnNpbmNlIGl0J3MgIG5vdCB3ZWxsIGRvY3VtZW50ZWQgOigKPj4+PiA+Pj4+Pgo+
-Pj4+ID4+Pj4+IGh0dHBzOi8vYnVnemlsbGEucmVkaGF0LmNvbS9zaG93X2J1Zy5jZ2k/aWQ9MTIx
-OTk3NAo+Pj4+ID4+Pj4+Cj4+Pj4gPj4+Pj4gV2UgaGF2ZSBvdmVyIDIwMCBtaWxsaW9uIG9iamVj
-dHMgaW4gdGhpcyBjbHVzdGVyLCBhbmQgaXQncyBzdGlsbAo+Pj4+ID4+Pj4+ZG9pbmcgIG92ZXIg
-MTUwMDAgd3JpdGUgSU9QUyBhbGwgZGF5IGxvbmcgd2l0aCAzMDIgc3Bpbm5pbmcKPj4+PiA+Pj4+
-PmRyaXZlcwo+Pj4+ID4+Pj4+KyBTQVRBIFNTRCAgam91cm5hbHMuIEhhdmluZyBlbm91Z2ggbWVt
-b3J5IGFuZCBkcm9wcGluZyB5b3VyCj4+Pj4gPj4+Pj52ZnNfY2FjaGVfcHJlc3N1cmUgIHNob3Vs
-ZCBhbHNvIGhlbHAuCj4+Pj4gPj4+Pj4KPj4+PiA+Pj4+IEluZGVlZC4KPj4+PiA+Pj4+Cj4+Pj4g
-Pj4+PiBTaW5jZSBpdCB3YXMgYXNrZWQgaW4gdGhhdCBidWcgcmVwb3J0IGFuZCBhbHNvIG15IGZp
-cnN0Cj4+Pj4gPj4+PnN1c3BpY2lvbiwgaXQgIHdvdWxkIHByb2JhYmx5IGJlIGdvb2QgdGltZSB0
-byBjbGFyaWZ5IHRoYXQgaXQKPj4+PiA+Pj4+aXNuJ3QgdGhlIHNwbGl0cyB0aGF0IGNhdXNlICB0
-aGUgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24sIGJ1dCB0aGUKPj4+PiA+Pj4+cmVzdWx0aW5nIGlu
-ZmxhdGlvbiBvZiBkaXIgZW50cmllcyAgYW5kIGV4aGF1c3Rpb24gb2YgU0xBQiBhbmQKPj4+PiA+
-Pj4+dGh1cyBoYXZpbmcgdG8gZ28gdG8gZGlzayBmb3IgdGhpbmdzIHRoYXQgIG5vcm1hbGx5IHdv
-dWxkIGJlIGluCj4+Pj5tZW1vcnkuCj4+Pj4gPj4+Pgo+Pj4+ID4+Pj4gTG9va2luZyBhdCBCbGFp
-cidzIGdyYXBoIGZyb20geWVzdGVyZGF5IHByZXR0eSBtdWNoIG1ha2VzIHRoYXQKPj4+PiA+Pj4+
-Y2xlYXIsIGEgIHB1cmVseSBzcGxpdCBjYXVzZWQgZGVncmFkYXRpb24gc2hvdWxkIGhhdmUgcmVs
-ZW50ZWQKPj4+PiA+Pj4+bXVjaCBxdWlja2VyLgo+Pj4+ID4+Pj4KPj4+PiA+Pj4+Cj4+Pj4gPj4+
-Pj4gS2VlcCBpbiBtaW5kIHRoYXQgaWYgeW91IGNoYW5nZSB0aGUgdmFsdWVzLCBpdCB3b24ndCB0
-YWtlIGVmZmVjdAo+Pj4+ID4+Pj4+IGltbWVkaWF0ZWx5LiBJdCBvbmx5IG1lcmdlcyB0aGVtIGJh
-Y2sgaWYgdGhlIGRpcmVjdG9yeSBpcyB1bmRlcgo+Pj4+ID4+Pj4+IHRoZSBjYWxjdWxhdGVkIHRo
-cmVzaG9sZCBhbmQgYSB3cml0ZSBvY2N1cnMgKG1heWJlIGEgcmVhZCwgSQo+Pj4+ID4+Pj4+IGZv
-cmdldCkuCj4+Pj4gPj4+Pj4KPj4+PiA+Pj4+IElmIGl0J3MgYSByZWFkIGEgcGxhaW4gc2NydWIg
-bWlnaHQgZG8gdGhlIHRyaWNrLgo+Pj4+ID4+Pj4KPj4+PiA+Pj4+IENocmlzdGlhbgo+Pj4+ID4+
-Pj4+IFdhcnJlbgo+Pj4+ID4+Pj4+Cj4+Pj4gPj4+Pj4KPj4+PiA+Pj4+PiBGcm9tOiBjZXBoLXVz
-ZXJzCj4+Pj4gPj4+Pj4KPj4+Pgo+Pj4+Pj4+Pj48Y2VwaC11c2Vycy1ib3VuY2VzQGxpc3RzLmNl
-cGguY29tPG1haWx0bzpjZXBoLXVzZXJzLWJvdW5jZXNAbGlzdHMuCj4+Pj4gPj4+Pj5jZXAKPj4+
-PiA+Pj4+PmguY29tPj4KPj4+PiA+Pj4+PiBvbiBiZWhhbGYgb2YgV2FkZSBIb2xsZXIKPj4+PiA+
-Pj4+PiA8d2FkZS5ob2xsZXJAZ21haWwuY29tPG1haWx0bzp3YWRlLmhvbGxlckBnbWFpbC5jb20+
-PiBEYXRlOgo+Pj4+ID4+Pj4+TW9uZGF5LCBKdW5lICAyMCwgMjAxNiBhdCAyOjQ4IFBNIFRvOiBC
-bGFpciBCZXRod2FpdGUKPj4+PiA+Pj4+PjxibGFpci5iZXRod2FpdGVAZ21haWwuY29tPG1haWx0
-bzpibGFpci5iZXRod2FpdGVAZ21haWwuY29tPj4sCj4+Pj4gPj4+Pj5XaWRvIGRlbiAgSG9sbGFu
-ZGVyIDx3aWRvQDQyb24uY29tPG1haWx0bzp3aWRvQDQyb24uY29tPj4gQ2M6Cj4+Pj4gPj4+Pj5D
-ZXBoIERldmVsb3BtZW50Cj4+Pj4gPj4+Pj48Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc8bWFp
-bHRvOmNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPj4sCj4+Pj4gPj4+Pj4gImNlcGgtdXNlcnNA
-bGlzdHMuY2VwaC5jb208bWFpbHRvOmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+Igo+Pj4+ID4+
-Pj4+IDxjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPG1haWx0bzpjZXBoLXVzZXJzQGxpc3RzLmNl
-cGguY29tPj4KPj4+PiA+Pj4+PlN1YmplY3Q6Cj4+Pj4gPj4+Pj4gUmU6IFtjZXBoLXVzZXJzXSBE
-cmFtYXRpYyBwZXJmb3JtYW5jZSBkcm9wIGF0IGNlcnRhaW4gbnVtYmVyIG9mCj4+Pj4gPj4+Pj5v
-YmplY3RzICBpbiBwb29sCj4+Pj4gPj4+Pj4KPj4+PiA+Pj4+PiBUaGFua3MgZXZlcnlvbmUgZm9y
-IHlvdXIgcmVwbGllcy4gIEkgc2luY2VyZWx5IGFwcHJlY2lhdGUgaXQuIFdlCj4+Pj4gPj4+Pj4g
-YXJlIHRlc3Rpbmcgd2l0aCBkaWZmZXJlbnQgcGdfbnVtIGFuZCBmaWxlc3RvcmVfc3BsaXRfbXVs
-dGlwbGUKPj4+PiA+Pj4+PiBzZXR0aW5ncy4gRWFybHkgaW5kaWNhdGlvbnMgYXJlIC4uLi4gd2Vs
-bCBub3QgZ3JlYXQuIFJlZ2FyZGxlc3MKPj4+PiA+Pj4+PiBpdCBpcyBuaWNlIHRvIHVuZGVyc3Rh
-bmQgdGhlIHN5bXB0b21zIGJldHRlciBzbyB3ZSB0cnkgdG8gZGVzaWduCj4+Pj4gPj4+Pj4gYXJv
-dW5kIGl0Lgo+Pj4+ID4+Pj4+Cj4+Pj4gPj4+Pj4gQmVzdCBSZWdhcmRzLAo+Pj4+ID4+Pj4+IFdh
-ZGUKPj4+PiA+Pj4+Pgo+Pj4+ID4+Pj4+Cj4+Pj4gPj4+Pj4gT24gTW9uLCBKdW4gMjAsIDIwMTYg
-YXQgMjozMiBBTSBCbGFpciBCZXRod2FpdGUKPj4+PiA+Pj4+PjxibGFpci5iZXRod2FpdGVAZ21h
-aWwuY29tPG1haWx0bzpibGFpci5iZXRod2FpdGVAZ21haWwuY29tPj4KPj4+Pndyb3RlOgo+Pj4+
-ID4+Pj4+T24KPj4+PiA+Pj4+PiAyMCBKdW5lIDIwMTYgYXQgMDk6MjEsIEJsYWlyIEJldGh3YWl0
-ZQo+Pj4+ID4+Pj4+PGJsYWlyLmJldGh3YWl0ZUBnbWFpbC5jb208bWFpbHRvOmJsYWlyLmJldGh3
-YWl0ZUBnbWFpbC5jb20+Pgo+Pj4+d3JvdGU6Cj4+Pj4gPj4+Pj4gPiBzbG93IHJlcXVlc3QgaXNz
-dWVzKS4gSWYgeW91IHdhdGNoIHlvdXIgeGZzIHN0YXRzIHlvdSdsbAo+Pj4+ID4+Pj4+ID4gbGlr
-ZWx5IGdldCBmdXJ0aGVyIGNvbmZpcm1hdGlvbi4gSW4gbXkgZXhwZXJpZW5jZQo+Pj4+ID4+Pj4+
-ID4geHNfZGlyX2xvb2t1cHMgYmFsbG9vbnMKPj4+PiA+Pj4+Pih3aGljaAo+Pj4+ID4+Pj4+ID4g
-bWVhbnMgZGlyZWN0b3J5IGxvb2t1cHMgYXJlIG1pc3NpbmcgY2FjaGUgYW5kIGdvaW5nIHRvIGRp
-c2spLgo+Pj4+ID4+Pj4+Cj4+Pj4gPj4+Pj4gTXVycGh5J3MgYSBiaXRjaC4gVG9kYXkgd2UgdXBn
-cmFkZWQgYSBjbHVzdGVyIHRvIGxhdGVzdCBIYW1tZXIKPj4+PiA+Pj4+PiBpbiBwcmVwYXJhdGlv
-biBmb3IgSmV3ZWwvUkhDUzIuIFR1cm5zIG91dCB3aGVuIHdlIGxhc3QgaGl0IHRoaXMKPj4+PiA+
-Pj4+PiB2ZXJ5IHByb2JsZW0gd2UgaGFkIG9ubHkgZXBoZW1lcmFsbHkgc2V0IHRoZSBuZXcgZmls
-ZXN0b3JlCj4+Pj4gPj4+Pj4gbWVyZ2Uvc3BsaXQgdmFsdWVzIC0gb29wcy4gSGVyZSdzIHdoYXQg
-c3RhcnRlZCBoYXBwZW5pbmcgd2hlbiB3ZQo+Pj4+ID4+Pj4+IHVwZ3JhZGVkIGFuZCByZXN0YXJ0
-ZWQgYSBidW5jaCBvZiBPU0RzOgo+Pj4+ID4+Pj4+Cj4+Pj4gPj4+Pj5odHRwczovL2F1LWVhc3Qu
-ZXJjLm1vbmFzaC5lZHUuYXUvc3dpZnQvdjEvcHVibGljL2dyYWZhbmEtY2VwaC14cwo+Pj4+ID4+
-Pj4+X2QKPj4+PiA+Pj4+PmlyXwo+Pj4+ID4+Pj4+bG9va3VwLnBuZwo+Pj4+ID4+Pj4+Cj4+Pj4g
-Pj4+Pj4gU2VlbWVkIHRvIGNhdXNlIGxvdHMgb2Ygc2xvdyByZXF1ZXN0cyA6LS8uIFdlIGNvcnJl
-Y3RlZCBpdCBhYm91dAo+Pj4+ID4+Pj4+IDEyOjMwLCB0aGVuIHN0aWxsIHRvb2sgYSB3aGlsZSB0
-byBzZXR0bGUuCj4+Pj4gPj4+Pj4KPj4+PiA+Pj4+PiAtLQo+Pj4+ID4+Pj4+IENoZWVycywKPj4+
-PiA+Pj4+PiB+QmxhaXJvCj4+Pj4gPj4+Pj4KPj4+PiA+Pj4+PiBUaGlzIGVtYWlsIGFuZCBhbnkg
-ZmlsZXMgdHJhbnNtaXR0ZWQgd2l0aCBpdCBhcmUgY29uZmlkZW50aWFsCj4+Pj4gPj4+Pj5hbmQg
-aW50ZW5kZWQgc29sZWx5IGZvciB0aGUgaW5kaXZpZHVhbCBvciBlbnRpdHkgdG8gd2hvbSB0aGV5
-IGFyZQo+Pj4+ID4+Pj4+YWRkcmVzc2VkLgo+Pj4+ID4+Pj4+IElmIHlvdSBoYXZlIHJlY2VpdmVk
-IHRoaXMgZW1haWwgaW4gZXJyb3IgZGVzdHJveSBpdCBpbW1lZGlhdGVseS4KPj4+PiA+Pj4+Pioq
-KiAgV2FsbWFydCBDb25maWRlbnRpYWwgKioqCj4+Pj4gPj4+Pgo+Pj4+ID4+Pj4KPj4+PiA+Pj4+
-IC0tCj4+Pj4gPj4+PiBDaHJpc3RpYW4gQmFsemVyICAgICAgICBOZXR3b3JrL1N5c3RlbXMgRW5n
-aW5lZXIKPj4+PiA+Pj4+IGNoaWJpQGdvbC5jb20gICAgICAgICAgIEdsb2JhbCBPbkxpbmUgSmFw
-YW4vUmFrdXRlbiBDb21tdW5pY2F0aW9ucwo+Pj4+ID4+Pj4gaHR0cDovL3d3dy5nb2wuY29tLwo+
-Pj4+ID4+Cj4+Pj4gPj4KPj4+PiA+Pgo+Pj4+ID4+IC0tCj4+Pj4gPj4gQ2hlZXJzLAo+Pj4+ID4+
-IH5CbGFpcm8KPj4+Pgo+Pj4+IFRoaXMgZW1haWwgYW5kIGFueSBmaWxlcyB0cmFuc21pdHRlZCB3
-aXRoIGl0IGFyZSBjb25maWRlbnRpYWwgYW5kCj4+Pj4gaW50ZW5kZWQgc29sZWx5IGZvciB0aGUg
-aW5kaXZpZHVhbCBvciBlbnRpdHkgdG8gd2hvbSB0aGV5IGFyZQo+Pj4+YWRkcmVzc2VkLgo+Pj4+
-IElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgZW1haWwgaW4gZXJyb3IgZGVzdHJveSBpdCBpbW1l
-ZGlhdGVseS4gKioqCj4+Pj4gV2FsbWFydCBDb25maWRlbnRpYWwgKioqCj4+Pj4gX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPj4+PiBjZXBoLXVzZXJzIG1h
-aWxpbmcgbGlzdCBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4+Pj4gaHR0cDovL2xpc3RzLmNl
-cGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tIFBMRUFTRSBOT1RFOgo+Pj4+
-IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2Fn
-ZSBpcyBpbnRlbmRlZAo+Pj4+IG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVj
-aXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUKPj4+PiByZWFkZXIgb2YgdGhpcyBtZXNzYWdl
-IGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieQo+Pj4+IG5vdGlm
-aWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0
-IGFueQo+Pj4+IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5n
-IG9mIHRoaXMgbWVzc2FnZSBpcwo+Pj4+IHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZl
-IHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwKPj4+PiBwbGVhc2Ugbm90aWZ5
-IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpCj4+Pj4g
-aW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2Fn
-ZSBpbiB5b3VyCj4+Pj4gcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJv
-bmljYWxseSBzdG9yZWQgY29waWVzKS4KPj4+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fXyBjZXBoLXVzZXJzIG1haWxpbmcKPj4+PiBsaXN0IGNlcGgtdXNl
-cnNAbGlzdHMuY2VwaC5jb20KPj4+PiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dp
-L2NlcGgtdXNlcnMtY2VwaC5jb20KPj4+Pgo+Pj4KPj4+Cj4+PiAtLQo+Pj4gQ2hyaXN0aWFuIEJh
-bHplciAgICAgICAgTmV0d29yay9TeXN0ZW1zIEVuZ2luZWVyCj4+PiBjaGliaUBnb2wuY29tICAg
-R2xvYmFsIE9uTGluZSBKYXBhbi9SYWt1dGVuIENvbW11bmljYXRpb25zCj4+PiBodHRwOi8vd3d3
-LmdvbC5jb20vCj4+PiBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0
-aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlCj4+PmlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1
-c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLgo+Pj5JZiB0aGUg
-cmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91
-IGFyZQo+Pj5oZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3Nh
-Z2UgaW4gZXJyb3IgYW5kIHRoYXQKPj4+YW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJp
-YnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcwo+Pj5zdHJpY3RseSBwcm9oaWJp
-dGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsCj4+
-PnBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93
-biBhYm92ZSkKPj4+aW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9m
-IHRoaXMgbWVzc2FnZSBpbiB5b3VyCj4+PnBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMg
-b3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuCj4KPgo+IFRoaXMgZW1haWwgYW5kIGFu
-eSBmaWxlcyB0cmFuc21pdHRlZCB3aXRoIGl0IGFyZSBjb25maWRlbnRpYWwgYW5kIGludGVuZGVk
-IHNvbGVseSBmb3IgdGhlIGluZGl2aWR1YWwgb3IgZW50aXR5IHRvIHdob20gdGhleSBhcmUgYWRk
-cmVzc2VkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGVtYWlsIGluIGVycm9yIGRlc3Ryb3kg
-aXQgaW1tZWRpYXRlbHkuICoqKiBXYWxtYXJ0IENvbmZpZGVudGlhbCAqKioKX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxp
-c3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
-Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+
+Hello,
+
+On Fri, 24 Jun 2016 15:45:52 -0400 Wade Holler wrote:
+
+> Not reasonable as you say :
+>=20
+> vm.min_free_kbytes =3D 90112
+>
+Yeah, my nodes with IB adapters all have that set to at least 512MB, 1G=
+B
+if they're over 64GB.
+=20
+> we're in recovery post expansion (48->54 OSDs) right now but free -t =
+is:
+>=20
+> #free -t
+>=20
+=46ree can be very misleading when it comes to the actual state of thin=
+gs
+with regards to memory fragmentation.
+
+Take a look at "cat /proc/buddyinfo" and read up on linux memory
+fragmentation.
+Also this:
+https://www.mail-archive.com/ceph-users@lists.ceph.com/msg22214.html
+
+Christian
+
+>               total        used        free      shared  buff/cache
+> available
+>=20
+> Mem:      693097104   378383384    36870080      369292   277843640
+> 250931372
+>=20
+> Swap:       1048572         956     1047616
+>=20
+> Total:    694145676   378384340    37917696
+>=20
+>=20
+> On Fri, Jun 24, 2016 at 12:24 PM, Warren Wang - ISD
+> <Warren.Wang@walmart.com> wrote:
+> > Oops, that reminds me, do you have min_free_kbytes set to something
+> > reasonable like at least 2-4GB?
+> >
+> > Warren Wang
+> >
+> >
+> >
+> > On 6/24/16, 10:23 AM, "Wade Holler" <wade.holler@gmail.com> wrote:
+> >
+> >>On the vm.vfs_cace_pressure =3D 1 :   We had this initially and I s=
+till
+> >>think it is the best choice for most configs.  However with our lar=
+ge
+> >>memory footprint, vfs_cache_pressure=3D1 increased the likelihood o=
+f
+> >>hitting an issue where our write response time would double; then a
+> >>drop of caches would return response time to normal.  I don't claim=
+ to
+> >>totally understand this and I only have speculation at the moment.
+> >>Again thanks for this suggestion, I do think it is best for boxes t=
+hat
+> >>don't have very large memory.
+> >>
+> >>@ Christian - reformatting to btrfs or ext4 is an option in my test
+> >>cluster.  I thought about that but needed to sort xfs first. (thats
+> >>what production will run right now) You all have helped me do that =
+and
+> >>thank you again.  I will circle back and test btrfs under the same
+> >>conditions.  I suspect that it will behave similarly but it's only =
+a
+> >>day and half's work or so to test.
+> >>
+> >>Best Regards,
+> >>Wade
+> >>
+> >>
+> >>On Thu, Jun 23, 2016 at 8:09 PM, Somnath Roy <Somnath.Roy@sandisk.c=
+om>
+> >>wrote:
+> >>> Oops , typo , 128 GB :-)...
+> >>>
+> >>> -----Original Message-----
+> >>> From: Christian Balzer [mailto:chibi@gol.com]
+> >>> Sent: Thursday, June 23, 2016 5:08 PM
+> >>> To: ceph-users@lists.ceph.com
+> >>> Cc: Somnath Roy; Warren Wang - ISD; Wade Holler; Blair Bethwaite;
+> >>> Ceph
+> >>>Development
+> >>> Subject: Re: [ceph-users] Dramatic performance drop at certain nu=
+mber
+> >>>of objects in pool
+> >>>
+> >>>
+> >>> Hello,
+> >>>
+> >>> On Thu, 23 Jun 2016 22:24:59 +0000 Somnath Roy wrote:
+> >>>
+> >>>> Or even vm.vfs_cache_pressure =3D 0 if you have sufficient memor=
+y to
+> >>>> *pin* inode/dentries in memory. We are using that for long now (=
+with
+> >>>> 128 TB node memory) and it seems helping specially for the rando=
+m
+> >>>> write workload and saving xattrs read in between.
+> >>>>
+> >>> 128TB node memory, really?
+> >>> Can I have some of those, too? ^o^
+> >>> And here I was thinking that Wade's 660GB machines were on the
+> >>>excessive side.
+> >>>
+> >>> There's something to be said (and optimized) when your storage no=
+des
+> >>>have the same or more RAM as your compute nodes...
+> >>>
+> >>> As for Warren, well spotted.
+> >>> I personally use vm.vfs_cache_pressure =3D 1, this avoids the pot=
+ential
+> >>>fireworks if your memory is really needed elsewhere, while keeping
+> >>>things in memory normally.
+> >>>
+> >>> Christian
+> >>>
+> >>>> Thanks & Regards
+> >>>> Somnath
+> >>>>
+> >>>> -----Original Message-----
+> >>>> From: ceph-users [mailto:ceph-users-bounces@lists.ceph.com] On
+> >>>> Behalf Of Warren Wang - ISD Sent: Thursday, June 23, 2016 3:09 P=
+M
+> >>>> To: Wade Holler; Blair Bethwaite
+> >>>> Cc: Ceph Development; ceph-users@lists.ceph.com
+> >>>> Subject: Re: [ceph-users] Dramatic performance drop at certain
+> >>>> number of objects in pool
+> >>>>
+> >>>> vm.vfs_cache_pressure =3D 100
+> >>>>
+> >>>> Go the other direction on that. You=E6=98=93ll want to keep it l=
+ow to help
+> >>>> keep inode/dentry info in memory. We use 10, and haven=E6=98=93t=
+ had a
+> >>>> problem.
+> >>>>
+> >>>>
+> >>>> Warren Wang
+> >>>>
+> >>>>
+> >>>>
+> >>>>
+> >>>> On 6/22/16, 9:41 PM, "Wade Holler" <wade.holler@gmail.com> wrote=
+:
+> >>>>
+> >>>> >Blairo,
+> >>>> >
+> >>>> >We'll speak in pre-replication numbers, replication for this po=
+ol
+> >>>> >is
+> >>>>3.
+> >>>> >
+> >>>> >23.3 Million Objects / OSD
+> >>>> >pg_num 2048
+> >>>> >16 OSDs / Server
+> >>>> >3 Servers
+> >>>> >660 GB RAM Total, 179 GB Used (free -t) / Server vm.swappiness =
+=3D 1
+> >>>> >vm.vfs_cache_pressure =3D 100
+> >>>> >
+> >>>> >Workload is native librados with python.  ALL 4k objects.
+> >>>> >
+> >>>> >Best Regards,
+> >>>> >Wade
+> >>>> >
+> >>>> >
+> >>>> >On Wed, Jun 22, 2016 at 9:33 PM, Blair Bethwaite
+> >>>> ><blair.bethwaite@gmail.com> wrote:
+> >>>> >> Wade, good to know.
+> >>>> >>
+> >>>> >> For the record, what does this work out to roughly per OSD? A=
+nd
+> >>>> >> how much RAM and how many PGs per OSD do you have?
+> >>>> >>
+> >>>> >> What's your workload? I wonder whether for certain workloads
+> >>>> >> (e.g. RBD) it's better to increase default object size somewh=
+at
+> >>>> >> before pushing the split/merge up a lot...
+> >>>> >>
+> >>>> >> Cheers,
+> >>>> >>
+> >>>> >> On 23 June 2016 at 11:26, Wade Holler <wade.holler@gmail.com>
+> >>>> >> wrote:
+> >>>> >>> Based on everyones suggestions; The first modification to 50=
+ /
+> >>>> >>> 16 enabled our config to get to ~645Mill objects before the
+> >>>> >>> behavior in question was observed (~330 was the previous
+> >>>> >>> ceiling). Subsequent modification to 50 / 24 has enabled us =
+to
+> >>>> >>> get to 1.1 Billion+
+> >>>> >>>
+> >>>> >>> Thank you all very much for your support and assistance.
+> >>>> >>>
+> >>>> >>> Best Regards,
+> >>>> >>> Wade
+> >>>> >>>
+> >>>> >>>
+> >>>> >>> On Mon, Jun 20, 2016 at 6:58 PM, Christian Balzer
+> >>>> >>> <chibi@gol.com>
+> >>>> >>>wrote:
+> >>>> >>>>
+> >>>> >>>> Hello,
+> >>>> >>>>
+> >>>> >>>> On Mon, 20 Jun 2016 20:47:32 +0000 Warren Wang - ISD wrote:
+> >>>> >>>>
+> >>>> >>>>> Sorry, late to the party here. I agree, up the merge and s=
+plit
+> >>>> >>>>>thresholds. We're as high as 50/12. I chimed in on an RH ti=
+cket
+> >>>> >>>>>here.
+> >>>> >>>>> One of those things you just have to find out as an operat=
+or
+> >>>> >>>>>since it's  not well documented :(
+> >>>> >>>>>
+> >>>> >>>>> https://bugzilla.redhat.com/show_bug.cgi?id=3D1219974
+> >>>> >>>>>
+> >>>> >>>>> We have over 200 million objects in this cluster, and it's
+> >>>> >>>>> still
+> >>>> >>>>>doing  over 15000 write IOPS all day long with 302 spinning
+> >>>> >>>>>drives
+> >>>> >>>>>+ SATA SSD  journals. Having enough memory and dropping you=
+r
+> >>>> >>>>>vfs_cache_pressure  should also help.
+> >>>> >>>>>
+> >>>> >>>> Indeed.
+> >>>> >>>>
+> >>>> >>>> Since it was asked in that bug report and also my first
+> >>>> >>>>suspicion, it  would probably be good time to clarify that i=
+t
+> >>>> >>>>isn't the splits that cause  the performance degradation, bu=
+t
+> >>>> >>>>the resulting inflation of dir entries  and exhaustion of SL=
+AB
+> >>>> >>>>and thus having to go to disk for things that  normally woul=
+d
+> >>>> >>>>be in
+> >>>>memory.
+> >>>> >>>>
+> >>>> >>>> Looking at Blair's graph from yesterday pretty much makes t=
+hat
+> >>>> >>>>clear, a  purely split caused degradation should have relent=
+ed
+> >>>> >>>>much quicker.
+> >>>> >>>>
+> >>>> >>>>
+> >>>> >>>>> Keep in mind that if you change the values, it won't take
+> >>>> >>>>> effect immediately. It only merges them back if the direct=
+ory
+> >>>> >>>>> is under the calculated threshold and a write occurs (mayb=
+e a
+> >>>> >>>>> read, I forget).
+> >>>> >>>>>
+> >>>> >>>> If it's a read a plain scrub might do the trick.
+> >>>> >>>>
+> >>>> >>>> Christian
+> >>>> >>>>> Warren
+> >>>> >>>>>
+> >>>> >>>>>
+> >>>> >>>>> From: ceph-users
+> >>>> >>>>>
+> >>>>
+> >>>>>>>>><ceph-users-bounces@lists.ceph.com<mailto:ceph-users-bounces=
+@lists.
+> >>>> >>>>>cep
+> >>>> >>>>>h.com>>
+> >>>> >>>>> on behalf of Wade Holler
+> >>>> >>>>> <wade.holler@gmail.com<mailto:wade.holler@gmail.com>> Date=
+:
+> >>>> >>>>>Monday, June  20, 2016 at 2:48 PM To: Blair Bethwaite
+> >>>> >>>>><blair.bethwaite@gmail.com<mailto:blair.bethwaite@gmail.com=
+>>,
+> >>>> >>>>>Wido den  Hollander <wido@42on.com<mailto:wido@42on.com>> C=
+c:
+> >>>> >>>>>Ceph Development
+> >>>> >>>>><ceph-devel@vger.kernel.org<mailto:ceph-devel@vger.kernel.o=
+rg>>,
+> >>>> >>>>> "ceph-users@lists.ceph.com<mailto:ceph-users@lists.ceph.co=
+m>"
+> >>>> >>>>> <ceph-users@lists.ceph.com<mailto:ceph-users@lists.ceph.co=
+m>>
+> >>>> >>>>>Subject:
+> >>>> >>>>> Re: [ceph-users] Dramatic performance drop at certain numb=
+er
+> >>>> >>>>> of
+> >>>> >>>>>objects  in pool
+> >>>> >>>>>
+> >>>> >>>>> Thanks everyone for your replies.  I sincerely appreciate =
+it.
+> >>>> >>>>> We are testing with different pg_num and
+> >>>> >>>>> filestore_split_multiple settings. Early indications are .=
+=2E..
+> >>>> >>>>> well not great. Regardless it is nice to understand the
+> >>>> >>>>> symptoms better so we try to design around it.
+> >>>> >>>>>
+> >>>> >>>>> Best Regards,
+> >>>> >>>>> Wade
+> >>>> >>>>>
+> >>>> >>>>>
+> >>>> >>>>> On Mon, Jun 20, 2016 at 2:32 AM Blair Bethwaite
+> >>>> >>>>><blair.bethwaite@gmail.com<mailto:blair.bethwaite@gmail.com=
+>>
+> >>>>wrote:
+> >>>> >>>>>On
+> >>>> >>>>> 20 June 2016 at 09:21, Blair Bethwaite
+> >>>> >>>>><blair.bethwaite@gmail.com<mailto:blair.bethwaite@gmail.com=
+>>
+> >>>>wrote:
+> >>>> >>>>> > slow request issues). If you watch your xfs stats you'll
+> >>>> >>>>> > likely get further confirmation. In my experience
+> >>>> >>>>> > xs_dir_lookups balloons
+> >>>> >>>>>(which
+> >>>> >>>>> > means directory lookups are missing cache and going to
+> >>>> >>>>> > disk).
+> >>>> >>>>>
+> >>>> >>>>> Murphy's a bitch. Today we upgraded a cluster to latest Ha=
+mmer
+> >>>> >>>>> in preparation for Jewel/RHCS2. Turns out when we last hit
+> >>>> >>>>> this very problem we had only ephemerally set the new
+> >>>> >>>>> filestore merge/split values - oops. Here's what started
+> >>>> >>>>> happening when we upgraded and restarted a bunch of OSDs:
+> >>>> >>>>>
+> >>>> >>>>>https://au-east.erc.monash.edu.au/swift/v1/public/grafana-c=
+eph-xs
+> >>>> >>>>>_d
+> >>>> >>>>>ir_
+> >>>> >>>>>lookup.png
+> >>>> >>>>>
+> >>>> >>>>> Seemed to cause lots of slow requests :-/. We corrected it
+> >>>> >>>>> about 12:30, then still took a while to settle.
+> >>>> >>>>>
+> >>>> >>>>> --
+> >>>> >>>>> Cheers,
+> >>>> >>>>> ~Blairo
+> >>>> >>>>>
+> >>>> >>>>> This email and any files transmitted with it are confident=
+ial
+> >>>> >>>>>and intended solely for the individual or entity to whom th=
+ey
+> >>>> >>>>>are addressed.
+> >>>> >>>>> If you have received this email in error destroy it
+> >>>> >>>>> immediately.
+> >>>> >>>>>***  Walmart Confidential ***
+> >>>> >>>>
+> >>>> >>>>
+> >>>> >>>> --
+> >>>> >>>> Christian Balzer        Network/Systems Engineer
+> >>>> >>>> chibi@gol.com           Global OnLine Japan/Rakuten
+> >>>> >>>> Communications http://www.gol.com/
+> >>>> >>
+> >>>> >>
+> >>>> >>
+> >>>> >> --
+> >>>> >> Cheers,
+> >>>> >> ~Blairo
+> >>>>
+> >>>> This email and any files transmitted with it are confidential an=
+d
+> >>>> intended solely for the individual or entity to whom they are
+> >>>>addressed.
+> >>>> If you have received this email in error destroy it immediately.=
+ ***
+> >>>> Walmart Confidential ***
+> >>>> _______________________________________________
+> >>>> ceph-users mailing list ceph-users@lists.ceph.com
+> >>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com PLEASE NO=
+TE:
+> >>>> The information contained in this electronic mail message is
+> >>>> intended only for the use of the designated recipient(s) named
+> >>>> above. If the reader of this message is not the intended recipie=
+nt,
+> >>>> you are hereby notified that you have received this message in
+> >>>> error and that any review, dissemination, distribution, or copyi=
+ng
+> >>>> of this message is strictly prohibited. If you have received thi=
+s
+> >>>> communication in error, please notify the sender by telephone or
+> >>>> e-mail (as shown above) immediately and destroy any and all copi=
+es
+> >>>> of this message in your possession (whether hard copies or
+> >>>> electronically stored copies).
+> >>>> _______________________________________________ ceph-users maili=
+ng
+> >>>> list ceph-users@lists.ceph.com
+> >>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >>>>
+> >>>
+> >>>
+> >>> --
+> >>> Christian Balzer        Network/Systems Engineer
+> >>> chibi@gol.com   Global OnLine Japan/Rakuten Communications
+> >>> http://www.gol.com/
+> >>> PLEASE NOTE: The information contained in this electronic mail
+> >>> message
+> >>>is intended only for the use of the designated recipient(s) named
+> >>>above. If the reader of this message is not the intended recipient=
+,
+> >>>you are hereby notified that you have received this message in err=
+or
+> >>>and that any review, dissemination, distribution, or copying of th=
+is
+> >>>message is strictly prohibited. If you have received this
+> >>>communication in error, please notify the sender by telephone or
+> >>>e-mail (as shown above) immediately and destroy any and all copies=
+ of
+> >>>this message in your possession (whether hard copies or
+> >>>electronically stored copies).
+> >
+> >
+> > This email and any files transmitted with it are confidential and
+> > intended solely for the individual or entity to whom they are
+> > addressed. If you have received this email in error destroy it
+> > immediately. *** Walmart Confidential ***
+>=20
+
+
+--=20
+Christian Balzer        Network/Systems Engineer               =20
+chibi@gol.com   	Global OnLine Japan/Rakuten Communications
+http://www.gol.com/
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
