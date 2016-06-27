@@ -1,53 +1,55 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: RDS - for stateless messenger
-Date: Mon, 27 Jun 2016 13:20:47 -0700
-Message-ID: <CAJ4mKGbKyHxvbX-d9wYCSFEeLhAL8StL2pvMafSMAgAU9D5xCA@mail.gmail.com>
-References: <DB5PR05MB1607E175D8ACBE9CE2B8DC0EA9200@DB5PR05MB1607.eurprd05.prod.outlook.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: ceph build changes
+Date: Mon, 27 Jun 2016 22:05:58 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1606272200310.7088@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f54.google.com ([209.85.213.54]:35840 "EHLO
-	mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751745AbcF0UUs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jun 2016 16:20:48 -0400
-Received: by mail-vk0-f54.google.com with SMTP id u64so247359583vkf.3
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Jun 2016 13:20:48 -0700 (PDT)
-In-Reply-To: <DB5PR05MB1607E175D8ACBE9CE2B8DC0EA9200@DB5PR05MB1607.eurprd05.prod.outlook.com>
+Received: from mx1.redhat.com ([209.132.183.28]:37539 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751875AbcF0WGA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 27 Jun 2016 18:06:00 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 75FBA85545
+	for <ceph-devel@vger.kernel.org>; Mon, 27 Jun 2016 22:06:00 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Avner Ben Hanoch <avnerb@mellanox.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: adeza@redhat.com
+Cc: ceph-devel@vger.kernel.org
 
-On Sun, Jun 26, 2016 at 10:08 AM, Avner Ben Hanoch <avnerb@mellanox.com> wrote:
-> Hi All,
->
-> *Background:*
-> As I wrote once I am considering messenger based on RDS protocol.
-> RDS protocol is datagram oriented like UDP; however, it is reliable and in-order like TCP and it is much more efficient than both (in case the underlying is RDMA).
-> See about RDS here - https://oss.oracle.com/pipermail/rds-devel/2007-November/000228.html
->
-> I am trying to convert AsyncMessenger to RDS.  The challenge is to convert from statefull connection to stateless connection (programmatically RDS is very much similar to UDP)
->
-> *Question:*
-> Async messenger starts each accepted socket with state=STATE_ACCEPTING and then it expects handshake.
-> Unfortunately, stateless connections don't have the concept of "accept"; hence, I see two ways to recognize "accept" situations:
-> 1. In case I am getting message from an address that doesn't exist in conns/accepting_conns collections.
-> 2. By adding special message that will indicate that this is an "accept request" from a new client
->
-> I prefer option #2 if it is possible - the question is which message I can use for indicating "Accept request"? - I thought of sending an empty datagram (without payload) for that purpose.  Do you think this idea will work?
+Hey Alfredo,
 
-Well, if you look through the connection startup in AsyncMessenger,
-you should see that it makes use of several different tags and things.
-And even if the underlying RDS protocol doesn't have a concept of
-connections, your Messenger will need to implement one (at least, if
-it's going to work anything like the AsyncMessenger does).
+Just a heads up that the changes to gitbuilder to enable cmake were pretty 
+minimal.  It basically comes down to using the make-dist script to 
+generate the tarball instead of running ./autogen.sh, ./configure, and 
+then 'make dist' just to get the tarball.  Here's what we changed:
 
-So, probably you just need to create a new "OPEN_CON" tag (or adjust
-one of the existing ones that might be rendered obsolete by use of
-RDS?) that gets sent before diving into the handshake pieces.
+	https://github.com/ceph/autobuild-ceph/commit/eccdc8f61273e97710203eaae55a2c4258b64087
 
-But if you're working on this you'll want to make sure you're also
-following the discussions about a msgr2 protocol that have been
-happening on the lists. That changes a few things and adds support for
-new features that you'll want to be aware of.
--Greg
+It's slightly annoying because older branches won't have make-dist, but 
+newer branches will, and it has to do a build both ways.  Not too crazy, 
+though.
+
+The other change was that we have a new environment variable for passing 
+down cmake optons that parallels the old CEPH_EXTRA_CONFIGURE_ARGS:
+
+	https://github.com/ceph/autobuild-ceph/commit/71d02e8b2c9bd3533c44b3bf0408681ed7890248
+
+I'm guessing we don't need that for a proper release, but in case we do, 
+the script should just set both.
+
+Anyway, with those changes, the final step is to change debian/rules and 
+ceph.spec.in in ceph.git itself to build using cmake instead of autotools, 
+but as long as the source tarball is coming from make-dist the ceph-build 
+stuff doesn't need to know or care about that--it's all hidden by rpmbuild 
+and dpkg-buildpackage/pbuilder.
+
+As soon as the deb and rpm changes are working when built by the 
+gitbuilders (basically there with debs, rpms up next) I think we should do 
+a dev release through the new jenkins pipeline to demonstrate that the 
+whole thing works.  Maybe the week after next?
+
+Thanks!
+sage
