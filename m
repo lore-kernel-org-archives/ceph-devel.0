@@ -1,48 +1,115 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: About thread_local and TmapMigratePP.DataScan case
-Date: Tue, 28 Jun 2016 02:04:51 +0800
-Message-ID: <CACJqLybSUa6WtfcvXa5W4AAXJUgEBDPX2Mo+nd3SDeLkHVgDwA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: assert
+Date: Mon, 27 Jun 2016 18:10:31 +0000
+Message-ID: <BL2PR02MB21158CE89E5AB2FC8CBF9A2EF4210@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <alpine.DEB.2.11.1606271610170.2844@piezo.us.to>
+ <CALe9h7f+fCv73Si_1RoF7bQsSz24cWU0f7V2_rGE-nbzMWVjLA@mail.gmail.com>
+ <alpine.DEB.2.11.1606271642550.2844@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sg2apc01on0127.outbound.protection.outlook.com ([104.47.125.127]:40384
-	"EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+Received: from mail-bn1on0084.outbound.protection.outlook.com ([157.56.110.84]:43082
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751639AbcF0SFH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 27 Jun 2016 14:05:07 -0400
-Received: by mail-vk0-f45.google.com with SMTP id j2so242479098vkg.2
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Jun 2016 11:05:01 -0700 (PDT)
+	id S1751601AbcF0SKf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jun 2016 14:10:35 -0400
+In-Reply-To: <alpine.DEB.2.11.1606271642550.2844@piezo.us.to>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi all,
+Yes, if we can move some assert out in the io path for performance build that will definitely save some cpu cycles in the io path.  +1 for this proposal.
 
-anyone who knows what's the special thing with TmapMigratePP.DataScan
-case. When I introduce thread_local variable in
-PR(https://github.com/ceph/ceph/pull/9783/files#diff-254a8401d238ec25c714a5596f85b5ebL64),
-it always failed because the thread local variable is assigned to zero
-when execute this test!
+Thanks & Regards
+Somnath
 
-For example, when tid == 512596224 local_center should be 5fed4e48,
-but after begin this test case, this thread_local variable is assigned
-to zero!:
-tid=-512596224 local_center=5fed4e48 this=5fed4e48
-[New Thread 0x7fffdef21700 (LWP 11835)]
-tid=-512596224 local_center=5fed4e48 this=5fed4e48
-[New Thread 0x7fffde720700 (LWP 11836)]
-[New Thread 0x7fffddf1f700 (LWP 11837)]
-[New Thread 0x7fffdd71e700 (LWP 11838)]
-[New Thread 0x7fffdcf1d700 (LWP 11839)]
-[New Thread 0x7fffdc71c700 (LWP 11840)]
-[New Thread 0x7fffdbf1b700 (LWP 11841)]
-tid=-134366272 local_center=0 this=5fed4e48
-tid=-134366272 local_center=0 this=5fed4e48
-tid=-134366272 local_center=0 this=5fed4e48
-tid=-512596224 local_center=0 this=5fed4e48
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+Sent: Monday, June 27, 2016 9:45 AM
+To: John Spray
+Cc: Ceph Development
+Subject: Re: assert
 
+On Mon, 27 Jun 2016, John Spray wrote:
+> On Mon, Jun 27, 2016 at 5:16 PM, Sage Weil <sweil@redhat.com> wrote:
+> > We have a problem with assert.  Actually, a few problems.
+> >
+> > 1. Our code is written assuming that assert is never compiled out.
+> > We have lots of assert(0) and assert(0 == "informative failure
+> > message") instances all over the code that should really be something like abort().
+> > If you compile out assert, things won't work (well, fail) as expected.
+> >
+> > 2. We have a special implementation of assert in include/assert.h
+> > that will log the assertion failure to the global debug log, along
+> > with a stack track, before crashing.  This is normally fine, except
+> > that lots of random library or system headers include the system
+> > assert (/usr/include/assert.h), which is written such that it does
+> > not lib nicely with another definition.  From /usr/include/assert.h:
+> >
+> > #ifdef  _ASSERT_H
+> >
+> > # undef _ASSERT_H
+> > # undef assert
+> > # undef __ASSERT_VOID_CAST
+> >
+> > # ifdef __USE_GNU
+> > #  undef assert_perror
+> > # endif
+> >
+> > #endif /* assert.h      */
+> >
+> > #define _ASSERT_H       1
+> >
+> > That means that if you include our assert, and then some other
+> > random header includes /usr/include/assert, it will (silently!) clobber ours.
+> >
+> > 3. This is all highlighted by the switch to cmake.  The current
+> > defautl build does not define NDEBUG, which means that assert is
+> > compiled away, and we get a bunch of unused variable warnings from
+> > code like
+> >
+> >   r = read(...);
+> >   assert(r > 0);
+> >
+> > So... what do to?  We can fix these instances when we find them, but
+> > the #include order is inherently fragile.
+> >
+> > Note that using the system assert isn't a total disaster: system
+> > assert will trigger an abort, which will trigger the SIGABRT handler
+> > which *also* dumps a stack trace to the debug log.  The problem is
+> > that it doesn't show the assertion condition and line number.
+> >
+> >
+> > I suggest:
+> >
+> > 0. Switch cmake to a debug but optimized build.  Ensure the release
+> > builds do the same.
+> >
+> > 1. Do an audit and replace assert(0) et al with ceph_abort(const
+> > char *msg), or similar.
+>
+> Definitely support this: I find the assert(0)s kind of ugly anyway.
+>
+> > 2. Replace all other instances of assert with ceph_assert.
+>
+> Annoying but probably necessary.  assert() amongst other things bit me
+> recently when importing Python.h from Ceph code.
+>
+> > That's a lot of work, though.  Other ideas?
+>
+> Down the line from this, I would also like us to distinguish "high
+> level" asserts that indicate logical inconsistency rather than e.g.
+> malformed structures, so that we can dump even more info in these
+> cases (http://tracker.ceph.com/issues/11174).
 
-QA job:http://qa-proxy.ceph.com/teuthology/haomai-2016-06-27_03:55:04-rados-wip-haomai-testing---basic-smithi/279412/teuthology.log
+That makes sense.  I have a related question too whether or not we want to make a distinction between asserts that we can compile out in a release/performance build and those we cannot.  For example, stuff in peering we would probably never want to compile out, and we are using assert only because it is a convenient shorthand for "if (!x) crash".
 
-This can be repeated locally and I want to know what's the difference
-this case introduced
+Maybe ceph_assert_always vs ceph_assert?
+
+sage
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
