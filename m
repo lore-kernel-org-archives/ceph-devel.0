@@ -1,51 +1,48 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: cmake
-Date: Mon, 27 Jun 2016 17:50:45 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
+From: Haomai Wang <haomai@xsky.com>
+Subject: About thread_local and TmapMigratePP.DataScan case
+Date: Tue, 28 Jun 2016 02:04:51 +0800
+Message-ID: <CACJqLybSUa6WtfcvXa5W4AAXJUgEBDPX2Mo+nd3SDeLkHVgDwA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44195 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751638AbcF0Rur (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 27 Jun 2016 13:50:47 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 092417F6A5
-	for <ceph-devel@vger.kernel.org>; Mon, 27 Jun 2016 17:50:47 +0000 (UTC)
-Received: from ovpn-112-100.phx2.redhat.com (ovpn-112-100.phx2.redhat.com [10.3.112.100])
-	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u5RHojgp025724
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Mon, 27 Jun 2016 13:50:46 -0400
+Received: from mail-sg2apc01on0127.outbound.protection.outlook.com ([104.47.125.127]:40384
+	"EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751639AbcF0SFH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 27 Jun 2016 14:05:07 -0400
+Received: by mail-vk0-f45.google.com with SMTP id j2so242479098vkg.2
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Jun 2016 11:05:01 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-We are switching from autotools to cmake on the master branch. Any 
-builds done post-jewel will be cmake and not autotools based.  Jewel and 
-older releases will still be built with autotools the old way.
+Hi all,
 
-The README.md in the master branch has been updated with new developer 
-build instructions.  Please take a look:
+anyone who knows what's the special thing with TmapMigratePP.DataScan
+case. When I introduce thread_local variable in
+PR(https://github.com/ceph/ceph/pull/9783/files#diff-254a8401d238ec25c714a5596f85b5ebL64),
+it always failed because the thread local variable is assigned to zero
+when execute this test!
 
-	https://github.com/ceph/ceph/blob/master/README.md
+For example, when tid == 512596224 local_center should be 5fed4e48,
+but after begin this test case, this thread_local variable is assigned
+to zero!:
+tid=-512596224 local_center=5fed4e48 this=5fed4e48
+[New Thread 0x7fffdef21700 (LWP 11835)]
+tid=-512596224 local_center=5fed4e48 this=5fed4e48
+[New Thread 0x7fffde720700 (LWP 11836)]
+[New Thread 0x7fffddf1f700 (LWP 11837)]
+[New Thread 0x7fffdd71e700 (LWP 11838)]
+[New Thread 0x7fffdcf1d700 (LWP 11839)]
+[New Thread 0x7fffdc71c700 (LWP 11840)]
+[New Thread 0x7fffdbf1b700 (LWP 11841)]
+tid=-134366272 local_center=0 this=5fed4e48
+tid=-134366272 local_center=0 this=5fed4e48
+tid=-134366272 local_center=0 this=5fed4e48
+tid=-512596224 local_center=0 this=5fed4e48
 
-If you are doing development, please switch to using cmake (i.e., 
-run do_cmake.sh) now.  Running vstart.sh is a little different and it 
-takes some getting used to.
 
-If there is anything that doesn't work that is part of your developer 
-workflow, we need to fix it now, before the autotools support is removed 
-and you're unable to work!  This is hopefully a week or two away.
+QA job:http://qa-proxy.ceph.com/teuthology/haomai-2016-06-27_03:55:04-rados-wip-haomai-testing---basic-smithi/279412/teuthology.log
 
-Current status:
-
- - gitbuilders mostly using make-dist instead of 'make dist' 
-   (autotools) to generate release tarballs
- - wip-cmake-debian building debs with cmake
- - rpm coming shortly
- - release build tool update last, followed by a 11.0.0 release.
-
-Thank you!
-sage
+This can be repeated locally and I want to know what's the difference
+this case introduced
