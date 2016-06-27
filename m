@@ -1,53 +1,62 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Questions for NVRAM+SATA SSDs with Bluestore
-Date: Mon, 27 Jun 2016 12:31:26 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1606271229510.2844@piezo.us.to>
-References: <CAFNt83a4mnNhO722drHTB_FavwzFfHJpRfCbUg8En2WpRHZWdw@mail.gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: mem leaks in Bluestore?
+Date: Mon, 27 Jun 2016 17:11:38 +0300
+Message-ID: <d75d6d88-3407-45a3-7495-44d4587aaa06@mirantis.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1305960165-1467030688=:2844"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53001 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751601AbcF0Mb3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jun 2016 08:31:29 -0400
-In-Reply-To: <CAFNt83a4mnNhO722drHTB_FavwzFfHJpRfCbUg8En2WpRHZWdw@mail.gmail.com>
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:32851 "EHLO
+	mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751385AbcF0OLk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jun 2016 10:11:40 -0400
+Received: by mail-lf0-f54.google.com with SMTP id f6so156868256lfg.0
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Jun 2016 07:11:40 -0700 (PDT)
+Received: from [127.0.0.1] ([91.218.144.129])
+        by smtp.googlemail.com with ESMTPSA id l11sm3375469lfl.23.2016.06.27.07.11.38
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 27 Jun 2016 07:11:38 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: myoungwon oh <ohmyoungwon@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi All,
 
---8323329-1305960165-1467030688=:2844
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+let me share some observations I collected while running 
+ceph_test_objectstore against the bluestore.
 
-On Mon, 27 Jun 2016, myoungwon oh wrote:
-> Hi, I have questions for bluestore (4K random write case).
-> 
-> So far, we have used NVRAM(PCIe) as journal and SSD (SATA) as data
-> disk (filestore).
-> Therefore, we got performance gain from NVRAM journal.
-> However, current Bluestore design seems that data (4K aligned) is
-> written to data disk first, then metadata is written to WAL rocksdb.
-> This design can remove “double write” in objectstore, but in our case,
-> NVRAM can not be utilized fully.
-> 
->  So, my questions are that
-> 
-> 1. Can bluestore write WAL first as filestore?
+Initially I started this investigations due to a failure in 
+SyntheticMatrixCompressionAlgorithm test case. The issue appeared while 
+running the the whole test suite and had a pretty odd symptom: failed 
+test case was run with settings that aren't provided for it: compression 
+= none, compression algorithm = snappy. No attempts to run for zlib 
+despite the fact zlib is the first in the list. When running single test 
+case everything is OK.
+Additional investigations led me to the fact that RAM at my VM decreases 
+almost to zero while running the test suite and that probably prevents 
+from setting desired config params. Hence I proceeded with mem leak 
+investigation.
 
-You can do it indirectly with bluestore_min_alloc_size=65536, which will 
-send anything smaller than this value through the wal path.  Please let 
-us know what effect this has on our latency/performance!
+Since Synthetic test cases are pretty complex I switched to less complex 
+one - Many4KWriteNoCSumTest. As it performs writes only against the 
+single object this eliminates other ops, compression, csum, multiple 
+object handlings etc from under the suspicion.
+Currently I can see ~6Gb mem consumption when doing ~3000 random writes 
+(up to 4K) over 4M object. Counting Bluestore's Buffer, Blob and Onode 
+objects shows that they aren't grow unexpectedly over the time for the 
+test case.
+Then I changed the test case to perform fixed length(64K) writes - mem 
+consumption for 3000 writes reduced to 500M but I can see that Buffer 
+count is permanently growing - one buffer per single write. Thus 
+original issue is rather specific for small writes. But probably there 
+is another issue with buffer cache for big ones.
+That's all what I have so far.
 
-> 2. If not, using bcache or flashcache for NVRAM on top of SSDs is right 
-> answer?
+Any comments/ideas are appreciated.
 
-This is also possible, but I expect we'd like to make this work out of the 
-box if we can!
 
-sage
+Thanks,
+Igor
 
---8323329-1305960165-1467030688=:2844--
+
