@@ -1,41 +1,76 @@
-From: myoungwon oh <ohmyoungwon@gmail.com>
-Subject: Questions for NVRAM+SATA SSDs with Bluestore
-Date: Mon, 27 Jun 2016 11:31:48 +0900
-Message-ID: <CAFNt83a4mnNhO722drHTB_FavwzFfHJpRfCbUg8En2WpRHZWdw@mail.gmail.com>
+From: Jeff Liu <jeff.liu@easystack.cn>
+Subject: Re: [PATCH] mds/mdstypes.h: drop the unnecessary format string of
+ snprintf
+Date: Mon, 27 Jun 2016 14:45:58 +0800
+Message-ID: <5770CBA6.1050304@easystack.cn>
+References: <5770C700.1020202@easystack.cn> <CAAM7YAnCTyccFSVRDTh=mUAZ=5sA6ZSfma4UvE62W9Py2LzK+Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f173.google.com ([209.85.223.173]:36640 "EHLO
-	mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751571AbcF0Cbt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Jun 2016 22:31:49 -0400
-Received: by mail-io0-f173.google.com with SMTP id s63so137608684ioi.3
-        for <ceph-devel@vger.kernel.org>; Sun, 26 Jun 2016 19:31:49 -0700 (PDT)
+Received: from m199-177.yeah.net ([123.58.177.199]:21113 "EHLO
+	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751852AbcF0GqE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jun 2016 02:46:04 -0400
+In-Reply-To: <CAAM7YAnCTyccFSVRDTh=mUAZ=5sA6ZSfma4UvE62W9Py2LzK+Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi, I have questions for bluestore (4K random write case).
+Got it, thanks Zheng.
 
-So far, we have used NVRAM(PCIe) as journal and SSD (SATA) as data
-disk (filestore).
-Therefore, we got performance gain from NVRAM journal.
-However, current Bluestore design seems that data (4K aligned) is
-written to data disk first, then metadata is written to WAL rocksdb.
-This design can remove =E2=80=9Cdouble write=E2=80=9D in objectstore, b=
-ut in our case,
-NVRAM can not be utilized fully.
+On 2016=E5=B9=B406=E6=9C=8827=E6=97=A5 14:38, Yan, Zheng wrote:
 
- So, my questions are that
+Please open a pull request at https://github.com/ceph/ceph
 
-1. Can bluestore write WAL first as filestore?
+Regards
+Yan, Zheng
 
-2. If not, using bcache or flashcache for NVRAM on top of SSDs is right=
- answer?
+On Mon, Jun 27, 2016 at 2:26 PM, Jeff Liu <jeff.liu@easystack.cn> wrote=
+:
+
+> Drop the unnecessary format string of snprintf
+>
+> Signed-off-by: Jie Liu <jeff.liu@easystack.cn>
+> ---
+>  src/mds/mdstypes.h | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/src/mds/mdstypes.h b/src/mds/mdstypes.h
+> index c69a655..3414ecd 100644
+> --- a/src/mds/mdstypes.h
+> +++ b/src/mds/mdstypes.h
+> @@ -741,7 +741,7 @@ struct dentry_key_t {
+>        uint64_t val(snapid);
+>        snprintf(b, sizeof(b), "%" PRIx64, val);
+>      } else {
+> -      snprintf(b, sizeof(b), "%s", "head");
+> +      snprintf(b, sizeof(b), "head");
+>      }
+>      ostringstream oss;
+>      oss << name << "_" << b;
+> --
+> 1.8.3.2
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
-Thanks
+--=20
+Cheers,
+
+Jeff Liu
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
