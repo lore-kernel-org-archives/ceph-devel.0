@@ -1,97 +1,51 @@
-From: Ramesh Chander <Ramesh.Chander@sandisk.com>
-Subject: RE: assert
-Date: Mon, 27 Jun 2016 16:20:55 +0000
-Message-ID: <CY1PR0201MB182065A6E2A8123D33D5A70985210@CY1PR0201MB1820.namprd02.prod.outlook.com>
-References: <alpine.DEB.2.11.1606271610170.2844@piezo.us.to>
+From: Sage Weil <sweil@redhat.com>
+Subject: cmake
+Date: Mon, 27 Jun 2016 17:50:45 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0057.outbound.protection.outlook.com ([157.56.111.57]:32416
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751905AbcF0Qx0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jun 2016 12:53:26 -0400
-In-Reply-To: <alpine.DEB.2.11.1606271610170.2844@piezo.us.to>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:44195 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751638AbcF0Rur (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 27 Jun 2016 13:50:47 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 092417F6A5
+	for <ceph-devel@vger.kernel.org>; Mon, 27 Jun 2016 17:50:47 +0000 (UTC)
+Received: from ovpn-112-100.phx2.redhat.com (ovpn-112-100.phx2.redhat.com [10.3.112.100])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u5RHojgp025724
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Mon, 27 Jun 2016 13:50:46 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
+We are switching from autotools to cmake on the master branch. Any 
+builds done post-jewel will be cmake and not autotools based.  Jewel and 
+older releases will still be built with autotools the old way.
 
+The README.md in the master branch has been updated with new developer 
+build instructions.  Please take a look:
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Monday, June 27, 2016 9:47 PM
-> To: ceph-devel@vger.kernel.org
-> Subject: assert
->
-> We have a problem with assert.  Actually, a few problems.
->
-> 1. Our code is written assuming that assert is never compiled out.  We have
-> lots of assert(0) and assert(0 == "informative failure message") instances all
-> over the code that should really be something like abort().
-> If you compile out assert, things won't work (well, fail) as expected.
->
-> 2. We have a special implementation of assert in include/assert.h that will log
-> the assertion failure to the global debug log, along with a stack track, before
-> crashing.  This is normally fine, except that lots of random library or system
-> headers include the system assert (/usr/include/assert.h), which is written
-> such that it does not lib nicely with another definition.  From
-> /usr/include/assert.h:
->
-> #ifdef  _ASSERT_H
->
-> # undef _ASSERT_H
-> # undef assert
-> # undef __ASSERT_VOID_CAST
->
-> # ifdef __USE_GNU
-> #  undef assert_perror
-> # endif
->
-> #endif /* assert.h      */
->
-> #define _ASSERT_H       1
->
-> That means that if you include our assert, and then some other random
-> header includes /usr/include/assert, it will (silently!) clobber ours.
->
-> 3. This is all highlighted by the switch to cmake.  The current defautl build
-> does not define NDEBUG, which means that assert is compiled away, and we
-> get a bunch of unused variable warnings from code like
->
->   r = read(...);
->   assert(r > 0);
->
-> So... what do to?  We can fix these instances when we find them, but the
-> #include order is inherently fragile.
->
-> Note that using the system assert isn't a total disaster: system assert will
-> trigger an abort, which will trigger the SIGABRT handler which *also* dumps a
-> stack trace to the debug log.  The problem is that it doesn't show the
-> assertion condition and line number.
->
->
-> I suggest:
->
-> 0. Switch cmake to a debug but optimized build.  Ensure the release builds do
-> the same.
->
-> 1. Do an audit and replace assert(0) et al with ceph_abort(const char *msg),
-> or similar.
->
-> 2. Replace all other instances of assert with ceph_assert.
+	https://github.com/ceph/ceph/blob/master/README.md
 
-I think doing this should be more simple and portable. Hide all details in ceph_assert.
+If you are doing development, please switch to using cmake (i.e., 
+run do_cmake.sh) now.  Running vstart.sh is a little different and it 
+takes some getting used to.
 
->
-> That's a lot of work, though.  Other ideas?
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+If there is anything that doesn't work that is part of your developer 
+workflow, we need to fix it now, before the autotools support is removed 
+and you're unable to work!  This is hopefully a week or two away.
+
+Current status:
+
+ - gitbuilders mostly using make-dist instead of 'make dist' 
+   (autotools) to generate release tarballs
+ - wip-cmake-debian building debs with cmake
+ - rpm coming shortly
+ - release build tool update last, followed by a 11.0.0 release.
+
+Thank you!
+sage
