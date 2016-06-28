@@ -1,88 +1,153 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: ceph build changes
-Date: Tue, 28 Jun 2016 08:13:06 -0400
-Message-ID: <CAC-Np1xXt5zAUv9vtqh4V43JeCd0NKKV1G8wB_mhUfWVB5t9uw@mail.gmail.com>
-References: <alpine.DEB.2.11.1606272200310.7088@piezo.us.to>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Lib snappy error
+Date: Tue, 28 Jun 2016 15:40:13 +0300
+Message-ID: <af3537d7-fa8e-1c0a-310d-ea994955452f@mirantis.com>
+References: <CY1PR0201MB1820A490B5063DCFF9AC971085220@CY1PR0201MB1820.namprd02.prod.outlook.com>
+ <BL2PR02MB2115EEEF96F291F50C8B1127F4220@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <CY1PR0201MB1820CCFEF6847E640D56808885220@CY1PR0201MB1820.namprd02.prod.outlook.com>
+ <BL2PR02MB211592B5E83AC82B46F34A50F4220@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1606280346440.8816@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:35745 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750753AbcF1MNJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 08:13:09 -0400
-Received: by mail-wm0-f53.google.com with SMTP id v199so137050589wmv.0
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 05:13:08 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1606272200310.7088@piezo.us.to>
+Received: from mail-lf0-f46.google.com ([209.85.215.46]:35795 "EHLO
+	mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752051AbcF1MkR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 08:40:17 -0400
+Received: by mail-lf0-f46.google.com with SMTP id l188so10401580lfe.2
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 05:40:16 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1606280346440.8816@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 27, 2016 at 6:05 PM, Sage Weil <sweil@redhat.com> wrote:
-> Hey Alfredo,
+Shouldn't we remove compressor subfolder at all and store compressor 
+libraries a level up?
+
+
+On 28.06.2016 6:49, Sage Weil wrote:
+> On Tue, 28 Jun 2016, Somnath Roy wrote:
+>> 'Make install' will put all the libraries in the path (--prefix) you
+>> opted for during autogen (default /usr). You should do that in your dev
+>> env also just in case you have differene version present.
+> I wouldn't recommand make install, actually.
 >
-> Just a heads up that the changes to gitbuilder to enable cmake were pretty
-> minimal.  It basically comes down to using the make-dist script to
-> generate the tarball instead of running ./autogen.sh, ./configure, and
-> then 'make dist' just to get the tarball.  Here's what we changed:
+> This should work:
 >
->         https://github.com/ceph/autobuild-ceph/commit/eccdc8f61273e97710203eaae55a2c4258b64087
+> git clone git@github.com:ceph/ceph
+> cd ceph
+> ./do_cmake.sh
+> cd build
+> make ceph_test_objectstore
+> ln -s . lib/compressor
+> cat  <<EOM > ceph.conf
+> [global]
+> plugin dir = lib
+> EOM
+> bin/ceph_test_objecstore ...
 >
-> It's slightly annoying because older branches won't have make-dist, but
-> newer branches will, and it has to do a build both ways.  Not too crazy,
-> though.
-
-Thanks for the heads up.
-
-The changes look straightforward but I am concerned on how to make
-them work for a release. I could just copy/pasta them
-into the build script but it is very easy (and has happened before) to
-get out of sync if the gitbuilder script gets modifications.
-
-To get a tarball, you are right in what we call:
-
-* install-deps.sh (if it exists)
-* autogen.sh
-* configure
-
-
-See: https://github.com/ceph/ceph-build/blob/master/ceph-setup/build/build#L30-L58
-
-Is it not possible to get these changes within the source tree? Having
-a single place where to call them is a huge win.
-
+> I'll fix up do_cmake.sh shortly so that it sets up the symlinks and
+> ceph.conf the first time around.  Note that running ../src/vstart.sh will
+> also create the symlinks and a ceph.conf that will make
+> ceph_test_objectstore happy.
 >
-> The other change was that we have a new environment variable for passing
-> down cmake optons that parallels the old CEPH_EXTRA_CONFIGURE_ARGS:
->
->         https://github.com/ceph/autobuild-ceph/commit/71d02e8b2c9bd3533c44b3bf0408681ed7890248
->
-> I'm guessing we don't need that for a proper release, but in case we do,
-> the script should just set both.
-
-Passing options via environment variables sounds reasonable, it is
-nice that it got implemented.
-
->
-> Anyway, with those changes, the final step is to change debian/rules and
-> ceph.spec.in in ceph.git itself to build using cmake instead of autotools,
-> but as long as the source tarball is coming from make-dist the ceph-build
-> stuff doesn't need to know or care about that--it's all hidden by rpmbuild
-> and dpkg-buildpackage/pbuilder.
-
-So, we do call `make dist` and `make dist-bzip2`, but then again,
-porting the changes in build-ceph-native.sh is what
-worries me.
-
->
-> As soon as the deb and rpm changes are working when built by the
-> gitbuilders (basically there with debs, rpms up next) I think we should do
-> a dev release through the new jenkins pipeline to demonstrate that the
-> whole thing works.  Maybe the week after next?
-
-We can do that or even try "throwaway" builds before. Shouldn't be a
-problem to try it out.
-
->
-> Thanks!
 > sage
+>
+>
+>
+>
+>> -----Original Message-----
+>> From: Ramesh Chander
+>> Sent: Monday, June 27, 2016 8:08 PM
+>> To: Somnath Roy; ceph-devel@vger.kernel.org
+>> Cc: Sage Weil (sweil@redhat.com)
+>> Subject: RE: Lib snappy error
+>>
+>> No I did't, is that mandatory even for dev environments?
+>>
+>> Looks like path is hardcoded in any script.
+>>
+>>
+>>> -----Original Message-----
+>>> From: Somnath Roy
+>>> Sent: Tuesday, June 28, 2016 8:35 AM
+>>> To: Ramesh Chander; ceph-devel@vger.kernel.org
+>>> Cc: Sage Weil (sweil@redhat.com)
+>>> Subject: RE: Lib snappy error
+>>>
+>>> Did you do 'make install' ?
+>>>
+>>>
+>>> -----Original Message-----
+>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>>> owner@vger.kernel.org] On Behalf Of Ramesh Chander
+>>> Sent: Monday, June 27, 2016 7:56 PM
+>>> To: ceph-devel@vger.kernel.org
+>>> Cc: Sage Weil (sweil@redhat.com)
+>>> Subject: RE: Lib snappy error
+>>>
+>>> Creating sym link at  /usr/lib/ceph/compressor/libceph_snappy.so from
+>>> .libs/libceph_snappy.so.2.0.0 works for me
+>>>
+>>> Not sure what is the right way though.
+>>>
+>>> -Ramesh
+>>>
+>>>> -----Original Message-----
+>>>> From: Ramesh Chander
+>>>> Sent: Tuesday, June 28, 2016 8:07 AM
+>>>> To: ceph-devel@vger.kernel.org
+>>>> Cc: Sage Weil (sweil@redhat.com)
+>>>> Subject: Lib snappy error
+>>>>
+>>>> Hi All,
+>>>>
+>>>> I am getting this error whatever I do:
+>>>>
+>>>> [New Thread 0x7ffff1d70700 (LWP 14659)]
+>>>> 2016-06-28 08:00:02.395492 7ffff2d72700 -1
+>>>> bdev(store_test_temp_dir/block) _aio_thread got (4) Interrupted
+>>>> system call
+>>>> 2016-06-28 08:00:02.395755 7ffff7fda6c0 -1 load failed
+>>>> dlopen(/usr/lib/ceph/compressor/libceph_snappy.so):
+>>>> /usr/lib/ceph/compressor/libceph_snappy.so: cannot open shared
+>>>> object
+>>>> file: No such file or directory
+>>>> 2016-06-28 08:00:02.395766 7ffff7fda6c0 -1 create cannot load
+>>>> compressor of type snappy
+>>>> 2016-06-28 08:00:02.395769 7ffff7fda6c0 -1
+>>>> bluestore(store_test_temp_dir) _set_compression unable to initialize
+>>>> snappy compressor
+>>>>
+>>>> I did full make. Did clean and make again but still it fails everytime.
+>>>>
+>>>> I see in the path that it is looking for
+>>>> /usr/lib/ceph/compressor/libceph_snappy.so even though I am not
+>>>> installing ceph and using Vstart.
+>>>>
+>>>> Any idea what is wrong here?
+>>>>
+>>>> -Ramesh
+>>> PLEASE NOTE: The information contained in this electronic mail message
+>>> is intended only for the use of the designated recipient(s) named
+>>> above. If the reader of this message is not the intended recipient,
+>>> you are hereby notified that you have received this message in error
+>>> and that any review, dissemination, distribution, or copying of this
+>>> message is strictly prohibited. If you have received this
+>>> communication in error, please notify the sender by telephone or
+>>> e-mail (as shown above) immediately and destroy any and all copies of
+>>> this message in your possession (whether hard copies or electronically stored copies).
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>>> info at http://vger.kernel.org/majordomo-info.html
+>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
