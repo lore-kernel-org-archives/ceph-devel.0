@@ -1,88 +1,96 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: is the renewal in dentry_lease_is_valid necessary?
-Date: Tue, 28 Jun 2016 10:00:56 -0400
-Message-ID: <1467122456.32374.15.camel@redhat.com>
-References: <1467054441.25213.20.camel@redhat.com>
-	 <CAAM7YAm7qHJkKjXSiG2bz-D04uNVJTbDw4XbvZ9mnU==u9eT2Q@mail.gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: assert
+Date: Tue, 28 Jun 2016 22:10:05 +0800
+Message-ID: <CAJE9aOMghjY2H01sxD8Cf4Heuhjqi_QgQx53hHg-rT-vRnfi+w@mail.gmail.com>
+References: <alpine.DEB.2.11.1606271610170.2844@piezo.us.to>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f180.google.com ([209.85.220.180]:33832 "EHLO
-	mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752425AbcF1OJF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 10:09:05 -0400
-Received: by mail-qk0-f180.google.com with SMTP id t127so30891384qkf.1
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 07:09:04 -0700 (PDT)
-In-Reply-To: <CAAM7YAm7qHJkKjXSiG2bz-D04uNVJTbDw4XbvZ9mnU==u9eT2Q@mail.gmail.com>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:34986 "EHLO
+	mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752236AbcF1OQA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 10:16:00 -0400
+Received: by mail-qk0-f173.google.com with SMTP id a125so31297341qkc.2
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 07:15:17 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1606271610170.2844@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Zheng Yan <zyan@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 2016-06-28 at 21:03 +0800, Yan, Zheng wrote:
-> On Tue, Jun 28, 2016 at 3:07 AM, Jeff Layton <jlayton@redhat.com> wro=
-te:
-> >=20
-> > I'm eyeballing how to make ceph dentry revalidation occur in rcu-wa=
-lk
-> > mode in the kernel cephfs client. It looks fairly straightforward, =
-but
-> > for one thing:
-> >=20
-> > dentry_lease_is_valid queues an asynchronous lease renewal if we're
-> > halfway to the next lease renewal time:
-> >=20
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0if (session) {
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0ceph_mdsc_lease_send_msg(session, dir, dentr=
-y,
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0CEPH_MDS_LEASE_RENEW, seq);
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0ceph_put_mds_session(session);
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0}
-> >=20
-> > That can sleep, so we have to drop out of rcu walk mode in that cas=
-e.
-> >=20
-> > Is this lease renewal strictly necessary? I can make the code drop =
-out
-> > of rcuwalk mode and try again in that case, but if this is just an
-> > opportunistic thing, then it may be better for performance to take =
-a
-> > pass on renewing the lease early if we're still in RCU walk mode.
-> >=20
-> dentry_lease_is_valid is the only place that renew lease. I think it'=
-s
-> better to drop out of rcuwalk and try again
->=20
-> Regards
-> Yan, Zheng
->=20
+On Tue, Jun 28, 2016 at 12:16 AM, Sage Weil <sweil@redhat.com> wrote:
+> We have a problem with assert.  Actually, a few problems.
+>
+> 1. Our code is written assuming that assert is never compiled out.  We
+> have lots of assert(0) and assert(0 == "informative failure message")
+> instances all over the code that should really be something like abort().
+> If you compile out assert, things won't work (well, fail) as expected.
+>
+> 2. We have a special implementation of assert in include/assert.h that
+> will log the assertion failure to the global debug log, along with a stack
+> track, before crashing.  This is normally fine, except that lots of random
+> library or system headers include the system assert
+> (/usr/include/assert.h), which is written such that it does not lib nicely
+> with another definition.  From /usr/include/assert.h:
+>
+> #ifdef  _ASSERT_H
+>
+> # undef _ASSERT_H
+> # undef assert
+> # undef __ASSERT_VOID_CAST
+>
+> # ifdef __USE_GNU
+> #  undef assert_perror
+> # endif
+>
+> #endif /* assert.h      */
+>
+> #define _ASSERT_H       1
+>
+> That means that if you include our assert, and then some other random
+> header includes /usr/include/assert, it will (silently!) clobber ours.
+>
+> 3. This is all highlighted by the switch to cmake.  The current defautl
+> build does not define NDEBUG, which means that assert is compiled away,
+> and we get a bunch of unused variable warnings from code like
+>
+>   r = read(...);
+>   assert(r > 0);
+>
+> So... what do to?  We can fix these instances when we find them, but the
+> #include order is inherently fragile.
+>
+> Note that using the system assert isn't a total disaster: system assert
+> will trigger an abort, which will trigger the SIGABRT handler which *also*
+> dumps a stack trace to the debug log.  The problem is that it
+> doesn't show the assertion condition and line number.
+>
+>
+> I suggest:
+>
+> 0. Switch cmake to a debug but optimized build.  Ensure the release builds
+> do the same.
 
-That seems really odd to me.
+yeah, we do need this. some of the tests are actually using assert()
+as ASSERT_TRUE().
+i posted a PR for it: https://github.com/ceph/ceph/pull/9975.
 
-That call is only ever done in the d_revalidate codepath, so you'll
-only get a lease renewal when you have repeated path-based access to an
-existing dentry.
+>
+> 1. Do an audit and replace assert(0) et al with ceph_abort(const char
+> *msg), or similar.
+>
+> 2. Replace all other instances of assert with ceph_assert.
+>
+> That's a lot of work, though.  Other ideas?
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Maybe this means that I don't really understand ceph leases. More
-questions...
 
-What exactly does the lease cover here?
 
-Shouldn't we be renewing it even if we're _not_ doing any path-based
-access? For instance, if I open a file and issue reads and writes
-against it, that doesn't involve pathnames and the lease doesn't get an
-explicit renewal. Doesn't it still need to be renewed though?
-
---=20
-Jeff Layton <jlayton@redhat.com>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Regards
+Kefu Chai
