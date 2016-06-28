@@ -1,62 +1,93 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: cmake
-Date: Tue, 28 Jun 2016 16:28:49 -0400
-Message-ID: <29a3fbd4-8659-1391-79ce-98a37e5b84c8@redhat.com>
-References: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
+From: "Frank Filz" <ffilzlnx-mn4gwa5WIIQysxA8WJXlww@public.gmane.org>
+Subject: Re: new statx() like interface for libcephfs
+Date: Tue, 28 Jun 2016 13:47:57 -0700
+Message-ID: <001001d1d17e$5ab5e690$1021b3b0$@mindspring.com>
+References: <1467137825.32374.29.camel@redhat.com>
+	<CAL-2WbF5HAoAvbje8xr91OP5Cd1ye7UF7W+PA01m-V1+O==DjA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:36854 "EHLO
-	mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752500AbcF1U2v (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 16:28:51 -0400
-Received: by mail-qk0-f176.google.com with SMTP id z142so27257958qkb.3
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 13:28:51 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+Return-path: <nfs-ganesha-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <CAL-2WbF5HAoAvbje8xr91OP5Cd1ye7UF7W+PA01m-V1+O==DjA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-us
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/nfs-ganesha-devel>,
+	<mailto:nfs-ganesha-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=nfs-ganesha-devel>
+List-Post: <mailto:nfs-ganesha-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:nfs-ganesha-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/nfs-ganesha-devel>,
+	<mailto:nfs-ganesha-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: nfs-ganesha-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: 'Daniel Gryniewicz' <dang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, 'Jeff Layton' <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: 'David Howells' <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, 'Ceph Development' <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, 'Ganesha NFS List' <nfs-ganesha-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
+
+> Is stx_version a generation ID for the inode that can be used for the
+> NFSv4 Change ID?  If so, that would be quite useful to us.  Otherwise, I'm
+not
+> sure there's that much in there that's useful beyond what stat already
+> provides, unless I'm missing something.
+
+Even if stx_version isn't available for a change attribute, btime converts
+to NFS v4 create time.
+
+Frank
+
+> On Tue, Jun 28, 2016 at 2:17 PM, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> > I have a patchset queued up for ceph that adds btime (birthtime)
+> > support to it. What was lacking though was a mechanism to get the
+> > btime out of the inode.
+> >
+> > Rather than cook up a brand new interface just for the btime, I
+> > decided to "borrow" the work that David Howells did with the new
+> > proposed
+> > statx() interface. The pull request to add this to ceph is up here:
+> >
+> >      https://github.com/ceph/ceph/pull/9965
+> >
+> > Sage has already closed it out which I take to mean that he has pulled
+> > the patches into a staging branch for eventual merge.
+> >
+> > It occurs to me though that I didn't ask anyone who is working on the
+> > samba vfs or ganesha fsal code whether they think this interface is
+> > acceptable.
+> >
+> > Since Samba and Ganesha are the targeted users of this interface, it'd
+> > be good to have developers from both communities take a look and see
+> > if there are any problems here.
+> >
+> > Does anyone see any issues with the above pull request?
+> > --
+> > Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More
+> majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> 
+>
+----------------------------------------------------------------------------
+--
+> Attend Shape: An AT&T Tech Expo July 15-16. Meet us at AT&T Park in San
+> Francisco, CA to explore cutting-edge tech and listen to tech luminaries
+> present their vision of the future. This family event has something for
+> everyone, including kids. Get more information and register today.
+> http://sdm.link/attshape
+> _______________________________________________
+> Nfs-ganesha-devel mailing list
+> Nfs-ganesha-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+> https://lists.sourceforge.net/lists/listinfo/nfs-ganesha-devel
 
 
-On 06/27/2016 01:50 PM, Sage Weil wrote:
-> We are switching from autotools to cmake on the master branch. Any
-> builds done post-jewel will be cmake and not autotools based.  Jewel and
-> older releases will still be built with autotools the old way.
->
-> The README.md in the master branch has been updated with new developer
-> build instructions.  Please take a look:
->
-> 	https://github.com/ceph/ceph/blob/master/README.md
->
-> If you are doing development, please switch to using cmake (i.e.,
-> run do_cmake.sh) now.  Running vstart.sh is a little different and it
-> takes some getting used to.
->
-> If there is anything that doesn't work that is part of your developer
-> workflow, we need to fix it now, before the autotools support is removed
-> and you're unable to work!  This is hopefully a week or two away.
->
-> Current status:
->
->   - gitbuilders mostly using make-dist instead of 'make dist'
->     (autotools) to generate release tarballs
->   - wip-cmake-debian building debs with cmake
->   - rpm coming shortly
->   - release build tool update last, followed by a 11.0.0 release.
->
-> Thank you!
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+---
+This email has been checked for viruses by Avast antivirus software.
+https://www.avast.com/antivirus
 
-To those trying CMake, please note that autoconf generates a 
-ceph/src/acconfig.h. You'll want to remove that header, or cmake builds 
-will pull it in and get confused.
 
-Build failures in rocksdb are also common for those switching. This 
-seems to fix those issues: cd ceph/src/rocksdb; make clean
-
-Casey
+------------------------------------------------------------------------------
+Attend Shape: An AT&T Tech Expo July 15-16. Meet us at AT&T Park in San
+Francisco, CA to explore cutting-edge tech and listen to tech luminaries
+present their vision of the future. This family event has something for
+everyone, including kids. Get more information and register today.
+http://sdm.link/attshape
