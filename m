@@ -1,34 +1,64 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: jewel -> master upgrade
-Date: Tue, 28 Jun 2016 15:45:04 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1606281545010.18172@piezo.us.to>
-References: <075b96eb-bee1-8618-74a3-a10da327fef2@suse.de> <alpine.DEB.2.11.1606281343110.8816@piezo.us.to> <31000f1d-0158-9112-c753-423d29758077@suse.de>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: cmake
+Date: Tue, 28 Jun 2016 18:05:12 +0200
+Message-ID: <2bf0a521-863a-b43c-328c-9c6c6a7c73ca@digiware.nl>
+References: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
+ <94aeab09-6e86-9e94-5a96-d8e477b85cad@digiware.nl>
+ <alpine.DEB.2.11.1606281339570.8816@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33452 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752172AbcF1PpN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 11:45:13 -0400
-In-Reply-To: <31000f1d-0158-9112-c753-423d29758077@suse.de>
+Received: from smtp.digiware.nl ([176.74.240.9]:58361 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752180AbcF1QFb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 28 Jun 2016 12:05:31 -0400
+In-Reply-To: <alpine.DEB.2.11.1606281339570.8816@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-Done
+On 28-6-2016 15:42, Sage Weil wrote:
+> On Tue, 28 Jun 2016, Willem Jan Withagen wrote:
+>> On 27-6-2016 19:50, Sage Weil wrote:
+>>> We are switching from autotools to cmake on the master branch. Any 
+>>> builds done post-jewel will be cmake and not autotools based.  Jewel and 
+>>> older releases will still be built with autotools the old way.
+>>>
+>>> The README.md in the master branch has been updated with new developer 
+>>> build instructions.  Please take a look:
+>>>
+>>> 	https://github.com/ceph/ceph/blob/master/README.md
+>>>
+>>> If you are doing development, please switch to using cmake (i.e., 
+>>> run do_cmake.sh) now.  Running vstart.sh is a little different and it 
+>>> takes some getting used to.
+>>>
+>>> If there is anything that doesn't work that is part of your developer 
+>>> workflow, we need to fix it now, before the autotools support is removed 
+>>> and you're unable to work!  This is hopefully a week or two away.
+>>
+>> Hi Sage,
+>>
+>> Although i appreciate and understand the desire to move to cmake.
+>> Really ripping out the automake stuff would put me in the situation
+>> where I have no more building environment until all the cmake tweaks for
+>> FreeBSD are in place.
+>>
+>> An while I'll start working on it, time is rather scarce atm.
+>> So please disable but please keep it around for a bit longer...
+> 
+> There is no particular need to remove any of the autotools stuff while 
+> anyone still relies on it, so don't worry.  I'm just making sure 
+> everyone starts using it now so that we can identify any gaps and 
+> avoid surprises and fragmentation of efforts later.
+> 
+> Thanks for taking a look!
 
-On Tue, 28 Jun 2016, Nathan Cutler wrote:
+Sort of feel like starting all over again, and hacking all FreeBSD
+specials into the Make process.
+But I've done that, so it does have steady progress.
 
-> > We can just add a tag and not bother doing a release build for now... that
-> > is probably the simplest.  Any objections?
-> 
-> Just adding a tag is what I was hoping for.
-> 
-> Nathan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+--WjW
+
