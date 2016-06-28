@@ -1,66 +1,58 @@
 From: Sebastien Ponce <sebastien.ponce@cern.ch>
 Subject: Re: libradosstriper
-Date: Tue, 28 Jun 2016 05:27:25 +0200
-Message-ID: <1467084445.32200.8.camel@cern.ch>
+Date: Tue, 28 Jun 2016 05:26:31 +0200
+Message-ID: <1467084391.32200.7.camel@cern.ch>
 References: <alpine.DEB.2.11.1606272216370.7088@piezo.us.to>
-	 <CAN=+7FVmmgAuVF6cjwvGdyAU4YEXr8jLX-qiNjH50w6_YMs02g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db3on0075.outbound.protection.outlook.com ([157.55.234.75]:35840
-	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+Received: from mail-am1on0064.outbound.protection.outlook.com ([157.56.112.64]:10368
+	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750836AbcF1EBj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Jun 2016 00:01:39 -0400
-In-Reply-To: <CAN=+7FVmmgAuVF6cjwvGdyAU4YEXr8jLX-qiNjH50w6_YMs02g@mail.gmail.com>
+	id S1750704AbcF1EZH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 28 Jun 2016 00:25:07 -0400
+In-Reply-To: <alpine.DEB.2.11.1606272216370.7088@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>, Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-Would be great indeed. As it's already there, it can be done already
-now.
+On Mon, 2016-06-27 at 22:18 +0000, Sage Weil wrote:
+> Hi Sebastien,
+>=20
+> Do you mind updating us on the current status of
+> libradosstriper?=C2=A0=C2=A0Where=C2=A0does it stand feature-wise wit=
+h what you
+> need, how are you currently using it or how do you plan to use it,
+> and what is still missing?
+
+Most of the feature we need are there and they are being used,
+including in production. However, I have a couple of improvements to
+propose, in particular a faster remove implementation (using async
+removal of the subparts) and the few async APIs I've mentioned at the
+ceph day. I've just prepared the commits in the plane yesterday, I'll
+try to create the pull request this week.
+
+
+> Also, one thing we really want to see is test coverage for the code
+> so that we can comfortably point users toward it.=C2=A0=C2=A0This ide=
+ally would
+> look=C2=A0something like the ceph_test_rados_api_* tests that verify
+> individual=C2=A0operations behave as expected, and/or something like
+> ceph_test_rados that=C2=A0throws random operations at is and verifies=
+ it
+> returns correct results that match its in-memory model.
+
+I believe the test coverage for individual operations is complete for
+what exists, and the new improvements will come with their tests too.
+They are called ceph_test_radosstriper.
+Now I do not think I have the random operation one. Probably something
+to be added.
+
+Cheers,
 
 Sebastien
-
-On Mon, 2016-06-27 at 15:25 -0700, Samuel Just wrote:
-> The something like ceph_test_rados could then be wired into
-> ceph-qa-suite to be tested with osd thrashing to ensure that ordering
-> works and continues to work as expected.
-> -Sam
->=20
-> On Mon, Jun 27, 2016 at 3:18 PM, Sage Weil <sweil@redhat.com> wrote:
-> >=20
-> > Hi Sebastien,
-> >=20
-> > Do you mind updating us on the current status of
-> > libradosstriper?=C2=A0=C2=A0Where
-> > does it stand feature-wise with what you need, how are you
-> > currently using
-> > it or how do you plan to use it, and what is still missing?
-> >=20
-> > Also, one thing we really want to see is test coverage for the code
-> > so
-> > that we can comfortably point users toward it.=C2=A0=C2=A0This idea=
-lly would
-> > look
-> > something like the ceph_test_rados_api_* tests that verify
-> > individual
-> > operations behave as expected, and/or something like
-> > ceph_test_rados that
-> > throws random operations at is and verifies it returns correct
-> > results
-> > that match its in-memory model.
-> >=20
-> > Thanks!
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-
-> > devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at=C2=A0=C2=A0http://vger.kernel.org/majordomo-=
-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
