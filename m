@@ -1,86 +1,72 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: prefered behavior for injecting untracked args
-Date: Tue, 28 Jun 2016 18:41:49 +0200
-Message-ID: <9421c622-ef5f-235b-57c2-04b85da1cd4b@digiware.nl>
-References: <CAEYCsVJz9b8fDdEz8V7iraoq6t6wtY8ddt4XqBnxEVmvAcLnfA@mail.gmail.com>
- <alpine.DEB.2.11.1606281533160.8816@piezo.us.to>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: jewel -> master upgrade
+Date: Tue, 28 Jun 2016 16:47:38 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1606281646161.8816@piezo.us.to>
+References: <d9519d7f-ed00-48be-a9ca-f00f38fafa75@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-779205867-1467132460=:8816"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:61398 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752223AbcF1Qvd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Jun 2016 12:51:33 -0400
-In-Reply-To: <alpine.DEB.2.11.1606281533160.8816@piezo.us.to>
+Received: from cobra.newdream.net ([66.33.216.30]:34049 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752373AbcF1QsD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 12:48:03 -0400
+In-Reply-To: <d9519d7f-ed00-48be-a9ca-f00f38fafa75@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Xiaoxi Chen <superdebuger@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Dan Mick <dmick@redhat.com>
+Cc: Nathan Cutler <ncutler@suse.de>, ceph-devel@vger.kernel.org
 
-On 28-6-2016 17:38, Sage Weil wrote:
-> On Tue, 28 Jun 2016, Xiaoxi Chen wrote:
->> Hi,
->>
->>    In jewel , when handling "inject-args" command, monitor will report
->> "unchangeable" for those non-tracking args, nevertheless, the config
->> is still updated. as "ceph daemon config show " will give out the new
->> value.
->>
->>      It looks to me like if the configuration is not dynamically
->> changeable, we may better NOT to update the config? as the config set
->> by injectargs is not persist to disk , so before reboot the daemon,
->> config will not take effect, after reboot the daemon, config will
->> lost...it doesnt work(i.e make the config change) anyway.
->>
->>     We notice this because we had an accident on our network switch so
->> lots of the OSD down and out, and we would intent to speed up the
->> recovery, then we inject "osd_recovery_max_active= 10" and got
->> "unchangeable", but in admin socket we can see this configuration so
->> we assume it is working but actually not. My point is the non-tracking
->> args showing in admin socket config dump is really misleading, other
->> guys will never know whether the args in config dump is make effect if
->> they don't know how this is set, via admin socket or via configuration
->> files.
->>
->>     Kefu and I had some discussion on the original PR and would like to 
->> here more opinions, See pr for more background: 
->> https://github.com/ceph/ceph/pull/7085.
-> 
-> We desperately need to overhaul the way that config options are described 
-> and updated.  Right now we are cheating by letting any integer option be 
-> changed, regardless of whether an observer is defined, and no string 
-> options to be changed without an observer.  (This is the minimum necessary 
-> to make config updates thread safe.)
-> 
-> I think we need to extend the config_opts.h definitions of config options 
-> to include things like accepted values (for enums), and annotations 
-> indicating whether online updates are possible.  This *could* be implied 
-> by the presence of observers, but in practice most of the options are used 
-> directly out of g_conf and don't have observers defined...that would be 
-> a bigger changes. Just setting a flag in the config options would be a 
-> start.
-> 
-> We've discussed this a few times in the past and there is probably an 
-> etherpad sitting around somewhere from an old CDS...
-> 
-> As to your specific question(s),
-> 
-> 1- injectargs is never going to persis anything.  but we're looking at the 
-> ability to define config options for the cluster via the mon, that that 
-> would be persisted.
-> 
-> 2- making message you see accurate would be good.
-> 
-> 3- we may want to revise the observer framework a bit so that a set option 
-> can be rejected.  Right now the internal interface doesn't allow this.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-If we are going to change the framework for option definition.
-Would it be possible that there is a field to be used during doc
-generation so that it is possible to start autoextracting the
-functionality of said option.
-Just let all the descriptions be empty of the moment, test will be
-inserted over due time.
+--8323329-779205867-1467132460=:8816
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 
---WjW
+On Tue, 28 Jun 2016, Dan Mick wrote:
+> So...what happens when you want to do 11.0.0?
 
+11.0.1!   The 11.0.z are all just development checkpoint releases.  That 
+we haven't been doing mainly for lack of time.  I'm hoping that we can 
+appoint a ceph release manager to oversee these as well as the backport 
+release process soon.
+
+sage
+
+
+
+> 
+> Sent from Nine
+> 
+> ____________________________________________________________________________
+> From: Sage Weil <sage@newdream.net>
+> Sent: Jun 28, 2016 8:45 AM
+> To: Nathan Cutler
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: jewel -> master upgrade
+> 
+> Done
+> 
+> On Tue, 28 Jun 2016, Nathan Cutler wrote:
+> 
+> > > We can just add a tag and not bother doing a release build for now...
+> that
+> > > is probably the simplest.  Any objections?
+> >
+> > Just adding a tag is what I was hoping for.
+> >
+> > Nathan
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+--8323329-779205867-1467132460=:8816--
