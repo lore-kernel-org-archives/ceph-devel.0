@@ -1,166 +1,49 @@
-From: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Subject: static_ptr - making the factory pattern less costly
-Date: Tue, 28 Jun 2016 19:41:54 +0200
-Message-ID: <CA+H5UW36xpQvyopzEgZiH7v2QMm-mbWqJxuLNOSKLRA19Eau3A@mail.gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: new statx() like interface for libcephfs
+Date: Tue, 28 Jun 2016 14:17:05 -0400
+Message-ID: <1467137825.32374.29.camel@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:36788 "EHLO
-	mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752074AbcF1Rl4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 13:41:56 -0400
-Received: by mail-qk0-f173.google.com with SMTP id z142so18808578qkb.3
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 10:41:55 -0700 (PDT)
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:36066 "EHLO
+	mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752223AbcF1SRJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 14:17:09 -0400
+Received: by mail-qk0-f170.google.com with SMTP id z142so20648664qkb.3
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 11:17:08 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: "samba-technical@lists.samba.org" <samba-technical@lists.samba.org>, Ganesha NFS List <nfs-ganesha-devel@lists.sourceforge.net>, David Howells <dhowells@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hello Cephers,
+I have a patchset queued up for ceph that adds btime (birthtime)
+support to it. What was lacking though was a mechanism to get the btime
+out of the inode.
 
-I would like to put into your consideration the idea that came after
-the RadosGW's auth subsystem rework. Reviewers of the pull request
-raised concerns about introducing new memory allocations in the main
-path of execution. Most of them have been successfully addressed using
-already available tools (either in the standard library or in Boost) and
-the PR was merged. However, in few cases there was no simple solution.
-Those cases were orbiting mostly around the factory pattern:
+Rather than cook up a brand new interface just for the btime, I decided
+to "borrow" the work that David Howells did with the new proposed
+statx() interface. The pull request to add this to ceph is up here:
 
-  std::unique_ptr<ProductInterface> Factory::get_instance(...) {
-    if (...) {
-      // in C++14 we can also:
-      // return std::make_unique<ConcreteProductA>();
-      return std::unique_ptr<ProductInterface>(new ConcreteProductA());
-    } else {
-      return std::unique_ptr<ProductInterface>(new ConcreteProductB());
-    }
-  }
+=C2=A0 =C2=A0 =C2=A0https://github.com/ceph/ceph/pull/9965
 
-Although mentioning specific pull request, I believe the problem is more
-generic. I saw the factory pattern is being used quite extensively across
-RadosGW's code (RGWOp creation, formatters, auth appliers to name a few).
-I'm pretty sure that other components also employs this useful idiom.
+Sage has already closed it out which I take to mean that he has pulled
+the patches into a staging branch for eventual merge.
 
-The issue is that the memory is dynamically allocated even for cases
-where a consumer really could use its own stack frame instead. In C++
-we can inverse the responsibility of allocating memory from factory
-to its callers by applying the placement-new:
+It occurs to me though that I didn't ask anyone who is working on the
+samba vfs or ganesha fsal code whether they think this interface is
+acceptable.
 
-  ProductInterface* Factory::get_instance(void* area, ...) {
-    if (...) {
-      return new (area) ConcreteProductA();
-    } else {
-      return new (area) ConcreteProductB();
-    }
-  }
+Since Samba and Ganesha are the targeted users of this interface, it'd
+be good to have developers from both communities take a look and see if
+there are any problems here.
 
-As consumers allocate memory now, they need to somehow discover the storage
-size that is necessary to store a product. In many situations factories know
-at compile-time maximum size of what they produce, so constexpr can be used:
+Does anyone see any issues with the above pull request?
+--=20
+Jeff Layton <jlayton@redhat.com>
 
-  constexpr size_t Factory::get_max_size() {
-    return max(sizeof(ConcreteProductA), sizeof(ConcreteProductB));
-  }
-
-  void consumer() {
-    unsigned char storage[Factory::get_max_size()];
-    ProductInterface* product = Factory::get_instance(storage);
-
-    // Use the product.
-    // ...
-
-    // Destroy it.
-    product->~ProductInterface();
-  }
-
-Unfortunately, implementing the factory pattern in that way has drawbacks:
-
-1. It's dangerous. Someone might extend the get_instance() to produce
-a new ConcreteProductC that is bigger than everything before. If he
-forgets to alter get_max_size() accordingly, a data corruption will
-occur.
-
-2. Factory has no way to bind a deleter with a product.
-
-3. Callers must destroy the product through calling a destructor explicitly.
-
-4. Destructor of ProductInterface must be made virtual. Otherwise only
-a sub-object will be cleaned. This is also true for std::unique_ptr but
-not for std::shared_ptr.
-
-5. Moving objects (if products are move-constructible) in memory is
-a headache. Simply copying the memory is enough only for PODs. Anything
-more complex requires spawning a proper constructor but consumer is (or
-at least should be) unaware which implementation of a given interface it
-really uses.
-
-6. It's simply not elegant: evidently a implementation details (memory
-allocation) leak and pollute interfaces and interactions. Consumer must
-be aware about the low-level stuff (the explicit call to dtor).
-
-I had a few conversations with Adam Emerson, Casey Bodley and Matt
-Benjamin about researching an already existing solution. Unfortunately,
-we haven't found anything suitable. Instead, we realized the whole issue
-might be addressed by a concept that mixes some ideas present in things
-like boost::optional, boost::container::static_vector and std::unique_ptr.
-Let's call the new thing static_ptr due to similarity to static_vector
-of Boost.
-
-static_ptr might be seen as a fusion between raw pointer and encapsulated
-storage like in boost::optional. However, in contrast to it the capacity
-might be different than the pointee. It's fixed to a certain amount at
-compile-time (similarly to boost::container::static_vector). The owning
-semantic has been taken from std::unique_ptr. The overhead is actually one
-pointer and one boolean. It can be further minimized by cutting the bool.
-
-An early POC is available [1][2]. Its usage looks like below:
-
-  static_ptr<ProductInterface,
-             maxsizeof(ConcreteProductA, ConcreteProductB)>
-  Factory::get_instance(...) {
-    if (...) {
-      // It's guaranteed that any mismatch between size of product
-      // and storage in static_ptr will be detected in compile-time.
-      return make_static<ConcreteProductA>();
-    } else {
-      return make_static<ConcreteProductB>();
-    }
-  }
-
-  void consumer() {
-    auto product = Factory::get_instance();
-
-    // Use the product or even std::move it to a different pointer instance.
-    // ...
-
-    // It's destroyed properly even if the destructor of ProductInterface
-    // is not virtual.
-  }
-
-At the moment many things need further efforts. I see following items:
-
-1. Unit tests! A lot of unit tests! This might be painful as we have a very
-specific requirement here: it's expected that a compilation will fail in
-some circumstances (eg. std::moving a contained object to static_ptr that
-doesn't offer necessary amount of storage). Many frameworks will fall off
-due to that. In the worst case a bunch of scripts would be used to cover
-negative tests.
-
-2. make_static is definitely too complex. This is because it's built around
-std::tuple while native support for std::apply will be available with C++17.
-Adam Emerson proposed a simple solution to the issue. We might also want to
-take a look on Boost's typed in-place factories.
-
-3. Further overhead optimizations.
-
-4. Custom deleters. The required infrastructure is already in place.
-
-5. ?
-
-I would kindly ask you for comments and opinions about the concept as well
-as its adoption in Ceph.
-
-Regards,
-Radoslaw Zarzynski
-
-[1] https://github.com/rzarzynski/static_ptr/blob/master/static_ptr.hpp
-[2] https://github.com/rzarzynski/static_ptr/blob/master/examples/basic_usage.cc
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
