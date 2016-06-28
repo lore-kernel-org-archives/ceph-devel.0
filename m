@@ -1,64 +1,67 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: cmake
-Date: Tue, 28 Jun 2016 18:05:12 +0200
-Message-ID: <2bf0a521-863a-b43c-328c-9c6c6a7c73ca@digiware.nl>
-References: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
- <94aeab09-6e86-9e94-5a96-d8e477b85cad@digiware.nl>
- <alpine.DEB.2.11.1606281339570.8816@piezo.us.to>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: libradosstriper
+Date: Tue, 28 Jun 2016 09:07:10 -0700
+Message-ID: <CAN=+7FXrt6Y=TPRRdjkXZathXXKneV0eqT5VA6hQ5LOrxKoF3Q@mail.gmail.com>
+References: <alpine.DEB.2.11.1606272216370.7088@piezo.us.to>
+ <CAN=+7FVmmgAuVF6cjwvGdyAU4YEXr8jLX-qiNjH50w6_YMs02g@mail.gmail.com> <1467084445.32200.8.camel@cern.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:58361 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752180AbcF1QFb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Jun 2016 12:05:31 -0400
-In-Reply-To: <alpine.DEB.2.11.1606281339570.8816@piezo.us.to>
+Received: from mail-qk0-f181.google.com ([209.85.220.181]:34381 "EHLO
+	mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750753AbcF1QHM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 12:07:12 -0400
+Received: by mail-qk0-f181.google.com with SMTP id t127so37920220qkf.1
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 09:07:11 -0700 (PDT)
+In-Reply-To: <1467084445.32200.8.camel@cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sebastien Ponce <sebastien.ponce@cern.ch>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 28-6-2016 15:42, Sage Weil wrote:
-> On Tue, 28 Jun 2016, Willem Jan Withagen wrote:
->> On 27-6-2016 19:50, Sage Weil wrote:
->>> We are switching from autotools to cmake on the master branch. Any 
->>> builds done post-jewel will be cmake and not autotools based.  Jewel and 
->>> older releases will still be built with autotools the old way.
->>>
->>> The README.md in the master branch has been updated with new developer 
->>> build instructions.  Please take a look:
->>>
->>> 	https://github.com/ceph/ceph/blob/master/README.md
->>>
->>> If you are doing development, please switch to using cmake (i.e., 
->>> run do_cmake.sh) now.  Running vstart.sh is a little different and it 
->>> takes some getting used to.
->>>
->>> If there is anything that doesn't work that is part of your developer 
->>> workflow, we need to fix it now, before the autotools support is removed 
->>> and you're unable to work!  This is hopefully a week or two away.
+I don't remember anything like ceph_test_rados which uses
+libradosstriper.  Did I miss it?
+-Sam
+
+On Mon, Jun 27, 2016 at 8:27 PM, Sebastien Ponce
+<sebastien.ponce@cern.ch> wrote:
+> Would be great indeed. As it's already there, it can be done already
+> now.
+>
+> Sebastien
+>
+> On Mon, 2016-06-27 at 15:25 -0700, Samuel Just wrote:
+>> The something like ceph_test_rados could then be wired into
+>> ceph-qa-suite to be tested with osd thrashing to ensure that ordering
+>> works and continues to work as expected.
+>> -Sam
 >>
->> Hi Sage,
->>
->> Although i appreciate and understand the desire to move to cmake.
->> Really ripping out the automake stuff would put me in the situation
->> where I have no more building environment until all the cmake tweaks for
->> FreeBSD are in place.
->>
->> An while I'll start working on it, time is rather scarce atm.
->> So please disable but please keep it around for a bit longer...
-> 
-> There is no particular need to remove any of the autotools stuff while 
-> anyone still relies on it, so don't worry.  I'm just making sure 
-> everyone starts using it now so that we can identify any gaps and 
-> avoid surprises and fragmentation of efforts later.
-> 
-> Thanks for taking a look!
-
-Sort of feel like starting all over again, and hacking all FreeBSD
-specials into the Make process.
-But I've done that, so it does have steady progress.
-
---WjW
-
+>> On Mon, Jun 27, 2016 at 3:18 PM, Sage Weil <sweil@redhat.com> wrote:
+>> >
+>> > Hi Sebastien,
+>> >
+>> > Do you mind updating us on the current status of
+>> > libradosstriper?  Where
+>> > does it stand feature-wise with what you need, how are you
+>> > currently using
+>> > it or how do you plan to use it, and what is still missing?
+>> >
+>> > Also, one thing we really want to see is test coverage for the code
+>> > so
+>> > that we can comfortably point users toward it.  This ideally would
+>> > look
+>> > something like the ceph_test_rados_api_* tests that verify
+>> > individual
+>> > operations behave as expected, and/or something like
+>> > ceph_test_rados that
+>> > throws random operations at is and verifies it returns correct
+>> > results
+>> > that match its in-memory model.
+>> >
+>> > Thanks!
+>> > sage
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-
+>> > devel" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
