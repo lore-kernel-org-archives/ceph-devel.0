@@ -1,65 +1,76 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: "Tags" for Ceph pools?
-Date: Tue, 28 Jun 2016 22:20:41 +0100
-Message-ID: <CALe9h7eLi7BQNVUUb7yM+pyiV=_QE7Cs4kw0SzZ9U1LkoOu7Pw@mail.gmail.com>
-References: <20160628195427.bu2idrr25apcundv@suse.de>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: cmake
+Date: Tue, 28 Jun 2016 16:43:57 -0500
+Message-ID: <4c5c008f-ad0a-bcb5-7faa-d9971d42ba61@redhat.com>
+References: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
+ <29a3fbd4-8659-1391-79ce-98a37e5b84c8@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f169.google.com ([209.85.220.169]:36689 "EHLO
-	mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752377AbcF1V3F (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 17:29:05 -0400
-Received: by mail-qk0-f169.google.com with SMTP id z142so30046059qkb.3
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 14:29:03 -0700 (PDT)
-In-Reply-To: <20160628195427.bu2idrr25apcundv@suse.de>
+Received: from mx1.redhat.com ([209.132.183.28]:45891 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752395AbcF1Vop (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 28 Jun 2016 17:44:45 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 8533385542
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 21:44:00 +0000 (UTC)
+In-Reply-To: <29a3fbd4-8659-1391-79ce-98a37e5b84c8@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lars Marowsky-Bree <lmb@suse.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Casey Bodley <cbodley@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-On Tue, Jun 28, 2016 at 8:54 PM, Lars Marowsky-Bree <lmb@suse.com> wrote:
-> Hi all,
+On 06/28/2016 03:28 PM, Casey Bodley wrote:
 >
-> silly question time. From a UX perspective, we sometimes need to know
-> what a specific pool does. We can't always figure it out directly by
-> looking at the pool - is this used for RBDs? A MDS metadata pool? RGW
-> buckets?
+> On 06/27/2016 01:50 PM, Sage Weil wrote:
+>> We are switching from autotools to cmake on the master branch. Any
+>> builds done post-jewel will be cmake and not autotools based.  Jewel and
+>> older releases will still be built with autotools the old way.
+>>
+>> The README.md in the master branch has been updated with new developer
+>> build instructions.  Please take a look:
+>>
+>>     https://github.com/ceph/ceph/blob/master/README.md
+>>
+>> If you are doing development, please switch to using cmake (i.e.,
+>> run do_cmake.sh) now.  Running vstart.sh is a little different and it
+>> takes some getting used to.
+>>
+>> If there is anything that doesn't work that is part of your developer
+>> workflow, we need to fix it now, before the autotools support is removed
+>> and you're unable to work!  This is hopefully a week or two away.
+>>
+>> Current status:
+>>
+>>   - gitbuilders mostly using make-dist instead of 'make dist'
+>>     (autotools) to generate release tarballs
+>>   - wip-cmake-debian building debs with cmake
+>>   - rpm coming shortly
+>>   - release build tool update last, followed by a 11.0.0 release.
+>>
+>> Thank you!
+>> sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-> Right now, that is all bundled into the naming scheme. Is that the way
-> to proceed? Is there a recommended/standard naming scheme that tools
-> could attach to, then?
+> To those trying CMake, please note that autoconf generates a
+> ceph/src/acconfig.h. You'll want to remove that header, or cmake builds
+> will pull it in and get confused.
 >
-> We though of storing it in an object in the pool, but, uh, that
-> obviously doesn't work so well for cache-tiered pools ;-)
->
-> Or should we have metadata about our Ceph entities maintained outside
-> Ceph, in a separate tooling database?
->
-> Or would there be the chance to somehow store some description
-> somewhere, like a few k/v, free-form? x-... parameters maybe?
->
-> (Tool suppliers could then agree on common tags, hopefully.)
+> Build failures in rocksdb are also common for those switching. This
+> seems to fix those issues: cd ceph/src/rocksdb; make clean
 
-I've had some thoughts along these lines -- I was thinking it would be
-nice to have tags on auth IDs so that one could for example save the
-mapping between the Ceph ID and something outside of ceph.  As Greg
-mentions, we have the "config-key" interface currently, but it would
-be kind of nice to be able to do it in a more structured way.
+FWIW, this is a gotcha that folks using automake run into when the 
+rocksdb submodule updates.  make clean; make top level doesn't fix it, 
+you have to explicitly run make clean in the rocksdb directory.
 
-Storing "extras" without bloating the cluster maps is definitely not a
-problem, we do this for the OSD metadata, the awkward part is just
-keeping it all in sync, making sure things get cleaned up when
-pools/osds/keys go away.  While there is clearly a limit somewhere to
-how much non-essential state we store via the mons, my feeling is that
-we should go at least a bit further than our current config-key
-interface.
-
-What about something like namespacing those keys into a path-ish form
-like "[pool|osd|rule].<id>"? We could potentially do smart things with
-those well-formed keys down the line, like ensuring they correspond to
-things that really exist, including them in certain outputs, and
-enabling people to efficient scoped operations like "config-key list
-pool.3.*".
-
-John
+>
+> Casey
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
