@@ -1,33 +1,47 @@
-From: "Mrs. Basit" <ay47@bedustrat.com>
-Subject: charitable project
-Date: Tue, 28 Jun 2016 07:29:21 -0700
-Message-ID: <MEXPR01MB007276756BB7D544B502FA44D8220@MEXPR01MB0072.ausprd01.prod.outlook.com>
-Reply-To: <ranybasit@gmail.com>
+From: Xiaoxi Chen <superdebuger@gmail.com>
+Subject: prefered behavior for injecting untracked args
+Date: Tue, 28 Jun 2016 23:23:39 +0800
+Message-ID: <CAEYCsVJz9b8fDdEz8V7iraoq6t6wtY8ddt4XqBnxEVmvAcLnfA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sy3aus01hn0210.outbound.protection.outlook.com ([104.47.117.210]:36667
-	"EHLO AUS01-SY3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751673AbcF1PAL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 11:00:11 -0400
-Content-Description: Mail message body
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:33397 "EHLO
+	mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752175AbcF1PXl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 11:23:41 -0400
+Received: by mail-qk0-f177.google.com with SMTP id q79so35651140qke.0
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 08:23:40 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <ay47@bedustrat.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-I would like to seek your assistance in the fulfillment of my will. I a=
-m from Kingdom of Bahrain ,68 years old Woman suffering from cancer of =
-the Endometrial and I live in C=F4te d'Ivoire. I had no children and I =
-am currently in the process of living a great humiliation of my husband=
- relatives. If it pleases you, I want you to help me to create a charit=
-able project with the money that I inherited from my deceased husband. =
-It is my heart the desire to make a generous donation to you to work fo=
-r a charity project in your country. I will give you more details as so=
-on as I hear from you.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi,
+
+   In jewel , when handling "inject-args" command, monitor will report
+"unchangeable" for those non-tracking args, nevertheless, the config
+is still updated. as "ceph daemon config show " will give out the new
+value.
+
+     It looks to me like if the configuration is not dynamically
+changeable, we may better NOT to update the config? as the config set
+by injectargs is not persist to disk , so before reboot the daemon,
+config will not take effect, after reboot the daemon, config will
+lost...it doesnt work(i.e make the config change) anyway.
+
+    We notice this because we had an accident on our network switch so
+lots of the OSD down and out, and we would intent to speed up the
+recovery, then we inject "osd_recovery_max_active= 10" and got
+"unchangeable", but in admin socket we can see this configuration so
+we assume it is working but actually not. My point is the non-tracking
+args showing in admin socket config dump is really misleading, other
+guys will never know whether the args in config dump is make effect if
+they don't know how this is set, via admin socket or via configuration
+files.
+
+    Kefu and I had some discussion on the original PR and would like
+to here more opinions, See pr for more background:
+https://github.com/ceph/ceph/pull/7085.
+
+    Thanks for the input.
+
+Xiaoxi
