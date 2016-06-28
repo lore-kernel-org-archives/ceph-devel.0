@@ -1,58 +1,62 @@
-From: Lars Marowsky-Bree <lmb@suse.com>
-Subject: "Tags" for Ceph pools?
-Date: Tue, 28 Jun 2016 21:54:27 +0200
-Message-ID: <20160628195427.bu2idrr25apcundv@suse.de>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: cmake
+Date: Tue, 28 Jun 2016 16:28:49 -0400
+Message-ID: <29a3fbd4-8659-1391-79ce-98a37e5b84c8@redhat.com>
+References: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:43464 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752385AbcF1Tyx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Jun 2016 15:54:53 -0400
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id BEFB2AC80
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 19:54:27 +0000 (UTC)
-Content-Disposition: inline
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:36854 "EHLO
+	mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752500AbcF1U2v (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 16:28:51 -0400
+Received: by mail-qk0-f176.google.com with SMTP id z142so27257958qkb.3
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 13:28:51 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-Hi all,
-
-silly question time. From a UX perspective, we sometimes need to know
-what a specific pool does. We can't always figure it out directly by
-looking at the pool - is this used for RBDs? A MDS metadata pool? RGW
-buckets?
-
-Right now, that is all bundled into the naming scheme. Is that the way
-to proceed? Is there a recommended/standard naming scheme that tools
-could attach to, then?
-
-We though of storing it in an object in the pool, but, uh, that
-obviously doesn't work so well for cache-tiered pools ;-)
-
-Or should we have metadata about our Ceph entities maintained outside
-Ceph, in a separate tooling database?
-
-Or would there be the chance to somehow store some description
-somewhere, like a few k/v, free-form? x-... parameters maybe?
-
-(Tool suppliers could then agree on common tags, hopefully.)
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
 
+On 06/27/2016 01:50 PM, Sage Weil wrote:
+> We are switching from autotools to cmake on the master branch. Any
+> builds done post-jewel will be cmake and not autotools based.  Jewel and
+> older releases will still be built with autotools the old way.
+>
+> The README.md in the master branch has been updated with new developer
+> build instructions.  Please take a look:
+>
+> 	https://github.com/ceph/ceph/blob/master/README.md
+>
+> If you are doing development, please switch to using cmake (i.e.,
+> run do_cmake.sh) now.  Running vstart.sh is a little different and it
+> takes some getting used to.
+>
+> If there is anything that doesn't work that is part of your developer
+> workflow, we need to fix it now, before the autotools support is removed
+> and you're unable to work!  This is hopefully a week or two away.
+>
+> Current status:
+>
+>   - gitbuilders mostly using make-dist instead of 'make dist'
+>     (autotools) to generate release tarballs
+>   - wip-cmake-debian building debs with cmake
+>   - rpm coming shortly
+>   - release build tool update last, followed by a 11.0.0 release.
+>
+> Thank you!
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Regards
-    Lars
+To those trying CMake, please note that autoconf generates a 
+ceph/src/acconfig.h. You'll want to remove that header, or cmake builds 
+will pull it in and get confused.
 
---=20
-SUSE Linux GmbH, GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton,=
- HRB 21284 (AG N=FCrnberg)
-"Experience is the name everyone gives to their mistakes." -- Oscar Wil=
-de
+Build failures in rocksdb are also common for those switching. This 
+seems to fix those issues: cd ceph/src/rocksdb; make clean
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Casey
