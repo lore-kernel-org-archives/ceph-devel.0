@@ -1,54 +1,40 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: cmake
-Date: Tue, 28 Jun 2016 13:42:40 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1606281339570.8816@piezo.us.to>
-References: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to> <94aeab09-6e86-9e94-5a96-d8e477b85cad@digiware.nl>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: jewel -> master upgrade
+Date: Tue, 28 Jun 2016 13:43:45 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1606281343110.8816@piezo.us.to>
+References: <075b96eb-bee1-8618-74a3-a10da327fef2@suse.de>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35159 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751193AbcF1Nmn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Jun 2016 09:42:43 -0400
-In-Reply-To: <94aeab09-6e86-9e94-5a96-d8e477b85cad@digiware.nl>
+Received: from cobra.newdream.net ([66.33.216.30]:60965 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752257AbcF1Nns (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 09:43:48 -0400
+In-Reply-To: <075b96eb-bee1-8618-74a3-a10da327fef2@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: ceph-devel@vger.kernel.org
+To: Nathan Cutler <ncutler@suse.de>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 28 Jun 2016, Willem Jan Withagen wrote:
-> On 27-6-2016 19:50, Sage Weil wrote:
-> > We are switching from autotools to cmake on the master branch. Any 
-> > builds done post-jewel will be cmake and not autotools based.  Jewel and 
-> > older releases will still be built with autotools the old way.
-> > 
-> > The README.md in the master branch has been updated with new developer 
-> > build instructions.  Please take a look:
-> > 
-> > 	https://github.com/ceph/ceph/blob/master/README.md
-> > 
-> > If you are doing development, please switch to using cmake (i.e., 
-> > run do_cmake.sh) now.  Running vstart.sh is a little different and it 
-> > takes some getting used to.
-> > 
-> > If there is anything that doesn't work that is part of your developer 
-> > workflow, we need to fix it now, before the autotools support is removed 
-> > and you're unable to work!  This is hopefully a week or two away.
+On Tue, 28 Jun 2016, Nathan Cutler wrote:
+> I have been working on http://tracker.ceph.com/issues/14995 which has been
+> causing lots of failures in the upgrade suites, and now I think I know why.
 > 
-> Hi Sage,
+> At the moment, the highest tag in jewel is v10.2.2, while in master the
+> highest tag is v10.2.0 - this can be verified by doing "git describe" in both
+> branches.
 > 
-> Although i appreciate and understand the desire to move to cmake.
-> Really ripping out the automake stuff would put me in the situation
-> where I have no more building environment until all the cmake tweaks for
-> FreeBSD are in place.
+> Since the version numbers of all the packages are derived from "git describe",
+> we now have a situation where the package managers (rpm, dpkg, etc.) consider
+> master packages (i.e. packages built from the master branch) to be _older_
+> than jewel packages.
 > 
-> An while I'll start working on it, time is rather scarce atm.
-> So please disable but please keep it around for a bit longer...
+> The solution, I guess, would be to add a v11.0.0 tag to master.
 
-There is no particular need to remove any of the autotools stuff while 
-anyone still relies on it, so don't worry.  I'm just making sure 
-everyone starts using it now so that we can identify any gaps and 
-avoid surprises and fragmentation of efforts later.
+That would explain it.
 
-Thanks for taking a look!
+We can just add a tag and not bother doing a release build for now... that 
+is probably the simplest.  Any objections?
+
 sage
+
