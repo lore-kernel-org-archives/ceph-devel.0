@@ -1,55 +1,77 @@
-From: Daniel Gryniewicz <dang@redhat.com>
-Subject: Re: new statx() like interface for libcephfs
-Date: Tue, 28 Jun 2016 14:53:38 -0400
-Message-ID: <CAL-2WbF5HAoAvbje8xr91OP5Cd1ye7UF7W+PA01m-V1+O==DjA@mail.gmail.com>
-References: <1467137825.32374.29.camel@redhat.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: is the renewal in dentry_lease_is_valid necessary?
+Date: Tue, 28 Jun 2016 11:58:44 -0700
+Message-ID: <CAJ4mKGboE8oaqb1KBCEULpADyaSFmNTO5w6A5nMm80-rqFS6aQ@mail.gmail.com>
+References: <1467054441.25213.20.camel@redhat.com> <CAAM7YAm7qHJkKjXSiG2bz-D04uNVJTbDw4XbvZ9mnU==u9eT2Q@mail.gmail.com>
+ <1467122456.32374.15.camel@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:38687 "EHLO
-	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752558AbcF1SyA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 14:54:00 -0400
-Received: by mail-wm0-f51.google.com with SMTP id r201so40946249wme.1
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 11:53:59 -0700 (PDT)
-In-Reply-To: <1467137825.32374.29.camel@redhat.com>
+Received: from mail-vk0-f42.google.com ([209.85.213.42]:34899 "EHLO
+	mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752353AbcF1S6p (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 14:58:45 -0400
+Received: by mail-vk0-f42.google.com with SMTP id j2so35098585vkg.2
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 11:58:45 -0700 (PDT)
+In-Reply-To: <1467122456.32374.15.camel@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Jeff Layton <jlayton@redhat.com>
-Cc: "samba-technical@lists.samba.org" <samba-technical@lists.samba.org>, Ganesha NFS List <nfs-ganesha-devel@lists.sourceforge.net>, David Howells <dhowells@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: "Yan, Zheng" <ukernel@gmail.com>, Zheng Yan <zyan@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Is stx_version a generation ID for the inode that can be used for the
-NFSv4 Change ID?  If so, that would be quite useful to us.  Otherwise,
-I'm not sure there's that much in there that's useful beyond what stat
-already provides, unless I'm missing something.
+On Tue, Jun 28, 2016 at 7:00 AM, Jeff Layton <jlayton@redhat.com> wrote:
+> On Tue, 2016-06-28 at 21:03 +0800, Yan, Zheng wrote:
+>> On Tue, Jun 28, 2016 at 3:07 AM, Jeff Layton <jlayton@redhat.com> wrote:
+>> >
+>> > I'm eyeballing how to make ceph dentry revalidation occur in rcu-walk
+>> > mode in the kernel cephfs client. It looks fairly straightforward, but
+>> > for one thing:
+>> >
+>> > dentry_lease_is_valid queues an asynchronous lease renewal if we're
+>> > halfway to the next lease renewal time:
+>> >
+>> >         if (session) {
+>> >                 ceph_mdsc_lease_send_msg(session, dir, dentry,
+>> >                                          CEPH_MDS_LEASE_RENEW, seq);
+>> >                 ceph_put_mds_session(session);
+>> >         }
+>> >
+>> > That can sleep, so we have to drop out of rcu walk mode in that case.
+>> >
+>> > Is this lease renewal strictly necessary? I can make the code drop out
+>> > of rcuwalk mode and try again in that case, but if this is just an
+>> > opportunistic thing, then it may be better for performance to take a
+>> > pass on renewing the lease early if we're still in RCU walk mode.
+>> >
+>> dentry_lease_is_valid is the only place that renew lease. I think it's
+>> better to drop out of rcuwalk and try again
+>>
+>> Regards
+>> Yan, Zheng
+>>
+>
+> That seems really odd to me.
+>
+> That call is only ever done in the d_revalidate codepath, so you'll
+> only get a lease renewal when you have repeated path-based access to an
+> existing dentry.
+>
+> Maybe this means that I don't really understand ceph leases. More
+> questions...
+>
+> What exactly does the lease cover here?
+>
+> Shouldn't we be renewing it even if we're _not_ doing any path-based
+> access? For instance, if I open a file and issue reads and writes
+> against it, that doesn't involve pathnames and the lease doesn't get an
+> explicit renewal. Doesn't it still need to be renewed though?
 
-On Tue, Jun 28, 2016 at 2:17 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> I have a patchset queued up for ceph that adds btime (birthtime)
-> support to it. What was lacking though was a mechanism to get the btime
-> out of the inode.
->
-> Rather than cook up a brand new interface just for the btime, I decided
-> to "borrow" the work that David Howells did with the new proposed
-> statx() interface. The pull request to add this to ceph is up here:
->
->      https://github.com/ceph/ceph/pull/9965
->
-> Sage has already closed it out which I take to mean that he has pulled
-> the patches into a staging branch for eventual merge.
->
-> It occurs to me though that I didn't ask anyone who is working on the
-> samba vfs or ganesha fsal code whether they think this interface is
-> acceptable.
->
-> Since Samba and Ganesha are the targeted users of this interface, it'd
-> be good to have developers from both communities take a look and see if
-> there are any problems here.
->
-> Does anyone see any issues with the above pull request?
-> --
-> Jeff Layton <jlayton@redhat.com>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Ah. Leases cover the dentries, and are separate from the capabilities
+covering file IO and the inode itself. So actually, no, if nobody is
+doing dentry operations (directory listing, name resolution, etc) we
+don't care.
+
+This isn't a part of the protocol I'm very familiar with (it doesn't
+really come up in userspace code), but that might mean it's easier to
+understand if you look at the userspace version of it...?
+-Greg
