@@ -1,66 +1,88 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: About thread_local and TmapMigratePP.DataScan case
-Date: Tue, 28 Jun 2016 10:45:19 +0100
-Message-ID: <CALe9h7eHLJc-3HSt1yUxZQxgUzJXq_w2Oi=FyhmUYqetxRMqiA@mail.gmail.com>
-References: <CACJqLybSUa6WtfcvXa5W4AAXJUgEBDPX2Mo+nd3SDeLkHVgDwA@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: ceph build changes
+Date: Tue, 28 Jun 2016 08:13:06 -0400
+Message-ID: <CAC-Np1xXt5zAUv9vtqh4V43JeCd0NKKV1G8wB_mhUfWVB5t9uw@mail.gmail.com>
+References: <alpine.DEB.2.11.1606272200310.7088@piezo.us.to>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:35752 "EHLO
-	mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752325AbcF1Jpj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 05:45:39 -0400
-Received: by mail-qk0-f174.google.com with SMTP id a125so18803605qkc.2
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 02:45:39 -0700 (PDT)
-In-Reply-To: <CACJqLybSUa6WtfcvXa5W4AAXJUgEBDPX2Mo+nd3SDeLkHVgDwA@mail.gmail.com>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:35745 "EHLO
+	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750753AbcF1MNJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 08:13:09 -0400
+Received: by mail-wm0-f53.google.com with SMTP id v199so137050589wmv.0
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 05:13:08 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1606272200310.7088@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 27, 2016 at 7:04 PM, Haomai Wang <haomai@xsky.com> wrote:
-> Hi all,
+On Mon, Jun 27, 2016 at 6:05 PM, Sage Weil <sweil@redhat.com> wrote:
+> Hey Alfredo,
 >
-> anyone who knows what's the special thing with TmapMigratePP.DataScan
-> case. When I introduce thread_local variable in
-> PR(https://github.com/ceph/ceph/pull/9783/files#diff-254a8401d238ec25c714a5596f85b5ebL64),
-> it always failed because the thread local variable is assigned to zero
-> when execute this test!
-
-I don't know off the top of my head, but that particular piece of
-functionality (tmap migrate in DataScan) is intended to be removed for
-Kraken, so if your code won't need backporting to Jewel then we can
-just remove the test.
-
-John
-
-(This is the code that we put in Jewel to enable people to migrate
-their TMAP directory fragments to OMAP fully before we remove TMAP
-support in Kraken)
-
-> For example, when tid == 512596224 local_center should be 5fed4e48,
-> but after begin this test case, this thread_local variable is assigned
-> to zero!:
-> tid=-512596224 local_center=5fed4e48 this=5fed4e48
-> [New Thread 0x7fffdef21700 (LWP 11835)]
-> tid=-512596224 local_center=5fed4e48 this=5fed4e48
-> [New Thread 0x7fffde720700 (LWP 11836)]
-> [New Thread 0x7fffddf1f700 (LWP 11837)]
-> [New Thread 0x7fffdd71e700 (LWP 11838)]
-> [New Thread 0x7fffdcf1d700 (LWP 11839)]
-> [New Thread 0x7fffdc71c700 (LWP 11840)]
-> [New Thread 0x7fffdbf1b700 (LWP 11841)]
-> tid=-134366272 local_center=0 this=5fed4e48
-> tid=-134366272 local_center=0 this=5fed4e48
-> tid=-134366272 local_center=0 this=5fed4e48
-> tid=-512596224 local_center=0 this=5fed4e48
+> Just a heads up that the changes to gitbuilder to enable cmake were pretty
+> minimal.  It basically comes down to using the make-dist script to
+> generate the tarball instead of running ./autogen.sh, ./configure, and
+> then 'make dist' just to get the tarball.  Here's what we changed:
 >
+>         https://github.com/ceph/autobuild-ceph/commit/eccdc8f61273e97710203eaae55a2c4258b64087
 >
-> QA job:http://qa-proxy.ceph.com/teuthology/haomai-2016-06-27_03:55:04-rados-wip-haomai-testing---basic-smithi/279412/teuthology.log
+> It's slightly annoying because older branches won't have make-dist, but
+> newer branches will, and it has to do a build both ways.  Not too crazy,
+> though.
+
+Thanks for the heads up.
+
+The changes look straightforward but I am concerned on how to make
+them work for a release. I could just copy/pasta them
+into the build script but it is very easy (and has happened before) to
+get out of sync if the gitbuilder script gets modifications.
+
+To get a tarball, you are right in what we call:
+
+* install-deps.sh (if it exists)
+* autogen.sh
+* configure
+
+
+See: https://github.com/ceph/ceph-build/blob/master/ceph-setup/build/build#L30-L58
+
+Is it not possible to get these changes within the source tree? Having
+a single place where to call them is a huge win.
+
 >
-> This can be repeated locally and I want to know what's the difference
-> this case introduced
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> The other change was that we have a new environment variable for passing
+> down cmake optons that parallels the old CEPH_EXTRA_CONFIGURE_ARGS:
+>
+>         https://github.com/ceph/autobuild-ceph/commit/71d02e8b2c9bd3533c44b3bf0408681ed7890248
+>
+> I'm guessing we don't need that for a proper release, but in case we do,
+> the script should just set both.
+
+Passing options via environment variables sounds reasonable, it is
+nice that it got implemented.
+
+>
+> Anyway, with those changes, the final step is to change debian/rules and
+> ceph.spec.in in ceph.git itself to build using cmake instead of autotools,
+> but as long as the source tarball is coming from make-dist the ceph-build
+> stuff doesn't need to know or care about that--it's all hidden by rpmbuild
+> and dpkg-buildpackage/pbuilder.
+
+So, we do call `make dist` and `make dist-bzip2`, but then again,
+porting the changes in build-ceph-native.sh is what
+worries me.
+
+>
+> As soon as the deb and rpm changes are working when built by the
+> gitbuilders (basically there with debs, rpms up next) I think we should do
+> a dev release through the new jenkins pipeline to demonstrate that the
+> whole thing works.  Maybe the week after next?
+
+We can do that or even try "throwaway" builds before. Shouldn't be a
+problem to try it out.
+
+>
+> Thanks!
+> sage
