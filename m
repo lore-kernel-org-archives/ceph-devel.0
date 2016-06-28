@@ -1,51 +1,66 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: cmake
-Date: Tue, 28 Jun 2016 10:57:23 +0200
-Message-ID: <11a9c51d-fa53-24f7-678c-88d0b4c8dbbc@digiware.nl>
-References: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
- <94aeab09-6e86-9e94-5a96-d8e477b85cad@digiware.nl>
- <e454dbac-1c33-04be-965b-c290f7356e93@digiware.nl>
+From: John Spray <jspray@redhat.com>
+Subject: Re: About thread_local and TmapMigratePP.DataScan case
+Date: Tue, 28 Jun 2016 10:45:19 +0100
+Message-ID: <CALe9h7eHLJc-3HSt1yUxZQxgUzJXq_w2Oi=FyhmUYqetxRMqiA@mail.gmail.com>
+References: <CACJqLybSUa6WtfcvXa5W4AAXJUgEBDPX2Mo+nd3SDeLkHVgDwA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:31842 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750871AbcF1JMG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Jun 2016 05:12:06 -0400
-In-Reply-To: <e454dbac-1c33-04be-965b-c290f7356e93@digiware.nl>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:35752 "EHLO
+	mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752325AbcF1Jpj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2016 05:45:39 -0400
+Received: by mail-qk0-f174.google.com with SMTP id a125so18803605qkc.2
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2016 02:45:39 -0700 (PDT)
+In-Reply-To: <CACJqLybSUa6WtfcvXa5W4AAXJUgEBDPX2Mo+nd3SDeLkHVgDwA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Haomai Wang <haomai@xsky.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 28-6-2016 10:41, Willem Jan Withagen wrote:
-> But this one really has me:
-> ====
-> CMake Error: The following variables are used in this project, but they
-> are set to NOTFOUND.
-> Please set them or make sure they are set and tested correctly in the
-> CMake files:
-> FUSE_LIBRARIES (ADVANCED)
->     linked by target "rbd-fuse" in directory
-> 	/usr/srcs/Ceph/work.cmake/ceph/src
-> ====
-> 
-> in configure I'd say --without-fuse, but that does not really work here.
-> Same for RBD....
-> 
-> Any suggestions as to proceed? Preferably withotu fuse and RBD for the
-> moment? So my cmake env is more or less equal to the new cmake env.
+On Mon, Jun 27, 2016 at 7:04 PM, Haomai Wang <haomai@xsky.com> wrote:
+> Hi all,
+>
+> anyone who knows what's the special thing with TmapMigratePP.DataScan
+> case. When I introduce thread_local variable in
+> PR(https://github.com/ceph/ceph/pull/9783/files#diff-254a8401d238ec25c714a5596f85b5ebL64),
+> it always failed because the thread local variable is assigned to zero
+> when execute this test!
 
-Impolite to answer ones own questions:
--D WITH_<item>=OFF
+I don't know off the top of my head, but that particular piece of
+functionality (tmap migrate in DataScan) is intended to be removed for
+Kraken, so if your code won't need backporting to Jewel then we can
+just remove the test.
 
-However "" give:
-CMake Error at src/test/bench/CMakeLists.txt:76 (install):
-  install TARGETS given target "ceph_smalliobenchrbd" which does not
-exist in
-  this directory.
+John
 
-So got to tweek that.
+(This is the code that we put in Jewel to enable people to migrate
+their TMAP directory fragments to OMAP fully before we remove TMAP
+support in Kraken)
 
---WjW
-
+> For example, when tid == 512596224 local_center should be 5fed4e48,
+> but after begin this test case, this thread_local variable is assigned
+> to zero!:
+> tid=-512596224 local_center=5fed4e48 this=5fed4e48
+> [New Thread 0x7fffdef21700 (LWP 11835)]
+> tid=-512596224 local_center=5fed4e48 this=5fed4e48
+> [New Thread 0x7fffde720700 (LWP 11836)]
+> [New Thread 0x7fffddf1f700 (LWP 11837)]
+> [New Thread 0x7fffdd71e700 (LWP 11838)]
+> [New Thread 0x7fffdcf1d700 (LWP 11839)]
+> [New Thread 0x7fffdc71c700 (LWP 11840)]
+> [New Thread 0x7fffdbf1b700 (LWP 11841)]
+> tid=-134366272 local_center=0 this=5fed4e48
+> tid=-134366272 local_center=0 this=5fed4e48
+> tid=-134366272 local_center=0 this=5fed4e48
+> tid=-512596224 local_center=0 this=5fed4e48
+>
+>
+> QA job:http://qa-proxy.ceph.com/teuthology/haomai-2016-06-27_03:55:04-rados-wip-haomai-testing---basic-smithi/279412/teuthology.log
+>
+> This can be repeated locally and I want to know what's the difference
+> this case introduced
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
