@@ -1,76 +1,45 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: cmake
-Date: Wed, 29 Jun 2016 18:51:47 +0200
-Message-ID: <f859c212-83d3-98e8-50f0-40a5f7fd3afb@digiware.nl>
-References: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
- <94aeab09-6e86-9e94-5a96-d8e477b85cad@digiware.nl>
- <alpine.DEB.2.11.1606281339570.8816@piezo.us.to>
- <2bf0a521-863a-b43c-328c-9c6c6a7c73ca@digiware.nl>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: static_ptr - making the factory pattern less costly
+Date: Wed, 29 Jun 2016 13:42:57 -0400
+Message-ID: <20160629174256.GA5185@ultraspiritum.eng.arb.redhat.com>
+References: <CA+H5UW36xpQvyopzEgZiH7v2QMm-mbWqJxuLNOSKLRA19Eau3A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:42476 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:58982 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750932AbcF2QxO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 29 Jun 2016 12:53:14 -0400
-In-Reply-To: <2bf0a521-863a-b43c-328c-9c6c6a7c73ca@digiware.nl>
+	id S1750878AbcF2Rnr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 29 Jun 2016 13:43:47 -0400
+Content-Disposition: inline
+In-Reply-To: <CA+H5UW36xpQvyopzEgZiH7v2QMm-mbWqJxuLNOSKLRA19Eau3A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+Cc: Radoslaw Zarzynski <rzarzynski@mirantis.com>
 
-On 28-6-2016 18:05, Willem Jan Withagen wrote:
-> On 28-6-2016 15:42, Sage Weil wrote:
->> On Tue, 28 Jun 2016, Willem Jan Withagen wrote:
->>> On 27-6-2016 19:50, Sage Weil wrote:
->>>> We are switching from autotools to cmake on the master branch. Any 
->>>> builds done post-jewel will be cmake and not autotools based.  Jewel and 
->>>> older releases will still be built with autotools the old way.
->>>>
->>>> The README.md in the master branch has been updated with new developer 
->>>> build instructions.  Please take a look:
->>>>
->>>> 	https://github.com/ceph/ceph/blob/master/README.md
->>>>
->>>> If you are doing development, please switch to using cmake (i.e., 
->>>> run do_cmake.sh) now.  Running vstart.sh is a little different and it 
->>>> takes some getting used to.
->>>>
->>>> If there is anything that doesn't work that is part of your developer 
->>>> workflow, we need to fix it now, before the autotools support is removed 
->>>> and you're unable to work!  This is hopefully a week or two away.
->>>
->>> Hi Sage,
->>>
->>> Although i appreciate and understand the desire to move to cmake.
->>> Really ripping out the automake stuff would put me in the situation
->>> where I have no more building environment until all the cmake tweaks for
->>> FreeBSD are in place.
->>>
->>> An while I'll start working on it, time is rather scarce atm.
->>> So please disable but please keep it around for a bit longer...
->>
->> There is no particular need to remove any of the autotools stuff while 
->> anyone still relies on it, so don't worry.  I'm just making sure 
->> everyone starts using it now so that we can identify any gaps and 
->> avoid surprises and fragmentation of efforts later.
->>
->> Thanks for taking a look!
-> 
-> Sort of feel like starting all over again, and hacking all FreeBSD
-> specials into the Make process.
-> But I've done that, so it does have steady progress.
+On 28/06/2016, Radoslaw Zarzynski wrote:
+[snip]
+> The owning semantic has been taken from std::unique_ptr.
+[snip]
 
-First shot to be found in #10024
+Since moving or copying the static_ptr is the same as moving or
+copying the stored object, I think that should be the guideline.
+>
+The least surprising way to implement things would be:
 
-It does not compile all the way to the end. But I have a feeling that is
-because of new/extra code that has little to do with Cmake.
+(1) static_ptr<T> is copyable if T is copyable. It is movable if T is
+    movable. It is nothrow-copyable if T is nothrow-copyable. It is
+    nothrow-movable if T is nothrow-movable.
 
-Gladly change any parts for better.
+(2) If S is derived from T, but T is copyable and S is not, attempts
+    to store S in static_ptr<T> should fail. Same for move. If T is
+    nothrow-copyable or nothrow-movable and S is not, storing S in T
+    should fail.
 
-And yes, it is way much less hackish that automake stuff.
-I did not say easier, but the result should be a lot better to maintain.
+That way code written using static_ptr<T> won't have its expectations
+or exception safety change out from under it.
 
---WjW
-
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
