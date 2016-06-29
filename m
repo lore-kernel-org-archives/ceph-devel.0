@@ -1,63 +1,68 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [Y2038] [PATCH v3 00/24] Delete CURRENT_TIME_SEC
-	and replace current_fs_time()
-Date: Wed, 29 Jun 2016 21:48:02 +0200
-Message-ID: <4878160.cRxJJ9CCsj@wuerfel>
-References: <1466890668-23400-1-git-send-email-deepa.kernel@gmail.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: throttling PG removal
+Date: Wed, 29 Jun 2016 13:55:33 -0700
+Message-ID: <CAN=+7FW9P7frBHShpojUHbOyT9c_KrUi=h-qLXFRo1eq5-ky4Q@mail.gmail.com>
+References: <CABZ+qqnisScrzXiR=zbtaC291TnYxEPd=on5Ey1Ad89-02M+CA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-In-Reply-To: <1466890668-23400-1-git-send-email-deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
-List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
-Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-To: y2038-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Cc: shaggy-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, jfs-discussion-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, trond.myklebust-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, clm-b10kYP2dOMg@public.gmane.org, adilger.kernel-m1MBpc4rdrD3fQ9qLvQP4Q@public.gmane.org, Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org, paul-r2n+y4ga6xFZroRs9YW3xA@public.gmane.org, sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cm224.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, mfasheh-IBi9RG/b67k@public.gmane.org, john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, dsterba-IBi9RG/b67k@public.gmane.org, jaegeuk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, elder-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tytso-3s7WtUTddSA@public.gmane.org, dedekind1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, jbacik-b10kYP2dOMg@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, eparis-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-audit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jack-IBi9RG/b67k@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, torvalds@linux-foundation.
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qk0-f175.google.com ([209.85.220.175]:32811 "EHLO
+	mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751372AbcF2U5G (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jun 2016 16:57:06 -0400
+Received: by mail-qk0-f175.google.com with SMTP id q79so110874562qke.0
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Jun 2016 13:55:34 -0700 (PDT)
+In-Reply-To: <CABZ+qqnisScrzXiR=zbtaC291TnYxEPd=on5Ey1Ad89-02M+CA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Saturday, June 25, 2016 2:37:24 PM CEST Deepa Dinamani wrote:
-> The series is aimed at getting rid of CURRENT_TIME, CURRENT_TIME_SEC macros
-> and replacing current_fs_time() with current_time().
-> The macros are not y2038 safe. There is no plan to transition them into being
-> y2038 safe.
-> ktime_get_* api's can be used in their place. And, these are y2038 safe.
-> 
-> CURRENT_TIME will be deleted after 4.8 rc1 as there is a dependency function
-> time64_to_tm() for one of the CURRENT_TIME occurance.
-> 
-> Thanks to Arnd Bergmann for all the guidance and discussions.
-> 
-> Patches 3-5 were mostly generated using coccinelle.
-> 
-> All filesystem timestamps use current_fs_time() for right granularity as
-> mentioned in the respective commit texts of patches. This has a changed
-> signature, renamed to current_time() and moved to the fs/inode.c.
-> 
-> This series also serves as a preparatory series to transition vfs to 64 bit
-> timestamps as outlined here: https://lkml.org/lkml/2016/2/12/104 .
-> 
-> As per Linus's suggestion in https://lkml.org/lkml/2016/5/24/663 , all the
-> inode timestamp changes have been squashed into a single patch. Also,
-> current_time() now is used as a single generic vfs filesystem timestamp api.
-> It also takes struct inode* as argument instead of struct super_block*.
-> Posting all patches together in a bigger series so that the big picture is
-> clear.
-> 
-> As per the suggestion in https://lwn.net/Articles/672598/, CURRENT_TIME macro
-> bug fixes are being handled in a series separate from transitioning vfs to use.
-> 
+Seems reasonable for a short term fix.  Longer term, I'd like to dump
+it into the OpWQ with a super low priority.  Not sure about the
+osd_target_transaction_size, you'd have to see what else it's used
+for.
+-Sam
 
-Everything in this version looks good to me. Please add
-
-Reviewed-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-
-and send a pull request to Al Viro, based on the latest linux-4.7-rc release.
-
-	Arnd
+On Wed, Jun 29, 2016 at 9:40 AM, Dan van der Ster <dan@vanderster.com> wrote:
+> Hi all,
+>
+> We're deleting a large pool with lots of 4MB objects, and it's turning
+> out to be rather disruptive: >50 loadavg on osd machines, osd's
+> flapping, peering mess for the other pools.
+>
+> In general, I'd like to be able to throttle this way back so that the
+> deleted PG objects slowly disappear without affecting IO to other
+> pools. And AFAICT there's no way to achieve that in current jewel or
+> master.
+>
+> Here is the timing of the RemoveWQ on one of these OSDs:
+>
+> 2016-06-29 18:28:06.388530 7fee8a2e5700 12 OSD::disk_tp worker wq
+> OSD::RemoveWQ start processing 0x1 (1 active)
+> 2016-06-29 18:28:07.954758 7fee8a2e5700 15 OSD::disk_tp worker wq
+> OSD::RemoveWQ done processing 0x1 (0 active)
+> 2016-06-29 18:28:07.954766 7fee8a2e5700 12 OSD::disk_tp worker wq
+> OSD::RemoveWQ start processing 0x1 (1 active)
+> 2016-06-29 18:28:10.599542 7fee8a2e5700 15 OSD::disk_tp worker wq
+> OSD::RemoveWQ done processing 0x1 (0 active)
+>
+> I'd like to add a configurable osd_pg_remove_sleep, probably at the
+> top of OSD::RemoveWQ::_process ? Should that have the desired effect?
+>
+> Moreover, it would be nice to be able to decrease the number of
+> objects removed per instance of the worker. It's currently limited to
+> osd_target_transaction_size (shared by build_past_intervals_parallel,
+> remove_dir, and handle_osd_map). Should it be safe to decrease that
+> (to, say, 5) or would it be better to introduce something specific to
+> remove_dir?
+>
+> Thanks,
+>
+> Dan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
