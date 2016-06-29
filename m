@@ -1,59 +1,47 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 06/29/2016 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 29 Jun 2016 08:52:49 -0500
-Message-ID: <d7a5d16b-5581-ecfb-080c-4495dcd45b48@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: FW: msgr2 protocol comments
+Date: Wed, 29 Jun 2016 14:01:28 +0000
+Message-ID: <DB5PR05MB1607FCD5682DE2B31AF86B93A9230@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47650 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752519AbcF2ODH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 29 Jun 2016 10:03:07 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 45E283F720
-	for <ceph-devel@vger.kernel.org>; Wed, 29 Jun 2016 13:52:52 +0000 (UTC)
-Received: from [10.3.112.10] (ovpn-112-10.phx2.redhat.com [10.3.112.10])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u5TDqoti023934
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 29 Jun 2016 09:52:51 -0400
+Received: from mail-db3on0067.outbound.protection.outlook.com ([157.55.234.67]:46020
+	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752523AbcF2OR0 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jun 2016 10:17:26 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-We're back! 8AM PST as usual.  Today we'll cover some of the bluestore 
-onode size testing results, recent work toward reducing the onode size, 
-updated bluestore testing, MemDBStore, and more.  Please feel free to 
-add your own topic!
+See my 3rd point below :-)
 
-Here's the links:
+-----Original Message-----
+From: Avner Ben Hanoch 
+Sent: Wednesday, June 29, 2016 16:59
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Subject: msgr2 protocol comments
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
+Hi,
 
-To join the Meeting:
-https://bluejeans.com/268261044
+Reading documents and discussions about msgr2 I found it very exciting.
 
-To join via Browser:
-https://bluejeans.com/268261044/browser
+Few comments that I have at this phase:
 
-To join with Lync:
-https://bluejeans.com/268261044/lync
+1 - We might want to sharply clarify the terms client and server.  
+With msgr2 protocol, several streams can be multiplexed into one TCP connection.  If I understand correctly, these streams are not forced to be in the direction of the TCP connection - means the TCP client (initiator) can be either the stream client (initiator) or the stream server (acceptor).
+Hence, it might worth to have more subtle definitions and to use each one were appropriate 
 
+2 - it is not clear to me which step is at connection level and which step is at stream level.  
+For example, I would expect that Authentication will be at connection level - once for all its streams.  However, it is defined with the frames after the banner phase where it is considered the stream level
 
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
+3 - Since msgr2 is based on frames, and since it "knows" to continue a session even after a TCP disconnect - all these and more make msgr2 very appropriate for connectionless and/or datagram based transports (like UDP / RDS / and even XIO).
 
-To join via Phone:
-1) Dial:
-                +1 408 740 7256
-                +1 888 240 2560(US Toll Free)
-                +1 408 317 9253(Alternate Number)
-                (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
+Hence, I suggest to be more general in the definitions... to define a connection based on its tuple (source ip, source port, destination ip, destination port) and not necessarily based on TCP connection.
+This way we can make the implementation of msgr2 with maximum flexibly and maximum shared code between all future messengers.
 
-Mark
+Regards,
+  Avner
+
