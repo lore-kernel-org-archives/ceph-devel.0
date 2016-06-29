@@ -1,28 +1,20 @@
 From: Avner Ben Hanoch <avnerb@mellanox.com>
-Subject: FW: msgr2 protocol comments
-Date: Wed, 29 Jun 2016 14:01:28 +0000
-Message-ID: <DB5PR05MB1607FCD5682DE2B31AF86B93A9230@DB5PR05MB1607.eurprd05.prod.outlook.com>
+Subject: msgr2 protocol comments
+Date: Wed, 29 Jun 2016 13:59:25 +0000
+Message-ID: <DB5PR05MB1607AFD265F02526A1A46A94A9230@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db3on0067.outbound.protection.outlook.com ([157.55.234.67]:46020
+Received: from mail-db3on0076.outbound.protection.outlook.com ([157.55.234.76]:35648
 	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752523AbcF2OR0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jun 2016 10:17:26 -0400
+	id S1752138AbcF2OdL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jun 2016 10:33:11 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ceph Development <ceph-devel@vger.kernel.org>
-
-See my 3rd point below :-)
-
------Original Message-----
-From: Avner Ben Hanoch 
-Sent: Wednesday, June 29, 2016 16:59
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Subject: msgr2 protocol comments
 
 Hi,
 
