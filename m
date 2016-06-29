@@ -1,49 +1,108 @@
-From: Avner Ben Hanoch <avnerb@mellanox.com>
-Subject: RE: msgr2 protocol
-Date: Wed, 29 Jun 2016 11:59:51 +0000
-Message-ID: <DB5PR05MB1607570EB6CCCAB6F68D50E3A9230@DB5PR05MB1607.eurprd05.prod.outlook.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: is the renewal in dentry_lease_is_valid necessary?
+Date: Wed, 29 Jun 2016 08:25:00 -0400
+Message-ID: <1467203100.6220.2.camel@redhat.com>
+References: <1467054441.25213.20.camel@redhat.com>
+	 <CAAM7YAm7qHJkKjXSiG2bz-D04uNVJTbDw4XbvZ9mnU==u9eT2Q@mail.gmail.com>
+	 <1467122456.32374.15.camel@redhat.com>
+	 <B36A9223-ECDA-4B6A-90BE-34CEE6C753C2@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-am1on0079.outbound.protection.outlook.com ([157.56.112.79]:35134
-	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751980AbcF2L7z convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jun 2016 07:59:55 -0400
-Content-Language: en-US
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:35753 "EHLO
+	mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752164AbcF2MZE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jun 2016 08:25:04 -0400
+Received: by mail-qt0-f178.google.com with SMTP id f89so23882678qtd.2
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Jun 2016 05:25:03 -0700 (PDT)
+In-Reply-To: <B36A9223-ECDA-4B6A-90BE-34CEE6C753C2@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: Zheng Yan <ukernel@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-bbbb
+On Wed, 2016-06-29 at 14:53 +0800, Yan, Zheng wrote:
+> >=20
+> > On Jun 28, 2016, at 22:00, Jeff Layton <jlayton@redhat.com> wrote:
+> >=20
+> > On Tue, 2016-06-28 at 21:03 +0800, Yan, Zheng wrote:
+> > >=20
+> > > On Tue, Jun 28, 2016 at 3:07 AM, Jeff Layton <jlayton@redhat.com>
+> > > wrote:
+> > > >=20
+> > > >=20
+> > > > I'm eyeballing how to make ceph dentry revalidation occur in
+> > > > rcu-walk
+> > > > mode in the kernel cephfs client. It looks fairly
+> > > > straightforward, but
+> > > > for one thing:
+> > > >=20
+> > > > dentry_lease_is_valid queues an asynchronous lease renewal if
+> > > > we're
+> > > > halfway to the next lease renewal time:
+> > > >=20
+> > > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0if (session) {
+> > > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0ceph_mdsc_lease_send_msg(session, dir,=
+ dentry,
+> > > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0CEPH_MDS_LEASE_RENEW,
+> > > > seq);
+> > > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0ceph_put_mds_session(session);
+> > > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0}
+> > > >=20
+> > > > That can sleep, so we have to drop out of rcu walk mode in that
+> > > > case.
+> > > >=20
+> > > > Is this lease renewal strictly necessary? I can make the code
+> > > > drop out
+> > > > of rcuwalk mode and try again in that case, but if this is just
+> > > > an
+> > > > opportunistic thing, then it may be better for performance to
+> > > > take a
+> > > > pass on renewing the lease early if we're still in RCU walk
+> > > > mode.
+> > > >=20
+> > > dentry_lease_is_valid is the only place that renew lease. I think
+> > > it's
+> > > better to drop out of rcuwalk and try again
+> > >=20
+> > > Regards
+> > > Yan, Zheng
+> > >=20
+> > That seems really odd to me.
+> >=20
+> > That call is only ever done in the d_revalidate codepath, so you'll
+> > only get a lease renewal when you have repeated path-based access
+> > to an
+> > existing dentry.
+> >=20
+> > Maybe this means that I don't really understand ceph leases. More
+> > questions...
+> >=20
+> > What exactly does the lease cover here?
+> Lease covers dentry. MDS revoke release before changing dentry=E2=80=99=
+s
+> linkage. If client access a dentry frequently, it should renew the
+> dentry lease when necessary. If dentry lease expires, client need to
+> send a lookup request if it want to access the dentry.
+>=20
 
-On Sat, 28 May 2016 11:19 AM, Yehuda Sadeh-Weinraub <yehuda@xxxxxxxxxx> wrote: 
->On Fri, May 27, 2016 at 10:37 AM, Sage Weil <sweil@xxxxxxxxxx> wrote:
->>
->> If you do a connect and immediately write a few bytes to teh TCP 
->> stream, does that actaully translate to fewer packets?  I was guessing 
->> that the server writing the first bytes of the exchange would be fine 
->> but if it speeds things up for the client to optimistically start the 
->> exchange too we may as well...
->>
->
->While haven't really looked at it recently, I don't think it'd be possible to embed data with the SYN packet using the plain >vanilla tcp implementation. However, I believe that doing connect() and sending data immediately following it should improve >things, specifically if doing async connect (as with the async messenger), but this still needs to be proven.
->
->Yehuda
+Ok, got it, thanks. In that case, what might be better is to queue the
+lease renewal to a workqueue and stay in RCU lookup mode. It's not like
+we're planning to wait around on the reply so dropping out of RCU mode
+is probably not what we want. I'll take a look at whether it makes
+sense to embed a work_struct in the ceph_dentry_info.
 
-I am using TCP with network sniffers like Wireshark and this is always the case that I see in Linux  - *sending data soon after connect will always save packet by combining the ACK from the last step of TCP 3-way handshake with the 1st data packet* .  
-This is the case even when I did "short" activity between connect and send.
+--=20
+Jeff Layton <jlayton@redhat.com>
 
-Sniffer will show you 3 packets on the stream:
-1.	Client sends SYN packet
-2.	Server replies with SYN-ACK packet
-3.	Client send *data packet* that have the ACK flag set in it (this ACK completes the TCP 3-way handshake and makes 'accept' return on the server side)
-
-synchronous or asynchronous socket isn't relevant here because 'connect' returns with success upon receiving SYN-ACK from the server regardless of the actual client send of the TCP 3-way completing ACK (i.e., the client application doesn't need this ACK for relying on the socket as connected - only the server side need it).
-
-From my experience, even disabling nagle (TCP_NODELAY) doesn't affect this behavior (probably because TCP_NODELAY only affect sending *data* faster but does not change TCP handshake behavior)
-
-If you need a test application, I can provide you
-Avner
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
