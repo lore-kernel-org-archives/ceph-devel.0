@@ -1,106 +1,51 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: is the renewal in dentry_lease_is_valid necessary?
-Date: Wed, 29 Jun 2016 08:25:00 -0400
-Message-ID: <1467203100.6220.2.camel@redhat.com>
-References: <1467054441.25213.20.camel@redhat.com>
-	 <CAAM7YAm7qHJkKjXSiG2bz-D04uNVJTbDw4XbvZ9mnU==u9eT2Q@mail.gmail.com>
-	 <1467122456.32374.15.camel@redhat.com>
-	 <B36A9223-ECDA-4B6A-90BE-34CEE6C753C2@redhat.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: rbd jewel backports related to mirroring
+Date: Wed, 29 Jun 2016 08:43:59 -0400
+Message-ID: <CA+aFP1Cp+Up4z7=JoNm+7PwtHXmFc2gfo+sYcEFMQ8pDLzwiLQ@mail.gmail.com>
+References: <57738FE7.4060309@dachary.org>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f178.google.com ([209.85.216.178]:35753 "EHLO
-	mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752164AbcF2MZE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jun 2016 08:25:04 -0400
-Received: by mail-qt0-f178.google.com with SMTP id f89so23882678qtd.2
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Jun 2016 05:25:03 -0700 (PDT)
-In-Reply-To: <B36A9223-ECDA-4B6A-90BE-34CEE6C753C2@redhat.com>
+Received: from mail-pf0-f181.google.com ([209.85.192.181]:34467 "EHLO
+	mail-pf0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751767AbcF2MoB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jun 2016 08:44:01 -0400
+Received: by mail-pf0-f181.google.com with SMTP id h14so17986070pfe.1
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Jun 2016 05:44:00 -0700 (PDT)
+In-Reply-To: <57738FE7.4060309@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: Zheng Yan <ukernel@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 2016-06-29 at 14:53 +0800, Yan, Zheng wrote:
-> >=20
-> > On Jun 28, 2016, at 22:00, Jeff Layton <jlayton@redhat.com> wrote:
-> >=20
-> > On Tue, 2016-06-28 at 21:03 +0800, Yan, Zheng wrote:
-> > >=20
-> > > On Tue, Jun 28, 2016 at 3:07 AM, Jeff Layton <jlayton@redhat.com>
-> > > wrote:
-> > > >=20
-> > > >=20
-> > > > I'm eyeballing how to make ceph dentry revalidation occur in
-> > > > rcu-walk
-> > > > mode in the kernel cephfs client. It looks fairly
-> > > > straightforward, but
-> > > > for one thing:
-> > > >=20
-> > > > dentry_lease_is_valid queues an asynchronous lease renewal if
-> > > > we're
-> > > > halfway to the next lease renewal time:
-> > > >=20
-> > > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0if (session) {
-> > > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0ceph_mdsc_lease_send_msg(session, dir,=
- dentry,
-> > > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0CEPH_MDS_LEASE_RENEW,
-> > > > seq);
-> > > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0ceph_put_mds_session(session);
-> > > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0}
-> > > >=20
-> > > > That can sleep, so we have to drop out of rcu walk mode in that
-> > > > case.
-> > > >=20
-> > > > Is this lease renewal strictly necessary? I can make the code
-> > > > drop out
-> > > > of rcuwalk mode and try again in that case, but if this is just
-> > > > an
-> > > > opportunistic thing, then it may be better for performance to
-> > > > take a
-> > > > pass on renewing the lease early if we're still in RCU walk
-> > > > mode.
-> > > >=20
-> > > dentry_lease_is_valid is the only place that renew lease. I think
-> > > it's
-> > > better to drop out of rcuwalk and try again
-> > >=20
-> > > Regards
-> > > Yan, Zheng
-> > >=20
-> > That seems really odd to me.
-> >=20
-> > That call is only ever done in the d_revalidate codepath, so you'll
-> > only get a lease renewal when you have repeated path-based access
-> > to an
-> > existing dentry.
-> >=20
-> > Maybe this means that I don't really understand ceph leases. More
-> > questions...
-> >=20
-> > What exactly does the lease cover here?
-> Lease covers dentry. MDS revoke release before changing dentry=E2=80=99=
-s
-> linkage. If client access a dentry frequently, it should renew the
-> dentry lease when necessary. If dentry lease expires, client need to
-> send a lookup request if it want to access the dentry.
->=20
+My usual strategy just involves running "git cherry-pick -x" against
+any prior commits associated with the file with the merge conflict (I
+usually try to pull in the whole PR instead of just the single commit
+causing the merge conflict). These extra cherry-picks will be cleanly
+merged away when the PRs are merged into a single branch.  I usually
+run "git log --graph --decorate --date=3Drelative --oneline" to see the
+associated PRs of prior commits.
 
-Ok, got it, thanks. In that case, what might be better is to queue the
-lease renewal to a workqueue and stay in RCU lookup mode. It's not like
-we're planning to wait around on the reply so dropping out of RCU mode
-is probably not what we want. I'll take a look at whether it makes
-sense to embed a work_struct in the ceph_dentry_info.
+On Wed, Jun 29, 2016 at 5:07 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Jason,
+>
+> While working on jewel backports I noticed that there are a number of=
+ rbd backports ( http://tracker.ceph.com/projects/ceph/issues?per_page=3D=
+100&query_id=3D96 ) related to mirroring. At least three of them do not=
+ apply cleanly and I suspect they are interdependant. Is there a way to=
+ figure out the order in which they should be applied ? If not I'll sor=
+t it out anyway, no worries ;-)
+>
+> Cheers
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
 
 --=20
-Jeff Layton <jlayton@redhat.com>
-
+Jason
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
