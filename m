@@ -1,97 +1,135 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: SIGTERM and osd close
-Date: Fri, 1 Jul 2016 08:18:27 +1000
-Message-ID: <CAF-wwdHru3O3OPNrsB-GRTiGYFBueGU_ya=H38sGG7zZjqCvWw@mail.gmail.com>
-References: <CY1PR0201MB182059A3B8115A640EB69BA985240@CY1PR0201MB1820.namprd02.prod.outlook.com>
- <BL2PR02MB2115AA87DE1F8A1929FB6887F4240@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: Dan Mick <dmick@redhat.com>
+Subject: Re: master build failing
+Date: Thu, 30 Jun 2016 15:33:16 -0700
+Message-ID: <57759E2C.1050301@redhat.com>
+References: <CY1PR0201MB18209702FEAD607B802AC66985530@CY1PR0201MB1820.namprd02.prod.outlook.com>
+ <CAJE9aOP9ZF5NMHchpTy_dzwLTaTjjxbpdU0MSGJ_iKfNdX+PQg@mail.gmail.com>
+ <D39AD750.FBEB%evgeniy.firsov@sandisk.com>
+ <0b9ea189-c626-988d-3dd1-6af384b9ca16@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:38027 "EHLO
-	mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752096AbcF3WS3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2016 18:18:29 -0400
-Received: by mail-wm0-f49.google.com with SMTP id r201so4962937wme.1
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Jun 2016 15:18:29 -0700 (PDT)
-In-Reply-To: <BL2PR02MB2115AA87DE1F8A1929FB6887F4240@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from mx1.redhat.com ([209.132.183.28]:36477 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751569AbcF3Wdh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Jun 2016 18:33:37 -0400
+In-Reply-To: <0b9ea189-c626-988d-3dd1-6af384b9ca16@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>, kefu chai <tchaikov@gmail.com>, Ramesh Chander <Ramesh.Chander@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, dl-storm-dev <dl-storm-dev@sandisk.com>
 
-On Fri, Jul 1, 2016 at 4:44 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> You need to call it from BlueStore::umount() I guess for cleanup work..
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Ramesh Chander
-> Sent: Thursday, June 30, 2016 8:46 AM
-> To: ceph-devel@vger.kernel.org
-> Subject: SIGTERM and osd close
->
-> Hi All,
->
-> When I use stop.sh without any argument, I suppose it calls pkill with SIGTERM on osds as well as other processes.
+"do_cmake.sh" can automate some of that
 
-616   // install signal handlers
-617   init_async_signal_handler();
-618   register_async_signal_handler(SIGHUP, sighup_handler);
-619   register_async_signal_handler_oneshot(SIGINT, handle_osd_signal);
-620   register_async_signal_handler_oneshot(SIGTERM, handle_osd_signal);
-
- 65 void handle_osd_signal(int signum)
- 66 {
- 67   if (osd)
- 68     osd->handle_signal(signum);
- 69 }
-
-1735 void OSD::handle_signal(int signum)
-1736 {
-1737   assert(signum == SIGINT || signum == SIGTERM);
-1738   derr << "*** Got signal " << sig_str(signum) << " ***" << dendl;
-1739   shutdown();
-1740 }
-
-2598 int OSD::shutdown()
-2599 {
-
-OSD::shutdown() in src/osd/OSD.cc is quite a large function that
-performs quite a bit of clean up such as
-draining and shutting down thread pool work queues, shutting down
-messenger instances, un-registering
-admin commands, shutting down the PGs, flushing outstanding ops,
-updating the superblock and unmounting
-the filestore (as Somnath mentioned this might be where you want to
-look), shutting down the MON client and
-clearing the peering work queue, in no particular order.
-
-So there is no doubt the OSD (and other daemons such as MON and MDS)
-intercepts this signal and performs
-a graceful shutdown including many housekeeping tasks.
-
-HTH,
-Brad
-
->
-> Does osd handle this signal and take care of closing all components?
->
-> I am specifically interested in if it closes objectstore -> keyvaluedb .
->
-> I don't see my code of keyvaluedb shutdown/close being called when I do ./stop.sh
->
-> Any argument or way to force this?
->
-> -Ramesh
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
+On 06/30/2016 03:04 PM, Mark Nelson wrote:
+> If you are inclined, it's probably worth switching over to cmake at this
+> point.  I suspect the automake stuff is going to get crufty pretty fast
+> now that folks are switching over en mass.  I switched a couple of days
+> ago and after working out a couple of bugs it's working really well.
+> 
+> git clean -fdx
+> mkdir build; cd build
+> cmake ..
+> make -j $(nproc)
+> sudo make install
+> 
+> Mark
+> 
+> On 06/30/2016 04:05 PM, Evgeniy Firsov wrote:
+>> Same error for me.
+>> This is automake, jemalloc is installed.
+>>
+>> On 6/14/16, 1:30 AM, "ceph-devel-owner@vger.kernel.org on behalf of kefu
+>> chai" <ceph-devel-owner@vger.kernel.org on behalf of tchaikov@gmail.com>
+>> wrote:
+>>
+>>> On Tue, Jun 14, 2016 at 2:09 AM, Ramesh Chander
+>>> <Ramesh.Chander@sandisk.com> wrote:
+>>>> Getting these linker errors:
+>>>>
+>>>>
+>>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_impl
+>>>>
+>>>> .cc:583: undefined reference to `malloc_stats_print'
+>>>> collect2: error: ld returned 1 exit status
+>>>> make[3]: *** [ceph_test_objectstore_workloadgen] Error 1
+>>>> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
+>>>>
+>>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_impl
+>>>>
+>>>> .cc:583: undefined reference to `malloc_stats_print'
+>>>> collect2: error: ld returned 1 exit status
+>>>> make[3]: *** [ceph_test_objectstore] Error 1
+>>>> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
+>>>>
+>>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_impl
+>>>>
+>>>> .cc:583: undefined reference to `malloc_stats_print'
+>>>> collect2: error: ld returned 1 exit status
+>>>> make[3]: *** [ceph_xattr_bench] Error 1
+>>>> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
+>>>>
+>>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_impl
+>>>>
+>>>> .cc:583: undefined reference to `malloc_stats_print'
+>>>> collect2: error: ld returned 1 exit status
+>>>> make[3]: *** [ceph_test_filejournal] Error 1
+>>>>
+>>>> last time Mark did something to fix it.
+>>>>
+>>>> I tried make clean in rocksdb directory as well, still same error.
+>>>
+>>> did you uninstall jemalloc after configure or cmake? maybe you can
+>>> check the make_config.mk under rocksdb directory? are you using cmake
+>>> or automake?
+>>>
+>>>
+>>>>
+>>>> -Ramesh Chander
+>>>> PLEASE NOTE: The information contained in this electronic mail message
+>>>> is intended only for the use of the designated recipient(s) named
+>>>> above.
+>>>> If the reader of this message is not the intended recipient, you are
+>>>> hereby notified that you have received this message in error and that
+>>>> any review, dissemination, distribution, or copying of this message is
+>>>> strictly prohibited. If you have received this communication in error,
+>>>> please notify the sender by telephone or e-mail (as shown above)
+>>>> immediately and destroy any and all copies of this message in your
+>>>> possession (whether hard copies or electronically stored copies).
+>>>> -- 
+>>>> To unsubscribe from this list: send the line "unsubscribe
+>>>> ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>>
+>>> -- 
+>>> Regards
+>>> Kefu Chai
+>>> -- 
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> PLEASE NOTE: The information contained in this electronic mail message
+>> is intended only for the use of the designated recipient(s) named
+>> above. If the reader of this message is not the intended recipient,
+>> you are hereby notified that you have received this message in error
+>> and that any review, dissemination, distribution, or copying of this
+>> message is strictly prohibited. If you have received this
+>> communication in error, please notify the sender by telephone or
+>> e-mail (as shown above) immediately and destroy any and all copies of
+>> this message in your possession (whether hard copies or electronically
+>> stored copies).
+>> -- 
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> -- 
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-
-
--- 
-Cheers,
-Brad
