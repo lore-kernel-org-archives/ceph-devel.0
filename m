@@ -1,94 +1,44 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Questions for NVRAM+SATA SSDs with Bluestore
-Date: Thu, 30 Jun 2016 16:15:26 +0000
-Message-ID: <BL2PR02MB21158006A401C93BB672F4F6F4240@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <CAFNt83a4mnNhO722drHTB_FavwzFfHJpRfCbUg8En2WpRHZWdw@mail.gmail.com>
- <alpine.DEB.2.11.1606271229510.2844@piezo.us.to>
- <CAFNt83aFFy62vBGsd5-C1pyh09-Thwnz-pX7NNn9_45hs2qSVA@mail.gmail.com>
+Subject: RE: SIGTERM and osd close
+Date: Thu, 30 Jun 2016 18:44:22 +0000
+Message-ID: <BL2PR02MB2115AA87DE1F8A1929FB6887F4240@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <CY1PR0201MB182059A3B8115A640EB69BA985240@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0082.outbound.protection.outlook.com ([207.46.100.82]:55497
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+Received: from mail-cys01nam02on0089.outbound.protection.outlook.com ([104.47.37.89]:63216
+	"EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752194AbcF3QPf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 30 Jun 2016 12:15:35 -0400
-In-Reply-To: <CAFNt83aFFy62vBGsd5-C1pyh09-Thwnz-pX7NNn9_45hs2qSVA@mail.gmail.com>
+	id S1751973AbcF3S7I convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2016 14:59:08 -0400
+In-Reply-To: <CY1PR0201MB182059A3B8115A640EB69BA985240@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: myoungwon oh <ohmyoungwon@gmail.com>, Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ramesh Chander <Ramesh.Chander@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Q291bGQgeW91IHBsZWFzZSBleHBsYWluIGluIGRldGFpbCBhYm91dCB5b3VyIHRlc3QgY29uZmln
-dXJhdGlvbiAgKGxpa2UgaG93IG1hbnkgb3Nkcy8gcmVwbGljYXRpb24vIE5WUkFNIHVzZWQgb24g
-d2hlcmUgKSA/IEFsc28sIGhvdyBsb25nIHlvdSByYW4gdGhlIHRlc3QgPw0KDQpUaGFua3MgJiBS
-ZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdl
-ci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgbXlvdW5nd29uIG9oDQpTZW50OiBUaHVyc2RheSwg
-SnVuZSAzMCwgMjAxNiAxOjQwIEFNDQpUbzogU2FnZSBXZWlsDQpDYzogY2VwaC1kZXZlbEB2Z2Vy
-Lmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBRdWVzdGlvbnMgZm9yIE5WUkFNK1NBVEEgU1NEcyB3
-aXRoIEJsdWVzdG9yZQ0KDQpIaS4NCg0KDQpBcyB5b3UgbWVudGlvbmVkLCBibHVlc290cmVfbWlu
-X2FsbG9jX3NpemUgY2FuIHNlbmQgZGF0YSB0byB0aGUgd2FsIHBhdGguDQoNClBlcmZvcm1hbmNl
-IGlzIGltcHJvdmVkIHRoYW4gd3J0dGluZyBkaXJlY3RseSBTU0RzLiAobW9yZSB0aGFuIDEwS0lP
-UFMpDQoNCkhvd2V2ZXIsIHBlcmZvcm1hbmNlIG9mIGJsdWVzdG9yZSBpcyBsb3dlciB0aGFuIGZp
-bGVzdG9yZSAoc2VlIGJlbG93KS4NCg0KSSB0aGlua3MgdGhhdCB0aGVyZSBhcmUgbWFueSBwZXJm
-b3JtYW5jZSBvcHRpb25zIGZvciBibHVlc3RvcmUuDQoNClRoZXJlZm9yZSwgaSBuZWVkIHRvIHVu
-ZGVyc3RhbmQgaXQgaW4gb3JkZXIgdG8gc2VlIHJlYWwgcGVyZm9ybWFuY2UuDQoNCihJZiB5b3Ug
-aGF2ZSByZWNvbW1lbmRlZCBvcHRpb25zLCBwbGVhc2UgbGV0IG1lIGtub3cpDQoNCg0KDQpBbnl3
-YXksIG90aGVyIG9ic2VydmF0aW9ucyBhcmUgdGhhdA0KDQoxLiBNb3JlIHRoYW4gNzBLSU9QUyBp
-cyBvYnNlcnZlZCBhdCBmaXJzdCAyMH4zMCBzZWNvbmQgZHVyaW5nIHBlcmZvcm1hbmNlIHRlc3Qu
-IGFmdGVyIDIwfjMwIHNlY29uZCwgcGVyZm9ybWFuY2UgaXMgZHJvcCBzaWduaWZpY2FudGx5Lg0K
-DQogICAgKG9uZSBleHBlY3RlZCByZWFzb24gaXMgdGhhdCBtZXRhIGRhdGEgc2l6ZSAoYmxvYiBt
-YXAsIGV4dGVudCBtYXApIGlzIGluY3JlYXNpbmcpDQoNCjIuIGhpZ2ggbGF0ZW5jeSAobm90ZSB0
-aGF0IHRoaXMgaXMgbnZyYW0pDQoNCg0KDQpUaGFua3MuDQoNCg0KDQpCbHVlc3RvcmUgKG1hc3Rl
-ciBicmFuY2gsIDYvMjksIE5vIGNvbmZpZ3VyYXRpb25zIGFyZSBjaGFuZ2VkKQ0KDQojIyMjIyMj
-IyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyBCVyByZXN1bHQgSU9fU2l6ZSAgcmFuZHdyaXRl
-DQoNCjRLQiAgICAgIDIzNC40Mg0KDQojIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMj
-IyBJT1BTIHJlc3VsdCBJT19TaXplICByYW5kd3JpdGUNCg0KNEtCICAgICAgNjAwMDYNCg0KIyMj
-IyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgTGF0ZW5jeSByZXN1bHQgSU9fU2l6ZSAg
-cmFuZHdyaXRlIChtcykNCg0KNEtCICAgICAgOS41OTUNCg0KIyMjIyMjIyMjIyMjIyMjIyMjIyMj
-IyMjIyMjIyMjIyMjIyMgQ1BVIHV0aWxpemF0aW9uIElPX1NpemUgIHJhbmR3cml0ZQ0KDQo0S0Ig
-ICAgICA1Mi41Mw0KDQoNCg0KRmlsZXN0b3JlIChqZXdlbCwgMTAuMi4xLCBObyBjb25maWd1cmF0
-aW9ucyBhcmUgY2hhbmdlZCkNCg0KDQojIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMj
-IyBCVyByZXN1bHQgSU9fU2l6ZSAgcmFuZHdyaXRlDQoNCjRLQiAgICAgIDI2MC4zMw0KDQojIyMj
-IyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyBJT1BTIHJlc3VsdCBJT19TaXplICByYW5k
-d3JpdGUNCg0KNEtCICAgICAgNjY2NDANCg0KIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMj
-IyMjIyMgTGF0ZW5jeSByZXN1bHQgSU9fU2l6ZSAgcmFuZHdyaXRlIChtcykNCg0KNEtCICAgICAg
-OC42NDINCg0KIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgQ1BVIHV0aWxpemF0
-aW9uIElPX1NpemUgIHJhbmR3cml0ZQ0KDQo0S0IgICAgICA1Ni40Mg0KDQoNCjIwMTYtMDYtMjcg
-MjE6MzEgR01UKzA5OjAwIFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+Og0KPiBPbiBNb24s
-IDI3IEp1biAyMDE2LCBteW91bmd3b24gb2ggd3JvdGU6DQo+PiBIaSwgSSBoYXZlIHF1ZXN0aW9u
-cyBmb3IgYmx1ZXN0b3JlICg0SyByYW5kb20gd3JpdGUgY2FzZSkuDQo+Pg0KPj4gU28gZmFyLCB3
-ZSBoYXZlIHVzZWQgTlZSQU0oUENJZSkgYXMgam91cm5hbCBhbmQgU1NEIChTQVRBKSBhcyBkYXRh
-DQo+PiBkaXNrIChmaWxlc3RvcmUpLg0KPj4gVGhlcmVmb3JlLCB3ZSBnb3QgcGVyZm9ybWFuY2Ug
-Z2FpbiBmcm9tIE5WUkFNIGpvdXJuYWwuDQo+PiBIb3dldmVyLCBjdXJyZW50IEJsdWVzdG9yZSBk
-ZXNpZ24gc2VlbXMgdGhhdCBkYXRhICg0SyBhbGlnbmVkKSBpcw0KPj4gd3JpdHRlbiB0byBkYXRh
-IGRpc2sgZmlyc3QsIHRoZW4gbWV0YWRhdGEgaXMgd3JpdHRlbiB0byBXQUwgcm9ja3NkYi4NCj4+
-IFRoaXMgZGVzaWduIGNhbiByZW1vdmUg4oCcZG91YmxlIHdyaXRl4oCdIGluIG9iamVjdHN0b3Jl
-LCBidXQgaW4gb3VyDQo+PiBjYXNlLCBOVlJBTSBjYW4gbm90IGJlIHV0aWxpemVkIGZ1bGx5Lg0K
-Pj4NCj4+ICBTbywgbXkgcXVlc3Rpb25zIGFyZSB0aGF0DQo+Pg0KPj4gMS4gQ2FuIGJsdWVzdG9y
-ZSB3cml0ZSBXQUwgZmlyc3QgYXMgZmlsZXN0b3JlPw0KPg0KPiBZb3UgY2FuIGRvIGl0IGluZGly
-ZWN0bHkgd2l0aCBibHVlc3RvcmVfbWluX2FsbG9jX3NpemU9NjU1MzYsIHdoaWNoDQo+IHdpbGwg
-c2VuZCBhbnl0aGluZyBzbWFsbGVyIHRoYW4gdGhpcyB2YWx1ZSB0aHJvdWdoIHRoZSB3YWwgcGF0
-aC4NCj4gUGxlYXNlIGxldCB1cyBrbm93IHdoYXQgZWZmZWN0IHRoaXMgaGFzIG9uIG91ciBsYXRl
-bmN5L3BlcmZvcm1hbmNlIQ0KPg0KPj4gMi4gSWYgbm90LCB1c2luZyBiY2FjaGUgb3IgZmxhc2hj
-YWNoZSBmb3IgTlZSQU0gb24gdG9wIG9mIFNTRHMgaXMNCj4+IHJpZ2h0IGFuc3dlcj8NCj4NCj4g
-VGhpcyBpcyBhbHNvIHBvc3NpYmxlLCBidXQgSSBleHBlY3Qgd2UnZCBsaWtlIHRvIG1ha2UgdGhp
-cyB3b3JrIG91dCBvZg0KPiB0aGUgYm94IGlmIHdlIGNhbiENCj4NCj4gc2FnZQ0KLS0NClRvIHVu
-c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
-LWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
-Lm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
-ZG9tby1pbmZvLmh0bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGlu
-IHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVz
-ZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFk
-ZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJl
-IGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBl
-cnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9y
-IGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBo
-YXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0
-aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlh
-dGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlv
-dXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9y
-ZWQgY29waWVzKS4NCg==
+You need to call it from BlueStore::umount() I guess for cleanup work..
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Ramesh Chander
+Sent: Thursday, June 30, 2016 8:46 AM
+To: ceph-devel@vger.kernel.org
+Subject: SIGTERM and osd close
+
+Hi All,
+
+When I use stop.sh without any argument, I suppose it calls pkill with SIGTERM on osds as well as other processes.
+
+Does osd handle this signal and take care of closing all components?
+
+I am specifically interested in if it closes objectstore -> keyvaluedb .
+
+I don't see my code of keyvaluedb shutdown/close being called when I do ./stop.sh
+
+Any argument or way to force this?
+
+-Ramesh
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
