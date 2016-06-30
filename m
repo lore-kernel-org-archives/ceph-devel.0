@@ -1,136 +1,87 @@
-From: myoungwon oh <ohmyoungwon@gmail.com>
-Subject: Re: Questions for NVRAM+SATA SSDs with Bluestore
-Date: Thu, 30 Jun 2016 17:39:43 +0900
-Message-ID: <CAFNt83aFFy62vBGsd5-C1pyh09-Thwnz-pX7NNn9_45hs2qSVA@mail.gmail.com>
-References: <CAFNt83a4mnNhO722drHTB_FavwzFfHJpRfCbUg8En2WpRHZWdw@mail.gmail.com>
- <alpine.DEB.2.11.1606271229510.2844@piezo.us.to>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: RE: msgr2 protocol
+Date: Thu, 30 Jun 2016 11:59:15 +0000
+Message-ID: <DB5PR05MB1607B0F2121D66DED27A66F1A9240@DB5PR05MB1607.eurprd05.prod.outlook.com>
+References: <DB5PR05MB1607570EB6CCCAB6F68D50E3A9230@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <CADRKj5RQF8jOAMWgB+PPXn_z5nQpFPO43ieyuG8WpMy2bO5JuQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f43.google.com ([209.85.213.43]:33947 "EHLO
-	mail-vk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751669AbcF3Ik6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2016 04:40:58 -0400
-Received: by mail-vk0-f43.google.com with SMTP id c2so100371758vkg.1
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Jun 2016 01:39:44 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1606271229510.2844@piezo.us.to>
+Received: from mail-db3on0081.outbound.protection.outlook.com ([157.55.234.81]:35292
+	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751858AbcF3MdQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Jun 2016 08:33:16 -0400
+In-Reply-To: <CADRKj5RQF8jOAMWgB+PPXn_z5nQpFPO43ieyuG8WpMy2bO5JuQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi.
-
-
-As you mentioned, bluesotre_min_alloc_size can send data to the wal pat=
-h.
-
-Performance is improved than wrtting directly SSDs. (more than 10KIOPS)
-
-However, performance of bluestore is lower than filestore (see below).
-
-I thinks that there are many performance options for bluestore.
-
-Therefore, i need to understand it in order to see real performance.
-
-(If you have recommended options, please let me know)
-
-
-
-Anyway, other observations are that
-
-1. More than 70KIOPS is observed at first 20~30 second during
-performance test. after 20~30 second, performance is drop
-significantly.
-
-    (one expected reason is that meta data size (blob map, extent map)
-is increasing)
-
-2. high latency (note that this is nvram)
-
-
-
-Thanks.
-
-
-
-Bluestore (master branch, 6/29, No configurations are changed)
-
-################################### BW result IO_Size  randwrite
-
-4KB      234.42
-
-################################### IOPS result IO_Size  randwrite
-
-4KB      60006
-
-################################### Latency result IO_Size  randwrite (=
-ms)
-
-4KB      9.595
-
-################################### CPU utilization IO_Size  randwrite
-
-4KB      52.53
-
-
-
-=46ilestore (jewel, 10.2.1, No configurations are changed)
-
-
-################################### BW result IO_Size  randwrite
-
-4KB      260.33
-
-################################### IOPS result IO_Size  randwrite
-
-4KB      66640
-
-################################### Latency result IO_Size  randwrite (=
-ms)
-
-4KB      8.642
-
-################################### CPU utilization IO_Size  randwrite
-
-4KB      56.42
-
-
-2016-06-27 21:31 GMT+09:00 Sage Weil <sage@newdream.net>:
-> On Mon, 27 Jun 2016, myoungwon oh wrote:
->> Hi, I have questions for bluestore (4K random write case).
->>
->> So far, we have used NVRAM(PCIe) as journal and SSD (SATA) as data
->> disk (filestore).
->> Therefore, we got performance gain from NVRAM journal.
->> However, current Bluestore design seems that data (4K aligned) is
->> written to data disk first, then metadata is written to WAL rocksdb.
->> This design can remove =E2=80=9Cdouble write=E2=80=9D in objectstore=
-, but in our case,
->> NVRAM can not be utilized fully.
->>
->>  So, my questions are that
->>
->> 1. Can bluestore write WAL first as filestore?
->
-> You can do it indirectly with bluestore_min_alloc_size=3D65536, which=
- will
-> send anything smaller than this value through the wal path.  Please l=
-et
-> us know what effect this has on our latency/performance!
->
->> 2. If not, using bcache or flashcache for NVRAM on top of SSDs is ri=
-ght
->> answer?
->
-> This is also possible, but I expect we'd like to make this work out o=
-f the
-> box if we can!
->
-> sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogWWVodWRhIFNhZGVoLVdl
+aW5yYXViIA0KPiBTZW50OiBXZWRuZXNkYXksIEp1bmUgMjksIDIwMTYgMTk6NTMNCj4gDQo+IE9u
+IFdlZCwgSnVuIDI5LCAyMDE2IGF0IDQ6NTkgQU0sIEF2bmVyIEJlbiBIYW5vY2gNCj4gPGF2bmVy
+YkBtZWxsYW5veC5jb20+IHdyb3RlOg0KPiA+DQo+ID4gT24gU2F0LCAyOCBNYXkgMjAxNiAxMTox
+OSBBTSwgWWVodWRhIFNhZGVoLVdlaW5yYXViDQo+IDx5ZWh1ZGFAeHh4eHh4eHh4eD4gd3JvdGU6
+DQo+ID4+T24gRnJpLCBNYXkgMjcsIDIwMTYgYXQgMTA6MzcgQU0sIFNhZ2UgV2VpbCA8c3dlaWxA
+eHh4eHh4eHh4eD4gd3JvdGU6DQo+ID4+Pg0KPiA+Pj4gSWYgeW91IGRvIGEgY29ubmVjdCBhbmQg
+aW1tZWRpYXRlbHkgd3JpdGUgYSBmZXcgYnl0ZXMgdG8gdGVoIFRDUA0KPiA+Pj4gc3RyZWFtLCBk
+b2VzIHRoYXQgYWN0YXVsbHkgdHJhbnNsYXRlIHRvIGZld2VyIHBhY2tldHM/ICBJIHdhcw0KPiA+
+Pj4gZ3Vlc3NpbmcgdGhhdCB0aGUgc2VydmVyIHdyaXRpbmcgdGhlIGZpcnN0IGJ5dGVzIG9mIHRo
+ZSBleGNoYW5nZQ0KPiA+Pj4gd291bGQgYmUgZmluZSBidXQgaWYgaXQgc3BlZWRzIHRoaW5ncyB1
+cCBmb3IgdGhlIGNsaWVudCB0bw0KPiA+Pj4gb3B0aW1pc3RpY2FsbHkgc3RhcnQgdGhlIGV4Y2hh
+bmdlIHRvbyB3ZSBtYXkgYXMgd2VsbC4uLg0KPiA+Pj4NCj4gPj4NCj4gPj5XaGlsZSBoYXZlbid0
+IHJlYWxseSBsb29rZWQgYXQgaXQgcmVjZW50bHksIEkgZG9uJ3QgdGhpbmsgaXQnZCBiZSBwb3Nz
+aWJsZSB0bw0KPiBlbWJlZCBkYXRhIHdpdGggdGhlIFNZTiBwYWNrZXQgdXNpbmcgdGhlIHBsYWlu
+ID52YW5pbGxhIHRjcCBpbXBsZW1lbnRhdGlvbi4NCj4gSG93ZXZlciwgSSBiZWxpZXZlIHRoYXQg
+ZG9pbmcgY29ubmVjdCgpIGFuZCBzZW5kaW5nIGRhdGEgaW1tZWRpYXRlbHkNCj4gZm9sbG93aW5n
+IGl0IHNob3VsZCBpbXByb3ZlID50aGluZ3MsIHNwZWNpZmljYWxseSBpZiBkb2luZyBhc3luYyBj
+b25uZWN0IChhcw0KPiB3aXRoIHRoZSBhc3luYyBtZXNzZW5nZXIpLCBidXQgdGhpcyBzdGlsbCBu
+ZWVkcyB0byBiZSBwcm92ZW4uDQo+ID4+DQo+ID4+WWVodWRhDQo+ID4NCj4gPiBJIGFtIHVzaW5n
+IFRDUCB3aXRoIG5ldHdvcmsgc25pZmZlcnMgbGlrZSBXaXJlc2hhcmsgYW5kIHRoaXMgaXMgYWx3
+YXlzIHRoZQ0KPiBjYXNlIHRoYXQgSSBzZWUgaW4gTGludXggIC0gKnNlbmRpbmcgZGF0YSBzb29u
+IGFmdGVyIGNvbm5lY3Qgd2lsbCBhbHdheXMgc2F2ZQ0KPiBwYWNrZXQgYnkgY29tYmluaW5nIHRo
+ZSBBQ0sgZnJvbSB0aGUgbGFzdCBzdGVwIG9mIFRDUCAzLXdheSBoYW5kc2hha2Ugd2l0aA0KPiB0
+aGUgMXN0IGRhdGEgcGFja2V0KiAuDQo+ID4gVGhpcyBpcyB0aGUgY2FzZSBldmVuIHdoZW4gSSBk
+aWQgInNob3J0IiBhY3Rpdml0eSBiZXR3ZWVuIGNvbm5lY3QgYW5kIHNlbmQuDQo+ID4NCj4gPiBT
+bmlmZmVyIHdpbGwgc2hvdyB5b3UgMyBwYWNrZXRzIG9uIHRoZSBzdHJlYW06DQo+ID4gMS4gICAg
+ICBDbGllbnQgc2VuZHMgU1lOIHBhY2tldA0KPiA+IDIuICAgICAgU2VydmVyIHJlcGxpZXMgd2l0
+aCBTWU4tQUNLIHBhY2tldA0KPiA+IDMuICAgICAgQ2xpZW50IHNlbmQgKmRhdGEgcGFja2V0KiB0
+aGF0IGhhdmUgdGhlIEFDSyBmbGFnIHNldCBpbiBpdCAodGhpcyBBQ0sNCj4gY29tcGxldGVzIHRo
+ZSBUQ1AgMy13YXkgaGFuZHNoYWtlIGFuZCBtYWtlcyAnYWNjZXB0JyByZXR1cm4gb24gdGhlIHNl
+cnZlcg0KPiBzaWRlKQ0KPiA+DQo+ID4gc3luY2hyb25vdXMgb3IgYXN5bmNocm9ub3VzIHNvY2tl
+dCBpc24ndCByZWxldmFudCBoZXJlIGJlY2F1c2UgJ2Nvbm5lY3QnDQo+IHJldHVybnMgd2l0aCBz
+dWNjZXNzIHVwb24gcmVjZWl2aW5nIFNZTi1BQ0sgZnJvbSB0aGUgc2VydmVyIHJlZ2FyZGxlc3Mg
+b2YgdGhlDQo+IGFjdHVhbCBjbGllbnQgc2VuZCBvZiB0aGUgVENQIDMtd2F5IGNvbXBsZXRpbmcg
+QUNLIChpLmUuLCB0aGUgY2xpZW50IGFwcGxpY2F0aW9uDQo+IGRvZXNuJ3QgbmVlZCB0aGlzIEFD
+SyBmb3IgcmVseWluZyBvbiB0aGUgc29ja2V0IGFzIGNvbm5lY3RlZCAtIG9ubHkgdGhlIHNlcnZl
+cg0KPiBzaWRlIG5lZWQgaXQpLg0KPiA+DQo+ID4gRnJvbSBteSBleHBlcmllbmNlLCBldmVuIGRp
+c2FibGluZyBuYWdsZSAoVENQX05PREVMQVkpIGRvZXNuJ3QgYWZmZWN0DQo+ID4gdGhpcyBiZWhh
+dmlvciAocHJvYmFibHkgYmVjYXVzZSBUQ1BfTk9ERUxBWSBvbmx5IGFmZmVjdCBzZW5kaW5nICpk
+YXRhKg0KPiA+IGZhc3RlciBidXQgZG9lcyBub3QgY2hhbmdlIFRDUCBoYW5kc2hha2UgYmVoYXZp
+b3IpDQo+IA0KPiBSaWdodC4gSG93ZXZlciwgSSB3YXMgYWltaW5nIGF0IHNlbmRpbmcgdGhlIGRh
+dGEgd2l0aCB0aGUgU1lOLCBub3Qgd2l0aCB0aGUNCj4gQUNLIHRoYXQgZm9sbG93cyBpdCAodHJ5
+aW5nIHRvIGF2b2lkIHRoZSBmaXJzdCByb3VuZHRyaXApLiBJIGFzc3VtZSBpdCdzIG5vdCByZWFs
+bHkNCj4gcG9zc2libGUgd2l0aCB2YW5pbGxhIHRjcC4NCj4gDQo+IFllaHVkYQ0KPiANCkkgdGhp
+bmsgdGhhdCBTYWdlJ3MgaWRlYS9xdWVzdGlvbiB3YXMgdG8gaGF2ZSBmZXdlciBwYWNrZXRzIGFu
+ZCB0byBzcGVlZCB0aGluZ3MgdXAgYnkgaGF2aW5nIHRoZSBjbGllbnQgc3RhcnRpbmcgdGhlIGV4
+Y2hhbmdlIGluc3RlYWQgb2YgaGF2aW5nIHRoZSBzZXJ2ZXIgc3RhcnRpbmcgdGhlIGV4Y2hhbmdl
+Lg0KSGVuY2UsIEkgYW0gc2F5aW5nIC0gWUVTLiAgVGhpcyBpZGVhIGlzIGNvcnJlY3QuICBJdCB3
+aWxsIHNhdmUgb25lIHBhY2tldCBhbmQgaXQgd2lsbCBzYXZlIHRpbWUgb2YgaGFsZiByb3VuZCB0
+cmlwIChpLmUuLCBvbmUgbGVnKSBiZWNhdXNlIHRoZSBjbGllbnQgaXMgYWxsb3dlZCB0byBzZW5k
+IGRhdGEgYWZ0ZXIgMiBsZWdzIG9mIFRDUCAzLXdheSBoYW5kc2hha2U7IHdoaWxlIHRoZSBzZXJ2
+ZXIgbXVzdCB3YWl0IGZvciBjb21wbGV0aW9uIG9mIGFsbCAzIGxlZ3Mgb2YgVENQIDMtd2F5IGhh
+bmRzaGFrZSBiZWZvcmUgc2VuZGluZyBhbnkgZGF0YS4NCkFuZCBJIGFtIHNheWluZyB0aGF0IHRo
+aXMgaXMgdGhlIGJlaGF2aW9yIG9mIHZhbmlsbGEgVENQIHdpdGhvdXQgYW55IHNwZWNpYWwgc2V0
+dGluZ3MuDQoNCklmIHlvdSB3YW50IHRvIHNlbmQgdHJhZmZpYyB3aXRoIHRoZSAxc3QgU1lOIHBh
+Y2tldCB0aGFuIGl0IHNvdW5kcyBhIGJpdCBzdHJhbmdlIGV2ZW4gZm9yIG5vbi12YW5pbGxhIFRD
+UC4gIEJlY2F1c2UgdGhlIGNsaWVudCBkb2Vzbid0IGV2ZW4ga25vdyB0aGF0IHRoZSBzZXJ2ZXIg
+aXMgYWxpdmUgYXQgdGhpcyBwaGFzZSwgYW5kIHRoZSBzZXJ2ZXIgZG9lc24ndCBrbm93IHRoYXQg
+dGhlIGNsaWVudCBpcyBsZWdpdGltYXRlIGF0IHRoaXMgcGhhc2UuICBUaGlzIHdpbGwgYWxzbyBw
+cm9iYWJseSBleHBvc2UgeW91ciBzZXJ2ZXIgdG8gc2VjdXJpdHkgaXNzdWUgdGhhdCBpcyBjYWxs
+ZWQgU1lOIGF0dGFjaywgYmVjYXVzZSBzZXJ2ZXJzIGFyZSBhZnJhaWQgb2YgYWxsb2NhdGluZyBj
+b25uZWN0aW9uIHJlc291cmNlcyBqdXN0IGZvciBTWU4gcGFja2V0cyAoYmVjYXVzZSB0aGUgc3Jj
+IGlwL3BvcnQgY2FuIGJlIGZpY3RpdGlvdXMgYXQgdGhpcyBwaGFzZSBiZWZvcmUgdGhlIGNsaWVu
+dCB1c2VkIHRoZSBzZXJ2ZXIncyByZXBseSkNCg0KQXZuZXINCg==
