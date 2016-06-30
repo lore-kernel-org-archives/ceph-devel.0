@@ -1,205 +1,134 @@
-From: Sebastien Ponce <sebastien.ponce@cern.ch>
-Subject: Re: libradosstriper
-Date: Thu, 30 Jun 2016 09:47:40 +0200
-Message-ID: <1467272860.390.5.camel@cern.ch>
-References: <alpine.DEB.2.11.1606272216370.7088@piezo.us.to>
-	 <CAN=+7FVmmgAuVF6cjwvGdyAU4YEXr8jLX-qiNjH50w6_YMs02g@mail.gmail.com>
-	 <1467084445.32200.8.camel@cern.ch>
-	 <CAN=+7FXrt6Y=TPRRdjkXZathXXKneV0eqT5VA6hQ5LOrxKoF3Q@mail.gmail.com>
-	 <1467212620.603.13.camel@cern.ch>
-	 <CAN=+7FWi1pMFa-=fYYiaaNNyaKmm_8E8dbQOOdOwdTz5n8x34A@mail.gmail.com>
-	 <1467215067.603.20.camel@cern.ch>
-	 <CAN=+7FXwB45kLA+W7U_cyWkEOtykGpuYXXGv2Xh9wkBo_sXLMQ@mail.gmail.com>
+From: myoungwon oh <ohmyoungwon@gmail.com>
+Subject: Re: Questions for NVRAM+SATA SSDs with Bluestore
+Date: Thu, 30 Jun 2016 17:39:43 +0900
+Message-ID: <CAFNt83aFFy62vBGsd5-C1pyh09-Thwnz-pX7NNn9_45hs2qSVA@mail.gmail.com>
+References: <CAFNt83a4mnNhO722drHTB_FavwzFfHJpRfCbUg8En2WpRHZWdw@mail.gmail.com>
+ <alpine.DEB.2.11.1606271229510.2844@piezo.us.to>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-am1on0074.outbound.protection.outlook.com ([157.56.112.74]:41568
-	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751621AbcF3IDv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 30 Jun 2016 04:03:51 -0400
-In-Reply-To: <CAN=+7FXwB45kLA+W7U_cyWkEOtykGpuYXXGv2Xh9wkBo_sXLMQ@mail.gmail.com>
+Received: from mail-vk0-f43.google.com ([209.85.213.43]:33947 "EHLO
+	mail-vk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751669AbcF3Ik6 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2016 04:40:58 -0400
+Received: by mail-vk0-f43.google.com with SMTP id c2so100371758vkg.1
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Jun 2016 01:39:44 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1606271229510.2844@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: "Weil, Sage" <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-I would even use the same pool, as this is perfectly allowed. Will look=
- at this next week.
-
-On another topic, I've just created a pull request for the improvements=
- done on librados and libradosstriper around async calls :=C2=A0https:/=
-/github.com/ceph/ceph/pull/10049. Could somebody review it ?
-
-Also, I've added tests for the new calls, tried them and noticed that s=
-ome tests of the rados test suite concerning writesame are failing righ=
-t now.
-
-Sebastien
+Hi.
 
 
-On Wed, 2016-06-29 at 10:16 -0700, Samuel Just wrote:
-> Makes sense.=C2=A0 I guess they'd have to pull from distinct name poo=
-ls?
-> -Sam
-> On Jun 29, 2016 8:45 AM, "Sebastien Ponce" <sebastien.ponce@cern.ch>
-> wrote:
-> > Oh I see, I did not know this one indeed.
-> > I used the flag approach for the rados command line and it was
-> > really
-> > easy, as the API is identical, you only have to use a Striper
-> > object
-> > instead of an IOContext.
-> > Now looking at the RadosModel class, I see that the user API (like
-> > read/write/aio_read,...) is almost not used. Almost everything goes
-> > through the aio_operate calls wich are not present in Striper.
-> > So I believe the simplest would be to add a couple of=C2=A0TestOpTy=
-pe,
-> > namely 5 of them :
-> > TEST_OP_READ/WRITE/DELETE/SETXATTR/RMXATTR_STRIPER
-> > and implement the corresponding classes inheriting from TestOp.
-> > This would also have the advantage to mix striped and regular
-> > objects
-> > in the test, which is absolutely valid and thus should be tested.
-> >=20
-> > Sebastien
-> >=20
-> >=20
-> > On Wed, 2016-06-29 at 08:30 -0700, Samuel Just wrote:
-> > > Ah, sorry.=C2=A0=C2=A0See src/test/osd/RadosModel.* and
-> > > src/test/osd/TestRados.cc.=C2=A0=C2=A0It's gotten to be a somewha=
-t kludgy
-> > mess,
-> > > but it's a really valuable stress test for verifying that the osd
-> > and
-> > > librados are behaving properly, especially when combined with
-> > failure
-> > > injection and osd thrashing.=C2=A0=C2=A0I'd like to either create=
- a (less
-> > > kludgy, I can only hope) seperate version for librados striper,
-> > or
-> > > add
-> > > a flag to the existing one which causes it to use the striper
-> > instead
-> > > (and only allows ops where it makes sense).=C2=A0=C2=A0libradosst=
-riper
-> > should
-> > > have the same ordering properties for piplined writes as normal
-> > > librados (right?), so modifying the existing test would probably
-> > get
-> > > us the most coverage for the least effort.
-> > > -Sam
-> > >
-> > > On Wed, Jun 29, 2016 at 8:03 AM, Sebastien Ponce
-> > > <sebastien.ponce@cern.ch> wrote:
-> > > >
-> > > > Well, I'm not sure what you are exactly looking for : I see now
-> > > > that I
-> > > > look more carefully that there is a file called ceph_test_rados
-> > > > that
-> > > > looks like a wrapper around the ceph_test_rados_* tests.
-> > > > The equivalent does not seem to exist for striper (although the
-> > > > same
-> > > > wrapper would probably work), but the ceph_test_rados_striper_*
-> > > > tests
-> > > > do exist.
-> > > > Should we/I create a wrapper for striper ? I'm not sure I have
-> > the
-> > > > whole understanding of the structure of the whole test
-> > system...
-> > > >
-> > > > Sebastien
-> > > >
-> > > >
-> > > > On Tue, 2016-06-28 at 09:07 -0700, Samuel Just wrote:
-> > > > >
-> > > > > I don't remember anything like ceph_test_rados which uses
-> > > > > libradosstriper.=C2=A0=C2=A0Did I miss it?
-> > > > > -Sam
-> > > > >
-> > > > > On Mon, Jun 27, 2016 at 8:27 PM, Sebastien Ponce
-> > > > > <sebastien.ponce@cern.ch> wrote:
-> > > > > >
-> > > > > >
-> > > > > > Would be great indeed. As it's already there, it can be
-> > done
-> > > > > > already
-> > > > > > now.
-> > > > > >
-> > > > > > Sebastien
-> > > > > >
-> > > > > > On Mon, 2016-06-27 at 15:25 -0700, Samuel Just wrote:
-> > > > > > >
-> > > > > > >
-> > > > > > > The something like ceph_test_rados could then be wired
-> > into
-> > > > > > > ceph-qa-suite to be tested with osd thrashing to ensure
-> > that
-> > > > > > > ordering
-> > > > > > > works and continues to work as expected.
-> > > > > > > -Sam
-> > > > > > >
-> > > > > > > On Mon, Jun 27, 2016 at 3:18 PM, Sage Weil <sweil@redhat.
-> > com>
-> > > > > > > wrote:
-> > > > > > > >
-> > > > > > > >
-> > > > > > > >
-> > > > > > > > Hi Sebastien,
-> > > > > > > >
-> > > > > > > > Do you mind updating us on the current status of
-> > > > > > > > libradosstriper?=C2=A0=C2=A0Where
-> > > > > > > > does it stand feature-wise with what you need, how are
-> > you
-> > > > > > > > currently using
-> > > > > > > > it or how do you plan to use it, and what is still
-> > missing?
-> > > > > > > >
-> > > > > > > > Also, one thing we really want to see is test coverage
-> > for
-> > > > > > > > the
-> > > > > > > > code
-> > > > > > > > so
-> > > > > > > > that we can comfortably point users toward it.=C2=A0=C2=
-=A0This
-> > > > > > > > ideally
-> > > > > > > > would
-> > > > > > > > look
-> > > > > > > > something like the ceph_test_rados_api_* tests that
-> > verify
-> > > > > > > > individual
-> > > > > > > > operations behave as expected, and/or something like
-> > > > > > > > ceph_test_rados that
-> > > > > > > > throws random operations at is and verifies it returns
-> > > > > > > > correct
-> > > > > > > > results
-> > > > > > > > that match its in-memory model.
-> > > > > > > >
-> > > > > > > > Thanks!
-> > > > > > > > sage
-> > > > > > > > --
-> > > > > > > > To unsubscribe from this list: send the line
-> > "unsubscribe
-> > > > > > > > ceph-
-> > > > > > > > devel" in
-> > > > > > > > the body of a message to majordomo@vger.kernel.org
-> > > > > > > > More majordomo info at=C2=A0=C2=A0http://vger.kernel.or=
-g/majordom
-> > o-in
-> > > > > > > > fo.h
-> > > > > > > > tml
-> > > > > --
-> > > > > To unsubscribe from this list: send the line "unsubscribe
-> > ceph-
-> > > > > devel"
-> > > > > in
-> > > > > the body of a message to majordomo@vger.kernel.org
-> > > > > More majordomo info at=C2=A0=C2=A0http://vger.kernel.org/majo=
-rdomo-info
-> > .htm
-> > > > > l
-> >=20
+As you mentioned, bluesotre_min_alloc_size can send data to the wal pat=
+h.
+
+Performance is improved than wrtting directly SSDs. (more than 10KIOPS)
+
+However, performance of bluestore is lower than filestore (see below).
+
+I thinks that there are many performance options for bluestore.
+
+Therefore, i need to understand it in order to see real performance.
+
+(If you have recommended options, please let me know)
+
+
+
+Anyway, other observations are that
+
+1. More than 70KIOPS is observed at first 20~30 second during
+performance test. after 20~30 second, performance is drop
+significantly.
+
+    (one expected reason is that meta data size (blob map, extent map)
+is increasing)
+
+2. high latency (note that this is nvram)
+
+
+
+Thanks.
+
+
+
+Bluestore (master branch, 6/29, No configurations are changed)
+
+################################### BW result IO_Size  randwrite
+
+4KB      234.42
+
+################################### IOPS result IO_Size  randwrite
+
+4KB      60006
+
+################################### Latency result IO_Size  randwrite (=
+ms)
+
+4KB      9.595
+
+################################### CPU utilization IO_Size  randwrite
+
+4KB      52.53
+
+
+
+=46ilestore (jewel, 10.2.1, No configurations are changed)
+
+
+################################### BW result IO_Size  randwrite
+
+4KB      260.33
+
+################################### IOPS result IO_Size  randwrite
+
+4KB      66640
+
+################################### Latency result IO_Size  randwrite (=
+ms)
+
+4KB      8.642
+
+################################### CPU utilization IO_Size  randwrite
+
+4KB      56.42
+
+
+2016-06-27 21:31 GMT+09:00 Sage Weil <sage@newdream.net>:
+> On Mon, 27 Jun 2016, myoungwon oh wrote:
+>> Hi, I have questions for bluestore (4K random write case).
+>>
+>> So far, we have used NVRAM(PCIe) as journal and SSD (SATA) as data
+>> disk (filestore).
+>> Therefore, we got performance gain from NVRAM journal.
+>> However, current Bluestore design seems that data (4K aligned) is
+>> written to data disk first, then metadata is written to WAL rocksdb.
+>> This design can remove =E2=80=9Cdouble write=E2=80=9D in objectstore=
+, but in our case,
+>> NVRAM can not be utilized fully.
+>>
+>>  So, my questions are that
+>>
+>> 1. Can bluestore write WAL first as filestore?
+>
+> You can do it indirectly with bluestore_min_alloc_size=3D65536, which=
+ will
+> send anything smaller than this value through the wal path.  Please l=
+et
+> us know what effect this has on our latency/performance!
+>
+>> 2. If not, using bcache or flashcache for NVRAM on top of SSDs is ri=
+ght
+>> answer?
+>
+> This is also possible, but I expect we'd like to make this work out o=
+f the
+> box if we can!
+>
+> sage
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
