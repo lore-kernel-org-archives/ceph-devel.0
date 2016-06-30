@@ -1,87 +1,145 @@
-From: Avner Ben Hanoch <avnerb@mellanox.com>
-Subject: RE: msgr2 protocol
-Date: Thu, 30 Jun 2016 11:59:15 +0000
-Message-ID: <DB5PR05MB1607B0F2121D66DED27A66F1A9240@DB5PR05MB1607.eurprd05.prod.outlook.com>
-References: <DB5PR05MB1607570EB6CCCAB6F68D50E3A9230@DB5PR05MB1607.eurprd05.prod.outlook.com>
- <CADRKj5RQF8jOAMWgB+PPXn_z5nQpFPO43ieyuG8WpMy2bO5JuQ@mail.gmail.com>
+From: Alyona Kiselyova <akiselyova@mirantis.com>
+Subject: Re: How to propose plugin, which uses external lib
+Date: Thu, 30 Jun 2016 16:10:46 +0300
+Message-ID: <CAONhiy5tB_7Mn_7nYDbFDEO4FVtSgc=XGODkr9YZpyUGNzD=Zw@mail.gmail.com>
+References: <CAONhiy5cg+fX-A49shN9FLREpigiTO18vk7t9anM_ZK9Czc5cQ@mail.gmail.com>
+ <CACJqLybFf2G3jQjY5LBnsFtxsbeJ-L3V=+TbeR8h0Y9t_LsmOA@mail.gmail.com>
+ <alpine.DEB.2.11.1606171644370.27611@piezo.novalocal> <CAONhiy4xycDrFjxvuz0ubbnmZpzCfcMXW_VL4zabfbE-VsGtrw@mail.gmail.com>
+ <alpine.DEB.2.11.1606281414530.8816@piezo.us.to> <2143050522.8203100.1467142712597.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db3on0081.outbound.protection.outlook.com ([157.55.234.81]:35292
-	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751858AbcF3MdQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 30 Jun 2016 08:33:16 -0400
-In-Reply-To: <CADRKj5RQF8jOAMWgB+PPXn_z5nQpFPO43ieyuG8WpMy2bO5JuQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:35648 "EHLO
+	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751424AbcF3NKr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2016 09:10:47 -0400
+Received: by mail-oi0-f52.google.com with SMTP id r2so63787927oih.2
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Jun 2016 06:10:47 -0700 (PDT)
+In-Reply-To: <2143050522.8203100.1467142712597.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ali Maredia <amaredia@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, Haomai Wang <haomai@xsky.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogWWVodWRhIFNhZGVoLVdl
-aW5yYXViIA0KPiBTZW50OiBXZWRuZXNkYXksIEp1bmUgMjksIDIwMTYgMTk6NTMNCj4gDQo+IE9u
-IFdlZCwgSnVuIDI5LCAyMDE2IGF0IDQ6NTkgQU0sIEF2bmVyIEJlbiBIYW5vY2gNCj4gPGF2bmVy
-YkBtZWxsYW5veC5jb20+IHdyb3RlOg0KPiA+DQo+ID4gT24gU2F0LCAyOCBNYXkgMjAxNiAxMTox
-OSBBTSwgWWVodWRhIFNhZGVoLVdlaW5yYXViDQo+IDx5ZWh1ZGFAeHh4eHh4eHh4eD4gd3JvdGU6
-DQo+ID4+T24gRnJpLCBNYXkgMjcsIDIwMTYgYXQgMTA6MzcgQU0sIFNhZ2UgV2VpbCA8c3dlaWxA
-eHh4eHh4eHh4eD4gd3JvdGU6DQo+ID4+Pg0KPiA+Pj4gSWYgeW91IGRvIGEgY29ubmVjdCBhbmQg
-aW1tZWRpYXRlbHkgd3JpdGUgYSBmZXcgYnl0ZXMgdG8gdGVoIFRDUA0KPiA+Pj4gc3RyZWFtLCBk
-b2VzIHRoYXQgYWN0YXVsbHkgdHJhbnNsYXRlIHRvIGZld2VyIHBhY2tldHM/ICBJIHdhcw0KPiA+
-Pj4gZ3Vlc3NpbmcgdGhhdCB0aGUgc2VydmVyIHdyaXRpbmcgdGhlIGZpcnN0IGJ5dGVzIG9mIHRo
-ZSBleGNoYW5nZQ0KPiA+Pj4gd291bGQgYmUgZmluZSBidXQgaWYgaXQgc3BlZWRzIHRoaW5ncyB1
-cCBmb3IgdGhlIGNsaWVudCB0bw0KPiA+Pj4gb3B0aW1pc3RpY2FsbHkgc3RhcnQgdGhlIGV4Y2hh
-bmdlIHRvbyB3ZSBtYXkgYXMgd2VsbC4uLg0KPiA+Pj4NCj4gPj4NCj4gPj5XaGlsZSBoYXZlbid0
-IHJlYWxseSBsb29rZWQgYXQgaXQgcmVjZW50bHksIEkgZG9uJ3QgdGhpbmsgaXQnZCBiZSBwb3Nz
-aWJsZSB0bw0KPiBlbWJlZCBkYXRhIHdpdGggdGhlIFNZTiBwYWNrZXQgdXNpbmcgdGhlIHBsYWlu
-ID52YW5pbGxhIHRjcCBpbXBsZW1lbnRhdGlvbi4NCj4gSG93ZXZlciwgSSBiZWxpZXZlIHRoYXQg
-ZG9pbmcgY29ubmVjdCgpIGFuZCBzZW5kaW5nIGRhdGEgaW1tZWRpYXRlbHkNCj4gZm9sbG93aW5n
-IGl0IHNob3VsZCBpbXByb3ZlID50aGluZ3MsIHNwZWNpZmljYWxseSBpZiBkb2luZyBhc3luYyBj
-b25uZWN0IChhcw0KPiB3aXRoIHRoZSBhc3luYyBtZXNzZW5nZXIpLCBidXQgdGhpcyBzdGlsbCBu
-ZWVkcyB0byBiZSBwcm92ZW4uDQo+ID4+DQo+ID4+WWVodWRhDQo+ID4NCj4gPiBJIGFtIHVzaW5n
-IFRDUCB3aXRoIG5ldHdvcmsgc25pZmZlcnMgbGlrZSBXaXJlc2hhcmsgYW5kIHRoaXMgaXMgYWx3
-YXlzIHRoZQ0KPiBjYXNlIHRoYXQgSSBzZWUgaW4gTGludXggIC0gKnNlbmRpbmcgZGF0YSBzb29u
-IGFmdGVyIGNvbm5lY3Qgd2lsbCBhbHdheXMgc2F2ZQ0KPiBwYWNrZXQgYnkgY29tYmluaW5nIHRo
-ZSBBQ0sgZnJvbSB0aGUgbGFzdCBzdGVwIG9mIFRDUCAzLXdheSBoYW5kc2hha2Ugd2l0aA0KPiB0
-aGUgMXN0IGRhdGEgcGFja2V0KiAuDQo+ID4gVGhpcyBpcyB0aGUgY2FzZSBldmVuIHdoZW4gSSBk
-aWQgInNob3J0IiBhY3Rpdml0eSBiZXR3ZWVuIGNvbm5lY3QgYW5kIHNlbmQuDQo+ID4NCj4gPiBT
-bmlmZmVyIHdpbGwgc2hvdyB5b3UgMyBwYWNrZXRzIG9uIHRoZSBzdHJlYW06DQo+ID4gMS4gICAg
-ICBDbGllbnQgc2VuZHMgU1lOIHBhY2tldA0KPiA+IDIuICAgICAgU2VydmVyIHJlcGxpZXMgd2l0
-aCBTWU4tQUNLIHBhY2tldA0KPiA+IDMuICAgICAgQ2xpZW50IHNlbmQgKmRhdGEgcGFja2V0KiB0
-aGF0IGhhdmUgdGhlIEFDSyBmbGFnIHNldCBpbiBpdCAodGhpcyBBQ0sNCj4gY29tcGxldGVzIHRo
-ZSBUQ1AgMy13YXkgaGFuZHNoYWtlIGFuZCBtYWtlcyAnYWNjZXB0JyByZXR1cm4gb24gdGhlIHNl
-cnZlcg0KPiBzaWRlKQ0KPiA+DQo+ID4gc3luY2hyb25vdXMgb3IgYXN5bmNocm9ub3VzIHNvY2tl
-dCBpc24ndCByZWxldmFudCBoZXJlIGJlY2F1c2UgJ2Nvbm5lY3QnDQo+IHJldHVybnMgd2l0aCBz
-dWNjZXNzIHVwb24gcmVjZWl2aW5nIFNZTi1BQ0sgZnJvbSB0aGUgc2VydmVyIHJlZ2FyZGxlc3Mg
-b2YgdGhlDQo+IGFjdHVhbCBjbGllbnQgc2VuZCBvZiB0aGUgVENQIDMtd2F5IGNvbXBsZXRpbmcg
-QUNLIChpLmUuLCB0aGUgY2xpZW50IGFwcGxpY2F0aW9uDQo+IGRvZXNuJ3QgbmVlZCB0aGlzIEFD
-SyBmb3IgcmVseWluZyBvbiB0aGUgc29ja2V0IGFzIGNvbm5lY3RlZCAtIG9ubHkgdGhlIHNlcnZl
-cg0KPiBzaWRlIG5lZWQgaXQpLg0KPiA+DQo+ID4gRnJvbSBteSBleHBlcmllbmNlLCBldmVuIGRp
-c2FibGluZyBuYWdsZSAoVENQX05PREVMQVkpIGRvZXNuJ3QgYWZmZWN0DQo+ID4gdGhpcyBiZWhh
-dmlvciAocHJvYmFibHkgYmVjYXVzZSBUQ1BfTk9ERUxBWSBvbmx5IGFmZmVjdCBzZW5kaW5nICpk
-YXRhKg0KPiA+IGZhc3RlciBidXQgZG9lcyBub3QgY2hhbmdlIFRDUCBoYW5kc2hha2UgYmVoYXZp
-b3IpDQo+IA0KPiBSaWdodC4gSG93ZXZlciwgSSB3YXMgYWltaW5nIGF0IHNlbmRpbmcgdGhlIGRh
-dGEgd2l0aCB0aGUgU1lOLCBub3Qgd2l0aCB0aGUNCj4gQUNLIHRoYXQgZm9sbG93cyBpdCAodHJ5
-aW5nIHRvIGF2b2lkIHRoZSBmaXJzdCByb3VuZHRyaXApLiBJIGFzc3VtZSBpdCdzIG5vdCByZWFs
-bHkNCj4gcG9zc2libGUgd2l0aCB2YW5pbGxhIHRjcC4NCj4gDQo+IFllaHVkYQ0KPiANCkkgdGhp
-bmsgdGhhdCBTYWdlJ3MgaWRlYS9xdWVzdGlvbiB3YXMgdG8gaGF2ZSBmZXdlciBwYWNrZXRzIGFu
-ZCB0byBzcGVlZCB0aGluZ3MgdXAgYnkgaGF2aW5nIHRoZSBjbGllbnQgc3RhcnRpbmcgdGhlIGV4
-Y2hhbmdlIGluc3RlYWQgb2YgaGF2aW5nIHRoZSBzZXJ2ZXIgc3RhcnRpbmcgdGhlIGV4Y2hhbmdl
-Lg0KSGVuY2UsIEkgYW0gc2F5aW5nIC0gWUVTLiAgVGhpcyBpZGVhIGlzIGNvcnJlY3QuICBJdCB3
-aWxsIHNhdmUgb25lIHBhY2tldCBhbmQgaXQgd2lsbCBzYXZlIHRpbWUgb2YgaGFsZiByb3VuZCB0
-cmlwIChpLmUuLCBvbmUgbGVnKSBiZWNhdXNlIHRoZSBjbGllbnQgaXMgYWxsb3dlZCB0byBzZW5k
-IGRhdGEgYWZ0ZXIgMiBsZWdzIG9mIFRDUCAzLXdheSBoYW5kc2hha2U7IHdoaWxlIHRoZSBzZXJ2
-ZXIgbXVzdCB3YWl0IGZvciBjb21wbGV0aW9uIG9mIGFsbCAzIGxlZ3Mgb2YgVENQIDMtd2F5IGhh
-bmRzaGFrZSBiZWZvcmUgc2VuZGluZyBhbnkgZGF0YS4NCkFuZCBJIGFtIHNheWluZyB0aGF0IHRo
-aXMgaXMgdGhlIGJlaGF2aW9yIG9mIHZhbmlsbGEgVENQIHdpdGhvdXQgYW55IHNwZWNpYWwgc2V0
-dGluZ3MuDQoNCklmIHlvdSB3YW50IHRvIHNlbmQgdHJhZmZpYyB3aXRoIHRoZSAxc3QgU1lOIHBh
-Y2tldCB0aGFuIGl0IHNvdW5kcyBhIGJpdCBzdHJhbmdlIGV2ZW4gZm9yIG5vbi12YW5pbGxhIFRD
-UC4gIEJlY2F1c2UgdGhlIGNsaWVudCBkb2Vzbid0IGV2ZW4ga25vdyB0aGF0IHRoZSBzZXJ2ZXIg
-aXMgYWxpdmUgYXQgdGhpcyBwaGFzZSwgYW5kIHRoZSBzZXJ2ZXIgZG9lc24ndCBrbm93IHRoYXQg
-dGhlIGNsaWVudCBpcyBsZWdpdGltYXRlIGF0IHRoaXMgcGhhc2UuICBUaGlzIHdpbGwgYWxzbyBw
-cm9iYWJseSBleHBvc2UgeW91ciBzZXJ2ZXIgdG8gc2VjdXJpdHkgaXNzdWUgdGhhdCBpcyBjYWxs
-ZWQgU1lOIGF0dGFjaywgYmVjYXVzZSBzZXJ2ZXJzIGFyZSBhZnJhaWQgb2YgYWxsb2NhdGluZyBj
-b25uZWN0aW9uIHJlc291cmNlcyBqdXN0IGZvciBTWU4gcGFja2V0cyAoYmVjYXVzZSB0aGUgc3Jj
-IGlwL3BvcnQgY2FuIGJlIGZpY3RpdGlvdXMgYXQgdGhpcyBwaGFzZSBiZWZvcmUgdGhlIGNsaWVu
-dCB1c2VkIHRoZSBzZXJ2ZXIncyByZXBseSkNCg0KQXZuZXINCg==
+So, if I'm right, we need now a submodule, which is a fork of isa-l
+repo: https://github.com/01org/isa-l
+And then I'll can use it in my code, shown above, instead of copy of
+isa-l files, as I do it now, and problem with asm files compilation
+I'll solve via make and cmake files. Also this can be done in
+erasure-code plugin.
+In this case, who can help me with submodule creation? What procedure
+is needed here? Thanks!
+-------------------------------
+Best regards,
+Alyona Kiseleva
+
+
+On Tue, Jun 28, 2016 at 10:38 PM, Ali Maredia <amaredia@redhat.com> wrote:
+> Alyona & Sage,
+>
+> I'm a little unclear on what wants to be accomplished.
+>
+> From what I understand we would add a new submodule, which is a fork of the original, that has the asm files renamed to asm.s.
+>
+> Would we need to make ISA-L build with CMake?
+>
+> That being said CMake should be able to handle it without any issues.
+>
+> I'd be glad to help out with any CMake the integration process/issues/questions for the new submodule.
+>
+> -Ali
+>
+> ----- Original Message -----
+> From: "Sage Weil" <sage@newdream.net>
+> To: "Alyona Kiselyova" <akiselyova@mirantis.com>
+> Cc: "Haomai Wang" <haomai@xsky.com>, ceph-devel@vger.kernel.org
+> Sent: Tuesday, June 28, 2016 10:17:31 AM
+> Subject: Re: How to propose plugin, which uses external lib
+>
+> On Tue, 28 Jun 2016, Alyona Kiselyova wrote:
+>> In this case I would like to propose isa-l extension for zlib plugin -
+>> https://github.com/ceph/ceph/compare/master...Ved-vampir:zlib_isal_extension?expand=1
+>> I think, it would be better to choose plugin type based on processor
+>> type, this variant is used in branch. To add tuned option on the step
+>> of plugin loading is possible too, but here we can get an assert in
+>> case, if processor type is not compatible. Or it will be better
+>> nevertheless to keep this option and leave error treatment for plugin
+>> user?
+>
+> You mean in the case where the user set zlib_use_isal=true but the
+> processor doesn't have the right features?  In that case we could just
+> ignore the option and fall back.
+>
+> But what you have here looks fine to me.
+>
+> Could you perhaps add a unit test that takes some random data
+> (/dev/urandom maybe?) and compresses without isal and decompressed
+> with, and the other way around, so we have confidence they are
+> bit-compatible?
+>
+>> About isa-l lib files. The only change, that I made to them, is
+>> renaming asm files to asm.s, but I suspect this restriction can be
+>> bypassed by some options in make/cmake files? In this way I think it
+>> would be better to create submodule repo for isa-l lib, because I'm
+>> still thinking, that just making a copy is not a very good way.
+>
+> Yeah, I'm happy to go the submodule route.  I expect making cmake handle
+> it is doable... Ali?
+>
+> sage
+>
+>
+>
+>> -------------------------------
+>> Best regards,
+>> Alyona Kiseleva
+>>
+>>
+>> On Fri, Jun 17, 2016 at 7:47 PM, Sage Weil <sage@newdream.net> wrote:
+>> > On Sat, 18 Jun 2016, Haomai Wang wrote:
+>> >> Cool, I guess it should be behavior better than others in intel platform.
+>> >>
+>> >> On Fri, Jun 17, 2016 at 11:51 PM, Alyona Kiselyova
+>> >> <akiselyova@mirantis.com> wrote:
+>> >> > Hi,
+>> >> > I would like to propose a new compression plugin, which is based on
+>> >> > Isa-l open source library
+>> >> > (https://github.com/01org/isa-l/tree/master/igzip). I already have a
+>> >> > code - https://github.com/Ved-vampir/ceph/tree/wip_isal_plugin/src/compressor/isal.
+>> >> > I see, that there are erasure-code plugin, based on isa-l too. As I
+>> >> > see, library code is not loaded as submodule repo, like some others.
+>> >
+>> > In this case, I assume the inflate/deflate encoding is compatible with
+>> > zlib.  If that's the case, I think we don't want to treat this as a
+>> > different compression type, but rather as an optimized
+>> > implementation of the same type.
+>> >
+>> > Not sure the best way to do that, though.  The simplest would probably be
+>> > to make the ZlibCompressor either use zlib or isal based on an option
+>> > and/or processor type.
+>> >
+>> >> > But if I'm right, I think, it's not the best way to use external code.
+>> >>
+>> >> Sorry, why it's not a best way?
+>> >>
+>> >> > The question is, what is the right way to use external library in my case?
+>> >>
+>> >> I think maybe we could make the whole
+>> >> repo(https://github.com/01org/isa-l) as submodule and make each dir
+>> >> used by different compoent?
+>> >
+>> > In the crc case we just copied the relevant asm files into the ceph repo.
+>> > That's probably not the best path, though.  I think we had to make some
+>> > minor changes to make them build, too.  :/
+>> >
+>> > sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
