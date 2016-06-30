@@ -1,68 +1,207 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: About thread_local and TmapMigratePP.DataScan case
-Date: Thu, 30 Jun 2016 10:16:36 +0800
-Message-ID: <CACJqLyZ64uMF=JrXOyUQQa_YOz+PB=ybKwHLd4sgOy7z=p7E7g@mail.gmail.com>
-References: <CACJqLybSUa6WtfcvXa5W4AAXJUgEBDPX2Mo+nd3SDeLkHVgDwA@mail.gmail.com>
- <CAAM7YAm6uPjm_aY0Upw7qjCc0b4PRQZisu-K73ZQEu7TCKUodQ@mail.gmail.com>
+From: Sebastien Ponce <sebastien.ponce@cern.ch>
+Subject: Re: libradosstriper
+Date: Thu, 30 Jun 2016 09:47:40 +0200
+Message-ID: <1467272860.390.5.camel@cern.ch>
+References: <alpine.DEB.2.11.1606272216370.7088@piezo.us.to>
+	 <CAN=+7FVmmgAuVF6cjwvGdyAU4YEXr8jLX-qiNjH50w6_YMs02g@mail.gmail.com>
+	 <1467084445.32200.8.camel@cern.ch>
+	 <CAN=+7FXrt6Y=TPRRdjkXZathXXKneV0eqT5VA6hQ5LOrxKoF3Q@mail.gmail.com>
+	 <1467212620.603.13.camel@cern.ch>
+	 <CAN=+7FWi1pMFa-=fYYiaaNNyaKmm_8E8dbQOOdOwdTz5n8x34A@mail.gmail.com>
+	 <1467215067.603.20.camel@cern.ch>
+	 <CAN=+7FXwB45kLA+W7U_cyWkEOtykGpuYXXGv2Xh9wkBo_sXLMQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-os2jpn01on0134.outbound.protection.outlook.com ([104.47.92.134]:5536
-	"EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
+Received: from mail-am1on0074.outbound.protection.outlook.com ([157.56.112.74]:41568
+	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751483AbcF3CQw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 29 Jun 2016 22:16:52 -0400
-Received: by mail-vk0-f42.google.com with SMTP id k68so4482853vkb.0
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Jun 2016 19:16:46 -0700 (PDT)
-In-Reply-To: <CAAM7YAm6uPjm_aY0Upw7qjCc0b4PRQZisu-K73ZQEu7TCKUodQ@mail.gmail.com>
+	id S1751621AbcF3IDv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Jun 2016 04:03:51 -0400
+In-Reply-To: <CAN=+7FXwB45kLA+W7U_cyWkEOtykGpuYXXGv2Xh9wkBo_sXLMQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>
+Cc: "Weil, Sage" <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-On Thu, Jun 30, 2016 at 10:13 AM, Yan, Zheng <ukernel@gmail.com> wrote:
-> On Tue, Jun 28, 2016 at 2:04 AM, Haomai Wang <haomai@xsky.com> wrote:
->> Hi all,
->>
->> anyone who knows what's the special thing with TmapMigratePP.DataScan
->> case. When I introduce thread_local variable in
->> PR(https://github.com/ceph/ceph/pull/9783/files#diff-254a8401d238ec25c714a5596f85b5ebL64),
->> it always failed because the thread local variable is assigned to zero
->> when execute this test!
->>
->
-> thread_local is not portable. In your case, using thread_local
-> variable is not necessary, you can use pthread_self() directly.
->
-> As I know pthread_self() return 0 if the program isn't linked to libpthread.so
->
+I would even use the same pool, as this is perfectly allowed. Will look=
+ at this next week.
 
-yes, I have changed to pthread_self
+On another topic, I've just created a pull request for the improvements=
+ done on librados and libradosstriper around async calls :=C2=A0https:/=
+/github.com/ceph/ceph/pull/10049. Could somebody review it ?
 
->
->> For example, when tid == 512596224 local_center should be 5fed4e48,
->> but after begin this test case, this thread_local variable is assigned
->> to zero!:
->> tid=-512596224 local_center=5fed4e48 this=5fed4e48
->> [New Thread 0x7fffdef21700 (LWP 11835)]
->> tid=-512596224 local_center=5fed4e48 this=5fed4e48
->> [New Thread 0x7fffde720700 (LWP 11836)]
->> [New Thread 0x7fffddf1f700 (LWP 11837)]
->> [New Thread 0x7fffdd71e700 (LWP 11838)]
->> [New Thread 0x7fffdcf1d700 (LWP 11839)]
->> [New Thread 0x7fffdc71c700 (LWP 11840)]
->> [New Thread 0x7fffdbf1b700 (LWP 11841)]
->> tid=-134366272 local_center=0 this=5fed4e48
->> tid=-134366272 local_center=0 this=5fed4e48
->> tid=-134366272 local_center=0 this=5fed4e48
->> tid=-512596224 local_center=0 this=5fed4e48
->>
->>
->> QA job:http://qa-proxy.ceph.com/teuthology/haomai-2016-06-27_03:55:04-rados-wip-haomai-testing---basic-smithi/279412/teuthology.log
->>
->> This can be repeated locally and I want to know what's the difference
->> this case introduced
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Also, I've added tests for the new calls, tried them and noticed that s=
+ome tests of the rados test suite concerning writesame are failing righ=
+t now.
+
+Sebastien
+
+
+On Wed, 2016-06-29 at 10:16 -0700, Samuel Just wrote:
+> Makes sense.=C2=A0 I guess they'd have to pull from distinct name poo=
+ls?
+> -Sam
+> On Jun 29, 2016 8:45 AM, "Sebastien Ponce" <sebastien.ponce@cern.ch>
+> wrote:
+> > Oh I see, I did not know this one indeed.
+> > I used the flag approach for the rados command line and it was
+> > really
+> > easy, as the API is identical, you only have to use a Striper
+> > object
+> > instead of an IOContext.
+> > Now looking at the RadosModel class, I see that the user API (like
+> > read/write/aio_read,...) is almost not used. Almost everything goes
+> > through the aio_operate calls wich are not present in Striper.
+> > So I believe the simplest would be to add a couple of=C2=A0TestOpTy=
+pe,
+> > namely 5 of them :
+> > TEST_OP_READ/WRITE/DELETE/SETXATTR/RMXATTR_STRIPER
+> > and implement the corresponding classes inheriting from TestOp.
+> > This would also have the advantage to mix striped and regular
+> > objects
+> > in the test, which is absolutely valid and thus should be tested.
+> >=20
+> > Sebastien
+> >=20
+> >=20
+> > On Wed, 2016-06-29 at 08:30 -0700, Samuel Just wrote:
+> > > Ah, sorry.=C2=A0=C2=A0See src/test/osd/RadosModel.* and
+> > > src/test/osd/TestRados.cc.=C2=A0=C2=A0It's gotten to be a somewha=
+t kludgy
+> > mess,
+> > > but it's a really valuable stress test for verifying that the osd
+> > and
+> > > librados are behaving properly, especially when combined with
+> > failure
+> > > injection and osd thrashing.=C2=A0=C2=A0I'd like to either create=
+ a (less
+> > > kludgy, I can only hope) seperate version for librados striper,
+> > or
+> > > add
+> > > a flag to the existing one which causes it to use the striper
+> > instead
+> > > (and only allows ops where it makes sense).=C2=A0=C2=A0libradosst=
+riper
+> > should
+> > > have the same ordering properties for piplined writes as normal
+> > > librados (right?), so modifying the existing test would probably
+> > get
+> > > us the most coverage for the least effort.
+> > > -Sam
+> > >
+> > > On Wed, Jun 29, 2016 at 8:03 AM, Sebastien Ponce
+> > > <sebastien.ponce@cern.ch> wrote:
+> > > >
+> > > > Well, I'm not sure what you are exactly looking for : I see now
+> > > > that I
+> > > > look more carefully that there is a file called ceph_test_rados
+> > > > that
+> > > > looks like a wrapper around the ceph_test_rados_* tests.
+> > > > The equivalent does not seem to exist for striper (although the
+> > > > same
+> > > > wrapper would probably work), but the ceph_test_rados_striper_*
+> > > > tests
+> > > > do exist.
+> > > > Should we/I create a wrapper for striper ? I'm not sure I have
+> > the
+> > > > whole understanding of the structure of the whole test
+> > system...
+> > > >
+> > > > Sebastien
+> > > >
+> > > >
+> > > > On Tue, 2016-06-28 at 09:07 -0700, Samuel Just wrote:
+> > > > >
+> > > > > I don't remember anything like ceph_test_rados which uses
+> > > > > libradosstriper.=C2=A0=C2=A0Did I miss it?
+> > > > > -Sam
+> > > > >
+> > > > > On Mon, Jun 27, 2016 at 8:27 PM, Sebastien Ponce
+> > > > > <sebastien.ponce@cern.ch> wrote:
+> > > > > >
+> > > > > >
+> > > > > > Would be great indeed. As it's already there, it can be
+> > done
+> > > > > > already
+> > > > > > now.
+> > > > > >
+> > > > > > Sebastien
+> > > > > >
+> > > > > > On Mon, 2016-06-27 at 15:25 -0700, Samuel Just wrote:
+> > > > > > >
+> > > > > > >
+> > > > > > > The something like ceph_test_rados could then be wired
+> > into
+> > > > > > > ceph-qa-suite to be tested with osd thrashing to ensure
+> > that
+> > > > > > > ordering
+> > > > > > > works and continues to work as expected.
+> > > > > > > -Sam
+> > > > > > >
+> > > > > > > On Mon, Jun 27, 2016 at 3:18 PM, Sage Weil <sweil@redhat.
+> > com>
+> > > > > > > wrote:
+> > > > > > > >
+> > > > > > > >
+> > > > > > > >
+> > > > > > > > Hi Sebastien,
+> > > > > > > >
+> > > > > > > > Do you mind updating us on the current status of
+> > > > > > > > libradosstriper?=C2=A0=C2=A0Where
+> > > > > > > > does it stand feature-wise with what you need, how are
+> > you
+> > > > > > > > currently using
+> > > > > > > > it or how do you plan to use it, and what is still
+> > missing?
+> > > > > > > >
+> > > > > > > > Also, one thing we really want to see is test coverage
+> > for
+> > > > > > > > the
+> > > > > > > > code
+> > > > > > > > so
+> > > > > > > > that we can comfortably point users toward it.=C2=A0=C2=
+=A0This
+> > > > > > > > ideally
+> > > > > > > > would
+> > > > > > > > look
+> > > > > > > > something like the ceph_test_rados_api_* tests that
+> > verify
+> > > > > > > > individual
+> > > > > > > > operations behave as expected, and/or something like
+> > > > > > > > ceph_test_rados that
+> > > > > > > > throws random operations at is and verifies it returns
+> > > > > > > > correct
+> > > > > > > > results
+> > > > > > > > that match its in-memory model.
+> > > > > > > >
+> > > > > > > > Thanks!
+> > > > > > > > sage
+> > > > > > > > --
+> > > > > > > > To unsubscribe from this list: send the line
+> > "unsubscribe
+> > > > > > > > ceph-
+> > > > > > > > devel" in
+> > > > > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > > > > More majordomo info at=C2=A0=C2=A0http://vger.kernel.or=
+g/majordom
+> > o-in
+> > > > > > > > fo.h
+> > > > > > > > tml
+> > > > > --
+> > > > > To unsubscribe from this list: send the line "unsubscribe
+> > ceph-
+> > > > > devel"
+> > > > > in
+> > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > More majordomo info at=C2=A0=C2=A0http://vger.kernel.org/majo=
+rdomo-info
+> > .htm
+> > > > > l
+> >=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
