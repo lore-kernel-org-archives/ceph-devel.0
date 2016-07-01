@@ -1,154 +1,41 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: master build failing
-Date: Fri, 1 Jul 2016 01:42:55 +0000
-Message-ID: <BL2PR02MB211512FF3BC9C16180914D73F4250@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <CY1PR0201MB18209702FEAD607B802AC66985530@CY1PR0201MB1820.namprd02.prod.outlook.com>
- <CAJE9aOP9ZF5NMHchpTy_dzwLTaTjjxbpdU0MSGJ_iKfNdX+PQg@mail.gmail.com>
- <D39AD750.FBEB%evgeniy.firsov@sandisk.com>
- <0b9ea189-c626-988d-3dd1-6af384b9ca16@redhat.com>
- <57759E2C.1050301@redhat.com>
+From: Zhangzengran <zhangzengran@h3c.com>
+Subject: libaio parallel
+Date: Fri, 1 Jul 2016 02:00:31 +0000
+Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB23D89B91@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0088.outbound.protection.outlook.com ([104.47.36.88]:26160
-	"EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+Received: from smtp.h3c.com ([60.191.123.56]:3789 "EHLO h3cmg01-ex.h3c.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751793AbcGAB57 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2016 21:57:59 -0400
-In-Reply-To: <57759E2C.1050301@redhat.com>
-Content-Language: en-US
+	id S1752053AbcGACAo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Jun 2016 22:00:44 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dmick@redhat.com>, Mark Nelson <mnelson@redhat.com>, Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>, kefu chai <tchaikov@gmail.com>, Ramesh Chander <Ramesh.Chander@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, dl-storm-dev <dl-storm-dev@sandisk.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-How do I build ceph now with cmake conditionally with tcmalloc/jemalloc/rocksdb etc. ?
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Dan Mick
-Sent: Thursday, June 30, 2016 3:33 PM
-To: Mark Nelson; Evgeniy Firsov; kefu chai; Ramesh Chander
-Cc: ceph-devel; dl-storm-dev
-Subject: Re: master build failing
-
-"do_cmake.sh" can automate some of that
-
-On 06/30/2016 03:04 PM, Mark Nelson wrote:
-> If you are inclined, it's probably worth switching over to cmake at
-> this point.  I suspect the automake stuff is going to get crufty
-> pretty fast now that folks are switching over en mass.  I switched a
-> couple of days ago and after working out a couple of bugs it's working really well.
->
-> git clean -fdx
-> mkdir build; cd build
-> cmake ..
-> make -j $(nproc)
-> sudo make install
->
-> Mark
->
-> On 06/30/2016 04:05 PM, Evgeniy Firsov wrote:
->> Same error for me.
->> This is automake, jemalloc is installed.
->>
->> On 6/14/16, 1:30 AM, "ceph-devel-owner@vger.kernel.org on behalf of
->> kefu chai" <ceph-devel-owner@vger.kernel.org on behalf of
->> tchaikov@gmail.com>
->> wrote:
->>
->>> On Tue, Jun 14, 2016 at 2:09 AM, Ramesh Chander
->>> <Ramesh.Chander@sandisk.com> wrote:
->>>> Getting these linker errors:
->>>>
->>>>
->>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/d
->>>> b_impl
->>>>
->>>> .cc:583: undefined reference to `malloc_stats_print'
->>>> collect2: error: ld returned 1 exit status
->>>> make[3]: *** [ceph_test_objectstore_workloadgen] Error 1
->>>> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
->>>>
->>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/d
->>>> b_impl
->>>>
->>>> .cc:583: undefined reference to `malloc_stats_print'
->>>> collect2: error: ld returned 1 exit status
->>>> make[3]: *** [ceph_test_objectstore] Error 1
->>>> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
->>>>
->>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/d
->>>> b_impl
->>>>
->>>> .cc:583: undefined reference to `malloc_stats_print'
->>>> collect2: error: ld returned 1 exit status
->>>> make[3]: *** [ceph_xattr_bench] Error 1
->>>> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
->>>>
->>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/d
->>>> b_impl
->>>>
->>>> .cc:583: undefined reference to `malloc_stats_print'
->>>> collect2: error: ld returned 1 exit status
->>>> make[3]: *** [ceph_test_filejournal] Error 1
->>>>
->>>> last time Mark did something to fix it.
->>>>
->>>> I tried make clean in rocksdb directory as well, still same error.
->>>
->>> did you uninstall jemalloc after configure or cmake? maybe you can
->>> check the make_config.mk under rocksdb directory? are you using
->>> cmake or automake?
->>>
->>>
->>>>
->>>> -Ramesh Chander
->>>> PLEASE NOTE: The information contained in this electronic mail
->>>> message is intended only for the use of the designated recipient(s)
->>>> named above.
->>>> If the reader of this message is not the intended recipient, you
->>>> are hereby notified that you have received this message in error
->>>> and that any review, dissemination, distribution, or copying of
->>>> this message is strictly prohibited. If you have received this
->>>> communication in error, please notify the sender by telephone or
->>>> e-mail (as shown above) immediately and destroy any and all copies
->>>> of this message in your possession (whether hard copies or electronically stored copies).
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe
->>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>> --
->>> Regards
->>> Kefu Chai
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe
->>> ceph-devel" in the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->> PLEASE NOTE: The information contained in this electronic mail
->> message is intended only for the use of the designated recipient(s)
->> named above. If the reader of this message is not the intended
->> recipient, you are hereby notified that you have received this
->> message in error and that any review, dissemination, distribution, or
->> copying of this message is strictly prohibited. If you have received
->> this communication in error, please notify the sender by telephone or
->> e-mail (as shown above) immediately and destroy any and all copies of
->> this message in your possession (whether hard copies or
->> electronically stored copies).
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in the body of a message to majordomo@vger.kernel.org More majordomo
-> info at  http://vger.kernel.org/majordomo-info.html
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+SGksIGFsbDoNCiAgICAgICAgIFJlY2VudGx5IHdlIGZvdW5kIHRoYXQsIHdoZW4gcnVubmluZyBm
+aW8gd2l0aCBpb2VuZ2luZT1saWJhaW8gb24gb25lIGNsdXN0ZXIgbm9kZSAsIHNvbWUgb3BzIHdp
+bGwgYmVjb21lIHNsb3cgcXVlc3QgaWYgdGhlIGlvZGVwdGggaXMgbGFyZ2UgZW5vdWdoLg0KV2Ug
+dHJhY2sgdGhlIGxvZyAsZm91bmQgdGhhdCB0aGUgc2xvdyBxdWVzdCBibG9ja2VkIHRvbyBsb25n
+IHdoZW4gdGhlIGpvdXJuYWwgZW50cnkgd3JpdGVuIHdpdGggaW9fc3VibWl0Lg0KICAgICAgICAg
+SXMgaXQgYSBwcm9ibGVtIG9mIGxpYmFpbyBwYXJhbGxlbD8gVGhhbmsgeW91IQ0KLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLQ0K5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa5L+h
+5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK
+6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQrnmoTkuKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbk
+u5bkurrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbp
+g6jliIblnLDms4TpnLLjgIHlpI3liLbjgIENCuaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/
+oeaBr+OAguWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaI
+lumCruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0K6YKu5Lu277yBDQpUaGlzIGUtbWFp
+bCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZy
+b20gSDNDLCB3aGljaCBpcw0KaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkg
+d2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhlDQppbmZvcm1hdGlv
+biBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVk
+IHRvLCB0b3RhbCBvciBwYXJ0aWFsDQpkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3Nl
+bWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCnJlY2lwaWVudChz
+KSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgcGxl
+YXNlIG5vdGlmeSB0aGUgc2VuZGVyDQpieSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQg
+ZGVsZXRlIGl0IQ0K
