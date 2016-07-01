@@ -1,145 +1,29 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: SIGTERM and osd close
-Date: Fri, 1 Jul 2016 14:01:31 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1607011400020.31398@piezo.us.to>
-References: <CY1PR0201MB182059A3B8115A640EB69BA985240@CY1PR0201MB1820.namprd02.prod.outlook.com> <BL2PR02MB2115AA87DE1F8A1929FB6887F4240@BL2PR02MB2115.namprd02.prod.outlook.com> <CAF-wwdHru3O3OPNrsB-GRTiGYFBueGU_ya=H38sGG7zZjqCvWw@mail.gmail.com>
- <CY1PR0201MB1820403A983D116EA80C273085250@CY1PR0201MB1820.namprd02.prod.outlook.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: libaio parallel
+Date: Fri, 1 Jul 2016 14:20:04 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1607011419000.31398@piezo.us.to>
+References: <7BD28126D6935A4498AE6DE60B5D4CAB23D89B91@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-2083117381-1467381693=:31398"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57350 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752443AbcGAOBe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 1 Jul 2016 10:01:34 -0400
-In-Reply-To: <CY1PR0201MB1820403A983D116EA80C273085250@CY1PR0201MB1820.namprd02.prod.outlook.com>
+Received: from cobra.newdream.net ([66.33.216.30]:52829 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752652AbcGAOUQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jul 2016 10:20:16 -0400
+In-Reply-To: <7BD28126D6935A4498AE6DE60B5D4CAB23D89B91@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ramesh Chander <Ramesh.Chander@sandisk.com>
-Cc: Brad Hubbard <bhubbard@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Zhangzengran <zhangzengran@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Fri, 1 Jul 2016, Zhangzengran wrote:
+> Hi, all:
+>          Recently we found that, when running fio with ioengine=libaio on one cluster node , some ops will become slow quest if the iodepth is large enough.
+> We track the log ,found that the slow quest blocked too long when the journal entry writen with io_submit.
+>          Is it a problem of libaio parallel? Thank you!
 
---8323329-2083117381-1467381693=:31398
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-
-On Fri, 1 Jul 2016, Ramesh Chander wrote:
-> Thank you all for reply,
-> 
-> Brad,
-> 
-> I should trace the code path you pointed out.
-
-In this case, the important bit is BlueFS::umount(), which calls 
-BlueFS::_stop_alloc().  BlueStore::_close_db() should be calling 
-bluefs->umount().  Any of the unit tests should be triggering these code 
-paths.
+How deep is the queue depth?  And where are you seeing the slow requests?  
+At some point you will just saturate the OSDs and latency will go up, but 
+it should take a lot of requests for that to happen.
 
 sage
-
-
-> 
-> -Regards,
-> Ramesh
-> 
-> > -----Original Message-----
-> > From: Brad Hubbard [mailto:bhubbard@redhat.com]
-> > Sent: Friday, July 01, 2016 3:48 AM
-> > To: Somnath Roy
-> > Cc: Ramesh Chander; ceph-devel@vger.kernel.org
-> > Subject: Re: SIGTERM and osd close
-> >
-> > On Fri, Jul 1, 2016 at 4:44 AM, Somnath Roy <Somnath.Roy@sandisk.com>
-> > wrote:
-> > > You need to call it from BlueStore::umount() I guess for cleanup work..
-> > >
-> > > -----Original Message-----
-> > > From: ceph-devel-owner@vger.kernel.org
-> > > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Ramesh
-> > Chander
-> > > Sent: Thursday, June 30, 2016 8:46 AM
-> > > To: ceph-devel@vger.kernel.org
-> > > Subject: SIGTERM and osd close
-> > >
-> > > Hi All,
-> > >
-> > > When I use stop.sh without any argument, I suppose it calls pkill with
-> > SIGTERM on osds as well as other processes.
-> >
-> > 616   // install signal handlers
-> > 617   init_async_signal_handler();
-> > 618   register_async_signal_handler(SIGHUP, sighup_handler);
-> > 619   register_async_signal_handler_oneshot(SIGINT, handle_osd_signal);
-> > 620   register_async_signal_handler_oneshot(SIGTERM, handle_osd_signal);
-> >
-> >  65 void handle_osd_signal(int signum)
-> >  66 {
-> >  67   if (osd)
-> >  68     osd->handle_signal(signum);
-> >  69 }
-> >
-> > 1735 void OSD::handle_signal(int signum)
-> > 1736 {
-> > 1737   assert(signum == SIGINT || signum == SIGTERM);
-> > 1738   derr << "*** Got signal " << sig_str(signum) << " ***" << dendl;
-> > 1739   shutdown();
-> > 1740 }
-> >
-> > 2598 int OSD::shutdown()
-> > 2599 {
-> >
-> > OSD::shutdown() in src/osd/OSD.cc is quite a large function that performs
-> > quite a bit of clean up such as draining and shutting down thread pool work
-> > queues, shutting down messenger instances, un-registering admin
-> > commands, shutting down the PGs, flushing outstanding ops, updating the
-> > superblock and unmounting the filestore (as Somnath mentioned this might
-> > be where you want to look), shutting down the MON client and clearing the
-> > peering work queue, in no particular order.
-> >
-> > So there is no doubt the OSD (and other daemons such as MON and MDS)
-> > intercepts this signal and performs a graceful shutdown including many
-> > housekeeping tasks.
-> >
-> > HTH,
-> > Brad
-> >
-> > >
-> > > Does osd handle this signal and take care of closing all components?
-> > >
-> > > I am specifically interested in if it closes objectstore -> keyvaluedb .
-> > >
-> > > I don't see my code of keyvaluedb shutdown/close being called when I
-> > > do ./stop.sh
-> > >
-> > > Any argument or way to force this?
-> > >
-> > > -Ramesh
-> > > PLEASE NOTE: The information contained in this electronic mail message is
-> > intended only for the use of the designated recipient(s) named above. If the
-> > reader of this message is not the intended recipient, you are hereby notified
-> > that you have received this message in error and that any review,
-> > dissemination, distribution, or copying of this message is strictly prohibited. If
-> > you have received this communication in error, please notify the sender by
-> > telephone or e-mail (as shown above) immediately and destroy any and all
-> > copies of this message in your possession (whether hard copies or
-> > electronically stored copies).
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > in the body of a message to majordomo@vger.kernel.org More
-> > majordomo
-> > > info at  http://vger.kernel.org/majordomo-info.html
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > in the body of a message to majordomo@vger.kernel.org More
-> > majordomo
-> > > info at  http://vger.kernel.org/majordomo-info.html
-> >
-> >
-> >
-> > --
-> > Cheers,
-> > Brad
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> N?????r??y??????X??ǧv???)޺{.n?????z?]z????ay?ʇڙ??j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
---8323329-2083117381-1467381693=:31398--
