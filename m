@@ -1,109 +1,154 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: master build failing
-Date: Thu, 30 Jun 2016 22:04:15 +0000
-Message-ID: <BL2PR02MB2115AFA6B239598DA2EE8980F4240@BL2PR02MB2115.namprd02.prod.outlook.com>
+Date: Fri, 1 Jul 2016 01:42:55 +0000
+Message-ID: <BL2PR02MB211512FF3BC9C16180914D73F4250@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <CY1PR0201MB18209702FEAD607B802AC66985530@CY1PR0201MB1820.namprd02.prod.outlook.com>
  <CAJE9aOP9ZF5NMHchpTy_dzwLTaTjjxbpdU0MSGJ_iKfNdX+PQg@mail.gmail.com>
  <D39AD750.FBEB%evgeniy.firsov@sandisk.com>
+ <0b9ea189-c626-988d-3dd1-6af384b9ca16@redhat.com>
+ <57759E2C.1050301@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0055.outbound.protection.outlook.com ([104.47.37.55]:65038
-	"EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+Received: from mail-sn1nam02on0088.outbound.protection.outlook.com ([104.47.36.88]:26160
+	"EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752057AbcF3Xi0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2016 19:38:26 -0400
-In-Reply-To: <D39AD750.FBEB%evgeniy.firsov@sandisk.com>
+	id S1751793AbcGAB57 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2016 21:57:59 -0400
+In-Reply-To: <57759E2C.1050301@redhat.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>, kefu chai <tchaikov@gmail.com>, Ramesh Chander <Ramesh.Chander@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>, dl-storm-dev <dl-storm-dev@sandisk.com>
+To: Dan Mick <dmick@redhat.com>, Mark Nelson <mnelson@redhat.com>, Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>, kefu chai <tchaikov@gmail.com>, Ramesh Chander <Ramesh.Chander@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, dl-storm-dev <dl-storm-dev@sandisk.com>
 
-This is happening with jemalloc enabled build and not with tcmalloc. Wondering the jemalloc version we are using supports malloc_stats_print , Ubuntu still ships jemalloc version 3.6..
-
-Thanks & Regards
-Somnath
+How do I build ceph now with cmake conditionally with tcmalloc/jemalloc/rocksdb etc. ?
 
 -----Original Message-----
-From: Evgeniy Firsov
-Sent: Thursday, June 30, 2016 2:05 PM
-To: kefu chai; Ramesh Chander
-Cc: ceph-devel; Mark Nelson (mnelson@redhat.com); dl-storm-dev
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Dan Mick
+Sent: Thursday, June 30, 2016 3:33 PM
+To: Mark Nelson; Evgeniy Firsov; kefu chai; Ramesh Chander
+Cc: ceph-devel; dl-storm-dev
 Subject: Re: master build failing
 
-Same error for me.
-This is automake, jemalloc is installed.
+"do_cmake.sh" can automate some of that
 
-On 6/14/16, 1:30 AM, "ceph-devel-owner@vger.kernel.org on behalf of kefu chai" <ceph-devel-owner@vger.kernel.org on behalf of tchaikov@gmail.com>
-wrote:
-
->On Tue, Jun 14, 2016 at 2:09 AM, Ramesh Chander
-><Ramesh.Chander@sandisk.com> wrote:
->> Getting these linker errors:
->>
->>
->>/root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_i
->>mpl
->>.cc:583: undefined reference to `malloc_stats_print'
->> collect2: error: ld returned 1 exit status
->> make[3]: *** [ceph_test_objectstore_workloadgen] Error 1
->> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
->>
->>/root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_i
->>mpl
->>.cc:583: undefined reference to `malloc_stats_print'
->> collect2: error: ld returned 1 exit status
->> make[3]: *** [ceph_test_objectstore] Error 1
->> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
->>
->>/root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_i
->>mpl
->>.cc:583: undefined reference to `malloc_stats_print'
->> collect2: error: ld returned 1 exit status
->> make[3]: *** [ceph_xattr_bench] Error 1
->> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
->>
->>/root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_i
->>mpl
->>.cc:583: undefined reference to `malloc_stats_print'
->> collect2: error: ld returned 1 exit status
->> make[3]: *** [ceph_test_filejournal] Error 1
->>
->> last time Mark did something to fix it.
->>
->> I tried make clean in rocksdb directory as well, still same error.
+On 06/30/2016 03:04 PM, Mark Nelson wrote:
+> If you are inclined, it's probably worth switching over to cmake at
+> this point.  I suspect the automake stuff is going to get crufty
+> pretty fast now that folks are switching over en mass.  I switched a
+> couple of days ago and after working out a couple of bugs it's working really well.
 >
->did you uninstall jemalloc after configure or cmake? maybe you can
->check the make_config.mk under rocksdb directory? are you using cmake
->or automake?
+> git clean -fdx
+> mkdir build; cd build
+> cmake ..
+> make -j $(nproc)
+> sudo make install
 >
+> Mark
 >
+> On 06/30/2016 04:05 PM, Evgeniy Firsov wrote:
+>> Same error for me.
+>> This is automake, jemalloc is installed.
 >>
->> -Ramesh Chander
+>> On 6/14/16, 1:30 AM, "ceph-devel-owner@vger.kernel.org on behalf of
+>> kefu chai" <ceph-devel-owner@vger.kernel.org on behalf of
+>> tchaikov@gmail.com>
+>> wrote:
+>>
+>>> On Tue, Jun 14, 2016 at 2:09 AM, Ramesh Chander
+>>> <Ramesh.Chander@sandisk.com> wrote:
+>>>> Getting these linker errors:
+>>>>
+>>>>
+>>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/d
+>>>> b_impl
+>>>>
+>>>> .cc:583: undefined reference to `malloc_stats_print'
+>>>> collect2: error: ld returned 1 exit status
+>>>> make[3]: *** [ceph_test_objectstore_workloadgen] Error 1
+>>>> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
+>>>>
+>>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/d
+>>>> b_impl
+>>>>
+>>>> .cc:583: undefined reference to `malloc_stats_print'
+>>>> collect2: error: ld returned 1 exit status
+>>>> make[3]: *** [ceph_test_objectstore] Error 1
+>>>> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
+>>>>
+>>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/d
+>>>> b_impl
+>>>>
+>>>> .cc:583: undefined reference to `malloc_stats_print'
+>>>> collect2: error: ld returned 1 exit status
+>>>> make[3]: *** [ceph_xattr_bench] Error 1
+>>>> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
+>>>>
+>>>> /root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/d
+>>>> b_impl
+>>>>
+>>>> .cc:583: undefined reference to `malloc_stats_print'
+>>>> collect2: error: ld returned 1 exit status
+>>>> make[3]: *** [ceph_test_filejournal] Error 1
+>>>>
+>>>> last time Mark did something to fix it.
+>>>>
+>>>> I tried make clean in rocksdb directory as well, still same error.
+>>>
+>>> did you uninstall jemalloc after configure or cmake? maybe you can
+>>> check the make_config.mk under rocksdb directory? are you using
+>>> cmake or automake?
+>>>
+>>>
+>>>>
+>>>> -Ramesh Chander
+>>>> PLEASE NOTE: The information contained in this electronic mail
+>>>> message is intended only for the use of the designated recipient(s)
+>>>> named above.
+>>>> If the reader of this message is not the intended recipient, you
+>>>> are hereby notified that you have received this message in error
+>>>> and that any review, dissemination, distribution, or copying of
+>>>> this message is strictly prohibited. If you have received this
+>>>> communication in error, please notify the sender by telephone or
+>>>> e-mail (as shown above) immediately and destroy any and all copies
+>>>> of this message in your possession (whether hard copies or electronically stored copies).
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe
+>>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>>
+>>> --
+>>> Regards
+>>> Kefu Chai
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe
+>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 >> PLEASE NOTE: The information contained in this electronic mail
->>message is intended only for the use of the designated recipient(s) named above.
->>If the reader of this message is not the intended recipient, you are
->>hereby notified that you have received this message in error and that
->>any review, dissemination, distribution, or copying of this message is
->>strictly prohibited. If you have received this communication in error,
->>please notify the sender by telephone or e-mail (as shown above)
->>immediately and destroy any and all copies of this message in your
->>possession (whether hard copies or electronically stored copies).
+>> message is intended only for the use of the designated recipient(s)
+>> named above. If the reader of this message is not the intended
+>> recipient, you are hereby notified that you have received this
+>> message in error and that any review, dissemination, distribution, or
+>> copying of this message is strictly prohibited. If you have received
+>> this communication in error, please notify the sender by telephone or
+>> e-mail (as shown above) immediately and destroy any and all copies of
+>> this message in your possession (whether hard copies or
+>> electronically stored copies).
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>in  the body of a message to majordomo@vger.kernel.org  More majordomo
->>info at  http://vger.kernel.org/majordomo-info.html
->
->
->
->--
->Regards
->Kefu Chai
->--
->To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->in the body of a message to majordomo@vger.kernel.org More majordomo
->info at  http://vger.kernel.org/majordomo-info.html
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> in the body of a message to majordomo@vger.kernel.org More majordomo
+> info at  http://vger.kernel.org/majordomo-info.html
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
