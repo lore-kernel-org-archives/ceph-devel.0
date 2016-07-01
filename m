@@ -1,41 +1,63 @@
-From: Zhangzengran <zhangzengran@h3c.com>
-Subject: libaio parallel
-Date: Fri, 1 Jul 2016 02:00:31 +0000
-Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB23D89B91@H3CMLB12-EX.srv.huawei-3com.com>
+From: Xiaoxi Chen <superdebuger@gmail.com>
+Subject: Re: cephfs: status of directory fragmentation and multiple filesystems
+Date: Fri, 1 Jul 2016 10:17:45 +0800
+Message-ID: <CAEYCsV+Nu=6r7+cVTay2exuZSgsPXNK-YnKS3jzvgus-y-NhUQ@mail.gmail.com>
+References: <CA+H5UW0Uu_+GYNq6EKw7GguiL-w3bEv3AKV72APLSbqgkLzS6A@mail.gmail.com>
+ <CAJ4mKGZQ3C8HT=m=0afmEe3tLA=xpxb==VHfKtPpOAgSC-gxPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:3789 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752053AbcGACAo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 30 Jun 2016 22:00:44 -0400
-Content-Language: zh-CN
+Received: from mail-qk0-f181.google.com ([209.85.220.181]:35288 "EHLO
+	mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752375AbcGACRq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2016 22:17:46 -0400
+Received: by mail-qk0-f181.google.com with SMTP id a125so180355329qkc.2
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Jun 2016 19:17:46 -0700 (PDT)
+In-Reply-To: <CAJ4mKGZQ3C8HT=m=0afmEe3tLA=xpxb==VHfKtPpOAgSC-gxPQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Radoslaw Zarzynski <rzarzynski@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-SGksIGFsbDoNCiAgICAgICAgIFJlY2VudGx5IHdlIGZvdW5kIHRoYXQsIHdoZW4gcnVubmluZyBm
-aW8gd2l0aCBpb2VuZ2luZT1saWJhaW8gb24gb25lIGNsdXN0ZXIgbm9kZSAsIHNvbWUgb3BzIHdp
-bGwgYmVjb21lIHNsb3cgcXVlc3QgaWYgdGhlIGlvZGVwdGggaXMgbGFyZ2UgZW5vdWdoLg0KV2Ug
-dHJhY2sgdGhlIGxvZyAsZm91bmQgdGhhdCB0aGUgc2xvdyBxdWVzdCBibG9ja2VkIHRvbyBsb25n
-IHdoZW4gdGhlIGpvdXJuYWwgZW50cnkgd3JpdGVuIHdpdGggaW9fc3VibWl0Lg0KICAgICAgICAg
-SXMgaXQgYSBwcm9ibGVtIG9mIGxpYmFpbyBwYXJhbGxlbD8gVGhhbmsgeW91IQ0KLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLQ0K5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa5L+h
-5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK
-6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQrnmoTkuKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbk
-u5bkurrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbp
-g6jliIblnLDms4TpnLLjgIHlpI3liLbjgIENCuaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/
-oeaBr+OAguWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaI
-lumCruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0K6YKu5Lu277yBDQpUaGlzIGUtbWFp
-bCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZy
-b20gSDNDLCB3aGljaCBpcw0KaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkg
-d2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhlDQppbmZvcm1hdGlv
-biBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVk
-IHRvLCB0b3RhbCBvciBwYXJ0aWFsDQpkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3Nl
-bWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCnJlY2lwaWVudChz
-KSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgcGxl
-YXNlIG5vdGlmeSB0aGUgc2VuZGVyDQpieSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQg
-ZGVsZXRlIGl0IQ0K
+Greg,
+    Would you mind sharing your insight about potential issue of
+multiple FS?  It looks to me like we can separate every component of
+the cluster --- i.e , each FS has its own data pool ,meta pool, and
+even the pools can be mapped to different osds. Seperate MDS nodes so
+they dont  compete for memory .  The only sharing part is Monitor , so
+seems it is simpler than the dir frag and very likely to work ?
+
+     As single MDS can only sustain 1~2 CPU cores and provide less
+than 2000 TPS for most of the operation (tested with mds_log = false ,
+which is the upper bound of performance. op including rename, utime,
+open).  So multi-fs is some kind of *must have* for  one like to
+provide FS service.
+
+Xiaoxi
+
+2016-06-30 1:53 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
+> On Wed, Jun 29, 2016 at 10:47 AM, Radoslaw Zarzynski
+> <rzarzynski@mirantis.com> wrote:
+>> Hello,
+>>
+>> I saw the recent question about having more than 1 active
+>> MDS in a cluster. I would like to ask similar ones but in
+>> the matter of 1) directory fragmentation and 2) running
+>> multiple filesystems within same cluster.
+>>
+>> When those features are expected to be production-ready?
+>> What do we need to achieve this status?
+>
+> These are both all about the QA work of just making sure they're
+> well-tested in the nightlies, and demonstrating that the functionality
+> isn't broken. We're expecting dirfrags to be enabled in Kraken; I
+> don't know if there's a target timeline around multi-fs.
+>
+> There are available tickets in the tracker that basically come out to
+> "demonstrate dirfrags actually get exercised in the nightlies", etc if
+> you're interested in contributing!
+> -Greg
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
