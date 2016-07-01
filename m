@@ -1,107 +1,56 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: master build failing
-Date: Fri, 1 Jul 2016 15:46:35 +0000
-Message-ID: <BL2PR02MB2115F38ACD4D978E4AC4C201F4250@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <CY1PR0201MB18209702FEAD607B802AC66985530@CY1PR0201MB1820.namprd02.prod.outlook.com>
- <CAJE9aOP9ZF5NMHchpTy_dzwLTaTjjxbpdU0MSGJ_iKfNdX+PQg@mail.gmail.com>
- <D39AD750.FBEB%evgeniy.firsov@sandisk.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: static_ptr - making the factory pattern less costly
+Date: Fri, 1 Jul 2016 13:54:16 -0400
+Message-ID: <33128da8-93f8-3c54-4b98-440b1737c873@redhat.com>
+References: <20160629174256.GA5185@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0061.outbound.protection.outlook.com ([104.47.36.61]:23728
-	"EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751523AbcGAQCD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jul 2016 12:02:03 -0400
-In-Reply-To: <D39AD750.FBEB%evgeniy.firsov@sandisk.com>
-Content-Language: en-US
+Received: from mail-qt0-f176.google.com ([209.85.216.176]:35080 "EHLO
+	mail-qt0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752410AbcGASAm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jul 2016 14:00:42 -0400
+Received: by mail-qt0-f176.google.com with SMTP id f89so61385665qtd.2
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Jul 2016 11:00:41 -0700 (PDT)
+In-Reply-To: <20160629174256.GA5185@ultraspiritum.eng.arb.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>, kefu chai <tchaikov@gmail.com>, Ramesh Chander <Ramesh.Chander@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>, dl-storm-dev <dl-storm-dev@sandisk.com>
+To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>, Radoslaw Zarzynski <rzarzynski@mirantis.com>
 
-EF,
-Just checking, ZS_LOG_LEVEL=info will not be logging aggressively ? Shouldn't we give error/warning ?
 
------Original Message-----
-From: Evgeniy Firsov
-Sent: Thursday, June 30, 2016 2:05 PM
-To: kefu chai; Ramesh Chander
-Cc: ceph-devel; Mark Nelson (mnelson@redhat.com); dl-storm-dev
-Subject: Re: master build failing
+On 06/29/2016 01:42 PM, Adam C. Emerson wrote:
+> On 28/06/2016, Radoslaw Zarzynski wrote:
+> [snip]
+>> The owning semantic has been taken from std::unique_ptr.
+> [snip]
+>
+> Since moving or copying the static_ptr is the same as moving or
+> copying the stored object, I think that should be the guideline.
+> The least surprising way to implement things would be:
+>
+> (1) static_ptr<T> is copyable if T is copyable. It is movable if T is
+>      movable. It is nothrow-copyable if T is nothrow-copyable. It is
+>      nothrow-movable if T is nothrow-movable.
+>
+> (2) If S is derived from T, but T is copyable and S is not, attempts
+>      to store S in static_ptr<T> should fail. Same for move. If T is
+>      nothrow-copyable or nothrow-movable and S is not, storing S in T
+>      should fail.
+>
+> That way code written using static_ptr<T> won't have its expectations
+> or exception safety change out from under it.
+>
 
-Same error for me.
-This is automake, jemalloc is installed.
+Agreed for the most part. But as a smart pointer, there's the added 
+distinction of empty/not-empty.
 
-On 6/14/16, 1:30 AM, "ceph-devel-owner@vger.kernel.org on behalf of kefu chai" <ceph-devel-owner@vger.kernel.org on behalf of tchaikov@gmail.com>
-wrote:
+Moves should be supported if T is movable -or- copyable (i.e. move 
+operations are deleted), and should result in the source being empty 
+regardless of whether T is moved or copied.
 
->On Tue, Jun 14, 2016 at 2:09 AM, Ramesh Chander
-><Ramesh.Chander@sandisk.com> wrote:
->> Getting these linker errors:
->>
->>
->>/root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_i
->>mpl
->>.cc:583: undefined reference to `malloc_stats_print'
->> collect2: error: ld returned 1 exit status
->> make[3]: *** [ceph_test_objectstore_workloadgen] Error 1
->> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
->>
->>/root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_i
->>mpl
->>.cc:583: undefined reference to `malloc_stats_print'
->> collect2: error: ld returned 1 exit status
->> make[3]: *** [ceph_test_objectstore] Error 1
->> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
->>
->>/root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_i
->>mpl
->>.cc:583: undefined reference to `malloc_stats_print'
->> collect2: error: ld returned 1 exit status
->> make[3]: *** [ceph_xattr_bench] Error 1
->> rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
->>
->>/root/ram/ram_bkp/ceph/ceph-latest/ceph_unit_issue/src/rocksdb/db/db_i
->>mpl
->>.cc:583: undefined reference to `malloc_stats_print'
->> collect2: error: ld returned 1 exit status
->> make[3]: *** [ceph_test_filejournal] Error 1
->>
->> last time Mark did something to fix it.
->>
->> I tried make clean in rocksdb directory as well, still same error.
->
->did you uninstall jemalloc after configure or cmake? maybe you can
->check the make_config.mk under rocksdb directory? are you using cmake
->or automake?
->
->
->>
->> -Ramesh Chander
->> PLEASE NOTE: The information contained in this electronic mail
->>message is intended only for the use of the designated recipient(s) named above.
->>If the reader of this message is not the intended recipient, you are
->>hereby notified that you have received this message in error and that
->>any review, dissemination, distribution, or copying of this message is
->>strictly prohibited. If you have received this communication in error,
->>please notify the sender by telephone or e-mail (as shown above)
->>immediately and destroy any and all copies of this message in your
->>possession (whether hard copies or electronically stored copies).
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>in  the body of a message to majordomo@vger.kernel.org  More majordomo
->>info at  http://vger.kernel.org/majordomo-info.html
->
->
->
->--
->Regards
->Kefu Chai
->--
->To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->in the body of a message to majordomo@vger.kernel.org More majordomo
->info at  http://vger.kernel.org/majordomo-info.html
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+There's also some ambiguity with respect to construction vs. assignment. 
+If the destination is empty, then a move-assignment would instead result 
+in a move-construct of T. The same goes for copy-assignment. This means 
+that the noexcept specifiers will need to require both 
+nothrow-constructible and nothrow-assignable.
