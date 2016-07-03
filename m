@@ -1,109 +1,82 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Questions for NVRAM+SATA SSDs with Bluestore
-Date: Sat, 2 Jul 2016 22:28:14 -0500
-Message-ID: <71d5d4b4-8515-4ec1-def1-7e713bdb0288@redhat.com>
-References: <CAFNt83a4mnNhO722drHTB_FavwzFfHJpRfCbUg8En2WpRHZWdw@mail.gmail.com>
- <alpine.DEB.2.11.1606271229510.2844@piezo.us.to>
- <CALZt5jyD_pbs4ZTiSvcDS1i1ubvvu=mkF4iQ5F+1fXRtJb7RPA@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: "Tags" for Ceph pools?
+Date: Sun, 3 Jul 2016 10:56:59 +0200 (CEST)
+Message-ID: <1820571474.345.1467536219936@ox.pcextreme.nl>
+References: <20160628195427.bu2idrr25apcundv@suse.de>
+ <CALe9h7eLi7BQNVUUb7yM+pyiV=_QE7Cs4kw0SzZ9U1LkoOu7Pw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54394 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751480AbcGCD2S (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 2 Jul 2016 23:28:18 -0400
-In-Reply-To: <CALZt5jyD_pbs4ZTiSvcDS1i1ubvvu=mkF4iQ5F+1fXRtJb7RPA@mail.gmail.com>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:37929 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750955AbcGCI5H (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Jul 2016 04:57:07 -0400
+In-Reply-To: <CALe9h7eLi7BQNVUUb7yM+pyiV=_QE7Cs4kw0SzZ9U1LkoOu7Pw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ning Yao <zay11022@gmail.com>, Sage Weil <sage@newdream.net>
-Cc: myoungwon oh <ohmyoungwon@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>, Lars Marowsky-Bree <lmb@suse.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Ning,
 
-The metadata issues are well known, see the recent threads and PRs=20
-regarding reducing the onode size.  I think this issue is two-pronged.=20
-We need to do everything we can to reduce the size of the onode (and th=
-e=20
-recent PRs should help significantly).  Beyond that, rocksdb itself=20
-tends to have high write (and read) amp.  We can probably improve thing=
-s=20
-to a certain extent with tuning, but an alternate option is to use=20
-Sandisk's zetascale kvstore.  They are planning on submitting a PR for=20
-their kvstore code soonish.  Zetascale itself is already available and=20
-is open source:
+> Op 28 juni 2016 om 23:20 schreef John Spray <jspray@redhat.com>:
+> 
+> 
+> On Tue, Jun 28, 2016 at 8:54 PM, Lars Marowsky-Bree <lmb@suse.com> wrote:
+> > Hi all,
+> >
+> > silly question time. From a UX perspective, we sometimes need to know
+> > what a specific pool does. We can't always figure it out directly by
+> > looking at the pool - is this used for RBDs? A MDS metadata pool? RGW
+> > buckets?
+> >
+> > Right now, that is all bundled into the naming scheme. Is that the way
+> > to proceed? Is there a recommended/standard naming scheme that tools
+> > could attach to, then?
+> >
+> > We though of storing it in an object in the pool, but, uh, that
+> > obviously doesn't work so well for cache-tiered pools ;-)
+> >
+> > Or should we have metadata about our Ceph entities maintained outside
+> > Ceph, in a separate tooling database?
+> >
+> > Or would there be the chance to somehow store some description
+> > somewhere, like a few k/v, free-form? x-... parameters maybe?
+> >
+> > (Tool suppliers could then agree on common tags, hopefully.)
+> 
+> I've had some thoughts along these lines -- I was thinking it would be
+> nice to have tags on auth IDs so that one could for example save the
+> mapping between the Ceph ID and something outside of ceph.  As Greg
+> mentions, we have the "config-key" interface currently, but it would
+> be kind of nice to be able to do it in a more structured way.
+> 
 
-https://github.com/SanDisk-Open-Source/zetascale
+That would be awesome. Being able to tag a OSD with for example:  bluestore,nvme,ssd,hdd
 
-Ramesh has also recently submitted a PR for an in-memory store that we=20
-can test against to see how rocksdb and zetascale are doing.  Perhaps=20
-some day we could do something similar for nvdimm storage.
+You could query these tags again and have automation to stuff around it. Or also start a OSD:
 
-Mark
+$ ceph-osd --id 0 --tags ssd,bluestore
 
-On 07/02/2016 03:18 PM, Ning Yao wrote:
-> Hi, Sage
-> I have tried with bluestore_min_alloc_size =3D 4096 so that the updat=
-ed
-> writes can always reallocate inito new extents. It avoids double writ=
-e
-> theoretically, but with high speed device like nvme=EF=BC=8Cit still =
-has
-> performance issue with metadata updating and the bottleneck is
-> apparently in rocksdb. I think the compaction and data organization i=
-n
-> rocksdb may affect a lots.  It may have lots of works to do with
-> rocksdb and bluefs such as using different compaction strategies and
-> use less number of levels in rocksdb?=E3=80=80So any guides about tho=
-se and
-> what  is the future directions on current bluestore performance issue=
-?
-> Regards
-> Ning Yao
->
->
-> 2016-06-27 20:31 GMT+08:00 Sage Weil <sage@newdream.net>:
->> On Mon, 27 Jun 2016, myoungwon oh wrote:
->>> Hi, I have questions for bluestore (4K random write case).
->>>
->>> So far, we have used NVRAM(PCIe) as journal and SSD (SATA) as data
->>> disk (filestore).
->>> Therefore, we got performance gain from NVRAM journal.
->>> However, current Bluestore design seems that data (4K aligned) is
->>> written to data disk first, then metadata is written to WAL rocksdb=
-=2E
->>> This design can remove =E2=80=9Cdouble write=E2=80=9D in objectstor=
-e, but in our case,
->>> NVRAM can not be utilized fully.
->>>
->>>  So, my questions are that
->>>
->>> 1. Can bluestore write WAL first as filestore?
->>
->> You can do it indirectly with bluestore_min_alloc_size=3D65536, whic=
-h will
->> send anything smaller than this value through the wal path.  Please =
-let
->> us know what effect this has on our latency/performance!
->>
->>> 2. If not, using bcache or flashcache for NVRAM on top of SSDs is r=
-ight
->>> answer?
->>
->> This is also possible, but I expect we'd like to make this work out =
-of the
->> box if we can!
->>
->> sage
+The tags could then be used by additional tools to query stuff from there.
+
+> Storing "extras" without bloating the cluster maps is definitely not a
+> problem, we do this for the OSD metadata, the awkward part is just
+> keeping it all in sync, making sure things get cleaned up when
+> pools/osds/keys go away.  While there is clearly a limit somewhere to
+> how much non-essential state we store via the mons, my feeling is that
+> we should go at least a bit further than our current config-key
+> interface.
+> 
+> What about something like namespacing those keys into a path-ish form
+> like "[pool|osd|rule].<id>"? We could potentially do smart things with
+> those well-formed keys down the line, like ensuring they correspond to
+> things that really exist, including them in certain outputs, and
+> enabling people to efficient scoped operations like "config-key list
+> pool.3.*".
+> 
+> John
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
