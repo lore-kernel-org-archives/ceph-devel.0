@@ -1,41 +1,51 @@
-From: Mykola Golub <mgolub@mirantis.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
 Subject: Re: Cmake, Clang and plugins
-Date: Mon, 4 Jul 2016 15:54:17 +0300
-Message-ID: <20160704125415.GA14833@gmail.com>
+Date: Mon, 4 Jul 2016 15:07:45 +0200
+Message-ID: <4774c940-f81f-62e6-6bbf-2cf03318b0ef@digiware.nl>
 References: <dca061d8-b93d-1247-1271-91409f90ca71@digiware.nl>
+ <20160704125415.GA14833@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f47.google.com ([209.85.215.47]:35925 "EHLO
-	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753561AbcGDMyU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jul 2016 08:54:20 -0400
-Received: by mail-lf0-f47.google.com with SMTP id q132so116671032lfe.3
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Jul 2016 05:54:19 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <dca061d8-b93d-1247-1271-91409f90ca71@digiware.nl>
+Received: from smtp.digiware.nl ([176.74.240.9]:11064 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753414AbcGDNIS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 4 Jul 2016 09:08:18 -0400
+In-Reply-To: <20160704125415.GA14833@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
+To: Mykola Golub <mgolub@mirantis.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Jul 04, 2016 at 01:09:15PM +0200, Willem Jan Withagen wrote:
-> Hi,
+On 4-7-2016 14:54, Mykola Golub wrote:
+> On Mon, Jul 04, 2016 at 01:09:15PM +0200, Willem Jan Withagen wrote:
+>> Hi,
+>>
+>> I'm being pestered by:
+>>  dlopen(/home/wjw/Ceph/work.cmake/ceph/build/lib/libec_jerasure.so):
+>> /home/wjw/Ceph/work.cmake/ceph/build/lib/libec_jerasure.so: Undefined
+>> symbol "ceph_arch_neon"
+>> if I try to run anything that want as plugin.
+>>
+>> Now the question is: what extra bui;ding/linker  options would this
+>> require to actually fix this?
 > 
-> I'm being pestered by:
->  dlopen(/home/wjw/Ceph/work.cmake/ceph/build/lib/libec_jerasure.so):
-> /home/wjw/Ceph/work.cmake/ceph/build/lib/libec_jerasure.so: Undefined
-> symbol "ceph_arch_neon"
-> if I try to run anything that want as plugin.
+> If I recall it right, in automake it is fixed by this:
 > 
-> Now the question is: what extra bui;ding/linker  options would this
-> require to actually fix this?
+> if LINUX
+> liberasure_code_la_LIBADD = -ldl
+> endif # LINUX
 
-If I recall it right, in automake it is fixed by this:
+Hi Mykola,
 
-if LINUX
-liberasure_code_la_LIBADD = -ldl
-endif # LINUX
+That is actually to get the dlopen/close/.... function linked into the
+parent program. But under FreeBSD these are part of libc.
+Hence the fact that they are only included explicitly on Linux.
 
--- 
-Mykola Golub
+My problem is probably more on the other side:
+the child plugin module is not able to satisfy all dynamic linking items.
+
+--WjW
+
+
