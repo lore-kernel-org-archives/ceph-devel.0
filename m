@@ -1,51 +1,36 @@
-From: Jeegn Chen <jeegnchen@gmail.com>
-Subject: Definition of nlock in common/Mutex.h seems resulting in core dump
-Date: Mon, 4 Jul 2016 16:18:05 +0800
-Message-ID: <CAFZHTOaR-U5OT1YZe8S3VARpNuU5SZ6bLLQ4CkKuVq1gaoKJnQ@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: cmake
+Date: Mon, 4 Jul 2016 11:05:07 +0200
+Message-ID: <0ba08c31-8c9e-a483-6c5b-07ce9b6b5495@digiware.nl>
+References: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f42.google.com ([209.85.215.42]:33130 "EHLO
-	mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753062AbcGDISI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jul 2016 04:18:08 -0400
-Received: by mail-lf0-f42.google.com with SMTP id f6so112265219lfg.0
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Jul 2016 01:18:07 -0700 (PDT)
+Received: from smtp.digiware.nl ([176.74.240.9]:50828 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932715AbcGDJFX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 4 Jul 2016 05:05:23 -0400
+In-Reply-To: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-Hi all,
+On 27-6-2016 19:50, Sage Weil wrote:
+> We are switching from autotools to cmake on the master branch. Any 
+> builds done post-jewel will be cmake and not autotools based.  Jewel and 
+> older releases will still be built with autotools the old way.
 
-I see such call stack in a Ceph 0.94.1 OSD core dump.
-Mutex::_pre_unlock() asserted failure when it noticed an inconsistent
-in nlock. I checked the code and did not find logic error yet. But I
-notice the type of nlock is int instead of atomic_t and nlock is
-modified without locking. Thus in multi-threaded environment, the
-value of nlock may be updated inconsistently when threads are
-scheduled in different ways. So my guess is that the root cause of the
-core dump is the incorrect type of nlock. The related logic in Ceph
-10.2.0 seems the same.
+Hi Sage,
 
-What do you think?
+Question about Cmake versions....
 
-(gdb) bt
-#0  0x000000374360f6ab in raise () from /lib64/libpthread.so.0
-#1  0x0000000000bf1525 in reraise_fatal (signum=6) at
-global/signal_handler.cc:59
-#2  handle_fatal_signal (signum=6) at global/signal_handler.cc:109
-#3  <signal handler called>
-#4  0x0000003743232625 in raise () from /lib64/libc.so.6
-#5  0x0000003743233e05 in abort () from /lib64/libc.so.6
-#6  0x000000374322b74e in __assert_fail_base () from /lib64/libc.so.6
-#7  0x000000374322b810 in __assert_fail () from /lib64/libc.so.6
-#8  0x0000000000c0ba85 in _pre_unlock (this=0x5892240) at common/Mutex.h:96
-#9  Mutex::Unlock (this=0x5892240) at common/Mutex.cc:104
-#10 0x0000000000c1a9eb in ~Locker (this=0x5892220) at common/Mutex.h:118
-#11 CephContextServiceThread::entry (this=0x5892220) at
-common/ceph_context.cc:73
-#12 0x0000003743607aa1 in start_thread () from /lib64/libpthread.so.0
-#13 0x00000037432e893d in clone () from /lib64/libc.so.6
-(gdb) frame 8
-#8  0x0000000000c0ba85 in _pre_unlock (this=0x5892240) at common/Mutex.h:96
-96          assert(nlock > 0);
+On FreeBSD cmake is version 3.5.2
+My Centos box has 2.8.11
+
+If there any "minimum" requirements here??
+
+--WjW
+
+
+
