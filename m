@@ -1,110 +1,66 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Failing OSDs (suicide timeout) due to flaky clients
-Date: Tue, 5 Jul 2016 20:59:11 +0200 (CEST)
-Message-ID: <39488107.541.1467745151556@ox.pcextreme.nl>
-References: <256042034.446.1467643268046@ox.pcextreme.nl>
- <CABZ+qqk5G9S47-3chQ-81okkCEkUKhg=Dz_V4FHEnbwus7vBiA@mail.gmail.com>
- <410573451.453.1467650925047@ox.pcextreme.nl>
- <CAEYCsV+4fJGq38CHpmCQhmENmX3yRQWD4Bma6dgxkcCFuUHS6Q@mail.gmail.com>
- <377473173.481.1467703560299@ox.pcextreme.nl>
- <CABAwU-bBofDt4yaWqgVADZP1Vx=CQKqFrbJY7DSPYCcq8AM9Qw@mail.gmail.com>
- <2029231343.493.1467709835165@ox.pcextreme.nl>
- <CAJ4mKGa8jrcSFPXOwyPndkTigzyhfS-dP37U1wHE=d-+MODo4A@mail.gmail.com>
- <480504153.536.1467740755666@ox.pcextreme.nl>
- <CAJ4mKGbOehcotz6uJtp-+uhDgVm7jWFNk-ShBCsQ3ORQhnuR1Q@mail.gmail.com>
- <815030793.538.1467743528746@ox.pcextreme.nl>
- <CAJ4mKGaFPDzZ3jh9B5SxPbOiadXu7J+W+-gJ7WnOJZahM42_ng@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: cmake
+Date: Tue, 5 Jul 2016 21:09:32 +0200
+Message-ID: <490b0db7-a342-88b6-832e-94f5dbf57b59@digiware.nl>
+References: <alpine.DEB.2.11.1606271746590.2844@piezo.us.to>
+ <94aeab09-6e86-9e94-5a96-d8e477b85cad@digiware.nl>
+ <alpine.DEB.2.11.1606281339570.8816@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:37095 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750774AbcGES7S (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jul 2016 14:59:18 -0400
-In-Reply-To: <CAJ4mKGaFPDzZ3jh9B5SxPbOiadXu7J+W+-gJ7WnOJZahM42_ng@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:16167 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751105AbcGETKK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 Jul 2016 15:10:10 -0400
+In-Reply-To: <alpine.DEB.2.11.1606281339570.8816@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: huang jun <hjwsm1989@gmail.com>, Dan van der Ster <dan@vanderster.com>, Xiaoxi Chen <superdebuger@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-
-> Op 5 juli 2016 om 20:35 schreef Gregory Farnum <gfarnum@redhat.com>:
+On 28-6-2016 15:42, Sage Weil wrote:
+> On Tue, 28 Jun 2016, Willem Jan Withagen wrote:
+>> On 27-6-2016 19:50, Sage Weil wrote:
+>>> We are switching from autotools to cmake on the master branch. Any 
+>>> builds done post-jewel will be cmake and not autotools based.  Jewel and 
+>>> older releases will still be built with autotools the old way.
+>>>
+>>> The README.md in the master branch has been updated with new developer 
+>>> build instructions.  Please take a look:
+>>>
+>>> 	https://github.com/ceph/ceph/blob/master/README.md
+>>>
+>>> If you are doing development, please switch to using cmake (i.e., 
+>>> run do_cmake.sh) now.  Running vstart.sh is a little different and it 
+>>> takes some getting used to.
+>>>
+>>> If there is anything that doesn't work that is part of your developer 
+>>> workflow, we need to fix it now, before the autotools support is removed 
+>>> and you're unable to work!  This is hopefully a week or two away.
+>>
+>> Hi Sage,
+>>
+>> Although i appreciate and understand the desire to move to cmake.
+>> Really ripping out the automake stuff would put me in the situation
+>> where I have no more building environment until all the cmake tweaks for
+>> FreeBSD are in place.
+>>
+>> An while I'll start working on it, time is rather scarce atm.
+>> So please disable but please keep it around for a bit longer...
 > 
+> There is no particular need to remove any of the autotools stuff while 
+> anyone still relies on it, so don't worry.  I'm just making sure 
+> everyone starts using it now so that we can identify any gaps and 
+> avoid surprises and fragmentation of efforts later.
 > 
-> Uh, searching for OpTracker in my github emails leads me to
-> https://github.com/ceph/ceph/pull/7148
-> 
+> Thanks for taking a look!
 
-Ah, yes! That's the one probably.
+I'm at 8 fails of 132 tests.
 
-Looking at it this was only backported to Jewel, but not to Hammer nor Firefly.
+Which is more or less what I have in my FreeBSD work. And I did not take
+all FreeBSD-wip stuff to my cmake tree.
 
-- http://tracker.ceph.com/issues/14248
-- https://github.com/ceph/ceph/commit/67be35cba7c384353b0b6d49284a4ead94c4152e
+So I'm going to clean up, and then hopelully we can get tings in the tree.
 
-It applies cleanly on Hammer. Building packages and will see if it resolves it. Now find a way to test it and reproduce this.
-
-Wido
-
-> I didn't try and trace the backports but there should be links from
-> the referenced Redmine ticket, or you can search the git logs.
-> -Greg
-> 
-> On Tue, Jul 5, 2016 at 11:32 AM, Wido den Hollander <wido@42on.com> wrote:
-> >
-> >> Op 5 juli 2016 om 19:48 schreef Gregory Farnum <gfarnum@redhat.com>:
-> >>
-> >>
-> >> On Tue, Jul 5, 2016 at 10:45 AM, Wido den Hollander <wido@42on.com> wrote:
-> >> >
-> >> >> Op 5 juli 2016 om 19:27 schreef Gregory Farnum <gfarnum@redhat.com>:
-> >> >>
-> >> >>
-> >> >> On Tue, Jul 5, 2016 at 2:10 AM, Wido den Hollander <wido@42on.com> wrote:
-> >> >> >
-> >> >> >> Op 5 juli 2016 om 10:56 schreef huang jun <hjwsm1989@gmail.com>:
-> >> >> >>
-> >> >> >>
-> >> >> >> i see osd timed out many times.
-> >> >> >> In SimpleMessenger mode, when sending msg, the Pipeconnection will
-> >> >> >> hold a lock, which maybe hold by other threads,
-> >> >> >> it's reported before: http://tracker.ceph.com/issues/9921
-> >> >> >>
-> >> >> >
-> >> >> > Thank you! It surely looks like the same symptoms we are seeing in this cluster.
-> >> >> >
-> >> >> > The bug has been marked as resolved, but are you sure it is?
-> >> >>
-> >> >> Pretty sure about that bug being done.
-> >> >>
-> >> >> The conntrack filling thing sounds vaguely familiar though. Is this
-> >> >> the latest hammer? I think there were some leaks of messages while
-> >> >> sending replies that might have blocked up incoming queues that got
-> >> >> resolved later.
-> >> >
-> >> > Keep in mind, it's the conntrack filling up on the client which results in >50% packetloss on that client.
-> >> >
-> >> > The cluster is not firewalled and doesn't do any connection tracking.
-> >> >
-> >> > This is hammer 0.94.5, if this is fixed in .6 or .7, do you have an idea for which commit I should look? (Simple)Messenger related?
-> >>
-> >> If it is one of the op leaks, it'll be in the OSD OpTracker stuff to
-> >> avoid keeping around message references for tracking purposes and
-> >> unblocking the client Throttles.
-> >
-> > Thanks! I've been looking in the hammer and master branch, but was unable to find the right commit I think. Been looking for 45 minutes now, but nothing which caught my attention.
-> >
-> > If you have the time, would you be so kind to take a look?
-> >
-> > Wido
-> >
-> >> -Greg
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--WjW
