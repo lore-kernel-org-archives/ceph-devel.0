@@ -1,43 +1,61 @@
-From: Tim Serong <tserong-IBi9RG/b67k@public.gmane.org>
-Subject: CFP: linux.conf.au 2017 (Hobart, Tasmania, Australia)
-Date: Wed, 6 Jul 2016 19:47:30 +1000
-Message-ID: <4a32faea-55b8-167d-c434-5186c4487c55@suse.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: ceph-mds jewel backports leak
+Date: Wed, 6 Jul 2016 12:51:32 +0200
+Message-ID: <577CE2B4.6010505@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from slow1-d.mail.gandi.net ([217.70.178.86]:60007 "EHLO
+	slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750937AbcGFK6K (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jul 2016 06:58:10 -0400
+Received: from relay2-d.mail.gandi.net (relay2-d.mail.gandi.net [217.70.183.194])
+	by slow1-d.mail.gandi.net (Postfix) with ESMTP id CBD484869D6
+	for <ceph-devel@vger.kernel.org>; Wed,  6 Jul 2016 12:51:37 +0200 (CEST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi All,
+Hi John,
 
-The CFP for linux.conf.au 2017 (January 16-20 in Hobart, Tasmania,
-Australia) opened on Monday:
+While testing the CephFS jewel backports found in the jewel-backports b=
+ranch, we ran into a memory leak that consistently happen:
 
-  https://linux.conf.au/proposals/
+http://pulpito.ceph.com/loic-2016-06-16_02:28:14-fs-jewel-backports---b=
+asic-smithi/263842
 
-This is one of the best F/OSS conferences in the world, and is being
-held in one of the most beautiful places in the world (although I might
-be slightly biased on the latter point, on account of living in Tasmania).
+and that is not present in the jewel branch
 
-The CFP will remain open until August 5.  Please everyone go submit a
-talk, or at least plan to attend.  It's going to be excellent :)
+http://pulpito.ceph.com/loic-2016-06-28_23:43:39-fs-jewel---basic-smith=
+i/282493/
 
-Cheers,
+Meaning one of the backports is doing something wrong. Or there is a ba=
+ckport fixing the leak that is missing.
 
-Tim
--- 
-Tim Serong
-Senior Clustering Engineer
-SUSE
-tserong-IBi9RG/b67k@public.gmane.org
+This one looks interesting to me
+
+https://github.com/ceph/ceph/commit/37b7b09ee19ad64362c2faf63461353c03a=
+36ada
+
+There also are related to leaks but I'm not so sure.
+
+https://github.com/ceph/ceph/commit/89f74c98ea43df46291c8bec890b3a75c7c=
+e38b4
+https://github.com/ceph/ceph/commit/4c52bf9ed47d52510536ebc34bd6c56adba=
+1df53
+
+If you have ideas on how to approach this and save random exploration t=
+ime, it would be most welcome. If not, I'll get it eventually, no worri=
+es :-)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
