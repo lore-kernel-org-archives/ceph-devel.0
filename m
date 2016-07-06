@@ -1,156 +1,41 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: segfault in bluestore during random writes
-Date: Wed, 6 Jul 2016 14:48:15 +0000
-Message-ID: <BL2PR02MB211526CD238E75118F88A573F43A0@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <0b69c134-ffa9-1918-b4f5-ca9cc0cd7fbe@redhat.com>
- <BLUPR0201MB1908E4B6055CAF348E4B8703E23A0@BLUPR0201MB1908.namprd02.prod.outlook.com>
- <bc890855-35dc-223b-b44c-fa1e677babcb@redhat.com>
- <15694cfc-1e84-52e8-d63e-21ca4ddf0be0@redhat.com>
- <BL2PR02MB211579CAD7EAEE72AF0494EAF43A0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <bff138a5-edf4-89c5-3456-00fd8b0b679c@redhat.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: AttributeError: 'Rados' object has no attribute 'monitor_log'
+Date: Wed, 6 Jul 2016 19:22:15 +0200
+Message-ID: <30f6bbac-0b8b-b241-b58d-e3960051ad7c@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0040.outbound.protection.outlook.com ([104.47.36.40]:11185
-	"EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754138AbcGFOsT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jul 2016 10:48:19 -0400
-In-Reply-To: <bff138a5-edf4-89c5-3456-00fd8b0b679c@redhat.com>
-Content-Language: en-US
+Received: from smtp.digiware.nl ([176.74.240.9]:47162 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754168AbcGFRW7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 6 Jul 2016 13:22:59 -0400
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.digiware.nl (Postfix) with ESMTPSA id BD0E31534C7
+	for <ceph-devel@vger.kernel.org>; Wed,  6 Jul 2016 19:22:24 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Varada Kari <Varada.Kari@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-I got it ~6/23 , so we need to look for commits before that..
+Hi,
 
------Original Message-----
-From: Mark Nelson [mailto:mnelson@redhat.com] 
-Sent: Wednesday, July 06, 2016 7:45 AM
-To: Somnath Roy; Varada Kari; ceph-devel
-Subject: Re: segfault in bluestore during random writes
+I'm trying to run cephtool-test-mon.sh, and it gets there quite far
+but somewhere down the test I have this error:
+Now python is not my strong point.
 
-Ah, sorry I missed it.  Do you remember when you first encountered it? 
-Might help track down the commit where it first appeared.
+Where should I start looking?
 
-Mark
+--WjW
 
-On 07/06/2016 09:32 AM, Somnath Roy wrote:
-> Mark,
-> This is the same trace I got (and posted in community)  while you were in vacation. I can still reproduce this in my setup easily.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-> Sent: Wednesday, July 06, 2016 7:02 AM
-> To: Varada Kari; ceph-devel
-> Subject: Re: segfault in bluestore during random writes
->
-> Oh, sorry, this wasn't memdbstore, this was trim cache on reads which got applied earlier this week.  I was testing 06178de9 with the trim cache on reads PR applied.
->
-> Mark
->
-> On 07/06/2016 07:00 AM, Mark Nelson wrote:
->> Hi Varada,
->>
->> Ah, this version happens to be with the memstoredb patch applied, 
->> though it is unused in this test.  I don't believe this should be 
->> causing the problem, but I'll verify it is happening without that patch as well.
->>
->> Mark
->>
->> On 07/06/2016 01:45 AM, Varada Kari wrote:
->>> Hi mark,
->>>
->>> I have tried reproducing the issue with latest master, so far no 
->>> luck with 128k and 512k block sizes on a 1000GB rbd image.
->>> I couldn't find #5e07e5a3446ee39189c5b959be624411561175f5 in master, 
->>> are you using any private changes?
->>>
->>> I will try some more time today to reproduce the issue. Seems blob 
->>> map got corrupted in your case.
->>>
->>> Varada
->>>
->>> On Tuesday 05 July 2016 09:06 PM, Mark Nelson wrote:
->>>> Hi Guys,
->>>>
->>>> This is primarily for Varada but if anyone else wants to take a 
->>>> look feel free.  We are hitting segfaults in tc_state_proc during 
->>>> random writes.  I was able to reproduce with logging enabled and 
->>>> got a core dump.  I've only briefly looked at the code/logs, but I 
->>>> haven't really looked through it in earnest yet.  Unfortunately the 
->>>> logs are about 4GB and the core dump is 2GB, so I'll only attach the last 10k lines.
->>>> Hopefully it should be fairly reproducible.  I'll try to see if I 
->>>> can narrow down commits that have touched the write path over the 
->>>> last 4 weeks and see if anything looks relevant.
->>>>
->>>> Varada: let me know if you can reproduce.  Thanks!
->>>>
->>>> gdb bt:
->>>>
->>>>> (gdb) bt
->>>>> #0  0x00007f9c59708fcb in raise (sig=11) at
->>>>> ../nptl/sysdeps/unix/sysv/linux/pt-raise.c:37
->>>>> #1  0x0000000000bd7505 in reraise_fatal (signum=11) at
->>>>> /home/ubuntu/src/markhpc/ceph/src/global/signal_handler.cc:69
->>>>> #2  handle_fatal_signal (signum=11) at
->>>>> /home/ubuntu/src/markhpc/ceph/src/global/signal_handler.cc:133
->>>>> #3  <signal handler called>
->>>>> #4  next_node (node=<synthetic pointer>) at
->>>>> /usr/include/boost/intrusive/detail/tree_algorithms.hpp:446
->>>>> #5  next_node (p=<synthetic pointer>) at
->>>>> /usr/include/boost/intrusive/rbtree_algorithms.hpp:352
->>>>> #6  operator++ (this=<synthetic pointer>) at
->>>>> /usr/include/boost/intrusive/detail/tree_node.hpp:128
->>>>> #7  BlueStore::_txc_state_proc (this=this@entry=0xaff6000,
->>>>> txc=txc@entry=0x192c8c80) at
->>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4568
->>>>> #8  0x0000000000aeddb7 in BlueStore::_txc_finish_io 
->>>>> (this=this@entry=0xaff6000, txc=txc@entry=0x192c8c80) at
->>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4669
->>>>> #9  0x0000000000aed23f in BlueStore::_txc_state_proc 
->>>>> (this=0xaff6000, txc=0x192c8c80) at
->>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4559
->>>>> #10 0x0000000000bc134a in KernelDevice::_aio_thread
->>>>> (this=0xaf20960) at
->>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/KernelDevice.cc:270
->>>>> #11 0x0000000000bc588d in KernelDevice::AioCompletionThread::entry
->>>>> (this=<optimized out>) at
->>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/KernelDevice.h:49
->>>>> #12 0x00007f9c59701dc5 in start_thread (arg=0x7f9c4da2e700) at
->>>>> pthread_create.c:308
->>>>> #13 0x00007f9c575fc28d in clone () at
->>>>> ../sysdeps/unix/sysv/linux/x86_64/clone.S:113
->>>>> (gdb) frame 7
->>>>> #7  BlueStore::_txc_state_proc (this=this@entry=0xaff6000,
->>>>> txc=txc@entry=0x192c8c80) at
->>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4568
->>>>> 4568for (auto& p : o->blob_map.blob_map) {
->>>> Mark
->>>
->>> PLEASE NOTE: The information contained in this electronic mail 
->>> message is intended only for the use of the designated recipient(s) 
->>> named above. If the reader of this message is not the intended 
->>> recipient, you are hereby notified that you have received this 
->>> message in error and that any review, dissemination, distribution, 
->>> or copying of this message is strictly prohibited. If you have 
->>> received this communication in error, please notify the sender by 
->>> telephone or e-mail (as shown above) immediately and destroy any and 
->>> all copies of this message in your possession (whether hard copies 
->>> or electronically stored copies).
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo 
->> info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
+/home/wjw/Ceph/work.cmake/ceph/qa/workunits/cephtool/test.sh:159:
+ceph_watch_start:  sleep 1
+5: Traceback (most recent call last):
+5:   File "/home/wjw/Ceph/work.cmake/ceph/build/bin/ceph", line 948, in
+<module>
+5:     retval = main()
+5:   File "/home/wjw/Ceph/work.cmake/ceph/build/bin/ceph", line 775, in main
+5:     run_in_thread(cluster_handle.monitor_log, level, watch_cb, 0)
+5: AttributeError: 'Rados' object has no attribute 'monitor_log'
+
