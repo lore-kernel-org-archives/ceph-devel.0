@@ -1,59 +1,69 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH 0/4] ceph: allow ceph_d_revalidate to handle some cases under LOOKUP_RCU
-Date: Wed, 6 Jul 2016 09:55:41 +0800
-Message-ID: <E195472F-5AB6-45A8-83AF-AA1798207E9C@redhat.com>
-References: <1467736069-27140-1-git-send-email-jlayton@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=us-ascii
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: Re: segfault in bluestore during random writes
+Date: Wed, 6 Jul 2016 06:45:12 +0000
+Message-ID: <BLUPR0201MB1908E4B6055CAF348E4B8703E23A0@BLUPR0201MB1908.namprd02.prod.outlook.com>
+References: <0b69c134-ffa9-1918-b4f5-ca9cc0cd7fbe@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47346 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751339AbcGFBzq convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jul 2016 21:55:46 -0400
-In-Reply-To: <1467736069-27140-1-git-send-email-jlayton@redhat.com>
+Received: from mail-co1nam03on0041.outbound.protection.outlook.com ([104.47.40.41]:50624
+	"EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750779AbcGFIQo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jul 2016 04:16:44 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, Al Viro <viro@ZenIV.linux.org.uk>
+To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+Hi mark,
 
-> On Jul 6, 2016, at 00:27, Jeff Layton <jlayton@redhat.com> wrote:
-> 
-> The basic idea with this set is to allow the kernel client to allow the
-> client to do more d_revalidate functionality under the rcu_read_lock.
-> The idea is basically to do what we can there while not blocking, and
-> then return -ECHILD for the rest.
-> 
-> The only really questionable bit is the part where we need to take the
-> d_lock in ceph_d_release. I think it should be largely uncontended, but
-> it's still less than ideal. Maybe there is some way to handle that
-> locklessly?
-> 
-> Also, it would be nice to not have to drop out of rcuwalk mode in order
-> to run the lease renewal. It seems like the kind of thing that would be
-> ideal to queue to a workqueue, but I don't see a way to do that without
-> introducing a potential deadlock.
-> 
-> My teuthology run with it passed all but one test, which seems to have
-> been an unrelated problem (though I could be wrong there).
-> 
-> Jeff Layton (4):
->  ceph: remove ceph_mdsc_lease_release
->  ceph: clear d_fsinfo pointer under d_lock
->  ceph: allow dentry_lease_is_valid to work under RCU walk
->  ceph: handle LOOKUP_RCU in ceph_d_revalidate
-> 
-> fs/ceph/dir.c        | 67 +++++++++++++++++++++++++++++++++++-----------------
-> fs/ceph/mds_client.c | 41 --------------------------------
-> fs/ceph/mds_client.h |  4 ----
-> 3 files changed, 45 insertions(+), 67 deletions(-)
+I have tried reproducing the issue with latest master, so far no luck
+with 128k and 512k block sizes on a 1000GB rbd image.
+I couldn't find #5e07e5a3446ee39189c5b959be624411561175f5 in master, are
+you using any private changes?
 
-Reviewed-by: Yan, Zheng <zyan@redhat.com>
+I will try some more time today to reproduce the issue. Seems blob map
+got corrupted in your case.
 
+Varada
 
-> 
-> -- 
-> 2.5.5
-> 
+On Tuesday 05 July 2016 09:06 PM, Mark Nelson wrote:
+> Hi Guys,
+>
+> This is primarily for Varada but if anyone else wants to take a look
+> feel free.  We are hitting segfaults in tc_state_proc during random
+> writes.  I was able to reproduce with logging enabled and got a core
+> dump.  I've only briefly looked at the code/logs, but I haven't really
+> looked through it in earnest yet.  Unfortunately the logs are about 4GB
+> and the core dump is 2GB, so I'll only attach the last 10k lines.
+> Hopefully it should be fairly reproducible.  I'll try to see if I can
+> narrow down commits that have touched the write path over the last 4
+> weeks and see if anything looks relevant.
+>
+> Varada: let me know if you can reproduce.  Thanks!
+>
+> gdb bt:
+>
+>> (gdb) bt
+>> #0  0x00007f9c59708fcb in raise (sig=11) at ../nptl/sysdeps/unix/sysv/linux/pt-raise.c:37
+>> #1  0x0000000000bd7505 in reraise_fatal (signum=11) at /home/ubuntu/src/markhpc/ceph/src/global/signal_handler.cc:69
+>> #2  handle_fatal_signal (signum=11) at /home/ubuntu/src/markhpc/ceph/src/global/signal_handler.cc:133
+>> #3  <signal handler called>
+>> #4  next_node (node=<synthetic pointer>) at /usr/include/boost/intrusive/detail/tree_algorithms.hpp:446
+>> #5  next_node (p=<synthetic pointer>) at /usr/include/boost/intrusive/rbtree_algorithms.hpp:352
+>> #6  operator++ (this=<synthetic pointer>) at /usr/include/boost/intrusive/detail/tree_node.hpp:128
+>> #7  BlueStore::_txc_state_proc (this=this@entry=0xaff6000, txc=txc@entry=0x192c8c80) at /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4568
+>> #8  0x0000000000aeddb7 in BlueStore::_txc_finish_io (this=this@entry=0xaff6000, txc=txc@entry=0x192c8c80) at /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4669
+>> #9  0x0000000000aed23f in BlueStore::_txc_state_proc (this=0xaff6000, txc=0x192c8c80) at /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4559
+>> #10 0x0000000000bc134a in KernelDevice::_aio_thread (this=0xaf20960) at /home/ubuntu/src/markhpc/ceph/src/os/bluestore/KernelDevice.cc:270
+>> #11 0x0000000000bc588d in KernelDevice::AioCompletionThread::entry (this=<optimized out>) at /home/ubuntu/src/markhpc/ceph/src/os/bluestore/KernelDevice.h:49
+>> #12 0x00007f9c59701dc5 in start_thread (arg=0x7f9c4da2e700) at pthread_create.c:308
+>> #13 0x00007f9c575fc28d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:113
+>> (gdb) frame 7
+>> #7  BlueStore::_txc_state_proc (this=this@entry=0xaff6000, txc=txc@entry=0x192c8c80) at /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4568
+>> 4568for (auto& p : o->blob_map.blob_map) {
+> Mark
 
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
