@@ -1,136 +1,93 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: segfault in bluestore during random writes
-Date: Wed, 6 Jul 2016 14:32:21 +0000
-Message-ID: <BL2PR02MB211579CAD7EAEE72AF0494EAF43A0@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <0b69c134-ffa9-1918-b4f5-ca9cc0cd7fbe@redhat.com>
- <BLUPR0201MB1908E4B6055CAF348E4B8703E23A0@BLUPR0201MB1908.namprd02.prod.outlook.com>
- <bc890855-35dc-223b-b44c-fa1e677babcb@redhat.com>
- <15694cfc-1e84-52e8-d63e-21ca4ddf0be0@redhat.com>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: cmake: problems with /tmp/ceph-detect-init-virtualenv and
+ /tmp/ceph-disk-virtualenv (after install, afaict)
+Date: Wed, 6 Jul 2016 10:38:35 -0400 (EDT)
+Message-ID: <2007506255.12422492.1467815915172.JavaMail.zimbra@redhat.com>
+References: <1022013954.12407882.1467814484109.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0060.outbound.protection.outlook.com ([104.47.36.60]:63566
-	"EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753825AbcGFOc0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jul 2016 10:32:26 -0400
-In-Reply-To: <15694cfc-1e84-52e8-d63e-21ca4ddf0be0@redhat.com>
-Content-Language: en-US
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:43442 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753825AbcGFOig (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jul 2016 10:38:36 -0400
+In-Reply-To: <1022013954.12407882.1467814484109.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Varada Kari <Varada.Kari@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Marcus Watts <mwatts@redhat.com>
 
-Mark,
-This is the same trace I got (and posted in community)  while you were in vacation. I can still reproduce this in my setup easily.
+Hi,
 
-Thanks & Regards
-Somnath
+I ran into some new cmake build breakages after pulling up to ceph master, yesterday afternoon.
 
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-Sent: Wednesday, July 06, 2016 7:02 AM
-To: Varada Kari; ceph-devel
-Subject: Re: segfault in bluestore during random writes
+I'm not sure this is all that can go awry, but definitely builds as a non-root user now fail after "sudo make install," because logic in the ceph-disk and detect-init targets attempts to remove files in those global paths, which fails due to permissions:
 
-Oh, sorry, this wasn't memdbstore, this was trim cache on reads which got applied earlier this week.  I was testing 06178de9 with the trim cache on reads PR applied.
+[ 53%] ceph-disk is being created
+Running virtualenv with interpreter /usr/bin/python2.7
+New python executable in /tmp/ceph-disk-virtualenv/bin/python2.7
+Also creating executable in /tmp/ceph-disk-virtualenv/bin/python
+Installing setuptools, pip...done.
+You are using pip version 6.0.8, however version 8.1.2 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+Collecting pip>=6.1
+  Using cached pip-8.1.2-py2.py3-none-any.whl
+Installing collected packages: pip
+  Found existing installation: pip 6.0.8
+    Uninstalling pip-6.0.8:
+      Successfully uninstalled pip-6.0.8
 
-Mark
+Successfully installed pip-8.1.2
+Collecting tox>=1.9
+  Url 'file:///home/mbenjamin/ceph-poo/src/ceph-disk/wheelhouse' is ignored: it is neither a file nor a directory.
+  Using cached tox-2.3.1-py2.py3-none-any.whl
+Collecting virtualenv>=1.11.2 (from tox>=1.9)
+  Url 'file:///home/mbenjamin/ceph-poo/src/ceph-disk/wheelhouse' is ignored: it is neither a file nor a directory.
+  Using cached virtualenv-15.0.2-py2.py3-none-any.whl
+Collecting py>=1.4.17 (from tox>=1.9)
+  Url 'file:///home/mbenjamin/ceph-poo/src/ceph-disk/wheelhouse' is ignored: it is neither a file nor a directory.
+  Using cached py-1.4.31-py2.py3-none-any.whl
+Collecting pluggy<0.4.0,>=0.3.0 (from tox>=1.9)
+  Url 'file:///home/mbenjamin/ceph-poo/src/ceph-disk/wheelhouse' is ignored: it is neither a file nor a directory.
+  Using cached pluggy-0.3.1-py2.py3-none-any.whl
+Installing collected packages: virtualenv, py, pluggy, tox
+Successfully installed pluggy-0.3.1 py-1.4.31 tox-2.3.1 virtualenv-15.0.2
+You must give at least one requirement to install (maybe you meant "pip install file:///home/mbenjamin/ceph-poo/src/ceph-disk/wheelhouse"?)
+Ignoring indexes: https://pypi.python.org/simple
+Obtaining file:///home/mbenjamin/ceph-poo/src/ceph-disk
+Requirement already satisfied (use --upgrade to upgrade): setuptools in /tmp/ceph-disk-virtualenv/lib/python2.7/site-packages (from ceph-disk==1.0.0)
+Installing collected packages: ceph-disk
+  Running setup.py develop for ceph-disk
+Successfully installed ceph-disk
+[ 53%] Built target ceph-disk
+[ 54%] Built target ceph_disk-clone
+[ 54%] ceph-detect-init is being created
+rm: cannot remove \u2018/tmp/ceph-detect-init-virtualenv/log.txt\u2019: Permission denied
+rm: cannot remove \u2018/tmp/ceph-detect-init-virtualenv/pip-selfcheck.json\u2019: Permission denied
+rm: cannot remove \u2018/tmp/ceph-detect-init-virtualenv/bin/ceph-detect-init\u2019: Permission denied
+rm: cannot remove \u2018/tmp/ceph-detect-init-virtualenv/bin/tox-quickstart\u2019: Permission denied
+rm: cannot remove \u2018/tmp/ceph-detect-init-virtualenv/bin/tox\u2019: Permission denied
+rm: cannot remove \u2018/tmp/ceph-detect-init-virtualenv/bin/virtualenv\u2019: Permission denied
+rm: cannot remove \u2018/tmp/ceph-detect-init-virtualenv/bin/pip2.7\u2019: Permission denied
+...
 
-On 07/06/2016 07:00 AM, Mark Nelson wrote:
-> Hi Varada,
->
-> Ah, this version happens to be with the memstoredb patch applied,
-> though it is unused in this test.  I don't believe this should be
-> causing the problem, but I'll verify it is happening without that patch as well.
->
-> Mark
->
-> On 07/06/2016 01:45 AM, Varada Kari wrote:
->> Hi mark,
->>
->> I have tried reproducing the issue with latest master, so far no luck
->> with 128k and 512k block sizes on a 1000GB rbd image.
->> I couldn't find #5e07e5a3446ee39189c5b959be624411561175f5 in master,
->> are you using any private changes?
->>
->> I will try some more time today to reproduce the issue. Seems blob
->> map got corrupted in your case.
->>
->> Varada
->>
->> On Tuesday 05 July 2016 09:06 PM, Mark Nelson wrote:
->>> Hi Guys,
->>>
->>> This is primarily for Varada but if anyone else wants to take a look
->>> feel free.  We are hitting segfaults in tc_state_proc during random
->>> writes.  I was able to reproduce with logging enabled and got a core
->>> dump.  I've only briefly looked at the code/logs, but I haven't
->>> really looked through it in earnest yet.  Unfortunately the logs are
->>> about 4GB and the core dump is 2GB, so I'll only attach the last 10k lines.
->>> Hopefully it should be fairly reproducible.  I'll try to see if I
->>> can narrow down commits that have touched the write path over the
->>> last 4 weeks and see if anything looks relevant.
->>>
->>> Varada: let me know if you can reproduce.  Thanks!
->>>
->>> gdb bt:
->>>
->>>> (gdb) bt
->>>> #0  0x00007f9c59708fcb in raise (sig=11) at
->>>> ../nptl/sysdeps/unix/sysv/linux/pt-raise.c:37
->>>> #1  0x0000000000bd7505 in reraise_fatal (signum=11) at
->>>> /home/ubuntu/src/markhpc/ceph/src/global/signal_handler.cc:69
->>>> #2  handle_fatal_signal (signum=11) at
->>>> /home/ubuntu/src/markhpc/ceph/src/global/signal_handler.cc:133
->>>> #3  <signal handler called>
->>>> #4  next_node (node=<synthetic pointer>) at
->>>> /usr/include/boost/intrusive/detail/tree_algorithms.hpp:446
->>>> #5  next_node (p=<synthetic pointer>) at
->>>> /usr/include/boost/intrusive/rbtree_algorithms.hpp:352
->>>> #6  operator++ (this=<synthetic pointer>) at
->>>> /usr/include/boost/intrusive/detail/tree_node.hpp:128
->>>> #7  BlueStore::_txc_state_proc (this=this@entry=0xaff6000,
->>>> txc=txc@entry=0x192c8c80) at
->>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4568
->>>> #8  0x0000000000aeddb7 in BlueStore::_txc_finish_io
->>>> (this=this@entry=0xaff6000, txc=txc@entry=0x192c8c80) at
->>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4669
->>>> #9  0x0000000000aed23f in BlueStore::_txc_state_proc
->>>> (this=0xaff6000, txc=0x192c8c80) at
->>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4559
->>>> #10 0x0000000000bc134a in KernelDevice::_aio_thread
->>>> (this=0xaf20960) at
->>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/KernelDevice.cc:270
->>>> #11 0x0000000000bc588d in KernelDevice::AioCompletionThread::entry
->>>> (this=<optimized out>) at
->>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/KernelDevice.h:49
->>>> #12 0x00007f9c59701dc5 in start_thread (arg=0x7f9c4da2e700) at
->>>> pthread_create.c:308
->>>> #13 0x00007f9c575fc28d in clone () at
->>>> ../sysdeps/unix/sysv/linux/x86_64/clone.S:113
->>>> (gdb) frame 7
->>>> #7  BlueStore::_txc_state_proc (this=this@entry=0xaff6000,
->>>> txc=txc@entry=0x192c8c80) at
->>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4568
->>>> 4568for (auto& p : o->blob_map.blob_map) {
->>> Mark
->>
->> PLEASE NOTE: The information contained in this electronic mail
->> message is intended only for the use of the designated recipient(s)
->> named above. If the reader of this message is not the intended
->> recipient, you are hereby notified that you have received this
->> message in error and that any review, dissemination, distribution, or
->> copying of this message is strictly prohibited. If you have received
->> this communication in error, please notify the sender by telephone or
->> e-mail (as shown above) immediately and destroy any and all copies of
->> this message in your possession (whether hard copies or
->> electronically stored copies).
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in the body of a message to majordomo@vger.kernel.org More majordomo
-> info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+Initially I thought parallel cmake builds were broken altogether, but I haven't been able to reproduce that after removing both ceph virtualenv trees from /tmp.
+
+I think in general this is something we should work on cleaning up, even though I guess it existed in the original automake build.  For various reasons, the self-restriction of cmake builds to their build directory is one of their advantages, and it's been true for the ceph cmake build until last week.
+
+Marcus has some more detailed writeup on the virtualenv trees rehashing from last week, which I think he'll send later.
+
+Matt
+
+-- 
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-707-0660
+fax.  734-769-8938
+cel.  734-216-5309
