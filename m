@@ -1,182 +1,142 @@
-From: Alyona Kiselyova <akiselyova@mirantis.com>
-Subject: Re: How to propose plugin, which uses external lib
-Date: Wed, 6 Jul 2016 17:45:12 +0300
-Message-ID: <CAONhiy4DhBWxO89G+iSjjTRb7djE_h=inAonfrck0ozyNWmhOQ@mail.gmail.com>
-References: <CAONhiy5cg+fX-A49shN9FLREpigiTO18vk7t9anM_ZK9Czc5cQ@mail.gmail.com>
- <CACJqLybFf2G3jQjY5LBnsFtxsbeJ-L3V=+TbeR8h0Y9t_LsmOA@mail.gmail.com>
- <alpine.DEB.2.11.1606171644370.27611@piezo.novalocal> <CAONhiy4xycDrFjxvuz0ubbnmZpzCfcMXW_VL4zabfbE-VsGtrw@mail.gmail.com>
- <alpine.DEB.2.11.1606281414530.8816@piezo.us.to> <2143050522.8203100.1467142712597.JavaMail.zimbra@redhat.com>
- <CAONhiy5tB_7Mn_7nYDbFDEO4FVtSgc=XGODkr9YZpyUGNzD=Zw@mail.gmail.com>
- <alpine.DEB.2.11.1606301430060.31395@piezo.us.to> <CAONhiy7CMy8vJ=MsMwtfNLWDdvT4gdSHWMgJJL2YCjHL-cjVGg@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: segfault in bluestore during random writes
+Date: Wed, 6 Jul 2016 09:45:10 -0500
+Message-ID: <bff138a5-edf4-89c5-3456-00fd8b0b679c@redhat.com>
+References: <0b69c134-ffa9-1918-b4f5-ca9cc0cd7fbe@redhat.com>
+ <BLUPR0201MB1908E4B6055CAF348E4B8703E23A0@BLUPR0201MB1908.namprd02.prod.outlook.com>
+ <bc890855-35dc-223b-b44c-fa1e677babcb@redhat.com>
+ <15694cfc-1e84-52e8-d63e-21ca4ddf0be0@redhat.com>
+ <BL2PR02MB211579CAD7EAEE72AF0494EAF43A0@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f42.google.com ([209.85.218.42]:34469 "EHLO
-	mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753827AbcGFOpN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jul 2016 10:45:13 -0400
-Received: by mail-oi0-f42.google.com with SMTP id s66so273181488oif.1
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Jul 2016 07:45:13 -0700 (PDT)
-In-Reply-To: <CAONhiy7CMy8vJ=MsMwtfNLWDdvT4gdSHWMgJJL2YCjHL-cjVGg@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:57716 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753825AbcGFOpN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 6 Jul 2016 10:45:13 -0400
+In-Reply-To: <BL2PR02MB211579CAD7EAEE72AF0494EAF43A0@BL2PR02MB2115.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ali Maredia <amaredia@redhat.com>, Haomai Wang <haomai@xsky.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Varada Kari <Varada.Kari@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-I made a PR with new plugin: https://github.com/ceph/ceph/pull/10158
-Ali, please, take a look on CMake part, I'm not sure, if it's correct
-in work with asm files. Thanks!
--------------------------------
-Best regards,
-Alyona Kiseleva
+Ah, sorry I missed it.  Do you remember when you first encountered it? 
+Might help track down the commit where it first appeared.
 
+Mark
 
-On Thu, Jun 30, 2016 at 5:55 PM, Alyona Kiselyova
-<akiselyova@mirantis.com> wrote:
-> Thanks, I think, it works: https://github.com/ceph/ceph/pull/10066
-> -------------------------------
-> Best regards,
-> Alyona Kiseleva
+On 07/06/2016 09:32 AM, Somnath Roy wrote:
+> Mark,
+> This is the same trace I got (and posted in community)  while you were in vacation. I can still reproduce this in my setup easily.
 >
+> Thanks & Regards
+> Somnath
 >
-> On Thu, Jun 30, 2016 at 5:31 PM, Sage Weil <sweil@redhat.com> wrote:
->> On Thu, 30 Jun 2016, Alyona Kiselyova wrote:
->>> So, if I'm right, we need now a submodule, which is a fork of isa-l
->>> repo: https://github.com/01org/isa-l
->>> And then I'll can use it in my code, shown above, instead of copy of
->>> isa-l files, as I do it now, and problem with asm files compilation
->>> I'll solve via make and cmake files. Also this can be done in
->>> erasure-code plugin.
->>> In this case, who can help me with submodule creation? What procedure
->>> is needed here? Thanks!
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+> Sent: Wednesday, July 06, 2016 7:02 AM
+> To: Varada Kari; ceph-devel
+> Subject: Re: segfault in bluestore during random writes
+>
+> Oh, sorry, this wasn't memdbstore, this was trim cache on reads which got applied earlier this week.  I was testing 06178de9 with the trim cache on reads PR applied.
+>
+> Mark
+>
+> On 07/06/2016 07:00 AM, Mark Nelson wrote:
+>> Hi Varada,
 >>
->> I made a fork for the ceph github user at
+>> Ah, this version happens to be with the memstoredb patch applied,
+>> though it is unused in this test.  I don't believe this should be
+>> causing the problem, but I'll verify it is happening without that patch as well.
 >>
->>         https://github.com/ceph/isa-l
+>> Mark
 >>
->> Use that as the remote and create a branch that adds it as a submodule at
->> src/isa-l.  'git submodule add ...'.  That should do it!
->>
->> sage
->>
->>
->>> -------------------------------
->>> Best regards,
->>> Alyona Kiseleva
+>> On 07/06/2016 01:45 AM, Varada Kari wrote:
+>>> Hi mark,
 >>>
+>>> I have tried reproducing the issue with latest master, so far no luck
+>>> with 128k and 512k block sizes on a 1000GB rbd image.
+>>> I couldn't find #5e07e5a3446ee39189c5b959be624411561175f5 in master,
+>>> are you using any private changes?
 >>>
->>> On Tue, Jun 28, 2016 at 10:38 PM, Ali Maredia <amaredia@redhat.com> wrote:
->>> > Alyona & Sage,
->>> >
->>> > I'm a little unclear on what wants to be accomplished.
->>> >
->>> > From what I understand we would add a new submodule, which is a fork of the original, that has the asm files renamed to asm.s.
->>> >
->>> > Would we need to make ISA-L build with CMake?
->>> >
->>> > That being said CMake should be able to handle it without any issues.
->>> >
->>> > I'd be glad to help out with any CMake the integration process/issues/questions for the new submodule.
->>> >
->>> > -Ali
->>> >
->>> > ----- Original Message -----
->>> > From: "Sage Weil" <sage@newdream.net>
->>> > To: "Alyona Kiselyova" <akiselyova@mirantis.com>
->>> > Cc: "Haomai Wang" <haomai@xsky.com>, ceph-devel@vger.kernel.org
->>> > Sent: Tuesday, June 28, 2016 10:17:31 AM
->>> > Subject: Re: How to propose plugin, which uses external lib
->>> >
->>> > On Tue, 28 Jun 2016, Alyona Kiselyova wrote:
->>> >> In this case I would like to propose isa-l extension for zlib plugin -
->>> >> https://github.com/ceph/ceph/compare/master...Ved-vampir:zlib_isal_extension?expand=1
->>> >> I think, it would be better to choose plugin type based on processor
->>> >> type, this variant is used in branch. To add tuned option on the step
->>> >> of plugin loading is possible too, but here we can get an assert in
->>> >> case, if processor type is not compatible. Or it will be better
->>> >> nevertheless to keep this option and leave error treatment for plugin
->>> >> user?
->>> >
->>> > You mean in the case where the user set zlib_use_isal=true but the
->>> > processor doesn't have the right features?  In that case we could just
->>> > ignore the option and fall back.
->>> >
->>> > But what you have here looks fine to me.
->>> >
->>> > Could you perhaps add a unit test that takes some random data
->>> > (/dev/urandom maybe?) and compresses without isal and decompressed
->>> > with, and the other way around, so we have confidence they are
->>> > bit-compatible?
->>> >
->>> >> About isa-l lib files. The only change, that I made to them, is
->>> >> renaming asm files to asm.s, but I suspect this restriction can be
->>> >> bypassed by some options in make/cmake files? In this way I think it
->>> >> would be better to create submodule repo for isa-l lib, because I'm
->>> >> still thinking, that just making a copy is not a very good way.
->>> >
->>> > Yeah, I'm happy to go the submodule route.  I expect making cmake handle
->>> > it is doable... Ali?
->>> >
->>> > sage
->>> >
->>> >
->>> >
->>> >> -------------------------------
->>> >> Best regards,
->>> >> Alyona Kiseleva
->>> >>
->>> >>
->>> >> On Fri, Jun 17, 2016 at 7:47 PM, Sage Weil <sage@newdream.net> wrote:
->>> >> > On Sat, 18 Jun 2016, Haomai Wang wrote:
->>> >> >> Cool, I guess it should be behavior better than others in intel platform.
->>> >> >>
->>> >> >> On Fri, Jun 17, 2016 at 11:51 PM, Alyona Kiselyova
->>> >> >> <akiselyova@mirantis.com> wrote:
->>> >> >> > Hi,
->>> >> >> > I would like to propose a new compression plugin, which is based on
->>> >> >> > Isa-l open source library
->>> >> >> > (https://github.com/01org/isa-l/tree/master/igzip). I already have a
->>> >> >> > code - https://github.com/Ved-vampir/ceph/tree/wip_isal_plugin/src/compressor/isal.
->>> >> >> > I see, that there are erasure-code plugin, based on isa-l too. As I
->>> >> >> > see, library code is not loaded as submodule repo, like some others.
->>> >> >
->>> >> > In this case, I assume the inflate/deflate encoding is compatible with
->>> >> > zlib.  If that's the case, I think we don't want to treat this as a
->>> >> > different compression type, but rather as an optimized
->>> >> > implementation of the same type.
->>> >> >
->>> >> > Not sure the best way to do that, though.  The simplest would probably be
->>> >> > to make the ZlibCompressor either use zlib or isal based on an option
->>> >> > and/or processor type.
->>> >> >
->>> >> >> > But if I'm right, I think, it's not the best way to use external code.
->>> >> >>
->>> >> >> Sorry, why it's not a best way?
->>> >> >>
->>> >> >> > The question is, what is the right way to use external library in my case?
->>> >> >>
->>> >> >> I think maybe we could make the whole
->>> >> >> repo(https://github.com/01org/isa-l) as submodule and make each dir
->>> >> >> used by different compoent?
->>> >> >
->>> >> > In the crc case we just copied the relevant asm files into the ceph repo.
->>> >> > That's probably not the best path, though.  I think we had to make some
->>> >> > minor changes to make them build, too.  :/
->>> >> >
->>> >> > sage
->>> >> --
->>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> >> the body of a message to majordomo@vger.kernel.org
->>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> >>
->>> >>
->>> > --
->>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> > the body of a message to majordomo@vger.kernel.org
->>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> I will try some more time today to reproduce the issue. Seems blob
+>>> map got corrupted in your case.
 >>>
+>>> Varada
 >>>
+>>> On Tuesday 05 July 2016 09:06 PM, Mark Nelson wrote:
+>>>> Hi Guys,
+>>>>
+>>>> This is primarily for Varada but if anyone else wants to take a look
+>>>> feel free.  We are hitting segfaults in tc_state_proc during random
+>>>> writes.  I was able to reproduce with logging enabled and got a core
+>>>> dump.  I've only briefly looked at the code/logs, but I haven't
+>>>> really looked through it in earnest yet.  Unfortunately the logs are
+>>>> about 4GB and the core dump is 2GB, so I'll only attach the last 10k lines.
+>>>> Hopefully it should be fairly reproducible.  I'll try to see if I
+>>>> can narrow down commits that have touched the write path over the
+>>>> last 4 weeks and see if anything looks relevant.
+>>>>
+>>>> Varada: let me know if you can reproduce.  Thanks!
+>>>>
+>>>> gdb bt:
+>>>>
+>>>>> (gdb) bt
+>>>>> #0  0x00007f9c59708fcb in raise (sig=11) at
+>>>>> ../nptl/sysdeps/unix/sysv/linux/pt-raise.c:37
+>>>>> #1  0x0000000000bd7505 in reraise_fatal (signum=11) at
+>>>>> /home/ubuntu/src/markhpc/ceph/src/global/signal_handler.cc:69
+>>>>> #2  handle_fatal_signal (signum=11) at
+>>>>> /home/ubuntu/src/markhpc/ceph/src/global/signal_handler.cc:133
+>>>>> #3  <signal handler called>
+>>>>> #4  next_node (node=<synthetic pointer>) at
+>>>>> /usr/include/boost/intrusive/detail/tree_algorithms.hpp:446
+>>>>> #5  next_node (p=<synthetic pointer>) at
+>>>>> /usr/include/boost/intrusive/rbtree_algorithms.hpp:352
+>>>>> #6  operator++ (this=<synthetic pointer>) at
+>>>>> /usr/include/boost/intrusive/detail/tree_node.hpp:128
+>>>>> #7  BlueStore::_txc_state_proc (this=this@entry=0xaff6000,
+>>>>> txc=txc@entry=0x192c8c80) at
+>>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4568
+>>>>> #8  0x0000000000aeddb7 in BlueStore::_txc_finish_io
+>>>>> (this=this@entry=0xaff6000, txc=txc@entry=0x192c8c80) at
+>>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4669
+>>>>> #9  0x0000000000aed23f in BlueStore::_txc_state_proc
+>>>>> (this=0xaff6000, txc=0x192c8c80) at
+>>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4559
+>>>>> #10 0x0000000000bc134a in KernelDevice::_aio_thread
+>>>>> (this=0xaf20960) at
+>>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/KernelDevice.cc:270
+>>>>> #11 0x0000000000bc588d in KernelDevice::AioCompletionThread::entry
+>>>>> (this=<optimized out>) at
+>>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/KernelDevice.h:49
+>>>>> #12 0x00007f9c59701dc5 in start_thread (arg=0x7f9c4da2e700) at
+>>>>> pthread_create.c:308
+>>>>> #13 0x00007f9c575fc28d in clone () at
+>>>>> ../sysdeps/unix/sysv/linux/x86_64/clone.S:113
+>>>>> (gdb) frame 7
+>>>>> #7  BlueStore::_txc_state_proc (this=this@entry=0xaff6000,
+>>>>> txc=txc@entry=0x192c8c80) at
+>>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4568
+>>>>> 4568for (auto& p : o->blob_map.blob_map) {
+>>>> Mark
+>>>
+>>> PLEASE NOTE: The information contained in this electronic mail
+>>> message is intended only for the use of the designated recipient(s)
+>>> named above. If the reader of this message is not the intended
+>>> recipient, you are hereby notified that you have received this
+>>> message in error and that any review, dissemination, distribution, or
+>>> copying of this message is strictly prohibited. If you have received
+>>> this communication in error, please notify the sender by telephone or
+>>> e-mail (as shown above) immediately and destroy any and all copies of
+>>> this message in your possession (whether hard copies or
+>>> electronically stored copies).
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
