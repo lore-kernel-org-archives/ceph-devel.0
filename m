@@ -1,36 +1,49 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Object watcher can't be deleted when primary goes to down
-Date: Thu, 7 Jul 2016 17:58:30 +0800
-Message-ID: <CALZt5jzC-FxZqzF06pv5r_Ve6T1GCUuZFw7_YOrR8qzbHOL=FQ@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: RBD volumes for bare-metal hosts
+Date: Thu, 7 Jul 2016 12:43:19 +0200
+Message-ID: <CAOi1vP_64+AqJ3viovav8G7EfWNu5vfQs5ORx1Q0xUG4FCMvDw@mail.gmail.com>
+References: <CA+H5UW2-RKn6aDfpjT1+hFHyNx7-kX1PoXxSV_sbT9zaCbJ2+w@mail.gmail.com>
+ <CAOi1vP_JFBXVEsQxTAkbtGR1WyXdoeev=--xT6gircBff5EAYw@mail.gmail.com> <CA+H5UW1_M+bDMu6xu9JL9Ojb6j3JihyTnQcFvMYb6BPU49dPUQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:34365 "EHLO
-	mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751475AbcGGJ6b (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jul 2016 05:58:31 -0400
-Received: by mail-qk0-f176.google.com with SMTP id t127so9844369qkf.1
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Jul 2016 02:58:31 -0700 (PDT)
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:35439 "EHLO
+	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751478AbcGGKnV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jul 2016 06:43:21 -0400
+Received: by mail-wm0-f42.google.com with SMTP id z126so143264989wme.0
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Jul 2016 03:43:20 -0700 (PDT)
+In-Reply-To: <CA+H5UW1_M+bDMu6xu9JL9Ojb6j3JihyTnQcFvMYb6BPU49dPUQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Yunchuan Wen <yunchuan.wen@kylin-cloud.com>
 
-Hi all,
+On Wed, Jul 6, 2016 at 2:21 AM, Radoslaw Zarzynski
+<rzarzynski@mirantis.com> wrote:
+> Hi Ilya,
+>
+> Thanks for the quick and detailed response.
+>
+> On Wed, Jul 6, 2016 at 1:41 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
+>> The code for exclusive-lock, object-map and fast-diff is pretty much
+>> ready.  We had a large prerequisite that had to go in before any of
+>> these and it's been merged into 4.7, so it's now a matter of review and
+>> more comprehensive testing.  deep-flatten isn't ready, but should
+>> follow shortly after.
+>
+> This sounds great.
+>
+>> No concrete plans for mirroring support yet.
+>
+> AFAIK the sole dependency for mirroring (from RBD volume
+> consumer's POV) is journaling that in turn requires exclusive-lock.
+> Having the last one in the code base opens a door for the whole
+> feature. The user-space daemon (rbd-mirror) and tooling might be
+> reused. Is that correct?
 
-Currently, Object watcher just register timeout callback function
-HandleWatchTimeout on primary OSD.
-However, If primary OSD and rbd client becomes down at the time (If
-virtual machine and ceph-osd is on the same physical server) ,  then
-the replica OSD will leave the watcher there until the Object is
-accessed and populate the watcher again. So eventually, if we want to
-remove the unused image, it will return error saying image is still
-busy because the watcher is still there.
-Currently, if we want to find out the object containing watchers, we
-need to scan all objects so that it is unreasonable to do that. But I
-think it is reasonable to remove the watcher normally in this case,
-otherwise client will get wrong information about whether the image is
-busy. So we can record the watcher information in omap and retrieve
-the information the cluster restart or something primary OSD is down?
+Yes, that should be correct.
 
-Regards
-Ning Yao
+Thanks,
+
+                Ilya
