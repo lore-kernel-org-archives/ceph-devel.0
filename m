@@ -1,7 +1,7 @@
-From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Subject: RE: segfault in bluestore during random writes
-Date: Thu, 7 Jul 2016 08:53:07 +0000
-Message-ID: <6AA21C22F0A5DA478922644AD2EC308C373B4B36@SHSMSX101.ccr.corp.intel.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: Re: segfault in bluestore during random writes
+Date: Thu, 7 Jul 2016 08:30:43 +0000
+Message-ID: <BLUPR0201MB1908EF2D0EF0D05D452016E4E23B0@BLUPR0201MB1908.namprd02.prod.outlook.com>
 References: <0b69c134-ffa9-1918-b4f5-ca9cc0cd7fbe@redhat.com>
  <BLUPR0201MB1908E4B6055CAF348E4B8703E23A0@BLUPR0201MB1908.namprd02.prod.outlook.com>
  <bc890855-35dc-223b-b44c-fa1e677babcb@redhat.com>
@@ -10,32 +10,24 @@ References: <0b69c134-ffa9-1918-b4f5-ca9cc0cd7fbe@redhat.com>
  <bff138a5-edf4-89c5-3456-00fd8b0b679c@redhat.com>
  <BL2PR02MB211526CD238E75118F88A573F43A0@BL2PR02MB2115.namprd02.prod.outlook.com>
  <6AA21C22F0A5DA478922644AD2EC308C373B4AFA@SHSMSX101.ccr.corp.intel.com>
- <BLUPR0201MB1908EF2D0EF0D05D452016E4E23B0@BLUPR0201MB1908.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:33894 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756993AbcGGIxL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jul 2016 04:53:11 -0400
-In-Reply-To: <BLUPR0201MB1908EF2D0EF0D05D452016E4E23B0@BLUPR0201MB1908.namprd02.prod.outlook.com>
+Received: from mail-sn1nam01on0044.outbound.protection.outlook.com ([104.47.32.44]:23829
+	"EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751722AbcGGJED convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jul 2016 05:04:03 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Varada Kari <Varada.Kari@sandisk.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
-
-My case isn't overlap. This because one modify blob_map and one read. 
-
------Original Message-----
-From: Varada Kari [mailto:Varada.Kari@sandisk.com] 
-Sent: Thursday, July 7, 2016 4:31 PM
-To: Ma, Jianpeng <jianpeng.ma@intel.com>; Somnath Roy <Somnath.Roy@sandisk.com>; Mark Nelson <mnelson@redhat.com>; ceph-devel <ceph-devel@vger.kernel.org>
-Subject: Re: segfault in bluestore during random writes
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
 One more observation on the same lines as Ma Jianpeng,
 
-For the same onode i see 17 references and 16 flushing_txns. I think we are getting parallel txns running on the same object.
+For the same onode i see 17 references and 16 flushing_txns. I think we
+are getting parallel txns running on the same object.
 (gdb) p *(o.px)
 $8 = {
   nref = {
@@ -64,8 +56,12 @@ flush_txns = std::set with 16 elements = {
     [14] = 0x7fdc0ca12a80,
     [15] = 0x7fdc12c2f480
 
-I have written my object with 8K before and overwriting with 64k now, which is showing this behavior.
-But does allowing parallel writes harm if they are writing to different offset and length and guarantee the order? we can check the overlap and not allow write if they have a overlap, else we are okay to run parallel writes to the object.
+I have written my object with 8K before and overwriting with 64k now,
+which is showing this behavior.
+But does allowing parallel writes harm if they are writing to different
+offset and length and guarantee the order? we can check the overlap and
+not allow write if they have a overlap, else we are okay to run parallel
+writes to the object.
 In this case we are missing some locking while updating the blob_map.
 Still not able to figure of the exact location.
 
@@ -179,22 +175,15 @@ On Thursday 07 July 2016 01:23 PM, Ma, Jianpeng wrote:
 > 3306073     -1> 2016-07-07 23:48:12.542979 7f7f4449c700 10 bluestore(/mnt/ceph/build/dev/osd2) queue_transactions existing 0xac78760 osr(0.4f 0xb6d2d80)
 > 3306074      0> 2016-07-07 23:48:12.547121 7f7f55cbf700 -1 *** Caught signal (Segmentation fault) **
 > 3306075  in thread 7f7f55cbf700 thread_name:bstore_aio
-> 3306076
-> 3306077  ceph version v11.0.0-373-g7dedce8 
-> (7dedce8a6e0474d4d14f9aa509428bab84d075af)
+> 3306076 
+> 3306077  ceph version v11.0.0-373-g7dedce8 (7dedce8a6e0474d4d14f9aa509428bab84d075af)
 > 3306078  1: /mnt/ceph/build/bin/ceph-osd() [0xc329ae]
 > 3306079  2: (()+0x10a00) [0x7f7f62923a00]
-> 3306080  3: 
-> (BlueStore::_txc_state_proc(BlueStore::TransContext*)+0x8cb) 
-> [0xb4798b]
-> 3306081  4: 
-> (BlueStore::_txc_finish_io(BlueStore::TransContext*)+0x1bf) [0xb4801f]
-> 3306082  5: 
-> (BlueStore::_txc_state_proc(BlueStore::TransContext*)+0x27f) 
-> [0xb4733f]
+> 3306080  3: (BlueStore::_txc_state_proc(BlueStore::TransContext*)+0x8cb) [0xb4798b]
+> 3306081  4: (BlueStore::_txc_finish_io(BlueStore::TransContext*)+0x1bf) [0xb4801f]
+> 3306082  5: (BlueStore::_txc_state_proc(BlueStore::TransContext*)+0x27f) [0xb4733f]
 > 3306083  6: (KernelDevice::_aio_thread()+0x912) [0xc1a872]
-> 3306084  7: (KernelDevice::AioCompletionThread::entry()+0xd) 
-> [0xc1d81d]
+> 3306084  7: (KernelDevice::AioCompletionThread::entry()+0xd) [0xc1d81d]
 > 3306085  8: (()+0x761a) [0x7f7f6291a61a]
 > 3306086  9: (clone()+0x6d) [0x7f7f6059959d]
 > 3306087  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
@@ -210,11 +199,9 @@ On Thursday 07 July 2016 01:23 PM, Ma, Jianpeng wrote:
 >
 >
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
 > Sent: Wednesday, July 6, 2016 10:48 PM
-> To: Mark Nelson <mnelson@redhat.com>; Varada Kari 
-> <Varada.Kari@sandisk.com>; ceph-devel <ceph-devel@vger.kernel.org>
+> To: Mark Nelson <mnelson@redhat.com>; Varada Kari <Varada.Kari@sandisk.com>; ceph-devel <ceph-devel@vger.kernel.org>
 > Subject: RE: segfault in bluestore during random writes
 >
 > I got it ~6/23 , so we need to look for commits before that..
@@ -262,8 +249,8 @@ On Thursday 07 July 2016 01:23 PM, Ma, Jianpeng wrote:
 >>>>
 >>>> I have tried reproducing the issue with latest master, so far no 
 >>>> luck with 128k and 512k block sizes on a 1000GB rbd image.
->>>> I couldn't find #5e07e5a3446ee39189c5b959be624411561175f5 in 
->>>> master, are you using any private changes?
+>>>> I couldn't find #5e07e5a3446ee39189c5b959be624411561175f5 in master, 
+>>>> are you using any private changes?
 >>>>
 >>>> I will try some more time today to reproduce the issue. Seems blob 
 >>>> map got corrupted in your case.
@@ -277,8 +264,8 @@ On Thursday 07 July 2016 01:23 PM, Ma, Jianpeng wrote:
 >>>>> look feel free.  We are hitting segfaults in tc_state_proc during 
 >>>>> random writes.  I was able to reproduce with logging enabled and 
 >>>>> got a core dump.  I've only briefly looked at the code/logs, but I 
->>>>> haven't really looked through it in earnest yet.  Unfortunately 
->>>>> the logs are about 4GB and the core dump is 2GB, so I'll only attach the last 10k lines.
+>>>>> haven't really looked through it in earnest yet.  Unfortunately the 
+>>>>> logs are about 4GB and the core dump is 2GB, so I'll only attach the last 10k lines.
 >>>>> Hopefully it should be fairly reproducible.  I'll try to see if I 
 >>>>> can narrow down commits that have touched the write path over the 
 >>>>> last 4 weeks and see if anything looks relevant.
@@ -312,10 +299,8 @@ On Thursday 07 July 2016 01:23 PM, Ma, Jianpeng wrote:
 >>>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueStore.cc:4559
 >>>>>> #10 0x0000000000bc134a in KernelDevice::_aio_thread
 >>>>>> (this=0xaf20960) at
->>>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/KernelDevice.cc:27
->>>>>> 0
->>>>>> #11 0x0000000000bc588d in 
->>>>>> KernelDevice::AioCompletionThread::entry
+>>>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/KernelDevice.cc:270
+>>>>>> #11 0x0000000000bc588d in KernelDevice::AioCompletionThread::entry
 >>>>>> (this=<optimized out>) at
 >>>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/KernelDevice.h:49
 >>>>>> #12 0x00007f9c59701dc5 in start_thread (arg=0x7f9c4da2e700) at
@@ -335,9 +320,9 @@ On Thursday 07 July 2016 01:23 PM, Ma, Jianpeng wrote:
 >>>> message in error and that any review, dissemination, distribution, 
 >>>> or copying of this message is strictly prohibited. If you have 
 >>>> received this communication in error, please notify the sender by 
->>>> telephone or e-mail (as shown above) immediately and destroy any 
->>>> and all copies of this message in your possession (whether hard 
->>>> copies or electronically stored copies).
+>>>> telephone or e-mail (as shown above) immediately and destroy any and 
+>>>> all copies of this message in your possession (whether hard copies 
+>>>> or electronically stored copies).
 >>>>
 >>> --
 >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
@@ -350,8 +335,6 @@ On Thursday 07 July 2016 01:23 PM, Ma, Jianpeng wrote:
 >> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 >>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 
