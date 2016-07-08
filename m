@@ -1,77 +1,102 @@
-From: Patrick McLean <patrickm@gaikai.com>
-Subject: deadlocks in rbd unmap and map
-Date: Thu, 7 Jul 2016 18:28:52 -0700
-Message-ID: <CAE2NFgVL6_+6JmW7aFO+v3j37BFnxXEneaOHk0eOCx-Vj1pAOA@mail.gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: yet another assertion in bluestore during random write
+Date: Fri, 8 Jul 2016 13:39:18 +0300
+Message-ID: <c8078e34-836e-6383-7540-d5fea731efb2@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f180.google.com ([209.85.223.180]:35955 "EHLO
-	mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753408AbcGHB2x (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jul 2016 21:28:53 -0400
-Received: by mail-io0-f180.google.com with SMTP id l202so34669842ioe.3
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Jul 2016 18:28:53 -0700 (PDT)
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:36587 "EHLO
+	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754046AbcGHKjW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jul 2016 06:39:22 -0400
+Received: by mail-lf0-f47.google.com with SMTP id q132so26877798lfe.3
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Jul 2016 03:39:21 -0700 (PDT)
+Received: from [172.18.12.66] ([91.218.144.129])
+        by smtp.googlemail.com with ESMTPSA id h191sm8085926lfh.0.2016.07.08.03.39.19
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 08 Jul 2016 03:39:19 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is on linus git master as of 2016/07/01
+Hi All,
 
-These appear to be two separate deadlocks, one on a a map operation,
-and one on an unmap operation. We can reproduce these pretty
-regularly, but it seems like there is some sort of race condition, as
-it happens no where near every time.
 
-We are currently working to reproduce on a kernel with lockdep
-enabled, as well as better debugging information. Please let me know
-if I can provide any more information.
+as I mentioned during yesterday's bluestore syncup I observed another 
+issue with bluestore during random write.
 
-# grep -C 40 rbd /proc/*/stack
-/proc/14109/stack-[<ffffffff8111c7c4>] __queue_work+0x144/0x420
-/proc/14109/stack-[<ffffffff8112c1c0>] default_wake_function+0x0/0x10
-/proc/14109/stack:[<ffffffffa01561ee>]
-rbd_obj_method_sync.constprop.48+0x1be/0x290 [rbd]
-/proc/14109/stack:[<ffffffffa0156aea>] rbd_dev_header_info+0x15a/0x930 [rbd]
-/proc/14109/stack:[<ffffffffa0157450>] rbd_watch_cb+0x0/0xa0 [rbd]
-/proc/14109/stack:[<ffffffffa0157586>]
-rbd_dev_image_probe.part.42+0x96/0x910 [rbd]
-/proc/14109/stack:[<ffffffffa015640e>] rbd_dev_image_id+0x14e/0x1b0 [rbd]
-/proc/14109/stack:[<ffffffffa015828f>] do_rbd_add.isra.43+0x48f/0xbb0 [rbd]
-/proc/14109/stack-[<ffffffff8123ba27>] __kmalloc+0x27/0x170
-/proc/14109/stack-[<ffffffff812b7f3a>] kernfs_fop_write+0x10a/0x190
-/proc/14109/stack-[<ffffffff8124dc63>] __vfs_write+0x23/0x120
-/proc/14109/stack-[<ffffffff8124e8f3>] vfs_write+0xb3/0x1a0
-/proc/14109/stack-[<ffffffff8124fbd2>] SyS_write+0x42/0xa0
-/proc/14109/stack-[<ffffffff81816f72>] entry_SYSCALL_64_fastpath+0x1a/0xa4
-/proc/14109/stack-[<ffffffffffffffff>] 0xffffffffffffffff
---
-/proc/29744/stack-[<ffffffff813c7c63>] call_rwsem_down_write_failed+0x13/0x20
-/proc/29744/stack:[<ffffffffa01572dd>] rbd_dev_refresh+0x1d/0xf0 [rbd]
-/proc/29744/stack:[<ffffffffa0157413>] rbd_watch_errcb+0x33/0x70 [rbd]
-/proc/29744/stack-[<ffffffffa0126a2e>] do_watch_error+0x2e/0x40 [libceph]
-/proc/29744/stack-[<ffffffff8111d935>] process_one_work+0x145/0x3c0
-/proc/29744/stack-[<ffffffff8111dbfa>] worker_thread+0x4a/0x470
-/proc/29744/stack-[<ffffffff8111dbb0>] worker_thread+0x0/0x470
-/proc/29744/stack-[<ffffffff81122e4d>] kthread+0xbd/0xe0
-/proc/29744/stack-[<ffffffff8181717f>] ret_from_fork+0x1f/0x40
-/proc/29744/stack-[<ffffffff81122d90>] kthread+0x0/0xe0
-/proc/29744/stack-[<ffffffffffffffff>] 0xffffffffffffffff
---
-/proc/3426/stack-[<ffffffff8115ea31>] try_to_del_timer_sync+0x41/0x60
-/proc/3426/stack-[<ffffffff8115ea94>] del_timer_sync+0x44/0x50
-/proc/3426/stack-[<ffffffff8112c1c0>] default_wake_function+0x0/0x10
-/proc/3426/stack-[<ffffffff8111b35f>] flush_workqueue+0x12f/0x540
-/proc/3426/stack:[<ffffffffa015376b>] do_rbd_remove.isra.25+0xfb/0x190 [rbd]
-/proc/3426/stack-[<ffffffff812b7f3a>] kernfs_fop_write+0x10a/0x190
-/proc/3426/stack-[<ffffffff8124dc63>] __vfs_write+0x23/0x120
-/proc/3426/stack-[<ffffffff8124e8f3>] vfs_write+0xb3/0x1a0
-/proc/3426/stack-[<ffffffff8124fbd2>] SyS_write+0x42/0xa0
-/proc/3426/stack-[<ffffffff81816f72>] entry_SYSCALL_64_fastpath+0x1a/0xa4
-/proc/3426/stack-[<ffffffffffffffff>] 0xffffffffffffffff
+Here is the backtrace:
 
- # ps aux | egrep '(14109|29744|3426)'
-root      3426  0.0  0.0 181256 10488 ?        Dl   Jul06   0:00 rbd
-unmap /dev/rbd0
-root     14109  0.0  0.0 246704 10228 ?        Sl   Jul03   0:01 rbd
-map --pool XXXX XXXXXXX
-root     29744  0.0  0.0      0     0 ?        D    Jul05   0:00 [kworker/u16:2]
+      0> 2016-07-07 17:05:10.520543 7ff393dbf700 -1 
+os/bluestore/BlueFS.cc: In function 'int BlueFS::_allocate(unsigned int, 
+uint64_t, std::vector<bluefs_extent_t>*)' thread 7ff393dbf700 time 
+2016-07-07 17:05:10.507412
+os/bluestore/BlueFS.cc: 1398: FAILED assert(0 == "allocate failed... wtf")
+
+  ceph version 11.0.0-289-g173e5a6 
+(173e5a6d85f624a714c0029db6f828cb1968cf3d)
+  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char 
+const*)+0x82) [0x7ff3a9833452]
+  2: (BlueFS::_allocate(unsigned int, unsigned long, 
+std::vector<bluefs_extent_t, std::allocator<bluefs_extent_t> >*)+0x760) 
+[0x7ff3a95186e0]
+  3: (BlueFS::_compact_log()+0xd9b) [0x7ff3a951ba8b]
+  4: (BlueFS::_maybe_compact_log()+0x2a0) [0x7ff3a951c510]
+  5: (BlueFS::sync_metadata()+0x20f) [0x7ff3a951d77f]
+  6: (BlueRocksDirectory::Fsync()+0xd) [0x7ff3a95300dd]
+  7: (rocksdb::DBImpl::WriteImpl(rocksdb::WriteOptions const&, 
+rocksdb::WriteBatch*, rocksdb::WriteCallback*, unsigned long*, unsigned 
+long, bool)+0x14e1) [0x7ff3a95ea281]
+  8: (rocksdb::DBImpl::Write(rocksdb::WriteOptions const&, 
+rocksdb::WriteBatch*)+0x1b) [0x7ff3a95eae1b]
+  9: 
+(RocksDBStore::submit_transaction_sync(std::shared_ptr<KeyValueDB::TransactionImpl>)+0x6b) 
+[0x7ff3a95b7d7b]
+  10: (BlueStore::_kv_sync_thread()+0x167b) [0x7ff3a942aefb]
+  11: (BlueStore::KVSyncThread::entry()+0xd) [0x7ff3a944af5d]
+  12: (()+0x80a5) [0x7ff3a7a170a5]
+  13: (clone()+0x6d) [0x7ff3a58f9cfd]
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
+needed to interpret this.
+
+Looks like bitmap allocator returns a failure at some moment.
+
+My environment:
+
+* Ceph cluster run via vstart.sh.
+
+*rbd image created via:
+
+./rbd create --size 1024 -c ceph.conf --image-feature layering fio_test
+./rbd map -c ceph.conf fio_test
+
+* fio script is as follows:
+
+[global]
+
+[rbd_iodepth32]
+ioengine=libaio
+iodepth=32
+filename=/dev/rbd12
+size=1m
+io_size=8192m
+bs=128k
+rw=randwrite
+numjobs=3
+
+
+Bug is easily reproducible with the script when bluestore allocator is 
+set to bitmap (by default). I was unable to reproduce the issue with 
+stupid allocator hence I suppose it's rather bitmap allocator internal 
+issue. Maybe some leaks as it occurs rather by the end of the FIO script?
+
+  One should apply bluestore patch I posted yesterday prior to reproduce 
+this issue as one can hit another bug otherwise.
+
+
+Thanks,
+
+Igor
+
