@@ -1,74 +1,309 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: drop i386 support
-Date: Mon, 11 Jul 2016 09:42:25 -0400
-Message-ID: <CAC-Np1wm16Ljt17w6fZN6-oxtEfWCGz-Ve6JtdZqiLnAFBqL_w@mail.gmail.com>
-References: <CAJE9aONDn6S+8e7GNDpLX+6YaqSSEpQcFUDH_WeCXZrHfePAhg@mail.gmail.com>
- <20160711073205.GA14502@predictor> <1382742234.736.1468223238352@ox.pcextreme.nl>
- <alpine.DEB.2.11.1607111256190.2776@piezo.us.to>
+From: Sebastien Ponce <sebastien.ponce@cern.ch>
+Subject: Re: libradosstriper
+Date: Mon, 11 Jul 2016 14:35:47 +0200
+Message-ID: <1468240547.32193.1.camel@cern.ch>
+References: <alpine.DEB.2.11.1606272216370.7088@piezo.us.to>
+	 <CAN=+7FVmmgAuVF6cjwvGdyAU4YEXr8jLX-qiNjH50w6_YMs02g@mail.gmail.com>
+	 <1467084445.32200.8.camel@cern.ch>
+	 <CAN=+7FXrt6Y=TPRRdjkXZathXXKneV0eqT5VA6hQ5LOrxKoF3Q@mail.gmail.com>
+	 <1467212620.603.13.camel@cern.ch>
+	 <CAN=+7FWi1pMFa-=fYYiaaNNyaKmm_8E8dbQOOdOwdTz5n8x34A@mail.gmail.com>
+	 <1467215067.603.20.camel@cern.ch>
+	 <CAN=+7FXwB45kLA+W7U_cyWkEOtykGpuYXXGv2Xh9wkBo_sXLMQ@mail.gmail.com>
+	 <1467272860.390.5.camel@cern.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:35872 "EHLO
-	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751093AbcGKNm1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jul 2016 09:42:27 -0400
-Received: by mail-wm0-f45.google.com with SMTP id f126so91071857wma.1
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Jul 2016 06:42:27 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1607111256190.2776@piezo.us.to>
+Received: from mail-db5eur01on0084.outbound.protection.outlook.com ([104.47.2.84]:6011
+	"EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1030674AbcGKOKy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 11 Jul 2016 10:10:54 -0400
+In-Reply-To: <1467272860.390.5.camel@cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Wido den Hollander <wido@42on.com>, =?UTF-8?B?UGlvdHIgRGHFgmVr?= <branch@predictor.org.pl>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>
+Cc: "Weil, Sage" <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-On Mon, Jul 11, 2016 at 8:58 AM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 11 Jul 2016, Wido den Hollander wrote:
->> > Op 11 juli 2016 om 9:32 schreef Piotr Da=C5=82ek <branch@predictor=
-=2Eorg.pl>:
->> > On Mon, Jul 11, 2016 at 02:57:12PM +0800, kefu chai wrote:
->> > > Hi Cephers,
->> > >
->> > > I am proposing drop the support of i386. as we don't compile Cep=
-h with
->> > > any i386 gitbuilder now[1] and hence don't test the i386 builds =
-on
->> > > sepia on a regular basis. Also, based on the assumption that peo=
-ple
->> > > don't use i386 in production, I think we can drop it from the mi=
-nimum
->> > > hardware document[2]?
->> > >
->> > > And we won't explicitly disable the i386 build in code if we dec=
-ide to
->> > > drop the i386 support, as we always try to be portable if possib=
-le.
->> > > But just don't claim the i386 as the officially supported arch
->> > > anymore.
->> > >
->> > > What do you think?
->> >
->> > +1 from my side. Regular users are on amd64, and those willing to =
-run on
->> > small devices are using ARM anyway.
->> >
->>
->> Indeed. In my experience I have never seen a cluster run on i386.
->>
->> +1 from my side to drop i386.
->
-> Yep.
->
-> The only value is the i386 builder, which serves as a canary for 32-b=
-it
-> build issues, and is a more convenient that building on 32-bit arm
-> hardware.  So +.5 from me to keeping the builder around...
+Anyone wanting to review the pool request mentioned below ?
+Would be nice if it could be included in the next release.
 
-We also don't build i386 releases anymore (at least for a couple of yea=
-rs now)
+Sebastien
 
 
->
-> sage
+On Thu, 2016-06-30 at 09:47 +0200, Sebastien Ponce wrote:
+> I would even use the same pool, as this is perfectly allowed. Will
+> look at this next week.
+>=20
+> On another topic, I've just created a pull request for the
+> improvements done on librados and libradosstriper around async calls
+> :=C2=A0https://github.com/ceph/ceph/pull/10049. Could somebody review=
+ it ?
+>=20
+> Also, I've added tests for the new calls, tried them and noticed that
+> some tests of the rados test suite concerning writesame are failing
+> right now.
+>=20
+> Sebastien
+>=20
+>=20
+> On Wed, 2016-06-29 at 10:16 -0700, Samuel Just wrote:
+> >=20
+> > Makes sense.=C2=A0 I guess they'd have to pull from distinct name p=
+ools?
+> > -Sam
+> > On Jun 29, 2016 8:45 AM, "Sebastien Ponce" <sebastien.ponce@cern.ch
+> > >
+> > wrote:
+> > >=20
+> > > Oh I see, I did not know this one indeed.
+> > > I used the flag approach for the rados command line and it was
+> > > really
+> > > easy, as the API is identical, you only have to use a Striper
+> > > object
+> > > instead of an IOContext.
+> > > Now looking at the RadosModel class, I see that the user API
+> > > (like
+> > > read/write/aio_read,...) is almost not used. Almost everything
+> > > goes
+> > > through the aio_operate calls wich are not present in Striper.
+> > > So I believe the simplest would be to add a couple of=C2=A0TestOp=
+Type,
+> > > namely 5 of them :
+> > > TEST_OP_READ/WRITE/DELETE/SETXATTR/RMXATTR_STRIPER
+> > > and implement the corresponding classes inheriting from TestOp.
+> > > This would also have the advantage to mix striped and regular
+> > > objects
+> > > in the test, which is absolutely valid and thus should be tested.
+> > >=20
+> > > Sebastien
+> > >=20
+> > >=20
+> > > On Wed, 2016-06-29 at 08:30 -0700, Samuel Just wrote:
+> > > >=20
+> > > > Ah, sorry.=C2=A0=C2=A0See src/test/osd/RadosModel.* and
+> > > > src/test/osd/TestRados.cc.=C2=A0=C2=A0It's gotten to be a somew=
+hat kludgy
+> > > mess,
+> > > >=20
+> > > > but it's a really valuable stress test for verifying that the
+> > > > osd
+> > > and
+> > > >=20
+> > > > librados are behaving properly, especially when combined with
+> > > failure
+> > > >=20
+> > > > injection and osd thrashing.=C2=A0=C2=A0I'd like to either crea=
+te a (less
+> > > > kludgy, I can only hope) seperate version for librados striper,
+> > > or
+> > > >=20
+> > > > add
+> > > > a flag to the existing one which causes it to use the striper
+> > > instead
+> > > >=20
+> > > > (and only allows ops where it makes sense).=C2=A0=C2=A0librados=
+striper
+> > > should
+> > > >=20
+> > > > have the same ordering properties for piplined writes as normal
+> > > > librados (right?), so modifying the existing test would
+> > > > probably
+> > > get
+> > > >=20
+> > > > us the most coverage for the least effort.
+> > > > -Sam
+> > > >=20
+> > > > On Wed, Jun 29, 2016 at 8:03 AM, Sebastien Ponce
+> > > > <sebastien.ponce@cern.ch> wrote:
+> > > > >=20
+> > > > >=20
+> > > > > Well, I'm not sure what you are exactly looking for : I see
+> > > > > now
+> > > > > that I
+> > > > > look more carefully that there is a file called
+> > > > > ceph_test_rados
+> > > > > that
+> > > > > looks like a wrapper around the ceph_test_rados_* tests.
+> > > > > The equivalent does not seem to exist for striper (although
+> > > > > the
+> > > > > same
+> > > > > wrapper would probably work), but the
+> > > > > ceph_test_rados_striper_*
+> > > > > tests
+> > > > > do exist.
+> > > > > Should we/I create a wrapper for striper ? I'm not sure I
+> > > > > have
+> > > the
+> > > >=20
+> > > > >=20
+> > > > > whole understanding of the structure of the whole test
+> > > system...
+> > > >=20
+> > > > >=20
+> > > > >=20
+> > > > > Sebastien
+> > > > >=20
+> > > > >=20
+> > > > > On Tue, 2016-06-28 at 09:07 -0700, Samuel Just wrote:
+> > > > > >=20
+> > > > > >=20
+> > > > > > I don't remember anything like ceph_test_rados which uses
+> > > > > > libradosstriper.=C2=A0=C2=A0Did I miss it?
+> > > > > > -Sam
+> > > > > >=20
+> > > > > > On Mon, Jun 27, 2016 at 8:27 PM, Sebastien Ponce
+> > > > > > <sebastien.ponce@cern.ch> wrote:
+> > > > > > >=20
+> > > > > > >=20
+> > > > > > >=20
+> > > > > > > Would be great indeed. As it's already there, it can be
+> > > done
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > >=20
+> > > > > > > already
+> > > > > > > now.
+> > > > > > >=20
+> > > > > > > Sebastien
+> > > > > > >=20
+> > > > > > > On Mon, 2016-06-27 at 15:25 -0700, Samuel Just wrote:
+> > > > > > > >=20
+> > > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > The something like ceph_test_rados could then be wired
+> > > into
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > ceph-qa-suite to be tested with osd thrashing to ensure
+> > > that
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > ordering
+> > > > > > > > works and continues to work as expected.
+> > > > > > > > -Sam
+> > > > > > > >=20
+> > > > > > > > On Mon, Jun 27, 2016 at 3:18 PM, Sage Weil <sweil@redha
+> > > > > > > > t.
+> > > com>
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > wrote:
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > > Hi Sebastien,
+> > > > > > > > >=20
+> > > > > > > > > Do you mind updating us on the current status of
+> > > > > > > > > libradosstriper?=C2=A0=C2=A0Where
+> > > > > > > > > does it stand feature-wise with what you need, how
+> > > > > > > > > are
+> > > you
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > > currently using
+> > > > > > > > > it or how do you plan to use it, and what is still
+> > > missing?
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > > Also, one thing we really want to see is test
+> > > > > > > > > coverage
+> > > for
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > > the
+> > > > > > > > > code
+> > > > > > > > > so
+> > > > > > > > > that we can comfortably point users toward it.=C2=A0=C2=
+=A0This
+> > > > > > > > > ideally
+> > > > > > > > > would
+> > > > > > > > > look
+> > > > > > > > > something like the ceph_test_rados_api_* tests that
+> > > verify
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > > individual
+> > > > > > > > > operations behave as expected, and/or something like
+> > > > > > > > > ceph_test_rados that
+> > > > > > > > > throws random operations at is and verifies it
+> > > > > > > > > returns
+> > > > > > > > > correct
+> > > > > > > > > results
+> > > > > > > > > that match its in-memory model.
+> > > > > > > > >=20
+> > > > > > > > > Thanks!
+> > > > > > > > > sage
+> > > > > > > > > --
+> > > > > > > > > To unsubscribe from this list: send the line
+> > > "unsubscribe
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > > ceph-
+> > > > > > > > > devel" in
+> > > > > > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > > > > > More majordomo info at=C2=A0=C2=A0http://vger.kernel.=
+org/majord
+> > > > > > > > > om
+> > > o-in
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > >=20
+> > > > > > > >=20
+> > > > > > > > >=20
+> > > > > > > > > fo.h
+> > > > > > > > > tml
+> > > > > > --
+> > > > > > To unsubscribe from this list: send the line "unsubscribe
+> > > ceph-
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > devel"
+> > > > > > in
+> > > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > > More majordomo info at=C2=A0=C2=A0http://vger.kernel.org/ma=
+jordomo-in
+> > > > > > fo
+> > > .htm
+> > > >=20
+> > > > >=20
+> > > > > >=20
+> > > > > > l
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
