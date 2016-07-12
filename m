@@ -1,77 +1,65 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: bluestore onode diet and encoding overhead
-Date: Tue, 12 Jul 2016 07:13:46 +0000
-Message-ID: <BL2PR02MB2115078CDAD92FC1F7612B35F4300@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
+From: Dongsheng Yang <dongsheng.yang@easystack.cn>
+Subject: Re: RBD volumes for bare-metal hosts
+Date: Tue, 12 Jul 2016 15:46:15 +0800
+Message-ID: <5784A047.20200@easystack.cn>
+References: <CA+H5UW2-RKn6aDfpjT1+hFHyNx7-kX1PoXxSV_sbT9zaCbJ2+w@mail.gmail.com>
+ <CAOi1vP_JFBXVEsQxTAkbtGR1WyXdoeev=--xT6gircBff5EAYw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn3nam01on0069.outbound.protection.outlook.com ([104.47.33.69]:38592
-	"EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750717AbcGLHNy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 12 Jul 2016 03:13:54 -0400
-In-Reply-To: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
-Content-Language: en-US
+Received: from mr213139.mail.yeah.net ([223.252.213.139]:37307 "EHLO
+	mr213139.mail.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750779AbcGLHqV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jul 2016 03:46:21 -0400
+In-Reply-To: <CAOi1vP_JFBXVEsQxTAkbtGR1WyXdoeev=--xT6gircBff5EAYw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>, Radoslaw Zarzynski <rzarzynski@mirantis.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Yunchuan Wen <yunchuan.wen@kylin-cloud.com>
 
-VGhhbmtzIE1hcmsgIQ0KWWVzLCBxdWl0ZSBzaW1pbGFyIHJlc3VsdCBJIGFtIGFsc28gc2VlaW5n
-IGZvciA0SyBSVy4gQlRXLCBkaWQgeW91IGdldCBjaGFuY2UgdG8gdHJ5IG91dCB0aGUgcm9ja3Nk
-YiB0dW5pbmcgSSBwb3N0ZWQgZWFybGllciA/IEl0IG1heSByZWR1Y2UgdGhlIHN0YWxscyBpbiB5
-b3VyIGVudmlyb25tZW50Lg0KDQpSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVz
-c2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRv
-OmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTWFyayBOZWxz
-b24NClNlbnQ6IFR1ZXNkYXksIEp1bHkgMTIsIDIwMTYgMTI6MDMgQU0NClRvOiBjZXBoLWRldmVs
-DQpTdWJqZWN0OiBibHVlc3RvcmUgb25vZGUgZGlldCBhbmQgZW5jb2Rpbmcgb3ZlcmhlYWQNCg0K
-SGkgQWxsLA0KDQpXaXRoIElnb3IncyBwYXRjaCBsYXN0IHdlZWsgSSB3YXMgYWJsZSB0byBnZXQg
-c29tZSBibHVlc3RvcmUgcGVyZm9ybWFuY2UgcnVucyBpbiB3aXRob3V0IHNlZ2ZhdWx0aW5nIGFu
-ZCBzdGFydGVkIGxvb2tpbmcgaW50IHRoZSByZXN1bHRzLg0KU29tZXdoZXJlIGFsb25nIHRoZSBs
-aW5lIHdlIHJlYWxseSBzY3Jld2VkIHVwIHJlYWQgcGVyZm9ybWFuY2UsIGJ1dCB0aGF0J3MgYW5v
-dGhlciB0b3BpYy4gIFJpZ2h0IG5vdyBJIHdhbnQgdG8gZm9jdXMgb24gcmFuZG9tIHdyaXRlcy4N
-CkJlZm9yZSB3ZSBwdXQgdGhlIG9ub2RlIG9uIGEgZGlldCB3ZSB3ZXJlIHNlZWluZyBtYXNzaXZl
-IGFtb3VudHMgb2YgcmVhZCB0cmFmZmljIGluIFJvY2tzREIgZHVyaW5nIGNvbXBhY3Rpb24gdGhh
-dCBjYXVzZWQgd3JpdGUgc3RhbGxzIGR1cmluZyA0SyByYW5kb20gd3JpdGVzLiAgUmFuZG9tIHdy
-aXRlIHBlcmZvcm1hbmNlIG9uIGZhc3QgaGFyZHdhcmUgbGlrZSBOVk1lIGRldmljZXMgd2FzIG9m
-dGVuIGJlbG93IGZpbGVzdG9yZSBhdCBhbnl0aGluZyBvdGhlciB0aGFuIHZlcnkgbGFyZ2UgSU8g
-c2l6ZXMuICBUaGlzIHdhcyBsYXJnZWx5IGR1ZSB0byB0aGUgc2l6ZSBvZiB0aGUgb25vZGUgY29t
-cG91bmRlZCB3aXRoIFJvY2tzREIncyB0ZW5kZW5jeSB0b3dhcmQgcmVhZCBhbmQgd3JpdGUgYW1w
-bGlmaWNhdGlvbi4NCg0KVGhlIG5ldyB0ZXN0IHJlc3VsdHMgbG9vayB2ZXJ5IHByb21pc2luZy4g
-IFdlJ3ZlIGRyYW1hdGljYWxseSBpbXByb3ZlZCBwZXJmb3JtYW5jZSBvZiByYW5kb20gd3JpdGVz
-IGF0IG1vc3QgSU8gc2l6ZXMsIHNvIHRoYXQgdGhleSBhcmUgbm93IHR5cGljYWxseSBxdWl0ZSBh
-IGJpdCBoaWdoZXIgdGhhbiBib3RoIGZpbGVzdG9yZSBhbmQgb2xkZXIgYmx1ZXN0b3JlIGNvZGUu
-ICBVbmZvcnR1bmF0ZWx5IGZvciB2ZXJ5IHNtYWxsIElPIHNpemVzIHBlcmZvcm1hbmNlIGhhc24n
-dCBpbXByb3ZlZCBtdWNoLiAgV2UgYXJlIG5vIGxvbmdlciBzZWVpbmcgaHVnZSBhbW91bnRzIG9m
-IFJvY2tzREIgcmVhZCB0cmFmZmljIGFuZCBmZXdlciB3cml0ZSBzdGFsbHMuICBXZSBhcmUgaG93
-ZXZlciBzZWVpbmcgaHVnZSBtZW1vcnkgdXNhZ2UgKH45R0IgUlNTIHBlciBPU0QpIGFuZCB2ZXJ5
-IGhpZ2ggQ1BVIHVzYWdlLiAgSSB0aGluayB0aGlzIGNvbmZpcm1zIHNvbWUgb2YgdGhlIG1lbW9y
-eSBpc3N1ZXMgc29tbmF0aCB3YXMgY29udGludWluZyB0byBzZWUuICBJIGRvbid0IHRoaW5rIGl0
-J3MgYSBsZWFrIGV4YWN0bHkgYmFzZWQgb24gaG93IHRoZSBPU0RzIHdlcmUgYmVoYXZpbmcsIGJ1
-dCB3ZSBuZWVkIHRvIHJ1biB0aHJvdWdoIG1hc3NpZiBzdGlsbCB0byBiZSBzdXJlLg0KDQpJIGVu
-ZGVkIHVwIHNwZW5kaW5nIHNvbWUgdGltZSB0b25pZ2h0IHdpdGggcGVyZiBhbmQgZGlnZ2luZyB0
-aHJvdWdoIHRoZSBlbmNvZGUgY29kZS4gIEkgd3JvdGUgdXAgc29tZSBub3RlcyB3aXRoIGdyYXBo
-cyBhbmQgY29kZSBzbmlwcGV0cyBhbmQgZGVjaWRlZCB0byBwdXQgdGhlbSB1cCBvbiB0aGUgd2Vi
-LiAgQmFzaWNhbGx5IHNvbWUgb2YgdGhlIGVuY29kaW5nIGNoYW5nZXMgd2UgaW1wbGVtZW50ZWQg
-bGFzdCBtb250aCB0byByZWR1Y2UgdGhlIG9ub2RlIHNpemUgYWxzbyBhcHBlYXIgdG8gcmVzdWx0
-IGluIG1vcmUgYnVmZmVyOjpsaXN0IGFwcGVuZHMgYW5kIHRoZSBhc3NvY2lhdGVkIG92ZXJoZWFk
-Lg0KSSd2ZSBiZWVuIHRyeWluZyB0byB0aGluayB0aHJvdWdoIHdheXMgdG8gaW1wcm92ZSB0aGUg
-c2l0dWF0aW9uIGFuZCB0aG91Z2h0IG90aGVyIHBlb3BsZSBtaWdodCBoYXZlIHNvbWUgaWRlYXMg
-dG9vLiAgSGVyZSdzIGEgbGluayB0byB0aGUgc2hvcnQgd3JpdGV1cDoNCg0KaHR0cHM6Ly9kcml2
-ZS5nb29nbGUuY29tL2ZpbGUvZC8wQjJnVEJacmtybnBaZUMwNGVrbG1NMkk0V2trL3ZpZXc/dXNw
-PXNoYXJpbmcNCg0KVGhhbmtzLA0KTWFyaw0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
-aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBv
-ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBp
-bmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNClBMRUFT
-RSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWls
-IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCBy
-ZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlz
-IG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0
-IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2
-aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNz
-YWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29t
-bXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9u
-ZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkg
-YW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhl
-ciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
+
+
+On 07/06/2016 07:41 AM, Ilya Dryomov wrote:
+> On Wed, Jul 6, 2016 at 12:16 AM, Radoslaw Zarzynski
+> <rzarzynski@mirantis.com> wrote:
+>> Hello Guys,
+>>
+>> I wonder about a method for providing bare-metal hosts with an access
+>> to RBD volumes.
+>>
+>> The most obvious solution is krbd. Unfortunately, it has a substantial
+>> feature gap in comparison to librbd [1][2]. exclusive-lock seems to be
+>> the basic dependency that should be satisfied to even start thinking
+>> about the rest. Is someone working on this feature? What are the plans
+>> in general?
+> The code for exclusive-lock, object-map and fast-diff is pretty much
+> ready.
+
+Hi Ilya,
+     Sounds great! But where can I read these code, I did not find it
+in https://github.com/ceph/ceph-client. could you give a reference
+for it. thanx a lot.
+
+Yang
+>   We had a large prerequisite that had to go in before any of
+> these and it's been merged into 4.7, so it's now a matter of review and
+> more comprehensive testing.  deep-flatten isn't ready, but should
+> follow shortly after.
+>
+> Note that you can disable all of these features dynamically and that
+> the image is perfectly usable with none of them enabled.  Unless you
+> have clones or discard a lot, in which case object-map can help, the
+> I/O path is the same.
+>
+> No concrete plans for mirroring support yet.
+>
+> Thanks,
+>
+>                  Ilya
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
