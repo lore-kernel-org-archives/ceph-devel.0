@@ -1,198 +1,112 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
+From: Mark Nelson <mnelson@redhat.com>
 Subject: Re: bluestore onode diet and encoding overhead
-Date: Tue, 12 Jul 2016 15:37:23 +0000
-Message-ID: <BLUPR0201MB1908E727D5A2DE924C7D8279E2300@BLUPR0201MB1908.namprd02.prod.outlook.com>
+Date: Tue, 12 Jul 2016 10:37:39 -0500
+Message-ID: <47766d61-03f4-b55b-6d08-c090747c54b6@redhat.com>
 References: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
- <BL2PR02MB2115078CDAD92FC1F7612B35F4300@BL2PR02MB2115.namprd02.prod.outlook.com>
- <56ae4a08-0f34-a843-3cbc-9832faddc030@redhat.com>
- <86ec3393-dfea-02df-df74-97cca42aaae1@mirantis.com>
- <e2538609-7724-5e2f-b71a-8a32c45f4479@redhat.com>
- <ad19ecba-2dab-6cb3-e193-0da3d5d06da8@mirantis.com>
- <fcd816f1-057d-7cc7-d989-4c8ee5ede2db@redhat.com>
- <BL2PR02MB2115FC2AABEC8FA6055680F5F4300@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <BLUPR0201MB1524775973993917A1A59078E8300@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2nam02on0072.outbound.protection.outlook.com ([104.47.38.72]:29872
-	"EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S933421AbcGLPh1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 12 Jul 2016 11:37:27 -0400
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:33406 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932331AbcGLPhm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 Jul 2016 11:37:42 -0400
+In-Reply-To: <BLUPR0201MB1524775973993917A1A59078E8300@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-VGhpcyBvbmUgc2VlbXMgdG8gYmUsIHdlIGhhdmUgc3BhY2UoZnJhZ21lbnRlZCkgZm9yIHRoZSBh
-bGxvY2F0aW9uLCBidXQKbm90IGFibGUgdG8gYWxsb2NhdGUgaW4gY29udGlndW91cyB3YXkuCkkg
-Y2FuIHJlcHJvZHVjZSB0aGlzIHByb2JsZW0gaW4gYSB1bml0IHRlc3QuIHdpbGwgY2hlY2sgd2l0
-aCBSYW1lc2ggb24gdGhhdC4KClZhcmFkYQoKCk9uIFR1ZXNkYXkgMTIgSnVseSAyMDE2IDA4OjQ1
-IFBNLCBTb21uYXRoIFJveSB3cm90ZToKPiBNYXJrLAo+IFJlY2VudGx5LCB0aGUgZGVmYXVsdCBh
-bGxvY2F0b3IgaXMgY2hhbmdlZCB0byBCaXRtYXAgYW5kIEkgc2F3IGl0IGlzIHJldHVybmluZyA8
-IDAgcmV0dXJuIHZhbHVlIG9ubHkgaW4gdGhlIGZvbGxvd2luZyBjYXNlLgo+Cj4gICBjb3VudCA9
-IG1fYml0X2FsbG9jLT5hbGxvY19ibG9ja3NfcmVzKG5ibGtzLCAmc3RhcnRfYmxrKTsKPiAgIGlm
-IChjb3VudCA9PSAwKSB7Cj4gICAgIHJldHVybiAtRU5PU1BDOwo+ICAgfQo+Cj4gU28sIGl0IHNl
-ZW1zIGl0IG1heSBub3QgYmUgdGhlIG1lbW9yeSBidXQgZGIgcGFydGl0aW9uIGlzIGdldHRpbmcg
-b3V0IG9mIHNwYWNlICg/KS4gSSBuZXZlciBmYWNlZCBpdCBzbyBmYXIgYXMgSSB3YXMgcnVubmlu
-ZyB3aXRoIDEwMEdCIG9mIGRiIHBhcnRpdGlvbiBtYXkgYmUuCj4gVGhlIGFtb3VudCBvZiBtZXRh
-ZGF0YSB3cml0ZSBnb2luZyBvbiB0byB0aGUgZGIgZXZlbiBhZnRlciBvbm9kZSBkaWV0IGlzIHN0
-YXJ0aW5nIGZyb20gfjFLIGFuZCBvdmVyIHRpbWUgaXQgaXMgcmVhY2hpbmcgPiA0ayBvciBzbyAo
-SSBjaGVja2VkIGZvciA0SyBSVykuIEl0IGlzIGdyb3dpbmcgYXMgZXh0ZW50cyBhcmUgZ3Jvd2lu
-Zy4gU28sIDggR0IgbWF5IG5vdCBiZSBlbm91Z2guCj4gSWYgdGhpcyBpcyB0cnVlLCBuZXh0IGNo
-YWxsZW5nZSBpcyAsIGhvdyB0byBhdXRvbWF0aWNhbGx5IChvciBkb2N1bWVudCkgdGhlIHNpemUg
-b2Ygcm9ja3NkYiBkYiBwYXJ0aXRpb24gYmFzZWQgb24gdGhlIGRhdGEgcGFydGl0aW9uIHNpemUu
-IEZvciBleGFtcGxlLCBpbiB0aGUgWlMgY2FzZSwgd2UgaGF2ZSBjYWxjdWxhdGVkIHRoYXQgd2Ug
-bmVlZCB+OUcgZGIgc3BhY2UgcGVyIFRCLiBXZSBuZWVkIHRvIGRvIHNpbWlsYXIgY2FsY3VsYXRp
-b24gZm9yIHJvY2tzYmQgYXMgd2VsbC4KPgo+IFRoYW5rcyAmIFJlZ2FyZHMKPiBTb21uYXRoCj4K
-Pgo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tCj4gRnJvbTogTWFyayBOZWxzb24gW21haWx0
-bzptbmVsc29uQHJlZGhhdC5jb21dCj4gU2VudDogVHVlc2RheSwgSnVseSAxMiwgMjAxNiA2OjAz
-IEFNCj4gVG86IElnb3IgRmVkb3RvdjsgU29tbmF0aCBSb3k7IGNlcGgtZGV2ZWwKPiBTdWJqZWN0
-OiBSZTogYmx1ZXN0b3JlIG9ub2RlIGRpZXQgYW5kIGVuY29kaW5nIG92ZXJoZWFkCj4KPiBJbiB0
-aGlzIGNhc2UgSSdtIGFzc2lnbmluZyBwZXIgT1NEOgo+Cj4gMUcgRGF0YSAoYmFzaWNhbGx5IHRo
-ZSB0b3AgbGV2ZWwgT1NEIGRpcikgMUcgV0FMIDhHIERCIDE0MEcgQmxvY2sKPgo+IE1hcmsKPgo+
-IE9uIDA3LzEyLzIwMTYgMDc6NTcgQU0sIElnb3IgRmVkb3RvdiB3cm90ZToKPj4gTWFyaywKPj4K
-Pj4geW91IGNhbiBmaW5kIG15IHBvc3QgbmFtZWQgJ3lldCBhbm90aGVyIGFzc2VydGlvbiBpbiBi
-bHVlc3RvcmUgZHVyaW5nCj4+IHJhbmRvbSB3cml0ZScgbGFzdCB3ZWVrLiBJdCBjb250YWlucyBz
-dGVwcyB0byByZXByb2R1Y2UgaW4gbXkgY2FzZS4KPj4KPj4gQWxzbyBJIGRpZCBzb21lIGludmVz
-dGlnYXRpb25zIChzdGlsbCBpbmNvbXBsZXRlIHRob3VnaCkgd2l0aCB0dW5pbmcKPj4gJ2JsdWVz
-dG9yZSBibG9jayBkYiBzaXplJyBhbmQgJ2JsdWVzdG9yZSBibG9jayB3YWwgc2l6ZScuIFNldHRp
-bmcgYm90aAo+PiB0byAyNTZNIGZpeGVzIHRoZSBpc3N1ZSBmb3IgbWUuCj4+Cj4+IEJ1dCBJJ20g
-c3RpbGwgdW5jZXJ0YWluIGlmIHRoYXQncyBhIGJ1ZyBvciBqdXN0IGluYXBwcm9wcmlhdGUgc2V0
-dGluZ3MuLi4KPj4KPj4KPj4gVGhhbmtzLAo+Pgo+PiBJZ29yCj4+Cj4+Cj4+IE9uIDEyLjA3LjIw
-MTYgMTU6NDgsIE1hcmsgTmVsc29uIHdyb3RlOgo+Pj4gT2gsIHRoYXQncyBnb29kIHRvIGtub3ch
-ICBIYXZlIHlvdSB0cmFja2VkIGl0IGRvd24gYXQgYWxsPyAgSSBub3RpY2VkCj4+PiBwcmV0dHkg
-ZXh0cmVtZSBtZW1vcnkgdXNhZ2Ugb24gdGhlIE9TRHMgc3RpbGwsIHNvIHRoYXQgbWlnaHQgYmUg
-cGFydAo+Pj4gb2YgaXQuICBJJ20gZG9pbmcgYSBtYXNzaWYgcnVuIG5vdy4KPj4+Cj4+PiBNYXJr
-Cj4+Pgo+Pj4gT24gMDcvMTIvMjAxNiAwNzo0MCBBTSwgSWdvciBGZWRvdG92IHdyb3RlOgo+Pj4+
-IFRoYXQncyBzaW1pbGFyIHRvIHdoYXQgSSBoYXZlIHdoaWxlIHJ1bm5pbmcgbXkgdGVzdCBjYXNl
-IHdpdGggdnN0YXJ0Li4uCj4+Pj4gV2l0aG91dCBTb21uYXRoJ3Mgc2V0dGluZ3MgdGhvdWdoLi4K
-Pj4+Pgo+Pj4+Cj4+Pj4gT24gMTIuMDcuMjAxNiAxNTozNCwgTWFyayBOZWxzb24gd3JvdGU6Cj4+
-Pj4+IEhpIFNvbW5hdGgsCj4+Pj4+Cj4+Pj4+IEkgYWNjaWRlbnRhbGx5IHNjcmV3ZWQgdXAgbXkg
-Zmlyc3QgcnVuIHdpdGggeW91ciBzZXR0aW5ncyBidXQgcmVyYW4KPj4+Pj4gbGFzdCBuaWdodC4g
-IFdpdGggeW91ciB0dW5pbmcgdGhlIE9TRHMgYXJlIGZhaWxpbmcgdG8gYWxsb2NhdGUgdG8KPj4+
-Pj4gYmRldjAgYWZ0ZXIgYWJvdXQgMzAgbWludXRlcyBvZiB0ZXN0aW5nOgo+Pj4+Pgo+Pj4+PiAy
-MDE2LTA3LTEyIDAzOjQ4OjUxLjEyNzc4MSA3ZjBjZWY4Yjc3MDAgLTEgYmx1ZWZzIF9hbGxvY2F0
-ZSBmYWlsZWQKPj4+Pj4gdG8gYWxsb2NhdGUgMTA0ODU3NiBvbiBiZGV2IDAsIGZyZWUgMDsgZmFs
-bGJhY2sgdG8gYmRldiAxCj4+Pj4+Cj4+Pj4+IFRoZXkgYXJlIGFibGUgdG8gY29udGludWUgcnVu
-bmluZywgYnV0IHVsdGltYXRlbHkgdGhpcyBsZWFkcyB0byBhbgo+Pj4+PiBhc3NlcnQgbGF0ZXIg
-b24uICBJIHdvbmRlciBpZiBpdCdzIG5vdCBjb21wYWN0aW5nIGZhc3QgZW5vdWdoIGFuZAo+Pj4+
-PiBlbmRzIHVwIGNvbnN1bWluZyB0aGUgZW50aXJlIGRpc2sgd2l0aCBzdGFsZSBtZXRhZGF0YS4K
-Pj4+Pj4KPj4+Pj4gMjAxNi0wNy0xMiAwNDozMTowMi42MzE5ODIgN2YwY2VmOGI3NzAwIC0xCj4+
-Pj4+IC9ob21lL3VidW50dS9zcmMvbWFya2hwYy9jZXBoL3NyYy9vcy9ibHVlc3RvcmUvQmx1ZUZT
-LmNjOiBJbgo+Pj4+PiBmdW5jdGlvbiAnaW50IEJsdWVGUzo6X2FsbG9jYXRlKHVuc2lnbmVkIGlu
-dCwgdWludDY0X3QsCj4+Pj4+IHN0ZDo6dmVjdG9yPGJsdWVmc19leHRlbnRfdD4qKScgdGhyZWFk
-IDdmMGNlZjhiNzcwMCB0aW1lIDIwMTYtMDctMTIKPj4+Pj4gMDQ6MzE6MDIuNjI3MTM4Cj4+Pj4+
-IC9ob21lL3VidW50dS9zcmMvbWFya2hwYy9jZXBoL3NyYy9vcy9ibHVlc3RvcmUvQmx1ZUZTLmNj
-OiAxMzk4Ogo+Pj4+PiBGQUlMRUQKPj4+Pj4gYXNzZXJ0KDAgPT0gImFsbG9jYXRlIGZhaWxlZC4u
-LiB3dGYiKQo+Pj4+Pgo+Pj4+PiAgY2VwaCB2ZXJzaW9uIHYxMC4wLjQtNjkzNi1nYzdkYTJmNwo+
-Pj4+PiAoYzdkYTJmN2M4Njk2OTQyNDY2NTBhOTI3NmEyYjY3YWVkOWJmODE4ZikKPj4+Pj4gIDE6
-IChjZXBoOjpfX2NlcGhfYXNzZXJ0X2ZhaWwoY2hhciBjb25zdCosIGNoYXIgY29uc3QqLCBpbnQs
-IGNoYXIKPj4+Pj4gY29uc3QqKSsweDg1KSBbMHhkNGNiNzVdCj4+Pj4+ICAyOiAoQmx1ZUZTOjpf
-YWxsb2NhdGUodW5zaWduZWQgaW50LCB1bnNpZ25lZCBsb25nLAo+Pj4+PiBzdGQ6OnZlY3Rvcjxi
-bHVlZnNfZXh0ZW50X3QsIHN0ZDo6YWxsb2NhdG9yPGJsdWVmc19leHRlbnRfdD4KPj4+Pj4+ICop
-KzB4NzYwKSBbMHhiOTgyMjBdCj4+Pj4+ICAzOiAoQmx1ZUZTOjpfY29tcGFjdF9sb2coKSsweGQ1
-YikgWzB4YjliNWFiXQo+Pj4+PiAgNDogKEJsdWVGUzo6X21heWJlX2NvbXBhY3RfbG9nKCkrMHgy
-YTApIFsweGI5YzA0MF0KPj4+Pj4gIDU6IChCbHVlRlM6OnN5bmNfbWV0YWRhdGEoKSsweDIwZikg
-WzB4YjlkMjhmXQo+Pj4+PiAgNjogKEJsdWVSb2Nrc0RpcmVjdG9yeTo6RnN5bmMoKSsweGQpIFsw
-eGJiMmZhZF0KPj4+Pj4gIDc6IChyb2Nrc2RiOjpEQkltcGw6OldyaXRlSW1wbChyb2Nrc2RiOjpX
-cml0ZU9wdGlvbnMgY29uc3QmLAo+Pj4+PiByb2Nrc2RiOjpXcml0ZUJhdGNoKiwgcm9ja3NkYjo6
-V3JpdGVDYWxsYmFjayosIHVuc2lnbmVkIGxvbmcqLAo+Pj4+PiB1bnNpZ25lZCBsb25nLCBib29s
-KSsweDE0NTYpIFsweGJmZGI5Nl0KPj4+Pj4gIDg6IChyb2Nrc2RiOjpEQkltcGw6OldyaXRlKHJv
-Y2tzZGI6OldyaXRlT3B0aW9ucyBjb25zdCYsCj4+Pj4+IHJvY2tzZGI6OldyaXRlQmF0Y2gqKSsw
-eDI3KSBbMHhiZmU3YTddCj4+Pj4+ICA5Ogo+Pj4+PiAoUm9ja3NEQlN0b3JlOjpzdWJtaXRfdHJh
-bnNhY3Rpb25fc3luYyhzdGQ6OnNoYXJlZF9wdHI8S2V5VmFsdWVEQjo6Cj4+Pj4+IFRyYW5zYWN0
-aW9uSW1wbD4pKzB4NmIpCj4+Pj4+Cj4+Pj4+IFsweGIzZGYyYl0KPj4+Pj4gIDEwOiAoQmx1ZVN0
-b3JlOjpfa3Zfc3luY190aHJlYWQoKSsweGVkYikgWzB4YWY5MzViXQo+Pj4+PiAgMTE6IChCbHVl
-U3RvcmU6OktWU3luY1RocmVhZDo6ZW50cnkoKSsweGQpIFsweGIyMWU4ZF0KPj4+Pj4gIDEyOiAo
-KCkrMHg3ZGM1KSBbMHg3ZjBkMTg1YzRkYzVdCj4+Pj4+ICAxMzogKGNsb25lKCkrMHg2ZCkgWzB4
-N2YwZDE2NGJmMjhkXQo+Pj4+PiAgTk9URTogYSBjb3B5IG9mIHRoZSBleGVjdXRhYmxlLCBvciBg
-b2JqZHVtcCAtcmRTIDxleGVjdXRhYmxlPmAgaXMKPj4+Pj4gbmVlZGVkIHRvIGludGVycHJldCB0
-aGlzLgo+Pj4+Pgo+Pj4+Pgo+Pj4+PiBPbiAwNy8xMi8yMDE2IDAyOjEzIEFNLCBTb21uYXRoIFJv
-eSB3cm90ZToKPj4+Pj4+IFRoYW5rcyBNYXJrICEKPj4+Pj4+IFllcywgcXVpdGUgc2ltaWxhciBy
-ZXN1bHQgSSBhbSBhbHNvIHNlZWluZyBmb3IgNEsgUlcuIEJUVywgZGlkIHlvdQo+Pj4+Pj4gZ2V0
-IGNoYW5jZSB0byB0cnkgb3V0IHRoZSByb2Nrc2RiIHR1bmluZyBJIHBvc3RlZCBlYXJsaWVyID8g
-SXQgbWF5Cj4+Pj4+PiByZWR1Y2UgdGhlIHN0YWxscyBpbiB5b3VyIGVudmlyb25tZW50Lgo+Pj4+
-Pj4KPj4+Pj4+IFJlZ2FyZHMKPj4+Pj4+IFNvbW5hdGgKPj4+Pj4+Cj4+Pj4+PiAtLS0tLU9yaWdp
-bmFsIE1lc3NhZ2UtLS0tLQo+Pj4+Pj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
-bC5vcmcKPj4+Pj4+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9u
-IEJlaGFsZiBPZiBNYXJrIE5lbHNvbgo+Pj4+Pj4gU2VudDogVHVlc2RheSwgSnVseSAxMiwgMjAx
-NiAxMjowMyBBTQo+Pj4+Pj4gVG86IGNlcGgtZGV2ZWwKPj4+Pj4+IFN1YmplY3Q6IGJsdWVzdG9y
-ZSBvbm9kZSBkaWV0IGFuZCBlbmNvZGluZyBvdmVyaGVhZAo+Pj4+Pj4KPj4+Pj4+IEhpIEFsbCwK
-Pj4+Pj4+Cj4+Pj4+PiBXaXRoIElnb3IncyBwYXRjaCBsYXN0IHdlZWsgSSB3YXMgYWJsZSB0byBn
-ZXQgc29tZSBibHVlc3RvcmUKPj4+Pj4+IHBlcmZvcm1hbmNlIHJ1bnMgaW4gd2l0aG91dCBzZWdm
-YXVsdGluZyBhbmQgc3RhcnRlZCBsb29raW5nIGludAo+Pj4+Pj4gdGhlIHJlc3VsdHMuCj4+Pj4+
-PiBTb21ld2hlcmUgYWxvbmcgdGhlIGxpbmUgd2UgcmVhbGx5IHNjcmV3ZWQgdXAgcmVhZCBwZXJm
-b3JtYW5jZSwKPj4+Pj4+IGJ1dCB0aGF0J3MgYW5vdGhlciB0b3BpYy4gIFJpZ2h0IG5vdyBJIHdh
-bnQgdG8gZm9jdXMgb24gcmFuZG9tIHdyaXRlcy4KPj4+Pj4+IEJlZm9yZSB3ZSBwdXQgdGhlIG9u
-b2RlIG9uIGEgZGlldCB3ZSB3ZXJlIHNlZWluZyBtYXNzaXZlIGFtb3VudHMKPj4+Pj4+IG9mIHJl
-YWQgdHJhZmZpYyBpbiBSb2Nrc0RCIGR1cmluZyBjb21wYWN0aW9uIHRoYXQgY2F1c2VkIHdyaXRl
-Cj4+Pj4+PiBzdGFsbHMgZHVyaW5nIDRLIHJhbmRvbSB3cml0ZXMuICBSYW5kb20gd3JpdGUgcGVy
-Zm9ybWFuY2Ugb24gZmFzdAo+Pj4+Pj4gaGFyZHdhcmUgbGlrZSBOVk1lIGRldmljZXMgd2FzIG9m
-dGVuIGJlbG93IGZpbGVzdG9yZSBhdCBhbnl0aGluZwo+Pj4+Pj4gb3RoZXIgdGhhbiB2ZXJ5IGxh
-cmdlIElPIHNpemVzLiAgVGhpcyB3YXMgbGFyZ2VseSBkdWUgdG8gdGhlIHNpemUKPj4+Pj4+IG9m
-IHRoZSBvbm9kZSBjb21wb3VuZGVkIHdpdGggUm9ja3NEQidzIHRlbmRlbmN5IHRvd2FyZCByZWFk
-IGFuZAo+Pj4+Pj4gd3JpdGUgYW1wbGlmaWNhdGlvbi4KPj4+Pj4+Cj4+Pj4+PiBUaGUgbmV3IHRl
-c3QgcmVzdWx0cyBsb29rIHZlcnkgcHJvbWlzaW5nLiAgV2UndmUgZHJhbWF0aWNhbGx5Cj4+Pj4+
-PiBpbXByb3ZlZCBwZXJmb3JtYW5jZSBvZiByYW5kb20gd3JpdGVzIGF0IG1vc3QgSU8gc2l6ZXMs
-IHNvIHRoYXQKPj4+Pj4+IHRoZXkgYXJlIG5vdyB0eXBpY2FsbHkgcXVpdGUgYSBiaXQgaGlnaGVy
-IHRoYW4gYm90aCBmaWxlc3RvcmUgYW5kCj4+Pj4+PiBvbGRlciBibHVlc3RvcmUgY29kZS4gIFVu
-Zm9ydHVuYXRlbHkgZm9yIHZlcnkgc21hbGwgSU8gc2l6ZXMKPj4+Pj4+IHBlcmZvcm1hbmNlIGhh
-c24ndCBpbXByb3ZlZCBtdWNoLiAgV2UgYXJlIG5vIGxvbmdlciBzZWVpbmcgaHVnZQo+Pj4+Pj4g
-YW1vdW50cyBvZiBSb2Nrc0RCIHJlYWQgdHJhZmZpYyBhbmQgZmV3ZXIgd3JpdGUgc3RhbGxzLiAg
-V2UgYXJlCj4+Pj4+PiBob3dldmVyIHNlZWluZyBodWdlIG1lbW9yeSB1c2FnZSAofjlHQiBSU1Mg
-cGVyIE9TRCkgYW5kIHZlcnkgaGlnaAo+Pj4+Pj4gQ1BVIHVzYWdlLiAgSSB0aGluayB0aGlzIGNv
-bmZpcm1zIHNvbWUgb2YgdGhlIG1lbW9yeSBpc3N1ZXMKPj4+Pj4+IHNvbW5hdGggd2FzIGNvbnRp
-bnVpbmcgdG8gc2VlLiAgSSBkb24ndCB0aGluayBpdCdzIGEgbGVhayBleGFjdGx5Cj4+Pj4+PiBi
-YXNlZCBvbiBob3cgdGhlIE9TRHMgd2VyZSBiZWhhdmluZywgYnV0IHdlIG5lZWQgdG8gcnVuIHRo
-cm91Z2ggbWFzc2lmIHN0aWxsIHRvIGJlIHN1cmUuCj4+Pj4+Pgo+Pj4+Pj4gSSBlbmRlZCB1cCBz
-cGVuZGluZyBzb21lIHRpbWUgdG9uaWdodCB3aXRoIHBlcmYgYW5kIGRpZ2dpbmcKPj4+Pj4+IHRo
-cm91Z2ggdGhlIGVuY29kZSBjb2RlLiAgSSB3cm90ZSB1cCBzb21lIG5vdGVzIHdpdGggZ3JhcGhz
-IGFuZAo+Pj4+Pj4gY29kZSBzbmlwcGV0cyBhbmQgZGVjaWRlZCB0byBwdXQgdGhlbSB1cCBvbiB0
-aGUgd2ViLiAgQmFzaWNhbGx5Cj4+Pj4+PiBzb21lIG9mIHRoZSBlbmNvZGluZyBjaGFuZ2VzIHdl
-IGltcGxlbWVudGVkIGxhc3QgbW9udGggdG8gcmVkdWNlCj4+Pj4+PiB0aGUgb25vZGUgc2l6ZSBh
-bHNvIGFwcGVhciB0byByZXN1bHQgaW4gbW9yZSBidWZmZXI6Omxpc3QgYXBwZW5kcwo+Pj4+Pj4g
-YW5kIHRoZSBhc3NvY2lhdGVkIG92ZXJoZWFkLgo+Pj4+Pj4gSSd2ZSBiZWVuIHRyeWluZyB0byB0
-aGluayB0aHJvdWdoIHdheXMgdG8gaW1wcm92ZSB0aGUgc2l0dWF0aW9uCj4+Pj4+PiBhbmQgdGhv
-dWdodCBvdGhlciBwZW9wbGUgbWlnaHQgaGF2ZSBzb21lIGlkZWFzIHRvby4gIEhlcmUncyBhIGxp
-bmsKPj4+Pj4+IHRvIHRoZSBzaG9ydCB3cml0ZXVwOgo+Pj4+Pj4KPj4+Pj4+IGh0dHBzOi8vZHJp
-dmUuZ29vZ2xlLmNvbS9maWxlL2QvMEIyZ1RCWnJrcm5wWmVDMDRla2xtTTJJNFdray92aWV3Pwo+
-Pj4+Pj4gdXNwPXNoYXJpbmcKPj4+Pj4+Cj4+Pj4+Pgo+Pj4+Pj4KPj4+Pj4+IFRoYW5rcywKPj4+
-Pj4+IE1hcmsKPj4+Pj4+IC0tCj4+Pj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDog
-c2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIKPj4+Pj4+IGluIHRoZSBib2R5
-IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUKPj4+Pj4+IG1h
-am9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
-bAo+Pj4+Pj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBl
-bGVjdHJvbmljIG1haWwKPj4+Pj4+IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVz
-ZSBvZiB0aGUgZGVzaWduYXRlZAo+Pj4+Pj4gcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0
-aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlCj4+Pj4+PiBpbnRlbmRlZCByZWNp
-cGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQKPj4+
-Pj4+IHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0
-aW9uLAo+Pj4+Pj4gZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBz
-dHJpY3RseSBwcm9oaWJpdGVkLgo+Pj4+Pj4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21t
-dW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5Cj4+Pj4+PiB0aGUgc2VuZGVyIGJ5IHRl
-bGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQKPj4+Pj4+
-IGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nl
-c3Npb24KPj4+Pj4+ICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3Jl
-ZCBjb3BpZXMpLgo+Pj4+Pj4gTiAgICAgciAgeSAgIGIgWCAgx6d2IF4gKd66ey5uICsgICB6IF16
-ICAge2F5IMqH2pkgLGoKPj4+Pj4+ICAgZiAgIGggICB6ICB3Cj4gICAgajordiAgIHcgaiBtICAg
-ICAgICAgelorICAgICDdomoiICAhdG1sPQo+Pj4+Pj4KPj4+Pj4+Cj4+Pj4+IC0tCj4+Pj4+IFRv
-IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZQo+
-Pj4+PiBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZwo+Pj4+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtl
-cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRp
-b24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQg
-b25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJv
-dmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVj
-aXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRo
-aXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBk
-aXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hp
-Yml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwg
-cGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3du
-IGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhp
-cyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVj
-dHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4KPiDvv717Lm7vv70r77+977+977+977+977+977+9
-77+9KyXvv73vv71sendt77+977+9Yu+/veunsu+/ve+/vXLvv73vv715x6nvv73Xr3pY77+977+9
-77+977+93Kh977+977+977+9xqB677+9Jmo6K3bvv73vv73vv73vv73vv73vv73vv716Wivvv73v
-v70rembvv73vv73vv71o77+977+977+9fu+/ve+/ve+/ve+/vWnvv73vv73vv71677+977+9d++/
-ve+/ve+/vT/vv73vv73vv73vv70m77+9Kd+iZgoK
+
+
+On 07/12/2016 10:20 AM, Allen Samuels wrote:
+> Good analysis.
+>
+> My original comments about putting the oNode on a diet included the idea of a "custom" encode/decode path for certain high-usage cases. At the time, Sage resisted going down that path hoping that a more optimized generic case would get the job done. Your analysis shows that while we've achieved significant space reduction this has come at the expense of CPU time -- which dominates small object performance (I suspect that eventually we'd discover that the variable length decode path would be responsible for a substantial read performance degradation also -- which may or may not be part of the read performance drop-off that you're seeing). This isn't a surprising result, though it is unfortunate.
+>
+> I believe we need to revisit the idea of custom encode/decode paths for high-usage cases, only now the gains need to be focused on CPU utilization as well as space efficiency.
+
+I'm not against it, but it might be worth at least a quick attempt at 
+preallocating the append_buffer and/or Piotr's idea to directly memcpy 
+without doing the append at all.  It may be that helps quite a bit 
+(though perhaps it's not enough in the long run).
+
+A couple of other thoughts:
+
+I still think SIMD encode approaches are interesting if we can lay data 
+out in memory in a friendly way (This feels like it might be painful 
+though):
+
+http://arxiv.org/abs/1209.2137
+
+But on the other hand, Kenton Varda who was previously a primary author 
+on google's protocol buffers ended up doing something a little different 
+than varint:
+
+https://capnproto.org/encoding.html
+
+Look specifically at the packing section.  It looks somewhat attractive 
+to me.
+
+Mark
+
+>
+> I believe this activity can also address some of the memory consumption issues that we're seeing now. I believe that the current lextent/blob/pextent usage of standard STL maps is both space and time inefficient -- in a place where it matters a lot. Sage has already discussed usage of something like flat_map from the boost library as a way to reduce the memory overhead, etc. I believe this is the right direction.
+>
+> Where are we on getting boost into our build?
+>
+> Allen Samuels
+> SanDisk |a Western Digital brand
+> 2880 Junction Avenue, Milpitas, CA 95134
+> T: +1 408 801 7030| M: +1 408 780 6416
+> allen.samuels@SanDisk.com
+>
+>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>> owner@vger.kernel.org] On Behalf Of Mark Nelson
+>> Sent: Tuesday, July 12, 2016 12:03 AM
+>> To: ceph-devel <ceph-devel@vger.kernel.org>
+>> Subject: bluestore onode diet and encoding overhead
+>>
+>> Hi All,
+>>
+>> With Igor's patch last week I was able to get some bluestore performance
+>> runs in without segfaulting and started looking int the results.
+>> Somewhere along the line we really screwed up read performance, but
+>> that's another topic.  Right now I want to focus on random writes.
+>> Before we put the onode on a diet we were seeing massive amounts of read
+>> traffic in RocksDB during compaction that caused write stalls during 4K
+>> random writes.  Random write performance on fast hardware like NVMe
+>> devices was often below filestore at anything other than very large IO sizes.
+>> This was largely due to the size of the onode compounded with RocksDB's
+>> tendency toward read and write amplification.
+>>
+>> The new test results look very promising.  We've dramatically improved
+>> performance of random writes at most IO sizes, so that they are now
+>> typically quite a bit higher than both filestore and older bluestore code.
+>> Unfortunately for very small IO sizes performance hasn't improved much.
+>> We are no longer seeing huge amounts of RocksDB read traffic and fewer
+>> write stalls.  We are however seeing huge memory usage (~9GB RSS per
+>> OSD) and very high CPU usage.  I think this confirms some of the memory
+>> issues somnath was continuing to see.  I don't think it's a leak exactly based
+>> on how the OSDs were behaving, but we need to run through massif still to
+>> be sure.
+>>
+>> I ended up spending some time tonight with perf and digging through the
+>> encode code.  I wrote up some notes with graphs and code snippets and
+>> decided to put them up on the web.  Basically some of the encoding changes
+>> we implemented last month to reduce the onode size also appear to result in
+>> more buffer::list appends and the associated overhead.
+>> I've been trying to think through ways to improve the situation and thought
+>> other people might have some ideas too.  Here's a link to the short writeup:
+>>
+>> https://drive.google.com/file/d/0B2gTBZrkrnpZeC04eklmM2I4Wkk/view?us
+>> p=sharing
+>>
+>> Thanks,
+>> Mark
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+>> body of a message to majordomo@vger.kernel.org More majordomo info at
+>> http://vger.kernel.org/majordomo-info.html
