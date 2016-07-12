@@ -1,31 +1,33 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: fio engine for ObjectStore
-Date: Tue, 12 Jul 2016 15:17:19 -0400
-Message-ID: <ca66f88b-2cb7-6bf6-b44f-671957aeeae1@redhat.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: rados testing run help office hours!
+Date: Tue, 12 Jul 2016 12:25:42 -0700
+Message-ID: <CAN=+7FW7uMnDmhCxBJdWaPzg9VaDky0Zni0ctGXnPUSzFH5FgQ@mail.gmail.com>
+References: <CAN=+7FU3Y0yO5FP2sd8rbB_Mpofkppj01oqhdyo-utCaHpx_3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f169.google.com ([209.85.216.169]:35309 "EHLO
-	mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750748AbcGLTRW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jul 2016 15:17:22 -0400
-Received: by mail-qt0-f169.google.com with SMTP id j35so13677212qtj.2
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Jul 2016 12:17:21 -0700 (PDT)
-Received: from [10.17.151.34] ([12.118.3.106])
-        by smtp.gmail.com with ESMTPSA id p83sm1207804qkh.49.2016.07.12.12.17.20
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 12 Jul 2016 12:17:20 -0700 (PDT)
+Received: from mail-qt0-f175.google.com ([209.85.216.175]:34982 "EHLO
+	mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750899AbcGLTZt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jul 2016 15:25:49 -0400
+Received: by mail-qt0-f175.google.com with SMTP id j35so13807838qtj.2
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Jul 2016 12:25:48 -0700 (PDT)
+In-Reply-To: <CAN=+7FU3Y0yO5FP2sd8rbB_Mpofkppj01oqhdyo-utCaHpx_3w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "Zafman, David" <dzafman@redhat.com>, "Dachary, Loic" <ldachary@redhat.com>
 
-Hi all,
+To clarify, they'll be on irc in #ceph-devel.
+-Sam
 
-I've rebased the fio objectstore work and reopened a pull request at 
-https://github.com/ceph/ceph/pull/10267. I hope that it can be useful to 
-the folks working on bluestore. You can find a README and examples in 
-src/test/fio/.
-
-Casey
+On Tue, Jul 12, 2016 at 10:47 AM, Samuel Just <sjust@redhat.com> wrote:
+> Are you flummoxed by teuthology-suite options or bewildered by
+> mysterious failures in pulpito?  Loic and David will be leading irc
+> "office hours" to help people understand how to schedule rados suite
+> runs and interpret the results!  Loic will be available on Mondays and
+> Thursdays 9-11 am CEST, and David will be available 2-4 pm PST Tuesday
+> and Thursday.  The hope is that as other developers get comfortable
+> with the process, we can distribute the testing load on new PRs among
+> more people.  We'll adjust as necessary depending on how this goes.
+> -Sam
