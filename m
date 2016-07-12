@@ -1,7 +1,7 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
 Subject: Re: bluestore onode diet and encoding overhead
-Date: Tue, 12 Jul 2016 18:31:32 +0300
-Message-ID: <34330d24-a43d-8c4b-aeaf-a7023e193aa1@mirantis.com>
+Date: Tue, 12 Jul 2016 15:37:23 +0000
+Message-ID: <BLUPR0201MB1908E727D5A2DE924C7D8279E2300@BLUPR0201MB1908.namprd02.prod.outlook.com>
 References: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
  <BL2PR02MB2115078CDAD92FC1F7612B35F4300@BL2PR02MB2115.namprd02.prod.outlook.com>
  <56ae4a08-0f34-a843-3cbc-9832faddc030@redhat.com>
@@ -11,296 +11,188 @@ References: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
  <fcd816f1-057d-7cc7-d989-4c8ee5ede2db@redhat.com>
  <BL2PR02MB2115FC2AABEC8FA6055680F5F4300@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f44.google.com ([209.85.215.44]:33863 "EHLO
-	mail-lf0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751366AbcGLPbf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jul 2016 11:31:35 -0400
-Received: by mail-lf0-f44.google.com with SMTP id h129so17107766lfh.1
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Jul 2016 08:31:34 -0700 (PDT)
-In-Reply-To: <BL2PR02MB2115FC2AABEC8FA6055680F5F4300@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from mail-bl2nam02on0072.outbound.protection.outlook.com ([104.47.38.72]:29872
+	"EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S933421AbcGLPh1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 Jul 2016 11:37:27 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Somnath,
-
-yeah,  you're right about db partition is getting out of space:
-
--876> 2016-07-12 18:19:26.133795 7f8e6ddb7700 10 bluefs get_usage bdev =
-0=20
-free 0 (0 B) / 268431360 (255 MB), used 100%
--875> 2016-07-12 18:19:26.133796 7f8e6ddb7700 10 bluefs get_usage bdev =
-1=20
-free 193986560 (185 MB) / 268427264 (255 MB), used 27%
--874> 2016-07-12 18:19:26.133797 7f8e6ddb7700 10 bluefs get_usage bdev =
-2=20
-free 1073741824 (1024 MB) / 1074782208 (1024 MB), used 0%
-
-And I don't see much RAM consumption in this case.
-
-But the curious thing about my test case is that it shouldn't increase=20
-amount of metadata written as I'm doing writes within the first megabyt=
-e=20
-only( see fio script I posted last week).
-
-Looks like somebody wastes DB space - usage at bdev 0 is constantly=20
-growing while I'm running the test case...
-And another observation - the issue isn't reproduced with stupid=20
-allocator hence I suspect some bug in bitmap one...
-
-Thanks,
-Igor
-
-
-On 12.07.2016 18:14, Somnath Roy wrote:
-> Mark,
-> Recently, the default allocator is changed to Bitmap and I saw it is =
-returning < 0 return value only in the following case.
->
->    count =3D m_bit_alloc->alloc_blocks_res(nblks, &start_blk);
->    if (count =3D=3D 0) {
->      return -ENOSPC;
->    }
->
-> So, it seems it may not be the memory but db partition is getting out=
- of space (?). I never faced it so far as I was running with 100GB of d=
-b partition may be.
-> The amount of metadata write going on to the db even after onode diet=
- is starting from ~1K and over time it is reaching > 4k or so (I checke=
-d for 4K RW). It is growing as extents are growing. So, 8 GB may not be=
- enough.
-> If this is true, next challenge is , how to automatically (or documen=
-t) the size of rocksdb db partition based on the data partition size. F=
-or example, in the ZS case, we have calculated that we need ~9G db spac=
-e per TB. We need to do similar calculation for rocksbd as well.
->
-> Thanks & Regards
-> Somnath
->
->
-> -----Original Message-----
-> From: Mark Nelson [mailto:mnelson@redhat.com]
-> Sent: Tuesday, July 12, 2016 6:03 AM
-> To: Igor Fedotov; Somnath Roy; ceph-devel
-> Subject: Re: bluestore onode diet and encoding overhead
->
-> In this case I'm assigning per OSD:
->
-> 1G Data (basically the top level OSD dir) 1G WAL 8G DB 140G Block
->
-> Mark
->
-> On 07/12/2016 07:57 AM, Igor Fedotov wrote:
->> Mark,
->>
->> you can find my post named 'yet another assertion in bluestore durin=
-g
->> random write' last week. It contains steps to reproduce in my case.
->>
->> Also I did some investigations (still incomplete though) with tuning
->> 'bluestore block db size' and 'bluestore block wal size'. Setting bo=
-th
->> to 256M fixes the issue for me.
->>
->> But I'm still uncertain if that's a bug or just inappropriate settin=
-gs...
->>
->>
->> Thanks,
->>
->> Igor
->>
->>
->> On 12.07.2016 15:48, Mark Nelson wrote:
->>> Oh, that's good to know!  Have you tracked it down at all?  I notic=
-ed
->>> pretty extreme memory usage on the OSDs still, so that might be par=
-t
->>> of it.  I'm doing a massif run now.
->>>
->>> Mark
->>>
->>> On 07/12/2016 07:40 AM, Igor Fedotov wrote:
->>>> That's similar to what I have while running my test case with vsta=
-rt...
->>>> Without Somnath's settings though..
->>>>
->>>>
->>>> On 12.07.2016 15:34, Mark Nelson wrote:
->>>>> Hi Somnath,
->>>>>
->>>>> I accidentally screwed up my first run with your settings but rer=
-an
->>>>> last night.  With your tuning the OSDs are failing to allocate to
->>>>> bdev0 after about 30 minutes of testing:
->>>>>
->>>>> 2016-07-12 03:48:51.127781 7f0cef8b7700 -1 bluefs _allocate faile=
-d
->>>>> to allocate 1048576 on bdev 0, free 0; fallback to bdev 1
->>>>>
->>>>> They are able to continue running, but ultimately this leads to a=
-n
->>>>> assert later on.  I wonder if it's not compacting fast enough and
->>>>> ends up consuming the entire disk with stale metadata.
->>>>>
->>>>> 2016-07-12 04:31:02.631982 7f0cef8b7700 -1
->>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueFS.cc: In
->>>>> function 'int BlueFS::_allocate(unsigned int, uint64_t,
->>>>> std::vector<bluefs_extent_t>*)' thread 7f0cef8b7700 time 2016-07-=
-12
->>>>> 04:31:02.627138
->>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueFS.cc: 1398:
->>>>> FAILED
->>>>> assert(0 =3D=3D "allocate failed... wtf")
->>>>>
->>>>>   ceph version v10.0.4-6936-gc7da2f7
->>>>> (c7da2f7c869694246650a9276a2b67aed9bf818f)
->>>>>   1: (ceph::__ceph_assert_fail(char const*, char const*, int, cha=
-r
->>>>> const*)+0x85) [0xd4cb75]
->>>>>   2: (BlueFS::_allocate(unsigned int, unsigned long,
->>>>> std::vector<bluefs_extent_t, std::allocator<bluefs_extent_t>
->>>>>> *)+0x760) [0xb98220]
->>>>>   3: (BlueFS::_compact_log()+0xd5b) [0xb9b5ab]
->>>>>   4: (BlueFS::_maybe_compact_log()+0x2a0) [0xb9c040]
->>>>>   5: (BlueFS::sync_metadata()+0x20f) [0xb9d28f]
->>>>>   6: (BlueRocksDirectory::Fsync()+0xd) [0xbb2fad]
->>>>>   7: (rocksdb::DBImpl::WriteImpl(rocksdb::WriteOptions const&,
->>>>> rocksdb::WriteBatch*, rocksdb::WriteCallback*, unsigned long*,
->>>>> unsigned long, bool)+0x1456) [0xbfdb96]
->>>>>   8: (rocksdb::DBImpl::Write(rocksdb::WriteOptions const&,
->>>>> rocksdb::WriteBatch*)+0x27) [0xbfe7a7]
->>>>>   9:
->>>>> (RocksDBStore::submit_transaction_sync(std::shared_ptr<KeyValueDB=
-::
->>>>> TransactionImpl>)+0x6b)
->>>>>
->>>>> [0xb3df2b]
->>>>>   10: (BlueStore::_kv_sync_thread()+0xedb) [0xaf935b]
->>>>>   11: (BlueStore::KVSyncThread::entry()+0xd) [0xb21e8d]
->>>>>   12: (()+0x7dc5) [0x7f0d185c4dc5]
->>>>>   13: (clone()+0x6d) [0x7f0d164bf28d]
->>>>>   NOTE: a copy of the executable, or `objdump -rdS <executable>` =
-is
->>>>> needed to interpret this.
->>>>>
->>>>>
->>>>> On 07/12/2016 02:13 AM, Somnath Roy wrote:
->>>>>> Thanks Mark !
->>>>>> Yes, quite similar result I am also seeing for 4K RW. BTW, did y=
-ou
->>>>>> get chance to try out the rocksdb tuning I posted earlier ? It m=
-ay
->>>>>> reduce the stalls in your environment.
->>>>>>
->>>>>> Regards
->>>>>> Somnath
->>>>>>
->>>>>> -----Original Message-----
->>>>>> From: ceph-devel-owner@vger.kernel.org
->>>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nels=
-on
->>>>>> Sent: Tuesday, July 12, 2016 12:03 AM
->>>>>> To: ceph-devel
->>>>>> Subject: bluestore onode diet and encoding overhead
->>>>>>
->>>>>> Hi All,
->>>>>>
->>>>>> With Igor's patch last week I was able to get some bluestore
->>>>>> performance runs in without segfaulting and started looking int
->>>>>> the results.
->>>>>> Somewhere along the line we really screwed up read performance,
->>>>>> but that's another topic.  Right now I want to focus on random w=
-rites.
->>>>>> Before we put the onode on a diet we were seeing massive amounts
->>>>>> of read traffic in RocksDB during compaction that caused write
->>>>>> stalls during 4K random writes.  Random write performance on fas=
-t
->>>>>> hardware like NVMe devices was often below filestore at anything
->>>>>> other than very large IO sizes.  This was largely due to the siz=
-e
->>>>>> of the onode compounded with RocksDB's tendency toward read and
->>>>>> write amplification.
->>>>>>
->>>>>> The new test results look very promising.  We've dramatically
->>>>>> improved performance of random writes at most IO sizes, so that
->>>>>> they are now typically quite a bit higher than both filestore an=
-d
->>>>>> older bluestore code.  Unfortunately for very small IO sizes
->>>>>> performance hasn't improved much.  We are no longer seeing huge
->>>>>> amounts of RocksDB read traffic and fewer write stalls.  We are
->>>>>> however seeing huge memory usage (~9GB RSS per OSD) and very hig=
-h
->>>>>> CPU usage.  I think this confirms some of the memory issues
->>>>>> somnath was continuing to see.  I don't think it's a leak exactl=
-y
->>>>>> based on how the OSDs were behaving, but we need to run through =
-massif still to be sure.
->>>>>>
->>>>>> I ended up spending some time tonight with perf and digging
->>>>>> through the encode code.  I wrote up some notes with graphs and
->>>>>> code snippets and decided to put them up on the web.  Basically
->>>>>> some of the encoding changes we implemented last month to reduce
->>>>>> the onode size also appear to result in more buffer::list append=
-s
->>>>>> and the associated overhead.
->>>>>> I've been trying to think through ways to improve the situation
->>>>>> and thought other people might have some ideas too.  Here's a li=
-nk
->>>>>> to the short writeup:
->>>>>>
->>>>>> https://drive.google.com/file/d/0B2gTBZrkrnpZeC04eklmM2I4Wkk/vie=
-w?
->>>>>> usp=3Dsharing
->>>>>>
->>>>>>
->>>>>>
->>>>>> Thanks,
->>>>>> Mark
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
-evel"
->>>>>> in the body of a message to majordomo@vger.kernel.org More
->>>>>> majordomo info at http://vger.kernel.org/majordomo-info.html
->>>>>> PLEASE NOTE: The information contained in this electronic mail
->>>>>> message is intended only for the use of the designated
->>>>>> recipient(s) named above. If the reader of this message is not t=
-he
->>>>>> intended recipient, you are hereby notified that you have receiv=
-ed
->>>>>> this message in error and that any review, dissemination,
->>>>>> distribution, or copying of this message is strictly prohibited.
->>>>>> If you have received this communication in error, please notify
->>>>>> the sender by telephone or e-mail (as shown above) immediately a=
-nd
->>>>>> destroy any and all copies of this message in your possession
->>>>>> (whether hard copies or electronically stored copies).
->>>>>> N     r  y   b X  =C7=A7v ^ )=DE=BA{.n +   z ]z   {ay =1D=CA=87=DA=
-=99 ,j
->>>>>>    f   h   z =1E w
->     j:+v   w j m         zZ+     =DD=A2j"  !tml=3D
->>>>>>
->>>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
-> PLEASE NOTE: The information contained in this electronic mail messag=
-e is intended only for the use of the designated recipient(s) named abo=
-ve. If the reader of this message is not the intended recipient, you ar=
-e hereby notified that you have received this message in error and that=
- any review, dissemination, distribution, or copying of this message is=
- strictly prohibited. If you have received this communication in error,=
- please notify the sender by telephone or e-mail (as shown above) immed=
-iately and destroy any and all copies of this message in your possessio=
-n (whether hard copies or electronically stored copies).
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhpcyBvbmUgc2VlbXMgdG8gYmUsIHdlIGhhdmUgc3BhY2UoZnJhZ21lbnRlZCkgZm9yIHRoZSBh
+bGxvY2F0aW9uLCBidXQKbm90IGFibGUgdG8gYWxsb2NhdGUgaW4gY29udGlndW91cyB3YXkuCkkg
+Y2FuIHJlcHJvZHVjZSB0aGlzIHByb2JsZW0gaW4gYSB1bml0IHRlc3QuIHdpbGwgY2hlY2sgd2l0
+aCBSYW1lc2ggb24gdGhhdC4KClZhcmFkYQoKCk9uIFR1ZXNkYXkgMTIgSnVseSAyMDE2IDA4OjQ1
+IFBNLCBTb21uYXRoIFJveSB3cm90ZToKPiBNYXJrLAo+IFJlY2VudGx5LCB0aGUgZGVmYXVsdCBh
+bGxvY2F0b3IgaXMgY2hhbmdlZCB0byBCaXRtYXAgYW5kIEkgc2F3IGl0IGlzIHJldHVybmluZyA8
+IDAgcmV0dXJuIHZhbHVlIG9ubHkgaW4gdGhlIGZvbGxvd2luZyBjYXNlLgo+Cj4gICBjb3VudCA9
+IG1fYml0X2FsbG9jLT5hbGxvY19ibG9ja3NfcmVzKG5ibGtzLCAmc3RhcnRfYmxrKTsKPiAgIGlm
+IChjb3VudCA9PSAwKSB7Cj4gICAgIHJldHVybiAtRU5PU1BDOwo+ICAgfQo+Cj4gU28sIGl0IHNl
+ZW1zIGl0IG1heSBub3QgYmUgdGhlIG1lbW9yeSBidXQgZGIgcGFydGl0aW9uIGlzIGdldHRpbmcg
+b3V0IG9mIHNwYWNlICg/KS4gSSBuZXZlciBmYWNlZCBpdCBzbyBmYXIgYXMgSSB3YXMgcnVubmlu
+ZyB3aXRoIDEwMEdCIG9mIGRiIHBhcnRpdGlvbiBtYXkgYmUuCj4gVGhlIGFtb3VudCBvZiBtZXRh
+ZGF0YSB3cml0ZSBnb2luZyBvbiB0byB0aGUgZGIgZXZlbiBhZnRlciBvbm9kZSBkaWV0IGlzIHN0
+YXJ0aW5nIGZyb20gfjFLIGFuZCBvdmVyIHRpbWUgaXQgaXMgcmVhY2hpbmcgPiA0ayBvciBzbyAo
+SSBjaGVja2VkIGZvciA0SyBSVykuIEl0IGlzIGdyb3dpbmcgYXMgZXh0ZW50cyBhcmUgZ3Jvd2lu
+Zy4gU28sIDggR0IgbWF5IG5vdCBiZSBlbm91Z2guCj4gSWYgdGhpcyBpcyB0cnVlLCBuZXh0IGNo
+YWxsZW5nZSBpcyAsIGhvdyB0byBhdXRvbWF0aWNhbGx5IChvciBkb2N1bWVudCkgdGhlIHNpemUg
+b2Ygcm9ja3NkYiBkYiBwYXJ0aXRpb24gYmFzZWQgb24gdGhlIGRhdGEgcGFydGl0aW9uIHNpemUu
+IEZvciBleGFtcGxlLCBpbiB0aGUgWlMgY2FzZSwgd2UgaGF2ZSBjYWxjdWxhdGVkIHRoYXQgd2Ug
+bmVlZCB+OUcgZGIgc3BhY2UgcGVyIFRCLiBXZSBuZWVkIHRvIGRvIHNpbWlsYXIgY2FsY3VsYXRp
+b24gZm9yIHJvY2tzYmQgYXMgd2VsbC4KPgo+IFRoYW5rcyAmIFJlZ2FyZHMKPiBTb21uYXRoCj4K
+Pgo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tCj4gRnJvbTogTWFyayBOZWxzb24gW21haWx0
+bzptbmVsc29uQHJlZGhhdC5jb21dCj4gU2VudDogVHVlc2RheSwgSnVseSAxMiwgMjAxNiA2OjAz
+IEFNCj4gVG86IElnb3IgRmVkb3RvdjsgU29tbmF0aCBSb3k7IGNlcGgtZGV2ZWwKPiBTdWJqZWN0
+OiBSZTogYmx1ZXN0b3JlIG9ub2RlIGRpZXQgYW5kIGVuY29kaW5nIG92ZXJoZWFkCj4KPiBJbiB0
+aGlzIGNhc2UgSSdtIGFzc2lnbmluZyBwZXIgT1NEOgo+Cj4gMUcgRGF0YSAoYmFzaWNhbGx5IHRo
+ZSB0b3AgbGV2ZWwgT1NEIGRpcikgMUcgV0FMIDhHIERCIDE0MEcgQmxvY2sKPgo+IE1hcmsKPgo+
+IE9uIDA3LzEyLzIwMTYgMDc6NTcgQU0sIElnb3IgRmVkb3RvdiB3cm90ZToKPj4gTWFyaywKPj4K
+Pj4geW91IGNhbiBmaW5kIG15IHBvc3QgbmFtZWQgJ3lldCBhbm90aGVyIGFzc2VydGlvbiBpbiBi
+bHVlc3RvcmUgZHVyaW5nCj4+IHJhbmRvbSB3cml0ZScgbGFzdCB3ZWVrLiBJdCBjb250YWlucyBz
+dGVwcyB0byByZXByb2R1Y2UgaW4gbXkgY2FzZS4KPj4KPj4gQWxzbyBJIGRpZCBzb21lIGludmVz
+dGlnYXRpb25zIChzdGlsbCBpbmNvbXBsZXRlIHRob3VnaCkgd2l0aCB0dW5pbmcKPj4gJ2JsdWVz
+dG9yZSBibG9jayBkYiBzaXplJyBhbmQgJ2JsdWVzdG9yZSBibG9jayB3YWwgc2l6ZScuIFNldHRp
+bmcgYm90aAo+PiB0byAyNTZNIGZpeGVzIHRoZSBpc3N1ZSBmb3IgbWUuCj4+Cj4+IEJ1dCBJJ20g
+c3RpbGwgdW5jZXJ0YWluIGlmIHRoYXQncyBhIGJ1ZyBvciBqdXN0IGluYXBwcm9wcmlhdGUgc2V0
+dGluZ3MuLi4KPj4KPj4KPj4gVGhhbmtzLAo+Pgo+PiBJZ29yCj4+Cj4+Cj4+IE9uIDEyLjA3LjIw
+MTYgMTU6NDgsIE1hcmsgTmVsc29uIHdyb3RlOgo+Pj4gT2gsIHRoYXQncyBnb29kIHRvIGtub3ch
+ICBIYXZlIHlvdSB0cmFja2VkIGl0IGRvd24gYXQgYWxsPyAgSSBub3RpY2VkCj4+PiBwcmV0dHkg
+ZXh0cmVtZSBtZW1vcnkgdXNhZ2Ugb24gdGhlIE9TRHMgc3RpbGwsIHNvIHRoYXQgbWlnaHQgYmUg
+cGFydAo+Pj4gb2YgaXQuICBJJ20gZG9pbmcgYSBtYXNzaWYgcnVuIG5vdy4KPj4+Cj4+PiBNYXJr
+Cj4+Pgo+Pj4gT24gMDcvMTIvMjAxNiAwNzo0MCBBTSwgSWdvciBGZWRvdG92IHdyb3RlOgo+Pj4+
+IFRoYXQncyBzaW1pbGFyIHRvIHdoYXQgSSBoYXZlIHdoaWxlIHJ1bm5pbmcgbXkgdGVzdCBjYXNl
+IHdpdGggdnN0YXJ0Li4uCj4+Pj4gV2l0aG91dCBTb21uYXRoJ3Mgc2V0dGluZ3MgdGhvdWdoLi4K
+Pj4+Pgo+Pj4+Cj4+Pj4gT24gMTIuMDcuMjAxNiAxNTozNCwgTWFyayBOZWxzb24gd3JvdGU6Cj4+
+Pj4+IEhpIFNvbW5hdGgsCj4+Pj4+Cj4+Pj4+IEkgYWNjaWRlbnRhbGx5IHNjcmV3ZWQgdXAgbXkg
+Zmlyc3QgcnVuIHdpdGggeW91ciBzZXR0aW5ncyBidXQgcmVyYW4KPj4+Pj4gbGFzdCBuaWdodC4g
+IFdpdGggeW91ciB0dW5pbmcgdGhlIE9TRHMgYXJlIGZhaWxpbmcgdG8gYWxsb2NhdGUgdG8KPj4+
+Pj4gYmRldjAgYWZ0ZXIgYWJvdXQgMzAgbWludXRlcyBvZiB0ZXN0aW5nOgo+Pj4+Pgo+Pj4+PiAy
+MDE2LTA3LTEyIDAzOjQ4OjUxLjEyNzc4MSA3ZjBjZWY4Yjc3MDAgLTEgYmx1ZWZzIF9hbGxvY2F0
+ZSBmYWlsZWQKPj4+Pj4gdG8gYWxsb2NhdGUgMTA0ODU3NiBvbiBiZGV2IDAsIGZyZWUgMDsgZmFs
+bGJhY2sgdG8gYmRldiAxCj4+Pj4+Cj4+Pj4+IFRoZXkgYXJlIGFibGUgdG8gY29udGludWUgcnVu
+bmluZywgYnV0IHVsdGltYXRlbHkgdGhpcyBsZWFkcyB0byBhbgo+Pj4+PiBhc3NlcnQgbGF0ZXIg
+b24uICBJIHdvbmRlciBpZiBpdCdzIG5vdCBjb21wYWN0aW5nIGZhc3QgZW5vdWdoIGFuZAo+Pj4+
+PiBlbmRzIHVwIGNvbnN1bWluZyB0aGUgZW50aXJlIGRpc2sgd2l0aCBzdGFsZSBtZXRhZGF0YS4K
+Pj4+Pj4KPj4+Pj4gMjAxNi0wNy0xMiAwNDozMTowMi42MzE5ODIgN2YwY2VmOGI3NzAwIC0xCj4+
+Pj4+IC9ob21lL3VidW50dS9zcmMvbWFya2hwYy9jZXBoL3NyYy9vcy9ibHVlc3RvcmUvQmx1ZUZT
+LmNjOiBJbgo+Pj4+PiBmdW5jdGlvbiAnaW50IEJsdWVGUzo6X2FsbG9jYXRlKHVuc2lnbmVkIGlu
+dCwgdWludDY0X3QsCj4+Pj4+IHN0ZDo6dmVjdG9yPGJsdWVmc19leHRlbnRfdD4qKScgdGhyZWFk
+IDdmMGNlZjhiNzcwMCB0aW1lIDIwMTYtMDctMTIKPj4+Pj4gMDQ6MzE6MDIuNjI3MTM4Cj4+Pj4+
+IC9ob21lL3VidW50dS9zcmMvbWFya2hwYy9jZXBoL3NyYy9vcy9ibHVlc3RvcmUvQmx1ZUZTLmNj
+OiAxMzk4Ogo+Pj4+PiBGQUlMRUQKPj4+Pj4gYXNzZXJ0KDAgPT0gImFsbG9jYXRlIGZhaWxlZC4u
+LiB3dGYiKQo+Pj4+Pgo+Pj4+PiAgY2VwaCB2ZXJzaW9uIHYxMC4wLjQtNjkzNi1nYzdkYTJmNwo+
+Pj4+PiAoYzdkYTJmN2M4Njk2OTQyNDY2NTBhOTI3NmEyYjY3YWVkOWJmODE4ZikKPj4+Pj4gIDE6
+IChjZXBoOjpfX2NlcGhfYXNzZXJ0X2ZhaWwoY2hhciBjb25zdCosIGNoYXIgY29uc3QqLCBpbnQs
+IGNoYXIKPj4+Pj4gY29uc3QqKSsweDg1KSBbMHhkNGNiNzVdCj4+Pj4+ICAyOiAoQmx1ZUZTOjpf
+YWxsb2NhdGUodW5zaWduZWQgaW50LCB1bnNpZ25lZCBsb25nLAo+Pj4+PiBzdGQ6OnZlY3Rvcjxi
+bHVlZnNfZXh0ZW50X3QsIHN0ZDo6YWxsb2NhdG9yPGJsdWVmc19leHRlbnRfdD4KPj4+Pj4+ICop
+KzB4NzYwKSBbMHhiOTgyMjBdCj4+Pj4+ICAzOiAoQmx1ZUZTOjpfY29tcGFjdF9sb2coKSsweGQ1
+YikgWzB4YjliNWFiXQo+Pj4+PiAgNDogKEJsdWVGUzo6X21heWJlX2NvbXBhY3RfbG9nKCkrMHgy
+YTApIFsweGI5YzA0MF0KPj4+Pj4gIDU6IChCbHVlRlM6OnN5bmNfbWV0YWRhdGEoKSsweDIwZikg
+WzB4YjlkMjhmXQo+Pj4+PiAgNjogKEJsdWVSb2Nrc0RpcmVjdG9yeTo6RnN5bmMoKSsweGQpIFsw
+eGJiMmZhZF0KPj4+Pj4gIDc6IChyb2Nrc2RiOjpEQkltcGw6OldyaXRlSW1wbChyb2Nrc2RiOjpX
+cml0ZU9wdGlvbnMgY29uc3QmLAo+Pj4+PiByb2Nrc2RiOjpXcml0ZUJhdGNoKiwgcm9ja3NkYjo6
+V3JpdGVDYWxsYmFjayosIHVuc2lnbmVkIGxvbmcqLAo+Pj4+PiB1bnNpZ25lZCBsb25nLCBib29s
+KSsweDE0NTYpIFsweGJmZGI5Nl0KPj4+Pj4gIDg6IChyb2Nrc2RiOjpEQkltcGw6OldyaXRlKHJv
+Y2tzZGI6OldyaXRlT3B0aW9ucyBjb25zdCYsCj4+Pj4+IHJvY2tzZGI6OldyaXRlQmF0Y2gqKSsw
+eDI3KSBbMHhiZmU3YTddCj4+Pj4+ICA5Ogo+Pj4+PiAoUm9ja3NEQlN0b3JlOjpzdWJtaXRfdHJh
+bnNhY3Rpb25fc3luYyhzdGQ6OnNoYXJlZF9wdHI8S2V5VmFsdWVEQjo6Cj4+Pj4+IFRyYW5zYWN0
+aW9uSW1wbD4pKzB4NmIpCj4+Pj4+Cj4+Pj4+IFsweGIzZGYyYl0KPj4+Pj4gIDEwOiAoQmx1ZVN0
+b3JlOjpfa3Zfc3luY190aHJlYWQoKSsweGVkYikgWzB4YWY5MzViXQo+Pj4+PiAgMTE6IChCbHVl
+U3RvcmU6OktWU3luY1RocmVhZDo6ZW50cnkoKSsweGQpIFsweGIyMWU4ZF0KPj4+Pj4gIDEyOiAo
+KCkrMHg3ZGM1KSBbMHg3ZjBkMTg1YzRkYzVdCj4+Pj4+ICAxMzogKGNsb25lKCkrMHg2ZCkgWzB4
+N2YwZDE2NGJmMjhkXQo+Pj4+PiAgTk9URTogYSBjb3B5IG9mIHRoZSBleGVjdXRhYmxlLCBvciBg
+b2JqZHVtcCAtcmRTIDxleGVjdXRhYmxlPmAgaXMKPj4+Pj4gbmVlZGVkIHRvIGludGVycHJldCB0
+aGlzLgo+Pj4+Pgo+Pj4+Pgo+Pj4+PiBPbiAwNy8xMi8yMDE2IDAyOjEzIEFNLCBTb21uYXRoIFJv
+eSB3cm90ZToKPj4+Pj4+IFRoYW5rcyBNYXJrICEKPj4+Pj4+IFllcywgcXVpdGUgc2ltaWxhciBy
+ZXN1bHQgSSBhbSBhbHNvIHNlZWluZyBmb3IgNEsgUlcuIEJUVywgZGlkIHlvdQo+Pj4+Pj4gZ2V0
+IGNoYW5jZSB0byB0cnkgb3V0IHRoZSByb2Nrc2RiIHR1bmluZyBJIHBvc3RlZCBlYXJsaWVyID8g
+SXQgbWF5Cj4+Pj4+PiByZWR1Y2UgdGhlIHN0YWxscyBpbiB5b3VyIGVudmlyb25tZW50Lgo+Pj4+
+Pj4KPj4+Pj4+IFJlZ2FyZHMKPj4+Pj4+IFNvbW5hdGgKPj4+Pj4+Cj4+Pj4+PiAtLS0tLU9yaWdp
+bmFsIE1lc3NhZ2UtLS0tLQo+Pj4+Pj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
+bC5vcmcKPj4+Pj4+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9u
+IEJlaGFsZiBPZiBNYXJrIE5lbHNvbgo+Pj4+Pj4gU2VudDogVHVlc2RheSwgSnVseSAxMiwgMjAx
+NiAxMjowMyBBTQo+Pj4+Pj4gVG86IGNlcGgtZGV2ZWwKPj4+Pj4+IFN1YmplY3Q6IGJsdWVzdG9y
+ZSBvbm9kZSBkaWV0IGFuZCBlbmNvZGluZyBvdmVyaGVhZAo+Pj4+Pj4KPj4+Pj4+IEhpIEFsbCwK
+Pj4+Pj4+Cj4+Pj4+PiBXaXRoIElnb3IncyBwYXRjaCBsYXN0IHdlZWsgSSB3YXMgYWJsZSB0byBn
+ZXQgc29tZSBibHVlc3RvcmUKPj4+Pj4+IHBlcmZvcm1hbmNlIHJ1bnMgaW4gd2l0aG91dCBzZWdm
+YXVsdGluZyBhbmQgc3RhcnRlZCBsb29raW5nIGludAo+Pj4+Pj4gdGhlIHJlc3VsdHMuCj4+Pj4+
+PiBTb21ld2hlcmUgYWxvbmcgdGhlIGxpbmUgd2UgcmVhbGx5IHNjcmV3ZWQgdXAgcmVhZCBwZXJm
+b3JtYW5jZSwKPj4+Pj4+IGJ1dCB0aGF0J3MgYW5vdGhlciB0b3BpYy4gIFJpZ2h0IG5vdyBJIHdh
+bnQgdG8gZm9jdXMgb24gcmFuZG9tIHdyaXRlcy4KPj4+Pj4+IEJlZm9yZSB3ZSBwdXQgdGhlIG9u
+b2RlIG9uIGEgZGlldCB3ZSB3ZXJlIHNlZWluZyBtYXNzaXZlIGFtb3VudHMKPj4+Pj4+IG9mIHJl
+YWQgdHJhZmZpYyBpbiBSb2Nrc0RCIGR1cmluZyBjb21wYWN0aW9uIHRoYXQgY2F1c2VkIHdyaXRl
+Cj4+Pj4+PiBzdGFsbHMgZHVyaW5nIDRLIHJhbmRvbSB3cml0ZXMuICBSYW5kb20gd3JpdGUgcGVy
+Zm9ybWFuY2Ugb24gZmFzdAo+Pj4+Pj4gaGFyZHdhcmUgbGlrZSBOVk1lIGRldmljZXMgd2FzIG9m
+dGVuIGJlbG93IGZpbGVzdG9yZSBhdCBhbnl0aGluZwo+Pj4+Pj4gb3RoZXIgdGhhbiB2ZXJ5IGxh
+cmdlIElPIHNpemVzLiAgVGhpcyB3YXMgbGFyZ2VseSBkdWUgdG8gdGhlIHNpemUKPj4+Pj4+IG9m
+IHRoZSBvbm9kZSBjb21wb3VuZGVkIHdpdGggUm9ja3NEQidzIHRlbmRlbmN5IHRvd2FyZCByZWFk
+IGFuZAo+Pj4+Pj4gd3JpdGUgYW1wbGlmaWNhdGlvbi4KPj4+Pj4+Cj4+Pj4+PiBUaGUgbmV3IHRl
+c3QgcmVzdWx0cyBsb29rIHZlcnkgcHJvbWlzaW5nLiAgV2UndmUgZHJhbWF0aWNhbGx5Cj4+Pj4+
+PiBpbXByb3ZlZCBwZXJmb3JtYW5jZSBvZiByYW5kb20gd3JpdGVzIGF0IG1vc3QgSU8gc2l6ZXMs
+IHNvIHRoYXQKPj4+Pj4+IHRoZXkgYXJlIG5vdyB0eXBpY2FsbHkgcXVpdGUgYSBiaXQgaGlnaGVy
+IHRoYW4gYm90aCBmaWxlc3RvcmUgYW5kCj4+Pj4+PiBvbGRlciBibHVlc3RvcmUgY29kZS4gIFVu
+Zm9ydHVuYXRlbHkgZm9yIHZlcnkgc21hbGwgSU8gc2l6ZXMKPj4+Pj4+IHBlcmZvcm1hbmNlIGhh
+c24ndCBpbXByb3ZlZCBtdWNoLiAgV2UgYXJlIG5vIGxvbmdlciBzZWVpbmcgaHVnZQo+Pj4+Pj4g
+YW1vdW50cyBvZiBSb2Nrc0RCIHJlYWQgdHJhZmZpYyBhbmQgZmV3ZXIgd3JpdGUgc3RhbGxzLiAg
+V2UgYXJlCj4+Pj4+PiBob3dldmVyIHNlZWluZyBodWdlIG1lbW9yeSB1c2FnZSAofjlHQiBSU1Mg
+cGVyIE9TRCkgYW5kIHZlcnkgaGlnaAo+Pj4+Pj4gQ1BVIHVzYWdlLiAgSSB0aGluayB0aGlzIGNv
+bmZpcm1zIHNvbWUgb2YgdGhlIG1lbW9yeSBpc3N1ZXMKPj4+Pj4+IHNvbW5hdGggd2FzIGNvbnRp
+bnVpbmcgdG8gc2VlLiAgSSBkb24ndCB0aGluayBpdCdzIGEgbGVhayBleGFjdGx5Cj4+Pj4+PiBi
+YXNlZCBvbiBob3cgdGhlIE9TRHMgd2VyZSBiZWhhdmluZywgYnV0IHdlIG5lZWQgdG8gcnVuIHRo
+cm91Z2ggbWFzc2lmIHN0aWxsIHRvIGJlIHN1cmUuCj4+Pj4+Pgo+Pj4+Pj4gSSBlbmRlZCB1cCBz
+cGVuZGluZyBzb21lIHRpbWUgdG9uaWdodCB3aXRoIHBlcmYgYW5kIGRpZ2dpbmcKPj4+Pj4+IHRo
+cm91Z2ggdGhlIGVuY29kZSBjb2RlLiAgSSB3cm90ZSB1cCBzb21lIG5vdGVzIHdpdGggZ3JhcGhz
+IGFuZAo+Pj4+Pj4gY29kZSBzbmlwcGV0cyBhbmQgZGVjaWRlZCB0byBwdXQgdGhlbSB1cCBvbiB0
+aGUgd2ViLiAgQmFzaWNhbGx5Cj4+Pj4+PiBzb21lIG9mIHRoZSBlbmNvZGluZyBjaGFuZ2VzIHdl
+IGltcGxlbWVudGVkIGxhc3QgbW9udGggdG8gcmVkdWNlCj4+Pj4+PiB0aGUgb25vZGUgc2l6ZSBh
+bHNvIGFwcGVhciB0byByZXN1bHQgaW4gbW9yZSBidWZmZXI6Omxpc3QgYXBwZW5kcwo+Pj4+Pj4g
+YW5kIHRoZSBhc3NvY2lhdGVkIG92ZXJoZWFkLgo+Pj4+Pj4gSSd2ZSBiZWVuIHRyeWluZyB0byB0
+aGluayB0aHJvdWdoIHdheXMgdG8gaW1wcm92ZSB0aGUgc2l0dWF0aW9uCj4+Pj4+PiBhbmQgdGhv
+dWdodCBvdGhlciBwZW9wbGUgbWlnaHQgaGF2ZSBzb21lIGlkZWFzIHRvby4gIEhlcmUncyBhIGxp
+bmsKPj4+Pj4+IHRvIHRoZSBzaG9ydCB3cml0ZXVwOgo+Pj4+Pj4KPj4+Pj4+IGh0dHBzOi8vZHJp
+dmUuZ29vZ2xlLmNvbS9maWxlL2QvMEIyZ1RCWnJrcm5wWmVDMDRla2xtTTJJNFdray92aWV3Pwo+
+Pj4+Pj4gdXNwPXNoYXJpbmcKPj4+Pj4+Cj4+Pj4+Pgo+Pj4+Pj4KPj4+Pj4+IFRoYW5rcywKPj4+
+Pj4+IE1hcmsKPj4+Pj4+IC0tCj4+Pj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDog
+c2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIKPj4+Pj4+IGluIHRoZSBib2R5
+IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUKPj4+Pj4+IG1h
+am9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
+bAo+Pj4+Pj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBl
+bGVjdHJvbmljIG1haWwKPj4+Pj4+IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVz
+ZSBvZiB0aGUgZGVzaWduYXRlZAo+Pj4+Pj4gcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0
+aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlCj4+Pj4+PiBpbnRlbmRlZCByZWNp
+cGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQKPj4+
+Pj4+IHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0
+aW9uLAo+Pj4+Pj4gZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBz
+dHJpY3RseSBwcm9oaWJpdGVkLgo+Pj4+Pj4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21t
+dW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5Cj4+Pj4+PiB0aGUgc2VuZGVyIGJ5IHRl
+bGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQKPj4+Pj4+
+IGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nl
+c3Npb24KPj4+Pj4+ICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3Jl
+ZCBjb3BpZXMpLgo+Pj4+Pj4gTiAgICAgciAgeSAgIGIgWCAgx6d2IF4gKd66ey5uICsgICB6IF16
+ICAge2F5IMqH2pkgLGoKPj4+Pj4+ICAgZiAgIGggICB6ICB3Cj4gICAgajordiAgIHcgaiBtICAg
+ICAgICAgelorICAgICDdomoiICAhdG1sPQo+Pj4+Pj4KPj4+Pj4+Cj4+Pj4+IC0tCj4+Pj4+IFRv
+IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZQo+
+Pj4+PiBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZwo+Pj4+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtl
+cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRp
+b24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQg
+b25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJv
+dmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVj
+aXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRo
+aXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBk
+aXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hp
+Yml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwg
+cGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3du
+IGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhp
+cyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVj
+dHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4KPiDvv717Lm7vv70r77+977+977+977+977+977+9
+77+9KyXvv73vv71sendt77+977+9Yu+/veunsu+/ve+/vXLvv73vv715x6nvv73Xr3pY77+977+9
+77+977+93Kh977+977+977+9xqB677+9Jmo6K3bvv73vv73vv73vv73vv73vv73vv716Wivvv73v
+v70rembvv73vv73vv71o77+977+977+9fu+/ve+/ve+/ve+/vWnvv73vv73vv71677+977+9d++/
+ve+/ve+/vT/vv73vv73vv73vv70m77+9Kd+iZgoK
