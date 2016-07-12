@@ -1,155 +1,251 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
+From: Mark Nelson <mnelson@redhat.com>
 Subject: Re: bluestore onode diet and encoding overhead
-Date: Tue, 12 Jul 2016 12:47:50 +0000
-Message-ID: <BLUPR0201MB1908AF7512A4F4220FC1B9C6E2300@BLUPR0201MB1908.namprd02.prod.outlook.com>
+Date: Tue, 12 Jul 2016 08:02:55 -0500
+Message-ID: <fcd816f1-057d-7cc7-d989-4c8ee5ede2db@redhat.com>
 References: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
  <BL2PR02MB2115078CDAD92FC1F7612B35F4300@BL2PR02MB2115.namprd02.prod.outlook.com>
  <56ae4a08-0f34-a843-3cbc-9832faddc030@redhat.com>
  <86ec3393-dfea-02df-df74-97cca42aaae1@mirantis.com>
+ <e2538609-7724-5e2f-b71a-8a32c45f4479@redhat.com>
+ <ad19ecba-2dab-6cb3-e193-0da3d5d06da8@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0059.outbound.protection.outlook.com ([104.47.42.59]:4176
-	"EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S933349AbcGLNCI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 12 Jul 2016 09:02:08 -0400
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:41690 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933381AbcGLNC6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 Jul 2016 09:02:58 -0400
+In-Reply-To: <ad19ecba-2dab-6cb3-e193-0da3d5d06da8@mirantis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, Mark Nelson <mnelson@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>, Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-V2UgcmVzZXJ2ZSB0aGUgc3BhY2UgYmVmb3JlIGFjdHVhbCBhbGxvY2F0aW9uLCB0aGF0IHNlZW1z
-IHRvIGdvIGZpbmUNCmhlcmUsIGJ1dCB3aGVuIGl0IGNvbWVzIHRvIGFsbG9jYXRpbmcgdGhlIGJs
-b2NrcyB3ZSBhcmUgZ29pbmcgb3V0IHNwYWNlLg0KSSBhbSB0cnlpbmcgdG8gcmVwcm9kdWNpbmcg
-dGhlIHNhbWUgcHJvYmxlbS4gd2lsbCB1cGRhdGUgaWYgaSBoYXZlIHNvbWUNCmZpbmRpbmdzLg0K
-DQpWYXJhZGENCg0KT24gVHVlc2RheSAxMiBKdWx5IDIwMTYgMDY6MTAgUE0sIElnb3IgRmVkb3Rv
-diB3cm90ZToNCj4gVGhhdCdzIHNpbWlsYXIgdG8gd2hhdCBJIGhhdmUgd2hpbGUgcnVubmluZyBt
-eSB0ZXN0IGNhc2Ugd2l0aCB2c3RhcnQuLi4NCj4gV2l0aG91dCBTb21uYXRoJ3Mgc2V0dGluZ3Mg
-dGhvdWdoLi4NCj4NCj4NCj4gT24gMTIuMDcuMjAxNiAxNTozNCwgTWFyayBOZWxzb24gd3JvdGU6
-DQo+PiBIaSBTb21uYXRoLA0KPj4NCj4+IEkgYWNjaWRlbnRhbGx5IHNjcmV3ZWQgdXAgbXkgZmly
-c3QgcnVuIHdpdGggeW91ciBzZXR0aW5ncyBidXQgcmVyYW4NCj4+IGxhc3QgbmlnaHQuICBXaXRo
-IHlvdXIgdHVuaW5nIHRoZSBPU0RzIGFyZSBmYWlsaW5nIHRvIGFsbG9jYXRlIHRvDQo+PiBiZGV2
-MCBhZnRlciBhYm91dCAzMCBtaW51dGVzIG9mIHRlc3Rpbmc6DQo+Pg0KPj4gMjAxNi0wNy0xMiAw
-Mzo0ODo1MS4xMjc3ODEgN2YwY2VmOGI3NzAwIC0xIGJsdWVmcyBfYWxsb2NhdGUgZmFpbGVkIHRv
-DQo+PiBhbGxvY2F0ZSAxMDQ4NTc2IG9uIGJkZXYgMCwgZnJlZSAwOyBmYWxsYmFjayB0byBiZGV2
-IDENCj4+DQo+PiBUaGV5IGFyZSBhYmxlIHRvIGNvbnRpbnVlIHJ1bm5pbmcsIGJ1dCB1bHRpbWF0
-ZWx5IHRoaXMgbGVhZHMgdG8gYW4NCj4+IGFzc2VydCBsYXRlciBvbi4gIEkgd29uZGVyIGlmIGl0
-J3Mgbm90IGNvbXBhY3RpbmcgZmFzdCBlbm91Z2ggYW5kIGVuZHMNCj4+IHVwIGNvbnN1bWluZyB0
-aGUgZW50aXJlIGRpc2sgd2l0aCBzdGFsZSBtZXRhZGF0YS4NCj4+DQo+PiAyMDE2LTA3LTEyIDA0
-OjMxOjAyLjYzMTk4MiA3ZjBjZWY4Yjc3MDAgLTENCj4+IC9ob21lL3VidW50dS9zcmMvbWFya2hw
-Yy9jZXBoL3NyYy9vcy9ibHVlc3RvcmUvQmx1ZUZTLmNjOiBJbiBmdW5jdGlvbg0KPj4gJ2ludCBC
-bHVlRlM6Ol9hbGxvY2F0ZSh1bnNpZ25lZCBpbnQsIHVpbnQ2NF90LA0KPj4gc3RkOjp2ZWN0b3I8
-Ymx1ZWZzX2V4dGVudF90PiopJyB0aHJlYWQgN2YwY2VmOGI3NzAwIHRpbWUgMjAxNi0wNy0xMg0K
-Pj4gMDQ6MzE6MDIuNjI3MTM4DQo+PiAvaG9tZS91YnVudHUvc3JjL21hcmtocGMvY2VwaC9zcmMv
-b3MvYmx1ZXN0b3JlL0JsdWVGUy5jYzogMTM5ODogRkFJTEVEDQo+PiBhc3NlcnQoMCA9PSAiYWxs
-b2NhdGUgZmFpbGVkLi4uIHd0ZiIpDQo+Pg0KPj4gIGNlcGggdmVyc2lvbiB2MTAuMC40LTY5MzYt
-Z2M3ZGEyZjcNCj4+IChjN2RhMmY3Yzg2OTY5NDI0NjY1MGE5Mjc2YTJiNjdhZWQ5YmY4MThmKQ0K
-Pj4gIDE6IChjZXBoOjpfX2NlcGhfYXNzZXJ0X2ZhaWwoY2hhciBjb25zdCosIGNoYXIgY29uc3Qq
-LCBpbnQsIGNoYXINCj4+IGNvbnN0KikrMHg4NSkgWzB4ZDRjYjc1XQ0KPj4gIDI6IChCbHVlRlM6
-Ol9hbGxvY2F0ZSh1bnNpZ25lZCBpbnQsIHVuc2lnbmVkIGxvbmcsDQo+PiBzdGQ6OnZlY3Rvcjxi
-bHVlZnNfZXh0ZW50X3QsIHN0ZDo6YWxsb2NhdG9yPGJsdWVmc19leHRlbnRfdD4NCj4+PiAqKSsw
-eDc2MCkgWzB4Yjk4MjIwXQ0KPj4gIDM6IChCbHVlRlM6Ol9jb21wYWN0X2xvZygpKzB4ZDViKSBb
-MHhiOWI1YWJdDQo+PiAgNDogKEJsdWVGUzo6X21heWJlX2NvbXBhY3RfbG9nKCkrMHgyYTApIFsw
-eGI5YzA0MF0NCj4+ICA1OiAoQmx1ZUZTOjpzeW5jX21ldGFkYXRhKCkrMHgyMGYpIFsweGI5ZDI4
-Zl0NCj4+ICA2OiAoQmx1ZVJvY2tzRGlyZWN0b3J5OjpGc3luYygpKzB4ZCkgWzB4YmIyZmFkXQ0K
-Pj4gIDc6IChyb2Nrc2RiOjpEQkltcGw6OldyaXRlSW1wbChyb2Nrc2RiOjpXcml0ZU9wdGlvbnMg
-Y29uc3QmLA0KPj4gcm9ja3NkYjo6V3JpdGVCYXRjaCosIHJvY2tzZGI6OldyaXRlQ2FsbGJhY2sq
-LCB1bnNpZ25lZCBsb25nKiwNCj4+IHVuc2lnbmVkIGxvbmcsIGJvb2wpKzB4MTQ1NikgWzB4YmZk
-Yjk2XQ0KPj4gIDg6IChyb2Nrc2RiOjpEQkltcGw6OldyaXRlKHJvY2tzZGI6OldyaXRlT3B0aW9u
-cyBjb25zdCYsDQo+PiByb2Nrc2RiOjpXcml0ZUJhdGNoKikrMHgyNykgWzB4YmZlN2E3XQ0KPj4g
-IDk6DQo+PiAoUm9ja3NEQlN0b3JlOjpzdWJtaXRfdHJhbnNhY3Rpb25fc3luYyhzdGQ6OnNoYXJl
-ZF9wdHI8S2V5VmFsdWVEQjo6VHJhbnNhY3Rpb25JbXBsPikrMHg2YikNCj4+IFsweGIzZGYyYl0N
-Cj4+ICAxMDogKEJsdWVTdG9yZTo6X2t2X3N5bmNfdGhyZWFkKCkrMHhlZGIpIFsweGFmOTM1Yl0N
-Cj4+ICAxMTogKEJsdWVTdG9yZTo6S1ZTeW5jVGhyZWFkOjplbnRyeSgpKzB4ZCkgWzB4YjIxZThk
-XQ0KPj4gIDEyOiAoKCkrMHg3ZGM1KSBbMHg3ZjBkMTg1YzRkYzVdDQo+PiAgMTM6IChjbG9uZSgp
-KzB4NmQpIFsweDdmMGQxNjRiZjI4ZF0NCj4+ICBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFi
-bGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1dGFibGU+YCBpcw0KPj4gbmVlZGVkIHRvIGludGVy
-cHJldCB0aGlzLg0KPj4NCj4+DQo+PiBPbiAwNy8xMi8yMDE2IDAyOjEzIEFNLCBTb21uYXRoIFJv
-eSB3cm90ZToNCj4+PiBUaGFua3MgTWFyayAhDQo+Pj4gWWVzLCBxdWl0ZSBzaW1pbGFyIHJlc3Vs
-dCBJIGFtIGFsc28gc2VlaW5nIGZvciA0SyBSVy4gQlRXLCBkaWQgeW91DQo+Pj4gZ2V0IGNoYW5j
-ZSB0byB0cnkgb3V0IHRoZSByb2Nrc2RiIHR1bmluZyBJIHBvc3RlZCBlYXJsaWVyID8gSXQgbWF5
-DQo+Pj4gcmVkdWNlIHRoZSBzdGFsbHMgaW4geW91ciBlbnZpcm9ubWVudC4NCj4+Pg0KPj4+IFJl
-Z2FyZHMNCj4+PiBTb21uYXRoDQo+Pj4NCj4+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0K
-Pj4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnDQo+Pj4gW21haWx0bzpj
-ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIE1hcmsgTmVsc29u
-DQo+Pj4gU2VudDogVHVlc2RheSwgSnVseSAxMiwgMjAxNiAxMjowMyBBTQ0KPj4+IFRvOiBjZXBo
-LWRldmVsDQo+Pj4gU3ViamVjdDogYmx1ZXN0b3JlIG9ub2RlIGRpZXQgYW5kIGVuY29kaW5nIG92
-ZXJoZWFkDQo+Pj4NCj4+PiBIaSBBbGwsDQo+Pj4NCj4+PiBXaXRoIElnb3IncyBwYXRjaCBsYXN0
-IHdlZWsgSSB3YXMgYWJsZSB0byBnZXQgc29tZSBibHVlc3RvcmUNCj4+PiBwZXJmb3JtYW5jZSBy
-dW5zIGluIHdpdGhvdXQgc2VnZmF1bHRpbmcgYW5kIHN0YXJ0ZWQgbG9va2luZyBpbnQgdGhlDQo+
-Pj4gcmVzdWx0cy4NCj4+PiBTb21ld2hlcmUgYWxvbmcgdGhlIGxpbmUgd2UgcmVhbGx5IHNjcmV3
-ZWQgdXAgcmVhZCBwZXJmb3JtYW5jZSwgYnV0DQo+Pj4gdGhhdCdzIGFub3RoZXIgdG9waWMuICBS
-aWdodCBub3cgSSB3YW50IHRvIGZvY3VzIG9uIHJhbmRvbSB3cml0ZXMuDQo+Pj4gQmVmb3JlIHdl
-IHB1dCB0aGUgb25vZGUgb24gYSBkaWV0IHdlIHdlcmUgc2VlaW5nIG1hc3NpdmUgYW1vdW50cyBv
-Zg0KPj4+IHJlYWQgdHJhZmZpYyBpbiBSb2Nrc0RCIGR1cmluZyBjb21wYWN0aW9uIHRoYXQgY2F1
-c2VkIHdyaXRlIHN0YWxscw0KPj4+IGR1cmluZyA0SyByYW5kb20gd3JpdGVzLiAgUmFuZG9tIHdy
-aXRlIHBlcmZvcm1hbmNlIG9uIGZhc3QgaGFyZHdhcmUNCj4+PiBsaWtlIE5WTWUgZGV2aWNlcyB3
-YXMgb2Z0ZW4gYmVsb3cgZmlsZXN0b3JlIGF0IGFueXRoaW5nIG90aGVyIHRoYW4NCj4+PiB2ZXJ5
-IGxhcmdlIElPIHNpemVzLiAgVGhpcyB3YXMgbGFyZ2VseSBkdWUgdG8gdGhlIHNpemUgb2YgdGhl
-IG9ub2RlDQo+Pj4gY29tcG91bmRlZCB3aXRoIFJvY2tzREIncyB0ZW5kZW5jeSB0b3dhcmQgcmVh
-ZCBhbmQgd3JpdGUgYW1wbGlmaWNhdGlvbi4NCj4+Pg0KPj4+IFRoZSBuZXcgdGVzdCByZXN1bHRz
-IGxvb2sgdmVyeSBwcm9taXNpbmcuICBXZSd2ZSBkcmFtYXRpY2FsbHkNCj4+PiBpbXByb3ZlZCBw
-ZXJmb3JtYW5jZSBvZiByYW5kb20gd3JpdGVzIGF0IG1vc3QgSU8gc2l6ZXMsIHNvIHRoYXQgdGhl
-eQ0KPj4+IGFyZSBub3cgdHlwaWNhbGx5IHF1aXRlIGEgYml0IGhpZ2hlciB0aGFuIGJvdGggZmls
-ZXN0b3JlIGFuZCBvbGRlcg0KPj4+IGJsdWVzdG9yZSBjb2RlLiAgVW5mb3J0dW5hdGVseSBmb3Ig
-dmVyeSBzbWFsbCBJTyBzaXplcyBwZXJmb3JtYW5jZQ0KPj4+IGhhc24ndCBpbXByb3ZlZCBtdWNo
-LiAgV2UgYXJlIG5vIGxvbmdlciBzZWVpbmcgaHVnZSBhbW91bnRzIG9mDQo+Pj4gUm9ja3NEQiBy
-ZWFkIHRyYWZmaWMgYW5kIGZld2VyIHdyaXRlIHN0YWxscy4gIFdlIGFyZSBob3dldmVyIHNlZWlu
-Zw0KPj4+IGh1Z2UgbWVtb3J5IHVzYWdlICh+OUdCIFJTUyBwZXIgT1NEKSBhbmQgdmVyeSBoaWdo
-IENQVSB1c2FnZS4gIEkNCj4+PiB0aGluayB0aGlzIGNvbmZpcm1zIHNvbWUgb2YgdGhlIG1lbW9y
-eSBpc3N1ZXMgc29tbmF0aCB3YXMgY29udGludWluZw0KPj4+IHRvIHNlZS4gIEkgZG9uJ3QgdGhp
-bmsgaXQncyBhIGxlYWsgZXhhY3RseSBiYXNlZCBvbiBob3cgdGhlIE9TRHMgd2VyZQ0KPj4+IGJl
-aGF2aW5nLCBidXQgd2UgbmVlZCB0byBydW4gdGhyb3VnaCBtYXNzaWYgc3RpbGwgdG8gYmUgc3Vy
-ZS4NCj4+Pg0KPj4+IEkgZW5kZWQgdXAgc3BlbmRpbmcgc29tZSB0aW1lIHRvbmlnaHQgd2l0aCBw
-ZXJmIGFuZCBkaWdnaW5nIHRocm91Z2gNCj4+PiB0aGUgZW5jb2RlIGNvZGUuICBJIHdyb3RlIHVw
-IHNvbWUgbm90ZXMgd2l0aCBncmFwaHMgYW5kIGNvZGUgc25pcHBldHMNCj4+PiBhbmQgZGVjaWRl
-ZCB0byBwdXQgdGhlbSB1cCBvbiB0aGUgd2ViLiAgQmFzaWNhbGx5IHNvbWUgb2YgdGhlDQo+Pj4g
-ZW5jb2RpbmcgY2hhbmdlcyB3ZSBpbXBsZW1lbnRlZCBsYXN0IG1vbnRoIHRvIHJlZHVjZSB0aGUg
-b25vZGUgc2l6ZQ0KPj4+IGFsc28gYXBwZWFyIHRvIHJlc3VsdCBpbiBtb3JlIGJ1ZmZlcjo6bGlz
-dCBhcHBlbmRzIGFuZCB0aGUgYXNzb2NpYXRlZA0KPj4+IG92ZXJoZWFkLg0KPj4+IEkndmUgYmVl
-biB0cnlpbmcgdG8gdGhpbmsgdGhyb3VnaCB3YXlzIHRvIGltcHJvdmUgdGhlIHNpdHVhdGlvbiBh
-bmQNCj4+PiB0aG91Z2h0IG90aGVyIHBlb3BsZSBtaWdodCBoYXZlIHNvbWUgaWRlYXMgdG9vLiAg
-SGVyZSdzIGEgbGluayB0byB0aGUNCj4+PiBzaG9ydCB3cml0ZXVwOg0KPj4+DQo+Pj4gaHR0cHM6
-Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8wQjJnVEJacmtybnBaZUMwNGVrbG1NMkk0V2trL3Zp
-ZXc/dXNwPXNoYXJpbmcNCj4+Pg0KPj4+DQo+Pj4gVGhhbmtzLA0KPj4+IE1hcmsNCj4+PiAtLQ0K
-Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNj
-cmliZSBjZXBoLWRldmVsIg0KPj4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
-bW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+Pj4gaW5mbyBhdCBodHRwOi8vdmdl
-ci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+PiBQTEVBU0UgTk9URTogVGhlIGlu
-Zm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbA0KPj4+IG1lc3NhZ2Ug
-aXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQo
-cykNCj4+PiBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90
-IHRoZSBpbnRlbmRlZA0KPj4+IHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhh
-dCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzDQo+Pj4gbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBh
-bnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yDQo+Pj4gY29weWluZyBv
-ZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2
-ZWQNCj4+PiB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNl
-bmRlciBieSB0ZWxlcGhvbmUgb3INCj4+PiBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlh
-dGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YNCj4+PiB0aGlzIG1lc3NhZ2Ug
-aW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yDQo+Pj4gZWxlY3Ryb25p
-Y2FsbHkgc3RvcmVkIGNvcGllcykuDQo+Pj4gTu+/ve+/ve+/ve+/ve+/vXLvv73vv71577+977+9
-77+9Yu+/vVjvv73vv73Hp3bvv71e77+9Kd66ey5u77+9K++/ve+/ve+/vXrvv71deu+/ve+/ve+/
-vXthee+/vcqH2pnvv70sau+/ve+/vWbvv73vv73vv71o77+977+977+9eu+/ve+/vXfvv73vv73v
-v73vv73vv73vv71qOit277+977+977+9d++/vWrvv71t77+977+977+977+977+977+977+977+9
-elor77+977+977+977+977+93aJqIu+/ve+/vSF0bWw9DQo+Pj4NCj4+Pg0KPj4gLS0NCj4+IFRv
-IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBj
-ZXBoLWRldmVsIiBpbg0KPj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2Vy
-Lmtlcm5lbC5vcmcNCj4+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5l
-bC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4gdGhl
-IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4gTW9yZSBt
-YWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5o
-dG1sDQo+DQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMg
-ZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0
-aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2Yg
-dGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVi
-eSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBh
-bmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlp
-bmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJl
-Y2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2Vu
-ZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBh
-bmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9z
-c2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29w
-aWVzKS4NCg==
+In this case I'm assigning per OSD:
+
+1G Data (basically the top level OSD dir)
+1G WAL
+8G DB
+140G Block
+
+Mark
+
+On 07/12/2016 07:57 AM, Igor Fedotov wrote:
+> Mark,
+>
+> you can find my post named 'yet another assertion in bluestore during
+> random write' last week. It contains steps to reproduce in my case.
+>
+> Also I did some investigations (still incomplete though) with tuning
+> 'bluestore block db size' and 'bluestore block wal size'. Setting bot=
+h
+> to 256M fixes the issue for me.
+>
+> But I'm still uncertain if that's a bug or just inappropriate setting=
+s...
+>
+>
+> Thanks,
+>
+> Igor
+>
+>
+> On 12.07.2016 15:48, Mark Nelson wrote:
+>> Oh, that's good to know!  Have you tracked it down at all?  I notice=
+d
+>> pretty extreme memory usage on the OSDs still, so that might be part
+>> of it.  I'm doing a massif run now.
+>>
+>> Mark
+>>
+>> On 07/12/2016 07:40 AM, Igor Fedotov wrote:
+>>> That's similar to what I have while running my test case with vstar=
+t...
+>>> Without Somnath's settings though..
+>>>
+>>>
+>>> On 12.07.2016 15:34, Mark Nelson wrote:
+>>>> Hi Somnath,
+>>>>
+>>>> I accidentally screwed up my first run with your settings but rera=
+n
+>>>> last night.  With your tuning the OSDs are failing to allocate to
+>>>> bdev0 after about 30 minutes of testing:
+>>>>
+>>>> 2016-07-12 03:48:51.127781 7f0cef8b7700 -1 bluefs _allocate failed=
+ to
+>>>> allocate 1048576 on bdev 0, free 0; fallback to bdev 1
+>>>>
+>>>> They are able to continue running, but ultimately this leads to an
+>>>> assert later on.  I wonder if it's not compacting fast enough and =
+ends
+>>>> up consuming the entire disk with stale metadata.
+>>>>
+>>>> 2016-07-12 04:31:02.631982 7f0cef8b7700 -1
+>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueFS.cc: In funct=
+ion
+>>>> 'int BlueFS::_allocate(unsigned int, uint64_t,
+>>>> std::vector<bluefs_extent_t>*)' thread 7f0cef8b7700 time 2016-07-1=
+2
+>>>> 04:31:02.627138
+>>>> /home/ubuntu/src/markhpc/ceph/src/os/bluestore/BlueFS.cc: 1398: FA=
+ILED
+>>>> assert(0 =3D=3D "allocate failed... wtf")
+>>>>
+>>>>  ceph version v10.0.4-6936-gc7da2f7
+>>>> (c7da2f7c869694246650a9276a2b67aed9bf818f)
+>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>>> const*)+0x85) [0xd4cb75]
+>>>>  2: (BlueFS::_allocate(unsigned int, unsigned long,
+>>>> std::vector<bluefs_extent_t, std::allocator<bluefs_extent_t>
+>>>> >*)+0x760) [0xb98220]
+>>>>  3: (BlueFS::_compact_log()+0xd5b) [0xb9b5ab]
+>>>>  4: (BlueFS::_maybe_compact_log()+0x2a0) [0xb9c040]
+>>>>  5: (BlueFS::sync_metadata()+0x20f) [0xb9d28f]
+>>>>  6: (BlueRocksDirectory::Fsync()+0xd) [0xbb2fad]
+>>>>  7: (rocksdb::DBImpl::WriteImpl(rocksdb::WriteOptions const&,
+>>>> rocksdb::WriteBatch*, rocksdb::WriteCallback*, unsigned long*,
+>>>> unsigned long, bool)+0x1456) [0xbfdb96]
+>>>>  8: (rocksdb::DBImpl::Write(rocksdb::WriteOptions const&,
+>>>> rocksdb::WriteBatch*)+0x27) [0xbfe7a7]
+>>>>  9:
+>>>> (RocksDBStore::submit_transaction_sync(std::shared_ptr<KeyValueDB:=
+:TransactionImpl>)+0x6b)
+>>>>
+>>>> [0xb3df2b]
+>>>>  10: (BlueStore::_kv_sync_thread()+0xedb) [0xaf935b]
+>>>>  11: (BlueStore::KVSyncThread::entry()+0xd) [0xb21e8d]
+>>>>  12: (()+0x7dc5) [0x7f0d185c4dc5]
+>>>>  13: (clone()+0x6d) [0x7f0d164bf28d]
+>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>> needed to interpret this.
+>>>>
+>>>>
+>>>> On 07/12/2016 02:13 AM, Somnath Roy wrote:
+>>>>> Thanks Mark !
+>>>>> Yes, quite similar result I am also seeing for 4K RW. BTW, did yo=
+u
+>>>>> get chance to try out the rocksdb tuning I posted earlier ? It ma=
+y
+>>>>> reduce the stalls in your environment.
+>>>>>
+>>>>> Regards
+>>>>> Somnath
+>>>>>
+>>>>> -----Original Message-----
+>>>>> From: ceph-devel-owner@vger.kernel.org
+>>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelso=
+n
+>>>>> Sent: Tuesday, July 12, 2016 12:03 AM
+>>>>> To: ceph-devel
+>>>>> Subject: bluestore onode diet and encoding overhead
+>>>>>
+>>>>> Hi All,
+>>>>>
+>>>>> With Igor's patch last week I was able to get some bluestore
+>>>>> performance runs in without segfaulting and started looking int t=
+he
+>>>>> results.
+>>>>> Somewhere along the line we really screwed up read performance, b=
+ut
+>>>>> that's another topic.  Right now I want to focus on random writes=
+=2E
+>>>>> Before we put the onode on a diet we were seeing massive amounts =
+of
+>>>>> read traffic in RocksDB during compaction that caused write stall=
+s
+>>>>> during 4K random writes.  Random write performance on fast hardwa=
+re
+>>>>> like NVMe devices was often below filestore at anything other tha=
+n
+>>>>> very large IO sizes.  This was largely due to the size of the ono=
+de
+>>>>> compounded with RocksDB's tendency toward read and write
+>>>>> amplification.
+>>>>>
+>>>>> The new test results look very promising.  We've dramatically
+>>>>> improved performance of random writes at most IO sizes, so that t=
+hey
+>>>>> are now typically quite a bit higher than both filestore and olde=
+r
+>>>>> bluestore code.  Unfortunately for very small IO sizes performanc=
+e
+>>>>> hasn't improved much.  We are no longer seeing huge amounts of
+>>>>> RocksDB read traffic and fewer write stalls.  We are however seei=
+ng
+>>>>> huge memory usage (~9GB RSS per OSD) and very high CPU usage.  I
+>>>>> think this confirms some of the memory issues somnath was continu=
+ing
+>>>>> to see.  I don't think it's a leak exactly based on how the OSDs =
+were
+>>>>> behaving, but we need to run through massif still to be sure.
+>>>>>
+>>>>> I ended up spending some time tonight with perf and digging throu=
+gh
+>>>>> the encode code.  I wrote up some notes with graphs and code snip=
+pets
+>>>>> and decided to put them up on the web.  Basically some of the
+>>>>> encoding changes we implemented last month to reduce the onode si=
+ze
+>>>>> also appear to result in more buffer::list appends and the associ=
+ated
+>>>>> overhead.
+>>>>> I've been trying to think through ways to improve the situation a=
+nd
+>>>>> thought other people might have some ideas too.  Here's a link to=
+ the
+>>>>> short writeup:
+>>>>>
+>>>>> https://drive.google.com/file/d/0B2gTBZrkrnpZeC04eklmM2I4Wkk/view=
+?usp=3Dsharing
+>>>>>
+>>>>>
+>>>>>
+>>>>> Thanks,
+>>>>> Mark
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel"
+>>>>> in the body of a message to majordomo@vger.kernel.org More majord=
+omo
+>>>>> info at http://vger.kernel.org/majordomo-info.html
+>>>>> PLEASE NOTE: The information contained in this electronic mail
+>>>>> message is intended only for the use of the designated recipient(=
+s)
+>>>>> named above. If the reader of this message is not the intended
+>>>>> recipient, you are hereby notified that you have received this
+>>>>> message in error and that any review, dissemination, distribution=
+, or
+>>>>> copying of this message is strictly prohibited. If you have recei=
+ved
+>>>>> this communication in error, please notify the sender by telephon=
+e or
+>>>>> e-mail (as shown above) immediately and destroy any and all copie=
+s of
+>>>>> this message in your possession (whether hard copies or
+>>>>> electronically stored copies).
+>>>>> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BD=
+y=EF=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD=
+^=EF=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=
+=BF=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=
+=BD=EF=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=
+=BF=BD=1E=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=
+=BDj:+v=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=
+=EF=BF=BD=EF=BF=BD=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!tml=3D
+>>>>>
+>>>>>
+>>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe
+>>>> ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
