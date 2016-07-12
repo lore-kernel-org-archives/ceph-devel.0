@@ -1,62 +1,77 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: bluestore onode diet and encoding overhead
-Date: Tue, 12 Jul 2016 02:03:18 -0500
-Message-ID: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: bluestore onode diet and encoding overhead
+Date: Tue, 12 Jul 2016 07:13:46 +0000
+Message-ID: <BL2PR02MB2115078CDAD92FC1F7612B35F4300@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42567 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751841AbcGLHDV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 12 Jul 2016 03:03:21 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id AFA373B3C2
-	for <ceph-devel@vger.kernel.org>; Tue, 12 Jul 2016 07:03:20 +0000 (UTC)
-Received: from [10.3.112.18] (ovpn-112-18.phx2.redhat.com [10.3.112.18])
-	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u6C73IMc015925
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Tue, 12 Jul 2016 03:03:20 -0400
+Received: from mail-bn3nam01on0069.outbound.protection.outlook.com ([104.47.33.69]:38592
+	"EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750717AbcGLHNy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 Jul 2016 03:13:54 -0400
+In-Reply-To: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi All,
-
-With Igor's patch last week I was able to get some bluestore performance 
-runs in without segfaulting and started looking int the results. 
-Somewhere along the line we really screwed up read performance, but 
-that's another topic.  Right now I want to focus on random writes. 
-Before we put the onode on a diet we were seeing massive amounts of read 
-traffic in RocksDB during compaction that caused write stalls during 4K 
-random writes.  Random write performance on fast hardware like NVMe 
-devices was often below filestore at anything other than very large IO 
-sizes.  This was largely due to the size of the onode compounded with 
-RocksDB's tendency toward read and write amplification.
-
-The new test results look very promising.  We've dramatically improved 
-performance of random writes at most IO sizes, so that they are now 
-typically quite a bit higher than both filestore and older bluestore 
-code.  Unfortunately for very small IO sizes performance hasn't improved 
-much.  We are no longer seeing huge amounts of RocksDB read traffic and 
-fewer write stalls.  We are however seeing huge memory usage (~9GB RSS 
-per OSD) and very high CPU usage.  I think this confirms some of the 
-memory issues somnath was continuing to see.  I don't think it's a leak 
-exactly based on how the OSDs were behaving, but we need to run through 
-massif still to be sure.
-
-I ended up spending some time tonight with perf and digging through the 
-encode code.  I wrote up some notes with graphs and code snippets and 
-decided to put them up on the web.  Basically some of the encoding 
-changes we implemented last month to reduce the onode size also appear 
-to result in more buffer::list appends and the associated overhead. 
-I've been trying to think through ways to improve the situation and 
-thought other people might have some ideas too.  Here's a link to the 
-short writeup:
-
-https://drive.google.com/file/d/0B2gTBZrkrnpZeC04eklmM2I4Wkk/view?usp=sharing
-
-Thanks,
-Mark
+VGhhbmtzIE1hcmsgIQ0KWWVzLCBxdWl0ZSBzaW1pbGFyIHJlc3VsdCBJIGFtIGFsc28gc2VlaW5n
+IGZvciA0SyBSVy4gQlRXLCBkaWQgeW91IGdldCBjaGFuY2UgdG8gdHJ5IG91dCB0aGUgcm9ja3Nk
+YiB0dW5pbmcgSSBwb3N0ZWQgZWFybGllciA/IEl0IG1heSByZWR1Y2UgdGhlIHN0YWxscyBpbiB5
+b3VyIGVudmlyb25tZW50Lg0KDQpSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVz
+c2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRv
+OmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTWFyayBOZWxz
+b24NClNlbnQ6IFR1ZXNkYXksIEp1bHkgMTIsIDIwMTYgMTI6MDMgQU0NClRvOiBjZXBoLWRldmVs
+DQpTdWJqZWN0OiBibHVlc3RvcmUgb25vZGUgZGlldCBhbmQgZW5jb2Rpbmcgb3ZlcmhlYWQNCg0K
+SGkgQWxsLA0KDQpXaXRoIElnb3IncyBwYXRjaCBsYXN0IHdlZWsgSSB3YXMgYWJsZSB0byBnZXQg
+c29tZSBibHVlc3RvcmUgcGVyZm9ybWFuY2UgcnVucyBpbiB3aXRob3V0IHNlZ2ZhdWx0aW5nIGFu
+ZCBzdGFydGVkIGxvb2tpbmcgaW50IHRoZSByZXN1bHRzLg0KU29tZXdoZXJlIGFsb25nIHRoZSBs
+aW5lIHdlIHJlYWxseSBzY3Jld2VkIHVwIHJlYWQgcGVyZm9ybWFuY2UsIGJ1dCB0aGF0J3MgYW5v
+dGhlciB0b3BpYy4gIFJpZ2h0IG5vdyBJIHdhbnQgdG8gZm9jdXMgb24gcmFuZG9tIHdyaXRlcy4N
+CkJlZm9yZSB3ZSBwdXQgdGhlIG9ub2RlIG9uIGEgZGlldCB3ZSB3ZXJlIHNlZWluZyBtYXNzaXZl
+IGFtb3VudHMgb2YgcmVhZCB0cmFmZmljIGluIFJvY2tzREIgZHVyaW5nIGNvbXBhY3Rpb24gdGhh
+dCBjYXVzZWQgd3JpdGUgc3RhbGxzIGR1cmluZyA0SyByYW5kb20gd3JpdGVzLiAgUmFuZG9tIHdy
+aXRlIHBlcmZvcm1hbmNlIG9uIGZhc3QgaGFyZHdhcmUgbGlrZSBOVk1lIGRldmljZXMgd2FzIG9m
+dGVuIGJlbG93IGZpbGVzdG9yZSBhdCBhbnl0aGluZyBvdGhlciB0aGFuIHZlcnkgbGFyZ2UgSU8g
+c2l6ZXMuICBUaGlzIHdhcyBsYXJnZWx5IGR1ZSB0byB0aGUgc2l6ZSBvZiB0aGUgb25vZGUgY29t
+cG91bmRlZCB3aXRoIFJvY2tzREIncyB0ZW5kZW5jeSB0b3dhcmQgcmVhZCBhbmQgd3JpdGUgYW1w
+bGlmaWNhdGlvbi4NCg0KVGhlIG5ldyB0ZXN0IHJlc3VsdHMgbG9vayB2ZXJ5IHByb21pc2luZy4g
+IFdlJ3ZlIGRyYW1hdGljYWxseSBpbXByb3ZlZCBwZXJmb3JtYW5jZSBvZiByYW5kb20gd3JpdGVz
+IGF0IG1vc3QgSU8gc2l6ZXMsIHNvIHRoYXQgdGhleSBhcmUgbm93IHR5cGljYWxseSBxdWl0ZSBh
+IGJpdCBoaWdoZXIgdGhhbiBib3RoIGZpbGVzdG9yZSBhbmQgb2xkZXIgYmx1ZXN0b3JlIGNvZGUu
+ICBVbmZvcnR1bmF0ZWx5IGZvciB2ZXJ5IHNtYWxsIElPIHNpemVzIHBlcmZvcm1hbmNlIGhhc24n
+dCBpbXByb3ZlZCBtdWNoLiAgV2UgYXJlIG5vIGxvbmdlciBzZWVpbmcgaHVnZSBhbW91bnRzIG9m
+IFJvY2tzREIgcmVhZCB0cmFmZmljIGFuZCBmZXdlciB3cml0ZSBzdGFsbHMuICBXZSBhcmUgaG93
+ZXZlciBzZWVpbmcgaHVnZSBtZW1vcnkgdXNhZ2UgKH45R0IgUlNTIHBlciBPU0QpIGFuZCB2ZXJ5
+IGhpZ2ggQ1BVIHVzYWdlLiAgSSB0aGluayB0aGlzIGNvbmZpcm1zIHNvbWUgb2YgdGhlIG1lbW9y
+eSBpc3N1ZXMgc29tbmF0aCB3YXMgY29udGludWluZyB0byBzZWUuICBJIGRvbid0IHRoaW5rIGl0
+J3MgYSBsZWFrIGV4YWN0bHkgYmFzZWQgb24gaG93IHRoZSBPU0RzIHdlcmUgYmVoYXZpbmcsIGJ1
+dCB3ZSBuZWVkIHRvIHJ1biB0aHJvdWdoIG1hc3NpZiBzdGlsbCB0byBiZSBzdXJlLg0KDQpJIGVu
+ZGVkIHVwIHNwZW5kaW5nIHNvbWUgdGltZSB0b25pZ2h0IHdpdGggcGVyZiBhbmQgZGlnZ2luZyB0
+aHJvdWdoIHRoZSBlbmNvZGUgY29kZS4gIEkgd3JvdGUgdXAgc29tZSBub3RlcyB3aXRoIGdyYXBo
+cyBhbmQgY29kZSBzbmlwcGV0cyBhbmQgZGVjaWRlZCB0byBwdXQgdGhlbSB1cCBvbiB0aGUgd2Vi
+LiAgQmFzaWNhbGx5IHNvbWUgb2YgdGhlIGVuY29kaW5nIGNoYW5nZXMgd2UgaW1wbGVtZW50ZWQg
+bGFzdCBtb250aCB0byByZWR1Y2UgdGhlIG9ub2RlIHNpemUgYWxzbyBhcHBlYXIgdG8gcmVzdWx0
+IGluIG1vcmUgYnVmZmVyOjpsaXN0IGFwcGVuZHMgYW5kIHRoZSBhc3NvY2lhdGVkIG92ZXJoZWFk
+Lg0KSSd2ZSBiZWVuIHRyeWluZyB0byB0aGluayB0aHJvdWdoIHdheXMgdG8gaW1wcm92ZSB0aGUg
+c2l0dWF0aW9uIGFuZCB0aG91Z2h0IG90aGVyIHBlb3BsZSBtaWdodCBoYXZlIHNvbWUgaWRlYXMg
+dG9vLiAgSGVyZSdzIGEgbGluayB0byB0aGUgc2hvcnQgd3JpdGV1cDoNCg0KaHR0cHM6Ly9kcml2
+ZS5nb29nbGUuY29tL2ZpbGUvZC8wQjJnVEJacmtybnBaZUMwNGVrbG1NMkk0V2trL3ZpZXc/dXNw
+PXNoYXJpbmcNCg0KVGhhbmtzLA0KTWFyaw0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
+aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBv
+ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBp
+bmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNClBMRUFT
+RSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWls
+IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCBy
+ZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlz
+IG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0
+IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2
+aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNz
+YWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29t
+bXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9u
+ZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkg
+YW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhl
+ciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
