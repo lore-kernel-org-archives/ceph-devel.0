@@ -1,110 +1,92 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: deadlocks in rbd unmap and map
-Date: Wed, 13 Jul 2016 09:38:31 +0200
-Message-ID: <CAOi1vP_7dHOVnxTHEhfYsiXQGvd+e8ecsPf10cg0s33Ry4Vt9Q@mail.gmail.com>
-References: <CAE2NFgVL6_+6JmW7aFO+v3j37BFnxXEneaOHk0eOCx-Vj1pAOA@mail.gmail.com>
- <CAOi1vP8NhgYHpfZT8w=meFf6vwPrS-izRZnvSPwrRc+3vwvAWQ@mail.gmail.com>
- <CAE2NFgW0ntzuFkRup5QCGfYMBuHo4Er9+y+OtKDTeaXBBtgE3g@mail.gmail.com>
- <CAOi1vP_HwML=7+iZrJFzJpbRcSomKBX5r8RT2hnRGF23agN1FQ@mail.gmail.com>
- <CAE2NFgVVth4BRQNCy6SFOnLnLf0NQ=kgoHcuMLpnz5beG3w-nQ@mail.gmail.com>
- <CAOi1vP8fg4cmAvOOKQWZUcvNpiQ5CzpVr1q=rjhtTjasa85msQ@mail.gmail.com> <CAE2NFgXvtZYzD9EGp+GHxcSndS3AoKyvpZkwdmsTr2rB9KF__w@mail.gmail.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: bluestore onode diet and encoding overhead
+Date: Wed, 13 Jul 2016 07:47:50 -0700
+Message-ID: <CAN=+7FWoWu4E=6HLCve+t8zCvWNZRmFckhwFq2T2ZEDxS2d1=w@mail.gmail.com>
+References: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
+ <BLUPR0201MB1524775973993917A1A59078E8300@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1607121658240.497@piezo.us.to>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:35425 "EHLO
-	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751250AbcGMHio (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jul 2016 03:38:44 -0400
-Received: by mail-wm0-f44.google.com with SMTP id f65so16831789wmi.0
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2016 00:38:43 -0700 (PDT)
-In-Reply-To: <CAE2NFgXvtZYzD9EGp+GHxcSndS3AoKyvpZkwdmsTr2rB9KF__w@mail.gmail.com>
+Received: from mail-qk0-f180.google.com ([209.85.220.180]:35776 "EHLO
+	mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753026AbcGMOsc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jul 2016 10:48:32 -0400
+Received: by mail-qk0-f180.google.com with SMTP id s63so45692339qkb.2
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2016 07:48:07 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1607121658240.497@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McLean <patrickm@gaikai.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Victor Payno <vpayno@gaikai.com>, Cliff Pajaro <cpajaro@gaikai.com>, Roderick Colenbrander <roderick@gaikai.com>, Rae Yip <ryip@gaikai.com>, Frank Reed <freed@gaikai.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 13, 2016 at 2:38 AM, Patrick McLean <patrickm@gaikai.com> wrote:
-> On Sat, Jul 9, 2016 at 7:30 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
->> On Fri, Jul 8, 2016 at 10:30 PM, Patrick McLean <patrickm@gaikai.com> wrote:
->>> On Fri, Jul 8, 2016 at 11:46 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
->>>> On Fri, Jul 8, 2016 at 7:51 PM, Patrick McLean <patrickm@gaikai.com> wrote:
->>>>> On Fri, Jul 8, 2016 at 4:40 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
->>>>>> On Fri, Jul 8, 2016 at 3:28 AM, Patrick McLean <patrickm@gaikai.com> wrote:
->>>>>>> This is on linus git master as of 2016/07/01
->>>>>>>
->>>>>>> These appear to be two separate deadlocks, one on a a map operation,
->>>>>>> and one on an unmap operation. We can reproduce these pretty
->>>>>>> regularly, but it seems like there is some sort of race condition, as
->>>>>>> it happens no where near every time.
->>>>>>>
->>>>>
->>>>>>
->>>>>> It's a single deadlock between "rbd map" and a kworker thread, a later
->>>>>> "rbd unmap" is just a victim.
->>>>>>
->>>>>> Are you mapping the same image more than once?
->>>>>>
->>>>>
->>>>> We shouldn't be, there is a higher-level locking system that is
->>>>> supposed to prevent that.
->>>>
->>>> It's actually allowed, I'm just trying to get an idea of what was going
->>>> on.
->>>>
->>>> I spoke too soon.  The trace of pid 14109 is inconsistent - the entries
->>>> in the middle don't make sense.  Do you have a different set of traces
->>>> or are they all the same?
->>>
->>> Here is another backtrace. It seems that once it happens to a
->>> particular image once, it always does the same thing. We have not
->>> figured out what triggers the first hang.
->>>
->>> # grep -C 40 rbd /proc/*/stack
->>> /proc/5295/stack-[<ffffffff8111c7c4>] __queue_work+0x144/0x420
->>> /proc/5295/stack-[<ffffffff8112c1c0>] default_wake_function+0x0/0x10
->>> /proc/5295/stack:[<ffffffffa01621ee>]
->>> rbd_obj_method_sync.constprop.48+0x1be/0x290 [rbd]
->>> /proc/5295/stack:[<ffffffffa0162aea>] rbd_dev_header_info+0x15a/0x930 [rbd]
->>> /proc/5295/stack:[<ffffffffa0163450>] rbd_watch_cb+0x0/0xa0 [rbd]
->>> /proc/5295/stack:[<ffffffffa0163586>]
->>> rbd_dev_image_probe.part.42+0x96/0x910 [rbd]
->>> /proc/5295/stack:[<ffffffffa016240e>] rbd_dev_image_id+0x14e/0x1b0 [rbd]
->>> /proc/5295/stack:[<ffffffffa016428f>] do_rbd_add.isra.43+0x48f/0xbb0 [rbd]
->>> /proc/5295/stack-[<ffffffff8123ba27>] __kmalloc+0x27/0x170
->>> /proc/5295/stack-[<ffffffff812b7f3a>] kernfs_fop_write+0x10a/0x190
->>> /proc/5295/stack-[<ffffffff8124dc63>] __vfs_write+0x23/0x120
->>> /proc/5295/stack-[<ffffffff8124e8f3>] vfs_write+0xb3/0x1a0
->>> /proc/5295/stack-[<ffffffff8124fbd2>] SyS_write+0x42/0xa0
->>> /proc/5295/stack-[<ffffffff81816f72>] entry_SYSCALL_64_fastpath+0x1a/0xa4
->>> /proc/5295/stack-[<ffffffffffffffff>] 0xffffffffffffffff
->>>
->>> # ps aux | grep 5295
->>> root      5295  0.0  0.0 246704 10352 pts/4    Sl+  20:20   0:00 rbd
->>> map --pool XXXXXXX XXXXXXXX
+I think that seems like a good way to go!
+-Sam
+
+On Tue, Jul 12, 2016 at 6:50 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Tue, 12 Jul 2016, Allen Samuels wrote:
+>> Good analysis.
 >>
->> Anything in dmesg?  It looks like rbd map is waiting for a reply to one
->> of the header read-in requests and is never woken up.  rbd map holds
->> a semaphore, blocking the kworker, which blocks rbd unmap.
+>> My original comments about putting the oNode on a diet included the idea
+>> of a "custom" encode/decode path for certain high-usage cases. At the
+>> time, Sage resisted going down that path hoping that a more optimized
+>> generic case would get the job done. Your analysis shows that while
+>> we've achieved significant space reduction this has come at the expense
+>> of CPU time -- which dominates small object performance (I suspect that
+>> eventually we'd discover that the variable length decode path would be
+>> responsible for a substantial read performance degradation also -- which
+>> may or may not be part of the read performance drop-off that you're
+>> seeing). This isn't a surprising result, though it is unfortunate.
 >>
->> Can you set "debug ms = 1" on all OSDs and try to reproduce?
->> I'd also like to see the content of /sys/kernel/debug/ceph/*/osdc when
->> it happens again.
->>
+>> I believe we need to revisit the idea of custom encode/decode paths for
+>> high-usage cases, only now the gains need to be focused on CPU
+>> utilization as well as space efficiency.
 >
-> Here is the contents of the osdc debug file on a machine that had been
-> in that state for 3 days.
+> I still think we can get most or all of the way there in a generic way by
+> revising the way that we interact with bufferlist for encode and decode.
+> We haven't actually tried to optimize this yet, and the current code is
+> pretty horribly inefficient (asserts all over the place, and many layers
+> of pointer indirection to do a simple append).  I think we need to do two
+> things:
 >
-> # cat /sys/kernel/debug/ceph/*/osdc
-> REQUESTS 1 homeless 0
-> 7 osd38 4.27a8d388 [38,16,47]/38 [38,16,47]/38
-> rbd_header.bea4a16ebd6a9a 0x400011 1 0'0 call
-> LINGER REQUESTS
-> 1 osd38 4.27a8d388 [38,16,47]/38 [38,16,47]/38
-> rbd_header.bea4a16ebd6a9a 0x24 0 WC/0
-
-OK, so it's waiting for a reply.  Do you have a debug ms = 1 log for
-osd38?
-
-Thanks,
-
-                Ilya
+> 1) decode path: optimize the iterator class so that it has a const char
+> *current and const char *current_end that point into the current
+> buffer::ptr.  This way any decode will have a single pointer
+> add+comparison to ensure there is enough data to copy before falling into
+> the slow path (partial buffer, move to next buffer, etc.).
+>
+> 2) Having that comparison is still not ideal, but we shoudl consider ways
+> to get around that too.  For example, if we know that we are going to
+> decode N M-byte things, we could do an iterator 'reserve' or 'check' that
+> ensures we have a valid pointer for that much and then proceed without
+> checks.  The interface here would be tricky, though, since in the slow
+> case we'll span buffers and need to magically fall back to a different
+> decode path (hard to maintain) or do a temporary copy (probably faster but
+> we need to ensure the iterator owns it and frees is later).  I'd say this
+> is step 2 and optional; step 1 will have the most benefit.
+>
+> 3) encode path: currently all encode methods take a bufferlist& and the
+> bufferlist itself as an append buffer.  I think this is flawed and
+> limiting.  Instead, we should make a new class called
+> buffer::list::appender (or similar) and templatize the encode methods so
+> they can take a safe_appender (which does bounds checking) or an
+> unsafe_appender (which does not).  For the latter, the user takes
+> responsibility for making sure there is enough space by doing a reserve()
+> type call which returns an unsafe_appender, and it's their job to make
+> sure they don't shove too much data into it.  That should make the encode
+> path a memcpy + ptr increment (for savvy/optimized callers).
+>
+> I suggest we use bluestore as a test case to make the interfaces work and
+> be fast.  If we succeed we can take advantage of it across the reset of
+> the code base as well.
+>
+> That's my thinking, at least.  I haven't had time to prototype it out yet,
+> but I think our goal should be to make the encode/decode paths capable of
+> being a memcpy + ptr addition in the fast path, and let that guide the
+> interface...
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
