@@ -1,113 +1,170 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: bluestore onode diet and encoding overhead
-Date: Tue, 12 Jul 2016 22:13:14 -0500
-Message-ID: <0b770e1d-5b3a-b9d1-175c-ccec29ee1737@redhat.com>
-References: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
- <BLUPR0201MB1524775973993917A1A59078E8300@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1607121658240.497@piezo.us.to>
+From: Ramesh Chander <Ramesh.Chander@sandisk.com>
+Subject: RE: bluestore asserts if I/O size > 4MB when using SSDs
+Date: Wed, 13 Jul 2016 03:35:35 +0000
+Message-ID: <CY1PR0201MB182054D468DA2F44A56EDC0885310@CY1PR0201MB1820.namprd02.prod.outlook.com>
+References: <D3AA996A.B5682%krehm@cray.com>
+ <c1e0bd6c-1202-1c5d-20c0-fea4c976c12d@redhat.com>
+ <BL2PR02MB211536CE8D0BB8DFA73FB0CEF4300@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60424 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750816AbcGMDNz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 12 Jul 2016 23:13:55 -0400
-In-Reply-To: <alpine.DEB.2.11.1607121658240.497@piezo.us.to>
+Received: from mail-co1nam03on0052.outbound.protection.outlook.com ([104.47.40.52]:43328
+	"EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750816AbcGMDgC convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jul 2016 23:36:02 -0400
+In-Reply-To: <BL2PR02MB211536CE8D0BB8DFA73FB0CEF4300@BL2PR02MB2115.namprd02.prod.outlook.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, Kevan Rehm <krehm@cray.com>, "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
 
+Yes, single allocation is limited by zone size * block size ( 4k * 1024 for ssd).
 
+Both are configurable though.
 
-On 07/12/2016 08:50 PM, Sage Weil wrote:
-> On Tue, 12 Jul 2016, Allen Samuels wrote:
->> Good analysis.
->>
->> My original comments about putting the oNode on a diet included the idea
->> of a "custom" encode/decode path for certain high-usage cases. At the
->> time, Sage resisted going down that path hoping that a more optimized
->> generic case would get the job done. Your analysis shows that while
->> we've achieved significant space reduction this has come at the expense
->> of CPU time -- which dominates small object performance (I suspect that
->> eventually we'd discover that the variable length decode path would be
->> responsible for a substantial read performance degradation also -- which
->> may or may not be part of the read performance drop-off that you're
->> seeing). This isn't a surprising result, though it is unfortunate.
->>
->> I believe we need to revisit the idea of custom encode/decode paths for
->> high-usage cases, only now the gains need to be focused on CPU
->> utilization as well as space efficiency.
+-Ramesh
+
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Somnath Roy
+> Sent: Tuesday, July 12, 2016 11:43 PM
+> To: Mark Nelson; Kevan Rehm; ceph-devel (ceph-devel@vger.kernel.org)
+> Subject: RE: bluestore asserts if I/O size > 4MB when using SSDs
 >
-> I still think we can get most or all of the way there in a generic way by
-> revising the way that we interact with bufferlist for encode and decode.
-> We haven't actually tried to optimize this yet, and the current code is
-> pretty horribly inefficient (asserts all over the place, and many layers
-> of pointer indirection to do a simple append).  I think we need to do two
-> things:
+> May be allocator is not able to handle bigger request than 4MB, Ramesh ?
 >
-> 1) decode path: optimize the iterator class so that it has a const char
-> *current and const char *current_end that point into the current
-> buffer::ptr.  This way any decode will have a single pointer
-> add+comparison to ensure there is enough data to copy before falling into
-> the slow path (partial buffer, move to next buffer, etc.).
 >
-
-I don't have a good sense yet for how much this is hurting us in the 
-read path.  We screwed something up in the last couple of weeks and 
-small reads are quite slow.
-
-> 2) Having that comparison is still not ideal, but we shoudl consider ways
-> to get around that too.  For example, if we know that we are going to
-> decode N M-byte things, we could do an iterator 'reserve' or 'check' that
-> ensures we have a valid pointer for that much and then proceed without
-> checks.  The interface here would be tricky, though, since in the slow
-> case we'll span buffers and need to magically fall back to a different
-> decode path (hard to maintain) or do a temporary copy (probably faster but
-> we need to ensure the iterator owns it and frees is later).  I'd say this
-> is step 2 and optional; step 1 will have the most benefit.
+>       uint64_t want = max_alloc_size ? MIN(final_length, max_alloc_size) :
+> final_length;
+>       int r = alloc->allocate(want, min_alloc_size, hint,
+>       &e.offset, &l);
+>       assert(r == 0);
 >
-> 3) encode path: currently all encode methods take a bufferlist& and the
-> bufferlist itself as an append buffer.  I think this is flawed and
-> limiting.  Instead, we should make a new class called
-> buffer::list::appender (or similar) and templatize the encode methods so
-> they can take a safe_appender (which does bounds checking) or an
-> unsafe_appender (which does not).  For the latter, the user takes
-> responsibility for making sure there is enough space by doing a reserve()
-> type call which returns an unsafe_appender, and it's their job to make
-> sure they don't shove too much data into it.  That should make the encode
-> path a memcpy + ptr increment (for savvy/optimized callers).
-
-Seems reasonable and similar in performance to what Piotr and I were 
-discussing this morning.  As a very simple test I was thinking of doing 
-a quick size computation and then passing that in to increase the 
-append_buffer size when the bufferlist is created in 
-Bluestore::_txc_write_nodes.  His idea went a bit farther to break the 
-encapsulation, compute the fully encoded message, and dump it directly 
-into a buffer of a computed size without the extra assert checks or 
-bounds checking.  Obviously his idea would be faster but more work.
-
-It sounds like your solution would be similar but a bit more formalized.
-
+> Kevan,
+> Could you please try setting the following in the ceph.conf and reproduce ?
+> You need to recreate the cluster.
 >
-> I suggest we use bluestore as a test case to make the interfaces work and
-> be fast.  If we succeed we can take advantage of it across the reset of
-> the code base as well.
-
-Do we have other places in the code with similar byte append behavior? 
-That's what's really killing us I think, especially with how small the 
-new append_buffer is when you run out of space when appending bytes.
-
+> bluestore_allocator = stupid
 >
-> That's my thinking, at least.  I haven't had time to prototype it out yet,
-> but I think our goal should be to make the encode/decode paths capable of
-> being a memcpy + ptr addition in the fast path, and let that guide the
-> interface...
+> Thanks & Regards
+> Somnath
 >
-> sage
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Mark Nelson
+> Sent: Tuesday, July 12, 2016 11:03 AM
+> To: Kevan Rehm; ceph-devel (ceph-devel@vger.kernel.org)
+> Subject: Re: bluestore asserts if I/O size > 4MB when using SSDs
+>
+> Hi Kevan,
+>
+> There's been a lot of big changes in the last couple of months so we're slowly
+> working on getting things back into a stable state.  :)  Thanks for the report!
+>
+> Mark
+>
+> On 07/12/2016 12:56 PM, Kevan Rehm wrote:
+> > Greetings,
+> >
+> > I have opened issue #16662 for a bluestore assert that happens when
+> > using SSDs with I/O sizes larger than 4 MB.  Below is the traceback.
+> Inquiring
+> > minds can look at the issue for an analysis of what is happening.   If you
+> > set 'bluestore_max_alloc_size' to 4194304 in ceph.conf, then you can
+> > avoid this problem.
+> >
+> > Cheers, Kevan
+> >
+> >      0> 2016-07-12 15:37:03.377685 7f47731a7700 -1
+> > os/bluestore/BlueStore.cc: In function 'int
+> > BlueStore::_do_alloc_write(BlueStore::TransContext*,
+> > BlueStore::WriteContext*)' thread 7f47731a7700 time 2016-07-12
+> > 15:37:03.368821
+> > os/bluestore/BlueStore.cc: 5988: FAILED assert(r == 0)
+> >
+> >  ceph version 11.0.0-196-g85bb43e
+> > (85bb43e111692989d2296a389ce45377d2297d6f)
+> >  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> > const*)+0x85) [0x7f479212de35]
+> >  2: (BlueStore::_do_alloc_write(BlueStore::TransContext*,
+> > BlueStore::WriteContext*)+0x10af) [0x7f4791d48c4f]
+> >  3: (BlueStore::_do_write(BlueStore::TransContext*,
+> > boost::intrusive_ptr<BlueStore::Collection>&,
+> > boost::intrusive_ptr<BlueStore::Onode>, unsigned long, unsigned long,
+> > ceph::buffer::list&, unsigned int)+0x3e9) [0x7f4791d69479]
+> >  4: (BlueStore::_write(BlueStore::TransContext*,
+> > boost::intrusive_ptr<BlueStore::Collection>&,
+> > boost::intrusive_ptr<BlueStore::Onode>&, unsigned long, unsigned long,
+> > ceph::buffer::list&, unsigned int)+0x10f) [0x7f4791d6a0bf]
+> >  5: (BlueStore::_txc_add_transaction(BlueStore::TransContext*,
+> > ObjectStore::Transaction*)+0x1127) [0x7f4791d6e297]
+> >  6: (BlueStore::queue_transactions(ObjectStore::Sequencer*,
+> > std::vector<ObjectStore::Transaction,
+> > std::allocator<ObjectStore::Transaction> >&,
+> > std::shared_ptr<TrackedOp>,
+> > ThreadPool::TPHandle*)+0x41a) [0x7f4791d7017a]
+> >  7:
+> > (ReplicatedPG::queue_transactions(std::vector<ObjectStore::Transaction
+> > , std::allocator<ObjectStore::Transaction> >&,
+> > std::shared_ptr<OpRequest>)+0x8c) [0x7f4791bffc4c]
+> >  8: (ReplicatedBackend::submit_transaction(hobject_t const&,
+> > eversion_t const&, std::unique_ptr<PGBackend::PGTransaction,
+> > std::default_delete<PGBackend::PGTransaction> >&&, eversion_t const&,
+> > eversion_t const&, std::vector<pg_log_entry_t,
+> > std::allocator<pg_log_entry_t> > const&,
+> > boost::optional<pg_hit_set_history_t>&, Context*, Context*, Context*,
+> > unsigned long, osd_reqid_t, std::shared_ptr<OpRequest>)+0x94d)
+> > [0x7f4791c3b67d]
+> >  9: (ReplicatedPG::issue_repop(ReplicatedPG::RepGather*,
+> > ReplicatedPG::OpContext*)+0x6af) [0x7f4791b8ba5f]
+> >  10: (ReplicatedPG::execute_ctx(ReplicatedPG::OpContext*)+0xeea)
+> > [0x7f4791bdfeda]
+> >  11: (ReplicatedPG::do_op(std::shared_ptr<OpRequest>&)+0x2843)
+> > [0x7f4791be3853]
+> >  12: (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&,
+> > ThreadPool::TPHandle&)+0x777) [0x7f4791b9e957]
+> >  13: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+> > std::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x41d)
+> > [0x7f4791a4d0ad]
+> >  14: (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>
+> > const&)+0x6d) [0x7f4791a4d2fd]
+> >  15: (OSD::ShardedOpWQ::_process(unsigned int,
+> > ceph::heartbeat_handle_d*)+0x864) [0x7f4791a6e884]
+> >  16: (ShardedThreadPool::shardedthreadpool_worker(unsigned
+> int)+0x947)
+> > [0x7f4792112147]
+> >  17: (ShardedThreadPool::WorkThreadSharded::entry()+0x10)
+> > [0x7f47921142a0]
+> >  18: (()+0x7dc5) [0x7f478ffd7dc5]
+> >  19: (clone()+0x6d) [0x7f478e1efced]
+> >  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> > needed to interpret this.
+> >
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in the body of a message to majordomo@vger.kernel.org More
+> majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> >
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
+> PLEASE NOTE: The information contained in this electronic mail message is
+> intended only for the use of the designated recipient(s) named above. If the
+> reader of this message is not the intended recipient, you are hereby notified
+> that you have received this message in error and that any review,
+> dissemination, distribution, or copying of this message is strictly prohibited. If
+> you have received this communication in error, please notify the sender by
+> telephone or e-mail (as shown above) immediately and destroy any and all
+> copies of this message in your possession (whether hard copies or
+> electronically stored copies).
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
