@@ -1,92 +1,38 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: bluestore onode diet and encoding overhead
-Date: Wed, 13 Jul 2016 07:47:50 -0700
-Message-ID: <CAN=+7FWoWu4E=6HLCve+t8zCvWNZRmFckhwFq2T2ZEDxS2d1=w@mail.gmail.com>
-References: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
- <BLUPR0201MB1524775973993917A1A59078E8300@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1607121658240.497@piezo.us.to>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: updated gmock/gtest - now a googletest submodule
+Date: Wed, 13 Jul 2016 08:30:42 -0700
+Message-ID: <57865EA2.8080501@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f180.google.com ([209.85.220.180]:35776 "EHLO
-	mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753026AbcGMOsc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jul 2016 10:48:32 -0400
-Received: by mail-qk0-f180.google.com with SMTP id s63so45692339qkb.2
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2016 07:48:07 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1607121658240.497@piezo.us.to>
+Received: from mx1.redhat.com ([209.132.183.28]:52022 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751362AbcGMPbB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 13 Jul 2016 11:31:01 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id E8DD712049C
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2016 15:30:36 +0000 (UTC)
+Received: from [10.3.225.116] (vpn-225-116.phx2.redhat.com [10.3.225.116])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u6DFUaQG001419
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2016 11:30:36 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I think that seems like a good way to go!
--Sam
+Hey folks, an updated version of gmock and gtest, which are now in a
+single shared repo, called googletest, has been merged [0].
 
-On Tue, Jul 12, 2016 at 6:50 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 12 Jul 2016, Allen Samuels wrote:
->> Good analysis.
->>
->> My original comments about putting the oNode on a diet included the idea
->> of a "custom" encode/decode path for certain high-usage cases. At the
->> time, Sage resisted going down that path hoping that a more optimized
->> generic case would get the job done. Your analysis shows that while
->> we've achieved significant space reduction this has come at the expense
->> of CPU time -- which dominates small object performance (I suspect that
->> eventually we'd discover that the variable length decode path would be
->> responsible for a substantial read performance degradation also -- which
->> may or may not be part of the read performance drop-off that you're
->> seeing). This isn't a surprising result, though it is unfortunate.
->>
->> I believe we need to revisit the idea of custom encode/decode paths for
->> high-usage cases, only now the gains need to be focused on CPU
->> utilization as well as space efficiency.
->
-> I still think we can get most or all of the way there in a generic way by
-> revising the way that we interact with bufferlist for encode and decode.
-> We haven't actually tried to optimize this yet, and the current code is
-> pretty horribly inefficient (asserts all over the place, and many layers
-> of pointer indirection to do a simple append).  I think we need to do two
-> things:
->
-> 1) decode path: optimize the iterator class so that it has a const char
-> *current and const char *current_end that point into the current
-> buffer::ptr.  This way any decode will have a single pointer
-> add+comparison to ensure there is enough data to copy before falling into
-> the slow path (partial buffer, move to next buffer, etc.).
->
-> 2) Having that comparison is still not ideal, but we shoudl consider ways
-> to get around that too.  For example, if we know that we are going to
-> decode N M-byte things, we could do an iterator 'reserve' or 'check' that
-> ensures we have a valid pointer for that much and then proceed without
-> checks.  The interface here would be tricky, though, since in the slow
-> case we'll span buffers and need to magically fall back to a different
-> decode path (hard to maintain) or do a temporary copy (probably faster but
-> we need to ensure the iterator owns it and frees is later).  I'd say this
-> is step 2 and optional; step 1 will have the most benefit.
->
-> 3) encode path: currently all encode methods take a bufferlist& and the
-> bufferlist itself as an append buffer.  I think this is flawed and
-> limiting.  Instead, we should make a new class called
-> buffer::list::appender (or similar) and templatize the encode methods so
-> they can take a safe_appender (which does bounds checking) or an
-> unsafe_appender (which does not).  For the latter, the user takes
-> responsibility for making sure there is enough space by doing a reserve()
-> type call which returns an unsafe_appender, and it's their job to make
-> sure they don't shove too much data into it.  That should make the encode
-> path a memcpy + ptr increment (for savvy/optimized callers).
->
-> I suggest we use bluestore as a test case to make the interfaces work and
-> be fast.  If we succeed we can take advantage of it across the reset of
-> the code base as well.
->
-> That's my thinking, at least.  I haven't had time to prototype it out yet,
-> but I think our goal should be to make the encode/decode paths capable of
-> being a memcpy + ptr addition in the fast path, and let that guide the
-> interface...
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+You'll need to make sure your submodules are up to date if you build
+the latest master.
+
+This fixes a bug with gcc 6 and unit tests as noted in that PR,
+but as with any update, may introduce bugs. If you see any new
+oddities related to gmock or gtest, this may be the cause.
+
+Josh
+
+[0] https://github.com/ceph/ceph/pull/9134
