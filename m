@@ -1,7 +1,7 @@
 From: Allen Samuels <Allen.Samuels@sandisk.com>
 Subject: RE: bluestore onode diet and encoding overhead
-Date: Thu, 14 Jul 2016 14:10:27 +0000
-Message-ID: <BY2PR0201MB1525B5D17B014B1F8CAD2277E8320@BY2PR0201MB1525.namprd02.prod.outlook.com>
+Date: Thu, 14 Jul 2016 14:14:17 +0000
+Message-ID: <BY2PR0201MB1525E65D316A3DAC17046005E8320@BY2PR0201MB1525.namprd02.prod.outlook.com>
 References: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
  <BLUPR0201MB1524775973993917A1A59078E8300@BLUPR0201MB1524.namprd02.prod.outlook.com>
  <alpine.DEB.2.11.1607121658240.497@piezo.us.to>
@@ -12,11 +12,11 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam01on0087.outbound.protection.outlook.com ([104.47.34.87]:3859
-	"EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+Received: from mail-sn1nam02on0088.outbound.protection.outlook.com ([104.47.36.88]:14016
+	"EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750897AbcGNOKa convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2016 10:10:30 -0400
+	id S1751160AbcGNOOU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2016 10:14:20 -0400
 In-Reply-To: <47c4376f-a958-9cb6-9bd1-c9ac4a56ac35@redhat.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
@@ -24,27 +24,70 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: Mark Nelson <mnelson@redhat.com>, Sage Weil <sweil@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Yes, I did actually run the code before I posted it.
+w.r.t. allocation, yes -- exactly. Here's a snippet from my previous e-mail that completes the picture:
 
-w.r.t. varint encoding. You have two choices w.r.t. a variable length encoded, you could examine the data to accurately predict the output size OR you could just return a constant that represents the worst-case (max) size.  For individual fields, it probably doesn't matter what you chose, but for fields that are part of something in a container, you probably want the option of NOT running down the container to size up each element -- so you'd just choose the worst-case size for the estimator.
+Fundamentally, the problem that we have is lack of knowledge about how much data is going to be encoded (and to a lesser extent, decoded). Currently, we basically check for space on each micro-encode operation. Clearly those checks have to be eliminated. That leaves us with basically three choices:
 
-Though this code doesn't show it, I wrote some pseudo-code in a previous e-mail that glues this framework into the bufferlist stuff. That pseudo code is well prepared for estimate functions that are too large (indeed, it expects that to happen) and it naturally handles buffer overrun detection.
+(1) Pre-allocate a buffer sufficiently large.
+(2) Check for sufficient space at "strategic" places in the code.
+(3) Fiddle with the CPU memory mapping tables to generate a page fault when we run off the end of our buffer (which clearly must be page aligned, blah blah blah) and then contrive to auto-allocate and restart.
 
-I didn't describe it in the example,  but this framework very naturally handles versioning, you just add some code like:
+I reject (3) as too complex and not worth the effort.
 
-Struct abc {
-   Int version;
-   Int a;
-   Int b; 
-   ..... enc_dec(p) {
-      ::enc_dec(p, version);
-      ::enc_dec(p, a);
-      If (s != DECODE || version > 5) ::enc_dec(p, b); // This field is present in all estimate and encode operations, but only in decode operations when version is > 5
-   }
-};
+I reject (2) as difficult to maintain and difficult to determine where the "strategic" points in the code are that retain correctness, but happen infrequently enough to minimize CPU utilization. 
 
-What this framework doesn't yet handle very well is situations where you have a container with a contained type that is a primitive (i.e., uint8) and you want that contained type to be custom encoded.
-Currently, the only solution is replace the contained primitive type with a class wrapper. Unfortunately a typedef is NOT sufficient to differentiate it.
+That leaves us with (1).
+
+Method (1) must consist of making a worst-case prediction of the size of the encoded data. Encoded the data into the allocated buffer and then "freeing" the unused portion (since tight encoding of the data is content-dependent in length). The encode and free processes are relatively straightforward, but the prediction process has some options to explore.
+
+(1a) Constant "maximum". We could easily establish something like a 128K or 256K constant upper limit and just use a buffer of that size.
+(1b) computed "maximum", For simple objects (a few fields/containers) it's relatively easy to add up the necessary sizes to generate an estimate. For complex objects, this is error prone because you're duplicating the encode with the estimate-size logic.
+
+Right now, I'm trying to concoct some combinations of C++ templates that's lets me merge the estimate-size, encode and decode functions into a common routine so that we can avoid this system-matic error. Stay tuned.
+
+One of the dangers of the prediction scheme is what if the prediction is incorrect -- too small. Then you'll get buffer overrun. It's been suggested that we insert some special debug-assert code to detect that situation which is only enabled at compile-time. I believe this is NOT the right solution. The buffer overrun problem is data dependent. That means it will be especially hard to debug in the field as what you're looking for is essentially silent data corruption.
+
+I believe that the best solution is to simply check the fully-encoded buffer against the estimate that was made. If the estimate is too small, then assert-out. Leave this in production code. If we encounter an encode-buffer overrun at least we'll now that was the source of the problem and we can fix it. (I assert that if you see this, it'll be pretty obvious where it went wrong -- especially if I'm able to create a unified estimate-size, encode and decode function.
+
+One last problem to solve is the decode problem. We need to know how much data is in a fast-encode buffer in order to ensure that it's not fragmented in the buffer::list. This is relatively easy if the encode leaves a "total bytes" field at the start of the operation.
+
+Now we can see the pseudo-code for fast-encode.
+
+Void fast_encode(object& o, bufferptr& b) {
+   size_t estimate = o.estimate_sizeof_fast_encode() + sizeof(int);  // Extra int is for explicit size of the overall buffer.
+   char * buf_start = b.push_back (estimate);	// returns pointer to a block of memory appended to the end that's of the specified size;
+   char * buf_end  = o.do_fast_encode(buf_start + sizeof(int)); // starts serialization into the address pointed at by the input parameter, returns "next" pointer, i.e., pointer to next unused byte 
+   size_t consumed = buf_end - buf_start; // Compute consumed bytes
+
+   assert(consumed <= estimate);  // Here's where we catch a silent data corruption due to an overflow
+
+   *(int *)buf_start = consumed;  // Total size of consumed buffer, including the starting int stored back at the start...
+
+   size_t unused = estimate - consumed; // Amount of unused space at the end.
+
+   b.pop_back(unused); // "free" the unused bytes at the end of the buffer.
+
+}
+
+Now we can see the shape of the fast_decode function.
+
+Void fast_decode(object& o, bufferptr& b) {
+   
+   Int encode_size = b.pop_front_int();   // Remove first bytes where the encode left the size of the full buffer
+
+   const char *buf_start = b.contiguous_ptr(encode_size - sizeof(int));   // return pointer to sequential buffer of specified number of bytes <<<<- here's where we might have to copy discontiguous buffers into a single buffer.
+
+   const char *buf_end = o.fast_decode(buf_start);		              // Decode data from the buffer into the object, return the pointer to the last consumed byte.
+
+   Size_t consumed_bytes = buf_end - buf_start;
+  
+  Assert(consumed_bytes == encode_size);			// Consistency check, we consumed exactly as much as we encoded (NB, I may have left off a " + sizeof(int)" for the initial buffer size.)
+
+   b.pop_front(consumed_bytes);				// logically remove the bytes that we've consumed
+
+}
+
+
 
 Allen Samuels
 SanDisk |a Western Digital brand
