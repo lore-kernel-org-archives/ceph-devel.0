@@ -1,27 +1,40 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Bluestore read performance
-Date: Thu, 14 Jul 2016 12:28:07 -0500
-Message-ID: <9c0bc712-6cce-2275-3a7a-cb6167a60818@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore read performance
+Date: Thu, 14 Jul 2016 17:36:18 +0000
+Message-ID: <BL2PR02MB211550E445D474F8EA8A5937F4320@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <BL2PR02MB2115F97A4A7B2362E214816CF4320@BL2PR02MB2115.namprd02.prod.outlook.com>
  <40b656c1-4e91-cfc2-aa41-fb8d6f2a4dd1@mirantis.com>
+ <9c0bc712-6cce-2275-3a7a-cb6167a60818@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45297 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751175AbcGNR2L (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 14 Jul 2016 13:28:11 -0400
-In-Reply-To: <40b656c1-4e91-cfc2-aa41-fb8d6f2a4dd1@mirantis.com>
+Received: from mail-co1nam03on0060.outbound.protection.outlook.com ([104.47.40.60]:9629
+	"EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751051AbcGNRgW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2016 13:36:22 -0400
+In-Reply-To: <9c0bc712-6cce-2275-3a7a-cb6167a60818@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, Somnath Roy <Somnath.Roy@sandisk.com>
+To: Mark Nelson <mnelson@redhat.com>, Igor Fedotov <ifedotov@mirantis.com>
 Cc: "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
 
-We are leaking or at least spiking memory much higher than than in some 
-cases.  In my tests I can get them up to about 9GB RSS per OSD.  I only 
-have 4 nodes per OSD and 64GB of RAM though so I'm not hitting swap (in 
-fact these nodes don't have swap).
+Thanks Igor ! I was not aware of cache shards..
+I am running with 25 shards (Generally, we need more shards for the parallelism.), so, it will take ~12G per OSD for the cash only. That is probably clarifies why we are seeing memory spikes..
+
+Regards
+Somnath
+
+-----Original Message-----
+From: Mark Nelson [mailto:mnelson@redhat.com]
+Sent: Thursday, July 14, 2016 10:28 AM
+To: Igor Fedotov; Somnath Roy
+Cc: ceph-devel (ceph-devel@vger.kernel.org)
+Subject: Re: Bluestore read performance
+
+We are leaking or at least spiking memory much higher than than in some cases.  In my tests I can get them up to about 9GB RSS per OSD.  I only have 4 nodes per OSD and 64GB of RAM though so I'm not hitting swap (in fact these nodes don't have swap).
 
 Mark
 
@@ -30,15 +43,16 @@ On 07/14/2016 12:17 PM, Igor Fedotov wrote:
 >
 > I have a question and some comments w.r.t. memory swapping.
 >
-> What's amount of RAM do you have at your nodes? How many of it is taken
-> by OSDs?
+> What's amount of RAM do you have at your nodes? How many of it is
+> taken by OSDs?
 >
 > I can see that each BlueStore OSD may occupy
-> bluestore_buffer_cache_size  *  osd_op_num_shards = 512M * 5 = 2.5G (by
+> bluestore_buffer_cache_size  *  osd_op_num_shards = 512M * 5 = 2.5G
+> (by
 > default) for buffer cache.
 >
-> Hence in Somnath's environment one might expect up to 20G taken for the
-> cache. Does that estimation correlate with the real life?
+> Hence in Somnath's environment one might expect up to 20G taken for
+> the cache. Does that estimation correlate with the real life?
 >
 >
 > Thanks,
@@ -75,7 +89,8 @@ On 07/14/2016 12:17 PM, Igor Fedotov wrote:
 >>          osd_op_num_shards = 25
 >>
 >>          bluestore_rocksdb_options =
->> "max_write_buffer_number=16,min_write_buffer_number_to_merge=16,recycle_log_file_num=16,compaction_threads=32,flusher_threads=4,
+>> "max_write_buffer_number=16,min_write_buffer_number_to_merge=16,recyc
+>> le_log_file_num=16,compaction_threads=32,flusher_threads=4,
 >>
 >>
 >> max_background_compactions=32,max_background_flushes=8,max_bytes_for_level_base=5368709120,write_buffer_size=83886080,level0_file_num_compaction_trigger=4,level0_slowdown_writes_trigger=400,level0_stop_writes_trigger=800"
@@ -91,7 +106,8 @@ On 07/14/2016 12:17 PM, Igor Fedotov wrote:
 >>
 >> Here is the output I got.
 >>
->> rbd_iodepth32: (g=0): rw=randread, bs=4K-4K/4K-4K/4K-4K, ioengine=rbd,
+>> rbd_iodepth32: (g=0): rw=randread, bs=4K-4K/4K-4K/4K-4K,
+>> ioengine=rbd,
 >> iodepth=128
 >> ...
 >> fio-2.1.11
@@ -126,10 +142,10 @@ On 07/14/2016 12:17 PM, Igor Fedotov wrote:
 >>       | 99.99th=[602112]
 >>
 >>
->> I was getting > 600MB/s  before memory started swapping for me and the
->> fio output came down.
->> I never tested Bluestore read before, but, it is definitely lower than
->> Filestore for me.
+>> I was getting > 600MB/s  before memory started swapping for me and
+>> the fio output came down.
+>> I never tested Bluestore read before, but, it is definitely lower
+>> than Filestore for me.
 >> But, it is far better than you are getting it seems (?). Do you mind
 >> trying with the above ceph.conf option as well ?
 >>
@@ -140,22 +156,23 @@ On 07/14/2016 12:17 PM, Igor Fedotov wrote:
 >> Thanks & Regards
 >> Somnath
 >>
->> PLEASE NOTE: The information contained in this electronic mail message
->> is intended only for the use of the designated recipient(s) named
->> above. If the reader of this message is not the intended recipient,
->> you are hereby notified that you have received this message in error
->> and that any review, dissemination, distribution, or copying of this
->> message is strictly prohibited. If you have received this
->> communication in error, please notify the sender by telephone or
+>> PLEASE NOTE: The information contained in this electronic mail
+>> message is intended only for the use of the designated recipient(s)
+>> named above. If the reader of this message is not the intended
+>> recipient, you are hereby notified that you have received this
+>> message in error and that any review, dissemination, distribution, or
+>> copying of this message is strictly prohibited. If you have received
+>> this communication in error, please notify the sender by telephone or
 >> e-mail (as shown above) immediately and destroy any and all copies of
->> this message in your possession (whether hard copies or electronically
->> stored copies).
+>> this message in your possession (whether hard copies or
+>> electronically stored copies).
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> in the body of a message to majordomo@vger.kernel.org More majordomo
+> info at  http://vger.kernel.org/majordomo-info.html
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
