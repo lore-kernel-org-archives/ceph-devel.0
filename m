@@ -1,37 +1,44 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Bluestore read performance
-Date: Thu, 14 Jul 2016 20:17:58 +0300
-Message-ID: <40b656c1-4e91-cfc2-aa41-fb8d6f2a4dd1@mirantis.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore read performance
+Date: Thu, 14 Jul 2016 17:23:53 +0000
+Message-ID: <BL2PR02MB21153F2D1CDA7F98ABF670E9F4320@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <BL2PR02MB2115F97A4A7B2362E214816CF4320@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <40b656c1-4e91-cfc2-aa41-fb8d6f2a4dd1@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f43.google.com ([209.85.215.43]:35467 "EHLO
-	mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751300AbcGNRSH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2016 13:18:07 -0400
-Received: by mail-lf0-f43.google.com with SMTP id f93so69554025lfi.2
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Jul 2016 10:18:05 -0700 (PDT)
-In-Reply-To: <BL2PR02MB2115F97A4A7B2362E214816CF4320@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from mail-dm3nam03on0048.outbound.protection.outlook.com ([104.47.41.48]:60783
+	"EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751300AbcGNRXz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2016 13:23:55 -0400
+In-Reply-To: <40b656c1-4e91-cfc2-aa41-fb8d6f2a4dd1@mirantis.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>
+To: Igor Fedotov <ifedotov@mirantis.com>, "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>
 Cc: "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
+
+Why it will be related to osd_op_num_shards ?
+
+-----Original Message-----
+From: Igor Fedotov [mailto:ifedotov@mirantis.com] 
+Sent: Thursday, July 14, 2016 10:18 AM
+To: Somnath Roy; Mark Nelson (mnelson@redhat.com)
+Cc: ceph-devel (ceph-devel@vger.kernel.org)
+Subject: Re: Bluestore read performance
 
 Somnath, Mark
 
 I have a question and some comments w.r.t. memory swapping.
 
-What's amount of RAM do you have at your nodes? How many of it is taken 
-by OSDs?
+What's amount of RAM do you have at your nodes? How many of it is taken by OSDs?
 
-I can see that each BlueStore OSD may occupy 
-bluestore_buffer_cache_size  *  osd_op_num_shards = 512M * 5 = 2.5G (by 
+I can see that each BlueStore OSD may occupy bluestore_buffer_cache_size  *  osd_op_num_shards = 512M * 5 = 2.5G (by
 default) for buffer cache.
 
-Hence in Somnath's environment one might expect up to 20G taken for the 
-cache. Does that estimation correlate with the real life?
+Hence in Somnath's environment one might expect up to 20G taken for the cache. Does that estimation correlate with the real life?
 
 
 Thanks,
