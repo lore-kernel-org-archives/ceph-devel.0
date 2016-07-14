@@ -1,27 +1,46 @@
-From: Daniel Oliveira <doliveira@suse.com>
-Subject: LDAP/KRB5 authentication mode.
-Date: Thu, 14 Jul 2016 14:51:06 -0600
-Message-ID: <1468529466.6657.27.camel@suse.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: AttributeError: 'Rados' object has no attribute 'monitor_log'
+Date: Thu, 14 Jul 2016 22:50:43 +0200
+Message-ID: <0b1f91d5-81bb-0c5c-961e-a9ad19ba7f6d@digiware.nl>
+References: <30f6bbac-0b8b-b241-b58d-e3960051ad7c@digiware.nl>
+ <CAF-wwdG5-NSDT2YDBWk_cNSU7vzajv9EQ75GZ99qSQJBUbjVkQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:36815 "EHLO
-	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752498AbcGNUt7 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Thu, 14 Jul 2016 16:49:59 -0400
+Received: from smtp.digiware.nl ([176.74.240.9]:32250 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752355AbcGNUvH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 14 Jul 2016 16:51:07 -0400
+In-Reply-To: <CAF-wwdG5-NSDT2YDBWk_cNSU7vzajv9EQ75GZ99qSQJBUbjVkQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Brad Hubbard <bhubbard@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi, 
+On 7-7-2016 00:46, Brad Hubbard wrote:
+> On Thu, Jul 7, 2016 at 3:22 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> Hi,
+>>
+>> I'm trying to run cephtool-test-mon.sh, and it gets there quite far
+>> but somewhere down the test I have this error:
+>> Now python is not my strong point.
+> 
+> Not mine either but monitor_log should be defined in
+> src/pybind/rados/rados.pyx and within the
+> "Rados" object definition.
+> 
+>  519 cdef class Rados(object):
+> ...
+> 1280     def monitor_log(self, level, callback, arg):
+> 
+> I guess just checking they are there is a start :)
+> 
+> HTH,
+> Brad
 
-I've talking to Kefu/Badone about the work in question and would like to help with that. 
+Fixed by recompilation.
+So could be a faulty leftover from previous build attempts.
 
-Please, who should I talk to in order to understand where we are at and then start working on it? 
-
-Thanks,
--Daniel 
+--WjW
 
 
