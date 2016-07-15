@@ -1,46 +1,28 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: AttributeError: 'Rados' object has no attribute 'monitor_log'
-Date: Thu, 14 Jul 2016 22:50:43 +0200
-Message-ID: <0b1f91d5-81bb-0c5c-961e-a9ad19ba7f6d@digiware.nl>
-References: <30f6bbac-0b8b-b241-b58d-e3960051ad7c@digiware.nl>
- <CAF-wwdG5-NSDT2YDBWk_cNSU7vzajv9EQ75GZ99qSQJBUbjVkQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: BlueStore Transaction + collection
+Date: Fri, 15 Jul 2016 00:19:17 +0000
+Message-ID: <BL2PR02MB2115BF3FDC6BE2CC21A1DF51F4330@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:32250 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752355AbcGNUvH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 14 Jul 2016 16:51:07 -0400
-In-Reply-To: <CAF-wwdG5-NSDT2YDBWk_cNSU7vzajv9EQ75GZ99qSQJBUbjVkQ@mail.gmail.com>
+Received: from mail-cys01nam02on0080.outbound.protection.outlook.com ([104.47.37.80]:27328
+	"EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751247AbcGOATU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2016 20:19:20 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
+Cc: "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
 
-On 7-7-2016 00:46, Brad Hubbard wrote:
-> On Thu, Jul 7, 2016 at 3:22 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> Hi,
->>
->> I'm trying to run cephtool-test-mon.sh, and it gets there quite far
->> but somewhere down the test I have this error:
->> Now python is not my strong point.
-> 
-> Not mine either but monitor_log should be defined in
-> src/pybind/rados/rados.pyx and within the
-> "Rados" object definition.
-> 
->  519 cdef class Rados(object):
-> ...
-> 1280     def monitor_log(self, level, callback, arg):
-> 
-> I guess just checking they are there is a start :)
-> 
-> HTH,
-> Brad
+Hi Sage/Sam,
+I am seeing we are using vector of collections within _txc_add_transaction() (https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L5206). I always thought all ops within a transaction will be having same collection id.
+What is the scenario (or use case) where we may have ops with different collection ids within a transaction.
+Also, I saw in BlueStore we are storing the first_collection (https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.h#L893)  among these op->cid.
+I couldn't understand the reason as only place we are using that to trim the collection cache during _txc_finish -> _osr_reap_done(). If there is multiple collections within a txc op , why only first one is used.
 
-Fixed by recompilation.
-So could be a faulty leftover from previous build attempts.
-
---WjW
-
-
+Thanks & Regards
+Somnath
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
