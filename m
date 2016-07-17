@@ -1,384 +1,65 @@
-From: Kevan Rehm <krehm@cray.com>
-Subject: Re: bluestore bug#15724: bluefs _replay file with link count 0:
-Date: Sat, 16 Jul 2016 14:35:58 +0000
-Message-ID: <D3AFAFEA.B7BC1%krehm@cray.com>
-References: <D3AEB014.B72CE%krehm@cray.com>
- <BLUPR0201MB19080519FE7AA5404334B652E2340@BLUPR0201MB1908.namprd02.prod.outlook.com>
- <D3AF7C2F.B79C3%krehm@cray.com>
- <BLUPR0201MB19080FAACCC0068828401BCAE2340@BLUPR0201MB1908.namprd02.prod.outlook.com>
+From: Shehbaz Jaffer <shehbazjaffer007@gmail.com>
+Subject: Re: bluestore allocator performance testing
+Date: Sun, 17 Jul 2016 01:09:21 -0400
+Message-ID: <CAPLK-i_wJp2p14MdUJO8BN=ubt7sPhoWP880Yg5uBxzfcUs7Hw@mail.gmail.com>
+References: <a42b6dd8-ea3e-a635-7af2-74f024f3ee1a@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from esa1.cray.iphmx.com ([68.232.142.33]:53133 "EHLO
-	esa1.cray.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751379AbcGPOgD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Jul 2016 10:36:03 -0400
-In-Reply-To: <BLUPR0201MB19080FAACCC0068828401BCAE2340@BLUPR0201MB1908.namprd02.prod.outlook.com>
-Content-Language: en-US
-Content-ID: <763E84B88E91A44BBB82E5E1BF97C36B@namprd11.prod.outlook.com>
+Received: from mail-yw0-f175.google.com ([209.85.161.175]:34919 "EHLO
+	mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750921AbcGQFJX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Jul 2016 01:09:23 -0400
+Received: by mail-yw0-f175.google.com with SMTP id l125so135268698ywb.2
+        for <ceph-devel@vger.kernel.org>; Sat, 16 Jul 2016 22:09:22 -0700 (PDT)
+In-Reply-To: <a42b6dd8-ea3e-a635-7af2-74f024f3ee1a@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Varada Kari <Varada.Kari@sandisk.com>, "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+Hi Mark,
 
+Thanks for these results, could you please share the benchmarks? Also,
+since the main reason for implementing bitmap allocator was to reduce
+memory footprint, perhaps a benchmark measuring the memory usage or
+performance under memory constrained environments would help better
+estimate the advantages of bitmap allocator.
 
-On 7/16/16, 7:16 AM, "Varada Kari" <Varada.Kari@sandisk.com> wrote:
-
->On Saturday 16 July 2016 04:53 PM, Kevan Rehm wrote:
->> Varada, see below.
->>
->> On 7/16/16, 2:23 AM, "Varada Kari" <Varada.Kari@sandisk.com> wrote:
->>
->>> On Saturday 16 July 2016 01:52 AM, Kevan Rehm wrote:
->>>> Greetings,
->>>>
->>>> I have made a bit of progress.  Still looking for ideas/advise while I
->>>> keep digging.
->>>>
->>>> First, the ceph version I forgot to mention last time.
->>>>
->>>> # ceph -v
->>>> ceph version 11.0.0-196-g85bb43e
->>>> (85bb43e111692989d2296a389ce45377d2297d6f)
->>>>
->>>>
->>>>
->>>> As a refresher, here is the beginning of the problem transaction which
->>>> will result in an inode with 0 links.   There are actually three
->>>>inodes
->>>> in
->>>> this transaction which will all end up having 0 links, inodes 109,
->>>>102,
->>>> and 113.
->>>>
->>>> 2016-07-13 16:03:03.929679 7fb6617c1800 10 bluefs _replay 0x5be000:
->>>> txn(seq 77752 len 35269 crc 1796157826)
->>>> 2016-07-13 16:03:03.929681 7fb6617c1800 20 bluefs _replay 0x5be000:
->>>> op_dir_unlink  db/000154.log
->>>> 2016-07-13 16:03:03.929683 7fb6617c1800 20 bluefs _replay 0x5be000:
->>>> op_file_remove 109
->>>> 2016-07-13 16:03:03.929684 7fb6617c1800 20 bluefs _replay 0x5be000:
->>>> op_dir_unlink  db/000153.log
->>>> 2016-07-13 16:03:03.929685 7fb6617c1800 20 bluefs _replay 0x5be000:
->>>> op_file_remove 102
->>>> 2016-07-13 16:03:03.929686 7fb6617c1800 20 bluefs _replay 0x5be000:
->>>> op_dir_unlink  db/000151.log
->>>> 2016-07-13 16:03:03.929686 7fb6617c1800 20 bluefs _replay 0x5be000:
->>>> op_file_remove 113
->>>> 2016-07-13 16:03:03.929687 7fb6617c1800 20 bluefs _replay 0x5be000:
->>>> op_dir_unlink  db/000150.log
->>>> 2016-07-13 16:03:03.929688 7fb6617c1800 20 bluefs _replay 0x5be000:
->>>> op_file_remove 111
->>>> 2016-07-13 16:03:03.929689 7fb6617c1800 20 bluefs _replay 0x5be000:
->>>> op_file_update  file(ino 113 size 71354938 mtime 2016-07-12
->>>> 17:05:53.738683 bdev 1 extents
->>>>
->>>> 
->>>>[1:904921088+1048576,1:910163968+2097152,1:916455424+2097152,1:93113548
->>>>8+
->>>> 20
->>>>
->>>> 
->>>>97152,1:937426944+2097152,1:943718400+2097152,1:950009856+2097152,1:960
->>>>49
->>>> 56
->>>> 16+58720256])
->>>> 2016-07-13 16:03:03.929693 7fb6617c1800 30 bluefs _get_file ino 113 =
->>>> 0x7fb66aafc880 (new)
->>> When _get_file() is called with a inode number, if the file is not
->>>found
->>> in file_map
->>> a new file is created and returned, hence that (new) in the log file.
->>> These set of events
->>> can happen in case of rename. You can see the same BlueFS::rename(). In
->>> that case, we use the
->>> same inode number.
->>
->> I'm not sure I understand, I do not believe this is a rename case.  For
->> this to be a rename, there would have to be at least one op_dir_link()
->> call for each op_dir_unlink() call in the sequence above.   The only
->>code
->> sequence I can find where an op_dir_unlink() and an op_file_remove()
->> appear together without a corresponding op_dir_link() is when a file is
->> being deleted.
->>
->> The (new) above makes my point exactly.  The op_file_remove() call above
->> freed the block allocation for the inode and released the inode from the
->> filemap, showing that the file->refs had to be zero at that time
->>(routine
->> _drop_link).   Yet the following op_file_update() call is performing a
->> truncate on that same inode, which is not in the filemap.   So the
->>caller
->> has to be holding a file structure whose refs field is greater than
->>zero.
->> Which implies that the caller's file structure has to be stale.  The
->>fact
->> that the op_file_update file contents for inode 113 is exactly the same
->>as
->> the previous op_file_update contents prior to the op_file_remove(),
->>except
->> for a reduction in file size, proves I believe that the file struct used
->> by the op_file_update() caller is stale.
->>
->>
->>>> 2016-07-13 16:03:03.929695 7fb6617c1800 20 bluefs _replay 0x5be000:
->>>> op_file_update  file(ino 102 size 68557043 mtime 2016-07-12
->>>> 17:05:54.615190 bdev 1 extents
->>>>
->>>> 
->>>>[1:78643200+1048576,1:191889408+1048576,1:197132288+1048576,1:202375168
->>>>+2
->>>> 09
->>>>
->>>> 
->>>>7152,1:208666624+2097152,1:214958080+2097152,1:221249536+2097152,1:2275
->>>>40
->>>> 99
->>>>
->>>> 
->>>>2+1048576,1:232783872+2097152,1:239075328+2097152,1:245366784+2097152,1
->>>>:2
->>>> 51
->>>>
->>>> 
->>>>658240+2097152,1:257949696+1048576,1:263192576+2097152,1:269484032+2097
->>>>15
->>>> 2,
->>>>
->>>> 
->>>>1:275775488+2097152,1:282066944+2097152,1:288358400+2097152,1:294649856
->>>>+1
->>>> 04
->>>>
->>>> 
->>>>8576,1:299892736+2097152,1:306184192+2097152,1:312475648+2097152,1:3187
->>>>67
->>>> 10
->>>>
->>>> 
->>>>4+1048576,1:324009984+2097152,1:330301440+2097152,1:336592896+2097152,1
->>>>:3
->>>> 42
->>>>
->>>> 
->>>>884352+2097152,1:349175808+1048576,1:354418688+2097152,1:360710144+2097
->>>>15
->>>> 2,
->>>>
->>>> 
->>>>1:367001600+1048576,1:372244480+1048576,1:377487360+2097152,1:383778816
->>>>+1
->>>> 04
->>>>
->>>> 
->>>>8576,1:389021696+1048576,1:394264576+2097152,1:400556032+1048576,1:4057
->>>>98
->>>> 91
->>>> 2+3145728,1:507510784+5242880])
->>>> 2016-07-13 16:03:03.929702 7fb6617c1800 30 bluefs _get_file ino 102 =
->>>> 0x7fb66aafbb90 (new)
->>>> 2016-07-13 16:03:03.929703 7fb6617c1800 20 bluefs _replay 0x5be000:
->>>> op_file_update  file(ino 109 size 64421913 mtime 2016-07-12
->>>> 22:41:33.028030 bdev 1 extents
->>>> [1:512753664+31457280,1:545259520+4194304,1:550502400+36700160])
->>>> 2016-07-13 16:03:03.929705 7fb6617c1800 30 bluefs _get_file ino 109 =
->>>> 0x7fb66aafbe60 (new)
->>>> ...
->>>>
->>>>
->>>> The prior transaction log entry for each of the three inodes was
->>>>another
->>>> op_file_update() call.  The only difference between the two updates
->>>>for
->>>> ino 133 was file size went from 71359362 -> 71354938, 4424 less bytes,
->>>> all
->>>> other fields are identical.
->>> Are the extents same for both the events?
->>
->> Yes, please compare this line with the one higher above in this email,
->>you
->> can see that only the file size is different.   That is true for all
->>three
->> of these inodes.
->>
->>>> 2016-07-13 16:03:03.925186 7fb6617c1800 20 bluefs _replay 0x5b4000:
->>>> op_file_update  file(ino 113 size 71359362 mtime 2016-07-12
->>>> 17:05:53.738683 bdev 1 extents
->>>>
->>>> 
->>>>[1:904921088+1048576,1:910163968+2097152,1:916455424+2097152,1:93113548
->>>>8+
->>>> 20
->>>>
->>>> 
->>>>97152,1:937426944+2097152,1:943718400+2097152,1:950009856+2097152,1:960
->>>>49
->>>> 56
->>>> 16+58720256])
->>>> 2016-07-13 16:03:03.925197 7fb6617c1800 30 bluefs _get_file ino 113 =
->>>> 0x7fb66aafbb90
->>>>
->>>>
->>>> Same story for inode 109, the file size changed from 71354939 ->
->>>> 64421913,
->>>> 6933026 less bytes, all other fields are identical.
->>>>
->>>> 2016-07-13 16:03:03.926101 7fb6617c1800 20 bluefs _replay 0x5ba000:
->>>> op_file_update  file(ino 109 size 71354939 mtime 2016-07-12
->>>> 22:41:33.028030 bdev 1 extents
->>>> [1:512753664+31457280,1:545259520+4194304,1:550502400+36700160])
->>>> 2016-07-13 16:03:03.926103 7fb6617c1800 30 bluefs _get_file ino 109 =
->>>> 0x7fb66aafc910
->>>>
->>>>
->>>>
->>>>
->>>>
->>>> Same story for inode 102, the file size changed from 71359405 ->
->>>> 68557043,
->>>> 2802362 less bytes, all other fields are identical.
->>>>
->>>> 2016-07-13 16:03:03.926040 7fb6617c1800 20 bluefs _replay 0x5b9000:
->>>> op_file_update  file(ino 102 size 71359405 mtime 2016-07-12
->>>> 17:05:54.615190 bdev 1 extents
->>>>
->>>> 
->>>>[1:78643200+1048576,1:191889408+1048576,1:197132288+1048576,1:202375168
->>>>+2
->>>> 09
->>>>
->>>> 
->>>>7152,1:208666624+2097152,1:214958080+2097152,1:221249536+2097152,1:2275
->>>>40
->>>> 99
->>>>
->>>> 
->>>>2+1048576,1:232783872+2097152,1:239075328+2097152,1:245366784+2097152,1
->>>>:2
->>>> 51
->>>>
->>>> 
->>>>658240+2097152,1:257949696+1048576,1:263192576+2097152,1:269484032+2097
->>>>15
->>>> 2,
->>>>
->>>> 
->>>>1:275775488+2097152,1:282066944+2097152,1:288358400+2097152,1:294649856
->>>>+1
->>>> 04
->>>>
->>>> 
->>>>8576,1:299892736+2097152,1:306184192+2097152,1:312475648+2097152,1:3187
->>>>67
->>>> 10
->>>>
->>>> 
->>>>4+1048576,1:324009984+2097152,1:330301440+2097152,1:336592896+2097152,1
->>>>:3
->>>> 42
->>>>
->>>> 
->>>>884352+2097152,1:349175808+1048576,1:354418688+2097152,1:360710144+2097
->>>>15
->>>> 2,
->>>>
->>>> 
->>>>1:367001600+1048576,1:372244480+1048576,1:377487360+2097152,1:383778816
->>>>+1
->>>> 04
->>>>
->>>> 
->>>>8576,1:389021696+1048576,1:394264576+2097152,1:400556032+1048576,1:4057
->>>>98
->>>> 91
->>>> 2+3145728,1:507510784+5242880])
->>>> 2016-07-13 16:03:03.926048 7fb6617c1800 30 bluefs _get_file ino 102 =
->>>> 0x7fb66aafbe60
->>>>
->>>>
->>>>
->>>>
->>>> There is only one caller of op_file_update() in which the size of the
->>>> file
->>>> is reduced but all other fields stay the same, that is
->>>> BlueFS::_truncate(), which in turn is only called by
->>>>BlueFS::truncate(),
->>>> which is only called by BlueRocksWritableFile::Close().
->>>>
->>>> The op_dir_unlink() and op_file_remove() calls for each of the three
->>>> inodes seem to be coming from BlueRocksEnv::DeleteFile(), but I'm
->>>>having
->>>> difficulty finding where the call is coming from.
->>> Any syscall making dir rename or file remove or directory remove will
->>> result in BlueFS::rename or unlink
->>> or corresponding calls and results in op_dir_* or op_file_* operations.
->>> rocksdb wal_manager or compaction
->>> can trigger these calls during that process. Will take a closer look at
->>> the logs, if i can get something from them.
->>>> So the problem appears to be that the file is first deleted, then it
->>>>is
->>>> closed, and a byproduct of the close operation  on a stale fnode is
->>>>that
->>>> another op_file_update() entry gets logged, recreating the deleted
->>>>inode
->>>> with a stale fnode, resulting in the 0 links failure.
->>> Once the file is deleted, all the underlying extents will be cleared.
->>> Until and unless there is race in handling on
->>> the files from application level, Bluefs doesn't have any control over
->>> them. If the a file(handle) is been reused after
->>> deletion, that seems to be a bug. Will take a look at the logs to
->>> confirm your theory.
->>> But here, this seems to be more of rename use case. one more thing to
->>> verify is the extents owned by the inodes mentioned.
->>
->> No, I don't believe this is a rename, see above.
->>
->> I'll note that every occurrence of this problem has been preceded by an
->> OSD segfault.  And this problem is racy, if I increase debug logging for
->> bluefs or bluestore, then the problem goes away.  I have 50+ bluestore
->> segfaults and asserts in my cluster logs; I suspect many could be due to
->> this problem, because the same range of blocks is being freed more than
->> once.   If some other file should perform an allocation between the
->> block-freeing in op_file_remove() and the second freeing in
->> op_file_update(), then we could easily have multiple files with the same
->> block allocation at the same time.
->>
->> I think this problem can be caught fairly easily, an assert could be
->>added
->> to _truncate().   The _truncate() routine is only called for files which
->> are open, which means that the inode has to be in the filemap.   Code
->> could be added at the front of _truncate() to look up the inode in the
->> filemap, and if it is not there, then assert.   That would provide a
->>stack
->> trace showing the caller using the file struct with the stale reference
->> count.   (It may be a few days before I have a chance to try this
->>myself.)
->Sure. Could you please let me know the steps to hit issue?
->i am doing only few min runs to check the performance and some unit test
->cases.
->I will add the necessary asserts if i can reproduce the issue and fix it.
- 
-Thanks for the help!   I will have to get back to you on Monday, as there
-is another person on our team who runs the benchmarks that trigger this
-problem, I don't know how to run his benchmarks myself.
-
-Kevan
- 
+On Sat, Jul 16, 2016 at 10:28 AM, Mark Nelson <mnelson@redhat.com> wrote:
+> Hi All,
 >
->Varada
->> Regards, Kevan
->>
->>
->>
+> Yesterday I ran through some quick tests looking at bluestore with stupid
+> allocator and bitmap allocator, then compared with some existing jewel
+> filestore benchmark results:
 >
->PLEASE NOTE: The information contained in this electronic mail message is
->intended only for the use of the designated recipient(s) named above. If
->the reader of this message is not the intended recipient, you are hereby
->notified that you have received this message in error and that any
->review, dissemination, distribution, or copying of this message is
->strictly prohibited. If you have received this communication in error,
->please notify the sender by telephone or e-mail (as shown above)
->immediately and destroy any and all copies of this message in your
->possession (whether hard copies or electronically stored copies).
+> https://drive.google.com/file/d/0B2gTBZrkrnpZRWg2MTFhSk85b2M/view?usp=sharing
+>
+> Both allocators resulted in similar read performance characteristics (not
+> shown as I wanted to focus on writes).  For writes they were quite
+> different.  Stupid allocator was faster than bitmap allocator for sequential
+> writes, while bitmap allocator was faster than stupid allocator for most
+> sizes of random writes.  Bluestore in general was faster than filestore for
+> large writes (due to the avoidance of journal writes), but was slower to
+> varying degrees at small IO sizes.  bitmap allocator appears to result in
+> very good random write behavior down to ~32K IO sizes, so small IO
+> performance may improve as better locking behavior and Allen's encode/decode
+> proposal are implemented.
+>
+> I think it would probably be worth spending a bit of time to understand why
+> the sequential write performance with bitmap allocator is so much slower
+> than stupid allocator.
+>
+> Mark
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+
+
+-- 
+Shehbaz Jaffer
+First Year Graduate Student
+Sir Edward S Rogers Sr Department of Electrical and Computer Engineering
+University of Toronto
