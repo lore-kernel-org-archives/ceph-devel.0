@@ -1,96 +1,26 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Jenkins build pestered by 'no such option:
- --disable-pip-version-check'
-Date: Mon, 18 Jul 2016 21:08:39 +0200
-Message-ID: <04152f22-d98e-4c17-6ad4-8895b4d8682b@digiware.nl>
-References: <65d919f9-a015-4fe8-b578-b2fc275494de@digiware.nl>
- <CAC-Np1xhGOo9JUcVm=4yqhN7FJJVFwxrGPXs30Rhw6a5ava_sg@mail.gmail.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: verbose logging for mount -t ceph or ceph-fuse problems
+Date: Mon, 18 Jul 2016 22:41:22 +0000
+Message-ID: <DM3PR1201MB09250DDBE36361721995F79B9B360@DM3PR1201MB0925.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:39633 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751013AbcGRTJK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 18 Jul 2016 15:09:10 -0400
-In-Reply-To: <CAC-Np1xhGOo9JUcVm=4yqhN7FJJVFwxrGPXs30Rhw6a5ava_sg@mail.gmail.com>
+Received: from mail-cys01nam02on0075.outbound.protection.outlook.com ([104.47.37.75]:62019
+	"EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751825AbcGRW4v convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jul 2016 18:56:51 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 18-7-2016 20:48, Alfredo Deza wrote:
-> On Mon, Jul 18, 2016 at 9:57 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> Since somewhere last week all my Jenkins test are aborted this.
->> And I was under the assumption that issue would have been fixed?
->>
->> --WjW
->>
->> See:
->> https://jenkins.ceph.com/job/ceph-pull-requests/9255/console
->>
->> Running virtualenv with interpreter /usr/bin/python2.7
->>
->> Usage:
->>   pip <command> [options]
->>
->> no such option: --disable-pip-version-check
->>
->> Usage:
->>   pip <command> [options]
->>
->> no such option: --disable-pip-version-check
->>
->> Usage:
->>   pip <command> [options]
-> 
-> 
-> That seems to be a problem in the code that creates the ceph-disk
-> virtual environment (python's virtualenv).
-> 
-> That code lives within the Ceph source tree so a fix would need to
-> happen there (the Jenkins job can't really fix this)
-> 
-> The full error (to make it easier for others to see) is:
-> 
-> New python executable in /tmp/ceph.V2f/ceph-disk-virtualenv/bin/python2.7
-> Also creating executable in /tmp/ceph.V2f/ceph-disk-virtualenv/bin/python
-> Installing setuptools, pip...
-> done.
-> Running virtualenv with interpreter /usr/bin/python2.7
-> 
-> Usage:
->   pip <command> [options]
-> 
-> no such option: --disable-pip-version-check
-> 
-> Usage:
->   pip <command> [options]
-> 
-> no such option: --disable-pip-version-check
-> 
-> Usage:
->   pip <command> [options]
-> 
-> no such option: --disable-pip-version-check
-> make[3]: *** [src/ceph-disk/CMakeFiles/ceph-disk] Error 2
-> make[2]: *** [src/ceph-disk/CMakeFiles/ceph-disk.dir/all] Error 2
-> make[2]: *** Waiting for unfinished jobs....
+What debug option (from http://docs.ceph.com/docs/master/rados/troubleshooting/log-and-debug/) would be best to find errors coming from 
+   * mount -t ceph ...
+   * or ceph-fuse
 
-Yup,
-I totally agree, but why am I (the only one) suffering from this?
+My problems seem to be network-address-related because if I create the cluster with 1Gig addresses rather than 10Gig, both mount -t ceph and ceph-fuse work fine.
 
-Where as the code is plainly in the tree if you
-   grep -R disable-pip-version-check .
-at the root of the tree.
-And I think more pepeles tests should suffer from this if they are
-running in env's where pip does not have this option.
-
-Even more wierd is that the VM claims to be running trusty, and I'd
-expect it to run a rather recent pip after installation?
-
-But I'm still trying get the hang of all this python trickery.
-
---WjW
-
+-- Tom Deneau
 
