@@ -1,44 +1,39 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: ceph-mgr update
-Date: Mon, 18 Jul 2016 14:28:38 +0100
-Message-ID: <CALe9h7f_dLRSVTDfj0S3FiTc9nicCKd1iZm5ykOcQT5xnnfcFg@mail.gmail.com>
-References: <CALe9h7fdMEtxSKQGi4B6OeeWV77=Fbv5LzV8231Pz28+wHzfrw@mail.gmail.com>
- <CALqRxCzyB=F5Ttmh6_=u90VU1D0aW9jcgzZqR6tduNunes+Dpg@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: updated gmock/gtest - now a googletest submodule
+Date: Mon, 18 Jul 2016 15:55:39 +0200
+Message-ID: <e0317c98-8e5c-a208-d1b7-6be83440a363@digiware.nl>
+References: <57865EA2.8080501@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f181.google.com ([209.85.220.181]:36827 "EHLO
-	mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750998AbcGRN27 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jul 2016 09:28:59 -0400
-Received: by mail-qk0-f181.google.com with SMTP id x1so71756396qkb.3
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Jul 2016 06:28:58 -0700 (PDT)
-In-Reply-To: <CALqRxCzyB=F5Ttmh6_=u90VU1D0aW9jcgzZqR6tduNunes+Dpg@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:17623 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751537AbcGRN4E (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 18 Jul 2016 09:56:04 -0400
+In-Reply-To: <57865EA2.8080501@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jul 18, 2016 at 2:23 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
-> On Mon, Jul 18, 2016 at 5:40 AM, John Spray <jspray@redhat.com> wrote:
->> Hi all,
->>
->> The ceph-mgr code has come on a long way since my last update, and
->> there are now pull requests open:
->> https://github.com/ceph/ceph/pull/10328
->> https://github.com/ceph/ceph-qa-suite/pull/1086
->>
->
-> "tools: remove legacy `cephfs` tool" is near and dear to my heart, and
-> it could be its own PR, right? It may be easier/faster to review
-> separately.
+On 13-7-2016 17:30, Josh Durgin wrote:
+> Hey folks, an updated version of gmock and gtest, which are now in a
+> single shared repo, called googletest, has been merged [0].
+> 
+> You'll need to make sure your submodules are up to date if you build
+> the latest master.
+> 
+> This fixes a bug with gcc 6 and unit tests as noted in that PR,
+> but as with any update, may introduce bugs. If you see any new
+> oddities related to gmock or gtest, this may be the cause.
 
-Already is: https://github.com/ceph/ceph/pull/10243
+Hi Josh,
 
-Just happens to be on this branch as well (I probably should have
-cleaned that up before opening the PR...)
+I think the code is sitting wll when compiling for FreeBSD
+Did not need to change the build-script, and all unittests pass.
+So real nice.
 
-John
+Thanx,
+--WjW
 
->
-> - Ken
+
