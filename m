@@ -1,87 +1,238 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: LDAP/KRB5 authentication mode
-Date: Tue, 19 Jul 2016 13:34:58 -0700
-Message-ID: <CAJ4mKGatunAOk4oBanXUMcAgZTYU7L8S5e2Uzc8nsNmiOajS8g@mail.gmail.com>
-References: <1468529466.6657.27.camel@suse.com> <1468949911.6841.7.camel@suse.com>
- <1582725052.22664551.1468957627218.JavaMail.zimbra@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] libceph: apply new_state before new_up_client on incrementals
+Date: Tue, 19 Jul 2016 23:26:37 +0200
+Message-ID: <1468963597-10667-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f47.google.com ([209.85.213.47]:35963 "EHLO
-	mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751803AbcGSUe7 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jul 2016 16:34:59 -0400
-Received: by mail-vk0-f47.google.com with SMTP id g1so28730362vkb.3
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Jul 2016 13:34:59 -0700 (PDT)
-In-Reply-To: <1582725052.22664551.1468957627218.JavaMail.zimbra@redhat.com>
+Received: from mail-qk0-f196.google.com ([209.85.220.196]:35452 "EHLO
+	mail-qk0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751036AbcGSV1D (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jul 2016 17:27:03 -0400
+Received: by mail-qk0-f196.google.com with SMTP id q62so2399150qkf.2
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Jul 2016 14:27:02 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjamin@redhat.com>
-Cc: Daniel Oliveira <doliveira@suse.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: Josh Durgin <jdurgin@redhat.com>
 
-On Tue, Jul 19, 2016 at 12:47 PM, Matt Benjamin <mbenjamin@redhat.com> wrote:
-> Hi Daniel,
->
-> Sorry you haven't gotten a response.  There is work ongoing in the RGW standup related to using LDAP and krb5 (via STS) authentication systems in -RGW-.  Please consider coming to an RGW standup to sync up and discuss (though some details like design writeups of course come to this list).
->
-> If your interest is in general ceph and ceph messaging, I defer to others and other discussion--e.g., Msgr2.
+Currently, osd_weight and osd_state fields are updated in the encoding
+order.  This is wrong, because an incremental map may look like e.g.
 
-Yeah, I don't think any work has been done on integrating Kerberos
-into the monitor for log-in and getting ceph tickets etc yet. :(
--Greg
+    new_up_client: { osd=6, addr=... } # set osd_state and addr
+    new_state: { osd=6, xorstate=EXISTS } # clear osd_state
 
->
-> Regards,
->
-> Matt
->
-> ----- Original Message -----
->> From: "Daniel Oliveira" <doliveira@suse.com>
->> To: ceph-devel@vger.kernel.org
->> Cc: sweil@redhat.com
->> Sent: Tuesday, July 19, 2016 1:38:31 PM
->> Subject: Re: LDAP/KRB5 authentication mode
->>
->> Hi Team,
->>
->> I haven't heard anything back on this, so just wondering if we know who
->> is working on this part of the project so we could help out?!
->>
->> Thanks,
->> -Daniel
->>
->>
->> On Thu, 2016-07-14 at 14:51 -0600, Daniel Oliveira wrote:
->> > Hi,
->> >
->> > I've talking to Kefu/Badone about the work in question and would like
->> > to help with that.
->> >
->> > Please, who should I talk to in order to understand where we are at
->> > and then start working on it?
->> >
->> > Thanks,
->> > -Daniel
->> >
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> Matt Benjamin
-> Red Hat, Inc.
-> 315 West Huron Street, Suite 140A
-> Ann Arbor, Michigan 48103
->
-> http://www.redhat.com/en/technologies/storage
->
-> tel.  734-707-0660
-> fax.  734-769-8938
-> cel.  734-216-5309
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Suppose osd6's current osd_state is EXISTS (i.e. osd6 is down).  After
+applying new_up_client, osd_state is changed to EXISTS | UP.  Carrying
+on with the new_state update, we flip EXISTS and leave osd6 in a weird
+"!EXISTS but UP" state.  A non-existent OSD is considered down by the
+mapping code
+
+2087    for (i = 0; i < pg->pg_temp.len; i++) {
+2088            if (ceph_osd_is_down(osdmap, pg->pg_temp.osds[i])) {
+2089                    if (ceph_can_shift_osds(pi))
+2090                            continue;
+2091
+2092                    temp->osds[temp->size++] = CRUSH_ITEM_NONE;
+
+and so requests get directed to the second OSD in the set instead of
+the first, resulting in OSD-side errors like:
+
+[WRN] : client.4239 192.168.122.21:0/2444980242 misdirected client.4239.1:2827 pg 2.5df899f2 to osd.4 not [1,4,6] in e680/680
+
+and hung rbds on the client:
+
+[  493.566367] rbd: rbd0: write 400000 at 11cc00000 (0)
+[  493.566805] rbd: rbd0:   result -6 xferred 400000
+[  493.567011] blk_update_request: I/O error, dev rbd0, sector 9330688
+
+The fix is to decouple application from the decoding and:
+- apply new_weight first
+- apply new_state before new_up_client
+- twiddle osd_state flags if marking in
+- clear out some of the state if osd is destroyed
+
+Fixes: http://tracker.ceph.com/issues/14901
+
+Cc: stable@vger.kernel.org # 3.15+: 6dd74e44dc1d: libceph: set 'exists' flag for newly up osd
+Cc: stable@vger.kernel.org # 3.15+
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ net/ceph/osdmap.c | 156 +++++++++++++++++++++++++++++++++++++++---------------
+ 1 file changed, 113 insertions(+), 43 deletions(-)
+
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index 03062bb763b3..7e480bf75bcf 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -1261,6 +1261,115 @@ struct ceph_osdmap *ceph_osdmap_decode(void **p, void *end)
+ }
+ 
+ /*
++ * Encoding order is (new_up_client, new_state, new_weight).  Need to
++ * apply in the (new_weight, new_state, new_up_client) order, because
++ * an incremental map may look like e.g.
++ *
++ *     new_up_client: { osd=6, addr=... } # set osd_state and addr
++ *     new_state: { osd=6, xorstate=EXISTS } # clear osd_state
++ */
++static int decode_new_up_state_weight(void **p, void *end,
++				      struct ceph_osdmap *map)
++{
++	void *new_up_client;
++	void *new_state;
++	void *new_weight_end;
++	u32 len;
++
++	new_up_client = *p;
++	ceph_decode_32_safe(p, end, len, e_inval);
++	len *= sizeof(u32) + sizeof(struct ceph_entity_addr);
++	ceph_decode_need(p, end, len, e_inval);
++	*p += len;
++
++	new_state = *p;
++	ceph_decode_32_safe(p, end, len, e_inval);
++	len *= sizeof(u32) + sizeof(u8);
++	ceph_decode_need(p, end, len, e_inval);
++	*p += len;
++
++	/* new_weight */
++	ceph_decode_32_safe(p, end, len, e_inval);
++	while (len--) {
++		s32 osd;
++		u32 w;
++
++		ceph_decode_need(p, end, 2*sizeof(u32), e_inval);
++		osd = ceph_decode_32(p);
++		w = ceph_decode_32(p);
++		BUG_ON(osd >= map->max_osd);
++		pr_info("osd%d weight 0x%x %s\n", osd, w,
++		     w == CEPH_OSD_IN ? "(in)" :
++		     (w == CEPH_OSD_OUT ? "(out)" : ""));
++		map->osd_weight[osd] = w;
++
++		/*
++		 * If we are marking in, set the EXISTS, and clear the
++		 * AUTOOUT and NEW bits.
++		 */
++		if (w) {
++			map->osd_state[osd] |= CEPH_OSD_EXISTS;
++			map->osd_state[osd] &= ~(CEPH_OSD_AUTOOUT |
++						 CEPH_OSD_NEW);
++		}
++	}
++	new_weight_end = *p;
++
++	/* new_state (up/down) */
++	*p = new_state;
++	len = ceph_decode_32(p);
++	while (len--) {
++		s32 osd;
++		u8 xorstate;
++		int ret;
++
++		osd = ceph_decode_32(p);
++		xorstate = ceph_decode_8(p);
++		if (xorstate == 0)
++			xorstate = CEPH_OSD_UP;
++		BUG_ON(osd >= map->max_osd);
++		if ((map->osd_state[osd] & CEPH_OSD_UP) &&
++		    (xorstate & CEPH_OSD_UP))
++			pr_info("osd%d down\n", osd);
++		if ((map->osd_state[osd] & CEPH_OSD_EXISTS) &&
++		    (xorstate & CEPH_OSD_EXISTS)) {
++			pr_info("osd%d does not exist\n", osd);
++			map->osd_weight[osd] = CEPH_OSD_IN;
++			ret = set_primary_affinity(map, osd,
++						   CEPH_OSD_DEFAULT_PRIMARY_AFFINITY);
++			if (ret)
++				return ret;
++			memset(map->osd_addr + osd, 0, sizeof(*map->osd_addr));
++			map->osd_state[osd] = 0;
++		} else {
++			map->osd_state[osd] ^= xorstate;
++		}
++	}
++
++	/* new_up_client */
++	*p = new_up_client;
++	len = ceph_decode_32(p);
++	while (len--) {
++		s32 osd;
++		struct ceph_entity_addr addr;
++
++		osd = ceph_decode_32(p);
++		ceph_decode_copy(p, &addr, sizeof(addr));
++		ceph_decode_addr(&addr);
++		BUG_ON(osd >= map->max_osd);
++		pr_info("osd%d up\n", osd);
++		map->osd_state[osd] |= CEPH_OSD_EXISTS | CEPH_OSD_UP;
++		map->osd_addr[osd] = addr;
++	}
++
++	*p = new_weight_end;
++	return 0;
++
++e_inval:
++	return -EINVAL;
++}
++
++/*
+  * decode and apply an incremental map update.
+  */
+ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
+@@ -1358,49 +1467,10 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
+ 			__remove_pg_pool(&map->pg_pools, pi);
+ 	}
+ 
+-	/* new_up */
+-	ceph_decode_32_safe(p, end, len, e_inval);
+-	while (len--) {
+-		u32 osd;
+-		struct ceph_entity_addr addr;
+-		ceph_decode_32_safe(p, end, osd, e_inval);
+-		ceph_decode_copy_safe(p, end, &addr, sizeof(addr), e_inval);
+-		ceph_decode_addr(&addr);
+-		pr_info("osd%d up\n", osd);
+-		BUG_ON(osd >= map->max_osd);
+-		map->osd_state[osd] |= CEPH_OSD_UP | CEPH_OSD_EXISTS;
+-		map->osd_addr[osd] = addr;
+-	}
+-
+-	/* new_state */
+-	ceph_decode_32_safe(p, end, len, e_inval);
+-	while (len--) {
+-		u32 osd;
+-		u8 xorstate;
+-		ceph_decode_32_safe(p, end, osd, e_inval);
+-		xorstate = **(u8 **)p;
+-		(*p)++;  /* clean flag */
+-		if (xorstate == 0)
+-			xorstate = CEPH_OSD_UP;
+-		if (xorstate & CEPH_OSD_UP)
+-			pr_info("osd%d down\n", osd);
+-		if (osd < map->max_osd)
+-			map->osd_state[osd] ^= xorstate;
+-	}
+-
+-	/* new_weight */
+-	ceph_decode_32_safe(p, end, len, e_inval);
+-	while (len--) {
+-		u32 osd, off;
+-		ceph_decode_need(p, end, sizeof(u32)*2, e_inval);
+-		osd = ceph_decode_32(p);
+-		off = ceph_decode_32(p);
+-		pr_info("osd%d weight 0x%x %s\n", osd, off,
+-		     off == CEPH_OSD_IN ? "(in)" :
+-		     (off == CEPH_OSD_OUT ? "(out)" : ""));
+-		if (osd < map->max_osd)
+-			map->osd_weight[osd] = off;
+-	}
++	/* new_up_client, new_state, new_weight */
++	err = decode_new_up_state_weight(p, end, map);
++	if (err)
++		goto bad;
+ 
+ 	/* new_pg_temp */
+ 	err = decode_new_pg_temp(p, end, map);
+-- 
+2.4.3
+
