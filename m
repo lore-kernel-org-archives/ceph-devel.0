@@ -1,44 +1,44 @@
-From: Srikar <srikar.kumar@gmail.com>
-Subject: Developer =?utf-8?b?TW9kZV9RdWVyeQ==?=
-Date: Tue, 19 Jul 2016 14:11:06 +0000 (UTC)
-Message-ID: <loom.20160719T153936-718@post.gmane.org>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: dpkg-buildpackage failed on Ubuntu 16.4 - 'override_dh_auto_build'
+ failed
+Date: Tue, 19 Jul 2016 09:09:51 +0000
+Message-ID: <DB5PR05MB1607AA6E7B4D217AA82E6DCDA9370@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:52300 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753391AbcGSOLi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 19 Jul 2016 10:11:38 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1bPVkE-0002gM-I9
-	for ceph-devel@vger.kernel.org; Tue, 19 Jul 2016 16:11:35 +0200
-Received: from 115.119.152.66.static-hyderabad.vsnl.net.in ([115.119.152.66.static-hyderabad.vsnl.net.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Jul 2016 16:11:34 +0200
-Received: from srikar.kumar by 115.119.152.66.static-hyderabad.vsnl.net.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Jul 2016 16:11:34 +0200
+Received: from mail-db5eur01on0058.outbound.protection.outlook.com ([104.47.2.58]:9680
+	"EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753451AbcGSOmU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jul 2016 10:42:20 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
 Hi all,
-      I am testing the development mode cluster by adding debugs and
-checking benchmarks. I went through below documents.
-http://docs.ceph.com/docs/master/dev/quick_guide/
-http://docs.ceph.com/docs/master/dev/dev_cluster_deployement/
 
-So far I added debugs in the following files "rados.cc" and "IoCtxImpl.cc"
-and "OSD.cc". According to my understanding after deploying a development 
-mode, it will create a fake cluster. I am able to see the debugs added in
-"rados.cc" and "IoCtxImpl.cc" files but unable to see the debugs related 
-to "OSD.cc", when I try to bring an existing osd daemon in the cluster up 
-or down.If it creates a fake cluster, does that mean it will create psuedo
-OSD's ? Do I need to perform operations on them for checking the debugs? If
-it is how can I check them?
-Thanks & Regards,
-S.Srikar.
+What is the recommended way to install my builds of ceph?
 
+Following ceph instruction here http://docs.ceph.com/docs/master/install/build-ceph/ on a Ubuntu 16.4 machine, I got the following errors from dpkg-buildpackage -j32 (after 1-2 hours of waiting :-( ):
+
+   dh_auto_build: make -j32 returned exit code 2
+   debian/rules:28: recipe for target 'override_dh_auto_build' failed
+   make[1]: *** [override_dh_auto_build] Error 2
+   make[1]: Leaving directory '/mnt/sdb/avnerb/ceph'
+   debian/rules:22: recipe for target 'build' failed
+   make: *** [build] Error 2
+   dpkg-buildpackage: error: debian/rules build gave error exit status 2
+
+According to debian here https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=777814 this error might be related to gcc-5.
+
+Anyhow, I only want to use the recommended way for installing my builds of ceph (Preferred one that can be installed over a cluster that was deployed using ceph-deploy)
+
+I tried "make install" and encountered errors.
+dpkg-buildpackage also failed for me
+
+Can someone advise please
+
+TIA,
+  Avner
