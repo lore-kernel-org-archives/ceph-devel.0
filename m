@@ -1,41 +1,96 @@
-From: Daniel Oliveira <doliveira@suse.com>
-Subject: Re: LDAP/KRB5 authentication mode
-Date: Tue, 19 Jul 2016 11:38:31 -0600
-Message-ID: <1468949911.6841.7.camel@suse.com>
-References: <1468529466.6657.27.camel@suse.com>
+From: Muminul Islam Russell <misla011@fiu.edu>
+Subject: Re: Selinux policy error in syslog
+Date: Tue, 19 Jul 2016 12:05:04 -0700
+Message-ID: <CAK=B8yahqmFobpU8a8qV58A0J3o9P_K9NqS6S67Y-OQ5XyY5pQ@mail.gmail.com>
+References: <CAK=B8yZ-bykpECA=w+OoZjmqB_hAufWC4=uNK+75dgydmmnNZQ@mail.gmail.com>
+ <CALqRxCyrCM1r38z5L55ZnaXPZu+ffuU__9XysshsxT499crUZA@mail.gmail.com>
+ <CAK=B8yYt3u-w3Pc8cJfCGY4zNf2F9gyE0e2H5hgU4D6oRZjWWg@mail.gmail.com>
+ <CAK=B8ybPc9ig=qaUpVb5msUsoWce7o_p8Q0mgcHtA1Zm59y6qA@mail.gmail.com>
+ <CALqRxCyUz+vcRijm33nyg=EcnT2HF6FRN6y1fCq2BZ2VdjK2bw@mail.gmail.com> <CAK=B8ybB=O3g1V121s6vy1VrnzrJiJnVtpRbf4rxytnZmo1irg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:58894 "EHLO
-	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752364AbcGSRhR (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Tue, 19 Jul 2016 13:37:17 -0400
-In-Reply-To: <1468529466.6657.27.camel@suse.com>
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:34124 "EHLO
+	mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751364AbcGSTFf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jul 2016 15:05:35 -0400
+Received: by mail-qk0-f176.google.com with SMTP id o67so24913730qke.1
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Jul 2016 12:05:05 -0700 (PDT)
+In-Reply-To: <CAK=B8ybB=O3g1V121s6vy1VrnzrJiJnVtpRbf4rxytnZmo1irg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sweil@redhat.com
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Team, 
-
-I haven't heard anything back on this, so just wondering if we know who
-is working on this part of the project so we could help out?!
+I am not a selinux guy. Is there any quick fix for this?
 
 Thanks,
--Daniel 
+Muminul
 
-
-On Thu, 2016-07-14 at 14:51 -0600, Daniel Oliveira wrote:
-> Hi, 
-> 
-> I've talking to Kefu/Badone about the work in question and would like
-> to help with that. 
-> 
-> Please, who should I talk to in order to understand where we are at
-> and then start working on it? 
-> 
+On Wed, Jul 13, 2016 at 1:35 PM, Muminul Islam Russell <misla011@fiu.edu> wrote:
+> Yes. But I think we have to fix this within ceph-selinux. :)
+>
 > Thanks,
-> -Daniel 
-> 
+> Muminul
+>
+> On Wed, Jul 13, 2016 at 1:33 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
+>> It sounds like you'll have to use the CentOS 7 kernels to avoid this error :(
+>>
+>> - Ken
+>>
+>> On Wed, Jul 13, 2016 at 2:32 PM, Muminul Islam Russell <misla011@fiu.edu> wrote:
+>>> FYI:
+>>>
+>>> The issue is in later kernel i.e in may case 4.1.12.
+>>>
+>>> Not reproducible in 3.8 or 3.10 kernel.
+>>>
+>>> --
+>>> Muminul
+>>>
+>>> On Wed, Jul 13, 2016 at 1:01 PM, Muminul Islam Russell <misla011@fiu.edu> wrote:
+>>>> I am using Kernel 4.1.12 and Ceph 10.2.2.
+>>>>
+>>>> Thanks,
+>>>> Muminul
+>>>>
+>>>> On Wed, Jul 13, 2016 at 12:14 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
+>>>>> Hi Muminul,
+>>>>>
+>>>>> Are you running with all the latest updates?
+>>>>>
+>>>>> Do you still experience issues with kernel 3.10.0-327.22.2.el7 ?
+>>>>>
+>>>>> - Ken
+>>>>>
+>>>>> On Wed, Jul 13, 2016 at 12:46 PM, Muminul Islam Russell
+>>>>> <misla011@fiu.edu> wrote:
+>>>>>> Hello,
+>>>>>>
+>>>>>> I got the following error while installing ceph-selinux.
+>>>>>>
+>>>>>> kernel: SELinux:  Permission audit_read in class capability2 not defined in
+>>>>>> policy.
+>>>>>> kernel: SELinux:  Class binder not defined in policy.
+>>>>>> kernel: SELinux: the above unknown classes and permissions will be allowed
+>>>>>>
+>>>>>> command to reproduce the error:
+>>>>>> /usr/sbin/semodule -i /usr/share/selinux/packages/ceph.pp
+>>>>>>
+>>>>>> Then check the output in syslog.
+>>>>>>
+>>>>>> Info:
+>>>>>> These are object classes and av permissions that were introduced in the
+>>>>>> newer kernel, but ceph-selinux policy is for the older kernel and thus does
+>>>>>> not know these new object classes and av permissions. So they will just be
+>>>>>> ignored (allowed). So other than a few warnings it really does not
+>>>>>> affect anything or change the behavior of the policy I believe.
+>>>>>>
+>>>>>> But we could just get rid of this warnings.
+>>>>>>
+>>>>>> Thanks,
+>>>>>> Muminul
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
