@@ -1,39 +1,74 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: getting more updates in rocksdb
-Date: Wed, 20 Jul 2016 12:38:34 +0200
-Message-ID: <a8d5d498-cbc7-f252-64a3-791995bfc5bc@digiware.nl>
+From: Ira Cooper <ira@wakeful.net>
+Subject: Re: CephFS Samba VFS RHEL packages
+Date: Wed, 20 Jul 2016 07:21:25 -0400
+Message-ID: <20160720112058.GA13150@ira-t460p.lan>
+References: <CA+z5Dsx7phEMT1oxENzCwXxQrB0NtCLwxWGPKF+NeMZNr+KkSw@mail.gmail.com>
+ <CALe9h7c=zegmKFYkz7-oKSG9uQ0-TUE+DkXSCNdkwJgvpqsRXA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:40404 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751640AbcGTKiu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 20 Jul 2016 06:38:50 -0400
-Received: from [192.168.10.67] (opteron [192.168.10.67])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.digiware.nl (Postfix) with ESMTPSA id 6042415340A
-	for <ceph-devel@vger.kernel.org>; Wed, 20 Jul 2016 12:38:37 +0200 (CEST)
+Received: from mail-qt0-f169.google.com ([209.85.216.169]:33132 "EHLO
+	mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752356AbcGTLVd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jul 2016 07:21:33 -0400
+Received: by mail-qt0-f169.google.com with SMTP id w38so24372598qtb.0
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Jul 2016 04:21:33 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CALe9h7c=zegmKFYkz7-oKSG9uQ0-TUE+DkXSCNdkwJgvpqsRXA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Blair Bethwaite <blair.bethwaite@gmail.com>, Ira Cooper <ira@wakeful.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
+On Wed, Jul 20, 2016 at 10:59:36AM +0100, John Spray wrote:
+> On Wed, Jul 20, 2016 at 6:45 AM, Blair Bethwaite
+> <blair.bethwaite@gmail.com> wrote:
+> > Hi all,
+> >
+> > We've started a CephFS Samba PoC on RHEL but just noticed the Samba
+> > Ceph VFS doesn't seem to be included with Samba on RHEL, or we're not
+> > looking in the right place. Trying to avoid needing to build Samba
+> > from source if possible. Any pointers appreciated.
+> 
+> RHEL packagers tend to be conservative about building in feature flags
+> that aren't official parts of their product.
+> 
+> Unfortunately we do our upstream Samba testing on Ubuntu, so don't
+> have any RPMs from the gitbuilders either; you're probably going to
+> have to build your own.
+> 
+> CCing Ira who was recently evaluating the state of Samba+CephFS and
+> might have some tips on setting this up on RHEL.
 
-Hi,
+RHEL: I don't expect that the packages will ever be part of the
+RHEL Samba build.  The ones for Gluster aren't, as precident.  But
+I don't speak for Red Hat.   :)
 
-I submitted a small patch to rocksdb for FreeBSD
-https://github.com/facebook/rocksdb/commit/b726bf59619d43651838e03cce9f876b3560cbda
+I also don't work on RHEL.  I work on Fedora.  So all of this is
+written from the point of view of Fedora 23.  I'm working on
+straightening out my Fedora 24 development setup.
 
-And was hopping that it would be tracked by my Ceph stuff as well.
-But refetching things, it does not seem to be in the tree ceph cmake
-fetches.
+As far as state of the world?
 
-And I'm not fluent enough in git to actually check if my current
-checkout with hash: 5647fa427c4eab87c0caf8bcbb91f5846a4623f9
-should contain the above commit.
+CTDB: It can be made to work, but I don't recommend it at this
+time.  The settings needed aren't friendly to CephFS, and I
+would not recommend this in production today.
 
-And if it is not in, would it be possible to get it in the module we
-fetch for Ceph?
+ACLs: Aren't implemented in vfs_ceph, because I still have to
+submit the refactored vfs_ceph code to the Samba team list,
+but I ran into testing issues on the CephFS side, regarding
+ACL setting, if the Gluster side works, I may just see if we
+can push these anyways.  The refactoring unifies the ACL
+handling between vfs_ceph and vfs_gluster.
 
---WjW
+Working absent those two issues: Seems ok, for modern Ceph
+bits.  most recent Jewel should be "ok", as I understand
+it.  I did my work on pre-release Jewel bits.
+
+I recommend looking at my presentation that I gave at SambaXP.
+http://sambaxp.org/ day 3.  It may be out of date in a few
+spots, but it should be close.
+
+Cheers,
+
+-Ira / ira@(samba.org|wakeful.net)
