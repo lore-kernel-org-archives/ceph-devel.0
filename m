@@ -1,44 +1,71 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: CephFS Samba VFS RHEL packages
-Date: Wed, 20 Jul 2016 09:32:11 -0600
-Message-ID: <CALqRxCwg3jFN2OTC2ut=otHukOGHw9p9r7+RbByvQdTMBifM8A@mail.gmail.com>
-References: <CA+z5Dsx7phEMT1oxENzCwXxQrB0NtCLwxWGPKF+NeMZNr+KkSw@mail.gmail.com>
+From: Gaurav Goyal <er.gauravgoyal-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Ceph : Generic Query : Raw Format of images
+Date: Wed, 20 Jul 2016 11:41:17 -0400
+Message-ID: <CANba6BaNu7qCmd3NpU2Yc4uMpRc_Za28WL4L0BKFr=1ars+CNA@mail.gmail.com>
 Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============1335204047=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
+
+--===============1335204047==
+Content-Type: multipart/alternative; boundary=001a114187e84be2b6053813088a
+
+--001a114187e84be2b6053813088a
 Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f45.google.com ([209.85.213.45]:33405 "EHLO
-	mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754715AbcGTPcM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jul 2016 11:32:12 -0400
-Received: by mail-vk0-f45.google.com with SMTP id x130so74240286vkc.0
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Jul 2016 08:32:12 -0700 (PDT)
-In-Reply-To: <CA+z5Dsx7phEMT1oxENzCwXxQrB0NtCLwxWGPKF+NeMZNr+KkSw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Blair Bethwaite <blair.bethwaite@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-The Samba packages in Fedora 22+ do enable the Samba VFS:
-https://bugzilla.redhat.com/1174412
+Dear Ceph User,
 
-From what Ira said downthread, this is pretty experimental, so you
-could run your tests on a Fedora system and see how it goes :)
+I want to ask a very generic query regarding ceph.
 
-- Ken
+Ceph does use .raw format. But every single company is providing qcow2
+images.
+It takes a lot of time to convert the images to raw format.
 
-On Tue, Jul 19, 2016 at 11:45 PM, Blair Bethwaite
-<blair.bethwaite@gmail.com> wrote:
-> Hi all,
->
-> We've started a CephFS Samba PoC on RHEL but just noticed the Samba
-> Ceph VFS doesn't seem to be included with Samba on RHEL, or we're not
-> looking in the right place. Trying to avoid needing to build Samba
-> from source if possible. Any pointers appreciated.
->
-> --
-> Cheers,
-> ~Blairo
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+is it something everyone else is dealing with?
+Or i am not doing something right.
+
+Specially when Organization know ceph functionality, why dont they create
+raw images along with qcow2.
+
+
+Regards
+Gaurav Goyal
+
+--001a114187e84be2b6053813088a
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Dear Ceph User,<div><br></div><div>I want to ask a very ge=
+neric query regarding ceph.</div><div><br></div><div>Ceph does use .raw for=
+mat. But every single company is providing qcow2 images.=C2=A0</div><div>It=
+ takes a lot of time to convert the images to raw format.=C2=A0</div><div><=
+br></div><div>is it something everyone else is dealing with?=C2=A0</div><di=
+v>Or i am not doing something right.</div><div><br></div><div>Specially whe=
+n Organization know ceph functionality, why dont they create raw images alo=
+ng with qcow2.</div><div><br></div><div><br></div><div>Regards</div><div>Ga=
+urav Goyal</div></div>
+
+--001a114187e84be2b6053813088a--
+
+--===============1335204047==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1335204047==--
