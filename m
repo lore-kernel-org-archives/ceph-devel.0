@@ -1,30 +1,49 @@
-From: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: CephFS Samba VFS RHEL packages
-Date: Wed, 20 Jul 2016 15:45:04 +1000
-Message-ID: <CA+z5Dsx7phEMT1oxENzCwXxQrB0NtCLwxWGPKF+NeMZNr+KkSw@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Jenkins build pestered by 'no such option:
+ --disable-pip-version-check'
+Date: Wed, 20 Jul 2016 09:09:21 +0200
+Message-ID: <cde3c0c3-e91e-4df4-9496-a4b14c13975d@digiware.nl>
+References: <b3939bd4-59c4-4820-8be2-7c087f8b7757@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([176.74.240.9]:25383 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751671AbcGTHJy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 20 Jul 2016 03:09:54 -0400
+In-Reply-To: <b3939bd4-59c4-4820-8be2-7c087f8b7757@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Dan Mick <dmick@redhat.com>, dang@redhat.com, Alfredo Deza <adeza@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi all,
+On 20-7-2016 08:02, Dan Mick wrote:
+> ....but I guess that's also broken at the moment
+> 
+> Sent from Nine <http://www.9folders.com/>
+> ------------------------------------------------------------------------
+> *From:* Dan Mick
+> *Sent:* Jul 19, 2016 8:21 PM
+> *To:* Willem Jan Withagen; dang@redhat.com; Alfredo Deza
+> *Cc:* Ceph Development
+> *Subject:* Re: Jenkins build pestered by 'no such option:
+> --disable-pip-version-check'
+> 
+> 
+>> Well the problem is, that it is not me that has an old version of pip.
+>> But this is in Jenkins and that is on the test environment where there
+>> is fetched fresh very test-build.
+>> I would not know how to influence this?
+> 
+> It looks as though one massive commit in
+> https://github.com/ceph/ceph/pull/10283 included a fix that should
+> resolve this.  Perhaps pull that into your branch?
 
-We've started a CephFS Samba PoC on RHEL but just noticed the Samba
-Ceph VFS doesn't seem to be included with Samba on RHEL, or we're not
-looking in the right place. Trying to avoid needing to build Samba
-from source if possible. Any pointers appreciated.
+That would mean that my pull contains code that is already in HEAD.
+I guess that would work locally, but not during Jenkins testing.
+Beter I check why I did not get it with a rebase?
 
--- 
-Cheers,
-~Blairo
+--WjW
+
+
