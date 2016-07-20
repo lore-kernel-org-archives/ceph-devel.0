@@ -1,33 +1,60 @@
 From: Dan Mick <dmick@redhat.com>
-Subject: Re: Jenkins build pestered by 'no such option:
- --disable-pip-version-check'
-Date: Tue, 19 Jul 2016 20:21:50 -0700
-Message-ID: <578EEE4E.7010102@redhat.com>
-References: <65d919f9-a015-4fe8-b578-b2fc275494de@digiware.nl>
- <CAC-Np1xhGOo9JUcVm=4yqhN7FJJVFwxrGPXs30Rhw6a5ava_sg@mail.gmail.com>
- <04152f22-d98e-4c17-6ad4-8895b4d8682b@digiware.nl>
- <f4d2f173-00e7-47f6-2de7-d1ffc6b8837f@redhat.com>
- <2fc90487-18f9-31af-ab8e-ada88e2b01e7@digiware.nl>
+Subject: Re: dpkg-buildpackage failed on Ubuntu 16.4 -
+ 'override_dh_auto_build' failed
+Date: Tue, 19 Jul 2016 20:23:28 -0700
+Message-ID: <578EEEB0.6060706@redhat.com>
+References: <DB5PR05MB1607AA6E7B4D217AA82E6DCDA9370@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60873 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:45120 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753142AbcGTDVw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 19 Jul 2016 23:21:52 -0400
-In-Reply-To: <2fc90487-18f9-31af-ab8e-ada88e2b01e7@digiware.nl>
+	id S1753013AbcGTDX3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 19 Jul 2016 23:23:29 -0400
+In-Reply-To: <DB5PR05MB1607AA6E7B4D217AA82E6DCDA9370@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>, dang@redhat.com, Alfredo Deza <adeza@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Avner Ben Hanoch <avnerb@mellanox.com>, Ceph Development <ceph-devel@vger.kernel.org>
+
+There's no detail of what went wrong in your excerpt.  All that says is
+"something failed in the build".  You need to analyze the failure more
+closely to figure out what actually went wrong.
+
+On 07/19/2016 02:09 AM, Avner Ben Hanoch wrote:
+> Hi all,
+> 
+> What is the recommended way to install my builds of ceph?
+> 
+> Following ceph instruction here http://docs.ceph.com/docs/master/install/build-ceph/ on a Ubuntu 16.4 machine, I got the following errors from dpkg-buildpackage -j32 (after 1-2 hours of waiting :-( ):
+> 
+>    dh_auto_build: make -j32 returned exit code 2
+>    debian/rules:28: recipe for target 'override_dh_auto_build' failed
+>    make[1]: *** [override_dh_auto_build] Error 2
+>    make[1]: Leaving directory '/mnt/sdb/avnerb/ceph'
+>    debian/rules:22: recipe for target 'build' failed
+>    make: *** [build] Error 2
+>    dpkg-buildpackage: error: debian/rules build gave error exit status 2
+> 
+> According to debian here https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=777814 this error might be related to gcc-5.
+> 
+> Anyhow, I only want to use the recommended way for installing my builds of ceph (Preferred one that can be installed over a cluster that was deployed using ceph-deploy)
+> 
+> I tried "make install" and encountered errors.
+> dpkg-buildpackage also failed for me
+> 
+> Can someone advise please
+> 
+> TIA,
+>   Avner
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
 
-> Well the problem is, that it is not me that has an old version of pip.
-> But this is in Jenkins and that is on the test environment where there
-> is fetched fresh very test-build.
-> I would not know how to influence this?
-
-It looks as though one massive commit in
-https://github.com/ceph/ceph/pull/10283 included a fix that should
-resolve this.  Perhaps pull that into your branch?
+-- 
+Dan Mick
+Red Hat, Inc.
+Ceph docs: http://ceph.com/docs
