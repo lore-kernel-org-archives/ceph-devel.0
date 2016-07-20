@@ -1,49 +1,39 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: CephFS Samba VFS RHEL packages
-Date: Wed, 20 Jul 2016 10:59:36 +0100
-Message-ID: <CALe9h7c=zegmKFYkz7-oKSG9uQ0-TUE+DkXSCNdkwJgvpqsRXA@mail.gmail.com>
-References: <CA+z5Dsx7phEMT1oxENzCwXxQrB0NtCLwxWGPKF+NeMZNr+KkSw@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: getting more updates in rocksdb
+Date: Wed, 20 Jul 2016 12:38:34 +0200
+Message-ID: <a8d5d498-cbc7-f252-64a3-791995bfc5bc@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f177.google.com ([209.85.216.177]:33090 "EHLO
-	mail-qt0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753844AbcGTJ75 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jul 2016 05:59:57 -0400
-Received: by mail-qt0-f177.google.com with SMTP id w38so23503342qtb.0
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Jul 2016 02:59:57 -0700 (PDT)
-In-Reply-To: <CA+z5Dsx7phEMT1oxENzCwXxQrB0NtCLwxWGPKF+NeMZNr+KkSw@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:40404 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751640AbcGTKiu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 20 Jul 2016 06:38:50 -0400
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.digiware.nl (Postfix) with ESMTPSA id 6042415340A
+	for <ceph-devel@vger.kernel.org>; Wed, 20 Jul 2016 12:38:37 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Blair Bethwaite <blair.bethwaite@gmail.com>
-Cc: Ira Cooper <icooper@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 20, 2016 at 6:45 AM, Blair Bethwaite
-<blair.bethwaite@gmail.com> wrote:
-> Hi all,
->
-> We've started a CephFS Samba PoC on RHEL but just noticed the Samba
-> Ceph VFS doesn't seem to be included with Samba on RHEL, or we're not
-> looking in the right place. Trying to avoid needing to build Samba
-> from source if possible. Any pointers appreciated.
 
-RHEL packagers tend to be conservative about building in feature flags
-that aren't official parts of their product.
+Hi,
 
-Unfortunately we do our upstream Samba testing on Ubuntu, so don't
-have any RPMs from the gitbuilders either; you're probably going to
-have to build your own.
+I submitted a small patch to rocksdb for FreeBSD
+https://github.com/facebook/rocksdb/commit/b726bf59619d43651838e03cce9f876b3560cbda
 
-CCing Ira who was recently evaluating the state of Samba+CephFS and
-might have some tips on setting this up on RHEL.
+And was hopping that it would be tracked by my Ceph stuff as well.
+But refetching things, it does not seem to be in the tree ceph cmake
+fetches.
 
-Cheers,
-John
+And I'm not fluent enough in git to actually check if my current
+checkout with hash: 5647fa427c4eab87c0caf8bcbb91f5846a4623f9
+should contain the above commit.
 
-> --
-> Cheers,
-> ~Blairo
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+And if it is not in, would it be possible to get it in the module we
+fetch for Ceph?
+
+--WjW
