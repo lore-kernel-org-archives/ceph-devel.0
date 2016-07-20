@@ -1,65 +1,43 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: deadlocks in rbd unmap and map
-Date: Wed, 20 Jul 2016 15:14:14 +0200
-Message-ID: <CAOi1vP_maPag+tTABWKnFYQhs6UamzWc9e3Zw9J6m24WgcHncQ@mail.gmail.com>
-References: <CAE2NFgVL6_+6JmW7aFO+v3j37BFnxXEneaOHk0eOCx-Vj1pAOA@mail.gmail.com>
- <CAOi1vP8NhgYHpfZT8w=meFf6vwPrS-izRZnvSPwrRc+3vwvAWQ@mail.gmail.com>
- <CAE2NFgW0ntzuFkRup5QCGfYMBuHo4Er9+y+OtKDTeaXBBtgE3g@mail.gmail.com>
- <CAOi1vP_HwML=7+iZrJFzJpbRcSomKBX5r8RT2hnRGF23agN1FQ@mail.gmail.com>
- <CAE2NFgVVth4BRQNCy6SFOnLnLf0NQ=kgoHcuMLpnz5beG3w-nQ@mail.gmail.com>
- <CAOi1vP8fg4cmAvOOKQWZUcvNpiQ5CzpVr1q=rjhtTjasa85msQ@mail.gmail.com>
- <CAE2NFgXvtZYzD9EGp+GHxcSndS3AoKyvpZkwdmsTr2rB9KF__w@mail.gmail.com>
- <CAOi1vP_7dHOVnxTHEhfYsiXQGvd+e8ecsPf10cg0s33Ry4Vt9Q@mail.gmail.com> <CAE2NFgUxwvS_LnsoNp+zTK+4e+DSF24i==sPW2ARcZ9LJn1Otg@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: getting more updates in rocksdb
+Date: Wed, 20 Jul 2016 06:32:02 -0700
+Message-ID: <CAJ4mKGYEmECcn_9wMBTovk0tUCnLtTH2Cmy=K18WzK02Fjah4A@mail.gmail.com>
+References: <a8d5d498-cbc7-f252-64a3-791995bfc5bc@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:35342 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753503AbcGTNOQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jul 2016 09:14:16 -0400
-Received: by mail-wm0-f47.google.com with SMTP id f65so175313215wmi.0
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Jul 2016 06:14:16 -0700 (PDT)
-In-Reply-To: <CAE2NFgUxwvS_LnsoNp+zTK+4e+DSF24i==sPW2ARcZ9LJn1Otg@mail.gmail.com>
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:35361 "EHLO
+	mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752627AbcGTNcD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jul 2016 09:32:03 -0400
+Received: by mail-vk0-f48.google.com with SMTP id w127so68914609vkh.2
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Jul 2016 06:32:03 -0700 (PDT)
+In-Reply-To: <a8d5d498-cbc7-f252-64a3-791995bfc5bc@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McLean <patrickm@gaikai.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Victor Payno <vpayno@gaikai.com>, Cliff Pajaro <cpajaro@gaikai.com>, Roderick Colenbrander <roderick@gaikai.com>, Rae Yip <ryip@gaikai.com>, Frank Reed <freed@gaikai.com>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 20, 2016 at 1:23 AM, Patrick McLean <patrickm@gaikai.com> wrote:
-> We got this on our rbd clients this morning, it is not actually a
-> panic, but networking seems to have died on those boxes and since they
-> are netbooted, they were dead.
+On Wed, Jul 20, 2016 at 3:38 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
 >
-> It looks like a crash in rbd_watch_cb:
+> Hi,
 >
-> [68479.925931] Call Trace:
-> [68479.928632]  [<ffffffff81140f2e>] ? wq_worker_sleeping+0xe/0x90
-> [68479.934793]  [<ffffffff819738bc>] __schedule+0x50c/0xb90
-> [68479.940349]  [<ffffffff81445db5>] ? put_io_context_active+0xa5/0xc0
-> [68479.946866]  [<ffffffff81973f7c>] schedule+0x3c/0x90
-> [68479.952077]  [<ffffffff81126554>] do_exit+0x7b4/0xc60
-> [68479.957373]  [<ffffffff8109891c>] oops_end+0x9c/0xd0
-> [68479.962579]  [<ffffffff81098d8b>] die+0x4b/0x70
-> [68479.967357]  [<ffffffff81095d15>] do_general_protection+0xe5/0x1b0
-> [68479.973780]  [<ffffffff8197b988>] general_protection+0x28/0x30
-> [68479.979857]  [<ffffffffa01be161>] ? rbd_watch_cb+0x21/0x100 [rbd]
-> [68479.986202]  [<ffffffff81173f8f>] ? up_read+0x1f/0x40
-> [68479.991506]  [<ffffffffa00c3c09>] do_watch_notify+0x99/0x170 [libceph]
-> [68479.998279]  [<ffffffff8114003a>] process_one_work+0x1da/0x660
-> [68480.004352]  [<ffffffff8113ffac>] ? process_one_work+0x14c/0x660
-> [68480.010601]  [<ffffffff8114050e>] worker_thread+0x4e/0x490
-> [68480.016326]  [<ffffffff811404c0>] ? process_one_work+0x660/0x660
-> [68480.022578]  [<ffffffff811404c0>] ? process_one_work+0x660/0x660
-> [68480.028823]  [<ffffffff81146c51>] kthread+0x101/0x120
-> [68480.034149]  [<ffffffff81979baf>] ret_from_fork+0x1f/0x40
-> [68480.039796]  [<ffffffff81146b50>] ? kthread_create_on_node+0x250/0x250
+> I submitted a small patch to rocksdb for FreeBSD
+> https://github.com/facebook/rocksdb/commit/b726bf59619d43651838e03cce9f876b3560cbda
+>
+> And was hopping that it would be tracked by my Ceph stuff as well.
+> But refetching things, it does not seem to be in the tree ceph cmake
+> fetches.
+>
+> And I'm not fluent enough in git to actually check if my current
+> checkout with hash: 5647fa427c4eab87c0caf8bcbb91f5846a4623f9
+> should contain the above commit.
 
-The attached log starts with [68479.452369].  Do you have an earlier
-chunk?  I'm specifically looking for whether the rbd_watch_cb() was the
-first splat.
+Use "git log" on both trees and search for the hashes? :)
 
-Any luck reproducing the hang with logging enabled?
-
-Thanks,
-
-                Ilya
+Anyway, the Ceph submodule does not auto-update (git submodules don't
+support that AFAIK). You can go into the rocksdb folder and try
+checking out the latest upstream master, then committing the new hash
+as a commit in the Ceph git repo (at least, once your commit is
+merged; not sure if it is yet).
+-Greg
