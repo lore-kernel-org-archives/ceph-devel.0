@@ -1,373 +1,53 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: Re: Ceph 10.2.2 OSD Crash
-Date: Wed, 20 Jul 2016 17:05:25 -0700
-Message-ID: <950a113d-2946-53f3-f7be-22a4caa5c077@redhat.com>
-References: <ab9f0a2e-9caf-21d4-88c7-207ab2f54e90@wigen.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Bluestore Bitmap allocator crash
+Date: Thu, 21 Jul 2016 01:44:09 +0000
+Message-ID: <BL2PR02MB211503A698A90F23CC6BF383F4090@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49514 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751337AbcGUAF0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 20 Jul 2016 20:05:26 -0400
-In-Reply-To: <ab9f0a2e-9caf-21d4-88c7-207ab2f54e90@wigen.net>
+Received: from mail-dm3nam03on0080.outbound.protection.outlook.com ([104.47.41.80]:15632
+	"EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753453AbcGUBoO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jul 2016 21:44:14 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexander Wigen <alex@wigen.net>, ceph-devel@vger.kernel.org
+To: Ramesh Chander <Ramesh.Chander@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+Ramesh,
+I am hitting the following crash during IO path the moment I started io.
+
+os/bluestore/BitMapAllocator.cc: 76: FAILED assert(!(off % m_block_size))
+
+ ceph version 11.0.0-696-ga3438ba (a3438bac71a54cb43e5feb93ad09228bf69942ae)
+ 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x80) [0x55804242de40]
+ 2: (BitMapAllocator::insert_free(unsigned long, unsigned long)+0x2e3) [0x558042132813]
+ 3: (BitMapAllocator::commit_finish()+0x2a5) [0x558042132e55]
+ 4: (BlueStore::_kv_sync_thread()+0x142d) [0x558041fff61d]
+ 5: (BlueStore::KVSyncThread::entry()+0xd) [0x558042028c2d]
+ 6: (Thread::entry_wrapper()+0x75) [0x55804240d755]
+ 7: (()+0x76fa) [0x7f36699076fa]
+ 8: (clone()+0x6d) [0x7f3667767b5d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
 
 
-There is already a tracker http://tracker.ceph.com/issues/13937 and a 
-pull request that hasn't merged yet https://github.com/ceph/ceph/pull/9304
+What I did :
+------------
 
-As a work around you could use the osd logs to find the bad shard and 
-remove it with the ceph-objectstore-tool.
+1. I have a separate wal partition to a nvram device
 
-David
+2. change min_alloc_size to 16K
 
-On 7/20/16 3:06 PM, Alexander Wigen wrote:
+3. ran 4k rw.
 
-> Hi there,
->
-> I had a OSD crash today under heavy rebuild load. Here's the output:
->
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: osd/ECBackend.cc: In 
-> function 'virtual void 
-> OnRecoveryReadComplete::finish(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&)' t
-> hread 7f0cc2ef4700 time 2016-07-20 22:42:03.738188
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: osd/ECBackend.cc: 
-> 203: FAILED assert(res.errors.empty())
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: ceph version 10.2.2 
-> (45107e21c568dd033c2f0a3107dec8f0b0e58374)
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 1: 
-> (ceph::__ceph_assert_fail(char const*, char const*, int, char 
-> const*)+0x85) [0x7f0ce761c5b5]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 2: 
-> (OnRecoveryReadComplete::finish(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&)+0x192) [0x7f0ce71bb982]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 3: 
-> (GenContext<std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&>::complete(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_
-> t&>&)+0x9) [0x7f0ce71a8f49]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 4: 
-> (ECBackend::complete_read_op(ECBackend::ReadOp&, 
-> RecoveryMessages*)+0x73) [0x7f0ce719f043]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 5: 
-> (ECBackend::handle_sub_read_reply(pg_shard_t, ECSubReadReply&, 
-> RecoveryMessages*)+0xfe9) [0x7f0ce71a00b9]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 6: 
-> (ECBackend::handle_message(std::shared_ptr<OpRequest>)+0x1a3) 
-> [0x7f0ce71a7513]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 7: 
-> (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&, 
-> ThreadPool::TPHandle&)+0x100) [0x7f0ce70dc810]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 8: 
-> (OSD::dequeue_op(boost::intrusive_ptr<PG>, std::shared_ptr<OpRequest>, 
-> ThreadPool::TPHandle&)+0x41d) [0x7f0ce6f91a8d]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 9: 
-> (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>&)+0x6d) 
-> [0x7f0ce6f91cdd]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 10: 
-> (OSD::ShardedOpWQ::_process(unsigned int, 
-> ceph::heartbeat_handle_d*)+0x869) [0x7f0ce6f96809]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 11: 
-> (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x887) 
-> [0x7f0ce760c557]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 12: 
-> (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f0ce760e4c0]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 13: (()+0x7dc5) 
-> [0x7f0ce554adc5]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 14: (clone()+0x6d) 
-> [0x7f0ce3bd5ced]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: NOTE: a copy of the 
-> executable, or `objdump -rdS <executable>` is needed to interpret this.
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 2016-07-20 
-> 22:42:03.746704 7f0cc2ef4700 -1 osd/ECBackend.cc: In function 'virtual 
-> void OnRecoveryReadComplete::finish(std::pair<Recover
-> yMessages*, ECBackend::read_result_t&>&)' thread 7f0cc2ef4700 time 
-> 2016-07-20 22:42:03.738188
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: osd/ECBackend.cc: 
-> 203: FAILED assert(res.errors.empty())
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: ceph version 10.2.2 
-> (45107e21c568dd033c2f0a3107dec8f0b0e58374)
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 1: 
-> (ceph::__ceph_assert_fail(char const*, char const*, int, char 
-> const*)+0x85) [0x7f0ce761c5b5]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 2: 
-> (OnRecoveryReadComplete::finish(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&)+0x192) [0x7f0ce71bb982]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 3: 
-> (GenContext<std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&>::complete(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_
-> t&>&)+0x9) [0x7f0ce71a8f49]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 4: 
-> (ECBackend::complete_read_op(ECBackend::ReadOp&, 
-> RecoveryMessages*)+0x73) [0x7f0ce719f043]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 5: 
-> (ECBackend::handle_sub_read_reply(pg_shard_t, ECSubReadReply&, 
-> RecoveryMessages*)+0xfe9) [0x7f0ce71a00b9]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 6: 
-> (ECBackend::handle_message(std::shared_ptr<OpRequest>)+0x1a3) 
-> [0x7f0ce71a7513]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 7: 
-> (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&, 
-> ThreadPool::TPHandle&)+0x100) [0x7f0ce70dc810]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 8: 
-> (OSD::dequeue_op(boost::intrusive_ptr<PG>, std::shared_ptr<OpRequest>, 
-> ThreadPool::TPHandle&)+0x41d) [0x7f0ce6f91a8d]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 9: 
-> (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>&)+0x6d) 
-> [0x7f0ce6f91cdd]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 10: 
-> (OSD::ShardedOpWQ::_process(unsigned int, 
-> ceph::heartbeat_handle_d*)+0x869) [0x7f0ce6f96809]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 11: 
-> (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x887) 
-> [0x7f0ce760c557]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 12: 
-> (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f0ce760e4c0]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 13: (()+0x7dc5) 
-> [0x7f0ce554adc5]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 14: (clone()+0x6d) 
-> [0x7f0ce3bd5ced]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: NOTE: a copy of the 
-> executable, or `objdump -rdS <executable>` is needed to interpret this.
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 0> 2016-07-20 
-> 22:42:03.746704 7f0cc2ef4700 -1 osd/ECBackend.cc: In function 'virtual 
-> void OnRecoveryReadComplete::finish(std::pair<Reco
-> veryMessages*, ECBackend::read_result_t&>&)' thread 7f0cc2ef4700 time 
-> 2016-07-20 22:42:03.738188
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: osd/ECBackend.cc: 
-> 203: FAILED assert(res.errors.empty())
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: ceph version 10.2.2 
-> (45107e21c568dd033c2f0a3107dec8f0b0e58374)
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 1: 
-> (ceph::__ceph_assert_fail(char const*, char const*, int, char 
-> const*)+0x85) [0x7f0ce761c5b5]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 2: 
-> (OnRecoveryReadComplete::finish(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&)+0x192) [0x7f0ce71bb982]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 3: 
-> (GenContext<std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&>::complete(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_
-> t&>&)+0x9) [0x7f0ce71a8f49]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 4: 
-> (ECBackend::complete_read_op(ECBackend::ReadOp&, 
-> RecoveryMessages*)+0x73) [0x7f0ce719f043]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 5: 
-> (ECBackend::handle_sub_read_reply(pg_shard_t, ECSubReadReply&, 
-> RecoveryMessages*)+0xfe9) [0x7f0ce71a00b9]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 6: 
-> (ECBackend::handle_message(std::shared_ptr<OpRequest>)+0x1a3) 
-> [0x7f0ce71a7513]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 7: 
-> (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&, 
-> ThreadPool::TPHandle&)+0x100) [0x7f0ce70dc810]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 8: 
-> (OSD::dequeue_op(boost::intrusive_ptr<PG>, std::shared_ptr<OpRequest>, 
-> ThreadPool::TPHandle&)+0x41d) [0x7f0ce6f91a8d]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 9: 
-> (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>&)+0x6d) 
-> [0x7f0ce6f91cdd]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 10: 
-> (OSD::ShardedOpWQ::_process(unsigned int, 
-> ceph::heartbeat_handle_d*)+0x869) [0x7f0ce6f96809]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 11: 
-> (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x887) 
-> [0x7f0ce760c557]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 12: 
-> (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f0ce760e4c0]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 13: (()+0x7dc5) 
-> [0x7f0ce554adc5]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 14: (clone()+0x6d) 
-> [0x7f0ce3bd5ced]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: NOTE: a copy of the 
-> executable, or `objdump -rdS <executable>` is needed to interpret this.
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: *** Caught signal 
-> (Aborted) **
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: in thread 
-> 7f0cc2ef4700 thread_name:tp_osd_tp
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: ceph version 10.2.2 
-> (45107e21c568dd033c2f0a3107dec8f0b0e58374)
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 1: (()+0x91341a) 
-> [0x7f0ce751c41a]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 2: (()+0xf100) 
-> [0x7f0ce5552100]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 3: (gsignal()+0x37) 
-> [0x7f0ce3b145f7]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 4: (abort()+0x148) 
-> [0x7f0ce3b15ce8]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 5: 
-> (ceph::__ceph_assert_fail(char const*, char const*, int, char 
-> const*)+0x267) [0x7f0ce761c797]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 6: 
-> (OnRecoveryReadComplete::finish(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&)+0x192) [0x7f0ce71bb982]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 7: 
-> (GenContext<std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&>::complete(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&)+0x9) [0x7f0ce71a8f49]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 8: 
-> (ECBackend::complete_read_op(ECBackend::ReadOp&, 
-> RecoveryMessages*)+0x73) [0x7f0ce719f043]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 9: 
-> (ECBackend::handle_sub_read_reply(pg_shard_t, ECSubReadReply&, 
-> RecoveryMessages*)+0xfe9) [0x7f0ce71a00b9]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 10: 
-> (ECBackend::handle_message(std::shared_ptr<OpRequest>)+0x1a3) 
-> [0x7f0ce71a7513]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 11: 
-> (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&, 
-> ThreadPool::TPHandle&)+0x100) [0x7f0ce70dc810]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 12: 
-> (OSD::dequeue_op(boost::intrusive_ptr<PG>, std::shared_ptr<OpRequest>, 
-> ThreadPool::TPHandle&)+0x41d) [0x7f0ce6f91a8d]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 13: 
-> (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>&)+0x6d) 
-> [0x7f0ce6f91cdd]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 14: 
-> (OSD::ShardedOpWQ::_process(unsigned int, 
-> ceph::heartbeat_handle_d*)+0x869) [0x7f0ce6f96809]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 15: 
-> (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x887) 
-> [0x7f0ce760c557]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 16: 
-> (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f0ce760e4c0]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 17: (()+0x7dc5) 
-> [0x7f0ce554adc5]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 18: (clone()+0x6d) 
-> [0x7f0ce3bd5ced]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 2016-07-20 
-> 22:42:03.775158 7f0cc2ef4700 -1 *** Caught signal (Aborted) **
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: in thread 
-> 7f0cc2ef4700 thread_name:tp_osd_tp
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: ceph version 10.2.2 
-> (45107e21c568dd033c2f0a3107dec8f0b0e58374)
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 1: (()+0x91341a) 
-> [0x7f0ce751c41a]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 2: (()+0xf100) 
-> [0x7f0ce5552100]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 3: (gsignal()+0x37) 
-> [0x7f0ce3b145f7]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 4: (abort()+0x148) 
-> [0x7f0ce3b15ce8]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 5: 
-> (ceph::__ceph_assert_fail(char const*, char const*, int, char 
-> const*)+0x267) [0x7f0ce761c797]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 6: 
-> (OnRecoveryReadComplete::finish(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&)+0x192) [0x7f0ce71bb982]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 7: 
-> (GenContext<std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&>::complete(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&)+0x9) [0x7f0ce71a8f49]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 8: 
-> (ECBackend::complete_read_op(ECBackend::ReadOp&, 
-> RecoveryMessages*)+0x73) [0x7f0ce719f043]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 9: 
-> (ECBackend::handle_sub_read_reply(pg_shard_t, ECSubReadReply&, 
-> RecoveryMessages*)+0xfe9) [0x7f0ce71a00b9]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 10: 
-> (ECBackend::handle_message(std::shared_ptr<OpRequest>)+0x1a3) 
-> [0x7f0ce71a7513]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 11: 
-> (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&, 
-> ThreadPool::TPHandle&)+0x100) [0x7f0ce70dc810]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 12: 
-> (OSD::dequeue_op(boost::intrusive_ptr<PG>, std::shared_ptr<OpRequest>, 
-> ThreadPool::TPHandle&)+0x41d) [0x7f0ce6f91a8d]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 13: 
-> (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>&)+0x6d) 
-> [0x7f0ce6f91cdd]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 14: 
-> (OSD::ShardedOpWQ::_process(unsigned int, 
-> ceph::heartbeat_handle_d*)+0x869) [0x7f0ce6f96809]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 15: 
-> (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x887) 
-> [0x7f0ce760c557]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 16: 
-> (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f0ce760e4c0]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 17: (()+0x7dc5) 
-> [0x7f0ce554adc5]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 18: (clone()+0x6d) 
-> [0x7f0ce3bd5ced]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: NOTE: a copy of the 
-> executable, or `objdump -rdS <executable>` is needed to interpret this.
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 0> 2016-07-20 
-> 22:42:03.775158 7f0cc2ef4700 -1 *** Caught signal (Aborted) **
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: in thread 
-> 7f0cc2ef4700 thread_name:tp_osd_tp
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: ceph version 10.2.2 
-> (45107e21c568dd033c2f0a3107dec8f0b0e58374)
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 1: (()+0x91341a) 
-> [0x7f0ce751c41a]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 2: (()+0xf100) 
-> [0x7f0ce5552100]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 3: (gsignal()+0x37) 
-> [0x7f0ce3b145f7]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 4: (abort()+0x148) 
-> [0x7f0ce3b15ce8]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 5: 
-> (ceph::__ceph_assert_fail(char const*, char const*, int, char 
-> const*)+0x267) [0x7f0ce761c797]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 6: 
-> (OnRecoveryReadComplete::finish(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&)+0x192) [0x7f0ce71bb982]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 7: 
-> (GenContext<std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&>::complete(std::pair<RecoveryMessages*, 
-> ECBackend::read_result_t&>&)+0x9) [0x7f0ce71a8f49]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 8: 
-> (ECBackend::complete_read_op(ECBackend::ReadOp&, 
-> RecoveryMessages*)+0x73) [0x7f0ce719f043]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 9: 
-> (ECBackend::handle_sub_read_reply(pg_shard_t, ECSubReadReply&, 
-> RecoveryMessages*)+0xfe9) [0x7f0ce71a00b9]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 10: 
-> (ECBackend::handle_message(std::shared_ptr<OpRequest>)+0x1a3) 
-> [0x7f0ce71a7513]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 11: 
-> (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&, 
-> ThreadPool::TPHandle&)+0x100) [0x7f0ce70dc810]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 12: 
-> (OSD::dequeue_op(boost::intrusive_ptr<PG>, std::shared_ptr<OpRequest>, 
-> ThreadPool::TPHandle&)+0x41d) [0x7f0ce6f91a8d]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 13: 
-> (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>&)+0x6d) 
-> [0x7f0ce6f91cdd]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 14: 
-> (OSD::ShardedOpWQ::_process(unsigned int, 
-> ceph::heartbeat_handle_d*)+0x869) [0x7f0ce6f96809]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 15: 
-> (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x887) 
-> [0x7f0ce760c557]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 16: 
-> (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f0ce760e4c0]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 17: (()+0x7dc5) 
-> [0x7f0ce554adc5]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: 18: (clone()+0x6d) 
-> [0x7f0ce3bd5ced]
-> Jul 20 22:42:03 node4.wigen.svg ceph-osd[24096]: NOTE: a copy of the 
-> executable, or `objdump -rdS <executable>` is needed to interpret this.
-> Jul 20 22:42:03 node4.wigen.svg systemd[1]: ceph-osd@12.service: main 
-> process exited, code=killed, status=6/ABRT
-> Jul 20 22:42:03 node4.wigen.svg systemd[1]: Unit ceph-osd@12.service 
-> entered failed state.
-> Jul 20 22:42:03 node4.wigen.svg systemd[1]: ceph-osd@12.service failed.
-> Jul 20 22:42:04 node4.wigen.svg systemd[1]: ceph-osd@12.service 
-> holdoff time over, scheduling restart.
->
-> I've generated an object dump if anyone is interested let me know.
->
->
-> Cheers,
-> Alex
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Let me know if you need further details.
 
+Thanks & Regards
+Somnath
+
+
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
