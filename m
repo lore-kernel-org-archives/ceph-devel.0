@@ -1,94 +1,147 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] libceph: apply new_state before new_up_client on incrementals
-Date: Thu, 21 Jul 2016 17:27:36 +0200
-Message-ID: <CAOi1vP-BOfzQpNH1yRaZO78F0aT3ictmWJ_UO-9K1bsQDriM_w@mail.gmail.com>
-References: <1468963597-10667-1-git-send-email-idryomov@gmail.com> <57901170.4000809@redhat.com>
+From: Sugang Li <sugangli@winlab.rutgers.edu>
+Subject: Re: replicatedPG assert fails
+Date: Thu, 21 Jul 2016 11:34:43 -0400
+Message-ID: <CAG0LsznYeRyG8Bi9y6crBC2s1J1xSjm_YZvnaTuXvJkkrdD=4w@mail.gmail.com>
+References: <CAG0LsznhUpP=ub-TmiHSO0A9JZWjk8eov2Lu8y15snqcdG_4Aw@mail.gmail.com>
+ <CAN=+7FWkeX+5zwzuYcHE35ZSHWO7ZyUVG0vHd3Y+K5AEPPsb1w@mail.gmail.com>
+ <CAG0LszmDNdrJpBM9sA3ivuZmzvqupPOyHafQCJuvooiamiUnqQ@mail.gmail.com> <CAN=+7FWD4UzR0QnYEBmmh9brRWan+2yjd45P28b4DNhQYXgYmA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:36332 "EHLO
-	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753112AbcGUP1j (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jul 2016 11:27:39 -0400
-Received: by mail-wm0-f48.google.com with SMTP id q128so25756795wma.1
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Jul 2016 08:27:38 -0700 (PDT)
-In-Reply-To: <57901170.4000809@redhat.com>
+Received: from mail-qt0-f181.google.com ([209.85.216.181]:34746 "EHLO
+	mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753100AbcGUPeo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jul 2016 11:34:44 -0400
+Received: by mail-qt0-f181.google.com with SMTP id u25so46019179qtb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Jul 2016 08:34:44 -0700 (PDT)
+In-Reply-To: <CAN=+7FWD4UzR0QnYEBmmh9brRWan+2yjd45P28b4DNhQYXgYmA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Jul 21, 2016 at 2:04 AM, Josh Durgin <jdurgin@redhat.com> wrote:
-> On 07/19/2016 02:26 PM, Ilya Dryomov wrote:
->>
->> Currently, osd_weight and osd_state fields are updated in the encoding
->> order.  This is wrong, because an incremental map may look like e.g.
->>
->>      new_up_client: { osd=6, addr=... } # set osd_state and addr
->>      new_state: { osd=6, xorstate=EXISTS } # clear osd_state
->>
->> Suppose osd6's current osd_state is EXISTS (i.e. osd6 is down).  After
->> applying new_up_client, osd_state is changed to EXISTS | UP.  Carrying
->> on with the new_state update, we flip EXISTS and leave osd6 in a weird
->> "!EXISTS but UP" state.  A non-existent OSD is considered down by the
->> mapping code
->>
->> 2087    for (i = 0; i < pg->pg_temp.len; i++) {
->> 2088            if (ceph_osd_is_down(osdmap, pg->pg_temp.osds[i])) {
->> 2089                    if (ceph_can_shift_osds(pi))
->> 2090                            continue;
->> 2091
->> 2092                    temp->osds[temp->size++] = CRUSH_ITEM_NONE;
->>
->> and so requests get directed to the second OSD in the set instead of
->> the first, resulting in OSD-side errors like:
->>
->> [WRN] : client.4239 192.168.122.21:0/2444980242 misdirected
->> client.4239.1:2827 pg 2.5df899f2 to osd.4 not [1,4,6] in e680/680
->>
->> and hung rbds on the client:
->>
->> [  493.566367] rbd: rbd0: write 400000 at 11cc00000 (0)
->> [  493.566805] rbd: rbd0:   result -6 xferred 400000
->> [  493.567011] blk_update_request: I/O error, dev rbd0, sector 9330688
->>
->> The fix is to decouple application from the decoding and:
->> - apply new_weight first
->> - apply new_state before new_up_client
->> - twiddle osd_state flags if marking in
->> - clear out some of the state if osd is destroyed
->>
->> Fixes: http://tracker.ceph.com/issues/14901
->>
->> Cc: stable@vger.kernel.org # 3.15+: 6dd74e44dc1d: libceph: set 'exists'
->> flag for newly up osd
->> Cc: stable@vger.kernel.org # 3.15+
->> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
->> ---
->>   net/ceph/osdmap.c | 156
->> +++++++++++++++++++++++++++++++++++++++---------------
->>   1 file changed, 113 insertions(+), 43 deletions(-)
->
->
-> This matches userspace's incremental handling now. Looks good.
+Yes, I understand that. I was introduced to Ceph only 1 month ago, but
+I have the basic idea of Ceph communication pattern now. I have not
+make any changes to OSD yet. So I was wondering what is purpose of
+this "assert(oid.pool == static_cast<int64_t>(info.pgid.pool()))", and
+to change the code in OSD, what are the main aspects I should pay
+attention to?
+Since this is only a research project, the implementation does not
+have to be very sophisticated.
 
-Technically, no.  new_primary_affinity is decoded along with new_weight
-in userspace and crushmap is applied at the very end, after weights and
-states are applied.  AFAICT crushmap is applied last only because of
-the userspace-only adjust_osd_weights(), which needs to have the new
-weights.
-
-As for primary-affinity, the following
-
-    new_up_client: { osd=X, addr=... }
-    new_state: { osd=X, xorstate=EXISTS }
-    new_primary_affinity: { osd=X, aff=Y }
-
-would be misinterpreted - the kernel client would stay on aff=Y instead
-of aff=1 (reset), but I don't see a (obvious, at least) way to get such
-a map, and, as I wanted this to be as small as possible for backporting,
-I punted on that.  Let me know if you see otherwise.
+I know my question is kinda too broad, any hints or suggestions will
+be highly appreciated.
 
 Thanks,
 
-                Ilya
+Sugang
+
+On Thu, Jul 21, 2016 at 11:22 AM, Samuel Just <sjust@redhat.com> wrote:
+> Oh, that's a much more complicated change.  You are going to need to
+> make extensive changes to the OSD to make that work.
+> -Sam
+>
+> On Thu, Jul 21, 2016 at 8:21 AM, Sugang Li <sugangli@winlab.rutgers.edu> wrote:
+>> Hi Sam,
+>>
+>> Thanks for the quick reply. The main modification I made is to call
+>> calc_target within librados::IoCtxImpl::aio_operate before op_submit,
+>> so that I can get all replicated OSDs' id, and send a write op to each
+>> of them. I can also attach the modified code if necessary.
+>>
+>> I just reproduced this error with the conf you provided,  please see below:
+>> osd/ReplicatedPG.cc: In function 'int
+>> ReplicatedPG::find_object_context(const hobject_t&, ObjectContextRef*,
+>> bool, bool, hobject_t*)' thread 7fd6aba59700 time 2016-07-21
+>> 15:09:26.431436
+>> osd/ReplicatedPG.cc: 9042: FAILED assert(oid.pool ==
+>> static_cast<int64_t>(info.pgid.pool()))
+>>  ceph version 10.2.0-2562-g0793a28 (0793a2844baa38f6bcc5c1724a1ceb9f8f1bbd9c)
+>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x8b) [0x7fd6c5733e8b]
+>>  2: (ReplicatedPG::find_object_context(hobject_t const&,
+>> std::shared_ptr<ObjectContext>*, bool, bool, hobject_t*)+0x1e54)
+>> [0x7fd6c51ef7c4]
+>>  3: (ReplicatedPG::do_op(std::shared_ptr<OpRequest>&)+0x186e) [0x7fd6c521fe9e]
+>>  4: (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&,
+>> ThreadPool::TPHandle&)+0x73c) [0x7fd6c51dca3c]
+>>  5: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>> std::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f5)
+>> [0x7fd6c5094d65]
+>>  6: (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>
+>> const&)+0x5d) [0x7fd6c5094f8d]
+>>  7: (OSD::ShardedOpWQ::_process(unsigned int,
+>> ceph::heartbeat_handle_d*)+0x86c) [0x7fd6c50b603c]
+>>  8: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x947)
+>> [0x7fd6c5724117]
+>>  9: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7fd6c5726270]
+>>  10: (()+0x8184) [0x7fd6c3b98184]
+>>  11: (clone()+0x6d) [0x7fd6c1aa937d]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>> 2016-07-21 15:09:26.454854 7fd6aba59700 -1 osd/ReplicatedPG.cc: In
+>> function 'int ReplicatedPG::find_object_context(const hobject_t&,
+>> ObjectContextRef*, bool, bool, hobject_t*)' thread 7fd6aba59700 time
+>> 2016-07-21 15:09:26.431436
+>>
+>>
+>> This error occurs three times since I wrote to three OSDs.
+>>
+>> Thanks,
+>>
+>> Sugang
+>>
+>> On Thu, Jul 21, 2016 at 10:54 AM, Samuel Just <sjust@redhat.com> wrote:
+>>> Hmm.  Can you provide more information about the poison op?  If you
+>>> can reproduce with
+>>> debug osd = 20
+>>> debug filestore = 20
+>>> debug ms = 1
+>>> it should be easier to work out what is going on.
+>>> -Sam
+>>>
+>>> On Thu, Jul 21, 2016 at 7:13 AM, Sugang Li <sugangli@winlab.rutgers.edu> wrote:
+>>>> Hi all,
+>>>>
+>>>> I am working on a research project which requires multiple write
+>>>> operations for the same object at the same time from the client. At
+>>>> the OSD side, I got this error:
+>>>> osd/ReplicatedPG.cc: In function 'int
+>>>> ReplicatedPG::find_object_context(const hobject_t&, ObjectContextRef*,
+>>>> bool, bool, hobject_t*)' thread 7f0586193700 time 2016-07-21
+>>>> 14:02:04.218448
+>>>> osd/ReplicatedPG.cc: 9041: FAILED assert(oid.pool ==
+>>>> static_cast<int64_t>(info.pgid.pool()))
+>>>>  ceph version 10.2.0-2562-g0793a28 (0793a2844baa38f6bcc5c1724a1ceb9f8f1bbd9c)
+>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>>> const*)+0x8b) [0x7f059fe6dd7b]
+>>>>  2: (ReplicatedPG::find_object_context(hobject_t const&,
+>>>> std::shared_ptr<ObjectContext>*, bool, bool, hobject_t*)+0x1dbb)
+>>>> [0x7f059f9296fb]
+>>>>  3: (ReplicatedPG::do_op(std::shared_ptr<OpRequest>&)+0x186e) [0x7f059f959d7e]
+>>>>  4: (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&,
+>>>> ThreadPool::TPHandle&)+0x73c) [0x7f059f916a0c]
+>>>>  5: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>>>> std::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f5)
+>>>> [0x7f059f7ced65]
+>>>>  6: (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>
+>>>> const&)+0x5d) [0x7f059f7cef8d]
+>>>>  7: (OSD::ShardedOpWQ::_process(unsigned int,
+>>>> ceph::heartbeat_handle_d*)+0x86c) [0x7f059f7f003c]
+>>>>  8: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x947)
+>>>> [0x7f059fe5e007]
+>>>>  9: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f059fe60160]
+>>>>  10: (()+0x8184) [0x7f059e2d2184]
+>>>>  11: (clone()+0x6d) [0x7f059c1e337d]
+>>>>
+>>>> And at the client side, I got segmentation fault.
+>>>>
+>>>> I am wondering what will be the possible reason that cause the assert fail?
+>>>>
+>>>> Thanks,
+>>>>
+>>>> Sugang
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
