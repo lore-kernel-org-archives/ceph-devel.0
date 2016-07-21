@@ -1,53 +1,53 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: Bluestore Bitmap allocator crash
-Date: Thu, 21 Jul 2016 01:44:09 +0000
-Message-ID: <BL2PR02MB211503A698A90F23CC6BF383F4090@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: verbose logging for mount -t ceph or ceph-fuse problems
+Date: Wed, 20 Jul 2016 20:14:40 -0600
+Message-ID: <CALqRxCyH4uipdGEyPosmwcf0eGexYbkTZwwYQRpyOW4ELPHGfA@mail.gmail.com>
+References: <DM3PR1201MB09250DDBE36361721995F79B9B360@DM3PR1201MB0925.namprd12.prod.outlook.com>
+ <CALe9h7fxL54r014kJRz7tfXbGrcMpsT74Uh9PCjguMrkjydeiQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-dm3nam03on0080.outbound.protection.outlook.com ([104.47.41.80]:15632
-	"EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753453AbcGUBoO convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jul 2016 21:44:14 -0400
-Content-Language: en-US
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:34595 "EHLO
+	mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751339AbcGUCOm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jul 2016 22:14:42 -0400
+Received: by mail-vk0-f49.google.com with SMTP id s189so94075221vkh.1
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Jul 2016 19:14:41 -0700 (PDT)
+In-Reply-To: <CALe9h7fxL54r014kJRz7tfXbGrcMpsT74Uh9PCjguMrkjydeiQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ramesh Chander <Ramesh.Chander@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: "Deneau, Tom" <tom.deneau@amd.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Ramesh,
-I am hitting the following crash during IO path the moment I started io.
+Thanks John, I've captured that in the docs for the page Tom linked.
 
-os/bluestore/BitMapAllocator.cc: 76: FAILED assert(!(off % m_block_size))
+https://github.com/ceph/ceph/pull/10374
 
- ceph version 11.0.0-696-ga3438ba (a3438bac71a54cb43e5feb93ad09228bf69942ae)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x80) [0x55804242de40]
- 2: (BitMapAllocator::insert_free(unsigned long, unsigned long)+0x2e3) [0x558042132813]
- 3: (BitMapAllocator::commit_finish()+0x2a5) [0x558042132e55]
- 4: (BlueStore::_kv_sync_thread()+0x142d) [0x558041fff61d]
- 5: (BlueStore::KVSyncThread::entry()+0xd) [0x558042028c2d]
- 6: (Thread::entry_wrapper()+0x75) [0x55804240d755]
- 7: (()+0x76fa) [0x7f36699076fa]
- 8: (clone()+0x6d) [0x7f3667767b5d]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+- Ken
 
-
-What I did :
-------------
-
-1. I have a separate wal partition to a nvram device
-
-2. change min_alloc_size to 16K
-
-3. ran 4k rw.
-
-Let me know if you need further details.
-
-Thanks & Regards
-Somnath
-
-
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+On Tue, Jul 19, 2016 at 2:47 AM, John Spray <jspray@redhat.com> wrote:
+> For ceph-fuse, try running in the foreground with logging to the
+> console (-d) and enabling client debug (--debug-client=20), enabling
+> prints for each message sent (--debug-ms=1) and debugging for the
+> monitor client (--debug-monc=20).
+>
+> Cheers,
+> John
+>
+> On Mon, Jul 18, 2016 at 11:41 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
+>> What debug option (from http://docs.ceph.com/docs/master/rados/troubleshooting/log-and-debug/) would be best to find errors coming from
+>>    * mount -t ceph ...
+>>    * or ceph-fuse
+>>
+>> My problems seem to be network-address-related because if I create the cluster with 1Gig addresses rather than 10Gig, both mount -t ceph and ceph-fuse work fine.
+>>
+>> -- Tom Deneau
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
