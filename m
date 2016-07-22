@@ -1,155 +1,224 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: Pool creation fails: 'failed run crushtool: fork failed: (12)
- Cannot allocate memory'
-Date: Fri, 22 Jul 2016 20:46:49 +1000
-Message-ID: <20160722104649.GA24794@rskikr.localdomain>
-References: <976529875.1339.1469116197418@ox.pcextreme.nl>
- <CAJ4mKGaCvH9uj49340wXqLr5fScBYjRqh7YosGH48vOoDxk2sQ@mail.gmail.com>
- <1117268583.1343.1469126502597@ox.pcextreme.nl>
- <20160721235726.GA31519@rskikr.localdomain>
- <1891032362.1371.1469180486335@ox.pcextreme.nl>
+From: Sugang Li <sugangli@winlab.rutgers.edu>
+Subject: Re: replicatedPG assert fails
+Date: Fri, 22 Jul 2016 10:00:26 -0400
+Message-ID: <CAG0LszkW3pmOysb4jo1ZoGdTUjEwKoE==s=+bEmA+m5nNbL+Zg@mail.gmail.com>
+References: <CAG0LsznhUpP=ub-TmiHSO0A9JZWjk8eov2Lu8y15snqcdG_4Aw@mail.gmail.com>
+ <CAN=+7FWkeX+5zwzuYcHE35ZSHWO7ZyUVG0vHd3Y+K5AEPPsb1w@mail.gmail.com>
+ <CAG0LszmDNdrJpBM9sA3ivuZmzvqupPOyHafQCJuvooiamiUnqQ@mail.gmail.com>
+ <CAN=+7FWD4UzR0QnYEBmmh9brRWan+2yjd45P28b4DNhQYXgYmA@mail.gmail.com>
+ <CAG0LsznYeRyG8Bi9y6crBC2s1J1xSjm_YZvnaTuXvJkkrdD=4w@mail.gmail.com>
+ <CAN=+7FWis8Gm-X2Zm59fVdBbwuXyJYMWWy5rJ9Wrpdzhw-pH6g@mail.gmail.com>
+ <CAN=+7FVxvdPXofUXfB1D1h_nm-0uZOUAgRwX4Tiak3Sp+a5Hkw@mail.gmail.com>
+ <CAG0Lsz=+JO2BtgUvoYkrnw-7WnOwZrOS+TANk6ykZbwt9X32Jg@mail.gmail.com>
+ <CAN=+7FVRDO1yf_NaCm6PZ1P6rk=GhPBTqzxhSuiXZuJa0Yt8pg@mail.gmail.com>
+ <CAG0Lszk9_Ngf0Q82FRYzs=7qWScNJimQp1y=zTDSyYCSC5S71w@mail.gmail.com>
+ <CAN=+7FWe3B_5+_x3s09j9LnfL3dSAOvPSZJhLBdwyiNQ7123fw@mail.gmail.com>
+ <CAG0Lsznj+cQf5CD9pirE2qArURT+DVHD0V0=g=ud4NLYqGm7ow@mail.gmail.com> <CAN=+7FVsj-9ek9GKD5apWr7S0iFwrfezQLGgKaOkECtkcH9_Cg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f182.google.com ([209.85.192.182]:33562 "EHLO
-	mail-pf0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752452AbcGVKq7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2016 06:46:59 -0400
-Received: by mail-pf0-f182.google.com with SMTP id y134so40503529pfg.0
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Jul 2016 03:46:58 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <1891032362.1371.1469180486335@ox.pcextreme.nl>
+Received: from mail-qk0-f179.google.com ([209.85.220.179]:33200 "EHLO
+	mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754048AbcGVOA2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2016 10:00:28 -0400
+Received: by mail-qk0-f179.google.com with SMTP id p74so101963930qka.0
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jul 2016 07:00:27 -0700 (PDT)
+In-Reply-To: <CAN=+7FVsj-9ek9GKD5apWr7S0iFwrfezQLGgKaOkECtkcH9_Cg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Jul 22, 2016 at 11:41:26AM +0200, Wido den Hollander wrote:
-> 
-> > Op 22 juli 2016 om 1:57 schreef Brad Hubbard <bhubbard@redhat.com>:
-> > 
-> > 
-> > On Thu, Jul 21, 2016 at 08:41:42PM +0200, Wido den Hollander wrote:
-> > > 
-> > > > Op 21 juli 2016 om 20:01 schreef Gregory Farnum <gfarnum@redhat.com>:
-> > > > 
-> > > > 
-> > > > On Thu, Jul 21, 2016 at 8:49 AM, Wido den Hollander <wido@42on.com> wrote:
-> > > > > Hi,
-> > > > >
-> > > > > On a CentOS 7 system with a Jewel 10.2.2 cluster I'm trying to create a pool which fails.
-> > > > >
-> > > > > Any pool I try to create, with or without a ruleset applied to it fails with this error:
-> > > > >
-> > > > > "Error ENOMEM: crushtool check failed with -12: failed run crushtool: fork failed: (12) Cannot allocate memory"
-> > > > >
-> > > > > At first I thought it was a package version mismatch, but it doesn't seem to be the case.
-> > > > >
-> > > > > There are other commands like 'radosgw-admin' I see fail with -12 error codes as well.
-> > > > >
-> > > > > Any ideas what might be going on here? The system has roughly 29GB of free memory, so that should be sufficient.
-> > > > 
-> > > > ulimits?
-> > > 
-> > > Good suggestion, didn't check that, but after looking at them I don't think they are:
-> > > 
-> > > [root@srv-zmb16-21 ~]# ulimit -a
-> > > core file size          (blocks, -c) 0
-> > > data seg size           (kbytes, -d) unlimited
-> > > scheduling priority             (-e) 0
-> > > file size               (blocks, -f) unlimited
-> > > pending signals                 (-i) 128505
-> > > max locked memory       (kbytes, -l) 64
-> > > max memory size         (kbytes, -m) unlimited
-> > > open files                      (-n) 65536
-> > > pipe size            (512 bytes, -p) 8
-> > > POSIX message queues     (bytes, -q) 819200
-> > > real-time priority              (-r) 0
-> > > stack size              (kbytes, -s) 8192
-> > > cpu time               (seconds, -t) unlimited
-> > > max user processes              (-u) 4096
-> > > virtual memory          (kbytes, -v) unlimited
-> > > file locks                      (-x) unlimited
-> > > [root@srv-zmb16-21 ~]#
-> > > 
-> > > Wouldn't you say?
-> > 
-> > 
-> > As a test try doubling vm.max_map_count. We've seen the ENOMEM before in cases
-> > where the number of memory allocations mapped by a process exceeded this value.
-> > Note that if this is the issue it likely indicates somewhere in excess of
-> > 32700 threads are being created so you may want to look at just how many
-> > threads *are* being created when this issue is seen as well as taking a look
-> > at the /proc/<PID>/maps file for the process to verify the number of
-> > allocations. If you are seeing > 32700 threads created we should look at
-> > whether that number makes sense in your environment.
-> > 
-> 
-> Thanks for the pointers. It wasn't THE solution, but you brought me to the right area to look.
-> 
-> I ran the Ceph command with '--debug-ms=10' and this lead me to:
-> 
-> 2016-07-22 10:57:25.387445 7f593657c700  1 -- [2a04:XX:XX:70d4:ec4:7aff:febc:15f0]:0/1657730817 <== mon.0 [2a04:XX:XX:70d4:ec4:7aff:febc:15f0]:6789/0 8 ==== mon_command_ack([{"prefix": "osd pool create", "pg_num": 512, "erasure_code_profile": "prd-zm1-hdd", "pool": ".zm1.rgw.meta", "pgp_num": 512}]=-12 crushtool check failed with -12: failed run crushtool: fork failed: (12) Cannot allocate memory v135559) v1 ==== 253+0+0 (3230086078 0 0) 0x7f59200042e0 con 0x7f593805f290
-> 
-> What I saw is that it was the *monitor* who was sending back the ENOMEM, not my local system.
-> 
-> It was running into some limits. Keep in mind, this is a 1800 OSD cluster with 5 Monitors.
-> 
-> So I upped a few limits:
-> 
-> - vm.max_map_count=262144
-> - kernel.pid_max=4194303
-> 
-> Didn't work, so I looked at the systemd service definition:
-> 
-> In ceph-mon@.service I updated these lines:
-> 
-> LimitNOFILE=1048576
-> LimitNPROC=1048576
-> 
-> to:
-> 
-> LimitNOFILE=-1
-> LimitNPROC=-1
-> 
-> After a systemd reload and restart of the monitors it all succeeded.
-> 
+Actually write lock the object only.  Is that gonna work?
 
-Nicely done.
+Sugang
 
-Seems excessive it would be using over one million file descriptors or the
-same amount of processes though?
-
-Maybe we should gather lsof and ps (probably need to use one of the options
-under "THREAD DISPLAY" in the man page to capture thread IDs as well as PIDs)
-and try and work out why so many of these resources are being allocated?
-
-HTH,
-Brad
-
-> Wido
-> 
-> > HTH,
-> > Brad
-> > 
-> > > 
-> > > I also checked, SELinux is disabled. 'setenforce 0'.
-> > > 
-> > > Wido
-> > > 
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > > the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
--- 
-Cheers,
-Brad
+On Thu, Jul 21, 2016 at 5:59 PM, Samuel Just <sjust@redhat.com> wrote:
+> Write lock on the whole pg?  How do parallel clients work?
+> -Sam
+>
+> On Thu, Jul 21, 2016 at 12:36 PM, Sugang Li <sugangli@winlab.rutgers.edu> wrote:
+>> The error above occurs when I am sending MOSOp to the replicas, and I
+>> have to fix that first.
+>>
+>> For the consistency, we are still using the Primary OSD as a control
+>> center. That is, the client always goes to Primary OSD to ask for a
+>> write lock, then write the replica.
+>>
+>> Sugang
+>>
+>> On Thu, Jul 21, 2016 at 3:28 PM, Samuel Just <sjust@redhat.com> wrote:
+>>> Well, they are actually different types with different encodings and
+>>> different contents.  The client doesn't really have the information
+>>> needed to build a MSG_OSD_REPOP.  Your best bet will be to send an
+>>> MOSDOp to the replicas and hack up a write path that makes that work.
+>>>
+>>> How do you plan to address the consistency problems?
+>>> -Sam
+>>>
+>>> On Thu, Jul 21, 2016 at 11:11 AM, Sugang Li <sugangli@winlab.rutgers.edu> wrote:
+>>>> So, to start with, I think one naive  way is to make the replica think
+>>>> it receives an op from the primary OSD, which actually comes from the
+>>>> client. And the branching point looks like started from
+>>>> OSD::dispatch_op_fast, where handle_op or handle_replica_op is called
+>>>> based on the type of the request. So my question is, at the client
+>>>> side, is there a way that I could set the corresponding variables
+>>>> referred by "op->get_req()->get_type()" to  MSG_OSD_SUBOP or
+>>>> MSG_OSD_REPOP?
+>>>>
+>>>> Sugang
+>>>>
+>>>> On Thu, Jul 21, 2016 at 12:03 PM, Samuel Just <sjust@redhat.com> wrote:
+>>>>> Parallel read will be a *lot* easier since read-from-replica already
+>>>>> works.  Write to replica, however, is tough.  The write path uses a
+>>>>> lot of structures which are only populated on the primary.  You're
+>>>>> going to have to hack up most of the write path to bypass the existing
+>>>>> replication machinery.  Beyond that, maintaining consistency will
+>>>>> obviously be a challenge.
+>>>>> -Sam
+>>>>>
+>>>>> On Thu, Jul 21, 2016 at 8:49 AM, Sugang Li <sugangli@winlab.rutgers.edu> wrote:
+>>>>>> My goal is to achieve parallel write/read from the client instead of
+>>>>>> the primary OSD.
+>>>>>>
+>>>>>> Sugang
+>>>>>>
+>>>>>> On Thu, Jul 21, 2016 at 11:47 AM, Samuel Just <sjust@redhat.com> wrote:
+>>>>>>> I may be misunderstanding your goal.  What are you trying to achieve?
+>>>>>>> -Sam
+>>>>>>>
+>>>>>>> On Thu, Jul 21, 2016 at 8:43 AM, Samuel Just <sjust@redhat.com> wrote:
+>>>>>>>> Well, that assert is asserting that the object is in the pool that the
+>>>>>>>> pg operating on it belongs to.  Something very wrong must have
+>>>>>>>> happened for it to be not true.  Also, replicas have basically none of
+>>>>>>>> the code required to handle a write, so I'm kind of surprised it got
+>>>>>>>> that far.  I suggest that you read the debug logging and read the OSD
+>>>>>>>> op handling path.
+>>>>>>>> -Sam
+>>>>>>>>
+>>>>>>>> On Thu, Jul 21, 2016 at 8:34 AM, Sugang Li <sugangli@winlab.rutgers.edu> wrote:
+>>>>>>>>> Yes, I understand that. I was introduced to Ceph only 1 month ago, but
+>>>>>>>>> I have the basic idea of Ceph communication pattern now. I have not
+>>>>>>>>> make any changes to OSD yet. So I was wondering what is purpose of
+>>>>>>>>> this "assert(oid.pool == static_cast<int64_t>(info.pgid.pool()))", and
+>>>>>>>>> to change the code in OSD, what are the main aspects I should pay
+>>>>>>>>> attention to?
+>>>>>>>>> Since this is only a research project, the implementation does not
+>>>>>>>>> have to be very sophisticated.
+>>>>>>>>>
+>>>>>>>>> I know my question is kinda too broad, any hints or suggestions will
+>>>>>>>>> be highly appreciated.
+>>>>>>>>>
+>>>>>>>>> Thanks,
+>>>>>>>>>
+>>>>>>>>> Sugang
+>>>>>>>>>
+>>>>>>>>> On Thu, Jul 21, 2016 at 11:22 AM, Samuel Just <sjust@redhat.com> wrote:
+>>>>>>>>>> Oh, that's a much more complicated change.  You are going to need to
+>>>>>>>>>> make extensive changes to the OSD to make that work.
+>>>>>>>>>> -Sam
+>>>>>>>>>>
+>>>>>>>>>> On Thu, Jul 21, 2016 at 8:21 AM, Sugang Li <sugangli@winlab.rutgers.edu> wrote:
+>>>>>>>>>>> Hi Sam,
+>>>>>>>>>>>
+>>>>>>>>>>> Thanks for the quick reply. The main modification I made is to call
+>>>>>>>>>>> calc_target within librados::IoCtxImpl::aio_operate before op_submit,
+>>>>>>>>>>> so that I can get all replicated OSDs' id, and send a write op to each
+>>>>>>>>>>> of them. I can also attach the modified code if necessary.
+>>>>>>>>>>>
+>>>>>>>>>>> I just reproduced this error with the conf you provided,  please see below:
+>>>>>>>>>>> osd/ReplicatedPG.cc: In function 'int
+>>>>>>>>>>> ReplicatedPG::find_object_context(const hobject_t&, ObjectContextRef*,
+>>>>>>>>>>> bool, bool, hobject_t*)' thread 7fd6aba59700 time 2016-07-21
+>>>>>>>>>>> 15:09:26.431436
+>>>>>>>>>>> osd/ReplicatedPG.cc: 9042: FAILED assert(oid.pool ==
+>>>>>>>>>>> static_cast<int64_t>(info.pgid.pool()))
+>>>>>>>>>>>  ceph version 10.2.0-2562-g0793a28 (0793a2844baa38f6bcc5c1724a1ceb9f8f1bbd9c)
+>>>>>>>>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>>>>>>>>>> const*)+0x8b) [0x7fd6c5733e8b]
+>>>>>>>>>>>  2: (ReplicatedPG::find_object_context(hobject_t const&,
+>>>>>>>>>>> std::shared_ptr<ObjectContext>*, bool, bool, hobject_t*)+0x1e54)
+>>>>>>>>>>> [0x7fd6c51ef7c4]
+>>>>>>>>>>>  3: (ReplicatedPG::do_op(std::shared_ptr<OpRequest>&)+0x186e) [0x7fd6c521fe9e]
+>>>>>>>>>>>  4: (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&,
+>>>>>>>>>>> ThreadPool::TPHandle&)+0x73c) [0x7fd6c51dca3c]
+>>>>>>>>>>>  5: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>>>>>>>>>>> std::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f5)
+>>>>>>>>>>> [0x7fd6c5094d65]
+>>>>>>>>>>>  6: (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>
+>>>>>>>>>>> const&)+0x5d) [0x7fd6c5094f8d]
+>>>>>>>>>>>  7: (OSD::ShardedOpWQ::_process(unsigned int,
+>>>>>>>>>>> ceph::heartbeat_handle_d*)+0x86c) [0x7fd6c50b603c]
+>>>>>>>>>>>  8: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x947)
+>>>>>>>>>>> [0x7fd6c5724117]
+>>>>>>>>>>>  9: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7fd6c5726270]
+>>>>>>>>>>>  10: (()+0x8184) [0x7fd6c3b98184]
+>>>>>>>>>>>  11: (clone()+0x6d) [0x7fd6c1aa937d]
+>>>>>>>>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>>>>>>>>> needed to interpret this.
+>>>>>>>>>>> 2016-07-21 15:09:26.454854 7fd6aba59700 -1 osd/ReplicatedPG.cc: In
+>>>>>>>>>>> function 'int ReplicatedPG::find_object_context(const hobject_t&,
+>>>>>>>>>>> ObjectContextRef*, bool, bool, hobject_t*)' thread 7fd6aba59700 time
+>>>>>>>>>>> 2016-07-21 15:09:26.431436
+>>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>>> This error occurs three times since I wrote to three OSDs.
+>>>>>>>>>>>
+>>>>>>>>>>> Thanks,
+>>>>>>>>>>>
+>>>>>>>>>>> Sugang
+>>>>>>>>>>>
+>>>>>>>>>>> On Thu, Jul 21, 2016 at 10:54 AM, Samuel Just <sjust@redhat.com> wrote:
+>>>>>>>>>>>> Hmm.  Can you provide more information about the poison op?  If you
+>>>>>>>>>>>> can reproduce with
+>>>>>>>>>>>> debug osd = 20
+>>>>>>>>>>>> debug filestore = 20
+>>>>>>>>>>>> debug ms = 1
+>>>>>>>>>>>> it should be easier to work out what is going on.
+>>>>>>>>>>>> -Sam
+>>>>>>>>>>>>
+>>>>>>>>>>>> On Thu, Jul 21, 2016 at 7:13 AM, Sugang Li <sugangli@winlab.rutgers.edu> wrote:
+>>>>>>>>>>>>> Hi all,
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> I am working on a research project which requires multiple write
+>>>>>>>>>>>>> operations for the same object at the same time from the client. At
+>>>>>>>>>>>>> the OSD side, I got this error:
+>>>>>>>>>>>>> osd/ReplicatedPG.cc: In function 'int
+>>>>>>>>>>>>> ReplicatedPG::find_object_context(const hobject_t&, ObjectContextRef*,
+>>>>>>>>>>>>> bool, bool, hobject_t*)' thread 7f0586193700 time 2016-07-21
+>>>>>>>>>>>>> 14:02:04.218448
+>>>>>>>>>>>>> osd/ReplicatedPG.cc: 9041: FAILED assert(oid.pool ==
+>>>>>>>>>>>>> static_cast<int64_t>(info.pgid.pool()))
+>>>>>>>>>>>>>  ceph version 10.2.0-2562-g0793a28 (0793a2844baa38f6bcc5c1724a1ceb9f8f1bbd9c)
+>>>>>>>>>>>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>>>>>>>>>>>> const*)+0x8b) [0x7f059fe6dd7b]
+>>>>>>>>>>>>>  2: (ReplicatedPG::find_object_context(hobject_t const&,
+>>>>>>>>>>>>> std::shared_ptr<ObjectContext>*, bool, bool, hobject_t*)+0x1dbb)
+>>>>>>>>>>>>> [0x7f059f9296fb]
+>>>>>>>>>>>>>  3: (ReplicatedPG::do_op(std::shared_ptr<OpRequest>&)+0x186e) [0x7f059f959d7e]
+>>>>>>>>>>>>>  4: (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&,
+>>>>>>>>>>>>> ThreadPool::TPHandle&)+0x73c) [0x7f059f916a0c]
+>>>>>>>>>>>>>  5: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>>>>>>>>>>>>> std::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3f5)
+>>>>>>>>>>>>> [0x7f059f7ced65]
+>>>>>>>>>>>>>  6: (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>
+>>>>>>>>>>>>> const&)+0x5d) [0x7f059f7cef8d]
+>>>>>>>>>>>>>  7: (OSD::ShardedOpWQ::_process(unsigned int,
+>>>>>>>>>>>>> ceph::heartbeat_handle_d*)+0x86c) [0x7f059f7f003c]
+>>>>>>>>>>>>>  8: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x947)
+>>>>>>>>>>>>> [0x7f059fe5e007]
+>>>>>>>>>>>>>  9: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f059fe60160]
+>>>>>>>>>>>>>  10: (()+0x8184) [0x7f059e2d2184]
+>>>>>>>>>>>>>  11: (clone()+0x6d) [0x7f059c1e337d]
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> And at the client side, I got segmentation fault.
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> I am wondering what will be the possible reason that cause the assert fail?
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Thanks,
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Sugang
+>>>>>>>>>>>>> --
+>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
