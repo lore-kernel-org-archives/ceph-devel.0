@@ -1,37 +1,35 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Ceph fix for 4.7-rc8
-Date: Sat, 23 Jul 2016 17:34:27 +0200
-Message-ID: <1469288067-21830-1-git-send-email-idryomov@gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: Ceph fix for 4.7-rc8
+Date: Sun, 24 Jul 2016 10:09:47 +0900
+Message-ID: <CA+55aFw3Yf+Yzc9W6iFMTh=HONMASc8ecfTm2+cLHAV9RxQZKQ@mail.gmail.com>
+References: <1469288067-21830-1-git-send-email-idryomov@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1469288067-21830-1-git-send-email-idryomov@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+On Sun, Jul 24, 2016 at 12:34 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
+>
+> The tag is signed with a brand new key - Sage is on vacation and
+> I didn't anticipate this.  Hopefully that's not a no-no.
 
-The following changes since commit 92d21ac74a9e3c09b0b01c764e530657e4c85c49:
+Hmm. Not only is the signing key new, you apparently haven't even
+pushed out the key to the usual pgp key servers, so I can't even see
+if it has any good signatures on it.
 
-  Linux 4.7-rc7 (2016-07-10 20:24:59 -0700)
+The patch look s reasonable, so I've pulled it, but can you please:
 
-are available in the git repository at:
+ (a) get your new key signed by somebody if it isn't already
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.7-rc8
+ (b) make sure it's actually synced to some pgp keyserver ("gpg
+--send-keys 0211F38B" or similar)
 
-for you to fetch changes up to 930c532869774ebf8af9efe9484c597f896a7d46:
+ (c) send me email when that is done so that I can update my keyring.
 
-  libceph: apply new_state before new_up_client on incrementals (2016-07-22 15:17:40 +0200)
+Thanks,
 
-The tag is signed with a brand new key - Sage is on vacation and
-I didn't anticipate this.  Hopefully that's not a no-no.
-
-----------------------------------------------------------------
-A fix for a long-standing bug in the incremental osdmap handling code
-that caused misdirected requests, tagged for stable.
-
-----------------------------------------------------------------
-Ilya Dryomov (1):
-      libceph: apply new_state before new_up_client on incrementals
-
- net/ceph/osdmap.c | 156 +++++++++++++++++++++++++++++++++++++++---------------
- 1 file changed, 113 insertions(+), 43 deletions(-)
+         Linus
