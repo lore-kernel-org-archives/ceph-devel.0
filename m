@@ -1,68 +1,43 @@
-From: =?utf-8?Q?Fr=C3=A9d=C3=A9ric_Nass?=
-	<frederic.nass@univ-lorraine.fr>
-Subject: Re: Source tarball ?
-Date: Tue, 26 Jul 2016 20:59:48 +0200
-Message-ID: <9C0021AF-7CB4-4D89-AE5A-9F1378458C02@univ-lorraine.fr>
-References: <317258558.8105500.1469557914923.JavaMail.zimbra@univ-lorraine.fr> <5797B023.5090500@dachary.org>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Acct. Dept. Bank Of China" <info@boc.cn>
+Subject: STRICTLY CONFIDENTIAL .
+Date: Tue, 26 Jul 2016 14:29:11 -0500
+Message-ID: <201607261920.u6QJKIN1005484@infonetg.com>
+Reply-To: <chim.w@yahoo.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset="Windows-1251"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mta-outslow1.mel.univ-lorraine.fr ([193.54.32.11]:33826 "EHLO
-	mta-outslow1.mel.univ-lorraine.fr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S964839AbcGZS7x convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 26 Jul 2016 14:59:53 -0400
-In-Reply-To: <5797B023.5090500@dachary.org>
+Received: from mail.infonetg.com ([1.224.163.43]:59247 "EHLO infonetg.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751468AbcGZTfe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 26 Jul 2016 15:35:34 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: ceph-devel@vger.kernel.org
 
-Hi Loic,
+I have important transaction for you as next of kin to claim US$8.37m  Mail me on my private email: chim.w@yahoo.com   so i can send you more details
 
-Thank you for the link, it will help Marc (leading http://www.esos-proj=
-ect.com/) to update the Ceph RBD kernel client in ESOS.
+Thanks
 
-I guess this page needs an update:  http://ceph.com/resources/downloads=
-/.
+Mr.Chim Wai Kim
 
-Regards,
 
-=46r=C3=A9d=C3=A9ric.
 
-> Le 26 juil. 2016 =C3=A0 20:46, Loic Dachary <loic@dachary.org> a =C3=A9=
-crit :
->=20
-> Hi,
->=20
-> You will find the latest at http://download.ceph.com/tarballs/ceph_10=
-=2E2.2.orig.tar.gz
->=20
-> Cheers
->=20
-> On 26/07/2016 20:31, Fr=C3=A9d=C3=A9ric Nass wrote:
->> Hello,
->>=20
->> Where can I download a vanilla source tarball of the latest, stable =
-version of Ceph ? (Jewel ?)
->>=20
->> This link points to Infernalis version and not Jewel: http://ceph.co=
-m/resources/downloads/
->>=20
->> Fr=C3=A9d=C3=A9ric.
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>=20
->=20
-> --=20
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+
+
+
+===========================================================================
+
+DISCLAIMER: This email and any files it contains are confidential and intended for the use of the recipient(s) only. If you are not the intended recipient you should notify the sender immediately and destroy the material from your system. Unauthorised use, disclosure, copying, distribution or any action taken or omitted to be taken in reliance on the information in this e-mail is prohibited and may be unlawful..And might be punishable under 
+section 67B of the IT Act (2008
+
+
+
+
+
+
+                
