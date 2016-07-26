@@ -1,48 +1,81 @@
-From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
-Subject: Re: snapshot implementation problems/options
-Date: Tue, 26 Jul 2016 07:24:21 +0200
-Message-ID: <20160726052421.GE658@predictor>
-References: <CAJ4mKGbf-zvTkZaqqsZDOA=ZrCsq=WRP80DM3wQpXcOWxYX-hg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from predictor.org.pl ([185.5.97.54]:44314 "EHLO predictor.org.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751587AbcGZFYG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 26 Jul 2016 01:24:06 -0400
-Content-Disposition: inline
-In-Reply-To: <CAJ4mKGbf-zvTkZaqqsZDOA=ZrCsq=WRP80DM3wQpXcOWxYX-hg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH] ceph: Correctly return NXIO errors from ceph_llseek.
+Date: Tue, 26 Jul 2016 14:47:41 +0800
+Message-ID: <C53CE781-3B20-4151-B73E-4B1D5580A84A@redhat.com>
+References: <20160721174310.21805-1-phil.turnbull@oracle.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160721174310.21805-1-phil.turnbull@oracle.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Phil Turnbull <phil.turnbull@oracle.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, open list <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Jul 25, 2016 at 07:41:53PM -0700, Gregory Farnum wrote:
-> [..]
-> Anyway, these are the things I'm thinking about right now and that
-> we'll want to consider as we evaluate moving forward on snapshots and
-> other features. If you have thoughts or design ideas, please speak up=
-!
 
-One thing that striked me in the past is the way the snapshot informati=
-on is
-kept by OSDs. In a nutshell, it's a bufferlist with pre-encoded data th=
-at
-OSDs keep for entire lifetime. Once we need these data, we decode the
-bufferlist. One issue is that we waste time for snapshot data decode, a=
-nd
-another is that we waste RAM for bufferlist itself, even when the objec=
-t(s)
-don't have any snashots at all.
-While working on new snapshots implementation, that could be taken into
-account too...
+> On Jul 22, 2016, at 01:43, Phil Turnbull <phil.turnbull@oracle.com> wrote:
+> 
+> ceph_llseek does not correctly return NXIO errors because the 'out' path
+> always returns 'offset'.
+> 
+> Fixes: 06222e491e66 ("fs: handle SEEK_HOLE/SEEK_DATA properly in all fs's that define their own llseek")
+> Signed-off-by: Phil Turnbull <phil.turnbull@oracle.com>
+> ---
+> fs/ceph/file.c | 12 +++++-------
+> 1 file changed, 5 insertions(+), 7 deletions(-)
+> 
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index ce2f5795e44b..13adb5b2ef29 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -1448,16 +1448,14 @@ static loff_t ceph_llseek(struct file *file, loff_t offset, int whence)
+> {
+> 	struct inode *inode = file->f_mapping->host;
+> 	loff_t i_size;
+> -	int ret;
+> +	loff_t ret;
+> 
+> 	inode_lock(inode);
+> 
+> 	if (whence == SEEK_END || whence == SEEK_DATA || whence == SEEK_HOLE) {
+> 		ret = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE, false);
+> -		if (ret < 0) {
+> -			offset = ret;
+> +		if (ret < 0)
+> 			goto out;
+> -		}
+> 	}
+> 
+> 	i_size = i_size_read(inode);
+> @@ -1473,7 +1471,7 @@ static loff_t ceph_llseek(struct file *file, loff_t offset, int whence)
+> 		 * write() or lseek() might have altered it
+> 		 */
+> 		if (offset == 0) {
+> -			offset = file->f_pos;
+> +			ret = file->f_pos;
+> 			goto out;
+> 		}
+> 		offset += file->f_pos;
+> @@ -1493,11 +1491,11 @@ static loff_t ceph_llseek(struct file *file, loff_t offset, int whence)
+> 		break;
+> 	}
+> 
+> -	offset = vfs_setpos(file, offset, inode->i_sb->s_maxbytes);
+> +	ret = vfs_setpos(file, offset, inode->i_sb->s_maxbytes);
+> 
+> out:
+> 	inode_unlock(inode);
+> -	return offset;
+> +	return ret;
+> }
+> 
+> static inline void ceph_zero_partial_page(
 
---=20
-Piotr Da=C5=82ek
-branch@predictor.org.pl
-http://blog.predictor.org.pl
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+applied, thanks
+
+Yan, Zheng
+
+> -- 
+> 2.9.0.rc2
+> 
