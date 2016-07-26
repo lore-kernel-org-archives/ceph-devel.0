@@ -1,42 +1,54 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: deadlocks in rbd unmap and map
-Date: Tue, 26 Jul 2016 20:11:25 +0200
-Message-ID: <CAOi1vP-4ua0y=XAraG-wfGaj-5Y9tZ+XnExza3pt_oWceL-eGQ@mail.gmail.com>
-References: <CAE2NFgVL6_+6JmW7aFO+v3j37BFnxXEneaOHk0eOCx-Vj1pAOA@mail.gmail.com>
- <CAOi1vP8NhgYHpfZT8w=meFf6vwPrS-izRZnvSPwrRc+3vwvAWQ@mail.gmail.com>
- <CAE2NFgW0ntzuFkRup5QCGfYMBuHo4Er9+y+OtKDTeaXBBtgE3g@mail.gmail.com>
- <CAOi1vP_HwML=7+iZrJFzJpbRcSomKBX5r8RT2hnRGF23agN1FQ@mail.gmail.com>
- <CAE2NFgVVth4BRQNCy6SFOnLnLf0NQ=kgoHcuMLpnz5beG3w-nQ@mail.gmail.com>
- <CAOi1vP8fg4cmAvOOKQWZUcvNpiQ5CzpVr1q=rjhtTjasa85msQ@mail.gmail.com>
- <CAE2NFgXvtZYzD9EGp+GHxcSndS3AoKyvpZkwdmsTr2rB9KF__w@mail.gmail.com>
- <CAOi1vP_7dHOVnxTHEhfYsiXQGvd+e8ecsPf10cg0s33Ry4Vt9Q@mail.gmail.com>
- <CAOi1vP_X=60SHQzJ4v2yZ4JypYgXm+r3GNHn0_7tZkRcte-v3w@mail.gmail.com> <CAE2NFgXj0PpX0uN6RGNuXquwkmBncr7KHANaSK6c8SAVTWUVLQ@mail.gmail.com>
+From: Mike Christie <mchristi@redhat.com>
+Subject: Re: Compare And Write against unwritten ranges
+Date: Tue, 26 Jul 2016 13:29:03 -0500
+Message-ID: <5797ABEF.1040101@redhat.com>
+References: <20160726141409.14135a00@echidna.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:37539 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932428AbcGZSL3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2016 14:11:29 -0400
-Received: by mail-wm0-f50.google.com with SMTP id i5so28569870wmg.0
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2016 11:11:29 -0700 (PDT)
-In-Reply-To: <CAE2NFgXj0PpX0uN6RGNuXquwkmBncr7KHANaSK6c8SAVTWUVLQ@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:43839 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757929AbcGZS3F (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 26 Jul 2016 14:29:05 -0400
+In-Reply-To: <20160726141409.14135a00@echidna.suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McLean <patrickm@gaikai.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Victor Payno <vpayno@gaikai.com>, Cliff Pajaro <cpajaro@gaikai.com>, Roderick Colenbrander <roderick@gaikai.com>, Rae Yip <ryip@gaikai.com>, Frank Reed <freed@gaikai.com>
+To: David Disseldorp <ddiss@suse.de>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jul 26, 2016 at 7:58 PM, Patrick McLean <patrickm@gaikai.com> wrote:
-> Hi Ilya,
->
-> We discovered this weekend that enabling lockdep in the kernel makes the
-> issue go away. We are working on reproducing without lockdep, and isolating
-> the issue in the OSD logs. We should be have OSD debug logs this week.
+On 07/26/2016 07:14 AM, David Disseldorp wrote:
+> Hi Mike,
+> 
+> Returning to the OSD cmpext functionality in
+> https://github.com/ceph/ceph/pull/8911 , I'm wondering how such
+> requests should be handled against unwritten ranges.
+> 
+> Currently an OSD will return -EINVAL to the client, as the short read
+> will be caught via:
+> https://github.com/ceph/ceph/pull/8911/commits/440895ea9f2604756c9f3c81e5c4ec5ca40401d7#diff-72747d40a424e7b5404366b557ff12a3R3722
+> -EINVAL then means that krbd will return an error for the corresponding
+> client I/O.
+> 
+> For read requests, rbd_img_obj_request_read_callback() handles
+> zero-filling read buffers that cover unwritten RBD ranges. For SCSI
+> Compare And Write the OSD is responsible for atomicity, so zero-filling
+> on the client side is problematic.
+> One potential option could be to add a truncate/zero operation to the
+> Compare And Write compound request, or optionally support truncate_seq
+> and truncate_size parameters in cmpext. Any thoughts/suggestions on the
+> approach here?
 
-I'm going to need the "cat /sys/kernel/debug/ceph/*/osdc" output, the
-osd log for the osd from that output, and the output of "echo w" and
-"echo t" to /proc/sysrq-trigger.
+We have a similar problem if the data needed to be copyup'd right? I
+think the multi-op route might be nice because it could work for both cases.
 
-Thanks,
+Did you already try the multi op zero/truncate approach? Did you have to
+make changes to the OSD code too?
 
-                Ilya
+A long while back, I was working on the copyup part of the problem but I
+hit another problem. It was something like the copyup's write would
+succeed, but when the cmpext op does the read it will fail still. If I
+sent it down as a multi-op, some other bits/structs on the OSD side
+needed to be updated before I could do the cmpext op. I cannot find the
+patches and I never submitted because I had just hacked it in for
+testing. Did you hit something similar?
