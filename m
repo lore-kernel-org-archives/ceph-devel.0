@@ -1,38 +1,47 @@
-From: =?utf-8?B?RnLDqWTDqXJpYw==?= Nass <frederic.nass@univ-lorraine.fr>
-Subject: Source tarball ?
-Date: Tue, 26 Jul 2016 20:31:54 +0200 (CEST)
-Message-ID: <317258558.8105500.1469557914923.JavaMail.zimbra@univ-lorraine.fr>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Source tarball ?
+Date: Tue, 26 Jul 2016 20:46:59 +0200
+Message-ID: <5797B023.5090500@dachary.org>
+References: <317258558.8105500.1469557914923.JavaMail.zimbra@univ-lorraine.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mta-outslow1.mel.univ-lorraine.fr ([193.54.32.11]:33462 "EHLO
-	mta-outslow1.mel.univ-lorraine.fr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752549AbcGZSb6 convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 26 Jul 2016 14:31:58 -0400
-Received: from mta-out1.mel.univ-lorraine.fr (mta-out1.mel.univ-lorraine.fr [193.54.32.9])
-	by mta-outslow1.mel.univ-lorraine.fr (Postfix) with ESMTP id BC896800CA
-	for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2016 20:31:55 +0200 (CEST)
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by mta-out1.mel.univ-lorraine.fr (Postfix) with ESMTP id B5303E0003
-	for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2016 20:31:55 +0200 (CEST)
-Received: from zp7.mel.univ-lorraine.fr (zp7.mel.univ-lorraine.fr [100.74.187.102])
-	by mta-out1.mel.univ-lorraine.fr (Postfix) with ESMTP id 4EB83E0002
-	for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2016 20:31:55 +0200 (CEST)
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:51110 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757632AbcGZSrD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2016 14:47:03 -0400
+In-Reply-To: <317258558.8105500.1469557914923.JavaMail.zimbra@univ-lorraine.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass@univ-lorraine.fr>, ceph-devel@vger.kernel.org
 
-Hello,
+Hi,
 
-Where can I download a vanilla source tarball of the latest, stable ver=
-sion of Ceph ? (Jewel ?)
+You will find the latest at http://download.ceph.com/tarballs/ceph_10.2=
+=2E2.orig.tar.gz
 
-This link points to Infernalis version and not Jewel: http://ceph.com/r=
-esources/downloads/
+Cheers
 
-=46r=C3=A9d=C3=A9ric.
+On 26/07/2016 20:31, Fr=C3=A9d=C3=A9ric Nass wrote:
+> Hello,
+>=20
+> Where can I download a vanilla source tarball of the latest, stable v=
+ersion of Ceph ? (Jewel ?)
+>=20
+> This link points to Infernalis version and not Jewel: http://ceph.com=
+/resources/downloads/
+>=20
+> Fr=C3=A9d=C3=A9ric.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
