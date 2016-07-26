@@ -1,44 +1,46 @@
-From: Zhangzengran <zhangzengran@h3c.com>
-Subject: [multisite]marker_track
-Date: Tue, 26 Jul 2016 09:57:26 +0000
-Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314C09C9@H3CMLB12-EX.srv.huawei-3com.com>
+From: Ricardo Dias <rdias@suse.com>
+Subject: Re: static member variable in libcommon and double free
+Date: Tue, 26 Jul 2016 11:29:01 +0100
+Message-ID: <20160726102901.GA24441@rdias-suse-laptop>
+References: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:29087 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753840AbcGZJ5z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 26 Jul 2016 05:57:55 -0400
-Content-Language: zh-CN
+Received: from smtp.nue.novell.com ([195.135.221.5]:47135 "EHLO
+	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751041AbcGZK3f (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Tue, 26 Jul 2016 06:29:35 -0400
+Content-Disposition: inline
+In-Reply-To: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "yehuda@redhat.com" <yehuda@redhat.com>
+To: kefu chai <tchaikov@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgWWVodWRhOg0KICAgICAgICBSZWNlbnRseSB3aGVuIHJlYWRpbmcgdGhlIG11bHRpc2l0ZSBj
-b2RlICxJIGZvdW5kIHRoZSBtYXJrZXJfdHJhY2sgbWF5IGhhdmUgYSBwcm9ibGVtIGFzIGZsbG93
-Og0KDQogICAgdHJhY2sgPSBuZXcgUkdXU3luY1NoYXJkTWFya2VyVHJhY2sgKHdpdGggd2luZG93
-ID0gMikNCg0KICAgIHRyYWNrLnN0YXJ0KCIxIiwxKTsNCiAgICB0cmFjay5zdGFydCgiMiIsMik7
-DQrjgIDjgIB0cmFjay5zdGFydCgiMyIsMyk7DQrjgIDjgIB0cmFjay5maW5pc2goIjMiKTsNCuOA
-gOOAgHRyYWNrLmZpbmlzaCgiMSIpOw0K44CA44CADQrjgIDjgIB0aGVuIHRoZSB0cmFjayB3aWxs
-IHN0b3JlIG1hcmtlciAzIGJlY2F1c2UgZmluc2hlZCBlbnRyaWVzIHJlYWNoZWQgd2luZG93LmJ1
-dCBpZiB0aGVuIDIgd2FzIGZhaWxlZCwgaXMgaXQgYSBwcm9ibGVtPw0KDQrjgIDjgIBUaGFuayB5
-b3UgIQ0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t
-5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ
-5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQrnmoTkuKrkurrmiJbnvqTnu4TjgILn
-poHmraLku7vkvZXlhbbku5bkurrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zkvYbkuI3p
-mZDkuo7lhajpg6jmiJbpg6jliIblnLDms4TpnLLjgIHlpI3liLbjgIENCuaIluaVo+WPke+8ieac
-rOmCruS7tuS4reeahOS/oeaBr+OAguWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aC
-qOeri+WNs+eUteivneaIlumCruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0K6YKu5Lu2
-77yBDQpUaGlzIGUtbWFpbCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFs
-IGluZm9ybWF0aW9uIGZyb20gSDNDLCB3aGljaCBpcw0KaW50ZW5kZWQgb25seSBmb3IgdGhlIHBl
-cnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ugb2Yg
-dGhlDQppbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkgKGluY2x1ZGluZywg
-YnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsDQpkaXNjbG9zdXJlLCByZXByb2R1
-Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5k
-ZWQNCnJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFp
-bCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyDQpieSBwaG9uZSBvciBlbWFpbCBp
-bW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0K
+Hi,
+
+Here goes my 2 cents...
+
+My vote is on to forbid the non-POD static variables in libcommon!
+
+--
+Ricardo Dias
+
+
+On 2016-07-26 17:32:34, kefu chai wrote:
+> 
+> so, maybe we should just forbid the non-POD static variables in
+> libcommon? if you have  better solution, or i am completely wrong (i
+> wish so), please let me know.
+> 
+> thanks,
+> 
+> -- 
+> Regards
+> Kefu Chai
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
