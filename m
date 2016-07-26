@@ -1,92 +1,114 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: static member variable in libcommon and double free
-Date: Tue, 26 Jul 2016 19:06:25 +0800
-Message-ID: <CAJE9aOOumNu1d3dm0HBL_Zr0_dGdqgdQtqrx00rZoitivXf1=A@mail.gmail.com>
-References: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
- <CALe9h7cn19-Rk_RN-F8HtinL8tsoou1-KgczMgT6Jtj9eWKtww@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: deadlocks in rbd unmap and map
+Date: Tue, 26 Jul 2016 13:27:39 +0200
+Message-ID: <CAOi1vP_X=60SHQzJ4v2yZ4JypYgXm+r3GNHn0_7tZkRcte-v3w@mail.gmail.com>
+References: <CAE2NFgVL6_+6JmW7aFO+v3j37BFnxXEneaOHk0eOCx-Vj1pAOA@mail.gmail.com>
+ <CAOi1vP8NhgYHpfZT8w=meFf6vwPrS-izRZnvSPwrRc+3vwvAWQ@mail.gmail.com>
+ <CAE2NFgW0ntzuFkRup5QCGfYMBuHo4Er9+y+OtKDTeaXBBtgE3g@mail.gmail.com>
+ <CAOi1vP_HwML=7+iZrJFzJpbRcSomKBX5r8RT2hnRGF23agN1FQ@mail.gmail.com>
+ <CAE2NFgVVth4BRQNCy6SFOnLnLf0NQ=kgoHcuMLpnz5beG3w-nQ@mail.gmail.com>
+ <CAOi1vP8fg4cmAvOOKQWZUcvNpiQ5CzpVr1q=rjhtTjasa85msQ@mail.gmail.com>
+ <CAE2NFgXvtZYzD9EGp+GHxcSndS3AoKyvpZkwdmsTr2rB9KF__w@mail.gmail.com> <CAOi1vP_7dHOVnxTHEhfYsiXQGvd+e8ecsPf10cg0s33Ry4Vt9Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f180.google.com ([209.85.220.180]:35944 "EHLO
-	mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751041AbcGZLG1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2016 07:06:27 -0400
-Received: by mail-qk0-f180.google.com with SMTP id x1so2420827qkb.3
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2016 04:06:27 -0700 (PDT)
-In-Reply-To: <CALe9h7cn19-Rk_RN-F8HtinL8tsoou1-KgczMgT6Jtj9eWKtww@mail.gmail.com>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:35382 "EHLO
+	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755796AbcGZL1l (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2016 07:27:41 -0400
+Received: by mail-wm0-f43.google.com with SMTP id f65so169917255wmi.0
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2016 04:27:41 -0700 (PDT)
+In-Reply-To: <CAOi1vP_7dHOVnxTHEhfYsiXQGvd+e8ecsPf10cg0s33Ry4Vt9Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Patrick McLean <patrickm@gaikai.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Victor Payno <vpayno@gaikai.com>, Cliff Pajaro <cpajaro@gaikai.com>, Roderick Colenbrander <roderick@gaikai.com>, Rae Yip <ryip@gaikai.com>, Frank Reed <freed@gaikai.com>
 
-On Tue, Jul 26, 2016 at 6:36 PM, John Spray <jspray@redhat.com> wrote:
-> On Tue, Jul 26, 2016 at 10:32 AM, kefu chai <tchaikov@gmail.com> wrote:
->> Hey Cephers,
+On Wed, Jul 13, 2016 at 9:38 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
+> On Wed, Jul 13, 2016 at 2:38 AM, Patrick McLean <patrickm@gaikai.com> wrote:
+>> On Sat, Jul 9, 2016 at 7:30 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
+>>> On Fri, Jul 8, 2016 at 10:30 PM, Patrick McLean <patrickm@gaikai.com> wrote:
+>>>> On Fri, Jul 8, 2016 at 11:46 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
+>>>>> On Fri, Jul 8, 2016 at 7:51 PM, Patrick McLean <patrickm@gaikai.com> wrote:
+>>>>>> On Fri, Jul 8, 2016 at 4:40 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
+>>>>>>> On Fri, Jul 8, 2016 at 3:28 AM, Patrick McLean <patrickm@gaikai.com> wrote:
+>>>>>>>> This is on linus git master as of 2016/07/01
+>>>>>>>>
+>>>>>>>> These appear to be two separate deadlocks, one on a a map operation,
+>>>>>>>> and one on an unmap operation. We can reproduce these pretty
+>>>>>>>> regularly, but it seems like there is some sort of race condition, as
+>>>>>>>> it happens no where near every time.
+>>>>>>>>
+>>>>>>
+>>>>>>>
+>>>>>>> It's a single deadlock between "rbd map" and a kworker thread, a later
+>>>>>>> "rbd unmap" is just a victim.
+>>>>>>>
+>>>>>>> Are you mapping the same image more than once?
+>>>>>>>
+>>>>>>
+>>>>>> We shouldn't be, there is a higher-level locking system that is
+>>>>>> supposed to prevent that.
+>>>>>
+>>>>> It's actually allowed, I'm just trying to get an idea of what was going
+>>>>> on.
+>>>>>
+>>>>> I spoke too soon.  The trace of pid 14109 is inconsistent - the entries
+>>>>> in the middle don't make sense.  Do you have a different set of traces
+>>>>> or are they all the same?
+>>>>
+>>>> Here is another backtrace. It seems that once it happens to a
+>>>> particular image once, it always does the same thing. We have not
+>>>> figured out what triggers the first hang.
+>>>>
+>>>> # grep -C 40 rbd /proc/*/stack
+>>>> /proc/5295/stack-[<ffffffff8111c7c4>] __queue_work+0x144/0x420
+>>>> /proc/5295/stack-[<ffffffff8112c1c0>] default_wake_function+0x0/0x10
+>>>> /proc/5295/stack:[<ffffffffa01621ee>]
+>>>> rbd_obj_method_sync.constprop.48+0x1be/0x290 [rbd]
+>>>> /proc/5295/stack:[<ffffffffa0162aea>] rbd_dev_header_info+0x15a/0x930 [rbd]
+>>>> /proc/5295/stack:[<ffffffffa0163450>] rbd_watch_cb+0x0/0xa0 [rbd]
+>>>> /proc/5295/stack:[<ffffffffa0163586>]
+>>>> rbd_dev_image_probe.part.42+0x96/0x910 [rbd]
+>>>> /proc/5295/stack:[<ffffffffa016240e>] rbd_dev_image_id+0x14e/0x1b0 [rbd]
+>>>> /proc/5295/stack:[<ffffffffa016428f>] do_rbd_add.isra.43+0x48f/0xbb0 [rbd]
+>>>> /proc/5295/stack-[<ffffffff8123ba27>] __kmalloc+0x27/0x170
+>>>> /proc/5295/stack-[<ffffffff812b7f3a>] kernfs_fop_write+0x10a/0x190
+>>>> /proc/5295/stack-[<ffffffff8124dc63>] __vfs_write+0x23/0x120
+>>>> /proc/5295/stack-[<ffffffff8124e8f3>] vfs_write+0xb3/0x1a0
+>>>> /proc/5295/stack-[<ffffffff8124fbd2>] SyS_write+0x42/0xa0
+>>>> /proc/5295/stack-[<ffffffff81816f72>] entry_SYSCALL_64_fastpath+0x1a/0xa4
+>>>> /proc/5295/stack-[<ffffffffffffffff>] 0xffffffffffffffff
+>>>>
+>>>> # ps aux | grep 5295
+>>>> root      5295  0.0  0.0 246704 10352 pts/4    Sl+  20:20   0:00 rbd
+>>>> map --pool XXXXXXX XXXXXXXX
+>>>
+>>> Anything in dmesg?  It looks like rbd map is waiting for a reply to one
+>>> of the header read-in requests and is never woken up.  rbd map holds
+>>> a semaphore, blocking the kworker, which blocks rbd unmap.
+>>>
+>>> Can you set "debug ms = 1" on all OSDs and try to reproduce?
+>>> I'd also like to see the content of /sys/kernel/debug/ceph/*/osdc when
+>>> it happens again.
+>>>
 >>
->> we are almost finished the transition to cmake. but we are also facing
->> some problems which did not exist in autotools.
+>> Here is the contents of the osdc debug file on a machine that had been
+>> in that state for 3 days.
 >>
->> last time i asked help on static library versus dynamic library in
->> this mailing list. and the consensus was we should just build and
->> package dynamic libraries. but this time, i ran into a more difficult
->> one: http://tracker.ceph.com/issues/16686.
->>
->> a little bit background: we have a convenience library named libcommon
->> which wraps some of the class/methods shared across the Ceph project,
->> messenger among the other things. and in tracker#16686, i found that
->> in AsyncMessenger.cc, we have a static member variable named
->> WorkerPool::name. it is a std::string. see
->> https://github.com/ceph/ceph/blob/master/src/msg/async/AsyncMessenger.cc#L346
->>
->> if we load both libceph.so and librados.so in the same process, when
->> the process exists, this variable will be destructed twice. hence the
->> double free. because the linker thinks that the symbols the two copies
->> of libcommon in libcephfs and librados are the same ones. while the
->> two libraries destruct the variable individually. that's why we have
->> this problem.
->>
->> you might want to ask, "it works in autotools!". i asked myself the
->> same question. and i found that we don't pass
->> "-Wl,--exclude-libs=libcommon.a" or "-Wl,--exclude-libs,ALL" to linker
->> when linking libcephfs and librados, as we did in automake. this
->> confuses the run-time linker. yeah, we can do the same in cmake. but
->> this breaks the build. see
->> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-trusty-amd64-basic/log.cgi?log=87ff7617bf2c07d43b6a6b7d116ea61f9ea6e905:
->>
->> ```
->> /srv/autobuild-ceph/gitbuilder.git/build/out~/ceph-11.0.0-902-g87ff761/src/common/Formatter.h:92:
->> undefined reference to `ceph::Formatter::~Formatter()'
->>
->> error: collect2: ld returned 1 exit status
->>
->> make[4]: *** [bin/ceph_test_rados_api_c_read_operations] Error 1
->> ```
->>
->> some librados tests (maybe more of them) are using the non-public
->> symbols. so we have two solutions:
->>
->> - extract the .cc files which are used by these tests into a
->> convenience library and link the tests against it *and* librados. but
->> again this introduces the risk of double free. the extracted .cc files
->> should be non-POD static variable free.
->> - compile a static librados and link the tests against it. this
->> actually mimics the behavior of autotools. but this approach
->> complicates the cmake file, as we discussed before.
->>
->>
->> so, maybe we should just forbid the non-POD static variables in
->> libcommon? if you have  better solution, or i am completely wrong (i
->> wish so), please let me know.
+>> # cat /sys/kernel/debug/ceph/*/osdc
+>> REQUESTS 1 homeless 0
+>> 7 osd38 4.27a8d388 [38,16,47]/38 [38,16,47]/38
+>> rbd_header.bea4a16ebd6a9a 0x400011 1 0'0 call
+>> LINGER REQUESTS
+>> 1 osd38 4.27a8d388 [38,16,47]/38 [38,16,47]/38
+>> rbd_header.bea4a16ebd6a9a 0x24 0 WC/0
 >
-> Is there a way we can detect any non-POD static variables at compile
-> time, so that we don't risk accidentally adding them?
+> OK, so it's waiting for a reply.  Do you have a debug ms = 1 log for
+> osd38?
 
-probably yes. but to my limited knowledge, i don't know. unless we
-enforce a policy to use some C++ template to audit every newly added
-static variable to libcommon, before defining it. that's not developer
-friendly, i'd say.
+I've filed http://tracker.ceph.com/issues/16630.
 
+Thanks,
 
--- 
-Regards
-Kefu Chai
+                Ilya
