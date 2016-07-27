@@ -1,96 +1,96 @@
-From: John Spray <jspray@redhat.com>
+From: kefu chai <tchaikov@gmail.com>
 Subject: Re: static member variable in libcommon and double free
-Date: Wed, 27 Jul 2016 12:23:23 +0100
-Message-ID: <CALe9h7f_VP0jzx2QnCMHAHPtwrOSMvxAbJg2_Spkdf48MeUQdg@mail.gmail.com>
+Date: Wed, 27 Jul 2016 20:04:31 +0800
+Message-ID: <CAJE9aONRiJaOBEkOGhZBUAy6=_cEFTd0hCgmaUyOQ5=a8dvCvQ@mail.gmail.com>
 References: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
+ <CALe9h7cn19-Rk_RN-F8HtinL8tsoou1-KgczMgT6Jtj9eWKtww@mail.gmail.com>
+ <CAJE9aOOumNu1d3dm0HBL_Zr0_dGdqgdQtqrx00rZoitivXf1=A@mail.gmail.com>
+ <alpine.LSU.2.20.1607261706350.28641@ancalagon.suse.com> <BLUPR0201MB152490EB7FE729C197978E1DE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <20160727015433.GB22132@rskikr.localdomain> <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f182.google.com ([209.85.216.182]:34965 "EHLO
-	mail-qt0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754200AbcG0LXo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2016 07:23:44 -0400
-Received: by mail-qt0-f182.google.com with SMTP id x25so27618421qtx.2
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Jul 2016 04:23:44 -0700 (PDT)
-In-Reply-To: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
+Received: from mail-qt0-f173.google.com ([209.85.216.173]:33844 "EHLO
+	mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754131AbcG0MEd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2016 08:04:33 -0400
+Received: by mail-qt0-f173.google.com with SMTP id u25so27907325qtb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Jul 2016 05:04:32 -0700 (PDT)
+In-Reply-To: <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>
+Cc: Brad Hubbard <bhubbard@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Jesse Williamson <jwilliamson@suse.de>, John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jul 26, 2016 at 10:32 AM, kefu chai <tchaikov@gmail.com> wrote:
-> Hey Cephers,
+On Wed, Jul 27, 2016 at 10:33 AM, Patrick Donnelly <pdonnell@redhat.com> wrote:
+> On Tue, Jul 26, 2016 at 9:54 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
+>>> I'm guessing that the source of the problem is that the AsyncMessager.cc file is included twice, one in each library. If so, then the solution is to break out the offending *.cc file into a separate third library that's linked in the right combination with the others so that there's no duplication.
+>>>
+>>
+>> I believe the problem can also be solved with a static member function or a
+>> wrapper function for the static variable. I tried this and it appears to
+>> resolve the issue.
 >
-> we are almost finished the transition to cmake. but we are also facing
-> some problems which did not exist in autotools.
->
-> last time i asked help on static library versus dynamic library in
-> this mailing list. and the consensus was we should just build and
-> package dynamic libraries. but this time, i ran into a more difficult
-> one: http://tracker.ceph.com/issues/16686.
+> Another solution is to use anonymous namespaces which will force the
+> symbol to be local to the translation unit.
 
-I strongly suspect that http://tracker.ceph.com/issues/16556 is caused
-by the same problem with the symbols in lockdep.cc, although in this
-instance it is only causing a problem when we fork.  I have a patch
-(https://github.com/ceph/ceph/pull/10452) which demonstrates that the
-issue goes away when we don't load librados and libcephfs into the
-same process.
+but anonymous namespace has its own limitation, for example, we cannot use
+wrap class WorkerPool in anonymous namespace, see
+https://github.com/ceph/ceph/blob/master/src/msg/async/AsyncMessenger.cc#L308,
+as WorkerPool is forward declared in the header file.
 
-John
+>
+>> It would be possible to audit use of such variables using nm or objdump but
+>> this might be a bit difficult to maintain?
+>
+> There was a proposal to add -Wglobal-variable to gcc about this same
+> issue but it didn't appear to go anywhere:
+>
+> https://gcc.gnu.org/bugzilla/show_bug.cgi?id=46097
+>
+>> Since this is easy to reproduce it would also be simple to write a test to
+>> check for this specific issue along the lines of the following.
+>>
+>> $ g++ -O2 -x c++ - -Wl,--rpath=./lib -L./lib -lrados -lcephfs<<EOF
+>> int main(int, char**)
+>> {
+>>   return 0;
+>> }
+>> EOF
+>
+> Ideally the shared libraries should not export any global variables.
 
-> a little bit background: we have a convenience library named libcommon
-> which wraps some of the class/methods shared across the Ceph project,
-> messenger among the other things. and in tracker#16686, i found that
-> in AsyncMessenger.cc, we have a static member variable named
-> WorkerPool::name. it is a std::string. see
-> https://github.com/ceph/ceph/blob/master/src/msg/async/AsyncMessenger.cc#L346
+thanks Patrick, yeah. this would force us to do the right thing:
+
+* for cephfs
+ - pass `--exclude-libs=libcommon.a` to linker,
+ - find a way to implement libtools' "-export-symbols-regex
+'^ceph_.*'" with cmake
+* for librados
+ - pass `--exclude-libs=ALL` to linker,
+* for those naughty tests who use the internal symbols
+ - link them against the convenience libs (or objects) by which the
+symbols are offered.
+
+> There are numerous bugs other than double delete. For example, if a
+> global variable (address) is used as a sentinel in librados and then
+> later libceph is loaded defining a new sentinel (same type), any data
+> structures created relying on the address of the previous sentinel may
+> break. [This is not purely limited to global variables or even C++,
+> you can also have magnificent breakage if functions defined in a
+> common static library with external linkage are replaced. In that
+> case, code which depends on variables with local linkage may also
+> break. Ultimately, the fix is to explicitly export only the desired
+> functions of some API in the shared library.]
 >
-> if we load both libceph.so and librados.so in the same process, when
-> the process exists, this variable will be destructed twice. hence the
-> double free. because the linker thinks that the symbols the two copies
-> of libcommon in libcephfs and librados are the same ones. while the
-> two libraries destruct the variable individually. that's why we have
-> this problem.
->
-> you might want to ask, "it works in autotools!". i asked myself the
-> same question. and i found that we don't pass
-> "-Wl,--exclude-libs=libcommon.a" or "-Wl,--exclude-libs,ALL" to linker
-> when linking libcephfs and librados, as we did in automake. this
-> confuses the run-time linker. yeah, we can do the same in cmake. but
-> this breaks the build. see
-> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-trusty-amd64-basic/log.cgi?log=87ff7617bf2c07d43b6a6b7d116ea61f9ea6e905:
->
-> ```
-> /srv/autobuild-ceph/gitbuilder.git/build/out~/ceph-11.0.0-902-g87ff761/src/common/Formatter.h:92:
-> undefined reference to `ceph::Formatter::~Formatter()'
->
-> error: collect2: ld returned 1 exit status
->
-> make[4]: *** [bin/ceph_test_rados_api_c_read_operations] Error 1
-> ```
->
-> some librados tests (maybe more of them) are using the non-public
-> symbols. so we have two solutions:
->
-> - extract the .cc files which are used by these tests into a
-> convenience library and link the tests against it *and* librados. but
-> again this introduces the risk of double free. the extracted .cc files
-> should be non-POD static variable free.
-> - compile a static librados and link the tests against it. this
-> actually mimics the behavior of autotools. but this approach
-> complicates the cmake file, as we discussed before.
->
->
-> so, maybe we should just forbid the non-POD static variables in
-> libcommon? if you have  better solution, or i am completely wrong (i
-> wish so), please let me know.
->
-> thanks,
+> A test which checks for the double delete is a good start...
 >
 > --
-> Regards
-> Kefu Chai
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Patrick Donnelly
+
+
+
+-- 
+Regards
+Kefu Chai
