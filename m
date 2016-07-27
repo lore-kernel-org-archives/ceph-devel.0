@@ -1,87 +1,96 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: static member variable in libcommon and double free
-Date: Wed, 27 Jul 2016 02:40:53 +0000
-Message-ID: <BLUPR0201MB1524E467A2745777CB82E20BE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: static member variable in libcommon and double free
+Date: Wed, 27 Jul 2016 12:23:23 +0100
+Message-ID: <CALe9h7f_VP0jzx2QnCMHAHPtwrOSMvxAbJg2_Spkdf48MeUQdg@mail.gmail.com>
 References: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
- <CALe9h7cn19-Rk_RN-F8HtinL8tsoou1-KgczMgT6Jtj9eWKtww@mail.gmail.com>
- <CAJE9aOOumNu1d3dm0HBL_Zr0_dGdqgdQtqrx00rZoitivXf1=A@mail.gmail.com>
- <alpine.LSU.2.20.1607261706350.28641@ancalagon.suse.com>
- <BLUPR0201MB152490EB7FE729C197978E1DE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <20160727015433.GB22132@rskikr.localdomain>
- <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam01on0066.outbound.protection.outlook.com ([104.47.34.66]:41504
-	"EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751214AbcG0Ck6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 26 Jul 2016 22:40:58 -0400
-In-Reply-To: <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qt0-f182.google.com ([209.85.216.182]:34965 "EHLO
+	mail-qt0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754200AbcG0LXo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2016 07:23:44 -0400
+Received: by mail-qt0-f182.google.com with SMTP id x25so27618421qtx.2
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Jul 2016 04:23:44 -0700 (PDT)
+In-Reply-To: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick Donnelly <pdonnell@redhat.com>, Brad Hubbard <bhubbard@redhat.com>
-Cc: Jesse Williamson <jwilliamson@suse.de>, kefu chai <tchaikov@gmail.com>, John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBQYXRyaWNrIERvbm5lbGx5IFtt
-YWlsdG86cGRvbm5lbGxAcmVkaGF0LmNvbV0NCj4gU2VudDogVHVlc2RheSwgSnVseSAyNiwgMjAx
-NiA3OjM0IFBNDQo+IFRvOiBCcmFkIEh1YmJhcmQgPGJodWJiYXJkQHJlZGhhdC5jb20+DQo+IENj
-OiBBbGxlbiBTYW11ZWxzIDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPjsgSmVzc2UgV2lsbGlh
-bXNvbg0KPiA8andpbGxpYW1zb25Ac3VzZS5kZT47IGtlZnUgY2hhaSA8dGNoYWlrb3ZAZ21haWwu
-Y29tPjsgSm9obiBTcHJheQ0KPiA8anNwcmF5QHJlZGhhdC5jb20+OyBjZXBoLWRldmVsQHZnZXIu
-a2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogc3RhdGljIG1lbWJlciB2YXJpYWJsZSBpbiBsaWJj
-b21tb24gYW5kIGRvdWJsZSBmcmVlDQo+IA0KPiBPbiBUdWUsIEp1bCAyNiwgMjAxNiBhdCA5OjU0
-IFBNLCBCcmFkIEh1YmJhcmQgPGJodWJiYXJkQHJlZGhhdC5jb20+DQo+IHdyb3RlOg0KPiA+PiBJ
-J20gZ3Vlc3NpbmcgdGhhdCB0aGUgc291cmNlIG9mIHRoZSBwcm9ibGVtIGlzIHRoYXQgdGhlIEFz
-eW5jTWVzc2FnZXIuY2MNCj4gZmlsZSBpcyBpbmNsdWRlZCB0d2ljZSwgb25lIGluIGVhY2ggbGli
-cmFyeS4gSWYgc28sIHRoZW4gdGhlIHNvbHV0aW9uIGlzIHRvIGJyZWFrDQo+IG91dCB0aGUgb2Zm
-ZW5kaW5nICouY2MgZmlsZSBpbnRvIGEgc2VwYXJhdGUgdGhpcmQgbGlicmFyeSB0aGF0J3MgbGlu
-a2VkIGluIHRoZSByaWdodA0KPiBjb21iaW5hdGlvbiB3aXRoIHRoZSBvdGhlcnMgc28gdGhhdCB0
-aGVyZSdzIG5vIGR1cGxpY2F0aW9uLg0KPiA+Pg0KPiA+DQo+ID4gSSBiZWxpZXZlIHRoZSBwcm9i
-bGVtIGNhbiBhbHNvIGJlIHNvbHZlZCB3aXRoIGEgc3RhdGljIG1lbWJlciBmdW5jdGlvbg0KPiA+
-IG9yIGEgd3JhcHBlciBmdW5jdGlvbiBmb3IgdGhlIHN0YXRpYyB2YXJpYWJsZS4gSSB0cmllZCB0
-aGlzIGFuZCBpdA0KPiA+IGFwcGVhcnMgdG8gcmVzb2x2ZSB0aGUgaXNzdWUuDQo+IA0KPiBBbm90
-aGVyIHNvbHV0aW9uIGlzIHRvIHVzZSBhbm9ueW1vdXMgbmFtZXNwYWNlcyB3aGljaCB3aWxsIGZv
-cmNlIHRoZQ0KPiBzeW1ib2wgdG8gYmUgbG9jYWwgdG8gdGhlIHRyYW5zbGF0aW9uIHVuaXQuDQoN
-Cldvbid0IHRoaXMgcmVzdWx0IGluIHR3byBpbnN0YW50aWF0aW9ucyBvZiB0aGUgImdsb2JhbCIg
-dmFyaWFibGU/IFRoYXQgc2VlbXMgbGlrZSBhIGh1Z2UgcmlzayB0byB0aGUgaW50ZWdyaXR5IG9m
-IHRoZSBvcGVyYXRpb24gb2YgdGhhdCBjbGFzcy4uLi4gSU1PLCB0aGF0J3MgdGhlIHdyb25nIHNv
-bHV0aW9uIGFzIGl0IHdpbGwgZWxpbWluYXRlIGEgY2xlYXIgc2lnbmFsIG9mIGEgcHJvYmxlbSBi
-dXQgd291bGQgYWxsb3cgdGhlIGxhbmd1YWdlIHNlbWFudGljcyB0byBiZSBkZWdyYWRlZCBzaWxl
-bnRseS4NCg0KSSB0aGluayB0aGUgc29sdXRpb24gaXMgc3RpbGwgdG8gcHJvcGVybHkgaW1wbGVt
-ZW50IHRoZSBPRFIgcnVsZSwgYnJlYWsgdGhpcyBjbGFzcyBpbnRvIGEgc2VwYXJhdGUgbGlicmFy
-eSB0aGF0J3Mgb25seSBpbmNsdWRlZCBvbmNlIGluIEFOWSBidWlsZC4NCg0KQXMgd2FzIG1lbnRp
-b25lZCwgYSBzY3JpcHQgd2l0aCBvYmpkdW1wIGFuZCBubSB0b29scyBvdWdodCB0byBiZSBhYmxl
-IHRvIGRldGVjdCB0aGlzIHNpdHVhdGlvbiAtLSBwcm92aWRlZCB0aGF0IGl0IGhhcyBhbiBhY2N1
-cmF0ZSBtb2RlbCBvZiB3aGF0IGxpYnJhcmllcyBhcmUgYmVpbmcgY29tYmluZWQgaW4gd2hhdCBl
-eGVjdXRhYmxlcy4NCg0KSU1PLCBJJ2QganVzdCByYXRoZXIgc2VlIHVzIHN3aXRjaCB0byBzdGF0
-aWMgbGlua2luZyAtLSBzaW1wbGVyIHRvIHJlYXNvbiBhYm91dC4uLiBCdXQgSSBndWVzcyB0aGF0
-IHNoaXAgc2FpbGVkIDooDQoNCiANCj4gDQo+ID4gSXQgd291bGQgYmUgcG9zc2libGUgdG8gYXVk
-aXQgdXNlIG9mIHN1Y2ggdmFyaWFibGVzIHVzaW5nIG5tIG9yDQo+ID4gb2JqZHVtcCBidXQgdGhp
-cyBtaWdodCBiZSBhIGJpdCBkaWZmaWN1bHQgdG8gbWFpbnRhaW4/DQo+IA0KPiBUaGVyZSB3YXMg
-YSBwcm9wb3NhbCB0byBhZGQgLVdnbG9iYWwtdmFyaWFibGUgdG8gZ2NjIGFib3V0IHRoaXMgc2Ft
-ZSBpc3N1ZQ0KPiBidXQgaXQgZGlkbid0IGFwcGVhciB0byBnbyBhbnl3aGVyZToNCj4gDQo+IGh0
-dHBzOi8vZ2NjLmdudS5vcmcvYnVnemlsbGEvc2hvd19idWcuY2dpP2lkPTQ2MDk3DQo+IA0KPiA+
-IFNpbmNlIHRoaXMgaXMgZWFzeSB0byByZXByb2R1Y2UgaXQgd291bGQgYWxzbyBiZSBzaW1wbGUg
-dG8gd3JpdGUgYQ0KPiA+IHRlc3QgdG8gY2hlY2sgZm9yIHRoaXMgc3BlY2lmaWMgaXNzdWUgYWxv
-bmcgdGhlIGxpbmVzIG9mIHRoZSBmb2xsb3dpbmcuDQo+ID4NCj4gPiAkIGcrKyAtTzIgLXggYysr
-IC0gLVdsLC0tcnBhdGg9Li9saWIgLUwuL2xpYiAtbHJhZG9zIC1sY2VwaGZzPDxFT0YgaW50DQo+
-ID4gbWFpbihpbnQsIGNoYXIqKikgew0KPiA+ICAgcmV0dXJuIDA7DQo+ID4gfQ0KPiA+IEVPRg0K
-PiANCj4gSWRlYWxseSB0aGUgc2hhcmVkIGxpYnJhcmllcyBzaG91bGQgbm90IGV4cG9ydCBhbnkg
-Z2xvYmFsIHZhcmlhYmxlcy4NCj4gVGhlcmUgYXJlIG51bWVyb3VzIGJ1Z3Mgb3RoZXIgdGhhbiBk
-b3VibGUgZGVsZXRlLiBGb3IgZXhhbXBsZSwgaWYgYSBnbG9iYWwNCj4gdmFyaWFibGUgKGFkZHJl
-c3MpIGlzIHVzZWQgYXMgYSBzZW50aW5lbCBpbiBsaWJyYWRvcyBhbmQgdGhlbiBsYXRlciBsaWJj
-ZXBoIGlzDQo+IGxvYWRlZCBkZWZpbmluZyBhIG5ldyBzZW50aW5lbCAoc2FtZSB0eXBlKSwgYW55
-IGRhdGEgc3RydWN0dXJlcyBjcmVhdGVkDQo+IHJlbHlpbmcgb24gdGhlIGFkZHJlc3Mgb2YgdGhl
-IHByZXZpb3VzIHNlbnRpbmVsIG1heSBicmVhay4gW1RoaXMgaXMgbm90IHB1cmVseQ0KPiBsaW1p
-dGVkIHRvIGdsb2JhbCB2YXJpYWJsZXMgb3IgZXZlbiBDKyssIHlvdSBjYW4gYWxzbyBoYXZlIG1h
-Z25pZmljZW50DQo+IGJyZWFrYWdlIGlmIGZ1bmN0aW9ucyBkZWZpbmVkIGluIGEgY29tbW9uIHN0
-YXRpYyBsaWJyYXJ5IHdpdGggZXh0ZXJuYWwgbGlua2FnZQ0KPiBhcmUgcmVwbGFjZWQuIEluIHRo
-YXQgY2FzZSwgY29kZSB3aGljaCBkZXBlbmRzIG9uIHZhcmlhYmxlcyB3aXRoIGxvY2FsIGxpbmth
-Z2UNCj4gbWF5IGFsc28gYnJlYWsuIFVsdGltYXRlbHksIHRoZSBmaXggaXMgdG8gZXhwbGljaXRs
-eSBleHBvcnQgb25seSB0aGUgZGVzaXJlZA0KPiBmdW5jdGlvbnMgb2Ygc29tZSBBUEkgaW4gdGhl
-IHNoYXJlZCBsaWJyYXJ5Ll0NCj4gDQo+IEEgdGVzdCB3aGljaCBjaGVja3MgZm9yIHRoZSBkb3Vi
-bGUgZGVsZXRlIGlzIGEgZ29vZCBzdGFydC4uLg0KPiANCj4gLS0NCj4gUGF0cmljayBEb25uZWxs
-eQ0K
+On Tue, Jul 26, 2016 at 10:32 AM, kefu chai <tchaikov@gmail.com> wrote:
+> Hey Cephers,
+>
+> we are almost finished the transition to cmake. but we are also facing
+> some problems which did not exist in autotools.
+>
+> last time i asked help on static library versus dynamic library in
+> this mailing list. and the consensus was we should just build and
+> package dynamic libraries. but this time, i ran into a more difficult
+> one: http://tracker.ceph.com/issues/16686.
+
+I strongly suspect that http://tracker.ceph.com/issues/16556 is caused
+by the same problem with the symbols in lockdep.cc, although in this
+instance it is only causing a problem when we fork.  I have a patch
+(https://github.com/ceph/ceph/pull/10452) which demonstrates that the
+issue goes away when we don't load librados and libcephfs into the
+same process.
+
+John
+
+> a little bit background: we have a convenience library named libcommon
+> which wraps some of the class/methods shared across the Ceph project,
+> messenger among the other things. and in tracker#16686, i found that
+> in AsyncMessenger.cc, we have a static member variable named
+> WorkerPool::name. it is a std::string. see
+> https://github.com/ceph/ceph/blob/master/src/msg/async/AsyncMessenger.cc#L346
+>
+> if we load both libceph.so and librados.so in the same process, when
+> the process exists, this variable will be destructed twice. hence the
+> double free. because the linker thinks that the symbols the two copies
+> of libcommon in libcephfs and librados are the same ones. while the
+> two libraries destruct the variable individually. that's why we have
+> this problem.
+>
+> you might want to ask, "it works in autotools!". i asked myself the
+> same question. and i found that we don't pass
+> "-Wl,--exclude-libs=libcommon.a" or "-Wl,--exclude-libs,ALL" to linker
+> when linking libcephfs and librados, as we did in automake. this
+> confuses the run-time linker. yeah, we can do the same in cmake. but
+> this breaks the build. see
+> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-trusty-amd64-basic/log.cgi?log=87ff7617bf2c07d43b6a6b7d116ea61f9ea6e905:
+>
+> ```
+> /srv/autobuild-ceph/gitbuilder.git/build/out~/ceph-11.0.0-902-g87ff761/src/common/Formatter.h:92:
+> undefined reference to `ceph::Formatter::~Formatter()'
+>
+> error: collect2: ld returned 1 exit status
+>
+> make[4]: *** [bin/ceph_test_rados_api_c_read_operations] Error 1
+> ```
+>
+> some librados tests (maybe more of them) are using the non-public
+> symbols. so we have two solutions:
+>
+> - extract the .cc files which are used by these tests into a
+> convenience library and link the tests against it *and* librados. but
+> again this introduces the risk of double free. the extracted .cc files
+> should be non-POD static variable free.
+> - compile a static librados and link the tests against it. this
+> actually mimics the behavior of autotools. but this approach
+> complicates the cmake file, as we discussed before.
+>
+>
+> so, maybe we should just forbid the non-POD static variables in
+> libcommon? if you have  better solution, or i am completely wrong (i
+> wish so), please let me know.
+>
+> thanks,
+>
+> --
+> Regards
+> Kefu Chai
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
