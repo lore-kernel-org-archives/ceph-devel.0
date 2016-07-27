@@ -1,106 +1,70 @@
-From: Brad Hubbard <bhubbard@redhat.com>
+From: Patrick Donnelly <pdonnell@redhat.com>
 Subject: Re: static member variable in libcommon and double free
-Date: Wed, 27 Jul 2016 11:54:33 +1000
-Message-ID: <20160727015433.GB22132@rskikr.localdomain>
+Date: Tue, 26 Jul 2016 22:33:51 -0400
+Message-ID: <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
 References: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
  <CALe9h7cn19-Rk_RN-F8HtinL8tsoou1-KgczMgT6Jtj9eWKtww@mail.gmail.com>
  <CAJE9aOOumNu1d3dm0HBL_Zr0_dGdqgdQtqrx00rZoitivXf1=A@mail.gmail.com>
- <alpine.LSU.2.20.1607261706350.28641@ancalagon.suse.com>
- <BLUPR0201MB152490EB7FE729C197978E1DE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.LSU.2.20.1607261706350.28641@ancalagon.suse.com> <BLUPR0201MB152490EB7FE729C197978E1DE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <20160727015433.GB22132@rskikr.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f170.google.com ([209.85.192.170]:34983 "EHLO
-	mail-pf0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752537AbcG0Byp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2016 21:54:45 -0400
-Received: by mail-pf0-f170.google.com with SMTP id x72so5284523pfd.2
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2016 18:54:45 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <BLUPR0201MB152490EB7FE729C197978E1DE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Received: from mail-qt0-f181.google.com ([209.85.216.181]:32934 "EHLO
+	mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752732AbcG0CeW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2016 22:34:22 -0400
+Received: by mail-qt0-f181.google.com with SMTP id w38so22600208qtb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2016 19:34:21 -0700 (PDT)
+In-Reply-To: <20160727015433.GB22132@rskikr.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Jesse Williamson <jwilliamson@suse.de>, kefu chai <tchaikov@gmail.com>, John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Jesse Williamson <jwilliamson@suse.de>, kefu chai <tchaikov@gmail.com>, John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 27, 2016 at 12:39:13AM +0000, Allen Samuels wrote:
-> I don't think is the problem that John and Kefu described.
-> 
-> Seems that  the problem is that there are two dynamic libraries that think each one of them is responsible for static run-time initialization of the same global variable. This violates the "One Definition Rule".
+On Tue, Jul 26, 2016 at 9:54 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
+>> I'm guessing that the source of the problem is that the AsyncMessager.cc file is included twice, one in each library. If so, then the solution is to break out the offending *.cc file into a separate third library that's linked in the right combination with the others so that there's no duplication.
+>>
+>
+> I believe the problem can also be solved with a static member function or a
+> wrapper function for the static variable. I tried this and it appears to
+> resolve the issue.
 
-I agree, I believe this is a violation of the ODR as well.
+Another solution is to use anonymous namespaces which will force the
+symbol to be local to the translation unit.
 
-> 
-> I'm guessing that the source of the problem is that the AsyncMessager.cc file is included twice, one in each library. If so, then the solution is to break out the offending *.cc file into a separate third library that's linked in the right combination with the others so that there's no duplication.
-> 
+> It would be possible to audit use of such variables using nm or objdump but
+> this might be a bit difficult to maintain?
 
-I believe the problem can also be solved with a static member function or a
-wrapper function for the static variable. I tried this and it appears to
-resolve the issue.
+There was a proposal to add -Wglobal-variable to gcc about this same
+issue but it didn't appear to go anywhere:
 
-It would be possible to audit use of such variables using nm or objdump but
-this might be a bit difficult to maintain?
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=46097
 
-Since this is easy to reproduce it would also be simple to write a test to
-check for this specific issue along the lines of the following.
+> Since this is easy to reproduce it would also be simple to write a test to
+> check for this specific issue along the lines of the following.
+>
+> $ g++ -O2 -x c++ - -Wl,--rpath=./lib -L./lib -lrados -lcephfs<<EOF
+> int main(int, char**)
+> {
+>   return 0;
+> }
+> EOF
 
-$ g++ -O2 -x c++ - -Wl,--rpath=./lib -L./lib -lrados -lcephfs<<EOF
-int main(int, char**)
-{
-  return 0;
-}
-EOF
+Ideally the shared libraries should not export any global variables.
+There are numerous bugs other than double delete. For example, if a
+global variable (address) is used as a sentinel in librados and then
+later libceph is loaded defining a new sentinel (same type), any data
+structures created relying on the address of the previous sentinel may
+break. [This is not purely limited to global variables or even C++,
+you can also have magnificent breakage if functions defined in a
+common static library with external linkage are replaced. In that
+case, code which depends on variables with local linkage may also
+break. Ultimately, the fix is to explicitly export only the desired
+functions of some API in the shared library.]
 
-./a.out
-*** Error in `./a.out': double free or corruption (fasttop): 0x0000000000ad45c0 ***
-...
-Aborted (core dumped)
-
-I'd be happy to create a test that covers this case if we think it is worthwhile?
-
-> I have no idea why this appears to work with autotools.
-> 
-> 
-> Allen Samuels
-> SanDisk |a Western Digital brand
-> 951 SanDisk Drive, Milpitas, CA 95035
-> T: +1 408 801 7030| M: +1 408 780 6416
-> allen.samuels@SanDisk.com
-> 
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> > owner@vger.kernel.org] On Behalf Of Jesse Williamson
-> > Sent: Tuesday, July 26, 2016 5:12 PM
-> > To: kefu chai <tchaikov@gmail.com>
-> > Cc: John Spray <jspray@redhat.com>; ceph-devel@vger.kernel.org
-> > Subject: Re: static member variable in libcommon and double free
-> > 
-> > 
-> > Folks,
-> > 
-> > I hope this will help.
-> > 
-> > Three are some issues that you need to know about when you're writing
-> > computer programs in C++. Before you decide to change away from the
-> > whole
-> > structure, consider what it is currently accomplishing.
-> > 
-> > Here is one of them. It may be exactly what you're running in to:
-> > https://isocpp.org/wiki/faq/ctors#static-init-order
-> > 
-> > Please feel free to ask questions.
-> > 
-> > -Jesse
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+A test which checks for the double delete is a good start...
 
 -- 
-Cheers,
-Brad
+Patrick Donnelly
