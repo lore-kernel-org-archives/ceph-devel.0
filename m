@@ -1,70 +1,87 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: static member variable in libcommon and double free
-Date: Tue, 26 Jul 2016 22:33:51 -0400
-Message-ID: <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: static member variable in libcommon and double free
+Date: Wed, 27 Jul 2016 02:40:53 +0000
+Message-ID: <BLUPR0201MB1524E467A2745777CB82E20BE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
 References: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
  <CALe9h7cn19-Rk_RN-F8HtinL8tsoou1-KgczMgT6Jtj9eWKtww@mail.gmail.com>
  <CAJE9aOOumNu1d3dm0HBL_Zr0_dGdqgdQtqrx00rZoitivXf1=A@mail.gmail.com>
- <alpine.LSU.2.20.1607261706350.28641@ancalagon.suse.com> <BLUPR0201MB152490EB7FE729C197978E1DE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.LSU.2.20.1607261706350.28641@ancalagon.suse.com>
+ <BLUPR0201MB152490EB7FE729C197978E1DE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
  <20160727015433.GB22132@rskikr.localdomain>
+ <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f181.google.com ([209.85.216.181]:32934 "EHLO
-	mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752732AbcG0CeW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2016 22:34:22 -0400
-Received: by mail-qt0-f181.google.com with SMTP id w38so22600208qtb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2016 19:34:21 -0700 (PDT)
-In-Reply-To: <20160727015433.GB22132@rskikr.localdomain>
+Received: from mail-by2nam01on0066.outbound.protection.outlook.com ([104.47.34.66]:41504
+	"EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751214AbcG0Ck6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 26 Jul 2016 22:40:58 -0400
+In-Reply-To: <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Jesse Williamson <jwilliamson@suse.de>, kefu chai <tchaikov@gmail.com>, John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>, Brad Hubbard <bhubbard@redhat.com>
+Cc: Jesse Williamson <jwilliamson@suse.de>, kefu chai <tchaikov@gmail.com>, John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jul 26, 2016 at 9:54 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
->> I'm guessing that the source of the problem is that the AsyncMessager.cc file is included twice, one in each library. If so, then the solution is to break out the offending *.cc file into a separate third library that's linked in the right combination with the others so that there's no duplication.
->>
->
-> I believe the problem can also be solved with a static member function or a
-> wrapper function for the static variable. I tried this and it appears to
-> resolve the issue.
-
-Another solution is to use anonymous namespaces which will force the
-symbol to be local to the translation unit.
-
-> It would be possible to audit use of such variables using nm or objdump but
-> this might be a bit difficult to maintain?
-
-There was a proposal to add -Wglobal-variable to gcc about this same
-issue but it didn't appear to go anywhere:
-
-https://gcc.gnu.org/bugzilla/show_bug.cgi?id=46097
-
-> Since this is easy to reproduce it would also be simple to write a test to
-> check for this specific issue along the lines of the following.
->
-> $ g++ -O2 -x c++ - -Wl,--rpath=./lib -L./lib -lrados -lcephfs<<EOF
-> int main(int, char**)
-> {
->   return 0;
-> }
-> EOF
-
-Ideally the shared libraries should not export any global variables.
-There are numerous bugs other than double delete. For example, if a
-global variable (address) is used as a sentinel in librados and then
-later libceph is loaded defining a new sentinel (same type), any data
-structures created relying on the address of the previous sentinel may
-break. [This is not purely limited to global variables or even C++,
-you can also have magnificent breakage if functions defined in a
-common static library with external linkage are replaced. In that
-case, code which depends on variables with local linkage may also
-break. Ultimately, the fix is to explicitly export only the desired
-functions of some API in the shared library.]
-
-A test which checks for the double delete is a good start...
-
--- 
-Patrick Donnelly
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBQYXRyaWNrIERvbm5lbGx5IFtt
+YWlsdG86cGRvbm5lbGxAcmVkaGF0LmNvbV0NCj4gU2VudDogVHVlc2RheSwgSnVseSAyNiwgMjAx
+NiA3OjM0IFBNDQo+IFRvOiBCcmFkIEh1YmJhcmQgPGJodWJiYXJkQHJlZGhhdC5jb20+DQo+IENj
+OiBBbGxlbiBTYW11ZWxzIDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPjsgSmVzc2UgV2lsbGlh
+bXNvbg0KPiA8andpbGxpYW1zb25Ac3VzZS5kZT47IGtlZnUgY2hhaSA8dGNoYWlrb3ZAZ21haWwu
+Y29tPjsgSm9obiBTcHJheQ0KPiA8anNwcmF5QHJlZGhhdC5jb20+OyBjZXBoLWRldmVsQHZnZXIu
+a2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogc3RhdGljIG1lbWJlciB2YXJpYWJsZSBpbiBsaWJj
+b21tb24gYW5kIGRvdWJsZSBmcmVlDQo+IA0KPiBPbiBUdWUsIEp1bCAyNiwgMjAxNiBhdCA5OjU0
+IFBNLCBCcmFkIEh1YmJhcmQgPGJodWJiYXJkQHJlZGhhdC5jb20+DQo+IHdyb3RlOg0KPiA+PiBJ
+J20gZ3Vlc3NpbmcgdGhhdCB0aGUgc291cmNlIG9mIHRoZSBwcm9ibGVtIGlzIHRoYXQgdGhlIEFz
+eW5jTWVzc2FnZXIuY2MNCj4gZmlsZSBpcyBpbmNsdWRlZCB0d2ljZSwgb25lIGluIGVhY2ggbGli
+cmFyeS4gSWYgc28sIHRoZW4gdGhlIHNvbHV0aW9uIGlzIHRvIGJyZWFrDQo+IG91dCB0aGUgb2Zm
+ZW5kaW5nICouY2MgZmlsZSBpbnRvIGEgc2VwYXJhdGUgdGhpcmQgbGlicmFyeSB0aGF0J3MgbGlu
+a2VkIGluIHRoZSByaWdodA0KPiBjb21iaW5hdGlvbiB3aXRoIHRoZSBvdGhlcnMgc28gdGhhdCB0
+aGVyZSdzIG5vIGR1cGxpY2F0aW9uLg0KPiA+Pg0KPiA+DQo+ID4gSSBiZWxpZXZlIHRoZSBwcm9i
+bGVtIGNhbiBhbHNvIGJlIHNvbHZlZCB3aXRoIGEgc3RhdGljIG1lbWJlciBmdW5jdGlvbg0KPiA+
+IG9yIGEgd3JhcHBlciBmdW5jdGlvbiBmb3IgdGhlIHN0YXRpYyB2YXJpYWJsZS4gSSB0cmllZCB0
+aGlzIGFuZCBpdA0KPiA+IGFwcGVhcnMgdG8gcmVzb2x2ZSB0aGUgaXNzdWUuDQo+IA0KPiBBbm90
+aGVyIHNvbHV0aW9uIGlzIHRvIHVzZSBhbm9ueW1vdXMgbmFtZXNwYWNlcyB3aGljaCB3aWxsIGZv
+cmNlIHRoZQ0KPiBzeW1ib2wgdG8gYmUgbG9jYWwgdG8gdGhlIHRyYW5zbGF0aW9uIHVuaXQuDQoN
+Cldvbid0IHRoaXMgcmVzdWx0IGluIHR3byBpbnN0YW50aWF0aW9ucyBvZiB0aGUgImdsb2JhbCIg
+dmFyaWFibGU/IFRoYXQgc2VlbXMgbGlrZSBhIGh1Z2UgcmlzayB0byB0aGUgaW50ZWdyaXR5IG9m
+IHRoZSBvcGVyYXRpb24gb2YgdGhhdCBjbGFzcy4uLi4gSU1PLCB0aGF0J3MgdGhlIHdyb25nIHNv
+bHV0aW9uIGFzIGl0IHdpbGwgZWxpbWluYXRlIGEgY2xlYXIgc2lnbmFsIG9mIGEgcHJvYmxlbSBi
+dXQgd291bGQgYWxsb3cgdGhlIGxhbmd1YWdlIHNlbWFudGljcyB0byBiZSBkZWdyYWRlZCBzaWxl
+bnRseS4NCg0KSSB0aGluayB0aGUgc29sdXRpb24gaXMgc3RpbGwgdG8gcHJvcGVybHkgaW1wbGVt
+ZW50IHRoZSBPRFIgcnVsZSwgYnJlYWsgdGhpcyBjbGFzcyBpbnRvIGEgc2VwYXJhdGUgbGlicmFy
+eSB0aGF0J3Mgb25seSBpbmNsdWRlZCBvbmNlIGluIEFOWSBidWlsZC4NCg0KQXMgd2FzIG1lbnRp
+b25lZCwgYSBzY3JpcHQgd2l0aCBvYmpkdW1wIGFuZCBubSB0b29scyBvdWdodCB0byBiZSBhYmxl
+IHRvIGRldGVjdCB0aGlzIHNpdHVhdGlvbiAtLSBwcm92aWRlZCB0aGF0IGl0IGhhcyBhbiBhY2N1
+cmF0ZSBtb2RlbCBvZiB3aGF0IGxpYnJhcmllcyBhcmUgYmVpbmcgY29tYmluZWQgaW4gd2hhdCBl
+eGVjdXRhYmxlcy4NCg0KSU1PLCBJJ2QganVzdCByYXRoZXIgc2VlIHVzIHN3aXRjaCB0byBzdGF0
+aWMgbGlua2luZyAtLSBzaW1wbGVyIHRvIHJlYXNvbiBhYm91dC4uLiBCdXQgSSBndWVzcyB0aGF0
+IHNoaXAgc2FpbGVkIDooDQoNCiANCj4gDQo+ID4gSXQgd291bGQgYmUgcG9zc2libGUgdG8gYXVk
+aXQgdXNlIG9mIHN1Y2ggdmFyaWFibGVzIHVzaW5nIG5tIG9yDQo+ID4gb2JqZHVtcCBidXQgdGhp
+cyBtaWdodCBiZSBhIGJpdCBkaWZmaWN1bHQgdG8gbWFpbnRhaW4/DQo+IA0KPiBUaGVyZSB3YXMg
+YSBwcm9wb3NhbCB0byBhZGQgLVdnbG9iYWwtdmFyaWFibGUgdG8gZ2NjIGFib3V0IHRoaXMgc2Ft
+ZSBpc3N1ZQ0KPiBidXQgaXQgZGlkbid0IGFwcGVhciB0byBnbyBhbnl3aGVyZToNCj4gDQo+IGh0
+dHBzOi8vZ2NjLmdudS5vcmcvYnVnemlsbGEvc2hvd19idWcuY2dpP2lkPTQ2MDk3DQo+IA0KPiA+
+IFNpbmNlIHRoaXMgaXMgZWFzeSB0byByZXByb2R1Y2UgaXQgd291bGQgYWxzbyBiZSBzaW1wbGUg
+dG8gd3JpdGUgYQ0KPiA+IHRlc3QgdG8gY2hlY2sgZm9yIHRoaXMgc3BlY2lmaWMgaXNzdWUgYWxv
+bmcgdGhlIGxpbmVzIG9mIHRoZSBmb2xsb3dpbmcuDQo+ID4NCj4gPiAkIGcrKyAtTzIgLXggYysr
+IC0gLVdsLC0tcnBhdGg9Li9saWIgLUwuL2xpYiAtbHJhZG9zIC1sY2VwaGZzPDxFT0YgaW50DQo+
+ID4gbWFpbihpbnQsIGNoYXIqKikgew0KPiA+ICAgcmV0dXJuIDA7DQo+ID4gfQ0KPiA+IEVPRg0K
+PiANCj4gSWRlYWxseSB0aGUgc2hhcmVkIGxpYnJhcmllcyBzaG91bGQgbm90IGV4cG9ydCBhbnkg
+Z2xvYmFsIHZhcmlhYmxlcy4NCj4gVGhlcmUgYXJlIG51bWVyb3VzIGJ1Z3Mgb3RoZXIgdGhhbiBk
+b3VibGUgZGVsZXRlLiBGb3IgZXhhbXBsZSwgaWYgYSBnbG9iYWwNCj4gdmFyaWFibGUgKGFkZHJl
+c3MpIGlzIHVzZWQgYXMgYSBzZW50aW5lbCBpbiBsaWJyYWRvcyBhbmQgdGhlbiBsYXRlciBsaWJj
+ZXBoIGlzDQo+IGxvYWRlZCBkZWZpbmluZyBhIG5ldyBzZW50aW5lbCAoc2FtZSB0eXBlKSwgYW55
+IGRhdGEgc3RydWN0dXJlcyBjcmVhdGVkDQo+IHJlbHlpbmcgb24gdGhlIGFkZHJlc3Mgb2YgdGhl
+IHByZXZpb3VzIHNlbnRpbmVsIG1heSBicmVhay4gW1RoaXMgaXMgbm90IHB1cmVseQ0KPiBsaW1p
+dGVkIHRvIGdsb2JhbCB2YXJpYWJsZXMgb3IgZXZlbiBDKyssIHlvdSBjYW4gYWxzbyBoYXZlIG1h
+Z25pZmljZW50DQo+IGJyZWFrYWdlIGlmIGZ1bmN0aW9ucyBkZWZpbmVkIGluIGEgY29tbW9uIHN0
+YXRpYyBsaWJyYXJ5IHdpdGggZXh0ZXJuYWwgbGlua2FnZQ0KPiBhcmUgcmVwbGFjZWQuIEluIHRo
+YXQgY2FzZSwgY29kZSB3aGljaCBkZXBlbmRzIG9uIHZhcmlhYmxlcyB3aXRoIGxvY2FsIGxpbmth
+Z2UNCj4gbWF5IGFsc28gYnJlYWsuIFVsdGltYXRlbHksIHRoZSBmaXggaXMgdG8gZXhwbGljaXRs
+eSBleHBvcnQgb25seSB0aGUgZGVzaXJlZA0KPiBmdW5jdGlvbnMgb2Ygc29tZSBBUEkgaW4gdGhl
+IHNoYXJlZCBsaWJyYXJ5Ll0NCj4gDQo+IEEgdGVzdCB3aGljaCBjaGVja3MgZm9yIHRoZSBkb3Vi
+bGUgZGVsZXRlIGlzIGEgZ29vZCBzdGFydC4uLg0KPiANCj4gLS0NCj4gUGF0cmljayBEb25uZWxs
+eQ0K
