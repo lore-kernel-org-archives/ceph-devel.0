@@ -1,96 +1,71 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: static member variable in libcommon and double free
-Date: Wed, 27 Jul 2016 20:04:31 +0800
-Message-ID: <CAJE9aONRiJaOBEkOGhZBUAy6=_cEFTd0hCgmaUyOQ5=a8dvCvQ@mail.gmail.com>
-References: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
- <CALe9h7cn19-Rk_RN-F8HtinL8tsoou1-KgczMgT6Jtj9eWKtww@mail.gmail.com>
- <CAJE9aOOumNu1d3dm0HBL_Zr0_dGdqgdQtqrx00rZoitivXf1=A@mail.gmail.com>
- <alpine.LSU.2.20.1607261706350.28641@ancalagon.suse.com> <BLUPR0201MB152490EB7FE729C197978E1DE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <20160727015433.GB22132@rskikr.localdomain> <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
+From: David Disseldorp <ddiss@suse.de>
+Subject: Re: Compare And Write against unwritten ranges
+Date: Wed, 27 Jul 2016 14:57:44 +0200
+Message-ID: <20160727145744.048f1fe3@echidna.suse.de>
+References: <20160726141409.14135a00@echidna.suse.de>
+	<5797ABEF.1040101@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f173.google.com ([209.85.216.173]:33844 "EHLO
-	mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754131AbcG0MEd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2016 08:04:33 -0400
-Received: by mail-qt0-f173.google.com with SMTP id u25so27907325qtb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Jul 2016 05:04:32 -0700 (PDT)
-In-Reply-To: <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:34919 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753144AbcG0M5q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 27 Jul 2016 08:57:46 -0400
+In-Reply-To: <5797ABEF.1040101@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick Donnelly <pdonnell@redhat.com>
-Cc: Brad Hubbard <bhubbard@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Jesse Williamson <jwilliamson@suse.de>, John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mike Christie <mchristi@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 27, 2016 at 10:33 AM, Patrick Donnelly <pdonnell@redhat.com> wrote:
-> On Tue, Jul 26, 2016 at 9:54 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
->>> I'm guessing that the source of the problem is that the AsyncMessager.cc file is included twice, one in each library. If so, then the solution is to break out the offending *.cc file into a separate third library that's linked in the right combination with the others so that there's no duplication.
->>>
->>
->> I believe the problem can also be solved with a static member function or a
->> wrapper function for the static variable. I tried this and it appears to
->> resolve the issue.
->
-> Another solution is to use anonymous namespaces which will force the
-> symbol to be local to the translation unit.
+Thanks for the feedback Mike...
 
-but anonymous namespace has its own limitation, for example, we cannot use
-wrap class WorkerPool in anonymous namespace, see
-https://github.com/ceph/ceph/blob/master/src/msg/async/AsyncMessenger.cc#L308,
-as WorkerPool is forward declared in the header file.
+On Tue, 26 Jul 2016 13:29:03 -0500, Mike Christie wrote:
 
->
->> It would be possible to audit use of such variables using nm or objdump but
->> this might be a bit difficult to maintain?
->
-> There was a proposal to add -Wglobal-variable to gcc about this same
-> issue but it didn't appear to go anywhere:
->
-> https://gcc.gnu.org/bugzilla/show_bug.cgi?id=46097
->
->> Since this is easy to reproduce it would also be simple to write a test to
->> check for this specific issue along the lines of the following.
->>
->> $ g++ -O2 -x c++ - -Wl,--rpath=./lib -L./lib -lrados -lcephfs<<EOF
->> int main(int, char**)
->> {
->>   return 0;
->> }
->> EOF
->
-> Ideally the shared libraries should not export any global variables.
+> On 07/26/2016 07:14 AM, David Disseldorp wrote:
+> > Hi Mike,
+> > 
+> > Returning to the OSD cmpext functionality in
+> > https://github.com/ceph/ceph/pull/8911 , I'm wondering how such
+> > requests should be handled against unwritten ranges.
+> > 
+> > Currently an OSD will return -EINVAL to the client, as the short read
+> > will be caught via:
+> > https://github.com/ceph/ceph/pull/8911/commits/440895ea9f2604756c9f3c81e5c4ec5ca40401d7#diff-72747d40a424e7b5404366b557ff12a3R3722
+> > -EINVAL then means that krbd will return an error for the corresponding
+> > client I/O.
+> > 
+> > For read requests, rbd_img_obj_request_read_callback() handles
+> > zero-filling read buffers that cover unwritten RBD ranges. For SCSI
+> > Compare And Write the OSD is responsible for atomicity, so zero-filling
+> > on the client side is problematic.
+> > One potential option could be to add a truncate/zero operation to the
+> > Compare And Write compound request, or optionally support truncate_seq
+> > and truncate_size parameters in cmpext. Any thoughts/suggestions on the
+> > approach here?
+> 
+> We have a similar problem if the data needed to be copyup'd right? I
 
-thanks Patrick, yeah. this would force us to do the right thing:
+Similar, but different - copyup should be handled via the
+rbd_img_obj_parent_read_full() logic in rbd_img_obj_request_submit().
 
-* for cephfs
- - pass `--exclude-libs=libcommon.a` to linker,
- - find a way to implement libtools' "-export-symbols-regex
-'^ceph_.*'" with cmake
-* for librados
- - pass `--exclude-libs=ALL` to linker,
-* for those naughty tests who use the internal symbols
- - link them against the convenience libs (or objects) by which the
-symbols are offered.
+> think the multi-op route might be nice because it could work for both cases.
+> 
+> Did you already try the multi op zero/truncate approach? Did you have to
+> make changes to the OSD code too?
 
-> There are numerous bugs other than double delete. For example, if a
-> global variable (address) is used as a sentinel in librados and then
-> later libceph is loaded defining a new sentinel (same type), any data
-> structures created relying on the address of the previous sentinel may
-> break. [This is not purely limited to global variables or even C++,
-> you can also have magnificent breakage if functions defined in a
-> common static library with external linkage are replaced. In that
-> case, code which depends on variables with local linkage may also
-> break. Ultimately, the fix is to explicitly export only the desired
-> functions of some API in the shared library.]
->
-> A test which checks for the double delete is a good start...
->
-> --
-> Patrick Donnelly
+I'm working on a multi-op prototype now, and will send you the patches
+when done. I don't expect any changes on the OSD side.
 
+> A long while back, I was working on the copyup part of the problem but I
+> hit another problem. It was something like the copyup's write would
+> succeed, but when the cmpext op does the read it will fail still. If I
+> sent it down as a multi-op, some other bits/structs on the OSD side
+> needed to be updated before I could do the cmpext op. I cannot find the
+> patches and I never submitted because I had just hacked it in for
+> testing. Did you hit something similar?
 
+Yeah, I've seen issues with copyup+cmpext+write, but am treating that
+as a separate problem for now.
 
--- 
-Regards
-Kefu Chai
+Cheers, David
