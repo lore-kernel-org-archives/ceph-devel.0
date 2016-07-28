@@ -1,34 +1,59 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: v0.94.8 timeframe
-Date: Thu, 28 Jul 2016 13:16:37 -0600
-Message-ID: <CALqRxCzwi31SZJ+qej6G+nVQba-g-udMnnX=aXBmQ-Qc6L2VPA@mail.gmail.com>
-References: <CALqRxCwDvsR__Cztj7w+kFE7T=3mt0mWRXNT+yej=iPQDX==cg@mail.gmail.com>
- <1f584fef-324c-f452-55e0-490ce8605130@suse.de>
+From: Patrick Donnelly <pdonnell@redhat.com>
+Subject: Re: static member variable in libcommon and double free
+Date: Thu, 28 Jul 2016 16:03:14 -0400
+Message-ID: <CA+2bHPZsc14wsXBTr7ftwqwsQELZaTqk218wnSMGCe817QQHkQ@mail.gmail.com>
+References: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
+ <CALe9h7cn19-Rk_RN-F8HtinL8tsoou1-KgczMgT6Jtj9eWKtww@mail.gmail.com>
+ <CAJE9aOOumNu1d3dm0HBL_Zr0_dGdqgdQtqrx00rZoitivXf1=A@mail.gmail.com>
+ <alpine.LSU.2.20.1607261706350.28641@ancalagon.suse.com> <BLUPR0201MB152490EB7FE729C197978E1DE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <20160727015433.GB22132@rskikr.localdomain> <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
+ <CAJE9aONRiJaOBEkOGhZBUAy6=_cEFTd0hCgmaUyOQ5=a8dvCvQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f180.google.com ([209.85.217.180]:33820 "EHLO
-	mail-ua0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753876AbcG1TQj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2016 15:16:39 -0400
-Received: by mail-ua0-f180.google.com with SMTP id 35so46754897uap.1
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2016 12:16:38 -0700 (PDT)
-In-Reply-To: <1f584fef-324c-f452-55e0-490ce8605130@suse.de>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:33898 "EHLO
+	mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757809AbcG1UDo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2016 16:03:44 -0400
+Received: by mail-qk0-f173.google.com with SMTP id o67so72894045qke.1
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2016 13:03:44 -0700 (PDT)
+In-Reply-To: <CAJE9aONRiJaOBEkOGhZBUAy6=_cEFTd0hCgmaUyOQ5=a8dvCvQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.de>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Brad Hubbard <bhubbard@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Jesse Williamson <jwilliamson@suse.de>, John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Jul 28, 2016 at 8:25 AM, Nathan Cutler <ncutler@suse.de> wrote:
+On Wed, Jul 27, 2016 at 8:04 AM, kefu chai <tchaikov@gmail.com> wrote:
+>> Ideally the shared libraries should not export any global variables.
 >
-> Hi Ken:
+> thanks Patrick, yeah. this would force us to do the right thing:
 >
->> When should we expect v0.94.8 to be released?
->
-> Thanks to Loic and Sam, who helped me with teuthology log analysis, I can
-> report that 0.94.8 is starting to look greenish! I would like to think/hope
-> it could be released within the next 30 days.
+> * for cephfs
+>  - pass `--exclude-libs=libcommon.a` to linker,
+>  - find a way to implement libtools' "-export-symbols-regex
+> '^ceph_.*'" with cmake
+> * for librados
+>  - pass `--exclude-libs=ALL` to linker,
+> * for those naughty tests who use the internal symbols
+>  - link them against the convenience libs (or objects) by which the
+> symbols are offered.
 
-Thanks for the update Nathan, that is helpful.
+Great job kefu on the fix: https://github.com/ceph/ceph/pull/10472
 
-- Ken
+I'll quote my comment on that PR:
+
+This makes a huge reduction in the exported symbols:
+
+$ objdump -T librados.so > librados.so.2850b6f
+...
+$ wc -l lib*so*
+   2082 libcephfs.so.2850b6f
+  10744 libcephfs.so.2850b6f^
+   2009 librados.so.2850b6f
+  10401 librados.so.2850b6f^
+
+And the final set of global symbols look about right to me. (There
+could be more pruning done but it's probably not worth it.)
+
+-- 
+Patrick Donnelly
