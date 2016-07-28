@@ -1,39 +1,23 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore tuning
-Date: Thu, 28 Jul 2016 05:26:41 +0000
-Message-ID: <BL2PR02MB21155CC9B2F21BE7B6ED1567F4000@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: Bluestore tuning
+Date: Thu, 28 Jul 2016 05:18:50 +0000
+Message-ID: <4D529B90-D7F5-4651-91B1-879F480D932B@Teradata.com>
 References: <BL2PR02MB21154CABD62BAD59D1E8CD5FF40F0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <4D529B90-D7F5-4651-91B1-879F480D932B@Teradata.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0068.outbound.protection.outlook.com ([104.47.36.68]:7520
-	"EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751361AbcG1F0p convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2016 01:26:45 -0400
-In-Reply-To: <4D529B90-D7F5-4651-91B1-879F480D932B@Teradata.com>
+Received: from nat13.teradata.com ([153.65.16.13]:32775 "EHLO
+	rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752636AbcG1Fqb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2016 01:46:31 -0400
+In-Reply-To: <BL2PR02MB21154CABD62BAD59D1E8CD5FF40F0@BL2PR02MB2115.namprd02.prod.outlook.com>
 Content-Language: en-US
+Content-ID: <F650C6EFB720D2478E7A14DE7F3AAB4A@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
 Cc: "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-My ceph version is 11.0.0-811-g278ea12, it is ~3-4 days old master.
-Regarding stability , it is getting there , no more easy crashes seen :-)
-I am getting a memory leak though in the write path and after 1 hour of continuous run (4K RW) memory is started swapping for me..I am trying to nail it down..
-
-Thanks & Regards
-Somnath
- 
-
------Original Message-----
-From: Kamble, Nitin A [mailto:Nitin.Kamble@Teradata.com] 
-Sent: Wednesday, July 27, 2016 10:19 PM
-To: Somnath Roy
-Cc: Mark Nelson (mnelson@redhat.com); ceph-devel@vger.kernel.org
-Subject: Re: Bluestore tuning
 
 Hi Somnath,
   Thanks for sharing this information. And great to see bluestore with improved stability and performance. Which version of ceph were you running in this environment, latest master? 
@@ -85,10 +69,8 @@ Nitin
 > --------
 > No preconditioning of rbd images , started writing 4K RW from the beginning.
 > 
-> Jobs: 10 (f=10): [w(10)] [100.0% done] [0KB/150.3MB/0KB /s] [0/38.5K/0 
-> iops] [eta 00m:00s]
-> rbd_iodepth32: (groupid=0, jobs=10): err= 0: pid=883598: Fri Jul 22 
-> 19:43:41 2016
+> Jobs: 10 (f=10): [w(10)] [100.0% done] [0KB/150.3MB/0KB /s] [0/38.5K/0 iops] [eta 00m:00s]
+> rbd_iodepth32: (groupid=0, jobs=10): err= 0: pid=883598: Fri Jul 22 19:43:41 2016
 >  write: io=282082MB, bw=160473KB/s, iops=40118, runt=1800007msec
 >    slat (usec): min=25, max=2578, avg=51.73, stdev=15.99
 >    clat (usec): min=585, max=2096.7K, avg=3913.59, stdev=9871.73
@@ -135,8 +117,7 @@ Nitin
 > BTW, I am not able to run BlueStore more than 2 hour at a stretch due to memory issues. It is filling up my system memory (2 node of 64 G memory , running 8 OSDS on each) fast.
 > The following operation I did and it started swapping.
 > 
-> 1. Created a 4TB image and did 1M sequential preconditioning (took ~1 
-> hour)
+> 1. Created a 4TB image and did 1M sequential preconditioning (took ~1 hour)
 > 
 > 2. Followed by two 30 min 4k RW with QD 128 (numjob = 10) and in the 2nd run memory started swapping.
 > 
@@ -147,7 +128,7 @@ Nitin
 > 
 > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
