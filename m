@@ -1,26 +1,48 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Bluestore tuning
-Date: Thu, 28 Jul 2016 14:10:46 +0000
-Message-ID: <BLUPR0201MB15246365F78D92D45BBF66C5E8000@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Date: Thu, 28 Jul 2016 15:17:10 +0000
+Message-ID: <BL2PR02MB21159D0D76E31CFFB05C80A0F4000@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <BL2PR02MB21154CABD62BAD59D1E8CD5FF40F0@BL2PR02MB2115.namprd02.prod.outlook.com>
  <4D529B90-D7F5-4651-91B1-879F480D932B@Teradata.com>
  <BL2PR02MB21155CC9B2F21BE7B6ED1567F4000@BL2PR02MB2115.namprd02.prod.outlook.com>
  <D3BF0C2C.1135C%evgeniy.firsov@sandisk.com>
+ <BLUPR0201MB15246365F78D92D45BBF66C5E8000@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0078.outbound.protection.outlook.com ([104.47.42.78]:11584
+Received: from mail-by2nam03on0061.outbound.protection.outlook.com ([104.47.42.61]:60317
 	"EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1758655AbcG1Ooo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2016 10:44:44 -0400
-In-Reply-To: <D3BF0C2C.1135C%evgeniy.firsov@sandisk.com>
+	id S1758625AbcG1PRO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2016 11:17:14 -0400
+In-Reply-To: <BLUPR0201MB15246365F78D92D45BBF66C5E8000@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+To: Allen Samuels <Allen.Samuels@sandisk.com>, Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>, "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
 Cc: "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+I don't think the cache is based on count, it is based on size and numb=
+er of shards you are running with.
+If you see in my ceph.conf , I have limited cache size to 100MB (bluest=
+ore_buffer_cache_size =3D 104857600) and I have 25 shards. So, each OSD=
+ will be using 2.5GB of memory as cache at max and I have 8 OSDs runnin=
+g , so, total OSD RSS for cache could be ~20GB. Anything above that wil=
+l be trimmed. This is what I am seeing in read path and after limiting =
+this in write path also I am seeing less growth. But, this is a small l=
+eak that is still happening in the write path it seems (unless we are n=
+ot doing a cache->trim() somewhere in the path).
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+=46rom: Allen Samuels
+Sent: Thursday, July 28, 2016 7:11 AM
+To: Evgeniy Firsov; Somnath Roy; Kamble, Nitin A
+Cc: Mark Nelson (mnelson@redhat.com); ceph-devel@vger.kernel.org
+Subject: RE: Bluestore tuning
 
 If the oNode cache is based on oNode count, then we might want to rethi=
 nk the accounting as the oNode size is likely to be highly variable mea=
@@ -45,28 +67,26 @@ allen.samuels@SanDisk.com
 > Cc: Mark Nelson (mnelson@redhat.com) <mnelson@redhat.com>; ceph-
 > devel@vger.kernel.org
 > Subject: Re: Bluestore tuning
->=20
+>
 > Somnath,
->=20
+>
 > In my opinion, =B3memory leak=B2 may be just onode cache size grows.
-> By default its 16K entries per PG (8 by default), onode size is ~38K =
-for 4M RBD
-> object, so its 5.1G by default.
+> By default its 16K entries per PG (8 by default), onode size is ~38K
+> for 4M RBD object, so its 5.1G by default.
 > Likely you use much more Pgs.
 > Disabling checksums, reducing RBD object size will reduce the cache s=
 ize.
->=20
+>
 > On 7/27/16, 10:26 PM, "ceph-devel-owner@vger.kernel.org on behalf of
 > Somnath Roy" <ceph-devel-owner@vger.kernel.org on behalf of
 > Somnath.Roy@sandisk.com> wrote:
->=20
+>
 > >My ceph version is 11.0.0-811-g278ea12, it is ~3-4 days old master.
 > >Regarding stability , it is getting there , no more easy crashes see=
 n
 > >:-) I am getting a memory leak though in the write path and after 1
-> >hour of continuous run (4K RW) memory is started swapping for me..I =
-am
-> >trying to nail it down..
+> >hour of continuous run (4K RW) memory is started swapping for me..I
+> >am trying to nail it down..
 > >
 > >Thanks & Regards
 > >Somnath
@@ -80,10 +100,9 @@ am
 > >Subject: Re: Bluestore tuning
 > >
 > >Hi Somnath,
-> >  Thanks for sharing this information. And great to see bluestore wi=
-th
-> >improved stability and performance. Which version of ceph were you
-> >running in this environment, latest master?
+> >  Thanks for sharing this information. And great to see bluestore
+> >with improved stability and performance. Which version of ceph were
+> >you running in this environment, latest master?
 > >Also it would be good to know the level of stability of the environm=
 ent.
 > >Did ceph cluster broke after collection of this data?
@@ -125,7 +144,8 @@ kgro
 > 70912
 > >>0,w
 > >>rite_buffer_size=3D83886080,level0_file_num_compaction_trigger=3D4,=
-level0
+level
+> >>0
 > _
 > >>slo wdown_writes_trigger=3D400,level0_stop_writes_trigger=3D800"
 > >>
@@ -209,10 +229,9 @@ ore*.
 > >>
 > >> This is based on my experiment on all SSD , HDD case will be diffe=
 rent.
-> >> Tuning also depends on your cpu complex/memory, I am running with =
-48
-> >>core (HT enabled) dual socket Xeon on each node with 64GB of memory=
-=2E.
+> >> Tuning also depends on your cpu complex/memory, I am running with
+> >>48 core (HT enabled) dual socket Xeon on each node with 64GB of mem=
+ory..
 > >>
 > >> Thanks & Regards
 > >> Somnath
@@ -225,9 +244,9 @@ rent.
 > >> Subject: Rocksdb tuning on Bluestore
 > >>
 > >> Mark,
-> >> With the following tuning it seems rocksdb is performing better in=
- my
-> >>environment. Basically, doing aggressive compaction to reduce the
+> >> With the following tuning it seems rocksdb is performing better in
+> >>my environment. Basically, doing aggressive compaction to reduce th=
+e
 > >>write stalls.
 > >>
 > >> bluestore_rocksdb_options =3D
@@ -243,24 +262,23 @@ ckgr
 > 87091
 > >>20,
 > >>write_buffer_size=3D83886080,level0_file_num_compaction_trigger=3D4=
-,level
+,leve
+> >>l
 > 0
 > >>_sl owdown_writes_trigger=3D400,level0_stop_writes_trigger=3D800"
 > >>
 > >>
-> >> BTW, I am not able to run BlueStore more than 2 hour at a stretch =
-due
-> >>to memory issues. It is filling up my system memory (2 node of 64 G
-> >>memory , running 8 OSDS on each) fast.
+> >> BTW, I am not able to run BlueStore more than 2 hour at a stretch
+> >>due to memory issues. It is filling up my system memory (2 node of
+> >>64 G memory , running 8 OSDS on each) fast.
 > >> The following operation I did and it started swapping.
 > >>
-> >> 1. Created a 4TB image and did 1M sequential preconditioning (took=
- ~1
+> >> 1. Created a 4TB image and did 1M sequential preconditioning (took
+> >> ~1
 > >> hour)
 > >>
-> >> 2. Followed by two 30 min 4k RW with QD 128 (numjob =3D 10) and in=
- the
-> >>2nd run memory started swapping.
+> >> 2. Followed by two 30 min 4k RW with QD 128 (numjob =3D 10) and in
+> >>the 2nd run memory started swapping.
 > >>
 > >> Let me know how this rocksdb option works for you.
 > >>
@@ -268,20 +286,18 @@ due
 > >> Somnath
 > >>
 > >> PLEASE NOTE: The information contained in this electronic mail
-> >>message is intended only for the use of the designated recipient(s)=
- named
+> >>message is intended only for the use of the designated recipient(s)
+> >>named
 > above.
 > >>If the reader of this message is not the intended recipient, you ar=
 e
-> >>hereby notified that you have received this message in error and th=
-at
-> >>any review, dissemination, distribution, or copying of this message=
- is
-> >>strictly prohibited. If you have received this communication in err=
-or,
-> >>please notify the sender by telephone or e-mail (as shown above)
-> >>immediately and destroy any and all copies of this message in your
-> >>possession (whether hard copies or electronically stored copies).
+> >>hereby notified that you have received this message in error and
+> >>that any review, dissemination, distribution, or copying of this
+> >>message is strictly prohibited. If you have received this
+> >>communication in error, please notify the sender by telephone or
+> >>e-mail (as shown above) immediately and destroy any and all copies
+> >>of this message in your possession (whether hard copies or electron=
+ically stored copies).
 > >> --
 > >> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
 el"
@@ -294,27 +310,31 @@ el"
 "
 > >in the body of a message to majordomo@vger.kernel.org More majordomo
 > >info at  http://vger.kernel.org/majordomo-info.html
->=20
+>
 > PLEASE NOTE: The information contained in this electronic mail messag=
-e is
-> intended only for the use of the designated recipient(s) named above.=
- If the
-> reader of this message is not the intended recipient, you are hereby =
-notified
-> that you have received this message in error and that any review,
-> dissemination, distribution, or copying of this message is strictly p=
-rohibited. If
-> you have received this communication in error, please notify the send=
-er by
-> telephone or e-mail (as shown above) immediately and destroy any and =
-all
-> copies of this message in your possession (whether hard copies or
-> electronically stored copies).
+e
+> is intended only for the use of the designated recipient(s) named
+> above. If the reader of this message is not the intended recipient,
+> you are hereby notified that you have received this message in error
+> and that any review, dissemination, distribution, or copying of this
+> message is strictly prohibited. If you have received this
+> communication in error, please notify the sender by telephone or
+> e-mail (as shown above) immediately and destroy any and all copies of
+> this message in your possession (whether hard copies or electronicall=
+y stored copies).
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> in the body of a message to majordomo@vger.kernel.org More majordomo
+> info at http://vger.kernel.org/majordomo-info.html
+PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above=
+=2E If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
