@@ -1,69 +1,107 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: static member variable in libcommon and double free
-Date: Thu, 28 Jul 2016 22:29:52 +0200
-Message-ID: <36a70e12-94af-7c24-291b-ceac29336454@digiware.nl>
-References: <CAJE9aONBeLSw-tqanviSHB=u_LjKkHrGoQ6WMXvzH4gc8FfFYQ@mail.gmail.com>
- <CALe9h7cn19-Rk_RN-F8HtinL8tsoou1-KgczMgT6Jtj9eWKtww@mail.gmail.com>
- <CAJE9aOOumNu1d3dm0HBL_Zr0_dGdqgdQtqrx00rZoitivXf1=A@mail.gmail.com>
- <alpine.LSU.2.20.1607261706350.28641@ancalagon.suse.com>
- <BLUPR0201MB152490EB7FE729C197978E1DE80F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <20160727015433.GB22132@rskikr.localdomain>
- <CA+2bHPbvLaeMNuZcO__KWdCLYOYz+9u-NOGakK9VgrQwuTvL-g@mail.gmail.com>
- <CAJE9aONRiJaOBEkOGhZBUAy6=_cEFTd0hCgmaUyOQ5=a8dvCvQ@mail.gmail.com>
- <CA+2bHPZsc14wsXBTr7ftwqwsQELZaTqk218wnSMGCe817QQHkQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: BLueStore Deadlock
+Date: Thu, 28 Jul 2016 22:21:45 +0000
+Message-ID: <BL2PR02MB2115604A7C4767FC465C320EF4000@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <6AA21C22F0A5DA478922644AD2EC308C373B92BC@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:33157 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751304AbcG1UaO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 28 Jul 2016 16:30:14 -0400
-In-Reply-To: <CA+2bHPZsc14wsXBTr7ftwqwsQELZaTqk218wnSMGCe817QQHkQ@mail.gmail.com>
+Received: from mail-by2nam01on0061.outbound.protection.outlook.com ([104.47.34.61]:15118
+	"EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751438AbcG1WVs convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2016 18:21:48 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick Donnelly <pdonnell@redhat.com>, kefu chai <tchaikov@gmail.com>
-Cc: Brad Hubbard <bhubbard@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Jesse Williamson <jwilliamson@suse.de>, John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 28-7-2016 22:03, Patrick Donnelly wrote:
-> On Wed, Jul 27, 2016 at 8:04 AM, kefu chai <tchaikov@gmail.com> wrote:
->>> Ideally the shared libraries should not export any global variables.
->>
->> thanks Patrick, yeah. this would force us to do the right thing:
->>
->> * for cephfs
->>  - pass `--exclude-libs=libcommon.a` to linker,
->>  - find a way to implement libtools' "-export-symbols-regex
->> '^ceph_.*'" with cmake
->> * for librados
->>  - pass `--exclude-libs=ALL` to linker,
->> * for those naughty tests who use the internal symbols
->>  - link them against the convenience libs (or objects) by which the
->> symbols are offered.
-> 
-> Great job kefu on the fix: https://github.com/ceph/ceph/pull/10472
-> 
-> I'll quote my comment on that PR:
-> 
-> This makes a huge reduction in the exported symbols:
-> 
-> $ objdump -T librados.so > librados.so.2850b6f
-> ...
-> $ wc -l lib*so*
->    2082 libcephfs.so.2850b6f
->   10744 libcephfs.so.2850b6f^
->    2009 librados.so.2850b6f
->   10401 librados.so.2850b6f^
-> 
-> And the final set of global symbols look about right to me. (There
-> could be more pruning done but it's probably not worth it.)
+Jianpeng,
+I thought through this and it seems there could be one possible deadlock scenario.
 
-Kefu,
+tp_osd_tp --> waiting on onode->flush() for previous txc to finish. Holding Wlock(coll)
+aio_complete_thread --> waiting for RLock(coll)
+No other thread will be blocked here.
 
-Looks like a nice workaround.
-Just hope that this is workable with other toolchains as well.
-Currently FreeBSD uses binutils, so that'll work. But the direction is
-to remove and replace with another set of tools.
+We do add previous txc in the flush_txns list during _txc_write_nodes() and before aio_complete_thread calling _txc_state_proc(). So, if within this time frame if we have IO on the same collection , it will be waiting on unfinished txcs.
+The solution to this could be the following..
 
---WjW
+root@emsnode5:~/ceph-master/src# git diff
+diff --git a/src/os/bluestore/BlueStore.cc b/src/os/bluestore/BlueStore.cc
+index e8548b1..575a234 100644
+--- a/src/os/bluestore/BlueStore.cc
++++ b/src/os/bluestore/BlueStore.cc
+@@ -4606,6 +4606,11 @@ void BlueStore::_txc_state_proc(TransContext *txc)
+         (txc->first_collection)->lock.get_read();
+       }
+       for (auto& o : txc->onodes) {
++        {
++          std::lock_guard<std::mutex> l(o->flush_lock);
++          o->flush_txns.insert(txc);
++        }
++
+         for (auto& p : o->blob_map.blob_map) {
+            p.bc.finish_write(txc->seq);
+        }
+@@ -4733,8 +4738,8 @@ void BlueStore::_txc_write_nodes(TransContext *txc, KeyValueDB::Transaction t)
+     dout(20) << "  onode " << (*p)->oid << " is " << bl.length() << dendl;
+     t->set(PREFIX_OBJ, (*p)->key, bl);
 
+-    std::lock_guard<std::mutex> l((*p)->flush_lock);
+-    (*p)->flush_txns.insert(txc);
++    /*std::lock_guard<std::mutex> l((*p)->flush_lock);
++    (*p)->flush_txns.insert(txc);*/
+   }
+
+
+I am not able to reproduce this in my setup , so, if you can do the above changes in your env and see if you are still hitting the issue, would be helpful.
+
+Thanks & Regards
+Somnath
+
+
+-----Original Message-----
+From: Somnath Roy
+Sent: Thursday, July 28, 2016 8:45 AM
+To: 'Ma, Jianpeng'
+Cc: ceph-devel
+Subject: RE: BLueStore Deadlock
+
+Hi Jianpeng,
+Are you trying with latest master and still hitting the issue (seems so but confirming) ?
+The following scenario should not be creating deadlock because of the following reason.
+
+Onode->flush() is waiting on flush_lock() and from _txc_finish() it is releasing that before taking osr->qlock(). Am I missing anything ?
+
+I got a deadlock in this path in one of my earlier changes in the following pull request (described in detail there) and it is fixed and merged.
+
+https://github.com/ceph/ceph/pull/10220
+
+If my theory is right , we are hitting deadlock because of some other reason may be. It seems you are doing WAL write , could you please describe the steps to reproduce ?
+
+Thanks & Regards
+Somnath
+
+From: Ma, Jianpeng [mailto:jianpeng.ma@intel.com]
+Sent: Thursday, July 28, 2016 1:46 AM
+To: Somnath Roy
+Cc: ceph-devel; Ma, Jianpeng
+Subject: BLueStore Deadlock
+
+Hi Roy:
+     When do seqwrite w/ rbd+librbd, I met deadlock for bluestore. It can reproduce 100%.(based on 98602ae6c67637dbadddd549bd9a0035e5a2717)
+By add message and this found this bug caused by bf70bcb6c54e4d6404533bc91781a5ef77d62033.
+Consider this case:
+
+tp_osd_tp                                              aio_complete_thread                                 kv_sync_thread
+Rwlock(coll)                                            txc_finish_io                                                     _txc_finish do_write                                                 lock(osr->qlock)                                               lock(osr->qlock) do_read                                                  RLock(coll)                                                                     need osr->qlock to continue
+onode->flush()                                            need coll
+onode->readlock to continue
+   need previous txc complete
+
+But current I don't how to fix this.
+
+Thanks!
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
