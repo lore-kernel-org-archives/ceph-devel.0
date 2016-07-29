@@ -1,23 +1,35 @@
 From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
 Subject: RE: BLueStore Deadlock
-Date: Fri, 29 Jul 2016 01:24:22 +0000
-Message-ID: <6AA21C22F0A5DA478922644AD2EC308C373B940C@SHSMSX101.ccr.corp.intel.com>
+Date: Fri, 29 Jul 2016 01:36:26 +0000
+Message-ID: <6AA21C22F0A5DA478922644AD2EC308C373B9424@SHSMSX101.ccr.corp.intel.com>
 References: <6AA21C22F0A5DA478922644AD2EC308C373B92BC@SHSMSX101.ccr.corp.intel.com>
   <BL2PR02MB2115604A7C4767FC465C320EF4000@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <6AA21C22F0A5DA478922644AD2EC308C373B940C@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:46088 "EHLO mga11.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:2990 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750805AbcG2BY0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2016 21:24:26 -0400
-In-Reply-To: <BL2PR02MB2115604A7C4767FC465C320EF4000@BL2PR02MB2115.namprd02.prod.outlook.com>
+	id S1750805AbcG2Bgg convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2016 21:36:36 -0400
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C373B940C@SHSMSX101.ccr.corp.intel.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>, Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+Roy: my question is why is there STATE_WRITTING?  For read we don't by pass cache, so why need STATE_WRITTING?
+
+Thanks!
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Ma, Jianpeng
+Sent: Friday, July 29, 2016 9:24 AM
 To: Somnath Roy <Somnath.Roy@sandisk.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Subject: RE: BLueStore Deadlock
 
 Hi Roy:
     W/ your patch, there still deadlock.
@@ -117,5 +129,7 @@ But current I don't how to fix this.
 
 Thanks!
 PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
