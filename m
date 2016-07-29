@@ -1,57 +1,49 @@
-From: "Kamble, Nitin A" <Nitin.Kamble-Iz5qeGvAONRWk0Htik3J/w@public.gmane.org>
+From: Gerard Braad <me@gbraad.nl>
 Subject: Re: Cmake and rpmbuild
-Date: Fri, 29 Jul 2016 06:20:11 +0000
-Message-ID: <FEE54276-2859-45C6-8D89-FB7F375A3158@Teradata.com>
+Date: Fri, 29 Jul 2016 14:24:30 +0800
+Message-ID: <CAGrH30UmTME+QgRdOe+RwhtwLNQ2vLjdn4MdZCDL2FVpGJofow@mail.gmail.com>
 References: <CAGrH30XYN5fsx4HojZf3QdEAyvLm+-7N=tKYJU13HhjLrrRToQ@mail.gmail.com>
+ <FEE54276-2859-45C6-8D89-FB7F375A3158@Teradata.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAGrH30XYN5fsx4HojZf3QdEAyvLm+-7N=tKYJU13HhjLrrRToQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Content-ID: <9D22AE3301ACE346ADA849657610DD27-4zKsZ4M6+sdEKMMhf/gKZA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Gerard Braad <me-+lKzbiBlNwRmR6Xm/wNWPw@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-io0-f176.google.com ([209.85.223.176]:32908 "EHLO
+	mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750785AbcG2GYc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jul 2016 02:24:32 -0400
+Received: by mail-io0-f176.google.com with SMTP id 38so120417340iol.0
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2016 23:24:31 -0700 (PDT)
+In-Reply-To: <FEE54276-2859-45C6-8D89-FB7F375A3158@Teradata.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
+Cc: ceph-users <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-R2VyYWxkLA0KICAgVG8gbWUgdGhpcyBsb29rcyBsaWtlIGEgdGVycmlibHkgY3JpcHBsZWQgZW52
-aXJvbm1lbnQgdG8gYnVpbGQgY2VwaCwgYW5kIEkgd29u4oCZdCBib3RoZXIgYnVpbGRpbmcgaW4g
-c3VjaCBlbnZpcm9ubWVudC4gSU1PLCBJdOKAmXMgbm90IHdvcnRoIGZvciBhbnlib2R5IHRvIG9w
-dGltaXplIHRoZSBidWlsZCBwcm9jZXNzIHRvIG1ha2UgaXQgd29yayBvbiBzdWNoIGEgY3JpcHBs
-ZWQgZW52aXJvbm1lbnQuDQoNCkFuZCB0byBhbnN3ZXIgeW91ciBxdWVzdGlvbiwgSWYgeW91IGNh
-biBub3QgYWRkIG1vcmUgbWVtb3J5IHRoZW4gcHJvdmlkZSBtb3JlIHN3YXAgc3BhY2UgdG8gaW5j
-cmVhc2UgdGhlIHZpcnR1YWwgbWVtb3J5LiAgWW91IGNhbiBhbHNvIHJlbW92ZSB0aGUgIOKAnC1q
-IiBwYXJhbWV0ZXIgdG8g4oCcbWFrZSIgaW4gdGhlIHNwZWMgZmlsZSB0byBhdm9pZCBjcmVhdGlu
-ZyBsb3Qgb2YgcHJvY2Vzc2VzIGZvciBwYXJhbGxlbCBidWlsZC4NCg0KTml0aW4NCg0KPiBPbiBK
-dWwgMjgsIDIwMTYsIGF0IDY6NTAgUE0sIEdlcmFyZCBCcmFhZCA8bWVAZ2JyYWFkLm5sPiB3cm90
-ZToNCj4gDQo+IEhpIEFsbCwNCj4gDQo+IA0KPiBBdCB0aGUgbW9tZW50IEkgYW0gc2V0dGluZyB1
-cCBDSSBwaXBlbGluZXMgZm9yIENlcGggYW5kIHJhbiBpbnRvIGENCj4gc21hbGwgaXNzdWU7IEkg
-aGF2ZSBzb21lIG1lbW9yeSBjb25zdHJhaW5lZCBydW5uZXJzICgyRykuIFNvLCB3aGVuDQo+IHBl
-cmZvcm1pbmcgYSBidWlsZCB1c2luZyBkby1jbWFrZSBhbGwgaXMgZmluZS4uLiB0aGUgYnVpbGQg
-bWlnaHQgbGFzdA0KPiBsb25nLCBidXQgYWZ0ZXIgYW4gaG91ciBvciB0d28gSSBhbSBncmVldGVk
-IHdpdGggYSAnQnVpbGQgc3VjY2VlZGVkJw0KPiBtZXNzYWdlLCBJIGdhdGhlciB0aGUgYXJ0aWZh
-Y3RzIGFuZCBhbGwgaXMgd2VsbC4NCj4gDQo+IEJ1dCB3aGVuIEkgZG8gYSBycG1idWlsZCwgSSBo
-YXZlIHRvIHJlbHkgb24gZG9pbmcgYSBtYWtlLWRpc3QsIGFuZA0KPiB0aGVuIGlzc3VlIGEgcnBt
-YnVpbGQgdGFyZ2V0aW5nIHRoaXMgdGFyYmFsbC4gSG93ZXZlciwgaW4gdGhlIHNhbWUNCj4gcnVu
-bmVycywgdGhpcyBidWlsZCB3aWxsIGZhaWwgd2l0aCAidmlydHVhbCBtZW1vcnkgZXhoYXVzdGVk
-Ii4gSXMNCj4gdGhlcmUgYW55dGhpbmcgSSBjYW4gZG8gdGhhdCBkb2VzIG5vdCBpbW1lZGlhdGVs
-eSBpbnZvbHZlIGFkZGluZyBtb3JlDQo+IG1lbW9yeT8NCj4gDQo+IElmIG1vcmUgaW5mb3JtYXRp
-b24gaXMgbmVlZGVkLCBwbGVhc2UgbGV0IG1lIGtub3cuLi4NCj4gDQo+IHJlZ2FyZHMsDQo+IA0K
-PiANCj4gR2VyYXJkDQo+IA0KPiAtLSANCj4gDQo+ICAgR2VyYXJkIEJyYWFkIHwgaHR0cDovL2di
-cmFhZC5ubA0KPiAgIFsgRG9pbmcgT3BlbiBTb3VyY2UgTWF0dGVycyBdDQo+IC0tDQo+IFRvIHVu
-c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
-LWRldmVsIiBpbg0KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
-bmVsLm9yZw0KPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
-L21ham9yZG9tby1pbmZvLmh0bWwNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5j
-ZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2Vw
-aC5jb20K
+On Fri, Jul 29, 2016 at 2:20 PM, Kamble, Nitin A
+<Nitin.Kamble@teradata.com> wrote:
+>    To me this looks like a terribly crippled environment to build cep=
+h, and I won=E2=80=99t bother building in such environment. IMO, It=E2=80=
+=99s not worth for anybody to optimize the build process to make it wor=
+k on such a crippled environment.
+
+PoC phase... but likely the conclusion is as expected. Builds run
+perfectly in a 8G setup.
+
+> And to answer your question, If you can not add more memory then prov=
+ide more swap space to increase the virtual memory.  You can also remov=
+e the  =E2=80=9C-j" parameter to =E2=80=9Cmake" in the spec file to avo=
+id creating lot of processes for parallel build.
+
+`-j` has been altered and had no effect. Just wondering why doing a
+`cmake` finishes without any problem in the same environment. And why
+rpmbuild is also running something else than cmake (this is a target
+for future)?
+
+regards,
+Gerard
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
