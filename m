@@ -1,43 +1,57 @@
-From: "Acct. Dept. Bank Of China" <info@boc.cn>
-Subject: STRICTLY CONFIDENTIAL .
-Date: Fri, 29 Jul 2016 00:00:43 -0500
-Message-ID: <201607290451.u6T4pSiD017023@infonetg.com>
-Reply-To: <chim.w@yahoo.com>
+From: "Kamble, Nitin A" <Nitin.Kamble-Iz5qeGvAONRWk0Htik3J/w@public.gmane.org>
+Subject: Re: Cmake and rpmbuild
+Date: Fri, 29 Jul 2016 06:20:11 +0000
+Message-ID: <FEE54276-2859-45C6-8D89-FB7F375A3158@Teradata.com>
+References: <CAGrH30XYN5fsx4HojZf3QdEAyvLm+-7N=tKYJU13HhjLrrRToQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="Windows-1251"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.infonetg.com ([1.224.163.43]:37008 "EHLO infonetg.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751055AbcG2FHc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 29 Jul 2016 01:07:32 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAGrH30XYN5fsx4HojZf3QdEAyvLm+-7N=tKYJU13HhjLrrRToQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Content-ID: <9D22AE3301ACE346ADA849657610DD27-4zKsZ4M6+sdEKMMhf/gKZA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Gerard Braad <me-+lKzbiBlNwRmR6Xm/wNWPw@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-I have important transaction for you as next of kin to claim US$8.37m  Mail me on my private email: chim.w@yahoo.com   so i can send you more details
-
-Thanks
-
-Mr.Chim Wai Kim
-
-
-
-
-
-
-
-
-
-
-===========================================================================
-
-DISCLAIMER: This email and any files it contains are confidential and intended for the use of the recipient(s) only. If you are not the intended recipient you should notify the sender immediately and destroy the material from your system. Unauthorised use, disclosure, copying, distribution or any action taken or omitted to be taken in reliance on the information in this e-mail is prohibited and may be unlawful..And might be punishable under 
-section 67B of the IT Act (2008
-
-
-
-
-
-
-                
+R2VyYWxkLA0KICAgVG8gbWUgdGhpcyBsb29rcyBsaWtlIGEgdGVycmlibHkgY3JpcHBsZWQgZW52
+aXJvbm1lbnQgdG8gYnVpbGQgY2VwaCwgYW5kIEkgd29u4oCZdCBib3RoZXIgYnVpbGRpbmcgaW4g
+c3VjaCBlbnZpcm9ubWVudC4gSU1PLCBJdOKAmXMgbm90IHdvcnRoIGZvciBhbnlib2R5IHRvIG9w
+dGltaXplIHRoZSBidWlsZCBwcm9jZXNzIHRvIG1ha2UgaXQgd29yayBvbiBzdWNoIGEgY3JpcHBs
+ZWQgZW52aXJvbm1lbnQuDQoNCkFuZCB0byBhbnN3ZXIgeW91ciBxdWVzdGlvbiwgSWYgeW91IGNh
+biBub3QgYWRkIG1vcmUgbWVtb3J5IHRoZW4gcHJvdmlkZSBtb3JlIHN3YXAgc3BhY2UgdG8gaW5j
+cmVhc2UgdGhlIHZpcnR1YWwgbWVtb3J5LiAgWW91IGNhbiBhbHNvIHJlbW92ZSB0aGUgIOKAnC1q
+IiBwYXJhbWV0ZXIgdG8g4oCcbWFrZSIgaW4gdGhlIHNwZWMgZmlsZSB0byBhdm9pZCBjcmVhdGlu
+ZyBsb3Qgb2YgcHJvY2Vzc2VzIGZvciBwYXJhbGxlbCBidWlsZC4NCg0KTml0aW4NCg0KPiBPbiBK
+dWwgMjgsIDIwMTYsIGF0IDY6NTAgUE0sIEdlcmFyZCBCcmFhZCA8bWVAZ2JyYWFkLm5sPiB3cm90
+ZToNCj4gDQo+IEhpIEFsbCwNCj4gDQo+IA0KPiBBdCB0aGUgbW9tZW50IEkgYW0gc2V0dGluZyB1
+cCBDSSBwaXBlbGluZXMgZm9yIENlcGggYW5kIHJhbiBpbnRvIGENCj4gc21hbGwgaXNzdWU7IEkg
+aGF2ZSBzb21lIG1lbW9yeSBjb25zdHJhaW5lZCBydW5uZXJzICgyRykuIFNvLCB3aGVuDQo+IHBl
+cmZvcm1pbmcgYSBidWlsZCB1c2luZyBkby1jbWFrZSBhbGwgaXMgZmluZS4uLiB0aGUgYnVpbGQg
+bWlnaHQgbGFzdA0KPiBsb25nLCBidXQgYWZ0ZXIgYW4gaG91ciBvciB0d28gSSBhbSBncmVldGVk
+IHdpdGggYSAnQnVpbGQgc3VjY2VlZGVkJw0KPiBtZXNzYWdlLCBJIGdhdGhlciB0aGUgYXJ0aWZh
+Y3RzIGFuZCBhbGwgaXMgd2VsbC4NCj4gDQo+IEJ1dCB3aGVuIEkgZG8gYSBycG1idWlsZCwgSSBo
+YXZlIHRvIHJlbHkgb24gZG9pbmcgYSBtYWtlLWRpc3QsIGFuZA0KPiB0aGVuIGlzc3VlIGEgcnBt
+YnVpbGQgdGFyZ2V0aW5nIHRoaXMgdGFyYmFsbC4gSG93ZXZlciwgaW4gdGhlIHNhbWUNCj4gcnVu
+bmVycywgdGhpcyBidWlsZCB3aWxsIGZhaWwgd2l0aCAidmlydHVhbCBtZW1vcnkgZXhoYXVzdGVk
+Ii4gSXMNCj4gdGhlcmUgYW55dGhpbmcgSSBjYW4gZG8gdGhhdCBkb2VzIG5vdCBpbW1lZGlhdGVs
+eSBpbnZvbHZlIGFkZGluZyBtb3JlDQo+IG1lbW9yeT8NCj4gDQo+IElmIG1vcmUgaW5mb3JtYXRp
+b24gaXMgbmVlZGVkLCBwbGVhc2UgbGV0IG1lIGtub3cuLi4NCj4gDQo+IHJlZ2FyZHMsDQo+IA0K
+PiANCj4gR2VyYXJkDQo+IA0KPiAtLSANCj4gDQo+ICAgR2VyYXJkIEJyYWFkIHwgaHR0cDovL2di
+cmFhZC5ubA0KPiAgIFsgRG9pbmcgT3BlbiBTb3VyY2UgTWF0dGVycyBdDQo+IC0tDQo+IFRvIHVu
+c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
+LWRldmVsIiBpbg0KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
+bmVsLm9yZw0KPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
+L21ham9yZG9tby1pbmZvLmh0bWwNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5j
+ZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2Vw
+aC5jb20K
