@@ -1,53 +1,41 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: [sepia] "This branch is out-of-date with the base branch"
-Date: Fri, 29 Jul 2016 11:31:45 -0700
-Message-ID: <CAJ4mKGbWcjkz3Uj65TkC1kkrN9Dhd-yQW=02RYkMmsE207Kfzw@mail.gmail.com>
-References: <CALe9h7fiBXcFVzo9k2+smVxWrewBw_dK8uMY6kJuts_MwA6mtg@mail.gmail.com>
- <CALqRxCyOjLXBYJg=Le3Sz6c-_mJoTG8o7oTXRVWqe5SFvziJuw@mail.gmail.com>
- <CAJ4mKGY2ZyRBtkR+BAmFSc7Vc05dg=6fsEP4h2wTXuhUFw=Egw@mail.gmail.com> <CALqRxCzU=Ksj7zMKaAjWqPaMR5YLCi77tGKted+hfgzzWs8Gew@mail.gmail.com>
+From: Jesse Williamson <jwilliamson@suse.de>
+Subject: Re: [Feature request] config diff on a single option with the admin
+ socket
+Date: Fri, 29 Jul 2016 11:32:29 -0700 (PDT)
+Message-ID: <alpine.LSU.2.20.1607291125130.28641@ancalagon.suse.com>
+References: <CA+HUO7+qxtsS03yKp2ETUhKy6WTX1ESd0Xridw13viWwa0Cj3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII; format=flowed
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f179.google.com ([209.85.217.179]:36086 "EHLO
-	mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750834AbcG2Sbr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jul 2016 14:31:47 -0400
-Received: by mail-ua0-f179.google.com with SMTP id j59so67619351uaj.3
-        for <ceph-devel@vger.kernel.org>; Fri, 29 Jul 2016 11:31:46 -0700 (PDT)
-In-Reply-To: <CALqRxCzU=Ksj7zMKaAjWqPaMR5YLCi77tGKted+hfgzzWs8Gew@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:55901 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752269AbcG2Sce (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 29 Jul 2016 14:32:34 -0400
+In-Reply-To: <CA+HUO7+qxtsS03yKp2ETUhKy6WTX1ESd0Xridw13viWwa0Cj3Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Zack Cerza <zack@redhat.com>, John Spray <jspray@redhat.com>, "sepia@lists.ceph.com" <sepia@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sebastien Han <shan@redhat.com>
+Cc: Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Fri, Jul 29, 2016 at 11:08 AM, Ken Dreyer <kdreyer@redhat.com> wrote=
-:
-> On Fri, Jul 29, 2016 at 11:27 AM, Gregory Farnum <gfarnum@redhat.com>=
- wrote:
->> I know Zack wanted this on teuthology, but I really don't think it's
->> acceptable for the qa-suite stuff -- it practically guarantees we wo=
-n't be
->> able to merge what was actually tested!
->> Also, those branches need to be coordinated with ceph PRs and contin=
-uous
->> rebasing of them over the long periods of time that can entail is ju=
-st not
->> feasible.
->> -Greg
+On Fri, 29 Jul 2016, Sebastien Han wrote:
+
+Hi Sebastien,
+
+> I'd like to have the same but for a specific option only.
 >
-> Personally I like "Require status checks to pass before merging", but
-> the other setting, "Require branches to be up to date
-> before merging" setting is pretty strict, particularly when every PR
-> has to be rebased by hand.
+> So something like:
+>
+> ceph daemon mon.ceph-mon-01 config diff get <field>
+>
+> Which will return the diff between the actual config value and the
+> original config value.
 
-Oh yes, the fast-forward requirement is what I meant as well =E2=80=94 =
-I'm
-really glad we flipped the switch to require tests be passing
-everywhere!
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I might be able to help with this, if there's no support that anyone 
+already knows of, or clear takers. I'm working on a small config-related 
+librados feature right now and am somewhat familiar with the relevant 
+moving parts on that end, so I might be in a good position to work on it.
+
+WRT the admin socket, I'm less clear, but can be pointed in the right 
+direction. :-)
+
+-Jesse
