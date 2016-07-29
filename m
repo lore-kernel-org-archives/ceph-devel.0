@@ -1,49 +1,62 @@
-From: Gerard Braad <me@gbraad.nl>
-Subject: Re: Cmake and rpmbuild
-Date: Fri, 29 Jul 2016 14:24:30 +0800
-Message-ID: <CAGrH30UmTME+QgRdOe+RwhtwLNQ2vLjdn4MdZCDL2FVpGJofow@mail.gmail.com>
-References: <CAGrH30XYN5fsx4HojZf3QdEAyvLm+-7N=tKYJU13HhjLrrRToQ@mail.gmail.com>
- <FEE54276-2859-45C6-8D89-FB7F375A3158@Teradata.com>
+From: Zhangzengran <zhangzengran@h3c.com>
+Subject: re: [rgw multisite] sync thread hang
+Date: Fri, 29 Jul 2016 07:17:51 +0000
+Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314C2515@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f176.google.com ([209.85.223.176]:32908 "EHLO
-	mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750785AbcG2GYc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jul 2016 02:24:32 -0400
-Received: by mail-io0-f176.google.com with SMTP id 38so120417340iol.0
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2016 23:24:31 -0700 (PDT)
-In-Reply-To: <FEE54276-2859-45C6-8D89-FB7F375A3158@Teradata.com>
+Received: from smtp.h3c.com ([60.191.123.56]:34792 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750868AbcG2HYm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 29 Jul 2016 03:24:42 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
-Cc: ceph-users <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "cbodley@redhat.com" <cbodley@redhat.com>
+Cc: "yehuda@redhat.com" <yehuda@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Jul 29, 2016 at 2:20 PM, Kamble, Nitin A
-<Nitin.Kamble@teradata.com> wrote:
->    To me this looks like a terribly crippled environment to build cep=
-h, and I won=E2=80=99t bother building in such environment. IMO, It=E2=80=
-=99s not worth for anybody to optimize the build process to make it wor=
-k on such a crippled environment.
-
-PoC phase... but likely the conclusion is as expected. Builds run
-perfectly in a 8G setup.
-
-> And to answer your question, If you can not add more memory then prov=
-ide more swap space to increase the virtual memory.  You can also remov=
-e the  =E2=80=9C-j" parameter to =E2=80=9Cmake" in the spec file to avo=
-id creating lot of processes for parallel build.
-
-`-j` has been altered and had no effect. Just wondering why doing a
-`cmake` finishes without any problem in the same environment. And why
-rpmbuild is also running something else than cmake (this is a target
-for future)?
-
-regards,
-Gerard
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgQ2FzZXk6DQogICAgICAgIE15IE9TIGlzIENlbnRPUyBMaW51eCByZWxlYXNlIDcuMi4xNTEx
+IChDb3JlKSwgbGliY3VybCB2ZXJzaW9uIGlzIDcuMjkuMC0yNS4gKHdpdGggSEFWRV9DVVJMX01V
+TFRJX1dBSVQgaXMgVFJVRSkuDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQpIaSBDYXNleToN
+CiAgICAgICAgV2UgYXJlIHRlc3RpbmcgbXVsdGlzaXRlIG9uIHYxMC4yLjIsIGFuZCBmb3VuZCB0
+aGF0IHRoZSBtZXRhIHN5bmMgdGhyZWFkIGJsb2NrZWQgd2hlbiBzaGFyZHMgcmVhZGluZyByZW1v
+dGUgbWRsb2cgcmVzcG9uc2Uod3JpdGUgbWV0aG9kIGluIFJHV0hUVFBNYW5hZ2VyOjpzaWduYWxf
+dGhyZWFkKCkpLCAgYW5kIHRoZSBSR1dIVFRQTWFuYWdlcjo6UmVxc1RocmVhZCBhbHNvIGJsb2Nr
+ZWQgb24gcG9sbC5BcmUgdGhlcmUgc29tZSBrb3duIGJ1Z3MgYmUgZml4ZWQgYWxyZWFkeT8gVGhh
+bmsgeW91IQ0KDQpbUkdXQ2xvbmVNZXRhTG9nQ29yb3V0aW5lXQ0KKGdkYikgZnJhbWUNCiMwICAw
+eDAwMDA3ZjZkNjZhYmQxY2QgaW4gd3JpdGUgKCkgZnJvbSAvbGliNjQvbGlicHRocmVhZC5zby4w
+DQooZ2RiKSBpbmZvIGZyYW1lDQpTdGFjayBsZXZlbCAwLCBmcmFtZSBhdCAweDdmNmM3NGZlNmJi
+MDoNCiByaXAgPSAweDdmNmQ2NmFiZDFjZCBpbiB3cml0ZTsgc2F2ZWQgcmlwIDB4N2Y2ZDY3NDU3
+YjIwICBjYWxsZWQgYnkgZnJhbWUgYXQgMHg3ZjZjNzRmZTZkMTAgIEFyZ2xpc3QgYXQgMHg3ZjZj
+NzRmZTZiOTgsIGFyZ3M6DQogTG9jYWxzIGF0IDB4N2Y2Yzc0ZmU2Yjk4LCBQcmV2aW91cyBmcmFt
+ZSdzIHNwIGlzIDB4N2Y2Yzc0ZmU2YmIwICBTYXZlZCByZWdpc3RlcnM6DQogIHJpcCBhdCAweDdm
+NmM3NGZlNmJhOA0KKGdkYikgaGVscCBmcmFtZQ0KU2VsZWN0IGFuZCBwcmludCBhIHN0YWNrIGZy
+YW1lLg0KV2l0aCBubyBhcmd1bWVudCwgcHJpbnQgdGhlIHNlbGVjdGVkIHN0YWNrIGZyYW1lLiAg
+KFNlZSBhbHNvICJpbmZvIGZyYW1lIikuDQpBbiBhcmd1bWVudCBzcGVjaWZpZXMgdGhlIGZyYW1l
+IHRvIHNlbGVjdC4NCkl0IGNhbiBiZSBhIHN0YWNrIGZyYW1lIG51bWJlciBvciB0aGUgYWRkcmVz
+cyBvZiB0aGUgZnJhbWUuDQpXaXRoIGFyZ3VtZW50LCBub3RoaW5nIGlzIHByaW50ZWQgaWYgaW5w
+dXQgaXMgY29taW5nIGZyb20gYSBjb21tYW5kIGZpbGUgb3IgYSB1c2VyLWRlZmluZWQgY29tbWFu
+ZC4NCihnZGIpIGZyYW1lIDB4N2Y2Yzc0ZmU2ZDEwDQojMSAgMHgwMDAwN2Y2ZDY3NDU3YjIwIGlu
+IFJHV0hUVFBNYW5hZ2VyOjpzaWduYWxfdGhyZWFkKCkgKCkgZnJvbSAvbGliNjQvbGlicmd3LnNv
+LjINCg0KW1JHV0hUVFBNYW5hZ2VyOjpSZXFzVGhyZWFkXQ0KKGdkYikgdGhyZWFkIDE1Mw0KW1N3
+aXRjaGluZyB0byB0aHJlYWQgMTUzIChUaHJlYWQgMHg3ZjZjNzU3ZWE3MDAgKExXUCAxMDY5MSkp
+XQ0KIzAgIDB4MDAwMDdmNmQ2NjBiNzY5ZCBpbiBwb2xsICgpIGZyb20gL2xpYjY0L2xpYmMuc28u
+Ng0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t5bee
+5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ5LqO
+5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQrnmoTkuKrkurrmiJbnvqTnu4TjgILnpoHm
+raLku7vkvZXlhbbku5bkurrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zkvYbkuI3pmZDk
+uo7lhajpg6jmiJbpg6jliIblnLDms4TpnLLjgIHlpI3liLbjgIENCuaIluaVo+WPke+8ieacrOmC
+ruS7tuS4reeahOS/oeaBr+OAguWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOer
+i+WNs+eUteivneaIlumCruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0K6YKu5Lu277yB
+DQpUaGlzIGUtbWFpbCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGlu
+Zm9ybWF0aW9uIGZyb20gSDNDLCB3aGljaCBpcw0KaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNv
+biBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhl
+DQppbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkgKGluY2x1ZGluZywgYnV0
+IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsDQpkaXNjbG9zdXJlLCByZXByb2R1Y3Rp
+b24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQN
+CnJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBp
+biBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyDQpieSBwaG9uZSBvciBlbWFpbCBpbW1l
+ZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0K
