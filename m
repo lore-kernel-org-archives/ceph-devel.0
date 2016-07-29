@@ -1,43 +1,59 @@
-From: Gerard Braad <me@gbraad.nl>
-Subject: Cmake and rpmbuild
-Date: Fri, 29 Jul 2016 09:50:51 +0800
-Message-ID: <CAGrH30XYN5fsx4HojZf3QdEAyvLm+-7N=tKYJU13HhjLrrRToQ@mail.gmail.com>
+From: Zhangzengran <zhangzengran@h3c.com>
+Subject: [rgw multisite] sync thread hang
+Date: Fri, 29 Jul 2016 04:37:17 +0000
+Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314C2493@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:33805 "EHLO
-	mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751269AbcG2Buw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2016 21:50:52 -0400
-Received: by mail-io0-f195.google.com with SMTP id g86so8738773ioj.1
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2016 18:50:52 -0700 (PDT)
+Received: from smtp.h3c.com ([60.191.123.56]:34434 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750721AbcG2EiP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 29 Jul 2016 00:38:15 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users <ceph-users@lists.ceph.com>, ceph-devel@vger.kernel.org
+To: "cbodley@redhat.com" <cbodley@redhat.com>
+Cc: "yehuda@redhat.com" <yehuda@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi All,
-
-
-At the moment I am setting up CI pipelines for Ceph and ran into a
-small issue; I have some memory constrained runners (2G). So, when
-performing a build using do-cmake all is fine... the build might last
-long, but after an hour or two I am greeted with a 'Build succeeded'
-message, I gather the artifacts and all is well.
-
-But when I do a rpmbuild, I have to rely on doing a make-dist, and
-then issue a rpmbuild targeting this tarball. However, in the same
-runners, this build will fail with "virtual memory exhausted". Is
-there anything I can do that does not immediately involve adding more
-memory?
-
-If more information is needed, please let me know...
-
-regards,
-
-
-Gerard
-
--- 
-
-   Gerard Braad | http://gbraad.nl
-   [ Doing Open Source Matters ]
+SGkgQ2FzZXk6DQogICAgICAgIFdlIGFyZSB0ZXN0aW5nIG11bHRpc2l0ZSBvbiB2MTAuMi4yLCBh
+bmQgZm91bmQgdGhhdCB0aGUgbWV0YSBzeW5jIHRocmVhZCBibG9ja2VkIHdoZW4gc2hhcmRzIHJl
+YWRpbmcgcmVtb3RlIG1kbG9nIHJlc3BvbnNlKHdyaXRlIG1ldGhvZCBpbiBSR1dIVFRQTWFuYWdl
+cjo6c2lnbmFsX3RocmVhZCgpKSwNCiBhbmQgdGhlIFJHV0hUVFBNYW5hZ2VyOjpSZXFzVGhyZWFk
+IGFsc28gYmxvY2tlZCBvbiBwb2xsLkFyZSB0aGVyZSBzb21lIGtvd24gYnVncyBiZSBmaXhlZCBh
+bHJlYWR5PyBUaGFuayB5b3UhDQoNCltSR1dDbG9uZU1ldGFMb2dDb3JvdXRpbmVdDQooZ2RiKSBm
+cmFtZQ0KIzAgIDB4MDAwMDdmNmQ2NmFiZDFjZCBpbiB3cml0ZSAoKSBmcm9tIC9saWI2NC9saWJw
+dGhyZWFkLnNvLjANCihnZGIpIGluZm8gZnJhbWUNClN0YWNrIGxldmVsIDAsIGZyYW1lIGF0IDB4
+N2Y2Yzc0ZmU2YmIwOg0KIHJpcCA9IDB4N2Y2ZDY2YWJkMWNkIGluIHdyaXRlOyBzYXZlZCByaXAg
+MHg3ZjZkNjc0NTdiMjANCiBjYWxsZWQgYnkgZnJhbWUgYXQgMHg3ZjZjNzRmZTZkMTANCiBBcmds
+aXN0IGF0IDB4N2Y2Yzc0ZmU2Yjk4LCBhcmdzOg0KIExvY2FscyBhdCAweDdmNmM3NGZlNmI5OCwg
+UHJldmlvdXMgZnJhbWUncyBzcCBpcyAweDdmNmM3NGZlNmJiMA0KIFNhdmVkIHJlZ2lzdGVyczoN
+CiAgcmlwIGF0IDB4N2Y2Yzc0ZmU2YmE4DQooZ2RiKSBoZWxwIGZyYW1lDQpTZWxlY3QgYW5kIHBy
+aW50IGEgc3RhY2sgZnJhbWUuDQpXaXRoIG5vIGFyZ3VtZW50LCBwcmludCB0aGUgc2VsZWN0ZWQg
+c3RhY2sgZnJhbWUuICAoU2VlIGFsc28gImluZm8gZnJhbWUiKS4NCkFuIGFyZ3VtZW50IHNwZWNp
+ZmllcyB0aGUgZnJhbWUgdG8gc2VsZWN0Lg0KSXQgY2FuIGJlIGEgc3RhY2sgZnJhbWUgbnVtYmVy
+IG9yIHRoZSBhZGRyZXNzIG9mIHRoZSBmcmFtZS4NCldpdGggYXJndW1lbnQsIG5vdGhpbmcgaXMg
+cHJpbnRlZCBpZiBpbnB1dCBpcyBjb21pbmcgZnJvbQ0KYSBjb21tYW5kIGZpbGUgb3IgYSB1c2Vy
+LWRlZmluZWQgY29tbWFuZC4NCihnZGIpIGZyYW1lIDB4N2Y2Yzc0ZmU2ZDEwDQojMSAgMHgwMDAw
+N2Y2ZDY3NDU3YjIwIGluIFJHV0hUVFBNYW5hZ2VyOjpzaWduYWxfdGhyZWFkKCkgKCkgZnJvbSAv
+bGliNjQvbGlicmd3LnNvLjINCg0KW1JHV0hUVFBNYW5hZ2VyOjpSZXFzVGhyZWFkXQ0KKGdkYikg
+dGhyZWFkIDE1Mw0KW1N3aXRjaGluZyB0byB0aHJlYWQgMTUzIChUaHJlYWQgMHg3ZjZjNzU3ZWE3
+MDAgKExXUCAxMDY5MSkpXQ0KIzAgIDB4MDAwMDdmNmQ2NjBiNzY5ZCBpbiBwb2xsICgpIGZyb20g
+L2xpYjY0L2xpYmMuc28uNg0KDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrmnKzpgq7ku7blj4rlhbbp
+mYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDlhazlj7jnmoTkv53lr4bk
+v6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7oNCueahOS4quS6
+uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8
+iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOAgQ0K
+5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo6ZSZ5pS25LqG5pys
+6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R5Lu25Lq65bm25Yig
+6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFp
+biBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNoIGlzDQppbnRlbmRlZCBv
+bmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlzIGxpc3RlZCBhYm92
+ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4gaW4gYW55IHdh
+eSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRpYWwNCmRpc2Ns
+b3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29ucyBvdGhlciB0
+aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQuIElmIHlvdSByZWNl
+aXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXINCmJ5IHBo
+b25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo=
