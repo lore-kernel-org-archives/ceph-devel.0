@@ -1,34 +1,45 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH -next] libceph: using kfree_rcu() to simplify the code
-Date: Sat, 30 Jul 2016 16:58:23 +0200
-Message-ID: <CAOi1vP8Lki_ZNOu4NKkdQhopO_NrM0Z4RrZ1=srRdoApNChJwg@mail.gmail.com>
-References: <1469839106-3692-1-git-send-email-weiyj.lk@gmail.com>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Vote for OpenStack Talks!
+Date: Sun, 31 Jul 2016 13:36:08 +0530
+Message-ID: <CANA9Uk6CakM5T9+v=wa5-fk7KsH4Vp5-dHXF9SdMJbWcekD=9A@mail.gmail.com>
+References: <CAAZbbf1GEkPeod8M4ZroYaY3sNQAsvtBPS_U4RmXdwmEZL+rMA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35277 "EHLO
-	mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751027AbcG3O7K (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 30 Jul 2016 10:59:10 -0400
-Received: by mail-wm0-f66.google.com with SMTP id i5so19641614wmg.2
-        for <ceph-devel@vger.kernel.org>; Sat, 30 Jul 2016 07:58:24 -0700 (PDT)
-In-Reply-To: <1469839106-3692-1-git-send-email-weiyj.lk@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Wei Yongjun <weiyj.lk@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAAZbbf1GEkPeod8M4ZroYaY3sNQAsvtBPS_U4RmXdwmEZL+rMA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Sat, Jul 30, 2016 at 2:38 AM, Wei Yongjun <weiyj.lk@gmail.com> wrote:
-> The callback function of call_rcu() just calls a kfree(), so we
-> can use kfree_rcu() instead of call_rcu() + callback function.
->
-> Signed-off-by: Wei Yongjun <weiyj.lk@gmail.com>
-> ---
->  net/ceph/string_table.c | 8 +-------
->  1 file changed, 1 insertion(+), 7 deletions(-)
-
-Applied.
-
-Thanks,
-
-                Ilya
+UGxlYXNlIHZvdGUgZm9yIG15IHByZXNlbnRhdGlvbiAoc2VhcmNoICJzd2FtaSByZWRkeSIpCmh0
+dHBzOi8vd3d3Lm9wZW5zdGFjay5vcmcvc3VtbWl0L2JhcmNlbG9uYS0yMDE2L3ZvdGUtZm9yLXNw
+ZWFrZXJzL3ByZXNlbnRhdGlvbi8xNTEzNy8/cT1yYW5nYQoKT24gV2VkLCBKdWwgMjcsIDIwMTYg
+YXQgMToxNiBBTSwgUGF0cmljayBNY0dhcnJ5IDxwbWNnYXJyeUByZWRoYXQuY29tPiB3cm90ZToK
+PiBIZXkgY2VwaGVycywKPgo+IEl0IHNlZW1zIHRoYXQgZGlyZWN0IGxpbmtzIHRvIHNwZWNpZmlj
+IE9wZW5TdGFjayB0YWxrcyBoYXZlIGJlZW4KPiBkaXNhYmxlZCBmb3IgdGhlIHZvdGluZyBwZXJp
+b2QgdGhpcyBzdW1taXQuIFNvLCBwbGVhc2UgdGFrZSBhIHdhbGsKPiB0aHJvdWdoIHRoZSBzZWFy
+Y2ggaW50ZXJmYWNlIGFuZCBwaWNrIG91dCB5b3VyIGZhdm9yaXRlIENlcGggdGFsa3MgdG8KPiBw
+cm9tb3RlIQo+Cj4gaHR0cHM6Ly93d3cub3BlbnN0YWNrLm9yZy9zdW1taXQvYmFyY2Vsb25hLTIw
+MTYvdm90ZS1mb3Itc3BlYWtlcnMvCj4KPiBUaGVyZSBhcmUgdG9ucyBvZiBnb29kIHN1Ym1pc3Np
+b25zLCBidXQgd2XigJlsbCBvbmx5IHNlZSBnb29kCj4gcmVwcmVzZW50YXRpb24gYXQgdGhlIHN1
+bW1pdCBpZiB5b3UgYWxsIGdldCBvdXQgYW5kIHZvdGUgKGFuZAo+IGVuY291cmFnZSBvdGhlcnMg
+dG8gZG8gdGhlIHNhbWUpLiBQbGVhc2UgbGV0IG1lIGtub3cgaWYgeW91IGhhdmUgYW55Cj4gcXVl
+c3Rpb25zLiBUaGFua3MhCj4KPgo+IC0tCj4KPiBCZXN0IFJlZ2FyZHMsCj4KPiBQYXRyaWNrIE1j
+R2FycnkKPiBEaXJlY3RvciBDZXBoIENvbW11bml0eSB8fCBSZWQgSGF0Cj4gaHR0cDovL2NlcGgu
+Y29tICB8fCAgaHR0cDovL2NvbW11bml0eS5yZWRoYXQuY29tCj4gQHNjdXR0bGVtb25rZXkgfHwg
+QGNlcGgKPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+
+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IGh0
+dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQpfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1h
+aWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNv
+bS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
