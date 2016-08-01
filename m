@@ -1,45 +1,126 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Vote for OpenStack Talks!
-Date: Sun, 31 Jul 2016 13:36:08 +0530
-Message-ID: <CANA9Uk6CakM5T9+v=wa5-fk7KsH4Vp5-dHXF9SdMJbWcekD=9A@mail.gmail.com>
-References: <CAAZbbf1GEkPeod8M4ZroYaY3sNQAsvtBPS_U4RmXdwmEZL+rMA@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: snapshot implementation problems/options
+Date: Mon, 1 Aug 2016 07:48:23 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1607281928430.1098@piezo.us.to>
+References: <CAJ4mKGbf-zvTkZaqqsZDOA=ZrCsq=WRP80DM3wQpXcOWxYX-hg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAAZbbf1GEkPeod8M4ZroYaY3sNQAsvtBPS_U4RmXdwmEZL+rMA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:36238 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751822AbcHAHs0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Aug 2016 03:48:26 -0400
+In-Reply-To: <CAJ4mKGbf-zvTkZaqqsZDOA=ZrCsq=WRP80DM3wQpXcOWxYX-hg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Zheng Yan <zyan@redhat.com>
 
-UGxlYXNlIHZvdGUgZm9yIG15IHByZXNlbnRhdGlvbiAoc2VhcmNoICJzd2FtaSByZWRkeSIpCmh0
-dHBzOi8vd3d3Lm9wZW5zdGFjay5vcmcvc3VtbWl0L2JhcmNlbG9uYS0yMDE2L3ZvdGUtZm9yLXNw
-ZWFrZXJzL3ByZXNlbnRhdGlvbi8xNTEzNy8/cT1yYW5nYQoKT24gV2VkLCBKdWwgMjcsIDIwMTYg
-YXQgMToxNiBBTSwgUGF0cmljayBNY0dhcnJ5IDxwbWNnYXJyeUByZWRoYXQuY29tPiB3cm90ZToK
-PiBIZXkgY2VwaGVycywKPgo+IEl0IHNlZW1zIHRoYXQgZGlyZWN0IGxpbmtzIHRvIHNwZWNpZmlj
-IE9wZW5TdGFjayB0YWxrcyBoYXZlIGJlZW4KPiBkaXNhYmxlZCBmb3IgdGhlIHZvdGluZyBwZXJp
-b2QgdGhpcyBzdW1taXQuIFNvLCBwbGVhc2UgdGFrZSBhIHdhbGsKPiB0aHJvdWdoIHRoZSBzZWFy
-Y2ggaW50ZXJmYWNlIGFuZCBwaWNrIG91dCB5b3VyIGZhdm9yaXRlIENlcGggdGFsa3MgdG8KPiBw
-cm9tb3RlIQo+Cj4gaHR0cHM6Ly93d3cub3BlbnN0YWNrLm9yZy9zdW1taXQvYmFyY2Vsb25hLTIw
-MTYvdm90ZS1mb3Itc3BlYWtlcnMvCj4KPiBUaGVyZSBhcmUgdG9ucyBvZiBnb29kIHN1Ym1pc3Np
-b25zLCBidXQgd2XigJlsbCBvbmx5IHNlZSBnb29kCj4gcmVwcmVzZW50YXRpb24gYXQgdGhlIHN1
-bW1pdCBpZiB5b3UgYWxsIGdldCBvdXQgYW5kIHZvdGUgKGFuZAo+IGVuY291cmFnZSBvdGhlcnMg
-dG8gZG8gdGhlIHNhbWUpLiBQbGVhc2UgbGV0IG1lIGtub3cgaWYgeW91IGhhdmUgYW55Cj4gcXVl
-c3Rpb25zLiBUaGFua3MhCj4KPgo+IC0tCj4KPiBCZXN0IFJlZ2FyZHMsCj4KPiBQYXRyaWNrIE1j
-R2FycnkKPiBEaXJlY3RvciBDZXBoIENvbW11bml0eSB8fCBSZWQgSGF0Cj4gaHR0cDovL2NlcGgu
-Y29tICB8fCAgaHR0cDovL2NvbW11bml0eS5yZWRoYXQuY29tCj4gQHNjdXR0bGVtb25rZXkgfHwg
-QGNlcGgKPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+
-IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IGh0
-dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQpfX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1h
-aWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNv
-bS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Mon, 25 Jul 2016, Gregory Farnum wrote:
+> Now that we've got a stable base filesystem, we're thinking about how
+> to enable and support long-term the "add-on" features. I've lately
+> been diving into our snapshot code and thinking about alternatives
+> that might be easier to implement and debug (we've had snapshots
+> "basically working" for a long time, and Zheng has made them a lot
+> more reliable, but they still have some issues especially with
+> multi-mds stuff).
+> 
+> I sent in a PR (https://github.com/ceph/ceph/pull/10436) with some
+> basic snapshot documentation, and you may have seen my email on
+> ceph-users about the expected semantics. This is to discuss in a
+> little more detail some of the pieces I've run into that are hard, and
+> the alternatives.
+> 
+> Perhaps the most immediately fixable problem is the "past_parents"
+> links I reference there. When generating the snapids for a SnapContext
+> we look at our local SnapRealm *and* all of its past_parents to
+> generate the complete list. As a consequence, you need to have *all*
+> of the past_parents loaded in memory when doing writes. :( We've had a
+> lot of bugs, at least one remains, and I don't know how much are
+> unfound.
+> Luckily, this is fairly simple to solve: when we create a new
+> SnapRealm, or move it or anything, we can merge its ancestral snapids
+> into the local SnapRealm's list (ie, into the list of snaps in the
+> associated sr_t on-disk). It looks to be so easy a change that tfter
+> going through the code, I'm a little baffled that wasn't the design to
+> begin with! (The trade-off is that on-disk inode structures which
+> frequently move through SnapRealms will get a little larger. I can't
+> imagine it being a big deal, especially in comparison to forcing all
+> the snap parent inodes to be pinned in the cache.)
+
++1
+ 
+> The other big source of bugs in our system is more diffuse, but also
+> all for one big feature: we asynchronously flush snapshot data (both
+> file data to the OSDs and metadata caps to the MDS). If we were trying
+> to ruthlessly simplify things, I'd want to eliminate all that code in
+> favor of simply forcing synchronous writeback when taking a snapshot.
+> I haven't worked through all the consequences of it yet (probably it
+> would involve a freeze on the tree and revoking all caps?) but I'd
+> expect it to reduce the amount of code and complication by a
+> significant amount. I'm inclined to attempt this but it depends on
+> what snapshot behavior we consider acceptable.
+
+I would be inclined to keep the async behavior here despite the 
+complexity.  Unless there are fundamental issues we can't fix I think the 
+complexity is worth it.
+
+> =============
+> 
+> The last big idea I'd like to explore is changing the way we store
+> metadata. I'm not sure about this one yet, but I find the idea of
+> taking actual RADOS snapshots of directory objects, instead of copying
+> the dentries. If we force clients to flush out all data during a
+> snapshot, this becomes pretty simple; it's much harder if we try and
+> maintain async flushing.
+> 
+> Upsides: we don't "pollute" normal file IO with the snapshotted
+> entries. Clean up of removed snapshots happens OSD-side with less MDS
+> work. The best part: we can treat snapshot trees and read activity as
+> happening on entirely separate but normal pieces of the metadata
+> hierarchy, instead of on weird special-rule snapshot IO (by just
+> attaching a SnapContext to all the associated IO, instead of tracking
+> which dentry the snapid applies to, which past version we should be
+> reading, etc).
+> 
+> Downsides: when actually reading snapshot data, there's more
+> duplication in the cache. The OSDs make some attempt at efficient
+> copy-on-write of omap data, but it doesn't work very well on backfill,
+> so we should expect it to take more disk space. And as I mentioned, if
+> we don't do synchronous snapshots, then it would take some extra
+> machinery to make sure we flush data out in the right order to make
+> this work.
+
+What if we keep async snap flushes, but separate out snapped metadata in a 
+different dirfrag.. either a snap of the same object or a different 
+object.  We would need to wait until all the snap cap flushes came in 
+before writing it out, so the simplest approach would probably be to 
+create all of the dentries/inodes in the cache and mark it dirty, and 
+defer writing the dirfrag until the last cap flush comes in.  If we do a 
+snap of the same dirfrag, we additionally need to defer any writes to 
+newer dirfrags too (bc we have to write to rados is chronological order 
+for that object).  That's annoying, but possibly worth it to avoid having 
+to do cleanup.
+
+All of the complicated 'follows' stuff isn't going to go away, 
+though--it'll just switch change from a dentry to a dirfrag property.
+
+> =============
+> 
+> Side point: hard links are really unpleasant with our snapshots in
+> general. Right now snapshots apply to the primary link, but not to
+> others. I can't think of any good solutions: the best one so far
+> involves moving the inode (either logically or physically) out of the
+> dentry, and then setting up logic similar to that used for
+> past_parents and open_snap_parents() whenever you open it from
+> anywhere. :( I've about convinced myself that's just a flat
+> requirement (unless we want to go back to having a global lookup table
+> for all hard links!), but if anybody has alternatives I'd love to hear
+> them...
+
+IMO the current "sloppy" semantics (snapshot applies to first/primary 
+link) are good enough.  Hard links are pretty rare, and often in the same 
+directory anyway.  I agree that to solve it properly the file needs its 
+own snaprealm, which is pretty annoying.
+
+sage
