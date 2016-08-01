@@ -1,143 +1,344 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: snapshot implementation problems/options
-Date: Mon, 1 Aug 2016 06:52:22 -0700
-Message-ID: <CAJ4mKGbPhW_QefWtUCr-c8j5MM1Th6pvncybo+iyoj1Rd5mSJw@mail.gmail.com>
-References: <CAJ4mKGbf-zvTkZaqqsZDOA=ZrCsq=WRP80DM3wQpXcOWxYX-hg@mail.gmail.com>
- <alpine.DEB.2.11.1607281928430.1098@piezo.us.to>
+From: kbuild test robot <fengguang.wu@intel.com>
+Subject: [ceph-client:wip-o-nomtime-1 1/1] include/linux/compiler.h:429:38:
+ error: call to '__compiletime_assert_754' declared with attribute error:
+ BUILD_BUG_ON failed: 22 - 1 != HWEIGHT32( O_RDONLY | O_WRONLY | O_RDWR |
+ O_CREAT | O_EXCL | O_NOCTTY | O_TRUNC | O_APPEND | __O_SYNC | O_DSYNC |
+ FASYNC | O_DIRECT | O_LARGEFILE | O_DIRECTORY | O_NOFOLLOW | O_NOATIME |
+ O_CLOEXEC | __FMODE_EXEC | O_PATH | __O_TMPFILE | __FMODE_NONOTIFY|
+ O_NOMTIME )
+Date: Mon, 1 Aug 2016 22:22:20 +0800
+Message-ID: <201608012218.cMvvmHze%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/mixed; boundary="k+w/mQv8wyuph6w0"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f180.google.com ([209.85.217.180]:34333 "EHLO
-	mail-ua0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751640AbcHAOAR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Aug 2016 10:00:17 -0400
-Received: by mail-ua0-f180.google.com with SMTP id 35so106710433uap.1
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Aug 2016 07:00:16 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1607281928430.1098@piezo.us.to>
+Received: from mga11.intel.com ([192.55.52.93]:52682 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751153AbcHAOXi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 1 Aug 2016 10:23:38 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, John Spray <jspray@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Zheng Yan <zyan@redhat.com>
-
-On Mon, Aug 1, 2016 at 12:48 AM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 25 Jul 2016, Gregory Farnum wrote:
->> Now that we've got a stable base filesystem, we're thinking about how
->> to enable and support long-term the "add-on" features. I've lately
->> been diving into our snapshot code and thinking about alternatives
->> that might be easier to implement and debug (we've had snapshots
->> "basically working" for a long time, and Zheng has made them a lot
->> more reliable, but they still have some issues especially with
->> multi-mds stuff).
->>
->> I sent in a PR (https://github.com/ceph/ceph/pull/10436) with some
->> basic snapshot documentation, and you may have seen my email on
->> ceph-users about the expected semantics. This is to discuss in a
->> little more detail some of the pieces I've run into that are hard, and
->> the alternatives.
->>
->> Perhaps the most immediately fixable problem is the "past_parents"
->> links I reference there. When generating the snapids for a SnapContext
->> we look at our local SnapRealm *and* all of its past_parents to
->> generate the complete list. As a consequence, you need to have *all*
->> of the past_parents loaded in memory when doing writes. :( We've had a
->> lot of bugs, at least one remains, and I don't know how much are
->> unfound.
->> Luckily, this is fairly simple to solve: when we create a new
->> SnapRealm, or move it or anything, we can merge its ancestral snapids
->> into the local SnapRealm's list (ie, into the list of snaps in the
->> associated sr_t on-disk). It looks to be so easy a change that tfter
->> going through the code, I'm a little baffled that wasn't the design to
->> begin with! (The trade-off is that on-disk inode structures which
->> frequently move through SnapRealms will get a little larger. I can't
->> imagine it being a big deal, especially in comparison to forcing all
->> the snap parent inodes to be pinned in the cache.)
->
-> +1
->
->> The other big source of bugs in our system is more diffuse, but also
->> all for one big feature: we asynchronously flush snapshot data (both
->> file data to the OSDs and metadata caps to the MDS). If we were trying
->> to ruthlessly simplify things, I'd want to eliminate all that code in
->> favor of simply forcing synchronous writeback when taking a snapshot.
->> I haven't worked through all the consequences of it yet (probably it
->> would involve a freeze on the tree and revoking all caps?) but I'd
->> expect it to reduce the amount of code and complication by a
->> significant amount. I'm inclined to attempt this but it depends on
->> what snapshot behavior we consider acceptable.
->
-> I would be inclined to keep the async behavior here despite the
-> complexity.  Unless there are fundamental issues we can't fix I think the
-> complexity is worth it.
-
-Ha. We talked about this in standup last week and came to the
-conclusion that we actually prefer synchronous flushes, because they
-make the data loss semantics easier for users to understand. Sync
-snaps seem similarly necessary if an HPC machine were using them for
-checkpoints. Can you talk about the advantages of async snaps?
+To: Zach Brown <zab@redhat.com>
+Cc: kbuild-all@01.org, ceph-devel@vger.kernel.org, Sage Weil <sage@redhat.com>
 
 
->
->> =============
->>
->> The last big idea I'd like to explore is changing the way we store
->> metadata. I'm not sure about this one yet, but I find the idea of
->> taking actual RADOS snapshots of directory objects, instead of copying
->> the dentries. If we force clients to flush out all data during a
->> snapshot, this becomes pretty simple; it's much harder if we try and
->> maintain async flushing.
->>
->> Upsides: we don't "pollute" normal file IO with the snapshotted
->> entries. Clean up of removed snapshots happens OSD-side with less MDS
->> work. The best part: we can treat snapshot trees and read activity as
->> happening on entirely separate but normal pieces of the metadata
->> hierarchy, instead of on weird special-rule snapshot IO (by just
->> attaching a SnapContext to all the associated IO, instead of tracking
->> which dentry the snapid applies to, which past version we should be
->> reading, etc).
->>
->> Downsides: when actually reading snapshot data, there's more
->> duplication in the cache. The OSDs make some attempt at efficient
->> copy-on-write of omap data, but it doesn't work very well on backfill,
->> so we should expect it to take more disk space. And as I mentioned, if
->> we don't do synchronous snapshots, then it would take some extra
->> machinery to make sure we flush data out in the right order to make
->> this work.
->
-> What if we keep async snap flushes, but separate out snapped metadata in a
-> different dirfrag.. either a snap of the same object or a different
-> object.  We would need to wait until all the snap cap flushes came in
-> before writing it out, so the simplest approach would probably be to
-> create all of the dentries/inodes in the cache and mark it dirty, and
-> defer writing the dirfrag until the last cap flush comes in.  If we do a
-> snap of the same dirfrag, we additionally need to defer any writes to
-> newer dirfrags too (bc we have to write to rados is chronological order
-> for that object).  That's annoying, but possibly worth it to avoid having
-> to do cleanup.
->
-> All of the complicated 'follows' stuff isn't going to go away,
-> though--it'll just switch change from a dentry to a dirfrag property.
->
->> =============
->>
->> Side point: hard links are really unpleasant with our snapshots in
->> general. Right now snapshots apply to the primary link, but not to
->> others. I can't think of any good solutions: the best one so far
->> involves moving the inode (either logically or physically) out of the
->> dentry, and then setting up logic similar to that used for
->> past_parents and open_snap_parents() whenever you open it from
->> anywhere. :( I've about convinced myself that's just a flat
->> requirement (unless we want to go back to having a global lookup table
->> for all hard links!), but if anybody has alternatives I'd love to hear
->> them...
->
-> IMO the current "sloppy" semantics (snapshot applies to first/primary
-> link) are good enough.  Hard links are pretty rare, and often in the same
-> directory anyway.  I agree that to solve it properly the file needs its
-> own snaprealm, which is pretty annoying.
+--k+w/mQv8wyuph6w0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Mmm. It's true that they're rare, but it's also a very surprising
-behavior for users that's hard to explain. Maybe as an interim measure
-we could disallow creating snapshots at directories which have a
-traversing hard link? I think I've worked out how to do that
-reasonably efficiently.
--Greg
+tree:   https://github.com/ceph/ceph-client.git wip-o-nomtime-1
+head:   1f6d1c01b14b1884799aeeabb9673f80032cbfff
+commit: 1f6d1c01b14b1884799aeeabb9673f80032cbfff [1/1] vfs: add a O_NOMTIME flag
+config: parisc-c3000_defconfig (attached as .config)
+compiler: hppa-linux-gnu-gcc (Debian 5.4.0-6) 5.4.0 20160609
+reproduce:
+        wget https://git.kernel.org/cgit/linux/kernel/git/wfg/lkp-tests.git/plain/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        git checkout 1f6d1c01b14b1884799aeeabb9673f80032cbfff
+        # save the attached .config to linux build tree
+        make.cross ARCH=parisc 
+
+All error/warnings (new ones prefixed by >>):
+
+   In file included from include/uapi/linux/stddef.h:1:0,
+                    from include/linux/stddef.h:4,
+                    from include/uapi/linux/posix_types.h:4,
+                    from include/uapi/linux/types.h:13,
+                    from include/linux/types.h:5,
+                    from include/linux/syscalls.h:70,
+                    from fs/fcntl.c:7:
+   fs/fcntl.c: In function 'fcntl_init':
+>> include/linux/compiler.h:429:38: error: call to '__compiletime_assert_754' declared with attribute error: BUILD_BUG_ON failed: 22 - 1 != HWEIGHT32( O_RDONLY | O_WRONLY | O_RDWR | O_CREAT | O_EXCL | O_NOCTTY | O_TRUNC | O_APPEND | __O_SYNC | O_DSYNC | FASYNC | O_DIRECT | O_LARGEFILE | O_DIRECTORY | O_NOFOLLOW | O_NOATIME | O_CLOEXEC | __FMODE_EXEC | O_PATH | __O_TMPFILE | __FMODE_NONOTIFY| O_NOMTIME )
+     _compiletime_assert(condition, msg, __compiletime_assert_, __LINE__)
+                                         ^
+   include/linux/compiler.h:412:4: note: in definition of macro '__compiletime_assert'
+       prefix ## suffix();    \
+       ^
+   include/linux/compiler.h:429:2: note: in expansion of macro '_compiletime_assert'
+     _compiletime_assert(condition, msg, __compiletime_assert_, __LINE__)
+     ^
+   include/linux/bug.h:50:37: note: in expansion of macro 'compiletime_assert'
+    #define BUILD_BUG_ON_MSG(cond, msg) compiletime_assert(!(cond), msg)
+                                        ^
+   include/linux/bug.h:74:2: note: in expansion of macro 'BUILD_BUG_ON_MSG'
+     BUILD_BUG_ON_MSG(condition, "BUILD_BUG_ON failed: " #condition)
+     ^
+>> fs/fcntl.c:745:2: note: in expansion of macro 'BUILD_BUG_ON'
+     BUILD_BUG_ON(22 - 1 /* for O_RDONLY being 0 */ != HWEIGHT32(
+     ^
+
+vim +/__compiletime_assert_754 +429 include/linux/compiler.h
+
+9a8ab1c3 Daniel Santos  2013-02-21  423   *
+9a8ab1c3 Daniel Santos  2013-02-21  424   * In tradition of POSIX assert, this macro will break the build if the
+9a8ab1c3 Daniel Santos  2013-02-21  425   * supplied condition is *false*, emitting the supplied error message if the
+9a8ab1c3 Daniel Santos  2013-02-21  426   * compiler has support to do so.
+9a8ab1c3 Daniel Santos  2013-02-21  427   */
+9a8ab1c3 Daniel Santos  2013-02-21  428  #define compiletime_assert(condition, msg) \
+9a8ab1c3 Daniel Santos  2013-02-21 @429  	_compiletime_assert(condition, msg, __compiletime_assert_, __LINE__)
+9a8ab1c3 Daniel Santos  2013-02-21  430  
+47933ad4 Peter Zijlstra 2013-11-06  431  #define compiletime_assert_atomic_type(t)				\
+47933ad4 Peter Zijlstra 2013-11-06  432  	compiletime_assert(__native_word(t),				\
+
+:::::: The code at line 429 was first introduced by commit
+:::::: 9a8ab1c39970a4938a72d94e6fd13be88a797590 bug.h, compiler.h: introduce compiletime_assert & BUILD_BUG_ON_MSG
+
+:::::: TO: Daniel Santos <daniel.santos@pobox.com>
+:::::: CC: Linus Torvalds <torvalds@linux-foundation.org>
+
+---
+0-DAY kernel test infrastructure                Open Source Technology Center
+https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
+
+--k+w/mQv8wyuph6w0
+Content-Type: application/octet-stream
+Content-Disposition: attachment; filename=".config.gz"
+Content-Transfer-Encoding: base64
+
+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
+GysDIYPTjtG9UIl1jVQ3BdX//OqZraDRAAA=
+
+--k+w/mQv8wyuph6w0--
