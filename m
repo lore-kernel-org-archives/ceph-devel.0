@@ -1,54 +1,42 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: [rgw multisite] disable specified bucket data sync
-Date: Tue, 2 Aug 2016 16:42:43 -0400
-Message-ID: <dc36d124-bae3-9e42-9daa-4ff66a3d23e5@redhat.com>
-References: <7BD28126D6935A4498AE6DE60B5D4CAB314C2E40@H3CMLB12-EX.srv.huawei-3com.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Another BlueFS corruption
+Date: Tue, 2 Aug 2016 22:59:13 +0000
+Message-ID: <BL2PR02MB21159A24C7A61A47077F539AF4050@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f180.google.com ([209.85.220.180]:34301 "EHLO
-	mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755150AbcHBUmq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Aug 2016 16:42:46 -0400
-Received: by mail-qk0-f180.google.com with SMTP id p186so60519201qkd.1
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Aug 2016 13:42:45 -0700 (PDT)
-In-Reply-To: <7BD28126D6935A4498AE6DE60B5D4CAB314C2E40@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from mail-dm3nam03on0083.outbound.protection.outlook.com ([104.47.41.83]:60480
+	"EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754164AbcHBW7Q convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Aug 2016 18:59:16 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zhangzengran <zhangzengran@h3c.com>
-Cc: "yehuda@redhat.com" <yehuda@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-
-On 08/02/2016 03:34 AM, Zhangzengran wrote:
-> Hi Casey:
->          Why don’t support stopping specified bucket data sync. Is there any difficulty in implementing the feature?
->          Or am I missing something?
->
->          Thank you !
-> -------------------------------------------------------------------------------------------------------------------------------------
-> 本邮件及其附件含有杭州华三通信技术有限公司的保密信息，仅限于发送给上面地址中列出
-> 的个人或群组。禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制、
-> 或散发）本邮件中的信息。如果您错收了本邮件，请您立即电话或邮件通知发件人并删除本
-> 邮件！
-> This e-mail and its attachments contain confidential information from H3C, which is
-> intended only for the person or entity whose address is listed above. Any use of the
-> information contained herein in any way (including, but not limited to, total or partial
-> disclosure, reproduction, or dissemination) by persons other than the intended
-> recipient(s) is prohibited. If you receive this e-mail in error, please notify the sender
-> by phone or email immediately and delete it!
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
 Hi,
+Got another corruption within BlueFS during replay.
 
-What would you like to get out of this feature? A way to disable sync on 
-a given bucket temporarily, and turn it back on later? Or just a way to 
-have a subset of buckets that don't ever participate in sync?
+Thread 1 "ceph-osd" received signal SIGSEGV, Segmentation fault.
+0x0000555555d33bfc in BlueFS::_read (this=this@entry=0x7ffff34fca80, h=h@entry=0x7fffe8472300, buf=buf@entry=0x7fffe8472308, off=0, len=4096,
+    outbl=outbl@entry=0x7fffffff58a0, out=0x0) at os/bluestore/BlueFS.cc:839
+839           uint64_t l = MIN(p->length - x_off, want);
+(gdb) bt
+#0  0x0000555555d33bfc in BlueFS::_read (this=this@entry=0x7ffff34fca80, h=h@entry=0x7fffe8472300, buf=buf@entry=0x7fffe8472308, off=0, len=4096,
+    outbl=outbl@entry=0x7fffffff58a0, out=0x0) at os/bluestore/BlueFS.cc:839
+#1  0x0000555555d43abf in BlueFS::_replay (this=this@entry=0x7ffff34fca80) at os/bluestore/BlueFS.cc:475
+#2  0x0000555555d46f2f in BlueFS::mount (this=0x7ffff34fca80) at os/bluestore/BlueFS.cc:343
+#3  0x0000555555c2cb8d in BlueStore::_open_db (this=this@entry=0x7ffff3549c00, create=create@entry=false) at os/bluestore/BlueStore.cc:2096
+#4  0x0000555555c50ded in BlueStore::mount (this=0x7ffff3549c00) at os/bluestore/BlueStore.cc:2739
+#5  0x00005555559113f6 in OSD::init (this=0x7ffff35ff000) at osd/OSD.cc:2025
+#6  0x0000555555874680 in main (argc=<optimized out>, argv=<optimized out>) at ceph_osd.cc:609
 
-Do you have a use case for the first? That's not something we'd considered.
+I got now total of 3 BlueFS replay bug and created the following tracker adding all crashes..
 
-If you just want to have some buckets that never sync, you might 
-consider serving those out of a separate gateway, in a zone that isn't 
-part of a multisite configuration.
+http://tracker.ceph.com/issues/16897
 
-Thanks,
-Casey
+Thanks & Regards
+Somnath
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
