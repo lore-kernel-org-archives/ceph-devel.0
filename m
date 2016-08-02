@@ -1,34 +1,85 @@
-From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Reminder: CDM tomorrow
-Date: Tue, 2 Aug 2016 11:15:02 -0400
-Message-ID: <CAAZbbf1MdcLusbO4mDNqfg1cK6szZmw0zdE8b1tLdUVE+uj08A@mail.gmail.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: handling qemu-guest logs in ceph-ansible
+Date: Tue, 2 Aug 2016 09:41:30 -0600
+Message-ID: <CALqRxCzgcU_adEcGESwahLmXE1rXN_AF3eP0vq3qsS92T3w3LQ@mail.gmail.com>
+References: <CALqRxCzk4-u842fq5xBW2SrdYSY+9wD=zLEDtUrAgNZ-L4pggA@mail.gmail.com>
+ <CAJ4mKGa6Mj7PJ8nnij+QcbgdCtCfzuH7POgeXBXyo51CtT91Qg@mail.gmail.com> <CA+aFP1DGzX7M7CugzH51VXTQzasZkSe3Jxm+kudRE6PzeotPWQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-Cc: board-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ua0-f173.google.com ([209.85.217.173]:35171 "EHLO
+	mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S967598AbcHBPlc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Aug 2016 11:41:32 -0400
+Received: by mail-ua0-f173.google.com with SMTP id l32so132132049ual.2
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Aug 2016 08:41:31 -0700 (PDT)
+In-Reply-To: <CA+aFP1DGzX7M7CugzH51VXTQzasZkSe3Jxm+kudRE6PzeotPWQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGV5IGNlcGhlcnMsCgpKdXN0IGEgcmVtaW5kZXIgdGhhdCBvdXIgQ2VwaCBEZXZlbG9wZXIgTW9u
-dGhseSBkaXNjdXNzaW9uIGlzCmhhcHBlbmluZyB0b21vcnJvdyBhdCAxMjozMHAgRURUIG9uIGJs
-dWVqZWFucy4gUGxlYXNlLCBpZiB5b3UgYXJlCndvcmtpbmcgb24gc29tZXRoaW5nIGluIHRoZSBD
-ZXBoIGNvZGUgYmFzZSBjdXJyZW50bHksIGp1c3QgZHJvcCBhCnF1aWNrIG5vdGUgb24gdGhlIENE
-TSBwYWdlIHNvIHRoYXQgd2XigJlyZSBhYmxlIHRvIGdldCBpdCBvbiB0aGUgYWdlbmRhLgpUaGFu
-a3MhCgpodHRwOi8vd2lraS5jZXBoLmNvbS9DRE1fMDMtQVVHLTIwMTYKCklmIHlvdSBuZWVkIHRo
-ZSBkaWFsLWluIGluZm9ybWF0aW9uLCB5b3UgY2FuIGZpbmQgaXQgYXQ6CgpodHRwOi8vd2lraS5j
-ZXBoLmNvbS9QbGFubmluZwoKClNlZSB5b3UgdGhlcmUhCgotLSAKCkJlc3QgUmVnYXJkcywKClBh
-dHJpY2sgTWNHYXJyeQpEaXJlY3RvciBDZXBoIENvbW11bml0eSB8fCBSZWQgSGF0Cmh0dHA6Ly9j
-ZXBoLmNvbSAgfHwgIGh0dHA6Ly9jb21tdW5pdHkucmVkaGF0LmNvbQpAc2N1dHRsZW1vbmtleSB8
-fCBAY2VwaApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpj
-ZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9s
-aXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+Thanks Jason!
+
+I've tried to capture this in our docs, here:
+https://github.com/ceph/ceph/pull/10542
+
+When that's nailed down, we can get a fix into ceph-ansible as well.
+
+- Ken
+
+
+On Tue, Aug 2, 2016 at 7:19 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+> Our documented process is to create a new cephx user (e.g.
+> client.libvirt) and libvirt / QEMU will then use that client (and its
+> configuration file settings) since you probably don't want to be
+> running with admin credentials [1]. You can create a "[client]"
+> section as a catch-all in addition to user-specific sections like
+> "[client.libvirt]".
+>
+> [1] http://docs.ceph.com/docs/master/rbd/libvirt/
+>
+> On Mon, Aug 1, 2016 at 4:18 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+>> On Mon, Aug 1, 2016 at 12:25 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
+>>> With the new unprivileged user support in Jewel, I'm seeing some
+>>> issues with logging and file permissions.
+>>>
+>>> ceph-ansible always configures client logging on every cluster node, like so:
+>>>
+>>>   [client]
+>>>   log file = /var/log/ceph/qemu-guest-$pid.log
+>>>
+>>> As a result, every single client command (eg "ceph health") will
+>>> create a new root-owned "qemu-guest-$pid" log file (which leads to
+>>> issues with logrotate failing to rotate the root-owned files in the
+>>> diretory...)
+>>>
+>>> It's clear we need to remove that bit from the ceph.conf files that
+>>> ceph-ansible writes, but I'm wondering what it *should* be?
+>>>
+>>> Is there a more granular way to configure Ceph so that we only log
+>>> qemu/librbd interactions to qemu-guest-$pid, rather than all client
+>>> logs?
+>>
+>> I don't know the full toolchain these all use (is this for teuthology
+>> or a wider thing?), but generally:
+>> * you can specify different config files on the command line when the
+>> client starts
+>> * you can specify override config values of any kind on the command
+>> line when a client starts
+>> * I believe that QEMU/KVM configs for CephFS let you specify config
+>> values independently
+>> * I think(?) you can specify config "sections" based on specific
+>> client IDs, not just the [client] type
+>>
+>> So I'd look into whichever of those options is most convenient. :)
+>> -Greg
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Jason
