@@ -1,40 +1,39 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Errors in ceph_objectstore_tool.py
-Date: Mon, 1 Aug 2016 23:03:51 +0200
-Message-ID: <61e37d1c-5cdb-2fb1-eaae-fe976cb448fd@digiware.nl>
+From: Zhangzengran <zhangzengran@h3c.com>
+Subject: [rgw multisite] disable specified bucket data sync
+Date: Tue, 2 Aug 2016 07:34:27 +0000
+Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314C2E40@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:29078 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752187AbcHAWQ1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 1 Aug 2016 18:16:27 -0400
-Received: from [192.168.10.10] (asus [192.168.10.10])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.digiware.nl (Postfix) with ESMTPSA id 311D724246
-	for <ceph-devel@vger.kernel.org>; Mon,  1 Aug 2016 23:03:51 +0200 (CEST)
+Received: from smtp.h3c.com ([60.191.123.56]:39438 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751042AbcHBHfq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 2 Aug 2016 03:35:46 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: "cbodley@redhat.com" <cbodley@redhat.com>
+Cc: "yehuda@redhat.com" <yehuda@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
-
-It aborts with:
-2016-08-01 14:17:03.777916 7f9c00d629c0 -1 asok(0x188ebb0)
-AdminSocketConfigObs::init: failed: AdminSocket::bind_and_listen: The
-UNIX domain socket path
-/home/jenkins-build/build/workspace/ceph-pull-requests/build/ceph_objectstore_tool_dir/out/client.admin.25541.asok
-is too long! The maximum length on this system is 107
-
-And the last remark is true, it is a sort of hard upperlimit on length
-of socket-names. (107 in Linux, 104 in FreeBSD)
-
-Which is probably the reason why on most systems sockets are created in
-/tmp, /var/tmp or /var/run/
-
-So I guess that some of the testscripts need to be adjusted to this
-limit and not create the sockets in ..../<testdir>/*.asok
-
---WjW
+SGkgQ2FzZXk6DQogICAgICAgIFdoeSBkb27igJl0IHN1cHBvcnQgc3RvcHBpbmcgc3BlY2lmaWVk
+IGJ1Y2tldCBkYXRhIHN5bmMuIElzIHRoZXJlIGFueSBkaWZmaWN1bHR5IGluIGltcGxlbWVudGlu
+ZyB0aGUgZmVhdHVyZT8NCiAgICAgICAgT3IgYW0gSSBtaXNzaW5nIHNvbWV0aGluZz8NCg0KICAg
+ICAgICBUaGFuayB5b3UgIQ0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K5pys6YKu5Lu25Y+K5YW26ZmE
+5Lu25ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h
+5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQrnmoTkuKrkurrm
+iJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbku5bkurrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjl
+jIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDms4TpnLLjgIHlpI3liLbjgIENCuaI
+luaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OAguWmguaenOaCqOmUmeaUtuS6huacrOmC
+ruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZ
+pOacrA0K6YKu5Lu277yBDQpUaGlzIGUtbWFpbCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4g
+Y29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20gSDNDLCB3aGljaCBpcw0KaW50ZW5kZWQgb25s
+eSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUu
+IEFueSB1c2Ugb2YgdGhlDQppbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkg
+KGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsDQpkaXNjbG9z
+dXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhh
+biB0aGUgaW50ZW5kZWQNCnJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2
+ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyDQpieSBwaG9u
+ZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0K
