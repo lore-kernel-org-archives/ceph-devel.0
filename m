@@ -1,85 +1,92 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: handling qemu-guest logs in ceph-ansible
-Date: Tue, 2 Aug 2016 09:41:30 -0600
-Message-ID: <CALqRxCzgcU_adEcGESwahLmXE1rXN_AF3eP0vq3qsS92T3w3LQ@mail.gmail.com>
-References: <CALqRxCzk4-u842fq5xBW2SrdYSY+9wD=zLEDtUrAgNZ-L4pggA@mail.gmail.com>
- <CAJ4mKGa6Mj7PJ8nnij+QcbgdCtCfzuH7POgeXBXyo51CtT91Qg@mail.gmail.com> <CA+aFP1DGzX7M7CugzH51VXTQzasZkSe3Jxm+kudRE6PzeotPWQ@mail.gmail.com>
+From: Muminul Islam Russell <misla011@fiu.edu>
+Subject: Syslog error during disk preparation
+Date: Tue, 2 Aug 2016 10:05:58 -0700
+Message-ID: <CAK=B8yZmeAKVxVoZVH2wDAS+xW8Hg6xygtB8W0SdqyOqfkK7gg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f173.google.com ([209.85.217.173]:35171 "EHLO
-	mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S967598AbcHBPlc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Aug 2016 11:41:32 -0400
-Received: by mail-ua0-f173.google.com with SMTP id l32so132132049ual.2
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Aug 2016 08:41:31 -0700 (PDT)
-In-Reply-To: <CA+aFP1DGzX7M7CugzH51VXTQzasZkSe3Jxm+kudRE6PzeotPWQ@mail.gmail.com>
+Received: from mail-qk0-f175.google.com ([209.85.220.175]:34841 "EHLO
+	mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030371AbcHBRGA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Aug 2016 13:06:00 -0400
+Received: by mail-qk0-f175.google.com with SMTP id s63so180847773qkb.2
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Aug 2016 10:05:59 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: loic@dachary.org
 
-Thanks Jason!
+Hi Loic,
 
-I've tried to capture this in our docs, here:
-https://github.com/ceph/ceph/pull/10542
+I am getting a lot of error messages in system log file while
+preparing the device. Can you please tell me what is wrong here?
 
-When that's nailed down, we can get a fix into ceph-ansible as well.
+Ceph version: 10.2.2
 
-- Ken
+The command I am using:
+
+ceph-deploy  purge ca-ostest433
+ceph-deploy  purgedata ca-ostest433
+ceph-deploy new ca-ostest433
+echo "osd pool default size = 1" >> ceph.conf
+ceph-deploy install  ca-ostest433
+ceph-deploy mon create-initial
+ceph-deploy mon create ca-ostest433
+ceph-deploy gatherkeys ca-ostest433
+
+ceph-deploy disk zap ca-ostest433:sdb
+ceph-deploy osd prepare ca-ostest433:sdb
+ceph status
+
+Error message that I got in the system log : cat /var/log/messages:
+
+Aug  1 05:59:39 ca-ostest432 sh: File
+"/usr/lib/python2.7/site-packages/ceph_disk/main.py", line 4994, in
+run
+Aug  1 05:59:39 ca-ostest432 sh: main(sys.argv[1:])
+Aug  1 05:59:39 ca-ostest432 sh: File
+"/usr/lib/python2.7/site-packages/ceph_disk/main.py", line 4945, in
+main
+Aug  1 05:59:39 ca-ostest432 sh: args.func(args)
+Aug  1 05:59:39 ca-ostest432 sh: File
+"/usr/lib/python2.7/site-packages/ceph_disk/main.py", line 4703, in
+<lambda>
+Aug  1 05:59:39 ca-ostest432 sh: func=lambda args:
+main_activate_space(name,args),
+Aug  1 05:59:39 ca-ostest432 sh: File
+"/usr/lib/python2.7/site-packages/ceph_disk/main.py", line 3722, in
+main_activate_space
+Aug  1 05:59:39 ca-ostest432 sh: reactivate=args.reactivate,
+Aug  1 05:59:39 ca-ostest432 sh: File
+"/usr/lib/python2.7/site-packages/ceph_disk/main.py", line 3009, in
+mount_activate
+  Aug  1 05:59:39 ca-ostest432 sh: e,
+Aug  1 05:59:39 ca-ostest432 sh: ceph_disk.main.FilesystemTypeError:
+Cannot discover filesystem type: device
+/dev/disk/by-partuuid/00000000-0000-0000-0000-00000
+0000000: Command '/sbin/blkid' returned non-zero exit status 2
+Aug  1 05:59:39 ca-ostest432 python: detected unhandled Python
+exception in'/usr/sbin/ceph-disk'
+Aug  1 05:59:39 ca-ostest432 abrt-server: Not saving repeating crash
+in '/usr/sbin/ceph-disk'
+Aug  1 05:59:39 ca-ostest432 sh: Traceback (most recent call last):
+Aug  1 05:59:39 ca-ostest432 sh: File "/usr/sbin/ceph-disk", line 9, in <module>
+Aug  1 05:59:39 ca-ostest432 sh: load_entry_point('ceph-disk==1.0.0',
+'console_scripts', 'ceph-disk')()
+Aug  1 05:59:39 ca-ostest432 sh: File
+"/usr/lib/python2.7/site-packages/ceph_disk/main.py", line 4994, in
+run
+Aug  1 05:59:39 ca-ostest432 sh: main(sys.argv[1:])
+Aug  1 05:59:39 ca-ostest432 sh: File
+"/usr/lib/python2.7/site-packages/ceph_disk/main.py", line 4945, in
+main
+Aug  1 05:59:39 ca-ostest432 sh: args.func(args)
+Aug  1 05:59:39 ca-ostest432 sh: File
+"/usr/lib/python2.7/site-packages/ceph_disk/main.py", line 4382, in
+main_trigger
+Aug  1 05:59:39 ca-ostest432 sh: raise Error('return code ' + str(ret))
+Aug  1 05:59:39 ca-ostest432 sh: ceph_disk.main.Error: Error: return code 1
 
 
-On Tue, Aug 2, 2016 at 7:19 AM, Jason Dillaman <jdillama@redhat.com> wrote:
-> Our documented process is to create a new cephx user (e.g.
-> client.libvirt) and libvirt / QEMU will then use that client (and its
-> configuration file settings) since you probably don't want to be
-> running with admin credentials [1]. You can create a "[client]"
-> section as a catch-all in addition to user-specific sections like
-> "[client.libvirt]".
->
-> [1] http://docs.ceph.com/docs/master/rbd/libvirt/
->
-> On Mon, Aug 1, 2016 at 4:18 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
->> On Mon, Aug 1, 2016 at 12:25 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
->>> With the new unprivileged user support in Jewel, I'm seeing some
->>> issues with logging and file permissions.
->>>
->>> ceph-ansible always configures client logging on every cluster node, like so:
->>>
->>>   [client]
->>>   log file = /var/log/ceph/qemu-guest-$pid.log
->>>
->>> As a result, every single client command (eg "ceph health") will
->>> create a new root-owned "qemu-guest-$pid" log file (which leads to
->>> issues with logrotate failing to rotate the root-owned files in the
->>> diretory...)
->>>
->>> It's clear we need to remove that bit from the ceph.conf files that
->>> ceph-ansible writes, but I'm wondering what it *should* be?
->>>
->>> Is there a more granular way to configure Ceph so that we only log
->>> qemu/librbd interactions to qemu-guest-$pid, rather than all client
->>> logs?
->>
->> I don't know the full toolchain these all use (is this for teuthology
->> or a wider thing?), but generally:
->> * you can specify different config files on the command line when the
->> client starts
->> * you can specify override config values of any kind on the command
->> line when a client starts
->> * I believe that QEMU/KVM configs for CephFS let you specify config
->> values independently
->> * I think(?) you can specify config "sections" based on specific
->> client IDs, not just the [client] type
->>
->> So I'd look into whichever of those options is most convenient. :)
->> -Greg
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Jason
+Thanks,
+Muminul
