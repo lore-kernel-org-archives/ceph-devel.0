@@ -1,75 +1,129 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: handling qemu-guest logs in ceph-ansible
-Date: Tue, 2 Aug 2016 09:19:07 -0400
-Message-ID: <CA+aFP1DGzX7M7CugzH51VXTQzasZkSe3Jxm+kudRE6PzeotPWQ@mail.gmail.com>
-References: <CALqRxCzk4-u842fq5xBW2SrdYSY+9wD=zLEDtUrAgNZ-L4pggA@mail.gmail.com>
- <CAJ4mKGa6Mj7PJ8nnij+QcbgdCtCfzuH7POgeXBXyo51CtT91Qg@mail.gmail.com>
-Reply-To: dillaman@redhat.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph updates for 4.8-rc1
+Date: Tue,  2 Aug 2016 16:09:23 +0200
+Message-ID: <1470146963-18367-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f52.google.com ([209.85.220.52]:36822 "EHLO
-	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965972AbcHBNt4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Aug 2016 09:49:56 -0400
-Received: by mail-pa0-f52.google.com with SMTP id pp5so63698922pac.3
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Aug 2016 06:48:24 -0700 (PDT)
-In-Reply-To: <CAJ4mKGa6Mj7PJ8nnij+QcbgdCtCfzuH7POgeXBXyo51CtT91Qg@mail.gmail.com>
+Received: from mail-qt0-f194.google.com ([209.85.216.194]:33865 "EHLO
+	mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934884AbcHBOYJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Aug 2016 10:24:09 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ken Dreyer <kdreyer@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Our documented process is to create a new cephx user (e.g.
-client.libvirt) and libvirt / QEMU will then use that client (and its
-configuration file settings) since you probably don't want to be
-running with admin credentials [1]. You can create a "[client]"
-section as a catch-all in addition to user-specific sections like
-"[client.libvirt]".
+Hi Linus,
 
-[1] http://docs.ceph.com/docs/master/rbd/libvirt/
+The following changes since commit 523d939ef98fd712632d93a5a2b588e477a7565e:
 
-On Mon, Aug 1, 2016 at 4:18 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> On Mon, Aug 1, 2016 at 12:25 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
->> With the new unprivileged user support in Jewel, I'm seeing some
->> issues with logging and file permissions.
->>
->> ceph-ansible always configures client logging on every cluster node, like so:
->>
->>   [client]
->>   log file = /var/log/ceph/qemu-guest-$pid.log
->>
->> As a result, every single client command (eg "ceph health") will
->> create a new root-owned "qemu-guest-$pid" log file (which leads to
->> issues with logrotate failing to rotate the root-owned files in the
->> diretory...)
->>
->> It's clear we need to remove that bit from the ceph.conf files that
->> ceph-ansible writes, but I'm wondering what it *should* be?
->>
->> Is there a more granular way to configure Ceph so that we only log
->> qemu/librbd interactions to qemu-guest-$pid, rather than all client
->> logs?
->
-> I don't know the full toolchain these all use (is this for teuthology
-> or a wider thing?), but generally:
-> * you can specify different config files on the command line when the
-> client starts
-> * you can specify override config values of any kind on the command
-> line when a client starts
-> * I believe that QEMU/KVM configs for CephFS let you specify config
-> values independently
-> * I think(?) you can specify config "sections" based on specific
-> client IDs, not just the [client] type
->
-> So I'd look into whichever of those options is most convenient. :)
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  Linux 4.7 (2016-07-24 12:23:50 -0700)
 
+are available in the git repository at:
 
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.8-rc1
 
--- 
-Jason
+for you to fetch changes up to a0f2b65275413b3438e9f55b1427273cd893c3b2:
+
+  ceph: fix symbol versioning for ceph_monc_do_statfs (2016-07-28 15:32:53 +0200)
+
+----------------------------------------------------------------
+The highlights are:
+
+ * RADOS namespace support in libceph and CephFS (Zheng Yan and myself).
+   The stopgaps added in 4.5 to deny access to inodes in namespaces are
+   removed and CEPH_FEATURE_FS_FILE_LAYOUT_V2 feature bit is now fully
+   supported.
+
+ * A large rework of the MDS cap flushing code (Zheng Yan).
+
+ * Handle some of ->d_revalidate() in RCU mode (Jeff Layton).  We were
+   overly pessimistic before, bailing at the first sight of LOOKUP_RCU.
+
+On top of that we've got a few CephFS bug fixes, a couple of cleanups
+and Arnd's workaround for a weird genksyms issue.
+
+----------------------------------------------------------------
+Arnd Bergmann (1):
+      ceph: fix symbol versioning for ceph_monc_do_statfs
+
+Colin Ian King (1):
+      ceph: fix spelling mistake: "resgister" -> "register"
+
+Ilya Dryomov (3):
+      libceph: fix some missing includes
+      libceph: add an ONSTACK initializer for oids
+      libceph: add start en/decoding block helpers
+
+Jeff Layton (4):
+      ceph: remove ceph_mdsc_lease_release
+      ceph: clear d_fsinfo pointer under d_lock
+      ceph: allow dentry_lease_is_valid to work under RCU walk
+      ceph: handle LOOKUP_RCU in ceph_d_revalidate
+
+Miklos Szeredi (1):
+      ceph: don't use ->d_time
+
+Nikolay Borisov (1):
+      ceph: Mark the file cache as unreclaimable
+
+Phil Turnbull (1):
+      ceph: Correctly return NXIO errors from ceph_llseek
+
+Yan, Zheng (22):
+      libceph: define new ceph_file_layout structure
+      libceph: introduce reference counted string
+      libceph: rados pool namespace support
+      libceph: make sure redirect does not change namespace
+      ceph: rados pool namespace support
+      ceph: set user pages dirty after direct IO read
+      ceph: reduce i_nr_by_mode array size
+      ceph: fix use-after-free bug in ceph_direct_read_write()
+      ceph: wait unsafe sync writes for evicting inode
+      ceph: fix NULL dereference in ceph_queue_cap_snap()
+      libceph: fsmap.user subscription support
+      ceph: mount non-default filesystem by name
+      ceph: update cap reconnect message to version 3
+      ceph: include 'follows' of pending snapflush in cap reconnect message
+      ceph: update types of some local varibles
+      ceph: use list instead of rbtree to track cap flushes
+      ceph: unify cap flush and snapcap flush
+      ceph: avoid sending duplicated cap flush message
+      ceph: introduce an inode flag to indicates if snapflush is needed
+      ceph: kick cap flushes before sending other cap message
+      ceph: cleanup ceph_flush_snaps()
+      ceph: optimize cap flush waiting
+
+ drivers/block/rbd.c               |  15 +-
+ fs/ceph/addr.c                    |  77 +++-
+ fs/ceph/cache.c                   |   2 +-
+ fs/ceph/caps.c                    | 873 ++++++++++++++++++++------------------
+ fs/ceph/dir.c                     |  73 ++--
+ fs/ceph/file.c                    |  77 +++-
+ fs/ceph/inode.c                   |  40 +-
+ fs/ceph/ioctl.c                   |  30 +-
+ fs/ceph/mds_client.c              | 358 ++++++++--------
+ fs/ceph/mds_client.h              |  19 +-
+ fs/ceph/snap.c                    |  10 +-
+ fs/ceph/super.c                   |  43 +-
+ fs/ceph/super.h                   |  48 +--
+ fs/ceph/xattr.c                   | 101 +++--
+ include/linux/ceph/ceph_fs.h      |  55 ++-
+ include/linux/ceph/decode.h       |  55 +++
+ include/linux/ceph/libceph.h      |   4 +-
+ include/linux/ceph/mon_client.h   |   7 +-
+ include/linux/ceph/msgpool.h      |   1 -
+ include/linux/ceph/osd_client.h   |   1 +
+ include/linux/ceph/osdmap.h       |  15 +-
+ include/linux/ceph/string_table.h |  62 +++
+ net/ceph/Makefile                 |   2 +-
+ net/ceph/ceph_common.c            |   2 +
+ net/ceph/ceph_fs.c                |  30 +-
+ net/ceph/debugfs.c                |  12 +-
+ net/ceph/mon_client.c             |   4 +-
+ net/ceph/msgpool.c                |   1 +
+ net/ceph/osd_client.c             |  49 ++-
+ net/ceph/osdmap.c                 |  58 ++-
+ net/ceph/string_table.c           | 111 +++++
+ 31 files changed, 1412 insertions(+), 823 deletions(-)
+ create mode 100644 include/linux/ceph/string_table.h
+ create mode 100644 net/ceph/string_table.c
