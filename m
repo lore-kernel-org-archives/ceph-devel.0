@@ -1,51 +1,72 @@
-From: Ben England <bengland@redhat.com>
-Subject: Re: CephFs performance data
-Date: Wed, 3 Aug 2016 15:33:51 -0400 (EDT)
-Message-ID: <906232803.11790446.1470252831523.JavaMail.zimbra@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: CephFs performance data
+Date: Wed, 3 Aug 2016 19:38:49 +0000
+Message-ID: <BL2PR02MB21150D6995E83419C568EE60F4060@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <BL2PR02MB211528CE823D5728C3A474ACF4060@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <906232803.11790446.1470252831523.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:45453 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757182AbcHCTdy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Aug 2016 15:33:54 -0400
-In-Reply-To: <BL2PR02MB211528CE823D5728C3A474ACF4060@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from mail-dm3nam03on0045.outbound.protection.outlook.com ([104.47.41.45]:51952
+	"EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932255AbcHCUPM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 3 Aug 2016 16:15:12 -0400
+In-Reply-To: <906232803.11790446.1470252831523.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Ben England <bengland@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Thanks Somnath, here are the Cephfs slides from this morning. 
-
-https://s3.amazonaws.com/ben.england/Cephfs+performance+results+June+2016.pdf
-
-Let me know if you have trouble reading them.
-
-As for sequential 4-KB I/O performance, I believe kernel Cephfs client is aggregating reads and writes - otherwise you are quite right that the IOPS level could not be sustained.  This is common practice in other distributed filesystems as well, such as NFS and Gluster.  For RANDOM I/O, coalescing of I/O requests is far less likely.   I have some performance data on these runs that should be useful in confirming the result, will try to look that up for you.
-
-I'm looking forward to hearing other people's results with Cephfs as well.
-
--ben
-
-
------ Original Message -----
-> From: "Somnath Roy" <Somnath.Roy@sandisk.com>
-> To: "Ben England (bengland@redhat.com)" <bengland@redhat.com>
-> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Sent: Wednesday, August 3, 2016 12:23:21 PM
-> Subject: CephFs performance data
-> 
-> Ben,
-> Thanks for the first cut data on CephFS , it was really helpful.
-> Do you mind to send out the slides ?
-> Also, continuing the discussion on 4K SW throughput is ~1GB/S , if you are
-> running test with direct IO, client Linux system can't coalesce the writes
-> and I didn't see much coalescing at the OSD servers as well. Unless CephFS
-> has some coalescing logic it will be good if we can find out how we are
-> getting this bigger throughput for 4K. Let me know if I am missing
-> something..
-> 
-> Thanks & Regards
-> Somnath
+VGhhbmtzIEJlbiwgeWVzIGNvYWxlc2NpbmcgaXMgdHJ1ZSBpZiB5b3UgYXJlICpub3QqIHJ1bm5p
+bmcgd2l0aCBkaXJlY3QgaW8sIGFyZSB5b3UgPw0KV2UgY291bGQgZWFzaWx5IGZpZ3VyZSBvdXQg
+Y2xpZW50IHNpZGUgY29hbGVzY2luZyBieSBhbmFseXppbmcgbmV0d29yayB0cmFmZmljIEkgc3Vw
+cG9zZS4NCg0KPDwgSSdtIGxvb2tpbmcgZm9yd2FyZCB0byBoZWFyaW5nIG90aGVyIHBlb3BsZSdz
+IHJlc3VsdHMgd2l0aCBDZXBoZnMgYXMgd2VsbA0KV2l0aGluIFNhbkRpc2ssIHdlIHN0YXJ0ZWQg
+YmVuY2htYXJraW5nIENlcGhGUyBvbiBhbGwgZmxhc2ggYW5kIGF0IHNvbWUgcG9pbnQgd2Ugc2hv
+dWxkIGJlIGFibGUgdG8gc2hhcmUgcmVzdWx0IHdpdGggY29tbXVuaXR5Lg0KDQpSZWdhcmRzDQpT
+b21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBCZW4gRW5nbGFuZCBb
+bWFpbHRvOmJlbmdsYW5kQHJlZGhhdC5jb21dDQpTZW50OiBXZWRuZXNkYXksIEF1Z3VzdCAwMywg
+MjAxNiAxMjozNCBQTQ0KVG86IFNvbW5hdGggUm95DQpDYzogY2VwaC1kZXZlbA0KU3ViamVjdDog
+UmU6IENlcGhGcyBwZXJmb3JtYW5jZSBkYXRhDQoNClRoYW5rcyBTb21uYXRoLCBoZXJlIGFyZSB0
+aGUgQ2VwaGZzIHNsaWRlcyBmcm9tIHRoaXMgbW9ybmluZy4NCg0KaHR0cHM6Ly9zMy5hbWF6b25h
+d3MuY29tL2Jlbi5lbmdsYW5kL0NlcGhmcytwZXJmb3JtYW5jZStyZXN1bHRzK0p1bmUrMjAxNi5w
+ZGYNCg0KTGV0IG1lIGtub3cgaWYgeW91IGhhdmUgdHJvdWJsZSByZWFkaW5nIHRoZW0uDQoNCkFz
+IGZvciBzZXF1ZW50aWFsIDQtS0IgSS9PIHBlcmZvcm1hbmNlLCBJIGJlbGlldmUga2VybmVsIENl
+cGhmcyBjbGllbnQgaXMgYWdncmVnYXRpbmcgcmVhZHMgYW5kIHdyaXRlcyAtIG90aGVyd2lzZSB5
+b3UgYXJlIHF1aXRlIHJpZ2h0IHRoYXQgdGhlIElPUFMgbGV2ZWwgY291bGQgbm90IGJlIHN1c3Rh
+aW5lZC4gIFRoaXMgaXMgY29tbW9uIHByYWN0aWNlIGluIG90aGVyIGRpc3RyaWJ1dGVkIGZpbGVz
+eXN0ZW1zIGFzIHdlbGwsIHN1Y2ggYXMgTkZTIGFuZCBHbHVzdGVyLiAgRm9yIFJBTkRPTSBJL08s
+IGNvYWxlc2Npbmcgb2YgSS9PIHJlcXVlc3RzIGlzIGZhciBsZXNzIGxpa2VseS4gICBJIGhhdmUg
+c29tZSBwZXJmb3JtYW5jZSBkYXRhIG9uIHRoZXNlIHJ1bnMgdGhhdCBzaG91bGQgYmUgdXNlZnVs
+IGluIGNvbmZpcm1pbmcgdGhlIHJlc3VsdCwgd2lsbCB0cnkgdG8gbG9vayB0aGF0IHVwIGZvciB5
+b3UuDQoNCkknbSBsb29raW5nIGZvcndhcmQgdG8gaGVhcmluZyBvdGhlciBwZW9wbGUncyByZXN1
+bHRzIHdpdGggQ2VwaGZzIGFzIHdlbGwuDQoNCi1iZW4NCg0KDQotLS0tLSBPcmlnaW5hbCBNZXNz
+YWdlIC0tLS0tDQo+IEZyb206ICJTb21uYXRoIFJveSIgPFNvbW5hdGguUm95QHNhbmRpc2suY29t
+Pg0KPiBUbzogIkJlbiBFbmdsYW5kIChiZW5nbGFuZEByZWRoYXQuY29tKSIgPGJlbmdsYW5kQHJl
+ZGhhdC5jb20+DQo+IENjOiAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
+Pg0KPiBTZW50OiBXZWRuZXNkYXksIEF1Z3VzdCAzLCAyMDE2IDEyOjIzOjIxIFBNDQo+IFN1Ympl
+Y3Q6IENlcGhGcyBwZXJmb3JtYW5jZSBkYXRhDQo+DQo+IEJlbiwNCj4gVGhhbmtzIGZvciB0aGUg
+Zmlyc3QgY3V0IGRhdGEgb24gQ2VwaEZTICwgaXQgd2FzIHJlYWxseSBoZWxwZnVsLg0KPiBEbyB5
+b3UgbWluZCB0byBzZW5kIG91dCB0aGUgc2xpZGVzID8NCj4gQWxzbywgY29udGludWluZyB0aGUg
+ZGlzY3Vzc2lvbiBvbiA0SyBTVyB0aHJvdWdocHV0IGlzIH4xR0IvUyAsIGlmIHlvdQ0KPiBhcmUg
+cnVubmluZyB0ZXN0IHdpdGggZGlyZWN0IElPLCBjbGllbnQgTGludXggc3lzdGVtIGNhbid0IGNv
+YWxlc2NlDQo+IHRoZSB3cml0ZXMgYW5kIEkgZGlkbid0IHNlZSBtdWNoIGNvYWxlc2NpbmcgYXQg
+dGhlIE9TRCBzZXJ2ZXJzIGFzDQo+IHdlbGwuIFVubGVzcyBDZXBoRlMgaGFzIHNvbWUgY29hbGVz
+Y2luZyBsb2dpYyBpdCB3aWxsIGJlIGdvb2QgaWYgd2UNCj4gY2FuIGZpbmQgb3V0IGhvdyB3ZSBh
+cmUgZ2V0dGluZyB0aGlzIGJpZ2dlciB0aHJvdWdocHV0IGZvciA0Sy4gTGV0IG1lDQo+IGtub3cg
+aWYgSSBhbSBtaXNzaW5nIHNvbWV0aGluZy4uDQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29t
+bmF0aA0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVj
+dHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBk
+ZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlz
+IG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5v
+dGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0
+aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBv
+ZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2
+ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIg
+YnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBk
+ZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNz
+aW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMp
+Lg0K
