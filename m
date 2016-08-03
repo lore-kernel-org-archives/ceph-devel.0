@@ -1,50 +1,151 @@
-From: Zhangzengran <zhangzengran@h3c.com>
-Subject: Re: [rgw multisite] disable specified bucket data sync
-Date: Wed, 3 Aug 2016 01:16:19 +0000
-Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314C2FD8@H3CMLB12-EX.srv.huawei-3com.com>
+From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Subject: RE: BLueStore Deadlock
+Date: Wed, 3 Aug 2016 01:35:01 +0000
+Message-ID: <6AA21C22F0A5DA478922644AD2EC308C373B9AB0@SHSMSX101.ccr.corp.intel.com>
+References: <6AA21C22F0A5DA478922644AD2EC308C373B92BC@SHSMSX101.ccr.corp.intel.com>
+  <BL2PR02MB2115604A7C4767FC465C320EF4000@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <6AA21C22F0A5DA478922644AD2EC308C373B940C@SHSMSX101.ccr.corp.intel.com>
+ <6AA21C22F0A5DA478922644AD2EC308C373B9424@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:40962 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751341AbcHCBQf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 2 Aug 2016 21:16:35 -0400
-Content-Language: zh-CN
+Received: from mga02.intel.com ([134.134.136.20]:39127 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754635AbcHCBfG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Aug 2016 21:35:06 -0400
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C373B9424@SHSMSX101.ccr.corp.intel.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Somnath Roy <Somnath.Roy@sandisk.com>
 
-Pj4gSGkgQ2FzZXk6DQo+PiAgICAgICAgICBXaHkgZG9u4oCZdCBzdXBwb3J0IHN0b3BwaW5nIHNw
-ZWNpZmllZCBidWNrZXQgZGF0YSBzeW5jLiBJcyB0aGVyZSBhbnkgZGlmZmljdWx0eSBpbiBpbXBs
-ZW1lbnRpbmcgdGhlIGZlYXR1cmU/DQo+PiAgICAgICAgICBPciBhbSBJIG1pc3Npbmcgc29tZXRo
-aW5nPw0KPj4NCj4+ICAgICAgICAgIFRoYW5rIHlvdSAhDQo+DQo+DQo+SGksDQo+DQo+V2hhdCB3
-b3VsZCB5b3UgbGlrZSB0byBnZXQgb3V0IG9mIHRoaXMgZmVhdHVyZT8gQSB3YXkgdG8gZGlzYWJs
-ZSBzeW5jIG9uIGEgZ2l2ZW4gYnVja2V0IHRlbXBvcmFyaWx5LCBhbmQgdHVybiBpdCBiYWNrIG9u
-IGxhdGVyPyBPciBqdXN0IGEgd2F5IHRvIGhhdmUgYSBzdWJzZXQgb2YgYnVja2V0cyB0aGF0IGRv
-bid0IGV2ZXIgcGFydGljaXBhdGUgaW4gc3luYz8NCj4NCj5EbyB5b3UgaGF2ZSBhIHVzZSBjYXNl
-IGZvciB0aGUgZmlyc3Q/IFRoYXQncyBub3Qgc29tZXRoaW5nIHdlJ2QgY29uc2lkZXJlZC4NCj4N
-Cj5JZiB5b3UganVzdCB3YW50IHRvIGhhdmUgc29tZSBidWNrZXRzIHRoYXQgbmV2ZXIgc3luYywg
-eW91IG1pZ2h0IGNvbnNpZGVyIHNlcnZpbmcgdGhvc2Ugb3V0IG9mIGEgc2VwYXJhdGUgZ2F0ZXdh
-eSwgaW4gYSB6b25lIHRoYXQgaXNuJ3QgcGFydCBvZiBhIG11bHRpc2l0ZSBjb25maWd1cmF0aW9u
-Lg0KPg0KPlRoYW5rcywNCj5DYXNleQ0KDQpkZXBsb3kgYSBzZXBhcmF0ZSBub25lLXN5bmMgem9u
-ZSB3aXRoIGRpZmZlcmVudCBlbmRwb2ludCBtYXkgbm90IGEgZ29vZCBjaG9pY2UuIHdlIGhvcGUg
-ZW5hYmxlL2Rpc2FibGUgYSBzcGVjaWZpZWQgYnVja2V0IHN5bmMgY291bGQgYmUgc29tZXdoYXQg
-ZmxleGlibGUuIDopDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrmnKzpgq7ku7blj4rlhbbpmYTku7bl
-kKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDlhazlj7jnmoTkv53lr4bkv6Hmga/v
-vIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7oNCueahOS4quS6uuaIlue+
-pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8iOWMheaL
-rOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOAgQ0K5oiW5pWj
-5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu2
-77yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pys
-DQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBjb25m
-aWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNoIGlzDQppbnRlbmRlZCBvbmx5IGZv
-ciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlzIGxpc3RlZCBhYm92ZS4gQW55
-IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4gaW4gYW55IHdheSAoaW5j
-bHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRpYWwNCmRpc2Nsb3N1cmUs
-IHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29ucyBvdGhlciB0aGFuIHRo
-ZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZlIHRo
-aXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXINCmJ5IHBob25lIG9y
-IGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo=
+Hi Sage:
+    Why is there STATE_WRITTING? 
+  In my option: for normal read, it do onode->flush() , so no need wait io complete. The special case is one transaction which has two write and later write need read.
+  For write, if it is wal-write, when do finish_write, the data don't locate into disk. This different with non-wal-write
+
+Thanks! 
+  
+
+-----Original Message-----
+From: Ma, Jianpeng 
+Sent: Friday, July 29, 2016 9:36 AM
+To: Ma, Jianpeng <jianpeng.ma@intel.com>; Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Subject: RE: BLueStore Deadlock
+
+Roy: my question is why is there STATE_WRITTING?  For read we don't by pass cache, so why need STATE_WRITTING?
+
+Thanks!
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Ma, Jianpeng
+Sent: Friday, July 29, 2016 9:24 AM
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Subject: RE: BLueStore Deadlock
+
+Hi Roy:
+    W/ your patch, there still deadlock.
+By the way, if we change the BufferSpace::_add_buffer, if w/ cache flush push it into cache front and if w/o cache flag only put it  at back.
+I think use this way we can remove finish_write.
+How about it?
+
+Thanks!
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+Sent: Friday, July 29, 2016 6:22 AM
+To: Ma, Jianpeng <jianpeng.ma@intel.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Subject: RE: BLueStore Deadlock
+
+Jianpeng,
+I thought through this and it seems there could be one possible deadlock scenario.
+
+tp_osd_tp --> waiting on onode->flush() for previous txc to finish. Holding Wlock(coll) aio_complete_thread --> waiting for RLock(coll) No other thread will be blocked here.
+
+We do add previous txc in the flush_txns list during _txc_write_nodes() and before aio_complete_thread calling _txc_state_proc(). So, if within this time frame if we have IO on the same collection , it will be waiting on unfinished txcs.
+The solution to this could be the following..
+
+root@emsnode5:~/ceph-master/src# git diff diff --git a/src/os/bluestore/BlueStore.cc b/src/os/bluestore/BlueStore.cc index e8548b1..575a234 100644
+--- a/src/os/bluestore/BlueStore.cc
++++ b/src/os/bluestore/BlueStore.cc
+@@ -4606,6 +4606,11 @@ void BlueStore::_txc_state_proc(TransContext *txc)
+         (txc->first_collection)->lock.get_read();
+       }
+       for (auto& o : txc->onodes) {
++        {
++          std::lock_guard<std::mutex> l(o->flush_lock);
++          o->flush_txns.insert(txc);
++        }
++
+         for (auto& p : o->blob_map.blob_map) {
+            p.bc.finish_write(txc->seq);
+        }
+@@ -4733,8 +4738,8 @@ void BlueStore::_txc_write_nodes(TransContext *txc, KeyValueDB::Transaction t)
+     dout(20) << "  onode " << (*p)->oid << " is " << bl.length() << dendl;
+     t->set(PREFIX_OBJ, (*p)->key, bl);
+
+-    std::lock_guard<std::mutex> l((*p)->flush_lock);
+-    (*p)->flush_txns.insert(txc);
++    /*std::lock_guard<std::mutex> l((*p)->flush_lock);
++    (*p)->flush_txns.insert(txc);*/
+   }
+
+
+I am not able to reproduce this in my setup , so, if you can do the above changes in your env and see if you are still hitting the issue, would be helpful.
+
+Thanks & Regards
+Somnath
+
+
+-----Original Message-----
+From: Somnath Roy
+Sent: Thursday, July 28, 2016 8:45 AM
+To: 'Ma, Jianpeng'
+Cc: ceph-devel
+Subject: RE: BLueStore Deadlock
+
+Hi Jianpeng,
+Are you trying with latest master and still hitting the issue (seems so but confirming) ?
+The following scenario should not be creating deadlock because of the following reason.
+
+Onode->flush() is waiting on flush_lock() and from _txc_finish() it is releasing that before taking osr->qlock(). Am I missing anything ?
+
+I got a deadlock in this path in one of my earlier changes in the following pull request (described in detail there) and it is fixed and merged.
+
+https://github.com/ceph/ceph/pull/10220
+
+If my theory is right , we are hitting deadlock because of some other reason may be. It seems you are doing WAL write , could you please describe the steps to reproduce ?
+
+Thanks & Regards
+Somnath
+
+From: Ma, Jianpeng [mailto:jianpeng.ma@intel.com]
+Sent: Thursday, July 28, 2016 1:46 AM
+To: Somnath Roy
+Cc: ceph-devel; Ma, Jianpeng
+Subject: BLueStore Deadlock
+
+Hi Roy:
+     When do seqwrite w/ rbd+librbd, I met deadlock for bluestore. It can reproduce 100%.(based on 98602ae6c67637dbadddd549bd9a0035e5a2717)
+By add message and this found this bug caused by bf70bcb6c54e4d6404533bc91781a5ef77d62033.
+Consider this case:
+
+tp_osd_tp                                              aio_complete_thread                                 kv_sync_thread
+Rwlock(coll)                                            txc_finish_io                                                     _txc_finish do_write                                                 lock(osr->qlock)                                               lock(osr->qlock) do_read                                                  RLock(coll)                                                                     need osr->qlock to continue
+onode->flush()                                            need coll
+onode->readlock to continue
+   need previous txc complete
+
+But current I don't how to fix this.
+
+Thanks!
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
