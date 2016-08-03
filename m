@@ -1,7 +1,7 @@
 From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 2/5] ceph: Propagate dentry down to inode_change_ok()
-Date: Wed,  3 Aug 2016 13:28:06 +0200
-Message-ID: <1470223689-17783-3-git-send-email-jack@suse.cz>
+Subject: [PATCH 3/5] fuse: Propagate dentry down to inode_change_ok()
+Date: Wed,  3 Aug 2016 13:28:07 +0200
+Message-ID: <1470223689-17783-4-git-send-email-jack@suse.cz>
 References: <1470223689-17783-1-git-send-email-jack@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,71 +23,70 @@ List-Id: ceph-devel.vger.kernel.org
 
 To avoid clearing of capabilities or security related extended
 attributes too early, inode_change_ok() will need to take dentry instead
-of inode. ceph_setattr() has the dentry easily available but
-__ceph_setattr() is also called from ceph_set_acl() where dentry is not
-easily available. Luckily that call path does not need inode_change_ok()
-to be called anyway. So reorganize functions a bit so that
-inode_change_ok() is called only from paths where dentry is available.
+of inode. Propagate it down to fuse_do_setattr().
 
+Acked-by: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- fs/ceph/acl.c   |  5 +++++
- fs/ceph/inode.c | 19 +++++++++++--------
- 2 files changed, 16 insertions(+), 8 deletions(-)
+ fs/fuse/dir.c    | 7 ++++---
+ fs/fuse/file.c   | 2 +-
+ fs/fuse/fuse_i.h | 2 +-
+ 3 files changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
-index 013151d50069..a2cedfde75eb 100644
---- a/fs/ceph/acl.c
-+++ b/fs/ceph/acl.c
-@@ -127,6 +127,11 @@ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type)
- 			goto out_free;
- 	}
- 
-+	if (ceph_snap(inode) != CEPH_NOSNAP) {
-+		ret = -EROFS;
-+		goto out_free;
-+	}
-+
- 	if (new_mode != old_mode) {
- 		newattrs.ia_mode = new_mode;
- 		newattrs.ia_valid = ATTR_MODE;
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index dd3a6dbf71eb..2aa3c0bcf3a5 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1905,13 +1905,6 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
- 	int inode_dirty_flags = 0;
- 	bool lock_snap_rwsem = false;
- 
--	if (ceph_snap(inode) != CEPH_NOSNAP)
--		return -EROFS;
--
--	err = inode_change_ok(inode, attr);
--	if (err != 0)
--		return err;
--
- 	prealloc_cf = ceph_alloc_cap_flush();
- 	if (!prealloc_cf)
- 		return -ENOMEM;
-@@ -2124,7 +2117,17 @@ out_put:
+diff --git a/fs/fuse/dir.c b/fs/fuse/dir.c
+index 5f1627725791..f29ce9cb30e6 100644
+--- a/fs/fuse/dir.c
++++ b/fs/fuse/dir.c
+@@ -1591,9 +1591,10 @@ int fuse_flush_times(struct inode *inode, struct fuse_file *ff)
+  * vmtruncate() doesn't allow for this case, so do the rlimit checking
+  * and the actual truncation by hand.
   */
- int ceph_setattr(struct dentry *dentry, struct iattr *attr)
+-int fuse_do_setattr(struct inode *inode, struct iattr *attr,
++int fuse_do_setattr(struct dentry *dentry, struct iattr *attr,
+ 		    struct file *file)
  {
--	return __ceph_setattr(d_inode(dentry), attr);
 +	struct inode *inode = d_inode(dentry);
-+	int err;
-+
-+	if (ceph_snap(inode) != CEPH_NOSNAP)
-+		return -EROFS;
-+
-+	err = inode_change_ok(inode, attr);
-+	if (err != 0)
-+		return err;
-+
-+	return __ceph_setattr(inode, attr);
+ 	struct fuse_conn *fc = get_fuse_conn(inode);
+ 	struct fuse_inode *fi = get_fuse_inode(inode);
+ 	FUSE_ARGS(args);
+@@ -1707,9 +1708,9 @@ static int fuse_setattr(struct dentry *entry, struct iattr *attr)
+ 		return -EACCES;
+ 
+ 	if (attr->ia_valid & ATTR_FILE)
+-		return fuse_do_setattr(inode, attr, attr->ia_file);
++		return fuse_do_setattr(entry, attr, attr->ia_file);
+ 	else
+-		return fuse_do_setattr(inode, attr, NULL);
++		return fuse_do_setattr(entry, attr, NULL);
  }
  
- /*
+ static int fuse_getattr(struct vfsmount *mnt, struct dentry *entry,
+diff --git a/fs/fuse/file.c b/fs/fuse/file.c
+index f394aff59c36..4b9201b7c80b 100644
+--- a/fs/fuse/file.c
++++ b/fs/fuse/file.c
+@@ -2841,7 +2841,7 @@ static void fuse_do_truncate(struct file *file)
+ 	attr.ia_file = file;
+ 	attr.ia_valid |= ATTR_FILE;
+ 
+-	fuse_do_setattr(inode, &attr, file);
++	fuse_do_setattr(file_dentry(file), &attr, file);
+ }
+ 
+ static inline loff_t fuse_round_up(loff_t off)
+diff --git a/fs/fuse/fuse_i.h b/fs/fuse/fuse_i.h
+index 5db5d24f91a5..c6a3bef34fd3 100644
+--- a/fs/fuse/fuse_i.h
++++ b/fs/fuse/fuse_i.h
+@@ -958,7 +958,7 @@ bool fuse_write_update_size(struct inode *inode, loff_t pos);
+ int fuse_flush_times(struct inode *inode, struct fuse_file *ff);
+ int fuse_write_inode(struct inode *inode, struct writeback_control *wbc);
+ 
+-int fuse_do_setattr(struct inode *inode, struct iattr *attr,
++int fuse_do_setattr(struct dentry *dentry, struct iattr *attr,
+ 		    struct file *file);
+ 
+ void fuse_set_initialized(struct fuse_conn *fc);
 -- 
 2.6.6
 
