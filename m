@@ -1,11 +1,13 @@
 From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 0/5 v2] fs: Avoid premature clearing of file capabilities
-Date: Wed,  3 Aug 2016 13:28:04 +0200
-Message-ID: <1470223689-17783-1-git-send-email-jack@suse.cz>
+Subject: [PATCH 2/5] ceph: Propagate dentry down to inode_change_ok()
+Date: Wed,  3 Aug 2016 13:28:06 +0200
+Message-ID: <1470223689-17783-3-git-send-email-jack@suse.cz>
+References: <1470223689-17783-1-git-send-email-jack@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <xfs-bounces@oss.sgi.com>
+In-Reply-To: <1470223689-17783-1-git-send-email-jack@suse.cz>
 List-Unsubscribe: <http://oss.sgi.com/mailman/options/xfs>,
 	<mailto:xfs-request@oss.sgi.com?subject=unsubscribe>
 List-Archive: <http://oss.sgi.com/pipermail/xfs>
@@ -19,24 +21,75 @@ To: Al Viro <viro@ZenIV.linux.org.uk>
 Cc: Jan Kara <jack@suse.cz>, Miklos Szeredi <miklos@szeredi.hu>, xfs@oss.sgi.com, "Yan, Zheng" <zyan@redhat.com>, linux-fsdevel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hello,
+To avoid clearing of capabilities or security related extended
+attributes too early, inode_change_ok() will need to take dentry instead
+of inode. ceph_setattr() has the dentry easily available but
+__ceph_setattr() is also called from ceph_set_acl() where dentry is not
+easily available. Luckily that call path does not need inode_change_ok()
+to be called anyway. So reorganize functions a bit so that
+inode_change_ok() is called only from paths where dentry is available.
 
-this patch series is my attempt to fix an issue when user can clear capabilites
-of arbitrary file he can look up for example by running chown on it (this got
-assigned CVE-2015-1350). The problem is that we call security_inode_killpriv()
-before checking permissions in inode_change_ok(). This patch set moves that
-call into inode_change_ok() after permissions are checked - the only trouble is
-that we need to give dentry instead of inode there and that is not completely
-trivial in some cases - I'm still missing a review from Ceph people to verify I
-didn't miss anything.
+Signed-off-by: Jan Kara <jack@suse.cz>
+---
+ fs/ceph/acl.c   |  5 +++++
+ fs/ceph/inode.c | 19 +++++++++++--------
+ 2 files changed, 16 insertions(+), 8 deletions(-)
 
-Anyway, I guess the changes are fine for merging. Al, you please merge the
-patches? Thanks!
-
-Changes since v1:
-* Added acks for XFS and FUSE patches
-
-								Honza
+diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
+index 013151d50069..a2cedfde75eb 100644
+--- a/fs/ceph/acl.c
++++ b/fs/ceph/acl.c
+@@ -127,6 +127,11 @@ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type)
+ 			goto out_free;
+ 	}
+ 
++	if (ceph_snap(inode) != CEPH_NOSNAP) {
++		ret = -EROFS;
++		goto out_free;
++	}
++
+ 	if (new_mode != old_mode) {
+ 		newattrs.ia_mode = new_mode;
+ 		newattrs.ia_valid = ATTR_MODE;
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index dd3a6dbf71eb..2aa3c0bcf3a5 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1905,13 +1905,6 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
+ 	int inode_dirty_flags = 0;
+ 	bool lock_snap_rwsem = false;
+ 
+-	if (ceph_snap(inode) != CEPH_NOSNAP)
+-		return -EROFS;
+-
+-	err = inode_change_ok(inode, attr);
+-	if (err != 0)
+-		return err;
+-
+ 	prealloc_cf = ceph_alloc_cap_flush();
+ 	if (!prealloc_cf)
+ 		return -ENOMEM;
+@@ -2124,7 +2117,17 @@ out_put:
+  */
+ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
+ {
+-	return __ceph_setattr(d_inode(dentry), attr);
++	struct inode *inode = d_inode(dentry);
++	int err;
++
++	if (ceph_snap(inode) != CEPH_NOSNAP)
++		return -EROFS;
++
++	err = inode_change_ok(inode, attr);
++	if (err != 0)
++		return err;
++
++	return __ceph_setattr(inode, attr);
+ }
+ 
+ /*
+-- 
+2.6.6
 
 _______________________________________________
 xfs mailing list
