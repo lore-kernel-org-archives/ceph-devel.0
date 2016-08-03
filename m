@@ -1,39 +1,49 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: CephFs performance data
-Date: Wed, 3 Aug 2016 17:29:27 +0100
-Message-ID: <CALe9h7fJpxymoTBz-K-MNvksT8U2ZnhDN4RUb9FeEBY_OWJV+w@mail.gmail.com>
-References: <BL2PR02MB211586BC32D5102FEE450C7AF4060@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: Zack Cerza <zack@redhat.com>
+Subject: Re: [sepia] "This branch is out-of-date with the base branch"
+Date: Wed, 3 Aug 2016 10:53:44 -0600
+Message-ID: <CACk6Fj=O0p32_4LtjCs_TSuhGvHTvQpL5rnb22Mp=sCdB_z0mQ@mail.gmail.com>
+References: <CALe9h7fiBXcFVzo9k2+smVxWrewBw_dK8uMY6kJuts_MwA6mtg@mail.gmail.com>
+ <CALqRxCyOjLXBYJg=Le3Sz6c-_mJoTG8o7oTXRVWqe5SFvziJuw@mail.gmail.com>
+ <CAJ4mKGY2ZyRBtkR+BAmFSc7Vc05dg=6fsEP4h2wTXuhUFw=Egw@mail.gmail.com>
+ <CALqRxCzU=Ksj7zMKaAjWqPaMR5YLCi77tGKted+hfgzzWs8Gew@mail.gmail.com> <CAJ4mKGbWcjkz3Uj65TkC1kkrN9Dhd-yQW=02RYkMmsE207Kfzw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f169.google.com ([209.85.220.169]:33258 "EHLO
-	mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751501AbcHCQbP convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Aug 2016 12:31:15 -0400
-Received: by mail-qk0-f169.google.com with SMTP id p74so207525255qka.0
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Aug 2016 09:29:48 -0700 (PDT)
-In-Reply-To: <BL2PR02MB211586BC32D5102FEE450C7AF4060@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:34426 "EHLO
+	mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932453AbcHCRQJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Aug 2016 13:16:09 -0400
+Received: by mail-lf0-f49.google.com with SMTP id l69so165827874lfg.1
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Aug 2016 10:16:08 -0700 (PDT)
+In-Reply-To: <CAJ4mKGbWcjkz3Uj65TkC1kkrN9Dhd-yQW=02RYkMmsE207Kfzw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: "Ben England (bengland@redhat.com)" <bengland@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Ken Dreyer <kdreyer@redhat.com>, John Spray <jspray@redhat.com>, "sepia@lists.ceph.com" <sepia@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Aug 3, 2016 at 5:24 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Ben,
-> Thanks for the first cut data on CephFS , it was really helpful.
-> Do you mind to send out the slides ?
-> Also, continuing the discussion on 4K SW throughput is ~1GB/S , if you are running test with direct IO, client Linux system can't coalesce the writes and I didn't see much coalescing at the OSD servers as well. Unless CephFS has some coalescing logic it will be good if we can find out how we are getting this bigger throughput for 4K. Let me know if I am missing something..
+I'm sorry folks - I didn't see this until now (filters?)
 
-The impression I had was that the later kclient tests were not using
-direct IO, but I might be wrong?
+I must have changed this the same day I changed teuthology's behavior.
+It was a mistake; sorry for any inconvenience!
 
-John
-
-> Thanks & Regards
-> Somnath
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Fri, Jul 29, 2016 at 12:31 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> On Fri, Jul 29, 2016 at 11:08 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
+>> On Fri, Jul 29, 2016 at 11:27 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
+>>> I know Zack wanted this on teuthology, but I really don't think it's
+>>> acceptable for the qa-suite stuff -- it practically guarantees we won't be
+>>> able to merge what was actually tested!
+>>> Also, those branches need to be coordinated with ceph PRs and continuous
+>>> rebasing of them over the long periods of time that can entail is just not
+>>> feasible.
+>>> -Greg
+>>
+>> Personally I like "Require status checks to pass before merging", but
+>> the other setting, "Require branches to be up to date
+>> before merging" setting is pretty strict, particularly when every PR
+>> has to be rebased by hand.
+>
+> Oh yes, the fast-forward requirement is what I meant as well — I'm
+> really glad we flipped the switch to require tests be passing
+> everywhere!
+> -Greg
