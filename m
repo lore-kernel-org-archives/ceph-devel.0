@@ -1,49 +1,51 @@
-From: Zack Cerza <zack@redhat.com>
-Subject: Re: [sepia] "This branch is out-of-date with the base branch"
-Date: Wed, 3 Aug 2016 10:53:44 -0600
-Message-ID: <CACk6Fj=O0p32_4LtjCs_TSuhGvHTvQpL5rnb22Mp=sCdB_z0mQ@mail.gmail.com>
-References: <CALe9h7fiBXcFVzo9k2+smVxWrewBw_dK8uMY6kJuts_MwA6mtg@mail.gmail.com>
- <CALqRxCyOjLXBYJg=Le3Sz6c-_mJoTG8o7oTXRVWqe5SFvziJuw@mail.gmail.com>
- <CAJ4mKGY2ZyRBtkR+BAmFSc7Vc05dg=6fsEP4h2wTXuhUFw=Egw@mail.gmail.com>
- <CALqRxCzU=Ksj7zMKaAjWqPaMR5YLCi77tGKted+hfgzzWs8Gew@mail.gmail.com> <CAJ4mKGbWcjkz3Uj65TkC1kkrN9Dhd-yQW=02RYkMmsE207Kfzw@mail.gmail.com>
+From: Ben England <bengland@redhat.com>
+Subject: Re: CephFs performance data
+Date: Wed, 3 Aug 2016 15:33:51 -0400 (EDT)
+Message-ID: <906232803.11790446.1470252831523.JavaMail.zimbra@redhat.com>
+References: <BL2PR02MB211528CE823D5728C3A474ACF4060@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:34426 "EHLO
-	mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932453AbcHCRQJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Aug 2016 13:16:09 -0400
-Received: by mail-lf0-f49.google.com with SMTP id l69so165827874lfg.1
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Aug 2016 10:16:08 -0700 (PDT)
-In-Reply-To: <CAJ4mKGbWcjkz3Uj65TkC1kkrN9Dhd-yQW=02RYkMmsE207Kfzw@mail.gmail.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:45453 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757182AbcHCTdy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Aug 2016 15:33:54 -0400
+In-Reply-To: <BL2PR02MB211528CE823D5728C3A474ACF4060@BL2PR02MB2115.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ken Dreyer <kdreyer@redhat.com>, John Spray <jspray@redhat.com>, "sepia@lists.ceph.com" <sepia@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-I'm sorry folks - I didn't see this until now (filters?)
+Thanks Somnath, here are the Cephfs slides from this morning. 
 
-I must have changed this the same day I changed teuthology's behavior.
-It was a mistake; sorry for any inconvenience!
+https://s3.amazonaws.com/ben.england/Cephfs+performance+results+June+2016.pdf
 
-On Fri, Jul 29, 2016 at 12:31 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> On Fri, Jul 29, 2016 at 11:08 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
->> On Fri, Jul 29, 2016 at 11:27 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
->>> I know Zack wanted this on teuthology, but I really don't think it's
->>> acceptable for the qa-suite stuff -- it practically guarantees we won't be
->>> able to merge what was actually tested!
->>> Also, those branches need to be coordinated with ceph PRs and continuous
->>> rebasing of them over the long periods of time that can entail is just not
->>> feasible.
->>> -Greg
->>
->> Personally I like "Require status checks to pass before merging", but
->> the other setting, "Require branches to be up to date
->> before merging" setting is pretty strict, particularly when every PR
->> has to be rebased by hand.
->
-> Oh yes, the fast-forward requirement is what I meant as well — I'm
-> really glad we flipped the switch to require tests be passing
-> everywhere!
-> -Greg
+Let me know if you have trouble reading them.
+
+As for sequential 4-KB I/O performance, I believe kernel Cephfs client is aggregating reads and writes - otherwise you are quite right that the IOPS level could not be sustained.  This is common practice in other distributed filesystems as well, such as NFS and Gluster.  For RANDOM I/O, coalescing of I/O requests is far less likely.   I have some performance data on these runs that should be useful in confirming the result, will try to look that up for you.
+
+I'm looking forward to hearing other people's results with Cephfs as well.
+
+-ben
+
+
+----- Original Message -----
+> From: "Somnath Roy" <Somnath.Roy@sandisk.com>
+> To: "Ben England (bengland@redhat.com)" <bengland@redhat.com>
+> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+> Sent: Wednesday, August 3, 2016 12:23:21 PM
+> Subject: CephFs performance data
+> 
+> Ben,
+> Thanks for the first cut data on CephFS , it was really helpful.
+> Do you mind to send out the slides ?
+> Also, continuing the discussion on 4K SW throughput is ~1GB/S , if you are
+> running test with direct IO, client Linux system can't coalesce the writes
+> and I didn't see much coalescing at the OSD servers as well. Unless CephFS
+> has some coalescing logic it will be good if we can find out how we are
+> getting this bigger throughput for 4K. Let me know if I am missing
+> something..
+> 
+> Thanks & Regards
+> Somnath
