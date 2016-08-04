@@ -1,52 +1,47 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: jewel rgw backport issue with metadata
-Date: Thu, 4 Aug 2016 16:05:20 +0200
-Message-ID: <57A34BA0.2060707@dachary.org>
-References: <57A33F23.8080606@dachary.org>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: ./make-debs.sh / dpkg-buildpackage failed because of
+ override_dh_auto_configure from debian/rules
+Date: Thu, 4 Aug 2016 08:37:48 -0600
+Message-ID: <CALqRxCx4hQs634_YE07RswiKCcZ_S+NyUSvP8F0ihV0ApC9QJw@mail.gmail.com>
+References: <DB5PR05MB1607E14365A8266A29A7E260A9060@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from slow1-d.mail.gandi.net ([217.70.178.86]:37050 "EHLO
-	slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933826AbcHDOHu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Aug 2016 10:07:50 -0400
-Received: from relay6-d.mail.gandi.net (relay6-d.mail.gandi.net [217.70.183.198])
-	by slow1-d.mail.gandi.net (Postfix) with ESMTP id 2CA8E47A036
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Aug 2016 16:07:14 +0200 (CEST)
-Received: from mfilter30-d.gandi.net (mfilter30-d.gandi.net [217.70.178.161])
-	by relay6-d.mail.gandi.net (Postfix) with ESMTP id 37BBFFB8C6
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Aug 2016 16:05:23 +0200 (CEST)
-Received: from relay6-d.mail.gandi.net ([IPv6:::ffff:217.70.183.198])
-	by mfilter30-d.gandi.net (mfilter30-d.gandi.net [::ffff:10.0.15.180]) (amavisd-new, port 10024)
-	with ESMTP id qNsNI7cK5Oym for <ceph-devel@vger.kernel.org>;
-	Thu,  4 Aug 2016 16:05:21 +0200 (CEST)
-Received: from [192.168.3.6] (xd9ba6520.dyn.telefonica.de [217.186.101.32])
-	(Authenticated sender: loic@dachary.org)
-	by relay6-d.mail.gandi.net (Postfix) with ESMTPSA id 882F6FB8BF
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Aug 2016 16:05:21 +0200 (CEST)
-In-Reply-To: <57A33F23.8080606@dachary.org>
+Received: from mail-vk0-f42.google.com ([209.85.213.42]:36579 "EHLO
+	mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750941AbcHDOht (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Aug 2016 10:37:49 -0400
+Received: by mail-vk0-f42.google.com with SMTP id n129so169063852vke.3
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Aug 2016 07:37:49 -0700 (PDT)
+In-Reply-To: <DB5PR05MB1607E14365A8266A29A7E260A9060@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Avner Ben Hanoch <avnerb@mellanox.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I was wrong: the problem does not always show on the jewel-backport branch : it succeeds sometimes http://pulpito.ceph.com/loic-2016-08-04_05:47:34-rgw-jewel-backports---basic-smithi/
+Would you please paste more output above the lines you've pasted
+there? The failure is higher up in the log.
 
-On 04/08/2016 15:12, Loic Dachary wrote:
-> Hi,
-> 
-> In the current jewel branch, 
-> 
-> rgw/singleton/{overrides.yaml xfs.yaml all/radosgw-admin-data-sync.yaml frontend/apache.yaml fs/xfs.yaml rgw_pool_type/ec-profile.yaml}
-> 
-> consistently succeeds[1]. However, when backporting it frequently fails on the integration branch[2]. Out of the commits merged in the integration branch for jewel[3] only a few relate to rgw and I'm unclear which one could cause that kind of failure. If anyone has an idea, I'll take it :-) Otherwise I'll keep digging.
-> 
-> Cheers
-> 
-> [1] http://pulpito.ceph.com/loic-2016-08-04_03:45:32-rgw-jewel---basic-smithi/ and http://pulpito.ceph.com/loic-2016-06-28_23:57:48-rgw-jewel-backports---basic-smithi/
-> [2] http://pulpito.ceph.com/loic-2016-07-07_08:16:03-rgw-jewel-backports---basic-smithi/300632 and http://pulpito.ceph.com/loic-2016-08-03_00:04:42-rgw-jewel-backports---basic-smithi/347441
-> [3] http://tracker.ceph.com/issues/16344#note-10
-> 
+- Ken
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+On Wed, Aug 3, 2016 at 5:42 AM, Avner Ben Hanoch <avnerb@mellanox.com> wrote:
+> Hi all,
+>
+> Running ./make-debs.sh from Ceph master branch on Ubuntu-16.04 produces the error below:
+> =====
+>     debian/rules:25: recipe for target 'override_dh_auto_configure' failed
+>     make[1]: *** [override_dh_auto_configure] Error 2
+>     make[1]: Leaving directory '/mnt/sdh/avnerb/deb-v11.0.0/Ubuntu/WORKDIR/ceph-11.0.0-1228-gc162a8a'
+>     debian/rules:22: recipe for target 'build' failed
+>     make: *** [build] Error 2
+>     dpkg-buildpackage: error: debian/rules build gave error exit status 2
+> =====
+> I saw that recently there were changes in this area for gitbuilder to enable cmake. Perhaps it is related??
+>
+> Anyhow, is there a way to create deb packages? Or, is there a plan to fix this situation?
+> TIA,
+>   Avner
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
