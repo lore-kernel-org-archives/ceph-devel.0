@@ -1,172 +1,62 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: BLueStore Deadlock
-Date: Fri, 5 Aug 2016 02:14:02 +0000
-Message-ID: <BL2PR02MB2115A9ED532BA7728F44A02AF4180@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <6AA21C22F0A5DA478922644AD2EC308C373B92BC@SHSMSX101.ccr.corp.intel.com>
-  <BL2PR02MB2115604A7C4767FC465C320EF4000@BL2PR02MB2115.namprd02.prod.outlook.com>
- <6AA21C22F0A5DA478922644AD2EC308C373B940C@SHSMSX101.ccr.corp.intel.com>
- <6AA21C22F0A5DA478922644AD2EC308C373B9424@SHSMSX101.ccr.corp.intel.com>
- <6AA21C22F0A5DA478922644AD2EC308C373B9AB0@SHSMSX101.ccr.corp.intel.com>
+From: Patrick Donnelly <pdonnell@redhat.com>
+Subject: MultiMDS Test Progress
+Date: Thu, 4 Aug 2016 23:54:31 -0400
+Message-ID: <CA+2bHPamkv7Qa5M3FhYuFRg5cJuO4aq8e_04XmvRmir4va1t6Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0067.outbound.protection.outlook.com ([104.47.32.67]:47451
-	"EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1756374AbcHEC3Z convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Aug 2016 22:29:25 -0400
-In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C373B9AB0@SHSMSX101.ccr.corp.intel.com>
-Content-Language: en-US
+Received: from mail-qk0-f180.google.com ([209.85.220.180]:36780 "EHLO
+	mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759213AbcHEDzE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Aug 2016 23:55:04 -0400
+Received: by mail-qk0-f180.google.com with SMTP id v123so119934923qkh.3
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Aug 2016 20:55:03 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Ma, Jianpeng" <jianpeng.ma@intel.com>, Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>
+To: ceph-devel@vger.kernel.org
 
-Sorry for the delay ,
-Jianpeng,
-Could you please try the following pull request in your setup and see if the deadlock is still happening ?
+Hello all,
 
-https://github.com/ceph/ceph/pull/10578
+For the past two weeks I've been in the process of resurrecting the multimds
+test suite which has not be regularly exercised in some time. This is part of
+the initial work to have multiple active metadata server configurations
+regularly tested and supported. Recent multimds test runs can be viewed (as
+always) at [1].
 
-Mark,
-I think it has the probable fix for your crash in onode->flush() as well , could you please try this out ?
+The first stage of this work is to organize and process the current failures
+into bug reports [2-8]. These are just the currently known failures we have
+coming from our tests. Some failures like #16926 [8] are particularly
+widespread and probably masking many other failures.
 
-Thanks & Regards
-Somnath
+As the team works on these bugs, the next steps are to expand our test coverage
+of the multimds suite. So far we have planned:
 
------Original Message-----
-From: Ma, Jianpeng [mailto:jianpeng.ma@intel.com] 
-Sent: Tuesday, August 02, 2016 6:35 PM
-To: Sage Weil
-Cc: ceph-devel; Somnath Roy
-Subject: RE: BLueStore Deadlock
+o [9] Testing MDS cluster size changes under load.
 
-Hi Sage:
-    Why is there STATE_WRITTING? 
-  In my option: for normal read, it do onode->flush() , so no need wait io complete. The special case is one transaction which has two write and later write need read.
-  For write, if it is wal-write, when do finish_write, the data don't locate into disk. This different with non-wal-write
+o [10] Testing directory fragmentation and inode export under load. This test
+  will be exercising the balancer in the MDS.
 
-Thanks! 
-  
+o [11] Testing cluster recovery during failures migration/fragmentation.
 
------Original Message-----
-From: Ma, Jianpeng 
-Sent: Friday, July 29, 2016 9:36 AM
-To: Ma, Jianpeng <jianpeng.ma@intel.com>; Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
-Subject: RE: BLueStore Deadlock
+o [To Be Filed] Testing rename with authoritative inodes/directories varying
+  across multiple MDSs.
 
-Roy: my question is why is there STATE_WRITTING?  For read we don't by pass cache, so why need STATE_WRITTING?
+o [To Be Filed] Integrate recently added tests in the fs suite into the
+  multimds suite.
 
-Thanks!
+Please let us know if you have any comments or questions.
 
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Ma, Jianpeng
-Sent: Friday, July 29, 2016 9:24 AM
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
-Subject: RE: BLueStore Deadlock
+[1] http://pulpito.ceph.com/?suite=multimds
+[2] http://tracker.ceph.com/issues/16768
+[3] http://tracker.ceph.com/issues/16807
+[4] http://tracker.ceph.com/issues/16886
+[5] http://tracker.ceph.com/issues/16914
+[6] http://tracker.ceph.com/issues/16913
+[7] http://tracker.ceph.com/issues/16925
+[8] http://tracker.ceph.com/issues/16926
+[9] http://tracker.ceph.com/issues/10792
+[10] http://tracker.ceph.com/issues/7320
+[11] http://tracker.ceph.com/issues/4492
 
-Hi Roy:
-    W/ your patch, there still deadlock.
-By the way, if we change the BufferSpace::_add_buffer, if w/ cache flush push it into cache front and if w/o cache flag only put it  at back.
-I think use this way we can remove finish_write.
-How about it?
-
-Thanks!
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
-Sent: Friday, July 29, 2016 6:22 AM
-To: Ma, Jianpeng <jianpeng.ma@intel.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
-Subject: RE: BLueStore Deadlock
-
-Jianpeng,
-I thought through this and it seems there could be one possible deadlock scenario.
-
-tp_osd_tp --> waiting on onode->flush() for previous txc to finish. Holding Wlock(coll) aio_complete_thread --> waiting for RLock(coll) No other thread will be blocked here.
-
-We do add previous txc in the flush_txns list during _txc_write_nodes() and before aio_complete_thread calling _txc_state_proc(). So, if within this time frame if we have IO on the same collection , it will be waiting on unfinished txcs.
-The solution to this could be the following..
-
-root@emsnode5:~/ceph-master/src# git diff diff --git a/src/os/bluestore/BlueStore.cc b/src/os/bluestore/BlueStore.cc index e8548b1..575a234 100644
---- a/src/os/bluestore/BlueStore.cc
-+++ b/src/os/bluestore/BlueStore.cc
-@@ -4606,6 +4606,11 @@ void BlueStore::_txc_state_proc(TransContext *txc)
-         (txc->first_collection)->lock.get_read();
-       }
-       for (auto& o : txc->onodes) {
-+        {
-+          std::lock_guard<std::mutex> l(o->flush_lock);
-+          o->flush_txns.insert(txc);
-+        }
-+
-         for (auto& p : o->blob_map.blob_map) {
-            p.bc.finish_write(txc->seq);
-        }
-@@ -4733,8 +4738,8 @@ void BlueStore::_txc_write_nodes(TransContext *txc, KeyValueDB::Transaction t)
-     dout(20) << "  onode " << (*p)->oid << " is " << bl.length() << dendl;
-     t->set(PREFIX_OBJ, (*p)->key, bl);
-
--    std::lock_guard<std::mutex> l((*p)->flush_lock);
--    (*p)->flush_txns.insert(txc);
-+    /*std::lock_guard<std::mutex> l((*p)->flush_lock);
-+    (*p)->flush_txns.insert(txc);*/
-   }
-
-
-I am not able to reproduce this in my setup , so, if you can do the above changes in your env and see if you are still hitting the issue, would be helpful.
-
-Thanks & Regards
-Somnath
-
-
------Original Message-----
-From: Somnath Roy
-Sent: Thursday, July 28, 2016 8:45 AM
-To: 'Ma, Jianpeng'
-Cc: ceph-devel
-Subject: RE: BLueStore Deadlock
-
-Hi Jianpeng,
-Are you trying with latest master and still hitting the issue (seems so but confirming) ?
-The following scenario should not be creating deadlock because of the following reason.
-
-Onode->flush() is waiting on flush_lock() and from _txc_finish() it is releasing that before taking osr->qlock(). Am I missing anything ?
-
-I got a deadlock in this path in one of my earlier changes in the following pull request (described in detail there) and it is fixed and merged.
-
-https://github.com/ceph/ceph/pull/10220
-
-If my theory is right , we are hitting deadlock because of some other reason may be. It seems you are doing WAL write , could you please describe the steps to reproduce ?
-
-Thanks & Regards
-Somnath
-
-From: Ma, Jianpeng [mailto:jianpeng.ma@intel.com]
-Sent: Thursday, July 28, 2016 1:46 AM
-To: Somnath Roy
-Cc: ceph-devel; Ma, Jianpeng
-Subject: BLueStore Deadlock
-
-Hi Roy:
-     When do seqwrite w/ rbd+librbd, I met deadlock for bluestore. It can reproduce 100%.(based on 98602ae6c67637dbadddd549bd9a0035e5a2717)
-By add message and this found this bug caused by bf70bcb6c54e4d6404533bc91781a5ef77d62033.
-Consider this case:
-
-tp_osd_tp                                              aio_complete_thread                                 kv_sync_thread
-Rwlock(coll)                                            txc_finish_io                                                     _txc_finish do_write                                                 lock(osr->qlock)                                               lock(osr->qlock) do_read                                                  RLock(coll)                                                                     need osr->qlock to continue
-onode->flush()                                            need coll
-onode->readlock to continue
-   need previous txc complete
-
-But current I don't how to fix this.
-
-Thanks!
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Patrick Donnelly
