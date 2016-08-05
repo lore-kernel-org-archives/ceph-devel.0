@@ -1,29 +1,36 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Merging rados related backports
-Date: Fri, 5 Aug 2016 15:08:36 +0200
-Message-ID: <57A48FD4.40401@dachary.org>
+From: kefu chai <tchaikov@gmail.com>
+Subject: gcc-6 is c++14 by default, and hammer does not like it
+Date: Fri, 5 Aug 2016 22:05:51 +0800
+Message-ID: <CAJE9aOPoceT-SGM7ANLqtnaF6T8PUcEJJqwefx7BQj7N3A=i4A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:35984 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751799AbcHENIm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Aug 2016 09:08:42 -0400
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:36749 "EHLO
+	mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759711AbcHEOFx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Aug 2016 10:05:53 -0400
+Received: by mail-qt0-f170.google.com with SMTP id 52so174538190qtq.3
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Aug 2016 07:05:52 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sam,
+hey cephers,
 
-When running the rados suite on a given backport targetting jewel (or hammer for that matter, but it's less of an issue) I figured the smallest subset would be enough to guarantee there is no trivial regression, this is why we're routinely using X/2000. I understand this is not enough coverage to release jewel and we have the nightlies running X/14 for that. When jewel is eventually released, all of the rados suite should have been run.
+just a heads up, for those who are using the bleeding edge
+compiler[1], hammer does not compile by default.
 
-If you think there are too many regressions merged in the jewel branch because X/2000 did not detect them, we will increase the size of the subset. This will slow down backporting when the lab is misbehaving, but that's less time consuming than chassing a regression long after the guilty commit has been merged.
+i took a while to figure it out tonight. and seems the packaged
+liboost is now compiled using gcc6 with C++14 enabled, so the headers
+are found, but the source does not link with some libboost libraries
+if you pass 'CXXFLAGS=-std=c++98' to configure. and moreover, seems
+libstdc++ does not play well with hammer, i didn't root cause this.
 
-Cheers
+at last, i cowardly used gcc-5 to compile hammer.
 
-[1] http://tracker.ceph.com/projects/ceph-releases/wiki/Sepia/97
+---
+[1] https://gcc.gnu.org/gcc-6/changes.html
 
 -- 
-Loïc Dachary, Artisan Logiciel Libre
+Regards
+Kefu Chai
