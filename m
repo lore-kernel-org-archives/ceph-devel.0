@@ -1,76 +1,53 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Questions about embedding Lua in the Ceph source tree
-Date: Fri, 5 Aug 2016 14:00:23 -0400
-Message-ID: <CAC-Np1wVKE5iaaMSOM_3HxwQiX6E1PoH8-RUBcctBVM-ghqMGA@mail.gmail.com>
+From: Patrick Donnelly <pdonnell@redhat.com>
+Subject: Re: Questions about embedding Lua in the Ceph source tree
+Date: Fri, 5 Aug 2016 14:49:38 -0400
+Message-ID: <CA+2bHPbrWe-GRSXnNoL639SvRBGahc=Le=k5Ww1byUjCmkoUMQ@mail.gmail.com>
+References: <CAC-Np1wVKE5iaaMSOM_3HxwQiX6E1PoH8-RUBcctBVM-ghqMGA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:38084 "EHLO
-	mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932800AbcHESA0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Aug 2016 14:00:26 -0400
-Received: by mail-wm0-f49.google.com with SMTP id o80so47441368wme.1
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Aug 2016 11:00:25 -0700 (PDT)
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:33551 "EHLO
+	mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S937832AbcHESuK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Aug 2016 14:50:10 -0400
+Received: by mail-qk0-f173.google.com with SMTP id p74so271485832qka.0
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Aug 2016 11:50:09 -0700 (PDT)
+In-Reply-To: <CAC-Np1wVKE5iaaMSOM_3HxwQiX6E1PoH8-RUBcctBVM-ghqMGA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-At the last Ceph Developer Monthly (CDM) meeting, there was some discussion
-about "Mantle" [0], a "a programmable metadata balancer built into the
-MDS" which
-would use Lua for controlling the load balancing policies.
+On Fri, Aug 5, 2016 at 2:00 PM, Alfredo Deza <adeza@redhat.com> wrote:
+> There is a tendency to embed dependencies in the Ceph project which is a big
+> problem for maintainers (there are many reasons for this, including security
+> patches, and keeping up to date with forks). For Mantle, this is the case
+> again: it depends on a Pull Request [1] that embeds a *forked* version of the
+> official Lua repository that includes custom changes.
 
-I wanted to raise a few questions that are important from the
-testing/release/maintenance point of view in hopes that we can clarify what the
-best path is moving forward and how we can have a robust support for this
-feature.
+I think we should be using our own copy of the upstream tarballs. Is
+there no way to use Lua's Makefiles with our cmake build?
 
-Using Python to create a good portion of the tooling for Ceph, we have
-found there is a constant struggle
-for testing:
+> Here are a few concerns I have:
+>
+> * The fork is already modified and has diverged from the upstream Lua [2], who
+>   is going to keep up with upstream changes? (pulling/rebasing etc...)
 
-* virtualenvs can (and do) break
-* Python packaging can be cumbersome to work with and the Ceph source
-has a good amount of workarounds
-  to provide an easier path for development)
-* Python tools in the Ceph tree are not real Python packages which
-forces the whole tooling to workaround this as well
-* Dependencies are difficult to deal with (ceph-disk has only one: argparse)
+The cmsgpack module should be in the ceph/ tree and added to the preload table:
 
-There is a tendency to embed dependencies in the Ceph project which is a big
-problem for maintainers (there are many reasons for this, including security
-patches, and keeping up to date with forks). For Mantle, this is the case
-again: it depends on a Pull Request [1] that embeds a *forked* version of the
-official Lua repository that includes custom changes.
+https://www.lua.org/manual/5.3/manual.html#pdf-require
 
-Here are a few concerns I have:
+Scripts should then require "cmsgpack".
 
-* The fork is already modified and has diverged from the upstream Lua [2], who
-  is going to keep up with upstream changes? (pulling/rebasing etc...)
-* Who (or whom) is going to be responsible for keeping track of CVE's and their
-  corresponding patches?
-* Embedding Lua in this form makes it *impossible* for distro maintainers to
-  package Ceph: they would most likely rip out and figure out how to try and
-  make it work with the distro-provided version. *This is very frowned upon and
-  creates a gigantic amount of work for package maintainers*.
-* Modifying the make files to accommodate for this is fine, but that is a tiny
-  corner of the impact this would have on everything else that deals with Ceph.
-  These would certainly need attention (and there are lots more):
-  - Continuous Integration scripts (make check)
-  - Release scripts and process/workflow
-  - Testing (both functional and unit tests)
-  - Packaging rules
+> * Embedding Lua in this form makes it *impossible* for distro maintainers to
+>   package Ceph: they would most likely rip out and figure out how to try and
+>   make it work with the distro-provided version. *This is very frowned upon and
+>   creates a gigantic amount of work for package maintainers*.
 
-Even if the Lua interpreter was out-of-tree, my concern is how to provide these
-patches (e.g. the cmsgpack module) so that it works in the expected manner?
+We should definitely try to limit changes to Lua unless it's
+absolutely necessary. I haven't seen a good reason yet so I suggest
+using bare upstream so maintainers can use the system liblua if
+desired.
 
-Is it not possible to make this a completely separate component of Ceph that
-doesn't require the project to embed the modified forked or depend in any way
-with the modifications done to the Lua interpreter?
-
-
-
-[0] Mantle BluePrint
-https://github.com/michaelsevilla/mantle-popper/wiki/Blueprint
-[1] Lua object class support Pull Request https://github.com/ceph/ceph/pull/7338
-[2] https://github.com/ceph/lua/commits/lua-5.3-ceph
+-- 
+Patrick Donnelly
