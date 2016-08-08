@@ -1,33 +1,33 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: =?UTF-8?Q?Re=3A_why_clog_can_redirect_to_mon=EF=BC=9F?=
-Date: Mon, 8 Aug 2016 16:28:23 -0700
-Message-ID: <CAJ4mKGZiAVp1S4O+ggstc_Lxh7Eda_Gi9_7Zuv-DJ1bQZZhsUw@mail.gmail.com>
-References: <CAKZcxgc95-dGB=CCnvXe__rz9SpWzDGUkpR327x-OgnKExKZ2w@mail.gmail.com>
+From: Jesse Williamson <jwilliamson@suse.de>
+Subject: Re: [Feature request] config diff on a single option with the admin
+ socket
+Date: Mon, 8 Aug 2016 16:50:12 -0700 (PDT)
+Message-ID: <alpine.LSU.2.20.1608081649040.2000@ancalagon.suse.com>
+References: <CA+HUO7+qxtsS03yKp2ETUhKy6WTX1ESd0Xridw13viWwa0Cj3Q@mail.gmail.com> <alpine.LSU.2.20.1607291125130.28641@ancalagon.suse.com> <CA+HUO7+QVu-HqBT7EuuEoLwPVng84HzG_MmbvMQyueEstR-6Gw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; format=flowed; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f171.google.com ([209.85.217.171]:34101 "EHLO
-	mail-ua0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751652AbcHHXeS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Aug 2016 19:34:18 -0400
-Received: by mail-ua0-f171.google.com with SMTP id 35so277673201uap.1
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Aug 2016 16:34:18 -0700 (PDT)
-In-Reply-To: <CAKZcxgc95-dGB=CCnvXe__rz9SpWzDGUkpR327x-OgnKExKZ2w@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:48764 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752513AbcHHXuQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 8 Aug 2016 19:50:16 -0400
+In-Reply-To: <CA+HUO7+QVu-HqBT7EuuEoLwPVng84HzG_MmbvMQyueEstR-6Gw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jaze Lee <jazeltq@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sebastien Han <shan@redhat.com>
+Cc: Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Mon, Aug 8, 2016 at 6:35 AM, Jaze Lee <jazeltq@gmail.com> wrote:
-> Hi all，
->
->       I found that clog default send message to mon. But i do not know why it
-> sends to mon? Can someone explian more about why we do that ?
+On Mon, 8 Aug 2016, Sebastien Han wrote:
 
-The purpose of the "central log" is to send log messages to a central
-location for sharing. The mon is what we've got right now; it collects
-the messages, writes them to a local file, and spits them out to
-anybody running "ceph -w" (technically, anybody with a log
-subscription).
--Greg
+Hi Sebastien,
+
+> Did you get a chance to look into this Jesse?
+
+I did, but Daniel pinged me and it sounds like he's right on top of it. 
+:-)
+
+> Thanks for offering your help on this one!
+
+You're welcome!
+
+-Jesse
