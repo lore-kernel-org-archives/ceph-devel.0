@@ -1,126 +1,67 @@
-From: Victor Payno <vpayno@gaikai.com>
-Subject: Re: linux 4.7.0 rbd client kernel panic when OSD process was killed
- by OOM
-Date: Tue, 9 Aug 2016 13:29:51 -0700
-Message-ID: <CALXUmNSBjpuPPMh_wJ53AF1X21Ed-0ofmhdn6YkoAEq7no6ssg@mail.gmail.com>
-References: <CALXUmNQ91fBrvKQJOeyfT_BZXLikEyDOA9tOMH54pt3NDU+taQ@mail.gmail.com>
- <CAOi1vP8_D6FwQPzGuqsiRv=be3Zv4U7kmO-HjcQEVehD8sYwHA@mail.gmail.com>
- <CALXUmNTVdqn3vBirg-=+a=bq=nAhV=LCR-eAAO4BRyyL6XYpQQ@mail.gmail.com>
- <CALXUmNSwd76iOF=z-TVSy=YX_v0Hv5sutUh6jgNi2iGzHqmfyg@mail.gmail.com> <CAOi1vP-Jc9X+9isOHiMtSt9JrK26MmkqoQY7knMwsA_Vv9dOiw@mail.gmail.com>
+From: Noah Watkins <noahwatkins@gmail.com>
+Subject: Re: Questions about embedding Lua in the Ceph source tree
+Date: Tue, 9 Aug 2016 15:07:41 -0700
+Message-ID: <CAB2gnbXTbjGjWasZxu2VPUupwQmD+oyAfF=eGMNa6D=xHNN+mg@mail.gmail.com>
+References: <CAC-Np1wVKE5iaaMSOM_3HxwQiX6E1PoH8-RUBcctBVM-ghqMGA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f53.google.com ([209.85.214.53]:35717 "EHLO
-	mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932404AbcHIUaN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Aug 2016 16:30:13 -0400
-Received: by mail-it0-f53.google.com with SMTP id u186so22383211ita.0
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Aug 2016 13:30:12 -0700 (PDT)
-In-Reply-To: <CAOi1vP-Jc9X+9isOHiMtSt9JrK26MmkqoQY7knMwsA_Vv9dOiw@mail.gmail.com>
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:35459 "EHLO
+	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932360AbcHIWHn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Aug 2016 18:07:43 -0400
+Received: by mail-oi0-f52.google.com with SMTP id 4so36499850oih.2
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Aug 2016 15:07:42 -0700 (PDT)
+In-Reply-To: <CAC-Np1wVKE5iaaMSOM_3HxwQiX6E1PoH8-RUBcctBVM-ghqMGA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Patrick McLean <patrickm@gaikai.com>, Roderick Colenbrander <roderick@gaikai.com>, Cliff Pajaro <cpajaro@gaikai.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-The problem with the swap file/partition is that I've seen OSD grow
-past 64GB in size.
-With previous OOMs, I've seen one to four (out of eight to twelve
-OSDs) OOM on a single host.
-And I've had times when one OOM cascades into additional OOMs on other hosts.
-
-For this last OOM event, we think that the client rbds (168+) hit the
-100 snapshot limit and they all started pruning at the same time.
-It's possible that we had both pruning and snapshoting happening at
-the same time (not on the same rbd).
-Also, when the rbds reach 100 snapshots, a prune follows every
-snapshot creation (oops, we're fixing that).
-
-
-
-
-
-
-
-
-On Tue, Aug 9, 2016 at 2:02 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> On Mon, Aug 8, 2016 at 10:35 PM, Victor Payno <vpayno@gaikai.com> wrote:
->> Ilya:
->>
->> I think it is the same error, I was confusing it with the 4.4 kernel error.
+On Fri, Aug 5, 2016 at 11:00 AM, Alfredo Deza <adeza@redhat.com> wrote:
 >
-> The kernel client shouldn't crash no matter what - I'll look into it
-> later this or next week.
->
->>
->> Do you have documentation on settings we can use to limit the memory
->> growth of OSD processes?
->>
->> So far all I have is changing these from
->>
->> osd_min_pg_log_entries = 3000
->> osd_max_pg_log_entries = 10000
->>
->> to
->>
->> osd_min_pg_log_entries = 300
->> osd_max_pg_log_entries = 1000
->>
->> and now I'm trying  these settings
->>
->> osd_min_pg_log_entries = 150
->> osd_max_pg_log_entries = 500
->>
->>
->>
->> The hosts have 12 OSDs (8TB HDDs with SSDs for journals) and 32 GB of
->> RAM. We're having a hard time with getting more memory because Ceph
->> documentation says 2GB per OSD (24 GB).
->
->>
->> The bigger problem I have is that once an OSD OOMs, I can't recover
->> it, I have to destroy it and create it again. Unfortunately that
->> starts a domino effect and other nodes start loosing 1 OSD to OOM.
->> Eventually I end up destroying the cluster and starting over again.
->>
->>
->> This cluster had 2 pools, the second pool had a single 100TB RBD with
->> 3.6 TB of data (was currently mapped and mounted but idle).
->
-> How many PGs in each pool?
->
-> Was there a recovery underway?  I know from experience that during
-> recovery it can blow past the 2G mark, especially if more than a few
-> OSDs on the host are being rebalanced at the same time.
->
-> Do you have an idea on what leads to the OOM kill?  A test workload you
-> are running, general state of the cluster, etc.
->
-> To get out of  it, I'd add a big swapfile, set the flags to pause any
-> background operations (backfill, scrub, etc) and prevent OSD flapping
-> and just babysit it, monitoring memory usage.  You might want to search
-> ceph-users archive for more tricks.
->
-> Thanks,
->
->                 Ilya
+> * The fork is already modified and has diverged from the upstream Lua [2], who
+>   is going to keep up with upstream changes? (pulling/rebasing etc...)
+> * Who (or whom) is going to be responsible for keeping track of CVE's and their
+>   corresponding patches?
 
+I'm not trying to avoid these questions, but here is some information
+that might be useful in figuring out answers:
 
+Lua scripting was enabled in Redis in 2011 and is a high-profile
+feature. Since 2011 it appears that only a handful of commits were
+related to core Lua [1] (there are many related to included 3rd party
+libraries): a couple build fixes and a patch to disable bytecode
+execution, but the later was likely not a CVE, it was disabling a Lua
+feature.
 
--- 
-Victor Payno
-ビクター·ペイン
+With respect to Lua being used to program object classes, it would
+seem that at the moment both Redis and Ceph have a similar security
+model in which API access is explicitly granted and those users are
+trusted; similar to users with enough access to dynamic load c++
+modules. My point being that we might want to at first consider the
+on-going maintenance costs of fixes for stability over those that
+address vulnerabilities, and Redis seems to be one big example of
+where stability has not been an issue for the core Lua library. What
+this means for Mantle, I'm not sure.
 
-Sr. Release Engineer
-シニアリリースエンジニア
+> * Embedding Lua in this form makes it *impossible* for distro maintainers to
+>   package Ceph: they would most likely rip out and figure out how to try and
+>   make it work with the distro-provided version. *This is very frowned upon and
+>   creates a gigantic amount of work for package maintainers*.
 
+I think that as Patrick points out in [2], making this choice flexible
+would be nice if we have a compelling reason. And starting with the
+distro-provided version might be a good option. Linking against
+distro-provided versions is very convenient, but also means we give up
+the ability to customize the VM if we wanted, and have added headaches
+with handling differences across all possible versions of Lua we might
+need to link against. On the other hand, some users [3] may want to
+link against LuaJIT for special features, and unlike the Lua
+interpreter which is commonly built into its target package, it is
+explicitly recommended that users link against the distro-provided
+versions of LuaJIT.
 
-
-Gaikai, a Sony Computer Entertainment Company   ∆○×□
-ガイカイ、ソニー・コンピュータエンタテインメント傘下会社
-65 Enterprise
-Aliso Viejo, CA 92656 USA
-
-Web: www.gaikai.com
-Email: vpayno@gaikai.com
-Phone: (949) 330-6850
+[1]: https://github.com/antirez/redis/tree/unstable/deps/lua
+[2] Lua object class support Pull Request https://github.com/ceph/ceph/pull/7338
+[3]: http://ceph.com/rados/dynamic-object-interfaces-with-lua/
