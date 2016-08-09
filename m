@@ -1,129 +1,81 @@
-From: Daniel Oliveira <doliveira@suse.com>
-Subject: Re: [Feature request] config diff on a single option with the admin
- socket
-Date: Mon, 08 Aug 2016 20:38:55 -0600
-Message-ID: <1470710335.14948.10.camel@suse.com>
-References: <CA+HUO7+qxtsS03yKp2ETUhKy6WTX1ESd0Xridw13viWwa0Cj3Q@mail.gmail.com>
-	 <alpine.LSU.2.20.1607291125130.28641@ancalagon.suse.com>
-	 <CA+HUO7+QVu-HqBT7EuuEoLwPVng84HzG_MmbvMQyueEstR-6Gw@mail.gmail.com>
-	 <1470691964.14948.2.camel@suse.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: osd/ReplicatedPG.cc: 3101: FAILED assert(0)
+Date: Tue, 9 Aug 2016 10:18:33 +0200
+Message-ID: <CAOi1vP9dRCcuhFr0BanJ_noKqV0n+2JvmX-4TFhhC0ur2neYYA@mail.gmail.com>
+References: <CALXUmNQDLuK+rO2bxz+gj8ZOGS4V2kJtiGJoZosXPDZfqwqZSA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:44299 "EHLO
-	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752078AbcHICh0 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Mon, 8 Aug 2016 22:37:26 -0400
-In-Reply-To: <1470691964.14948.2.camel@suse.com>
+Received: from mail-ua0-f171.google.com ([209.85.217.171]:34869 "EHLO
+	mail-ua0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751194AbcHIISf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Aug 2016 04:18:35 -0400
+Received: by mail-ua0-f171.google.com with SMTP id n59so7586485uan.2
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Aug 2016 01:18:35 -0700 (PDT)
+In-Reply-To: <CALXUmNQDLuK+rO2bxz+gj8ZOGS4V2kJtiGJoZosXPDZfqwqZSA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sebastien Han <shan@redhat.com>, Jesse Williamson <jwilliamson@suse.de>
-Cc: Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Victor Payno <vpayno@gaikai.com>, Samuel Just <sjust@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Rae Yip <ryip@gaikai.com>, Cliff Pajaro <cpajaro@gaikai.com>, Roderick Colenbrander <roderick@gaikai.com>
 
-Sebastien, 
+On Tue, Aug 9, 2016 at 5:35 AM, Victor Payno <vpayno@gaikai.com> wrote:
+> We got this error while we had mapped rbds, and creating and deleting
+> snapshots on unmapped rbds. We have more logs, just wasn't sure how
+> far back you need to go.
+>
+>
+>     -3> 2016-08-07 20:34:23.034180 7ff7a3d53700  1 --
+> 172.20.3.100:0/25852 <== osd.45 172.20.3.101:6801/61384 235931 ====
+> osd_ping(ping_reply e47657 stamp 2016-08-07 20:34:23.013702) v2 ====
+> 47+0+0 (1835738769 0 0) 0x55e757031e00 con 0x55e7597bef20
+>     -2> 2016-08-07 20:34:23.034188 7ff7a3d53700  1 --
+> 172.20.3.100:0/25852 <== osd.48 172.20.3.101:6807/61495 235931 ====
+> osd_ping(ping_reply e47657 stamp 2016-08-07 20:34:23.013702) v2 ====
+> 47+0+0 (1835738769 0 0) 0x55e757161800 con 0x55e7595f26e0
+>     -1> 2016-08-07 20:34:23.034207 7ff7a154e700  1 --
+> 172.20.3.100:6807/25852 --> 192.168.225.100:0/59480 --
+> osd_ping(ping_reply e47657 stamp 2016-08-07 20:34:23.060394) v2 -- ?+0
+> 0x55e7bdd78400 con 0x55e75660b340
+>      0> 2016-08-07 20:34:23.034428 7ff79953e700 -1
+> osd/ReplicatedPG.cc: In function 'ReplicatedPG::RepGather*
+> ReplicatedPG::trim_object(const hobject_t&)' thread 7ff79953e700 time
+> 2016-08-07 20:34:23.024037
+> osd/ReplicatedPG.cc: 3101: FAILED assert(0)
+>
+>  ceph version 9.2.0 (bb2ecea240f3a1d525bcb35670cb07bd1f0ca299)
+>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> const*)+0x8b) [0x55e751fba09b]
+>  2: (ReplicatedPG::trim_object(hobject_t const&)+0x2fb) [0x55e751cd10db]
+>  3: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
+> const&)+0x424) [0x55e751d04694]
+>  4: (boost::statechart::simple_state<ReplicatedPG::TrimmingObjects,
+> ReplicatedPG::SnapTrimmer, boost::mpl::list<mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_::na, mpl_::na>,
+> (boost::statechart::history_mode)0>::react_impl(boost::statechart::event_base
+> const&, void const*)+0xb4) [0x55e751d2e1c4]
+>  5: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
+> ReplicatedPG::NotTrimming, std::allocator<void>,
+> boost::statechart::null_exception_translator>::process_queued_events()+0x12b)
+> [0x55e751d1c31b]
+>  6: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
+> ReplicatedPG::NotTrimming, std::allocator<void>,
+> boost::statechart::null_exception_translator>::process_event(boost::statechart::event_base
+> const&)+0x84) [0x55e751d1c4e4]
+>  7: (ReplicatedPG::snap_trimmer(unsigned int)+0x4bc) [0x55e751ca87dc]
+>  8: (OSD::ShardedOpWQ::_process(unsigned int,
+> ceph::heartbeat_handle_d*)+0x691) [0x55e751b350b1]
+>  9: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x872)
+> [0x55e751faab42]
+>  10: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55e751faca20]
+>  11: (()+0x84b4) [0x7ff7b7cd24b4]
+>  12: (clone()+0x6d) [0x7ff7b60274cd]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
 
-For now, We have something like this (which follows the same standard
-as 'config diff' and 'config get' : 
-
-#1:
-./ceph --admin-daemon out/osd.1.asok config diff get
-mon_data_avail_crit 
-{
-    "diff": {
-        "current": {
-            "mon_data_avail_crit": "1"
-        },
-        "defaults": {
-            "mon_data_avail_crit": "5"
-        }
-    },
-    "unknown": []
-}
-
-./ceph --admin-daemon out/osd.1.asok config diff get
-mon_data_avail_warn
-{
-    "diff": {
-        "current": {
-            "mon_data_avail_warn": "10"
-        },
-        "defaults": {
-            "mon_data_avail_warn": "30"
-        }
-    },
-    "unknown": []
-}
-
-What would be the proper way to display a setting that *was not*
-changed from its default?, for example: 
-./ceph --admin-daemon out/osd.1.asok config diff get num_client
-{
-    "diff": {
-        "current": {},
-        "defaults": {}
-    },
-    "unknown": []
-}
-
-Or only the "current" value? 
+Looks like an OSD bug - adding Sam.
 
 Thanks,
--Daniel 
 
-
-On Mon, 2016-08-08 at 15:32 -0600, Daniel Oliveira wrote:
-> Sebastien, 
-> 
-> As I was working on a couple of other things related to validating
-> parameters/settings, I ended up adding the feature in question and I
-> am just in the process of testing it. I will keep you posted.
-> 
-> Thanks,
-> -Daniel 
-> 
-> 
-> On Mon, 2016-08-08 at 14:16 +0200, Sebastien Han wrote:
-> > Would be nice if you could get a stab at it, actually I don't know
-> > where to look in the code to see where the magic is happening for
-> > the
-> > admin socket.
-> > Most of the logic is there so this shouldn't be too difficult :).
-> > 
-> > Did you get a chance to look into this Jesse?
-> > Thanks for offering your help on this one!
-> > 
-> > On Fri, Jul 29, 2016 at 8:32 PM, Jesse Williamson <
-> > jwilliamson@suse.de> wrote:
-> > > On Fri, 29 Jul 2016, Sebastien Han wrote:
-> > > 
-> > > Hi Sebastien,
-> > > 
-> > > > I'd like to have the same but for a specific option only.
-> > > > 
-> > > > So something like:
-> > > > 
-> > > > ceph daemon mon.ceph-mon-01 config diff get <field>
-> > > > 
-> > > > Which will return the diff between the actual config value and
-> > > > the
-> > > > original config value.
-> > > 
-> > > 
-> > > I might be able to help with this, if there's no support that
-> > > anyone already
-> > > knows of, or clear takers. I'm working on a small config-related
-> > > librados
-> > > feature right now and am somewhat familiar with the relevant
-> > > moving parts on
-> > > that end, so I might be in a good position to work on it.
-> > > 
-> > > WRT the admin socket, I'm less clear, but can be pointed in the
-> > > right
-> > > direction. :-)
-> > > 
-> > > -Jesse
-> > 
-> > 
-> > 
+                Ilya
