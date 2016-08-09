@@ -1,46 +1,32 @@
 From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 1/5] xfs: Propagate dentry down to inode_change_ok()
-Date: Tue, 9 Aug 2016 01:27:56 -0700
-Message-ID: <20160809082756.GA11657@infradead.org>
+Subject: Re: [PATCH 4/5] fs: Give dentry to inode_change_ok() instead of inode
+Date: Tue, 9 Aug 2016 01:28:28 -0700
+Message-ID: <20160809082828.GB11657@infradead.org>
 References: <1470223689-17783-1-git-send-email-jack@suse.cz>
-	<1470223689-17783-2-git-send-email-jack@suse.cz>
+ <1470223689-17783-5-git-send-email-jack@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <xfs-bounces@oss.sgi.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from bombadil.infradead.org ([198.137.202.9]:48316 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751764AbcHII2c (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Aug 2016 04:28:32 -0400
 Content-Disposition: inline
-In-Reply-To: <1470223689-17783-2-git-send-email-jack@suse.cz>
-List-Unsubscribe: <http://oss.sgi.com/mailman/options/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=unsubscribe>
-List-Archive: <http://oss.sgi.com/pipermail/xfs>
-List-Post: <mailto:xfs@oss.sgi.com>
-List-Help: <mailto:xfs-request@oss.sgi.com?subject=help>
-List-Subscribe: <http://oss.sgi.com/mailman/listinfo/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=subscribe>
-Errors-To: xfs-bounces@oss.sgi.com
-Sender: xfs-bounces@oss.sgi.com
+In-Reply-To: <1470223689-17783-5-git-send-email-jack@suse.cz>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: Jan Kara <jack@suse.cz>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, xfs@oss.sgi.com, "Yan,
-	Zheng" <zyan@redhat.com>, Al Viro <viro@ZenIV.linux.org.uk>, linux-fsdevel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Cc: Al Viro <viro@ZenIV.linux.org.uk>, Miklos Szeredi <miklos@szeredi.hu>, xfs@oss.sgi.com, "Yan, Zheng" <zyan@redhat.com>, linux-fsdevel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
-> +static int
-> +xfs_vn_change_ok(
-> +	struct dentry	*dentry,
-> +	struct iattr	*iattr)
+On Wed, Aug 03, 2016 at 01:28:08PM +0200, Jan Kara wrote:
+> inode_change_ok() will be resposible for clearing capabilities and IMA
+> extended attributes and as such will need dentry. Give it as an argument
+> to inode_change_ok() instead of an inode. Also rename inode_change_ok()
+> to setattr_prepare() to better relect that it does also some
+> modifications in addition to checks.
+> 
+> Signed-off-by: Jan Kara <jack@suse.cz>
 
-Please don't use the _vn prefix for something that's not an
-actual inode operation (and we should do a mess rename to 
-_iop one day as well.)
+Looks fine:
 
-> +int
-> +xfs_vn_setattr_nonsize(
-> +	struct dentry		*dentry,
-> +	struct iattr		*iattr)
-
-Same here.
-
-_______________________________________________
-xfs mailing list
-xfs@oss.sgi.com
-http://oss.sgi.com/mailman/listinfo/xfs
+Reviewed-by: Christoph Hellwig <hch@lst.de>
