@@ -1,50 +1,129 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: =?UTF-8?Q?Re=3A_why_clog_can_redirect_to_mon=EF=BC=9F?=
-Date: Mon, 8 Aug 2016 18:33:22 -0700
-Message-ID: <CAJ4mKGY-SaefbVaohEZLOGBppL9f1kXi-+k81Hr=yU1yU9LcWg@mail.gmail.com>
-References: <CAKZcxgc95-dGB=CCnvXe__rz9SpWzDGUkpR327x-OgnKExKZ2w@mail.gmail.com>
- <CAJ4mKGZiAVp1S4O+ggstc_Lxh7Eda_Gi9_7Zuv-DJ1bQZZhsUw@mail.gmail.com> <CAKZcxgcRz2YdceKy1bSSKA4+dSvg-Jw28sniJjQemL-mwYp_xA@mail.gmail.com>
+From: Daniel Oliveira <doliveira@suse.com>
+Subject: Re: [Feature request] config diff on a single option with the admin
+ socket
+Date: Mon, 08 Aug 2016 20:38:55 -0600
+Message-ID: <1470710335.14948.10.camel@suse.com>
+References: <CA+HUO7+qxtsS03yKp2ETUhKy6WTX1ESd0Xridw13viWwa0Cj3Q@mail.gmail.com>
+	 <alpine.LSU.2.20.1607291125130.28641@ancalagon.suse.com>
+	 <CA+HUO7+QVu-HqBT7EuuEoLwPVng84HzG_MmbvMQyueEstR-6Gw@mail.gmail.com>
+	 <1470691964.14948.2.camel@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f181.google.com ([209.85.217.181]:33186 "EHLO
-	mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752159AbcHIBdY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Aug 2016 21:33:24 -0400
-Received: by mail-ua0-f181.google.com with SMTP id 74so95632373uau.0
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Aug 2016 18:33:23 -0700 (PDT)
-In-Reply-To: <CAKZcxgcRz2YdceKy1bSSKA4+dSvg-Jw28sniJjQemL-mwYp_xA@mail.gmail.com>
+Received: from victor.provo.novell.com ([137.65.250.26]:44299 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752078AbcHICh0 (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Mon, 8 Aug 2016 22:37:26 -0400
+In-Reply-To: <1470691964.14948.2.camel@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jaze Lee <jazeltq@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sebastien Han <shan@redhat.com>, Jesse Williamson <jwilliamson@suse.de>
+Cc: Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-[ Re-adding list. ]
+Sebastien, 
 
-On Mon, Aug 8, 2016 at 6:31 PM, Jaze Lee <jazeltq@gmail.com> wrote:
-> 2016-08-09 7:28 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
->> On Mon, Aug 8, 2016 at 6:35 AM, Jaze Lee <jazeltq@gmail.com> wrote:
->>> Hi all，
->>>
->>>       I found that clog default send message to mon. But i do not know why it
->>> sends to mon? Can someone explian more about why we do that ?
->>
->> The purpose of the "central log" is to send log messages to a central
->> location for sharing. The mon is what we've got right now; it collects
->> the messages, writes them to a local file, and spits them out to
->> anybody running "ceph -w" (technically, anybody with a log
->> subscription).
->> -Greg
->
-> Thanks Greg. One more question.
->
-> The central log is used to monitor cluster status, so if i make
-> clog_to_monitors = false, then
-> i could not get the change of cluster status. Does it？
+For now, We have something like this (which follows the same standard
+as 'config diff' and 'config get' : 
 
-You'll still get information about OSDs going up and down, and other
-things which the monitors check for directly. But you won't get so
-many per-daemon messages about weird-looking things. I wouldn't turn
-off clog_to_monitors unless you have a very specific reason for it.
--Greg
+#1:
+./ceph --admin-daemon out/osd.1.asok config diff get
+mon_data_avail_crit 
+{
+    "diff": {
+        "current": {
+            "mon_data_avail_crit": "1"
+        },
+        "defaults": {
+            "mon_data_avail_crit": "5"
+        }
+    },
+    "unknown": []
+}
+
+./ceph --admin-daemon out/osd.1.asok config diff get
+mon_data_avail_warn
+{
+    "diff": {
+        "current": {
+            "mon_data_avail_warn": "10"
+        },
+        "defaults": {
+            "mon_data_avail_warn": "30"
+        }
+    },
+    "unknown": []
+}
+
+What would be the proper way to display a setting that *was not*
+changed from its default?, for example: 
+./ceph --admin-daemon out/osd.1.asok config diff get num_client
+{
+    "diff": {
+        "current": {},
+        "defaults": {}
+    },
+    "unknown": []
+}
+
+Or only the "current" value? 
+
+Thanks,
+-Daniel 
+
+
+On Mon, 2016-08-08 at 15:32 -0600, Daniel Oliveira wrote:
+> Sebastien, 
+> 
+> As I was working on a couple of other things related to validating
+> parameters/settings, I ended up adding the feature in question and I
+> am just in the process of testing it. I will keep you posted.
+> 
+> Thanks,
+> -Daniel 
+> 
+> 
+> On Mon, 2016-08-08 at 14:16 +0200, Sebastien Han wrote:
+> > Would be nice if you could get a stab at it, actually I don't know
+> > where to look in the code to see where the magic is happening for
+> > the
+> > admin socket.
+> > Most of the logic is there so this shouldn't be too difficult :).
+> > 
+> > Did you get a chance to look into this Jesse?
+> > Thanks for offering your help on this one!
+> > 
+> > On Fri, Jul 29, 2016 at 8:32 PM, Jesse Williamson <
+> > jwilliamson@suse.de> wrote:
+> > > On Fri, 29 Jul 2016, Sebastien Han wrote:
+> > > 
+> > > Hi Sebastien,
+> > > 
+> > > > I'd like to have the same but for a specific option only.
+> > > > 
+> > > > So something like:
+> > > > 
+> > > > ceph daemon mon.ceph-mon-01 config diff get <field>
+> > > > 
+> > > > Which will return the diff between the actual config value and
+> > > > the
+> > > > original config value.
+> > > 
+> > > 
+> > > I might be able to help with this, if there's no support that
+> > > anyone already
+> > > knows of, or clear takers. I'm working on a small config-related
+> > > librados
+> > > feature right now and am somewhat familiar with the relevant
+> > > moving parts on
+> > > that end, so I might be in a good position to work on it.
+> > > 
+> > > WRT the admin socket, I'm less clear, but can be pointed in the
+> > > right
+> > > direction. :-)
+> > > 
+> > > -Jesse
+> > 
+> > 
+> > 
