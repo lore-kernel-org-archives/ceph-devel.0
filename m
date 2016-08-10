@@ -1,100 +1,50 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [RFC PATCH] client: don't use special inode for /..
-Date: Wed, 10 Aug 2016 17:52:17 -0400
-Message-ID: <1470865937.2694.26.camel@redhat.com>
-References: <1470846630-830-1-git-send-email-jlayton@redhat.com>
-	  <CA+2bHPYjYPRn99e3nCTjED6c89MnD_Eih_27z_J1=b4_CtLqOg@mail.gmail.com>
-	 <1470861005.2694.12.camel@redhat.com>
-	 <alpine.DEB.2.11.1608102122450.17770@piezo.us.to>
+From: Noah Watkins <noahwatkins@gmail.com>
+Subject: Re: Questions about embedding Lua in the Ceph source tree
+Date: Wed, 10 Aug 2016 15:01:09 -0700
+Message-ID: <CAB2gnbUHQROsGQbxHCYTC-PM52iopwujhyHxjaGkZxfWB6-CYQ@mail.gmail.com>
+References: <CAC-Np1wVKE5iaaMSOM_3HxwQiX6E1PoH8-RUBcctBVM-ghqMGA@mail.gmail.com>
+ <CA+2bHPbrWe-GRSXnNoL639SvRBGahc=Le=k5Ww1byUjCmkoUMQ@mail.gmail.com>
+ <CAB2gnbW3-PXaBJN4DiqwnuQ7MUSXpKTvxVUR7VaF4e3PS=tffw@mail.gmail.com>
+ <CAB2gnbU_HMvmhX3ipgP3wdRzJOHgxv_xFnr=48je9KX065pYJw@mail.gmail.com> <CA+2bHPaU6nEUkiSjE+9a=8HMMFebDSt=yzZ6ZDMooEmyXf8Pig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f172.google.com ([209.85.220.172]:35555 "EHLO
-	mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751979AbcHJVwW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 17:52:22 -0400
-Received: by mail-qk0-f172.google.com with SMTP id v123so16395096qkh.2
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 14:52:21 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1608102122450.17770@piezo.us.to>
+Received: from mail-oi0-f45.google.com ([209.85.218.45]:33072 "EHLO
+	mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932254AbcHJWBL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 18:01:11 -0400
+Received: by mail-oi0-f45.google.com with SMTP id c15so78010818oig.0
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 15:01:10 -0700 (PDT)
+In-Reply-To: <CA+2bHPaU6nEUkiSjE+9a=8HMMFebDSt=yzZ6ZDMooEmyXf8Pig@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>
+Cc: Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 2016-08-10 at 21:23 +0000, Sage Weil wrote:
-> On Wed, 10 Aug 2016, Jeff Layton wrote:
-> > On Wed, 2016-08-10 at 16:08 -0400, Patrick Donnelly wrote:
-> > > > On Wed, Aug 10, 2016 at 12:30 PM, Jeff Layton <jlayton@redhat.com>
-> > > wrote:
-> > > > 
-> > > > The CEPH_INO_DOTDOT thing is quite strange. Under most OS (Linux
-> > > > included), the parent of the root is itself. IOW, at the root, '.'
-> > > > and
-> > > > '..' refer to the same inode.
-> > > > 
-> > > > Change the ceph client to do the same, as this allows users to get
-> > > > valid stat info for '..', as well as elimnating some special-
-> > > > casing.
-> > > > 
-> > > > > Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> > > 
-> > > Don't forget Client::_lookup:
-> > > 
-> > >   if (dname == "..") {
-> > >     if (dir->dn_set.empty())
-> > >       r = -ENOENT;
-> > >     else
-> > >       *target = dir->get_first_parent()->dir->parent_inode; //dirs
-> > > can't be hard-linked
-> > >     goto done;
-> > >   }
-> > > 
-> > > Otherwise LGTM.
-> > > 
-> > 
-> > 
-> > Ahh, thanks. So will dir->dn_set.empty() be true at the root? If so,
-> > then something like the patch below?
-> > 
-> > Note that this patch is not strictly necessary, but it does simplify
-> > some other changes that I have queued up:
-> > 
-> > diff --git a/src/client/Client.cc b/src/client/Client.cc
-> > index 5ab0ace4d3df..287baaf20536 100644
-> > --- a/src/client/Client.cc
-> > +++ b/src/client/Client.cc
-> > @@ -5924,7 +5924,7 @@ int Client::_lookup(Inode *dir, const string& dname, int mask,
-> >  
-> >    if (dname == "..") {
-> >      if (dir->dn_set.empty())
-> > -      r = -ENOENT;
-> > +      *target = dir;
-> >      else
-> >        *target = dir->get_first_parent()->dir->parent_inode; //dirs can't be hard-linked
-> >      goto done;
-> 
-> IIRC I did the dotdot thing originally because otherwise the '..' entry at 
-> the mount point in ls -al didn't point to the parent directory.  Having 
-> the fs explicitly do .. at all seems pretty weird to me... it seems like 
-> the VFS should be doing this.  But in any case, I'd just verify that it 
-> behaves the same way a real mount does after this change.
-> 
-> sage
+On Tue, Aug 9, 2016 at 7:17 PM, Patrick Donnelly <pdonnell@redhat.com> wrote:
+>
+> Supporting multiple versions of Lua isn't a good idea. I suggest
+> sticking with Lua 5.3. [This has the consequence of making LuaJIT
+> unsupported by cls-lua but I'm personally okay with that. There isn't
+> any strong reason to maintain support with LuaJIT and it lacks many
+> new Lua facilities we will want (like string.pack).]
 
+One compelling reason for LuaJIT is that it supports linking against C
+libraries dynamically. So for instance linking against ImageMagick to
+create thumbnail compression plugin is possible without writing any C
+glue. But really the first version of cls_lua is probably not the last
+version and that sort of thing can come later.
 
-The Linux VFS will definitely already handle ".." correctly (as you end
-up doing a transition to a different vfsmount). So this shouldn't
-affect ceph-fuse, AFAICT.
+> Is it not okay to require distributions to build our bundled Lua if
+> they don't have 5.3 in their repos?
 
-I think this change would primarily be noticed by those using libcephfs
-directly...either in ceph_readdir/ceph_lookup (and related) calls, or
-during a pathwalk.
+I too would very much prefer supporting a single version (5.3). Since
+distro-provided versions of Lua don't satisfy our goal of supporting a
+single Lua version, the two+ options are:
 
-That said, Patrick's suggestion to add some tests around this makes
-sense. I'll plan to spin that up so we can be clear on how the behavior
-changes.
+1) statically link the Lua VM into Ceph like we had been doing
+2) produce distro-specific packages only for Ceph (I think once upon a
+time this was done for LevelDB?)
+3) ??
 
-Thanks,
--- 
-Jeff Layton <jlayton@redhat.com>
+- Noah
