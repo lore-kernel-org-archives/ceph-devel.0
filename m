@@ -1,36 +1,66 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: OSD crash after Upgrade to Jewel
-Date: Wed, 10 Aug 2016 19:52:08 +0200 (CEST)
-Message-ID: <1722398688.2333.1470851528137@ox.pcextreme.nl>
+From: Karl Cronburg <karl.cronburg@gmail.com>
+Subject: Histogram output from fio
+Date: Wed, 10 Aug 2016 14:17:19 -0400
+Message-ID: <CADFviKCiat+2oRANaxyx-GaJp-EmpD1a7hSS-d2SpcsD0CxAtQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:34004 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933044AbcHJSKz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 14:10:55 -0400
-Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
-	by smtp01.mail.pcextreme.nl (Postfix) with ESMTPSA id 4BFF876140
-	for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 19:52:08 +0200 (CEST)
+Received: from mail-oi0-f43.google.com ([209.85.218.43]:34712 "EHLO
+	mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932774AbcHJSRV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 14:17:21 -0400
+Received: by mail-oi0-f43.google.com with SMTP id l203so70340447oib.1
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 11:17:20 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
 Hi,
 
-I'm seeing this crash on multiple OSDs while upgrading to Jewel:
+There are three new parameters to fio which some of you may find useful:
 
-     0> 2016-08-10 19:41:40.686944 7f20d37f1700 -1 common/buffer.cc: In function 'void ceph::buffer::ptr::copy_in(unsigned int, unsigned int, const char*, bool)' thread 7f20d37f1700 time 2016-08-10 19:41:40.682052
-common/buffer.cc: 977: FAILED assert(o+l <= _len)
+--write_hist_log=[file_prefix - same semantics as --write_lat_log]
+--log_hist_msec=[milliseconds between histogram logs - same semantics
+as --log_avg_msec]
+--log_hist_coarseness=[int from 0 to 6]
 
-It started to happen when the OSDs came under load due to a node failing (hardware) which brought a lot of PGs in a unclean state.
+This produces *_clat_hist* files. Higher coarseness results in
+aggregation of bins (half as many for each increment in coarseness) in
+the output log files (fewer bins - smaller log files, less accuracy).
+By default (coarseness=0) it produces 1,216 bins per histogram entry
+(at least 2KB per fio thread). For anyone interested in the exact
+latency values for the bins, see how the following variables are
+computed in the post processor:
 
-I already filed a tracker issue for it: http://tracker.ceph.com/issues/16982
+bin_vals = [ ] # mid-point of each bin
+lower_bin_vals = [ ] # lower edge of each bin
+upper_bin_vals = [ ] # upper edge of each bin
 
-All machines are running Ubuntu 14.04 with the 4.4 kernel.
+By default there is a max latency of ~17 seconds in the histogram
+bins. I plan to handle this dynamically in fio, but for now you can
+recompile fio after doing something like the following:
 
-Wondering if somebody has seen this before. This cluster is very down at the moment..
+sed -i.bak 's/^#define FIO_IO_U_PLAT_GROUP_NR 19\n/#define
+FIO_IO_U_PLAT_GROUP_NR 24/g' stat.h
 
+Where the '24' gives a max latency of ~9 minutes. This max latency in
+no way affects the accuracy of latency percentiles falling below the
+max. It can however invalidate the computed average (which I'm
+guessing is not usually an interesting statistics anyways).
 
-Wido
+Post processing tool for getting min/max/percentile/average statistics
+(numpy + pandas are dependencies):
+
+    https://github.com/axboe/fio/blob/master/tools/hist/fiologparser_hist.py
+
+Visualization comparing accuracy of *_clat_hist* with *_clat.*:
+
+    https://cronburg.com/fio/demo/latency.html
+
+Slides from the ceph perf meeting:
+
+    https://cronburg.com/fio/MCV_latencies.pdf
+
+Feel free to email me with any questions!
+
+-Karl Cronburg-
