@@ -1,23 +1,21 @@
 From: Karl Cronburg <karl.cronburg@gmail.com>
 Subject: Histogram output from fio
-Date: Wed, 10 Aug 2016 14:17:19 -0400
-Message-ID: <CADFviKCiat+2oRANaxyx-GaJp-EmpD1a7hSS-d2SpcsD0CxAtQ@mail.gmail.com>
+Date: Wed, 10 Aug 2016 13:23:43 -0400
+Message-ID: <CADFviKASH8U3UoZhBHbPFt4w5+yiNA6WO2-cf_5FAj8ZeGd96A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f43.google.com ([209.85.218.43]:34712 "EHLO
-	mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932774AbcHJSRV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 14:17:21 -0400
-Received: by mail-oi0-f43.google.com with SMTP id l203so70340447oib.1
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 11:17:20 -0700 (PDT)
+Received: from mail-oi0-f46.google.com ([209.85.218.46]:35520 "EHLO
+	mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933740AbcHJSSk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 14:18:40 -0400
+Received: by mail-oi0-f46.google.com with SMTP id 4so70556357oih.2
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 11:18:40 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi,
-
-There are three new parameters to fio which some of you may find useful:
+There are three new parameters to fio:
 
 --write_hist_log=[file_prefix - same semantics as --write_lat_log]
 --log_hist_msec=[milliseconds between histogram logs - same semantics
