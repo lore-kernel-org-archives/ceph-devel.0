@@ -1,30 +1,36 @@
 From: Wido den Hollander <wido@42on.com>
-Subject: Delayed start of OSDs with systemd to prevent slowdowns
-Date: Wed, 10 Aug 2016 10:37:40 +0200 (CEST)
-Message-ID: <97824899.2313.1470818261025@ox.pcextreme.nl>
+Subject: OSD crash after Upgrade to Jewel
+Date: Wed, 10 Aug 2016 19:52:08 +0200 (CEST)
+Message-ID: <1722398688.2333.1470851528137@ox.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:33269 "EHLO
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:34004 "EHLO
 	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750780AbcHJSBA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 14:01:00 -0400
+	with ESMTP id S933044AbcHJSKz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 14:10:55 -0400
 Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
-	by smtp01.mail.pcextreme.nl (Postfix) with ESMTPSA id 2E4C576134
-	for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 10:37:41 +0200 (CEST)
+	by smtp01.mail.pcextreme.nl (Postfix) with ESMTPSA id 4BFF876140
+	for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 19:52:08 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
 Hi,
 
-Currently with the systemd design a booting system will start all OSDs at the same time. This means that a cluster suddenly gets a bunch of CRUSH updates (if update on start is enabled), booting OSDs and PGs which go into peering state.
+I'm seeing this crash on multiple OSDs while upgrading to Jewel:
 
-My systemd-foo isn't that good, but I was wondering if there is a way to modify ceph-osd.target in such a way that it doesn't start all the OSDs in parallel?
+     0> 2016-08-10 19:41:40.686944 7f20d37f1700 -1 common/buffer.cc: In function 'void ceph::buffer::ptr::copy_in(unsigned int, unsigned int, const char*, bool)' thread 7f20d37f1700 time 2016-08-10 19:41:40.682052
+common/buffer.cc: 977: FAILED assert(o+l <= _len)
 
-I would like 1 or maybe 2 OSDs to start at the same time with a delay of 120 seconds in between. This way the boot will take longer, but the impact on the cluster will be less.
+It started to happen when the OSDs came under load due to a node failing (hardware) which brought a lot of PGs in a unclean state.
 
-Any ideas on how we might achieve this with systemd?
+I already filed a tracker issue for it: http://tracker.ceph.com/issues/16982
+
+All machines are running Ubuntu 14.04 with the 4.4 kernel.
+
+Wondering if somebody has seen this before. This cluster is very down at the moment..
+
 
 Wido
