@@ -1,27 +1,43 @@
-From: Nathan Cutler <ncutler@suse.de>
-Subject: 0.94.8?
-Date: Wed, 10 Aug 2016 09:48:55 +0200
-Message-ID: <eb6c8639-061c-ecc3-6bd4-5cc6a0e99bdf@suse.de>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: back!
+Date: Wed, 10 Aug 2016 10:21:49 -0600
+Message-ID: <CALqRxCyAgPEksBMdznw0TwYaVw5F+KsRCFqhio1t9w7XX6K8JQ@mail.gmail.com>
 References: <alpine.DEB.2.11.1608092255560.9992@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:38410 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752389AbcHJSDs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 10 Aug 2016 14:03:48 -0400
+Received: from mail-ua0-f177.google.com ([209.85.217.177]:35845 "EHLO
+	mail-ua0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932547AbcHJSDp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 14:03:45 -0400
+Received: by mail-ua0-f177.google.com with SMTP id 97so82559769uav.3
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 11:03:45 -0700 (PDT)
 In-Reply-To: <alpine.DEB.2.11.1608092255560.9992@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sage:
+Great to have you back!
 
-Welcome back!
+Ceph is back to HEALTH_OK now :)
 
-In your absence, we merged a bunch of hammer backport PRs. Do you think 
-it's time to cut 0.94.8?
+- Ken
 
-Nathan
+On Tue, Aug 9, 2016 at 4:58 PM, Sage Weil <sweil@redhat.com> wrote:
+> Hi all-
+>
+> I'm back from an extended vacation and am caught up on my email.  If you
+> sent me anything important that I haven't responded to yet please resend
+> it as I probably missed it.
+>
+> My plan is to focus first on the pending bluestore stuff and then the
+> bufferlist encode optimizations.  If there's anything else that needs my
+> attention, let me know!
+>
+> Thanks-
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
