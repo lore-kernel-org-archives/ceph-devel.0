@@ -1,54 +1,80 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: rbd-mirror related jewel backports
-Date: Wed, 10 Aug 2016 11:07:14 +0200
-Message-ID: <57AAEEC2.3060108@dachary.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+From: Jeff Layton <jlayton@redhat.com>
+Subject: [RFC PATCH] client: don't use special inode for /..
+Date: Wed, 10 Aug 2016 12:30:30 -0400
+Message-ID: <1470846630-830-1-git-send-email-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from slow1-d.mail.gandi.net ([217.70.178.86]:35472 "EHLO
-	slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934382AbcHJSiO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 14:38:14 -0400
-Received: from relay4-d.mail.gandi.net (relay4-d.mail.gandi.net [217.70.183.196])
-	by slow1-d.mail.gandi.net (Postfix) with ESMTP id C4C4F47B45E
-	for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 11:07:19 +0200 (CEST)
+Received: from mx1.redhat.com ([209.132.183.28]:45772 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932604AbcHJS4d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 10 Aug 2016 14:56:33 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 9081EA0C51
+	for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 16:30:31 +0000 (UTC)
+Received: from tlielax.poochiereds.net (ovpn-116-46.rdu2.redhat.com [10.10.116.46])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u7AGUU58003351
+	for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 12:30:31 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <mgolub@mirantis.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Mykola,
+The CEPH_INO_DOTDOT thing is quite strange. Under most OS (Linux
+included), the parent of the root is itself. IOW, at the root, '.' and
+'..' refer to the same inode.
 
-There are seven rbd-mirror related backports which do not cherry-pick cleanly. I've not looked at each of them yet and I would very much appreciate your advice about the best way to proceed.
+Change the ceph client to do the same, as this allows users to get
+valid stat info for '..', as well as elimnating some special-casing.
 
-http://tracker.ceph.com/issues/16511
-http://tracker.ceph.com/issues/16512
-http://tracker.ceph.com/issues/16658
-http://tracker.ceph.com/issues/16701
-http://tracker.ceph.com/issues/16747
-http://tracker.ceph.com/issues/16902
-http://tracker.ceph.com/issues/16978
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ src/client/Client.cc  | 13 +++----------
+ src/include/ceph_fs.h |  1 -
+ 2 files changed, 3 insertions(+), 11 deletions(-)
 
-Maybe they should be cherry-picked in a specific order in order to avoid conflicts ? For instance, maybe one of the pending backports that you can see at
-
-https://github.com/ceph/ceph/pulls?q=is%3Aopen+is%3Apr+milestone%3Ajewel+label%3Arbd
-
-would avoid some of the conflicts if merged ? I'm thinking specifically
-
-https://github.com/ceph/ceph/pull/10646
-https://github.com/ceph/ceph/pull/10644
-
-What I'm looking for, ideally, is a way to order the cherry-picks to avoid any conflict. That may involve backporting a few additional pull requests (for instance when the type of an argument changes from int64_t to uint64_t, that creates a lot of potential conflicts and backporting that change could help, even if it is not required to fix a given bug.
-
-There are three backports that also do not apply because of a conflict but do not seem to be related to rbd-mirror. Unless you advise otherwise, I'll attempt to resolve these individually and assume there is complex interaction with other backports.
-
-http://tracker.ceph.com/issues/16950
-http://tracker.ceph.com/issues/16904
-http://tracker.ceph.com/issues/16735
-
-Thanks in advance for your guidance !
-
+diff --git a/src/client/Client.cc b/src/client/Client.cc
+index 2df632fc0e08..77f464ad76ae 100644
+--- a/src/client/Client.cc
++++ b/src/client/Client.cc
+@@ -7244,9 +7244,9 @@ int Client::readdir_r_cb(dir_result_t *d, add_dirent_cb_t cb, void *p)
+       fill_stat(in, &st);
+       fill_dirent(&de, "..", S_IFDIR, st.st_ino, next_off);
+     } else {
+-      /* must be at the root (no parent),
+-       * so we add the dotdot with a special inode (3) */
+-      fill_dirent(&de, "..", S_IFDIR, CEPH_INO_DOTDOT, next_off);
++      /* must be at the root (no parent), so fill out with same info as "." */
++      fill_stat(diri, &st);
++      fill_dirent(&de, "..", S_IFDIR, st.st_ino, next_off);
+     }
+ 
+ 
+@@ -9684,13 +9684,6 @@ int Client::ll_getattr(Inode *in, struct stat *attr, int uid, int gid)
+   tout(cct) << "ll_getattr" << std::endl;
+   tout(cct) << vino.ino.val << std::endl;
+ 
+-  /* special case for dotdot (..) */
+-  if (vino.ino.val == CEPH_INO_DOTDOT) {
+-    attr->st_mode = S_IFDIR | 0755;
+-    attr->st_nlink = 2;
+-    return 0;
+-  }
+-
+   int res;
+   if (vino.snapid < CEPH_NOSNAP)
+     res = 0;
+diff --git a/src/include/ceph_fs.h b/src/include/ceph_fs.h
+index 772e475ccc91..1610aaf17cc2 100644
+--- a/src/include/ceph_fs.h
++++ b/src/include/ceph_fs.h
+@@ -28,7 +28,6 @@
+ 
+ #define CEPH_INO_ROOT   1
+ #define CEPH_INO_CEPH   2       /* hidden .ceph dir */
+-#define CEPH_INO_DOTDOT 3	/* used by ceph fuse for parent (..) */
+ #define CEPH_INO_LOST_AND_FOUND 4	/* reserved ino for use in recovery */
+ 
+ /* arbitrary limit on max # of monitors (cluster of 3 is typical) */
 -- 
-Loïc Dachary, Artisan Logiciel Libre
+2.7.4
 
