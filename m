@@ -1,51 +1,70 @@
 From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: CMake build errors in modules
-Date: Wed, 10 Aug 2016 16:30:33 -0400
-Message-ID: <CA+2bHPa6=yngnR_Q-YLPOE-2sW8G95ngW7wEyV82yLOe9pXfPw@mail.gmail.com>
-References: <CA+2bHPYVhQPi=vP99HR610CY1nwkfJpAnQZBMN491zMtBj48cQ@mail.gmail.com>
+Subject: Re: [RFC PATCH] client: don't use special inode for /..
+Date: Wed, 10 Aug 2016 16:46:46 -0400
+Message-ID: <CA+2bHPatRa=77jr=JsuLFE86SXH9d7LNKN0LHTB1tMmeSti59A@mail.gmail.com>
+References: <1470846630-830-1-git-send-email-jlayton@redhat.com>
+ <CA+2bHPYjYPRn99e3nCTjED6c89MnD_Eih_27z_J1=b4_CtLqOg@mail.gmail.com> <1470861005.2694.12.camel@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f179.google.com ([209.85.220.179]:32775 "EHLO
-	mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932487AbcHJUbF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 16:31:05 -0400
-Received: by mail-qk0-f179.google.com with SMTP id t7so55632572qkh.0
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 13:31:04 -0700 (PDT)
-In-Reply-To: <CA+2bHPYVhQPi=vP99HR610CY1nwkfJpAnQZBMN491zMtBj48cQ@mail.gmail.com>
+Received: from mail-qk0-f178.google.com ([209.85.220.178]:34034 "EHLO
+	mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932697AbcHJUrS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 16:47:18 -0400
+Received: by mail-qk0-f178.google.com with SMTP id p186so55964855qkd.1
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 13:47:17 -0700 (PDT)
+In-Reply-To: <1470861005.2694.12.camel@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Jeff Layton <jlayton@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Aug 10, 2016 at 4:15 PM, Patrick Donnelly <pdonnell@redhat.com> wrote:
-> I sometimes get build errors for modules (not always the same module)
-> about missing headers:
+On Wed, Aug 10, 2016 at 4:30 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> On Wed, 2016-08-10 at 16:08 -0400, Patrick Donnelly wrote:
+>> On Wed, Aug 10, 2016 at 12:30 PM, Jeff Layton <jlayton@redhat.com>
+>> wrote:
+>> >
+>> > The CEPH_INO_DOTDOT thing is quite strange. Under most OS (Linux
+>> > included), the parent of the root is itself. IOW, at the root, '.'
+>> > and
+>> > '..' refer to the same inode.
+>> >
+>> > Change the ceph client to do the same, as this allows users to get
+>> > valid stat info for '..', as well as elimnating some special-
+>> > casing.
+>> >
+>> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
+>>
+>> Don't forget Client::_lookup:
+>>
+>>   if (dname == "..") {
+>>     if (dir->dn_set.empty())
+>>       r = -ENOENT;
+>>     else
+>>       *target = dir->get_first_parent()->dir->parent_inode; //dirs
+>> can't be hard-linked
+>>     goto done;
+>>   }
+>>
+>> Otherwise LGTM.
+>>
 >
-> $ (cd build && make)
-> [...]
-> [ 25%] rocksdb building
->   GEN      util/build_version.cc
-> make[3]: *** No rule to make target `db/writebuffer.h', needed by
-> `db/column_family.o'.  Stop.
-> make[2]: *** [src/CMakeFiles/build_rocksdb] Error 2
-> make[1]: *** [src/CMakeFiles/build_rocksdb.dir/all] Error 2
-> make: *** [all] Error 2
 >
-> What's the right way to fix this? I already tried `git submodule
-> update` and my working copy was sterile (`git clean -xfd`) before the
-> build.
+> Ahh, thanks. So will dir->dn_set.empty() be true at the root? If so,
+> then something like the patch below?
 
-Hmm, I think this is because the submodules are not being cleaned as
-well by `git clean -xfd`? So perhaps the right way to achieve a
-sterile build is:
+Well, that's tricky actually. My understanding is that if dn_set is
+empty then either the inode is unlinked or it is the root inode (from
+the client's perspective). So the below patch is probably not quite
+right? I think if the directory is unlinked but not the root, its ".."
+should still refer to its first parent? The ENOENT error is probably
+wrong.
 
-# COPY PASTE DANGER: this nukes all of your local modifications
-git submodule deinit --force
-git clean -xfd
-git checkout .
-git submodule init
+> Note that this patch is not strictly necessary, but it does simplify
+> some other changes that I have queued up:
 
-Is there something else that is preferable?
+I think the patch is a good change but there may be some other code
+paths that need fixed. This change needs some simple tests.
 
 -- 
 Patrick Donnelly
