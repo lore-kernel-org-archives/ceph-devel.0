@@ -1,50 +1,113 @@
-From: Noah Watkins <noahwatkins@gmail.com>
-Subject: Re: Questions about embedding Lua in the Ceph source tree
-Date: Wed, 10 Aug 2016 15:01:09 -0700
-Message-ID: <CAB2gnbUHQROsGQbxHCYTC-PM52iopwujhyHxjaGkZxfWB6-CYQ@mail.gmail.com>
-References: <CAC-Np1wVKE5iaaMSOM_3HxwQiX6E1PoH8-RUBcctBVM-ghqMGA@mail.gmail.com>
- <CA+2bHPbrWe-GRSXnNoL639SvRBGahc=Le=k5Ww1byUjCmkoUMQ@mail.gmail.com>
- <CAB2gnbW3-PXaBJN4DiqwnuQ7MUSXpKTvxVUR7VaF4e3PS=tffw@mail.gmail.com>
- <CAB2gnbU_HMvmhX3ipgP3wdRzJOHgxv_xFnr=48je9KX065pYJw@mail.gmail.com> <CA+2bHPaU6nEUkiSjE+9a=8HMMFebDSt=yzZ6ZDMooEmyXf8Pig@mail.gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: [RFC PATCH] client: don't use special inode for /..
+Date: Wed, 10 Aug 2016 18:21:45 -0400
+Message-ID: <1470867705.2694.30.camel@redhat.com>
+References: <1470846630-830-1-git-send-email-jlayton@redhat.com>
+	 <CA+2bHPYjYPRn99e3nCTjED6c89MnD_Eih_27z_J1=b4_CtLqOg@mail.gmail.com>
+	 <1470861005.2694.12.camel@redhat.com>
+	 <CA+2bHPatRa=77jr=JsuLFE86SXH9d7LNKN0LHTB1tMmeSti59A@mail.gmail.com>
+	 <1470863180.2694.17.camel@redhat.com>
+	 <CA+2bHPaDy-UiEvve3y0f6eCmxTvCx5UUV9yvjUP=_J0eqCWJJQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f45.google.com ([209.85.218.45]:33072 "EHLO
-	mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932254AbcHJWBL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 18:01:11 -0400
-Received: by mail-oi0-f45.google.com with SMTP id c15so78010818oig.0
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 15:01:10 -0700 (PDT)
-In-Reply-To: <CA+2bHPaU6nEUkiSjE+9a=8HMMFebDSt=yzZ6ZDMooEmyXf8Pig@mail.gmail.com>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:33598 "EHLO
+	mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751741AbcHJWXL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 18:23:11 -0400
+Received: by mail-qk0-f173.google.com with SMTP id t7so58195004qkh.0
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 15:21:49 -0700 (PDT)
+In-Reply-To: <CA+2bHPaDy-UiEvve3y0f6eCmxTvCx5UUV9yvjUP=_J0eqCWJJQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick Donnelly <pdonnell@redhat.com>
-Cc: Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>, Sage Weil <sage@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Aug 9, 2016 at 7:17 PM, Patrick Donnelly <pdonnell@redhat.com> wrote:
->
-> Supporting multiple versions of Lua isn't a good idea. I suggest
-> sticking with Lua 5.3. [This has the consequence of making LuaJIT
-> unsupported by cls-lua but I'm personally okay with that. There isn't
-> any strong reason to maintain support with LuaJIT and it lacks many
-> new Lua facilities we will want (like string.pack).]
+On Wed, 2016-08-10 at 17:15 -0400, Patrick Donnelly wrote:
+> > On Wed, Aug 10, 2016 at 5:06 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> > 
+> > On Wed, 2016-08-10 at 16:46 -0400, Patrick Donnelly wrote:
+> > > 
+> > > > 
+> > > > On Wed, Aug 10, 2016 at 4:30 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> > > > 
+> > > > On Wed, 2016-08-10 at 16:08 -0400, Patrick Donnelly wrote:
+> > > > > 
+> > > > > 
+> > > > > > 
+> > > > > > > 
+> > > > > > > > 
+> > > > > > > > On Wed, Aug 10, 2016 at 12:30 PM, Jeff Layton <jlayton@redhat.com>
+> > > > > wrote:
+> > > > > > 
+> > > > > > 
+> > > > > > 
+> > > > > > The CEPH_INO_DOTDOT thing is quite strange. Under most OS (Linux
+> > > > > > included), the parent of the root is itself. IOW, at the root, '.'
+> > > > > > and
+> > > > > > '..' refer to the same inode.
+> > > > > > 
+> > > > > > Change the ceph client to do the same, as this allows users to get
+> > > > > > valid stat info for '..', as well as elimnating some special-
+> > > > > > casing.
+> > > > > > 
+> > > > > > > 
+> > > > > > > > 
+> > > > > > > > > 
+> > > > > > > > > > 
+> > > > > > > > > > > > > > > > > > > > Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> > > > > 
+> > > > > Don't forget Client::_lookup:
+> > > > > 
+> > > > >   if (dname == "..") {
+> > > > >     if (dir->dn_set.empty())
+> > > > >       r = -ENOENT;
+> > > > >     else
+> > > > >       *target = dir->get_first_parent()->dir->parent_inode; //dirs
+> > > > > can't be hard-linked
+> > > > >     goto done;
+> > > > >   }
+> > > > > 
+> > > > > Otherwise LGTM.
+> > > > > 
+> > > > 
+> > > > 
+> > > > Ahh, thanks. So will dir->dn_set.empty() be true at the root? If so,
+> > > > then something like the patch below?
+> > > 
+> > > Well, that's tricky actually. My understanding is that if dn_set is
+> > > empty then either the inode is unlinked or it is the root inode (from
+> > > the client's perspective). So the below patch is probably not quite
+> > > right? I think if the directory is unlinked but not the root, its ".."
+> > > should still refer to its first parent? The ENOENT error is probably
+> > > wrong.
+> > > 
+> > 
+> > Ok, so is there some way to reliably tell whether it's the root? Should
+> > we instead check whether it's inode number is CEPH_INO_ROOT ?
+> 
+> Inode::is_root should work. By the way, I see now that the readdir
+> code is also wrong. It should not need to check dn_set at all (just
+> is_root()). (It doesn't matter if the directory inode is unlinked, the
+> parent is still visible.)
+> 
 
-One compelling reason for LuaJIT is that it supports linking against C
-libraries dynamically. So for instance linking against ImageMagick to
-create thumbnail compression plugin is possible without writing any C
-glue. But really the first version of cls_lua is probably not the last
-version and that sort of thing can come later.
 
-> Is it not okay to require distributions to build our bundled Lua if
-> they don't have 5.3 in their repos?
+Ahh thanks. I'll see about fixing that up while I'm in there too.
 
-I too would very much prefer supporting a single version (5.3). Since
-distro-provided versions of Lua don't satisfy our goal of supporting a
-single Lua version, the two+ options are:
+Your point about is_root is valid, but I think we should step back a
+min and consider how we expect this to work when we mount a subtree of
+the MDS root.
 
-1) statically link the Lua VM into Ceph like we had been doing
-2) produce distro-specific packages only for Ceph (I think once upon a
-time this was done for LevelDB?)
-3) ??
+Suppose I do:
 
-- Noah
+    ceph_mount(&cmount, "/foo/bar/baz");
+    ceph_lookup(&cmount, "/..", &st);
+
+...what should we ultimately end up stat'ing there? Should I get back
+the info for "bar" or "baz" ?
+
+Thanks,
+-- 
+Jeff Layton <jlayton@redhat.com>
