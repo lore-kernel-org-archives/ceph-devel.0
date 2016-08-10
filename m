@@ -1,36 +1,205 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: back!
-Date: Tue, 9 Aug 2016 22:58:11 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608092255560.9992@piezo.us.to>
+From: Daniel Oliveira <doliveira@suse.com>
+Subject: Re: [Feature request] config diff on a single option with the admin
+ socket
+Date: Tue, 09 Aug 2016 18:03:29 -0600
+Message-ID: <1470787409.7371.13.camel@suse.com>
+References: <CA+HUO7+qxtsS03yKp2ETUhKy6WTX1ESd0Xridw13viWwa0Cj3Q@mail.gmail.com>
+	 <alpine.LSU.2.20.1607291125130.28641@ancalagon.suse.com>
+	 <CA+HUO7+QVu-HqBT7EuuEoLwPVng84HzG_MmbvMQyueEstR-6Gw@mail.gmail.com>
+	 <1470691964.14948.2.camel@suse.com> <1470710335.14948.10.camel@suse.com>
+	 <CA+HUO7KTXfHeHOcQpRX4pfneA+ReyQb2FoBjkxurzZw87NaiSA@mail.gmail.com>
+	 <CAFdRU71GgzaN6RCeEBRQY51r6Pd0-a0xsz0vJ7=pRd2Ja+eGNA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54296 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932526AbcHIW6O (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 9 Aug 2016 18:58:14 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 87EF820279
-	for <ceph-devel@vger.kernel.org>; Tue,  9 Aug 2016 22:58:13 +0000 (UTC)
-Received: from ovpn-112-26.phx2.redhat.com (ovpn-112-26.phx2.redhat.com [10.3.112.26])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u79MwBCV021620
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Tue, 9 Aug 2016 18:58:13 -0400
+Received: from prv3-mh.provo.novell.com ([137.65.250.26]:51576 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752512AbcHJACX (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Tue, 9 Aug 2016 20:02:23 -0400
+In-Reply-To: <CAFdRU71GgzaN6RCeEBRQY51r6Pd0-a0xsz0vJ7=pRd2Ja+eGNA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hi all-
+Shinobu,
 
-I'm back from an extended vacation and am caught up on my email.  If you 
-sent me anything important that I haven't responded to yet please resend 
-it as I probably missed it.
+Sorry, but I am not sure I understand what your request is. If it is
+not related to Sebastien's feature request, we probably would need a
+different one so we can track it properly. Are you referring to a
+*config file parser* kind of thing, where some checking is done to make
+sure settings are in the proper section? Or am I missing something? 
 
-My plan is to focus first on the pending bluestore stuff and then the 
-bufferlist encode optimizations.  If there's anything else that needs my 
-attention, let me know!
+-Daniel 
 
-Thanks-
-sage
+
+
+On Tue, 2016-08-09 at 19:51 +0900, Shinobu Kinjo wrote:
+> Just question.
+> 
+> Do we have already something like config file validation check
+> command?
+> If not, it would be better to add this capability for end users if it
+> would not burden you.
+> 
+> Because it's not a bit clear about which option must be in which
+> section.
+> 
+> Thoughts?
+> 
+>  - Shinobu
+> 
+> 
+> On Tue, Aug 9, 2016 at 6:52 PM, Sebastien Han <shan@redhat.com>
+> wrote:
+> > Thanks a lot Daniel, that looks exactly right.
+> > If nothing changed I think it's valid to keep both fields showing
+> > the
+> > same value.
+> > This is either when comparing with whatever tool because the
+> > structure
+> > won't change so we don't have to handle a particular case.
+> > 
+> > Others? Thoughts?
+> > 
+> > On Tue, Aug 9, 2016 at 4:38 AM, Daniel Oliveira <doliveira@suse.com
+> > > wrote:
+> > > Sebastien,
+> > > 
+> > > For now, We have something like this (which follows the same
+> > > standard
+> > > as 'config diff' and 'config get' :
+> > > 
+> > > #1:
+> > > ./ceph --admin-daemon out/osd.1.asok config diff get
+> > > mon_data_avail_crit
+> > > {
+> > >     "diff": {
+> > >         "current": {
+> > >             "mon_data_avail_crit": "1"
+> > >         },
+> > >         "defaults": {
+> > >             "mon_data_avail_crit": "5"
+> > >         }
+> > >     },
+> > >     "unknown": []
+> > > }
+> > > 
+> > > ./ceph --admin-daemon out/osd.1.asok config diff get
+> > > mon_data_avail_warn
+> > > {
+> > >     "diff": {
+> > >         "current": {
+> > >             "mon_data_avail_warn": "10"
+> > >         },
+> > >         "defaults": {
+> > >             "mon_data_avail_warn": "30"
+> > >         }
+> > >     },
+> > >     "unknown": []
+> > > }
+> > > 
+> > > What would be the proper way to display a setting that *was not*
+> > > changed from its default?, for example:
+> > > ./ceph --admin-daemon out/osd.1.asok config diff get num_client
+> > > {
+> > >     "diff": {
+> > >         "current": {},
+> > >         "defaults": {}
+> > >     },
+> > >     "unknown": []
+> > > }
+> > > 
+> > > Or only the "current" value?
+> > > 
+> > > Thanks,
+> > > -Daniel
+> > > 
+> > > 
+> > > On Mon, 2016-08-08 at 15:32 -0600, Daniel Oliveira wrote:
+> > > > Sebastien,
+> > > > 
+> > > > As I was working on a couple of other things related to
+> > > > validating
+> > > > parameters/settings, I ended up adding the feature in question
+> > > > and I
+> > > > am just in the process of testing it. I will keep you posted.
+> > > > 
+> > > > Thanks,
+> > > > -Daniel
+> > > > 
+> > > > 
+> > > > On Mon, 2016-08-08 at 14:16 +0200, Sebastien Han wrote:
+> > > > > Would be nice if you could get a stab at it, actually I don't
+> > > > > know
+> > > > > where to look in the code to see where the magic is happening
+> > > > > for
+> > > > > the
+> > > > > admin socket.
+> > > > > Most of the logic is there so this shouldn't be too difficult
+> > > > > :).
+> > > > > 
+> > > > > Did you get a chance to look into this Jesse?
+> > > > > Thanks for offering your help on this one!
+> > > > > 
+> > > > > On Fri, Jul 29, 2016 at 8:32 PM, Jesse Williamson <
+> > > > > jwilliamson@suse.de> wrote:
+> > > > > > On Fri, 29 Jul 2016, Sebastien Han wrote:
+> > > > > > 
+> > > > > > Hi Sebastien,
+> > > > > > 
+> > > > > > > I'd like to have the same but for a specific option only.
+> > > > > > > 
+> > > > > > > So something like:
+> > > > > > > 
+> > > > > > > ceph daemon mon.ceph-mon-01 config diff get <field>
+> > > > > > > 
+> > > > > > > Which will return the diff between the actual config
+> > > > > > > value and
+> > > > > > > the
+> > > > > > > original config value.
+> > > > > > 
+> > > > > > 
+> > > > > > I might be able to help with this, if there's no support
+> > > > > > that
+> > > > > > anyone already
+> > > > > > knows of, or clear takers. I'm working on a small config
+> > > > > > -related
+> > > > > > librados
+> > > > > > feature right now and am somewhat familiar with the
+> > > > > > relevant
+> > > > > > moving parts on
+> > > > > > that end, so I might be in a good position to work on it.
+> > > > > > 
+> > > > > > WRT the admin socket, I'm less clear, but can be pointed in
+> > > > > > the
+> > > > > > right
+> > > > > > direction. :-)
+> > > > > > 
+> > > > > > -Jesse
+> > > > > 
+> > > > > 
+> > > > > 
+> > 
+> > 
+> > 
+> > --
+> > Cheers
+> > 
+> > ––––––
+> > Sébastien Han
+> > Principal Storage Architect
+> > 
+> > "Always give 100%. Unless you're giving blood."
+> > 
+> > Mail: seb@redhat.com
+> > Address: 11 bis, rue Roquépine - 75008 Paris
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph
+> > -devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
