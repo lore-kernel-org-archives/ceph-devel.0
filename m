@@ -1,70 +1,78 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: [RFC PATCH] client: don't use special inode for /..
-Date: Wed, 10 Aug 2016 16:46:46 -0400
-Message-ID: <CA+2bHPatRa=77jr=JsuLFE86SXH9d7LNKN0LHTB1tMmeSti59A@mail.gmail.com>
-References: <1470846630-830-1-git-send-email-jlayton@redhat.com>
- <CA+2bHPYjYPRn99e3nCTjED6c89MnD_Eih_27z_J1=b4_CtLqOg@mail.gmail.com> <1470861005.2694.12.camel@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: rbd-mirror related jewel backports
+Date: Wed, 10 Aug 2016 23:00:41 +0200
+Message-ID: <57AB95F9.3050101@dachary.org>
+References: <57AAEEC2.3060108@dachary.org>
+ <CA+aFP1CFahNravqJ3RuVLnAO9gXsOcsDoPy8=QRBPQ+=txUtLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f178.google.com ([209.85.220.178]:34034 "EHLO
-	mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932697AbcHJUrS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 16:47:18 -0400
-Received: by mail-qk0-f178.google.com with SMTP id p186so55964855qkd.1
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2016 13:47:17 -0700 (PDT)
-In-Reply-To: <1470861005.2694.12.camel@redhat.com>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:35644 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752930AbcHJVAs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2016 17:00:48 -0400
+In-Reply-To: <CA+aFP1CFahNravqJ3RuVLnAO9gXsOcsDoPy8=QRBPQ+=txUtLw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: dillaman@redhat.com
+Cc: Mykola Golub <mgolub@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Aug 10, 2016 at 4:30 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> On Wed, 2016-08-10 at 16:08 -0400, Patrick Donnelly wrote:
->> On Wed, Aug 10, 2016 at 12:30 PM, Jeff Layton <jlayton@redhat.com>
->> wrote:
->> >
->> > The CEPH_INO_DOTDOT thing is quite strange. Under most OS (Linux
->> > included), the parent of the root is itself. IOW, at the root, '.'
->> > and
->> > '..' refer to the same inode.
->> >
->> > Change the ceph client to do the same, as this allows users to get
->> > valid stat info for '..', as well as elimnating some special-
->> > casing.
->> >
->> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
->>
->> Don't forget Client::_lookup:
->>
->>   if (dname == "..") {
->>     if (dir->dn_set.empty())
->>       r = -ENOENT;
->>     else
->>       *target = dir->get_first_parent()->dir->parent_inode; //dirs
->> can't be hard-linked
->>     goto done;
->>   }
->>
->> Otherwise LGTM.
->>
->
->
-> Ahh, thanks. So will dir->dn_set.empty() be true at the root? If so,
-> then something like the patch below?
 
-Well, that's tricky actually. My understanding is that if dn_set is
-empty then either the inode is unlinked or it is the root inode (from
-the client's perspective). So the below patch is probably not quite
-right? I think if the directory is unlinked but not the root, its ".."
-should still refer to its first parent? The ENOENT error is probably
-wrong.
 
-> Note that this patch is not strictly necessary, but it does simplify
-> some other changes that I have queued up:
+On 10/08/2016 22:14, Jason Dillaman wrote:
+> Loic,
+> 
+> If you want, I can create the backport PRs for those tickets.
 
-I think the patch is a good change but there may be some other code
-paths that need fixed. This change needs some simple tests.
+That would be great. Alternatively, if that's less time consuming for you, just suggest a backport order and I'll figure it out.
+
+Cheers
+
+> 
+> 
+> On Wed, Aug 10, 2016 at 5:07 AM, Loic Dachary <loic@dachary.org> wrote:
+>> Hi Mykola,
+>>
+>> There are seven rbd-mirror related backports which do not cherry-pick cleanly. I've not looked at each of them yet and I would very much appreciate your advice about the best way to proceed.
+>>
+>> http://tracker.ceph.com/issues/16511
+>> http://tracker.ceph.com/issues/16512
+>> http://tracker.ceph.com/issues/16658
+>> http://tracker.ceph.com/issues/16701
+>> http://tracker.ceph.com/issues/16747
+>> http://tracker.ceph.com/issues/16902
+>> http://tracker.ceph.com/issues/16978
+>>
+>> Maybe they should be cherry-picked in a specific order in order to avoid conflicts ? For instance, maybe one of the pending backports that you can see at
+>>
+>> https://github.com/ceph/ceph/pulls?q=is%3Aopen+is%3Apr+milestone%3Ajewel+label%3Arbd
+>>
+>> would avoid some of the conflicts if merged ? I'm thinking specifically
+>>
+>> https://github.com/ceph/ceph/pull/10646
+>> https://github.com/ceph/ceph/pull/10644
+>>
+>> What I'm looking for, ideally, is a way to order the cherry-picks to avoid any conflict. That may involve backporting a few additional pull requests (for instance when the type of an argument changes from int64_t to uint64_t, that creates a lot of potential conflicts and backporting that change could help, even if it is not required to fix a given bug.
+>>
+>> There are three backports that also do not apply because of a conflict but do not seem to be related to rbd-mirror. Unless you advise otherwise, I'll attempt to resolve these individually and assume there is complex interaction with other backports.
+>>
+>> http://tracker.ceph.com/issues/16950
+>> http://tracker.ceph.com/issues/16904
+>> http://tracker.ceph.com/issues/16735
+>>
+>> Thanks in advance for your guidance !
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
 
 -- 
-Patrick Donnelly
+Loïc Dachary, Artisan Logiciel Libre
