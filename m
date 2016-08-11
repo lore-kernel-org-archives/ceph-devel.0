@@ -1,265 +1,116 @@
-From: Shinobu Kinjo <shinobu.kj@gmail.com>
-Subject: Re: [Feature request] config diff on a single option with the admin socket
-Date: Thu, 11 Aug 2016 18:30:05 +0900
-Message-ID: <CAFdRU73nYA=Cn2k9RDJrwmJEHEWFGKxXbDr+g8eq1LuOaLFt3A@mail.gmail.com>
-References: <CA+HUO7+qxtsS03yKp2ETUhKy6WTX1ESd0Xridw13viWwa0Cj3Q@mail.gmail.com>
- <alpine.LSU.2.20.1607291125130.28641@ancalagon.suse.com> <CA+HUO7+QVu-HqBT7EuuEoLwPVng84HzG_MmbvMQyueEstR-6Gw@mail.gmail.com>
- <1470691964.14948.2.camel@suse.com> <1470710335.14948.10.camel@suse.com>
- <CA+HUO7KTXfHeHOcQpRX4pfneA+ReyQb2FoBjkxurzZw87NaiSA@mail.gmail.com>
- <CAFdRU71GgzaN6RCeEBRQY51r6Pd0-a0xsz0vJ7=pRd2Ja+eGNA@mail.gmail.com>
- <1470787409.7371.13.camel@suse.com> <CAFdRU73Hgc9TdrekmGv6mziuQ2roxYFKD1VopLMg1=Tq5sJHcQ@mail.gmail.com>
- <CA+HUO7KaPMDEUQRUEX3gS-RtJ1F6asAba+A2XTosEySfLYpG5w@mail.gmail.com>
-Reply-To: skinjo@redhat.com
+From: John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: cephfs performance benchmark -- metadata intensive
+Date: Thu, 11 Aug 2016 11:07:10 +0100
+Message-ID: <CALe9h7fqrOCGn564HLPyMS6ouOHaY0phuZ64OHnq0Vx8VJWoug@mail.gmail.com>
+References: <CAEYCsVKksnVV+HeNBo4YofPz4Re1CRT3jCTCE2L12NqieMVYWA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f170.google.com ([209.85.220.170]:33476 "EHLO
-	mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752449AbcHKJaG convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 05:30:06 -0400
-Received: by mail-qk0-f170.google.com with SMTP id t7so68508843qkh.0
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Aug 2016 02:30:06 -0700 (PDT)
-In-Reply-To: <CA+HUO7KaPMDEUQRUEX3gS-RtJ1F6asAba+A2XTosEySfLYpG5w@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sebastien Han <shan@redhat.com>
-Cc: Daniel Oliveira <doliveira@suse.com>, Squid Cybernetic <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAEYCsVKksnVV+HeNBo4YofPz4Re1CRT3jCTCE2L12NqieMVYWA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, james.liu-gPhfCIXyaqCqndwCJWfcng@public.gmane.org, "Chen, Xiaoxi" <xiaoxchen-ZuctOmHWJ9c@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Aug 11, 2016 at 5:16 PM, Sebastien Han <shan@redhat.com> wrote:
-> Daniel,
+On Thu, Aug 11, 2016 at 8:29 AM, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Hi ,
 >
-> Are you fine with my answer?
-> Just trying to keep the main subject alive here :).
+>
+>      Here is the slide I shared yesterday on performance meeting.
+> Thanks and hoping for inputs.
+>
+>
+> http://www.slideshare.net/XiaoxiChen3/cephfs-jewel-mds-performance-benchmark
 
-Agreed -;
+These are definitely useful results and I encourage everyone working
+with cephfs to go and look at Xiaoxi's slides.
+
+The main thing that this highlighted for me was our lack of testing so
+far on systems with full caches.  Too much of our existing testing is
+done on freshly configured systems that never fill the MDS cache.
+
+Test 2.1 notes that we don't enable directory fragmentation by default
+currently -- this is an issue, and I'm hoping we can switch it on by
+default in Kraken (see thread "Switching on mds_bal_frag by default").
+In the meantime we have the fix that Patrick wrote for Jewel which at
+least prevents people creating dirfrags too large for the OSDs to
+handle.
+
+Test 2.2: since a "failing to respond to cache pressure" bug is
+affecting this, I would guess we see the performance fall off at about
+the point where the *client* caches fill up (so they start trimming
+things even though they're ignore cache pressure).  It would be
+interesting to see this chart with addition lines for some related
+perf counters like mds_log.evtrm and mds.inodes_expired, that might
+make it pretty obvious where the MDS is entering different stages that
+see a decrease in the rate of handling client requests.
+
+We really need to sort out the "failing to respond to cache pressure"
+issues that keep popping up, especially if they're still happening on
+a comparatively simple test that is just creating files.  We have a
+specific test for this[1] that is currently being run against the fuse
+client but not the kernel client[2].  This is a good time to try and
+push that forward so I've kicked off an experimental run here:
+http://pulpito.ceph.com/jspray-2016-08-10_16:14:52-kcephfs:recovery-master-testing-basic-mira/
+
+In the meantime, although there are reports of similar issues with
+newer kernels, it would be very useful to confirm if the same issue is
+still occurring with more recent kernels.  Issues with cache trimming
+have occurred due to various (separate) bugs, so it's possible that
+while some people are still seeing cache trimming issues with recent
+kernels, the specific case you're hitting might be fixed.
+
+Test 2.3: restarting the MDS doesn't actually give you a completely
+empty cache (everything in the journal gets replayed to pre-populate
+the cache on MDS startup).  However, the results are still valid
+because you're using a different random order in the non-caching test
+case, and the number of inodes in your journal is probably much
+smaller than the overall cache size so it's only a little bit
+populated.  We don't currently have a "drop cache" command built into
+the MDS but it would be pretty easy to add one for use in testing
+(basically just call mds->mdcache->trim(0)).
+
+As one would imagine, the non-caching case is latency-dominated when
+the working set is larger than the cache, where each client is waiting
+for one open to finish before proceeding to the next.  The MDS is
+probably capable of handling many more operations per second, but it
+would need more parallel IO operations from the clients.  When a
+single client is doing opens one by one, you're potentially seeing a
+full network+disk latency for each one (though in practice the OSD
+read cache will be helping a lot here).  This non-caching case would
+be the main argument for giving the metadata pool low latency (SSD)
+storage.
+
+Test 2.5: The observation that the CPU bottleneck makes using fast
+storage for the metadata pool less useful (in sequential/cached cases)
+is valid, although it could still be useful to isolate the metadata
+OSDs (probably SSDs since not so much capacity is needed) to avoid
+competing with data operations.  For random access in the non-caching
+cases (2.3, 2.4) I think you would probably see an improvement from
+SSDs.
+
+Thanks again to the team from ebay for sharing all this.
+
+John
+
+
+
+1. https://github.com/ceph/ceph-qa-suite/blob/master/tasks/cephfs/test_client_limits.py#L96
+2. http://tracker.ceph.com/issues/9466
+
 
 >
-> On Wed, Aug 10, 2016 at 12:34 PM, Shinobu Kinjo <shinobu.kj@gmail.com> wrote:
->> Daniel,
->>
->> On Wed, Aug 10, 2016 at 9:03 AM, Daniel Oliveira <doliveira@suse.com> wrote:
->>> Shinobu,
->>>
->>> Sorry, but I am not sure I understand what your request is. If it is
->>> not related to Sebastien's feature request, we probably would need a
->>> different one so we can track it properly. Are you referring to a
->>> *config file parser* kind of thing, where some checking is done to make
->>> sure settings are in the proper section? Or am I missing something?
->>
->> Yes, that is exactly what I said.
->> Does that capabilities make sense?
->>
->>>
->>> -Daniel
->>>
->>>
->>>
->>> On Tue, 2016-08-09 at 19:51 +0900, Shinobu Kinjo wrote:
->>>> Just question.
->>>>
->>>> Do we have already something like config file validation check
->>>> command?
->>>> If not, it would be better to add this capability for end users if it
->>>> would not burden you.
->>>>
->>>> Because it's not a bit clear about which option must be in which
->>>> section.
->>>>
->>>> Thoughts?
->>>>
->>>>  - Shinobu
->>>>
->>>>
->>>> On Tue, Aug 9, 2016 at 6:52 PM, Sebastien Han <shan@redhat.com>
->>>> wrote:
->>>> > Thanks a lot Daniel, that looks exactly right.
->>>> > If nothing changed I think it's valid to keep both fields showing
->>>> > the
->>>> > same value.
->>>> > This is either when comparing with whatever tool because the
->>>> > structure
->>>> > won't change so we don't have to handle a particular case.
->>>> >
->>>> > Others? Thoughts?
->>>> >
->>>> > On Tue, Aug 9, 2016 at 4:38 AM, Daniel Oliveira <doliveira@suse.com
->>>> > > wrote:
->>>> > > Sebastien,
->>>> > >
->>>> > > For now, We have something like this (which follows the same
->>>> > > standard
->>>> > > as 'config diff' and 'config get' :
->>>> > >
->>>> > > #1:
->>>> > > ./ceph --admin-daemon out/osd.1.asok config diff get
->>>> > > mon_data_avail_crit
->>>> > > {
->>>> > >     "diff": {
->>>> > >         "current": {
->>>> > >             "mon_data_avail_crit": "1"
->>>> > >         },
->>>> > >         "defaults": {
->>>> > >             "mon_data_avail_crit": "5"
->>>> > >         }
->>>> > >     },
->>>> > >     "unknown": []
->>>> > > }
->>>> > >
->>>> > > ./ceph --admin-daemon out/osd.1.asok config diff get
->>>> > > mon_data_avail_warn
->>>> > > {
->>>> > >     "diff": {
->>>> > >         "current": {
->>>> > >             "mon_data_avail_warn": "10"
->>>> > >         },
->>>> > >         "defaults": {
->>>> > >             "mon_data_avail_warn": "30"
->>>> > >         }
->>>> > >     },
->>>> > >     "unknown": []
->>>> > > }
->>>> > >
->>>> > > What would be the proper way to display a setting that *was not*
->>>> > > changed from its default?, for example:
->>>> > > ./ceph --admin-daemon out/osd.1.asok config diff get num_client
->>>> > > {
->>>> > >     "diff": {
->>>> > >         "current": {},
->>>> > >         "defaults": {}
->>>> > >     },
->>>> > >     "unknown": []
->>>> > > }
->>>> > >
->>>> > > Or only the "current" value?
->>>> > >
->>>> > > Thanks,
->>>> > > -Daniel
->>>> > >
->>>> > >
->>>> > > On Mon, 2016-08-08 at 15:32 -0600, Daniel Oliveira wrote:
->>>> > > > Sebastien,
->>>> > > >
->>>> > > > As I was working on a couple of other things related to
->>>> > > > validating
->>>> > > > parameters/settings, I ended up adding the feature in question
->>>> > > > and I
->>>> > > > am just in the process of testing it. I will keep you posted.
->>>> > > >
->>>> > > > Thanks,
->>>> > > > -Daniel
->>>> > > >
->>>> > > >
->>>> > > > On Mon, 2016-08-08 at 14:16 +0200, Sebastien Han wrote:
->>>> > > > > Would be nice if you could get a stab at it, actually I don't
->>>> > > > > know
->>>> > > > > where to look in the code to see where the magic is happening
->>>> > > > > for
->>>> > > > > the
->>>> > > > > admin socket.
->>>> > > > > Most of the logic is there so this shouldn't be too difficult
->>>> > > > > :).
->>>> > > > >
->>>> > > > > Did you get a chance to look into this Jesse?
->>>> > > > > Thanks for offering your help on this one!
->>>> > > > >
->>>> > > > > On Fri, Jul 29, 2016 at 8:32 PM, Jesse Williamson <
->>>> > > > > jwilliamson@suse.de> wrote:
->>>> > > > > > On Fri, 29 Jul 2016, Sebastien Han wrote:
->>>> > > > > >
->>>> > > > > > Hi Sebastien,
->>>> > > > > >
->>>> > > > > > > I'd like to have the same but for a specific option only.
->>>> > > > > > >
->>>> > > > > > > So something like:
->>>> > > > > > >
->>>> > > > > > > ceph daemon mon.ceph-mon-01 config diff get <field>
->>>> > > > > > >
->>>> > > > > > > Which will return the diff between the actual config
->>>> > > > > > > value and
->>>> > > > > > > the
->>>> > > > > > > original config value.
->>>> > > > > >
->>>> > > > > >
->>>> > > > > > I might be able to help with this, if there's no support
->>>> > > > > > that
->>>> > > > > > anyone already
->>>> > > > > > knows of, or clear takers. I'm working on a small config
->>>> > > > > > -related
->>>> > > > > > librados
->>>> > > > > > feature right now and am somewhat familiar with the
->>>> > > > > > relevant
->>>> > > > > > moving parts on
->>>> > > > > > that end, so I might be in a good position to work on it.
->>>> > > > > >
->>>> > > > > > WRT the admin socket, I'm less clear, but can be pointed in
->>>> > > > > > the
->>>> > > > > > right
->>>> > > > > > direction. :-)
->>>> > > > > >
->>>> > > > > > -Jesse
->>>> > > > >
->>>> > > > >
->>>> > > > >
->>>> >
->>>> >
->>>> >
->>>> > --
->>>> > Cheers
->>>> >
->>>> > ––––––
->>>> > Sébastien Han
->>>> > Principal Storage Architect
->>>> >
->>>> > "Always give 100%. Unless you're giving blood."
->>>> >
->>>> > Mail: seb@redhat.com
->>>> > Address: 11 bis, rue Roquépine - 75008 Paris
->>>> > --
->>>> > To unsubscribe from this list: send the line "unsubscribe ceph
->>>> > -devel" in
->>>> > the body of a message to majordomo@vger.kernel.org
->>>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->> --
->> Email:
->> shinobu@linux.com
->> shinobu@redhat.com
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Cheers
->
-> ––––––
-> Sébastien Han
-> Principal Storage Architect
->
-> "Always give 100%. Unless you're giving blood."
->
-> Mail: seb@redhat.com
-> Address: 11 bis, rue Roquépine - 75008 Paris
+> Xiaoxi
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Email:
-shinobu@linux.com
-shinobu@redhat.com
