@@ -1,53 +1,114 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: OSD not coming back up again
-Date: Thu, 11 Aug 2016 13:13:54 +0200
-Message-ID: <fa2b6a34-bad3-dd3a-bdbb-bb104e9b54c1@digiware.nl>
-References: <bdb93e87-8338-e485-a68d-f988d00f6785@digiware.nl>
- <453729567.2335.1470896803201@ox.pcextreme.nl>
- <a8d8e5cf-bfdb-6f73-e2a5-a2cc8a3e02af@digiware.nl>
- <301395781.2383.1470913324040@ox.pcextreme.nl>
+From: Wido den Hollander <wido@42on.com>
+Subject: RE: Delayed start of OSDs with systemd to prevent slowdowns
+Date: Thu, 11 Aug 2016 13:15:44 +0200 (CEST)
+Message-ID: <205555697.2385.1470914144218@ox.pcextreme.nl>
+References: <97824899.2313.1470818261025@ox.pcextreme.nl>
+ <CABZ+qqnX0k_0SvoM3bTLAL0q2z-pmGt4AnUpsd126vKOFnZU9Q@mail.gmail.com>
+ <CABZ+qq=S4ay1475BuR2AD2qhYmq279oKazGAKJG9ti-9pwPzug@mail.gmail.com>
+ <CABZ+qqmNi63on6Gipi5uhnL1X9e_erTwXHZt6cSw5XfkmoVaYA@mail.gmail.com>
+ <CABZ+qqnH0EK0bYc0xm6329+3WGk81GKb1OFR_9+No05bsAB5qg@mail.gmail.com>
+ <CABZ+qqmizdT9mpft9TkT87ygS0jJv=9NBipFVuS37dW4a2JvTw@mail.gmail.com>
+ <1156162690.2373.1470912834230@ox.pcextreme.nl>
+ <82ab0bb0.AEEAE5enJZIAAAAAAAAAAF2Jla4AADNJBWwAAAAAAACRXwBXrFuo@mailjet.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:50081 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752100AbcHKLOI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 11 Aug 2016 07:14:08 -0400
-In-Reply-To: <301395781.2383.1470913324040@ox.pcextreme.nl>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:39206 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752147AbcHKLPu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 07:15:50 -0400
+In-Reply-To: <82ab0bb0.AEEAE5enJZIAAAAAAAAAAF2Jla4AADNJBWwAAAAAAACRXwBXrFuo@mailjet.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>, nick@fisk.me.uk
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 11-8-2016 13:02, Wido den Hollander wrote:
->> Right before setting the osd to down, the newest map is 173.
->> So some maps have been exchanged....
->>
->> How does the OSD decide that it is healthy?
->> If it gets peer (ping) messages that is is up?
->>
+
+> Op 11 augustus 2016 om 13:04 schreef Nick Fisk <nick@fisk.me.uk>:
 > 
-> Not 100% sure, but waiting for healthy is something I haven't seen before.
 > 
-> Is it incrementing the newest_map when the cluster advances?
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wido den Hollander
+> > Sent: 11 August 2016 11:54
+> > To: Dan van der Ster <dan@vanderster.com>
+> > Cc: ceph-devel <ceph-devel@vger.kernel.org>
+> > Subject: Re: Delayed start of OSDs with systemd to prevent slowdowns
+> > 
+> > 
+> > > Op 11 augustus 2016 om 1:05 schreef Dan van der Ster <dan@vanderster.com>:
+> > >
+> > >
+> > > Hi Wido,
+> > >
+> > > I can't help you with the systemd foo, but I have two quick remarks ...
+> > >
+> > 
+> > Nobody seems to be able :) systemd is new to everybody.
+> > 
+> > > 1. I've always thought that this was a nice feature of systemd... To
+> > > get the osds booted and online as quickly as possible. And we've not
+> > > seen the peering issues you described.
+> > >
+> > 
+> > Yes, it's a nice feature. But these machines have 24 OSDs on a Dual Xeon E5 and the have a difficult time in coming up.
 > 
->>> Maybe try debug_osd = 20
->>
->> But then still I need to know what to look for, since 20 generates
->> serious output.
->>
-> True, it will. But I don't know exactly what to look for. debug_osd = 20 might reveal more information there.
+> Would something like this do what you want?
 > 
-> It might be a very simple log line which tells you what is going on.
+> https://www.freedesktop.org/software/systemd/man/systemd.timer.html#RandomizedDelaySec=
+> 
+> You have to set up a system timer for the service, a bit of research on that is probably needed.
+> 
 
-See my other mail, log did not reveal much.
-Other than that it made me look at the sockets.
+Good pointer! I'll test with that a bit and report back. Might take a while as I'm traveling a lot these weeks.
 
-But looking at the socket-states, I think the sockets on the OSD that is
-going down are not correctly closed. And so osd.0 thinks it is still
-connected. And osd.1 and osd.2 are without connection to osd.0, so they
-are correct in suggesting that it is dead.
+Wido
 
---WjW
-
-
+> I've found the delay seems to grow with the size of the OSD as well. Ie 6TB disks take a lot longer to start up than 2TB ones. 
+> 
+> > 
+> > Have to note that it's a mixed 0.94.7 <> 10.2.2 cluster, so it might be something there.
+> > 
+> > > 2. The crush weight change shouldn't cause problems, if the weight
+> > > isn't actually changing. IIRC it shouldn't even change the osdmap if
+> > > the value doesn't change.
+> > >
+> > 
+> > True, my bad indeed. That doesn't trigger a change, but it keeps the MONs busy however.
+> > 
+> > Wido
+> > 
+> > > Cheers, Dan
+> > >
+> > >
+> > > On 10 Aug 2016 11:01 a.m., "Wido den Hollander" <wido@42on.com> wrote:
+> > > >
+> > > > Hi,
+> > > >
+> > > > Currently with the systemd design a booting system will start all
+> > > > OSDs at
+> > > the same time. This means that a cluster suddenly gets a bunch of
+> > > CRUSH updates (if update on start is enabled), booting OSDs and PGs
+> > > which go into peering state.
+> > > >
+> > > > My systemd-foo isn't that good, but I was wondering if there is a
+> > > > way to
+> > > modify ceph-osd.target in such a way that it doesn't start all the
+> > > OSDs in parallel?
+> > > >
+> > > > I would like 1 or maybe 2 OSDs to start at the same time with a
+> > > > delay of
+> > > 120 seconds in between. This way the boot will take longer, but the
+> > > impact on the cluster will be less.
+> > > >
+> > > > Any ideas on how we might achieve this with systemd?
+> > > >
+> > > > Wido
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe
+> > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More
+> > majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
