@@ -1,161 +1,53 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: Bluestore different allocator performance Vs FileStore
-Date: Thu, 11 Aug 2016 08:28:50 -0400
-Message-ID: <CANP1eJH_A2X7EmAN59cLnQSqc+epZ9T4iVDykx5bNSe2AvW9dw@mail.gmail.com>
-References: <BL2PR02MB211554DBEC8F344E465BAFE5F41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608102125270.17770@piezo.us.to> <BL2PR02MB2115CB5D9E89815706293EBBF41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608102242590.17762@piezo.us.to>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fixes for 4.8-rc2
+Date: Thu, 11 Aug 2016 15:06:48 +0200
+Message-ID: <1470920808-14863-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:38440 "EHLO
-	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932301AbcHKM2x convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 08:28:53 -0400
-Received: by mail-wm0-f45.google.com with SMTP id o80so12725898wme.1
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Aug 2016 05:28:52 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1608102242590.17762@piezo.us.to>
+Received: from mail-yb0-f195.google.com ([209.85.213.195]:34946 "EHLO
+	mail-yb0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932203AbcHKNHB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 09:07:01 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wed, Aug 10, 2016 at 6:44 PM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 10 Aug 2016, Somnath Roy wrote:
->> << inline with [Somnath]
->>
->> -----Original Message-----
->> From: Sage Weil [mailto:sage@newdream.net]
->> Sent: Wednesday, August 10, 2016 2:31 PM
->> To: Somnath Roy
->> Cc: ceph-devel
->> Subject: Re: Bluestore different allocator performance Vs FileStore
->>
->> On Wed, 10 Aug 2016, Somnath Roy wrote:
->> > Hi, I spent some time on evaluating different Bluestore allocator and
->> > freelist performance. Also, tried to gaze the performance difference
->> > of Bluestore and filestore on the similar setup.
->> >
->> > Setup:
->> > --------
->> >
->> > 16 OSDs (8TB Flash) across 2 OSD nodes
->> >
->> > Single pool and single rbd image of 4TB. 2X replication.
->> >
->> > Disabled the exclusive lock feature so that I can run multiple write  jobs in parallel.
->> > rbd_cache is disabled in the client side.
->> > Each test ran for 15 mins.
->> >
->> > Result :
->> > ---------
->> >
->> > Here is the detailed report on this.
->> >
->> > https://github.com/somnathr/ceph/blob/6e03a5a41fe2c9b213a610200b2e8a25
->> > 0cb05986/Bluestore_allocator_comp.xlsx
->> >
->> > Each profile I named based on <allocator>-<freelist> , so in the graph for example "stupid-extent" meaning stupid allocator and extent freelist.
->> >
->> > I ran the test for each of the profile in the following order after creating a fresh rbd image for all the Bluestore test.
->> >
->> > 1. 4K RW for 15 min with 16QD and 10 jobs.
->> >
->> > 2. 16K RW for 15 min with 16QD and 10 jobs.
->> >
->> > 3. 64K RW for 15 min with 16QD and 10 jobs.
->> >
->> > 4. 256K RW for 15 min with 16QD and 10 jobs.
->> >
->> > The above are non-preconditioned case i.e ran before filling up the entire image. The reason is I don't see any reason of filling up the rbd image before like filestore case where it will give stable performance if we fill up the rbd images first. Filling up rbd images in case of filestore will create the files in the filesystem.
->> >
->> > 5. Next, I did precondition the 4TB image with 1M seq write. This is primarily because I want to load BlueStore with more data.
->> >
->> > 6. Ran 4K RW test again (this is called out preconditioned in the
->> > profile) for 15 min
->> >
->> > 7. Ran 4K Seq test for similar QD for 15 min
->> >
->> > 8. Ran 16K RW test again for 15min
->> >
->> > For filestore test, I ran tests after preconditioning the entire image first.
->> >
->> > Each sheet on the xls have different block size result , I often miss
->> > to navigate through the xls sheets , so, thought of mentioning here
->> > :-)
->> >
->> > I have also captured the mkfs time , OSD startup time and the memory usage after the entire run.
->> >
->> > Observation:
->> > ---------------
->> >
->> > 1. First of all, in case of bitmap allocator mkfs time (and thus cluster creation time for 16 OSDs) are ~16X slower than stupid allocator and filestore. Each OSD creation is taking ~2min or so sometimes and I nailed down the insert_free() function call (marked ****) in the Bitmap allocator is causing that.
->> >
->> > 2016-08-05 16:12:40.587148 7f4024d258c0 10 freelist enumerate_next
->> > start
->> > 2016-08-05 16:12:40.975539 7f4024d258c0 10 freelist enumerate_next
->> > 0x4663d00000~69959451000
->> > 2016-08-05 16:12:40.975555 7f4024d258c0 10 bitmapalloc:init_add_free
->> > instance 139913322803328 offset 0x4663d00000 length 0x69959451000
->> > ****2016-08-05 16:12:40.975557 7f4024d258c0 20 bitmapalloc:insert_free
->> > instance 139913322803328 off 0x4663d00000 len 0x69959451000****
->> > ****2016-08-05 16:13:20.748934 7f4024d258c0 10 freelist enumerate_next
->> > end****
->> > 2016-08-05 16:13:20.748978 7f4024d258c0 10
->> > bluestore(/var/lib/ceph/osd/ceph-0) _open_alloc loaded 6757 G in 1
->> > extents
->> >
->> > 2016-08-05 16:13:23.438511 7f4024d258c0 20 bluefs _read_random read
->> > buffered 0x4a14eb~265 of ^A:5242880+5242880
->> > 2016-08-05 16:13:23.438587 7f4024d258c0 20 bluefs _read_random got 613
->> > 2016-08-05 16:13:23.438658 7f4024d258c0 10 freelist enumerate_next
->> > 0x4663d00000~69959451000
->> > 2016-08-05 16:13:23.438664 7f4024d258c0 10 bitmapalloc:init_add_free
->> > instance 139913306273920 offset 0x4663d00000 length 0x69959451000
->> > *****2016-08-05 16:13:23.438666 7f4024d258c0 20
->> > bitmapalloc:insert_free instance 139913306273920 off 0x4663d00000 len
->> > 0x69959451000*****
->> > *****2016-08-05 16:14:03.132914 7f4024d258c0 10 freelist
->> > enumerate_next end
->>
->> I'm not sure there's any easy fix for this. We can amortize it by feeding space to bluefs slowly (so that we don't have to do all the inserts at once), but I'm not sure that's really better.
->>
->> [Somnath] I don't know that part of the code, so, may be a dumb question. This is during mkfs() time , so, can't we say to bluefs entire space is free ? I can understand for osd mount and all other cases we need to feed the free space every time.
->> IMO this is critical to fix as cluster creation time will be number of OSDs * 2 min otherwise. For me creating 16 OSDs cluster is taking ~32min compare to ~2 min for stupid allocator/filestore.
->> BTW, my drive data partition is ~6.9TB , db partition is ~100G and WAL is ~1G. I guess the time taking is dependent on data partition size as well (?
->
-> Well, we're fundamentally limited by the fact that it's a bitmap, and a
-> big chunk of space is "allocated" to bluefs and needs to have 1's set.
+Hi Linus,
 
-There's been a lot of research into compressed bitmaps (disk and
-memory) in the last 10 years steaming from database index research.
-Some of them can be decompressed at near memcpy speeds.
+The following changes since commit 29b4817d4018df78086157ea3a55c1d9424a7cfc:
 
-The current "best" method compressed compressed bitmap when you
-require editing is Roaring bitmaps. Link http://roaringbitmap.org/ and
-links to research http://arxiv.org/pdf/1603.06549.pdf ,
-http://arxiv.org/pdf/1402.6407.pdf .
+  Linux 4.8-rc1 (2016-08-07 18:18:00 -0700)
 
-This could be useful, not only for creation of the partition but also
-minimizing memory usage at runtime. And in the default case, you can
-reserve as much space needed for the worst case bitmap (no
-compression) but in most cases end up using only a fraction of it.
+are available in the git repository at:
 
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.8-rc2
 
+for you to fetch changes up to 4eacd4cb3a7c4794688ef4fad5d01f3a532a58e9:
 
+  ceph: initialize pathbase in the !dentry case in encode_caps_cb() (2016-08-09 17:26:56 +0200)
 
--- 
-Milosz Tanski
-CTO
-16 East 34th Street, 15th floor
-New York, NY 10016
+----------------------------------------------------------------
+A patch for a NULL dereference bug introduced in 4.8-rc1 and a handful
+of static checker fixes.
 
-p: 646-253-9055
-e: milosz@adfin.com
+----------------------------------------------------------------
+Ilya Dryomov (3):
+      rbd: destroy header_oloc in rbd_dev_release()
+      rbd: nuke the 32-bit pool id check
+      ceph: initialize pathbase in the !dentry case in encode_caps_cb()
+
+Wei Yongjun (3):
+      libceph: fix return value check in alloc_msg_with_page_vector()
+      libceph: make cancel_generic_request() static
+      libceph: using kfree_rcu() to simplify the code
+
+Yan, Zheng (1):
+      ceph: fix null pointer dereference in ceph_flush_snaps()
+
+ drivers/block/rbd.c     | 10 +---------
+ fs/ceph/caps.c          |  5 ++++-
+ fs/ceph/mds_client.c    |  1 +
+ net/ceph/mon_client.c   |  2 +-
+ net/ceph/osd_client.c   |  2 +-
+ net/ceph/string_table.c |  8 +-------
+ 6 files changed, 9 insertions(+), 19 deletions(-)
