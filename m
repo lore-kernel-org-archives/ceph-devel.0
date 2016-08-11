@@ -1,143 +1,40 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: Bluestore assert
-Date: Thu, 11 Aug 2016 22:32:02 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608112226280.17762@piezo.us.to>
-References: <BL2PR02MB2115443F5ACA3459E2CEBFBAF41D0@BL2PR02MB2115.namprd02.prod.outlook.com> <alpine.DEB.2.11.1608102121090.17770@piezo.us.to> <BL2PR02MB2115CDD714FC3883028291F8F41E0@BL2PR02MB2115.namprd02.prod.outlook.com> <alpine.DEB.2.11.1608111629170.17762@piezo.us.to>
- <7dc67e25-4e1c-09a1-8667-ee47572b9290@redhat.com> <alpine.DEB.2.11.1608111635230.17762@piezo.us.to> <BL2PR02MB2115D3D79C6194FD81E598F3F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: SCSI inquiry interface for RBD devices
+Date: Thu, 11 Aug 2016 23:38:41 +0000
+Message-ID: <27148ED4-95A8-4E8F-86C0-52CEEA9140E1@Teradata.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59326 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751494AbcHKWcG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 11 Aug 2016 18:32:06 -0400
-In-Reply-To: <BL2PR02MB2115D3D79C6194FD81E598F3F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from nat13.teradata.com ([153.65.16.13]:33454 "EHLO
+	rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751570AbcHKXiq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 19:38:46 -0400
+Received: from rpc7292.td.teradata.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id A990E258005
+	for <ceph-devel@vger.kernel.org>; Thu, 11 Aug 2016 19:39:02 -0400 (EDT)
+Received: from RPC4168.td.teradata.com (unknown [153.65.10.242])
+	by rpc7292.td.teradata.com (Postfix) with ESMTP id 9DC8332F25D
+	for <ceph-devel@vger.kernel.org>; Thu, 11 Aug 2016 19:39:02 -0400 (EDT)
+Received: from SUSHDC7998.TD.TERADATA.COM (unknown [153.65.10.254])
+	by Websense Email Security Gateway with ESMTPS id 613E796AFB664
+	for <ceph-devel@vger.kernel.org>; Thu, 11 Aug 2016 19:38:40 -0400 (EDT)
+Content-Language: en-US
+Content-ID: <5367A17307482344BD940AA7125CF2C7@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 11 Aug 2016, Somnath Roy wrote:
-> Sage,
-> Regarding the db assert , I hit that again on multiple OSDs while I was populating 40TB rbd images (~35TB written before crash).
-> I did the following changes in the code..
-> 
-> @@ -370,7 +370,7 @@ int RocksDBStore::submit_transaction(KeyValueDB::Transaction t)
->    utime_t lat = ceph_clock_now(g_ceph_context) - start;
->    logger->inc(l_rocksdb_txns);
->    logger->tinc(l_rocksdb_submit_latency, lat);
-> -  return s.ok() ? 0 : -1;
-> +  return s.ok() ? 0 : -s.code();
->  }
-> 
->  int RocksDBStore::submit_transaction_sync(KeyValueDB::Transaction t)
-> @@ -385,7 +385,7 @@ int RocksDBStore::submit_transaction_sync(KeyValueDB::Transaction t)
->    utime_t lat = ceph_clock_now(g_ceph_context) - start;
->    logger->inc(l_rocksdb_txns_sync);
->    logger->tinc(l_rocksdb_submit_sync_latency, lat);
-> -  return s.ok() ? 0 : -1;
-> +  return s.ok() ? 0 : -s.code();
->  }
->  int RocksDBStore::get_info_log_level(string info_log_level)
->  {
-> diff --git a/src/os/bluestore/BlueStore.cc b/src/os/bluestore/BlueStore.cc
-> index fe7f743..3f4ecd5 100644
-> --- a/src/os/bluestore/BlueStore.cc
-> +++ b/src/os/bluestore/BlueStore.cc
-> @@ -4989,6 +4989,9 @@ void BlueStore::_kv_sync_thread()
->              ++it) {
->           _txc_finalize_kv((*it), (*it)->t);
->           int r = db->submit_transaction((*it)->t);
-> +          if (r < 0 ) {
-> +            dout(0) << "submit_transaction returned = " << r << dendl;
-> +          }
->           assert(r == 0);
->         }
->        }
-> @@ -5026,6 +5029,10 @@ void BlueStore::_kv_sync_thread()
->         t->rm_single_key(PREFIX_WAL, key);
->        }
->        int r = db->submit_transaction_sync(t);
-> +      if (r < 0 ) {
-> +        dout(0) << "submit_transaction_sync returned = " << r << dendl;
-> +      }
-> +
->        assert(r == 0);
-> 
-> 
-> This is printing -1 in the log before asset. So, the corresponding code from the rocksdb side is "kNotFound".
-> It is not related to space as I hit this same issue irrespective of db partition size is 100G or 300G.
-> It seems some kind of corruption within Bluestore ?
-> Let me now the next step.
 
-Can you add this too?
+SCSI block devices has SG_IO IOCTL interface by which applications can identify the device uniquely. This helps applications identify the device uniquely without relying on the device file names or any other mechanisms.
 
-diff --git a/src/kv/RocksDBStore.cc b/src/kv/RocksDBStore.cc
-index 638d231..b5467f7 100644
---- a/src/kv/RocksDBStore.cc
-+++ b/src/kv/RocksDBStore.cc
-@@ -370,6 +370,9 @@ int 
-RocksDBStore::submit_transaction(KeyValueDB::Transaction t)
-   utime_t lat = ceph_clock_now(g_ceph_context) - start;
-   logger->inc(l_rocksdb_txns);
-   logger->tinc(l_rocksdb_submit_latency, lat);
-+  if (!s.ok()) {
-+    derr << __func__ << " error: " << s.ToString() << dendl;
-+  }
-   return s.ok() ? 0 : -1;
- }
- 
-It's not obvious to me how we would get NotFound when doing a Write 
-into the kv store.
+For more details l ook at the manpage of sg_inq commnad. https://manned.org/sg_inq
 
-Thanks!
-sage
+Some of the non SCSI devices also support this SG_IO interface for inquiry. Examples include SATA, NVME, Virtual Disks.
 
-> 
-> Thanks & Regards
-> Somnath
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Thursday, August 11, 2016 9:36 AM
-> To: Mark Nelson
-> Cc: Somnath Roy; ceph-devel
-> Subject: Re: Bluestore assert
-> 
-> On Thu, 11 Aug 2016, Mark Nelson wrote:
-> > Sorry if I missed this during discussion, but why are these being
-> > called if the file is deleted?
-> 
-> I'm not sure... rocksdb is the one consuming the interface.  Looking through the code, though, this is the only way I can see that we could log an op_file_update *after* an op_file_remove.
-> 
-> sage
-> 
-> >
-> > Mark
-> >
-> > On 08/11/2016 11:29 AM, Sage Weil wrote:
-> > > On Thu, 11 Aug 2016, Somnath Roy wrote:
-> > > > Sage,
-> > > > Please find the full log for the BlueFS replay bug in the
-> > > > following location.
-> > > >
-> > > > https://github.com/somnathr/ceph/blob/master/ceph-osd.1.log.zip
-> > > >
-> > > > For the db transaction one , I have added code to dump the rocksdb
-> > > > error code before the assert as you suggested and waiting to reproduce.
-> > >
-> > > I'm pretty sure this is the root cause:
-> > >
-> > > https://github.com/ceph/ceph/pull/10686
-> > >
-> > > sage
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe
-> > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > >
-> >
-> >
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> 
-> 
+It is desired to identify every RBD uniquely just from the device file. It will help in using RBD devices as drop in replacement for SCSI/SATA devices. Currently the RBD code in ceph-client does not support the SG_IO ioctl interface for inquiry to identify the device uniquely. Has adding the SG_IO ioctl interface to the RBD devices ever been considered before?
+
+
+
+Thanks,
+Nitin
