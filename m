@@ -1,40 +1,61 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: OSD not coming back up again
-Date: Thu, 11 Aug 2016 17:46:05 +0200
-Message-ID: <00e4ea05-3821-c3e4-d827-63c82c6c1979@digiware.nl>
-References: <bdb93e87-8338-e485-a68d-f988d00f6785@digiware.nl>
- <453729567.2335.1470896803201@ox.pcextreme.nl>
- <5727f9c9-57e0-6256-dbd7-30b73c6feaec@digiware.nl>
- <1788022033.2389.1470915881301@ox.pcextreme.nl>
- <57ca8142-b499-2ccb-7b19-d455b4f8318e@digiware.nl>
+From: Sage Weil <sweil@redhat.com>
+Subject: bluestore locking
+Date: Thu, 11 Aug 2016 16:03:36 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1608111555060.17762@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:33385 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:52766 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932249AbcHKPqO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 11 Aug 2016 11:46:14 -0400
-In-Reply-To: <57ca8142-b499-2ccb-7b19-d455b4f8318e@digiware.nl>
+	id S932395AbcHKQDj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 11 Aug 2016 12:03:39 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath.Roy@sandisk.com
+Cc: ceph-devel@vger.kernel.org
 
-On 11-8-2016 16:36, Willem Jan Withagen wrote:
-> On 11-8-2016 13:44, Wido den Hollander wrote:
->> Could be, but the log line which is interesting:
->>
->> 2016-08-11 12:06:16.473351 b69c480 10 osd.0 178 handle_osd_ping osd.2
->> 127.0.0.1:6811/13222 says i am down in 178
+After our conversation this mornning I went through the locking a bit more 
+and I think we're in okay shape.  To summarize:
 
-I looked in the mon.a log file and there I find repeated messages like:
+These 'forward lookup' structures are protected by coll->lock:
 
- mon.a@0(leader)e1 _ms_dispatch existing session 0xabddc80 for osd.0 :/0
+ Bnode::blob_map -> Blob                                    coll->lock
+ Onode::blob_map -> Blob                                    coll->lock
 
-Would that mean that there is a session for talking to osd.0 but its
-state has not been completed to include the remote address.
-And could this be due to an incomplete restart of the connection?
+These ones are protected by cache->lock:
 
---WjW
+ Collection::OnodeSpace::onode_map -> Onode (unordered_map)     cache->lock
+ Blob::bc -> Buffer                                             cache->lock
 
+The BnodeSet is a bit different because it is depopulated when the last 
+onode ref goes away.  But it has its own lock:
+
+ Collection::BnodeSet::uset -> Bnode (intrustive set)       BnodeSet::lock
+
+Anyway, the point of this is that the cache trim() can do everything it 
+needs with just cache->lock.  That means that during an update, we 
+normally have coll->lock to protect the structures we're touching, and if 
+we are adding onodes to OnodeSpace or BufferSpace we additionally take 
+cache->lock for the appropriate cache fragment.
+
+We were getting tripped up from the blob_map iteration in _txc_state_proc 
+because we were holding no locks at all (or, previously, a collection lock 
+that may or may not be the right one).  Igor's PR fixes this by 
+making Blob refcounted and keeping a list of these.  The finish_write() 
+function takes cache->lock as needed.  Also, it's worth pointing out that 
+the blobs that we're touching will all exist under an Onode that is in the 
+onodes list, and it turns out that the trim() is already doing the right 
+thing and not trimming Onodes that still have any refs.
+
+Which leaves me a bit confused as to how we originally were 
+crashing, because we were taking the first_collection lock.  My guess is 
+that first_collection was not the right collection and a racing update was 
+updating the Onode.  The refcounting alone sorts this out.  My other fix 
+would have also resolved it by taking the correct collection's 
+lock, I think.  Unless there is another locking problem I'm not seeing.. 
+but I think what is in master now has it covered.
+
+Igor, Somnath, does the current strategy make sense?
+
+sage
 
