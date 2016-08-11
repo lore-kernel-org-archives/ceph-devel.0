@@ -1,290 +1,294 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Bluestore different allocator performance Vs FileStore
-Date: Thu, 11 Aug 2016 06:24:42 -0500
-Message-ID: <c7ecb9ee-e402-e79c-e58b-428a298370b5@redhat.com>
-References: <BL2PR02MB211554DBEC8F344E465BAFE5F41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608102125270.17770@piezo.us.to>
- <BL2PR02MB2115CB5D9E89815706293EBBF41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608102242590.17762@piezo.us.to>
- <BLUPR0201MB15248A827640A2C8B2119C98E81D0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <CY1PR0201MB1820E86B7587927ED23C055A851E0@CY1PR0201MB1820.namprd02.prod.outlook.com>
- <BL2PR02MB21158A97201C01072BFC27F5F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: OSD not coming back up again
+Date: Thu, 11 Aug 2016 13:39:27 +0200
+Message-ID: <5727f9c9-57e0-6256-dbd7-30b73c6feaec@digiware.nl>
+References: <bdb93e87-8338-e485-a68d-f988d00f6785@digiware.nl>
+ <453729567.2335.1470896803201@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40864 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([176.74.240.9]:55584 "EHLO smtp.digiware.nl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750828AbcHKLYq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 11 Aug 2016 07:24:46 -0400
-In-Reply-To: <BL2PR02MB21158A97201C01072BFC27F5F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
+	id S932252AbcHKLjf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 11 Aug 2016 07:39:35 -0400
+In-Reply-To: <453729567.2335.1470896803201@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Ramesh Chander <Ramesh.Chander@sandisk.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Ben England <bengland@redhat.com>
+To: Wido den Hollander <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Ben England added parallel OSD creation to CBT a while back which 
-greatly speed up cluster creation time (not just for the bitmap 
-alloctaor).  I'm not sure if ceph-ansible creates OSDs in parallel, but 
-if not he might have some insights into how easy it would be to improve it.
+On 11-8-2016 08:26, Wido den Hollander wrote:
+> 
+>> Op 11 augustus 2016 om 2:40 schreef Willem Jan Withagen <wjw@digiware.nl>:
+>>
+>>
+>> Hi
+>>
+>> During testing with cephtool-test-mon.sh
+>>
+>> 3 OSDs are started, and then the code executes:
+>> ====
+>>   ceph osd set noup
+>>   ceph osd down 0
+>>   ceph osd dump | grep 'osd.0 down'
+>>   ceph osd unset noup
+>> ====
+>>
+>> And in 1000 secs osd.0 is not coming back up.
+>>
+>> Below some details, but where should I start looking?
+>>
+> Can you use the admin socket to query osd.0?
+> 
+> ceph daemon osd.0 status
+> 
+> What does that tell you?
+> 
+> Maybe try debug_osd = 20
 
-Mark
+Hi Wido,
 
-On 08/11/2016 02:11 AM, Somnath Roy wrote:
-> Yes, we can create OSDs in parallel but I am not sure how many people are creating cluster like that as ceph-deploy end there is no interface for that.
-> FYI, we have introduced some parallelism in SanDisk wrapper script for installer based on ceph-deploy.
-> I don't think even with all these parallel OSD creation, this problem will go away but for sure will be reduced  a bit as we have seen in case of OSD start time since it is inherently parallel.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Ramesh Chander
-> Sent: Wednesday, August 10, 2016 11:07 PM
-> To: Allen Samuels; Sage Weil; Somnath Roy
-> Cc: ceph-devel
-> Subject: RE: Bluestore different allocator performance Vs FileStore
->
-> Somnath,
->
-> Basically mkfs time has increased from 7.5 seconds (2min / 16) to 2 minutes ( 32 / 16).
->
-> But is there a reason you should create osds in serial? I think for mmultiple osds mkfs can happen in parallel?
->
-> As a fix I am looking to batch multiple insert_free calls for now. If still that does not help, thinking of doing insert_free on different part of device in parallel.
->
-> -Ramesh
->
->> -----Original Message-----
->> From: Ramesh Chander
->> Sent: Thursday, August 11, 2016 10:04 AM
->> To: Allen Samuels; Sage Weil; Somnath Roy
->> Cc: ceph-devel
->> Subject: RE: Bluestore different allocator performance Vs FileStore
->>
->> I think insert_free is limited by speed of function clear_bits here.
->>
->> Though set_bits and clear_bits have same logic except one sets and
->> another clears. Both of these does 64 bits (bitmap size) at a time.
->>
->> I am not sure if doing memset will make it faster. But if we can do it
->> for group of bitmaps, then it might help.
->>
->> I am looking in to code if we can handle mkfs and osd mount in special
->> way to make it faster.
->>
->> If I don't find an easy fix, we can go to path of deferring init to
->> later stage as and when required.
->>
->> -Ramesh
->>
->>> -----Original Message-----
->>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->>> owner@vger.kernel.org] On Behalf Of Allen Samuels
->>> Sent: Thursday, August 11, 2016 4:28 AM
->>> To: Sage Weil; Somnath Roy
->>> Cc: ceph-devel
->>> Subject: RE: Bluestore different allocator performance Vs FileStore
->>>
->>> We always knew that startup time for bitmap stuff would be somewhat
->>> longer. Still, the existing implementation can be speeded up
->>> significantly. The code in BitMapZone::set_blocks_used isn't very
->>> optimized. Converting it to use memset for all but the first/last
->>> bytes
->> should significantly speed it up.
->>>
->>>
->>> Allen Samuels
->>> SanDisk |a Western Digital brand
->>> 2880 Junction Avenue, San Jose, CA 95134
->>> T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
->>>
->>>
->>>> -----Original Message-----
->>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->>>> owner@vger.kernel.org] On Behalf Of Sage Weil
->>>> Sent: Wednesday, August 10, 2016 3:44 PM
->>>> To: Somnath Roy <Somnath.Roy@sandisk.com>
->>>> Cc: ceph-devel <ceph-devel@vger.kernel.org>
->>>> Subject: RE: Bluestore different allocator performance Vs
->>>> FileStore
->>>>
->>>> On Wed, 10 Aug 2016, Somnath Roy wrote:
->>>>> << inline with [Somnath]
->>>>>
->>>>> -----Original Message-----
->>>>> From: Sage Weil [mailto:sage@newdream.net]
->>>>> Sent: Wednesday, August 10, 2016 2:31 PM
->>>>> To: Somnath Roy
->>>>> Cc: ceph-devel
->>>>> Subject: Re: Bluestore different allocator performance Vs
->>>>> FileStore
->>>>>
->>>>> On Wed, 10 Aug 2016, Somnath Roy wrote:
->>>>>> Hi, I spent some time on evaluating different Bluestore
->>>>>> allocator and freelist performance. Also, tried to gaze the
->>>>>> performance difference of Bluestore and filestore on the
->>>>>> similar
->> setup.
->>>>>>
->>>>>> Setup:
->>>>>> --------
->>>>>>
->>>>>> 16 OSDs (8TB Flash) across 2 OSD nodes
->>>>>>
->>>>>> Single pool and single rbd image of 4TB. 2X replication.
->>>>>>
->>>>>> Disabled the exclusive lock feature so that I can run multiple
->>>>>> write  jobs in
->>>> parallel.
->>>>>> rbd_cache is disabled in the client side.
->>>>>> Each test ran for 15 mins.
->>>>>>
->>>>>> Result :
->>>>>> ---------
->>>>>>
->>>>>> Here is the detailed report on this.
->>>>>>
->>>>>>
->>>>
->>>
->> https://github.com/somnathr/ceph/blob/6e03a5a41fe2c9b213a610200b2e8a
->>>>>> 25 0cb05986/Bluestore_allocator_comp.xlsx
->>>>>>
->>>>>> Each profile I named based on <allocator>-<freelist> , so in
->>>>>> the graph for
->>>> example "stupid-extent" meaning stupid allocator and extent freelist.
->>>>>>
->>>>>> I ran the test for each of the profile in the following order
->>>>>> after creating a
->>>> fresh rbd image for all the Bluestore test.
->>>>>>
->>>>>> 1. 4K RW for 15 min with 16QD and 10 jobs.
->>>>>>
->>>>>> 2. 16K RW for 15 min with 16QD and 10 jobs.
->>>>>>
->>>>>> 3. 64K RW for 15 min with 16QD and 10 jobs.
->>>>>>
->>>>>> 4. 256K RW for 15 min with 16QD and 10 jobs.
->>>>>>
->>>>>> The above are non-preconditioned case i.e ran before filling
->>>>>> up the entire
->>>> image. The reason is I don't see any reason of filling up the rbd
->>>> image before like filestore case where it will give stable
->>>> performance if we fill up the rbd images first. Filling up rbd
->>>> images in case of filestore will create the files in the filesystem.
->>>>>>
->>>>>> 5. Next, I did precondition the 4TB image with 1M seq write.
->>>>>> This is
->>>> primarily because I want to load BlueStore with more data.
->>>>>>
->>>>>> 6. Ran 4K RW test again (this is called out preconditioned in
->>>>>> the
->>>>>> profile) for 15 min
->>>>>>
->>>>>> 7. Ran 4K Seq test for similar QD for 15 min
->>>>>>
->>>>>> 8. Ran 16K RW test again for 15min
->>>>>>
->>>>>> For filestore test, I ran tests after preconditioning the
->>>>>> entire image
->> first.
->>>>>>
->>>>>> Each sheet on the xls have different block size result , I
->>>>>> often miss to navigate through the xls sheets , so, thought of
->>>>>> mentioning here
->>>>>> :-)
->>>>>>
->>>>>> I have also captured the mkfs time , OSD startup time and the
->>>>>> memory
->>>> usage after the entire run.
->>>>>>
->>>>>> Observation:
->>>>>> ---------------
->>>>>>
->>>>>> 1. First of all, in case of bitmap allocator mkfs time (and
->>>>>> thus cluster
->>>> creation time for 16 OSDs) are ~16X slower than stupid allocator
->>>> and
->>> filestore.
->>>> Each OSD creation is taking ~2min or so sometimes and I nailed
->>>> down the
->>>> insert_free() function call (marked ****) in the Bitmap allocator
->>>> is causing that.
->>>>>>
->>>>>> 2016-08-05 16:12:40.587148 7f4024d258c0 10 freelist
->>>>>> enumerate_next start
->>>>>> 2016-08-05 16:12:40.975539 7f4024d258c0 10 freelist
->>>>>> enumerate_next
->>>>>> 0x4663d00000~69959451000
->>>>>> 2016-08-05 16:12:40.975555 7f4024d258c0 10
->>>>>> bitmapalloc:init_add_free instance 139913322803328 offset
->>>>>> 0x4663d00000 length 0x69959451000
->>>>>> ****2016-08-05 16:12:40.975557 7f4024d258c0 20
->>>>>> bitmapalloc:insert_free instance 139913322803328 off
->>>>>> 0x4663d00000 len 0x69959451000****
->>>>>> ****2016-08-05 16:13:20.748934 7f4024d258c0 10 freelist
->>>>>> enumerate_next
->>>>>> end****
->>>>>> 2016-08-05 16:13:20.748978 7f4024d258c0 10
->>>>>> bluestore(/var/lib/ceph/osd/ceph-0) _open_alloc loaded 6757 G
->>>>>> in
->>>>>> 1 extents
->>>>>>
->>>>>> 2016-08-05 16:13:23.438511 7f4024d258c0 20 bluefs _read_random
->>>>>> read buffered 0x4a14eb~265 of ^A:5242880+5242880
->>>>>> 2016-08-05 16:13:23.438587 7f4024d258c0 20 bluefs _read_random
->>>>>> got
->>>>>> 613
->>>>>> 2016-08-05 16:13:23.438658 7f4024d258c0 10 freelist
->>>>>> enumerate_next
->>>>>> 0x4663d00000~69959451000
->>>>>> 2016-08-05 16:13:23.438664 7f4024d258c0 10
->>>>>> bitmapalloc:init_add_free instance 139913306273920 offset
->>>>>> 0x4663d00000 length 0x69959451000
->>>>>> *****2016-08-05 16:13:23.438666 7f4024d258c0 20
->>>>>> bitmapalloc:insert_free instance 139913306273920 off
->>>>>> 0x4663d00000 len
->>>>>> 0x69959451000*****
->>>>>> *****2016-08-05 16:14:03.132914 7f4024d258c0 10 freelist
->>>>>> enumerate_next end
->>>>>
->>>>> I'm not sure there's any easy fix for this. We can amortize it
->>>>> by feeding
->>>> space to bluefs slowly (so that we don't have to do all the
->>>> inserts at once), but I'm not sure that's really better.
->>>>>
->>>>> [Somnath] I don't know that part of the code, so, may be a dumb
->>> question.
->>>> This is during mkfs() time , so, can't we say to bluefs entire
->>>> space is free ? I can understand for osd mount and all other cases
->>>> we need to feed the free space every time.
->>>>> IMO this is critical to fix as cluster creation time will be
->>>>> number of OSDs * 2
->>>> min otherwise. For me creating 16 OSDs cluster is taking ~32min
->>>> compare to
->>>> ~2 min for stupid allocator/filestore.
->>>>> BTW, my drive data partition is ~6.9TB , db partition is ~100G
->>>>> and WAL is
->>>> ~1G. I guess the time taking is dependent on data partition size as well (?
->>>>
->>>> Well, we're fundamentally limited by the fact that it's a bitmap,
->>>> and a big chunk of space is "allocated" to bluefs and needs to have 1's set.
->>>>
->>>> sage
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>> in the body of a message to majordomo@vger.kernel.org More
->>> majordomo
->>>> info at http://vger.kernel.org/majordomo-info.html
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More
->> majordomo
->>> info at http://vger.kernel.org/majordomo-info.html
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Thanx for the help.
+
+Below is a full cycle in the osd.0.log which seems to be stuck at 178
+But osd.1 has:
+{
+    "cluster_fsid": "4c57b34a-263a-41b0-a3b9-0e494ab840f5",
+    "osd_fsid": "99296090-9d6f-44be-9fdc-9c1266f12325",
+    "whoami": 1,
+    "state": "active",
+    "oldest_map": 1,
+    "newest_map": 179,
+    "num_pgs": 8
+}
+Which is also what the cluster thinks:
+
+    cluster 4c57b34a-263a-41b0-a3b9-0e494ab840f5
+     health HEALTH_WARN
+            8 pgs degraded
+            8 pgs stuck unclean
+            8 pgs undersized
+     monmap e1: 3 mons at
+{a=127.0.0.1:7202/0,b=127.0.0.1:7203/0,c=127.0.0.1:7204/0}
+            election epoch 6, quorum 0,1,2 a,b,c
+     osdmap e179: 3 osds: 2 up, 2 in; 8 remapped pgs
+            flags sortbitwise,require_jewel_osds,require_kraken_osds
+      pgmap v494: 8 pgs, 1 pools, 0 bytes data, 0 objects
+            248 GB used, 188 GB / 437 GB avail
+                   8 active+undersized+degraded
+
+So one way or another the down OSD does not receive the last pgmap?
+
+How does the pgmap update work?
+The OSD asks the/any mon for the last pgmap?
+The MONs are listening on 7202/7203/7204
+
+Now if I look in the sockets table I seed osd.1 and osd.2 connected to
+each other each with 2 connections.
+But osd.0 has sockets registered to osd.1 and osd.2.
+But osd.1 and osd.2 do not have these sockets in their table.
+
+So could it be that OSD.0 has not correctly reset the links? Because i
+understood that down/up will go thru a full disconnect?
+
+--WjW
+
+# sockstat | grep 13193
+wjw      ceph-osd   13193 5  tcp4   *:6800                *:*
+wjw      ceph-osd   13193 6  tcp4   *:6801                *:*
+wjw      ceph-osd   13193 7  tcp4   *:6802                *:*
+wjw      ceph-osd   13193 8  tcp4   *:6803                *:*
+wjw      ceph-osd   13193 12 stream
+/usr/srcs/Ceph/work/ceph/build/src/test/testdir/test-7202/out/osd.0.asok
+wjw      ceph-osd   13193 22 tcp4   127.0.0.1:60710       127.0.0.1:7204
+wjw      ceph-osd   13193 23 tcp4   127.0.0.1:30934       127.0.0.1:6808
+wjw      ceph-osd   13193 33 tcp4   127.0.0.1:15437       127.0.0.1:6805
+wjw      ceph-osd   13193 35 tcp4   127.0.0.1:15438       127.0.0.1:6807
+wjw      ceph-osd   13193 46 tcp4   127.0.0.1:15439       127.0.0.1:6806
+wjw      ceph-osd   13193 51 tcp4   127.0.0.1:15443       127.0.0.1:6809
+wjw      ceph-osd   13193 55 tcp4   127.0.0.1:15450       127.0.0.1:6810
+wjw      ceph-osd   13193 56 tcp4   127.0.0.1:15451       127.0.0.1:6811
+
+# sockstat | grep 13208
+wjw      ceph-osd   13208 5  tcp4   *:6804                *:*
+wjw      ceph-osd   13208 6  tcp4   *:6805                *:*
+wjw      ceph-osd   13208 7  tcp4   *:6806                *:*
+wjw      ceph-osd   13208 8  tcp4   *:6807                *:*
+wjw      ceph-osd   13208 12 stream
+/usr/srcs/Ceph/work/ceph/build/src/test/testdir/test-7202/out/osd.1.asok
+wjw      ceph-osd   13208 23 tcp4   127.0.0.1:15433      127.0.0.1:7204
+wjw      ceph-osd   13208 37 tcp4   127.0.0.1:45954      127.0.0.1:6808
+wjw      ceph-osd   13208 38 tcp4   127.0.0.1:6807       127.0.0.1:15438
+wjw      ceph-osd   13208 40 tcp4   127.0.0.1:6806        127.0.0.1:15439
+wjw      ceph-osd   13208 42 tcp4   127.0.0.1:35939      127.0.0.1:6804
+wjw      ceph-osd   13208 43 tcp4   127.0.0.1:6804       127.0.0.1:35939
+wjw      ceph-osd   13208 48 tcp4   127.0.0.1:15453      127.0.0.1:6810
+wjw      ceph-osd   13208 49 tcp4   127.0.0.1:6807       127.0.0.1:15444
+wjw      ceph-osd   13208 50 tcp4   127.0.0.1:6806       127.0.0.1:15445
+wjw      ceph-osd   13208 52 tcp4   127.0.0.1:15449      127.0.0.1:6809
+wjw      ceph-osd   13208 53 tcp4   127.0.0.1:15452      127.0.0.1:6811
+
+2016-08-11 12:06:14.567881 b0afa80 10 osd.0.objecter tick
+2016-08-11 12:06:14.756007 b2fcd00 20 osd.0 175 update_osd_stat
+osd_stat(124 GB used, 96486 MB avail, 218 GB total, peers [1,2]/[] op
+hist [])
+2016-08-11 12:06:14.756027 b2fcd00  5 osd.0 178 heartbeat: osd_stat(124
+GB used, 96486 MB avail, 218 GB total, peers [1,2]/[] op hist [])
+2016-08-11 12:06:14.756045 b2fcd00  1 -- 127.0.0.1:0/13192 -->
+127.0.0.1:6806/13207 -- osd_ping(ping e175 stamp 2016-08-11
+12:06:14.756036) v2 -- ?+0 0xb74e400 con 0xb4eb3a0
+2016-08-11 12:06:14.756109 b2fcd00  1 -- 127.0.0.1:0/13192 -->
+127.0.0.1:6807/13207 -- osd_ping(ping e175 stamp 2016-08-11
+12:06:14.756036) v2 -- ?+0 0xb6f9e00 con 0xb4eb480
+2016-08-11 12:06:14.756170 b2fcd00  1 -- 127.0.0.1:0/13192 -->
+127.0.0.1:6810/13222 -- osd_ping(ping e175 stamp 2016-08-11
+12:06:14.756036) v2 -- ?+0 0xb6faa00 con 0xb6c02a0
+2016-08-11 12:06:14.756203 b2fcd00  1 -- 127.0.0.1:0/13192 -->
+127.0.0.1:6811/13222 -- osd_ping(ping e175 stamp 2016-08-11
+12:06:14.756036) v2 -- ?+0 0xb6fb000 con 0xb6c0380
+2016-08-11 12:06:14.756227 b2fcd00 25 osd.0 178 heartbeat_check osd.1
+first_tx 2016-08-11 12:01:25.367701 last_tx 2016-08-11 12:06:14.756036
+last_rx_back 2016-08-11 12:06:11.194593 last_rx_front 2016-08-11
+12:06:11.194593
+2016-08-11 12:06:14.756251 b2fcd00 25 osd.0 178 heartbeat_check osd.2
+first_tx 2016-08-11 12:01:27.704062 last_tx 2016-08-11 12:06:14.756036
+last_rx_back 2016-08-11 12:06:11.194593 last_rx_front 2016-08-11
+12:06:11.194593
+2016-08-11 12:06:14.756413 b54a480  1 -- 127.0.0.1:0/13192 <== osd.1
+127.0.0.1:6806/13207 125 ==== osd_ping(ping_reply e178 stamp 2016-08-11
+12:06:14.756036) v2 ==== 47+0+0 (2065282926 0 0) 0xb5d5200 con 0xb4eb3a0
+2016-08-11 12:06:14.756456 b54a480 25 osd.0 178 handle_osd_ping got
+reply from osd.1 first_tx 2016-08-11 12:01:25.367701 last_tx 2016-08-11
+12:06:14.756036 last_rx_back 2016-08-11 12:06:11.194593 -> 2016-08-11
+12:06:14.756036 last_rx_front 2016-08-11 12:06:11.194593
+2016-08-11 12:06:14.756500 b69c900  1 -- 127.0.0.1:0/13192 <== osd.2
+127.0.0.1:6810/13222 124 ==== osd_ping(ping_reply e178 stamp 2016-08-11
+12:06:14.756036) v2 ==== 47+0+0 (2065282926 0 0) 0xb6a8800 con 0xb6c02a0
+2016-08-11 12:06:14.756539 b69c900 25 osd.0 178 handle_osd_ping got
+reply from osd.2 first_tx 2016-08-11 12:01:27.704062 last_tx 2016-08-11
+12:06:14.756036 last_rx_back 2016-08-11 12:06:11.194593 -> 2016-08-11
+12:06:14.756036 last_rx_front 2016-08-11 12:06:11.194593
+2016-08-11 12:06:14.756548 b54a480  1 -- 127.0.0.1:0/13192 <== osd.1
+127.0.0.1:6806/13207 126 ==== osd_ping(you_died e178 stamp 2016-08-11
+12:06:14.756036) v2 ==== 47+0+0 (936251703 0 0) 0xb5d5200 con 0xb4eb3a0
+2016-08-11 12:06:14.756579 b54a000  1 -- 127.0.0.1:0/13192 <== osd.1
+127.0.0.1:6807/13207 125 ==== osd_ping(ping_reply e178 stamp 2016-08-11
+12:06:14.756036) v2 ==== 47+0+0 (2065282926 0 0) 0xb5d5400 con 0xb4eb480
+2016-08-11 12:06:14.756599 b54a480 10 osd.0 178 handle_osd_ping osd.1
+127.0.0.1:6806/13207 says i am down in 178
+2016-08-11 12:06:14.756659 b69c480  1 -- 127.0.0.1:0/13192 <== osd.2
+127.0.0.1:6811/13222 124 ==== osd_ping(ping_reply e178 stamp 2016-08-11
+12:06:14.756036) v2 ==== 47+0+0 (2065282926 0 0) 0xb6ab200 con 0xb6c0380
+2016-08-11 12:06:14.756701 b54a000 25 osd.0 178 handle_osd_ping got
+reply from osd.1 first_tx 2016-08-11 12:01:25.367701 last_tx 2016-08-11
+12:06:14.756036 last_rx_back 2016-08-11 12:06:14.756036 last_rx_front
+2016-08-11 12:06:11.194593 -> 2016-08-11 12:06:14.756036
+2016-08-11 12:06:14.756718 b69c900  1 -- 127.0.0.1:0/13192 <== osd.2
+127.0.0.1:6810/13222 125 ==== osd_ping(you_died e178 stamp 2016-08-11
+12:06:14.756036) v2 ==== 47+0+0 (936251703 0 0) 0xb6a8800 con 0xb6c02a0
+2016-08-11 12:06:14.756752 b69c480 25 osd.0 178 handle_osd_ping got
+reply from osd.2 first_tx 2016-08-11 12:01:27.704062 last_tx 2016-08-11
+12:06:14.756036 last_rx_back 2016-08-11 12:06:14.756036 last_rx_front
+2016-08-11 12:06:11.194593 -> 2016-08-11 12:06:14.756036
+2016-08-11 12:06:14.756786 b54a000  1 -- 127.0.0.1:0/13192 <== osd.1
+127.0.0.1:6807/13207 126 ==== osd_ping(you_died e178 stamp 2016-08-11
+12:06:14.756036) v2 ==== 47+0+0 (936251703 0 0) 0xb5d5400 con 0xb4eb480
+2016-08-11 12:06:14.756810 b69c900 10 osd.0 178 handle_osd_ping osd.2
+127.0.0.1:6810/13222 says i am down in 178
+2016-08-11 12:06:14.756835 b69c480  1 -- 127.0.0.1:0/13192 <== osd.2
+127.0.0.1:6811/13222 125 ==== osd_ping(you_died e178 stamp 2016-08-11
+12:06:14.756036) v2 ==== 47+0+0 (936251703 0 0) 0xb6ab200 con 0xb6c0380
+2016-08-11 12:06:14.756859 b54a000 10 osd.0 178 handle_osd_ping osd.1
+127.0.0.1:6807/13207 says i am down in 178
+2016-08-11 12:06:14.756889 b69c480 10 osd.0 178 handle_osd_ping osd.2
+127.0.0.1:6811/13222 says i am down in 178
+2016-08-11 12:06:16.472456 b2fcd00 20 osd.0 175 update_osd_stat
+osd_stat(124 GB used, 96486 MB avail, 218 GB total, peers [1,2]/[] op
+hist [])
+2016-08-11 12:06:16.472484 b2fcd00  5 osd.0 178 heartbeat: osd_stat(124
+GB used, 96486 MB avail, 218 GB total, peers [1,2]/[] op hist [])
+2016-08-11 12:06:16.472504 b2fcd00  1 -- 127.0.0.1:0/13192 -->
+127.0.0.1:6806/13207 -- osd_ping(ping e175 stamp 2016-08-11
+12:06:16.472495) v2 -- ?+0 0xb6f8c00 con 0xb4eb3a0
+2016-08-11 12:06:16.472543 b2fcd00  1 -- 127.0.0.1:0/13192 -->
+127.0.0.1:6807/13207 -- osd_ping(ping e175 stamp 2016-08-11
+12:06:16.472495) v2 -- ?+0 0xb6fb800 con 0xb4eb480
+2016-08-11 12:06:16.472569 b2fcd00  1 -- 127.0.0.1:0/13192 -->
+127.0.0.1:6810/13222 -- osd_ping(ping e175 stamp 2016-08-11
+12:06:16.472495) v2 -- ?+0 0xb6fa200 con 0xb6c02a0
+2016-08-11 12:06:16.472649 b2fcd00  1 -- 127.0.0.1:0/13192 -->
+127.0.0.1:6811/13222 -- osd_ping(ping e175 stamp 2016-08-11
+12:06:16.472495) v2 -- ?+0 0xb6fac00 con 0xb6c0380
+2016-08-11 12:06:16.472700 b2fcd00 25 osd.0 178 heartbeat_check osd.1
+first_tx 2016-08-11 12:01:25.367701 last_tx 2016-08-11 12:06:16.472495
+last_rx_back 2016-08-11 12:06:14.756036 last_rx_front 2016-08-11
+12:06:14.756036
+2016-08-11 12:06:16.472735 b2fcd00 25 osd.0 178 heartbeat_check osd.2
+first_tx 2016-08-11 12:01:27.704062 last_tx 2016-08-11 12:06:16.472495
+last_rx_back 2016-08-11 12:06:14.756036 last_rx_front 2016-08-11
+12:06:14.756036
+2016-08-11 12:06:16.472852 b54a480  1 -- 127.0.0.1:0/13192 <== osd.1
+127.0.0.1:6806/13207 127 ==== osd_ping(ping_reply e178 stamp 2016-08-11
+12:06:16.472495) v2 ==== 47+0+0 (2323295095 0 0) 0xb5d5200 con 0xb4eb3a0
+2016-08-11 12:06:16.472924 b54a480 25 osd.0 178 handle_osd_ping got
+reply from osd.1 first_tx 2016-08-11 12:01:25.367701 last_tx 2016-08-11
+12:06:16.472495 last_rx_back 2016-08-11 12:06:14.756036 -> 2016-08-11
+12:06:16.472495 last_rx_front 2016-08-11 12:06:14.756036
+2016-08-11 12:06:16.472936 b54a000  1 -- 127.0.0.1:0/13192 <== osd.1
+127.0.0.1:6807/13207 127 ==== osd_ping(ping_reply e178 stamp 2016-08-11
+12:06:16.472495) v2 ==== 47+0+0 (2323295095 0 0) 0xb5d5400 con 0xb4eb480
+2016-08-11 12:06:16.472987 b69c900  1 -- 127.0.0.1:0/13192 <== osd.2
+127.0.0.1:6810/13222 126 ==== osd_ping(ping_reply e178 stamp 2016-08-11
+12:06:16.472495) v2 ==== 47+0+0 (2323295095 0 0) 0xb6a8800 con 0xb6c02a0
+2016-08-11 12:06:16.472995 b54a000 25 osd.0 178 handle_osd_ping got
+reply from osd.1 first_tx 2016-08-11 12:01:25.367701 last_tx 2016-08-11
+12:06:16.472495 last_rx_back 2016-08-11 12:06:16.472495 last_rx_front
+2016-08-11 12:06:14.756036 -> 2016-08-11 12:06:16.472495
+2016-08-11 12:06:16.473030 b54a480  1 -- 127.0.0.1:0/13192 <== osd.1
+127.0.0.1:6806/13207 128 ==== osd_ping(you_died e178 stamp 2016-08-11
+12:06:16.472495) v2 ==== 47+0+0 (3333229870 0 0) 0xb5d5200 con 0xb4eb3a0
+2016-08-11 12:06:16.473095 b54a000  1 -- 127.0.0.1:0/13192 <== osd.1
+127.0.0.1:6807/13207 128 ==== osd_ping(you_died e178 stamp 2016-08-11
+12:06:16.472495) v2 ==== 47+0+0 (3333229870 0 0) 0xb5d5400 con 0xb4eb480
+2016-08-11 12:06:16.473103 b69c900 25 osd.0 178 handle_osd_ping got
+reply from osd.2 first_tx 2016-08-11 12:01:27.704062 last_tx 2016-08-11
+12:06:16.472495 last_rx_back 2016-08-11 12:06:14.756036 -> 2016-08-11
+12:06:16.472495 last_rx_front 2016-08-11 12:06:14.756036
+2016-08-11 12:06:16.473119 b69c480  1 -- 127.0.0.1:0/13192 <== osd.2
+127.0.0.1:6811/13222 126 ==== osd_ping(ping_reply e178 stamp 2016-08-11
+12:06:16.472495) v2 ==== 47+0+0 (2323295095 0 0) 0xb6ab200 con 0xb6c0380
+2016-08-11 12:06:16.473164 b69c480 25 osd.0 178 handle_osd_ping got
+reply from osd.2 first_tx 2016-08-11 12:01:27.704062 last_tx 2016-08-11
+12:06:16.472495 last_rx_back 2016-08-11 12:06:16.472495 last_rx_front
+2016-08-11 12:06:14.756036 -> 2016-08-11 12:06:16.472495
+2016-08-11 12:06:16.473189 b69c900  1 -- 127.0.0.1:0/13192 <== osd.2
+127.0.0.1:6810/13222 127 ==== osd_ping(you_died e178 stamp 2016-08-11
+12:06:16.472495) v2 ==== 47+0+0 (3333229870 0 0) 0xb6a8800 con 0xb6c02a0
+2016-08-11 12:06:16.473206 b54a000 10 osd.0 178 handle_osd_ping osd.1
+127.0.0.1:6807/13207 says i am down in 178
+2016-08-11 12:06:16.473240 b54a480 10 osd.0 178 handle_osd_ping osd.1
+127.0.0.1:6806/13207 says i am down in 178
+2016-08-11 12:06:16.473273 b69c900 10 osd.0 178 handle_osd_ping osd.2
+127.0.0.1:6810/13222 says i am down in 178
+2016-08-11 12:06:16.473286 b69c480  1 -- 127.0.0.1:0/13192 <== osd.2
+127.0.0.1:6811/13222 127 ==== osd_ping(you_died e178 stamp 2016-08-11
+12:06:16.472495) v2 ==== 47+0+0 (3333229870 0 0) 0xb6ab200 con 0xb6c0380
+2016-08-11 12:06:16.473351 b69c480 10 osd.0 178 handle_osd_ping osd.2
+127.0.0.1:6811/13222 says i am down in 178
+2016-08-11 12:06:17.050885 b2f8400 10 monclient: tick
+2016-08-11 12:06:17.050921 b2f8400 10 monclient: _check_auth_rotating
+have uptodate secrets (they expire after 2016-08-11 12:05:47.050916)
+2016-08-11 12:06:18.020807 b267600 20
+filestore(/usr/srcs/Ceph/work/ceph/build/src/test/testdir/test-7202/dev/osd0)
+sync_entry woke after 5.173601
+2016-08-11 12:06:18.020836 b267600 10 journal commit_start
+max_applied_seq 633, open_ops 0
+2016-08-11 12:06:18.020841 b267600 10 journal commit_start blocked, all
+open_ops have completed
+2016-08-11 12:06:18.020845 b267600 10 journal commit_start nothing to do
+2016-08-11 12:06:18.020850 b267600 10 journal commit_start
+2016-08-11 12:06:18.020865 b267600 20
+filestore(/usr/srcs/Ceph/work/ceph/build/src/test/testdir/test-7202/dev/osd0)
+sync_entry waiting for max_interval 5.000000
+2016-08-11 12:06:19.582028 b0afa80 10 osd.0.objecter tick
+
