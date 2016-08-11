@@ -1,114 +1,290 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: RE: Delayed start of OSDs with systemd to prevent slowdowns
-Date: Thu, 11 Aug 2016 13:15:44 +0200 (CEST)
-Message-ID: <205555697.2385.1470914144218@ox.pcextreme.nl>
-References: <97824899.2313.1470818261025@ox.pcextreme.nl>
- <CABZ+qqnX0k_0SvoM3bTLAL0q2z-pmGt4AnUpsd126vKOFnZU9Q@mail.gmail.com>
- <CABZ+qq=S4ay1475BuR2AD2qhYmq279oKazGAKJG9ti-9pwPzug@mail.gmail.com>
- <CABZ+qqmNi63on6Gipi5uhnL1X9e_erTwXHZt6cSw5XfkmoVaYA@mail.gmail.com>
- <CABZ+qqnH0EK0bYc0xm6329+3WGk81GKb1OFR_9+No05bsAB5qg@mail.gmail.com>
- <CABZ+qqmizdT9mpft9TkT87ygS0jJv=9NBipFVuS37dW4a2JvTw@mail.gmail.com>
- <1156162690.2373.1470912834230@ox.pcextreme.nl>
- <82ab0bb0.AEEAE5enJZIAAAAAAAAAAF2Jla4AADNJBWwAAAAAAACRXwBXrFuo@mailjet.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: Bluestore different allocator performance Vs FileStore
+Date: Thu, 11 Aug 2016 06:24:42 -0500
+Message-ID: <c7ecb9ee-e402-e79c-e58b-428a298370b5@redhat.com>
+References: <BL2PR02MB211554DBEC8F344E465BAFE5F41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608102125270.17770@piezo.us.to>
+ <BL2PR02MB2115CB5D9E89815706293EBBF41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608102242590.17762@piezo.us.to>
+ <BLUPR0201MB15248A827640A2C8B2119C98E81D0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <CY1PR0201MB1820E86B7587927ED23C055A851E0@CY1PR0201MB1820.namprd02.prod.outlook.com>
+ <BL2PR02MB21158A97201C01072BFC27F5F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:39206 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752147AbcHKLPu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 07:15:50 -0400
-In-Reply-To: <82ab0bb0.AEEAE5enJZIAAAAAAAAAAF2Jla4AADNJBWwAAAAAAACRXwBXrFuo@mailjet.com>
+Received: from mx1.redhat.com ([209.132.183.28]:40864 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750828AbcHKLYq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 11 Aug 2016 07:24:46 -0400
+In-Reply-To: <BL2PR02MB21158A97201C01072BFC27F5F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>, nick@fisk.me.uk
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Ramesh Chander <Ramesh.Chander@sandisk.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Ben England <bengland@redhat.com>
 
+Ben England added parallel OSD creation to CBT a while back which 
+greatly speed up cluster creation time (not just for the bitmap 
+alloctaor).  I'm not sure if ceph-ansible creates OSDs in parallel, but 
+if not he might have some insights into how easy it would be to improve it.
 
-> Op 11 augustus 2016 om 13:04 schreef Nick Fisk <nick@fisk.me.uk>:
-> 
-> 
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wido den Hollander
-> > Sent: 11 August 2016 11:54
-> > To: Dan van der Ster <dan@vanderster.com>
-> > Cc: ceph-devel <ceph-devel@vger.kernel.org>
-> > Subject: Re: Delayed start of OSDs with systemd to prevent slowdowns
-> > 
-> > 
-> > > Op 11 augustus 2016 om 1:05 schreef Dan van der Ster <dan@vanderster.com>:
-> > >
-> > >
-> > > Hi Wido,
-> > >
-> > > I can't help you with the systemd foo, but I have two quick remarks ...
-> > >
-> > 
-> > Nobody seems to be able :) systemd is new to everybody.
-> > 
-> > > 1. I've always thought that this was a nice feature of systemd... To
-> > > get the osds booted and online as quickly as possible. And we've not
-> > > seen the peering issues you described.
-> > >
-> > 
-> > Yes, it's a nice feature. But these machines have 24 OSDs on a Dual Xeon E5 and the have a difficult time in coming up.
-> 
-> Would something like this do what you want?
-> 
-> https://www.freedesktop.org/software/systemd/man/systemd.timer.html#RandomizedDelaySec=
-> 
-> You have to set up a system timer for the service, a bit of research on that is probably needed.
-> 
+Mark
 
-Good pointer! I'll test with that a bit and report back. Might take a while as I'm traveling a lot these weeks.
-
-Wido
-
-> I've found the delay seems to grow with the size of the OSD as well. Ie 6TB disks take a lot longer to start up than 2TB ones. 
-> 
-> > 
-> > Have to note that it's a mixed 0.94.7 <> 10.2.2 cluster, so it might be something there.
-> > 
-> > > 2. The crush weight change shouldn't cause problems, if the weight
-> > > isn't actually changing. IIRC it shouldn't even change the osdmap if
-> > > the value doesn't change.
-> > >
-> > 
-> > True, my bad indeed. That doesn't trigger a change, but it keeps the MONs busy however.
-> > 
-> > Wido
-> > 
-> > > Cheers, Dan
-> > >
-> > >
-> > > On 10 Aug 2016 11:01 a.m., "Wido den Hollander" <wido@42on.com> wrote:
-> > > >
-> > > > Hi,
-> > > >
-> > > > Currently with the systemd design a booting system will start all
-> > > > OSDs at
-> > > the same time. This means that a cluster suddenly gets a bunch of
-> > > CRUSH updates (if update on start is enabled), booting OSDs and PGs
-> > > which go into peering state.
-> > > >
-> > > > My systemd-foo isn't that good, but I was wondering if there is a
-> > > > way to
-> > > modify ceph-osd.target in such a way that it doesn't start all the
-> > > OSDs in parallel?
-> > > >
-> > > > I would like 1 or maybe 2 OSDs to start at the same time with a
-> > > > delay of
-> > > 120 seconds in between. This way the boot will take longer, but the
-> > > impact on the cluster will be less.
-> > > >
-> > > > Any ideas on how we might achieve this with systemd?
-> > > >
-> > > > Wido
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe
-> > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More
-> > majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 08/11/2016 02:11 AM, Somnath Roy wrote:
+> Yes, we can create OSDs in parallel but I am not sure how many people are creating cluster like that as ceph-deploy end there is no interface for that.
+> FYI, we have introduced some parallelism in SanDisk wrapper script for installer based on ceph-deploy.
+> I don't think even with all these parallel OSD creation, this problem will go away but for sure will be reduced  a bit as we have seen in case of OSD start time since it is inherently parallel.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Ramesh Chander
+> Sent: Wednesday, August 10, 2016 11:07 PM
+> To: Allen Samuels; Sage Weil; Somnath Roy
+> Cc: ceph-devel
+> Subject: RE: Bluestore different allocator performance Vs FileStore
+>
+> Somnath,
+>
+> Basically mkfs time has increased from 7.5 seconds (2min / 16) to 2 minutes ( 32 / 16).
+>
+> But is there a reason you should create osds in serial? I think for mmultiple osds mkfs can happen in parallel?
+>
+> As a fix I am looking to batch multiple insert_free calls for now. If still that does not help, thinking of doing insert_free on different part of device in parallel.
+>
+> -Ramesh
+>
+>> -----Original Message-----
+>> From: Ramesh Chander
+>> Sent: Thursday, August 11, 2016 10:04 AM
+>> To: Allen Samuels; Sage Weil; Somnath Roy
+>> Cc: ceph-devel
+>> Subject: RE: Bluestore different allocator performance Vs FileStore
+>>
+>> I think insert_free is limited by speed of function clear_bits here.
+>>
+>> Though set_bits and clear_bits have same logic except one sets and
+>> another clears. Both of these does 64 bits (bitmap size) at a time.
+>>
+>> I am not sure if doing memset will make it faster. But if we can do it
+>> for group of bitmaps, then it might help.
+>>
+>> I am looking in to code if we can handle mkfs and osd mount in special
+>> way to make it faster.
+>>
+>> If I don't find an easy fix, we can go to path of deferring init to
+>> later stage as and when required.
+>>
+>> -Ramesh
+>>
+>>> -----Original Message-----
+>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>>> owner@vger.kernel.org] On Behalf Of Allen Samuels
+>>> Sent: Thursday, August 11, 2016 4:28 AM
+>>> To: Sage Weil; Somnath Roy
+>>> Cc: ceph-devel
+>>> Subject: RE: Bluestore different allocator performance Vs FileStore
+>>>
+>>> We always knew that startup time for bitmap stuff would be somewhat
+>>> longer. Still, the existing implementation can be speeded up
+>>> significantly. The code in BitMapZone::set_blocks_used isn't very
+>>> optimized. Converting it to use memset for all but the first/last
+>>> bytes
+>> should significantly speed it up.
+>>>
+>>>
+>>> Allen Samuels
+>>> SanDisk |a Western Digital brand
+>>> 2880 Junction Avenue, San Jose, CA 95134
+>>> T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
+>>>
+>>>
+>>>> -----Original Message-----
+>>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>>>> owner@vger.kernel.org] On Behalf Of Sage Weil
+>>>> Sent: Wednesday, August 10, 2016 3:44 PM
+>>>> To: Somnath Roy <Somnath.Roy@sandisk.com>
+>>>> Cc: ceph-devel <ceph-devel@vger.kernel.org>
+>>>> Subject: RE: Bluestore different allocator performance Vs
+>>>> FileStore
+>>>>
+>>>> On Wed, 10 Aug 2016, Somnath Roy wrote:
+>>>>> << inline with [Somnath]
+>>>>>
+>>>>> -----Original Message-----
+>>>>> From: Sage Weil [mailto:sage@newdream.net]
+>>>>> Sent: Wednesday, August 10, 2016 2:31 PM
+>>>>> To: Somnath Roy
+>>>>> Cc: ceph-devel
+>>>>> Subject: Re: Bluestore different allocator performance Vs
+>>>>> FileStore
+>>>>>
+>>>>> On Wed, 10 Aug 2016, Somnath Roy wrote:
+>>>>>> Hi, I spent some time on evaluating different Bluestore
+>>>>>> allocator and freelist performance. Also, tried to gaze the
+>>>>>> performance difference of Bluestore and filestore on the
+>>>>>> similar
+>> setup.
+>>>>>>
+>>>>>> Setup:
+>>>>>> --------
+>>>>>>
+>>>>>> 16 OSDs (8TB Flash) across 2 OSD nodes
+>>>>>>
+>>>>>> Single pool and single rbd image of 4TB. 2X replication.
+>>>>>>
+>>>>>> Disabled the exclusive lock feature so that I can run multiple
+>>>>>> write  jobs in
+>>>> parallel.
+>>>>>> rbd_cache is disabled in the client side.
+>>>>>> Each test ran for 15 mins.
+>>>>>>
+>>>>>> Result :
+>>>>>> ---------
+>>>>>>
+>>>>>> Here is the detailed report on this.
+>>>>>>
+>>>>>>
+>>>>
+>>>
+>> https://github.com/somnathr/ceph/blob/6e03a5a41fe2c9b213a610200b2e8a
+>>>>>> 25 0cb05986/Bluestore_allocator_comp.xlsx
+>>>>>>
+>>>>>> Each profile I named based on <allocator>-<freelist> , so in
+>>>>>> the graph for
+>>>> example "stupid-extent" meaning stupid allocator and extent freelist.
+>>>>>>
+>>>>>> I ran the test for each of the profile in the following order
+>>>>>> after creating a
+>>>> fresh rbd image for all the Bluestore test.
+>>>>>>
+>>>>>> 1. 4K RW for 15 min with 16QD and 10 jobs.
+>>>>>>
+>>>>>> 2. 16K RW for 15 min with 16QD and 10 jobs.
+>>>>>>
+>>>>>> 3. 64K RW for 15 min with 16QD and 10 jobs.
+>>>>>>
+>>>>>> 4. 256K RW for 15 min with 16QD and 10 jobs.
+>>>>>>
+>>>>>> The above are non-preconditioned case i.e ran before filling
+>>>>>> up the entire
+>>>> image. The reason is I don't see any reason of filling up the rbd
+>>>> image before like filestore case where it will give stable
+>>>> performance if we fill up the rbd images first. Filling up rbd
+>>>> images in case of filestore will create the files in the filesystem.
+>>>>>>
+>>>>>> 5. Next, I did precondition the 4TB image with 1M seq write.
+>>>>>> This is
+>>>> primarily because I want to load BlueStore with more data.
+>>>>>>
+>>>>>> 6. Ran 4K RW test again (this is called out preconditioned in
+>>>>>> the
+>>>>>> profile) for 15 min
+>>>>>>
+>>>>>> 7. Ran 4K Seq test for similar QD for 15 min
+>>>>>>
+>>>>>> 8. Ran 16K RW test again for 15min
+>>>>>>
+>>>>>> For filestore test, I ran tests after preconditioning the
+>>>>>> entire image
+>> first.
+>>>>>>
+>>>>>> Each sheet on the xls have different block size result , I
+>>>>>> often miss to navigate through the xls sheets , so, thought of
+>>>>>> mentioning here
+>>>>>> :-)
+>>>>>>
+>>>>>> I have also captured the mkfs time , OSD startup time and the
+>>>>>> memory
+>>>> usage after the entire run.
+>>>>>>
+>>>>>> Observation:
+>>>>>> ---------------
+>>>>>>
+>>>>>> 1. First of all, in case of bitmap allocator mkfs time (and
+>>>>>> thus cluster
+>>>> creation time for 16 OSDs) are ~16X slower than stupid allocator
+>>>> and
+>>> filestore.
+>>>> Each OSD creation is taking ~2min or so sometimes and I nailed
+>>>> down the
+>>>> insert_free() function call (marked ****) in the Bitmap allocator
+>>>> is causing that.
+>>>>>>
+>>>>>> 2016-08-05 16:12:40.587148 7f4024d258c0 10 freelist
+>>>>>> enumerate_next start
+>>>>>> 2016-08-05 16:12:40.975539 7f4024d258c0 10 freelist
+>>>>>> enumerate_next
+>>>>>> 0x4663d00000~69959451000
+>>>>>> 2016-08-05 16:12:40.975555 7f4024d258c0 10
+>>>>>> bitmapalloc:init_add_free instance 139913322803328 offset
+>>>>>> 0x4663d00000 length 0x69959451000
+>>>>>> ****2016-08-05 16:12:40.975557 7f4024d258c0 20
+>>>>>> bitmapalloc:insert_free instance 139913322803328 off
+>>>>>> 0x4663d00000 len 0x69959451000****
+>>>>>> ****2016-08-05 16:13:20.748934 7f4024d258c0 10 freelist
+>>>>>> enumerate_next
+>>>>>> end****
+>>>>>> 2016-08-05 16:13:20.748978 7f4024d258c0 10
+>>>>>> bluestore(/var/lib/ceph/osd/ceph-0) _open_alloc loaded 6757 G
+>>>>>> in
+>>>>>> 1 extents
+>>>>>>
+>>>>>> 2016-08-05 16:13:23.438511 7f4024d258c0 20 bluefs _read_random
+>>>>>> read buffered 0x4a14eb~265 of ^A:5242880+5242880
+>>>>>> 2016-08-05 16:13:23.438587 7f4024d258c0 20 bluefs _read_random
+>>>>>> got
+>>>>>> 613
+>>>>>> 2016-08-05 16:13:23.438658 7f4024d258c0 10 freelist
+>>>>>> enumerate_next
+>>>>>> 0x4663d00000~69959451000
+>>>>>> 2016-08-05 16:13:23.438664 7f4024d258c0 10
+>>>>>> bitmapalloc:init_add_free instance 139913306273920 offset
+>>>>>> 0x4663d00000 length 0x69959451000
+>>>>>> *****2016-08-05 16:13:23.438666 7f4024d258c0 20
+>>>>>> bitmapalloc:insert_free instance 139913306273920 off
+>>>>>> 0x4663d00000 len
+>>>>>> 0x69959451000*****
+>>>>>> *****2016-08-05 16:14:03.132914 7f4024d258c0 10 freelist
+>>>>>> enumerate_next end
+>>>>>
+>>>>> I'm not sure there's any easy fix for this. We can amortize it
+>>>>> by feeding
+>>>> space to bluefs slowly (so that we don't have to do all the
+>>>> inserts at once), but I'm not sure that's really better.
+>>>>>
+>>>>> [Somnath] I don't know that part of the code, so, may be a dumb
+>>> question.
+>>>> This is during mkfs() time , so, can't we say to bluefs entire
+>>>> space is free ? I can understand for osd mount and all other cases
+>>>> we need to feed the free space every time.
+>>>>> IMO this is critical to fix as cluster creation time will be
+>>>>> number of OSDs * 2
+>>>> min otherwise. For me creating 16 OSDs cluster is taking ~32min
+>>>> compare to
+>>>> ~2 min for stupid allocator/filestore.
+>>>>> BTW, my drive data partition is ~6.9TB , db partition is ~100G
+>>>>> and WAL is
+>>>> ~1G. I guess the time taking is dependent on data partition size as well (?
+>>>>
+>>>> Well, we're fundamentally limited by the fact that it's a bitmap,
+>>>> and a big chunk of space is "allocated" to bluefs and needs to have 1's set.
+>>>>
+>>>> sage
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>> in the body of a message to majordomo@vger.kernel.org More
+>>> majordomo
+>>>> info at http://vger.kernel.org/majordomo-info.html
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>> in the body of a message to majordomo@vger.kernel.org More
+>> majordomo
+>>> info at http://vger.kernel.org/majordomo-info.html
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
