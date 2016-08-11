@@ -1,332 +1,291 @@
-From: Ben England <bengland@redhat.com>
-Subject: Re: Bluestore different allocator performance Vs FileStore
-Date: Thu, 11 Aug 2016 10:06:53 -0400 (EDT)
-Message-ID: <1065606677.893701.1470924413647.JavaMail.zimbra@redhat.com>
-References: <BL2PR02MB211554DBEC8F344E465BAFE5F41D0@BL2PR02MB2115.namprd02.prod.outlook.com> <alpine.DEB.2.11.1608102125270.17770@piezo.us.to> <BL2PR02MB2115CB5D9E89815706293EBBF41D0@BL2PR02MB2115.namprd02.prod.outlook.com> <alpine.DEB.2.11.1608102242590.17762@piezo.us.to> <BLUPR0201MB15248A827640A2C8B2119C98E81D0@BLUPR0201MB1524.namprd02.prod.outlook.com> <CY1PR0201MB1820E86B7587927ED23C055A851E0@CY1PR0201MB1820.namprd02.prod.outlook.com> <BL2PR02MB21158A97201C01072BFC27F5F41E0@BL2PR02MB2115.namprd02.prod.outlook.com> <c7ecb9ee-e402-e79c-e58b-428a298370b5@redhat.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Bluestore StoreTest.Synthetic is broken
+Date: Thu, 11 Aug 2016 17:18:05 +0300
+Message-ID: <955577e2-f123-37e8-9e36-64baa967bc43@mirantis.com>
+References: <cb5fdaad-fefe-f221-cbe1-00c487e19d20@mirantis.com>
+ <97da0ab9-e9c7-0bf4-868e-702b9f391bb5@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:37728 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932303AbcHKOG5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 10:06:57 -0400
-In-Reply-To: <c7ecb9ee-e402-e79c-e58b-428a298370b5@redhat.com>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:36919 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750832AbcHKOSM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 10:18:12 -0400
+Received: by mail-wm0-f50.google.com with SMTP id i5so19601796wmg.0
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Aug 2016 07:18:11 -0700 (PDT)
+Received: from [127.0.0.1] ([91.218.144.129])
+        by smtp.googlemail.com with ESMTPSA id h62sm600333lji.28.2016.08.11.07.18.09
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 11 Aug 2016 07:18:09 -0700 (PDT)
+In-Reply-To: <97da0ab9-e9c7-0bf4-868e-702b9f391bb5@mirantis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Ramesh Chander <Ramesh.Chander@sandisk.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>, Sebastien Han <shan@redhat.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-cc'ing Sebastien Han... 
+Answering to myself.
 
-does "ceph-disk prepare" support completely parallel operation?
+The root cause is as follows:
 
-The only CBT constraint on parallel OSD creation that I'm aware of is that CBT had to serialize "ceph osd create" command, so that it knew what OSD number it created and what UUID it mapped to.  But even here it could have gotten the osd number from "ceph osd create" output.  Since this only takes 1 second, this was not a problem.  Everything else can run in parallel, and does, in CBT.  For any one OSD, the creation steps are serialized with a OSD creation thread, but OSDs are created in parallel once "ceph osd create" has run.  Ceph CBT does not use ceph-disk, so there is a chance that ceph-ansible, which depends on ceph-disk, has different constraints.
+store_test calls collection_list with pnext = NULL.
 
-ceph-ansible operates in parallel across OSD hosts, but within an OSD host it's one OSD at a time at present.   The bigger your OSD host count, the more parallelized this can be, although ansible has a default fan-out of 5 hosts, which isn't enough - I run it with much higher fan-out and haven't seen any problems so far.
+And pnext is assigned to an address of static_next at Bluestore.cc:4070.
 
-For example, for a server with 36 drives, this is a bit irritating.  As Somnath said, the mkfs command is the biggest consumer of time.  (i.e. ceph-disk prepare).  But at least it is bounded by the number of drives per server.  See this line in ceph-ansible that runs ceph-disk prepare.
+The issue is that static_next is defined within a local scope while 
+final output for *pnext happens out of this scope.
 
-https://github.com/ceph/ceph-ansible/blob/master/roles/ceph-osd/tasks/scenarios/raw_multi_journal.yml#L6
+Will publish a PR with the fix shortly.
 
-Ansible does appear to have some support for background tasks, See bottom of this page.  
 
-http://docs.ansible.com/ansible/playbooks_async.html
+Thanks,
 
-Sebastien, is there some way to fire up "ceph-disk prepare" for each device as separate asynchronous tasks and then wait for them all to complete before proceeding?  In the worst case, ceph-ansible could launch a shell script that would background the ceph-disk prepare processes within a host, and then wait for all of them to complete.  I'll try to follow up on this, was not sure whether this was still an issue in bluestore until I saw this e-mail.
+Igor
 
--ben
 
------ Original Message -----
-> From: "Mark Nelson" <mnelson@redhat.com>
-> To: "Somnath Roy" <Somnath.Roy@sandisk.com>, "Ramesh Chander" <Ramesh.Chander@sandisk.com>, "Allen Samuels"
-> <Allen.Samuels@sandisk.com>, "Sage Weil" <sage@newdream.net>
-> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "Ben England" <bengland@redhat.com>
-> Sent: Thursday, August 11, 2016 7:24:42 AM
-> Subject: Re: Bluestore different allocator performance Vs FileStore
-> 
-> Ben England added parallel OSD creation to CBT a while back which
-> greatly speed up cluster creation time (not just for the bitmap
-> alloctaor).  I'm not sure if ceph-ansible creates OSDs in parallel, but
-> if not he might have some insights into how easy it would be to improve it.
-> 
-> Mark
-> 
-> On 08/11/2016 02:11 AM, Somnath Roy wrote:
-> > Yes, we can create OSDs in parallel but I am not sure how many people are
-> > creating cluster like that as ceph-deploy end there is no interface for
-> > that.
-> > FYI, we have introduced some parallelism in SanDisk wrapper script for
-> > installer based on ceph-deploy.
-> > I don't think even with all these parallel OSD creation, this problem will
-> > go away but for sure will be reduced  a bit as we have seen in case of OSD
-> > start time since it is inherently parallel.
-> >
-> > Thanks & Regards
-> > Somnath
-> >
-> > -----Original Message-----
-> > From: Ramesh Chander
-> > Sent: Wednesday, August 10, 2016 11:07 PM
-> > To: Allen Samuels; Sage Weil; Somnath Roy
-> > Cc: ceph-devel
-> > Subject: RE: Bluestore different allocator performance Vs FileStore
-> >
-> > Somnath,
-> >
-> > Basically mkfs time has increased from 7.5 seconds (2min / 16) to 2 minutes
-> > ( 32 / 16).
-> >
-> > But is there a reason you should create osds in serial? I think for
-> > mmultiple osds mkfs can happen in parallel?
-> >
-> > As a fix I am looking to batch multiple insert_free calls for now. If still
-> > that does not help, thinking of doing insert_free on different part of
-> > device in parallel.
-> >
-> > -Ramesh
-> >
-> >> -----Original Message-----
-> >> From: Ramesh Chander
-> >> Sent: Thursday, August 11, 2016 10:04 AM
-> >> To: Allen Samuels; Sage Weil; Somnath Roy
-> >> Cc: ceph-devel
-> >> Subject: RE: Bluestore different allocator performance Vs FileStore
-> >>
-> >> I think insert_free is limited by speed of function clear_bits here.
-> >>
-> >> Though set_bits and clear_bits have same logic except one sets and
-> >> another clears. Both of these does 64 bits (bitmap size) at a time.
-> >>
-> >> I am not sure if doing memset will make it faster. But if we can do it
-> >> for group of bitmaps, then it might help.
-> >>
-> >> I am looking in to code if we can handle mkfs and osd mount in special
-> >> way to make it faster.
-> >>
-> >> If I don't find an easy fix, we can go to path of deferring init to
-> >> later stage as and when required.
-> >>
-> >> -Ramesh
-> >>
-> >>> -----Original Message-----
-> >>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> >>> owner@vger.kernel.org] On Behalf Of Allen Samuels
-> >>> Sent: Thursday, August 11, 2016 4:28 AM
-> >>> To: Sage Weil; Somnath Roy
-> >>> Cc: ceph-devel
-> >>> Subject: RE: Bluestore different allocator performance Vs FileStore
-> >>>
-> >>> We always knew that startup time for bitmap stuff would be somewhat
-> >>> longer. Still, the existing implementation can be speeded up
-> >>> significantly. The code in BitMapZone::set_blocks_used isn't very
-> >>> optimized. Converting it to use memset for all but the first/last
-> >>> bytes
-> >> should significantly speed it up.
-> >>>
-> >>>
-> >>> Allen Samuels
-> >>> SanDisk |a Western Digital brand
-> >>> 2880 Junction Avenue, San Jose, CA 95134
-> >>> T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
-> >>>
-> >>>
-> >>>> -----Original Message-----
-> >>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> >>>> owner@vger.kernel.org] On Behalf Of Sage Weil
-> >>>> Sent: Wednesday, August 10, 2016 3:44 PM
-> >>>> To: Somnath Roy <Somnath.Roy@sandisk.com>
-> >>>> Cc: ceph-devel <ceph-devel@vger.kernel.org>
-> >>>> Subject: RE: Bluestore different allocator performance Vs
-> >>>> FileStore
-> >>>>
-> >>>> On Wed, 10 Aug 2016, Somnath Roy wrote:
-> >>>>> << inline with [Somnath]
-> >>>>>
-> >>>>> -----Original Message-----
-> >>>>> From: Sage Weil [mailto:sage@newdream.net]
-> >>>>> Sent: Wednesday, August 10, 2016 2:31 PM
-> >>>>> To: Somnath Roy
-> >>>>> Cc: ceph-devel
-> >>>>> Subject: Re: Bluestore different allocator performance Vs
-> >>>>> FileStore
-> >>>>>
-> >>>>> On Wed, 10 Aug 2016, Somnath Roy wrote:
-> >>>>>> Hi, I spent some time on evaluating different Bluestore
-> >>>>>> allocator and freelist performance. Also, tried to gaze the
-> >>>>>> performance difference of Bluestore and filestore on the
-> >>>>>> similar
-> >> setup.
-> >>>>>>
-> >>>>>> Setup:
-> >>>>>> --------
-> >>>>>>
-> >>>>>> 16 OSDs (8TB Flash) across 2 OSD nodes
-> >>>>>>
-> >>>>>> Single pool and single rbd image of 4TB. 2X replication.
-> >>>>>>
-> >>>>>> Disabled the exclusive lock feature so that I can run multiple
-> >>>>>> write  jobs in
-> >>>> parallel.
-> >>>>>> rbd_cache is disabled in the client side.
-> >>>>>> Each test ran for 15 mins.
-> >>>>>>
-> >>>>>> Result :
-> >>>>>> ---------
-> >>>>>>
-> >>>>>> Here is the detailed report on this.
-> >>>>>>
-> >>>>>>
-> >>>>
-> >>>
-> >> https://github.com/somnathr/ceph/blob/6e03a5a41fe2c9b213a610200b2e8a
-> >>>>>> 25 0cb05986/Bluestore_allocator_comp.xlsx
-> >>>>>>
-> >>>>>> Each profile I named based on <allocator>-<freelist> , so in
-> >>>>>> the graph for
-> >>>> example "stupid-extent" meaning stupid allocator and extent freelist.
-> >>>>>>
-> >>>>>> I ran the test for each of the profile in the following order
-> >>>>>> after creating a
-> >>>> fresh rbd image for all the Bluestore test.
-> >>>>>>
-> >>>>>> 1. 4K RW for 15 min with 16QD and 10 jobs.
-> >>>>>>
-> >>>>>> 2. 16K RW for 15 min with 16QD and 10 jobs.
-> >>>>>>
-> >>>>>> 3. 64K RW for 15 min with 16QD and 10 jobs.
-> >>>>>>
-> >>>>>> 4. 256K RW for 15 min with 16QD and 10 jobs.
-> >>>>>>
-> >>>>>> The above are non-preconditioned case i.e ran before filling
-> >>>>>> up the entire
-> >>>> image. The reason is I don't see any reason of filling up the rbd
-> >>>> image before like filestore case where it will give stable
-> >>>> performance if we fill up the rbd images first. Filling up rbd
-> >>>> images in case of filestore will create the files in the filesystem.
-> >>>>>>
-> >>>>>> 5. Next, I did precondition the 4TB image with 1M seq write.
-> >>>>>> This is
-> >>>> primarily because I want to load BlueStore with more data.
-> >>>>>>
-> >>>>>> 6. Ran 4K RW test again (this is called out preconditioned in
-> >>>>>> the
-> >>>>>> profile) for 15 min
-> >>>>>>
-> >>>>>> 7. Ran 4K Seq test for similar QD for 15 min
-> >>>>>>
-> >>>>>> 8. Ran 16K RW test again for 15min
-> >>>>>>
-> >>>>>> For filestore test, I ran tests after preconditioning the
-> >>>>>> entire image
-> >> first.
-> >>>>>>
-> >>>>>> Each sheet on the xls have different block size result , I
-> >>>>>> often miss to navigate through the xls sheets , so, thought of
-> >>>>>> mentioning here
-> >>>>>> :-)
-> >>>>>>
-> >>>>>> I have also captured the mkfs time , OSD startup time and the
-> >>>>>> memory
-> >>>> usage after the entire run.
-> >>>>>>
-> >>>>>> Observation:
-> >>>>>> ---------------
-> >>>>>>
-> >>>>>> 1. First of all, in case of bitmap allocator mkfs time (and
-> >>>>>> thus cluster
-> >>>> creation time for 16 OSDs) are ~16X slower than stupid allocator
-> >>>> and
-> >>> filestore.
-> >>>> Each OSD creation is taking ~2min or so sometimes and I nailed
-> >>>> down the
-> >>>> insert_free() function call (marked ****) in the Bitmap allocator
-> >>>> is causing that.
-> >>>>>>
-> >>>>>> 2016-08-05 16:12:40.587148 7f4024d258c0 10 freelist
-> >>>>>> enumerate_next start
-> >>>>>> 2016-08-05 16:12:40.975539 7f4024d258c0 10 freelist
-> >>>>>> enumerate_next
-> >>>>>> 0x4663d00000~69959451000
-> >>>>>> 2016-08-05 16:12:40.975555 7f4024d258c0 10
-> >>>>>> bitmapalloc:init_add_free instance 139913322803328 offset
-> >>>>>> 0x4663d00000 length 0x69959451000
-> >>>>>> ****2016-08-05 16:12:40.975557 7f4024d258c0 20
-> >>>>>> bitmapalloc:insert_free instance 139913322803328 off
-> >>>>>> 0x4663d00000 len 0x69959451000****
-> >>>>>> ****2016-08-05 16:13:20.748934 7f4024d258c0 10 freelist
-> >>>>>> enumerate_next
-> >>>>>> end****
-> >>>>>> 2016-08-05 16:13:20.748978 7f4024d258c0 10
-> >>>>>> bluestore(/var/lib/ceph/osd/ceph-0) _open_alloc loaded 6757 G
-> >>>>>> in
-> >>>>>> 1 extents
-> >>>>>>
-> >>>>>> 2016-08-05 16:13:23.438511 7f4024d258c0 20 bluefs _read_random
-> >>>>>> read buffered 0x4a14eb~265 of ^A:5242880+5242880
-> >>>>>> 2016-08-05 16:13:23.438587 7f4024d258c0 20 bluefs _read_random
-> >>>>>> got
-> >>>>>> 613
-> >>>>>> 2016-08-05 16:13:23.438658 7f4024d258c0 10 freelist
-> >>>>>> enumerate_next
-> >>>>>> 0x4663d00000~69959451000
-> >>>>>> 2016-08-05 16:13:23.438664 7f4024d258c0 10
-> >>>>>> bitmapalloc:init_add_free instance 139913306273920 offset
-> >>>>>> 0x4663d00000 length 0x69959451000
-> >>>>>> *****2016-08-05 16:13:23.438666 7f4024d258c0 20
-> >>>>>> bitmapalloc:insert_free instance 139913306273920 off
-> >>>>>> 0x4663d00000 len
-> >>>>>> 0x69959451000*****
-> >>>>>> *****2016-08-05 16:14:03.132914 7f4024d258c0 10 freelist
-> >>>>>> enumerate_next end
-> >>>>>
-> >>>>> I'm not sure there's any easy fix for this. We can amortize it
-> >>>>> by feeding
-> >>>> space to bluefs slowly (so that we don't have to do all the
-> >>>> inserts at once), but I'm not sure that's really better.
-> >>>>>
-> >>>>> [Somnath] I don't know that part of the code, so, may be a dumb
-> >>> question.
-> >>>> This is during mkfs() time , so, can't we say to bluefs entire
-> >>>> space is free ? I can understand for osd mount and all other cases
-> >>>> we need to feed the free space every time.
-> >>>>> IMO this is critical to fix as cluster creation time will be
-> >>>>> number of OSDs * 2
-> >>>> min otherwise. For me creating 16 OSDs cluster is taking ~32min
-> >>>> compare to
-> >>>> ~2 min for stupid allocator/filestore.
-> >>>>> BTW, my drive data partition is ~6.9TB , db partition is ~100G
-> >>>>> and WAL is
-> >>>> ~1G. I guess the time taking is dependent on data partition size as well
-> >>>> (?
-> >>>>
-> >>>> Well, we're fundamentally limited by the fact that it's a bitmap,
-> >>>> and a big chunk of space is "allocated" to bluefs and needs to have 1's
-> >>>> set.
-> >>>>
-> >>>> sage
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> >>>> in the body of a message to majordomo@vger.kernel.org More
-> >>> majordomo
-> >>>> info at http://vger.kernel.org/majordomo-info.html
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> >>> in the body of a message to majordomo@vger.kernel.org More
-> >> majordomo
-> >>> info at http://vger.kernel.org/majordomo-info.html
-> > PLEASE NOTE: The information contained in this electronic mail message is
-> > intended only for the use of the designated recipient(s) named above. If
-> > the reader of this message is not the intended recipient, you are hereby
-> > notified that you have received this message in error and that any review,
-> > dissemination, distribution, or copying of this message is strictly
-> > prohibited. If you have received this communication in error, please
-> > notify the sender by telephone or e-mail (as shown above) immediately and
-> > destroy any and all copies of this message in your possession (whether
-> > hard copies or electronically stored copies).
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> 
+On 11.08.2016 16:34, Igor Fedotov wrote:
+> Better output from GDB
+>
+> Program received signal SIGSEGV, Segmentation fault.
+> append_out_escaped (in="", out=out@entry=0x7fffffffcb70) at 
+> /home/ifed/ceph/ceph_my4/src/common/hobject.cc:207
+> 207        if (*i == '%' || *i == ':' || *i == '/' || *i < 32 || *i >= 
+> 127) {
+> (gdb) bt
+> #0  append_out_escaped (in="", out=out@entry=0x7fffffffcb70) at 
+> /home/ifed/ceph/ceph_my4/src/common/hobject.cc:207
+> #1  0x00000000008cc2c9 in operator<< (out=..., o=...) at 
+> /home/ifed/ceph/ceph_my4/src/common/hobject.cc:258
+> #2  0x00000000008cc7f7 in operator<< (out=..., o=...) at 
+> /home/ifed/ceph/ceph_my4/src/common/hobject.cc:551
+> #3  0x000000000078b817 in BlueStore::collection_list 
+> (this=this@entry=0x92742f0, c_=..., start=..., end=..., 
+> sort_bitwise=sort_bitwise@entry=true,
+>     max=max@entry=10, ls=0x7fffffffd2a0, pnext=0x7fffffffcee0) at 
+> /home/ifed/ceph/ceph_my4/src/os/bluestore/BlueStore.cc:4219
+> #4  0x000000000079465b in BlueStore::collection_list (this=0x92742f0, 
+> cid=..., start=..., end=..., sort_bitwise=sort_bitwise@entry=true,
+>     max=max@entry=10, ls=0x7fffffffd2a0, pnext=0x0) at 
+> /home/ifed/ceph/ceph_my4/src/os/bluestore/BlueStore.cc:4088
+> #5  0x000000000069210b in SyntheticWorkloadState::shutdown 
+> (this=0x7fffffffd7f0) at 
+> /home/ifed/ceph/ceph_my4/src/test/objectstore/store_test.cc:3097
+> #6  0x0000000000657ac4 in doSyntheticTest (store=..., 
+> max_obj=<optimized out>, max_wr=<optimized out>, align=<optimized out>)
+>     at /home/ifed/ceph/ceph_my4/src/test/objectstore/store_test.cc:3761
+> #7  0x0000000000a07cb3 in 
+> HandleSehExceptionsInMethodIfSupported<testing::Test, void> 
+> (location=0xc09697 "the test body", method=<optimized out>,
+>     object=<optimized out>) at 
+> /home/ifed/ceph/ceph_my4/src/googletest/googletest/src/gtest.cc:2402
+> #8 
+> testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, 
+> void> (object=object@entry=0x9159ad0,
+>     method=(void (testing::Test::*)(testing::Test * const)) 0x6584e0 
+> <StoreTest_Synthetic_Test::TestBody()>,
+>     location=location@entry=0xc09697 "the test body") at 
+> /home/ifed/ceph/ceph_my4/src/googletest/googletest/src/gtest.cc:2438
+> #9  0x00000000009f74da in testing::Test::Run (this=0x9159ad0) at 
+> /home/ifed/ceph/ceph_my4/src/googletest/googletest/src/gtest.cc:2475
+>
+> (gdb) f 2
+> #2  0x00000000008cc7f7 in operator<< (out=..., o=...) at 
+> /home/ifed/ceph/ceph_my4/src/common/hobject.cc:551
+> 551      out << '#' << o.hobj << '#';
+> (gdb) p o.hobject
+> (gdb) p o
+> $8 = (const ghobject_t &) @0x7fffffffcee0: {hobj = {oid = {name = ""}, 
+> snap = {val = 18446744073709551614}, hash = 192, max = false,
+>     nibblewise_key_cache = 201326592, hash_reverse_bits = 50331648, 
+> static POOL_META = -1, static POOL_TEMP_START = -2, pool = 555, nspace 
+> = "",
+>     key = ""}, generation = 1, shard_id = {id = -1 '\377', static 
+> NO_SHARD = {id = -1 '\377',
+>       static NO_SHARD = <same as static member of an already seen 
+> type>}}, max = false, static NO_GEN = 18446744073709551615}
+> (gdb) p o.hobj
+> $9 = {oid = {name = ""}, snap = {val = 18446744073709551614}, hash = 
+> 192, max = false, nibblewise_key_cache = 201326592,
+>   hash_reverse_bits = 50331648, static POOL_META = -1, static 
+> POOL_TEMP_START = -2, pool = 555, nspace = "", key = ""}
+> (gdb) p o.hobj.oid.name
+> $10 = ""
+> (gdb) p o.hobj.oid.name.size()
+> $11 = 140737309080040
+>
+> logging immediately after the  assignement *pnext =  oid shows no 
+> corruption though...
+>
+>
+> On 11.08.2016 16:25, Igor Fedotov wrote:
+>> Hi All!
+>>
+>> I'm observing following crash when running Bluestore 
+>> StoreTest.Synthetic test casr( ceph_test_objectstore 
+>> --gtest_filter=ObjectStore/StoreTest.Synthetic/2 ):
+>>
+>>
+>>   -20> 2016-08-11 16:09:30.155436 7f6c1437b680 15 
+>> bluestore(store_test_temp_dir) collection_list 555.0_head start GHMIN 
+>> end GHMAX max 10
+>>    -19> 2016-08-11 16:09:30.155443 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list range 
+>> '--'0x7ffffffffffffdd300000000'.' to '--'0x7ff
+>> ffffffffffdd3ffffffff':' and '--'0x800000000000022b00000000'.' to 
+>> '--'0x800000000000022bffffffff':' start GHMIN
+>>    -18> 2016-08-11 16:09:30.155482 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list pend 
+>> '--'0x7ffffffffffffdd3ffffffff':'
+>>    -17> 2016-08-11 16:09:30.155509 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b00000000'.!=OBJ_1049aaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0xff 
+>>
+>> fffffffffffffe0000000000000000 > GHMAX
+>>    -16> 2016-08-11 16:09:30.155515 7f6c1437b680 30 
+>> bluestore(store_test_temp_dir) collection_list switch to non-temp 
+>> namespace
+>>    -15> 2016-08-11 16:09:30.155521 7f6c1437b680 30 
+>> bluestore(store_test_temp_dir) collection_list pend 
+>> '--'0x800000000000022bffffffff':'
+>>    -14> 2016-08-11 16:09:30.155524 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b00000000'.!=OBJ_1049aaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0xff 
+>>
+>> fffffffffffffe0000000000000000
+>>    -13> 2016-08-11 16:09:30.155536 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b00000000'.!=OBJ_1105aaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0x00 
+>>
+>> 0000005df155b0ffffffffffffffff
+>>    -12> 2016-08-11 16:09:30.155544 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b00000000'.!=OBJ_255aaaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0x000 
+>>
+>> 000007e448de90000000000000000
+>>    -11> 2016-08-11 16:09:30.155555 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b00000000'.!=OBJ_511aaaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0xfff 
+>>
+>> ffffffffffffe0000000000000001
+>>    -10> 2016-08-11 16:09:30.155563 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b00000000'.!=OBJ_767aaaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0x000 
+>>
+>> 000005cab38c60000000000000001
+>>     -9> 2016-08-11 16:09:30.155574 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b01000000'.!=OBJ_127aaaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0x000 
+>>
+>> 0000026f324ba0000000000000000
+>>     -8> 2016-08-11 16:09:30.155584 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b01000000'.!=OBJ_639aaaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0x000 
+>>
+>> 000007365f1ee0000000000000001
+>>     -7> 2016-08-11 16:09:30.155592 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b02000000'.!=OBJ_575aaaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0x000 
+>>
+>> 00000060a14630000000000000000
+>>     -6> 2016-08-11 16:09:30.155601 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b02000000'.!=OBJ_831aaaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0xfff 
+>>
+>> ffffffffffffe0000000000000000
+>>     -5> 2016-08-11 16:09:30.155612 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b03000000 (bnode, skipping)
+>>     -4> 2016-08-11 16:09:30.155617 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b03000000'.!=OBJ_1013aaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0xff 
+>>
+>> fffffffffffffe0000000000000002
+>>     -3> 2016-08-11 16:09:30.155626 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list key 
+>> '--'0x800000000000022b03000000'.!=OBJ_1243aaaaaa
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+>>
+>> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'0x00 
+>>
+>> 0000000c94deb00000000000000000
+>>     -2> 2016-08-11 16:09:30.155631 7f6c1437b680 20 
+>> bluestore(store_test_temp_dir) collection_list reached max 10
+>>     -1> 2016-08-11 16:09:30.155636 7f6c1437b680 20 
+>> bluestore.2QCache(0xa282410) trim onodes 500 / 500 buffers 1978368 / 
+>> 2000000
+>>      0> 2016-08-11 16:09:56.642872 7f6c1437b680 -1 *** Caught signal 
+>> (Segmentation fault) **
+>>  in thread 7f6c1437b680 thread_name:ceph_test_objec
+>>
+>>  ceph version v11.0.0-1434-gc6e561a 
+>> (c6e561a5385105dfbd70f642bcd5732fac0bca89)
+>>  1: bin/ceph_test_objectstore() [0xa1f207]
+>>  2: (()+0xfc90) [0x7f6c13f7bc90]
+>>  3: bin/ceph_test_objectstore() [0x8cadab]
+>>  4: (operator<<(std::ostream&, hobject_t const&)+0x229) [0x8d1709]
+>>  5: (operator<<(std::ostream&, ghobject_t const&)+0x107) [0x8d1c37]
+>>  6: 
+>> (BlueStore::collection_list(boost::intrusive_ptr<ObjectStore::CollectionImpl>&, 
+>> ghobject_t, ghobject_t, bool, int, std::vector<ghobject_t, std::al
+>> locator<ghobject_t> >*, ghobject_t*)+0xb6d) [0x78680d]
+>>  7: (BlueStore::collection_list(coll_t const&, ghobject_t, 
+>> ghobject_t, bool, int, std::vector<ghobject_t, 
+>> std::allocator<ghobject_t> >*, ghobject_t*)+
+>> 0x1eb) [0x79d64b]
+>>  8: (SyntheticWorkloadState::shutdown()+0x2ab) [0x68b88b]
+>>  9: (doSyntheticTest(boost::scoped_ptr<ObjectStore>&, unsigned long, 
+>> unsigned long, unsigned long)+0x471) [0x651741]
+>>
+>>
+>> It looks like it was introduced by the recent PR #10410 merge 
+>> (https://github.com/ceph/ceph/pull/10410). I don't observe the issue 
+>> prior to this patch.
+>>
+>> Brief analysis under GDB shows that ghobject_t instance pointed by 
+>> pnext passed to operator<< at Bluestore.cc:4167 is broken - oid.name 
+>> field has huge size..
+>>
+>> The issue is 100% reproducible.
+>>
+>>
+>> Thanks,
+>>
+>> Igor
+>>
+>>
+>>
+>
+
