@@ -1,248 +1,139 @@
-From: Sebastien Han <shan@redhat.com>
-Subject: Re: [Feature request] config diff on a single option with the admin socket
-Date: Thu, 11 Aug 2016 10:16:45 +0200
-Message-ID: <CA+HUO7KaPMDEUQRUEX3gS-RtJ1F6asAba+A2XTosEySfLYpG5w@mail.gmail.com>
-References: <CA+HUO7+qxtsS03yKp2ETUhKy6WTX1ESd0Xridw13viWwa0Cj3Q@mail.gmail.com>
- <alpine.LSU.2.20.1607291125130.28641@ancalagon.suse.com> <CA+HUO7+QVu-HqBT7EuuEoLwPVng84HzG_MmbvMQyueEstR-6Gw@mail.gmail.com>
- <1470691964.14948.2.camel@suse.com> <1470710335.14948.10.camel@suse.com>
- <CA+HUO7KTXfHeHOcQpRX4pfneA+ReyQb2FoBjkxurzZw87NaiSA@mail.gmail.com>
- <CAFdRU71GgzaN6RCeEBRQY51r6Pd0-a0xsz0vJ7=pRd2Ja+eGNA@mail.gmail.com>
- <1470787409.7371.13.camel@suse.com> <CAFdRU73Hgc9TdrekmGv6mziuQ2roxYFKD1VopLMg1=Tq5sJHcQ@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: OSD not coming back up again
+Date: Thu, 11 Aug 2016 10:46:46 +0200
+Message-ID: <a8d8e5cf-bfdb-6f73-e2a5-a2cc8a3e02af@digiware.nl>
+References: <bdb93e87-8338-e485-a68d-f988d00f6785@digiware.nl>
+ <453729567.2335.1470896803201@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:36737 "EHLO
-	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750916AbcHKIRI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 04:17:08 -0400
-Received: by mail-wm0-f54.google.com with SMTP id q128so14945621wma.1
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Aug 2016 01:17:07 -0700 (PDT)
-In-Reply-To: <CAFdRU73Hgc9TdrekmGv6mziuQ2roxYFKD1VopLMg1=Tq5sJHcQ@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:64241 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932434AbcHKIqw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 11 Aug 2016 04:46:52 -0400
+In-Reply-To: <453729567.2335.1470896803201@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: skinjo@redhat.com
-Cc: Daniel Oliveira <doliveira@suse.com>, Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Daniel,
+On 11-8-2016 08:26, Wido den Hollander wrote:
+> 
+>> Op 11 augustus 2016 om 2:40 schreef Willem Jan Withagen <wjw@digiware.nl>:
+>>
+>>
+>> Hi
+>>
+>> During testing with cephtool-test-mon.sh
+>>
+>> 3 OSDs are started, and then the code executes:
+>> ====
+>>   ceph osd set noup
+>>   ceph osd down 0
+>>   ceph osd dump | grep 'osd.0 down'
+>>   ceph osd unset noup
+>> ====
+>>
+>> And in 1000 secs osd.0 is not coming back up.
+>>
+>> Below some details, but where should I start looking?
+>>
+> Can you use the admin socket to query osd.0?
+> 
+> ceph daemon osd.0 status
+> 
+> What does that tell you?
 
-Are you fine with my answer?
-Just trying to keep the main subject alive here :).
+Good suggestion:
+{
+    "cluster_fsid": "0f7dc8d3-7010-4094-aa9a-a0694e7c05a6",
+    "osd_fsid": "621c9b39-b8ea-412a-a9db-115c97eafe7d",
+    "whoami": 0,
+    "state": "waiting_for_healthy",
+    "oldest_map": 1,
+    "newest_map": 176,
+    "num_pgs": 8
+}
 
-On Wed, Aug 10, 2016 at 12:34 PM, Shinobu Kinjo <shinobu.kj@gmail.com> wrote:
-> Daniel,
->
-> On Wed, Aug 10, 2016 at 9:03 AM, Daniel Oliveira <doliveira@suse.com> wrote:
->> Shinobu,
+Right before setting the osd to down, the newest map is 173.
+So some maps have been exchanged....
+
+How does the OSD decide that it is healthy?
+If it gets peer (ping) messages that is is up?
+
+> Maybe try debug_osd = 20
+
+But then still I need to know what to look for, since 20 generates
+serious output.
+
+Thanx,
+--WjW
+
+> 
+> Wido
+> 
+>> Thanx
+>> --WjW
 >>
->> Sorry, but I am not sure I understand what your request is. If it is
->> not related to Sebastien's feature request, we probably would need a
->> different one so we can track it properly. Are you referring to a
->> *config file parser* kind of thing, where some checking is done to make
->> sure settings are in the proper section? Or am I missing something?
->
-> Yes, that is exactly what I said.
-> Does that capabilities make sense?
->
 >>
->> -Daniel
+>> ceph -s gives:
 >>
+>>     cluster 9b2500f8-44fb-40d1-91bc-ed522e9db5c6
+>>      health HEALTH_WARN
+>>             8 pgs degraded
+>>             8 pgs stuck unclean
+>>             8 pgs undersized
+>>      monmap e1: 3 mons at
+>> {a=127.0.0.1:7202/0,b=127.0.0.1:7203/0,c=127.0.0.1:7204/0}
+>>             election epoch 6, quorum 0,1,2 a,b,c
+>>      osdmap e179: 3 osds: 2 up, 2 in; 8 remapped pgs
+>>             flags sortbitwise,require_jewel_osds,require_kraken_osds
+>>       pgmap v384: 8 pgs, 1 pools, 0 bytes data, 0 objects
+>>             248 GB used, 198 GB / 446 GB avail
+>>                    8 active+undersized+degraded
 >>
+>> And the pgmap version is slowly growing.....
 >>
->> On Tue, 2016-08-09 at 19:51 +0900, Shinobu Kinjo wrote:
->>> Just question.
->>>
->>> Do we have already something like config file validation check
->>> command?
->>> If not, it would be better to add this capability for end users if it
->>> would not burden you.
->>>
->>> Because it's not a bit clear about which option must be in which
->>> section.
->>>
->>> Thoughts?
->>>
->>>  - Shinobu
->>>
->>>
->>> On Tue, Aug 9, 2016 at 6:52 PM, Sebastien Han <shan@redhat.com>
->>> wrote:
->>> > Thanks a lot Daniel, that looks exactly right.
->>> > If nothing changed I think it's valid to keep both fields showing
->>> > the
->>> > same value.
->>> > This is either when comparing with whatever tool because the
->>> > structure
->>> > won't change so we don't have to handle a particular case.
->>> >
->>> > Others? Thoughts?
->>> >
->>> > On Tue, Aug 9, 2016 at 4:38 AM, Daniel Oliveira <doliveira@suse.com
->>> > > wrote:
->>> > > Sebastien,
->>> > >
->>> > > For now, We have something like this (which follows the same
->>> > > standard
->>> > > as 'config diff' and 'config get' :
->>> > >
->>> > > #1:
->>> > > ./ceph --admin-daemon out/osd.1.asok config diff get
->>> > > mon_data_avail_crit
->>> > > {
->>> > >     "diff": {
->>> > >         "current": {
->>> > >             "mon_data_avail_crit": "1"
->>> > >         },
->>> > >         "defaults": {
->>> > >             "mon_data_avail_crit": "5"
->>> > >         }
->>> > >     },
->>> > >     "unknown": []
->>> > > }
->>> > >
->>> > > ./ceph --admin-daemon out/osd.1.asok config diff get
->>> > > mon_data_avail_warn
->>> > > {
->>> > >     "diff": {
->>> > >         "current": {
->>> > >             "mon_data_avail_warn": "10"
->>> > >         },
->>> > >         "defaults": {
->>> > >             "mon_data_avail_warn": "30"
->>> > >         }
->>> > >     },
->>> > >     "unknown": []
->>> > > }
->>> > >
->>> > > What would be the proper way to display a setting that *was not*
->>> > > changed from its default?, for example:
->>> > > ./ceph --admin-daemon out/osd.1.asok config diff get num_client
->>> > > {
->>> > >     "diff": {
->>> > >         "current": {},
->>> > >         "defaults": {}
->>> > >     },
->>> > >     "unknown": []
->>> > > }
->>> > >
->>> > > Or only the "current" value?
->>> > >
->>> > > Thanks,
->>> > > -Daniel
->>> > >
->>> > >
->>> > > On Mon, 2016-08-08 at 15:32 -0600, Daniel Oliveira wrote:
->>> > > > Sebastien,
->>> > > >
->>> > > > As I was working on a couple of other things related to
->>> > > > validating
->>> > > > parameters/settings, I ended up adding the feature in question
->>> > > > and I
->>> > > > am just in the process of testing it. I will keep you posted.
->>> > > >
->>> > > > Thanks,
->>> > > > -Daniel
->>> > > >
->>> > > >
->>> > > > On Mon, 2016-08-08 at 14:16 +0200, Sebastien Han wrote:
->>> > > > > Would be nice if you could get a stab at it, actually I don't
->>> > > > > know
->>> > > > > where to look in the code to see where the magic is happening
->>> > > > > for
->>> > > > > the
->>> > > > > admin socket.
->>> > > > > Most of the logic is there so this shouldn't be too difficult
->>> > > > > :).
->>> > > > >
->>> > > > > Did you get a chance to look into this Jesse?
->>> > > > > Thanks for offering your help on this one!
->>> > > > >
->>> > > > > On Fri, Jul 29, 2016 at 8:32 PM, Jesse Williamson <
->>> > > > > jwilliamson@suse.de> wrote:
->>> > > > > > On Fri, 29 Jul 2016, Sebastien Han wrote:
->>> > > > > >
->>> > > > > > Hi Sebastien,
->>> > > > > >
->>> > > > > > > I'd like to have the same but for a specific option only.
->>> > > > > > >
->>> > > > > > > So something like:
->>> > > > > > >
->>> > > > > > > ceph daemon mon.ceph-mon-01 config diff get <field>
->>> > > > > > >
->>> > > > > > > Which will return the diff between the actual config
->>> > > > > > > value and
->>> > > > > > > the
->>> > > > > > > original config value.
->>> > > > > >
->>> > > > > >
->>> > > > > > I might be able to help with this, if there's no support
->>> > > > > > that
->>> > > > > > anyone already
->>> > > > > > knows of, or clear takers. I'm working on a small config
->>> > > > > > -related
->>> > > > > > librados
->>> > > > > > feature right now and am somewhat familiar with the
->>> > > > > > relevant
->>> > > > > > moving parts on
->>> > > > > > that end, so I might be in a good position to work on it.
->>> > > > > >
->>> > > > > > WRT the admin socket, I'm less clear, but can be pointed in
->>> > > > > > the
->>> > > > > > right
->>> > > > > > direction. :-)
->>> > > > > >
->>> > > > > > -Jesse
->>> > > > >
->>> > > > >
->>> > > > >
->>> >
->>> >
->>> >
->>> > --
->>> > Cheers
->>> >
->>> > ––––––
->>> > Sébastien Han
->>> > Principal Storage Architect
->>> >
->>> > "Always give 100%. Unless you're giving blood."
->>> >
->>> > Mail: seb@redhat.com
->>> > Address: 11 bis, rue Roquépine - 75008 Paris
->>> > --
->>> > To unsubscribe from this list: send the line "unsubscribe ceph
->>> > -devel" in
->>> > the body of a message to majordomo@vger.kernel.org
->>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
+>> This set of lines is repeated over and over in the osd.0.log
+>>
+>> 2016-08-11 02:31:48.710152 b2f4d00  1 -- 127.0.0.1:0/25528 -->
+>> 127.0.0.1:6806/25709 -- osd_ping(ping e175 stamp 2016-08-11
+>> 02:31:48.710144) v2 -- ?+0 0xb42bc00 con 0xb12ba40
+>> 2016-08-11 02:31:48.710188 b2f4d00  1 -- 127.0.0.1:0/25528 -->
+>> 127.0.0.1:6807/25709 -- osd_ping(ping e175 stamp 2016-08-11
+>> 02:31:48.710144) v2 -- ?+0 0xb42cc00 con 0xb12bb20
+>> 2016-08-11 02:31:48.710214 b2f4d00  1 -- 127.0.0.1:0/25528 -->
+>> 127.0.0.1:6810/25910 -- osd_ping(ping e175 stamp 2016-08-11
+>> 02:31:48.710144) v2 -- ?+0 0xb42a400 con 0xb12bc00
+>> 2016-08-11 02:31:48.710240 b2f4d00  1 -- 127.0.0.1:0/25528 -->
+>> 127.0.0.1:6811/25910 -- osd_ping(ping e175 stamp 2016-08-11
+>> 02:31:48.710144) v2 -- ?+0 0xb42c000 con 0xb12c140
+>> 2016-08-11 02:31:48.710604 b412480  1 -- 127.0.0.1:0/25528 <== osd.1
+>> 127.0.0.1:6806/25709 284 ==== osd_ping(ping_reply e179 stamp 2016-08-11
+>> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42d800 con 0xb12ba40
+>> 2016-08-11 02:31:48.710665 b486900  1 -- 127.0.0.1:0/25528 <== osd.2
+>> 127.0.0.1:6810/25910 283 ==== osd_ping(ping_reply e179 stamp 2016-08-11
+>> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42d200 con 0xb12bc00
+>> 2016-08-11 02:31:48.710683 b412480  1 -- 127.0.0.1:0/25528 <== osd.1
+>> 127.0.0.1:6806/25709 285 ==== osd_ping(you_died e179 stamp 2016-08-11
+>> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42d800 con 0xb12ba40
+>> 2016-08-11 02:31:48.710780 b412000  1 -- 127.0.0.1:0/25528 <== osd.1
+>> 127.0.0.1:6807/25709 284 ==== osd_ping(ping_reply e179 stamp 2016-08-11
+>> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42da00 con 0xb12bb20
+>> 2016-08-11 02:31:48.710789 b486900  1 -- 127.0.0.1:0/25528 <== osd.2
+>> 127.0.0.1:6810/25910 284 ==== osd_ping(you_died e179 stamp 2016-08-11
+>> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42d200 con 0xb12bc00
+>> 2016-08-11 02:31:48.710821 b486d80  1 -- 127.0.0.1:0/25528 <== osd.2
+>> 127.0.0.1:6811/25910 283 ==== osd_ping(ping_reply e179 stamp 2016-08-11
+>> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42d400 con 0xb12c140
+>> 2016-08-11 02:31:48.710973 b412000  1 -- 127.0.0.1:0/25528 <== osd.1
+>> 127.0.0.1:6807/25709 285 ==== osd_ping(you_died e179 stamp 2016-08-11
+>> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42da00 con 0xb12bb20
+>> 2016-08-11 02:31:48.711028 b486d80  1 -- 127.0.0.1:0/25528 <== osd.2
+>> 127.0.0.1:6811/25910 284 ==== osd_ping(you_died e179 stamp 2016-08-11
+>> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42d400 con 0xb12c140
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Email:
-> shinobu@linux.com
-> shinobu@redhat.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-
-
--- 
-Cheers
-
-––––––
-Sébastien Han
-Principal Storage Architect
-
-"Always give 100%. Unless you're giving blood."
-
-Mail: seb@redhat.com
-Address: 11 bis, rue Roquépine - 75008 Paris
