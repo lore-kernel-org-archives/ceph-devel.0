@@ -1,139 +1,32 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: OSD not coming back up again
-Date: Thu, 11 Aug 2016 10:46:46 +0200
-Message-ID: <a8d8e5cf-bfdb-6f73-e2a5-a2cc8a3e02af@digiware.nl>
-References: <bdb93e87-8338-e485-a68d-f988d00f6785@digiware.nl>
- <453729567.2335.1470896803201@ox.pcextreme.nl>
+From: Loic Dachary <loic@dachary.org>
+Subject: separating transient rados job errors
+Date: Thu, 11 Aug 2016 11:24:41 +0200
+Message-ID: <57AC4459.6030108@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:64241 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932434AbcHKIqw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 11 Aug 2016 04:46:52 -0400
-In-Reply-To: <453729567.2335.1470896803201@ox.pcextreme.nl>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:46319 "EHLO
+	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932271AbcHKJZP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 05:25:15 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 11-8-2016 08:26, Wido den Hollander wrote:
-> 
->> Op 11 augustus 2016 om 2:40 schreef Willem Jan Withagen <wjw@digiware.nl>:
->>
->>
->> Hi
->>
->> During testing with cephtool-test-mon.sh
->>
->> 3 OSDs are started, and then the code executes:
->> ====
->>   ceph osd set noup
->>   ceph osd down 0
->>   ceph osd dump | grep 'osd.0 down'
->>   ceph osd unset noup
->> ====
->>
->> And in 1000 secs osd.0 is not coming back up.
->>
->> Below some details, but where should I start looking?
->>
-> Can you use the admin socket to query osd.0?
-> 
-> ceph daemon osd.0 status
-> 
-> What does that tell you?
+Hi Sam,
 
-Good suggestion:
-{
-    "cluster_fsid": "0f7dc8d3-7010-4094-aa9a-a0694e7c05a6",
-    "osd_fsid": "621c9b39-b8ea-412a-a9db-115c97eafe7d",
-    "whoami": 0,
-    "state": "waiting_for_healthy",
-    "oldest_map": 1,
-    "newest_map": 176,
-    "num_pgs": 8
-}
+I propose that rados jobs known to experience occasional errors[1] are temporarily excluded from the nightlies while they are being fixed. And the nightlies could be green unless a new issue shows up. A wiki page listing the unreliable jobs[2] could be used to --filter-out the jobs it contains. When the problem is fixed, the job is removed from the wiki page and is no longer excluded from the nightlies.
 
-Right before setting the osd to down, the newest map is 173.
-So some maps have been exchanged....
+--filter-out <(curl -s http://tracker.ceph.com/projects/ceph/wiki/Rados-jewel.txt?key=$redmine_key |  cut -f2- -d' ' | perl -n0e 'print join(",", split(/\S*\n/))')
 
-How does the OSD decide that it is healthy?
-If it gets peer (ping) messages that is is up?
+What do you think ?
 
-> Maybe try debug_osd = 20
+Cheers
 
-But then still I need to know what to look for, since 20 generates
-serious output.
+[1] http://tracker.ceph.com/issues/15785 fails 30% of the time
+[2] http://tracker.ceph.com/projects/ceph/wiki/Rados-jewel
 
-Thanx,
---WjW
-
-> 
-> Wido
-> 
->> Thanx
->> --WjW
->>
->>
->> ceph -s gives:
->>
->>     cluster 9b2500f8-44fb-40d1-91bc-ed522e9db5c6
->>      health HEALTH_WARN
->>             8 pgs degraded
->>             8 pgs stuck unclean
->>             8 pgs undersized
->>      monmap e1: 3 mons at
->> {a=127.0.0.1:7202/0,b=127.0.0.1:7203/0,c=127.0.0.1:7204/0}
->>             election epoch 6, quorum 0,1,2 a,b,c
->>      osdmap e179: 3 osds: 2 up, 2 in; 8 remapped pgs
->>             flags sortbitwise,require_jewel_osds,require_kraken_osds
->>       pgmap v384: 8 pgs, 1 pools, 0 bytes data, 0 objects
->>             248 GB used, 198 GB / 446 GB avail
->>                    8 active+undersized+degraded
->>
->> And the pgmap version is slowly growing.....
->>
->> This set of lines is repeated over and over in the osd.0.log
->>
->> 2016-08-11 02:31:48.710152 b2f4d00  1 -- 127.0.0.1:0/25528 -->
->> 127.0.0.1:6806/25709 -- osd_ping(ping e175 stamp 2016-08-11
->> 02:31:48.710144) v2 -- ?+0 0xb42bc00 con 0xb12ba40
->> 2016-08-11 02:31:48.710188 b2f4d00  1 -- 127.0.0.1:0/25528 -->
->> 127.0.0.1:6807/25709 -- osd_ping(ping e175 stamp 2016-08-11
->> 02:31:48.710144) v2 -- ?+0 0xb42cc00 con 0xb12bb20
->> 2016-08-11 02:31:48.710214 b2f4d00  1 -- 127.0.0.1:0/25528 -->
->> 127.0.0.1:6810/25910 -- osd_ping(ping e175 stamp 2016-08-11
->> 02:31:48.710144) v2 -- ?+0 0xb42a400 con 0xb12bc00
->> 2016-08-11 02:31:48.710240 b2f4d00  1 -- 127.0.0.1:0/25528 -->
->> 127.0.0.1:6811/25910 -- osd_ping(ping e175 stamp 2016-08-11
->> 02:31:48.710144) v2 -- ?+0 0xb42c000 con 0xb12c140
->> 2016-08-11 02:31:48.710604 b412480  1 -- 127.0.0.1:0/25528 <== osd.1
->> 127.0.0.1:6806/25709 284 ==== osd_ping(ping_reply e179 stamp 2016-08-11
->> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42d800 con 0xb12ba40
->> 2016-08-11 02:31:48.710665 b486900  1 -- 127.0.0.1:0/25528 <== osd.2
->> 127.0.0.1:6810/25910 283 ==== osd_ping(ping_reply e179 stamp 2016-08-11
->> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42d200 con 0xb12bc00
->> 2016-08-11 02:31:48.710683 b412480  1 -- 127.0.0.1:0/25528 <== osd.1
->> 127.0.0.1:6806/25709 285 ==== osd_ping(you_died e179 stamp 2016-08-11
->> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42d800 con 0xb12ba40
->> 2016-08-11 02:31:48.710780 b412000  1 -- 127.0.0.1:0/25528 <== osd.1
->> 127.0.0.1:6807/25709 284 ==== osd_ping(ping_reply e179 stamp 2016-08-11
->> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42da00 con 0xb12bb20
->> 2016-08-11 02:31:48.710789 b486900  1 -- 127.0.0.1:0/25528 <== osd.2
->> 127.0.0.1:6810/25910 284 ==== osd_ping(you_died e179 stamp 2016-08-11
->> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42d200 con 0xb12bc00
->> 2016-08-11 02:31:48.710821 b486d80  1 -- 127.0.0.1:0/25528 <== osd.2
->> 127.0.0.1:6811/25910 283 ==== osd_ping(ping_reply e179 stamp 2016-08-11
->> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42d400 con 0xb12c140
->> 2016-08-11 02:31:48.710973 b412000  1 -- 127.0.0.1:0/25528 <== osd.1
->> 127.0.0.1:6807/25709 285 ==== osd_ping(you_died e179 stamp 2016-08-11
->> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42da00 con 0xb12bb20
->> 2016-08-11 02:31:48.711028 b486d80  1 -- 127.0.0.1:0/25528 <== osd.2
->> 127.0.0.1:6811/25910 284 ==== osd_ping(you_died e179 stamp 2016-08-11
->> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42d400 con 0xb12c140
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+-- 
+Loïc Dachary, Artisan Logiciel Libre
