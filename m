@@ -1,26 +1,42 @@
-From: Ramesh Chander <Ramesh.Chander@sandisk.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Bluestore different allocator performance Vs FileStore
-Date: Thu, 11 Aug 2016 06:07:13 +0000
-Message-ID: <CY1PR0201MB1820E86B7587927ED23C055A851E0@CY1PR0201MB1820.namprd02.prod.outlook.com>
+Date: Thu, 11 Aug 2016 07:11:58 +0000
+Message-ID: <BL2PR02MB21158A97201C01072BFC27F5F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <BL2PR02MB211554DBEC8F344E465BAFE5F41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
  <alpine.DEB.2.11.1608102125270.17770@piezo.us.to>
  <BL2PR02MB2115CB5D9E89815706293EBBF41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
  <alpine.DEB.2.11.1608102242590.17762@piezo.us.to>
  <BLUPR0201MB15248A827640A2C8B2119C98E81D0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+  <CY1PR0201MB1820E86B7587927ED23C055A851E0@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0048.outbound.protection.outlook.com ([104.47.32.48]:22594
-	"EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+Received: from mail-bl2nam02on0075.outbound.protection.outlook.com ([104.47.38.75]:49237
+	"EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752059AbcHKGk6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 02:40:58 -0400
+	id S932146AbcHKHMB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 03:12:01 -0400
+In-Reply-To: <CY1PR0201MB1820E86B7587927ED23C055A851E0@CY1PR0201MB1820.namprd02.prod.outlook.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>, Somnath Roy <Somnath.Roy@sandisk.com>
+To: Ramesh Chander <Ramesh.Chander@sandisk.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+Yes, we can create OSDs in parallel but I am not sure how many people are creating cluster like that as ceph-deploy end there is no interface for that.
+FYI, we have introduced some parallelism in SanDisk wrapper script for installer based on ceph-deploy.
+I don't think even with all these parallel OSD creation, this problem will go away but for sure will be reduced  a bit as we have seen in case of OSD start time since it is inherently parallel.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Ramesh Chander
+Sent: Wednesday, August 10, 2016 11:07 PM
+To: Allen Samuels; Sage Weil; Somnath Roy
+Cc: ceph-devel
+Subject: RE: Bluestore different allocator performance Vs FileStore
 
 Somnath,
 
@@ -41,17 +57,17 @@ As a fix I am looking to batch multiple insert_free calls for now. If still that
 >
 > I think insert_free is limited by speed of function clear_bits here.
 >
-> Though set_bits and clear_bits have same logic except one sets and another
-> clears. Both of these does 64 bits (bitmap size) at a time.
+> Though set_bits and clear_bits have same logic except one sets and
+> another clears. Both of these does 64 bits (bitmap size) at a time.
 >
-> I am not sure if doing memset will make it faster. But if we can do it for group
-> of bitmaps, then it might help.
+> I am not sure if doing memset will make it faster. But if we can do it
+> for group of bitmaps, then it might help.
 >
-> I am looking in to code if we can handle mkfs and osd mount in special way to
-> make it faster.
+> I am looking in to code if we can handle mkfs and osd mount in special
+> way to make it faster.
 >
-> If I don't find an easy fix, we can go to path of deferring init to later stage as
-> and when required.
+> If I don't find an easy fix, we can go to path of deferring init to
+> later stage as and when required.
 >
 > -Ramesh
 >
@@ -66,7 +82,8 @@ As a fix I am looking to batch multiple insert_free calls for now. If still that
 > > We always knew that startup time for bitmap stuff would be somewhat
 > > longer. Still, the existing implementation can be speeded up
 > > significantly. The code in BitMapZone::set_blocks_used isn't very
-> > optimized. Converting it to use memset for all but the first/last bytes
+> > optimized. Converting it to use memset for all but the first/last
+> > bytes
 > should significantly speed it up.
 > >
 > >
@@ -82,7 +99,8 @@ As a fix I am looking to batch multiple insert_free calls for now. If still that
 > > > Sent: Wednesday, August 10, 2016 3:44 PM
 > > > To: Somnath Roy <Somnath.Roy@sandisk.com>
 > > > Cc: ceph-devel <ceph-devel@vger.kernel.org>
-> > > Subject: RE: Bluestore different allocator performance Vs FileStore
+> > > Subject: RE: Bluestore different allocator performance Vs
+> > > FileStore
 > > >
 > > > On Wed, 10 Aug 2016, Somnath Roy wrote:
 > > > > << inline with [Somnath]
@@ -98,7 +116,8 @@ As a fix I am looking to batch multiple insert_free calls for now. If still that
 > > > > On Wed, 10 Aug 2016, Somnath Roy wrote:
 > > > > > Hi, I spent some time on evaluating different Bluestore
 > > > > > allocator and freelist performance. Also, tried to gaze the
-> > > > > performance difference of Bluestore and filestore on the similar
+> > > > > performance difference of Bluestore and filestore on the
+> > > > > similar
 > setup.
 > > > > >
 > > > > > Setup:
@@ -125,8 +144,8 @@ As a fix I am looking to batch multiple insert_free calls for now. If still that
 > https://github.com/somnathr/ceph/blob/6e03a5a41fe2c9b213a610200b2e8a
 > > > > > 25 0cb05986/Bluestore_allocator_comp.xlsx
 > > > > >
-> > > > > Each profile I named based on <allocator>-<freelist> , so in the
-> > > > > graph for
+> > > > > Each profile I named based on <allocator>-<freelist> , so in
+> > > > > the graph for
 > > > example "stupid-extent" meaning stupid allocator and extent freelist.
 > > > > >
 > > > > > I ran the test for each of the profile in the following order
@@ -141,8 +160,8 @@ As a fix I am looking to batch multiple insert_free calls for now. If still that
 > > > > >
 > > > > > 4. 256K RW for 15 min with 16QD and 10 jobs.
 > > > > >
-> > > > > The above are non-preconditioned case i.e ran before filling up
-> > > > > the entire
+> > > > > The above are non-preconditioned case i.e ran before filling
+> > > > > up the entire
 > > > image. The reason is I don't see any reason of filling up the rbd
 > > > image before like filestore case where it will give stable
 > > > performance if we fill up the rbd images first. Filling up rbd
@@ -160,11 +179,12 @@ As a fix I am looking to batch multiple insert_free calls for now. If still that
 > > > > >
 > > > > > 8. Ran 16K RW test again for 15min
 > > > > >
-> > > > > For filestore test, I ran tests after preconditioning the entire image
+> > > > > For filestore test, I ran tests after preconditioning the
+> > > > > entire image
 > first.
 > > > > >
-> > > > > Each sheet on the xls have different block size result , I often
-> > > > > miss to navigate through the xls sheets , so, thought of
+> > > > > Each sheet on the xls have different block size result , I
+> > > > > often miss to navigate through the xls sheets , so, thought of
 > > > > > mentioning here
 > > > > > :-)
 > > > > >
@@ -175,14 +195,15 @@ As a fix I am looking to batch multiple insert_free calls for now. If still that
 > > > > > Observation:
 > > > > > ---------------
 > > > > >
-> > > > > 1. First of all, in case of bitmap allocator mkfs time (and thus
-> > > > > cluster
-> > > creation time for 16 OSDs) are ~16X slower than stupid allocator and
+> > > > > 1. First of all, in case of bitmap allocator mkfs time (and
+> > > > > thus cluster
+> > > creation time for 16 OSDs) are ~16X slower than stupid allocator
+> > > and
 > > filestore.
-> > > Each OSD creation is taking ~2min or so sometimes and I nailed down
-> > > the
-> > > insert_free() function call (marked ****) in the Bitmap allocator is
-> > > causing that.
+> > > Each OSD creation is taking ~2min or so sometimes and I nailed
+> > > down the
+> > > insert_free() function call (marked ****) in the Bitmap allocator
+> > > is causing that.
 > > > > >
 > > > > > 2016-08-05 16:12:40.587148 7f4024d258c0 10 freelist
 > > > > > enumerate_next start
@@ -199,7 +220,8 @@ As a fix I am looking to batch multiple insert_free calls for now. If still that
 > > > > > enumerate_next
 > > > > > end****
 > > > > > 2016-08-05 16:13:20.748978 7f4024d258c0 10
-> > > > > bluestore(/var/lib/ceph/osd/ceph-0) _open_alloc loaded 6757 G in
+> > > > > bluestore(/var/lib/ceph/osd/ceph-0) _open_alloc loaded 6757 G
+> > > > > in
 > > > > > 1 extents
 > > > > >
 > > > > > 2016-08-05 16:13:23.438511 7f4024d258c0 20 bluefs _read_random
@@ -220,23 +242,23 @@ As a fix I am looking to batch multiple insert_free calls for now. If still that
 > > > > > *****2016-08-05 16:14:03.132914 7f4024d258c0 10 freelist
 > > > > > enumerate_next end
 > > > >
-> > > > I'm not sure there's any easy fix for this. We can amortize it by
-> > > > feeding
-> > > space to bluefs slowly (so that we don't have to do all the inserts
-> > > at once), but I'm not sure that's really better.
+> > > > I'm not sure there's any easy fix for this. We can amortize it
+> > > > by feeding
+> > > space to bluefs slowly (so that we don't have to do all the
+> > > inserts at once), but I'm not sure that's really better.
 > > > >
 > > > > [Somnath] I don't know that part of the code, so, may be a dumb
 > > question.
-> > > This is during mkfs() time , so, can't we say to bluefs entire space
-> > > is free ? I can understand for osd mount and all other cases we need
-> > > to feed the free space every time.
+> > > This is during mkfs() time , so, can't we say to bluefs entire
+> > > space is free ? I can understand for osd mount and all other cases
+> > > we need to feed the free space every time.
 > > > > IMO this is critical to fix as cluster creation time will be
 > > > > number of OSDs * 2
 > > > min otherwise. For me creating 16 OSDs cluster is taking ~32min
 > > > compare to
 > > > ~2 min for stupid allocator/filestore.
-> > > > BTW, my drive data partition is ~6.9TB , db partition is ~100G and
-> > > > WAL is
+> > > > BTW, my drive data partition is ~6.9TB , db partition is ~100G
+> > > > and WAL is
 > > > ~1G. I guess the time taking is dependent on data partition size as well (?
 > > >
 > > > Well, we're fundamentally limited by the fact that it's a bitmap,
