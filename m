@@ -1,116 +1,80 @@
-From: John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: cephfs performance benchmark -- metadata intensive
-Date: Thu, 11 Aug 2016 11:07:10 +0100
-Message-ID: <CALe9h7fqrOCGn564HLPyMS6ouOHaY0phuZ64OHnq0Vx8VJWoug@mail.gmail.com>
-References: <CAEYCsVKksnVV+HeNBo4YofPz4Re1CRT3jCTCE2L12NqieMVYWA@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Delayed start of OSDs with systemd to prevent slowdowns
+Date: Thu, 11 Aug 2016 12:53:54 +0200 (CEST)
+Message-ID: <1156162690.2373.1470912834230@ox.pcextreme.nl>
+References: <97824899.2313.1470818261025@ox.pcextreme.nl>
+ <CABZ+qqnX0k_0SvoM3bTLAL0q2z-pmGt4AnUpsd126vKOFnZU9Q@mail.gmail.com>
+ <CABZ+qq=S4ay1475BuR2AD2qhYmq279oKazGAKJG9ti-9pwPzug@mail.gmail.com>
+ <CABZ+qqmNi63on6Gipi5uhnL1X9e_erTwXHZt6cSw5XfkmoVaYA@mail.gmail.com>
+ <CABZ+qqnH0EK0bYc0xm6329+3WGk81GKb1OFR_9+No05bsAB5qg@mail.gmail.com>
+ <CABZ+qqmizdT9mpft9TkT87ygS0jJv=9NBipFVuS37dW4a2JvTw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAEYCsVKksnVV+HeNBo4YofPz4Re1CRT3jCTCE2L12NqieMVYWA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, james.liu-gPhfCIXyaqCqndwCJWfcng@public.gmane.org, "Chen, Xiaoxi" <xiaoxchen-ZuctOmHWJ9c@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
-On Thu, Aug 11, 2016 at 8:29 AM, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hi ,
->
->
->      Here is the slide I shared yesterday on performance meeting.
-> Thanks and hoping for inputs.
->
->
-> http://www.slideshare.net/XiaoxiChen3/cephfs-jewel-mds-performance-benchmark
-
-These are definitely useful results and I encourage everyone working
-with cephfs to go and look at Xiaoxi's slides.
-
-The main thing that this highlighted for me was our lack of testing so
-far on systems with full caches.  Too much of our existing testing is
-done on freshly configured systems that never fill the MDS cache.
-
-Test 2.1 notes that we don't enable directory fragmentation by default
-currently -- this is an issue, and I'm hoping we can switch it on by
-default in Kraken (see thread "Switching on mds_bal_frag by default").
-In the meantime we have the fix that Patrick wrote for Jewel which at
-least prevents people creating dirfrags too large for the OSDs to
-handle.
-
-Test 2.2: since a "failing to respond to cache pressure" bug is
-affecting this, I would guess we see the performance fall off at about
-the point where the *client* caches fill up (so they start trimming
-things even though they're ignore cache pressure).  It would be
-interesting to see this chart with addition lines for some related
-perf counters like mds_log.evtrm and mds.inodes_expired, that might
-make it pretty obvious where the MDS is entering different stages that
-see a decrease in the rate of handling client requests.
-
-We really need to sort out the "failing to respond to cache pressure"
-issues that keep popping up, especially if they're still happening on
-a comparatively simple test that is just creating files.  We have a
-specific test for this[1] that is currently being run against the fuse
-client but not the kernel client[2].  This is a good time to try and
-push that forward so I've kicked off an experimental run here:
-http://pulpito.ceph.com/jspray-2016-08-10_16:14:52-kcephfs:recovery-master-testing-basic-mira/
-
-In the meantime, although there are reports of similar issues with
-newer kernels, it would be very useful to confirm if the same issue is
-still occurring with more recent kernels.  Issues with cache trimming
-have occurred due to various (separate) bugs, so it's possible that
-while some people are still seeing cache trimming issues with recent
-kernels, the specific case you're hitting might be fixed.
-
-Test 2.3: restarting the MDS doesn't actually give you a completely
-empty cache (everything in the journal gets replayed to pre-populate
-the cache on MDS startup).  However, the results are still valid
-because you're using a different random order in the non-caching test
-case, and the number of inodes in your journal is probably much
-smaller than the overall cache size so it's only a little bit
-populated.  We don't currently have a "drop cache" command built into
-the MDS but it would be pretty easy to add one for use in testing
-(basically just call mds->mdcache->trim(0)).
-
-As one would imagine, the non-caching case is latency-dominated when
-the working set is larger than the cache, where each client is waiting
-for one open to finish before proceeding to the next.  The MDS is
-probably capable of handling many more operations per second, but it
-would need more parallel IO operations from the clients.  When a
-single client is doing opens one by one, you're potentially seeing a
-full network+disk latency for each one (though in practice the OSD
-read cache will be helping a lot here).  This non-caching case would
-be the main argument for giving the metadata pool low latency (SSD)
-storage.
-
-Test 2.5: The observation that the CPU bottleneck makes using fast
-storage for the metadata pool less useful (in sequential/cached cases)
-is valid, although it could still be useful to isolate the metadata
-OSDs (probably SSDs since not so much capacity is needed) to avoid
-competing with data operations.  For random access in the non-caching
-cases (2.3, 2.4) I think you would probably see an improvement from
-SSDs.
-
-Thanks again to the team from ebay for sharing all this.
-
-John
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:38322 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750803AbcHKKx6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 06:53:58 -0400
+In-Reply-To: <CABZ+qqmizdT9mpft9TkT87ygS0jJv=9NBipFVuS37dW4a2JvTw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 
+> Op 11 augustus 2016 om 1:05 schreef Dan van der Ster <dan@vanderster.com>:
+> 
+> 
+> Hi Wido,
+> 
+> I can't help you with the systemd foo, but I have two quick remarks ...
+> 
 
-1. https://github.com/ceph/ceph-qa-suite/blob/master/tasks/cephfs/test_client_limits.py#L96
-2. http://tracker.ceph.com/issues/9466
+Nobody seems to be able :) systemd is new to everybody.
 
+> 1. I've always thought that this was a nice feature of systemd... To get
+> the osds booted and online as quickly as possible. And we've not seen the
+> peering issues you described.
+> 
 
->
-> Xiaoxi
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yes, it's a nice feature. But these machines have 24 OSDs on a Dual Xeon E5 and the have a difficult time in coming up.
+
+Have to note that it's a mixed 0.94.7 <> 10.2.2 cluster, so it might be something there.
+
+> 2. The crush weight change shouldn't cause problems, if the weight isn't
+> actually changing. IIRC it shouldn't even change the osdmap if the value
+> doesn't change.
+> 
+
+True, my bad indeed. That doesn't trigger a change, but it keeps the MONs busy however.
+
+Wido
+
+> Cheers, Dan
+> 
+> 
+> On 10 Aug 2016 11:01 a.m., "Wido den Hollander" <wido@42on.com> wrote:
+> >
+> > Hi,
+> >
+> > Currently with the systemd design a booting system will start all OSDs at
+> the same time. This means that a cluster suddenly gets a bunch of CRUSH
+> updates (if update on start is enabled), booting OSDs and PGs which go into
+> peering state.
+> >
+> > My systemd-foo isn't that good, but I was wondering if there is a way to
+> modify ceph-osd.target in such a way that it doesn't start all the OSDs in
+> parallel?
+> >
+> > I would like 1 or maybe 2 OSDs to start at the same time with a delay of
+> 120 seconds in between. This way the boot will take longer, but the impact
+> on the cluster will be less.
+> >
+> > Any ideas on how we might achieve this with systemd?
+> >
+> > Wido
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
