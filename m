@@ -1,227 +1,112 @@
-From: Ramesh Chander <Ramesh.Chander@sandisk.com>
-Subject: RE: Bluestore different allocator performance Vs FileStore
-Date: Thu, 11 Aug 2016 04:34:08 +0000
-Message-ID: <CY1PR0201MB18200CF43D09AE97D3313031851E0@CY1PR0201MB1820.namprd02.prod.outlook.com>
-References: <BL2PR02MB211554DBEC8F344E465BAFE5F41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608102125270.17770@piezo.us.to>
- <BL2PR02MB2115CB5D9E89815706293EBBF41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608102242590.17762@piezo.us.to>
- <BLUPR0201MB15248A827640A2C8B2119C98E81D0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: OSD not coming back up again
+Date: Thu, 11 Aug 2016 08:26:43 +0200 (CEST)
+Message-ID: <453729567.2335.1470896803201@ox.pcextreme.nl>
+References: <bdb93e87-8338-e485-a68d-f988d00f6785@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-co1nam03on0077.outbound.protection.outlook.com ([104.47.40.77]:51264
-	"EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751598AbcHKEeM convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 00:34:12 -0400
-In-Reply-To: <BLUPR0201MB15248A827640A2C8B2119C98E81D0@BLUPR0201MB1524.namprd02.prod.outlook.com>
-Content-Language: en-US
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:55495 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932146AbcHKGej (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 02:34:39 -0400
+In-Reply-To: <bdb93e87-8338-e485-a68d-f988d00f6785@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>, Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
 
-I think insert_free is limited by speed of function clear_bits here.
 
-Though set_bits and clear_bits have same logic except one sets and another clears. Both of these does 64 bits (bitmap size) at a time.
+> Op 11 augustus 2016 om 2:40 schreef Willem Jan Withagen <wjw@digiware.nl>:
+> 
+> 
+> Hi
+> 
+> During testing with cephtool-test-mon.sh
+> 
+> 3 OSDs are started, and then the code executes:
+> ====
+>   ceph osd set noup
+>   ceph osd down 0
+>   ceph osd dump | grep 'osd.0 down'
+>   ceph osd unset noup
+> ====
+> 
+> And in 1000 secs osd.0 is not coming back up.
+> 
+> Below some details, but where should I start looking?
+> 
+Can you use the admin socket to query osd.0?
 
-I am not sure if doing memset will make it faster. But if we can do it for group of bitmaps, then it might help.
+ceph daemon osd.0 status
 
-I am looking in to code if we can handle mkfs and osd mount in special way to make it faster.
+What does that tell you?
 
-If I don't find an easy fix, we can go to path of deferring init to later stage as and when required.
+Maybe try debug_osd = 20
 
--Ramesh
+Wido
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Allen Samuels
-> Sent: Thursday, August 11, 2016 4:28 AM
-> To: Sage Weil; Somnath Roy
-> Cc: ceph-devel
-> Subject: RE: Bluestore different allocator performance Vs FileStore
->
-> We always knew that startup time for bitmap stuff would be somewhat
-> longer. Still, the existing implementation can be speeded up significantly. The
-> code in BitMapZone::set_blocks_used isn't very optimized. Converting it to
-> use memset for all but the first/last bytes should significantly speed it up.
->
->
-> Allen Samuels
-> SanDisk |a Western Digital brand
-> 2880 Junction Avenue, San Jose, CA 95134
-> T: +1 408 801 7030| M: +1 408 780 6416
-> allen.samuels@SanDisk.com
->
->
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> > owner@vger.kernel.org] On Behalf Of Sage Weil
-> > Sent: Wednesday, August 10, 2016 3:44 PM
-> > To: Somnath Roy <Somnath.Roy@sandisk.com>
-> > Cc: ceph-devel <ceph-devel@vger.kernel.org>
-> > Subject: RE: Bluestore different allocator performance Vs FileStore
-> >
-> > On Wed, 10 Aug 2016, Somnath Roy wrote:
-> > > << inline with [Somnath]
-> > >
-> > > -----Original Message-----
-> > > From: Sage Weil [mailto:sage@newdream.net]
-> > > Sent: Wednesday, August 10, 2016 2:31 PM
-> > > To: Somnath Roy
-> > > Cc: ceph-devel
-> > > Subject: Re: Bluestore different allocator performance Vs FileStore
-> > >
-> > > On Wed, 10 Aug 2016, Somnath Roy wrote:
-> > > > Hi, I spent some time on evaluating different Bluestore allocator
-> > > > and freelist performance. Also, tried to gaze the performance
-> > > > difference of Bluestore and filestore on the similar setup.
-> > > >
-> > > > Setup:
-> > > > --------
-> > > >
-> > > > 16 OSDs (8TB Flash) across 2 OSD nodes
-> > > >
-> > > > Single pool and single rbd image of 4TB. 2X replication.
-> > > >
-> > > > Disabled the exclusive lock feature so that I can run multiple
-> > > > write  jobs in
-> > parallel.
-> > > > rbd_cache is disabled in the client side.
-> > > > Each test ran for 15 mins.
-> > > >
-> > > > Result :
-> > > > ---------
-> > > >
-> > > > Here is the detailed report on this.
-> > > >
-> > > >
-> >
-> https://github.com/somnathr/ceph/blob/6e03a5a41fe2c9b213a610200b2e8a
-> > > > 25 0cb05986/Bluestore_allocator_comp.xlsx
-> > > >
-> > > > Each profile I named based on <allocator>-<freelist> , so in the
-> > > > graph for
-> > example "stupid-extent" meaning stupid allocator and extent freelist.
-> > > >
-> > > > I ran the test for each of the profile in the following order
-> > > > after creating a
-> > fresh rbd image for all the Bluestore test.
-> > > >
-> > > > 1. 4K RW for 15 min with 16QD and 10 jobs.
-> > > >
-> > > > 2. 16K RW for 15 min with 16QD and 10 jobs.
-> > > >
-> > > > 3. 64K RW for 15 min with 16QD and 10 jobs.
-> > > >
-> > > > 4. 256K RW for 15 min with 16QD and 10 jobs.
-> > > >
-> > > > The above are non-preconditioned case i.e ran before filling up
-> > > > the entire
-> > image. The reason is I don't see any reason of filling up the rbd
-> > image before like filestore case where it will give stable performance
-> > if we fill up the rbd images first. Filling up rbd images in case of
-> > filestore will create the files in the filesystem.
-> > > >
-> > > > 5. Next, I did precondition the 4TB image with 1M seq write. This
-> > > > is
-> > primarily because I want to load BlueStore with more data.
-> > > >
-> > > > 6. Ran 4K RW test again (this is called out preconditioned in the
-> > > > profile) for 15 min
-> > > >
-> > > > 7. Ran 4K Seq test for similar QD for 15 min
-> > > >
-> > > > 8. Ran 16K RW test again for 15min
-> > > >
-> > > > For filestore test, I ran tests after preconditioning the entire image first.
-> > > >
-> > > > Each sheet on the xls have different block size result , I often
-> > > > miss to navigate through the xls sheets , so, thought of
-> > > > mentioning here
-> > > > :-)
-> > > >
-> > > > I have also captured the mkfs time , OSD startup time and the
-> > > > memory
-> > usage after the entire run.
-> > > >
-> > > > Observation:
-> > > > ---------------
-> > > >
-> > > > 1. First of all, in case of bitmap allocator mkfs time (and thus
-> > > > cluster
-> > creation time for 16 OSDs) are ~16X slower than stupid allocator and
-> filestore.
-> > Each OSD creation is taking ~2min or so sometimes and I nailed down
-> > the
-> > insert_free() function call (marked ****) in the Bitmap allocator is
-> > causing that.
-> > > >
-> > > > 2016-08-05 16:12:40.587148 7f4024d258c0 10 freelist enumerate_next
-> > > > start
-> > > > 2016-08-05 16:12:40.975539 7f4024d258c0 10 freelist enumerate_next
-> > > > 0x4663d00000~69959451000
-> > > > 2016-08-05 16:12:40.975555 7f4024d258c0 10
-> > > > bitmapalloc:init_add_free instance 139913322803328 offset
-> > > > 0x4663d00000 length 0x69959451000
-> > > > ****2016-08-05 16:12:40.975557 7f4024d258c0 20
-> > > > bitmapalloc:insert_free instance 139913322803328 off 0x4663d00000
-> > > > len 0x69959451000****
-> > > > ****2016-08-05 16:13:20.748934 7f4024d258c0 10 freelist
-> > > > enumerate_next
-> > > > end****
-> > > > 2016-08-05 16:13:20.748978 7f4024d258c0 10
-> > > > bluestore(/var/lib/ceph/osd/ceph-0) _open_alloc loaded 6757 G in 1
-> > > > extents
-> > > >
-> > > > 2016-08-05 16:13:23.438511 7f4024d258c0 20 bluefs _read_random
-> > > > read buffered 0x4a14eb~265 of ^A:5242880+5242880
-> > > > 2016-08-05 16:13:23.438587 7f4024d258c0 20 bluefs _read_random got
-> > > > 613
-> > > > 2016-08-05 16:13:23.438658 7f4024d258c0 10 freelist enumerate_next
-> > > > 0x4663d00000~69959451000
-> > > > 2016-08-05 16:13:23.438664 7f4024d258c0 10
-> > > > bitmapalloc:init_add_free instance 139913306273920 offset
-> > > > 0x4663d00000 length 0x69959451000
-> > > > *****2016-08-05 16:13:23.438666 7f4024d258c0 20
-> > > > bitmapalloc:insert_free instance 139913306273920 off 0x4663d00000
-> > > > len
-> > > > 0x69959451000*****
-> > > > *****2016-08-05 16:14:03.132914 7f4024d258c0 10 freelist
-> > > > enumerate_next end
-> > >
-> > > I'm not sure there's any easy fix for this. We can amortize it by
-> > > feeding
-> > space to bluefs slowly (so that we don't have to do all the inserts at
-> > once), but I'm not sure that's really better.
-> > >
-> > > [Somnath] I don't know that part of the code, so, may be a dumb
-> question.
-> > This is during mkfs() time , so, can't we say to bluefs entire space
-> > is free ? I can understand for osd mount and all other cases we need
-> > to feed the free space every time.
-> > > IMO this is critical to fix as cluster creation time will be number
-> > > of OSDs * 2
-> > min otherwise. For me creating 16 OSDs cluster is taking ~32min
-> > compare to
-> > ~2 min for stupid allocator/filestore.
-> > > BTW, my drive data partition is ~6.9TB , db partition is ~100G and
-> > > WAL is
-> > ~1G. I guess the time taking is dependent on data partition size as well (?
-> >
-> > Well, we're fundamentally limited by the fact that it's a bitmap, and
-> > a big chunk of space is "allocated" to bluefs and needs to have 1's set.
-> >
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > in the body of a message to majordomo@vger.kernel.org More
-> majordomo
-> > info at http://vger.kernel.org/majordomo-info.html
+> Thanx
+> --WjW
+> 
+> 
+> ceph -s gives:
+> 
+>     cluster 9b2500f8-44fb-40d1-91bc-ed522e9db5c6
+>      health HEALTH_WARN
+>             8 pgs degraded
+>             8 pgs stuck unclean
+>             8 pgs undersized
+>      monmap e1: 3 mons at
+> {a=127.0.0.1:7202/0,b=127.0.0.1:7203/0,c=127.0.0.1:7204/0}
+>             election epoch 6, quorum 0,1,2 a,b,c
+>      osdmap e179: 3 osds: 2 up, 2 in; 8 remapped pgs
+>             flags sortbitwise,require_jewel_osds,require_kraken_osds
+>       pgmap v384: 8 pgs, 1 pools, 0 bytes data, 0 objects
+>             248 GB used, 198 GB / 446 GB avail
+>                    8 active+undersized+degraded
+> 
+> And the pgmap version is slowly growing.....
+> 
+> This set of lines is repeated over and over in the osd.0.log
+> 
+> 2016-08-11 02:31:48.710152 b2f4d00  1 -- 127.0.0.1:0/25528 -->
+> 127.0.0.1:6806/25709 -- osd_ping(ping e175 stamp 2016-08-11
+> 02:31:48.710144) v2 -- ?+0 0xb42bc00 con 0xb12ba40
+> 2016-08-11 02:31:48.710188 b2f4d00  1 -- 127.0.0.1:0/25528 -->
+> 127.0.0.1:6807/25709 -- osd_ping(ping e175 stamp 2016-08-11
+> 02:31:48.710144) v2 -- ?+0 0xb42cc00 con 0xb12bb20
+> 2016-08-11 02:31:48.710214 b2f4d00  1 -- 127.0.0.1:0/25528 -->
+> 127.0.0.1:6810/25910 -- osd_ping(ping e175 stamp 2016-08-11
+> 02:31:48.710144) v2 -- ?+0 0xb42a400 con 0xb12bc00
+> 2016-08-11 02:31:48.710240 b2f4d00  1 -- 127.0.0.1:0/25528 -->
+> 127.0.0.1:6811/25910 -- osd_ping(ping e175 stamp 2016-08-11
+> 02:31:48.710144) v2 -- ?+0 0xb42c000 con 0xb12c140
+> 2016-08-11 02:31:48.710604 b412480  1 -- 127.0.0.1:0/25528 <== osd.1
+> 127.0.0.1:6806/25709 284 ==== osd_ping(ping_reply e179 stamp 2016-08-11
+> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42d800 con 0xb12ba40
+> 2016-08-11 02:31:48.710665 b486900  1 -- 127.0.0.1:0/25528 <== osd.2
+> 127.0.0.1:6810/25910 283 ==== osd_ping(ping_reply e179 stamp 2016-08-11
+> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42d200 con 0xb12bc00
+> 2016-08-11 02:31:48.710683 b412480  1 -- 127.0.0.1:0/25528 <== osd.1
+> 127.0.0.1:6806/25709 285 ==== osd_ping(you_died e179 stamp 2016-08-11
+> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42d800 con 0xb12ba40
+> 2016-08-11 02:31:48.710780 b412000  1 -- 127.0.0.1:0/25528 <== osd.1
+> 127.0.0.1:6807/25709 284 ==== osd_ping(ping_reply e179 stamp 2016-08-11
+> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42da00 con 0xb12bb20
+> 2016-08-11 02:31:48.710789 b486900  1 -- 127.0.0.1:0/25528 <== osd.2
+> 127.0.0.1:6810/25910 284 ==== osd_ping(you_died e179 stamp 2016-08-11
+> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42d200 con 0xb12bc00
+> 2016-08-11 02:31:48.710821 b486d80  1 -- 127.0.0.1:0/25528 <== osd.2
+> 127.0.0.1:6811/25910 283 ==== osd_ping(ping_reply e179 stamp 2016-08-11
+> 02:31:48.710144) v2 ==== 47+0+0 (281956571 0 0) 0xb42d400 con 0xb12c140
+> 2016-08-11 02:31:48.710973 b412000  1 -- 127.0.0.1:0/25528 <== osd.1
+> 127.0.0.1:6807/25709 285 ==== osd_ping(you_died e179 stamp 2016-08-11
+> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42da00 con 0xb12bb20
+> 2016-08-11 02:31:48.711028 b486d80  1 -- 127.0.0.1:0/25528 <== osd.2
+> 127.0.0.1:6811/25910 284 ==== osd_ping(you_died e179 stamp 2016-08-11
+> 02:31:48.710144) v2 ==== 47+0+0 (1545205378 0 0) 0xb42d400 con 0xb12c140
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
