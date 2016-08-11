@@ -1,125 +1,144 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: rbd-mirror related jewel backports
-Date: Thu, 11 Aug 2016 11:01:22 -0400
-Message-ID: <CA+aFP1B8BVLRV8KRdTKUC_wbWMkZc9D+-1ijtxr-Tu-qXL2YLQ@mail.gmail.com>
-References: <57AAEEC2.3060108@dachary.org> <CA+aFP1CFahNravqJ3RuVLnAO9gXsOcsDoPy8=QRBPQ+=txUtLw@mail.gmail.com>
- <57AB95F9.3050101@dachary.org> <CA+aFP1Cz3yr+ETH26hRPJ1V0z9-Dpzi-sbFx6UDSa=TUHm0Z4A@mail.gmail.com>
- <57AC847F.3020601@dachary.org>
-Reply-To: dillaman@redhat.com
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore assert
+Date: Thu, 11 Aug 2016 15:32:26 +0000
+Message-ID: <BL2PR02MB2115CDD714FC3883028291F8F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB2115443F5ACA3459E2CEBFBAF41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608102121090.17770@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f47.google.com ([209.85.220.47]:33484 "EHLO
-	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751839AbcHKPBY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 11:01:24 -0400
-Received: by mail-pa0-f47.google.com with SMTP id ti13so1685194pac.0
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Aug 2016 08:01:24 -0700 (PDT)
-In-Reply-To: <57AC847F.3020601@dachary.org>
+Received: from mail-co1nam03on0073.outbound.protection.outlook.com ([104.47.40.73]:46444
+	"EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751003AbcHKPcb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 11:32:31 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Mykola Golub <mgolub@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-OK, that's fine with me.  The only ones left on your original list are
-(in order):
+Sage,
+Please find the full log for the BlueFS replay bug in the following location.
 
-http://tracker.ceph.com/issues/16902 (master 10484) (Tue, 2 Aug 2016
-20:14:54 +0300)
-http://tracker.ceph.com/issues/16950 (master 10574) (Sun, 7 Aug 2016
-13:33:45 +0300)
-http://tracker.ceph.com/issues/16978 (master 10613) (Tue, 9 Aug 2016
-16:18:49 +0300)
+https://github.com/somnathr/ceph/blob/master/ceph-osd.1.log.zip
 
-On Thu, Aug 11, 2016 at 9:58 AM, Loic Dachary <loic@dachary.org> wrote:
-> I can try to do that, it is simple enough. Because I'm not very familiar with the code base, it is entirely possible that I end up cherry-picking a lot more than what is reasonable when doing that. It is sometime non trivial to figure out when to stop. Who knows: I may end up cherry-picking *everything* from master :-) I'll call for help if it drifts too much.
+For the db transaction one , I have added code to dump the rocksdb error code before the assert as you suggested and waiting to reproduce.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Somnath Roy
+Sent: Wednesday, August 10, 2016 2:43 PM
+To: 'Sage Weil'
+Cc: ceph-devel
+Subject: RE: Bluestore assert
+
+Sage,
+I can't go for full log (20/20) as this is happening after long run (1 hour or so).
+Yes, I will add some code to print that if I hit next time. Basically, I would suggest to print all relevant values before we asserting in the log. That will be helpful most of the cases. I will try to create a pull request around that for Bluestore.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com]
+Sent: Wednesday, August 10, 2016 2:22 PM
+To: Somnath Roy
+Cc: ceph-devel
+Subject: Re: Bluestore assert
+
+On Wed, 10 Aug 2016, Somnath Roy wrote:
+> Sage,
+> FYI, this is another assert I am hitting quite frequently during longer runs..
 >
-> Cheers
+> os/bluestore/BlueStore.cc: 5029: FAILED assert(r == 0)
 >
-> On 11/08/2016 15:22, Jason Dillaman wrote:
->> No worries.
->>
->> My usual routine just involves pulling up master and jewel branch
->> merge logs for all RBD-related subdirectories in two terminals (for PR
->> merge timeline reference), pulling up the original PR to backport, and
->> then just cherry-pick until a conflict is hit. When that happens, I
->> locate which previous PR made the conflicting change and cherry-pick
->> it into the same backport branch.
->>
->> With this technique, you'll end up with PRs with the same
->> cherry-picked commits.  You'll be able to cleanly merge them into a
->> testing branch, but when it comes time to merge into the jewel branch
->> you'll need to rebase some PRs to automatically strip out the
->> duplicate cherry-picks.
->>
->> On Wed, Aug 10, 2016 at 5:00 PM, Loic Dachary <loic@dachary.org> wrote:
->>>
->>>
->>> On 10/08/2016 22:14, Jason Dillaman wrote:
->>>> Loic,
->>>>
->>>> If you want, I can create the backport PRs for those tickets.
->>>
->>> That would be great. Alternatively, if that's less time consuming for you, just suggest a backport order and I'll figure it out.
->>>
->>> Cheers
->>>
->>>>
->>>>
->>>> On Wed, Aug 10, 2016 at 5:07 AM, Loic Dachary <loic@dachary.org> wrote:
->>>>> Hi Mykola,
->>>>>
->>>>> There are seven rbd-mirror related backports which do not cherry-pick cleanly. I've not looked at each of them yet and I would very much appreciate your advice about the best way to proceed.
->>>>>
->>>>> http://tracker.ceph.com/issues/16511
->>>>> http://tracker.ceph.com/issues/16512
->>>>> http://tracker.ceph.com/issues/16658
->>>>> http://tracker.ceph.com/issues/16701
->>>>> http://tracker.ceph.com/issues/16747
->>>>> http://tracker.ceph.com/issues/16902
->>>>> http://tracker.ceph.com/issues/16978
->>>>>
->>>>> Maybe they should be cherry-picked in a specific order in order to avoid conflicts ? For instance, maybe one of the pending backports that you can see at
->>>>>
->>>>> https://github.com/ceph/ceph/pulls?q=is%3Aopen+is%3Apr+milestone%3Ajewel+label%3Arbd
->>>>>
->>>>> would avoid some of the conflicts if merged ? I'm thinking specifically
->>>>>
->>>>> https://github.com/ceph/ceph/pull/10646
->>>>> https://github.com/ceph/ceph/pull/10644
->>>>>
->>>>> What I'm looking for, ideally, is a way to order the cherry-picks to avoid any conflict. That may involve backporting a few additional pull requests (for instance when the type of an argument changes from int64_t to uint64_t, that creates a lot of potential conflicts and backporting that change could help, even if it is not required to fix a given bug.
->>>>>
->>>>> There are three backports that also do not apply because of a conflict but do not seem to be related to rbd-mirror. Unless you advise otherwise, I'll attempt to resolve these individually and assume there is complex interaction with other backports.
->>>>>
->>>>> http://tracker.ceph.com/issues/16950
->>>>> http://tracker.ceph.com/issues/16904
->>>>> http://tracker.ceph.com/issues/16735
->>>>>
->>>>> Thanks in advance for your guidance !
->>>>>
->>>>> --
->>>>> Loïc Dachary, Artisan Logiciel Libre
->>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>>
->>>
->>> --
->>> Loïc Dachary, Artisan Logiciel Libre
->>
->>
->>
+>  ceph version 11.0.0-1229-g729c852
+> (729c8523c12f95d2309388f7c619032cb3ea13cc)
+>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> const*)+0x80) [0x55d1c95315a0]
+>  2: (BlueStore::_kv_sync_thread()+0x1fae) [0x55d1c910a27e]
+>  3: (BlueStore::KVSyncThread::entry()+0xd) [0x55d1c912bf3d]
+>  4: (Thread::entry_wrapper()+0x75) [0x55d1c9510eb5]
+>  5: (()+0x76fa) [0x7fbade56c6fa]
+>  6: (clone()+0x6d) [0x7fbadc3ccb5d]
 >
-> --
-> Loïc Dachary, Artisan Logiciel Libre
+> The following db sync transaction is failing in kv_sync_thread
+>
+>       int r = db->submit_transaction_sync(t);
+>       assert(r == 0);
 
+Do you have a full log? Can you see what r is in this case?  I'm not sure why it would be returning an error there... it's probably coming from rocksdb?
 
+> And I hit the following BlueFS corruption again during replay.
+>
+> 2016-08-10 16:08:14.012853 7f3098c158c0  0 pidfile_write: ignore empty
+> --pid-file
+> 2016-08-10 16:08:14.014544 7f3098c158c0 -1 WARNING: the following
+> dangerous and experimental features are enabled: bluestore,rocksdb
+> 2016-08-10 16:08:14.020994 7f3098c158c0  1 bdev create path
+> /var/lib/ceph/osd/ceph-8/block type kernel
+> 2016-08-10 16:08:14.021496 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block) open path
+> /var/lib/ceph/osd/ceph-8/block
+> 2016-08-10 16:08:14.021675 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block) open size 7558019747840
+> (0x6dfbd151000, 7038 GB) block_size 4096 (4096 B) non-rotational
+> 2016-08-10 16:08:14.022135 7f3098c158c0  1 bdev create path
+> /var/lib/ceph/osd/ceph-8/block.db type kernel
+> 2016-08-10 16:08:14.022703 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block.db) open path
+> /var/lib/ceph/osd/ceph-8/block.db
+> 2016-08-10 16:08:14.022822 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block.db) open size 111669149696
+> (0x1a00000000, 104 GB) block_size 4096 (4096 B) non-rotational
+> 2016-08-10 16:08:14.023231 7f3098c158c0  1 bdev create path
+> /var/lib/ceph/osd/ceph-8/block type kernel
+> 2016-08-10 16:08:14.023782 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block) open path
+> /var/lib/ceph/osd/ceph-8/block
+> 2016-08-10 16:08:14.023894 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block) open size 7558019747840
+> (0x6dfbd151000, 7038 GB) block_size 4096 (4096 B) non-rotational
+> 2016-08-10 16:08:14.023908 7f3098c158c0  1 bdev create path
+> /var/lib/ceph/osd/ceph-8/block.wal type kernel
+> 2016-08-10 16:08:14.024366 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block.wal) open path
+> /var/lib/ceph/osd/ceph-8/block.wal
+> 2016-08-10 16:08:14.024471 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block.wal) open size 1073741824
+> (0x40000000, 1024 MB) block_size 4096 (4096 B) non-rotational
+> 2016-08-10 16:08:14.072497 7f3098c158c0 -1 bluefs _replay file with
+> link count 0: file(ino 16 size 67544250 mtime 2016-08-09
+> 20:06:51.480916 bdev 0 extents
+> [^@:5242880+4194304,^@:13631488+2097152,^@:19922944+5242880,^@:2936012
+> 8+5242880,^@:38797312+6291456,^@:49283072+6291456,^@:59768832+5242880,
+> ^@:69206016+6291456,^@:79691776+5242880,^@:89128960+6291456,^@:9961472
+> 0+6291456,^@:110100480+5242880,^@:119537664+4194304,^@:125829120+31457
+> 28])
+> 2016-08-10 16:08:14.072518 7f3098c158c0 -1 bluefs mount failed to
+> replay log: (5) Input/output error
+> 2016-08-10 16:08:14.072539 7f3098c158c0 -1
+> bluestore(/var/lib/ceph/osd/ceph-8) _open_db failed bluefs mount: (5)
+> Input/output error
+> 2016-08-10 16:08:14.072544 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block.wal) close
+> 2016-08-10 16:08:14.291953 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block.db) close
+> 2016-08-10 16:08:14.539823 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block) close
+> 2016-08-10 16:08:14.791829 7f3098c158c0  1
+> bdev(/var/lib/ceph/osd/ceph-8/block) close
+> 2016-08-10 16:08:15.051855 7f3098c158c0 -1 osd.8 0 OSD:init: unable to
+> mount object store
+> 2016-08-10 16:08:15.051869 7f3098c158c0 -1 ^[[0;31m ** ERROR: osd init
+> failed: (5) Input/output error^[[0m
 
--- 
-Jason
+Do you have a full log?
+
+Thanks!
+sage
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
