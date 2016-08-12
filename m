@@ -1,70 +1,66 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: potential issue with Bluestore collection_list
-Date: Fri, 12 Aug 2016 15:27:56 +0300
-Message-ID: <79464bf5-5ad6-7121-de4a-0f7978ad218e@mirantis.com>
-References: <8231b124-5e67-aa5a-98c3-e8a5c5ddaac7@mirantis.com>
- <alpine.DEB.2.11.1608111943090.17762@piezo.us.to>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Fork and RDMA operations
+Date: Fri, 12 Aug 2016 13:22:45 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1608121314380.17762@piezo.us.to>
+References: <emc456988a-f658-4bfd-b373-ceec459da0a7@lt-vu-7440>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:38096 "EHLO
-	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752113AbcHLM17 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 08:27:59 -0400
-Received: by mail-wm0-f52.google.com with SMTP id o80so30177423wme.1
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 05:27:59 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1608111943090.17762@piezo.us.to>
+Received: from cobra.newdream.net ([66.33.216.30]:58725 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752348AbcHLNWt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 09:22:49 -0400
+In-Reply-To: <emc456988a-f658-4bfd-b373-ceec459da0a7@lt-vu-7440>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Vu Pham <vuhuong@mellanox.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Avner Ben Hanoch <avnerb@mellanox.com>, Oren Duer <oren@mellanox.com>
 
-Yep, that's it. Thanks a lot!
+On Thu, 11 Aug 2016, Vu Pham wrote:
+> Hello all,
+> 
+> The background:
+> We have tested scaling with xio messenger and faced multiple *unknown* 
+> problems (hard to trace and reproduce). We recently find out that the 
+> daemonize/fork support isn't full in ibverbs. It assumes that the parent 
+> process will do the RDMA operations. Any child process try to do rdma 
+> operations will experience various unexpected problems.
+> 
+> ceph-osd/ceph-mon/ceph-mds daemonize (fork) after creating messengers.
+> Xio messenger will initialize accelio library and register RDMA memory 
+> in the 1st call to XioMessenger constructor.
+> This situation is very problematic where child process do rdma 
+> operations as described above
+> 
+> http://www.rdmamojo.com/2012/05/24/ibv_fork_init
+> http://www.spinics.net/lists/linux-rdma/msg03364.html
+> I create this PR which forces to daemonize/fork before creating 
+> messenger
+> 
+> https://github.com/ceph/ceph/pull/10600
+> 
+> I have tested this patch by bringing up a cluster with 4 nodes, 8 
+> osds/node, two monitors and run I/Os (4K - 4M block size) from 4 fio 
+> clients.
+> 
+> Is there any known problem to daemonize/fork before creating messenger?
+> Could you help to review and provide feedback?
 
+This more or less works.  The main issue is that we don't catch errors as 
+early as we did and a daemon may appear to start and then immediately 
+exit without printing an error.
 
+There is a Preforker class in common that is meant to address this (it's 
+used by ceph-fuse and ceph-mon already).  It does the fork early, when 
+prefork() is called, and keeps stdout/stderr open for an interim period 
+until you call preforker.exit() or .daemonize().  Any exit code gets 
+passed back to the parent over a socket.  I'm guessing that the mon is 
+already working fine since you're just moving the prefork.daemonize() line 
+around (the actual fork happened way back at
 
-On 11.08.2016 22:44, Sage Weil wrote:
-> On Thu, 11 Aug 2016, Igor Fedotov wrote:
->> Looks like BlueStore::collection_list method makes my day today :)
->>
->> While playing with new objectstore fio plugin (see
->> https://github.com/ceph/ceph/pull/10267) I observed BlueStore fsck reports
->> errors on restart. And completion if properly configured.
->>
->> After significant test case simplification it appeared that BlueStore::fsck
->> detects duplicate nid at the storage. More analysis showed that in fact it's
->> Bluestore::collection_list who returned duplicate entities.
->>
->> I have some gaps in my collection/object naming scheme understanding hence I
->> can't say definitely if fio assigns collection names properly. IMHO it's
->> rather an issue in BlueStore::collection_list.
->>
->> Here is pretty simple (hopefully) log (2 collections and 2 objects total) each
->> showing the case.
->>
->> IMHO the issue somewhere below the following line:
->>
->> 2016-08-11 18:30:44.595101 7fbe78f39780  1 bluestore(./fio-bluestore) fsck
->> collection 281474976710656.0_head
->>
->> where both object keys are reported.
->>
->> Sage, could you please take a look and comment.
-> I think this is the problem:
->
-> 2016-08-11 18:30:44.595104 7fbe78f39780 20 bluestore(./fio-bluestore) collection_list range '--'0x7ffefffffffffffe00000000'.' to '--'0x7ffefffffffffffeffffffff':' and '--'0x800100000000000000000000'.' to '--'0x8001000000000000ffffffff':' start GHMIN
->
-> for the .0 collection it is scanning the hash range that includes the
-> .1 collection.  That's because create_collection is being passed a bit
-> 'bits' value:
->
-> 2016-08-11 18:30:43.697022 7fbe78f39780 15 bluestore(./fio-bluestore) _create_collection 281474976710656.0_head bits 0
-> 2016-08-11 18:30:43.697037 7fbe78f39780 10 bluestore(./fio-bluestore) _create_collection 281474976710656.0_head bits 0 = 0
-> 2016-08-11 18:30:43.697038 7fbe78f39780 15 bluestore(./fio-bluestore) _create_collection 281474976710656.1_head bits 0
-> 2016-08-11 18:30:43.697042 7fbe78f39780 10 bluestore(./fio-bluestore) _create_collection 281474976710656.1_head bits 0 = 0
->
-> Since there are 2 collections, we need (at least) 1 significant bit.
->
-> sage
+	https://github.com/vuhuong/ceph-upstream/blob/5cd5546fb7ddb9ef69380476b0a80038ba74a405/src/ceph_mon.cc#L500
 
+) and you just need to make ceph_osd.cc and ceph_mds.cc use Preforker in a 
+similar way.
+
+sage
