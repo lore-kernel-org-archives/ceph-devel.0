@@ -1,132 +1,91 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Questions about Accepter::stop()
-Date: Sat, 13 Aug 2016 00:31:52 +0200
-Message-ID: <67687e3b-f514-b727-ca3a-173c82fc3860@digiware.nl>
-References: <3492e51f-021b-2c6e-2242-2237add24784@digiware.nl>
- <alpine.DEB.2.11.1608122056380.17762@piezo.us.to>
- <b6ef2b22-e693-afcc-1772-73ab2d6869cc@digiware.nl>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: bufferlist appenders
+Date: Fri, 12 Aug 2016 22:49:59 +0000
+Message-ID: <BLUPR0201MB1524DC4450553A8874C316E3E81F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+References: <alpine.DEB.2.11.1608121418090.17762@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:19927 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751031AbcHLWcD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 12 Aug 2016 18:32:03 -0400
-In-Reply-To: <b6ef2b22-e693-afcc-1772-73ab2d6869cc@digiware.nl>
+Received: from mail-bn3nam01on0074.outbound.protection.outlook.com ([104.47.33.74]:28331
+	"EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751953AbcHLWuD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Aug 2016 18:50:03 -0400
+In-Reply-To: <alpine.DEB.2.11.1608121418090.17762@piezo.us.to>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 12-8-2016 23:40, Willem Jan Withagen wrote:
-> On 12-8-2016 22:58, Sage Weil wrote:
->> On Fri, 12 Aug 2016, Willem Jan Withagen wrote:
->>> Hi,
->>>
->>> Still working on finding out why my OSD is not comming back up.
->>> Looking at the OSD it seems to recover, but it is not reported back to
->>> the other OSD and mons.
->>>
->>> Below some of the code from
->>> 	./src/msg/simple/Accepter.cc
->>>
->>> Turns out that the thread freezes on the join, and the complicating
->>> factor is that shoutdown always reports that
->>>   accepter.stop shutdown failed:  errno 57 (57) Socket is not connected
->>>
->>> Then the code goes into the join, and gets stuck in there.
->>>
->>> So I've execluded that part of the code, and the close section.
->>>
->>> That seems to work, but I would very much some more opinions on this.
->>> Original code was doen by Sage, but John Spray added a bit of exclusion
->>> on the join()
->>>
->>> And even with this change I cannot complete
->>> 	cephtool-test-mon.sh
->>> But I'm getting a lot further down the test.
->>
->> This is the thread we need to wake up in Accepter::entry():
->>
->>     ldout(msgr->cct,20) << "accepter calling poll" << dendl;
->>     int r = poll(&pfd, 1, -1);
->>     if (r < 0)
->>       break;
->>     ldout(msgr->cct,20) << "accepter poll got " << r << dendl;
->>
->>     if (pfd.revents & (POLLERR | POLLNVAL | POLLHUP))
->>       break;
->>
->>     ldout(msgr->cct,10) << "pfd.revents=" << pfd.revents << dendl;
->>     if (done) break;
->>
->> It shutdown(2) isn't the "right" (portable) way to kick the thread blocked 
->> on poll(2) on an accept socket, maybe there is some other socket call that 
->> is more appropriate?  It just needs to wake up poll so that we either see 
->> an error event queued or done == true.
+
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Friday, August 12, 2016 7:27 AM
+> To: ceph-devel@vger.kernel.org
+> Subject: bufferlist appenders
 > 
-> Yup,  that is what I see in the Linux code.
-> Poll returns with revent = 16 = POLLHUP.
+> A ton of time is the encoding/marshalling is spent doing bufferlist appends.
+> This is partly because the buffer code is doing lots of sanity range checks, and
+> party because there are multiple layers that get range checks and length
+> updates (bufferlist _len changes, and bufferlist::append_buffer (a ptr) gets
+> it's length updated, at the very least).
 > 
-> Now I'm sort of wondering what I can do with a socket that is already
-> disconnected.... Somebody has to have disconnected the connection.
-> And why the poll waiting on it does not report that....
-> perhaps calling close on it does signal the HUP.
+> To simplify and speed this up, I propose an 'appender' concept/type that is
+> used for doing appends in a more efficient way.  It would be used like so:
 > 
-> SHUT_RDWR has a few comments (at least in the FreeBSD manpage) but they
-> do not seem to fit this case.
+>  bufferlist bl;
+>  {
+>    bufferlist::safe_appender a = bl.get_safe_appender();
+>    ::encode(foo, a);
+>  }
 > 
-> Any idea oh who would have disconnected this socket?
+> or
 > 
-> Back to reading more manual pages. And trying to figure out the state
-> machine of a socket. :(
+>  {
+>    bufferlist::unsafe_appender a = bl.get_unsafe_appender(1024);
+>    ::encode(foo, a);
+>  }
+> 
+> The appender keeps its own bufferptr that it copies data into.  The bufferptr
+> isn't given to the bufferlist until the appender is destroyed (or flush() is called
+> explicitly).  This means that appends are generally just a memcpy and a
+> position pointer addition.  In the safe_appender case, we also do a range
+> change and allocate a new buffer if necessary.  In the unsafe_appender case,
+> it is the callers responsibility to say how big a buffer is preallocated.
+> 
+> I have a simple prototype here:
+> 
+> 	https://github.com/ceph/ceph/pull/10700
+> 
+> It appears to be almost 10x faster when encoding a uint64_t in a loop!
+> 
+> [ RUN      ] BufferList.appender_bench
+> appending 1073741824 bytes
+> buffer::list::append 20.285963
+> buffer::list encode 19.719120
+> buffer::list::safe_appender::append 2.588926
+> buffer::list::safe_appender::append_v 2.837026 buffer::list::safe_appender
+> encode 3.000614 buffer::list::unsafe_appender::append 2.452116
+> buffer::list::unsafe_appender::append_v 2.553745
+> buffer::list::unsafe_appender encode 2.200110
+> [       OK ] BufferList.appender_bench (55637 ms)
+> 
+> Interesting, unsafe isn't much faster than safe.  I suspect the CPU's branch
+> prediction is just working really well there?
 
-Right,
-
-If I start closing the socket, I'm getting revent = 32.
-Which is POLLINVAL
-	Invalid request: fd not open (output only).
-
-Available both on Linux and FreeBSD. On FreeBSD it is always to get that
-in revents, even if not asked for. 8-;
-So I guess adding that to the break expression is useful.
-
-And tack the closing somewhere into the stop. And make sure that join()
-is called.
-
---WjW
-
->>> void Accepter::stop()
->>> {
->>>   done = true;
->>>   ldout(msgr->cct,10) << __func__ << " accepter on: " << listen_sd << dendl;
->>>
->>>   if (listen_sd >= 0) {
->>>     if ( ::shutdown(listen_sd, SHUT_RDWR) < 0 ) {
->>>       ldout(msgr->cct,0) << __func__ << " shutdown failed: "
->>>               << " errno " << errno << " " << cpp_strerror(errno) << dendl;
->>>     }
->>>   }
->>>   if (errno != ENOTCONN) {
->>>     // wait for thread to stop before closing the socket, to avoid
->>>     // racing against fd re-use.
->>>     if (is_started()) {
->>>         ldout(msgr->cct,0) << __func__ << " wait for thread to join." <<
->>> dendl;
->>>       join();
->>>     }
->>>   } else {
->>>     listen_sd = -1;
->>>   }
->>>
->>>   if (listen_sd >= 0) {
->>>     if ( ::close(listen_sd) < 0 ) {
->>>       ldout(msgr->cct,0) << __func__ << "close failed: "
->>>               << " errno " << errno << " " << cpp_strerror(errno) << dendl;
->>>     }
->>>     listen_sd = -1;
->>>   }
->>>   done = false;
->>> }
-
+Yes it looks like it is. But this is a bit of a contrived case because you're timing this code which is 100% in the L1 cache, which might not be a good model. How bad does it get if the loop is unrolled enough times to fall out of the L1 cache but still in the L2 cache (which might be as pessimistic a simulation as the original code is optimistic). 
+> 
+> Anyway, thoughts on this?  Any suggestions for further improvement?
+> 
+> I think the next step is to figure out how to change our
+> WRITE_CLASS_ENCODER macros and encode function work with both
+> bufferlists and appenders so that it's easy to convert stuff over (and still work
+> with a mix of bufferlist-based encoders and appender-based encoders).
+> 
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
