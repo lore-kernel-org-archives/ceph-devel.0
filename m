@@ -1,121 +1,143 @@
-From: "Chen, Xiaoxi" <xiaoxchen@ebay.com>
-Subject: Re: cephfs performance benchmark -- metadata intensive
-Date: Fri, 12 Aug 2016 02:02:27 +0000
-Message-ID: <A2DEC671-527C-44FB-B788-8A2149FAD9F2@ebay.com>
-References: <CAEYCsVKksnVV+HeNBo4YofPz4Re1CRT3jCTCE2L12NqieMVYWA@mail.gmail.com>
- <CALe9h7fqrOCGn564HLPyMS6ouOHaY0phuZ64OHnq0Vx8VJWoug@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore different allocator performance Vs FileStore
+Date: Fri, 12 Aug 2016 03:10:10 +0000
+Message-ID: <BL2PR02MB211500E786B1AB540711A7E8F41F0@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB211554DBEC8F344E465BAFE5F41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <1431B127-59B3-4DCA-B3F2-FBB209ED2059@sandisk.com>
+ <CY1PR0201MB1820F3561F0F89AFAF8A24AE851E0@CY1PR0201MB1820.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608111636360.17762@piezo.us.to>
+ <BLUPR0201MB1524345DD4A25895939CE7B6E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608111710400.17762@piezo.us.to>
+ <BLUPR0201MB1524F46599D0A90A7025F373E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608111929250.17770@piezo.us.to>
+ <BLUPR0201MB15248F97217C67BA0051F131E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608112000200.17762@piezo.us.to>
+ <BLUPR0201MB15249FEF89ED408BDCC5808BE81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608112018400.17762@piezo.us.to>
+ <BLUPR0201MB1524A947959FE39B1D2A5E4EE81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608112115250.17762@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from phx-mipot-002.corp.ebay.com ([216.113.172.65]:2546 "EHLO
-	phx-mipot-002.corp.ebay.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751900AbcHLCMH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 11 Aug 2016 22:12:07 -0400
-In-Reply-To: <CALe9h7fqrOCGn564HLPyMS6ouOHaY0phuZ64OHnq0Vx8VJWoug@mail.gmail.com>
+Received: from mail-sn1nam01on0052.outbound.protection.outlook.com ([104.47.32.52]:31472
+	"EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751497AbcHLD0m (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 11 Aug 2016 23:26:42 -0400
+In-Reply-To: <alpine.DEB.2.11.1608112115250.17762@piezo.us.to>
 Content-Language: en-US
-Content-ID: <1ECF538A0092434F85FE67B875ADD580@namprd07.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>, Xiaoxi Chen <superdebuger@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, Mark Nelson <mnelson@redhat.com>, "james.liu@alibaba-inc.com" <james.liu@alibaba-inc.com>
+To: Sage Weil <sage@newdream.net>, Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-DQpIaSBKb2huLA0KICAgVGhhbmtzIGZvciB5b3VyIGlucHV0cy4gTXkgIHJlcGx5IGlubGluZWQ6
-KSAgDQpYaWFveGkNCg0KDQoNCg0KDQpPbiA4LzExLzE2LCA2OjA3IFBNLCAiSm9obiBTcHJheSIg
-PGpzcHJheUByZWRoYXQuY29tPiB3cm90ZToNCg0KPk9uIFRodSwgQXVnIDExLCAyMDE2IGF0IDg6
-MjkgQU0sIFhpYW94aSBDaGVuIDxzdXBlcmRlYnVnZXJAZ21haWwuY29tPiB3cm90ZToNCj4+IEhp
-ICwNCj4+DQo+Pg0KPj4gICAgICBIZXJlIGlzIHRoZSBzbGlkZSBJIHNoYXJlZCB5ZXN0ZXJkYXkg
-b24gcGVyZm9ybWFuY2UgbWVldGluZy4NCj4+IFRoYW5rcyBhbmQgaG9waW5nIGZvciBpbnB1dHMu
-DQo+Pg0KPj4NCj4+IGh0dHA6Ly93d3cuc2xpZGVzaGFyZS5uZXQvWGlhb3hpQ2hlbjMvY2VwaGZz
-LWpld2VsLW1kcy1wZXJmb3JtYW5jZS1iZW5jaG1hcmsNCj4NCj5UaGVzZSBhcmUgZGVmaW5pdGVs
-eSB1c2VmdWwgcmVzdWx0cyBhbmQgSSBlbmNvdXJhZ2UgZXZlcnlvbmUgd29ya2luZw0KPndpdGgg
-Y2VwaGZzIHRvIGdvIGFuZCBsb29rIGF0IFhpYW94aSdzIHNsaWRlcy4NCj4NCj5UaGUgbWFpbiB0
-aGluZyB0aGF0IHRoaXMgaGlnaGxpZ2h0ZWQgZm9yIG1lIHdhcyBvdXIgbGFjayBvZiB0ZXN0aW5n
-IHNvDQo+ZmFyIG9uIHN5c3RlbXMgd2l0aCBmdWxsIGNhY2hlcy4gIFRvbyBtdWNoIG9mIG91ciBl
-eGlzdGluZyB0ZXN0aW5nIGlzDQo+ZG9uZSBvbiBmcmVzaGx5IGNvbmZpZ3VyZWQgc3lzdGVtcyB0
-aGF0IG5ldmVyIGZpbGwgdGhlIE1EUyBjYWNoZS4NCj4NCj5UZXN0IDIuMSBub3RlcyB0aGF0IHdl
-IGRvbid0IGVuYWJsZSBkaXJlY3RvcnkgZnJhZ21lbnRhdGlvbiBieSBkZWZhdWx0DQo+Y3VycmVu
-dGx5IC0tIHRoaXMgaXMgYW4gaXNzdWUsIGFuZCBJJ20gaG9waW5nIHdlIGNhbiBzd2l0Y2ggaXQg
-b24gYnkNCj5kZWZhdWx0IGluIEtyYWtlbiAoc2VlIHRocmVhZCAiU3dpdGNoaW5nIG9uIG1kc19i
-YWxfZnJhZyBieSBkZWZhdWx0IikuDQo+SW4gdGhlIG1lYW50aW1lIHdlIGhhdmUgdGhlIGZpeCB0
-aGF0IFBhdHJpY2sgd3JvdGUgZm9yIEpld2VsIHdoaWNoIGF0DQo+bGVhc3QgcHJldmVudHMgcGVv
-cGxlIGNyZWF0aW5nIGRpcmZyYWdzIHRvbyBsYXJnZSBmb3IgdGhlIE9TRHMgdG8NCj5oYW5kbGUu
-DQo+DQo+VGVzdCAyLjI6IHNpbmNlIGEgImZhaWxpbmcgdG8gcmVzcG9uZCB0byBjYWNoZSBwcmVz
-c3VyZSIgYnVnIGlzDQo+YWZmZWN0aW5nIHRoaXMsIEkgd291bGQgZ3Vlc3Mgd2Ugc2VlIHRoZSBw
-ZXJmb3JtYW5jZSBmYWxsIG9mZiBhdCBhYm91dA0KPnRoZSBwb2ludCB3aGVyZSB0aGUgKmNsaWVu
-dCogY2FjaGVzIGZpbGwgdXAgKHNvIHRoZXkgc3RhcnQgdHJpbW1pbmcNCj50aGluZ3MgZXZlbiB0
-aG91Z2ggdGhleSdyZSBpZ25vcmUgY2FjaGUgcHJlc3N1cmUpLiAgSXQgd291bGQgYmUNCj5pbnRl
-cmVzdGluZyB0byBzZWUgdGhpcyBjaGFydCB3aXRoIGFkZGl0aW9uIGxpbmVzIGZvciBzb21lIHJl
-bGF0ZWQNCj5wZXJmIGNvdW50ZXJzIGxpa2UgbWRzX2xvZy5ldnRybSBhbmQgbWRzLmlub2Rlc19l
-eHBpcmVkLCB0aGF0IG1pZ2h0DQo+bWFrZSBpdCBwcmV0dHkgb2J2aW91cyB3aGVyZSB0aGUgTURT
-IGlzIGVudGVyaW5nIGRpZmZlcmVudCBzdGFnZXMgdGhhdA0KPnNlZSBhIGRlY3JlYXNlIGluIHRo
-ZSByYXRlIG9mIGhhbmRsaW5nIGNsaWVudCByZXF1ZXN0cy4NCj4NCj5XZSByZWFsbHkgbmVlZCB0
-byBzb3J0IG91dCB0aGUgImZhaWxpbmcgdG8gcmVzcG9uZCB0byBjYWNoZSBwcmVzc3VyZSINCj5p
-c3N1ZXMgdGhhdCBrZWVwIHBvcHBpbmcgdXAsIGVzcGVjaWFsbHkgaWYgdGhleSdyZSBzdGlsbCBo
-YXBwZW5pbmcgb24NCj5hIGNvbXBhcmF0aXZlbHkgc2ltcGxlIHRlc3QgdGhhdCBpcyBqdXN0IGNy
-ZWF0aW5nIGZpbGVzLiAgV2UgaGF2ZSBhDQo+c3BlY2lmaWMgdGVzdCBmb3IgdGhpc1sxXSB0aGF0
-IGlzIGN1cnJlbnRseSBiZWluZyBydW4gYWdhaW5zdCB0aGUgZnVzZQ0KPmNsaWVudCBidXQgbm90
-IHRoZSBrZXJuZWwgY2xpZW50WzJdLiAgVGhpcyBpcyBhIGdvb2QgdGltZSB0byB0cnkgYW5kDQo+
-cHVzaCB0aGF0IGZvcndhcmQgc28gSSd2ZSBraWNrZWQgb2ZmIGFuIGV4cGVyaW1lbnRhbCBydW4g
-aGVyZToNCj5odHRwOi8vcHVscGl0by5jZXBoLmNvbS9qc3ByYXktMjAxNi0wOC0xMF8xNjoxNDo1
-Mi1rY2VwaGZzOnJlY292ZXJ5LW1hc3Rlci10ZXN0aW5nLWJhc2ljLW1pcmEvDQo+DQo+SW4gdGhl
-IG1lYW50aW1lLCBhbHRob3VnaCB0aGVyZSBhcmUgcmVwb3J0cyBvZiBzaW1pbGFyIGlzc3VlcyB3
-aXRoDQo+bmV3ZXIga2VybmVscywgaXQgd291bGQgYmUgdmVyeSB1c2VmdWwgdG8gY29uZmlybSBp
-ZiB0aGUgc2FtZSBpc3N1ZSBpcw0KPnN0aWxsIG9jY3VycmluZyB3aXRoIG1vcmUgcmVjZW50IGtl
-cm5lbHMuICBJc3N1ZXMgd2l0aCBjYWNoZSB0cmltbWluZw0KPmhhdmUgb2NjdXJyZWQgZHVlIHRv
-IHZhcmlvdXMgKHNlcGFyYXRlKSBidWdzLCBzbyBpdCdzIHBvc3NpYmxlIHRoYXQNCj53aGlsZSBz
-b21lIHBlb3BsZSBhcmUgc3RpbGwgc2VlaW5nIGNhY2hlIHRyaW1taW5nIGlzc3VlcyB3aXRoIHJl
-Y2VudA0KPmtlcm5lbHMsIHRoZSBzcGVjaWZpYyBjYXNlIHlvdSdyZSBoaXR0aW5nIG1pZ2h0IGJl
-IGZpeGVkLg0KDQpBRkFJSyByaGVsIDcuMiB3aWxsIGJhY2twb3J0IG1vc3QoYWxsPykgZml4ZXMg
-YWdhaW5zdCBjZXBoZnMva3JiZCBpbiBuZXdlciBrZXJuZWw/IElmIHRoaXMgaXMgdGhlDQpDYXNl
-LCB3ZSB3b3VsZCBsaWtlIHRvIHRyeSA3LjIgYXMgdWJ1bnR1IDE2LjA0IHN0aWxsIG5vdCBmdWxs
-eSBpbnRlZ3JhdGVkIHdpdGggb3VyIG9wZW5zdGFjayBlbnYgeWV0Lg0KPg0KPlRlc3QgMi4zOiBy
-ZXN0YXJ0aW5nIHRoZSBNRFMgZG9lc24ndCBhY3R1YWxseSBnaXZlIHlvdSBhIGNvbXBsZXRlbHkN
-Cj5lbXB0eSBjYWNoZSAoZXZlcnl0aGluZyBpbiB0aGUgam91cm5hbCBnZXRzIHJlcGxheWVkIHRv
-IHByZS1wb3B1bGF0ZQ0KPnRoZSBjYWNoZSBvbiBNRFMgc3RhcnR1cCkuICBIb3dldmVyLCB0aGUg
-cmVzdWx0cyBhcmUgc3RpbGwgdmFsaWQNCj5iZWNhdXNlIHlvdSdyZSB1c2luZyBhIGRpZmZlcmVu
-dCByYW5kb20gb3JkZXIgaW4gdGhlIG5vbi1jYWNoaW5nIHRlc3QNCj5jYXNlLCBhbmQgdGhlIG51
-bWJlciBvZiBpbm9kZXMgaW4geW91ciBqb3VybmFsIGlzIHByb2JhYmx5IG11Y2gNCj5zbWFsbGVy
-IHRoYW4gdGhlIG92ZXJhbGwgY2FjaGUgc2l6ZSBzbyBpdCdzIG9ubHkgYSBsaXR0bGUgYml0DQo+
-cG9wdWxhdGVkLiAgV2UgZG9uJ3QgY3VycmVudGx5IGhhdmUgYSAiZHJvcCBjYWNoZSIgY29tbWFu
-ZCBidWlsdCBpbnRvDQo+dGhlIE1EUyBidXQgaXQgd291bGQgYmUgcHJldHR5IGVhc3kgdG8gYWRk
-IG9uZSBmb3IgdXNlIGluIHRlc3RpbmcNCj4oYmFzaWNhbGx5IGp1c3QgY2FsbCBtZHMtPm1kY2Fj
-aGUtPnRyaW0oMCkpLg0KPg0KPkFzIG9uZSB3b3VsZCBpbWFnaW5lLCB0aGUgbm9uLWNhY2hpbmcg
-Y2FzZSBpcyBsYXRlbmN5LWRvbWluYXRlZCB3aGVuDQo+dGhlIHdvcmtpbmcgc2V0IGlzIGxhcmdl
-ciB0aGFuIHRoZSBjYWNoZSwgd2hlcmUgZWFjaCBjbGllbnQgaXMgd2FpdGluZw0KPmZvciBvbmUg
-b3BlbiB0byBmaW5pc2ggYmVmb3JlIHByb2NlZWRpbmcgdG8gdGhlIG5leHQuICBUaGUgTURTIGlz
-DQo+cHJvYmFibHkgY2FwYWJsZSBvZiBoYW5kbGluZyBtYW55IG1vcmUgb3BlcmF0aW9ucyBwZXIg
-c2Vjb25kLCBidXQgaXQNCj53b3VsZCBuZWVkIG1vcmUgcGFyYWxsZWwgSU8gb3BlcmF0aW9ucyBm
-cm9tIHRoZSBjbGllbnRzLiAgV2hlbiBhDQo+c2luZ2xlIGNsaWVudCBpcyBkb2luZyBvcGVucyBv
-bmUgYnkgb25lLCB5b3UncmUgcG90ZW50aWFsbHkgc2VlaW5nIGENCj5mdWxsIG5ldHdvcmsrZGlz
-ayBsYXRlbmN5IGZvciBlYWNoIG9uZSAodGhvdWdoIGluIHByYWN0aWNlIHRoZSBPU0QNCj5yZWFk
-IGNhY2hlIHdpbGwgYmUgaGVscGluZyBhIGxvdCBoZXJlKS4gIFRoaXMgbm9uLWNhY2hpbmcgY2Fz
-ZSB3b3VsZA0KPmJlIHRoZSBtYWluIGFyZ3VtZW50IGZvciBnaXZpbmcgdGhlIG1ldGFkYXRhIHBv
-b2wgbG93IGxhdGVuY3kgKFNTRCkNCj5zdG9yYWdlLg0KDQpJIGd1ZXNzIHRoZSBhbXBsaWZpY2F0
-aW9uIG1pZ2h0IGJlIHRoZSBpc3N1ZSwgaW4gbWRzIGRlYnVnIGxvZyBJIGNhbiBzZWUgbG90cyBv
-ZiBjYWNoZSBpbnNlcnQvZXZpY3QsDQpCZWNhdXNlIHRoZSB3b3JraW5nIHNldCBpcyByYW5kb20s
-IHNvIHRoZSBwYXJlbnQgZGlyIGlzIGxpa2VseSBub3QgaW4gdGhlIGNhY2hlLCBzbyBvcGVuIGEg
-ZmlsZSBuZWVkIHRvIGxvYWQNClRoZSBkZW50cmllcyBvZiB0aGUgcGFyZW50IGRpciwgd2hpY2gg
-bWVhbnMgbG9hZGluZyhhbmQgZXZpY3RpbmcpIDQwOTYgZmRzPyANCg0KQW5kIGFzIEkgbmV2ZXIg
-ZHJvcCBwYWdlY2FjaGUgb24gT1NEIHNpZGUgKHdlIG1lYW4gdG8gZG8gdGhpcyB0byBtYWtlIE9T
-RCBhcyBmYXN0IGFzIHBvc3NpYmxlIC0gbmV2ZXIgYmUgdGhlIGJvdHRsZW5lY2spLCBtb3N0IG9m
-IHRoZSBJTw0KU2hvdWxkIHNlcnZlZCBmcm9tIHBhZ2VjYWNoZSh0aGUgSU9TVEFUIG9mIE9TRCBz
-aWRlIHByb3ZlIHRoaXMsIGl0IGlzIHByZXR0eSBpZGxlKS4NCj4NCj5UZXN0IDIuNTogVGhlIG9i
-c2VydmF0aW9uIHRoYXQgdGhlIENQVSBib3R0bGVuZWNrIG1ha2VzIHVzaW5nIGZhc3QNCj5zdG9y
-YWdlIGZvciB0aGUgbWV0YWRhdGEgcG9vbCBsZXNzIHVzZWZ1bCAoaW4gc2VxdWVudGlhbC9jYWNo
-ZWQgY2FzZXMpDQo+aXMgdmFsaWQsIGFsdGhvdWdoIGl0IGNvdWxkIHN0aWxsIGJlIHVzZWZ1bCB0
-byBpc29sYXRlIHRoZSBtZXRhZGF0YQ0KPk9TRHMgKHByb2JhYmx5IFNTRHMgc2luY2Ugbm90IHNv
-IG11Y2ggY2FwYWNpdHkgaXMgbmVlZGVkKSB0byBhdm9pZA0KPmNvbXBldGluZyB3aXRoIGRhdGEg
-b3BlcmF0aW9ucy4gIEZvciByYW5kb20gYWNjZXNzIGluIHRoZSBub24tY2FjaGluZw0KPmNhc2Vz
-ICgyLjMsIDIuNCkgSSB0aGluayB5b3Ugd291bGQgcHJvYmFibHkgc2VlIGFuIGltcHJvdmVtZW50
-IGZyb20NCj5TU0RzLg0KDQpEbyB3ZSBoYXZlIGFueSBjaGFuY2UgdG8gYnJlYWsgbWRzX2xvY2sg
-aW50byBzbWFsbGVyIG9uZT8gVGhhdCBjb3VsZCBiZSBhIGJpZyB3aW4gdG8gaGF2ZSBtdWx0aS10
-aHJlYWQ/DQo+DQo+VGhhbmtzIGFnYWluIHRvIHRoZSB0ZWFtIGZyb20gZWJheSBmb3Igc2hhcmlu
-ZyBhbGwgdGhpcy4NCj4NCj5Kb2huDQo+DQo+DQo+DQo+MS4gaHR0cHM6Ly9naXRodWIuY29tL2Nl
-cGgvY2VwaC1xYS1zdWl0ZS9ibG9iL21hc3Rlci90YXNrcy9jZXBoZnMvdGVzdF9jbGllbnRfbGlt
-aXRzLnB5I0w5Ng0KPjIuIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy85NDY2DQo+DQo+
-DQo+Pg0KPj4gWGlhb3hpDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
-IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBv
-ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRv
-bW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+Sage,
+I tried your PR but it is not helping much. See this each insert_free() call is taking ~40sec to complete and we have 2 calls that is taking time..
+
+2016-08-11 17:32:48.086109 7f7243fad8c0 10 bitmapalloc:init_add_free instance 140128595341440 offset 0x2000 length 0x6ab7d14f000
+2016-08-11 17:32:48.086111 7f7243fad8c0 20 bitmapalloc:insert_free instance 140128595341440 off 0x2000 len 0x6ab7d14f000
+2016-08-11 17:33:27.843948 7f7243fad8c0 30 freelist  no more clear bits in 0x6ab7d100000
+
+2016-08-11 17:33:30.839093 7f7243fad8c0 10 bitmapalloc:init_add_free instance 140127837929472 offset 0x2000 length 0x6ab7d14f000
+2016-08-11 17:33:30.839095 7f7243fad8c0 20 bitmapalloc:insert_free instance 140127837929472 off 0x2000 len 0x6ab7d14f000
+2016-08-11 17:34:10.517809 7f7243fad8c0 30 freelist  no more clear bits in 0x6ab7d100000
+
+I have also tried with the following and it is not helping either..
+
+       bluestore_bluefs_min_ratio = .01
+        bluestore_freelist_blocks_per_key = 512
+
+
+I did some debugging on this to find out which call inside this function is taking time and I found this within BitAllocator::free_blocks
+
+  debug_assert(is_allocated(start_block, num_blocks));
+
+  free_blocks_int(start_block, num_blocks);
+
+I did skip this debug_assert and total time reduced from ~80sec ~49sec , so, that's a significant improvement.
+
+Next, I found out that debug_assert(is_allocated()) is called from free_blocks_int as well. I commented out blindly all debug_assert(is_allocated()) and performance became similar to stupid/filestore.
+I didn't bother to look into is_allocated() anymore as my guess is we can safely ignore this during mkfs() time ?
+But, it will be good if we can optimize this as it may induce latency in the IO path (?).
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net]
+Sent: Thursday, August 11, 2016 2:20 PM
+To: Allen Samuels
+Cc: Ramesh Chander; Somnath Roy; ceph-devel
+Subject: RE: Bluestore different allocator performance Vs FileStore
+
+On Thu, 11 Aug 2016, Allen Samuels wrote:
+> > -----Original Message-----
+> > From: Sage Weil [mailto:sage@newdream.net]
+> > Sent: Thursday, August 11, 2016 1:24 PM
+> > To: Allen Samuels <Allen.Samuels@sandisk.com>
+> > Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>; Somnath Roy
+> > <Somnath.Roy@sandisk.com>; ceph-devel <ceph-devel@vger.kernel.org>
+> > Subject: RE: Bluestore different allocator performance Vs FileStore
+> >
+> > On Thu, 11 Aug 2016, Allen Samuels wrote:
+> > > Perhaps my understanding of the blueFS is incorrect -- so please
+> > > clarify as needed.
+> > >
+> > > I thought that the authoritative indication of space used by
+> > > BlueFS was contained in the snapshot/journal of BlueFS itself, NOT
+> > > in the KV store itself. This requires that upon startup, we replay
+> > > the BlueFS snapshot/journal into the FreeListManager so that it
+> > > properly records the consumption of BlueFS space (since that
+> > > allocation MAY NOT be accurate within the FreeListmanager itself).
+> > > But that this playback need not generate an KVStore operations
+> > > (since those are duplicates of the BlueFS).
+> > >
+> > > So in the code you cite:
+> > >
+> > > fm->allocate(0, reserved, t);
+> > >
+> > > There's no need to commit 't', and in fact, in the general case,
+> > > you don't want to commit 't'.
+> > >
+> > > That suggests to me that a version of allocate that doesn't have a
+> > > transaction could be easily created would have the speed we're
+> > > looking for (and independence from the BitMapAllocator to KVStore chunking).
+> >
+> > Oh, I see.  Yeah, you're right--this step isn't really necessary, as
+> > long as we ensure that the auxilliary representation of what bluefs
+> > owns (bluefs_extents in the superblock) is still passed into the
+> > Allocator during initialization.  Having the freelist reflect the
+> > allocator that this space was "in use" (by bluefs) and thus off
+> > limits to bluestore is simple but not strictly necessary.
+> >
+> > I'll work on a PR that avoids this...
+
+https://github.com/ceph/ceph/pull/10698
+
+Ramesh, can you give it a try?
+
+> > > I suspect that we also have long startup times because we're doing
+> > > the same underlying bitmap operations except they come from the
+> > > BlueFS replay code instead of the BlueFS initialization code, but
+> > > same problem with likely the same fix.
+> >
+> > BlueFS doesn't touch the FreelistManager (or explicitly persist the
+> > freelist at all)... we initialize the in-memory Allocator state from
+> > the metadata in the bluefs log.  I think we should be fine on this end.
+>
+> Likely that code suffers from the same problem -- a false need to
+> update the KV Store (During the playback, BlueFS extents are converted
+> to bitmap runs, it's essentially the same lower level code as the case
+> we're seeing now, but it instead of being driven by an artificial "big
+> run", it'sll be driven from the BlueFS Journal replay code). But
+> that's just a guess, I don't have time to track down the actual code right now.
+
+BlueFS can't touch the freelist (or kv store, ever) since it ultimately backs the kv store and that would be problematic.  We do initialize the bluefs Allocator's in-memory state, but that's it.
+
+The PR above changes the BlueStore::_init_alloc() so that BlueStore's Allocator state is initialize with both the freelist state (from kv store)
+*and* the bluefs_extents list (from the bluestore superblock).  (From this Allocator's perspective, all of bluefs's space is allocated and can't be used.  BlueFS has it's own separate instance to do it's internal
+allocations.)
+
+sage
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
