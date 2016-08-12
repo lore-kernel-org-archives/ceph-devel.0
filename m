@@ -1,139 +1,99 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore different allocator performance Vs FileStore
-Date: Fri, 12 Aug 2016 15:43:38 +0000
-Message-ID: <BL2PR02MB21157E270EA0F2F6FD7851D1F41F0@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <BL2PR02MB211554DBEC8F344E465BAFE5F41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <1431B127-59B3-4DCA-B3F2-FBB209ED2059@sandisk.com>
- <CY1PR0201MB1820F3561F0F89AFAF8A24AE851E0@CY1PR0201MB1820.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608111636360.17762@piezo.us.to>
- <BLUPR0201MB1524345DD4A25895939CE7B6E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608111710400.17762@piezo.us.to>
- <BLUPR0201MB1524F46599D0A90A7025F373E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608111929250.17770@piezo.us.to>
- <BLUPR0201MB15248F97217C67BA0051F131E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608112000200.17762@piezo.us.to>
- <BLUPR0201MB15249FEF89ED408BDCC5808BE81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608112018400.17762@piezo.us.to>
- <BLUPR0201MB1524A947959FE39B1D2A5E4EE81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608112115250.17762@piezo.us.to>
- <alpine.DEB.2.11.1608121521010.29701@piezo.us.to>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: Fork and RDMA operations
+Date: Fri, 12 Aug 2016 23:22:25 +0800
+Message-ID: <CACJqLybXfss4ay5+9WV6Ux1myrkDBiBN2jUSrbVKB44kak-XQg@mail.gmail.com>
+References: <emc456988a-f658-4bfd-b373-ceec459da0a7@lt-vu-7440> <alpine.DEB.2.11.1608121314380.17762@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0045.outbound.protection.outlook.com ([104.47.42.45]:48864
-	"EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+Received: from mail-ty1jpn01on0132.outbound.protection.outlook.com ([104.47.93.132]:41041
+	"EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751934AbcHLPnn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 12 Aug 2016 11:43:43 -0400
-In-Reply-To: <alpine.DEB.2.11.1608121521010.29701@piezo.us.to>
-Content-Language: en-US
+	id S1752601AbcHLP4D (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Aug 2016 11:56:03 -0400
+Received: by mail-ua0-f175.google.com with SMTP id 97so46723926uav.3
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 08:22:35 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1608121314380.17762@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Ramesh Chander <Ramesh.Chander@sandisk.com>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Vu Pham <vuhuong@mellanox.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Avner Ben Hanoch <avnerb@mellanox.com>, Oren Duer <oren@mellanox.com>
 
------Original Message-----
-From: Sage Weil [mailto:sage@newdream.net]
-Sent: Friday, August 12, 2016 8:26 AM
-To: Ramesh Chander
-Cc: Allen Samuels; Somnath Roy; ceph-devel
-Subject: RE: Bluestore different allocator performance Vs FileStore
+Hi Vu,
 
-On Thu, 11 Aug 2016, Sage Weil wrote:
-> On Thu, 11 Aug 2016, Allen Samuels wrote:
-> > > -----Original Message-----
-> > > From: Sage Weil [mailto:sage@newdream.net]
-> > > Sent: Thursday, August 11, 2016 1:24 PM
-> > > To: Allen Samuels <Allen.Samuels@sandisk.com>
-> > > Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>; Somnath Roy
-> > > <Somnath.Roy@sandisk.com>; ceph-devel <ceph-devel@vger.kernel.org>
-> > > Subject: RE: Bluestore different allocator performance Vs
-> > > FileStore
-> > >
-> > > On Thu, 11 Aug 2016, Allen Samuels wrote:
-> > > > Perhaps my understanding of the blueFS is incorrect -- so please
-> > > > clarify as needed.
-> > > >
-> > > > I thought that the authoritative indication of space used by
-> > > > BlueFS was contained in the snapshot/journal of BlueFS itself,
-> > > > NOT in the KV store itself. This requires that upon startup, we
-> > > > replay the BlueFS snapshot/journal into the FreeListManager so
-> > > > that it properly records the consumption of BlueFS space (since
-> > > > that allocation MAY NOT be accurate within the FreeListmanager
-> > > > itself). But that this playback need not generate an KVStore
-> > > > operations (since those are duplicates of the BlueFS).
-> > > >
-> > > > So in the code you cite:
-> > > >
-> > > > fm->allocate(0, reserved, t);
-> > > >
-> > > > There's no need to commit 't', and in fact, in the general case,
-> > > > you don't want to commit 't'.
-> > > >
-> > > > That suggests to me that a version of allocate that doesn't have
-> > > > a transaction could be easily created would have the speed we're
-> > > > looking for (and independence from the BitMapAllocator to KVStore chunking).
-> > >
-> > > Oh, I see.  Yeah, you're right--this step isn't really necessary,
-> > > as long as we ensure that the auxilliary representation of what
-> > > bluefs owns (bluefs_extents in the superblock) is still passed
-> > > into the Allocator during initialization.  Having the freelist
-> > > reflect the allocator that this space was "in use" (by bluefs) and
-> > > thus off limits to bluestore is simple but not strictly necessary.
-> > >
-> > > I'll work on a PR that avoids this...
+Actually you and me go into the same loop, in my async backend
+pr(https://github.com/ceph/ceph/pull/10264) the
+commit(https://github.com/ceph/ceph/pull/10264/commits/7055bafbcbf06425e71808cb2b089d1d04706728)
+defines a interface for prefork/postfork things. It's much like
+global_init_prefork_start/global_init_postfork_start but it's a
+generic interface.
+
+Refer to Kefu's comment why we need this:
+=============
+note to myself, w.r.t. the before/after daemonize hook
+
+1. it's a natural way to do bind/rebind in the event thread
+2. we do bind before daemon(2) now
+3. the child process after daemon(2) is a single threaded process, and
+all event threads are terminated, so no threads is taking care of
+bind/rebind after daemon(2),
+
+that's why we need to re-spawn the threads after daemon(2).
+=============
+
+So let's resolve alike problem like this
+
+
+On Fri, Aug 12, 2016 at 9:22 PM, Sage Weil <sage@newdream.net> wrote:
+> On Thu, 11 Aug 2016, Vu Pham wrote:
+>> Hello all,
+>>
+>> The background:
+>> We have tested scaling with xio messenger and faced multiple *unknown*
+>> problems (hard to trace and reproduce). We recently find out that the
+>> daemonize/fork support isn't full in ibverbs. It assumes that the parent
+>> process will do the RDMA operations. Any child process try to do rdma
+>> operations will experience various unexpected problems.
+>>
+>> ceph-osd/ceph-mon/ceph-mds daemonize (fork) after creating messengers.
+>> Xio messenger will initialize accelio library and register RDMA memory
+>> in the 1st call to XioMessenger constructor.
+>> This situation is very problematic where child process do rdma
+>> operations as described above
+>>
+>> http://www.rdmamojo.com/2012/05/24/ibv_fork_init
+>> http://www.spinics.net/lists/linux-rdma/msg03364.html
+>> I create this PR which forces to daemonize/fork before creating
+>> messenger
+>>
+>> https://github.com/ceph/ceph/pull/10600
+>>
+>> I have tested this patch by bringing up a cluster with 4 nodes, 8
+>> osds/node, two monitors and run I/Os (4K - 4M block size) from 4 fio
+>> clients.
+>>
+>> Is there any known problem to daemonize/fork before creating messenger?
+>> Could you help to review and provide feedback?
 >
-> https://github.com/ceph/ceph/pull/10698
+> This more or less works.  The main issue is that we don't catch errors as
+> early as we did and a daemon may appear to start and then immediately
+> exit without printing an error.
 >
-> Ramesh, can you give it a try?
+> There is a Preforker class in common that is meant to address this (it's
+> used by ceph-fuse and ceph-mon already).  It does the fork early, when
+> prefork() is called, and keeps stdout/stderr open for an interim period
+> until you call preforker.exit() or .daemonize().  Any exit code gets
+> passed back to the parent over a socket.  I'm guessing that the mon is
+> already working fine since you're just moving the prefork.daemonize() line
+> around (the actual fork happened way back at
 >
-> > > > I suspect that we also have long startup times because we're
-> > > > doing the same underlying bitmap operations except they come
-> > > > from the BlueFS replay code instead of the BlueFS initialization
-> > > > code, but same problem with likely the same fix.
-> > >
-> > > BlueFS doesn't touch the FreelistManager (or explicitly persist
-> > > the freelist at all)... we initialize the in-memory Allocator
-> > > state from the metadata in the bluefs log.  I think we should be fine on this end.
-> >
-> > Likely that code suffers from the same problem -- a false need to
-> > update the KV Store (During the playback, BlueFS extents are
-> > converted to bitmap runs, it's essentially the same lower level code
-> > as the case we're seeing now, but it instead of being driven by an
-> > artificial "big run", it'sll be driven from the BlueFS Journal
-> > replay code). But that's just a guess, I don't have time to track down the actual code right now.
+>         https://github.com/vuhuong/ceph-upstream/blob/5cd5546fb7ddb9ef69380476b0a80038ba74a405/src/ceph_mon.cc#L500
 >
-> BlueFS can't touch the freelist (or kv store, ever) since it
-> ultimately backs the kv store and that would be problematic.  We do
-> initialize the bluefs Allocator's in-memory state, but that's it.
+> ) and you just need to make ceph_osd.cc and ceph_mds.cc use Preforker in a
+> similar way.
 >
-> The PR above changes the BlueStore::_init_alloc() so that BlueStore's
-> Allocator state is initialize with both the freelist state (from kv
-> store)
-> *and* the bluefs_extents list (from the bluestore superblock).  (From
-> this Allocator's perspective, all of bluefs's space is allocated and
-> can't be used.  BlueFS has it's own separate instance to do it's
-> internal
-> allocations.)
-
-Ah, okay, so after our conversation in standup I went and looked at the code some more and realized I've been thinking about the BitmapFreelistManager and not the BitMapAllocator.  The ~40s is all CPU time spent updating in-memory bits, and has nothing to do with pushing updates through rocksdb.  Sorry for the confusing conversation.
-
-So... I think there is one thing we can do: change the initialization of the allocator state from the freelist so that the assumption is that space is freed and we tell it was is allocation (currently we assume everything is allocated and tell it what is free).  I'm not sure it's worth it,
-though: we'll just make things slower to start up on a full OSD instead of slower on an empty OSD.  And it seems like the CPU time really won't be significant anyway once the debugging stuff is taken out.
-
-I think this PR
-
-https://github.com/ceph/ceph/pull/10698
-
-is still a good idea, though, since it avoids useless freelist kv work during mkfs.
-
-Does that sound right?  Or am I still missing something?
-
-Thanks for you patience!
-
-[Somnath] Yes, I think it is a good idea , it seems it will reduce some kv operation from IO path as well  because _balance_bluefs_freespace is in IO path (?)
-sage
-
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
