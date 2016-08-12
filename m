@@ -1,137 +1,70 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: [ceph-users] cephfs performance benchmark -- metadata intensive
-Date: Fri, 12 Aug 2016 11:03:02 +0100
-Message-ID: <CALe9h7cDeh7tDbUQniJxQMCquT0tTCqdRT5zpoDCpMSP=e8FiQ@mail.gmail.com>
-References: <CAEYCsVKksnVV+HeNBo4YofPz4Re1CRT3jCTCE2L12NqieMVYWA@mail.gmail.com>
- <CALe9h7fqrOCGn564HLPyMS6ouOHaY0phuZ64OHnq0Vx8VJWoug@mail.gmail.com> <CAMdDSN3gKZCV0+6nVC7ba_9KqvWQgMrGq1jPxm9EPws4Ls286Q@mail.gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: potential issue with Bluestore collection_list
+Date: Fri, 12 Aug 2016 15:27:56 +0300
+Message-ID: <79464bf5-5ad6-7121-de4a-0f7978ad218e@mirantis.com>
+References: <8231b124-5e67-aa5a-98c3-e8a5c5ddaac7@mirantis.com>
+ <alpine.DEB.2.11.1608111943090.17762@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f182.google.com ([209.85.216.182]:33017 "EHLO
-	mail-qt0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752504AbcHLKDY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 06:03:24 -0400
-Received: by mail-qt0-f182.google.com with SMTP id w38so10231624qtb.0
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 03:03:24 -0700 (PDT)
-In-Reply-To: <CAMdDSN3gKZCV0+6nVC7ba_9KqvWQgMrGq1jPxm9EPws4Ls286Q@mail.gmail.com>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:38096 "EHLO
+	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752113AbcHLM17 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 08:27:59 -0400
+Received: by mail-wm0-f52.google.com with SMTP id o80so30177423wme.1
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 05:27:59 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1608111943090.17762@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brett Niver <bniver@redhat.com>
-Cc: Xiaoxi Chen <superdebuger@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, james.liu@alibaba-inc.com, "Chen, Xiaoxi" <xiaoxchen@ebay.com>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Aug 11, 2016 at 1:24 PM, Brett Niver <bniver@redhat.com> wrote:
-> Patrick and I had a related question yesterday, are we able to dynamically
-> vary cache size to artificially manipulate cache pressure?
+Yep, that's it. Thanks a lot!
 
-Yes -- at the top of MDCache::trim the max size is read straight out
-of g_conf so it should pick up on any changes you do with "tell
-injectargs".  Things might be a little bit funny though because the
-new cache limit wouldn't be reflected in the logic in lru_adjust().
 
-John
 
-> On Thu, Aug 11, 2016 at 6:07 AM, John Spray <jspray@redhat.com> wrote:
+On 11.08.2016 22:44, Sage Weil wrote:
+> On Thu, 11 Aug 2016, Igor Fedotov wrote:
+>> Looks like BlueStore::collection_list method makes my day today :)
 >>
->> On Thu, Aug 11, 2016 at 8:29 AM, Xiaoxi Chen <superdebuger@gmail.com>
->> wrote:
->> > Hi ,
->> >
->> >
->> >      Here is the slide I shared yesterday on performance meeting.
->> > Thanks and hoping for inputs.
->> >
->> >
->> >
->> > http://www.slideshare.net/XiaoxiChen3/cephfs-jewel-mds-performance-benchmark
+>> While playing with new objectstore fio plugin (see
+>> https://github.com/ceph/ceph/pull/10267) I observed BlueStore fsck reports
+>> errors on restart. And completion if properly configured.
 >>
->> These are definitely useful results and I encourage everyone working
->> with cephfs to go and look at Xiaoxi's slides.
+>> After significant test case simplification it appeared that BlueStore::fsck
+>> detects duplicate nid at the storage. More analysis showed that in fact it's
+>> Bluestore::collection_list who returned duplicate entities.
 >>
->> The main thing that this highlighted for me was our lack of testing so
->> far on systems with full caches.  Too much of our existing testing is
->> done on freshly configured systems that never fill the MDS cache.
+>> I have some gaps in my collection/object naming scheme understanding hence I
+>> can't say definitely if fio assigns collection names properly. IMHO it's
+>> rather an issue in BlueStore::collection_list.
 >>
->> Test 2.1 notes that we don't enable directory fragmentation by default
->> currently -- this is an issue, and I'm hoping we can switch it on by
->> default in Kraken (see thread "Switching on mds_bal_frag by default").
->> In the meantime we have the fix that Patrick wrote for Jewel which at
->> least prevents people creating dirfrags too large for the OSDs to
->> handle.
+>> Here is pretty simple (hopefully) log (2 collections and 2 objects total) each
+>> showing the case.
 >>
->> Test 2.2: since a "failing to respond to cache pressure" bug is
->> affecting this, I would guess we see the performance fall off at about
->> the point where the *client* caches fill up (so they start trimming
->> things even though they're ignore cache pressure).  It would be
->> interesting to see this chart with addition lines for some related
->> perf counters like mds_log.evtrm and mds.inodes_expired, that might
->> make it pretty obvious where the MDS is entering different stages that
->> see a decrease in the rate of handling client requests.
+>> IMHO the issue somewhere below the following line:
 >>
->> We really need to sort out the "failing to respond to cache pressure"
->> issues that keep popping up, especially if they're still happening on
->> a comparatively simple test that is just creating files.  We have a
->> specific test for this[1] that is currently being run against the fuse
->> client but not the kernel client[2].  This is a good time to try and
->> push that forward so I've kicked off an experimental run here:
+>> 2016-08-11 18:30:44.595101 7fbe78f39780  1 bluestore(./fio-bluestore) fsck
+>> collection 281474976710656.0_head
 >>
->> http://pulpito.ceph.com/jspray-2016-08-10_16:14:52-kcephfs:recovery-master-testing-basic-mira/
+>> where both object keys are reported.
 >>
->> In the meantime, although there are reports of similar issues with
->> newer kernels, it would be very useful to confirm if the same issue is
->> still occurring with more recent kernels.  Issues with cache trimming
->> have occurred due to various (separate) bugs, so it's possible that
->> while some people are still seeing cache trimming issues with recent
->> kernels, the specific case you're hitting might be fixed.
->>
->> Test 2.3: restarting the MDS doesn't actually give you a completely
->> empty cache (everything in the journal gets replayed to pre-populate
->> the cache on MDS startup).  However, the results are still valid
->> because you're using a different random order in the non-caching test
->> case, and the number of inodes in your journal is probably much
->> smaller than the overall cache size so it's only a little bit
->> populated.  We don't currently have a "drop cache" command built into
->> the MDS but it would be pretty easy to add one for use in testing
->> (basically just call mds->mdcache->trim(0)).
->>
->> As one would imagine, the non-caching case is latency-dominated when
->> the working set is larger than the cache, where each client is waiting
->> for one open to finish before proceeding to the next.  The MDS is
->> probably capable of handling many more operations per second, but it
->> would need more parallel IO operations from the clients.  When a
->> single client is doing opens one by one, you're potentially seeing a
->> full network+disk latency for each one (though in practice the OSD
->> read cache will be helping a lot here).  This non-caching case would
->> be the main argument for giving the metadata pool low latency (SSD)
->> storage.
->>
->> Test 2.5: The observation that the CPU bottleneck makes using fast
->> storage for the metadata pool less useful (in sequential/cached cases)
->> is valid, although it could still be useful to isolate the metadata
->> OSDs (probably SSDs since not so much capacity is needed) to avoid
->> competing with data operations.  For random access in the non-caching
->> cases (2.3, 2.4) I think you would probably see an improvement from
->> SSDs.
->>
->> Thanks again to the team from ebay for sharing all this.
->>
->> John
->>
->>
->>
->> 1.
->> https://github.com/ceph/ceph-qa-suite/blob/master/tasks/cephfs/test_client_limits.py#L96
->> 2. http://tracker.ceph.com/issues/9466
->>
->>
->> >
->> > Xiaoxi
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>> Sage, could you please take a look and comment.
+> I think this is the problem:
 >
+> 2016-08-11 18:30:44.595104 7fbe78f39780 20 bluestore(./fio-bluestore) collection_list range '--'0x7ffefffffffffffe00000000'.' to '--'0x7ffefffffffffffeffffffff':' and '--'0x800100000000000000000000'.' to '--'0x8001000000000000ffffffff':' start GHMIN
 >
+> for the .0 collection it is scanning the hash range that includes the
+> .1 collection.  That's because create_collection is being passed a bit
+> 'bits' value:
+>
+> 2016-08-11 18:30:43.697022 7fbe78f39780 15 bluestore(./fio-bluestore) _create_collection 281474976710656.0_head bits 0
+> 2016-08-11 18:30:43.697037 7fbe78f39780 10 bluestore(./fio-bluestore) _create_collection 281474976710656.0_head bits 0 = 0
+> 2016-08-11 18:30:43.697038 7fbe78f39780 15 bluestore(./fio-bluestore) _create_collection 281474976710656.1_head bits 0
+> 2016-08-11 18:30:43.697042 7fbe78f39780 10 bluestore(./fio-bluestore) _create_collection 281474976710656.1_head bits 0 = 0
+>
+> Since there are 2 collections, we need (at least) 1 significant bit.
+>
+> sage
+
