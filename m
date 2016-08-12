@@ -1,66 +1,41 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Fork and RDMA operations
-Date: Fri, 12 Aug 2016 13:22:45 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608121314380.17762@piezo.us.to>
-References: <emc456988a-f658-4bfd-b373-ceec459da0a7@lt-vu-7440>
+From: Orit Wasserman <owasserm@redhat.com>
+Subject: Re: 0.94.8 to QE
+Date: Fri, 12 Aug 2016 16:17:21 +0200
+Message-ID: <CABo9giTv1J2ZuR7VcXWES4bL+ZrZSERpm710z9edg-sE8Su4Sw@mail.gmail.com>
+References: <20160810162336.GA10146@wilbur.suse.cz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58725 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752348AbcHLNWt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 09:22:49 -0400
-In-Reply-To: <emc456988a-f658-4bfd-b373-ceec459da0a7@lt-vu-7440>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:38238 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751154AbcHLORX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 10:17:23 -0400
+Received: by mail-wm0-f46.google.com with SMTP id o80so36808297wme.1
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 07:17:22 -0700 (PDT)
+In-Reply-To: <20160810162336.GA10146@wilbur.suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vu Pham <vuhuong@mellanox.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Avner Ben Hanoch <avnerb@mellanox.com>, Oren Duer <oren@mellanox.com>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Yehuda Sadeh <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 11 Aug 2016, Vu Pham wrote:
-> Hello all,
-> 
-> The background:
-> We have tested scaling with xio messenger and faced multiple *unknown* 
-> problems (hard to trace and reproduce). We recently find out that the 
-> daemonize/fork support isn't full in ibverbs. It assumes that the parent 
-> process will do the RDMA operations. Any child process try to do rdma 
-> operations will experience various unexpected problems.
-> 
-> ceph-osd/ceph-mon/ceph-mds daemonize (fork) after creating messengers.
-> Xio messenger will initialize accelio library and register RDMA memory 
-> in the 1st call to XioMessenger constructor.
-> This situation is very problematic where child process do rdma 
-> operations as described above
-> 
-> http://www.rdmamojo.com/2012/05/24/ibv_fork_init
-> http://www.spinics.net/lists/linux-rdma/msg03364.html
-> I create this PR which forces to daemonize/fork before creating 
-> messenger
-> 
-> https://github.com/ceph/ceph/pull/10600
-> 
-> I have tested this patch by bringing up a cluster with 4 nodes, 8 
-> osds/node, two monitors and run I/Os (4K - 4M block size) from 4 fio 
-> clients.
-> 
-> Is there any known problem to daemonize/fork before creating messenger?
-> Could you help to review and provide feedback?
+Hi Nathan,
+We are still missing two pr:
+https://github.com/ceph/ceph/pull/7184
+https://github.com/ceph/ceph/pull/10509
 
-This more or less works.  The main issue is that we don't catch errors as 
-early as we did and a daemon may appear to start and then immediately 
-exit without printing an error.
+I scheduled a teuthology run for them and if it is successful I will merge them.
+I am not aware of other pending rgw backports.
 
-There is a Preforker class in common that is meant to address this (it's 
-used by ceph-fuse and ceph-mon already).  It does the fork early, when 
-prefork() is called, and keeps stdout/stderr open for an interim period 
-until you call preforker.exit() or .daemonize().  Any exit code gets 
-passed back to the parent over a socket.  I'm guessing that the mon is 
-already working fine since you're just moving the prefork.daemonize() line 
-around (the actual fork happened way back at
+Orit
 
-	https://github.com/vuhuong/ceph-upstream/blob/5cd5546fb7ddb9ef69380476b0a80038ba74a405/src/ceph_mon.cc#L500
-
-) and you just need to make ceph_osd.cc and ceph_mds.cc use Preforker in a 
-similar way.
-
-sage
+On Wed, Aug 10, 2016 at 6:23 PM, Nathan Cutler <ncutler@suse.cz> wrote:
+> Hi Yehuda:
+>
+> Do you think 0.94.8 is ready for QE to start testing, from RGW perspective?
+>
+> Regards,
+> Nathan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
