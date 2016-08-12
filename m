@@ -1,18 +1,18 @@
 From: Igor Fedotov <ifedotov@mirantis.com>
 Subject: Re: bluestore locking
-Date: Fri, 12 Aug 2016 17:23:02 +0300
-Message-ID: <33384829-ce3d-7e6d-a66d-b276c6550dd2@mirantis.com>
+Date: Fri, 12 Aug 2016 17:25:40 +0300
+Message-ID: <0dad6e8f-eac8-a312-c5e4-4a3d5ba672a9@mirantis.com>
 References: <alpine.DEB.2.11.1608111555060.17762@piezo.us.to>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:38513 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751254AbcHLOXP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 10:23:15 -0400
-Received: by mail-wm0-f46.google.com with SMTP id o80so37171290wme.1
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 07:23:05 -0700 (PDT)
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:38766 "EHLO
+	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751022AbcHLOZo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 10:25:44 -0400
+Received: by mail-wm0-f42.google.com with SMTP id o80so37333005wme.1
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 07:25:44 -0700 (PDT)
 In-Reply-To: <alpine.DEB.2.11.1608111555060.17762@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -58,6 +58,7 @@ this possible or I missed something?
 Thanks,
 
 Igor
+
 
 
 On 11.08.2016 19:03, Sage Weil wrote:
