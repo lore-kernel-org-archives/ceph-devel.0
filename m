@@ -1,114 +1,85 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: bluestore locking
-Date: Fri, 12 Aug 2016 17:25:40 +0300
-Message-ID: <0dad6e8f-eac8-a312-c5e4-4a3d5ba672a9@mirantis.com>
-References: <alpine.DEB.2.11.1608111555060.17762@piezo.us.to>
+From: Sage Weil <sweil@redhat.com>
+Subject: bufferlist appenders
+Date: Fri, 12 Aug 2016 14:27:26 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1608121418090.17762@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:38766 "EHLO
-	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751022AbcHLOZo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 10:25:44 -0400
-Received: by mail-wm0-f42.google.com with SMTP id o80so37333005wme.1
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 07:25:44 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1608111555060.17762@piezo.us.to>
+Received: from mx1.redhat.com ([209.132.183.28]:47302 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751254AbcHLO13 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Aug 2016 10:27:29 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 0EF904E343
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 14:27:29 +0000 (UTC)
+Received: from ovpn-112-26.phx2.redhat.com (ovpn-112-26.phx2.redhat.com [10.3.112.26])
+	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u7CERRx5002372
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 10:27:28 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Somnath.Roy@sandisk.com
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-In general the approach looks good.
+A ton of time is the encoding/marshalling is spent doing bufferlist 
+appends.  This is partly because the buffer code is doing lots of sanity 
+range checks, and party because there are multiple layers that get range 
+checks and length updates (bufferlist _len changes, 
+and bufferlist::append_buffer (a ptr) gets it's length updated, at the 
+very least).
 
-But I have some concerns about cache->lock use. Currently it's usage is 
-far from transparent and IMHO is potentially error prone.
+To simplify and speed this up, I propose an 'appender' concept/type that 
+is used for doing appends in a more efficient way.  It would be used 
+like so:
 
-The major issue with it is that there is no single entity that provides 
-a protected access. We use it from ONodeSpace, BufferSpace, BlueStore, 
-Cache class descendants...
+ bufferlist bl;
+ {
+   bufferlist::safe_appender a = bl.get_safe_appender();
+   ::encode(foo, a);
+ }
 
-Some of their methods are protected with this lock, some ( public ones!) 
-aren't. Sometimes there are comments that corresponding method has to be 
-invoked under such lock, sometimes not.
+or
 
-Even a variable name for the lock is too general and it's hard to 
-determine all the locations where it's used.
+ {
+   bufferlist::unsafe_appender a = bl.get_unsafe_appender(1024);
+   ::encode(foo, a);
+ }
 
-IMO this makes future maintenance and code evolution a difficult and 
-highly error prone task.
+The appender keeps its own bufferptr that it copies data into.  The 
+bufferptr isn't given to the bufferlist until the appender is destroyed 
+(or flush() is called explicitly).  This means that appends are generally 
+just a memcpy and a position pointer addition.  In the safe_appender case, 
+we also do a range change and allocate a new buffer if necessary.  In the 
+unsafe_appender case, it is the callers responsibility to say how big a 
+buffer is preallocated.
 
-Probably we should consider some refactoring on that to make all the 
-staff more manageable.
+I have a simple prototype here:
 
+	https://github.com/ceph/ceph/pull/10700
 
-Another topic irrelevant to the above.
+It appears to be almost 10x faster when encoding a uint64_t in a loop!
 
-Don't we have a potential unprotected gap for _remove_collection?
+[ RUN      ] BufferList.appender_bench
+appending 1073741824 bytes
+buffer::list::append 20.285963
+buffer::list encode 19.719120
+buffer::list::safe_appender::append 2.588926
+buffer::list::safe_appender::append_v 2.837026
+buffer::list::safe_appender encode 3.000614
+buffer::list::unsafe_appender::append 2.452116
+buffer::list::unsafe_appender::append_v 2.553745
+buffer::list::unsafe_appender encode 2.200110
+[       OK ] BufferList.appender_bench (55637 ms)
 
-It acquires coll_lock and then enumerates onode_map for object presence 
-( that's protected by the cache lock) and then proceeds with the 
-collection removal from coll_map.
+Interesting, unsafe isn't much faster than safe.  I suspect the CPU's 
+branch prediction is just working really well there?
 
-What will happen if someone inserts an object to the collection after an 
-enumeration but prior to collection removal, e.g. by calling touch. Is 
-this possible or I missed something?
+Anyway, thoughts on this?  Any suggestions for further improvement?
 
+I think the next step is to figure out how to change our 
+WRITE_CLASS_ENCODER macros and encode function work with both bufferlists 
+and appenders so that it's easy to convert stuff over (and still work with 
+a mix of bufferlist-based encoders and appender-based encoders).
 
-Thanks,
-
-Igor
-
-
-
-On 11.08.2016 19:03, Sage Weil wrote:
-> After our conversation this mornning I went through the locking a bit more
-> and I think we're in okay shape.  To summarize:
->
-> These 'forward lookup' structures are protected by coll->lock:
->
->   Bnode::blob_map -> Blob                                    coll->lock
->   Onode::blob_map -> Blob                                    coll->lock
->
-> These ones are protected by cache->lock:
->
->   Collection::OnodeSpace::onode_map -> Onode (unordered_map)     cache->lock
->   Blob::bc -> Buffer                                             cache->lock
->
-> The BnodeSet is a bit different because it is depopulated when the last
-> onode ref goes away.  But it has its own lock:
->
->   Collection::BnodeSet::uset -> Bnode (intrustive set)       BnodeSet::lock
->
-> Anyway, the point of this is that the cache trim() can do everything it
-> needs with just cache->lock.  That means that during an update, we
-> normally have coll->lock to protect the structures we're touching, and if
-> we are adding onodes to OnodeSpace or BufferSpace we additionally take
-> cache->lock for the appropriate cache fragment.
->
-> We were getting tripped up from the blob_map iteration in _txc_state_proc
-> because we were holding no locks at all (or, previously, a collection lock
-> that may or may not be the right one).  Igor's PR fixes this by
-> making Blob refcounted and keeping a list of these.  The finish_write()
-> function takes cache->lock as needed.  Also, it's worth pointing out that
-> the blobs that we're touching will all exist under an Onode that is in the
-> onodes list, and it turns out that the trim() is already doing the right
-> thing and not trimming Onodes that still have any refs.
->
-> Which leaves me a bit confused as to how we originally were
-> crashing, because we were taking the first_collection lock.  My guess is
-> that first_collection was not the right collection and a racing update was
-> updating the Onode.  The refcounting alone sorts this out.  My other fix
-> would have also resolved it by taking the correct collection's
-> lock, I think.  Unless there is another locking problem I'm not seeing..
-> but I think what is in master now has it covered.
->
-> Igor, Somnath, does the current strategy make sense?
->
-> sage
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+sage
