@@ -1,110 +1,28 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Questions about Accepter::stop()
-Date: Fri, 12 Aug 2016 20:58:21 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608122056380.17762@piezo.us.to>
-References: <3492e51f-021b-2c6e-2242-2237add24784@digiware.nl>
+From: Muminul Islam Russell <misla011@fiu.edu>
+Subject: Radosgw multisite configuration
+Date: Fri, 12 Aug 2016 14:34:59 -0700
+Message-ID: <CAK=B8yaHWbmVBNKJ5YkJ3W_7h63BRAqKzL+d0PX_Z-T-NWNRqA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33295 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751570AbcHLU6Z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 16:58:25 -0400
-In-Reply-To: <3492e51f-021b-2c6e-2242-2237add24784@digiware.nl>
+Received: from mail-ua0-f169.google.com ([209.85.217.169]:33633 "EHLO
+	mail-ua0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752161AbcHLVfB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 17:35:01 -0400
+Received: by mail-ua0-f169.google.com with SMTP id 74so61884016uau.0
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 14:35:01 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 12 Aug 2016, Willem Jan Withagen wrote:
-> Hi,
-> 
-> Still working on finding out why my OSD is not comming back up.
-> Looking at the OSD it seems to recover, but it is not reported back to
-> the other OSD and mons.
-> 
-> Below some of the code from
-> 	./src/msg/simple/Accepter.cc
-> 
-> Turns out that the thread freezes on the join, and the complicating
-> factor is that shoutdown always reports that
->   accepter.stop shutdown failed:  errno 57 (57) Socket is not connected
-> 
-> Then the code goes into the join, and gets stuck in there.
-> 
-> So I've execluded that part of the code, and the close section.
-> 
-> That seems to work, but I would very much some more opinions on this.
-> Original code was doen by Sage, but John Spray added a bit of exclusion
-> on the join()
-> 
-> And even with this change I cannot complete
-> 	cephtool-test-mon.sh
-> But I'm getting a lot further down the test.
-
-This is the thread we need to wake up in Accepter::entry():
-
-    ldout(msgr->cct,20) << "accepter calling poll" << dendl;
-    int r = poll(&pfd, 1, -1);
-    if (r < 0)
-      break;
-    ldout(msgr->cct,20) << "accepter poll got " << r << dendl;
-
-    if (pfd.revents & (POLLERR | POLLNVAL | POLLHUP))
-      break;
-
-    ldout(msgr->cct,10) << "pfd.revents=" << pfd.revents << dendl;
-    if (done) break;
-
-It shutdown(2) isn't the "right" (portable) way to kick the thread blocked 
-on poll(2) on an accept socket, maybe there is some other socket call that 
-is more appropriate?  It just needs to wake up poll so that we either see 
-an error event queued or done == true.
-
-sage
+Hello Cephers,
 
 
-> 
-> --WjW
-> 
-> 
-> void Accepter::stop()
-> {
->   done = true;
->   ldout(msgr->cct,10) << __func__ << " accepter on: " << listen_sd << dendl;
-> 
->   if (listen_sd >= 0) {
->     if ( ::shutdown(listen_sd, SHUT_RDWR) < 0 ) {
->       ldout(msgr->cct,0) << __func__ << " shutdown failed: "
->               << " errno " << errno << " " << cpp_strerror(errno) << dendl;
->     }
->   }
->   if (errno != ENOTCONN) {
->     // wait for thread to stop before closing the socket, to avoid
->     // racing against fd re-use.
->     if (is_started()) {
->         ldout(msgr->cct,0) << __func__ << " wait for thread to join." <<
-> dendl;
->       join();
->     }
->   } else {
->     listen_sd = -1;
->   }
-> 
->   if (listen_sd >= 0) {
->     if ( ::close(listen_sd) < 0 ) {
->       ldout(msgr->cct,0) << __func__ << "close failed: "
->               << " errno " << errno << " " << cpp_strerror(errno) << dendl;
->     }
->     listen_sd = -1;
->   }
->   done = false;
-> }
-> 
-> 	
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+I was trying to setup Ceph object gateway with multisite
+configuration. Most of the document I found only includes http based
+configuration. Is there any documentation for https?
+
+Not sure if multi site using https supports.
+
+Thanks,
+Muminul
