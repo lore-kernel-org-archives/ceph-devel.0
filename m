@@ -1,132 +1,294 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: rbd-mirror related jewel backports
-Date: Fri, 12 Aug 2016 11:12:01 +0200
-Message-ID: <57AD92E1.9050409@dachary.org>
-References: <57AAEEC2.3060108@dachary.org>
- <CA+aFP1CFahNravqJ3RuVLnAO9gXsOcsDoPy8=QRBPQ+=txUtLw@mail.gmail.com>
- <57AB95F9.3050101@dachary.org>
- <CA+aFP1Cz3yr+ETH26hRPJ1V0z9-Dpzi-sbFx6UDSa=TUHm0Z4A@mail.gmail.com>
- <57AC847F.3020601@dachary.org>
- <CA+aFP1B8BVLRV8KRdTKUC_wbWMkZc9D+-1ijtxr-Tu-qXL2YLQ@mail.gmail.com>
+From: Sebastien Han <shan@redhat.com>
+Subject: Re: [Feature request] config diff on a single option with the admin socket
+Date: Fri, 12 Aug 2016 11:28:31 +0200
+Message-ID: <CA+HUO7K_JYvii5owj4+i5KTG=i-0vYszfFP+BKJTgWnFe5PuaQ@mail.gmail.com>
+References: <CA+HUO7+qxtsS03yKp2ETUhKy6WTX1ESd0Xridw13viWwa0Cj3Q@mail.gmail.com>
+ <alpine.LSU.2.20.1607291125130.28641@ancalagon.suse.com> <CA+HUO7+QVu-HqBT7EuuEoLwPVng84HzG_MmbvMQyueEstR-6Gw@mail.gmail.com>
+ <1470691964.14948.2.camel@suse.com> <1470710335.14948.10.camel@suse.com>
+ <CA+HUO7KTXfHeHOcQpRX4pfneA+ReyQb2FoBjkxurzZw87NaiSA@mail.gmail.com>
+ <CAFdRU71GgzaN6RCeEBRQY51r6Pd0-a0xsz0vJ7=pRd2Ja+eGNA@mail.gmail.com>
+ <1470787409.7371.13.camel@suse.com> <CAFdRU73Hgc9TdrekmGv6mziuQ2roxYFKD1VopLMg1=Tq5sJHcQ@mail.gmail.com>
+ <CA+HUO7KaPMDEUQRUEX3gS-RtJ1F6asAba+A2XTosEySfLYpG5w@mail.gmail.com> <1470944722.26095.1.camel@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:39144 "EHLO
-	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751356AbcHLJMH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 05:12:07 -0400
-In-Reply-To: <CA+aFP1B8BVLRV8KRdTKUC_wbWMkZc9D+-1ijtxr-Tu-qXL2YLQ@mail.gmail.com>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:36479 "EHLO
+	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751858AbcHLJ2x (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 05:28:53 -0400
+Received: by mail-wm0-f53.google.com with SMTP id q128so17627929wma.1
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2016 02:28:52 -0700 (PDT)
+In-Reply-To: <1470944722.26095.1.camel@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: Mykola Golub <mgolub@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Daniel Oliveira <doliveira@suse.com>
+Cc: Shinobu Kinjo <skinjo@redhat.com>, Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hi Jason,
+Thanks, once it's pushed please send me the PR so I can have a look :).
 
-On 11/08/2016 17:01, Jason Dillaman wrote:
-> OK, that's fine with me.  The only ones left on your original list are
-> (in order):
-
-Excellent, that makes our work a lot easier :-) I'll start testing https://github.com/ceph/ceph/pull/10678 and once merged it will clear 6 backports.
-
-> 
-> http://tracker.ceph.com/issues/16902 (master 10484) (Tue, 2 Aug 2016
-> 20:14:54 +0300)
-> http://tracker.ceph.com/issues/16950 (master 10574) (Sun, 7 Aug 2016
-> 13:33:45 +0300)
-> http://tracker.ceph.com/issues/16978 (master 10613) (Tue, 9 Aug 2016
-> 16:18:49 +0300)
-> 
-> On Thu, Aug 11, 2016 at 9:58 AM, Loic Dachary <loic@dachary.org> wrote:
->> I can try to do that, it is simple enough. Because I'm not very familiar with the code base, it is entirely possible that I end up cherry-picking a lot more than what is reasonable when doing that. It is sometime non trivial to figure out when to stop. Who knows: I may end up cherry-picking *everything* from master :-) I'll call for help if it drifts too much.
+On Thu, Aug 11, 2016 at 9:45 PM, Daniel Oliveira <doliveira@suse.com> wrote:
+> Sebastien,
+>
+> Yes, I am ok with it and finished implementing it all (including the
+> behavior for unchanged settings) and planning on creating a PR still
+> today on this.
+>
+> -Daniel
+>
+>
+> On Thu, 2016-08-11 at 10:16 +0200, Sebastien Han wrote:
+>> Daniel,
 >>
->> Cheers
+>> Are you fine with my answer?
+>> Just trying to keep the main subject alive here :).
 >>
->> On 11/08/2016 15:22, Jason Dillaman wrote:
->>> No worries.
->>>
->>> My usual routine just involves pulling up master and jewel branch
->>> merge logs for all RBD-related subdirectories in two terminals (for PR
->>> merge timeline reference), pulling up the original PR to backport, and
->>> then just cherry-pick until a conflict is hit. When that happens, I
->>> locate which previous PR made the conflicting change and cherry-pick
->>> it into the same backport branch.
->>>
->>> With this technique, you'll end up with PRs with the same
->>> cherry-picked commits.  You'll be able to cleanly merge them into a
->>> testing branch, but when it comes time to merge into the jewel branch
->>> you'll need to rebase some PRs to automatically strip out the
->>> duplicate cherry-picks.
->>>
->>> On Wed, Aug 10, 2016 at 5:00 PM, Loic Dachary <loic@dachary.org> wrote:
->>>>
->>>>
->>>> On 10/08/2016 22:14, Jason Dillaman wrote:
->>>>> Loic,
->>>>>
->>>>> If you want, I can create the backport PRs for those tickets.
->>>>
->>>> That would be great. Alternatively, if that's less time consuming for you, just suggest a backport order and I'll figure it out.
->>>>
->>>> Cheers
->>>>
->>>>>
->>>>>
->>>>> On Wed, Aug 10, 2016 at 5:07 AM, Loic Dachary <loic@dachary.org> wrote:
->>>>>> Hi Mykola,
->>>>>>
->>>>>> There are seven rbd-mirror related backports which do not cherry-pick cleanly. I've not looked at each of them yet and I would very much appreciate your advice about the best way to proceed.
->>>>>>
->>>>>> http://tracker.ceph.com/issues/16511
->>>>>> http://tracker.ceph.com/issues/16512
->>>>>> http://tracker.ceph.com/issues/16658
->>>>>> http://tracker.ceph.com/issues/16701
->>>>>> http://tracker.ceph.com/issues/16747
->>>>>> http://tracker.ceph.com/issues/16902
->>>>>> http://tracker.ceph.com/issues/16978
->>>>>>
->>>>>> Maybe they should be cherry-picked in a specific order in order to avoid conflicts ? For instance, maybe one of the pending backports that you can see at
->>>>>>
->>>>>> https://github.com/ceph/ceph/pulls?q=is%3Aopen+is%3Apr+milestone%3Ajewel+label%3Arbd
->>>>>>
->>>>>> would avoid some of the conflicts if merged ? I'm thinking specifically
->>>>>>
->>>>>> https://github.com/ceph/ceph/pull/10646
->>>>>> https://github.com/ceph/ceph/pull/10644
->>>>>>
->>>>>> What I'm looking for, ideally, is a way to order the cherry-picks to avoid any conflict. That may involve backporting a few additional pull requests (for instance when the type of an argument changes from int64_t to uint64_t, that creates a lot of potential conflicts and backporting that change could help, even if it is not required to fix a given bug.
->>>>>>
->>>>>> There are three backports that also do not apply because of a conflict but do not seem to be related to rbd-mirror. Unless you advise otherwise, I'll attempt to resolve these individually and assume there is complex interaction with other backports.
->>>>>>
->>>>>> http://tracker.ceph.com/issues/16950
->>>>>> http://tracker.ceph.com/issues/16904
->>>>>> http://tracker.ceph.com/issues/16735
->>>>>>
->>>>>> Thanks in advance for your guidance !
->>>>>>
->>>>>> --
->>>>>> Loïc Dachary, Artisan Logiciel Libre
->>>>>>
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>>
->>>>>
->>>>
->>>> --
->>>> Loïc Dachary, Artisan Logiciel Libre
->>>
->>>
->>>
+>> On Wed, Aug 10, 2016 at 12:34 PM, Shinobu Kinjo <shinobu.kj@gmail.com
+>> > wrote:
+>> > Daniel,
+>> >
+>> > On Wed, Aug 10, 2016 at 9:03 AM, Daniel Oliveira <
+>> > doliveira@suse.com> wrote:
+>> > > Shinobu,
+>> > >
+>> > > Sorry, but I am not sure I understand what your request is. If it
+>> > > is
+>> > > not related to Sebastien's feature request, we probably would
+>> > > need a
+>> > > different one so we can track it properly. Are you referring to a
+>> > > *config file parser* kind of thing, where some checking is done
+>> > > to make
+>> > > sure settings are in the proper section? Or am I missing
+>> > > something?
+>> >
+>> > Yes, that is exactly what I said.
+>> > Does that capabilities make sense?
+>> >
+>> > >
+>> > > -Daniel
+>> > >
+>> > >
+>> > >
+>> > > On Tue, 2016-08-09 at 19:51 +0900, Shinobu Kinjo wrote:
+>> > > > Just question.
+>> > > >
+>> > > > Do we have already something like config file validation check
+>> > > > command?
+>> > > > If not, it would be better to add this capability for end users
+>> > > > if it
+>> > > > would not burden you.
+>> > > >
+>> > > > Because it's not a bit clear about which option must be in
+>> > > > which
+>> > > > section.
+>> > > >
+>> > > > Thoughts?
+>> > > >
+>> > > >  - Shinobu
+>> > > >
+>> > > >
+>> > > > On Tue, Aug 9, 2016 at 6:52 PM, Sebastien Han <shan@redhat.com>
+>> > > > wrote:
+>> > > > > Thanks a lot Daniel, that looks exactly right.
+>> > > > > If nothing changed I think it's valid to keep both fields
+>> > > > > showing
+>> > > > > the
+>> > > > > same value.
+>> > > > > This is either when comparing with whatever tool because the
+>> > > > > structure
+>> > > > > won't change so we don't have to handle a particular case.
+>> > > > >
+>> > > > > Others? Thoughts?
+>> > > > >
+>> > > > > On Tue, Aug 9, 2016 at 4:38 AM, Daniel Oliveira <
+>> > > > > doliveira@suse.com
+>> > > > > > wrote:
+>> > > > > > Sebastien,
+>> > > > > >
+>> > > > > > For now, We have something like this (which follows the
+>> > > > > > same
+>> > > > > > standard
+>> > > > > > as 'config diff' and 'config get' :
+>> > > > > >
+>> > > > > > #1:
+>> > > > > > ./ceph --admin-daemon out/osd.1.asok config diff get
+>> > > > > > mon_data_avail_crit
+>> > > > > > {
+>> > > > > >     "diff": {
+>> > > > > >         "current": {
+>> > > > > >             "mon_data_avail_crit": "1"
+>> > > > > >         },
+>> > > > > >         "defaults": {
+>> > > > > >             "mon_data_avail_crit": "5"
+>> > > > > >         }
+>> > > > > >     },
+>> > > > > >     "unknown": []
+>> > > > > > }
+>> > > > > >
+>> > > > > > ./ceph --admin-daemon out/osd.1.asok config diff get
+>> > > > > > mon_data_avail_warn
+>> > > > > > {
+>> > > > > >     "diff": {
+>> > > > > >         "current": {
+>> > > > > >             "mon_data_avail_warn": "10"
+>> > > > > >         },
+>> > > > > >         "defaults": {
+>> > > > > >             "mon_data_avail_warn": "30"
+>> > > > > >         }
+>> > > > > >     },
+>> > > > > >     "unknown": []
+>> > > > > > }
+>> > > > > >
+>> > > > > > What would be the proper way to display a setting that *was
+>> > > > > > not*
+>> > > > > > changed from its default?, for example:
+>> > > > > > ./ceph --admin-daemon out/osd.1.asok config diff get
+>> > > > > > num_client
+>> > > > > > {
+>> > > > > >     "diff": {
+>> > > > > >         "current": {},
+>> > > > > >         "defaults": {}
+>> > > > > >     },
+>> > > > > >     "unknown": []
+>> > > > > > }
+>> > > > > >
+>> > > > > > Or only the "current" value?
+>> > > > > >
+>> > > > > > Thanks,
+>> > > > > > -Daniel
+>> > > > > >
+>> > > > > >
+>> > > > > > On Mon, 2016-08-08 at 15:32 -0600, Daniel Oliveira wrote:
+>> > > > > > > Sebastien,
+>> > > > > > >
+>> > > > > > > As I was working on a couple of other things related to
+>> > > > > > > validating
+>> > > > > > > parameters/settings, I ended up adding the feature in
+>> > > > > > > question
+>> > > > > > > and I
+>> > > > > > > am just in the process of testing it. I will keep you
+>> > > > > > > posted.
+>> > > > > > >
+>> > > > > > > Thanks,
+>> > > > > > > -Daniel
+>> > > > > > >
+>> > > > > > >
+>> > > > > > > On Mon, 2016-08-08 at 14:16 +0200, Sebastien Han wrote:
+>> > > > > > > > Would be nice if you could get a stab at it, actually I
+>> > > > > > > > don't
+>> > > > > > > > know
+>> > > > > > > > where to look in the code to see where the magic is
+>> > > > > > > > happening
+>> > > > > > > > for
+>> > > > > > > > the
+>> > > > > > > > admin socket.
+>> > > > > > > > Most of the logic is there so this shouldn't be too
+>> > > > > > > > difficult
+>> > > > > > > > :).
+>> > > > > > > >
+>> > > > > > > > Did you get a chance to look into this Jesse?
+>> > > > > > > > Thanks for offering your help on this one!
+>> > > > > > > >
+>> > > > > > > > On Fri, Jul 29, 2016 at 8:32 PM, Jesse Williamson <
+>> > > > > > > > jwilliamson@suse.de> wrote:
+>> > > > > > > > > On Fri, 29 Jul 2016, Sebastien Han wrote:
+>> > > > > > > > >
+>> > > > > > > > > Hi Sebastien,
+>> > > > > > > > >
+>> > > > > > > > > > I'd like to have the same but for a specific option
+>> > > > > > > > > > only.
+>> > > > > > > > > >
+>> > > > > > > > > > So something like:
+>> > > > > > > > > >
+>> > > > > > > > > > ceph daemon mon.ceph-mon-01 config diff get <field>
+>> > > > > > > > > >
+>> > > > > > > > > > Which will return the diff between the actual
+>> > > > > > > > > > config
+>> > > > > > > > > > value and
+>> > > > > > > > > > the
+>> > > > > > > > > > original config value.
+>> > > > > > > > >
+>> > > > > > > > >
+>> > > > > > > > > I might be able to help with this, if there's no
+>> > > > > > > > > support
+>> > > > > > > > > that
+>> > > > > > > > > anyone already
+>> > > > > > > > > knows of, or clear takers. I'm working on a small
+>> > > > > > > > > config
+>> > > > > > > > > -related
+>> > > > > > > > > librados
+>> > > > > > > > > feature right now and am somewhat familiar with the
+>> > > > > > > > > relevant
+>> > > > > > > > > moving parts on
+>> > > > > > > > > that end, so I might be in a good position to work on
+>> > > > > > > > > it.
+>> > > > > > > > >
+>> > > > > > > > > WRT the admin socket, I'm less clear, but can be
+>> > > > > > > > > pointed in
+>> > > > > > > > > the
+>> > > > > > > > > right
+>> > > > > > > > > direction. :-)
+>> > > > > > > > >
+>> > > > > > > > > -Jesse
+>> > > > > > > >
+>> > > > > > > >
+>> > > > > > > >
+>> > > > >
+>> > > > >
+>> > > > >
+>> > > > > --
+>> > > > > Cheers
+>> > > > >
+>> > > > > ––––––
+>> > > > > Sébastien Han
+>> > > > > Principal Storage Architect
+>> > > > >
+>> > > > > "Always give 100%. Unless you're giving blood."
+>> > > > >
+>> > > > > Mail: seb@redhat.com
+>> > > > > Address: 11 bis, rue Roquépine - 75008 Paris
+>> > > > > --
+>> > > > > To unsubscribe from this list: send the line "unsubscribe
+>> > > > > ceph
+>> > > > > -devel" in
+>> > > > > the body of a message to majordomo@vger.kernel.org
+>> > > > > More majordomo info at
+>> > > > > http://vger.kernel.org/majordomo-info.html
+>> > > >
+>> > > >
+>> > > >
+>> > > --
+>> > > To unsubscribe from this list: send the line "unsubscribe ceph
+>> > > -devel" in
+>> > > the body of a message to majordomo@vger.kernel.org
+>> > > More majordomo info at
+>> > > http://vger.kernel.org/majordomo-info.html
+>> >
+>> >
+>> >
+>> > --
+>> > Email:
+>> > shinobu@linux.com
+>> > shinobu@redhat.com
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph
+>> > -devel" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
-> 
-> 
-> 
+>>
+>>
+
+
 
 -- 
-Loïc Dachary, Artisan Logiciel Libre
+Cheers
+
+––––––
+Sébastien Han
+Principal Storage Architect
+
+"Always give 100%. Unless you're giving blood."
+
+Mail: seb@redhat.com
+Address: 11 bis, rue Roquépine - 75008 Paris
