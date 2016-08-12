@@ -1,40 +1,46 @@
-From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Subject: SCSI inquiry interface for RBD devices
-Date: Thu, 11 Aug 2016 23:38:41 +0000
-Message-ID: <27148ED4-95A8-4E8F-86C0-52CEEA9140E1@Teradata.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Jemalloc enabled build is failing
+Date: Fri, 12 Aug 2016 00:17:52 +0000
+Message-ID: <BL2PR02MB21155D6B967D81A35FB55C2CF41F0@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:33454 "EHLO
-	rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751570AbcHKXiq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Aug 2016 19:38:46 -0400
-Received: from rpc7292.td.teradata.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id A990E258005
-	for <ceph-devel@vger.kernel.org>; Thu, 11 Aug 2016 19:39:02 -0400 (EDT)
-Received: from RPC4168.td.teradata.com (unknown [153.65.10.242])
-	by rpc7292.td.teradata.com (Postfix) with ESMTP id 9DC8332F25D
-	for <ceph-devel@vger.kernel.org>; Thu, 11 Aug 2016 19:39:02 -0400 (EDT)
-Received: from SUSHDC7998.TD.TERADATA.COM (unknown [153.65.10.254])
-	by Websense Email Security Gateway with ESMTPS id 613E796AFB664
-	for <ceph-devel@vger.kernel.org>; Thu, 11 Aug 2016 19:38:40 -0400 (EDT)
+Received: from mail-sn1nam01on0063.outbound.protection.outlook.com ([104.47.32.63]:31072
+	"EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750708AbcHLAR4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 11 Aug 2016 20:17:56 -0400
 Content-Language: en-US
-Content-ID: <5367A17307482344BD940AA7125CF2C7@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+
+Hi,
+I was planning to report this for long but keep on forgetting. Basically, if I enable jemalloc  on ceph build , it is failing for me with the following error.
+
+Makefile:16236: recipe for target 'ceph_objectstore_bench' failed
+make[3]: *** [ceph_objectstore_bench] Error 1
+rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
+/root/ceph-master/src/rocksdb/db/db_impl.cc:595: undefined reference to `malloc_stats_print'
+rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
+/root/ceph-master/src/rocksdb/db/db_impl.cc:595: undefined reference to `malloc_stats_print'
+collect2: error: ld returned 1 exit status
+Makefile:16792: recipe for target 'ceph_test_objectstore' failed
+make[3]: *** [ceph_test_objectstore] Error 1
+collect2: error: ld returned 1 exit status
+Makefile:16359: recipe for target 'ceph_smalliobenchfs' failed
+make[3]: *** [ceph_smalliobenchfs] Error 1
+rocksdb/librocksdb.a(db_impl.o): In function `DumpMallocStats':
+/root/ceph-master/src/rocksdb/db/db_impl.cc:595: undefined reference to `malloc_stats_print'
 
 
-SCSI block devices has SG_IO IOCTL interface by which applications can identify the device uniquely. This helps applications identify the device uniquely without relying on the device file names or any other mechanisms.
+I am commenting out the following line (and do a make clean on rocksdb folder) in src/rocksdb/db/db_impl.cc to make build go through.
 
-For more details l ook at the manpage of sg_inq commnad. https://manned.org/sg_inq
-
-Some of the non SCSI devices also support this SG_IO interface for inquiry. Examples include SATA, NVME, Virtual Disks.
-
-It is desired to identify every RBD uniquely just from the device file. It will help in using RBD devices as drop in replacement for SCSI/SATA devices. Currently the RBD code in ceph-client does not support the SG_IO ioctl interface for inquiry to identify the device uniquely. Has adding the SG_IO ioctl interface to the RBD devices ever been considered before?
+malloc_stats_print(GetJemallocStatus, &mstat, "");
 
 
 
-Thanks,
-Nitin
+Thanks & Regards
+Somnath
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
