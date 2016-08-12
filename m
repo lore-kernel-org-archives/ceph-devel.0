@@ -1,712 +1,132 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: bluestore onode diet and encoding overhead
-Date: Fri, 12 Aug 2016 22:25:24 +0000
-Message-ID: <BLUPR0201MB1524581619B5794A010858F8E81F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
-References: <9b80fe95-9da5-bffe-c869-a7ba51da70b3@redhat.com>
- <BLUPR0201MB1524775973993917A1A59078E8300@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1607121658240.497@piezo.us.to>
- <0b770e1d-5b3a-b9d1-175c-ccec29ee1737@redhat.com>
- <BY2PR0201MB15253B6976C145EA325489AAE8320@BY2PR0201MB1525.namprd02.prod.outlook.com>
- <47c4376f-a958-9cb6-9bd1-c9ac4a56ac35@redhat.com>
- <BY2PR0201MB1525B5D17B014B1F8CAD2277E8320@BY2PR0201MB1525.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608121601540.17762@piezo.us.to>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Questions about Accepter::stop()
+Date: Sat, 13 Aug 2016 00:31:52 +0200
+Message-ID: <67687e3b-f514-b727-ca3a-173c82fc3860@digiware.nl>
+References: <3492e51f-021b-2c6e-2242-2237add24784@digiware.nl>
+ <alpine.DEB.2.11.1608122056380.17762@piezo.us.to>
+ <b6ef2b22-e693-afcc-1772-73ab2d6869cc@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn3nam01on0086.outbound.protection.outlook.com ([104.47.33.86]:34866
-	"EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752297AbcHLWZ3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 12 Aug 2016 18:25:29 -0400
-In-Reply-To: <alpine.DEB.2.11.1608121601540.17762@piezo.us.to>
-Content-Language: en-US
+Received: from smtp.digiware.nl ([176.74.240.9]:19927 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751031AbcHLWcD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Aug 2016 18:32:03 -0400
+In-Reply-To: <b6ef2b22-e693-afcc-1772-73ab2d6869cc@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Friday, August 12, 2016 9:18 AM
-> To: Allen Samuels <Allen.Samuels@sandisk.com>
-> Cc: Mark Nelson <mnelson@redhat.com>; ceph-devel <ceph-
-> devel@vger.kernel.org>
-> Subject: RE: bluestore onode diet and encoding overhead
+On 12-8-2016 23:40, Willem Jan Withagen wrote:
+> On 12-8-2016 22:58, Sage Weil wrote:
+>> On Fri, 12 Aug 2016, Willem Jan Withagen wrote:
+>>> Hi,
+>>>
+>>> Still working on finding out why my OSD is not comming back up.
+>>> Looking at the OSD it seems to recover, but it is not reported back to
+>>> the other OSD and mons.
+>>>
+>>> Below some of the code from
+>>> 	./src/msg/simple/Accepter.cc
+>>>
+>>> Turns out that the thread freezes on the join, and the complicating
+>>> factor is that shoutdown always reports that
+>>>   accepter.stop shutdown failed:  errno 57 (57) Socket is not connected
+>>>
+>>> Then the code goes into the join, and gets stuck in there.
+>>>
+>>> So I've execluded that part of the code, and the close section.
+>>>
+>>> That seems to work, but I would very much some more opinions on this.
+>>> Original code was doen by Sage, but John Spray added a bit of exclusion
+>>> on the join()
+>>>
+>>> And even with this change I cannot complete
+>>> 	cephtool-test-mon.sh
+>>> But I'm getting a lot further down the test.
+>>
+>> This is the thread we need to wake up in Accepter::entry():
+>>
+>>     ldout(msgr->cct,20) << "accepter calling poll" << dendl;
+>>     int r = poll(&pfd, 1, -1);
+>>     if (r < 0)
+>>       break;
+>>     ldout(msgr->cct,20) << "accepter poll got " << r << dendl;
+>>
+>>     if (pfd.revents & (POLLERR | POLLNVAL | POLLHUP))
+>>       break;
+>>
+>>     ldout(msgr->cct,10) << "pfd.revents=" << pfd.revents << dendl;
+>>     if (done) break;
+>>
+>> It shutdown(2) isn't the "right" (portable) way to kick the thread blocked 
+>> on poll(2) on an accept socket, maybe there is some other socket call that 
+>> is more appropriate?  It just needs to wake up poll so that we either see 
+>> an error event queued or done == true.
 > 
-> Okay, I finally had some time to read through this thread!
+> Yup,  that is what I see in the Linux code.
+> Poll returns with revent = 16 = POLLHUP.
 > 
-> On Thu, 14 Jul 2016, Allen Samuels wrote:
-> > Yes, I did actually run the code before I posted it.
-> >
-> > w.r.t. varint encoding. You have two choices w.r.t. a variable length
-> > encoded, you could examine the data to accurately predict the output
-> > size OR you could just return a constant that represents the
-> > worst-case
-> > (max) size.  For individual fields, it probably doesn't matter what
-> > you chose, but for fields that are part of something in a container,
-> > you probably want the option of NOT running down the container to size
-> > up each element -- so you'd just choose the worst-case size for the
-> > estimator.
-> >
-> > Though this code doesn't show it, I wrote some pseudo-code in a
-> > previous e-mail that glues this framework into the bufferlist stuff.
-> > That pseudo code is well prepared for estimate functions that are too
-> > large (indeed, it expects that to happen) and it naturally handles
-> > buffer overrun detection.
-> >
-> > I didn't describe it in the example, but this framework very naturally
-> > handles versioning, you just add some code like:
-> >
-> > Struct abc {
-> >    Int version;
-> >    Int a;
-> >    Int b;
-> >    ..... enc_dec(p) {
-> >       ::enc_dec(p, version);
-> >       ::enc_dec(p, a);
-> >       If (s != DECODE || version > 5) ::enc_dec(p, b); // This field is present in
-> all estimate and encode operations, but only in decode operations when
-> version is > 5
-> >    }
-> > };
+> Now I'm sort of wondering what I can do with a socket that is already
+> disconnected.... Somebody has to have disconnected the connection.
+> And why the poll waiting on it does not report that....
+> perhaps calling close on it does signal the HUP.
 > 
-> This is pretty cool.  I'm mainly nervous about the versioning stuff.  The
-> current encode/decode scheme already has a length (so we're good there),
-> and also two other fields: struct_v and compat_v, indicating the version of
-> the encoding and the oldest decoder that can understand it.  I don't see any
-> reason why that couldn't be replicated here.  I am a bit nervous about the
-> decoding side, though, since it can get complicated.  What you have above is
-> the common case, but even a moderately simple one (where we didn't have
-> to do anything kludgey) looks like this:
+> SHUT_RDWR has a few comments (at least in the FreeBSD manpage) but they
+> do not seem to fit this case.
 > 
-> 	https://github.com/ceph/ceph/blob/master/src/osd/osd_types.cc#L
-> 2337
-
-Yes, the struct_v and compat_v stuff can be easily handled and I don't think the code is any more "complicated" than what's done for the object that you showed. In fact the code is almost identical....
-
-
+> Any idea oh who would have disconnected this socket?
 > 
-> I suspect those conditionals would end up looking like
-> 
->  if (s != DECODE || version > 5) {
->    ::enc_dec(p, b);
->  } if (s == DECODE) {
->    b = default/compat value;
->  }
+> Back to reading more manual pages. And trying to figure out the state
+> machine of a socket. :(
 
-Almost, I think it's simpler. Let's assume that the case we care about is a field that's present only in versions > 5. Then the code is: 
+Right,
 
-   If (version > 5) {
-      ::enc_dec(p,b);
-   }
-     ....default....
+If I start closing the socket, I'm getting revent = 32.
+Which is POLLINVAL
+	Invalid request: fd not open (output only).
 
-Which is pretty much what it looks like in the current code...
+Available both on Linux and FreeBSD. On FreeBSD it is always to get that
+in revents, even if not asked for. 8-;
+So I guess adding that to the break expression is useful.
 
+And tack the closing somewhere into the stop. And make sure that join()
+is called.
 
-> 
-> I'm still trying to sort out in my head how this relates to the appender thing.  I
-> think they're largely orthogonal, but the estimate function here could be
-> used to drive the unsafe_appender stuff pretty seamlessly.
-> Using the unsafe_appender manually is going to be a lot more error-prone,
-> but should get the same performance benefit, without unifying the
-> encode/decode stuff.
+--WjW
 
-Yes, they're conceptually orthogonal. In all cases, we make a CONSERVATIVE estimate of the space that's required. Acquire that space and then encode without checking for overflow. At the end of the encode you can forgive the unused space.
+>>> void Accepter::stop()
+>>> {
+>>>   done = true;
+>>>   ldout(msgr->cct,10) << __func__ << " accepter on: " << listen_sd << dendl;
+>>>
+>>>   if (listen_sd >= 0) {
+>>>     if ( ::shutdown(listen_sd, SHUT_RDWR) < 0 ) {
+>>>       ldout(msgr->cct,0) << __func__ << " shutdown failed: "
+>>>               << " errno " << errno << " " << cpp_strerror(errno) << dendl;
+>>>     }
+>>>   }
+>>>   if (errno != ENOTCONN) {
+>>>     // wait for thread to stop before closing the socket, to avoid
+>>>     // racing against fd re-use.
+>>>     if (is_started()) {
+>>>         ldout(msgr->cct,0) << __func__ << " wait for thread to join." <<
+>>> dendl;
+>>>       join();
+>>>     }
+>>>   } else {
+>>>     listen_sd = -1;
+>>>   }
+>>>
+>>>   if (listen_sd >= 0) {
+>>>     if ( ::close(listen_sd) < 0 ) {
+>>>       ldout(msgr->cct,0) << __func__ << "close failed: "
+>>>               << " errno " << errno << " " << cpp_strerror(errno) << dendl;
+>>>     }
+>>>     listen_sd = -1;
+>>>   }
+>>>   done = false;
+>>> }
 
-> 
-> I'm a bit worried that the estimate process will be too slow, though.  On a
-> complicated nested object, for example, it will have to traverse the full data
-> structure once to estimate, and then again to encode.  It might be simpler
-> and faster to have the outer parts of the structure operate on a
-> safe_encoder, and construct an unsafe_encoder only when we are explicitly
-> prepared to do the estimate.  For example, we can have a safe_encoder
-> method like
-
-These are exactly the right tradeoffs. The framework allows you do specify for particular containers whether you need to walk the container or not to make an estimate. The optimization is only important for containers with large numbers of small objects -- in any other case (small numbers, large objects....) the overhead isn't important to optimize out.
-
-BTW, there's nothing the framework that requires you to do the estimate process once for the whole world, you can absolutely doit in piecemeal like you suggest.
-
-IMO, the most important thing about the estimate/encode cycle is that the estimate NEVER be wrong. I was very worried about a design pattern that separated the estimation process from the actual encoding process in a way that would allow this kind of error to creep in. What I'm worried about is an endless series of production run-time failures due to incorrect estimation for low probability data-dependent cases -- in other words, I consider it a requirement of the design that the estimation process be so tightly linked to the encoding process that possibilities of rare overruns are essentially eliminated by construction. So, I ended up with a design pattern that -- by default -- is guaranteed to "get a good enough" answer [i.e., conservative] at the expensive of time  -- but you can select
- ively override the default in way that I think is pretty safe to get that time back when it matters.
-
-BTW, I expect most enc_dec calls for ESTIMATION to compile to just a few multiplies and adds for anything but a container you have to walk. 
-
-
-> 
->   unsafe_encoder reserve(size_t s);
-> 
-> so that we can do
-> 
->   void encode(bufferlist::safe_appender& ap) const {
->     ENCODE_START(2, 2);
->     // do a single range check for all of our simple members
->     {
->       unsafe_encoder t = ap.reserve(5 * sizeof(uint64_t));
->       ::encode(foo, t);
->       ::encode(bar, t);
->       ::encode(baz, t);
->       ::encode(a, t);
->       ::encode(b, t);
->     }
->     // use the safe encoder for some complex ones
->     ::encode(widget, ap);
->     ::encode(widget2, ap);
->     // explicitly estimate a simple container
->     {
->       unsafe_encoder t = ap.reserve(sub.size() * known_worst_case);
->       ::encode(sub, t);
->     }
->     // dynamically range check a complex container
->     ::encode(complex_container, ap);
->   }
-> 
-> The enc_dec currently forces a full estimate in all cases, even when it's not
-> really needed.  Perhaps we can come up with some set of templates and
-> wrapper functions so that we can use safe and unsafe encoders somewhat
-> interchangeably so that the estimate infrastructure is only triggered when
-> needed?
-
-I think the characterization of "full estimate in all cases, even when it's not really needed" isn't correct. If you code the above using my framework then for all except the two "complex" containers, the estimation is pretty simple, just a few adds and multiplies.
-
-It is true for the "complex" containers that you'll walk the container twice, once for the estimate and once for the encode. However, that's the only difference, the actual cost of encoding the elements of the two containers is the same (i.e., a reserve of the size followed by the encoding of the container itself) the only delta is that overhead of the for_each loop itself -- the cost of walking the container. I believe that if the container is "complex", then the cost of walking it, when compared to the cost of checking the buffer size and doing the per-element encode is minimal. In other words, I disagree about the cost of the estimate phase (you're doing the same work just re-distributed, I only walk the container itself once extra).
-
-
- 
-> 
-> sage
-> 
-> 
-> 
-> > What this framework doesn't yet handle very well is situations where
-> > you have a container with a contained type that is a primitive (i.e.,
-> > uint8) and you want that contained type to be custom encoded.
-> > Currently, the only solution is replace the contained primitive type
-> > with a class wrapper. Unfortunately a typedef is NOT sufficient to
-> differentiate it.
-> >
-> > Allen Samuels
-> > SanDisk |a Western Digital brand
-> > 2880 Junction Avenue, San Jose, CA 95134
-> > T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
-> >
-> >
-> > > -----Original Message-----
-> > > From: Mark Nelson [mailto:mnelson@redhat.com]
-> > > Sent: Thursday, July 14, 2016 4:16 AM
-> > > To: Allen Samuels <Allen.Samuels@sandisk.com>; Sage Weil
-> > > <sweil@redhat.com>
-> > > Cc: ceph-devel <ceph-devel@vger.kernel.org>
-> > > Subject: Re: bluestore onode diet and encoding overhead
-> > >
-> > > On 07/14/2016 12:52 AM, Allen Samuels wrote:
-> > > > As promised, here's some code that hacks out a new encode/decode
-> > > framework. That has the advantage of only having to list the fields
-> > > of a struct once and is pretty much guaranteed to never overrun a
-> buffer....
-> > > >
-> > > > Comments are requested :)
-> > >
-> > > It compiles! :D
-> > >
-> > > I looked over the code, but I want to look it over again after I've
-> > > had my coffee since I'm still shaking the cobwebs out.  Would the
-> > > idea here be that if you are doing varint encoding for example that
-> > > you always allocate the buffer based on ESTIMATE (also taking into
-> > > account the encoding overhead), but typically expect a much smaller
-> encoding?
-> > >
-> > > As it is, it's very clever.
-> > >
-> > > Mark
-> > >
-> > > >
-> > > >
-> > > > #include <iostream>
-> > > > #include <fstream>
-> > > > #include <set>
-> > > > #include <string>
-> > > > #include <string.h>
-> > > >
-> > > >
-> /*******************************************************
-> > > >
-> > > >
-> > > >    New fast encode/decode framework.
-> > > >
-> > > >    The entire framework is built around the idea that each object
-> > > > has three
-> > > operations:
-> > > >
-> > > >      ESTIMATE  -- worst-case estimate of the amount of storage
-> > > > required for
-> > > this object
-> > > >      ENCODE    -- encode object into buffer of size ESTIMATE
-> > > >      DECODE    -- encode object from buffer of size actual.
-> > > >
-> > > >    Each object has a single templated function that actually
-> > > > provides all three
-> > > operations in a single set of code.
-> > > >    But doing this, it's pretty much guaranteed that the ESTIMATE
-> > > > and the
-> > > ENCODE code are in harmony (i.e. that the estimate is correct)
-> > > >    it also saves a lot of typing/reading...
-> > > >
-> > > >    Generally, all three operations are provided on a single
-> > > > function name
-> > > with the input and return parameters overloaded to distinguish them.
-> > > >
-> > > >    It's observed that for each of the three operations there is a
-> > > > single value
-> > > which needs to be transmitted between each of the
-> > > micro-encode/decode calls
-> > > >    Yes, this is confusing, but let's look at a simple example
-> > > >
-> > > >     struct simple {
-> > > >       int a;
-> > > >       float b;
-> > > >       string c;
-> > > >       set<int> d;
-> > > >     };
-> > > >
-> > > >     To encode this struct we generate a function that does the
-> > > > micro-
-> > > encoding of each of the fields of the struct
-> > > >     Here's an example of a function that does the ESTIMATE operation.
-> > > >
-> > > >     size_t simple::estimate() {
-> > > >        return
-> > > >           sizeof(a) +
-> > > >           sizeof(b) +
-> > > >           c.size() +
-> > > >           d.size() * sizeof(int);
-> > > >     }
-> > > >
-> > > >     We're going to re-write it as:
-> > > >
-> > > >     size_t simple::estimate(size_t p) {
-> > > >        p = estimate(p,a);
-> > > >        p = estimate(p,b);
-> > > >        p = estimate(p,c);
-> > > >        p = estimate(p,d);
-> > > >        return p;
-> > > >     }
-> > > >
-> > > >     assuming that the sorta function:
-> > > >
-> > > >     template<typename t> size_t estimate(size_t p,t& o) { return p
-> > > > +
-> > > sizeof(o); }
-> > > >     template<typename t> size_t estimate(size_t p,set<t>& o) {
-> > > > return p + o.size() * sizeof(t); }
-> > > >
-> > > >
-> > > >     similarly, the encode operation is represented as:
-> > > >
-> > > >     char * simple::encode(char *p) {
-> > > >        p = encode(p,a);
-> > > >        p = encode(p,b);
-> > > >        p = encode(p,c);
-> > > >        p = encode(p,d);
-> > > >        return p;
-> > > >     }
-> > > >
-> > > >     similarly, the decode operation is represented as:
-> > > >
-> > > >     const char * simple::decode(const char *p) {
-> > > >        p = decode(p,a);
-> > > >        p = decode(p,b);
-> > > >        p = decode(p,c);
-> > > >        p = decode(p,d);
-> > > >        return p;
-> > > >     }
-> > > >
-> > > >
-> > > > You can now see that it's possible to create a single function
-> > > > that does all three operations in a single block of code, provided
-> > > > that you can
-> > > fiddle the input/output parameter types appropriately.
-> > > >
-> > > > In essence the pattern is
-> > > >
-> > > >     p = enc_dec(p,struct_field_1);
-> > > >     p = enc_dec(p,struct_field_2);
-> > > >     p = enc_dec(p,struct_field_3);
-> > > >
-> > > > With the type of p being set differently for each operation, i.e.,
-> > > >     for ESTIMATE, p = size_t
-> > > >     for ENCODE,   p = char *
-> > > >     for DECODE,   p = const char *
-> > > >
-> > > > This is the essence of how the encode/decode framework operates.
-> > > Though there is some more sophistication...
-> > > >
-> > > > ----------------------
-> > > >
-> > > > We also want to allow the encode/decode machinery to be per-type
-> > > > and to operate
-> > > >
-> > > >
-> > >
-> **********************************************************
-> > > ************
-> > > > *******/
-> > > >
-> > > > using namespace std;
-> > > >
-> > > > //
-> > > > // Just like the existing encode/decode machinery. The environment
-> > > > provides a rich set of // pre-defined encodes for primitive types
-> > > > and containers //
-> > > >
-> > > > #define DEFINE_ENC_DEC_RAW(type) \
-> > > > inline size_t      enc_dec(size_t p,type &o)      { return p + sizeof(type); } \
-> > > > inline char *      enc_dec(char *p, type &o)      { *(type *)p = o; return p +
-> > > sizeof(type); } \
-> > > > inline const char *enc_dec(const char *p,type &o) { o = *(const
-> > > > type *)p; return p + sizeof(type); }
-> > > >
-> > > > DEFINE_ENC_DEC_RAW(int);
-> > > > DEFINE_ENC_DEC_RAW(size_t);
-> > > >
-> > > > //
-> > > > // String encode/decode (Yea, I know size_t isn't portable -- this
-> > > > is an EXAMPLE man...) // inline size_t enc_dec(size_t p,string& s)
-> > > > { return p + sizeof(size_t) + s.size(); } inline char *
-> > > > enc_dec(char * p,string& s) { *(size_t *)p = s.size();
-> > > > memcpy(p+sizeof(size_t),s.c_str(),s.size()); return p +
-> > > > sizeof(size_t)
-> > > > + s.size(); } inline const char *enc_dec(const char *p,string& s)
-> > > > + { s
-> > > > = string(p + sizeof(size_t),*(size_t *)p); return p +
-> > > > sizeof(size_t) + s.size(); }
-> > > >
-> > > > //
-> > > > // Let's do a container.
-> > > > //
-> > > > // One of the problems with a container is that making an accurate
-> > > > estimate of the size // would theoretically require that you walk
-> > > > the entire
-> > > container and add up the sizes of each element.
-> > > > // We probably don't want to do that. So here, I do a hack that
-> > > > just assumes that I can fake up a individual element // and
-> > > > multiple that by the number of elements in a container. This hack
-> > > > works anytime that the estimate function // for the contained type has
-> a fixed maximum size.
-> > > BTW, this is safe, if the contained type has a variable size //
-> > > (like set<string>) then it will fault out the first time you run it.
-> > > > //
-> > > > // Naturally, something like set<string> or map<string,string> is
-> > > > a highly desirable thing to be able to encode/decode // there's no
-> > > > reason
-> > > that you can't create a enc_dec_slow function that properly computes
-> > > the maximum size by walking the container.
-> > > > //
-> > > > template<typename t>
-> > > > inline size_t enc_dec(size_t p,set<t>& s) { return p +
-> > > > sizeof(size_t)
-> > > > + (s.size() * ::enc_dec(size_t(0),*(t *) 0)); }
-> > > >
-> > > > template<typename t>
-> > > > inline char *enc_dec(char *p,set<t>& s) {
-> > > >    size_t sz = s.size();
-> > > >    p = enc_dec(p,sz);
-> > > >    for (const t& e : s) {
-> > > >       p = enc_dec(p,const_cast<t&>(e));
-> > > >    }
-> > > >    return p;
-> > > > }
-> > > >
-> > > > template<typename t>
-> > > > inline const char *enc_dec(const char *p,set<t>&s) {
-> > > >    size_t sz;
-> > > >    p = enc_dec(p,sz);
-> > > >    while (sz--) {
-> > > >       t temp;
-> > > >       p = enc_dec(p,temp);
-> > > >       s.insert(temp);
-> > > >    }
-> > > >    return p;
-> > > > }
-> > > >
-> > > > //
-> > > > // Specialized encode/decode for a single data type. These are
-> > > > invoked
-> > > explicitly...
-> > > > //
-> > > > inline size_t enc_dec_lba(size_t p,int& lba) {
-> > > >    return p + sizeof(lba); // Max....
-> > > > }
-> > > >
-> > > > inline char * enc_dec_lba(char *p,int& lba) {
-> > > >    *p = 15;
-> > > >    return p + 1; // blah blah
-> > > > }
-> > > >
-> > > > inline const char *enc_dec_lba(const char *p,int& lba) {
-> > > >    lba = *p;
-> > > >    return p+1;
-> > > > }
-> > > >
-> > > > //
-> > > > // Specialized encode/decode for more sophisticated things primitives.
-> > > > //
-> > > > // Here's an example of a encode/decoder for a pair of fields //
-> > > > inline size_t enc_dec_range(size_t p,short& start,short& end) {
-> > > >    return p + 2 * sizeof(short);
-> > > > }
-> > > >
-> > > > inline char *enc_dec_range(char *p, short& start, short& end) {
-> > > >    short *s = (short *) p;
-> > > >    s[0] = start;
-> > > >    s[1] = end;
-> > > >    return p + sizeof(short) * 2;
-> > > > }
-> > > >
-> > > > inline const char *enc_dec_range(const char *p,short& start, short&
-> end) {
-> > > >    start = *(short *)p;
-> > > >    end   = *(short *)(p + sizeof(short));
-> > > >    return p + 2*sizeof(short);
-> > > > }
-> > > >
-> > > >
-> > > > //
-> > > > // Some C++ template wizardry to make the single encode/decode
-> > > function possible.
-> > > > //
-> > > > enum SERIAL_TYPE {
-> > > >    ESTIMATE,
-> > > >    ENCODE,
-> > > >    DECODE
-> > > > };
-> > > >
-> > > > template <enum SERIAL_TYPE s> struct serial_type;
-> > > >
-> > > > template<> struct serial_type<ESTIMATE> { typedef size_t type; };
-> > > > template<> struct serial_type<ENCODE>   { typedef char * type; };
-> > > > template<> struct serial_type<DECODE>   { typedef const char *type; };
-> > > >
-> > > > //
-> > > > // This macro is the key, it connects the external non-member
-> > > > function to
-> > > the correct member function.
-> > > > //
-> > > > #define DEFINE_STRUCT_ENC_DEC(s) \
-> > > > inline size_t      enc_dec(size_t p, s &o) { return
-> o.enc_dec<ESTIMATE>(p); }
-> > > \
-> > > > inline char *      enc_dec(char *p , s &o)  { return
-> o.enc_dec<ENCODE>(p); }
-> > > \
-> > > > inline const char *enc_dec(const char *p,s &o)  { return
-> > > > o.enc_dec<DECODE>(p); }
-> > > >
-> > > > //
-> > > > // Our example structure
-> > > > //
-> > > > struct astruct {
-> > > >    int a;
-> > > >    set<int> b;
-> > > >    int lba;
-> > > >    short start,end;
-> > > >
-> > > >    //
-> > > >    // <<<<< You need to provide this function just one.
-> > > >    //
-> > > >    template<enum SERIAL_TYPE s> typename serial_type<s>::type
-> > > enc_dec(typename serial_type<s>::type p) {
-> > > >       p = ::enc_dec(p,a);
-> > > >       p = ::enc_dec(p,b);
-> > > >       p = ::enc_dec_lba(p,lba);
-> > > >       p = ::enc_dec_range(p,start,end);
-> > > >       return p;
-> > > >    }
-> > > > };
-> > > >
-> > > > //
-> > > > // This macro connects the global enc_dec to the member function.
-> > > > // One of these per struct declaration //
-> > > > DEFINE_STRUCT_ENC_DEC(astruct);
-> > > >
-> > > >
-> > > > //
-> > > > // Here's a simple test program. The real encode/decode framework
-> > > > needs to be connected to bufferlist using the pseudo-code // that
-> > > > I
-> > > documented in my previous email.
-> > > > //
-> > > >
-> > > > int main(int argc,char **argv) {
-> > > >
-> > > >    astruct a;
-> > > >    a.a = 10;
-> > > >    a.b.insert(2);
-> > > >    a.b.insert(3);
-> > > >    a.lba = 12;
-> > > >
-> > > >    size_t s = a.enc_dec<ESTIMATE>(size_t(0));
-> > > >    cout << "Estimated size is " << s << "\n";
-> > > >
-> > > >    char buffer[100];
-> > > >
-> > > >    char *end = a.enc_dec<ENCODE>(buffer);
-> > > >
-> > > >    cout << "Actual storage was " << end-buffer << "\n";
-> > > >
-> > > >    astruct b;
-> > > >
-> > > >    (void) b.enc_dec<DECODE>(buffer); // decode it
-> > > >
-> > > >    cout << "A.a = " << b.a << "\n";
-> > > >    for (auto e : b.b) {
-> > > >       cout << " " << e;
-> > > >    }
-> > > >
-> > > >    cout << "\n";
-> > > >
-> > > >    cout << "a.lba = " << b.lba << "\n";
-> > > >
-> > > >    return 0;
-> > > > }
-> > > >
-> > > >
-> > > > Allen Samuels
-> > > > SanDisk |a Western Digital brand
-> > > > 2880 Junction Avenue, San Jose, CA 95134
-> > > > T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
-> > > >
-> > > >
-> > > >> -----Original Message-----
-> > > >> From: Mark Nelson [mailto:mnelson@redhat.com]
-> > > >> Sent: Tuesday, July 12, 2016 8:13 PM
-> > > >> To: Sage Weil <sweil@redhat.com>; Allen Samuels
-> > > >> <Allen.Samuels@sandisk.com>
-> > > >> Cc: ceph-devel <ceph-devel@vger.kernel.org>
-> > > >> Subject: Re: bluestore onode diet and encoding overhead
-> > > >>
-> > > >>
-> > > >>
-> > > >> On 07/12/2016 08:50 PM, Sage Weil wrote:
-> > > >>> On Tue, 12 Jul 2016, Allen Samuels wrote:
-> > > >>>> Good analysis.
-> > > >>>>
-> > > >>>> My original comments about putting the oNode on a diet included
-> > > >>>> the idea of a "custom" encode/decode path for certain high-usage
-> cases.
-> > > >>>> At the time, Sage resisted going down that path hoping that a
-> > > >>>> more optimized generic case would get the job done. Your
-> > > >>>> analysis shows that while we've achieved significant space
-> > > >>>> reduction this has come at the expense of CPU time -- which
-> > > >>>> dominates small object performance (I suspect that eventually
-> > > >>>> we'd discover that the variable length decode path would be
-> > > >>>> responsible for a substantial read performance degradation also
-> > > >>>> -- which may or may not be part of the read performance
-> > > >>>> drop-off that you're seeing). This isn't a
-> > > surprising
-> > > >> result, though it is unfortunate.
-> > > >>>>
-> > > >>>> I believe we need to revisit the idea of custom encode/decode
-> > > >>>> paths for high-usage cases, only now the gains need to be
-> > > >>>> focused on CPU utilization as well as space efficiency.
-> > > >>>
-> > > >>> I still think we can get most or all of the way there in a
-> > > >>> generic way by revising the way that we interact with bufferlist
-> > > >>> for encode and
-> > > decode.
-> > > >>> We haven't actually tried to optimize this yet, and the current
-> > > >>> code is pretty horribly inefficient (asserts all over the place,
-> > > >>> and many layers of pointer indirection to do a simple append).
-> > > >>> I think we need to do two
-> > > >>> things:
-> > > >>>
-> > > >>> 1) decode path: optimize the iterator class so that it has a
-> > > >>> const char *current and const char *current_end that point into
-> > > >>> the current buffer::ptr.  This way any decode will have a single
-> > > >>> pointer
-> > > >>> add+comparison to ensure there is enough data to copy before
-> > > >>> add+falling into
-> > > >>> the slow path (partial buffer, move to next buffer, etc.).
-> > > >>>
-> > > >>
-> > > >> I don't have a good sense yet for how much this is hurting us in
-> > > >> the read path.  We screwed something up in the last couple of
-> > > >> weeks and small
-> > > reads
-> > > >> are quite slow.
-> > > >>
-> > > >>> 2) Having that comparison is still not ideal, but we shoudl
-> > > >>> consider ways to get around that too.  For example, if we know
-> > > >>> that we are going to decode N M-byte things, we could do an
-> > > >>> iterator 'reserve' or 'check' that ensures we have a valid
-> > > >>> pointer for that much and then proceed without checks.  The
-> > > >>> interface here would be tricky, though, since in the slow case
-> > > >>> we'll span buffers and need to magically fall back to a
-> > > >>> different decode path (hard to maintain) or do a temporary copy
-> > > >>> (probably faster but we need to ensure the iterator owns it and
-> > > >>> frees is later).  I'd say this is step 2 and optional; step 1
-> > > >>> will have the most
-> > > >> benefit.
-> > > >>>
-> > > >>> 3) encode path: currently all encode methods take a bufferlist&
-> > > >>> and the bufferlist itself as an append buffer.  I think this is
-> > > >>> flawed and limiting.  Instead, we should make a new class called
-> > > >>> buffer::list::appender (or similar) and templatize the encode
-> > > >>> methods so they can take a safe_appender (which does bounds
-> > > >>> checking) or an unsafe_appender (which does not).  For the
-> > > >>> latter, the user takes responsibility for making sure there is
-> > > >>> enough space by doing a
-> > > >>> reserve() type call which returns an unsafe_appender, and it's
-> > > >>> their job to make sure they don't shove too much data into it.
-> > > >>> That should make the encode path a memcpy + ptr increment (for
-> > > >>> savvy/optimized
-> > > >> callers).
-> > > >>
-> > > >> Seems reasonable and similar in performance to what Piotr and I
-> > > >> were discussing this morning.  As a very simple test I was
-> > > >> thinking of doing a
-> > > quick
-> > > >> size computation and then passing that in to increase the
-> > > >> append_buffer
-> > > size
-> > > >> when the bufferlist is created in Bluestore::_txc_write_nodes.
-> > > >> His idea
-> > > went
-> > > >> a bit farther to break the encapsulation, compute the fully
-> > > >> encoded message, and dump it directly into a buffer of a computed
-> > > >> size without
-> > > the
-> > > >> extra assert checks or bounds checking.  Obviously his idea would
-> > > >> be
-> > > faster
-> > > >> but more work.
-> > > >>
-> > > >> It sounds like your solution would be similar but a bit more formalized.
-> > > >>
-> > > >>>
-> > > >>> I suggest we use bluestore as a test case to make the interfaces
-> > > >>> work and be fast.  If we succeed we can take advantage of it
-> > > >>> across the reset of the code base as well.
-> > > >>
-> > > >> Do we have other places in the code with similar byte append
-> behavior?
-> > > >> That's what's really killing us I think, especially with how
-> > > >> small the new append_buffer is when you run out of space when
-> appending bytes.
-> > > >>
-> > > >>>
-> > > >>> That's my thinking, at least.  I haven't had time to prototype
-> > > >>> it out yet, but I think our goal should be to make the
-> > > >>> encode/decode paths capable of being a memcpy + ptr addition in
-> > > >>> the fast path, and let that guide the interface...
-> > > >>>
-> > > >>> sage
-> > > >>> --
-> > > >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > >>> in the body of a message to majordomo@vger.kernel.org More
-> > > >> majordomo
-> > > >>> info at  http://vger.kernel.org/majordomo-info.html
-> > > >>>
-> >
-> >
