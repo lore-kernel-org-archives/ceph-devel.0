@@ -1,89 +1,150 @@
-From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Subject: Re: SCSI inquiry interface for RBD devices
-Date: Fri, 12 Aug 2016 18:40:35 +0000
-Message-ID: <82369305-99D9-464E-B14A-D2E91AC7B76F@Teradata.com>
-References: <27148ED4-95A8-4E8F-86C0-52CEEA9140E1@Teradata.com>
- <CAOi1vP_5gtQXd95M=qspgPeRnTDvxBpC2dknARNv=HXNFKHivQ@mail.gmail.com>
- <4257DB75-0060-4867-A5D5-2AD374722452@Teradata.com>
- <CAOi1vP9mdNYRCD_cTa0=4tN71L1=tA24wXSr2NqhTH9BmUBAuw@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore different allocator performance Vs FileStore
+Date: Fri, 12 Aug 2016 20:02:51 +0000
+Message-ID: <BL2PR02MB21150DA4EF8A836BBA5EC7F2F41F0@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB211554DBEC8F344E465BAFE5F41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <1431B127-59B3-4DCA-B3F2-FBB209ED2059@sandisk.com>
+ <CY1PR0201MB1820F3561F0F89AFAF8A24AE851E0@CY1PR0201MB1820.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608111636360.17762@piezo.us.to>
+ <BLUPR0201MB1524345DD4A25895939CE7B6E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608111710400.17762@piezo.us.to>
+ <BLUPR0201MB1524F46599D0A90A7025F373E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608111929250.17770@piezo.us.to>
+ <BLUPR0201MB15248F97217C67BA0051F131E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608112000200.17762@piezo.us.to>
+ <BLUPR0201MB15249FEF89ED408BDCC5808BE81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608112018400.17762@piezo.us.to>
+ <BLUPR0201MB1524A947959FE39B1D2A5E4EE81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608112115250.17762@piezo.us.to>
+ <alpine.DEB.2.11.1608121521010.29701@piezo.us.to>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:33462 "EHLO
-	rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752582AbcHLSkj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2016 14:40:39 -0400
-In-Reply-To: <CAOi1vP9mdNYRCD_cTa0=4tN71L1=tA24wXSr2NqhTH9BmUBAuw@mail.gmail.com>
+Received: from mail-bn3nam01on0077.outbound.protection.outlook.com ([104.47.33.77]:39741
+	"EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751392AbcHLUCz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Aug 2016 16:02:55 -0400
 Content-Language: en-US
-Content-ID: <68005E5694AB7443B2CE8CD140532885@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Jason Dillaman <dillaman@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mike Christie <mchristi@redhat.com>
+To: Sage Weil <sage@newdream.net>, Ramesh Chander <Ramesh.Chander@sandisk.com>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+FYI, with latest master (optimized is_allocated()) the osd uptime and mkfs() time is *almost* (~2.5X slower now compare to 16X) similar to stupid.
+As we discussed today, removing debug_assert(is_allocated()) all together from mkfs() part should be resolving this gap as well...
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Somnath Roy
+Sent: Friday, August 12, 2016 8:44 AM
+To: 'Sage Weil'; Ramesh Chander
+Cc: Allen Samuels; ceph-devel
+Subject: RE: Bluestore different allocator performance Vs FileStore
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net]
+Sent: Friday, August 12, 2016 8:26 AM
+To: Ramesh Chander
+Cc: Allen Samuels; Somnath Roy; ceph-devel
+Subject: RE: Bluestore different allocator performance Vs FileStore
+
+On Thu, 11 Aug 2016, Sage Weil wrote:
+> On Thu, 11 Aug 2016, Allen Samuels wrote:
+> > > -----Original Message-----
+> > > From: Sage Weil [mailto:sage@newdream.net]
+> > > Sent: Thursday, August 11, 2016 1:24 PM
+> > > To: Allen Samuels <Allen.Samuels@sandisk.com>
+> > > Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>; Somnath Roy
+> > > <Somnath.Roy@sandisk.com>; ceph-devel <ceph-devel@vger.kernel.org>
+> > > Subject: RE: Bluestore different allocator performance Vs
+> > > FileStore
+> > >
+> > > On Thu, 11 Aug 2016, Allen Samuels wrote:
+> > > > Perhaps my understanding of the blueFS is incorrect -- so please
+> > > > clarify as needed.
+> > > >
+> > > > I thought that the authoritative indication of space used by
+> > > > BlueFS was contained in the snapshot/journal of BlueFS itself,
+> > > > NOT in the KV store itself. This requires that upon startup, we
+> > > > replay the BlueFS snapshot/journal into the FreeListManager so
+> > > > that it properly records the consumption of BlueFS space (since
+> > > > that allocation MAY NOT be accurate within the FreeListmanager
+> > > > itself). But that this playback need not generate an KVStore
+> > > > operations (since those are duplicates of the BlueFS).
+> > > >
+> > > > So in the code you cite:
+> > > >
+> > > > fm->allocate(0, reserved, t);
+> > > >
+> > > > There's no need to commit 't', and in fact, in the general case,
+> > > > you don't want to commit 't'.
+> > > >
+> > > > That suggests to me that a version of allocate that doesn't have
+> > > > a transaction could be easily created would have the speed we're
+> > > > looking for (and independence from the BitMapAllocator to KVStore chunking).
+> > >
+> > > Oh, I see.  Yeah, you're right--this step isn't really necessary,
+> > > as long as we ensure that the auxilliary representation of what
+> > > bluefs owns (bluefs_extents in the superblock) is still passed
+> > > into the Allocator during initialization.  Having the freelist
+> > > reflect the allocator that this space was "in use" (by bluefs) and
+> > > thus off limits to bluestore is simple but not strictly necessary.
+> > >
+> > > I'll work on a PR that avoids this...
+>
+> https://github.com/ceph/ceph/pull/10698
+>
+> Ramesh, can you give it a try?
+>
+> > > > I suspect that we also have long startup times because we're
+> > > > doing the same underlying bitmap operations except they come
+> > > > from the BlueFS replay code instead of the BlueFS initialization
+> > > > code, but same problem with likely the same fix.
+> > >
+> > > BlueFS doesn't touch the FreelistManager (or explicitly persist
+> > > the freelist at all)... we initialize the in-memory Allocator
+> > > state from the metadata in the bluefs log.  I think we should be fine on this end.
+> >
+> > Likely that code suffers from the same problem -- a false need to
+> > update the KV Store (During the playback, BlueFS extents are
+> > converted to bitmap runs, it's essentially the same lower level code
+> > as the case we're seeing now, but it instead of being driven by an
+> > artificial "big run", it'sll be driven from the BlueFS Journal
+> > replay code). But that's just a guess, I don't have time to track down the actual code right now.
+>
+> BlueFS can't touch the freelist (or kv store, ever) since it
+> ultimately backs the kv store and that would be problematic.  We do
+> initialize the bluefs Allocator's in-memory state, but that's it.
+>
+> The PR above changes the BlueStore::_init_alloc() so that BlueStore's
+> Allocator state is initialize with both the freelist state (from kv
+> store)
+> *and* the bluefs_extents list (from the bluestore superblock).  (From
+> this Allocator's perspective, all of bluefs's space is allocated and
+> can't be used.  BlueFS has it's own separate instance to do it's
+> internal
+> allocations.)
+
+Ah, okay, so after our conversation in standup I went and looked at the code some more and realized I've been thinking about the BitmapFreelistManager and not the BitMapAllocator.  The ~40s is all CPU time spent updating in-memory bits, and has nothing to do with pushing updates through rocksdb.  Sorry for the confusing conversation.
+
+So... I think there is one thing we can do: change the initialization of the allocator state from the freelist so that the assumption is that space is freed and we tell it was is allocation (currently we assume everything is allocated and tell it what is free).  I'm not sure it's worth it,
+though: we'll just make things slower to start up on a full OSD instead of slower on an empty OSD.  And it seems like the CPU time really won't be significant anyway once the debugging stuff is taken out.
+
+I think this PR
+
+https://github.com/ceph/ceph/pull/10698
+
+is still a good idea, though, since it avoids useless freelist kv work during mkfs.
+
+Does that sound right?  Or am I still missing something?
+
+Thanks for you patience!
+
+[Somnath] Yes, I think it is a good idea , it seems it will reduce some kv operation from IO path as well  because _balance_bluefs_freespace is in IO path (?) sage
 
 
-> On Aug 12, 2016, at 11:15 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> 
-> On Fri, Aug 12, 2016 at 7:42 PM, Kamble, Nitin A
-> <Nitin.Kamble@teradata.com> wrote:
->> 
->>> On Aug 12, 2016, at 7:17 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
->>> 
->>> On Fri, Aug 12, 2016 at 1:38 AM, Kamble, Nitin A
->>> <Nitin.Kamble@teradata.com> wrote:
->>>> 
->>>> SCSI block devices has SG_IO IOCTL interface by which applications can identify the device uniquely. This helps applications identify the device uniquely without relying on the device file names or any other mechanisms.
->>>> 
->>>> For more details l ook at the manpage of sg_inq commnad. https://manned.org/sg_inq
->>>> 
->>>> Some of the non SCSI devices also support this SG_IO interface for inquiry. Examples include SATA, NVME, Virtual Disks.
->>>> 
->>>> It is desired to identify every RBD uniquely just from the device file. It will help in using RBD devices as drop in replacement for SCSI/SATA devices. Currently the RBD code in ceph-client does not support the SG_IO ioctl interface for inquiry to identify the device uniquely. Has adding the SG_IO ioctl interface to the RBD devices ever been considered before?
->>> 
->>> No, SG_IO hasn't come up before, and we don't really have a good
->>> established way of doing that at all - if we had one, wiring up SG_IO
->>> (assuming no objections from SCSI maintainers) wouldn't be a problem.
->>> One approach is to concatenate a cluster-wide UUID with pool, image and
->>> snapshot IDs, but the problem there is that images can be moved between
->>> pools and clusters and v1 images don't have an image ID.
->> 
->> I am surprised to know that images can be moved across pools and clusters. The feature request for moving images across pools was rejected here: http://tracker.ceph.com/issues/2305 . Also the rbd man page says rbd rename across pools is not supported. (http://docs.ceph.com/docs/master/man/8/rbd/)
->> 
->> Is it a currently available feature?
-> 
-> There are a couple of hacky, undocumented and unsupported ways which
-> I won't describe.  The above was just a very bad way of saying that
-> current v2 image IDs are guaranteed to be unique only within a pool and
-> can be the duplicated between different pools on the same cluster and
-> different clusters.
-> 
->> 
->>> 
->>> Mike recently ran into the need to uniquely identify RBD devices for
->>> his multipath-tools work and I think he ended up using some variant of
->>> the above approach, grabbing IDs from /sys/bus/rbd.  (The cluster_uuid
->>> and snap_id attributes currently don't exist, but will be added in the
->>> next kernel release.)
->>> 
->>> It would make this a lot easier if we started generating a unique UUID
->>> for the image and each snapshot at image/snapshot creation time.  Jason?
->>> 
->> 
->> Image UUID seems like the right direction.
-> 
-> With UUIDs we would be in much better shape - current v2 image ID is
-> relatively very short.  We can couple it with a cluster UUID too.
-> 
->> If that UUID needs to be really unique, then image copy also need to create a new UUID.
-> 
-> It would be akin to the UUID of a partition.  I suppose including
-> a tune2fs -U functionality wouldn't hurt.  I'll add that to the ticket.
-> 
-
-The rbd creation creation tool having an ability to assign a specific UUID to the image being created would be useful too.
-
-> Thanks,
-> 
->                Ilya
-
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
