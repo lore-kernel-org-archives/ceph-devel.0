@@ -1,150 +1,78 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore different allocator performance Vs FileStore
-Date: Fri, 12 Aug 2016 20:02:51 +0000
-Message-ID: <BL2PR02MB21150DA4EF8A836BBA5EC7F2F41F0@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <BL2PR02MB211554DBEC8F344E465BAFE5F41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <1431B127-59B3-4DCA-B3F2-FBB209ED2059@sandisk.com>
- <CY1PR0201MB1820F3561F0F89AFAF8A24AE851E0@CY1PR0201MB1820.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608111636360.17762@piezo.us.to>
- <BLUPR0201MB1524345DD4A25895939CE7B6E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608111710400.17762@piezo.us.to>
- <BLUPR0201MB1524F46599D0A90A7025F373E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608111929250.17770@piezo.us.to>
- <BLUPR0201MB15248F97217C67BA0051F131E81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608112000200.17762@piezo.us.to>
- <BLUPR0201MB15249FEF89ED408BDCC5808BE81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608112018400.17762@piezo.us.to>
- <BLUPR0201MB1524A947959FE39B1D2A5E4EE81E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608112115250.17762@piezo.us.to>
- <alpine.DEB.2.11.1608121521010.29701@piezo.us.to>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Questions about Accepter::stop()
+Date: Fri, 12 Aug 2016 22:40:33 +0200
+Message-ID: <3492e51f-021b-2c6e-2242-2237add24784@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn3nam01on0077.outbound.protection.outlook.com ([104.47.33.77]:39741
-	"EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751392AbcHLUCz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 12 Aug 2016 16:02:55 -0400
-Content-Language: en-US
+Received: from smtp.digiware.nl ([176.74.240.9]:25350 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752328AbcHLUko (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Aug 2016 16:40:44 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Ramesh Chander <Ramesh.Chander@sandisk.com>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>
 
-FYI, with latest master (optimized is_allocated()) the osd uptime and mkfs() time is *almost* (~2.5X slower now compare to 16X) similar to stupid.
-As we discussed today, removing debug_assert(is_allocated()) all together from mkfs() part should be resolving this gap as well...
+Hi,
 
-Thanks & Regards
-Somnath
+Still working on finding out why my OSD is not comming back up.
+Looking at the OSD it seems to recover, but it is not reported back to
+the other OSD and mons.
 
------Original Message-----
-From: Somnath Roy
-Sent: Friday, August 12, 2016 8:44 AM
-To: 'Sage Weil'; Ramesh Chander
-Cc: Allen Samuels; ceph-devel
-Subject: RE: Bluestore different allocator performance Vs FileStore
+Below some of the code from
+	./src/msg/simple/Accepter.cc
 
------Original Message-----
-From: Sage Weil [mailto:sage@newdream.net]
-Sent: Friday, August 12, 2016 8:26 AM
-To: Ramesh Chander
-Cc: Allen Samuels; Somnath Roy; ceph-devel
-Subject: RE: Bluestore different allocator performance Vs FileStore
+Turns out that the thread freezes on the join, and the complicating
+factor is that shoutdown always reports that
+  accepter.stop shutdown failed:  errno 57 (57) Socket is not connected
 
-On Thu, 11 Aug 2016, Sage Weil wrote:
-> On Thu, 11 Aug 2016, Allen Samuels wrote:
-> > > -----Original Message-----
-> > > From: Sage Weil [mailto:sage@newdream.net]
-> > > Sent: Thursday, August 11, 2016 1:24 PM
-> > > To: Allen Samuels <Allen.Samuels@sandisk.com>
-> > > Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>; Somnath Roy
-> > > <Somnath.Roy@sandisk.com>; ceph-devel <ceph-devel@vger.kernel.org>
-> > > Subject: RE: Bluestore different allocator performance Vs
-> > > FileStore
-> > >
-> > > On Thu, 11 Aug 2016, Allen Samuels wrote:
-> > > > Perhaps my understanding of the blueFS is incorrect -- so please
-> > > > clarify as needed.
-> > > >
-> > > > I thought that the authoritative indication of space used by
-> > > > BlueFS was contained in the snapshot/journal of BlueFS itself,
-> > > > NOT in the KV store itself. This requires that upon startup, we
-> > > > replay the BlueFS snapshot/journal into the FreeListManager so
-> > > > that it properly records the consumption of BlueFS space (since
-> > > > that allocation MAY NOT be accurate within the FreeListmanager
-> > > > itself). But that this playback need not generate an KVStore
-> > > > operations (since those are duplicates of the BlueFS).
-> > > >
-> > > > So in the code you cite:
-> > > >
-> > > > fm->allocate(0, reserved, t);
-> > > >
-> > > > There's no need to commit 't', and in fact, in the general case,
-> > > > you don't want to commit 't'.
-> > > >
-> > > > That suggests to me that a version of allocate that doesn't have
-> > > > a transaction could be easily created would have the speed we're
-> > > > looking for (and independence from the BitMapAllocator to KVStore chunking).
-> > >
-> > > Oh, I see.  Yeah, you're right--this step isn't really necessary,
-> > > as long as we ensure that the auxilliary representation of what
-> > > bluefs owns (bluefs_extents in the superblock) is still passed
-> > > into the Allocator during initialization.  Having the freelist
-> > > reflect the allocator that this space was "in use" (by bluefs) and
-> > > thus off limits to bluestore is simple but not strictly necessary.
-> > >
-> > > I'll work on a PR that avoids this...
->
-> https://github.com/ceph/ceph/pull/10698
->
-> Ramesh, can you give it a try?
->
-> > > > I suspect that we also have long startup times because we're
-> > > > doing the same underlying bitmap operations except they come
-> > > > from the BlueFS replay code instead of the BlueFS initialization
-> > > > code, but same problem with likely the same fix.
-> > >
-> > > BlueFS doesn't touch the FreelistManager (or explicitly persist
-> > > the freelist at all)... we initialize the in-memory Allocator
-> > > state from the metadata in the bluefs log.  I think we should be fine on this end.
-> >
-> > Likely that code suffers from the same problem -- a false need to
-> > update the KV Store (During the playback, BlueFS extents are
-> > converted to bitmap runs, it's essentially the same lower level code
-> > as the case we're seeing now, but it instead of being driven by an
-> > artificial "big run", it'sll be driven from the BlueFS Journal
-> > replay code). But that's just a guess, I don't have time to track down the actual code right now.
->
-> BlueFS can't touch the freelist (or kv store, ever) since it
-> ultimately backs the kv store and that would be problematic.  We do
-> initialize the bluefs Allocator's in-memory state, but that's it.
->
-> The PR above changes the BlueStore::_init_alloc() so that BlueStore's
-> Allocator state is initialize with both the freelist state (from kv
-> store)
-> *and* the bluefs_extents list (from the bluestore superblock).  (From
-> this Allocator's perspective, all of bluefs's space is allocated and
-> can't be used.  BlueFS has it's own separate instance to do it's
-> internal
-> allocations.)
+Then the code goes into the join, and gets stuck in there.
 
-Ah, okay, so after our conversation in standup I went and looked at the code some more and realized I've been thinking about the BitmapFreelistManager and not the BitMapAllocator.  The ~40s is all CPU time spent updating in-memory bits, and has nothing to do with pushing updates through rocksdb.  Sorry for the confusing conversation.
+So I've execluded that part of the code, and the close section.
 
-So... I think there is one thing we can do: change the initialization of the allocator state from the freelist so that the assumption is that space is freed and we tell it was is allocation (currently we assume everything is allocated and tell it what is free).  I'm not sure it's worth it,
-though: we'll just make things slower to start up on a full OSD instead of slower on an empty OSD.  And it seems like the CPU time really won't be significant anyway once the debugging stuff is taken out.
+That seems to work, but I would very much some more opinions on this.
+Original code was doen by Sage, but John Spray added a bit of exclusion
+on the join()
 
-I think this PR
+And even with this change I cannot complete
+	cephtool-test-mon.sh
+But I'm getting a lot further down the test.
 
-https://github.com/ceph/ceph/pull/10698
-
-is still a good idea, though, since it avoids useless freelist kv work during mkfs.
-
-Does that sound right?  Or am I still missing something?
-
-Thanks for you patience!
-
-[Somnath] Yes, I think it is a good idea , it seems it will reduce some kv operation from IO path as well  because _balance_bluefs_freespace is in IO path (?) sage
+--WjW
 
 
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+void Accepter::stop()
+{
+  done = true;
+  ldout(msgr->cct,10) << __func__ << " accepter on: " << listen_sd << dendl;
+
+  if (listen_sd >= 0) {
+    if ( ::shutdown(listen_sd, SHUT_RDWR) < 0 ) {
+      ldout(msgr->cct,0) << __func__ << " shutdown failed: "
+              << " errno " << errno << " " << cpp_strerror(errno) << dendl;
+    }
+  }
+  if (errno != ENOTCONN) {
+    // wait for thread to stop before closing the socket, to avoid
+    // racing against fd re-use.
+    if (is_started()) {
+        ldout(msgr->cct,0) << __func__ << " wait for thread to join." <<
+dendl;
+      join();
+    }
+  } else {
+    listen_sd = -1;
+  }
+
+  if (listen_sd >= 0) {
+    if ( ::close(listen_sd) < 0 ) {
+      ldout(msgr->cct,0) << __func__ << "close failed: "
+              << " errno " << errno << " " << cpp_strerror(errno) << dendl;
+    }
+    listen_sd = -1;
+  }
+  done = false;
+}
+
+	
