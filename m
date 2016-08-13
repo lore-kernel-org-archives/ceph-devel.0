@@ -1,86 +1,43 @@
-From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
-Subject: Re: bufferlist appenders
-Date: Sat, 13 Aug 2016 10:50:56 +0200
-Message-ID: <20160813085056.GB22353@predictor>
-References: <alpine.DEB.2.11.1608121418090.17762@piezo.us.to>
+From: Wei Yongjun <weiyj.lk@gmail.com>
+Subject: [PATCH -next] ceph: use list_move instead of list_del/list_add
+Date: Sat, 13 Aug 2016 09:10:28 +0000
+Message-ID: <1471079428-9951-1-git-send-email-weiyj.lk@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from predictor.org.pl ([185.5.97.54]:50336 "EHLO predictor.org.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751644AbcHMI6L (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 13 Aug 2016 04:58:11 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1608121418090.17762@piezo.us.to>
+Received: from mail-pa0-f68.google.com ([209.85.220.68]:36263 "EHLO
+	mail-pa0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751299AbcHMJKf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 13 Aug 2016 05:10:35 -0400
+Received: by mail-pa0-f68.google.com with SMTP id ez1so658012pab.3
+        for <ceph-devel@vger.kernel.org>; Sat, 13 Aug 2016 02:10:35 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: Wei Yongjun <weiyj.lk@gmail.com>, ceph-devel@vger.kernel.org
 
-On Fri, Aug 12, 2016 at 02:27:26PM +0000, Sage Weil wrote:
-> A ton of time is the encoding/marshalling is spent doing bufferlist 
-> appends.  This is partly because the buffer code is doing lots of sanity 
-> range checks, and party because there are multiple layers that get range 
-> checks and length updates (bufferlist _len changes, 
-> and bufferlist::append_buffer (a ptr) gets it's length updated, at the 
-> very least).
-> 
-> To simplify and speed this up, I propose an 'appender' concept/type that 
-> is used for doing appends in a more efficient way.  It would be used 
-> like so:
-> 
->  bufferlist bl;
->  {
->    bufferlist::safe_appender a = bl.get_safe_appender();
->    ::encode(foo, a);
->  }
-> 
-> or
-> 
->  {
->    bufferlist::unsafe_appender a = bl.get_unsafe_appender(1024);
->    ::encode(foo, a);
->  }
-> 
-> The appender keeps its own bufferptr that it copies data into.  The 
-> bufferptr isn't given to the bufferlist until the appender is destroyed 
-> (or flush() is called explicitly).  This means that appends are generally 
-> just a memcpy and a position pointer addition.  In the safe_appender case, 
-> we also do a range change and allocate a new buffer if necessary.  In the 
-> unsafe_appender case, it is the callers responsibility to say how big a 
-> buffer is preallocated.
-> 
-> I have a simple prototype here:
-> 
-> 	https://github.com/ceph/ceph/pull/10700
-> 
-> It appears to be almost 10x faster when encoding a uint64_t in a loop!
-> 
-> [ RUN      ] BufferList.appender_bench
-> appending 1073741824 bytes
-> buffer::list::append 20.285963
-> buffer::list encode 19.719120
-> buffer::list::safe_appender::append 2.588926
-> buffer::list::safe_appender::append_v 2.837026
-> buffer::list::safe_appender encode 3.000614
-> buffer::list::unsafe_appender::append 2.452116
-> buffer::list::unsafe_appender::append_v 2.553745
-> buffer::list::unsafe_appender encode 2.200110
-> [       OK ] BufferList.appender_bench (55637 ms)
-> 
-> Interesting, unsafe isn't much faster than safe.  I suspect the CPU's 
-> branch prediction is just working really well there?
+Using list_move() instead of list_del() + list_add().
 
-That may be the case, as there's only one branch in safe appender, contrary
-to four in buffer::ptr::append. Also, appenders don't return values.
+Signed-off-by: Wei Yongjun <weiyj.lk@gmail.com>
+---
+ fs/ceph/mds_client.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-> Anyway, thoughts on this?  Any suggestions for further improvement?
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index f72d4ae..d55df51 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1150,8 +1150,7 @@ static int remove_session_caps_cb(struct inode *inode, struct ceph_cap *cap,
+ 		while (!list_empty(&ci->i_cap_flush_list)) {
+ 			cf = list_first_entry(&ci->i_cap_flush_list,
+ 					      struct ceph_cap_flush, i_list);
+-			list_del(&cf->i_list);
+-			list_add(&cf->i_list, &to_remove);
++			list_move(&cf->i_list, &to_remove);
+ 		}
+ 
+ 		spin_lock(&mdsc->cap_dirty_lock);
 
-As I wrote on github - replace memcpy with maybe_inline_memcpy for even more
-performance.
 
--- 
-Piotr Dałek
-branch@predictor.org.pl
-http://blog.predictor.org.pl
+
