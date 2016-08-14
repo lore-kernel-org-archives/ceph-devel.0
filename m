@@ -1,94 +1,154 @@
-From: Avner Ben Hanoch <avnerb@mellanox.com>
-Subject: RE: ./make-debs.sh / dpkg-buildpackage failed because of
- override_dh_auto_configure from debian/rules
-Date: Sun, 14 Aug 2016 08:25:51 +0000
-Message-ID: <DB5PR05MB16075EA7BC9419C9A4297612A9110@DB5PR05MB1607.eurprd05.prod.outlook.com>
-References: <DB5PR05MB1607E14365A8266A29A7E260A9060@DB5PR05MB1607.eurprd05.prod.outlook.com>
- <CALqRxCx4hQs634_YE07RswiKCcZ_S+NyUSvP8F0ihV0ApC9QJw@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Questions about Accepter::stop()
+Date: Sun, 14 Aug 2016 14:14:46 +0200
+Message-ID: <fb18be0c-ad7e-b5ba-c841-5e361b9e5a93@digiware.nl>
+References: <3492e51f-021b-2c6e-2242-2237add24784@digiware.nl>
+ <alpine.DEB.2.11.1608122056380.17762@piezo.us.to>
+ <b6ef2b22-e693-afcc-1772-73ab2d6869cc@digiware.nl>
+ <67687e3b-f514-b727-ca3a-173c82fc3860@digiware.nl>
+ <8bfc92da-efd2-6783-b74a-9ed3612a6f8a@digiware.nl>
+ <alpine.DEB.2.11.1608131357080.17762@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db5eur01on0070.outbound.protection.outlook.com ([104.47.2.70]:24716
-	"EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S933960AbcHNL7Q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 14 Aug 2016 07:59:16 -0400
-In-Reply-To: <CALqRxCx4hQs634_YE07RswiKCcZ_S+NyUSvP8F0ihV0ApC9QJw@mail.gmail.com>
-Content-Language: en-US
+Received: from smtp.digiware.nl ([176.74.240.9]:52968 "EHLO smtp.digiware.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750701AbcHNMOx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 14 Aug 2016 08:14:53 -0400
+In-Reply-To: <alpine.DEB.2.11.1608131357080.17762@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
+To: Sage Weil <sage@newdream.net>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-VGhhbmtzLiAgSGVyZSBhcmUgdGhlIGxpbmVzIGJlZm9yZQ0KKEkgY2hlY2tlZCBvdXQgYSBjb21t
-aXQgZnJvbSBBdWcgNSwgYmVjYXVzZSBjdXJyZW50bHkgbWFzdGVyIGJyYW5jaCBmYWlscyBpbiBj
-b21waWxhdGlvbikNCg0KICAgICAgICBjcCAtZiAvdXNyL3NoYXJlL21pc2MvY29uZmlnLnN1YiAu
-L3NyYy9nb29nbGV0ZXN0L2dvb2dsZXRlc3QvYnVpbGQtYXV4L2NvbmZpZy5zdWINCiAgICAgICAg
-Y3AgLWFuIC0tcmVmbGluaz1hdXRvIGNvbmZpZy5zdWIgZGViaWFuLy5kZWJoZWxwZXIvYnVja2V0
-L2ZpbGVzLzcyZTAyZWE5MzQ0NzAzOGY4Y2VkMjRmMjk2YjMxZTBmMzk3YmJjYzZiMzJhYmRjZjli
-MzhjODBmMTUzNDMzZmQudG1wDQogICAgICAgIG12IC1mIGRlYmlhbi8uZGViaGVscGVyL2J1Y2tl
-dC9maWxlcy83MmUwMmVhOTM0NDcwMzhmOGNlZDI0ZjI5NmIzMWUwZjM5N2JiY2M2YjMyYWJkY2Y5
-YjM4YzgwZjE1MzQzM2ZkLnRtcCBkZWJpYW4vLmRlYmhlbHBlci9idWNrZXQvZmlsZXMvNzJlMDJl
-YTkzNDQ3MDM4ZjhjZWQyNGYyOTZiMzFlMGYzOTdiYmNjNmIzMmFiZGNmOWIzOGM4MGYxNTM0MzNm
-ZA0KICAgICAgICBjcCAtZiAvdXNyL3NoYXJlL21pc2MvY29uZmlnLnN1YiAuL2NvbmZpZy5zdWIN
-CiAgIGRlYmlhbi9ydWxlcyBvdmVycmlkZV9kaF9hdXRvX2NvbmZpZ3VyZQ0KbWFrZVsxXTogRW50
-ZXJpbmcgZGlyZWN0b3J5ICcvbW50L3NkaC9hdm5lcmIvZGViLUF1ZzUvVWJ1bnR1L1dPUktESVIv
-Y2VwaC0xMS4wLjAtMTI0MC1nZjZkNmJjNycNCmRoX2F1dG9fY29uZmlndXJlIC0tYnVpbGRzeXN0
-ZW09Y21ha2UgLS0gLURVU0VfQ1JZUFRPUFA9T0ZGIC1EV0lUSF9PQ0Y9T04gLURXSVRIX0xUVE5H
-PU9OIC1EV0lUSF9DRVBIRlNfSkFWQT1PTiAtRENNQUtFX0lOU1RBTExfTElCRElSPS91c3IvbGli
-IC1EQ01BS0VfSU5TVEFMTF9MSUJFWEVDRElSPS91c3IvbGliIC1EQ01BS0VfSU5TVEFMTF9TWVND
-T05GRElSPS9ldGMNCiAgICAgICAgbWtkaXIgLXAgb2JqLXg4Nl82NC1saW51eC1nbnUNCiAgICAg
-ICAgY2Qgb2JqLXg4Nl82NC1saW51eC1nbnUNCiAgICAgICAgY21ha2UgLi4gLURDTUFLRV9JTlNU
-QUxMX1BSRUZJWD0vdXNyIC1EQ01BS0VfVkVSQk9TRV9NQUtFRklMRT1PTiAtRENNQUtFX0JVSUxE
-X1RZUEU9Tm9uZSAtRENNQUtFX0lOU1RBTExfU1lTQ09ORkRJUj0vZXRjIC1EQ01BS0VfSU5TVEFM
-TF9MT0NBTFNUQVRFRElSPS92YXIgLURVU0VfQ1JZUFRPUFA9T0ZGIC1EV0lUSF9PQ0Y9T04gLURX
-SVRIX0xUVE5HPU9OIC1EV0lUSF9DRVBIRlNfSkFWQT1PTiAtRENNQUtFX0lOU1RBTExfTElCRElS
-PS91c3IvbGliIC1EQ01BS0VfSU5TVEFMTF9MSUJFWEVDRElSPS91c3IvbGliIC1EQ01BS0VfSU5T
-VEFMTF9TWVNDT05GRElSPS9ldGMNCkNNYWtlIEVycm9yOiBUaGUgc291cmNlIGRpcmVjdG9yeSAi
-L21udC9zZGgvYXZuZXJiL2RlYi1BdWc1L1VidW50dS9XT1JLRElSL2NlcGgtMTEuMC4wLTEyNDAt
-Z2Y2ZDZiYzciIGRvZXMgbm90IGFwcGVhciB0byBjb250YWluIENNYWtlTGlzdHMudHh0Lg0KU3Bl
-Y2lmeSAtLWhlbHAgZm9yIHVzYWdlLCBvciBwcmVzcyB0aGUgaGVscCBidXR0b24gb24gdGhlIENN
-YWtlIEdVSS4NCiAgICAgICAgY2QgL21udC9zZGgvYXZuZXJiL2RlYi1BdWc1L1VidW50dS9XT1JL
-RElSL2NlcGgtMTEuMC4wLTEyNDAtZ2Y2ZDZiYzcNCmRoX2F1dG9fY29uZmlndXJlOiBjbWFrZSAu
-LiAtRENNQUtFX0lOU1RBTExfUFJFRklYPS91c3IgLURDTUFLRV9WRVJCT1NFX01BS0VGSUxFPU9O
-IC1EQ01BS0VfQlVJTERfVFlQRT1Ob25lIC1EQ01BS0VfSU5TVEFMTF9TWVNDT05GRElSPS9ldGMg
-LURDTUFLRV9JTlNUQUxMX0xPQ0FMU1RBVEVESVI9L3ZhciAtRFVTRV9DUllQVE9QUD1PRkYgLURX
-SVRIX09DRj1PTiAtRFdJVEhfTFRUTkc9T04gLURXSVRIX0NFUEhGU19KQVZBPU9OIC1EQ01BS0Vf
-SU5TVEFMTF9MSUJESVI9L3Vzci9saWIgLURDTUFLRV9JTlNUQUxMX0xJQkVYRUNESVI9L3Vzci9s
-aWIgLURDTUFLRV9JTlNUQUxMX1NZU0NPTkZESVI9L2V0YyByZXR1cm5lZCBleGl0IGNvZGUgMQ0K
-ZGViaWFuL3J1bGVzOjI1OiByZWNpcGUgZm9yIHRhcmdldCAnb3ZlcnJpZGVfZGhfYXV0b19jb25m
-aWd1cmUnIGZhaWxlZA0KbWFrZVsxXTogKioqIFtvdmVycmlkZV9kaF9hdXRvX2NvbmZpZ3VyZV0g
-RXJyb3IgMg0KbWFrZVsxXTogTGVhdmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVyYi9kZWIt
-QXVnNS9VYnVudHUvV09SS0RJUi9jZXBoLTExLjAuMC0xMjQwLWdmNmQ2YmM3Jw0KZGViaWFuL3J1
-bGVzOjIyOiByZWNpcGUgZm9yIHRhcmdldCAnYnVpbGQnIGZhaWxlZA0KbWFrZTogKioqIFtidWls
-ZF0gRXJyb3IgMg0KZHBrZy1idWlsZHBhY2thZ2U6IGVycm9yOiBkZWJpYW4vcnVsZXMgYnVpbGQg
-Z2F2ZSBlcnJvciBleGl0IHN0YXR1cyAyDQoNCg0KDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3Nh
-Z2UtLS0tLQ0KPiBGcm9tOiBLZW4gRHJleWVyIFttYWlsdG86a2RyZXllckByZWRoYXQuY29tXQ0K
-PiBTZW50OiBUaHVyc2RheSwgQXVndXN0IDA0LCAyMDE2IDE3OjM4DQo+IFRvOiBBdm5lciBCZW4g
-SGFub2NoIDxhdm5lcmJAbWVsbGFub3guY29tPg0KPiBDYzogQ2VwaCBEZXZlbG9wbWVudCA8Y2Vw
-aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQo+IFN1YmplY3Q6IFJlOiAuL21ha2UtZGVicy5zaCAv
-IGRwa2ctYnVpbGRwYWNrYWdlIGZhaWxlZCBiZWNhdXNlIG9mDQo+IG92ZXJyaWRlX2RoX2F1dG9f
-Y29uZmlndXJlIGZyb20gZGViaWFuL3J1bGVzDQo+IA0KPiBXb3VsZCB5b3UgcGxlYXNlIHBhc3Rl
-IG1vcmUgb3V0cHV0IGFib3ZlIHRoZSBsaW5lcyB5b3UndmUgcGFzdGVkIHRoZXJlPw0KPiBUaGUg
-ZmFpbHVyZSBpcyBoaWdoZXIgdXAgaW4gdGhlIGxvZy4NCj4gDQo+IC0gS2VuDQo+IA0KPiBPbiBX
-ZWQsIEF1ZyAzLCAyMDE2IGF0IDU6NDIgQU0sIEF2bmVyIEJlbiBIYW5vY2ggPGF2bmVyYkBtZWxs
-YW5veC5jb20+DQo+IHdyb3RlOg0KPiA+IEhpIGFsbCwNCj4gPg0KPiA+IFJ1bm5pbmcgLi9tYWtl
-LWRlYnMuc2ggZnJvbSBDZXBoIG1hc3RlciBicmFuY2ggb24gVWJ1bnR1LTE2LjA0DQo+IHByb2R1
-Y2VzIHRoZSBlcnJvciBiZWxvdzoNCj4gPiA9PT09PQ0KPiA+ICAgICBkZWJpYW4vcnVsZXM6MjU6
-IHJlY2lwZSBmb3IgdGFyZ2V0ICdvdmVycmlkZV9kaF9hdXRvX2NvbmZpZ3VyZScgZmFpbGVkDQo+
-ID4gICAgIG1ha2VbMV06ICoqKiBbb3ZlcnJpZGVfZGhfYXV0b19jb25maWd1cmVdIEVycm9yIDIN
-Cj4gPiAgICAgbWFrZVsxXTogTGVhdmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVyYi9kZWIt
-DQo+IHYxMS4wLjAvVWJ1bnR1L1dPUktESVIvY2VwaC0xMS4wLjAtMTIyOC1nYzE2MmE4YScNCj4g
-PiAgICAgZGViaWFuL3J1bGVzOjIyOiByZWNpcGUgZm9yIHRhcmdldCAnYnVpbGQnIGZhaWxlZA0K
-PiA+ICAgICBtYWtlOiAqKiogW2J1aWxkXSBFcnJvciAyDQo+ID4gICAgIGRwa2ctYnVpbGRwYWNr
-YWdlOiBlcnJvcjogZGViaWFuL3J1bGVzIGJ1aWxkIGdhdmUgZXJyb3IgZXhpdA0KPiA+IHN0YXR1
-cyAyID09PT09IEkgc2F3IHRoYXQgcmVjZW50bHkgdGhlcmUgd2VyZSBjaGFuZ2VzIGluIHRoaXMg
-YXJlYSBmb3INCj4gPiBnaXRidWlsZGVyIHRvIGVuYWJsZSBjbWFrZS4gUGVyaGFwcyBpdCBpcyBy
-ZWxhdGVkPz8NCj4gPg0KPiA+IEFueWhvdywgaXMgdGhlcmUgYSB3YXkgdG8gY3JlYXRlIGRlYiBw
-YWNrYWdlcz8gT3IsIGlzIHRoZXJlIGEgcGxhbiB0byBmaXggdGhpcw0KPiBzaXR1YXRpb24/DQo+
-ID4gVElBLA0KPiA+ICAgQXZuZXINCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
-cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
-b3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
-by5odG1sDQo=
+On 13-8-2016 16:01, Sage Weil wrote:
+> On Sat, 13 Aug 2016, Willem Jan Withagen wrote:
+>> On 13-8-2016 00:31, Willem Jan Withagen wrote:
+>>> On 12-8-2016 23:40, Willem Jan Withagen wrote:
+>>>> On 12-8-2016 22:58, Sage Weil wrote:
+>>>>> On Fri, 12 Aug 2016, Willem Jan Withagen wrote:
+>>>>>> Hi,
+>>>>>>
+>>>>>> Still working on finding out why my OSD is not comming back up.
+>>>>>> Looking at the OSD it seems to recover, but it is not reported back to
+>>>>>> the other OSD and mons.
+>>>>>>
+>>>>>> Below some of the code from
+>>>>>> 	./src/msg/simple/Accepter.cc
+>>>>>>
+>>>>>> Turns out that the thread freezes on the join, and the complicating
+>>>>>> factor is that shoutdown always reports that
+>>>>>>   accepter.stop shutdown failed:  errno 57 (57) Socket is not connected
+>>>>>>
+>>>>>> Then the code goes into the join, and gets stuck in there.
+>>>>>>
+>>>>>> So I've execluded that part of the code, and the close section.
+>>>>>>
+>>>>>> That seems to work, but I would very much some more opinions on this.
+>>>>>> Original code was doen by Sage, but John Spray added a bit of exclusion
+>>>>>> on the join()
+>>>>>>
+>>>>>> And even with this change I cannot complete
+>>>>>> 	cephtool-test-mon.sh
+>>>>>> But I'm getting a lot further down the test.
+>>>>>
+>>>>> This is the thread we need to wake up in Accepter::entry():
+>>>>>
+>>>>>     ldout(msgr->cct,20) << "accepter calling poll" << dendl;
+>>>>>     int r = poll(&pfd, 1, -1);
+>>>>>     if (r < 0)
+>>>>>       break;
+>>>>>     ldout(msgr->cct,20) << "accepter poll got " << r << dendl;
+>>>>>
+>>>>>     if (pfd.revents & (POLLERR | POLLNVAL | POLLHUP))
+>>>>>       break;
+>>>>>
+>>>>>     ldout(msgr->cct,10) << "pfd.revents=" << pfd.revents << dendl;
+>>>>>     if (done) break;
+>>>>>
+>>>>> It shutdown(2) isn't the "right" (portable) way to kick the thread blocked 
+>>>>> on poll(2) on an accept socket, maybe there is some other socket call that 
+>>>>> is more appropriate?  It just needs to wake up poll so that we either see 
+>>>>> an error event queued or done == true.
+>>>>
+>>>> Yup,  that is what I see in the Linux code.
+>>>> Poll returns with revent = 16 = POLLHUP.
+>>>>
+>>>> Now I'm sort of wondering what I can do with a socket that is already
+>>>> disconnected.... Somebody has to have disconnected the connection.
+>>>> And why the poll waiting on it does not report that....
+>>>> perhaps calling close on it does signal the HUP.
+>>>>
+>>>> SHUT_RDWR has a few comments (at least in the FreeBSD manpage) but they
+>>>> do not seem to fit this case.
+>>>>
+>>>> Any idea oh who would have disconnected this socket?
+>>>>
+>>>> Back to reading more manual pages. And trying to figure out the state
+>>>> machine of a socket. :(
+>>>
+>>> Right,
+>>>
+>>> If I start closing the socket, I'm getting revent = 32.
+>>> Which is POLLINVAL
+>>> 	Invalid request: fd not open (output only).
+>>>
+>>> Available both on Linux and FreeBSD. On FreeBSD it is always to get that
+>>> in revents, even if not asked for. 8-;
+>>> So I guess adding that to the break expression is useful.
+>>>
+>>> And tack the closing somewhere into the stop. And make sure that join()
+>>> is called.
+>>
+>> Hi Sage,
+>>
+>> Got a pull in #10720 that does work on my end...
+>> I left the close at the end in so other OSes get the change to close the
+>> socket when shutdown triggered the poll().
+> 
+> I think the reason we don't use close(2) in the normal case is that it is 
+> racy becaues the fd value may be reused by another thread immediately 
+> after we close it, and at close time we can't be certain that the other 
+> thread is already blocked in poll(2) (it might be about to call it).
+> 
+> say fd == 2.  we start shutdown from T1:
+> T1: close(fd)
+> T3: other = open(...)     (other = 2)   (totally unrelated thread, maybe doing file io)
+> T2: accept(fd)
+> 
+> It seems like there should be a better way?
+
+Oke, I sort of see the problem....
+
+Only it raises even more questions. :)
+
+1) A bit more philosophical
+What would normally the purpose be to actually shutdown a socket
+descriptor? Not receiving any more connect setups.
+And then why would in the FreeBSD case the listen_sd be not connected?
+
+2) Your example is a bit too short?
+If you close the socket listener are you allowed to accept() on it
+without setting it up again? The actual Accepter::bind routine has the
+setup socket stuff as first action...
+And even Accepter::rebind goes thru Accepter::bind
+
+In Accepter::Entry() we do close the listen_sd anyways at the end.
+So even there we can race between the end of the close() and the return,
+where the thread is joined.
+So we do create a new socket anyways?
+
+So I'm not quite sure that the new listen_sd is actually dependant on
+the fact that it has the same value as it used to have?
+
+One solution I can think of (but don't like) is that in the FreeBSD case
+we result to busy waiting this poll loop? But that is sort of expensive,
+because this part of the code does not get much exercise.
+
+The other solution would be to include a watch pipe in the poll fds.
+And then write that pipe if you want to trigger the poll. Instead of
+doing the shutdown. I think there is example code for this on the web,
+it is called the self-pipe trick.
+
+--WjW
