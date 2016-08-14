@@ -1,115 +1,94 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: bufferlist appenders
-Date: Sat, 13 Aug 2016 21:31:36 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608132120570.17762@piezo.us.to>
-References: <alpine.DEB.2.11.1608121418090.17762@piezo.us.to> <BLUPR0201MB1524DC4450553A8874C316E3E81F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: RE: ./make-debs.sh / dpkg-buildpackage failed because of
+ override_dh_auto_configure from debian/rules
+Date: Sun, 14 Aug 2016 08:25:51 +0000
+Message-ID: <DB5PR05MB16075EA7BC9419C9A4297612A9110@DB5PR05MB1607.eurprd05.prod.outlook.com>
+References: <DB5PR05MB1607E14365A8266A29A7E260A9060@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <CALqRxCx4hQs634_YE07RswiKCcZ_S+NyUSvP8F0ihV0ApC9QJw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46096 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751817AbcHNJSc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 14 Aug 2016 05:18:32 -0400
-In-Reply-To: <BLUPR0201MB1524DC4450553A8874C316E3E81F0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Received: from mail-db5eur01on0070.outbound.protection.outlook.com ([104.47.2.70]:24716
+	"EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S933960AbcHNL7Q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 14 Aug 2016 07:59:16 -0400
+In-Reply-To: <CALqRxCx4hQs634_YE07RswiKCcZ_S+NyUSvP8F0ihV0ApC9QJw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 12 Aug 2016, Allen Samuels wrote:
-> 
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> > owner@vger.kernel.org] On Behalf Of Sage Weil
-> > Sent: Friday, August 12, 2016 7:27 AM
-> > To: ceph-devel@vger.kernel.org
-> > Subject: bufferlist appenders
-> > 
-> > A ton of time is the encoding/marshalling is spent doing bufferlist appends.
-> > This is partly because the buffer code is doing lots of sanity range checks, and
-> > party because there are multiple layers that get range checks and length
-> > updates (bufferlist _len changes, and bufferlist::append_buffer (a ptr) gets
-> > it's length updated, at the very least).
-> > 
-> > To simplify and speed this up, I propose an 'appender' concept/type that is
-> > used for doing appends in a more efficient way.  It would be used like so:
-> > 
-> >  bufferlist bl;
-> >  {
-> >    bufferlist::safe_appender a = bl.get_safe_appender();
-> >    ::encode(foo, a);
-> >  }
-> > 
-> > or
-> > 
-> >  {
-> >    bufferlist::unsafe_appender a = bl.get_unsafe_appender(1024);
-> >    ::encode(foo, a);
-> >  }
-> > 
-> > The appender keeps its own bufferptr that it copies data into.  The bufferptr
-> > isn't given to the bufferlist until the appender is destroyed (or flush() is called
-> > explicitly).  This means that appends are generally just a memcpy and a
-> > position pointer addition.  In the safe_appender case, we also do a range
-> > change and allocate a new buffer if necessary.  In the unsafe_appender case,
-> > it is the callers responsibility to say how big a buffer is preallocated.
-> > 
-> > I have a simple prototype here:
-> > 
-> > 	https://github.com/ceph/ceph/pull/10700
-> > 
-> > It appears to be almost 10x faster when encoding a uint64_t in a loop!
-> > 
-> > [ RUN      ] BufferList.appender_bench
-> > appending 1073741824 bytes
-> > buffer::list::append 20.285963
-> > buffer::list encode 19.719120
-> > buffer::list::safe_appender::append 2.588926
-> > buffer::list::safe_appender::append_v 2.837026 buffer::list::safe_appender
-> > encode 3.000614 buffer::list::unsafe_appender::append 2.452116
-> > buffer::list::unsafe_appender::append_v 2.553745
-> > buffer::list::unsafe_appender encode 2.200110
-> > [       OK ] BufferList.appender_bench (55637 ms)
-> > 
-> > Interesting, unsafe isn't much faster than safe.  I suspect the CPU's branch
-> > prediction is just working really well there?
-> 
-> Yes it looks like it is. But this is a bit of a contrived case because 
-> you're timing this code which is 100% in the L1 cache, which might not 
-> be a good model. How bad does it get if the loop is unrolled enough 
-> times to fall out of the L1 cache but still in the L2 cache (which might 
-> be as pessimistic a simulation as the original code is optimistic).
-
-I updated the test to pick a random point in a big array and then encode 
-16 items inline/unrolled in the hopes that this would avoid just hammering 
-L1.  It does mean that the 16 contiguous items will probably all get 
-fetched together (or have the fetch pipelined), but I think that's 
-probably pretty realistic.
-
-The test also went through several other revisions and refinements 
-yesterday with Igor's review.  Here's the result now:
-
-[ RUN      ] BufferList.appender_bench
-appending 268435456 uint64_t's
-buffer::list::append 7.142146
-buffer::list encode 7.968760
-buffer::list::safe_appender::append 3.506399
-buffer::list::safe_appender::append (reserve 16) 2.291478
-buffer::list::safe_appender::append_v 3.673429
-buffer::list::safe_appender::append_v (reserve 16) 2.291800
-buffer::list::safe_appender encode 3.673988
-buffer::list::unsafe_appender::append 1.766341
-buffer::list::unsafe_appender::append_v 1.748361
-buffer::list::unsafe_appender encode 1.746126
-[       OK ] BufferList.appender_bench (36340 ms)
-
-which looks much more like what I would expect to see.  The 'reserve 16' 
-cases are doing a single bounds check and then doing 16 unsafe appends.  
-Bottom line is that doing the limited bounds checks gets you most of the 
-way to totally unguarded, but not all the way.  And no guards is 
-definitely faster (roughly 2x faster than a guard for every word).
-
-Anyway, I think the next step is to look and the enc_dec and see if 
-this can complement the approach...
-
-sage
+VGhhbmtzLiAgSGVyZSBhcmUgdGhlIGxpbmVzIGJlZm9yZQ0KKEkgY2hlY2tlZCBvdXQgYSBjb21t
+aXQgZnJvbSBBdWcgNSwgYmVjYXVzZSBjdXJyZW50bHkgbWFzdGVyIGJyYW5jaCBmYWlscyBpbiBj
+b21waWxhdGlvbikNCg0KICAgICAgICBjcCAtZiAvdXNyL3NoYXJlL21pc2MvY29uZmlnLnN1YiAu
+L3NyYy9nb29nbGV0ZXN0L2dvb2dsZXRlc3QvYnVpbGQtYXV4L2NvbmZpZy5zdWINCiAgICAgICAg
+Y3AgLWFuIC0tcmVmbGluaz1hdXRvIGNvbmZpZy5zdWIgZGViaWFuLy5kZWJoZWxwZXIvYnVja2V0
+L2ZpbGVzLzcyZTAyZWE5MzQ0NzAzOGY4Y2VkMjRmMjk2YjMxZTBmMzk3YmJjYzZiMzJhYmRjZjli
+MzhjODBmMTUzNDMzZmQudG1wDQogICAgICAgIG12IC1mIGRlYmlhbi8uZGViaGVscGVyL2J1Y2tl
+dC9maWxlcy83MmUwMmVhOTM0NDcwMzhmOGNlZDI0ZjI5NmIzMWUwZjM5N2JiY2M2YjMyYWJkY2Y5
+YjM4YzgwZjE1MzQzM2ZkLnRtcCBkZWJpYW4vLmRlYmhlbHBlci9idWNrZXQvZmlsZXMvNzJlMDJl
+YTkzNDQ3MDM4ZjhjZWQyNGYyOTZiMzFlMGYzOTdiYmNjNmIzMmFiZGNmOWIzOGM4MGYxNTM0MzNm
+ZA0KICAgICAgICBjcCAtZiAvdXNyL3NoYXJlL21pc2MvY29uZmlnLnN1YiAuL2NvbmZpZy5zdWIN
+CiAgIGRlYmlhbi9ydWxlcyBvdmVycmlkZV9kaF9hdXRvX2NvbmZpZ3VyZQ0KbWFrZVsxXTogRW50
+ZXJpbmcgZGlyZWN0b3J5ICcvbW50L3NkaC9hdm5lcmIvZGViLUF1ZzUvVWJ1bnR1L1dPUktESVIv
+Y2VwaC0xMS4wLjAtMTI0MC1nZjZkNmJjNycNCmRoX2F1dG9fY29uZmlndXJlIC0tYnVpbGRzeXN0
+ZW09Y21ha2UgLS0gLURVU0VfQ1JZUFRPUFA9T0ZGIC1EV0lUSF9PQ0Y9T04gLURXSVRIX0xUVE5H
+PU9OIC1EV0lUSF9DRVBIRlNfSkFWQT1PTiAtRENNQUtFX0lOU1RBTExfTElCRElSPS91c3IvbGli
+IC1EQ01BS0VfSU5TVEFMTF9MSUJFWEVDRElSPS91c3IvbGliIC1EQ01BS0VfSU5TVEFMTF9TWVND
+T05GRElSPS9ldGMNCiAgICAgICAgbWtkaXIgLXAgb2JqLXg4Nl82NC1saW51eC1nbnUNCiAgICAg
+ICAgY2Qgb2JqLXg4Nl82NC1saW51eC1nbnUNCiAgICAgICAgY21ha2UgLi4gLURDTUFLRV9JTlNU
+QUxMX1BSRUZJWD0vdXNyIC1EQ01BS0VfVkVSQk9TRV9NQUtFRklMRT1PTiAtRENNQUtFX0JVSUxE
+X1RZUEU9Tm9uZSAtRENNQUtFX0lOU1RBTExfU1lTQ09ORkRJUj0vZXRjIC1EQ01BS0VfSU5TVEFM
+TF9MT0NBTFNUQVRFRElSPS92YXIgLURVU0VfQ1JZUFRPUFA9T0ZGIC1EV0lUSF9PQ0Y9T04gLURX
+SVRIX0xUVE5HPU9OIC1EV0lUSF9DRVBIRlNfSkFWQT1PTiAtRENNQUtFX0lOU1RBTExfTElCRElS
+PS91c3IvbGliIC1EQ01BS0VfSU5TVEFMTF9MSUJFWEVDRElSPS91c3IvbGliIC1EQ01BS0VfSU5T
+VEFMTF9TWVNDT05GRElSPS9ldGMNCkNNYWtlIEVycm9yOiBUaGUgc291cmNlIGRpcmVjdG9yeSAi
+L21udC9zZGgvYXZuZXJiL2RlYi1BdWc1L1VidW50dS9XT1JLRElSL2NlcGgtMTEuMC4wLTEyNDAt
+Z2Y2ZDZiYzciIGRvZXMgbm90IGFwcGVhciB0byBjb250YWluIENNYWtlTGlzdHMudHh0Lg0KU3Bl
+Y2lmeSAtLWhlbHAgZm9yIHVzYWdlLCBvciBwcmVzcyB0aGUgaGVscCBidXR0b24gb24gdGhlIENN
+YWtlIEdVSS4NCiAgICAgICAgY2QgL21udC9zZGgvYXZuZXJiL2RlYi1BdWc1L1VidW50dS9XT1JL
+RElSL2NlcGgtMTEuMC4wLTEyNDAtZ2Y2ZDZiYzcNCmRoX2F1dG9fY29uZmlndXJlOiBjbWFrZSAu
+LiAtRENNQUtFX0lOU1RBTExfUFJFRklYPS91c3IgLURDTUFLRV9WRVJCT1NFX01BS0VGSUxFPU9O
+IC1EQ01BS0VfQlVJTERfVFlQRT1Ob25lIC1EQ01BS0VfSU5TVEFMTF9TWVNDT05GRElSPS9ldGMg
+LURDTUFLRV9JTlNUQUxMX0xPQ0FMU1RBVEVESVI9L3ZhciAtRFVTRV9DUllQVE9QUD1PRkYgLURX
+SVRIX09DRj1PTiAtRFdJVEhfTFRUTkc9T04gLURXSVRIX0NFUEhGU19KQVZBPU9OIC1EQ01BS0Vf
+SU5TVEFMTF9MSUJESVI9L3Vzci9saWIgLURDTUFLRV9JTlNUQUxMX0xJQkVYRUNESVI9L3Vzci9s
+aWIgLURDTUFLRV9JTlNUQUxMX1NZU0NPTkZESVI9L2V0YyByZXR1cm5lZCBleGl0IGNvZGUgMQ0K
+ZGViaWFuL3J1bGVzOjI1OiByZWNpcGUgZm9yIHRhcmdldCAnb3ZlcnJpZGVfZGhfYXV0b19jb25m
+aWd1cmUnIGZhaWxlZA0KbWFrZVsxXTogKioqIFtvdmVycmlkZV9kaF9hdXRvX2NvbmZpZ3VyZV0g
+RXJyb3IgMg0KbWFrZVsxXTogTGVhdmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVyYi9kZWIt
+QXVnNS9VYnVudHUvV09SS0RJUi9jZXBoLTExLjAuMC0xMjQwLWdmNmQ2YmM3Jw0KZGViaWFuL3J1
+bGVzOjIyOiByZWNpcGUgZm9yIHRhcmdldCAnYnVpbGQnIGZhaWxlZA0KbWFrZTogKioqIFtidWls
+ZF0gRXJyb3IgMg0KZHBrZy1idWlsZHBhY2thZ2U6IGVycm9yOiBkZWJpYW4vcnVsZXMgYnVpbGQg
+Z2F2ZSBlcnJvciBleGl0IHN0YXR1cyAyDQoNCg0KDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3Nh
+Z2UtLS0tLQ0KPiBGcm9tOiBLZW4gRHJleWVyIFttYWlsdG86a2RyZXllckByZWRoYXQuY29tXQ0K
+PiBTZW50OiBUaHVyc2RheSwgQXVndXN0IDA0LCAyMDE2IDE3OjM4DQo+IFRvOiBBdm5lciBCZW4g
+SGFub2NoIDxhdm5lcmJAbWVsbGFub3guY29tPg0KPiBDYzogQ2VwaCBEZXZlbG9wbWVudCA8Y2Vw
+aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQo+IFN1YmplY3Q6IFJlOiAuL21ha2UtZGVicy5zaCAv
+IGRwa2ctYnVpbGRwYWNrYWdlIGZhaWxlZCBiZWNhdXNlIG9mDQo+IG92ZXJyaWRlX2RoX2F1dG9f
+Y29uZmlndXJlIGZyb20gZGViaWFuL3J1bGVzDQo+IA0KPiBXb3VsZCB5b3UgcGxlYXNlIHBhc3Rl
+IG1vcmUgb3V0cHV0IGFib3ZlIHRoZSBsaW5lcyB5b3UndmUgcGFzdGVkIHRoZXJlPw0KPiBUaGUg
+ZmFpbHVyZSBpcyBoaWdoZXIgdXAgaW4gdGhlIGxvZy4NCj4gDQo+IC0gS2VuDQo+IA0KPiBPbiBX
+ZWQsIEF1ZyAzLCAyMDE2IGF0IDU6NDIgQU0sIEF2bmVyIEJlbiBIYW5vY2ggPGF2bmVyYkBtZWxs
+YW5veC5jb20+DQo+IHdyb3RlOg0KPiA+IEhpIGFsbCwNCj4gPg0KPiA+IFJ1bm5pbmcgLi9tYWtl
+LWRlYnMuc2ggZnJvbSBDZXBoIG1hc3RlciBicmFuY2ggb24gVWJ1bnR1LTE2LjA0DQo+IHByb2R1
+Y2VzIHRoZSBlcnJvciBiZWxvdzoNCj4gPiA9PT09PQ0KPiA+ICAgICBkZWJpYW4vcnVsZXM6MjU6
+IHJlY2lwZSBmb3IgdGFyZ2V0ICdvdmVycmlkZV9kaF9hdXRvX2NvbmZpZ3VyZScgZmFpbGVkDQo+
+ID4gICAgIG1ha2VbMV06ICoqKiBbb3ZlcnJpZGVfZGhfYXV0b19jb25maWd1cmVdIEVycm9yIDIN
+Cj4gPiAgICAgbWFrZVsxXTogTGVhdmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVyYi9kZWIt
+DQo+IHYxMS4wLjAvVWJ1bnR1L1dPUktESVIvY2VwaC0xMS4wLjAtMTIyOC1nYzE2MmE4YScNCj4g
+PiAgICAgZGViaWFuL3J1bGVzOjIyOiByZWNpcGUgZm9yIHRhcmdldCAnYnVpbGQnIGZhaWxlZA0K
+PiA+ICAgICBtYWtlOiAqKiogW2J1aWxkXSBFcnJvciAyDQo+ID4gICAgIGRwa2ctYnVpbGRwYWNr
+YWdlOiBlcnJvcjogZGViaWFuL3J1bGVzIGJ1aWxkIGdhdmUgZXJyb3IgZXhpdA0KPiA+IHN0YXR1
+cyAyID09PT09IEkgc2F3IHRoYXQgcmVjZW50bHkgdGhlcmUgd2VyZSBjaGFuZ2VzIGluIHRoaXMg
+YXJlYSBmb3INCj4gPiBnaXRidWlsZGVyIHRvIGVuYWJsZSBjbWFrZS4gUGVyaGFwcyBpdCBpcyBy
+ZWxhdGVkPz8NCj4gPg0KPiA+IEFueWhvdywgaXMgdGhlcmUgYSB3YXkgdG8gY3JlYXRlIGRlYiBw
+YWNrYWdlcz8gT3IsIGlzIHRoZXJlIGEgcGxhbiB0byBmaXggdGhpcw0KPiBzaXR1YXRpb24/DQo+
+ID4gVElBLA0KPiA+ICAgQXZuZXINCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
+cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRo
+ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
+b3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
+by5odG1sDQo=
