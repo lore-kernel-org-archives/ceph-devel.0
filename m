@@ -1,63 +1,208 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: SCSI inquiry interface for RBD devices
-Date: Sat, 13 Aug 2016 21:14:38 +0200
-Message-ID: <CAOi1vP-nuRzksfvaCZ1nj6sTmxsH=XS2PdAFj_9j94FtMcpFqw@mail.gmail.com>
-References: <27148ED4-95A8-4E8F-86C0-52CEEA9140E1@Teradata.com>
- <CAOi1vP_5gtQXd95M=qspgPeRnTDvxBpC2dknARNv=HXNFKHivQ@mail.gmail.com>
- <4257DB75-0060-4867-A5D5-2AD374722452@Teradata.com> <CAOi1vP9mdNYRCD_cTa0=4tN71L1=tA24wXSr2NqhTH9BmUBAuw@mail.gmail.com>
- <82369305-99D9-464E-B14A-D2E91AC7B76F@Teradata.com> <847a97cf-04b3-9f29-2884-5c757727b3a2@ieee.org>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore assert
+Date: Sun, 14 Aug 2016 17:24:58 +0000
+Message-ID: <BL2PR02MB2115BB77EA5BA38BCF48E52DF4110@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB2115443F5ACA3459E2CEBFBAF41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608102121090.17770@piezo.us.to>
+ <BL2PR02MB2115CDD714FC3883028291F8F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608111629170.17762@piezo.us.to>
+ <7dc67e25-4e1c-09a1-8667-ee47572b9290@redhat.com>
+ <alpine.DEB.2.11.1608111635230.17762@piezo.us.to>
+ <BL2PR02MB2115D3D79C6194FD81E598F3F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608112226280.17762@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f175.google.com ([209.85.217.175]:36614 "EHLO
-	mail-ua0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752268AbcHNNru (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 14 Aug 2016 09:47:50 -0400
-Received: by mail-ua0-f175.google.com with SMTP id 97so42511302uav.3
-        for <ceph-devel@vger.kernel.org>; Sun, 14 Aug 2016 06:47:50 -0700 (PDT)
-In-Reply-To: <847a97cf-04b3-9f29-2884-5c757727b3a2@ieee.org>
+Received: from mail-bn3nam01on0057.outbound.protection.outlook.com ([104.47.33.57]:56928
+	"EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751987AbcHNRZC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 14 Aug 2016 13:25:02 -0400
+In-Reply-To: <alpine.DEB.2.11.1608112226280.17762@piezo.us.to>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
-Cc: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>, Jason Dillaman <dillaman@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mike Christie <mchristi@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sat, Aug 13, 2016 at 5:18 PM, Alex Elder <elder@ieee.org> wrote:
-> On 08/12/2016 01:40 PM, Kamble, Nitin A wrote:
->>> It would make this a lot easier if we started generating a unique UUID
->>> >>> for the image and each snapshot at image/snapshot creation time.  Jason?
->>> >>>
->>>>
->>>> Image UUID seems like the right direction.
->
-> Yes.  It's not a snapshot you want, but the basic image, regardless
-> of the state of its content.  It needs to be created at image
+Sage,
+I did this..
 
-I'm not sure I follow.  We need to have an identifier for each mappable
-entity - that's images (HEADs) and snapshots.
+root@emsnode5:~/ceph-master/src# git diff
+diff --git a/src/kv/RocksDBStore.cc b/src/kv/RocksDBStore.cc
+index 638d231..bcf0935 100644
+--- a/src/kv/RocksDBStore.cc
++++ b/src/kv/RocksDBStore.cc
+@@ -370,6 +370,10 @@ int RocksDBStore::submit_transaction(KeyValueDB::Transaction t)
+   utime_t lat = ceph_clock_now(g_ceph_context) - start;
+   logger->inc(l_rocksdb_txns);
+   logger->tinc(l_rocksdb_submit_latency, lat);
++  if (!s.ok()) {
++    derr << __func__ << " error: " << s.ToString()
++        << "code = " << s.code() << dendl;
++  }
+   return s.ok() ? 0 : -1;
+ }
 
-> creation time, and no matter how many times the image grows or
-> shrinks, or how the cluster gets reorganized along the way, that
-> UUID uniquely defines the image (and it ought not to be possible,
-> as a rule, to *change* an image's UUID).  Coping an entire image
+@@ -385,6 +389,11 @@ int RocksDBStore::submit_transaction_sync(KeyValueDB::Transaction t)
+   utime_t lat = ceph_clock_now(g_ceph_context) - start;
+   logger->inc(l_rocksdb_txns_sync);
+   logger->tinc(l_rocksdb_submit_sync_latency, lat);
++  if (!s.ok()) {
++    derr << __func__ << " error: " << s.ToString()
++        << "code = " << s.code() << dendl;
++  }
++
+   return s.ok() ? 0 : -1;
+ }
+ int RocksDBStore::get_info_log_level(string info_log_level)
+@@ -442,7 +451,8 @@ void RocksDBStore::RocksDBTransactionImpl::rmkey(const string &prefix,
+ void RocksDBStore::RocksDBTransactionImpl::rm_single_key(const string &prefix,
+                                                         const string &k)
+ {
+-  bat->SingleDelete(combine_strings(prefix, k));
++  //bat->SingleDelete(combine_strings(prefix, k));
++  bat->Delete(combine_strings(prefix, k));
+ }
 
-Why?  IMO it shouldn't be any different from a filesystem UUID - a user
-should be able to create an image (snapshot) with the specified UUID,
-change it at any time and maybe even clear it (allowing clear makes
-older images a non-issue).  We already have an unchangeable pool-wide
-ID for ourselves, this is aimed at users and they should be in full
-control here.
+But, the db crash is still happening with the following log message.
 
-> (or cloning) would require a new UUID (as has been said).
->
-> I think the UUID should be defined independent of the cluster as
-> well.  In that case, there may be a reason to think about a "move"
-> operation, where it an image is transferred to a new cluster, with
-> the new one retaining the original UUID and the old one going away.
+rocksdb: submit_transaction_sync error: NotFound: code = 1
 
-By default, it would be a randomly-generated UUID.  What I had meant
-when I said "we can couple it with a cluster UUID too" was that we can
-export a cluster UUID along with an image UUID.
+It seems it is not related to rm_single_key as I am hitting this from  https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L5108 as well where rm_single_key is not called.
+May be I should dump the transaction and see what's in there ?
 
-Thanks,
+I am hitting the BlueFS replay bug I mentioned earlier and applied your patch (https://github.com/ceph/ceph/pull/10686) but not helping.
+Is it because I needed to run with this patch from the beginning and not just during replay ?
 
-                Ilya
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com] 
+Sent: Thursday, August 11, 2016 3:32 PM
+To: Somnath Roy
+Cc: Mark Nelson; ceph-devel
+Subject: RE: Bluestore assert
+
+On Thu, 11 Aug 2016, Somnath Roy wrote:
+> Sage,
+> Regarding the db assert , I hit that again on multiple OSDs while I was populating 40TB rbd images (~35TB written before crash).
+> I did the following changes in the code..
+> 
+> @@ -370,7 +370,7 @@ int RocksDBStore::submit_transaction(KeyValueDB::Transaction t)
+>    utime_t lat = ceph_clock_now(g_ceph_context) - start;
+>    logger->inc(l_rocksdb_txns);
+>    logger->tinc(l_rocksdb_submit_latency, lat);
+> -  return s.ok() ? 0 : -1;
+> +  return s.ok() ? 0 : -s.code();
+>  }
+> 
+>  int RocksDBStore::submit_transaction_sync(KeyValueDB::Transaction t) 
+> @@ -385,7 +385,7 @@ int RocksDBStore::submit_transaction_sync(KeyValueDB::Transaction t)
+>    utime_t lat = ceph_clock_now(g_ceph_context) - start;
+>    logger->inc(l_rocksdb_txns_sync);
+>    logger->tinc(l_rocksdb_submit_sync_latency, lat);
+> -  return s.ok() ? 0 : -1;
+> +  return s.ok() ? 0 : -s.code();
+>  }
+>  int RocksDBStore::get_info_log_level(string info_log_level)  { diff 
+> --git a/src/os/bluestore/BlueStore.cc b/src/os/bluestore/BlueStore.cc 
+> index fe7f743..3f4ecd5 100644
+> --- a/src/os/bluestore/BlueStore.cc
+> +++ b/src/os/bluestore/BlueStore.cc
+> @@ -4989,6 +4989,9 @@ void BlueStore::_kv_sync_thread()
+>              ++it) {
+>           _txc_finalize_kv((*it), (*it)->t);
+>           int r = db->submit_transaction((*it)->t);
+> +          if (r < 0 ) {
+> +            dout(0) << "submit_transaction returned = " << r << dendl;
+> +          }
+>           assert(r == 0);
+>         }
+>        }
+> @@ -5026,6 +5029,10 @@ void BlueStore::_kv_sync_thread()
+>         t->rm_single_key(PREFIX_WAL, key);
+>        }
+>        int r = db->submit_transaction_sync(t);
+> +      if (r < 0 ) {
+> +        dout(0) << "submit_transaction_sync returned = " << r << dendl;
+> +      }
+> +
+>        assert(r == 0);
+> 
+> 
+> This is printing -1 in the log before asset. So, the corresponding code from the rocksdb side is "kNotFound".
+> It is not related to space as I hit this same issue irrespective of db partition size is 100G or 300G.
+> It seems some kind of corruption within Bluestore ?
+> Let me now the next step.
+
+Can you add this too?
+
+diff --git a/src/kv/RocksDBStore.cc b/src/kv/RocksDBStore.cc index 638d231..b5467f7 100644
+--- a/src/kv/RocksDBStore.cc
++++ b/src/kv/RocksDBStore.cc
+@@ -370,6 +370,9 @@ int
+RocksDBStore::submit_transaction(KeyValueDB::Transaction t)
+   utime_t lat = ceph_clock_now(g_ceph_context) - start;
+   logger->inc(l_rocksdb_txns);
+   logger->tinc(l_rocksdb_submit_latency, lat);
++  if (!s.ok()) {
++    derr << __func__ << " error: " << s.ToString() << dendl;  }
+   return s.ok() ? 0 : -1;
+ }
+ 
+It's not obvious to me how we would get NotFound when doing a Write into the kv store.
+
+Thanks!
+sage
+
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Thursday, August 11, 2016 9:36 AM
+> To: Mark Nelson
+> Cc: Somnath Roy; ceph-devel
+> Subject: Re: Bluestore assert
+> 
+> On Thu, 11 Aug 2016, Mark Nelson wrote:
+> > Sorry if I missed this during discussion, but why are these being 
+> > called if the file is deleted?
+> 
+> I'm not sure... rocksdb is the one consuming the interface.  Looking through the code, though, this is the only way I can see that we could log an op_file_update *after* an op_file_remove.
+> 
+> sage
+> 
+> >
+> > Mark
+> >
+> > On 08/11/2016 11:29 AM, Sage Weil wrote:
+> > > On Thu, 11 Aug 2016, Somnath Roy wrote:
+> > > > Sage,
+> > > > Please find the full log for the BlueFS replay bug in the 
+> > > > following location.
+> > > >
+> > > > https://github.com/somnathr/ceph/blob/master/ceph-osd.1.log.zip
+> > > >
+> > > > For the db transaction one , I have added code to dump the 
+> > > > rocksdb error code before the assert as you suggested and waiting to reproduce.
+> > >
+> > > I'm pretty sure this is the root cause:
+> > >
+> > > https://github.com/ceph/ceph/pull/10686
+> > >
+> > > sage
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe 
+> > > ceph-devel" in the body of a message to majordomo@vger.kernel.org 
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >
+> >
+> >
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> 
+> 
