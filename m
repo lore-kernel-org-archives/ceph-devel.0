@@ -1,101 +1,58 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: per-pool bluestore options
-Date: Mon, 15 Aug 2016 16:48:49 +0300
-Message-ID: <4adc2518-07d5-f4bd-7d71-5716bfb767c1@mirantis.com>
-References: <alpine.DEB.2.11.1608131843050.17762@piezo.us.to>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: CephFS and Samba hang on copy of large file
+Date: Mon, 15 Aug 2016 15:58:35 +0200 (CEST)
+Message-ID: <1951857528.2492.1471269515710@ox.pcextreme.nl>
+References: <1423426743.2483.1471267435085@ox.pcextreme.nl>
+ <CAAPGDwLxomxLJMZNsW7qs9vqjnxH9zbBkUjBok7tsHXA_rt3yA@mail.gmail.com>
+ <1197956778.2488.1471268140723@ox.pcextreme.nl>
+ <CAAPGDwKx6w3s5gG9FHu91kLz4kurPD+B1cQNdo8oKYmGu2L-Qg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:33348 "EHLO
-	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753099AbcHONro (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Aug 2016 09:47:44 -0400
-Received: by mail-wm0-f51.google.com with SMTP id d196so21037699wmd.0
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Aug 2016 06:47:43 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1608131843050.17762@piezo.us.to>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:33417 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752796AbcHON6k (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Aug 2016 09:58:40 -0400
+In-Reply-To: <CAAPGDwKx6w3s5gG9FHu91kLz4kurPD+B1cQNdo8oKYmGu2L-Qg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-
-Sage,
-
-see inline.
+To: Ira Cooper <ira@wakeful.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 
-On 13.08.2016 21:56, Sage Weil wrote:
-> Hi Igor,
->
-> I took another look at
->
-> 	https://github.com/ceph/ceph/pull/10556
->
-> You define three settings:
->
->   compress_hint - determines if pool contains compressible / incompressible data
->   compress_algorithm - permits to specify different compression algorithm
->   compress_ratio - specifies maximum compression ratio
->
-> I think we should extend this to include csum-related options.  And use a
-> consistent naming scheme that aligns with the config options where we just
-> strip off the bluestore_ prefix.  The relevant options are:
-Sounds good!
-The major questions here is how do these per-pool options correlate with 
-corresponding per-store ones?
-One might suggest per-pool options to have higher priority over 
-per-store one. But I'm not sure that the best option.  Sometimes user 
-might want to disable/alter corresponding option without enumerating all 
-the pools by simple switching at per-store level. Hence we need to 
-consider some means for that.
->   bluestore_csum = {true, false}
->   bluestore_csum_type = {crc32c, crc32c_{8,16}, ...}
->   bluestore_csum_min_chunk_size = 4k      (*)
->   bluestore_csum_max_chunk_size = 64k     (*)
->   bluestore_compression = {force, aggressive, passive, none}
-Actually this option along with compression_hint result in a single 
-flag: compress or not. Any rationale for not using that simple flag?
+> Op 15 augustus 2016 om 15:43 schreef Ira Cooper <ira@wakeful.net>:
+> 
+> 
+> On Mon, Aug 15, 2016 at 9:35 AM, Wido den Hollander <wido@42on.com> wrote:
+> >
+> >> Op 15 augustus 2016 om 15:27 schreef Ira Cooper <ira@wakeful.net>:
+> >>
+> >>
+> >> Have you tried the ceph VFS module in Samba yet?
+> >>
+> >
+> > Yes. That works, but the performance is a lot lower. So for that we are testing/using the CephFS kernel client.
+> >
+> > I would also like to see the VFS module upstream in Samba, you still need to manually patch it in.
+> 
+> It is in upstream Samba.
+> 
+> https://git.samba.org/?p=samba.git;a=blob;f=source3/modules/vfs_ceph.c;h=59e9b9cf9b3e8e5313a20823994fcacf9e4b4168;hb=f1b42ec778e08875e076df7fdf67dd69bf9b2757
+> 
+> It's been there a while now.
+> 
+> I'm curious what you are patching in, and what the performance numbers are. :)
 
-My original idea here was to have bluestore_compression on per-store 
-basis and compression_hint of per pool one. This way one can receive 
-pretty flexible control at both storage and pool level - see my question 
-above.
+No, sorry for that confusion. I meant DEB and/or RPM packages. You have to compile manually which not all companies like.
 
->   bluestore_compression_algorithm = {snappy, zlib, ...}
->   bluestore_compression_min_blob_size = 256k
->   bluestore_compression_max_blob_size = 4M
->   bluestore_compression_required_ratio = .875
->
-> (*) These currently have a different name but aren't used yet.  Working on
-> a PR to change that.
->
-> What's missing is your 'compress_hint'.  We can call that
-> 'compression_hint' to align with the names above?
->
->   compression_hint = {compressible, incompressible, ...}
->
-> The main changes from your PR that I think we need to make are:
->
-> * These options should be part of the pool_opts_t structure in pg_pool_t
-> (which is a set of optional key/value-like parameters for the pool).
->
-> * We can add a new ObjectStore operation that passes down parameters for a
-> collection, and have the OSD pass these all in for each PG collection when
-> the pool properties change.  That way ObjectStore doesn't need to persist
-> these options at all--just store the ones it understands in memory, and
-> the OSD will always reset them on startup etc.
-One, probably silly, question here - do pool and collection have 1 to 1 
-relation? It seemed to me that they don't and hence we can't store 
-per-pool settings at collection level without some additional mapping: 
-pool -> setting. Also this requires some means to remove pool settings 
-entry when pool goes away...
+With the kernel client we see about 200MB/sec and with VFS about 50MB/sec.
 
-And another question - are there any means to receive notification when 
-pool setting changes. Similar to the one we have for OSD settings. We 
-need that to trigger that new Object Store operation to update pool 
-settings.
->
-> What do you think?
->
-> sage
+However, I still wonder why samba went in status D. That should not happen.
 
+Wido
+
+> 
+> Thanks,
+> 
+> -Ira
