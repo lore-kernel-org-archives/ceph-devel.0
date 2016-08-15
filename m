@@ -1,219 +1,86 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Questions about Accepter::stop()
-Date: Mon, 15 Aug 2016 22:37:36 +0200
-Message-ID: <d7c48e3c-00e2-eec6-4d56-5b35ec05f9cc@digiware.nl>
-References: <3492e51f-021b-2c6e-2242-2237add24784@digiware.nl>
- <alpine.DEB.2.11.1608122056380.17762@piezo.us.to>
- <b6ef2b22-e693-afcc-1772-73ab2d6869cc@digiware.nl>
- <67687e3b-f514-b727-ca3a-173c82fc3860@digiware.nl>
- <8bfc92da-efd2-6783-b74a-9ed3612a6f8a@digiware.nl>
- <alpine.DEB.2.11.1608131357080.17762@piezo.us.to>
- <fb18be0c-ad7e-b5ba-c841-5e361b9e5a93@digiware.nl>
- <alpine.DEB.2.11.1608151947010.14754@piezo.us.to>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: [rgw multisite] disable specified bucket data sync
+Date: Mon, 15 Aug 2016 16:48:37 -0400
+Message-ID: <0bf06e63-8d0c-ec3b-9af7-02454e7af35b@redhat.com>
+References: <7BD28126D6935A4498AE6DE60B5D4CAB314C2FD8@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:13403 "EHLO smtp.digiware.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932115AbcHOUhl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 15 Aug 2016 16:37:41 -0400
-In-Reply-To: <alpine.DEB.2.11.1608151947010.14754@piezo.us.to>
+Received: from mail-yw0-f177.google.com ([209.85.161.177]:35746 "EHLO
+	mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932115AbcHOUsk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Aug 2016 16:48:40 -0400
+Received: by mail-yw0-f177.google.com with SMTP id j12so32746354ywb.2
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Aug 2016 13:48:39 -0700 (PDT)
+In-Reply-To: <7BD28126D6935A4498AE6DE60B5D4CAB314C2FD8@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Zhangzengran <zhangzengran@h3c.com>, "idealguo@139.com" <idealguo@139.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 15-8-2016 21:50, Sage Weil wrote:
-> On Sun, 14 Aug 2016, Willem Jan Withagen wrote:
->> On 13-8-2016 16:01, Sage Weil wrote:
->>> On Sat, 13 Aug 2016, Willem Jan Withagen wrote:
->>>> On 13-8-2016 00:31, Willem Jan Withagen wrote:
->>>>> On 12-8-2016 23:40, Willem Jan Withagen wrote:
->>>>>> On 12-8-2016 22:58, Sage Weil wrote:
->>>>>>> On Fri, 12 Aug 2016, Willem Jan Withagen wrote:
->>>>>>>> Hi,
->>>>>>>>
->>>>>>>> Still working on finding out why my OSD is not comming back up.
->>>>>>>> Looking at the OSD it seems to recover, but it is not reported back to
->>>>>>>> the other OSD and mons.
->>>>>>>>
->>>>>>>> Below some of the code from
->>>>>>>> 	./src/msg/simple/Accepter.cc
->>>>>>>>
->>>>>>>> Turns out that the thread freezes on the join, and the complicating
->>>>>>>> factor is that shoutdown always reports that
->>>>>>>>   accepter.stop shutdown failed:  errno 57 (57) Socket is not connected
->>>>>>>>
->>>>>>>> Then the code goes into the join, and gets stuck in there.
->>>>>>>>
->>>>>>>> So I've execluded that part of the code, and the close section.
->>>>>>>>
->>>>>>>> That seems to work, but I would very much some more opinions on this.
->>>>>>>> Original code was doen by Sage, but John Spray added a bit of exclusion
->>>>>>>> on the join()
->>>>>>>>
->>>>>>>> And even with this change I cannot complete
->>>>>>>> 	cephtool-test-mon.sh
->>>>>>>> But I'm getting a lot further down the test.
->>>>>>>
->>>>>>> This is the thread we need to wake up in Accepter::entry():
->>>>>>>
->>>>>>>     ldout(msgr->cct,20) << "accepter calling poll" << dendl;
->>>>>>>     int r = poll(&pfd, 1, -1);
->>>>>>>     if (r < 0)
->>>>>>>       break;
->>>>>>>     ldout(msgr->cct,20) << "accepter poll got " << r << dendl;
->>>>>>>
->>>>>>>     if (pfd.revents & (POLLERR | POLLNVAL | POLLHUP))
->>>>>>>       break;
->>>>>>>
->>>>>>>     ldout(msgr->cct,10) << "pfd.revents=" << pfd.revents << dendl;
->>>>>>>     if (done) break;
->>>>>>>
->>>>>>> It shutdown(2) isn't the "right" (portable) way to kick the thread blocked 
->>>>>>> on poll(2) on an accept socket, maybe there is some other socket call that 
->>>>>>> is more appropriate?  It just needs to wake up poll so that we either see 
->>>>>>> an error event queued or done == true.
->>>>>>
->>>>>> Yup,  that is what I see in the Linux code.
->>>>>> Poll returns with revent = 16 = POLLHUP.
->>>>>>
->>>>>> Now I'm sort of wondering what I can do with a socket that is already
->>>>>> disconnected.... Somebody has to have disconnected the connection.
->>>>>> And why the poll waiting on it does not report that....
->>>>>> perhaps calling close on it does signal the HUP.
->>>>>>
->>>>>> SHUT_RDWR has a few comments (at least in the FreeBSD manpage) but they
->>>>>> do not seem to fit this case.
->>>>>>
->>>>>> Any idea oh who would have disconnected this socket?
->>>>>>
->>>>>> Back to reading more manual pages. And trying to figure out the state
->>>>>> machine of a socket. :(
->>>>>
->>>>> Right,
->>>>>
->>>>> If I start closing the socket, I'm getting revent = 32.
->>>>> Which is POLLINVAL
->>>>> 	Invalid request: fd not open (output only).
->>>>>
->>>>> Available both on Linux and FreeBSD. On FreeBSD it is always to get that
->>>>> in revents, even if not asked for. 8-;
->>>>> So I guess adding that to the break expression is useful.
->>>>>
->>>>> And tack the closing somewhere into the stop. And make sure that join()
->>>>> is called.
->>>>
->>>> Hi Sage,
->>>>
->>>> Got a pull in #10720 that does work on my end...
->>>> I left the close at the end in so other OSes get the change to close the
->>>> socket when shutdown triggered the poll().
+The ability to disable sync per-bucket could certainly be added, but it 
+would take some work to get right.
+
+First you'd need a radosgw-admin command to enable/disable sync on a 
+given bucket, and store that flag with the bucket instance. We read the 
+bucket instance before starting sync on each bucket, so you could skip 
+the sync depending on that flag.
+
+However, each zone is trying to sync data from all other zones in its 
+zonegroup. So disabling it on zone A, for example, will only prevent 
+zone A from pulling changes from other zones. The other zones would 
+still be pulling changes from zone A, because they have their own copy 
+of the bucket instance. So you'd probably want some way to coordinate 
+this setting between zones.
+
+The other challenge would be in the interaction with the 'data changes 
+log'. Each zone maintains a log of bucket names that have local changes 
+(you can view this with 'radosgw-admin datalog list'). Other zones read 
+from this log to decide which buckets they need to sync. However, say 
+that zone A reads about a change to bucket1 on zone B. If sync on 
+bucket1 is disabled, zone A skips the sync and advances its position in 
+zone B's datalog. So if sync on bucket1 is later enabled, zone A won't 
+remember that it needs to sync from B.
+
+So I think the trick would be to add special entries to the datalog when 
+buckets are enabled/disabled, so that other zones will know to a) update 
+their local bucket instance, and b) restart sync if enabled. We might 
+also want to restrict the radosgw-admin command to the zonegroup's 
+master zone so we can avoid races between enable/disable from different 
+zones.
+
+Casey
+
+
+On 08/02/2016 09:16 PM, Zhangzengran wrote:
+>>> Hi Casey:
+>>>           Why don’t support stopping specified bucket data sync. Is there any difficulty in implementing the feature?
+>>>           Or am I missing something?
 >>>
->>> I think the reason we don't use close(2) in the normal case is that it is 
->>> racy becaues the fd value may be reused by another thread immediately 
->>> after we close it, and at close time we can't be certain that the other 
->>> thread is already blocked in poll(2) (it might be about to call it).
->>>
->>> say fd == 2.  we start shutdown from T1:
->>> T1: close(fd)
->>> T3: other = open(...)     (other = 2)   (totally unrelated thread, maybe doing file io)
->>> T2: accept(fd)
->>>
->>> It seems like there should be a better way?
+>>>           Thank you !
 >>
->> Oke, I sort of see the problem....
+>> Hi,
 >>
->> Only it raises even more questions. :)
+>> What would you like to get out of this feature? A way to disable sync on a given bucket temporarily, and turn it back on later? Or just a way to have a subset of buckets that don't ever participate in sync?
 >>
->> 1) A bit more philosophical
->> What would normally the purpose be to actually shutdown a socket
->> descriptor? Not receiving any more connect setups.
->> And then why would in the FreeBSD case the listen_sd be not connected?
-> 
-> I'm not sure an accepter socket is 'connected' in the usual sense.  We 
-> call accept(2) on it, but there is no peer...
-
-I guess that that is the reason ::shutdown complains.
-Also tried ::shutdown(listend_sd, SHUT_RD) that did not generate errors,
-but did not work either... And the descriptor that socket returns is not
-per se a file-decriptor. It is just a handle to refer to when asking for
-incoming connections.
-
->> 2) Your example is a bit too short?
->> If you close the socket listener are you allowed to accept() on it
->> without setting it up again? The actual Accepter::bind routine has the
->> setup socket stuff as first action...
->> And even Accepter::rebind goes thru Accepter::bind
-> 
-> The problem si that as soon as you close(2), the fd is freed and available 
-> for use by someone else.  If you use it again you'll either get EBADF (if 
-> you're lucky) or (more likely) some other thread will open a file or 
-> socket and you'll trample all over whatever they are trying to do.  In 
-> short: be very very careful nobody is using the fd anymore before you 
-> close it!
-
-I do agree with this being a potential source for complex errors.
-
->> In Accepter::Entry() we do close the listen_sd anyways at the end.
->> So even there we can race between the end of the close() and the return,
->> where the thread is joined.
-> 
-> Currenty we join before closing (right?).
-
-Not really sure about that.
-Accepter.cc: unmodified: line 332: the end of Accepter::entry() has
-  ldout(msgr->cct,20) << __func__ << " closing" << dendl;
-  // don't close socket, in case we start up again?  blech.
-  if (listen_sd >= 0) {
-    ::close(listen_sd);
-    listen_sd = -1;
-  }
-  ldout(msgr->cct,10) << __func__ << " stopping" << dendl;
-  return 0;
-
-Which closes the listen_sd before we exit Accepter::entry and join.
-
-So would be tempted to say that we close before join().
-
-
->> So we do create a new socket anyways?
+>> Do you have a use case for the first? That's not something we'd considered.
 >>
->> So I'm not quite sure that the new listen_sd is actually dependant on
->> the fact that it has the same value as it used to have?
+>> If you just want to have some buckets that never sync, you might consider serving those out of a separate gateway, in a zone that isn't part of a multisite configuration.
 >>
->> One solution I can think of (but don't like) is that in the FreeBSD case
->> we result to busy waiting this poll loop? But that is sort of expensive,
->> because this part of the code does not get much exercise.
-> 
-> A workaround might be to set a modest timeout (say, 1s) on the poll.  
-> Worst case, you wait up to 1s to shut down, which isn't to bad, and in the 
-> normal case you only wake up needlessly once per second (also not *too* 
-> bad).
-> 
->> The other solution would be to include a watch pipe in the poll fds.
->> And then write that pipe if you want to trigger the poll. Instead of
->> doing the shutdown. I think there is example code for this on the web,
->> it is called the self-pipe trick.
-> 
-> That's probably the most elegant/correct solution... I'm not sure that teh 
-> current behavior where we call shutdown(2) on an unconnected socket and it 
-> wakes up poll(2) is well-defined behavior.
-
-I actually found more cases of the selfpipe solution, and it is a
-portable ways of tackling the challenge.
-But there are also more cases that use ::shutdown().
-Which I will have to review and see of they cause the same type of
-errors. But perhaps should we just rewrite all the shutdown cases, just
-to use the same code in all code.
-
-Perhaps find a good example code in the tree, and just copy/paste it
-here. Especially since I'm ignoring the EAGAIN cases, that should be
-wrapped in a retry loop.
-
-Anyways this would definitely beat any form of active waiting.
-
---WjW
-
+>> Thanks,
+>> Casey
+> deploy a separate none-sync zone with different endpoint may not a good choice. we hope enable/disable a specified bucket sync could be somewhat flexible. :)
+> -------------------------------------------------------------------------------------------------------------------------------------
+> 本邮件及其附件含有杭州华三通信技术有限公司的保密信息，仅限于发送给上面地址中列出
+> 的个人或群组。禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制、
+> 或散发）本邮件中的信息。如果您错收了本邮件，请您立即电话或邮件通知发件人并删除本
+> 邮件！
+> This e-mail and its attachments contain confidential information from H3C, which is
+> intended only for the person or entity whose address is listed above. Any use of the
+> information contained herein in any way (including, but not limited to, total or partial
+> disclosure, reproduction, or dissemination) by persons other than the intended
+> recipient(s) is prohibited. If you receive this e-mail in error, please notify the sender
+> by phone or email immediately and delete it!
+> N�����r��y���b�X��ǧv�^�)޺{.n�+���z�]z���{ay�ʇڙ�,j��f���h���z��w������j:+v���w�j�m��������zZ+�����ݢj"��!tml=
 
