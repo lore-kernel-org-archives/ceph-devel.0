@@ -1,37 +1,67 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Sequential write performance on cloning images
-Date: Mon, 15 Aug 2016 08:16:44 -0400
-Message-ID: <CA+aFP1D+gBbTK=JiJSG=nevZoxxTAq=OgU6GGFQ=uO0smLsCKw@mail.gmail.com>
-References: <CAOb-7EzSpjYp9dZB4j2UoTgB6H0WZM5SeC2rJ=EYMc9R9a6x3Q@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Wido den Hollander <wido@42on.com>
+Subject: CephFS and Samba hang on copy of large file
+Date: Mon, 15 Aug 2016 15:23:54 +0200 (CEST)
+Message-ID: <1423426743.2483.1471267435085@ox.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f179.google.com ([209.85.192.179]:34130 "EHLO
-	mail-pf0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752707AbcHOMQq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Aug 2016 08:16:46 -0400
-Received: by mail-pf0-f179.google.com with SMTP id p64so16757240pfb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Aug 2016 05:16:45 -0700 (PDT)
-In-Reply-To: <CAOb-7EzSpjYp9dZB4j2UoTgB6H0WZM5SeC2rJ=EYMc9R9a6x3Q@mail.gmail.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:58049 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752785AbcHONYC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Aug 2016 09:24:02 -0400
+Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
+	by smtp01.mail.pcextreme.nl (Postfix) with ESMTPSA id 3003A76258
+	for <ceph-devel@vger.kernel.org>; Mon, 15 Aug 2016 15:23:55 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ridge Chen <ridge.chen@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sun, Aug 14, 2016 at 10:41 PM, Ridge Chen <ridge.chen@gmail.com> wrote:
-> I have tested on hammer and jewel, the results are similar. Is it expected?
+Hi,
 
-In this case, there actually would not be an extra copy-up since you
-already performed the necessary copy-ups during the "dd" against
-"clone-vol1". The only difference, on the librbd side, is that the
-write operation would have an additional "assert object exists"
-operation before the write operation.
+I'm running into a issue in combination of CephFS and Samba and I was wondering if a dev knew what is happening here.
 
-Do you see similar differences with the librbd cache disabled and the
-object map disabled?
+The situation:
+- Jewel cluster
+- CephFS kernel client version 4.7
+- Samba re-export of CephFS
+- Mount options: rw,noatime,acl
 
+A copy of a 15GB file results in Samba hanging in status D:
 
+root@hlms-zaken-01:~# ps aux|grep smb|grep D
+jongh       8887  0.0  0.0 376656 19068 ?        D    14:42   0:00 /usr/sbin/smbd -D
+jongh       9740  0.0  0.0 377380 19244 ?        D    14:49   0:00 /usr/sbin/smbd -D
+root@hlms-zaken-01:~# cat /proc/8887/stack
+[<ffffffff8132d353>] call_rwsem_down_write_failed+0x13/0x20
+[<ffffffff8121a145>] vfs_setxattr+0x55/0xb0
+[<ffffffff8121a2a5>] setxattr+0x105/0x170
+[<ffffffff81203aa1>] filename_lookup+0xf1/0x180
+[<ffffffff8120369f>] getname_flags+0x6f/0x1e0
+[<ffffffff8121a3bd>] path_setxattr+0xad/0xe0
+[<ffffffff8121a4f0>] SyS_setxattr+0x10/0x20
+[<ffffffff815e8b76>] entry_SYSCALL_64_fastpath+0x1e/0xa8
+[<ffffffffffffffff>] 0xffffffffffffffff
+root@hlms-zaken-01:~# cat /proc/9740/stack
+[<ffffffff8132d353>] call_rwsem_down_write_failed+0x13/0x20
+[<ffffffff8121a145>] vfs_setxattr+0x55/0xb0
+[<ffffffff8121a2a5>] setxattr+0x105/0x170
+[<ffffffff81203aa1>] filename_lookup+0xf1/0x180
+[<ffffffff8120369f>] getname_flags+0x6f/0x1e0
+[<ffffffff8121a3bd>] path_setxattr+0xad/0xe0
+[<ffffffff8121a4f0>] SyS_setxattr+0x10/0x20
+[<ffffffff815e8b76>] entry_SYSCALL_64_fastpath+0x1e/0xa8
+[<ffffffffffffffff>] 0xffffffffffffffff
+root@hlms-zaken-01:~#
 
--- 
-Jason
+Now, when I look in /sys/kernel/debug/ceph/*/osdc / mdsc there are no outstanding requests to the OSDs or MDS.
+
+Both these calls just hang for ever on these requests and they don't continue.
+
+Any pointers where to start looking for this? I tried the 4.4 kernel before, it gave me the same hang. So that's why I upgraded to 4.7 to see if it was fixed there.
+
+The Ceph cluster is currently backfilling 17 PGs, but this also happend when HEALTH_OK was around.
+
+There are no block or slow requests in the cluster.
+
+Wido
