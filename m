@@ -1,75 +1,44 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Sequential write performance on cloning images
-Date: Mon, 15 Aug 2016 22:22:13 -0400
-Message-ID: <CA+aFP1B=KAwu6Er1Zhun+eNUNJ_N_y-9CZipazqNFd==QEJiPA@mail.gmail.com>
-References: <CAOb-7EzSpjYp9dZB4j2UoTgB6H0WZM5SeC2rJ=EYMc9R9a6x3Q@mail.gmail.com>
- <CA+aFP1D+gBbTK=JiJSG=nevZoxxTAq=OgU6GGFQ=uO0smLsCKw@mail.gmail.com> <CAOb-7EwU_sE_T5geNU6OHHO_x5XZG3E3ZqfOxOqbDi8Ss6p5fg@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: 0.94.8 QE validation - on-hold
+Date: Tue, 16 Aug 2016 12:54:33 +1000
+Message-ID: <CAF-wwdGhNd9LpVp+8TJ4A+hwPkjowyRnec-yxtwfsBPG-wDnMg@mail.gmail.com>
+References: <CAMMFjmG7sa8zL7mSJzaLyivYv-j2GLx9rW-=XLT=Z8L_eG2hbQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:36123 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751423AbcHPCWP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Aug 2016 22:22:15 -0400
-Received: by mail-pa0-f46.google.com with SMTP id pp5so21245165pac.3
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Aug 2016 19:22:15 -0700 (PDT)
-In-Reply-To: <CAOb-7EwU_sE_T5geNU6OHHO_x5XZG3E3ZqfOxOqbDi8Ss6p5fg@mail.gmail.com>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:37748 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752958AbcHPCyf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Aug 2016 22:54:35 -0400
+Received: by mail-wm0-f54.google.com with SMTP id i5so138056160wmg.0
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Aug 2016 19:54:35 -0700 (PDT)
+In-Reply-To: <CAMMFjmG7sa8zL7mSJzaLyivYv-j2GLx9rW-=XLT=Z8L_eG2hbQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ridge Chen <ridge.chen@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: Nathan Cutler <ncutler@suse.cz>, "Weil, Sage" <sage@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Dachary, Loic" <ldachary@redhat.com>
 
-The "assert object exists" check is just a "stat" op inserted before
-the write op in the same transaction.  If the object doesn't exist
-(i.e. a clone copy-on-write is required), the transaction will fail
-within the OSD and librbd will know it needs to perform a copy-up.
-However, in your case, this stat op should be essentially a no-op so I
-would expect zero performance penalty.
+On Tue, Aug 16, 2016 at 9:19 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
+> Nathan,
+>
+> Based on a small subset of suites ran so far, one issue seems persisting -
+>
+> http://tracker.ceph.com/issues/17035
+> "saw valgrind issues" in hammer 0.94.8 release
 
-Do you rebuild your images after every test run? I ask because one big
-difference is that when you are writing to the parent image, it has a
-snapshot so the first write to a backing object would require a
-copy-on-write operation within the OSD.
+Pretty sure this is http://tracker.ceph.com/issues/15117
 
-
-
-On Mon, Aug 15, 2016 at 10:05 PM, Ridge Chen <ridge.chen@gmail.com> wrote:
-> Hi
 >
-> Thanks for your quick response.
+> I need your assessment if we need to fix this issue before continuing
+> QE validation of this point release.
 >
-> Yes, the result is similar with object-map disabled. And in all my
-> tests the librbd cache is disabled.
+> Holding on further validations till we make this decision.
 >
-> Could you explain more about the additional "assert object exists"
-> operation? what it does in osd side?
->
-> And can we bypass the operation in this very common case based on the
-> object-map feature?
->
-> Regards,
-> Ridge
->
-> 2016-08-15 20:16 GMT+08:00 Jason Dillaman <jdillama@redhat.com>:
->> On Sun, Aug 14, 2016 at 10:41 PM, Ridge Chen <ridge.chen@gmail.com> wrote:
->>> I have tested on hammer and jewel, the results are similar. Is it expected?
->>
->> In this case, there actually would not be an extra copy-up since you
->> already performed the necessary copy-ups during the "dd" against
->> "clone-vol1". The only difference, on the librbd side, is that the
->> write operation would have an additional "assert object exists"
->> operation before the write operation.
->>
->> Do you see similar differences with the librbd cache disabled and the
->> object map disabled?
->>
->>
->>
->> --
->> Jason
+> Thx
+> YuriW
 
 
 
 -- 
-Jason
+Cheers,
+Brad
