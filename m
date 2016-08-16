@@ -1,51 +1,53 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: 0.94.8 QE validation - on-hold
-Date: Tue, 16 Aug 2016 09:18:31 -0700
-Message-ID: <CAMMFjmHC9GKO7UpQuu8AzgseMfuai_mFiFpuvtHkR2ve+vrfGg@mail.gmail.com>
-References: <CAMMFjmG7sa8zL7mSJzaLyivYv-j2GLx9rW-=XLT=Z8L_eG2hbQ@mail.gmail.com>
- <CAF-wwdGhNd9LpVp+8TJ4A+hwPkjowyRnec-yxtwfsBPG-wDnMg@mail.gmail.com>
- <20160816080138.GE5947@rskikr.localdomain> <82fc130c-c7ca-5ae2-3ccf-d41aeb207129@suse.cz>
- <CAMMFjmE-Oqg-a6MpK-9sA+V4yFPXeB+uT5LKK2L_uQr0hzQS_w@mail.gmail.com>
- <CAMMFjmGc0sgP7Rv3569ds8M3tcVFGYOcqbimQMM4eELAF7+c3w@mail.gmail.com> <cefec434-d73e-ae6a-d3a0-b2ce3b7b3290@suse.cz>
+From: Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [GIT PULL] [PATCH v4 00/26] Delete CURRENT_TIME
+ and CURRENT_TIME_SEC macros
+Date: Tue, 16 Aug 2016 11:18:52 -0700
+Message-ID: <CABeXuvp027DZR0=zQPp86oGdi2B+Gh16z8_FyoY5UDUdHXAngA@mail.gmail.com>
+References: <1471128518-24075-1-git-send-email-deepa.kernel@gmail.com>
+	<20160815162312.GA19794@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:38287 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753616AbcHPQSd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2016 12:18:33 -0400
-Received: by mail-wm0-f53.google.com with SMTP id o80so178889223wme.1
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Aug 2016 09:18:32 -0700 (PDT)
-In-Reply-To: <cefec434-d73e-ae6a-d3a0-b2ce3b7b3290@suse.cz>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>, "Dachary, Loic" <ldachary@redhat.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+In-Reply-To: <20160815162312.GA19794-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: Dave Kleikamp <shaggy-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, jfs-discussion-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Trond Myklebust <trond.myklebust-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, Andreas Dilger <adilger.kernel-m1MBpc4rdrD3fQ9qLvQP4Q@public.gmane.org>, Brian Uchino <buchino-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "James E.J. Bottomley" <jejb-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, Paul Moore <paul-r2n+y4ga6xFZroRs9YW3xA@public.gmane.org>, Linux SCSI List <linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, y2038 Mailman List <y2038-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>, Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Changman Lee <cm224.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Evgeniy Dushistov <dushistov-JGs/UdohzUI@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Mark Fasheh <mfasheh-IBi9RG/b67k@public.gmane.org>, Suma Ramars <sramars-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, Jaegeuk Kim <jaege>
+List-Id: ceph-devel.vger.kernel.org
 
-Oh never mind, Nathan.
-It's fixed in teuthology, so my question was invalid
+Thank you for the suggestion.
 
-Thx
-YuriW
+> Who are you execting to pull this huge patch series?
 
-On Tue, Aug 16, 2016 at 9:06 AM, Nathan Cutler <ncutler@suse.cz> wrote:
->> Should we backport https://github.com/ceph/teuthology/pull/933 to
->> hammer 0.94.8 ?
->
->
-> Hi Yuri:
->
-> While teuthology may have hammer, jewel, etc. branches, these can be ignored
-> - only the master branch is used AFAIK.
->
-> In my account on teuthology.front, I have a clone of
-> https://github.com/ceph/teuthology and inside that I have a virtualenv from
-> which I run teuthology-suite. To get the latest teuthology fixes, I usually
-> just nuke the entire clone and start from a fresh clone:
->
-> git clone https://github.com/ceph/teuthology
-> cd teuthology
-> ./bootstrap
-> virtualenv/bin/teuthology-suite . . .
->
-> Nathan
+The last pull request was addressed to Al as per Arnd's suggestion.
+I'm not completely sure who should it be addressed to.
+
+> Why not just introduce the new api call, wait for that to be merged, and
+> then push the individual patches through the different subsystems?
+> After half of those get ignored, then provide a single set of patches
+> that can go through Andrew or my trees.
+
+Arnd and I tried to do this a few ways.
+
+We can try to introduce the api first like you suggest.
+
+There are a few Acks already on the patches.
+And, patches 2-5 also need to be merged through some common tree like
+yours or Andrew's as you suggest.
+
+So, if everyone is ok, I could do the following:
+
+1. Post patches 1-5 for rc-2.
+2. Post all other patches to respective maintainers after rc-2
+3. Then after patches get ignored or merged, post remaining as a
+series for you or Andrew to pick up.
+
+-Deepa
