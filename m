@@ -1,55 +1,54 @@
-From: Victor Denisov <vdenisov@mirantis.com>
-Subject: Snapshots of consistency groups
-Date: Mon, 15 Aug 2016 16:46:05 -0700
-Message-ID: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+From: Ridge Chen <ridge.chen@gmail.com>
+Subject: Re: Sequential write performance on cloning images
+Date: Tue, 16 Aug 2016 10:05:46 +0800
+Message-ID: <CAOb-7EwU_sE_T5geNU6OHHO_x5XZG3E3ZqfOxOqbDi8Ss6p5fg@mail.gmail.com>
+References: <CAOb-7EzSpjYp9dZB4j2UoTgB6H0WZM5SeC2rJ=EYMc9R9a6x3Q@mail.gmail.com>
+ <CA+aFP1D+gBbTK=JiJSG=nevZoxxTAq=OgU6GGFQ=uO0smLsCKw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f177.google.com ([209.85.217.177]:35517 "EHLO
-	mail-ua0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752316AbcHOXqH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Aug 2016 19:46:07 -0400
-Received: by mail-ua0-f177.google.com with SMTP id n59so96671275uan.2
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Aug 2016 16:46:07 -0700 (PDT)
+Received: from mail-io0-f171.google.com ([209.85.223.171]:36213 "EHLO
+	mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932201AbcHPCFr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Aug 2016 22:05:47 -0400
+Received: by mail-io0-f171.google.com with SMTP id b62so95330814iod.3
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Aug 2016 19:05:47 -0700 (PDT)
+In-Reply-To: <CA+aFP1D+gBbTK=JiJSG=nevZoxxTAq=OgU6GGFQ=uO0smLsCKw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, Jason Dillaman <dillaman@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Mykola Golub <mgolub@mirantis.com>
+To: dillaman@redhat.com
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Gentlemen,
+Hi
 
-I'm writing to you to ask for your opinion regarding quiescing writes.
+Thanks for your quick response.
 
-Here is the situation. In order to take snapshots of all images in a
-consistency group,
-we first need to quiesce all the image writers in the consistency group.
-Let me call
-group client - a client which requests a consistency group to take a snapshot.
-Image client - the client that writes to an image.
-Let's say group client starts sending notify_quiesce to all image
-clients that write to the images in the group. After quiescing half of
-the image clients the group client can die.
+Yes, the result is similar with object-map disabled. And in all my
+tests the librbd cache is disabled.
 
-It presents us with a dilemma - what should we do with those quiesced
-image clients.
+Could you explain more about the additional "assert object exists"
+operation? what it does in osd side?
 
-Option 1 - is to wait till someone manually runs recover for that
-consistency group.
-We can show warning next to those unfinished groups when user runs
-group list command.
-There will be a command like group recover, which allows users to
-rollback unsuccessful snapshots
-or continue them using create snapshot command.
+And can we bypass the operation in this very common case based on the
+object-map feature?
 
-Option 2 - is to establish some heart beats between group client and
-image client. If group client fails to heart beat then image client
-unquiesces itself and continues normal operation.
+Regards,
+Ridge
 
-Option 3 - is to have a timeout for each image client. If group client
-fails to make a group snapshot within this timeout then we resume our
-normal operation informing group client of the fact.
-
-Which of these options do you prefer? Probably there are other options
-that I miss.
-
-Thanks,
-Victor.
+2016-08-15 20:16 GMT+08:00 Jason Dillaman <jdillama@redhat.com>:
+> On Sun, Aug 14, 2016 at 10:41 PM, Ridge Chen <ridge.chen@gmail.com> wrote:
+>> I have tested on hammer and jewel, the results are similar. Is it expected?
+>
+> In this case, there actually would not be an extra copy-up since you
+> already performed the necessary copy-ups during the "dd" against
+> "clone-vol1". The only difference, on the librbd side, is that the
+> write operation would have an additional "assert object exists"
+> operation before the write operation.
+>
+> Do you see similar differences with the librbd cache disabled and the
+> object map disabled?
+>
+>
+>
+> --
+> Jason
