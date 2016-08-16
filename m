@@ -1,104 +1,85 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Snapshots of consistency groups
-Date: Tue, 16 Aug 2016 09:29:38 -0400
-Message-ID: <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
-References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
- <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: CephFS and Samba hang on copy of large file
+Date: Tue, 16 Aug 2016 10:05:19 -0400
+Message-ID: <1471356319.2873.8.camel@redhat.com>
+References: <1423426743.2483.1471267435085@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f50.google.com ([209.85.220.50]:36053 "EHLO
-	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751861AbcHPN3n (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2016 09:29:43 -0400
-Received: by mail-pa0-f50.google.com with SMTP id pp5so26536241pac.3
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Aug 2016 06:29:40 -0700 (PDT)
-In-Reply-To: <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+Received: from mail-qt0-f171.google.com ([209.85.216.171]:34959 "EHLO
+	mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753518AbcHPOF5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2016 10:05:57 -0400
+Received: by mail-qt0-f171.google.com with SMTP id x25so35397333qtx.2
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Aug 2016 07:05:23 -0700 (PDT)
+In-Reply-To: <1423426743.2483.1471267435085@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Victor Denisov <vdenisov@mirantis.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>, Mykola Golub <mgolub@mirantis.com>
+To: Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-... one more thing:
+On Mon, 2016-08-15 at 15:23 +0200, Wido den Hollander wrote:
+> Hi,
+> 
+> I'm running into a issue in combination of CephFS and Samba and I was
+> wondering if a dev knew what is happening here.
+> 
+> The situation:
+> - Jewel cluster
+> - CephFS kernel client version 4.7
+> - Samba re-export of CephFS
+> - Mount options: rw,noatime,acl
+> 
+> A copy of a 15GB file results in Samba hanging in status D:
+> 
+> root@hlms-zaken-01:~# ps aux|grep smb|grep D
+> jongh       8887  0.0  0.0 376656 19068 ?        D    14:42   0:00
+> /usr/sbin/smbd -D
+> jongh       9740  0.0  0.0 377380 19244 ?        D    14:49   0:00
+> /usr/sbin/smbd -D
+> root@hlms-zaken-01:~# cat /proc/8887/stack
+> [<ffffffff8132d353>] call_rwsem_down_write_failed+0x13/0x20
+> [<ffffffff8121a145>] vfs_setxattr+0x55/0xb0
+> [<ffffffff8121a2a5>] setxattr+0x105/0x170
+> [<ffffffff81203aa1>] filename_lookup+0xf1/0x180
+> [<ffffffff8120369f>] getname_flags+0x6f/0x1e0
+> [<ffffffff8121a3bd>] path_setxattr+0xad/0xe0
+> [<ffffffff8121a4f0>] SyS_setxattr+0x10/0x20
+> [<ffffffff815e8b76>] entry_SYSCALL_64_fastpath+0x1e/0xa8
+> [<ffffffffffffffff>] 0xffffffffffffffff
+> root@hlms-zaken-01:~# cat /proc/9740/stack
+> [<ffffffff8132d353>] call_rwsem_down_write_failed+0x13/0x20
+> [<ffffffff8121a145>] vfs_setxattr+0x55/0xb0
+> [<ffffffff8121a2a5>] setxattr+0x105/0x170
+> [<ffffffff81203aa1>] filename_lookup+0xf1/0x180
+> [<ffffffff8120369f>] getname_flags+0x6f/0x1e0
+> [<ffffffff8121a3bd>] path_setxattr+0xad/0xe0
+> [<ffffffff8121a4f0>] SyS_setxattr+0x10/0x20
+> [<ffffffff815e8b76>] entry_SYSCALL_64_fastpath+0x1e/0xa8
+> [<ffffffffffffffff>] 0xffffffffffffffff
+> root@hlms-zaken-01:~#
+> 
+> Now, when I look in /sys/kernel/debug/ceph/*/osdc / mdsc there are no
+> outstanding requests to the OSDs or MDS.
+> 
+> Both these calls just hang for ever on these requests and they don't
+> continue.
+> 
+> Any pointers where to start looking for this? I tried the 4.4 kernel
+> before, it gave me the same hang. So that's why I upgraded to 4.7 to
+> see if it was fixed there.
+> 
+> The Ceph cluster is currently backfilling 17 PGs, but this also
+> happend when HEALTH_OK was around.
+> 
+> There are no block or slow requests in the cluster.
+> 
+FWIW, looks like those tasks are stuck trying to acquire the inode
+rwsem in order to do a setxattr. Most likely, something grabbed that
+lock and didn't release it for some reason.
 
-I was also thinking that we need a new RBD feature bit to be used to
-indicate that an image is part of a consistency group to prevent older
-librbd clients from removing the image or group snapshots.  This could
-be a RBD_FEATURES_RW_INCOMPATIBLE feature bit so older clients can
-still open the image R/O while its part of a group.
+In order to track that down, you'd need to take a look at the state of all of the tasks on the machine and try to track down the one that's holding this lock (or "these locks" -- these could be different inodes after all).
 
-On Tue, Aug 16, 2016 at 9:26 AM, Jason Dillaman <jdillama@redhat.com> wrote:
-> Way back in April when we had the CDM, I was originally thinking we
-> should implement option 3. Essentially, you have a prepare group
-> snapshot RPC message that extends a "paused IO" lease to the caller.
-> When that lease expires, IO would automatically be resumed even if the
-> group snapshot hasn't been created yet.  This would also require
-> commit/abort group snapshot RPC messages.
->
-> However, thinking about this last night, here is another potential option:
->
-> Option 4 - require images to have the exclusive lock feature before
-> they can be added to a consistency group (and prevent disabling of
-> exclusive-lock while they are part of a group). Then librbd, via the
-> rbd CLI (or client application of the rbd consistency group snap
-> create API), can co-operatively acquire the lock from all active image
-> clients within the group (i.e. all IO has been flushed and paused) and
-> can proceed with snapshot creation. If the rbd CLI dies, the normal
-> exclusive lock handling process will automatically take care of
-> re-acquiring the lock from the dead client and resuming IO.
->
-> This option not only re-uses existing code, it would also eliminate
-> the need to add/update the RPC messages for prepare/commit/abort
-> snapshot creation to support group snapshots (since it could all be
-> handled internally).
->
-> On Mon, Aug 15, 2016 at 7:46 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->> Gentlemen,
->>
->> I'm writing to you to ask for your opinion regarding quiescing writes.
->>
->> Here is the situation. In order to take snapshots of all images in a
->> consistency group,
->> we first need to quiesce all the image writers in the consistency group.
->> Let me call
->> group client - a client which requests a consistency group to take a snapshot.
->> Image client - the client that writes to an image.
->> Let's say group client starts sending notify_quiesce to all image
->> clients that write to the images in the group. After quiescing half of
->> the image clients the group client can die.
->>
->> It presents us with a dilemma - what should we do with those quiesced
->> image clients.
->>
->> Option 1 - is to wait till someone manually runs recover for that
->> consistency group.
->> We can show warning next to those unfinished groups when user runs
->> group list command.
->> There will be a command like group recover, which allows users to
->> rollback unsuccessful snapshots
->> or continue them using create snapshot command.
->>
->> Option 2 - is to establish some heart beats between group client and
->> image client. If group client fails to heart beat then image client
->> unquiesces itself and continues normal operation.
->>
->> Option 3 - is to have a timeout for each image client. If group client
->> fails to make a group snapshot within this timeout then we resume our
->> normal operation informing group client of the fact.
->>
->> Which of these options do you prefer? Probably there are other options
->> that I miss.
->>
->> Thanks,
->> Victor.
->
->
->
-> --
-> Jason
-
-
-
--- 
-Jason
+It may be simplest to force a vmcore and then poke around in there with the crash kernel debugger. Identify the inode that has the blocked rwsem, verify that it's still legit (not freed or anything) and then see if you can figure out which task might have failed to release the lock and why.
+-- 
+Jeff Layton <jlayton@redhat.com>
