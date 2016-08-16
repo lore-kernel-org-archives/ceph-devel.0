@@ -1,94 +1,88 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: jewel backports: cephfs.InvalidValue: error in setxattr
-Date: Tue, 16 Aug 2016 10:44:26 +0200
-Message-ID: <57B2D26A.3080904@dachary.org>
-References: <57B1F22E.7050508@dachary.org>
- <CAAM7YAkFFPJrJGjeaWdNu8zQqRMAYovbe+dJaLYuscNcKKvwVg@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: CephFS and Samba hang on copy of large file
+Date: Tue, 16 Aug 2016 12:32:05 +0200 (CEST)
+Message-ID: <1229560418.2529.1471343525435@ox.pcextreme.nl>
+References: <1423426743.2483.1471267435085@ox.pcextreme.nl>
+ <CAAPGDwLxomxLJMZNsW7qs9vqjnxH9zbBkUjBok7tsHXA_rt3yA@mail.gmail.com>
+ <1197956778.2488.1471268140723@ox.pcextreme.nl>
+ <CAAPGDwKx6w3s5gG9FHu91kLz4kurPD+B1cQNdo8oKYmGu2L-Qg@mail.gmail.com>
+ <1951857528.2492.1471269515710@ox.pcextreme.nl>
+ <CANP1eJHBW4e2wYKV0z0fRMVaGu_tmn+KewACsupnhoB4uGeTHg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:32914 "EHLO
-	relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751870AbcHPIox (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2016 04:44:53 -0400
-In-Reply-To: <CAAM7YAkFFPJrJGjeaWdNu8zQqRMAYovbe+dJaLYuscNcKKvwVg@mail.gmail.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:53449 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753163AbcHPKcL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2016 06:32:11 -0400
+In-Reply-To: <CANP1eJHBW4e2wYKV0z0fRMVaGu_tmn+KewACsupnhoB4uGeTHg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: Ira Cooper <ira@wakeful.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Yan,
 
-On 16/08/2016 04:16, Yan, Zheng wrote:
-> On Tue, Aug 16, 2016 at 12:47 AM, Loic Dachary <loic@dachary.org> wrote:
->> Hi John,
->>
->> http://pulpito.ceph.com/loic-2016-08-15_07:35:11-fs-jewel-backports-distro-basic-smithi/364579/ has the following error:
->>
->> 2016-08-15T08:13:22.919 INFO:teuthology.orchestra.run.smithi052.stderr:create_volume: /volumes/grpid/volid
->> 2016-08-15T08:13:22.919 INFO:teuthology.orchestra.run.smithi052.stderr:create_volume: grpid/volid, create pool fsvolume_volid as data_isolated =True.
->> 2016-08-15T08:13:22.919 INFO:teuthology.orchestra.run.smithi052.stderr:Traceback (most recent call last):
->> 2016-08-15T08:13:22.920 INFO:teuthology.orchestra.run.smithi052.stderr:  File "<string>", line 11, in <module>
->> 2016-08-15T08:13:22.920 INFO:teuthology.orchestra.run.smithi052.stderr:  File "/usr/lib/python2.7/dist-packages/ceph_volume_client.py", line 632, in create_volume
->> 2016-08-15T08:13:22.920 INFO:teuthology.orchestra.run.smithi052.stderr:    self.fs.setxattr(path, 'ceph.dir.layout.pool', pool_name, 0)
->> 2016-08-15T08:13:22.920 INFO:teuthology.orchestra.run.smithi052.stderr:  File "cephfs.pyx", line 779, in cephfs.LibCephFS.setxattr (/srv/autobuild-ceph/gitbuilder.git/build/out~/ceph-10.2.2-351-g431d02a/src/build/cephfs.c:10542)
->> 2016-08-15T08:13:22.920 INFO:teuthology.orchestra.run.smithi052.stderr:cephfs.InvalidValue: error in setxattr
->>
-> 
-> The error is because MDS had outdated osdmap and thought the newly
-> creately pool does not exist. (MDS has code that makes sure its osdmap
-> is the same as or newer than fs client's osdmap)  For this case, It
-> seems both mds and fs client had outdated osdmap.  Pool creation was
-> through self.rados. self.rados had the newest olsdmap, but self.fs
-> might have outdated osdmap.
-
-Interesting. Do you know why this happens ? Is there a specific pull request that causes this ?
-
-Thanks a lot for your help !
-
-> 
-> Regards
-> Yan, Zheng
+> Op 15 augustus 2016 om 23:36 schreef Milosz Tanski <milosz@adfin.com>:
 > 
 > 
->> This is jewel with a number of CephFS related backports
->>
->> https://github.com/ceph/ceph/tree/jewel-backports but I can't see which one could cause that kind of error.
->>
->> There are a few differences between the jewel and master branch of ceph-qa-suite, but it does not seem to be the cause;
->>
->> git log --no-merges --oneline --cherry-mark --left-right ceph/jewel...ceph/master -- suites/fs
->>
->>> ed1e7f1 suites/fs: fix log whitelist for inotable repair
->>> 41e51eb suites: fix asok_dump_tree.yaml
->>> c669f1e cephfs: add test for dump tree admin socket command
->>> 60dc968 suites/fs: log whitelist for inotable repair
->> = 1558a48 fs: add snapshot tests to mds thrashing
->> = b9b18c7 fs: add snapshot tests to mds thrashing
->>> dc165e6 cephfs: test fragment size limit
->>> 4179c85 suites/fs: use simple messenger some places
->>> 367973b cephfs: test readahead is working
->>> 795d586 suites/fs/permission: run qa/workunits/fs/misc/{acl.sh,chmod.sh}
->>> 45b8e9c suites/fs: fix config for enabling libcephfs posix ACL
->> = fe74a2c suites: allow four remote clients for fs/recovery
->> = b970f97 suites: allow four remote clients for fs/recovery
->>
->> If that rings a bell, let me know. Otherwise I'll keep digging to narrow it down.
->>
->> Cheers
->>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> On Mon, Aug 15, 2016 at 9:58 AM, Wido den Hollander <wido@42on.com> wrote:
+> >
+> >> Op 15 augustus 2016 om 15:43 schreef Ira Cooper <ira@wakeful.net>:
+> >>
+> >>
+> >> On Mon, Aug 15, 2016 at 9:35 AM, Wido den Hollander <wido@42on.com> wrote:
+> >> >
+> >> >> Op 15 augustus 2016 om 15:27 schreef Ira Cooper <ira@wakeful.net>:
+> >> >>
+> >> >>
+> >> >> Have you tried the ceph VFS module in Samba yet?
+> >> >>
+> >> >
+> >> > Yes. That works, but the performance is a lot lower. So for that we are testing/using the CephFS kernel client.
+> >> >
+> >> > I would also like to see the VFS module upstream in Samba, you still need to manually patch it in.
+> >>
+> >> It is in upstream Samba.
+> >>
+> >> https://git.samba.org/?p=samba.git;a=blob;f=source3/modules/vfs_ceph.c;h=59e9b9cf9b3e8e5313a20823994fcacf9e4b4168;hb=f1b42ec778e08875e076df7fdf67dd69bf9b2757
+> >>
+> >> It's been there a while now.
+> >>
+> >> I'm curious what you are patching in, and what the performance numbers are. :)
+> >
+> > No, sorry for that confusion. I meant DEB and/or RPM packages. You have to compile manually which not all companies like.
+> >
+> > With the kernel client we see about 200MB/sec and with VFS about 50MB/sec.
+> 
+> I'm willing to bet that at lest some of it is page cache & read ahead.
+> 
+
+Probably indeed. Tested with Jewel and VFS and we see a much higher throughput right now.
+
+We had to disable sendfile in Samba though.
+
+Still, it's not good that Samba locked up and stayed in status D. That should not happen.
+
+Wido
+
+> >
+> > However, I still wonder why samba went in status D. That should not happen.
+> >
+> > Wido
+> >
+> 
+> 
+> 
+> -- 
+> Milosz Tanski
+> CTO
+> 16 East 34th Street, 15th floor
+> New York, NY 10016
+> 
+> p: 646-253-9055
+> e: milosz@adfin.com
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
