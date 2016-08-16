@@ -1,122 +1,89 @@
-From: Ira Cooper <ira@wakeful.net>
-Subject: Re: CephFS and Samba hang on copy of large file
-Date: Tue, 16 Aug 2016 07:59:23 -0400
-Message-ID: <CAAPGDwJDNRuBUxaBMCHU-zsMWTLAesi2Upqs2gKVprH=hmz5ew@mail.gmail.com>
-References: <1423426743.2483.1471267435085@ox.pcextreme.nl>
- <CAAPGDwLxomxLJMZNsW7qs9vqjnxH9zbBkUjBok7tsHXA_rt3yA@mail.gmail.com>
- <1197956778.2488.1471268140723@ox.pcextreme.nl> <CAAPGDwKx6w3s5gG9FHu91kLz4kurPD+B1cQNdo8oKYmGu2L-Qg@mail.gmail.com>
- <1951857528.2492.1471269515710@ox.pcextreme.nl> <CANP1eJHBW4e2wYKV0z0fRMVaGu_tmn+KewACsupnhoB4uGeTHg@mail.gmail.com>
- <1229560418.2529.1471343525435@ox.pcextreme.nl> <CAAPGDwJ_B8kC3ye1G54dDRO_7yUhDN67PswYLZb1EL6GQtRjKg@mail.gmail.com>
- <1252645494.2536.1471344242365@ox.pcextreme.nl> <CAAPGDwJV_+G7ZQ0pzrSuLxtDuHDoiU-yYgv0ohxL47qTr99PqA@mail.gmail.com>
- <1519079957.2552.1471347820959@ox.pcextreme.nl>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: Snapshots of consistency groups
+Date: Tue, 16 Aug 2016 09:26:21 -0400
+Message-ID: <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f176.google.com ([209.85.217.176]:35769 "EHLO
-	mail-ua0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753620AbcHPL7o (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2016 07:59:44 -0400
-Received: by mail-ua0-f176.google.com with SMTP id n59so117221994uan.2
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Aug 2016 04:59:44 -0700 (PDT)
-In-Reply-To: <1519079957.2552.1471347820959@ox.pcextreme.nl>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:34015 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753367AbcHPN0W (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2016 09:26:22 -0400
+Received: by mail-pa0-f44.google.com with SMTP id fi15so26597589pac.1
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Aug 2016 06:26:22 -0700 (PDT)
+In-Reply-To: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Milosz Tanski <milosz@adfin.com>
+To: Victor Denisov <vdenisov@mirantis.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>, Mykola Golub <mgolub@mirantis.com>
 
-On Tue, Aug 16, 2016 at 7:43 AM, Wido den Hollander <wido@42on.com> wrote:
+Way back in April when we had the CDM, I was originally thinking we
+should implement option 3. Essentially, you have a prepare group
+snapshot RPC message that extends a "paused IO" lease to the caller.
+When that lease expires, IO would automatically be resumed even if the
+group snapshot hasn't been created yet.  This would also require
+commit/abort group snapshot RPC messages.
+
+However, thinking about this last night, here is another potential option:
+
+Option 4 - require images to have the exclusive lock feature before
+they can be added to a consistency group (and prevent disabling of
+exclusive-lock while they are part of a group). Then librbd, via the
+rbd CLI (or client application of the rbd consistency group snap
+create API), can co-operatively acquire the lock from all active image
+clients within the group (i.e. all IO has been flushed and paused) and
+can proceed with snapshot creation. If the rbd CLI dies, the normal
+exclusive lock handling process will automatically take care of
+re-acquiring the lock from the dead client and resuming IO.
+
+This option not only re-uses existing code, it would also eliminate
+the need to add/update the RPC messages for prepare/commit/abort
+snapshot creation to support group snapshots (since it could all be
+handled internally).
+
+On Mon, Aug 15, 2016 at 7:46 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+> Gentlemen,
 >
->> Op 16 augustus 2016 om 12:48 schreef Ira Cooper <ira@wakeful.net>:
->>
->>
->> On Tue, Aug 16, 2016 at 6:44 AM, Wido den Hollander <wido@42on.com> wrote:
->> >
->> >> Op 16 augustus 2016 om 12:38 schreef Ira Cooper <ira@wakeful.net>:
->> >>
->> >>
->> >> On Tue, Aug 16, 2016 at 6:32 AM, Wido den Hollander <wido@42on.com> wrote:
->> >> >
->> >> >> Op 15 augustus 2016 om 23:36 schreef Milosz Tanski <milosz@adfin.com>:
->> >> >>
->> >> >>
->> >> >> On Mon, Aug 15, 2016 at 9:58 AM, Wido den Hollander <wido@42on.com> wrote:
->> >> >> >
->> >> >> >> Op 15 augustus 2016 om 15:43 schreef Ira Cooper <ira@wakeful.net>:
->> >> >> >>
->> >> >> >>
->> >> >> >> On Mon, Aug 15, 2016 at 9:35 AM, Wido den Hollander <wido@42on.com> wrote:
->> >> >> >> >
->> >> >> >> >> Op 15 augustus 2016 om 15:27 schreef Ira Cooper <ira@wakeful.net>:
->> >> >> >> >>
->> >> >> >> >>
->> >> >> >> >> Have you tried the ceph VFS module in Samba yet?
->> >> >> >> >>
->> >> >> >> >
->> >> >> >> > Yes. That works, but the performance is a lot lower. So for that we are testing/using the CephFS kernel client.
->> >> >> >> >
->> >> >> >> > I would also like to see the VFS module upstream in Samba, you still need to manually patch it in.
->> >> >> >>
->> >> >> >> It is in upstream Samba.
->> >> >> >>
->> >> >> >> https://git.samba.org/?p=samba.git;a=blob;f=source3/modules/vfs_ceph.c;h=59e9b9cf9b3e8e5313a20823994fcacf9e4b4168;hb=f1b42ec778e08875e076df7fdf67dd69bf9b2757
->> >> >> >>
->> >> >> >> It's been there a while now.
->> >> >> >>
->> >> >> >> I'm curious what you are patching in, and what the performance numbers are. :)
->> >> >> >
->> >> >> > No, sorry for that confusion. I meant DEB and/or RPM packages. You have to compile manually which not all companies like.
->> >> >> >
->> >> >> > With the kernel client we see about 200MB/sec and with VFS about 50MB/sec.
->> >> >>
->> >> >> I'm willing to bet that at lest some of it is page cache & read ahead.
->> >> >>
->> >> >
->> >> > Probably indeed. Tested with Jewel and VFS and we see a much higher throughput right now.
->> >> >
->> >> > We had to disable sendfile in Samba though.
->> >> >
->> >> > Still, it's not good that Samba locked up and stayed in status D. That should not happen.
->> >>
->> >> Sendfile doesn't make much sense with a userspace filesystem like vfs_ceph.
->> >>
->> >
->> > True, but it was still in the config. Had to debug that.
->> >
->> >> You said performance improved, how much?
->> >>
->> >
->> > We went from 50MB/sec to 150 ~ 200MB/sec write speed.
->> >
->> > Writing directly to CephFS (kernel) goes with 900MB/sec.
->> >
->> >> Also are you using copy, robocopy, the windows explorer?  And which
->> >> version of Windows?
->> >>
->> >
->> > A wide range of Operating Systems. In this case it was a Ubuntu 16.04 desktop, but the clients are also Windows 7, 8 and Windows 10. Just using the Explorer in Windows's case.
->>
->> Were you talking read or write performance before?
->>
+> I'm writing to you to ask for your opinion regarding quiescing writes.
 >
-> All write performance. We don't care that much about read in this environment.
-
-Ok then AIO won't have much impact, nor much of anything.  I'm now much more
-curious about what is going on :).
-
->> Also any chance you could run these tests from a Windows 7+ machine?
->>
->> I know it is an odd request on a Linux list, but for debugging Samba,
->> it helps at times.
->>
+> Here is the situation. In order to take snapshots of all images in a
+> consistency group,
+> we first need to quiesce all the image writers in the consistency group.
+> Let me call
+> group client - a client which requests a consistency group to take a snapshot.
+> Image client - the client that writes to an image.
+> Let's say group client starts sending notify_quiesce to all image
+> clients that write to the images in the group. After quiescing half of
+> the image clients the group client can die.
 >
-> I'm currently not at that customer, so I'm not able to run the test. I also don't have remote access.
+> It presents us with a dilemma - what should we do with those quiesced
+> image clients.
 >
-> The hang we saw was from a Windows 7 desktop btw, not the Ubuntu one. We just used the Ubuntu desktop to see if it also happened there.
+> Option 1 - is to wait till someone manually runs recover for that
+> consistency group.
+> We can show warning next to those unfinished groups when user runs
+> group list command.
+> There will be a command like group recover, which allows users to
+> rollback unsuccessful snapshots
+> or continue them using create snapshot command.
+>
+> Option 2 - is to establish some heart beats between group client and
+> image client. If group client fails to heart beat then image client
+> unquiesces itself and continues normal operation.
+>
+> Option 3 - is to have a timeout for each image client. If group client
+> fails to make a group snapshot within this timeout then we resume our
+> normal operation informing group client of the fact.
+>
+> Which of these options do you prefer? Probably there are other options
+> that I miss.
+>
+> Thanks,
+> Victor.
 
-Alas, the use pattern will be different between the two. :(
 
-SMB 2.1 vs. SMB1 with unix extensions is a major delta.
 
-Cheers,
-
--Ira
+-- 
+Jason
