@@ -1,103 +1,36 @@
-From: Ira Cooper <ira@wakeful.net>
-Subject: Re: CephFS and Samba hang on copy of large file
-Date: Tue, 16 Aug 2016 06:48:28 -0400
-Message-ID: <CAAPGDwJV_+G7ZQ0pzrSuLxtDuHDoiU-yYgv0ohxL47qTr99PqA@mail.gmail.com>
-References: <1423426743.2483.1471267435085@ox.pcextreme.nl>
- <CAAPGDwLxomxLJMZNsW7qs9vqjnxH9zbBkUjBok7tsHXA_rt3yA@mail.gmail.com>
- <1197956778.2488.1471268140723@ox.pcextreme.nl> <CAAPGDwKx6w3s5gG9FHu91kLz4kurPD+B1cQNdo8oKYmGu2L-Qg@mail.gmail.com>
- <1951857528.2492.1471269515710@ox.pcextreme.nl> <CANP1eJHBW4e2wYKV0z0fRMVaGu_tmn+KewACsupnhoB4uGeTHg@mail.gmail.com>
- <1229560418.2529.1471343525435@ox.pcextreme.nl> <CAAPGDwJ_B8kC3ye1G54dDRO_7yUhDN67PswYLZb1EL6GQtRjKg@mail.gmail.com>
- <1252645494.2536.1471344242365@ox.pcextreme.nl>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: 0.94.8 QE validation - on-hold
+Date: Tue, 16 Aug 2016 13:51:31 +0200
+Message-ID: <82fc130c-c7ca-5ae2-3ccf-d41aeb207129@suse.cz>
+References: <CAMMFjmG7sa8zL7mSJzaLyivYv-j2GLx9rW-=XLT=Z8L_eG2hbQ@mail.gmail.com>
+ <CAF-wwdGhNd9LpVp+8TJ4A+hwPkjowyRnec-yxtwfsBPG-wDnMg@mail.gmail.com>
+ <20160816080138.GE5947@rskikr.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f175.google.com ([209.85.217.175]:34205 "EHLO
-	mail-ua0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753268AbcHPK4p (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2016 06:56:45 -0400
-Received: by mail-ua0-f175.google.com with SMTP id k90so115106060uak.1
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Aug 2016 03:56:45 -0700 (PDT)
-In-Reply-To: <1252645494.2536.1471344242365@ox.pcextreme.nl>
+Received: from mx2.suse.de ([195.135.220.15]:52504 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751861AbcHPLvg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 16 Aug 2016 07:51:36 -0400
+In-Reply-To: <20160816080138.GE5947@rskikr.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Milosz Tanski <milosz@adfin.com>
+To: Brad Hubbard <bhubbard@redhat.com>, Yuri Weinstein <yweinste@redhat.com>
+Cc: "Weil, Sage" <sage@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Dachary, Loic" <ldachary@redhat.com>
 
-On Tue, Aug 16, 2016 at 6:44 AM, Wido den Hollander <wido@42on.com> wrote:
+> At this stage, after looking at this in great depth today we have decided this
+> is a problem, most likely in libunwind, and should be able to be safely
+> ignored. There are suppression files to be found for this issue, or very
+> similar issues, such as
+> https://github.com/hkimura/foedus_code/blob/master/foedus-core/tools/valgrind.supp
+> and we already even have multiple valgrind suppressions for similar issues.
 >
->> Op 16 augustus 2016 om 12:38 schreef Ira Cooper <ira@wakeful.net>:
->>
->>
->> On Tue, Aug 16, 2016 at 6:32 AM, Wido den Hollander <wido@42on.com> wrote:
->> >
->> >> Op 15 augustus 2016 om 23:36 schreef Milosz Tanski <milosz@adfin.com>:
->> >>
->> >>
->> >> On Mon, Aug 15, 2016 at 9:58 AM, Wido den Hollander <wido@42on.com> wrote:
->> >> >
->> >> >> Op 15 augustus 2016 om 15:43 schreef Ira Cooper <ira@wakeful.net>:
->> >> >>
->> >> >>
->> >> >> On Mon, Aug 15, 2016 at 9:35 AM, Wido den Hollander <wido@42on.com> wrote:
->> >> >> >
->> >> >> >> Op 15 augustus 2016 om 15:27 schreef Ira Cooper <ira@wakeful.net>:
->> >> >> >>
->> >> >> >>
->> >> >> >> Have you tried the ceph VFS module in Samba yet?
->> >> >> >>
->> >> >> >
->> >> >> > Yes. That works, but the performance is a lot lower. So for that we are testing/using the CephFS kernel client.
->> >> >> >
->> >> >> > I would also like to see the VFS module upstream in Samba, you still need to manually patch it in.
->> >> >>
->> >> >> It is in upstream Samba.
->> >> >>
->> >> >> https://git.samba.org/?p=samba.git;a=blob;f=source3/modules/vfs_ceph.c;h=59e9b9cf9b3e8e5313a20823994fcacf9e4b4168;hb=f1b42ec778e08875e076df7fdf67dd69bf9b2757
->> >> >>
->> >> >> It's been there a while now.
->> >> >>
->> >> >> I'm curious what you are patching in, and what the performance numbers are. :)
->> >> >
->> >> > No, sorry for that confusion. I meant DEB and/or RPM packages. You have to compile manually which not all companies like.
->> >> >
->> >> > With the kernel client we see about 200MB/sec and with VFS about 50MB/sec.
->> >>
->> >> I'm willing to bet that at lest some of it is page cache & read ahead.
->> >>
->> >
->> > Probably indeed. Tested with Jewel and VFS and we see a much higher throughput right now.
->> >
->> > We had to disable sendfile in Samba though.
->> >
->> > Still, it's not good that Samba locked up and stayed in status D. That should not happen.
->>
->> Sendfile doesn't make much sense with a userspace filesystem like vfs_ceph.
->>
+> https://github.com/ceph/teuthology/blob/master/teuthology/task/valgrind.supp#L38
 >
-> True, but it was still in the config. Had to debug that.
->
->> You said performance improved, how much?
->>
->
-> We went from 50MB/sec to 150 ~ 200MB/sec write speed.
->
-> Writing directly to CephFS (kernel) goes with 900MB/sec.
->
->> Also are you using copy, robocopy, the windows explorer?  And which
->> version of Windows?
->>
->
-> A wide range of Operating Systems. In this case it was a Ubuntu 16.04 desktop, but the clients are also Windows 7, 8 and Windows 10. Just using the Explorer in Windows's case.
+> Thanks to Kefu for helping with this.
 
-Were you talking read or write performance before?
+Thanks, guys. This showed up during integration testing and it was 
+judged to not be a blocker. We saw it on CentOS only.
 
-Also any chance you could run these tests from a Windows 7+ machine?
-
-I know it is an odd request on a Linux list, but for debugging Samba,
-it helps at times.
-
-Thanks,
-
--Ira / ira@(samba.org|redhat.com|wakeful.net)
-
-Technical Lead / Red Hat Storage - SMB (Samba) Team
+Nathan
