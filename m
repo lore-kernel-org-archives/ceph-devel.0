@@ -1,85 +1,47 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: CephFS and Samba hang on copy of large file
-Date: Tue, 16 Aug 2016 10:05:19 -0400
-Message-ID: <1471356319.2873.8.camel@redhat.com>
-References: <1423426743.2483.1471267435085@ox.pcextreme.nl>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: 0.94.8 QE validation - on-hold
+Date: Tue, 16 Aug 2016 08:07:38 -0700
+Message-ID: <CAMMFjmE-Oqg-a6MpK-9sA+V4yFPXeB+uT5LKK2L_uQr0hzQS_w@mail.gmail.com>
+References: <CAMMFjmG7sa8zL7mSJzaLyivYv-j2GLx9rW-=XLT=Z8L_eG2hbQ@mail.gmail.com>
+ <CAF-wwdGhNd9LpVp+8TJ4A+hwPkjowyRnec-yxtwfsBPG-wDnMg@mail.gmail.com>
+ <20160816080138.GE5947@rskikr.localdomain> <82fc130c-c7ca-5ae2-3ccf-d41aeb207129@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:34959 "EHLO
-	mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753518AbcHPOF5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2016 10:05:57 -0400
-Received: by mail-qt0-f171.google.com with SMTP id x25so35397333qtx.2
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Aug 2016 07:05:23 -0700 (PDT)
-In-Reply-To: <1423426743.2483.1471267435085@ox.pcextreme.nl>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:36248 "EHLO
+	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753680AbcHPPPB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2016 11:15:01 -0400
+Received: by mail-wm0-f48.google.com with SMTP id q128so150100439wma.1
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Aug 2016 08:15:00 -0700 (PDT)
+In-Reply-To: <82fc130c-c7ca-5ae2-3ccf-d41aeb207129@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Brad Hubbard <bhubbard@redhat.com>, "Weil, Sage" <sage@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Dachary, Loic" <ldachary@redhat.com>
 
-On Mon, 2016-08-15 at 15:23 +0200, Wido den Hollander wrote:
-> Hi,
-> 
-> I'm running into a issue in combination of CephFS and Samba and I was
-> wondering if a dev knew what is happening here.
-> 
-> The situation:
-> - Jewel cluster
-> - CephFS kernel client version 4.7
-> - Samba re-export of CephFS
-> - Mount options: rw,noatime,acl
-> 
-> A copy of a 15GB file results in Samba hanging in status D:
-> 
-> root@hlms-zaken-01:~# ps aux|grep smb|grep D
-> jongh       8887  0.0  0.0 376656 19068 ?        D    14:42   0:00
-> /usr/sbin/smbd -D
-> jongh       9740  0.0  0.0 377380 19244 ?        D    14:49   0:00
-> /usr/sbin/smbd -D
-> root@hlms-zaken-01:~# cat /proc/8887/stack
-> [<ffffffff8132d353>] call_rwsem_down_write_failed+0x13/0x20
-> [<ffffffff8121a145>] vfs_setxattr+0x55/0xb0
-> [<ffffffff8121a2a5>] setxattr+0x105/0x170
-> [<ffffffff81203aa1>] filename_lookup+0xf1/0x180
-> [<ffffffff8120369f>] getname_flags+0x6f/0x1e0
-> [<ffffffff8121a3bd>] path_setxattr+0xad/0xe0
-> [<ffffffff8121a4f0>] SyS_setxattr+0x10/0x20
-> [<ffffffff815e8b76>] entry_SYSCALL_64_fastpath+0x1e/0xa8
-> [<ffffffffffffffff>] 0xffffffffffffffff
-> root@hlms-zaken-01:~# cat /proc/9740/stack
-> [<ffffffff8132d353>] call_rwsem_down_write_failed+0x13/0x20
-> [<ffffffff8121a145>] vfs_setxattr+0x55/0xb0
-> [<ffffffff8121a2a5>] setxattr+0x105/0x170
-> [<ffffffff81203aa1>] filename_lookup+0xf1/0x180
-> [<ffffffff8120369f>] getname_flags+0x6f/0x1e0
-> [<ffffffff8121a3bd>] path_setxattr+0xad/0xe0
-> [<ffffffff8121a4f0>] SyS_setxattr+0x10/0x20
-> [<ffffffff815e8b76>] entry_SYSCALL_64_fastpath+0x1e/0xa8
-> [<ffffffffffffffff>] 0xffffffffffffffff
-> root@hlms-zaken-01:~#
-> 
-> Now, when I look in /sys/kernel/debug/ceph/*/osdc / mdsc there are no
-> outstanding requests to the OSDs or MDS.
-> 
-> Both these calls just hang for ever on these requests and they don't
-> continue.
-> 
-> Any pointers where to start looking for this? I tried the 4.4 kernel
-> before, it gave me the same hang. So that's why I upgraded to 4.7 to
-> see if it was fixed there.
-> 
-> The Ceph cluster is currently backfilling 17 PGs, but this also
-> happend when HEALTH_OK was around.
-> 
-> There are no block or slow requests in the cluster.
-> 
-FWIW, looks like those tasks are stuck trying to acquire the inode
-rwsem in order to do a setxattr. Most likely, something grabbed that
-lock and didn't release it for some reason.
+Thank you all.
 
-In order to track that down, you'd need to take a look at the state of all of the tasks on the machine and try to track down the one that's holding this lock (or "these locks" -- these could be different inodes after all).
+I will resume testing.
 
-It may be simplest to force a vmcore and then poke around in there with the crash kernel debugger. Identify the inode that has the blocked rwsem, verify that it's still legit (not freed or anything) and then see if you can figure out which task might have failed to release the lock and why.
--- 
-Jeff Layton <jlayton@redhat.com>
+On Tue, Aug 16, 2016 at 4:51 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+>> At this stage, after looking at this in great depth today we have decided
+>> this
+>> is a problem, most likely in libunwind, and should be able to be safely
+>> ignored. There are suppression files to be found for this issue, or very
+>> similar issues, such as
+>>
+>> https://github.com/hkimura/foedus_code/blob/master/foedus-core/tools/valgrind.supp
+>> and we already even have multiple valgrind suppressions for similar
+>> issues.
+>>
+>>
+>> https://github.com/ceph/teuthology/blob/master/teuthology/task/valgrind.supp#L38
+>>
+>> Thanks to Kefu for helping with this.
+>
+>
+> Thanks, guys. This showed up during integration testing and it was judged to
+> not be a blocker. We saw it on CentOS only.
+>
+> Nathan
