@@ -1,95 +1,205 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Sequential write performance on cloning images
-Date: Wed, 17 Aug 2016 12:29:47 -0400
-Message-ID: <CA+aFP1BMSuWqRQQnq_9YS5_ad1UfqD4jfGFLTBLyvHg-hyxnaw@mail.gmail.com>
-References: <CAOb-7EzSpjYp9dZB4j2UoTgB6H0WZM5SeC2rJ=EYMc9R9a6x3Q@mail.gmail.com>
- <CA+aFP1D+gBbTK=JiJSG=nevZoxxTAq=OgU6GGFQ=uO0smLsCKw@mail.gmail.com>
- <CAOb-7EwU_sE_T5geNU6OHHO_x5XZG3E3ZqfOxOqbDi8Ss6p5fg@mail.gmail.com>
- <CA+aFP1B=KAwu6Er1Zhun+eNUNJ_N_y-9CZipazqNFd==QEJiPA@mail.gmail.com> <CAOb-7EzHd7wcoCcFWx-Cr2PT+BDGchdupQV5hT12SnXV56O=aQ@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: bluestore blobs
+Date: Thu, 18 Aug 2016 00:32:52 +0800
+Message-ID: <CACJqLybJ6VMRabC_xFT5NS=+P=YyFn4JOZLXRcs9gvwo0MJ4dg@mail.gmail.com>
+References: <alpine.DEB.2.11.1608171407220.17762@piezo.us.to>
+ <CACJqLyZeE7zH-TFX_e5N7x1drWheyUQ08SVeeAEYBK=Yau4OkA@mail.gmail.com>
+ <alpine.DEB.2.11.1608171522210.17762@piezo.us.to> <CACJqLybeGmFuV9yJtH2i7KiRu6q+6+PsN+xdeFm+Addw0KXTFA@mail.gmail.com>
+ <alpine.DEB.2.11.1608171538040.17762@piezo.us.to> <CACJqLyZ_M4KZRxOVy8a58Vz=dj2SHQ5LWUkkkOHt9Q-wRjeJyQ@mail.gmail.com>
+ <alpine.DEB.2.11.1608171604100.17762@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f171.google.com ([209.85.192.171]:34313 "EHLO
-	mail-pf0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750764AbcHQQ3s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Aug 2016 12:29:48 -0400
-Received: by mail-pf0-f171.google.com with SMTP id p64so39017635pfb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Aug 2016 09:29:48 -0700 (PDT)
-In-Reply-To: <CAOb-7EzHd7wcoCcFWx-Cr2PT+BDGchdupQV5hT12SnXV56O=aQ@mail.gmail.com>
+Received: from mail-ty1jpn01on0138.outbound.protection.outlook.com ([104.47.93.138]:52583
+	"EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752774AbcHQQdG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Aug 2016 12:33:06 -0400
+Received: by mail-ua0-f176.google.com with SMTP id 74so180028656uau.0
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Aug 2016 09:33:00 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1608171604100.17762@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ridge Chen <ridge.chen@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Varada Kari <varada.kari@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-How and when did you compare the IOPS from the clone against the IOPS
-from the parent?
+On Thu, Aug 18, 2016 at 12:10 AM, Sage Weil <sweil@redhat.com> wrote:
+> On Thu, 18 Aug 2016, Haomai Wang wrote:
+>> On Wed, Aug 17, 2016 at 11:43 PM, Sage Weil <sweil@redhat.com> wrote:
+>> > On Wed, 17 Aug 2016, Haomai Wang wrote:
+>> >> On Wed, Aug 17, 2016 at 11:25 PM, Sage Weil <sweil@redhat.com> wrote:
+>> >> > On Wed, 17 Aug 2016, Haomai Wang wrote:
+>> >> >> another latency perf problem:
+>> >> >>
+>> >> >> rocksdb log is on bluefs and mainly uses append and fsync interface to
+>> >> >> complete WAL.
+>> >> >>
+>> >> >> I found the latency between kv transaction submitting isn't negligible
+>> >> >> and limit the transaction throughput.
+>> >> >>
+>> >> >> So what if we implement a async transaction submit in rocksdb side
+>> >> >> using callback way? It will decrease kv in queue latency. It would
+>> >> >> help rocksdb WAL performance close to FileJournal. And async interface
+>> >> >> will help control each kv transaction size and make transaction
+>> >> >> complete smoothly instead of tps spike with us precious.
+>> >> >
+>> >> > Can we get the same benefit by calling BlueFS::_flush on the log whenever
+>> >> > we have X bytes accumulated (I think there is an option in rocksdb that
+>> >> > drives this already, actually)?  Changing the interfaces around will
+>> >> > change the threading model (= work) but doesn't actually change who needs
+>> >> > to wait and when.
+>> >>
+>> >> why we need to wait after interface change?
+>> >>
+>> >> 1. kv thread submit transaction with callback.
+>> >> 2. rocksdb append and call bluefs aio_submit with callback
+>> >> 3. bluefs submit aio write with callback
+>> >> 4. KernelDevice will poll linux aio event and execute callback inline
+>> >> or queue finish
+>> >> 5. callback will notify we complete the kv transaction
+>> >>
+>> >> the main task is implement logics in rocksdb log*.cc and bluefs aio
+>> >> submit interface....
+>> >>
+>> >> Is anything I'm missing?
+>> >
+>> > That can all be done with callbacks, but even if we do the kv thread will
+>> > still need to wait on the callback before doing anything else.
+>> >
+>> > Oh, you're suggesting we have multiple batches of transactions in flight.
+>> > Got it.
+>>
+>> I don't think so.. because bluefs has lock for fsync and flush. So
+>> multi rocksdb thread will be serial to flush...
+>
+> Oh, this was fixed recently:
+>
+>         10d055d65727e47deae4e459bc21aaa243c24a7d
+>         97699334acd59e9530d36b13d3a8408cabf848ef
 
-On Mon, Aug 15, 2016 at 11:58 PM, Ridge Chen <ridge.chen@gmail.com> wrote:
-> Hi
+Hmm, looks better!
+
+The only thing is I notice we don't have FileWriter lock for "buffer",
+so multi rocksdb writer will result in corrupt? I haven't look at
+rocksdb to check, but I think if posix backend, rocksdb don't need to
+have a look to protect log append racing.
+
 >
-> The parent image of "clone-vol1", which is "ori-vol1", is not touched
-> during the test.
+>> and another thing is the single thread is help for polling case.....
+>> from my current perf, compared queue filejournal class, rocksdb plays
+>> 1.5x-2x latency, in heavy load it will be more .... Yes, filejournal
+>> exactly has a good pipeline for pure linux aio job.
 >
-> Regards
-> Ridge
+> Yeah, I think you're right.  Even if we do the parallel submission, we
+> don't want to do parallel blocking (since the callers don't want to
+> block), so we'll still want async completion/notification of commit.
 >
-> 2016-08-16 10:22 GMT+08:00 Jason Dillaman <jdillama@redhat.com>:
->> The "assert object exists" check is just a "stat" op inserted before
->> the write op in the same transaction.  If the object doesn't exist
->> (i.e. a clone copy-on-write is required), the transaction will fail
->> within the OSD and librbd will know it needs to perform a copy-up.
->> However, in your case, this stat op should be essentially a no-op so I
->> would expect zero performance penalty.
+> No idea if this is something the rocksdb folks are already interested in
+> or not... want to ask them on their cool facebook group?  :)
+>
+>         https://www.facebook.com/groups/rocksdb.dev/
+
+sure
+
+>
+> sage
+>
+>
 >>
->> Do you rebuild your images after every test run? I ask because one big
->> difference is that when you are writing to the parent image, it has a
->> snapshot so the first write to a backing object would require a
->> copy-on-write operation within the OSD.
->>
->>
->>
->> On Mon, Aug 15, 2016 at 10:05 PM, Ridge Chen <ridge.chen@gmail.com> wrote:
->>> Hi
->>>
->>> Thanks for your quick response.
->>>
->>> Yes, the result is similar with object-map disabled. And in all my
->>> tests the librbd cache is disabled.
->>>
->>> Could you explain more about the additional "assert object exists"
->>> operation? what it does in osd side?
->>>
->>> And can we bypass the operation in this very common case based on the
->>> object-map feature?
->>>
->>> Regards,
->>> Ridge
->>>
->>> 2016-08-15 20:16 GMT+08:00 Jason Dillaman <jdillama@redhat.com>:
->>>> On Sun, Aug 14, 2016 at 10:41 PM, Ridge Chen <ridge.chen@gmail.com> wrote:
->>>>> I have tested on hammer and jewel, the results are similar. Is it expected?
->>>>
->>>> In this case, there actually would not be an extra copy-up since you
->>>> already performed the necessary copy-ups during the "dd" against
->>>> "clone-vol1". The only difference, on the librbd side, is that the
->>>> write operation would have an additional "assert object exists"
->>>> operation before the write operation.
->>>>
->>>> Do you see similar differences with the librbd cache disabled and the
->>>> object map disabled?
->>>>
->>>>
->>>>
->>>> --
->>>> Jason
->>
->>
->>
+>> >
+>> > I think we will get some of the benefit by enabling the parallel
+>> > transaction submits (so we don't funnel everything through
+>> > _kv_sync_thread).  I think we should get that merged first and see how it
+>> > behaves before taking the next step.  I forgot to ask Varada is standup
+>> > this morning what the current status of that is.  Varada?
+>> >
+>> > sage
+>> >
+>> >>
+>> >> >
+>> >> > sage
+>> >> >
+>> >> >
+>> >> >
+>> >> >>
+>> >> >>
+>> >> >> On Wed, Aug 17, 2016 at 10:26 PM, Sage Weil <sweil@redhat.com> wrote:
+>> >> >> > I think we need to look at other changes in addition to the encoding
+>> >> >> > performance improvements.  Even if they end up being good enough, these
+>> >> >> > changes are somewhat orthogonal and at least one of them should give us
+>> >> >> > something that is even faster.
+>> >> >> >
+>> >> >> > 1. I mentioned this before, but we should keep the encoding
+>> >> >> > bluestore_blob_t around when we load the blob map.  If it's not changed,
+>> >> >> > don't reencode it.  There are no blockers for implementing this currently.
+>> >> >> > It may be difficult to ensure the blobs are properly marked dirty... I'll
+>> >> >> > see if we can use proper accessors for the blob to enforce this at compile
+>> >> >> > time.  We should do that anyway.
+>> >> >> >
+>> >> >> > 2. This turns the blob Put into rocksdb into two memcpy stages: one to
+>> >> >> > assemble the bufferlist (lots of bufferptrs to each untouched blob)
+>> >> >> > into a single rocksdb::Slice, and another memcpy somewhere inside
+>> >> >> > rocksdb to copy this into the write buffer.  We could extend the
+>> >> >> > rocksdb interface to take an iovec so that the first memcpy isn't needed
+>> >> >> > (and rocksdb will instead iterate over our buffers and copy them directly
+>> >> >> > into its write buffer).  This is probably a pretty small piece of the
+>> >> >> > overall time... should verify with a profiler before investing too much
+>> >> >> > effort here.
+>> >> >> >
+>> >> >> > 3. Even if we do the above, we're still setting a big (~4k or more?) key
+>> >> >> > into rocksdb every time we touch an object, even when a tiny amount of
+>> >> >> > metadata is getting changed.  This is a consequence of embedding all of
+>> >> >> > the blobs into the onode (or bnode).  That seemed like a good idea early
+>> >> >> > on when they were tiny (i.e., just an extent), but now I'm not so sure.  I
+>> >> >> > see a couple of different options:
+>> >> >> >
+>> >> >> > a) Store each blob as ($onode_key+$blobid).  When we load the onode, load
+>> >> >> > the blobs too.  They will hopefully be sequential in rocksdb (or
+>> >> >> > definitely sequential in zs).  Probably go back to using an iterator.
+>> >> >> >
+>> >> >> > b) Go all in on the "bnode" like concept.  Assign blob ids so that they
+>> >> >> > are unique for any given hash value.  Then store the blobs as
+>> >> >> > $shard.$poolid.$hash.$blobid (i.e., where the bnode is now).  Then when
+>> >> >> > clone happens there is no onode->bnode migration magic happening--we've
+>> >> >> > already committed to storing blobs in separate keys.  When we load the
+>> >> >> > onode, keep the conditional bnode loading we already have.. but when the
+>> >> >> > bnode is loaded load up all the blobs for the hash key.  (Okay, we could
+>> >> >> > fault in blobs individually, but that code will be more complicated.)
+>> >> >> >
+>> >> >> > In both these cases, a write will dirty the onode (which is back to being
+>> >> >> > pretty small.. just xattrs and the lextent map) and 1-3 blobs (also now
+>> >> >> > small keys).  Updates will generate much lower metadata write traffic,
+>> >> >> > which'll reduce media wear and compaction overhead.  The cost is that
+>> >> >> > operations (e.g., reads) that have to fault in an onode are now fetching
+>> >> >> > several nearby keys instead of a single key.
+>> >> >> >
+>> >> >> >
+>> >> >> > #1 and #2 are completely orthogonal to any encoding efficiency
+>> >> >> > improvements we make.  And #1 is simple... I plan to implement this
+>> >> >> > shortly.
+>> >> >> >
+>> >> >> > #3 is balancing (re)encoding efficiency against the cost of separate keys,
+>> >> >> > and that tradeoff will change as encoding efficiency changes, so it'll be
+>> >> >> > difficult to properly evaluate without knowing where we'll land with the
+>> >> >> > (re)encode times.  I think it's a design decision made early on that is
+>> >> >> > worth revisiting, though!
+>> >> >> >
+>> >> >> > sage
+>> >> >> > --
+>> >> >> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >> >> > the body of a message to majordomo@vger.kernel.org
+>> >> >> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >> >> --
+>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >> >> the body of a message to majordomo@vger.kernel.org
+>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >> >>
+>> >> >>
+>> >>
+>> >>
 >> --
->> Jason
-
-
-
--- 
-Jason
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
