@@ -1,120 +1,95 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: per-pool bluestore options
-Date: Wed, 17 Aug 2016 16:27:43 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608171617250.17762@piezo.us.to>
-References: <alpine.DEB.2.11.1608131843050.17762@piezo.us.to> <4adc2518-07d5-f4bd-7d71-5716bfb767c1@mirantis.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: Sequential write performance on cloning images
+Date: Wed, 17 Aug 2016 12:29:47 -0400
+Message-ID: <CA+aFP1BMSuWqRQQnq_9YS5_ad1UfqD4jfGFLTBLyvHg-hyxnaw@mail.gmail.com>
+References: <CAOb-7EzSpjYp9dZB4j2UoTgB6H0WZM5SeC2rJ=EYMc9R9a6x3Q@mail.gmail.com>
+ <CA+aFP1D+gBbTK=JiJSG=nevZoxxTAq=OgU6GGFQ=uO0smLsCKw@mail.gmail.com>
+ <CAOb-7EwU_sE_T5geNU6OHHO_x5XZG3E3ZqfOxOqbDi8Ss6p5fg@mail.gmail.com>
+ <CA+aFP1B=KAwu6Er1Zhun+eNUNJ_N_y-9CZipazqNFd==QEJiPA@mail.gmail.com> <CAOb-7EzHd7wcoCcFWx-Cr2PT+BDGchdupQV5hT12SnXV56O=aQ@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38914 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750764AbcHQQ1q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 17 Aug 2016 12:27:46 -0400
-In-Reply-To: <4adc2518-07d5-f4bd-7d71-5716bfb767c1@mirantis.com>
+Received: from mail-pf0-f171.google.com ([209.85.192.171]:34313 "EHLO
+	mail-pf0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750764AbcHQQ3s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Aug 2016 12:29:48 -0400
+Received: by mail-pf0-f171.google.com with SMTP id p64so39017635pfb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Aug 2016 09:29:48 -0700 (PDT)
+In-Reply-To: <CAOb-7EzHd7wcoCcFWx-Cr2PT+BDGchdupQV5hT12SnXV56O=aQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ridge Chen <ridge.chen@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 15 Aug 2016, Igor Fedotov wrote:
-> On 13.08.2016 21:56, Sage Weil wrote:
-> > Hi Igor,
-> > 
-> > I took another look at
-> > 
-> > 	https://github.com/ceph/ceph/pull/10556
-> > 
-> > You define three settings:
-> > 
-> >   compress_hint - determines if pool contains compressible / incompressible
-> > data
-> >   compress_algorithm - permits to specify different compression algorithm
-> >   compress_ratio - specifies maximum compression ratio
-> > 
-> > I think we should extend this to include csum-related options.  And use a
-> > consistent naming scheme that aligns with the config options where we just
-> > strip off the bluestore_ prefix.  The relevant options are:
-> Sounds good!
-> The major questions here is how do these per-pool options correlate with
-> corresponding per-store ones?
-> One might suggest per-pool options to have higher priority over per-store one.
-> But I'm not sure that the best option.  Sometimes user might want to
-> disable/alter corresponding option without enumerating all the pools by simple
-> switching at per-store level. Hence we need to consider some means for that.
+How and when did you compare the IOPS from the clone against the IOPS
+from the parent?
+
+On Mon, Aug 15, 2016 at 11:58 PM, Ridge Chen <ridge.chen@gmail.com> wrote:
+> Hi
+>
+> The parent image of "clone-vol1", which is "ori-vol1", is not touched
+> during the test.
+>
+> Regards
+> Ridge
+>
+> 2016-08-16 10:22 GMT+08:00 Jason Dillaman <jdillama@redhat.com>:
+>> The "assert object exists" check is just a "stat" op inserted before
+>> the write op in the same transaction.  If the object doesn't exist
+>> (i.e. a clone copy-on-write is required), the transaction will fail
+>> within the OSD and librbd will know it needs to perform a copy-up.
+>> However, in your case, this stat op should be essentially a no-op so I
+>> would expect zero performance penalty.
+>>
+>> Do you rebuild your images after every test run? I ask because one big
+>> difference is that when you are writing to the parent image, it has a
+>> snapshot so the first write to a backing object would require a
+>> copy-on-write operation within the OSD.
+>>
+>>
+>>
+>> On Mon, Aug 15, 2016 at 10:05 PM, Ridge Chen <ridge.chen@gmail.com> wrote:
+>>> Hi
+>>>
+>>> Thanks for your quick response.
+>>>
+>>> Yes, the result is similar with object-map disabled. And in all my
+>>> tests the librbd cache is disabled.
+>>>
+>>> Could you explain more about the additional "assert object exists"
+>>> operation? what it does in osd side?
+>>>
+>>> And can we bypass the operation in this very common case based on the
+>>> object-map feature?
+>>>
+>>> Regards,
+>>> Ridge
+>>>
+>>> 2016-08-15 20:16 GMT+08:00 Jason Dillaman <jdillama@redhat.com>:
+>>>> On Sun, Aug 14, 2016 at 10:41 PM, Ridge Chen <ridge.chen@gmail.com> wrote:
+>>>>> I have tested on hammer and jewel, the results are similar. Is it expected?
+>>>>
+>>>> In this case, there actually would not be an extra copy-up since you
+>>>> already performed the necessary copy-ups during the "dd" against
+>>>> "clone-vol1". The only difference, on the librbd side, is that the
+>>>> write operation would have an additional "assert object exists"
+>>>> operation before the write operation.
+>>>>
+>>>> Do you see similar differences with the librbd cache disabled and the
+>>>> object map disabled?
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> Jason
+>>
+>>
+>>
+>> --
+>> Jason
 
 
-> >   bluestore_csum = {true, false}
-> >   bluestore_csum_type = {crc32c, crc32c_{8,16}, ...}
-> >   bluestore_csum_min_chunk_size = 4k      (*)
-> >   bluestore_csum_max_chunk_size = 64k     (*)
-> >   bluestore_compression = {force, aggressive, passive, none}
-> Actually this option along with compression_hint result in a single flag:
-> compress or not. Any rationale for not using that simple flag?
 
-There are currently two persistent hints: compressible and incompressible.  
-Aggressive will compress unless incompressible, whereas passive will 
-compress if compressible.  Either way it varies per object, though, so a 
-single flag isn't sufficient.
-
-> My original idea here was to have bluestore_compression on per-store basis and
-> compression_hint of per pool one. This way one can receive pretty flexible
-> control at both storage and pool level - see my question above.
-
-Yeah, I'm not sure how complex it's worth getting.  To get complete 
-control, we probably need a default *and* the min/max allowed range for 
-each option in order to bound what you can choose per-pool, but I think 
-that is probably overkill.
-
-A bit easier would be to have
-
- bluestore_csum_override = {,true,false}
- bluestore_csum_type_override = {, crc32c, crc32c_{8,16}}
- bluestore_compression_override = {, force, aggressive, passive, none}
-
-and have them blank by default (no override).  For the numeric options 
-we'd need to use 0 to mean 'no override'.
-
-What do you think?
-
-> >   bluestore_compression_algorithm = {snappy, zlib, ...}
-> >   bluestore_compression_min_blob_size = 256k
-> >   bluestore_compression_max_blob_size = 4M
-> >   bluestore_compression_required_ratio = .875
-> > 
-> > (*) These currently have a different name but aren't used yet.  Working on
-> > a PR to change that.
-> > 
-> > What's missing is your 'compress_hint'.  We can call that
-> > 'compression_hint' to align with the names above?
-> > 
-> >   compression_hint = {compressible, incompressible, ...}
-> > 
-> > The main changes from your PR that I think we need to make are:
-> > 
-> > * These options should be part of the pool_opts_t structure in pg_pool_t
-> > (which is a set of optional key/value-like parameters for the pool).
-> > 
-> > * We can add a new ObjectStore operation that passes down parameters for a
-> > collection, and have the OSD pass these all in for each PG collection when
-> > the pool properties change.  That way ObjectStore doesn't need to persist
-> > these options at all--just store the ones it understands in memory, and
-> > the OSD will always reset them on startup etc.
-> One, probably silly, question here - do pool and collection have 1 to 1
-> relation? It seemed to me that they don't and hence we can't store per-pool
-> settings at collection level without some additional mapping: pool -> setting.
-> Also this requires some means to remove pool settings entry when pool goes
-> away...
-
-It's 1:1 mapping of PG to collection, but lots of PGs per pool.  So when 
-the OSD gets a pool change, it'll set the same flags for all local PGs in 
-that pool.  A bit of duplication, but it keeps the interface 
-uncomplicated (no need to teach ObjectStore about pools).
-
-> And another question - are there any means to receive notification when pool
-> setting changes. Similar to the one we have for OSD settings. We need that to
-> trigger that new Object Store operation to update pool settings.
-
-There is already some machinery to do this (the pg_pool_t struct has an 
-epoch field).  See void PGPool::update(OSDMapRef map) in PG.cc.
-
-sage
+-- 
+Jason
