@@ -1,46 +1,85 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Questions about Accepter::stop()
-Date: Wed, 17 Aug 2016 12:36:08 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608171234490.17762@piezo.us.to>
-References: <3492e51f-021b-2c6e-2242-2237add24784@digiware.nl> <alpine.DEB.2.11.1608122056380.17762@piezo.us.to> <b6ef2b22-e693-afcc-1772-73ab2d6869cc@digiware.nl> <67687e3b-f514-b727-ca3a-173c82fc3860@digiware.nl> <8bfc92da-efd2-6783-b74a-9ed3612a6f8a@digiware.nl>
- <alpine.DEB.2.11.1608131357080.17762@piezo.us.to> <fb18be0c-ad7e-b5ba-c841-5e361b9e5a93@digiware.nl> <alpine.DEB.2.11.1608151947010.14754@piezo.us.to> <d7c48e3c-00e2-eec6-4d56-5b35ec05f9cc@digiware.nl>
+From: Sage Weil <sweil@redhat.com>
+Subject: bluestore blobs
+Date: Wed, 17 Aug 2016 14:26:00 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1608171407220.17762@piezo.us.to>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58655 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752513AbcHQMgL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Aug 2016 08:36:11 -0400
-In-Reply-To: <d7c48e3c-00e2-eec6-4d56-5b35ec05f9cc@digiware.nl>
+Received: from mx1.redhat.com ([209.132.183.28]:51894 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750896AbcHQO0D (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Aug 2016 10:26:03 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 59F1783F47
+	for <ceph-devel@vger.kernel.org>; Wed, 17 Aug 2016 14:26:02 +0000 (UTC)
+Received: from ovpn-112-26.phx2.redhat.com (ovpn-112-26.phx2.redhat.com [10.3.112.26])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u7HEQ07Q031993
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 17 Aug 2016 10:26:01 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, 15 Aug 2016, Willem Jan Withagen wrote:
-> > A workaround might be to set a modest timeout (say, 1s) on the poll.  
-> > Worst case, you wait up to 1s to shut down, which isn't to bad, and in the 
-> > normal case you only wake up needlessly once per second (also not *too* 
-> > bad).
-> > 
-> >> The other solution would be to include a watch pipe in the poll fds.
-> >> And then write that pipe if you want to trigger the poll. Instead of
-> >> doing the shutdown. I think there is example code for this on the web,
-> >> it is called the self-pipe trick.
-> > 
-> > That's probably the most elegant/correct solution... I'm not sure that teh 
-> > current behavior where we call shutdown(2) on an unconnected socket and it 
-> > wakes up poll(2) is well-defined behavior.
-> 
-> I actually found more cases of the selfpipe solution, and it is a
-> portable ways of tackling the challenge.
-> But there are also more cases that use ::shutdown().
-> Which I will have to review and see of they cause the same type of
-> errors. But perhaps should we just rewrite all the shutdown cases, just
-> to use the same code in all code.
+I think we need to look at other changes in addition to the encoding 
+performance improvements.  Even if they end up being good enough, these 
+changes are somewhat orthogonal and at least one of them should give us 
+something that is even faster.
 
-That would be my preference.  Then we're not potentially abusing the API 
-and FreeBSD isn't using a different path that isn't as well tested.
+1. I mentioned this before, but we should keep the encoding 
+bluestore_blob_t around when we load the blob map.  If it's not changed, 
+don't reencode it.  There are no blockers for implementing this currently.  
+It may be difficult to ensure the blobs are properly marked dirty... I'll 
+see if we can use proper accessors for the blob to enforce this at compile 
+time.  We should do that anyway.
 
-Thanks!
+2. This turns the blob Put into rocksdb into two memcpy stages: one to 
+assemble the bufferlist (lots of bufferptrs to each untouched blob) 
+into a single rocksdb::Slice, and another memcpy somewhere inside 
+rocksdb to copy this into the write buffer.  We could extend the 
+rocksdb interface to take an iovec so that the first memcpy isn't needed 
+(and rocksdb will instead iterate over our buffers and copy them directly 
+into its write buffer).  This is probably a pretty small piece of the 
+overall time... should verify with a profiler before investing too much 
+effort here.
+
+3. Even if we do the above, we're still setting a big (~4k or more?) key 
+into rocksdb every time we touch an object, even when a tiny amount of 
+metadata is getting changed.  This is a consequence of embedding all of 
+the blobs into the onode (or bnode).  That seemed like a good idea early 
+on when they were tiny (i.e., just an extent), but now I'm not so sure.  I 
+see a couple of different options:
+
+a) Store each blob as ($onode_key+$blobid).  When we load the onode, load 
+the blobs too.  They will hopefully be sequential in rocksdb (or 
+definitely sequential in zs).  Probably go back to using an iterator.
+
+b) Go all in on the "bnode" like concept.  Assign blob ids so that they 
+are unique for any given hash value.  Then store the blobs as 
+$shard.$poolid.$hash.$blobid (i.e., where the bnode is now).  Then when 
+clone happens there is no onode->bnode migration magic happening--we've 
+already committed to storing blobs in separate keys.  When we load the 
+onode, keep the conditional bnode loading we already have.. but when the 
+bnode is loaded load up all the blobs for the hash key.  (Okay, we could 
+fault in blobs individually, but that code will be more complicated.)
+
+In both these cases, a write will dirty the onode (which is back to being 
+pretty small.. just xattrs and the lextent map) and 1-3 blobs (also now 
+small keys).  Updates will generate much lower metadata write traffic, 
+which'll reduce media wear and compaction overhead.  The cost is that 
+operations (e.g., reads) that have to fault in an onode are now fetching 
+several nearby keys instead of a single key.
+
+
+#1 and #2 are completely orthogonal to any encoding efficiency 
+improvements we make.  And #1 is simple... I plan to implement this 
+shortly.
+
+#3 is balancing (re)encoding efficiency against the cost of separate keys, 
+and that tradeoff will change as encoding efficiency changes, so it'll be 
+difficult to properly evaluate without knowing where we'll land with the 
+(re)encode times.  I think it's a design decision made early on that is 
+worth revisiting, though!
+
 sage
