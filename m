@@ -1,182 +1,167 @@
-From: Mark Nelson <mnelson@redhat.com>
+From: Haomai Wang <haomai@xsky.com>
 Subject: Re: bluestore blobs
-Date: Wed, 17 Aug 2016 10:58:55 -0500
-Message-ID: <b62ca19f-de96-dc8d-ad9c-ed54d192b09b@redhat.com>
+Date: Thu, 18 Aug 2016 00:00:00 +0800
+Message-ID: <CACJqLyZ_M4KZRxOVy8a58Vz=dj2SHQ5LWUkkkOHt9Q-wRjeJyQ@mail.gmail.com>
 References: <alpine.DEB.2.11.1608171407220.17762@piezo.us.to>
  <CACJqLyZeE7zH-TFX_e5N7x1drWheyUQ08SVeeAEYBK=Yau4OkA@mail.gmail.com>
- <alpine.DEB.2.11.1608171522210.17762@piezo.us.to>
- <CACJqLybeGmFuV9yJtH2i7KiRu6q+6+PsN+xdeFm+Addw0KXTFA@mail.gmail.com>
+ <alpine.DEB.2.11.1608171522210.17762@piezo.us.to> <CACJqLybeGmFuV9yJtH2i7KiRu6q+6+PsN+xdeFm+Addw0KXTFA@mail.gmail.com>
  <alpine.DEB.2.11.1608171538040.17762@piezo.us.to>
- <BL2PR02MB211540F4843D11ACEFEEB5A6F4140@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43564 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753016AbcHQP7F (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 17 Aug 2016 11:59:05 -0400
-In-Reply-To: <BL2PR02MB211540F4843D11ACEFEEB5A6F4140@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from mail-pu1apc01on0106.outbound.protection.outlook.com ([104.47.126.106]:19648
+	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750764AbcHQQAN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Aug 2016 12:00:13 -0400
+Received: by mail-ua0-f170.google.com with SMTP id 97so178293120uav.3
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Aug 2016 09:00:06 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1608171538040.17762@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sweil@redhat.com>, Varada Kari <Varada.Kari@sandisk.com>, Haomai Wang <haomai@xsky.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Varada Kari <varada.kari@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 08/17/2016 10:55 AM, Somnath Roy wrote:
-> Will parallel transaction submit improve the rocksdb performance ?
-> If not, it is unlikely we will see any benefit because of that. May be different db like ZS could benefit out of that though.
-> What I saw after short circuiting the db path entirely earlier that db performance is still the bottleneck.
-
-Did you try the memdbstore at all?  Last time I tried it bluestore was 
-segfaulting, but it's possible it works now.
-
-Mark
-
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Wednesday, August 17, 2016 8:43 AM
-> To: Varada Kari; Haomai Wang
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: bluestore blobs
->
+On Wed, Aug 17, 2016 at 11:43 PM, Sage Weil <sweil@redhat.com> wrote:
 > On Wed, 17 Aug 2016, Haomai Wang wrote:
 >> On Wed, Aug 17, 2016 at 11:25 PM, Sage Weil <sweil@redhat.com> wrote:
->>> On Wed, 17 Aug 2016, Haomai Wang wrote:
->>>> another latency perf problem:
->>>>
->>>> rocksdb log is on bluefs and mainly uses append and fsync interface
->>>> to complete WAL.
->>>>
->>>> I found the latency between kv transaction submitting isn't
->>>> negligible and limit the transaction throughput.
->>>>
->>>> So what if we implement a async transaction submit in rocksdb side
->>>> using callback way? It will decrease kv in queue latency. It would
->>>> help rocksdb WAL performance close to FileJournal. And async
->>>> interface will help control each kv transaction size and make
->>>> transaction complete smoothly instead of tps spike with us precious.
->>>
->>> Can we get the same benefit by calling BlueFS::_flush on the log
->>> whenever we have X bytes accumulated (I think there is an option in
->>> rocksdb that drives this already, actually)?  Changing the
->>> interfaces around will change the threading model (= work) but
->>> doesn't actually change who needs to wait and when.
+>> > On Wed, 17 Aug 2016, Haomai Wang wrote:
+>> >> another latency perf problem:
+>> >>
+>> >> rocksdb log is on bluefs and mainly uses append and fsync interface to
+>> >> complete WAL.
+>> >>
+>> >> I found the latency between kv transaction submitting isn't negligible
+>> >> and limit the transaction throughput.
+>> >>
+>> >> So what if we implement a async transaction submit in rocksdb side
+>> >> using callback way? It will decrease kv in queue latency. It would
+>> >> help rocksdb WAL performance close to FileJournal. And async interface
+>> >> will help control each kv transaction size and make transaction
+>> >> complete smoothly instead of tps spike with us precious.
+>> >
+>> > Can we get the same benefit by calling BlueFS::_flush on the log whenever
+>> > we have X bytes accumulated (I think there is an option in rocksdb that
+>> > drives this already, actually)?  Changing the interfaces around will
+>> > change the threading model (= work) but doesn't actually change who needs
+>> > to wait and when.
 >>
 >> why we need to wait after interface change?
 >>
 >> 1. kv thread submit transaction with callback.
->> 2. rocksdb append and call bluefs aio_submit with callback 3. bluefs
->> submit aio write with callback 4. KernelDevice will poll linux aio
->> event and execute callback inline or queue finish 5. callback will
->> notify we complete the kv transaction
+>> 2. rocksdb append and call bluefs aio_submit with callback
+>> 3. bluefs submit aio write with callback
+>> 4. KernelDevice will poll linux aio event and execute callback inline
+>> or queue finish
+>> 5. callback will notify we complete the kv transaction
 >>
 >> the main task is implement logics in rocksdb log*.cc and bluefs aio
 >> submit interface....
 >>
 >> Is anything I'm missing?
 >
-> That can all be done with callbacks, but even if we do the kv thread will still need to wait on the callback before doing anything else.
+> That can all be done with callbacks, but even if we do the kv thread will
+> still need to wait on the callback before doing anything else.
 >
 > Oh, you're suggesting we have multiple batches of transactions in flight.
 > Got it.
+
+I don't think so.. because bluefs has lock for fsync and flush. So
+multi rocksdb thread will be serial to flush... and another thing is
+the single thread is help for polling case.....
+
+from my current perf, compared queue filejournal class, rocksdb plays
+1.5x-2x latency, in heavy load it will be more .... Yes, filejournal
+exactly has a good pipeline for pure linux aio job.
+
 >
-> I think we will get some of the benefit by enabling the parallel transaction submits (so we don't funnel everything through _kv_sync_thread).  I think we should get that merged first and see how it behaves before taking the next step.  I forgot to ask Varada is standup this morning what the current status of that is.  Varada?
+> I think we will get some of the benefit by enabling the parallel
+> transaction submits (so we don't funnel everything through
+> _kv_sync_thread).  I think we should get that merged first and see how it
+> behaves before taking the next step.  I forgot to ask Varada is standup
+> this morning what the current status of that is.  Varada?
 >
 > sage
 >
 >>
->>>
->>> sage
->>>
->>>
->>>
->>>>
->>>>
->>>> On Wed, Aug 17, 2016 at 10:26 PM, Sage Weil <sweil@redhat.com> wrote:
->>>>> I think we need to look at other changes in addition to the
->>>>> encoding performance improvements.  Even if they end up being
->>>>> good enough, these changes are somewhat orthogonal and at least
->>>>> one of them should give us something that is even faster.
->>>>>
->>>>> 1. I mentioned this before, but we should keep the encoding
->>>>> bluestore_blob_t around when we load the blob map.  If it's not
->>>>> changed, don't reencode it.  There are no blockers for implementing this currently.
->>>>> It may be difficult to ensure the blobs are properly marked
->>>>> dirty... I'll see if we can use proper accessors for the blob to
->>>>> enforce this at compile time.  We should do that anyway.
->>>>>
->>>>> 2. This turns the blob Put into rocksdb into two memcpy stages:
->>>>> one to assemble the bufferlist (lots of bufferptrs to each
->>>>> untouched blob) into a single rocksdb::Slice, and another memcpy
->>>>> somewhere inside rocksdb to copy this into the write buffer.  We
->>>>> could extend the rocksdb interface to take an iovec so that the
->>>>> first memcpy isn't needed (and rocksdb will instead iterate over
->>>>> our buffers and copy them directly into its write buffer).  This
->>>>> is probably a pretty small piece of the overall time... should
->>>>> verify with a profiler before investing too much effort here.
->>>>>
->>>>> 3. Even if we do the above, we're still setting a big (~4k or
->>>>> more?) key into rocksdb every time we touch an object, even when
->>>>> a tiny amount of metadata is getting changed.  This is a
->>>>> consequence of embedding all of the blobs into the onode (or
->>>>> bnode).  That seemed like a good idea early on when they were
->>>>> tiny (i.e., just an extent), but now I'm not so sure.  I see a couple of different options:
->>>>>
->>>>> a) Store each blob as ($onode_key+$blobid).  When we load the
->>>>> onode, load the blobs too.  They will hopefully be sequential in
->>>>> rocksdb (or definitely sequential in zs).  Probably go back to using an iterator.
->>>>>
->>>>> b) Go all in on the "bnode" like concept.  Assign blob ids so
->>>>> that they are unique for any given hash value.  Then store the
->>>>> blobs as $shard.$poolid.$hash.$blobid (i.e., where the bnode is
->>>>> now).  Then when clone happens there is no onode->bnode migration
->>>>> magic happening--we've already committed to storing blobs in
->>>>> separate keys.  When we load the onode, keep the conditional
->>>>> bnode loading we already have.. but when the bnode is loaded load
->>>>> up all the blobs for the hash key.  (Okay, we could fault in
->>>>> blobs individually, but that code will be more complicated.)
->>>>>
->>>>> In both these cases, a write will dirty the onode (which is back
->>>>> to being pretty small.. just xattrs and the lextent map) and 1-3
->>>>> blobs (also now small keys).  Updates will generate much lower
->>>>> metadata write traffic, which'll reduce media wear and compaction
->>>>> overhead.  The cost is that operations (e.g., reads) that have to
->>>>> fault in an onode are now fetching several nearby keys instead of a single key.
->>>>>
->>>>>
->>>>> #1 and #2 are completely orthogonal to any encoding efficiency
->>>>> improvements we make.  And #1 is simple... I plan to implement
->>>>> this shortly.
->>>>>
->>>>> #3 is balancing (re)encoding efficiency against the cost of
->>>>> separate keys, and that tradeoff will change as encoding
->>>>> efficiency changes, so it'll be difficult to properly evaluate
->>>>> without knowing where we'll land with the (re)encode times.  I
->>>>> think it's a design decision made early on that is worth revisiting, though!
->>>>>
->>>>> sage
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at
->>>>> http://vger.kernel.org/majordomo-info.html
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe
->>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
+>> >
+>> > sage
+>> >
+>> >
+>> >
+>> >>
+>> >>
+>> >> On Wed, Aug 17, 2016 at 10:26 PM, Sage Weil <sweil@redhat.com> wrote:
+>> >> > I think we need to look at other changes in addition to the encoding
+>> >> > performance improvements.  Even if they end up being good enough, these
+>> >> > changes are somewhat orthogonal and at least one of them should give us
+>> >> > something that is even faster.
+>> >> >
+>> >> > 1. I mentioned this before, but we should keep the encoding
+>> >> > bluestore_blob_t around when we load the blob map.  If it's not changed,
+>> >> > don't reencode it.  There are no blockers for implementing this currently.
+>> >> > It may be difficult to ensure the blobs are properly marked dirty... I'll
+>> >> > see if we can use proper accessors for the blob to enforce this at compile
+>> >> > time.  We should do that anyway.
+>> >> >
+>> >> > 2. This turns the blob Put into rocksdb into two memcpy stages: one to
+>> >> > assemble the bufferlist (lots of bufferptrs to each untouched blob)
+>> >> > into a single rocksdb::Slice, and another memcpy somewhere inside
+>> >> > rocksdb to copy this into the write buffer.  We could extend the
+>> >> > rocksdb interface to take an iovec so that the first memcpy isn't needed
+>> >> > (and rocksdb will instead iterate over our buffers and copy them directly
+>> >> > into its write buffer).  This is probably a pretty small piece of the
+>> >> > overall time... should verify with a profiler before investing too much
+>> >> > effort here.
+>> >> >
+>> >> > 3. Even if we do the above, we're still setting a big (~4k or more?) key
+>> >> > into rocksdb every time we touch an object, even when a tiny amount of
+>> >> > metadata is getting changed.  This is a consequence of embedding all of
+>> >> > the blobs into the onode (or bnode).  That seemed like a good idea early
+>> >> > on when they were tiny (i.e., just an extent), but now I'm not so sure.  I
+>> >> > see a couple of different options:
+>> >> >
+>> >> > a) Store each blob as ($onode_key+$blobid).  When we load the onode, load
+>> >> > the blobs too.  They will hopefully be sequential in rocksdb (or
+>> >> > definitely sequential in zs).  Probably go back to using an iterator.
+>> >> >
+>> >> > b) Go all in on the "bnode" like concept.  Assign blob ids so that they
+>> >> > are unique for any given hash value.  Then store the blobs as
+>> >> > $shard.$poolid.$hash.$blobid (i.e., where the bnode is now).  Then when
+>> >> > clone happens there is no onode->bnode migration magic happening--we've
+>> >> > already committed to storing blobs in separate keys.  When we load the
+>> >> > onode, keep the conditional bnode loading we already have.. but when the
+>> >> > bnode is loaded load up all the blobs for the hash key.  (Okay, we could
+>> >> > fault in blobs individually, but that code will be more complicated.)
+>> >> >
+>> >> > In both these cases, a write will dirty the onode (which is back to being
+>> >> > pretty small.. just xattrs and the lextent map) and 1-3 blobs (also now
+>> >> > small keys).  Updates will generate much lower metadata write traffic,
+>> >> > which'll reduce media wear and compaction overhead.  The cost is that
+>> >> > operations (e.g., reads) that have to fault in an onode are now fetching
+>> >> > several nearby keys instead of a single key.
+>> >> >
+>> >> >
+>> >> > #1 and #2 are completely orthogonal to any encoding efficiency
+>> >> > improvements we make.  And #1 is simple... I plan to implement this
+>> >> > shortly.
+>> >> >
+>> >> > #3 is balancing (re)encoding efficiency against the cost of separate keys,
+>> >> > and that tradeoff will change as encoding efficiency changes, so it'll be
+>> >> > difficult to properly evaluate without knowing where we'll land with the
+>> >> > (re)encode times.  I think it's a design decision made early on that is
+>> >> > worth revisiting, though!
+>> >> >
+>> >> > sage
+>> >> > --
+>> >> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >> > the body of a message to majordomo@vger.kernel.org
+>> >> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>
+>> >>
 >>
 >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
