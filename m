@@ -1,119 +1,46 @@
-From: Zhangzengran <zhangzengran@h3c.com>
-Subject: Re: [rgw multisite] disable specified bucket data sync
-Date: Wed, 17 Aug 2016 11:06:40 +0000
-Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314C6988@H3CMLB12-EX.srv.huawei-3com.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Questions about Accepter::stop()
+Date: Wed, 17 Aug 2016 12:36:08 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1608171234490.17762@piezo.us.to>
+References: <3492e51f-021b-2c6e-2242-2237add24784@digiware.nl> <alpine.DEB.2.11.1608122056380.17762@piezo.us.to> <b6ef2b22-e693-afcc-1772-73ab2d6869cc@digiware.nl> <67687e3b-f514-b727-ca3a-173c82fc3860@digiware.nl> <8bfc92da-efd2-6783-b74a-9ed3612a6f8a@digiware.nl>
+ <alpine.DEB.2.11.1608131357080.17762@piezo.us.to> <fb18be0c-ad7e-b5ba-c841-5e361b9e5a93@digiware.nl> <alpine.DEB.2.11.1608151947010.14754@piezo.us.to> <d7c48e3c-00e2-eec6-4d56-5b35ec05f9cc@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:2364 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753474AbcHQLRa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 17 Aug 2016 07:17:30 -0400
-Content-Language: zh-CN
+Received: from cobra.newdream.net ([66.33.216.30]:58655 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752513AbcHQMgL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Aug 2016 08:36:11 -0400
+In-Reply-To: <d7c48e3c-00e2-eec6-4d56-5b35ec05f9cc@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "yehuda@redhat.com" <yehuda@redhat.com>, "cbodley@redhat.com" <cbodley@redhat.com>, "guozhandong@cmss.chinamobile.com" <guozhandong@cmss.chinamobile.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SSBoYXZlIHNvbWUgZGlmZmVyZW50IGlkZWFzLCBidXQgaSBkbyBub3Qga25vdyB3aGV0aGVyIG9y
-IG5vdCBmZWFzaWJsZS4NCg0KcmlnaHQgbm93IHRoZSBkYXRhIHN5bmMgaXMgYmFzZWQgb24gZGF0
-YS1jaGFuZ2UgbG9nIGFuZCBiaWxvZywgYW5kIHdob2xlIGJ1Y2tldHMnYm90aCBsb2dzDQpsb2dn
-ZWQgZGVwZW5kaW5nIG9uIHpvbmUnbG9nX2RhdGEgZmxhZyAuIFNvIGkgdGhpbmssIHdlIGNvdWxk
-IHN0b3AgbG9nZ2luZyB0aGUgc3BlY2lmaWVkIGJ1Y2tldCdzIGJpbG9nIGFuZA0KZGF0YS1jaGFu
-Z2UgbG9nLHdoZW4gd2Ugd2FudCB0byBkaXNhYmxlIGl0cyBkYXRhIHN5bmMuIFRodXMgd2UgbW9k
-aWZ5IHRoZSBsb2cgbG9naWMgaW5zdGVhZCBvZiBzeW5jIGxvZ2ljLg0KZW5hYmxlL2Rpc2FibGUg
-bG9nIGFsc28gZGVwZW5kIG9uIGEgbmV3IGZsYWcgaW4gYnVja2V0IGluZm8sIHdoaWNoIG1vZGlm
-aWVkIGJ5IGEgbmV3IHJndy1hZG1pbiBjb21tYW5kLg0KDQpTZXBhcmF0aW5nIHRoZSBmZWF0dXJl
-IGZyb20gc3luYyBsb2dpYyBtYXliZSBoZWxwIHRvIHNpbXBsaWZ5IGZ1cnR1cmUgem9uZXMgY2hh
-bmdlcy4NCg0KVGhhbmtzDQo+T24gTW9uLCBBdWcgMTUsIDIwMTYgYXQgMTo0OCBQTSwgQ2FzZXkg
-Qm9kbGV5IDxjYm9kbGV5QHJlZGhhdC5jb20+IHdyb3RlOg0KPj4gVGhlIGFiaWxpdHkgdG8gZGlz
-YWJsZSBzeW5jIHBlci1idWNrZXQgY291bGQgY2VydGFpbmx5IGJlIGFkZGVkLCBidXQNCj4+IGl0
-IHdvdWxkIHRha2Ugc29tZSB3b3JrIHRvIGdldCByaWdodC4NCj4+DQo+PiBGaXJzdCB5b3UnZCBu
-ZWVkIGEgcmFkb3Nndy1hZG1pbiBjb21tYW5kIHRvIGVuYWJsZS9kaXNhYmxlIHN5bmMgb24gYQ0K
-Pj4gZ2l2ZW4gYnVja2V0LCBhbmQgc3RvcmUgdGhhdCBmbGFnIHdpdGggdGhlIGJ1Y2tldCBpbnN0
-YW5jZS4gV2UgcmVhZA0KPj4gdGhlIGJ1Y2tldCBpbnN0YW5jZSBiZWZvcmUgc3RhcnRpbmcgc3lu
-YyBvbiBlYWNoIGJ1Y2tldCwgc28geW91IGNvdWxkDQo+PiBza2lwIHRoZSBzeW5jIGRlcGVuZGlu
-ZyBvbiB0aGF0IGZsYWcuDQo+DQo+VGhhdCB3b3VsZCBiZSB0aGUgYnVja2V0IGluZm8gKHRoYXQg
-Y29ycmVzcG9uZHMgdG8gYSBzcGVjaWZpYyBidWNrZXQgaW5zdGFuY2UpLg0KPg0KPj4NCj4+IEhv
-d2V2ZXIsIGVhY2ggem9uZSBpcyB0cnlpbmcgdG8gc3luYyBkYXRhIGZyb20gYWxsIG90aGVyIHpv
-bmVzIGluIGl0cw0KPj4gem9uZWdyb3VwLiBTbyBkaXNhYmxpbmcgaXQgb24gem9uZSBBLCBmb3Ig
-ZXhhbXBsZSwgd2lsbCBvbmx5IHByZXZlbnQNCj4+IHpvbmUgQSBmcm9tIHB1bGxpbmcgY2hhbmdl
-cyBmcm9tIG90aGVyIHpvbmVzLiBUaGUgb3RoZXIgem9uZXMgd291bGQNCj4+IHN0aWxsIGJlIHB1
-bGxpbmcgY2hhbmdlcyBmcm9tIHpvbmUgQSwgYmVjYXVzZSB0aGV5IGhhdmUgdGhlaXIgb3duIGNv
-cHkNCj4+IG9mIHRoZSBidWNrZXQgaW5zdGFuY2UuIFNvIHlvdSdkIHByb2JhYmx5IHdhbnQgc29t
-ZSB3YXkgdG8gY29vcmRpbmF0ZQ0KPj4gdGhpcyBzZXR0aW5nIGJldHdlZW4NCj4NCj5Ob3QgcXVp
-dGUuIFRoZSBidWNrZXQgaW5mbyBpcyBhIG1ldGFkYXRhIGVudGl0eSwgc28gaXQncyBiZWluZyBt
-b2RpZmllZCBvbiB0aGUgbWFzdGVyIGFuZCBzeW5jZWQgdG8gYWxsIG90aGVyIHpvbmVzLiBTaW1p
-bGFyIHRvIG90aGVyIGJ1Y2tldCBtZXRhZGF0YSBjaGFuZ2VzLCB3ZSBjYW4gaGF2ZSB0aGUgem9u
-ZSB3aGVyZSB0aGUgY2hhbmdlIGlzIHJlcXVlc3RlZCBvbiBmb3J3YXJkIHRoZSByZXF1ZXN0IHRv
-IHRoZSBtYXN0ZXIuDQo+DQo+PiB6b25lcy4NCj4+DQo+PiBUaGUgb3RoZXIgY2hhbGxlbmdlIHdv
-dWxkIGJlIGluIHRoZSBpbnRlcmFjdGlvbiB3aXRoIHRoZSAnZGF0YSBjaGFuZ2VzIGxvZycuDQo+
-PiBFYWNoIHpvbmUgbWFpbnRhaW5zIGEgbG9nIG9mIGJ1Y2tldCBuYW1lcyB0aGF0IGhhdmUgbG9j
-YWwgY2hhbmdlcyAoeW91DQo+PiBjYW4gdmlldyB0aGlzIHdpdGggJ3JhZG9zZ3ctYWRtaW4gZGF0
-YWxvZyBsaXN0JykuIE90aGVyIHpvbmVzIHJlYWQNCj4+IGZyb20gdGhpcyBsb2cgdG8gZGVjaWRl
-IHdoaWNoIGJ1Y2tldHMgdGhleSBuZWVkIHRvIHN5bmMuIEhvd2V2ZXIsIHNheQ0KPj4gdGhhdCB6
-b25lIEEgcmVhZHMgYWJvdXQgYSBjaGFuZ2UgdG8gYnVja2V0MSBvbiB6b25lIEIuIElmIHN5bmMg
-b24NCj4+IGJ1Y2tldDEgaXMgZGlzYWJsZWQsIHpvbmUgQSBza2lwcyB0aGUgc3luYyBhbmQgYWR2
-YW5jZXMgaXRzIHBvc2l0aW9uDQo+PiBpbiB6b25lIEIncyBkYXRhbG9nLiBTbyBpZiBzeW5jIG9u
-DQo+PiBidWNrZXQxIGlzIGxhdGVyIGVuYWJsZWQsIHpvbmUgQSB3b24ndCByZW1lbWJlciB0aGF0
-IGl0IG5lZWRzIHRvIHN5bmMNCj4+IGZyb20gQi4NCj4NCj5ZZWFoLCBuZWVkIHRvIGFkZCBlbnRy
-eSB0byB0aGUgZGF0YSBsb2cgd2hlbmV2ZXIgd2UgZW5hYmxlIChub3Qgc3VyZSBhYm91dCBkaXNh
-YmxlKSBzeW5jIG9uIGEgYnVja2V0Lg0KPg0KPj4NCj4+IFNvIEkgdGhpbmsgdGhlIHRyaWNrIHdv
-dWxkIGJlIHRvIGFkZCBzcGVjaWFsIGVudHJpZXMgdG8gdGhlIGRhdGFsb2cNCj4+IHdoZW4gYnVj
-a2V0cyBhcmUgZW5hYmxlZC9kaXNhYmxlZCwgc28gdGhhdCBvdGhlciB6b25lcyB3aWxsIGtub3cg
-dG8gYSkNCj4+IHVwZGF0ZSB0aGVpciBsb2NhbCBidWNrZXQgaW5zdGFuY2UsIGFuZCBiKSByZXN0
-YXJ0IHN5bmMgaWYgZW5hYmxlZC4gV2UNCj4+IG1pZ2h0IGFsc28gd2FudCB0byByZXN0cmljdCB0
-aGUgcmFkb3Nndy1hZG1pbiBjb21tYW5kIHRvIHRoZQ0KPj4gem9uZWdyb3VwJ3MgbWFzdGVyIHpv
-bmUgc28gd2UgY2FuIGF2b2lkIHJhY2VzIGJldHdlZW4gZW5hYmxlL2Rpc2FibGUgZnJvbSBkaWZm
-ZXJlbnQgem9uZXMuDQo+DQo+V2Ugc2hvdWxkIGRvIGl0IHRoZSBzYW1lIHdheSB3ZSBkbyBvdGhl
-ciBidWNrZXQgbWV0YWRhdGEgY2hhbmdlcywgcG90ZW50aWFsbHkganVzdCByZXVzZSB0aGF0IGNv
-ZGUgcGF0aC4NCj4NCj4+DQo+DQo+T25lIHRoaW5nIHRoYXQgSSB3b3VsZCBkbyBkaWZmZXJlbnRs
-eSBpcyB0aGF0IGluc3RlYWQgb2YgaGF2aW5nIGEgc2luZ2xlIGZsYWcgb24gdGhlIGJ1Y2tldCBp
-bmZvIHRvIHNwZWNpZnkgd2hldGhlciBhIGJ1Y2tldCBpcyBnZXR0aW5nIHN5bmNlZCBvciBub3Qs
-IEknZCBoYXZlIGEgbW9yZSBkZXRhaWxlZCBtYXBwaW5nIG9mIGRpZmZlcmVudCB6b25lIHJlbGF0
-aW9uc2hpcHMuIEZvciBlYWNoIHpvbmUgaXQnZCBzcGVjaWZ5IHdoaWNoIHpvbmVzIGl0J3Mgc3lu
-Y2luZyB0aGlzIGJ1Y2tldCBmcm9tLiBCeSBkZWZhdWx0IHRoZSBtYXAgd2lsbCBiZSBlbXB0eSwg
-YW5kIHRoZXJlIHdpbGwgYmUgYW5vdGhlciBmbGFnIHRoYXQgd2lsbCBvdmVycmlkZSBpdCB0aGF0
-IHdpbGwganVzdCBtZWFuICdzeW5jIGZyb20gYWxsJw0KPihkZWZhdWx0IGFzIHRydWUpLiBUaGlz
-IGlzIHByZXR0eSBtdWNoIGluIGxpbmUgd2l0aCBzb21lIGNoYW5nZXMgdGhhdCBJJ20gcGxhbm5p
-bmcgZm9yIHRoZSB6b25lcyB0aGVtc2VsdmVzLCBzbyBoYXZpbmcgYSBwZXItYnVja2V0IHN5bmMg
-Y29uZmlnIG1ha2VzIHNlbnNlLiBJdCdsbCBhbHNvIGJlIGEgc3RlcCB0b3dhcmRzIGltcGxlbWVu
-dGluZyB0aGUgc3dpZnQgY29udGFpbmVyIHN5bmMgYXBpLg0KPg0KPlllaHVkYQ0KPg0KPj4gQ2Fz
-ZXkNCj4+DQo+Pg0KPj4NCj4+IE9uIDA4LzAyLzIwMTYgMDk6MTYgUE0sIFpoYW5nemVuZ3JhbiB3
-cm90ZToNCj4+Pj4+DQo+Pj4+PiBIaSBDYXNleToNCj4+Pj4+ICAgICAgICAgICBXaHkgZG9u4oCZ
-dCBzdXBwb3J0IHN0b3BwaW5nIHNwZWNpZmllZCBidWNrZXQgZGF0YSBzeW5jLiBJcw0KPj4+Pj4g
-dGhlcmUgYW55IGRpZmZpY3VsdHkgaW4gaW1wbGVtZW50aW5nIHRoZSBmZWF0dXJlPw0KPj4+Pj4g
-ICAgICAgICAgIE9yIGFtIEkgbWlzc2luZyBzb21ldGhpbmc/DQo+Pj4+Pg0KPj4+Pj4gICAgICAg
-ICAgIFRoYW5rIHlvdSAhDQo+Pj4+DQo+Pj4+DQo+Pj4+IEhpLA0KPj4+Pg0KPj4+PiBXaGF0IHdv
-dWxkIHlvdSBsaWtlIHRvIGdldCBvdXQgb2YgdGhpcyBmZWF0dXJlPyBBIHdheSB0byBkaXNhYmxl
-DQo+Pj4+IHN5bmMgb24gYSBnaXZlbiBidWNrZXQgdGVtcG9yYXJpbHksIGFuZCB0dXJuIGl0IGJh
-Y2sgb24gbGF0ZXI/IE9yDQo+Pj4+IGp1c3QgYSB3YXkgdG8gaGF2ZSBhIHN1YnNldCBvZiBidWNr
-ZXRzIHRoYXQgZG9uJ3QgZXZlciBwYXJ0aWNpcGF0ZSBpbiBzeW5jPw0KPj4+Pg0KPj4+PiBEbyB5
-b3UgaGF2ZSBhIHVzZSBjYXNlIGZvciB0aGUgZmlyc3Q/IFRoYXQncyBub3Qgc29tZXRoaW5nIHdl
-J2QNCj4+Pj4gY29uc2lkZXJlZC4NCj4+Pj4NCj4+Pj4gSWYgeW91IGp1c3Qgd2FudCB0byBoYXZl
-IHNvbWUgYnVja2V0cyB0aGF0IG5ldmVyIHN5bmMsIHlvdSBtaWdodA0KPj4+PiBjb25zaWRlciBz
-ZXJ2aW5nIHRob3NlIG91dCBvZiBhIHNlcGFyYXRlIGdhdGV3YXksIGluIGEgem9uZSB0aGF0DQo+
-Pj4+IGlzbid0IHBhcnQgb2YgYSBtdWx0aXNpdGUgY29uZmlndXJhdGlvbi4NCj4+Pj4NCj4+Pj4g
-VGhhbmtzLA0KPj4+PiBDYXNleQ0KPj4+DQo+Pj4gZGVwbG95IGEgc2VwYXJhdGUgbm9uZS1zeW5j
-IHpvbmUgd2l0aCBkaWZmZXJlbnQgZW5kcG9pbnQgbWF5IG5vdCBhDQo+Pj4gZ29vZCBjaG9pY2Uu
-IHdlIGhvcGUgZW5hYmxlL2Rpc2FibGUgYSBzcGVjaWZpZWQgYnVja2V0IHN5bmMgY291bGQgYmUN
-Cj4+PiBzb21ld2hhdCBmbGV4aWJsZS4gOikNCj4+Pg0KDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0N
-CuacrOmCruS7tuWPiuWFtumZhOS7tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZ
-kOWFrOWPuOeahOS/neWvhuS/oeaBr++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4
-reWIl+WHug0K55qE5Liq5Lq65oiW576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu7
-5L2V5b2i5byP5L2/55So77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE
-6Zyy44CB5aSN5Yi244CBDQrmiJbmlaPlj5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLm
-npzmgqjplJnmlLbkuobmnKzpgq7ku7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrn
-n6Xlj5Hku7bkurrlubbliKDpmaTmnKwNCumCruS7tu+8gQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBh
-dHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hp
-Y2ggaXMNCmludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJl
-c3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVk
-IGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwg
-b3IgcGFydGlhbA0KZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBi
-eSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGli
-aXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkg
-dGhlIHNlbmRlcg0KYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCEN
-Cg==
+On Mon, 15 Aug 2016, Willem Jan Withagen wrote:
+> > A workaround might be to set a modest timeout (say, 1s) on the poll.  
+> > Worst case, you wait up to 1s to shut down, which isn't to bad, and in the 
+> > normal case you only wake up needlessly once per second (also not *too* 
+> > bad).
+> > 
+> >> The other solution would be to include a watch pipe in the poll fds.
+> >> And then write that pipe if you want to trigger the poll. Instead of
+> >> doing the shutdown. I think there is example code for this on the web,
+> >> it is called the self-pipe trick.
+> > 
+> > That's probably the most elegant/correct solution... I'm not sure that teh 
+> > current behavior where we call shutdown(2) on an unconnected socket and it 
+> > wakes up poll(2) is well-defined behavior.
+> 
+> I actually found more cases of the selfpipe solution, and it is a
+> portable ways of tackling the challenge.
+> But there are also more cases that use ::shutdown().
+> Which I will have to review and see of they cause the same type of
+> errors. But perhaps should we just rewrite all the shutdown cases, just
+> to use the same code in all code.
+
+That would be my preference.  Then we're not potentially abusing the API 
+and FreeBSD isn't using a different path that isn't as well tested.
+
+Thanks!
+sage
