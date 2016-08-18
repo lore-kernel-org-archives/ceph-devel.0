@@ -1,173 +1,145 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: Re: per-pool bluestore options
-Date: Thu, 18 Aug 2016 16:18:33 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608181615370.2394@piezo.us.to>
-References: <alpine.DEB.2.11.1608131843050.17762@piezo.us.to> <4adc2518-07d5-f4bd-7d71-5716bfb767c1@mirantis.com> <alpine.DEB.2.11.1608171617250.17762@piezo.us.to> <26d298ca-a400-c102-92fc-6f5dd3d483f4@mirantis.com> <alpine.DEB.2.11.1608181513430.2394@piezo.us.to>
- <e161ff11-aef1-fc26-3d65-3b2b549a60a7@mirantis.com>
+Subject: RE: bluestore blobs
+Date: Thu, 18 Aug 2016 15:10:22 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1608181459500.2394@piezo.us.to>
+References: <alpine.DEB.2.11.1608171407220.17762@piezo.us.to> <BLUPR0201MB1524D88B4FD92E208DF840B0E8150@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44720 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:54114 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750757AbcHSCyb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 18 Aug 2016 22:54:31 -0400
-In-Reply-To: <e161ff11-aef1-fc26-3d65-3b2b549a60a7@mirantis.com>
+        id S1754244AbcHSC4r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 18 Aug 2016 22:56:47 -0400
+In-Reply-To: <BLUPR0201MB1524D88B4FD92E208DF840B0E8150@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: ceph-devel@vger.kernel.org
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 18 Aug 2016, Igor Fedotov wrote:
-> On 18.08.2016 18:26, Sage Weil wrote:
-> > On Thu, 18 Aug 2016, Igor Fedotov wrote:
-> > > On 17.08.2016 19:27, Sage Weil wrote:
-> > > > On Mon, 15 Aug 2016, Igor Fedotov wrote:
-> > > > > On 13.08.2016 21:56, Sage Weil wrote:
-> > > > > > Hi Igor,
-> > > > > > 
-> > > > > > I took another look at
-> > > > > > 
-> > > > > > 	https://github.com/ceph/ceph/pull/10556
-> > > > > > 
-> > > > > > You define three settings:
-> > > > > > 
-> > > > > >     compress_hint - determines if pool contains compressible /
-> > > > > > incompressible
-> > > > > > data
-> > > > > >     compress_algorithm - permits to specify different compression
-> > > > > > algorithm
-> > > > > >     compress_ratio - specifies maximum compression ratio
-> > > > > > 
-> > > > > > I think we should extend this to include csum-related options.  And
-> > > > > > use
-> > > > > > a
-> > > > > > consistent naming scheme that aligns with the config options where
-> > > > > > we
-> > > > > > just
-> > > > > > strip off the bluestore_ prefix.  The relevant options are:
-> > > > > Sounds good!
-> > > > > The major questions here is how do these per-pool options correlate
-> > > > > with
-> > > > > corresponding per-store ones?
-> > > > > One might suggest per-pool options to have higher priority over
-> > > > > per-store
-> > > > > one.
-> > > > > But I'm not sure that the best option.  Sometimes user might want to
-> > > > > disable/alter corresponding option without enumerating all the pools
-> > > > > by
-> > > > > simple
-> > > > > switching at per-store level. Hence we need to consider some means for
-> > > > > that.
-> > > > > >     bluestore_csum = {true, false}
-> > > > > >     bluestore_csum_type = {crc32c, crc32c_{8,16}, ...}
-> > > > > >     bluestore_csum_min_chunk_size = 4k      (*)
-> > > > > >     bluestore_csum_max_chunk_size = 64k     (*)
-> > > > > >     bluestore_compression = {force, aggressive, passive, none}
-> > > > > Actually this option along with compression_hint result in a single
-> > > > > flag:
-> > > > > compress or not. Any rationale for not using that simple flag?
-> > > > There are currently two persistent hints: compressible and
-> > > > incompressible.
-> > > > Aggressive will compress unless incompressible, whereas passive will
-> > > > compress if compressible.  Either way it varies per object, though, so a
-> > > > single flag isn't sufficient.
-> > > So final approach is to have bluestore_compression switch at pool level
-> > > (and
-> > > per-store too) and compression_hint at object one, right? Hence we don't
-> > > need
-> > > compression_hint per pool. In fact my original point was that the
-> > > latter(along
-> > > with bluestore_compression) is IMHO an overkill and can be substituted
-> > > with
-> > > simple enable_compression flag.
-> > I think so.  Having a pool compression_hint = compressible will accomplish
-> > the same thing as setting the pool compression = aggressive.
-> OK, Sounds good!
-> Still there is an open question how to assign such a hint to objects from user
-> perspective....
-
-https://github.com/ceph/ceph/blob/master/src/include/rados/librados.h#L145
-and
-https://github.com/ceph/ceph/blob/master/src/include/rados/librados.h#L2438
-
-> > > > > My original idea here was to have bluestore_compression on per-store
-> > > > > basis
-> > > > > and
-> > > > > compression_hint of per pool one. This way one can receive pretty
-> > > > > flexible
-> > > > > control at both storage and pool level - see my question above.
-> > > > Yeah, I'm not sure how complex it's worth getting.  To get complete
-> > > > control, we probably need a default *and* the min/max allowed range for
-> > > > each option in order to bound what you can choose per-pool, but I think
-> > > > that is probably overkill.
-> > > > 
-> > > > A bit easier would be to have
-> > > > 
-> > > >    bluestore_csum_override = {,true,false}
-> > > >    bluestore_csum_type_override = {, crc32c, crc32c_{8,16}}
-> > > >    bluestore_compression_override = {, force, aggressive, passive, none}
-> > > > 
-> > > > and have them blank by default (no override).  For the numeric options
-> > > > we'd need to use 0 to mean 'no override'.
-> > > > 
-> > > > What do you think?
-> > > IMO per-pool settings (if set) have to override corresponding per-store
-> > > one by default. But one should be able to turn off that behavior with
-> > > 'one-click' and force specific per-store setting to prevail.
-> > > Hence we don't need 'override' settings at per-pool level but should have
-> > > one
-> > > at per-store one. E.g.
-> > > 
-> > > Pool A has:
-> > > bluestore_csum = true
-> > > Pool B:
-> > > bluestore_csum=<not set>
-> > > OSD:
-> > > bluestore_csum=  false [/force]
-> > > 
-> > > if /'force' is omitted - actual settings are
-> > > Pool A:
-> > > bluestore_csum=true
-> > > Pool B:
-> > > bluestore_csum=false
-> > > 
-> > > else
-> > > Pool A:
-> > > bluestore_csum=false
-> > > Pool B:
-> > > bluestore_csum=false
-> > Hmm, this makes parsing more complicated but is probably less confusing.
-> > But what about numeric values?
+On Thu, 18 Aug 2016, Allen Samuels wrote:
+> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> > owner@vger.kernel.org] On Behalf Of Sage Weil
+> > Sent: Wednesday, August 17, 2016 7:26 AM
+> > To: ceph-devel@vger.kernel.org
+> > Subject: bluestore blobs
 > > 
-> >   bluestore_compression_max_blob_size=1048576/force?
+> > I think we need to look at other changes in addition to the encoding
+> > performance improvements.  Even if they end up being good enough, these
+> > changes are somewhat orthogonal and at least one of them should give us
+> > something that is even faster.
 > > 
-> > This is partly why I like the (implementation) simplicity of
-> > 
-> >   bluestore_compression_max_blob_size_force=1048576
-> > 
-> > (or _override, whatever).
-> This way one gets parameter name duplication for each per-store parameter that
-> has per-pool clone. E.g.
+> > 1. I mentioned this before, but we should keep the encoding
+> > bluestore_blob_t around when we load the blob map.  If it's not changed,
+> > don't reencode it.  There are no blockers for implementing this currently.
+> > It may be difficult to ensure the blobs are properly marked dirty... I'll see if
+> > we can use proper accessors for the blob to enforce this at compile time.  We
+> > should do that anyway.
 > 
->  bluestore_compression_max_blob_size for default settings
-> 
-> and
->  bluestore_compression_max_blob_size_force for override ones.
-> 
-> Can't say that's pretty elegant..
-> What's about a single generic parameter that denotes per-collection params to
-> be banned, e.g.
-> 
-> bluestore_force_per_store_settings = *
-> bluestore_force_per_store_settings = bluestore_compression
-> bluestore_force_per_store_settings = bluestore_compression, bluestore_csum,
-> bluestore_csum_type
-> 
-> 
-> or bluestore_disable_per_collection_settings = a,b,c ?
+> If it's not changed, then why are we re-writing it? I'm having a hard 
+> time thinking of a case worth optimizing where I want to re-write the 
+> oNode but the blob_map is unchanged. Am I missing something obvious?
 
-I like this.  Or rather the converse:
+An onode's blob_map might have 300 blobs, and a single write only updates 
+one of them.  The other 299 blobs need not be reencoded, just memcpy'd.
 
- bluestore_allow_per_collection_settings = bluestore_compression,bluestore_csum, ...
+> > 2. This turns the blob Put into rocksdb into two memcpy stages: one to
+> > assemble the bufferlist (lots of bufferptrs to each untouched blob) into a
+> > single rocksdb::Slice, and another memcpy somewhere inside rocksdb to
+> > copy this into the write buffer.  We could extend the rocksdb interface to
+> > take an iovec so that the first memcpy isn't needed (and rocksdb will instead
+> > iterate over our buffers and copy them directly into its write buffer).  This is
+> > probably a pretty small piece of the overall time... should verify with a
+> > profiler before investing too much effort here.
+> 
+> I doubt it's the memcpy that's really the expensive part. I'll bet it's 
+> that we're transcoding from an internal to an external representation on 
+> an element by element basis. If the iovec scheme is going to help, it 
+> presumes that the internal data structure essentially matches the 
+> external data structure so that only an iovec copy is required. I'm 
+> wondering how compatible this is with the current concepts of 
+> lextext/blob/pextent.
+
+I'm thinking of the xattr case (we have a bunch of strings to copy 
+verbatim) and updated-one-blob-and-kept-99-unchanged case: instead 
+of memcpy'ing them into a big contiguous buffer and having rocksdb 
+memcpy *that* into it's larger buffer, give rocksdb an iovec so that they 
+smaller buffers are assembled only once.
+
+These buffers will be on the order of many 10s to a couple 100s of bytes.  
+I'm not sure where the crossover point for constructing and then 
+traversing an iovec vs just copying twice would be...
+ 
+> > 3. Even if we do the above, we're still setting a big (~4k or more?) key into
+> > rocksdb every time we touch an object, even when a tiny amount of
+> > metadata is getting changed.  This is a consequence of embedding all of the
+> > blobs into the onode (or bnode).  That seemed like a good idea early on
+> > when they were tiny (i.e., just an extent), but now I'm not so sure.  I see a
+> > couple of different options:
+> > 
+> > a) Store each blob as ($onode_key+$blobid).  When we load the onode, load
+> > the blobs too.  They will hopefully be sequential in rocksdb (or definitely
+> > sequential in zs).  Probably go back to using an iterator.
+> > 
+> > b) Go all in on the "bnode" like concept.  Assign blob ids so that they are
+> > unique for any given hash value.  Then store the blobs as
+> > $shard.$poolid.$hash.$blobid (i.e., where the bnode is now).  Then when
+> > clone happens there is no onode->bnode migration magic happening--we've
+> > already committed to storing blobs in separate keys.  When we load the
+> > onode, keep the conditional bnode loading we already have.. but when the
+> > bnode is loaded load up all the blobs for the hash key.  (Okay, we could fault
+> > in blobs individually, but that code will be more complicated.)
+> > 
+> > In both these cases, a write will dirty the onode (which is back to being pretty
+> > small.. just xattrs and the lextent map) and 1-3 blobs (also now small keys).
+> > Updates will generate much lower metadata write traffic, which'll reduce
+> > media wear and compaction overhead.  The cost is that operations (e.g.,
+> > reads) that have to fault in an onode are now fetching several nearby keys
+> > instead of a single key.
+> > 
+> > 
+> > #1 and #2 are completely orthogonal to any encoding efficiency
+> > improvements we make.  And #1 is simple... I plan to implement this shortly.
+> > 
+> > #3 is balancing (re)encoding efficiency against the cost of separate keys, and
+> > that tradeoff will change as encoding efficiency changes, so it'll be difficult to
+> > properly evaluate without knowing where we'll land with the (re)encode
+> > times.  I think it's a design decision made early on that is worth revisiting,
+> > though!
+> 
+> It's not just the encoding efficiency, it's the cost of KV accesses. For 
+> example, we could move the lextent map into the KV world similarly to 
+> the way that you're suggesting the blob_maps be moved. You could do it 
+> for the xattrs also. Now you've almost completely eliminated any 
+> serialization/deserialization costs for the LARGE oNodes that we have 
+> today but have replaced that with several KV lookups (one small Onode, 
+> probably an xAttr, an lextent and a blob_map).
+> 
+> I'm guessing that the "right" point is in between. I doubt that 
+> separating the oNode from the xattrs pays off (especially since the 
+> current code pretty much assumes that they are all cheap to get at).
+
+Yep.. this is why it'll be a hard call to make, esp when the encoding 
+efficiency is changing at the same time.  I'm calling out blobs here 
+because they are biggish (lextents are tiny) and nontrivial to encode 
+(xattrs are just strings).
+
+> I'm wondering if it pays off to make each lextent entry a separate 
+> key/value vs encoding the entire extent table (several KB) as a single 
+> value. Same for the blobmap (though I suspect they have roughly the same 
+> behavior w.r.t. this particular parameter)
+
+I'm guessing no because they are so small that the kv overhead will dwarf 
+the encoding cost, but who knows.  I think implementing the blob case 
+won't be so bad and will give us a better idea (i.e., blobs are bigger and 
+more expensive and if it's not a win there then certainly don't bother 
+with lextents).
+
+> We need to temper this experiment with the notion that we change the 
+> lextent/blob_map encoding to something that doesn't require transcoding 
+> -- if possible.
+
+Right.  I don't have any bright ideas here, though.  The variable length 
+encoding makes this really hard and we still care about keeping things 
+small.
 
 sage
