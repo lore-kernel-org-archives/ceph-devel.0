@@ -1,146 +1,197 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: RE: wip-enc-dec
-Date: Fri, 19 Aug 2016 13:43:53 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608191343410.14754@piezo.us.to>
-References: <CAN=+7FW+csmLcFGUPNabFMwvHHy0HWKWhX+bMzpa8_cYiCjSxQ@mail.gmail.com> <BLUPR0201MB1524E198EBBCB36CAA1DC1FEE8150@BLUPR0201MB1524.namprd02.prod.outlook.com> <CAN=+7FWSbP8=Ae6pZnTkNwAtaVxdLEc+gRWsnfsrWvwaY8EeFw@mail.gmail.com>
- <BLUPR0201MB19083A572C596FA095BFAD70E2160@BLUPR0201MB1908.namprd02.prod.outlook.com> <67424d36-1785-0082-fe66-0fa1f09083fa@redhat.com> <BLUPR0201MB1524A7BD0C5F0F0DC8A73278E8160@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Subject: RE: bluestore blobs
+Date: Fri, 19 Aug 2016 13:53:21 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1608191344500.14754@piezo.us.to>
+References: <alpine.DEB.2.11.1608171407220.17762@piezo.us.to> <BLUPR0201MB1524D88B4FD92E208DF840B0E8150@BLUPR0201MB1524.namprd02.prod.outlook.com> <alpine.DEB.2.11.1608181459500.2394@piezo.us.to>
+ <BLUPR0201MB1524E3013146AF4A4EFA573FE8160@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60152 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44062 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755423AbcHSNvl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 19 Aug 2016 09:51:41 -0400
-In-Reply-To: <BLUPR0201MB1524A7BD0C5F0F0DC8A73278E8160@BLUPR0201MB1524.namprd02.prod.outlook.com>
+        id S1752435AbcHSNxX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 19 Aug 2016 09:53:23 -0400
+In-Reply-To: <BLUPR0201MB1524E3013146AF4A4EFA573FE8160@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Mark Nelson <mnelson@redhat.com>, Varada Kari <Varada.Kari@sandisk.com>, Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 On Fri, 19 Aug 2016, Allen Samuels wrote:
-> While we've been focusing the encode/decode optimization around 
-> bluestore. I'm eager to see what these new schemes will do for things on 
-> the wire. Our old performance measurements (back in the E/F timeframe) 
-> showed that wire-oriented serialization/deserialization was a 
-> significant CPU hog too.
-
-Yes!  :)
-
-s
-
-> Just something to get around to once we stabilize what we're going to do 
-> in this area.
-> 
-> 
-> Allen Samuels
-> SanDisk |a Western Digital brand
-> 2880 Junction Avenue, San Jose, CA 95134
-> T: +1 408 801 7030| M: +1 408 780 6416
-> allen.samuels@SanDisk.com
-> 
-> 
 > > -----Original Message-----
-> > From: Mark Nelson [mailto:mnelson@redhat.com]
-> > Sent: Thursday, August 18, 2016 7:41 PM
-> > To: Varada Kari <Varada.Kari@sandisk.com>; Samuel Just
-> > <sjust@redhat.com>; Allen Samuels <Allen.Samuels@sandisk.com>
-> > Cc: ceph-devel@vger.kernel.org; Weil, Sage <sweil@redhat.com>
-> > Subject: Re: wip-enc-dec
+> > From: Sage Weil [mailto:sweil@redhat.com]
+> > Sent: Thursday, August 18, 2016 8:10 AM
+> > To: Allen Samuels <Allen.Samuels@sandisk.com>
+> > Cc: ceph-devel@vger.kernel.org
+> > Subject: RE: bluestore blobs
 > > 
-> > Hi Varada,
+> > On Thu, 18 Aug 2016, Allen Samuels wrote:
+> > > > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> > > > owner@vger.kernel.org] On Behalf Of Sage Weil
+> > > > Sent: Wednesday, August 17, 2016 7:26 AM
+> > > > To: ceph-devel@vger.kernel.org
+> > > > Subject: bluestore blobs
+> > > >
+> > > > I think we need to look at other changes in addition to the encoding
+> > > > performance improvements.  Even if they end up being good enough,
+> > > > these changes are somewhat orthogonal and at least one of them
+> > > > should give us something that is even faster.
+> > > >
+> > > > 1. I mentioned this before, but we should keep the encoding
+> > > > bluestore_blob_t around when we load the blob map.  If it's not
+> > > > changed, don't reencode it.  There are no blockers for implementing this
+> > currently.
+> > > > It may be difficult to ensure the blobs are properly marked dirty...
+> > > > I'll see if we can use proper accessors for the blob to enforce this
+> > > > at compile time.  We should do that anyway.
+> > >
+> > > If it's not changed, then why are we re-writing it? I'm having a hard
+> > > time thinking of a case worth optimizing where I want to re-write the
+> > > oNode but the blob_map is unchanged. Am I missing something obvious?
 > > 
-> > FWIW, here's my branch where I've been playing with using safe_appenders
-> > in the existing bluestore encoding scheme:
-> > 
-> > https://github.com/markhpc/ceph/tree/wip-bluestore-append
-> > 
-> > Looks like it's going to be pretty advantageous to use a big appender to
-> > encode as much of the blob as possible.  It's making a pretty substantial
-> > difference, at least with ou
-> > 
-> > Mark
-> > 
-> > On 08/18/2016 09:03 PM, Varada Kari wrote:
-> > > Hi Sam,
-> > >
-> > > Here is some wip code on the new approach proposed by Allen.
-> > >
-> > > https://github.com/varadakari/ceph/commits/wip-enc-dec
-> > >
-> > > we are using a raw buffer which has all the encoded data and absorbed
-> > > into bufferlist once completed.
-> > > It pretty much has all the containers and primitive types support.
-> > > Working on some more optimizations on
-> > > the bluestore end to reduce the onode size along with blob map, but
-> > > they are wrapped in BlueStore.* files.
-> > > enc_dec.h and test_enc_dec.cc contains the logic.
-> > >
-> > > Haven't tired with the safe and unsafe appenders yet.
-> > >
-> > > Varada
-> > >
-> > > On Friday 19 August 2016 05:44 AM, Samuel Just wrote:
-> > >> Here's a beginning on what that might look like:
-> > >> https://github.com/athanatos/ceph/commits/wip-sam-enc-dec-proto
-> > >>
-> > >> The design mostly comes from Allen/Varada's approach, but it uses
-> > >> unsafe_appender (I don't really feel strongly about that, Sage
-> > >> indicated that just using a raw pointer would probably be faster).
-> > >> The important part is that the top two commits above convert all
-> > >> primitive types as well as vector and pair (provided that their
-> > >> templated types support the new machinery).  This means that
-> > >> vector<int> should be able to preallocate and use unsafe_appender for
-> > >> all existing users.  I think it's worth going to some effort to make
-> > >> it easy to convert over existing users.
-> > >> -Sam
-> > >>
-> > >> On Thu, Aug 18, 2016 at 10:35 AM, Allen Samuels
-> > >> <Allen.Samuels@sandisk.com> wrote:
-> > >>> No reason not to merge them.
-> > >>>
-> > >>>
-> > >>> Allen Samuels
-> > >>> SanDisk |a Western Digital brand
-> > >>> 2880 Junction Avenue, San Jose, CA 95134
-> > >>> T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
-> > >>>
-> > >>>
-> > >>>> -----Original Message-----
-> > >>>> From: Samuel Just [mailto:sjust@redhat.com]
-> > >>>> Sent: Thursday, August 18, 2016 9:43 AM
-> > >>>> To: Allen Samuels <Allen.Samuels@sandisk.com>; Varada Kari
-> > >>>> <Varada.Kari@sandisk.com>; ceph-devel@vger.kernel.org
-> > >>>> Subject: wip-enc-dec
-> > >>>>
-> > >>>> Is there a reason not to put this new machinery directly into
-> > encoding.h?  The
-> > >>>> new machinery seems to be sufficient to implement the existing
-> > ::encode
-> > >>>> and ::decode types and should be compatible, right?
-> > >>>> With the containers, we can use template trickery to also forward the
-> > new
-> > >>>> functions when present in the mapped types.  That would let us
-> > gradually
-> > >>>> adapt the code base.
-> > >>>> -Sam
-> > >
-> > > PLEASE NOTE: The information contained in this electronic mail message is
-> > intended only for the use of the designated recipient(s) named above. If the
-> > reader of this message is not the intended recipient, you are hereby notified
-> > that you have received this message in error and that any review,
-> > dissemination, distribution, or copying of this message is strictly prohibited. If
-> > you have received this communication in error, please notify the sender by
-> > telephone or e-mail (as shown above) immediately and destroy any and all
-> > copies of this message in your possession (whether hard copies or
-> > electronically stored copies).
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > An onode's blob_map might have 300 blobs, and a single write only updates
+> > one of them.  The other 299 blobs need not be reencoded, just memcpy'd.
 > 
+> As long as we're just appending that's a good optimization. How often 
+> does that happen? It's certainly not going to help the RBD 4K random 
+> write problem.
+
+It won't help the (l)extent_map encoding, but it avoids almost all of the 
+blob reencoding.  A 4k random write will update one blob out of ~100 (or 
+whatever it is).
+
+> > > > 2. This turns the blob Put into rocksdb into two memcpy stages: one
+> > > > to assemble the bufferlist (lots of bufferptrs to each untouched
+> > > > blob) into a single rocksdb::Slice, and another memcpy somewhere
+> > > > inside rocksdb to copy this into the write buffer.  We could extend
+> > > > the rocksdb interface to take an iovec so that the first memcpy
+> > > > isn't needed (and rocksdb will instead iterate over our buffers and
+> > > > copy them directly into its write buffer).  This is probably a
+> > > > pretty small piece of the overall time... should verify with a profiler
+> > before investing too much effort here.
+> > >
+> > > I doubt it's the memcpy that's really the expensive part. I'll bet
+> > > it's that we're transcoding from an internal to an external
+> > > representation on an element by element basis. If the iovec scheme is
+> > > going to help, it presumes that the internal data structure
+> > > essentially matches the external data structure so that only an iovec
+> > > copy is required. I'm wondering how compatible this is with the
+> > > current concepts of lextext/blob/pextent.
+> > 
+> > I'm thinking of the xattr case (we have a bunch of strings to copy
+> > verbatim) and updated-one-blob-and-kept-99-unchanged case: instead of
+> > memcpy'ing them into a big contiguous buffer and having rocksdb memcpy
+> > *that* into it's larger buffer, give rocksdb an iovec so that they smaller
+> > buffers are assembled only once.
+> > 
+> > These buffers will be on the order of many 10s to a couple 100s of bytes.
+> > I'm not sure where the crossover point for constructing and then traversing
+> > an iovec vs just copying twice would be...
+> > 
 > 
+> Yes this will eliminate the "extra" copy, but the real problem is that 
+> the oNode itself is just too large. I doubt removing one extra copy is 
+> going to suddenly "solve" this problem. I think we're going to end up 
+> rejiggering things so that this will be much less of a problem than it 
+> is now -- time will tell.
+
+Yeah, leaving this one for last I think... until we see memcpy show up in 
+the profile.
+ 
+> > > > 3. Even if we do the above, we're still setting a big (~4k or more?)
+> > > > key into rocksdb every time we touch an object, even when a tiny
+> 
+> See my analysis, you're looking at 8-10K for the RBD random write case 
+> -- which I think everybody cares a lot about.
+> 
+> > > > amount of metadata is getting changed.  This is a consequence of
+> > > > embedding all of the blobs into the onode (or bnode).  That seemed
+> > > > like a good idea early on when they were tiny (i.e., just an
+> > > > extent), but now I'm not so sure.  I see a couple of different options:
+> > > >
+> > > > a) Store each blob as ($onode_key+$blobid).  When we load the onode,
+> > > > load the blobs too.  They will hopefully be sequential in rocksdb
+> > > > (or definitely sequential in zs).  Probably go back to using an iterator.
+> > > >
+> > > > b) Go all in on the "bnode" like concept.  Assign blob ids so that
+> > > > they are unique for any given hash value.  Then store the blobs as
+> > > > $shard.$poolid.$hash.$blobid (i.e., where the bnode is now).  Then
+> > > > when clone happens there is no onode->bnode migration magic
+> > > > happening--we've already committed to storing blobs in separate
+> > > > keys.  When we load the onode, keep the conditional bnode loading we
+> > > > already have.. but when the bnode is loaded load up all the blobs
+> > > > for the hash key.  (Okay, we could fault in blobs individually, but
+> > > > that code will be more complicated.)
+> 
+> I like this direction. I think you'll still end up demand loading the 
+> blobs in order to speed up the random read case. This scheme will result 
+> in some space-amplification, both in the lextent and in the blob-map, 
+> it's worth a bit of study too see how bad the metadata/data ratio 
+> becomes (just as a guess, $shard.$poolid.$hash.$blobid is probably 16 + 
+> 16 + 8 + 16 bytes in size, that's ~60 bytes of key for each Blob -- 
+> unless your KV store does path compression. My reading of RocksDB sst 
+> file seems to indicate that it doesn't, I *believe* that ZS does [need 
+> to confirm]). I'm wondering if the current notion of local vs. global 
+> blobs isn't actually beneficial in that we can give local blobs 
+> different names that sort with their associated oNode (which probably 
+> makes the space-amp worse) which is an important optimization. We do 
+> need to watch the space amp, we're going to be burning DRAM to make KV 
+> accesses cheap and the amount of DRAM is proportional to the space amp.
+
+I got this mostly working last night... just need to sort out the clone 
+case (and clean up a bunch of code).  It was a relatively painless 
+transition to make, although in its current form the blobs all belong to 
+the bnode, and the bnode if ephemeral but remains in memory until all 
+referencing onodes go away.  Mostly fine, except it means that odd 
+combinations of clone could leave lots of blobs in cache that don't get 
+trimmed.  Will address that later.
+
+I'll try to finish it up this morning and get it passing tests and posted.
+
+> > > > In both these cases, a write will dirty the onode (which is back to
+> > > > being pretty small.. just xattrs and the lextent map) and 1-3 blobs (also
+> > now small keys).
+> 
+> I'm not sure the oNode is going to be that small. Looking at the RBD 
+> random 4K write case, you're going to have 1K entries each of which has 
+> an offset, size and a blob-id reference in them. In my current oNode 
+> compression scheme this compresses to about 1 byte per entry. However, 
+> this optimization relies on being able to cheaply renumber the blob-ids, 
+> which is no longer possible when the blob-ids become parts of a key (see 
+> above). So now you'll have a minimum of 1.5-3 bytes extra for each 
+> blob-id (because you can't assume that the blob-ids become "dense" 
+> anymore) So you're looking at 2.5-4 bytes per entry or about 2.5-4K 
+> Bytes of lextent table. Worse, because of the variable length encoding 
+> you'll have to scan the entire table to deserialize it (yes, we could do 
+> differential editing when we write but that's another discussion). Oh 
+> and I forgot to add the 200-300 bytes of oNode and xattrs :). So while 
+> this looks small compared to the current ~30K for the entire thing 
+> oNode/lextent/blobmap, it's NOT a huge gain over 8-10K of the compressed 
+> oNode/lextent/blobmap scheme that I published earlier.
+> 
+> If we want to do better we will need to separate the lextent from the 
+> oNode also. It's relatively easy to move the lextents into the KV store 
+> itself (there are two obvious ways to deal with this, either use the 
+> native offset/size from the lextent itself OR create 'N' buckets of 
+> logical offset into which we pour entries -- both of these would add 
+> somewhere between 1 and 2 KV look-ups per operation -- here is where an 
+> iterator would probably help.
+> 
+> Unfortunately, if you only process a portion of the lextent (because 
+> you've made it into multiple keys and you don't want to load all of 
+> them) you no longer can re-generate the refmap on the fly (another key 
+> space optimization). The lack of refmap screws up a number of other 
+> important algorithms -- for example the overlapping blob-map thing, etc. 
+> Not sure if these are easy to rewrite or not -- too complicated to think 
+> about at this hour of the evening.
+
+Yeah, I forgot about the extent_map and how big it gets.  I think, though, 
+that if we can get a 4mb object with 1024 4k lextents to encode the whole 
+onode and extent_map in under 4K that will be good enough.  The blob 
+update that goes with it will be ~200 bytes, and benchmarks aside, the 4k 
+random write 100% fragmented object is a worst case.
+
+Anyway, I'll get the blob separation branch working and we can go from 
+there...
+
+sage
