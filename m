@@ -1,110 +1,110 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: wip-enc-dec
-Date: Fri, 19 Aug 2016 09:21:46 -0700
-Message-ID: <CAN=+7FUt7sRQDcTp=0i=xpX917xmT94WtiiO5FC_7ah+92j=og@mail.gmail.com>
-References: <CAN=+7FW+csmLcFGUPNabFMwvHHy0HWKWhX+bMzpa8_cYiCjSxQ@mail.gmail.com>
- <BLUPR0201MB1524E198EBBCB36CAA1DC1FEE8150@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <CAN=+7FWSbP8=Ae6pZnTkNwAtaVxdLEc+gRWsnfsrWvwaY8EeFw@mail.gmail.com>
- <BLUPR0201MB19083A572C596FA095BFAD70E2160@BLUPR0201MB1908.namprd02.prod.outlook.com>
- <CAN=+7FWqvbXJ8k1srv8QSMocAUUfTf0GOtOBscLww7vVnEHeEQ@mail.gmail.com> <BLUPR0201MB190863C230AE671EB96EC1FDE2160@BLUPR0201MB1908.namprd02.prod.outlook.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: BlueStore metadata write overhead
+Date: Fri, 19 Aug 2016 17:03:01 +0000
+Message-ID: <BL2PR02MB2115CA2313338720CA844CA3F4160@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB2115119EAA0F68B837D71C6CF4150@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608191358510.10673@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f47.google.com ([209.85.214.47]:36221 "EHLO
-        mail-it0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752067AbcHSQVs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Aug 2016 12:21:48 -0400
-Received: by mail-it0-f47.google.com with SMTP id e63so32506902ith.1
-        for <ceph-devel@vger.kernel.org>; Fri, 19 Aug 2016 09:21:48 -0700 (PDT)
-In-Reply-To: <BLUPR0201MB190863C230AE671EB96EC1FDE2160@BLUPR0201MB1908.namprd02.prod.outlook.com>
+Received: from mail-co1nam03on0074.outbound.protection.outlook.com ([104.47.40.74]:50096
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753916AbcHSRDF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 19 Aug 2016 13:03:05 -0400
+In-Reply-To: <alpine.DEB.2.11.1608191358510.10673@piezo.us.to>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Varada Kari <Varada.Kari@sandisk.com>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sweil@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-No particular need to use my code, it's just a quick proof of concept.
-Also, I bet there's a cleaner/less annoying way to setup the
-containers to automatically implement the new functionality when
-present in the templated type while falling back to the old
-implementations otherwise.
--Sam
+Yes, seems something wrong..Here is the 'ceph df' on a freshly created clus=
+ter with no data.
 
-On Fri, Aug 19, 2016 at 8:23 AM, Varada Kari <Varada.Kari@sandisk.com> wrote:
-> Sure Sam. Working on couple of optimizations with the current branch,
-> will work on this integration once that is completed.
-> Haven't completely gone through the hooks what you have written yet, but
-> will rebase my branch on that once i am done with current changes.
+root@stormeap-1:~/fio_rbd/fio/examples# ceph df
+2016-08-19 09:47:45.714539 7f7fd3ed9700 -1 WARNING: the following dangerous=
+ and experimental features are enabled: bluestore,rocksdb
+2016-08-19 09:47:45.717589 7f7fd3ed9700 -1 WARNING: the following dangerous=
+ and experimental features are enabled: bluestore,rocksdb
+2016-08-19 09:47:45.718583 7f7fd3ed9700 -1 WARNING: the following dangerous=
+ and experimental features are enabled: bluestore,rocksdb
+GLOBAL:
+    SIZE     AVAIL       RAW USED     %RAW USED
+    106T     100536G        8742G          8.00
+POOLS:
+    NAME              ID     USED     %USED     MAX AVAIL     OBJECTS
+    recovery_test     1        16         0        50268G           3
+
+It is saying 8TB RAW used , I will take a look.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com]
+Sent: Friday, August 19, 2016 7:00 AM
+To: Somnath Roy
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: BlueStore metadata write overhead
+
+On Thu, 18 Aug 2016, Somnath Roy wrote:
+> Sage, Here is some estimate probably how much extra (space wise) we
+> are writing with Bluestore. Considering Rocksdb has not much space amp
+> for level style compaction , these are mostly the metadata Bluestore
+> is writing.
 >
-> Thanks,
-> Varada
+> BlueStore:
+> ----------------
+> root@stormeap-1:~/fio_rbd/fio/examples# ceph df
+> 2016-08-17 11:00:57.936952 7f5c39a2b700 -1 WARNING: the following
+> dangerous and experimental features are enabled: bluestore,rocksdb
+> 2016-08-17 11:00:57.939969 7f5c39a2b700 -1 WARNING: the following
+> dangerous and experimental features are enabled: bluestore,rocksdb
+> 2016-08-17 11:00:57.941269 7f5c39a2b700 -1 WARNING: the following
+> dangerous and experimental features are enabled: bluestore,rocksdb
+> GLOBAL:
+>     SIZE     AVAIL      RAW USED     %RAW USED
+>     106T     22411G       86867G         79.49
+> POOLS:
+>     NAME              ID     USED       %USED     MAX AVAIL     OBJECTS
+>     recovery_test     1      39062G     71.49         6290G     10000003
 >
-> On Friday 19 August 2016 08:44 PM, Samuel Just wrote:
->> Yeah, that's what my branch is based on.  My goal wasn't to replace
->> what you've been working on, but rather to suggest a way to hook it
->> into the existing encode/decode machinery so that everything would
->> benefit.
->> -Sam
->>
->> On Thu, Aug 18, 2016 at 7:03 PM, Varada Kari <Varada.Kari@sandisk.com> wrote:
->>> Hi Sam,
->>>
->>> Here is some wip code on the new approach proposed by Allen.
->>>
->>> https://github.com/varadakari/ceph/commits/wip-enc-dec
->>>
->>> we are using a raw buffer which has all the encoded data and absorbed
->>> into bufferlist once completed.
->>> It pretty much has all the containers and primitive types support.
->>> Working on some more optimizations on
->>> the bluestore end to reduce the onode size along with blob map, but they
->>> are wrapped in BlueStore.* files.
->>> enc_dec.h and test_enc_dec.cc contains the logic.
->>>
->>> Haven't tired with the safe and unsafe appenders yet.
->>>
->>> Varada
->>>
->>> On Friday 19 August 2016 05:44 AM, Samuel Just wrote:
->>>> Here's a beginning on what that might look like:
->>>> https://github.com/athanatos/ceph/commits/wip-sam-enc-dec-proto
->>>>
->>>> The design mostly comes from Allen/Varada's approach, but it uses
->>>> unsafe_appender (I don't really feel strongly about that, Sage
->>>> indicated that just using a raw pointer would probably be faster).
->>>> The important part is that the top two commits above convert all
->>>> primitive types as well as vector and pair (provided that their
->>>> templated types support the new machinery).  This means that
->>>> vector<int> should be able to preallocate and use unsafe_appender for
->>>> all existing users.  I think it's worth going to some effort to make
->>>> it easy to convert over existing users.
->>>> -Sam
->>>>
->>>> On Thu, Aug 18, 2016 at 10:35 AM, Allen Samuels
->>>> <Allen.Samuels@sandisk.com> wrote:
->>>>> No reason not to merge them.
->>>>>
->>>>>
->>>>> Allen Samuels
->>>>> SanDisk |a Western Digital brand
->>>>> 2880 Junction Avenue, San Jose, CA 95134
->>>>> T: +1 408 801 7030| M: +1 408 780 6416
->>>>> allen.samuels@SanDisk.com
->>>>>
->>>>>
->>>>>> -----Original Message-----
->>>>>> From: Samuel Just [mailto:sjust@redhat.com]
->>>>>> Sent: Thursday, August 18, 2016 9:43 AM
->>>>>> To: Allen Samuels <Allen.Samuels@sandisk.com>; Varada Kari
->>>>>> <Varada.Kari@sandisk.com>; ceph-devel@vger.kernel.org
->>>>>> Subject: wip-enc-dec
->>>>>>
->>>>>> Is there a reason not to put this new machinery directly into encoding.h?  The
->>>>>> new machinery seems to be sufficient to implement the existing ::encode
->>>>>> and ::decode types and should be compatible, right?
->>>>>> With the containers, we can use template trickery to also forward the new
->>>>>> functions when present in the mapped types.  That would let us gradually
->>>>>> adapt the code base.
->>>>>> -Sam
->>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 >
+> So, if we trust the statfs implementation of Bluestore , it is  writing ~=
+8743 GB more.  Total data  =3D image size of 39062 GB * replication 2 =3D ~=
+78124 GB. So, ~11.19% more.
+> BTW, this is after 1MB image preconditioning only, filling with 4K blocks=
+ize will be adding more metadata.
+>
+> Filestore:
+> -----------
+> GLOBAL:
+>     SIZE     AVAIL      RAW USED     %RAW USED
+>     109T     34443G       78147G         69.41
+> POOLS:
+>     NAME              ID     USED       %USED     MAX AVAIL     OBJECTS
+>     recovery_test     2      39062G     69.39        12930G     10000003
+>
+> So, in the similar setup , filestore is writing only ~23GB extra and
+> i.e ~0.029%
+
+This seems like a lot for bluestore.  The statfs output from bluestore shou=
+ld show how much of the space is bluefs vs bluestore.
+
+Hmm, my guess is that bluestore is counting all of the space that it has gi=
+ven to bluefs as used, even though bluefs isn't using it.  Probably just ne=
+ed to make BlueStore::statfs() call BlueFs::statfs() and correct for the bl=
+uefs unused space...
+
+sage
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
