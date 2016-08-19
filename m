@@ -1,92 +1,122 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: helgrind fincorrectly reports lock order violated
-Date: Fri, 19 Aug 2016 14:30:25 -0400
-Message-ID: <CA+aFP1AOstQ-bgGN=KaNir05g3-yxRZRPsGQL0_rKji5hJpqiQ@mail.gmail.com>
-References: <57B56FA5.6060108@dachary.org>
-Reply-To: dillaman@redhat.com
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: Re: releasing jewel v10.2.3 ?
+Date: Fri, 19 Aug 2016 23:16:11 +0300
+Message-ID: <20160819201610.GA7970@gmail.com>
+References: <57B698D0.1050409@dachary.org>
+ <20160819130529.GC17630@gmail.com>
+ <57B708D0.4030109@dachary.org>
+ <20160819140151.GD17630@gmail.com>
+ <57B71B0D.1010202@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f45.google.com ([209.85.220.45]:34118 "EHLO
-        mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754672AbcHSSa1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Aug 2016 14:30:27 -0400
-Received: by mail-pa0-f45.google.com with SMTP id fi15so18361424pac.1
-        for <ceph-devel@vger.kernel.org>; Fri, 19 Aug 2016 11:30:27 -0700 (PDT)
-In-Reply-To: <57B56FA5.6060108@dachary.org>
+Received: from mail-lf0-f48.google.com ([209.85.215.48]:35112 "EHLO
+        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754171AbcHSUQa (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Aug 2016 16:16:30 -0400
+Received: by mail-lf0-f48.google.com with SMTP id f93so40379587lfi.2
+        for <ceph-devel@vger.kernel.org>; Fri, 19 Aug 2016 13:16:14 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <57B71B0D.1010202@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Jason Dillaman <jdillama@redhat.com>
 
-Sounds good to me -- the helgrind problems have always been low
-priority for me since they change with each OS so its next to
-impossible to keep up with new false positives being added to the code
-base well below librbd.
+Loic, I have created backport PRs:
 
-On Thu, Aug 18, 2016 at 4:19 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Jason,
->
-> The jewel rbd job
->
-> rbd/valgrind/{base/install.yaml clusters/{fixed-1.yaml openstack.yaml} fs/xfs.yaml validator/helgrind.yaml workloads/c_api_tests_with_journaling.yaml}
->
-> at
->
-> http://pulpito.ceph.com/loic-2016-08-17_22:11:27-rbd-jewel-backports-loic-distro-basic-smithi/371732/
->
-> for the sake of validating a series of backports found at https://github.com/ceph/ceph/pull/10684 failed with:
->
-> 2016-08-18T03:38:43.412 INFO:tasks.workunit.client.0.smithi036.stderr:==21351== Helgrind, a thread error detector
-> 2016-08-18T03:38:43.413 INFO:tasks.workunit.client.0.smithi036.stderr:==21351== Copyright (C) 2007-2013, and GNU GPL'd, by OpenWorks LLP et al.
-> 2016-08-18T03:38:43.413 INFO:tasks.workunit.client.0.smithi036.stderr:==21351== Using Valgrind-3.10.0.SVN and LibVEX; rerun with -h for copyright info
-> 2016-08-18T03:38:43.413 INFO:tasks.workunit.client.0.smithi036.stderr:==21351== Command: ceph_test_librbd
-> 2016-08-18T03:38:43.413 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==
-> 2016-08-18T03:38:43.413 INFO:tasks.workunit.client.0.smithi036.stderr:==21351== ---Thread-Announcement------------------------------------------
-> 2016-08-18T03:38:43.413 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==
-> 2016-08-18T03:38:43.413 INFO:tasks.workunit.client.0.smithi036.stderr:==21351== Thread #26 was created
-> 2016-08-18T03:38:43.413 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    at 0xC92943E: clone (clone.S:74)
-> 2016-08-18T03:38:43.413 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0xAC3F199: do_clone.constprop.3 (createthread.c:75)
-> 2016-08-18T03:38:43.414 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0xAC408BA: pthread_create@@GLIBC_2.2.5 (createthread.c:245)
-> 2016-08-18T03:38:43.414 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0xAA2BC90: ??? (in /usr/lib/valgrind/vgpreload_helgrind-amd64-linux.so)
-> 2016-08-18T03:38:43.414 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0x715508: Thread::try_create(unsigned long) (Thread.cc:139)
-> 2016-08-18T03:38:43.414 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0x7155D7: Thread::create(char const*, unsigned long) (Thread.cc:154)
-> 2016-08-18T03:38:43.414 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0x6FF67E: Finisher::start() (Finisher.cc:15)
-> 2016-08-18T03:38:43.414 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0x669743: librados::RadosClient::connect() (RadosClient.cc:298)
-> 2016-08-18T03:38:43.414 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0x638FAF: rados_connect (librados.cc:2611)
-> 2016-08-18T03:38:43.414 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0x98DD6B: connect_cluster(void**) (test.cc:368)
-> 2016-08-18T03:38:43.414 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0x45A826: TestLibRBD::SetUpTestCase() (test_librbd.cc:159)
-> 2016-08-18T03:38:43.414 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0x948DA2: void testing::internal::HandleExceptionsInMethodIfSupported<testing::TestCase, void>(testing::TestCase*, void (testing::TestCase::*)(), char const*) (gtest.cc:2078)
-> 2016-08-18T03:38:43.414 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==
-> 2016-08-18T03:38:43.415 INFO:tasks.workunit.client.0.smithi036.stderr:==21351== ----------------------------------------------------------------
-> 2016-08-18T03:38:43.415 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==
-> 2016-08-18T03:38:43.415 INFO:tasks.workunit.client.0.smithi036.stderr:==21351== Thread #26: lock order "0xD822EC8 before 0xD8FFB10" violated
-> 2016-08-18T03:38:43.415 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==
-> 2016-08-18T03:38:43.415 INFO:tasks.workunit.client.0.smithi036.stderr:==21351== Observed (incorrect) order is: acquisition of lock at 0xD8FFB10
-> 2016-08-18T03:38:43.415 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    at 0xAA2D145: pthread_mutex_lock (in /usr/lib/valgrind/vgpreload_helgrind-amd64-linux.so)
-> 2016-08-18T03:38:43.415 INFO:tasks.workunit.client.0.smithi036.stderr:==21351==    by 0x6E2497: Mutex::Lock(bool) (Mutex.cc:110)
-> ...
->
-> And it looks like your commits:
->
-> https://github.com/ceph/ceph/commit/7d64f0ea62545d2ac4a4b399e9566d80b41d3068
-> https://github.com/ceph/ceph/commit/d4c76649902b74c37da4f7d448bcb0b7ffa04084
-> https://github.com/ceph/ceph/commit/b12cf70fe415cc872c33223bb6574ce47bea0623
->
-> are trying to address the problem. However, none of them were merged. A quick search in the tracker found
->
-> http://tracker.ceph.com/issues/15424 Many helgrind lock warnings within Objecter
-> http://tracker.ceph.com/issues/15352 TestJournalEntries.AioWrite: failed assert(m_watch_in_progress)
->
-> I'm tempted to add the failed job to the issue you created to collect helgrind issues: http://tracker.ceph.com/issues/14846 although none of the logs it contains seem to exactly match the failure. I could then set it to be backported to jewel and wait until https://github.com/ceph/ceph/pull/9436 is merged in master.
->
-> What do you think ?
->
-> --
+https://github.com/ceph/ceph/pull/10797
+https://github.com/ceph/ceph/pull/10798
+
+It is not tested yet though. I will be able to start testing tomorrow.
+
+On Fri, Aug 19, 2016 at 04:43:25PM +0200, Loic Dachary wrote:
+> 
+> 
+> On 19/08/2016 16:01, Mykola Golub wrote:
+> > "convert AioObjectRequest/AioObjectRead classes to templates" is a
+> > part of this PR:
+> > 
+> > https://github.com/ceph/ceph/pull/10462
+> > 
+> > which fixes http://tracker.ceph.com/issues/16478 and was going to be
+> > backported too:
+> > 
+> > http://tracker.ceph.com/issues/16903
+> > 
+> > I would prefer if we merged all necessary commits to resolve the
+> > conflict. This would ease further backporting.
+> 
+> That makes sense.
+> 
+> > I can try to prepare a backport PR this weekend. 
+> 
+> It would be great, thank you !
+> 
+> > Do we have a deadline?
+> 
+> Not yet. Given this blocks a few rbd backports, it would be good to wait until it is resolved anyway.
+> 
+> Cheers
+> 
+> > On Fri, Aug 19, 2016 at 03:25:36PM +0200, Loic Dachary wrote:
+> >> Hi Mykola,
+> >>
+> >> On 19/08/2016 15:05, Mykola Golub wrote:
+> >>> Loic,
+> >>>
+> >>> I think this regression is highly desirable to be merged to jewel
+> >>> before the release:
+> >>>
+> >>> http://tracker.ceph.com/issues/16654
+> >>>
+> >>> I have just merged Jason's PR to master.
+> >>
+> >> I created the backport and tried to cherry-pick but running into a conflict that is caused (I think) by the templatization
+> >>
+> >> librbd: convert AioObjectRequest/AioObjectRead classes to templates
+> >>
+> >> Should the templatization and all it entails be backported ? Or should the conflict be resolved by adapting the code to the non template jewel form ?
+> >>
+> >> Your help would be much appreciated in that matter and I assigned http://tracker.ceph.com/issues/17080#note-2 to you for that reason. If you don't have time to deal with this, please let me know and unassign yourself.
+> >>
+> >> Cheers
+> >>
+> >>>
+> >>> On Fri, Aug 19, 2016 at 07:27:44AM +0200, Loic Dachary wrote:
+> >>>> Hi Sage,
+> >>>>
+> >>>> Here are the issues that would be in jewel v10.2.3 if we decided to release it now: http://tracker.ceph.com/versions/518
+> >>>> And here is the backport queue : http://tracker.ceph.com/projects/ceph/issues?query_id=96
+> >>>>
+> >>>> Do you think it is time to cut the release and ask QE to start testing ?
+> >>>>
+> >>>> Cheers
+> >>>>
+> >>>> -- 
+> >>>> Loïc Dachary, Artisan Logiciel Libre
+> >>>>
+> >>>> --
+> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >>>> the body of a message to majordomo@vger.kernel.org
+> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>
+> >>
+> >> -- 
+> >> Loïc Dachary, Artisan Logiciel Libre
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> 
+> -- 
 > Loïc Dachary, Artisan Logiciel Libre
-
-
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 -- 
-Jason
+Mykola Golub
