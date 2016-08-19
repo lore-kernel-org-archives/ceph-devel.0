@@ -1,66 +1,71 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: BlueStore metadata write overhead
-Date: Fri, 19 Aug 2016 06:52:47 -0500
-Message-ID: <f5040ff2-325a-10f0-7404-54ba922a3e19@redhat.com>
-References: <BL2PR02MB2115119EAA0F68B837D71C6CF4150@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: releasing jewel v10.2.3 ?
+Date: Fri, 19 Aug 2016 14:34:03 +0200
+Message-ID: <57B6FCBB.2080905@dachary.org>
+References: <57B698D0.1050409@dachary.org>
+ <CA+H5UW0pmYVaMMCukBU7OZ1C6S5ThYZ2xfT70JXkR8MSBZONOQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35834 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753120AbcHSLwz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 19 Aug 2016 07:52:55 -0400
-In-Reply-To: <BL2PR02MB2115119EAA0F68B837D71C6CF4150@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:60343 "EHLO
+        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751599AbcHSMeJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Aug 2016 08:34:09 -0400
+In-Reply-To: <CA+H5UW0pmYVaMMCukBU7OZ1C6S5ThYZ2xfT70JXkR8MSBZONOQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Somnath,
+Hi,
 
-Did you have checksums and/or compression enabled during these tests for 
-bluestore?
+On 19/08/2016 13:49, Radoslaw Zarzynski wrote:
+> Hello,
+> 
+> I'd love to see RadosGW v10.2.3 passing RefStack:
+> 
+> * jewel: rgw: Swift's object versioning doesn't support
+>   restoring a previous version on DELETE
+>   http://tracker.ceph.com/issues/16393
+>   https://github.com/ceph/ceph/pull/10710
 
-Mark
+It is scheduled to be tested
 
-On 08/18/2016 06:10 PM, Somnath Roy wrote:
-> Sage,
-> Here is some estimate probably how much extra (space wise) we are writing with Bluestore. Considering Rocksdb has not much space amp for level style compaction , these are mostly the metadata Bluestore is writing.
->
-> BlueStore:
-> ----------------
-> root@stormeap-1:~/fio_rbd/fio/examples# ceph df
-> 2016-08-17 11:00:57.936952 7f5c39a2b700 -1 WARNING: the following dangerous and experimental features are enabled: bluestore,rocksdb
-> 2016-08-17 11:00:57.939969 7f5c39a2b700 -1 WARNING: the following dangerous and experimental features are enabled: bluestore,rocksdb
-> 2016-08-17 11:00:57.941269 7f5c39a2b700 -1 WARNING: the following dangerous and experimental features are enabled: bluestore,rocksdb
-> GLOBAL:
->     SIZE     AVAIL      RAW USED     %RAW USED
->     106T     22411G       86867G         79.49
-> POOLS:
->     NAME              ID     USED       %USED     MAX AVAIL     OBJECTS
->     recovery_test     1      39062G     71.49         6290G     10000003
->
->
-> So, if we trust the statfs implementation of Bluestore , it is  writing ~8743 GB more.  Total data  = image size of 39062 GB * replication 2 = ~78124 GB. So, ~11.19% more.
-> BTW, this is after 1MB image preconditioning only, filling with 4K blocksize will be adding more metadata.
->
-> Filestore:
-> -----------
-> GLOBAL:
->     SIZE     AVAIL      RAW USED     %RAW USED
->     109T     34443G       78147G         69.41
-> POOLS:
->     NAME              ID     USED       %USED     MAX AVAIL     OBJECTS
->     recovery_test     2      39062G     69.39        12930G     10000003
->
-> So, in the similar setup , filestore is writing only ~23GB extra and i.e ~0.029%
->
-> Thanks & Regards
-> Somnath
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+http://tracker.ceph.com/issues/16344#note-27
+http://pulpito.ceph.com/loic-2016-08-17_11:24:55-rgw-jewel-backports-distro-basic-smithi/
+
+as part of the current integration branch
+
+http://tracker.ceph.com/issues/16344#note-23
+
+If we're lucky (i.e. no infrastructure troubles and no rgw pull request disrupt the test in bizarre ways) it will be ready to merge early next week.
+
+Cheers
+
+> 
+> Regards,
+> Radek
+> 
+> 
+> On Fri, Aug 19, 2016 at 7:27 AM, Loic Dachary <loic@dachary.org> wrote:
+>> Hi Sage,
+>>
+>> Here are the issues that would be in jewel v10.2.3 if we decided to release it now: http://tracker.ceph.com/versions/518
+>> And here is the backport queue : http://tracker.ceph.com/projects/ceph/issues?query_id=96
+>>
+>> Do you think it is time to cut the release and ask QE to start testing ?
+>>
+>> Cheers
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
