@@ -1,182 +1,94 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: per-pool bluestore options
-Date: Thu, 18 Aug 2016 15:26:43 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608181513430.2394@piezo.us.to>
-References: <alpine.DEB.2.11.1608131843050.17762@piezo.us.to> <4adc2518-07d5-f4bd-7d71-5716bfb767c1@mirantis.com> <alpine.DEB.2.11.1608171617250.17762@piezo.us.to> <26d298ca-a400-c102-92fc-6f5dd3d483f4@mirantis.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: Re: wip-enc-dec
+Date: Fri, 19 Aug 2016 02:03:15 +0000
+Message-ID: <BLUPR0201MB19083A572C596FA095BFAD70E2160@BLUPR0201MB1908.namprd02.prod.outlook.com>
+References: <CAN=+7FW+csmLcFGUPNabFMwvHHy0HWKWhX+bMzpa8_cYiCjSxQ@mail.gmail.com>
+ <BLUPR0201MB1524E198EBBCB36CAA1DC1FEE8150@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <CAN=+7FWSbP8=Ae6pZnTkNwAtaVxdLEc+gRWsnfsrWvwaY8EeFw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38454 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754034AbcHSAyQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 18 Aug 2016 20:54:16 -0400
-In-Reply-To: <26d298ca-a400-c102-92fc-6f5dd3d483f4@mirantis.com>
+Received: from mail-by2nam03on0073.outbound.protection.outlook.com ([104.47.42.73]:39692
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753854AbcHSCS7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 18 Aug 2016 22:18:59 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: ceph-devel@vger.kernel.org
+To: Samuel Just <sjust@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sweil@redhat.com>
 
-On Thu, 18 Aug 2016, Igor Fedotov wrote:
-> On 17.08.2016 19:27, Sage Weil wrote:
-> > On Mon, 15 Aug 2016, Igor Fedotov wrote:
-> > > On 13.08.2016 21:56, Sage Weil wrote:
-> > > > Hi Igor,
-> > > > 
-> > > > I took another look at
-> > > > 
-> > > > 	https://github.com/ceph/ceph/pull/10556
-> > > > 
-> > > > You define three settings:
-> > > > 
-> > > >    compress_hint - determines if pool contains compressible /
-> > > > incompressible
-> > > > data
-> > > >    compress_algorithm - permits to specify different compression
-> > > > algorithm
-> > > >    compress_ratio - specifies maximum compression ratio
-> > > > 
-> > > > I think we should extend this to include csum-related options.  And use
-> > > > a
-> > > > consistent naming scheme that aligns with the config options where we
-> > > > just
-> > > > strip off the bluestore_ prefix.  The relevant options are:
-> > > Sounds good!
-> > > The major questions here is how do these per-pool options correlate with
-> > > corresponding per-store ones?
-> > > One might suggest per-pool options to have higher priority over per-store
-> > > one.
-> > > But I'm not sure that the best option.  Sometimes user might want to
-> > > disable/alter corresponding option without enumerating all the pools by
-> > > simple
-> > > switching at per-store level. Hence we need to consider some means for
-> > > that.
-> > 
-> > > >    bluestore_csum = {true, false}
-> > > >    bluestore_csum_type = {crc32c, crc32c_{8,16}, ...}
-> > > >    bluestore_csum_min_chunk_size = 4k      (*)
-> > > >    bluestore_csum_max_chunk_size = 64k     (*)
-> > > >    bluestore_compression = {force, aggressive, passive, none}
-> > > Actually this option along with compression_hint result in a single flag:
-> > > compress or not. Any rationale for not using that simple flag?
-> > There are currently two persistent hints: compressible and incompressible.
-> > Aggressive will compress unless incompressible, whereas passive will
-> > compress if compressible.  Either way it varies per object, though, so a
-> > single flag isn't sufficient.
-> So final approach is to have bluestore_compression switch at pool level (and
-> per-store too) and compression_hint at object one, right? Hence we don't need
-> compression_hint per pool. In fact my original point was that the latter(along
-> with bluestore_compression) is IMHO an overkill and can be substituted with
-> simple enable_compression flag.
+Hi Sam,
 
-I think so.  Having a pool compression_hint = compressible will accomplish 
-the same thing as setting the pool compression = aggressive.
+Here is some wip code on the new approach proposed by Allen.
 
-> > > My original idea here was to have bluestore_compression on per-store basis
-> > > and
-> > > compression_hint of per pool one. This way one can receive pretty flexible
-> > > control at both storage and pool level - see my question above.
-> > Yeah, I'm not sure how complex it's worth getting.  To get complete
-> > control, we probably need a default *and* the min/max allowed range for
-> > each option in order to bound what you can choose per-pool, but I think
-> > that is probably overkill.
-> > 
-> > A bit easier would be to have
-> > 
-> >   bluestore_csum_override = {,true,false}
-> >   bluestore_csum_type_override = {, crc32c, crc32c_{8,16}}
-> >   bluestore_compression_override = {, force, aggressive, passive, none}
-> > 
-> > and have them blank by default (no override).  For the numeric options
-> > we'd need to use 0 to mean 'no override'.
-> > 
-> > What do you think?
-> IMO per-pool settings (if set) have to override corresponding per-store 
-> one by default. But one should be able to turn off that behavior with 
-> 'one-click' and force specific per-store setting to prevail.
-> Hence we don't need 'override' settings at per-pool level but should have one
-> at per-store one. E.g.
-> 
-> Pool A has:
-> bluestore_csum = true
-> Pool B:
-> bluestore_csum=<not set>
-> OSD:
-> bluestore_csum=  false [/force]
-> 
-> if /'force' is omitted - actual settings are
-> Pool A:
-> bluestore_csum=true
-> Pool B:
-> bluestore_csum=false
-> 
-> else
-> Pool A:
-> bluestore_csum=false
-> Pool B:
-> bluestore_csum=false
+https://github.com/varadakari/ceph/commits/wip-enc-dec
 
-Hmm, this makes parsing more complicated but is probably less confusing.  
-But what about numeric values?  
+we are using a raw buffer which has all the encoded data and absorbed
+into bufferlist once completed.
+It pretty much has all the containers and primitive types support.
+Working on some more optimizations on
+the bluestore end to reduce the onode size along with blob map, but they
+are wrapped in BlueStore.* files.
+enc_dec.h and test_enc_dec.cc contains the logic.
 
- bluestore_compression_max_blob_size=1048576/force?
+Haven't tired with the safe and unsafe appenders yet.
 
-This is partly why I like the (implementation) simplicity of
+Varada
 
- bluestore_compression_max_blob_size_force=1048576
+On Friday 19 August 2016 05:44 AM, Samuel Just wrote:
+> Here's a beginning on what that might look like:
+> https://github.com/athanatos/ceph/commits/wip-sam-enc-dec-proto
+>
+> The design mostly comes from Allen/Varada's approach, but it uses
+> unsafe_appender (I don't really feel strongly about that, Sage
+> indicated that just using a raw pointer would probably be faster).
+> The important part is that the top two commits above convert all
+> primitive types as well as vector and pair (provided that their
+> templated types support the new machinery).  This means that
+> vector<int> should be able to preallocate and use unsafe_appender for
+> all existing users.  I think it's worth going to some effort to make
+> it easy to convert over existing users.
+> -Sam
+>
+> On Thu, Aug 18, 2016 at 10:35 AM, Allen Samuels
+> <Allen.Samuels@sandisk.com> wrote:
+>> No reason not to merge them.
+>>
+>>
+>> Allen Samuels
+>> SanDisk |a Western Digital brand
+>> 2880 Junction Avenue, San Jose, CA 95134
+>> T: +1 408 801 7030| M: +1 408 780 6416
+>> allen.samuels@SanDisk.com
+>>
+>>
+>>> -----Original Message-----
+>>> From: Samuel Just [mailto:sjust@redhat.com]
+>>> Sent: Thursday, August 18, 2016 9:43 AM
+>>> To: Allen Samuels <Allen.Samuels@sandisk.com>; Varada Kari
+>>> <Varada.Kari@sandisk.com>; ceph-devel@vger.kernel.org
+>>> Subject: wip-enc-dec
+>>>
+>>> Is there a reason not to put this new machinery directly into encoding.=
+h?  The
+>>> new machinery seems to be sufficient to implement the existing ::encode
+>>> and ::decode types and should be compatible, right?
+>>> With the containers, we can use template trickery to also forward the n=
+ew
+>>> functions when present in the mapped types.  That would let us graduall=
+y
+>>> adapt the code base.
+>>> -Sam
 
-(or _override, whatever).
-
-> An additional 'bluestore_force_all_settings=true' can be introduced to force
-> all per-store settings to prevail too.
-
-Or maybe
-
- bluestore_ignore_per_collection_settings=true
-or the converse
- bluestore_per_collection_settings=false
-
-to be precise?
-
-> > > >    bluestore_compression_algorithm = {snappy, zlib, ...}
-> > > >    bluestore_compression_min_blob_size = 256k
-> > > >    bluestore_compression_max_blob_size = 4M
-> > > >    bluestore_compression_required_ratio = .875
-> > > > 
-> > > > (*) These currently have a different name but aren't used yet.  Working
-> > > > on
-> > > > a PR to change that.
-> > > > 
-> > > > What's missing is your 'compress_hint'.  We can call that
-> > > > 'compression_hint' to align with the names above?
-> > > > 
-> > > >    compression_hint = {compressible, incompressible, ...}
-> > > > 
-> > > > The main changes from your PR that I think we need to make are:
-> > > > 
-> > > > * These options should be part of the pool_opts_t structure in pg_pool_t
-> > > > (which is a set of optional key/value-like parameters for the pool).
-> > > > 
-> > > > * We can add a new ObjectStore operation that passes down parameters for
-> > > > a
-> > > > collection, and have the OSD pass these all in for each PG collection
-> > > > when
-> > > > the pool properties change.  That way ObjectStore doesn't need to
-> > > > persist
-> > > > these options at all--just store the ones it understands in memory, and
-> > > > the OSD will always reset them on startup etc.
-> > > One, probably silly, question here - do pool and collection have 1 to 1
-> > > relation? It seemed to me that they don't and hence we can't store
-> > > per-pool
-> > > settings at collection level without some additional mapping: pool ->
-> > > setting.
-> > > Also this requires some means to remove pool settings entry when pool goes
-> > > away...
-> > It's 1:1 mapping of PG to collection, but lots of PGs per pool.  So when
-> > the OSD gets a pool change, it'll set the same flags for all local PGs in
-> > that pool.  A bit of duplication, but it keeps the interface
-> > uncomplicated (no need to teach ObjectStore about pools).
-> And PG belongs to single pool only, right?
-
-Right.
-
-sage
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
