@@ -1,67 +1,84 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
+From: Loic Dachary <loic@dachary.org>
 Subject: Re: releasing jewel v10.2.3 ?
-Date: Fri, 19 Aug 2016 12:37:16 +0200 (CEST)
-Message-ID: <423689760.277585.1471603036158.JavaMail.zimbra@oxygem.tv>
-References: <57B698D0.1050409@dachary.org> <1074794425.66535.1471591086293.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
+Date: Fri, 19 Aug 2016 13:00:44 +0200
+Message-ID: <57B6E6DC.6030008@dachary.org>
+References: <57B698D0.1050409@dachary.org>
+ <1074794425.66535.1471591086293.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
+ <423689760.277585.1471603036158.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.211.110]:36964 "EHLO
-        mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754219AbcHSKnK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Aug 2016 06:43:10 -0400
-In-Reply-To: <1074794425.66535.1471591086293.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:56522 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752435AbcHSLCU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Aug 2016 07:02:20 -0400
+In-Reply-To: <423689760.277585.1471603036158.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Loic Dachary <loic@dachary.org>, Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
+To: Alexandre DERUMIER <aderumier@odiso.com>, Wido den Hollander <wido@42on.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
 
-Hi,
+Hi Alexandre,
 
-Personnaly I'm waiting for theses backports for librbd:
-
-"jewel: mkfs.xfs slow performance with discards and object map"
-http://tracker.ceph.com/issues/16867
-
-"jewel: Discard hangs when 'rbd_skip_partial_discard' is enabled"
-http://tracker.ceph.com/issues/16869
-
-Alexandre
-
------ Mail original -----
-De: "Wido den Hollander" <wido@42on.com>
-À: "Loic Dachary" <loic@dachary.org>
-Cc: "Sage Weil" <sweil@redhat.com>, "ceph-devel" <ceph-devel@vger.kernel.org>, "Abhishek Varshney" <abhishek.varshney@flipkart.com>
-Envoyé: Vendredi 19 Août 2016 09:18:05
-Objet: Re: releasing jewel v10.2.3 ?
-
-> Op 19 aug. 2016 om 07:28 heeft Loic Dachary <loic@dachary.org> het volgende geschreven: 
+On 19/08/2016 12:37, Alexandre DERUMIER wrote:
+> Hi,
 > 
-> Hi Sage, 
+> Personnaly I'm waiting for theses backports for librbd:
 > 
-> Here are the issues that would be in jewel v10.2.3 if we decided to release it now: http://tracker.ceph.com/versions/518 
-> And here is the backport queue : http://tracker.ceph.com/projects/ceph/issues?query_id=96 
+> "jewel: mkfs.xfs slow performance with discards and object map"
+> http://tracker.ceph.com/issues/16867
+
+I think it will be merged before 10.2.3 is released.
+
 > 
-> Do you think it is time to cut the release and ask QE to start testing ? 
+> "jewel: Discard hangs when 'rbd_skip_partial_discard' is enabled"
+> http://tracker.ceph.com/issues/16869
+
+This one was conflicting and did not get tested yet. I rebased it a minute ago and it will hopefully compile now. If you can run a rbd job that is relevant it will speedup backporting.
+
+Cheers
+
+> 
+> Alexandre
+> 
+> ----- Mail original -----
+> De: "Wido den Hollander" <wido@42on.com>
+> À: "Loic Dachary" <loic@dachary.org>
+> Cc: "Sage Weil" <sweil@redhat.com>, "ceph-devel" <ceph-devel@vger.kernel.org>, "Abhishek Varshney" <abhishek.varshney@flipkart.com>
+> Envoyé: Vendredi 19 Août 2016 09:18:05
+> Objet: Re: releasing jewel v10.2.3 ?
+> 
+>> Op 19 aug. 2016 om 07:28 heeft Loic Dachary <loic@dachary.org> het volgende geschreven: 
+>>
+>> Hi Sage, 
+>>
+>> Here are the issues that would be in jewel v10.2.3 if we decided to release it now: http://tracker.ceph.com/versions/518 
+>> And here is the backport queue : http://tracker.ceph.com/projects/ceph/issues?query_id=96 
+>>
+>> Do you think it is time to cut the release and ask QE to start testing ? 
+>>
+> 
+> I think that this one is a good candidate to go in as well. Since 10.2.4 can take a while. 
+> 
+> http://tracker.ceph.com/issues/17023 / https://github.com/ceph/ceph/pull/10725 
+> 
+> Nasty one which might catch users and leave them wondering why the OSDs are not coming up. 
+> 
+> Wido 
+> 
+>> Cheers 
+>>
+>> -- 
+>> LoÃ¯c Dachary, Artisan Logiciel Libre 
+>>
+>> -- 
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in 
+>> the body of a message to majordomo@vger.kernel.org 
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html 
+> N�����r��y���b�X��ǧv�^�)޺{.n�+���z�]z���{ay�ʇڙ�,j��f���h���z��w������j:+v���w�j�m��������zZ+�����ݢj"��!�i 
+> 
 > 
 
-I think that this one is a good candidate to go in as well. Since 10.2.4 can take a while. 
-
-http://tracker.ceph.com/issues/17023 / https://github.com/ceph/ceph/pull/10725 
-
-Nasty one which might catch users and leave them wondering why the OSDs are not coming up. 
-
-Wido 
-
-> Cheers 
-> 
-> -- 
-> LoÃ¯c Dachary, Artisan Logiciel Libre 
-> 
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in 
-> the body of a message to majordomo@vger.kernel.org 
-> More majordomo info at http://vger.kernel.org/majordomo-info.html 
-N�����r��y���b�X��ǧv�^�)޺{.n�+���z�]z���{ay�ʇڙ�,j��f���h���z��w������j:+v���w�j�m��������zZ+�����ݢj"��!�i 
-
+-- 
+Loïc Dachary, Artisan Logiciel Libre
