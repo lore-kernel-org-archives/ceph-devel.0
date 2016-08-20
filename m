@@ -1,33 +1,68 @@
-From: Srikar Somineni <srikar.kumar@gmail.com>
-Subject: Ceph_Manual_Installation
-Date: Sat, 20 Aug 2016 18:17:12 +0530
-Message-ID: <CABu999z6MkkN6Dr0xai52FKyV2S2reA2D1b5uvCmd4A52c6S=A@mail.gmail.com>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: rbd image mounts - issue
+Date: Sat, 20 Aug 2016 19:45:12 +0530
+Message-ID: <CANA9Uk4d19MnHzPi4kXQLPmmR==dHZsO_FYkWdcV_YTNE9f4GQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f44.google.com ([209.85.215.44]:34965 "EHLO
-        mail-lf0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752456AbcHTMrP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Aug 2016 08:47:15 -0400
-Received: by mail-lf0-f44.google.com with SMTP id f93so49502004lfi.2
-        for <ceph-devel@vger.kernel.org>; Sat, 20 Aug 2016 05:47:14 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============0951092133=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi All,
-          As a person new to Ceph, I am trying to build Ceph from
-source code while adding debugs. I went through some Ceph documents
-and what I gathered is that, after giving "make" and finally "make
-install" we will install Ceph libraries in /usr/lib(for an Linux
-system). These changes will take place on local user space only.
-         I want to install Ceph over an entire cluster. I have a
-cluster consisting of one Admin and Monitor node and three OSD nodes.
-I am building Ceph on Admin node .
-I want to install the built in Ceph code on the entire cluster. Can
-anyone help me how to proceed further with my  issue here . Do I need
-to make the built code as a local repository and use ceph-deploy to
-install on the cluster.
-Thanks in Advance.
-Regards,
-S.Srikar.
+--===============0951092133==
+Content-Type: multipart/alternative; boundary=94eb2c07c7a877315a053a8171a8
+
+--94eb2c07c7a877315a053a8171a8
+Content-Type: text/plain; charset=UTF-8
+
+Hello,
+I have around 6 rbd images. Mounted all 6 images to a VM.
+Now all works fine. no issues with access all these 6 mount partitions.
+
+Now, I have shared these 6 mount partions to others using NFS.
+But these NFS partitions facing the issue of disconnects during the access
+of these partition on NFS (dmsg says - no response from the partion)..
+
+Is the above use case correct?
+
+Please advise.
+
+Thanks
+Swami
+
+--94eb2c07c7a877315a053a8171a8
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Hello,<div>I have around 6 rbd=C2=A0images. Mounted all 6 =
+images to a VM.</div><div>Now all works fine. no issues with access all the=
+se 6 mount partitions.</div><div><br></div><div>Now, I have shared these 6 =
+mount partions=C2=A0to others using NFS.</div><div>But these NFS partitions=
+ facing the issue of disconnects during the access of these partition on NF=
+S (dmsg says - no response from the=C2=A0partion)..</div><div><br></div><di=
+v>Is the above use case correct?</div><div><br></div><div>Please advise.</d=
+iv><div><br></div><div>Thanks</div><div>Swami</div></div>
+
+--94eb2c07c7a877315a053a8171a8--
+
+--===============0951092133==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0951092133==--
