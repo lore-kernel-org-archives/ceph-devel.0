@@ -1,195 +1,198 @@
-From: Victor Denisov <vdenisov@mirantis.com>
-Subject: Re: Snapshots of consistency groups
-Date: Fri, 19 Aug 2016 17:36:56 -0700
-Message-ID: <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
-References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
- <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
- <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
- <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
- <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
- <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com> <20160819124813.GB17630@gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: BlueStore metadata write overhead
+Date: Sat, 20 Aug 2016 01:25:35 +0000
+Message-ID: <BL2PR02MB21152923FED03DCD09A0637DF4170@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB2115119EAA0F68B837D71C6CF4150@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608191358510.10673@piezo.us.to>
+ <BL2PR02MB2115CA2313338720CA844CA3F4160@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608191706420.14754@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="koi8-r"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f179.google.com ([209.85.217.179]:35189 "EHLO
-        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755757AbcHTAhW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Aug 2016 20:37:22 -0400
-Received: by mail-ua0-f179.google.com with SMTP id n59so106613503uan.2
-        for <ceph-devel@vger.kernel.org>; Fri, 19 Aug 2016 17:36:58 -0700 (PDT)
-In-Reply-To: <20160819124813.GB17630@gmail.com>
+Received: from mail-sn1nam02on0050.outbound.protection.outlook.com ([104.47.36.50]:33138
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1755137AbcHTB0H (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 19 Aug 2016 21:26:07 -0400
+In-Reply-To: <alpine.DEB.2.11.1608191706420.14754@piezo.us.to>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <mgolub@mirantis.com>
-Cc: Jason Dillaman <dillaman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-What if I'm holding this lock and somebody else is trying to reacquire the lock.
-How do I get notified about it?
+Sage,
+I applied your patch but it seems bluefs->get_usage() has some bug and that=
+'s why it is messing up the calculation. Here is the explanation :
 
+This is just after creating cluster, no image.
 
-On Fri, Aug 19, 2016 at 5:48 AM, Mykola Golub <mgolub@mirantis.com> wrote:
-> On Thu, Aug 18, 2016 at 09:20:02PM -0700, Victor Denisov wrote:
->> Could you please point me to the place in source code where writer
->> acquires an exclusive lock on the image.
->
-> Grep for 'exclusive_lock->request_lock'. Basically, what you need
-> (after opening the image) is:
->
-> ```
->   C_SaferCond lock_ctx;
->   {
->     RWLock::WLocker l(ictx->owner_lock);
->
->     if (ictx->exclusive_lock == nullptr) {
->       // exclusive-lock feature is not enabled
->       return -EINVAL;
->     }
->
->     // Request the lock. If it is currently owned by another client,
->     // RPC message will be sent to the client to release the lock.
->     ictx->exclusive_lock->request_lock(&lock_ctx);
->   } // release owner_lock before waiting to avoid potential deadlock
->
->   int r = lock_ctx.wait();
->   if (r < 0) {
->     return r;
->   }
->
->   RWLock::RLocker l(ictx->owner_lock);
->   if (ictx->exclusive_lock == nullptr || !ictx->exclusive_lock->is_lock_owner()) {
->        // failed to acquire exclusive lock
->        return -EROFS;
->   }
->
->   // At this point lock is acquired
->   ...
->
-> ```
->
-> You might want to look at this PR
->
->  https://github.com/ceph/ceph/pull/9592
->
-> where we discuss adding API methods to directly acquire and release
-> the exclusive lock. You don't need the API, but will find examples in
-> the patch, and also useful comments from Jason.
->
-> --
-> Mykola Golub
->
->> I presume you were talking about the feature:
->> exclusive_lock, shared_lock which can be used from command line using
->> commands lock list, lock break.
->>
->> On Thu, Aug 18, 2016 at 5:47 PM, Jason Dillaman <jdillama@redhat.com> wrote:
->> > There is already a "request lock" RPC message and this is already handled
->> > transparently within librbd when you attempt to acquire the lock and another
->> > client owns it.
->> >
->> >
->> > On Thursday, August 18, 2016, Victor Denisov <vdenisov@mirantis.com> wrote:
->> >>
->> >> If an image already has a writer who owns the lock,
->> >> should I implement a notification that allows to ask the writer to
->> >> release the lock,
->> >> is there already a standard way to intercept the exclusive lock?
->> >>
->> >> On Tue, Aug 16, 2016 at 6:29 AM, Jason Dillaman <jdillama@redhat.com>
->> >> wrote:
->> >> > ... one more thing:
->> >> >
->> >> > I was also thinking that we need a new RBD feature bit to be used to
->> >> > indicate that an image is part of a consistency group to prevent older
->> >> > librbd clients from removing the image or group snapshots.  This could
->> >> > be a RBD_FEATURES_RW_INCOMPATIBLE feature bit so older clients can
->> >> > still open the image R/O while its part of a group.
->> >> >
->> >> > On Tue, Aug 16, 2016 at 9:26 AM, Jason Dillaman <jdillama@redhat.com>
->> >> > wrote:
->> >> >> Way back in April when we had the CDM, I was originally thinking we
->> >> >> should implement option 3. Essentially, you have a prepare group
->> >> >> snapshot RPC message that extends a "paused IO" lease to the caller.
->> >> >> When that lease expires, IO would automatically be resumed even if the
->> >> >> group snapshot hasn't been created yet.  This would also require
->> >> >> commit/abort group snapshot RPC messages.
->> >> >>
->> >> >> However, thinking about this last night, here is another potential
->> >> >> option:
->> >> >>
->> >> >> Option 4 - require images to have the exclusive lock feature before
->> >> >> they can be added to a consistency group (and prevent disabling of
->> >> >> exclusive-lock while they are part of a group). Then librbd, via the
->> >> >> rbd CLI (or client application of the rbd consistency group snap
->> >> >> create API), can co-operatively acquire the lock from all active image
->> >> >> clients within the group (i.e. all IO has been flushed and paused) and
->> >> >> can proceed with snapshot creation. If the rbd CLI dies, the normal
->> >> >> exclusive lock handling process will automatically take care of
->> >> >> re-acquiring the lock from the dead client and resuming IO.
->> >> >>
->> >> >> This option not only re-uses existing code, it would also eliminate
->> >> >> the need to add/update the RPC messages for prepare/commit/abort
->> >> >> snapshot creation to support group snapshots (since it could all be
->> >> >> handled internally).
->> >> >>
->> >> >> On Mon, Aug 15, 2016 at 7:46 PM, Victor Denisov <vdenisov@mirantis.com>
->> >> >> wrote:
->> >> >>> Gentlemen,
->> >> >>>
->> >> >>> I'm writing to you to ask for your opinion regarding quiescing writes.
->> >> >>>
->> >> >>> Here is the situation. In order to take snapshots of all images in a
->> >> >>> consistency group,
->> >> >>> we first need to quiesce all the image writers in the consistency
->> >> >>> group.
->> >> >>> Let me call
->> >> >>> group client - a client which requests a consistency group to take a
->> >> >>> snapshot.
->> >> >>> Image client - the client that writes to an image.
->> >> >>> Let's say group client starts sending notify_quiesce to all image
->> >> >>> clients that write to the images in the group. After quiescing half of
->> >> >>> the image clients the group client can die.
->> >> >>>
->> >> >>> It presents us with a dilemma - what should we do with those quiesced
->> >> >>> image clients.
->> >> >>>
->> >> >>> Option 1 - is to wait till someone manually runs recover for that
->> >> >>> consistency group.
->> >> >>> We can show warning next to those unfinished groups when user runs
->> >> >>> group list command.
->> >> >>> There will be a command like group recover, which allows users to
->> >> >>> rollback unsuccessful snapshots
->> >> >>> or continue them using create snapshot command.
->> >> >>>
->> >> >>> Option 2 - is to establish some heart beats between group client and
->> >> >>> image client. If group client fails to heart beat then image client
->> >> >>> unquiesces itself and continues normal operation.
->> >> >>>
->> >> >>> Option 3 - is to have a timeout for each image client. If group client
->> >> >>> fails to make a group snapshot within this timeout then we resume our
->> >> >>> normal operation informing group client of the fact.
->> >> >>>
->> >> >>> Which of these options do you prefer? Probably there are other options
->> >> >>> that I miss.
->> >> >>>
->> >> >>> Thanks,
->> >> >>> Victor.
->> >> >>
->> >> >>
->> >> >>
->> >> >> --
->> >> >> Jason
->> >> >
->> >> >
->> >> >
->> >> > --
->> >> > Jason
->> >
->> >
->> >
->> > --
->> > Jason
->> >
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+root@emsnode5:~/ceph-master/src# ceph df
+2016-08-19 16:53:54.558617 7fddda4d1700 -1 WARNING: the following dangerous=
+ and experimental features are enabled: bluestore,rocksdb
+2016-08-19 16:53:54.562438 7fddda4d1700 -1 WARNING: the following dangerous=
+ and experimental features are enabled: bluestore,rocksdb
+GLOBAL:
+    SIZE     AVAIL     RAW USED     %RAW USED
+    115T      111T        4371G          3.68
+POOLS:
+    NAME     ID     USED     %USED     MAX AVAIL     OBJECTS
+    rbd      0         0         0        57151G           0
+
+And here is my drive partition:
+
+sdi           8:128  0     7T  0 disk
+=86=80sdi1        8:129  0    10G  0 part /var/lib/ceph/osd/ceph-15
+=86=80sdi2        8:130  0   304G  0 part ----> block.db
+=86=80sdi3        8:131  0    10G  0 part  -----> block.wal
+=84=80sdi4        8:132  0   6.7T  0 part
+
+So, total RAW size it should be showing ~ 112 TB (6.7TB X 16 (16 osds) + 30=
+4G X 16 (block.db) + 10G * 16 (block.wal) ). But, it is showing ~115TB.
+I did some debugging and found out that bluefs->get_usage() is returning 3 =
+vector entries instead of 2.  One entry of size 293345419264 is getting add=
+ed probably db.slow (?) even if no such device present.
+
+Secondly, we are showing entire db devices as used from the beginning , tha=
+t is probably ok since user won't be able to use that anyway. But, it would=
+ be good if we can somehow see the amount of db actually used in some stati=
+stics.
+
+Now, here is the 'ceph df' output after I have written 4k RW (without filli=
+ng up my 40TB  image) for 2 hours.
+
+root@stormeap-1:~/fio_rbd/fio/examples/plot# ceph df
+2016-08-19 16:13:50.843564 7fc0bc71a700 -1 WARNING: the following dangerous=
+ and experimental features are enabled: bluestore,rocksdb
+2016-08-19 16:13:50.846647 7fc0bc71a700 -1 WARNING: the following dangerous=
+ and experimental features are enabled: bluestore,rocksdb
+2016-08-19 16:13:50.848156 7fc0bc71a700 -1 WARNING: the following dangerous=
+ and experimental features are enabled: bluestore,rocksdb
+GLOBAL:
+    SIZE     AVAIL     RAW USED     %RAW USED
+    115T      110T        5809G          4.90
+POOLS:
+    NAME              ID     USED       %USED     MAX AVAIL     OBJECTS
+    recovery_test     1      37007G     62.37        56338G     10000003
+
+"RAW USED" is correctly showing the amount of data written to the cluster b=
+ut see the POOLS statistics , it is really confusing. Since it is touching =
+all the objects , the amount of used % it is showing ~37 TB while only 1.4 =
+TB is written.
+I saw pool data is not gathered from store->statfs() but from each op proba=
+bly ? Is there a bug ?
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com]=20
+Sent: Friday, August 19, 2016 10:08 AM
+To: Somnath Roy
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: BlueStore metadata write overhead
+
+Broken united wifi conspired to keep me from pushing this earlier:
+
+	https://github.com/ceph/ceph/pull/10795
+
+This should resolve it I think?  It does include the wal space in the total=
+, which is probably not right, but that should be a rounding error.
+
+sage
+
+On Fri, 19 Aug 2016, Somnath Roy wrote:
+
+> Yes, seems something wrong..Here is the 'ceph df' on a freshly created cl=
+uster with no data.
+>=20
+> root@stormeap-1:~/fio_rbd/fio/examples# ceph df
+> 2016-08-19 09:47:45.714539 7f7fd3ed9700 -1 WARNING: the following=20
+> dangerous and experimental features are enabled: bluestore,rocksdb
+> 2016-08-19 09:47:45.717589 7f7fd3ed9700 -1 WARNING: the following=20
+> dangerous and experimental features are enabled: bluestore,rocksdb
+> 2016-08-19 09:47:45.718583 7f7fd3ed9700 -1 WARNING: the following=20
+> dangerous and experimental features are enabled: bluestore,rocksdb
+> GLOBAL:
+>     SIZE     AVAIL       RAW USED     %RAW USED
+>     106T     100536G        8742G          8.00
+> POOLS:
+>     NAME              ID     USED     %USED     MAX AVAIL     OBJECTS
+>     recovery_test     1        16         0        50268G           3
+>=20
+> It is saying 8TB RAW used , I will take a look.
+>=20
+> Thanks & Regards
+> Somnath
+>=20
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Friday, August 19, 2016 7:00 AM
+> To: Somnath Roy
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: BlueStore metadata write overhead
+>=20
+> On Thu, 18 Aug 2016, Somnath Roy wrote:
+> > Sage, Here is some estimate probably how much extra (space wise) we=20
+> > are writing with Bluestore. Considering Rocksdb has not much space=20
+> > amp for level style compaction , these are mostly the metadata=20
+> > Bluestore is writing.
+> >
+> > BlueStore:
+> > ----------------
+> > root@stormeap-1:~/fio_rbd/fio/examples# ceph df
+> > 2016-08-17 11:00:57.936952 7f5c39a2b700 -1 WARNING: the following=20
+> > dangerous and experimental features are enabled: bluestore,rocksdb
+> > 2016-08-17 11:00:57.939969 7f5c39a2b700 -1 WARNING: the following=20
+> > dangerous and experimental features are enabled: bluestore,rocksdb
+> > 2016-08-17 11:00:57.941269 7f5c39a2b700 -1 WARNING: the following=20
+> > dangerous and experimental features are enabled: bluestore,rocksdb
+> > GLOBAL:
+> >     SIZE     AVAIL      RAW USED     %RAW USED
+> >     106T     22411G       86867G         79.49
+> > POOLS:
+> >     NAME              ID     USED       %USED     MAX AVAIL     OBJECTS
+> >     recovery_test     1      39062G     71.49         6290G     1000000=
+3
+> >
+> >
+> > So, if we trust the statfs implementation of Bluestore , it is  writing=
+ ~8743 GB more.  Total data  =3D image size of 39062 GB * replication 2 =3D=
+ ~78124 GB. So, ~11.19% more.
+> > BTW, this is after 1MB image preconditioning only, filling with 4K bloc=
+ksize will be adding more metadata.
+> >
+> > Filestore:
+> > -----------
+> > GLOBAL:
+> >     SIZE     AVAIL      RAW USED     %RAW USED
+> >     109T     34443G       78147G         69.41
+> > POOLS:
+> >     NAME              ID     USED       %USED     MAX AVAIL     OBJECTS
+> >     recovery_test     2      39062G     69.39        12930G     1000000=
+3
+> >
+> > So, in the similar setup , filestore is writing only ~23GB extra and=20
+> > i.e ~0.029%
+>=20
+> This seems like a lot for bluestore.  The statfs output from bluestore sh=
+ould show how much of the space is bluefs vs bluestore.
+>=20
+> Hmm, my guess is that bluestore is counting all of the space that it has =
+given to bluefs as used, even though bluefs isn't using it.  Probably just =
+need to make BlueStore::statfs() call BlueFs::statfs() and correct for the =
+bluefs unused space...
+>=20
+> sage
+> PLEASE NOTE: The information contained in this electronic mail message is=
+ intended only for the use of the designated recipient(s) named above. If t=
+he reader of this message is not the intended recipient, you are hereby not=
+ified that you have received this message in error and that any review, dis=
+semination, distribution, or copying of this message is strictly prohibited=
+. If you have received this communication in error, please notify the sende=
+r by telephone or e-mail (as shown above) immediately and destroy any and a=
+ll copies of this message in your possession (whether hard copies or electr=
+onically stored copies).
+>=20
+>=20
