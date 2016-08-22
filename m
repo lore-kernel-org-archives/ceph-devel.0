@@ -1,59 +1,150 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: errors in make-debs.sh because "make dist" fails on 'rocksdb/db/slice.cc'
-Date: Mon, 22 Aug 2016 15:00:06 -0700
-Message-ID: <CAJ4mKGYP+9TQ8wT-eUH1WkgwqXY3z2uF+3WFtpK8BRFNF9VWBw@mail.gmail.com>
-References: <DB5PR05MB1607C4B81D5433484A17801FA9E80@DB5PR05MB1607.eurprd05.prod.outlook.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore assert
+Date: Mon, 22 Aug 2016 22:01:29 +0000
+Message-ID: <BL2PR02MB2115FC5862FC94510C107536F4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB2115443F5ACA3459E2CEBFBAF41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608102121090.17770@piezo.us.to>
+ <BL2PR02MB2115CDD714FC3883028291F8F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608111629170.17762@piezo.us.to>
+ <7dc67e25-4e1c-09a1-8667-ee47572b9290@redhat.com>
+ <alpine.DEB.2.11.1608111635230.17762@piezo.us.to>
+ <BL2PR02MB2115D3D79C6194FD81E598F3F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608112226280.17762@piezo.us.to>
+ <BL2PR02MB2115BB77EA5BA38BCF48E52DF4110@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608151952230.14754@piezo.us.to>
+ <BL2PR02MB21150BE782012D52DBB8FF26F4130@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <BL2PR02MB2115FFBBBF5A04D62910A239F4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608222156580.25681@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f182.google.com ([209.85.217.182]:32791 "EHLO
-        mail-ua0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756483AbcHVWAJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2016 18:00:09 -0400
-Received: by mail-ua0-f182.google.com with SMTP id 74so214155337uau.0
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2016 15:00:07 -0700 (PDT)
-In-Reply-To: <DB5PR05MB1607C4B81D5433484A17801FA9E80@DB5PR05MB1607.eurprd05.prod.outlook.com>
+Received: from mail-bn3nam01on0058.outbound.protection.outlook.com ([104.47.33.58]:10819
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753952AbcHVWBe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 22 Aug 2016 18:01:34 -0400
+In-Reply-To: <alpine.DEB.2.11.1608222156580.25681@piezo.us.to>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Avner Ben Hanoch <avnerb@mellanox.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Aug 22, 2016 at 2:00 AM, Avner Ben Hanoch <avnerb@mellanox.com> wrote:
-> HI All,
->
-> The following lines from make-debs.sh:
->
->         vers=$(git describe --match "v*" | sed s/^v//)
->         ./autogen.sh
->         ./configure --with-rocksdb --with-ocf \
->             --with-nss --with-debug --enable-cephfs-java \
->             --with-lttng --with-babeltrace
->         make distdir=ceph-$vers dist
->
-> produces the following error:
->
->         make  dist-gzip am__post_remove_distdir='@:'
->         make[1]: Entering directory '/mnt/sdh/avnerb/ceph-github'
->         if test -d "ceph-11.0.0-1689-g23eeb74"; then find "ceph-11.0.0-1689-g23eeb74" -type d ! -perm -200 -exec chmod u+w {} ';' && rm -rf "ceph-11.0.0-1689-g23eeb74" || { sleep 5 && rm -rf "ceph-11.0.0-1689-g23eeb74"; }; else :; fi
->         test -d "ceph-11.0.0-1689-g23eeb74" || mkdir "ceph-11.0.0-1689-g23eeb74"
->          (cd src && make  top_distdir=../ceph-11.0.0-1689-g23eeb74 distdir=../ceph-11.0.0-1689-g23eeb74/src \
->              am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)
->         make[2]: Entering directory '/mnt/sdh/avnerb/ceph-github/src'
->         ./make_version -g ./.git_version
->         if [ -n "$NO_VERSION" ] ; then \
->                 ./make_version -g ./.git_version -c ./ceph_ver.h -n ; \
->         else \
->                 ./make_version -g ./.git_version -c ./ceph_ver.h ; \
->         fi
->         make[2]: *** No rule to make target 'rocksdb/db/slice.cc', needed by 'distdir'.  Stop.
->         make[2]: Leaving directory '/mnt/sdh/avnerb/ceph-github/src'
->         Makefile:976: recipe for target 'distdir' failed
->         make[1]: *** [distdir] Error 1
->         make[1]: Leaving directory '/mnt/sdh/avnerb/ceph-github'
->         Makefile:1078: recipe for target 'dist' failed
->         make: *** [dist] Error 2
+"compaction_style=3DkCompactionStyleUniversal"  in the bluestore_rocksdb_op=
+tions .
+Here is the option I am using..
 
-Errors here generally occur if you've got an outdated submodule (or
-it's just missing). Try deleting it and re-doing the submodule
-entirely.
--Greg
+        bluestore_rocksdb_options =3D "max_write_buffer_number=3D16,min_wri=
+te_buffer_number_to_merge=3D2,recycle_log_file_num=3D16,compaction_threads=
+=3D32,flusher_threads=3D8,max_background_compactions=3D32,max_background_fl=
+ushes=3D8,max_bytes_for_level_base=3D5368709120,write_buffer_size=3D8388608=
+0,level0_file_num_compaction_trigger=3D4,level0_slowdown_writes_trigger=3D4=
+00,level0_stop_writes_trigger=3D800,stats_dump_period_sec=3D10,compaction_s=
+tyle=3DkCompactionStyleUniversal"
+
+Here is another one after 4 hours of 4K RW :-)...Sorry to bombard you with =
+all these , I am adding more log for the next time if I hit it..
+
+
+     0> 2016-08-22 17:37:24.730817 7f8e7afff700 -1 os/bluestore/BlueFS.cc: =
+In function 'int BlueFS::_read_random(BlueFS::FileReader*, uint64_t, size_t=
+, char*)' thread 7f8e7afff700 time 2016-08-22 17:37:24.722706
+os/bluestore/BlueFS.cc: 845: FAILED assert(r =3D=3D 0)
+
+ ceph version 11.0.0-1688-g3fcc89c (3fcc89c7ab4c92e6c4564e29f4e1a663db36acc=
+0)
+ 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0=
+x80) [0x5581ed453cb0]
+ 2: (BlueFS::_read_random(BlueFS::FileReader*, unsigned long, unsigned long=
+, char*)+0x836) [0x5581ed11c1b6]
+ 3: (BlueRocksRandomAccessFile::Read(unsigned long, unsigned long, rocksdb:=
+:Slice*, char*) const+0x20) [0x5581ed13f840]
+ 4: (rocksdb::RandomAccessFileReader::Read(unsigned long, unsigned long, ro=
+cksdb::Slice*, char*) const+0x83f) [0x5581ed2c6f4f]
+ 5: (rocksdb::ReadBlockContents(rocksdb::RandomAccessFileReader*, rocksdb::=
+Footer const&, rocksdb::ReadOptions const&, rocksdb::BlockHandle const&, ro=
+cksdb::BlockContents*, rocksdb::Env*, bool, rocksdb::Slice const&, rocksdb:=
+:PersistentCacheOptions const&, rocksdb::Logger*)+0x358) [0x5581ed291c18]
+ 6: (()+0x94fd54) [0x5581ed282d54]
+ 7: (rocksdb::BlockBasedTable::NewDataBlockIterator(rocksdb::BlockBasedTabl=
+e::Rep*, rocksdb::ReadOptions const&, rocksdb::Slice const&, rocksdb::Block=
+Iter*)+0x60c) [0x5581ed284b3c]
+ 8: (rocksdb::BlockBasedTable::Get(rocksdb::ReadOptions const&, rocksdb::Sl=
+ice const&, rocksdb::GetContext*, bool)+0x508) [0x5581ed28ba68]
+ 9: (rocksdb::TableCache::Get(rocksdb::ReadOptions const&, rocksdb::Interna=
+lKeyComparator const&, rocksdb::FileDescriptor const&, rocksdb::Slice const=
+&, rocksdb::GetContext*, rocksdb::HistogramImpl*, bool, int)+0x158) [0x5581=
+ed252118]
+ 10: (rocksdb::Version::Get(rocksdb::ReadOptions const&, rocksdb::LookupKey=
+ const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allo=
+cator<char> >*, rocksdb::Status*, rocksdb::MergeContext*, bool*, bool*, uns=
+igned long*)+0x4f8) [0x5581ed25c458]
+ 11: (rocksdb::DBImpl::GetImpl(rocksdb::ReadOptions const&, rocksdb::Column=
+FamilyHandle*, rocksdb::Slice const&, std::__cxx11::basic_string<char, std:=
+:char_traits<char>, std::allocator<char> >*, bool*)+0x5fa) [0x5581ed1f3f7a]
+ 12: (rocksdb::DBImpl::Get(rocksdb::ReadOptions const&, rocksdb::ColumnFami=
+lyHandle*, rocksdb::Slice const&, std::__cxx11::basic_string<char, std::cha=
+r_traits<char>, std::allocator<char> >*)+0x22) [0x5581ed1f4182]
+ 13: (RocksDBStore::get(std::__cxx11::basic_string<char, std::char_traits<c=
+har>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::=
+char_traits<char>, std::allocator<char> > const&, ceph::buffer::list*)+0x15=
+7) [0x5581ed1d21d7]
+ 14: (BlueStore::Collection::get_onode(ghobject_t const&, bool)+0x55b) [0x5=
+581ed02802b]
+ 15: (BlueStore::_txc_add_transaction(BlueStore::TransContext*, ObjectStore=
+::Transaction*)+0x1e49) [0x5581ed0318a9]
+ 16: (BlueStore::queue_transactions(ObjectStore::Sequencer*, std::vector<Ob=
+jectStore::Transaction, std::allocator<ObjectStore::Transaction> >&, std::s=
+hared_ptr<TrackedOp>, ThreadPool::TPHandle*)+0x362) [0x5581ed032bc2]
+ 17: (ReplicatedPG::queue_transactions(std::vector<ObjectStore::Transaction=
+, std::allocator<ObjectStore::Transaction> >&, std::shared_ptr<OpRequest>)+=
+0x81) [0x5581ecea5e51]
+ 18: (ReplicatedBackend::sub_op_modify(std::shared_ptr<OpRequest>)+0xd39) [=
+0x5581ecef89e9]
+ 19: (ReplicatedBackend::handle_message(std::shared_ptr<OpRequest>)+0x2fb) =
+[0x5581ecefeb4b]
+ 20: (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&, ThreadPool::TPH=
+andle&)+0xbd) [0x5581ece4c63d]
+ 21: (OSD::dequeue_op(boost::intrusive_ptr<PG>, std::shared_ptr<OpRequest>,=
+ ThreadPool::TPHandle&)+0x409) [0x5581eccdd2e9]
+ 22: (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest> const&)+0x=
+52) [0x5581eccdd542]
+ 23: (OSD::ShardedOpWQ::_process(unsigned int, ceph::heartbeat_handle_d*)+0=
+x73f) [0x5581eccfd30f]
+ 24: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x89f) [0x5=
+581ed440b2f]
+ 25: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x5581ed4441f0]
+ 26: (Thread::entry_wrapper()+0x75) [0x5581ed4335c5]
+ 27: (()+0x76fa) [0x7f8ed9e4e6fa]
+ 28: (clone()+0x6d) [0x7f8ed7caeb5d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed t=
+o interpret this.
+
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com]
+Sent: Monday, August 22, 2016 2:57 PM
+To: Somnath Roy
+Cc: Mark Nelson; ceph-devel
+Subject: RE: Bluestore assert
+
+On Mon, 22 Aug 2016, Somnath Roy wrote:
+> FYI, I was running rocksdb by enabling universal style compaction
+> during this time.
+
+How are you selecting universal compaction?
+
+sage
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
