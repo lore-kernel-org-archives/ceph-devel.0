@@ -1,52 +1,63 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Mailing list archive?
-Date: Mon, 22 Aug 2016 14:37:09 +0200
-Message-ID: <de89369b-95ef-803f-7d46-a9d27462a38d@suse.cz>
-References: <8ac798ef-d952-647f-f53c-7b7a0c833b07@suse.cz>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: errors in make-debs.sh because "make dist" fails on
+ 'rocksdb/db/slice.cc'
+Date: Mon, 22 Aug 2016 09:00:46 +0000
+Message-ID: <DB5PR05MB1607C4B81D5433484A17801FA9E80@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:52561 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751902AbcHVMhK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 22 Aug 2016 08:37:10 -0400
-Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 88B2DABDB
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2016 12:37:09 +0000 (UTC)
-In-Reply-To: <8ac798ef-d952-647f-f53c-7b7a0c833b07@suse.cz>
+Received: from mail-db5eur01on0073.outbound.protection.outlook.com ([104.47.2.73]:13397
+        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751774AbcHVNdd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 22 Aug 2016 09:33:33 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Ah, here [2] it is:
+HI All,
 
-"I will not be taking the web servers up again. I’m just too fed up with 
-all that stuff. However, it would be a real shame if all the gazillions 
-of Gmane links out there stopped working. So here’s what I hope somebody 
-could make happen:
+The following lines from make-debs.sh:
 
-I hand over the gmane.org domain to you. You point the MX and the “news” 
-A to my server."
+	vers=3D$(git describe --match "v*" | sed s/^v//)
+	./autogen.sh
+	./configure --with-rocksdb --with-ocf \
+	    --with-nss --with-debug --enable-cephfs-java \
+	    --with-lttng --with-babeltrace
+	make distdir=3Dceph-$vers dist
 
-It appears the guy was operating gmane as a free public service for 14 
-years and got sued, spammed, threatened, and DDoSed in return.
+produces the following error:
 
-[2] 
-https://lars.ingebrigtsen.no/2016/07/28/the-end-of-gmane/comment-page-1/#comment-13502
+	make  dist-gzip am__post_remove_distdir=3D'@:'
+	make[1]: Entering directory '/mnt/sdh/avnerb/ceph-github'
+	if test -d "ceph-11.0.0-1689-g23eeb74"; then find "ceph-11.0.0-1689-g23eeb=
+74" -type d ! -perm -200 -exec chmod u+w {} ';' && rm -rf "ceph-11.0.0-1689=
+-g23eeb74" || { sleep 5 && rm -rf "ceph-11.0.0-1689-g23eeb74"; }; else :; f=
+i
+	test -d "ceph-11.0.0-1689-g23eeb74" || mkdir "ceph-11.0.0-1689-g23eeb74"
+	 (cd src && make  top_distdir=3D../ceph-11.0.0-1689-g23eeb74 distdir=3D../=
+ceph-11.0.0-1689-g23eeb74/src \
+	     am__remove_distdir=3D: am__skip_length_check=3D: am__skip_mode_fix=3D=
+: distdir)
+	make[2]: Entering directory '/mnt/sdh/avnerb/ceph-github/src'
+	./make_version -g ./.git_version
+	if [ -n "$NO_VERSION" ] ; then \
+		./make_version -g ./.git_version -c ./ceph_ver.h -n ; \
+	else \
+		./make_version -g ./.git_version -c ./ceph_ver.h ; \
+	fi
+	make[2]: *** No rule to make target 'rocksdb/db/slice.cc', needed by 'dist=
+dir'.  Stop.
+	make[2]: Leaving directory '/mnt/sdh/avnerb/ceph-github/src'
+	Makefile:976: recipe for target 'distdir' failed
+	make[1]: *** [distdir] Error 1
+	make[1]: Leaving directory '/mnt/sdh/avnerb/ceph-github'
+	Makefile:1078: recipe for target 'dist' failed
+	make: *** [dist] Error 2
 
-On 08/22/2016 02:30 PM, Nathan Cutler wrote:
-> At http://vger.kernel.org/vger-lists.html#ceph-devel and
-> http://ceph.com/resources/mailing-list-irc/ it says the archive of this
-> mailing list is http://dir.gmane.org/gmane.comp.file-systems.ceph.devel
->
-> However, public DNS servers no longer resolve dir.gmane.org.
->
-> I wonder if this has anything to do with this blog post [1] "The End of
-> Gmane"
->
-> [1] https://lars.ingebrigtsen.no/2016/07/28/the-end-of-gmane/
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+any idea?
+
+TIA,
+  Avner
