@@ -1,271 +1,90 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: BlueStore metadata write overhead
-Date: Mon, 22 Aug 2016 02:38:06 +0000
-Message-ID: <BL2PR02MB211522C68222951D1B4A46B3F4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <BL2PR02MB2115119EAA0F68B837D71C6CF4150@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608191358510.10673@piezo.us.to>
- <BL2PR02MB2115CA2313338720CA844CA3F4160@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608191706420.14754@piezo.us.to>
- <BL2PR02MB21152923FED03DCD09A0637DF4170@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608212334440.14754@piezo.us.to>
+From: Kefu Chai <kchai@redhat.com>
+Subject: Re: releasing jewel v10.2.3 ?
+Date: Mon, 22 Aug 2016 00:35:34 -0400 (EDT)
+Message-ID: <499139327.3003480.1471840534716.JavaMail.zimbra@redhat.com>
+References: <57B698D0.1050409@dachary.org> <1074794425.66535.1471591086293.JavaMail.open-xchange@ox03.mail.pcextreme.nl> <57BA0EC8.3050008@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="koi8-r"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam01on0070.outbound.protection.outlook.com ([104.47.34.70]:26976
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753678AbcHVCiK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 21 Aug 2016 22:38:10 -0400
-In-Reply-To: <alpine.DEB.2.11.1608212334440.14754@piezo.us.to>
-Content-Language: en-US
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:36763 "EHLO
+        mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752087AbcHVEfq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2016 00:35:46 -0400
+In-Reply-To: <57BA0EC8.3050008@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-Sage,
-I tried your recent changes and yes, the raw usage is fixed now. Here is th=
-e output after creating cluster (no data)..
-
-root@emsnode12:~/ceph-master/src# ceph df
-2016-08-21 19:19:05.165754 7f92eef84700 -1 WARNING: the following dangerous=
- and experimental features are enabled: bluestore,rocksdb
-2016-08-21 19:19:05.170018 7f92eef84700 -1 WARNING: the following dangerous=
- and experimental features are enabled: bluestore,rocksdb
-GLOBAL:
-    SIZE     AVAIL     RAW USED     %RAW USED
-    111T      111T         154M             0
-POOLS:
-    NAME     ID     USED     %USED     MAX AVAIL     OBJECTS
-    rbd      0         0         0        57071G           0
+To: Loic Dachary <loic@dachary.org>
+Cc: wido@42on.com, Ceph Development <ceph-devel@vger.kernel.org>, Samuel Just <sjust@redhat.com>
 
 
-But, as I mentioned earlier, we need to do something on the pool statistics=
-. See the following once I started writing on the image..
 
+----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: wido@42on.com, "Kefu Chai" <kchai@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+> Sent: Monday, August 22, 2016 4:27:52 AM
+> Subject: Re: releasing jewel v10.2.3 ?
+> 
+> 
+> Hi Wido,
+> 
+> Almost all pull requests requested for 10.2.3 are merged except this one.
+> There is a backport at https://github.com/ceph/ceph/pull/10804 . It will
+> need testing and it may take some time.
+> 
+> @Kefu Is there a job we can run to verify it does the right thing in jewel ?
+> 
 
-root@stormeap-1:~/fio_rbd/fio/examples/plot# ceph df
-2016-08-21 19:25:06.334383 7ff623555700 -1 WARNING: the following dangerous=
- and experimental features are enabled: bluestore,rocksdb
-2016-08-21 19:25:06.336808 7ff623555700 -1 WARNING: the following dangerous=
- and experimental features are enabled: bluestore,rocksdb
-2016-08-21 19:25:06.338099 7ff623555700 -1 WARNING: the following dangerous=
- and experimental features are enabled: bluestore,rocksdb
-GLOBAL:
-    SIZE     AVAIL     RAW USED     %RAW USED
-    111T      111T         221G          0.19
-POOLS:
-    NAME              ID     USED       %USED     MAX AVAIL     OBJECTS
-    recovery_test     1      26131G     45.79        56946G     9415872
+we do exercise "ceph osd pause" in workunit/cephtool[1], but we don't thrash
+osds in the test suite[2] that testing this command.
 
-pool is showing 26TB used while raw usage is 221GB , thoughts ?
+@Sam, how about adding "ceph osd {pause,unpause}" calls to Thrasher in ceph_manager.py,
+so the thrashosd tests can test it as well?
 
-Thanks & Regards
-Somnath
+--
+[1] suites/rados/singleton/all/cephtool.yaml
+[2] suites/rados/singleton/
 
------Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com]=20
-Sent: Sunday, August 21, 2016 4:37 PM
-To: Somnath Roy
-Cc: ceph-devel@vger.kernel.org
-Subject: RE: BlueStore metadata write overhead
-
-I updated the branch and I think it is correct now.
-
-For the shared device, we only want to add the 'free' space (according to
-bluefs) to the total.  (Ohterwise, it's counted as used by bluestore becaus=
-e the space is allocated to bluefs.)
-
-If there is an additional (unshared) device (BDEV_DB) that is dedicated to =
-bluefs, we add both the total and free amounts in.
-
-We ignore the bluefs wal device (if any).
-
-Thanks!
-sage
-
-
-On Sat, 20 Aug 2016, Somnath Roy wrote:
-> Sage,
-> I applied your patch but it seems bluefs->get_usage() has some bug and th=
-at's why it is messing up the calculation. Here is the explanation :
->=20
-> This is just after creating cluster, no image.
->=20
-> root@emsnode5:~/ceph-master/src# ceph df
-> 2016-08-19 16:53:54.558617 7fddda4d1700 -1 WARNING: the following=20
-> dangerous and experimental features are enabled: bluestore,rocksdb
-> 2016-08-19 16:53:54.562438 7fddda4d1700 -1 WARNING: the following=20
-> dangerous and experimental features are enabled: bluestore,rocksdb
-> GLOBAL:
->     SIZE     AVAIL     RAW USED     %RAW USED
->     115T      111T        4371G          3.68
-> POOLS:
->     NAME     ID     USED     %USED     MAX AVAIL     OBJECTS
->     rbd      0         0         0        57151G           0
->=20
-> And here is my drive partition:
->=20
-> sdi           8:128  0     7T  0 disk
-> =86=80sdi1        8:129  0    10G  0 part /var/lib/ceph/osd/ceph-15
-> =86=80sdi2        8:130  0   304G  0 part ----> block.db
-> =86=80sdi3        8:131  0    10G  0 part  -----> block.wal
-> =84=80sdi4        8:132  0   6.7T  0 part
->=20
-> So, total RAW size it should be showing ~ 112 TB (6.7TB X 16 (16 osds) + =
-304G X 16 (block.db) + 10G * 16 (block.wal) ). But, it is showing ~115TB.
-> I did some debugging and found out that bluefs->get_usage() is returning =
-3 vector entries instead of 2.  One entry of size 293345419264 is getting a=
-dded probably db.slow (?) even if no such device present.
->=20
-> Secondly, we are showing entire db devices as used from the beginning , t=
-hat is probably ok since user won't be able to use that anyway. But, it wou=
-ld be good if we can somehow see the amount of db actually used in some sta=
-tistics.
->=20
-> Now, here is the 'ceph df' output after I have written 4k RW (without fil=
-ling up my 40TB  image) for 2 hours.
->=20
-> root@stormeap-1:~/fio_rbd/fio/examples/plot# ceph df
-> 2016-08-19 16:13:50.843564 7fc0bc71a700 -1 WARNING: the following=20
-> dangerous and experimental features are enabled: bluestore,rocksdb
-> 2016-08-19 16:13:50.846647 7fc0bc71a700 -1 WARNING: the following=20
-> dangerous and experimental features are enabled: bluestore,rocksdb
-> 2016-08-19 16:13:50.848156 7fc0bc71a700 -1 WARNING: the following=20
-> dangerous and experimental features are enabled: bluestore,rocksdb
-> GLOBAL:
->     SIZE     AVAIL     RAW USED     %RAW USED
->     115T      110T        5809G          4.90
-> POOLS:
->     NAME              ID     USED       %USED     MAX AVAIL     OBJECTS
->     recovery_test     1      37007G     62.37        56338G     10000003
->=20
-> "RAW USED" is correctly showing the amount of data written to the cluster=
- but see the POOLS statistics , it is really confusing. Since it is touchin=
-g all the objects , the amount of used % it is showing ~37 TB while only 1.=
-4 TB is written.
-> I saw pool data is not gathered from store->statfs() but from each op pro=
-bably ? Is there a bug ?
->=20
-> Thanks & Regards
-> Somnath
->=20
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Friday, August 19, 2016 10:08 AM
-> To: Somnath Roy
-> Cc: ceph-devel@vger.kernel.org
-> Subject: RE: BlueStore metadata write overhead
->=20
-> Broken united wifi conspired to keep me from pushing this earlier:
->=20
-> 	https://github.com/ceph/ceph/pull/10795
->=20
-> This should resolve it I think?  It does include the wal space in the tot=
-al, which is probably not right, but that should be a rounding error.
->=20
-> sage
->=20
-> On Fri, 19 Aug 2016, Somnath Roy wrote:
->=20
-> > Yes, seems something wrong..Here is the 'ceph df' on a freshly created =
-cluster with no data.
-> >=20
-> > root@stormeap-1:~/fio_rbd/fio/examples# ceph df
-> > 2016-08-19 09:47:45.714539 7f7fd3ed9700 -1 WARNING: the following=20
-> > dangerous and experimental features are enabled: bluestore,rocksdb
-> > 2016-08-19 09:47:45.717589 7f7fd3ed9700 -1 WARNING: the following=20
-> > dangerous and experimental features are enabled: bluestore,rocksdb
-> > 2016-08-19 09:47:45.718583 7f7fd3ed9700 -1 WARNING: the following=20
-> > dangerous and experimental features are enabled: bluestore,rocksdb
-> > GLOBAL:
-> >     SIZE     AVAIL       RAW USED     %RAW USED
-> >     106T     100536G        8742G          8.00
-> > POOLS:
-> >     NAME              ID     USED     %USED     MAX AVAIL     OBJECTS
-> >     recovery_test     1        16         0        50268G           3
-> >=20
-> > It is saying 8TB RAW used , I will take a look.
-> >=20
-> > Thanks & Regards
-> > Somnath
-> >=20
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sweil@redhat.com]
-> > Sent: Friday, August 19, 2016 7:00 AM
-> > To: Somnath Roy
-> > Cc: ceph-devel@vger.kernel.org
-> > Subject: Re: BlueStore metadata write overhead
-> >=20
-> > On Thu, 18 Aug 2016, Somnath Roy wrote:
-> > > Sage, Here is some estimate probably how much extra (space wise)=20
-> > > we are writing with Bluestore. Considering Rocksdb has not much=20
-> > > space amp for level style compaction , these are mostly the=20
-> > > metadata Bluestore is writing.
-> > >
-> > > BlueStore:
-> > > ----------------
-> > > root@stormeap-1:~/fio_rbd/fio/examples# ceph df
-> > > 2016-08-17 11:00:57.936952 7f5c39a2b700 -1 WARNING: the following=20
-> > > dangerous and experimental features are enabled: bluestore,rocksdb
-> > > 2016-08-17 11:00:57.939969 7f5c39a2b700 -1 WARNING: the following=20
-> > > dangerous and experimental features are enabled: bluestore,rocksdb
-> > > 2016-08-17 11:00:57.941269 7f5c39a2b700 -1 WARNING: the following=20
-> > > dangerous and experimental features are enabled: bluestore,rocksdb
-> > > GLOBAL:
-> > >     SIZE     AVAIL      RAW USED     %RAW USED
-> > >     106T     22411G       86867G         79.49
-> > > POOLS:
-> > >     NAME              ID     USED       %USED     MAX AVAIL     OBJEC=
-TS
-> > >     recovery_test     1      39062G     71.49         6290G     10000=
-003
-> > >
-> > >
-> > > So, if we trust the statfs implementation of Bluestore , it is  writi=
-ng ~8743 GB more.  Total data  =3D image size of 39062 GB * replication 2 =
-=3D ~78124 GB. So, ~11.19% more.
-> > > BTW, this is after 1MB image preconditioning only, filling with 4K bl=
-ocksize will be adding more metadata.
-> > >
-> > > Filestore:
-> > > -----------
-> > > GLOBAL:
-> > >     SIZE     AVAIL      RAW USED     %RAW USED
-> > >     109T     34443G       78147G         69.41
-> > > POOLS:
-> > >     NAME              ID     USED       %USED     MAX AVAIL     OBJEC=
-TS
-> > >     recovery_test     2      39062G     69.39        12930G     10000=
-003
-> > >
-> > > So, in the similar setup , filestore is writing only ~23GB extra=20
-> > > and i.e ~0.029%
-> >=20
-> > This seems like a lot for bluestore.  The statfs output from bluestore =
-should show how much of the space is bluefs vs bluestore.
-> >=20
-> > Hmm, my guess is that bluestore is counting all of the space that it ha=
-s given to bluefs as used, even though bluefs isn't using it.  Probably jus=
-t need to make BlueStore::statfs() call BlueFs::statfs() and correct for th=
-e bluefs unused space...
-> >=20
-> > sage
-> > PLEASE NOTE: The information contained in this electronic mail message =
-is intended only for the use of the designated recipient(s) named above. If=
- the reader of this message is not the intended recipient, you are hereby n=
-otified that you have received this message in error and that any review, d=
-issemination, distribution, or copying of this message is strictly prohibit=
-ed. If you have received this communication in error, please notify the sen=
-der by telephone or e-mail (as shown above) immediately and destroy any and=
- all copies of this message in your possession (whether hard copies or elec=
-tronically stored copies).
-> >=20
-> >=20
+> Cheers
+> 
+> On 19/08/2016 09:18, wido@42on.com wrote:
+> > 
+> > 
+> >> Op 19 aug. 2016 om 07:28 heeft Loic Dachary <loic@dachary.org> het
+> >> volgende geschreven:
+> >>
+> >> Hi Sage,
+> >>
+> >> Here are the issues that would be in jewel v10.2.3 if we decided to
+> >> release it now: http://tracker.ceph.com/versions/518
+> >> And here is the backport queue :
+> >> http://tracker.ceph.com/projects/ceph/issues?query_id=96
+> >>
+> >> Do you think it is time to cut the release and ask QE to start testing ?
+> >>
+> > 
+> > I think that this one is a good candidate to go in as well. Since 10.2.4
+> > can take a while.
+> > 
+> > http://tracker.ceph.com/issues/17023 /
+> > https://github.com/ceph/ceph/pull/10725
+> > 
+> > Nasty one which might catch users and leave them wondering why the OSDs are
+> > not coming up.
+> > 
+> > Wido
+> > 
+> >> Cheers
+> >>
+> >> --
+> >> LoÃ¯c Dachary, Artisan Logiciel Libre
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=20
-> in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
+> Loïc Dachary, Artisan Logiciel Libre
+>
