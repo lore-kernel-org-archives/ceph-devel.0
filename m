@@ -1,42 +1,43 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: csum_order/csum_length encoding per blob
-Date: Mon, 22 Aug 2016 13:49:06 +0000
-Message-ID: <BLUPR0201MB19082E9CDF05E78B27233850E2E80@BLUPR0201MB1908.namprd02.prod.outlook.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Python 3 a blocking requirement?
+Date: Mon, 22 Aug 2016 16:37:34 +0200
+Message-ID: <2ef48fae-b971-3983-2488-c3181607dae3@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0087.outbound.protection.outlook.com ([104.47.42.87]:31424
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1755337AbcHVNtJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 22 Aug 2016 09:49:09 -0400
-Content-Language: en-US
+Received: from smtp.digiware.nl ([176.74.240.9]:33694 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756002AbcHVOhv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 22 Aug 2016 10:37:51 -0400
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 08F2825440
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2016 16:37:41 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Igor Fedotov <ifedotov@mirantis.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage/Igor,
+I was trying to do some tests on my Centos box.
+And ran into:
 
-Right now the csum_order and csum_length are per blob. Can we make them per=
- onode? Is there any specific reason to make them per blob?
-I understand we can choose a different type of checksum for the entire stor=
-e after using the store with one type of csum type. But is it a frequent op=
-eration?
-If we can place csum_* per onode, we can detach them from blob, we can redu=
-ce the serializable onode size this way.
-Or we can place the csum property as a pool property?
+-- Found PythonLibs: /usr/lib64/libpython2.7.so (found suitable version
+"2.7.5", minimum required is "2")
+CMake Error at
+/usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:108 (message):
+  Could NOT find Python3Interp: Found unsuitable version "2.7.5", but
+  required is at least "3" (found /usr/bin/python)
+Call Stack (most recent call first):
+  /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:313
+(_FPHSA_FAILURE_MESSAGE)
+  cmake/modules/FindPython3Interp.cmake:146
+(FIND_PACKAGE_HANDLE_STANDARD_ARGS)
+  src/CMakeLists.txt:274 (find_package)
 
-Thanks,
-Varada
+Now is this due to me not being synced enough with master/HEAD, or is
+this an actual problem?
 
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this message in error and that any review, disse=
-mination, distribution, or copying of this message is strictly prohibited. =
-If you have received this communication in error, please notify the sender =
-by telephone or e-mail (as shown above) immediately and destroy any and all=
- copies of this message in your possession (whether hard copies or electron=
-ically stored copies).
+Thanx,
+--WjW
+
