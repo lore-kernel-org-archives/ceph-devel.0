@@ -1,31 +1,57 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: What to do with python-ceph-compat?
-Date: Mon, 22 Aug 2016 14:20:40 -0600
-Message-ID: <CALqRxCwQwVfur17YUv1Q5Brx8GWbGGcAFA+v18p5q+SMn=6pxw@mail.gmail.com>
-References: <46719a38-0ab0-604d-89cb-50eeb6d32d3d@suse.cz>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: 0.94.8 QE validation status
+Date: Mon, 22 Aug 2016 14:04:19 -0700
+Message-ID: <CAMMFjmFnSi68xJKh+WtpzHzoGu=w1QPnDjZefAuN-fSXtdWi7g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f176.google.com ([209.85.217.176]:34357 "EHLO
-        mail-ua0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752523AbcHVUUm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2016 16:20:42 -0400
-Received: by mail-ua0-f176.google.com with SMTP id k90so209892157uak.1
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2016 13:20:41 -0700 (PDT)
-In-Reply-To: <46719a38-0ab0-604d-89cb-50eeb6d32d3d@suse.cz>
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:35875 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755894AbcHVVEW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2016 17:04:22 -0400
+Received: by mail-wm0-f47.google.com with SMTP id q128so137710047wma.1
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2016 14:04:21 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Weil, Sage" <sage@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Dachary, Loic" <ldachary@redhat.com>, Nathan Cutler <ncutler@suse.cz>
 
-On Mon, Aug 22, 2016 at 3:27 AM, Nathan Cutler <ncutler@suse.cz> wrote:
-> Finally, we could just keep the "python-ceph" (deb) and "python-ceph-compat"
-> (rpm) packages "forever", i.e. for as long as we have tests that start by
-> installing pre-hammer versions.
+Detailed summary of the QE Validation can be found here
+http://tracker.ceph.com/issues/15895#note-33
 
-I'm ok with keeping the package around this long. I don't expect us to
-still be testing firefly upgrades in Aug 2017, because Kraken and
-Luminous will be out, and I think Hammer will probably be the baseline
-for upgrade tests.
+The following suites were in scope of this point release testing:
 
-- Ken
+rados (subset 1/20)
+rbd
+rgw
+fs
+krbd
+kcephfs
+knfs
+hadoop
+samba
+rest
+ceph-deploy
+upgrade/client-upgrade
+upgrade/hammer-x (jewel)
+upgrade/hammer
+powercycle
+
+Deprecated suites (Sage pls reconfirm)
+
+upgrade/dumpling-firefly-x
+upgrade/firefly-x (hammer)
+upgrade/hammer-x (infernalis)
+upgrade/firefly-hammer-x (infernalis)
+
+Known issues (need approval):
+
+http://tracker.ceph.com/issues/17075 was caught be several runs, see
+email from Nathan with details "What to do with python-ceph-compat?"
+
+krbd -  http://tracker.ceph.com/issues/17083 (Jason pls review/approve)
+knsf - http://tracker.ceph.com/issues/17074 (Gregory, Sage pls review/approve)
+upgrade/hammer-x (jewel) - http://tracker.ceph.com/issues/17075 (Sage
+pls review/approve)
+
+Thx
+YuriW
