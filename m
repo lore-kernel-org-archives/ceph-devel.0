@@ -1,126 +1,164 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Odd WAL traffic for BlueStore
-Date: Mon, 22 Aug 2016 15:08:20 +0000
-Message-ID: <BL2PR02MB2115EFE5D05D208F2C6F45AAF4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Odd WAL traffic for BlueStore
+Date: Mon, 22 Aug 2016 18:08:30 +0300
+Message-ID: <2804de2d-b39c-bee1-a1e3-25b4cb7a041b@mirantis.com>
 References: <6efcdfb2-e25b-bceb-b10c-0669c813d917@mirantis.com>
  <BL2PR02MB21151B5FE45EDD119BB3084DF4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam01on0089.outbound.protection.outlook.com ([104.47.34.89]:20560
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754714AbcHVPIZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 22 Aug 2016 11:08:25 -0400
+Received: from mail-lf0-f41.google.com ([209.85.215.41]:33736 "EHLO
+        mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755845AbcHVPId (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2016 11:08:33 -0400
+Received: by mail-lf0-f41.google.com with SMTP id b199so80232587lfe.0
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2016 08:08:32 -0700 (PDT)
 In-Reply-To: <BL2PR02MB21151B5FE45EDD119BB3084DF4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
-Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-QW5vdGhlciBwb2ludCwgSSBuZXZlciB0cmllZCBidXQgdGhlcmUgaXMgYW4gb3B0aW9uIHRvIGRp
-c2FibGUgV0FMIHdyaXRlIGR1cmluZyByb2Nrc2RiIHdyaXRlLCB3ZSBjYW4gdHJ5IHRoaXMgb3B0
-aW9uIGFuZCBzZWUgaWYgdGhhdCBpcyByZWR1Y2luZyBXQUwgcGFydGl0aW9uIHdyaXRlcyBvciBu
-b3QuDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdl
-LS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2Vw
-aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTb21uYXRoIFJveQ0K
-U2VudDogTW9uZGF5LCBBdWd1c3QgMjIsIDIwMTYgODowNiBBTQ0KVG86IElnb3IgRmVkb3Rvdjsg
-Y2VwaC1kZXZlbA0KU3ViamVjdDogUkU6IE9kZCBXQUwgdHJhZmZpYyBmb3IgQmx1ZVN0b3JlDQoN
-Cklnb3IsDQpJIGFtIGFsd2F5cyBzZWVpbmcgdGhpcyBXQUwgdHJhZmZpYyBpbiBteSA0ayB0ZXN0
-cy4gSW5pdGlhbGx5LCBJIHRob3VnaHQgdGhlcmUgYXJlIHNvbWUgZmF1bHR5IGxvZ2ljIG9uIEJs
-dWVzdG9yZSBzaWRlIGFuZCBub3QgaG9ub3JpbmcgbWluX2FsbG9jX3NpemUgLCBidXQsIGZ1cnRo
-ZXIgZGVidWdnaW5nIGl0IHNlZW1zIHRoZSB0cmFmZmljIGlzIGdlbmVyYXRlZCBmcm9tIEJsdWVG
-Uy9Sb2Nrc2RiLg0KUmVnYXJkaW5nIHJvY2tzZGIgdHVuaW5nLCBpZiB5b3UgYXJlIG5vdCBydW5u
-aW5nIHRoZSB0ZXN0cyBsb25nIGVub3VnaCAobWF5IGJlID4yMCBtaW4pIHlvdSB3b3VsZG4ndCBi
-ZSBzZWVpbmcgYW55IGRpZmZlcmVuY2Ugd2l0aCBkZWZhdWx0Lg0KDQpUaGFua3MgJiBSZWdhcmRz
-DQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVs
-LW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
-ZWwub3JnXSBPbiBCZWhhbGYgT2YgSWdvciBGZWRvdG92DQpTZW50OiBNb25kYXksIEF1Z3VzdCAy
-MiwgMjAxNiA2OjQ3IEFNDQpUbzogY2VwaC1kZXZlbA0KU3ViamVjdDogT2RkIFdBTCB0cmFmZmlj
-IGZvciBCbHVlU3RvcmUNCg0KSGkgQWxsLA0KDQpXaGlsZSB0ZXN0aW5nIEJsdWVTdG9yZSBhcyBh
-IHN0YW5kYWxvbmUgc3RvcmFnZSB2aWEgRklPIHBsdWdpbiBJJ20gb2JzZXJ2aW5nIGh1Z2UgdHJh
-ZmZpYyB0byBhIFdBTCBkZXZpY2UuDQoNCkJsdWVzdG9yZSBpcyBjb25maWd1cmVkIHRvIHVzZSAy
-IDQ1MCBHYiBJbnRlbCdzIFNTRDogSU5URUwgU1NEU0MyQlg0ODBHNEwNCg0KVGhlIGZpcnN0IFNT
-RCBpcyBzcGxpdCBpbnRvIDIgcGFydGl0aW9ucyAoMjAwICYgMjUwIEdiKSBmb3IgQmxvY2sgREIg
-YW5kIEJsb2NrIFdBTC4NCg0KVGhlIHNlY29uZCBpcyBzcGxpdCBzaW1pbGFybHkgYW5kIGZpcnN0
-IDIwMEdiIHBhcnRpdGlvbiBhbGxvY2F0ZWQgZm9yIFJhdyBCbG9jayBkYXRhLg0KDQpSb2Nrc0RC
-IHNldHRpbmdzIGFyZSBzZXQgYXMgU29tbmF0aCBzdWdnZXN0ZWQgaW4gaGlzICdSb2Nrc0RCIHR1
-bmluZycgLg0KTm8gbXVjaCBkaWZmZXJlbmNlIGNvbXBhcmluZyB0byBkZWZhdWx0IHNldHRpbmdz
-IHRob3VnaC4uLg0KDQpBcyBhIHJlc3VsdCB3aGVuIGRvaW5nIDRrIHNlcXVlbnRpYWwgd3JpdGUg
-KDhHYiB0b3RhbCkgdG8gYSBmcmVzaCBzdG9yYWdlIEknbSBvYnNlcnZpbmcgKHVzaW5nIG5tb24g
-YW5kIG90aGVyIGRpc2sgbW9uIHRvb2xzKSBzaWduaWZpY2FudCB3cml0ZSB0cmFmZmljIHRvIFdB
-TCBkZXZpY2UuIEFuZCBpdCBncm93cyBldmVudHVhbGx5IGZyb20gfjEwTWJzIHRvIH4xNzBNYnMu
-IFJhdyBCbG9jayBkZXZpY2UgdHJhZmZpYyBpcyBwcmV0dHkgc3RhYmxlIGF0IH4zMCBNYnMuDQoN
-CkFkZGl0aW9uYWxseSBJIGluc2VydGVkIGFuIG91dHB1dCBmb3IgQmx1ZUZTIHBlcmYgY291bnRl
-cnMgb24gdW1vdW50KGxfYmx1ZWZzX2J5dGVzX3dyaXR0ZW5fd2FsICYgbF9ibHVlZnNfYnl0ZXNf
-d3JpdHRlbl9zc3QpLg0KDQpUaGUgcmVzdWx0aW5nIHZhbHVlcyBhcmUgdmVyeSBmcnVzdHJhdGlu
-ZzogfjI4R2IgYW5kIDRHYiBmb3IgbF9ibHVlZnNfYnl0ZXNfd3JpdHRlbl93YWwgJiBsX2JsdWVm
-c19ieXRlc193cml0dGVuX3NzdCByZXNwZWN0aXZlbHkuDQoNCg0KRG9pbmcgNjRLIGNoYW5nZXMg
-dGhlIHBpY3R1cmUgZHJhbWF0aWNhbGx5Og0KDQpXQUwgdHJhZmZpYyBpcyBzdGFibGUgYXQgMTAt
-MTIgTWJzIGFuZCBSQVcgQmxvY2sgb25lIGlzIGF0IH40MDBNYnMgQmx1ZUZTIGNvdW50ZXJzIGFy
-ZSB+MTQwTWIgYW5kIDFLIHJlc3BlY3RpdmVseS4NCg0KU3VyZWx5IHdyaXRlIGNvbXBsZXRlcyBt
-dWNoIGZhc3RlciBpbiB0aGUgc2Vjb25kIGNhc2UuDQoNCk5vIFdBTCBpcyByZXBvcnRlZCBpbiBs
-b2dzIGF0IEJsdWVTdG9yZSBsZXZlbCBmb3IgYm90aCBjYXNlcy4NCg0KDQpIaWdoIEJsdWVGUyBX
-QUwgdHJhZmZpYyBpcyBvYnNlcnZlZCB3aGVuIHJ1bm5pbmcgc3Vic2VxdWVudCByYW5kb20gNEsg
-Ulcgb3ZlciB0aGUgc3RvcmUgcHJvcGFnYXRlZCB0aGlzIHdheSB0b28uDQoNCkknbSB3b25kZXJp
-bmcgd2h5IFdBTCBkZXZpY2UgaXMgaW52b2x2ZWQgaW4gdGhlIHByb2Nlc3MgYXQgYWxsICggd3Jp
-dGVzIGhhcHBlbiBpbiBtaW5fYWxsb2Nfc2l6ZSBibG9ja3MpIG9wZXJhdGUgYW5kIHdoeSB0aGUg
-dHJhZmZpYyBhbmQgd3JpdHRlbiBkYXRhIHZvbHVtZSBpcyBzbyBoaWdoPw0KDQpEb24ndCB3ZSBo
-YXZlIHNvbWUgZmF1bHQgYWZmZWN0aW5nIDRLIHBlcmZvcm1hbmNlIGhlcmU/DQoNCg0KSGVyZSBh
-cmUgbXkgc2V0dGluZ3MgYW5kIEZJTyBqb2Igc3BlY2lmaWNhdGlvbjoNCg0KIyMjIyMjIyMjIyMj
-IyMjIyMjIyMjIyMjIyMjDQoNCltnbG9iYWxdDQogICAgICAgICBkZWJ1ZyBibHVlc3RvcmUgPSAw
-LzANCiAgICAgICAgIGRlYnVnIGJsdWVmcyA9IDEvMA0KICAgICAgICAgZGVidWcgYmRldiA9IDAv
-MA0KICAgICAgICAgZGVidWcgcm9ja3NkYiA9IDAvMA0KDQogICAgICAgICAjIHNwcmVhZCBvYmpl
-Y3RzIG92ZXIgOCBjb2xsZWN0aW9ucw0KICAgICAgICAgb3NkIHBvb2wgZGVmYXVsdCBwZyBudW0g
-PSAzMg0KICAgICAgICAgbG9nIHRvIHN0ZGVyciA9IGZhbHNlDQoNCltvc2RdDQogICAgICAgICBv
-c2Qgb2JqZWN0c3RvcmUgPSBibHVlc3RvcmUNCiAgICAgICAgIGJsdWVzdG9yZV9ibG9ja19jcmVh
-dGUgPSB0cnVlDQogICAgICAgICBibHVlc3RvcmVfYmxvY2tfZGJfY3JlYXRlID0gdHJ1ZQ0KICAg
-ICAgICAgYmx1ZXN0b3JlX2Jsb2NrX3dhbF9jcmVhdGUgPSB0cnVlDQogICAgICAgICBibHVlc3Rv
-cmVfbWluX2FsbG9jX3NpemUgPSA0MDk2DQogICAgICAgICAjYmx1ZXN0b3JlX21heF9hbGxvY19z
-aXplID0gI29yIDQwOTYNCiAgICAgICAgIGJsdWVzdG9yZV9mc2NrX29uX21vdW50ID0gZmFsc2UN
-Cg0KICAgICAgICAgYmx1ZXN0b3JlX2Jsb2NrX3BhdGg9L2Rldi9zZGkxDQogICAgICAgICBibHVl
-c3RvcmVfYmxvY2tfZGJfcGF0aD0vZGV2L3NkZTENCiAgICAgICAgIGJsdWVzdG9yZV9ibG9ja193
-YWxfcGF0aD0vZGV2L3NkZTINCg0KICAgICAgICAgZW5hYmxlIGV4cGVyaW1lbnRhbCB1bnJlY292
-ZXJhYmxlIGRhdGEgY29ycnVwdGluZyBmZWF0dXJlcyA9IGJsdWVzdG9yZSByb2Nrc2RiIG1lbWRi
-DQoNCiAgICAgICAgIGJsdWVzdG9yZV9yb2Nrc2RiX29wdGlvbnMgPQ0KIm1heF93cml0ZV9idWZm
-ZXJfbnVtYmVyPTE2LG1pbl93cml0ZV9idWZmZXJfbnVtYmVyX3RvX21lcmdlPTIscmVjeWNsZV9s
-b2dfZmlsZV9udW09MTYsY29tcGFjdGlvbl90aHJlYWRzPTMyLGZsdXNoZXJfdGhyZWFkcz04LG1h
-eF9iYWNrZ3JvdW5kX2NvbXBhY3Rpb25zPTMyLG1heF9iYWNrZ3JvdW5kX2ZsdXNoZXM9OCxtYXhf
-Ynl0ZXNfZm9yX2xldmVsX2Jhc2U9NTM2ODcwOTEyMCx3cml0ZV9idWZmZXJfc2l6ZT04Mzg4NjA4
-MCxsZXZlbDBfZmlsZV9udW1fY29tcGFjdGlvbl90cmlnZ2VyPTQsbGV2ZWwwX3Nsb3dkb3duX3dy
-aXRlc190cmlnZ2VyPTQwMCxsZXZlbDBfc3RvcF93cml0ZXNfdHJpZ2dlcj04MDAiDQoNCiAgICAg
-ICAgIHJvY2tzZGJfY2FjaGVfc2l6ZSA9IDQyOTQ5NjcyOTYNCiAgICAgICAgIGJsdWVzdG9yZV9j
-c3VtID0gZmFsc2UNCiAgICAgICAgIGJsdWVzdG9yZV9jc3VtX3R5cGUgPSBub25lDQogICAgICAg
-ICBibHVlc3RvcmVfYmx1ZWZzX2J1ZmZlcmVkX2lvID0gZmFsc2UNCiAgICAgICAgIGJsdWVzdG9y
-ZV9tYXhfb3BzID0gMzAwMDANCiAgICAgICAgIGJsdWVzdG9yZV9tYXhfYnl0ZXMgPSA2MjkxNDU2
-MDANCiAgICAgICAgIGJsdWVzdG9yZV9idWZmZXJfY2FjaGVfc2l6ZSA9IDEwNDg1NzYwMA0KICAg
-ICAgICAgYmx1ZXN0b3JlX2Jsb2NrX3dhbF9zaXplID0gMA0KDQogICAgICAgICAjIHVzZSBkaXJl
-Y3Rvcnk9IG9wdGlvbiBmcm9tIGZpbyBqb2IgZmlsZQ0KICAgICAgICAgb3NkIGRhdGEgPSAke2Zp
-b19kaXJ9DQoNCiAgICAgICAgICMgbG9nIGluc2lkZSBmaW9fZGlyDQogICAgICAgICBsb2cgZmls
-ZSA9ICR7ZmlvX2Rpcn0vbG9nDQojIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMN
-Cg0KI0ZJTyBqb2JzDQojIyMjIyMjIyMjIyMjIyMjIw0KIyBSdW5zIGEgNGsgcmFuZG9tIHdyaXRl
-IHRlc3QgYWdhaW5zdCB0aGUgY2VwaCBCbHVlU3RvcmUuDQpbZ2xvYmFsXQ0KaW9lbmdpbmU9L3Vz
-ci9sb2NhbC9saWIvbGliZmlvX2NlcGhfb2JqZWN0c3RvcmUuc28gIyBtdXN0IGJlIGZvdW5kIGlu
-IHlvdXIgTERfTElCUkFSWV9QQVRIDQoNCmNvbmY9Y2VwaC1ibHVlc3RvcmUtc29tbmF0aC5jb25m
-ICMgbXVzdCBwb2ludCB0byBhIHZhbGlkIGNlcGggY29uZmlndXJhdGlvbiBmaWxlIGRpcmVjdG9y
-eT0uL2Zpby1ibHVlc3RvcmUgIyBkaXJlY3RvcnkgZm9yIG9zZF9kYXRhDQoNCnJ3PXdyaXRlDQpp
-b2RlcHRoPTE2DQpzaXplPTI1Nm0NCg0KW2JsdWVzdG9yZV0NCm5yX2ZpbGVzPTYzDQpicz00ayAg
-ICAgICAgIyBvciA2NGsNCm51bWpvYnM9MzINCiMjIyMjIyMjIyMjIyMNCg0KDQotLQ0KVG8gdW5z
-dWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgt
-ZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
-b3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4g
-dGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNl
-IG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRl
-ciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUg
-aGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVy
-cm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3Ig
-Y29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhh
-dmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRo
-ZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0
-ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91
-ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3Jl
-ZCBjb3BpZXMpLg0KTiAgICAgciAgeSAgIGIgWCAgx6d2IF4gKd66ey5uICsgICB6IF16ICAge2F5
-IB3Kh9qZICxqICAgZiAgIGggICB6IB4gdyAgICAgICBqOit2ICAgdyBqIG0gICAgICAgICB6Wisg
-ICAgIN2iaiIgICEgaQ0K
+Somnath,
+
+Yeah, looks like that's indeed non-BlueStore traffic. I made some log 
+analysis and haven't seen any WAL activity at BlueStore level.
+
+And thanks for your comment on rocksdb tuning.
+
+Kind regards,
+
+Igor
+
+
+On 22.08.2016 18:05, Somnath Roy wrote:
+> Igor,
+> I am always seeing this WAL traffic in my 4k tests. Initially, I thought there are some faulty logic on Bluestore side and not honoring min_alloc_size , but, further debugging it seems the traffic is generated from BlueFS/Rocksdb.
+> Regarding rocksdb tuning, if you are not running the tests long enough (may be >20 min) you wouldn't be seeing any difference with default.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Igor Fedotov
+> Sent: Monday, August 22, 2016 6:47 AM
+> To: ceph-devel
+> Subject: Odd WAL traffic for BlueStore
+>
+> Hi All,
+>
+> While testing BlueStore as a standalone storage via FIO plugin I'm observing huge traffic to a WAL device.
+>
+> Bluestore is configured to use 2 450 Gb Intel's SSD: INTEL SSDSC2BX480G4L
+>
+> The first SSD is split into 2 partitions (200 & 250 Gb) for Block DB and Block WAL.
+>
+> The second is split similarly and first 200Gb partition allocated for Raw Block data.
+>
+> RocksDB settings are set as Somnath suggested in his 'RocksDB tuning' .
+> No much difference comparing to default settings though...
+>
+> As a result when doing 4k sequential write (8Gb total) to a fresh storage I'm observing (using nmon and other disk mon tools) significant write traffic to WAL device. And it grows eventually from ~10Mbs to ~170Mbs. Raw Block device traffic is pretty stable at ~30 Mbs.
+>
+> Additionally I inserted an output for BlueFS perf counters on umount(l_bluefs_bytes_written_wal & l_bluefs_bytes_written_sst).
+>
+> The resulting values are very frustrating: ~28Gb and 4Gb for l_bluefs_bytes_written_wal & l_bluefs_bytes_written_sst respectively.
+>
+>
+> Doing 64K changes the picture dramatically:
+>
+> WAL traffic is stable at 10-12 Mbs and RAW Block one is at ~400Mbs
+> BlueFS counters are ~140Mb and 1K respectively.
+>
+> Surely write completes much faster in the second case.
+>
+> No WAL is reported in logs at BlueStore level for both cases.
+>
+>
+> High BlueFS WAL traffic is observed when running subsequent random 4K RW
+> over the store propagated this way too.
+>
+> I'm wondering why WAL device is involved in the process at all ( writes
+> happen in min_alloc_size blocks) operate and why the traffic and written
+> data volume is so high?
+>
+> Don't we have some fault affecting 4K performance here?
+>
+>
+> Here are my settings and FIO job specification:
+>
+> ###########################
+>
+> [global]
+>           debug bluestore = 0/0
+>           debug bluefs = 1/0
+>           debug bdev = 0/0
+>           debug rocksdb = 0/0
+>
+>           # spread objects over 8 collections
+>           osd pool default pg num = 32
+>           log to stderr = false
+>
+> [osd]
+>           osd objectstore = bluestore
+>           bluestore_block_create = true
+>           bluestore_block_db_create = true
+>           bluestore_block_wal_create = true
+>           bluestore_min_alloc_size = 4096
+>           #bluestore_max_alloc_size = #or 4096
+>           bluestore_fsck_on_mount = false
+>
+>           bluestore_block_path=/dev/sdi1
+>           bluestore_block_db_path=/dev/sde1
+>           bluestore_block_wal_path=/dev/sde2
+>
+>           enable experimental unrecoverable data corrupting features =
+> bluestore rocksdb memdb
+>
+>           bluestore_rocksdb_options =
+> "max_write_buffer_number=16,min_write_buffer_number_to_merge=2,recycle_log_file_num=16,compaction_threads=32,flusher_threads=8,max_background_compactions=32,max_background_flushes=8,max_bytes_for_level_base=5368709120,write_buffer_size=83886080,level0_file_num_compaction_trigger=4,level0_slowdown_writes_trigger=400,level0_stop_writes_trigger=800"
+>
+>           rocksdb_cache_size = 4294967296
+>           bluestore_csum = false
+>           bluestore_csum_type = none
+>           bluestore_bluefs_buffered_io = false
+>           bluestore_max_ops = 30000
+>           bluestore_max_bytes = 629145600
+>           bluestore_buffer_cache_size = 104857600
+>           bluestore_block_wal_size = 0
+>
+>           # use directory= option from fio job file
+>           osd data = ${fio_dir}
+>
+>           # log inside fio_dir
+>           log file = ${fio_dir}/log
+> ####################################
+>
+> #FIO jobs
+> #################
+> # Runs a 4k random write test against the ceph BlueStore.
+> [global]
+> ioengine=/usr/local/lib/libfio_ceph_objectstore.so # must be found in
+> your LD_LIBRARY_PATH
+>
+> conf=ceph-bluestore-somnath.conf # must point to a valid ceph
+> configuration file
+> directory=./fio-bluestore # directory for osd_data
+>
+> rw=write
+> iodepth=16
+> size=256m
+>
+> [bluestore]
+> nr_files=63
+> bs=4k        # or 64k
+> numjobs=32
+> #############
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
