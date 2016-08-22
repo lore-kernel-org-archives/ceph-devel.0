@@ -1,216 +1,155 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Odd WAL traffic for BlueStore
-Date: Mon, 22 Aug 2016 19:14:17 +0300
-Message-ID: <1cca0540-16e2-fbc7-b6fe-e373affd59de@mirantis.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Odd WAL traffic for BlueStore
+Date: Mon, 22 Aug 2016 16:13:59 +0000
+Message-ID: <BL2PR02MB21153CF98D9601EEC92BB75DF4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
 References: <6efcdfb2-e25b-bceb-b10c-0669c813d917@mirantis.com>
- <alpine.DEB.2.11.1608221503560.2394@piezo.us.to>
- <f131f407-0a93-50c0-eab0-3cad3a0009bd@mirantis.com>
- <alpine.DEB.2.11.1608221512080.2394@piezo.us.to>
+ <BL2PR02MB21151B5FE45EDD119BB3084DF4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <BL2PR02MB2115EFE5D05D208F2C6F45AAF4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <f196b058-7fa0-1901-6aa5-ceba2fdbc8bc@mirantis.com>
+ <BL2PR02MB2115973D9B9D051C9B4FC977F4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f46.google.com ([209.85.215.46]:34670 "EHLO
-        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752074AbcHVQOV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2016 12:14:21 -0400
-Received: by mail-lf0-f46.google.com with SMTP id l89so81572117lfi.1
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2016 09:14:20 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1608221512080.2394@piezo.us.to>
+Received: from mail-sn1nam02on0089.outbound.protection.outlook.com ([104.47.36.89]:52656
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1755256AbcHVQ2v (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 22 Aug 2016 12:28:51 -0400
+In-Reply-To: <BL2PR02MB2115973D9B9D051C9B4FC977F4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Sage,
-
-here it is
-
-https://drive.google.com/open?id=0B-4q9QFReegLZmxrd19VYTc2aVU
-
-
-debug bluestore was set to 10 to reduce the log's size.
-
-nr_files=8
-
-numjobs=1
-
-
-Total 89Mb was written from fio.
-
-Please note following lines at the end
-
-2016-08-22 15:53:01.717433 7fbf42ffd700  0 bluefs umount
-2016-08-22 15:53:01.717440 7fbf42ffd700  0 bluefs 859013499 1069409
-
-These are mentioned bluefs perf counters.
-
-859Mb for 'wal_bytes_written'!
-
-Please let me know if you need anything else.
-
-Thanks,
-Igor
-
-On 22.08.2016 18:12, Sage Weil wrote:
-> debug bluestore = 20
-> debug bluefs = 20
-> debug rocksdb = 5
->
-> Thanks!
-> sage
->
->
-> On Mon, 22 Aug 2016, Igor Fedotov wrote:
->
->> Will prepare shortly. Any suggestions on desired levels and components?
->>
->>
->> On 22.08.2016 18:08, Sage Weil wrote:
->>> On Mon, 22 Aug 2016, Igor Fedotov wrote:
->>>> Hi All,
->>>>
->>>> While testing BlueStore as a standalone storage via FIO plugin I'm
->>>> observing
->>>> huge traffic to a WAL device.
->>>>
->>>> Bluestore is configured to use 2 450 Gb Intel's SSD: INTEL SSDSC2BX480G4L
->>>>
->>>> The first SSD is split into 2 partitions (200 & 250 Gb) for Block DB and
->>>> Block
->>>> WAL.
->>>>
->>>> The second is split similarly and first 200Gb partition allocated for Raw
->>>> Block data.
->>>>
->>>> RocksDB settings are set as Somnath suggested in his 'RocksDB tuning' . No
->>>> much difference comparing to default settings though...
->>>>
->>>> As a result when doing 4k sequential write (8Gb total) to a fresh storage
->>>> I'm
->>>> observing (using nmon and other disk mon tools) significant write traffic
->>>> to
->>>> WAL device. And it grows eventually from ~10Mbs to ~170Mbs. Raw Block
->>>> device
->>>> traffic is pretty stable at ~30 Mbs.
->>>>
->>>> Additionally I inserted an output for BlueFS perf counters on
->>>> umount(l_bluefs_bytes_written_wal & l_bluefs_bytes_written_sst).
->>>>
->>>> The resulting values are very frustrating: ~28Gb and 4Gb for
->>>> l_bluefs_bytes_written_wal & l_bluefs_bytes_written_sst respectively.
->>> Yeah, this doesn't seem right.  Have you generated a log to see what is
->>> actually happening on each write?  I don't have any bright ideas about
->>> what is going wrong here.
->>>
->>> sage
->>>
->>>> Doing 64K changes the picture dramatically:
->>>>
->>>> WAL traffic is stable at 10-12 Mbs and RAW Block one is at ~400Mbs
->>>> BlueFS counters are ~140Mb and 1K respectively.
->>>>
->>>> Surely write completes much faster in the second case.
->>>>
->>>> No WAL is reported in logs at BlueStore level for both cases.
->>>>
->>>>
->>>> High BlueFS WAL traffic is observed when running subsequent random 4K RW
->>>> over
->>>> the store propagated this way too.
->>>>
->>>> I'm wondering why WAL device is involved in the process at all ( writes
->>>> happen
->>>> in min_alloc_size blocks) operate and why the traffic and written data
->>>> volume
->>>> is so high?
->>>>
->>>> Don't we have some fault affecting 4K performance here?
->>>>
->>>>
->>>> Here are my settings and FIO job specification:
->>>>
->>>> ###########################
->>>>
->>>> [global]
->>>>           debug bluestore = 0/0
->>>>           debug bluefs = 1/0
->>>>           debug bdev = 0/0
->>>>           debug rocksdb = 0/0
->>>>
->>>>           # spread objects over 8 collections
->>>>           osd pool default pg num = 32
->>>>           log to stderr = false
->>>>
->>>> [osd]
->>>>           osd objectstore = bluestore
->>>>           bluestore_block_create = true
->>>>           bluestore_block_db_create = true
->>>>           bluestore_block_wal_create = true
->>>>           bluestore_min_alloc_size = 4096
->>>>           #bluestore_max_alloc_size = #or 4096
->>>>           bluestore_fsck_on_mount = false
->>>>
->>>>           bluestore_block_path=/dev/sdi1
->>>>           bluestore_block_db_path=/dev/sde1
->>>>           bluestore_block_wal_path=/dev/sde2
->>>>
->>>>           enable experimental unrecoverable data corrupting features =
->>>> bluestore
->>>> rocksdb memdb
->>>>
->>>>           bluestore_rocksdb_options =
->>>> "max_write_buffer_number=16,min_write_buffer_number_to_merge=2,recycle_log_file_num=16,compaction_threads=32,flusher_threads=8,max_background_compactions=32,max_background_flushes=8,max_bytes_for_level_base=5368709120,write_buffer_size=83886080,level0_file_num_compaction_trigger=4,level0_slowdown_writes_trigger=400,level0_stop_writes_trigger=800"
->>>>
->>>>           rocksdb_cache_size = 4294967296
->>>>           bluestore_csum = false
->>>>           bluestore_csum_type = none
->>>>           bluestore_bluefs_buffered_io = false
->>>>           bluestore_max_ops = 30000
->>>>           bluestore_max_bytes = 629145600
->>>>           bluestore_buffer_cache_size = 104857600
->>>>           bluestore_block_wal_size = 0
->>>>
->>>>           # use directory= option from fio job file
->>>>           osd data = ${fio_dir}
->>>>
->>>>           # log inside fio_dir
->>>>           log file = ${fio_dir}/log
->>>> ####################################
->>>>
->>>> #FIO jobs
->>>> #################
->>>> # Runs a 4k random write test against the ceph BlueStore.
->>>> [global]
->>>> ioengine=/usr/local/lib/libfio_ceph_objectstore.so # must be found in your
->>>> LD_LIBRARY_PATH
->>>>
->>>> conf=ceph-bluestore-somnath.conf # must point to a valid ceph
->>>> configuration
->>>> file
->>>> directory=./fio-bluestore # directory for osd_data
->>>>
->>>> rw=write
->>>> iodepth=16
->>>> size=256m
->>>>
->>>> [bluestore]
->>>> nr_files=63
->>>> bs=4k        # or 64k
->>>> numjobs=32
->>>> #############
->>>>
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-
+SWdvciwNCkkganVzdCB2ZXJpZmllZCBzZXR0aW5nICdkaXNhYmxlV0FMPSB0cnVlJyBpbiB0aGUg
+Y2VwaC5jb25mIHJvY2tzZGIgb3B0aW9uIGFuZCBpdCBpcyB3b3JraW5nIGFzIGV4cGVjdGVkLiBJ
+IGFtIG5vdCBzZWVpbmcgYW55IFdBTCB0cmFmZmljIG5vdy4NCg0KVGhhbmtzICYgUmVnYXJkcw0K
+U29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1v
+d25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVs
+Lm9yZ10gT24gQmVoYWxmIE9mIFNvbW5hdGggUm95DQpTZW50OiBNb25kYXksIEF1Z3VzdCAyMiwg
+MjAxNiA4OjUzIEFNDQpUbzogSWdvciBGZWRvdG92OyBjZXBoLWRldmVsDQpTdWJqZWN0OiBSRTog
+T2RkIFdBTCB0cmFmZmljIGZvciBCbHVlU3RvcmUNCg0KZGlzYWJsZVdBTD10cnVlIGluIHRoZSBy
+b2Nrc2RiIG9wdGlvbiBpbiBjZXBoLmNvbmYgb3IgZG8gdGhpcyAoaWYgcHJldmlvdXMgaXMgYnVn
+Z3kgb3Igbm90IHdvcmtpbmcpLi4NCg0KUm9ja3NEQlN0b3JlOjpzdWJtaXRfdHJhbnNhY3Rpb24g
+YW5kIFJvY2tzREJTdG9yZTo6c3VibWl0X3RyYW5zYWN0aW9uX3N5bmMgIGhhcyB0aGlzIG9wdGlv
+biBzZXQgZXhwbGljaXRseSAsIG1ha2UgaXQgJ3RydWUnLg0KDQp3b3B0aW9ucy5kaXNhYmxlV0FM
+ID0gdHJ1ZQ0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCg0KLS0tLS1PcmlnaW5hbCBN
+ZXNzYWdlLS0tLS0NCkZyb206IElnb3IgRmVkb3RvdiBbbWFpbHRvOmlmZWRvdG92QG1pcmFudGlz
+LmNvbV0gDQpTZW50OiBNb25kYXksIEF1Z3VzdCAyMiwgMjAxNiA4OjEyIEFNDQpUbzogU29tbmF0
+aCBSb3k7IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBPZGQgV0FMIHRyYWZmaWMgZm9yIEJsdWVT
+dG9yZQ0KDQpDYW4geW91IHBvaW50IGl0IG91dD8gRG9uJ3Qgc2VlIGFueS4uLg0KDQoNCk9uIDIy
+LjA4LjIwMTYgMTg6MDgsIFNvbW5hdGggUm95IHdyb3RlOg0KPiBBbm90aGVyIHBvaW50LCBJIG5l
+dmVyIHRyaWVkIGJ1dCB0aGVyZSBpcyBhbiBvcHRpb24gdG8gZGlzYWJsZSBXQUwgd3JpdGUgZHVy
+aW5nIHJvY2tzZGIgd3JpdGUsIHdlIGNhbiB0cnkgdGhpcyBvcHRpb24gYW5kIHNlZSBpZiB0aGF0
+IGlzIHJlZHVjaW5nIFdBTCBwYXJ0aXRpb24gd3JpdGVzIG9yIG5vdC4NCj4NCj4gVGhhbmtzICYg
+UmVnYXJkcw0KPiBTb21uYXRoDQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZy
+b206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1v
+d25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTb21uYXRoIFJveQ0KPiBTZW50OiBN
+b25kYXksIEF1Z3VzdCAyMiwgMjAxNiA4OjA2IEFNDQo+IFRvOiBJZ29yIEZlZG90b3Y7IGNlcGgt
+ZGV2ZWwNCj4gU3ViamVjdDogUkU6IE9kZCBXQUwgdHJhZmZpYyBmb3IgQmx1ZVN0b3JlDQo+DQo+
+IElnb3IsDQo+IEkgYW0gYWx3YXlzIHNlZWluZyB0aGlzIFdBTCB0cmFmZmljIGluIG15IDRrIHRl
+c3RzLiBJbml0aWFsbHksIEkgdGhvdWdodCB0aGVyZSBhcmUgc29tZSBmYXVsdHkgbG9naWMgb24g
+Qmx1ZXN0b3JlIHNpZGUgYW5kIG5vdCBob25vcmluZyBtaW5fYWxsb2Nfc2l6ZSAsIGJ1dCwgZnVy
+dGhlciBkZWJ1Z2dpbmcgaXQgc2VlbXMgdGhlIHRyYWZmaWMgaXMgZ2VuZXJhdGVkIGZyb20gQmx1
+ZUZTL1JvY2tzZGIuDQo+IFJlZ2FyZGluZyByb2Nrc2RiIHR1bmluZywgaWYgeW91IGFyZSBub3Qg
+cnVubmluZyB0aGUgdGVzdHMgbG9uZyBlbm91Z2ggKG1heSBiZSA+MjAgbWluKSB5b3Ugd291bGRu
+J3QgYmUgc2VlaW5nIGFueSBkaWZmZXJlbmNlIHdpdGggZGVmYXVsdC4NCj4NCj4gVGhhbmtzICYg
+UmVnYXJkcw0KPiBTb21uYXRoDQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZy
+b206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1v
+d25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBJZ29yIEZlZG90b3YNCj4gU2VudDog
+TW9uZGF5LCBBdWd1c3QgMjIsIDIwMTYgNjo0NyBBTQ0KPiBUbzogY2VwaC1kZXZlbA0KPiBTdWJq
+ZWN0OiBPZGQgV0FMIHRyYWZmaWMgZm9yIEJsdWVTdG9yZQ0KPg0KPiBIaSBBbGwsDQo+DQo+IFdo
+aWxlIHRlc3RpbmcgQmx1ZVN0b3JlIGFzIGEgc3RhbmRhbG9uZSBzdG9yYWdlIHZpYSBGSU8gcGx1
+Z2luIEknbSBvYnNlcnZpbmcgaHVnZSB0cmFmZmljIHRvIGEgV0FMIGRldmljZS4NCj4NCj4gQmx1
+ZXN0b3JlIGlzIGNvbmZpZ3VyZWQgdG8gdXNlIDIgNDUwIEdiIEludGVsJ3MgU1NEOiBJTlRFTCBT
+U0RTQzJCWDQ4MEc0TA0KPg0KPiBUaGUgZmlyc3QgU1NEIGlzIHNwbGl0IGludG8gMiBwYXJ0aXRp
+b25zICgyMDAgJiAyNTAgR2IpIGZvciBCbG9jayBEQiBhbmQgQmxvY2sgV0FMLg0KPg0KPiBUaGUg
+c2Vjb25kIGlzIHNwbGl0IHNpbWlsYXJseSBhbmQgZmlyc3QgMjAwR2IgcGFydGl0aW9uIGFsbG9j
+YXRlZCBmb3IgUmF3IEJsb2NrIGRhdGEuDQo+DQo+IFJvY2tzREIgc2V0dGluZ3MgYXJlIHNldCBh
+cyBTb21uYXRoIHN1Z2dlc3RlZCBpbiBoaXMgJ1JvY2tzREIgdHVuaW5nJyAuDQo+IE5vIG11Y2gg
+ZGlmZmVyZW5jZSBjb21wYXJpbmcgdG8gZGVmYXVsdCBzZXR0aW5ncyB0aG91Z2guLi4NCj4NCj4g
+QXMgYSByZXN1bHQgd2hlbiBkb2luZyA0ayBzZXF1ZW50aWFsIHdyaXRlICg4R2IgdG90YWwpIHRv
+IGEgZnJlc2ggc3RvcmFnZSBJJ20gb2JzZXJ2aW5nICh1c2luZyBubW9uIGFuZCBvdGhlciBkaXNr
+IG1vbiB0b29scykgc2lnbmlmaWNhbnQgd3JpdGUgdHJhZmZpYyB0byBXQUwgZGV2aWNlLiBBbmQg
+aXQgZ3Jvd3MgZXZlbnR1YWxseSBmcm9tIH4xME1icyB0byB+MTcwTWJzLiBSYXcgQmxvY2sgZGV2
+aWNlIHRyYWZmaWMgaXMgcHJldHR5IHN0YWJsZSBhdCB+MzAgTWJzLg0KPg0KPiBBZGRpdGlvbmFs
+bHkgSSBpbnNlcnRlZCBhbiBvdXRwdXQgZm9yIEJsdWVGUyBwZXJmIGNvdW50ZXJzIG9uIHVtb3Vu
+dChsX2JsdWVmc19ieXRlc193cml0dGVuX3dhbCAmIGxfYmx1ZWZzX2J5dGVzX3dyaXR0ZW5fc3N0
+KS4NCj4NCj4gVGhlIHJlc3VsdGluZyB2YWx1ZXMgYXJlIHZlcnkgZnJ1c3RyYXRpbmc6IH4yOEdi
+IGFuZCA0R2IgZm9yIGxfYmx1ZWZzX2J5dGVzX3dyaXR0ZW5fd2FsICYgbF9ibHVlZnNfYnl0ZXNf
+d3JpdHRlbl9zc3QgcmVzcGVjdGl2ZWx5Lg0KPg0KPg0KPiBEb2luZyA2NEsgY2hhbmdlcyB0aGUg
+cGljdHVyZSBkcmFtYXRpY2FsbHk6DQo+DQo+IFdBTCB0cmFmZmljIGlzIHN0YWJsZSBhdCAxMC0x
+MiBNYnMgYW5kIFJBVyBCbG9jayBvbmUgaXMgYXQgfjQwME1icyBCbHVlRlMgY291bnRlcnMgYXJl
+IH4xNDBNYiBhbmQgMUsgcmVzcGVjdGl2ZWx5Lg0KPg0KPiBTdXJlbHkgd3JpdGUgY29tcGxldGVz
+IG11Y2ggZmFzdGVyIGluIHRoZSBzZWNvbmQgY2FzZS4NCj4NCj4gTm8gV0FMIGlzIHJlcG9ydGVk
+IGluIGxvZ3MgYXQgQmx1ZVN0b3JlIGxldmVsIGZvciBib3RoIGNhc2VzLg0KPg0KPg0KPiBIaWdo
+IEJsdWVGUyBXQUwgdHJhZmZpYyBpcyBvYnNlcnZlZCB3aGVuIHJ1bm5pbmcgc3Vic2VxdWVudCBy
+YW5kb20gNEsgUlcgb3ZlciB0aGUgc3RvcmUgcHJvcGFnYXRlZCB0aGlzIHdheSB0b28uDQo+DQo+
+IEknbSB3b25kZXJpbmcgd2h5IFdBTCBkZXZpY2UgaXMgaW52b2x2ZWQgaW4gdGhlIHByb2Nlc3Mg
+YXQgYWxsICggd3JpdGVzIGhhcHBlbiBpbiBtaW5fYWxsb2Nfc2l6ZSBibG9ja3MpIG9wZXJhdGUg
+YW5kIHdoeSB0aGUgdHJhZmZpYyBhbmQgd3JpdHRlbiBkYXRhIHZvbHVtZSBpcyBzbyBoaWdoPw0K
+Pg0KPiBEb24ndCB3ZSBoYXZlIHNvbWUgZmF1bHQgYWZmZWN0aW5nIDRLIHBlcmZvcm1hbmNlIGhl
+cmU/DQo+DQo+DQo+IEhlcmUgYXJlIG15IHNldHRpbmdzIGFuZCBGSU8gam9iIHNwZWNpZmljYXRp
+b246DQo+DQo+ICMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIw0KPg0KPiBbZ2xvYmFsXQ0KPiAg
+ICAgICAgICAgZGVidWcgYmx1ZXN0b3JlID0gMC8wDQo+ICAgICAgICAgICBkZWJ1ZyBibHVlZnMg
+PSAxLzANCj4gICAgICAgICAgIGRlYnVnIGJkZXYgPSAwLzANCj4gICAgICAgICAgIGRlYnVnIHJv
+Y2tzZGIgPSAwLzANCj4NCj4gICAgICAgICAgICMgc3ByZWFkIG9iamVjdHMgb3ZlciA4IGNvbGxl
+Y3Rpb25zDQo+ICAgICAgICAgICBvc2QgcG9vbCBkZWZhdWx0IHBnIG51bSA9IDMyDQo+ICAgICAg
+ICAgICBsb2cgdG8gc3RkZXJyID0gZmFsc2UNCj4NCj4gW29zZF0NCj4gICAgICAgICAgIG9zZCBv
+YmplY3RzdG9yZSA9IGJsdWVzdG9yZQ0KPiAgICAgICAgICAgYmx1ZXN0b3JlX2Jsb2NrX2NyZWF0
+ZSA9IHRydWUNCj4gICAgICAgICAgIGJsdWVzdG9yZV9ibG9ja19kYl9jcmVhdGUgPSB0cnVlDQo+
+ICAgICAgICAgICBibHVlc3RvcmVfYmxvY2tfd2FsX2NyZWF0ZSA9IHRydWUNCj4gICAgICAgICAg
+IGJsdWVzdG9yZV9taW5fYWxsb2Nfc2l6ZSA9IDQwOTYNCj4gICAgICAgICAgICNibHVlc3RvcmVf
+bWF4X2FsbG9jX3NpemUgPSAjb3IgNDA5Ng0KPiAgICAgICAgICAgYmx1ZXN0b3JlX2ZzY2tfb25f
+bW91bnQgPSBmYWxzZQ0KPg0KPiAgICAgICAgICAgYmx1ZXN0b3JlX2Jsb2NrX3BhdGg9L2Rldi9z
+ZGkxDQo+ICAgICAgICAgICBibHVlc3RvcmVfYmxvY2tfZGJfcGF0aD0vZGV2L3NkZTENCj4gICAg
+ICAgICAgIGJsdWVzdG9yZV9ibG9ja193YWxfcGF0aD0vZGV2L3NkZTINCj4NCj4gICAgICAgICAg
+IGVuYWJsZSBleHBlcmltZW50YWwgdW5yZWNvdmVyYWJsZSBkYXRhIGNvcnJ1cHRpbmcgZmVhdHVy
+ZXMgPSBibHVlc3RvcmUgcm9ja3NkYiBtZW1kYg0KPg0KPiAgICAgICAgICAgYmx1ZXN0b3JlX3Jv
+Y2tzZGJfb3B0aW9ucyA9DQo+ICJtYXhfd3JpdGVfYnVmZmVyX251bWJlcj0xNixtaW5fd3JpdGVf
+YnVmZmVyX251bWJlcl90b19tZXJnZT0yLHJlY3ljbGVfbG9nX2ZpbGVfbnVtPTE2LGNvbXBhY3Rp
+b25fdGhyZWFkcz0zMixmbHVzaGVyX3RocmVhZHM9OCxtYXhfYmFja2dyb3VuZF9jb21wYWN0aW9u
+cz0zMixtYXhfYmFja2dyb3VuZF9mbHVzaGVzPTgsbWF4X2J5dGVzX2Zvcl9sZXZlbF9iYXNlPTUz
+Njg3MDkxMjAsd3JpdGVfYnVmZmVyX3NpemU9ODM4ODYwODAsbGV2ZWwwX2ZpbGVfbnVtX2NvbXBh
+Y3Rpb25fdHJpZ2dlcj00LGxldmVsMF9zbG93ZG93bl93cml0ZXNfdHJpZ2dlcj00MDAsbGV2ZWww
+X3N0b3Bfd3JpdGVzX3RyaWdnZXI9ODAwIg0KPg0KPiAgICAgICAgICAgcm9ja3NkYl9jYWNoZV9z
+aXplID0gNDI5NDk2NzI5Ng0KPiAgICAgICAgICAgYmx1ZXN0b3JlX2NzdW0gPSBmYWxzZQ0KPiAg
+ICAgICAgICAgYmx1ZXN0b3JlX2NzdW1fdHlwZSA9IG5vbmUNCj4gICAgICAgICAgIGJsdWVzdG9y
+ZV9ibHVlZnNfYnVmZmVyZWRfaW8gPSBmYWxzZQ0KPiAgICAgICAgICAgYmx1ZXN0b3JlX21heF9v
+cHMgPSAzMDAwMA0KPiAgICAgICAgICAgYmx1ZXN0b3JlX21heF9ieXRlcyA9IDYyOTE0NTYwMA0K
+PiAgICAgICAgICAgYmx1ZXN0b3JlX2J1ZmZlcl9jYWNoZV9zaXplID0gMTA0ODU3NjAwDQo+ICAg
+ICAgICAgICBibHVlc3RvcmVfYmxvY2tfd2FsX3NpemUgPSAwDQo+DQo+ICAgICAgICAgICAjIHVz
+ZSBkaXJlY3Rvcnk9IG9wdGlvbiBmcm9tIGZpbyBqb2IgZmlsZQ0KPiAgICAgICAgICAgb3NkIGRh
+dGEgPSAke2Zpb19kaXJ9DQo+DQo+ICAgICAgICAgICAjIGxvZyBpbnNpZGUgZmlvX2Rpcg0KPiAg
+ICAgICAgICAgbG9nIGZpbGUgPSAke2Zpb19kaXJ9L2xvZw0KPiAjIyMjIyMjIyMjIyMjIyMjIyMj
+IyMjIyMjIyMjIyMjIyMjIyMNCj4NCj4gI0ZJTyBqb2JzDQo+ICMjIyMjIyMjIyMjIyMjIyMjDQo+
+ICMgUnVucyBhIDRrIHJhbmRvbSB3cml0ZSB0ZXN0IGFnYWluc3QgdGhlIGNlcGggQmx1ZVN0b3Jl
+Lg0KPiBbZ2xvYmFsXQ0KPiBpb2VuZ2luZT0vdXNyL2xvY2FsL2xpYi9saWJmaW9fY2VwaF9vYmpl
+Y3RzdG9yZS5zbyAjIG11c3QgYmUgZm91bmQgaW4geW91ciBMRF9MSUJSQVJZX1BBVEgNCj4NCj4g
+Y29uZj1jZXBoLWJsdWVzdG9yZS1zb21uYXRoLmNvbmYgIyBtdXN0IHBvaW50IHRvIGEgdmFsaWQg
+Y2VwaCBjb25maWd1cmF0aW9uIGZpbGUgZGlyZWN0b3J5PS4vZmlvLWJsdWVzdG9yZSAjIGRpcmVj
+dG9yeSBmb3Igb3NkX2RhdGENCj4NCj4gcnc9d3JpdGUNCj4gaW9kZXB0aD0xNg0KPiBzaXplPTI1
+Nm0NCj4NCj4gW2JsdWVzdG9yZV0NCj4gbnJfZmlsZXM9NjMNCj4gYnM9NGsgICAgICAgICMgb3Ig
+NjRrDQo+IG51bWpvYnM9MzINCj4gIyMjIyMjIyMjIyMjIw0KPg0KPg0KPiAtLQ0KPiBUbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
+ZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
+cmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
+bW8taW5mby5odG1sDQo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGlu
+IHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVz
+ZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFk
+ZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJl
+IGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBl
+cnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9y
+IGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBo
+YXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0
+aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlh
+dGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlv
+dXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9y
+ZWQgY29waWVzKS4NCj4gTiAgICAgciAgeSAgIGIgWCAgx6d2IF4gKd66ey5uICsgICB6IF16ICAg
+e2F5IB3Kh9qZICxqICAgZiAgIGggICB6IB4gdyAgICAgICBqOit2ICAgdyBqIG0gICAgICAgICB6
+WisgICAgIN2iaiIgICEgaQ0KDQoT77+977+97Lm7HO+/vSbvv71+77+9Ju+/vRjvv73vv70rLe+/
+ve+/vd22F++/ve+/vXfvv73vv73Lm++/ve+/ve+/vW3vv70e77+9F17vv73vv71i77+977+9Xm7v
+v71y77+977+977+9eu+/vRrvv73vv71o77+977+977+977+9Ju+/ve+/vR7vv71H77+977+977+9
+aO+/vQMo77+96ZqO77+93aJqIu+/ve+/vRrvv70bbe+/ve+/ve+/ve+/ve+/vXrvv73elu+/ve+/
+ve+/vWbvv73vv73vv71o77+977+977+9fu+/vW3vv70NCg==
