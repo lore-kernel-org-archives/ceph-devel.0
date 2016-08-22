@@ -1,76 +1,29 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Re: why rbd journaling first write journal to journal pool and then
- write data
-Date: Mon, 22 Aug 2016 18:37:52 +0800
-Message-ID: <CALZt5jxa9FPnFD3KSEb3wy5gjWCJubj0m3Hn4rXvGCeyf4wm8w@mail.gmail.com>
-References: <CAKZcxgdqLtdyLPF-dXczMu1hWjbtoF3i2iugDJH1ngtmqNLNNA@mail.gmail.com>
- <FCFF045F-961E-4FCF-973F-9D0DFB6469DC@suse.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Mailing list archive?
+Date: Mon, 22 Aug 2016 14:30:51 +0200
+Message-ID: <8ac798ef-d952-647f-f53c-7b7a0c833b07@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f181.google.com ([209.85.220.181]:32882 "EHLO
-        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751352AbcHVKhy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2016 06:37:54 -0400
-Received: by mail-qk0-f181.google.com with SMTP id z190so80916837qkc.0
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2016 03:37:53 -0700 (PDT)
-In-Reply-To: <FCFF045F-961E-4FCF-973F-9D0DFB6469DC@suse.com>
+Received: from mx2.suse.de ([195.135.220.15]:51598 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752074AbcHVMax (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 22 Aug 2016 08:30:53 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 52395AAF2
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2016 12:30:52 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ricardo Dias <ricardo.dias@suse.com>
-Cc: Jaze Lee <jazeltq@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi, Ricardo
+At http://vger.kernel.org/vger-lists.html#ceph-devel and 
+http://ceph.com/resources/mailing-list-irc/ it says the archive of this 
+mailing list is http://dir.gmane.org/gmane.comp.file-systems.ceph.devel
 
-I got what you mean.
+However, public DNS servers no longer resolve dir.gmane.org.
 
-First of all, if we enable the rbd journaling, currently  write
-latency will be doubled since it should wait for finish of the write
-operation.
+I wonder if this has anything to do with this blog post [1] "The End of 
+Gmane"
 
-So If the issue is what you mentioned above. I think we have some
-other ways to solve it. For example, we can snapshot the primary image
-and run a whole image scan to find those objects which is different
-from each other. And then delete the snapshot on the primary and
-continue to replying journal again.  In this way, we can also maintain
-the image consistency?
-Regards
-Ning Yao
-
-
-2016-08-22 17:31 GMT+08:00 Ricardo Dias <ricardo.dias@suse.com>:
-> Hi Jaze,
->
-> If you write data first, and you have a failure after writing data and be=
-fore writing to the journal, then you cannot recover that write operation a=
-nd it will be lost.
->
-> You can see the journal as a primary replica of data.
->
-> Ricardo Dias
->
-> Sent from my mobile phone
->
->> On 22 Aug 2016, at 09:46, Jaze Lee <jazeltq@gmail.com> wrote:
->>
->> Hi all:
->>   I found that rbd journaling first write journal and then write data.
->>   Why we not first write data and then write journal? Is there some
->> considerration
->>   for which is first ?
->>
->>   Thanks a lot.
->>
->> --
->> =E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[1] https://lars.ingebrigtsen.no/2016/07/28/the-end-of-gmane/
