@@ -1,36 +1,31 @@
-From: Jason Dillaman <jdillama@redhat.com>
+From: Loic Dachary <loic@dachary.org>
 Subject: Re: rbd and the next jewel release v10.2.3
-Date: Tue, 23 Aug 2016 09:32:00 -0400
-Message-ID: <CA+aFP1Bfm3KpvGigaht=W=6yjBg0saBfLxMDv=BzB0KXMsEyjQ@mail.gmail.com>
-References: <57BC0D5F.5050006@dachary.org> <CA+aFP1CzY1UFgzUcWnCDAhqKH+p95gkhSZ7k+XhsuStm_y0ZnQ@mail.gmail.com>
+Date: Tue, 23 Aug 2016 15:32:20 +0200
+Message-ID: <57BC5064.1030109@dachary.org>
+References: <57BC0D5F.5050006@dachary.org>
+ <CA+aFP1CzY1UFgzUcWnCDAhqKH+p95gkhSZ7k+XhsuStm_y0ZnQ@mail.gmail.com>
  <57BC4BB1.2090803@dachary.org>
-Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f174.google.com ([209.85.192.174]:33284 "EHLO
-        mail-pf0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756416AbcHWNcZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Aug 2016 09:32:25 -0400
-Received: by mail-pf0-f174.google.com with SMTP id y134so43910549pfg.0
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Aug 2016 06:32:01 -0700 (PDT)
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:59607 "EHLO
+        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754577AbcHWNc1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Aug 2016 09:32:27 -0400
 In-Reply-To: <57BC4BB1.2090803@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
+To: dillaman@redhat.com
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
 
-The PR is available now [1].  I can build a test branch, run the
-tests, and email you with a +1 if that works better timezone-wise.
+The jewel-backport branch is in gitbuilder with the http://tracker.ceph.com/issues/16950 backport https://github.com/ceph/ceph/pull/10827 . I'll wait to hear from you before scheduling a run however.
 
-[1] https://github.com/ceph/ceph/pull/10827
-
-On Tue, Aug 23, 2016 at 9:12 AM, Loic Dachary <loic@dachary.org> wrote:
+On 23/08/2016 15:12, Loic Dachary wrote:
 > Ok. Let me know when the backport of http://tracker.ceph.com/issues/16950 is ready and I'll schedule tests. If you'd rather do the test yourself, that's also fine with me :-)
->
+> 
 > Cheers
->
+> 
 > On 23/08/2016 15:06, Jason Dillaman wrote:
 >> If at all possible, I would definitely like to see the following
 >> included in 10.2.3 since users are hitting it in the field:
@@ -65,11 +60,7 @@ On Tue, Aug 23, 2016 at 9:12 AM, Loic Dachary <loic@dachary.org> wrote:
 >>
 >>
 >>
->
-> --
-> Loïc Dachary, Artisan Logiciel Libre
-
-
+> 
 
 -- 
-Jason
+Loïc Dachary, Artisan Logiciel Libre
