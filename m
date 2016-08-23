@@ -1,66 +1,86 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: rbd and the next jewel release v10.2.3
-Date: Tue, 23 Aug 2016 15:32:20 +0200
-Message-ID: <57BC5064.1030109@dachary.org>
-References: <57BC0D5F.5050006@dachary.org>
- <CA+aFP1CzY1UFgzUcWnCDAhqKH+p95gkhSZ7k+XhsuStm_y0ZnQ@mail.gmail.com>
- <57BC4BB1.2090803@dachary.org>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: RE: errors in make-debs.sh because "make dist" fails on
+ 'rocksdb/db/slice.cc'
+Date: Tue, 23 Aug 2016 13:18:05 +0000
+Message-ID: <DB5PR05MB1607F44B510339AA71F00F54A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
+References: <DB5PR05MB1607C4B81D5433484A17801FA9E80@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <CAJ4mKGYP+9TQ8wT-eUH1WkgwqXY3z2uF+3WFtpK8BRFNF9VWBw@mail.gmail.com>
+ <DB5PR05MB160736C8DBCC82350BE98385A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <20160823110125.GG5955@rskikr.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:59607 "EHLO
-        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754577AbcHWNc1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Aug 2016 09:32:27 -0400
-In-Reply-To: <57BC4BB1.2090803@dachary.org>
+Received: from mail-db5eur01on0068.outbound.protection.outlook.com ([104.47.2.68]:47456
+        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754611AbcHWNcv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 23 Aug 2016 09:32:51 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-The jewel-backport branch is in gitbuilder with the http://tracker.ceph.com/issues/16950 backport https://github.com/ceph/ceph/pull/10827 . I'll wait to hear from you before scheduling a run however.
+Oops - submodule rocksdb was changed in ceph after v11.0.0:
 
-On 23/08/2016 15:12, Loic Dachary wrote:
-> Ok. Let me know when the backport of http://tracker.ceph.com/issues/16950 is ready and I'll schedule tests. If you'd rather do the test yourself, that's also fine with me :-)
-> 
-> Cheers
-> 
-> On 23/08/2016 15:06, Jason Dillaman wrote:
->> If at all possible, I would definitely like to see the following
->> included in 10.2.3 since users are hitting it in the field:
->>
->> http://tracker.ceph.com/issues/16950
->>
->> ... and given that would require another RBD test run prior to merge,
->> I would also like to include the following which already have open
->> PRs:
->>
->> https://github.com/ceph/ceph/pull/10791
->> https://github.com/ceph/ceph/pull/10790
->> https://github.com/ceph/ceph/pull/10792
->> https://github.com/ceph/ceph/pull/10646
->> https://github.com/ceph/ceph/pull/10647
->> https://github.com/ceph/ceph/pull/10786
->>
->> I can create a PR for the high priority issue this morning.
->>
->> On Tue, Aug 23, 2016 at 4:46 AM, Loic Dachary <loic@dachary.org> wrote:
->>> Hi Jason,
->>>
->>> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel received (I think :-) enough rbd backports to cut the release. It was more challenging than usual and I'd like to thank you and Mykola for helping with the tricky parts.
->>>
->>> Do you think the jewel branch is ready for QE to start their own round of testing ?
->>>
->>> Cheers
->>>
->>> --
->>> Loïc Dachary, Artisan Logiciel Libre
->>>
->>
->>
->>
-> 
+master - not working:
+rocksdb @ 6797e6f	rocksdb: revert the change introduced by dc41731
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+v11.0.0 - working:
+rocksdb @ 5647fa4	rocksdb: pull up to master
+
+
+and apparently, *the file 'db/slice.cc' was deleted during that change*
+hence, this explains why make dist (that is invoked by ./make-debs.sh) comp=
+lains about it
+         make[2]: *** No rule to make target 'rocksdb/db/slice.cc', needed =
+by 'distdir'.  Stop.
+
+Any idea how to fix this?
+
+TIA,
+  Avner
+
+
+-----Original Message-----
+From: Avner Ben Hanoch=20
+Sent: Tuesday, August 23, 2016 15:13
+To: 'Brad Hubbard'=20
+Cc: Gregory Farnum; Ceph Development <ceph-devel@vger.kernel.org>
+Subject: RE: errors in make-debs.sh because "make dist" fails on 'rocksdb/d=
+b/slice.cc'
+
+Thanks Brad,
+
+Unfortunately, cleaning doesn't help
+And anyhow the error occurs even with fresh git clone from the HEAD of ceph=
+ master (that brings with it fresh submodules)
+
+AFAICU, the SHA1 of src/rocksdb is identical (for both workingv11.0.0  and =
+not working HEAD of master) In both cases, I see: SHA1=3D6797e6f Avoid upda=
+ting memtable allocated bytes if write_buffer_size is not set (which is als=
+o the latest commit in https://github.com/ceph/rocksdb)
+
+Avner
+
+-----Original Message-----
+From: Brad Hubbard
+Sent: Tuesday, August 23, 2016 14:01
+To: Avner Ben Hanoch
+Cc: Gregory Farnum; Ceph Development <ceph-devel@vger.kernel.org>
+Subject: Re: errors in make-debs.sh because "make dist" fails on 'rocksdb/d=
+b/slice.cc'
+
+
+You could try changing to src/rocksdb and running "make clean" and "git cle=
+an -fdx" and retrying the build. It's possible some build artefact was left=
+ over in that submodule's directory structure for that commit. You could al=
+so compare the
+SHA1 of the src/rocksdb submodule in each case (workingv11.0.0  and not wor=
+king) and see what changed between them.
+
+--
+HTH,
+Brad
+
