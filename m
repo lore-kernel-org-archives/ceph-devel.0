@@ -1,53 +1,45 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: BUG ON librbd or libc
-Date: Tue, 23 Aug 2016 15:45:58 +0800
-Message-ID: <CALZt5jz5K_+bduZg6DgQxjm4E6L4Eizp_aW8pOgiEWB33Vc=ng@mail.gmail.com>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph Day Munich - 23 Sep 2016
+Date: Tue, 23 Aug 2016 15:57:53 +0800
+Message-ID: <CAAZbbf32L90eCsE7dHwwuWzsMasQgQmjD7G0tkNUzaqstcfLsg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:36442 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752760AbcHWHqA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Aug 2016 03:46:00 -0400
-Received: by mail-qk0-f176.google.com with SMTP id l2so99606831qkf.3
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Aug 2016 00:45:59 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, board-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi, all
+Hey cephers,
 
-Our vm is terminated unexpectedly when using librbd in our production
-environment with CentOS 7.0 kernel 3.12 with Ceph version 0.94.5 and
-glibc version 2.17. we get log from libvirtd as below
+We now finally have a date and location confirmed for Ceph Day Munich
+in September:
 
-*** Error in `/usr/libexec/qemu-kvm': invalid fastbin entry (free):
-0x00007f7db7eed740 ***
+http://ceph.com/cephdays/ceph-day-munich/
 
-======= Backtrace: =========
+If you are interested in being a speaker please send me the following:
 
-/lib64/libc.so.6(+0x7d1fd)[0x7f8520fe61fd]
+1) Speaker Name
+2) Speaker Org
+3) Talk Title
+4) Talk abstract
 
-/lib64/librbd.so.1(_ZNSt10_List_baseIN4ceph6buffer3ptrESaIS2_EE8_M_clearEv+0x2f)[0x7f8527589b3f]
-
-/lib64/librados.so.2(+0xb8a06)[0x7f8525080a06]
-
-/lib64/librados.so.2(+0xb9457)[0x7f8525081457]
-
-/lib64/librados.so.2(+0x718f7)[0x7f85250398f7]
-
-/lib64/librados.so.2(+0x2bffe5)[0x7f8525287fe5]
-
-/lib64/librados.so.2(+0x2cbaad)[0x7f8525293aad]
-
-/lib64/libpthread.so.0(+0x7df5)[0x7f852ab12df5]
-
-/lib64/libc.so.6(clone+0x6d)[0x7f852105f1ad]
-
-but the log does not show symbols so that we cannot know which
-functions cause the error, any suggestions?
+I will be accepting speakers on a first-come first-served basis. Thanks!
 
 
+-- 
 
-Regards
-Ning Yao
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
