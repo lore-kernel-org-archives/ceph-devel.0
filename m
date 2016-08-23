@@ -1,45 +1,77 @@
-From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Day Munich - 23 Sep 2016
-Date: Tue, 23 Aug 2016 15:57:53 +0800
-Message-ID: <CAAZbbf32L90eCsE7dHwwuWzsMasQgQmjD7G0tkNUzaqstcfLsg@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Python 3 a blocking requirement?
+Date: Tue, 23 Aug 2016 10:03:34 +0200
+Message-ID: <77f467b7-7bcc-8267-8987-4cb4fb95260c@digiware.nl>
+References: <2ef48fae-b971-3983-2488-c3181607dae3@digiware.nl>
+ <9d76a1ec-52c8-b429-a11b-ad8af1bc6a65@redhat.com>
+ <ed49edc5-633b-bd2a-0139-272695bd2d7a@digiware.nl>
+ <c7814b3d-24dc-ced2-d435-b08d10f5f493@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, board-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([176.74.240.9]:14545 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757212AbcHWIDi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 23 Aug 2016 04:03:38 -0400
+In-Reply-To: <c7814b3d-24dc-ced2-d435-b08d10f5f493@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hey cephers,
+On 23-8-2016 00:57, Josh Durgin wrote:
+> On 08/22/2016 03:41 PM, Willem Jan Withagen wrote:
+>> On 23-8-2016 00:19, Josh Durgin wrote:
+>>> On 08/22/2016 07:37 AM, Willem Jan Withagen wrote:
+>>>> I was trying to do some tests on my Centos box.
+>>>> And ran into:
+>>>>
+>>>> -- Found PythonLibs: /usr/lib64/libpython2.7.so (found suitable version
+>>>> "2.7.5", minimum required is "2")
+>>>> CMake Error at
+>>>> /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:108
+>>>> (message):
+>>>>   Could NOT find Python3Interp: Found unsuitable version "2.7.5", but
+>>>>   required is at least "3" (found /usr/bin/python)
+>>>> Call Stack (most recent call first):
+>>>>   /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:313
+>>>> (_FPHSA_FAILURE_MESSAGE)
+>>>>   cmake/modules/FindPython3Interp.cmake:146
+>>>> (FIND_PACKAGE_HANDLE_STANDARD_ARGS)
+>>>>   src/CMakeLists.txt:274 (find_package)
+>>>>
+>>>> Now is this due to me not being synced enough with master/HEAD, or is
+>>>> this an actual problem?
+>>>
+>>> It's not a strict requirement - you could add some conditionals
+>>> in src/pybind/CMakeLists.txt to disable it if you don't want to build
+>>> python 3 versions of the python bindings.
+>>>
+>>> Alternatively you can grab python 3.4 for Centos 7 from EPEL.
+>>
+>> If it is not a strict requirement, than it would be nice if cmake would
+>> accept thus....
+>> And set something like HAVE_PYTHON3
+> 
+> Yeah, if making it optional is desired that'd be the way to go.
+> 
+>> Why not drop the REQUIRED from the find_package()?
+> 
+> Until there is a HAVE_PYTHON3 it should fail early. This was just a
+> first iteration of python 3 packages for ceph libraries, and since each
+> platform we test has python 3, we didn't try to make it optional. I've
+> no objections if you want to add that option.
 
-We now finally have a date and location confirmed for Ceph Day Munich
-in September:
+That is fair enough, I just found out the hard way because I do not run
+make-deps every time.
+And I have to maintain the deps list for FreeBSD manually atm.
 
-http://ceph.com/cephdays/ceph-day-munich/
+So the dependancies in the rpms has python3 as requirement, and that
+gets python3 available before getting to Ceph?
+If so I, I'll add them to the FreeBSD packages list. That'll move things
+forward, instead of stasis.
 
-If you are interested in being a speaker please send me the following:
-
-1) Speaker Name
-2) Speaker Org
-3) Talk Title
-4) Talk abstract
-
-I will be accepting speakers on a first-come first-served basis. Thanks!
+Thanx,
+--WjW
 
 
--- 
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
