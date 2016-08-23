@@ -1,99 +1,64 @@
-From: Avner Ben Hanoch <avnerb@mellanox.com>
-Subject: RE: errors in make-debs.sh because "make dist" fails on
- 'rocksdb/db/slice.cc'
-Date: Tue, 23 Aug 2016 08:27:30 +0000
-Message-ID: <DB5PR05MB16074DC608303C8D469731F9A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
-References: <DB5PR05MB1607C4B81D5433484A17801FA9E80@DB5PR05MB1607.eurprd05.prod.outlook.com>
- <CAJ4mKGYP+9TQ8wT-eUH1WkgwqXY3z2uF+3WFtpK8BRFNF9VWBw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: rbd and the next jewel release v10.2.3
+Date: Tue, 23 Aug 2016 15:12:17 +0200
+Message-ID: <57BC4BB1.2090803@dachary.org>
+References: <57BC0D5F.5050006@dachary.org>
+ <CA+aFP1CzY1UFgzUcWnCDAhqKH+p95gkhSZ7k+XhsuStm_y0ZnQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db5eur01on0054.outbound.protection.outlook.com ([104.47.2.54]:60715
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1757185AbcHWNHJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 23 Aug 2016 09:07:09 -0400
-In-Reply-To: <CAJ4mKGYP+9TQ8wT-eUH1WkgwqXY3z2uF+3WFtpK8BRFNF9VWBw@mail.gmail.com>
-Content-Language: en-US
+Received: from slow1-d.mail.gandi.net ([217.70.178.86]:53233 "EHLO
+        slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757662AbcHWNNs (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Aug 2016 09:13:48 -0400
+Received: from relay3-d.mail.gandi.net (relay3-d.mail.gandi.net [217.70.183.195])
+        by slow1-d.mail.gandi.net (Postfix) with ESMTP id 0D2E85358B9
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Aug 2016 15:13:28 +0200 (CEST)
+In-Reply-To: <CA+aFP1CzY1UFgzUcWnCDAhqKH+p95gkhSZ7k+XhsuStm_y0ZnQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: dillaman@redhat.com
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
 
-VGhhbmtzIEdyZWcsDQoNClRoZSBzYW1lIGVycm9yIGV4aXN0cyBldmVuIGlmIHN0YXJ0IHdpdGgg
-bmV3IGNsb25lOg0KCWdpdCBjbG9uZSBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoLmdpdCBj
-ZXBoLWdpdGh1Yg0KCWNkIGNlcGgtZ2l0aHViDQoJLi9tYWtlLWRlYnMuc2gNCg0KSW4gdGhlIG91
-dHB1dCwgSSBjYW4gbm93IHNlZSBtYW55IGNsb25lcyBvZiBzdWJtb2R1bGVzLCBpbmNsdWRpbmc6
-DQoJLi4uDQoJQ2xvbmluZyBpbnRvICdzcmMvcm9ja3NkYicuLi4NCglyZW1vdGU6IENvdW50aW5n
-IG9iamVjdHM6IDQxMjIzLCBkb25lLg0KCXJlbW90ZTogQ29tcHJlc3Npbmcgb2JqZWN0czogMTAw
-JSAoNC80KSwgZG9uZS4NCglyZW1vdGU6IFRvdGFsIDQxMjIzIChkZWx0YSAwKSwgcmV1c2VkIDAg
-KGRlbHRhIDApLCBwYWNrLXJldXNlZCA0MTIxOQ0KCVJlY2VpdmluZyBvYmplY3RzOiAxMDAlICg0
-MTIyMy80MTIyMyksIDUxLjA1IE1pQiB8IDEuODUgTWlCL3MsIGRvbmUuDQoJUmVzb2x2aW5nIGRl
-bHRhczogMTAwJSAoMzA3MTgvMzA3MTgpLCBkb25lLg0KCUNoZWNraW5nIGNvbm5lY3Rpdml0eS4u
-LiBkb25lLg0KCVN1Ym1vZHVsZSBwYXRoICdzcmMvcm9ja3NkYic6IGNoZWNrZWQgb3V0ICc2Nzk3
-ZTZmZmFjZDkwNDcwMTQwZjY0Y2VhMDY4OTcwYmIzYTMwYWFmJw0KCS4uLg0KDQpBbmQgc3RpbGws
-IHNhbWUgZXJyb3IsIGF0IHRoZSBlbmQ6DQoJLi4uDQoJKyBtYWtlIGRpc3RkaXI9Y2VwaC0xMS4w
-LjAtMTcxOC1nMjIwMmJjYyBkaXN0DQoJbWFrZSAgZGlzdC1nemlwIGFtX19wb3N0X3JlbW92ZV9k
-aXN0ZGlyPSdAOicNCgltYWtlWzFdOiBFbnRlcmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVy
-Yi9jZXBoLWdpdGh1YicNCglpZiB0ZXN0IC1kICJjZXBoLTExLjAuMC0xNzE4LWcyMjAyYmNjIjsg
-dGhlbiBmaW5kICJjZXBoLTExLjAuMC0xNzE4LWcyMjAyYmNjIiAtdHlwZSBkICEgLXBlcm0gLTIw
-MCAtZXhlYyBjaG1vZCB1K3cge30gJzsnICYmIHJtIC1yZiAiY2VwaC0xMS4wLjAtMTcxOC1nMjIw
-MmJjYyIgfHwgeyBzbGVlcCA1ICYmIHJtIC1yZiAiY2VwaC0xMS4wLjAtMTcxOC1nMjIwMmJjYyI7
-IH07IGVsc2UgOjsgZmkNCgl0ZXN0IC1kICJjZXBoLTExLjAuMC0xNzE4LWcyMjAyYmNjIiB8fCBt
-a2RpciAiY2VwaC0xMS4wLjAtMTcxOC1nMjIwMmJjYyINCgkgKGNkIHNyYyAmJiBtYWtlICB0b3Bf
-ZGlzdGRpcj0uLi9jZXBoLTExLjAuMC0xNzE4LWcyMjAyYmNjIGRpc3RkaXI9Li4vY2VwaC0xMS4w
-LjAtMTcxOC1nMjIwMmJjYy9zcmMgXA0KCSAgICAgYW1fX3JlbW92ZV9kaXN0ZGlyPTogYW1fX3Nr
-aXBfbGVuZ3RoX2NoZWNrPTogYW1fX3NraXBfbW9kZV9maXg9OiBkaXN0ZGlyKQ0KCW1ha2VbMl06
-IEVudGVyaW5nIGRpcmVjdG9yeSAnL21udC9zZGgvYXZuZXJiL2NlcGgtZ2l0aHViL3NyYycNCgku
-L21ha2VfdmVyc2lvbiAtZyAuLy5naXRfdmVyc2lvbg0KCWlmIFsgLW4gIiROT19WRVJTSU9OIiBd
-IDsgdGhlbiBcDQoJCS4vbWFrZV92ZXJzaW9uIC1nIC4vLmdpdF92ZXJzaW9uIC1jIC4vY2VwaF92
-ZXIuaCAtbiA7IFwNCgllbHNlIFwNCgkJLi9tYWtlX3ZlcnNpb24gLWcgLi8uZ2l0X3ZlcnNpb24g
-LWMgLi9jZXBoX3Zlci5oIDsgXA0KCWZpDQoJbWFrZVsyXTogKioqIE5vIHJ1bGUgdG8gbWFrZSB0
-YXJnZXQgJ3JvY2tzZGIvZGIvc2xpY2UuY2MnLCBuZWVkZWQgYnkgJ2Rpc3RkaXInLiAgU3RvcC4N
-CgltYWtlWzJdOiBMZWF2aW5nIGRpcmVjdG9yeSAnL21udC9zZGgvYXZuZXJiL2NlcGgtZ2l0aHVi
-L3NyYycNCglNYWtlZmlsZTo5NzY6IHJlY2lwZSBmb3IgdGFyZ2V0ICdkaXN0ZGlyJyBmYWlsZWQN
-CgltYWtlWzFdOiAqKiogW2Rpc3RkaXJdIEVycm9yIDENCgltYWtlWzFdOiBMZWF2aW5nIGRpcmVj
-dG9yeSAnL21udC9zZGgvYXZuZXJiL2NlcGgtZ2l0aHViJw0KCU1ha2VmaWxlOjEwNzg6IHJlY2lw
-ZSBmb3IgdGFyZ2V0ICdkaXN0JyBmYWlsZWQNCgltYWtlOiAqKiogW2Rpc3RdIEVycm9yIDINCg0K
-LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEdyZWdvcnkgRmFybnVtIA0KU2VudDog
-VHVlc2RheSwgQXVndXN0IDIzLCAyMDE2IDAxOjAwDQpUbzogQXZuZXIgQmVuIEhhbm9jaA0KQ2M6
-IENlcGggRGV2ZWxvcG1lbnQgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KU3ViamVjdDog
-UmU6IGVycm9ycyBpbiBtYWtlLWRlYnMuc2ggYmVjYXVzZSAibWFrZSBkaXN0IiBmYWlscyBvbiAn
-cm9ja3NkYi9kYi9zbGljZS5jYycNCg0KT24gTW9uLCBBdWcgMjIsIDIwMTYgYXQgMjowMCBBTSwg
-QXZuZXIgQmVuIEhhbm9jaCA8YXZuZXJiQG1lbGxhbm94LmNvbT4gd3JvdGU6DQo+IEhJIEFsbCwN
-Cj4NCj4gVGhlIGZvbGxvd2luZyBsaW5lcyBmcm9tIG1ha2UtZGVicy5zaDoNCj4NCj4gICAgICAg
-ICB2ZXJzPSQoZ2l0IGRlc2NyaWJlIC0tbWF0Y2ggInYqIiB8IHNlZCBzL152Ly8pDQo+ICAgICAg
-ICAgLi9hdXRvZ2VuLnNoDQo+ICAgICAgICAgLi9jb25maWd1cmUgLS13aXRoLXJvY2tzZGIgLS13
-aXRoLW9jZiBcDQo+ICAgICAgICAgICAgIC0td2l0aC1uc3MgLS13aXRoLWRlYnVnIC0tZW5hYmxl
-LWNlcGhmcy1qYXZhIFwNCj4gICAgICAgICAgICAgLS13aXRoLWx0dG5nIC0td2l0aC1iYWJlbHRy
-YWNlDQo+ICAgICAgICAgbWFrZSBkaXN0ZGlyPWNlcGgtJHZlcnMgZGlzdA0KPg0KPiBwcm9kdWNl
-cyB0aGUgZm9sbG93aW5nIGVycm9yOg0KPg0KPiAgICAgICAgIG1ha2UgIGRpc3QtZ3ppcCBhbV9f
-cG9zdF9yZW1vdmVfZGlzdGRpcj0nQDonDQo+ICAgICAgICAgbWFrZVsxXTogRW50ZXJpbmcgZGly
-ZWN0b3J5ICcvbW50L3NkaC9hdm5lcmIvY2VwaC1naXRodWInDQo+ICAgICAgICAgaWYgdGVzdCAt
-ZCAiY2VwaC0xMS4wLjAtMTY4OS1nMjNlZWI3NCI7IHRoZW4gZmluZCAiY2VwaC0xMS4wLjAtMTY4
-OS1nMjNlZWI3NCIgLXR5cGUgZCAhIC1wZXJtIC0yMDAgLWV4ZWMgY2htb2QgdSt3IHt9ICc7JyAm
-JiBybSAtcmYgImNlcGgtMTEuMC4wLTE2ODktZzIzZWViNzQiIHx8IHsgc2xlZXAgNSAmJiBybSAt
-cmYgImNlcGgtMTEuMC4wLTE2ODktZzIzZWViNzQiOyB9OyBlbHNlIDo7IGZpDQo+ICAgICAgICAg
-dGVzdCAtZCAiY2VwaC0xMS4wLjAtMTY4OS1nMjNlZWI3NCIgfHwgbWtkaXIgImNlcGgtMTEuMC4w
-LTE2ODktZzIzZWViNzQiDQo+ICAgICAgICAgIChjZCBzcmMgJiYgbWFrZSAgdG9wX2Rpc3RkaXI9
-Li4vY2VwaC0xMS4wLjAtMTY4OS1nMjNlZWI3NCBkaXN0ZGlyPS4uL2NlcGgtMTEuMC4wLTE2ODkt
-ZzIzZWViNzQvc3JjIFwNCj4gICAgICAgICAgICAgIGFtX19yZW1vdmVfZGlzdGRpcj06IGFtX19z
-a2lwX2xlbmd0aF9jaGVjaz06IGFtX19za2lwX21vZGVfZml4PTogZGlzdGRpcikNCj4gICAgICAg
-ICBtYWtlWzJdOiBFbnRlcmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1
-Yi9zcmMnDQo+ICAgICAgICAgLi9tYWtlX3ZlcnNpb24gLWcgLi8uZ2l0X3ZlcnNpb24NCj4gICAg
-ICAgICBpZiBbIC1uICIkTk9fVkVSU0lPTiIgXSA7IHRoZW4gXA0KPiAgICAgICAgICAgICAgICAg
-Li9tYWtlX3ZlcnNpb24gLWcgLi8uZ2l0X3ZlcnNpb24gLWMgLi9jZXBoX3Zlci5oIC1uIDsgXA0K
-PiAgICAgICAgIGVsc2UgXA0KPiAgICAgICAgICAgICAgICAgLi9tYWtlX3ZlcnNpb24gLWcgLi8u
-Z2l0X3ZlcnNpb24gLWMgLi9jZXBoX3Zlci5oIDsgXA0KPiAgICAgICAgIGZpDQo+ICAgICAgICAg
-bWFrZVsyXTogKioqIE5vIHJ1bGUgdG8gbWFrZSB0YXJnZXQgJ3JvY2tzZGIvZGIvc2xpY2UuY2Mn
-LCBuZWVkZWQgYnkgJ2Rpc3RkaXInLiAgU3RvcC4NCj4gICAgICAgICBtYWtlWzJdOiBMZWF2aW5n
-IGRpcmVjdG9yeSAnL21udC9zZGgvYXZuZXJiL2NlcGgtZ2l0aHViL3NyYycNCj4gICAgICAgICBN
-YWtlZmlsZTo5NzY6IHJlY2lwZSBmb3IgdGFyZ2V0ICdkaXN0ZGlyJyBmYWlsZWQNCj4gICAgICAg
-ICBtYWtlWzFdOiAqKiogW2Rpc3RkaXJdIEVycm9yIDENCj4gICAgICAgICBtYWtlWzFdOiBMZWF2
-aW5nIGRpcmVjdG9yeSAnL21udC9zZGgvYXZuZXJiL2NlcGgtZ2l0aHViJw0KPiAgICAgICAgIE1h
-a2VmaWxlOjEwNzg6IHJlY2lwZSBmb3IgdGFyZ2V0ICdkaXN0JyBmYWlsZWQNCj4gICAgICAgICBt
-YWtlOiAqKiogW2Rpc3RdIEVycm9yIDINCg0KRXJyb3JzIGhlcmUgZ2VuZXJhbGx5IG9jY3VyIGlm
-IHlvdSd2ZSBnb3QgYW4gb3V0ZGF0ZWQgc3VibW9kdWxlIChvciBpdCdzIGp1c3QgbWlzc2luZyku
-IFRyeSBkZWxldGluZyBpdCBhbmQgcmUtZG9pbmcgdGhlIHN1Ym1vZHVsZSBlbnRpcmVseS4NCi1H
-cmVnDQo=
+Ok. Let me know when the backport of http://tracker.ceph.com/issues/16950 is ready and I'll schedule tests. If you'd rather do the test yourself, that's also fine with me :-)
+
+Cheers
+
+On 23/08/2016 15:06, Jason Dillaman wrote:
+> If at all possible, I would definitely like to see the following
+> included in 10.2.3 since users are hitting it in the field:
+> 
+> http://tracker.ceph.com/issues/16950
+> 
+> ... and given that would require another RBD test run prior to merge,
+> I would also like to include the following which already have open
+> PRs:
+> 
+> https://github.com/ceph/ceph/pull/10791
+> https://github.com/ceph/ceph/pull/10790
+> https://github.com/ceph/ceph/pull/10792
+> https://github.com/ceph/ceph/pull/10646
+> https://github.com/ceph/ceph/pull/10647
+> https://github.com/ceph/ceph/pull/10786
+> 
+> I can create a PR for the high priority issue this morning.
+> 
+> On Tue, Aug 23, 2016 at 4:46 AM, Loic Dachary <loic@dachary.org> wrote:
+>> Hi Jason,
+>>
+>> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel received (I think :-) enough rbd backports to cut the release. It was more challenging than usual and I'd like to thank you and Mykola for helping with the tricky parts.
+>>
+>> Do you think the jewel branch is ready for QE to start their own round of testing ?
+>>
+>> Cheers
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
+>>
+> 
+> 
+> 
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
