@@ -1,44 +1,200 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Ceph Upgrade Issue
-Date: Tue, 23 Aug 2016 20:44:36 +0200 (CEST)
-Message-ID: <1953555259.2912.1471977877142@ox.pcextreme.nl>
-References: <CAMDPVREGpHRimVhFvZy8VcptZsS2AXdiXvJ9xFbtmyZ5Ca1uOg@mail.gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: should we remove autotools from master?
+Date: Tue, 23 Aug 2016 14:50:44 -0400
+Message-ID: <CA+aFP1BdoUcPEcAaHnq1_gA=c+K=U3qkNNC25Zjaka0ydNAj4A@mail.gmail.com>
+References: <alpine.DEB.2.11.1608231356290.25681@piezo.us.to>
+ <57BC5B7A.8050103@dachary.org> <DB5PR05MB16077097293BBD4CBF85D90EA9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <alpine.DEB.2.11.1608231517060.25681@piezo.us.to> <CAC-Np1x2wxuZ0X6V8PfZjbwpApeYnZXpY_Ad1JdMjt6zDQ2atg@mail.gmail.com>
+ <alpine.DEB.2.11.1608231821460.25681@piezo.us.to> <CAN=+7FVMqE19tQym6yUb+3A1V9-DbX4RLf3-cFjp-enTSR6CKQ@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:34145 "EHLO
-        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751199AbcHWSol (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Aug 2016 14:44:41 -0400
-In-Reply-To: <CAMDPVREGpHRimVhFvZy8VcptZsS2AXdiXvJ9xFbtmyZ5Ca1uOg@mail.gmail.com>
+Received: from mail-pa0-f53.google.com ([209.85.220.53]:33701 "EHLO
+        mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753044AbcHWSur (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Aug 2016 14:50:47 -0400
+Received: by mail-pa0-f53.google.com with SMTP id ti13so50662831pac.0
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Aug 2016 11:50:47 -0700 (PDT)
+In-Reply-To: <CAN=+7FVMqE19tQym6yUb+3A1V9-DbX4RLf3-cFjp-enTSR6CKQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thipparapu Vijaykumar <thipparapu.vijaykumar@gmail.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: Samuel Just <sjust@redhat.com>, Alfredo Deza <adeza@redhat.com>, Avner Ben Hanoch <avnerb@mellanox.com>, Loic Dachary <loic@dachary.org>, Nathan Cutler <ncutler@suse.cz>, Brad Hubbard <bhubbard@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Adir Lev <adirl@mellanox.com>
 
++1 -- I also forget to update the autotools makefile.
 
-> Op 23 augustus 2016 om 18:01 schreef Thipparapu Vijaykumar <thipparapu.vijaykumar@gmail.com>:
-> 
-> 
-> Hi All,
->            I've a requirement where my existing ceph cluster need to
-> run with the newly build ceph source with instrumented additional
-> debugs.
->  Could anyone help me to achieve the above requirement?
-> 
-
-Why not build DEB or RPM packages from source and install them? That's usually a easy route to take in this case.
-
-For DEB it's just:
-
-$ dpkg-buildpackage
-
-Wido
-
-> 
-> Thanks & Regards,
-> Vijay Kumar.
+On Tue, Aug 23, 2016 at 2:26 PM, Samuel Just <sjust@redhat.com> wrote:
+> +1 to dumping autotools, I keep forgetting to add files in.
+> -Sam
+>
+> On Tue, Aug 23, 2016 at 11:24 AM, Sage Weil <sweil@redhat.com> wrote:
+>> On Tue, 23 Aug 2016, Alfredo Deza wrote:
+>>> On Tue, Aug 23, 2016 at 11:21 AM, Sage Weil <sweil@redhat.com> wrote:
+>>> > On Tue, 23 Aug 2016, Avner Ben Hanoch wrote:
+>>> >> For removing autotools support, I think that we should first announce
+>>> >> that autotools will not be supported starting <some-future-day> and till
+>>> >> then support both of them in parallel and response to questions about
+>>> >> it.
+>>> >
+>>> > I think we're basically proposing some-future-day as now.
+>>> >
+>>> >> Also, we first need to make sure that we have comprehensive instructions
+>>> >> for using cmake. Notice, that many developers are not familiar with
+>>> >> cmake; hence, there might be need for extra explanations.
+>>> >>
+>>> >> For example, I tried now the instructions in https://github.com/ceph/ceph/blob/master/README.md
+>>> >>       ./do_cmake.sh
+>>> >>       cd build
+>>> >>       make
+>>> >> and I got the error:
+>>> >>       make: *** No targets specified and no makefile found.  Stop.
+>>> >>
+>>> >> Probably, because of the explanation "This assumes you make your build
+>>> >> dir a subdirectory of the ceph.git checkout. If you put it elsewhere,
+>>> >> just replace .. above with a correct path to the checkout." However, if
+>>> >> you are not familiar with cmake, then this explanation does not tell you
+>>> >> how to recover from the error.
+>>> >
+>>> > The do_cmake.sh script is doing 'mkdir build', so assuming you actually
+>>> > ran it from the git checkout (i.e., ./do_cmake.sh) then this should be the
+>>> > case.  Is that actually what caused the error?
+>>> >
+>>> > I agree that step 0 is to make README.md complete for cmake.  Perhaps
+>>> > step 1 is to remove autotools instructions too.
+>>> >
+>>> >> Also, I am not sure it is clear to all developers how to combine above
+>>> >> instructions with options that you could provide to ./configure script.
+>>> >
+>>> > There is no more ./configure :).  There are a new set of options you can
+>>> > pass cmake that are referenced here in README.md:
+>>> >
+>>> >         https://github.com/ceph/ceph/blob/master/README.md#cmake-options
+>>> >
+>>> >> Hence, I think removing autotools support should not be immediate
+>>> >
+>>> > Please help us identify any (other) documentation gaps so we can get past
+>>> > this.  I thought README.md was in good shape...
+>>>
+>>> Nothing in there helped when trying to build binaries in the CI
+>>> scripts. I had to look at
+>>> https://github.com/ceph/autobuild-ceph/blob/master/build-ceph-rpm.sh#L56-L58
+>>> to try to make it work.
+>>>
+>>> Of course, this might not help anyone else, since it might not be
+>>> common to run `make-dist` ?
+>>
+>> Ah, good point.  This PR
+>>
+>>         https://github.com/ceph/ceph/pull/10829
+>>
+>> replaces the incomplete/wrong package build directions with make-dist
+>> instructions.
+>>
+>> Should we document how to build a proper rpm or deb here, or should we try
+>> to pull what autobuilder and/or ceph-build are doing into scripts in
+>> ceph.git, and replace the (broken?) make-debs.sh with make-{deb,rpm} and
+>> ensure they work?  I think it depends on if anything in what you build is
+>> likely to require changes outside of the ceph tree...
+>>
+>> sage
+>>
+>>
+>>>
+>>> >
+>>> > sage
+>>> >
+>>> >
+>>> >> Avner
+>>> >>
+>>> >> > -----Original Message-----
+>>> >> > From: Loic Dachary
+>>> >> >
+>>> >> >
+>>> >> > On 23/08/2016 15:58, Sage Weil wrote:
+>>> >> > > Should we remove the autotools stuff from master?
+>>> >> > >
+>>> >> > > Yes:
+>>> >> > > - It won't be maintained
+>>> >> > > - It sucks
+>>> >> > > - It confuses people and they use it by mistake
+>>> >> > > - We'll find any build scripts etc that haven't been converted sooner
+>>> >> > > rather than later
+>>> >> > >
+>>> >> > > No:
+>>> >> > > - Other architectures might rely on it
+>>> >> > > - It's possible some build scripts haven't been convert yet
+>>> >> > >
+>>> >> > > I'm thinking yes?
+>>> >> >
+>>> >> > I vote yes. The build scripts I know about are either converted or broken
+>>> >> > because autotools no longer works :-)
+>>> >> >
+>>>
+>>> Yes from me too. We do have the build scripts kind of messed up
+>>> already for master in Jenkins:
+>>>
+>>> https://github.com/ceph/ceph-build/commit/40b94af494dbb07440bf90f5b6695ecf2839b392
+>>>
+>>> We still need to support both because we still need to cut releases
+>>> for branches that do not support it though.
+>>>
+>>> >> > Cheers
+>>> >> >
+>>> >> > > sage
+>>> >> > >
+>>> >> > >
+>>> >> > > On Tue, 23 Aug 2016, Nathan Cutler wrote:
+>>> >> > >
+>>> >> > >>> That's a different make-deb(s).sh
+>>> >> > >>
+>>> >> > >> Allow me to qualify that statement. This thread seems to be about
+>>> >> > >>
+>>> >> > >> https://github.com/ceph/ceph/blob/master/make-debs.sh
+>>> >> > >>
+>>> >> > >> while the "make-deb.sh" I am working on is
+>>> >> > >>
+>>> >> > >> https://github.com/ceph/ceph-qa-suite/blob/master/tasks/buildpackages
+>>> >> > >> /make-deb.sh
+>>> >> > >>
+>>> >> > >> which is used with the teuthology-openstack backend. However, I see
+>>> >> > >> the two scripts are similar.
+>>> >> > >>
+>>> >> > >> In general, although the autotools stuff is still there in master, it
+>>> >> > >> is not maintained and should not be expected to work (or continue to
+>>> >> > >> work). All build infrastructure targeting master should be converted to
+>>> >> > cmake.
+>>> >> > >>
+>>> >> > >> Nathan
+>>> >> > >> --
+>>> >> > >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>> >> > >> in the body of a message to majordomo@vger.kernel.org More majordomo
+>>> >> > >> info at  http://vger.kernel.org/majordomo-info.html
+>>> >> > >>
+>>> >> > >>
+>>> >> > > --
+>>> >> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>> >> > > in the body of a message to majordomo@vger.kernel.org More majordomo
+>>> >> > > info at  http://vger.kernel.org/majordomo-info.html
+>>> >> > >
+>>> >> >
+>>> >> > --
+>>> >> > Loïc Dachary, Artisan Logiciel Libre
+>>> >>
+>>> >>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Jason
