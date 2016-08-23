@@ -1,299 +1,494 @@
 From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: Re: Bluestore assert
-Date: Tue, 23 Aug 2016 05:38:06 +0000
-Message-ID: <BLUPR0201MB1908C134820967497751C7DEE2EB0@BLUPR0201MB1908.namprd02.prod.outlook.com>
-References: <BL2PR02MB2115443F5ACA3459E2CEBFBAF41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608102121090.17770@piezo.us.to>
- <BL2PR02MB2115CDD714FC3883028291F8F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608111629170.17762@piezo.us.to>
- <7dc67e25-4e1c-09a1-8667-ee47572b9290@redhat.com>
- <alpine.DEB.2.11.1608111635230.17762@piezo.us.to>
- <BL2PR02MB2115D3D79C6194FD81E598F3F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608112226280.17762@piezo.us.to>
- <BL2PR02MB2115BB77EA5BA38BCF48E52DF4110@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608151952230.14754@piezo.us.to>
- <BL2PR02MB21150BE782012D52DBB8FF26F4130@BL2PR02MB2115.namprd02.prod.outlook.com>
- <BL2PR02MB2115FFBBBF5A04D62910A239F4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1608222156580.25681@piezo.us.to>
- <BL2PR02MB2115C713F6AF6B989B4DC536F4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
- <BLUPR0201MB19080C16D04BBD56AFB8481CE2EB0@BLUPR0201MB1908.namprd02.prod.outlook.com>
- <BL2PR02MB2115DA709F31B00E604229E7F4EB0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <BLUPR0201MB1908A6C29035CA84DD79D2ACE2EB0@BLUPR0201MB1908.namprd02.prod.outlook.com>
- <BL2PR02MB21152C73410490729F47C8B3F4EB0@BL2PR02MB2115.namprd02.prod.outlook.com>
- <BLUPR0201MB1908DC68CBDFDFDA084AC341E2EB0@BLUPR0201MB1908.namprd02.prod.outlook.com>
- <BL2PR02MB2115046BFE90A28756E2C5B3F4EB0@BL2PR02MB2115.namprd02.prod.outlook.com>
+Subject: Re: bluestore blobs REVISITED
+Date: Tue, 23 Aug 2016 05:21:25 +0000
+Message-ID: <BLUPR0201MB1908D8369750CEFC86BF066AE2EB0@BLUPR0201MB1908.namprd02.prod.outlook.com>
+References: <BLUPR0201MB15245F1EA4B70EF5761981AFE8170@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608211601350.14754@piezo.us.to>
+ <2F51EC8C-D280-4DFF-8FF6-4AC97071A7D5@sandisk.com>
+ <BLUPR0201MB15245054714F66FC2AB92935E8E80@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608222158190.25681@piezo.us.to>
+ <BLUPR0201MB152454CA00246E35A1AE08C0E8E80@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608222249560.25681@piezo.us.to>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn3nam01on0074.outbound.protection.outlook.com ([104.47.33.74]:9725
-        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+Received: from mail-sn1nam01on0087.outbound.protection.outlook.com ([104.47.32.87]:26944
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752299AbcHWFyO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 23 Aug 2016 01:54:14 -0400
+        id S1753781AbcHWFyi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 23 Aug 2016 01:54:38 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sweil@redhat.com>
-Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Sorry, i got confused, yes you are correct. Disable the async compaction=0A=
-and try. That's the recent change which went in. But there shouldn't any=0A=
-difference in that.=0A=
-=0A=
-Varada=0A=
-=0A=
-On Tuesday 23 August 2016 11:05 AM, Somnath Roy wrote:=0A=
-> It is by default doing async compaction , right ? Only if the option is s=
-et true, it is going for sync compaction..So, code is not same I guess ?=0A=
->=0A=
-> -----Original Message-----=0A=
-> From: Varada Kari =0A=
-> Sent: Monday, August 22, 2016 10:31 PM=0A=
-> To: Somnath Roy; Sage Weil=0A=
-> Cc: Mark Nelson; ceph-devel=0A=
-> Subject: Re: Bluestore assert=0A=
->=0A=
-> Nope. Then the code is same. We shouldn't be seeing any issue. Logs would=
- help anyway. Let us run with debugs on and see.=0A=
->=0A=
-> Varada=0A=
->=0A=
-> On Tuesday 23 August 2016 10:57 AM, Somnath Roy wrote:=0A=
->> bluefs_compact_log_sync =3D false by default, you mean to say make it tr=
-ue ?=0A=
->>=0A=
->> -----Original Message-----=0A=
->> From: Varada Kari=0A=
->> Sent: Monday, August 22, 2016 10:25 PM=0A=
->> To: Somnath Roy; Sage Weil=0A=
->> Cc: Mark Nelson; ceph-devel=0A=
->> Subject: Re: Bluestore assert=0A=
->>=0A=
->> Can you try disabling the async log compaction and check once?=0A=
->> bluefs_compact_log_sync to false.=0A=
->>=0A=
->> Varada=0A=
->>=0A=
->> On Tuesday 23 August 2016 10:48 AM, Somnath Roy wrote:=0A=
->>> Well, it is trying to get a map for an epoch and failing.This is part o=
-f meta object read and going to rocksdb/Bluefs, so, it seems it is also a c=
-orruption at BlueFS level. =0A=
->>> Logs are not useful, I am modifying code to print detailed output durin=
-g crash , hope we can figure out something with that for the other crashes.=
-=0A=
->>>=0A=
->>> Thanks & Regards=0A=
->>> Somnath=0A=
->>>=0A=
->>> -----Original Message-----=0A=
->>> From: Varada Kari=0A=
->>> Sent: Monday, August 22, 2016 10:09 PM=0A=
->>> To: Somnath Roy; Sage Weil=0A=
->>> Cc: Mark Nelson; ceph-devel=0A=
->>> Subject: Re: Bluestore assert=0A=
->>>=0A=
->>> We added couple of new asserts in the code and changed the log compacti=
-on to async. That was the recent change happened on BlueFS. But this one se=
-ems we are not able to read from BlueStore.=0A=
->>> But the other assert what you have posted, was from BlueFS(read from ro=
-cksdb). May be we should write some unit test cases to reproduce the same i=
-ssue similar to rocksdb write patterns.=0A=
->>> Can you point me to the logs?=0A=
->>>=0A=
->>> Varada=0A=
->>>=0A=
->>> On Tuesday 23 August 2016 04:42 AM, Somnath Roy wrote:=0A=
->>>> Sage,=0A=
->>>> I think there are some bug introduced recently in the BlueFS and I am =
-getting the corruption like this which I was not facing earlier.=0A=
->>>>=0A=
->>>>    -5> 2016-08-22 15:55:21.248558 7fb68f7ff700  4 rocksdb: EVENT_LOG_v=
-1 {"time_micros": 1471906521248538, "job": 3, "event": "compaction_started"=
-, "files_L0": [2115, 2102, 2087, 2069, 2046], "files_L1": [], "files_L2": [=
-], "files_L3": [], "files_L4": [], "files_L5": [], "files_L6": [1998, 2007,=
- 2013, 2019, 2026, 2032, 2039, 2043, 2052, 2060], "score": 1.5, "input_data=
-_size": 1648188401}=0A=
->>>>     -4> 2016-08-22 15:55:27.209944 7fb6ba94d8c0  0 <cls> cls/hello/cls=
-_hello.cc:305: loading cls_hello=0A=
->>>>     -3> 2016-08-22 15:55:27.213612 7fb6ba94d8c0  0 <cls> cls/cephfs/cl=
-s_cephfs.cc:202: loading cephfs_size_scan=0A=
->>>>     -2> 2016-08-22 15:55:27.213627 7fb6ba94d8c0  0 _get_class not perm=
-itted to load kvs=0A=
->>>>     -1> 2016-08-22 15:55:27.214620 7fb6ba94d8c0 -1 osd.0 0 failed to l=
-oad OSD map for epoch 321, got 0 bytes=0A=
->>>>      0> 2016-08-22 15:55:27.216111 7fb6ba94d8c0 -1 osd/OSD.h: In =0A=
->>>> function 'OSDMapRef OSDService::get_map(epoch_t)' thread =0A=
->>>> 7fb6ba94d8c0 time 2016-08-22 15:55:27.214638=0A=
->>>> osd/OSD.h: 999: FAILED assert(ret)=0A=
->>>>=0A=
->>>>  ceph version 11.0.0-1688-g6f48ee6=0A=
->>>> (6f48ee6bc5c85f44d7ca4c984f9bef1339c2bea4)=0A=
->>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char=0A=
->>>> const*)+0x80) [0x5617f2a99e80]=0A=
->>>>  2: (OSDService::get_map(unsigned int)+0x5d) [0x5617f2395fdd]=0A=
->>>>  3: (OSD::init()+0x1f7e) [0x5617f233d3ce]=0A=
->>>>  4: (main()+0x2fe0) [0x5617f229d1f0]=0A=
->>>>  5: (__libc_start_main()+0xf0) [0x7fb6b7196830]=0A=
->>>>  6: (_start()+0x29) [0x5617f22eb909]=0A=
->>>>=0A=
->>>> OSDs are not coming up (after a restart) and eventually I had to recre=
-ate the cluster.=0A=
->>>>=0A=
->>>> Thanks & Regards=0A=
->>>> Somnath=0A=
->>>>=0A=
->>>> -----Original Message-----=0A=
->>>> From: Somnath Roy=0A=
->>>> Sent: Monday, August 22, 2016 3:01 PM=0A=
->>>> To: 'Sage Weil'=0A=
->>>> Cc: Mark Nelson; ceph-devel=0A=
->>>> Subject: RE: Bluestore assert=0A=
->>>>=0A=
->>>> "compaction_style=3DkCompactionStyleUniversal"  in the bluestore_rocks=
-db_options .=0A=
->>>> Here is the option I am using..=0A=
->>>>=0A=
->>>>         bluestore_rocksdb_options =3D "max_write_buffer_number=3D16,mi=
-n_write_buffer_number_to_merge=3D2,recycle_log_file_num=3D16,compaction_thr=
-eads=3D32,flusher_threads=3D8,max_background_compactions=3D32,max_backgroun=
-d_flushes=3D8,max_bytes_for_level_base=3D5368709120,write_buffer_size=3D838=
-86080,level0_file_num_compaction_trigger=3D4,level0_slowdown_writes_trigger=
-=3D400,level0_stop_writes_trigger=3D800,stats_dump_period_sec=3D10,compacti=
-on_style=3DkCompactionStyleUniversal"=0A=
->>>>=0A=
->>>> Here is another one after 4 hours of 4K RW :-)...Sorry to bombard you =
-with all these , I am adding more log for the next time if I hit it..=0A=
->>>>=0A=
->>>>=0A=
->>>>      0> 2016-08-22 17:37:24.730817 7f8e7afff700 -1=0A=
->>>> os/bluestore/BlueFS.cc: In function 'int =0A=
->>>> BlueFS::_read_random(BlueFS::FileReader*, uint64_t, size_t, char*)'=0A=
->>>> thread 7f8e7afff700 time 2016-08-22 17:37:24.722706=0A=
->>>> os/bluestore/BlueFS.cc: 845: FAILED assert(r =3D=3D 0)=0A=
->>>>=0A=
->>>>  ceph version 11.0.0-1688-g3fcc89c=0A=
->>>> (3fcc89c7ab4c92e6c4564e29f4e1a663db36acc0)=0A=
->>>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char=0A=
->>>> const*)+0x80) [0x5581ed453cb0]=0A=
->>>>  2: (BlueFS::_read_random(BlueFS::FileReader*, unsigned long, =0A=
->>>> unsigned long, char*)+0x836) [0x5581ed11c1b6]=0A=
->>>>  3: (BlueRocksRandomAccessFile::Read(unsigned long, unsigned long, =0A=
->>>> rocksdb::Slice*, char*) const+0x20) [0x5581ed13f840]=0A=
->>>>  4: (rocksdb::RandomAccessFileReader::Read(unsigned long, unsigned =0A=
->>>> long, rocksdb::Slice*, char*) const+0x83f) [0x5581ed2c6f4f]=0A=
->>>>  5: (rocksdb::ReadBlockContents(rocksdb::RandomAccessFileReader*,=0A=
->>>> rocksdb::Footer const&, rocksdb::ReadOptions const&, =0A=
->>>> rocksdb::BlockHandle const&, rocksdb::BlockContents*, rocksdb::Env*, =
-=0A=
->>>> bool, rocksdb::Slice const&, rocksdb::PersistentCacheOptions const&,=
-=0A=
->>>> rocksdb::Logger*)+0x358) [0x5581ed291c18]=0A=
->>>>  6: (()+0x94fd54) [0x5581ed282d54]=0A=
->>>>  7: =0A=
->>>> (rocksdb::BlockBasedTable::NewDataBlockIterator(rocksdb::BlockBasedT=
-=0A=
->>>> a b le::Rep*, rocksdb::ReadOptions const&, rocksdb::Slice const&,=0A=
->>>> rocksdb::BlockIter*)+0x60c) [0x5581ed284b3c]=0A=
->>>>  8: (rocksdb::BlockBasedTable::Get(rocksdb::ReadOptions const&, =0A=
->>>> rocksdb::Slice const&, rocksdb::GetContext*, bool)+0x508) =0A=
->>>> [0x5581ed28ba68]=0A=
->>>>  9: (rocksdb::TableCache::Get(rocksdb::ReadOptions const&, =0A=
->>>> rocksdb::InternalKeyComparator const&, rocksdb::FileDescriptor =0A=
->>>> const&, rocksdb::Slice const&, rocksdb::GetContext*, =0A=
->>>> rocksdb::HistogramImpl*, bool, int)+0x158) [0x5581ed252118]=0A=
->>>>  10: (rocksdb::Version::Get(rocksdb::ReadOptions const&, =0A=
->>>> rocksdb::LookupKey const&, std::__cxx11::basic_string<char, =0A=
->>>> std::char_traits<char>, std::allocator<char> >*, rocksdb::Status*, =0A=
->>>> rocksdb::MergeContext*, bool*, bool*, unsigned long*)+0x4f8) =0A=
->>>> [0x5581ed25c458]=0A=
->>>>  11: (rocksdb::DBImpl::GetImpl(rocksdb::ReadOptions const&, =0A=
->>>> rocksdb::ColumnFamilyHandle*, rocksdb::Slice const&, =0A=
->>>> std::__cxx11::basic_string<char, std::char_traits<char>, =0A=
->>>> std::allocator<char> >*, bool*)+0x5fa) [0x5581ed1f3f7a]=0A=
->>>>  12: (rocksdb::DBImpl::Get(rocksdb::ReadOptions const&, =0A=
->>>> rocksdb::ColumnFamilyHandle*, rocksdb::Slice const&, =0A=
->>>> std::__cxx11::basic_string<char, std::char_traits<char>, =0A=
->>>> std::allocator<char> >*)+0x22) [0x5581ed1f4182]=0A=
->>>>  13: (RocksDBStore::get(std::__cxx11::basic_string<char,=0A=
->>>> std::char_traits<char>, std::allocator<char> > const&, =0A=
->>>> std::__cxx11::basic_string<char, std::char_traits<char>, =0A=
->>>> std::allocator<char> > const&, ceph::buffer::list*)+0x157) =0A=
->>>> [0x5581ed1d21d7]=0A=
->>>>  14: (BlueStore::Collection::get_onode(ghobject_t const&,=0A=
->>>> bool)+0x55b) [0x5581ed02802b]=0A=
->>>>  15: (BlueStore::_txc_add_transaction(BlueStore::TransContext*,=0A=
->>>> ObjectStore::Transaction*)+0x1e49) [0x5581ed0318a9]=0A=
->>>>  16: (BlueStore::queue_transactions(ObjectStore::Sequencer*,=0A=
->>>> std::vector<ObjectStore::Transaction,=0A=
->>>> std::allocator<ObjectStore::Transaction> >&, =0A=
->>>> std::shared_ptr<TrackedOp>, ThreadPool::TPHandle*)+0x362) =0A=
->>>> [0x5581ed032bc2]=0A=
->>>>  17: =0A=
->>>> (ReplicatedPG::queue_transactions(std::vector<ObjectStore::Transacti=
-=0A=
->>>> o n , std::allocator<ObjectStore::Transaction> >&,=0A=
->>>> std::shared_ptr<OpRequest>)+0x81) [0x5581ecea5e51]=0A=
->>>>  18: =0A=
->>>> (ReplicatedBackend::sub_op_modify(std::shared_ptr<OpRequest>)+0xd39)=
-=0A=
->>>> [0x5581ecef89e9]=0A=
->>>>  19: =0A=
->>>> (ReplicatedBackend::handle_message(std::shared_ptr<OpRequest>)+0x2fb=
-=0A=
->>>> )=0A=
->>>> [0x5581ecefeb4b]=0A=
->>>>  20: (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&,=0A=
->>>> ThreadPool::TPHandle&)+0xbd) [0x5581ece4c63d]=0A=
->>>>  21: (OSD::dequeue_op(boost::intrusive_ptr<PG>,=0A=
->>>> std::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x409) =0A=
->>>> [0x5581eccdd2e9]=0A=
->>>>  22: (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>=0A=
->>>> const&)+0x52) [0x5581eccdd542]=0A=
->>>>  23: (OSD::ShardedOpWQ::_process(unsigned int,=0A=
->>>> ceph::heartbeat_handle_d*)+0x73f) [0x5581eccfd30f]=0A=
->>>>  24: (ShardedThreadPool::shardedthreadpool_worker(unsigned=0A=
->>>> int)+0x89f) [0x5581ed440b2f]=0A=
->>>>  25: (ShardedThreadPool::WorkThreadSharded::entry()+0x10)=0A=
->>>> [0x5581ed4441f0]=0A=
->>>>  26: (Thread::entry_wrapper()+0x75) [0x5581ed4335c5]=0A=
->>>>  27: (()+0x76fa) [0x7f8ed9e4e6fa]=0A=
->>>>  28: (clone()+0x6d) [0x7f8ed7caeb5d]=0A=
->>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is nee=
-ded to interpret this.=0A=
->>>>=0A=
->>>>=0A=
->>>> Thanks & Regards=0A=
->>>> Somnath=0A=
->>>>=0A=
->>>> -----Original Message-----=0A=
->>>> From: Sage Weil [mailto:sweil@redhat.com]=0A=
->>>> Sent: Monday, August 22, 2016 2:57 PM=0A=
->>>> To: Somnath Roy=0A=
->>>> Cc: Mark Nelson; ceph-devel=0A=
->>>> Subject: RE: Bluestore assert=0A=
->>>>=0A=
->>>> On Mon, 22 Aug 2016, Somnath Roy wrote:=0A=
->>>>> FYI, I was running rocksdb by enabling universal style compaction =0A=
->>>>> during this time.=0A=
->>>> How are you selecting universal compaction?=0A=
->>>>=0A=
->>>> sage=0A=
->>>> PLEASE NOTE: The information contained in this electronic mail message=
- is intended only for the use of the designated recipient(s) named above. I=
-f the reader of this message is not the intended recipient, you are hereby =
-notified that you have received this message in error and that any review, =
-dissemination, distribution, or copying of this message is strictly prohibi=
-ted. If you have received this communication in error, please notify the se=
-nder by telephone or e-mail (as shown above) immediately and destroy any an=
-d all copies of this message in your possession (whether hard copies or ele=
-ctronically stored copies).=0A=
->>>> --=0A=
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-=0A=
->>>> in the body of a message to majordomo@vger.kernel.org More majordomo =
-=0A=
->>>> info at  http://vger.kernel.org/majordomo-info.html=0A=
->>>>=0A=
->=0A=
-=0A=
+On Tuesday 23 August 2016 04:27 AM, Sage Weil wrote:
+> On Mon, 22 Aug 2016, Allen Samuels wrote:
+>>> -----Original Message-----
+>>> From: Sage Weil [mailto:sweil@redhat.com]
+>>> Sent: Monday, August 22, 2016 6:09 PM
+>>> To: Allen Samuels <Allen.Samuels@sandisk.com>
+>>> Cc: ceph-devel@vger.kernel.org
+>>> Subject: RE: bluestore blobs REVISITED
+>>>
+>>> On Mon, 22 Aug 2016, Allen Samuels wrote:
+>>>> Another possibility is to "bin" the lextent table into known, fixed,
+>>>> offset ranges. Suppose each oNode had a fixed range of LBA keys
+>>>> associated with the lextent table: say [0..128K), [128K..256K), ...
+>>> Yeah, I think that's the way to do it.  Either a set<uint32_t>
+>>> lextent_key_offsets or uint64_t lextent_map_chunk_size to specify the
+>>> granularity.
+>> Need to do some actual estimates on this scheme to make sure we're
+>> actually landing on a real solution and not just another band-aid that
+>> we have to rip off (painfully) at some future time.
+> Yeah
+>
+>>>> It eliminates the need to put a "lower_bound" into the KV Store
+>>>> directly. Though it'll likely be a bit more complex above and somewhat
+>>>> less efficient.
+>>> FWIW this is basically wat the iterator does, I think.  It's a separate=
+ rocksdb
+>>> operation to create a snapshot to iterate over (and we don't rely on th=
+at
+>>> feature anywhere).  It's still more expensive than raw gets just becaus=
+e it has
+>>> to have fingers in all the levels to ensure that it finds all the keys =
+for the given
+>>> range, while get can stop once it finds a key or a tombstone (either in=
+ a cache
+>>> or a higher level of the tree).
+>>>
+>>> But I'm not super thrilled about this complexity.  I still hope
+>>> (wishfully?) we can get the lextent map small enough that we can leave =
+it in
+>>> the onode.  Otherwise we really are going to net +1 kv fetch for every
+>>> operation (3, in the clone case... onode, then lextent, then shared blo=
+b).
+>> I don't see the feasibility of leaving the lextent map in the oNode.
+>> It's just too big for the 4K random write case. I know that's not
+>> indicative of real-world usage. But it's what people use to measure
+>> systems....
+> How small do you think it would need to be to be acceptable (in teh
+> worst-case, 1024 4k lextents in a 4m object)?  2k?  3k?  1k?
+>
+> You're probably right, but I think I can still cut the full map encoding
+> further.  It was 6500, I did a quick tweak to get it to 5500, and I think
+> I can drop another 1-2 bytes per entry for common cases (offset of 0,
+> length =3D=3D previous lextent length), which would get it under the 4k m=
+ark.
+I am also working on some of the optimizations like this. Introduced one
+byte to
+indicate whether the offset is zero or not, and if lextent length is
+same as the blob pextent length(fails in case of super block and
+incremental osd map, doesn't have a good hack so far to address this),
+iff pextent vector has only one extent.
+Another one, if we know, there is only one extent in the pextent
+vector(usually the case) may be we can serialize the extent directly not
+through the vector which saves couple of bytes to store the size of the
+vector. Similar ones for lextents as well. Making changes to see if that
+yields some savings.
+
+
+Varada
+
+>> BTW, w.r.t. lower-bound, my reading of the BloomFilter / Prefix stuff
+>> suggests that it's would relatively trivial to ensure that bloom-filters
+>> properly ignore the "offset" portion of an lextent key. Meaning that I
+>> believe that a "lower_bound" operator ought to be relatively easy to
+>> implement without triggering the overhead of a snapshot, again, provided
+>> that you provided a custom bloom-filter implementation that did the
+>> right thing.
+> Hmm, that might help.  It may be that this isn't super significant,
+> though, too... as I mentioned there is no snapshot involved with a vanill=
+a
+> iterator.
+>
+>> So the question is do we want to avoid monkeying with RocksDB and go
+>> with a binning approach (TBD ensuring that this is a real solution to
+>> the problem) OR do we bite the bullet and solve the lower-bound lookup
+>> problem?
+>>
+>> BTW, on the "binning" scheme, perhaps the solution is just put the
+>> current "binning value" [presumeably some log2 thing] into the oNode
+>> itself -- it'll just be a byte. Then you're only stuck with the
+>> complexity of deciding when to do a "split" if the current bin has
+>> gotten too large (some arbitrary limit on size of the encoded
+>> lexent-bin)
+> I think simple is better, but it's annoying because one big bin means
+> splitting all other bins, and we don't know when to merge without
+> seeing all bin sizes.
+>
+> sage
+>
+>
+>>> sage
+>>>
+>>>>
+>>>>> -----Original Message-----
+>>>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>>>>> owner@vger.kernel.org] On Behalf Of Allen Samuels
+>>>>> Sent: Sunday, August 21, 2016 10:27 AM
+>>>>> To: Sage Weil <sweil@redhat.com>
+>>>>> Cc: ceph-devel@vger.kernel.org
+>>>>> Subject: Re: bluestore blobs REVISITED
+>>>>>
+>>>>> I wonder how hard it would be to add a "lower-bound" fetch like stl.
+>>>>> That would allow the kv store to do the fetch without incurring the
+>>>>> overhead of a snapshot for the iteration scan.
+>>>>>
+>>>>> Shared blobs were always going to trigger an extra kv fetch no matter
+>>> what.
+>>>>> Sent from my iPhone. Please excuse all typos and autocorrects.
+>>>>>
+>>>>>> On Aug 21, 2016, at 12:08 PM, Sage Weil <sweil@redhat.com> wrote:
+>>>>>>
+>>>>>>> On Sat, 20 Aug 2016, Allen Samuels wrote:
+>>>>>>> I have another proposal (it just occurred to me, so it might not
+>>>>>>> survive more scrutiny).
+>>>>>>>
+>>>>>>> Yes, we should remove the blob-map from the oNode.
+>>>>>>>
+>>>>>>> But I believe we should also remove the lextent map from the
+>>>>>>> oNode and make each lextent be an independent KV value.
+>>>>>>>
+>>>>>>> However, in the special case where each extent --exactly-- maps
+>>>>>>> onto a blob AND the blob is not referenced by any other extent
+>>>>>>> (which is the typical case, unless you're doing compression with
+>>>>>>> strange-ish
+>>>>>>> overlaps)
+>>>>>>> -- then you encode the blob in the lextent itself and there's no
+>>>>>>> separate blob entry.
+>>>>>>>
+>>>>>>> This is pretty much exactly the same number of KV fetches as what
+>>>>>>> you proposed before when the blob isn't shared (the typical case)
+>>>>>>> -- except the oNode is MUCH MUCH smaller now.
+>>>>>> I think this approach makes a lot of sense!  The only thing I'm
+>>>>>> worried about is that the lextent keys are no longer known when
+>>>>>> they are being fetched (since they will be a logical offset),
+>>>>>> which means we'll have to use an iterator instead of a simple get.
+>>>>>> The former is quite a bit slower than the latter (which can make
+>>>>>> use of the rocksdb caches and/or key bloom filters more easily).
+>>>>>>
+>>>>>> We could augment your approach by keeping *just* the lextent
+>>>>>> offsets in the onode, so that we know exactly which lextent key to
+>>>>>> fetch, but then I'm not sure we'll get much benefit (lextent
+>>>>>> metadata size goes down by ~1/3, but then we have an extra get for
+>>> cloned objects).
+>>>>>> Hmm, the other thing to keep in mind is that for RBD the common
+>>>>>> case is that lots of objects have clones, and many of those
+>>>>>> objects' blobs will be shared.
+>>>>>>
+>>>>>> sage
+>>>>>>
+>>>>>>> So for the non-shared case, you fetch the oNode which is
+>>>>>>> dominated by the xattrs now (so figure a couple of hundred bytes
+>>>>>>> and not much CPU cost to deserialize). And then fetch from the KV
+>>>>>>> for the lextent (which is 1 fetch -- unless it overlaps two
+>>>>>>> previous lextents). If it's the optimal case, the KV fetch is
+>>>>>>> small (10-15 bytes) and trivial to deserialize. If it's an
+>>>>>>> unshared/local blob then you're ready to go. If the blob is
+>>>>>>> shared (locally or globally) then you'll have to go fetch that one =
+too.
+>>>>>>>
+>>>>>>> This might lead to the elimination of the local/global blob thing
+>>>>>>> (I think you've talked about that before) as now the only "local"
+>>>>>>> blobs are the unshared single extent blobs which are stored
+>>>>>>> inline with the lextent entry. You'll still have the special
+>>>>>>> cases of promoting unshared
+>>>>>>> (inline) blobs to global blobs -- which is probably similar to
+>>>>>>> the current promotion "magic" on a clone operation.
+>>>>>>>
+>>>>>>> The current refmap concept may require some additional work. I
+>>>>>>> believe that we'll have to do a reconstruction of the refmap, but
+>>>>>>> fortunately only for the range of the current I/O. That will be a
+>>>>>>> bit more expensive, but still less expensive than reconstructing
+>>>>>>> the entire refmap for every oNode deserialization, Fortunately I
+>>>>>>> believe the refmap is only really needed for compression cases or
+>>>>>>> RBD cases
+>>>>> without "trim"
+>>>>>>> (this is the case to optimize -- it'll make trim really important
+>>>>>>> for performance).
+>>>>>>>
+>>>>>>> Best of both worlds????
+>>>>>>>
+>>>>>>> Allen Samuels
+>>>>>>> SanDisk |a Western Digital brand
+>>>>>>> 2880 Junction Avenue, Milpitas, CA 95134
+>>>>>>> T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
+>>>>>>>
+>>>>>>>
+>>>>>>>> -----Original Message-----
+>>>>>>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>>>>>>>> owner@vger.kernel.org] On Behalf Of Allen Samuels
+>>>>>>>> Sent: Friday, August 19, 2016 7:16 AM
+>>>>>>>> To: Sage Weil <sweil@redhat.com>
+>>>>>>>> Cc: ceph-devel@vger.kernel.org
+>>>>>>>> Subject: RE: bluestore blobs
+>>>>>>>>
+>>>>>>>>> -----Original Message-----
+>>>>>>>>> From: Sage Weil [mailto:sweil@redhat.com]
+>>>>>>>>> Sent: Friday, August 19, 2016 6:53 AM
+>>>>>>>>> To: Allen Samuels <Allen.Samuels@sandisk.com>
+>>>>>>>>> Cc: ceph-devel@vger.kernel.org
+>>>>>>>>> Subject: RE: bluestore blobs
+>>>>>>>>>
+>>>>>>>>> On Fri, 19 Aug 2016, Allen Samuels wrote:
+>>>>>>>>>>> -----Original Message-----
+>>>>>>>>>>> From: Sage Weil [mailto:sweil@redhat.com]
+>>>>>>>>>>> Sent: Thursday, August 18, 2016 8:10 AM
+>>>>>>>>>>> To: Allen Samuels <Allen.Samuels@sandisk.com>
+>>>>>>>>>>> Cc: ceph-devel@vger.kernel.org
+>>>>>>>>>>> Subject: RE: bluestore blobs
+>>>>>>>>>>>
+>>>>>>>>>>> On Thu, 18 Aug 2016, Allen Samuels wrote:
+>>>>>>>>>>>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-
+>>> devel-
+>>>>>>>>>>>>> owner@vger.kernel.org] On Behalf Of Sage Weil
+>>>>>>>>>>>>> Sent: Wednesday, August 17, 2016 7:26 AM
+>>>>>>>>>>>>> To: ceph-devel@vger.kernel.org
+>>>>>>>>>>>>> Subject: bluestore blobs
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> I think we need to look at other changes in addition to the
+>>>>>>>>>>>>> encoding performance improvements.  Even if they end up
+>>>>>>>>>>>>> being good enough, these changes are somewhat orthogonal
+>>>>>>>>>>>>> and at
+>>>>> least
+>>>>>>>>>>>>> one of them should give us something that is even faster.
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> 1. I mentioned this before, but we should keep the encoding
+>>>>>>>>>>>>> bluestore_blob_t around when we load the blob map.  If it's
+>>>>>>>>>>>>> not changed, don't reencode it.  There are no blockers for
+>>>>>>>>>>>>> implementing this
+>>>>>>>>>>> currently.
+>>>>>>>>>>>>> It may be difficult to ensure the blobs are properly marked
+>>> dirty...
+>>>>>>>>>>>>> I'll see if we can use proper accessors for the blob to
+>>>>>>>>>>>>> enforce this at compile time.  We should do that anyway.
+>>>>>>>>>>>> If it's not changed, then why are we re-writing it? I'm
+>>>>>>>>>>>> having a hard time thinking of a case worth optimizing where
+>>>>>>>>>>>> I want to re-write the oNode but the blob_map is unchanged.
+>>>>>>>>>>>> Am I missing
+>>>>>>>>> something obvious?
+>>>>>>>>>>> An onode's blob_map might have 300 blobs, and a single write
+>>>>>>>>>>> only updates one of them.  The other 299 blobs need not be
+>>>>>>>>>>> reencoded, just
+>>>>>>>>> memcpy'd.
+>>>>>>>>>> As long as we're just appending that's a good optimization.
+>>>>>>>>>> How often does that happen? It's certainly not going to help
+>>>>>>>>>> the RBD 4K random write problem.
+>>>>>>>>> It won't help the (l)extent_map encoding, but it avoids almost
+>>>>>>>>> all of the blob reencoding.  A 4k random write will update one
+>>>>>>>>> blob out of
+>>>>>>>>> ~100 (or whatever it is).
+>>>>>>>>>
+>>>>>>>>>>>>> 2. This turns the blob Put into rocksdb into two memcpy
+>>> stages:
+>>>>>>>>>>>>> one to assemble the bufferlist (lots of bufferptrs to each
+>>>>>>>>>>>>> untouched
+>>>>>>>>>>>>> blob) into a single rocksdb::Slice, and another memcpy
+>>>>>>>>>>>>> somewhere inside rocksdb to copy this into the write buffer.
+>>>>>>>>>>>>> We could extend the rocksdb interface to take an iovec so
+>>>>>>>>>>>>> that the first memcpy isn't needed (and rocksdb will
+>>>>>>>>>>>>> instead iterate over our buffers and copy them directly into =
+its
+>>> write buffer).
+>>>>>>>>>>>>> This is probably a pretty small piece of the overall time...
+>>>>>>>>>>>>> should verify with a profiler
+>>>>>>>>>>> before investing too much effort here.
+>>>>>>>>>>>> I doubt it's the memcpy that's really the expensive part.
+>>>>>>>>>>>> I'll bet it's that we're transcoding from an internal to an
+>>>>>>>>>>>> external representation on an element by element basis. If
+>>>>>>>>>>>> the iovec scheme is going to help, it presumes that the
+>>>>>>>>>>>> internal data structure essentially matches the external
+>>>>>>>>>>>> data structure so that only an iovec copy is required. I'm
+>>>>>>>>>>>> wondering how compatible this is with the current concepts
+>>>>>>>>>>>> of
+>>>>> lextext/blob/pextent.
+>>>>>>>>>>> I'm thinking of the xattr case (we have a bunch of strings to
+>>>>>>>>>>> copy
+>>>>>>>>>>> verbatim) and updated-one-blob-and-kept-99-unchanged case:
+>>>>>>>>>>> instead of memcpy'ing them into a big contiguous buffer and
+>>>>>>>>>>> having rocksdb memcpy
+>>>>>>>>>>> *that* into it's larger buffer, give rocksdb an iovec so that
+>>>>>>>>>>> they smaller buffers are assembled only once.
+>>>>>>>>>>>
+>>>>>>>>>>> These buffers will be on the order of many 10s to a couple
+>>>>>>>>>>> 100s of
+>>>>>>>> bytes.
+>>>>>>>>>>> I'm not sure where the crossover point for constructing and
+>>>>>>>>>>> then traversing an iovec vs just copying twice would be...
+>>>>>>>>>> Yes this will eliminate the "extra" copy, but the real problem
+>>>>>>>>>> is that the oNode itself is just too large. I doubt removing
+>>>>>>>>>> one extra copy is going to suddenly "solve" this problem. I
+>>>>>>>>>> think we're going to end up rejiggering things so that this
+>>>>>>>>>> will be much less of a problem than it is now -- time will tell.
+>>>>>>>>> Yeah, leaving this one for last I think... until we see memcpy
+>>>>>>>>> show up in the profile.
+>>>>>>>>>
+>>>>>>>>>>>>> 3. Even if we do the above, we're still setting a big (~4k
+>>>>>>>>>>>>> or
+>>>>>>>>>>>>> more?) key into rocksdb every time we touch an object, even
+>>>>>>>>>>>>> when a tiny
+>>>>>>>>>> See my analysis, you're looking at 8-10K for the RBD random
+>>>>>>>>>> write case
+>>>>>>>>>> -- which I think everybody cares a lot about.
+>>>>>>>>>>
+>>>>>>>>>>>>> amount of metadata is getting changed.  This is a
+>>>>>>>>>>>>> consequence of embedding all of the blobs into the onode
+>>>>>>>>>>>>> (or bnode).  That seemed like a good idea early on when
+>>>>>>>>>>>>> they were tiny (i.e., just an extent), but now I'm not so
+>>>>>>>>>>>>> sure.  I see a couple of different
+>>>>>>>>> options:
+>>>>>>>>>>>>> a) Store each blob as ($onode_key+$blobid).  When we load
+>>>>>>>>>>>>> the onode, load the blobs too.  They will hopefully be
+>>>>>>>>>>>>> sequential in rocksdb (or definitely sequential in zs).
+>>>>>>>>>>>>> Probably go back to using an
+>>>>>>>>> iterator.
+>>>>>>>>>>>>> b) Go all in on the "bnode" like concept.  Assign blob ids
+>>>>>>>>>>>>> so that they are unique for any given hash value.  Then
+>>>>>>>>>>>>> store the blobs as $shard.$poolid.$hash.$blobid (i.e.,
+>>>>>>>>>>>>> where the bnode is now).  Then when clone happens there is
+>>>>>>>>>>>>> no onode->bnode migration magic happening--we've already
+>>>>>>>>>>>>> committed to storing blobs in separate keys.  When we load
+>>>>>>>>>>>>> the onode, keep the conditional bnode loading we already
+>>>>>>>>>>>>> have.. but when the bnode is loaded load up all the blobs
+>>>>>>>>>>>>> for the hash key.  (Okay, we could fault in blobs
+>>>>>>>>>>>>> individually, but that code will be more
+>>>>>>>>>>>>> complicated.)
+>>>>>>>>>> I like this direction. I think you'll still end up demand
+>>>>>>>>>> loading the blobs in order to speed up the random read case.
+>>>>>>>>>> This scheme will result in some space-amplification, both in
+>>>>>>>>>> the lextent and in the blob-map, it's worth a bit of study too
+>>>>>>>>>> see how bad the metadata/data ratio becomes (just as a guess,
+>>>>>>>>>> $shard.$poolid.$hash.$blobid is probably 16 +
+>>>>>>>>>> 16 + 8 + 16 bytes in size, that's ~60 bytes of key for each
+>>>>>>>>>> Blob
+>>>>>>>>>> -- unless your KV store does path compression. My reading of
+>>>>>>>>>> RocksDB sst file seems to indicate that it doesn't, I
+>>>>>>>>>> *believe* that ZS does [need to confirm]). I'm wondering if
+>>>>>>>>>> the current notion
+>>>>> of local vs.
+>>>>>>>>>> global blobs isn't actually beneficial in that we can give
+>>>>>>>>>> local blobs different names that sort with their associated
+>>>>>>>>>> oNode (which probably makes the space-amp worse) which is an
+>>>>>>>>>> important optimization. We do need to watch the space amp,
+>>>>>>>>>> we're going to be burning DRAM to make KV accesses cheap and
+>>>>>>>>>> the amount of DRAM
+>>>>> is
+>>>>>>>> proportional to the space amp.
+>>>>>>>>> I got this mostly working last night... just need to sort out
+>>>>>>>>> the clone case (and clean up a bunch of code).  It was a
+>>>>>>>>> relatively painless transition to make, although in its current
+>>>>>>>>> form the blobs all belong to the bnode, and the bnode if
+>>>>>>>>> ephemeral but remains in
+>>>>>>>> memory until all referencing onodes go away.
+>>>>>>>>> Mostly fine, except it means that odd combinations of clone
+>>>>>>>>> could leave lots of blobs in cache that don't get trimmed.
+>>>>>>>>> Will address that
+>>>>> later.
+>>>>>>>>> I'll try to finish it up this morning and get it passing tests an=
+d posted.
+>>>>>>>>>
+>>>>>>>>>>>>> In both these cases, a write will dirty the onode (which is
+>>>>>>>>>>>>> back to being pretty small.. just xattrs and the lextent
+>>>>>>>>>>>>> map) and 1-3 blobs (also
+>>>>>>>>>>> now small keys).
+>>>>>>>>>> I'm not sure the oNode is going to be that small. Looking at
+>>>>>>>>>> the RBD random 4K write case, you're going to have 1K entries
+>>>>>>>>>> each of which has an offset, size and a blob-id reference in
+>>>>>>>>>> them. In my current oNode compression scheme this compresses
+>>>>>>>>>> to about 1 byte
+>>>>> per entry.
+>>>>>>>>>> However, this optimization relies on being able to cheaply
+>>>>>>>>>> renumber the blob-ids, which is no longer possible when the
+>>>>>>>>>> blob-ids become parts of a key (see above). So now you'll have
+>>>>>>>>>> a minimum of 1.5-3 bytes extra for each blob-id (because you
+>>>>>>>>>> can't assume that the blob-ids
+>>>>>>>>> become "dense"
+>>>>>>>>>> anymore) So you're looking at 2.5-4 bytes per entry or about
+>>>>>>>>>> 2.5-4K Bytes of lextent table. Worse, because of the variable
+>>>>>>>>>> length encoding you'll have to scan the entire table to
+>>>>>>>>>> deserialize it (yes, we could do differential editing when we
+>>>>>>>>>> write but that's another
+>>>>>>>> discussion).
+>>>>>>>>>> Oh and I forgot to add the 200-300 bytes of oNode and xattrs :).
+>>>>>>>>>> So while this looks small compared to the current ~30K for the
+>>>>>>>>>> entire thing oNode/lextent/blobmap, it's NOT a huge gain over
+>>>>>>>>>> 8-10K of the compressed oNode/lextent/blobmap scheme that I
+>>>>> published earlier.
+>>>>>>>>>> If we want to do better we will need to separate the lextent
+>>>>>>>>>> from the oNode also. It's relatively easy to move the lextents
+>>>>>>>>>> into the KV store itself (there are two obvious ways to deal
+>>>>>>>>>> with this, either use the native offset/size from the lextent
+>>>>>>>>>> itself OR create 'N' buckets of logical offset into which we
+>>>>>>>>>> pour entries -- both of these would add somewhere between 1
+>>>>>>>>>> and 2 KV look-ups
+>>>>> per
+>>>>>>>>>> operation
+>>>>>>>>>> -- here is where an iterator would probably help.
+>>>>>>>>>>
+>>>>>>>>>> Unfortunately, if you only process a portion of the lextent
+>>>>>>>>>> (because you've made it into multiple keys and you don't want
+>>>>>>>>>> to load all of
+>>>>>>>>>> them) you no longer can re-generate the refmap on the fly
+>>>>>>>>>> (another key space optimization). The lack of refmap screws up
+>>>>>>>>>> a number of other important algorithms -- for example the
+>>>>>>>>>> overlapping blob-map
+>>>>>>>> thing, etc.
+>>>>>>>>>> Not sure if these are easy to rewrite or not -- too
+>>>>>>>>>> complicated to think about at this hour of the evening.
+>>>>>>>>> Yeah, I forgot about the extent_map and how big it gets.  I
+>>>>>>>>> think, though, that if we can get a 4mb object with 1024 4k
+>>>>>>>>> lextents to encode the whole onode and extent_map in under 4K
+>>>>>>>>> that will be good enough.  The blob update that goes with it
+>>>>>>>>> will be ~200 bytes, and benchmarks aside, the 4k random write
+>>>>>>>>> 100% fragmented object is a worst
+>>>>>>>> case.
+>>>>>>>>
+>>>>>>>> Yes, it's a worst-case. But it's a
+>>>>>>>> "worst-case-that-everybody-looks-at" vs. a
+>>>>>>>> "worst-case-that-almost-
+>>>>> nobody-looks-at".
+>>>>>>>> I'm still concerned about having an oNode that's larger than a 4K
+>>> block.
+>>>>>>>>
+>>>>>>>>> Anyway, I'll get the blob separation branch working and we can
+>>>>>>>>> go from there...
+>>>>>>>>>
+>>>>>>>>> sage
+>>>>>>>> --
+>>>>>>>> To unsubscribe from this list: send the line "unsubscribe
+>>>>>>>> ceph-devel" in the body of a message to
+>>>>>>>> majordomo@vger.kernel.org More majordomo info at
+>>>>>>>> http://vger.kernel.org/majordomo-info.html
+>>>>>>> --
+>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l"
+>>>>>>> in the body of a message to majordomo@vger.kernel.org More
+>>>>> majordomo
+>>>>>>> info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>
+>>>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe
+>>>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
