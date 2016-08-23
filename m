@@ -1,86 +1,37 @@
-From: Avner Ben Hanoch <avnerb@mellanox.com>
-Subject: RE: errors in make-debs.sh because "make dist" fails on
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: errors in make-debs.sh because "make dist" fails on
  'rocksdb/db/slice.cc'
-Date: Tue, 23 Aug 2016 13:18:05 +0000
-Message-ID: <DB5PR05MB1607F44B510339AA71F00F54A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
+Date: Tue, 23 Aug 2016 15:33:51 +0200
+Message-ID: <a48780cc-bfbf-7b24-32b9-0cd3581b00df@suse.cz>
 References: <DB5PR05MB1607C4B81D5433484A17801FA9E80@DB5PR05MB1607.eurprd05.prod.outlook.com>
  <CAJ4mKGYP+9TQ8wT-eUH1WkgwqXY3z2uF+3WFtpK8BRFNF9VWBw@mail.gmail.com>
  <DB5PR05MB160736C8DBCC82350BE98385A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
  <20160823110125.GG5955@rskikr.localdomain>
+ <20160823112140.GH5955@rskikr.localdomain>
+ <cb68488d-2c92-b0dd-cda4-92d3ea149b22@suse.cz>
+ <e367df5c-5995-25dd-fc0b-b5096d757edf@suse.cz>
+ <DB5PR05MB1607E0FC452D4FF419A78542A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db5eur01on0068.outbound.protection.outlook.com ([104.47.2.68]:47456
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754611AbcHWNcv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 23 Aug 2016 09:32:51 -0400
-Content-Language: en-US
+Received: from mx2.suse.de ([195.135.220.15]:35822 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757265AbcHWNfh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 23 Aug 2016 09:35:37 -0400
+In-Reply-To: <DB5PR05MB1607E0FC452D4FF419A78542A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
+To: Avner Ben Hanoch <avnerb@mellanox.com>, Brad Hubbard <bhubbard@redhat.com>
 Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Oops - submodule rocksdb was changed in ceph after v11.0.0:
+> Thanks for the clarification Nathan,
+>
+> I am using the updated master branch from https://github.com/ceph/ceph .  Anyhow, I don't think the problem is in the file make-debs.sh itself, but in something that is invoked from it regarding make dist with regard to the file db/slice.cc from rocksdb submodule.
+>
+> Do you have any idea if someone execute make-debs.sh on the updated ceph master branch?
 
-master - not working:
-rocksdb @ 6797e6f	rocksdb: revert the change introduced by dc41731
+AFAIK you are the first to try it on master.
 
-v11.0.0 - working:
-rocksdb @ 5647fa4	rocksdb: pull up to master
-
-
-and apparently, *the file 'db/slice.cc' was deleted during that change*
-hence, this explains why make dist (that is invoked by ./make-debs.sh) comp=
-lains about it
-         make[2]: *** No rule to make target 'rocksdb/db/slice.cc', needed =
-by 'distdir'.  Stop.
-
-Any idea how to fix this?
-
-TIA,
-  Avner
-
-
------Original Message-----
-From: Avner Ben Hanoch=20
-Sent: Tuesday, August 23, 2016 15:13
-To: 'Brad Hubbard'=20
-Cc: Gregory Farnum; Ceph Development <ceph-devel@vger.kernel.org>
-Subject: RE: errors in make-debs.sh because "make dist" fails on 'rocksdb/d=
-b/slice.cc'
-
-Thanks Brad,
-
-Unfortunately, cleaning doesn't help
-And anyhow the error occurs even with fresh git clone from the HEAD of ceph=
- master (that brings with it fresh submodules)
-
-AFAICU, the SHA1 of src/rocksdb is identical (for both workingv11.0.0  and =
-not working HEAD of master) In both cases, I see: SHA1=3D6797e6f Avoid upda=
-ting memtable allocated bytes if write_buffer_size is not set (which is als=
-o the latest commit in https://github.com/ceph/rocksdb)
-
-Avner
-
------Original Message-----
-From: Brad Hubbard
-Sent: Tuesday, August 23, 2016 14:01
-To: Avner Ben Hanoch
-Cc: Gregory Farnum; Ceph Development <ceph-devel@vger.kernel.org>
-Subject: Re: errors in make-debs.sh because "make dist" fails on 'rocksdb/d=
-b/slice.cc'
-
-
-You could try changing to src/rocksdb and running "make clean" and "git cle=
-an -fdx" and retrying the build. It's possible some build artefact was left=
- over in that submodule's directory structure for that commit. You could al=
-so compare the
-SHA1 of the src/rocksdb submodule in each case (workingv11.0.0  and not wor=
-king) and see what changed between them.
-
---
-HTH,
-Brad
-
+Since the script uses autotools (not cmake) to do the build, it is not 
+expected to work on master. IMO the script needs to be modified.
