@@ -1,43 +1,57 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: errors in make-debs.sh because "make dist" fails on
- 'rocksdb/db/slice.cc'
-Date: Tue, 23 Aug 2016 14:59:13 +0200
-Message-ID: <e367df5c-5995-25dd-fc0b-b5096d757edf@suse.cz>
-References: <DB5PR05MB1607C4B81D5433484A17801FA9E80@DB5PR05MB1607.eurprd05.prod.outlook.com>
- <CAJ4mKGYP+9TQ8wT-eUH1WkgwqXY3z2uF+3WFtpK8BRFNF9VWBw@mail.gmail.com>
- <DB5PR05MB160736C8DBCC82350BE98385A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
- <20160823110125.GG5955@rskikr.localdomain>
- <20160823112140.GH5955@rskikr.localdomain>
- <cb68488d-2c92-b0dd-cda4-92d3ea149b22@suse.cz>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: rbd and the next jewel release v10.2.3
+Date: Tue, 23 Aug 2016 09:06:19 -0400
+Message-ID: <CA+aFP1CzY1UFgzUcWnCDAhqKH+p95gkhSZ7k+XhsuStm_y0ZnQ@mail.gmail.com>
+References: <57BC0D5F.5050006@dachary.org>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:57282 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754067AbcHWM7S (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 23 Aug 2016 08:59:18 -0400
-In-Reply-To: <cb68488d-2c92-b0dd-cda4-92d3ea149b22@suse.cz>
+Received: from mail-pf0-f178.google.com ([209.85.192.178]:36838 "EHLO
+        mail-pf0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757844AbcHWNGV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Aug 2016 09:06:21 -0400
+Received: by mail-pf0-f178.google.com with SMTP id h186so43619544pfg.3
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Aug 2016 06:06:20 -0700 (PDT)
+In-Reply-To: <57BC0D5F.5050006@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>, Avner Ben Hanoch <avnerb@mellanox.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
 
-> That's a different make-deb(s).sh
+If at all possible, I would definitely like to see the following
+included in 10.2.3 since users are hitting it in the field:
 
-Allow me to qualify that statement. This thread seems to be about
+http://tracker.ceph.com/issues/16950
 
-https://github.com/ceph/ceph/blob/master/make-debs.sh
+... and given that would require another RBD test run prior to merge,
+I would also like to include the following which already have open
+PRs:
 
-while the "make-deb.sh" I am working on is
+https://github.com/ceph/ceph/pull/10791
+https://github.com/ceph/ceph/pull/10790
+https://github.com/ceph/ceph/pull/10792
+https://github.com/ceph/ceph/pull/10646
+https://github.com/ceph/ceph/pull/10647
+https://github.com/ceph/ceph/pull/10786
 
-https://github.com/ceph/ceph-qa-suite/blob/master/tasks/buildpackages/make-deb.sh
+I can create a PR for the high priority issue this morning.
 
-which is used with the teuthology-openstack backend. However, I see the 
-two scripts are similar.
+On Tue, Aug 23, 2016 at 4:46 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Jason,
+>
+> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel received (I think :-) enough rbd backports to cut the release. It was more challenging than usual and I'd like to thank you and Mykola for helping with the tricky parts.
+>
+> Do you think the jewel branch is ready for QE to start their own round of testing ?
+>
+> Cheers
+>
+> --
+> Loïc Dachary, Artisan Logiciel Libre
+>
 
-In general, although the autotools stuff is still there in master, it is 
-not maintained and should not be expected to work (or continue to work). 
-All build infrastructure targeting master should be converted to cmake.
 
-Nathan
+
+-- 
+Jason
