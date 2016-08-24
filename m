@@ -1,48 +1,70 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH -next] ceph: use list_move instead of list_del/list_add
-Date: Wed, 24 Aug 2016 15:41:54 +0200
-Message-ID: <CAOi1vP9TB3vsRSCUWsWCD4aKZ9bBkmaydwG6Jj_Y6jwTgtxMOQ@mail.gmail.com>
-References: <1471079428-9951-1-git-send-email-weiyj.lk@gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Ceph Upgrade Issue
+Date: Wed, 24 Aug 2016 16:00:31 +0200 (CEST)
+Message-ID: <718776942.3031.1472047231643@ox.pcextreme.nl>
+References: <CAMDPVREGpHRimVhFvZy8VcptZsS2AXdiXvJ9xFbtmyZ5Ca1uOg@mail.gmail.com>
+ <1953555259.2912.1471977877142@ox.pcextreme.nl>
+ <CAMDPVRGiW6DcBBkr2WBHJmMREcbNDfHc9PqBKUN0J0XsS5s+CQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f193.google.com ([209.85.217.193]:34325 "EHLO
-        mail-ua0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753286AbcHXNy5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 09:54:57 -0400
-Received: by mail-ua0-f193.google.com with SMTP id d97so1302898uad.1
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 06:54:56 -0700 (PDT)
-In-Reply-To: <1471079428-9951-1-git-send-email-weiyj.lk@gmail.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:58863 "EHLO
+        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756281AbcHXOAi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 10:00:38 -0400
+In-Reply-To: <CAMDPVRGiW6DcBBkr2WBHJmMREcbNDfHc9PqBKUN0J0XsS5s+CQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wei Yongjun <weiyj.lk@gmail.com>
-Cc: Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Thipparapu Vijaykumar <thipparapu.vijaykumar@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Sat, Aug 13, 2016 at 11:10 AM, Wei Yongjun <weiyj.lk@gmail.com> wrote:
-> Using list_move() instead of list_del() + list_add().
->
-> Signed-off-by: Wei Yongjun <weiyj.lk@gmail.com>
-> ---
->  fs/ceph/mds_client.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
->
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index f72d4ae..d55df51 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -1150,8 +1150,7 @@ static int remove_session_caps_cb(struct inode *inode, struct ceph_cap *cap,
->                 while (!list_empty(&ci->i_cap_flush_list)) {
->                         cf = list_first_entry(&ci->i_cap_flush_list,
->                                               struct ceph_cap_flush, i_list);
-> -                       list_del(&cf->i_list);
-> -                       list_add(&cf->i_list, &to_remove);
-> +                       list_move(&cf->i_list, &to_remove);
->                 }
->
->                 spin_lock(&mdsc->cap_dirty_lock);
 
-Applied.
+> Op 24 augustus 2016 om 15:06 schreef Thipparapu Vijaykumar <thipparapu.vijaykumar@gmail.com>:
+> 
+> 
+> Hi Wido,
+> 
+>            Thanks for reply. After building DEB packages from the Ceph
+> source, could you please tell me  how  to install all those DEB
+> packages on entire cluster.
+> 
 
-Thanks,
+Just like you do with any other DEB. Copy it to the machines and install it with dpkg.
 
-                Ilya
+Wido
+
+> Thanks & Regards,
+> Vijay Kumar.
+> 
+> On Wed, Aug 24, 2016 at 12:14 AM, Wido den Hollander <wido@42on.com> wrote:
+> >
+> >> Op 23 augustus 2016 om 18:01 schreef Thipparapu Vijaykumar <thipparapu.vijaykumar@gmail.com>:
+> >>
+> >>
+> >> Hi All,
+> >>            I've a requirement where my existing ceph cluster need to
+> >> run with the newly build ceph source with instrumented additional
+> >> debugs.
+> >>  Could anyone help me to achieve the above requirement?
+> >>
+> >
+> > Why not build DEB or RPM packages from source and install them? That's usually a easy route to take in this case.
+> >
+> > For DEB it's just:
+> >
+> > $ dpkg-buildpackage
+> >
+> > Wido
+> >
+> >>
+> >> Thanks & Regards,
+> >> Vijay Kumar.
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
