@@ -1,133 +1,314 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 16/16] rbd: add force close option
-Date: Wed, 24 Aug 2016 15:18:40 +0200
-Message-ID: <1472044720-29116-17-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 09/16] rbd: retry watch re-registration periodically
+Date: Wed, 24 Aug 2016 15:18:33 +0200
+Message-ID: <1472044720-29116-10-git-send-email-idryomov@gmail.com>
 References: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f194.google.com ([209.85.161.194]:33619 "EHLO
-        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754119AbcHXNT6 (ORCPT
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:35664 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753773AbcHXNT6 (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 09:19:58 -0400
-Received: by mail-yw0-f194.google.com with SMTP id z8so793955ywa.0
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 06:19:09 -0700 (PDT)
+Received: by mail-yw0-f195.google.com with SMTP id r9so789508ywg.2
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 06:19:01 -0700 (PDT)
 Received: from dhcp-1-219.brq.redhat.com (nat-pool-brq-t.redhat.com. [213.175.37.10])
-        by smtp.gmail.com with ESMTPSA id e197sm5371294ywa.16.2016.08.24.06.19.07
+        by smtp.gmail.com with ESMTPSA id e197sm5371294ywa.16.2016.08.24.06.19.00
         for <ceph-devel@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 24 Aug 2016 06:19:08 -0700 (PDT)
+        Wed, 24 Aug 2016 06:19:00 -0700 (PDT)
 In-Reply-To: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-From: Mike Christie <mchristi@redhat.com>
+Revamp watch code to support retrying watch re-registration:
 
-This adds a force close option, so we can force the unmapping
-of a rbd device that is open. If a path/device is blacklisted, apps
-like multipathd can map a new device and then unmap the old one.
-The unmapping cleanup would then be handled by the generic hotunplug
-code paths in multipahd like is done for iSCSI, FC/FCOE, SAS, etc.
+- add rbd_dev->watch_state for more robust errcb handling
+- store watch cookie separately to avoid dereferencing watch_handle
+  which is set to NULL on unwatch
+- move re-register code into a delayed work and retry re-registration
+  every second, unless the client is blacklisted
 
-Signed-off-by: Mike Christie <mchristi@redhat.com>
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- Documentation/ABI/testing/sysfs-bus-rbd | 10 +++++++---
- drivers/block/rbd.c                     | 35 ++++++++++++++++++++++++---------
- 2 files changed, 33 insertions(+), 12 deletions(-)
+ drivers/block/rbd.c   | 138 +++++++++++++++++++++++++++++++++++++++-----------
+ net/ceph/osd_client.c |   1 +
+ 2 files changed, 110 insertions(+), 29 deletions(-)
 
-diff --git a/Documentation/ABI/testing/sysfs-bus-rbd b/Documentation/ABI/testing/sysfs-bus-rbd
-index 6dccbf82fcf4..f208ac58d613 100644
---- a/Documentation/ABI/testing/sysfs-bus-rbd
-+++ b/Documentation/ABI/testing/sysfs-bus-rbd
-@@ -6,7 +6,7 @@ Description:
- 
- Being used for adding and removing rbd block devices.
- 
--Usage: <mon ip addr> <options> <pool name> <rbd image name> [snap name]
-+Usage: <mon ip addr> <options> <pool name> <rbd image name> [<snap name>]
- 
-  $ echo "192.168.0.1 name=admin rbd foo" > /sys/bus/rbd/add
- 
-@@ -14,9 +14,13 @@ The snapshot name can be "-" or omitted to map the image read/write. A <dev-id>
- will be assigned for any registered block device. If snapshot is used, it will
- be mapped read-only.
- 
--Removal of a device:
-+Usage: <dev-id> [force]
- 
--  $ echo <dev-id> > /sys/bus/rbd/remove
-+ $ echo 2 > /sys/bus/rbd/remove
-+
-+Optional "force" argument which when passed will wait for running requests and
-+then unmap the image. Requests sent to the driver after initiating the removal
-+will be failed.  (August 2016, since 4.9.)
- 
- What:		/sys/bus/rbd/add_single_major
- Date:		December 2013
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 8ff2dc872008..35fc1da6c83d 100644
+index 1c805eea6767..cb96fb19e8a7 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -6347,18 +6347,26 @@ static ssize_t do_rbd_remove(struct bus_type *bus,
- 	struct rbd_device *rbd_dev = NULL;
- 	struct list_head *tmp;
- 	int dev_id;
--	unsigned long ul;
-+	char opt_buf[6];
- 	bool already = false;
-+	bool force = false;
+@@ -114,6 +114,8 @@ static int atomic_dec_return_safe(atomic_t *v)
+ 
+ #define RBD_OBJ_PREFIX_LEN_MAX	64
+ 
++#define RBD_RETRY_DELAY		msecs_to_jiffies(1000)
++
+ /* Feature bits */
+ 
+ #define RBD_FEATURE_LAYERING	(1<<0)
+@@ -319,6 +321,12 @@ struct rbd_img_request {
+ #define for_each_obj_request_safe(ireq, oreq, n) \
+ 	list_for_each_entry_safe_reverse(oreq, n, &(ireq)->obj_requests, links)
+ 
++enum rbd_watch_state {
++	RBD_WATCH_STATE_UNREGISTERED,
++	RBD_WATCH_STATE_REGISTERED,
++	RBD_WATCH_STATE_ERROR,
++};
++
+ struct rbd_mapping {
+ 	u64                     size;
+ 	u64                     features;
+@@ -352,7 +360,11 @@ struct rbd_device {
+ 
+ 	struct ceph_file_layout	layout;		/* used for all rbd requests */
+ 
++	struct mutex		watch_mutex;
++	enum rbd_watch_state	watch_state;
+ 	struct ceph_osd_linger_request *watch_handle;
++	u64			watch_cookie;
++	struct delayed_work	watch_dwork;
+ 
+ 	struct workqueue_struct	*task_wq;
+ 
+@@ -3083,9 +3095,6 @@ out_err:
+ 	obj_request_done_set(obj_request);
+ }
+ 
+-static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev);
+-static void __rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev);
+-
+ static void rbd_watch_cb(void *arg, u64 notify_id, u64 cookie,
+ 			 u64 notifier_id, void *data, size_t data_len)
+ {
+@@ -3113,35 +3122,34 @@ static void rbd_watch_cb(void *arg, u64 notify_id, u64 cookie,
+ 		rbd_warn(rbd_dev, "notify_ack ret %d", ret);
+ }
+ 
++static void __rbd_unregister_watch(struct rbd_device *rbd_dev);
++
+ static void rbd_watch_errcb(void *arg, u64 cookie, int err)
+ {
+ 	struct rbd_device *rbd_dev = arg;
+-	int ret;
+ 
+ 	rbd_warn(rbd_dev, "encountered watch error: %d", err);
+ 
+-	__rbd_dev_header_unwatch_sync(rbd_dev);
++	mutex_lock(&rbd_dev->watch_mutex);
++	if (rbd_dev->watch_state == RBD_WATCH_STATE_REGISTERED) {
++		__rbd_unregister_watch(rbd_dev);
++		rbd_dev->watch_state = RBD_WATCH_STATE_ERROR;
+ 
+-	ret = rbd_dev_header_watch_sync(rbd_dev);
+-	if (ret) {
+-		rbd_warn(rbd_dev, "failed to reregister watch: %d", ret);
+-		return;
++		queue_delayed_work(rbd_dev->task_wq, &rbd_dev->watch_dwork, 0);
+ 	}
+-
+-	ret = rbd_dev_refresh(rbd_dev);
+-	if (ret)
+-		rbd_warn(rbd_dev, "reregisteration refresh failed: %d", ret);
++	mutex_unlock(&rbd_dev->watch_mutex);
+ }
+ 
+ /*
+- * Initiate a watch request, synchronously.
++ * watch_mutex must be locked
+  */
+-static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev)
++static int __rbd_register_watch(struct rbd_device *rbd_dev)
+ {
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct ceph_osd_linger_request *handle;
+ 
+ 	rbd_assert(!rbd_dev->watch_handle);
++	dout("%s rbd_dev %p\n", __func__, rbd_dev);
+ 
+ 	handle = ceph_osdc_watch(osdc, &rbd_dev->header_oid,
+ 				 &rbd_dev->header_oloc, rbd_watch_cb,
+@@ -3153,13 +3161,16 @@ static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev)
+ 	return 0;
+ }
+ 
+-static void __rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
++/*
++ * watch_mutex must be locked
++ */
++static void __rbd_unregister_watch(struct rbd_device *rbd_dev)
+ {
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
  	int ret;
  
--	ret = kstrtoul(buf, 10, &ul);
--	if (ret)
--		return ret;
--
--	/* convert to int; abort if we lost anything in the conversion */
--	dev_id = (int)ul;
--	if (dev_id != ul)
-+	dev_id = -1;
-+	opt_buf[0] = '\0';
-+	sscanf(buf, "%d %5s", &dev_id, opt_buf);
-+	if (dev_id < 0) {
-+		pr_err("dev_id out of range\n");
- 		return -EINVAL;
-+	}
-+	if (opt_buf[0] != '\0') {
-+		if (!strcmp(opt_buf, "force")) {
-+			force = true;
-+		} else {
-+			pr_err("bad remove option at '%s'\n", opt_buf);
-+			return -EINVAL;
-+		}
-+	}
+-	if (!rbd_dev->watch_handle)
+-		return;
++	rbd_assert(rbd_dev->watch_handle);
++	dout("%s rbd_dev %p\n", __func__, rbd_dev);
  
- 	ret = -ENOENT;
- 	spin_lock(&rbd_dev_list_lock);
-@@ -6371,7 +6379,7 @@ static ssize_t do_rbd_remove(struct bus_type *bus,
+ 	ret = ceph_osdc_unwatch(osdc, rbd_dev->watch_handle);
+ 	if (ret)
+@@ -3168,17 +3179,80 @@ static void __rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
+ 	rbd_dev->watch_handle = NULL;
+ }
+ 
+-/*
+- * Tear down a watch request, synchronously.
+- */
+-static void rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
++static int rbd_register_watch(struct rbd_device *rbd_dev)
++{
++	int ret;
++
++	mutex_lock(&rbd_dev->watch_mutex);
++	rbd_assert(rbd_dev->watch_state == RBD_WATCH_STATE_UNREGISTERED);
++	ret = __rbd_register_watch(rbd_dev);
++	if (ret)
++		goto out;
++
++	rbd_dev->watch_state = RBD_WATCH_STATE_REGISTERED;
++	rbd_dev->watch_cookie = rbd_dev->watch_handle->linger_id;
++
++out:
++	mutex_unlock(&rbd_dev->watch_mutex);
++	return ret;
++}
++
++static void cancel_tasks_sync(struct rbd_device *rbd_dev)
+ {
+-	__rbd_dev_header_unwatch_sync(rbd_dev);
++	dout("%s rbd_dev %p\n", __func__, rbd_dev);
++
++	cancel_delayed_work_sync(&rbd_dev->watch_dwork);
++}
++
++static void rbd_unregister_watch(struct rbd_device *rbd_dev)
++{
++	cancel_tasks_sync(rbd_dev);
++
++	mutex_lock(&rbd_dev->watch_mutex);
++	if (rbd_dev->watch_state == RBD_WATCH_STATE_REGISTERED)
++		__rbd_unregister_watch(rbd_dev);
++	rbd_dev->watch_state = RBD_WATCH_STATE_UNREGISTERED;
++	mutex_unlock(&rbd_dev->watch_mutex);
+ 
+-	dout("%s flushing notifies\n", __func__);
+ 	ceph_osdc_flush_notifies(&rbd_dev->rbd_client->client->osdc);
+ }
+ 
++static void rbd_reregister_watch(struct work_struct *work)
++{
++	struct rbd_device *rbd_dev = container_of(to_delayed_work(work),
++					    struct rbd_device, watch_dwork);
++	int ret;
++
++	dout("%s rbd_dev %p\n", __func__, rbd_dev);
++
++	mutex_lock(&rbd_dev->watch_mutex);
++	if (rbd_dev->watch_state != RBD_WATCH_STATE_ERROR)
++		goto fail_unlock;
++
++	ret = __rbd_register_watch(rbd_dev);
++	if (ret) {
++		rbd_warn(rbd_dev, "failed to reregister watch: %d", ret);
++		if (ret != -EBLACKLISTED)
++			queue_delayed_work(rbd_dev->task_wq,
++					   &rbd_dev->watch_dwork,
++					   RBD_RETRY_DELAY);
++		goto fail_unlock;
++	}
++
++	rbd_dev->watch_state = RBD_WATCH_STATE_REGISTERED;
++	rbd_dev->watch_cookie = rbd_dev->watch_handle->linger_id;
++	mutex_unlock(&rbd_dev->watch_mutex);
++
++	ret = rbd_dev_refresh(rbd_dev);
++	if (ret)
++		rbd_warn(rbd_dev, "reregisteration refresh failed: %d", ret);
++
++	return;
++
++fail_unlock:
++	mutex_unlock(&rbd_dev->watch_mutex);
++}
++
+ /*
+  * Synchronous osd object method call.  Returns the number of bytes
+  * returned in the outbound buffer, or a negative error code.
+@@ -3945,6 +4019,8 @@ static void rbd_spec_free(struct kref *kref)
+ 
+ static void rbd_dev_free(struct rbd_device *rbd_dev)
+ {
++	WARN_ON(rbd_dev->watch_state != RBD_WATCH_STATE_UNREGISTERED);
++
+ 	ceph_oid_destroy(&rbd_dev->header_oid);
+ 	ceph_oloc_destroy(&rbd_dev->header_oloc);
+ 
+@@ -3991,6 +4067,10 @@ static struct rbd_device *__rbd_dev_create(struct rbd_client *rbdc,
+ 	ceph_oid_init(&rbd_dev->header_oid);
+ 	ceph_oloc_init(&rbd_dev->header_oloc);
+ 
++	mutex_init(&rbd_dev->watch_mutex);
++	rbd_dev->watch_state = RBD_WATCH_STATE_UNREGISTERED;
++	INIT_DELAYED_WORK(&rbd_dev->watch_dwork, rbd_reregister_watch);
++
+ 	rbd_dev->dev.bus = &rbd_bus_type;
+ 	rbd_dev->dev.type = &rbd_device_type;
+ 	rbd_dev->dev.parent = &rbd_root_dev;
+@@ -5222,7 +5302,7 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, int depth)
+ 		goto err_out_format;
+ 
+ 	if (!depth) {
+-		ret = rbd_dev_header_watch_sync(rbd_dev);
++		ret = rbd_register_watch(rbd_dev);
+ 		if (ret) {
+ 			if (ret == -ENOENT)
+ 				pr_info("image %s/%s does not exist\n",
+@@ -5281,7 +5361,7 @@ err_out_probe:
+ 	rbd_dev_unprobe(rbd_dev);
+ err_out_watch:
+ 	if (!depth)
+-		rbd_dev_header_unwatch_sync(rbd_dev);
++		rbd_unregister_watch(rbd_dev);
+ err_out_format:
+ 	rbd_dev->image_format = 0;
+ 	kfree(rbd_dev->spec->image_id);
+@@ -5348,11 +5428,11 @@ static ssize_t do_rbd_add(struct bus_type *bus,
+ 	rc = rbd_dev_device_setup(rbd_dev);
+ 	if (rc) {
+ 		/*
+-		 * rbd_dev_header_unwatch_sync() can't be moved into
++		 * rbd_unregister_watch() can't be moved into
+ 		 * rbd_dev_image_release() without refactoring, see
+ 		 * commit 1f3ef78861ac.
+ 		 */
+-		rbd_dev_header_unwatch_sync(rbd_dev);
++		rbd_unregister_watch(rbd_dev);
+ 		rbd_dev_image_release(rbd_dev);
+ 		goto out;
  	}
- 	if (!ret) {
- 		spin_lock_irq(&rbd_dev->lock);
--		if (rbd_dev->open_count)
-+		if (rbd_dev->open_count && !force)
- 			ret = -EBUSY;
- 		else
- 			already = test_and_set_bit(RBD_DEV_FLAG_REMOVING,
-@@ -6382,6 +6390,15 @@ static ssize_t do_rbd_remove(struct bus_type *bus,
+@@ -5473,7 +5553,7 @@ static ssize_t do_rbd_remove(struct bus_type *bus,
  	if (ret < 0 || already)
  		return ret;
  
-+	if (force) {
-+		/*
-+		 * Prevent new IO from being queued and wait for existing
-+		 * IO to complete/fail.
-+		 */
-+		blk_mq_freeze_queue(rbd_dev->disk->queue);
-+		blk_set_queue_dying(rbd_dev->disk->queue);
-+	}
-+
- 	down_write(&rbd_dev->lock_rwsem);
- 	if (__rbd_is_lock_owner(rbd_dev))
- 		rbd_unlock(rbd_dev);
+-	rbd_dev_header_unwatch_sync(rbd_dev);
++	rbd_unregister_watch(rbd_dev);
+ 
+ 	/*
+ 	 * Don't free anything from rbd_dev->disk until after all
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index fbc6b7090c65..d9bf7a1d0a58 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -4014,6 +4014,7 @@ EXPORT_SYMBOL(ceph_osdc_list_watchers);
+  */
+ void ceph_osdc_flush_notifies(struct ceph_osd_client *osdc)
+ {
++	dout("%s osdc %p\n", __func__, osdc);
+ 	flush_workqueue(osdc->notify_wq);
+ }
+ EXPORT_SYMBOL(ceph_osdc_flush_notifies);
 -- 
 2.4.3
 
