@@ -1,88 +1,90 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: rbd and the next jewel release v10.2.3
-Date: Wed, 24 Aug 2016 09:07:53 +0200
-Message-ID: <57BD47C9.2080704@dachary.org>
-References: <57BC0D5F.5050006@dachary.org>
- <CA+aFP1CzY1UFgzUcWnCDAhqKH+p95gkhSZ7k+XhsuStm_y0ZnQ@mail.gmail.com>
- <57BC4BB1.2090803@dachary.org> <57BC5064.1030109@dachary.org>
- <57BC50DA.5040804@dachary.org>
- <CA+aFP1AiswTvMpd9Agcw6s4qFJgvjRF5HH4=VuCz5Yopu_+R6Q@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Python 3 a blocking requirement?
+Date: Wed, 24 Aug 2016 11:38:52 +0200
+Message-ID: <73da48c0-a358-0cb7-ff9b-3e787803b660@digiware.nl>
+References: <2ef48fae-b971-3983-2488-c3181607dae3@digiware.nl>
+ <9d76a1ec-52c8-b429-a11b-ad8af1bc6a65@redhat.com>
+ <ed49edc5-633b-bd2a-0139-272695bd2d7a@digiware.nl>
+ <c7814b3d-24dc-ced2-d435-b08d10f5f493@redhat.com>
+ <77f467b7-7bcc-8267-8987-4cb4fb95260c@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:44452 "EHLO
-        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753267AbcHXHI0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 03:08:26 -0400
-In-Reply-To: <CA+aFP1AiswTvMpd9Agcw6s4qFJgvjRF5HH4=VuCz5Yopu_+R6Q@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:47910 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752974AbcHXJj1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 24 Aug 2016 05:39:27 -0400
+In-Reply-To: <77f467b7-7bcc-8267-8987-4cb4fb95260c@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
+To: Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-It is running at http://pulpito.ceph.com/loic-2016-08-24_06:41:40-rbd-jewel-backports-distro-basic-smithi/
-
-On 23/08/2016 15:35, Jason Dillaman wrote:
-> OK -- in that case, feel free to kick off an rbd test run after it
-> builds.  If it ends up being after-hours, let me know and I can kick
-> it off.
-> 
-> Thanks
-> 
-> On Tue, Aug 23, 2016 at 9:34 AM, Loic Dachary <loic@dachary.org> wrote:
->> The jewel-backport branch also has all the pull request you mentionned below. The details of what it contains are at http://tracker.ceph.com/issues/16344#note-32
->>
->> On 23/08/2016 15:32, Loic Dachary wrote:
->>> The jewel-backport branch is in gitbuilder with the http://tracker.ceph.com/issues/16950 backport https://github.com/ceph/ceph/pull/10827 . I'll wait to hear from you before scheduling a run however.
+On 23-8-2016 10:03, Willem Jan Withagen wrote:
+> On 23-8-2016 00:57, Josh Durgin wrote:
+>> On 08/22/2016 03:41 PM, Willem Jan Withagen wrote:
+>>> On 23-8-2016 00:19, Josh Durgin wrote:
+>>>> On 08/22/2016 07:37 AM, Willem Jan Withagen wrote:
+>>>>> I was trying to do some tests on my Centos box.
+>>>>> And ran into:
+>>>>>
+>>>>> -- Found PythonLibs: /usr/lib64/libpython2.7.so (found suitable version
+>>>>> "2.7.5", minimum required is "2")
+>>>>> CMake Error at
+>>>>> /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:108
+>>>>> (message):
+>>>>>   Could NOT find Python3Interp: Found unsuitable version "2.7.5", but
+>>>>>   required is at least "3" (found /usr/bin/python)
+>>>>> Call Stack (most recent call first):
+>>>>>   /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:313
+>>>>> (_FPHSA_FAILURE_MESSAGE)
+>>>>>   cmake/modules/FindPython3Interp.cmake:146
+>>>>> (FIND_PACKAGE_HANDLE_STANDARD_ARGS)
+>>>>>   src/CMakeLists.txt:274 (find_package)
+>>>>>
+>>>>> Now is this due to me not being synced enough with master/HEAD, or is
+>>>>> this an actual problem?
+>>>>
+>>>> It's not a strict requirement - you could add some conditionals
+>>>> in src/pybind/CMakeLists.txt to disable it if you don't want to build
+>>>> python 3 versions of the python bindings.
+>>>>
+>>>> Alternatively you can grab python 3.4 for Centos 7 from EPEL.
 >>>
->>> On 23/08/2016 15:12, Loic Dachary wrote:
->>>> Ok. Let me know when the backport of http://tracker.ceph.com/issues/16950 is ready and I'll schedule tests. If you'd rather do the test yourself, that's also fine with me :-)
->>>>
->>>> Cheers
->>>>
->>>> On 23/08/2016 15:06, Jason Dillaman wrote:
->>>>> If at all possible, I would definitely like to see the following
->>>>> included in 10.2.3 since users are hitting it in the field:
->>>>>
->>>>> http://tracker.ceph.com/issues/16950
->>>>>
->>>>> ... and given that would require another RBD test run prior to merge,
->>>>> I would also like to include the following which already have open
->>>>> PRs:
->>>>>
->>>>> https://github.com/ceph/ceph/pull/10791
->>>>> https://github.com/ceph/ceph/pull/10790
->>>>> https://github.com/ceph/ceph/pull/10792
->>>>> https://github.com/ceph/ceph/pull/10646
->>>>> https://github.com/ceph/ceph/pull/10647
->>>>> https://github.com/ceph/ceph/pull/10786
->>>>>
->>>>> I can create a PR for the high priority issue this morning.
->>>>>
->>>>> On Tue, Aug 23, 2016 at 4:46 AM, Loic Dachary <loic@dachary.org> wrote:
->>>>>> Hi Jason,
->>>>>>
->>>>>> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel received (I think :-) enough rbd backports to cut the release. It was more challenging than usual and I'd like to thank you and Mykola for helping with the tricky parts.
->>>>>>
->>>>>> Do you think the jewel branch is ready for QE to start their own round of testing ?
->>>>>>
->>>>>> Cheers
->>>>>>
->>>>>> --
->>>>>> Loïc Dachary, Artisan Logiciel Libre
->>>>>>
->>>>>
->>>>>
->>>>>
->>>>
->>>
+>>> If it is not a strict requirement, than it would be nice if cmake would
+>>> accept thus....
+>>> And set something like HAVE_PYTHON3
 >>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
+>> Yeah, if making it optional is desired that'd be the way to go.
+>>
+>>> Why not drop the REQUIRED from the find_package()?
+>>
+>> Until there is a HAVE_PYTHON3 it should fail early. This was just a
+>> first iteration of python 3 packages for ceph libraries, and since each
+>> platform we test has python 3, we didn't try to make it optional. I've
+>> no objections if you want to add that option.
 > 
+> That is fair enough, I just found out the hard way because I do not run
+> make-deps every time.
+> And I have to maintain the deps list for FreeBSD manually atm.
 > 
-> 
+> So the dependancies in the rpms has python3 as requirement, and that
+> gets python3 available before getting to Ceph?
+> If so I, I'll add them to the FreeBSD packages list. That'll move things
+> forward, instead of stasis.
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+Tried this on FreeBSD and the Python detector is not as lenient.
+It refuses to find python3 stuff even though it is available as
+/usr/local/bin/puthon3 ....
+
+So the solution ATM is to
+ - delete the REQUIRED which will result in complaints (but no error)
+   that python3 is not found
+ - replace REQUIRED with QUIET.
+   And that generates no ouput but silently ignores any misses.
+
+For the time being I'd prefer the second one, as to not start people a
+goose chase to fix getting python3
+
+--WjW
+
