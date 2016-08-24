@@ -1,48 +1,37 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: should we remove autotools from master?
-Date: Wed, 24 Aug 2016 11:44:51 +0200
-Message-ID: <ac76726a-4645-959b-e635-2661ed70c521@digiware.nl>
-References: <alpine.DEB.2.11.1608231356290.25681@piezo.us.to>
- <57BC5B7A.8050103@dachary.org>
- <DB5PR05MB16077097293BBD4CBF85D90EA9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
+From: Jaze Lee <jazeltq@gmail.com>
+Subject: rbd cannot enable mirroring in the current pool mirroring mode
+Date: Wed, 24 Aug 2016 18:06:05 +0800
+Message-ID: <CAKZcxgcKKzt0G0wAj3NwoEY38nprmtSrfUKqFUvhbS3G9NMW5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:21569 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755115AbcHXJw1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 24 Aug 2016 05:52:27 -0400
-In-Reply-To: <DB5PR05MB16077097293BBD4CBF85D90EA9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
+Received: from mail-it0-f52.google.com ([209.85.214.52]:37439 "EHLO
+        mail-it0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750933AbcHXKGH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 06:06:07 -0400
+Received: by mail-it0-f52.google.com with SMTP id f6so24897348ith.0
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 03:06:06 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Avner Ben Hanoch <avnerb@mellanox.com>, Loic Dachary <loic@dachary.org>, Sage Weil <sweil@redhat.com>, Nathan Cutler <ncutler@suse.cz>
-Cc: Brad Hubbard <bhubbard@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Adir Lev <adirl@mellanox.com>
+To: ceph-devel@vger.kernel.org
 
-On 23-8-2016 17:11, Avner Ben Hanoch wrote:
-> For removing autotools support, I think that we should first announce that autotools will not be supported starting <some-future-day> and till then support both of them in parallel and response to questions about it.
-> 
-> Also, we first need to make sure that we have comprehensive instructions for using cmake.
-> Notice, that many developers are not familiar with cmake; hence, there might be need for extra explanations.
-> 
-> For example, I tried now the instructions in https://github.com/ceph/ceph/blob/master/README.md 
-> 	./do_cmake.sh
-> 	cd build
-> 	make
-> and I got the error:
-> 	make: *** No targets specified and no makefile found.  Stop.
-> 
-> Probably, because of the explanation "This assumes you make your build dir a subdirectory of the ceph.git checkout. If you put it elsewhere, just replace .. above with a correct path to the checkout." However, if you are not familiar with cmake, then this explanation does not tell you how to recover from the error.
-> 
-> Also, I am not sure it is clear to all developers how to combine above instructions with options that you could provide to ./configure script.
+Hi, all
+   I first test pool mode. After that, i want to try image mode.
+I first stop rbd-mirror, and then disable pool mode, but i can not set the =
+mode
+to image.
 
-eeeh,
-
-Isn't ./configure part of the autotools and should that not also go?
-Haven't used ./configure since I started using cmake, which is a big plus.
-
-Note that you can put build/config options on the do_cmake.sh commandline.
-
---WjW
+[root@docker-0 ~]# rbd mirror pool disable rbd
+[root@docker-0 ~]# rbd mirror image enable rbd/test
+2016-08-24 12:23:27.578209 7f0d295b4d80 -1 librbd: cannot enable
+mirroring in the current pool mirroring mode
+[root@docker-0 ~]# ceph -v
+ceph version 10.2.2 (45107e21c568dd033c2f0a3107dec8f0b0e58374)
 
 
+May be i missed something?
+
+
+--=20
+=E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
