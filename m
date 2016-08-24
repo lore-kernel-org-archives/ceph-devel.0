@@ -1,65 +1,54 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: pg_stat_t is 500+ bytes
-Date: Wed, 24 Aug 2016 11:12:24 -0500
-Message-ID: <e20c13f4-ae6f-e06a-ac1b-c5736737e642@redhat.com>
-References: <alpine.DEB.2.11.1608231807270.25681@piezo.us.to>
- <CACJqLyYaXy81jvFj2jiofucYLPY4cmQQtDohJwRTb5ddLzOedA@mail.gmail.com>
- <CACJqLybzJHWrVF-gOZy6nvUTb0weZJRtqt4rJBO_Nn1viBjDgw@mail.gmail.com>
- <alpine.DEB.2.11.1608241607360.25681@piezo.us.to>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: assert
+Date: Wed, 24 Aug 2016 12:17:49 -0400
+Message-ID: <e27ed37d-be2c-47d1-587f-91735e42ab15@redhat.com>
+References: <alpine.DEB.2.11.1606271610170.2844@piezo.us.to>
+ <CALe9h7f+fCv73Si_1RoF7bQsSz24cWU0f7V2_rGE-nbzMWVjLA@mail.gmail.com>
+ <alpine.DEB.2.11.1606271642550.2844@piezo.us.to>
+ <120706851.74131386.1472049260388.JavaMail.zimbra@redhat.com>
+ <20160824154557.GA22386@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41408 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754513AbcHXQM4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 24 Aug 2016 12:12:56 -0400
-In-Reply-To: <alpine.DEB.2.11.1608241607360.25681@piezo.us.to>
+Received: from mail-yw0-f170.google.com ([209.85.161.170]:35122 "EHLO
+        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754872AbcHXQRv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 12:17:51 -0400
+Received: by mail-yw0-f170.google.com with SMTP id j12so12959952ywb.2
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 09:17:51 -0700 (PDT)
+Received: from [10.17.151.126] ([12.118.3.106])
+        by smtp.gmail.com with ESMTPSA id z193sm5731254ywa.34.2016.08.24.09.17.49
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 24 Aug 2016 09:17:49 -0700 (PDT)
+In-Reply-To: <20160824154557.GA22386@ultraspiritum.eng.arb.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Haomai Wang <haomai@xsky.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
 
+On 08/24/2016 11:45 AM, Adam C. Emerson wrote:
+> On 24/08/2016, Matt Benjamin wrote:
+>> Mark Nelson called attention to this topic again yesterday in #ceph-devel.
+>>
+>> We favor retaining the ability to re-declare specific asserts such that they are, as with assert in general historically, compiled out.  I think it's reasonable if this is a marked case.
+>>
+>> That seems to imply that if ceph_assert is the unmarked case, it won't be compiled out, so is essentially ceph_assert_always, as below (or else that form should be used...it's a little long).
+> If we want to go for brevity, we could have ceph_assert() be the
+> unmarked case that functions just like assert macro.
+>
+> Then we could use something like ceph_demand() (ceph_ultimatum?
+> ceph_blackmail?) to indicate the case that isn't compiled out.
+>
+> Personally, I would just like to get rid of Ceph's assert.h and its
+> unending war with every other header file in the world. At one point
+> killed off the header and linked in an object that overrode
+> __assert_fail. This worked very well, though it would require handling
+> every C library implementation we're compiled against.
+>
 
-On 08/24/2016 11:09 AM, Sage Weil wrote:
-> On Wed, 24 Aug 2016, Haomai Wang wrote:
->> On Wed, Aug 24, 2016 at 11:01 AM, Haomai Wang <haomai@xsky.com> wrote:
->>> On Wed, Aug 24, 2016 at 2:13 AM, Sage Weil <sweil@redhat.com> wrote:
->>>> This is huge.  It takes the pg_info_t str from 306 bytes to 847 bytes, and
->>>> this _info omap key is rewritten on *every* IO.
->>>>
->>>> We could shrink this down significant with varint and/or delta encoding
->>>> since a huge portion of it is just a bunch of uint64_t counters.  This
->>>> will probably cost some CPU time, but OTOH it'll also shrink our metadata
->>>> down a fair bit too which will pay off later.
->>>>
->>>> Anybody want to tackle this?
->>>
->>> what about separating "object_stat_collection_t stats" from pg_stat_t?
->>> pg info should be unchanged for most of times, we could only update
->>> object related stats. This may help to reduce half bytes.
->
-> I don't think this will work, since every op changes last_update in
-> pg_info_t *and* the stats (write op count, total bytes, objects, etc.).
->
->> Or we only store increment values and keep the full in memory(may
->> reduce to 20-30bytes). In period time we store the full structure(only
->> hundreds of bytes)....
->
-> A delta is probably very compressible (only a few fields in the stats
-> struct change).  The question is how fast can we make it in CPU time.
-> Probably a simple delta (which will be almost all 0's) and a trivial
-> run-length-encoding scheme that just gets rid of the 0's would do well
-> enough...
-
-Do we have any rough idea of how many/often consecutive 0s we end up 
-with in the current encoding?
-
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+I dug up an old commit as an example of overriding libc's 
+__assert_fail() function, which would allow us to use the system's 
+assert.h as is: 
+https://github.com/cohortfsllc/cohortfs-ceph/commit/40956ad3661192462246ed7e5435522c5708ffbc
