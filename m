@@ -1,306 +1,86 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 08/16] rbd: introduce a per-device ordered workqueue
-Date: Wed, 24 Aug 2016 15:18:32 +0200
-Message-ID: <1472044720-29116-9-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 14/16] rbd: add 'snap_id' sysfs rbd device attribute
+Date: Wed, 24 Aug 2016 15:18:38 +0200
+Message-ID: <1472044720-29116-15-git-send-email-idryomov@gmail.com>
 References: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:36145 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753655AbcHXNT6 (ORCPT
+Received: from mail-yb0-f193.google.com ([209.85.213.193]:36534 "EHLO
+        mail-yb0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753937AbcHXNT6 (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 09:19:58 -0400
-Received: by mail-yw0-f193.google.com with SMTP id u134so786121ywg.3
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 06:19:00 -0700 (PDT)
+Received: by mail-yb0-f193.google.com with SMTP id f60so443668ybi.3
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 06:19:07 -0700 (PDT)
 Received: from dhcp-1-219.brq.redhat.com (nat-pool-brq-t.redhat.com. [213.175.37.10])
-        by smtp.gmail.com with ESMTPSA id e197sm5371294ywa.16.2016.08.24.06.18.59
+        by smtp.gmail.com with ESMTPSA id e197sm5371294ywa.16.2016.08.24.06.19.05
         for <ceph-devel@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 24 Aug 2016 06:18:59 -0700 (PDT)
+        Wed, 24 Aug 2016 06:19:05 -0700 (PDT)
 In-Reply-To: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-This is going to be used for reregistering watch requests and
-exclusive-lock tasks: acquire/request lock, notify-acquired, release
-lock, notify-released.  Some refactoring in the map/unmap paths was
-necessary to give this workqueue a meaningful name: "rbdX-tasks".
+From: Mike Christie <mchristi@redhat.com>
 
+Export snap id in sysfs, so tools like multipathd can use it in a uuid.
+
+Signed-off-by: Mike Christie <mchristi@redhat.com>
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c | 151 ++++++++++++++++++++++++----------------------------
- 1 file changed, 71 insertions(+), 80 deletions(-)
+ Documentation/ABI/testing/sysfs-bus-rbd |  4 ++++
+ drivers/block/rbd.c                     | 10 ++++++++++
+ 2 files changed, 14 insertions(+)
 
+diff --git a/Documentation/ABI/testing/sysfs-bus-rbd b/Documentation/ABI/testing/sysfs-bus-rbd
+index 9a655f3f4386..7bf8d4fa6f63 100644
+--- a/Documentation/ABI/testing/sysfs-bus-rbd
++++ b/Documentation/ABI/testing/sysfs-bus-rbd
+@@ -102,6 +102,10 @@ current_snap
+ 
+ 	The current snapshot for which the device is mapped.
+ 
++snap_id
++
++	The current snapshot's id.  (August 2016, since 4.9.)
++
+ parent
+ 
+ 	Information identifying the chain of parent images in a layered rbd
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index e0585e9040f1..1c805eea6767 100644
+index c95104a80065..36ebec19dc20 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -128,11 +128,8 @@ static int atomic_dec_return_safe(atomic_t *v)
- /*
-  * An RBD device name will be "rbd#", where the "rbd" comes from
-  * RBD_DRV_NAME above, and # is a unique integer identifier.
-- * MAX_INT_FORMAT_WIDTH is used in ensuring DEV_NAME_LEN is big
-- * enough to hold all possible device names.
-  */
- #define DEV_NAME_LEN		32
--#define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
- 
- /*
-  * block device image metadata (in-memory version)
-@@ -353,10 +350,12 @@ struct rbd_device {
- 	struct ceph_object_id	header_oid;
- 	struct ceph_object_locator header_oloc;
- 
--	struct ceph_file_layout	layout;
-+	struct ceph_file_layout	layout;		/* used for all rbd requests */
- 
- 	struct ceph_osd_linger_request *watch_handle;
- 
-+	struct workqueue_struct	*task_wq;
-+
- 	struct rbd_spec		*parent_spec;
- 	u64			parent_overlap;
- 	atomic_t		parent_ref;
-@@ -3944,11 +3943,8 @@ static void rbd_spec_free(struct kref *kref)
- 	kfree(spec);
+@@ -4669,6 +4669,14 @@ static ssize_t rbd_snap_show(struct device *dev,
+ 	return sprintf(buf, "%s\n", rbd_dev->spec->snap_name);
  }
  
--static void rbd_dev_release(struct device *dev)
-+static void rbd_dev_free(struct rbd_device *rbd_dev)
- {
--	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
--	bool need_put = !!rbd_dev->opts;
--
- 	ceph_oid_destroy(&rbd_dev->header_oid);
- 	ceph_oloc_destroy(&rbd_dev->header_oloc);
- 
-@@ -3956,6 +3952,19 @@ static void rbd_dev_release(struct device *dev)
- 	rbd_spec_put(rbd_dev->spec);
- 	kfree(rbd_dev->opts);
- 	kfree(rbd_dev);
-+}
-+
-+static void rbd_dev_release(struct device *dev)
++static ssize_t rbd_snap_id_show(struct device *dev,
++				struct device_attribute *attr, char *buf)
 +{
 +	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
-+	bool need_put = !!rbd_dev->opts;
 +
-+	if (need_put) {
-+		destroy_workqueue(rbd_dev->task_wq);
-+		ida_simple_remove(&rbd_dev_id_ida, rbd_dev->dev_id);
-+	}
-+
-+	rbd_dev_free(rbd_dev);
- 
- 	/*
- 	 * This is racy, but way better than putting module outside of
-@@ -3966,19 +3975,16 @@ static void rbd_dev_release(struct device *dev)
- 		module_put(THIS_MODULE);
- }
- 
--static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
--					 struct rbd_spec *spec,
--					 struct rbd_options *opts)
-+static struct rbd_device *__rbd_dev_create(struct rbd_client *rbdc,
-+					   struct rbd_spec *spec)
- {
- 	struct rbd_device *rbd_dev;
- 
--	rbd_dev = kzalloc(sizeof (*rbd_dev), GFP_KERNEL);
-+	rbd_dev = kzalloc(sizeof(*rbd_dev), GFP_KERNEL);
- 	if (!rbd_dev)
- 		return NULL;
- 
- 	spin_lock_init(&rbd_dev->lock);
--	rbd_dev->flags = 0;
--	atomic_set(&rbd_dev->parent_ref, 0);
- 	INIT_LIST_HEAD(&rbd_dev->node);
- 	init_rwsem(&rbd_dev->header_rwsem);
- 
-@@ -3992,9 +3998,6 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
- 
- 	rbd_dev->rbd_client = rbdc;
- 	rbd_dev->spec = spec;
--	rbd_dev->opts = opts;
--
--	/* Initialize the layout used for all rbd requests */
- 
- 	rbd_dev->layout.stripe_unit = 1 << RBD_MAX_OBJ_ORDER;
- 	rbd_dev->layout.stripe_count = 1;
-@@ -4002,15 +4005,48 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
- 	rbd_dev->layout.pool_id = spec->pool_id;
- 	RCU_INIT_POINTER(rbd_dev->layout.pool_ns, NULL);
- 
--	/*
--	 * If this is a mapping rbd_dev (as opposed to a parent one),
--	 * pin our module.  We have a ref from do_rbd_add(), so use
--	 * __module_get().
--	 */
--	if (rbd_dev->opts)
--		__module_get(THIS_MODULE);
-+	return rbd_dev;
++	return sprintf(buf, "%llu\n", rbd_dev->spec->snap_id);
 +}
 +
-+/*
-+ * Create a mapping rbd_dev.
-+ */
-+static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
-+					 struct rbd_spec *spec,
-+					 struct rbd_options *opts)
-+{
-+	struct rbd_device *rbd_dev;
-+
-+	rbd_dev = __rbd_dev_create(rbdc, spec);
-+	if (!rbd_dev)
-+		return NULL;
-+
-+	rbd_dev->opts = opts;
-+
-+	/* get an id and fill in device name */
-+	rbd_dev->dev_id = ida_simple_get(&rbd_dev_id_ida, 0,
-+					 minor_to_rbd_dev_id(1 << MINORBITS),
-+					 GFP_KERNEL);
-+	if (rbd_dev->dev_id < 0)
-+		goto fail_rbd_dev;
-+
-+	sprintf(rbd_dev->name, RBD_DRV_NAME "%d", rbd_dev->dev_id);
-+	rbd_dev->task_wq = alloc_ordered_workqueue("%s-tasks", WQ_MEM_RECLAIM,
-+						   rbd_dev->name);
-+	if (!rbd_dev->task_wq)
-+		goto fail_dev_id;
- 
-+	/* we have a ref from do_rbd_add() */
-+	__module_get(THIS_MODULE);
-+
-+	dout("%s rbd_dev %p dev_id %d\n", __func__, rbd_dev, rbd_dev->dev_id);
- 	return rbd_dev;
-+
-+fail_dev_id:
-+	ida_simple_remove(&rbd_dev_id_ida, rbd_dev->dev_id);
-+fail_rbd_dev:
-+	rbd_dev_free(rbd_dev);
-+	return NULL;
- }
- 
- static void rbd_dev_destroy(struct rbd_device *rbd_dev)
-@@ -4646,46 +4682,6 @@ static int rbd_dev_header_info(struct rbd_device *rbd_dev)
- }
- 
  /*
-- * Get a unique rbd identifier for the given new rbd_dev, and add
-- * the rbd_dev to the global list.
-- */
--static int rbd_dev_id_get(struct rbd_device *rbd_dev)
--{
--	int new_dev_id;
--
--	new_dev_id = ida_simple_get(&rbd_dev_id_ida,
--				    0, minor_to_rbd_dev_id(1 << MINORBITS),
--				    GFP_KERNEL);
--	if (new_dev_id < 0)
--		return new_dev_id;
--
--	rbd_dev->dev_id = new_dev_id;
--
--	spin_lock(&rbd_dev_list_lock);
--	list_add_tail(&rbd_dev->node, &rbd_dev_list);
--	spin_unlock(&rbd_dev_list_lock);
--
--	dout("rbd_dev %p given dev id %d\n", rbd_dev, rbd_dev->dev_id);
--
--	return 0;
--}
--
--/*
-- * Remove an rbd_dev from the global list, and record that its
-- * identifier is no longer in use.
-- */
--static void rbd_dev_id_put(struct rbd_device *rbd_dev)
--{
--	spin_lock(&rbd_dev_list_lock);
--	list_del_init(&rbd_dev->node);
--	spin_unlock(&rbd_dev_list_lock);
--
--	ida_simple_remove(&rbd_dev_id_ida, rbd_dev->dev_id);
--
--	dout("rbd_dev %p released dev id %d\n", rbd_dev, rbd_dev->dev_id);
--}
--
--/*
-  * Skips over white space at *buf, and updates *buf to point to the
-  * first found non-space character (if any). Returns the length of
-  * the token (string of non-white space characters) found.  Note
-@@ -5077,8 +5073,7 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
- 		goto out_err;
- 	}
+  * For a v2 image, shows the chain of parent images, separated by empty
+  * lines.  For v1 images or if there is no parent, shows "(no parent
+@@ -4730,6 +4738,7 @@ static DEVICE_ATTR(name, S_IRUGO, rbd_name_show, NULL);
+ static DEVICE_ATTR(image_id, S_IRUGO, rbd_image_id_show, NULL);
+ static DEVICE_ATTR(refresh, S_IWUSR, NULL, rbd_image_refresh);
+ static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
++static DEVICE_ATTR(snap_id, S_IRUGO, rbd_snap_id_show, NULL);
+ static DEVICE_ATTR(parent, S_IRUGO, rbd_parent_show, NULL);
  
--	parent = rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec,
--				NULL);
-+	parent = __rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec);
- 	if (!parent) {
- 		ret = -ENOMEM;
- 		goto out_err;
-@@ -5113,22 +5108,12 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
- {
- 	int ret;
- 
--	/* Get an id and fill in device name. */
--
--	ret = rbd_dev_id_get(rbd_dev);
--	if (ret)
--		goto err_out_unlock;
--
--	BUILD_BUG_ON(DEV_NAME_LEN
--			< sizeof (RBD_DRV_NAME) + MAX_INT_FORMAT_WIDTH);
--	sprintf(rbd_dev->name, "%s%d", RBD_DRV_NAME, rbd_dev->dev_id);
--
- 	/* Record our major and minor device numbers. */
- 
- 	if (!single_major) {
- 		ret = register_blkdev(0, rbd_dev->name);
- 		if (ret < 0)
--			goto err_out_id;
-+			goto err_out_unlock;
- 
- 		rbd_dev->major = ret;
- 		rbd_dev->minor = 0;
-@@ -5160,6 +5145,10 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
- 	set_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
- 	up_write(&rbd_dev->header_rwsem);
- 
-+	spin_lock(&rbd_dev_list_lock);
-+	list_add_tail(&rbd_dev->node, &rbd_dev_list);
-+	spin_unlock(&rbd_dev_list_lock);
-+
- 	add_disk(rbd_dev->disk);
- 	pr_info("%s: added with size 0x%llx\n", rbd_dev->disk->disk_name,
- 		(unsigned long long) rbd_dev->mapping.size);
-@@ -5173,8 +5162,6 @@ err_out_disk:
- err_out_blkdev:
- 	if (!single_major)
- 		unregister_blkdev(rbd_dev->major, rbd_dev->name);
--err_out_id:
--	rbd_dev_id_put(rbd_dev);
- err_out_unlock:
- 	up_write(&rbd_dev->header_rwsem);
- 	return ret;
-@@ -5406,12 +5393,16 @@ static ssize_t rbd_add_single_major(struct bus_type *bus,
- static void rbd_dev_device_release(struct rbd_device *rbd_dev)
- {
- 	rbd_free_disk(rbd_dev);
-+
-+	spin_lock(&rbd_dev_list_lock);
-+	list_del_init(&rbd_dev->node);
-+	spin_unlock(&rbd_dev_list_lock);
-+
- 	clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
- 	device_del(&rbd_dev->dev);
- 	rbd_dev_mapping_clear(rbd_dev);
- 	if (!single_major)
- 		unregister_blkdev(rbd_dev->major, rbd_dev->name);
--	rbd_dev_id_put(rbd_dev);
- }
- 
- static void rbd_dev_remove_parent(struct rbd_device *rbd_dev)
+ static struct attribute *rbd_attrs[] = {
+@@ -4745,6 +4754,7 @@ static struct attribute *rbd_attrs[] = {
+ 	&dev_attr_name.attr,
+ 	&dev_attr_image_id.attr,
+ 	&dev_attr_current_snap.attr,
++	&dev_attr_snap_id.attr,
+ 	&dev_attr_parent.attr,
+ 	&dev_attr_refresh.attr,
+ 	NULL
 -- 
 2.4.3
 
