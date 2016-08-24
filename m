@@ -1,119 +1,96 @@
 From: Alex Elder <elder@ieee.org>
-Subject: Re: SCSI inquiry interface for RBD devices
-Date: Wed, 24 Aug 2016 13:44:42 -0500
-Message-ID: <7a3b5e29-5cdb-553f-c10a-ce2f1945f3b1@ieee.org>
-References: <27148ED4-95A8-4E8F-86C0-52CEEA9140E1@Teradata.com>
- <CAOi1vP_5gtQXd95M=qspgPeRnTDvxBpC2dknARNv=HXNFKHivQ@mail.gmail.com>
- <4257DB75-0060-4867-A5D5-2AD374722452@Teradata.com>
- <CAOi1vP9mdNYRCD_cTa0=4tN71L1=tA24wXSr2NqhTH9BmUBAuw@mail.gmail.com>
- <82369305-99D9-464E-B14A-D2E91AC7B76F@Teradata.com>
- <847a97cf-04b3-9f29-2884-5c757727b3a2@ieee.org>
- <CAOi1vP-nuRzksfvaCZ1nj6sTmxsH=XS2PdAFj_9j94FtMcpFqw@mail.gmail.com>
+Subject: Re: [PATCH 01/16] libceph: rename ceph_entity_name_encode() ->
+ ceph_auth_entity_name_encode()
+Date: Wed, 24 Aug 2016 13:49:07 -0500
+Message-ID: <28e3c600-d042-bebc-31d4-2f5223a2de5c@ieee.org>
+References: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
+ <1472044720-29116-2-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f43.google.com ([209.85.214.43]:35972 "EHLO
-        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755812AbcHXSop (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 14:44:45 -0400
-Received: by mail-it0-f43.google.com with SMTP id e63so227673751ith.1
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 11:44:45 -0700 (PDT)
-In-Reply-To: <CAOi1vP-nuRzksfvaCZ1nj6sTmxsH=XS2PdAFj_9j94FtMcpFqw@mail.gmail.com>
+Received: from mail-it0-f44.google.com ([209.85.214.44]:37754 "EHLO
+        mail-it0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755308AbcHXStJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 14:49:09 -0400
+Received: by mail-it0-f44.google.com with SMTP id f6so50341595ith.0
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 11:49:09 -0700 (PDT)
+In-Reply-To: <1472044720-29116-2-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>, Jason Dillaman <dillaman@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mike Christie <mchristi@redhat.com>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
-On 08/13/2016 02:14 PM, Ilya Dryomov wrote:
-> On Sat, Aug 13, 2016 at 5:18 PM, Alex Elder <elder@ieee.org> wrote:
->> On 08/12/2016 01:40 PM, Kamble, Nitin A wrote:
->>>> It would make this a lot easier if we started generating a unique UUID
->>>>>>> for the image and each snapshot at image/snapshot creation time.  Jason?
->>>>>>>
->>>>>
->>>>> Image UUID seems like the right direction.
+On 08/24/2016 08:18 AM, Ilya Dryomov wrote:
+> Clear up EntityName vs entity_name_t confusion.
 
-I'm really sorry I didn't respond to this earlier.  I sent out
-my message and promptly went on vacation for a week.
+If I understand what your code does, you're using
+"auth_entity_name" to represent whatever "EntityName"
+is.  (At this point I'm just looking at the code; I
+haven't gone to look at what an entity_name_t or
+EntitnyName are...)
 
->> Yes.  It's not a snapshot you want, but the basic image, regardless
->> of the state of its content.  It needs to be created at image
-> 
-> I'm not sure I follow.  We need to have an identifier for each mappable
-> entity - that's images (HEADs) and snapshots.
+In any case, this looks good to me.
 
-I guess it really boils down to what you intend this
-unique identifier to represent.  SCSI has VPD data
-pages for device identification.  I *think* these
-are intended to allow a physical device or logical
-unit to have a persistent, globally unique identifier.
-I haven't worked with the SCSI specs in a *long* time
-though, and I'm just scanning an SPC draft right now.
-
-Anyway, my earlier response was based on the notion that
-you wanted to identify some RBD image equivalent of a
-hardware unique identifier, much as you might have for
-identifying a single physical disk drive.  In that case,
-the identifier should be generated at image creation time.
-If a copy of an image were created, it might contain the
-same data, but would necessarily have a different UUID
-for the duplicate image.
-
-The complication is that we really aren't dealing with
-physical entities here.  It is not possible to truly
-duplicate a physical disk drive in the same way we
-can duplicate an RBD image.  And there is no concept
-of a snapshot or clone for a physical disk.
-
-I don't actually know how exactly this identifier is
-intended to be used, and I probably just spoke with
-an improper understanding.
-
->> creation time, and no matter how many times the image grows or
->> shrinks, or how the cluster gets reorganized along the way, that
->> UUID uniquely defines the image (and it ought not to be possible,
->> as a rule, to *change* an image's UUID).  Coping an entire image
-> 
-> Why?  IMO it shouldn't be any different from a filesystem UUID - a user
-> should be able to create an image (snapshot) with the specified UUID,
-> change it at any time and maybe even clear it (allowing clear makes
-> older images a non-issue).  We already have an unchangeable pool-wide
-> ID for ourselves, this is aimed at users and they should be in full
-> control here.
-
-That may be the better model in this case.  That is, the
-UUID you're talking about is a soft label that's unique,
-but changeable.  The model I had in my mind was more like
-an airplane serial number plate; you can replace every
-part on an airplane, but it remains "the same airplane"
-as long as it has on it the plate that shows the original
-serial number.
-
->> (or cloning) would require a new UUID (as has been said).
->>
->> I think the UUID should be defined independent of the cluster as
->> well.  In that case, there may be a reason to think about a "move"
->> operation, where it an image is transferred to a new cluster, with
->> the new one retaining the original UUID and the old one going away.
-> 
-> By default, it would be a randomly-generated UUID.  What I had meant
-> when I said "we can couple it with a cluster UUID too" was that we can
-> export a cluster UUID along with an image UUID.
-
-Again, sorry for the delay in responding to you.  I don't
-claim to know the answer, but I think you need to be very
-clear on what the UUID you're talking about really represents.
-Mimicking the SCSI inquiry interface is reasonable, but we
-are dealing with something that isn't exactly like a SCSI
-device, so I think precision on the meaning will be important.
-
-					-Alex
-
+Reviewed-by: Alex Elder <elder@linaro.org>
 
 > 
-> Thanks,
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> ---
+>  include/linux/ceph/auth.h | 2 +-
+>  net/ceph/auth.c           | 7 +++++--
+>  net/ceph/auth_none.c      | 2 +-
+>  3 files changed, 7 insertions(+), 4 deletions(-)
 > 
->                 Ilya
+> diff --git a/include/linux/ceph/auth.h b/include/linux/ceph/auth.h
+> index 1563265d2097..374bb1c4ef52 100644
+> --- a/include/linux/ceph/auth.h
+> +++ b/include/linux/ceph/auth.h
+> @@ -104,7 +104,7 @@ extern int ceph_auth_build_hello(struct ceph_auth_client *ac,
+>  extern int ceph_handle_auth_reply(struct ceph_auth_client *ac,
+>  				  void *buf, size_t len,
+>  				  void *reply_buf, size_t reply_len);
+> -extern int ceph_entity_name_encode(const char *name, void **p, void *end);
+> +int ceph_auth_entity_name_encode(const char *name, void **p, void *end);
+>  
+>  extern int ceph_build_auth(struct ceph_auth_client *ac,
+>  		    void *msg_buf, size_t msg_len);
+> diff --git a/net/ceph/auth.c b/net/ceph/auth.c
+> index 2bc5965fdd1e..78067dda9d3c 100644
+> --- a/net/ceph/auth.c
+> +++ b/net/ceph/auth.c
+> @@ -82,7 +82,10 @@ void ceph_auth_reset(struct ceph_auth_client *ac)
+>  	mutex_unlock(&ac->mutex);
+>  }
+>  
+> -int ceph_entity_name_encode(const char *name, void **p, void *end)
+> +/*
+> + * EntityName, not to be confused with entity_name_t
+> + */
+> +int ceph_auth_entity_name_encode(const char *name, void **p, void *end)
+>  {
+>  	int len = strlen(name);
+>  
+> @@ -124,7 +127,7 @@ int ceph_auth_build_hello(struct ceph_auth_client *ac, void *buf, size_t len)
+>  	for (i = 0; i < num; i++)
+>  		ceph_encode_32(&p, supported_protocols[i]);
+>  
+> -	ret = ceph_entity_name_encode(ac->name, &p, end);
+> +	ret = ceph_auth_entity_name_encode(ac->name, &p, end);
+>  	if (ret < 0)
+>  		goto out;
+>  	ceph_decode_need(&p, end, sizeof(u64), bad);
+> diff --git a/net/ceph/auth_none.c b/net/ceph/auth_none.c
+> index 5f836f02ae36..df45e467c81f 100644
+> --- a/net/ceph/auth_none.c
+> +++ b/net/ceph/auth_none.c
+> @@ -46,7 +46,7 @@ static int ceph_auth_none_build_authorizer(struct ceph_auth_client *ac,
+>  	int ret;
+>  
+>  	ceph_encode_8_safe(&p, end, 1, e_range);
+> -	ret = ceph_entity_name_encode(ac->name, &p, end);
+> +	ret = ceph_auth_entity_name_encode(ac->name, &p, end);
+>  	if (ret < 0)
+>  		return ret;
+>  
 > 
 
