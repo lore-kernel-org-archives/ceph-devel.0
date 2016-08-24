@@ -1,52 +1,117 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: rgw and the next jewel release v10.2.3
-Date: Wed, 24 Aug 2016 13:32:06 -0400
-Message-ID: <6315ff7a-e766-6d21-539f-cff31cf124bd@redhat.com>
-References: <57BC10E5.10408@dachary.org>
- <CADRKj5Sb6+9gue7NZJ47+3AmK-PyQZA2BoKvqXD7EbYXSrqv3w@mail.gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: rbd and the next jewel release v10.2.3
+Date: Wed, 24 Aug 2016 13:40:49 -0400
+Message-ID: <CA+aFP1ADvKitH6de9qyk9-CuxDM0U0eKX-s7JQvjhB1CpzQn8w@mail.gmail.com>
+References: <57BC0D5F.5050006@dachary.org> <CA+aFP1CzY1UFgzUcWnCDAhqKH+p95gkhSZ7k+XhsuStm_y0ZnQ@mail.gmail.com>
+ <57BC4BB1.2090803@dachary.org> <57BC5064.1030109@dachary.org>
+ <57BC50DA.5040804@dachary.org> <CA+aFP1AiswTvMpd9Agcw6s4qFJgvjRF5HH4=VuCz5Yopu_+R6Q@mail.gmail.com>
+ <57BD47C9.2080704@dachary.org> <CA+aFP1DambKmEX3SFO-Y4VZ-rJpMBAdFVTz3AJTwbFh7fDdg7g@mail.gmail.com>
+ <57BDC200.1020900@dachary.org>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f175.google.com ([209.85.161.175]:33918 "EHLO
-        mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752703AbcHXRcI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 13:32:08 -0400
-Received: by mail-yw0-f175.google.com with SMTP id z8so14373811ywa.1
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 10:32:08 -0700 (PDT)
-In-Reply-To: <CADRKj5Sb6+9gue7NZJ47+3AmK-PyQZA2BoKvqXD7EbYXSrqv3w@mail.gmail.com>
+Received: from mail-pf0-f175.google.com ([209.85.192.175]:36558 "EHLO
+        mail-pf0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754250AbcHXRku (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 13:40:50 -0400
+Received: by mail-pf0-f175.google.com with SMTP id h186so8863234pfg.3
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 10:40:50 -0700 (PDT)
+In-Reply-To: <57BDC200.1020900@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Loic Dachary <loic@dachary.org>
+To: Loic Dachary <loic@dachary.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
 
+Just need the following two PRs merged and then ACK for QE:
 
-On 08/24/2016 12:41 PM, Yehuda Sadeh-Weinraub wrote:
-> Hey Casey,
+https://github.com/ceph/ceph/pull/10791
+https://github.com/ceph/ceph/pull/10827
+
+On Wed, Aug 24, 2016 at 11:49 AM, Loic Dachary <loic@dachary.org> wrote:
 >
-> are all the multisite fixes we wanted in?
-
-There are still a few pending backport, including 3 in particular that 
-fix segfaults:
-
-http://tracker.ceph.com/issues/16901
-http://tracker.ceph.com/issues/16864
-http://tracker.ceph.com/issues/16696
-
-It looks like that last one is blocked by conflicts with the tenant 
-support backport in http://tracker.ceph.com/issues/16702. I'll rebase 
-that one and open a PR.
-
-Casey
-
 >
-> On Tue, Aug 23, 2016 at 2:01 AM, Loic Dachary <loic@dachary.org> wrote:
->> Hi Yehuda,
+> On 24/08/2016 17:30, Jason Dillaman wrote:
+>> +1 -- results look as expected.
+>
+> Cool :-) Backports were merged, is there anything else you need ? Or can it be passed to QE ?
+>
 >>
->> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel passed the rgw suite (http://tracker.ceph.com/issues/16344#note-27 except for two failures). Do you think the jewel branch is ready for QE to start their own round of testing ?
+>> On Wed, Aug 24, 2016 at 3:07 AM, Loic Dachary <loic@dachary.org> wrote:
+>>> It is running at http://pulpito.ceph.com/loic-2016-08-24_06:41:40-rbd-jewel-backports-distro-basic-smithi/
+>>>
+>>> On 23/08/2016 15:35, Jason Dillaman wrote:
+>>>> OK -- in that case, feel free to kick off an rbd test run after it
+>>>> builds.  If it ends up being after-hours, let me know and I can kick
+>>>> it off.
+>>>>
+>>>> Thanks
+>>>>
+>>>> On Tue, Aug 23, 2016 at 9:34 AM, Loic Dachary <loic@dachary.org> wrote:
+>>>>> The jewel-backport branch also has all the pull request you mentionned below. The details of what it contains are at http://tracker.ceph.com/issues/16344#note-32
+>>>>>
+>>>>> On 23/08/2016 15:32, Loic Dachary wrote:
+>>>>>> The jewel-backport branch is in gitbuilder with the http://tracker.ceph.com/issues/16950 backport https://github.com/ceph/ceph/pull/10827 . I'll wait to hear from you before scheduling a run however.
+>>>>>>
+>>>>>> On 23/08/2016 15:12, Loic Dachary wrote:
+>>>>>>> Ok. Let me know when the backport of http://tracker.ceph.com/issues/16950 is ready and I'll schedule tests. If you'd rather do the test yourself, that's also fine with me :-)
+>>>>>>>
+>>>>>>> Cheers
+>>>>>>>
+>>>>>>> On 23/08/2016 15:06, Jason Dillaman wrote:
+>>>>>>>> If at all possible, I would definitely like to see the following
+>>>>>>>> included in 10.2.3 since users are hitting it in the field:
+>>>>>>>>
+>>>>>>>> http://tracker.ceph.com/issues/16950
+>>>>>>>>
+>>>>>>>> ... and given that would require another RBD test run prior to merge,
+>>>>>>>> I would also like to include the following which already have open
+>>>>>>>> PRs:
+>>>>>>>>
+>>>>>>>> https://github.com/ceph/ceph/pull/10791
+>>>>>>>> https://github.com/ceph/ceph/pull/10790
+>>>>>>>> https://github.com/ceph/ceph/pull/10792
+>>>>>>>> https://github.com/ceph/ceph/pull/10646
+>>>>>>>> https://github.com/ceph/ceph/pull/10647
+>>>>>>>> https://github.com/ceph/ceph/pull/10786
+>>>>>>>>
+>>>>>>>> I can create a PR for the high priority issue this morning.
+>>>>>>>>
+>>>>>>>> On Tue, Aug 23, 2016 at 4:46 AM, Loic Dachary <loic@dachary.org> wrote:
+>>>>>>>>> Hi Jason,
+>>>>>>>>>
+>>>>>>>>> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel received (I think :-) enough rbd backports to cut the release. It was more challenging than usual and I'd like to thank you and Mykola for helping with the tricky parts.
+>>>>>>>>>
+>>>>>>>>> Do you think the jewel branch is ready for QE to start their own round of testing ?
+>>>>>>>>>
+>>>>>>>>> Cheers
+>>>>>>>>>
+>>>>>>>>> --
+>>>>>>>>> Loïc Dachary, Artisan Logiciel Libre
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>
+>>>>>>
+>>>>>
+>>>>> --
+>>>>> Loïc Dachary, Artisan Logiciel Libre
+>>>>
+>>>>
+>>>>
+>>>
+>>> --
+>>> Loïc Dachary, Artisan Logiciel Libre
 >>
->> Cheers
 >>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
+>>
+>
+> --
+> Loïc Dachary, Artisan Logiciel Libre
 
+
+
+-- 
+Jason
