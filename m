@@ -1,44 +1,52 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: assert
-Date: Wed, 24 Aug 2016 13:26:44 -0400
-Message-ID: <20160824172644.GD22386@ultraspiritum.eng.arb.redhat.com>
-References: <alpine.DEB.2.11.1606271610170.2844@piezo.us.to>
- <alpine.DEB.2.11.1606271642550.2844@piezo.us.to>
- <120706851.74131386.1472049260388.JavaMail.zimbra@redhat.com>
- <20160824154557.GA22386@ultraspiritum.eng.arb.redhat.com>
- <alpine.DEB.2.11.1608241621090.25681@piezo.us.to>
- <20160824162643.GB22386@ultraspiritum.eng.arb.redhat.com>
- <CADRKj5QOmD6FZukz1n_mGLz2feHaPRT0B=njhKLZXAYNGJ2J5A@mail.gmail.com>
- <20160824170959.GC22386@ultraspiritum.eng.arb.redhat.com>
- <549678475.74238167.1472059352713.JavaMail.zimbra@redhat.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: rgw and the next jewel release v10.2.3
+Date: Wed, 24 Aug 2016 13:32:06 -0400
+Message-ID: <6315ff7a-e766-6d21-539f-cff31cf124bd@redhat.com>
+References: <57BC10E5.10408@dachary.org>
+ <CADRKj5Sb6+9gue7NZJ47+3AmK-PyQZA2BoKvqXD7EbYXSrqv3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50974 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752054AbcHXR1s (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 24 Aug 2016 13:27:48 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id C4835AE459
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 17:27:47 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <549678475.74238167.1472059352713.JavaMail.zimbra@redhat.com>
+Received: from mail-yw0-f175.google.com ([209.85.161.175]:33918 "EHLO
+        mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752703AbcHXRcI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 13:32:08 -0400
+Received: by mail-yw0-f175.google.com with SMTP id z8so14373811ywa.1
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 10:32:08 -0700 (PDT)
+In-Reply-To: <CADRKj5Sb6+9gue7NZJ47+3AmK-PyQZA2BoKvqXD7EbYXSrqv3w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjamin@redhat.com>
-Cc: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Mark Nelson <mnelson@redhat.com>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
 
-On 24/08/2016, Matt Benjamin wrote:
-> Ok, that's fair, I guess.  If a given C runtime lacks something compatible, do we then need to do for that environment exactly what we would otherwise do in general?
 
-Maybe? I don't think there are any such. The alternative is to
-open-code the error message printing and abort into the macro body and
-I would be very surprised if anyone did that. So long as the macro
-calls a function, we should be able to shim in an override for it.
+On 08/24/2016 12:41 PM, Yehuda Sadeh-Weinraub wrote:
+> Hey Casey,
+>
+> are all the multisite fixes we wanted in?
 
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+There are still a few pending backport, including 3 in particular that 
+fix segfaults:
+
+http://tracker.ceph.com/issues/16901
+http://tracker.ceph.com/issues/16864
+http://tracker.ceph.com/issues/16696
+
+It looks like that last one is blocked by conflicts with the tenant 
+support backport in http://tracker.ceph.com/issues/16702. I'll rebase 
+that one and open a PR.
+
+Casey
+
+>
+> On Tue, Aug 23, 2016 at 2:01 AM, Loic Dachary <loic@dachary.org> wrote:
+>> Hi Yehuda,
+>>
+>> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel passed the rgw suite (http://tracker.ceph.com/issues/16344#note-27 except for two failures). Do you think the jewel branch is ready for QE to start their own round of testing ?
+>>
+>> Cheers
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
+
