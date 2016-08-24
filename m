@@ -1,314 +1,306 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 09/16] rbd: retry watch re-registration periodically
-Date: Wed, 24 Aug 2016 15:18:33 +0200
-Message-ID: <1472044720-29116-10-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 08/16] rbd: introduce a per-device ordered workqueue
+Date: Wed, 24 Aug 2016 15:18:32 +0200
+Message-ID: <1472044720-29116-9-git-send-email-idryomov@gmail.com>
 References: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:35664 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753773AbcHXNT6 (ORCPT
+Received: from mail-yw0-f193.google.com ([209.85.161.193]:36145 "EHLO
+        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753655AbcHXNT6 (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 09:19:58 -0400
-Received: by mail-yw0-f195.google.com with SMTP id r9so789508ywg.2
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 06:19:01 -0700 (PDT)
+Received: by mail-yw0-f193.google.com with SMTP id u134so786121ywg.3
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 06:19:00 -0700 (PDT)
 Received: from dhcp-1-219.brq.redhat.com (nat-pool-brq-t.redhat.com. [213.175.37.10])
-        by smtp.gmail.com with ESMTPSA id e197sm5371294ywa.16.2016.08.24.06.19.00
+        by smtp.gmail.com with ESMTPSA id e197sm5371294ywa.16.2016.08.24.06.18.59
         for <ceph-devel@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 24 Aug 2016 06:19:00 -0700 (PDT)
+        Wed, 24 Aug 2016 06:18:59 -0700 (PDT)
 In-Reply-To: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Revamp watch code to support retrying watch re-registration:
-
-- add rbd_dev->watch_state for more robust errcb handling
-- store watch cookie separately to avoid dereferencing watch_handle
-  which is set to NULL on unwatch
-- move re-register code into a delayed work and retry re-registration
-  every second, unless the client is blacklisted
+This is going to be used for reregistering watch requests and
+exclusive-lock tasks: acquire/request lock, notify-acquired, release
+lock, notify-released.  Some refactoring in the map/unmap paths was
+necessary to give this workqueue a meaningful name: "rbdX-tasks".
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c   | 138 +++++++++++++++++++++++++++++++++++++++-----------
- net/ceph/osd_client.c |   1 +
- 2 files changed, 110 insertions(+), 29 deletions(-)
+ drivers/block/rbd.c | 151 ++++++++++++++++++++++++----------------------------
+ 1 file changed, 71 insertions(+), 80 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 1c805eea6767..cb96fb19e8a7 100644
+index e0585e9040f1..1c805eea6767 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -114,6 +114,8 @@ static int atomic_dec_return_safe(atomic_t *v)
- 
- #define RBD_OBJ_PREFIX_LEN_MAX	64
- 
-+#define RBD_RETRY_DELAY		msecs_to_jiffies(1000)
-+
- /* Feature bits */
- 
- #define RBD_FEATURE_LAYERING	(1<<0)
-@@ -319,6 +321,12 @@ struct rbd_img_request {
- #define for_each_obj_request_safe(ireq, oreq, n) \
- 	list_for_each_entry_safe_reverse(oreq, n, &(ireq)->obj_requests, links)
- 
-+enum rbd_watch_state {
-+	RBD_WATCH_STATE_UNREGISTERED,
-+	RBD_WATCH_STATE_REGISTERED,
-+	RBD_WATCH_STATE_ERROR,
-+};
-+
- struct rbd_mapping {
- 	u64                     size;
- 	u64                     features;
-@@ -352,7 +360,11 @@ struct rbd_device {
- 
- 	struct ceph_file_layout	layout;		/* used for all rbd requests */
- 
-+	struct mutex		watch_mutex;
-+	enum rbd_watch_state	watch_state;
- 	struct ceph_osd_linger_request *watch_handle;
-+	u64			watch_cookie;
-+	struct delayed_work	watch_dwork;
- 
- 	struct workqueue_struct	*task_wq;
- 
-@@ -3083,9 +3095,6 @@ out_err:
- 	obj_request_done_set(obj_request);
- }
- 
--static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev);
--static void __rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev);
--
- static void rbd_watch_cb(void *arg, u64 notify_id, u64 cookie,
- 			 u64 notifier_id, void *data, size_t data_len)
- {
-@@ -3113,35 +3122,34 @@ static void rbd_watch_cb(void *arg, u64 notify_id, u64 cookie,
- 		rbd_warn(rbd_dev, "notify_ack ret %d", ret);
- }
- 
-+static void __rbd_unregister_watch(struct rbd_device *rbd_dev);
-+
- static void rbd_watch_errcb(void *arg, u64 cookie, int err)
- {
- 	struct rbd_device *rbd_dev = arg;
--	int ret;
- 
- 	rbd_warn(rbd_dev, "encountered watch error: %d", err);
- 
--	__rbd_dev_header_unwatch_sync(rbd_dev);
-+	mutex_lock(&rbd_dev->watch_mutex);
-+	if (rbd_dev->watch_state == RBD_WATCH_STATE_REGISTERED) {
-+		__rbd_unregister_watch(rbd_dev);
-+		rbd_dev->watch_state = RBD_WATCH_STATE_ERROR;
- 
--	ret = rbd_dev_header_watch_sync(rbd_dev);
--	if (ret) {
--		rbd_warn(rbd_dev, "failed to reregister watch: %d", ret);
--		return;
-+		queue_delayed_work(rbd_dev->task_wq, &rbd_dev->watch_dwork, 0);
- 	}
--
--	ret = rbd_dev_refresh(rbd_dev);
--	if (ret)
--		rbd_warn(rbd_dev, "reregisteration refresh failed: %d", ret);
-+	mutex_unlock(&rbd_dev->watch_mutex);
- }
- 
+@@ -128,11 +128,8 @@ static int atomic_dec_return_safe(atomic_t *v)
  /*
-- * Initiate a watch request, synchronously.
-+ * watch_mutex must be locked
+  * An RBD device name will be "rbd#", where the "rbd" comes from
+  * RBD_DRV_NAME above, and # is a unique integer identifier.
+- * MAX_INT_FORMAT_WIDTH is used in ensuring DEV_NAME_LEN is big
+- * enough to hold all possible device names.
   */
--static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev)
-+static int __rbd_register_watch(struct rbd_device *rbd_dev)
- {
- 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
- 	struct ceph_osd_linger_request *handle;
+ #define DEV_NAME_LEN		32
+-#define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
  
- 	rbd_assert(!rbd_dev->watch_handle);
-+	dout("%s rbd_dev %p\n", __func__, rbd_dev);
- 
- 	handle = ceph_osdc_watch(osdc, &rbd_dev->header_oid,
- 				 &rbd_dev->header_oloc, rbd_watch_cb,
-@@ -3153,13 +3161,16 @@ static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev)
- 	return 0;
- }
- 
--static void __rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
-+/*
-+ * watch_mutex must be locked
-+ */
-+static void __rbd_unregister_watch(struct rbd_device *rbd_dev)
- {
- 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
- 	int ret;
- 
--	if (!rbd_dev->watch_handle)
--		return;
-+	rbd_assert(rbd_dev->watch_handle);
-+	dout("%s rbd_dev %p\n", __func__, rbd_dev);
- 
- 	ret = ceph_osdc_unwatch(osdc, rbd_dev->watch_handle);
- 	if (ret)
-@@ -3168,17 +3179,80 @@ static void __rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
- 	rbd_dev->watch_handle = NULL;
- }
- 
--/*
-- * Tear down a watch request, synchronously.
-- */
--static void rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
-+static int rbd_register_watch(struct rbd_device *rbd_dev)
-+{
-+	int ret;
-+
-+	mutex_lock(&rbd_dev->watch_mutex);
-+	rbd_assert(rbd_dev->watch_state == RBD_WATCH_STATE_UNREGISTERED);
-+	ret = __rbd_register_watch(rbd_dev);
-+	if (ret)
-+		goto out;
-+
-+	rbd_dev->watch_state = RBD_WATCH_STATE_REGISTERED;
-+	rbd_dev->watch_cookie = rbd_dev->watch_handle->linger_id;
-+
-+out:
-+	mutex_unlock(&rbd_dev->watch_mutex);
-+	return ret;
-+}
-+
-+static void cancel_tasks_sync(struct rbd_device *rbd_dev)
- {
--	__rbd_dev_header_unwatch_sync(rbd_dev);
-+	dout("%s rbd_dev %p\n", __func__, rbd_dev);
-+
-+	cancel_delayed_work_sync(&rbd_dev->watch_dwork);
-+}
-+
-+static void rbd_unregister_watch(struct rbd_device *rbd_dev)
-+{
-+	cancel_tasks_sync(rbd_dev);
-+
-+	mutex_lock(&rbd_dev->watch_mutex);
-+	if (rbd_dev->watch_state == RBD_WATCH_STATE_REGISTERED)
-+		__rbd_unregister_watch(rbd_dev);
-+	rbd_dev->watch_state = RBD_WATCH_STATE_UNREGISTERED;
-+	mutex_unlock(&rbd_dev->watch_mutex);
- 
--	dout("%s flushing notifies\n", __func__);
- 	ceph_osdc_flush_notifies(&rbd_dev->rbd_client->client->osdc);
- }
- 
-+static void rbd_reregister_watch(struct work_struct *work)
-+{
-+	struct rbd_device *rbd_dev = container_of(to_delayed_work(work),
-+					    struct rbd_device, watch_dwork);
-+	int ret;
-+
-+	dout("%s rbd_dev %p\n", __func__, rbd_dev);
-+
-+	mutex_lock(&rbd_dev->watch_mutex);
-+	if (rbd_dev->watch_state != RBD_WATCH_STATE_ERROR)
-+		goto fail_unlock;
-+
-+	ret = __rbd_register_watch(rbd_dev);
-+	if (ret) {
-+		rbd_warn(rbd_dev, "failed to reregister watch: %d", ret);
-+		if (ret != -EBLACKLISTED)
-+			queue_delayed_work(rbd_dev->task_wq,
-+					   &rbd_dev->watch_dwork,
-+					   RBD_RETRY_DELAY);
-+		goto fail_unlock;
-+	}
-+
-+	rbd_dev->watch_state = RBD_WATCH_STATE_REGISTERED;
-+	rbd_dev->watch_cookie = rbd_dev->watch_handle->linger_id;
-+	mutex_unlock(&rbd_dev->watch_mutex);
-+
-+	ret = rbd_dev_refresh(rbd_dev);
-+	if (ret)
-+		rbd_warn(rbd_dev, "reregisteration refresh failed: %d", ret);
-+
-+	return;
-+
-+fail_unlock:
-+	mutex_unlock(&rbd_dev->watch_mutex);
-+}
-+
  /*
-  * Synchronous osd object method call.  Returns the number of bytes
-  * returned in the outbound buffer, or a negative error code.
-@@ -3945,6 +4019,8 @@ static void rbd_spec_free(struct kref *kref)
+  * block device image metadata (in-memory version)
+@@ -353,10 +350,12 @@ struct rbd_device {
+ 	struct ceph_object_id	header_oid;
+ 	struct ceph_object_locator header_oloc;
  
- static void rbd_dev_free(struct rbd_device *rbd_dev)
- {
-+	WARN_ON(rbd_dev->watch_state != RBD_WATCH_STATE_UNREGISTERED);
+-	struct ceph_file_layout	layout;
++	struct ceph_file_layout	layout;		/* used for all rbd requests */
+ 
+ 	struct ceph_osd_linger_request *watch_handle;
+ 
++	struct workqueue_struct	*task_wq;
 +
+ 	struct rbd_spec		*parent_spec;
+ 	u64			parent_overlap;
+ 	atomic_t		parent_ref;
+@@ -3944,11 +3943,8 @@ static void rbd_spec_free(struct kref *kref)
+ 	kfree(spec);
+ }
+ 
+-static void rbd_dev_release(struct device *dev)
++static void rbd_dev_free(struct rbd_device *rbd_dev)
+ {
+-	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+-	bool need_put = !!rbd_dev->opts;
+-
  	ceph_oid_destroy(&rbd_dev->header_oid);
  	ceph_oloc_destroy(&rbd_dev->header_oloc);
  
-@@ -3991,6 +4067,10 @@ static struct rbd_device *__rbd_dev_create(struct rbd_client *rbdc,
- 	ceph_oid_init(&rbd_dev->header_oid);
- 	ceph_oloc_init(&rbd_dev->header_oloc);
- 
-+	mutex_init(&rbd_dev->watch_mutex);
-+	rbd_dev->watch_state = RBD_WATCH_STATE_UNREGISTERED;
-+	INIT_DELAYED_WORK(&rbd_dev->watch_dwork, rbd_reregister_watch);
+@@ -3956,6 +3952,19 @@ static void rbd_dev_release(struct device *dev)
+ 	rbd_spec_put(rbd_dev->spec);
+ 	kfree(rbd_dev->opts);
+ 	kfree(rbd_dev);
++}
 +
- 	rbd_dev->dev.bus = &rbd_bus_type;
- 	rbd_dev->dev.type = &rbd_device_type;
- 	rbd_dev->dev.parent = &rbd_root_dev;
-@@ -5222,7 +5302,7 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, int depth)
- 		goto err_out_format;
- 
- 	if (!depth) {
--		ret = rbd_dev_header_watch_sync(rbd_dev);
-+		ret = rbd_register_watch(rbd_dev);
- 		if (ret) {
- 			if (ret == -ENOENT)
- 				pr_info("image %s/%s does not exist\n",
-@@ -5281,7 +5361,7 @@ err_out_probe:
- 	rbd_dev_unprobe(rbd_dev);
- err_out_watch:
- 	if (!depth)
--		rbd_dev_header_unwatch_sync(rbd_dev);
-+		rbd_unregister_watch(rbd_dev);
- err_out_format:
- 	rbd_dev->image_format = 0;
- 	kfree(rbd_dev->spec->image_id);
-@@ -5348,11 +5428,11 @@ static ssize_t do_rbd_add(struct bus_type *bus,
- 	rc = rbd_dev_device_setup(rbd_dev);
- 	if (rc) {
- 		/*
--		 * rbd_dev_header_unwatch_sync() can't be moved into
-+		 * rbd_unregister_watch() can't be moved into
- 		 * rbd_dev_image_release() without refactoring, see
- 		 * commit 1f3ef78861ac.
- 		 */
--		rbd_dev_header_unwatch_sync(rbd_dev);
-+		rbd_unregister_watch(rbd_dev);
- 		rbd_dev_image_release(rbd_dev);
- 		goto out;
- 	}
-@@ -5473,7 +5553,7 @@ static ssize_t do_rbd_remove(struct bus_type *bus,
- 	if (ret < 0 || already)
- 		return ret;
- 
--	rbd_dev_header_unwatch_sync(rbd_dev);
-+	rbd_unregister_watch(rbd_dev);
++static void rbd_dev_release(struct device *dev)
++{
++	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
++	bool need_put = !!rbd_dev->opts;
++
++	if (need_put) {
++		destroy_workqueue(rbd_dev->task_wq);
++		ida_simple_remove(&rbd_dev_id_ida, rbd_dev->dev_id);
++	}
++
++	rbd_dev_free(rbd_dev);
  
  	/*
- 	 * Don't free anything from rbd_dev->disk until after all
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index fbc6b7090c65..d9bf7a1d0a58 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -4014,6 +4014,7 @@ EXPORT_SYMBOL(ceph_osdc_list_watchers);
-  */
- void ceph_osdc_flush_notifies(struct ceph_osd_client *osdc)
- {
-+	dout("%s osdc %p\n", __func__, osdc);
- 	flush_workqueue(osdc->notify_wq);
+ 	 * This is racy, but way better than putting module outside of
+@@ -3966,19 +3975,16 @@ static void rbd_dev_release(struct device *dev)
+ 		module_put(THIS_MODULE);
  }
- EXPORT_SYMBOL(ceph_osdc_flush_notifies);
+ 
+-static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+-					 struct rbd_spec *spec,
+-					 struct rbd_options *opts)
++static struct rbd_device *__rbd_dev_create(struct rbd_client *rbdc,
++					   struct rbd_spec *spec)
+ {
+ 	struct rbd_device *rbd_dev;
+ 
+-	rbd_dev = kzalloc(sizeof (*rbd_dev), GFP_KERNEL);
++	rbd_dev = kzalloc(sizeof(*rbd_dev), GFP_KERNEL);
+ 	if (!rbd_dev)
+ 		return NULL;
+ 
+ 	spin_lock_init(&rbd_dev->lock);
+-	rbd_dev->flags = 0;
+-	atomic_set(&rbd_dev->parent_ref, 0);
+ 	INIT_LIST_HEAD(&rbd_dev->node);
+ 	init_rwsem(&rbd_dev->header_rwsem);
+ 
+@@ -3992,9 +3998,6 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+ 
+ 	rbd_dev->rbd_client = rbdc;
+ 	rbd_dev->spec = spec;
+-	rbd_dev->opts = opts;
+-
+-	/* Initialize the layout used for all rbd requests */
+ 
+ 	rbd_dev->layout.stripe_unit = 1 << RBD_MAX_OBJ_ORDER;
+ 	rbd_dev->layout.stripe_count = 1;
+@@ -4002,15 +4005,48 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+ 	rbd_dev->layout.pool_id = spec->pool_id;
+ 	RCU_INIT_POINTER(rbd_dev->layout.pool_ns, NULL);
+ 
+-	/*
+-	 * If this is a mapping rbd_dev (as opposed to a parent one),
+-	 * pin our module.  We have a ref from do_rbd_add(), so use
+-	 * __module_get().
+-	 */
+-	if (rbd_dev->opts)
+-		__module_get(THIS_MODULE);
++	return rbd_dev;
++}
++
++/*
++ * Create a mapping rbd_dev.
++ */
++static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
++					 struct rbd_spec *spec,
++					 struct rbd_options *opts)
++{
++	struct rbd_device *rbd_dev;
++
++	rbd_dev = __rbd_dev_create(rbdc, spec);
++	if (!rbd_dev)
++		return NULL;
++
++	rbd_dev->opts = opts;
++
++	/* get an id and fill in device name */
++	rbd_dev->dev_id = ida_simple_get(&rbd_dev_id_ida, 0,
++					 minor_to_rbd_dev_id(1 << MINORBITS),
++					 GFP_KERNEL);
++	if (rbd_dev->dev_id < 0)
++		goto fail_rbd_dev;
++
++	sprintf(rbd_dev->name, RBD_DRV_NAME "%d", rbd_dev->dev_id);
++	rbd_dev->task_wq = alloc_ordered_workqueue("%s-tasks", WQ_MEM_RECLAIM,
++						   rbd_dev->name);
++	if (!rbd_dev->task_wq)
++		goto fail_dev_id;
+ 
++	/* we have a ref from do_rbd_add() */
++	__module_get(THIS_MODULE);
++
++	dout("%s rbd_dev %p dev_id %d\n", __func__, rbd_dev, rbd_dev->dev_id);
+ 	return rbd_dev;
++
++fail_dev_id:
++	ida_simple_remove(&rbd_dev_id_ida, rbd_dev->dev_id);
++fail_rbd_dev:
++	rbd_dev_free(rbd_dev);
++	return NULL;
+ }
+ 
+ static void rbd_dev_destroy(struct rbd_device *rbd_dev)
+@@ -4646,46 +4682,6 @@ static int rbd_dev_header_info(struct rbd_device *rbd_dev)
+ }
+ 
+ /*
+- * Get a unique rbd identifier for the given new rbd_dev, and add
+- * the rbd_dev to the global list.
+- */
+-static int rbd_dev_id_get(struct rbd_device *rbd_dev)
+-{
+-	int new_dev_id;
+-
+-	new_dev_id = ida_simple_get(&rbd_dev_id_ida,
+-				    0, minor_to_rbd_dev_id(1 << MINORBITS),
+-				    GFP_KERNEL);
+-	if (new_dev_id < 0)
+-		return new_dev_id;
+-
+-	rbd_dev->dev_id = new_dev_id;
+-
+-	spin_lock(&rbd_dev_list_lock);
+-	list_add_tail(&rbd_dev->node, &rbd_dev_list);
+-	spin_unlock(&rbd_dev_list_lock);
+-
+-	dout("rbd_dev %p given dev id %d\n", rbd_dev, rbd_dev->dev_id);
+-
+-	return 0;
+-}
+-
+-/*
+- * Remove an rbd_dev from the global list, and record that its
+- * identifier is no longer in use.
+- */
+-static void rbd_dev_id_put(struct rbd_device *rbd_dev)
+-{
+-	spin_lock(&rbd_dev_list_lock);
+-	list_del_init(&rbd_dev->node);
+-	spin_unlock(&rbd_dev_list_lock);
+-
+-	ida_simple_remove(&rbd_dev_id_ida, rbd_dev->dev_id);
+-
+-	dout("rbd_dev %p released dev id %d\n", rbd_dev, rbd_dev->dev_id);
+-}
+-
+-/*
+  * Skips over white space at *buf, and updates *buf to point to the
+  * first found non-space character (if any). Returns the length of
+  * the token (string of non-white space characters) found.  Note
+@@ -5077,8 +5073,7 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
+ 		goto out_err;
+ 	}
+ 
+-	parent = rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec,
+-				NULL);
++	parent = __rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec);
+ 	if (!parent) {
+ 		ret = -ENOMEM;
+ 		goto out_err;
+@@ -5113,22 +5108,12 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
+ {
+ 	int ret;
+ 
+-	/* Get an id and fill in device name. */
+-
+-	ret = rbd_dev_id_get(rbd_dev);
+-	if (ret)
+-		goto err_out_unlock;
+-
+-	BUILD_BUG_ON(DEV_NAME_LEN
+-			< sizeof (RBD_DRV_NAME) + MAX_INT_FORMAT_WIDTH);
+-	sprintf(rbd_dev->name, "%s%d", RBD_DRV_NAME, rbd_dev->dev_id);
+-
+ 	/* Record our major and minor device numbers. */
+ 
+ 	if (!single_major) {
+ 		ret = register_blkdev(0, rbd_dev->name);
+ 		if (ret < 0)
+-			goto err_out_id;
++			goto err_out_unlock;
+ 
+ 		rbd_dev->major = ret;
+ 		rbd_dev->minor = 0;
+@@ -5160,6 +5145,10 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
+ 	set_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
+ 	up_write(&rbd_dev->header_rwsem);
+ 
++	spin_lock(&rbd_dev_list_lock);
++	list_add_tail(&rbd_dev->node, &rbd_dev_list);
++	spin_unlock(&rbd_dev_list_lock);
++
+ 	add_disk(rbd_dev->disk);
+ 	pr_info("%s: added with size 0x%llx\n", rbd_dev->disk->disk_name,
+ 		(unsigned long long) rbd_dev->mapping.size);
+@@ -5173,8 +5162,6 @@ err_out_disk:
+ err_out_blkdev:
+ 	if (!single_major)
+ 		unregister_blkdev(rbd_dev->major, rbd_dev->name);
+-err_out_id:
+-	rbd_dev_id_put(rbd_dev);
+ err_out_unlock:
+ 	up_write(&rbd_dev->header_rwsem);
+ 	return ret;
+@@ -5406,12 +5393,16 @@ static ssize_t rbd_add_single_major(struct bus_type *bus,
+ static void rbd_dev_device_release(struct rbd_device *rbd_dev)
+ {
+ 	rbd_free_disk(rbd_dev);
++
++	spin_lock(&rbd_dev_list_lock);
++	list_del_init(&rbd_dev->node);
++	spin_unlock(&rbd_dev_list_lock);
++
+ 	clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
+ 	device_del(&rbd_dev->dev);
+ 	rbd_dev_mapping_clear(rbd_dev);
+ 	if (!single_major)
+ 		unregister_blkdev(rbd_dev->major, rbd_dev->name);
+-	rbd_dev_id_put(rbd_dev);
+ }
+ 
+ static void rbd_dev_remove_parent(struct rbd_device *rbd_dev)
 -- 
 2.4.3
 
