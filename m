@@ -1,194 +1,94 @@
 From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 06/16] libceph: support for blacklisting clients
-Date: Wed, 24 Aug 2016 14:59:33 -0500
-Message-ID: <4c9e5d33-eb0f-2d53-e10b-a2099e51855e@ieee.org>
+Subject: Re: [PATCH 07/16] libceph: rename ceph_client_id() ->
+ ceph_client_gid()
+Date: Wed, 24 Aug 2016 15:00:08 -0500
+Message-ID: <028df11c-08d0-5972-7f44-e2064696092d@ieee.org>
 References: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
- <1472044720-29116-7-git-send-email-idryomov@gmail.com>
+ <1472044720-29116-8-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f42.google.com ([209.85.214.42]:34897 "EHLO
-        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750947AbcHXUAX (ORCPT
+Received: from mail-it0-f48.google.com ([209.85.214.48]:36243 "EHLO
+        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752653AbcHXUAX (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 16:00:23 -0400
-Received: by mail-it0-f42.google.com with SMTP id x131so231344981ite.0
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 12:59:34 -0700 (PDT)
-In-Reply-To: <1472044720-29116-7-git-send-email-idryomov@gmail.com>
+Received: by mail-it0-f48.google.com with SMTP id e63so231738927ith.1
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 13:00:10 -0700 (PDT)
+In-Reply-To: <1472044720-29116-8-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
+
+Why?  There must be at least a one-line explanation.
+
 On 08/24/2016 08:18 AM, Ilya Dryomov wrote:
-> From: Douglas Fuller <dfuller@redhat.com>
-> 
-> Reuse ceph_mon_generic_request infrastructure for sending monitor
-> commands.  In particular, add support for 'blacklist add' to prevent
-> other, non-responsive clients from making further updates.
-> 
-> Signed-off-by: Douglas Fuller <dfuller@redhat.com>
-> [idryomov@gmail.com: refactor, misc fixes throughout]
 > Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 
-Looks OK to me.
+Looks good.
 
 Reviewed-by: Alex Elder <elder@linaro.org>
 
 > ---
->  include/linux/ceph/ceph_fs.h    | 11 ++++++
->  include/linux/ceph/mon_client.h |  3 ++
->  net/ceph/mon_client.c           | 82 +++++++++++++++++++++++++++++++++++++++++
->  3 files changed, 96 insertions(+)
+>  drivers/block/rbd.c          | 2 +-
+>  include/linux/ceph/libceph.h | 2 +-
+>  net/ceph/ceph_common.c       | 7 ++++---
+>  3 files changed, 6 insertions(+), 5 deletions(-)
 > 
-> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-> index 7868d602c0a0..c086e63dcee1 100644
-> --- a/include/linux/ceph/ceph_fs.h
-> +++ b/include/linux/ceph/ceph_fs.h
-> @@ -138,6 +138,9 @@ struct ceph_dir_layout {
->  #define CEPH_MSG_POOLOP_REPLY           48
->  #define CEPH_MSG_POOLOP                 49
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 6c6519f6492a..e0585e9040f1 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -3758,7 +3758,7 @@ static ssize_t rbd_client_id_show(struct device *dev,
+>  	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
 >  
-> +/* mon commands */
-> +#define CEPH_MSG_MON_COMMAND            50
-> +#define CEPH_MSG_MON_COMMAND_ACK        51
->  
->  /* osd */
->  #define CEPH_MSG_OSD_MAP                41
-> @@ -176,6 +179,14 @@ struct ceph_mon_statfs_reply {
->  	struct ceph_statfs st;
->  } __attribute__ ((packed));
->  
-> +struct ceph_mon_command {
-> +	struct ceph_mon_request_header monhdr;
-> +	struct ceph_fsid fsid;
-> +	__le32 num_strs;         /* always 1 */
-> +	__le32 str_len;
-> +	char str[];
-> +} __attribute__ ((packed));
-> +
->  struct ceph_osd_getmap {
->  	struct ceph_mon_request_header monhdr;
->  	struct ceph_fsid fsid;
-> diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
-> index 24d704d1ea5c..d5a3ecea578d 100644
-> --- a/include/linux/ceph/mon_client.h
-> +++ b/include/linux/ceph/mon_client.h
-> @@ -141,6 +141,9 @@ int ceph_monc_get_version(struct ceph_mon_client *monc, const char *what,
->  int ceph_monc_get_version_async(struct ceph_mon_client *monc, const char *what,
->  				ceph_monc_callback_t cb, u64 private_data);
->  
-> +int ceph_monc_blacklist_add(struct ceph_mon_client *monc,
-> +			    struct ceph_entity_addr *client_addr);
-> +
->  extern int ceph_monc_open_session(struct ceph_mon_client *monc);
->  
->  extern int ceph_monc_validate_auth(struct ceph_mon_client *monc);
-> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index ef34a02719d7..a8effc8b7280 100644
-> --- a/net/ceph/mon_client.c
-> +++ b/net/ceph/mon_client.c
-> @@ -835,6 +835,83 @@ int ceph_monc_get_version_async(struct ceph_mon_client *monc, const char *what,
+>  	return sprintf(buf, "client%lld\n",
+> -			ceph_client_id(rbd_dev->rbd_client->client));
+> +		       ceph_client_gid(rbd_dev->rbd_client->client));
 >  }
->  EXPORT_SYMBOL(ceph_monc_get_version_async);
 >  
-> +static void handle_command_ack(struct ceph_mon_client *monc,
-> +			       struct ceph_msg *msg)
-> +{
-> +	struct ceph_mon_generic_request *req;
-> +	void *p = msg->front.iov_base;
-> +	void *const end = p + msg->front_alloc_len;
-> +	u64 tid = le64_to_cpu(msg->hdr.tid);
-> +
-> +	dout("%s msg %p tid %llu\n", __func__, msg, tid);
-> +
-> +	ceph_decode_need(&p, end, sizeof(struct ceph_mon_request_header) +
-> +							    sizeof(u32), bad);
-> +	p += sizeof(struct ceph_mon_request_header);
-> +
-> +	mutex_lock(&monc->mutex);
-> +	req = lookup_generic_request(&monc->generic_request_tree, tid);
-> +	if (!req) {
-> +		mutex_unlock(&monc->mutex);
-> +		return;
-> +	}
-> +
-> +	req->result = ceph_decode_32(&p);
-> +	__finish_generic_request(req);
-> +	mutex_unlock(&monc->mutex);
-> +
-> +	complete_generic_request(req);
-> +	return;
-> +
-> +bad:
-> +	pr_err("corrupt mon_command ack, tid %llu\n", tid);
-> +	ceph_msg_dump(msg);
-> +}
-> +
-> +int ceph_monc_blacklist_add(struct ceph_mon_client *monc,
-> +			    struct ceph_entity_addr *client_addr)
-> +{
-> +	struct ceph_mon_generic_request *req;
-> +	struct ceph_mon_command *h;
-> +	int ret = -ENOMEM;
-> +	int len;
-> +
-> +	req = alloc_generic_request(monc, GFP_NOIO);
-> +	if (!req)
-> +		goto out;
-> +
-> +	req->request = ceph_msg_new(CEPH_MSG_MON_COMMAND, 256, GFP_NOIO, true);
-> +	if (!req->request)
-> +		goto out;
-> +
-> +	req->reply = ceph_msg_new(CEPH_MSG_MON_COMMAND_ACK, 512, GFP_NOIO,
-> +				  true);
-> +	if (!req->reply)
-> +		goto out;
-> +
-> +	mutex_lock(&monc->mutex);
-> +	register_generic_request(req);
-> +	h = req->request->front.iov_base;
-> +	h->monhdr.have_version = 0;
-> +	h->monhdr.session_mon = cpu_to_le16(-1);
-> +	h->monhdr.session_mon_tid = 0;
-> +	h->fsid = monc->monmap->fsid;
-> +	h->num_strs = cpu_to_le32(1);
-> +	len = sprintf(h->str, "{ \"prefix\": \"osd blacklist\", \
-> +		                 \"blacklistop\": \"add\", \
-> +				 \"addr\": \"%pISpc/%u\" }",
-> +		      &client_addr->in_addr, le32_to_cpu(client_addr->nonce));
-> +	h->str_len = cpu_to_le32(len);
-> +	send_generic_request(monc, req);
-> +	mutex_unlock(&monc->mutex);
-> +
-> +	ret = wait_generic_request(req);
-> +out:
-> +	put_generic_request(req);
-> +	return ret;
-> +}
-> +EXPORT_SYMBOL(ceph_monc_blacklist_add);
-> +
+>  static ssize_t rbd_pool_show(struct device *dev,
+> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+> index 83fc1fff7061..b4cffff70e44 100644
+> --- a/include/linux/ceph/libceph.h
+> +++ b/include/linux/ceph/libceph.h
+> @@ -264,7 +264,7 @@ extern struct ceph_client *ceph_create_client(struct ceph_options *opt,
+>  					      void *private,
+>  					      u64 supported_features,
+>  					      u64 required_features);
+> -extern u64 ceph_client_id(struct ceph_client *client);
+> +u64 ceph_client_gid(struct ceph_client *client);
+>  extern void ceph_destroy_client(struct ceph_client *client);
+>  extern int __ceph_open_session(struct ceph_client *client,
+>  			       unsigned long started);
+> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+> index bddfcf6f09c2..8a7921767308 100644
+> --- a/net/ceph/ceph_common.c
+> +++ b/net/ceph/ceph_common.c
+> @@ -566,11 +566,11 @@ int ceph_print_client_options(struct seq_file *m, struct ceph_client *client)
+>  }
+>  EXPORT_SYMBOL(ceph_print_client_options);
+>  
+> -u64 ceph_client_id(struct ceph_client *client)
+> +u64 ceph_client_gid(struct ceph_client *client)
+>  {
+>  	return client->monc.auth->global_id;
+>  }
+> -EXPORT_SYMBOL(ceph_client_id);
+> +EXPORT_SYMBOL(ceph_client_gid);
+>  
 >  /*
->   * Resend pending generic requests.
->   */
-> @@ -1139,6 +1216,10 @@ static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
->  		handle_get_version_reply(monc, msg);
->  		break;
+>   * create a fresh client instance
+> @@ -685,7 +685,8 @@ int __ceph_open_session(struct ceph_client *client, unsigned long started)
+>  			return client->auth_err;
+>  	}
 >  
-> +	case CEPH_MSG_MON_COMMAND_ACK:
-> +		handle_command_ack(monc, msg);
-> +		break;
-> +
->  	case CEPH_MSG_MON_MAP:
->  		ceph_monc_handle_map(monc, msg);
->  		break;
-> @@ -1178,6 +1259,7 @@ static struct ceph_msg *mon_alloc_msg(struct ceph_connection *con,
->  		m = ceph_msg_get(monc->m_subscribe_ack);
->  		break;
->  	case CEPH_MSG_STATFS_REPLY:
-> +	case CEPH_MSG_MON_COMMAND_ACK:
->  		return get_generic_reply(con, hdr, skip);
->  	case CEPH_MSG_AUTH_REPLY:
->  		m = ceph_msg_get(monc->m_auth_reply);
+> -	pr_info("client%llu fsid %pU\n", ceph_client_id(client), &client->fsid);
+> +	pr_info("client%llu fsid %pU\n", ceph_client_gid(client),
+> +		&client->fsid);
+>  	ceph_debugfs_client_init(client);
+>  
+>  	return 0;
 > 
 
