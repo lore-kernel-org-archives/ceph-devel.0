@@ -1,133 +1,122 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 15/16] rbd: add 'config_info' sysfs rbd device attribute
-Date: Wed, 24 Aug 2016 15:18:39 +0200
-Message-ID: <1472044720-29116-16-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 12/16] rbd: add 'client_addr' sysfs rbd device attribute
+Date: Wed, 24 Aug 2016 15:18:36 +0200
+Message-ID: <1472044720-29116-13-git-send-email-idryomov@gmail.com>
 References: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f196.google.com ([209.85.161.196]:35679 "EHLO
-        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754086AbcHXNT6 (ORCPT
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:35670 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753889AbcHXNT6 (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 09:19:58 -0400
-Received: by mail-yw0-f196.google.com with SMTP id r9so789608ywg.2
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 06:19:08 -0700 (PDT)
+Received: by mail-yw0-f195.google.com with SMTP id r9so789553ywg.2
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 06:19:04 -0700 (PDT)
 Received: from dhcp-1-219.brq.redhat.com (nat-pool-brq-t.redhat.com. [213.175.37.10])
-        by smtp.gmail.com with ESMTPSA id e197sm5371294ywa.16.2016.08.24.06.19.06
+        by smtp.gmail.com with ESMTPSA id e197sm5371294ywa.16.2016.08.24.06.19.03
         for <ceph-devel@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 24 Aug 2016 06:19:07 -0700 (PDT)
+        Wed, 24 Aug 2016 06:19:03 -0700 (PDT)
 In-Reply-To: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-From: Mike Christie <mchristi@redhat.com>
-
-Export the info used to setup the rbd image, so it can be used to remap
-the image.
+Export client addr/nonce, so userspace can check if a image is being
+blacklisted.
 
 Signed-off-by: Mike Christie <mchristi@redhat.com>
-[idryomov@gmail.com: do_rbd_add() EH]
+[idryomov@gmail.com: ceph_client_addr(), endianess fix]
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- Documentation/ABI/testing/sysfs-bus-rbd |  5 +++++
- drivers/block/rbd.c                     | 23 +++++++++++++++++++++--
- 2 files changed, 26 insertions(+), 2 deletions(-)
+ Documentation/ABI/testing/sysfs-bus-rbd |  6 ++++++
+ drivers/block/rbd.c                     | 13 +++++++++++++
+ include/linux/ceph/libceph.h            |  1 +
+ net/ceph/ceph_common.c                  |  6 ++++++
+ 4 files changed, 26 insertions(+)
 
 diff --git a/Documentation/ABI/testing/sysfs-bus-rbd b/Documentation/ABI/testing/sysfs-bus-rbd
-index 7bf8d4fa6f63..6dccbf82fcf4 100644
+index 2ddd680929d8..273e27f2491f 100644
 --- a/Documentation/ABI/testing/sysfs-bus-rbd
 +++ b/Documentation/ABI/testing/sysfs-bus-rbd
-@@ -57,6 +57,11 @@ cluster_fsid
+@@ -43,6 +43,12 @@ Description:	Available only if rbd module is inserted with single_major
+ Entries under /sys/bus/rbd/devices/<dev-id>/
+ --------------------------------------------
  
- 	The ceph cluster UUID.  (August 2016, since 4.9.)
- 
-+config_info
++client_addr
 +
-+	The string written into /sys/bus/rbd/add{,_single_major}.  (August
-+	2016, since 4.9.)
++	The ceph unique client entity_addr_t (address + nonce).
++	The format is <address>:<port>/<nonce>: '1.2.3.4:1234/5678' or
++	'[1:2:3:4:5:6:7:8]:1234/5678'.  (August 2016, since 4.9.)
 +
- features
+ client_id
  
- 	A hexadecimal encoding of the feature bits for this image.
+ 	The ceph unique client id that was assigned for this specific session.
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 36ebec19dc20..8ff2dc872008 100644
+index fd1a9891b348..69d76c3afcdd 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -370,6 +370,7 @@ struct rbd_device {
- 	unsigned long		flags;		/* possibly lock protected */
- 	struct rbd_spec		*spec;
- 	struct rbd_options	*opts;
-+	char			*config_info;	/* add{,_single_major} string */
- 
- 	struct ceph_object_id	header_oid;
- 	struct ceph_object_locator header_oloc;
-@@ -4620,6 +4621,14 @@ static ssize_t rbd_cluster_fsid_show(struct device *dev,
- 	return sprintf(buf, "%pU\n", &rbd_dev->rbd_client->client->fsid);
+@@ -4592,6 +4592,17 @@ static ssize_t rbd_minor_show(struct device *dev,
+ 	return sprintf(buf, "%d\n", rbd_dev->minor);
  }
  
-+static ssize_t rbd_config_info_show(struct device *dev,
++static ssize_t rbd_client_addr_show(struct device *dev,
 +				    struct device_attribute *attr, char *buf)
 +{
 +	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
++	struct ceph_entity_addr *client_addr =
++	    ceph_client_addr(rbd_dev->rbd_client->client);
 +
-+	return sprintf(buf, "%s\n", rbd_dev->config_info);
++	return sprintf(buf, "%pISpc/%u\n", &client_addr->in_addr,
++		       le32_to_cpu(client_addr->nonce));
 +}
 +
- static ssize_t rbd_pool_show(struct device *dev,
- 			     struct device_attribute *attr, char *buf)
+ static ssize_t rbd_client_id_show(struct device *dev,
+ 				  struct device_attribute *attr, char *buf)
  {
-@@ -4732,6 +4741,7 @@ static DEVICE_ATTR(minor, S_IRUGO, rbd_minor_show, NULL);
- static DEVICE_ATTR(client_addr, S_IRUGO, rbd_client_addr_show, NULL);
+@@ -4702,6 +4713,7 @@ static DEVICE_ATTR(size, S_IRUGO, rbd_size_show, NULL);
+ static DEVICE_ATTR(features, S_IRUGO, rbd_features_show, NULL);
+ static DEVICE_ATTR(major, S_IRUGO, rbd_major_show, NULL);
+ static DEVICE_ATTR(minor, S_IRUGO, rbd_minor_show, NULL);
++static DEVICE_ATTR(client_addr, S_IRUGO, rbd_client_addr_show, NULL);
  static DEVICE_ATTR(client_id, S_IRUGO, rbd_client_id_show, NULL);
- static DEVICE_ATTR(cluster_fsid, S_IRUGO, rbd_cluster_fsid_show, NULL);
-+static DEVICE_ATTR(config_info, S_IRUSR, rbd_config_info_show, NULL);
  static DEVICE_ATTR(pool, S_IRUGO, rbd_pool_show, NULL);
  static DEVICE_ATTR(pool_id, S_IRUGO, rbd_pool_id_show, NULL);
- static DEVICE_ATTR(name, S_IRUGO, rbd_name_show, NULL);
-@@ -4749,6 +4759,7 @@ static struct attribute *rbd_attrs[] = {
- 	&dev_attr_client_addr.attr,
+@@ -4716,6 +4728,7 @@ static struct attribute *rbd_attrs[] = {
+ 	&dev_attr_features.attr,
+ 	&dev_attr_major.attr,
+ 	&dev_attr_minor.attr,
++	&dev_attr_client_addr.attr,
  	&dev_attr_client_id.attr,
- 	&dev_attr_cluster_fsid.attr,
-+	&dev_attr_config_info.attr,
  	&dev_attr_pool.attr,
  	&dev_attr_pool_id.attr,
- 	&dev_attr_name.attr,
-@@ -4824,6 +4835,7 @@ static void rbd_dev_free(struct rbd_device *rbd_dev)
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index b4cffff70e44..1816c5e26581 100644
+--- a/include/linux/ceph/libceph.h
++++ b/include/linux/ceph/libceph.h
+@@ -264,6 +264,7 @@ extern struct ceph_client *ceph_create_client(struct ceph_options *opt,
+ 					      void *private,
+ 					      u64 supported_features,
+ 					      u64 required_features);
++struct ceph_entity_addr *ceph_client_addr(struct ceph_client *client);
+ u64 ceph_client_gid(struct ceph_client *client);
+ extern void ceph_destroy_client(struct ceph_client *client);
+ extern int __ceph_open_session(struct ceph_client *client,
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index 8a7921767308..464e88599b9d 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -566,6 +566,12 @@ int ceph_print_client_options(struct seq_file *m, struct ceph_client *client)
+ }
+ EXPORT_SYMBOL(ceph_print_client_options);
  
- 	ceph_oid_destroy(&rbd_dev->header_oid);
- 	ceph_oloc_destroy(&rbd_dev->header_oloc);
-+	kfree(rbd_dev->config_info);
- 
- 	rbd_put_client(rbd_dev->rbd_client);
- 	rbd_spec_put(rbd_dev->spec);
-@@ -6223,10 +6235,18 @@ static ssize_t do_rbd_add(struct bus_type *bus,
- 	spec = NULL;		/* rbd_dev now owns this */
- 	rbd_opts = NULL;	/* rbd_dev now owns this */
- 
-+	rbd_dev->config_info = kstrdup(buf, GFP_KERNEL);
-+	if (!rbd_dev->config_info) {
-+		rc = -ENOMEM;
-+		goto err_out_rbd_dev;
-+	}
++struct ceph_entity_addr *ceph_client_addr(struct ceph_client *client)
++{
++	return &client->msgr.inst.addr;
++}
++EXPORT_SYMBOL(ceph_client_addr);
 +
- 	down_write(&rbd_dev->header_rwsem);
- 	rc = rbd_dev_image_probe(rbd_dev, 0);
--	if (rc < 0)
-+	if (rc < 0) {
-+		up_write(&rbd_dev->header_rwsem);
- 		goto err_out_rbd_dev;
-+	}
- 
- 	/* If we are mapping a snapshot it must be marked read-only */
- 
-@@ -6253,7 +6273,6 @@ out:
- 	return rc;
- 
- err_out_rbd_dev:
--	up_write(&rbd_dev->header_rwsem);
- 	rbd_dev_destroy(rbd_dev);
- err_out_client:
- 	rbd_put_client(rbdc);
+ u64 ceph_client_gid(struct ceph_client *client)
+ {
+ 	return client->monc.auth->global_id;
 -- 
 2.4.3
 
