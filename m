@@ -1,102 +1,86 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: Python 3 a blocking requirement?
-Date: Wed, 24 Aug 2016 07:16:06 -0600
-Message-ID: <CALqRxCxQdinA2HY_61Q7FujfUh9_o2Pystm9=LC-PvtHB5jJ9g@mail.gmail.com>
-References: <2ef48fae-b971-3983-2488-c3181607dae3@digiware.nl>
- <9d76a1ec-52c8-b429-a11b-ad8af1bc6a65@redhat.com> <ed49edc5-633b-bd2a-0139-272695bd2d7a@digiware.nl>
- <c7814b3d-24dc-ced2-d435-b08d10f5f493@redhat.com> <77f467b7-7bcc-8267-8987-4cb4fb95260c@digiware.nl>
- <73da48c0-a358-0cb7-ff9b-3e787803b660@digiware.nl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH 07/16] libceph: rename ceph_client_id() -> ceph_client_gid()
+Date: Wed, 24 Aug 2016 15:18:31 +0200
+Message-ID: <1472044720-29116-8-git-send-email-idryomov@gmail.com>
+References: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f176.google.com ([209.85.217.176]:34735 "EHLO
-        mail-ua0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754917AbcHXNQI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 09:16:08 -0400
-Received: by mail-ua0-f176.google.com with SMTP id k90so27192736uak.1
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 06:16:07 -0700 (PDT)
-In-Reply-To: <73da48c0-a358-0cb7-ff9b-3e787803b660@digiware.nl>
+Received: from mail-yb0-f195.google.com ([209.85.213.195]:36520 "EHLO
+        mail-yb0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753073AbcHXNT6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Aug 2016 09:19:58 -0400
+Received: by mail-yb0-f195.google.com with SMTP id f60so443591ybi.3
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Aug 2016 06:18:59 -0700 (PDT)
+Received: from dhcp-1-219.brq.redhat.com (nat-pool-brq-t.redhat.com. [213.175.37.10])
+        by smtp.gmail.com with ESMTPSA id e197sm5371294ywa.16.2016.08.24.06.18.58
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 24 Aug 2016 06:18:58 -0700 (PDT)
+In-Reply-To: <1472044720-29116-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Somewhat related to this discussion, I've opened
-http://tracker.ceph.com/issues/17103 to track making Python 3
-optional.
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c          | 2 +-
+ include/linux/ceph/libceph.h | 2 +-
+ net/ceph/ceph_common.c       | 7 ++++---
+ 3 files changed, 6 insertions(+), 5 deletions(-)
 
-- Ken
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 6c6519f6492a..e0585e9040f1 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3758,7 +3758,7 @@ static ssize_t rbd_client_id_show(struct device *dev,
+ 	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+ 
+ 	return sprintf(buf, "client%lld\n",
+-			ceph_client_id(rbd_dev->rbd_client->client));
++		       ceph_client_gid(rbd_dev->rbd_client->client));
+ }
+ 
+ static ssize_t rbd_pool_show(struct device *dev,
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index 83fc1fff7061..b4cffff70e44 100644
+--- a/include/linux/ceph/libceph.h
++++ b/include/linux/ceph/libceph.h
+@@ -264,7 +264,7 @@ extern struct ceph_client *ceph_create_client(struct ceph_options *opt,
+ 					      void *private,
+ 					      u64 supported_features,
+ 					      u64 required_features);
+-extern u64 ceph_client_id(struct ceph_client *client);
++u64 ceph_client_gid(struct ceph_client *client);
+ extern void ceph_destroy_client(struct ceph_client *client);
+ extern int __ceph_open_session(struct ceph_client *client,
+ 			       unsigned long started);
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index bddfcf6f09c2..8a7921767308 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -566,11 +566,11 @@ int ceph_print_client_options(struct seq_file *m, struct ceph_client *client)
+ }
+ EXPORT_SYMBOL(ceph_print_client_options);
+ 
+-u64 ceph_client_id(struct ceph_client *client)
++u64 ceph_client_gid(struct ceph_client *client)
+ {
+ 	return client->monc.auth->global_id;
+ }
+-EXPORT_SYMBOL(ceph_client_id);
++EXPORT_SYMBOL(ceph_client_gid);
+ 
+ /*
+  * create a fresh client instance
+@@ -685,7 +685,8 @@ int __ceph_open_session(struct ceph_client *client, unsigned long started)
+ 			return client->auth_err;
+ 	}
+ 
+-	pr_info("client%llu fsid %pU\n", ceph_client_id(client), &client->fsid);
++	pr_info("client%llu fsid %pU\n", ceph_client_gid(client),
++		&client->fsid);
+ 	ceph_debugfs_client_init(client);
+ 
+ 	return 0;
+-- 
+2.4.3
 
-On Wed, Aug 24, 2016 at 3:38 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
-> On 23-8-2016 10:03, Willem Jan Withagen wrote:
->> On 23-8-2016 00:57, Josh Durgin wrote:
->>> On 08/22/2016 03:41 PM, Willem Jan Withagen wrote:
->>>> On 23-8-2016 00:19, Josh Durgin wrote:
->>>>> On 08/22/2016 07:37 AM, Willem Jan Withagen wrote:
->>>>>> I was trying to do some tests on my Centos box.
->>>>>> And ran into:
->>>>>>
->>>>>> -- Found PythonLibs: /usr/lib64/libpython2.7.so (found suitable version
->>>>>> "2.7.5", minimum required is "2")
->>>>>> CMake Error at
->>>>>> /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:108
->>>>>> (message):
->>>>>>   Could NOT find Python3Interp: Found unsuitable version "2.7.5", but
->>>>>>   required is at least "3" (found /usr/bin/python)
->>>>>> Call Stack (most recent call first):
->>>>>>   /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:313
->>>>>> (_FPHSA_FAILURE_MESSAGE)
->>>>>>   cmake/modules/FindPython3Interp.cmake:146
->>>>>> (FIND_PACKAGE_HANDLE_STANDARD_ARGS)
->>>>>>   src/CMakeLists.txt:274 (find_package)
->>>>>>
->>>>>> Now is this due to me not being synced enough with master/HEAD, or is
->>>>>> this an actual problem?
->>>>>
->>>>> It's not a strict requirement - you could add some conditionals
->>>>> in src/pybind/CMakeLists.txt to disable it if you don't want to build
->>>>> python 3 versions of the python bindings.
->>>>>
->>>>> Alternatively you can grab python 3.4 for Centos 7 from EPEL.
->>>>
->>>> If it is not a strict requirement, than it would be nice if cmake would
->>>> accept thus....
->>>> And set something like HAVE_PYTHON3
->>>
->>> Yeah, if making it optional is desired that'd be the way to go.
->>>
->>>> Why not drop the REQUIRED from the find_package()?
->>>
->>> Until there is a HAVE_PYTHON3 it should fail early. This was just a
->>> first iteration of python 3 packages for ceph libraries, and since each
->>> platform we test has python 3, we didn't try to make it optional. I've
->>> no objections if you want to add that option.
->>
->> That is fair enough, I just found out the hard way because I do not run
->> make-deps every time.
->> And I have to maintain the deps list for FreeBSD manually atm.
->>
->> So the dependancies in the rpms has python3 as requirement, and that
->> gets python3 available before getting to Ceph?
->> If so I, I'll add them to the FreeBSD packages list. That'll move things
->> forward, instead of stasis.
->
-> Tried this on FreeBSD and the Python detector is not as lenient.
-> It refuses to find python3 stuff even though it is available as
-> /usr/local/bin/puthon3 ....
->
-> So the solution ATM is to
->  - delete the REQUIRED which will result in complaints (but no error)
->    that python3 is not found
->  - replace REQUIRED with QUIET.
->    And that generates no ouput but silently ignores any misses.
->
-> For the time being I'd prefer the second one, as to not start people a
-> goose chase to fix getting python3
->
-> --WjW
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
