@@ -1,127 +1,181 @@
-From: Avner Ben Hanoch <avnerb@mellanox.com>
-Subject: RE: errors in make-debs.sh because "make dist" fails on
- 'rocksdb/db/slice.cc'
-Date: Thu, 25 Aug 2016 13:10:42 +0000
-Message-ID: <DB5PR05MB160766D3467A2A346023FAEAA9ED0@DB5PR05MB1607.eurprd05.prod.outlook.com>
-References: <DB5PR05MB1607C4B81D5433484A17801FA9E80@DB5PR05MB1607.eurprd05.prod.outlook.com>
- <CAJ4mKGYP+9TQ8wT-eUH1WkgwqXY3z2uF+3WFtpK8BRFNF9VWBw@mail.gmail.com>
- <DB5PR05MB160736C8DBCC82350BE98385A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
- <20160823110125.GG5955@rskikr.localdomain>
- <20160823112140.GH5955@rskikr.localdomain>
- <cb68488d-2c92-b0dd-cda4-92d3ea149b22@suse.cz>
- <e367df5c-5995-25dd-fc0b-b5096d757edf@suse.cz>
- <DB5PR05MB1607E0FC452D4FF419A78542A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
- <a48780cc-bfbf-7b24-32b9-0cd3581b00df@suse.cz>
- <DB5PR05MB160796FAC0A385F2682873DCA9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
- <CAJE9aOPbCc2XKd7LWC2Cg9yawV2PRhKkw-YJoWyzMXDfDSQk_w@mail.gmail.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: Re: parallel transaction submit
+Date: Thu, 25 Aug 2016 14:26:18 +0000
+Message-ID: <BLUPR0201MB19083965C2FB9F3357BF3961E2ED0@BLUPR0201MB1908.namprd02.prod.outlook.com>
+References: <FC753468179C1C4EB15768F212C46AF266329D@shsmsx102.ccr.corp.intel.com>
+ <CACJqLyY7YZ=O_do0OD8d28cmNiknDcMm957qYidA_zGoQ5O+gw@mail.gmail.com>
+ <BLUPR0201MB1908C3583D12C047DD0542E3E2ED0@BLUPR0201MB1908.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608251404580.10979@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db5eur01on0050.outbound.protection.outlook.com ([104.47.2.50]:64090
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+Received: from mail-co1nam03on0058.outbound.protection.outlook.com ([104.47.40.58]:23336
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1756661AbcHYOnR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 25 Aug 2016 10:43:17 -0400
-In-Reply-To: <CAJE9aOPbCc2XKd7LWC2Cg9yawV2PRhKkw-YJoWyzMXDfDSQk_w@mail.gmail.com>
+        id S1754945AbcHYOm2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 25 Aug 2016 10:42:28 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Nathan Cutler <ncutler@suse.cz>, Brad Hubbard <bhubbard@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Haomai Wang <haomai@xsky.com>, "Tang, Haodong" <haodong.tang@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBrZWZ1IGNoYWkgDQo+IFNlbnQ6
-IFR1ZXNkYXksIEF1Z3VzdCAyMywgMjAxNiAxOTowNQ0KPiANCj4gT24gVHVlLCBBdWcgMjMsIDIw
-MTYgYXQgMTA6MDkgUE0sIEF2bmVyIEJlbiBIYW5vY2gNCj4gPGF2bmVyYkBtZWxsYW5veC5jb20+
-IHdyb3RlOg0KPiA+IFRoYW5rcy4NCj4gPiBTbywgd2hhdCBpcyB0aGUgcHJvcGVyIHdheSBmb3Ig
-Y3JlYXRpbmcgKi5kZWIgZmlsZXMNCj4gDQo+IGRwa2ctYnVpbGRwYWNrYWdlIC1qOCAtdWMgLS1i
-dWlsZD1iaW5hcnkNCj4gDQpUaGFua3Mga2VmdSwNCg0KSSB0cmllZCBkcGtnLWJ1aWxkcGFja2Fn
-ZSAtajggLXVjIC1iICgtLWJ1aWxkPWJpbmFyeSB3YXMgaW52YWxpZCBhcmd1bWVudCkNCkl0IHJ1
-biBsb25nIHRpbWUgdGlsbCBpdCByZWFjaGVkIHRoZSBmb2xsb3dpbmcgZXJyb3I6DQoJL21udC9z
-ZGgvYXZuZXJiL2NlcGgtZ2l0aHViL3NyYy9saWJyYWRvcy9saWJyYWRvcy5jYzo0NzozMDogZmF0
-YWwgZXJyb3I6IHRyYWNpbmcvbGlicmFkb3MuaDogTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeQ0K
-DQpBbGwgbXkgY29tbWFuZHMsIHBsdXMgcmVsZXZhbnQgb3V0cHV0IGlzIGJlbG93Og0KDQojIGdp
-dCBjbG9uZSBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2VwaCBjZXBoLWdpdGh1Yg0KIyBjZCBjZXBo
-LWdpdGh1Yg0KIyBnaXQgc3VibW9kdWxlIHVwZGF0ZSAtLWluaXQgLS1yZWN1cnNpdmUNCiMuL2lu
-c3RhbGwtZGVwcy5zaA0KIy4vZG9fY21ha2Uuc2gNCiMgY2QgYnVpbGQvDQojIG1ha2UgLWoNCiMg
-Y2QgLi4NCiMgZHBrZy1idWlsZHBhY2thZ2UgLWogLXVjIC1iDQouLi4NCm1ha2UgLWYgc3JjL0NN
-YWtlRmlsZXMvbGlicmFkb3NfYXBpLmRpci9idWlsZC5tYWtlIHNyYy9DTWFrZUZpbGVzL2xpYnJh
-ZG9zX2FwaS5kaXIvZGVwZW5kDQptYWtlWzRdOiBFbnRlcmluZyBkaXJlY3RvcnkgJy9tbnQvc2Ro
-L2F2bmVyYi9jZXBoLWdpdGh1Yi9vYmoteDg2XzY0LWxpbnV4LWdudScNCmNkIC9tbnQvc2RoL2F2
-bmVyYi9jZXBoLWdpdGh1Yi9vYmoteDg2XzY0LWxpbnV4LWdudSAmJiAvdXNyL2Jpbi9jbWFrZSAt
-RSBjbWFrZV9kZXBlbmRzICJVbml4IE1ha2VmaWxlcyIgL21udC9zZGgvYXZuZXJiL2NlcGgtZ2l0
-aHViIC9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9zcmMgL21udC9zZGgvYXZuZXJiL2NlcGgt
-Z2l0aHViL29iai14ODZfNjQtbGludXgtZ251IC9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9v
-YmoteDg2XzY0LWxpbnV4LWdudS9zcmMgL21udC9zZGgvYXZuZXJiL2NlcGgtZ2l0aHViL29iai14
-ODZfNjQtbGludXgtZ251L3NyYy9DTWFrZUZpbGVzL2xpYnJhZG9zX2FwaS5kaXIvRGVwZW5kSW5m
-by5jbWFrZSAtLWNvbG9yPQ0KU2Nhbm5pbmcgZGVwZW5kZW5jaWVzIG9mIHRhcmdldCBsaWJyYWRv
-c19hcGkNCm1ha2VbNF06IExlYXZpbmcgZGlyZWN0b3J5ICcvbW50L3NkaC9hdm5lcmIvY2VwaC1n
-aXRodWIvb2JqLXg4Nl82NC1saW51eC1nbnUnDQptYWtlIC1mIHNyYy9DTWFrZUZpbGVzL2xpYnJh
-ZG9zX2FwaS5kaXIvYnVpbGQubWFrZSBzcmMvQ01ha2VGaWxlcy9saWJyYWRvc19hcGkuZGlyL2J1
-aWxkDQptYWtlWzRdOiBFbnRlcmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVyYi9jZXBoLWdp
-dGh1Yi9vYmoteDg2XzY0LWxpbnV4LWdudScNClsgMTclXSBCdWlsZGluZyBDWFggb2JqZWN0IHNy
-Yy9DTWFrZUZpbGVzL2xpYnJhZG9zX2FwaS5kaXIvY29tbW9uL2J1ZmZlci5jYy5vDQpjZCAvbW50
-L3NkaC9hdm5lcmIvY2VwaC1naXRodWIvb2JqLXg4Nl82NC1saW51eC1nbnUvc3JjICYmIC91c3Iv
-YmluL3g4Nl82NC1saW51eC1nbnUtZysrICAgLURDRVBIX0xJQkRJUj1cIi91c3IvbGliXCIgLURD
-RVBIX1BLR0xJQkRJUj1cIi91c3IvbGliL2NlcGhcIiAtRF9fbGludXhfXyAtSS9tbnQvc2RoL2F2
-bmVyYi9jZXBoLWdpdGh1Yi9vYmoteDg2XzY0LWxpbnV4LWdudS9zcmMvaW5jbHVkZSAtSS9tbnQv
-c2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9zcmMgLUkvbW50L3NkaC9hdm5lcmIvY2VwaC1naXRodWIv
-b2JqLXg4Nl82NC1saW51eC1nbnUvaW5jbHVkZSAtSS9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1
-Yi9zcmMveHhIYXNoICAtZyAtTzIgLWZzdGFjay1wcm90ZWN0b3Itc3Ryb25nIC1XZm9ybWF0IC1X
-ZXJyb3I9Zm9ybWF0LXNlY3VyaXR5IC1XZGF0ZS10aW1lIC1EX0ZPUlRJRllfU09VUkNFPTIgIC1X
-YWxsIC1XdHlwZS1saW1pdHMgLVdpZ25vcmVkLXF1YWxpZmllcnMgLVdpbml0LXNlbGYgLVdwb2lu
-dGVyLWFyaXRoIC1XZXJyb3I9Zm9ybWF0LXNlY3VyaXR5IC1mbm8tc3RyaWN0LWFsaWFzaW5nIC1m
-c2lnbmVkLWNoYXIgLXJkeW5hbWljIC1XcCwtVV9GT1JUSUZZX1NPVVJDRSwtRF9GT1JUSUZZX1NP
-VVJDRT0yIC1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZyAtZnRlbXBsYXRlLWRlcHRoLTEwMjQgLVdu
-by1pbnZhbGlkLW9mZnNldG9mIC1Xbm9uLXZpcnR1YWwtZHRvciAtV292ZXJsb2FkZWQtdmlydHVh
-bCAtV3N0cmljdC1udWxsLXNlbnRpbmVsIC1mZGlhZ25vc3RpY3MtY29sb3I9YXV0byAtSS91c3Iv
-aW5jbHVkZS9uc3MgLUkvdXNyL2luY2x1ZGUvbnNwciAtZm5vLWJ1aWx0aW4tbWFsbG9jIC1mbm8t
-YnVpbHRpbi1jYWxsb2MgLWZuby1idWlsdGluLXJlYWxsb2MgLWZuby1idWlsdGluLWZyZWUgLWZQ
-SUMgICAtREhBVkVfQ09ORklHX0ggLURfX0NFUEhfXyAtRF9SRUVOVFJBTlQgLURfVEhSRUFEX1NB
-RkUgLURfX1NURENfRk9STUFUX01BQ1JPUyAtRF9HTlVfU09VUkNFIC1EX0ZJTEVfT0ZGU0VUX0JJ
-VFM9NjQgLXN0ZD1jKysxMSAtbyBDTWFrZUZpbGVzL2xpYnJhZG9zX2FwaS5kaXIvY29tbW9uL2J1
-ZmZlci5jYy5vIC1jIC9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9zcmMvY29tbW9uL2J1ZmZl
-ci5jYw0KWyAxNyVdIEJ1aWxkaW5nIENYWCBvYmplY3Qgc3JjL0NNYWtlRmlsZXMvbGlicmFkb3Nf
-YXBpLmRpci9saWJyYWRvcy9saWJyYWRvcy5jYy5vDQpjZCAvbW50L3NkaC9hdm5lcmIvY2VwaC1n
-aXRodWIvb2JqLXg4Nl82NC1saW51eC1nbnUvc3JjICYmIC91c3IvYmluL3g4Nl82NC1saW51eC1n
-bnUtZysrICAgLURDRVBIX0xJQkRJUj1cIi91c3IvbGliXCIgLURDRVBIX1BLR0xJQkRJUj1cIi91
-c3IvbGliL2NlcGhcIiAtRF9fbGludXhfXyAtSS9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9v
-YmoteDg2XzY0LWxpbnV4LWdudS9zcmMvaW5jbHVkZSAtSS9tbnQvc2RoL2F2bmVyYi9jZXBoLWdp
-dGh1Yi9zcmMgLUkvbW50L3NkaC9hdm5lcmIvY2VwaC1naXRodWIvb2JqLXg4Nl82NC1saW51eC1n
-bnUvaW5jbHVkZSAtSS9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9zcmMveHhIYXNoICAtZyAt
-TzIgLWZzdGFjay1wcm90ZWN0b3Itc3Ryb25nIC1XZm9ybWF0IC1XZXJyb3I9Zm9ybWF0LXNlY3Vy
-aXR5IC1XZGF0ZS10aW1lIC1EX0ZPUlRJRllfU09VUkNFPTIgIC1XYWxsIC1XdHlwZS1saW1pdHMg
-LVdpZ25vcmVkLXF1YWxpZmllcnMgLVdpbml0LXNlbGYgLVdwb2ludGVyLWFyaXRoIC1XZXJyb3I9
-Zm9ybWF0LXNlY3VyaXR5IC1mbm8tc3RyaWN0LWFsaWFzaW5nIC1mc2lnbmVkLWNoYXIgLXJkeW5h
-bWljIC1XcCwtVV9GT1JUSUZZX1NPVVJDRSwtRF9GT1JUSUZZX1NPVVJDRT0yIC1mc3RhY2stcHJv
-dGVjdG9yLXN0cm9uZyAtZnRlbXBsYXRlLWRlcHRoLTEwMjQgLVduby1pbnZhbGlkLW9mZnNldG9m
-IC1Xbm9uLXZpcnR1YWwtZHRvciAtV292ZXJsb2FkZWQtdmlydHVhbCAtV3N0cmljdC1udWxsLXNl
-bnRpbmVsIC1mZGlhZ25vc3RpY3MtY29sb3I9YXV0byAtSS91c3IvaW5jbHVkZS9uc3MgLUkvdXNy
-L2luY2x1ZGUvbnNwciAtZm5vLWJ1aWx0aW4tbWFsbG9jIC1mbm8tYnVpbHRpbi1jYWxsb2MgLWZu
-by1idWlsdGluLXJlYWxsb2MgLWZuby1idWlsdGluLWZyZWUgLWZQSUMgICAtREhBVkVfQ09ORklH
-X0ggLURfX0NFUEhfXyAtRF9SRUVOVFJBTlQgLURfVEhSRUFEX1NBRkUgLURfX1NURENfRk9STUFU
-X01BQ1JPUyAtRF9HTlVfU09VUkNFIC1EX0ZJTEVfT0ZGU0VUX0JJVFM9NjQgLXN0ZD1jKysxMSAt
-byBDTWFrZUZpbGVzL2xpYnJhZG9zX2FwaS5kaXIvbGlicmFkb3MvbGlicmFkb3MuY2MubyAtYyAv
-bW50L3NkaC9hdm5lcmIvY2VwaC1naXRodWIvc3JjL2xpYnJhZG9zL2xpYnJhZG9zLmNjDQovbW50
-L3NkaC9hdm5lcmIvY2VwaC1naXRodWIvc3JjL2xpYnJhZG9zL2xpYnJhZG9zLmNjOjQ3OjMwOiBm
-YXRhbCBlcnJvcjogdHJhY2luZy9saWJyYWRvcy5oOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5
-DQpjb21waWxhdGlvbiB0ZXJtaW5hdGVkLg0Kc3JjL0NNYWtlRmlsZXMvbGlicmFkb3NfYXBpLmRp
-ci9idWlsZC5tYWtlOjg5OiByZWNpcGUgZm9yIHRhcmdldCAnc3JjL0NNYWtlRmlsZXMvbGlicmFk
-b3NfYXBpLmRpci9saWJyYWRvcy9saWJyYWRvcy5jYy5vJyBmYWlsZWQNCm1ha2VbNF06ICoqKiBb
-c3JjL0NNYWtlRmlsZXMvbGlicmFkb3NfYXBpLmRpci9saWJyYWRvcy9saWJyYWRvcy5jYy5vXSBF
-cnJvciAxDQptYWtlWzRdOiBMZWF2aW5nIGRpcmVjdG9yeSAnL21udC9zZGgvYXZuZXJiL2NlcGgt
-Z2l0aHViL29iai14ODZfNjQtbGludXgtZ251Jw0KQ01ha2VGaWxlcy9NYWtlZmlsZTI6OTc4OiBy
-ZWNpcGUgZm9yIHRhcmdldCAnc3JjL0NNYWtlRmlsZXMvbGlicmFkb3NfYXBpLmRpci9hbGwnIGZh
-aWxlZA0KbWFrZVszXTogKioqIFtzcmMvQ01ha2VGaWxlcy9saWJyYWRvc19hcGkuZGlyL2FsbF0g
-RXJyb3IgMg0KbWFrZVszXTogTGVhdmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVyYi9jZXBo
-LWdpdGh1Yi9vYmoteDg2XzY0LWxpbnV4LWdudScNCk1ha2VmaWxlOjE0MTogcmVjaXBlIGZvciB0
-YXJnZXQgJ2FsbCcgZmFpbGVkDQptYWtlWzJdOiAqKiogW2FsbF0gRXJyb3IgMg0KbWFrZVsyXTog
-TGVhdmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9vYmoteDg2XzY0
-LWxpbnV4LWdudScNCiAgICAgICAgY2QgL21udC9zZGgvYXZuZXJiL2NlcGgtZ2l0aHViDQpkaF9h
-dXRvX2J1aWxkOiBtYWtlIC1qMSByZXR1cm5lZCBleGl0IGNvZGUgMg0KZGViaWFuL3J1bGVzOjI4
-OiByZWNpcGUgZm9yIHRhcmdldCAnb3ZlcnJpZGVfZGhfYXV0b19idWlsZCcgZmFpbGVkDQptYWtl
-WzFdOiAqKiogW292ZXJyaWRlX2RoX2F1dG9fYnVpbGRdIEVycm9yIDINCm1ha2VbMV06IExlYXZp
-bmcgZGlyZWN0b3J5ICcvbW50L3NkaC9hdm5lcmIvY2VwaC1naXRodWInDQpkZWJpYW4vcnVsZXM6
-MjI6IHJlY2lwZSBmb3IgdGFyZ2V0ICdiaW5hcnknIGZhaWxlZA0KbWFrZTogKioqIFtiaW5hcnld
-IEVycm9yIDINCmRwa2ctYnVpbGRwYWNrYWdlOiBlcnJvcjogZmFrZXJvb3QgZGViaWFuL3J1bGVz
-IGJpbmFyeSBnYXZlIGVycm9yIGV4aXQgc3RhdHVzIDINCg0K
+On Thursday 25 August 2016 07:41 PM, Sage Weil wrote:=0A=
+> On Thu, 25 Aug 2016, Varada Kari wrote:=0A=
+>> Hi,=0A=
+>>=0A=
+>> Increasing the number of the kv_sync_threads is not giving much of=0A=
+>> performance. In the current threading model, shard_worker submits the IO=
+=0A=
+>> to the block device which are handled by aio_callback thread(which is=0A=
+>> one) and submits to the kv_sync thread, which batches the requests and=
+=0A=
+>> submits to the rocksdb. Because kv_sync batches the requests and submits=
+=0A=
+>> the requests, we might observe more time spent on kv_sync_thread=0A=
+>> routine. And i haven't observed much of an improvement by adding more=0A=
+>> threads here.=0A=
+>>=0A=
+>> But when increased the number of callbacks thread from aio(still needs=
+=0A=
+>> some refinements in polling for the request completions) and completing=
+=0A=
+>> the write completion in the same thread context increased some=0A=
+>> performance. I don't have the numbers to say how much, but that is=0A=
+>> better than having multiple kv_sync threads, adding one more queue and=
+=0A=
+>> lock. You can refer to=0A=
+>> https://github.com/varadakari/ceph/commits/wip-parallel-aiocb (ignore=0A=
+>> the first commit, was trying to do sync transaction in the same thread=
+=0A=
+>> context of sharded worker to measure the latency).=0A=
+> Yeah, I think this is right.  I see two avenues of attack:=0A=
+>=0A=
+> - Try to eliminate the handoff to _kv_sync_thread by having the =0A=
+> transaction submitted to rocksdb in the calling thread.  This will =0A=
+> require a bit of refactoring but I think it's possible. We don't actually=
+ =0A=
+> want to block, though, so it'll be an async submission, and we'll still =
+=0A=
+> need kv_sync_thread just telling rocksdb to commit in a loop and =0A=
+> triggering callbacks.  A recent PR sharded the completion finishers so I'=
+m =0A=
+> guessing the final step would be some affinity thing that pins the =0A=
+> finishers to the same cores as the submitters?=0A=
+I kind of copied what kv_sync_thread does and was able to run multiple=0A=
+callbacks at the same time.=0A=
+If we can complete the write ack in the same aio_cb thread not handing=0A=
+off to finisher thread, we can eliminate=0A=
+one thread switch and we can have same number of threads as shards. We=0A=
+can use the same logic to handle the finishers=0A=
+(not sure if we can process the request by reading the osr here) for the=0A=
+callback threads.=0A=
+=0A=
+Varada=0A=
+> - Shard the io completion (before we submit the kv transaction).  Not sur=
+e =0A=
+> if we want a thread per shard, or polls at opportunistic/strategic points=
+ =0A=
+> in code.  The goal would be keeping the processing local to the =0A=
+> core/socket (vs the current strategy of a single thread waiting/polling =
+=0A=
+> for completions and doing the next phase of work).=0A=
+>=0A=
+>> was exploring a way to have the aio callback thread matached/reserved at=
+=0A=
+>> the time of io submission, so that we don't need to do io_getevents(),=
+=0A=
+>> kind of a async callback to the specified thread so that we can avoid=0A=
+>> some waiting logic in io_getevents() and process the request in the same=
+=0A=
+>> thread context. You can refer to=0A=
+>> http://manpages.ubuntu.com/manpages/wily/man3/io_set_callback.3.html. I=
+=0A=
+>> don't have the working code ready for this. FWIW, that is worth=0A=
+>> experimenting and see if it reduces any latency.=0A=
+> I don't think this will help--it just means you're using a layer of the =
+=0A=
+> library that's calling getevents for you and calling your callback.=0A=
+>=0A=
+> Thanks!=0A=
+> sage=0A=
+>=0A=
+>=0A=
+>> Varada=0A=
+>>=0A=
+>> On Thursday 25 August 2016 01:25 PM, Haomai Wang wrote:=0A=
+>>> looks very litlle improvements. rocksdb result meet my expectation=0A=
+>>> because rocksdb internal has lock for multi sync write. But memdb=0A=
+>>> improments is a little confusing.=0A=
+>>>=0A=
+>>> On Thu, Aug 25, 2016 at 3:45 PM, Tang, Haodong <haodong.tang@intel.com>=
+ wrote:=0A=
+>>>> Hi Sage, Varada=0A=
+>>>>=0A=
+>>>> Noticed you are making parallel transaction submits, we also worked ou=
+t a prototype that looks similar, here is the link for the implementation: =
+https://github.com/ceph/ceph/pull/10856=0A=
+>>>>=0A=
+>>>> Background:=0A=
+>>>> From the perf counter we added, found it spent a lot time in kv_queue,=
+ that is, single thread transaction submits is not competent to handle the =
+transaction from OSD.=0A=
+>>>>=0A=
+>>>> Implementation:=0A=
+>>>> The key thought is to use multiple thread and assign each TransContext=
+ to one of the processing threads. In order to parallelize transaction subm=
+it, add different kv_locks and kv_conds for each thread.=0A=
+>>>>=0A=
+>>>> Performance evaluation:=0A=
+>>>> Test ENV:=0A=
+>>>>         4 x server, 4 x client, 16 x Intel S3700 as block device, and =
+4 x Intel P3600 as Rocksdb/WAL device.=0A=
+>>>> Performance:=0A=
+>>>> We also did several quick tests to verify the performance benefit, the=
+ results showed that parallel transaction submission will brought 10% perfo=
+rmance improvement if using memdb, but little performance improvement with =
+rocksdb.=0A=
+>>>>=0A=
+>>>> What's more, without parallel transaction submits, we also see perform=
+ance boost if just changing to MemDB, but a little.=0A=
+>>>>=0A=
+>>>> Test summary:=0A=
+>>>> QD Scaling Test - 4k Random Write:=0A=
+>>>>                                                                       =
+            QD =3D 1      QD =3D 16     QD =3D 32      QD =3D 64      QD =
+=3D 128=0A=
+>>>> With rocksdb (IOPS)                                              682  =
+          173000       190000        203000       204000=0A=
+>>>> With memdb (IOPS)                                              704    =
+        180000       194000        206000       218000=0A=
+>>>> With rocksdb+multiple_kv_thread(IOPS)          /                164243=
+        167037        180961      201752=0A=
+>>>> With memdb+multiple_kv_thread(IOPS)          /                 176000 =
+      200000        221000      227000=0A=
+>>>>=0A=
+>>>>=0A=
+>>>> It seems single thread of transaction submits will be a bottleneck if =
+using MemDB.=0A=
+>>>> --=0A=
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in=0A=
+>>>> the body of a message to majordomo@vger.kernel.org=0A=
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html=0A=
+>> PLEASE NOTE: The information contained in this electronic mail message i=
+s intended only for the use of the designated recipient(s) named above. If =
+the reader of this message is not the intended recipient, you are hereby no=
+tified that you have received this message in error and that any review, di=
+ssemination, distribution, or copying of this message is strictly prohibite=
+d. If you have received this communication in error, please notify the send=
+er by telephone or e-mail (as shown above) immediately and destroy any and =
+all copies of this message in your possession (whether hard copies or elect=
+ronically stored copies).=0A=
+>> --=0A=
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in=
+=0A=
+>> the body of a message to majordomo@vger.kernel.org=0A=
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html=0A=
+>>=0A=
+>>=0A=
+=0A=
