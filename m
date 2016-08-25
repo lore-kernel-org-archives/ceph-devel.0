@@ -1,89 +1,133 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: CephFS and the next jewel release v10.2.3
-Date: Thu, 25 Aug 2016 14:33:32 -0700
-Message-ID: <CAJ4mKGaCBhH3ayWrb7PS899kX-9Q+KVLFQSBJZat44KtJg2Lew@mail.gmail.com>
-References: <57BC1089.9080209@dachary.org> <CAJ4mKGZ0DAH8Osa4mS8dupxg49GxBeutnvv3e55wSfsO0vt2SQ@mail.gmail.com>
- <CAJ4mKGbOzdxCoFhzmXmbQbs0G2MuxwSR2Qb83WkGGJNXg8TgFg@mail.gmail.com>
- <57BE0B4C.6060104@dachary.org> <CAJ4mKGbYD6mKjcH_++E1HF1zRBX5sVWJoq-z=h+_UQBMXEr9Kg@mail.gmail.com>
- <57BF5F5E.3070105@dachary.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: divergent datastructure changes
+Date: Thu, 25 Aug 2016 21:32:09 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1608252128560.25681@piezo.us.to>
+References: <CADRKj5R=dnq6xxGvizTB-_jqfPWaCXnkFCkMsz4_ePppyo8HCQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f181.google.com ([209.85.217.181]:36529 "EHLO
-        mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753968AbcHYVeE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2016 17:34:04 -0400
-Received: by mail-ua0-f181.google.com with SMTP id m60so66668780uam.3
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2016 14:33:33 -0700 (PDT)
-In-Reply-To: <57BF5F5E.3070105@dachary.org>
+Received: from cobra.newdream.net ([66.33.216.30]:56386 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752978AbcHYVi5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2016 17:38:57 -0400
+In-Reply-To: <CADRKj5R=dnq6xxGvizTB-_jqfPWaCXnkFCkMsz4_ePppyo8HCQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-You've got two jobs never getting locks, 2 dead on Java linker issues
-(which probably never worked; they aren't any kind of release
-blocker), and one OSD crash. The crash is
+On Thu, 25 Aug 2016, Yehuda Sadeh-Weinraub wrote:
+> The encode/decode functionality that we use for [de]marshalling is
+> fine, as long as we always move forward. Here's a typical example
+> (redacted for simplicity).
+> 
+>   void encode(bufferlist& bl) const {
+>     ENCODE_START(8, 1, bl);
+>     ::encode(domain_root, bl);
+>     ::encode(control_pool, bl);
+>     ::encode(gc_pool, bl);
+>     ::encode(log_pool, bl);
+>     ::encode(intent_log_pool, bl);
+>     ::encode(usage_log_pool, bl);
+>     ::encode(user_keys_pool, bl);
+>     ::encode(user_email_pool, bl);
+>     ::encode(user_swift_pool, bl);
+>     ::encode(user_uid_pool, bl);
+> ...
+>     ::encode(system_key, bl);
+>     ::encode(placement_pools, bl);
+>     ::encode(metadata_heap, bl);
+>     ::encode(realm_id, bl);
+> ...
+>     ENCODE_FINISH(bl);
+>   }
+> 
+>   void decode(bufferlist::iterator& bl) {
+>     DECODE_START(8, bl);
+>     ::decode(domain_root, bl);
+>     ::decode(control_pool, bl);
+>     ::decode(gc_pool, bl);
+>     ::decode(log_pool, bl);
+>     ::decode(intent_log_pool, bl);
+>     ::decode(usage_log_pool, bl);
+>     ::decode(user_keys_pool, bl);
+>     ::decode(user_email_pool, bl);
+>     ::decode(user_swift_pool, bl);
+>     ::decode(user_uid_pool, bl);
+> ...
+>     if (struct_v >= 3)
+>       ::decode(system_key, bl);
+>     if (struct_v >= 4)
+>       ::decode(placement_pools, bl);
+>     if (struct_v >= 5)
+>       ::decode(metadata_heap, bl);
+>     if (struct_v >= 6) {
+>       ::decode(realm_id, bl);
+>     }
+> ...
+>     DECODE_FINISH(bl);
+>   }
+> 
+> So the idea is that whenever we add a field, we bump up the encoded
+> version, add the field at the end. Decoding is done in order, and we
+> test struct_v to determine whether we need to decode the next param.
+> 
+> The main issue I'm having trouble with right now is what to do when we
+> need to backport a change that needs a datastructure change. For
+> example. in the above example, let's say that we need to backport the
+> realm_id field to an older version that was only up to V3.
+> 
+> One solution would be to make sure that when backporting such a
+> change, we need to drag with us all the other fields that lead up to
+> to the one that we need (e.g., we want realm_id, but we need to bring
+> with us also placement_pools, and metadata_heap). This might not be so
+> sustainable. The above example might be trivial, but what if
+> metadata_heap was not a string, but rather a complex data type that in
+> order to build correctly, we need to backport another feature (and
+> bring with it the same issues).
 
-2016-08-25 09:21:45.616945 7fa22623a700 -1 os/filestore/FileStore.cc:
-In function 'void
-FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int,
-ThreadPool::TPHandle*)' thread 7fa22623a700 time 2016-08-25
-09:21:45.612229
-os/filestore/FileStore.cc: 2912: FAILED assert(0 == "unexpected error")
+In the past we've just dragged the other fields with us.  I can only 
+recall this happening a handful of times.  I try to put any new fields 
+into a separate commit with *just* the data structure changes so that 
+(among other things) it can be easily backported without dragging anything 
+else along with it.
+ 
+> It seems to me that for issues like that we might want to consider
+> adding a more sophisticated encoding scheme that will be more feature
+> oriented, rather than just blindly putting everything one after the
+> other.
+> 
+> E.g., some kind of a bit field with offsets into the data, along the
+> following lines:
+> 
+> feature.encode(0, system_key);
+> feature.encode(1, placement_pools);
+> feature.encode(2, metadata_heap);
+> ::encode(features, bl);
+> 
+> and on the decoding side:
+> 
+> ::decode(features, bl);
+> features.decode(0, system_key);
+> features.decode(1, placement_pools);
+> features.decode(2, metadata_heap);
+> 
+> In the above example, if we only need metadata_heap, then we can just do this:
+> 
+> ::decode(features, bl);
+> features.decode(2, metadata_heap);
+> 
+> The indexes to the fields should be defined appropriately obviously,
+> and will be consistent across versions. That should be relatively
+> easier to maintain than making sure we keep the data structures
+> consistent when having divergent branches I think.
 
-That most often is an fs/disk issue of some kind, but the kernel logs
-are sadly empty so I can't guarantee it.
+This seems useful if we need to backport things out of order, but how 
+often does that really happen?  The cost is some CPU time during decoding, 
+incurred for every encode/decode for all time, to cover a case that should 
+be pretty rare.
 
+Have we need a case where the intervening fields are complex data 
+structure(s) and difficult to backport?
 
-On Thu, Aug 25, 2016 at 2:13 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi,
->
-> The run completed at http://pulpito.ceph.com/loic-2016-08-25_06:39:08-fs-jewel-backports-distro-basic-smithi/ with no valgrind error but a few other failures. Note that it is based on the jewel-backports branch which contains a few more backports in addition to https://github.com/ceph/ceph/pull/10847 and I'm not sure what to blame yet. I'll look into it tomorrow unless you beat me to it :-)
->
-> Cheers
->
-> On 24/08/2016 23:03, Gregory Farnum wrote:
->> On Wed, Aug 24, 2016 at 2:02 PM, Loic Dachary <loic@dachary.org> wrote:
->>>
->>>
->>> On 24/08/2016 22:46, Gregory Farnum wrote:
->>>> On Wed, Aug 24, 2016 at 11:11 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
->>>>> On Tue, Aug 23, 2016 at 1:59 AM, Loic Dachary <loic@dachary.org> wrote:
->>>>>> Hi John,
->>>>>>
->>>>>> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel passed the fs suite (http://tracker.ceph.com/issues/16344#note-30 except for three valgrind failures). Do you think the jewel branch is ready for QE to start their own round of testing ?
->>>>>>
->>>>>> Cheers
->>>>>>
->>>>>> P.S. CC'ing Greg because John is on vacation, in case a decision is to be made before he returns.
->>>>>
->>>>> Ugh, I went to check these valgrind failures and they're a failed
->>>>> mutex assert on shutdown. Let me dig into what's happening. :(
->>>>> -Greg
->>>>
->>>> Hmm, we seem to have some badly-colliding backports. If you look at
->>>> commit ac449472df2978123192d5f22247d8b8bc5efb28 and MDSRank.cc line
->>>> 242, you'll see it does mds_lock.Unlock() twice in quick succession.
->>>> :(
->>>>
->>>> One of them came in from 7c2eab19, and the other from 1d3a8168. I
->>>> think maybe the patches got reordered in their backport order or
->>>> something.
->>>>
->>>> Patrick, can you give https://github.com/ceph/ceph/pull/10847 a quick
->>>> review? Loic, can you then run the failed tests against a backport
->>>> branch which includes that patch?
->>>
->>> https://github.com/ceph/ceph/pull/10847 has been pushed as part of the jewel-backports integration branch right now and I'll schedule a fs run as soon as it finishes building. Thanks for the quick fix !
->>
->> Sure. Assuming that works out everything else looked good to me. :)
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> Loïc Dachary, Artisan Logiciel Libre
+sage
