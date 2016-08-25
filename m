@@ -1,75 +1,77 @@
-From: "Tang, Haodong" <haodong.tang@intel.com>
-Subject: RE: parallel transaction submit
-Date: Thu, 25 Aug 2016 08:48:07 +0000
-Message-ID: <FC753468179C1C4EB15768F212C46AF26632CC@shsmsx102.ccr.corp.intel.com>
-References: <FC753468179C1C4EB15768F212C46AF266329D@shsmsx102.ccr.corp.intel.com>
- <CACJqLyY7YZ=O_do0OD8d28cmNiknDcMm957qYidA_zGoQ5O+gw@mail.gmail.com>
+From: Thipparapu Vijaykumar <thipparapu.vijaykumar@gmail.com>
+Subject: Re: Ceph Upgrade Issue
+Date: Thu, 25 Aug 2016 18:09:40 +0530
+Message-ID: <CAMDPVRE09wciBkknsuGmu+ePiXk-uo5tzmXC62aA-LpjWDdFFw@mail.gmail.com>
+References: <CAMDPVREGpHRimVhFvZy8VcptZsS2AXdiXvJ9xFbtmyZ5Ca1uOg@mail.gmail.com>
+ <1953555259.2912.1471977877142@ox.pcextreme.nl> <CAMDPVRGiW6DcBBkr2WBHJmMREcbNDfHc9PqBKUN0J0XsS5s+CQ@mail.gmail.com>
+ <718776942.3031.1472047231643@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:35881 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755631AbcHYIto (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 25 Aug 2016 04:49:44 -0400
-In-Reply-To: <CACJqLyY7YZ=O_do0OD8d28cmNiknDcMm957qYidA_zGoQ5O+gw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-oi0-f65.google.com ([209.85.218.65]:36180 "EHLO
+        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1759017AbcHYMj4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2016 08:39:56 -0400
+Received: by mail-oi0-f65.google.com with SMTP id b22so4446783oii.3
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2016 05:39:41 -0700 (PDT)
+In-Reply-To: <718776942.3031.1472047231643@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: "sweil@redhat.com" <sweil@redhat.com>, "varada.kari@sandisk.com" <varada.kari@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: ceph-devel@vger.kernel.org
 
-WWVhaCwgZnJvbSB0aGUgcGVyZiBjb3VudGVyLCB3ZSBkbyByZWR1Y2UgdGltZSB3YWl0aW5nIGZv
-ciBrdl9xdWV1ZSwgYnV0IGluY3JlYXNlIHJvY2tzZGIgc3VibWlzc3Rpb24gdGltZS4gU2VlbXMg
-aXQgaXMgYmV0dGVyIHRvIGRvIGJhdGNoIHN1Ym1pc3Npb24gZm9yIHJvY2tzZGIgaW5zdGVhZCBv
-ZiBwYXJhbGxlbCBzdWJtaXNzaW9uLiBCZXNpZGVzLCBwYXJhbGxlbCBzdWJtaXNzaW9uIGFsc28g
-bWFrZSBiZGV2LT5mbHVzaCBtb3JlIGZyZXF1ZW50Lg0KDQpGcm9tIHRoZSB0ZXN0IHJlc3VsdCwg
-dGhlcmUgaXMgYSBsaXR0bGUgcGVyZm9ybWFuY2UgaW1wcm92ZW1lbnQgaWYgdXNpbmcgbWVtZGIs
-IGJ1dCBjb21wYXJlZCB3aXRoIHJvY2tzZGIsIHRocm91Z2hwdXQgaXMgbW9yZSBzdGFibGUuDQoN
-Ci0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhh
-b21haUB4c2t5LmNvbV0gDQpTZW50OiBUaHVyc2RheSwgQXVndXN0IDI1LCAyMDE2IDM6NTUgUE0N
-ClRvOiBUYW5nLCBIYW9kb25nIDxoYW9kb25nLnRhbmdAaW50ZWwuY29tPg0KQ2M6IHN3ZWlsQHJl
-ZGhhdC5jb207IHZhcmFkYS5rYXJpQHNhbmRpc2suY29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVs
-Lm9yZw0KU3ViamVjdDogUmU6IHBhcmFsbGVsIHRyYW5zYWN0aW9uIHN1Ym1pdA0KDQpsb29rcyB2
-ZXJ5IGxpdGxsZSBpbXByb3ZlbWVudHMuIHJvY2tzZGIgcmVzdWx0IG1lZXQgbXkgZXhwZWN0YXRp
-b24gYmVjYXVzZSByb2Nrc2RiIGludGVybmFsIGhhcyBsb2NrIGZvciBtdWx0aSBzeW5jIHdyaXRl
-LiBCdXQgbWVtZGIgaW1wcm9tZW50cyBpcyBhIGxpdHRsZSBjb25mdXNpbmcuDQoNCk9uIFRodSwg
-QXVnIDI1LCAyMDE2IGF0IDM6NDUgUE0sIFRhbmcsIEhhb2RvbmcgPGhhb2RvbmcudGFuZ0BpbnRl
-bC5jb20+IHdyb3RlOg0KPiBIaSBTYWdlLCBWYXJhZGENCj4NCj4gTm90aWNlZCB5b3UgYXJlIG1h
-a2luZyBwYXJhbGxlbCB0cmFuc2FjdGlvbiBzdWJtaXRzLCB3ZSBhbHNvIHdvcmtlZCANCj4gb3V0
-IGEgcHJvdG90eXBlIHRoYXQgbG9va3Mgc2ltaWxhciwgaGVyZSBpcyB0aGUgbGluayBmb3IgdGhl
-IA0KPiBpbXBsZW1lbnRhdGlvbjogaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzEw
-ODU2DQo+DQo+IEJhY2tncm91bmQ6DQo+IEZyb20gdGhlIHBlcmYgY291bnRlciB3ZSBhZGRlZCwg
-Zm91bmQgaXQgc3BlbnQgYSBsb3QgdGltZSBpbiBrdl9xdWV1ZSwgdGhhdCBpcywgc2luZ2xlIHRo
-cmVhZCB0cmFuc2FjdGlvbiBzdWJtaXRzIGlzIG5vdCBjb21wZXRlbnQgdG8gaGFuZGxlIHRoZSB0
-cmFuc2FjdGlvbiBmcm9tIE9TRC4NCj4NCj4gSW1wbGVtZW50YXRpb246DQo+IFRoZSBrZXkgdGhv
-dWdodCBpcyB0byB1c2UgbXVsdGlwbGUgdGhyZWFkIGFuZCBhc3NpZ24gZWFjaCBUcmFuc0NvbnRl
-eHQgdG8gb25lIG9mIHRoZSBwcm9jZXNzaW5nIHRocmVhZHMuIEluIG9yZGVyIHRvIHBhcmFsbGVs
-aXplIHRyYW5zYWN0aW9uIHN1Ym1pdCwgYWRkIGRpZmZlcmVudCBrdl9sb2NrcyBhbmQga3ZfY29u
-ZHMgZm9yIGVhY2ggdGhyZWFkLg0KPg0KPiBQZXJmb3JtYW5jZSBldmFsdWF0aW9uOg0KPiBUZXN0
-IEVOVjoNCj4gICAgICAgICA0IHggc2VydmVyLCA0IHggY2xpZW50LCAxNiB4IEludGVsIFMzNzAw
-IGFzIGJsb2NrIGRldmljZSwgYW5kIDQgeCBJbnRlbCBQMzYwMCBhcyBSb2Nrc2RiL1dBTCBkZXZp
-Y2UuDQo+IFBlcmZvcm1hbmNlOg0KPiBXZSBhbHNvIGRpZCBzZXZlcmFsIHF1aWNrIHRlc3RzIHRv
-IHZlcmlmeSB0aGUgcGVyZm9ybWFuY2UgYmVuZWZpdCwgdGhlIHJlc3VsdHMgc2hvd2VkIHRoYXQg
-cGFyYWxsZWwgdHJhbnNhY3Rpb24gc3VibWlzc2lvbiB3aWxsIGJyb3VnaHQgMTAlIHBlcmZvcm1h
-bmNlIGltcHJvdmVtZW50IGlmIHVzaW5nIG1lbWRiLCBidXQgbGl0dGxlIHBlcmZvcm1hbmNlIGlt
-cHJvdmVtZW50IHdpdGggcm9ja3NkYi4NCj4NCj4gV2hhdCdzIG1vcmUsIHdpdGhvdXQgcGFyYWxs
-ZWwgdHJhbnNhY3Rpb24gc3VibWl0cywgd2UgYWxzbyBzZWUgcGVyZm9ybWFuY2UgYm9vc3QgaWYg
-anVzdCBjaGFuZ2luZyB0byBNZW1EQiwgYnV0IGEgbGl0dGxlLg0KPg0KPiBUZXN0IHN1bW1hcnk6
-DQo+IFFEIFNjYWxpbmcgVGVzdCAtIDRrIFJhbmRvbSBXcml0ZToNCj4gICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgIFFEID0gMSAgICAgIFFEID0gMTYgICAgIFFEID0gMzIgICAgICBRRCA9IDY0ICAg
-ICAgUUQgPSAxMjgNCj4gV2l0aCByb2Nrc2RiIChJT1BTKSAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICA2ODIgICAgICAgICAgICAxNzMwMDAgICAgICAgMTkwMDAw
-ICAgICAgICAyMDMwMDAgICAgICAgMjA0MDAwDQo+IFdpdGggbWVtZGIgKElPUFMpICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDcwNCAgICAgICAgICAgIDE4MDAw
-MCAgICAgICAxOTQwMDAgICAgICAgIDIwNjAwMCAgICAgICAyMTgwMDANCj4gV2l0aCByb2Nrc2Ri
-K211bHRpcGxlX2t2X3RocmVhZChJT1BTKSAgICAgICAgICAvICAgICAgICAgICAgICAgIDE2NDI0
-MyAgICAgICAgMTY3MDM3ICAgICAgICAxODA5NjEgICAgICAyMDE3NTINCj4gV2l0aCBtZW1kYitt
-dWx0aXBsZV9rdl90aHJlYWQoSU9QUykgICAgICAgICAgLyAgICAgICAgICAgICAgICAgMTc2MDAw
-ICAgICAgIDIwMDAwMCAgICAgICAgMjIxMDAwICAgICAgMjI3MDAwDQo+DQo+DQo+IEl0IHNlZW1z
-IHNpbmdsZSB0aHJlYWQgb2YgdHJhbnNhY3Rpb24gc3VibWl0cyB3aWxsIGJlIGEgYm90dGxlbmVj
-ayBpZiB1c2luZyBNZW1EQi4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
-IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBv
-ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyAN
-Cj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+Thanks Wido for your help, Now I am able to see my debugs in log files.
+
+Regards,
+Vijay kumar.
+
+On Wed, Aug 24, 2016 at 7:30 PM, Wido den Hollander <wido@42on.com> wrote:
+>
+>> Op 24 augustus 2016 om 15:06 schreef Thipparapu Vijaykumar <thipparapu.vijaykumar@gmail.com>:
+>>
+>>
+>> Hi Wido,
+>>
+>>            Thanks for reply. After building DEB packages from the Ceph
+>> source, could you please tell me  how  to install all those DEB
+>> packages on entire cluster.
+>>
+>
+> Just like you do with any other DEB. Copy it to the machines and install it with dpkg.
+>
+> Wido
+>
+>> Thanks & Regards,
+>> Vijay Kumar.
+>>
+>> On Wed, Aug 24, 2016 at 12:14 AM, Wido den Hollander <wido@42on.com> wrote:
+>> >
+>> >> Op 23 augustus 2016 om 18:01 schreef Thipparapu Vijaykumar <thipparapu.vijaykumar@gmail.com>:
+>> >>
+>> >>
+>> >> Hi All,
+>> >>            I've a requirement where my existing ceph cluster need to
+>> >> run with the newly build ceph source with instrumented additional
+>> >> debugs.
+>> >>  Could anyone help me to achieve the above requirement?
+>> >>
+>> >
+>> > Why not build DEB or RPM packages from source and install them? That's usually a easy route to take in this case.
+>> >
+>> > For DEB it's just:
+>> >
+>> > $ dpkg-buildpackage
+>> >
+>> > Wido
+>> >
+>> >>
+>> >> Thanks & Regards,
+>> >> Vijay Kumar.
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
