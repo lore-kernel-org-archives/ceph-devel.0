@@ -1,122 +1,112 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: parallel transaction submit
-Date: Thu, 25 Aug 2016 14:11:02 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608251404580.10979@piezo.us.to>
-References: <FC753468179C1C4EB15768F212C46AF266329D@shsmsx102.ccr.corp.intel.com> <CACJqLyY7YZ=O_do0OD8d28cmNiknDcMm957qYidA_zGoQ5O+gw@mail.gmail.com> <BLUPR0201MB1908C3583D12C047DD0542E3E2ED0@BLUPR0201MB1908.namprd02.prod.outlook.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: bluestore blobs REVISITED
+Date: Thu, 25 Aug 2016 14:16:09 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1608251412210.25681@piezo.us.to>
+References: <BLUPR0201MB15245F1EA4B70EF5761981AFE8170@BLUPR0201MB1524.namprd02.prod.outlook.com> <alpine.DEB.2.11.1608222158190.25681@piezo.us.to> <BLUPR0201MB152454CA00246E35A1AE08C0E8E80@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608222249560.25681@piezo.us.to> <BLUPR0201MB1524C52747AF115A4C178D0FE8E80@BLUPR0201MB1524.namprd02.prod.outlook.com> <alpine.DEB.2.11.1608231548080.25678@piezo.us.to> <BLUPR0201MB152475F2D6907CAD2E594FC6E8EB0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608231918460.25678@piezo.us.to> <BLUPR0201MB1524808F8F4763BB50517C12E8EA0@BLUPR0201MB1524.namprd02.prod.outlook.com> <alpine.DEB.2.11.1608241759180.25678@piezo.us.to> <35D6E177-5070-4853-8CF4-FBDA14B08CAD@sandisk.com>
+ <alpine.DEB.2.11.1608242113300.25681@piezo.us.to> <67930A6B-070C-4C81-92D8-351AE28D5890@sandisk.com> <alpine.DEB.2.11.1608242228270.25681@piezo.us.to> <CA+aFP1D1t9w7UNw-3WcP1ZeiVFAatcL610ER=s+mFM3DGEnaLg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53059 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934432AbcHYOLV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2016 10:11:21 -0400
-In-Reply-To: <BLUPR0201MB1908C3583D12C047DD0542E3E2ED0@BLUPR0201MB1908.namprd02.prod.outlook.com>
+Received: from mx1.redhat.com ([209.132.183.28]:59412 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751316AbcHYOYb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 25 Aug 2016 10:24:31 -0400
+In-Reply-To: <CA+aFP1D1t9w7UNw-3WcP1ZeiVFAatcL610ER=s+mFM3DGEnaLg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Varada Kari <Varada.Kari@sandisk.com>
-Cc: Haomai Wang <haomai@xsky.com>, "Tang, Haodong" <haodong.tang@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: dillaman@redhat.com
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, "jdurgin@redhat.com" <jdurgin@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 25 Aug 2016, Varada Kari wrote:
-> Hi,
-> 
-> Increasing the number of the kv_sync_threads is not giving much of
-> performance. In the current threading model, shard_worker submits the IO
-> to the block device which are handled by aio_callback thread(which is
-> one) and submits to the kv_sync thread, which batches the requests and
-> submits to the rocksdb. Because kv_sync batches the requests and submits
-> the requests, we might observe more time spent on kv_sync_thread
-> routine. And i haven't observed much of an improvement by adding more
-> threads here.
-> 
-> But when increased the number of callbacks thread from aio(still needs
-> some refinements in polling for the request completions) and completing
-> the write completion in the same thread context increased some
-> performance. I don't have the numbers to say how much, but that is
-> better than having multiple kv_sync threads, adding one more queue and
-> lock. You can refer to
-> https://github.com/varadakari/ceph/commits/wip-parallel-aiocb (ignore
-> the first commit, was trying to do sync transaction in the same thread
-> context of sharded worker to measure the latency).
+On Thu, 25 Aug 2016, Jason Dillaman wrote:
+> Just so I understand, let's say a user snapshots an RBD image that has
+> active IO. At this point, are you saying that the "A" data
+> (pre-snapshot) is still (potentially) in the cache and any write
+> op-induced creation of clone "B" would not be in the cache?  If that's
+> the case, it sounds like a re-read would be required after the first
+> "post snapshot" write op.
 
-Yeah, I think this is right.  I see two avenues of attack:
+I mean you could have a sequence like
 
-- Try to eliminate the handoff to _kv_sync_thread by having the 
-transaction submitted to rocksdb in the calling thread.  This will 
-require a bit of refactoring but I think it's possible. We don't actually 
-want to block, though, so it'll be an async submission, and we'll still 
-need kv_sync_thread just telling rocksdb to commit in a loop and 
-triggering callbacks.  A recent PR sharded the completion finishers so I'm 
-guessing the final step would be some affinity thing that pins the 
-finishers to the same cores as the submitters?
+ write A 0~4096 to disk block X
+ clone A -> B
+ read A 0~4096   (cache hit, it's still there)
+ read B 0~4096   (cache miss, read disk block X.  now 2 copies of X in ram)
+ read A 0~4096   (cache hit again, it's still there)
 
-- Shard the io completion (before we submit the kv transaction).  Not sure 
-if we want a thread per shard, or polls at opportunistic/strategic points 
-in code.  The goal would be keeping the processing local to the 
-core/socket (vs the current strategy of a single thread waiting/polling 
-for completions and doing the next phase of work).
+The question is whether the "miss" reading B is concerning.  Or the 
+double-caching, I suppose.
 
-> was exploring a way to have the aio callback thread matached/reserved at
-> the time of io submission, so that we don't need to do io_getevents(),
-> kind of a async callback to the specified thread so that we can avoid
-> some waiting logic in io_getevents() and process the request in the same
-> thread context. You can refer to
-> http://manpages.ubuntu.com/manpages/wily/man3/io_set_callback.3.html. I
-> don't have the working code ready for this. FWIW, that is worth
-> experimenting and see if it reduces any latency.
-
-I don't think this will help--it just means you're using a layer of the 
-library that's calling getevents for you and calling your callback.
-
-Thanks!
 sage
 
 
 > 
-> Varada
-> 
-> On Thursday 25 August 2016 01:25 PM, Haomai Wang wrote:
-> > looks very litlle improvements. rocksdb result meet my expectation
-> > because rocksdb internal has lock for multi sync write. But memdb
-> > improments is a little confusing.
+> On Wed, Aug 24, 2016 at 6:29 PM, Sage Weil <sweil@redhat.com> wrote:
+> > On Wed, 24 Aug 2016, Allen Samuels wrote:
+> >> Yikes. You mean that blob ids are escaping the environment of the
+> >> lextent table. That's scary. What is the key for this cache? We probably
+> >> need to invalidate it or something.
 > >
-> > On Thu, Aug 25, 2016 at 3:45 PM, Tang, Haodong <haodong.tang@intel.com> wrote:
-> >> Hi Sage, Varada
+> > I mean that there will no longer be blob ids (except within the encoding
+> > of a particular extent map shard).  Which means that when you write to A,
+> > clone A->B, and then read B, B's blob will no longer be the same as A's
+> > blob (as it is now in the bnode, or would have been with the -blobwise
+> > branch) and the cache won't be preserved.
+> >
+> > Which I *think* is okay...?
+> >
+> > sage
+> >
+> >
 > >>
-> >> Noticed you are making parallel transaction submits, we also worked out a prototype that looks similar, here is the link for the implementation: https://github.com/ceph/ceph/pull/10856
+> >> Sent from my iPhone. Please excuse all typos and autocorrects.
 > >>
-> >> Background:
-> >> From the perf counter we added, found it spent a lot time in kv_queue, that is, single thread transaction submits is not competent to handle the transaction from OSD.
+> >> > On Aug 24, 2016, at 5:18 PM, Sage Weil <sweil@redhat.com> wrote:
+> >> >
+> >> > On Wed, 24 Aug 2016, Allen Samuels wrote:
+> >> >>> In that case, we should focus instead on sharing the ref_map *only* and
+> >> >>> always inline the forward pointers for the blob.  This is closer to what
+> >> >>> we were originally doing with the enode.  In fact, we could go back to the
+> >> >>> enode approach were it's just a big extent_ref_map and only used to defer
+> >> >>> deallocations until all refs are retired.  The blob is then more ephemeral
+> >> >>> (local to the onode, immutable copy if cloned), and we can more easily
+> >> >>> rejigger how we store it.
+> >> >>>
+> >> >>> We'd still have a "ref map" type structure for the blob, but it would only
+> >> >>> be used for counting the lextents that reference it, and we can
+> >> >>> dynamically build it when we load the extent map.  If we impose the
+> >> >>> restriction that whatever the map sharding approach we take we never share
+> >> >>> a blob across a shard, we the blobs are always local and "ephemeral"
+> >> >>> in the sense we've been talking about.  The only downside here, I think,
+> >> >>> is that the write path needs to be smart enough to not create any new blob
+> >> >>> that spans whatever the current map sharding is (or, alternatively,
+> >> >>> trigger a resharding if it does so).
+> >> >>
+> >> >> Not just a resharding but also a possible decompress recompress cycle.
+> >> >
+> >> > Yeah.
+> >> >
+> >> > Oh, the other consequence of this is that we lose the unified blob-wise
+> >> > cache behavior we added a while back.  That means that if you write a
+> >> > bunch of data to a rbd data object, then clone it, then read of the clone,
+> >> > it'll re-read the data from disk.  Because it'll be a different blob in
+> >> > memory (since we'll be making a copy of the metadata etc).
+> >> >
+> >> > Josh, Jason, do you have a sense of whether that really matters?  The
+> >> > common case is probably someone who creates a snapshot and then backs it
+> >> > up, but it's going to be reading gobs of cold data off disk anyway so I'm
+> >> > guessing it doesn't matter that a bit of warm data that just preceded the
+> >> > snapshot gets re-read.
+> >> >
+> >> > sage
+> >> >
 > >>
-> >> Implementation:
-> >> The key thought is to use multiple thread and assign each TransContext to one of the processing threads. In order to parallelize transaction submit, add different kv_locks and kv_conds for each thread.
 > >>
-> >> Performance evaluation:
-> >> Test ENV:
-> >>         4 x server, 4 x client, 16 x Intel S3700 as block device, and 4 x Intel P3600 as Rocksdb/WAL device.
-> >> Performance:
-> >> We also did several quick tests to verify the performance benefit, the results showed that parallel transaction submission will brought 10% performance improvement if using memdb, but little performance improvement with rocksdb.
-> >>
-> >> What's more, without parallel transaction submits, we also see performance boost if just changing to MemDB, but a little.
-> >>
-> >> Test summary:
-> >> QD Scaling Test - 4k Random Write:
-> >>                                                                                   QD = 1      QD = 16     QD = 32      QD = 64      QD = 128
-> >> With rocksdb (IOPS)                                              682            173000       190000        203000       204000
-> >> With memdb (IOPS)                                              704            180000       194000        206000       218000
-> >> With rocksdb+multiple_kv_thread(IOPS)          /                164243        167037        180961      201752
-> >> With memdb+multiple_kv_thread(IOPS)          /                 176000       200000        221000      227000
-> >>
-> >>
-> >> It seems single thread of transaction submits will be a bottleneck if using MemDB.
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> -- 
+> Jason
 > 
 > 
