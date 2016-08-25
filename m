@@ -1,84 +1,113 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: Fork and RDMA operations
-Date: Thu, 25 Aug 2016 08:43:14 -0400
-Message-ID: <f67d1686-090d-e495-784f-c68b1b5d1b73@redhat.com>
-References: <emc456988a-f658-4bfd-b373-ceec459da0a7@lt-vu-7440>
- <alpine.DEB.2.11.1608121314380.17762@piezo.us.to>
- <CACJqLybXfss4ay5+9WV6Ux1myrkDBiBN2jUSrbVKB44kak-XQg@mail.gmail.com>
- <alpine.DEB.2.11.1608121625320.17762@piezo.us.to>
- <d026edff-3e36-e3e3-42d8-811534638439@redhat.com>
- <alpine.DEB.2.11.1608242128000.25681@piezo.us.to>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: pg_stat_t is 500+ bytes
+Date: Thu, 25 Aug 2016 20:54:58 +0800
+Message-ID: <CACJqLyagS94AefE3vj6pEb5F7J74XTn5zLT+Sm65hHvzSXfqwg@mail.gmail.com>
+References: <alpine.DEB.2.11.1608231807270.25681@piezo.us.to>
+ <CACJqLyYaXy81jvFj2jiofucYLPY4cmQQtDohJwRTb5ddLzOedA@mail.gmail.com>
+ <CACJqLybzJHWrVF-gOZy6nvUTb0weZJRtqt4rJBO_Nn1viBjDgw@mail.gmail.com>
+ <alpine.DEB.2.11.1608241607360.25681@piezo.us.to> <e20c13f4-ae6f-e06a-ac1b-c5736737e642@redhat.com>
+ <20160824162031.GA26181@predictor>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f172.google.com ([209.85.161.172]:33653 "EHLO
-        mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755666AbcHYMnQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2016 08:43:16 -0400
-Received: by mail-yw0-f172.google.com with SMTP id r9so28537831ywg.0
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2016 05:43:15 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1608242128000.25681@piezo.us.to>
+Received: from mail-hk2apc01on0118.outbound.protection.outlook.com ([104.47.124.118]:56312
+        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1758290AbcHYMzO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 25 Aug 2016 08:55:14 -0400
+Received: by mail-ua0-f179.google.com with SMTP id l94so18677085ual.0
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2016 05:55:04 -0700 (PDT)
+In-Reply-To: <20160824162031.GA26181@predictor>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <branch@predictor.org.pl>
+Cc: Mark Nelson <mnelson@redhat.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+I think there exists a lot of fields can't be discarded via judging
+0s, like utime_t, epoch_t. A simple way is to compare with previous
+pg_info_t.
 
+BTW, I want to mentiond pg_info_t encoding occurs 6.05% cpu time in pg
+thread(thread level not process level).
 
-On 08/24/2016 05:32 PM, Sage Weil wrote:
-> On Wed, 24 Aug 2016, Casey Bodley wrote:
->> On 08/12/2016 12:27 PM, Sage Weil wrote:
->>> It seems like it would be simpler to push the fork before any important
->>> operations.  (And BTW with systemd and upstart we don't fork anyway; it's
->>> just there for sysvinit.)  The preforker thing is there to make it easy to
->>> fork early, but keep the parent waiting around so that you can do more
->>> intialization, print errors, and terminate with an error code if something
->>> (post-fork) goes wrong.  In theory, there's no reason why we couldn't make
->>> this almost the very first thing the daemon does so that *all* work is
->>> done in the child...
->>>
->>> sage
->>>
->> I've recently run into issues related to fork as well (see my "memory leaks
->> related to CephContext and global_init_daemonize()" email). Trying to manage
->> resources across a fork is difficult and error-prone, so changing how we
->> daemonize could eliminate a whole class of these bugs. And as Haomai points
->> out, we're going to great lengths to make things work in the current model.
+looks we have three optimization from mark and Piotr:
+
+1. reconstruct pg_info_t and make high frequent fields together.
+2. change some fields to smaller bits
+3. uses SIMD to optimize low frequency fields difference comparison(optiona=
+l)
+
+intel SSE4.2 pcmpistrm instructive could do very good 128bytes
+comparison, pg_info_t is above 700bytes:
+
+inline const char *skip_same_128_bytes_SIMD(const char* p, const char* p2) =
+{
+    const __m128i w =3D _mm_load_si128((const __m128i *)p2);
+
+    for (;; p +=3D 16) {
+        const __m128i s =3D _mm_load_si128((const __m128i *)p);
+        const unsigned r =3D _mm_cvtsi128_si32(_mm_cmpistrm(w, s,
+            _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY |
+            _SIDD_BIT_MASK | _SIDD_NEGATIVE_POLARITY));
+
+        if (r !=3D 0) // some of characters isn't equal
+            return p + __builtin_ffs(r) - 1;
+    }
+}
+
+On Thu, Aug 25, 2016 at 12:20 AM, Piotr Da=C5=82ek <branch@predictor.org.pl=
+> wrote:
+> On Wed, Aug 24, 2016 at 11:12:24AM -0500, Mark Nelson wrote:
 >>
->> I'm a big fan of Sage's theory that all work could be done in the child
->> process, and I'm willing to take on the project if we can reach a consensus on
->> the design.
 >>
->> Whether or not we're interested in long-term support for SysV, the ability to
->> daemonize is useful our for development workflow (vstart.sh in particular). To
->> fill this role, some basic requirements for the parent process are:
->> * don't exit until initialization is finished
->> * return an error code if initialization failed
+>> On 08/24/2016 11:09 AM, Sage Weil wrote:
+>> >On Wed, 24 Aug 2016, Haomai Wang wrote:
+>> >>On Wed, Aug 24, 2016 at 11:01 AM, Haomai Wang <haomai@xsky.com> wrote:
+>> >>>On Wed, Aug 24, 2016 at 2:13 AM, Sage Weil <sweil@redhat.com> wrote:
+>> >>>>This is huge.  It takes the pg_info_t str from 306 bytes to 847 byte=
+s, and
+>> >>>>this _info omap key is rewritten on *every* IO.
+>> >>>>
+>> >>>>We could shrink this down significant with varint and/or delta encod=
+ing
+>> >>>>since a huge portion of it is just a bunch of uint64_t counters.  Th=
+is
+>> >>>>will probably cost some CPU time, but OTOH it'll also shrink our met=
+adata
+>> >>>>down a fair bit too which will pay off later.
+>> >>>>
+>> >>>>Anybody want to tackle this?
+>> >>>
+>> >>>what about separating "object_stat_collection_t stats" from pg_stat_t=
+?
+>> >>>pg info should be unchanged for most of times, we could only update
+>> >>>object related stats. This may help to reduce half bytes.
+>> >
+>> >I don't think this will work, since every op changes last_update in
+>> >pg_info_t *and* the stats (write op count, total bytes, objects, etc.).
+>> >
+>> >>Or we only store increment values and keep the full in memory(may
+>> >>reduce to 20-30bytes). In period time we store the full structure(only
+>> >>hundreds of bytes)....
+>> >
+>> >A delta is probably very compressible (only a few fields in the stats
+>> >struct change).  The question is how fast can we make it in CPU time.
+>> >Probably a simple delta (which will be almost all 0's) and a trivial
+>> >run-length-encoding scheme that just gets rid of the 0's would do well
+>> >enough...
 >>
->> As Sage pointed out, this is exactly what Preforker is doing for ceph-mon. So
->> we can start by changing the other daemons to use that instead of
->> global_init_daemonize().
->>
->> The next step is to prevent global_init()/common_init()/CephContext from doing
->> any work in the parent process (esp. spawning threads for Log,
->> CephContextServiceThread, and AdminSocket). Decoupling the config parsing from
->> CephContext initialization seems like a natural way to accomplish that. So the
->> parent would create and initialize the md_config_t object, then after fork,
->> the child would pass that as an argument when creating the CephContext.
->>
->> How does that sound for a start?
-> Sounds good to me!  The last step (decoupling) sounds like it's not
-> strictly necessary but is probably worthwhile.  It will get deep into a
-> bunch of crufty code that isn't much fun to deal with, so I suspect you'll
-> either run away screaming or come up with something pretty satisfying that
-> removes a bunch of ugly code.
+>> Do we have any rough idea of how many/often consecutive 0s we end up
+>> with in the current encoding?
 >
-> sage
-
-Thanks Sage. I'll have to investigate some more to see how messy it will 
-be, but I'm more worried about trying to construct a 'partial' 
-CephContext for parsing, and exposing that to the application when most 
-of its capabilities (logging, especially) are missing. The parent 
-process won't be able to call any code with dout()s, so I think it's 
-safest to avoid constructing a CephContext in the first place.
+> Or how high these counters get? We could try transposing the matrix made =
+of
+> those counters. At least the two most significant bytes in most of those
+> counters are mostly zeros, and after transposing, simple RLE would be
+> feasible. In any case, I'm not sure if *all* of these fields need to be
+> uint64_t.
+>
+> --
+> Piotr Da=C5=82ek
+> branch@predictor.org.pl
+> http://blog.predictor.org.pl
