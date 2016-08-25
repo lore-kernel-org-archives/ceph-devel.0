@@ -1,72 +1,120 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: CephFS and the next jewel release v10.2.3
-Date: Thu, 25 Aug 2016 23:13:02 +0200
-Message-ID: <57BF5F5E.3070105@dachary.org>
-References: <57BC1089.9080209@dachary.org>
- <CAJ4mKGZ0DAH8Osa4mS8dupxg49GxBeutnvv3e55wSfsO0vt2SQ@mail.gmail.com>
- <CAJ4mKGbOzdxCoFhzmXmbQbs0G2MuxwSR2Qb83WkGGJNXg8TgFg@mail.gmail.com>
- <57BE0B4C.6060104@dachary.org>
- <CAJ4mKGbYD6mKjcH_++E1HF1zRBX5sVWJoq-z=h+_UQBMXEr9Kg@mail.gmail.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: divergent datastructure changes
+Date: Thu, 25 Aug 2016 14:10:47 -0700
+Message-ID: <CADRKj5R=dnq6xxGvizTB-_jqfPWaCXnkFCkMsz4_ePppyo8HCQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:37531 "EHLO
-        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754199AbcHYVN5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2016 17:13:57 -0400
-In-Reply-To: <CAJ4mKGbYD6mKjcH_++E1HF1zRBX5sVWJoq-z=h+_UQBMXEr9Kg@mail.gmail.com>
+Received: from mail-ua0-f178.google.com ([209.85.217.178]:34726 "EHLO
+        mail-ua0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754789AbcHYVP6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2016 17:15:58 -0400
+Received: by mail-ua0-f178.google.com with SMTP id k90so106212616uak.1
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2016 14:15:56 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+The encode/decode functionality that we use for [de]marshalling is
+fine, as long as we always move forward. Here's a typical example
+(redacted for simplicity).
 
-The run completed at http://pulpito.ceph.com/loic-2016-08-25_06:39:08-fs-jewel-backports-distro-basic-smithi/ with no valgrind error but a few other failures. Note that it is based on the jewel-backports branch which contains a few more backports in addition to https://github.com/ceph/ceph/pull/10847 and I'm not sure what to blame yet. I'll look into it tomorrow unless you beat me to it :-)
+  void encode(bufferlist& bl) const {
+    ENCODE_START(8, 1, bl);
+    ::encode(domain_root, bl);
+    ::encode(control_pool, bl);
+    ::encode(gc_pool, bl);
+    ::encode(log_pool, bl);
+    ::encode(intent_log_pool, bl);
+    ::encode(usage_log_pool, bl);
+    ::encode(user_keys_pool, bl);
+    ::encode(user_email_pool, bl);
+    ::encode(user_swift_pool, bl);
+    ::encode(user_uid_pool, bl);
+...
+    ::encode(system_key, bl);
+    ::encode(placement_pools, bl);
+    ::encode(metadata_heap, bl);
+    ::encode(realm_id, bl);
+...
+    ENCODE_FINISH(bl);
+  }
 
-Cheers
+  void decode(bufferlist::iterator& bl) {
+    DECODE_START(8, bl);
+    ::decode(domain_root, bl);
+    ::decode(control_pool, bl);
+    ::decode(gc_pool, bl);
+    ::decode(log_pool, bl);
+    ::decode(intent_log_pool, bl);
+    ::decode(usage_log_pool, bl);
+    ::decode(user_keys_pool, bl);
+    ::decode(user_email_pool, bl);
+    ::decode(user_swift_pool, bl);
+    ::decode(user_uid_pool, bl);
+...
+    if (struct_v >= 3)
+      ::decode(system_key, bl);
+    if (struct_v >= 4)
+      ::decode(placement_pools, bl);
+    if (struct_v >= 5)
+      ::decode(metadata_heap, bl);
+    if (struct_v >= 6) {
+      ::decode(realm_id, bl);
+    }
+...
+    DECODE_FINISH(bl);
+  }
 
-On 24/08/2016 23:03, Gregory Farnum wrote:
-> On Wed, Aug 24, 2016 at 2:02 PM, Loic Dachary <loic@dachary.org> wrote:
->>
->>
->> On 24/08/2016 22:46, Gregory Farnum wrote:
->>> On Wed, Aug 24, 2016 at 11:11 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
->>>> On Tue, Aug 23, 2016 at 1:59 AM, Loic Dachary <loic@dachary.org> wrote:
->>>>> Hi John,
->>>>>
->>>>> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel passed the fs suite (http://tracker.ceph.com/issues/16344#note-30 except for three valgrind failures). Do you think the jewel branch is ready for QE to start their own round of testing ?
->>>>>
->>>>> Cheers
->>>>>
->>>>> P.S. CC'ing Greg because John is on vacation, in case a decision is to be made before he returns.
->>>>
->>>> Ugh, I went to check these valgrind failures and they're a failed
->>>> mutex assert on shutdown. Let me dig into what's happening. :(
->>>> -Greg
->>>
->>> Hmm, we seem to have some badly-colliding backports. If you look at
->>> commit ac449472df2978123192d5f22247d8b8bc5efb28 and MDSRank.cc line
->>> 242, you'll see it does mds_lock.Unlock() twice in quick succession.
->>> :(
->>>
->>> One of them came in from 7c2eab19, and the other from 1d3a8168. I
->>> think maybe the patches got reordered in their backport order or
->>> something.
->>>
->>> Patrick, can you give https://github.com/ceph/ceph/pull/10847 a quick
->>> review? Loic, can you then run the failed tests against a backport
->>> branch which includes that patch?
->>
->> https://github.com/ceph/ceph/pull/10847 has been pushed as part of the jewel-backports integration branch right now and I'll schedule a fs run as soon as it finishes building. Thanks for the quick fix !
-> 
-> Sure. Assuming that works out everything else looked good to me. :)
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+So the idea is that whenever we add a field, we bump up the encoded
+version, add the field at the end. Decoding is done in order, and we
+test struct_v to determine whether we need to decode the next param.
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+The main issue I'm having trouble with right now is what to do when we
+need to backport a change that needs a datastructure change. For
+example. in the above example, let's say that we need to backport the
+realm_id field to an older version that was only up to V3.
+
+One solution would be to make sure that when backporting such a
+change, we need to drag with us all the other fields that lead up to
+to the one that we need (e.g., we want realm_id, but we need to bring
+with us also placement_pools, and metadata_heap). This might not be so
+sustainable. The above example might be trivial, but what if
+metadata_heap was not a string, but rather a complex data type that in
+order to build correctly, we need to backport another feature (and
+bring with it the same issues).
+
+It seems to me that for issues like that we might want to consider
+adding a more sophisticated encoding scheme that will be more feature
+oriented, rather than just blindly putting everything one after the
+other.
+
+E.g., some kind of a bit field with offsets into the data, along the
+following lines:
+
+feature.encode(0, system_key);
+feature.encode(1, placement_pools);
+feature.encode(2, metadata_heap);
+::encode(features, bl);
+
+and on the decoding side:
+
+::decode(features, bl);
+features.decode(0, system_key);
+features.decode(1, placement_pools);
+features.decode(2, metadata_heap);
+
+In the above example, if we only need metadata_heap, then we can just do this:
+
+::decode(features, bl);
+features.decode(2, metadata_heap);
+
+The indexes to the fields should be defined appropriately obviously,
+and will be consistent across versions. That should be relatively
+easier to maintain than making sure we keep the data structures
+consistent when having divergent branches I think.
+
+Any thoughts?
+
+Thanks,
+Yehuda
