@@ -1,102 +1,127 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: rgw/s3_bucket_quota.pl failure on the jewel-backports
- integration branch
-Date: Thu, 25 Aug 2016 10:43:04 -0400 (EDT)
-Message-ID: <79549893.74970999.1472136184073.JavaMail.zimbra@redhat.com>
-References: <57BEF687.80805@dachary.org>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: RE: errors in make-debs.sh because "make dist" fails on
+ 'rocksdb/db/slice.cc'
+Date: Thu, 25 Aug 2016 13:10:42 +0000
+Message-ID: <DB5PR05MB160766D3467A2A346023FAEAA9ED0@DB5PR05MB1607.eurprd05.prod.outlook.com>
+References: <DB5PR05MB1607C4B81D5433484A17801FA9E80@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <CAJ4mKGYP+9TQ8wT-eUH1WkgwqXY3z2uF+3WFtpK8BRFNF9VWBw@mail.gmail.com>
+ <DB5PR05MB160736C8DBCC82350BE98385A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <20160823110125.GG5955@rskikr.localdomain>
+ <20160823112140.GH5955@rskikr.localdomain>
+ <cb68488d-2c92-b0dd-cda4-92d3ea149b22@suse.cz>
+ <e367df5c-5995-25dd-fc0b-b5096d757edf@suse.cz>
+ <DB5PR05MB1607E0FC452D4FF419A78542A9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <a48780cc-bfbf-7b24-32b9-0cd3581b00df@suse.cz>
+ <DB5PR05MB160796FAC0A385F2682873DCA9EB0@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <CAJE9aOPbCc2XKd7LWC2Cg9yawV2PRhKkw-YJoWyzMXDfDSQk_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:33991 "EHLO
-        mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756711AbcHYOnQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2016 10:43:16 -0400
-In-Reply-To: <57BEF687.80805@dachary.org>
+Received: from mail-db5eur01on0050.outbound.protection.outlook.com ([104.47.2.50]:64090
+        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1756661AbcHYOnR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 25 Aug 2016 10:43:17 -0400
+In-Reply-To: <CAJE9aOPbCc2XKd7LWC2Cg9yawV2PRhKkw-YJoWyzMXDfDSQk_w@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Casey Bodley <cbodley@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Nathan Cutler <ncutler@suse.cz>, Brad Hubbard <bhubbard@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Looks like a failure in s3_bucket_quota.  I'm not sure if this could be related to the issues w/bucket lifecycle PR?
-
-Matt
-
------ Original Message -----
-> From: "Loic Dachary" <loic@dachary.org>
-> To: "Casey Bodley" <cbodley@redhat.com>
-> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-> Sent: Thursday, August 25, 2016 9:45:43 AM
-> Subject: rgw/s3_bucket_quota.pl failure on the jewel-backports integration branch
-> 
-> Hi Casey,
-> 
-> http://pulpito.ceph.com/loic-2016-08-25_06:41:52-rgw-jewel-backports-distro-basic-smithi/
-> 
-> which runs against the jewel-backports branch has a number of rgw pull
-> requests
-> 
-> http://tracker.ceph.com/issues/16344#note-36
-> 
-> and shows a new failures which look like this:
-> 
-> http://qa-proxy.ceph.com/teuthology/loic-2016-08-25_06:41:52-rgw-jewel-backports-distro-basic-smithi/384799/teuthology.log
-> 
-> 2016-08-25T11:16:52.377 INFO:tasks.workunit.client.0.smithi042.stdout:user
-> qa_user deleted
-> 2016-08-25T11:16:52.377 INFO:tasks.workunit.client.0.smithi042.stdout:bucket
-> delete succeeded
-> 2016-08-25T11:16:52.377 INFO:tasks.workunit.client.0.smithi042.stdout:Bucket
-> Created: buck_2016_07_25_11_16_51
-> 2016-08-25T11:16:52.377 INFO:tasks.workunit.client.0.smithi042.stdout:quota
-> set for the bucket: buck_2016_07_25_11_16_51
-> 2016-08-25T11:16:52.377 INFO:tasks.workunit.client.0.smithi042.stdout:quota
-> enabled for the bucket: buck_2016_07_25_11_16_51
-> 2016-08-25T11:16:52.378 INFO:tasks.workunit.client.0.smithi042.stdout:adding
-> file to bucket: 10Mb.
-> 2016-08-25T11:16:52.378 INFO:tasks.workunit.client.0.smithi042.stdout:upload
-> file successful
-> 2016-08-25T11:16:52.378
-> INFO:tasks.workunit.client.0.smithi042.stdout:readding file to bucket:
-> 10MBfile1
-> 2016-08-25T11:16:52.378
-> INFO:tasks.workunit.client.0.smithi042.stdout:readding file success
-> 2016-08-25T11:16:52.378
-> INFO:tasks.workunit.client.0.smithi042.stdout:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> 2016-08-25T11:16:52.378 INFO:tasks.workunit.client.0.smithi042.stdout:Test
-> case:  FAILED - set max objects and test beyond max objects failed
-> 2016-08-25T11:16:52.378
-> INFO:tasks.workunit.client.0.smithi042.stdout:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> 
-> Our focus in this run is to make sure https://github.com/ceph/ceph/pull/10845
-> passes. I don't know enough about rgw tests to figure out if it is related
-> to the commits in this pull request or not.
-> 
-> What do you think ?
-> 
-> P.S. The error also seems to be incorrectly handled later on but that's
-> another issue ;-)
-> 
-> 2016-08-25T11:16:52.489 INFO:tasks.workunit.client.0.smithi042.stderr:Can't
-> call method "err" on an undefined value at
-> /home/ubuntu/cephtest/workunit.client.0/rgw/s3_bucket_quota.pl line 199.
-> 
-> --
-> Loïc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBrZWZ1IGNoYWkgDQo+IFNlbnQ6
+IFR1ZXNkYXksIEF1Z3VzdCAyMywgMjAxNiAxOTowNQ0KPiANCj4gT24gVHVlLCBBdWcgMjMsIDIw
+MTYgYXQgMTA6MDkgUE0sIEF2bmVyIEJlbiBIYW5vY2gNCj4gPGF2bmVyYkBtZWxsYW5veC5jb20+
+IHdyb3RlOg0KPiA+IFRoYW5rcy4NCj4gPiBTbywgd2hhdCBpcyB0aGUgcHJvcGVyIHdheSBmb3Ig
+Y3JlYXRpbmcgKi5kZWIgZmlsZXMNCj4gDQo+IGRwa2ctYnVpbGRwYWNrYWdlIC1qOCAtdWMgLS1i
+dWlsZD1iaW5hcnkNCj4gDQpUaGFua3Mga2VmdSwNCg0KSSB0cmllZCBkcGtnLWJ1aWxkcGFja2Fn
+ZSAtajggLXVjIC1iICgtLWJ1aWxkPWJpbmFyeSB3YXMgaW52YWxpZCBhcmd1bWVudCkNCkl0IHJ1
+biBsb25nIHRpbWUgdGlsbCBpdCByZWFjaGVkIHRoZSBmb2xsb3dpbmcgZXJyb3I6DQoJL21udC9z
+ZGgvYXZuZXJiL2NlcGgtZ2l0aHViL3NyYy9saWJyYWRvcy9saWJyYWRvcy5jYzo0NzozMDogZmF0
+YWwgZXJyb3I6IHRyYWNpbmcvbGlicmFkb3MuaDogTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeQ0K
+DQpBbGwgbXkgY29tbWFuZHMsIHBsdXMgcmVsZXZhbnQgb3V0cHV0IGlzIGJlbG93Og0KDQojIGdp
+dCBjbG9uZSBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2VwaCBjZXBoLWdpdGh1Yg0KIyBjZCBjZXBo
+LWdpdGh1Yg0KIyBnaXQgc3VibW9kdWxlIHVwZGF0ZSAtLWluaXQgLS1yZWN1cnNpdmUNCiMuL2lu
+c3RhbGwtZGVwcy5zaA0KIy4vZG9fY21ha2Uuc2gNCiMgY2QgYnVpbGQvDQojIG1ha2UgLWoNCiMg
+Y2QgLi4NCiMgZHBrZy1idWlsZHBhY2thZ2UgLWogLXVjIC1iDQouLi4NCm1ha2UgLWYgc3JjL0NN
+YWtlRmlsZXMvbGlicmFkb3NfYXBpLmRpci9idWlsZC5tYWtlIHNyYy9DTWFrZUZpbGVzL2xpYnJh
+ZG9zX2FwaS5kaXIvZGVwZW5kDQptYWtlWzRdOiBFbnRlcmluZyBkaXJlY3RvcnkgJy9tbnQvc2Ro
+L2F2bmVyYi9jZXBoLWdpdGh1Yi9vYmoteDg2XzY0LWxpbnV4LWdudScNCmNkIC9tbnQvc2RoL2F2
+bmVyYi9jZXBoLWdpdGh1Yi9vYmoteDg2XzY0LWxpbnV4LWdudSAmJiAvdXNyL2Jpbi9jbWFrZSAt
+RSBjbWFrZV9kZXBlbmRzICJVbml4IE1ha2VmaWxlcyIgL21udC9zZGgvYXZuZXJiL2NlcGgtZ2l0
+aHViIC9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9zcmMgL21udC9zZGgvYXZuZXJiL2NlcGgt
+Z2l0aHViL29iai14ODZfNjQtbGludXgtZ251IC9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9v
+YmoteDg2XzY0LWxpbnV4LWdudS9zcmMgL21udC9zZGgvYXZuZXJiL2NlcGgtZ2l0aHViL29iai14
+ODZfNjQtbGludXgtZ251L3NyYy9DTWFrZUZpbGVzL2xpYnJhZG9zX2FwaS5kaXIvRGVwZW5kSW5m
+by5jbWFrZSAtLWNvbG9yPQ0KU2Nhbm5pbmcgZGVwZW5kZW5jaWVzIG9mIHRhcmdldCBsaWJyYWRv
+c19hcGkNCm1ha2VbNF06IExlYXZpbmcgZGlyZWN0b3J5ICcvbW50L3NkaC9hdm5lcmIvY2VwaC1n
+aXRodWIvb2JqLXg4Nl82NC1saW51eC1nbnUnDQptYWtlIC1mIHNyYy9DTWFrZUZpbGVzL2xpYnJh
+ZG9zX2FwaS5kaXIvYnVpbGQubWFrZSBzcmMvQ01ha2VGaWxlcy9saWJyYWRvc19hcGkuZGlyL2J1
+aWxkDQptYWtlWzRdOiBFbnRlcmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVyYi9jZXBoLWdp
+dGh1Yi9vYmoteDg2XzY0LWxpbnV4LWdudScNClsgMTclXSBCdWlsZGluZyBDWFggb2JqZWN0IHNy
+Yy9DTWFrZUZpbGVzL2xpYnJhZG9zX2FwaS5kaXIvY29tbW9uL2J1ZmZlci5jYy5vDQpjZCAvbW50
+L3NkaC9hdm5lcmIvY2VwaC1naXRodWIvb2JqLXg4Nl82NC1saW51eC1nbnUvc3JjICYmIC91c3Iv
+YmluL3g4Nl82NC1saW51eC1nbnUtZysrICAgLURDRVBIX0xJQkRJUj1cIi91c3IvbGliXCIgLURD
+RVBIX1BLR0xJQkRJUj1cIi91c3IvbGliL2NlcGhcIiAtRF9fbGludXhfXyAtSS9tbnQvc2RoL2F2
+bmVyYi9jZXBoLWdpdGh1Yi9vYmoteDg2XzY0LWxpbnV4LWdudS9zcmMvaW5jbHVkZSAtSS9tbnQv
+c2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9zcmMgLUkvbW50L3NkaC9hdm5lcmIvY2VwaC1naXRodWIv
+b2JqLXg4Nl82NC1saW51eC1nbnUvaW5jbHVkZSAtSS9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1
+Yi9zcmMveHhIYXNoICAtZyAtTzIgLWZzdGFjay1wcm90ZWN0b3Itc3Ryb25nIC1XZm9ybWF0IC1X
+ZXJyb3I9Zm9ybWF0LXNlY3VyaXR5IC1XZGF0ZS10aW1lIC1EX0ZPUlRJRllfU09VUkNFPTIgIC1X
+YWxsIC1XdHlwZS1saW1pdHMgLVdpZ25vcmVkLXF1YWxpZmllcnMgLVdpbml0LXNlbGYgLVdwb2lu
+dGVyLWFyaXRoIC1XZXJyb3I9Zm9ybWF0LXNlY3VyaXR5IC1mbm8tc3RyaWN0LWFsaWFzaW5nIC1m
+c2lnbmVkLWNoYXIgLXJkeW5hbWljIC1XcCwtVV9GT1JUSUZZX1NPVVJDRSwtRF9GT1JUSUZZX1NP
+VVJDRT0yIC1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZyAtZnRlbXBsYXRlLWRlcHRoLTEwMjQgLVdu
+by1pbnZhbGlkLW9mZnNldG9mIC1Xbm9uLXZpcnR1YWwtZHRvciAtV292ZXJsb2FkZWQtdmlydHVh
+bCAtV3N0cmljdC1udWxsLXNlbnRpbmVsIC1mZGlhZ25vc3RpY3MtY29sb3I9YXV0byAtSS91c3Iv
+aW5jbHVkZS9uc3MgLUkvdXNyL2luY2x1ZGUvbnNwciAtZm5vLWJ1aWx0aW4tbWFsbG9jIC1mbm8t
+YnVpbHRpbi1jYWxsb2MgLWZuby1idWlsdGluLXJlYWxsb2MgLWZuby1idWlsdGluLWZyZWUgLWZQ
+SUMgICAtREhBVkVfQ09ORklHX0ggLURfX0NFUEhfXyAtRF9SRUVOVFJBTlQgLURfVEhSRUFEX1NB
+RkUgLURfX1NURENfRk9STUFUX01BQ1JPUyAtRF9HTlVfU09VUkNFIC1EX0ZJTEVfT0ZGU0VUX0JJ
+VFM9NjQgLXN0ZD1jKysxMSAtbyBDTWFrZUZpbGVzL2xpYnJhZG9zX2FwaS5kaXIvY29tbW9uL2J1
+ZmZlci5jYy5vIC1jIC9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9zcmMvY29tbW9uL2J1ZmZl
+ci5jYw0KWyAxNyVdIEJ1aWxkaW5nIENYWCBvYmplY3Qgc3JjL0NNYWtlRmlsZXMvbGlicmFkb3Nf
+YXBpLmRpci9saWJyYWRvcy9saWJyYWRvcy5jYy5vDQpjZCAvbW50L3NkaC9hdm5lcmIvY2VwaC1n
+aXRodWIvb2JqLXg4Nl82NC1saW51eC1nbnUvc3JjICYmIC91c3IvYmluL3g4Nl82NC1saW51eC1n
+bnUtZysrICAgLURDRVBIX0xJQkRJUj1cIi91c3IvbGliXCIgLURDRVBIX1BLR0xJQkRJUj1cIi91
+c3IvbGliL2NlcGhcIiAtRF9fbGludXhfXyAtSS9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9v
+YmoteDg2XzY0LWxpbnV4LWdudS9zcmMvaW5jbHVkZSAtSS9tbnQvc2RoL2F2bmVyYi9jZXBoLWdp
+dGh1Yi9zcmMgLUkvbW50L3NkaC9hdm5lcmIvY2VwaC1naXRodWIvb2JqLXg4Nl82NC1saW51eC1n
+bnUvaW5jbHVkZSAtSS9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9zcmMveHhIYXNoICAtZyAt
+TzIgLWZzdGFjay1wcm90ZWN0b3Itc3Ryb25nIC1XZm9ybWF0IC1XZXJyb3I9Zm9ybWF0LXNlY3Vy
+aXR5IC1XZGF0ZS10aW1lIC1EX0ZPUlRJRllfU09VUkNFPTIgIC1XYWxsIC1XdHlwZS1saW1pdHMg
+LVdpZ25vcmVkLXF1YWxpZmllcnMgLVdpbml0LXNlbGYgLVdwb2ludGVyLWFyaXRoIC1XZXJyb3I9
+Zm9ybWF0LXNlY3VyaXR5IC1mbm8tc3RyaWN0LWFsaWFzaW5nIC1mc2lnbmVkLWNoYXIgLXJkeW5h
+bWljIC1XcCwtVV9GT1JUSUZZX1NPVVJDRSwtRF9GT1JUSUZZX1NPVVJDRT0yIC1mc3RhY2stcHJv
+dGVjdG9yLXN0cm9uZyAtZnRlbXBsYXRlLWRlcHRoLTEwMjQgLVduby1pbnZhbGlkLW9mZnNldG9m
+IC1Xbm9uLXZpcnR1YWwtZHRvciAtV292ZXJsb2FkZWQtdmlydHVhbCAtV3N0cmljdC1udWxsLXNl
+bnRpbmVsIC1mZGlhZ25vc3RpY3MtY29sb3I9YXV0byAtSS91c3IvaW5jbHVkZS9uc3MgLUkvdXNy
+L2luY2x1ZGUvbnNwciAtZm5vLWJ1aWx0aW4tbWFsbG9jIC1mbm8tYnVpbHRpbi1jYWxsb2MgLWZu
+by1idWlsdGluLXJlYWxsb2MgLWZuby1idWlsdGluLWZyZWUgLWZQSUMgICAtREhBVkVfQ09ORklH
+X0ggLURfX0NFUEhfXyAtRF9SRUVOVFJBTlQgLURfVEhSRUFEX1NBRkUgLURfX1NURENfRk9STUFU
+X01BQ1JPUyAtRF9HTlVfU09VUkNFIC1EX0ZJTEVfT0ZGU0VUX0JJVFM9NjQgLXN0ZD1jKysxMSAt
+byBDTWFrZUZpbGVzL2xpYnJhZG9zX2FwaS5kaXIvbGlicmFkb3MvbGlicmFkb3MuY2MubyAtYyAv
+bW50L3NkaC9hdm5lcmIvY2VwaC1naXRodWIvc3JjL2xpYnJhZG9zL2xpYnJhZG9zLmNjDQovbW50
+L3NkaC9hdm5lcmIvY2VwaC1naXRodWIvc3JjL2xpYnJhZG9zL2xpYnJhZG9zLmNjOjQ3OjMwOiBm
+YXRhbCBlcnJvcjogdHJhY2luZy9saWJyYWRvcy5oOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5
+DQpjb21waWxhdGlvbiB0ZXJtaW5hdGVkLg0Kc3JjL0NNYWtlRmlsZXMvbGlicmFkb3NfYXBpLmRp
+ci9idWlsZC5tYWtlOjg5OiByZWNpcGUgZm9yIHRhcmdldCAnc3JjL0NNYWtlRmlsZXMvbGlicmFk
+b3NfYXBpLmRpci9saWJyYWRvcy9saWJyYWRvcy5jYy5vJyBmYWlsZWQNCm1ha2VbNF06ICoqKiBb
+c3JjL0NNYWtlRmlsZXMvbGlicmFkb3NfYXBpLmRpci9saWJyYWRvcy9saWJyYWRvcy5jYy5vXSBF
+cnJvciAxDQptYWtlWzRdOiBMZWF2aW5nIGRpcmVjdG9yeSAnL21udC9zZGgvYXZuZXJiL2NlcGgt
+Z2l0aHViL29iai14ODZfNjQtbGludXgtZ251Jw0KQ01ha2VGaWxlcy9NYWtlZmlsZTI6OTc4OiBy
+ZWNpcGUgZm9yIHRhcmdldCAnc3JjL0NNYWtlRmlsZXMvbGlicmFkb3NfYXBpLmRpci9hbGwnIGZh
+aWxlZA0KbWFrZVszXTogKioqIFtzcmMvQ01ha2VGaWxlcy9saWJyYWRvc19hcGkuZGlyL2FsbF0g
+RXJyb3IgMg0KbWFrZVszXTogTGVhdmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVyYi9jZXBo
+LWdpdGh1Yi9vYmoteDg2XzY0LWxpbnV4LWdudScNCk1ha2VmaWxlOjE0MTogcmVjaXBlIGZvciB0
+YXJnZXQgJ2FsbCcgZmFpbGVkDQptYWtlWzJdOiAqKiogW2FsbF0gRXJyb3IgMg0KbWFrZVsyXTog
+TGVhdmluZyBkaXJlY3RvcnkgJy9tbnQvc2RoL2F2bmVyYi9jZXBoLWdpdGh1Yi9vYmoteDg2XzY0
+LWxpbnV4LWdudScNCiAgICAgICAgY2QgL21udC9zZGgvYXZuZXJiL2NlcGgtZ2l0aHViDQpkaF9h
+dXRvX2J1aWxkOiBtYWtlIC1qMSByZXR1cm5lZCBleGl0IGNvZGUgMg0KZGViaWFuL3J1bGVzOjI4
+OiByZWNpcGUgZm9yIHRhcmdldCAnb3ZlcnJpZGVfZGhfYXV0b19idWlsZCcgZmFpbGVkDQptYWtl
+WzFdOiAqKiogW292ZXJyaWRlX2RoX2F1dG9fYnVpbGRdIEVycm9yIDINCm1ha2VbMV06IExlYXZp
+bmcgZGlyZWN0b3J5ICcvbW50L3NkaC9hdm5lcmIvY2VwaC1naXRodWInDQpkZWJpYW4vcnVsZXM6
+MjI6IHJlY2lwZSBmb3IgdGFyZ2V0ICdiaW5hcnknIGZhaWxlZA0KbWFrZTogKioqIFtiaW5hcnld
+IEVycm9yIDINCmRwa2ctYnVpbGRwYWNrYWdlOiBlcnJvcjogZmFrZXJvb3QgZGViaWFuL3J1bGVz
+IGJpbmFyeSBnYXZlIGVycm9yIGV4aXQgc3RhdHVzIDINCg0K
