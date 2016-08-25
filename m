@@ -1,40 +1,111 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: cmake on jewel
-Date: Thu, 25 Aug 2016 12:32:39 -0400 (EDT)
-Message-ID: <1686456395.75059503.1472142759254.JavaMail.zimbra@redhat.com>
-References: <1341964413.75029444.1472140127089.JavaMail.zimbra@redhat.com>
+From: Orit Wasserman <owasserm@redhat.com>
+Subject: Re: rgw/s3_bucket_quota.pl failure on the jewel-backports integration branch
+Date: Thu, 25 Aug 2016 17:32:50 +0200
+Message-ID: <CABo9giT5Y4xt3Xs4h2T=jogrLZn+GC=XeogRnbSL3h=qfGC9jg@mail.gmail.com>
+References: <57BEF687.80805@dachary.org> <79549893.74970999.1472136184073.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:60026 "EHLO
-        mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756872AbcHYQcw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2016 12:32:52 -0400
-In-Reply-To: <1341964413.75029444.1472140127089.JavaMail.zimbra@redhat.com>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:38412 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1760054AbcHYQeB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2016 12:34:01 -0400
+Received: by mail-wm0-f42.google.com with SMTP id o80so80774730wme.1
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2016 09:33:35 -0700 (PDT)
+In-Reply-To: <79549893.74970999.1472136184073.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Kefu Chai <kchai@redhat.com>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, Casey Bodley <cbodley@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Folks,
+could be the default quota backport:
+https://github.com/ceph/ceph/pull/10832?
 
-The current head of the jewel branch has developed some cmake breakage relative to earlier in the jewel cycle.  Lots of fixes (mostly by Kefu) landed on master, but haven't been pulled back.  I'm not sure (doubt) that all of those would make sense to backport (though I'm not sure--mostly I'm thinking about pybuild stuff).
-
-Since we'll be relying on jewel for some time, it would still be valuable to be able to do cmake builds for it (prototyping and smoke testing backported changes, etc).  Is fixing cmake on jewel an option?
-
-Thanks,
-
-Matt
-
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+On Thu, Aug 25, 2016 at 4:43 PM, Matt Benjamin <mbenjamin@redhat.com> wrote:
+> Looks like a failure in s3_bucket_quota.  I'm not sure if this could be related to the issues w/bucket lifecycle PR?
+>
+> Matt
+>
+> ----- Original Message -----
+>> From: "Loic Dachary" <loic@dachary.org>
+>> To: "Casey Bodley" <cbodley@redhat.com>
+>> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+>> Sent: Thursday, August 25, 2016 9:45:43 AM
+>> Subject: rgw/s3_bucket_quota.pl failure on the jewel-backports integration branch
+>>
+>> Hi Casey,
+>>
+>> http://pulpito.ceph.com/loic-2016-08-25_06:41:52-rgw-jewel-backports-distro-basic-smithi/
+>>
+>> which runs against the jewel-backports branch has a number of rgw pull
+>> requests
+>>
+>> http://tracker.ceph.com/issues/16344#note-36
+>>
+>> and shows a new failures which look like this:
+>>
+>> http://qa-proxy.ceph.com/teuthology/loic-2016-08-25_06:41:52-rgw-jewel-backports-distro-basic-smithi/384799/teuthology.log
+>>
+>> 2016-08-25T11:16:52.377 INFO:tasks.workunit.client.0.smithi042.stdout:user
+>> qa_user deleted
+>> 2016-08-25T11:16:52.377 INFO:tasks.workunit.client.0.smithi042.stdout:bucket
+>> delete succeeded
+>> 2016-08-25T11:16:52.377 INFO:tasks.workunit.client.0.smithi042.stdout:Bucket
+>> Created: buck_2016_07_25_11_16_51
+>> 2016-08-25T11:16:52.377 INFO:tasks.workunit.client.0.smithi042.stdout:quota
+>> set for the bucket: buck_2016_07_25_11_16_51
+>> 2016-08-25T11:16:52.377 INFO:tasks.workunit.client.0.smithi042.stdout:quota
+>> enabled for the bucket: buck_2016_07_25_11_16_51
+>> 2016-08-25T11:16:52.378 INFO:tasks.workunit.client.0.smithi042.stdout:adding
+>> file to bucket: 10Mb.
+>> 2016-08-25T11:16:52.378 INFO:tasks.workunit.client.0.smithi042.stdout:upload
+>> file successful
+>> 2016-08-25T11:16:52.378
+>> INFO:tasks.workunit.client.0.smithi042.stdout:readding file to bucket:
+>> 10MBfile1
+>> 2016-08-25T11:16:52.378
+>> INFO:tasks.workunit.client.0.smithi042.stdout:readding file success
+>> 2016-08-25T11:16:52.378
+>> INFO:tasks.workunit.client.0.smithi042.stdout:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>> 2016-08-25T11:16:52.378 INFO:tasks.workunit.client.0.smithi042.stdout:Test
+>> case:  FAILED - set max objects and test beyond max objects failed
+>> 2016-08-25T11:16:52.378
+>> INFO:tasks.workunit.client.0.smithi042.stdout:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>>
+>> Our focus in this run is to make sure https://github.com/ceph/ceph/pull/10845
+>> passes. I don't know enough about rgw tests to figure out if it is related
+>> to the commits in this pull request or not.
+>>
+>> What do you think ?
+>>
+>> P.S. The error also seems to be incorrectly handled later on but that's
+>> another issue ;-)
+>>
+>> 2016-08-25T11:16:52.489 INFO:tasks.workunit.client.0.smithi042.stderr:Can't
+>> call method "err" on an undefined value at
+>> /home/ubuntu/cephtest/workunit.client.0/rgw/s3_bucket_quota.pl line 199.
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> --
+> Matt Benjamin
+> Red Hat, Inc.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+>
+> http://www.redhat.com/en/technologies/storage
+>
+> tel.  734-707-0660
+> fax.  734-769-8938
+> cel.  734-216-5309
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
