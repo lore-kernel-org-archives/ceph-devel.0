@@ -1,104 +1,122 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: CephFS and the next jewel release v10.2.3
-Date: Fri, 26 Aug 2016 00:47:35 +0200
-Message-ID: <57BF7587.2010603@dachary.org>
-References: <57BC1089.9080209@dachary.org>
- <CAJ4mKGZ0DAH8Osa4mS8dupxg49GxBeutnvv3e55wSfsO0vt2SQ@mail.gmail.com>
- <CAJ4mKGbOzdxCoFhzmXmbQbs0G2MuxwSR2Qb83WkGGJNXg8TgFg@mail.gmail.com>
- <57BE0B4C.6060104@dachary.org>
- <CAJ4mKGbYD6mKjcH_++E1HF1zRBX5sVWJoq-z=h+_UQBMXEr9Kg@mail.gmail.com>
- <57BF5F5E.3070105@dachary.org>
- <CAJ4mKGaCBhH3ayWrb7PS899kX-9Q+KVLFQSBJZat44KtJg2Lew@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: pg_stat_t is 500+ bytes
+Date: Fri, 26 Aug 2016 01:28:46 +0000
+Message-ID: <BL2PR02MB2115EF13157B893AFBCFA225F4EC0@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <alpine.DEB.2.11.1608231807270.25681@piezo.us.to>
+ <CACJqLyYaXy81jvFj2jiofucYLPY4cmQQtDohJwRTb5ddLzOedA@mail.gmail.com>
+ <CACJqLybzJHWrVF-gOZy6nvUTb0weZJRtqt4rJBO_Nn1viBjDgw@mail.gmail.com>
+ <alpine.DEB.2.11.1608241607360.25681@piezo.us.to>
+ <e20c13f4-ae6f-e06a-ac1b-c5736737e642@redhat.com>
+ <20160824162031.GA26181@predictor>
+ <CACJqLyagS94AefE3vj6pEb5F7J74XTn5zLT+Sm65hHvzSXfqwg@mail.gmail.com>
+ <CACJqLyY3H5cQ9=s6uwUtJrGNygWg-ChifuSCNtbJ+0819dhkzw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from slow1-d.mail.gandi.net ([217.70.178.86]:40480 "EHLO
-        slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755570AbcHZASv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2016 20:18:51 -0400
-Received: from relay5-d.mail.gandi.net (relay5-d.mail.gandi.net [217.70.183.197])
-        by slow1-d.mail.gandi.net (Postfix) with ESMTP id 3551C535D81
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Aug 2016 00:49:20 +0200 (CEST)
-In-Reply-To: <CAJ4mKGaCBhH3ayWrb7PS899kX-9Q+KVLFQSBJZat44KtJg2Lew@mail.gmail.com>
+Received: from mail-sn1nam02on0072.outbound.protection.outlook.com ([104.47.36.72]:38656
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751569AbcHZB2t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 25 Aug 2016 21:28:49 -0400
+In-Reply-To: <CACJqLyY3H5cQ9=s6uwUtJrGNygWg-ChifuSCNtbJ+0819dhkzw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomai@xsky.com>, =?utf-8?B?UGlvdHIgRGHFgmVr?= <branch@predictor.org.pl>
+Cc: Mark Nelson <mnelson@redhat.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-https://github.com/ceph/ceph/pull/10847 is merged
-
-On 25/08/2016 23:33, Gregory Farnum wrote:
-> You've got two jobs never getting locks, 2 dead on Java linker issues
-> (which probably never worked; they aren't any kind of release
-> blocker), and one OSD crash. The crash is
-> 
-> 2016-08-25 09:21:45.616945 7fa22623a700 -1 os/filestore/FileStore.cc:
-> In function 'void
-> FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int,
-> ThreadPool::TPHandle*)' thread 7fa22623a700 time 2016-08-25
-> 09:21:45.612229
-> os/filestore/FileStore.cc: 2912: FAILED assert(0 == "unexpected error")
-> 
-> That most often is an fs/disk issue of some kind, but the kernel logs
-> are sadly empty so I can't guarantee it.
-> 
-> 
-> On Thu, Aug 25, 2016 at 2:13 PM, Loic Dachary <loic@dachary.org> wrote:
->> Hi,
->>
->> The run completed at http://pulpito.ceph.com/loic-2016-08-25_06:39:08-fs-jewel-backports-distro-basic-smithi/ with no valgrind error but a few other failures. Note that it is based on the jewel-backports branch which contains a few more backports in addition to https://github.com/ceph/ceph/pull/10847 and I'm not sure what to blame yet. I'll look into it tomorrow unless you beat me to it :-)
->>
->> Cheers
->>
->> On 24/08/2016 23:03, Gregory Farnum wrote:
->>> On Wed, Aug 24, 2016 at 2:02 PM, Loic Dachary <loic@dachary.org> wrote:
->>>>
->>>>
->>>> On 24/08/2016 22:46, Gregory Farnum wrote:
->>>>> On Wed, Aug 24, 2016 at 11:11 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
->>>>>> On Tue, Aug 23, 2016 at 1:59 AM, Loic Dachary <loic@dachary.org> wrote:
->>>>>>> Hi John,
->>>>>>>
->>>>>>> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel passed the fs suite (http://tracker.ceph.com/issues/16344#note-30 except for three valgrind failures). Do you think the jewel branch is ready for QE to start their own round of testing ?
->>>>>>>
->>>>>>> Cheers
->>>>>>>
->>>>>>> P.S. CC'ing Greg because John is on vacation, in case a decision is to be made before he returns.
->>>>>>
->>>>>> Ugh, I went to check these valgrind failures and they're a failed
->>>>>> mutex assert on shutdown. Let me dig into what's happening. :(
->>>>>> -Greg
->>>>>
->>>>> Hmm, we seem to have some badly-colliding backports. If you look at
->>>>> commit ac449472df2978123192d5f22247d8b8bc5efb28 and MDSRank.cc line
->>>>> 242, you'll see it does mds_lock.Unlock() twice in quick succession.
->>>>> :(
->>>>>
->>>>> One of them came in from 7c2eab19, and the other from 1d3a8168. I
->>>>> think maybe the patches got reordered in their backport order or
->>>>> something.
->>>>>
->>>>> Patrick, can you give https://github.com/ceph/ceph/pull/10847 a quick
->>>>> review? Loic, can you then run the failed tests against a backport
->>>>> branch which includes that patch?
->>>>
->>>> https://github.com/ceph/ceph/pull/10847 has been pushed as part of the jewel-backports integration branch right now and I'll schedule a fs run as soon as it finishes building. Thanks for the quick fix !
->>>
->>> Sure. Assuming that works out everything else looked good to me. :)
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+U2FnZSwNCkkgY2FuIHNlZSBmb3Igc3RhdGlzdGljcyB3ZSBhcmUgc3RvcmluZyA0MCBieXRlcyBm
+b3IgZWFjaCBJTy4uDQoNCk1lcmdlKCBQcmVmaXggPSBUIGtleSA9ICdibHVlc3RvcmVfc3RhdGZz
+JyBWYWx1ZSBzaXplID0gNDApDQoNClNob3VsZCB3ZSByZWFsbHkgc3RvcmUgaXQgb24gZWFjaCBJ
+TyA/DQoNCjEuIElNTywgZ2F0aGVyaW5nL3N0b3Jpbmcgc3RhdHMgc2hvdWxkIGJlIGNvbmZpZ3Vy
+YWJsZQ0KDQoyLiBJZiBlbmFibGVkLCBJIHRoaW5rIHdlIGNhbiBoYXZlIGNvdW50ZXJzIG1haW50
+YWluZWQgaW4gbWVtb3J5IGFuZCBwZXJzaXN0IHRoYXQgdG8gZGIgYmV0d2VlbiBzb21lIGNvbmZp
+Z3VyYWJsZSBpbnRlcnZhbCA/DQoNCkJUVywgYXMgeW91IG1lbnRpb25lZCwgcGdfaW5mbyBpcyBo
+dWdlLCA4NTUgYnl0ZXMuDQoNClB1dCggUHJlZml4ID0gTSBrZXkgPSAweDAwMDAwMDAwMDAwMDA3
+NDYnLl9pbmZvJyBWYWx1ZSBzaXplID0gODU1KQ0KDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5h
+dGgNCg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25l
+ckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQpTZW50OiBUaHVyc2RheSwgQXVndXN0IDI1LCAy
+MDE2IDU6NTYgQU0NClRvOiBQaW90ciBEYcWCZWsNCkNjOiBNYXJrIE5lbHNvbjsgU2FnZSBXZWls
+OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IHBnX3N0YXRfdCBpcyA1
+MDArIGJ5dGVzDQoNCk9uIFRodSwgQXVnIDI1LCAyMDE2IGF0IDg6NTQgUE0sIEhhb21haSBXYW5n
+IDxoYW9tYWlAeHNreS5jb20+IHdyb3RlOg0KPiBJIHRoaW5rIHRoZXJlIGV4aXN0cyBhIGxvdCBv
+ZiBmaWVsZHMgY2FuJ3QgYmUgZGlzY2FyZGVkIHZpYSBqdWRnaW5nDQo+IDBzLCBsaWtlIHV0aW1l
+X3QsIGVwb2NoX3QuIEEgc2ltcGxlIHdheSBpcyB0byBjb21wYXJlIHdpdGggcHJldmlvdXMNCj4g
+cGdfaW5mb190Lg0KDQpPaCwgc29ycnkuIFdlIG1heSBjb3VsZCB1c2UgYSBmcmVzaCBwZ19pbmZv
+X3QgdG8gaW5kaWNhdGUuIEJ1dCBiZWxvdyBhbHNvIGNvdWxkIGFwcGx5IHRoaXMgd2F5Lg0KDQo+
+DQo+IEJUVywgSSB3YW50IHRvIG1lbnRpb25kIHBnX2luZm9fdCBlbmNvZGluZyBvY2N1cnMgNi4w
+NSUgY3B1IHRpbWUgaW4gcGcNCj4gdGhyZWFkKHRocmVhZCBsZXZlbCBub3QgcHJvY2VzcyBsZXZl
+bCkuDQo+DQo+IGxvb2tzIHdlIGhhdmUgdGhyZWUgb3B0aW1pemF0aW9uIGZyb20gbWFyayBhbmQg
+UGlvdHI6DQo+DQo+IDEuIHJlY29uc3RydWN0IHBnX2luZm9fdCBhbmQgbWFrZSBoaWdoIGZyZXF1
+ZW50IGZpZWxkcyB0b2dldGhlci4NCj4gMi4gY2hhbmdlIHNvbWUgZmllbGRzIHRvIHNtYWxsZXIg
+Yml0cw0KPiAzLiB1c2VzIFNJTUQgdG8gb3B0aW1pemUgbG93IGZyZXF1ZW5jeSBmaWVsZHMgZGlm
+ZmVyZW5jZQ0KPiBjb21wYXJpc29uKG9wdGlvbmFsKQ0KPg0KPiBpbnRlbCBTU0U0LjIgcGNtcGlz
+dHJtIGluc3RydWN0aXZlIGNvdWxkIGRvIHZlcnkgZ29vZCAxMjhieXRlcw0KPiBjb21wYXJpc29u
+LCBwZ19pbmZvX3QgaXMgYWJvdmUgNzAwYnl0ZXM6DQo+DQo+IGlubGluZSBjb25zdCBjaGFyICpz
+a2lwX3NhbWVfMTI4X2J5dGVzX1NJTUQoY29uc3QgY2hhciogcCwgY29uc3QgY2hhciogcDIpIHsN
+Cj4gICAgIGNvbnN0IF9fbTEyOGkgdyA9IF9tbV9sb2FkX3NpMTI4KChjb25zdCBfX20xMjhpICop
+cDIpOw0KPg0KPiAgICAgZm9yICg7OyBwICs9IDE2KSB7DQo+ICAgICAgICAgY29uc3QgX19tMTI4
+aSBzID0gX21tX2xvYWRfc2kxMjgoKGNvbnN0IF9fbTEyOGkgKilwKTsNCj4gICAgICAgICBjb25z
+dCB1bnNpZ25lZCByID0gX21tX2N2dHNpMTI4X3NpMzIoX21tX2NtcGlzdHJtKHcsIHMsDQo+ICAg
+ICAgICAgICAgIF9TSUREX1VCWVRFX09QUyB8IF9TSUREX0NNUF9FUVVBTF9BTlkgfA0KPiAgICAg
+ICAgICAgICBfU0lERF9CSVRfTUFTSyB8IF9TSUREX05FR0FUSVZFX1BPTEFSSVRZKSk7DQo+DQo+
+ICAgICAgICAgaWYgKHIgIT0gMCkgLy8gc29tZSBvZiBjaGFyYWN0ZXJzIGlzbid0IGVxdWFsDQo+
+ICAgICAgICAgICAgIHJldHVybiBwICsgX19idWlsdGluX2ZmcyhyKSAtIDE7DQo+ICAgICB9DQo+
+IH0NCj4NCj4gT24gVGh1LCBBdWcgMjUsIDIwMTYgYXQgMTI6MjAgQU0sIFBpb3RyIERhxYJlayA8
+YnJhbmNoQHByZWRpY3Rvci5vcmcucGw+IHdyb3RlOg0KPj4gT24gV2VkLCBBdWcgMjQsIDIwMTYg
+YXQgMTE6MTI6MjRBTSAtMDUwMCwgTWFyayBOZWxzb24gd3JvdGU6DQo+Pj4NCj4+Pg0KPj4+IE9u
+IDA4LzI0LzIwMTYgMTE6MDkgQU0sIFNhZ2UgV2VpbCB3cm90ZToNCj4+PiA+T24gV2VkLCAyNCBB
+dWcgMjAxNiwgSGFvbWFpIFdhbmcgd3JvdGU6DQo+Pj4gPj5PbiBXZWQsIEF1ZyAyNCwgMjAxNiBh
+dCAxMTowMSBBTSwgSGFvbWFpIFdhbmcgPGhhb21haUB4c2t5LmNvbT4gd3JvdGU6DQo+Pj4gPj4+
+T24gV2VkLCBBdWcgMjQsIDIwMTYgYXQgMjoxMyBBTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQu
+Y29tPiB3cm90ZToNCj4+PiA+Pj4+VGhpcyBpcyBodWdlLiAgSXQgdGFrZXMgdGhlIHBnX2luZm9f
+dCBzdHIgZnJvbSAzMDYgYnl0ZXMgdG8gODQ3DQo+Pj4gPj4+PmJ5dGVzLCBhbmQgdGhpcyBfaW5m
+byBvbWFwIGtleSBpcyByZXdyaXR0ZW4gb24gKmV2ZXJ5KiBJTy4NCj4+PiA+Pj4+DQo+Pj4gPj4+
+PldlIGNvdWxkIHNocmluayB0aGlzIGRvd24gc2lnbmlmaWNhbnQgd2l0aCB2YXJpbnQgYW5kL29y
+IGRlbHRhDQo+Pj4gPj4+PmVuY29kaW5nIHNpbmNlIGEgaHVnZSBwb3J0aW9uIG9mIGl0IGlzIGp1
+c3QgYSBidW5jaCBvZiB1aW50NjRfdA0KPj4+ID4+Pj5jb3VudGVycy4gIFRoaXMgd2lsbCBwcm9i
+YWJseSBjb3N0IHNvbWUgQ1BVIHRpbWUsIGJ1dCBPVE9IIGl0J2xsDQo+Pj4gPj4+PmFsc28gc2hy
+aW5rIG91ciBtZXRhZGF0YSBkb3duIGEgZmFpciBiaXQgdG9vIHdoaWNoIHdpbGwgcGF5IG9mZiBs
+YXRlci4NCj4+PiA+Pj4+DQo+Pj4gPj4+PkFueWJvZHkgd2FudCB0byB0YWNrbGUgdGhpcz8NCj4+
+PiA+Pj4NCj4+PiA+Pj53aGF0IGFib3V0IHNlcGFyYXRpbmcgIm9iamVjdF9zdGF0X2NvbGxlY3Rp
+b25fdCBzdGF0cyIgZnJvbSBwZ19zdGF0X3Q/DQo+Pj4gPj4+cGcgaW5mbyBzaG91bGQgYmUgdW5j
+aGFuZ2VkIGZvciBtb3N0IG9mIHRpbWVzLCB3ZSBjb3VsZCBvbmx5DQo+Pj4gPj4+dXBkYXRlIG9i
+amVjdCByZWxhdGVkIHN0YXRzLiBUaGlzIG1heSBoZWxwIHRvIHJlZHVjZSBoYWxmIGJ5dGVzLg0K
+Pj4+ID4NCj4+PiA+SSBkb24ndCB0aGluayB0aGlzIHdpbGwgd29yaywgc2luY2UgZXZlcnkgb3Ag
+Y2hhbmdlcyBsYXN0X3VwZGF0ZSBpbg0KPj4+ID5wZ19pbmZvX3QgKmFuZCogdGhlIHN0YXRzICh3
+cml0ZSBvcCBjb3VudCwgdG90YWwgYnl0ZXMsIG9iamVjdHMsIGV0Yy4pLg0KPj4+ID4NCj4+PiA+
+Pk9yIHdlIG9ubHkgc3RvcmUgaW5jcmVtZW50IHZhbHVlcyBhbmQga2VlcCB0aGUgZnVsbCBpbiBt
+ZW1vcnkobWF5DQo+Pj4gPj5yZWR1Y2UgdG8gMjAtMzBieXRlcykuIEluIHBlcmlvZCB0aW1lIHdl
+IHN0b3JlIHRoZSBmdWxsDQo+Pj4gPj5zdHJ1Y3R1cmUob25seSBodW5kcmVkcyBvZiBieXRlcyku
+Li4uDQo+Pj4gPg0KPj4+ID5BIGRlbHRhIGlzIHByb2JhYmx5IHZlcnkgY29tcHJlc3NpYmxlIChv
+bmx5IGEgZmV3IGZpZWxkcyBpbiB0aGUNCj4+PiA+c3RhdHMgc3RydWN0IGNoYW5nZSkuICBUaGUg
+cXVlc3Rpb24gaXMgaG93IGZhc3QgY2FuIHdlIG1ha2UgaXQgaW4gQ1BVIHRpbWUuDQo+Pj4gPlBy
+b2JhYmx5IGEgc2ltcGxlIGRlbHRhICh3aGljaCB3aWxsIGJlIGFsbW9zdCBhbGwgMCdzKSBhbmQg
+YQ0KPj4+ID50cml2aWFsIHJ1bi1sZW5ndGgtZW5jb2Rpbmcgc2NoZW1lIHRoYXQganVzdCBnZXRz
+IHJpZCBvZiB0aGUgMCdzDQo+Pj4gPndvdWxkIGRvIHdlbGwgZW5vdWdoLi4uDQo+Pj4NCj4+PiBE
+byB3ZSBoYXZlIGFueSByb3VnaCBpZGVhIG9mIGhvdyBtYW55L29mdGVuIGNvbnNlY3V0aXZlIDBz
+IHdlIGVuZCB1cA0KPj4+IHdpdGggaW4gdGhlIGN1cnJlbnQgZW5jb2Rpbmc/DQo+Pg0KPj4gT3Ig
+aG93IGhpZ2ggdGhlc2UgY291bnRlcnMgZ2V0PyBXZSBjb3VsZCB0cnkgdHJhbnNwb3NpbmcgdGhl
+IG1hdHJpeA0KPj4gbWFkZSBvZiB0aG9zZSBjb3VudGVycy4gQXQgbGVhc3QgdGhlIHR3byBtb3N0
+IHNpZ25pZmljYW50IGJ5dGVzIGluDQo+PiBtb3N0IG9mIHRob3NlIGNvdW50ZXJzIGFyZSBtb3N0
+bHkgemVyb3MsIGFuZCBhZnRlciB0cmFuc3Bvc2luZywNCj4+IHNpbXBsZSBSTEUgd291bGQgYmUg
+ZmVhc2libGUuIEluIGFueSBjYXNlLCBJJ20gbm90IHN1cmUgaWYgKmFsbCogb2YNCj4+IHRoZXNl
+IGZpZWxkcyBuZWVkIHRvIGJlIHVpbnQ2NF90Lg0KPj4NCj4+IC0tDQo+PiBQaW90ciBEYcWCZWsN
+Cj4+IGJyYW5jaEBwcmVkaWN0b3Iub3JnLnBsDQo+PiBodHRwOi8vYmxvZy5wcmVkaWN0b3Iub3Jn
+LnBsDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
+c3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
+bW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtl
+cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlv
+biBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBv
+bmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92
+ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNp
+cGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
+cyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRp
+c3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGli
+aXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBw
+bGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24g
+YWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlz
+IG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0
+cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0K
