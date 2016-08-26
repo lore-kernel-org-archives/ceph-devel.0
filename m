@@ -1,38 +1,49 @@
-From: "Robin H. Johnson" <robbat2@gentoo.org>
-Subject: Re: Ceph 0.94.8 Hammer released
-Date: Fri, 26 Aug 2016 22:52:18 +0000
-Message-ID: <robbat2-20160826T225027-679783010Z@orbis-terrarum.net>
-References: <alpine.DEB.2.11.1608262128480.27294@piezo.us.to>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: debugging librbd to a VM
+Date: Fri, 26 Aug 2016 21:08:30 +0000
+Message-ID: <MWHPR12MB19342F27DDBF165F5BAE4ADC9BEC0@MWHPR12MB1934.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.gentoo.org ([140.211.166.183]:58614 "EHLO smtp.gentoo.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754113AbcHZWwT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 26 Aug 2016 18:52:19 -0400
-Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by smtp.gentoo.org (Postfix) with ESMTPS id 4F16D3407D0
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Aug 2016 22:52:18 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1608262128480.27294@piezo.us.to>
+Received: from mail-sn1nam02on0078.outbound.protection.outlook.com ([104.47.36.78]:17819
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754508AbcHZXom (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 26 Aug 2016 19:44:42 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Aug 26, 2016 at 09:31:45PM +0000, Sage Weil wrote:
-> * For packages, see http://ceph.com/docs/master/install/get-packages
-I don't see any .8 packages for Debian/Ubuntu yet in the older path:
-https://download.ceph.com/debian-hammer/pool/main/c/ceph/
+I have two small clusters configured with the same version of Ceph and the =
+same OS version.
+(different processor hardware)
 
-And the flavors variant path:
-https://download.ceph.com/debian-hammer/flavors/default/pool/main/c/ceph/
-does not contain Hammer builds for Precise yet.
+On these clusters I have bootable RBD images that I expect a VM to boot fro=
+m.
+On one cluster, the VM does not boot from the image.  On the other cluster,=
+ it boots fine.
+On the failing cluster, a VM can boot fine from the base qcow2 image from w=
+hich the rbd image was created.  It's only rbd images that are causing prob=
+lems for the VM.
 
--- 
-Robin Hugh Johnson
-Gentoo Linux: Dev, Infra Lead, Foundation Trustee & Treasurer
-E-Mail   : robbat2@gentoo.org
-GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
-GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
+I would like to enable some debug logging that could tell where the two clu=
+sters are diverging.
+
+I tried adding
+        debug rbd =3D 20
+        log file =3D /tmp/cbt/ceph/log/$name.log
+
+I do see some rbd debug messages to stderr during operations like rbd clone=
+, etc. but I don't see any log files created in /tmp/cbt/ceph or /var/log/c=
+eph or any messages when librbd is being used by say qemu-img convert, or b=
+y qemu-kvm.
+
+Is there a way to see detailed debug messages for librbd?
+
+Or is there a better way to see where things are diverging between these tw=
+o clusters?
+(note: I tried lttng but could not get it to record anything)
+
+-- Tom
