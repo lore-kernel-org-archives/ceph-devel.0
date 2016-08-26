@@ -1,36 +1,38 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: make check failure on bluefs
-Date: Fri, 26 Aug 2016 21:42:23 +0000
-Message-ID: <BL2PR02MB211509DBFFB5AA0985DCF543F4EC0@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: "Robin H. Johnson" <robbat2@gentoo.org>
+Subject: Re: Ceph 0.94.8 Hammer released
+Date: Fri, 26 Aug 2016 22:52:18 +0000
+Message-ID: <robbat2-20160826T225027-679783010Z@orbis-terrarum.net>
+References: <alpine.DEB.2.11.1608262128480.27294@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0042.outbound.protection.outlook.com ([104.47.37.42]:17680
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751036AbcHZVm1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 26 Aug 2016 17:42:27 -0400
-Content-Language: en-US
+Received: from smtp.gentoo.org ([140.211.166.183]:58614 "EHLO smtp.gentoo.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754113AbcHZWwT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 26 Aug 2016 18:52:19 -0400
+Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by smtp.gentoo.org (Postfix) with ESMTPS id 4F16D3407D0
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Aug 2016 22:52:18 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1608262128480.27294@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Sage,
-Not able to reproduce in the latest master with my setup. I have updated th=
-e following tracker with the relevant logs.
+On Fri, Aug 26, 2016 at 09:31:45PM +0000, Sage Weil wrote:
+> * For packages, see http://ceph.com/docs/master/install/get-packages
+I don't see any .8 packages for Debian/Ubuntu yet in the older path:
+https://download.ceph.com/debian-hammer/pool/main/c/ceph/
 
-http://tracker.ceph.com/issues/17021
+And the flavors variant path:
+https://download.ceph.com/debian-hammer/flavors/default/pool/main/c/ceph/
+does not contain Hammer builds for Precise yet.
 
-Thanks & Regards
-Somnath
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this message in error and that any review, disse=
-mination, distribution, or copying of this message is strictly prohibited. =
-If you have received this communication in error, please notify the sender =
-by telephone or e-mail (as shown above) immediately and destroy any and all=
- copies of this message in your possession (whether hard copies or electron=
-ically stored copies).
+-- 
+Robin Hugh Johnson
+Gentoo Linux: Dev, Infra Lead, Foundation Trustee & Treasurer
+E-Mail   : robbat2@gentoo.org
+GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
