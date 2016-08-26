@@ -1,32 +1,33 @@
-From: Michal Marek <mmarek@suse.cz>
-Subject: Re: [PATCH] ceph: fix symbol versioning for ceph_monc_do_statfs
-Date: Fri, 26 Aug 2016 14:40:34 +0200
-Message-ID: <7bd07499-ac33-9659-0a8a-a3ddfa96f13d@suse.cz>
-References: <1465823125-171114-1-git-send-email-arnd@arndb.de>
+From: Sage Weil <sweil@redhat.com>
+Subject: bluestore blobs
+Date: Fri, 26 Aug 2016 17:51:57 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1608261747440.24244@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1465823125-171114-1-git-send-email-arnd@arndb.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Sage Weil <sage@redhat.com>, Jan Beulich <jbeulich@suse.com>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Alex Elder <elder@linaro.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:57964 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751643AbcHZR7b (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 26 Aug 2016 13:59:31 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: allen.samuels@sandisk.com
+Cc: ceph-devel@vger.kernel.org
 
-On 2016-06-13 15:04, Arnd Bergmann wrote:
-> The genksyms helper in the kernel cannot parse a type definition
-> like "typeof(((type *)0)->keyfld)" that is used in the DEFINE_RB_FUNCS
-> helper, causing the following EXPORT_SYMBOL() statement to be ignored
-> when computing the crcs, and triggering a warning about this:
-> 
-> WARNING: "ceph_monc_do_statfs" [fs/ceph/ceph.ko] has no CRC
+Hi Allen,
 
-FYI, Nick fixed the genksyms state machine to cope with this syntax. See
-commits
+The "blobs must be confined to a extent map shard" rule is still somewhat 
+unsatisfying to me.  There's another easy possibility, though: we 
+allow blobs to span extent map shards, and when they do, we stuff them 
+directly in the onode.  The number of such blobs will always be small 
+(no more than the number of extent map shards), so I don't think size is a 
+concern.  And we'll always already have them loaded up when we bring any 
+particular shard in, so we don't need to worry about any additional 
+complexity around paging them in.  And we avoid the slightly annoying cut 
+points on compressed extents when they cross such boundaries.
 
-5c6f3225d00d kbuild: Regenerate genksyms lexer
-4fab91605a6b kbuild: genksyms fix for typeof handling
+This also avoids some of the tuning practicalities that were annoying me 
+(does a global config option control where the enforced cut points are?  
+what happens if that changes on an existing store?)
 
-in today's linux-next. So the workaround can eventually be reverted.
-
-Michal
+sage
