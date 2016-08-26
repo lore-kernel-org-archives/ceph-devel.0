@@ -1,49 +1,54 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: debugging librbd to a VM
-Date: Fri, 26 Aug 2016 21:08:30 +0000
-Message-ID: <MWHPR12MB19342F27DDBF165F5BAE4ADC9BEC0@MWHPR12MB1934.namprd12.prod.outlook.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: should we remove autotools from master?
+Date: Fri, 26 Aug 2016 23:44:15 +0000
+Message-ID: <856563CD-6D2D-4248-B688-4A146A6F9C4B@Teradata.com>
+References: <alpine.DEB.2.11.1608231356290.25681@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0078.outbound.protection.outlook.com ([104.47.36.78]:17819
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754508AbcHZXom (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 26 Aug 2016 19:44:42 -0400
+Received: from nat13.teradata.com ([153.65.16.13]:33302 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1754593AbcHZXom (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Aug 2016 19:44:42 -0400
+In-Reply-To: <alpine.DEB.2.11.1608231356290.25681@piezo.us.to>
 Content-Language: en-US
+Content-ID: <C27315CF0AA74C4CA7767C08CD71CAC6@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Nathan Cutler <ncutler@suse.cz>, Brad Hubbard <bhubbard@redhat.com>, Avner Ben Hanoch <avnerb@mellanox.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-I have two small clusters configured with the same version of Ceph and the =
-same OS version.
-(different processor hardware)
-
-On these clusters I have bootable RBD images that I expect a VM to boot fro=
-m.
-On one cluster, the VM does not boot from the image.  On the other cluster,=
- it boots fine.
-On the failing cluster, a VM can boot fine from the base qcow2 image from w=
-hich the rbd image was created.  It's only rbd images that are causing prob=
-lems for the VM.
-
-I would like to enable some debug logging that could tell where the two clu=
-sters are diverging.
-
-I tried adding
-        debug rbd =3D 20
-        log file =3D /tmp/cbt/ceph/log/$name.log
-
-I do see some rbd debug messages to stderr during operations like rbd clone=
-, etc. but I don't see any log files created in /tmp/cbt/ceph or /var/log/c=
-eph or any messages when librbd is being used by say qemu-img convert, or b=
-y qemu-kvm.
-
-Is there a way to see detailed debug messages for librbd?
-
-Or is there a better way to see where things are diverging between these tw=
-o clusters?
-(note: I tried lttng but could not get it to record anything)
-
--- Tom
+DQoNCj4gT24gQXVnIDIzLCAyMDE2LCBhdCA2OjU4IEFNLCBTYWdlIFdlaWwgPHN3ZWlsQHJlZGhh
+dC5jb20+IHdyb3RlOg0KPiANCj4gU2hvdWxkIHdlIHJlbW92ZSB0aGUgYXV0b3Rvb2xzIHN0dWZm
+IGZyb20gbWFzdGVyPw0KPiANCj4gWWVzOg0KPiAtIEl0IHdvbid0IGJlIG1haW50YWluZWQNCj4g
+LSBJdCBzdWNrcw0KPiAtIEl0IGNvbmZ1c2VzIHBlb3BsZSBhbmQgdGhleSB1c2UgaXQgYnkgbWlz
+dGFrZQ0KPiAtIFdlJ2xsIGZpbmQgYW55IGJ1aWxkIHNjcmlwdHMgZXRjIHRoYXQgaGF2ZW4ndCBi
+ZWVuIGNvbnZlcnRlZCBzb29uZXIgDQo+IHJhdGhlciB0aGFuIGxhdGVyDQo+IA0KPiBObzoNCj4g
+LSBPdGhlciBhcmNoaXRlY3R1cmVzIG1pZ2h0IHJlbHkgb24gaXQNCg0KSXQgd291bGQgYmUgZ29v
+ZCB0byBrbm93IGhvdyBtYW55IGV4aXN0aW5nIGFyY2hpdGVjdHVyZXMgd2lsbCBiZSBicm9rZW4g
+d2l0aCBkcm9wcGluZyBvZiBhdXRvbWFrZS4gTm9ib2R5IGhhcyBzY3JlYW1lZCBsb3VkIGVub3Vn
+aCB5ZXQsIHNvIGxvb2tzIGxpa2UgaXTigJlzIG5vdCBhIGJpZyBpc3N1ZS4NCg0KTml0aW4NCg0K
+PiAtIEl0J3MgcG9zc2libGUgc29tZSBidWlsZCBzY3JpcHRzIGhhdmVuJ3QgYmVlbiBjb252ZXJ0
+IHlldA0KPiANCj4gSSdtIHRoaW5raW5nIHllcz8NCj4gc2FnZQ0KPiANCj4gDQo+IE9uIFR1ZSwg
+MjMgQXVnIDIwMTYsIE5hdGhhbiBDdXRsZXIgd3JvdGU6DQo+IA0KPj4+IFRoYXQncyBhIGRpZmZl
+cmVudCBtYWtlLWRlYihzKS5zaA0KPj4gDQo+PiBBbGxvdyBtZSB0byBxdWFsaWZ5IHRoYXQgc3Rh
+dGVtZW50LiBUaGlzIHRocmVhZCBzZWVtcyB0byBiZSBhYm91dA0KPj4gDQo+PiBodHRwczovL2dp
+dGh1Yi5jb20vY2VwaC9jZXBoL2Jsb2IvbWFzdGVyL21ha2UtZGVicy5zaA0KPj4gDQo+PiB3aGls
+ZSB0aGUgIm1ha2UtZGViLnNoIiBJIGFtIHdvcmtpbmcgb24gaXMNCj4+IA0KPj4gaHR0cHM6Ly9n
+aXRodWIuY29tL2NlcGgvY2VwaC1xYS1zdWl0ZS9ibG9iL21hc3Rlci90YXNrcy9idWlsZHBhY2th
+Z2VzL21ha2UtZGViLnNoDQo+PiANCj4+IHdoaWNoIGlzIHVzZWQgd2l0aCB0aGUgdGV1dGhvbG9n
+eS1vcGVuc3RhY2sgYmFja2VuZC4gSG93ZXZlciwgSSBzZWUgdGhlIHR3bw0KPj4gc2NyaXB0cyBh
+cmUgc2ltaWxhci4NCj4+IA0KPj4gSW4gZ2VuZXJhbCwgYWx0aG91Z2ggdGhlIGF1dG90b29scyBz
+dHVmZiBpcyBzdGlsbCB0aGVyZSBpbiBtYXN0ZXIsIGl0IGlzIG5vdA0KPj4gbWFpbnRhaW5lZCBh
+bmQgc2hvdWxkIG5vdCBiZSBleHBlY3RlZCB0byB3b3JrIChvciBjb250aW51ZSB0byB3b3JrKS4g
+QWxsIGJ1aWxkDQo+PiBpbmZyYXN0cnVjdHVyZSB0YXJnZXRpbmcgbWFzdGVyIHNob3VsZCBiZSBj
+b252ZXJ0ZWQgdG8gY21ha2UuDQo+PiANCj4+IE5hdGhhbg0KPj4gLS0NCj4+IFRvIHVuc3Vic2Ny
+aWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVs
+IiBpbg0KPj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
+cmcNCj4+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
+b3Jkb21vLWluZm8uaHRtbA0KPj4gDQo+PiANCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
+aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+IHRo
+ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+IE1vcmUg
+bWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
+aHRtbA0KDQo=
