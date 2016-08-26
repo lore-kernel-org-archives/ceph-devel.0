@@ -1,35 +1,36 @@
-From: Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph 0.94.8 Hammer released
-Date: Fri, 26 Aug 2016 21:31:45 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1608262128480.27294@piezo.us.to>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: make check failure on bluefs
+Date: Fri, 26 Aug 2016 21:42:23 +0000
+Message-ID: <BL2PR02MB211509DBFFB5AA0985DCF543F4EC0@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
-	<mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
-List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
-	<mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-announce-Qp0mS5GaXlQ@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-cys01nam02on0042.outbound.protection.outlook.com ([104.47.37.42]:17680
+        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751036AbcHZVm1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 26 Aug 2016 17:42:27 -0400
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This Hammer point release fixes several bugs.
+Sage,
+Not able to reproduce in the latest master with my setup. I have updated th=
+e following tracker with the relevant logs.
 
-We recommend that all hammer v0.94.x users upgrade.
+http://tracker.ceph.com/issues/17021
 
-For the changelog, please see
-
-	http://docs.ceph.com/docs/master/release-notes/#v0-94-8-hammer
-
-Getting Ceph
-------------
-
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-0.94.8.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+Thanks & Regards
+Somnath
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
