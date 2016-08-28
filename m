@@ -1,152 +1,498 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: pg_stat_t is 500+ bytes
-Date: Sat, 27 Aug 2016 00:00:10 +0000
-Message-ID: <BL2PR02MB2115A0503FC241BBF5281E04F4EF0@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <alpine.DEB.2.11.1608231807270.25681@piezo.us.to>
- <CACJqLyYaXy81jvFj2jiofucYLPY4cmQQtDohJwRTb5ddLzOedA@mail.gmail.com>
- <CACJqLybzJHWrVF-gOZy6nvUTb0weZJRtqt4rJBO_Nn1viBjDgw@mail.gmail.com>
- <alpine.DEB.2.11.1608241607360.25681@piezo.us.to>
- <e20c13f4-ae6f-e06a-ac1b-c5736737e642@redhat.com>
- <20160824162031.GA26181@predictor>
- <CACJqLyagS94AefE3vj6pEb5F7J74XTn5zLT+Sm65hHvzSXfqwg@mail.gmail.com>
- <CACJqLyY3H5cQ9=s6uwUtJrGNygWg-ChifuSCNtbJ+0819dhkzw@mail.gmail.com>
+Subject: RE: Bluestore assert
+Date: Sun, 28 Aug 2016 14:37:10 +0000
+Message-ID: <BL2PR02MB211585A7C9F55044BECAF77FF4EE0@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB2115443F5ACA3459E2CEBFBAF41D0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608111635230.17762@piezo.us.to>
+ <BL2PR02MB2115D3D79C6194FD81E598F3F41E0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608112226280.17762@piezo.us.to>
+ <BL2PR02MB2115BB77EA5BA38BCF48E52DF4110@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608151952230.14754@piezo.us.to>
+ <BL2PR02MB21150BE782012D52DBB8FF26F4130@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <BL2PR02MB2115FFBBBF5A04D62910A239F4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608222156580.25681@piezo.us.to>
+  <BL2PR02MB2115C713F6AF6B989B4DC536F4E80@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608231343530.25678@piezo.us.to>
+  <CY1PR02MB2123D6119409C1F61BF39A46F4EA0@CY1PR02MB2123.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608242042510.25681@piezo.us.to>
+ <CY1PR02MB21235A07222322180C0E2BDFF4EA0@CY1PR02MB2123.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1608242132460.25681@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn3nam01on0076.outbound.protection.outlook.com ([104.47.33.76]:31072
-        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+Received: from mail-by2nam01on0076.outbound.protection.outlook.com ([104.47.34.76]:11744
+        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754593AbcH0APq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 26 Aug 2016 20:15:46 -0400
+        id S1752371AbcH1OhO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 28 Aug 2016 10:37:14 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>, =?utf-8?B?UGlvdHIgRGHFgmVr?= <branch@predictor.org.pl>
-Cc: Mark Nelson <mnelson@redhat.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-U2FnZS9TYW0sDQpJIHdhcyBnb2luZyB0aHJvdWdoIHRoZSBwZ19pbmZvX3Qgc3RydWN0dXJlcyBh
-bmQgaXQgc2VlbXMgdGhlIGZvbGxvd2luZyBmaWVsZHMgYXJlIGR1cGxpY2F0ZXMgYW1vbmcgdGhl
-IGRpZmZlcmVudCBpbm5lciBzdHJ1Y3R1cmVzLg0KDQpldmVyc2lvbl90IGxhc3Rfc2NydWI7ICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAtPiAgIGR1cGxpY2F0ZSB3aXRoaW4gIHBnX3N0
-YXRfdCwgcGdfaGlzdG9yeV90DQpldmVyc2lvbl90IGxhc3RfZGVlcF9zY3J1YjsgICAgICAgICAg
-ICAgICAgICAgIC0+IGR1cGxpY2F0ZSB3aXRoaW4gIHBnX3N0YXRfdCwgcGdfaGlzdG9yeV90DQp1
-dGltZV90IGxhc3Rfc2NydWJfc3RhbXA7ICAgICAgICAgICAgICAgICAgICAgICAgLT4gZHVwbGlj
-YXRlIHdpdGhpbiAgcGdfc3RhdF90LCBwZ19oaXN0b3J5X3QNCnV0aW1lX3QgbGFzdF9kZWVwX3Nj
-cnViX3N0YW1wOyAgICAgICAgICAgLT4gZHVwbGljYXRlIHdpdGhpbiAgcGdfc3RhdF90LCBwZ19o
-aXN0b3J5X3QNCnV0aW1lX3QgbGFzdF9jbGVhbl9zY3J1Yl9zdGFtcDsgICAgICAgICAgICAtPiBk
-dXBsaWNhdGUgd2l0aGluICBwZ19zdGF0X3QsIHBnX2hpc3RvcnlfdA0KDQpwZ19zdGF0X3QgLT4g
-Y3JlYXRlZCBpcyBkdXBsaWNhdGUgb2YgcGdfaGlzdG9yeV90IC0+IGVwb2NoX2NyZWF0ZWQgPw0K
-DQpwZ19zdGF0X3QtPmxhc3RfYmVjYW1lX2FjdGl2ZSBpcyBkdXBsaWNhdGUgb2YgcGdfc3RhdF90
-LT5sYXN0X2FjdGl2ZSA/DQpwZ19zdGF0X3QtPmxhc3RfYmVjYW1lX3BlZXJlZCBpcyBkdXBsaWNh
-dGUgb2YgcGdfc3RhdF90LT5sYXN0X3BlZXJlZCA/DQoNCkZvbGxvd2luZyBxdWljayBvcHRpbWl6
-YXRpb24gd2UgY291bGQgZG8gYXMgd2VsbCBwcm9iYWJseS4uDQpUaGUgZm9sbG93aW5nIGZpZWxk
-cyBvZiBvYmplY3Rfc3RhdF9zdW1fdCAgY2FuIGhhdmUgdmFsdWUgb2YgMCBhbmQgMSAsIHNvLCB3
-aHkgbm90IHJlcGxhY2VkIHdpdGggc3RydWN0dXJlIGJpdCBmaWVsZCA/DQoNCiAgaW50MzJfdCBu
-dW1fZmx1c2hfbW9kZV9oaWdoOyAgLy8gMSB3aGVuIGluIGhpZ2ggZmx1c2ggbW9kZSwgb3RoZXJ3
-aXNlIDANCiAgaW50MzJfdCBudW1fZmx1c2hfbW9kZV9sb3c7ICAgLy8gMSB3aGVuIGluIGxvdyBm
-bHVzaCBtb2RlLCBvdGhlcndpc2UgMA0KICBpbnQzMl90IG51bV9ldmljdF9tb2RlX3NvbWU7ICAv
-LyAxIHdoZW4gaW4gZXZpY3Qgc29tZSBtb2RlLCBvdGhlcndpc2UgMA0KICBpbnQzMl90IG51bV9l
-dmljdF9tb2RlX2Z1bGw7ICAvLyAxIHdoZW4gaW4gZXZpY3QgZnVsbCBtb2RlLCBvdGhlcndpc2Ug
-MA0KDQpTYW1lIHdpdGggdGhlIGZvbGxvd2luZyBmaWVsZCBvZiBwZ19pbmZvX3QgLCB3ZSBjYW4g
-cmVwbGFjZSB3aXRoIGJpdGZpZWxkLg0KDQpib29sIGxhc3RfYmFja2ZpbGxfYml0d2lzZQ0KDQpU
-aGVzZSB3aWxsIHJlcGxhY2UgOTMgYnl0ZXMgd2l0aCA1IGJpdHMuDQoNCkFtIEkgbWlzc2luZyBh
-bnl0aGluZyA/DQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBN
-ZXNzYWdlLS0tLS0NCkZyb206IFNvbW5hdGggUm95DQpTZW50OiBUaHVyc2RheSwgQXVndXN0IDI1
-LCAyMDE2IDY6MjkgUE0NClRvOiAnSGFvbWFpIFdhbmcnOyBQaW90ciBEYcWCZWsNCkNjOiBNYXJr
-IE5lbHNvbjsgU2FnZSBXZWlsOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDog
-UkU6IHBnX3N0YXRfdCBpcyA1MDArIGJ5dGVzDQoNClNhZ2UsDQpJIGNhbiBzZWUgZm9yIHN0YXRp
-c3RpY3Mgd2UgYXJlIHN0b3JpbmcgNDAgYnl0ZXMgZm9yIGVhY2ggSU8uLg0KDQpNZXJnZSggUHJl
-Zml4ID0gVCBrZXkgPSAnYmx1ZXN0b3JlX3N0YXRmcycgVmFsdWUgc2l6ZSA9IDQwKQ0KDQpTaG91
-bGQgd2UgcmVhbGx5IHN0b3JlIGl0IG9uIGVhY2ggSU8gPw0KDQoxLiBJTU8sIGdhdGhlcmluZy9z
-dG9yaW5nIHN0YXRzIHNob3VsZCBiZSBjb25maWd1cmFibGUNCg0KMi4gSWYgZW5hYmxlZCwgSSB0
-aGluayB3ZSBjYW4gaGF2ZSBjb3VudGVycyBtYWludGFpbmVkIGluIG1lbW9yeSBhbmQgcGVyc2lz
-dCB0aGF0IHRvIGRiIGJldHdlZW4gc29tZSBjb25maWd1cmFibGUgaW50ZXJ2YWwgPw0KDQpCVFcs
-IGFzIHlvdSBtZW50aW9uZWQsIHBnX2luZm8gaXMgaHVnZSwgODU1IGJ5dGVzLg0KDQpQdXQoIFBy
-ZWZpeCA9IE0ga2V5ID0gMHgwMDAwMDAwMDAwMDAwNzQ2Jy5faW5mbycgVmFsdWUgc2l6ZSA9IDg1
-NSkNCg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNz
-YWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86
-Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBIYW9tYWkgV2Fu
-Zw0KU2VudDogVGh1cnNkYXksIEF1Z3VzdCAyNSwgMjAxNiA1OjU2IEFNDQpUbzogUGlvdHIgRGHF
-gmVrDQpDYzogTWFyayBOZWxzb247IFNhZ2UgV2VpbDsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5v
-cmcNClN1YmplY3Q6IFJlOiBwZ19zdGF0X3QgaXMgNTAwKyBieXRlcw0KDQpPbiBUaHUsIEF1ZyAy
-NSwgMjAxNiBhdCA4OjU0IFBNLCBIYW9tYWkgV2FuZyA8aGFvbWFpQHhza3kuY29tPiB3cm90ZToN
-Cj4gSSB0aGluayB0aGVyZSBleGlzdHMgYSBsb3Qgb2YgZmllbGRzIGNhbid0IGJlIGRpc2NhcmRl
-ZCB2aWEganVkZ2luZw0KPiAwcywgbGlrZSB1dGltZV90LCBlcG9jaF90LiBBIHNpbXBsZSB3YXkg
-aXMgdG8gY29tcGFyZSB3aXRoIHByZXZpb3VzDQo+IHBnX2luZm9fdC4NCg0KT2gsIHNvcnJ5LiBX
-ZSBtYXkgY291bGQgdXNlIGEgZnJlc2ggcGdfaW5mb190IHRvIGluZGljYXRlLiBCdXQgYmVsb3cg
-YWxzbyBjb3VsZCBhcHBseSB0aGlzIHdheS4NCg0KPg0KPiBCVFcsIEkgd2FudCB0byBtZW50aW9u
-ZCBwZ19pbmZvX3QgZW5jb2Rpbmcgb2NjdXJzIDYuMDUlIGNwdSB0aW1lIGluIHBnDQo+IHRocmVh
-ZCh0aHJlYWQgbGV2ZWwgbm90IHByb2Nlc3MgbGV2ZWwpLg0KPg0KPiBsb29rcyB3ZSBoYXZlIHRo
-cmVlIG9wdGltaXphdGlvbiBmcm9tIG1hcmsgYW5kIFBpb3RyOg0KPg0KPiAxLiByZWNvbnN0cnVj
-dCBwZ19pbmZvX3QgYW5kIG1ha2UgaGlnaCBmcmVxdWVudCBmaWVsZHMgdG9nZXRoZXIuDQo+IDIu
-IGNoYW5nZSBzb21lIGZpZWxkcyB0byBzbWFsbGVyIGJpdHMNCj4gMy4gdXNlcyBTSU1EIHRvIG9w
-dGltaXplIGxvdyBmcmVxdWVuY3kgZmllbGRzIGRpZmZlcmVuY2UNCj4gY29tcGFyaXNvbihvcHRp
-b25hbCkNCj4NCj4gaW50ZWwgU1NFNC4yIHBjbXBpc3RybSBpbnN0cnVjdGl2ZSBjb3VsZCBkbyB2
-ZXJ5IGdvb2QgMTI4Ynl0ZXMNCj4gY29tcGFyaXNvbiwgcGdfaW5mb190IGlzIGFib3ZlIDcwMGJ5
-dGVzOg0KPg0KPiBpbmxpbmUgY29uc3QgY2hhciAqc2tpcF9zYW1lXzEyOF9ieXRlc19TSU1EKGNv
-bnN0IGNoYXIqIHAsIGNvbnN0IGNoYXIqIHAyKSB7DQo+ICAgICBjb25zdCBfX20xMjhpIHcgPSBf
-bW1fbG9hZF9zaTEyOCgoY29uc3QgX19tMTI4aSAqKXAyKTsNCj4NCj4gICAgIGZvciAoOzsgcCAr
-PSAxNikgew0KPiAgICAgICAgIGNvbnN0IF9fbTEyOGkgcyA9IF9tbV9sb2FkX3NpMTI4KChjb25z
-dCBfX20xMjhpICopcCk7DQo+ICAgICAgICAgY29uc3QgdW5zaWduZWQgciA9IF9tbV9jdnRzaTEy
-OF9zaTMyKF9tbV9jbXBpc3RybSh3LCBzLA0KPiAgICAgICAgICAgICBfU0lERF9VQllURV9PUFMg
-fCBfU0lERF9DTVBfRVFVQUxfQU5ZIHwNCj4gICAgICAgICAgICAgX1NJRERfQklUX01BU0sgfCBf
-U0lERF9ORUdBVElWRV9QT0xBUklUWSkpOw0KPg0KPiAgICAgICAgIGlmIChyICE9IDApIC8vIHNv
-bWUgb2YgY2hhcmFjdGVycyBpc24ndCBlcXVhbA0KPiAgICAgICAgICAgICByZXR1cm4gcCArIF9f
-YnVpbHRpbl9mZnMocikgLSAxOw0KPiAgICAgfQ0KPiB9DQo+DQo+IE9uIFRodSwgQXVnIDI1LCAy
-MDE2IGF0IDEyOjIwIEFNLCBQaW90ciBEYcWCZWsgPGJyYW5jaEBwcmVkaWN0b3Iub3JnLnBsPiB3
-cm90ZToNCj4+IE9uIFdlZCwgQXVnIDI0LCAyMDE2IGF0IDExOjEyOjI0QU0gLTA1MDAsIE1hcmsg
-TmVsc29uIHdyb3RlOg0KPj4+DQo+Pj4NCj4+PiBPbiAwOC8yNC8yMDE2IDExOjA5IEFNLCBTYWdl
-IFdlaWwgd3JvdGU6DQo+Pj4gPk9uIFdlZCwgMjQgQXVnIDIwMTYsIEhhb21haSBXYW5nIHdyb3Rl
-Og0KPj4+ID4+T24gV2VkLCBBdWcgMjQsIDIwMTYgYXQgMTE6MDEgQU0sIEhhb21haSBXYW5nIDxo
-YW9tYWlAeHNreS5jb20+IHdyb3RlOg0KPj4+ID4+Pk9uIFdlZCwgQXVnIDI0LCAyMDE2IGF0IDI6
-MTMgQU0sIFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6DQo+Pj4gPj4+PlRoaXMg
-aXMgaHVnZS4gIEl0IHRha2VzIHRoZSBwZ19pbmZvX3Qgc3RyIGZyb20gMzA2IGJ5dGVzIHRvIDg0
-Nw0KPj4+ID4+Pj5ieXRlcywgYW5kIHRoaXMgX2luZm8gb21hcCBrZXkgaXMgcmV3cml0dGVuIG9u
-ICpldmVyeSogSU8uDQo+Pj4gPj4+Pg0KPj4+ID4+Pj5XZSBjb3VsZCBzaHJpbmsgdGhpcyBkb3du
-IHNpZ25pZmljYW50IHdpdGggdmFyaW50IGFuZC9vciBkZWx0YQ0KPj4+ID4+Pj5lbmNvZGluZyBz
-aW5jZSBhIGh1Z2UgcG9ydGlvbiBvZiBpdCBpcyBqdXN0IGEgYnVuY2ggb2YgdWludDY0X3QNCj4+
-PiA+Pj4+Y291bnRlcnMuICBUaGlzIHdpbGwgcHJvYmFibHkgY29zdCBzb21lIENQVSB0aW1lLCBi
-dXQgT1RPSCBpdCdsbA0KPj4+ID4+Pj5hbHNvIHNocmluayBvdXIgbWV0YWRhdGEgZG93biBhIGZh
-aXIgYml0IHRvbyB3aGljaCB3aWxsIHBheSBvZmYgbGF0ZXIuDQo+Pj4gPj4+Pg0KPj4+ID4+Pj5B
-bnlib2R5IHdhbnQgdG8gdGFja2xlIHRoaXM/DQo+Pj4gPj4+DQo+Pj4gPj4+d2hhdCBhYm91dCBz
-ZXBhcmF0aW5nICJvYmplY3Rfc3RhdF9jb2xsZWN0aW9uX3Qgc3RhdHMiIGZyb20gcGdfc3RhdF90
-Pw0KPj4+ID4+PnBnIGluZm8gc2hvdWxkIGJlIHVuY2hhbmdlZCBmb3IgbW9zdCBvZiB0aW1lcywg
-d2UgY291bGQgb25seQ0KPj4+ID4+PnVwZGF0ZSBvYmplY3QgcmVsYXRlZCBzdGF0cy4gVGhpcyBt
-YXkgaGVscCB0byByZWR1Y2UgaGFsZiBieXRlcy4NCj4+PiA+DQo+Pj4gPkkgZG9uJ3QgdGhpbmsg
-dGhpcyB3aWxsIHdvcmssIHNpbmNlIGV2ZXJ5IG9wIGNoYW5nZXMgbGFzdF91cGRhdGUgaW4NCj4+
-PiA+cGdfaW5mb190ICphbmQqIHRoZSBzdGF0cyAod3JpdGUgb3AgY291bnQsIHRvdGFsIGJ5dGVz
-LCBvYmplY3RzLCBldGMuKS4NCj4+PiA+DQo+Pj4gPj5PciB3ZSBvbmx5IHN0b3JlIGluY3JlbWVu
-dCB2YWx1ZXMgYW5kIGtlZXAgdGhlIGZ1bGwgaW4gbWVtb3J5KG1heQ0KPj4+ID4+cmVkdWNlIHRv
-IDIwLTMwYnl0ZXMpLiBJbiBwZXJpb2QgdGltZSB3ZSBzdG9yZSB0aGUgZnVsbA0KPj4+ID4+c3Ry
-dWN0dXJlKG9ubHkgaHVuZHJlZHMgb2YgYnl0ZXMpLi4uLg0KPj4+ID4NCj4+PiA+QSBkZWx0YSBp
-cyBwcm9iYWJseSB2ZXJ5IGNvbXByZXNzaWJsZSAob25seSBhIGZldyBmaWVsZHMgaW4gdGhlDQo+
-Pj4gPnN0YXRzIHN0cnVjdCBjaGFuZ2UpLiAgVGhlIHF1ZXN0aW9uIGlzIGhvdyBmYXN0IGNhbiB3
-ZSBtYWtlIGl0IGluIENQVSB0aW1lLg0KPj4+ID5Qcm9iYWJseSBhIHNpbXBsZSBkZWx0YSAod2hp
-Y2ggd2lsbCBiZSBhbG1vc3QgYWxsIDAncykgYW5kIGENCj4+PiA+dHJpdmlhbCBydW4tbGVuZ3Ro
-LWVuY29kaW5nIHNjaGVtZSB0aGF0IGp1c3QgZ2V0cyByaWQgb2YgdGhlIDAncw0KPj4+ID53b3Vs
-ZCBkbyB3ZWxsIGVub3VnaC4uLg0KPj4+DQo+Pj4gRG8gd2UgaGF2ZSBhbnkgcm91Z2ggaWRlYSBv
-ZiBob3cgbWFueS9vZnRlbiBjb25zZWN1dGl2ZSAwcyB3ZSBlbmQgdXANCj4+PiB3aXRoIGluIHRo
-ZSBjdXJyZW50IGVuY29kaW5nPw0KPj4NCj4+IE9yIGhvdyBoaWdoIHRoZXNlIGNvdW50ZXJzIGdl
-dD8gV2UgY291bGQgdHJ5IHRyYW5zcG9zaW5nIHRoZSBtYXRyaXgNCj4+IG1hZGUgb2YgdGhvc2Ug
-Y291bnRlcnMuIEF0IGxlYXN0IHRoZSB0d28gbW9zdCBzaWduaWZpY2FudCBieXRlcyBpbg0KPj4g
-bW9zdCBvZiB0aG9zZSBjb3VudGVycyBhcmUgbW9zdGx5IHplcm9zLCBhbmQgYWZ0ZXIgdHJhbnNw
-b3NpbmcsDQo+PiBzaW1wbGUgUkxFIHdvdWxkIGJlIGZlYXNpYmxlLiBJbiBhbnkgY2FzZSwgSSdt
-IG5vdCBzdXJlIGlmICphbGwqIG9mDQo+PiB0aGVzZSBmaWVsZHMgbmVlZCB0byBiZSB1aW50NjRf
-dC4NCj4+DQo+PiAtLQ0KPj4gUGlvdHIgRGHFgmVrDQo+PiBicmFuY2hAcHJlZGljdG9yLm9yZy5w
-bA0KPj4gaHR0cDovL2Jsb2cucHJlZGljdG9yLm9yZy5wbA0KLS0NClRvIHVuc3Vic2NyaWJlIGZy
-b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0
-aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1h
-am9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ry
-b25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVz
-aWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBt
-ZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3Rp
-ZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhh
-dCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2Yg
-dGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVk
-IHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5
-IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVz
-dHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lv
-biAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4N
-Cg==
+Sage,
+Some updates on this.
+
+1. The issue is reproduced with the latest rocksdb master as well.
+
+2. The issue is *not happening* if I run disabling rocksdb log recycling. T=
+his proves our root cause is right.
+
+3. Running some more performance tests by disabling log recycling , but, in=
+itial impression is, it is introducing spikes and output is not as stable a=
+s enabling log recycling.
+
+4. Created a rocksdb issue for this (https://github.com/facebook/rocksdb/is=
+sues/1303)
+
+Thanks & Regards
+Somnath
+
+
+-----Original Message-----
+From: Somnath Roy=20
+Sent: Thursday, August 25, 2016 2:35 PM
+To: 'Sage Weil'
+Cc: 'Mark Nelson'; 'ceph-devel'
+Subject: RE: Bluestore assert
+
+Sage,
+Hope you are able to download the log I shared via google doc.
+It seems the bug is around this portion.
+
+2016-08-25 00:44:03.348710 7f7c117ff700  4 rocksdb: adding log 254 to recyc=
+le list
+
+2016-08-25 00:44:03.348722 7f7c117ff700  4 rocksdb: adding log 256 to recyc=
+le list
+
+2016-08-25 00:44:03.348725 7f7c117ff700  4 rocksdb: (Original Log Time 2016=
+/08/25-00:44:03.347467) [default] Level-0 commit table #258 started
+2016-08-25 00:44:03.348727 7f7c117ff700  4 rocksdb: (Original Log Time 2016=
+/08/25-00:44:03.348225) [default] Level-0 commit table #258: memtable #1 do=
+ne
+2016-08-25 00:44:03.348729 7f7c117ff700  4 rocksdb: (Original Log Time 2016=
+/08/25-00:44:03.348227) [default] Level-0 commit table #258: memtable #2 do=
+ne
+2016-08-25 00:44:03.348730 7f7c117ff700  4 rocksdb: (Original Log Time 2016=
+/08/25-00:44:03.348239) EVENT_LOG_v1 {"time_micros": 1472111043348233, "job=
+": 88, "event": "flush_finished", "lsm_state": [3, 4, 0, 0, 0, 0, 0], "immu=
+table_memtables": 0}
+2016-08-25 00:44:03.348735 7f7c117ff700  4 rocksdb: (Original Log Time 2016=
+/08/25-00:44:03.348297) [default] Level summary: base level 1 max bytes bas=
+e 5368709120 files[3 4 0 0 0 0 0] max score 0.75
+
+2016-08-25 00:44:03.348751 7f7c117ff700  4 rocksdb: [JOB 88] Try to delete =
+WAL files size 131512372, prev total WAL file size 131834601, number of liv=
+e WAL files 3.
+
+2016-08-25 00:44:03.348761 7f7c117ff700 10 bluefs unlink db.wal/000256.log
+2016-08-25 00:44:03.348766 7f7c117ff700 20 bluefs _drop_link had refs 1 on =
+file(ino 19 size 0x3f3ddd9 mtime 2016-08-25 00:41:26.298423 bdev 0 extents =
+[0:0xc500000+200000,0:0xcb00000+800000,0:0xd700000+700000,0:0xe200000+80000=
+0,0:0xee00000+800000,0:0xfa00000+800000,0:0x10600000+700000,0:0x11100000+70=
+0000,0:0x11c00000+800000,0:0x12800000+100000])
+2016-08-25 00:44:03.348775 7f7c117ff700 20 bluefs _drop_link destroying fil=
+e(ino 19 size 0x3f3ddd9 mtime 2016-08-25 00:41:26.298423 bdev 0 extents [0:=
+0xc500000+200000,0:0xcb00000+800000,0:0xd700000+700000,0:0xe200000+800000,0=
+:0xee00000+800000,0:0xfa00000+800000,0:0x10600000+700000,0:0x11100000+70000=
+0,0:0x11c00000+800000,0:0x12800000+100000])
+2016-08-25 00:44:03.348794 7f7c117ff700 10 bluefs unlink db.wal/000254.log
+2016-08-25 00:44:03.348796 7f7c117ff700 20 bluefs _drop_link had refs 1 on =
+file(ino 18 size 0x3f3d402 mtime 2016-08-25 00:41:26.299110 bdev 0 extents =
+[0:0x6500000+400000,0:0x6d00000+700000,0:0x7800000+800000,0:0x8400000+80000=
+0,0:0x9000000+800000,0:0x9c00000+700000,0:0xa700000+900000,0:0xb400000+8000=
+00,0:0xc000000+500000])
+2016-08-25 00:44:03.348803 7f7c117ff700 20 bluefs _drop_link destroying fil=
+e(ino 18 size 0x3f3d402 mtime 2016-08-25 00:41:26.299110 bdev 0 extents [0:=
+0x6500000+400000,0:0x6d00000+700000,0:0x7800000+800000,0:0x8400000+800000,0=
+:0x9000000+800000,0:0x9c00000+700000,0:0xa700000+900000,0:0xb400000+800000,=
+0:0xc000000+500000])
+
+So, log 254 is added to the recycle list and at the same time it is added f=
+or deletion. It seems there is a race condition in this portion (?).
+
+I was going through the rocksdb code and I found the following.
+
+1. DBImpl::FindObsoleteFiles is the one that is responsible for populating =
+log_recycle_files and log_delete_files. It is also deleting entries from al=
+ive_log_files_. But, this is always under mutex_ lock.
+
+2. Log is deleted from DBImpl::DeleteObsoleteFileImpl which is *not* under =
+lock , but iterating over log_delete_files. This is fishy but it shouldn't =
+be the reason for same log number end up in two list.
+
+3. I saw all the places but the following  place alive_log_files_ (within D=
+BImpl::WriteImpl)  is accessed without lock.
+
+4625       alive_log_files_.back().AddSize(log_entry.size());  =20
+
+Can it be reintroducing the same log number (254) , I am not sure.
+
+Summary, it seems a rocksb bug and making recycle_log_file_num =3D 0 should=
+ *bypass* that. I need to check the performance impact for this though.
+
+Should I post this to rocksdb community or any other place from where I can=
+ get response from rocksdb folks ?
+
+Thanks & Regards
+Somnath
+
+
+-----Original Message-----
+From: Somnath Roy
+Sent: Wednesday, August 24, 2016 2:52 PM
+To: 'Sage Weil'
+Cc: Mark Nelson; ceph-devel
+Subject: RE: Bluestore assert
+
+Sage,
+Thanks for looking , glad that we figured out something :-)..
+So, you want me to reproduce this with only debug_bluefs =3D 20/20 ? Don't =
+need bluestore log ?
+Hope my root partition doesn't get full , this crash happened after 6 hours=
+ :-) ,=20
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com]
+Sent: Wednesday, August 24, 2016 2:34 PM
+To: Somnath Roy
+Cc: Mark Nelson; ceph-devel
+Subject: RE: Bluestore assert
+
+On Wed, 24 Aug 2016, Somnath Roy wrote:
+> Sage, It is there in the following github link I posted earlier..You=20
+> can see 3 logs there..
+>=20
+> https://github.com/somnathr/ceph/commit/b69811eb2b87f25cf017b39c687d88
+> a1b28fcc39
+
+Ah sorry, got it.
+
+And looking at the crash and code the weird error you're getting makes perf=
+ect sense: it's coming from the ReuseWritableFile() function (which gets an=
+d error on rename and returns that).  It shouldn't ever fail, so there is e=
+ither a bug in the bluefs code or the rocksdb recycling code.
+
+I think we need a full bluefs log leading up to the crash so we can find ou=
+t what happened to the file that is missing...
+
+sage
+
+
+
+ >=20
+> Thanks & Regards
+> Somnath
+>=20
+>=20
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Wednesday, August 24, 2016 1:43 PM
+> To: Somnath Roy
+> Cc: Mark Nelson; ceph-devel
+> Subject: RE: Bluestore assert
+>=20
+> On Wed, 24 Aug 2016, Somnath Roy wrote:
+> > Sage,
+> > I got the db assert log from submit_transaction in the following locati=
+on.
+> >=20
+> > https://github.com/somnathr/ceph/commit/b69811eb2b87f25cf017b39c687d
+> > 88
+> > a1b28fcc39
+> >=20
+> > This is the log with level 1/20 and with my hook of printing rocksdb::w=
+ritebatch transaction. I have uploaded 3 osd logs and a common pattern befo=
+re crash is the following.
+> >=20
+> >    -34> 2016-08-24 02:37:22.074321 7ff151fff700  4 rocksdb: reusing=20
+> > log 266 from recycle list
+> >=20
+> >    -33> 2016-08-24 02:37:22.074332 7ff151fff700 10 bluefs rename db.wal=
+/000266.log -> db.wal/000271.log
+> >    -32> 2016-08-24 02:37:22.074338 7ff151fff700 20 bluefs rename dir db=
+.wal (0x7ff18bdfdec0) file 000266.log not found
+> >    -31> 2016-08-24 02:37:22.074341 7ff151fff700  4 rocksdb: [default] N=
+ew memtable created with log file: #271. Immutable memtables: 0.
+> >=20
+> > It is trying to rename the wal file it seems and old file is not found.=
+ You can see the transaction printed in the log along with error code like =
+this.
+>=20
+> How much of the log do you have? Can you post what you have somewhere?
+>=20
+> Thanks!
+> sage
+>=20
+>=20
+> >=20
+> >    -30> 2016-08-24 02:37:22.074486 7ff151fff700 -1 rocksdb:=20
+> > submit_transaction error: NotFound:  code =3D 1 rocksdb::WriteBatch =3D=
+=20
+> > Put( Prefix =3D M key =3D
+> > 0x0000000000001483'.0000000087.00000000000000035303')
+> > Put( Prefix =3D M key =3D 0x0000000000001483'._info') Put( Prefix =3D O=
+=20
+> > key =3D
+> > '--'0x800000000000000137863de5'.!=3Drbd_data.105b6b8b4567.000000000089
+> > ac
+> > e7!'0xfffffffffffffffeffffffffffffffff)
+> > Delete( Prefix =3D B key =3D 0x000004e73ae72000) Put( Prefix =3D B key =
+=3D
+> > 0x000004e73af72000) Merge( Prefix =3D T key =3D 'bluestore_statfs')
+> >=20
+> > Hope my decoding of the key is proper, I have reused pretty_binary_stri=
+ng() of Bluestore after removing 1st 2 bytes of the key which is prefix and=
+ a '0'.
+> >=20
+> > Any suggestion on the next step of root causing this db assert if log r=
+ename is not enough hint ?
+> >=20
+> > BTW, I ran this time with bluefs_compact_log_sync =3D true and without =
+commenting the inode number asserts. I didn't hit those asserts as well as =
+no corruption  so far. Seems like bug of async compaction. Will try to repr=
+oduce with verbose log that one later.
+> >=20
+> > Thanks & Regards
+> > Somnath
+> >=20
+> > -----Original Message-----
+> > From: Somnath Roy
+> > Sent: Tuesday, August 23, 2016 7:46 AM
+> > To: 'Sage Weil'
+> > Cc: Mark Nelson; ceph-devel
+> > Subject: RE: Bluestore assert
+> >=20
+> > I was running my tests for 2 hours and it happened within that time.
+> > I will try to reproduce with 1/20.
+> >=20
+> > Thanks & Regards
+> > Somnath
+> >=20
+> > -----Original Message-----
+> > From: Sage Weil [mailto:sweil@redhat.com]
+> > Sent: Tuesday, August 23, 2016 6:46 AM
+> > To: Somnath Roy
+> > Cc: Mark Nelson; ceph-devel
+> > Subject: RE: Bluestore assert
+> >=20
+> > On Mon, 22 Aug 2016, Somnath Roy wrote:
+> > > Sage,
+> > > I think there are some bug introduced recently in the BlueFS and I=20
+> > > am getting the corruption like this which I was not facing earlier.
+> >=20
+> > My guess is the async bluefs compaction.  You can set 'bluefs compact l=
+og sync =3D true' to disable it.
+> >=20
+> > Any idea how long do you have to run to reproduce?  I'd love to see a b=
+luefs log leading up to it.  If it eats too much disk space, you could do d=
+ebug bluefs =3D 1/20 so that it only dumps recent history on crash.
+> >=20
+> > Thanks!
+> > sage
+> >=20
+> > >=20
+> > >    -5> 2016-08-22 15:55:21.248558 7fb68f7ff700  4 rocksdb: EVENT_LOG_=
+v1 {"time_micros": 1471906521248538, "job": 3, "event": "compaction_started=
+", "files_L0": [2115, 2102, 2087, 2069, 2046], "files_L1": [], "files_L2": =
+[], "files_L3": [], "files_L4": [], "files_L5": [], "files_L6": [1998, 2007=
+, 2013, 2019, 2026, 2032, 2039, 2043, 2052, 2060], "score": 1.5, "input_dat=
+a_size": 1648188401}
+> > >     -4> 2016-08-22 15:55:27.209944 7fb6ba94d8c0  0 <cls> cls/hello/cl=
+s_hello.cc:305: loading cls_hello
+> > >     -3> 2016-08-22 15:55:27.213612 7fb6ba94d8c0  0 <cls> cls/cephfs/c=
+ls_cephfs.cc:202: loading cephfs_size_scan
+> > >     -2> 2016-08-22 15:55:27.213627 7fb6ba94d8c0  0 _get_class not per=
+mitted to load kvs
+> > >     -1> 2016-08-22 15:55:27.214620 7fb6ba94d8c0 -1 osd.0 0 failed to =
+load OSD map for epoch 321, got 0 bytes
+> > >      0> 2016-08-22 15:55:27.216111 7fb6ba94d8c0 -1 osd/OSD.h: In=20
+> > > function 'OSDMapRef OSDService::get_map(epoch_t)' thread
+> > > 7fb6ba94d8c0 time 2016-08-22 15:55:27.214638
+> > > osd/OSD.h: 999: FAILED assert(ret)
+> > >=20
+> > >  ceph version 11.0.0-1688-g6f48ee6
+> > > (6f48ee6bc5c85f44d7ca4c984f9bef1339c2bea4)
+> > >  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> > > const*)+0x80) [0x5617f2a99e80]
+> > >  2: (OSDService::get_map(unsigned int)+0x5d) [0x5617f2395fdd]
+> > >  3: (OSD::init()+0x1f7e) [0x5617f233d3ce]
+> > >  4: (main()+0x2fe0) [0x5617f229d1f0]
+> > >  5: (__libc_start_main()+0xf0) [0x7fb6b7196830]
+> > >  6: (_start()+0x29) [0x5617f22eb909]
+> > >=20
+> > > OSDs are not coming up (after a restart) and eventually I had to recr=
+eate the cluster.
+> > >=20
+> > > Thanks & Regards
+> > > Somnath
+> > >=20
+> > > -----Original Message-----
+> > > From: Somnath Roy
+> > > Sent: Monday, August 22, 2016 3:01 PM
+> > > To: 'Sage Weil'
+> > > Cc: Mark Nelson; ceph-devel
+> > > Subject: RE: Bluestore assert
+> > >=20
+> > > "compaction_style=3DkCompactionStyleUniversal"  in the bluestore_rock=
+sdb_options .
+> > > Here is the option I am using..
+> > >=20
+> > >         bluestore_rocksdb_options =3D "max_write_buffer_number=3D16,m=
+in_write_buffer_number_to_merge=3D2,recycle_log_file_num=3D16,compaction_th=
+reads=3D32,flusher_threads=3D8,max_background_compactions=3D32,max_backgrou=
+nd_flushes=3D8,max_bytes_for_level_base=3D5368709120,write_buffer_size=3D83=
+886080,level0_file_num_compaction_trigger=3D4,level0_slowdown_writes_trigge=
+r=3D400,level0_stop_writes_trigger=3D800,stats_dump_period_sec=3D10,compact=
+ion_style=3DkCompactionStyleUniversal"
+> > >=20
+> > > Here is another one after 4 hours of 4K RW :-)...Sorry to bombard you=
+ with all these , I am adding more log for the next time if I hit it..
+> > >=20
+> > >=20
+> > >      0> 2016-08-22 17:37:24.730817 7f8e7afff700 -1
+> > > os/bluestore/BlueFS.cc: In function 'int=20
+> > > BlueFS::_read_random(BlueFS::FileReader*, uint64_t, size_t, char*)'
+> > > thread 7f8e7afff700 time 2016-08-22 17:37:24.722706
+> > > os/bluestore/BlueFS.cc: 845: FAILED assert(r =3D=3D 0)
+> > >=20
+> > >  ceph version 11.0.0-1688-g3fcc89c
+> > > (3fcc89c7ab4c92e6c4564e29f4e1a663db36acc0)
+> > >  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> > > const*)+0x80) [0x5581ed453cb0]
+> > >  2: (BlueFS::_read_random(BlueFS::FileReader*, unsigned long,=20
+> > > unsigned long, char*)+0x836) [0x5581ed11c1b6]
+> > >  3: (BlueRocksRandomAccessFile::Read(unsigned long, unsigned long,=20
+> > > rocksdb::Slice*, char*) const+0x20) [0x5581ed13f840]
+> > >  4: (rocksdb::RandomAccessFileReader::Read(unsigned long, unsigned=20
+> > > long, rocksdb::Slice*, char*) const+0x83f) [0x5581ed2c6f4f]
+> > >  5: (rocksdb::ReadBlockContents(rocksdb::RandomAccessFileReader*,
+> > > rocksdb::Footer const&, rocksdb::ReadOptions const&,=20
+> > > rocksdb::BlockHandle const&, rocksdb::BlockContents*,=20
+> > > rocksdb::Env*, bool, rocksdb::Slice const&,=20
+> > > rocksdb::PersistentCacheOptions const&,
+> > > rocksdb::Logger*)+0x358) [0x5581ed291c18]
+> > >  6: (()+0x94fd54) [0x5581ed282d54]
+> > >  7:=20
+> > > (rocksdb::BlockBasedTable::NewDataBlockIterator(rocksdb::BlockBase
+> > > dT ab le::Rep*, rocksdb::ReadOptions const&, rocksdb::Slice=20
+> > > const&,
+> > > rocksdb::BlockIter*)+0x60c) [0x5581ed284b3c]
+> > >  8: (rocksdb::BlockBasedTable::Get(rocksdb::ReadOptions const&,=20
+> > > rocksdb::Slice const&, rocksdb::GetContext*, bool)+0x508)=20
+> > > [0x5581ed28ba68]
+> > >  9: (rocksdb::TableCache::Get(rocksdb::ReadOptions const&,=20
+> > > rocksdb::InternalKeyComparator const&, rocksdb::FileDescriptor=20
+> > > const&, rocksdb::Slice const&, rocksdb::GetContext*,=20
+> > > rocksdb::HistogramImpl*, bool, int)+0x158) [0x5581ed252118]
+> > >  10: (rocksdb::Version::Get(rocksdb::ReadOptions const&,=20
+> > > rocksdb::LookupKey const&, std::__cxx11::basic_string<char,=20
+> > > std::char_traits<char>, std::allocator<char> >*, rocksdb::Status*,=20
+> > > rocksdb::MergeContext*, bool*, bool*, unsigned long*)+0x4f8)=20
+> > > [0x5581ed25c458]
+> > >  11: (rocksdb::DBImpl::GetImpl(rocksdb::ReadOptions const&,=20
+> > > rocksdb::ColumnFamilyHandle*, rocksdb::Slice const&,=20
+> > > std::__cxx11::basic_string<char, std::char_traits<char>,=20
+> > > std::allocator<char> >*, bool*)+0x5fa) [0x5581ed1f3f7a]
+> > >  12: (rocksdb::DBImpl::Get(rocksdb::ReadOptions const&,=20
+> > > rocksdb::ColumnFamilyHandle*, rocksdb::Slice const&,=20
+> > > std::__cxx11::basic_string<char, std::char_traits<char>,=20
+> > > std::allocator<char> >*)+0x22) [0x5581ed1f4182]
+> > >  13: (RocksDBStore::get(std::__cxx11::basic_string<char,
+> > > std::char_traits<char>, std::allocator<char> > const&,=20
+> > > std::__cxx11::basic_string<char, std::char_traits<char>,=20
+> > > std::allocator<char> > const&, ceph::buffer::list*)+0x157)=20
+> > > [0x5581ed1d21d7]
+> > >  14: (BlueStore::Collection::get_onode(ghobject_t const&,
+> > > bool)+0x55b) [0x5581ed02802b]
+> > >  15: (BlueStore::_txc_add_transaction(BlueStore::TransContext*,
+> > > ObjectStore::Transaction*)+0x1e49) [0x5581ed0318a9]
+> > >  16: (BlueStore::queue_transactions(ObjectStore::Sequencer*,
+> > > std::vector<ObjectStore::Transaction,
+> > > std::allocator<ObjectStore::Transaction> >&,=20
+> > > std::shared_ptr<TrackedOp>, ThreadPool::TPHandle*)+0x362)=20
+> > > [0x5581ed032bc2]
+> > >  17:=20
+> > > (ReplicatedPG::queue_transactions(std::vector<ObjectStore::Transac
+> > > ti on , std::allocator<ObjectStore::Transaction> >&,
+> > > std::shared_ptr<OpRequest>)+0x81) [0x5581ecea5e51]
+> > >  18:=20
+> > > (ReplicatedBackend::sub_op_modify(std::shared_ptr<OpRequest>)+0xd3
+> > > 9)
+> > > [0x5581ecef89e9]
+> > >  19:=20
+> > > (ReplicatedBackend::handle_message(std::shared_ptr<OpRequest>)+0x2
+> > > fb
+> > > )
+> > > [0x5581ecefeb4b]
+> > >  20: (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&,
+> > > ThreadPool::TPHandle&)+0xbd) [0x5581ece4c63d]
+> > >  21: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+> > > std::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x409)=20
+> > > [0x5581eccdd2e9]
+> > >  22: (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>
+> > > const&)+0x52) [0x5581eccdd542]
+> > >  23: (OSD::ShardedOpWQ::_process(unsigned int,
+> > > ceph::heartbeat_handle_d*)+0x73f) [0x5581eccfd30f]
+> > >  24: (ShardedThreadPool::shardedthreadpool_worker(unsigned
+> > > int)+0x89f) [0x5581ed440b2f]
+> > >  25: (ShardedThreadPool::WorkThreadSharded::entry()+0x10)
+> > > [0x5581ed4441f0]
+> > >  26: (Thread::entry_wrapper()+0x75) [0x5581ed4335c5]
+> > >  27: (()+0x76fa) [0x7f8ed9e4e6fa]
+> > >  28: (clone()+0x6d) [0x7f8ed7caeb5d]
+> > >  NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
+eded to interpret this.
+> > >=20
+> > >=20
+> > > Thanks & Regards
+> > > Somnath
+> > >=20
+> > > -----Original Message-----
+> > > From: Sage Weil [mailto:sweil@redhat.com]
+> > > Sent: Monday, August 22, 2016 2:57 PM
+> > > To: Somnath Roy
+> > > Cc: Mark Nelson; ceph-devel
+> > > Subject: RE: Bluestore assert
+> > >=20
+> > > On Mon, 22 Aug 2016, Somnath Roy wrote:
+> > > > FYI, I was running rocksdb by enabling universal style=20
+> > > > compaction during this time.
+> > >=20
+> > > How are you selecting universal compaction?
+> > >=20
+> > > sage
+> > > PLEASE NOTE: The information contained in this electronic mail messag=
+e is intended only for the use of the designated recipient(s) named above. =
+If the reader of this message is not the intended recipient, you are hereby=
+ notified that you have received this message in error and that any review,=
+ dissemination, distribution, or copying of this message is strictly prohib=
+ited. If you have received this communication in error, please notify the s=
+ender by telephone or e-mail (as shown above) immediately and destroy any a=
+nd all copies of this message in your possession (whether hard copies or el=
+ectronically stored copies).
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+=20
+> > > in the body of a message to majordomo@vger.kernel.org More=20
+> > > majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >=20
+> > >=20
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=20
+> > in the body of a message to majordomo@vger.kernel.org More majordomo=20
+> > info at  http://vger.kernel.org/majordomo-info.html
+> >=20
+> >=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=20
+> in the body of a message to majordomo@vger.kernel.org More majordomo=20
+> info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
