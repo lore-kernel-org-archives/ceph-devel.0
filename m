@@ -1,55 +1,71 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: new boost
-Date: Mon, 29 Aug 2016 18:39:37 -0400
-Message-ID: <CANP1eJF3dQfTbOSL3bmJ27iQeGzS0NfKLPubSeQ6Rw=EAKFH-A@mail.gmail.com>
-References: <alpine.DEB.2.11.1608261829420.24244@piezo.us.to>
- <CALqRxCzuD+uD4pw=E4Ds1gQh84hxHResMNkuoz7E7fYB9x1BJg@mail.gmail.com>
- <alpine.DEB.2.11.1608291556290.24244@piezo.us.to> <CALqRxCyj1ac648vNyBfKtezrXKWG6k-R4oZowtSSkGtHDN0RZQ@mail.gmail.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: debugging librbd to a VM
+Date: Mon, 29 Aug 2016 22:53:41 +0000
+Message-ID: <MWHPR12MB1934B4AFE9933CF16FFF2E5E9BE10@MWHPR12MB1934.namprd12.prod.outlook.com>
+References: <MWHPR12MB19342F27DDBF165F5BAE4ADC9BEC0@MWHPR12MB1934.namprd12.prod.outlook.com>
+ <20160829080314.GA1733@gmail.com>
+ <CAF-wwdFbgk_WcYQbEteGuCPF-b=WkX9ZpdACR01+GRoZCHB6=A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f68.google.com ([209.85.215.68]:33359 "EHLO
-        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756398AbcH2Wjs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 18:39:48 -0400
-Received: by mail-lf0-f68.google.com with SMTP id f93so78670lfi.0
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 15:39:45 -0700 (PDT)
-In-Reply-To: <CALqRxCyj1ac648vNyBfKtezrXKWG6k-R4oZowtSSkGtHDN0RZQ@mail.gmail.com>
+Received: from mail-by2nam03on0072.outbound.protection.outlook.com ([104.47.42.72]:2128
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751223AbcH2Wxp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 29 Aug 2016 18:53:45 -0400
+In-Reply-To: <CAF-wwdFbgk_WcYQbEteGuCPF-b=WkX9ZpdACR01+GRoZCHB6=A@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Brad Hubbard <bhubbard@redhat.com>, Mykola Golub <mgolub@mirantis.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Aug 29, 2016 at 12:16 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
-> On Mon, Aug 29, 2016 at 10:00 AM, Sage Weil <sweil@redhat.com> wrote:
->> I think this is #4:
->>
->>> 4) #1, with cmake smarts to let you choose the submodule or installed
->>> boost (and possibly autoselect system boost if it's new enough).
->
-> Oh cool, sorry I didn't understand that :) Yes, that sounds good.
->
->> The goal should be to eventually drop the submodule as supported distros
->> are brought up to date.  I suspect, though, that we'll find other shiny
->> new features we'll want to start using so this may never happen...
->
-> If we're still finding features from the latest boost that we want
-> years from now, then I'm ok with that. It means that someone's keeping
-> the bundled library up-to-date, the project is still getting value
-> from the bundled library, and the asset-vs-liability scale is properly
-> balanced IMHO.
->
-
-Boost is one of those projects where there's not too much value in
-using the distro package. For starters, Boost is so template heavy
-that the vast majority of code ends up getting compiled with the
-actual executable. It also makes no guarantees about forwards /
-backwards compatibility new version of boost requires a rebuild of all
-the apps dependent on it. So all the normal distro arguments about one
-library shared across many packages and security updates becomes void.
-
-Because of the lack of forwards/backwards compatibility guarantees
-it's also hard to build against against distro versions because every
-distro (and then FreeBSD) all end up using different versions. So I
-would argue that it's hard to certify correctness unless one version
-of Ceph is always using one version of boost.
+U28gaW4gbXkgY2FzZSB3aGF0IHdvdWxkICRuYW1lIGJlPw0KDQotLSBUb20NCg0KPiAtLS0tLU9y
+aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCcmFkIEh1YmJhcmQgW21haWx0bzpiaHViYmFy
+ZEByZWRoYXQuY29tXQ0KPiBTZW50OiBNb25kYXksIEF1Z3VzdCAyOSwgMjAxNiA1OjI5IFBNDQo+
+IFRvOiBNeWtvbGEgR29sdWIgPG1nb2x1YkBtaXJhbnRpcy5jb20+DQo+IENjOiBEZW5lYXUsIFRv
+bSA8dG9tLmRlbmVhdUBhbWQuY29tPjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3Vi
+amVjdDogUmU6IGRlYnVnZ2luZyBsaWJyYmQgdG8gYSBWTQ0KPiANCj4gT24gTW9uLCBBdWcgMjks
+IDIwMTYgYXQgNjowMyBQTSwgTXlrb2xhIEdvbHViIDxtZ29sdWJAbWlyYW50aXMuY29tPiB3cm90
+ZToNCj4gPiBNYXkgYmUgcWVtdSBkb2VzIG5vdCBzZWUgeW91IGNlcGguY29uZj8gT3Igc29tZSBv
+dGhlciBlbnZpcm9ubWVudGFsDQo+ID4gaXNzdWUgKGUuZy4gd2l0aCBxZW11IHJiZCBkcml2ZXIp
+LiBUcnkNCj4gPg0KPiA+IGxkZCAvdXNyL2Jpbi9xZW11LXN5c3RlbS14ODZfNjQgfGdyZXAgcmJk
+DQo+ID4NCj4gPiBIYXZlIHlvdSB0cmllZCBzdGFydGluZyBpdCBmcm9tIGNvbW1hbmQgbGluZT8N
+Cj4gPg0KPiA+IFlvdSBjb3VsZCBjaGVjayBpZiBjb25maWcgZGVidWcgb3B0aW9ucyB3b3JrIGFz
+IGV4cGVjdGVkIHNldHRpbmcgdGhlbQ0KPiA+IG9uIHlvdXIgd29ya2luZyBjbHVzdGVyLg0KPiAN
+Cj4gWW91IGNhbiBhbHNvIHRyeSAidG91Y2ggL3RtcC9jYnQvY2VwaC9sb2cvJG5hbWUubG9nIiBh
+bmQgImNobW9kIDc3Nw0KPiAvdG1wL2NidC9jZXBoL2xvZy8kbmFtZS5sb2ciIHRvIGVsaW1pbmF0
+ZSBwZXJtaXNzaW9ucyBpc3N1ZXMuDQo+IA0KPiA+DQo+ID4gT24gRnJpLCBBdWcgMjYsIDIwMTYg
+YXQgMDk6MDg6MzBQTSArMDAwMCwgRGVuZWF1LCBUb20gd3JvdGU6DQo+ID4+IEkgaGF2ZSB0d28g
+c21hbGwgY2x1c3RlcnMgY29uZmlndXJlZCB3aXRoIHRoZSBzYW1lIHZlcnNpb24gb2YgQ2VwaCBh
+bmQNCj4gdGhlIHNhbWUgT1MgdmVyc2lvbi4NCj4gPj4gKGRpZmZlcmVudCBwcm9jZXNzb3IgaGFy
+ZHdhcmUpDQo+ID4+DQo+ID4+IE9uIHRoZXNlIGNsdXN0ZXJzIEkgaGF2ZSBib290YWJsZSBSQkQg
+aW1hZ2VzIHRoYXQgSSBleHBlY3QgYSBWTSB0byBib290DQo+IGZyb20uDQo+ID4+IE9uIG9uZSBj
+bHVzdGVyLCB0aGUgVk0gZG9lcyBub3QgYm9vdCBmcm9tIHRoZSBpbWFnZS4gIE9uIHRoZSBvdGhl
+cg0KPiBjbHVzdGVyLCBpdCBib290cyBmaW5lLg0KPiA+PiBPbiB0aGUgZmFpbGluZyBjbHVzdGVy
+LCBhIFZNIGNhbiBib290IGZpbmUgZnJvbSB0aGUgYmFzZSBxY293MiBpbWFnZQ0KPiBmcm9tIHdo
+aWNoIHRoZSByYmQgaW1hZ2Ugd2FzIGNyZWF0ZWQuICBJdCdzIG9ubHkgcmJkIGltYWdlcyB0aGF0
+IGFyZQ0KPiBjYXVzaW5nIHByb2JsZW1zIGZvciB0aGUgVk0uDQo+ID4+DQo+ID4+IEkgd291bGQg
+bGlrZSB0byBlbmFibGUgc29tZSBkZWJ1ZyBsb2dnaW5nIHRoYXQgY291bGQgdGVsbCB3aGVyZSB0
+aGUgdHdvDQo+IGNsdXN0ZXJzIGFyZSBkaXZlcmdpbmcuDQo+ID4+DQo+ID4+IEkgdHJpZWQgYWRk
+aW5nDQo+ID4+ICAgICAgICAgZGVidWcgcmJkID0gMjANCj4gPj4gICAgICAgICBsb2cgZmlsZSA9
+IC90bXAvY2J0L2NlcGgvbG9nLyRuYW1lLmxvZw0KPiA+Pg0KPiA+PiBJIGRvIHNlZSBzb21lIHJi
+ZCBkZWJ1ZyBtZXNzYWdlcyB0byBzdGRlcnIgZHVyaW5nIG9wZXJhdGlvbnMgbGlrZSByYmQNCj4g
+Y2xvbmUsIGV0Yy4gYnV0IEkgZG9uJ3Qgc2VlIGFueSBsb2cgZmlsZXMgY3JlYXRlZCBpbiAvdG1w
+L2NidC9jZXBoIG9yDQo+IC92YXIvbG9nL2NlcGggb3IgYW55IG1lc3NhZ2VzIHdoZW4gbGlicmJk
+IGlzIGJlaW5nIHVzZWQgYnkgc2F5IHFlbXUtaW1nDQo+IGNvbnZlcnQsIG9yIGJ5IHFlbXUta3Zt
+Lg0KPiA+Pg0KPiA+PiBJcyB0aGVyZSBhIHdheSB0byBzZWUgZGV0YWlsZWQgZGVidWcgbWVzc2Fn
+ZXMgZm9yIGxpYnJiZD8NCj4gPj4NCj4gPj4gT3IgaXMgdGhlcmUgYSBiZXR0ZXIgd2F5IHRvIHNl
+ZSB3aGVyZSB0aGluZ3MgYXJlIGRpdmVyZ2luZyBiZXR3ZWVuDQo+IHRoZXNlIHR3byBjbHVzdGVy
+cz8NCj4gPj4gKG5vdGU6IEkgdHJpZWQgbHR0bmcgYnV0IGNvdWxkIG5vdCBnZXQgaXQgdG8gcmVj
+b3JkIGFueXRoaW5nKQ0KPiA+Pg0KPiA+PiAtLSBUb20NCj4gPj4gLS0NCj4gPj4gVG8gdW5zdWJz
+Y3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2
+ZWwiDQo+ID4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJu
+ZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+ID4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
+cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiA+DQo+ID4gLS0NCj4gPiBNeWtvbGEgR29sdWINCj4g
+PiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
+bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBt
+YWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0
+cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IA0KPiANCj4gDQo+IC0t
+DQo+IENoZWVycywNCj4gQnJhZA0K
