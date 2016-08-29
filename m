@@ -1,75 +1,55 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: debugging librbd to a VM
-Date: Tue, 30 Aug 2016 08:29:16 +1000
-Message-ID: <CAF-wwdFbgk_WcYQbEteGuCPF-b=WkX9ZpdACR01+GRoZCHB6=A@mail.gmail.com>
-References: <MWHPR12MB19342F27DDBF165F5BAE4ADC9BEC0@MWHPR12MB1934.namprd12.prod.outlook.com>
- <20160829080314.GA1733@gmail.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: new boost
+Date: Mon, 29 Aug 2016 18:39:37 -0400
+Message-ID: <CANP1eJF3dQfTbOSL3bmJ27iQeGzS0NfKLPubSeQ6Rw=EAKFH-A@mail.gmail.com>
+References: <alpine.DEB.2.11.1608261829420.24244@piezo.us.to>
+ <CALqRxCzuD+uD4pw=E4Ds1gQh84hxHResMNkuoz7E7fYB9x1BJg@mail.gmail.com>
+ <alpine.DEB.2.11.1608291556290.24244@piezo.us.to> <CALqRxCyj1ac648vNyBfKtezrXKWG6k-R4oZowtSSkGtHDN0RZQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:35819 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750840AbcH2W3T (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 18:29:19 -0400
-Received: by mail-wm0-f53.google.com with SMTP id f65so96680679wmi.0
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 15:29:18 -0700 (PDT)
-In-Reply-To: <20160829080314.GA1733@gmail.com>
+Received: from mail-lf0-f68.google.com ([209.85.215.68]:33359 "EHLO
+        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756398AbcH2Wjs (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 18:39:48 -0400
+Received: by mail-lf0-f68.google.com with SMTP id f93so78670lfi.0
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 15:39:45 -0700 (PDT)
+In-Reply-To: <CALqRxCyj1ac648vNyBfKtezrXKWG6k-R4oZowtSSkGtHDN0RZQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <mgolub@mirantis.com>
-Cc: "Deneau, Tom" <tom.deneau@amd.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Aug 29, 2016 at 6:03 PM, Mykola Golub <mgolub@mirantis.com> wrote:
-> May be qemu does not see you ceph.conf? Or some other environmental
-> issue (e.g. with qemu rbd driver). Try
+On Mon, Aug 29, 2016 at 12:16 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
+> On Mon, Aug 29, 2016 at 10:00 AM, Sage Weil <sweil@redhat.com> wrote:
+>> I think this is #4:
+>>
+>>> 4) #1, with cmake smarts to let you choose the submodule or installed
+>>> boost (and possibly autoselect system boost if it's new enough).
 >
-> ldd /usr/bin/qemu-system-x86_64 |grep rbd
+> Oh cool, sorry I didn't understand that :) Yes, that sounds good.
 >
-> Have you tried starting it from command line?
+>> The goal should be to eventually drop the submodule as supported distros
+>> are brought up to date.  I suspect, though, that we'll find other shiny
+>> new features we'll want to start using so this may never happen...
 >
-> You could check if config debug options work as expected setting them
-> on your working cluster.
-
-You can also try "touch /tmp/cbt/ceph/log/$name.log" and
-"chmod 777 /tmp/cbt/ceph/log/$name.log" to eliminate permissions issues.
-
+> If we're still finding features from the latest boost that we want
+> years from now, then I'm ok with that. It means that someone's keeping
+> the bundled library up-to-date, the project is still getting value
+> from the bundled library, and the asset-vs-liability scale is properly
+> balanced IMHO.
 >
-> On Fri, Aug 26, 2016 at 09:08:30PM +0000, Deneau, Tom wrote:
->> I have two small clusters configured with the same version of Ceph and the same OS version.
->> (different processor hardware)
->>
->> On these clusters I have bootable RBD images that I expect a VM to boot from.
->> On one cluster, the VM does not boot from the image.  On the other cluster, it boots fine.
->> On the failing cluster, a VM can boot fine from the base qcow2 image from which the rbd image was created.  It's only rbd images that are causing problems for the VM.
->>
->> I would like to enable some debug logging that could tell where the two clusters are diverging.
->>
->> I tried adding
->>         debug rbd = 20
->>         log file = /tmp/cbt/ceph/log/$name.log
->>
->> I do see some rbd debug messages to stderr during operations like rbd clone, etc. but I don't see any log files created in /tmp/cbt/ceph or /var/log/ceph or any messages when librbd is being used by say qemu-img convert, or by qemu-kvm.
->>
->> Is there a way to see detailed debug messages for librbd?
->>
->> Or is there a better way to see where things are diverging between these two clusters?
->> (note: I tried lttng but could not get it to record anything)
->>
->> -- Tom
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> Mykola Golub
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+Boost is one of those projects where there's not too much value in
+using the distro package. For starters, Boost is so template heavy
+that the vast majority of code ends up getting compiled with the
+actual executable. It also makes no guarantees about forwards /
+backwards compatibility new version of boost requires a rebuild of all
+the apps dependent on it. So all the normal distro arguments about one
+library shared across many packages and security updates becomes void.
 
-
--- 
-Cheers,
-Brad
+Because of the lack of forwards/backwards compatibility guarantees
+it's also hard to build against against distro versions because every
+distro (and then FreeBSD) all end up using different versions. So I
+would argue that it's hard to certify correctness unless one version
+of Ceph is always using one version of boost.
