@@ -1,56 +1,56 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Ceph 0.94.8 for Precise has build issues
-Date: Mon, 29 Aug 2016 10:44:38 -0400
-Message-ID: <CAC-Np1yrGo-N2gFRoxRquEdFEz-+yHhNgdJDAKvjaHcHsCwvmw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: SIMD accelerated crush_do_rule proof of concept
+Date: Mon, 29 Aug 2016 16:54:11 +0200
+Message-ID: <57C44C93.3050100@dachary.org>
+References: <57C41F9E.7090309@dachary.org>
+ <alpine.DEB.2.11.1608291352290.24244@piezo.us.to>
+ <a97a87c5-1cc6-7747-8a2a-347e49ae6e69@6wind.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:38119 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755800AbcH2Ool (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 10:44:41 -0400
-Received: by mail-wm0-f52.google.com with SMTP id o80so95859065wme.1
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 07:44:39 -0700 (PDT)
+Received: from slow1-d.mail.gandi.net ([217.70.178.86]:46068 "EHLO
+        slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757200AbcH2O6z (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 10:58:55 -0400
+Received: from relay3-d.mail.gandi.net (relay3-d.mail.gandi.net [217.70.183.195])
+        by slow1-d.mail.gandi.net (Postfix) with ESMTP id 5668947BB6D
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 16:55:36 +0200 (CEST)
+In-Reply-To: <a97a87c5-1cc6-7747-8a2a-347e49ae6e69@6wind.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
+To: Vincent JARDIN <vincent.jardin@6wind.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-0.94.8 was released a few days ago, but Precise will refuse to build
-correctly with the following error:
+Hi Vincent,
 
-In file included from ./include/types.h:21:0,
-                 from ./msg/msg_types.h:20,
-                 from ./common/entity_name.h:24,
-                 from ./common/config.h:26,
-                 from ./common/dout.h:20,
-                 from ./common/debug.h:18,
-                 from erasure-code/jerasure/ErasureCodeJerasure.cc:18:
-./include/uuid.h:14:42: fatal error: boost/random/random_device.hpp:
-No such file or directory
+On 29/08/2016 16:08, Vincent JARDIN wrote:
+> Le 29/08/2016 à 15:55, Sage Weil a écrit :
+>> To answer your question, the only real risk/problem I see is that we need
+>> to keep the perfectly in sync with the non-optimized variant
+> 
+> I do propose a generic implementation that allows to share SIMD on ARM, Intel and others (Altivec),
+> 
+> 
+> https://github.com/dachary/ceph/commit/71ae4584d9ed57f70aad718d0ffe206a01e91fef
+> 
+> You can try the following,
+> For instance,
+> #include <stdint.h>
+> #include <immintrin.h>
+> {
+> __v32qi va, vb;
+> va = (__v32qi) { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 4, 1, 0 };
+> vb = (__v32qi) { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+> 
+> __v32qi res = va ^ vb;
+> }
+> 
+> it will produce the optimized Neon or AVX, AVX2 according to each targets.
 
-This is not an issue specific to the environment where we try Precise
-builds (Jenkins)  as it is also present in the Precise gitbuilder [0]
+Generic code that relies on the compiler optimizations is terse, which is nice. But the code is not generic: it needs to be written specifically for the optimizer, which is self defeating. The http://locklessinc.com/articles/vectorize/ article illustrate that in a fun way. Instead of maintaining code with SIMD instructions, you need to understand each optimizer by reading assembly language, which is more complicated.
 
-It looks like there is an inconsistency in the package versions for libboost.
+Cheers
 
-The debian/control file specifies a version of libboost-dev >= 1.42,
-but there are changes in library paths that Ceph relies that are
-present in 1.47 and above [1]. Precise has a few libboost versions
-including 1.46 and 1.48, since 1.46 meets the requirement in the
-control file it gets installed.
-
-I have tried changing the control file at build time (completely
-non-ideal) but still facing the same issue:
-
--               libboost-dev (>= 1.42),
-+               libboost-dev (>= 1.48),
-
-If someone else can chime in on how to properly fix this for Precise
-would be great. If it means a change in the Ceph source it will mean
-that we will be required to get 0.94.9 out with that fix (0.94.8 is
-already tagged)
-
--Alfredo
-
-[0] http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-precise-amd64-basic/log.cgi?log=838cd35201e4fe1339e16d987cc33e873524af90
-[1] http://www.boost.org/doc/libs/1_46_0/doc/html/boost/random_device.html
+-- 
+Loïc Dachary, Artisan Logiciel Libre
