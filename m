@@ -1,72 +1,35 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH 1/1] ceph: do not modify fi->frag in need_reset_readdir()
-Date: Mon, 29 Aug 2016 09:34:11 +0800
-Message-ID: <D44BDF11-B00F-40F3-9446-7E5228C00A6B@redhat.com>
-References: <20160828164712.24840-1-nicolas.iooss_linux@m4x.org>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160828164712.24840-1-nicolas.iooss_linux@m4x.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Nicolas Iooss <nicolas.iooss_linux@m4x.org>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Accelerating crush with SIMD
+Date: Sun, 28 Aug 2016 21:28:25 -0700
+Message-ID: <CAJ4mKGbpnUFqXpVLVpbWrzGXHjJA17ec-evUUutBKVo9iJndBw@mail.gmail.com>
+References: <57C3269E.7010102@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ua0-f169.google.com ([209.85.217.169]:35943 "EHLO
+        mail-ua0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750909AbcH2E2j (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 00:28:39 -0400
+Received: by mail-ua0-f169.google.com with SMTP id m60so186489580uam.3
+        for <ceph-devel@vger.kernel.org>; Sun, 28 Aug 2016 21:28:27 -0700 (PDT)
+In-Reply-To: <57C3269E.7010102@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+On Sun, Aug 28, 2016 at 10:59 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi,
+>
+> Could we significantly accelerate crush with SIMD instructions ? I don't remember the idea being discussed but maybe I missed it.
 
-> On Aug 29, 2016, at 00:47, Nicolas Iooss <nicolas.iooss_linux@m4x.org> wrote:
-> 
-> Commit f3c4ebe65ea1 ("ceph: using hash value to compose dentry offset")
-> modified "if (fpos_frag(new_pos) != fi->frag)" to "if (fi->frag |=
-> fpos_frag(new_pos))" in need_reset_readdir(), thus replacing a
-> comparison operator with an assignment one.
-> 
-> This looks like a typo which is reported by clang when building the
-> kernel with some warning flags:
-> 
->    fs/ceph/dir.c:600:22: error: using the result of an assignment as a
->    condition without parentheses [-Werror,-Wparentheses]
->            } else if (fi->frag |= fpos_frag(new_pos)) {
->                       ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
->    fs/ceph/dir.c:600:22: note: place parentheses around the assignment
->    to silence this warning
->            } else if (fi->frag |= fpos_frag(new_pos)) {
->                                ^
->                       (                             )
->    fs/ceph/dir.c:600:22: note: use '!=' to turn this compound
->    assignment into an inequality comparison
->            } else if (fi->frag |= fpos_frag(new_pos)) {
->                                ^~
->                                !=
-> 
-> Fixes: f3c4ebe65ea1 ("ceph: using hash value to compose dentry offset")
-> Cc: stable@vger.kernel.org # 4.7.x
-> Signed-off-by: Nicolas Iooss <nicolas.iooss_linux@m4x.org>
-> ---
-> fs/ceph/dir.c | 2 +-
-> 1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index c64a0b794d49..df4b3e6fa563 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -597,7 +597,7 @@ static bool need_reset_readdir(struct ceph_file_info *fi, loff_t new_pos)
-> 	if (is_hash_order(new_pos)) {
-> 		/* no need to reset last_name for a forward seek when
-> 		 * dentries are sotred in hash order */
-> -	} else if (fi->frag |= fpos_frag(new_pos)) {
-> +	} else if (fi->frag != fpos_frag(new_pos)) {
-> 		return true;
-> 	}
-> 	rinfo = fi->last_readdir ? &fi->last_readdir->r_reply_info : NULL;
+I think it was attempted, but using a lookup table method turned out
+to be much faster. Sage did some prototyping and then some folks from
+Intel did a lot of heavy optimization; I'd be surprised if anybody
+managed to speed up the CRUSH calculations much at this point (at
+least, without changing the fundamental math involved).
 
-
-Applied, thanks
-
-Yan, Zheng
-
-
-
-> -- 
-> 2.9.3
-> 
+Sorry I can't be more detailed; the actual CRUSH implementation is
+something I've largely left alone. I imagine the optimization points
+become pretty clear running git blame or something though. ;)
+-Greg
