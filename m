@@ -1,368 +1,275 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: rgw: metadata search
-Date: Mon, 29 Aug 2016 13:20:10 -0700
-Message-ID: <CADRKj5R7CeZLoHWtD=BfGSXxkeJmeaC_n8WDUzJ-vHxJWFtM1A@mail.gmail.com>
-References: <CADRKj5Q8nVnWcGGbG_d8nE71x8eApXNbJQ920ZfnaN3tJ90c9Q@mail.gmail.com>
- <57C40BFC.7090703@xtaotech.com>
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: Snapshots of consistency groups
+Date: Mon, 29 Aug 2016 14:10:36 -0700
+Message-ID: <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+ <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+ <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
+ <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
+ <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
+ <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
+ <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
+ <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
+ <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f177.google.com ([209.85.217.177]:36453 "EHLO
-        mail-ua0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752400AbcH2UUM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 16:20:12 -0400
-Received: by mail-ua0-f177.google.com with SMTP id m60so225638472uam.3
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 13:20:12 -0700 (PDT)
-In-Reply-To: <57C40BFC.7090703@xtaotech.com>
+Received: from mail-ua0-f175.google.com ([209.85.217.175]:33505 "EHLO
+        mail-ua0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755468AbcH2VKi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 17:10:38 -0400
+Received: by mail-ua0-f175.google.com with SMTP id l94so160389ual.0
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 14:10:38 -0700 (PDT)
+In-Reply-To: <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yang Joseph <joseph.yang@xtaotech.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Javen Wu <javen.wu@xtaotech.com>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-On Mon, Aug 29, 2016 at 3:18 AM, Yang Joseph <joseph.yang@xtaotech.com> wrote:
-> Hello Yehuda,
->
-> What you have done is cool. Actually I tried to collect all user-defined
-> metadata of the S3 object and let it search-able or index-able.
->
-> Though user is able to tag their S3 object with user-defined metadata,
-> now it not a easy job to do index operations on these metadata. So
-> I think why not to store a shadow copy of user-defined meta data
-> into a database or search engine by extending Boto implementation.
->
-> I tried to modified boto llib and user can specify shadow database info,
-> then replicate metadata into a shadow db. And as rgw's put/copy/
-> CompleteMultipart not return object's version_id now, I made minor
-> changes to RGW in order to export this information to client side.
->
-> At the beginning, I replicated the metadata into a MYSQL. And I want to
-> user the same way to replicated metadata to ES as well. Finally, I think
-> I'd better to abstract a API or method to support kinds of DB/search engine
-> until I saw your proposal.
->
-> Why not use this kind of simple way to achieve the goal?
+Right, I forgot about snaphot "namespaces". I'll add this part.
+I guess it makes sense to discuss the whole thing on the next CDM.
 
-Not sure I understand the approach correctly, but it sounds like
-you'll need to extend boto for that to work. This can work for certain
-applications, but there are a few problems that I see with it. First,
-it requires that you use this modified boto version all across the
-board. This is a huge issue for most use cases.
-Other issue that I can think of is that since you update the metadata
-after the object has updated, and probably don't keep a journal for
-these operations, then in certain cases (e.g., due to network issues,
-client crash, etc.) you will miss updates. Moreover, there's no
-ordering control here, so having multiple writers writing the same
-object will have trouble updating the correct object's version
-metadata.
-
-Yehuda
-
+On Sun, Aug 28, 2016 at 5:37 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+> I think the first step is to implement the concept of snapshot "namespaces".
 >
->  --------------- To check all the user-defined metadata
-> ------------------------------------
+> This could be implemented as an optional variant structure associated
+> with each snapshot at creation (see the ImageWatcher RPC messages or
+> journaling event type encoding for examples of this). For consistency
+> group snapshots, this structure would identify the snapshot as
+> belonging to the consistency group and have a unique id back to the
+> specific group snapshot.
 >
-> mysql> select * from xattr4;
-> +--------+----------+-------+-----------+---------------------------------+--------+---------------------+
-> | bucket | obj      | xattr | val       | version                         |
-> host   | date                |
-> +--------+----------+-------+-----------+---------------------------------+--------+---------------------+
-> | testbucket3 | micky         | meta1 | enable-8M             | null
-> | joseph | 2016-08-15 04:26:36 |
-> | testbucket3 | micky         | meta2 | enable-8M             | null
-> | joseph | 2016-08-15 04:26:36 |
-> | testbucket4 | fffffffffffff | meta1 | vvvvvvvvvvv1111111111 |
-> FUCXsZpMNKN1Cm0M7zmM8hjDR1eIgB3 | joseph | 2016-08-18 03:53:14 |
-> | testbucket4 | fffffffffffff | meta2 | vvvvvvvvvvv1111111111 |
-> FUCXsZpMNKN1Cm0M7zmM8hjDR1eIgB3 | joseph | 2016-08-18 03:53:14 |
-> | testbucket4 | fffffffffffff | meta1 | vvvvvvvvvvv1111111111 |
-> 9oFN-Tg9Th8GWAvOMZoI21voh0z9Xyq | joseph | 2016-08-18 05:37:53 |
-> | testbucket4 | fffffffffffff | meta2 | vvvvvvvvvvv1111111111 |
-> 9oFN-Tg9Th8GWAvOMZoI21voh0z9Xyq | joseph | 2016-08-18 05:37:53 |
+> When creating a snapshot, the state machine would (1) create the group
+> snapshot record, (2) set the state of the group to "creating snapshot"
+> (to prevent new images from being added/removed from the group while
+> the op is in-progress), (3) acquire the lock for all images in the
+> group, (4) create the individual image snapshots with the linkage back
+> to the group snapshot record (can be performed in parallel up to max
+> concurrent ops), (5) release the exclusive locks, and (6) reset the
+> group status to "ready".
 >
-> ....
+> If you have a hard crash/failure anywhere, a "snap remove" operation
+> should be designed to get the group back into consistent state (i.e.
+> remove any snapshots linked to the group and reset the group state
+> back to ready).
 >
-> Thx,
+> On Fri, Aug 26, 2016 at 5:05 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>> Guys,
+>>
+>> I updated Snapshots section of this document:
+>> http://pad.ceph.com/p/consistency_groups, in accordance with my
+>> improved understanding of how it should be implemented.
+>> Please take a look and provide your comments. Some of my concerns
+>> regarding the implementation I highlighted in bold.
+>>
+>> Looking forward to your valuable remarks.
+>> Thanks in advance.
+>> V.
+>>
+>>
+>> On Sat, Aug 20, 2016 at 9:27 AM, Mykola Golub <mgolub@mirantis.com> wrote:
+>>> On Fri, Aug 19, 2016 at 05:36:56PM -0700, Victor Denisov wrote:
+>>>> What if I'm holding this lock and somebody else is trying to reacquire the lock.
+>>>> How do I get notified about it?
+>>>
+>>> The image watcher is notified, which triggers its handler:
+>>>
+>>>  ImageWatcher<I>::handle_payload(const RequestLockPayload, *ack_ctx)
+>>>
+>>> The handler calls the current lock policy method `lock_requested()`,
+>>> which will define what to do with the lock request. The StandartPolicy
+>>> is to release the lock, so it may ping-ponging between the
+>>> clients. You may define a different policy -- rbd-mirror is an example
+>>> where it is used.
+>>>
+>>> Everywhere where an operation needs the exclusive lock, it is always
+>>> checked if we currently are a lock owner, i.e:
+>>>
+>>>  ictx->exclusive_lock->is_lock_owner()
+>>>
+>>> and if it is false, the exlusive lock is requested. Before this check
+>>> you need to aquire ctx->owner_lock, and until you release owner_lock
+>>> you can be sure your exclusive lock will not leak to another
+>>> client. After releasing owner_lock, you will need to repeate the check
+>>> again when you need it.
+>>>
+>>> --
+>>> Mykola Golub
+>>>
+>>>>
+>>>>
+>>>> On Fri, Aug 19, 2016 at 5:48 AM, Mykola Golub <mgolub@mirantis.com> wrote:
+>>>> > On Thu, Aug 18, 2016 at 09:20:02PM -0700, Victor Denisov wrote:
+>>>> >> Could you please point me to the place in source code where writer
+>>>> >> acquires an exclusive lock on the image.
+>>>> >
+>>>> > Grep for 'exclusive_lock->request_lock'. Basically, what you need
+>>>> > (after opening the image) is:
+>>>> >
+>>>> > ```
+>>>> >   C_SaferCond lock_ctx;
+>>>> >   {
+>>>> >     RWLock::WLocker l(ictx->owner_lock);
+>>>> >
+>>>> >     if (ictx->exclusive_lock == nullptr) {
+>>>> >       // exclusive-lock feature is not enabled
+>>>> >       return -EINVAL;
+>>>> >     }
+>>>> >
+>>>> >     // Request the lock. If it is currently owned by another client,
+>>>> >     // RPC message will be sent to the client to release the lock.
+>>>> >     ictx->exclusive_lock->request_lock(&lock_ctx);
+>>>> >   } // release owner_lock before waiting to avoid potential deadlock
+>>>> >
+>>>> >   int r = lock_ctx.wait();
+>>>> >   if (r < 0) {
+>>>> >     return r;
+>>>> >   }
+>>>> >
+>>>> >   RWLock::RLocker l(ictx->owner_lock);
+>>>> >   if (ictx->exclusive_lock == nullptr || !ictx->exclusive_lock->is_lock_owner()) {
+>>>> >        // failed to acquire exclusive lock
+>>>> >        return -EROFS;
+>>>> >   }
+>>>> >
+>>>> >   // At this point lock is acquired
+>>>> >   ...
+>>>> >
+>>>> > ```
+>>>> >
+>>>> > You might want to look at this PR
+>>>> >
+>>>> >  https://github.com/ceph/ceph/pull/9592
+>>>> >
+>>>> > where we discuss adding API methods to directly acquire and release
+>>>> > the exclusive lock. You don't need the API, but will find examples in
+>>>> > the patch, and also useful comments from Jason.
+>>>> >
+>>>> > --
+>>>> > Mykola Golub
+>>>> >
+>>>> >> I presume you were talking about the feature:
+>>>> >> exclusive_lock, shared_lock which can be used from command line using
+>>>> >> commands lock list, lock break.
+>>>> >>
+>>>> >> On Thu, Aug 18, 2016 at 5:47 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>> >> > There is already a "request lock" RPC message and this is already handled
+>>>> >> > transparently within librbd when you attempt to acquire the lock and another
+>>>> >> > client owns it.
+>>>> >> >
+>>>> >> >
+>>>> >> > On Thursday, August 18, 2016, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>> >> >>
+>>>> >> >> If an image already has a writer who owns the lock,
+>>>> >> >> should I implement a notification that allows to ask the writer to
+>>>> >> >> release the lock,
+>>>> >> >> is there already a standard way to intercept the exclusive lock?
+>>>> >> >>
+>>>> >> >> On Tue, Aug 16, 2016 at 6:29 AM, Jason Dillaman <jdillama@redhat.com>
+>>>> >> >> wrote:
+>>>> >> >> > ... one more thing:
+>>>> >> >> >
+>>>> >> >> > I was also thinking that we need a new RBD feature bit to be used to
+>>>> >> >> > indicate that an image is part of a consistency group to prevent older
+>>>> >> >> > librbd clients from removing the image or group snapshots.  This could
+>>>> >> >> > be a RBD_FEATURES_RW_INCOMPATIBLE feature bit so older clients can
+>>>> >> >> > still open the image R/O while its part of a group.
+>>>> >> >> >
+>>>> >> >> > On Tue, Aug 16, 2016 at 9:26 AM, Jason Dillaman <jdillama@redhat.com>
+>>>> >> >> > wrote:
+>>>> >> >> >> Way back in April when we had the CDM, I was originally thinking we
+>>>> >> >> >> should implement option 3. Essentially, you have a prepare group
+>>>> >> >> >> snapshot RPC message that extends a "paused IO" lease to the caller.
+>>>> >> >> >> When that lease expires, IO would automatically be resumed even if the
+>>>> >> >> >> group snapshot hasn't been created yet.  This would also require
+>>>> >> >> >> commit/abort group snapshot RPC messages.
+>>>> >> >> >>
+>>>> >> >> >> However, thinking about this last night, here is another potential
+>>>> >> >> >> option:
+>>>> >> >> >>
+>>>> >> >> >> Option 4 - require images to have the exclusive lock feature before
+>>>> >> >> >> they can be added to a consistency group (and prevent disabling of
+>>>> >> >> >> exclusive-lock while they are part of a group). Then librbd, via the
+>>>> >> >> >> rbd CLI (or client application of the rbd consistency group snap
+>>>> >> >> >> create API), can co-operatively acquire the lock from all active image
+>>>> >> >> >> clients within the group (i.e. all IO has been flushed and paused) and
+>>>> >> >> >> can proceed with snapshot creation. If the rbd CLI dies, the normal
+>>>> >> >> >> exclusive lock handling process will automatically take care of
+>>>> >> >> >> re-acquiring the lock from the dead client and resuming IO.
+>>>> >> >> >>
+>>>> >> >> >> This option not only re-uses existing code, it would also eliminate
+>>>> >> >> >> the need to add/update the RPC messages for prepare/commit/abort
+>>>> >> >> >> snapshot creation to support group snapshots (since it could all be
+>>>> >> >> >> handled internally).
+>>>> >> >> >>
+>>>> >> >> >> On Mon, Aug 15, 2016 at 7:46 PM, Victor Denisov <vdenisov@mirantis.com>
+>>>> >> >> >> wrote:
+>>>> >> >> >>> Gentlemen,
+>>>> >> >> >>>
+>>>> >> >> >>> I'm writing to you to ask for your opinion regarding quiescing writes.
+>>>> >> >> >>>
+>>>> >> >> >>> Here is the situation. In order to take snapshots of all images in a
+>>>> >> >> >>> consistency group,
+>>>> >> >> >>> we first need to quiesce all the image writers in the consistency
+>>>> >> >> >>> group.
+>>>> >> >> >>> Let me call
+>>>> >> >> >>> group client - a client which requests a consistency group to take a
+>>>> >> >> >>> snapshot.
+>>>> >> >> >>> Image client - the client that writes to an image.
+>>>> >> >> >>> Let's say group client starts sending notify_quiesce to all image
+>>>> >> >> >>> clients that write to the images in the group. After quiescing half of
+>>>> >> >> >>> the image clients the group client can die.
+>>>> >> >> >>>
+>>>> >> >> >>> It presents us with a dilemma - what should we do with those quiesced
+>>>> >> >> >>> image clients.
+>>>> >> >> >>>
+>>>> >> >> >>> Option 1 - is to wait till someone manually runs recover for that
+>>>> >> >> >>> consistency group.
+>>>> >> >> >>> We can show warning next to those unfinished groups when user runs
+>>>> >> >> >>> group list command.
+>>>> >> >> >>> There will be a command like group recover, which allows users to
+>>>> >> >> >>> rollback unsuccessful snapshots
+>>>> >> >> >>> or continue them using create snapshot command.
+>>>> >> >> >>>
+>>>> >> >> >>> Option 2 - is to establish some heart beats between group client and
+>>>> >> >> >>> image client. If group client fails to heart beat then image client
+>>>> >> >> >>> unquiesces itself and continues normal operation.
+>>>> >> >> >>>
+>>>> >> >> >>> Option 3 - is to have a timeout for each image client. If group client
+>>>> >> >> >>> fails to make a group snapshot within this timeout then we resume our
+>>>> >> >> >>> normal operation informing group client of the fact.
+>>>> >> >> >>>
+>>>> >> >> >>> Which of these options do you prefer? Probably there are other options
+>>>> >> >> >>> that I miss.
+>>>> >> >> >>>
+>>>> >> >> >>> Thanks,
+>>>> >> >> >>> Victor.
+>>>> >> >> >>
+>>>> >> >> >>
+>>>> >> >> >>
+>>>> >> >> >> --
+>>>> >> >> >> Jason
+>>>> >> >> >
+>>>> >> >> >
+>>>> >> >> >
+>>>> >> >> > --
+>>>> >> >> > Jason
+>>>> >> >
+>>>> >> >
+>>>> >> >
+>>>> >> > --
+>>>> >> > Jason
+>>>> >> >
+>>>> >> --
+>>>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> >> the body of a message to majordomo@vger.kernel.org
+>>>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-> Yang Honggang
 >
 >
->
-> On 08/25/2016 06:53 AM, Yehuda Sadeh-Weinraub wrote:
->>
->> I have recently been working on adding metadata search to rgw. It's
->> not in yet, nor is it completely ready. I do think that it's at a
->> point where it would be great to get some feedback. This feature is
->> built on top of another feature that I talked about a few months ago
->> on CDM, which is the "sync modules" (formerly known as "sync plugins")
->> feature. The current code can be found in the following PR:
->>
->> https://github.com/ceph/ceph/pull/10731
->>
->> The "sync modules" feature that the metadata search (via
->> elasticsearch) depends on provides the framework that allows
->> forwarding data (and metadata) to external tiers. It extends the
->> current multi-zone feature such that the current sync process uses the
->> default sync module. A sync module is a set of callbacks that are
->> called for each change that happens in data (and potentially in
->> metadata, e.g., bucket creation, new user, etc.; note: object's
->> metadata change is regaded as change in data) in a single zone-group.
->> The rgw multi-zone system is eventual consistent, so changes are not
->> applied synchronously.
->>
->> A sync module is tied to a zone. Each zone has the module that is
->> responsible for handling the cross-zones data synchronization. A sync
->> module defines whether the zone can export data (e.g., regular rgw
->> data one), or can only digest data that was modified on another zone
->> (e.g., log zone, metadata search, etc.).
->>
->> The zone definition within the zonegroup configuration has a new
->> 'tier_type' field. This param controls which sync module will be used
->> for handling the cross-zone data sync. The zone private configuration
->> (that is not exposed to other zones) has a new section that can be
->> used to pass in sync-module specific configuration parameters. An
->> example of such param would be the endpoint of the elasticsearch
->> server that will be used by the module.
->>
->> A sync module is tied to a zone. Each zone has the module that is
->> responsible for handling the cross-zones data synchronization. A sync
->> module defines whether the zone can export data (e.g., regular rgw
->> data one), or can only digest data that was modified on another zone
->> (e.g., log zone, metadata search, etc.)
->>
->> The zone definition within the zonegroup configuration has a new
->> 'tier_type' field. This param controls which sync module will be used
->> for handling the cross-zone data sync. See here:
->>
->> $ mrun c1 radosgw-admin zonegroup get
->> {
->> ...
->>      "zones": [
->>          {
->>              "id": "cc602d3a-de81-4682-ad51-59765acad32c",
->>              "name": "us-west",
->>              "endpoints": [
->>                  "http:\/\/localhost:8001"
->>              ],
->>              "log_meta": "false",
->>              "log_data": "true",
->>              "bucket_index_max_shards": 0,
->>              "read_only": "false",
->>              "tier_type": "elasticsearch"
->>          },
->>          {
->>              "id": "cde6b332-5bb8-4dc0-8219-b68932565ea1",
->>              "name": "us-east-1",
->>              "endpoints": [
->>                  "http:\/\/localhost:8000"
->>              ],
->>              "log_meta": "true",
->>              "log_data": "true",
->>              "bucket_index_max_shards": 0,
->>              "read_only": "false",
->>              "tier_type": ""
->>          }
->>      ],
->> ...
->> }
->>
->> The zone private configuration (that is not exposed to other zones)
->> has a new section that can be used to pass in sync-module specific
->> configuration parameters. An example of such param would be the
->> endpoint of the elasticsearch server that will be used by the module.
->>
->> $ mrun c2 radosgw-admin zone get
->> {
->> ...
->>      "metadata_heap": "us-west.rgw.meta",
->>      "tier_config": [
->>          {
->>              "key": "endpoint",
->>              "val": "http:\/\/localhost:9200"
->>          }
->>      ],
->> ...
->> }
->>
->> An example for a trivial sync module implementation is the log module,
->> which dumps to the rgw debug log every object that needs to be synced,
->> and the operation that associated with it (create, delete,
->> delete_marker). Note that for object creation it only provides the
->> name of the objects that needs to be synced, but not any extra
->> information about that object (such as object's size, and metadata).
->> We also have a not-as-trivial implementation that fetches all the
->> metadata associated with an object that needs to be synced from the
->> source zone. This serves as the foundation for the metadata indexing
->> module.
->>
->> * metadata search via elasticsearch
->>
->> The solution for metadata search we discussed was to use elasticsearch
->> to index metadata. When saying metadata here I refer to all the
->> metadata that is associated with data objects. Such metadata includes
->> the object names, containing bucket name, size, content type, user
->> specified metadata, acls, etc. We will also be able to index other
->> type of metadata that associated with the zone, such as existing
->> users, and bucket names.
->>
->> Elasticsearch is an indexing framework that provides trivial
->> mechanisms to index data, and to perform queries on that. Indexing the
->> data is being through a RESTful api that allows HTTP PUTting and
->> POSTing a json structure that describes the data. Querying the index
->> is being done by simple GET operation.
->>
->> A metadata indexing rgw zone consists of a ceph cluster (can
->> piggy-back on another existing zone, or can reside in its own ceph
->> cluster) that needs to hold the synchronization and rgw metadata
->> information. It also includes an elasticsearch server. The zone needs
->> to be configured with tier_type set to 'elasticsearch', and the zone
->> private configuration should point at the designated elasticsearch
->> server. Whenever a change happens in the zone group (or through the
->> initial full-sync process) the sync module updates elasticsearch with
->> the metadata associated with the object, or removes the object's
->> metadata altogether if needed. Once data is indexed, it is possible to
->> access elasticsearch and query the metadata by the the different index
->> keys.
->>
->> An open question is whether we want to have rgw deal with the querying
->> api, or just leave it for elasticsearch to handle that. Another option
->> is to proxy metadata requests (via rgw) and send these to
->> elasticsearch. In any solution that requires that rgw is involved in
->> the querying process, we'll need to make up a RESTful api (that could
->> be based on the elasticsearch api). Leaving this outside of rgw is
->> trivial (from the perspective of rgw development).
->>
->> Elasticsearch does not provide off the shelf security module (that is
->> open and free at least) such as user authentication and/or
->> authorization. Security is needed so that users could only run
->> metadata queries on their own data, and not on other users' data.
->> Current security mechanisms for elasticsearch require either a
->> proprietary non-open elasticsearch extension, or other rudimentary
->> open modules. The elasticsearch default "security" model is non
->> existent, and relies on limiting access to specific url prefix through
->> a proxy. It is an open question which way we want to go. We can leave
->> it for the users (provided that we document the setup), or address it
->> by proxying requests through rgw and reuse its own auth (which on one
->> hand will solve the authorization issue, but will introduce an api
->> problem, it's probably not going to be compatible with current
->> elasticsearch commonly used api).  We currently store which users have
->> read permissions to each object. This will allow filtering search
->> results so that only the authorized users could see the relevant
->> objects.
->>
->>
->> * status
->>
->> The branch (referenced above through the PR), implements a trivial
->> sync module that pushes object's metadata to a configured
->> elasticsearch module. The main things that I want to add is
->>
->>   - limit zone sync to prespecified zones, and not all zones in the
->> zonegroup
->>
->> This is not necessarily unique to this feature, but can help here
->> quite a lot. There are a few edge cases that can cause some trouble
->> when syncing from more than one zone here (and are not an issue with
->> the regular rgw data sync, but due to some limitations can cause some
->> weirdness).
->>
->>   - elasticsearch preconfiguration / index setup
->>
->> We currently don't control any of the indexes that are being created
->> by elasticsearch. We just post the objects and let elasticsearch do
->> what it does. This might not be optimal, or might even be problematic.
->> One way to handle that would be through preconfiguring the index when
->> first starting the sync process on the elasticsearch zone. Howeve,
->> it'll need bigger expertise in elasticsearch, as there are some tricky
->> issues (e.g., what to do with user custom defined metadata?)
->>
->> And finally, here's an example of a query that retrieves all the
->> objects that have the custom 'color' metadata field set to 'silver':
->>
->> $ curl -XGET http://localhost:9200/rgw/_search?q=meta.custom.color:silver
->> {
->>      "took": 5,
->>      "timed_out": false,
->>      "_shards": {
->>          "total": 5,
->>          "successful": 5,
->>          "failed": 0
->>      },
->>      "hits": {
->>          "total": 1,
->>          "max_score": 0.30685282,
->>          "hits": [
->>              {
->>                  "_index": "rgw",
->>                  "_type": "object",
->>                  "_id":
->> "cde6b332-5bb8-4dc0-8219-b68932565ea1.4127.1:foo3:",
->>                  "_score": 0.30685282,
->>                  "_source": {
->>                      "bucket": "buck2",
->>                      "name": "foo3",
->>                      "instance": "",
->>                      "owner": {
->>                          "id": "yehsad",
->>                          "display_name": "yehuda"
->>                      },
->>                      "permissions": [
->>                          "yehsad"
->>                      ],
->>                      "meta": {
->>                          "size": 35,
->>                          "mtime": "2016-08-23T18:28:40.098Z",
->>                          "etag": "6216701a3418bdf56506670b91db3845",
->>                          "x-amz-date": "Tue, 23 Aug 2016 18:28:39 GMT",
->>                          "custom": {
->>                              "color": "silver"
->>                          }
->>                      }
->>                  }
->>              }
->>          ]
->>      }
->> }
->>
->>
->> * open questions
->>
->>   - special metadata search api
->>
->> Do we need to integrate a special metadata search api into rgw? This
->> will require defining the new api. Another option is to just proxy
->> requests to elasticsearch. A third option is to do nothing.
->>
->>   - authorization
->>
->> Authorization is an issue. As it is now, a user that can connect to
->> the elasticsearch server will be able by default to yank metadata of
->> all objects in the system. There are ways to configure a proxy on top
->> of elasticsearch to limit users operations. The read permissions field
->> that we provide as part of the indexed documents should help there.
->> - Should we just document how users need to configure the system?
->> - Do we need to investigate an external elasticsearch security module?
->> The ones I've seen didn't seem to quite cut it.
->> - proxy requests through rgw to force authorization through that?
->>
->>   - deep object inspection for metadata classification
->>
->> As it is now we only look at the current metadata assigned to the
->> objects. Something that we can explore in the future is to allow for
->> some extensible way to look into the actual objects' data, and then
->> attach other metadata to these objects. E.g., for image files it could
->> store the resolution, or the EXIF data if exists. This can currently
->> be done by external scripts that would run over the data itself and
->> update the objects' metadata, but hooking it into the sync module
->> itself could be interesting.
->>
->>
->> Feedback appreciated!
->>
->> Thanks,
->> Yehuda
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+> --
+> Jason
