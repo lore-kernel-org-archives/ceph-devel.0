@@ -1,26 +1,106 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: jewel branch for v10.2.3 ready for QE
-Date: Mon, 29 Aug 2016 17:04:23 +0200
-Message-ID: <57C44EF7.5020700@dachary.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: SIMD accelerated crush_do_rule proof of concept
+Date: Mon, 29 Aug 2016 17:07:39 +0200
+Message-ID: <CAOi1vP-Q+=QGh2+5H_3y-GBM5txHz_gMkBXTFCc=tAjV_Miztw@mail.gmail.com>
+References: <57C41F9E.7090309@dachary.org> <alpine.DEB.2.11.1608291352290.24244@piezo.us.to>
+ <57C440AF.1010905@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay6-d.mail.gandi.net ([217.70.183.198]:57442 "EHLO
-        relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757409AbcH2PFA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 11:05:00 -0400
+Received: from mail-ua0-f172.google.com ([209.85.217.172]:33378 "EHLO
+        mail-ua0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751324AbcH2PIG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 11:08:06 -0400
+Received: by mail-ua0-f172.google.com with SMTP id l94so187441315ual.0
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 08:07:41 -0700 (PDT)
+In-Reply-To: <57C440AF.1010905@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Yuri,
+On Mon, Aug 29, 2016 at 4:03 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Sage,
+>
+> On 29/08/2016 15:55, Sage Weil wrote:
+>> On Mon, 29 Aug 2016, Loic Dachary wrote:
+>>> Hi,
+>>>
+>>> TL;DR: crush_do_rule using SIMD goes twice faster, the implementation is
+>>> straightforward and would help with crushmap validation, is there any
+>>> reason not to do it ?
+>>>
+>>> When resolving a crush rule (crush_do_rule in mapper.c), the straw2
+>>> function (bucket_straw2_choose) calls the hashing function
+>>> (crush_hash32_3) for each item in a bucket and keeps the best match.
+>>> When a bucket has four items, the hash function can be run using SIMD
+>>> instructions. Each item value is 32 bits and four can fit in a __m128i.
+>>>
+>>> I tried to inline the hash function when the conditions are right[1] and
+>>> run a test to measure the difference.
+>>>
+>>> crushtool -o /tmp/t.map --num_osds 1024 --build node straw2 8 datacenter straw2 4 root straw2 0
+>>> time crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 2048000 --num-rep 4
+>>> rule 0 (replicated_ruleset), x = 1..2048000, numrep = 4..4
+>>> rule 0 (replicated_ruleset) num_rep 4 result size == 4:      2048000/2048000
+>>>
+>>> With SIMD
+>>>
+>>> real 0m10.433s
+>>> user 0m10.428s
+>>> sys  0m0.000s
+>>>
+>>> Without SIMD
+>>>
+>>> real 0m19.344s
+>>> user 0m19.340s
+>>> sys  0m0.004s
+>>>
+>>> Callgrind estimated cycles for each crush_do_rule are in the same range:
+>>>
+>>> rm crush.callgrind ; valgrind --tool=callgrind --callgrind-out-file=crush.callgrind crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 204800 --num-rep 4
+>>> kcachegrind crush.callgrind
+>>>
+>>> With SIMD    : crush_do_rule is estimated to use 21 205 cycles
+>>> Without SIMD : crush_do_rule is estimated to use 53 068 cycles
+>>>
+>>> This proof of concept relies on instructions that are available on all
+>>> ARM & Intel processors, nothing complicated is going on. It is
+>>> beneficial to crush maps that have more than four disks per host, more
+>>> than four hosts per rack etc. It probably is a small win for an OSD or
+>>> even a client. For crushmap validation it helps significantly since the
+>>> MON are not able to run crushtool asynchronously and it needs to run
+>>> within a few seconds (because it blocks the MON).
+>>>
+>>> The implementation is straightforward: it needs sub/xor/lshift/rshift.
+>>> The only relatively tricky part is runtime / compile time detection of
+>>> the SIMD instructions for both Intel and ARM processors. Luckily this
+>>> has already been taken care of when integrating with the jerasure
+>>> erasure code plugin.
+>>>
+>>> Is there any reason why it would not be good to implement this ?
+>>
+>> This is really cool!  I agree that the straw2 O(n) calculation on each
+>> node is the place to apply this.
+>>
+>> To answer your question, the only real risk/problem I see is that we need
+>> to keep the perfectly in sync with the non-optimized variant since the
+>> result has to be deterministic.  The maintenance burden is small, I think,
+>> since for that reason the code behavior doesn't really change, but we do
+>> need to pretty exhaustively verify that the new implementation matches the
+>> old one.  Perhaps a set of unit tests that compile both variants and feed
+>> it randomly sized and weighted straw2 buckets and feed lots of values
+>> through?
+>
+> Right: the implementation is likely to be simple but it needs serious testing. I'll give it a try.
 
-The jewel branch for v10.2.3 as found at https://github.com/ceph/ceph/commits/jewel has been approved by Greg, Yehuda, Jason and Sam and is ready for QE. For the record, the head is https://github.com/ceph/ceph/commit/9bfc0cf178dc21b0fe33e0ce3b90a18858abaf1b and the details of the tests run are at http://tracker.ceph.com/issues/16344.
+We should also make sure it's neatly hidden under !__KERNEL__.  Since
+the benefit to the clients is assumed to be minimal it's probably not
+worth bothering with bringing SSE into the kernel implementation.
 
-Cheers
+(However, if it turns out otherwise we can look into it - IIRC raid6
+in-kernel library is using SSE, and probably some crypto code too.)
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+Thanks,
 
+                Ilya
