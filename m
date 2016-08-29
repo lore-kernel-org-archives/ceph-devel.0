@@ -1,79 +1,64 @@
-From: Erwan Velu <evelu@redhat.com>
-Subject: Re: Ceph 0.94.8 for Precise has build issues
-Date: Mon, 29 Aug 2016 11:39:29 -0400 (EDT)
-Message-ID: <1865565590.6858495.1472485169410.JavaMail.zimbra@redhat.com>
-References: <CAC-Np1yrGo-N2gFRoxRquEdFEz-+yHhNgdJDAKvjaHcHsCwvmw@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: new boost
+Date: Mon, 29 Aug 2016 16:00:28 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1608291556290.24244@piezo.us.to>
+References: <alpine.DEB.2.11.1608261829420.24244@piezo.us.to> <CALqRxCzuD+uD4pw=E4Ds1gQh84hxHResMNkuoz7E7fYB9x1BJg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:46316 "EHLO
-        mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752808AbcH2Pjb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 11:39:31 -0400
-In-Reply-To: <CAC-Np1yrGo-N2gFRoxRquEdFEz-+yHhNgdJDAKvjaHcHsCwvmw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:40166 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751195AbcH2QBU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 29 Aug 2016 12:01:20 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 7EBEE80082
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 16:00:30 +0000 (UTC)
+In-Reply-To: <CALqRxCzuD+uD4pw=E4Ds1gQh84hxHResMNkuoz7E7fYB9x1BJg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-maintainers@ceph.com
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-I'm not a Ubuntu expert by I found that :
+On Mon, 29 Aug 2016, Ken Dreyer wrote:
+> On Fri, Aug 26, 2016 at 12:42 PM, Sage Weil <sweil@redhat.com> wrote:
+> > Now that we've transitioned to cmake, I'd like to resurrect the discussion
+> > about moving to a new version of boost.  I'm dying to use small_vector and
+> > flat_map.
+> >
+> > IIRC, we have a few options:
+> >
+> > 1) boost as a submodule.  compile and link statically.
+> >  - easy to maintain
+> >  - no packaging impact
+> >  - dev/build environment is not dependent on system install boost
+> 
+> The end-to-end build time is going to get even longer, and there is a
+> maintenance cost when we stop paying that tech debt a little bit at a
+> time when the distros release new boost packages. GitHub says Ceph's
+> civetweb is "This branch is 26 commits ahead, 1551 commits behind
+> civetweb:master". How do we keep that same thing from happening over
+> the years with a bundled boost?
 
-The 1.48 version of -dev package depends on libboost1.46-dev
-1.48 package doesn't provide any content (http://us.archive.ubuntu.com/ubuntu/pool/main/b/boost-defaults/libboost-dev_1.48.0.2_amd64.deb)
+civetweb is a bit of a special case because (1) we have to fork because we 
+have functionality that isn't necessarily suitable for upstream and (2) 
+it's mean to be linked statically anyway.  But yes, it is a maintenance 
+burden.
 
-As a result, we get a 1.46 which doesn't have the random_device.hpp.
+> Can we have a middle ground, where we use an up-to-date bundled
+> version of boost on distros without the features you want, and then
+> use the system boost if it's new enough (ie Fedora and presumably
+> Xenial or Yakkety)?
 
-That's very confusing and explains what you are reporting.
+I think this is #4:
 
-Anyone have ideas why it's done like that ?
+> 4) #1, with cmake smarts to let you choose the submodule or installed 
+> boost (and possibly autoselect system boost if it's new enough).
 
------ Mail original -----
-De: "Alfredo Deza" <adeza@redhat.com>
-À: "ceph-devel" <ceph-devel@vger.kernel.org>, ceph-maintainers@ceph.com
-Envoyé: Lundi 29 Août 2016 16:44:38
-Objet: Ceph 0.94.8 for Precise has build issues
+The goal should be to eventually drop the submodule as supported distros 
+are brought up to date.  I suspect, though, that we'll find other shiny 
+new features we'll want to start using so this may never happen...
 
-0.94.8 was released a few days ago, but Precise will refuse to build
-correctly with the following error:
+sage
 
-In file included from ./include/types.h:21:0,
-                 from ./msg/msg_types.h:20,
-                 from ./common/entity_name.h:24,
-                 from ./common/config.h:26,
-                 from ./common/dout.h:20,
-                 from ./common/debug.h:18,
-                 from erasure-code/jerasure/ErasureCodeJerasure.cc:18:
-./include/uuid.h:14:42: fatal error: boost/random/random_device.hpp:
-No such file or directory
-
-This is not an issue specific to the environment where we try Precise
-builds (Jenkins)  as it is also present in the Precise gitbuilder [0]
-
-It looks like there is an inconsistency in the package versions for libboost.
-
-The debian/control file specifies a version of libboost-dev >= 1.42,
-but there are changes in library paths that Ceph relies that are
-present in 1.47 and above [1]. Precise has a few libboost versions
-including 1.46 and 1.48, since 1.46 meets the requirement in the
-control file it gets installed.
-
-I have tried changing the control file at build time (completely
-non-ideal) but still facing the same issue:
-
--               libboost-dev (>= 1.42),
-+               libboost-dev (>= 1.48),
-
-If someone else can chime in on how to properly fix this for Precise
-would be great. If it means a change in the Ceph source it will mean
-that we will be required to get 0.94.9 out with that fix (0.94.8 is
-already tagged)
-
--Alfredo
-
-[0] http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-precise-amd64-basic/log.cgi?log=838cd35201e4fe1339e16d987cc33e873524af90
-[1] http://www.boost.org/doc/libs/1_46_0/doc/html/boost/random_device.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
