@@ -1,113 +1,49 @@
-From: Loic Dachary <loic@dachary.org>
+From: Vincent JARDIN <vincent.jardin@6wind.com>
 Subject: Re: SIMD accelerated crush_do_rule proof of concept
-Date: Mon, 29 Aug 2016 16:03:27 +0200
-Message-ID: <57C440AF.1010905@dachary.org>
+Date: Mon, 29 Aug 2016 16:08:55 +0200
+Message-ID: <a97a87c5-1cc6-7747-8a2a-347e49ae6e69@6wind.com>
 References: <57C41F9E.7090309@dachary.org>
  <alpine.DEB.2.11.1608291352290.24244@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from slow1-d.mail.gandi.net ([217.70.178.86]:34148 "EHLO
-        slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932816AbcH2OFH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 10:05:07 -0400
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:37500 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756135AbcH2OJC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 10:09:02 -0400
+Received: by mail-wm0-f43.google.com with SMTP id i5so94154322wmg.0
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 07:09:01 -0700 (PDT)
 In-Reply-To: <alpine.DEB.2.11.1608291352290.24244@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Sage Weil <sage@newdream.net>, Loic Dachary <loic@dachary.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+Le 29/08/2016 à 15:55, Sage Weil a écrit :
+> To answer your question, the only real risk/problem I see is that we need
+> to keep the perfectly in sync with the non-optimized variant
 
-On 29/08/2016 15:55, Sage Weil wrote:
-> On Mon, 29 Aug 2016, Loic Dachary wrote:
->> Hi,
->>
->> TL;DR: crush_do_rule using SIMD goes twice faster, the implementation is 
->> straightforward and would help with crushmap validation, is there any 
->> reason not to do it ?
->>
->> When resolving a crush rule (crush_do_rule in mapper.c), the straw2 
->> function (bucket_straw2_choose) calls the hashing function 
->> (crush_hash32_3) for each item in a bucket and keeps the best match. 
->> When a bucket has four items, the hash function can be run using SIMD 
->> instructions. Each item value is 32 bits and four can fit in a __m128i.
->>
->> I tried to inline the hash function when the conditions are right[1] and 
->> run a test to measure the difference.
->>
->> crushtool -o /tmp/t.map --num_osds 1024 --build node straw2 8 datacenter straw2 4 root straw2 0
->> time crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 2048000 --num-rep 4
->> rule 0 (replicated_ruleset), x = 1..2048000, numrep = 4..4
->> rule 0 (replicated_ruleset) num_rep 4 result size == 4:	2048000/2048000
->>
->> With SIMD
->>
->> real	0m10.433s
->> user	0m10.428s
->> sys	0m0.000s
->>
->> Without SIMD
->>
->> real	0m19.344s
->> user	0m19.340s
->> sys	0m0.004s
->>
->> Callgrind estimated cycles for each crush_do_rule are in the same range:
->>
->> rm crush.callgrind ; valgrind --tool=callgrind --callgrind-out-file=crush.callgrind crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 204800 --num-rep 4
->> kcachegrind crush.callgrind
->>
->> With SIMD    : crush_do_rule is estimated to use 21 205 cycles
->> Without SIMD : crush_do_rule is estimated to use 53 068 cycles
->>
->> This proof of concept relies on instructions that are available on all 
->> ARM & Intel processors, nothing complicated is going on. It is 
->> beneficial to crush maps that have more than four disks per host, more 
->> than four hosts per rack etc. It probably is a small win for an OSD or 
->> even a client. For crushmap validation it helps significantly since the 
->> MON are not able to run crushtool asynchronously and it needs to run 
->> within a few seconds (because it blocks the MON).
->>
->> The implementation is straightforward: it needs sub/xor/lshift/rshift. 
->> The only relatively tricky part is runtime / compile time detection of 
->> the SIMD instructions for both Intel and ARM processors. Luckily this 
->> has already been taken care of when integrating with the jerasure 
->> erasure code plugin.
->>
->> Is there any reason why it would not be good to implement this ?
-> 
-> This is really cool!  I agree that the straw2 O(n) calculation on each 
-> node is the place to apply this.
-> 
-> To answer your question, the only real risk/problem I see is that we need 
-> to keep the perfectly in sync with the non-optimized variant since the 
-> result has to be deterministic.  The maintenance burden is small, I think, 
-> since for that reason the code behavior doesn't really change, but we do 
-> need to pretty exhaustively verify that the new implementation matches the 
-> old one.  Perhaps a set of unit tests that compile both variants and feed 
-> it randomly sized and weighted straw2 buckets and feed lots of values 
-> through?
+I do propose a generic implementation that allows to share SIMD on ARM, 
+Intel and others (Altivec),
 
-Right: the implementation is likely to be simple but it needs serious testing. I'll give it a try.
+ 
+https://github.com/dachary/ceph/commit/71ae4584d9ed57f70aad718d0ffe206a01e91fef
 
-Cheers
+You can try the following,
+For instance,
+#include <stdint.h>
+#include <immintrin.h>
+{
+__v32qi va, vb;
+va = (__v32qi) { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 
+17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 4, 1, 0 };
+vb = (__v32qi) { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 
+17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
 
-> sage
-> 
->>
->> Cheers
->>
->> [1] https://github.com/dachary/ceph/commit/71ae4584d9ed57f70aad718d0ffe206a01e91fef
->>
->> -- 
->> Loïc Dachary, Artisan Logiciel Libre
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+__v32qi res = va ^ vb;
+}
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+it will produce the optimized Neon or AVX, AVX2 according to each targets.
+
+
