@@ -1,71 +1,113 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: debugging librbd to a VM
-Date: Mon, 29 Aug 2016 22:53:41 +0000
-Message-ID: <MWHPR12MB1934B4AFE9933CF16FFF2E5E9BE10@MWHPR12MB1934.namprd12.prod.outlook.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: debugging librbd to a VM
+Date: Tue, 30 Aug 2016 09:12:46 +1000
+Message-ID: <CAF-wwdHOjAXXUt+-ehKEPYV9Ldte7U48fyCsTUdVUcTkXiohxg@mail.gmail.com>
 References: <MWHPR12MB19342F27DDBF165F5BAE4ADC9BEC0@MWHPR12MB1934.namprd12.prod.outlook.com>
- <20160829080314.GA1733@gmail.com>
- <CAF-wwdFbgk_WcYQbEteGuCPF-b=WkX9ZpdACR01+GRoZCHB6=A@mail.gmail.com>
+ <20160829080314.GA1733@gmail.com> <CAF-wwdFbgk_WcYQbEteGuCPF-b=WkX9ZpdACR01+GRoZCHB6=A@mail.gmail.com>
+ <MWHPR12MB1934B4AFE9933CF16FFF2E5E9BE10@MWHPR12MB1934.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0072.outbound.protection.outlook.com ([104.47.42.72]:2128
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751223AbcH2Wxp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 29 Aug 2016 18:53:45 -0400
-In-Reply-To: <CAF-wwdFbgk_WcYQbEteGuCPF-b=WkX9ZpdACR01+GRoZCHB6=A@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:37023 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753932AbcH2XMv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2016 19:12:51 -0400
+Received: by mail-wm0-f47.google.com with SMTP id i5so8244214wmg.0
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 16:12:49 -0700 (PDT)
+In-Reply-To: <MWHPR12MB1934B4AFE9933CF16FFF2E5E9BE10@MWHPR12MB1934.namprd12.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>, Mykola Golub <mgolub@mirantis.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Deneau, Tom" <tom.deneau@amd.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-U28gaW4gbXkgY2FzZSB3aGF0IHdvdWxkICRuYW1lIGJlPw0KDQotLSBUb20NCg0KPiAtLS0tLU9y
-aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCcmFkIEh1YmJhcmQgW21haWx0bzpiaHViYmFy
-ZEByZWRoYXQuY29tXQ0KPiBTZW50OiBNb25kYXksIEF1Z3VzdCAyOSwgMjAxNiA1OjI5IFBNDQo+
-IFRvOiBNeWtvbGEgR29sdWIgPG1nb2x1YkBtaXJhbnRpcy5jb20+DQo+IENjOiBEZW5lYXUsIFRv
-bSA8dG9tLmRlbmVhdUBhbWQuY29tPjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3Vi
-amVjdDogUmU6IGRlYnVnZ2luZyBsaWJyYmQgdG8gYSBWTQ0KPiANCj4gT24gTW9uLCBBdWcgMjks
-IDIwMTYgYXQgNjowMyBQTSwgTXlrb2xhIEdvbHViIDxtZ29sdWJAbWlyYW50aXMuY29tPiB3cm90
-ZToNCj4gPiBNYXkgYmUgcWVtdSBkb2VzIG5vdCBzZWUgeW91IGNlcGguY29uZj8gT3Igc29tZSBv
-dGhlciBlbnZpcm9ubWVudGFsDQo+ID4gaXNzdWUgKGUuZy4gd2l0aCBxZW11IHJiZCBkcml2ZXIp
-LiBUcnkNCj4gPg0KPiA+IGxkZCAvdXNyL2Jpbi9xZW11LXN5c3RlbS14ODZfNjQgfGdyZXAgcmJk
-DQo+ID4NCj4gPiBIYXZlIHlvdSB0cmllZCBzdGFydGluZyBpdCBmcm9tIGNvbW1hbmQgbGluZT8N
-Cj4gPg0KPiA+IFlvdSBjb3VsZCBjaGVjayBpZiBjb25maWcgZGVidWcgb3B0aW9ucyB3b3JrIGFz
-IGV4cGVjdGVkIHNldHRpbmcgdGhlbQ0KPiA+IG9uIHlvdXIgd29ya2luZyBjbHVzdGVyLg0KPiAN
-Cj4gWW91IGNhbiBhbHNvIHRyeSAidG91Y2ggL3RtcC9jYnQvY2VwaC9sb2cvJG5hbWUubG9nIiBh
-bmQgImNobW9kIDc3Nw0KPiAvdG1wL2NidC9jZXBoL2xvZy8kbmFtZS5sb2ciIHRvIGVsaW1pbmF0
-ZSBwZXJtaXNzaW9ucyBpc3N1ZXMuDQo+IA0KPiA+DQo+ID4gT24gRnJpLCBBdWcgMjYsIDIwMTYg
-YXQgMDk6MDg6MzBQTSArMDAwMCwgRGVuZWF1LCBUb20gd3JvdGU6DQo+ID4+IEkgaGF2ZSB0d28g
-c21hbGwgY2x1c3RlcnMgY29uZmlndXJlZCB3aXRoIHRoZSBzYW1lIHZlcnNpb24gb2YgQ2VwaCBh
-bmQNCj4gdGhlIHNhbWUgT1MgdmVyc2lvbi4NCj4gPj4gKGRpZmZlcmVudCBwcm9jZXNzb3IgaGFy
-ZHdhcmUpDQo+ID4+DQo+ID4+IE9uIHRoZXNlIGNsdXN0ZXJzIEkgaGF2ZSBib290YWJsZSBSQkQg
-aW1hZ2VzIHRoYXQgSSBleHBlY3QgYSBWTSB0byBib290DQo+IGZyb20uDQo+ID4+IE9uIG9uZSBj
-bHVzdGVyLCB0aGUgVk0gZG9lcyBub3QgYm9vdCBmcm9tIHRoZSBpbWFnZS4gIE9uIHRoZSBvdGhl
-cg0KPiBjbHVzdGVyLCBpdCBib290cyBmaW5lLg0KPiA+PiBPbiB0aGUgZmFpbGluZyBjbHVzdGVy
-LCBhIFZNIGNhbiBib290IGZpbmUgZnJvbSB0aGUgYmFzZSBxY293MiBpbWFnZQ0KPiBmcm9tIHdo
-aWNoIHRoZSByYmQgaW1hZ2Ugd2FzIGNyZWF0ZWQuICBJdCdzIG9ubHkgcmJkIGltYWdlcyB0aGF0
-IGFyZQ0KPiBjYXVzaW5nIHByb2JsZW1zIGZvciB0aGUgVk0uDQo+ID4+DQo+ID4+IEkgd291bGQg
-bGlrZSB0byBlbmFibGUgc29tZSBkZWJ1ZyBsb2dnaW5nIHRoYXQgY291bGQgdGVsbCB3aGVyZSB0
-aGUgdHdvDQo+IGNsdXN0ZXJzIGFyZSBkaXZlcmdpbmcuDQo+ID4+DQo+ID4+IEkgdHJpZWQgYWRk
-aW5nDQo+ID4+ICAgICAgICAgZGVidWcgcmJkID0gMjANCj4gPj4gICAgICAgICBsb2cgZmlsZSA9
-IC90bXAvY2J0L2NlcGgvbG9nLyRuYW1lLmxvZw0KPiA+Pg0KPiA+PiBJIGRvIHNlZSBzb21lIHJi
-ZCBkZWJ1ZyBtZXNzYWdlcyB0byBzdGRlcnIgZHVyaW5nIG9wZXJhdGlvbnMgbGlrZSByYmQNCj4g
-Y2xvbmUsIGV0Yy4gYnV0IEkgZG9uJ3Qgc2VlIGFueSBsb2cgZmlsZXMgY3JlYXRlZCBpbiAvdG1w
-L2NidC9jZXBoIG9yDQo+IC92YXIvbG9nL2NlcGggb3IgYW55IG1lc3NhZ2VzIHdoZW4gbGlicmJk
-IGlzIGJlaW5nIHVzZWQgYnkgc2F5IHFlbXUtaW1nDQo+IGNvbnZlcnQsIG9yIGJ5IHFlbXUta3Zt
-Lg0KPiA+Pg0KPiA+PiBJcyB0aGVyZSBhIHdheSB0byBzZWUgZGV0YWlsZWQgZGVidWcgbWVzc2Fn
-ZXMgZm9yIGxpYnJiZD8NCj4gPj4NCj4gPj4gT3IgaXMgdGhlcmUgYSBiZXR0ZXIgd2F5IHRvIHNl
-ZSB3aGVyZSB0aGluZ3MgYXJlIGRpdmVyZ2luZyBiZXR3ZWVuDQo+IHRoZXNlIHR3byBjbHVzdGVy
-cz8NCj4gPj4gKG5vdGU6IEkgdHJpZWQgbHR0bmcgYnV0IGNvdWxkIG5vdCBnZXQgaXQgdG8gcmVj
-b3JkIGFueXRoaW5nKQ0KPiA+Pg0KPiA+PiAtLSBUb20NCj4gPj4gLS0NCj4gPj4gVG8gdW5zdWJz
-Y3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2
-ZWwiDQo+ID4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJu
-ZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+ID4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
-cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiA+DQo+ID4gLS0NCj4gPiBNeWtvbGEgR29sdWINCj4g
-PiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
-bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBt
-YWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0
-cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IA0KPiANCj4gDQo+IC0t
-DQo+IENoZWVycywNCj4gQnJhZA0K
+On Tue, Aug 30, 2016 at 8:53 AM, Deneau, Tom <tom.deneau@amd.com> wrote:
+> So in my case what would $name be?
+
+OK. To begin with just hard code a consistent name.
+
+/var/log/ceph/rbd.log
+
+Use that in the conf file, touch it and chmod it then restart you qemu
+instance (don't
+just restart the VM).
+
+>
+> -- Tom
+>
+>> -----Original Message-----
+>> From: Brad Hubbard [mailto:bhubbard@redhat.com]
+>> Sent: Monday, August 29, 2016 5:29 PM
+>> To: Mykola Golub <mgolub@mirantis.com>
+>> Cc: Deneau, Tom <tom.deneau@amd.com>; ceph-devel@vger.kernel.org
+>> Subject: Re: debugging librbd to a VM
+>>
+>> On Mon, Aug 29, 2016 at 6:03 PM, Mykola Golub <mgolub@mirantis.com> wrote:
+>> > May be qemu does not see you ceph.conf? Or some other environmental
+>> > issue (e.g. with qemu rbd driver). Try
+>> >
+>> > ldd /usr/bin/qemu-system-x86_64 |grep rbd
+>> >
+>> > Have you tried starting it from command line?
+>> >
+>> > You could check if config debug options work as expected setting them
+>> > on your working cluster.
+>>
+>> You can also try "touch /tmp/cbt/ceph/log/$name.log" and "chmod 777
+>> /tmp/cbt/ceph/log/$name.log" to eliminate permissions issues.
+>>
+>> >
+>> > On Fri, Aug 26, 2016 at 09:08:30PM +0000, Deneau, Tom wrote:
+>> >> I have two small clusters configured with the same version of Ceph and
+>> the same OS version.
+>> >> (different processor hardware)
+>> >>
+>> >> On these clusters I have bootable RBD images that I expect a VM to boot
+>> from.
+>> >> On one cluster, the VM does not boot from the image.  On the other
+>> cluster, it boots fine.
+>> >> On the failing cluster, a VM can boot fine from the base qcow2 image
+>> from which the rbd image was created.  It's only rbd images that are
+>> causing problems for the VM.
+>> >>
+>> >> I would like to enable some debug logging that could tell where the two
+>> clusters are diverging.
+>> >>
+>> >> I tried adding
+>> >>         debug rbd = 20
+>> >>         log file = /tmp/cbt/ceph/log/$name.log
+>> >>
+>> >> I do see some rbd debug messages to stderr during operations like rbd
+>> clone, etc. but I don't see any log files created in /tmp/cbt/ceph or
+>> /var/log/ceph or any messages when librbd is being used by say qemu-img
+>> convert, or by qemu-kvm.
+>> >>
+>> >> Is there a way to see detailed debug messages for librbd?
+>> >>
+>> >> Or is there a better way to see where things are diverging between
+>> these two clusters?
+>> >> (note: I tried lttng but could not get it to record anything)
+>> >>
+>> >> -- Tom
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> >> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> >> info at  http://vger.kernel.org/majordomo-info.html
+>> >
+>> > --
+>> > Mykola Golub
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> > in the body of a message to majordomo@vger.kernel.org More majordomo
+>> > info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>> --
+>> Cheers,
+>> Brad
+
+
+
+-- 
+Cheers,
+Brad
