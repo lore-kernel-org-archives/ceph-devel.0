@@ -1,55 +1,103 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: status of cephfs/multiple mds
-Date: Tue, 30 Aug 2016 11:04:05 +0100
-Message-ID: <CALe9h7fs3LqBBVK32nY7mrpH_-gQcmgns9cKq877H=LwbN+tsQ@mail.gmail.com>
-References: <7B5C2F2226F8AF419D625C6097AD814CB60EB03A@H3CMLB14-EX.srv.huawei-3com.com>
+From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
+Subject: Re: SIMD accelerated crush_do_rule proof of concept
+Date: Tue, 30 Aug 2016 15:24:56 +0200
+Message-ID: <20160830132456.GE10692@predictor>
+References: <57C41F9E.7090309@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f175.google.com ([209.85.220.175]:36328 "EHLO
-        mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756476AbcH3KE1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Aug 2016 06:04:27 -0400
-Received: by mail-qk0-f175.google.com with SMTP id l2so12982251qkf.3
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Aug 2016 03:04:26 -0700 (PDT)
-In-Reply-To: <7B5C2F2226F8AF419D625C6097AD814CB60EB03A@H3CMLB14-EX.srv.huawei-3com.com>
+Received: from predictor.org.pl ([185.5.97.54]:56031 "EHLO predictor.org.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750790AbcH3NYI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 30 Aug 2016 09:24:08 -0400
+Content-Disposition: inline
+In-Reply-To: <57C41F9E.7090309@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "zhengbin.08747@h3c.com" <zhengbin.08747@h3c.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-T24gVHVlLCBBdWcgMzAsIDIwMTYgYXQgMTA6MzUgQU0sIHpoZW5nYmluLjA4NzQ3QGgzYy5jb20N
-Cjx6aGVuZ2Jpbi4wODc0N0BoM2MuY29tPiB3cm90ZToNCj4gQXMgd2Uga25vdywgbXVsdGlwbGUg
-bWRzIGlzIGV4cGVyaW1lbnRhbCwgd2UgaGF2ZSBkb25lIGl0IHlldD8gd2hlbiBpdCBjYW4gYmUg
-c3RhYmxlPyBEb2VzIHRoaXMgaGF2ZSBhIHJvYWRtYXA/DQo+DQo+IEluIHRyYWNrZXIuY2VwaC5j
-b20vcHJvamVjdHMvY2VwaC93aWtpLyNQbGFubmluZy1DRE0sICB0aGVyZSBpcyBub3RoaW5nIGFi
-b3V0IGNlcGhmcy4NCj4NCj4gQ2FuIHlvdSBzaGFyZSBDZXBoRlMgdG8tZG8gbGlzdCBmb3IgdXM/
-IFRoYW5rIHlvdQ0KDQpZb3UgY2FuIHNlZSB0aGUgb3V0c3RhbmRpbmcgaXNzdWVzIHJlbGF0ZWQg
-dG8gbXVsdGktTURTIGluIHRoZSBpc3N1ZSB0cmFja2VyOg0KaHR0cDovL3RyYWNrZXIuY2VwaC5j
-b20vcHJvamVjdHMvY2VwaGZzL2lzc3Vlcz91dGY4PSVFMiU5QyU5MyZzZXRfZmlsdGVyPTEmZiU1
-QiU1RD1zdGF0dXNfaWQmb3AlNUJzdGF0dXNfaWQlNUQ9byZmJTVCJTVEPWNhdGVnb3J5X2lkJm9w
-JTVCY2F0ZWdvcnlfaWQlNUQ9JTNEJnYlNUJjYXRlZ29yeV9pZCU1RCU1QiU1RD05MCZmJTVCJTVE
-PSZjJTVCJTVEPXByb2plY3QmYyU1QiU1RD10cmFja2VyJmMlNUIlNUQ9c3RhdHVzJmMlNUIlNUQ9
-cHJpb3JpdHkmYyU1QiU1RD1zdWJqZWN0JmMlNUIlNUQ9YXNzaWduZWRfdG8mYyU1QiU1RD11cGRh
-dGVkX29uJmMlNUIlNUQ9Y2F0ZWdvcnkmYyU1QiU1RD1maXhlZF92ZXJzaW9uJmMlNUIlNUQ9Y2Zf
-MyZncm91cF9ieT0NCg0KVGhpcyBpcyBnb2luZyB0byBiZSBhbiBvbmdvaW5nIGFyZWEgZm9yIGlt
-cHJvdmVtZW50IHRocm91Z2ggdGhlIEtyYWtlbg0KYW5kIEx1bWlub3VzIGN5Y2xlcy4NCg0KSm9o
-bg0KDQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4g5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ
-5p2t5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF
-6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQo+IOeahOS4quS6uuaIlue+pOe7
-hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8iOWMheaLrOS9
-huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOAgQ0KPiDmiJbmlaPl
-j5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzpgq7ku7bv
-vIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDpmaTmnKwN
-Cj4g6YKu5Lu277yBDQo+IFRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBj
-b25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNoIGlzDQo+IGludGVuZGVkIG9u
-bHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3Zl
-LiBBbnkgdXNlIG9mIHRoZQ0KPiBpbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3
-YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsDQo+IGRp
-c2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29ucyBvdGhl
-ciB0aGFuIHRoZSBpbnRlbmRlZA0KPiByZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91
-IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0K
-PiBieSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0K
+On Mon, Aug 29, 2016 at 01:42:22PM +0200, Loic Dachary wrote:
+> Hi,
+> 
+> TL;DR: crush_do_rule using SIMD goes twice faster, the implementation is straightforward and would help with crushmap validation, is there any reason not to do it ?
+> 
+> When resolving a crush rule (crush_do_rule in mapper.c), the straw2 function (bucket_straw2_choose) calls the hashing function (crush_hash32_3) for each item in a bucket and keeps the best match. When a bucket has four items, the hash function can be run using SIMD instructions. Each item value is 32 bits and four can fit in a __m128i.
+> 
+> I tried to inline the hash function when the conditions are right[1] and run a test to measure the difference.
+> 
+> crushtool -o /tmp/t.map --num_osds 1024 --build node straw2 8 datacenter straw2 4 root straw2 0
+> time crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 2048000 --num-rep 4
+> rule 0 (replicated_ruleset), x = 1..2048000, numrep = 4..4
+> rule 0 (replicated_ruleset) num_rep 4 result size == 4:	2048000/2048000
+> 
+> With SIMD
+> 
+> real	0m10.433s
+> user	0m10.428s
+> sys	0m0.000s
+> 
+> Without SIMD
+> 
+> real	0m19.344s
+> user	0m19.340s
+> sys	0m0.004s
+> 
+> Callgrind estimated cycles for each crush_do_rule are in the same range:
+> 
+> rm crush.callgrind ; valgrind --tool=callgrind --callgrind-out-file=crush.callgrind crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 204800 --num-rep 4
+> kcachegrind crush.callgrind
+> 
+> With SIMD    : crush_do_rule is estimated to use 21 205 cycles
+> Without SIMD : crush_do_rule is estimated to use 53 068 cycles
+> 
+> This proof of concept relies on instructions that are available on all ARM & Intel processors, nothing complicated is going on. It is beneficial to crush maps that have more than four disks per host, more than four hosts per rack etc. It probably is a small win for an OSD or even a client. For crushmap validation it helps significantly since the MON are not able to run crushtool asynchronously and it needs to run within a few seconds (because it blocks the MON).
+> 
+> The implementation is straightforward: it needs sub/xor/lshift/rshift. The only relatively tricky part is runtime / compile time detection of the SIMD instructions for both Intel and ARM processors. Luckily this has already been taken care of when integrating with the jerasure erasure code plugin.
+> 
+> Is there any reason why it would not be good to implement this ?
+
+I like this and I hope you'll be able to get it into master. I was wondering
+if straw2 can be optimized further and realized that crush_ln() looks quite
+expensive. I did some basic statistics and it looks like that crush_ln
+accepts inputs in 0-65535 range, making lookup table solution feasible.
+I tried it out:
+
+Original:
+
+[branch@localhost bin]$ time ./crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 2048000 --num-rep 4                                                                                                                
+rule 0 (replicated_ruleset), x = 1..2048000, numrep = 4..4                                                                       
+rule 0 (replicated_ruleset) num_rep 4 result size == 4: 2048000/2048000                                                          
+                                                                                                                                 
+real    0m25.635s                                                                                                                
+user    0m25.553s                                                                                                                
+sys     0m0.072s                                                                                                                 
+
+Loic's SIMD:
+
+[branch@localhost bin]$ time ./crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 2048000 --num-rep 4                                                                                                                
+rule 0 (replicated_ruleset), x = 1..2048000, numrep = 4..4                                                                       
+rule 0 (replicated_ruleset) num_rep 4 result size == 4: 2048000/2048000                                                          
+                                                                                                                                 
+real    0m15.292s                                                                                                                
+user    0m15.227s                                                                                                                
+sys     0m0.056s        
+
++Crush LN cache:
+
+[branch@localhost bin]$ time ./crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 2048000 --num-rep 4                                                                                                                
+rule 0 (replicated_ruleset), x = 1..2048000, numrep = 4..4                                                                       
+rule 0 (replicated_ruleset) num_rep 4 result size == 4: 2048000/2048000                                                          
+                                                                                                                                 
+real    0m11.828s                                                                                                                
+user    0m11.746s                                                                                                                
+sys     0m0.078s
+
+There's a drawback, too - 65536 of__u64's take 512KB of ram, so the question is
+- is it worth it...
+
+-- 
+Piotr Dałek
+branch@predictor.org.pl
+http://blog.predictor.org.pl
