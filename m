@@ -1,103 +1,26 @@
-From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
-Subject: Re: SIMD accelerated crush_do_rule proof of concept
-Date: Tue, 30 Aug 2016 15:24:56 +0200
-Message-ID: <20160830132456.GE10692@predictor>
-References: <57C41F9E.7090309@dachary.org>
+From: =?UTF-8?B?6I2A5a6B5oiQ?= <qbsales@tencent.com>
+Subject: Enlace de Pagina >>website name<<
+Date: Tue, 30 Aug 2016 13:38:14 +0000
+Message-ID: <3ed880e576eb6c6b223425903b0696bc@participacionciudadana.mineduc.cl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from predictor.org.pl ([185.5.97.54]:56031 "EHLO predictor.org.pl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750790AbcH3NYI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 30 Aug 2016 09:24:08 -0400
-Content-Disposition: inline
-In-Reply-To: <57C41F9E.7090309@dachary.org>
+Received: from f5.mineduc.cl ([163.247.44.69]:50709 "EHLO
+        vlp-wordpress01.mineduc.cl" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751530AbcH3NoS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 30 Aug 2016 09:44:18 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Aug 29, 2016 at 01:42:22PM +0200, Loic Dachary wrote:
-> Hi,
-> 
-> TL;DR: crush_do_rule using SIMD goes twice faster, the implementation is straightforward and would help with crushmap validation, is there any reason not to do it ?
-> 
-> When resolving a crush rule (crush_do_rule in mapper.c), the straw2 function (bucket_straw2_choose) calls the hashing function (crush_hash32_3) for each item in a bucket and keeps the best match. When a bucket has four items, the hash function can be run using SIMD instructions. Each item value is 32 bits and four can fit in a __m128i.
-> 
-> I tried to inline the hash function when the conditions are right[1] and run a test to measure the difference.
-> 
-> crushtool -o /tmp/t.map --num_osds 1024 --build node straw2 8 datacenter straw2 4 root straw2 0
-> time crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 2048000 --num-rep 4
-> rule 0 (replicated_ruleset), x = 1..2048000, numrep = 4..4
-> rule 0 (replicated_ruleset) num_rep 4 result size == 4:	2048000/2048000
-> 
-> With SIMD
-> 
-> real	0m10.433s
-> user	0m10.428s
-> sys	0m0.000s
-> 
-> Without SIMD
-> 
-> real	0m19.344s
-> user	0m19.340s
-> sys	0m0.004s
-> 
-> Callgrind estimated cycles for each crush_do_rule are in the same range:
-> 
-> rm crush.callgrind ; valgrind --tool=callgrind --callgrind-out-file=crush.callgrind crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 204800 --num-rep 4
-> kcachegrind crush.callgrind
-> 
-> With SIMD    : crush_do_rule is estimated to use 21 205 cycles
-> Without SIMD : crush_do_rule is estimated to use 53 068 cycles
-> 
-> This proof of concept relies on instructions that are available on all ARM & Intel processors, nothing complicated is going on. It is beneficial to crush maps that have more than four disks per host, more than four hosts per rack etc. It probably is a small win for an OSD or even a client. For crushmap validation it helps significantly since the MON are not able to run crushtool asynchronously and it needs to run within a few seconds (because it blocks the MON).
-> 
-> The implementation is straightforward: it needs sub/xor/lshift/rshift. The only relatively tricky part is runtime / compile time detection of the SIMD instructions for both Intel and ARM processors. Luckily this has already been taken care of when integrating with the jerasure erasure code plugin.
-> 
-> Is there any reason why it would not be good to implement this ?
+【澳门金沙集团】电子游戏不计输赢，天天1.2%返水无上限！
+拥有MG电子、BB电子等最火平台，1元即可游戏（支持支付宝、微信、财付通、游戏点卡充值）
+最新捕鱼游戏上线，独具一格，玩法精彩，惊喜连不停，运气高到爆！
+丰富的各类电子游戏，邀您体验，赶快加入吧！：http://www.834516.com/?ceph-devel@vger.kernel.org
+------------------------------------------
+                    痛过之后就不会觉得痛了，有的只会是一颗冷漠的心。
 
-I like this and I hope you'll be able to get it into master. I was wondering
-if straw2 can be optimized further and realized that crush_ln() looks quite
-expensive. I did some basic statistics and it looks like that crush_ln
-accepts inputs in 0-65535 range, making lookup table solution feasible.
-I tried it out:
+荀宁成
 
-Original:
-
-[branch@localhost bin]$ time ./crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 2048000 --num-rep 4                                                                                                                
-rule 0 (replicated_ruleset), x = 1..2048000, numrep = 4..4                                                                       
-rule 0 (replicated_ruleset) num_rep 4 result size == 4: 2048000/2048000                                                          
-                                                                                                                                 
-real    0m25.635s                                                                                                                
-user    0m25.553s                                                                                                                
-sys     0m0.072s                                                                                                                 
-
-Loic's SIMD:
-
-[branch@localhost bin]$ time ./crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 2048000 --num-rep 4                                                                                                                
-rule 0 (replicated_ruleset), x = 1..2048000, numrep = 4..4                                                                       
-rule 0 (replicated_ruleset) num_rep 4 result size == 4: 2048000/2048000                                                          
-                                                                                                                                 
-real    0m15.292s                                                                                                                
-user    0m15.227s                                                                                                                
-sys     0m0.056s        
-
-+Crush LN cache:
-
-[branch@localhost bin]$ time ./crushtool -i /tmp/t.map --show-bad-mappings --show-statistics --test --rule 0 --min-x 1 --max-x 2048000 --num-rep 4                                                                                                                
-rule 0 (replicated_ruleset), x = 1..2048000, numrep = 4..4                                                                       
-rule 0 (replicated_ruleset) num_rep 4 result size == 4: 2048000/2048000                                                          
-                                                                                                                                 
-real    0m11.828s                                                                                                                
-user    0m11.746s                                                                                                                
-sys     0m0.078s
-
-There's a drawback, too - 65536 of__u64's take 512KB of ram, so the question is
-- is it worth it...
-
--- 
-Piotr Dałek
-branch@predictor.org.pl
-http://blog.predictor.org.pl
