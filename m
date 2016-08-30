@@ -1,69 +1,40 @@
-From: Mykola Golub <mgolub@mirantis.com>
-Subject: Re: debugging librbd to a VM
-Date: Tue, 30 Aug 2016 07:54:10 +0300
-Message-ID: <20160830045408.GA22787@gmail.com>
-References: <MWHPR12MB19342F27DDBF165F5BAE4ADC9BEC0@MWHPR12MB1934.namprd12.prod.outlook.com>
- <20160829080314.GA1733@gmail.com>
- <MWHPR12MB19344F276252365A9F02AFBC9BE10@MWHPR12MB1934.namprd12.prod.outlook.com>
+From: "zhengbin.08747@h3c.com" <zhengbin.08747@h3c.com>
+Subject: status of cephfs/multiple mds
+Date: Tue, 30 Aug 2016 09:35:05 +0000
+Message-ID: <7B5C2F2226F8AF419D625C6097AD814CB60EB03A@H3CMLB14-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f47.google.com ([209.85.215.47]:35194 "EHLO
-        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751797AbcH3EyO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Aug 2016 00:54:14 -0400
-Received: by mail-lf0-f47.google.com with SMTP id f93so5065186lfi.2
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2016 21:54:13 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <MWHPR12MB19344F276252365A9F02AFBC9BE10@MWHPR12MB1934.namprd12.prod.outlook.com>
+Received: from smtp.h3c.com ([60.191.123.56]:41126 "EHLO h3cmg01-ex.h3c.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752238AbcH3Jfg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 30 Aug 2016 05:35:36 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>
-Cc: Jason Dillaman <jdillama@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: 'Gregory Farnum' <gfarnum@redhat.com>
+Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
-On Mon, Aug 29, 2016 at 06:33:28PM +0000, Deneau, Tom wrote:
- 
-> I notice on both clusters the qemu process running is
-> /usr/libexec/qemu-kvm (this is RHEL 7.2) and the
-> euser,fgroup,ruser,uname printed by ps are all user qemu.
-
-> (note: I am initiating the VM thru virsh define xyz.xml followed by
-> virsh start, and the user initiating both those virsh commands is
-> root).
-
-So I advise to look at ps output for exact qemu command line and
-compare this with the working environments. If they are the same, try
-to run this manually from command line (instead of virsh) to see if
-there is useful output (under qemu user and root). If you don't see
-the qemu process on the non-working environment (because it terminated
-with failure), try to run here the command from the working env.
-
-> On both clusters /etc/ceph/ceph.conf is 644 access.
-> 
-> On both clusters, I get
-> ldd /usr/libexec/qemu-kvm | grep rbd
->     librbd.so.1 => /lib64/librbd.so.1 (0x00007fbdf1071000)
-> 
-> 
-> When I try 
->     rbd --id admin export <image-spec> - | md5sum
-> I get the same md5sum values on both clusters.
-> 
-> If I use --id qemu instead, I get 
->     rbd: couldn't connect to the cluster
-> on both clusters.
-
-Why did you try 'qemu' id? I doubt qemu sets it this way.
-
-> 
-> If I leave off the --id option entirely, it works on both clusters and I get the same md5sum.
-> 
-> Have not tried setting debug options on the working cluster, will
-> try that.
-
-So it does not look like rbd issue. I don't think 'debug rbd' is
-useful here. You could try increasing 'debug ms' (ceph messages)
-though.
-
--- 
-Mykola Golub
+QXMgd2Uga25vdywgbXVsdGlwbGUgbWRzIGlzIGV4cGVyaW1lbnRhbCwgd2UgaGF2ZSBkb25lIGl0
+IHlldD8gd2hlbiBpdCBjYW4gYmUgc3RhYmxlPyBEb2VzIHRoaXMgaGF2ZSBhIHJvYWRtYXA/DQoN
+CkluIHRyYWNrZXIuY2VwaC5jb20vcHJvamVjdHMvY2VwaC93aWtpLyNQbGFubmluZy1DRE0sICB0
+aGVyZSBpcyBub3RoaW5nIGFib3V0IGNlcGhmcy4NCg0KQ2FuIHlvdSBzaGFyZSBDZXBoRlMgdG8t
+ZG8gbGlzdCBmb3IgdXM/IFRoYW5rIHlvdQ0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K5pys6YKu5Lu2
+5Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE
+5L+d5a+G5L+h5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQrn
+moTkuKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbku5bkurrku6Xku7vkvZXlvaLlvI/k
+vb/nlKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDms4TpnLLjgIHlpI3l
+iLbjgIENCuaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OAguWmguaenOaCqOmUmeaU
+tuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumAmuefpeWPkeS7tuS6
+uuW5tuWIoOmZpOacrA0K6YKu5Lu277yBDQpUaGlzIGUtbWFpbCBhbmQgaXRzIGF0dGFjaG1lbnRz
+IGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20gSDNDLCB3aGljaCBpcw0KaW50
+ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0
+ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhlDQppbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGlu
+IGFueSB3YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFs
+DQpkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMg
+b3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCnJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5
+b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVy
+DQpieSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0K
