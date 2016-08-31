@@ -1,62 +1,37 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH 2/2] cephfs: remove warning when ceph_releasepage() is
- called on dirty page.
-Date: Wed, 31 Aug 2016 09:48:22 -0400
-Message-ID: <1472651302.5795.6.camel@redhat.com>
-References: <874m61eje0.fsf@notabene.neil.brown.name>
-         <87y43dd4oe.fsf@notabene.neil.brown.name>
+From: John Spray <jspray@redhat.com>
+Subject: Python 3 plans
+Date: Wed, 31 Aug 2016 15:09:31 +0100
+Message-ID: <CALe9h7fHZpXF18HoiQ4qeihrbg5C9p14m=T834T6tm+pdsquuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:35648 "EHLO
-        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933390AbcHaNsZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Aug 2016 09:48:25 -0400
-Received: by mail-qk0-f182.google.com with SMTP id v123so51347538qkh.2
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Aug 2016 06:48:24 -0700 (PDT)
-In-Reply-To: <87y43dd4oe.fsf@notabene.neil.brown.name>
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:33537 "EHLO
+        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933969AbcHaOKL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Aug 2016 10:10:11 -0400
+Received: by mail-qt0-f170.google.com with SMTP id 11so13217084qtc.0
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Aug 2016 07:09:52 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: NeilBrown <neilb@suse.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 2016-08-31 at 12:59 +1000, NeilBrown wrote:
-> If O_DIRECT writes are racing with buffered writes, then
-> the call to invalidate_inode_pages2_range() can call ceph_releasepage()
-> on dirty pages.
-> 
-> Most filesystems hold inode_lock() across O_DIRECT writes so they do not
-> suffer this race, but cephfs deliberately drops the lock, and opens a window
-> for the race.
-> 
-> This race can be triggered with the generic/036 test from the xfstests
-> test suite.  It doesn't happen every time, but it does happen often.
-> 
-> As the possibilty is expected, remove the warning, and instead include
-> the PageDirty() status in the debug message.
-> 
-> > Signed-off-by: NeilBrown <neilb@suse.com>
-> ---
->  fs/ceph/addr.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
-> 
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index d5b6f959a3c3..f657da7d12ff 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -175,9 +175,8 @@ static void ceph_invalidatepage(struct page *page, unsigned int offset,
->  
->  static int ceph_releasepage(struct page *page, gfp_t g)
->  {
-> > -	dout("%p releasepage %p idx %lu\n", page->mapping->host,
-> > -	     page, page->index);
-> > -	WARN_ON(PageDirty(page));
-> > +	dout("%p releasepage %p idx %lu (%sdirty)\n", page->mapping->host,
-> > +	     page, page->index, PageDirty(page) ? "" : "not ");
->  
-> >  	/* Can we release the page from the cache? */
-> >  	if (!ceph_release_fscache_page(page, g))
+Hi all,
 
+Various people have been helpfully fixing up the python modules for
+python 3 -- but I realised I wasn't sure what our plan really was or
+who was depending on this.
 
-Reviewed-by: Jeff Layton <jlayton@redhat.com>
+Some educated guesses:
+ * All the existing modules working with both python 2 and 3 for Kraken?
+ * Starting to test on python 3 when we have Xenial nodes in the lab?
+ * Keeping python 2 support indefinitely for EL7?
+
+Related things:
+ * I guess some openstack CIs might start depending on Python 3 at
+some stage?  Maybe this motivated some of the work so far.
+ * ceph-mgr will only be python 2 when it lands, it embeds an
+interpreter so will need a bunch of #ifdeffing to support both 2 and 3
+(a necessary evil)
+
+Cheers,
+John
