@@ -1,37 +1,38 @@
-From: John Spray <jspray@redhat.com>
-Subject: Python 3 plans
-Date: Wed, 31 Aug 2016 15:09:31 +0100
-Message-ID: <CALe9h7fHZpXF18HoiQ4qeihrbg5C9p14m=T834T6tm+pdsquuw@mail.gmail.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: ceph-mgr @ Linuxcon EU
+Date: Thu, 1 Sep 2016 01:36:21 +0900
+Message-ID: <CAAZbbf1=VmSb4vo1YOS_rZ6EOCx0_T4f3vSPZsGp_DmwhVoWxA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:33537 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933969AbcHaOKL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Aug 2016 10:10:11 -0400
-Received: by mail-qt0-f170.google.com with SMTP id 11so13217084qtc.0
-        for <ceph-devel@vger.kernel.org>; Wed, 31 Aug 2016 07:09:52 -0700 (PDT)
+Received: from mail-yb0-f180.google.com ([209.85.213.180]:33856 "EHLO
+        mail-yb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935813AbcHaQgW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 Aug 2016 12:36:22 -0400
+Received: by mail-yb0-f180.google.com with SMTP id x93so19180172ybh.1
+        for <ceph-devel@vger.kernel.org>; Wed, 31 Aug 2016 09:36:22 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hi all,
+Hey cephers,
 
-Various people have been helpfully fixing up the python modules for
-python 3 -- but I realised I wasn't sure what our plan really was or
-who was depending on this.
+Just wanted to send a note that we will be having a face-to-face
+meeting at Linuxcon EU for those who are planning on substantial
+participation in the development of the new ceph-mgr daemon. This
+meeting will be 10a-12p on 05 Oct. If you are interested in attending
+please let me know so that I can add you to the list.
 
-Some educated guesses:
- * All the existing modules working with both python 2 and 3 for Kraken?
- * Starting to test on python 3 when we have Xenial nodes in the lab?
- * Keeping python 2 support indefinitely for EL7?
+Please only sign up on this if you are absolutely sure you are going
+to be committing substantial development time on this project as we
+need to keep the numbers at this meeting relatively low. Thanks.
 
-Related things:
- * I guess some openstack CIs might start depending on Python 3 at
-some stage?  Maybe this motivated some of the work so far.
- * ceph-mgr will only be python 2 when it lands, it embeds an
-interpreter so will need a bunch of #ifdeffing to support both 2 and 3
-(a necessary evil)
 
-Cheers,
-John
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
