@@ -1,42 +1,69 @@
 From: Jeff Layton <jlayton@samba.org>
-Subject: [samba RFC PATCH 1/6] vfs:ceph: add configure test for ceph_statx
-Date: Wed, 31 Aug 2016 09:01:09 -0400
-Message-ID: <1472648474-3131-2-git-send-email-jlayton@samba.org>
+Subject: [samba RFC PATCH 2/6] vfs:ceph: add init_stat_ex_from_ceph_statx
+Date: Wed, 31 Aug 2016 09:01:10 -0400
+Message-ID: <1472648474-3131-3-git-send-email-jlayton@samba.org>
 References: <1472648474-3131-1-git-send-email-jlayton@samba.org>
-Return-path: <samba-technical-bounces@lists.samba.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from hr2.samba.org ([144.76.82.148]:31407 "EHLO hr2.samba.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S934231AbcHaNBz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 31 Aug 2016 09:01:55 -0400
 In-Reply-To: <1472648474-3131-1-git-send-email-jlayton@samba.org>
-List-Unsubscribe: <https://lists.samba.org/mailman/options/samba-technical>,
- <mailto:samba-technical-request@lists.samba.org?subject=unsubscribe>
-List-Archive: <http://lists.samba.org/pipermail/samba-technical/>
-List-Post: <mailto:samba-technical@lists.samba.org>
-List-Help: <mailto:samba-technical-request@lists.samba.org?subject=help>
-List-Subscribe: <https://lists.samba.org/mailman/listinfo/samba-technical>,
- <mailto:samba-technical-request@lists.samba.org?subject=subscribe>
-Errors-To: samba-technical-bounces@lists.samba.org
-Sender: "samba-technical" <samba-technical-bounces@lists.samba.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: samba-technical@lists.samba.org
-Cc: ceph-devel@vger.kernel.org, ira@wakeful.net
-List-Id: ceph-devel.vger.kernel.org
+Cc: ira@wakeful.net, ceph-devel@vger.kernel.org
 
-...so we can conditionally compile in its use.
+Add a helper function that will convert a ceph_statx structure to a
+stat_ex. The main difference is that we can now get a proper btime.
 
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- source3/wscript | 2 ++
- 1 file changed, 2 insertions(+)
+ source3/modules/vfs_ceph.c | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
 
-diff --git a/source3/wscript b/source3/wscript
-index 5ce1b77e23b1..c6b2421c45b7 100644
---- a/source3/wscript
-+++ b/source3/wscript
-@@ -1582,6 +1582,8 @@ main() {
-     if conf.CHECK_HEADERS('cephfs/libcephfs.h', False, False, 'cephfs') and conf.CHECK_LIB('cephfs', shlib=True) and Options.options.with_cephfs:
-         if Options.options.with_acl_support:
-             conf.DEFINE('HAVE_CEPH', '1')
-+            if conf.CHECK_FUNCS_IN('ceph_statx', 'cephfs', headers='cephfs/libcephfs.h'):
-+                conf.DEFINE('HAVE_CEPH_STATX', '1')
-         else:
-             Logs.warn("ceph support disabled due to --without-acl-support")
-             conf.undefine('HAVE_CEPH')
+diff --git a/source3/modules/vfs_ceph.c b/source3/modules/vfs_ceph.c
+index 59e9b9cf9b3e..62ed469843de 100644
+--- a/source3/modules/vfs_ceph.c
++++ b/source3/modules/vfs_ceph.c
+@@ -535,6 +535,37 @@ static int cephwrap_fsync(struct vfs_handle_struct *handle, files_struct *fsp)
+ 	WRAP_RETURN(result);
+ }
+ 
++#ifdef HAVE_CEPH_STATX
++#define	MINORBITS	(20)
++#define	MINORMASK	((1U << MINORBITS) - 1)
++#define	MAJOR(dev)	((unsigned int) ((dev) >> MINORBITS))
++#define	MINOR(dev)	((unsigned int) ((dev) & MINORMASK))
++#define	MKDEV(ma,mi)	(((ma) << MINORBITS) | (mi))
++
++static void init_stat_ex_from_ceph_statx(struct stat_ex *dst, const struct ceph_statx *stx)
++{
++	dst->st_ex_dev = MKDEV(stx->stx_dev_major, stx->stx_dev_minor);
++	dst->st_ex_rdev = MKDEV(stx->stx_rdev_major, stx->stx_rdev_minor);
++	dst->st_ex_ino = stx->stx_ino;
++	dst->st_ex_mode = stx->stx_mode;
++	dst->st_ex_uid = stx->stx_uid;
++	dst->st_ex_gid = stx->stx_gid;
++	dst->st_ex_size = stx->stx_size;
++	dst->st_ex_nlink = stx->stx_nlink;
++	dst->st_ex_atime.tv_sec = stx->stx_atime;
++	dst->st_ex_atime.tv_nsec = stx->stx_atime_ns;
++	dst->st_ex_btime.tv_sec = stx->stx_btime;
++	dst->st_ex_btime.tv_nsec = stx->stx_btime_ns;
++	dst->st_ex_ctime.tv_sec = stx->stx_ctime;
++	dst->st_ex_ctime.tv_nsec = stx->stx_ctime_ns;
++	dst->st_ex_mtime.tv_sec = stx->stx_mtime;
++	dst->st_ex_mtime.tv_nsec = stx->stx_mtime_ns;
++	dst->st_ex_calculated_birthtime = false;
++	dst->st_ex_blksize = stx->stx_blksize;
++	dst->st_ex_blocks = stx->stx_blocks;
++}
++#endif /* HAVE_CEPH_STATX */
++
+ static int cephwrap_stat(struct vfs_handle_struct *handle,
+ 			struct smb_filename *smb_fname)
+ {
 -- 
 2.7.4
+
