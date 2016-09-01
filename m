@@ -1,53 +1,33 @@
 From: John Spray <jspray@redhat.com>
-Subject: Re: ceph-mgr @ Linuxcon EU
-Date: Thu, 1 Sep 2016 10:47:57 +0100
-Message-ID: <CALe9h7dyYBbg-eA0CqhT+2Z9n3brYNh0nketnqszBEaq=Jm2=Q@mail.gmail.com>
-References: <CAAZbbf1=VmSb4vo1YOS_rZ6EOCx0_T4f3vSPZsGp_DmwhVoWxA@mail.gmail.com>
+Subject: Switching cephfs suites from btrfs to xfs
+Date: Thu, 1 Sep 2016 11:33:10 +0100
+Message-ID: <CALe9h7e7ePnRe+cmFO4DZTwCbJJErVbwpHH4YzGur9LtgxXHdg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f175.google.com ([209.85.220.175]:32945 "EHLO
-        mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751810AbcIAJsV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Sep 2016 05:48:21 -0400
-Received: by mail-qk0-f175.google.com with SMTP id z190so78949370qkc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Sep 2016 02:48:20 -0700 (PDT)
-In-Reply-To: <CAAZbbf1=VmSb4vo1YOS_rZ6EOCx0_T4f3vSPZsGp_DmwhVoWxA@mail.gmail.com>
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:35183 "EHLO
+        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932676AbcIAKdc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Sep 2016 06:33:32 -0400
+Received: by mail-qk0-f170.google.com with SMTP id v123so79677782qkh.2
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Sep 2016 03:33:31 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <pmcgarry@redhat.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Aug 31, 2016 at 5:36 PM, Patrick McGarry <pmcgarry@redhat.com> wrote:
-> Hey cephers,
->
-> Just wanted to send a note that we will be having a face-to-face
-> meeting at Linuxcon EU for those who are planning on substantial
-> participation in the development of the new ceph-mgr daemon. This
-> meeting will be 10a-12p on 05 Oct. If you are interested in attending
-> please let me know so that I can add you to the list.
->
-> Please only sign up on this if you are absolutely sure you are going
-> to be committing substantial development time on this project as we
-> need to keep the numbers at this meeting relatively low. Thanks.
+Given our current push toward bluestore as the long term plan, I'm
+wondering if anyone would object to me switching off the use of btrfs
+in the CephFS test suites?
 
-Quick addition: I'll be at the conference Tuesday through Thursday so
-informal chats are also welcome for anyone who isn't going to be in
-the official meeting.
+I think the motivation for this historically was to maximise coverage
+of the FileStore pieces that XFS doesn't exercise, but that probably
+matters less these days, and the (much larger) rados suite covers
+btrfs.
 
-Cheers,
+My motivation is to get rid of the intermittent assert(0 ==
+"unexpected error") OSD crashes that crop up in our testing every once
+in a while and are attributed to btrfs.
+
+Thoughts?
+
 John
-
->
-> --
->
-> Best Regards,
->
-> Patrick McGarry
-> Director Ceph Community || Red Hat
-> http://ceph.com  ||  http://community.redhat.com
-> @scuttlemonkey || @ceph
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
