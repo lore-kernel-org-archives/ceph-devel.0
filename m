@@ -1,45 +1,38 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Switching cephfs suites from btrfs to xfs
-Date: Thu, 1 Sep 2016 14:16:03 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609011415390.19032@piezo.us.to>
-References: <CALe9h7e7ePnRe+cmFO4DZTwCbJJErVbwpHH4YzGur9LtgxXHdg@mail.gmail.com>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph at OpenStack Barcelona
+Date: Thu, 1 Sep 2016 10:29:50 -0400
+Message-ID: <CAAZbbf25tQvLYHrWmx4Vrzg1BuoAZe4nZyaxxPiorGbUpZQedw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38796 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752170AbcIAOQH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Sep 2016 10:16:07 -0400
-In-Reply-To: <CALe9h7e7ePnRe+cmFO4DZTwCbJJErVbwpHH4YzGur9LtgxXHdg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, board-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 1 Sep 2016, John Spray wrote:
-> Given our current push toward bluestore as the long term plan, I'm
-> wondering if anyone would object to me switching off the use of btrfs
-> in the CephFS test suites?
-
-Sounds good to me!
-
-sage
-
-> I think the motivation for this historically was to maximise coverage
-> of the FileStore pieces that XFS doesn't exercise, but that probably
-> matters less these days, and the (much larger) rados suite covers
-> btrfs.
-> 
-> My motivation is to get rid of the intermittent assert(0 ==
-> "unexpected error") OSD crashes that crop up in our testing every once
-> in a while and are attributed to btrfs.
-> 
-> Thoughts?
-> 
-> John
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+SGV5IGNlcGhlcnMsCgpOb3cgdGhhdCBvdXIgQVBBQyByb2Fkc2hvdyBoYXMgY29uY2x1ZGVkIEni
+gJltIHN0YXJ0aW5nIHRvIGxvb2sgZm9yd2FyZAp0byB1cGNvbWluZyBldmVudHMgbGlrZSBPcGVu
+U3RhY2sgQmFyY2Vsb25hLiBUaGVyZSB3ZXJlIGEgdG9uIG9mIHRhbGtzCnN1Ym1pdHRlZCB0aGlz
+IHRpbWUgYXJvdW5kLCBzbyBtYW55IG9mIHlvdSBkaWQgbm90IGdldCB5b3VyIHRhbGsKYWNjZXB0
+ZWQuIFlvdSBjYW4gc2VlIHRoZSA4IGFjY2VwdGVkIHRhbGtzIGhlcmU6CgpodHRwczovL3d3dy5v
+cGVuc3RhY2sub3JnL3N1bW1pdC9iYXJjZWxvbmEtMjAxNi9zdW1taXQtc2NoZWR1bGUvZ2xvYmFs
+LXNlYXJjaD90PWNlcGgKCkkgYW0gaW4gdGhlIHByb2Nlc3Mgb2YgdHJ5aW5nIHRvIHB1dCB0b2dl
+dGhlciBhbiBhbmNpbGxhcnkgZXZlbnQgb24KZWl0aGVyIFR1ZXMgb3IgV2VkIHRoYXQgd2Vlaywg
+YnV0IEkgYW0gaGF2aW5nIHRyb3VibGUgZmluZGluZwphZmZvcmRhYmxlIHNwYWNlLiBJZiBhbnkg
+b2YgeW91IHdvdWxkIGxpa2UgdG8gcHJlc2VudCBhdCBhIHNpZGUgZXZlbnQKKGFuZC9vciBzcG9u
+c29yIHRoZSBlZmZvcnQpIHBsZWFzZSBsZXQgbWUga25vdy4gSSBhbSB3b3JraW5nIHdpdGggdGhl
+Ck9wZW5TdGFjayBmb3VuZGF0aW9uIHRvIHNlZSB3aGF0IHdlIGNhbiBnZXQgZ29pbmcuIFRoYW5r
+cy4KCgotLSAKCkJlc3QgUmVnYXJkcywKClBhdHJpY2sgTWNHYXJyeQpEaXJlY3RvciBDZXBoIENv
+bW11bml0eSB8fCBSZWQgSGF0Cmh0dHA6Ly9jZXBoLmNvbSAgfHwgIGh0dHA6Ly9jb21tdW5pdHku
+cmVkaGF0LmNvbQpAc2N1dHRsZW1vbmtleSB8fCBAY2VwaApfX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVz
+ZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
+aC11c2Vycy1jZXBoLmNvbQo=
