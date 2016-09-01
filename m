@@ -1,96 +1,68 @@
 From: NeilBrown <neilb@suse.com>
-Subject: Re: [PATCH 1/2] cephfs: ignore error from invalidate_inode_pages2_range() in direct write.
-Date: Thu, 01 Sep 2016 11:01:26 +1000
-Message-ID: <87pooocu1l.fsf@notabene.neil.brown.name>
-References: <874m61eje0.fsf@notabene.neil.brown.name> <871t15ej9y.fsf@notabene.neil.brown.name> <1472651257.5795.5.camel@redhat.com>
+Subject: Re: [PATCH 0/2]: CEPHFS: allow for races between direct and buffered writes
+Date: Thu, 01 Sep 2016 11:13:36 +1000
+Message-ID: <87mvjscthb.fsf@notabene.neil.brown.name>
+References: <874m61eje0.fsf@notabene.neil.brown.name> <CAAM7YA=p9EdH6Kd2t_b5ZzbEHm5PSvEVakcSTtCiH=5o5sNi1g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; boundary="=-=-=";
         micalg=pgp-sha256; protocol="application/pgp-signature"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:40423 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:42152 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753885AbcIABBg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 31 Aug 2016 21:01:36 -0400
-In-Reply-To: <1472651257.5795.5.camel@redhat.com>
+        id S1753793AbcIABNp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 31 Aug 2016 21:13:45 -0400
+In-Reply-To: <CAAM7YA=p9EdH6Kd2t_b5ZzbEHm5PSvEVakcSTtCiH=5o5sNi1g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
 --=-=-=
 Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
 
-On Wed, Aug 31 2016, Jeff Layton wrote:
+On Wed, Aug 31 2016, Yan, Zheng wrote:
+
+> On Wed, Aug 31, 2016 at 10:56 AM, NeilBrown <neilb@suse.com> wrote:
+>>
+>> Hi,
+>>  it is quite possible for O_DIRECT and buffered writes to a file to
+>>  race.
+>>  The xfstests test suite has a test - generic/036 - which tests this
+>>  case.
+>>
+>>  Unlike most filesystems, cephfs does not hold inode_lock() across
+>>  direct writes.  This means that buffer pages can become dirty while
+>>  direct writes are happening.  This confused ceph a little.
 >
-> Good catch. Even better might be to just declare a int ret2 and not
-> clobber "ret" at all.
+> how about make ceph_write_iter() hold inode_lock() for direct/sync write?
 
-Like the following?  Must better, yes.
+You could probably do that.  You could even use inode_lock_shared() to
+allow multiple writers to perform O_DIRECT writes to the same file in
+parallel.
 
->
-> Clearly, mixing buffered and direct I/O is gross, but I suppose you
-> could hit the occasional problem here with a real workload
-> occasionally.
->
-> Should this go to stable? The patch seems safe enough.
+But I don't know why ceph did this differently from every other
+filesystem, and the git commit message doesn't shine any light on that
+question.  I didn't want to propose a change that I didn't understand
+the consequences of.
 
-Hardly seems worth it, but certainly safe enough.
-
->
-> Reviewed-by: Jeff Layton <jlayton@redhat.com>
+If you did extend the locking over ceph_direct_read_write(), it would
+probably make sense to remove the truncate_inode_pages_range() call as
+it should be redundant.
 
 Thanks,
 NeilBrown
 
-From: NeilBrown <neilb@suse.com>
-Subject: [PATCH] cephfs: ignore error from invalidate_inode_pages2_range() =
-in
- direct write.
 
-This call can fail if there are dirty pages.  The preceding call to
-filemap_write_and_wait_range() will normally remove dirty pages, but
-as inode_lock() is not held over calls to ceph_direct_read_write(), it
-could race with non-direct writes and pages could be dirtied
-immediately after filemap_write_and_wait_range() returns
-
-If there are dirty pages, they will be removed by the subsequent call
-to truncate_inode_pages_range(), so having them here is not a problem.
-
-If the 'ret' value is left holding an error, then in the async IO case
-(aio_req is not NULL) the loop that would normally call
-ceph_osdc_start_request() will see the error in 'ret' and abort all
-requests.  This doesn't seem like correct behaviour.
-
-So use separate 'ret2' instead of overloading 'ret'
-
-Signed-off-by: NeilBrown <neilb@suse.com>
-Reviewed-by: Jeff Layton <jlayton@redhat.com>
-=2D--
- fs/ceph/file.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 0f5375d8e030..395c7fcb1cea 100644
-=2D-- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -902,10 +902,10 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov=
-_iter *iter,
- 		return ret;
-=20
- 	if (write) {
-=2D		ret =3D invalidate_inode_pages2_range(inode->i_mapping,
-+		int ret2 =3D invalidate_inode_pages2_range(inode->i_mapping,
- 					pos >> PAGE_SHIFT,
- 					(pos + count) >> PAGE_SHIFT);
-=2D		if (ret < 0)
-+		if (ret2 < 0)
- 			dout("invalidate_inode_pages2_range returned %d\n", ret);
-=20
- 		flags =3D CEPH_OSD_FLAG_ORDERSNAP |
-=2D-=20
-2.9.3
-
+>
+> Regards
+> Yan, Zheng
+>>
+>>  The following two patches allow ceph to handle this possibility a
+>>  little more cleanly.  The more important patch removes a WARN_ON() for
+>>  a circumstance which can easily be triggered.
+>>
+>> Thanks,
+>> NeilBrown
 
 --=-=-=
 Content-Type: application/pgp-signature; name="signature.asc"
@@ -98,18 +70,18 @@ Content-Type: application/pgp-signature; name="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2
 
-iQIcBAEBCAAGBQJXx33nAAoJEDnsnt1WYoG5iFwP/jZFQjDuoiArGy9Qdg5FL8o1
-mASXtdnjPNw5cu2iDCvWEcN83bWRkAsgStQzAHjc0rp7fI/b/CC50RFG4olYh+M3
-fwcSZ0/GVPkBALPjHeIvLbneqRDiwK/iEb3XoVxGNmZYOGe/asd3MMSAxX7kF2ZA
-OFUlLAEuMvcgtTb6steSGyJC8ZmoOEiSobRHYDcimcONeK7MwIqs0lIhmuqEAisf
-TaIUOwuC9f7SqRnZRFZGqyEH0rN66ME5t69A0RRRGZLb+P3pvzxsHUumlDm5jMLC
-FNd6nVi7EgIoVgiuQ5O2SSw6Kf+gzCHrEFcXQYhjtvoe+XdX/m7cGa64T9sfUpWp
-VhcdC7dims8tkPH4pnqHSqu9X1+U7EW6WdroaojcMKu7jrKpgyxbsNmuCbmYMGUd
-a00LbGCVBoe0joWiaJzCHPAjLt2BjDeYMSpa7YDG6aMamxZrmsxXr/W4K4/xHITP
-vDLbU813uGgGYzroGEQuQBZR8w40I5rB+TUqabwo7bnz8Byns4rE0HAMRL8+Lkuq
-yd/Pii8W368/J+Ekf87GjvMaQB2fgWHRHWEIx+sTr/4kQe0aLbvSZV+UI+C+BSwV
-D7D+7rTkt0/UJjz9gFcfJWEPkvbrwKGjnWiVgIr7+czyeiZHVBJs64+om5bdUUTY
-gcsP5D4xaTwLC7hMrLU+
-=zvVr
+iQIcBAEBCAAGBQJXx4DAAAoJEDnsnt1WYoG5vmcQAJ268DBmwkXjZxKLhSA3LkEl
+44vpuk+p7BF+4dc5epK4bCxPztolFwPkOH4GPbgYIUq5/8joiLzKd1vInUdEncQK
+Ke82JSp66X8Hjyrjq0OpWPTfDz2RPEgA7biII1gLGtCVR5OhHAW2y+4jRbzKn8wh
+xH96/Dh65tMJDk4K50qnNyOpPeSfRMDbiWG0DcwzLzswlHmWqaSg685m9nR8PfMN
+zNeMc09fTWuCUDKZ1gEEryIqpuCGB+/BlcxuFnTrSyP1u7vZamZnSNfR8zLOM5jJ
+OCg+JaEkeTMzj1Pks4VOUvTydpK0ZEInX6jNw15dn4TlinBShA+gX9M3tjgCFD/e
+sIU9kWzB222VEQgvdL0RMz7/mX0yCZzL3XTtd3UpWY5Sfdtg11VbVDIAuK3RDHBZ
+xiLH6rqxoJXwA042oXAuQlAJyHw7+oU/r4lzS87fJ5UJHpGtRDRS63ou1sJ3a525
+m1lx5toQoXu9vp9QikZG9M2o1nj27airTITjfFbeh3+0681uP9ufOkw1opbIp8Td
+Wr9cNB4Ubdr+dFkCqk16j6x1DWWXs7g8qmY/udi2mIJsYOmpwfgvU0uupuvgEXhu
+ki9tbdt11HyzMm8Oux76Lp/0P0gEIw9Uii4PMuvxMhdUqrYv985IvccK68OkTsV/
+rbM0L9n6TpkdrRvygE5w
+=NjDM
 -----END PGP SIGNATURE-----
 --=-=-=--
