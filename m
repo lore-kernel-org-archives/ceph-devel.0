@@ -1,38 +1,73 @@
-From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph at OpenStack Barcelona
-Date: Thu, 1 Sep 2016 10:29:50 -0400
-Message-ID: <CAAZbbf25tQvLYHrWmx4Vrzg1BuoAZe4nZyaxxPiorGbUpZQedw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, board-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH 0/2]: CEPHFS: allow for races between direct and buffered writes
+Date: Thu, 1 Sep 2016 22:30:23 +0800
+Message-ID: <53A4AE18-147D-44BC-8F96-62E4B7C0A16C@redhat.com>
+References: <874m61eje0.fsf@notabene.neil.brown.name> <CAAM7YA=p9EdH6Kd2t_b5ZzbEHm5PSvEVakcSTtCiH=5o5sNi1g@mail.gmail.com> <87mvjscthb.fsf@notabene.neil.brown.name>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:50020 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754017AbcIAObB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 1 Sep 2016 10:31:01 -0400
+In-Reply-To: <87mvjscthb.fsf@notabene.neil.brown.name>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: NeilBrown <neilb@suse.com>
+Cc: Zheng Yan <ukernel@gmail.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGV5IGNlcGhlcnMsCgpOb3cgdGhhdCBvdXIgQVBBQyByb2Fkc2hvdyBoYXMgY29uY2x1ZGVkIEni
-gJltIHN0YXJ0aW5nIHRvIGxvb2sgZm9yd2FyZAp0byB1cGNvbWluZyBldmVudHMgbGlrZSBPcGVu
-U3RhY2sgQmFyY2Vsb25hLiBUaGVyZSB3ZXJlIGEgdG9uIG9mIHRhbGtzCnN1Ym1pdHRlZCB0aGlz
-IHRpbWUgYXJvdW5kLCBzbyBtYW55IG9mIHlvdSBkaWQgbm90IGdldCB5b3VyIHRhbGsKYWNjZXB0
-ZWQuIFlvdSBjYW4gc2VlIHRoZSA4IGFjY2VwdGVkIHRhbGtzIGhlcmU6CgpodHRwczovL3d3dy5v
-cGVuc3RhY2sub3JnL3N1bW1pdC9iYXJjZWxvbmEtMjAxNi9zdW1taXQtc2NoZWR1bGUvZ2xvYmFs
-LXNlYXJjaD90PWNlcGgKCkkgYW0gaW4gdGhlIHByb2Nlc3Mgb2YgdHJ5aW5nIHRvIHB1dCB0b2dl
-dGhlciBhbiBhbmNpbGxhcnkgZXZlbnQgb24KZWl0aGVyIFR1ZXMgb3IgV2VkIHRoYXQgd2Vlaywg
-YnV0IEkgYW0gaGF2aW5nIHRyb3VibGUgZmluZGluZwphZmZvcmRhYmxlIHNwYWNlLiBJZiBhbnkg
-b2YgeW91IHdvdWxkIGxpa2UgdG8gcHJlc2VudCBhdCBhIHNpZGUgZXZlbnQKKGFuZC9vciBzcG9u
-c29yIHRoZSBlZmZvcnQpIHBsZWFzZSBsZXQgbWUga25vdy4gSSBhbSB3b3JraW5nIHdpdGggdGhl
-Ck9wZW5TdGFjayBmb3VuZGF0aW9uIHRvIHNlZSB3aGF0IHdlIGNhbiBnZXQgZ29pbmcuIFRoYW5r
-cy4KCgotLSAKCkJlc3QgUmVnYXJkcywKClBhdHJpY2sgTWNHYXJyeQpEaXJlY3RvciBDZXBoIENv
-bW11bml0eSB8fCBSZWQgSGF0Cmh0dHA6Ly9jZXBoLmNvbSAgfHwgIGh0dHA6Ly9jb21tdW5pdHku
-cmVkaGF0LmNvbQpAc2N1dHRsZW1vbmtleSB8fCBAY2VwaApfX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVz
-ZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
-aC11c2Vycy1jZXBoLmNvbQo=
+
+> On Sep 1, 2016, at 09:13, NeilBrown <neilb@suse.com> wrote:
+> 
+> On Wed, Aug 31 2016, Yan, Zheng wrote:
+> 
+>> On Wed, Aug 31, 2016 at 10:56 AM, NeilBrown <neilb@suse.com> wrote:
+>>> 
+>>> Hi,
+>>> it is quite possible for O_DIRECT and buffered writes to a file to
+>>> race.
+>>> The xfstests test suite has a test - generic/036 - which tests this
+>>> case.
+>>> 
+>>> Unlike most filesystems, cephfs does not hold inode_lock() across
+>>> direct writes.  This means that buffer pages can become dirty while
+>>> direct writes are happening.  This confused ceph a little.
+>> 
+>> how about make ceph_write_iter() hold inode_lock() for direct/sync write?
+> 
+> You could probably do that.  You could even use inode_lock_shared() to
+> allow multiple writers to perform O_DIRECT writes to the same file in
+> parallel.
+> 
+> But I don't know why ceph did this differently from every other
+> filesystem, and the git commit message doesn't shine any light on that
+> question.  I didn't want to propose a change that I didn't understand
+> the consequences of.
+> 
+> If you did extend the locking over ceph_direct_read_write(), it would
+> probably make sense to remove the truncate_inode_pages_range() call as
+> it should be redundant.
+
+both patches applied
+
+Regards
+Yan, Zheng
+
+
+> 
+> Thanks,
+> NeilBrown
+> 
+> 
+>> 
+>> Regards
+>> Yan, Zheng
+>>> 
+>>> The following two patches allow ceph to handle this possibility a
+>>> little more cleanly.  The more important patch removes a WARN_ON() for
+>>> a circumstance which can easily be triggered.
+>>> 
+>>> Thanks,
+>>> NeilBrown
+
