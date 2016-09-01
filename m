@@ -1,87 +1,107 @@
-From: NeilBrown <neilb@suse.com>
-Subject: Re: [PATCH 0/2]: CEPHFS: allow for races between direct and buffered writes
-Date: Thu, 01 Sep 2016 11:13:36 +1000
-Message-ID: <87mvjscthb.fsf@notabene.neil.brown.name>
-References: <874m61eje0.fsf@notabene.neil.brown.name> <CAAM7YA=p9EdH6Kd2t_b5ZzbEHm5PSvEVakcSTtCiH=5o5sNi1g@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Python 3 plans
+Date: Thu, 1 Sep 2016 10:45:38 +0100
+Message-ID: <CALe9h7eZ+ssvUXv6xfv2PbU-ZiAbXOxza6KEf=xP-X2VfpqjPg@mail.gmail.com>
+References: <CALe9h7fHZpXF18HoiQ4qeihrbg5C9p14m=T834T6tm+pdsquuw@mail.gmail.com>
+ <2bf23853-de9e-5a98-2db1-fe17e9999548@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-        micalg=pgp-sha256; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:42152 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753793AbcIABNp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 31 Aug 2016 21:13:45 -0400
-In-Reply-To: <CAAM7YA=p9EdH6Kd2t_b5ZzbEHm5PSvEVakcSTtCiH=5o5sNi1g@mail.gmail.com>
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:34970 "EHLO
+        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751011AbcIAJqA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Sep 2016 05:46:00 -0400
+Received: by mail-qk0-f169.google.com with SMTP id v123so78685102qkh.2
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Sep 2016 02:45:59 -0700 (PDT)
+In-Reply-To: <2bf23853-de9e-5a98-2db1-fe17e9999548@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
---=-=-=
-Content-Type: text/plain
-
-On Wed, Aug 31 2016, Yan, Zheng wrote:
-
-> On Wed, Aug 31, 2016 at 10:56 AM, NeilBrown <neilb@suse.com> wrote:
+On Wed, Aug 31, 2016 at 8:01 PM, Josh Durgin <jdurgin@redhat.com> wrote:
+> On 08/31/2016 07:09 AM, John Spray wrote:
 >>
->> Hi,
->>  it is quite possible for O_DIRECT and buffered writes to a file to
->>  race.
->>  The xfstests test suite has a test - generic/036 - which tests this
->>  case.
+>> Hi all,
 >>
->>  Unlike most filesystems, cephfs does not hold inode_lock() across
->>  direct writes.  This means that buffer pages can become dirty while
->>  direct writes are happening.  This confused ceph a little.
+>> Various people have been helpfully fixing up the python modules for
+>> python 3 -- but I realised I wasn't sure what our plan really was or
+>> who was depending on this.
+>>
+>> Some educated guesses:
+>>  * All the existing modules working with both python 2 and 3 for Kraken?
 >
-> how about make ceph_write_iter() hold inode_lock() for direct/sync write?
-
-You could probably do that.  You could even use inode_lock_shared() to
-allow multiple writers to perform O_DIRECT writes to the same file in
-parallel.
-
-But I don't know why ceph did this differently from every other
-filesystem, and the git commit message doesn't shine any light on that
-question.  I didn't want to propose a change that I didn't understand
-the consequences of.
-
-If you did extend the locking over ceph_direct_read_write(), it would
-probably make sense to remove the truncate_inode_pages_range() call as
-it should be redundant.
-
-Thanks,
-NeilBrown
-
-
 >
-> Regards
-> Yan, Zheng
->>
->>  The following two patches allow ceph to handle this possibility a
->>  little more cleanly.  The more important patch removes a WARN_ON() for
->>  a circumstance which can easily be triggered.
->>
->> Thanks,
->> NeilBrown
+> That was the goal for this summer - 2 students worked on this for
+> google summer of code, and completed this (along with tests) for almost
+> everything - there are just a few PRs left to merge, and a bit
+> more test coverage to add [0][1]. Blaxpirit added python3 distro
+> packages of libraries under pybind, which entails building python2 and
+> python3 versions of the Cython libraries within the course of a normal
+> build.
+>
+> In addition, onyb overhauled the python packaging was so once Kraken is
+> released, we can upload the Kraken cython bindings to pypi, and
+> developers can easily use them with virtualenvs of any python version.
+>
+>>  * Starting to test on python 3 when we have Xenial nodes in the lab?
+>
+>
+> We're testing python2 and 3 on centos 7 (py3 from epel) and trusty for
+> now. Xenial also has python2, it's just not installed by default, so
+> python3 support is not necessary for running on xenial.
+>
+>>  * Keeping python 2 support indefinitely for EL7?
+>
+>
+> This is needed not just for EL7, but also for existing users of the
+> python libraries that have not yet ported their applications to
+> python3. I see no need to make anything python3-only any time soon.
+>
+>> Related things:
+>>  * I guess some openstack CIs might start depending on Python 3 at
+>> some stage?  Maybe this motivated some of the work so far.
+>
+>
+> There's no one motivating user for this work, it's more a combination
+> of users interested in running with python 3 (like the folks who ported
+> the librados bindings), and preparing for the future. Distros are
+> getting closer to python3-only as python2 enters its final years (2.7,
+> the last of the 2.x series, is set to stop being supported upstream in
+> 2020) [2].
+>
+>>  * ceph-mgr will only be python 2 when it lands, it embeds an
+>> interpreter so will need a bunch of #ifdeffing to support both 2 and 3
+>> (a necessary evil)
+>
+>
+> Perhaps it would make sense to build a ceph-mgr-python-3 package as
+> well, now that the build system can use python2 and python3.
 
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
+At build time the difference will just be whether it's using the
+header/libs from python-dev or python3-dev, so that part should be
+fairly simple.  I hadn't got as far as thinking about whether we
+wanted a ceph-mgr package that would either link with python 2 or
+python 3 depending on the distro target, or whether to build two
+packages so that users could choose which python they wanted to use.
+It might even be possible to build a binary that would support either
+python depending on which libs were found at runtime, but that would
+probably be too crazy.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+> We still need to add some more conditionals around this in cmake - for
+> kraken, to disable python3 builds when it isn't available (like on suse
+> or rhel [3]). In the far future, once there are distros with no python2
+> support, there will be some more build work needed to make the python2
+> parts optional.
 
-iQIcBAEBCAAGBQJXx4DAAAoJEDnsnt1WYoG5vmcQAJ268DBmwkXjZxKLhSA3LkEl
-44vpuk+p7BF+4dc5epK4bCxPztolFwPkOH4GPbgYIUq5/8joiLzKd1vInUdEncQK
-Ke82JSp66X8Hjyrjq0OpWPTfDz2RPEgA7biII1gLGtCVR5OhHAW2y+4jRbzKn8wh
-xH96/Dh65tMJDk4K50qnNyOpPeSfRMDbiWG0DcwzLzswlHmWqaSg685m9nR8PfMN
-zNeMc09fTWuCUDKZ1gEEryIqpuCGB+/BlcxuFnTrSyP1u7vZamZnSNfR8zLOM5jJ
-OCg+JaEkeTMzj1Pks4VOUvTydpK0ZEInX6jNw15dn4TlinBShA+gX9M3tjgCFD/e
-sIU9kWzB222VEQgvdL0RMz7/mX0yCZzL3XTtd3UpWY5Sfdtg11VbVDIAuK3RDHBZ
-xiLH6rqxoJXwA042oXAuQlAJyHw7+oU/r4lzS87fJ5UJHpGtRDRS63ou1sJ3a525
-m1lx5toQoXu9vp9QikZG9M2o1nj27airTITjfFbeh3+0681uP9ufOkw1opbIp8Td
-Wr9cNB4Ubdr+dFkCqk16j6x1DWWXs7g8qmY/udi2mIJsYOmpwfgvU0uupuvgEXhu
-ki9tbdt11HyzMm8Oux76Lp/0P0gEIw9Uii4PMuvxMhdUqrYv985IvccK68OkTsV/
-rbM0L9n6TpkdrRvygE5w
-=NjDM
------END PGP SIGNATURE-----
---=-=-=--
+OK, all makes sense, thanks.
+
+John
+
+> Josh
+>
+> [0]
+> https://gist.github.com/blaxpirit/82dc8b81e4e94bdb4ee3d3ec436faa53#file-gsoc-2016-md
+> [1] https://gist.github.com/onyb/e5c282d3368631f5d46d62b37bc0ef0d
+> [2] https://www.python.org/dev/peps/pep-0373/#maintenance-releases
+> [3] http://tracker.ceph.com/issues/17103
