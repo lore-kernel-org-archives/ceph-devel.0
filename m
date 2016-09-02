@@ -1,38 +1,52 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: About BUG #16279
-Date: Fri, 2 Sep 2016 10:44:30 +0800
-Message-ID: <CALZt5jygWSRUBh4uJS1O69zw4ZageJ+pg4nkxUuByyRrqsQsQw@mail.gmail.com>
+From: Marcus Watts <mwatts@redhat.com>
+Subject: Re: Cephx kerberization support
+Date: Fri, 2 Sep 2016 00:58:07 -0400
+Message-ID: <20160902045807.GE10138@degu.eng.arb.redhat.com>
+References: <1472006052.10929.0.camel@suse.com>
+ <alpine.DEB.2.11.1609011927560.31624@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f175.google.com ([209.85.216.175]:36357 "EHLO
-        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751029AbcIBCoc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Sep 2016 22:44:32 -0400
-Received: by mail-qt0-f175.google.com with SMTP id 52so52010090qtq.3
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Sep 2016 19:44:31 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:45518 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750823AbcIBE6K (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 2 Sep 2016 00:58:10 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1609011927560.31624@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, Daniel Oliveira <doliveira@suse.com>
 
-Hi, all
+I think the two most challenging bits of integrating kerberos in w/
+ceph will be dealing with authorization and dealing with keytabs.
 
-we got the same issue http://tracker.ceph.com/issues/16279
+So the keytab thing is simple.  kerberos entirely uses symmetric
+encryption so it requires each host or service have a keytab.  Possession
+of the keytab = ability to impersonate anyone (to that host and/or service);
+hence needs to be suitably protected.  Deploying an additional osd/mon
+requires properly creating or propagating a keytab to that host.  This is
+just a provisioning problem, and is not really any different than cephx
+of course.
 
-I think it is possible objiter->second->version == last_divergent_update?
+Authorization is more complex.  ldap is one way to go, and particularly
+for enterprise environments with lots of users, has lots of obvious
+advantages.  So, for external identities, this is certainly what you want.
+You probably don't want these things replicated to a "ceph identity"
+or have a separate identity database replicating what ldap does for this.
+At the same time, you are probably going to want a least a bit of
+logic between ldap, because ldap dn's and groups are
+not a thing of obvious beauty for storage acls, or, really,
+ldap gives you way more rope than you want.
 
-If olog is [200'5 ~ 200'10, 202'11~ 202'20] with object A: [200'5, 200'8]
-   log is [200'3 ~ 200'11], object A : [200'5, 200'8]
+For internal identities (ie, the various bits of ceph as they talk to each
+other) - ldap may not be a good choice.  For these you might find a more
+special purpose local data store that's probably more strictly internal
+to ceph to be appropriate for this.  The choices you make above for
+the keytab (per host or per service) will influence your choices here.
+If you go with a single global per-service key (no per-host...) for
+instance, then you your internal identity authorization needs become
+very simple: either it knows the per-service key (and is "god") or it
+doesn't.  If you go with finer grained keytabs, then you can be somewhat
+more elaborate in your security choices.
 
-Then after merge log os [200'3 ~ 200'10, 202'11~202'20] with divergent entry:
-object A: 200'5 and 200'8
-
-first_divergent_update will be 200'5 and last_divergent_update will be
-200'8 for object A. If can find it in current log, and the possible
-version the object A is equal or greater than 200'8.  So I am not sure
-it must be greater than last_divergent_update but may be equal?
-
-Am I missing something else?
-
-Regards
-Ning Yao
+					-Marcus Watts
