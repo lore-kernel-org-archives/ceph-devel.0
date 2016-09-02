@@ -1,66 +1,51 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Store test BluestoreStatFSTest failure
-Date: Fri, 2 Sep 2016 14:17:52 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609021417050.31624@piezo.us.to>
-References: <CY1PR0201MB1820E737B99E2655DC28620085E50@CY1PR0201MB1820.namprd02.prod.outlook.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: About BUG #16279
+Date: Fri, 2 Sep 2016 08:50:18 -0700
+Message-ID: <CAN=+7FUwtmZYQ0wf4Juo5s9-QMpN7HBbehk+7mCY+qxRuhdKRw@mail.gmail.com>
+References: <CALZt5jygWSRUBh4uJS1O69zw4ZageJ+pg4nkxUuByyRrqsQsQw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45739 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752253AbcIBORz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Sep 2016 10:17:55 -0400
-In-Reply-To: <CY1PR0201MB1820E737B99E2655DC28620085E50@CY1PR0201MB1820.namprd02.prod.outlook.com>
+Received: from mail-qk0-f175.google.com ([209.85.220.175]:36262 "EHLO
+        mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932465AbcIBPuU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Sep 2016 11:50:20 -0400
+Received: by mail-qk0-f175.google.com with SMTP id l2so123144386qkf.3
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Sep 2016 08:50:19 -0700 (PDT)
+In-Reply-To: <CALZt5jygWSRUBh4uJS1O69zw4ZageJ+pg4nkxUuByyRrqsQsQw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ramesh Chander <Ramesh.Chander@sandisk.com>
+To: Ning Yao <zay11022@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 2 Sep 2016, Ramesh Chander wrote:
-> I am trying to run ceph_test_objectstore with my changes and I see this 
-> intermittent failure.
-> 
-> 
-> Store_test.cc At line 1187:
-> 
-> 1174     ObjectStore::Transaction t;
-> 1175     bufferlist bl;
-> 1176     bl.append("abcde");
-> 1177     t.write(cid, hoid, 0, 5, bl);
-> 1178     cerr << "Append 5 bytes" << std::endl;
-> 1179     r = apply_transaction(store, &osr, std::move(t));
-> 1180     ASSERT_EQ(r, 0);
-> 1181
-> 1182     struct store_statfs_t statfs;
-> 1183     int r = store->statfs(&statfs);
-> 1184     ASSERT_EQ(r, 0);
-> 1185     ASSERT_EQ(5, statfs.stored);
-> 1186     ASSERT_EQ(0x10000, statfs.allocated);
-> 1187     ASSERT_EQ(available0 - 0x10000, statfs.available);
-> 
-> The total allocated are 1MB more than expected by this test.
-> 
-> (gdb) p statfs
-> $50 = {total = 10737418240, available = 10722672640, allocated = 65536, stored = 5, compressed = 0, compressed_allocated = 0, compressed_original = 0}
-> (gdb) p available0
-> $51 = 10723786752
-> (gdb) p 10723786752-10722672640
-> $52 = 1114112
-> (gdb) p 1114112-65536
-> $53 = 1048576
-> (gdb) p $53 / 1024
-> $54 = 1024
-> (gdb) list
-> 
-> I traced call and looks like there is really a 1MB allocation from 
-> BlueFS: _flush_range function.
-> 
-> Is it possible that when we write an object BlueFS also allocated 
-> another 1MB block and causing this difference?
-> 
-> How to avoid this failure? Is it test case issue ?
+On Thu, Sep 1, 2016 at 7:44 PM, Ning Yao <zay11022@gmail.com> wrote:
+> Hi, all
+>
+> we got the same issue http://tracker.ceph.com/issues/16279
+>
+> I think it is possible objiter->second->version == last_divergent_update?
+>
+> If olog is [200'5 ~ 200'10, 202'11~ 202'20] with object A: [200'5, 200'8]
+>    log is [200'3 ~ 200'11], object A : [200'5, 200'8]
+>
+> Then after merge log os [200'3 ~ 200'10, 202'11~202'20] with divergent entry:
+> object A: 200'5 and 200'8
 
-We merged a PR a day or two ago that disabled the allocated checks in the 
-unit test.  If you rebase on master this should go away!
+I think I'm misunderstanding your notation, but if I'm reading this
+right, the entries at 200'5 and 200'8 would *not* be divergent -- the
+only divergent entry would be 200'11.
 
-sage
+>
+> first_divergent_update will be 200'5 and last_divergent_update will be
+> 200'8 for object A. If can find it in current log, and the possible
+> version the object A is equal or greater than 200'8.  So I am not sure
+> it must be greater than last_divergent_update but may be equal?
+>
+> Am I missing something else?
+>
+> Regards
+> Ning Yao
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
