@@ -1,45 +1,43 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Python 3 plans
-Date: Fri, 2 Sep 2016 11:56:46 +0200
-Message-ID: <a91096da-7dd0-5347-ac11-13c75ec57c06@digiware.nl>
-References: <CALe9h7fHZpXF18HoiQ4qeihrbg5C9p14m=T834T6tm+pdsquuw@mail.gmail.com>
- <2bf23853-de9e-5a98-2db1-fe17e9999548@redhat.com>
- <dbcef1f1-82a7-3d8e-ddb1-7d204b1f58cc@digiware.nl>
+Subject: Re: Switching cephfs suites from btrfs to xfs
+Date: Fri, 2 Sep 2016 11:57:44 +0200
+Message-ID: <763a5969-16b6-dc99-b2ee-0bc2c11aa85e@digiware.nl>
+References: <CALe9h7e7ePnRe+cmFO4DZTwCbJJErVbwpHH4YzGur9LtgxXHdg@mail.gmail.com>
+ <CA+2bHPZi87JdOVRUDgXjJQE6836zp16us2a+DVU-upWt6B0FLA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:24683 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([176.74.240.9]:24719 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751711AbcIBJ46 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 2 Sep 2016 05:56:58 -0400
-In-Reply-To: <dbcef1f1-82a7-3d8e-ddb1-7d204b1f58cc@digiware.nl>
+        id S1752856AbcIBJ57 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 2 Sep 2016 05:57:59 -0400
+In-Reply-To: <CA+2bHPZi87JdOVRUDgXjJQE6836zp16us2a+DVU-upWt6B0FLA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>, John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 31-8-2016 22:04, Willem Jan Withagen wrote:
-> On 31-8-2016 21:01, Josh Durgin wrote:
->> On 08/31/2016 07:09 AM, John Spray wrote:
->>> Hi all,
->>>
->>> Various people have been helpfully fixing up the python modules for
->>> python 3 -- but I realised I wasn't sure what our plan really was or
->>> who was depending on this.
+On 2-9-2016 02:51, Patrick Donnelly wrote:
+> On Thu, Sep 1, 2016 at 6:33 AM, John Spray <jspray@redhat.com> wrote:
+>> Given our current push toward bluestore as the long term plan, I'm
+>> wondering if anyone would object to me switching off the use of btrfs
+>> in the CephFS test suites?
+>>
+>> I think the motivation for this historically was to maximise coverage
+>> of the FileStore pieces that XFS doesn't exercise, but that probably
+>> matters less these days, and the (much larger) rados suite covers
+>> btrfs.
+>>
+>> My motivation is to get rid of the intermittent assert(0 ==
+>> "unexpected error") OSD crashes that crop up in our testing every once
+>> in a while and are attributed to btrfs.
 > 
-> This is on FreeBSD.
-> 
-> I have not yet figured out why, but even though {python/cython}3 is not
-> installed, I'm getting Cmake to report that it found cytron3.
-> And then things start to fail during building.
+> I like the idea. +1
 
-I have submitted PR #10960 to make python3 stuff fail quietly, meaning
-that if it is not available Cmake will not start moaning.
-It still reports that it is using cyton3, but that seems annoying but
-harmless.
+It his means that a lot of the shell code I excluded for FreeBSD, then
+I'm all for it. :)
 
-Perhaps you care to merge this PR?
-
-Thanx,
 --WjW
+
 
