@@ -1,40 +1,30 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: bitmap allocator granularity
-Date: Tue, 6 Sep 2016 19:27:03 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609061922340.31624@piezo.us.to>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: ceph v10.2.3 QE validation status
+Date: Tue, 6 Sep 2016 16:19:07 -0400
+Message-ID: <CA+aFP1CHaWAkr+cQu0cGvg0YMfq+5YtLRLzH0CNzwzzKk=RhdQ@mail.gmail.com>
+References: <CAMMFjmHb=m_WJg8TMaVBOdXB37=viYOBSOYEXL_Bo3kET=hyoA@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58452 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934551AbcIFT1F (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 6 Sep 2016 15:27:05 -0400
+Received: from mail-pa0-f50.google.com ([209.85.220.50]:36063 "EHLO
+        mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755973AbcIFUTJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Sep 2016 16:19:09 -0400
+Received: by mail-pa0-f50.google.com with SMTP id id6so15957150pad.3
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Sep 2016 13:19:08 -0700 (PDT)
+In-Reply-To: <CAMMFjmHb=m_WJg8TMaVBOdXB37=viYOBSOYEXL_Bo3kET=hyoA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ramesh.Chander@sandisk.com, ceph-devel@vger.kernel.org
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, "Weil, Sage" <sage@redhat.com>, "Just, Samuel" <sjust@redhat.com>, David Zafman <dzafman@redhat.com>
 
-Hi Ramesh,
+On Tue, Sep 6, 2016 at 1:12 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
+> rbd:
+>    multiple issues (Jason pls rview/approve, see notes
+> http://tracker.ceph.com/issues/16344#note-46)
 
-It looks like fsck error I've been chasing on my branch is a general 
-problem with the bitmap granularity.  The 
-ObjectStore/StoreTest.SyntheticMatrixCsumVsCompression/2 test sets 
-min_alloc_size to 32k and then to something smaller after that.  My branch 
-adds an occasional umount+fsck+mount to the synthetic 
-workload test that uncovers a problem: if we start with a 
-small min_alloc_size, write some objects, and then umount and remount with 
-a larger min_alloc_size (say, 32k), things can go wrong.  The allocator 
-defines its bits in terms of min_alloc_size, but some used extents are 
-smaller than that, and when they get released we trigger an assert like
+Approved
 
-/home/sage/src/ceph/src/os/bluestore/BitMapAllocator.cc: In function 'void BitMapAllocator::insert_free(uint64_t, uint64_t)' thread 7ffb44deb700 time 2016-09-06 15:23:39.055902
-/home/sage/src/ceph/src/os/bluestore/BitMapAllocator.cc: 76: FAILED assert(!(off % m_block_size))
-
-There was a related issue with fsck that its used_blcoks bitmap was 
-min_alloc_size granularity.
-
-I see two options: we can either unconditionally maintain the bitmap in 
-block_size units, or we can store persistently the smallest min_alloc_size 
-that we have ever mounted with and use that ("min_min_alloc_size?").
-
-What do you think?
-sage
+-- 
+Jason
