@@ -1,127 +1,45 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: OOB message roll into Messenger interface
-Date: Tue, 6 Sep 2016 21:33:24 +0800
-Message-ID: <CACJqLyZwMyYK5C1kigG+r8KBe4QwYN6z0+jBpnE8a+aaebnGzw@mail.gmail.com>
-References: <CACJqLyYuofjcwGgwRP09DjtZ77Hs9_-0eEmQkGf5ASjDits-og@mail.gmail.com>
- <alpine.DEB.2.11.1609061314440.24099@piezo.us.to>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: status of bluestore
+Date: Tue, 6 Sep 2016 13:54:59 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1609061354260.31624@piezo.us.to>
+References: <CAAoAbe3Wv=am-tapSkRSvnv4UR3y+PAhef92QE=m7U9Sb12gsA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-526521415-1473170104=:31624"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pu1apc01on0098.outbound.protection.outlook.com ([104.47.126.98]:55296
-        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754086AbcIFNdr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 6 Sep 2016 09:33:47 -0400
-Received: by mail-ua0-f171.google.com with SMTP id u68so29629579uau.1
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Sep 2016 06:33:40 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1609061314440.24099@piezo.us.to>
+Received: from mx1.redhat.com ([209.132.183.28]:35328 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933689AbcIFNzF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 6 Sep 2016 09:55:05 -0400
+In-Reply-To: <CAAoAbe3Wv=am-tapSkRSvnv4UR3y+PAhef92QE=m7U9Sb12gsA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?GB2312?B?1cXR7g==?= <zhang.yang@datatom.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Sep 6, 2016 at 9:17 PM, Sage Weil <sage@newdream.net> wrote:
-> Hi Haomai!
->
-> On Sun, 4 Sep 2016, Haomai Wang wrote:
->> Background:
->> Each osd has two heartbeat messenger instances to maintain front/back
->> network available. It brings lots of connections and messages overhead
->> in scale out cluster. Actually we can combine these heartbeat
->> exchanges to public/cluster messengers to reduce tons of
->> connections(resources).
->>
->> Then heartbeat message should be OOB and shared the same thread/socket
->> with normal message channel. So it can exactly represent the heartbeat
->> role for real IO message. Otherwise, heartbeat channel's status can't
->> indicate the real IO message channel status. Because different socket
->> uses different send buffer/recv buffer, if real io message blocked,
->> oob message may be healthy.
->>
->> Besides OSD's heartbeat things, we have logic PING/PONG lived in
->> Objecter Ping/WatchNotify Ping etc. For the same goal, they could
->> share the heartbeat message.
->>
->> In a real rbd use case env, if we combines these ping/pong messages,
->> thousands of messages could be avoided which means lots of resources.
->>
->> As we reduce the heartbeat overhead, we can reduce heartbeat interval
->> and increase frequency which help a lot to the accurate of cluster
->> failure detection!
->
-> I'm very excited to see this move forward!
->
->> Design:
->>
->> As discussed in Raleigh, we could defines these interfaces:
->>
->> int Connection::register_oob_message(identitfy_op, callback, interval);
->>
->> Users like Objecter linger ping could register a "callback" which
->> generate bufferlist used to be carried by heartbeat message.
->> "interval" indicate the user's oob message's send interval.
->>
->> "identitfy_op" indicates who can handle the oob info in peer side.
->> Like "Ping", "OSDPing" or "LingerPing" as the current message define.
->
-> This looks convenient for the simpler callers, but I worry it won't work
-> as well for OSDPing. There's a bunch of odd locking around the heartbeat
-> info and the code already exists to do the the heartbeat sends.  I'm not
-> sure it will simplify to a simple interval.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Hmm, I'm not sure what's the odd locking thing refer to. As we can
-register callback when adding new peer and unregister callback when
-removing peer from "heartbeat_peers".
+--8323329-526521415-1473170104=:31624
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
-The main send message construct callback extract from this loop:
-  for (map<int,HeartbeatInfo>::iterator i = heartbeat_peers.begin();
-       i != heartbeat_peers.end();
-       ++i) {
-    int peer = i->first;
-    i->second.last_tx = now;
-    if (i->second.first_tx == utime_t())
-      i->second.first_tx = now;
-    dout(30) << "heartbeat sending ping to osd." << peer << dendl;
-    i->second.con_back->send_message(new MOSDPing(monc->get_fsid(),
- service.get_osdmap()->get_epoch(),
- MOSDPing::PING,
- now));
+Hi Yang-
 
-    if (i->second.con_front)
-      i->second.con_front->send_message(new MOSDPing(monc->get_fsid(),
-    service.get_osdmap()->get_epoch(),
-    MOSDPing::PING,
-    now));
-  }
+The current development version of bluestore is *very* different from what 
+is in Jewel, and is still changing. We plan to have a stable version in 
+Kraken, which will be released by the end of the year.
 
-Only "fsid", "osdmap epoch" are required, I don't think it will block.
-Then I think lots of locking/odding things exists on heartbeat
-dispatch/handle process. sending process is clear I guess.
+sage
 
-The advantage to register callback is we can combine multi layers oob
-messages to one.
+On Tue, 6 Sep 2016, 张杨 wrote:
 
->
-> An easier first step would be to just define a
-> Connection::send_message_oob(Message*).  That would require almost no
-> changes to the calling code, and avoid having to create the timing
-> infrastructure inside AsyncMessenger...
->
-> sage
->
->> void Dispatcher::ms_dispatch_oob(Message*)
->>
->> handle the oob message with parsing each oob part.
->>
->> So lots of timer control in user's side could be avoided via callback
->> generator. When sending, OOB message could insert the front of send
->> message queue but we can't get any help from kernel oob flag since
->> it's really useless..
->>
->> Any suggestion is welcomed!
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+> Hi Sage,         we know that the bluestore is experimental. could you tell
+> us when it can be stable? is there a schedule？ or how can us involved this
+> ？
+> In http://tracker.ceph.com/projects/ceph/issues ,i saw some issues about
+> bluestore ,but it's base on v10.2.2 or early, I found it is quit different
+> from v11.0.0. so the v11.0.0 is that we should pay a close attention?
+>        Could you share that for us? Thank you
+> 
+> 
+--8323329-526521415-1473170104=:31624--
