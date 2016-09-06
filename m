@@ -1,41 +1,49 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: bluestore sharded extent map, and design review session
-Date: Tue, 6 Sep 2016 18:08:14 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609061807430.31624@piezo.us.to>
-References: <alpine.DEB.2.11.1609021653240.31624@piezo.us.to> <alpine.DEB.2.11.1609021949130.31624@piezo.us.to>
+From: Wido den Hollander <wido@42on.com>
+Subject: librados.h version numbers
+Date: Tue, 6 Sep 2016 21:18:47 +0200 (CEST)
+Message-ID: <1843378866.3701.1473189527273@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39550 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936277AbcIFSIR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Sep 2016 14:08:17 -0400
-Received: from localhost (localhost [127.0.0.1])
-        by cobra.newdream.net (Postfix) with ESMTPS id 98564813E3
-        for <ceph-devel@vger.kernel.org>; Tue,  6 Sep 2016 11:08:16 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1609021949130.31624@piezo.us.to>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:53086 "EHLO
+        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755902AbcIFTSw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Sep 2016 15:18:52 -0400
+Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
+        by smtp01.mail.pcextreme.nl (Postfix) with ESMTPSA id 1DA0F761E8
+        for <ceph-devel@vger.kernel.org>; Tue,  6 Sep 2016 21:18:47 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 2 Sep 2016, Sage Weil wrote:
-> On Fri, 2 Sep 2016, Sage Weil wrote:
-> > Hi everyone,
-> > 
-> > I have the sharded extent code passing all my tests and in a reasonably 
-> > clean state:
-> > 
-> > 	https://github.com/ceph/ceph/pull/10963
-> > 
-> > Please review!
-> > 
-> > Also, I think now is a good time to do another video call to walk through 
-> > the current/new design and code.
-> > 
-> > How about Tuesday Sep 6 at 9am PDT / 12pm EDT?
-> 
-> https://bluejeans.com/5192676054/
+Hi,
 
-https://bluejeans.com/s/PwsaW/
+wido@wido-laptop:~$ python -c "import rados; r = rados.Rados(); print(r.version())"
+0.69.1
+wido@wido-laptop:~$ dpkg -l|grep rados|awk '{print $2" "$3}'
+librados-dev 10.2.2-1trusty
+librados2 10.2.2-1trusty
+libradosstriper1 10.2.2-1trusty
+python-rados 10.2.2-1trusty
+wido@wido-laptop:~$
 
-s 
+Looking at librados.h in master I see:
+
+#define LIBRADOS_VER_MAJOR 0
+#define LIBRADOS_VER_MINOR 69
+#define LIBRADOS_VER_EXTRA 1
+
+Is this something which has just been forgotten to update?
+
+Looking at the 'ceph' tool I see:
+
+CEPH_GIT_NICE_VER="10.2.2"
+
+This is updated during packaging/build it seems.
+
+Should we maybe do that for librados.h as well?
+
+Is there any other way (other then executing 'ceph -v') to get the version of the local librados?
+
+Wido
