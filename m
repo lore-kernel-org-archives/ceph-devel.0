@@ -1,150 +1,88 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: OOB message roll into Messenger interface
-Date: Tue, 6 Sep 2016 22:15:24 +0800
-Message-ID: <CACJqLyawmL0YVoeX_n8L2W-n+TZKVHYJmSU9=jD0S=Q4csuY3w@mail.gmail.com>
-References: <CACJqLyYuofjcwGgwRP09DjtZ77Hs9_-0eEmQkGf5ASjDits-og@mail.gmail.com>
- <alpine.DEB.2.11.1609061314440.24099@piezo.us.to> <CACJqLyZwMyYK5C1kigG+r8KBe4QwYN6z0+jBpnE8a+aaebnGzw@mail.gmail.com>
- <alpine.DEB.2.11.1609061400550.31624@piezo.us.to>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: About BUG #16279
+Date: Tue, 6 Sep 2016 07:32:41 -0700
+Message-ID: <CAN=+7FXC0Sh7684Htze1Aqop+tGHZfzaru2CFK9B=fTog5izXQ@mail.gmail.com>
+References: <CALZt5jygWSRUBh4uJS1O69zw4ZageJ+pg4nkxUuByyRrqsQsQw@mail.gmail.com>
+ <CAN=+7FUwtmZYQ0wf4Juo5s9-QMpN7HBbehk+7mCY+qxRuhdKRw@mail.gmail.com> <CALZt5jziM6jvisL0cnK1RmHQQ+dgwDrnD8VotTUCcJAs8zUuqQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pu1apc01on0107.outbound.protection.outlook.com ([104.47.126.107]:54965
-        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1756034AbcIFOPl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 6 Sep 2016 10:15:41 -0400
-Received: by mail-vk0-f46.google.com with SMTP id v189so101131404vkv.1
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Sep 2016 07:15:34 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1609061400550.31624@piezo.us.to>
+Received: from mail-qk0-f180.google.com ([209.85.220.180]:35729 "EHLO
+        mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755473AbcIFOcs (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Sep 2016 10:32:48 -0400
+Received: by mail-qk0-f180.google.com with SMTP id v123so219033580qkh.2
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Sep 2016 07:32:47 -0700 (PDT)
+In-Reply-To: <CALZt5jziM6jvisL0cnK1RmHQQ+dgwDrnD8VotTUCcJAs8zUuqQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ning Yao <zay11022@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Sep 6, 2016 at 10:06 PM, Sage Weil <sage@newdream.net> wrote:
-> On Tue, 6 Sep 2016, Haomai Wang wrote:
->> On Tue, Sep 6, 2016 at 9:17 PM, Sage Weil <sage@newdream.net> wrote:
->> > Hi Haomai!
->> >
->> > On Sun, 4 Sep 2016, Haomai Wang wrote:
->> >> Background:
->> >> Each osd has two heartbeat messenger instances to maintain front/back
->> >> network available. It brings lots of connections and messages overhead
->> >> in scale out cluster. Actually we can combine these heartbeat
->> >> exchanges to public/cluster messengers to reduce tons of
->> >> connections(resources).
->> >>
->> >> Then heartbeat message should be OOB and shared the same thread/socket
->> >> with normal message channel. So it can exactly represent the heartbeat
->> >> role for real IO message. Otherwise, heartbeat channel's status can't
->> >> indicate the real IO message channel status. Because different socket
->> >> uses different send buffer/recv buffer, if real io message blocked,
->> >> oob message may be healthy.
->> >>
->> >> Besides OSD's heartbeat things, we have logic PING/PONG lived in
->> >> Objecter Ping/WatchNotify Ping etc. For the same goal, they could
->> >> share the heartbeat message.
->> >>
->> >> In a real rbd use case env, if we combines these ping/pong messages,
->> >> thousands of messages could be avoided which means lots of resources.
->> >>
->> >> As we reduce the heartbeat overhead, we can reduce heartbeat interval
->> >> and increase frequency which help a lot to the accurate of cluster
->> >> failure detection!
->> >
->> > I'm very excited to see this move forward!
->> >
->> >> Design:
->> >>
->> >> As discussed in Raleigh, we could defines these interfaces:
->> >>
->> >> int Connection::register_oob_message(identitfy_op, callback, interval);
->> >>
->> >> Users like Objecter linger ping could register a "callback" which
->> >> generate bufferlist used to be carried by heartbeat message.
->> >> "interval" indicate the user's oob message's send interval.
->> >>
->> >> "identitfy_op" indicates who can handle the oob info in peer side.
->> >> Like "Ping", "OSDPing" or "LingerPing" as the current message define.
->> >
->> > This looks convenient for the simpler callers, but I worry it won't work
->> > as well for OSDPing. There's a bunch of odd locking around the heartbeat
->> > info and the code already exists to do the the heartbeat sends.  I'm not
->> > sure it will simplify to a simple interval.
->>
->> Hmm, I'm not sure what's the odd locking thing refer to. As we can
->> register callback when adding new peer and unregister callback when
->> removing peer from "heartbeat_peers".
->>
->> The main send message construct callback extract from this loop:
->>   for (map<int,HeartbeatInfo>::iterator i = heartbeat_peers.begin();
->>        i != heartbeat_peers.end();
->>        ++i) {
->>     int peer = i->first;
->>     i->second.last_tx = now;
->>     if (i->second.first_tx == utime_t())
->>       i->second.first_tx = now;
->>     dout(30) << "heartbeat sending ping to osd." << peer << dendl;
->>     i->second.con_back->send_message(new MOSDPing(monc->get_fsid(),
->>  service.get_osdmap()->get_epoch(),
->>  MOSDPing::PING,
->>  now));
->>
->>     if (i->second.con_front)
->>       i->second.con_front->send_message(new MOSDPing(monc->get_fsid(),
->>     service.get_osdmap()->get_epoch(),
->>     MOSDPing::PING,
->>     now));
->>   }
->>
->> Only "fsid", "osdmap epoch" are required, I don't think it will block.
->> Then I think lots of locking/odding things exists on heartbeat
->> dispatch/handle process. sending process is clear I guess.
->
-> Yeah, I guess that's fine.  I was worried about some dependency between
-> who we ping and the osdmap epoch in the message (and races adding/removing
-> heartbeat peers), but I think it doesn't matter.
->
-> Even so, I think it would be good to expose the send_message_oob()
-> interface, and do this in 2 stages so the two changes are decoupled.
-> Unless there is some implementation reason why the oob message scheduling
-> needs to be done inside the messenger?
+No, in that example the versions are different, 100'10 vs 122'10.
+-Sam
 
-Agreed! we could remove heartbeat messenger firstly!
-
+On Tue, Sep 6, 2016 at 3:35 AM, Ning Yao <zay11022@gmail.com> wrote:
+> So I think the notation in the code is misunderstanding?
 >
-> sage
+> Or the code to get list<pg_log_entry_t> divergent in merge_log is wrong?
 >
->> The advantage to register callback is we can combine multi layers oob
->> messages to one.
+>     // move aside divergent items
+>     list<pg_log_entry_t> divergent;
+>     while (!log.empty()) {
+>       pg_log_entry_t &oe = *log.log.rbegin();
+>       /*
+>        * look at eversion.version here.  we want to avoid a situation like:
+>        *  our log: 100'10 (0'0) m 10000004d3a.00000000/head by
+> client4225.1:18529
+>        *  new log: 122'10 (0'0) m 10000004d3a.00000000/head by
+> client4225.1:18529
+>        *  lower_bound = 100'9
+>        * i.e, same request, different version.  If the eversion.version is > the
+>        * lower_bound, we it is divergent.
+>        */
+>       if (oe.version.version <= lower_bound.version)
+> break;
+>       dout(10) << "merge_log divergent " << oe << dendl;
+>       divergent.push_front(oe);
+>       log.log.pop_back();
+>     }
+>
+> As the logic above,  divergent will contain all log_entry whose
+> version is the same in olog and log?
+> Regards
+> Ning Yao
+>
+>
+> 2016-09-02 23:50 GMT+08:00 Samuel Just <sjust@redhat.com>:
+>> On Thu, Sep 1, 2016 at 7:44 PM, Ning Yao <zay11022@gmail.com> wrote:
+>>> Hi, all
+>>>
+>>> we got the same issue http://tracker.ceph.com/issues/16279
+>>>
+>>> I think it is possible objiter->second->version == last_divergent_update?
+>>>
+>>> If olog is [200'5 ~ 200'10, 202'11~ 202'20] with object A: [200'5, 200'8]
+>>>    log is [200'3 ~ 200'11], object A : [200'5, 200'8]
+>>>
+>>> Then after merge log os [200'3 ~ 200'10, 202'11~202'20] with divergent entry:
+>>> object A: 200'5 and 200'8
 >>
->> >
->> > An easier first step would be to just define a
->> > Connection::send_message_oob(Message*).  That would require almost no
->> > changes to the calling code, and avoid having to create the timing
->> > infrastructure inside AsyncMessenger...
->> >
->> > sage
->> >
->> >> void Dispatcher::ms_dispatch_oob(Message*)
->> >>
->> >> handle the oob message with parsing each oob part.
->> >>
->> >> So lots of timer control in user's side could be avoided via callback
->> >> generator. When sending, OOB message could insert the front of send
->> >> message queue but we can't get any help from kernel oob flag since
->> >> it's really useless..
->> >>
->> >> Any suggestion is welcomed!
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >>
->> >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> I think I'm misunderstanding your notation, but if I'm reading this
+>> right, the entries at 200'5 and 200'8 would *not* be divergent -- the
+>> only divergent entry would be 200'11.
 >>
->>
+>>>
+>>> first_divergent_update will be 200'5 and last_divergent_update will be
+>>> 200'8 for object A. If can find it in current log, and the possible
+>>> version the object A is equal or greater than 200'8.  So I am not sure
+>>> it must be greater than last_divergent_update but may be equal?
+>>>
+>>> Am I missing something else?
+>>>
+>>> Regards
+>>> Ning Yao
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
