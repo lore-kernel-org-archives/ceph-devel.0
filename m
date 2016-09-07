@@ -1,214 +1,68 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: OOB message roll into Messenger interface
-Date: Tue, 6 Sep 2016 22:58:16 -0400 (EDT)
-Message-ID: <196329289.81852590.1473217096448.JavaMail.zimbra@redhat.com>
-References: <CACJqLyYuofjcwGgwRP09DjtZ77Hs9_-0eEmQkGf5ASjDits-og@mail.gmail.com> <alpine.DEB.2.11.1609061314440.24099@piezo.us.to> <CACJqLyZwMyYK5C1kigG+r8KBe4QwYN6z0+jBpnE8a+aaebnGzw@mail.gmail.com> <alpine.DEB.2.11.1609061400550.31624@piezo.us.to> <CACJqLyawmL0YVoeX_n8L2W-n+TZKVHYJmSU9=jD0S=Q4csuY3w@mail.gmail.com> <CAJ4mKGbt_-Qg06TjEJLD3TGn-M24BgAsKNgoxRzx55pT=rZweg@mail.gmail.com> <alpine.DEB.2.11.1609061802560.31624@piezo.us.to> <CACJqLyZ6zBXVTUfdhYHnsGkpkfTUZdiyoTQxd=FqYjsr=g9OBg@mail.gmail.com>
+From: Elita Lobo <loboelita@gmail.com>
+Subject: Re: Query regarding storage of objects in ceph
+Date: Wed, 7 Sep 2016 11:14:26 +0530
+Message-ID: <CAA8xDw1-BEaGmUTEhN=ZWH+uh7Dby_dxNuOh70Exy5toA9dG+g@mail.gmail.com>
+References: <CAA8xDw2jFn_C-Cj1mZ5w9UUxNpe3Z4SeM-2=xcUPJGOg=v4R9w@mail.gmail.com>
+ <CAF-wwdE0bg7vQ=HfMqzWqv5W5ZKB+3tCf2mCt6os_Jpf_tX8Ug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:60676 "EHLO
-        mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933598AbcIGC6S (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Sep 2016 22:58:18 -0400
-In-Reply-To: <CACJqLyZ6zBXVTUfdhYHnsGkpkfTUZdiyoTQxd=FqYjsr=g9OBg@mail.gmail.com>
+Received: from mail-yb0-f176.google.com ([209.85.213.176]:35536 "EHLO
+        mail-yb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750820AbcIGFo2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Sep 2016 01:44:28 -0400
+Received: by mail-yb0-f176.google.com with SMTP id g5so2350854yba.2
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Sep 2016 22:44:27 -0700 (PDT)
+In-Reply-To: <CAF-wwdE0bg7vQ=HfMqzWqv5W5ZKB+3tCf2mCt6os_Jpf_tX8Ug@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: Sage Weil <sage@newdream.net>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel@vger.kernel.org
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-ifaict, sending over UDP brings lossy delivery
+Hi,
 
-will that in general be acceptable?
+Thanks , It was helpful. Could you please tell me how to trace local
+function calls made by ceph?
+I tried using gdb but it gave the following error.
 
-Matt
+https://paste.fedoraproject.org/423219/73227055/
 
------ Original Message -----
-> From: "Haomai Wang" <haomai@xsky.com>
-> To: "Sage Weil" <sage@newdream.net>
-> Cc: "Gregory Farnum" <gfarnum@redhat.com>, ceph-devel@vger.kernel.org
-> Sent: Tuesday, September 6, 2016 10:46:11 PM
-> Subject: Re: OOB message roll into Messenger interface
-> 
-> On Wed, Sep 7, 2016 at 2:06 AM, Sage Weil <sage@newdream.net> wrote:
-> > On Tue, 6 Sep 2016, Gregory Farnum wrote:
-> >> On Tue, Sep 6, 2016 at 7:15 AM, Haomai Wang <haomai@xsky.com> wrote:
-> >> > On Tue, Sep 6, 2016 at 10:06 PM, Sage Weil <sage@newdream.net> wrote:
-> >> >> On Tue, 6 Sep 2016, Haomai Wang wrote:
-> >> >>> On Tue, Sep 6, 2016 at 9:17 PM, Sage Weil <sage@newdream.net> wrote:
-> >> >>> > Hi Haomai!
-> >> >>> >
-> >> >>> > On Sun, 4 Sep 2016, Haomai Wang wrote:
-> >> >>> >> Background:
-> >> >>> >> Each osd has two heartbeat messenger instances to maintain
-> >> >>> >> front/back
-> >> >>> >> network available. It brings lots of connections and messages
-> >> >>> >> overhead
-> >> >>> >> in scale out cluster. Actually we can combine these heartbeat
-> >> >>> >> exchanges to public/cluster messengers to reduce tons of
-> >> >>> >> connections(resources).
-> >> >>> >>
-> >> >>> >> Then heartbeat message should be OOB and shared the same
-> >> >>> >> thread/socket
-> >> >>> >> with normal message channel. So it can exactly represent the
-> >> >>> >> heartbeat
-> >> >>> >> role for real IO message. Otherwise, heartbeat channel's status
-> >> >>> >> can't
-> >> >>> >> indicate the real IO message channel status. Because different
-> >> >>> >> socket
-> >> >>> >> uses different send buffer/recv buffer, if real io message blocked,
-> >> >>> >> oob message may be healthy.
-> >> >>> >>
-> >> >>> >> Besides OSD's heartbeat things, we have logic PING/PONG lived in
-> >> >>> >> Objecter Ping/WatchNotify Ping etc. For the same goal, they could
-> >> >>> >> share the heartbeat message.
-> >> >>> >>
-> >> >>> >> In a real rbd use case env, if we combines these ping/pong
-> >> >>> >> messages,
-> >> >>> >> thousands of messages could be avoided which means lots of
-> >> >>> >> resources.
-> >> >>> >>
-> >> >>> >> As we reduce the heartbeat overhead, we can reduce heartbeat
-> >> >>> >> interval
-> >> >>> >> and increase frequency which help a lot to the accurate of cluster
-> >> >>> >> failure detection!
-> >> >>> >
-> >> >>> > I'm very excited to see this move forward!
-> >> >>> >
-> >> >>> >> Design:
-> >> >>> >>
-> >> >>> >> As discussed in Raleigh, we could defines these interfaces:
-> >> >>> >>
-> >> >>> >> int Connection::register_oob_message(identitfy_op, callback,
-> >> >>> >> interval);
-> >> >>> >>
-> >> >>> >> Users like Objecter linger ping could register a "callback" which
-> >> >>> >> generate bufferlist used to be carried by heartbeat message.
-> >> >>> >> "interval" indicate the user's oob message's send interval.
-> >> >>> >>
-> >> >>> >> "identitfy_op" indicates who can handle the oob info in peer side.
-> >> >>> >> Like "Ping", "OSDPing" or "LingerPing" as the current message
-> >> >>> >> define.
-> >> >>> >
-> >> >>> > This looks convenient for the simpler callers, but I worry it won't
-> >> >>> > work
-> >> >>> > as well for OSDPing. There's a bunch of odd locking around the
-> >> >>> > heartbeat
-> >> >>> > info and the code already exists to do the the heartbeat sends.  I'm
-> >> >>> > not
-> >> >>> > sure it will simplify to a simple interval.
-> >> >>>
-> >> >>> Hmm, I'm not sure what's the odd locking thing refer to. As we can
-> >> >>> register callback when adding new peer and unregister callback when
-> >> >>> removing peer from "heartbeat_peers".
-> >> >>>
-> >> >>> The main send message construct callback extract from this loop:
-> >> >>>   for (map<int,HeartbeatInfo>::iterator i = heartbeat_peers.begin();
-> >> >>>        i != heartbeat_peers.end();
-> >> >>>        ++i) {
-> >> >>>     int peer = i->first;
-> >> >>>     i->second.last_tx = now;
-> >> >>>     if (i->second.first_tx == utime_t())
-> >> >>>       i->second.first_tx = now;
-> >> >>>     dout(30) << "heartbeat sending ping to osd." << peer << dendl;
-> >> >>>     i->second.con_back->send_message(new MOSDPing(monc->get_fsid(),
-> >> >>>  service.get_osdmap()->get_epoch(),
-> >> >>>  MOSDPing::PING,
-> >> >>>  now));
-> >> >>>
-> >> >>>     if (i->second.con_front)
-> >> >>>       i->second.con_front->send_message(new MOSDPing(monc->get_fsid(),
-> >> >>>     service.get_osdmap()->get_epoch(),
-> >> >>>     MOSDPing::PING,
-> >> >>>     now));
-> >> >>>   }
-> >> >>>
-> >> >>> Only "fsid", "osdmap epoch" are required, I don't think it will block.
-> >> >>> Then I think lots of locking/odding things exists on heartbeat
-> >> >>> dispatch/handle process. sending process is clear I guess.
-> >> >>
-> >> >> Yeah, I guess that's fine.  I was worried about some dependency between
-> >> >> who we ping and the osdmap epoch in the message (and races
-> >> >> adding/removing
-> >> >> heartbeat peers), but I think it doesn't matter.
-> >> >>
-> >> >> Even so, I think it would be good to expose the send_message_oob()
-> >> >> interface, and do this in 2 stages so the two changes are decoupled.
-> >> >> Unless there is some implementation reason why the oob message
-> >> >> scheduling
-> >> >> needs to be done inside the messenger?
-> >> >
-> >> > Agreed! we could remove heartbeat messenger firstly!
-> >> >
-> >> >>
-> >> >> sage
-> >> >>
-> >> >>> The advantage to register callback is we can combine multi layers oob
-> >> >>> messages to one.
-> >> >>>
-> >> >>> >
-> >> >>> > An easier first step would be to just define a
-> >> >>> > Connection::send_message_oob(Message*).  That would require almost
-> >> >>> > no
-> >> >>> > changes to the calling code, and avoid having to create the timing
-> >> >>> > infrastructure inside AsyncMessenger...
-> >> >>> >
-> >> >>> > sage
-> >> >>> >
-> >> >>> >> void Dispatcher::ms_dispatch_oob(Message*)
-> >> >>> >>
-> >> >>> >> handle the oob message with parsing each oob part.
-> >> >>> >>
-> >> >>> >> So lots of timer control in user's side could be avoided via
-> >> >>> >> callback
-> >> >>> >> generator. When sending, OOB message could insert the front of send
-> >> >>> >> message queue but we can't get any help from kernel oob flag since
-> >> >>> >> it's really useless..
-> >> >>> >>
-> >> >>> >> Any suggestion is welcomed!
-> >>
-> >> Let's keep in mind the challenges of out-of-band messaging over TCP/IP.
-> >>
-> >> Namely, when we discussed this we couldn't figure out any way
-> >> (including the TCP priority stuff, which doesn't work with the
-> >> required semantics — even when it does function) to get traffic to
-> >> actually go out-of-band. IB messaging systems actually have a
-> >> "channels" concept that lets you do genuine OOB transmission that
-> >> skips over queues and other data; TCP doesn't. In fact the best we
-> >> came up with for doing this with Simple/AsyncMessenger was giving the
-> >> Messenger duplicate sockets/queues/etc, which is hardly ideal.
-> >>
-> >> So, maybe we can remove the heartbeat messenger by giving each
-> >> Connection two sockets and queues. That might even work better for the
-> >> AsyncMessenger than it does for SimpleMessenger?
-> >> But any implementation that orders OSD heartbeat messages behind
-> >> ordinary data traffic in kernel or router buffers is probably going to
-> >> fail us. :(
-> >
-> > Oh, good point.  I didn't read that paragraph carefully.  I think we
-> > should use a second socket connected to the same address for OOB messages.
-> > Or possibly push them over UDP... but we'd need to define retry semantics
-> > in that case.
-> 
-> if udp, I think udp hb interval should be less, caller should delegate
-> send logic to connection...
-> 
-> >
-> > sage
+On Tue, Sep 6, 2016 at 10:35 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
+> On Tue, Sep 6, 2016 at 2:31 PM, Elita Lobo <loboelita@gmail.com> wrote:
+>> Hello,
+>>
+>> I am using Ceph in my research project and hence need to know a bit
+>> about how it works internally.  I would be grateful if someone would
+>> answer my queries.
+>>
+>>  When chunks of 2 objects have to be stored on an osd, are they put
+>> into the same file or are these chunks stored in separate file. Is
+>> there any way I could see this data using some command? And in which
+>> folder of the osd are they stored in?
+>
+> Working your way through this may help.
+>
+> http://cephnotes.ksperis.com/blog/2013/08/20/ceph-osd-where-is-my-data
+>
+>>
+>> Also, is there a way I can see the whole flow of function calls made
+>> when a node repair is going on?
+>>
+>> Lastly, could someone please suggest some resources ( other than docs)
+>> which would help me understand the internal implementation and give me
+>> an idea how to debug in ceph. (Attaching gdb to ceph daemons running
+>> in the background etc)
+>>
+>> Thanking you,
+>> Yours sincerely,
+>> Elita Lobo
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+> Cheers,
+> Brad
