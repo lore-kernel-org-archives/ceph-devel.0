@@ -1,84 +1,52 @@
-From: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Subject: Re: rgw: feedback on auth engine selection
-Date: Wed, 7 Sep 2016 19:19:01 +0200
-Message-ID: <CA+H5UW1Qf++2R36y05GFAFTcJO2YN77W4z1yjpUMgAHitnsG-Q@mail.gmail.com>
-References: <e2a2e0c9-51e7-b703-2c8d-7b489d4e8994@redhat.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: OpenStack Barcelona discount code
+Date: Wed, 7 Sep 2016 14:30:17 -0400
+Message-ID: <CAAZbbf0=0x4xFrsLhog9bCxsubs1BgtBzus9KQbkWBrzt_xMXA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:35036 "EHLO
-        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752001AbcIGRTD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Sep 2016 13:19:03 -0400
-Received: by mail-qk0-f171.google.com with SMTP id v123so21729497qkh.2
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Sep 2016 10:19:02 -0700 (PDT)
-In-Reply-To: <e2a2e0c9-51e7-b703-2c8d-7b489d4e8994@redhat.com>
+Received: from mail-yw0-f174.google.com ([209.85.161.174]:35331 "EHLO
+        mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756224AbcIGSaS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Sep 2016 14:30:18 -0400
+Received: by mail-yw0-f174.google.com with SMTP id j1so14324201ywb.2
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Sep 2016 11:30:17 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>
-Cc: Matt Benjamin <mbenjamin@redhat.com>, Orit Wasserman <owasserm@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, mdw@redhat.com, Pritha Srivastava <prsrivas@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>, board@lists.ceph.com
 
-Hi Casey!
+Hey cephers,
 
-I think we could make that with currently existing
-AuthEngines. Although they have some internal
-state, rework of authenticate() methods to return
-a pair consisted with enum (GRANTED, DENIED,
-TRY_NEXT) and AuthApplier would allow to strip
-it down.
+For those who are attending OpenStack Summit in Barcelona this October
+and have not yer purchased your ticket I wanted to share a 20%
+discount code that has just been provided to Red Hat that we can
+freely share. The code you need to enter is:
 
-Where I see problems is AWS Auth v4. It's truly
-state-full. And when it comes to handling state,
-I would prefer to use the language assistance for
-it (non-static class members) instead of letting
-internals (context) leak to req_state.
+RED_OPENSTACKSUMMIT
 
-Anyway, before we start discussing the whole
-auth stuff further, I guess it would be helpful to
-write in one place all requirements/plans that
-might affect this area. For instance, the idea of
-RGWHandler rework can have such impact.
+This 20% discount code is good for unlimited uses on Full Access
+registrations until online sales end on October 22. This code is not
+applicable for people who have already registered at the early bird
+price, cannot be used in person onsite in Barcelona, and cannot be
+used for day only passes. Prices increase again on September 28, but
+this code will still be valid for 20% off the increased price until
+October 22.
 
-Let me start the requirements with an item found
-after a session with Swift's FormPost middleware:
+The code can be redeemed on Eventbrite HERE. When you register on
+Eventbrite, you will need to first click on “Enter Promotional Code”
+and then copy and paste your code in the text box before you select
+the ticket type. It's easy to miss, so please reference the following
+illustration:
+https://www.dropbox.com/s/eyvjn99erg1p47p/HowToUseRegCode_BarcelonaSummit.jpg?dl=0
 
-* the auth infrastructure must allow for easy-adoption
-  of new AuthEngines as even FormPost would need
-  one :-).
+If you have any problems or questions please let me know. Thanks!
 
-Regards,
-Radek
+-- 
 
+Best Regards,
 
-On Tue, Sep 6, 2016 at 11:49 PM, Casey Bodley <cbodley@redhat.com> wrote:
-> Hi Radek and friends,
->
-> Matt and I have been discussing the auth strategy work in progress at
-> https://github.com/ceph/ceph/pull/10925.
->
-> With respect to the original auth rework, I really like the distinction
-> between the Engine and the Applier, with only the Applier having access to
-> the req_state. But I feel like we could have gone a step further with
-> Engine, to remove all per-request state so that a single Engine instance
-> could be reused for each request.
->
-> It looks like this could be accomplished pretty easily by adding req_state*
-> as an argument to the authenticate() function. Token extraction, if
-> necessary, would happen internally to authenticate() so we shouldn't need to
-> store the token in RGWTokenBasedAuthEngine. It doesn't look like the other
-> engines need to store much either (let me know if I'm missing something!),
-> but if there is important state that's unique to a given engine, we might
-> consider moving it into the associated Applier.
->
-> Having an Engine without per-request state means that, on initialization, we
-> just need to generate a vector of Engines (pointers or unique_ptrs because
-> they're polymorphic). RGWHandler_REST_SWIFT::authorize() works pretty much
-> exactly as it is, except you loop over that vector instead of the std::array
-> of Engines on the stack.
->
-> I feel like the current AuthStrategy design is trying to get here, but by
-> adding extra abstractions instead of collapsing the existing layers. Do you
-> buy that?
->
-> Thanks,
-> Casey
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
