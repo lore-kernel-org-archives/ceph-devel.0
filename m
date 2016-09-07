@@ -1,48 +1,96 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: rgw: feedback on auth engine selection
-Date: Wed, 7 Sep 2016 17:09:58 -0400
-Message-ID: <45ac8340-c6eb-8cdc-9c83-3db6f7f3fcd6@redhat.com>
-References: <e2a2e0c9-51e7-b703-2c8d-7b489d4e8994@redhat.com>
- <CA+H5UW1Qf++2R36y05GFAFTcJO2YN77W4z1yjpUMgAHitnsG-Q@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Encode/Decode new framework
+Date: Wed, 7 Sep 2016 21:29:38 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1609072114580.32742@piezo.us.to>
+References: <BLUPR0201MB190892BDBE41A2AA7502EB9DE2F80@BLUPR0201MB1908.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f175.google.com ([209.85.213.175]:34563 "EHLO
-        mail-yb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750772AbcIGVKB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Sep 2016 17:10:01 -0400
-Received: by mail-yb0-f175.google.com with SMTP id x93so10357033ybh.1
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Sep 2016 14:10:00 -0700 (PDT)
-Received: from [10.17.151.126] ([12.118.3.106])
-        by smtp.gmail.com with ESMTPSA id b9sm15586920ywh.45.2016.09.07.14.09.59
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 07 Sep 2016 14:09:59 -0700 (PDT)
-In-Reply-To: <CA+H5UW1Qf++2R36y05GFAFTcJO2YN77W4z1yjpUMgAHitnsG-Q@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:59296 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752047AbcIGV3l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 7 Sep 2016 17:29:41 -0400
+In-Reply-To: <BLUPR0201MB190892BDBE41A2AA7502EB9DE2F80@BLUPR0201MB1908.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Varada Kari <Varada.Kari@sandisk.com>, sjust@redhat.com
+Cc: ceph-devel@vger.kernel.org
 
+Hi Varada!
 
-On 09/07/2016 01:19 PM, Radoslaw Zarzynski wrote:
-> Where I see problems is AWS Auth v4. It's truly
-> state-full. And when it comes to handling state,
-> I would prefer to use the language assistance for
-> it (non-static class members) instead of letting
-> internals (context) leak to req_state.
-AWS v4 is a good example to look at, yeah. It's a special case, because 
-there's a separate 'complete' step after reading the body of the 
-request, so we need to track auth state between the calls to authorize() 
-and complete(). The current implementation stores this stuff in a 
-'struct rgw_aws4_auth' member of req_state.
+On Wed, 7 Sep 2016, Varada Kari wrote:
+> Hi Sage,
+> 
+> Here is the branch with some changes, not able to compile(yet!). Need to
+> write some more templates for STL(multimap etc...) and intrusive containers.
+> 
+> https://github.com/varadakari/ceph/commits/wip-enc-dec-proto
+> 
+> Right now i am facing some problem with encoding of MonMap with mon_addr
+> which is a map with string and entity_address_t. Have a written template
+> class for string which doesn't need any features. But this map needs a
+> features for address and not for string.
+> Trying to fix the problem. Please have a look. Correct me if i am going
+> in a wrong direction in the implementation(overall approach).
 
-So far, all of the AuthEngine instances have been constructed on the 
-stack in their handler's authorize() method, so their state has been 
-limited to that scope. If a new AWS4AuthEngine were to encapsulate v4 
-auth this state, the engine would have to live somewhere outside of the 
-authorize() method - most likely in req_state. But we could just as 
-easily have a stateless AWS4AuthEngine that accessed the existing 
-rgw_aws4_auth via req_state. Encapsulation of rgw_aws4_auth could be 
-improved by making everything private except for a complete() method 
-(and call it  AWS4AuthCompletion, for example).
+I think teh way to address this is make sure that non-featured items have 
+the uint64_t features = 0 argument defined for encode (as they do now). 
+Then make the container declaration something like
+
+template<typename T, typename S>
+struct enc_dec_traits<
+  std::map<T, S>,
+  typename std::enable_if<
+    enc_dec_traits<T>::supported && enc_dec_traits<S>::feature &&
+    (enc_dec_traits<T>::feature || enc_dec_traits<S>::feature)>::type> {
+  const static bool supported = true;
+  const static bool feature = true;
+  ...
+
+and then make the encode methods pass through a feature argument.  I.e., 
+if either the key or the value requires featurse to encode, we require 
+features to encode.
+
+Is that what you're asking?
+
+Alternatively, we can probably avoid specializing the template on 
+featured/unfeatured at all, and in the enc_dec_traits just declare both a 
+featured and unfeatured encode method.  The unfeatured one will error out 
+at compile time if you call it on T or S types that require features.
+
+I haven't looked to closely at this branch, but it looks like the basic 
+approach is:
+
+ - my appenders
+ - sam's branch that defines encode with templated App
+ - each object has encode, decode, and estimate
+ - STL containers are defined based on above
+
+but none of the enc_dec functions that let you write all three in one go.  
+Are you thinking that that would be a separate, orthoganal thing, that 
+lets you write a single enc_dec template function, and then use a macro to 
+declare the encode/decode/estimate functions that call it, so that it all 
+glues together?
+
+I'm still confused about what we are doing with the encode/decode/estimate 
+members of the enc_dec_traits<> structures.  If we need a traits instance 
+in order to encode/decode, that means we can't do the bare
+
+  ::encode(foo, bl);
+
+that we've been doing so far.  Unless there's some other template magic 
+that instantiates the traits on demand?  Something like
+
+template<class T, class App>
+void encode(const T& a, App &app) {
+  enc_dec_traits<T> t;
+  t.encode(a, app);
+}
+
+?
+
+Should we get on a bluejeans and walk through the possible paths here and 
+pick an approach?  Because I'm pretty confused now by all the variations 
+I've seen.
+
+sage
