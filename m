@@ -1,108 +1,52 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: Re: librados.h version numbers
-Date: Thu, 8 Sep 2016 13:38:53 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609081337440.32742@piezo.us.to>
-References: <1843378866.3701.1473189527273@ox.pcextreme.nl> <37bd7608-3352-5057-d238-e04517640f5b@redhat.com> <CAJ4mKGaLv+n8JsJkAYSoNz+3N3rsJHe+tjwoReN_B3AQPibAKQ@mail.gmail.com> <77759347.3838.1473317968120@ox.pcextreme.nl> <alpine.DEB.2.11.1609081322310.32742@piezo.us.to>
- <1735254177.3909.1473341381129@ox.pcextreme.nl>
+Subject: new release manager
+Date: Thu, 8 Sep 2016 13:47:24 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1609081328030.32742@piezo.us.to>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53036 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:57790 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757942AbcIHNi4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 8 Sep 2016 09:38:56 -0400
-In-Reply-To: <1735254177.3909.1473341381129@ox.pcextreme.nl>
+        id S1750992AbcIHNr1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 8 Sep 2016 09:47:27 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: ceph-users@ceph.com
 
-On Thu, 8 Sep 2016, Wido den Hollander wrote:
-> > Op 8 september 2016 om 15:24 schreef Sage Weil <sweil@redhat.com>:
-> > On Thu, 8 Sep 2016, Wido den Hollander wrote:
-> > > > Op 8 september 2016 om 3:08 schreef Gregory Farnum <gfarnum@redhat.com>:
-> > > > 
-> > > > 
-> > > > On Tue, Sep 6, 2016 at 4:16 PM, Josh Durgin <jdurgin@redhat.com> wrote:
-> > > > > On 09/06/2016 12:18 PM, Wido den Hollander wrote:
-> > > > >>
-> > > > >> Hi,
-> > > > >>
-> > > > >> wido@wido-laptop:~$ python -c "import rados; r = rados.Rados();
-> > > > >> print(r.version())"
-> > > > >> 0.69.1
-> > > > >> wido@wido-laptop:~$ dpkg -l|grep rados|awk '{print $2" "$3}'
-> > > > >> librados-dev 10.2.2-1trusty
-> > > > >> librados2 10.2.2-1trusty
-> > > > >> libradosstriper1 10.2.2-1trusty
-> > > > >> python-rados 10.2.2-1trusty
-> > > > >> wido@wido-laptop:~$
-> > > > >>
-> > > > >> Looking at librados.h in master I see:
-> > > > >>
-> > > > >> #define LIBRADOS_VER_MAJOR 0
-> > > > >> #define LIBRADOS_VER_MINOR 69
-> > > > >> #define LIBRADOS_VER_EXTRA 1
-> > > > >>
-> > > > >> Is this something which has just been forgotten to update?
-> > > > >
-> > > > >
-> > > > > Pretty much. Not much has relied on the librados/librbd version numbers
-> > > > > of this style. Adding tests for particular functions can be more
-> > > > > reliable than checking version numbers, since sometimes functions are
-> > > > > backported.
-> > > > >
-> > > > >> Looking at the 'ceph' tool I see:
-> > > > >>
-> > > > >> CEPH_GIT_NICE_VER="10.2.2"
-> > > > >>
-> > > > >> This is updated during packaging/build it seems.
-> > > > >>
-> > > > >> Should we maybe do that for librados.h as well?
-> > > > >
-> > > > >
-> > > > > I see no reason not to.
-> > > > 
-> > > > We at one point were trying to only increment the librados library
-> > > > version when stuff actually changed. Shockingly, that manual
-> > > > maintenance mostly resulted in it not getting updated. ;)
-> > > > But is it really that helpful to just provide another way of exposing
-> > > > the package version, instead of doing something that actually
-> > > > illustrates what functions are around? :/
-> > > 
-> > > I was using some Python code to gather Ceph information ( 
-> > > https://github.com/42on/ceph-collect ). One of the things I wanted to 
-> > > know is the installed Ceph version and I used the version() method.
-> > > 
-> > > It kept giving back 0.69.1 so I started looking into that.
-> > > 
-> > > I just try to avoid calling subprocesses when this isn't required.
-> > > 
-> > > Since the version() method is unreliable in giving back the version, 
-> > > what to do with it?
-> > 
-> > Let's remove those #defines from the header, and then do something like 
-> > include the auto-generated ceph_ver.h in the package, and update the 
-> > version functions to #include that and return an accurate string...
-> > 
-> 
-> yeah, one thing though.
-> 
-> #define CEPH_GIT_VER @CEPH_GIT_VER@
-> #define CEPH_GIT_NICE_VER "@CEPH_GIT_NICE_VER@"
-> 
-> librados.h:
-> 
-> CEPH_RADOS_API void rados_version(int *major, int *minor, int *extra);
-> 
-> We don't have major, minor and extra stored separately in ceph_ver.h at the moment.
+Hi everyone,
 
-Let's just replace it with
+A key role that we've had a hard time staying on top of is that of release 
+manager.  Getting releases tagged, built, and published has been done on a 
+pretty ad hoc basis without much in the way of central coordination or a 
+schedule or much else.  The dev checkpoint releases we used to do on a 
+regular basis have mostly stopped entirely because we get busy with other 
+things and either forget or don't have the time.
 
-CEPH_RADOS_API const char *rados_version_string();
-CEPH_RADOS_API const char *rados_git_version_string();
+The situation improved dramatically when Loic organized a group of 
+contributors to work on handling backports of bug fixes to stable releases 
+and created and documented a repeatable and scalable process.  Even so, 
+releases themselves have remained a pain point.
 
-We could parse the components out of the string, but I'm not sure it's 
-worth the effort?
+Abhishek Lekshman (of SUSE) has offered to take on a release manager role 
+to coordinate our efforts.  Yay!  This will include
 
+ - deciding when to do a stable release (a combination of regular cadence 
+and expedited releases due to critical bugs)
+ - working with the backports team to ensure backports land and are 
+tested in time for a stable release
+ - working with dev leads for their sign-off on releases
+ - periodic dev checkpoint releases off of master
+ - driving the mechanics of the release itself (the new build/release 
+infrastructure that Alfredo and team have been working on)
+ - release announcements (email + blog)
+
+although I'm sure the role will evolve as we go.  :)
+
+We've just ripped the last vestiges of autotools out of the master branch, 
+so one of the first projects will be to kick the tires on the new build 
+infrastructure with a dev release off of master that is 100% cmake.
+
+Thanks, Abhishek!
 sage
+
