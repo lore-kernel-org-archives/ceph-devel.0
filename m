@@ -1,32 +1,48 @@
-From: Samuel Just <sjust@redhat.com>
+From: David Zafman <dzafman@redhat.com>
 Subject: Re: Scrub and collection_list() order
-Date: Thu, 8 Sep 2016 15:35:51 -0700
-Message-ID: <CAN=+7FUHda36vOv9jHanjGrKzMGCx_p1CMoqUa7v2cDS-xa9Jg@mail.gmail.com>
-References: <798293d3-e4fb-9814-b305-aa264f2968ac@redhat.com> <alpine.DEB.2.11.1609082202530.10416@piezo.us.to>
+Date: Thu, 8 Sep 2016 15:41:37 -0700
+Message-ID: <ffdb5eab-e8f6-90e0-0d31-a9622f9aa9b3@redhat.com>
+References: <798293d3-e4fb-9814-b305-aa264f2968ac@redhat.com>
+ <alpine.DEB.2.11.1609082202530.10416@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f179.google.com ([209.85.216.179]:36544 "EHLO
-        mail-qt0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751000AbcIHWfy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Sep 2016 18:35:54 -0400
-Received: by mail-qt0-f179.google.com with SMTP id l91so14409483qte.3
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Sep 2016 15:35:53 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:59796 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752578AbcIHWli (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 8 Sep 2016 18:41:38 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 6DE574E4E7
+        for <ceph-devel@vger.kernel.org>; Thu,  8 Sep 2016 22:41:38 +0000 (UTC)
 In-Reply-To: <alpine.DEB.2.11.1609082202530.10416@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: David Zafman <dzafman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: 'ceph-devel' <ceph-devel@vger.kernel.org>
 
-Hmm, that's annoying!  I don't think we really want to change the sort
-ordering for this.  David: how about we just keep a vector of
-un-processed clone metadata (whatever _scrub looks at) until we hit
-head?  We can still deep scrub each clone in turn without the head, we
-just have to keep the metadata around until we finally come upon the
-head/snapdir.
--Sam
 
-On Thu, Sep 8, 2016 at 3:05 PM, Sage Weil <sweil@redhat.com> wrote:
+Sage,
+
+
+     The current workaround is bad because if an object has many clones 
+we have to ignore the osd_scrub_chunk_max and find a chunk that includes 
+the head object for those clones.  Then the analysis code processes that 
+chunk in reverse order.  We think that this behavior is the long 
+standing cause of performance issues during deep scrub in RBD 
+environments with lots of clones.    An object with N clones will chunk 
+at least the N+1 objects no matter what the value of osd_scrub_chunk_max.
+
+   I have the analysis code modified to handle smaller arbitrary chunks 
+(state is saved between chunks) but that can only work if the objects 
+arrive in reverse order since it still requires the head objects first.
+
+David
+
+
+On 9/8/16 3:05 PM, Sage Weil wrote:
 > On Thu, 8 Sep 2016, David Zafman wrote:
 >> Sage,
 >>
@@ -38,7 +54,6 @@ On Thu, Sep 8, 2016 at 3:05 PM, Sage Weil <sweil@redhat.com> wrote:
 >> objects before the snapshots?  The current code has to ignore
 >> osd_scrub_chunk_max in order to find a natural boundary so that the scrub code
 >> can go in reverse order for that segment.
->
 > collection_list has to return objects in ghobject_t sort order, so it's
 > really bool operator<(const ghobject_t& l, const ghobject_t& r)'s fault
 > that snaps come first.  I don't think we can make it go backwards
@@ -55,3 +70,4 @@ On Thu, Sep 8, 2016 at 3:05 PM, Sage Weil <sweil@redhat.com> wrote:
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
