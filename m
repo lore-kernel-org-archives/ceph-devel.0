@@ -1,101 +1,73 @@
-From: Ramesh Chander <Ramesh.Chander@sandisk.com>
-Subject: RE: assert at BitMapAllocator
-Date: Thu, 8 Sep 2016 16:45:45 +0000
-Message-ID: <CY1PR0201MB18208FC20978DF6806F46D4085FB0@CY1PR0201MB1820.namprd02.prod.outlook.com>
-References: <36559f57-15a3-f6d8-b27c-1efe5b1cb041@mirantis.com>
+From: Radoslaw Zarzynski <rzarzynski@mirantis.com>
+Subject: Re: rgw: feedback on auth engine selection
+Date: Thu, 8 Sep 2016 19:19:11 +0200
+Message-ID: <CA+H5UW2nL1nWa6YFW7yoiuu0WE-rYxYjMpm1X+Tw6_LbvSrwwQ@mail.gmail.com>
+References: <e2a2e0c9-51e7-b703-2c8d-7b489d4e8994@redhat.com>
+ <CA+H5UW1Qf++2R36y05GFAFTcJO2YN77W4z1yjpUMgAHitnsG-Q@mail.gmail.com> <6113bdf0-10fb-a30d-e4a0-797df61f8bd0@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0043.outbound.protection.outlook.com ([104.47.32.43]:23568
-        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932443AbcIHRAK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 8 Sep 2016 13:00:10 -0400
-In-Reply-To: <36559f57-15a3-f6d8-b27c-1efe5b1cb041@mirantis.com>
-Content-Language: en-US
+Received: from mail-qk0-f181.google.com ([209.85.220.181]:35338 "EHLO
+        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965916AbcIHRTN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Sep 2016 13:19:13 -0400
+Received: by mail-qk0-f181.google.com with SMTP id v123so55337652qkh.2
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Sep 2016 10:19:13 -0700 (PDT)
+In-Reply-To: <6113bdf0-10fb-a30d-e4a0-797df61f8bd0@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Casey Bodley <cbodley@redhat.com>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-VGhlIGJsdWVzdG9yZSBhbGxvY2F0b3IgaXMgaW5pdGlhbGl6ZWQgd2l0aCBtaW5fYWxsb2Nfc2l6
-ZSBhbmQgQmx1ZUZTIGluc3RhbmNlIG9mIGFsbG9jYXRvciBpcyBpbml0aWFsaXplZCB3aXRoIGJs
-dWVmc19hbGxvY19zaXplLg0KDQpUaGUgaW50ZW50aW9uIHRvIGtlZXAgQmx1ZUZTIGFsbG9jYXRv
-ciB0byBibHVlZnNfYWxsb2Nfc2l6ZSAoMU1CKSB3YXMgY29uc2lkZXJpbmcgdGhhdCBhbGxvY2F0
-aW9ucyBhcmUgYWx3YXlzIDFNQiBmb3IgQmx1ZUZTLCBzbyAxTUIgYmxvY2sgc2l6ZSBrZWVwcyBp
-dCBtZW1vcnkgYW5kIHNlYXJjaCBlZmZpY2llbnQuDQoNCkJ1dCBpbiBjYXNlIG9mIG1vdmluZyBl
-eHRlbnRzIGJldHdlZW4gYmx1ZWZzIGFuZCBibHVlc3RvcmUgdGhpcyBhc3N1bXB0aW9uIGJyZWFr
-cy4NCg0KU28gZWl0aGVyIHdlIGNhbiBtYWtlIHN1cmUgdGhhdCBleHRlbnRzIG1vdmluZyB0byBh
-bmQgZnJvIGJsdWVzdG9yZSBhbmQgYmx1ZWZzIGFyZSBhbHdheXMgaW4gY29udGlndW91cyAxTUIg
-Y2h1bmtzLiBUaGF0IGRlbWFuZHMgYXZhaWxhYmlsaXR5IG9mIDFNQiBjaHVua3MuDQoNCk9yDQoN
-Cm1ha2UgYmx1ZWZzIGFsbG9jYXRvciBhbHNvIHVzZSBtaW5fYWxsb2Nfc2l6ZS4NCg0KDQozMTYg
-ICAgIGFzc2VydChiZGV2W2lkXS0+Z2V0X3NpemUoKSk7DQogMzE3ICAgICBhbGxvY1tpZF0gPSBB
-bGxvY2F0b3I6OmNyZWF0ZShnX2NvbmYtPmJsdWVzdG9yZV9hbGxvY2F0b3IsDQogMzE4ICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBiZGV2W2lkXS0+Z2V0X3NpemUoKSwNCiAzMTkg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdfY29uZi0+Ymx1ZWZzX2FsbG9jX3Np
-emUpOyAgICAgPDw8IENoYW5nZSBpdCB0byBnX2NvbmYtPm1pbl9hbGxvY19zaXplIG9yIHRvIG1p
-biBtaW5fYWxsb2Nfc2l6ZSBhcyBkaXNjdXNzZWQgaW4gb3RoZXIgdGhyZWFkIHJlZ2FyZGluZyB0
-aGUgY2hhbmdpbmcgbWluX2FsbG9jX3NpemUgYWNyb3NzIHJlYm9vdHMuDQoNCg0KQnV0IHRoYXQg
-bWF5IG1ha2UgdHdvIGluc3RhbmNlIG9mIGFsbG9jYXRvciBmb3Igc2FtZSBkZXZpY2UgYW5kIGhh
-dmUgZG91YmxlIG1lbW9yeSByZXF1aXJlbWVudC4NCg0KSWdvciwNCg0KIFNlY29uZCBzaG91bGQg
-YXQgbGVhc3QgZml4IHlvdSBwcm9ibGVtIGZvciBub3cuDQoNCg0KLVJlZ2FyZHMsDQogUmFtZXNo
-DQoNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwt
-b3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5r
-ZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSWdvciBGZWRvdG92DQo+IFNlbnQ6IFRodXJzZGF5LCBT
-ZXB0ZW1iZXIgMDgsIDIwMTYgNzo1NyBQTQ0KPiBUbzogY2VwaC1kZXZlbA0KPiBTdWJqZWN0OiBh
-c3NlcnQgYXQgQml0TWFwQWxsb2NhdG9yDQo+DQo+IEhpIEFsbCwNCj4NCj4gSSdtIG9ic2Vydmlu
-ZyBhbiBhc3NlcnQgYXQgQml0TWFwQWxsb2NhdG9yIHdpdGggcmVjZW50IG1hc3Rlci4NCj4NCj4g
-SGVyZSBpcyB0aGUgY2FsbCBzdGFjaw0KPg0KPiAgICAtMj4gMjAxNi0wOS0wOCAxNDowMzowNi4w
-MTI4NDcgN2ZlNjRmZmZmNzAwICAwDQo+IGJsdWVzdG9yZSguL2Zpby1ibHVlc3RvcmUpIF9iYWxh
-bmNlX2JsdWVmc19mcmVlc3BhY2UgcmVjbGFpbWluZw0KPiAxOTA4MzQyNzg0ICgxODE5IE0pDQo+
-ICAgICAgLTE+IDIwMTYtMDktMDggMTQ6MDM6MDYuMDEyOTE1IDdmZTY0ZmZmZjcwMCAgMCBiaXRt
-YXBhbGxvYzpyZXNlcnZlDQo+IDE5MDgzNDI3ODQgMTA0ODU3Ng0KPiAgICAgICAwPiAyMDE2LTA5
-LTA4IDE0OjAzOjA2LjAyNjQyNSA3ZmU2NGZmZmY3MDAgLTENCj4gL3Jvb3QvY2VwaC9jZXBoL3Ny
-Yy9vcy9ibHVlc3RvcmUvQml0TWFwQWxsb2NhdG9yLmNjOiBJbiBmdW5jdGlvbiAndmlydHVhbCBp
-bnQNCj4gQml0TWFwQWxsb2NhdG9yOjpyZXNlcnZlKHVpbnQ2NF90KScgdGhyZWFkIDdmZTY0ZmZm
-ZjcwMCB0aW1lIDIwMTYtMDktMDgNCj4gMTQ6MDM6MDYuMDEyOTMwDQo+IC9yb290L2NlcGgvY2Vw
-aC9zcmMvb3MvYmx1ZXN0b3JlL0JpdE1hcEFsbG9jYXRvci5jYzogODg6IEZBSUxFRA0KPiBhc3Nl
-cnQoIShuZWVkICUgbV9ibG9ja19zaXplKSkNCj4NCj4gICBjZXBoIHZlcnNpb24gdjExLjAuMC0y
-MTYwLWcxNTU2MTkwDQo+ICgxNTU2MTkwODUxMGEzODM4ZTg3ZjE5MzhlNWFmYzY1NTcwZmVjZGM0
-KQ0KPiAgIDE6IChjZXBoOjpfX2NlcGhfYXNzZXJ0X2ZhaWwoY2hhciBjb25zdCosIGNoYXIgY29u
-c3QqLCBpbnQsIGNoYXINCj4gY29uc3QqKSsweDk1KSBbMHg3ZmU3MmYxMzJkN2VdDQo+ICAgMjog
-KEJpdE1hcEFsbG9jYXRvcjo6cmVzZXJ2ZSh1bnNpZ25lZCBsb25nKSsweDIwNCkgWzB4N2ZlNzJl
-ZmI4NDgyXQ0KPiAgIDM6IChCbHVlRlM6OnJlY2xhaW1fYmxvY2tzKHVuc2lnbmVkIGludCwgdW5z
-aWduZWQgbG9uZywgdW5zaWduZWQgbG9uZyosDQo+IHVuc2lnbmVkIGludCopKzB4Mjg2KSBbMHg3
-ZmU3MmVmNmJjM2FdDQo+ICAgNDoNCj4gKEJsdWVTdG9yZTo6X2JhbGFuY2VfYmx1ZWZzX2ZyZWVz
-cGFjZShzdGQ6OnZlY3RvcjxibHVlc3RvcmVfcGV4dGVudF90LA0KPiBzdGQ6OmFsbG9jYXRvcjxi
-bHVlc3RvcmVfcGV4dGVudF90PiA+KikrMHgxNDE3KSBbMHg3ZmU3MmVlNjIyMjddDQo+ICAgNTog
-KEJsdWVTdG9yZTo6X2t2X3N5bmNfdGhyZWFkKCkrMHgxMjM0KSBbMHg3ZmU3MmVlODQ5ZDJdDQo+
-ICAgNjogKEJsdWVTdG9yZTo6S1ZTeW5jVGhyZWFkOjplbnRyeSgpKzB4MWMpIFsweDdmZTcyZWVh
-ODFjOF0NCj4gICA3OiAoVGhyZWFkOjplbnRyeV93cmFwcGVyKCkrMHhjMSkgWzB4N2ZlNzJmMWVh
-OWRkXQ0KPiAgIDg6IChUaHJlYWQ6Ol9lbnRyeV9mdW5jKHZvaWQqKSsweDE4KSBbMHg3ZmU3MmYx
-ZWE5MTJdDQo+ICAgOTogKCgpKzB4NzZmYSkgWzB4N2ZlNzQyMWRjNmZhXQ0KPiAgIDEwOiAoY2xv
-bmUoKSsweDZkKSBbMHg3ZmU3NDFkMGViNWRdDQo+DQo+IFRoZSBsaW5lIGJlbG93IHByZXNlbnRz
-ICdyZWNsYWltJyB2YXIgdmFsdWUgd2hlbiBjYWxsaW5nDQo+IGJsdWVmcy0+cmVjbGFpbV9ibG9j
-a3MgZnJvbSBCbHVlU3RvcmUuY2MNCj4NCj4gICAgLTI+IDIwMTYtMDktMDggMTQ6MDM6MDYuMDEy
-ODQ3IDdmZTY0ZmZmZjcwMCAgMA0KPiBibHVlc3RvcmUoLi9maW8tYmx1ZXN0b3JlKSBfYmFsYW5j
-ZV9ibHVlZnNfZnJlZXNwYWNlIHJlY2xhaW1pbmcNCj4gMTkwODM0Mjc4NCAoMTgxOSBNKQ0KPg0K
-PiBhbmQgZm9sbG93aW5nIG9uZSBwcm92aWRlcyBuZWVkICYgbV9ibG9ja19zaXplIHZhcnMgYXQN
-Cj4gQml0TWFwQWxsb2M6OnJlc2VydmUNCj4NCj4gICAgICAtMT4gMjAxNi0wOS0wOCAxNDowMzow
-Ni4wMTI5MTUgN2ZlNjRmZmZmNzAwICAwIGJpdG1hcGFsbG9jOnJlc2VydmUNCj4gMTkwODM0Mjc4
-NCAxMDQ4NTc2DQo+DQo+IE9uZSBjYW4gc2VlIHRoYXQgQmx1ZVN0b3JlIHByb3ZpZGVzIGEgdmFs
-dWUgbm90IGFsaWduZWQgd2l0aA0KPiBCaXRNYXBBbGxvY2F0b3IncyBtX2Jsb2NrX3NpemUuDQo+
-IEluZGVlZCB0aGVyZSBpcw0KPiAgICAgIHJlY2xhaW0gPSBQMlJPVU5EVVAocmVjbGFpbSwgbWlu
-X2FsbG9jX3NpemUpOyB3aGVyZSBtaW5fYWxsb2Nfc2l6ZSA9DQo+IDY0SyBpbiBteSBjYXNlLCBu
-b3QgMU0gYXMgQml0TWFwQWxsb2NhdG9yIGV4cGVjdHMuDQo+DQo+IEFueSBjb21tZW50cy9zdWdn
-ZXN0aW9ucz8NCj4NCj4gVGhhbmtzLA0KPiBJZ29yDQo+DQo+DQo+IC0tDQo+IFRvIHVuc3Vic2Ny
-aWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVs
-IiBpbiB0aGUNCj4gYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9y
-ZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4g
-dGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNl
-IG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRl
-ciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUg
-aGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVy
-cm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3Ig
-Y29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhh
-dmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRo
-ZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0
-ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91
-ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3Jl
-ZCBjb3BpZXMpLg0K
+On Wed, Sep 7, 2016 at 11:05 PM, Casey Bodley <cbodley@redhat.com> wrote:
+> Some specific requirements that I recall from our past discussions include:
+>
+> - don't heap allocate auth state per request
+
+Great. I understood that we don't need to optimize the early
+run-time (setup, initialization) to eradicate dynamic allocations.
+This would allow to make the things easier to read through
+skipping some crazy CRTP/SFINAE stuff.
+
+> - don't construct or call into AuthEngines that shouldn't be enabled for the
+> given handler
+
+This sounds like a step further in comparison with the current
+solution. In the past we had a lot of "ifs" executed per request.
+Currently, the logic is split into per-engine pieces and encapsulated
+in is_applicable method of AuthEngines. In my understanding
+the goal is to introduce init-time preselection. However, we need
+to discuss dealing with run-time config changes (operator injecting
+new configuration without restart). Do we want to cover this use
+case at all?
+
+> I'll add some of the other refactoring goals we've discussed, but I don't
+> think they place any strict requirements on the auth subsystem:
+>
+> - RGWHandler: being able to reuse handler instances, instead of allocating a
+> new one for each request
+
+At the moment RGWHandler is dynamically allocated on each
+request. Do we plan to remove only the allocations or go even
+further and make handlers entirely state-less?
+
+> - req_state: contains too many unrelated fields, some of which are
+> transformed in confusing ways over the lifetime of the request. needs to be
+> broken up into smaller, better encapsulated sub-objects
+
+I'm 100% behind that.
+
+> - concurrency: move away from a synchronous process_request() to build on
+> asio frontend work
+
+Sound really interesting.
+
+
+Let me propose another requirement:
+ - critical components should facilitate unit testing. In the future
+   they should be covered by reasonable set of unit tests.
+
+What do you think?
+
+Regards,
+Radek
