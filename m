@@ -1,46 +1,68 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: no more autotools
-Date: Thu, 8 Sep 2016 19:12:58 -0400
-Message-ID: <CAC-Np1y3i+mKo9fyCQxB6RZg_BJSw-kcTw_ZO-9zaOQnS-nDUQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1609081352170.9549@piezo.us.to>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Scrub and collection_list() order
+Date: Thu, 8 Sep 2016 16:13:51 -0700
+Message-ID: <CAJ4mKGbBe1zqC8CPrOyRbFYA6G5nPUH8uOBVqg0Bh6_neg2Fbw@mail.gmail.com>
+References: <798293d3-e4fb-9814-b305-aa264f2968ac@redhat.com>
+ <alpine.DEB.2.11.1609082202530.10416@piezo.us.to> <CAN=+7FUHda36vOv9jHanjGrKzMGCx_p1CMoqUa7v2cDS-xa9Jg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:38092 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752430AbcIHXNA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Sep 2016 19:13:00 -0400
-Received: by mail-wm0-f44.google.com with SMTP id 1so3503567wmz.1
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Sep 2016 16:12:59 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1609081352170.9549@piezo.us.to>
+Received: from mail-ua0-f172.google.com ([209.85.217.172]:35026 "EHLO
+        mail-ua0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753590AbcIHXN5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Sep 2016 19:13:57 -0400
+Received: by mail-ua0-f172.google.com with SMTP id 95so29832706uaz.2
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Sep 2016 16:13:53 -0700 (PDT)
+In-Reply-To: <CAN=+7FUHda36vOv9jHanjGrKzMGCx_p1CMoqUa7v2cDS-xa9Jg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, abhishek@suse.com
+To: Samuel Just <sjust@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, David Zafman <dzafman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Sep 8, 2016 at 10:00 AM, Sage Weil <sweil@redhat.com> wrote:
-> Yesterday we merged a PR that removed all of the autotools build
-> infrastructure from the master branch of ceph.git.  We'll be 100% cmake
-> for Kraken.  Hooray!
->
-> Huge thank you to Ali, Casey, Kefu, and everyone else who helped with this
-> effort!
->
-> The gitbuilder and teuthology bits should all now be fully functional with
-> cmake-only as we've been doing builds and tests with it for a while.
-> We've no doubt broken some things with the release builds.
->
-> I think the next step should be to do a dev release (11.0.1) to work
-> through the kinks and ensure that in a few weeks/months time when we are
-> ready for kraken -rc's everything is working.  Alfredo and Abhishek, this
-> will be mostly fall on you :).  I think any master commit is fine for our
-> purposes (it's just a dev checkpoint and the main goal is to make sure the
-> build works, not produce a well-tested set of packages for end users).
+Isn't there also a requirement (or else a bunch of embedded
+optimizations that assume) that clones sort before HEAD in terms of
+backfill et al?
+-Greg
 
-For the new CI replacement we already are building master (and kraken)
-correctly so for
-actual releases this shouldn't be too much of a hassle.
-
-We are in a good place for a dev release (11.0.1) any time now.
+On Thu, Sep 8, 2016 at 3:35 PM, Samuel Just <sjust@redhat.com> wrote:
+> Hmm, that's annoying!  I don't think we really want to change the sort
+> ordering for this.  David: how about we just keep a vector of
+> un-processed clone metadata (whatever _scrub looks at) until we hit
+> head?  We can still deep scrub each clone in turn without the head, we
+> just have to keep the metadata around until we finally come upon the
+> head/snapdir.
+> -Sam
 >
-> sage
+> On Thu, Sep 8, 2016 at 3:05 PM, Sage Weil <sweil@redhat.com> wrote:
+>> On Thu, 8 Sep 2016, David Zafman wrote:
+>>> Sage,
+>>>
+>>> Does any code depend on collection_list returning snapshots BEFORE
+>>> head/snapdir?  I'm trying to improve scrub's overhead per osd_scrub_chunk_max
+>>> of objects, but scrub for to do the snapshot consistency analysis it needs the
+>>> head objects first.  Can we add a collection_list() that returns the objects
+>>> in completely reverse order?  Or can it be changed to return head/snapdir
+>>> objects before the snapshots?  The current code has to ignore
+>>> osd_scrub_chunk_max in order to find a natural boundary so that the scrub code
+>>> can go in reverse order for that segment.
+>>
+>> collection_list has to return objects in ghobject_t sort order, so it's
+>> really bool operator<(const ghobject_t& l, const ghobject_t& r)'s fault
+>> that snaps come first.  I don't think we can make it go backwards
+>> efficiently given how rocksdb etc works.
+>>
+>> It might be possible to change the ghobject_t sort order, though, but I
+>> suspect it'll require a clusterwide osdmap flag again, similar to the
+>> sortbitwise thing we did earlier. Blech.
+>>
+>> How bad is the current workaround?
+>>
+>> sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
