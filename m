@@ -1,50 +1,94 @@
-From: Jeff Layton <jlayton@samba.org>
-Subject: Re: [samba PATCH] vfs:ceph: convert to using ceph_statx structures
- and functions, when available
-Date: Thu, 08 Sep 2016 10:35:55 -0400
-Message-ID: <1473345355.2564.8.camel@samba.org>
-References: <1473344984-22564-1-git-send-email-jlayton@samba.org>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: no more autotools
+Date: Thu, 8 Sep 2016 14:58:31 +0000
+Message-ID: <BL2PR02MB2115460AF429AF9002962CA8F4FB0@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <alpine.DEB.2.11.1609081352170.9549@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from hr2.samba.org ([144.76.82.148]:58548 "EHLO hr2.samba.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1758458AbcIHOgE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 8 Sep 2016 10:36:04 -0400
-In-Reply-To: <1473344984-22564-1-git-send-email-jlayton@samba.org>
+Received: from mail-dm3nam03on0060.outbound.protection.outlook.com ([104.47.41.60]:64144
+        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S965929AbcIHO6i (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 8 Sep 2016 10:58:38 -0400
+In-Reply-To: <alpine.DEB.2.11.1609081352170.9549@piezo.us.to>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: samba-technical@lists.samba.org
-Cc: ceph-devel@vger.kernel.org, ira@wakeful.net
+To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "adeza@redhat.com" <adeza@redhat.com>, "abhishek@suse.com" <abhishek@suse.com>
 
-On Thu, 2016-09-08 at 10:29 -0400, Jeff Layton wrote:
-> Add a configure test for the ceph_statx function, and use that to
-> determine whether to compile in new functions that use it and its
-> variants, or whether to use a the older code that fetches birthtimes
-> from an xattr.
-> 
-> For cephwrap_lstat, we can use ceph_statx with the AT_SYMLINK_NOFOLLOW
-> flag to get the right lookup semantics.
-> 
-> For setting the times via cephwrap_ntimes, We can just use ceph_setattrx
-> and pass them all in at the same time.
-> 
-> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> ---
->  source3/modules/vfs_ceph.c | 216 ++++++++++++++++++++++++++++++++++++++-------
->  source3/wscript            |   2 +
->  2 files changed, 185 insertions(+), 33 deletions(-)
-> 
+Sage,
+I saw do_autogen.sh is still there but failing as autogen.sh not there :-).=
+.
+One more thing , jemalloc enabled build along with rocksdb is still failing=
+ , I had to manually uncomment the following in db_impl.cc to get it throug=
+h.
 
-The new interfaces are now merged in the ceph master branch and should
-ship with the Kraken release. I know however, that Greg F. has some
-libcephfs API changes queued up that might change these function
-prototypes.
+/*static void GetJemallocStatus(void* mstat_arg, const char* status) {
+  MallocStatus* mstat =3D reinterpret_cast<MallocStatus*>(mstat_arg);
+  size_t status_len =3D status ? strlen(status) : 0;
+  size_t buf_size =3D (size_t)(mstat->end - mstat->cur);
+  if (!status_len || status_len > buf_size) {
+    return;
+  }
 
-So, it may be good to hold off on merging this into samba master until
-his work has been merged.
+  snprintf(mstat->cur, buf_size, "%s", status);
+  mstat->cur +=3D status_len;
+}*/
 
-Cheers,
--- 
-Jeff Layton <jlayton@samba.org>
+
+//malloc_stats_print(GetJemallocStatus, &mstat, "");
+
+I did this to enable jemalloc with cmake.
+
+./install-deps.sh
+./do_cmake.sh
+cd build
+cmake -D ALLOCATOR=3Djemalloc ..
+make -j48
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel=
+.org] On Behalf Of Sage Weil
+Sent: Thursday, September 08, 2016 7:00 AM
+To: ceph-devel@vger.kernel.org
+Cc: adeza@redhat.com; abhishek@suse.com
+Subject: no more autotools
+
+Yesterday we merged a PR that removed all of the autotools build infrastruc=
+ture from the master branch of ceph.git.  We'll be 100% cmake for Kraken.  =
+Hooray!
+
+Huge thank you to Ali, Casey, Kefu, and everyone else who helped with this =
+effort!
+
+The gitbuilder and teuthology bits should all now be fully functional with =
+cmake-only as we've been doing builds and tests with it for a while.
+We've no doubt broken some things with the release builds.
+
+I think the next step should be to do a dev release (11.0.1) to work throug=
+h the kinks and ensure that in a few weeks/months time when we are ready fo=
+r kraken -rc's everything is working.  Alfredo and Abhishek, this will be m=
+ostly fall on you :).  I think any master commit is fine for our purposes (=
+it's just a dev checkpoint and the main goal is to make sure the build work=
+s, not produce a well-tested set of packages for end users).
+
+sage
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
