@@ -1,40 +1,71 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Bluestore memory leak
-Date: Wed, 7 Sep 2016 21:03:52 -0500
-Message-ID: <3effe79d-b044-c6a2-36d0-53d0b3c149ce@redhat.com>
-References: <BL2PR02MB21153E4497C3C2364B543BAEF4FB0@BL2PR02MB2115.namprd02.prod.outlook.com>
+From: Xusangdi <xu.sangdi@h3c.com>
+Subject: MDS failed to reconnect a kernel client with CIFS workload
+Date: Thu, 8 Sep 2016 06:35:27 +0000
+Message-ID: <FF8D83DAE5DF57468726B79904321E06251184E0@H3CMLB12-EX.srv.huawei-3com.com>
+References: <FF8D83DAE5DF57468726B79904321E06251178CB@H3CMLB12-EX.srv.huawei-3com.com>
+ <FF8D83DAE5DF57468726B79904321E06251180C0@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46690 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752549AbcIHCD4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 7 Sep 2016 22:03:56 -0400
-In-Reply-To: <BL2PR02MB21153E4497C3C2364B543BAEF4FB0@BL2PR02MB2115.namprd02.prod.outlook.com>
+Received: from smtp.h3c.com ([60.191.123.56]:16308 "EHLO h3cmg01-ex.h3c.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752900AbcIHGfi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 8 Sep 2016 02:35:38 -0400
+In-Reply-To: <FF8D83DAE5DF57468726B79904321E06251180C0@H3CMLB12-EX.srv.huawei-3com.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
-Hi Somnath,
-
-I complained loudly and often enough to get Sage to take a look and he 
-fixed a bunch of stuff. :)  The following PR dramatically improves 
-things, though I haven't verified that it's totally fixed yet:
-
-https://github.com/ceph/ceph/pull/11011
-
-Mark
-
-On 09/07/2016 08:08 PM, Somnath Roy wrote:
-> Sage,
-> As Mark said, the latest code has severe memory leak , my system memory (64GB) started swapping after 3 min of 4K RW run.
->
-> Thanks & Regards
-> Somnath
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+SGkgQ2VwaGVycywNCg0KV2UgZW5jb3VudGVyZWQgYSBwcm9ibGVtIHdoZW4gdXNpbmcgQ2VwaEZT
+ICsgU2FtYmEsIHdoaWNoIGZhaWxzIHRoZSByZWNvbm5lY3Rpb24gcGhhc2Ugb2YgTURTIHJlc3Bh
+d24uDQpSZXByb2R1Y2Ugc3RlcHM6DQoxLiBrZXJuZWwgbW91bnQgQ2VwaEZTIHRvIGEgU2FtYmEg
+c2VydmVyDQoyLiByZS1leHBvcnQgdGhlIG1vdW50IHBvaW50IGJ5IFNhbWJhDQozLiBjb25uZWN0
+IHRvIFNhbWJhIHNlcnZlciBmcm9tIGEgV2luZG93cyA3IGNsaWVudCwgYW5kIGNvcHkgYSBsYXJn
+ZSBmaWxlICg0R0IpIHRvIHRoZSBzaGFyZWQgZGlyZWN0b3J5DQo0LiBkdXJpbmcgY29weSBwcm9j
+ZXNzLCByZXN0YXJ0IHRoZSBhY3RpdmUgKGFuZCB0aGUgb25seSBvbmUpIE1EUw0KNS4gTURTIHRo
+ZW4gZ2l2ZXMgdXAgcmVjb25uZWN0aW5nIHRvIHRoZSBrZXJuZWwgY2xpZW50IGFmdGVyIHRpbWVv
+dXQNCkFzIGEgcmVzdWx0LCBhbGwgY2xpZW50IHJlcXVlc3RzIHdpbGwgaGFuZyBmb3IgbGlrZSBm
+b3JldmVyIDo8DQoNCkkgZGlkIGEgZmV3IGV4dHJhIHRlc3RzLCB3aGljaCBwcm92ZWQgdGhhdCB0
+aGlzIGlzc3VlIHdpbGwgbm90IG9jY3VyIHdoZW4gdXNpbmcga2VybmVsIGNsaWVudCBkaXJlY3Rs
+eSBub3IgdmlhDQpORlMgcmUtZXhwb3J0LiBGcm9tIHRoZSBzeXNsb2cgSSBmb3VuZCB0aGUgZm9s
+bG93aW5nIGVycm9yICh3aXRoIGR5bmFtaWMgZGVidWcgZW5hYmxlZCk6DQoNClNlcCAgNiAyMDoz
+NDo0MSB0cnVzdHk4MSBrZXJuZWw6IFs0NjU4NTguNjc2NjM4XSBjZXBoOiBtZHMwIGNhcHMgc3Rh
+bGUNClNlcCAgNiAyMDozNDo0MSB0cnVzdHk4MSBrZXJuZWw6IFs0NjU4NTkuMTIzNzgwXSBjZXBo
+OiBtZHMwIHJlY29ubmVjdCBzdGFydA0KU2VwICA2IDIwOjM0OjQxIHRydXN0eTgxIGtlcm5lbDog
+WzQ2NTg1OS4xMjUxMTNdIGNlcGg6ICBzZXNzaW9uIGZmZmY4ODAxMTIxZjcwMDAgc3RhdGUgcmVj
+b25uZWN0aW5nDQpTZXAgIDYgMjA6MzQ6NDEgdHJ1c3R5ODEga2VybmVsOiBbNDY1ODU5LjEyNjMw
+Nl0gY2VwaDogIGNvdW50ZWQgMCBmbG9jayBsb2NrcyBhbmQgMCBmY250bCBsb2Nrcw0KU2VwICA2
+IDIwOjM0OjQxIHRydXN0eTgxIGtlcm5lbDogWzQ2NTg1OS4xMjYzNDldIGNlcGg6ICBlbmNvZGlu
+ZyAwIGZsb2NrIGFuZCAwIGZjbnRsIGxvY2tzY2VwaDogIGNvdW50ZWQgMSBmbG9jayBsb2NrcyBh
+bmQgMCBmY250bCBsb2Nrcw0KU2VwICA2IDIwOjM0OjQxIHRydXN0eTgxIGtlcm5lbDogWzQ2NTg1
+OS4xMjg1NzVdIGNlcGg6ICBlbmNvZGluZyAxIGZsb2NrIGFuZCAwIGZjbnRsIGxvY2tzY2VwaDog
+IEhhdmUgdW5rbm93biBsb2NrIHR5cGUgMzINClNlcCAgNiAyMDozNDo0MSB0cnVzdHk4MSBrZXJu
+ZWw6IFs0NjU4NTkuMTI5Nzk1XSBjZXBoOiBlcnJvciAtMjIgcHJlcGFyaW5nIHJlY29ubmVjdCBm
+b3IgbWRzMA0KDQpJdCBsb29rcyBsaWtlIHRoZSBDSUZTIHdvcmtsb2FkIGdlbmVyYXRlcyBhbiBp
+bnZhbGlkIGxvY2sgdHlwZSwgYnV0IEnigJltIG5vdCBzdXJlIGFib3V0IHRoaXMuIEFueSBzdWdn
+ZXN0aW9ucz8NCg0KUFM6DQoxLiBTYW1iYSB2ZXJzaW9uOiA0LjMuOSwga2VybmVsIHZlcnNpb246
+IDMuMTkuMC0yNS1nZW5lcmljDQoyLiBJIGFsc28gdHJpZWQgYSBuZXdlciBrZXJuZWwgKDQuNC4w
+LTMxLWdlbmVyaWMpLCBidXQgd2l0aCBubyBsdWNrDQpGZWIgMTEgMTE6NDE6NTIgeGVydXMxMDEg
+a2VybmVsOiBbICA4MzYuOTYwNDQxXSBjZXBoOiBtZHMwIHJlY29ubmVjdCBzdGFydA0KRmViIDEx
+IDExOjQxOjUyIHhlcnVzMTAxIGtlcm5lbDogWyAgODM2Ljk2MDQ5NF0gY2VwaDogZXJyb3IgLTIy
+IHByZXBhcmluZyByZWNvbm5lY3QgZm9yIG1kczANCg0KUmVnYXJkcywNCi0tLVNhbmR5DQoNCi0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0NCuacrOmCruS7tuWPiuWFtumZhOS7tuWQq+acieadreW3nuWNjuS4
+iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaBr++8jOS7hemZkOS6juWPkemA
+gee7meS4iumdouWcsOWdgOS4reWIl+WHug0K55qE5Liq5Lq65oiW576k57uE44CC56aB5q2i5Lu7
+5L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo
+6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN5Yi244CBDQrmiJbmlaPlj5HvvInmnKzpgq7ku7bk
+uK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzpgq7ku7bvvIzor7fmgqjnq4vljbPn
+lLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDpmaTmnKwNCumCruS7tu+8gQ0KVGhp
+cyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1h
+dGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3Ig
+ZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZQ0KaW5m
+b3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3Qg
+bGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBv
+ciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQpyZWNp
+cGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJy
+b3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRl
+bHkgYW5kIGRlbGV0ZSBpdCENCg==
