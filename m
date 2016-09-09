@@ -1,42 +1,48 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: rename PR
-Date: Fri, 9 Sep 2016 10:16:30 -0400 (EDT)
-Message-ID: <71460615.83653154.1473430590652.JavaMail.zimbra@redhat.com>
-References: <580189648.83640635.1473430099895.JavaMail.zimbra@redhat.com>
+From: Radoslaw Zarzynski <rzarzynski@mirantis.com>
+Subject: Re: rgw: feedback on auth engine selection
+Date: Fri, 9 Sep 2016 17:43:09 +0200
+Message-ID: <CA+H5UW2z3AhZHnJTVb_DYYRMHmMD4Krp=p1hxu9U-w5u6Z3O7w@mail.gmail.com>
+References: <e2a2e0c9-51e7-b703-2c8d-7b489d4e8994@redhat.com>
+ <CA+H5UW1Qf++2R36y05GFAFTcJO2YN77W4z1yjpUMgAHitnsG-Q@mail.gmail.com>
+ <6113bdf0-10fb-a30d-e4a0-797df61f8bd0@redhat.com> <513084813.83123312.1473355275673.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:49915 "EHLO
-        mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751222AbcIIOQb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Sep 2016 10:16:31 -0400
-In-Reply-To: <580189648.83640635.1473430099895.JavaMail.zimbra@redhat.com>
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:33930 "EHLO
+        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752601AbcIIPnL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Sep 2016 11:43:11 -0400
+Received: by mail-qk0-f182.google.com with SMTP id m184so80364225qkb.1
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Sep 2016 08:43:11 -0700 (PDT)
+In-Reply-To: <513084813.83123312.1473355275673.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chen Min <chenmin@xsky.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Pritha Srivastava <prsrivas@redhat.com>
+Cc: Casey Bodley <cbodley@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hi Chen,
+On Thu, Sep 8, 2016 at 7:21 PM, Pritha Srivastava <prsrivas@redhat.com> wro=
+te:
+> One more requirement to add to the list:
+>
+> - In case of AWS, two different methods (RGWPostObj_ObjStore_S3::get_poli=
+cy() and RGW_Auth_S3::authorize), will be making use of the Auth Engines to=
+ authenticate a request and the auth key extraction method will be differen=
+t for both of them. The auth infrastructure needs to take care of this.
 
-I wanted to let you know, I merged your exact-match PR.  Now, I suspect that you're also not running a recent-enough version of nfs-ganesha, because I think that the rename issue you fixed wouldn't easily reproduce if you were.
+Hi Pritha,
 
-A key point I wanted to highlight is that it's part of the scaling (and ha, and...) strategy that our nfs file handles are name-stable, rather than arbitrary values.  One implication of that is that when a file is renamed, the renamed object has a different file id and hence NFS file handle value than it did before the rename.  We use the parent directory's change attribute to ensure that clients that had the vnode cached see an invalidate.  (Nothing in your PR contradicts that, of course.)
+Thanks for pointing this out! FormPost implementations
+in both S3 (RGWPostObj) and Swift require workflow
+very similar to AWS v4. They need to parse fragments
+of HTTP body to verify form's integrity (using signature)
+before making the ultimate decision whether a request
+is authenticated or not.
 
-Another strategic decision we made is, we don't rename directories (just stating it for posterity). :)
+I think that after extending the infrastructure to cover
+AWSv4 we would be also able to:
+ 1. eradicate the get_policy() method of RGWPostObj,
+ 2. avoid implementing similar thing in Swift's FormPost.
 
-Cheers,
-
-Matt
-
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+Regards,
+Radek
