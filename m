@@ -1,229 +1,291 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: Encode/Decode new framework
-Date: Fri, 9 Sep 2016 21:38:31 +0000
-Message-ID: <BY2PR0201MB15257C6CCBB9C33D1D1DC0FBE8FA0@BY2PR0201MB1525.namprd02.prod.outlook.com>
-References: <BLUPR0201MB190892BDBE41A2AA7502EB9DE2F80@BLUPR0201MB1908.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1609072114580.32742@piezo.us.to>
- <alpine.DEB.2.11.1609081926450.10416@piezo.us.to>
- <CAN=+7FXp9nLT17Z6ve-OCMHLWS68rUB_5tPN03S-4oQcCjo0AQ@mail.gmail.com>
- <alpine.DEB.2.11.1609091957410.20211@piezo.us.to>
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: Snapshots of consistency groups
+Date: Fri, 9 Sep 2016 15:41:03 -0700
+Message-ID: <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+ <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+ <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
+ <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
+ <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
+ <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
+ <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
+ <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
+ <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com> <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0064.outbound.protection.outlook.com ([104.47.32.64]:6464
-        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753554AbcIIVif (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 9 Sep 2016 17:38:35 -0400
-In-Reply-To: <alpine.DEB.2.11.1609091957410.20211@piezo.us.to>
-Content-Language: en-US
+Received: from mail-vk0-f45.google.com ([209.85.213.45]:35537 "EHLO
+        mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755564AbcIIWlF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Sep 2016 18:41:05 -0400
+Received: by mail-vk0-f45.google.com with SMTP id 16so61714075vko.2
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Sep 2016 15:41:04 -0700 (PDT)
+In-Reply-To: <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Samuel Just <sjust@redhat.com>
-Cc: Varada Kari <Varada.Kari@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-Tm90IHN1cmUgd2h5IHlvdSBuZWVkIHRoZSBkZWZhdWx0IGFyZ3VtZW50IGF0IGFsbC4gRnVuZGFt
-ZW50YWxseSwgdGhlIHRyYWl0cyBhcmUgZ2x1ZWQgdG8gdGhlIHR5cGUgaXRzZWxmLCBub3QgdG8g
-dGhlIHVzYWdlIG9mIHRoZSB0eXBlIChpLmUuLCB0aGUgZW5jL2RlYyBjYWxsLXNpdGUpLg0KDQpT
-byB5b3UgZ2V0IHRoZSBzYW1lIGZ1bmN0aW9uYWxpdHkgYnkgc2ltcGx5IGNyZWF0aW5nIHlvdXIg
-b3duIHN0cnVjdCBkZW5jX3RyYWl0czx0eXBlPiwgaS5lLiwgb3ZlcnJpZGluZyB0aGUgZ2VuZXJh
-dGVkIHZlcnNpb24gb2YgZGVuY190cmFpdHMgd2l0aCB5b3VyIG93biBzcGVjaWFsaXplZCB2ZXJz
-aW9uLg0KDQpXaGljaCBpcyBleGFjdGx5IHRoZSBzYW1lIGNvZGUgdGhhdCB5b3Ugd291bGQgaGF2
-ZSBhdCB0aGUgZW5kIG9mIHRoZSB0eXBlIGluZGlyZWN0aW9uIG9mIHRoZSBvdmVycmlkZGVuIGRl
-ZmF1bHQgdGVtcGxhdGUgYXJndW1lbnQuDQoNCkluIGVzc2VuY2UsIHRoZSBkZWZhdWx0IGFyZ3Vt
-ZW50IGFkZHMgYSBsZXZlbCBvZiBpbmRpcmVjdGlvbiwgYnV0IHlvdSdyZSBzdGlsbCBnb2luZyB0
-byBldmVudHVhbGx5IGhhdmUgdG8gcHJvdmlkZSBhIHN0cnVjdCB3aXRoIHRoZSB2YXJpb3VzIHN1
-cHBvcnRlZCwgZmVhdHVyZWQsIGJvdW5kZWQgbWVtYmVycyBkZWZpbmVkLg0KDQpTbywgYmxvdyBp
-dCBvZmYgZXZlbiBpZiB5b3UgZ2V0IGl0IHRvIHdvcmssIEkgZG9uJ3QgdGhpbmsgeW91J3ZlIGFk
-ZGVkIGFueSBnZW5lcmFsaXR5IGF0IGFsbC4gDQoNCg0KDQpBbGxlbiBTYW11ZWxzDQpTYW5EaXNr
-IHxhIFdlc3Rlcm4gRGlnaXRhbCBicmFuZA0KMjg4MCBKdW5jdGlvbiBBdmVudWUsIFNhbiBKb3Nl
-LCBDQSA5NTEzNA0KVDogKzEgNDA4IDgwMSA3MDMwfCBNOiArMSA0MDggNzgwIDY0MTYNCmFsbGVu
-LnNhbXVlbHNAU2FuRGlzay5jb20NCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+
-IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZl
-bC0NCj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgU2FnZSBXZWlsDQo+IFNl
-bnQ6IEZyaWRheSwgU2VwdGVtYmVyIDA5LCAyMDE2IDE6MDMgUE0NCj4gVG86IFNhbXVlbCBKdXN0
-IDxzanVzdEByZWRoYXQuY29tPg0KPiBDYzogVmFyYWRhIEthcmkgPFZhcmFkYS5LYXJpQHNhbmRp
-c2suY29tPjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IEVuY29k
-ZS9EZWNvZGUgbmV3IGZyYW1ld29yaw0KPiANCj4gQXJnaCwgc28gSSB0aG91Z2h0IEkgd2FzIG9u
-IGEgcm9sbCB1bnRpbCBJIHJhbiB1cCBhZ2FpbnN0IGEgcHJvYmxlbSB3aGVuIGFkZGluZw0KPiB0
-cmFpdHMgZm9yIGNvbnRhaW5lcnM6DQo+IA0KPiB0ZW1wbGF0ZTx0eXBlbmFtZSBULCB0eXBlbmFt
-ZSB0cmFpdHM9ZGVuY190cmFpdHM8VD4+IHN0cnVjdA0KPiBkZW5jX3RyYWl0czxzdGQ6Omxpc3Q8
-VD4+IHsNCj4gICBlbnVtIHsgc3VwcG9ydGVkID0gdHJhaXRzOjpzdXBwb3J0ZWQgfTsNCj4gICBl
-bnVtIHsgZmVhdHVyZWQgPSB0cmFpdHM6OmZlYXR1cmVkIH07DQo+ICAgZW51bSB7IGJvdW5kZWQg
-PSBmYWxzZSB9Ow0KPiANCj4gICB0eXBlbmFtZSBzdGQ6OmVuYWJsZV9pZjwhdHJhaXRzOjpib3Vu
-ZGVkICYmICF0cmFpdHM6OmZlYXR1cmVkPjo6dHlwZQ0KPiAgICAgYm91bmRfZW5jb2RlKGNvbnN0
-IHN0ZDo6bGlzdDxUPiYgcywgc2l6ZV90JiBwKSB7DQo+ICAgICBwICs9IHNpemVvZih1aW50MzJf
-dCk7DQo+ICAgICBmb3IgKGNvbnN0IFQmIGUgOiBzKSB7DQo+ICAgICAgIGRlbmMoZSwgcCk7DQo+
-ICAgICB9DQo+ICAgfQ0KPiAgIC4uLg0KPiANCj4gYnV0IEkgZ2V0IGEgY29tcGlsZSBlcnJvciBv
-biB0aGUgZGVuY190cmFpdHM8c3RkOjpsaXN0PFQ+PiBsaW5lOg0KPiANCj4gL2hvbWUvc2FnZS9z
-cmMvY2VwaDMvc3JjL2luY2x1ZGUvZGVuYy5oOjE4MTo4OiBlcnJvcjogZGVmYXVsdCB0ZW1wbGF0
-ZQ0KPiBhcmd1bWVudHMgbWF5IG5vdCBiZSB1c2VkIGluIHBhcnRpYWwgc3BlY2lhbGl6YXRpb25z
-ICBzdHJ1Y3QNCj4gZGVuY190cmFpdHM8c3RkOjpsaXN0PFQ+PiB7DQo+ICAgICAgICAgXg0KPiAv
-aG9tZS9zYWdlL3NyYy9jZXBoMy9zcmMvaW5jbHVkZS9kZW5jLmg6MTgxOjg6IGVycm9yOiB0ZW1w
-bGF0ZQ0KPiBwYXJhbWV0ZXJzIG5vdCBkZWR1Y2libGUgaW4gcGFydGlhbCBzcGVjaWFsaXphdGlv
-bjoNCj4gL2hvbWUvc2FnZS9zcmMvY2VwaDMvc3JjL2luY2x1ZGUvZGVuYy5oOjE4MTo4OiBub3Rl
-OiAgICAgICAgIOKAmHRyYWl0c+KAmQ0KPiANCj4gDQo+IEkgYWxzbyB0cmllZCBhIGZldyB2YXJp
-YXRpb25zIG9uIHRoaXM6DQo+IA0KPiB0ZW1wbGF0ZTx0eXBlbmFtZSBULCB0eXBlbmFtZSB0cmFp
-dHM9ZGVuY190cmFpdHM8VD4+DQo+ICAgc3RydWN0IGRlbmNfdHJhaXRzPHN0ZDo6bGlzdDxUPiwN
-Cj4gCQkgICAgIHR5cGVuYW1lIHN0ZDo6ZW5hYmxlX2lmPHRyYWl0czo6c3VwcG9ydGVkPjo6dHlw
-ZT4gew0KPiAgIC4uLg0KPiANCj4gYnV0IGdldCB0aGUgc2FtZSBlcnJvci4NCj4gDQo+IEJhc2lj
-YWxseSwgSSdtIG5vdCBzdXJlIGlmL2hvdyB3ZSBjYW4gcGFzcyBpbiBhIGN1c3RvbSB0cmFpdHMg
-Zm9yIFQgdG8gYQ0KPiBjb250YWluZXIgZW5jb2RlIChlLmcuLCBsaXN0PFQ+KS4NCj4gDQo+IEFu
-eSBpZGVhcz8NCj4gDQo+IEFsdGhvdWdoIGhvbmVzdGx5IEknbSBub3Qgc3VyZSBob3cgdXNlZnVs
-L2ltcG9ydGFudCB0aGF0IHJlYWxseSBpcywgc28gSSdtDQo+IGp1c3QgZ29pbmcgdG8gbGVhdmUg
-aXQgb2ZmIGZvciBub3cuDQo+IA0KPiBzYWdlDQo+IA0KPiANCj4gDQo+IA0KPiBPbiBUaHUsIDgg
-U2VwIDIwMTYsIFNhbXVlbCBKdXN0IHdyb3RlOg0KPiANCj4gPiBJIHdlbnQgYSBiaXQgZnVydGhl
-ciBvbg0KPiA+IGh0dHBzOi8vZ2l0aHViLmNvbS9hdGhhbmF0b3MvY2VwaC90cmVlL3dpcC1zYW0t
-ZW5jLWRlYy1wcm90bw0KPiA+DQo+ID4gVGhlIGJyYW5jaCBub3cgZ2VuZXJhdGVzIGVuY2RlYyBm
-cmVlIGZ1bmN0aW9ucyBmb3IgZXZlcnkgdHlwZSB3aXRoIGFuDQo+ID4gZW5jX2RlY190cmFpdHMg
-aW5zdGFuY2UuICBBbHNvLCBpdCBhdXRvbWF0aWNhbGx5IGdlbmVyYXRlcyBhbg0KPiA+IGVuY19k
-ZWNfdHJhaXRzIGluc3RhbmNlIGZvciBldmVyeSB0eXBlIHdpdGggZW5jZGVjIG1ldGhvZHMgdmFs
-aWQgZm9yDQo+ID4gYWxsIG9mIHRoZSByZXF1aXJlZCBhcmd1bWVudCB0eXBlcyAobGlrZSBXUklU
-RV9DTEFTU19FTkNPREVSIGN1cnJlbnRseQ0KPiA+IGRvZXMgd2l0aCB0eXBlcyB3aXRoIGVuY29k
-ZSBhbmQgZGVjb2RlIG1ldGhvZHMsIGJ1dCB3aXRob3V0IGFjdHVhbGx5DQo+ID4gbmVlZGluZyB0
-aGUgbWFjcm8pLiAgSXQgYWxzbyB1cGdyYWRlcyBvYmplY3RfdCB0byB1c2UgdGhlIG5ldyB3YXkg
-KGJ5DQo+ID4gZGVmaW5pbmcgYSBzaW5nbGUgdGVtcGxhdGVkIGVuY2RlYyBtZXRob2QpLiAgaG9i
-amVjdF90IGlzIGFsc28NCj4gPiBwYXJ0aWFsbHkgY29udmVydGVkIC0tIHN0aWxsIG5lZWRzIGEg
-c3RyYXRlZ3kgZm9yIEVOQ09ERV9TVEFSVCBhbmQNCj4gPiBmcmllbmRzLg0KPiA+DQo+ID4gVGhl
-IGFjdHVhbCBhZHZhbnRhZ2Ugb2YgYm90aGVyaW5nIHdpdGggYW55IG9mIHRoaXMgdGhhdCBvbmNl
-IGhvYmplY3RfdA0KPiA+IGlzIGNvbnZlcnRlZCwgKmFsbCogdHlwZXMgd2hpY2ggZW5jb2RlIHZl
-Y3Rvcjxob2JqZWN0X3Q+IC0tIGV2ZW4gdXNpbmcNCj4gPiB0aGUgb2xkLXN0eWxlIDo6ZW5jb2Rl
-IGNhbGwgLS0gYXV0b21hdGljYWxseSBjYW4gZXN0aW1hdGUgdGhlIHRvdGFsDQo+ID4gc2l6ZSBh
-bmQgYmxhc3QgdGhlIHdob2xlIHZlY3RvciBpbnRvIGFuIHVuc2FmZV9hcHBlbmRlciAob3IgYSBj
-aGFyICopLg0KPiA+DQo+ID4gVGhlcmUgYXJlIGEgZmV3IGlzc3VlczoNCj4gPiAtIFN0aWxsIG5l
-ZWQgdG8gZmlndXJlIG91dCBob3cgdG8gZG8gY29uZGl0aW9uYWwgZGVjb2Rpbmcgd2l0aCBhDQo+
-ID4gc2luZ2xlIHRlbXBsYXRlZCBlbmNkZWMgbWV0aG9kLg0KPiA+IC0gVGhlIHNpbmdsZSB0ZW1w
-bGF0ZWQgZW5jZGVjIG1ldGhvZCBzZWVtcyB0byBtYWtlIGl0IGltcG9zc2libGUgdG8NCj4gPiBt
-YWtlIHRoZSBlbmNvZGUgdmFyaWFudHMgY29uc3QgLS0gSSdtIHByb2JhYmx5IG1pc3NpbmcgYSB0
-cmljayB0aGVyZQ0KPiA+ICh0aGUgYnJhbmNoIGN1cnJlbnRseSBqdXN0IGRvZXMgYSBjb25zdF9j
-YXN0KS4NCj4gPg0KPiA+IEkgZG8gdGhpbmsgYWxsIG9mIHRoaXMgaXMgb3J0aG9nb25hbCB0byBB
-bGxlbidzIHN0dWZmLCBzbyBJJ20gcmVhbGx5DQo+ID4ganVzdCB0cnlpbmcgdG8gZGVtb25zdHJh
-dGUgdGhhdCBBbGxlbidzIHN0dWZmIGNhbiBiZSBleHRlbmRlZCB0byBmaXQNCj4gPiBzZWFtbGVz
-c2x5IGluIHdpdGggdGhlIGV4aXN0aW5nIGVuY29kaW5nIHN0YWNrLiAgVGhhdCBpcywgdGhhdCBh
-bGwNCj4gPiBuZXctc3R5bGUgdHlwZXMgc2hvdWxkIGFsc28gc3VwcG9ydCA6OmVuY29kZS86OmRl
-Y29kZSwgYW5kIHRoYXQNCj4gPiA6OmVuY29kZSBvbiBhbiBvYmplY3QgY29tcG9zZWQgZW50aXJl
-bHkgb2YgbmV3LXN0eWxlIG9iamVjdHMgc2hvdWxkIGJlDQo+ID4gYWJsZSB0byBkbyBhbiBhY2Nl
-bGVyYXRlZCBlbmNvZGluZyBzbyB0aGF0IHdlIGNhbiB1cGRhdGUgY29tbW9uDQo+ID4gY3JpdGlj
-YWwtcGF0aCBkYXRhIHN0cnVjdHVyZXMgKHZlY3RvcnMgb2YgY29tbW9uIHR5cGVzLCBmb3IgZXhh
-bXBsZSkNCj4gPiB3aXRob3V0IG5lZWRpbmcgdG8gdXBkYXRlIGFsbCB1c2VycyBhbGwgdGhlIHdh
-eSB1cCB0aGUgc3RhY2sgYXQgdGhlDQo+ID4gc2FtZSB0aW1lLg0KPiA+IC1TYW0NCj4gPg0KPiA+
-IE9uIFRodSwgU2VwIDgsIDIwMTYgYXQgMTI6NDUgUE0sIFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0
-LmNvbT4gd3JvdGU6DQo+ID4gPiBIZXksDQo+ID4gPg0KPiA+ID4gSSBzcGVudCBhIGJpdCBvZiB0
-aW1lIGxvb2tpbmcgYXQgdGhpcyB0b2RheSBidXQgcXVpY2tseSByYW4gdXANCj4gPiA+IGFnYWlu
-c3QgYSBwcm9ibGVtLiAgTWF5YmUgdGhpcyBpcyBvYnZpb3VzLCBidXQgSSBoYWRuJ3Qgbm90aWNl
-ZA0KPiA+ID4geWVzdGVyZGF5LiBTYW0ncyBvcmlnaW5hbCBicmFuY2ggZGVmaW5lcyBlbmNvZGUv
-ZGVjb2RlIGZ1bmN0aW9ucyBsaWtlDQo+IHNvOg0KPiA+ID4NCj4gPiA+IHRlbXBsYXRlPHR5cGVu
-YW1lIHR5cGUsIHR5cGVuYW1lIHRyYWl0cz1lbmNfZGVjX3RyYWl0czx0eXBlPiA+DQo+ID4gPiBp
-bmxpbmUgdHlwZW5hbWUgc3RkOjplbmFibGVfaWY8dHJhaXRzOjpzdXBwb3J0ZWQgJiYNCj4gPiA+
-ICF0cmFpdHM6OmZlYXR1cmU+Ojp0eXBlIGVuY29kZShjb25zdCB0eXBlICZ2LCBidWZmZXJsaXN0
-ICZibCwgdWludDY0X3QNCj4gZmVhdHVyZXM9MCkgew0KPiA+ID4gICBzaXplX3Qgc2l6ZSA9IHRy
-YWl0czo6ZXN0aW1hdGUodik7DQo+ID4gPiAgIGJ1ZmZlcmxpc3Q6OnVuc2FmZV9hcHBlbmRlciBh
-cHAoJmJsLCBzaXplKTsNCj4gPiA+ICAgdHJhaXRzOjplbmNvZGUodiwgYXBwKTsNCj4gPiA+IH0N
-Cj4gPiA+DQo+ID4gPiBUaGlzIHR5cGUgb2YgYXBwcm9hY2ggc2ltcGx5IGRvZXNuJ3Qgd29yayBp
-ZiBvdXIgb3ZlcmFsbCBnb2FsIGlzIHRvDQo+ID4gPiBkbw0KPiA+ID4gKm9uZSogZXN0aW1hdGUg
-Zm9yIGEgY29tcGxleCBlbmNvZGUgKGNvbnRhaW5lciBvZiBpdGVtcywgb3IgYmlnDQo+ID4gPiBz
-dHJ1Y3R1cmUgdGhhdCBpbmNsdWRlcyBzbWFsbGVyIG9uZXMpLCBhbmQgdGhlbiBlbmNvZGUgaW50
-byBhDQo+IHByZWFsbG9jYXRlZCBidWZmZXIuDQo+ID4gPiBBdCBsZWFzdCBpdCB3b24ndCB3b3Jr
-IGlmIG91ciBlbmNvZGUgZnVuY3Rpb25zIGFyZSB3cml0dGVuIGluIHRoZQ0KPiA+ID4gdXN1YWwg
-d2F5IGxpa2UNCj4gPiA+DQo+ID4gPiAgIHZvaWQgZW5jb2RlKGJ1ZmZlcmxpc3QmIGJsKSBjb25z
-dCB7DQo+ID4gPiAgICAgOjplbmNvZGUobWVtYmVyMSwgYmwpOw0KPiA+ID4gICAgIDo6ZW5jb2Rl
-KG1lbWJlcjIsIGJsKTsNCj4gPiA+ICAgfQ0KPiA+ID4NCj4gPiA+IGJlY2F1c2UgdGhvc2UgZW5j
-b2RlcyB3aWxsIHJlLWludm9rZSB0aGUgYWJvdmUgZ2x1ZSB3cmFwcGVycyB0aGF0IGRvDQo+ID4g
-PiB0aGUgZXN0aW1hdGlvbi4NCj4gPiA+DQo+ID4gPiBJbiBvcmRlciBmb3IgdGhpcyB0byB3b3Jr
-LCBJIHRoaW5rIGEga2V5IHJlcXVpcmVtZW50IGlzIHRoYXQgd2UgaGF2ZQ0KPiA+ID4gIm5ldy1z
-dHlsZSIgYW5kICJvbGQtc3R5bGUiIGVuY29kZSBmdW5jdGlvbnMuICBJZiBhbnkgb2xkLXN0eWxl
-IGNvZGUNCj4gPiA+IGNhbGxzIGFuIG9sZC1zdHlsZSBlbmNvZGUoKSBvbiBhIG5ldy1zdHlsZSBv
-YmplY3QsIHdlJ2xsIGludm9rZSBhDQo+ID4gPiB3cmFwcGVyIGxpa2UgdGhlIGFib3ZlIHRoYXQg
-ZG9lcyBhbiBlc3RpbWF0aW9uLiAgQnV0IG5ldy1zdHlsZSBjb2RlDQo+ID4gPiBoYXMgdG8gaW52
-b2tlIGEgbmV3LXN0eWxlIGVuY29kZSBmb3IgYW55IG5lc3RlZCBzdHJ1Y3R1cmVzLiAgKEl0DQo+
-ID4gPiBzaW1wbHkgZG9lc24ndCBtYWtlIHNlbnNlIGZvciBhIG5ldy1zdHlsZSBlbmNvZGUgdG8g
-ZW5jb2RlIGFuDQo+ID4gPiBvbGQtc3R5bGUgb2JqZWN0IGJlY2F1c2UgaXQgY2FuJ3QgY2FsY3Vs
-YXRlIGl0cyBzaXplLikNCj4gPiA+DQo+ID4gPiBUaGF0IG1lYW5zIHdlIG5lZWQgdG8gZGVmaW5l
-IGEgbmV3LXN0eWxlIHRoYXQgaXMgZGlzdGluY3QuICBJDQo+ID4gPiBzdWdnZXN0IHdlIGp1c3Qg
-Z28gd2l0aCBBbGxlbidzIGVuY19kZWMgc2NoZW1lLiAgSXQncyBjbGVhcmx5DQo+ID4gPiBkaXN0
-aW5jdCwgYW5kIGl0IHByb21pc2VzIHRvIGJlIGZhc3RlciBmb3IgYm90aCBlbmNvZGUgKGNoYXIg
-KidzDQo+ID4gPiBwYXNzZWQgYXJvdW5kKSBhbmQgZGVjb2RlLg0KPiA+ID4NCj4gPiA+IEFuZCB0
-aGVuIHdlIGV4cGxpY2l0bHkgZGlzYWxsb3cgbmV3LXN0eWxlIGVuY19kZWMgZnJvbSBlbmNvZGlu
-Zw0KPiA+ID4gb2xkLXN0eWxlIG9iamVjdHMuDQo+ID4gPg0KPiA+ID4gT25jZSB3ZSBkbyB0aGF0
-LCBJIHRoaW5rIHRoZSBnbHVlIHRvIG1ha2UgdGhpcyB3b3JrIHdpbGwgYmUgcmVhbGx5IHNpbXBs
-ZToNCj4gPiA+IGludm9rZSBlc3RpbWF0ZSwgcHJlYWxsb2NhdGUgYSBidWZmZXIsIGFuZCB0aGVu
-IGludm9rZSB0aGUgbmV3IGVuY29kZS4NCj4gPiA+DQo+ID4gPiBJIHRoaW5rIHRoZSBvbmx5IHRy
-aWNrIGlzIGNvbnRhaW5lcnMsIHdoZXJlIHdlJ2xsIG5lZWQgdG8gZGVmaW5lIHR3bw0KPiA+ID4g
-ZGlmZmVyZW50IHZlcnNpb25zOiBvbmUgZm9yIG9sZC1zdHlsZSBlbmNvZGVycyAodGhlIGV4aXN0
-aW5nIGNvZGUNCj4gPiA+IHdpdGggZW5hYmxlX2lmIGFuZCAhc3VwcG9ydGVkIGd1YXJkaW5nIHRo
-ZW0pIGFuZCBvbmUgZm9yIG5ldw0KPiBlbmNvZGVycy4NCj4gPiA+DQo+ID4gPiBHaXZlbiB0aGF0
-LCBJIHRoaW5rIGl0IG1ha2VzIHRoZSBtb3N0IHNlbnNlIHRvIHN0YXJ0IHdpdGggQWxsZW4gYW5k
-DQo+ID4gPiBWYXJhZGEncyBvcmlnaW5hbCBicmFuY2guICBJJ20gZ29pbmcgdG8gZ2l2ZSBpdCBh
-IGdvLi4uDQo+ID4gPg0KPiA+ID4gc2FnZQ0KPiA+ID4NCj4gPiA+DQo+ID4gPg0KPiA+ID4NCj4g
-PiA+DQo+ID4gPiBPbiBXZWQsIDcgU2VwIDIwMTYsIFNhZ2UgV2VpbCB3cm90ZToNCj4gPiA+DQo+
-ID4gPj4gSGkgVmFyYWRhIQ0KPiA+ID4+DQo+ID4gPj4gT24gV2VkLCA3IFNlcCAyMDE2LCBWYXJh
-ZGEgS2FyaSB3cm90ZToNCj4gPiA+PiA+IEhpIFNhZ2UsDQo+ID4gPj4gPg0KPiA+ID4+ID4gSGVy
-ZSBpcyB0aGUgYnJhbmNoIHdpdGggc29tZSBjaGFuZ2VzLCBub3QgYWJsZSB0byBjb21waWxlKHll
-dCEpLg0KPiA+ID4+ID4gTmVlZCB0byB3cml0ZSBzb21lIG1vcmUgdGVtcGxhdGVzIGZvciBTVEwo
-bXVsdGltYXAgZXRjLi4uKSBhbmQNCj4gaW50cnVzaXZlIGNvbnRhaW5lcnMuDQo+ID4gPj4gPg0K
-PiA+ID4+ID4gaHR0cHM6Ly9naXRodWIuY29tL3ZhcmFkYWthcmkvY2VwaC9jb21taXRzL3dpcC1l
-bmMtZGVjLXByb3RvDQo+ID4gPj4gPg0KPiA+ID4+ID4gUmlnaHQgbm93IGkgYW0gZmFjaW5nIHNv
-bWUgcHJvYmxlbSB3aXRoIGVuY29kaW5nIG9mIE1vbk1hcCB3aXRoDQo+ID4gPj4gPiBtb25fYWRk
-ciB3aGljaCBpcyBhIG1hcCB3aXRoIHN0cmluZyBhbmQgZW50aXR5X2FkZHJlc3NfdC4gSGF2ZSBh
-DQo+ID4gPj4gPiB3cml0dGVuIHRlbXBsYXRlIGNsYXNzIGZvciBzdHJpbmcgd2hpY2ggZG9lc24n
-dCBuZWVkIGFueQ0KPiA+ID4+ID4gZmVhdHVyZXMuIEJ1dCB0aGlzIG1hcCBuZWVkcyBhIGZlYXR1
-cmVzIGZvciBhZGRyZXNzIGFuZCBub3QgZm9yIHN0cmluZy4NCj4gPiA+PiA+IFRyeWluZyB0byBm
-aXggdGhlIHByb2JsZW0uIFBsZWFzZSBoYXZlIGEgbG9vay4gQ29ycmVjdCBtZSBpZiBpIGFtDQo+
-ID4gPj4gPiBnb2luZyBpbiBhIHdyb25nIGRpcmVjdGlvbiBpbiB0aGUgaW1wbGVtZW50YXRpb24o
-b3ZlcmFsbCBhcHByb2FjaCkuDQo+ID4gPj4NCj4gPiA+PiBJIHRoaW5rIHRlaCB3YXkgdG8gYWRk
-cmVzcyB0aGlzIGlzIG1ha2Ugc3VyZSB0aGF0IG5vbi1mZWF0dXJlZA0KPiA+ID4+IGl0ZW1zIGhh
-dmUgdGhlIHVpbnQ2NF90IGZlYXR1cmVzID0gMCBhcmd1bWVudCBkZWZpbmVkIGZvciBlbmNvZGUg
-KGFzDQo+IHRoZXkgZG8gbm93KS4NCj4gPiA+PiBUaGVuIG1ha2UgdGhlIGNvbnRhaW5lciBkZWNs
-YXJhdGlvbiBzb21ldGhpbmcgbGlrZQ0KPiA+ID4+DQo+ID4gPj4gdGVtcGxhdGU8dHlwZW5hbWUg
-VCwgdHlwZW5hbWUgUz4NCj4gPiA+PiBzdHJ1Y3QgZW5jX2RlY190cmFpdHM8DQo+ID4gPj4gICBz
-dGQ6Om1hcDxULCBTPiwNCj4gPiA+PiAgIHR5cGVuYW1lIHN0ZDo6ZW5hYmxlX2lmPA0KPiA+ID4+
-ICAgICBlbmNfZGVjX3RyYWl0czxUPjo6c3VwcG9ydGVkICYmIGVuY19kZWNfdHJhaXRzPFM+Ojpm
-ZWF0dXJlICYmDQo+ID4gPj4gICAgIChlbmNfZGVjX3RyYWl0czxUPjo6ZmVhdHVyZSB8fCBlbmNf
-ZGVjX3RyYWl0czxTPjo6ZmVhdHVyZSk+Ojp0eXBlPiB7DQo+ID4gPj4gICBjb25zdCBzdGF0aWMg
-Ym9vbCBzdXBwb3J0ZWQgPSB0cnVlOw0KPiA+ID4+ICAgY29uc3Qgc3RhdGljIGJvb2wgZmVhdHVy
-ZSA9IHRydWU7DQo+ID4gPj4gICAuLi4NCj4gPiA+Pg0KPiA+ID4+IGFuZCB0aGVuIG1ha2UgdGhl
-IGVuY29kZSBtZXRob2RzIHBhc3MgdGhyb3VnaCBhIGZlYXR1cmUgYXJndW1lbnQuDQo+ID4gPj4g
-SS5lLiwgaWYgZWl0aGVyIHRoZSBrZXkgb3IgdGhlIHZhbHVlIHJlcXVpcmVzIGZlYXR1cnNlIHRv
-IGVuY29kZSwNCj4gPiA+PiB3ZSByZXF1aXJlIGZlYXR1cmVzIHRvIGVuY29kZS4NCj4gPiA+Pg0K
-PiA+ID4+IElzIHRoYXQgd2hhdCB5b3UncmUgYXNraW5nPw0KPiA+ID4+DQo+ID4gPj4gQWx0ZXJu
-YXRpdmVseSwgd2UgY2FuIHByb2JhYmx5IGF2b2lkIHNwZWNpYWxpemluZyB0aGUgdGVtcGxhdGUg
-b24NCj4gPiA+PiBmZWF0dXJlZC91bmZlYXR1cmVkIGF0IGFsbCwgYW5kIGluIHRoZSBlbmNfZGVj
-X3RyYWl0cyBqdXN0IGRlY2xhcmUNCj4gPiA+PiBib3RoIGEgZmVhdHVyZWQgYW5kIHVuZmVhdHVy
-ZWQgZW5jb2RlIG1ldGhvZC4gIFRoZSB1bmZlYXR1cmVkIG9uZQ0KPiA+ID4+IHdpbGwgZXJyb3Ig
-b3V0IGF0IGNvbXBpbGUgdGltZSBpZiB5b3UgY2FsbCBpdCBvbiBUIG9yIFMgdHlwZXMgdGhhdCBy
-ZXF1aXJlDQo+IGZlYXR1cmVzLg0KPiA+ID4+DQo+ID4gPj4gSSBoYXZlbid0IGxvb2tlZCB0byBj
-bG9zZWx5IGF0IHRoaXMgYnJhbmNoLCBidXQgaXQgbG9va3MgbGlrZSB0aGUNCj4gPiA+PiBiYXNp
-YyBhcHByb2FjaCBpczoNCj4gPiA+Pg0KPiA+ID4+ICAtIG15IGFwcGVuZGVycw0KPiA+ID4+ICAt
-IHNhbSdzIGJyYW5jaCB0aGF0IGRlZmluZXMgZW5jb2RlIHdpdGggdGVtcGxhdGVkIEFwcA0KPiA+
-ID4+ICAtIGVhY2ggb2JqZWN0IGhhcyBlbmNvZGUsIGRlY29kZSwgYW5kIGVzdGltYXRlDQo+ID4g
-Pj4gIC0gU1RMIGNvbnRhaW5lcnMgYXJlIGRlZmluZWQgYmFzZWQgb24gYWJvdmUNCj4gPiA+Pg0K
-PiA+ID4+IGJ1dCBub25lIG9mIHRoZSBlbmNfZGVjIGZ1bmN0aW9ucyB0aGF0IGxldCB5b3Ugd3Jp
-dGUgYWxsIHRocmVlIGluIG9uZSBnby4NCj4gPiA+PiBBcmUgeW91IHRoaW5raW5nIHRoYXQgdGhh
-dCB3b3VsZCBiZSBhIHNlcGFyYXRlLCBvcnRob2dhbmFsIHRoaW5nLA0KPiA+ID4+IHRoYXQgbGV0
-cyB5b3Ugd3JpdGUgYSBzaW5nbGUgZW5jX2RlYyB0ZW1wbGF0ZSBmdW5jdGlvbiwgYW5kIHRoZW4N
-Cj4gPiA+PiB1c2UgYSBtYWNybyB0byBkZWNsYXJlIHRoZSBlbmNvZGUvZGVjb2RlL2VzdGltYXRl
-IGZ1bmN0aW9ucyB0aGF0DQo+ID4gPj4gY2FsbCBpdCwgc28gdGhhdCBpdCBhbGwgZ2x1ZXMgdG9n
-ZXRoZXI/DQo+ID4gPj4NCj4gPiA+PiBJJ20gc3RpbGwgY29uZnVzZWQgYWJvdXQgd2hhdCB3ZSBh
-cmUgZG9pbmcgd2l0aCB0aGUNCj4gPiA+PiBlbmNvZGUvZGVjb2RlL2VzdGltYXRlIG1lbWJlcnMg
-b2YgdGhlIGVuY19kZWNfdHJhaXRzPD4gc3RydWN0dXJlcy4NCj4gPiA+PiBJZiB3ZSBuZWVkIGEg
-dHJhaXRzIGluc3RhbmNlIGluIG9yZGVyIHRvIGVuY29kZS9kZWNvZGUsIHRoYXQgbWVhbnMNCj4g
-PiA+PiB3ZSBjYW4ndCBkbyB0aGUgYmFyZQ0KPiA+ID4+DQo+ID4gPj4gICA6OmVuY29kZShmb28s
-IGJsKTsNCj4gPiA+Pg0KPiA+ID4+IHRoYXQgd2UndmUgYmVlbiBkb2luZyBzbyBmYXIuICBVbmxl
-c3MgdGhlcmUncyBzb21lIG90aGVyIHRlbXBsYXRlDQo+ID4gPj4gbWFnaWMgdGhhdCBpbnN0YW50
-aWF0ZXMgdGhlIHRyYWl0cyBvbiBkZW1hbmQ/ICBTb21ldGhpbmcgbGlrZQ0KPiA+ID4+DQo+ID4g
-Pj4gdGVtcGxhdGU8Y2xhc3MgVCwgY2xhc3MgQXBwPg0KPiA+ID4+IHZvaWQgZW5jb2RlKGNvbnN0
-IFQmIGEsIEFwcCAmYXBwKSB7DQo+ID4gPj4gICBlbmNfZGVjX3RyYWl0czxUPiB0Ow0KPiA+ID4+
-ICAgdC5lbmNvZGUoYSwgYXBwKTsNCj4gPiA+PiB9DQo+ID4gPj4NCj4gPiA+PiA/DQo+ID4gPj4N
-Cj4gPiA+PiBTaG91bGQgd2UgZ2V0IG9uIGEgYmx1ZWplYW5zIGFuZCB3YWxrIHRocm91Z2ggdGhl
-IHBvc3NpYmxlIHBhdGhzDQo+ID4gPj4gaGVyZSBhbmQgcGljayBhbiBhcHByb2FjaD8gIEJlY2F1
-c2UgSSdtIHByZXR0eSBjb25mdXNlZCBub3cgYnkgYWxsDQo+ID4gPj4gdGhlIHZhcmlhdGlvbnMg
-SSd2ZSBzZWVuLg0KPiA+ID4+DQo+ID4gPj4gc2FnZQ0KPiA+ID4+IC0tDQo+ID4gPj4gVG8gdW5z
-dWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlDQo+ID4g
-Pj4gY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2Vy
-Lmtlcm5lbC5vcmcNCj4gPiA+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5r
-ZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gPiA+Pg0KPiA+ID4+DQo+ID4gLS0NCj4g
-PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
-YmUgY2VwaC1kZXZlbCINCj4gPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21v
-QHZnZXIua2VybmVsLm9yZyBNb3JlDQo+IG1ham9yZG9tbw0KPiA+IGluZm8gYXQgIGh0dHA6Ly92
-Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiA+DQo+ID4NCg==
+I have a question about where SnapshotNamespace type should be placed.
+I placed it in cls/rbd/cls_rbd_types.h because cls client and cls
+backend components should have access to this type.
+Also this type is required in librbd/Operations.cc - because we want
+to specify in what namespace Operations::snap_create should create
+snapshots.
+However Operations.cc doesn't import cls_rbd_types.h right now. If the
+question was about public interface of librbd/librbd.cc, then I would
+create a duplicate of SnapshotNamespace type in librbd layer without
+hesitation.
+But these functions are internal, so, my question is whether it's
+really feasible to create another type for SnapshotNamespace in librbd
+layer.
+
+
+On Mon, Aug 29, 2016 at 2:10 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+> Right, I forgot about snaphot "namespaces". I'll add this part.
+> I guess it makes sense to discuss the whole thing on the next CDM.
+>
+> On Sun, Aug 28, 2016 at 5:37 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>> I think the first step is to implement the concept of snapshot "namespaces".
+>>
+>> This could be implemented as an optional variant structure associated
+>> with each snapshot at creation (see the ImageWatcher RPC messages or
+>> journaling event type encoding for examples of this). For consistency
+>> group snapshots, this structure would identify the snapshot as
+>> belonging to the consistency group and have a unique id back to the
+>> specific group snapshot.
+>>
+>> When creating a snapshot, the state machine would (1) create the group
+>> snapshot record, (2) set the state of the group to "creating snapshot"
+>> (to prevent new images from being added/removed from the group while
+>> the op is in-progress), (3) acquire the lock for all images in the
+>> group, (4) create the individual image snapshots with the linkage back
+>> to the group snapshot record (can be performed in parallel up to max
+>> concurrent ops), (5) release the exclusive locks, and (6) reset the
+>> group status to "ready".
+>>
+>> If you have a hard crash/failure anywhere, a "snap remove" operation
+>> should be designed to get the group back into consistent state (i.e.
+>> remove any snapshots linked to the group and reset the group state
+>> back to ready).
+>>
+>> On Fri, Aug 26, 2016 at 5:05 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>> Guys,
+>>>
+>>> I updated Snapshots section of this document:
+>>> http://pad.ceph.com/p/consistency_groups, in accordance with my
+>>> improved understanding of how it should be implemented.
+>>> Please take a look and provide your comments. Some of my concerns
+>>> regarding the implementation I highlighted in bold.
+>>>
+>>> Looking forward to your valuable remarks.
+>>> Thanks in advance.
+>>> V.
+>>>
+>>>
+>>> On Sat, Aug 20, 2016 at 9:27 AM, Mykola Golub <mgolub@mirantis.com> wrote:
+>>>> On Fri, Aug 19, 2016 at 05:36:56PM -0700, Victor Denisov wrote:
+>>>>> What if I'm holding this lock and somebody else is trying to reacquire the lock.
+>>>>> How do I get notified about it?
+>>>>
+>>>> The image watcher is notified, which triggers its handler:
+>>>>
+>>>>  ImageWatcher<I>::handle_payload(const RequestLockPayload, *ack_ctx)
+>>>>
+>>>> The handler calls the current lock policy method `lock_requested()`,
+>>>> which will define what to do with the lock request. The StandartPolicy
+>>>> is to release the lock, so it may ping-ponging between the
+>>>> clients. You may define a different policy -- rbd-mirror is an example
+>>>> where it is used.
+>>>>
+>>>> Everywhere where an operation needs the exclusive lock, it is always
+>>>> checked if we currently are a lock owner, i.e:
+>>>>
+>>>>  ictx->exclusive_lock->is_lock_owner()
+>>>>
+>>>> and if it is false, the exlusive lock is requested. Before this check
+>>>> you need to aquire ctx->owner_lock, and until you release owner_lock
+>>>> you can be sure your exclusive lock will not leak to another
+>>>> client. After releasing owner_lock, you will need to repeate the check
+>>>> again when you need it.
+>>>>
+>>>> --
+>>>> Mykola Golub
+>>>>
+>>>>>
+>>>>>
+>>>>> On Fri, Aug 19, 2016 at 5:48 AM, Mykola Golub <mgolub@mirantis.com> wrote:
+>>>>> > On Thu, Aug 18, 2016 at 09:20:02PM -0700, Victor Denisov wrote:
+>>>>> >> Could you please point me to the place in source code where writer
+>>>>> >> acquires an exclusive lock on the image.
+>>>>> >
+>>>>> > Grep for 'exclusive_lock->request_lock'. Basically, what you need
+>>>>> > (after opening the image) is:
+>>>>> >
+>>>>> > ```
+>>>>> >   C_SaferCond lock_ctx;
+>>>>> >   {
+>>>>> >     RWLock::WLocker l(ictx->owner_lock);
+>>>>> >
+>>>>> >     if (ictx->exclusive_lock == nullptr) {
+>>>>> >       // exclusive-lock feature is not enabled
+>>>>> >       return -EINVAL;
+>>>>> >     }
+>>>>> >
+>>>>> >     // Request the lock. If it is currently owned by another client,
+>>>>> >     // RPC message will be sent to the client to release the lock.
+>>>>> >     ictx->exclusive_lock->request_lock(&lock_ctx);
+>>>>> >   } // release owner_lock before waiting to avoid potential deadlock
+>>>>> >
+>>>>> >   int r = lock_ctx.wait();
+>>>>> >   if (r < 0) {
+>>>>> >     return r;
+>>>>> >   }
+>>>>> >
+>>>>> >   RWLock::RLocker l(ictx->owner_lock);
+>>>>> >   if (ictx->exclusive_lock == nullptr || !ictx->exclusive_lock->is_lock_owner()) {
+>>>>> >        // failed to acquire exclusive lock
+>>>>> >        return -EROFS;
+>>>>> >   }
+>>>>> >
+>>>>> >   // At this point lock is acquired
+>>>>> >   ...
+>>>>> >
+>>>>> > ```
+>>>>> >
+>>>>> > You might want to look at this PR
+>>>>> >
+>>>>> >  https://github.com/ceph/ceph/pull/9592
+>>>>> >
+>>>>> > where we discuss adding API methods to directly acquire and release
+>>>>> > the exclusive lock. You don't need the API, but will find examples in
+>>>>> > the patch, and also useful comments from Jason.
+>>>>> >
+>>>>> > --
+>>>>> > Mykola Golub
+>>>>> >
+>>>>> >> I presume you were talking about the feature:
+>>>>> >> exclusive_lock, shared_lock which can be used from command line using
+>>>>> >> commands lock list, lock break.
+>>>>> >>
+>>>>> >> On Thu, Aug 18, 2016 at 5:47 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>> >> > There is already a "request lock" RPC message and this is already handled
+>>>>> >> > transparently within librbd when you attempt to acquire the lock and another
+>>>>> >> > client owns it.
+>>>>> >> >
+>>>>> >> >
+>>>>> >> > On Thursday, August 18, 2016, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>> >> >>
+>>>>> >> >> If an image already has a writer who owns the lock,
+>>>>> >> >> should I implement a notification that allows to ask the writer to
+>>>>> >> >> release the lock,
+>>>>> >> >> is there already a standard way to intercept the exclusive lock?
+>>>>> >> >>
+>>>>> >> >> On Tue, Aug 16, 2016 at 6:29 AM, Jason Dillaman <jdillama@redhat.com>
+>>>>> >> >> wrote:
+>>>>> >> >> > ... one more thing:
+>>>>> >> >> >
+>>>>> >> >> > I was also thinking that we need a new RBD feature bit to be used to
+>>>>> >> >> > indicate that an image is part of a consistency group to prevent older
+>>>>> >> >> > librbd clients from removing the image or group snapshots.  This could
+>>>>> >> >> > be a RBD_FEATURES_RW_INCOMPATIBLE feature bit so older clients can
+>>>>> >> >> > still open the image R/O while its part of a group.
+>>>>> >> >> >
+>>>>> >> >> > On Tue, Aug 16, 2016 at 9:26 AM, Jason Dillaman <jdillama@redhat.com>
+>>>>> >> >> > wrote:
+>>>>> >> >> >> Way back in April when we had the CDM, I was originally thinking we
+>>>>> >> >> >> should implement option 3. Essentially, you have a prepare group
+>>>>> >> >> >> snapshot RPC message that extends a "paused IO" lease to the caller.
+>>>>> >> >> >> When that lease expires, IO would automatically be resumed even if the
+>>>>> >> >> >> group snapshot hasn't been created yet.  This would also require
+>>>>> >> >> >> commit/abort group snapshot RPC messages.
+>>>>> >> >> >>
+>>>>> >> >> >> However, thinking about this last night, here is another potential
+>>>>> >> >> >> option:
+>>>>> >> >> >>
+>>>>> >> >> >> Option 4 - require images to have the exclusive lock feature before
+>>>>> >> >> >> they can be added to a consistency group (and prevent disabling of
+>>>>> >> >> >> exclusive-lock while they are part of a group). Then librbd, via the
+>>>>> >> >> >> rbd CLI (or client application of the rbd consistency group snap
+>>>>> >> >> >> create API), can co-operatively acquire the lock from all active image
+>>>>> >> >> >> clients within the group (i.e. all IO has been flushed and paused) and
+>>>>> >> >> >> can proceed with snapshot creation. If the rbd CLI dies, the normal
+>>>>> >> >> >> exclusive lock handling process will automatically take care of
+>>>>> >> >> >> re-acquiring the lock from the dead client and resuming IO.
+>>>>> >> >> >>
+>>>>> >> >> >> This option not only re-uses existing code, it would also eliminate
+>>>>> >> >> >> the need to add/update the RPC messages for prepare/commit/abort
+>>>>> >> >> >> snapshot creation to support group snapshots (since it could all be
+>>>>> >> >> >> handled internally).
+>>>>> >> >> >>
+>>>>> >> >> >> On Mon, Aug 15, 2016 at 7:46 PM, Victor Denisov <vdenisov@mirantis.com>
+>>>>> >> >> >> wrote:
+>>>>> >> >> >>> Gentlemen,
+>>>>> >> >> >>>
+>>>>> >> >> >>> I'm writing to you to ask for your opinion regarding quiescing writes.
+>>>>> >> >> >>>
+>>>>> >> >> >>> Here is the situation. In order to take snapshots of all images in a
+>>>>> >> >> >>> consistency group,
+>>>>> >> >> >>> we first need to quiesce all the image writers in the consistency
+>>>>> >> >> >>> group.
+>>>>> >> >> >>> Let me call
+>>>>> >> >> >>> group client - a client which requests a consistency group to take a
+>>>>> >> >> >>> snapshot.
+>>>>> >> >> >>> Image client - the client that writes to an image.
+>>>>> >> >> >>> Let's say group client starts sending notify_quiesce to all image
+>>>>> >> >> >>> clients that write to the images in the group. After quiescing half of
+>>>>> >> >> >>> the image clients the group client can die.
+>>>>> >> >> >>>
+>>>>> >> >> >>> It presents us with a dilemma - what should we do with those quiesced
+>>>>> >> >> >>> image clients.
+>>>>> >> >> >>>
+>>>>> >> >> >>> Option 1 - is to wait till someone manually runs recover for that
+>>>>> >> >> >>> consistency group.
+>>>>> >> >> >>> We can show warning next to those unfinished groups when user runs
+>>>>> >> >> >>> group list command.
+>>>>> >> >> >>> There will be a command like group recover, which allows users to
+>>>>> >> >> >>> rollback unsuccessful snapshots
+>>>>> >> >> >>> or continue them using create snapshot command.
+>>>>> >> >> >>>
+>>>>> >> >> >>> Option 2 - is to establish some heart beats between group client and
+>>>>> >> >> >>> image client. If group client fails to heart beat then image client
+>>>>> >> >> >>> unquiesces itself and continues normal operation.
+>>>>> >> >> >>>
+>>>>> >> >> >>> Option 3 - is to have a timeout for each image client. If group client
+>>>>> >> >> >>> fails to make a group snapshot within this timeout then we resume our
+>>>>> >> >> >>> normal operation informing group client of the fact.
+>>>>> >> >> >>>
+>>>>> >> >> >>> Which of these options do you prefer? Probably there are other options
+>>>>> >> >> >>> that I miss.
+>>>>> >> >> >>>
+>>>>> >> >> >>> Thanks,
+>>>>> >> >> >>> Victor.
+>>>>> >> >> >>
+>>>>> >> >> >>
+>>>>> >> >> >>
+>>>>> >> >> >> --
+>>>>> >> >> >> Jason
+>>>>> >> >> >
+>>>>> >> >> >
+>>>>> >> >> >
+>>>>> >> >> > --
+>>>>> >> >> > Jason
+>>>>> >> >
+>>>>> >> >
+>>>>> >> >
+>>>>> >> > --
+>>>>> >> > Jason
+>>>>> >> >
+>>>>> >> --
+>>>>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> >> the body of a message to majordomo@vger.kernel.org
+>>>>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>> --
+>> Jason
