@@ -1,123 +1,126 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: librados.h version numbers
-Date: Fri, 9 Sep 2016 08:51:41 +0200 (CEST)
-Message-ID: <383545525.3921.1473403901626@ox.pcextreme.nl>
-References: <1843378866.3701.1473189527273@ox.pcextreme.nl>
- <37bd7608-3352-5057-d238-e04517640f5b@redhat.com>
- <CAJ4mKGaLv+n8JsJkAYSoNz+3N3rsJHe+tjwoReN_B3AQPibAKQ@mail.gmail.com>
- <77759347.3838.1473317968120@ox.pcextreme.nl>
- <alpine.DEB.2.11.1609081322310.32742@piezo.us.to>
- <1735254177.3909.1473341381129@ox.pcextreme.nl>
- <alpine.DEB.2.11.1609081337440.32742@piezo.us.to>
+From: Xiaoxi Chen <superdebuger@gmail.com>
+Subject: Re: ceph v10.2.3 QE validation status
+Date: Fri, 9 Sep 2016 20:41:22 +0800
+Message-ID: <CAEYCsVK8gSeozJPu-eN-GnkW3Cd5P3uJrOYwA5VD9YqTCzUH3Q@mail.gmail.com>
+References: <CAMMFjmHb=m_WJg8TMaVBOdXB37=viYOBSOYEXL_Bo3kET=hyoA@mail.gmail.com>
+ <CAMMFjmFBW+Zdnx8Ux9mtKvh3W187oHL3UDqNpKtkHZ15Q=porg@mail.gmail.com> <57CFB4D4.1060706@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:58091 "EHLO
-        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751234AbcIIGvr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Sep 2016 02:51:47 -0400
-In-Reply-To: <alpine.DEB.2.11.1609081337440.32742@piezo.us.to>
+Received: from mail-yw0-f171.google.com ([209.85.161.171]:36228 "EHLO
+        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753033AbcIIMlY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Sep 2016 08:41:24 -0400
+Received: by mail-yw0-f171.google.com with SMTP id u124so32913775ywg.3
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Sep 2016 05:41:23 -0700 (PDT)
+In-Reply-To: <57CFB4D4.1060706@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Yuri Weinstein <yweinste@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Weil, Sage" <sage@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, David Zafman <dzafman@redhat.com>
 
+Hi,
+  Sorry for jump in , we just hit a bug
+(http://tracker.ceph.com/issues/17252) in our production ,which blocks
+cinder service ,  once cinder hit this bug th cinder-volume service
+cannot serve anymore request.  It is not hard to reproduce---  our 6
+cinder-volume nodes hitting this with 12 hours after restart.
 
-> Op 8 september 2016 om 15:38 schreef Sage Weil <sweil@redhat.com>:
-> 
-> 
-> On Thu, 8 Sep 2016, Wido den Hollander wrote:
-> > > Op 8 september 2016 om 15:24 schreef Sage Weil <sweil@redhat.com>:
-> > > On Thu, 8 Sep 2016, Wido den Hollander wrote:
-> > > > > Op 8 september 2016 om 3:08 schreef Gregory Farnum <gfarnum@redhat.com>:
-> > > > > 
-> > > > > 
-> > > > > On Tue, Sep 6, 2016 at 4:16 PM, Josh Durgin <jdurgin@redhat.com> wrote:
-> > > > > > On 09/06/2016 12:18 PM, Wido den Hollander wrote:
-> > > > > >>
-> > > > > >> Hi,
-> > > > > >>
-> > > > > >> wido@wido-laptop:~$ python -c "import rados; r = rados.Rados();
-> > > > > >> print(r.version())"
-> > > > > >> 0.69.1
-> > > > > >> wido@wido-laptop:~$ dpkg -l|grep rados|awk '{print $2" "$3}'
-> > > > > >> librados-dev 10.2.2-1trusty
-> > > > > >> librados2 10.2.2-1trusty
-> > > > > >> libradosstriper1 10.2.2-1trusty
-> > > > > >> python-rados 10.2.2-1trusty
-> > > > > >> wido@wido-laptop:~$
-> > > > > >>
-> > > > > >> Looking at librados.h in master I see:
-> > > > > >>
-> > > > > >> #define LIBRADOS_VER_MAJOR 0
-> > > > > >> #define LIBRADOS_VER_MINOR 69
-> > > > > >> #define LIBRADOS_VER_EXTRA 1
-> > > > > >>
-> > > > > >> Is this something which has just been forgotten to update?
-> > > > > >
-> > > > > >
-> > > > > > Pretty much. Not much has relied on the librados/librbd version numbers
-> > > > > > of this style. Adding tests for particular functions can be more
-> > > > > > reliable than checking version numbers, since sometimes functions are
-> > > > > > backported.
-> > > > > >
-> > > > > >> Looking at the 'ceph' tool I see:
-> > > > > >>
-> > > > > >> CEPH_GIT_NICE_VER="10.2.2"
-> > > > > >>
-> > > > > >> This is updated during packaging/build it seems.
-> > > > > >>
-> > > > > >> Should we maybe do that for librados.h as well?
-> > > > > >
-> > > > > >
-> > > > > > I see no reason not to.
-> > > > > 
-> > > > > We at one point were trying to only increment the librados library
-> > > > > version when stuff actually changed. Shockingly, that manual
-> > > > > maintenance mostly resulted in it not getting updated. ;)
-> > > > > But is it really that helpful to just provide another way of exposing
-> > > > > the package version, instead of doing something that actually
-> > > > > illustrates what functions are around? :/
-> > > > 
-> > > > I was using some Python code to gather Ceph information ( 
-> > > > https://github.com/42on/ceph-collect ). One of the things I wanted to 
-> > > > know is the installed Ceph version and I used the version() method.
-> > > > 
-> > > > It kept giving back 0.69.1 so I started looking into that.
-> > > > 
-> > > > I just try to avoid calling subprocesses when this isn't required.
-> > > > 
-> > > > Since the version() method is unreliable in giving back the version, 
-> > > > what to do with it?
-> > > 
-> > > Let's remove those #defines from the header, and then do something like 
-> > > include the auto-generated ceph_ver.h in the package, and update the 
-> > > version functions to #include that and return an accurate string...
-> > > 
-> > 
-> > yeah, one thing though.
-> > 
-> > #define CEPH_GIT_VER @CEPH_GIT_VER@
-> > #define CEPH_GIT_NICE_VER "@CEPH_GIT_NICE_VER@"
-> > 
-> > librados.h:
-> > 
-> > CEPH_RADOS_API void rados_version(int *major, int *minor, int *extra);
-> > 
-> > We don't have major, minor and extra stored separately in ceph_ver.h at the moment.
-> 
-> Let's just replace it with
-> 
-> CEPH_RADOS_API const char *rados_version_string();
-> CEPH_RADOS_API const char *rados_git_version_string();
-> 
-> We could parse the components out of the string, but I'm not sure it's 
-> worth the effort?
-> 
+  Discussed with Haomai, he will provide a PR very shortly. Do we have
+any chance to get this in for 10.2.3 ? Suspecting everyone in jewel
+will suffer from this bug.
 
-No, I don't think so. Seems good to me to add these functions and remove the old version() method.
+Xiaoxi
 
-Wido
-
-> sage
+2016-09-07 14:33 GMT+08:00 Loic Dachary <loic@dachary.org>:
+> Hi Yuri,
+>
+> The deph-disk suite must be run on VPS.
+>
+> Cheers
+>
+> On 06/09/2016 22:26, Yuri Weinstein wrote:
+>> Missed a line with ceph-disk issue -
+>>
+>> ceph-disk:
+>>    http://tracker.ceph.com/issues/15350
+>>    (Loic, Sam pls review/approve)
+>>
+>> On Tue, Sep 6, 2016 at 10:12 AM, Yuri Weinstein <yweinste@redhat.com> wr=
+ote:
+>>> Detailed summary of the QE Validation can be found here
+>>> http://tracker.ceph.com/issues/16344#note-46
+>>>
+>>> The following suites were in scope of this point release validation:
+>>>
+>>> rados (subset 35/50 297 jobs)
+>>> rbd
+>>> rgw
+>>> fs
+>>> krbd
+>>> kcephfs
+>>> knfs
+>>> rest
+>>> hadoop
+>>> samba
+>>> ceph-deploy
+>>> ceph-disk
+>>> upgrade/client-upgrade
+>>> upgrade/hammer-x (jewel)
+>>> upgrade/infernalis-x (jewel)
+>>> powercycle
+>>> (please let me know if any suites are missing from this ^ list)
+>>>
+>>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D
+>>> Issues requiring approval/decision:
+>>>
+>>> rados:
+>>>    http://tracker.ceph.com/issues/16516 (approved by DavidZ)
+>>>
+>>> rbd:
+>>>    multiple issues (Jason pls rview/approve, see notes
+>>> http://tracker.ceph.com/issues/16344#note-46)
+>>>
+>>> krbd:
+>>>    http://tracker.ceph.com/issues/17223
+>>>    http://tracker.ceph.com/issues/17221
+>>>    http://tracker.ceph.com/issues/17222
+>>>    (Jason pls rview/approve)
+>>>
+>>> knfs
+>>>    http://tracker.ceph.com/issues/17192
+>>>    (Greg pls rview/approve, note: it's similar we saw in hammer point r=
+elease)
+>>>
+>>> samba:
+>>>    http://tracker.ceph.com/issues/17184
+>>>    (Greg pls rview/approve)
+>>>
+>>> upgrade/client-upgrade:about:startpage
+>>>    http://tracker.ceph.com/issues/16506
+>>>    (Sage, Sam, Jason pls rview/approve)
+>>>
+>>> upgrade/infernalis-x (jewel):
+>>>    http://tracker.ceph.com/issues/17176
+>>>    (Sam, David  pls rview/approve)
+>>>
+>>> powercycle:
+>>>    http://tracker.ceph.com/issues/17177
+>>>    (Sage  pls rview/approve)
+>>>
+>>> Loic, given that we have high number of issues in this release, if you
+>>> and dev leads find that we need to add more backports we may consider
+>>> validating a new point RC (sha1).
+>>>
+>>> Thx
+>>> YuriW
+>>
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
