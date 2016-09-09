@@ -1,58 +1,129 @@
-From: =?utf-8?B?6ZmI5pWP?= <chenmin@xsky.com>
-Subject: reply: rename PR
-Date: Fri, 9 Sep 2016 16:05:37 +0000
-Message-ID: <SG2PR02MB1198C040AE2CC5270488E028C6FA0@SG2PR02MB1198.apcprd02.prod.outlook.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: ceph v10.2.3 QE validation status
+Date: Fri, 9 Sep 2016 11:19:36 -0700
+Message-ID: <CAMMFjmFRHAu8cPpLatorQ_LZ_5fcAbA082ivT1N7bA9Qr_qgdg@mail.gmail.com>
+References: <CAMMFjmHb=m_WJg8TMaVBOdXB37=viYOBSOYEXL_Bo3kET=hyoA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pu1apc01on0096.outbound.protection.outlook.com ([104.47.126.96]:36729
-        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751830AbcIIQj5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 9 Sep 2016 12:39:57 -0400
-Content-Language: zh-CN
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:36191 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751463AbcIISTi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Sep 2016 14:19:38 -0400
+Received: by mail-wm0-f46.google.com with SMTP id b187so45114728wme.1
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Sep 2016 11:19:37 -0700 (PDT)
+In-Reply-To: <CAMMFjmHb=m_WJg8TMaVBOdXB37=viYOBSOYEXL_Bo3kET=hyoA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjamin@redhat.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, "Weil, Sage" <sage@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, David Zafman <dzafman@redhat.com>
 
-SGkgTWF0dA0KDQoJSSBoYXZlIG5vdGljZWQgcmd3IGZpbGUgcmVuYW1lIGlzIG5vdCBQT1NJWCBz
-dHJpY3RseSwgYmVjYXVzZSBzcmMgZmlsZSBhbmQgZGVzdCBmaWxlIG93biBkaWZmZXJlbnQgaW5v
-ZGUgbnVtYmVyIChoYXNoIG9mIGJ1Y2tldCArIG9iamVjdCkuSSBoYXZlIG5vdCB0ZXN0ZWQgb24g
-bmZzLWdhbmVzaGEgdXBzdHJlYW0gZm9yIHNvbWUgcmVhc29uLCBhbmQgd2lsbCBjaGVja291dCB0
-byBtYXN0ZXIgdG8gdGVzdCBGU0FMX1JHVyBsYXRlci4NCglGb3IgTkZTIHNjYWxpbmcsIHRoZSBt
-YWluIHByb2JsZW0gaXMgdGhhdCBkaWZmZXJlbnQgTkZTLWdhbmVzaGEgc2VydmVyIGtlZXAgaXRz
-IGlub2RlIGNhY2hlIGluIGxvY2FsIG1lbW9yeSBhbmQgdGhlcmUgaXMgbm8gZ2xvYmFsIHZpZXcg
-b2YgaW5vZGUgY2FjaGUoZGlyZWN0b3J5IHRyZWUpIGluIHRoZSBORlMtZ2FuZXNoYSBjbHVzdGVy
-IGNvbm5lY3R0ZWQgdG8gdGhlIHNhbWUgcmd3IGJ1Y2tldC4gRm9yIEkgaGF2ZSB0ZXN0ZWQgTkZT
-LWdhbmVzaGEgSEEgd2l0aCBwYWNlbWFrZXIrY29yb3N5bmMgd2FjaHRlZCBhbmQgZm91bmQgaW5v
-ZGUgY2FjaGUgY2Fubm90IGJlIHNoYXJlZCBiZXR3ZWVuIHByaW1hcnkgYW5kIGJhY2t1cC4gRm9y
-IE5GU3Y0LCBzZXNzaW9uIHN0YXRlIGFuZCBsb2NrIHN0YXRlIHNob3VsZCBiZSBwZXJzaXN0IHRv
-IHN0b3JhZ2UsIHNvIHRoZSBORlMtZ2FuZXNoYSBjbHVzdGVyIGNhbiBzaGFyZSB0aGVtLg0KCUlu
-IGFkZGl0aW9uLCB3aGF0IGlzIHRoZSBwbGFuIG9mIGZsb2NrIGluIHJndyBmaWxlLCBmb3IgaXQg
-aXMgaW1wb3J0YW50IHRvIE5GUyBjbHVzdGVyLg0KDQpDaGVuIE1pbiANCg0KLS0tLS3pgq7ku7bl
-jp/ku7YtLS0tLQ0K5Y+R5Lu25Lq6OiBNYXR0IEJlbmphbWluIFttYWlsdG86bWJlbmphbWluQHJl
-ZGhhdC5jb21dIA0K5Y+R6YCB5pe26Ze0OiAyMDE25bm0OeaciDnml6UgMjI6MTcNCuaUtuS7tuS6
-ujog6ZmI5pWPIDxjaGVubWluQHhza3kuY29tPg0K5oqE6YCBOiBUaGUgU2FjcmVkIE9yZGVyIG9m
-IHRoZSBTcXVpZCBDeWJlcm5ldGljIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NCuS4u+mi
-mDogcmVuYW1lIFBSDQoNCkhpIENoZW4sDQoNCkkgd2FudGVkIHRvIGxldCB5b3Uga25vdywgSSBt
-ZXJnZWQgeW91ciBleGFjdC1tYXRjaCBQUi4gIE5vdywgSSBzdXNwZWN0IHRoYXQgeW91J3JlIGFs
-c28gbm90IHJ1bm5pbmcgYSByZWNlbnQtZW5vdWdoIHZlcnNpb24gb2YgbmZzLWdhbmVzaGEsIGJl
-Y2F1c2UgSSB0aGluayB0aGF0IHRoZSByZW5hbWUgaXNzdWUgeW91IGZpeGVkIHdvdWxkbid0IGVh
-c2lseSByZXByb2R1Y2UgaWYgeW91IHdlcmUuDQoNCkEga2V5IHBvaW50IEkgd2FudGVkIHRvIGhp
-Z2hsaWdodCBpcyB0aGF0IGl0J3MgcGFydCBvZiB0aGUgc2NhbGluZyAoYW5kIGhhLCBhbmQuLi4p
-IHN0cmF0ZWd5IHRoYXQgb3VyIG5mcyBmaWxlIGhhbmRsZXMgYXJlIG5hbWUtc3RhYmxlLCByYXRo
-ZXIgdGhhbiBhcmJpdHJhcnkgdmFsdWVzLiAgT25lIGltcGxpY2F0aW9uIG9mIHRoYXQgaXMgdGhh
-dCB3aGVuIGEgZmlsZSBpcyByZW5hbWVkLCB0aGUgcmVuYW1lZCBvYmplY3QgaGFzIGEgZGlmZmVy
-ZW50IGZpbGUgaWQgYW5kIGhlbmNlIE5GUyBmaWxlIGhhbmRsZSB2YWx1ZSB0aGFuIGl0IGRpZCBi
-ZWZvcmUgdGhlIHJlbmFtZS4gIFdlIHVzZSB0aGUgcGFyZW50IGRpcmVjdG9yeSdzIGNoYW5nZSBh
-dHRyaWJ1dGUgdG8gZW5zdXJlIHRoYXQgY2xpZW50cyB0aGF0IGhhZCB0aGUgdm5vZGUgY2FjaGVk
-IHNlZSBhbiBpbnZhbGlkYXRlLiAgKE5vdGhpbmcgaW4geW91ciBQUiBjb250cmFkaWN0cyB0aGF0
-LCBvZiBjb3Vyc2UuKQ0KDQpBbm90aGVyIHN0cmF0ZWdpYyBkZWNpc2lvbiB3ZSBtYWRlIGlzLCB3
-ZSBkb24ndCByZW5hbWUgZGlyZWN0b3JpZXMgKGp1c3Qgc3RhdGluZyBpdCBmb3IgcG9zdGVyaXR5
-KS4gOikNCg0KQ2hlZXJzLA0KDQpNYXR0DQoNCi0tIA0KTWF0dCBCZW5qYW1pbg0KUmVkIEhhdCwg
-SW5jLg0KMzE1IFdlc3QgSHVyb24gU3RyZWV0LCBTdWl0ZSAxNDBBDQpBbm4gQXJib3IsIE1pY2hp
-Z2FuIDQ4MTAzDQoNCmh0dHA6Ly93d3cucmVkaGF0LmNvbS9lbi90ZWNobm9sb2dpZXMvc3RvcmFn
-ZQ0KDQp0ZWwuICA3MzQtNzA3LTA2NjANCmZheC4gIDczNC03NjktODkzOA0KY2VsLiAgNzM0LTIx
-Ni01MzA5DQo=
+Ticket http://tracker.ceph.com/issues/16344#note-46 updated with dev
+leads approvals (pls review) as following (suites marked with * still
+need decision/fix):
+
+rados:
+   http://tracker.ceph.com/issues/16516 (approved by DavidZ)
+
+rbd:
+   multiple issues (Approved by Jason)
+
+krbd:
+   http://tracker.ceph.com/issues/17223
+   http://tracker.ceph.com/issues/17221
+   http://tracker.ceph.com/issues/17222
+   (Approved by Ilya)
+
+* knfs
+   http://tracker.ceph.com/issues/17192
+   (Greg pls review/approve, note: it's similar we saw in hammer point release)
+
+* samba:
+   http://tracker.ceph.com/issues/17184
+   (Greg pls review/approve)
+
+upgrade/client-upgrade:about:startpage
+   http://tracker.ceph.com/issues/16506
+   (Approved by Loic)
+
+upgrade/infernalis-x (jewel):
+   http://tracker.ceph.com/issues/17176
+   (Approved by Loic)
+
+* powercycle:
+   http://tracker.ceph.com/issues/17177
+   (Sage  pls review/approve)
+
+* ceph-disk
+   http://tracker.ceph.com/issues/17114
+   http://tracker.ceph.com/issues/17100
+   (Loic  pls review/approve)
+
+Thx
+YuriW
+
+On Tue, Sep 6, 2016 at 10:12 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
+> Detailed summary of the QE Validation can be found here
+> http://tracker.ceph.com/issues/16344#note-46
+>
+> The following suites were in scope of this point release validation:
+>
+> rados (subset 35/50 297 jobs)
+> rbd
+> rgw
+> fs
+> krbd
+> kcephfs
+> knfs
+> rest
+> hadoop
+> samba
+> ceph-deploy
+> ceph-disk
+> upgrade/client-upgrade
+> upgrade/hammer-x (jewel)
+> upgrade/infernalis-x (jewel)
+> powercycle
+> (please let me know if any suites are missing from this ^ list)
+>
+> ==============================
+> Issues requiring approval/decision:
+>
+> rados:
+>    http://tracker.ceph.com/issues/16516 (approved by DavidZ)
+>
+> rbd:
+>    multiple issues (Jason pls rview/approve, see notes
+> http://tracker.ceph.com/issues/16344#note-46)
+>
+> krbd:
+>    http://tracker.ceph.com/issues/17223
+>    http://tracker.ceph.com/issues/17221
+>    http://tracker.ceph.com/issues/17222
+>    (Jason pls rview/approve)
+>
+> knfs
+>    http://tracker.ceph.com/issues/17192
+>    (Greg pls rview/approve, note: it's similar we saw in hammer point release)
+>
+> samba:
+>    http://tracker.ceph.com/issues/17184
+>    (Greg pls rview/approve)
+>
+> upgrade/client-upgrade:about:startpage
+>    http://tracker.ceph.com/issues/16506
+>    (Sage, Sam, Jason pls rview/approve)
+>
+> upgrade/infernalis-x (jewel):
+>    http://tracker.ceph.com/issues/17176
+>    (Sam, David  pls rview/approve)
+>
+> powercycle:
+>    http://tracker.ceph.com/issues/17177
+>    (Sage  pls rview/approve)
+>
+> Loic, given that we have high number of issues in this release, if you
+> and dev leads find that we need to add more backports we may consider
+> validating a new point RC (sha1).
+>
+> Thx
+> YuriW
