@@ -1,67 +1,73 @@
-From: "Praveen Kumar G T (Cloud Platform)" <praveen.gt@flipkart.com>
-Subject: Request for review
-Date: Mon, 12 Sep 2016 04:23:58 +0530
-Message-ID: <34EF87B5-6270-4F75-B763-D265A901660A@flipkart.com>
-References: <7E451D9A-1426-47EA-8DA9-6BF9927CCCBB@flipkart.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2104\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: quoted-printable
+From: Radoslaw Zarzynski <rzarzynski@mirantis.com>
+Subject: Re: rgw: feedback on auth engine selection
+Date: Mon, 12 Sep 2016 01:20:33 +0200
+Message-ID: <CA+H5UW2TMo=axqbg78Nva5DLTXgigORZw3ZT3btAjoXLSdRq9A@mail.gmail.com>
+References: <e2a2e0c9-51e7-b703-2c8d-7b489d4e8994@redhat.com>
+ <CA+H5UW1Qf++2R36y05GFAFTcJO2YN77W4z1yjpUMgAHitnsG-Q@mail.gmail.com>
+ <45ac8340-c6eb-8cdc-9c83-3db6f7f3fcd6@redhat.com> <CA+H5UW3J3XtMeqhH7FjRCe-ocep-ZidLSpNX=1y=sX6GmcamRQ@mail.gmail.com>
+ <d1335f1c-26ce-5d46-8cc3-af806be25822@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f51.google.com ([209.85.220.51]:33393 "EHLO
-        mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752264AbcIKWxm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Sep 2016 18:53:42 -0400
-Received: by mail-pa0-f51.google.com with SMTP id cm16so44884060pac.0
-        for <ceph-devel@vger.kernel.org>; Sun, 11 Sep 2016 15:53:42 -0700 (PDT)
-Received: from [192.168.1.105] ([122.172.62.196])
-        by smtp.gmail.com with ESMTPSA id y3sm19570711pfy.36.2016.09.11.15.53.40
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Sun, 11 Sep 2016 15:53:41 -0700 (PDT)
+Received: from mail-qk0-f178.google.com ([209.85.220.178]:34821 "EHLO
+        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752789AbcIKXUe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Sep 2016 19:20:34 -0400
+Received: by mail-qk0-f178.google.com with SMTP id t7so24253699qkh.2
+        for <ceph-devel@vger.kernel.org>; Sun, 11 Sep 2016 16:20:34 -0700 (PDT)
+In-Reply-To: <d1335f1c-26ce-5d46-8cc3-af806be25822@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Casey Bodley <cbodley@redhat.com>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Definitions
+Hi Casey,
 
-Orphaned Objects: Orphaned objects are created when a Multipart upload =
-has uploaded some or all of the parts but without executing multipart =
-cancel or multipart complete. An incomplete Multipart upload is neither =
-created nor destroyed, it is in orphan state
-Leaked Objects : Objects that are not deleted on the ceph cluster but =
-assumed to be deleted by s3 client. These objects cannot be accessed by =
-s3 clients but still occupy space in the ceph cluster
+On Thu, Sep 8, 2016 at 10:49 PM, Casey Bodley <cbodley@redhat.com> wrote:
+> Thanks for the extra background! You've convinced me that it makes sense to
+> extend the auth interfaces to support this instead of treating it as a
+> special case. But I still don't think that AuthEngine is the right place to
+> manage that state - mainly because each request will be trying to
+> authenticate against multiple different engines, and only one of them will
+> be successful. So with stateful AuthEngines, we'll have to construct and
+> destruct instances for all of the engines that fail, and then once we find
+> one that succeeds, we have to move or copy that instance to extend its
+> lifetime to that of the req_state. I don't see a generic way to do that
+> without an extra allocation.
 
-Problem
+I see your concerns. I think we can deal with the issues of additional
+dynamic allocations and moving/copying memory as well.
 
-A s3 bucket cannot be deleted when there are objects in it. The bucket =
-deletion command will fail with error BucketNotEmpty. The objects in the =
-buckets can be listed using any of the s3 clients. In case if we have =
-orphaned objects present in the bucket, they will not be listed via the =
-normal listing operations of the s3 clients. If the bucket is deleted =
-when there are orphaned objects in the bucket, they will end up being =
-leaked. This ends of using space in the ceph cluster even though the =
-objects are not accessed by any of the s3 clients. This space is not =
-accounted under the radosgw user account as well
+At the moment ::authorize() of the Swift API's handler instantiates
+multiple engines on stack only to form the array of interface-typed
+pointers. I'm pretty sure we can create them in the step-by-step
+manner and perform the real job having only one instance alive
+at the same time. The mockup of AuthStrategy::Visitor interface is
+designed to utilize this pattern.
 
-Tracker link
+We can pair the step-by-step processing together with the static_ptr,
+that already has the emplace<ConreteClass>(ctor, args) machinery,
+to create AuthEngine instance directly in its final location.
 
-http://tracker.ceph.com/issues/17164
+This way we can avoid creation of disabled auth engines, dynamic
+memory allocations, std::moving/copying between ::authorize() scope
+and req_state and even optimize the on-stack memory usage.
 
-Fix
+> I pointed out AuthApplier (which is what we return from a successful call to
+> AuthEngine::authorize()) earlier, because it's an existing example of auth
+> state that we store with req_state for later access. That seems like a much
+> better pattern for something like AuthCompletion. I suggested combining this
+> with AuthApplier, because a) then we don't have to allocate the completion
+> state separately, and b) the completion is a noop for most auth engines.
 
-The fix will avoid deletion of buckets even if there are Orphaned =
-objects in the bucket. So now bucket deletion command will return =
-BucketNotEmpty  when there are orphaned objects as well.
+What makes me a bit uncomfortable with putting the authenticate_complete()
+into AuthApplier is mixing responsibilities. Applier operates in the area
+of identity - it verifies whether someone owns an account, has the admin
+status, loads its account info and so on. AuthEngine in turn is supposed
+to encapsulate the request authentication process.
 
-Pull request
-
-https://github.com/ceph/ceph/pull/10920=20
-
-Can somebody Please review the fix. We have already verified the fix =
-locally.
+Verifying message integrity looks like a part of request authentication
+and thus conceptually seems to be the Engine's job.
 
 Regards,
-Praveen.
-
-
+Radek
