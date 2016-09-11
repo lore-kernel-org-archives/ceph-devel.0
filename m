@@ -1,116 +1,32 @@
 From: Elita Lobo <loboelita@gmail.com>
-Subject: Re: Query regarding storage of objects in ceph
-Date: Sun, 11 Sep 2016 21:43:22 +0530
-Message-ID: <CAA8xDw1+rEzJx6nm3cKH3d-XWZArT4Q824BNAkV3qomqu1--Uw@mail.gmail.com>
-References: <CAA8xDw2jFn_C-Cj1mZ5w9UUxNpe3Z4SeM-2=xcUPJGOg=v4R9w@mail.gmail.com>
- <CAF-wwdE0bg7vQ=HfMqzWqv5W5ZKB+3tCf2mCt6os_Jpf_tX8Ug@mail.gmail.com>
- <CAA8xDw1-BEaGmUTEhN=ZWH+uh7Dby_dxNuOh70Exy5toA9dG+g@mail.gmail.com>
- <20160907061804.GH5914@rskikr.localdomain> <CAA8xDw0mVqDLHuKHZU+x3uFnQf5WJ9NsXTJa_zMbRnvB=SB9Hw@mail.gmail.com>
+Subject: Fwd: Which IDE do you use for ceph-development?
+Date: Sun, 11 Sep 2016 22:03:15 +0530
+Message-ID: <CAA8xDw1RA2RhZ=ERPKK0ZjD1Zc4iWYgm_zSvNHHEdJ+q7FcJag@mail.gmail.com>
+References: <CAA8xDw3OPGikoYF3Knef5tBrCsg+Hvekhyh7BVGJZCq4Yn93Fw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f54.google.com ([209.85.218.54]:34149 "EHLO
-        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751044AbcIKQNY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Sep 2016 12:13:24 -0400
-Received: by mail-oi0-f54.google.com with SMTP id m11so257911285oif.1
-        for <ceph-devel@vger.kernel.org>; Sun, 11 Sep 2016 09:13:23 -0700 (PDT)
-In-Reply-To: <CAA8xDw0mVqDLHuKHZU+x3uFnQf5WJ9NsXTJa_zMbRnvB=SB9Hw@mail.gmail.com>
+Received: from mail-oi0-f50.google.com ([209.85.218.50]:33985 "EHLO
+        mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750912AbcIKQdQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Sep 2016 12:33:16 -0400
+Received: by mail-oi0-f50.google.com with SMTP id m11so258695093oif.1
+        for <ceph-devel@vger.kernel.org>; Sun, 11 Sep 2016 09:33:16 -0700 (PDT)
+In-Reply-To: <CAA8xDw3OPGikoYF3Knef5tBrCsg+Hvekhyh7BVGJZCq4Yn93Fw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
 Hi,
 
-Thanks, Will look into it.
+I tried using NEtbeans and Eclipse . Netbeans gave this error.
+https://paste.fedoraproject.org/426622/61053414/
+
+And Eclipse is not able to detect header files although I added the
+path of the include directory.
+
+Has anyone successfully built the ceph code on any IDE?
 
 
 Regards,
 Elita Lobo
-
-On Sun, Sep 11, 2016 at 9:41 PM, Elita Lobo <loboelita@gmail.com> wrote:
-> Hi,
->
-> Thanks, Will look into it.
->
->
-> Regards,
-> Elita Lobo
->
-> On Wed, Sep 7, 2016 at 11:48 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
->>
->> On Wed, Sep 07, 2016 at 11:14:26AM +0530, Elita Lobo wrote:
->> > Hi,
->> >
->> > Thanks , It was helpful. Could you please tell me how to trace local
->> > function calls made by ceph?
->> > I tried using gdb but it gave the following error.
->> >
->> > https://paste.fedoraproject.org/423219/73227055/
->>
->> Those errors look to be primarily because of missing debuginfo.
->>
->> You can use command files in gdb or "-ex" commands on the command line to
->> set a
->> breakpoint, dump a backtrace, continue and detach if you want to dump
->> stacks
->> when known functions are hit. https://poormansprofiler.org/ is a good
->> starting
->> point. Adding dout statements and looking at the logs can also be helpful
->> to
->> understand what is going on.
->>
->> I'm sure others have more ideas.
->>
->> --
->> Cheers,
->> Brad
->>
->> >
->> > On Tue, Sep 6, 2016 at 10:35 AM, Brad Hubbard <bhubbard@redhat.com>
->> > wrote:
->> > > On Tue, Sep 6, 2016 at 2:31 PM, Elita Lobo <loboelita@gmail.com>
->> > > wrote:
->> > >> Hello,
->> > >>
->> > >> I am using Ceph in my research project and hence need to know a bit
->> > >> about how it works internally.  I would be grateful if someone would
->> > >> answer my queries.
->> > >>
->> > >>  When chunks of 2 objects have to be stored on an osd, are they put
->> > >> into the same file or are these chunks stored in separate file. Is
->> > >> there any way I could see this data using some command? And in which
->> > >> folder of the osd are they stored in?
->> > >
->> > > Working your way through this may help.
->> > >
->> > > http://cephnotes.ksperis.com/blog/2013/08/20/ceph-osd-where-is-my-data
->> > >
->> > >>
->> > >> Also, is there a way I can see the whole flow of function calls made
->> > >> when a node repair is going on?
->> > >>
->> > >> Lastly, could someone please suggest some resources ( other than
->> > >> docs)
->> > >> which would help me understand the internal implementation and give
->> > >> me
->> > >> an idea how to debug in ceph. (Attaching gdb to ceph daemons running
->> > >> in the background etc)
->> > >>
->> > >> Thanking you,
->> > >> Yours sincerely,
->> > >> Elita Lobo
->> > >> --
->> > >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> > >> in
->> > >> the body of a message to majordomo@vger.kernel.org
->> > >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> > >
->> > >
->> > >
->> > > --
->> > > Cheers,
->> > > Brad
->
->
