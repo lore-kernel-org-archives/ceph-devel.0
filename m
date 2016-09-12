@@ -1,7 +1,7 @@
 From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 17/47] block-rbd: Rename jump labels in rbd_init_disk()
-Date: Mon, 12 Sep 2016 21:03:03 +0200
-Message-ID: <fbc4c5ad-5337-fa8d-e31d-0424e71ebcb8@users.sourceforge.net>
+Subject: [PATCH 18/47] block-rbd: Fix jump targets in rbd_queue_workfn()
+Date: Mon, 12 Sep 2016 21:04:26 +0200
+Message-ID: <b9b5afb4-9326-2549-7efb-a232830f69d5@users.sourceforge.net>
 References: <566ABCD9.1060404@users.sourceforge.net>
  <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
 Mime-Version: 1.0
@@ -15,45 +15,124 @@ Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia 
 List-Id: ceph-devel.vger.kernel.org
 
 From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Mon, 12 Sep 2016 18:26:28 +0200
+Date: Mon, 12 Sep 2016 18:28:23 +0200
 
-Adjust jump labels according to the current Linux coding style convention.
+* Adjust jump targets according to the current Linux coding
+  style convention.
+
+* Delete a duplicate check then at the end.
 
 Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 ---
- drivers/block/rbd.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ drivers/block/rbd.c | 37 ++++++++++++++++++++-----------------
+ 1 file changed, 20 insertions(+), 17 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 0b6f0f9..97d4d63 100644
+index 97d4d63..2b5f76e 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -4500,12 +4500,12 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 
- 	err = blk_mq_alloc_tag_set(&rbd_dev->tag_set);
- 	if (err)
--		goto out_disk;
-+		goto put_disk;
- 
- 	q = blk_mq_init_queue(&rbd_dev->tag_set);
- 	if (IS_ERR(q)) {
- 		err = PTR_ERR(q);
--		goto out_tag_set;
-+		goto free_tag_set;
+@@ -4113,7 +4113,7 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 		dout("%s: non-fs request type %d\n", __func__,
+ 			(int) rq->cmd_type);
+ 		result = -EIO;
+-		goto err;
++		goto end_request;
  	}
  
- 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, q);
-@@ -4537,9 +4537,9 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 	rbd_dev->disk = disk;
+ 	if (req_op(rq) == REQ_OP_DISCARD)
+@@ -4128,7 +4128,7 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 	if (!length) {
+ 		dout("%s: zero-length request\n", __func__);
+ 		result = 0;
+-		goto err_rq;
++		goto put_snap_context;
+ 	}
  
- 	return 0;
--out_tag_set:
-+ free_tag_set:
- 	blk_mq_free_tag_set(&rbd_dev->tag_set);
--out_disk:
-+ put_disk:
- 	put_disk(disk);
- 	return err;
+ 	/* Only reads are allowed to a read-only device */
+@@ -4136,7 +4136,7 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 	if (op_type != OBJ_OP_READ) {
+ 		if (rbd_dev->mapping.read_only) {
+ 			result = -EROFS;
+-			goto err_rq;
++			goto warn_more;
+ 		}
+ 		rbd_assert(rbd_dev->spec->snap_id == CEPH_NOSNAP);
+ 	}
+@@ -4151,14 +4151,14 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 		dout("request for non-existent snapshot");
+ 		rbd_assert(rbd_dev->spec->snap_id != CEPH_NOSNAP);
+ 		result = -ENXIO;
+-		goto err_rq;
++		goto warn_more;
+ 	}
+ 
+ 	if (offset && length > U64_MAX - offset + 1) {
+ 		rbd_warn(rbd_dev, "bad request range (%llu~%llu)", offset,
+ 			 length);
+ 		result = -EINVAL;
+-		goto err_rq;	/* Shouldn't happen */
++		goto warn_more;	/* Shouldn't happen */
+ 	}
+ 
+ 	blk_mq_start_request(rq);
+@@ -4176,7 +4176,7 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 		rbd_warn(rbd_dev, "beyond EOD (%llu~%llu > %llu)", offset,
+ 			 length, mapping_size);
+ 		result = -EIO;
+-		goto err_rq;
++		goto warn_more;
+ 	}
+ 
+ 	if (must_be_locked) {
+@@ -4189,7 +4189,7 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 					     snapc);
+ 	if (!img_request) {
+ 		result = -ENOMEM;
+-		goto err_unlock;
++		goto unlock;
+ 	}
+ 	img_request->rq = rq;
+ 	snapc = NULL; /* img_request consumes a ref */
+@@ -4201,27 +4201,30 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 		result = rbd_img_request_fill(img_request, OBJ_REQUEST_BIO,
+ 					      rq->bio);
+ 	if (result)
+-		goto err_img_request;
++		goto put_request;
+ 
+ 	result = rbd_img_request_submit(img_request);
+ 	if (result)
+-		goto err_img_request;
++		goto put_request;
+ 
+ 	if (must_be_locked)
+ 		up_read(&rbd_dev->lock_rwsem);
+ 	return;
+-
+-err_img_request:
++ put_request:
+ 	rbd_img_request_put(img_request);
+-err_unlock:
++ unlock:
+ 	if (must_be_locked)
+ 		up_read(&rbd_dev->lock_rwsem);
+-err_rq:
+-	if (result)
+-		rbd_warn(rbd_dev, "%s %llx at %llx result %d",
+-			 obj_op_name(op_type), length, offset, result);
++ warn_more:
++	rbd_warn(rbd_dev,
++		 "%s %llx at %llx result %d",
++		 obj_op_name(op_type),
++		 length,
++		 offset,
++		 result);
++ put_snap_context:
+ 	ceph_put_snap_context(snapc);
+-err:
++ end_request:
+ 	blk_mq_end_request(rq, result);
  }
+ 
 -- 
 2.10.0
