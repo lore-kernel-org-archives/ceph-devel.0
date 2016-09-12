@@ -1,8 +1,7 @@
 From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 19/47] block-rbd: Rename a jump label in
- rbd_reregister_watch()
-Date: Mon, 12 Sep 2016 21:05:21 +0200
-Message-ID: <83afc929-81ff-db63-4f08-a9c72eb8dde6@users.sourceforge.net>
+Subject: [PATCH 20/47] block-rbd: Rename a jump label in rbd_register_watch()
+Date: Mon, 12 Sep 2016 21:06:10 +0200
+Message-ID: <76429d28-548c-63dd-fee7-ca5585b88856@users.sourceforge.net>
 References: <566ABCD9.1060404@users.sourceforge.net>
  <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
 Mime-Version: 1.0
@@ -16,46 +15,33 @@ Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia 
 List-Id: ceph-devel.vger.kernel.org
 
 From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Mon, 12 Sep 2016 19:31:04 +0200
+Date: Mon, 12 Sep 2016 19:33:00 +0200
 
 Adjust a jump label according to the current Linux coding style convention.
 
 Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 ---
- drivers/block/rbd.c | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+ drivers/block/rbd.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 2b5f76e..97dbc1a 100644
+index 97dbc1a..b0b5a3b 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -3950,7 +3950,7 @@ static void rbd_reregister_watch(struct work_struct *work)
- 
- 	mutex_lock(&rbd_dev->watch_mutex);
- 	if (rbd_dev->watch_state != RBD_WATCH_STATE_ERROR)
--		goto fail_unlock;
-+		goto unlock;
- 
+@@ -3900,12 +3900,11 @@ static int rbd_register_watch(struct rbd_device *rbd_dev)
+ 	rbd_assert(rbd_dev->watch_state == RBD_WATCH_STATE_UNREGISTERED);
  	ret = __rbd_register_watch(rbd_dev);
- 	if (ret) {
-@@ -3959,7 +3959,7 @@ static void rbd_reregister_watch(struct work_struct *work)
- 			queue_delayed_work(rbd_dev->task_wq,
- 					   &rbd_dev->watch_dwork,
- 					   RBD_RETRY_DELAY);
--		goto fail_unlock;
+ 	if (ret)
+-		goto out;
 +		goto unlock;
- 	}
  
  	rbd_dev->watch_state = RBD_WATCH_STATE_REGISTERED;
-@@ -3980,8 +3980,7 @@ static void rbd_reregister_watch(struct work_struct *work)
- 	up_write(&rbd_dev->lock_rwsem);
- 	wake_requests(rbd_dev, true);
- 	return;
+ 	rbd_dev->watch_cookie = rbd_dev->watch_handle->linger_id;
 -
--fail_unlock:
+-out:
 + unlock:
  	mutex_unlock(&rbd_dev->watch_mutex);
- 	up_write(&rbd_dev->lock_rwsem);
+ 	return ret;
  }
 -- 
 2.10.0
