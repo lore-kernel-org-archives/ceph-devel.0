@@ -1,51 +1,61 @@
 From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 14/47] block-rbd: Rename a jump label in
- rbd_dev_v2_object_prefix()
-Date: Mon, 12 Sep 2016 20:59:34 +0200
-Message-ID: <7378c5de-9568-2736-fba6-7fc9a31bd1df@users.sourceforge.net>
+Subject: [PATCH 15/47] block-rbd: Rename jump labels in rbd_dev_create()
+Date: Mon, 12 Sep 2016 21:00:23 +0200
+Message-ID: <475899b2-a0fc-7bd9-43fe-c83c390158ff@users.sourceforge.net>
 References: <566ABCD9.1060404@users.sourceforge.net>
  <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <kernel-janitors-owner@vger.kernel.org>
 In-Reply-To: <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: kernel-janitors-owner@vger.kernel.org
 To: ceph-devel@vger.kernel.org, Alex Elder <elder@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>
 Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
 List-Id: ceph-devel.vger.kernel.org
 
 From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Mon, 12 Sep 2016 18:10:02 +0200
+Date: Mon, 12 Sep 2016 18:12:39 +0200
 
-Adjust a jump label according to the current Linux coding style convention.
+Adjust jump labels according to the current Linux coding style convention.
 
 Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 ---
- drivers/block/rbd.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/block/rbd.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index aff8c4e..6acddc53 100644
+index 6acddc53..262805a 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -5017,7 +5017,7 @@ static int rbd_dev_v2_object_prefix(struct rbd_device *rbd_dev)
- 				reply_buf, RBD_OBJ_PREFIX_LEN_MAX);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0)
--		goto out;
-+		goto free_buffer;
+@@ -4930,23 +4930,22 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+ 					 minor_to_rbd_dev_id(1 << MINORBITS),
+ 					 GFP_KERNEL);
+ 	if (rbd_dev->dev_id < 0)
+-		goto fail_rbd_dev;
++		goto free_device;
  
- 	p = reply_buf;
- 	rbd_dev->header.object_prefix = ceph_extract_encoded_string(&p,
-@@ -5030,7 +5030,7 @@ static int rbd_dev_v2_object_prefix(struct rbd_device *rbd_dev)
- 	} else {
- 		dout("  object_prefix = %s\n", rbd_dev->header.object_prefix);
- 	}
--out:
-+ free_buffer:
- 	kfree(reply_buf);
+ 	sprintf(rbd_dev->name, RBD_DRV_NAME "%d", rbd_dev->dev_id);
+ 	rbd_dev->task_wq = alloc_ordered_workqueue("%s-tasks", WQ_MEM_RECLAIM,
+ 						   rbd_dev->name);
+ 	if (!rbd_dev->task_wq)
+-		goto fail_dev_id;
++		goto remove_id;
  
- 	return ret;
+ 	/* we have a ref from do_rbd_add() */
+ 	__module_get(THIS_MODULE);
+ 
+ 	dout("%s rbd_dev %p dev_id %d\n", __func__, rbd_dev, rbd_dev->dev_id);
+ 	return rbd_dev;
+-
+-fail_dev_id:
++ remove_id:
+ 	ida_simple_remove(&rbd_dev_id_ida, rbd_dev->dev_id);
+-fail_rbd_dev:
++ free_device:
+ 	rbd_dev_free(rbd_dev);
+ 	return NULL;
+ }
 -- 
 2.10.0
+
