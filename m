@@ -1,8 +1,8 @@
 From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 27/47] block-rbd: Rename a jump label in
- rbd_img_request_submit()
-Date: Mon, 12 Sep 2016 21:13:07 +0200
-Message-ID: <e136c10c-64fb-2e7f-64ea-8ae44db37d35@users.sourceforge.net>
+Subject: [PATCH 28/47] block-rbd: Refactor a jump target in
+ rbd_img_obj_exists_submit()
+Date: Mon, 12 Sep 2016 21:14:05 +0200
+Message-ID: <d35a0325-67df-8e08-5b28-827e5faecc6c@users.sourceforge.net>
 References: <566ABCD9.1060404@users.sourceforge.net>
  <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
 Mime-Version: 1.0
@@ -16,31 +16,47 @@ Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia 
 List-Id: ceph-devel.vger.kernel.org
 
 From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Mon, 12 Sep 2016 19:43:35 +0200
+Date: Mon, 12 Sep 2016 19:44:30 +0200
 
-Adjust a jump label according to the current Linux coding style convention.
+Adjust a jump target so that a duplicate check can then be avoided
+at the end.
 
 Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 ---
- drivers/block/rbd.c | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+ drivers/block/rbd.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 23812e4..17bdc21 100644
+index 17bdc21..66801ec 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -3033,10 +3033,9 @@ static int rbd_img_request_submit(struct rbd_img_request *img_request)
- 	for_each_obj_request_safe(img_request, obj_request, next_obj_request) {
- 		ret = rbd_img_obj_request_submit(obj_request);
- 		if (ret)
--			goto out_put_ireq;
-+			goto put_request;
- 	}
--
--out_put_ireq:
+@@ -2920,7 +2920,7 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+ 	stat_request = rbd_obj_request_create(obj_request->object_name, 0, 0,
+ 							OBJ_REQUEST_PAGES);
+ 	if (!stat_request)
+-		goto out;
++		goto put_request;
+ 
+ 	rbd_obj_request_get(obj_request);
+ 	stat_request->obj_request = obj_request;
+@@ -2932,7 +2932,7 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+ 	stat_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
+ 						   stat_request);
+ 	if (!stat_request->osd_req)
+-		goto out;
++		goto put_request;
+ 	stat_request->callback = rbd_img_obj_exists_callback;
+ 
+ 	osd_req_op_init(stat_request->osd_req, 0, CEPH_OSD_OP_STAT, 0);
+@@ -2942,8 +2942,8 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+ 
+ 	osdc = &rbd_dev->rbd_client->client->osdc;
+ 	ret = rbd_obj_request_submit(osdc, stat_request);
+-out:
+ 	if (ret)
 + put_request:
- 	rbd_img_request_put(img_request);
+ 		rbd_obj_request_put(obj_request);
+ 
  	return ret;
- }
 -- 
 2.10.0
