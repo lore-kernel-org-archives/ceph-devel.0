@@ -1,8 +1,7 @@
 From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 40/47] block-rbd: One function call less in
- rbd_dev_probe_parent() after error detection
-Date: Mon, 12 Sep 2016 21:29:15 +0200
-Message-ID: <41288740-f584-070d-125e-21a33d0255bf@users.sourceforge.net>
+Subject: [PATCH 45/47] block-rbd: Rename a jump label in rbd_slab_init()
+Date: Mon, 12 Sep 2016 21:34:14 +0200
+Message-ID: <c0f88ee7-fb42-081f-6660-3f8a264df0cb@users.sourceforge.net>
 References: <566ABCD9.1060404@users.sourceforge.net>
  <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
 Mime-Version: 1.0
@@ -16,71 +15,35 @@ Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia 
 List-Id: ceph-devel.vger.kernel.org
 
 From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Mon, 12 Sep 2016 20:00:08 +0200
+Date: Mon, 12 Sep 2016 20:05:42 +0200
 
-The rbd_dev_destroy() function was called in two cases by the
-rbd_dev_probe_parent() function during error handling even if
-the passed variable contained a null pointer.
-
-* Adjust jump targets according to the current Linux coding
-  style convention.
-
-* Delete an initialisation for the variable "parent" at the beginning
-  which became unnecessary with this refactoring.
+Adjust a jump label according to the current Linux coding style convention.
 
 Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 ---
- drivers/block/rbd.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ drivers/block/rbd.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index e01df3c..a037a5d 100644
+index b106c68..8802a06 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -5950,7 +5950,7 @@ out_err:
-  */
- static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
- {
--	struct rbd_device *parent = NULL;
-+	struct rbd_device *parent;
- 	int ret;
- 
- 	if (!rbd_dev->parent_spec)
-@@ -5959,13 +5959,13 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
- 	if (++depth > RBD_MAX_PARENT_CHAIN_LEN) {
- 		pr_info("parent chain is too long (%d)\n", depth);
- 		ret = -EINVAL;
+@@ -6454,14 +6454,14 @@ static int rbd_slab_init(void)
+ 	rbd_assert(!rbd_obj_request_cache);
+ 	rbd_obj_request_cache = KMEM_CACHE(rbd_obj_request, 0);
+ 	if (!rbd_obj_request_cache)
 -		goto out_err;
-+		goto unparent_device;
- 	}
++		goto destroy_cache;
  
- 	parent = __rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec);
- 	if (!parent) {
- 		ret = -ENOMEM;
--		goto out_err;
-+		goto unparent_device;
- 	}
- 
- 	/*
-@@ -5977,15 +5977,15 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
- 
- 	ret = rbd_dev_image_probe(parent, depth);
- 	if (ret < 0)
--		goto out_err;
-+		goto destroy_device;
- 
- 	rbd_dev->parent = parent;
- 	atomic_set(&rbd_dev->parent_ref, 1);
- 	return 0;
--
+ 	rbd_assert(!rbd_segment_name_cache);
+ 	rbd_segment_name_cache = kmem_cache_create("rbd_segment_name",
+ 					CEPH_MAX_OID_NAME_LEN + 1, 1, 0, NULL);
+ 	if (rbd_segment_name_cache)
+ 		return 0;
 -out_err:
--	rbd_dev_unparent(rbd_dev);
-+ destroy_device:
- 	rbd_dev_destroy(parent);
-+ unparent_device:
-+	rbd_dev_unparent(rbd_dev);
- 	return ret;
- }
++ destroy_cache:
+ 	kmem_cache_destroy(rbd_obj_request_cache);
+ 	rbd_obj_request_cache = NULL;
  
 -- 
 2.10.0
