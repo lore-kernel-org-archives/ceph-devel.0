@@ -1,8 +1,7 @@
 From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 16/47] block-rbd: Rename jump labels in
- rbd_dev_v1_header_info()
-Date: Mon, 12 Sep 2016 21:01:42 +0200
-Message-ID: <ff082acc-cdcc-2738-6242-d8ef35c42999@users.sourceforge.net>
+Subject: [PATCH 17/47] block-rbd: Rename jump labels in rbd_init_disk()
+Date: Mon, 12 Sep 2016 21:03:03 +0200
+Message-ID: <fbc4c5ad-5337-fa8d-e31d-0424e71ebcb8@users.sourceforge.net>
 References: <566ABCD9.1060404@users.sourceforge.net>
  <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
 Mime-Version: 1.0
@@ -16,7 +15,7 @@ Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia 
 List-Id: ceph-devel.vger.kernel.org
 
 From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Mon, 12 Sep 2016 18:15:44 +0200
+Date: Mon, 12 Sep 2016 18:26:28 +0200
 
 Adjust jump labels according to the current Linux coding style convention.
 
@@ -26,38 +25,35 @@ Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 262805a..0b6f0f9 100644
+index 0b6f0f9..97d4d63 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -4352,17 +4352,17 @@ static int rbd_dev_v1_header_info(struct rbd_device *rbd_dev)
- 		ret = rbd_obj_read_sync(rbd_dev, rbd_dev->header_oid.name,
- 				       0, size, ondisk);
- 		if (ret < 0)
--			goto out;
-+			goto free_header;
- 		if ((size_t)ret < size) {
- 			ret = -ENXIO;
- 			rbd_warn(rbd_dev, "short header read (want %zd got %d)",
- 				size, ret);
--			goto out;
-+			goto free_header;
- 		}
- 		if (!rbd_dev_ondisk_valid(ondisk)) {
- 			ret = -ENXIO;
- 			rbd_warn(rbd_dev, "invalid header");
--			goto out;
-+			goto free_header;
- 		}
+@@ -4500,12 +4500,12 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
  
- 		names_size = le64_to_cpu(ondisk->snap_names_len);
-@@ -4371,7 +4371,7 @@ static int rbd_dev_v1_header_info(struct rbd_device *rbd_dev)
- 	} while (snap_count != want_count);
+ 	err = blk_mq_alloc_tag_set(&rbd_dev->tag_set);
+ 	if (err)
+-		goto out_disk;
++		goto put_disk;
  
- 	ret = rbd_header_from_disk(rbd_dev, ondisk);
--out:
-+ free_header:
- 	kfree(ondisk);
+ 	q = blk_mq_init_queue(&rbd_dev->tag_set);
+ 	if (IS_ERR(q)) {
+ 		err = PTR_ERR(q);
+-		goto out_tag_set;
++		goto free_tag_set;
+ 	}
  
- 	return ret;
+ 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, q);
+@@ -4537,9 +4537,9 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ 	rbd_dev->disk = disk;
+ 
+ 	return 0;
+-out_tag_set:
++ free_tag_set:
+ 	blk_mq_free_tag_set(&rbd_dev->tag_set);
+-out_disk:
++ put_disk:
+ 	put_disk(disk);
+ 	return err;
+ }
 -- 
 2.10.0
