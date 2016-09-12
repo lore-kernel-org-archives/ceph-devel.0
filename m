@@ -1,7 +1,8 @@
 From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 25/47] block-rbd: Fix jump targets in rbd_img_parent_read()
-Date: Mon, 12 Sep 2016 21:11:27 +0200
-Message-ID: <813ced30-1914-b507-f5f8-ddc5d073c54a@users.sourceforge.net>
+Subject: [PATCH 26/47] block-rbd: Rename a jump label in
+ rbd_img_parent_read_callback()
+Date: Mon, 12 Sep 2016 21:12:18 +0200
+Message-ID: <73d111a3-5d8c-ea4e-fd2c-a22bc8c62c31@users.sourceforge.net>
 References: <566ABCD9.1060404@users.sourceforge.net>
  <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
 Mime-Version: 1.0
@@ -15,53 +16,36 @@ Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia 
 List-Id: ceph-devel.vger.kernel.org
 
 From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Mon, 12 Sep 2016 19:39:54 +0200
+Date: Mon, 12 Sep 2016 19:40:45 +0200
 
-* Adjust jump targets according to the current Linux coding
-  style convention.
-
-* Delete a duplicate check then at the end.
+Adjust a jump label according to the current Linux coding style convention.
 
 Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 ---
- drivers/block/rbd.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ drivers/block/rbd.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 09a0ed3..6777464 100644
+index 6777464..23812e4 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -3120,7 +3120,7 @@ static void rbd_img_parent_read(struct rbd_obj_request *obj_request)
- 						obj_request->length);
- 	result = -ENOMEM;
- 	if (!img_request)
--		goto out_err;
-+		goto status_indication;
+@@ -3077,7 +3077,7 @@ static void rbd_img_parent_read_callback(struct rbd_img_request *img_request)
  
- 	if (obj_request->type == OBJ_REQUEST_BIO)
- 		result = rbd_img_request_fill(img_request, OBJ_REQUEST_BIO,
-@@ -3129,17 +3129,17 @@ static void rbd_img_parent_read(struct rbd_obj_request *obj_request)
- 		result = rbd_img_request_fill(img_request, OBJ_REQUEST_PAGES,
- 						obj_request->pages);
- 	if (result)
--		goto out_err;
-+		goto put_request;
+ 	obj_request->result = img_result;
+ 	if (obj_request->result)
+-		goto out;
++		goto callback;
  
- 	img_request->callback = rbd_img_parent_read_callback;
- 	result = rbd_img_request_submit(img_request);
- 	if (result)
--		goto out_err;
-+		goto put_request;
- 
- 	return;
--out_err:
--	if (img_request)
--		rbd_img_request_put(img_request);
-+ put_request:
-+	rbd_img_request_put(img_request);
-+ status_indication:
- 	obj_request->result = result;
- 	obj_request->xferred = 0;
- 	obj_request_done_set(obj_request);
+ 	/*
+ 	 * We need to zero anything beyond the parent overlap
+@@ -3099,7 +3099,7 @@ static void rbd_img_parent_read_callback(struct rbd_img_request *img_request)
+ 	} else {
+ 		obj_request->xferred = img_xferred;
+ 	}
+-out:
++ callback:
+ 	rbd_img_obj_request_read_callback(obj_request);
+ 	rbd_obj_request_complete(obj_request);
+ }
 -- 
 2.10.0
