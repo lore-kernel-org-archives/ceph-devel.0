@@ -1,82 +1,77 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: rgw: feedback on auth engine selection
-Date: Mon, 12 Sep 2016 14:35:30 -0400
-Message-ID: <abc73f6d-9862-f77d-346e-0eb9d1aff59b@redhat.com>
-References: <e2a2e0c9-51e7-b703-2c8d-7b489d4e8994@redhat.com>
- <CA+H5UW1Qf++2R36y05GFAFTcJO2YN77W4z1yjpUMgAHitnsG-Q@mail.gmail.com>
- <6113bdf0-10fb-a30d-e4a0-797df61f8bd0@redhat.com>
- <CA+H5UW2nL1nWa6YFW7yoiuu0WE-rYxYjMpm1X+Tw6_LbvSrwwQ@mail.gmail.com>
- <1a932fce-a05d-d690-953d-6f5b74467182@redhat.com>
- <CA+H5UW32fPXFer3v_2XcHA=cAVy9b8F4u+GcHeRStaWC-SyGCg@mail.gmail.com>
+From: SF Markus Elfring <elfring@users.sourceforge.net>
+Subject: [PATCH 00/47] RADOS Block Device: Fine-tuning for several function
+ implementations
+Date: Mon, 12 Sep 2016 20:40:19 +0200
+Message-ID: <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
+References: <566ABCD9.1060404@users.sourceforge.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f171.google.com ([209.85.213.171]:33648 "EHLO
-        mail-yb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752632AbcILSfd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Sep 2016 14:35:33 -0400
-Received: by mail-yb0-f171.google.com with SMTP id n11so8462348yba.0
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Sep 2016 11:35:32 -0700 (PDT)
-In-Reply-To: <CA+H5UW32fPXFer3v_2XcHA=cAVy9b8F4u+GcHeRStaWC-SyGCg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <566ABCD9.1060404@users.sourceforge.net>
+Sender: kernel-janitors-owner@vger.kernel.org
+To: ceph-devel@vger.kernel.org, Alex Elder <elder@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
+List-Id: ceph-devel.vger.kernel.org
 
+From: Markus Elfring <elfring@users.sourceforge.net>
+Date: Mon, 12 Sep 2016 20:35:20 +0200
 
+Several update suggestions were taken into account
+from static source code analysis.
 
-On 09/12/2016 05:48 AM, Radoslaw Zarzynski wrote:
-> On Thu, Sep 8, 2016 at 8:23 PM, Casey Bodley <cbodley@redhat.com> wrote:
->> Right, this was the requirement that motivated the work on preselection, so we would only try to authenticate against engines that are properly configured and relevant to the given handler.
-> Which component should be responsible for verifying correctness
-> of configuration? I would say the best candidate is an AuthEngine
-> itself. Some time ago the static can_be_enabled() was proposed.
-> If we need that feature, maybe similar (but better named) method
-> is a way to go?
+Markus Elfring (47):
+  Use kmalloc_array() in rbd_header_from_disk()
+  Less function calls in rbd_header_from_disk() after error detection
+  Adjust the position of a jump label in rbd_header_from_disk()
+  Refactor two calls for memory allocations in rbd_dev_image_id()
+  One function call less in rbd_dev_image_id() after error detection
+  Rename jump labels in rbd_add_parse_args()
+  Rename a jump label in rbd_dev_v2_snap_name()
+  Rename jump labels in rbd_dev_v2_snap_context()
+  Rename a jump label in rbd_spec_fill_names()
+  One function call less in rbd_dev_image_name() after error detection
+  Delete three unnecessary initialisations in rbd_dev_image_name()
+  One function call less in rbd_dev_v2_parent_info() after error detection
+  Delete an unnecessary initialisation in rbd_dev_v2_parent_info()
+  Rename a jump label in rbd_dev_v2_object_prefix()
+  Rename jump labels in rbd_dev_create()
+  Rename jump labels in rbd_dev_v1_header_info()
+  Rename jump labels in rbd_init_disk()
+  Fix jump targets in rbd_queue_workfn()
+  Rename a jump label in rbd_reregister_watch()
+  Rename a jump label in rbd_register_watch()
+  Rename jump labels in rbd_try_lock()
+  Rename a jump label in find_watcher()
+  Rename jump labels in get_lock_owner_info()
+  Rename jump labels in rbd_request_lock()
+  Fix jump targets in rbd_img_parent_read()
+  Rename a jump label in rbd_img_parent_read_callback()
+  Rename a jump label in rbd_img_request_submit()
+  Refactor a jump target in rbd_img_obj_exists_submit()
+  Delete an unnecessary initialisation in rbd_img_obj_exists_submit()
+  Refactor a jump target in rbd_img_obj_exists_callback()
+  Fix three jump targets in rbd_img_obj_parent_read_full()
+  Rename a jump label in rbd_img_obj_parent_read_full_callback()
+  Adjust the position of a jump label in rbd_img_request_fill()
+  Rename a jump label in rbd_img_obj_callback()
+  Rename jump labels in rbd_osd_req_create_copyup()
+  Rename jump labels in rbd_osd_req_create()
+  Rename a jump label in bio_chain_clone_range()
+  Rename jump labels in rbd_client_create()
+  Rename a jump label in rbd_ioctl_set_ro()
+  One function call less in rbd_dev_probe_parent() after error detection
+  Rename jump labels in rbd_dev_device_setup()
+  Rename jump labels in rbd_dev_image_probe()
+  Rename jump labels in do_rbd_add()
+  Delete an unnecessary initialisation in do_rbd_add()
+  Rename a jump label in rbd_slab_init()
+  Rename jump labels in rbd_init()
+  Delete unwanted spaces behind usages of the sizeof operator
 
-I think this responsibility needs to be shared between the auth method 
-and the module (s3, swift, or nfs) that's trying to configure it. The 
-objection to a static can_be_enabled() method as part of the AuthEngine 
-interface was that it doesn't allow different modules to provide a 
-custom configuration - it could only decide based on global state like 
-ceph.conf. That said, I do think it makes sense for the concrete 
-AuthEngine types to provide their own methods that take whatever 
-configuration parameters are relevant to that auth type.
+ drivers/block/rbd.c | 544 ++++++++++++++++++++++++++--------------------------
+ 1 file changed, 272 insertions(+), 272 deletions(-)
 
-As an example, here's how I see s3 constructing its auth strategy:
-
-using AuthEnginePtr = std::unique_ptr<AuthEngine>;
-using AuthStrategy = std::vector<AuthEnginePtr>;
-
-static AuthStrategy get_s3_auth_strategy()
-{
-   AuthStrategy strategy;
-
-   // try to configure LDAP
-   LDAPAuthEngine ldap;
-   if (ldap.initialize(ldap_uri, ldap_binddn, ldap_bindpw, 
-ldap_searchdn, ldap_dnattr)) {
-     AuthEnginePtr ptr{new LDAPAuthEngine(std::move(ldap))};
-     strategy.emplace_back(std::move(ptr));
-   }
-
-   ...
-   return strategy;
-}
-
-(this assumes the 'stateless' version of AuthEngine, where its only 
-state is configuration, rather than the state needed to authenticate a 
-single request. so initialize() is a non-static member function)
-
->> With respect to changing the auth strategy (i.e. the list of engines configured for a given handler) at runtime, I'm not sure it's worth the complexity at this point, and we certainly don't want to add locking to do this safely. [note that we do have 'dynamic reconfiguration' which pauses the frontend while it reloads RGWRados, so we could use that mechanism to change auth strategy without needing new locks]
-> Great. It looks that at this phase we don't need to have the feature onboard.
-> It's enough to just don't prohibit implementing it in the future.
->
-> P.S.
-> Sorry for resending this letter, Casey. I had accidentally sent HTML
-> on my mobile client. The message was refused by vger.kernel.org.
->
-> Regards,
-> Radek
+-- 
+2.10.0
 
