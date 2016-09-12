@@ -1,135 +1,117 @@
-From: Loic Dachary <ldachary@redhat.com>
-Subject: Re: ceph v10.2.3 QE validation status
-Date: Mon, 12 Sep 2016 22:00:13 +0200
-Message-ID: <57D7094D.9050400@redhat.com>
-References: <CAMMFjmHb=m_WJg8TMaVBOdXB37=viYOBSOYEXL_Bo3kET=hyoA@mail.gmail.com>
- <CAMMFjmFRHAu8cPpLatorQ_LZ_5fcAbA082ivT1N7bA9Qr_qgdg@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore memory leak
+Date: Mon, 12 Sep 2016 20:54:38 +0000
+Message-ID: <BL2PR02MB211523F7620D138235D6B2CBF4FF0@BL2PR02MB2115.namprd02.prod.outlook.com>
+References: <BL2PR02MB21153E4497C3C2364B543BAEF4FB0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <3effe79d-b044-c6a2-36d0-53d0b3c149ce@redhat.com>
+ <BL2PR02MB2115528CD794399F5E7D7A75F4FB0@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <777f0f87-864a-a88e-fd37-39ff7e309c62@redhat.com>
+ <BL2PR02MB2115B854CD3ECBA130B8731AF4FB0@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59032 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750998AbcILUAS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 12 Sep 2016 16:00:18 -0400
-In-Reply-To: <CAMMFjmFRHAu8cPpLatorQ_LZ_5fcAbA082ivT1N7bA9Qr_qgdg@mail.gmail.com>
+Received: from mail-cys01nam02on0081.outbound.protection.outlook.com ([104.47.37.81]:27030
+        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751260AbcILUyl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 12 Sep 2016 16:54:41 -0400
+In-Reply-To: <BL2PR02MB2115B854CD3ECBA130B8731AF4FB0@BL2PR02MB2115.namprd02.prod.outlook.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <loic@dachary.org>, "Weil, Sage" <sage@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, David Zafman <dzafman@redhat.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+Mark,
+Thanks for soname* param , it worked with tcmalloc for me..
 
+Sage,
+Please find the valgrind memcheck output here..
+https://docs.google.com/document/d/12yx8jVmdkXrYPmq4DSxcdUBWc8xKrPjJDOTES29=
+9_do/edit?usp=3Dsharing
 
-On 09/09/2016 20:19, Yuri Weinstein wrote:
-> Ticket http://tracker.ceph.com/issues/16344#note-46 updated with dev
-> leads approvals (pls review) as following (suites marked with * still
-> need decision/fix):
->
-> rados:
->    http://tracker.ceph.com/issues/16516 (approved by DavidZ)
->
-> rbd:
->    multiple issues (Approved by Jason)
->
-> krbd:
->    http://tracker.ceph.com/issues/17223
->    http://tracker.ceph.com/issues/17221
->    http://tracker.ceph.com/issues/17222
->    (Approved by Ilya)
->
-> * knfs
->    http://tracker.ceph.com/issues/17192
->    (Greg pls review/approve, note: it's similar we saw in hammer point release)
->
-> * samba:
->    http://tracker.ceph.com/issues/17184
->    (Greg pls review/approve)
->
-> upgrade/client-upgrade:about:startpage
->    http://tracker.ceph.com/issues/16506
->    (Approved by Loic)
->
-> upgrade/infernalis-x (jewel):
->    http://tracker.ceph.com/issues/17176
->    (Approved by Loic)
->
-> * powercycle:
->    http://tracker.ceph.com/issues/17177
->    (Sage  pls review/approve)
->
-> * ceph-disk
->    http://tracker.ceph.com/issues/17114
->    http://tracker.ceph.com/issues/17100
->    (Loic  pls review/approve)
-I confirm that these problems are related to the test suite and not ceph-disk executable. Therefore they are not, in my opinion, blockers for the jewel release.
+It seems it is leaking memory (see 'definitely lost')..I will go through th=
+e code and try to find out if those are valid or not. Thought of sharing wi=
+th you meanwhile as it will be much faster if you have time to look as well=
+ :-)
 
-Cheers
-> Thx
-> YuriW
->
-> On Tue, Sep 6, 2016 at 10:12 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
->> Detailed summary of the QE Validation can be found here
->> http://tracker.ceph.com/issues/16344#note-46
->>
->> The following suites were in scope of this point release validation:
->>
->> rados (subset 35/50 297 jobs)
->> rbd
->> rgw
->> fs
->> krbd
->> kcephfs
->> knfs
->> rest
->> hadoop
->> samba
->> ceph-deploy
->> ceph-disk
->> upgrade/client-upgrade
->> upgrade/hammer-x (jewel)
->> upgrade/infernalis-x (jewel)
->> powercycle
->> (please let me know if any suites are missing from this ^ list)
->>
->> ==============================
->> Issues requiring approval/decision:
->>
->> rados:
->>    http://tracker.ceph.com/issues/16516 (approved by DavidZ)
->>
->> rbd:
->>    multiple issues (Jason pls rview/approve, see notes
->> http://tracker.ceph.com/issues/16344#note-46)
->>
->> krbd:
->>    http://tracker.ceph.com/issues/17223
->>    http://tracker.ceph.com/issues/17221
->>    http://tracker.ceph.com/issues/17222
->>    (Jason pls rview/approve)
->>
->> knfs
->>    http://tracker.ceph.com/issues/17192
->>    (Greg pls rview/approve, note: it's similar we saw in hammer point release)
->>
->> samba:
->>    http://tracker.ceph.com/issues/17184
->>    (Greg pls rview/approve)
->>
->> upgrade/client-upgrade:about:startpage
->>    http://tracker.ceph.com/issues/16506
->>    (Sage, Sam, Jason pls rview/approve)
->>
->> upgrade/infernalis-x (jewel):
->>    http://tracker.ceph.com/issues/17176
->>    (Sam, David  pls rview/approve)
->>
->> powercycle:
->>    http://tracker.ceph.com/issues/17177
->>    (Sage  pls rview/approve)
->>
->> Loic, given that we have high number of issues in this release, if you
->> and dev leads find that we need to add more backports we may consider
->> validating a new point RC (sha1).
->>
->> Thx
->> YuriW
+Regards
+Somnath
 
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel=
+.org] On Behalf Of Somnath Roy
+Sent: Thursday, September 08, 2016 1:32 PM
+To: Mark Nelson; ceph-devel
+Subject: RE: Bluestore memory leak
+
+Yes, a bit probably :-)..Will try to find out from where it is leaking..
+
+-----Original Message-----
+From: Mark Nelson [mailto:mnelson@redhat.com]
+Sent: Thursday, September 08, 2016 1:28 PM
+To: Somnath Roy; ceph-devel
+Subject: Re: Bluestore memory leak
+
+What I'm seeing is that after 5 minutes of 4k random writes, my OSDs are us=
+ing about half the memory they were previously.  I'm not sure we have entir=
+ely fixed it, but can you you confirm that it's at least growing slower tha=
+n it used to?
+
+Mark
+
+On 09/08/2016 03:24 PM, Somnath Roy wrote:
+> Sage/Mark,
+> Leak is still there with latest master, I can't complete a 5 min run , me=
+mory is getting full.
+>
+> root@emsnode11:~/ceph-master/build# ceph -v
+> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***=20
+> ceph version v11.0.0-2173-g0985370
+> (0985370d2d729c6b8ef373e2dc4241b0eea474bf)
+> root@emsnode11:~/ceph-master/build#
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Mark Nelson [mailto:mnelson@redhat.com]
+> Sent: Wednesday, September 07, 2016 7:04 PM
+> To: Somnath Roy; ceph-devel
+> Subject: Re: Bluestore memory leak
+>
+> Hi Somnath,
+>
+> I complained loudly and often enough to get Sage to take a look and he fi=
+xed a bunch of stuff. :)  The following PR dramatically improves things, th=
+ough I haven't verified that it's totally fixed yet:
+>
+> https://github.com/ceph/ceph/pull/11011
+>
+> Mark
+>
+> On 09/07/2016 08:08 PM, Somnath Roy wrote:
+>> Sage,
+>> As Mark said, the latest code has severe memory leak , my system memory =
+(64GB) started swapping after 3 min of 4K RW run.
+>>
+>> Thanks & Regards
+>> Somnath
+>> PLEASE NOTE: The information contained in this electronic mail message i=
+s intended only for the use of the designated recipient(s) named above. If =
+the reader of this message is not the intended recipient, you are hereby no=
+tified that you have received this message in error and that any review, di=
+ssemination, distribution, or copying of this message is strictly prohibite=
+d. If you have received this communication in error, please notify the send=
+er by telephone or e-mail (as shown above) immediately and destroy any and =
+all copies of this message in your possession (whether hard copies or elect=
+ronically stored copies).
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo=20
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in th=
+e body of a message to majordomo@vger.kernel.org More majordomo info at  ht=
+tp://vger.kernel.org/majordomo-info.html
