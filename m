@@ -1,7 +1,7 @@
 From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 24/47] block-rbd: Rename jump labels in rbd_request_lock()
-Date: Mon, 12 Sep 2016 21:10:34 +0200
-Message-ID: <e5bdbae6-c9d0-8c0d-9ba7-95826cf726b4@users.sourceforge.net>
+Subject: [PATCH 25/47] block-rbd: Fix jump targets in rbd_img_parent_read()
+Date: Mon, 12 Sep 2016 21:11:27 +0200
+Message-ID: <813ced30-1914-b507-f5f8-ddc5d073c54a@users.sourceforge.net>
 References: <566ABCD9.1060404@users.sourceforge.net>
  <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
 Mime-Version: 1.0
@@ -15,54 +15,53 @@ Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia 
 List-Id: ceph-devel.vger.kernel.org
 
 From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Mon, 12 Sep 2016 19:38:52 +0200
+Date: Mon, 12 Sep 2016 19:39:54 +0200
 
-Adjust jump labels according to the current Linux coding style convention.
+* Adjust jump targets according to the current Linux coding
+  style convention.
+
+* Delete a duplicate check then at the end.
 
 Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 ---
- drivers/block/rbd.c | 12 +++++-------
- 1 file changed, 5 insertions(+), 7 deletions(-)
+ drivers/block/rbd.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index e175d21..09a0ed3 100644
+index 09a0ed3..6777464 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -3297,7 +3297,7 @@ static int rbd_request_lock(struct rbd_device *rbd_dev)
- 				   &reply_pages, &reply_len);
- 	if (ret && ret != -ETIMEDOUT) {
- 		rbd_warn(rbd_dev, "failed to request lock: %d", ret);
--		goto out;
-+		goto release_page_vector;
- 	}
+@@ -3120,7 +3120,7 @@ static void rbd_img_parent_read(struct rbd_obj_request *obj_request)
+ 						obj_request->length);
+ 	result = -ENOMEM;
+ 	if (!img_request)
+-		goto out_err;
++		goto status_indication;
  
- 	if (reply_len > 0 && reply_len <= PAGE_SIZE) {
-@@ -3321,7 +3321,7 @@ static int rbd_request_lock(struct rbd_device *rbd_dev)
- 				rbd_warn(rbd_dev,
- 					 "duplicate lock owners detected");
- 				ret = -EIO;
--				goto out;
-+				goto release_page_vector;
- 			}
+ 	if (obj_request->type == OBJ_REQUEST_BIO)
+ 		result = rbd_img_request_fill(img_request, OBJ_REQUEST_BIO,
+@@ -3129,17 +3129,17 @@ static void rbd_img_parent_read(struct rbd_obj_request *obj_request)
+ 		result = rbd_img_request_fill(img_request, OBJ_REQUEST_PAGES,
+ 						obj_request->pages);
+ 	if (result)
+-		goto out_err;
++		goto put_request;
  
- 			lock_owner_responded = true;
-@@ -3342,14 +3342,12 @@ static int rbd_request_lock(struct rbd_device *rbd_dev)
- 		rbd_warn(rbd_dev, "no lock owners detected");
- 		ret = -ETIMEDOUT;
- 	}
--
--out:
-+ release_page_vector:
- 	ceph_release_page_vector(reply_pages, calc_pages_for(0, reply_len));
- 	return ret;
--
--e_inval:
-+ e_inval:
- 	ret = -EINVAL;
--	goto out;
-+	goto release_page_vector;
- }
+ 	img_request->callback = rbd_img_parent_read_callback;
+ 	result = rbd_img_request_submit(img_request);
+ 	if (result)
+-		goto out_err;
++		goto put_request;
  
- static void wake_requests(struct rbd_device *rbd_dev, bool wake_all)
+ 	return;
+-out_err:
+-	if (img_request)
+-		rbd_img_request_put(img_request);
++ put_request:
++	rbd_img_request_put(img_request);
++ status_indication:
+ 	obj_request->result = result;
+ 	obj_request->xferred = 0;
+ 	obj_request_done_set(obj_request);
 -- 
 2.10.0
