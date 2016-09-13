@@ -1,80 +1,118 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 04/47] block-rbd: Refactor two calls for memory
- allocations in rbd_dev_image_id()
-Date: Tue, 13 Sep 2016 10:03:11 +0200
-Message-ID: <CAOi1vP_KmPfS0EEQ14TAuQs3m3UMnzFf_oVn3ZmKvFuOGnQ_Ug@mail.gmail.com>
+Subject: Re: [PATCH 06/47] block-rbd: Rename jump labels in rbd_add_parse_args()
+Date: Tue, 13 Sep 2016 10:05:59 +0200
+Message-ID: <CAOi1vP9aRfwLYunq+6DL5y6Fby8P17bhK651kvZfG=bXb+F_hA@mail.gmail.com>
 References: <566ABCD9.1060404@users.sourceforge.net> <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
- <dd52b320-58e3-48f7-f909-49bd3f388a5e@users.sourceforge.net>
+ <96128866-0e4e-65bb-9342-44ce885616e5@users.sourceforge.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f193.google.com ([209.85.217.193]:34095 "EHLO
-        mail-ua0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751574AbcIMIDN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Sep 2016 04:03:13 -0400
-In-Reply-To: <dd52b320-58e3-48f7-f909-49bd3f388a5e@users.sourceforge.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <96128866-0e4e-65bb-9342-44ce885616e5@users.sourceforge.net>
+Sender: linux-kernel-owner@vger.kernel.org
 To: SF Markus Elfring <elfring@users.sourceforge.net>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Sep 12, 2016 at 8:45 PM, SF Markus Elfring
+On Mon, Sep 12, 2016 at 8:47 PM, SF Markus Elfring
 <elfring@users.sourceforge.net> wrote:
 > From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Sun, 11 Sep 2016 14:48:41 +0200
+> Date: Sun, 11 Sep 2016 15:20:48 +0200
 >
-> * Pass the sizes for memory allocations to the corresponding functions
->   directly without storing the calculated values in an
->   intermediate variable.
->
-> * Delete the local variable "size" which became unnecessary with
->   this refactoring.
+> Adjust jump labels according to the current Linux coding style convention.
 >
 > Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 > ---
->  drivers/block/rbd.c | 10 ++++------
->  1 file changed, 4 insertions(+), 6 deletions(-)
+>  drivers/block/rbd.c | 24 ++++++++++++------------
+>  1 file changed, 12 insertions(+), 12 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index d61a066..c1da844 100644
+> index a6d9a06..dd4da1f 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -5833,7 +5833,6 @@ again:
->  static int rbd_dev_image_id(struct rbd_device *rbd_dev)
->  {
->         int ret;
-> -       size_t size;
->         char *object_name;
->         void *response;
->         char *image_id;
-> @@ -5854,17 +5853,16 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
->          * First, see if the format 2 image id file exists, and if
->          * so, get the image's persistent id from it.
->          */
-> -       size = sizeof (RBD_ID_PREFIX) + strlen(rbd_dev->spec->image_name);
-> -       object_name = kmalloc(size, GFP_NOIO);
-> +       object_name = kmalloc(sizeof(RBD_ID_PREFIX)
-> +                             + strlen(rbd_dev->spec->image_name),
-> +                             GFP_NOIO);
->         if (!object_name)
+> @@ -5709,27 +5709,27 @@ static int rbd_add_parse_args(const char *buf,
 >                 return -ENOMEM;
->         sprintf(object_name, "%s%s", RBD_ID_PREFIX, rbd_dev->spec->image_name);
->         dout("rbd id object name is %s\n", object_name);
+>         if (!*options) {
+>                 rbd_warn(NULL, "no options provided");
+> -               goto out_err;
+> +               goto free_options;
+>         }
 >
->         /* Response will be an encoded string, which includes a length */
-> -
-> -       size = sizeof (__le32) + RBD_IMAGE_ID_LEN_MAX;
-> -       response = kzalloc(size, GFP_NOIO);
-> +       response = kzalloc(sizeof(__le32) + RBD_IMAGE_ID_LEN_MAX, GFP_NOIO);
->         if (!response) {
->                 ret = -ENOMEM;
->                 goto out;
+>         spec = rbd_spec_alloc();
+>         if (!spec)
+> -               goto out_mem;
+> +               goto status_indication;
+>
+>         spec->pool_name = dup_token(&buf, NULL);
+>         if (!spec->pool_name)
+> -               goto out_mem;
+> +               goto status_indication;
+>         if (!*spec->pool_name) {
+>                 rbd_warn(NULL, "no pool name provided");
+> -               goto out_err;
+> +               goto free_options;
+>         }
+>
+>         spec->image_name = dup_token(&buf, NULL);
+>         if (!spec->image_name)
+> -               goto out_mem;
+> +               goto status_indication;
+>         if (!*spec->image_name) {
+>                 rbd_warn(NULL, "no image name provided");
+> -               goto out_err;
+> +               goto free_options;
+>         }
+>
+>         /*
+> @@ -5742,11 +5742,11 @@ static int rbd_add_parse_args(const char *buf,
+>                 len = sizeof (RBD_SNAP_HEAD_NAME) - 1;
+>         } else if (len > RBD_MAX_SNAP_NAME_LEN) {
+>                 ret = -ENAMETOOLONG;
+> -               goto out_err;
+> +               goto free_options;
+>         }
+>         snap_name = kmemdup(buf, len + 1, GFP_KERNEL);
+>         if (!snap_name)
+> -               goto out_mem;
+> +               goto status_indication;
+>         *(snap_name + len) = '\0';
+>         spec->snap_name = snap_name;
+>
+> @@ -5754,7 +5754,7 @@ static int rbd_add_parse_args(const char *buf,
+>
+>         rbd_opts = kzalloc(sizeof (*rbd_opts), GFP_KERNEL);
+>         if (!rbd_opts)
+> -               goto out_mem;
+> +               goto status_indication;
+>
+>         rbd_opts->read_only = RBD_READ_ONLY_DEFAULT;
+>         rbd_opts->queue_depth = RBD_QUEUE_DEPTH_DEFAULT;
+> @@ -5764,7 +5764,7 @@ static int rbd_add_parse_args(const char *buf,
+>                                         parse_rbd_opts_token, rbd_opts);
+>         if (IS_ERR(copts)) {
+>                 ret = PTR_ERR(copts);
+> -               goto out_err;
+> +               goto free_options;
+>         }
+>         kfree(options);
+>
+> @@ -5773,9 +5773,9 @@ static int rbd_add_parse_args(const char *buf,
+>         *rbd_spec = spec;
+>
+>         return 0;
+> -out_mem:
+> + status_indication:
+>         ret = -ENOMEM;
+> -out_err:
+> + free_options:
+>         kfree(rbd_opts);
+>         rbd_spec_put(spec);
+>         kfree(options);
 > --
 > 2.10.0
->
 
-How is this any better?  If anything, it makes the first kmalloc() call
-slightly less readable.
+For a ret = -ENOMEM; statement, your status_indication label actually
+conveys less information than out_mem did.  Don't waste everybody's
+time by sending these pointless rename patches, please.
 
 Thanks,
 
