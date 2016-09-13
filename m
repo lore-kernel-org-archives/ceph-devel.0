@@ -1,73 +1,50 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 28/47] block-rbd: Refactor a jump target in rbd_img_obj_exists_submit()
-Date: Tue, 13 Sep 2016 10:10:48 +0200
-Message-ID: <CAOi1vP_ETMVvw5WhRM-Zbe8Aec+sXDJm2-W8+w3EZ-bccVzEnA@mail.gmail.com>
-References: <566ABCD9.1060404@users.sourceforge.net> <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
- <d35a0325-67df-8e08-5b28-827e5faecc6c@users.sourceforge.net>
+From: SF Markus Elfring <elfring@users.sourceforge.net>
+Subject: Re: [PATCH 03/47] block-rbd: Adjust the position of a jump label in
+ rbd_header_from_disk()
+Date: Tue, 13 Sep 2016 10:12:32 +0200
+Message-ID: <121f05b0-ac94-4d81-289e-9dc3668eab95@users.sourceforge.net>
+References: <566ABCD9.1060404@users.sourceforge.net>
+ <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
+ <71b06567-1ea9-204d-d61b-2af4426d9cd1@users.sourceforge.net>
+ <CAOi1vP9iQ6u7dm0dRMg4rs6tLaR5mv55yew0URTX00-y6C0S6g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f194.google.com ([209.85.217.194]:34927 "EHLO
-        mail-ua0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751044AbcIMIKu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Sep 2016 04:10:50 -0400
-In-Reply-To: <d35a0325-67df-8e08-5b28-827e5faecc6c@users.sourceforge.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: SF Markus Elfring <elfring@users.sourceforge.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAOi1vP9iQ6u7dm0dRMg4rs6tLaR5mv55yew0URTX00-y6C0S6g@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Sep 12, 2016 at 9:14 PM, SF Markus Elfring
-<elfring@users.sourceforge.net> wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Mon, 12 Sep 2016 19:44:30 +0200
->
-> Adjust a jump target so that a duplicate check can then be avoided
-> at the end.
->
-> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
-> ---
->  drivers/block/rbd.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 17bdc21..66801ec 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -2920,7 +2920,7 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
->         stat_request = rbd_obj_request_create(obj_request->object_name, 0, 0,
->                                                         OBJ_REQUEST_PAGES);
->         if (!stat_request)
-> -               goto out;
-> +               goto put_request;
->
->         rbd_obj_request_get(obj_request);
->         stat_request->obj_request = obj_request;
-> @@ -2932,7 +2932,7 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
->         stat_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
->                                                    stat_request);
->         if (!stat_request->osd_req)
-> -               goto out;
-> +               goto put_request;
->         stat_request->callback = rbd_img_obj_exists_callback;
->
->         osd_req_op_init(stat_request->osd_req, 0, CEPH_OSD_OP_STAT, 0);
-> @@ -2942,8 +2942,8 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
->
->         osdc = &rbd_dev->rbd_client->client->osdc;
->         ret = rbd_obj_request_submit(osdc, stat_request);
-> -out:
->         if (ret)
-> + put_request:
->                 rbd_obj_request_put(obj_request);
->
->         return ret;
-> --
-> 2.10.0
+>> @@ -1064,7 +1064,7 @@ static int rbd_header_from_disk(struct rbd_device *rbd_dev,
+>>         header->snap_sizes = snap_sizes;
+>>
+>>         return 0;
+>> -out_2big:
+>> + out_2big:
+>>         ret = -EIO;
+>>         kfree(snap_sizes);
+>>   free_names:
+…
+> Can you point where this current convention is documented?
 
-Don't do this.  goto into an if block is rarely a good idea, more so
-when you are attempting to micro-optimize a very cold error path.
+Yes.
+https://git.kernel.org/cgit/linux/kernel/git/next/linux-next.git/commit/Documentation/CodingStyle?id=865a1caa4b6b886babdd9d67e7c3608be4567a51
 
-Thanks,
+Do you find the software update "CodingStyle: Clarify and complete chapter 7" interesting?
 
-                Ilya
+
+> Certainly not in CodingStyle, AFAICT...
+
+I suggest to look at the current version once more.
+
+
+> I know some people prefer a single space in there because it makes
+> "diff -p" work better, but nowadays with "git diff" this argument is
+> pretty moot.
+
+Would you like to discuss the corresponding software evolution a bit more?
+
+Regards,
+Markus
