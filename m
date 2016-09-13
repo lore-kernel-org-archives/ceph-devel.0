@@ -1,32 +1,24 @@
-From: Mark Nelson <mnelson@redhat.com>
+From: Gregory Farnum <gfarnum@redhat.com>
 Subject: Re: Are we ready to move from Trusty to Xenial in the lab?
-Date: Tue, 13 Sep 2016 14:08:28 -0500
-Message-ID: <be4fe90c-8dcf-8307-5c6a-01d1de0705c6@redhat.com>
+Date: Tue, 13 Sep 2016 12:47:32 -0700
+Message-ID: <CAJ4mKGZBENbrtbzkM-Pbmqa=KwvAK2QvMc8h3-GJ0+SnQdfH9w@mail.gmail.com>
 References: <CABq-AyRr-tKgtm9dOF4g2fxL7aR4jPfYtLppBc_12Uh39xJL8g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46496 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1759239AbcIMTIa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Sep 2016 15:08:30 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 83ABE8553E
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Sep 2016 19:08:30 +0000 (UTC)
+Received: from mail-yw0-f171.google.com ([209.85.161.171]:36132 "EHLO
+        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1759880AbcIMTre (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Sep 2016 15:47:34 -0400
+Received: by mail-yw0-f171.google.com with SMTP id u124so99861320ywg.3
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Sep 2016 12:47:33 -0700 (PDT)
 In-Reply-To: <CABq-AyRr-tKgtm9dOF4g2fxL7aR4jPfYtLppBc_12Uh39xJL8g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Meno <gmeno@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Meno <gmeno@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Maybe prototype it first on the new smithi nodes and if everything looks 
-good, move the rest over?
-
-Mark
-
-On 09/13/2016 02:05 PM, Gregory Meno wrote:
+On Tue, Sep 13, 2016 at 12:05 PM, Gregory Meno <gmeno@redhat.com> wrote:
 > Hello readers,
 >
 > I am aware that our nightly tests are running on centos7 and trusty in
@@ -46,14 +38,17 @@ On 09/13/2016 02:05 PM, Gregory Meno wrote:
 > machines on the fly before each test (edeploy --
 > https://github.com/redhat-cip/edeploy)
 > * python3 isn't quite ready and we'll feel a lot of pain in the short term
->
-> Is there something I'm missing here?
-> Should we just go ahead and see how it goes?
->
-> cheers,
-> Gregory
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+
+We'll still have python2 available, right? What's the specific pain point here?
+
+I'm thinking of stuff like ceph-mgr and CephVolumeClient (...and
+calamari?) which are still python 2 and don't have any work scheduled
+to update them yet. If that's a blocker, that would be a reason. But I
+think it just means teuthology needs to install python2 and use it
+easily?
+
+Anyway, as Mark said we don't need to move everything. We can image
+the new machines and put them in a different pool and run all the
+suites through to see if there's trouble, or just do it on a couple
+testnodes or something.
+-Greg
