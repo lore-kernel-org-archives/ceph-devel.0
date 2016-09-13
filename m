@@ -1,54 +1,76 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Snapshots of consistency groups
-Date: Tue, 13 Sep 2016 08:33:11 -0400
-Message-ID: <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
-References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
- <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
- <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
- <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
- <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
- <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
- <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
- <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
- <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
- <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
- <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
- <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
- <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
- <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
- <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
- <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com> <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: msgr2 protocol
+Date: Tue, 13 Sep 2016 13:21:50 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1609131316230.19761@piezo.us.to>
+References: <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com> <alpine.DEB.2.11.1606100649010.6221@cpach.fuggernut.com> <20160610190510.GA18999@degu.eng.arb.redhat.com> <alpine.DEB.2.11.1606101658530.6221@cpach.fuggernut.com>
+ <20160611230503.GA18268@degu.eng.arb.redhat.com> <alpine.DEB.2.11.1606121950490.32559@cpach.fuggernut.com> <CACJqLyax_SXEZp3vA2_wR+CdwKOo2Re=SsK2xfXqmXjz9d8iNw@mail.gmail.com> <alpine.DEB.2.11.1609092112171.19761@piezo.us.to>
+ <CACJqLyYwKZ5_1OHR_5=+mr=1ED2Nt34x4TB29j5dE1D+NjzFpg@mail.gmail.com> <CACJqLybA-cArcno2oS0AZx238hrV64PZyK9fFXdCBuVHKQQP3Q@mail.gmail.com> <alpine.DEB.2.11.1609111703430.19761@piezo.us.to> <CACJqLybGs1paSFu4zBEFW8dhYVBfDHSEzY3RwKGvDA03wdiF2A@mail.gmail.com>
+ <alpine.DEB.2.11.1609121319270.19761@piezo.us.to> <CAJ4mKGZYTr4D1dXa8aEt9muNwrOA9DsxRzWVf0=zWH44VZ-Onw@mail.gmail.com> <CACJqLyZOh=scFqW2LyWMQ3h9LND0mXkaycs=38XfNjJKQwWryg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f172.google.com ([209.85.192.172]:36574 "EHLO
-        mail-pf0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750999AbcIMMdN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Sep 2016 08:33:13 -0400
-Received: by mail-pf0-f172.google.com with SMTP id 128so63229486pfb.3
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Sep 2016 05:33:13 -0700 (PDT)
-In-Reply-To: <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:38088 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751633AbcIMNVx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Sep 2016 09:21:53 -0400
+In-Reply-To: <CACJqLyZOh=scFqW2LyWMQ3h9LND0mXkaycs=38XfNjJKQwWryg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Victor Denisov <vdenisov@mirantis.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Haomai Wang <haomai@xsky.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Marcus Watts <mwatts@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Sep 12, 2016 at 7:09 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
-> I also think, probably, moving existing group api to Group.cc can be
-> done in a separate pull request.
+On Tue, 13 Sep 2016, Haomai Wang wrote:
+> On Tue, Sep 13, 2016 at 8:03 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> > On Mon, Sep 12, 2016 at 6:21 AM, Sage Weil <sweil@redhat.com> wrote:
+> >> On Mon, 12 Sep 2016, Haomai Wang wrote:
+> >>> This way is ok to me. So another change is double messenger
+> >>> instances(to v1 and v2) or let each messenger support multi binding
+> >>> addresses(this may need to refactor messenger interface).
+> >>
+> >> Yeah.  I'm guessing we'll want to have an entity_addrvec_t with address
+> >> types mapped to different Messenger implementations (e.g., xio), so we'll
+> >> wan to allow multiple instance eventually.  But we'll also just want to
+> >> allow multiple binding (v1 + v2, or ipv4 + ipv6).  :/
+> >
+> > Hmm, is that really necessary? It seems a fair bit more complicated
+> > and I'm not sure there's much payoff given the connection types.
+> > Long-term the only doubled connection I can see being needed is the
+> > client one; OSD cluster messengers will only be required to bind twice
+> > during the initial upgrade period.
+> >
+> > Put another way, what's the advantage of supporting two different
+> > protocols within one messenger? That just sounds like a disaster
+> 
+> I don't think this version upgrade will happen right now. I guess
+> there will be a version to switch to async msgr, then we consider to
+> upgrade msgr version really.
+> 
+> > waiting to happen, and not one worth risking for slightly reducing the
+> > thread count on AsyncMessenger (especially with users coming from the
+> > SimpleMessenger).
+> 
+> Maybe you like aonther msgr like asyncmessengerv2? instead of the same
+> msgr type. From my view, msgrv2 will reduce packet per message and
+> prepare for the other new features.
 
-Agreed -- no worries.
+There are two sides to the problem: the server needs to multi-home at 
+mulitiple addresses (v1 + v2, ipv4 + ipv6 + xio, etc).  Using separate 
+Messenger instances doesn't seem like a big deal there.
 
-> On Mon, Sep 12, 2016 at 4:06 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->> Another quick question.
->> Do you think it makes sense to introduce snapshot namespaces in a pull
->> request and review it first?
->> It looks like a self sufficient change that we can merge before
->> introducing snapshots.
+On the connecting client side of things, we will regularly be presented 
+with an entity_addrvec_t for a peer and want to connect.  Something needs 
+to pick a preferred address and connect.  If it's multiple Messengers, 
+then there needs to be some multiplexing layer that opens a Connection.  
+(I think from there on out almost everything is con-handle based, so that 
+shouldn't be a problem.)
 
-Yes, I think that would be a good idea to simplify the PR and get it
-merged potentially quicker.
+For v1/v2 a single instance would do, but once we start talking about xio 
+then clearly we need the multiplexing (on both ends), so that's probably 
+the way to go.
 
--- 
-Jason
+Whether it's a fork of msg/async or a constructor argument that determines 
+which version of the protocol to speak doesn't matter much to me.  We 
+could even just make async pure v2 and leave simplemessenger for legacy 
+clients... that's the least long term code maintenance...
+
+sage
