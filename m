@@ -1,42 +1,54 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Fwd: Which IDE do you use for ceph-development?
-Date: Tue, 13 Sep 2016 07:23:31 -0500
-Message-ID: <38641b86-3ad7-968e-814a-8fdecb3ab7c4@redhat.com>
-References: <CAA8xDw3OPGikoYF3Knef5tBrCsg+Hvekhyh7BVGJZCq4Yn93Fw@mail.gmail.com>
- <CAA8xDw1RA2RhZ=ERPKK0ZjD1Zc4iWYgm_zSvNHHEdJ+q7FcJag@mail.gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: Snapshots of consistency groups
+Date: Tue, 13 Sep 2016 08:33:11 -0400
+Message-ID: <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+ <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+ <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
+ <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
+ <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
+ <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
+ <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
+ <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
+ <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
+ <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
+ <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
+ <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
+ <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
+ <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
+ <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
+ <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com> <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41652 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751561AbcIMMXd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Sep 2016 08:23:33 -0400
-In-Reply-To: <CAA8xDw1RA2RhZ=ERPKK0ZjD1Zc4iWYgm_zSvNHHEdJ+q7FcJag@mail.gmail.com>
+Received: from mail-pf0-f172.google.com ([209.85.192.172]:36574 "EHLO
+        mail-pf0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750999AbcIMMdN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Sep 2016 08:33:13 -0400
+Received: by mail-pf0-f172.google.com with SMTP id 128so63229486pfb.3
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Sep 2016 05:33:13 -0700 (PDT)
+In-Reply-To: <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Elita Lobo <loboelita@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Victor Denisov <vdenisov@mirantis.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-vim. :D
+On Mon, Sep 12, 2016 at 7:09 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+> I also think, probably, moving existing group api to Group.cc can be
+> done in a separate pull request.
 
-Mark
+Agreed -- no worries.
 
-On 09/11/2016 11:33 AM, Elita Lobo wrote:
-> Hi,
->
-> I tried using NEtbeans and Eclipse . Netbeans gave this error.
-> https://paste.fedoraproject.org/426622/61053414/
->
-> And Eclipse is not able to detect header files although I added the
-> path of the include directory.
->
-> Has anyone successfully built the ceph code on any IDE?
->
->
-> Regards,
-> Elita Lobo
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+> On Mon, Sep 12, 2016 at 4:06 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>> Another quick question.
+>> Do you think it makes sense to introduce snapshot namespaces in a pull
+>> request and review it first?
+>> It looks like a self sufficient change that we can merge before
+>> introducing snapshots.
+
+Yes, I think that would be a good idea to simplify the PR and get it
+merged potentially quicker.
+
+-- 
+Jason
