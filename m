@@ -1,48 +1,109 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Mismatching nonce for 'ceph osd.0 tell'
-Date: Tue, 13 Sep 2016 13:35:04 -0700
-Message-ID: <CAJ4mKGa+wydRuMtvCYiOe823v9UkN2Qk0FkViqHhLAPmGeFoGA@mail.gmail.com>
-References: <f54dda71-dabf-cab2-948c-83b9f2007aff@digiware.nl>
- <CACJqLybyu1_rKj7g7qSfrtZCVMhJvgcvU2Q7vfoRUvs-3hT3JQ@mail.gmail.com>
- <14688c37-068c-0bc6-615d-de2f8f5bfdc6@digiware.nl> <CAJ4mKGawPKP=rGB9t1wkwn00sYcBE8T9ac327mGLv90Z4MFxpg@mail.gmail.com>
- <3df7e2ed-eb34-8ba8-8a8d-9d7b66e45315@digiware.nl>
+From: Sage Weil <sweil@redhat.com>
+Subject: wip-denc
+Date: Tue, 13 Sep 2016 21:17:19 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1609132104590.19761@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f181.google.com ([209.85.161.181]:35368 "EHLO
-        mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750951AbcIMUfG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Sep 2016 16:35:06 -0400
-Received: by mail-yw0-f181.google.com with SMTP id u82so48304876ywc.2
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Sep 2016 13:35:05 -0700 (PDT)
-In-Reply-To: <3df7e2ed-eb34-8ba8-8a8d-9d7b66e45315@digiware.nl>
+Received: from mx1.redhat.com ([209.132.183.28]:34718 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754521AbcIMVRV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Sep 2016 17:17:21 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 436394E4D5
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Sep 2016 21:17:21 +0000 (UTC)
+Received: from ovpn-112-101.phx2.redhat.com (ovpn-112-101.phx2.redhat.com [10.3.112.101])
+        by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u8DLHJxs023017
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Sep 2016 17:17:20 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Tue, Sep 13, 2016 at 1:29 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
-> On 13-9-2016 21:52, Gregory Farnum wrote:
->> Is osd.0 actually running? If so it *should* have a socket, unless
->> you've disabled them somehow. Check the logs and see if there are
->> failures when it gets set up, I guess?
->>
->> Anyway, something has indeed gone terribly wrong here. I know at one
->> point you had some messenger patches you were using to try and get
->> stuff going on BSD; if you still have some there I think you need to
->> consider them suspect. Otherwise, uh...the network stack is behaving
->> very differently than Linux's?
->
-> So what is the expected result of an osd down/up?
->
-> Before it is connected to ports like:
->         127.0.0.1:{6800,,6801,6802}/{nonce=pid-like}
-> after the osd has gone down/up the sockets work be:
->         127.0.0.1:{6800,,6801,6802}/{(nonce=pid-like)+1000000}
->
-> or are the ports also incremented?
+Hi everyone,
 
-IIRC, it should usually be the same ports and different nonce. But the
-port is *allowed* to change; that happens sometimes if there was an
-unclean shutdown and the port is still considered in-use by the OS for
-instance.
+Okay, I have a new wip-denc branch working and ready for some review:
+
+	https://github.com/ceph/ceph/pull/11027
+
+Highlights:
+
+- This includes appender/iterator changes to buffer* to speed up 
+encoding and decoding (fewer bounds checks, simpler structures).
+
+- Accordingly, classes/types using the new-style have different arguments 
+types for encode/decode.  There is also a new bound_encode() method that 
+is used to calculate how big of a buffer to preallocate.
+
+- Most of the important helpers for doing types have new versions that 
+work with the new framework (e.g., the ENCODE_START macro has a 
+new DENC_START counterpart).
+
+- There is also a mechanism that lets you define the bound_encode, 
+encode, and decode methods all in one go using some template magic.  This 
+only works for pretty simple types, but it is handy.  It looks like so:
+
+  struct foo_t {
+    uint32_t a, b;
+    ...
+    DENC(foo_t, v, p) {
+      DENC_START(1, 1, p);
+      denc(v.a, p);
+      denc(v.b, p);
+      ...
+      DENC_FINISH(p);
+    }
+  };
+  WRITE_CLASS_DENC(foo_t)
+  
+
+- For new-style types, a new 'denc' function that is overload to do either 
+bound_encode, encode, or decode (based on argument types) is defined.  
+That means that
+
+  ::denc(v, p);
+
+will work for size_t& p, bufferptr::iterator& p, or 
+bufferlist::contiguous_appender& p.  This facilitates the DENC definitions 
+above.
+
+- There is glue to invoke new-style encode/decode when old-style encode() 
+and decode() are invoked, provided a denc_traits<T> is defined.
+
+- Most of the common containers are there list, vector, set, map, pair, 
+but others need to be converted.
+
+- Currently, we're a bit aggressive about using the new-style over the 
+old-style when we have the change.  For example, if you have 
+
+  vector<int32_t> foo;
+  ::encode(foo, bl);
+
+it will see that it knows how to do int32_t new-style and invoke the 
+new-style vector<> code.  I think this is going to be a net win, since 
+we avoid doing bounds checks on append for every element (and the 
+bound_encode is O(1) for thees base types).  On the other hand, it is 
+currently smart enough to not use new-style for individual integer 
+types, like so
+
+  int32_t v;
+  ::encode(v, bl);
+
+although I suspect after the optimizer gets done with it the generated 
+machine code is almost identical.
+
+- Most of the key bluestore types are converted over so that we can do 
+some benchmarking.
+
+An overview is at the top of the new denc.h header here:
+
+	https://github.com/liewegas/ceph/blob/wip-denc/src/include/denc.h#L55
+
+I think I've captured the best of Allen's, Varada's, and Sam's various 
+approaches, but we'll see how it behaves.  Let me know what you think!
+
+Thanks-
+sage
+
