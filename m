@@ -1,274 +1,108 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: msgr2 protocol
-Date: Tue, 13 Sep 2016 13:31:22 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609131327350.19761@piezo.us.to>
-References: <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com>         <CAJ4mKGaWx8m4Zh_f6tQWe9ows77HHyMmv5y52Rr-5Q-ob_N1Yg@mail.gmail.com>         <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com>        
- <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com>         <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com>         <CAJ4mKGbyCiWbuwGxhGu_ohf7vxNqVqgf4XQQpQ7eg-tP-YO+gg@mail.gmail.com>         <alpine.DEB.2.11.1606100649010.6221@cpach.fuggernut.com>
-         <20160610190510.GA18999@degu.eng.arb.redhat.com>         <alpine.DEB.2.11.1606101658530.6221@cpach.fuggernut.com>         <20160611230503.GA18268@degu.eng.arb.redhat.com>         <alpine.DEB.2.11.1606121950490.32559@cpach.fuggernut.com>        
- <CACJqLyax_SXEZp3vA2_wR+CdwKOo2Re=SsK2xfXqmXjz9d8iNw@mail.gmail.com>         <alpine.DEB.2.11.1609092112171.19761@piezo.us.to>         <CACJqLyYwKZ5_1OHR_5=+mr=1ED2Nt34x4TB29j5dE1D+NjzFpg@mail.gmail.com>         <CACJqLybA-cArcno2oS0AZx238hrV64PZyK9fFXdCBuVHKQQP3Q@mail.gmail.com>
-         <alpine.DEB.2.11.1609111703430.19761@piezo.us.to> <1473765504.4740.14.camel@redhat.com>
+From: Jean Delvare <jdelvare@suse.de>
+Subject: Re: [PATCH 03/47] block-rbd: Adjust the position of a jump label in
+ rbd_header_from_disk()
+Date: Tue, 13 Sep 2016 16:36:26 +0200
+Message-ID: <20160913163626.436629af@endymion>
+References: <566ABCD9.1060404@users.sourceforge.net>
+        <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
+        <71b06567-1ea9-204d-d61b-2af4426d9cd1@users.sourceforge.net>
+        <CAOi1vP9iQ6u7dm0dRMg4rs6tLaR5mv55yew0URTX00-y6C0S6g@mail.gmail.com>
+        <121f05b0-ac94-4d81-289e-9dc3668eab95@users.sourceforge.net>
+        <CAOi1vP_XDRj9B-vAYVB=qN5Z-vbq75tYU1dFADRBz6P+J6V56Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-532798250-1473773484=:19761"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37472 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757072AbcIMNbZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Sep 2016 09:31:25 -0400
-In-Reply-To: <1473765504.4740.14.camel@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: Haomai Wang <haomai@xsky.com>, Marcus Watts <mwatts@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
-
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-532798250-1473773484=:19761
-Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAOi1vP_XDRj9B-vAYVB=qN5Z-vbq75tYU1dFADRBz6P+J6V56Q@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Jonathan Corbet <corbet@lwn.net>, Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>, Andrew Morton <akpm@linux-foundation.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, 13 Sep 2016, Jeff Layton wrote:
-> On Sun, 2016-09-11 at 17:05 +0000, Sage Weil wrote:
-> > On Sat, 10 Sep 2016, Haomai Wang wrote:
-> > > About thing is v1/v2 compatible. I rethink the details:
-> > > 
-> > > 0. we need to define the new banner which must longer than before("ceph v027")
-> > > 1. assume msgr v2 banner is "ceph v2 %64llx %64llx\n"
-> > > 2. both in simle/async codes, server side must issue banner firstly
-> > > 3. if server side supports v2 and client only supports v1, client will
-> > > receive 9 bytes and do memcmp, then reject this connection via closing
-> > > socket. So server side could retry the older version
-> > > 4. if server side only supports v1 and client supports v2, client
-> > > according banner to reply corresponding banner
-> > > 
-> > > This tricky design is based on the implementation fact "accept side
-> > > issue the banner firstly" and "new banner is longer than old banner",
-> > > and this way doesn't need to involve other dependences like mon port
-> > > changes.
-> > > 
-> > > Does this way has problem?
-> > 
-> > I was thinking we avoid this problem and any hacky initial handshakes by 
-> > speaking v2 on the new port and v1 on the old port.  Then the monmap has 
-> > an entity_addrvec_t with both a v1 and v2 address (encoding with just the 
-> > v1 address for old clients). Same for the OSDs.
-> > 
-> > The v1 handshake just isn't extensible (how do you tell a v2 client 
-> > connecting that you speak both v1 and v2?).
-> > 
-> 
-> Depending on port assignments for the protocol is pretty icky though.
-> There may be valid reasons to use different ports in some environments
-> and then that heuristic goes right out the window.
-> 
-> One thing that is really strange about both the old and new protocols
-> is that they have the client and server sending the initial exchange
-> concurrently, or have the server send it first.  While it may speed up
-> the initial negotiation slightly, it makes it really hard to handle
-> fallback to earlier protocol versions (as Haomai pointed out), as the
-> client is responsible for handing reconnects.
-> 
-> Consider the case where we have a client that supports only v1 but a
-> server that supports v1 and v2. Client connects and then server sends a
-> v2 message. Client doesn't understand it and closes the connection and
-> reconnects, only to end up in the same situation on the second attempt.
-> 
-> There's no way for the server to preserve the state from the initial
-> connection attempt and handle the new connection with v1. Would it not
-> make more sense to have the client connect and send its initial banner,
-> and then let the server decide what sort of banner to send based on
-> what the client sent?
+Hi Ilya,
 
-This is why the v2 banner has the features values (%lx with supported and 
-required bits).  Clients and servers (connecter and accepters, really, 
-since servers talk to each other too) can concurrently announce what they 
-support and require and then go from there.  It doesn't help with the v1 
-transition, but the addrvec changes (entity_addr_t now has a type 
-indicating which protocol is spoken, and multiple addrs can be listed for 
-any server) along with a mon port change (which we have to do anyway to 
-switch to our IANA assigned port) handle the v1 transition.
+Thanks for adding me.
 
-Are there other reasons to do the client banner first?  
+On Tue, 13 Sep 2016 11:16:13 +0200, Ilya Dryomov wrote:
+> On Tue, Sep 13, 2016 at 10:12 AM, SF Markus Elfring
+> <elfring@users.sourceforge.net> wrote:
+> >>> @@ -1064,7 +1064,7 @@ static int rbd_header_from_disk(struct rbd_device *rbd_dev,
+> >>>         header->snap_sizes = snap_sizes;
+> >>>
+> >>>         return 0;
+> >>> -out_2big:
+> >>> + out_2big:
+> >>>         ret = -EIO;
+> >>>         kfree(snap_sizes);
+> >>>   free_names:
+> > …
+> >> Can you point where this current convention is documented?
+> >
+> > Yes.
+> > https://git.kernel.org/cgit/linux/kernel/git/next/linux-next.git/commit/Documentation/CodingStyle?id=865a1caa4b6b886babdd9d67e7c3608be4567a51
+> 
+> Huh.  That patch is not in Linus' tree.
+> 
+> >
+> > Do you find the software update "CodingStyle: Clarify and complete chapter 7" interesting?
+> >
+> >
+> >> Certainly not in CodingStyle, AFAICT...
+> >
+> > I suggest to look at the current version once more.
+> >
+> >
+> >> I know some people prefer a single space in there because it makes
+> >> "diff -p" work better, but nowadays with "git diff" this argument is
+> >> pretty moot.
+> >
+> > Would you like to discuss the corresponding software evolution a bit more?
+> 
+> Jon, could you please yank 865a1caa4b6b ("CodingStyle: Clarify and
+> complete chapter 7") from your linux-next branch or at least change "It
+> is advised to indent labels" to something less stronger?  It hasn't
+> even hit mainline yet and we are already getting spammed.
 
-sage
+The problem isn't the documentation update nor whether you or me like a
+space before labels or not. The problem is Markus Elfring. The guy just
+spend his time flooding maintainers with unneeded changes they never
+asked for. Ignore him and you'll be much better. If he was not flooding
+you with this, he would find something else :-(
 
+When I wrote "It is advised to indent labels with one space", I never
+meant that all the existing code should be converted that way. I
+expressed a preference, and provided a rationale for this preference.
+After that, an advice is just that: an advice.
+
+> Looks like 9 out of 10 labels are not indented
 > 
-> > > 
-> > > 
-> > > > On Sat, Sep 10, 2016 at 11:37 AM, Haomai Wang <haomai@xsky.com> wrote:
-> > > >
-> > > >
-> > > > > On Sat, Sep 10, 2016 at 5:14 AM, Sage Weil <sweil@redhat.com> wrote:
-> > > >>
-> > > >> On Sat, 10 Sep 2016, Haomai Wang wrote:
-> > > >> > @sage in current impl, when logic fault like state mismatch, data format
-> > > >> > mismatch or anything else, connection will abort session via closing
-> > > >> > socket.
-> > > >> > And the peer side would do something according to policy too.
-> > > >> > In msgr v2 when introducing multi streams in the same connection, we
-> > > >> > can't
-> > > >> > simply abort socket to indicate something wrong now. I think we need to
-> > > >> > introduce TAG_ABORT with error message.
-> > > >> >
-> > > >> > But the peer side may stuck into a state like reading enough data as
-> > > >> > "length" indicate. It may miss the TAG_ABORT notify or other reconnect
-> > > >> > tag.
-> > > >> > A tricky thing is we use tcp OOB bit to send which exactly trigger
-> > > >> > "urgent"
-> > > >> > signal when receiving, but it only occur 1 byte in tcp proto which can
-> > > >> > be
-> > > >> > used here to indicate the stream id(32bit designed now).
-> > > >> >
-> > > >> > What's more, multi stream mixed within one socket may make trouble to
-> > > >> > message receiving when potential tcp packet silent error. So it looks we
-> > > >> > can't use the same socket the multi stream to meet our demands.
-> > > >> >
-> > > >> > Any idea?
-> > > >>
-> > > >> I think we intorduce a TAG_ABORT to interrupt the stream.  And then we
-> > > >> have to assume that the low-level msgr2 implementation that reads and
-> > > >> writes frames (which have their own frame_len) is not buggy.  In practice,
-> > > >> the aborts tend to happen because we get a message we don't understand
-> > > >> (version mismatch, encoding compatibility bug, etc.), and that'll happen
-> > > >> at a higher level after frames have been read... so a TAG_ABORT will be
-> > > >> sufficient.
-> > > >
-> > > >
-> > > > yes, if frame is ok. It should be ok.... Let's go through this firstly...
-> > > > The worse case is the frame length is not expected as data transferred.
-> > > >
-> > > >>
-> > > >>
-> > > >> Also, we can have an option to make aborts close the socket.  That'll be
-> > > >> fine for now anyway, although later it's probably to disruptive when
-> > > >> multiple streams are sharing a socket...
-> > > >>
-> > > >> sage
-> > > >>
-> > > >>
-> > > >>  >
-> > > >> >
-> > > >> >
-> > > > >> > On Mon, Jun 13, 2016 at 7:59 AM, Sage Weil <sweil@redhat.com> wrote:
-> > > >> >       On Sat, 11 Jun 2016, Marcus Watts wrote:
-> > > >> >       > If the client doesn't look at "features" before it sends
-> > > >> >       stuff, it
-> > > >> >       > will not be able to be very smart about taking advantage of
-> > > >> >       some
-> > > >> >       > future better method.  In fact, there isn't much advantage
-> > > >> >       > to the server sending anything early - it could just as easily
-> > > >> >       > wait until after it's seen the clients request.
-> > > >> >       >
-> > > >> >       > Failing hard & retrying on a failed reconnect is going to be
-> > > >> >       slower.
-> > > >> >       > On the bright side, at least it shouldn't happen often.
-> > > >> >
-> > > >> >       Yep.  Well, I think it is the client's (limited choice).  If it
-> > > >> >       needs to
-> > > >> >       know the server features, it needs to either wait for them, or
-> > > >> >       make some
-> > > >> >       optimistic choice and be prepared to pay the cost of a mistake.
-> > > >> >       We should
-> > > >> >       give the client choice, though, if we can.
-> > > >> >
-> > > >> >       > If you're sending encryption (w/ different auth or keys) from
-> > > >> >       several
-> > > >> >       > different streams, how are you planning to indicate which bits
-> > > >> >       > go with which scheme?, and which bits are you planning to
-> > > >> >       encrypt
-> > > >> >       > and which not?
-> > > >> >
-> > > >> >       This is what he stream ids are for, and why the outer portion of
-> > > >> >       the frame
-> > > >> >       is unencrypted.  See
-> > > >> >
-> > > >> >
-> > > >> > https://github.com/ceph/ceph/pull/9461/files#diff-83789b4be697d82eedbcbe330
-> > > >> >       c44b436R68
-> > > >> >
-> > > >> >        +  stream_id (le32)
-> > > >> >        +  frame_len (le32)
-> > > >> >        +  tag (TAG_* byte)
-> > > >> >        +  payload
-> > > >> >        +  [payload padding -- only present after stream auth phase]
-> > > >> >        +  [signature -- only present after stream auth phase]
-> > > >> >
-> > > >> >       The tag and payload (and padding) would be encrypted or signed,
-> > > >> >       but not
-> > > >> >       the stream id and frame_len.
-> > > >> >
-> > > >> >       > Byte count limits.  Basically, you don't want collisions
-> > > >> >       because
-> > > >> >       > of duplicated keys or data.  This depends on your crypto
-> > > >> >       system,
-> > > >> >       > so, for instance, you should not encrypt with one key more
-> > > >> >       than
-> > > >> >       >       aes, cbc        about 2^68 bytes
-> > > >> >       >       aes, ctr        exactly 2^128 bytes
-> > > >> >       > more generally, this depends on mode, blocksize, ...
-> > > >> >       > This applies across *all* uses of the key - and so you would
-> > > >> >       > generally want to use the session key directly as little as
-> > > >> >       possible.
-> > > >> >       > (in particular, using the session key for ctr directly would
-> > > >> >       be very very bad.)
-> > > >> >       >
-> > > >> >       > If you've got multiple streams going already, you should be
-> > > >> >       able
-> > > >> >       > to include a fairly simple rekey method with little effort.
-> > > >> >       > For instance, as part of the method, you could,
-> > > >> >       >       up front as part of the method
-> > > >> >       >               send a per-stream key encrypted under the shared
-> > > >> >       secret.
-> > > >> >       >       prepend to the first data sent in a payload
-> > > >> >       >               byte limit, stream key #0 (encrypted under the
-> > > >> >       per-stream key)
-> > > >> >       >               then encrypt the next N bytes with stream key #0
-> > > >> >       >       when the byte limit is reached, prepend to the
-> > > >> >       >               next data sent in a payload
-> > > >> >       >               byte limit, stream key #1 (encrypted under the
-> > > >> >       per-stream key)
-> > > >> >       >               then encrypt the next N bytes with stream key #1
-> > > >> >       >       &etc.
-> > > >> >
-> > > >> >       Good idea.  If I understand correctly, it means that the
-> > > >> >       session_key is
-> > > >> >       only used to send the new/next random encryption key, and if we
-> > > >> >       make the
-> > > >> >       byte limit part of the initial protocol we get the rotation we
-> > > >> >       need.  It
-> > > >> >       might be simpler to do it as a frame limit instead of byte
-> > > >> >       limit, and
-> > > >> >       assume max-length frames (2^32 bytes).  We could still be super
-> > > >> >       conservative and rotate the encryption key every 2^16 messages
-> > > >> >       or
-> > > >> >       something...?  And rotating the key on frame boundaries should
-> > > >> >       be much
-> > > >> >       simpler to implement.
-> > > >> >
-> > > >> >       Anyway, that part can be defined a bit later, I think.
-> > > >> >
-> > > >> >       Thanks!
-> > > >> >       sage
-> > > >> >
-> > > >> >
-> > > >> >
-> > > >> >
-> > > >
-> > > >
-> > > 
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> -- 
-> Jeff Layton <jlayton@poochiereds.net>
-> -- 
-> Jeff Layton <jlayton@redhat.com>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---8323329-532798250-1473773484=:19761--
+> $ git grep '^[a-z0-9]\+:' -- *.c | wc -l
+> 27945
+> $ git grep '^ [a-z0-9]\+:' -- *.c | wc -l
+> 2925
+
+Your regexps are wrong ;-) but the ratio is correct.
+
+> so I'd say that's a bad advise as far as consistency goes, and the
+> "diff -p" argument is pretty moot nowadays.
+
+It wasn't moot when I sent the documentation update patch. Or why would
+you think it was? "git diff", by default, behaves exactly the same as
+"diff -p" with regards to unindented labels (i.e. it doesn't handle
+them properly.)
+
+However, since then the issue was discussed somewhere else:
+https://lkml.org/lkml/2016/9/5/214
+
+As you can see, alternatives to indenting labels with one space were
+found. Therefore you will soon be correct saying "the diff -p argument
+is pretty moot." As soon as my patch hits mainline, actually. Which
+shouldn't take too long as Andrew Morton picked it 4 days ago.
+
+Once this happens, I'm fine with CodingStyle being updated again to
+reflect the current situation.
+
+Hope it clarifies,
+-- 
+Jean Delvare
+SUSE L3 Support
