@@ -1,73 +1,52 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: MDS failed to reconnect a kernel client with CIFS workload
-Date: Mon, 12 Sep 2016 16:56:33 -0700
-Message-ID: <CAJ4mKGaH_G9XDXQFjgcWOTaQ_f2nJT8Ojn_n1rHUiBFhyznoXQ@mail.gmail.com>
-References: <FF8D83DAE5DF57468726B79904321E06251178CB@H3CMLB12-EX.srv.huawei-3com.com>
- <FF8D83DAE5DF57468726B79904321E06251180C0@H3CMLB12-EX.srv.huawei-3com.com> <FF8D83DAE5DF57468726B79904321E06251184E0@H3CMLB12-EX.srv.huawei-3com.com>
+Subject: Re: msgr2 protocol
+Date: Mon, 12 Sep 2016 17:03:50 -0700
+Message-ID: <CAJ4mKGZYTr4D1dXa8aEt9muNwrOA9DsxRzWVf0=zWH44VZ-Onw@mail.gmail.com>
+References: <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com>
+ <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com> <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com>
+ <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com> <CAJ4mKGbyCiWbuwGxhGu_ohf7vxNqVqgf4XQQpQ7eg-tP-YO+gg@mail.gmail.com>
+ <alpine.DEB.2.11.1606100649010.6221@cpach.fuggernut.com> <20160610190510.GA18999@degu.eng.arb.redhat.com>
+ <alpine.DEB.2.11.1606101658530.6221@cpach.fuggernut.com> <20160611230503.GA18268@degu.eng.arb.redhat.com>
+ <alpine.DEB.2.11.1606121950490.32559@cpach.fuggernut.com> <CACJqLyax_SXEZp3vA2_wR+CdwKOo2Re=SsK2xfXqmXjz9d8iNw@mail.gmail.com>
+ <alpine.DEB.2.11.1609092112171.19761@piezo.us.to> <CACJqLyYwKZ5_1OHR_5=+mr=1ED2Nt34x4TB29j5dE1D+NjzFpg@mail.gmail.com>
+ <CACJqLybA-cArcno2oS0AZx238hrV64PZyK9fFXdCBuVHKQQP3Q@mail.gmail.com>
+ <alpine.DEB.2.11.1609111703430.19761@piezo.us.to> <CACJqLybGs1paSFu4zBEFW8dhYVBfDHSEzY3RwKGvDA03wdiF2A@mail.gmail.com>
+ <alpine.DEB.2.11.1609121319270.19761@piezo.us.to>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f176.google.com ([209.85.217.176]:33224 "EHLO
-        mail-ua0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751097AbcILX4f (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Sep 2016 19:56:35 -0400
-Received: by mail-ua0-f176.google.com with SMTP id v13so2439690uav.0
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Sep 2016 16:56:34 -0700 (PDT)
-In-Reply-To: <FF8D83DAE5DF57468726B79904321E06251184E0@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:33548 "EHLO
+        mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752105AbcIMADw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Sep 2016 20:03:52 -0400
+Received: by mail-vk0-f49.google.com with SMTP id f76so159597614vke.0
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Sep 2016 17:03:52 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1609121319270.19761@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xusangdi <xu.sangdi@h3c.com>, Zheng Yan <zyan@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Haomai Wang <haomai@xsky.com>, Marcus Watts <mwatts@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Sep 7, 2016 at 11:35 PM, Xusangdi <xu.sangdi@h3c.com> wrote:
-> Hi Cephers,
+On Mon, Sep 12, 2016 at 6:21 AM, Sage Weil <sweil@redhat.com> wrote:
+> On Mon, 12 Sep 2016, Haomai Wang wrote:
+>> This way is ok to me. So another change is double messenger
+>> instances(to v1 and v2) or let each messenger support multi binding
+>> addresses(this may need to refactor messenger interface).
 >
-> We encountered a problem when using CephFS + Samba, which fails the reconnection phase of MDS respawn.
-> Reproduce steps:
-> 1. kernel mount CephFS to a Samba server
-> 2. re-export the mount point by Samba
-> 3. connect to Samba server from a Windows 7 client, and copy a large file (4GB) to the shared directory
-> 4. during copy process, restart the active (and the only one) MDS
-> 5. MDS then gives up reconnecting to the kernel client after timeout
-> As a result, all client requests will hang for like forever :<
->
-> I did a few extra tests, which proved that this issue will not occur when using kernel client directly nor via
-> NFS re-export. From the syslog I found the following error (with dynamic debug enabled):
->
-> Sep  6 20:34:41 trusty81 kernel: [465858.676638] ceph: mds0 caps stale
-> Sep  6 20:34:41 trusty81 kernel: [465859.123780] ceph: mds0 reconnect start
-> Sep  6 20:34:41 trusty81 kernel: [465859.125113] ceph:  session ffff8801121f7000 state reconnecting
-> Sep  6 20:34:41 trusty81 kernel: [465859.126306] ceph:  counted 0 flock locks and 0 fcntl locks
-> Sep  6 20:34:41 trusty81 kernel: [465859.126349] ceph:  encoding 0 flock and 0 fcntl locksceph:  counted 1 flock locks and 0 fcntl locks
-> Sep  6 20:34:41 trusty81 kernel: [465859.128575] ceph:  encoding 1 flock and 0 fcntl locksceph:  Have unknown lock type 32
-> Sep  6 20:34:41 trusty81 kernel: [465859.129795] ceph: error -22 preparing reconnect for mds0
->
-> It looks like the CIFS workload generates an invalid lock type, but I’m not sure about this. Any suggestions?
+> Yeah.  I'm guessing we'll want to have an entity_addrvec_t with address
+> types mapped to different Messenger implementations (e.g., xio), so we'll
+> wan to allow multiple instance eventually.  But we'll also just want to
+> allow multiple binding (v1 + v2, or ipv4 + ipv6).  :/
 
-That's pretty weird. Looks to me like it's just reading data out of
-the inode passed in, and that's somehow corrupted. Zheng, do you have
-any idea?
+Hmm, is that really necessary? It seems a fair bit more complicated
+and I'm not sure there's much payoff given the connection types.
+Long-term the only doubled connection I can see being needed is the
+client one; OSD cluster messengers will only be required to bind twice
+during the initial upgrade period.
+
+Put another way, what's the advantage of supporting two different
+protocols within one messenger? That just sounds like a disaster
+waiting to happen, and not one worth risking for slightly reducing the
+thread count on AsyncMessenger (especially with users coming from the
+SimpleMessenger).
 -Greg
-
->
-> PS:
-> 1. Samba version: 4.3.9, kernel version: 3.19.0-25-generic
-> 2. I also tried a newer kernel (4.4.0-31-generic), but with no luck
-> Feb 11 11:41:52 xerus101 kernel: [  836.960441] ceph: mds0 reconnect start
-> Feb 11 11:41:52 xerus101 kernel: [  836.960494] ceph: error -22 preparing reconnect for mds0
->
-> Regards,
-> ---Sandy
->
-> -------------------------------------------------------------------------------------------------------------------------------------
-> 本邮件及其附件含有杭州华三通信技术有限公司的保密信息，仅限于发送给上面地址中列出
-> 的个人或群组。禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制、
-> 或散发）本邮件中的信息。如果您错收了本邮件，请您立即电话或邮件通知发件人并删除本
-> 邮件！
-> This e-mail and its attachments contain confidential information from H3C, which is
-> intended only for the person or entity whose address is listed above. Any use of the
-> information contained herein in any way (including, but not limited to, total or partial
-> disclosure, reproduction, or dissemination) by persons other than the intended
-> recipient(s) is prohibited. If you receive this e-mail in error, please notify the sender
-> by phone or email immediately and delete it!
