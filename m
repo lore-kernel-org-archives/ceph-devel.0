@@ -1,141 +1,132 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: msgr2 protocol
-Date: Tue, 13 Sep 2016 15:10:51 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609131506250.19761@piezo.us.to>
-References: <CAJ4mKGYxu1CKbusKp5Sn5269Q3PNuUWWRMQt1qUNR2SQQPjuFQ@mail.gmail.com>                 <CAJ4mKGaWx8m4Zh_f6tQWe9ows77HHyMmv5y52Rr-5Q-ob_N1Yg@mail.gmail.com>                 <alpine.DEB.2.11.1606030912000.6221@cpach.fuggernut.com>                
- <CACJqLyZs9EdbnjSiazPzxD_R+yuwPT9BzDq-GmEyS55f_pYFdw@mail.gmail.com>                 <alpine.DEB.2.11.1606031333050.6221@cpach.fuggernut.com>                 <CAJ4mKGbyCiWbuwGxhGu_ohf7vxNqVqgf4XQQpQ7eg-tP-YO+gg@mail.gmail.com>                
- <alpine.DEB.2.11.1606100649010.6221@cpach.fuggernut.com>         <20160610190510.GA18999@degu.eng.arb.redhat.com>                 <alpine.DEB.2.11.1606101658530.6221@cpach.fuggernut.com>                 <20160611230503.GA18268@degu.eng.arb.redhat.com>    
-             <alpine.DEB.2.11.1606121950490.32559@cpach.fuggernut.com>                 <CACJqLyax_SXEZp3vA2_wR+CdwKOo2Re=SsK2xfXqmXjz9d8iNw@mail.gmail.com>                 <alpine.DEB.2.11.1609092112171.19761@piezo.us.to>                
- <CACJqLyYwKZ5_1OHR_5=+mr=1ED2Nt34x4TB29j5dE1D+NjzFpg@mail.gmail.com>                 <CACJqLybA-cArcno2oS0AZx238hrV64PZyK9fFXdCBuVHKQQP3Q@mail.gmail.com>         <alpine.DEB.2.11.1609111703430.19761@piezo.us.to>         <1473765504.4740.14.camel@redhat.com>
-         <alpine.DEB.2.11.1609131327350.19761@piezo.us.to> <1473778134.4740.44.camel@redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 03/47] block-rbd: Adjust the position of a jump label in rbd_header_from_disk()
+Date: Tue, 13 Sep 2016 17:30:33 +0200
+Message-ID: <CAOi1vP_JCEJoH8WBHtjBufU_C1dH-JaRPJkywRFFJSh8Q6mwdQ@mail.gmail.com>
+References: <566ABCD9.1060404@users.sourceforge.net> <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
+ <71b06567-1ea9-204d-d61b-2af4426d9cd1@users.sourceforge.net>
+ <CAOi1vP9iQ6u7dm0dRMg4rs6tLaR5mv55yew0URTX00-y6C0S6g@mail.gmail.com>
+ <121f05b0-ac94-4d81-289e-9dc3668eab95@users.sourceforge.net>
+ <CAOi1vP_XDRj9B-vAYVB=qN5Z-vbq75tYU1dFADRBz6P+J6V56Q@mail.gmail.com> <20160913163626.436629af@endymion>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1141036360-1473779454=:19761"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46176 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752971AbcIMPK4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Sep 2016 11:10:56 -0400
-In-Reply-To: <1473778134.4740.44.camel@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: Haomai Wang <haomai@xsky.com>, Marcus Watts <mwatts@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160913163626.436629af@endymion>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jean Delvare <jdelvare@suse.de>
+Cc: Jonathan Corbet <corbet@lwn.net>, Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>, Andrew Morton <akpm@linux-foundation.org>
+List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Tue, Sep 13, 2016 at 4:36 PM, Jean Delvare <jdelvare@suse.de> wrote:
+> Hi Ilya,
+>
+> Thanks for adding me.
+>
+> On Tue, 13 Sep 2016 11:16:13 +0200, Ilya Dryomov wrote:
+>> On Tue, Sep 13, 2016 at 10:12 AM, SF Markus Elfring
+>> <elfring@users.sourceforge.net> wrote:
+>> >>> @@ -1064,7 +1064,7 @@ static int rbd_header_from_disk(struct rbd_dev=
+ice *rbd_dev,
+>> >>>         header->snap_sizes =3D snap_sizes;
+>> >>>
+>> >>>         return 0;
+>> >>> -out_2big:
+>> >>> + out_2big:
+>> >>>         ret =3D -EIO;
+>> >>>         kfree(snap_sizes);
+>> >>>   free_names:
+>> > =E2=80=A6
+>> >> Can you point where this current convention is documented?
+>> >
+>> > Yes.
+>> > https://git.kernel.org/cgit/linux/kernel/git/next/linux-next.git/commi=
+t/Documentation/CodingStyle?id=3D865a1caa4b6b886babdd9d67e7c3608be4567a51
+>>
+>> Huh.  That patch is not in Linus' tree.
+>>
+>> >
+>> > Do you find the software update "CodingStyle: Clarify and complete cha=
+pter 7" interesting?
+>> >
+>> >
+>> >> Certainly not in CodingStyle, AFAICT...
+>> >
+>> > I suggest to look at the current version once more.
+>> >
+>> >
+>> >> I know some people prefer a single space in there because it makes
+>> >> "diff -p" work better, but nowadays with "git diff" this argument is
+>> >> pretty moot.
+>> >
+>> > Would you like to discuss the corresponding software evolution a bit m=
+ore?
+>>
+>> Jon, could you please yank 865a1caa4b6b ("CodingStyle: Clarify and
+>> complete chapter 7") from your linux-next branch or at least change "It
+>> is advised to indent labels" to something less stronger?  It hasn't
+>> even hit mainline yet and we are already getting spammed.
+>
+> The problem isn't the documentation update nor whether you or me like a
+> space before labels or not. The problem is Markus Elfring. The guy just
+> spend his time flooding maintainers with unneeded changes they never
+> asked for. Ignore him and you'll be much better. If he was not flooding
+> you with this, he would find something else :-(
+>
+> When I wrote "It is advised to indent labels with one space", I never
+> meant that all the existing code should be converted that way. I
 
---8323329-1141036360-1473779454=:19761
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Hi Jean,
 
-On Tue, 13 Sep 2016, Jeff Layton wrote:
-> On Tue, 2016-09-13 at 13:31 +0000, Sage Weil wrote:
-> > On Tue, 13 Sep 2016, Jeff Layton wrote:
-> > > On Sun, 2016-09-11 at 17:05 +0000, Sage Weil wrote:
-> > > > On Sat, 10 Sep 2016, Haomai Wang wrote:
-> > > > > About thing is v1/v2 compatible. I rethink the details:
-> > > > > 
-> > > > > 0. we need to define the new banner which must longer than before("ceph v027")
-> > > > > 1. assume msgr v2 banner is "ceph v2 %64llx %64llx\n"
-> > > > > 2. both in simle/async codes, server side must issue banner firstly
-> > > > > 3. if server side supports v2 and client only supports v1, client will
-> > > > > receive 9 bytes and do memcmp, then reject this connection via closing
-> > > > > socket. So server side could retry the older version
-> > > > > 4. if server side only supports v1 and client supports v2, client
-> > > > > according banner to reply corresponding banner
-> > > > > 
-> > > > > This tricky design is based on the implementation fact "accept side
-> > > > > issue the banner firstly" and "new banner is longer than old banner",
-> > > > > and this way doesn't need to involve other dependences like mon port
-> > > > > changes.
-> > > > > 
-> > > > > Does this way has problem?
-> > > > 
-> > > > I was thinking we avoid this problem and any hacky initial handshakes by 
-> > > > speaking v2 on the new port and v1 on the old port.  Then the monmap has 
-> > > > an entity_addrvec_t with both a v1 and v2 address (encoding with just the 
-> > > > v1 address for old clients). Same for the OSDs.
-> > > > 
-> > > > The v1 handshake just isn't extensible (how do you tell a v2 client 
-> > > > connecting that you speak both v1 and v2?).
-> > > > 
-> > > 
-> > > Depending on port assignments for the protocol is pretty icky though.
-> > > There may be valid reasons to use different ports in some environments
-> > > and then that heuristic goes right out the window.
-> > > 
-> > > One thing that is really strange about both the old and new protocols
-> > > is that they have the client and server sending the initial exchange
-> > > concurrently, or have the server send it first.  While it may speed up
-> > > the initial negotiation slightly, it makes it really hard to handle
-> > > fallback to earlier protocol versions (as Haomai pointed out), as the
-> > > client is responsible for handing reconnects.
-> > > 
-> > > Consider the case where we have a client that supports only v1 but a
-> > > server that supports v1 and v2. Client connects and then server sends a
-> > > v2 message. Client doesn't understand it and closes the connection and
-> > > reconnects, only to end up in the same situation on the second attempt.
-> > > 
-> > > There's no way for the server to preserve the state from the initial
-> > > connection attempt and handle the new connection with v1. Would it not
-> > > make more sense to have the client connect and send its initial banner,
-> > > and then let the server decide what sort of banner to send based on
-> > > what the client sent?
-> > 
-> > This is why the v2 banner has the features values (%lx with supported and 
-> > required bits).  Clients and servers (connecter and accepters, really, 
-> > since servers talk to each other too) can concurrently announce what they 
-> > support and require and then go from there.  It doesn't help with the v1 
-> > transition, but the addrvec changes (entity_addr_t now has a type 
-> > indicating which protocol is spoken, and multiple addrs can be listed for 
-> > any server) along with a mon port change (which we have to do anyway to 
-> > switch to our IANA assigned port) handle the v1 transition.
-> > 
-> 
-> Ahh ok, I didn't realize ceph was squatting on a port! Ok, then if
-> you're planning to switch to a new well-known port anyway, then a clean
-> break like this makes more sense.
-> 
-> I'll confess though that I don't quite understand the whole point of
-> the entity_addr_t's. What purpose does it serve to exchange network
-> addresses here?
+That much is clear, however ...
 
-The main thing is that entity_addr_t contains a nonce to distinguish 
-between difference incarnations of the same server on the same port.  When 
-an OSD is marked down and comes back up, the nonce will be different, and 
-its peers can tell they're talking to the new/current instance without any 
-stale state (or whatever).  Currently we guard this at the messenger 
-layer, so that if we're trying to connect to a particularly instance 
-of osd.12 we will simply fail to connect if that port is occupied by 
-someone else (e.g., a newer instance of osd.12 that we don't know about 
-yet) so that we don't confuse them or ourselves.
+> expressed a preference, and provided a rationale for this preference.
+> After that, an advice is just that: an advice.
+>
+>> Looks like 9 out of 10 labels are not indented
+>>
+>> $ git grep '^[a-z0-9]\+:' -- *.c | wc -l
+>> 27945
+>> $ git grep '^ [a-z0-9]\+:' -- *.c | wc -l
+>> 2925
+>
+> Your regexps are wrong ;-) but the ratio is correct.
 
-> Is it simply to inform the peer of other ways that it
-> can be reached?
+... one of the main points of any coding style is consistency.  When
+someone new wanting to submit say a new driver opens CodingStyle and
+sees "It is advised to indent labels ...", they might start indenting
+labels in their code and advise others to do the same.  Given the 9/10
+existing ratio, that advice is wrong.  If I wanted to clarify the
+situation, I'd have gone with "one space indented labels are also
+acceptable" or so.  The example you've re-indented dates back to 2.6.4
+times...
 
-With the addrvec changes anybody connecting to (this version of) you 
-should already have a list of all your addresses...
+>
+>> so I'd say that's a bad advise as far as consistency goes, and the
+>> "diff -p" argument is pretty moot nowadays.
+>
+> It wasn't moot when I sent the documentation update patch. Or why would
+> you think it was? "git diff", by default, behaves exactly the same as
+> "diff -p" with regards to unindented labels (i.e. it doesn't handle
+> them properly.)
 
-> What happens if I pick up my laptop that's acting as a
-> ceph client and wander onto a new network. Does anything break?
+The git diff xfuncname incantation is a few years old now.  git diff
+also works on regular files, BTW.
 
-I'm sure something will break currently, but eventually I think we can 
-shake these issues out... for clients, at least.  The servers all talk to 
-each other so we assume there is no NAT gumming up the works.
+>
+> However, since then the issue was discussed somewhere else:
+> https://lkml.org/lkml/2016/9/5/214
+>
+> As you can see, alternatives to indenting labels with one space were
+> found. Therefore you will soon be correct saying "the diff -p argument
+> is pretty moot." As soon as my patch hits mainline, actually. Which
+> shouldn't take too long as Andrew Morton picked it 4 days ago.
+>
+> Once this happens, I'm fine with CodingStyle being updated again to
+> reflect the current situation.
 
-> > Are there other reasons to do the client banner first?  
-> 
-> I think that's the main one.
-> 
-> The only other reason I can think of might be to guard against
-> information disclosure to port scanners. If you require the client to
-> send a banner first, then the server could drop the connection if it
-> doesn't look right without ever sending anything.
-> 
-> That said, given that we're going to be using a IANA designated port in
-> most cases, that's not going to be terribly useful. The port scanners
-> would just send a bogus but legit-looking banner to that port.
+I'm not sure which patch you are talking about - the message you linked
+is not a patch and it's impossible to follow large threads on lkml.org.
 
-Sounds good to me!
-sage
---8323329-1141036360-1473779454=:19761--
+Thanks,
+
+                Ilya
