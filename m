@@ -1,67 +1,72 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 15/47] block-rbd: Rename jump labels in rbd_dev_create()
-Date: Tue, 13 Sep 2016 10:07:42 +0200
-Message-ID: <CAOi1vP-1ULnxmyrRkTq2Dm1LXvBmczq9f0F1cPE0bUGwK4XF1Q@mail.gmail.com>
+Subject: Re: [PATCH 28/47] block-rbd: Refactor a jump target in rbd_img_obj_exists_submit()
+Date: Tue, 13 Sep 2016 10:10:48 +0200
+Message-ID: <CAOi1vP_ETMVvw5WhRM-Zbe8Aec+sXDJm2-W8+w3EZ-bccVzEnA@mail.gmail.com>
 References: <566ABCD9.1060404@users.sourceforge.net> <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
- <475899b2-a0fc-7bd9-43fe-c83c390158ff@users.sourceforge.net>
+ <d35a0325-67df-8e08-5b28-827e5faecc6c@users.sourceforge.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <475899b2-a0fc-7bd9-43fe-c83c390158ff@users.sourceforge.net>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ua0-f194.google.com ([209.85.217.194]:34927 "EHLO
+        mail-ua0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751044AbcIMIKu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Sep 2016 04:10:50 -0400
+In-Reply-To: <d35a0325-67df-8e08-5b28-827e5faecc6c@users.sourceforge.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: SF Markus Elfring <elfring@users.sourceforge.net>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
-List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Sep 12, 2016 at 9:00 PM, SF Markus Elfring
+On Mon, Sep 12, 2016 at 9:14 PM, SF Markus Elfring
 <elfring@users.sourceforge.net> wrote:
 > From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Mon, 12 Sep 2016 18:12:39 +0200
+> Date: Mon, 12 Sep 2016 19:44:30 +0200
 >
-> Adjust jump labels according to the current Linux coding style convention.
+> Adjust a jump target so that a duplicate check can then be avoided
+> at the end.
 >
 > Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 > ---
->  drivers/block/rbd.c | 9 ++++-----
->  1 file changed, 4 insertions(+), 5 deletions(-)
+>  drivers/block/rbd.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 6acddc53..262805a 100644
+> index 17bdc21..66801ec 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -4930,23 +4930,22 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
->                                          minor_to_rbd_dev_id(1 << MINORBITS),
->                                          GFP_KERNEL);
->         if (rbd_dev->dev_id < 0)
-> -               goto fail_rbd_dev;
-> +               goto free_device;
+> @@ -2920,7 +2920,7 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+>         stat_request = rbd_obj_request_create(obj_request->object_name, 0, 0,
+>                                                         OBJ_REQUEST_PAGES);
+>         if (!stat_request)
+> -               goto out;
+> +               goto put_request;
 >
->         sprintf(rbd_dev->name, RBD_DRV_NAME "%d", rbd_dev->dev_id);
->         rbd_dev->task_wq = alloc_ordered_workqueue("%s-tasks", WQ_MEM_RECLAIM,
->                                                    rbd_dev->name);
->         if (!rbd_dev->task_wq)
-> -               goto fail_dev_id;
-> +               goto remove_id;
+>         rbd_obj_request_get(obj_request);
+>         stat_request->obj_request = obj_request;
+> @@ -2932,7 +2932,7 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+>         stat_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
+>                                                    stat_request);
+>         if (!stat_request->osd_req)
+> -               goto out;
+> +               goto put_request;
+>         stat_request->callback = rbd_img_obj_exists_callback;
 >
->         /* we have a ref from do_rbd_add() */
->         __module_get(THIS_MODULE);
+>         osd_req_op_init(stat_request->osd_req, 0, CEPH_OSD_OP_STAT, 0);
+> @@ -2942,8 +2942,8 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
 >
->         dout("%s rbd_dev %p dev_id %d\n", __func__, rbd_dev, rbd_dev->dev_id);
->         return rbd_dev;
-> -
-> -fail_dev_id:
-> + remove_id:
->         ida_simple_remove(&rbd_dev_id_ida, rbd_dev->dev_id);
-> -fail_rbd_dev:
-> + free_device:
->         rbd_dev_free(rbd_dev);
->         return NULL;
->  }
+>         osdc = &rbd_dev->rbd_client->client->osdc;
+>         ret = rbd_obj_request_submit(osdc, stat_request);
+> -out:
+>         if (ret)
+> + put_request:
+>                 rbd_obj_request_put(obj_request);
+>
+>         return ret;
 > --
 > 2.10.0
->
 
-Really?  I mean out_err -> free_device I can understand, but this?
+Don't do this.  goto into an if block is rarely a good idea, more so
+when you are attempting to micro-optimize a very cold error path.
 
 Thanks,
 
