@@ -1,109 +1,62 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: wip-denc
-Date: Tue, 13 Sep 2016 21:17:19 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609132104590.19761@piezo.us.to>
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: Snapshots of consistency groups
+Date: Tue, 13 Sep 2016 16:41:55 -0700
+Message-ID: <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+ <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+ <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
+ <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
+ <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
+ <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
+ <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
+ <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
+ <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
+ <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
+ <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
+ <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
+ <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
+ <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
+ <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
+ <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
+ <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com> <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34718 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754521AbcIMVRV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Sep 2016 17:17:21 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 436394E4D5
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Sep 2016 21:17:21 +0000 (UTC)
-Received: from ovpn-112-101.phx2.redhat.com (ovpn-112-101.phx2.redhat.com [10.3.112.101])
-        by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u8DLHJxs023017
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Sep 2016 17:17:20 -0400
+Received: from mail-yw0-f181.google.com ([209.85.161.181]:36283 "EHLO
+        mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753442AbcIMXl4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Sep 2016 19:41:56 -0400
+Received: by mail-yw0-f181.google.com with SMTP id u124so1119160ywg.3
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Sep 2016 16:41:56 -0700 (PDT)
+In-Reply-To: <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-Hi everyone,
+Published a pull request for extracting Group.cc
 
-Okay, I have a new wip-denc branch working and ready for some review:
+https://github.com/ceph/ceph/pull/11070
 
-	https://github.com/ceph/ceph/pull/11027
+Please review.
 
-Highlights:
 
-- This includes appender/iterator changes to buffer* to speed up 
-encoding and decoding (fewer bounds checks, simpler structures).
-
-- Accordingly, classes/types using the new-style have different arguments 
-types for encode/decode.  There is also a new bound_encode() method that 
-is used to calculate how big of a buffer to preallocate.
-
-- Most of the important helpers for doing types have new versions that 
-work with the new framework (e.g., the ENCODE_START macro has a 
-new DENC_START counterpart).
-
-- There is also a mechanism that lets you define the bound_encode, 
-encode, and decode methods all in one go using some template magic.  This 
-only works for pretty simple types, but it is handy.  It looks like so:
-
-  struct foo_t {
-    uint32_t a, b;
-    ...
-    DENC(foo_t, v, p) {
-      DENC_START(1, 1, p);
-      denc(v.a, p);
-      denc(v.b, p);
-      ...
-      DENC_FINISH(p);
-    }
-  };
-  WRITE_CLASS_DENC(foo_t)
-  
-
-- For new-style types, a new 'denc' function that is overload to do either 
-bound_encode, encode, or decode (based on argument types) is defined.  
-That means that
-
-  ::denc(v, p);
-
-will work for size_t& p, bufferptr::iterator& p, or 
-bufferlist::contiguous_appender& p.  This facilitates the DENC definitions 
-above.
-
-- There is glue to invoke new-style encode/decode when old-style encode() 
-and decode() are invoked, provided a denc_traits<T> is defined.
-
-- Most of the common containers are there list, vector, set, map, pair, 
-but others need to be converted.
-
-- Currently, we're a bit aggressive about using the new-style over the 
-old-style when we have the change.  For example, if you have 
-
-  vector<int32_t> foo;
-  ::encode(foo, bl);
-
-it will see that it knows how to do int32_t new-style and invoke the 
-new-style vector<> code.  I think this is going to be a net win, since 
-we avoid doing bounds checks on append for every element (and the 
-bound_encode is O(1) for thees base types).  On the other hand, it is 
-currently smart enough to not use new-style for individual integer 
-types, like so
-
-  int32_t v;
-  ::encode(v, bl);
-
-although I suspect after the optimizer gets done with it the generated 
-machine code is almost identical.
-
-- Most of the key bluestore types are converted over so that we can do 
-some benchmarking.
-
-An overview is at the top of the new denc.h header here:
-
-	https://github.com/liewegas/ceph/blob/wip-denc/src/include/denc.h#L55
-
-I think I've captured the best of Allen's, Varada's, and Sam's various 
-approaches, but we'll see how it behaves.  Let me know what you think!
-
-Thanks-
-sage
-
+On Tue, Sep 13, 2016 at 5:33 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+> On Mon, Sep 12, 2016 at 7:09 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>> I also think, probably, moving existing group api to Group.cc can be
+>> done in a separate pull request.
+>
+> Agreed -- no worries.
+>
+>> On Mon, Sep 12, 2016 at 4:06 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>> Another quick question.
+>>> Do you think it makes sense to introduce snapshot namespaces in a pull
+>>> request and review it first?
+>>> It looks like a self sufficient change that we can merge before
+>>> introducing snapshots.
+>
+> Yes, I think that would be a good idea to simplify the PR and get it
+> merged potentially quicker.
+>
+> --
+> Jason
