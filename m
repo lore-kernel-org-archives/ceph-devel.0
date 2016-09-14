@@ -1,36 +1,35 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 01/47] block-rbd: Use kmalloc_array() in rbd_header_from_disk()
-Date: Wed, 14 Sep 2016 17:25:02 +0200
-Message-ID: <CAOi1vP_Awcjy_gtg9RrNz3_3J5EnDiT1hG4SWG20cF-mSKg7Gw@mail.gmail.com>
-References: <566ABCD9.1060404@users.sourceforge.net> <57806eb1-10ed-582e-72d0-2975e1ee967a@users.sourceforge.net>
- <6917f8b0-6122-3b30-0dc1-0394b28a6f61@users.sourceforge.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Update to latest rocksdb
+Date: Wed, 14 Sep 2016 16:46:33 +0000
+Message-ID: <BL2PR02MB2115F31BD88288DB8B4F5B3FF4F10@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <6917f8b0-6122-3b30-0dc1-0394b28a6f61@users.sourceforge.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-sn1nam02on0044.outbound.protection.outlook.com ([104.47.36.44]:4399
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1762049AbcINQqf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Sep 2016 12:46:35 -0400
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Sep 12, 2016 at 8:42 PM, SF Markus Elfring
-<elfring@users.sourceforge.net> wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Sun, 11 Sep 2016 12:21:25 +0200
->
-> * A multiplication for the size determination of a memory allocation
->   indicated that an array data structure should be processed.
->   Thus use the corresponding function "kmalloc_array".
->
->   This issue was detected by using the Coccinelle software.
->
-> * Delete the local variable "size" which became unnecessary with
->   this refactoring.
->
-> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+Sage,
+Now that my patch is been merged to rocksdb master , could you please pull =
+the latest rocksdb to the ceph repo as this will enable the longer run for =
+everybody ?
 
-Now applied.
-
-Thanks,
-
-                Ilya
+Thanks & Regards
+Somnath
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
