@@ -1,99 +1,42 @@
-From: Joao Eduardo Luis <joao@suse.de>
-Subject: Re: wip-denc
-Date: Wed, 14 Sep 2016 10:12:27 +0100
-Message-ID: <6cb3ef53-fcac-0d7c-4220-cef16510484d@suse.de>
-References: <alpine.DEB.2.11.1609132104590.19761@piezo.us.to>
+From: Martin Bukatovic <mbukatov@redhat.com>
+Subject: ceph-mgr and tendrl
+Date: Wed, 14 Sep 2016 11:50:51 +0200
+Message-ID: <678aa95f-73de-f309-c821-495c446e25f4@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:55475 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:47664 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751676AbcINJMa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Sep 2016 05:12:30 -0400
-In-Reply-To: <alpine.DEB.2.11.1609132104590.19761@piezo.us.to>
+        id S1751621AbcINJuy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Sep 2016 05:50:54 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 26C80C05678F
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Sep 2016 09:50:53 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: tendrl-devel@redhat.com, ceph-devel@vger.kernel.org
 
-On 09/13/2016 10:17 PM, Sage Weil wrote:
-> Hi everyone,
->
-> Okay, I have a new wip-denc branch working and ready for some review:
->
-> 	https://github.com/ceph/ceph/pull/11027
->
-> Highlights:
->
-> - This includes appender/iterator changes to buffer* to speed up
-> encoding and decoding (fewer bounds checks, simpler structures).
->
-> - Accordingly, classes/types using the new-style have different arguments
-> types for encode/decode.  There is also a new bound_encode() method that
-> is used to calculate how big of a buffer to preallocate.
->
-> - Most of the important helpers for doing types have new versions that
-> work with the new framework (e.g., the ENCODE_START macro has a
-> new DENC_START counterpart).
->
-> - There is also a mechanism that lets you define the bound_encode,
-> encode, and decode methods all in one go using some template magic.  This
-> only works for pretty simple types, but it is handy.  It looks like so:
->
->   struct foo_t {
->     uint32_t a, b;
->     ...
->     DENC(foo_t, v, p) {
->       DENC_START(1, 1, p);
->       denc(v.a, p);
->       denc(v.b, p);
->       ...
->       DENC_FINISH(p);
->     }
->   };
->   WRITE_CLASS_DENC(foo_t)
+Dear all,
 
-This looks really neat!
+we may need to check the current plans of the ceph community
+to introduce a new component of the ceph stack: ceph-mgr
 
-I do have a question though:
+The original idea has been shared some time ago here:
 
-   How do we handle conditional decoding depending on version?
+ * https://www.spinics.net/lists/ceph-devel/msg28047.html
+ * http://pad.ceph.com/p/ceph-mgr
 
-AFAICT, we basically use the same function (`_denc_friend()`) to do all 
-encoding/decoding operations, delegating to `denc()` the responsibility 
-of figuring out what operation needs to be done according to parameters 
-(i.e., decoding if parameter is a buffer::ptr::iterator; some form of 
-encoding otherwise).
+While this service seems to be concerned with additional
+features which may not be the best fit for adding into the
+MON daemons and as such there seems to be no or little
+overlap with what tendrl will to be doing, it's clear
+that both tendrl and ceph-mgr components need to cooperate,
+and so the dev teams would benefit from discussing their
+ideas from the early on.
 
-Even with `DENC_START` populating `struct_v` and `struct_compat`, just 
-like the traditional encoding.h scheme, I'm still trying to wrap my head 
-around how this would ideally be handled.
-
-So say we drop a field 'a' from `struct bar_t`, and add a field 'b' on 
-version X+1. We still want to encode 'a' on-the-wire for backward 
-compatibility with version X, alongside with shiny new 'b' for version 
- >= X+1.
-
-Encoding can be trivially handled, as we do now, by simply populating 
-whatever 'a' was with whatever we want. Decoding 'b' is also trivial, as 
-we only have to decode it.
-
-Whereas in version X we would simply have
-
-   DENC(bar_t, v, p) {
-    ...
-    denc(v.a, p);
-    ...
-   }
-
-on version X+1 we would have to make sure to encode the values 
-corresponding to 'a' but not decode anything to `v.a`, as it would not 
-exist.
-
-I can see how we could, possibly, get there by using the specific 
-encoding or decoding methods, depending on version, but that would 
-eventually escalate and lead to a mess in `DENC()`.
-
-Any thoughts on this?
-
-   -Joao
+-- 
+Martin Bukatovic
+USM QE team
