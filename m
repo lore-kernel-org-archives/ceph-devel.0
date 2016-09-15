@@ -1,35 +1,40 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: ceph v10.2.3 QE validation status
-Date: Thu, 15 Sep 2016 13:08:46 -0700
-Message-ID: <CAMMFjmHjddnyeS6tu5s4SuH+hLBQvnr5-GDuRd=LjDwDYUn80A@mail.gmail.com>
-References: <CAMMFjmHb=m_WJg8TMaVBOdXB37=viYOBSOYEXL_Bo3kET=hyoA@mail.gmail.com>
- <CAMMFjmFo=1B07c3czD41CkNUWR8htfSn9z5vwcpdJuVZjbtAyQ@mail.gmail.com>
- <alpine.DEB.2.11.1609151816540.19761@piezo.us.to> <CAMMFjmF-t1-CgwpEcmaLSei8tycsK03eY5jSt8ppVR8N3+AUwg@mail.gmail.com>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: Fwd: Which IDE do you use for ceph-development?
+Date: Thu, 15 Sep 2016 22:07:56 +0100
+Message-ID: <18ba07ef-a59b-9da5-d5cd-551502a64f28@suse.de>
+References: <CAA8xDw3OPGikoYF3Knef5tBrCsg+Hvekhyh7BVGJZCq4Yn93Fw@mail.gmail.com>
+ <CAA8xDw1RA2RhZ=ERPKK0ZjD1Zc4iWYgm_zSvNHHEdJ+q7FcJag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:38498 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754876AbcIOUIs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Sep 2016 16:08:48 -0400
-Received: by mail-wm0-f42.google.com with SMTP id 1so3733015wmz.1
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Sep 2016 13:08:47 -0700 (PDT)
-In-Reply-To: <CAMMFjmF-t1-CgwpEcmaLSei8tycsK03eY5jSt8ppVR8N3+AUwg@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:37256 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752448AbcIOVH6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 15 Sep 2016 17:07:58 -0400
+In-Reply-To: <CAA8xDw1RA2RhZ=ERPKK0ZjD1Zc4iWYgm_zSvNHHEdJ+q7FcJag@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, David Zafman <dzafman@redhat.com>
+To: Elita Lobo <loboelita@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Added John as person of interest :)
+On 09/11/2016 05:33 PM, Elita Lobo wrote:
+> Hi,
+>
+> I tried using NEtbeans and Eclipse . Netbeans gave this error.
+> https://paste.fedoraproject.org/426622/61053414/
+>
+> And Eclipse is not able to detect header files although I added the
+> path of the include directory.
+>
+> Has anyone successfully built the ceph code on any IDE?
 
-John, same question.
+Ceph used to build on Eclipse with CDT. Up to Ganymede or something, but 
+that was ages ago.
 
-On Thu, Sep 15, 2016 at 12:54 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
-> The only remaining issue seems to be in knfs suite
->
-> http://tracker.ceph.com/issues/16397
->
-> Greg, is it something that jewel 10.2.3 can be released with unfixed?
->
-> Thx
-> YuriW
+Eventually ended up moving to 'vim' because Eclipse started going nuts 
+due to boost, unable to recognize the library. Also, vim ends up being 
+nicer to develop on a remote server.
+
+Sorry if this doesn't help much.
+
+   -Joao
