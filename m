@@ -1,51 +1,58 @@
-From: Sage Weil <sage@newdream.net>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
 Subject: Re: Bluestore OSD support in ceph-disk
-Date: Thu, 15 Sep 2016 18:34:25 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609151833290.19761@piezo.us.to>
-References: <4459A44C-1336-4EC1-82F0-F491D0C83712@Teradata.com> <BL2PR02MB2115BE07E99958F8FA8E521CF4F10@BL2PR02MB2115.namprd02.prod.outlook.com> <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com> <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
+Date: Thu, 15 Sep 2016 18:46:44 +0000
+Message-ID: <BC30B826-3E63-4002-9436-60222C606E9F@Teradata.com>
+References: <4459A44C-1336-4EC1-82F0-F491D0C83712@Teradata.com>
+ <BL2PR02MB2115BE07E99958F8FA8E521CF4F10@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com>
+ <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
+ <alpine.DEB.2.11.1609151833290.19761@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-980904115-1473964467=:19761"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42308 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751334AbcIOSe2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Sep 2016 14:34:28 -0400
-In-Reply-To: <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
+Received: from nat13.teradata.com ([153.65.16.13]:37682 "EHLO
+        rpc7279.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751098AbcIOSqr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Sep 2016 14:46:47 -0400
+In-Reply-To: <alpine.DEB.2.11.1609151833290.19761@piezo.us.to>
+Content-Language: en-US
+Content-ID: <D57EC5CCFD27524199EF5464E6B1CF3A@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+To: Sage Weil <sage@newdream.net>
 Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-980904115-1473964467=:19761
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-
-On Thu, 15 Sep 2016, Kamble, Nitin A wrote:
-> Can I use ceph-disk to prepare a bluestore OSD now?
-> 
-> I would like to know proper command line parameters for ceph-disk .
-> 
-> The following related issue tracker has closed, does it mean it is ready 
-> to use for creation of bluestore OSDs?
-> 
-> From: http://tracker.ceph.com/issues/13942
-> 
-> >
-> > Updated by Sage Weil 9 months ago
-> >	• Status changed from In Progress to Verified
-> >	• Assignee deleted (Loic Dachary)
-> > For the 'ceph-disk prepare' part, I think we should keep it simple initially:
-> >
-> > ceph-disk --osd-objectstore bluestore maindev[:dbdev[:waldev]]
-> > and teach ceph-disk how to do the partitioning for bluestore (no generic way to ask ceph-osd that). We can leave off the db/wal devices initially, and then make activate work, so that there is something functional. Then add dbdev and waldev support last.
-
-You just need to pass --bluestore to ceph-disk for a single-disk setup. 
-The multi-device PR is still pending, but close:
-
-	https://github.com/ceph/ceph/pull/10135
-
-sage
---8323329-980904115-1473964467=:19761--
+DQo+IE9uIFNlcCAxNSwgMjAxNiwgYXQgMTE6MzQgQU0sIFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVh
+bS5uZXQ+IHdyb3RlOg0KPiANCj4gT24gVGh1LCAxNSBTZXAgMjAxNiwgS2FtYmxlLCBOaXRpbiBB
+IHdyb3RlOg0KPj4gQ2FuIEkgdXNlIGNlcGgtZGlzayB0byBwcmVwYXJlIGEgYmx1ZXN0b3JlIE9T
+RCBub3c/DQo+PiANCj4+IEkgd291bGQgbGlrZSB0byBrbm93IHByb3BlciBjb21tYW5kIGxpbmUg
+cGFyYW1ldGVycyBmb3IgY2VwaC1kaXNrIC4NCj4+IA0KPj4gVGhlIGZvbGxvd2luZyByZWxhdGVk
+IGlzc3VlIHRyYWNrZXIgaGFzIGNsb3NlZCwgZG9lcyBpdCBtZWFuIGl0IGlzIHJlYWR5IA0KPj4g
+dG8gdXNlIGZvciBjcmVhdGlvbiBvZiBibHVlc3RvcmUgT1NEcz8NCj4+IA0KPj4gRnJvbTogaHR0
+cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzEzOTQyDQo+PiANCj4+PiANCj4+PiBVcGRhdGVk
+IGJ5IFNhZ2UgV2VpbCA5IG1vbnRocyBhZ28NCj4+PiAJ4oCiIFN0YXR1cyBjaGFuZ2VkIGZyb20g
+SW4gUHJvZ3Jlc3MgdG8gVmVyaWZpZWQNCj4+PiAJ4oCiIEFzc2lnbmVlIGRlbGV0ZWQgKExvaWMg
+RGFjaGFyeSkNCj4+PiBGb3IgdGhlICdjZXBoLWRpc2sgcHJlcGFyZScgcGFydCwgSSB0aGluayB3
+ZSBzaG91bGQga2VlcCBpdCBzaW1wbGUgaW5pdGlhbGx5Og0KPj4+IA0KPj4+IGNlcGgtZGlzayAt
+LW9zZC1vYmplY3RzdG9yZSBibHVlc3RvcmUgbWFpbmRldls6ZGJkZXZbOndhbGRldl1dDQo+Pj4g
+YW5kIHRlYWNoIGNlcGgtZGlzayBob3cgdG8gZG8gdGhlIHBhcnRpdGlvbmluZyBmb3IgYmx1ZXN0
+b3JlIChubyBnZW5lcmljIHdheSB0byBhc2sgY2VwaC1vc2QgdGhhdCkuIFdlIGNhbiBsZWF2ZSBv
+ZmYgdGhlIGRiL3dhbCBkZXZpY2VzIGluaXRpYWxseSwgYW5kIHRoZW4gbWFrZSBhY3RpdmF0ZSB3
+b3JrLCBzbyB0aGF0IHRoZXJlIGlzIHNvbWV0aGluZyBmdW5jdGlvbmFsLiBUaGVuIGFkZCBkYmRl
+diBhbmQgd2FsZGV2IHN1cHBvcnQgbGFzdC4NCj4gDQo+IFlvdSBqdXN0IG5lZWQgdG8gcGFzcyAt
+LWJsdWVzdG9yZSB0byBjZXBoLWRpc2sgZm9yIGEgc2luZ2xlLWRpc2sgc2V0dXAuIA0KPiBUaGUg
+bXVsdGktZGV2aWNlIFBSIGlzIHN0aWxsIHBlbmRpbmcsIGJ1dCBjbG9zZToNCj4gDQo+IAlodHRw
+czovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTAxMzUNCj4gDQo+IHNhZ2UNCj4NCj4gc3Vk
+byBjZXBoLWRpc2sgcHJlcGFyZSAtLWJsdWVzdG9yZSAvZGV2L3NkYiAtLWJsb2NrLmRiIC9kZXYv
+c2RjIC0tYmxvY2sud2FsIC9kZXYvc2RjDQo+IA0KPiBUaGlzIHdpbGwgY3JlYXRlIDIgcGFydGl0
+aW9ucyBvbiBzZGIgYW5kIDIgcGFydGl0aW9ucyBvbiBzZGMsIHRoZW4gJ2Jsb2NrLmRiJyB3aWxs
+IHN5bWxpbmsgdG8gcGFydGl0aW9uIDEgb2Ygc2RjLCAnYmxvY2sud2FsJyB3aWxsIHN5bWxpbmsg
+dG8gcGFydGl0aW9uIDIgb2Ygc2RjLCAnYmxvY2snIHdpbGwgc3ltbGluayB0byBwYXJ0aXRpb24g
+MiBvZiBzZGIuDQo+DQoNCk5pY2UhICBJIGFtIGVhZ2VyIHRvIHNlZSBpdCBnbyBpbnRvIHRoZSBt
+YXN0ZXIgYnJhbmNoLCBhbmQgdHJ5IGl0IG91dC4gQW55IGFwcHJveGltYXRlIEVUQSBmb3IgbWVy
+Z2luZyB0aGlzIFBSPw0KDQpMb29rcyBsaWtlIHRoZSBXQUwgc2l6ZSBpcyBvZiBmaXhlZCAxMjhN
+QiBpcnJlc3BlY3RpdmUgb2YgdGhlIGJsb2NrIHN0b3JlIHNpemUuIEhvdyB0byBkZXRlcm1pbmUg
+dGhlIG1ldGFkYXRhIGRiIHNpemU/IEl0IG5lZWRzIHRvIHByb3BvcnRpb25hbCB0byB0aGUgYmxv
+Y2sgc3RvcmUgc2l6ZS4gSXMgdGhlcmUgYW55IHJlY29tbWVuZGVkIHJhdGlvPw0KDQoNCg0KVGhh
+bmtzLA0KTml0aW4NCg0K
