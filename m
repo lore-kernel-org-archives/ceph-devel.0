@@ -1,109 +1,38 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: ceph v10.2.3 QE validation status
-Date: Thu, 15 Sep 2016 18:16:59 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609151816540.19761@piezo.us.to>
-References: <CAMMFjmHb=m_WJg8TMaVBOdXB37=viYOBSOYEXL_Bo3kET=hyoA@mail.gmail.com> <CAMMFjmFo=1B07c3czD41CkNUWR8htfSn9z5vwcpdJuVZjbtAyQ@mail.gmail.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Bluestore OSD support in ceph-disk
+Date: Thu, 15 Sep 2016 18:23:32 +0000
+Message-ID: <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
+References: <4459A44C-1336-4EC1-82F0-F491D0C83712@Teradata.com>
+ <BL2PR02MB2115BE07E99958F8FA8E521CF4F10@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41276 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751563AbcIOSRE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 15 Sep 2016 14:17:04 -0400
-In-Reply-To: <CAMMFjmFo=1B07c3czD41CkNUWR8htfSn9z5vwcpdJuVZjbtAyQ@mail.gmail.com>
+Received: from nat13.teradata.com ([153.65.16.13]:37665 "EHLO
+        rpc7279.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752027AbcIOSXf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Sep 2016 14:23:35 -0400
+In-Reply-To: <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com>
+Content-Language: en-US
+Content-ID: <BF9DFC51EDFB9B4E93C39E0745443E77@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, David Zafman <dzafman@redhat.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
 
-On Tue, 13 Sep 2016, Yuri Weinstein wrote:
-> Please see updates http://tracker.ceph.com/issues/16344#note-46 (after
-> incorporating results from the latest runs on tip of jewel branch).
-> 
-> samba - passed
-> 
-> khfs - awaiting approval (Greg, John)
-> 
-> powercycle - awaiting approval (Sage, Loic)
-
-Approved!
-
-Thanks-
-sage
-
-> 
-> Thx
-> YuriW
-> 
-> On Tue, Sep 6, 2016 at 10:12 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
-> > Detailed summary of the QE Validation can be found here
-> > http://tracker.ceph.com/issues/16344#note-46
-> >
-> > The following suites were in scope of this point release validation:
-> >
-> > rados (subset 35/50 297 jobs)
-> > rbd
-> > rgw
-> > fs
-> > krbd
-> > kcephfs
-> > knfs
-> > rest
-> > hadoop
-> > samba
-> > ceph-deploy
-> > ceph-disk
-> > upgrade/client-upgrade
-> > upgrade/hammer-x (jewel)
-> > upgrade/infernalis-x (jewel)
-> > powercycle
-> > (please let me know if any suites are missing from this ^ list)
-> >
-> > ==============================
-> > Issues requiring approval/decision:
-> >
-> > rados:
-> >    http://tracker.ceph.com/issues/16516 (approved by DavidZ)
-> >
-> > rbd:
-> >    multiple issues (Jason pls rview/approve, see notes
-> > http://tracker.ceph.com/issues/16344#note-46)
-> >
-> > krbd:
-> >    http://tracker.ceph.com/issues/17223
-> >    http://tracker.ceph.com/issues/17221
-> >    http://tracker.ceph.com/issues/17222
-> >    (Jason pls rview/approve)
-> >
-> > knfs
-> >    http://tracker.ceph.com/issues/17192
-> >    (Greg pls rview/approve, note: it's similar we saw in hammer point release)
-> >
-> > samba:
-> >    http://tracker.ceph.com/issues/17184
-> >    (Greg pls rview/approve)
-> >
-> > upgrade/client-upgrade:about:startpage
-> >    http://tracker.ceph.com/issues/16506
-> >    (Sage, Sam, Jason pls rview/approve)
-> >
-> > upgrade/infernalis-x (jewel):
-> >    http://tracker.ceph.com/issues/17176
-> >    (Sam, David  pls rview/approve)
-> >
-> > powercycle:
-> >    http://tracker.ceph.com/issues/17177
-> >    (Sage  pls rview/approve)
-> >
-> > Loic, given that we have high number of issues in this release, if you
-> > and dev leads find that we need to add more backports we may consider
-> > validating a new point RC (sha1).
-> >
-> > Thx
-> > YuriW
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Q2FuIEkgdXNlIGNlcGgtZGlzayB0byBwcmVwYXJlIGEgYmx1ZXN0b3JlIE9TRCBub3c/DQoNCkkg
+d291bGQgbGlrZSB0byBrbm93IHByb3BlciBjb21tYW5kIGxpbmUgcGFyYW1ldGVycyBmb3IgY2Vw
+aC1kaXNrIC4NCg0KVGhlIGZvbGxvd2luZyByZWxhdGVkIGlzc3VlIHRyYWNrZXIgaGFzIGNsb3Nl
+ZCwgZG9lcyBpdCBtZWFuIGl0IGlzIHJlYWR5IHRvIHVzZSBmb3IgY3JlYXRpb24gb2YgYmx1ZXN0
+b3JlIE9TRHM/DQoNCkZyb206IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xMzk0Mg0K
+DQo+DQo+IFVwZGF0ZWQgYnkgU2FnZSBXZWlsIDkgbW9udGhzIGFnbw0KPgnigKIgU3RhdHVzIGNo
+YW5nZWQgZnJvbSBJbiBQcm9ncmVzcyB0byBWZXJpZmllZA0KPgnigKIgQXNzaWduZWUgZGVsZXRl
+ZCAoTG9pYyBEYWNoYXJ5KQ0KPiBGb3IgdGhlICdjZXBoLWRpc2sgcHJlcGFyZScgcGFydCwgSSB0
+aGluayB3ZSBzaG91bGQga2VlcCBpdCBzaW1wbGUgaW5pdGlhbGx5Og0KPg0KPiBjZXBoLWRpc2sg
+LS1vc2Qtb2JqZWN0c3RvcmUgYmx1ZXN0b3JlIG1haW5kZXZbOmRiZGV2Wzp3YWxkZXZdXQ0KPiBh
+bmQgdGVhY2ggY2VwaC1kaXNrIGhvdyB0byBkbyB0aGUgcGFydGl0aW9uaW5nIGZvciBibHVlc3Rv
+cmUgKG5vIGdlbmVyaWMgd2F5IHRvIGFzayBjZXBoLW9zZCB0aGF0KS4gV2UgY2FuIGxlYXZlIG9m
+ZiB0aGUgZGIvd2FsIGRldmljZXMgaW5pdGlhbGx5LCBhbmQgdGhlbiBtYWtlIGFjdGl2YXRlIHdv
+cmssIHNvIHRoYXQgdGhlcmUgaXMgc29tZXRoaW5nIGZ1bmN0aW9uYWwuIFRoZW4gYWRkIGRiZGV2
+IGFuZCB3YWxkZXYgc3VwcG9ydCBsYXN0Lg0KPg0KDQpUaGFua3MsDQpOaXRpbg0KDQo=
