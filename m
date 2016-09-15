@@ -1,57 +1,43 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Effect of 11014 on wip-denc bitmap allocator locking overhead
-Date: Wed, 14 Sep 2016 15:55:17 -0500
-Message-ID: <b54f84b5-abe6-f259-74be-08d59efbfebb@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: wip-denc
+Date: Thu, 15 Sep 2016 00:39:35 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1609150038380.19761@piezo.us.to>
+References: <alpine.DEB.2.11.1609132104590.19761@piezo.us.to> <a89da24e-7791-ef4a-acce-9f653eaac08e@redhat.com> <BL2PR02MB2115A35131A2704721503480F4F10@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44696 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:39372 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753970AbcINUzU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Sep 2016 16:55:20 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 01ADDC04D2AF
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Sep 2016 20:55:20 +0000 (UTC)
-Received: from [10.3.112.17] (ovpn-112-17.phx2.redhat.com [10.3.112.17])
-        by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u8EKtIRV031469
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Sep 2016 16:55:19 -0400
+        id S1756504AbcIOAkO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Sep 2016 20:40:14 -0400
+In-Reply-To: <BL2PR02MB2115A35131A2704721503480F4F10@BL2PR02MB2115.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Mark Nelson <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Today at the bluestore standup and perf meeting there was some 
-discussion regarding time spent in bitmap allocator locking and the 
-effect of 11014 on it.  I ran a 4K random write test today with wip-denc 
-+ 11059 + 11014 and took a perf callgraph during 4K random writes.
+On Wed, 14 Sep 2016, Somnath Roy wrote:
+> Another point, probably, not related to leak fix, but, in the latest master (+ your 1st 5 commits) I am hitting the following assert after OSD restart. If I run IO for some time..
+> 
+> Thread 1 "ceph-osd" received signal SIGABRT, Aborted.
+> 0x00007ffff47fd418 in __GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:54
+> 54      ../sysdeps/unix/sysv/linux/raise.c: No such file or directory.
+> (gdb) bt
+> #0  0x00007ffff47fd418 in __GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:54
+> #1  0x00007ffff47ff01a in __GI_abort () at abort.c:89
+> #2  0x0000555555fa114b in ceph::__ceph_assert_fail (assertion=assertion@entry=0x5555562460ed "rm.empty()",
+>     file=file@entry=0x555556245fd8 "/root/ceph-master/src/os/bluestore/StupidAllocator.cc", line=line@entry=305,
+>     func=func@entry=0x5555562462c0 <StupidAllocator::init_rm_free(unsigned long, unsigned long)::__PRETTY_FUNCTION__> "virtual void StupidAllocator::init_rm_free(uint64_t, uint64_t)") at /root/ceph-master/src/common/assert.cc:78
+> #3  0x0000555555df6d5c in StupidAllocator::init_rm_free (this=0x55555f06f7a0, offset=<optimized out>, length=<optimized out>)
+>     at /root/ceph-master/src/os/bluestore/StupidAllocator.cc:305
+> #4  0x0000555555dd33aa in BlueFS::mount (this=0x55555f266580) at /root/ceph-master/src/os/bluestore/BlueFS.cc:366
+> #5  0x0000555555d017e5 in BlueStore::_open_db (this=this@entry=0x55555f162000, create=create@entry=false) at /root/ceph-master/src/os/bluestore/BlueStore.cc:3008
+> #6  0x0000555555d1c02d in BlueStore::mount (this=0x55555f162000) at /root/ceph-master/src/os/bluestore/BlueStore.cc:3659
+> #7  0x0000555555924ef3 in OSD::init (this=0x55555f14a000) at /root/ceph-master/src/osd/OSD.cc:2025
+> #8  0x00005555558838ff in main (argc=<optimized out>, argv=<optimized out>) at /root/ceph-master/src/ceph_osd.cc:609
 
-As expected we are still picking up some buffer::list::append time in 
-encode_some even after the wip-denc changes:
+I hit this one this afternoon. Fix is included in
 
--    5.45%     2.10%  tp_osd_tp        ceph-osd                     [.] 
-BlueStore::ExtentMap::encode_some
-    - 3.35% BlueStore::ExtentMap::encode_some
-       - 2.51% ceph::buffer::list::append
-            2.31% ceph::buffer::ptr::ptr
-    + 1.24% __clone
+	https://github.com/ceph/ceph/pull/11087
 
-But we also still see a fair amount of time spent in 
-BitMapAreaLeaf::child_check_n_lock:
-
--    5.26%     0.88%  tp_osd_tp        ceph-osd                     [.] 
-BitMapAreaLeaf::child_check_n_lock
-    - 4.39% BitMapAreaLeaf::child_check_n_lock
-       - 1.78% BitMapZone::lock_excl_try
-            1.49% pthread_mutex_trylock
-       - 1.59% BitMapZone::is_exhausted
-          + 1.23% BitMapZone::check_locked
-         0.89% pthread_mutex_unlock
-
-This is pretty comparable to what I was seeing prior to 11014, so it 
-doesn't appear to be having much effect on this specific issue.
-
-Mark
-
+sage
