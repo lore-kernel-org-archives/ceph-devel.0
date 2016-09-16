@@ -1,61 +1,90 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Snapshots of consistency groups
-Date: Fri, 16 Sep 2016 13:37:52 -0400
-Message-ID: <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
-References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
- <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
- <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
- <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
- <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
- <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
- <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
- <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
- <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
- <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
- <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
- <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
- <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
- <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
- <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
- <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
- <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
- <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
- <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com> <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: Bluestore OSD support in ceph-disk
+Date: Fri, 16 Sep 2016 18:38:24 +0000
+Message-ID: <EA284BAD-1765-4600-92A9-32FF2BF098E9@Teradata.com>
+References: <4459A44C-1336-4EC1-82F0-F491D0C83712@Teradata.com>
+ <BL2PR02MB2115BE07E99958F8FA8E521CF4F10@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com>
+ <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
+ <alpine.DEB.2.11.1609151833290.19761@piezo.us.to>
+ <BC30B826-3E63-4002-9436-60222C606E9F@Teradata.com>
+ <alpine.DEB.2.11.1609151850330.19761@piezo.us.to>
+ <E9BC8A1A-CFD4-4D1E-A719-FD3AD217607E@Teradata.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f173.google.com ([209.85.192.173]:33297 "EHLO
-        mail-pf0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934703AbcIPRhy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2016 13:37:54 -0400
-Received: by mail-pf0-f173.google.com with SMTP id 21so18594279pfy.0
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Sep 2016 10:37:54 -0700 (PDT)
-In-Reply-To: <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
+Received: from nat13.teradata.com ([153.65.16.13]:37729 "EHLO
+        rpc7279.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752035AbcIPSi0 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2016 14:38:26 -0400
+In-Reply-To: <E9BC8A1A-CFD4-4D1E-A719-FD3AD217607E@Teradata.com>
+Content-Language: en-US
+Content-ID: <E237B8ADB2469844B1707402D6A1D97A@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Victor Denisov <vdenisov@mirantis.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Sage Weil <sage@newdream.net>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
-> if (struct_v >= 5) {
->       ::decode(snapshot_namespace, p);
->     } else {
->       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
->     }
->
-> then code for ::encode function of cls_rbd_snap would change accordingly:
->
-> instead of
->
-> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
-> snapshot_namespace);
->
-> I would do:
-> ::encode(snapshot_namespace, bl);
-
-
-+1 -- looks good to me
-
--- 
-Jason
+DQo+IE9uIFNlcCAxNSwgMjAxNiwgYXQgMTE6NDMgUE0sIEthbWJsZSwgTml0aW4gQSA8Tml0aW4u
+S2FtYmxlQFRlcmFkYXRhLmNvbT4gd3JvdGU6DQo+IA0KPj4gDQo+PiBPbiBTZXAgMTUsIDIwMTYs
+IGF0IDExOjU0IEFNLCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3cm90ZToNCj4+IA0K
+Pj4gDQo+PiBUaGUgMTI4TUIgZmlndXJlIGlzIG1vc3RseSBwdWxsZWQgb3V0IG9mIGEgaGF0LiAg
+SSBzdXNwZWN0IGl0IHdpbGwgYmUgDQo+PiByZWFzb25hYmxlLCBidXQgYSBwcm9wZXIgcmVjb21t
+ZW5kYXRpb24gaXMgZ29pbmcgdG8gZGVwZW5kIG9uIGhvdyB3ZSBlbmQgDQo+PiB1cCB0dW5pbmcg
+cm9ja3NkYiwgYW5kIHdlJ3ZlIHB1dCB0aGF0IG9mZiB1bnRpbCB0aGUgbWV0YWRhdGEgZm9ybWF0
+IGlzIA0KPj4gZmluYWxpemVkIGFuZCBhbnkgcm9ja3NkYiB0dW5pbmcgd2UgZG8gd2lsbCBiZSBt
+ZWFuaW5nZnVsLiAgV2UncmUgcHJldHR5IA0KPj4gbXVjaCBhdCB0aGF0IHBvaW50IG5vdy4uLg0K
+Pj4gDQo+PiBXaGF0ZXZlciBpdCBpcywgaXQgc2hvdWxkIGJlIHJlbGF0ZWQgdG8gdGhlIHJlcXVl
+c3QgcmF0ZSwgYW5kIHBlcmhhcHMgdGhlIA0KPj4gcmVsYXRpdmUgc3BlZWQgb2YgdGhlIHdhbCBk
+ZXZpY2UgYW5kIHRoZSBkYiBvciBtYWluIGRldmljZS4gIFRoZSBzaXplIG9mIA0KPj4gdGhlIHNs
+b3dlciBkZXZpY2VzIHNob3VsZG4ndCBtYXR0ZXIsIHRob3VnaC4NCj4+IA0KPj4gVGhlcmUgYXJl
+IHNvbWUgYmx1ZWZzIHBlcmYgY291bnRlcnMgdGhhdCBsZXQgeW91IG1vbml0b3Igd2hhdCB0aGUg
+d2FsIA0KPj4gZGV2aWNlIHV0aWxpemF0aW9uIGlzLiAgU2VlIA0KPj4gDQo+PiBiLmFkZF91NjQo
+bF9ibHVlZnNfd2FsX3RvdGFsX2J5dGVzLCAid2FsX3RvdGFsX2J5dGVzIiwNCj4+IAkgICAgIlRv
+dGFsIGJ5dGVzICh3YWwgZGV2aWNlKSIpOw0KPj4gYi5hZGRfdTY0KGxfYmx1ZWZzX3dhbF9mcmVl
+X2J5dGVzLCAid2FsX2ZyZWVfYnl0ZXMiLA0KPj4gCSAgICAiRnJlZSBieXRlcyAod2FsIGRldmlj
+ZSkiKTsNCj4+IA0KPj4gd2hpY2ggeW91IGNhbiBtb25pdG9yIHZpYSAnY2VwaCBkYWVtb24gb3Nk
+Lk4gcGVyZiBkdW1wJy4gIElmIHlvdSANCj4+IGRpc2NvdmVyIGFueXRoaW5nIGludGVyZXN0aW5n
+LCBsZXQgdXMga25vdyENCj4+IA0KPj4gVGhhbmtzLQ0KPj4gc2FnZQ0KPiANCj4gSSBjb3VsZCBi
+dWlsZCBhbmQgZGVwbG95IHRoZSBsYXRlc3QgbWFzdGVyIChjb21taXQ6IDkwOTZhZDM3ZjJjMDc5
+OGMyNmQ3Nzg0ZmI0ZTdhNzgxZmViNzJjYjgpIHdpdGggcGFydGl0aW9uZWQgYmx1ZXN0b3JlLiBJ
+IHN0cnVnZ2xlZCBhIGJpdCB0byBicmluZyB1cCBPU0RzIGFzIHRoZSBhdmFpbGFibGUgZG9jdW1l
+bnRhdGlvbiBmb3IgYnJpbmdpbmcgdXAgdGhlIHBhcnRpdGlvbmVkIGJsdWVzdG9yZSBPU0RzIGlz
+IG1vc3RseSBwcmltaXRpdmUgc28gZmFyLiBPbmNlIGNlcGgtZGlzayBnZXRzIHVwZGF0ZWQgdGhp
+cyBwYWluIHdpbGwgZ28gYXdheS4gV2Ugd2lsbCBzdHJlc3MgdGhlIGNsdXN0ZXIgc2hvcnRseSwg
+YnV0IHNvIGZhciBJIGFtIGRlbGlnaHRlZCB0byBzZWUgdGhhdCBmcm9tIGdyb3VuZC16ZXJvIGl0
+IGlzIGFibGUgc3RhbmQgdXAgb24gaXTigJlzIG93biBmZWV0IHRvIEhFQUxUSF9PSyB3aXRob3V0
+IGFueSBlcnJvcnMuIElmIEkgc2VlIGFueSBpc3N1ZXMgaW4gb3VyIHRlc3RzIEkgd2lsbCBzaGFy
+ZSBpdCBoZXJlLg0KPiANCj4gVGhhbmtzLA0KPiBOaXRpbg0KDQpPdXQgb2YgMzAgT1NEcywgb25l
+IGZhaWxlZCBhZnRlciBzdHJlc3Mgb2YgMS41aHJzLiBSZXN0IG9mIHRoZSAyOSBPU0RzIGFyZSBo
+b2xkaW5nIG9uIGZpbmUgZm9yIG1hbnkgaG91cnMuDQpJZiBuZWVkZWQgSSBjYW4gcHJvdmlkZSB0
+aGUgZXhlY3V0YWJsZSBvciBvYmpkdW1wLg0KDQoNCiBjZXBoIHZlcnNpb24gdjExLjAuMC0yMzA5
+LWc5MDk2YWQzICg5MDk2YWQzN2YyYzA3OThjMjZkNzc4NGZiNGU3YTc4MWZlYjcyY2I4KQ0KIDE6
+ICgoKSsweDg5MmRkMikgWzB4N2ZiNWJmMmI4ZGQyXQ0KIDI6ICgoKSsweGY4OTApIFsweDdmYjVi
+YjRhZTg5MF0NCiAzOiAoZ3NpZ25hbCgpKzB4MzcpIFsweDdmYjViYTI3MDE4N10NCiA0OiAoYWJv
+cnQoKSsweDExOCkgWzB4N2ZiNWJhMjcxNTM4XQ0KIDU6IChjZXBoOjpfX2NlcGhfYXNzZXJ0X2Zh
+aWwoY2hhciBjb25zdCosIGNoYXIgY29uc3QqLCBpbnQsIGNoYXIgY29uc3QqKSsweDI2NSkgWzB4
+N2ZiNWJmNDNhMmY1XQ0KIDY6IChCbHVlRlM6Ol9hbGxvY2F0ZSh1bnNpZ25lZCBjaGFyLCB1bnNp
+Z25lZCBsb25nLCBzdGQ6OnZlY3RvcjxibHVlZnNfZXh0ZW50X3QsIHN0ZDo6YWxsb2NhdG9yPGJs
+dWVmc19leHRlbnRfdD4gPiopKzB4OGFkKSBbMHg3ZmI1YmYyNzM1ZGRdDQogNzogKEJsdWVGUzo6
+X2ZsdXNoX2FuZF9zeW5jX2xvZyhzdGQ6OnVuaXF1ZV9sb2NrPHN0ZDo6bXV0ZXg+JiwgdW5zaWdu
+ZWQgbG9uZywgdW5zaWduZWQgbG9uZykrMHhiNGYpIFsweDdmYjViZjI3YWExZl0NCiA4OiAoQmx1
+ZUZTOjpfZnN5bmMoQmx1ZUZTOjpGaWxlV3JpdGVyKiwgc3RkOjp1bmlxdWVfbG9jazxzdGQ6Om11
+dGV4PiYpKzB4MjliKSBbMHg3ZmI1YmYyN2JjOWJdDQogOTogKEJsdWVSb2Nrc1dyaXRhYmxlRmls
+ZTo6U3luYygpKzB4NGUpIFsweDdmYjViZjI5MTI1ZV0NCiAxMDogKHJvY2tzZGI6OldyaXRhYmxl
+RmlsZVdyaXRlcjo6U3luY0ludGVybmFsKGJvb2wpKzB4MTM5KSBbMHg3ZmI1YmYzODg2OTldDQog
+MTE6IChyb2Nrc2RiOjpXcml0YWJsZUZpbGVXcml0ZXI6OlN5bmMoYm9vbCkrMHg4OCkgWzB4N2Zi
+NWJmMzg5MjM4XQ0KIDEyOiAocm9ja3NkYjo6REJJbXBsOjpXcml0ZUltcGwocm9ja3NkYjo6V3Jp
+dGVPcHRpb25zIGNvbnN0Jiwgcm9ja3NkYjo6V3JpdGVCYXRjaCosIHJvY2tzZGI6OldyaXRlQ2Fs
+bGJhY2sqLCB1bnNpZ25lZCBsb25nKiwgdW5zaWduZWQgbG9uZywgYm9vbCkrMHgxM2NmKSBbMHg3
+ZmI1YmYyZTBhMmZdDQogMTM6IChyb2Nrc2RiOjpEQkltcGw6OldyaXRlKHJvY2tzZGI6OldyaXRl
+T3B0aW9ucyBjb25zdCYsIHJvY2tzZGI6OldyaXRlQmF0Y2gqKSsweDI3KSBbMHg3ZmI1YmYyZTE2
+MzddDQogMTQ6IChSb2Nrc0RCU3RvcmU6OnN1Ym1pdF90cmFuc2FjdGlvbl9zeW5jKHN0ZDo6c2hh
+cmVkX3B0cjxLZXlWYWx1ZURCOjpUcmFuc2FjdGlvbkltcGw+KSsweDViKSBbMHg3ZmI1YmYyMWEx
+NGJdDQogMTU6IChCbHVlU3RvcmU6Ol9rdl9zeW5jX3RocmVhZCgpKzB4ZjVhKSBbMHg3ZmI1YmYx
+ZTdmZmFdDQogMTY6IChCbHVlU3RvcmU6OktWU3luY1RocmVhZDo6ZW50cnkoKSsweGQpIFsweDdm
+YjViZjFmNWE2ZF0NCiAxNzogKCgpKzB4ODBhNCkgWzB4N2ZiNWJiNGE3MGE0XQ0KIDE4OiAoY2xv
+bmUoKSsweDZkKSBbMHg3ZmI1YmEzMjAwNGRdDQogTk9URTogYSBjb3B5IG9mIHRoZSBleGVjdXRh
+YmxlLCBvciBgb2JqZHVtcCAtcmRTIDxleGVjdXRhYmxlPmAgaXMgbmVlZGVkIHRvIGludGVycHJl
+dCB0aGlzLg0KDQpUaGFua3MsDQpOaXRpbg0KDQoNCg==
