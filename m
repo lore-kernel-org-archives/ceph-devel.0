@@ -1,215 +1,56 @@
-From: Michal Jarzabek <stiopa@gmail.com>
-Subject: Re: Which IDE do you use for ceph-development?
-Date: Fri, 16 Sep 2016 07:15:36 +0100
-Message-ID: <CAEFDAA4xjYJk5Y3rnfXs_kKg5Qg1c=TdsMgWEfGko0RvJMNtzQ@mail.gmail.com>
-References: <CAA8xDw3OPGikoYF3Knef5tBrCsg+Hvekhyh7BVGJZCq4Yn93Fw@mail.gmail.com>
- <CAA8xDw1RA2RhZ=ERPKK0ZjD1Zc4iWYgm_zSvNHHEdJ+q7FcJag@mail.gmail.com>
- <CAF-wwdEE9KC=4agvTyrxNQcoSjo408SV8DNTfF0Kj2us3Nawkw@mail.gmail.com>
- <CAA8xDw2MirA6WW7ZxSUG_jLzw7md4Ws7JwzBQQ66Vcu3Q1-1jw@mail.gmail.com>
- <CAA8xDw2cU8DN6=SQ3kNCZsXTNrmeZdyKxAhuMV46SjugsGthAw@mail.gmail.com>
- <CA+hcxJTufzt8KkL+Hj93X09OZuyipM-tkVk_v3-mo5NbBDohrQ@mail.gmail.com> <CAF-wwdF=0LVTVrfF-6Q3arq+ETaar=6-H3MbEe5CSvJqV3WKmg@mail.gmail.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: Bluestore OSD support in ceph-disk
+Date: Fri, 16 Sep 2016 06:43:30 +0000
+Message-ID: <E9BC8A1A-CFD4-4D1E-A719-FD3AD217607E@Teradata.com>
+References: <4459A44C-1336-4EC1-82F0-F491D0C83712@Teradata.com>
+ <BL2PR02MB2115BE07E99958F8FA8E521CF4F10@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com>
+ <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
+ <alpine.DEB.2.11.1609151833290.19761@piezo.us.to>
+ <BC30B826-3E63-4002-9436-60222C606E9F@Teradata.com>
+ <alpine.DEB.2.11.1609151850330.19761@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f44.google.com ([209.85.213.44]:32942 "EHLO
-        mail-vk0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751905AbcIPGPh (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2016 02:15:37 -0400
-Received: by mail-vk0-f44.google.com with SMTP id 192so12150151vkl.0
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Sep 2016 23:15:37 -0700 (PDT)
-In-Reply-To: <CAF-wwdF=0LVTVrfF-6Q3arq+ETaar=6-H3MbEe5CSvJqV3WKmg@mail.gmail.com>
+Received: from nat13.teradata.com ([153.65.16.13]:38079 "EHLO
+        rpc7279.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752856AbcIPGnc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2016 02:43:32 -0400
+In-Reply-To: <alpine.DEB.2.11.1609151850330.19761@piezo.us.to>
+Content-Language: en-US
+Content-ID: <4A0EC1C67FB4DA46A9A7E6CE6FBB5A97@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: Victor Denisov <vdenisov@mirantis.com>, Elita Lobo <loboelita@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Sage Weil <sage@newdream.net>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
-
-For code completion/navigation YouCompleteMe works great -
-https://valloric.github.io/YouCompleteMe.
-
-
-On Fri, Sep 16, 2016 at 4:14 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
-> On Fri, Sep 16, 2016 at 12:15 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->> Hi Elita,
->>
->> I'm not sure how familiar you are with Vim, so, probably some advice
->> would be useful.
->>
->> cscope is the most useful tool for navigating c++ code:
->> http://cscope.sourceforge.net/cscope_vim_tutorial.html
->> You need to put this file:
->> http://cscope.sourceforge.net/cscope_maps.vim to your ~/.vim/plugin
->> directory.
->> Then run these commands in ceph src directory:
->>
->> find . -name "*.cc" > cscope.file
->> find . -name "*.h" >> cscope.file
->> find . -name "*.hpp" >> cscope.file
->> find . -name "*.cpp" >> cscope.file
->> find . -name "*.c" >> cscope.file
->>
->> and then
->> cscope -qbk
->
-> I used to do it this way but now I just use the cscope vim plugin that
-> ships with fedora and just run "gtags" (GNU global tags) to populate
-> the tags database.
->
->>
->> Then open any file, but make sure that your current working directory is src.
->>
->> If you want to have more then one plugin use vim pathogen:
->> https://github.com/tpope/vim-pathogen
->
-> +1
->
->>
->> I recommend using the following plugins:
->> gundo - allows you to visualize the history of your edits in vim -
->> https://github.com/sjl/gundo.vim
->> nerdtree - allows you to visualize your directory structure -
->> https://github.com/scrooloose/nerdtree
->
-> I use commandT here (fuzzy search).
->
->> vim-fugitive - allows you to work with git from vim -
->> https://github.com/tpope/vim-fugitive
->
-> +1
->
->>
->> Besides keys that cscope provides you can use some text search
->> features that are built into vim:
->>
->> gf - if you are standing on a file (include file) it will jump to this file.
->> [ + ctrl - i - look for the symbol that you are standing on upwards
->> including all include files.
->
-> There are more quick navigation commands (see :help jump-motions and
-> :help tag) if you type ":tags" you can see your tag stack and jump
-> around within it.
->
->> This is useful because cscope shows all declarations of a function,
->> but this keystroke shows you, most likely, the declaration you need.
->> I say most likely because sometimes it finds forward definition not a
->> real definition, but still it's useful in 96.3 percent of cases)
->
-> With the scope plugin you can type the following to find a global defintion:
->
-> :cs f g lock_suspend_timeout
->
-> Find all callers;
->
-> :cs f c lock_suspend_timeout
->
-> Find all uses of the symbol;
->
-> :cs f s lock_suspend_timeout
->
-> Find a file;
->
-> :cs f f PG.h
->
-> ...and the rest.
->
->         USAGE   :cs find {querytype} {name}
->
->             {querytype} corresponds to the actual cscope line
->             interface numbers as well as default nvi commands:
->
->                 0 or s: Find this C symbol
->                 1 or g: Find this definition
->                 2 or d: Find functions called by this function
->                 3 or c: Find functions calling this function
->                 4 or t: Find this text string
->                 6 or e: Find this egrep pattern
->                 7 or f: Find this file
->                 8 or i: Find files #including this file
->
-> Like everyone else I've tried many IDEs but nothing beats vim.
->
-> --
-> HTH,
-> Brad
->
->>
->> Hopefully it was useful.
->>
->> Victor.
->>
->> On Thu, Sep 15, 2016 at 6:55 PM, Elita Lobo <loboelita@gmail.com> wrote:
->>> Hi,
->>>
->>> @Brad,
->>> Hi Brad,
->>>
->>> Thanks again :) ! Will try it out.
->>>
->>> @ Joao, @Mark,
->>> Thanks for the suggestion. I was using vim but I hadn't configured it
->>> to index the files, hence it was becoming very difficult to search for
->>> definitions/declarations etc (Was using grep) . Also, I was hoping I
->>> could build the code on atleast one IDE which could show me all the
->>> local function calls made in each process.
->>> I tried using gdb, added debugging symbols etc but still couldnt trace
->>> the local function calls.
->>> I have somehow managed to figure out the flow using logs/printfs and
->>> experimenting with the ceph commands.
->>>
->>>
->>> Thanks and Regards,
->>> Elita Lobo
->>>
->>>
->>> On Fri, Sep 16, 2016 at 7:15 AM, Elita Lobo <loboelita@gmail.com> wrote:
->>>> Hi Brad,
->>>>
->>>> Thanks :) ! Will try it out. Currently managing with Code Blocks.
->>>>
->>>>
->>>> Regards,
->>>> Elita
->>>>
->>>> On Tue, Sep 13, 2016 at 11:53 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
->>>>>
->>>>> Pretty sure I built it OK in QtCreator but it was some time ago now.
->>>>>
->>>>> --
->>>>> Cheers,
->>>>> Brad
->>>>>
->>>>> On Mon, Sep 12, 2016 at 2:33 AM, Elita Lobo <loboelita@gmail.com> wrote:
->>>>> > Hi,
->>>>> >
->>>>> > I tried using NEtbeans and Eclipse . Netbeans gave this error.
->>>>> > https://paste.fedoraproject.org/426622/61053414/
->>>>> >
->>>>> > And Eclipse is not able to detect header files although I added the
->>>>> > path of the include directory.
->>>>> >
->>>>> > Has anyone successfully built the ceph code on any IDE?
->>>>> >
->>>>> >
->>>>> > Regards,
->>>>> > Elita Lobo
->>>>> > --
->>>>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> > the body of a message to majordomo@vger.kernel.org
->>>>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Cheers,
-> Brad
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQo+IE9uIFNlcCAxNSwgMjAxNiwgYXQgMTE6NTQgQU0sIFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVh
+bS5uZXQ+IHdyb3RlOg0KPiANCj4gDQo+IFRoZSAxMjhNQiBmaWd1cmUgaXMgbW9zdGx5IHB1bGxl
+ZCBvdXQgb2YgYSBoYXQuICBJIHN1c3BlY3QgaXQgd2lsbCBiZSANCj4gcmVhc29uYWJsZSwgYnV0
+IGEgcHJvcGVyIHJlY29tbWVuZGF0aW9uIGlzIGdvaW5nIHRvIGRlcGVuZCBvbiBob3cgd2UgZW5k
+IA0KPiB1cCB0dW5pbmcgcm9ja3NkYiwgYW5kIHdlJ3ZlIHB1dCB0aGF0IG9mZiB1bnRpbCB0aGUg
+bWV0YWRhdGEgZm9ybWF0IGlzIA0KPiBmaW5hbGl6ZWQgYW5kIGFueSByb2Nrc2RiIHR1bmluZyB3
+ZSBkbyB3aWxsIGJlIG1lYW5pbmdmdWwuICBXZSdyZSBwcmV0dHkgDQo+IG11Y2ggYXQgdGhhdCBw
+b2ludCBub3cuLi4NCj4gDQo+IFdoYXRldmVyIGl0IGlzLCBpdCBzaG91bGQgYmUgcmVsYXRlZCB0
+byB0aGUgcmVxdWVzdCByYXRlLCBhbmQgcGVyaGFwcyB0aGUgDQo+IHJlbGF0aXZlIHNwZWVkIG9m
+IHRoZSB3YWwgZGV2aWNlIGFuZCB0aGUgZGIgb3IgbWFpbiBkZXZpY2UuICBUaGUgc2l6ZSBvZiAN
+Cj4gdGhlIHNsb3dlciBkZXZpY2VzIHNob3VsZG4ndCBtYXR0ZXIsIHRob3VnaC4NCj4gDQo+IFRo
+ZXJlIGFyZSBzb21lIGJsdWVmcyBwZXJmIGNvdW50ZXJzIHRoYXQgbGV0IHlvdSBtb25pdG9yIHdo
+YXQgdGhlIHdhbCANCj4gZGV2aWNlIHV0aWxpemF0aW9uIGlzLiAgU2VlIA0KPiANCj4gIGIuYWRk
+X3U2NChsX2JsdWVmc193YWxfdG90YWxfYnl0ZXMsICJ3YWxfdG90YWxfYnl0ZXMiLA0KPiAJICAg
+ICJUb3RhbCBieXRlcyAod2FsIGRldmljZSkiKTsNCj4gIGIuYWRkX3U2NChsX2JsdWVmc193YWxf
+ZnJlZV9ieXRlcywgIndhbF9mcmVlX2J5dGVzIiwNCj4gCSAgICAiRnJlZSBieXRlcyAod2FsIGRl
+dmljZSkiKTsNCj4gDQo+IHdoaWNoIHlvdSBjYW4gbW9uaXRvciB2aWEgJ2NlcGggZGFlbW9uIG9z
+ZC5OIHBlcmYgZHVtcCcuICBJZiB5b3UgDQo+IGRpc2NvdmVyIGFueXRoaW5nIGludGVyZXN0aW5n
+LCBsZXQgdXMga25vdyENCj4gDQo+IFRoYW5rcy0NCj4gc2FnZQ0KDQpJIGNvdWxkIGJ1aWxkIGFu
+ZCBkZXBsb3kgdGhlIGxhdGVzdCBtYXN0ZXIgKGNvbW1pdDogOTA5NmFkMzdmMmMwNzk4YzI2ZDc3
+ODRmYjRlN2E3ODFmZWI3MmNiOCkgd2l0aCBwYXJ0aXRpb25lZCBibHVlc3RvcmUuIEkgc3RydWdn
+bGVkIGEgYml0IHRvIGJyaW5nIHVwIE9TRHMgYXMgdGhlIGF2YWlsYWJsZSBkb2N1bWVudGF0aW9u
+IGZvciBicmluZ2luZyB1cCB0aGUgcGFydGl0aW9uZWQgYmx1ZXN0b3JlIE9TRHMgaXMgbW9zdGx5
+IHByaW1pdGl2ZSBzbyBmYXIuIE9uY2UgY2VwaC1kaXNrIGdldHMgdXBkYXRlZCB0aGlzIHBhaW4g
+d2lsbCBnbyBhd2F5LiBXZSB3aWxsIHN0cmVzcyB0aGUgY2x1c3RlciBzaG9ydGx5LCBidXQgc28g
+ZmFyIEkgYW0gZGVsaWdodGVkIHRvIHNlZSB0aGF0IGZyb20gZ3JvdW5kLXplcm8gaXQgaXMgYWJs
+ZSBzdGFuZCB1cCBvbiBpdOKAmXMgb3duIGZlZXQgdG8gSEVBTFRIX09LIHdpdGhvdXQgYW55IGVy
+cm9ycy4gSWYgSSBzZWUgYW55IGlzc3VlcyBpbiBvdXIgdGVzdHMgSSB3aWxsIHNoYXJlIGl0IGhl
+cmUuDQoNClRoYW5rcywNCk5pdGluDQoNCg==
