@@ -1,130 +1,67 @@
-From: Kostis Fardelas <dante1234@gmail.com>
-Subject: Re: Suiciding and corrupted OSDs zero out Ceph cluster IO
-Date: Fri, 16 Sep 2016 21:45:18 +0300
-Message-ID: <CAN3wisW3r7kxbW1fhSRF8yN9iunXKA_K4XUN3y3nZ-tDTYOWSA@mail.gmail.com>
-References: <CAN3wisVcObOWrSey3xXNwuLMNidncc+NSTOFvSNKiAJ9P-oCDA@mail.gmail.com>
- <CACJqLyb5kfTvi7BAYX05krNUjEPFTG0GihD2R2purHUUOKpEnQ@mail.gmail.com>
- <CAN3wisXrWmVK+CeZgpq-6mLCurfTWcEsXLgfsotcbxbFC+3j7Q@mail.gmail.com> <CACJqLyaF_22Drc8ARrBGh=OKN6zVD0mQ=Cb8Ocbc=uY26u=fFg@mail.gmail.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: Bluestore OSD support in ceph-disk
+Date: Fri, 16 Sep 2016 19:00:17 +0000
+Message-ID: <E27159E7-FDEB-4075-B1B3-8C788D2CCA8C@Teradata.com>
+References: <4459A44C-1336-4EC1-82F0-F491D0C83712@Teradata.com>
+ <BL2PR02MB2115BE07E99958F8FA8E521CF4F10@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com>
+ <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
+ <alpine.DEB.2.11.1609151833290.19761@piezo.us.to>
+ <BC30B826-3E63-4002-9436-60222C606E9F@Teradata.com>
+ <alpine.DEB.2.11.1609151850330.19761@piezo.us.to>
+ <E9BC8A1A-CFD4-4D1E-A719-FD3AD217607E@Teradata.com>
+ <EA284BAD-1765-4600-92A9-32FF2BF098E9@Teradata.com>
+ <BL2PR02MB21150C4B85B1897282432B86F4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:35020 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752496AbcIPSpU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2016 14:45:20 -0400
-Received: by mail-qk0-f173.google.com with SMTP id t7so97012310qkh.2
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Sep 2016 11:45:20 -0700 (PDT)
-In-Reply-To: <CACJqLyaF_22Drc8ARrBGh=OKN6zVD0mQ=Cb8Ocbc=uY26u=fFg@mail.gmail.com>
+Received: from nat13.teradata.com ([153.65.16.13]:37753 "EHLO
+        rpc7279.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S964804AbcIPTAZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2016 15:00:25 -0400
+In-Reply-To: <BL2PR02MB21150C4B85B1897282432B86F4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
+Content-Language: en-US
+Content-ID: <B00E6D26E393E64F9990060A79DBC2DE@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Sorry Haomai, I have no idea
 
-On 16 September 2016 at 18:45, Haomai Wang <haomai@xsky.com> wrote:
-> On Fri, Sep 16, 2016 at 7:30 PM, Kostis Fardelas <dante1234@gmail.com> wrote:
->> Sure,
->> ceph-post-file: ebc211d2-5ae1-40ee-b40a-7668a21232e6
->
-> Oh, sorry, I forget how to access this post... Anyone may give a guide.....
->
->>
->> Contains the ceph logs and crashed OSD logs with default debug level.
->> The flapping problem starts @2016-09-09 20:57:14.230840 and the OSDs
->> crash (with suicide and corrupted leveldb logs) @2016-09-10 between
->> 02:04 - 02:40. You will notice tha when we tried to start them some
->> hours later, the OSDs kept crashing but with different asserts.
->>
->> On 16 September 2016 at 13:34, Haomai Wang <haomai@xsky.com> wrote:
->>> On Fri, Sep 16, 2016 at 5:11 PM, Kostis Fardelas <dante1234@gmail.com> wrote:
->>>> (sent this email to ceph-users too, but there was no feedback due to
->>>> to its complex issues I guess, so I am sending this in ceph-devel too.
->>>> Thanks)
->>>>
->>>> Hello cephers,
->>>> last week we survived a 3-day outage on our ceph cluster (Hammer
->>>> 0.94.7, 162 OSDs, 27 "fat" nodes, 1000s of clients) due to 6 out of
->>>> 162 OSDs crash in the SAME node. The outage was caused in the
->>>> following timeline:
->>>> time 0:  OSDs living in the same node (rd0-19) start heavily flapping
->>>> (in the logs: failed, wrongly marked me down, RESETSESSION etc). Some
->>>> more OSDs on other nodes are also flapping but the OSDs of this single
->>>> node seem to have played the major part in this problem
->>>>
->>>> time +6h: rd0-19 OSDs assert. Two of them suicide on OSD::osd_op_tp
->>>> thread timeout and the other ones assert with EPERM and corrupted
->>>> leveldb related errors. Something like this:
->>>>
->>>> 2016-09-10 02:40:47.155718 7f699b724700  0 filestore(/rados/rd0-19-01)
->>>>  error (1) Operation not permitted not handled on operation 0x46db2d00
->>>> (1731767079.0.0, or op 0, counting from 0)
->>>> 2016-09-10 02:40:47.155731 7f699b724700  0 filestore(/rados/rd0-19-01)
->>>> unexpected error code
->>>> 2016-09-10 02:40:47.155732 7f699b724700  0 filestore(/rados/rd0-19-01)
->>>>  transaction dump:
->>>> {
->>>>     "ops": [
->>>>         {
->>>>             "op_num": 0,
->>>>             "op_name": "omap_setkeys",
->>>>             "collection": "3.b30_head",
->>>>             "oid": "3\/b30\/\/head",
->>>>             "attr_lens": {
->>>>                 "_epoch": 4,
->>>>                 "_info": 734
->>>>             }
->>>>         }
->>>>     ]
->>>> }
->>>>
->>>>
->>>> 2016-09-10 02:40:47.155778 7f699671a700 -1 os/FileStore.cc: In
->>>> function 'unsigned int
->>>> FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int,
->>>> ThreadPool::TPH
->>>> andle*)' thread 7f699671a700 time 2016-09-10 02:40:47.153544
->>>> os/FileStore.cc: 2761: FAILED assert(0 == "unexpected error")
->>>>
->>>> This leaves the cluster in a state like below:
->>>> 2016-09-10 03:04:31.927635 mon.0 62.217.119.14:6789/0 948003 : cluster
->>>> [INF] osdmap e281474: 162 osds: 156 up, 156 in
->>>> 2016-09-10 03:04:32.145074 mon.0 62.217.119.14:6789/0 948004 : cluster
->>>> [INF] pgmap v105867219: 28672 pgs: 1
->>>> active+recovering+undersized+degraded, 26684 active+clean, 1889
->>>> active+undersized+degraded, 98 down+peering; 95983 GB data, 179 TB
->>>> used, 101379 GB / 278 TB avail; 12106 B/s rd, 11 op/s;
->>>> 2408539/69641962 objects degraded (3.458%); 1/34820981 unfound
->>>> (0.000%)
->>>>
->>>> From this time we have almost no IO propably due to 98 down+peering
->>>> PGs, 1 unfound object and 1000s of librados clients stuck.
->>>> As of now, we have not managed to pinpoint what caused the crashes (no
->>>> disk errors, no network errors, no general hardware errors, nothing in
->>>> dmesg) but things are still under investigation. Finally we managed to
->>>> bring up enough crashed OSDs for IO to continue (using gdb, leveldb
->>>> repairs, ceph-objectstore-tool), but our main questions exists:
->>>>
->>>> A. the 6 OSDs were on the same node. What is so special about
->>>> suiciding + EPERMs that leave the cluster with down+peering and zero
->>>> IO? Is this a normal behaviour after a crash like this? Notice that
->>>> the cluster has marked the crashed OSDs down+out, so it seems that the
->>>> cluster somehow "fenced" these OSDs but in a manner that leaves the
->>>> cluster unusable. Our crushmap is the default one with the host as a
->>>> failure domain
->>>> B. would replication=3 help? Would we need replication=3 and min=2 to
->>>> avoid such a problem in the future? Right now we are on size=2 &
->>>> min_size=1
->>>> C. would an increase in suicide timeouts help for future incidents like this?
->>>> D. are there any known related bugs on 0.94.7? Haven't found anything so far...
->>>
->>> Could you please provide with ceph.log and the down osd logs at that
->>> time? I don't have clue in your description so far.
->>>
->>>>
->>>> Regards,
->>>> Kostis
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> On Sep 16, 2016, at 11:43 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> 
+> Please send the snippet (very first trace , go up in the log) where it is actually printing the assert.
+> BTW, what workload you are running ?
+> 
+> Thanks & Regards
+> Somnath
+> 
+Here it is.
+
+2016-09-16 08:49:30.605845 7fb5a96ba700 -1 /build/nitin/nightly_builds/20160914_125459-master/ceph.git/rpmbuild/BUILD/ceph-v11.0.0-2309.g9096ad3/src/os/bluestore/BlueFS.cc: In function 'int BlueFS::_allocate(uint8_t, uint64_t, std::vecto
+r<bluefs_extent_t>*)' thread 7fb5a96ba700 time 2016-09-16 08:49:30.602139
+/build/nitin/nightly_builds/20160914_125459-master/ceph.git/rpmbuild/BUILD/ceph-v11.0.0-2309.g9096ad3/src/os/bluestore/BlueFS.cc: 1686: FAILED assert(0 == "allocate failed... wtf")
+
+ ceph version v11.0.0-2309-g9096ad3 (9096ad37f2c0798c26d7784fb4e7a781feb72cb8)
+ 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x8b) [0x7fb5bf43a11b]
+ 2: (BlueFS::_allocate(unsigned char, unsigned long, std::vector<bluefs_extent_t, std::allocator<bluefs_extent_t> >*)+0x8ad) [0x7fb5bf2735dd]
+ 3: (BlueFS::_flush_and_sync_log(std::unique_lock<std::mutex>&, unsigned long, unsigned long)+0xb4f) [0x7fb5bf27aa1f]
+ 4: (BlueFS::_fsync(BlueFS::FileWriter*, std::unique_lock<std::mutex>&)+0x29b) [0x7fb5bf27bc9b]
+ 5: (BlueRocksWritableFile::Sync()+0x4e) [0x7fb5bf29125e]
+ 6: (rocksdb::WritableFileWriter::SyncInternal(bool)+0x139) [0x7fb5bf388699]
+ 7: (rocksdb::WritableFileWriter::Sync(bool)+0x88) [0x7fb5bf389238]
+ 8: (rocksdb::DBImpl::WriteImpl(rocksdb::WriteOptions const&, rocksdb::WriteBatch*, rocksdb::WriteCallback*, unsigned long*, unsigned long, bool)+0x13cf) [0x7fb5bf2e0a2f]
+ 9: (rocksdb::DBImpl::Write(rocksdb::WriteOptions const&, rocksdb::WriteBatch*)+0x27) [0x7fb5bf2e1637]
+ 10: (RocksDBStore::submit_transaction_sync(std::shared_ptr<KeyValueDB::TransactionImpl>)+0x5b) [0x7fb5bf21a14b]
+ 11: (BlueStore::_kv_sync_thread()+0xf5a) [0x7fb5bf1e7ffa]
+ 12: (BlueStore::KVSyncThread::entry()+0xd) [0x7fb5bf1f5a6d]
+ 13: (()+0x80a4) [0x7fb5bb4a70a4]
+ 14: (clone()+0x6d) [0x7fb5ba32004d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+
+
+
+Thanks,
+Nitin
+
