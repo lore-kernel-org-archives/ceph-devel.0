@@ -1,85 +1,61 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: filestore_fiemap is bad, memstore is buggy.
-Date: Sat, 17 Sep 2016 00:29:05 +0800
-Message-ID: <CACJqLyb31LmurPPpmi9_LbwvRGZaSp2sXmqpaFE5UXP3ynE4Ow@mail.gmail.com>
-References: <alpine.DEB.2.11.1609152142570.19761@piezo.us.to>
- <CACJqLyZPOJ8R-4=hZxPMZMzZj2WEGDdqrMNbuxHUsLjwVN6wMA@mail.gmail.com> <alpine.DEB.2.11.1609161323470.1037@piezo.us.to>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: Snapshots of consistency groups
+Date: Fri, 16 Sep 2016 13:37:52 -0400
+Message-ID: <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+ <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+ <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
+ <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
+ <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
+ <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
+ <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
+ <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
+ <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
+ <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
+ <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
+ <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
+ <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
+ <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
+ <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
+ <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
+ <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
+ <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
+ <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com> <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pu1apc01on0095.outbound.protection.outlook.com ([104.47.126.95]:31489
-        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933244AbcIPQ3T (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 16 Sep 2016 12:29:19 -0400
-Received: by mail-vk0-f45.google.com with SMTP id g9so34693283vkg.1
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Sep 2016 09:29:13 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1609161323470.1037@piezo.us.to>
+Received: from mail-pf0-f173.google.com ([209.85.192.173]:33297 "EHLO
+        mail-pf0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934703AbcIPRhy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2016 13:37:54 -0400
+Received: by mail-pf0-f173.google.com with SMTP id 21so18594279pfy.0
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Sep 2016 10:37:54 -0700 (PDT)
+In-Reply-To: <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Victor Denisov <vdenisov@mirantis.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-On Fri, Sep 16, 2016 at 9:24 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Fri, 16 Sep 2016, Haomai Wang wrote:
->> On Fri, Sep 16, 2016 at 5:48 AM, Sage Weil <sweil@redhat.com> wrote:
->> > I was adding tests for clone_range in preparation for improving the
->> > bluestore implementation and got stuck on memstore and filestore bugs!
->> >
->> > The most alarming is that filestore very quickly fails the tests if
->> > filestore_fiemap is enabled.  It's off by default (phew!) but the
->> > ceph_test_objectstore test was explicitly enabling it to get better
->> > coverage.  For now I've just removed that so we stick with the default (no
->> > fiemap == good).  I wonder if we should consider removing fiemap from the
->> > code entirely, though, since it is clearly buggy, even on a modern kernel
->> > (I'm running 4.4 and XFS).
->>
->> I tried with the new test case, I found even disable fiemap, I will
->> ran into failure. So I suspect the splice codes, I disable it, test
->> passed.
->>
->> But fiemap and seek_data/seek_hole is still failing even disable
->> splice, I would like to dive into more to verify our codes if correct
->> since _do_seek_hole_data is copied from fiemap....
+On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+> if (struct_v >= 5) {
+>       ::decode(snapshot_namespace, p);
+>     } else {
+>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
+>     }
 >
-> Yeah, good idea.  Thanks for looking into it!
-
-Oh, I think I found the problem.
-
-If source file exists hole in [offset, length], fiemap or
-seek_data/seek_hole will return empty data map(map<uint64_t, uint64_t>
-exomap). So we won't write any to target file. But we exactly need to
-write zero to target file in [offset, length]....
-
-And the other case is we may write garbage data to target file. This
-fix may help a lot to cases:
-
---- a/src/os/filestore/FileStore.cc
-+++ b/src/os/filestore/FileStore.cc
-@@ -3597,7 +3597,7 @@ int FileStore::_do_copy_range(int from, int to,
-uint64_t srcoff, u
-   int buflen = 4096 * 16; //limit by pipe max size.see fcntl
-
- #ifdef CEPH_HAVE_SPLICE
--  if (backend->has_splice()) {
-+  if (backend->has_splice() && 0) {
-     int pipefd[2];
-     if (pipe(pipefd) < 0) {
-       r = -errno;
-@@ -3661,6 +3661,7 @@ int FileStore::_do_copy_range(int from, int to,
-uint64_t srcoff, u
-     char buf[buflen];
-     while (pos < end) {
-       int l = MIN(end-pos, buflen);
-+      memset(buf, 0, l);
-       r = ::read(from, buf, l);
-       dout(25) << "  read from " << pos << "~" << l << " got " << r << dendl;
-       if (r < 0) {
-
-Hmm, I'm on the vacation and don't have test machine at hand. Let me
-rethink this logic and verify it's true. Anyone who want to fix this
-problem immediately, plz feel free to do... Or correct me if I'm
-wrong!
-
+> then code for ::encode function of cls_rbd_snap would change accordingly:
 >
-> sage
+> instead of
+>
+> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
+> snapshot_namespace);
+>
+> I would do:
+> ::encode(snapshot_namespace, bl);
+
+
++1 -- looks good to me
+
+-- 
+Jason
