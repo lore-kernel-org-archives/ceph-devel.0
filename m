@@ -1,77 +1,141 @@
-From: Chris Patterson <cjp256@gmail.com>
-Subject: stack size limit issues with xen + qemu + rbd
-Date: Fri, 16 Sep 2016 16:55:17 -0400
-Message-ID: <CABZSBQef-UvYxD+Yg_G5mNT604pdeH5fb3_xVuautm4YfFc5Kg@mail.gmail.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: Bluestore OSD support in ceph-disk
+Date: Fri, 16 Sep 2016 23:09:23 +0000
+Message-ID: <B3E46566-5536-4414-8A51-7223ABDA463E@Teradata.com>
+References: <4459A44C-1336-4EC1-82F0-F491D0C83712@Teradata.com>
+ <BL2PR02MB2115BE07E99958F8FA8E521CF4F10@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com>
+ <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
+ <alpine.DEB.2.11.1609151833290.19761@piezo.us.to>
+ <BC30B826-3E63-4002-9436-60222C606E9F@Teradata.com>
+ <alpine.DEB.2.11.1609151850330.19761@piezo.us.to>
+ <E9BC8A1A-CFD4-4D1E-A719-FD3AD217607E@Teradata.com>
+ <EA284BAD-1765-4600-92A9-32FF2BF098E9@Teradata.com>
+ <BL2PR02MB21150C4B85B1897282432B86F4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <E27159E7-FDEB-4075-B1B3-8C788D2CCA8C@Teradata.com>
+ <BL2PR02MB21153BD658496CF33BD40CB8F4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <3BA97D41-E3A1-404A-9FEE-41245D56D538@Teradata.com>
+ <alpine.DEB.2.11.1609162053270.1040@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f52.google.com ([209.85.213.52]:35343 "EHLO
-        mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756724AbcIPUzj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2016 16:55:39 -0400
-Received: by mail-vk0-f52.google.com with SMTP id b133so43358547vka.2
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Sep 2016 13:55:39 -0700 (PDT)
+Received: from nat13.teradata.com ([153.65.16.13]:37946 "EHLO
+        rpc7279.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1753245AbcIPXJ1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2016 19:09:27 -0400
+In-Reply-To: <alpine.DEB.2.11.1609162053270.1040@piezo.us.to>
+Content-Language: en-US
+Content-ID: <4042D0D84086C14DA3100A25582D1854@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: xen-devel@lists.xenproject.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-I have spent some time investigating a case where qemu is failing to
-register xenstore watches for a PV guest once I enable vfb (and
-thereby triggering the creation of a qemu instance).
-
-The qemu logs show something along the lines of:
-xen be core: xen be core: xen be: watching backend path
-(backend/console/3) failed
-xen be: watching backend path (backend/console/3) failed
-xen be core: xen be core: xen be: watching backend path (backend/vkbd/3) failed
-xen be: watching backend path (backend/vkbd/3) failed
-xen be core: xen be core: xen be: watching backend path (backend/qdisk/3) failed
-xen be: watching backend path (backend/qdisk/3) failed
-xen be core: xen be core: xen be: watching backend path (backend/qusb/3) failed
-xen be: watching backend path (backend/qusb/3) failed
-xen be core: xen be core: xen be: watching backend path (backend/vfb/3) failed
-xen be: watching backend path (backend/vfb/3) failed
-xen be core: xen be core: xen be: watching backend path (backend/qnic/3) failed
-xen be: watching backend path (backend/qnic/3) failed
-
-I have tested qemu master, qemu-xen in the master xen tree, as well as
-a few tags all with the same issue.
-
-I came across a similar issue reported by Juergen Gross:
-https://lists.nongnu.org/archive/html/qemu-devel/2016-07/msg03341.html
-
-Sure enough, the thread stack size was the culprit.  I had been
-testing with qemu with the associated fix "vnc-tight: fix regression
-with libxenstore" as it is in master, so that wasn't it...
-
-I did some basic analysis of the qemu binary and the libraries it is pulling in:
-
-for lib in $(ldd /usr/local/bin/qemu-system-i386 | grep -o '/.* '); do
-echo "lib=$lib"; readelf -S "$lib" | grep -e tbss -e tdata -A1 ; done
-
-The largest consumers were:
-lib=/usr/lib/x86_64-linux-gnu/librbd.so.1
-  [17] .tbss             NOBITS           000000000088fed0  0068fed0
-       0000000000001820  0000000000000000 WAT       0     0     8
-lib=/usr/lib/x86_64-linux-gnu/librados.so.2
-  [17] .tbss             NOBITS           0000000000718600  00518600
-       0000000000000aa0  0000000000000000 WAT       0     0     8
-
-IIUC, librbd & librados are using nearly 9k of the 16k alone (I am
-assuming this thread-local storage must be consumed as part of the
-thread's stack)?
-
-I narrowed that down to Ceph's usage of __thread in stringify() in
-src/include/stringify.h.
-
-To make things functional, the options were either to:
-(a) disable rbd at configure time for qemu
-(b) reduce the level of thread-local storage in dependencies
-(particularly ceph's stringify)
-(c) increase the stack size specified in xenstore's xs.c
-
-Is there is any precedent/policy with regards to expected TLS and/or
-stack usage for dependencies?  Is the best course of action (b)? Or
-perhaps reconsider the default size for (c)?
-
-Thoughts? :)
+DQo+IE9uIFNlcCAxNiwgMjAxNiwgYXQgMTo1NCBQTSwgU2FnZSBXZWlsIDxzYWdlQG5ld2RyZWFt
+Lm5ldD4gd3JvdGU6DQo+IA0KPiBPbiBGcmksIDE2IFNlcCAyMDE2LCBLYW1ibGUsIE5pdGluIEEg
+d3JvdGU6DQo+Pj4gT24gU2VwIDE2LCAyMDE2LCBhdCAxMjoyMyBQTSwgU29tbmF0aCBSb3kgPFNv
+bW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4+PiANCj4+PiBIb3cgeW91IGNvbmZpZ3Vy
+ZWQgYmx1ZXN0b3JlLCBhbGwgZGVmYXVsdCA/IGkuZSBhbGwgaW4gc2luZ2xlIHBhcnRpdGlvbiAs
+IG5vIHNlcGFyYXRlIHBhcnRpdGlvbiBmb3IgZGIvd2FsID8NCj4+IEl0IGlzIHNlcGFyYXRlZCBw
+YXJ0aXRpb25zIGZvciBkYXRhKFNTRCksIHdhbChTU0QpLCByb2Nrc2RiKFNTRCksICYgYmxvY2sg
+c3RvcmUgKEhERCkuDQo+PiANCj4+PiBXb25kZXJpbmcgaWYgeW91IGFyZSBvdXQgb2YgZGIgc3Bh
+Y2UvZGlzayBzcGFjZSA/DQo+PiBJIG5vdGljZSBhIG1pc2NvbmZpZ3VyYXRpb24gb24gdGhlIGNs
+dXN0ZXIgbm93LiBUaGUgd2FsICYgZGIgcGFydGl0aW9uIHVzZSBnb3Qgc3dhcHBlZCwgc28gaXQg
+aXMgZ2V0dGluZyBqdXN0IDEyOE1CIGRiIHBhcnRpdGlvbiBub3cuIFByb2JhYmx5IHRoaXMgaXMg
+dGhlIGNhdXNlIG9mIHRoZSBhc3NlcnQuDQo+IA0KPiBGV0lXIGJsdWVmcyBpcyBzdXBwb3NlZCB0
+byBmYWxsIGJhY2sgb24gYW55IGFsbG9jYXRpb24gZmFpbHVyZSB0byB0aGUgbmV4dCANCj4gbGFy
+Z2VyL3Nsb3dlciBkZXZpY2UgKHdhbCAtPiBkYiAtPiBwcmltYXJ5KSwgc28gaGF2aW5nIGEgdGlu
+eSB3YWwgb3IgdGlueSANCj4gZGIgc2hvdWxkbid0IGFjdHVhbGx5IG1hdHRlci4gIEEgYmx1ZWZz
+IGxvZyAoZGVidWcgYmx1ZWZzID0gMTAgb3IgMjApIA0KPiBsZWFkaW5nIHVwIHRvIGFueSBjcmFz
+aCB0aGVyZSB3b3VsZCBiZSBoZWxwZnVsLg0KPiANCj4gVGhhbmtzIQ0KPiBzYWdlDQo+IA0KDQpH
+b29kIHRvIGtub3cgdGhpcyBmYWxsIGJhY2sgbWVjaGFuaXNtLg0KSW4gbXkgcHJldmlvdXMgcnVu
+IHRoZSBwYXJ0aXRpb25zIGFuZCBzaXplcyBpbiBjb25maWcgZGlkIG5vdCBtYXRjaC4gSSBzZWUg
+dGhlIGNlcGgtZGFlbW9uLWR1bXANCnNob3dpbmcgOTAwTUIrIHVzZWQgZm9yIGRiIHdoaWxlIGRi
+IHBhcnRpdGlvbiB3YXMgMTI4TUIuIEkgd2FzIHRoaW5raW5nIGl0IHN0YXJ0ZWQgb3ZlcndyaXRp
+bmcgb24NCnRvIHRoZSBuZXh0IHBhcnRpdGlvbi4gQnV0IGluc3RlYWQgYXMgcGVyIHRoaXMgYmFj
+a3VwIGxvZ2ljIGl0IHN0YXJ0ZWQgdXNpbmcgSEREIGZvciBkYi4NCg0KT25lIGlzc3VlIEkgc2Vl
+IGlzIHRoYXQsIGNlcGguY29uZiBsaXN0cyB0aGUgc2l6ZXMgb2YgdGhlIHdhbCxkYiwmIGJsb2Nr
+LiBCdXQgaXQgaXMgcG9zc2libGUgdGhhdCBhY3R1YWwNCnBhcnRpdGlvbnMgbWF5IGhhdmUgZGlm
+ZmVyZW50IHNpemVzLiBGcm9tIHRoZSBjZXBoLWRhZW1vbi1kdW1wIG91dHB1dCBsb29rcyBsaWtl
+IGl0IGlzIG5vdCBsb29raW5nDQphdCB0aGUgcGFydGl0aW9u4oCZcyByZWFsIHNpemUsIGluc3Rl
+YWQgdGhlIGNvZGUgaXMgYXNzdW1pbmcgdGhlIHNpemVzIGZyb20gdGhlIGNvbmZpZyBmaWxlIGFz
+IHRoZSBwYXJ0aXRpb24NCnNpemVzLiBJIHRoaW5rIHByb2Jpbmcgb2YgdGhlIHNpemUgb2YgZXhp
+c3RpbmcgZGV2aWNlcy9maWxlcyB3aWxsIGJlIGJldHRlciB0aGFuIHRha2luZyB0aGUgc2l6ZXMg
+ZnJvbSB0aGUNCmNvbmZpZyBmaWxlIGJsaW5kbHkuDQoNCkFmdGVyIDUgaG91cnMgb3Igc28gNisg
+b3NkcyB3ZXJlIGRvd24gb3V0IG9mIDMwLg0KV2Ugd2lsbCBiZSBydW5uaW5nIHRoZSBzdHJlc3Mg
+dGVzdCBvbmUgYWdhaW4gd2l0aCB0aGUgZml4ZWQgcGFydGl0aW9uIGNvbmZpZ3VyYXRpb24gd2l0
+aCBkZWJ1ZyBsZXZlbCBvZg0KMCwgdG8gZ2V0IG1heCBwZXJmb3JtYW5jZSBvdXQuIEFuZCBpZiB0
+aGF0IGZhaWxzIHRoZW4gSSB3aWxsIHN3aXRjaCB0byBkZWJ1ZyBsZXZlbCAxMCBvciAyMCwgYW5k
+IGdhdGhlcg0Kc29tZSBkZXRhaWxlZCBsb2dzLg0KDQpUaGFua3MsDQpOaXRpbg0KDQo+IA0KPj4+
+IFdlIGhhZCBzb21lIGlzc3VlcyBpbiB0aGlzIGZyb250IHNvbWV0aW1lcyBiYWNrIHdoaWNoIHdh
+cyBmaXhlZCwgbWF5IGJlIGEgbmV3IGlzc3VlICg/KS4gTmVlZCB2ZXJib3NlIGxvZyBmb3IgYXQg
+bGVhc3QgYmx1ZWZzIChkZWJ1Z19ibHVlZnMgPSAyMC8yMCkNCj4+IA0KPj4gTGV0IG1lIGZpeCB0
+aGUgY2x1c3RlciBjb25maWd1cmF0aW9uLCB0byBnaXZlIGJldHRlciBzcGFjZSB0byB0aGUgREIg
+cGFydGl0aW9uLiBBbmQgaWYgd2l0aCB0aGF0IHRoaXMgaXNzdWUgY29tZXMgdXAgdGhlbiBJIHdp
+bGwgdHJ5IGNhcHR1cmluZyBkZXRhaWxlZCBsb2dzLg0KPj4gDQo+Pj4gQlRXLCB3aGF0IGlzIHlv
+dXIgd29ya2xvYWQgKGJsb2NrIHNpemUsIElPIHBhdHRlcm4gKSA/DQo+PiANCj4+IFRoZSB3b3Jr
+bG9hZCBpcyBpbnRlcm5hbCB0ZXJhZGF0YSBiZW5jaG1hcmssIHdoaWNoIHNpbXVsYXRlcyBJTyBw
+YXR0ZXJuIG9mIGRhdGFiYXNlIGRpc2sgYWNjZXNzIHdpdGggdmFyaW91cyBibG9jayBzaXplcyBh
+bmQgSU8gcGF0dGVybi4gDQo+PiANCj4+IFRoYW5rcywNCj4+IE5pdGluDQo+PiANCj4+IA0KPj4g
+DQo+Pj4gDQo+Pj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+PiBGcm9tOiBLYW1ibGUs
+IE5pdGluIEEgW21haWx0bzpOaXRpbi5LYW1ibGVAVGVyYWRhdGEuY29tXQ0KPj4+IFNlbnQ6IEZy
+aWRheSwgU2VwdGVtYmVyIDE2LCAyMDE2IDEyOjAwIFBNDQo+Pj4gVG86IFNvbW5hdGggUm95DQo+
+Pj4gQ2M6IFNhZ2UgV2VpbDsgQ2VwaCBEZXZlbG9wbWVudA0KPj4+IFN1YmplY3Q6IFJlOiBCbHVl
+c3RvcmUgT1NEIHN1cHBvcnQgaW4gY2VwaC1kaXNrDQo+Pj4gDQo+Pj4gDQo+Pj4+IE9uIFNlcCAx
+NiwgMjAxNiwgYXQgMTE6NDMgQU0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNv
+bT4gd3JvdGU6DQo+Pj4+IA0KPj4+PiBQbGVhc2Ugc2VuZCB0aGUgc25pcHBldCAodmVyeSBmaXJz
+dCB0cmFjZSAsIGdvIHVwIGluIHRoZSBsb2cpIHdoZXJlIGl0IGlzIGFjdHVhbGx5IHByaW50aW5n
+IHRoZSBhc3NlcnQuDQo+Pj4+IEJUVywgd2hhdCB3b3JrbG9hZCB5b3UgYXJlIHJ1bm5pbmcgPw0K
+Pj4+PiANCj4+Pj4gVGhhbmtzICYgUmVnYXJkcw0KPj4+PiBTb21uYXRoDQo+Pj4+IA0KPj4+IEhl
+cmUgaXQgaXMuDQo+Pj4gDQo+Pj4gMjAxNi0wOS0xNiAwODo0OTozMC42MDU4NDUgN2ZiNWE5NmJh
+NzAwIC0xIC9idWlsZC9uaXRpbi9uaWdodGx5X2J1aWxkcy8yMDE2MDkxNF8xMjU0NTktbWFzdGVy
+L2NlcGguZ2l0L3JwbWJ1aWxkL0JVSUxEL2NlcGgtdjExLjAuMC0yMzA5Lmc5MDk2YWQzL3NyYy9v
+cy9ibHVlc3RvcmUvQmx1ZUZTLmNjOiBJbiBmdW5jdGlvbiAnaW50IEJsdWVGUzo6X2FsbG9jYXRl
+KHVpbnQ4X3QsIHVpbnQ2NF90LCBzdGQ6OnZlY3RvIHI8Ymx1ZWZzX2V4dGVudF90PiopJyB0aHJl
+YWQgN2ZiNWE5NmJhNzAwIHRpbWUgMjAxNi0wOS0xNiAwODo0OTozMC42MDIxMzkNCj4+PiAvYnVp
+bGQvbml0aW4vbmlnaHRseV9idWlsZHMvMjAxNjA5MTRfMTI1NDU5LW1hc3Rlci9jZXBoLmdpdC9y
+cG1idWlsZC9CVUlMRC9jZXBoLXYxMS4wLjAtMjMwOS5nOTA5NmFkMy9zcmMvb3MvYmx1ZXN0b3Jl
+L0JsdWVGUy5jYzogMTY4NjogRkFJTEVEIGFzc2VydCgwID09ICJhbGxvY2F0ZSBmYWlsZWQuLi4g
+d3RmIikNCj4+PiANCj4+PiBjZXBoIHZlcnNpb24gdjExLjAuMC0yMzA5LWc5MDk2YWQzICg5MDk2
+YWQzN2YyYzA3OThjMjZkNzc4NGZiNGU3YTc4MWZlYjcyY2I4KQ0KPj4+IDE6IChjZXBoOjpfX2Nl
+cGhfYXNzZXJ0X2ZhaWwoY2hhciBjb25zdCosIGNoYXIgY29uc3QqLCBpbnQsIGNoYXIgY29uc3Qq
+KSsweDhiKSBbMHg3ZmI1YmY0M2ExMWJdDQo+Pj4gMjogKEJsdWVGUzo6X2FsbG9jYXRlKHVuc2ln
+bmVkIGNoYXIsIHVuc2lnbmVkIGxvbmcsIHN0ZDo6dmVjdG9yPGJsdWVmc19leHRlbnRfdCwgc3Rk
+OjphbGxvY2F0b3I8Ymx1ZWZzX2V4dGVudF90PiA+KikrMHg4YWQpIFsweDdmYjViZjI3MzVkZF0N
+Cj4+PiAzOiAoQmx1ZUZTOjpfZmx1c2hfYW5kX3N5bmNfbG9nKHN0ZDo6dW5pcXVlX2xvY2s8c3Rk
+OjptdXRleD4mLCB1bnNpZ25lZCBsb25nLCB1bnNpZ25lZCBsb25nKSsweGI0ZikgWzB4N2ZiNWJm
+MjdhYTFmXQ0KPj4+IDQ6IChCbHVlRlM6Ol9mc3luYyhCbHVlRlM6OkZpbGVXcml0ZXIqLCBzdGQ6
+OnVuaXF1ZV9sb2NrPHN0ZDo6bXV0ZXg+JikrMHgyOWIpIFsweDdmYjViZjI3YmM5Yl0NCj4+PiA1
+OiAoQmx1ZVJvY2tzV3JpdGFibGVGaWxlOjpTeW5jKCkrMHg0ZSkgWzB4N2ZiNWJmMjkxMjVlXQ0K
+Pj4+IDY6IChyb2Nrc2RiOjpXcml0YWJsZUZpbGVXcml0ZXI6OlN5bmNJbnRlcm5hbChib29sKSsw
+eDEzOSkgWzB4N2ZiNWJmMzg4Njk5XQ0KPj4+IDc6IChyb2Nrc2RiOjpXcml0YWJsZUZpbGVXcml0
+ZXI6OlN5bmMoYm9vbCkrMHg4OCkgWzB4N2ZiNWJmMzg5MjM4XQ0KPj4+IDg6IChyb2Nrc2RiOjpE
+QkltcGw6OldyaXRlSW1wbChyb2Nrc2RiOjpXcml0ZU9wdGlvbnMgY29uc3QmLCByb2Nrc2RiOjpX
+cml0ZUJhdGNoKiwgcm9ja3NkYjo6V3JpdGVDYWxsYmFjayosIHVuc2lnbmVkIGxvbmcqLCB1bnNp
+Z25lZCBsb25nLCBib29sKSsweDEzY2YpIFsweDdmYjViZjJlMGEyZl0NCj4+PiA5OiAocm9ja3Nk
+Yjo6REJJbXBsOjpXcml0ZShyb2Nrc2RiOjpXcml0ZU9wdGlvbnMgY29uc3QmLCByb2Nrc2RiOjpX
+cml0ZUJhdGNoKikrMHgyNykgWzB4N2ZiNWJmMmUxNjM3XQ0KPj4+IDEwOiAoUm9ja3NEQlN0b3Jl
+OjpzdWJtaXRfdHJhbnNhY3Rpb25fc3luYyhzdGQ6OnNoYXJlZF9wdHI8S2V5VmFsdWVEQjo6VHJh
+bnNhY3Rpb25JbXBsPikrMHg1YikgWzB4N2ZiNWJmMjFhMTRiXQ0KPj4+IDExOiAoQmx1ZVN0b3Jl
+Ojpfa3Zfc3luY190aHJlYWQoKSsweGY1YSkgWzB4N2ZiNWJmMWU3ZmZhXQ0KPj4+IDEyOiAoQmx1
+ZVN0b3JlOjpLVlN5bmNUaHJlYWQ6OmVudHJ5KCkrMHhkKSBbMHg3ZmI1YmYxZjVhNmRdDQo+Pj4g
+MTM6ICgoKSsweDgwYTQpIFsweDdmYjViYjRhNzBhNF0NCj4+PiAxNDogKGNsb25lKCkrMHg2ZCkg
+WzB4N2ZiNWJhMzIwMDRkXQ0KPj4+IE5PVEU6IGEgY29weSBvZiB0aGUgZXhlY3V0YWJsZSwgb3Ig
+YG9iamR1bXAgLXJkUyA8ZXhlY3V0YWJsZT5gIGlzIG5lZWRlZCB0byBpbnRlcnByZXQgdGhpcy4N
+Cj4+PiANCj4+PiANCj4+PiANCj4+PiBUaGFua3MsDQo+Pj4gTml0aW4NCj4+PiANCj4+PiBQTEVB
+U0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFp
+bCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQg
+cmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBp
+cyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhh
+dCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJl
+dmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVz
+c2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNv
+bW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhv
+bmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55
+IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRo
+ZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+PiANCj4+
+IC0tDQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
+dWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpv
+cmRvbW9Admdlci5rZXJuZWwub3JnDQo+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8v
+dmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0K
