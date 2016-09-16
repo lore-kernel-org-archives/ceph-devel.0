@@ -1,104 +1,77 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Bluestore OSD support in ceph-disk
-Date: Fri, 16 Sep 2016 20:54:31 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609162053270.1040@piezo.us.to>
-References: <4459A44C-1336-4EC1-82F0-F491D0C83712@Teradata.com> <BL2PR02MB2115BE07E99958F8FA8E521CF4F10@BL2PR02MB2115.namprd02.prod.outlook.com> <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com> <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
- <alpine.DEB.2.11.1609151833290.19761@piezo.us.to> <BC30B826-3E63-4002-9436-60222C606E9F@Teradata.com> <alpine.DEB.2.11.1609151850330.19761@piezo.us.to> <E9BC8A1A-CFD4-4D1E-A719-FD3AD217607E@Teradata.com> <EA284BAD-1765-4600-92A9-32FF2BF098E9@Teradata.com>
- <BL2PR02MB21150C4B85B1897282432B86F4F30@BL2PR02MB2115.namprd02.prod.outlook.com> <E27159E7-FDEB-4075-B1B3-8C788D2CCA8C@Teradata.com> <BL2PR02MB21153BD658496CF33BD40CB8F4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
- <3BA97D41-E3A1-404A-9FEE-41245D56D538@Teradata.com>
+From: Chris Patterson <cjp256@gmail.com>
+Subject: stack size limit issues with xen + qemu + rbd
+Date: Fri, 16 Sep 2016 16:55:17 -0400
+Message-ID: <CABZSBQef-UvYxD+Yg_G5mNT604pdeH5fb3_xVuautm4YfFc5Kg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48704 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965254AbcIPUye (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2016 16:54:34 -0400
-In-Reply-To: <3BA97D41-E3A1-404A-9FEE-41245D56D538@Teradata.com>
+Received: from mail-vk0-f52.google.com ([209.85.213.52]:35343 "EHLO
+        mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756724AbcIPUzj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2016 16:55:39 -0400
+Received: by mail-vk0-f52.google.com with SMTP id b133so43358547vka.2
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Sep 2016 13:55:39 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: xen-devel@lists.xenproject.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
 
-On Fri, 16 Sep 2016, Kamble, Nitin A wrote:
-> > On Sep 16, 2016, at 12:23 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> > 
-> > How you configured bluestore, all default ? i.e all in single partition , no separate partition for db/wal ?
-> It is separated partitions for data(SSD), wal(SSD), rocksdb(SSD), & block store (HDD).
-> 
-> > Wondering if you are out of db space/disk space ?
-> I notice a misconfiguration on the cluster now. The wal & db partition use got swapped, so it is getting just 128MB db partition now. Probably this is the cause of the assert.
+I have spent some time investigating a case where qemu is failing to
+register xenstore watches for a PV guest once I enable vfb (and
+thereby triggering the creation of a qemu instance).
 
-FWIW bluefs is supposed to fall back on any allocation failure to the next 
-larger/slower device (wal -> db -> primary), so having a tiny wal or tiny 
-db shouldn't actually matter.  A bluefs log (debug bluefs = 10 or 20) 
-leading up to any crash there would be helpful.
+The qemu logs show something along the lines of:
+xen be core: xen be core: xen be: watching backend path
+(backend/console/3) failed
+xen be: watching backend path (backend/console/3) failed
+xen be core: xen be core: xen be: watching backend path (backend/vkbd/3) failed
+xen be: watching backend path (backend/vkbd/3) failed
+xen be core: xen be core: xen be: watching backend path (backend/qdisk/3) failed
+xen be: watching backend path (backend/qdisk/3) failed
+xen be core: xen be core: xen be: watching backend path (backend/qusb/3) failed
+xen be: watching backend path (backend/qusb/3) failed
+xen be core: xen be core: xen be: watching backend path (backend/vfb/3) failed
+xen be: watching backend path (backend/vfb/3) failed
+xen be core: xen be core: xen be: watching backend path (backend/qnic/3) failed
+xen be: watching backend path (backend/qnic/3) failed
 
-Thanks!
-sage
+I have tested qemu master, qemu-xen in the master xen tree, as well as
+a few tags all with the same issue.
 
+I came across a similar issue reported by Juergen Gross:
+https://lists.nongnu.org/archive/html/qemu-devel/2016-07/msg03341.html
 
-> > We had some issues in this front sometimes back which was fixed, may be a new issue (?). Need verbose log for at least bluefs (debug_bluefs = 20/20)
-> 
-> Let me fix the cluster configuration, to give better space to the DB partition. And if with that this issue comes up then I will try capturing detailed logs.
-> 
-> > BTW, what is your workload (block size, IO pattern ) ?
-> 
-> The workload is internal teradata benchmark, which simulates IO pattern of database disk access with various block sizes and IO pattern. 
-> 
-> Thanks,
-> Nitin
-> 
-> 
-> 
-> > 
-> > -----Original Message-----
-> > From: Kamble, Nitin A [mailto:Nitin.Kamble@Teradata.com]
-> > Sent: Friday, September 16, 2016 12:00 PM
-> > To: Somnath Roy
-> > Cc: Sage Weil; Ceph Development
-> > Subject: Re: Bluestore OSD support in ceph-disk
-> > 
-> > 
-> >> On Sep 16, 2016, at 11:43 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> >> 
-> >> Please send the snippet (very first trace , go up in the log) where it is actually printing the assert.
-> >> BTW, what workload you are running ?
-> >> 
-> >> Thanks & Regards
-> >> Somnath
-> >> 
-> > Here it is.
-> > 
-> > 2016-09-16 08:49:30.605845 7fb5a96ba700 -1 /build/nitin/nightly_builds/20160914_125459-master/ceph.git/rpmbuild/BUILD/ceph-v11.0.0-2309.g9096ad3/src/os/bluestore/BlueFS.cc: In function 'int BlueFS::_allocate(uint8_t, uint64_t, std::vecto r<bluefs_extent_t>*)' thread 7fb5a96ba700 time 2016-09-16 08:49:30.602139
-> > /build/nitin/nightly_builds/20160914_125459-master/ceph.git/rpmbuild/BUILD/ceph-v11.0.0-2309.g9096ad3/src/os/bluestore/BlueFS.cc: 1686: FAILED assert(0 == "allocate failed... wtf")
-> > 
-> > ceph version v11.0.0-2309-g9096ad3 (9096ad37f2c0798c26d7784fb4e7a781feb72cb8)
-> > 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x8b) [0x7fb5bf43a11b]
-> > 2: (BlueFS::_allocate(unsigned char, unsigned long, std::vector<bluefs_extent_t, std::allocator<bluefs_extent_t> >*)+0x8ad) [0x7fb5bf2735dd]
-> > 3: (BlueFS::_flush_and_sync_log(std::unique_lock<std::mutex>&, unsigned long, unsigned long)+0xb4f) [0x7fb5bf27aa1f]
-> > 4: (BlueFS::_fsync(BlueFS::FileWriter*, std::unique_lock<std::mutex>&)+0x29b) [0x7fb5bf27bc9b]
-> > 5: (BlueRocksWritableFile::Sync()+0x4e) [0x7fb5bf29125e]
-> > 6: (rocksdb::WritableFileWriter::SyncInternal(bool)+0x139) [0x7fb5bf388699]
-> > 7: (rocksdb::WritableFileWriter::Sync(bool)+0x88) [0x7fb5bf389238]
-> > 8: (rocksdb::DBImpl::WriteImpl(rocksdb::WriteOptions const&, rocksdb::WriteBatch*, rocksdb::WriteCallback*, unsigned long*, unsigned long, bool)+0x13cf) [0x7fb5bf2e0a2f]
-> > 9: (rocksdb::DBImpl::Write(rocksdb::WriteOptions const&, rocksdb::WriteBatch*)+0x27) [0x7fb5bf2e1637]
-> > 10: (RocksDBStore::submit_transaction_sync(std::shared_ptr<KeyValueDB::TransactionImpl>)+0x5b) [0x7fb5bf21a14b]
-> > 11: (BlueStore::_kv_sync_thread()+0xf5a) [0x7fb5bf1e7ffa]
-> > 12: (BlueStore::KVSyncThread::entry()+0xd) [0x7fb5bf1f5a6d]
-> > 13: (()+0x80a4) [0x7fb5bb4a70a4]
-> > 14: (clone()+0x6d) [0x7fb5ba32004d]
-> > NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
-> > 
-> > 
-> > 
-> > Thanks,
-> > Nitin
-> > 
-> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Sure enough, the thread stack size was the culprit.  I had been
+testing with qemu with the associated fix "vnc-tight: fix regression
+with libxenstore" as it is in master, so that wasn't it...
+
+I did some basic analysis of the qemu binary and the libraries it is pulling in:
+
+for lib in $(ldd /usr/local/bin/qemu-system-i386 | grep -o '/.* '); do
+echo "lib=$lib"; readelf -S "$lib" | grep -e tbss -e tdata -A1 ; done
+
+The largest consumers were:
+lib=/usr/lib/x86_64-linux-gnu/librbd.so.1
+  [17] .tbss             NOBITS           000000000088fed0  0068fed0
+       0000000000001820  0000000000000000 WAT       0     0     8
+lib=/usr/lib/x86_64-linux-gnu/librados.so.2
+  [17] .tbss             NOBITS           0000000000718600  00518600
+       0000000000000aa0  0000000000000000 WAT       0     0     8
+
+IIUC, librbd & librados are using nearly 9k of the 16k alone (I am
+assuming this thread-local storage must be consumed as part of the
+thread's stack)?
+
+I narrowed that down to Ceph's usage of __thread in stringify() in
+src/include/stringify.h.
+
+To make things functional, the options were either to:
+(a) disable rbd at configure time for qemu
+(b) reduce the level of thread-local storage in dependencies
+(particularly ceph's stringify)
+(c) increase the stack size specified in xenstore's xs.c
+
+Is there is any precedent/policy with regards to expected TLS and/or
+stack usage for dependencies?  Is the best course of action (b)? Or
+perhaps reconsider the default size for (c)?
+
+Thoughts? :)
