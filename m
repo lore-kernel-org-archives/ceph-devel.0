@@ -1,159 +1,136 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore OSD support in ceph-disk
-Date: Fri, 16 Sep 2016 23:15:18 +0000
-Message-ID: <BL2PR02MB2115227088E471EBE1188D4AF4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
-References: <4459A44C-1336-4EC1-82F0-F491D0C83712@Teradata.com>
- <BL2PR02MB2115BE07E99958F8FA8E521CF4F10@BL2PR02MB2115.namprd02.prod.outlook.com>
- <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com>
- <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
- <alpine.DEB.2.11.1609151833290.19761@piezo.us.to>
- <BC30B826-3E63-4002-9436-60222C606E9F@Teradata.com>
- <alpine.DEB.2.11.1609151850330.19761@piezo.us.to>
- <E9BC8A1A-CFD4-4D1E-A719-FD3AD217607E@Teradata.com>
- <EA284BAD-1765-4600-92A9-32FF2BF098E9@Teradata.com>
- <BL2PR02MB21150C4B85B1897282432B86F4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
- <E27159E7-FDEB-4075-B1B3-8C788D2CCA8C@Teradata.com>
- <BL2PR02MB21153BD658496CF33BD40CB8F4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
- <3BA97D41-E3A1-404A-9FEE-41245D56D538@Teradata.com>
- <alpine.DEB.2.11.1609162053270.1040@piezo.us.to>
- <B3E46566-5536-4414-8A51-7223ABDA463E@Teradata.com>
+From: Kostis Fardelas <dante1234@gmail.com>
+Subject: Re: Suiciding and corrupted OSDs zero out Ceph cluster IO
+Date: Sat, 17 Sep 2016 12:53:30 +0300
+Message-ID: <CAN3wisU4KL5T1FRvdmiLy0uF88tE6GE_2zu9b_nbo6+n1yBi_w@mail.gmail.com>
+References: <CAN3wisVcObOWrSey3xXNwuLMNidncc+NSTOFvSNKiAJ9P-oCDA@mail.gmail.com>
+ <CACJqLyb5kfTvi7BAYX05krNUjEPFTG0GihD2R2purHUUOKpEnQ@mail.gmail.com>
+ <CAN3wisXrWmVK+CeZgpq-6mLCurfTWcEsXLgfsotcbxbFC+3j7Q@mail.gmail.com>
+ <CACJqLyaF_22Drc8ARrBGh=OKN6zVD0mQ=Cb8Ocbc=uY26u=fFg@mail.gmail.com> <CAN3wisW3r7kxbW1fhSRF8yN9iunXKA_K4XUN3y3nZ-tDTYOWSA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0063.outbound.protection.outlook.com ([104.47.36.63]:17536
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752567AbcIPXPU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 16 Sep 2016 19:15:20 -0400
-In-Reply-To: <B3E46566-5536-4414-8A51-7223ABDA463E@Teradata.com>
-Content-Language: en-US
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:36804 "EHLO
+        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754949AbcIQJxc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Sep 2016 05:53:32 -0400
+Received: by mail-qk0-f182.google.com with SMTP id z190so109290878qkc.3
+        for <ceph-devel@vger.kernel.org>; Sat, 17 Sep 2016 02:53:31 -0700 (PDT)
+In-Reply-To: <CAN3wisW3r7kxbW1fhSRF8yN9iunXKA_K4XUN3y3nZ-tDTYOWSA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>, Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomai@xsky.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-VGhlIHNpemVzIG9mIHRoZSBwYXJ0aXRpb25zIGZyb20gY2VwaC5jb25mIGlzIG5vdCBtYW5kYXRv
-cnkuIA0KSWYgeW91IG1lbnRpb24gLCB0aGUgcGFydGl0aW9uIG9mIGRiL3dhbC9kYXRhICwgaXQg
-c2hvdWxkIGJlIHVzaW5nIHRoZSBlbnRpcmUgc2l6ZSBvZiB0aGUgcGFydGl0aW9uLiBJZiB5b3Ug
-bWVudGlvbiB0aGUgc2l6ZXMgb24gdG9wICwgaXQgd2lsbCB0cnVuY2F0ZSB0byB0aGF0IHNpemUu
-LkhlcmUgaXMgb25lIHNhbXBsZSBjb25maWcuLg0KDQpbb3NkLjBdDQogICAgICAgaG9zdCA9IGVt
-c25vZGUxMA0KICAgICAgIGRldnMgPSAvZGV2L3NkYjENCiAgICAgICBibHVlc3RvcmVfYmxvY2tf
-ZGJfcGF0aCA9IC9kZXYvc2RiMg0KICAgICAgIGJsdWVzdG9yZV9ibG9ja193YWxfcGF0aCA9IC9k
-ZXYvc2RiMw0KICAgICAgIGJsdWVzdG9yZV9ibG9ja19wYXRoID0gL2Rldi9zZGI0DQoNCkkgZ3Vl
-c3MgZGV2cyBpcyBub3QgcmVxdWlyZWQgZm9yIGNlcGgtZGlzay4gSSBhbSB1c2luZyBvbGQgbWtj
-ZXBoZnMgc3R1ZmYgYW5kIHRoYXQncyB3aHkgaXQgaXMgbmVlZGVkLg0KDQpUaGFua3MgJiBSZWdh
-cmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBLYW1ibGUs
-IE5pdGluIEEgW21haWx0bzpOaXRpbi5LYW1ibGVAVGVyYWRhdGEuY29tXSANClNlbnQ6IEZyaWRh
-eSwgU2VwdGVtYmVyIDE2LCAyMDE2IDQ6MDkgUE0NClRvOiBTYWdlIFdlaWwNCkNjOiBTb21uYXRo
-IFJveTsgQ2VwaCBEZXZlbG9wbWVudA0KU3ViamVjdDogUmU6IEJsdWVzdG9yZSBPU0Qgc3VwcG9y
-dCBpbiBjZXBoLWRpc2sNCg0KDQo+IE9uIFNlcCAxNiwgMjAxNiwgYXQgMTo1NCBQTSwgU2FnZSBX
-ZWlsIDxzYWdlQG5ld2RyZWFtLm5ldD4gd3JvdGU6DQo+IA0KPiBPbiBGcmksIDE2IFNlcCAyMDE2
-LCBLYW1ibGUsIE5pdGluIEEgd3JvdGU6DQo+Pj4gT24gU2VwIDE2LCAyMDE2LCBhdCAxMjoyMyBQ
-TSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4+PiANCj4+
-PiBIb3cgeW91IGNvbmZpZ3VyZWQgYmx1ZXN0b3JlLCBhbGwgZGVmYXVsdCA/IGkuZSBhbGwgaW4g
-c2luZ2xlIHBhcnRpdGlvbiAsIG5vIHNlcGFyYXRlIHBhcnRpdGlvbiBmb3IgZGIvd2FsID8NCj4+
-IEl0IGlzIHNlcGFyYXRlZCBwYXJ0aXRpb25zIGZvciBkYXRhKFNTRCksIHdhbChTU0QpLCByb2Nr
-c2RiKFNTRCksICYgYmxvY2sgc3RvcmUgKEhERCkuDQo+PiANCj4+PiBXb25kZXJpbmcgaWYgeW91
-IGFyZSBvdXQgb2YgZGIgc3BhY2UvZGlzayBzcGFjZSA/DQo+PiBJIG5vdGljZSBhIG1pc2NvbmZp
-Z3VyYXRpb24gb24gdGhlIGNsdXN0ZXIgbm93LiBUaGUgd2FsICYgZGIgcGFydGl0aW9uIHVzZSBn
-b3Qgc3dhcHBlZCwgc28gaXQgaXMgZ2V0dGluZyBqdXN0IDEyOE1CIGRiIHBhcnRpdGlvbiBub3cu
-IFByb2JhYmx5IHRoaXMgaXMgdGhlIGNhdXNlIG9mIHRoZSBhc3NlcnQuDQo+IA0KPiBGV0lXIGJs
-dWVmcyBpcyBzdXBwb3NlZCB0byBmYWxsIGJhY2sgb24gYW55IGFsbG9jYXRpb24gZmFpbHVyZSB0
-byB0aGUgDQo+IG5leHQgbGFyZ2VyL3Nsb3dlciBkZXZpY2UgKHdhbCAtPiBkYiAtPiBwcmltYXJ5
-KSwgc28gaGF2aW5nIGEgdGlueSB3YWwgDQo+IG9yIHRpbnkgZGIgc2hvdWxkbid0IGFjdHVhbGx5
-IG1hdHRlci4gIEEgYmx1ZWZzIGxvZyAoZGVidWcgYmx1ZWZzID0gMTAgDQo+IG9yIDIwKSBsZWFk
-aW5nIHVwIHRvIGFueSBjcmFzaCB0aGVyZSB3b3VsZCBiZSBoZWxwZnVsLg0KPiANCj4gVGhhbmtz
-IQ0KPiBzYWdlDQo+IA0KDQpHb29kIHRvIGtub3cgdGhpcyBmYWxsIGJhY2sgbWVjaGFuaXNtLg0K
-SW4gbXkgcHJldmlvdXMgcnVuIHRoZSBwYXJ0aXRpb25zIGFuZCBzaXplcyBpbiBjb25maWcgZGlk
-IG5vdCBtYXRjaC4gSSBzZWUgdGhlIGNlcGgtZGFlbW9uLWR1bXAgc2hvd2luZyA5MDBNQisgdXNl
-ZCBmb3IgZGIgd2hpbGUgZGIgcGFydGl0aW9uIHdhcyAxMjhNQi4gSSB3YXMgdGhpbmtpbmcgaXQg
-c3RhcnRlZCBvdmVyd3JpdGluZyBvbiB0byB0aGUgbmV4dCBwYXJ0aXRpb24uIEJ1dCBpbnN0ZWFk
-IGFzIHBlciB0aGlzIGJhY2t1cCBsb2dpYyBpdCBzdGFydGVkIHVzaW5nIEhERCBmb3IgZGIuDQoN
-Ck9uZSBpc3N1ZSBJIHNlZSBpcyB0aGF0LCBjZXBoLmNvbmYgbGlzdHMgdGhlIHNpemVzIG9mIHRo
-ZSB3YWwsZGIsJiBibG9jay4gQnV0IGl0IGlzIHBvc3NpYmxlIHRoYXQgYWN0dWFsIHBhcnRpdGlv
-bnMgbWF5IGhhdmUgZGlmZmVyZW50IHNpemVzLiBGcm9tIHRoZSBjZXBoLWRhZW1vbi1kdW1wIG91
-dHB1dCBsb29rcyBsaWtlIGl0IGlzIG5vdCBsb29raW5nIGF0IHRoZSBwYXJ0aXRpb27igJlzIHJl
-YWwgc2l6ZSwgaW5zdGVhZCB0aGUgY29kZSBpcyBhc3N1bWluZyB0aGUgc2l6ZXMgZnJvbSB0aGUg
-Y29uZmlnIGZpbGUgYXMgdGhlIHBhcnRpdGlvbiBzaXplcy4gSSB0aGluayBwcm9iaW5nIG9mIHRo
-ZSBzaXplIG9mIGV4aXN0aW5nIGRldmljZXMvZmlsZXMgd2lsbCBiZSBiZXR0ZXIgdGhhbiB0YWtp
-bmcgdGhlIHNpemVzIGZyb20gdGhlIGNvbmZpZyBmaWxlIGJsaW5kbHkuDQoNCkFmdGVyIDUgaG91
-cnMgb3Igc28gNisgb3NkcyB3ZXJlIGRvd24gb3V0IG9mIDMwLg0KV2Ugd2lsbCBiZSBydW5uaW5n
-IHRoZSBzdHJlc3MgdGVzdCBvbmUgYWdhaW4gd2l0aCB0aGUgZml4ZWQgcGFydGl0aW9uIGNvbmZp
-Z3VyYXRpb24gd2l0aCBkZWJ1ZyBsZXZlbCBvZiAwLCB0byBnZXQgbWF4IHBlcmZvcm1hbmNlIG91
-dC4gQW5kIGlmIHRoYXQgZmFpbHMgdGhlbiBJIHdpbGwgc3dpdGNoIHRvIGRlYnVnIGxldmVsIDEw
-IG9yIDIwLCBhbmQgZ2F0aGVyIHNvbWUgZGV0YWlsZWQgbG9ncy4NCg0KVGhhbmtzLA0KTml0aW4N
-Cg0KPiANCj4+PiBXZSBoYWQgc29tZSBpc3N1ZXMgaW4gdGhpcyBmcm9udCBzb21ldGltZXMgYmFj
-ayB3aGljaCB3YXMgZml4ZWQsIG1heSANCj4+PiBiZSBhIG5ldyBpc3N1ZSAoPykuIE5lZWQgdmVy
-Ym9zZSBsb2cgZm9yIGF0IGxlYXN0IGJsdWVmcyANCj4+PiAoZGVidWdfYmx1ZWZzID0gMjAvMjAp
-DQo+PiANCj4+IExldCBtZSBmaXggdGhlIGNsdXN0ZXIgY29uZmlndXJhdGlvbiwgdG8gZ2l2ZSBi
-ZXR0ZXIgc3BhY2UgdG8gdGhlIERCIHBhcnRpdGlvbi4gQW5kIGlmIHdpdGggdGhhdCB0aGlzIGlz
-c3VlIGNvbWVzIHVwIHRoZW4gSSB3aWxsIHRyeSBjYXB0dXJpbmcgZGV0YWlsZWQgbG9ncy4NCj4+
-IA0KPj4+IEJUVywgd2hhdCBpcyB5b3VyIHdvcmtsb2FkIChibG9jayBzaXplLCBJTyBwYXR0ZXJu
-ICkgPw0KPj4gDQo+PiBUaGUgd29ya2xvYWQgaXMgaW50ZXJuYWwgdGVyYWRhdGEgYmVuY2htYXJr
-LCB3aGljaCBzaW11bGF0ZXMgSU8gcGF0dGVybiBvZiBkYXRhYmFzZSBkaXNrIGFjY2VzcyB3aXRo
-IHZhcmlvdXMgYmxvY2sgc2l6ZXMgYW5kIElPIHBhdHRlcm4uIA0KPj4gDQo+PiBUaGFua3MsDQo+
-PiBOaXRpbg0KPj4gDQo+PiANCj4+IA0KPj4+IA0KPj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
-LS0tDQo+Pj4gRnJvbTogS2FtYmxlLCBOaXRpbiBBIFttYWlsdG86Tml0aW4uS2FtYmxlQFRlcmFk
-YXRhLmNvbV0NCj4+PiBTZW50OiBGcmlkYXksIFNlcHRlbWJlciAxNiwgMjAxNiAxMjowMCBQTQ0K
-Pj4+IFRvOiBTb21uYXRoIFJveQ0KPj4+IENjOiBTYWdlIFdlaWw7IENlcGggRGV2ZWxvcG1lbnQN
-Cj4+PiBTdWJqZWN0OiBSZTogQmx1ZXN0b3JlIE9TRCBzdXBwb3J0IGluIGNlcGgtZGlzaw0KPj4+
-IA0KPj4+IA0KPj4+PiBPbiBTZXAgMTYsIDIwMTYsIGF0IDExOjQzIEFNLCBTb21uYXRoIFJveSA8
-U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPj4+PiANCj4+Pj4gUGxlYXNlIHNlbmQg
-dGhlIHNuaXBwZXQgKHZlcnkgZmlyc3QgdHJhY2UgLCBnbyB1cCBpbiB0aGUgbG9nKSB3aGVyZSBp
-dCBpcyBhY3R1YWxseSBwcmludGluZyB0aGUgYXNzZXJ0Lg0KPj4+PiBCVFcsIHdoYXQgd29ya2xv
-YWQgeW91IGFyZSBydW5uaW5nID8NCj4+Pj4gDQo+Pj4+IFRoYW5rcyAmIFJlZ2FyZHMNCj4+Pj4g
-U29tbmF0aA0KPj4+PiANCj4+PiBIZXJlIGl0IGlzLg0KPj4+IA0KPj4+IDIwMTYtMDktMTYgMDg6
-NDk6MzAuNjA1ODQ1IDdmYjVhOTZiYTcwMCAtMSANCj4+PiAvYnVpbGQvbml0aW4vbmlnaHRseV9i
-dWlsZHMvMjAxNjA5MTRfMTI1NDU5LW1hc3Rlci9jZXBoLmdpdC9ycG1idWlsZA0KPj4+IC9CVUlM
-RC9jZXBoLXYxMS4wLjAtMjMwOS5nOTA5NmFkMy9zcmMvb3MvYmx1ZXN0b3JlL0JsdWVGUy5jYzog
-SW4gDQo+Pj4gZnVuY3Rpb24gJ2ludCBCbHVlRlM6Ol9hbGxvY2F0ZSh1aW50OF90LCB1aW50NjRf
-dCwgc3RkOjp2ZWN0byANCj4+PiByPGJsdWVmc19leHRlbnRfdD4qKScgdGhyZWFkIDdmYjVhOTZi
-YTcwMCB0aW1lIDIwMTYtMDktMTYgDQo+Pj4gMDg6NDk6MzAuNjAyMTM5DQo+Pj4gL2J1aWxkL25p
-dGluL25pZ2h0bHlfYnVpbGRzLzIwMTYwOTE0XzEyNTQ1OS1tYXN0ZXIvY2VwaC5naXQvcnBtYnVp
-bGQNCj4+PiAvQlVJTEQvY2VwaC12MTEuMC4wLTIzMDkuZzkwOTZhZDMvc3JjL29zL2JsdWVzdG9y
-ZS9CbHVlRlMuY2M6IDE2ODY6IA0KPj4+IEZBSUxFRCBhc3NlcnQoMCA9PSAiYWxsb2NhdGUgZmFp
-bGVkLi4uIHd0ZiIpDQo+Pj4gDQo+Pj4gY2VwaCB2ZXJzaW9uIHYxMS4wLjAtMjMwOS1nOTA5NmFk
-MyANCj4+PiAoOTA5NmFkMzdmMmMwNzk4YzI2ZDc3ODRmYjRlN2E3ODFmZWI3MmNiOCkNCj4+PiAx
-OiAoY2VwaDo6X19jZXBoX2Fzc2VydF9mYWlsKGNoYXIgY29uc3QqLCBjaGFyIGNvbnN0KiwgaW50
-LCBjaGFyIA0KPj4+IGNvbnN0KikrMHg4YikgWzB4N2ZiNWJmNDNhMTFiXQ0KPj4+IDI6IChCbHVl
-RlM6Ol9hbGxvY2F0ZSh1bnNpZ25lZCBjaGFyLCB1bnNpZ25lZCBsb25nLCANCj4+PiBzdGQ6OnZl
-Y3RvcjxibHVlZnNfZXh0ZW50X3QsIHN0ZDo6YWxsb2NhdG9yPGJsdWVmc19leHRlbnRfdD4gDQo+
-Pj4gPiopKzB4OGFkKSBbMHg3ZmI1YmYyNzM1ZGRdDQo+Pj4gMzogKEJsdWVGUzo6X2ZsdXNoX2Fu
-ZF9zeW5jX2xvZyhzdGQ6OnVuaXF1ZV9sb2NrPHN0ZDo6bXV0ZXg+JiwgDQo+Pj4gdW5zaWduZWQg
-bG9uZywgdW5zaWduZWQgbG9uZykrMHhiNGYpIFsweDdmYjViZjI3YWExZl0NCj4+PiA0OiAoQmx1
-ZUZTOjpfZnN5bmMoQmx1ZUZTOjpGaWxlV3JpdGVyKiwgDQo+Pj4gc3RkOjp1bmlxdWVfbG9jazxz
-dGQ6Om11dGV4PiYpKzB4MjliKSBbMHg3ZmI1YmYyN2JjOWJdDQo+Pj4gNTogKEJsdWVSb2Nrc1dy
-aXRhYmxlRmlsZTo6U3luYygpKzB4NGUpIFsweDdmYjViZjI5MTI1ZV0NCj4+PiA2OiAocm9ja3Nk
-Yjo6V3JpdGFibGVGaWxlV3JpdGVyOjpTeW5jSW50ZXJuYWwoYm9vbCkrMHgxMzkpIA0KPj4+IFsw
-eDdmYjViZjM4ODY5OV0NCj4+PiA3OiAocm9ja3NkYjo6V3JpdGFibGVGaWxlV3JpdGVyOjpTeW5j
-KGJvb2wpKzB4ODgpIFsweDdmYjViZjM4OTIzOF0NCj4+PiA4OiAocm9ja3NkYjo6REJJbXBsOjpX
-cml0ZUltcGwocm9ja3NkYjo6V3JpdGVPcHRpb25zIGNvbnN0JiwgDQo+Pj4gcm9ja3NkYjo6V3Jp
-dGVCYXRjaCosIHJvY2tzZGI6OldyaXRlQ2FsbGJhY2sqLCB1bnNpZ25lZCBsb25nKiwgDQo+Pj4g
-dW5zaWduZWQgbG9uZywgYm9vbCkrMHgxM2NmKSBbMHg3ZmI1YmYyZTBhMmZdDQo+Pj4gOTogKHJv
-Y2tzZGI6OkRCSW1wbDo6V3JpdGUocm9ja3NkYjo6V3JpdGVPcHRpb25zIGNvbnN0JiwgDQo+Pj4g
-cm9ja3NkYjo6V3JpdGVCYXRjaCopKzB4MjcpIFsweDdmYjViZjJlMTYzN10NCj4+PiAxMDogDQo+
-Pj4gKFJvY2tzREJTdG9yZTo6c3VibWl0X3RyYW5zYWN0aW9uX3N5bmMoc3RkOjpzaGFyZWRfcHRy
-PEtleVZhbHVlREI6OlQNCj4+PiByYW5zYWN0aW9uSW1wbD4pKzB4NWIpIFsweDdmYjViZjIxYTE0
-Yl0NCj4+PiAxMTogKEJsdWVTdG9yZTo6X2t2X3N5bmNfdGhyZWFkKCkrMHhmNWEpIFsweDdmYjVi
-ZjFlN2ZmYV0NCj4+PiAxMjogKEJsdWVTdG9yZTo6S1ZTeW5jVGhyZWFkOjplbnRyeSgpKzB4ZCkg
-WzB4N2ZiNWJmMWY1YTZkXQ0KPj4+IDEzOiAoKCkrMHg4MGE0KSBbMHg3ZmI1YmI0YTcwYTRdDQo+
-Pj4gMTQ6IChjbG9uZSgpKzB4NmQpIFsweDdmYjViYTMyMDA0ZF0NCj4+PiBOT1RFOiBhIGNvcHkg
-b2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1dGFibGU+YCBpcyBuZWVk
-ZWQgdG8gaW50ZXJwcmV0IHRoaXMuDQo+Pj4gDQo+Pj4gDQo+Pj4gDQo+Pj4gVGhhbmtzLA0KPj4+
-IE5pdGluDQo+Pj4gDQo+Pj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQg
-aW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUg
-dXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJl
-YWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBh
-cmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGlu
-IGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwg
-b3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91
-IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5
-IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVk
-aWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4g
-eW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0
-b3JlZCBjb3BpZXMpLg0KPj4gDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
-c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPj4gaW4gdGhlIGJv
-ZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRv
-bW8gDQo+PiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwNCg0K
+If you had no luck with the cep-post file, you may also find the
+uploaded logs @ the following url:
+https://files.noc.grnet.gr/aqhzgq6q6furshaxiky3-ikduxv2xcwinlgv3
+
+On 16 September 2016 at 21:45, Kostis Fardelas <dante1234@gmail.com> wrote:
+> Sorry Haomai, I have no idea
+>
+> On 16 September 2016 at 18:45, Haomai Wang <haomai@xsky.com> wrote:
+>> On Fri, Sep 16, 2016 at 7:30 PM, Kostis Fardelas <dante1234@gmail.com> wrote:
+>>> Sure,
+>>> ceph-post-file: ebc211d2-5ae1-40ee-b40a-7668a21232e6
+>>
+>> Oh, sorry, I forget how to access this post... Anyone may give a guide.....
+>>
+>>>
+>>> Contains the ceph logs and crashed OSD logs with default debug level.
+>>> The flapping problem starts @2016-09-09 20:57:14.230840 and the OSDs
+>>> crash (with suicide and corrupted leveldb logs) @2016-09-10 between
+>>> 02:04 - 02:40. You will notice tha when we tried to start them some
+>>> hours later, the OSDs kept crashing but with different asserts.
+>>>
+>>> On 16 September 2016 at 13:34, Haomai Wang <haomai@xsky.com> wrote:
+>>>> On Fri, Sep 16, 2016 at 5:11 PM, Kostis Fardelas <dante1234@gmail.com> wrote:
+>>>>> (sent this email to ceph-users too, but there was no feedback due to
+>>>>> to its complex issues I guess, so I am sending this in ceph-devel too.
+>>>>> Thanks)
+>>>>>
+>>>>> Hello cephers,
+>>>>> last week we survived a 3-day outage on our ceph cluster (Hammer
+>>>>> 0.94.7, 162 OSDs, 27 "fat" nodes, 1000s of clients) due to 6 out of
+>>>>> 162 OSDs crash in the SAME node. The outage was caused in the
+>>>>> following timeline:
+>>>>> time 0:  OSDs living in the same node (rd0-19) start heavily flapping
+>>>>> (in the logs: failed, wrongly marked me down, RESETSESSION etc). Some
+>>>>> more OSDs on other nodes are also flapping but the OSDs of this single
+>>>>> node seem to have played the major part in this problem
+>>>>>
+>>>>> time +6h: rd0-19 OSDs assert. Two of them suicide on OSD::osd_op_tp
+>>>>> thread timeout and the other ones assert with EPERM and corrupted
+>>>>> leveldb related errors. Something like this:
+>>>>>
+>>>>> 2016-09-10 02:40:47.155718 7f699b724700  0 filestore(/rados/rd0-19-01)
+>>>>>  error (1) Operation not permitted not handled on operation 0x46db2d00
+>>>>> (1731767079.0.0, or op 0, counting from 0)
+>>>>> 2016-09-10 02:40:47.155731 7f699b724700  0 filestore(/rados/rd0-19-01)
+>>>>> unexpected error code
+>>>>> 2016-09-10 02:40:47.155732 7f699b724700  0 filestore(/rados/rd0-19-01)
+>>>>>  transaction dump:
+>>>>> {
+>>>>>     "ops": [
+>>>>>         {
+>>>>>             "op_num": 0,
+>>>>>             "op_name": "omap_setkeys",
+>>>>>             "collection": "3.b30_head",
+>>>>>             "oid": "3\/b30\/\/head",
+>>>>>             "attr_lens": {
+>>>>>                 "_epoch": 4,
+>>>>>                 "_info": 734
+>>>>>             }
+>>>>>         }
+>>>>>     ]
+>>>>> }
+>>>>>
+>>>>>
+>>>>> 2016-09-10 02:40:47.155778 7f699671a700 -1 os/FileStore.cc: In
+>>>>> function 'unsigned int
+>>>>> FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int,
+>>>>> ThreadPool::TPH
+>>>>> andle*)' thread 7f699671a700 time 2016-09-10 02:40:47.153544
+>>>>> os/FileStore.cc: 2761: FAILED assert(0 == "unexpected error")
+>>>>>
+>>>>> This leaves the cluster in a state like below:
+>>>>> 2016-09-10 03:04:31.927635 mon.0 62.217.119.14:6789/0 948003 : cluster
+>>>>> [INF] osdmap e281474: 162 osds: 156 up, 156 in
+>>>>> 2016-09-10 03:04:32.145074 mon.0 62.217.119.14:6789/0 948004 : cluster
+>>>>> [INF] pgmap v105867219: 28672 pgs: 1
+>>>>> active+recovering+undersized+degraded, 26684 active+clean, 1889
+>>>>> active+undersized+degraded, 98 down+peering; 95983 GB data, 179 TB
+>>>>> used, 101379 GB / 278 TB avail; 12106 B/s rd, 11 op/s;
+>>>>> 2408539/69641962 objects degraded (3.458%); 1/34820981 unfound
+>>>>> (0.000%)
+>>>>>
+>>>>> From this time we have almost no IO propably due to 98 down+peering
+>>>>> PGs, 1 unfound object and 1000s of librados clients stuck.
+>>>>> As of now, we have not managed to pinpoint what caused the crashes (no
+>>>>> disk errors, no network errors, no general hardware errors, nothing in
+>>>>> dmesg) but things are still under investigation. Finally we managed to
+>>>>> bring up enough crashed OSDs for IO to continue (using gdb, leveldb
+>>>>> repairs, ceph-objectstore-tool), but our main questions exists:
+>>>>>
+>>>>> A. the 6 OSDs were on the same node. What is so special about
+>>>>> suiciding + EPERMs that leave the cluster with down+peering and zero
+>>>>> IO? Is this a normal behaviour after a crash like this? Notice that
+>>>>> the cluster has marked the crashed OSDs down+out, so it seems that the
+>>>>> cluster somehow "fenced" these OSDs but in a manner that leaves the
+>>>>> cluster unusable. Our crushmap is the default one with the host as a
+>>>>> failure domain
+>>>>> B. would replication=3 help? Would we need replication=3 and min=2 to
+>>>>> avoid such a problem in the future? Right now we are on size=2 &
+>>>>> min_size=1
+>>>>> C. would an increase in suicide timeouts help for future incidents like this?
+>>>>> D. are there any known related bugs on 0.94.7? Haven't found anything so far...
+>>>>
+>>>> Could you please provide with ceph.log and the down osd logs at that
+>>>> time? I don't have clue in your description so far.
+>>>>
+>>>>>
+>>>>> Regards,
+>>>>> Kostis
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
