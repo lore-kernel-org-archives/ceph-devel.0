@@ -1,150 +1,170 @@
-From: Sage Weil <sage@newdream.net>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
 Subject: Re: Bluestore OSD support in ceph-disk
-Date: Sat, 17 Sep 2016 14:14:02 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1609171412030.1040@piezo.us.to>
-References: <4459A44C-1336-4EC1-82F0-F491D0C83712@Teradata.com> <BL2PR02MB2115BE07E99958F8FA8E521CF4F10@BL2PR02MB2115.namprd02.prod.outlook.com> <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com> <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
- <alpine.DEB.2.11.1609151833290.19761@piezo.us.to> <BC30B826-3E63-4002-9436-60222C606E9F@Teradata.com> <alpine.DEB.2.11.1609151850330.19761@piezo.us.to> <E9BC8A1A-CFD4-4D1E-A719-FD3AD217607E@Teradata.com> <EA284BAD-1765-4600-92A9-32FF2BF098E9@Teradata.com>
- <BL2PR02MB21150C4B85B1897282432B86F4F30@BL2PR02MB2115.namprd02.prod.outlook.com> <E27159E7-FDEB-4075-B1B3-8C788D2CCA8C@Teradata.com> <BL2PR02MB21153BD658496CF33BD40CB8F4F30@BL2PR02MB2115.namprd02.prod.outlook.com> <3BA97D41-E3A1-404A-9FEE-41245D56D538@Teradata.com>
- <alpine.DEB.2.11.1609162053270.1040@piezo.us.to> <B3E46566-5536-4414-8A51-7223ABDA463E@Teradata.com>
+Date: Sun, 18 Sep 2016 06:41:27 +0000
+Message-ID: <518C930B-0854-4C8E-8E8E-740D54C0613B@Teradata.com>
+References: <4459A44C-1336-4EC1-82F0-F491D0C83712@Teradata.com>
+ <BL2PR02MB2115BE07E99958F8FA8E521CF4F10@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <0B017562-31CE-4C51-8ADB-997E5D59C1BF@Teradata.com>
+ <C749C86B-A804-4566-9F63-B7B90E6E0891@Teradata.com>
+ <alpine.DEB.2.11.1609151833290.19761@piezo.us.to>
+ <BC30B826-3E63-4002-9436-60222C606E9F@Teradata.com>
+ <alpine.DEB.2.11.1609151850330.19761@piezo.us.to>
+ <E9BC8A1A-CFD4-4D1E-A719-FD3AD217607E@Teradata.com>
+ <EA284BAD-1765-4600-92A9-32FF2BF098E9@Teradata.com>
+ <BL2PR02MB21150C4B85B1897282432B86F4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <E27159E7-FDEB-4075-B1B3-8C788D2CCA8C@Teradata.com>
+ <BL2PR02MB21153BD658496CF33BD40CB8F4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
+ <3BA97D41-E3A1-404A-9FEE-41245D56D538@Teradata.com>
+ <alpine.DEB.2.11.1609162053270.1040@piezo.us.to>
+ <B3E46566-5536-4414-8A51-7223ABDA463E@Teradata.com>
+ <BL2PR02MB2115227088E471EBE1188D4AF4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-76053935-1474121644=:1040"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51499 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751944AbcIQOOF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Sep 2016 10:14:05 -0400
-In-Reply-To: <B3E46566-5536-4414-8A51-7223ABDA463E@Teradata.com>
+Received: from nat13.teradata.com ([153.65.16.13]:38184 "EHLO
+        rpc7279.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1754009AbcIRGla (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Sep 2016 02:41:30 -0400
+In-Reply-To: <BL2PR02MB2115227088E471EBE1188D4AF4F30@BL2PR02MB2115.namprd02.prod.outlook.com>
+Content-Language: en-US
+Content-ID: <446998E9556B314C9D89F0B1A43EC387@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-76053935-1474121644=:1040
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-
-On Fri, 16 Sep 2016, Kamble, Nitin A wrote:
-> > On Sep 16, 2016, at 1:54 PM, Sage Weil <sage@newdream.net> wrote:
-> > 
-> > On Fri, 16 Sep 2016, Kamble, Nitin A wrote:
-> >>> On Sep 16, 2016, at 12:23 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> >>> 
-> >>> How you configured bluestore, all default ? i.e all in single partition , no separate partition for db/wal ?
-> >> It is separated partitions for data(SSD), wal(SSD), rocksdb(SSD), & block store (HDD).
-> >> 
-> >>> Wondering if you are out of db space/disk space ?
-> >> I notice a misconfiguration on the cluster now. The wal & db partition use got swapped, so it is getting just 128MB db partition now. Probably this is the cause of the assert.
-> > 
-> > FWIW bluefs is supposed to fall back on any allocation failure to the next 
-> > larger/slower device (wal -> db -> primary), so having a tiny wal or tiny 
-> > db shouldn't actually matter.  A bluefs log (debug bluefs = 10 or 20) 
-> > leading up to any crash there would be helpful.
-> > 
-> > Thanks!
-> > sage
-> > 
-> 
-> Good to know this fall back mechanism.
-> In my previous run the partitions and sizes in config did not match. I see the ceph-daemon-dump
-> showing 900MB+ used for db while db partition was 128MB. I was thinking it started overwriting on
-> to the next partition. But instead as per this backup logic it started using HDD for db.
-> 
-> One issue I see is that, ceph.conf lists the sizes of the wal,db,& block. But it is possible that actual
-> partitions may have different sizes. From the ceph-daemon-dump output looks like it is not looking
-> at the partition’s real size, instead the code is assuming the sizes from the config file as the partition
-> sizes. I think probing of the size of existing devices/files will be better than taking the sizes from the
-> config file blindly.
-
-Those bluestore_block*_size options are only used in conjunction with 
-bluestore_block*_create = true to create a dummy block device file for 
-debugging/testing purposes.
-
-Are you referring to the perf counters (ceph daemon osd.N perf dump) 
-figures?  Can you share the numbers you saw?  It sounds like there might 
-be a bug in the instrumentation.
-
-> After 5 hours or so 6+ osds were down out of 30.
-> We will be running the stress test one again with the fixed partition configuration with debug level of
-> 0, to get max performance out. And if that fails then I will switch to debug level 10 or 20, and gather
-> some detailed logs.
-
-Any backtraces you see would be helpful.
-
-Thanks!
-sage
-
-
-> 
-> Thanks,
-> Nitin
-> 
-> > 
-> >>> We had some issues in this front sometimes back which was fixed, may be a new issue (?). Need verbose log for at least bluefs (debug_bluefs = 20/20)
-> >> 
-> >> Let me fix the cluster configuration, to give better space to the DB partition. And if with that this issue comes up then I will try capturing detailed logs.
-> >> 
-> >>> BTW, what is your workload (block size, IO pattern ) ?
-> >> 
-> >> The workload is internal teradata benchmark, which simulates IO pattern of database disk access with various block sizes and IO pattern. 
-> >> 
-> >> Thanks,
-> >> Nitin
-> >> 
-> >> 
-> >> 
-> >>> 
-> >>> -----Original Message-----
-> >>> From: Kamble, Nitin A [mailto:Nitin.Kamble@Teradata.com]
-> >>> Sent: Friday, September 16, 2016 12:00 PM
-> >>> To: Somnath Roy
-> >>> Cc: Sage Weil; Ceph Development
-> >>> Subject: Re: Bluestore OSD support in ceph-disk
-> >>> 
-> >>> 
-> >>>> On Sep 16, 2016, at 11:43 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> >>>> 
-> >>>> Please send the snippet (very first trace , go up in the log) where it is actually printing the assert.
-> >>>> BTW, what workload you are running ?
-> >>>> 
-> >>>> Thanks & Regards
-> >>>> Somnath
-> >>>> 
-> >>> Here it is.
-> >>> 
-> >>> 2016-09-16 08:49:30.605845 7fb5a96ba700 -1 /build/nitin/nightly_builds/20160914_125459-master/ceph.git/rpmbuild/BUILD/ceph-v11.0.0-2309.g9096ad3/src/os/bluestore/BlueFS.cc: In function 'int BlueFS::_allocate(uint8_t, uint64_t, std::vecto r<bluefs_extent_t>*)' thread 7fb5a96ba700 time 2016-09-16 08:49:30.602139
-> >>> /build/nitin/nightly_builds/20160914_125459-master/ceph.git/rpmbuild/BUILD/ceph-v11.0.0-2309.g9096ad3/src/os/bluestore/BlueFS.cc: 1686: FAILED assert(0 == "allocate failed... wtf")
-> >>> 
-> >>> ceph version v11.0.0-2309-g9096ad3 (9096ad37f2c0798c26d7784fb4e7a781feb72cb8)
-> >>> 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x8b) [0x7fb5bf43a11b]
-> >>> 2: (BlueFS::_allocate(unsigned char, unsigned long, std::vector<bluefs_extent_t, std::allocator<bluefs_extent_t> >*)+0x8ad) [0x7fb5bf2735dd]
-> >>> 3: (BlueFS::_flush_and_sync_log(std::unique_lock<std::mutex>&, unsigned long, unsigned long)+0xb4f) [0x7fb5bf27aa1f]
-> >>> 4: (BlueFS::_fsync(BlueFS::FileWriter*, std::unique_lock<std::mutex>&)+0x29b) [0x7fb5bf27bc9b]
-> >>> 5: (BlueRocksWritableFile::Sync()+0x4e) [0x7fb5bf29125e]
-> >>> 6: (rocksdb::WritableFileWriter::SyncInternal(bool)+0x139) [0x7fb5bf388699]
-> >>> 7: (rocksdb::WritableFileWriter::Sync(bool)+0x88) [0x7fb5bf389238]
-> >>> 8: (rocksdb::DBImpl::WriteImpl(rocksdb::WriteOptions const&, rocksdb::WriteBatch*, rocksdb::WriteCallback*, unsigned long*, unsigned long, bool)+0x13cf) [0x7fb5bf2e0a2f]
-> >>> 9: (rocksdb::DBImpl::Write(rocksdb::WriteOptions const&, rocksdb::WriteBatch*)+0x27) [0x7fb5bf2e1637]
-> >>> 10: (RocksDBStore::submit_transaction_sync(std::shared_ptr<KeyValueDB::TransactionImpl>)+0x5b) [0x7fb5bf21a14b]
-> >>> 11: (BlueStore::_kv_sync_thread()+0xf5a) [0x7fb5bf1e7ffa]
-> >>> 12: (BlueStore::KVSyncThread::entry()+0xd) [0x7fb5bf1f5a6d]
-> >>> 13: (()+0x80a4) [0x7fb5bb4a70a4]
-> >>> 14: (clone()+0x6d) [0x7fb5ba32004d]
-> >>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
-> >>> 
-> >>> 
-> >>> 
-> >>> Thanks,
-> >>> Nitin
-> >>> 
-> >>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> >> 
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> N?????r??y??????X??ǧv???)޺{.n?????z?]z????ay?ʇڙ??j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
---8323329-76053935-1474121644=:1040--
+DQo+IE9uIFNlcCAxNiwgMjAxNiwgYXQgNDoxNSBQTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95
+QHNhbmRpc2suY29tPiB3cm90ZToNCj4gDQo+IFRoZSBzaXplcyBvZiB0aGUgcGFydGl0aW9ucyBm
+cm9tIGNlcGguY29uZiBpcyBub3QgbWFuZGF0b3J5LiANCj4gSWYgeW91IG1lbnRpb24gLCB0aGUg
+cGFydGl0aW9uIG9mIGRiL3dhbC9kYXRhICwgaXQgc2hvdWxkIGJlIHVzaW5nIHRoZSBlbnRpcmUg
+c2l6ZSBvZiB0aGUgcGFydGl0aW9uLiBJZiB5b3UgbWVudGlvbiB0aGUgc2l6ZXMgb24gdG9wICwg
+aXQgd2lsbCB0cnVuY2F0ZSB0byB0aGF0IHNpemUuLkhlcmUgaXMgb25lIHNhbXBsZSBjb25maWcu
+Lg0KPiANCj4gW29zZC4wXQ0KPiAgICAgICBob3N0ID0gZW1zbm9kZTEwDQo+ICAgICAgIGRldnMg
+PSAvZGV2L3NkYjENCj4gICAgICAgYmx1ZXN0b3JlX2Jsb2NrX2RiX3BhdGggPSAvZGV2L3NkYjIN
+Cj4gICAgICAgYmx1ZXN0b3JlX2Jsb2NrX3dhbF9wYXRoID0gL2Rldi9zZGIzDQo+ICAgICAgIGJs
+dWVzdG9yZV9ibG9ja19wYXRoID0gL2Rldi9zZGI0DQo+IA0KPiBJIGd1ZXNzIGRldnMgaXMgbm90
+IHJlcXVpcmVkIGZvciBjZXBoLWRpc2suIEkgYW0gdXNpbmcgb2xkIG1rY2VwaGZzIHN0dWZmIGFu
+ZCB0aGF0J3Mgd2h5IGl0IGlzIG5lZWRlZC4NCj4gDQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29t
+bmF0aA0KPiANCg0KSW5zdGVhZCBvZiB1c2luZyB0aGUgY29uZmlnIGZvciBvc2QgZGVmaW5pdGlv
+biBJIGFtIGNyZWF0aW5nIHRoZSBPU0RzIG1hbnVhbGx5IHVzaW5nIGEgc2NyaXB0IGluIHdoaWNo
+IGFsbCANCnRoZSB3YWwsZGIsYmxvY2sgbGlua3MgYXJlIGNyZWF0ZWQuIEV2ZW4gaWYgb25lIGRv
+ZXMgbm90IHNwZWNpZnkgdGhlIHBhcnRpdGlvbnMgc2l6ZXMsIHRoZXJlIGFyZSBkZWZhdWx0cw0K
+cHJlZGVmaW5lZC4gSXMgdGhlcmUgYSB3YXkgdG8gaWdub3JlIHRoZSBzaXplIGZyb20gdGhlIGNv
+bmZpZyBhbmQgdXNlIHRoZSBzaXplIGJ5IHByb2JpbmcgdGhlIGRldmljZT8NCg0KVGhhbmtzLA0K
+Tml0aW4NCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBLYW1ibGUsIE5p
+dGluIEEgW21haWx0bzpOaXRpbi5LYW1ibGVAVGVyYWRhdGEuY29tXSANCj4gU2VudDogRnJpZGF5
+LCBTZXB0ZW1iZXIgMTYsIDIwMTYgNDowOSBQTQ0KPiBUbzogU2FnZSBXZWlsDQo+IENjOiBTb21u
+YXRoIFJveTsgQ2VwaCBEZXZlbG9wbWVudA0KPiBTdWJqZWN0OiBSZTogQmx1ZXN0b3JlIE9TRCBz
+dXBwb3J0IGluIGNlcGgtZGlzaw0KPiANCj4gDQo+PiBPbiBTZXAgMTYsIDIwMTYsIGF0IDE6NTQg
+UE0sIFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+IHdyb3RlOg0KPj4gDQo+PiBPbiBGcmks
+IDE2IFNlcCAyMDE2LCBLYW1ibGUsIE5pdGluIEEgd3JvdGU6DQo+Pj4+IE9uIFNlcCAxNiwgMjAx
+NiwgYXQgMTI6MjMgUE0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3Jv
+dGU6DQo+Pj4+IA0KPj4+PiBIb3cgeW91IGNvbmZpZ3VyZWQgYmx1ZXN0b3JlLCBhbGwgZGVmYXVs
+dCA/IGkuZSBhbGwgaW4gc2luZ2xlIHBhcnRpdGlvbiAsIG5vIHNlcGFyYXRlIHBhcnRpdGlvbiBm
+b3IgZGIvd2FsID8NCj4+PiBJdCBpcyBzZXBhcmF0ZWQgcGFydGl0aW9ucyBmb3IgZGF0YShTU0Qp
+LCB3YWwoU1NEKSwgcm9ja3NkYihTU0QpLCAmIGJsb2NrIHN0b3JlIChIREQpLg0KPj4+IA0KPj4+
+PiBXb25kZXJpbmcgaWYgeW91IGFyZSBvdXQgb2YgZGIgc3BhY2UvZGlzayBzcGFjZSA/DQo+Pj4g
+SSBub3RpY2UgYSBtaXNjb25maWd1cmF0aW9uIG9uIHRoZSBjbHVzdGVyIG5vdy4gVGhlIHdhbCAm
+IGRiIHBhcnRpdGlvbiB1c2UgZ290IHN3YXBwZWQsIHNvIGl0IGlzIGdldHRpbmcganVzdCAxMjhN
+QiBkYiBwYXJ0aXRpb24gbm93LiBQcm9iYWJseSB0aGlzIGlzIHRoZSBjYXVzZSBvZiB0aGUgYXNz
+ZXJ0Lg0KPj4gDQo+PiBGV0lXIGJsdWVmcyBpcyBzdXBwb3NlZCB0byBmYWxsIGJhY2sgb24gYW55
+IGFsbG9jYXRpb24gZmFpbHVyZSB0byB0aGUgDQo+PiBuZXh0IGxhcmdlci9zbG93ZXIgZGV2aWNl
+ICh3YWwgLT4gZGIgLT4gcHJpbWFyeSksIHNvIGhhdmluZyBhIHRpbnkgd2FsIA0KPj4gb3IgdGlu
+eSBkYiBzaG91bGRuJ3QgYWN0dWFsbHkgbWF0dGVyLiAgQSBibHVlZnMgbG9nIChkZWJ1ZyBibHVl
+ZnMgPSAxMCANCj4+IG9yIDIwKSBsZWFkaW5nIHVwIHRvIGFueSBjcmFzaCB0aGVyZSB3b3VsZCBi
+ZSBoZWxwZnVsLg0KPj4gDQo+PiBUaGFua3MhDQo+PiBzYWdlDQo+PiANCj4gDQo+IEdvb2QgdG8g
+a25vdyB0aGlzIGZhbGwgYmFjayBtZWNoYW5pc20uDQo+IEluIG15IHByZXZpb3VzIHJ1biB0aGUg
+cGFydGl0aW9ucyBhbmQgc2l6ZXMgaW4gY29uZmlnIGRpZCBub3QgbWF0Y2guIEkgc2VlIHRoZSBj
+ZXBoLWRhZW1vbi1kdW1wIHNob3dpbmcgOTAwTUIrIHVzZWQgZm9yIGRiIHdoaWxlIGRiIHBhcnRp
+dGlvbiB3YXMgMTI4TUIuIEkgd2FzIHRoaW5raW5nIGl0IHN0YXJ0ZWQgb3ZlcndyaXRpbmcgb24g
+dG8gdGhlIG5leHQgcGFydGl0aW9uLiBCdXQgaW5zdGVhZCBhcyBwZXIgdGhpcyBiYWNrdXAgbG9n
+aWMgaXQgc3RhcnRlZCB1c2luZyBIREQgZm9yIGRiLg0KPiANCj4gT25lIGlzc3VlIEkgc2VlIGlz
+IHRoYXQsIGNlcGguY29uZiBsaXN0cyB0aGUgc2l6ZXMgb2YgdGhlIHdhbCxkYiwmIGJsb2NrLiBC
+dXQgaXQgaXMgcG9zc2libGUgdGhhdCBhY3R1YWwgcGFydGl0aW9ucyBtYXkgaGF2ZSBkaWZmZXJl
+bnQgc2l6ZXMuIEZyb20gdGhlIGNlcGgtZGFlbW9uLWR1bXAgb3V0cHV0IGxvb2tzIGxpa2UgaXQg
+aXMgbm90IGxvb2tpbmcgYXQgdGhlIHBhcnRpdGlvbuKAmXMgcmVhbCBzaXplLCBpbnN0ZWFkIHRo
+ZSBjb2RlIGlzIGFzc3VtaW5nIHRoZSBzaXplcyBmcm9tIHRoZSBjb25maWcgZmlsZSBhcyB0aGUg
+cGFydGl0aW9uIHNpemVzLiBJIHRoaW5rIHByb2Jpbmcgb2YgdGhlIHNpemUgb2YgZXhpc3Rpbmcg
+ZGV2aWNlcy9maWxlcyB3aWxsIGJlIGJldHRlciB0aGFuIHRha2luZyB0aGUgc2l6ZXMgZnJvbSB0
+aGUgY29uZmlnIGZpbGUgYmxpbmRseS4NCj4gDQo+IEFmdGVyIDUgaG91cnMgb3Igc28gNisgb3Nk
+cyB3ZXJlIGRvd24gb3V0IG9mIDMwLg0KPiBXZSB3aWxsIGJlIHJ1bm5pbmcgdGhlIHN0cmVzcyB0
+ZXN0IG9uZSBhZ2FpbiB3aXRoIHRoZSBmaXhlZCBwYXJ0aXRpb24gY29uZmlndXJhdGlvbiB3aXRo
+IGRlYnVnIGxldmVsIG9mIDAsIHRvIGdldCBtYXggcGVyZm9ybWFuY2Ugb3V0LiBBbmQgaWYgdGhh
+dCBmYWlscyB0aGVuIEkgd2lsbCBzd2l0Y2ggdG8gZGVidWcgbGV2ZWwgMTAgb3IgMjAsIGFuZCBn
+YXRoZXIgc29tZSBkZXRhaWxlZCBsb2dzLg0KPiANCj4gVGhhbmtzLA0KPiBOaXRpbg0KPiANCj4+
+IA0KPj4+PiBXZSBoYWQgc29tZSBpc3N1ZXMgaW4gdGhpcyBmcm9udCBzb21ldGltZXMgYmFjayB3
+aGljaCB3YXMgZml4ZWQsIG1heSANCj4+Pj4gYmUgYSBuZXcgaXNzdWUgKD8pLiBOZWVkIHZlcmJv
+c2UgbG9nIGZvciBhdCBsZWFzdCBibHVlZnMgDQo+Pj4+IChkZWJ1Z19ibHVlZnMgPSAyMC8yMCkN
+Cj4+PiANCj4+PiBMZXQgbWUgZml4IHRoZSBjbHVzdGVyIGNvbmZpZ3VyYXRpb24sIHRvIGdpdmUg
+YmV0dGVyIHNwYWNlIHRvIHRoZSBEQiBwYXJ0aXRpb24uIEFuZCBpZiB3aXRoIHRoYXQgdGhpcyBp
+c3N1ZSBjb21lcyB1cCB0aGVuIEkgd2lsbCB0cnkgY2FwdHVyaW5nIGRldGFpbGVkIGxvZ3MuDQo+
+Pj4gDQo+Pj4+IEJUVywgd2hhdCBpcyB5b3VyIHdvcmtsb2FkIChibG9jayBzaXplLCBJTyBwYXR0
+ZXJuICkgPw0KPj4+IA0KPj4+IFRoZSB3b3JrbG9hZCBpcyBpbnRlcm5hbCB0ZXJhZGF0YSBiZW5j
+aG1hcmssIHdoaWNoIHNpbXVsYXRlcyBJTyBwYXR0ZXJuIG9mIGRhdGFiYXNlIGRpc2sgYWNjZXNz
+IHdpdGggdmFyaW91cyBibG9jayBzaXplcyBhbmQgSU8gcGF0dGVybi4gDQo+Pj4gDQo+Pj4gVGhh
+bmtzLA0KPj4+IE5pdGluDQo+Pj4gDQo+Pj4gDQo+Pj4gDQo+Pj4+IA0KPj4+PiAtLS0tLU9yaWdp
+bmFsIE1lc3NhZ2UtLS0tLQ0KPj4+PiBGcm9tOiBLYW1ibGUsIE5pdGluIEEgW21haWx0bzpOaXRp
+bi5LYW1ibGVAVGVyYWRhdGEuY29tXQ0KPj4+PiBTZW50OiBGcmlkYXksIFNlcHRlbWJlciAxNiwg
+MjAxNiAxMjowMCBQTQ0KPj4+PiBUbzogU29tbmF0aCBSb3kNCj4+Pj4gQ2M6IFNhZ2UgV2VpbDsg
+Q2VwaCBEZXZlbG9wbWVudA0KPj4+PiBTdWJqZWN0OiBSZTogQmx1ZXN0b3JlIE9TRCBzdXBwb3J0
+IGluIGNlcGgtZGlzaw0KPj4+PiANCj4+Pj4gDQo+Pj4+PiBPbiBTZXAgMTYsIDIwMTYsIGF0IDEx
+OjQzIEFNLCBTb21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPj4+
+Pj4gDQo+Pj4+PiBQbGVhc2Ugc2VuZCB0aGUgc25pcHBldCAodmVyeSBmaXJzdCB0cmFjZSAsIGdv
+IHVwIGluIHRoZSBsb2cpIHdoZXJlIGl0IGlzIGFjdHVhbGx5IHByaW50aW5nIHRoZSBhc3NlcnQu
+DQo+Pj4+PiBCVFcsIHdoYXQgd29ya2xvYWQgeW91IGFyZSBydW5uaW5nID8NCj4+Pj4+IA0KPj4+
+Pj4gVGhhbmtzICYgUmVnYXJkcw0KPj4+Pj4gU29tbmF0aA0KPj4+Pj4gDQo+Pj4+IEhlcmUgaXQg
+aXMuDQo+Pj4+IA0KPj4+PiAyMDE2LTA5LTE2IDA4OjQ5OjMwLjYwNTg0NSA3ZmI1YTk2YmE3MDAg
+LTEgDQo+Pj4+IC9idWlsZC9uaXRpbi9uaWdodGx5X2J1aWxkcy8yMDE2MDkxNF8xMjU0NTktbWFz
+dGVyL2NlcGguZ2l0L3JwbWJ1aWxkDQo+Pj4+IC9CVUlMRC9jZXBoLXYxMS4wLjAtMjMwOS5nOTA5
+NmFkMy9zcmMvb3MvYmx1ZXN0b3JlL0JsdWVGUy5jYzogSW4gDQo+Pj4+IGZ1bmN0aW9uICdpbnQg
+Qmx1ZUZTOjpfYWxsb2NhdGUodWludDhfdCwgdWludDY0X3QsIHN0ZDo6dmVjdG8gDQo+Pj4+IHI8
+Ymx1ZWZzX2V4dGVudF90PiopJyB0aHJlYWQgN2ZiNWE5NmJhNzAwIHRpbWUgMjAxNi0wOS0xNiAN
+Cj4+Pj4gMDg6NDk6MzAuNjAyMTM5DQo+Pj4+IC9idWlsZC9uaXRpbi9uaWdodGx5X2J1aWxkcy8y
+MDE2MDkxNF8xMjU0NTktbWFzdGVyL2NlcGguZ2l0L3JwbWJ1aWxkDQo+Pj4+IC9CVUlMRC9jZXBo
+LXYxMS4wLjAtMjMwOS5nOTA5NmFkMy9zcmMvb3MvYmx1ZXN0b3JlL0JsdWVGUy5jYzogMTY4Njog
+DQo+Pj4+IEZBSUxFRCBhc3NlcnQoMCA9PSAiYWxsb2NhdGUgZmFpbGVkLi4uIHd0ZiIpDQo+Pj4+
+IA0KPj4+PiBjZXBoIHZlcnNpb24gdjExLjAuMC0yMzA5LWc5MDk2YWQzIA0KPj4+PiAoOTA5NmFk
+MzdmMmMwNzk4YzI2ZDc3ODRmYjRlN2E3ODFmZWI3MmNiOCkNCj4+Pj4gMTogKGNlcGg6Ol9fY2Vw
+aF9hc3NlcnRfZmFpbChjaGFyIGNvbnN0KiwgY2hhciBjb25zdCosIGludCwgY2hhciANCj4+Pj4g
+Y29uc3QqKSsweDhiKSBbMHg3ZmI1YmY0M2ExMWJdDQo+Pj4+IDI6IChCbHVlRlM6Ol9hbGxvY2F0
+ZSh1bnNpZ25lZCBjaGFyLCB1bnNpZ25lZCBsb25nLCANCj4+Pj4gc3RkOjp2ZWN0b3I8Ymx1ZWZz
+X2V4dGVudF90LCBzdGQ6OmFsbG9jYXRvcjxibHVlZnNfZXh0ZW50X3Q+IA0KPj4+Pj4gKikrMHg4
+YWQpIFsweDdmYjViZjI3MzVkZF0NCj4+Pj4gMzogKEJsdWVGUzo6X2ZsdXNoX2FuZF9zeW5jX2xv
+ZyhzdGQ6OnVuaXF1ZV9sb2NrPHN0ZDo6bXV0ZXg+JiwgDQo+Pj4+IHVuc2lnbmVkIGxvbmcsIHVu
+c2lnbmVkIGxvbmcpKzB4YjRmKSBbMHg3ZmI1YmYyN2FhMWZdDQo+Pj4+IDQ6IChCbHVlRlM6Ol9m
+c3luYyhCbHVlRlM6OkZpbGVXcml0ZXIqLCANCj4+Pj4gc3RkOjp1bmlxdWVfbG9jazxzdGQ6Om11
+dGV4PiYpKzB4MjliKSBbMHg3ZmI1YmYyN2JjOWJdDQo+Pj4+IDU6IChCbHVlUm9ja3NXcml0YWJs
+ZUZpbGU6OlN5bmMoKSsweDRlKSBbMHg3ZmI1YmYyOTEyNWVdDQo+Pj4+IDY6IChyb2Nrc2RiOjpX
+cml0YWJsZUZpbGVXcml0ZXI6OlN5bmNJbnRlcm5hbChib29sKSsweDEzOSkgDQo+Pj4+IFsweDdm
+YjViZjM4ODY5OV0NCj4+Pj4gNzogKHJvY2tzZGI6OldyaXRhYmxlRmlsZVdyaXRlcjo6U3luYyhi
+b29sKSsweDg4KSBbMHg3ZmI1YmYzODkyMzhdDQo+Pj4+IDg6IChyb2Nrc2RiOjpEQkltcGw6Oldy
+aXRlSW1wbChyb2Nrc2RiOjpXcml0ZU9wdGlvbnMgY29uc3QmLCANCj4+Pj4gcm9ja3NkYjo6V3Jp
+dGVCYXRjaCosIHJvY2tzZGI6OldyaXRlQ2FsbGJhY2sqLCB1bnNpZ25lZCBsb25nKiwgDQo+Pj4+
+IHVuc2lnbmVkIGxvbmcsIGJvb2wpKzB4MTNjZikgWzB4N2ZiNWJmMmUwYTJmXQ0KPj4+PiA5OiAo
+cm9ja3NkYjo6REJJbXBsOjpXcml0ZShyb2Nrc2RiOjpXcml0ZU9wdGlvbnMgY29uc3QmLCANCj4+
+Pj4gcm9ja3NkYjo6V3JpdGVCYXRjaCopKzB4MjcpIFsweDdmYjViZjJlMTYzN10NCj4+Pj4gMTA6
+IA0KPj4+PiAoUm9ja3NEQlN0b3JlOjpzdWJtaXRfdHJhbnNhY3Rpb25fc3luYyhzdGQ6OnNoYXJl
+ZF9wdHI8S2V5VmFsdWVEQjo6VA0KPj4+PiByYW5zYWN0aW9uSW1wbD4pKzB4NWIpIFsweDdmYjVi
+ZjIxYTE0Yl0NCj4+Pj4gMTE6IChCbHVlU3RvcmU6Ol9rdl9zeW5jX3RocmVhZCgpKzB4ZjVhKSBb
+MHg3ZmI1YmYxZTdmZmFdDQo+Pj4+IDEyOiAoQmx1ZVN0b3JlOjpLVlN5bmNUaHJlYWQ6OmVudHJ5
+KCkrMHhkKSBbMHg3ZmI1YmYxZjVhNmRdDQo+Pj4+IDEzOiAoKCkrMHg4MGE0KSBbMHg3ZmI1YmI0
+YTcwYTRdDQo+Pj4+IDE0OiAoY2xvbmUoKSsweDZkKSBbMHg3ZmI1YmEzMjAwNGRdDQo+Pj4+IE5P
+VEU6IGEgY29weSBvZiB0aGUgZXhlY3V0YWJsZSwgb3IgYG9iamR1bXAgLXJkUyA8ZXhlY3V0YWJs
+ZT5gIGlzIG5lZWRlZCB0byBpbnRlcnByZXQgdGhpcy4NCj4+Pj4gDQo+Pj4+IA0KPj4+PiANCj4+
+Pj4gVGhhbmtzLA0KPj4+PiBOaXRpbg0KPj4+PiANCj4+Pj4gUExFQVNFIE5PVEU6IFRoZSBpbmZv
+cm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRl
+bmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1l
+ZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRl
+ZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2
+ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRp
+b24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkg
+cHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVy
+cm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMg
+c2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBv
+ZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9y
+IGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4+IA0KPj4+IC0tDQo+Pj4gVG8gdW5z
+dWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgt
+ZGV2ZWwiIA0KPj4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5r
+ZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5l
+bC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiANCg0K
