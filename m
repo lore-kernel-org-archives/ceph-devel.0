@@ -1,115 +1,200 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 2/8] rbd: clean up asserts in rbd_img_obj_request_submit() helpers
-Date: Mon, 19 Sep 2016 19:03:22 +0200
-Message-ID: <1474304608-17958-3-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 1/8] rbd: change rbd_obj_request_submit() signature
+Date: Mon, 19 Sep 2016 19:03:21 +0200
+Message-ID: <1474304608-17958-2-git-send-email-idryomov@gmail.com>
 References: <1474304608-17958-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:35416 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752315AbcISRDp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Sep 2016 13:03:45 -0400
-Received: by mail-yw0-f195.google.com with SMTP id u82so8530368ywc.2
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Sep 2016 10:03:45 -0700 (PDT)
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:35412 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752262AbcISRDo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Sep 2016 13:03:44 -0400
+Received: by mail-yw0-f194.google.com with SMTP id u82so8530346ywc.2
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Sep 2016 10:03:44 -0700 (PDT)
 In-Reply-To: <1474304608-17958-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Alex Elder <elder@linaro.org>
 
-Assert once in rbd_img_obj_request_submit().
+- osdc parameter is useless
+- starting with commit 5aea3dcd5021 ("libceph: a major OSD client
+  update"), ceph_osdc_start_request() always returns success
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c | 30 ++++++++++--------------------
- 1 file changed, 10 insertions(+), 20 deletions(-)
+ drivers/block/rbd.c | 70 ++++++++++++++++++-----------------------------------
+ 1 file changed, 23 insertions(+), 47 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index d8b702e3c4d9..027e0817a118 100644
+index 82569e65d61b..d8b702e3c4d9 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -2739,21 +2739,14 @@ out_err:
-  */
- static int rbd_img_obj_parent_read_full(struct rbd_obj_request *obj_request)
- {
--	struct rbd_img_request *img_request = NULL;
-+	struct rbd_device *rbd_dev = obj_request->img_request->rbd_dev;
- 	struct rbd_img_request *parent_request = NULL;
--	struct rbd_device *rbd_dev;
- 	u64 img_offset;
- 	u64 length;
- 	struct page **pages = NULL;
- 	u32 page_count;
- 	int result;
+@@ -1610,11 +1610,12 @@ static bool obj_request_type_valid(enum obj_request_type type)
+ 	}
+ }
  
--	rbd_assert(obj_request_img_data_test(obj_request));
--	rbd_assert(obj_request_type_valid(obj_request->type));
+-static int rbd_obj_request_submit(struct ceph_osd_client *osdc,
+-				struct rbd_obj_request *obj_request)
++static void rbd_obj_request_submit(struct rbd_obj_request *obj_request)
+ {
+-	dout("%s %p\n", __func__, obj_request);
+-	return ceph_osdc_start_request(osdc, obj_request->osd_req, false);
++	struct ceph_osd_request *osd_req = obj_request->osd_req;
++
++	dout("%s %p osd_req %p\n", __func__, obj_request, osd_req);
++	ceph_osdc_start_request(osd_req->r_osdc, osd_req, false);
+ }
+ 
+ static void rbd_obj_request_end(struct rbd_obj_request *obj_request)
+@@ -2638,7 +2639,6 @@ rbd_img_obj_parent_read_full_callback(struct rbd_img_request *img_request)
+ {
+ 	struct rbd_obj_request *orig_request;
+ 	struct ceph_osd_request *osd_req;
+-	struct ceph_osd_client *osdc;
+ 	struct rbd_device *rbd_dev;
+ 	struct page **pages;
+ 	enum obj_operation_type op_type;
+@@ -2675,13 +2675,9 @@ rbd_img_obj_parent_read_full_callback(struct rbd_img_request *img_request)
+ 	 * and re-submit the original write request.
+ 	 */
+ 	if (!rbd_dev->parent_overlap) {
+-		struct ceph_osd_client *osdc;
 -
--	img_request = obj_request->img_request;
--	rbd_assert(img_request != NULL);
--	rbd_dev = img_request->rbd_dev;
- 	rbd_assert(rbd_dev->parent != NULL);
+ 		ceph_release_page_vector(pages, page_count);
+-		osdc = &rbd_dev->rbd_client->client->osdc;
+-		img_result = rbd_obj_request_submit(osdc, orig_request);
+-		if (!img_result)
+-			return;
++		rbd_obj_request_submit(orig_request);
++		return;
+ 	}
+ 
+ 	if (img_result)
+@@ -2715,10 +2711,9 @@ rbd_img_obj_parent_read_full_callback(struct rbd_img_request *img_request)
+ 
+ 	/* All set, send it off. */
+ 
+-	osdc = &rbd_dev->rbd_client->client->osdc;
+-	img_result = rbd_obj_request_submit(osdc, orig_request);
+-	if (!img_result)
+-		return;
++	rbd_obj_request_submit(orig_request);
++	return;
++
+ out_err:
+ 	/* Record the error code and complete the request */
+ 
+@@ -2852,17 +2847,13 @@ static void rbd_img_obj_exists_callback(struct rbd_obj_request *obj_request)
  
  	/*
-@@ -2794,10 +2787,11 @@ static int rbd_img_obj_parent_read_full(struct rbd_obj_request *obj_request)
- 	result = rbd_img_request_fill(parent_request, OBJ_REQUEST_PAGES, pages);
- 	if (result)
- 		goto out_err;
-+
- 	parent_request->copyup_pages = pages;
- 	parent_request->copyup_page_count = page_count;
+ 	 * If the overlap has become 0 (most likely because the
+-	 * image has been flattened) we need to free the pages
+-	 * and re-submit the original write request.
++	 * image has been flattened) we need to re-submit the
++	 * original request.
+ 	 */
+ 	rbd_dev = orig_request->img_request->rbd_dev;
+ 	if (!rbd_dev->parent_overlap) {
+-		struct ceph_osd_client *osdc;
 -
- 	parent_request->callback = rbd_img_obj_parent_read_full_callback;
-+
- 	result = rbd_img_request_submit(parent_request);
- 	if (!result)
- 		return 0;
-@@ -2883,8 +2877,8 @@ out:
+-		osdc = &rbd_dev->rbd_client->client->osdc;
+-		result = rbd_obj_request_submit(osdc, orig_request);
+-		if (!result)
+-			return;
++		rbd_obj_request_submit(orig_request);
++		return;
+ 	}
  
- static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+ 	/*
+@@ -2894,7 +2885,6 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
  {
-+	struct rbd_device *rbd_dev = obj_request->img_request->rbd_dev;
  	struct rbd_obj_request *stat_request;
--	struct rbd_device *rbd_dev;
+ 	struct rbd_device *rbd_dev;
+-	struct ceph_osd_client *osdc;
  	struct page **pages = NULL;
  	u32 page_count;
  	size_t size;
-@@ -2915,8 +2909,6 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
- 	stat_request->pages = pages;
- 	stat_request->page_count = page_count;
+@@ -2938,8 +2928,9 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+ 					false, false);
+ 	rbd_osd_req_format_read(stat_request);
  
--	rbd_assert(obj_request->img_request);
--	rbd_dev = obj_request->img_request->rbd_dev;
- 	stat_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
- 						   stat_request);
- 	if (!stat_request->osd_req)
-@@ -2940,14 +2932,8 @@ out:
- 
- static bool img_obj_request_simple(struct rbd_obj_request *obj_request)
- {
--	struct rbd_img_request *img_request;
--	struct rbd_device *rbd_dev;
--
--	rbd_assert(obj_request_img_data_test(obj_request));
--
--	img_request = obj_request->img_request;
--	rbd_assert(img_request);
--	rbd_dev = img_request->rbd_dev;
-+	struct rbd_img_request *img_request = obj_request->img_request;
-+	struct rbd_device *rbd_dev = img_request->rbd_dev;
- 
- 	/* Reads */
- 	if (!img_request_write_test(img_request) &&
-@@ -2986,6 +2972,10 @@ static bool img_obj_request_simple(struct rbd_obj_request *obj_request)
- 
+-	osdc = &rbd_dev->rbd_client->client->osdc;
+-	ret = rbd_obj_request_submit(osdc, stat_request);
++	rbd_obj_request_submit(stat_request);
++	return 0;
++
+ out:
+ 	if (ret)
+ 		rbd_obj_request_put(obj_request);
+@@ -2996,13 +2987,8 @@ static bool img_obj_request_simple(struct rbd_obj_request *obj_request)
  static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
  {
-+	rbd_assert(obj_request_img_data_test(obj_request));
-+	rbd_assert(obj_request_type_valid(obj_request->type));
-+	rbd_assert(obj_request->img_request);
-+
  	if (img_obj_request_simple(obj_request)) {
- 		rbd_obj_request_submit(obj_request);
- 		return 0;
+-		struct rbd_device *rbd_dev;
+-		struct ceph_osd_client *osdc;
+-
+-		rbd_dev = obj_request->img_request->rbd_dev;
+-		osdc = &rbd_dev->rbd_client->client->osdc;
+-
+-		return rbd_obj_request_submit(osdc, obj_request);
++		rbd_obj_request_submit(obj_request);
++		return 0;
+ 	}
+ 
+ 	/*
+@@ -3065,12 +3051,8 @@ static void rbd_img_parent_read_callback(struct rbd_img_request *img_request)
+ 	rbd_assert(obj_request->img_request);
+ 	rbd_dev = obj_request->img_request->rbd_dev;
+ 	if (!rbd_dev->parent_overlap) {
+-		struct ceph_osd_client *osdc;
+-
+-		osdc = &rbd_dev->rbd_client->client->osdc;
+-		img_result = rbd_obj_request_submit(osdc, obj_request);
+-		if (!img_result)
+-			return;
++		rbd_obj_request_submit(obj_request);
++		return;
+ 	}
+ 
+ 	obj_request->result = img_result;
+@@ -3997,7 +3979,6 @@ static int rbd_obj_method_sync(struct rbd_device *rbd_dev,
+ 			     void *inbound,
+ 			     size_t inbound_size)
+ {
+-	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_obj_request *obj_request;
+ 	struct page **pages;
+ 	u32 page_count;
+@@ -4048,9 +4029,7 @@ static int rbd_obj_method_sync(struct rbd_device *rbd_dev,
+ 					0, false, false);
+ 	rbd_osd_req_format_read(obj_request);
+ 
+-	ret = rbd_obj_request_submit(osdc, obj_request);
+-	if (ret)
+-		goto out;
++	rbd_obj_request_submit(obj_request);
+ 	ret = rbd_obj_request_wait(obj_request);
+ 	if (ret)
+ 		goto out;
+@@ -4255,7 +4234,6 @@ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
+ 				u64 offset, u64 length, void *buf)
+ 
+ {
+-	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_obj_request *obj_request;
+ 	struct page **pages = NULL;
+ 	u32 page_count;
+@@ -4290,9 +4268,7 @@ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
+ 					false, false);
+ 	rbd_osd_req_format_read(obj_request);
+ 
+-	ret = rbd_obj_request_submit(osdc, obj_request);
+-	if (ret)
+-		goto out;
++	rbd_obj_request_submit(obj_request);
+ 	ret = rbd_obj_request_wait(obj_request);
+ 	if (ret)
+ 		goto out;
 -- 
 2.4.3
 
