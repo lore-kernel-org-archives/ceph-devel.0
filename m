@@ -1,55 +1,62 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 0/2] rbd_img_obj_exists_submit() fixes
-Date: Mon, 19 Sep 2016 19:06:45 +0200
-Message-ID: <CAOi1vP9G4zxaoNo-yyD8fEgM7RxLmMds4AeoPqtS3dwoMPV2sw@mail.gmail.com>
-References: <1472741959-1786-1-git-send-email-ddiss@suse.de>
- <20160915124805.20590455@echidna.suse.de> <CAOi1vP-XqpYFVsS26w_gm+vJygmiS848TjXEv79V80Ytjzdpig@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: ceph-disk and 'make'
+Date: Mon, 19 Sep 2016 11:30:00 -0700
+Message-ID: <CAJ4mKGb4ELCPgQOeiC_RWGtBZ44L1anrKX4eRJZx=p25cVCyMg@mail.gmail.com>
+References: <alpine.DEB.2.11.1609190036390.3215@piezo.us.to>
+ <57DF7DA0.2050007@dachary.org> <57DF9525.5050904@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f41.google.com ([209.85.213.41]:33204 "EHLO
+Received: from mail-vk0-f41.google.com ([209.85.213.41]:33559 "EHLO
         mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751015AbcISRGr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Sep 2016 13:06:47 -0400
-Received: by mail-vk0-f41.google.com with SMTP id u196so458209vkd.0
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Sep 2016 10:06:46 -0700 (PDT)
-In-Reply-To: <CAOi1vP-XqpYFVsS26w_gm+vJygmiS848TjXEv79V80Ytjzdpig@mail.gmail.com>
+        with ESMTP id S932237AbcISSaC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Sep 2016 14:30:02 -0400
+Received: by mail-vk0-f41.google.com with SMTP id u196so3975348vkd.0
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Sep 2016 11:30:02 -0700 (PDT)
+In-Reply-To: <57DF9525.5050904@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Disseldorp <ddiss@suse.de>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@linaro.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Sep 15, 2016 at 1:53 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> On Thu, Sep 15, 2016 at 12:48 PM, David Disseldorp <ddiss@suse.de> wrote:
->> On Thu,  1 Sep 2016 16:59:17 +0200, David Disseldorp wrote:
->>
->>> Hi,
->>>
->>> This patchset fixes a couple of bugs in the rbd_img_obj_exists_submit()
->>> code-path which appear to have been there since the function was first
->>> added.
->>>
->>> Feedback appreciated.
->>
->> Did anyone get a chance to look at these changes?
+On Sun, Sep 18, 2016 at 5:40 PM, Sage Weil <sweil@redhat.com> wrote:
+> I noticed that with the new cmake when I do a 'make' the ceph-disk target
+> isn't built.  And ctest will fail most of its unit tests.  It looks like
+> it is part of the 'tests' target, though.  Is it deliberate that a simple
+> 'make' doesn't build everything?
+
+Dunno about this specific case, but in general we don't want
+*everything* to be built with a simple "make", since it slows down
+compile (and, especially, linking). I don't think ceph-disk is used
+during development for anything except the tests so this would make
+some sense, right?
+
+On Mon, Sep 19, 2016 at 12:35 AM, Loic Dachary <loic@dachary.org> wrote:
+> After running
 >
-> Hi David,
+> ./install-deps.sh
+> mkdir build
+> cd build
+> cmake ../
+> make
 >
-> I was waiting for Alex to take a look, but then realized that there is
-> more to fix: img_request is also getting leaked and we can ignore
-> ceph_osdc_start_request return value, simplifying things.
+> I have
 >
-> For the invalid union field use issue, I think we can just skip calling
-> rbd_osd_req_format_read() for !img_data requests, but I need to double
-> check.
+> loic@a64e7ff3b216:~/ceph-ubuntu-14.04-loic/build$ ls -l src/ceph-disk
+> ls -l src/ceph-disk
+> total 28
+> drwxr-xr-x 4 loic loic 4096 Sep 19 05:57 CMakeFiles
+> -rw-r--r-- 1 loic loic  313 Sep 19 05:57 CTestTestfile.cmake
+> -rw-r--r-- 1 loic loic 7240 Sep 19 05:57 Makefile
+> lrwxrwxrwx 1 loic loic   58 Sep 19 06:00 README.rst -> /home/loic/ceph-ubuntu-14.04-loic/src/ceph-disk/README.rst
+> lrwxrwxrwx 1 loic loic   57 Sep 19 06:00 ceph_disk -> /home/loic/ceph-ubuntu-14.04-loic/src/ceph-disk/ceph_disk
+> -rw-r--r-- 1 loic loic 1878 Sep 19 05:57 cmake_install.cmake
+> lrwxrwxrwx 1 loic loic   64 Sep 19 06:00 requirements.txt -> /home/loic/ceph-ubuntu-14.04-loic/src/ceph-disk/requirements.txt
+> lrwxrwxrwx 1 loic loic   56 Sep 19 06:00 setup.py -> /home/loic/ceph-ubuntu-14.04-loic/src/ceph-disk/setup.py
+> lrwxrwxrwx 1 loic loic   69 Sep 19 06:00 test-requirements.txt -> /home/loic/ceph-ubuntu-14.04-loic/src/ceph-disk/test-requirements.txt
 >
-> I'll put together a branch my version of these fixes and ping you.
+> which I interpret as make building ceph-disk. Did you expect something else ?
 
-Hi David,
-
-I've pushed to testing @ ceph-client.git and posted to the list.
-See patches 6 and 7.
-
-Thanks,
-
-                Ilya
+Shouldn't any "built" stuff in cmake be going in the build directory
+rather than the ceph/src one?
+-Greg
