@@ -1,58 +1,107 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 8/8] rbd: img_data requests don't own their page array
-Date: Mon, 19 Sep 2016 19:03:28 +0200
-Message-ID: <1474304608-17958-9-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 6/8] rbd: rework rbd_img_obj_exists_submit() error paths
+Date: Mon, 19 Sep 2016 19:03:26 +0200
+Message-ID: <1474304608-17958-7-git-send-email-idryomov@gmail.com>
 References: <1474304608-17958-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:36312 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752436AbcISRDw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Sep 2016 13:03:52 -0400
-Received: by mail-yw0-f195.google.com with SMTP id v2so8594844ywg.3
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Sep 2016 10:03:52 -0700 (PDT)
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:34464 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752499AbcISRDu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Sep 2016 13:03:50 -0400
+Received: by mail-yw0-f194.google.com with SMTP id t67so8397732ywg.1
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Sep 2016 10:03:50 -0700 (PDT)
 In-Reply-To: <1474304608-17958-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Alex Elder <elder@linaro.org>
 
-Move the check into rbd_obj_request_destroy(), to avoid use-after-free
-on errors in rbd_img_request_fill().
+- don't put obj_request if rbd_obj_request_create() fails
+- don't leak stat_request if rbd_osd_req_create() fails
 
+Reported-by: David Disseldorp <ddiss@suse.de>
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c | 11 +++--------
- 1 file changed, 3 insertions(+), 8 deletions(-)
+ drivers/block/rbd.c | 42 ++++++++++++++++++++++--------------------
+ 1 file changed, 22 insertions(+), 20 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 8907ee6342ac..d305b9ebe2cf 100644
+index b9a4e79a663f..03f171067e08 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -2139,7 +2139,9 @@ static void rbd_obj_request_destroy(struct kref *kref)
- 			bio_chain_put(obj_request->bio_list);
- 		break;
- 	case OBJ_REQUEST_PAGES:
--		if (obj_request->pages)
-+		/* img_data requests don't own their page array */
-+		if (obj_request->pages &&
-+		    !obj_request_img_data_test(obj_request))
- 			ceph_release_page_vector(obj_request->pages,
- 						obj_request->page_count);
- 		break;
-@@ -2360,13 +2362,6 @@ static bool rbd_img_obj_end_request(struct rbd_obj_request *obj_request)
- 		xferred = obj_request->length;
- 	}
+@@ -2886,11 +2886,23 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+ {
+ 	struct rbd_device *rbd_dev = obj_request->img_request->rbd_dev;
+ 	struct rbd_obj_request *stat_request;
+-	struct page **pages = NULL;
++	struct page **pages;
+ 	u32 page_count;
+ 	size_t size;
+ 	int ret;
  
--	/* Image object requests don't own their page array */
++	stat_request = rbd_obj_request_create(obj_request->object_name, 0, 0,
++					      OBJ_REQUEST_PAGES);
++	if (!stat_request)
++		return -ENOMEM;
++
++	stat_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
++						   stat_request);
++	if (!stat_request->osd_req) {
++		ret = -ENOMEM;
++		goto fail_stat_request;
++	}
++
+ 	/*
+ 	 * The response data for a STAT call consists of:
+ 	 *     le64 length;
+@@ -2902,38 +2914,28 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+ 	size = sizeof (__le64) + sizeof (__le32) + sizeof (__le32);
+ 	page_count = (u32)calc_pages_for(0, size);
+ 	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
+-	if (IS_ERR(pages))
+-		return PTR_ERR(pages);
++	if (IS_ERR(pages)) {
++		ret = PTR_ERR(pages);
++		goto fail_stat_request;
++	}
+ 
+-	ret = -ENOMEM;
+-	stat_request = rbd_obj_request_create(obj_request->object_name, 0, 0,
+-							OBJ_REQUEST_PAGES);
+-	if (!stat_request)
+-		goto out;
++	osd_req_op_init(stat_request->osd_req, 0, CEPH_OSD_OP_STAT, 0);
++	osd_req_op_raw_data_in_pages(stat_request->osd_req, 0, pages, size, 0,
++				     false, false);
+ 
+ 	rbd_obj_request_get(obj_request);
+ 	stat_request->obj_request = obj_request;
+ 	stat_request->pages = pages;
+ 	stat_request->page_count = page_count;
 -
--	if (obj_request->type == OBJ_REQUEST_PAGES) {
--		obj_request->pages = NULL;
--		obj_request->page_count = 0;
--	}
+-	stat_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
+-						   stat_request);
+-	if (!stat_request->osd_req)
+-		goto out;
+ 	stat_request->callback = rbd_img_obj_exists_callback;
+ 
+-	osd_req_op_init(stat_request->osd_req, 0, CEPH_OSD_OP_STAT, 0);
+-	osd_req_op_raw_data_in_pages(stat_request->osd_req, 0, pages, size, 0,
+-					false, false);
+ 	rbd_osd_req_format_read(stat_request);
+ 
+ 	rbd_obj_request_submit(stat_request);
+ 	return 0;
+ 
+-out:
+-	if (ret)
+-		rbd_obj_request_put(obj_request);
 -
- 	if (img_request_child_test(img_request)) {
- 		rbd_assert(img_request->obj_request != NULL);
- 		more = obj_request->which < img_request->obj_request_count - 1;
++fail_stat_request:
++	rbd_obj_request_put(stat_request);
+ 	return ret;
+ }
+ 
 -- 
 2.4.3
 
