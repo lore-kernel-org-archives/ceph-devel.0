@@ -1,72 +1,29 @@
-From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
-Subject: Re: Cmake build. C compiler.
-Date: Tue, 20 Sep 2016 01:48:20 +0000
-Message-ID: <D405E2C2.12B3D%evgeniy.firsov@sandisk.com>
-References: <D405A8C2.12B32%evgeniy.firsov@sandisk.com>
- <c41894d2-1d9f-b640-b9e3-bcc958a8a518@digiware.nl>
+From: Joe Perches <joe@perches.com>
+Subject: Re: "CodingStyle: Clarify and complete chapter 7" in docs-next (was
+ Re: [PATCH 03/47] block-rbd: Adjust the position of a jump label in
+ rbd_header_from_disk())
+Date: Mon, 19 Sep 2016 19:46:06 -0700
+Message-ID: <1474339566.1954.25.camel@perches.com>
+References: <CAOi1vP8Y6V3mWs1bv=-CCVRfGi59P+3F85n6rzMn0=K6FqQkcw@mail.gmail.com>
+         <20160920001159.GM2356@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-co1nam03on0054.outbound.protection.outlook.com ([104.47.40.54]:53859
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752126AbcITCDP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 19 Sep 2016 22:03:15 -0400
-In-Reply-To: <c41894d2-1d9f-b640-b9e3-bcc958a8a518@digiware.nl>
-Content-Language: en-US
-Content-ID: <E7E2A50AA1529F4894888B6738EB3F6D@namprd02.prod.outlook.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <20160920001159.GM2356@ZenIV.linux.org.uk>
+Sender: linux-doc-owner@vger.kernel.org
+To: Al Viro <viro@ZenIV.linux.org.uk>, Ilya Dryomov <idryomov@gmail.com>, Andy Whitcroft <apw@canonical.com>, Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Jean Delvare <jdelvare@suse.de>, Jonathan Corbet <corbet@lwn.net>, Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>, Andrew Morton <akpm@linux-foundation.org>, linux-doc@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-SXQgaGFzIG5vdGhpbmcgdG8gZG8gd2l0aCBjb21waWxlcnMuDQpUaGVyZSBpcyBhIGJ1ZyBpbiBO
-REVCVUcgaGFuZGxpbmcgaW4gWmV0YVNjYWxlLCB3aGljaCBDZXBo4oCZcw0KQ21ha2VMaXN0cy50
-eHQgcGFzc2VzIGRvd24uDQoNCkFuZCDigJxpbiB0cmVl4oCdIGJ1aWxkIGp1c3QgdXNlcyB3cm9u
-ZyBpbmNsdWRlIHBhdGhzLCBJIGd1ZXNzLg0KDQpPbiA5LzE5LzE2LCAzOjAwIFBNLCAiV2lsbGVt
-IEphbiBXaXRoYWdlbiIgPHdqd0BkaWdpd2FyZS5ubD4gd3JvdGU6DQoNCj5PbiAxOS05LTIwMTYg
-MjM6MzcsIEV2Z2VuaXkgRmlyc292IHdyb3RlOg0KPj4gSGksIEd1eXMsDQo+Pg0KPj4gV2hlbiBJ
-IGJ1aWxkIENlcGggdXNpbmcgLi9kb19jbWFrZS5zaCAmJiBjZCBidWlsZCAmJiBtYWtlIC1qMzIs
-IGxvb2tzDQo+Pmxpa2UNCj4+IGV2ZXJ5dGhpbmcgaXMgY29tcGlsZWQgdXNpbmcgQysrIGNvbXBp
-bGVyLCBldmVuIGZpbGVzIHdpdGggLmMgZXh0ZW5zaW9uLg0KPj4gVGhpcyBmYWlscyBaZXRhU2Nh
-bGUgY29tcGlsYXRpb24sIHdoaWNoIGlzIHB1cmUgQy4NCj4+DQo+PiBJbiBvcHBvc2UgdG8gdGhh
-dCBpZiBJIGFtIGJ1aWxkaW5nIMKzaW4gdHJlZcKyLCB3aXRoIGNtYWtlIC4gJiYgbWFrZSAtajMy
-LA0KPj4gQ2VwaCBidWlsZCBmYWlscywgYmVjYXVzZSBpdCB1c2VzIHByb3BlciBDIGNvbXBpbGVy
-IGZvciAuYyBleHRlbnNpb24sDQo+PmJ1dA0KPj4gdGhleSBpbmNsdWRlIENlcGjCuXMgYXNzZXJ0
-Lmggd2hpY2ggaXMgQysrLg0KPj4NCj4+IFNvLCBwcm9iYWJseSwgSSBuZWVkIHRvIGNvbmZpZ3Vy
-ZSBjb21waWxlciBvbiBwZXIgZGlyZWN0b3J5IGJhc2lzLCBpcw0KPj4gdGhlcmUga25vd24gd2F5
-IHRvIGRvIHRoYXQ/DQo+PiBBbHNvLCBjYW4gc29tZWJvZHkgcG9pbnQgbWUgd2hlcmUgaW4gdGhl
-IENNYWtlTGlzdC50eHQgY29tcGlsZXIgaXMNCj4+IGNvbmZpZ3VyZWQgZm9yIMKzb3V0IG9mIHRy
-ZWXCsiBidWlsZD8gSSBtZWFuIEMrKyBmb3IgZXZlcnl0aGluZy4NCj4NCj5Zb3UgY2FuIHJ1bg0K
-PmNtYWtlIC0tc3lzdGVtLWluZm9ybWF0aW9uDQo+dG8gZmluZCBvdXQgd2hhdCB5b3Ugc3lzdGVt
-IGlzIHVzaW5nIGZvciBkZWZhdWx0cy4uLi4NCj4NCj5NaW5lIChGcmVlQlNEKSBoYXM6DQo+DQo+
-Q01BS0VfQ1hYX0NPTVBJTEVSID09ICIvdXNyL2Jpbi9DQyINCj5DTUFLRV9DX0NPTVBJTEVSID09
-ICIvdXNyL2Jpbi9jYyINCj4NCj5TbyBpdCBzb3J0IG9mIGFscmVhZHkga25vd3MgZnJvbSB0aGUg
-YmVnaW5uaW5nIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gQw0KPmFuZCBDKysNCj4NCj4tLVdqVw0K
-Pj4NCj4+IOKAuQ0KPj4gRXZnZW5peQ0KPj4NCj4+DQo+PiBQTEVBU0UgTk9URTogVGhlIGluZm9y
-bWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlDQo+PmlzIGlu
-dGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5h
-bWVkIGFib3ZlLg0KPj5JZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGlu
-dGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZQ0KPj5oZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2
-ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQNCj4+YW55IHJldmlldywg
-ZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBp
-cw0KPj5zdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11
-bmljYXRpb24gaW4gZXJyb3IsDQo+PnBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhv
-bmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkNCj4+aW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kg
-YW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyDQo+PnBvc3Nlc3Npb24g
-KHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+
-PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
-c3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
-b3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDov
-L3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+Pg0KPg0KDQpQTEVBU0UgTk9U
-RTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNz
-YWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBp
-ZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3Qg
-dGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3Ug
-aGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywg
-ZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBp
-cyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmlj
-YXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3Ig
-ZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBh
-bGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFy
-ZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo=
+On Tue, 2016-09-20 at 01:11 +0100, Al Viro wrote:
+> IMO what we need is to go through all rules in CodingStyle and if for
+> some rule there is no overwhelming majority in the core kernel, well,
+> the list has grown way too large and could use massive trimming.
+
+I'm in complete agreement.
+
+I also think that checkpatch's ERROR/WARNING/CHECK message naming is
+far too severe and injunctive and could use a renaming to something
+more silly, bug related and less commanding like FLEAS/GNATS/NITS.
+
