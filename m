@@ -1,79 +1,38 @@
-From: David <dclistslinux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Jewel Docs | error on mount.ceph page
-Date: Tue, 20 Sep 2016 18:48:17 +0100
-Message-ID: <CAGxt-avsxSa9BcD-E+YTB5OKpduy02s3=AoytDPqZ4370Rwyfg@mail.gmail.com>
-References: <CAGxt-as_LjROO8=gAfDk+y1DsQvvmvfo78dCFH+pYBgx-wdzhA@mail.gmail.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: ceph-disk and 'make'
+Date: Tue, 20 Sep 2016 12:04:13 -0600
+Message-ID: <CALqRxCy629qBDOobD==3B9M_-QkLjeg7xuPcVkkOQ1ycrotVrw@mail.gmail.com>
+References: <alpine.DEB.2.11.1609190036390.3215@piezo.us.to>
+ <57DF7DA0.2050007@dachary.org> <57DF9525.5050904@dachary.org>
+ <CAJ4mKGb4ELCPgQOeiC_RWGtBZ44L1anrKX4eRJZx=p25cVCyMg@mail.gmail.com> <CAJE9aONfH9uWx4vtYUTjJMo_udRU_vEOMBYag8H6gY8+jGNSCA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0671753150=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAGxt-as_LjROO8=gAfDk+y1DsQvvmvfo78dCFH+pYBgx-wdzhA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============0671753150==
-Content-Type: multipart/alternative; boundary=001a1141c640a94ce1053cf408f7
-
---001a1141c640a94ce1053cf408f7
 Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:34124 "EHLO
+        mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755672AbcITSEW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2016 14:04:22 -0400
+Received: by mail-vk0-f48.google.com with SMTP id o139so47414850vka.1
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Sep 2016 11:04:22 -0700 (PDT)
+In-Reply-To: <CAJE9aONfH9uWx4vtYUTjJMo_udRU_vEOMBYag8H6gY8+jGNSCA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Marcus Watts <mwatts@redhat.com>, Loic Dachary <loic@dachary.org>, Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Sorry I don't know the correct way to report this.
+On Tue, Sep 20, 2016 at 9:28 AM, kefu chai <tchaikov@gmail.com> wrote:
+> agreed, actually, a test-ready ceph-disk needs venv which pip to install the
+> dependencies, but debian pbuilder uses a cleanroom for building packages
+> in which no network access is allowed by default.
 
-Potential error on this page:
+I'm curious why we need a virtualenv at all (or why we "pip install" anything) ?
 
-on http://docs.ceph.com/docs/jewel/man/8/mount.ceph/
+The distros should have all the packaged python-* and python3-*
+dependencies already, right?
 
-Currently:
+If we could switch to using the packaged python dependencies for
+everything, we'd fix the pbuilder USENETWORK issue, and avoid the
+indeterminate nature of depending on whatever happens to be going on
+with pypi. Maybe I'm missing something, though?
 
-rsize
-int (bytes), max readahead, multiple of 1024, Default: 524288 (512*1024)
-
-Should it be something like the following?
-
-rsize
-int (bytes), max read size. Default: none
-
-rasize
-int (bytes), max readahead, multiple of 1024, Default: 8388608 (8192*1024)
-
---001a1141c640a94ce1053cf408f7
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<p dir=3D"ltr">Sorry I don&#39;t know the correct way to report this.</p>
-<p dir=3D"ltr">Potential error on this page:</p>
-<p dir=3D"ltr">on=C2=A0<a href=3D"http://docs.ceph.com/docs/jewel/man/8/mou=
-nt.ceph/">http://docs.ceph.com/docs/jewel/man/8/mount.ceph/</a></p>
-<p dir=3D"ltr">Currently:</p>
-<p dir=3D"ltr">rsize<br>
-int (bytes), max readahead, multiple of 1024, Default: 524288 (512*1024)</p=
->
-<p dir=3D"ltr">Should it be something like the following?</p>
-<p dir=3D"ltr">rsize<br>
-int (bytes), max read size. Default: none</p>
-<p dir=3D"ltr">rasize<br>
-int (bytes), max readahead, multiple of 1024, Default: 8388608 (8192*1024)<=
-/p>
-
---001a1141c640a94ce1053cf408f7--
-
---===============0671753150==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0671753150==--
+- Ken
