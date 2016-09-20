@@ -1,38 +1,72 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: helgrind and std::mutex ...
-Date: Mon, 19 Sep 2016 21:17:47 -0400
-Message-ID: <CA+aFP1DurHE=tx6ntqDp_F-NefCJZDA+OJn7KgSjML8f_PpvHw@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
+Subject: Re: Cmake build. C compiler.
+Date: Tue, 20 Sep 2016 01:48:20 +0000
+Message-ID: <D405E2C2.12B3D%evgeniy.firsov@sandisk.com>
+References: <D405A8C2.12B32%evgeniy.firsov@sandisk.com>
+ <c41894d2-1d9f-b640-b9e3-bcc958a8a518@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f43.google.com ([209.85.220.43]:34640 "EHLO
-        mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753440AbcITBRt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Sep 2016 21:17:49 -0400
-Received: by mail-pa0-f43.google.com with SMTP id wk8so996500pab.1
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Sep 2016 18:17:48 -0700 (PDT)
+Received: from mail-co1nam03on0054.outbound.protection.outlook.com ([104.47.40.54]:53859
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752126AbcITCDP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 19 Sep 2016 22:03:15 -0400
+In-Reply-To: <c41894d2-1d9f-b640-b9e3-bcc958a8a518@digiware.nl>
+Content-Language: en-US
+Content-ID: <E7E2A50AA1529F4894888B6738EB3F6D@namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Heads up: while attempting to clear out all real and imaginary
-helgrind errors reported during librbd teuthology test cases, I've
-discovered that helgrind is not compatible with std::mutex's use of
-PTHREAD_MUTEX_INITIALIZER -- an optimization which skips the normal
-calls to pthread_mutex_init / pthread_mutex_destroy.
-
-When objects using std::mutex are destructed, these mutexes remain in
-the helgrind internal tracking tables since pthread_mutex_destroy was
-not invoked.  This can result in false positives and even assertion
-failures should a pthread_rwlock eventually be allocated at the same
-address of a deallocated (but not destroyed) mutex.
-
-These failures are sprinkled throughout the new async messenger code
-base (since it relies exclusively on std::mutex instead of Ceph's
-Mutex pthread wrapper) and also within osdc's Objecter. For the
-short-term, I think my only option will be to disable all helgrind
-test cases in the librbd suite since they now provide no value due to
-the potential for random false positives or assertion failures.
-
-Jason
+SXQgaGFzIG5vdGhpbmcgdG8gZG8gd2l0aCBjb21waWxlcnMuDQpUaGVyZSBpcyBhIGJ1ZyBpbiBO
+REVCVUcgaGFuZGxpbmcgaW4gWmV0YVNjYWxlLCB3aGljaCBDZXBo4oCZcw0KQ21ha2VMaXN0cy50
+eHQgcGFzc2VzIGRvd24uDQoNCkFuZCDigJxpbiB0cmVl4oCdIGJ1aWxkIGp1c3QgdXNlcyB3cm9u
+ZyBpbmNsdWRlIHBhdGhzLCBJIGd1ZXNzLg0KDQpPbiA5LzE5LzE2LCAzOjAwIFBNLCAiV2lsbGVt
+IEphbiBXaXRoYWdlbiIgPHdqd0BkaWdpd2FyZS5ubD4gd3JvdGU6DQoNCj5PbiAxOS05LTIwMTYg
+MjM6MzcsIEV2Z2VuaXkgRmlyc292IHdyb3RlOg0KPj4gSGksIEd1eXMsDQo+Pg0KPj4gV2hlbiBJ
+IGJ1aWxkIENlcGggdXNpbmcgLi9kb19jbWFrZS5zaCAmJiBjZCBidWlsZCAmJiBtYWtlIC1qMzIs
+IGxvb2tzDQo+Pmxpa2UNCj4+IGV2ZXJ5dGhpbmcgaXMgY29tcGlsZWQgdXNpbmcgQysrIGNvbXBp
+bGVyLCBldmVuIGZpbGVzIHdpdGggLmMgZXh0ZW5zaW9uLg0KPj4gVGhpcyBmYWlscyBaZXRhU2Nh
+bGUgY29tcGlsYXRpb24sIHdoaWNoIGlzIHB1cmUgQy4NCj4+DQo+PiBJbiBvcHBvc2UgdG8gdGhh
+dCBpZiBJIGFtIGJ1aWxkaW5nIMKzaW4gdHJlZcKyLCB3aXRoIGNtYWtlIC4gJiYgbWFrZSAtajMy
+LA0KPj4gQ2VwaCBidWlsZCBmYWlscywgYmVjYXVzZSBpdCB1c2VzIHByb3BlciBDIGNvbXBpbGVy
+IGZvciAuYyBleHRlbnNpb24sDQo+PmJ1dA0KPj4gdGhleSBpbmNsdWRlIENlcGjCuXMgYXNzZXJ0
+Lmggd2hpY2ggaXMgQysrLg0KPj4NCj4+IFNvLCBwcm9iYWJseSwgSSBuZWVkIHRvIGNvbmZpZ3Vy
+ZSBjb21waWxlciBvbiBwZXIgZGlyZWN0b3J5IGJhc2lzLCBpcw0KPj4gdGhlcmUga25vd24gd2F5
+IHRvIGRvIHRoYXQ/DQo+PiBBbHNvLCBjYW4gc29tZWJvZHkgcG9pbnQgbWUgd2hlcmUgaW4gdGhl
+IENNYWtlTGlzdC50eHQgY29tcGlsZXIgaXMNCj4+IGNvbmZpZ3VyZWQgZm9yIMKzb3V0IG9mIHRy
+ZWXCsiBidWlsZD8gSSBtZWFuIEMrKyBmb3IgZXZlcnl0aGluZy4NCj4NCj5Zb3UgY2FuIHJ1bg0K
+PmNtYWtlIC0tc3lzdGVtLWluZm9ybWF0aW9uDQo+dG8gZmluZCBvdXQgd2hhdCB5b3Ugc3lzdGVt
+IGlzIHVzaW5nIGZvciBkZWZhdWx0cy4uLi4NCj4NCj5NaW5lIChGcmVlQlNEKSBoYXM6DQo+DQo+
+Q01BS0VfQ1hYX0NPTVBJTEVSID09ICIvdXNyL2Jpbi9DQyINCj5DTUFLRV9DX0NPTVBJTEVSID09
+ICIvdXNyL2Jpbi9jYyINCj4NCj5TbyBpdCBzb3J0IG9mIGFscmVhZHkga25vd3MgZnJvbSB0aGUg
+YmVnaW5uaW5nIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gQw0KPmFuZCBDKysNCj4NCj4tLVdqVw0K
+Pj4NCj4+IOKAuQ0KPj4gRXZnZW5peQ0KPj4NCj4+DQo+PiBQTEVBU0UgTk9URTogVGhlIGluZm9y
+bWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlDQo+PmlzIGlu
+dGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5h
+bWVkIGFib3ZlLg0KPj5JZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGlu
+dGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZQ0KPj5oZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2
+ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQNCj4+YW55IHJldmlldywg
+ZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBp
+cw0KPj5zdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11
+bmljYXRpb24gaW4gZXJyb3IsDQo+PnBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhv
+bmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkNCj4+aW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kg
+YW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyDQo+PnBvc3Nlc3Npb24g
+KHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+
+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
+c3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
+b3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDov
+L3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+Pg0KPg0KDQpQTEVBU0UgTk9U
+RTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNz
+YWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBp
+ZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3Qg
+dGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3Ug
+aGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywg
+ZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBp
+cyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmlj
+YXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3Ig
+ZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBh
+bGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFy
+ZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo=
