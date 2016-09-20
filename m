@@ -1,37 +1,79 @@
-From: Douglas Fuller <dfuller@redhat.com>
-Subject: A design for CephFS forward scrub with multiple MDS
-Date: Tue, 20 Sep 2016 13:16:06 -0400
-Message-ID: <45C6F82E-6242-41CE-BBA6-1F5200E0B9BC@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.0 \(3226\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:34208 "EHLO
-        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753442AbcITRQJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2016 13:16:09 -0400
-Received: by mail-yw0-f179.google.com with SMTP id g192so16595660ywh.1
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Sep 2016 10:16:08 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: John Spray <jspray@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
+From: David <dclistslinux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Jewel Docs | error on mount.ceph page
+Date: Tue, 20 Sep 2016 18:48:17 +0100
+Message-ID: <CAGxt-avsxSa9BcD-E+YTB5OKpduy02s3=AoytDPqZ4370Rwyfg@mail.gmail.com>
+References: <CAGxt-as_LjROO8=gAfDk+y1DsQvvmvfo78dCFH+pYBgx-wdzhA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============0671753150=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAGxt-as_LjROO8=gAfDk+y1DsQvvmvfo78dCFH+pYBgx-wdzhA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This serves to assemble some discussions we’ve had recently surrounding performing CephFS forward scrub in the case of multiple, active MDSs. I have been doing some implementation work recently in this area and it became a large enough departure from current practice that it’s probably time to revisit the design altogether. This message is intended to summarize the discussions I’ve had so far and to serve as a straw man for any changes that may be needed. It contains a couple questions as well.
+--===============0671753150==
+Content-Type: multipart/alternative; boundary=001a1141c640a94ce1053cf408f7
 
-Currently, CephFS forward scrub proceeds straightforwardly by enqueuing inodes onto a stack as they are found, completing each parent directory once all of its children have been scrubbed. In a multi-MDS system, this will need to be extended to handle subtrees present on other MDSs.
+--001a1141c640a94ce1053cf408f7
+Content-Type: text/plain; charset=UTF-8
 
-The proposed design is as follows:
+Sorry I don't know the correct way to report this.
 
-We scrub a local subtree as we would in the single-MDS case: follow the directory hierarchy downward, pushing found items onto a stack and completing directories once all their children are complete. When a subtree boundary is encountered, send a message to the authoritative MDS for that subtree requesting that it be scrubbed. When subtree scrubbing is complete, send a message to the requesting MDS with the completion information and relevant rstats for the parent directory inode (NB: do we have to block the scrubbing of all ancestors, then?).
+Potential error on this page:
 
-When popping an inode from the scrub stack, it’s important to note that its authority may have been changed by some intervening export. The scrubbing MDS will drop any file inode for which it is no longer authoritative, assuming this would be handled by the correct MDS. For directory inodes, forward a request to the authoritative MDS to scrub the directory. This may result in attempts to scrub the same inodes more than once (though we track this and can avoid most of the work), it seems necessary in order to guarantee no directories are missed due to splits or exports (NB: this is correct, right?).
+on http://docs.ceph.com/docs/jewel/man/8/mount.ceph/
 
-Outbound scrub requests will need to be tracked and restarted in the case of MDS failure.
+Currently:
 
-It may be the case that, in the case of a badly thrashing directory hierarchy, that many unnecessary sub-scrub requests may be created and duplicate work attempted. We can short-circuit the duplicate work by noting (as we do in the single-MDS case) when we have already scrubbed an inode and bailing when we attempt to do it again. I’m not sure that extra or unnecessary requests are avoidable or if they will pose a serious performance concern.
+rsize
+int (bytes), max readahead, multiple of 1024, Default: 524288 (512*1024)
 
-Additions, criticisms, clarifications, tomatoes, and other reactions would be appreciated.
+Should it be something like the following?
 
-Cheers,
-—Doug
+rsize
+int (bytes), max read size. Default: none
+
+rasize
+int (bytes), max readahead, multiple of 1024, Default: 8388608 (8192*1024)
+
+--001a1141c640a94ce1053cf408f7
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<p dir=3D"ltr">Sorry I don&#39;t know the correct way to report this.</p>
+<p dir=3D"ltr">Potential error on this page:</p>
+<p dir=3D"ltr">on=C2=A0<a href=3D"http://docs.ceph.com/docs/jewel/man/8/mou=
+nt.ceph/">http://docs.ceph.com/docs/jewel/man/8/mount.ceph/</a></p>
+<p dir=3D"ltr">Currently:</p>
+<p dir=3D"ltr">rsize<br>
+int (bytes), max readahead, multiple of 1024, Default: 524288 (512*1024)</p=
+>
+<p dir=3D"ltr">Should it be something like the following?</p>
+<p dir=3D"ltr">rsize<br>
+int (bytes), max read size. Default: none</p>
+<p dir=3D"ltr">rasize<br>
+int (bytes), max readahead, multiple of 1024, Default: 8388608 (8192*1024)<=
+/p>
+
+--001a1141c640a94ce1053cf408f7--
+
+--===============0671753150==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0671753150==--
