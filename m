@@ -1,43 +1,51 @@
-From: Gerard Braad <me-+lKzbiBlNwRmR6Xm/wNWPw@public.gmane.org>
-Subject: Re: Introducing Tendrl
-Date: Tue, 20 Sep 2016 15:23:15 +0800
-Message-ID: <CAGrH30W5nz8hb+RcUt+gSPJRPUJ4ptLn2goc-EWsqapBKJSCfw@mail.gmail.com>
-References: <CAOLAhP1dRqPFuVNPuOXfSktQdHEmuX-88iPb94RkWkm6AbS4+w@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: ceph v10.2.3 QE validation status
+Date: Tue, 20 Sep 2016 10:45:44 +0200
+Message-ID: <57E0F738.9080706@dachary.org>
+References: <CAMMFjmHb=m_WJg8TMaVBOdXB37=viYOBSOYEXL_Bo3kET=hyoA@mail.gmail.com>
+ <CAMMFjmFo=1B07c3czD41CkNUWR8htfSn9z5vwcpdJuVZjbtAyQ@mail.gmail.com>
+ <alpine.DEB.2.11.1609151816540.19761@piezo.us.to>
+ <CAMMFjmF-t1-CgwpEcmaLSei8tycsK03eY5jSt8ppVR8N3+AUwg@mail.gmail.com>
+ <CAMMFjmHjddnyeS6tu5s4SuH+hLBQvnr5-GDuRd=LjDwDYUn80A@mail.gmail.com>
+ <CAMMFjmHdLYZ+Yk4EMfBfPwaYBjEq6CFokDKpRkKQuS88fU+cfA@mail.gmail.com>
+ <CAC-Np1yDLkQ0OFkroTYXosY8GMvdtX5tW6m5a_9R+eh2Jj1U2A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <gluster-devel-bounces-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org>
-In-Reply-To: <CAOLAhP1dRqPFuVNPuOXfSktQdHEmuX-88iPb94RkWkm6AbS4+w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://www.gluster.org/mailman/options/gluster-devel>,
-	<mailto:gluster-devel-request-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://www.gluster.org/pipermail/gluster-devel/>
-List-Post: <mailto:gluster-devel-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org>
-List-Help: <mailto:gluster-devel-request-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org?subject=help>
-List-Subscribe: <http://www.gluster.org/mailman/listinfo/gluster-devel>,
-	<mailto:gluster-devel-request-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org?subject=subscribe>
-Sender: gluster-devel-bounces-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org
-Errors-To: gluster-devel-bounces-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org
-To: Mrugesh Karnik <mkarnik-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gluster Development <gluster-devel-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
-Hi Mrugesh,
-
-On Tue, Sep 20, 2016 at 3:10 PM, Mrugesh Karnik <mkarnik-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> I'd like to introduce the Tendrl project. Tendrl aims to build a
-> management interface for Ceph. We've pushed some documentation to the
-
-On Tue, Sep 20, 2016 at 3:15 PM, Mrugesh Karnik <mkarnik-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> I'd like to introduce the Tendrl project. Tendrl aims to build a
-> management interface for Gluster. We've pushed some documentation to
-
-It might help to introduce Tendrl as the "Universal Storage Manager'"
-with a possibility to either manage Ceph and/or Gluster.
-I understand you want specific feedback, but a clear definition of the
-tool would be helpful.
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:56885 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753626AbcITIpw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2016 04:45:52 -0400
+In-Reply-To: <CAC-Np1yDLkQ0OFkroTYXosY8GMvdtX5tW6m5a_9R+eh2Jj1U2A@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>, Yuri Weinstein <yweinste@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <loic@dachary.org>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, David Zafman <dzafman@redhat.com>, Jeff Layton <jlayton@redhat.com>
 
 
-regards,
 
+On 19/09/2016 22:36, Alfredo Deza wrote:
+> On Mon, Sep 19, 2016 at 4:12 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
+>> Alfredo, Sage
+>>
+>> All failed jobs/issues had been addressed/approved (details in
+>> http://tracker.ceph.com/issues/16344#note-46) and jewel ceph v10.2.3
+>> is ready for release.
+> We are unable to cut a release because Jewel is not building on Xenial.
+>
+> There are issues in the code that creates a virtualenv for
+> ceph-disk/ceph-detect-init that uses Python wheels that needs to be
+> corrected. Andrew and I have
+> been trying to fix this issue on the Jenkins side, but at this point
+> we have asked Loic to step in because we haven't been able to get a
+> workaround.
+>
+> See http://tracker.ceph.com/issues/16169
+It looks like this is a combo of jenkins providing a machine that is poluted by a previous job and the fact that it does not run install-deps.sh. The discussion continues in the tracker.
 
-Gerard
+Cheers
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
+
