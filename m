@@ -1,194 +1,37 @@
-From: Joe Julian <joe-Fcm6T8Fmt17HuhbChzYfaQ@public.gmane.org>
-Subject: Re: Introducing Tendrl
-Date: Tue, 20 Sep 2016 10:09:16 -0700
-Message-ID: <C1095376-CEC1-4B8C-9F1A-4157408FEFB5@julianfamily.org>
-References: <CAOLAhP1dRqPFuVNPuOXfSktQdHEmuX-88iPb94RkWkm6AbS4+w@mail.gmail.com>
-	<CAGrH30W5nz8hb+RcUt+gSPJRPUJ4ptLn2goc-EWsqapBKJSCfw@mail.gmail.com>
-	<c89afa54-57b5-3977-2d43-fa730e932a79@redhat.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============4101869484988502158=="
-Return-path: <gluster-devel-bounces-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org>
-In-Reply-To: <c89afa54-57b5-3977-2d43-fa730e932a79-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <http://www.gluster.org/mailman/options/gluster-devel>,
-	<mailto:gluster-devel-request-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://www.gluster.org/pipermail/gluster-devel/>
-List-Post: <mailto:gluster-devel-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org>
-List-Help: <mailto:gluster-devel-request-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org?subject=help>
-List-Subscribe: <http://www.gluster.org/mailman/listinfo/gluster-devel>,
-	<mailto:gluster-devel-request-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org?subject=subscribe>
-Sender: gluster-devel-bounces-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org
-Errors-To: gluster-devel-bounces-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org
-To: Ric Wheeler <rwheeler-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Gerard Braad <me-+lKzbiBlNwRmR6Xm/wNWPw@public.gmane.org>, Mrugesh Karnik <mkarnik-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gluster Development <gluster-devel-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Douglas Fuller <dfuller@redhat.com>
+Subject: A design for CephFS forward scrub with multiple MDS
+Date: Tue, 20 Sep 2016 13:16:06 -0400
+Message-ID: <45C6F82E-6242-41CE-BBA6-1F5200E0B9BC@redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.0 \(3226\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yw0-f179.google.com ([209.85.161.179]:34208 "EHLO
+        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753442AbcITRQJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2016 13:16:09 -0400
+Received: by mail-yw0-f179.google.com with SMTP id g192so16595660ywh.1
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Sep 2016 10:16:08 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: John Spray <jspray@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
 
---===============4101869484988502158==
-Content-Type: multipart/alternative; boundary="----LS8GMLI8I1AF15G02KSXHAMJXEG8LN"
-Content-Transfer-Encoding: 7bit
+This serves to assemble some discussions we’ve had recently surrounding performing CephFS forward scrub in the case of multiple, active MDSs. I have been doing some implementation work recently in this area and it became a large enough departure from current practice that it’s probably time to revisit the design altogether. This message is intended to summarize the discussions I’ve had so far and to serve as a straw man for any changes that may be needed. It contains a couple questions as well.
 
-------LS8GMLI8I1AF15G02KSXHAMJXEG8LN
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Currently, CephFS forward scrub proceeds straightforwardly by enqueuing inodes onto a stack as they are found, completing each parent directory once all of its children have been scrubbed. In a multi-MDS system, this will need to be extended to handle subtrees present on other MDSs.
 
-Does this compare to ViPR?=20
+The proposed design is as follows:
 
-On September 20, 2016 9:52:54 AM PDT, Ric Wheeler <rwheeler-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> w=
-rote:
->On 09/20/2016 10:23 AM, Gerard Braad wrote:
->> Hi Mrugesh,
->>
->> On Tue, Sep 20, 2016 at 3:10 PM, Mrugesh Karnik <mkarnik-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->wrote:
->>> I'd like to introduce the Tendrl project. Tendrl aims to build a
->>> management interface for Ceph. We've pushed some documentation to
->the
->> On Tue, Sep 20, 2016 at 3:15 PM, Mrugesh Karnik <mkarnik-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->wrote:
->>> I'd like to introduce the Tendrl project. Tendrl aims to build a
->>> management interface for Gluster. We've pushed some documentation to
->> It might help to introduce Tendrl as the "Universal Storage Manager'"
->> with a possibility to either manage Ceph and/or Gluster.
->> I understand you want specific feedback, but a clear definition of
->the
->> tool would be helpful.
->>
->
->(Apologies for reposting my response - gmail injected html into what I
->thought=20
->was a text reply and it bounced from ceph-devel.)
->
->Hi Gerard,
->
->I see the goal differently.
->
->It is better to think of tendryl as one component of a whole management
->
->application stack. At the bottom, we will have ceph specific components
->
->(ceph-mgr) and gluster specific components (glusterd), as well as other
->local=20
->storage/file system components like libstoragemgt and so on.
->
->Tendryl is the next layer up from that, but it itself is meant to be
->consumed by=20
->presentation layers. For a stand alone thing that we hope to use at Red
->Hat,=20
->there will be a universal storage manager stack with everything I
->mentioned=20
->above in it, as well as the GUI code.
->
->Other projects will hopefully find this useful enough and plug some or
->all of=20
->the components into other management stacks.
->
-From my point of view, the job is to try to provide as much as possible
->
->re-usable components that will be generically interesting to a wide
->variety of=20
->applications. It is definitely not about trying to make all storage
->stacks look=20
->the same and force artificial new names/concepts/etc on the users. Of
->course,=20
->any one application will tend to have a similar "skin" for UX elements
->to try=20
->and make it consistent for users.
->
->If we do it right, people passionate about Ceph but who don't care
->about Gluster=20
->will be able to be avoid getting tied up in something out of their
->interest.=20
->Same going the other way around for Gluster developers who don't care
->or know=20
->about Ceph. Over time, this might extend to other storage types like
->Samba or=20
->NFS Ganesha clusters, etc.
->
->Regards,
->
->Ric
->
->
->
->
->_______________________________________________
->Gluster-devel mailing list
->Gluster-devel-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org
->http://www.gluster.org/mailman/listinfo/gluster-devel
+We scrub a local subtree as we would in the single-MDS case: follow the directory hierarchy downward, pushing found items onto a stack and completing directories once all their children are complete. When a subtree boundary is encountered, send a message to the authoritative MDS for that subtree requesting that it be scrubbed. When subtree scrubbing is complete, send a message to the requesting MDS with the completion information and relevant rstats for the parent directory inode (NB: do we have to block the scrubbing of all ancestors, then?).
 
---=20
-Sent from my Android device with K-9 Mail. Please excuse my brevity.
-------LS8GMLI8I1AF15G02KSXHAMJXEG8LN
-Content-Type: text/html;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+When popping an inode from the scrub stack, it’s important to note that its authority may have been changed by some intervening export. The scrubbing MDS will drop any file inode for which it is no longer authoritative, assuming this would be handled by the correct MDS. For directory inodes, forward a request to the authoritative MDS to scrub the directory. This may result in attempts to scrub the same inodes more than once (though we track this and can avoid most of the work), it seems necessary in order to guarantee no directories are missed due to splits or exports (NB: this is correct, right?).
 
-<html><head></head><body>Does this compare to ViPR? <br><br><div class=3D=
-"gmail_quote">On September 20, 2016 9:52:54 AM PDT, Ric Wheeler &lt;rwhee=
-ler-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&gt; wrote:<blockquote class=3D"gmail_quote" style=3D"margi=
-n: 0pt 0pt 0pt 0.8ex; border-left: 1px solid rgb(204, 204, 204); padding-=
-left: 1ex;">
-<pre class=3D"k9mail">On 09/20/2016 10:23 AM, Gerard Braad wrote:<br /><b=
-lockquote class=3D"gmail_quote" style=3D"margin: 0pt 0pt 1ex 0.8ex; borde=
-r-left: 1px solid #729fcf; padding-left: 1ex;"> Hi Mrugesh,<br /><br /> O=
-n Tue, Sep 20, 2016 at 3:10 PM, Mrugesh Karnik &lt;mkarnik-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&gt;=
- wrote:<br /><blockquote class=3D"gmail_quote" style=3D"margin: 0pt 0pt 1=
-ex 0.8ex; border-left: 1px solid #ad7fa8; padding-left: 1ex;"> I'd like t=
-o introduce the Tendrl project. Tendrl aims to build a<br /> management i=
-nterface for Ceph. We've pushed some documentation to the<br /></blockquo=
-te> On Tue, Sep 20, 2016 at 3:15 PM, Mrugesh Karnik &lt;mkarnik-H+wXaHxf7aJhl2p70BpVqQ@public.gmane.org=
-m&gt; wrote:<br /><blockquote class=3D"gmail_quote" style=3D"margin: 0pt =
-0pt 1ex 0.8ex; border-left: 1px solid #ad7fa8; padding-left: 1ex;"> I'd l=
-ike to introduce the Tendrl project. Tendrl aims to build a<br /> managem=
-ent interface for Gluster. We've pushed some documentation to<br /></bloc=
-kquote> It might help to introduce Tendrl as the "Universal
-Storage Manager'"<br /> with a possibility to either manage Ceph and/or G=
-luster.<br /> I understand you want specific feedback, but a clear defini=
-tion of the<br /> tool would be helpful.</blockquote><br /><br />(Apologi=
-es for reposting my response - gmail injected html into what I thought <b=
-r />was a text reply and it bounced from ceph-devel.)<br /><br />Hi Gerar=
-d,<br /><br />I see the goal differently.<br /><br />It is better to thin=
-k of tendryl as one component of a whole management <br />application sta=
-ck. At the bottom, we will have ceph specific components <br />(ceph-mgr)=
- and gluster specific components (glusterd), as well as other local <br /=
->storage/file system components like libstoragemgt and so on.<br /><br />=
-Tendryl is the next layer up from that, but it itself is meant to be cons=
-umed by <br />presentation layers. For a stand alone thing that we hope t=
-o use at Red Hat, <br />there will be a universal storage manager stack w=
-ith everything I mentioned <br />above in it, as
-well as the GUI code.<br /><br />Other projects will hopefully find this =
-useful enough and plug some or all of <br />the components into other man=
-agement stacks.<br /><br /> From my point of view, the job is to try to p=
-rovide as much as possible <br />re-usable components that will be generi=
-cally interesting to a wide variety of <br />applications. It is definite=
-ly not about trying to make all storage stacks look <br />the same and fo=
-rce artificial new names/concepts/etc on the users. Of course, <br />any =
-one application will tend to have a similar "skin" for UX elements to try=
- <br />and make it consistent for users.<br /><br />If we do it right, pe=
-ople passionate about Ceph but who don't care about Gluster <br />will be=
- able to be avoid getting tied up in something out of their interest. <br=
- />Same going the other way around for Gluster developers who don't care =
-or know <br />about Ceph. Over time, this might extend to other storage t=
-ypes like Samba or <br />NFS Ganesha clusters,
-etc.<br /><br />Regards,<br /><br />Ric<br /><br /><br /><br /><br /><hr =
-/><br />Gluster-devel mailing list<br />Gluster-devel-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org<br /><a=
- href=3D"http://www.gluster.org/mailman/listinfo/gluster-devel">http://ww=
-w.gluster.org/mailman/listinfo/gluster-devel</a><br /></pre></blockquote>=
-</div><br>
--- <br>
-Sent from my Android device with K-9 Mail. Please excuse my brevity.</bod=
-y></html>
-------LS8GMLI8I1AF15G02KSXHAMJXEG8LN--
+Outbound scrub requests will need to be tracked and restarted in the case of MDS failure.
 
+It may be the case that, in the case of a badly thrashing directory hierarchy, that many unnecessary sub-scrub requests may be created and duplicate work attempted. We can short-circuit the duplicate work by noting (as we do in the single-MDS case) when we have already scrubbed an inode and bailing when we attempt to do it again. I’m not sure that extra or unnecessary requests are avoidable or if they will pose a serious performance concern.
 
---===============4101869484988502158==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Additions, criticisms, clarifications, tomatoes, and other reactions would be appreciated.
 
-_______________________________________________
-Gluster-devel mailing list
-Gluster-devel-+FkPdpiNhgJAfugRpC6u6w@public.gmane.org
-http://www.gluster.org/mailman/listinfo/gluster-devel
---===============4101869484988502158==--
+Cheers,
+—Doug
