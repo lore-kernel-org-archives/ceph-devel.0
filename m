@@ -1,66 +1,67 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: async messenger random read performance on NVMe
-Date: Wed, 21 Sep 2016 13:49:58 -0500
-Message-ID: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: async messenger random read performance on NVMe
+Date: Wed, 21 Sep 2016 19:02:34 +0000
+Message-ID: <CY1PR02MB21236DC2DEDA1C4577FED95BF4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
+References: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47316 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933016AbcIUSuB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 21 Sep 2016 14:50:01 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 2A49F9E62B
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 18:50:01 +0000 (UTC)
-Received: from [10.3.112.71] (ovpn-112-71.phx2.redhat.com [10.3.112.71])
-        by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u8LInx5L030352
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 14:50:00 -0400
+Received: from mail-dm3nam03on0076.outbound.protection.outlook.com ([104.47.41.76]:36512
+        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S934041AbcIUTCg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 21 Sep 2016 15:02:36 -0400
+In-Reply-To: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Recently in master we made async messenger default.  After doing a bunch 
-of bisection, it turns out that this caused a fairly dramatic decrease 
-in bluestore random read performance.  This is on a cluster with fairly 
-fast NVMe cards, 16 OSDs across 4 OSD hosts.  There are 8 fio client 
-processes with 32 concurrent threads each.
-
-Ceph master using bluestore
-
-Parameters tweaked:
-
-ms_async_send_inline
-ms_async_op_threads
-ms_async_max_op_threads
-
-simple: 168K IOPS
-
-send_inline: true
-async 3/5   threads: 111K IOPS
-async 4/8   threads: 125K IOPS
-async 8/16  threads: 128K IOPS
-async 16/32 threads: 128K IOPS
-async 24/48 threads: 128K IOPS
-async 25/50 threads: segfault
-async 26/52 threads: segfault
-async 32/64 threads: segfault
-
-send_inline: false
-async 3/5   threads: 153K IOPS
-async 4/8   threads: 153K IOPS
-async 8/16  threads: 152K IOPS
-
-So definitely setting send_inline to false helps pretty dramatically, 
-though we're still a little slower for small random reads than simple 
-messenger.  Haomai, regarding the segfaults, I took a quick look with 
-gdb at the core file but didn't see anything immediately obvious.  It 
-might be worth seeing if you can reproduce.
-
-On the performance front, I'll try to see if I can see anything obvious 
-in perf.
-
-Mark
+TWFyaywNCkFyZSB5b3UgdHJ5aW5nIHdpdGggbXVsdGlwbGUgcGh5c2ljYWwgY2xpZW50cyBhbmQg
+d2l0aCBpbmNyZWFzZWQgT1NEIHNoYXJkcz8NClNpbXBsZSBzaG91bGQgZ28gd2F5IG1vcmUgd2l0
+aCB0aGUgc2ltaWxhciBjb25maWcgZm9yIDRLIFJSIGJhc2VkIG9uIHRoZSByZXN1bHQgd2Ugd2Vy
+ZSBnZXR0aW5nIGVhcmxpZXIgdW5sZXNzIHlvdXIgY3B1IGlzIGdldHRpbmcgc2F0dXJhdGVkIGF0
+IHRoZSBPU0Qgbm9kZXMuDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1Pcmln
+aW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBN
+YXJrIE5lbHNvbg0KU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMjEsIDIwMTYgMTE6NTAgQU0N
+ClRvOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBhc3luYyBtZXNzZW5nZXIgcmFuZG9tIHJlYWQgcGVy
+Zm9ybWFuY2Ugb24gTlZNZQ0KDQpSZWNlbnRseSBpbiBtYXN0ZXIgd2UgbWFkZSBhc3luYyBtZXNz
+ZW5nZXIgZGVmYXVsdC4gIEFmdGVyIGRvaW5nIGEgYnVuY2ggb2YgYmlzZWN0aW9uLCBpdCB0dXJu
+cyBvdXQgdGhhdCB0aGlzIGNhdXNlZCBhIGZhaXJseSBkcmFtYXRpYyBkZWNyZWFzZSBpbiBibHVl
+c3RvcmUgcmFuZG9tIHJlYWQgcGVyZm9ybWFuY2UuICBUaGlzIGlzIG9uIGEgY2x1c3RlciB3aXRo
+IGZhaXJseSBmYXN0IE5WTWUgY2FyZHMsIDE2IE9TRHMgYWNyb3NzIDQgT1NEIGhvc3RzLiAgVGhl
+cmUgYXJlIDggZmlvIGNsaWVudCBwcm9jZXNzZXMgd2l0aCAzMiBjb25jdXJyZW50IHRocmVhZHMg
+ZWFjaC4NCg0KQ2VwaCBtYXN0ZXIgdXNpbmcgYmx1ZXN0b3JlDQoNClBhcmFtZXRlcnMgdHdlYWtl
+ZDoNCg0KbXNfYXN5bmNfc2VuZF9pbmxpbmUNCm1zX2FzeW5jX29wX3RocmVhZHMNCm1zX2FzeW5j
+X21heF9vcF90aHJlYWRzDQoNCnNpbXBsZTogMTY4SyBJT1BTDQoNCnNlbmRfaW5saW5lOiB0cnVl
+DQphc3luYyAzLzUgICB0aHJlYWRzOiAxMTFLIElPUFMNCmFzeW5jIDQvOCAgIHRocmVhZHM6IDEy
+NUsgSU9QUw0KYXN5bmMgOC8xNiAgdGhyZWFkczogMTI4SyBJT1BTDQphc3luYyAxNi8zMiB0aHJl
+YWRzOiAxMjhLIElPUFMNCmFzeW5jIDI0LzQ4IHRocmVhZHM6IDEyOEsgSU9QUw0KYXN5bmMgMjUv
+NTAgdGhyZWFkczogc2VnZmF1bHQNCmFzeW5jIDI2LzUyIHRocmVhZHM6IHNlZ2ZhdWx0DQphc3lu
+YyAzMi82NCB0aHJlYWRzOiBzZWdmYXVsdA0KDQpzZW5kX2lubGluZTogZmFsc2UNCmFzeW5jIDMv
+NSAgIHRocmVhZHM6IDE1M0sgSU9QUw0KYXN5bmMgNC84ICAgdGhyZWFkczogMTUzSyBJT1BTDQph
+c3luYyA4LzE2ICB0aHJlYWRzOiAxNTJLIElPUFMNCg0KU28gZGVmaW5pdGVseSBzZXR0aW5nIHNl
+bmRfaW5saW5lIHRvIGZhbHNlIGhlbHBzIHByZXR0eSBkcmFtYXRpY2FsbHksIHRob3VnaCB3ZSdy
+ZSBzdGlsbCBhIGxpdHRsZSBzbG93ZXIgZm9yIHNtYWxsIHJhbmRvbSByZWFkcyB0aGFuIHNpbXBs
+ZSBtZXNzZW5nZXIuICBIYW9tYWksIHJlZ2FyZGluZyB0aGUgc2VnZmF1bHRzLCBJIHRvb2sgYSBx
+dWljayBsb29rIHdpdGggZ2RiIGF0IHRoZSBjb3JlIGZpbGUgYnV0IGRpZG4ndCBzZWUgYW55dGhp
+bmcgaW1tZWRpYXRlbHkgb2J2aW91cy4gIEl0IG1pZ2h0IGJlIHdvcnRoIHNlZWluZyBpZiB5b3Ug
+Y2FuIHJlcHJvZHVjZS4NCg0KT24gdGhlIHBlcmZvcm1hbmNlIGZyb250LCBJJ2xsIHRyeSB0byBz
+ZWUgaWYgSSBjYW4gc2VlIGFueXRoaW5nIG9idmlvdXMgaW4gcGVyZi4NCg0KTWFyaw0KLS0NClRv
+IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBj
+ZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
+bmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
+am9yZG9tby1pbmZvLmh0bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVk
+IGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhl
+IHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSBy
+ZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3Ug
+YXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBp
+biBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24s
+IG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlv
+dSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlm
+eSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1l
+ZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGlu
+IHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBz
+dG9yZWQgY29waWVzKS4NCg==
