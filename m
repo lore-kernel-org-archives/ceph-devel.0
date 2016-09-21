@@ -1,60 +1,135 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph-disk and 'make'
-Date: Wed, 21 Sep 2016 07:07:18 +0200
-Message-ID: <57E21586.2020306@dachary.org>
-References: <alpine.DEB.2.11.1609190036390.3215@piezo.us.to>
- <57DF7DA0.2050007@dachary.org> <57DF9525.5050904@dachary.org>
- <CAJ4mKGb4ELCPgQOeiC_RWGtBZ44L1anrKX4eRJZx=p25cVCyMg@mail.gmail.com>
- <CAJE9aONfH9uWx4vtYUTjJMo_udRU_vEOMBYag8H6gY8+jGNSCA@mail.gmail.com>
- <CALqRxCy629qBDOobD==3B9M_-QkLjeg7xuPcVkkOQ1ycrotVrw@mail.gmail.com>
- <CAJE9aOMNC1ApUUKR3RVr+QBT1hEMLCbPddtA03F-wCvYMgBUWg@mail.gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Cmake build. C compiler.
+Date: Wed, 21 Sep 2016 14:04:30 +0800
+Message-ID: <CAJE9aOMzGb920sKSk+AvCnmzCtKsTmk4JFO7QYdB6ZhCVgwujg@mail.gmail.com>
+References: <D405A8C2.12B32%evgeniy.firsov@sandisk.com> <c41894d2-1d9f-b640-b9e3-bcc958a8a518@digiware.nl>
+ <D405E2C2.12B3D%evgeniy.firsov@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:48221 "EHLO
-        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754040AbcIUFHZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 01:07:25 -0400
-In-Reply-To: <CAJE9aOMNC1ApUUKR3RVr+QBT1hEMLCbPddtA03F-wCvYMgBUWg@mail.gmail.com>
+Received: from mail-oi0-f49.google.com ([209.85.218.49]:35350 "EHLO
+        mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752340AbcIUGEb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 02:04:31 -0400
+Received: by mail-oi0-f49.google.com with SMTP id w11so48621524oia.2
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Sep 2016 23:04:31 -0700 (PDT)
+In-Reply-To: <D405E2C2.12B3D%evgeniy.firsov@sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>, Ken Dreyer <kdreyer@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Marcus Watts <mwatts@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+On Tue, Sep 20, 2016 at 9:48 AM, Evgeniy Firsov
+<Evgeniy.Firsov@sandisk.com> wrote:
+> It has nothing to do with compilers.
+> There is a bug in NDEBUG handling in ZetaScale, which Ceph=E2=80=99s
+> CmakeLists.txt passes down.
+>
+> And =E2=80=9Cin tree=E2=80=9D build just uses wrong include paths, I gues=
+s.
+>
+> On 9/19/16, 3:00 PM, "Willem Jan Withagen" <wjw@digiware.nl> wrote:
+>
+>>On 19-9-2016 23:37, Evgeniy Firsov wrote:
+>>> Hi, Guys,
+>>>
+>>> When I build Ceph using ./do_cmake.sh && cd build && make -j32, looks
+>>>like
+>>> everything is compiled using C++ compiler, even files with .c extension=
+.
+
+this is not true. src/tracing/librados.c is a pure C source file. when
+i run following command, i have:
+
+$ make rados_tp VERBOSE=3D1
+...
+Building C object
+src/tracing/CMakeFiles/rados_tp.dir/__/__/include/tracing/librados.c.o
+cd /var/ceph/ceph/build/src/tracing && ccache /usr/bin/cc
+-DCEPH_LIBDIR=3D\"/home/kefu/.local/lib\"
+-DCEPH_PKGLIBDIR=3D\"/home/kefu/.local/lib/ceph\" -D__linux__
+-Drados_tp_EXPORTS -I/var/ceph/ceph/build/src/include
+-I/var/ceph/ceph/src -I/var/ceph/ceph/build/include
+-I/var/ceph/ceph/src/xxHash  -Wall -Wtype-limits -Wignored-qualifiers
+-Winit-self -Wpointer-arith -Werror=3Dformat-security
+-fno-strict-aliasing -fsigned-char -rdynamic -fstack-protector-strong
+-fdiagnostics-color=3Dauto -g -fPIC   -DHAVE_CONFIG_H -D__CEPH__
+-D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE
+-D_FILE_OFFSET_BITS=3D64 -o
+CMakeFiles/rados_tp.dir/__/__/include/tracing/librados.c.o   -c
+/var/ceph/ceph/build/include/tracing/librados.c
+Linking C shared library ../../lib/librados_tp.so
+...
+
+so it is using cc not c++ to compile this source file.
 
 
+>>> This fails ZetaScale compilation, which is pure C.
 
-On 21/09/2016 04:39, kefu chai wrote:
-> On Wed, Sep 21, 2016 at 2:04 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
->> On Tue, Sep 20, 2016 at 9:28 AM, kefu chai <tchaikov@gmail.com> wrote:
->>> agreed, actually, a test-ready ceph-disk needs venv which pip to install the
->>> dependencies, but debian pbuilder uses a cleanroom for building packages
->>> in which no network access is allowed by default.
+could you share your repo/branch address of Ceph with ZetaScale so
+people can try and verify?
+
+>>>
+>>> In oppose to that if I am building =C2=B3in tree=C2=B2, with cmake . &&=
+ make -j32,
+>>> Ceph build fails, because it uses proper C compiler for .c extension,
+>>>but
+>>> they include Ceph=C2=B9s assert.h which is C++.
+>>>
+>>> So, probably, I need to configure compiler on per directory basis, is
+>>> there known way to do that?
+>>> Also, can somebody point me where in the CMakeList.txt compiler is
+>>> configured for =C2=B3out of tree=C2=B2 build? I mean C++ for everything=
+.
 >>
->> I'm curious why we need a virtualenv at all (or why we "pip install" anything) ?
+>>You can run
+>>cmake --system-information
+>>to find out what you system is using for defaults....
 >>
->> The distros should have all the packaged python-* and python3-*
->> dependencies already, right?
+>>Mine (FreeBSD) has:
 >>
->> If we could switch to using the packaged python dependencies for
->> everything, we'd fix the pbuilder USENETWORK issue, and avoid the
->> indeterminate nature of depending on whatever happens to be going on
->> with pypi. Maybe I'm missing something, though?
-> 
-> we could. the python modules installed by pip are only used for
-> testing purpose, like tox, pytest, flake8, testtools, fixtures, i
-> think we can add them to the Build-Depends list. and let pbuilder to
-> take care of them.
-> 
-> @loic what do you think?
+>>CMAKE_CXX_COMPILER =3D=3D "/usr/bin/CC"
+>>CMAKE_C_COMPILER =3D=3D "/usr/bin/cc"
+>>
+>>So it sort of already knows from the beginning the difference between C
+>>and C++
+>>
+>>--WjW
+>>>
+>>> =E2=80=B9
+>>> Evgeniy
+>>>
+>>>
+>>> PLEASE NOTE: The information contained in this electronic mail message
+>>>is intended only for the use of the designated recipient(s) named above.
+>>>If the reader of this message is not the intended recipient, you are
+>>>hereby notified that you have received this message in error and that
+>>>any review, dissemination, distribution, or copying of this message is
+>>>strictly prohibited. If you have received this communication in error,
+>>>please notify the sender by telephone or e-mail (as shown above)
+>>>immediately and destroy any and all copies of this message in your
+>>>possession (whether hard copies or electronically stored copies).
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>
+> PLEASE NOTE: The information contained in this electronic mail message is=
+ intended only for the use of the designated recipient(s) named above. If t=
+he reader of this message is not the intended recipient, you are hereby not=
+ified that you have received this message in error and that any review, dis=
+semination, distribution, or copying of this message is strictly prohibited=
+. If you have received this communication in error, please notify the sende=
+r by telephone or e-mail (as shown above) immediately and destroy any and a=
+ll copies of this message in your possession (whether hard copies or electr=
+onically stored copies).
 
-It's worth a shot.
 
-The primary reason for encapsulating this into install-deps.sh was to cope with all supported operating systems with just two package file / directories (I.e. one debian directory with no #if/#else capability and one spec file). More often than not satisfying python requirements with packages is challenging, to say the least (even pip).
 
-That being said, the older operating systems are no longer supported and this may not be an issue right now. And when/if it becomes an issue once again in the future we can probably deal with it in a better way.
-
-Cheers
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+--=20
+Regards
+Kefu Chai
