@@ -1,77 +1,32 @@
-From: Ric Wheeler <rwheeler@redhat.com>
-Subject: Re: Introducing Tendrl
-Date: Wed, 21 Sep 2016 16:23:58 +0300
-Message-ID: <83efb133-02bd-ef4e-af3a-db630175275c@redhat.com>
-References: <CAOLAhP0dQo1_Dw-6TUxPXh+R+trxjQnLYWh+ax9E4iyV47tCiA@mail.gmail.com>
- <CALe9h7e3e=izA0UTeWF3rhZd_UmShEZs_1eGLRi4XoYY54VNXA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Douglas Fuller <dfuller@redhat.com>
+Subject: Re: A design for CephFS forward scrub with multiple MDS
+Date: Wed, 21 Sep 2016 09:25:47 -0400
+Message-ID: <511F3635-C7D2-4F6B-9B0F-7AD9D9C9F7B2@redhat.com>
+References: <45C6F82E-6242-41CE-BBA6-1F5200E0B9BC@redhat.com>
+ <CALe9h7cTGVVkkuKxc4CCRFC-xpyiPRfKXFj3i5Kof09Z3yfWhg@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.0 \(3226\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38288 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932964AbcIUNYD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 21 Sep 2016 09:24:03 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 5E37F7F7D5
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 13:24:03 +0000 (UTC)
-In-Reply-To: <CALe9h7e3e=izA0UTeWF3rhZd_UmShEZs_1eGLRi4XoYY54VNXA@mail.gmail.com>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:36839 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932964AbcIUNZu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 09:25:50 -0400
+Received: by mail-io0-f182.google.com with SMTP id m79so52433780ioo.3
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 06:25:50 -0700 (PDT)
+In-Reply-To: <CALe9h7cTGVVkkuKxc4CCRFC-xpyiPRfKXFj3i5Kof09Z3yfWhg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>, Mrugesh Karnik <mkarnik@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Gregory Farnum <gfarnum@redhat.com>
 
-On 09/21/2016 10:47 AM, John Spray wrote:
-> On Tue, Sep 20, 2016 at 8:10 AM, Mrugesh Karnik <mkarnik@redhat.com> wrote:
->> Hi all,
->>
->> I'd like to introduce the Tendrl project. Tendrl aims to build a
->> management interface for Ceph. We've pushed some documentation to the
->> documentation repository[1]. The documentation should provide an
->> understanding of the architecture and the components therein. This is
->> still a work in progress. So please feel free to ask questions and
->> make suggestions via the mailing list[2] and Github Issues[3]. There's
->> an IRC channel[4] as well.
-> Thanks Mrugesh, I've opened a series of github issues to ask for more
-> details on languages, protocols, security, scaling etc.  Where there
-> are still open questions please feel free to say so, I understand that
-> not everything is 100% defined.
-I am a big fan of debating these choices not just on github, but also on the 
-upstream lists. Best to put those choices out early for debate so we get 
-feedback before spending too much effort.
 
->
->> Martin Bukatovic had earlier initiated a discussion around Ceph
->> Manager on this list. I'd like to address that here. Currently, we've
->> repurposed Calamari codebase as the Ceph Bridge. We're also tracking
->> the development of Ceph Manager. We'll be setting up a test bed to
->> check the Ceph Manager functionality and respond to the list with
->> feedback and queries.
-> My understanding is that the ceph_bridge code was just a prototype --
-> I'd suggest that you go forward either with a ceph-mgr module or using
-> a REST API, but the calamari-derived ceph_bridge code should
-> definitely go away.
->
-> John
+>> Outbound scrub requests will need to be tracked and restarted in the case of MDS failure.
+> 
+> One thing we didn't discuss was the backwards case, where I (an MDS)
+> am told by another MDS to scrub a subtree, but he fails before I can
+> tell him the result of my scrub.  Simplest thing seems to be to abort
+> scrubs in this case, and say that (for the moment) a scrub is only
+> guaranteed to complete if the MDS where it was initiated stays online?
 
-I agree that we should be looking at building on ceph-mgr - totally makes sense 
-to build on an active project that the ceph community is actively working on.
-
-Regards,
-
-Ric
-
->
->> Thanks.
->>
->> [1] https://github.com/Tendrl/documentation
->> [2] https://www.redhat.com/mailman/listinfo/tendrl-devel
->> [3] https://github.com/Tendrl/documentation/issues
->> [4] #tendrl-devel on Freenode
->>
->> --
->> Mrugesh
->>
-
+That makes sense as a first pass. For the future, we could resend the completion to the new subtree root owner after reconnecting and at least update the rstats. The scrub may even complete in that case.
