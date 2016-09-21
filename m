@@ -1,135 +1,52 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: Cmake build. C compiler.
-Date: Wed, 21 Sep 2016 14:04:30 +0800
-Message-ID: <CAJE9aOMzGb920sKSk+AvCnmzCtKsTmk4JFO7QYdB6ZhCVgwujg@mail.gmail.com>
-References: <D405A8C2.12B32%evgeniy.firsov@sandisk.com> <c41894d2-1d9f-b640-b9e3-bcc958a8a518@digiware.nl>
- <D405E2C2.12B3D%evgeniy.firsov@sandisk.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: A design for CephFS forward scrub with multiple MDS
+Date: Tue, 20 Sep 2016 23:29:24 -0700
+Message-ID: <CAJ4mKGYo+P3JHH4OyzdAtmfx5JaMCT+xCzPLA45=BK50KJLAhg@mail.gmail.com>
+References: <45C6F82E-6242-41CE-BBA6-1F5200E0B9BC@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f49.google.com ([209.85.218.49]:35350 "EHLO
-        mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752340AbcIUGEb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 02:04:31 -0400
-Received: by mail-oi0-f49.google.com with SMTP id w11so48621524oia.2
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Sep 2016 23:04:31 -0700 (PDT)
-In-Reply-To: <D405E2C2.12B3D%evgeniy.firsov@sandisk.com>
+Received: from mail-yw0-f179.google.com ([209.85.161.179]:35184 "EHLO
+        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750862AbcIUG3Z (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 02:29:25 -0400
+Received: by mail-yw0-f179.google.com with SMTP id u82so36998945ywc.2
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Sep 2016 23:29:25 -0700 (PDT)
+In-Reply-To: <45C6F82E-6242-41CE-BBA6-1F5200E0B9BC@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Douglas Fuller <dfuller@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, John Spray <jspray@redhat.com>
 
-On Tue, Sep 20, 2016 at 9:48 AM, Evgeniy Firsov
-<Evgeniy.Firsov@sandisk.com> wrote:
-> It has nothing to do with compilers.
-> There is a bug in NDEBUG handling in ZetaScale, which Ceph=E2=80=99s
-> CmakeLists.txt passes down.
+On Tue, Sep 20, 2016 at 10:16 AM, Douglas Fuller <dfuller@redhat.com> wrote:
+> This serves to assemble some discussions we’ve had recently surrounding performing CephFS forward scrub in the case of multiple, active MDSs. I have been doing some implementation work recently in this area and it became a large enough departure from current practice that it’s probably time to revisit the design altogether. This message is intended to summarize the discussions I’ve had so far and to serve as a straw man for any changes that may be needed. It contains a couple questions as well.
 >
-> And =E2=80=9Cin tree=E2=80=9D build just uses wrong include paths, I gues=
-s.
+> Currently, CephFS forward scrub proceeds straightforwardly by enqueuing inodes onto a stack as they are found, completing each parent directory once all of its children have been scrubbed. In a multi-MDS system, this will need to be extended to handle subtrees present on other MDSs.
 >
-> On 9/19/16, 3:00 PM, "Willem Jan Withagen" <wjw@digiware.nl> wrote:
+> The proposed design is as follows:
 >
->>On 19-9-2016 23:37, Evgeniy Firsov wrote:
->>> Hi, Guys,
->>>
->>> When I build Ceph using ./do_cmake.sh && cd build && make -j32, looks
->>>like
->>> everything is compiled using C++ compiler, even files with .c extension=
-.
-
-this is not true. src/tracing/librados.c is a pure C source file. when
-i run following command, i have:
-
-$ make rados_tp VERBOSE=3D1
-...
-Building C object
-src/tracing/CMakeFiles/rados_tp.dir/__/__/include/tracing/librados.c.o
-cd /var/ceph/ceph/build/src/tracing && ccache /usr/bin/cc
--DCEPH_LIBDIR=3D\"/home/kefu/.local/lib\"
--DCEPH_PKGLIBDIR=3D\"/home/kefu/.local/lib/ceph\" -D__linux__
--Drados_tp_EXPORTS -I/var/ceph/ceph/build/src/include
--I/var/ceph/ceph/src -I/var/ceph/ceph/build/include
--I/var/ceph/ceph/src/xxHash  -Wall -Wtype-limits -Wignored-qualifiers
--Winit-self -Wpointer-arith -Werror=3Dformat-security
--fno-strict-aliasing -fsigned-char -rdynamic -fstack-protector-strong
--fdiagnostics-color=3Dauto -g -fPIC   -DHAVE_CONFIG_H -D__CEPH__
--D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE
--D_FILE_OFFSET_BITS=3D64 -o
-CMakeFiles/rados_tp.dir/__/__/include/tracing/librados.c.o   -c
-/var/ceph/ceph/build/include/tracing/librados.c
-Linking C shared library ../../lib/librados_tp.so
-...
-
-so it is using cc not c++ to compile this source file.
-
-
->>> This fails ZetaScale compilation, which is pure C.
-
-could you share your repo/branch address of Ceph with ZetaScale so
-people can try and verify?
-
->>>
->>> In oppose to that if I am building =C2=B3in tree=C2=B2, with cmake . &&=
- make -j32,
->>> Ceph build fails, because it uses proper C compiler for .c extension,
->>>but
->>> they include Ceph=C2=B9s assert.h which is C++.
->>>
->>> So, probably, I need to configure compiler on per directory basis, is
->>> there known way to do that?
->>> Also, can somebody point me where in the CMakeList.txt compiler is
->>> configured for =C2=B3out of tree=C2=B2 build? I mean C++ for everything=
-.
->>
->>You can run
->>cmake --system-information
->>to find out what you system is using for defaults....
->>
->>Mine (FreeBSD) has:
->>
->>CMAKE_CXX_COMPILER =3D=3D "/usr/bin/CC"
->>CMAKE_C_COMPILER =3D=3D "/usr/bin/cc"
->>
->>So it sort of already knows from the beginning the difference between C
->>and C++
->>
->>--WjW
->>>
->>> =E2=80=B9
->>> Evgeniy
->>>
->>>
->>> PLEASE NOTE: The information contained in this electronic mail message
->>>is intended only for the use of the designated recipient(s) named above.
->>>If the reader of this message is not the intended recipient, you are
->>>hereby notified that you have received this message in error and that
->>>any review, dissemination, distribution, or copying of this message is
->>>strictly prohibited. If you have received this communication in error,
->>>please notify the sender by telephone or e-mail (as shown above)
->>>immediately and destroy any and all copies of this message in your
->>>possession (whether hard copies or electronically stored copies).
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
+> We scrub a local subtree as we would in the single-MDS case: follow the directory hierarchy downward, pushing found items onto a stack and completing directories once all their children are complete. When a subtree boundary is encountered, send a message to the authoritative MDS for that subtree requesting that it be scrubbed. When subtree scrubbing is complete, send a message to the requesting MDS with the completion information and relevant rstats for the parent directory inode (NB: do we have to block the scrubbing of all ancestors, then?).
 >
-> PLEASE NOTE: The information contained in this electronic mail message is=
- intended only for the use of the designated recipient(s) named above. If t=
-he reader of this message is not the intended recipient, you are hereby not=
-ified that you have received this message in error and that any review, dis=
-semination, distribution, or copying of this message is strictly prohibited=
-. If you have received this communication in error, please notify the sende=
-r by telephone or e-mail (as shown above) immediately and destroy any and a=
-ll copies of this message in your possession (whether hard copies or electr=
-onically stored copies).
+> When popping an inode from the scrub stack, it’s important to note that its authority may have been changed by some intervening export. The scrubbing MDS will drop any file inode for which it is no longer authoritative, assuming this would be handled by the correct MDS. For directory inodes, forward a request to the authoritative MDS to scrub the directory. This may result in attempts to scrub the same inodes more than once (though we track this and can avoid most of the work), it seems necessary in order to guarantee no directories are missed due to splits or exports (NB: this is correct, right?).
 
+I think we need to spell this out a little more. Some thoughts:
+* right now, the ScrubStack is just a CInode*. This needs to turn into
+a two-way reference.
+* When we freeze a tree for export, we need a new step that removes it
+from the ScrubStack and sets up the "remote scrub" state we'd have if
+it were a freshly-encountered subtree boundary
+  * this may involve some delayed execution of remote scrub requests,
+or of bundling up the need for a scrub in the exported state
 
+> Outbound scrub requests will need to be tracked and restarted in the case of MDS failure.
+>
+> It may be the case that, in the case of a badly thrashing directory hierarchy, that many unnecessary sub-scrub requests may be created and duplicate work attempted. We can short-circuit the duplicate work by noting (as we do in the single-MDS case) when we have already scrubbed an inode and bailing when we attempt to do it again. I’m not sure that extra or unnecessary requests are avoidable or if they will pose a serious performance concern.
 
---=20
-Regards
-Kefu Chai
+I think a good design won't let this be much a problem. If subtrees
+move continuously we might have to "chase" the scrub (which perhaps
+argues for sending the scrub state along with the metadata export),
+but otherwise more fragmentation will require more messages but the
+system should handle that (it will presumably be constant state at the
+boundaries).
+-Greg
