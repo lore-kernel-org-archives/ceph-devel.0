@@ -1,58 +1,76 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: A design for CephFS forward scrub with multiple MDS
-Date: Wed, 21 Sep 2016 13:56:35 +0100
-Message-ID: <CALe9h7cTGVVkkuKxc4CCRFC-xpyiPRfKXFj3i5Kof09Z3yfWhg@mail.gmail.com>
-References: <45C6F82E-6242-41CE-BBA6-1F5200E0B9BC@redhat.com>
+From: Samuel Just <sjust-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: cache tier on rgw index pool
+Date: Wed, 21 Sep 2016 05:57:18 -0700
+Message-ID: <CAN=+7FWdY6ZS_Pgx=5EDmDag60vgrZ6hcW6WMSN0=Cuftrcv-g@mail.gmail.com>
+References: <CAP3mxSwSbn9YJyiffENP8nykXDzQZKBbneS83Pb5BEyRpqx0dA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:36463 "EHLO
-        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933433AbcIUM45 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 08:56:57 -0400
-Received: by mail-qk0-f182.google.com with SMTP id z190so44135901qkc.3
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 05:56:56 -0700 (PDT)
-In-Reply-To: <45C6F82E-6242-41CE-BBA6-1F5200E0B9BC@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Douglas Fuller <dfuller@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Gregory Farnum <gfarnum@redhat.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAP3mxSwSbn9YJyiffENP8nykXDzQZKBbneS83Pb5BEyRpqx0dA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Abhishek Varshney <abhishek.varshney-ay2nrczjKqVWk0Htik3J/w@public.gmane.org>
+Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Sep 20, 2016 at 6:16 PM, Douglas Fuller <dfuller@redhat.com> wrote:
-> This serves to assemble some discussions we’ve had recently surrounding performing CephFS forward scrub in the case of multiple, active MDSs. I have been doing some implementation work recently in this area and it became a large enough departure from current practice that it’s probably time to revisit the design altogether. This message is intended to summarize the discussions I’ve had so far and to serve as a straw man for any changes that may be needed. It contains a couple questions as well.
+I seriously doubt that it's ever going to be a winning strategy to let
+rgw index objects go to a cold tier.  Some practical problems:
+1) We don't track omap size (the leveldb entries for an object)
+because it would turn writes into rmw's -- so they always show up as 0
+size.  Thus, the target_max_bytes param is going to be useless.
+2) You can't store omap objects on an ec pool at all, so if the base
+pool is an ec pool, nothing will ever be demoted.
+3) We always promote whole objects.
+
+As to point 2., I'm guessing that Greg meant that OSDs don't care
+about each other's leveldb instances *directly* since leveldb itself
+is behind two layers of interfaces (one osd might have bluestore using
+rocksdb, while the other might have filestore with some other
+key-value db entirely).  Of course, replication -- certainly including
+the omap entries -- still happens, but at the object level rather than
+at the key-value db level.
+-Sam
+
+On Wed, Sep 21, 2016 at 5:43 AM, Abhishek Varshney
+<abhishek.varshney-ay2nrczjKqVWk0Htik3J/w@public.gmane.org> wrote:
+> Hi,
 >
-> Currently, CephFS forward scrub proceeds straightforwardly by enqueuing inodes onto a stack as they are found, completing each parent directory once all of its children have been scrubbed. In a multi-MDS system, this will need to be extended to handle subtrees present on other MDSs.
+> I am evaluating on setting up a cache tier for the rgw index pool and
+> have a few questions regarding that. The rgw index pool is different
+> as it completely stores the data in leveldb. The 'rados df' command on
+> the existing index pool shows size in KB as 0 on a 1 PB cluster with
+> 500 million objects running ceph 0.94.2.
 >
-> The proposed design is as follows:
+> Seeking clarifications on the following points:
 >
-> We scrub a local subtree as we would in the single-MDS case: follow the directory hierarchy downward, pushing found items onto a stack and completing directories once all their children are complete. When a subtree boundary is encountered, send a message to the authoritative MDS for that subtree requesting that it be scrubbed. When subtree scrubbing is complete, send a message to the requesting MDS with the completion information and relevant rstats for the parent directory inode (NB: do we have to block the scrubbing of all ancestors, then?).
-
-I think we have to block, yes -- otherwise we can't claim to have
-really validated the recursive statistics at the upper levels.
-
-> When popping an inode from the scrub stack, it’s important to note that its authority may have been changed by some intervening export. The scrubbing MDS will drop any file inode for which it is no longer authoritative, assuming this would be handled by the correct MDS. For directory inodes, forward a request to the authoritative MDS to scrub the directory. This may result in attempts to scrub the same inodes more than once (though we track this and can avoid most of the work), it seems necessary in order to guarantee no directories are missed due to splits or exports (NB: this is correct, right?).
-
-Yes, I think this sounds right.  I was fuzzy on this part when we
-talked yesterday but it makes more sense after sleeping on it: when
-something in our stack gets migrated away, we don't just forget about
-it, we treat it as a new bud on the tree that needs to be sent off to
-another mds and scrubbed.
-
+> 1. How are the cache tier parameters like target_max_bytes,
+> cache_target_dirty_ratio and cache_target_full_ratio honoured given
+> the size of index pool is shown as 0 and how does flush/eviction take
+> place in this case? Is there any specific reason why the omap data is
+> not reflected in the size, as Sage mentions it here [1]
 >
-> Outbound scrub requests will need to be tracked and restarted in the case of MDS failure.
-
-One thing we didn't discuss was the backwards case, where I (an MDS)
-am told by another MDS to scrub a subtree, but he fails before I can
-tell him the result of my scrub.  Simplest thing seems to be to abort
-scrubs in this case, and say that (for the moment) a scrub is only
-guaranteed to complete if the MDS where it was initiated stays online?
-
-John
-
-> It may be the case that, in the case of a badly thrashing directory hierarchy, that many unnecessary sub-scrub requests may be created and duplicate work attempted. We can short-circuit the duplicate work by noting (as we do in the single-MDS case) when we have already scrubbed an inode and bailing when we attempt to do it again. I’m not sure that extra or unnecessary requests are avoidable or if they will pose a serious performance concern.
+> 2. I found a mail archive in ceph-devel where Greg mentions that
+> "there's no cross-OSD LevelDB replication or communication" [2]. In
+> that case,  how does ceph handle re-balancing of leveldb instance data
+> in case of node failure?
 >
-> Additions, criticisms, clarifications, tomatoes, and other reactions would be appreciated.
+> 3. Are there any surprises that can be expected on deploying a cache
+> tier for rgw index pool ?
 >
-> Cheers,
-> —Doug
+> [1] http://www.spinics.net/lists/ceph-devel/msg28635.html
+> [2] http://www.spinics.net/lists/ceph-devel/msg24990.html
+>
+> Thanks
+> Abhishek Varshney
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
