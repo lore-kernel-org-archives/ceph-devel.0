@@ -1,53 +1,51 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: reStructuredText vs. AsciiDoc
-Date: Wed, 21 Sep 2016 18:38:46 -0400
-Message-ID: <CAC-Np1z_cxGx6q0-O=H68hcex3o-6ffAV==P_oT_Hyx=_fh96w@mail.gmail.com>
-References: <CALe9h7ewfBg0Q5fUV7zknDEy4pMpwNP9DQ-EYLm53tLmuRnbvw@mail.gmail.com>
+From: Dan Mick <dmick@redhat.com>
+Subject: Re: Docs falling out of sync with code
+Date: Wed, 21 Sep 2016 15:42:19 -0700
+Message-ID: <223d075f-724c-0eba-5165-2dc4ba0fd42e@redhat.com>
+References: <52e4b5e2-2db7-1437-8fd3-ab7b7e8ec879@redhat.com>
+ <alpine.DEB.2.11.1609212228270.1040@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:38176 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755629AbcIUWis (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 18:38:48 -0400
-Received: by mail-wm0-f42.google.com with SMTP id l132so116503060wmf.1
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 15:38:47 -0700 (PDT)
-In-Reply-To: <CALe9h7ewfBg0Q5fUV7zknDEy4pMpwNP9DQ-EYLm53tLmuRnbvw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:46204 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754062AbcIUWmU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 21 Sep 2016 18:42:20 -0400
+In-Reply-To: <alpine.DEB.2.11.1609212228270.1040@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Sep 20, 2016 at 7:25 AM, John Spray <jspray@redhat.com> wrote:
-> Hi all,
->
-> Currently the Ceph upstream documentation is mostly written in
-> restructuredtext, and built into HTML with Sphinx.
->
-> We at Red Hat have some writer colleagues who are more comfortable
-> with asciidoc, and it has been suggested that we could get more new
-> content upstream (i.e. on github for everyone) if we were using
-> asciidoc.
+On 09/21/2016 03:29 PM, Sage Weil wrote:
+> On Wed, 21 Sep 2016, Dan Mick wrote:
+>> The upstream docs at http://ceph.com/docs can tend to become out of
+>> date.  We don't have much process to track things that need doc work.
+>>
+>> As a start, I propose we add a "docs needed" flag to tracker.ceph.com so
+>> that we can at least search things that add or change features through a
+>> tracker issue, and a "docs needed" label to github, so we can track it
+>> on PRs as well.
+>>
+>> Thoughts?  We can make this happen pretty quickly, and of course it's no
+>> perfect lock, but at least it may start contributors and reviewers
+>> thinking about the issue.
+> 
+> We can make a 'needs-docs' tag for PRs in github.  If they don't block the 
+> merge, then we can still search for them in open or closed prs, and make a 
+> point of removing the tag once the docs are eventually updated.
 
-The barrier to contribute from asciidoc to rst is not huge, it is
-mainly inconvenient. I think there is much more to gain
-from current contributors to raise the bar to improve the current state of docs.
+That's what I meant by "docs needed label to github", yep.
 
->
-> So does anyone have any strong attachment to the restructuredtext
-> format currently in use?
+> For the tracker, maybe a category for each project instead of a 
+> separate tracker?  Not sure..
 
-I really like RestructuredText, but an important question here is:
-*if* we decided to move, are we aware of the burden that means
-to generate: html, man pages, and the porting of the extensions
-(doxygen, ditaa, and maybe something else I might be missing)
+You mean in addition to a flag?  I'm suggesting a flag so that issue
+authors/reviewers/casual observers can remind the assignee "btw, when
+you get to pushing this, make sure you've addressed the doc changes
+somehow".
 
->
-> (Opinions especially valued from people/groups who are active
-> contributors to the docs)
->
-> John
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The "issue for only documentation changes" is currently, yes, a separate
+"Tracker" dropdown (like bug or feature), which has always seemed a bit
+clunky, but workable, to me.
