@@ -1,65 +1,90 @@
-From: John Spray <jspray@redhat.com>
+From: Jeff Layton <jlayton@redhat.com>
 Subject: Re: richacl packaging for cephfs
-Date: Wed, 21 Sep 2016 13:00:18 +0100
-Message-ID: <CALe9h7dPwMvEVXA0vWxT=SjLm2RNRMVPv1MMAOScJo3sVawk_Q@mail.gmail.com>
+Date: Wed, 21 Sep 2016 08:19:09 -0400
+Message-ID: <1474460349.30941.1.camel@redhat.com>
 References: <CALe9h7f_q9iGzTRYhXHKiNFfn2qKfc-UUh+eWJ_XqTh9YoqQWg@mail.gmail.com>
- <CAHpGcMJ4KAnrbsgTJhru7AGWVP3Ch_LmZOtjiZBMkAGBkEhwNg@mail.gmail.com>
+         <1474384235.19989.35.camel@redhat.com>
+         <CAHc6FU5WKczSkNPd9GPB5TmVA4A2P4aE3kUkNX4-oeEtGB8Hkg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f180.google.com ([209.85.220.180]:36698 "EHLO
-        mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933777AbcIUMAk (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 08:00:40 -0400
-Received: by mail-qk0-f180.google.com with SMTP id z190so42650788qkc.3
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 05:00:39 -0700 (PDT)
-In-Reply-To: <CAHpGcMJ4KAnrbsgTJhru7AGWVP3Ch_LmZOtjiZBMkAGBkEhwNg@mail.gmail.com>
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:34843 "EHLO
+        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933810AbcIUMTO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 08:19:14 -0400
+Received: by mail-qk0-f176.google.com with SMTP id t7so43139648qkh.2
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 05:19:14 -0700 (PDT)
+In-Reply-To: <CAHc6FU5WKczSkNPd9GPB5TmVA4A2P4aE3kUkNX4-oeEtGB8Hkg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Andreas_Gr=C3=BCnbacher?= <andreas.gruenbacher@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, James Page <james.page@canonical.com>, Tim Serong <tserong@suse.com>, Ken Dreyer <kdreyer@redhat.com>
+To: Andreas Gruenbacher <agruenba@redhat.com>
+Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, James Page <james.page@canonical.com>, Tim Serong <tserong@suse.com>, Ken Dreyer <kdreyer@redhat.com>
 
-On Wed, Sep 21, 2016 at 12:31 PM, Andreas Grünbacher
-<andreas.gruenbacher@gmail.com> wrote:
-> 2016-09-20 16:57 GMT+02:00 John Spray <jspray@redhat.com>:
->> Hi all,
->>
->> I was just taking an updated look at how we could proceed to get
->> richacl support[1,2,3] built and tested in cephfs (probably for
->> luminous).
->>
->> The packages exist currently for Fedora.  For testing, we will need
->> them for Ubuntu (probably just Xenial?), CentOS and RHEL (once there
->> are RHEL nodes in the sepia lab).
->>
->> I'm not very aware of ways forward for Ubuntu, but on the CentOS front
->> it seems like we have at least a couple of possibilities:
->>  * Build ourselves (using some branch of the fedora packaging?) on a
->> Ceph gitbuilder/jenkins job and install from that repo in teuthology
->> jobs
->>  * Get packages into CentOS Storage SIG and point teuthology at
->> external storage SIG repos during testing
->>
->> I believe we could ask nicely for some help from the storage SIG to
->> package richacl, but I'm not immediately sure if that's actually our
->> preferred approach for consuming packages in our CI vs. self-building
->> anything that's not in the distro.
->>
->> Does anybody have thoughts on the best way to go?
->
-> As Jeff has suggested, does having the package in epel7 help you?
-
-I think this should work for the Ceph CI, I believe we already point
-our test nodes to EPEL -- thank you.
-
-John
-
->
->> Would also love to hear any thoughts about richacl  SUSE and Ubuntu
->
-> I don't have any experience with Ubuntu packaging. We can add stuff to
-> the upstream repository if that helps.
->
+On Wed, 2016-09-21 at 13:24 +0200, Andreas Gruenbacher wrote:
+> > On Tue, Sep 20, 2016 at 5:10 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> > 
+> > On Tue, 2016-09-20 at 15:57 +0100, John Spray wrote:
+> > > 
+> > > Hi all,
+> > > 
+> > > I was just taking an updated look at how we could proceed to get
+> > > richacl support[1,2,3] built and tested in cephfs (probably for
+> > > luminous).
+> > > 
+> > > The packages exist currently for Fedora.  For testing, we will need
+> > > them for Ubuntu (probably just Xenial?), CentOS and RHEL (once there
+> > > are RHEL nodes in the sepia lab).
+> > > 
+> > > I'm not very aware of ways forward for Ubuntu, but on the CentOS front
+> > > it seems like we have at least a couple of possibilities:
+> > >  * Build ourselves (using some branch of the fedora packaging?) on a
+> > > Ceph gitbuilder/jenkins job and install from that repo in teuthology
+> > > jobs
+> > >  * Get packages into CentOS Storage SIG and point teuthology at
+> > > external storage SIG repos during testing
+> > > 
+> > > I believe we could ask nicely for some help from the storage SIG to
+> > > package richacl, but I'm not immediately sure if that's actually our
+> > > preferred approach for consuming packages in our CI vs. self-building
+> > > anything that's not in the distro.
+> > > 
+> > > Does anybody have thoughts on the best way to go?
+> > > 
+> > > Would also love to hear any thoughts about richacl  SUSE and Ubuntu
+> > > 
+> > > John
+> > > 
+> > > 1. https://github.com/ceph/ceph/pull/6341
+> > > 2. https://github.com/andreas-gruenbacher/richacl
+> > > 3. http://pkgs.fedoraproject.org/cgit/rpms/richacl.git/
+> > > --
+> > 
+> > (cc'ing andreas)
+> > 
+> > There are already richacl packages for Fedora, and the build
+> > requirements are pretty reasonable. Is there any reason not to just ask
+> > for those packages to be added to EPEL7? Should be pretty trivial to
+> > get them built.
+> 
+> I've requested an epel7 branch to be added to:
+> 
+>   https://admin.fedoraproject.org/pkgdb/package/rpms/richacl/
+> 
+> as per:
+> 
+>   https://fedoraproject.org/wiki/PackageDB_admin_requests#Additional_branches_for_existing_packagesadded
+> 
+> Not sure how long it will take to get that approved or if any
+> additional steps are needed; I guess we'll find out.
+> 
 > Thanks,
 > Andreas
+
+Thanks Andreas! Last time I did it, it took around a day or so. You'll
+also need to kick off a package build once it's done. That should be
+all that's needed though.
+
+Cheers,
+-- 
+Jeff Layton <jlayton@redhat.com>
