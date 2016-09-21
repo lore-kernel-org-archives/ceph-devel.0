@@ -1,67 +1,79 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: async messenger random read performance on NVMe
-Date: Wed, 21 Sep 2016 19:02:34 +0000
-Message-ID: <CY1PR02MB21236DC2DEDA1C4577FED95BF4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: async messenger random read performance on NVMe
+Date: Wed, 21 Sep 2016 14:10:32 -0500
+Message-ID: <61672ba0-fadc-2f25-dcf2-090129bd1c53@redhat.com>
 References: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
+ <CY1PR02MB21236DC2DEDA1C4577FED95BF4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-dm3nam03on0076.outbound.protection.outlook.com ([104.47.41.76]:36512
-        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S934041AbcIUTCg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 21 Sep 2016 15:02:36 -0400
-In-Reply-To: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:56194 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S935188AbcIUTKk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 21 Sep 2016 15:10:40 -0400
+In-Reply-To: <CY1PR02MB21236DC2DEDA1C4577FED95BF4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-TWFyaywNCkFyZSB5b3UgdHJ5aW5nIHdpdGggbXVsdGlwbGUgcGh5c2ljYWwgY2xpZW50cyBhbmQg
-d2l0aCBpbmNyZWFzZWQgT1NEIHNoYXJkcz8NClNpbXBsZSBzaG91bGQgZ28gd2F5IG1vcmUgd2l0
-aCB0aGUgc2ltaWxhciBjb25maWcgZm9yIDRLIFJSIGJhc2VkIG9uIHRoZSByZXN1bHQgd2Ugd2Vy
-ZSBnZXR0aW5nIGVhcmxpZXIgdW5sZXNzIHlvdXIgY3B1IGlzIGdldHRpbmcgc2F0dXJhdGVkIGF0
-IHRoZSBPU0Qgbm9kZXMuDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1Pcmln
-aW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
-IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBN
-YXJrIE5lbHNvbg0KU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMjEsIDIwMTYgMTE6NTAgQU0N
-ClRvOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBhc3luYyBtZXNzZW5nZXIgcmFuZG9tIHJlYWQgcGVy
-Zm9ybWFuY2Ugb24gTlZNZQ0KDQpSZWNlbnRseSBpbiBtYXN0ZXIgd2UgbWFkZSBhc3luYyBtZXNz
-ZW5nZXIgZGVmYXVsdC4gIEFmdGVyIGRvaW5nIGEgYnVuY2ggb2YgYmlzZWN0aW9uLCBpdCB0dXJu
-cyBvdXQgdGhhdCB0aGlzIGNhdXNlZCBhIGZhaXJseSBkcmFtYXRpYyBkZWNyZWFzZSBpbiBibHVl
-c3RvcmUgcmFuZG9tIHJlYWQgcGVyZm9ybWFuY2UuICBUaGlzIGlzIG9uIGEgY2x1c3RlciB3aXRo
-IGZhaXJseSBmYXN0IE5WTWUgY2FyZHMsIDE2IE9TRHMgYWNyb3NzIDQgT1NEIGhvc3RzLiAgVGhl
-cmUgYXJlIDggZmlvIGNsaWVudCBwcm9jZXNzZXMgd2l0aCAzMiBjb25jdXJyZW50IHRocmVhZHMg
-ZWFjaC4NCg0KQ2VwaCBtYXN0ZXIgdXNpbmcgYmx1ZXN0b3JlDQoNClBhcmFtZXRlcnMgdHdlYWtl
-ZDoNCg0KbXNfYXN5bmNfc2VuZF9pbmxpbmUNCm1zX2FzeW5jX29wX3RocmVhZHMNCm1zX2FzeW5j
-X21heF9vcF90aHJlYWRzDQoNCnNpbXBsZTogMTY4SyBJT1BTDQoNCnNlbmRfaW5saW5lOiB0cnVl
-DQphc3luYyAzLzUgICB0aHJlYWRzOiAxMTFLIElPUFMNCmFzeW5jIDQvOCAgIHRocmVhZHM6IDEy
-NUsgSU9QUw0KYXN5bmMgOC8xNiAgdGhyZWFkczogMTI4SyBJT1BTDQphc3luYyAxNi8zMiB0aHJl
-YWRzOiAxMjhLIElPUFMNCmFzeW5jIDI0LzQ4IHRocmVhZHM6IDEyOEsgSU9QUw0KYXN5bmMgMjUv
-NTAgdGhyZWFkczogc2VnZmF1bHQNCmFzeW5jIDI2LzUyIHRocmVhZHM6IHNlZ2ZhdWx0DQphc3lu
-YyAzMi82NCB0aHJlYWRzOiBzZWdmYXVsdA0KDQpzZW5kX2lubGluZTogZmFsc2UNCmFzeW5jIDMv
-NSAgIHRocmVhZHM6IDE1M0sgSU9QUw0KYXN5bmMgNC84ICAgdGhyZWFkczogMTUzSyBJT1BTDQph
-c3luYyA4LzE2ICB0aHJlYWRzOiAxNTJLIElPUFMNCg0KU28gZGVmaW5pdGVseSBzZXR0aW5nIHNl
-bmRfaW5saW5lIHRvIGZhbHNlIGhlbHBzIHByZXR0eSBkcmFtYXRpY2FsbHksIHRob3VnaCB3ZSdy
-ZSBzdGlsbCBhIGxpdHRsZSBzbG93ZXIgZm9yIHNtYWxsIHJhbmRvbSByZWFkcyB0aGFuIHNpbXBs
-ZSBtZXNzZW5nZXIuICBIYW9tYWksIHJlZ2FyZGluZyB0aGUgc2VnZmF1bHRzLCBJIHRvb2sgYSBx
-dWljayBsb29rIHdpdGggZ2RiIGF0IHRoZSBjb3JlIGZpbGUgYnV0IGRpZG4ndCBzZWUgYW55dGhp
-bmcgaW1tZWRpYXRlbHkgb2J2aW91cy4gIEl0IG1pZ2h0IGJlIHdvcnRoIHNlZWluZyBpZiB5b3Ug
-Y2FuIHJlcHJvZHVjZS4NCg0KT24gdGhlIHBlcmZvcm1hbmNlIGZyb250LCBJJ2xsIHRyeSB0byBz
-ZWUgaWYgSSBjYW4gc2VlIGFueXRoaW5nIG9idmlvdXMgaW4gcGVyZi4NCg0KTWFyaw0KLS0NClRv
-IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBj
-ZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
-bmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
-am9yZG9tby1pbmZvLmh0bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVk
-IGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhl
-IHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSBy
-ZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3Ug
-YXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBp
-biBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24s
-IG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlv
-dSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlm
-eSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1l
-ZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGlu
-IHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBz
-dG9yZWQgY29waWVzKS4NCg==
+Yes to multiple physical clients (2 fio processes per client using 
+librbd with io depth = 32 each).  No to increased OSD shards, this is 
+just default.  Can you explain a bit more why Simple should go faster 
+with a similar config?  Did you mean async?  I'm going to try to dig in 
+with perf and see how they compare.  I wish I had a better way to 
+profile lock contention rather than poorman's profiling via gdb.  I 
+suppose lttng is the answer.
+
+Mark
+
+On 09/21/2016 02:02 PM, Somnath Roy wrote:
+> Mark,
+> Are you trying with multiple physical clients and with increased OSD shards?
+> Simple should go way more with the similar config for 4K RR based on the result we were getting earlier unless your cpu is getting saturated at the OSD nodes.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+> Sent: Wednesday, September 21, 2016 11:50 AM
+> To: ceph-devel
+> Subject: async messenger random read performance on NVMe
+>
+> Recently in master we made async messenger default.  After doing a bunch of bisection, it turns out that this caused a fairly dramatic decrease in bluestore random read performance.  This is on a cluster with fairly fast NVMe cards, 16 OSDs across 4 OSD hosts.  There are 8 fio client processes with 32 concurrent threads each.
+>
+> Ceph master using bluestore
+>
+> Parameters tweaked:
+>
+> ms_async_send_inline
+> ms_async_op_threads
+> ms_async_max_op_threads
+>
+> simple: 168K IOPS
+>
+> send_inline: true
+> async 3/5   threads: 111K IOPS
+> async 4/8   threads: 125K IOPS
+> async 8/16  threads: 128K IOPS
+> async 16/32 threads: 128K IOPS
+> async 24/48 threads: 128K IOPS
+> async 25/50 threads: segfault
+> async 26/52 threads: segfault
+> async 32/64 threads: segfault
+>
+> send_inline: false
+> async 3/5   threads: 153K IOPS
+> async 4/8   threads: 153K IOPS
+> async 8/16  threads: 152K IOPS
+>
+> So definitely setting send_inline to false helps pretty dramatically, though we're still a little slower for small random reads than simple messenger.  Haomai, regarding the segfaults, I took a quick look with gdb at the core file but didn't see anything immediately obvious.  It might be worth seeing if you can reproduce.
+>
+> On the performance front, I'll try to see if I can see anything obvious in perf.
+>
+> Mark
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
