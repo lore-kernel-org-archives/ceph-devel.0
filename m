@@ -1,64 +1,119 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Introducing Tendrl
-Date: Wed, 21 Sep 2016 08:47:06 +0100
-Message-ID: <CALe9h7e3e=izA0UTeWF3rhZd_UmShEZs_1eGLRi4XoYY54VNXA@mail.gmail.com>
-References: <CAOLAhP0dQo1_Dw-6TUxPXh+R+trxjQnLYWh+ax9E4iyV47tCiA@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Linking error with rocksdb
+Date: Wed, 21 Sep 2016 10:51:31 +0200
+Message-ID: <17b328e5-93d0-2004-f928-3331a645fc1f@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:33401 "EHLO
-        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754346AbcIUHr2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 03:47:28 -0400
-Received: by mail-qk0-f177.google.com with SMTP id w204so37799567qka.0
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 00:47:27 -0700 (PDT)
-In-Reply-To: <CAOLAhP0dQo1_Dw-6TUxPXh+R+trxjQnLYWh+ax9E4iyV47tCiA@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:54386 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753281AbcIUIvj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 21 Sep 2016 04:51:39 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mrugesh Karnik <mkarnik@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Sep 20, 2016 at 8:10 AM, Mrugesh Karnik <mkarnik@redhat.com> wrote:
-> Hi all,
->
-> I'd like to introduce the Tendrl project. Tendrl aims to build a
-> management interface for Ceph. We've pushed some documentation to the
-> documentation repository[1]. The documentation should provide an
-> understanding of the architecture and the components therein. This is
-> still a work in progress. So please feel free to ask questions and
-> make suggestions via the mailing list[2] and Github Issues[3]. There's
-> an IRC channel[4] as well.
+Hi,
 
-Thanks Mrugesh, I've opened a series of github issues to ask for more
-details on languages, protocols, security, scaling etc.  Where there
-are still open questions please feel free to say so, I understand that
-not everything is 100% defined.
+I think I had something like this before, but cannot find it in my Email
+archive...
 
-> Martin Bukatovic had earlier initiated a discussion around Ceph
-> Manager on this list. I'd like to address that here. Currently, we've
-> repurposed Calamari codebase as the Ceph Bridge. We're also tracking
-> the development of Ceph Manager. We'll be setting up a test bed to
-> check the Ceph Manager functionality and respond to the list with
-> feedback and queries.
+I'm trying to build head, which works for a long way, but it gets into
+trouble when linking ceph-mon. Errors out on not being able to find some
+of the references in librocksdb...
 
-My understanding is that the ceph_bridge code was just a prototype --
-I'd suggest that you go forward either with a ceph-mgr module or using
-a REST API, but the calamari-derived ceph_bridge code should
-definitely go away.
+librocksdb.a is recent:
+> ll src/rocksdb/librocksdb.a
+80012 -rw-rw-r--  1 wjw  tegenbosch  305720086 Sep 21 10:40
+src/rocksdb/librocksdb.a
+And it seems defined:
+> nm -e src/rocksdb/librocksdb.a | grep NewLRU
+                 U _ZN7rocksdb11NewLRUCacheEmibd
+                 U _ZN7rocksdb11NewLRUCacheEmibd
+                 U _ZN7rocksdb11NewLRUCacheEmibd
+                 U _ZN7rocksdb11NewLRUCacheEmibd
+                 U _ZN7rocksdb11NewLRUCacheEmibd
+0000000000001fd0 T _ZN7rocksdb11NewLRUCacheEmibd
+                 U _ZN7rocksdb11NewLRUCacheEmibd
+                 U _ZN7rocksdb11NewLRUCacheEmibd
+                 U _ZN7rocksdb11NewLRUCacheEmibd
+                 U _ZN7rocksdb11NewLRUCacheEmibd
+                 U _ZN7rocksdb11NewLRUCacheEmibd
+                 U _ZN7rocksdb11NewLRUCacheEmibd
 
-John
 
->
-> Thanks.
->
-> [1] https://github.com/Tendrl/documentation
-> [2] https://www.redhat.com/mailman/listinfo/tendrl-devel
-> [3] https://github.com/Tendrl/documentation/issues
-> [4] #tendrl-devel on Freenode
->
-> --
-> Mrugesh
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Strange thing that this is a routine that is only added recently. Which
+suggests that it tries to bind against an older librocksdb ..??
+Then I checkout a completely fresh head in a nes directory, still the
+same error.
+So I've deleted anything in /usr/local/ that looks like a
+librocksdb-library. But still it hits error.
+
+Any suggestions where to look further.
+
+--WjW
+
+/usr/bin/CC    -Wall -Wtype-limits -Wignored-qualifiers -Winit-self
+-Wpointer-arith -Werror=format-security -fno-strict-aliasing
+-fsigned-char -Wno-inconsistent-missing-override -Wno-mismatched-tags
+-Wno-unused-function -Wno-unused-local-typedef
+-Wno-inconsistent-missing-override -Wno-unused-private-field
+-Wno-varargs -Wno-gnu-designator -Wno-mismatched-tags
+-Wno-missing-braces -Wno-parentheses -Wno-deprecated-register
+-ftemplate-depth-1024 -Wno-invalid-offsetof -Wnon-virtual-dtor
+-fdiagnostics-color=auto -I/usr/local/include/nss/nss
+-I/usr/local/include/nspr -fno-builtin-malloc -fno-builtin-calloc
+-fno-builtin-realloc -fno-builtin-free -O0  -Wl,-export-dynamic
+CMakeFiles/ceph-mon.dir/ceph_mon.cc.o
+CMakeFiles/common_texttable_obj.dir/common/TextTable.cc.o  -o
+../bin/ceph-mon  -L/usr/local/lib ../lib/libmon.a ../lib/libcommon.a
+../lib/libos.a ../lib/libglobal.a -lrt /usr/local/lib/libatomic_ops.a
+/usr/local/lib/libtcmalloc.so ../lib/libkv.a
+/usr/local/lib/libleveldb.so ../../src/rocksdb/librocksdb.a -lsnappy -lz
+-lbz2 /usr/local/lib/liblz4.so ../lib/libcommon.a
+../lib/libjson_spirit.a ../lib/libcommon_utf8.a ../lib/liberasure_code.a
+/usr/local/lib/libboost_thread.so /usr/local/lib/libboost_system.so
+/usr/local/lib/libboost_regex.so /usr/local/lib/libboost_random.so
+/usr/local/lib/libboost_program_options.so
+/usr/local/lib/libboost_date_time.so
+/usr/local/lib/libboost_iostreams.so /usr/local/lib/libboost_chrono.so
+/usr/local/lib/libboost_atomic.so -lexecinfo
+/usr/local/lib/nss/libssl3.so /usr/local/lib/nss/libsmime3.so
+/usr/local/lib/nss/libnss3.so /usr/local/lib/nss/libnssutil3.so
+/usr/local/lib/libplds4.so /usr/local/lib/libplc4.so
+/usr/local/lib/libnspr4.so -lpthread -lrt
+-Wl,-rpath,/usr/local/lib:/usr/local/lib/nss:
+../lib/libmon.a(RocksDBStore.cc.o): In function
+`RocksDBStore::do_open(std::__1::basic_ostream<char,
+std::__1::char_traits<char> >&, bool)':
+/home/wjw/Ceph/master/ceph/src/kv/RocksDBStore.cc:(.text+0x5253):
+undefined reference to `rocksdb::NewLRUCache(unsigned long, int)'
+../lib/libmon.a(RocksDBStore.cc.o): In function
+`rocksdb::Status::InvalidArgument(rocksdb::Slice const&, rocksdb::Slice
+const&)':
+/home/wjw/Ceph/master/ceph/src/kv/RocksDBStore.cc:(.text._ZN7rocksdb6Status15InvalidArgumentERKNS_5SliceES3_[_ZN7rocksdb6Status15InvalidArgumentERKNS_5SliceES3_]+0x2f):
+undefined reference to `rocksdb::Status::Status(rocksdb::Status::Code,
+rocksdb::Slice const&, rocksdb::Slice const&)'
+../lib/libmon.a(RocksDBStore.cc.o):(.data.rel.ro._ZTVN12RocksDBStore19MergeOperatorRouterE[_ZTVN12RocksDBStore19MergeOperatorRouterE]+0x20):
+undefined reference to
+`rocksdb::AssociativeMergeOperator::FullMerge(rocksdb::Slice const&,
+rocksdb::Slice const*, std::__1::deque<std::__1::basic_string<char,
+std::__1::char_traits<char>, std::__1::allocator<char> >,
+std::__1::allocator<std::__1::basic_string<char,
+std::__1::char_traits<char>, std::__1::allocator<char> > > > const&,
+std::__1::basic_string<char, std::__1::char_traits<char>,
+std::__1::allocator<char> >*, rocksdb::Logger*) const'
+c++: error: linker command failed with exit code 1 (use -v to see
+invocation)
+gmake[3]: *** [src/CMakeFiles/ceph-mon.dir/build.make:129: bin/ceph-mon]
+Error 1
+gmake[3]: Leaving directory '/usr/srcs/Ceph/master/ceph/build'
+gmake[2]: *** [CMakeFiles/Makefile2:569:
+src/CMakeFiles/ceph-mon.dir/all] Error 2
+gmake[2]: Leaving directory '/usr/srcs/Ceph/master/ceph/build'
+gmake[1]: *** [CMakeFiles/Makefile2:581:
+src/CMakeFiles/ceph-mon.dir/rule] Error 2
+gmake[1]: Leaving directory '/usr/srcs/Ceph/master/ceph/build'
+gmake: *** [Makefile:264: ceph-mon] Error 2
+12.527u 6.015s 0:18.51 100.1%   2902+225k 2141+53502io 1pf+0w
