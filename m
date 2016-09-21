@@ -1,59 +1,77 @@
-From: Douglas Fuller <dfuller@redhat.com>
-Subject: Re: A design for CephFS forward scrub with multiple MDS
-Date: Wed, 21 Sep 2016 06:58:49 -0400
-Message-ID: <448CAE51-31E6-43FD-9BF0-CDEEA982493E@redhat.com>
-References: <45C6F82E-6242-41CE-BBA6-1F5200E0B9BC@redhat.com>
- <CAJ4mKGYo+P3JHH4OyzdAtmfx5JaMCT+xCzPLA45=BK50KJLAhg@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.0 \(3226\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+From: Andreas Gruenbacher <agruenba@redhat.com>
+Subject: Re: richacl packaging for cephfs
+Date: Wed, 21 Sep 2016 13:24:31 +0200
+Message-ID: <CAHc6FU5WKczSkNPd9GPB5TmVA4A2P4aE3kUkNX4-oeEtGB8Hkg@mail.gmail.com>
+References: <CALe9h7f_q9iGzTRYhXHKiNFfn2qKfc-UUh+eWJ_XqTh9YoqQWg@mail.gmail.com>
+ <1474384235.19989.35.camel@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f51.google.com ([209.85.214.51]:37799 "EHLO
-        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755939AbcIUK6v (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 06:58:51 -0400
-Received: by mail-it0-f51.google.com with SMTP id 186so46461739itf.0
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 03:58:51 -0700 (PDT)
-In-Reply-To: <CAJ4mKGYo+P3JHH4OyzdAtmfx5JaMCT+xCzPLA45=BK50KJLAhg@mail.gmail.com>
+Received: from mail-yb0-f171.google.com ([209.85.213.171]:33171 "EHLO
+        mail-yb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755177AbcIULYc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 07:24:32 -0400
+Received: by mail-yb0-f171.google.com with SMTP id 2so22283702ybv.0
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 04:24:32 -0700 (PDT)
+In-Reply-To: <1474384235.19989.35.camel@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, John Spray <jspray@redhat.com>
+To: Jeff Layton <jlayton@redhat.com>
+Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, James Page <james.page@canonical.com>, Tim Serong <tserong@suse.com>, Ken Dreyer <kdreyer@redhat.com>
 
+On Tue, Sep 20, 2016 at 5:10 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> On Tue, 2016-09-20 at 15:57 +0100, John Spray wrote:
+>> Hi all,
+>>
+>> I was just taking an updated look at how we could proceed to get
+>> richacl support[1,2,3] built and tested in cephfs (probably for
+>> luminous).
+>>
+>> The packages exist currently for Fedora.  For testing, we will need
+>> them for Ubuntu (probably just Xenial?), CentOS and RHEL (once there
+>> are RHEL nodes in the sepia lab).
+>>
+>> I'm not very aware of ways forward for Ubuntu, but on the CentOS front
+>> it seems like we have at least a couple of possibilities:
+>>  * Build ourselves (using some branch of the fedora packaging?) on a
+>> Ceph gitbuilder/jenkins job and install from that repo in teuthology
+>> jobs
+>>  * Get packages into CentOS Storage SIG and point teuthology at
+>> external storage SIG repos during testing
+>>
+>> I believe we could ask nicely for some help from the storage SIG to
+>> package richacl, but I'm not immediately sure if that's actually our
+>> preferred approach for consuming packages in our CI vs. self-building
+>> anything that's not in the distro.
+>>
+>> Does anybody have thoughts on the best way to go?
+>>
+>> Would also love to hear any thoughts about richacl  SUSE and Ubuntu
+>>
+>> John
+>>
+>> 1. https://github.com/ceph/ceph/pull/6341
+>> 2. https://github.com/andreas-gruenbacher/richacl
+>> 3. http://pkgs.fedoraproject.org/cgit/rpms/richacl.git/
+>> --
+>
+> (cc'ing andreas)
+>
+> There are already richacl packages for Fedora, and the build
+> requirements are pretty reasonable. Is there any reason not to just ask
+> for those packages to be added to EPEL7? Should be pretty trivial to
+> get them built.
 
-> On Sep 21, 2016, at 2:29 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> 
-> On Tue, Sep 20, 2016 at 10:16 AM, Douglas Fuller <dfuller@redhat.com> wrote:
->> 
->> When popping an inode from the scrub stack, it’s important to note that its authority may have been changed by some intervening export. The scrubbing MDS will drop any file inode for which it is no longer authoritative, assuming this would be handled by the correct MDS. For directory inodes, forward a request to the authoritative MDS to scrub the directory. This may result in attempts to scrub the same inodes more than once (though we track this and can avoid most of the work), it seems necessary in order to guarantee no directories are missed due to splits or exports (NB: this is correct, right?).
-> 
-> I think we need to spell this out a little more. Some thoughts:
-> * right now, the ScrubStack is just a CInode*. This needs to turn into
-> a two-way reference.
+I've requested an epel7 branch to be added to:
 
-I wasn’t at the datatype level of detail here. I agree it can’t be a CInode* anymore, and figured it’d have to be something we could fetch if it is exported while on the stack.
+  https://admin.fedoraproject.org/pkgdb/package/rpms/richacl/
 
-> * When we freeze a tree for export, we need a new step that removes it
-> from the ScrubStack and sets up the "remote scrub" state we'd have if
-> it were a freshly-encountered subtree boundary
->  * this may involve some delayed execution of remote scrub requests,
-> or of bundling up the need for a scrub in the exported state
+as per:
 
-Directories don’t know where their subtree roots are, so I’m not sure how we would remove subdirectories and their contained files from the stack if one of their parents were exported. I think the stack could be “dumb” in some sense and not care what happens to the items on it. If we pop a file inode for which we are not authoritative, we drop it on the floor, assuming its parent directory will cause it to be scrubbed elsewhere. If we pop a directory inode for which we are not authoritative, we send a request to the authoritative MDS to scrub it.
+  https://fedoraproject.org/wiki/PackageDB_admin_requests#Additional_branches_for_existing_packagesadded
 
-Some duplicate work is created here since a subtree could be exported and then we will end up requesting multiple scrub operations (which could race one another) in the same directory hierarchy. That’s inefficient, but can be handled fairly well by the existing code. If we want to avoid that, we could either:
-* When we pop a directory inode for which we are not authoritative, trace back to the nearest subtree root. We would need to maintain state for that subtree root anyway, so that could be checked to avoid duplication of work.
-* Create a wrapper data structure for scrubbing a given subtree and link scrub stack elements back to that. The problem would then be maintaining that data structure in the face of subtree changes.
+Not sure how long it will take to get that approved or if any
+additional steps are needed; I guess we'll find out.
 
->> Outbound scrub requests will need to be tracked and restarted in the case of MDS failure.
->> 
->> It may be the case that, in the case of a badly thrashing directory hierarchy, that many unnecessary sub-scrub requests may be created and duplicate work attempted. We can short-circuit the duplicate work by noting (as we do in the single-MDS case) when we have already scrubbed an inode and bailing when we attempt to do it again. I’m not sure that extra or unnecessary requests are avoidable or if they will pose a serious performance concern.
-> 
-> I think a good design won't let this be much a problem. If subtrees
-> move continuously we might have to "chase" the scrub (which perhaps
-> argues for sending the scrub state along with the metadata export),
-> but otherwise more fragmentation will require more messages but the
-> system should handle that (it will presumably be constant state at the
-> boundaries).
-> -Greg
-
+Thanks,
+Andreas
