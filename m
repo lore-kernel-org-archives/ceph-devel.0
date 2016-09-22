@@ -1,57 +1,151 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: "CodingStyle: Clarify and complete chapter 7" in docs-next
-Date: Thu, 22 Sep 2016 14:11:03 +0100
-Message-ID: <20160922131103.GW2356@ZenIV.linux.org.uk>
-References: <CAOi1vP8Y6V3mWs1bv=-CCVRfGi59P+3F85n6rzMn0=K6FqQkcw@mail.gmail.com>
- <20160920001159.GM2356@ZenIV.linux.org.uk>
- <1474339566.1954.25.camel@perches.com>
- <alpine.DEB.2.10.1609200751110.3346@hadrien>
- <1474353123.1954.28.camel@perches.com>
- <20160922112407.47da9393@endymion>
- <1474540930.8253.9.camel@perches.com>
- <20160922135758.0399725d@endymion>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: async messenger random read performance on NVMe
+Date: Thu, 22 Sep 2016 08:29:21 -0500
+Message-ID: <011585e9-6e13-5920-b347-85a8539b7f1a@redhat.com>
+References: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
+ <CY1PR02MB21236DC2DEDA1C4577FED95BF4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
+ <61672ba0-fadc-2f25-dcf2-090129bd1c53@redhat.com>
+ <CY1PR02MB2123F1C1AC9EC34A04ED3017F4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
+ <08bad1a0-e12d-825e-489d-9b44400cb57f@redhat.com>
+ <CY1PR02MB2123377EE95BCDB36BC763CDF4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160922135758.0399725d@endymion>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jean Delvare <jdelvare@suse.de>
-Cc: Joe Perches <joe@perches.com>, Julia Lawall <julia.lawall@lip6.fr>, Ilya Dryomov <idryomov@gmail.com>, Andy Whitcroft <apw@canonical.com>, Linus Torvalds <torvalds@linux-foundation.org>, Jonathan Corbet <corbet@lwn.net>, Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-doc@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:47592 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753112AbcIVN3Y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 22 Sep 2016 09:29:24 -0400
+In-Reply-To: <CY1PR02MB2123377EE95BCDB36BC763CDF4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Sep 22, 2016 at 01:57:58PM +0200, Jean Delvare wrote:
-> > 
-> > MUST is much stronger language than I would prefer.
-> 
-> That's what error means, really. When your compiler fails with an
-> error, you have no choice but to fix your code. Warnings on the other
-> hand may be ignored sometimes.
+I ran a couple of quick 4k randread tests with double the osd op 
+threads/shards:
 
-And they are errors, because of...?
+simple msgr:
 
-> Sure. But I'm afraid you keep changing topics and I have no idea where
-> you are going. We started with "should there be a space before jump
-> labels", then out of nowhere we were discussing the wording of the
-> output of checkpatch (how is that related?) and now you pull statistics
-> out of your hat, like these numbers imply anything.
-> 
-> checkpatch was called checkPATCH for a reason. It's main intent was to
-> prevent NEW (coding-style mostly) errors from creeping into the kernel.
-> The fact that old code does now always follow these recommendations is
-> unfortunate but that doesn't make checkpatch wrong or bad.
-> 
-> ERROR means that the new code isn't allowed to do that. Period.
+2/5  threads/shards: 168K IOPS
+4/10 threads/shards: 164K IOPS
 
-The main intent of checkpatch these days appears to be providing an easy
-way of thoughtless inflation of commit counts, everything else be damned.
-Make-work, in other words.
+async msgr (send inline false):
 
-The _only_ criterion for adding new checks should be a strong consensus in
-the core kernel.  IOW, it should be descriptive, not prescriptive.  "Some
-people do it this way, some - that" is not a valid reason for "let's make it
-uniform; that way is just better, so from now on it's a new requirement".
-Especially when the rationale behind the choice has all the intellectual
-rigour of feng shui.  Some of these checks are common-sense, some are
-absolutely arbitrary, there are far too many of them and elevating them
-to the level of compiler errors like you seem to do is rather dishonest.
+2/5 threads/shards: 153K IOPS
+4/10 threads/shards: 154K IOPS
+
+At least in this setup there doesn't seem to be much benefit to 
+increasing the osd op threads/shards.
+
+Mark
+
+On 09/21/2016 02:47 PM, Somnath Roy wrote:
+> I have 16 OSDs total (16 SSds) , if you are using 4 NvMe cards , the result make sense probably. Sorry for the noise.
+> But, in general we have seen significant performance difference by increasing shards if you have high end cpus with high cores.
+>
+> Thanks & Regards
+> Somnath
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+> Sent: Wednesday, September 21, 2016 12:41 PM
+> To: ceph-devel
+> Subject: Re: async messenger random read performance on NVMe
+>
+> FWIW, in these tests I have 4 NVMe cards split into 4 OSDs each, so your setup with 32 OSDs on SSD probably has more raw randread throughput potential than mine does.
+>
+> Mark
+>
+> On 09/21/2016 02:27 PM, Somnath Roy wrote:
+>> We have the following data from our lab which is all SSD setup and since yours is with NvMe , the result should be much superior than ours unless you are cpu saturated at the OSD hosts.
+>>
+>> Setup :
+>> -------
+>> 3 pools, 1024 PGs/pool
+>> One 2TB rbd image per pool , 3 physical clients running single fio/client with very high QD/jobs.
+>> 16 OSDs each with 4TB.
+>> Two OSD hosts with 48 cpu cores each.
+>> Replication : 2
+>>
+>> Result :
+>> -------
+>>
+>> 4K RR ~*374K IOPs*. With simple.
+>>
+>> I think we are using 25 shards per OSD and 2 threads/shard.
+>> If you are not cpu saturated, try with increased shards and it should give you better 4K RR results. We need to see aync is able to give similar throughput at that level or not.
+>> I will also try measuring if I am able to squeeze some time out of my
+>> BlueStore activities :-)
+>>
+>> Thanks & Regards
+>> Somnath
+>>
+>> -----Original Message-----
+>> From: Mark Nelson [mailto:mnelson@redhat.com]
+>> Sent: Wednesday, September 21, 2016 12:11 PM
+>> To: Somnath Roy; ceph-devel
+>> Subject: Re: async messenger random read performance on NVMe
+>>
+>> Yes to multiple physical clients (2 fio processes per client using librbd with io depth = 32 each).  No to increased OSD shards, this is just default.  Can you explain a bit more why Simple should go faster with a similar config?  Did you mean async?  I'm going to try to dig in with perf and see how they compare.  I wish I had a better way to profile lock contention rather than poorman's profiling via gdb.  I suppose lttng is the answer.
+>>
+>> Mark
+>>
+>> On 09/21/2016 02:02 PM, Somnath Roy wrote:
+>>> Mark,
+>>> Are you trying with multiple physical clients and with increased OSD shards?
+>>> Simple should go way more with the similar config for 4K RR based on the result we were getting earlier unless your cpu is getting saturated at the OSD nodes.
+>>>
+>>> Thanks & Regards
+>>> Somnath
+>>>
+>>> -----Original Message-----
+>>> From: ceph-devel-owner@vger.kernel.org
+>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+>>> Sent: Wednesday, September 21, 2016 11:50 AM
+>>> To: ceph-devel
+>>> Subject: async messenger random read performance on NVMe
+>>>
+>>> Recently in master we made async messenger default.  After doing a bunch of bisection, it turns out that this caused a fairly dramatic decrease in bluestore random read performance.  This is on a cluster with fairly fast NVMe cards, 16 OSDs across 4 OSD hosts.  There are 8 fio client processes with 32 concurrent threads each.
+>>>
+>>> Ceph master using bluestore
+>>>
+>>> Parameters tweaked:
+>>>
+>>> ms_async_send_inline
+>>> ms_async_op_threads
+>>> ms_async_max_op_threads
+>>>
+>>> simple: 168K IOPS
+>>>
+>>> send_inline: true
+>>> async 3/5   threads: 111K IOPS
+>>> async 4/8   threads: 125K IOPS
+>>> async 8/16  threads: 128K IOPS
+>>> async 16/32 threads: 128K IOPS
+>>> async 24/48 threads: 128K IOPS
+>>> async 25/50 threads: segfault
+>>> async 26/52 threads: segfault
+>>> async 32/64 threads: segfault
+>>>
+>>> send_inline: false
+>>> async 3/5   threads: 153K IOPS
+>>> async 4/8   threads: 153K IOPS
+>>> async 8/16  threads: 152K IOPS
+>>>
+>>> So definitely setting send_inline to false helps pretty dramatically, though we're still a little slower for small random reads than simple messenger.  Haomai, regarding the segfaults, I took a quick look with gdb at the core file but didn't see anything immediately obvious.  It might be worth seeing if you can reproduce.
+>>>
+>>> On the performance front, I'll try to see if I can see anything obvious in perf.
+>>>
+>>> Mark
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>>> info at  http://vger.kernel.org/majordomo-info.html
+>>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>>>
+>> N     r  y   b X  ǧv ^ )޺{.n +   z ]z   {ay ʇڙ ,j   f   h   z  w
+>    j:+v   w j m         zZ+     ݢj"  !tml=
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> N�����r��y���b�X��ǧv�^�)޺{.n�+���z�]z���{ay�ʇڙ�,j��f���h���z��w������j:+v���w�j�m��������zZ+�����ݢj"��!tml=
+>
