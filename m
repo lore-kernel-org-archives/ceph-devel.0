@@ -1,83 +1,70 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: async messenger random read performance on NVMe
-Date: Thu, 22 Sep 2016 11:04:03 +0800
-Message-ID: <CACJqLyZuheoQ6nMsYzYpoAxbV7ZarGiS_CbZVJZf0c7rsSuSfw@mail.gmail.com>
-References: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: [ceph-users] Ceph Rust Librados
+Date: Thu, 22 Sep 2016 14:38:57 +1000
+Message-ID: <CAF-wwdHKBTn9hMbnrBeFGY7PpoFOfsne6+vYnwCenuY0Cde=Zg@mail.gmail.com>
+References: <CAO4wRRTxiZLynydFfk+9hC_p6=05Aopd7mLeO4ji9Ue1Qxh5aQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ty1jpn01on0107.outbound.protection.outlook.com ([104.47.93.107]:15527
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932741AbcIVDER (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 21 Sep 2016 23:04:17 -0400
-Received: by mail-oi0-f54.google.com with SMTP id t83so83177682oie.3
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 20:04:11 -0700 (PDT)
-In-Reply-To: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:38634 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750799AbcIVEjA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Sep 2016 00:39:00 -0400
+Received: by mail-wm0-f46.google.com with SMTP id l132so125730334wmf.1
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 21:38:59 -0700 (PDT)
+In-Reply-To: <CAO4wRRTxiZLynydFfk+9hC_p6=05Aopd7mLeO4ji9Ue1Qxh5aQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Chris Jones <chris.jones@lambdastack.io>
+Cc: ceph-users <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Sep 22, 2016 at 2:49 AM, Mark Nelson <mnelson@redhat.com> wrote:
-> Recently in master we made async messenger default.  After doing a bunch of
-> bisection, it turns out that this caused a fairly dramatic decrease in
-> bluestore random read performance.  This is on a cluster with fairly fast
-> NVMe cards, 16 OSDs across 4 OSD hosts.  There are 8 fio client processes
-> with 32 concurrent threads each.
+On Thu, Sep 22, 2016 at 1:42 AM, Chris Jones <chris.jones@lambdastack.io> wrote:
+> Ceph-rust for librados has been released. It's an API interface in Rust for
+> all of librados that's a thin layer above the C APIs. There are low-level
+> direct access and higher level Rust helpers that make working directly with
+> librados simple.
 >
-> Ceph master using bluestore
+> The official repo is:
+> https://github.com/ceph/ceph-rust
 >
-> Parameters tweaked:
+> The Rust Crate is:
+> ceph-rust
 >
-> ms_async_send_inline
-> ms_async_op_threads
-> ms_async_max_op_threads
+> Rust is a systems programing language that gives you the speed and low-level
+> access of C but with the benefits of a higher level language. The main
+> benefits of Rust are:
+> 1. Speed
+> 2. Prevents segfaults
+> 3. Guarantees thread safety
+> 4. Strong typing
+> 5. Compiled
 >
-> simple: 168K IOPS
+> You can find out more at: https://www.rust-lang.org
 >
-> send_inline: true
-> async 3/5   threads: 111K IOPS
-> async 4/8   threads: 125K IOPS
-> async 8/16  threads: 128K IOPS
-> async 16/32 threads: 128K IOPS
-> async 24/48 threads: 128K IOPS
-> async 25/50 threads: segfault
-> async 26/52 threads: segfault
-> async 32/64 threads: segfault
+> Contributions are encouraged and welcomed.
+>
+> This is the base for a number of larger Ceph related projects.
 
-YES, it's expected :-(. We don't allow more async threads.... The fix
-is we limited async thread in graceful way instead of segment
-fault....
+Can you give us any hints to what these projects will entail?
 
+> Updates to
+> the library will be frequent.
 >
-> send_inline: false
-> async 3/5   threads: 153K IOPS
-> async 4/8   threads: 153K IOPS
-> async 8/16  threads: 152K IOPS
+> Also, there will be new Ceph tools coming soon and you can use the following
+> for RGW/S3 access from Rust: (Supports V2 and V4 signatures)
+> Crate: aws-sdk-rust - https://github.com/lambdastackio/aws-sdk-rust
+>
+> Thanks,
+> Chris Jones
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
 
-hmm, send_inline means whether caller directly do ::sendmsg()
-systemcall and the caller will dive into kernel tcp stack. When RR, I
-think bottleneck is caller thread like pg thread, so it will limit max
-bandwidth. But in other cases like iops less than 100w or RW,
-send_inline will reduce per io latency.
 
-Even false, it looks we still have a gap(10k) iops. Because each pipe
-has two threads to serve request. For async, we need to try our best
-to eliminate async thread work like fast_dispatch latency.
 
->
-> So definitely setting send_inline to false helps pretty dramatically, though
-> we're still a little slower for small random reads than simple messenger.
-> Haomai, regarding the segfaults, I took a quick look with gdb at the core
-> file but didn't see anything immediately obvious.  It might be worth seeing
-> if you can reproduce.
->
-> On the performance front, I'll try to see if I can see anything obvious in
-> perf.
->
-> Mark
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Cheers,
+Brad
