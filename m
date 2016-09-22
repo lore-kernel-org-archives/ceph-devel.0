@@ -1,53 +1,69 @@
-From: Dan Mick <dmick@redhat.com>
-Subject: Re: Docs falling out of sync with code
-Date: Wed, 21 Sep 2016 18:33:47 -0700
-Message-ID: <478c5b5e-2bfe-33ff-67e9-401f7d9f38c4@redhat.com>
-References: <52e4b5e2-2db7-1437-8fd3-ab7b7e8ec879@redhat.com>
- <alpine.DEB.2.11.1609212228270.1040@piezo.us.to>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: Linking error with rocksdb
+Date: Thu, 22 Sep 2016 13:00:56 +1000
+Message-ID: <20160922030056.GE6020@rskikr.localdomain>
+References: <17b328e5-93d0-2004-f928-3331a645fc1f@digiware.nl>
+ <CAF-wwdG=RCdgXZmh1qnoxthFpairjD-i1rg2_Q26Or8oLNuzVQ@mail.gmail.com>
+ <78c336e7-17a1-4133-682e-04fefa188b3d@digiware.nl>
+ <CAF-wwdGLGdf0t_EH=bedKSS58dj82dxroNUBx4V=rVwk_OthOg@mail.gmail.com>
+ <a703a996-11c7-815c-c991-9fa4dbec5b64@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44108 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933183AbcIVBds (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 21 Sep 2016 21:33:48 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 8A84E6CB4D
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Sep 2016 01:33:47 +0000 (UTC)
-Received: from [10.17.96.100] (angus.lax.redhat.com [10.17.96.100])
-        by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u8M1Xlci014022
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 21:33:47 -0400
-In-Reply-To: <alpine.DEB.2.11.1609212228270.1040@piezo.us.to>
+Received: from mail-pf0-f177.google.com ([209.85.192.177]:33736 "EHLO
+        mail-pf0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933890AbcIVDBK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2016 23:01:10 -0400
+Received: by mail-pf0-f177.google.com with SMTP id 21so25494911pfy.0
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2016 20:01:09 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <a703a996-11c7-815c-c991-9fa4dbec5b64@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: kefu chai <tchaikov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 09/21/2016 03:29 PM, Sage Weil wrote:
-> On Wed, 21 Sep 2016, Dan Mick wrote:
->> The upstream docs at http://ceph.com/docs can tend to become out of
->> date.  We don't have much process to track things that need doc work.
+On Wed, Sep 21, 2016 at 9:38 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 21-9-2016 12:36, Brad Hubbard wrote:
+>> On Wed, Sep 21, 2016 at 8:29 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>>> $ git submodule update --force --init --recursive
+>>>> $ git submodule foreach --recursive git clean -fdx
+>>>>
+>>>> and try building again.
+>>>
+>>> I will, but the complete tree was freshly fetched.
+>>> So it really should have been all up to date.
+>>>
 >>
->> As a start, I propose we add a "docs needed" flag to tracker.ceph.com so
->> that we can at least search things that add or change features through a
->> tracker issue, and a "docs needed" label to github, so we can track it
->> on PRs as well.
+>> That's good information to put in your OP along with platform, arch,
+>> distro, etc.
 >>
->> Thoughts?  We can make this happen pretty quickly, and of course it's no
->> perfect lock, but at least it may start contributors and reviewers
->> thinking about the issue.
-> 
-> We can make a 'needs-docs' tag for PRs in github.  If they don't block the 
-> merge, then we can still search for them in open or closed prs, and make a 
-> point of removing the tag once the docs are eventually updated.
-> 
-> For the tracker, maybe a category for each project instead of a 
-> separate tracker?  Not sure..
-> 
-> sage
+> Sorry,
+>
+> I've been spamming this list for FreeBSD issues so much, I forgot to add
+> this:
+>
+> FreeBSD 11.0 / amd64
+> Clang 3.8.0
+> binutils 2.25.1
 
-Seemed like general consensus, so I've added both a "Needs Doc" checkbox
-to tracker and a "needs-doc" tag for PRs and GH issues.  See how they feel.
+Ahh, I didn't recognise the email address but, now that you mention it...
 
+>
+> So it is not your std-run-of-the-mill problem. 8-D
+
+If this is specific to FreeBSD then I'm not sure I can be much help I'm afraid.
+
+>
+> --WjW
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Cheers,
+Brad
