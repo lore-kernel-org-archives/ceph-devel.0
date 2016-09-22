@@ -1,151 +1,97 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: async messenger random read performance on NVMe
-Date: Thu, 22 Sep 2016 08:29:21 -0500
-Message-ID: <011585e9-6e13-5920-b347-85a8539b7f1a@redhat.com>
-References: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
- <CY1PR02MB21236DC2DEDA1C4577FED95BF4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
- <61672ba0-fadc-2f25-dcf2-090129bd1c53@redhat.com>
- <CY1PR02MB2123F1C1AC9EC34A04ED3017F4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
- <08bad1a0-e12d-825e-489d-9b44400cb57f@redhat.com>
- <CY1PR02MB2123377EE95BCDB36BC763CDF4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] rbd: lock_on_read map option
+Date: Thu, 22 Sep 2016 16:22:57 +0200
+Message-ID: <1474554177-4029-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47592 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753112AbcIVN3Y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 22 Sep 2016 09:29:24 -0400
-In-Reply-To: <CY1PR02MB2123377EE95BCDB36BC763CDF4F60@CY1PR02MB2123.namprd02.prod.outlook.com>
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:33758 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756833AbcIVOXY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Sep 2016 10:23:24 -0400
+Received: by mail-yw0-f194.google.com with SMTP id g192so4797663ywh.0
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Sep 2016 07:23:24 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Mike Christie <mchristi@redhat.com>
 
-I ran a couple of quick 4k randread tests with double the osd op 
-threads/shards:
+Add a per-device option to acquire exclusive lock on reads (in addition
+to writes and discards).  The use case is iSCSI, where it will be used
+to prevent execution of stale writes after the implicit failover.
 
-simple msgr:
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
 
-2/5  threads/shards: 168K IOPS
-4/10 threads/shards: 164K IOPS
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index d305b9ebe2cf..eca04b6dc747 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -795,6 +795,7 @@ enum {
+ 	/* string args above */
+ 	Opt_read_only,
+ 	Opt_read_write,
++	Opt_lock_on_read,
+ 	Opt_err
+ };
+ 
+@@ -806,16 +807,19 @@ static match_table_t rbd_opts_tokens = {
+ 	{Opt_read_only, "ro"},		/* Alternate spelling */
+ 	{Opt_read_write, "read_write"},
+ 	{Opt_read_write, "rw"},		/* Alternate spelling */
++	{Opt_lock_on_read, "lock_on_read"},
+ 	{Opt_err, NULL}
+ };
+ 
+ struct rbd_options {
+ 	int	queue_depth;
+ 	bool	read_only;
++	bool	lock_on_read;
+ };
+ 
+ #define RBD_QUEUE_DEPTH_DEFAULT	BLKDEV_MAX_RQ
+ #define RBD_READ_ONLY_DEFAULT	false
++#define RBD_LOCK_ON_READ_DEFAULT false
+ 
+ static int parse_rbd_opts_token(char *c, void *private)
+ {
+@@ -851,6 +855,9 @@ static int parse_rbd_opts_token(char *c, void *private)
+ 	case Opt_read_write:
+ 		rbd_opts->read_only = false;
+ 		break;
++	case Opt_lock_on_read:
++		rbd_opts->lock_on_read = true;
++		break;
+ 	default:
+ 		/* libceph prints "bad option" msg */
+ 		return -EINVAL;
+@@ -4073,7 +4080,7 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 	u64 length = blk_rq_bytes(rq);
+ 	enum obj_operation_type op_type;
+ 	u64 mapping_size;
+-	bool must_be_locked = false;
++	bool must_be_locked;
+ 	int result;
+ 
+ 	if (rq->cmd_type != REQ_TYPE_FS) {
+@@ -4136,6 +4143,9 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 		snapc = rbd_dev->header.snapc;
+ 		ceph_get_snap_context(snapc);
+ 		must_be_locked = rbd_is_lock_supported(rbd_dev);
++	} else {
++		must_be_locked = rbd_dev->opts->lock_on_read &&
++					rbd_is_lock_supported(rbd_dev);
+ 	}
+ 	up_read(&rbd_dev->header_rwsem);
+ 
+@@ -5721,6 +5731,7 @@ static int rbd_add_parse_args(const char *buf,
+ 
+ 	rbd_opts->read_only = RBD_READ_ONLY_DEFAULT;
+ 	rbd_opts->queue_depth = RBD_QUEUE_DEPTH_DEFAULT;
++	rbd_opts->lock_on_read = RBD_LOCK_ON_READ_DEFAULT;
+ 
+ 	copts = ceph_parse_options(options, mon_addrs,
+ 					mon_addrs + mon_addrs_size - 1,
+-- 
+2.4.3
 
-async msgr (send inline false):
-
-2/5 threads/shards: 153K IOPS
-4/10 threads/shards: 154K IOPS
-
-At least in this setup there doesn't seem to be much benefit to 
-increasing the osd op threads/shards.
-
-Mark
-
-On 09/21/2016 02:47 PM, Somnath Roy wrote:
-> I have 16 OSDs total (16 SSds) , if you are using 4 NvMe cards , the result make sense probably. Sorry for the noise.
-> But, in general we have seen significant performance difference by increasing shards if you have high end cpus with high cores.
->
-> Thanks & Regards
-> Somnath
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-> Sent: Wednesday, September 21, 2016 12:41 PM
-> To: ceph-devel
-> Subject: Re: async messenger random read performance on NVMe
->
-> FWIW, in these tests I have 4 NVMe cards split into 4 OSDs each, so your setup with 32 OSDs on SSD probably has more raw randread throughput potential than mine does.
->
-> Mark
->
-> On 09/21/2016 02:27 PM, Somnath Roy wrote:
->> We have the following data from our lab which is all SSD setup and since yours is with NvMe , the result should be much superior than ours unless you are cpu saturated at the OSD hosts.
->>
->> Setup :
->> -------
->> 3 pools, 1024 PGs/pool
->> One 2TB rbd image per pool , 3 physical clients running single fio/client with very high QD/jobs.
->> 16 OSDs each with 4TB.
->> Two OSD hosts with 48 cpu cores each.
->> Replication : 2
->>
->> Result :
->> -------
->>
->> 4K RR ~*374K IOPs*. With simple.
->>
->> I think we are using 25 shards per OSD and 2 threads/shard.
->> If you are not cpu saturated, try with increased shards and it should give you better 4K RR results. We need to see aync is able to give similar throughput at that level or not.
->> I will also try measuring if I am able to squeeze some time out of my
->> BlueStore activities :-)
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Mark Nelson [mailto:mnelson@redhat.com]
->> Sent: Wednesday, September 21, 2016 12:11 PM
->> To: Somnath Roy; ceph-devel
->> Subject: Re: async messenger random read performance on NVMe
->>
->> Yes to multiple physical clients (2 fio processes per client using librbd with io depth = 32 each).  No to increased OSD shards, this is just default.  Can you explain a bit more why Simple should go faster with a similar config?  Did you mean async?  I'm going to try to dig in with perf and see how they compare.  I wish I had a better way to profile lock contention rather than poorman's profiling via gdb.  I suppose lttng is the answer.
->>
->> Mark
->>
->> On 09/21/2016 02:02 PM, Somnath Roy wrote:
->>> Mark,
->>> Are you trying with multiple physical clients and with increased OSD shards?
->>> Simple should go way more with the similar config for 4K RR based on the result we were getting earlier unless your cpu is getting saturated at the OSD nodes.
->>>
->>> Thanks & Regards
->>> Somnath
->>>
->>> -----Original Message-----
->>> From: ceph-devel-owner@vger.kernel.org
->>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
->>> Sent: Wednesday, September 21, 2016 11:50 AM
->>> To: ceph-devel
->>> Subject: async messenger random read performance on NVMe
->>>
->>> Recently in master we made async messenger default.  After doing a bunch of bisection, it turns out that this caused a fairly dramatic decrease in bluestore random read performance.  This is on a cluster with fairly fast NVMe cards, 16 OSDs across 4 OSD hosts.  There are 8 fio client processes with 32 concurrent threads each.
->>>
->>> Ceph master using bluestore
->>>
->>> Parameters tweaked:
->>>
->>> ms_async_send_inline
->>> ms_async_op_threads
->>> ms_async_max_op_threads
->>>
->>> simple: 168K IOPS
->>>
->>> send_inline: true
->>> async 3/5   threads: 111K IOPS
->>> async 4/8   threads: 125K IOPS
->>> async 8/16  threads: 128K IOPS
->>> async 16/32 threads: 128K IOPS
->>> async 24/48 threads: 128K IOPS
->>> async 25/50 threads: segfault
->>> async 26/52 threads: segfault
->>> async 32/64 threads: segfault
->>>
->>> send_inline: false
->>> async 3/5   threads: 153K IOPS
->>> async 4/8   threads: 153K IOPS
->>> async 8/16  threads: 152K IOPS
->>>
->>> So definitely setting send_inline to false helps pretty dramatically, though we're still a little slower for small random reads than simple messenger.  Haomai, regarding the segfaults, I took a quick look with gdb at the core file but didn't see anything immediately obvious.  It might be worth seeing if you can reproduce.
->>>
->>> On the performance front, I'll try to see if I can see anything obvious in perf.
->>>
->>> Mark
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>> info at  http://vger.kernel.org/majordomo-info.html
->>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>>
->> N     r  y   b X  ǧv ^ )޺{.n +   z ]z   {ay ʇڙ ,j   f   h   z  w
->    j:+v   w j m         zZ+     ݢj"  !tml=
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> N�����r��y���b�X��ǧv�^�)޺{.n�+���z�]z���{ay�ʇڙ�,j��f���h���z��w������j:+v���w�j�m��������zZ+�����ݢj"��!tml=
->
