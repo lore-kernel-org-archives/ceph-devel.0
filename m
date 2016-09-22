@@ -1,54 +1,58 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: OSD journal sizing
-Date: Thu, 22 Sep 2016 15:14:05 -0500
-Message-ID: <e2b9392c-cf56-b625-3e3f-caeffa0dffe2@redhat.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: OSD journal sizing
+Date: Thu, 22 Sep 2016 20:25:30 +0000
+Message-ID: <BLUPR0201MB1524FB56E86BCDC956ED168EE8C90@BLUPR0201MB1524.namprd02.prod.outlook.com>
 References: <90b637e7-8cac-ab6e-2363-65eb83760c2d@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:27426 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933451AbcIVUOI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 22 Sep 2016 16:14:08 -0400
+Received: from mail-bn3nam01on0086.outbound.protection.outlook.com ([104.47.33.86]:30109
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1030459AbcIVUZd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 22 Sep 2016 16:25:33 -0400
 In-Reply-To: <90b637e7-8cac-ab6e-2363-65eb83760c2d@suse.cz>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Nathan Cutler <ncutler@suse.cz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 09/22/2016 03:02 PM, Nathan Cutler wrote:
-> I've been researching OSD journals lately, and just realized something
-> that's not particularly nice.
->
-> SSDs are getting bigger and bigger. It's typical for customers to use
-> e.g. a 500GB SSD for their journals. If the OSDs themselves are on
-> spinners, there is no use in having journals bigger than 10GB because
-> the 7200 RPMs impose a hard ceiling on throughput that spinners can
-> achieve.
->
-> Now, SSDs need wear-leveling to avoid premature failure. If only a small
-> region of the SSD is partitioned/used, users may fear (regardless of the
-> reality, whatever it may be) that this small region will be "pummeled to
-> death" by Ceph and cause the expensive SSD to fail prematurely.
->
-> I *thought* this could be addressed by creating the journal partitions
-> large enough to fill the entire disk and using the "osd journal size"
-> parameter to limit how much disk capacity is actually used for
-> journaling, but now I just noticed that the "osd journal size" parameter
-> "is ignored if the journal is a block device, and the entire block
-> device is used."
-
-Have you seen evidence that journal writes are hitting the same cells on 
-SSDs when the journals are typically sized?  It seems a little premature 
-to me to create huge journals based on the fear that wear leveling isn't 
-functioning without any evidence.
-
->
-> And while working on http://tracker.ceph.com/issues/16878 it occurred to
-> me that large journals are not getting tested much. Is that a valid
-> assumption?
->
-> Next week I plan to attempt to make a reproducer for the bug, and then
-> try to come up with a patch to fix it. Any ideas/pointers, either here
-> or in the tracker, would be appreciated.
->
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIE5hdGhhbiBDdXRsZXINCj4gU2VudDogVGh1cnNkYXksIFNlcHRlbWJl
+ciAyMiwgMjAxNiAxMDowMyBQTQ0KPiBUbzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4g
+U3ViamVjdDogT1NEIGpvdXJuYWwgc2l6aW5nDQo+IA0KPiBJJ3ZlIGJlZW4gcmVzZWFyY2hpbmcg
+T1NEIGpvdXJuYWxzIGxhdGVseSwgYW5kIGp1c3QgcmVhbGl6ZWQgc29tZXRoaW5nIHRoYXQncw0K
+PiBub3QgcGFydGljdWxhcmx5IG5pY2UuDQo+IA0KPiBTU0RzIGFyZSBnZXR0aW5nIGJpZ2dlciBh
+bmQgYmlnZ2VyLiBJdCdzIHR5cGljYWwgZm9yIGN1c3RvbWVycyB0byB1c2UgZS5nLiBhDQo+IDUw
+MEdCIFNTRCBmb3IgdGhlaXIgam91cm5hbHMuIElmIHRoZSBPU0RzIHRoZW1zZWx2ZXMgYXJlIG9u
+IHNwaW5uZXJzLCB0aGVyZSBpcw0KPiBubyB1c2UgaW4gaGF2aW5nIGpvdXJuYWxzIGJpZ2dlciB0
+aGFuIDEwR0IgYmVjYXVzZSB0aGUgNzIwMCBSUE1zIGltcG9zZSBhDQo+IGhhcmQgY2VpbGluZyBv
+biB0aHJvdWdocHV0IHRoYXQgc3Bpbm5lcnMgY2FuIGFjaGlldmUuDQo+IA0KPiBOb3csIFNTRHMg
+bmVlZCB3ZWFyLWxldmVsaW5nIHRvIGF2b2lkIHByZW1hdHVyZSBmYWlsdXJlLiBJZiBvbmx5IGEg
+c21hbGwNCj4gcmVnaW9uIG9mIHRoZSBTU0QgaXMgcGFydGl0aW9uZWQvdXNlZCwgdXNlcnMgbWF5
+IGZlYXIgKHJlZ2FyZGxlc3Mgb2YgdGhlDQo+IHJlYWxpdHksIHdoYXRldmVyIGl0IG1heSBiZSkg
+dGhhdCB0aGlzIHNtYWxsIHJlZ2lvbiB3aWxsIGJlICJwdW1tZWxlZCB0bw0KPiBkZWF0aCIgYnkg
+Q2VwaCBhbmQgY2F1c2UgdGhlIGV4cGVuc2l2ZSBTU0QgdG8gZmFpbCBwcmVtYXR1cmVseS4NCg0K
+R2VuZXJhbGx5IFNTRHMgZG8gdGhlaXIgb3duIGludGVybmFsIHdlYXItbGV2ZWxpbmcgc28gdGhp
+cyBmZWFyIGlzIHByZXR0eSBtdWNoIHVuZm91bmRlZC4NCg0KPiANCj4gSSAqdGhvdWdodCogdGhp
+cyBjb3VsZCBiZSBhZGRyZXNzZWQgYnkgY3JlYXRpbmcgdGhlIGpvdXJuYWwgcGFydGl0aW9ucyBs
+YXJnZQ0KPiBlbm91Z2ggdG8gZmlsbCB0aGUgZW50aXJlIGRpc2sgYW5kIHVzaW5nIHRoZSAib3Nk
+IGpvdXJuYWwgc2l6ZSINCj4gcGFyYW1ldGVyIHRvIGxpbWl0IGhvdyBtdWNoIGRpc2sgY2FwYWNp
+dHkgaXMgYWN0dWFsbHkgdXNlZCBmb3Igam91cm5hbGluZywgYnV0DQo+IG5vdyBJIGp1c3Qgbm90
+aWNlZCB0aGF0IHRoZSAib3NkIGpvdXJuYWwgc2l6ZSIgcGFyYW1ldGVyICJpcyBpZ25vcmVkIGlm
+IHRoZQ0KPiBqb3VybmFsIGlzIGEgYmxvY2sgZGV2aWNlLCBhbmQgdGhlIGVudGlyZSBibG9jayBk
+ZXZpY2UgaXMgdXNlZC4iDQo+IA0KPiBBbmQgd2hpbGUgd29ya2luZyBvbiBodHRwOi8vdHJhY2tl
+ci5jZXBoLmNvbS9pc3N1ZXMvMTY4NzggaXQgb2NjdXJyZWQgdG8NCj4gbWUgdGhhdCBsYXJnZSBq
+b3VybmFscyBhcmUgbm90IGdldHRpbmcgdGVzdGVkIG11Y2guIElzIHRoYXQgYSB2YWxpZA0KPiBh
+c3N1bXB0aW9uPw0KPiANCj4gTmV4dCB3ZWVrIEkgcGxhbiB0byBhdHRlbXB0IHRvIG1ha2UgYSBy
+ZXByb2R1Y2VyIGZvciB0aGUgYnVnLCBhbmQgdGhlbiB0cnkNCj4gdG8gY29tZSB1cCB3aXRoIGEg
+cGF0Y2ggdG8gZml4IGl0LiBBbnkgaWRlYXMvcG9pbnRlcnMsIGVpdGhlciBoZXJlIG9yIGluIHRo
+ZQ0KPiB0cmFja2VyLCB3b3VsZCBiZSBhcHByZWNpYXRlZC4NCj4gDQo+IC0tDQo+IE5hdGhhbiBD
+dXRsZXINCj4gU29mdHdhcmUgRW5naW5lZXIgRGlzdHJpYnV0ZWQgU3RvcmFnZQ0KPiBTVVNFIExJ
+TlVYLCBzLnIuby4NCj4gVGVsLjogKzQyMCAyODQgMDg0IDAzNw0KPiAtLQ0KPiBUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
+bCIgaW4gdGhlDQo+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
+cmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
+ZG9tby1pbmZvLmh0bWwNCg==
