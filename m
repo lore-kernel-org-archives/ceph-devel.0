@@ -1,85 +1,101 @@
-From: Joe Perches <joe@perches.com>
+From: Jani Nikula <jani.nikula@linux.intel.com>
 Subject: Re: "CodingStyle: Clarify and complete chapter 7" in docs-next
-Date: Thu, 22 Sep 2016 03:42:10 -0700
-Message-ID: <1474540930.8253.9.camel@perches.com>
-References: <CAOi1vP8Y6V3mWs1bv=-CCVRfGi59P+3F85n6rzMn0=K6FqQkcw@mail.gmail.com>
-         <20160920001159.GM2356@ZenIV.linux.org.uk>
-         <1474339566.1954.25.camel@perches.com>
-         <alpine.DEB.2.10.1609200751110.3346@hadrien>
-         <1474353123.1954.28.camel@perches.com> <20160922112407.47da9393@endymion>
+Date: Thu, 22 Sep 2016 13:43:42 +0300
+Message-ID: <8760pop63l.fsf@intel.com>
+References: <CAOi1vP8Y6V3mWs1bv=-CCVRfGi59P+3F85n6rzMn0=K6FqQkcw@mail.gmail.com> <20160920001159.GM2356@ZenIV.linux.org.uk> <1474339566.1954.25.camel@perches.com> <alpine.DEB.2.10.1609200751110.3346@hadrien> <1474353123.1954.28.camel@perches.com> <20160922112407.47da9393@endymion>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-doc-owner@vger.kernel.org>
 In-Reply-To: <20160922112407.47da9393@endymion>
 Sender: linux-doc-owner@vger.kernel.org
-To: Jean Delvare <jdelvare@suse.de>
+To: Jean Delvare <jdelvare@suse.de>, Joe Perches <joe@perches.com>
 Cc: Julia Lawall <julia.lawall@lip6.fr>, Al Viro <viro@ZenIV.linux.org.uk>, Ilya Dryomov <idryomov@gmail.com>, Andy Whitcroft <apw@canonical.com>, Linus Torvalds <torvalds@linux-foundation.org>, Jonathan Corbet <corbet@lwn.net>, Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-doc@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 2016-09-22 at 11:24 +0200, Jean Delvare wrote:
-[]
-> > The seriousness with which some beginners take these message
-> > types though is troublesome,
-[]
+On Thu, 22 Sep 2016, Jean Delvare <jdelvare@suse.de> wrote:
+> Hi Joe,
+>
+> On Mon, 19 Sep 2016 23:32:03 -0700, Joe Perches wrote:
+>> On Tue, 2016-09-20 at 07:53 +0200, Julia Lawall wrote:
+>> > I think it is better to be clear.Â  CHECK was never really clear to me,
+>> > especially if you see it in isolation, on a file that doesn't also have
+>> > ERROR or WARNING.Â  NITS is a common word in this context, but not FLEAS
+>> > and GNATS, as far as I know.
+>> > There could also be a severity level: high medium and low
+>> 
+>> I agree clarity is good.
+>> 
+>> The seriousness with which some beginners take these message
+>> types though is troublesome,
+>
 > You need to think in terms of actual use cases. Who uses checkpatch and
 > why? I think there are 3 groups of users:
 > * Beginners. They won't run the script by themselves, instead they will
->   submit a patch which infringes a lot of coding style rules, and the
->   maintainer will point them to checkpatch and ask for a resubmission
->   which makes checkpatch happy. Being beginners, they can only rely on
->   the script itself to only report things which need to be fixed, by
->   default.
+>   submit a patch which infringes a lot of coding style rules, and the
+>   maintainer will point them to checkpatch and ask for a resubmission
+>   which makes checkpatch happy. Being beginners, they can only rely on
+>   the script itself to only report things which need to be fixed, by
+>   default.
 > * Experienced developers. Who simply want to make sure they did not
->   overlook anything before they post their work for review. They have
->   the knowledge to decide if they want to ignore some of the warnings.
+>   overlook anything before they post their work for review. They have
+>   the knowledge to decide if they want to ignore some of the warnings.
 > * People with too much spare time, looking for anything they could
->   "contribute" to the kernel. They will use --subjective and piss off
->   every maintainer they can find.
+>   "contribute" to the kernel. They will use --subjective and piss off
+>   every maintainer they can find.
+>
+> Sadly there's not much we can do about the third category, short of
+> killing option --subjective altogether.
 
-I think you overlook the category of a beginner submitting
-"my first kernel patch" which is a "coding style" defect of
-some type.  The Eudyptula and Outreachy programs seem to
-encourage these sorts of patches.
+You could make checkpatch have different defaults for patches and files,
+to encourage better style in new code, but to discourage finding
+problems in existing code.
 
-This is where "scripts/checkpatch.pl -f <file>" is most used.
+BR,
+Jani.
 
-I believe adding the --force option might be useful to
-restrict cleanup-style-only patches outside of staging.
 
-There's nothing wrong with cleanup style patches, it can be
-good introduction to compiler/config tool & kernel setup.
- 
-> I would rather suggest:
-> 
+>
+> The default settings should work out of the box for for the first
+> category.
+>
+>> Maybe prefix various different types of style messages.
+>> 
+>> Something like:
+>> 
+>> ERROR	-> CODE_STYLE_DEFECT
+>> WARNING -> CODE_STYLE_UNPREFERRED
+>> CHECK	-> CODE_STYLE_NIT
+>
+> I don't think you clarify anything with these changes, as they do not
+> carry the requirement from a submitter's perspective. If you really
+> want to change the names, I would rather suggest:
+>
 > ERROR -> MUST_FIX
 > WARNING -> SHOULD_FIX
 > CHECK -> MAY_FIX
+>
+> Or explain the categories in plain English, see below.
+>
+>> I doubt additional external documentation would help much.
+>
+> I agree. If anything needs to be explained, it should be included in
+> the output of checkpatch directly. For example, if any ERROR was
+> printed, include the following after the count summary:
+>
+> "ERROR means the code is infringing a core coding style rule. This MUST
+> be fixed before the patch is submitted upstream."
+>
+> And if any WARNING was printed, include the following:
+>
+> "WARNING means the code is not following the best practice. This SHOULD
+> be fixed before the patch is submitted upstream, unless the maintainer
+> agreed otherwise."
+>
+> Not sure if we need something for CHECK, as these messages are not
+> printed by default so I'd assume people who get them know what they
+> asked for. But apparently these confused Julia so maybe a similar
+> explanation would be needed for them too.
 
-MUST is much stronger language than I would prefer.
-
-There are still about a quarter million ERRORs just for
-spacing issues in the kernel tree.
-
-Here are the top 10 ERROR checkpatch messages treewide as of
-a few days ago,
-
-$ grep ERROR checkpatch.short_sorted_20160917
- 268308  ERROR:SPACING
-  37340  ERROR:CODE_INDENT
-  27678  ERROR:TRAILING_WHITESPACE
-  21024  ERROR:COMPLEX_MACRO
-  14048  ERROR:POINTER_LOCATION
-  12207  ERROR:TRAILING_STATEMENTS
-  11079  ERROR:OPEN_BRACE
-   6802  ERROR:ASSIGN_IN_IF
-   3940  ERROR:RETURN_PARENTHESES
-   2322  ERROR:NON_OCTAL_PERMISSIONS
-
-Maybe there could be some better classifications of the various
-messages.
-
-But there are about two million checkpatch messages overall in
-the kernel tree.
-
-That's a lot.
+-- 
+Jani Nikula, Intel Open Source Technology Center
