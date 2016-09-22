@@ -1,97 +1,84 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] rbd: lock_on_read map option
-Date: Thu, 22 Sep 2016 16:22:57 +0200
-Message-ID: <1474554177-4029-1-git-send-email-idryomov@gmail.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f194.google.com ([209.85.161.194]:33758 "EHLO
-        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756833AbcIVOXY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Sep 2016 10:23:24 -0400
-Received: by mail-yw0-f194.google.com with SMTP id g192so4797663ywh.0
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Sep 2016 07:23:24 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Mike Christie <mchristi@redhat.com>
+From: Jean Delvare <jdelvare@suse.de>
+Subject: Re: "CodingStyle: Clarify and complete chapter 7" in docs-next
+Date: Thu, 22 Sep 2016 16:58:37 +0200
+Message-ID: <20160922165837.1363860b@endymion>
+References: <CAOi1vP8Y6V3mWs1bv=-CCVRfGi59P+3F85n6rzMn0=K6FqQkcw@mail.gmail.com>
+        <20160920001159.GM2356@ZenIV.linux.org.uk>
+        <1474339566.1954.25.camel@perches.com>
+        <alpine.DEB.2.10.1609200751110.3346@hadrien>
+        <1474353123.1954.28.camel@perches.com>
+        <20160922112407.47da9393@endymion>
+        <1474540930.8253.9.camel@perches.com>
+        <20160922135758.0399725d@endymion>
+        <20160922131103.GW2356@ZenIV.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160922131103.GW2356@ZenIV.linux.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Al Viro <viro@ZenIV.linux.org.uk>
+Cc: Joe Perches <joe@perches.com>, Julia Lawall <julia.lawall@lip6.fr>, Ilya Dryomov <idryomov@gmail.com>, Andy Whitcroft <apw@canonical.com>, Linus Torvalds <torvalds@linux-foundation.org>, Jonathan Corbet <corbet@lwn.net>, Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-doc@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Add a per-device option to acquire exclusive lock on reads (in addition
-to writes and discards).  The use case is iSCSI, where it will be used
-to prevent execution of stale writes after the implicit failover.
+On Thu, 22 Sep 2016 14:11:03 +0100, Al Viro wrote:
+> On Thu, Sep 22, 2016 at 01:57:58PM +0200, Jean Delvare wrote:
+> > > 
+> > > MUST is much stronger language than I would prefer.
+> > 
+> > That's what error means, really. When your compiler fails with an
+> > error, you have no choice but to fix your code. Warnings on the other
+> > hand may be ignored sometimes.
+> 
+> And they are errors, because of...?
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- drivers/block/rbd.c | 13 ++++++++++++-
- 1 file changed, 12 insertions(+), 1 deletion(-)
+Because we decided they were important. Of course there is some
+subjectivity to this decision, much like all gcc warnings could be
+errors and some errors could be warnings. Which is why gcc allows
+enabling/disabling individually.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index d305b9ebe2cf..eca04b6dc747 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -795,6 +795,7 @@ enum {
- 	/* string args above */
- 	Opt_read_only,
- 	Opt_read_write,
-+	Opt_lock_on_read,
- 	Opt_err
- };
- 
-@@ -806,16 +807,19 @@ static match_table_t rbd_opts_tokens = {
- 	{Opt_read_only, "ro"},		/* Alternate spelling */
- 	{Opt_read_write, "read_write"},
- 	{Opt_read_write, "rw"},		/* Alternate spelling */
-+	{Opt_lock_on_read, "lock_on_read"},
- 	{Opt_err, NULL}
- };
- 
- struct rbd_options {
- 	int	queue_depth;
- 	bool	read_only;
-+	bool	lock_on_read;
- };
- 
- #define RBD_QUEUE_DEPTH_DEFAULT	BLKDEV_MAX_RQ
- #define RBD_READ_ONLY_DEFAULT	false
-+#define RBD_LOCK_ON_READ_DEFAULT false
- 
- static int parse_rbd_opts_token(char *c, void *private)
- {
-@@ -851,6 +855,9 @@ static int parse_rbd_opts_token(char *c, void *private)
- 	case Opt_read_write:
- 		rbd_opts->read_only = false;
- 		break;
-+	case Opt_lock_on_read:
-+		rbd_opts->lock_on_read = true;
-+		break;
- 	default:
- 		/* libceph prints "bad option" msg */
- 		return -EINVAL;
-@@ -4073,7 +4080,7 @@ static void rbd_queue_workfn(struct work_struct *work)
- 	u64 length = blk_rq_bytes(rq);
- 	enum obj_operation_type op_type;
- 	u64 mapping_size;
--	bool must_be_locked = false;
-+	bool must_be_locked;
- 	int result;
- 
- 	if (rq->cmd_type != REQ_TYPE_FS) {
-@@ -4136,6 +4143,9 @@ static void rbd_queue_workfn(struct work_struct *work)
- 		snapc = rbd_dev->header.snapc;
- 		ceph_get_snap_context(snapc);
- 		must_be_locked = rbd_is_lock_supported(rbd_dev);
-+	} else {
-+		must_be_locked = rbd_dev->opts->lock_on_read &&
-+					rbd_is_lock_supported(rbd_dev);
- 	}
- 	up_read(&rbd_dev->header_rwsem);
- 
-@@ -5721,6 +5731,7 @@ static int rbd_add_parse_args(const char *buf,
- 
- 	rbd_opts->read_only = RBD_READ_ONLY_DEFAULT;
- 	rbd_opts->queue_depth = RBD_QUEUE_DEPTH_DEFAULT;
-+	rbd_opts->lock_on_read = RBD_LOCK_ON_READ_DEFAULT;
- 
- 	copts = ceph_parse_options(options, mon_addrs,
- 					mon_addrs + mon_addrs_size - 1,
+I assume the current set of errors vs. warnings is the result of some
+consensus amongst kernel developers. It can certainly be adjusted if
+the consensus changes for whatever reason.
+
+> > Sure. But I'm afraid you keep changing topics and I have no idea where
+> > you are going. We started with "should there be a space before jump
+> > labels", then out of nowhere we were discussing the wording of the
+> > output of checkpatch (how is that related?) and now you pull statistics
+> > out of your hat, like these numbers imply anything.
+> > 
+> > checkpatch was called checkPATCH for a reason. It's main intent was to
+> > prevent NEW (coding-style mostly) errors from creeping into the kernel.
+> > The fact that old code does now always follow these recommendations is
+> > unfortunate but that doesn't make checkpatch wrong or bad.
+> > 
+> > ERROR means that the new code isn't allowed to do that. Period.
+> 
+> The main intent of checkpatch these days appears to be providing an easy
+> way of thoughtless inflation of commit counts, everything else be damned.
+> Make-work, in other words.
+
+Yes, I've noticed the trend too :-( But that's a problem with the
+people using the tool, mostly, not with the tool itself.
+
+> The _only_ criterion for adding new checks should be a strong consensus in
+> the core kernel.  IOW, it should be descriptive, not prescriptive.  "Some
+> people do it this way, some - that" is not a valid reason for "let's make it
+> uniform; that way is just better, so from now on it's a new requirement".
+> Especially when the rationale behind the choice has all the intellectual
+> rigour of feng shui.  Some of these checks are common-sense, some are
+> absolutely arbitrary, there are far too many of them (...)
+
+That I agree with, I've complained about the same before. But that
+doesn't mean checkpatch is not a wonderfully useful tool. It really is,
+if used properly.
+
+> and elevating them
+> to the level of compiler errors like you seem to do is rather dishonest.
+
+I see. Well clearly this discussion isn't going anywhere so I'll go
+back working on things that really matter. See you.
+
 -- 
-2.4.3
-
+Jean Delvare
+SUSE L3 Support
