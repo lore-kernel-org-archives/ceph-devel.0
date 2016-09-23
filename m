@@ -1,45 +1,92 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: Rust Librbd bindings
-Date: Fri, 23 Sep 2016 12:04:18 +1000
-Message-ID: <CAF-wwdGHMah1UWDrURCU9whhm_d7o+DsGim4HUQWZVTrd2-Xmg@mail.gmail.com>
-References: <57E46476.5000901@canonical.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:36186 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754127AbcIWCEU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Sep 2016 22:04:20 -0400
-Received: by mail-wm0-f46.google.com with SMTP id w84so4285600wmg.1
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Sep 2016 19:04:19 -0700 (PDT)
-In-Reply-To: <57E46476.5000901@canonical.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: chris holcombe <chris.holcombe@canonical.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
-
-On Fri, Sep 23, 2016 at 9:08 AM, chris holcombe
-<chris.holcombe@canonical.com> wrote:
-> Hey Ceph Devs,
->
-> Now that the precedent is set I'd like to offer my librbd bindings up to
-> be included on the main github.com/ceph page.  My repo lives at:
-> https://github.com/cholcombe973/librbd-sys.  I'd be happy to add more
-> docs to it and expand on the README.md if there's interest in having
-> this included.
-
-This just requires someone with permissions to fork it into the ceph space.
-
->
-> Thanks,
-> Chris
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH 2/5] ceph: Propagate dentry down to inode_change_ok()
+Date: Fri, 23 Sep 2016 15:45:27 +0800
+Message-ID: <354FA312-0132-4C88-BCBB-05686037C234@redhat.com>
+References: <1474299059-14806-1-git-send-email-jack@suse.cz>
+ <1474299059-14806-3-git-send-email-jack@suse.cz>
+Mime-Version: 1.0 (Mac OS X Mail 10.0 \(3226\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <1474299059-14806-3-git-send-email-jack@suse.cz>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: Al Viro <viro@ZenIV.linux.org.uk>, Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, xfs@oss.sgi.org, Dave Chinner <david@fromorbit.com>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>
+List-Id: ceph-devel.vger.kernel.org
 
 
+> On 19 Sep 2016, at 23:30, Jan Kara <jack@suse.cz> wrote:
+> 
+> To avoid clearing of capabilities or security related extended
+> attributes too early, inode_change_ok() will need to take dentry instead
+> of inode. ceph_setattr() has the dentry easily available but
+> __ceph_setattr() is also called from ceph_set_acl() where dentry is not
+> easily available. Luckily that call path does not need inode_change_ok()
+> to be called anyway. So reorganize functions a bit so that
+> inode_change_ok() is called only from paths where dentry is available.
+> 
+> Signed-off-by: Jan Kara <jack@suse.cz>
+> ---
+> fs/ceph/acl.c   |  5 +++++
+> fs/ceph/inode.c | 19 +++++++++++--------
+> 2 files changed, 16 insertions(+), 8 deletions(-)
+> 
+> diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
+> index 013151d50069..a2cedfde75eb 100644
+> --- a/fs/ceph/acl.c
+> +++ b/fs/ceph/acl.c
+> @@ -127,6 +127,11 @@ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type)
+> 			goto out_free;
+> 	}
+> 
+> +	if (ceph_snap(inode) != CEPH_NOSNAP) {
+> +		ret = -EROFS;
+> +		goto out_free;
+> +	}
+> +
+> 	if (new_mode != old_mode) {
+> 		newattrs.ia_mode = new_mode;
+> 		newattrs.ia_valid = ATTR_MODE;
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index dd3a6dbf71eb..2aa3c0bcf3a5 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -1905,13 +1905,6 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
+> 	int inode_dirty_flags = 0;
+> 	bool lock_snap_rwsem = false;
+> 
+> -	if (ceph_snap(inode) != CEPH_NOSNAP)
+> -		return -EROFS;
+> -
+> -	err = inode_change_ok(inode, attr);
+> -	if (err != 0)
+> -		return err;
+> -
+> 	prealloc_cf = ceph_alloc_cap_flush();
+> 	if (!prealloc_cf)
+> 		return -ENOMEM;
+> @@ -2124,7 +2117,17 @@ out_put:
+>  */
+> int ceph_setattr(struct dentry *dentry, struct iattr *attr)
+> {
+> -	return __ceph_setattr(d_inode(dentry), attr);
+> +	struct inode *inode = d_inode(dentry);
+> +	int err;
+> +
+> +	if (ceph_snap(inode) != CEPH_NOSNAP)
+> +		return -EROFS;
+> +
+> +	err = inode_change_ok(inode, attr);
+> +	if (err != 0)
+> +		return err;
+> +
+> +	return __ceph_setattr(inode, attr);
+> }
 
--- 
-Cheers,
-Brad
+Acked-by: 'Yan, Zheng’ <zyan@redhat.com>
+> 
+> /*
+> -- 
+> 2.6.6
+> 
+
