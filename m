@@ -1,171 +1,62 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: Cmake build. C compiler.
-Date: Fri, 23 Sep 2016 19:12:58 +0800
-Message-ID: <CAJE9aOOviq9ZVfQ8JmB8TVmVbA47XG14nC8qGth4P1LjkJxmYA@mail.gmail.com>
-References: <D405A8C2.12B32%evgeniy.firsov@sandisk.com> <c41894d2-1d9f-b640-b9e3-bcc958a8a518@digiware.nl>
- <D405E2C2.12B3D%evgeniy.firsov@sandisk.com> <CAJE9aOMzGb920sKSk+AvCnmzCtKsTmk4JFO7QYdB6ZhCVgwujg@mail.gmail.com>
- <D409B01F.12C8C%evgeniy.firsov@sandisk.com>
+From: John Spray <jspray@redhat.com>
+Subject: =?UTF-8?B?UmU6IOetlOWkjTogc3RhdHVzIG9mIGNlcGhmcy9tdWx0aXBsZSBtZHM=?=
+Date: Fri, 23 Sep 2016 12:46:19 +0100
+Message-ID: <CALe9h7f6X-4umW5qpVjDBK6PRDEoyw5u=qi01WH9tGUObQn=hA@mail.gmail.com>
+References: <7B5C2F2226F8AF419D625C6097AD814CDBD2F229@H3CMLB12-EX.srv.huawei-3com.com>
+ <CALe9h7eiCy3RFb58pK063m-0Rn-bxcf92VP=Rddi2Z+hvqbuOA@mail.gmail.com> <7B5C2F2226F8AF419D625C6097AD814CDBD2F34D@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f54.google.com ([209.85.218.54]:33726 "EHLO
-        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755175AbcIWLNA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Sep 2016 07:13:00 -0400
-Received: by mail-oi0-f54.google.com with SMTP id r126so130248315oib.0
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Sep 2016 04:12:59 -0700 (PDT)
-In-Reply-To: <D409B01F.12C8C%evgeniy.firsov@sandisk.com>
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:36339 "EHLO
+        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754332AbcIWLqk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Sep 2016 07:46:40 -0400
+Received: by mail-qk0-f176.google.com with SMTP id z190so102806902qkc.3
+        for <ceph-devel@vger.kernel.org>; Fri, 23 Sep 2016 04:46:40 -0700 (PDT)
+In-Reply-To: <7B5C2F2226F8AF419D625C6097AD814CDBD2F34D@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "zhengbin.08747@h3c.com" <zhengbin.08747@h3c.com>
+Cc: "Gregory Farnum <gfarnum@redhat.com> (gfarnum@redhat.com)" <gfarnum@redhat.com>, "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
 
-On Fri, Sep 23, 2016 at 7:02 AM, Evgeniy Firsov
-<Evgeniy.Firsov@sandisk.com> wrote:
-> Kefu,
->
-> You are right. My statement was wrong. I found that the problem was in
-> NDEBUG handling in ZS code.
-> However, do you know if there is a way to build =E2=80=9Cin tree=E2=80=9D=
-, I mean as we
-> did with auto tools, without creating =E2=80=9Cbuild=E2=80=9D directory?
-
-why would you want to build "in tree"? because you don't want ceph's
-"assert.h" to be include by ZS code?
-
->
-> On 9/20/16, 11:04 PM, "kefu chai" <tchaikov@gmail.com> wrote:
->
->>On Tue, Sep 20, 2016 at 9:48 AM, Evgeniy Firsov
->><Evgeniy.Firsov@sandisk.com> wrote:
->>> It has nothing to do with compilers.
->>> There is a bug in NDEBUG handling in ZetaScale, which Ceph=E2=80=99s
->>> CmakeLists.txt passes down.
->>>
->>> And =E2=80=9Cin tree=E2=80=9D build just uses wrong include paths, I gu=
-ess.
->>>
->>> On 9/19/16, 3:00 PM, "Willem Jan Withagen" <wjw@digiware.nl> wrote:
->>>
->>>>On 19-9-2016 23:37, Evgeniy Firsov wrote:
->>>>> Hi, Guys,
->>>>>
->>>>> When I build Ceph using ./do_cmake.sh && cd build && make -j32, looks
->>>>>like
->>>>> everything is compiled using C++ compiler, even files with .c
->>>>>extension.
->>
->>this is not true. src/tracing/librados.c is a pure C source file. when
->>i run following command, i have:
->>
->>$ make rados_tp VERBOSE=3D1
->>...
->>Building C object
->>src/tracing/CMakeFiles/rados_tp.dir/__/__/include/tracing/librados.c.o
->>cd /var/ceph/ceph/build/src/tracing && ccache /usr/bin/cc
->>-DCEPH_LIBDIR=3D\"/home/kefu/.local/lib\"
->>-DCEPH_PKGLIBDIR=3D\"/home/kefu/.local/lib/ceph\" -D__linux__
->>-Drados_tp_EXPORTS -I/var/ceph/ceph/build/src/include
->>-I/var/ceph/ceph/src -I/var/ceph/ceph/build/include
->>-I/var/ceph/ceph/src/xxHash  -Wall -Wtype-limits -Wignored-qualifiers
->>-Winit-self -Wpointer-arith -Werror=3Dformat-security
->>-fno-strict-aliasing -fsigned-char -rdynamic -fstack-protector-strong
->>-fdiagnostics-color=3Dauto -g -fPIC   -DHAVE_CONFIG_H -D__CEPH__
->>-D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE
->>-D_FILE_OFFSET_BITS=3D64 -o
->>CMakeFiles/rados_tp.dir/__/__/include/tracing/librados.c.o   -c
->>/var/ceph/ceph/build/include/tracing/librados.c
->>Linking C shared library ../../lib/librados_tp.so
->>...
->>
->>so it is using cc not c++ to compile this source file.
->>
->>
->>>>> This fails ZetaScale compilation, which is pure C.
->>
->>could you share your repo/branch address of Ceph with ZetaScale so
->>people can try and verify?
->>
->>>>>
->>>>> In oppose to that if I am building =C2=B3in tree=C2=B2, with cmake . =
-&& make
->>>>>-j32,
->>>>> Ceph build fails, because it uses proper C compiler for .c extension,
->>>>>but
->>>>> they include Ceph=C2=B9s assert.h which is C++.
->>>>>
->>>>> So, probably, I need to configure compiler on per directory basis, is
->>>>> there known way to do that?
->>>>> Also, can somebody point me where in the CMakeList.txt compiler is
->>>>> configured for =C2=B3out of tree=C2=B2 build? I mean C++ for everythi=
-ng.
->>>>
->>>>You can run
->>>>cmake --system-information
->>>>to find out what you system is using for defaults....
->>>>
->>>>Mine (FreeBSD) has:
->>>>
->>>>CMAKE_CXX_COMPILER =3D=3D "/usr/bin/CC"
->>>>CMAKE_C_COMPILER =3D=3D "/usr/bin/cc"
->>>>
->>>>So it sort of already knows from the beginning the difference between C
->>>>and C++
->>>>
->>>>--WjW
->>>>>
->>>>> =E2=80=B9
->>>>> Evgeniy
->>>>>
->>>>>
->>>>> PLEASE NOTE: The information contained in this electronic mail messag=
-e
->>>>>is intended only for the use of the designated recipient(s) named
->>>>>above.
->>>>>If the reader of this message is not the intended recipient, you are
->>>>>hereby notified that you have received this message in error and that
->>>>>any review, dissemination, distribution, or copying of this message is
->>>>>strictly prohibited. If you have received this communication in error,
->>>>>please notify the sender by telephone or e-mail (as shown above)
->>>>>immediately and destroy any and all copies of this message in your
->>>>>possession (whether hard copies or electronically stored copies).
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>>in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>
->>>
->>> PLEASE NOTE: The information contained in this electronic mail message
->>>is intended only for the use of the designated recipient(s) named above.
->>>If the reader of this message is not the intended recipient, you are
->>>hereby notified that you have received this message in error and that
->>>any review, dissemination, distribution, or copying of this message is
->>>strictly prohibited. If you have received this communication in error,
->>>please notify the sender by telephone or e-mail (as shown above)
->>>immediately and destroy any and all copies of this message in your
->>>possession (whether hard copies or electronically stored copies).
->>
->>
->>
->>--
->>Regards
->>Kefu Chai
->
-> PLEASE NOTE: The information contained in this electronic mail message is=
- intended only for the use of the designated recipient(s) named above. If t=
-he reader of this message is not the intended recipient, you are hereby not=
-ified that you have received this message in error and that any review, dis=
-semination, distribution, or copying of this message is strictly prohibited=
-. If you have received this communication in error, please notify the sende=
-r by telephone or e-mail (as shown above) immediately and destroy any and a=
-ll copies of this message in your possession (whether hard copies or electr=
-onically stored copies).
-
-
-
---=20
-Regards
-Kefu Chai
+T24gRnJpLCBTZXAgMjMsIDIwMTYgYXQgMTA6NDEgQU0sIHpoZW5nYmluLjA4NzQ3QGgzYy5jb20N
+Cjx6aGVuZ2Jpbi4wODc0N0BoM2MuY29tPiB3cm90ZToNCj4gSW4gb3JkZXIgdG8gdXNlIG11bHRp
+cGxlIG1kcyBmb3IgcHJvZHVjdCBwdXJwb3NlLCBEbyB3ZSBvbmx5IG5lZWQgdG8gZml4IGFsbCB0
+aGUgaXNzdWVzIGluIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL3Byb2plY3RzL2NlcGhmcy9pc3N1
+ZXMNCj4gT3IgYXJlIHRoZXJlIGFueSBvdGhlciB3b3JrIHdlIG5lZWQgdG8gZG8/DQoNClRob3Nl
+IGFuZCBhbGwgdGhlIG90aGVyIGlzc3VlcyB5b3UgbWlnaHQgZmluZCB3aGVuIHRlc3RpbmchDQoN
+CkpvaG4NCg0KPg0KPg0KPiAtLS0tLemCruS7tuWOn+S7ti0tLS0tDQo+IOWPkeS7tuS6ujogSm9o
+biBTcHJheSBbbWFpbHRvOmpzcHJheUByZWRoYXQuY29tXQ0KPiDlj5HpgIHml7bpl7Q6IDIwMTbl
+ubQ55pyIMjPml6UgMTc6MzINCj4g5pS25Lu25Lq6OiB6aGVuZ2JpbiAwODc0NyAoUkQpDQo+IOaK
+hOmAgTogR3JlZ29yeSBGYXJudW0gPGdmYXJudW1AcmVkaGF0LmNvbT4gKGdmYXJudW1AcmVkaGF0
+LmNvbSk7IGNlcGgtZGV2ZWwgKGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnKQ0KPiDkuLvpopg6
+IFJlOiBzdGF0dXMgb2YgY2VwaGZzL211bHRpcGxlIG1kcw0KPg0KPiBPbiBGcmksIFNlcCAyMywg
+MjAxNiBhdCA5OjAyIEFNLCB6aGVuZ2Jpbi4wODc0N0BoM2MuY29tIDx6aGVuZ2Jpbi4wODc0N0Bo
+M2MuY29tPiB3cm90ZToNCj4+IEFzIHdlIGtub3csIG11bHRpcGxlIG1kcyBpcyBleHBlcmltZW50
+YWwuIFdoYXQgaXMgdGhlIHJlYXNvbiBmb3IgaXQsDQo+PiBKdXN0IGJlY2F1c2UgbXVsdGlwbGUg
+bWRzIGhhcyB1bmtub3duIGJ1Z3M/SSBhbSBpbnRlcmVzdCBpbiBtdWx0aXBsZQ0KPj4gbWRzDQo+
+Pg0KPj4gSW4gdHJhY2tlci5jZXBoLmNvbS9wcm9qZWN0cy9jZXBoL3dpa2kvI1BsYW5uaW5nLUNE
+TSwgIHRoZXJlIGlzIG5vdGhpbmcgYWJvdXQgY2VwaGZzLg0KPj4NCj4+IENhbiB5b3Ugc2hhcmUg
+bXVsdGlwbGUgbWRzIHRvLWRvIGxpc3QgZm9yIG1lPyBUaGFuayB5b3UNCj4NCj4gR28gaGVyZToN
+Cj4gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vcHJvamVjdHMvY2VwaGZzL2lzc3Vlcw0KPg0KPiAu
+Li5hbmQgZmlsdGVyIGJ5IENhdGVnb3J5IGlzICJtdWx0aS1NRFMiIGZvciBhIGxpc3Qgb2Yga25v
+d24gYnVncy4NCj4NCj4gSm9obg0KPg0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+IOacrOmCruS7
+tuWPiuWFtumZhOS7tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOea
+hOS/neWvhuS/oeaBr++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4reWIl+WHug0K
+PiDnmoTkuKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbku5bkurrku6Xku7vkvZXlvaLl
+vI/kvb/nlKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDms4TpnLLjgIHl
+pI3liLbjgIENCj4g5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo
+6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R
+5Lu25Lq65bm25Yig6Zmk5pysDQo+IOmCruS7tu+8gQ0KPiBUaGlzIGUtbWFpbCBhbmQgaXRzIGF0
+dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20gSDNDLCB3aGlj
+aCBpcw0KPiBpbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRy
+ZXNzIGlzIGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCj4gaW5mb3JtYXRpb24gY29udGFp
+bmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90
+YWwgb3IgcGFydGlhbA0KPiBkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRp
+b24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCj4gcmVjaXBpZW50KHMpIGlz
+IHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ug
+bm90aWZ5IHRoZSBzZW5kZXINCj4gYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRl
+bGV0ZSBpdCENCg==
