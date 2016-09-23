@@ -1,62 +1,87 @@
-From: John Spray <jspray@redhat.com>
-Subject: =?UTF-8?B?UmU6IOetlOWkjTogc3RhdHVzIG9mIGNlcGhmcy9tdWx0aXBsZSBtZHM=?=
-Date: Fri, 23 Sep 2016 12:46:19 +0100
-Message-ID: <CALe9h7f6X-4umW5qpVjDBK6PRDEoyw5u=qi01WH9tGUObQn=hA@mail.gmail.com>
-References: <7B5C2F2226F8AF419D625C6097AD814CDBD2F229@H3CMLB12-EX.srv.huawei-3com.com>
- <CALe9h7eiCy3RFb58pK063m-0Rn-bxcf92VP=Rddi2Z+hvqbuOA@mail.gmail.com> <7B5C2F2226F8AF419D625C6097AD814CDBD2F34D@H3CMLB12-EX.srv.huawei-3com.com>
+From: =?UTF-8?B?QsOhcmEgQW7EjWluY292w6E=?= <bara@redhat.com>
+Subject: Re: reStructuredText vs. AsciiDoc
+Date: Fri, 23 Sep 2016 15:31:22 +0200
+Message-ID: <188947d4-2386-e401-3ad0-43cb7b21f3eb@redhat.com>
+References: <CALe9h7ewfBg0Q5fUV7zknDEy4pMpwNP9DQ-EYLm53tLmuRnbvw@mail.gmail.com>
+ <CAC-Np1z_cxGx6q0-O=H68hcex3o-6ffAV==P_oT_Hyx=_fh96w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:36339 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754332AbcIWLqk (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Sep 2016 07:46:40 -0400
-Received: by mail-qk0-f176.google.com with SMTP id z190so102806902qkc.3
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Sep 2016 04:46:40 -0700 (PDT)
-In-Reply-To: <7B5C2F2226F8AF419D625C6097AD814CDBD2F34D@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from mx1.redhat.com ([209.132.183.28]:58944 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S964968AbcIWNbZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 23 Sep 2016 09:31:25 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 4284E7CDF6
+        for <ceph-devel@vger.kernel.org>; Fri, 23 Sep 2016 13:31:25 +0000 (UTC)
+In-Reply-To: <CAC-Np1z_cxGx6q0-O=H68hcex3o-6ffAV==P_oT_Hyx=_fh96w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "zhengbin.08747@h3c.com" <zhengbin.08747@h3c.com>
-Cc: "Gregory Farnum <gfarnum@redhat.com> (gfarnum@redhat.com)" <gfarnum@redhat.com>, "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>, John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Petr Kovar <pkovar@redhat.com>
 
-T24gRnJpLCBTZXAgMjMsIDIwMTYgYXQgMTA6NDEgQU0sIHpoZW5nYmluLjA4NzQ3QGgzYy5jb20N
-Cjx6aGVuZ2Jpbi4wODc0N0BoM2MuY29tPiB3cm90ZToNCj4gSW4gb3JkZXIgdG8gdXNlIG11bHRp
-cGxlIG1kcyBmb3IgcHJvZHVjdCBwdXJwb3NlLCBEbyB3ZSBvbmx5IG5lZWQgdG8gZml4IGFsbCB0
-aGUgaXNzdWVzIGluIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL3Byb2plY3RzL2NlcGhmcy9pc3N1
-ZXMNCj4gT3IgYXJlIHRoZXJlIGFueSBvdGhlciB3b3JrIHdlIG5lZWQgdG8gZG8/DQoNClRob3Nl
-IGFuZCBhbGwgdGhlIG90aGVyIGlzc3VlcyB5b3UgbWlnaHQgZmluZCB3aGVuIHRlc3RpbmchDQoN
-CkpvaG4NCg0KPg0KPg0KPiAtLS0tLemCruS7tuWOn+S7ti0tLS0tDQo+IOWPkeS7tuS6ujogSm9o
-biBTcHJheSBbbWFpbHRvOmpzcHJheUByZWRoYXQuY29tXQ0KPiDlj5HpgIHml7bpl7Q6IDIwMTbl
-ubQ55pyIMjPml6UgMTc6MzINCj4g5pS25Lu25Lq6OiB6aGVuZ2JpbiAwODc0NyAoUkQpDQo+IOaK
-hOmAgTogR3JlZ29yeSBGYXJudW0gPGdmYXJudW1AcmVkaGF0LmNvbT4gKGdmYXJudW1AcmVkaGF0
-LmNvbSk7IGNlcGgtZGV2ZWwgKGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnKQ0KPiDkuLvpopg6
-IFJlOiBzdGF0dXMgb2YgY2VwaGZzL211bHRpcGxlIG1kcw0KPg0KPiBPbiBGcmksIFNlcCAyMywg
-MjAxNiBhdCA5OjAyIEFNLCB6aGVuZ2Jpbi4wODc0N0BoM2MuY29tIDx6aGVuZ2Jpbi4wODc0N0Bo
-M2MuY29tPiB3cm90ZToNCj4+IEFzIHdlIGtub3csIG11bHRpcGxlIG1kcyBpcyBleHBlcmltZW50
-YWwuIFdoYXQgaXMgdGhlIHJlYXNvbiBmb3IgaXQsDQo+PiBKdXN0IGJlY2F1c2UgbXVsdGlwbGUg
-bWRzIGhhcyB1bmtub3duIGJ1Z3M/SSBhbSBpbnRlcmVzdCBpbiBtdWx0aXBsZQ0KPj4gbWRzDQo+
-Pg0KPj4gSW4gdHJhY2tlci5jZXBoLmNvbS9wcm9qZWN0cy9jZXBoL3dpa2kvI1BsYW5uaW5nLUNE
-TSwgIHRoZXJlIGlzIG5vdGhpbmcgYWJvdXQgY2VwaGZzLg0KPj4NCj4+IENhbiB5b3Ugc2hhcmUg
-bXVsdGlwbGUgbWRzIHRvLWRvIGxpc3QgZm9yIG1lPyBUaGFuayB5b3UNCj4NCj4gR28gaGVyZToN
-Cj4gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vcHJvamVjdHMvY2VwaGZzL2lzc3Vlcw0KPg0KPiAu
-Li5hbmQgZmlsdGVyIGJ5IENhdGVnb3J5IGlzICJtdWx0aS1NRFMiIGZvciBhIGxpc3Qgb2Yga25v
-d24gYnVncy4NCj4NCj4gSm9obg0KPg0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+IOacrOmCruS7
-tuWPiuWFtumZhOS7tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOea
-hOS/neWvhuS/oeaBr++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4reWIl+WHug0K
-PiDnmoTkuKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbku5bkurrku6Xku7vkvZXlvaLl
-vI/kvb/nlKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDms4TpnLLjgIHl
-pI3liLbjgIENCj4g5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo
-6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R
-5Lu25Lq65bm25Yig6Zmk5pysDQo+IOmCruS7tu+8gQ0KPiBUaGlzIGUtbWFpbCBhbmQgaXRzIGF0
-dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20gSDNDLCB3aGlj
-aCBpcw0KPiBpbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRy
-ZXNzIGlzIGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCj4gaW5mb3JtYXRpb24gY29udGFp
-bmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90
-YWwgb3IgcGFydGlhbA0KPiBkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRp
-b24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCj4gcmVjaXBpZW50KHMpIGlz
-IHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ug
-bm90aWZ5IHRoZSBzZW5kZXINCj4gYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRl
-bGV0ZSBpdCENCg==
+On 09/22/2016 12:38 AM, Alfredo Deza wrote:
+> On Tue, Sep 20, 2016 at 7:25 AM, John Spray <jspray@redhat.com> wrote:
+>> Hi all,
+>>
+>> Currently the Ceph upstream documentation is mostly written in
+>> restructuredtext, and built into HTML with Sphinx.
+>>
+>> We at Red Hat have some writer colleagues who are more comfortable
+>> with asciidoc, and it has been suggested that we could get more new
+>> content upstream (i.e. on github for everyone) if we were using
+>> asciidoc.
+> 
+> The barrier to contribute from asciidoc to rst is not huge, it is
+> mainly inconvenient. I think there is much more to gain
+> from current contributors to raise the bar to improve the current state of docs.
+> 
+>>
+>> So does anyone have any strong attachment to the restructuredtext
+>> format currently in use?
+> 
+> I really like RestructuredText, but an important question here is:
+> *if* we decided to move, are we aware of the burden that means
+> to generate: html, man pages, and the porting of the extensions
+> (doxygen, ditaa, and maybe something else I might be missing)
+
+Another solution I can think of is to enhance pandoc (or some other
+converter) to be able to convert between RST and AsciiDoc reliably,
+without the need to manually edit the files afterwards.
+
+I recently found out that one of my colleagues (Petr Kovar, cc'ed) is
+dealing with the same problem. He contributes to the OpenStack upstream
+docs. Maybe we can join forces.
+
+Bara
+
+
+> 
+>>
+>> (Opinions especially valued from people/groups who are active
+>> contributors to the docs)
+>>
+>> John
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+
+-- 
+Bara Ancincova
+Technical Writer
+Customer Content Services
+IRC nick: bara
+
+Red Hat Czech, s.r.o.
+Purkynova 99
+612 45 Brno, Czech Republic
