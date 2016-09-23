@@ -1,118 +1,45 @@
-From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
-Subject: Re: Cmake build. C compiler.
-Date: Thu, 22 Sep 2016 23:02:19 +0000
-Message-ID: <D409B01F.12C8C%evgeniy.firsov@sandisk.com>
-References: <D405A8C2.12B32%evgeniy.firsov@sandisk.com>
- <c41894d2-1d9f-b640-b9e3-bcc958a8a518@digiware.nl>
- <D405E2C2.12B3D%evgeniy.firsov@sandisk.com>
- <CAJE9aOMzGb920sKSk+AvCnmzCtKsTmk4JFO7QYdB6ZhCVgwujg@mail.gmail.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: Rust Librbd bindings
+Date: Fri, 23 Sep 2016 12:04:18 +1000
+Message-ID: <CAF-wwdGHMah1UWDrURCU9whhm_d7o+DsGim4HUQWZVTrd2-Xmg@mail.gmail.com>
+References: <57E46476.5000901@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-co1nam03on0076.outbound.protection.outlook.com ([104.47.40.76]:1377
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S965208AbcIWAe4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 22 Sep 2016 20:34:56 -0400
-In-Reply-To: <CAJE9aOMzGb920sKSk+AvCnmzCtKsTmk4JFO7QYdB6ZhCVgwujg@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <43170A627171AA4BABE16920B062C14C@namprd02.prod.outlook.com>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:36186 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754127AbcIWCEU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Sep 2016 22:04:20 -0400
+Received: by mail-wm0-f46.google.com with SMTP id w84so4285600wmg.1
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Sep 2016 19:04:19 -0700 (PDT)
+In-Reply-To: <57E46476.5000901@canonical.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: chris holcombe <chris.holcombe@canonical.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-S2VmdSwNCg0KWW91IGFyZSByaWdodC4gTXkgc3RhdGVtZW50IHdhcyB3cm9uZy4gSSBmb3VuZCB0
-aGF0IHRoZSBwcm9ibGVtIHdhcyBpbg0KTkRFQlVHIGhhbmRsaW5nIGluIFpTIGNvZGUuDQpIb3dl
-dmVyLCBkbyB5b3Uga25vdyBpZiB0aGVyZSBpcyBhIHdheSB0byBidWlsZCDigJxpbiB0cmVl4oCd
-LCBJIG1lYW4gYXMgd2UNCmRpZCB3aXRoIGF1dG8gdG9vbHMsIHdpdGhvdXQgY3JlYXRpbmcg4oCc
-YnVpbGTigJ0gZGlyZWN0b3J5Pw0KDQpPbiA5LzIwLzE2LCAxMTowNCBQTSwgImtlZnUgY2hhaSIg
-PHRjaGFpa292QGdtYWlsLmNvbT4gd3JvdGU6DQoNCj5PbiBUdWUsIFNlcCAyMCwgMjAxNiBhdCA5
-OjQ4IEFNLCBFdmdlbml5IEZpcnNvdg0KPjxFdmdlbml5LkZpcnNvdkBzYW5kaXNrLmNvbT4gd3Jv
-dGU6DQo+PiBJdCBoYXMgbm90aGluZyB0byBkbyB3aXRoIGNvbXBpbGVycy4NCj4+IFRoZXJlIGlz
-IGEgYnVnIGluIE5ERUJVRyBoYW5kbGluZyBpbiBaZXRhU2NhbGUsIHdoaWNoIENlcGjigJlzDQo+
-PiBDbWFrZUxpc3RzLnR4dCBwYXNzZXMgZG93bi4NCj4+DQo+PiBBbmQg4oCcaW4gdHJlZeKAnSBi
-dWlsZCBqdXN0IHVzZXMgd3JvbmcgaW5jbHVkZSBwYXRocywgSSBndWVzcy4NCj4+DQo+PiBPbiA5
-LzE5LzE2LCAzOjAwIFBNLCAiV2lsbGVtIEphbiBXaXRoYWdlbiIgPHdqd0BkaWdpd2FyZS5ubD4g
-d3JvdGU6DQo+Pg0KPj4+T24gMTktOS0yMDE2IDIzOjM3LCBFdmdlbml5IEZpcnNvdiB3cm90ZToN
-Cj4+Pj4gSGksIEd1eXMsDQo+Pj4+DQo+Pj4+IFdoZW4gSSBidWlsZCBDZXBoIHVzaW5nIC4vZG9f
-Y21ha2Uuc2ggJiYgY2QgYnVpbGQgJiYgbWFrZSAtajMyLCBsb29rcw0KPj4+Pmxpa2UNCj4+Pj4g
-ZXZlcnl0aGluZyBpcyBjb21waWxlZCB1c2luZyBDKysgY29tcGlsZXIsIGV2ZW4gZmlsZXMgd2l0
-aCAuYw0KPj4+PmV4dGVuc2lvbi4NCj4NCj50aGlzIGlzIG5vdCB0cnVlLiBzcmMvdHJhY2luZy9s
-aWJyYWRvcy5jIGlzIGEgcHVyZSBDIHNvdXJjZSBmaWxlLiB3aGVuDQo+aSBydW4gZm9sbG93aW5n
-IGNvbW1hbmQsIGkgaGF2ZToNCj4NCj4kIG1ha2UgcmFkb3NfdHAgVkVSQk9TRT0xDQo+Li4uDQo+
-QnVpbGRpbmcgQyBvYmplY3QNCj5zcmMvdHJhY2luZy9DTWFrZUZpbGVzL3JhZG9zX3RwLmRpci9f
-Xy9fXy9pbmNsdWRlL3RyYWNpbmcvbGlicmFkb3MuYy5vDQo+Y2QgL3Zhci9jZXBoL2NlcGgvYnVp
-bGQvc3JjL3RyYWNpbmcgJiYgY2NhY2hlIC91c3IvYmluL2NjDQo+LURDRVBIX0xJQkRJUj1cIi9o
-b21lL2tlZnUvLmxvY2FsL2xpYlwiDQo+LURDRVBIX1BLR0xJQkRJUj1cIi9ob21lL2tlZnUvLmxv
-Y2FsL2xpYi9jZXBoXCIgLURfX2xpbnV4X18NCj4tRHJhZG9zX3RwX0VYUE9SVFMgLUkvdmFyL2Nl
-cGgvY2VwaC9idWlsZC9zcmMvaW5jbHVkZQ0KPi1JL3Zhci9jZXBoL2NlcGgvc3JjIC1JL3Zhci9j
-ZXBoL2NlcGgvYnVpbGQvaW5jbHVkZQ0KPi1JL3Zhci9jZXBoL2NlcGgvc3JjL3h4SGFzaCAgLVdh
-bGwgLVd0eXBlLWxpbWl0cyAtV2lnbm9yZWQtcXVhbGlmaWVycw0KPi1XaW5pdC1zZWxmIC1XcG9p
-bnRlci1hcml0aCAtV2Vycm9yPWZvcm1hdC1zZWN1cml0eQ0KPi1mbm8tc3RyaWN0LWFsaWFzaW5n
-IC1mc2lnbmVkLWNoYXIgLXJkeW5hbWljIC1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZw0KPi1mZGlh
-Z25vc3RpY3MtY29sb3I9YXV0byAtZyAtZlBJQyAgIC1ESEFWRV9DT05GSUdfSCAtRF9fQ0VQSF9f
-DQo+LURfUkVFTlRSQU5UIC1EX1RIUkVBRF9TQUZFIC1EX19TVERDX0ZPUk1BVF9NQUNST1MgLURf
-R05VX1NPVVJDRQ0KPi1EX0ZJTEVfT0ZGU0VUX0JJVFM9NjQgLW8NCj5DTWFrZUZpbGVzL3JhZG9z
-X3RwLmRpci9fXy9fXy9pbmNsdWRlL3RyYWNpbmcvbGlicmFkb3MuYy5vICAgLWMNCj4vdmFyL2Nl
-cGgvY2VwaC9idWlsZC9pbmNsdWRlL3RyYWNpbmcvbGlicmFkb3MuYw0KPkxpbmtpbmcgQyBzaGFy
-ZWQgbGlicmFyeSAuLi8uLi9saWIvbGlicmFkb3NfdHAuc28NCj4uLi4NCj4NCj5zbyBpdCBpcyB1
-c2luZyBjYyBub3QgYysrIHRvIGNvbXBpbGUgdGhpcyBzb3VyY2UgZmlsZS4NCj4NCj4NCj4+Pj4g
-VGhpcyBmYWlscyBaZXRhU2NhbGUgY29tcGlsYXRpb24sIHdoaWNoIGlzIHB1cmUgQy4NCj4NCj5j
-b3VsZCB5b3Ugc2hhcmUgeW91ciByZXBvL2JyYW5jaCBhZGRyZXNzIG9mIENlcGggd2l0aCBaZXRh
-U2NhbGUgc28NCj5wZW9wbGUgY2FuIHRyeSBhbmQgdmVyaWZ5Pw0KPg0KPj4+Pg0KPj4+PiBJbiBv
-cHBvc2UgdG8gdGhhdCBpZiBJIGFtIGJ1aWxkaW5nIMKzaW4gdHJlZcKyLCB3aXRoIGNtYWtlIC4g
-JiYgbWFrZQ0KPj4+Pi1qMzIsDQo+Pj4+IENlcGggYnVpbGQgZmFpbHMsIGJlY2F1c2UgaXQgdXNl
-cyBwcm9wZXIgQyBjb21waWxlciBmb3IgLmMgZXh0ZW5zaW9uLA0KPj4+PmJ1dA0KPj4+PiB0aGV5
-IGluY2x1ZGUgQ2VwaMK5cyBhc3NlcnQuaCB3aGljaCBpcyBDKysuDQo+Pj4+DQo+Pj4+IFNvLCBw
-cm9iYWJseSwgSSBuZWVkIHRvIGNvbmZpZ3VyZSBjb21waWxlciBvbiBwZXIgZGlyZWN0b3J5IGJh
-c2lzLCBpcw0KPj4+PiB0aGVyZSBrbm93biB3YXkgdG8gZG8gdGhhdD8NCj4+Pj4gQWxzbywgY2Fu
-IHNvbWVib2R5IHBvaW50IG1lIHdoZXJlIGluIHRoZSBDTWFrZUxpc3QudHh0IGNvbXBpbGVyIGlz
-DQo+Pj4+IGNvbmZpZ3VyZWQgZm9yIMKzb3V0IG9mIHRyZWXCsiBidWlsZD8gSSBtZWFuIEMrKyBm
-b3IgZXZlcnl0aGluZy4NCj4+Pg0KPj4+WW91IGNhbiBydW4NCj4+PmNtYWtlIC0tc3lzdGVtLWlu
-Zm9ybWF0aW9uDQo+Pj50byBmaW5kIG91dCB3aGF0IHlvdSBzeXN0ZW0gaXMgdXNpbmcgZm9yIGRl
-ZmF1bHRzLi4uLg0KPj4+DQo+Pj5NaW5lIChGcmVlQlNEKSBoYXM6DQo+Pj4NCj4+PkNNQUtFX0NY
-WF9DT01QSUxFUiA9PSAiL3Vzci9iaW4vQ0MiDQo+Pj5DTUFLRV9DX0NPTVBJTEVSID09ICIvdXNy
-L2Jpbi9jYyINCj4+Pg0KPj4+U28gaXQgc29ydCBvZiBhbHJlYWR5IGtub3dzIGZyb20gdGhlIGJl
-Z2lubmluZyB0aGUgZGlmZmVyZW5jZSBiZXR3ZWVuIEMNCj4+PmFuZCBDKysNCj4+Pg0KPj4+LS1X
-alcNCj4+Pj4NCj4+Pj4g4oC5DQo+Pj4+IEV2Z2VuaXkNCj4+Pj4NCj4+Pj4NCj4+Pj4gUExFQVNF
-IE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwg
-bWVzc2FnZQ0KPj4+PmlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0
-ZWQgcmVjaXBpZW50KHMpIG5hbWVkDQo+Pj4+YWJvdmUuDQo+Pj4+SWYgdGhlIHJlYWRlciBvZiB0
-aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUNCj4+Pj5o
-ZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJy
-b3IgYW5kIHRoYXQNCj4+Pj5hbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24s
-IG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzDQo+Pj4+c3RyaWN0bHkgcHJvaGliaXRlZC4g
-SWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLA0KPj4+PnBs
-ZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBh
-Ym92ZSkNCj4+Pj5pbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2Yg
-dGhpcyBtZXNzYWdlIGluIHlvdXINCj4+Pj5wb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVz
-IG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4+PiAtLQ0KPj4+PiBUbyB1bnN1
-YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
-ZXZlbCINCj4+Pj5pbg0KPj4+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZw0KPj4+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5r
-ZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+Pj4NCj4+Pg0KPj4NCj4+IFBMRUFTRSBO
-T1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1l
-c3NhZ2UNCj4+aXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCBy
-ZWNpcGllbnQocykgbmFtZWQgYWJvdmUuDQo+PklmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdl
-IGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlDQo+PmhlcmVieSBub3RpZmll
-ZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdA0K
-Pj5hbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2Yg
-dGhpcyBtZXNzYWdlIGlzDQo+PnN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2Vp
-dmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwNCj4+cGxlYXNlIG5vdGlmeSB0aGUgc2Vu
-ZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKQ0KPj5pbW1lZGlhdGVs
-eSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIN
-Cj4+cG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9y
-ZWQgY29waWVzKS4NCj4NCj4NCj4NCj4tLQ0KPlJlZ2FyZHMNCj5LZWZ1IENoYWkNCg0KUExFQVNF
-IE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwg
-bWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJl
-Y2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMg
-bm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZp
-ZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3Nh
-Z2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21t
-dW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25l
-IG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBh
-bmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVy
-IGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0K
+On Fri, Sep 23, 2016 at 9:08 AM, chris holcombe
+<chris.holcombe@canonical.com> wrote:
+> Hey Ceph Devs,
+>
+> Now that the precedent is set I'd like to offer my librbd bindings up to
+> be included on the main github.com/ceph page.  My repo lives at:
+> https://github.com/cholcombe973/librbd-sys.  I'd be happy to add more
+> docs to it and expand on the README.md if there's interest in having
+> this included.
+
+This just requires someone with permissions to fork it into the ceph space.
+
+>
+> Thanks,
+> Chris
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Cheers,
+Brad
