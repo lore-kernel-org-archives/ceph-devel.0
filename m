@@ -1,129 +1,109 @@
 From: Alex Elder <elder@linaro.org>
-Subject: Re: [PATCH 6/8] rbd: rework rbd_img_obj_exists_submit() error paths
-Date: Sun, 25 Sep 2016 11:30:30 -0500
-Message-ID: <d47671df-6f9d-ea62-fe44-31d41e7c0986@linaro.org>
+Subject: Re: [PATCH 7/8] rbd: don't call rbd_osd_req_format_read() for
+ !img_data requests
+Date: Sun, 25 Sep 2016 11:44:19 -0500
+Message-ID: <fc625423-0cf5-d836-176a-0337ab8cfddc@linaro.org>
 References: <1474304608-17958-1-git-send-email-idryomov@gmail.com>
- <1474304608-17958-7-git-send-email-idryomov@gmail.com>
+ <1474304608-17958-8-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f51.google.com ([209.85.214.51]:37081 "EHLO
-        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1034564AbcIYQac (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Sep 2016 12:30:32 -0400
-Received: by mail-it0-f51.google.com with SMTP id j69so25759976itb.0
-        for <ceph-devel@vger.kernel.org>; Sun, 25 Sep 2016 09:30:32 -0700 (PDT)
-In-Reply-To: <1474304608-17958-7-git-send-email-idryomov@gmail.com>
+Received: from mail-io0-f171.google.com ([209.85.223.171]:36179 "EHLO
+        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S938834AbcIYQoW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Sep 2016 12:44:22 -0400
+Received: by mail-io0-f171.google.com with SMTP id m79so161939554ioo.3
+        for <ceph-devel@vger.kernel.org>; Sun, 25 Sep 2016 09:44:21 -0700 (PDT)
+In-Reply-To: <1474304608-17958-8-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
 On 09/19/2016 12:03 PM, Ilya Dryomov wrote:
-> - don't put obj_request if rbd_obj_request_create() fails
+> Accessing obj_request->img_request union field is only valid for object
+> requests associated with an image (i.e. if obj_request_img_data_test()
+> returns true).  rbd_osd_req_format_read() used to do more, but now it
+> just sets osd_req->snap_id.  Standalone and stat object requests always
+> go to the HEAD revision and are fine with CEPH_NOSNAP set by libceph,
+> so get around the invalid union field use by simply not calling
+> rbd_osd_req_format_read() in those places.
 
-Not only that, don't leak the page vector in that case either.
+Since rbd_osd_req_format_{read,write} are now only called
+from rbd_img_obj_request_fill(), and they're really simple,
+maybe they could be eliminated entirely and open-coded
+instead.  We already have the img_request and osd_req pointers
+in the caller's context.
 
-> - don't leak stat_request if rbd_osd_req_create() fails
+Stat requests go to the HEAD because they are only involved for
+a layered write, which *cannot* be a snapshot.  I suppose that
+is something that could have been (or be) asserted.
 
-I believe the reference that was being dropped at the end of
-the function was intended to match the one taken for the
-assignment of stat_request->obj_request.  But clearly the
-error path wasn't right.  Your new code no longer has an
-error path that requires dropping that reference.  It is
-dropped near the top of rbd_img_obj_exists_callback().
+Is it guaranteed/required that method calls go to the HEAD?
+I'm sure they all do now, but my question is whether there's
+a good reason that it will *always* be true.  Maybe it is.
 
-In your new code you drop a reference to the stat request,
-but that's to match the one taken when that request was
-created.
+Similarly, rbd_obj_read_sync() is currently used only for
+standalone object requests.  But it's conceivable it could
+be useful for image objects.  (I'm not too concerned about
+that though...)
 
-> Reported-by: David Disseldorp <ddiss@suse.de>
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Anwyay, this looks fine.  My reservations are all about
+ensuring these assumptions are clear in the code.  Maybe
+a comment or two is warranted.
 
-This looks good.
+In any case...
 
 Reviewed-by: Alex Elder <elder@linaro.org>
 
+> Reported-by: David Disseldorp <ddiss@suse.de>
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 > ---
->  drivers/block/rbd.c | 42 ++++++++++++++++++++++--------------------
->  1 file changed, 22 insertions(+), 20 deletions(-)
+>  drivers/block/rbd.c | 9 ++-------
+>  1 file changed, 2 insertions(+), 7 deletions(-)
 > 
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index b9a4e79a663f..03f171067e08 100644
+> index 03f171067e08..8907ee6342ac 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -2886,11 +2886,23 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+> @@ -1943,11 +1943,10 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req)
+>  
+>  static void rbd_osd_req_format_read(struct rbd_obj_request *obj_request)
 >  {
->  	struct rbd_device *rbd_dev = obj_request->img_request->rbd_dev;
->  	struct rbd_obj_request *stat_request;
-> -	struct page **pages = NULL;
-> +	struct page **pages;
->  	u32 page_count;
->  	size_t size;
->  	int ret;
+> -	struct rbd_img_request *img_request = obj_request->img_request;
+>  	struct ceph_osd_request *osd_req = obj_request->osd_req;
 >  
-> +	stat_request = rbd_obj_request_create(obj_request->object_name, 0, 0,
-> +					      OBJ_REQUEST_PAGES);
-> +	if (!stat_request)
-> +		return -ENOMEM;
-> +
-> +	stat_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
-> +						   stat_request);
-> +	if (!stat_request->osd_req) {
-> +		ret = -ENOMEM;
-> +		goto fail_stat_request;
-> +	}
-> +
->  	/*
->  	 * The response data for a STAT call consists of:
->  	 *     le64 length;
-> @@ -2902,38 +2914,28 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
->  	size = sizeof (__le64) + sizeof (__le32) + sizeof (__le32);
->  	page_count = (u32)calc_pages_for(0, size);
->  	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
-> -	if (IS_ERR(pages))
-> -		return PTR_ERR(pages);
-> +	if (IS_ERR(pages)) {
-> +		ret = PTR_ERR(pages);
-> +		goto fail_stat_request;
-> +	}
+> -	if (img_request)
+> -		osd_req->r_snapid = img_request->snap_id;
+> +	rbd_assert(obj_request_img_data_test(obj_request));
+> +	osd_req->r_snapid = obj_request->img_request->snap_id;
+>  }
 >  
-> -	ret = -ENOMEM;
-> -	stat_request = rbd_obj_request_create(obj_request->object_name, 0, 0,
-> -							OBJ_REQUEST_PAGES);
-> -	if (!stat_request)
-> -		goto out;
-> +	osd_req_op_init(stat_request->osd_req, 0, CEPH_OSD_OP_STAT, 0);
-> +	osd_req_op_raw_data_in_pages(stat_request->osd_req, 0, pages, size, 0,
-> +				     false, false);
->  
->  	rbd_obj_request_get(obj_request);
->  	stat_request->obj_request = obj_request;
->  	stat_request->pages = pages;
+>  static void rbd_osd_req_format_write(struct rbd_obj_request *obj_request)
+> @@ -2929,8 +2928,6 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
 >  	stat_request->page_count = page_count;
-> -
-> -	stat_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
-> -						   stat_request);
-> -	if (!stat_request->osd_req)
-> -		goto out;
 >  	stat_request->callback = rbd_img_obj_exists_callback;
 >  
-> -	osd_req_op_init(stat_request->osd_req, 0, CEPH_OSD_OP_STAT, 0);
-> -	osd_req_op_raw_data_in_pages(stat_request->osd_req, 0, pages, size, 0,
-> -					false, false);
->  	rbd_osd_req_format_read(stat_request);
->  
+> -	rbd_osd_req_format_read(stat_request);
+> -
 >  	rbd_obj_request_submit(stat_request);
 >  	return 0;
 >  
-> -out:
-> -	if (ret)
-> -		rbd_obj_request_put(obj_request);
-> -
-> +fail_stat_request:
-> +	rbd_obj_request_put(stat_request);
->  	return ret;
->  }
+> @@ -4026,7 +4023,6 @@ static int rbd_obj_method_sync(struct rbd_device *rbd_dev,
+>  	osd_req_op_cls_response_data_pages(obj_request->osd_req, 0,
+>  					obj_request->pages, inbound_size,
+>  					0, false, false);
+> -	rbd_osd_req_format_read(obj_request);
 >  
+>  	rbd_obj_request_submit(obj_request);
+>  	ret = rbd_obj_request_wait(obj_request);
+> @@ -4265,7 +4261,6 @@ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
+>  					obj_request->length,
+>  					obj_request->offset & ~PAGE_MASK,
+>  					false, false);
+> -	rbd_osd_req_format_read(obj_request);
+>  
+>  	rbd_obj_request_submit(obj_request);
+>  	ret = rbd_obj_request_wait(obj_request);
 > 
 
