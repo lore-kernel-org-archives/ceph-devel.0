@@ -1,68 +1,58 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 8/8] rbd: img_data requests don't own their page array
-Date: Mon, 26 Sep 2016 19:25:54 +0200
-Message-ID: <CAOi1vP9LexxS62KJEW14T_GiY1t78EB7QbwXW2CJ2p_0FcJKWA@mail.gmail.com>
-References: <1474304608-17958-1-git-send-email-idryomov@gmail.com>
- <1474304608-17958-9-git-send-email-idryomov@gmail.com> <3fe273f8-7f12-26d4-885a-972e63c0b48e@linaro.org>
- <20160926173322.50fa05f8@echidna.suse.de>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: Rust Librbd bindings
+Date: Mon, 26 Sep 2016 12:25:03 -0600
+Message-ID: <CALqRxCwOvn5Sq+J8Wsf4QR8jJQ7_=fOYQ-4S3jsiwmfJrgYr_Q@mail.gmail.com>
+References: <57E46476.5000901@canonical.com> <CAF-wwdGHMah1UWDrURCU9whhm_d7o+DsGim4HUQWZVTrd2-Xmg@mail.gmail.com>
+ <57E53589.7090102@canonical.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f65.google.com ([209.85.213.65]:32856 "EHLO
-        mail-vk0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1034708AbcIZRZ4 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Sep 2016 13:25:56 -0400
-Received: by mail-vk0-f65.google.com with SMTP id z126so3020657vkd.0
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Sep 2016 10:25:55 -0700 (PDT)
-In-Reply-To: <20160926173322.50fa05f8@echidna.suse.de>
+Received: from mail-vk0-f41.google.com ([209.85.213.41]:36537 "EHLO
+        mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1162640AbcIZSZG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Sep 2016 14:25:06 -0400
+Received: by mail-vk0-f41.google.com with SMTP id d8so70549797vka.3
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Sep 2016 11:25:05 -0700 (PDT)
+In-Reply-To: <57E53589.7090102@canonical.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Disseldorp <ddiss@suse.de>
-Cc: Alex Elder <elder@linaro.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: chris holcombe <chris.holcombe@canonical.com>
+Cc: Brad Hubbard <bhubbard@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Sep 26, 2016 at 5:33 PM, David Disseldorp <ddiss@suse.de> wrote:
-> On Sun, 25 Sep 2016 12:06:34 -0500, Alex Elder wrote:
+Can we just move it instead of forking? It'll be less confusing for users :)
+
+https://github.com/cholcombe973/librbd-sys/settings, click the "Transfer" button
+
+- Ken
+
+On Fri, Sep 23, 2016 at 8:00 AM, chris holcombe
+<chris.holcombe@canonical.com> wrote:
+> Any ceph dev's with permissions willing to fork it?
 >
->> On 09/19/2016 12:03 PM, Ilya Dryomov wrote:
->> > Move the check into rbd_obj_request_destroy(), to avoid use-after-free
->> > on errors in rbd_img_request_fill().
->> >
->> > Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> On 09/22/2016 07:04 PM, Brad Hubbard wrote:
+>> On Fri, Sep 23, 2016 at 9:08 AM, chris holcombe
+>> <chris.holcombe@canonical.com> wrote:
+>>> Hey Ceph Devs,
+>>>
+>>> Now that the precedent is set I'd like to offer my librbd bindings up to
+>>> be included on the main github.com/ceph page.  My repo lives at:
+>>> https://github.com/cholcombe973/librbd-sys.  I'd be happy to add more
+>>> docs to it and expand on the README.md if there's interest in having
+>>> this included.
 >>
->> Is this because an error occurring in rbd_img_request_fill()
->> causes rbd_img_obj_request_del() to be called, which leads to
->> rbd_obj_request_destroy(), which (by this time) has not yet
->> had its obj_request->pages pointer set to NULL because the
->> object request is still outstanding?  (Your explanation was
->> a little brief...)
->
-> I agree, the commit message could be improved...
->
-> I think the use after free is in the rbd_img_obj_parent_read_full()
-> call path - if rbd_img_request_fill() fails after adding an obj_request
-> to the img_request->obj_requests list, then the corresponding page(s)
-> will be freed in the rbd_img_request_fill() out_unwind error path *and*
-> the rbd_img_obj_parent_read_full() error path.
-
-Correct.  The same goes for rbd_img_request_fill(OBJ_REQUEST_PAGES)
-call in rbd_img_parent_read().  I'll update the commit message.
-
->
->> The change in rbd_obj_request_destroy() looks good for that
->> case.
+>> This just requires someone with permissions to fork it into the ceph space.
 >>
->> The code deleted in rbd_img_obj_end_request() could still stay,
->> however.  Almost everywhere, pointers are reassigned to NULL
->> when it's known the thing referred to is no longer needed.
->> It's useful in post-mortem understanding of what's occurred.
->
-> Agreed.
-
-I disagree.  Yes, it sometimes helps if you do it systematically and
-all you have is a panic message.  But if you have a vmcore and trying
-to do an actual post-mortem, NULLed out pointers tend to work against
-you, especially if you NULL out something that hasn't just been freed.
-
-Thanks,
-
-                Ilya
+>>>
+>>> Thanks,
+>>> Chris
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
