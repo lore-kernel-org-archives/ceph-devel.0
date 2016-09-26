@@ -1,79 +1,67 @@
-From: Petr Kovar <pkovar@redhat.com>
-Subject: Re: reStructuredText vs. AsciiDoc
-Date: Mon, 26 Sep 2016 18:14:55 +0200
-Message-ID: <20160926181455.f5f3845cba85e87d857bb0ed@redhat.com>
-References: <CALe9h7ewfBg0Q5fUV7zknDEy4pMpwNP9DQ-EYLm53tLmuRnbvw@mail.gmail.com>
-        <CAC-Np1z_cxGx6q0-O=H68hcex3o-6ffAV==P_oT_Hyx=_fh96w@mail.gmail.com>
-        <188947d4-2386-e401-3ad0-43cb7b21f3eb@redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 7/8] rbd: don't call rbd_osd_req_format_read() for
+ !img_data requests
+Date: Mon, 26 Sep 2016 18:37:14 +0200
+Message-ID: <CAOi1vP-hOGzi-Fit2gd42pfuC3EEYzrYLYLG6iZBUzniv=hsSg@mail.gmail.com>
+References: <1474304608-17958-1-git-send-email-idryomov@gmail.com>
+ <1474304608-17958-8-git-send-email-idryomov@gmail.com> <fc625423-0cf5-d836-176a-0337ab8cfddc@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49638 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1161240AbcIZQO5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 26 Sep 2016 12:14:57 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id C41D27F7C5
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Sep 2016 16:14:54 +0000 (UTC)
-In-Reply-To: <188947d4-2386-e401-3ad0-43cb7b21f3eb@redhat.com>
+Received: from mail-vk0-f68.google.com ([209.85.213.68]:36602 "EHLO
+        mail-vk0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1422737AbcIZQhQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Sep 2016 12:37:16 -0400
+Received: by mail-vk0-f68.google.com with SMTP id v205so2936996vke.3
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Sep 2016 09:37:15 -0700 (PDT)
+In-Reply-To: <fc625423-0cf5-d836-176a-0337ab8cfddc@linaro.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?QsOhcmEgQW7EjWluY292w6E=?= <bara@redhat.com>
-Cc: Alfredo Deza <adeza@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@linaro.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 23 Sep 2016 15:31:22 +0200
-Bára Ančincová <bara@redhat.com> wrote:
+On Sun, Sep 25, 2016 at 6:44 PM, Alex Elder <elder@linaro.org> wrote:
+> On 09/19/2016 12:03 PM, Ilya Dryomov wrote:
+>> Accessing obj_request->img_request union field is only valid for object
+>> requests associated with an image (i.e. if obj_request_img_data_test()
+>> returns true).  rbd_osd_req_format_read() used to do more, but now it
+>> just sets osd_req->snap_id.  Standalone and stat object requests always
+>> go to the HEAD revision and are fine with CEPH_NOSNAP set by libceph,
+>> so get around the invalid union field use by simply not calling
+>> rbd_osd_req_format_read() in those places.
+>
+> Since rbd_osd_req_format_{read,write} are now only called
+> from rbd_img_obj_request_fill(), and they're really simple,
+> maybe they could be eliminated entirely and open-coded
+> instead.  We already have the img_request and osd_req pointers
+> in the caller's context.
+>
+> Stat requests go to the HEAD because they are only involved for
+> a layered write, which *cannot* be a snapshot.  I suppose that
+> is something that could have been (or be) asserted.
 
-> On 09/22/2016 12:38 AM, Alfredo Deza wrote:
-> > On Tue, Sep 20, 2016 at 7:25 AM, John Spray <jspray@redhat.com> wrote:
-> >> Hi all,
-> >>
-> >> Currently the Ceph upstream documentation is mostly written in
-> >> restructuredtext, and built into HTML with Sphinx.
-> >>
-> >> We at Red Hat have some writer colleagues who are more comfortable
-> >> with asciidoc, and it has been suggested that we could get more new
-> >> content upstream (i.e. on github for everyone) if we were using
-> >> asciidoc.
-> > 
-> > The barrier to contribute from asciidoc to rst is not huge, it is
-> > mainly inconvenient. I think there is much more to gain
-> > from current contributors to raise the bar to improve the current state of docs.
-> > 
-> >>
-> >> So does anyone have any strong attachment to the restructuredtext
-> >> format currently in use?
-> > 
-> > I really like RestructuredText, but an important question here is:
-> > *if* we decided to move, are we aware of the burden that means
-> > to generate: html, man pages, and the porting of the extensions
-> > (doxygen, ditaa, and maybe something else I might be missing)
-> 
-> Another solution I can think of is to enhance pandoc (or some other
-> converter) to be able to convert between RST and AsciiDoc reliably,
-> without the need to manually edit the files afterwards.
-> 
-> I recently found out that one of my colleagues (Petr Kovar, cc'ed) is
-> dealing with the same problem. He contributes to the OpenStack upstream
-> docs. Maybe we can join forces.
+The only reason it's working is img_request->snap_id has the same
+offset as obj_request->img_request and we end up setting stat snap_id
+to a kernel pointer.  A snapshot with an id like 0xffff...  can't
+practically exist, so we get the HEAD response from the OSDs.
 
-Thanks for looping me in, Bara. The RHOSP team is trying to semi-automate
-downstreaming some of the OpenStack upstream guides, which are apparently
-using the same publishing toolchain (RST + Sphinx) as the Ceph upstream.
-The problem is that support for RST markup in pandoc is currently
-incomplete, which makes the whole process very fragile. 
+>
+> Is it guaranteed/required that method calls go to the HEAD?
+> I'm sure they all do now, but my question is whether there's
+> a good reason that it will *always* be true.  Maybe it is.
+>
+> Similarly, rbd_obj_read_sync() is currently used only for
+> standalone object requests.  But it's conceivable it could
+> be useful for image objects.  (I'm not too concerned about
+> that though...)
+>
+> Anwyay, this looks fine.  My reservations are all about
+> ensuring these assumptions are clear in the code.  Maybe
+> a comment or two is warranted.
 
-I'd be very much interested in working together on finding a robust enough
-solution for RST to adoc conversion if that's what you decide to go with for
-your upstream to downstream content flow.
+libceph initializes snap_id to CEPH_NOSNAP - that's the API.  If the
+client isn't setting it, the assumption is clear - HEAD.
 
 Thanks,
-pk
 
--- 
-Petr Kovar
-Sr. Technical Writer | Customer Content Services
-Red Hat Czech, Brno
+                Ilya
