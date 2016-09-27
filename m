@@ -1,104 +1,78 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: libcephfs-java bindings built but not showing up in debian repository
-Date: Tue, 27 Sep 2016 10:24:59 -0400
-Message-ID: <CAC-Np1yfWL=_e3usvd2N7hqujsJcAfGwuFtDFmE_D32vARgxvg@mail.gmail.com>
-References: <CAB2gnbXwbVghGQac9N_s820iG+M19xucvLi7DJOAaZrNjhoCyA@mail.gmail.com>
- <CAJ4mKGZk_W2d-ZGZSsdV0kHv8QVjpq4Ev98dRPL+o=RZoQ-8=A@mail.gmail.com> <CAC-Np1y-1=rBJOeAM2Z6bxEaXSYBMOJUwFvHdbExYypXiqfdwQ@mail.gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: libcephfs API changes for credential rework
+Date: Tue, 27 Sep 2016 10:39:08 -0400
+Message-ID: <1474987148.2652.31.camel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:35178 "EHLO
-        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934118AbcI0OZG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Sep 2016 10:25:06 -0400
-Received: by mail-qk0-f182.google.com with SMTP id t7so17642542qkh.2
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Sep 2016 07:25:01 -0700 (PDT)
-In-Reply-To: <CAC-Np1y-1=rBJOeAM2Z6bxEaXSYBMOJUwFvHdbExYypXiqfdwQ@mail.gmail.com>
+Received: from mail-yb0-f181.google.com ([209.85.213.181]:33566 "EHLO
+        mail-yb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933202AbcI0OjL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Sep 2016 10:39:11 -0400
+Received: by mail-yb0-f181.google.com with SMTP id 2so5659467ybv.0
+        for <ceph-devel@vger.kernel.org>; Tue, 27 Sep 2016 07:39:10 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Noah Watkins <noahwatkins@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Dan Mick <dmick@redhat.com>, Beocat KSU <mozes@ksu.edu>, Andrew Schoen <aschoen@redhat.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sage@redhat.com>
 
-On Fri, Jun 10, 2016 at 8:15 AM, Alfredo Deza <adeza@redhat.com> wrote:
-> On Thu, Jun 9, 2016 at 8:50 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
->> On Thu, Jun 9, 2016 at 4:29 PM, Noah Watkins <noahwatkins@gmail.com> wrote:
->>> I'm trying to track down why the Java Debian packages are not showing
->>> up in the Jewel repository:
->>>
->>> Looking in the repository for jewel I see the JNI bindings deb:
->>>
->>>    http://download.ceph.com/debian-jewel/pool/main/c/ceph/
->>>    libcephfs-jni_10.2.1-1trusty_amd64.deb 13-May-2016 23:53 20368086
->>>
->>> but not the deb file containing the Java bits (libcephfs-java).
->>
->> Hmm, that's the official release packages, which I think aren't
->> produced using all the same stuff as the gitbuilders. Does
->> libcephfs-java get built the same way as the JNI bindings? I know we
->> have a separate gitbuilder for Hadoop JARs...
->
-> The release packages are not produced using the same process as gitbuilders.
->
-> This is an example output of Trusty building Jewel:
->
->     https://jenkins.ceph.com/job/ceph-build/ARCH=x86_64,DIST=trusty,MACHINE_SIZE=huge/133/consoleFull
->
-> At the end of the build, the process looks for files in:
-> `release/$VERSION` which in the previous case would be
-> `release/10.2.2`
->
-> All binaries are placed there and that is what ends up being consumed.
->
-> This is the actual file that builds debs for upstream releases:
->
->     https://github.com/ceph/ceph-build/blob/master/ceph-build/build/build_deb
->
-> The part that actually calls pbuilder to produce the binaries and then
-> copy them to our centralized binary store is:
->
->     https://github.com/ceph/ceph-build/blob/master/ceph-build/build/build_deb#L165-L194
->
->
+(tl;dr: we need to make some changes to the libcephfs API to allow
+ proper credential handling. What's the right approach to take?)
 
-As part of the migration out of gitbuilders and into the new CI
-system, we are now having issues where libcephfs-java is not getting
-built.
+Greg Farnum has posted a pull request to rework how credentials are
+handled in cephfs:
 
-We tried debugging and are a bit lost on what is required to get this
-built. The make flags seem correct (to me), and include
-WITH_CEPHFS_JAVA=ON
+    https://github.com/ceph/ceph/pull/11218
 
-Recent gitbuilder output shows this line that is missing when we build
-in Jenkins (and official releases as well):
+...the patch pile is rather large, but the upshot is basically to
+change the code not to carve out '-1' in the uid and gid ranges, and to
+allow callers to pass down lists of supplementary groups. This is
+mainly needed for nfs-ganesha, but it also allows ceph-fuse to delegate
+permissions checks to the MDS.
 
+That PR adds most of the low-level plumbing that's needed, but we still
+need to expose this capability to applications via libcephfs. Many
+libcephfs calls either take "int uid, int gid" or don't allow the
+caller to send down creds at all.
 
-    install -d debian/libcephfs-java
+I think what we'll want to do is allow applications to create a new
+credential object and pass that down to the library in some fashion.
+The question is: what's the best way to handle those API changes?
 
-If anyone can point us in the right direction, that would be great.
-The teuthology integration is blocked on this currently and we are
-running out of ideas.
+We have several options here:
 
+1) make a clean break with the old API: just change the arguments to
+the existing functions, bump the library's major version and set the
+"age" field in it to 0. If you built against old headers, it'll fail to
+load the library at runtime. This is clearly the simplest option, but
+requires everyone to rebuild applications that were built against the
+old headers.
 
-Recent sample output from Jenkins that doesn't have libcephfs-java:
+2) create a "parallel" API that takes pointers to UserPerm objects, and
+add new new calls for them. The old API then becomes a wrapper around
+the new code. This would work, but it's more work -- we'd need to add a
+whole swath of new calls that take this pointer. This has the advantage
+of allowing existing programs to continue working through a lib
+upgrade. For this, we'd bump the major lib version, and "age" field to
+indicate that the library has a new API, but is backward compatible
+with the old one. If we want to go this route, how should the new
+functions be named?
 
-https://jenkins.ceph.com/job/ceph-dev-build/ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=xenial,DIST=xenial,MACHINE_SIZE=huge/826/consoleFull
+3) get tricky with global and thread local variables. Add calls to
+allow users to set libcephfs creds at the process and thread level.
+When the API is called, we'll check to see if creds have been installed
+in either spot and use those if they're present. If they're not, then
+we'll grab them from the current task (much like we do today). This is
+somewhat analogous to using setuid/setgid/setgroups before making a
+syscall. It's less intuitive than option #2 and requires callers to
+manage their creds carefully, but means that we don't need to explode
+out the API _and_ preserves the ability to run programs built against
+the old headers.
 
+It's a fair bit of work any way we approach it, so I want to be clear
+on a direction before I dive in too deeply.
 
->>
->> -Greg
->>
->>> However, it looks like the gitbuilder is producing them:
->>>
->>>    http://gitbuilder.ceph.com/ceph-deb-trusty-x86_64-basic/ref/jewel/pool/main/c/ceph/
->>>    ===> libcephfs-java_10.2.1-135-g50143ed-1trusty_all.deb2016-06-09 15:191.0M
->>>    libcephfs-jni_10.2.1-135-g50143ed-1trusty_amd64.deb2016-06-09 15:1919M
->>>
->>> I grepped around the autobuilders and don't see any special cases for
->>> Java. Any clues?
->>>
->>> Thanks,
->>> Noah
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thoughts?
+-- 
+Jeff Layton <jlayton@redhat.com>
