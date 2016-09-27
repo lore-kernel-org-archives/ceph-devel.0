@@ -1,147 +1,130 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: libcephfs API changes for credential rework
-Date: Tue, 27 Sep 2016 11:43:31 -0400
-Message-ID: <1474991011.2652.58.camel@redhat.com>
-References: <1474987148.2652.31.camel@redhat.com>
-         <alpine.DEB.2.11.1609271501090.19850@piezo.us.to>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: libcephfs-java bindings built but not showing up in debian repository
+Date: Tue, 27 Sep 2016 11:51:47 -0400
+Message-ID: <CAC-Np1zgET95m7NMJSOcOtxNU73c3xrfW5FHHjZU3nJffUAsog@mail.gmail.com>
+References: <28c544ef-6521-4ba7-8678-2c0ae8be65f6@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f173.google.com ([209.85.161.173]:36840 "EHLO
-        mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933122AbcI0Pnf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Sep 2016 11:43:35 -0400
-Received: by mail-yw0-f173.google.com with SMTP id t67so10803175ywg.3
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Sep 2016 08:43:35 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1609271501090.19850@piezo.us.to>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:38532 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933939AbcI0Pvt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Sep 2016 11:51:49 -0400
+Received: by mail-wm0-f52.google.com with SMTP id l132so20220697wmf.1
+        for <ceph-devel@vger.kernel.org>; Tue, 27 Sep 2016 08:51:48 -0700 (PDT)
+In-Reply-To: <28c544ef-6521-4ba7-8678-2c0ae8be65f6@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Gregory Farnum <gfarnum@redhat.com>
+To: Dan Mick <dan.mick@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Noah Watkins <noahwatkins@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Dan Mick <dmick@redhat.com>, Beocat KSU <mozes@ksu.edu>, Andrew Schoen <aschoen@redhat.com>
 
-On Tue, 2016-09-27 at 15:13 +0000, Sage Weil wrote:
-> On Tue, 27 Sep 2016, Jeff Layton wrote:
-> > (tl;dr: we need to make some changes to the libcephfs API to allow
-> >  proper credential handling. What's the right approach to take?)
-> > 
-> > Greg Farnum has posted a pull request to rework how credentials are
-> > handled in cephfs:
-> > 
-> >     https://github.com/ceph/ceph/pull/11218
-> > 
-> > ...the patch pile is rather large, but the upshot is basically to
-> > change the code not to carve out '-1' in the uid and gid ranges, and to
-> > allow callers to pass down lists of supplementary groups. This is
-> > mainly needed for nfs-ganesha, but it also allows ceph-fuse to delegate
-> > permissions checks to the MDS.
-> > 
-> > That PR adds most of the low-level plumbing that's needed, but we still
-> > need to expose this capability to applications via libcephfs. Many
-> > libcephfs calls either take "int uid, int gid" or don't allow the
-> > caller to send down creds at all.
-> > 
-> > I think what we'll want to do is allow applications to create a new
-> > credential object and pass that down to the library in some fashion.
-> > The question is: what's the best way to handle those API changes?
-> > 
-> > We have several options here:
-> > 
-> > 1) make a clean break with the old API: just change the arguments to
-> > the existing functions, bump the library's major version and set the
-> > "age" field in it to 0. If you built against old headers, it'll fail to
-> > load the library at runtime. This is clearly the simplest option, but
-> > requires everyone to rebuild applications that were built against the
-> > old headers.
-> 
-> I think this is the way to go.  We'd bump the SONAME (libcephfs2!).  The 
-> packaging infrastructure is such that you can have the old version of the 
-> package (libcephfs1) installed at the same time as libcephfs2 (and 
-> -devel), so stuff that's linked to the old API can still work and 
-> coexist with stuff linked to the new one.  The only restriction (on debian 
-> at least; I assume in rpm-land it is the same) is that you can only have 
-> one version of the -dev package (headers) installed at a time, so you can 
-> only compile new code against one version at a time.
-> 
+On Tue, Sep 27, 2016 at 11:47 AM, Dan Mick <dan.mick@redhat.com> wrote:
+> Current thing to check: is javahelper installed in the pbuilder environment?
+> If it's missing that'll do this.  That's where Andrew and I were yesterday.
 
-Ok, so basically we just rely on the linker picking the right lib at
-build time. That would work too.
+It is installing it.
 
-That said, the RPMs are currently named libcephfs1 and
-libcephfs1-devel. I guess then we'd end up with a libcephfs2-devel. I
-think we could add a "conflicts" directive in the specfile for it to
-make sure we have a conflict with libcephfs1-devel.
-
-I can live with that approach if that's the consensus. It sucks for
-anyone who happens to have apps built against the old version, but
-that's life...
-
-> IIRC with the SONAME stuff you can specify the oldest compatible 
-> version.  We can take the lazy route and skip #2 below and make that 2 as 
-> well, which would mean installing libcephfs1 and libcephfs2 concurrently 
-> for compatibility.
-> 
-
-You can do this. In libtool versioning parlance what you do is bump
-"current" and "age", and set revision to 0:
-
-https://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
-
-That was what I was figuring we'd do if we took option #2 below. If we
-go with option #1 though, then we just bump "current" and set the other
-two fields to 0.
-
-> It seems like the key downside here is that any project building against 
-> libcephfs that isn't updated will not be able to use newer versions of the 
-> client until they move to the new API...
-> 
-
-Exactly.
-
-AIUI though, there aren't really many apps in the field that use
-libcephfs. The only two major ones I know of that aren't part of ceph
-itself are nfs-ganesha and samba. I intend to fix both of them to use
-the new API when it's available.
-
-Are there other consumers of this library that I should be aware of?
-
-> 
-> 
-> 
-> > 
-> > 2) create a "parallel" API that takes pointers to UserPerm objects, and
-> > add new new calls for them. The old API then becomes a wrapper around
-> > the new code. This would work, but it's more work -- we'd need to add a
-> > whole swath of new calls that take this pointer. This has the advantage
-> > of allowing existing programs to continue working through a lib
-> > upgrade. For this, we'd bump the major lib version, and "age" field to
-> > indicate that the library has a new API, but is backward compatible
-> > with the old one. If we want to go this route, how should the new
-> > functions be named?
-> > 
-> > 3) get tricky with global and thread local variables. Add calls to
-> > allow users to set libcephfs creds at the process and thread level.
-> > When the API is called, we'll check to see if creds have been installed
-> > in either spot and use those if they're present. If they're not, then
-> > we'll grab them from the current task (much like we do today). This is
-> > somewhat analogous to using setuid/setgid/setgroups before making a
-> > syscall. It's less intuitive than option #2 and requires callers to
-> > manage their creds carefully, but means that we don't need to explode
-> > out the API _and_ preserves the ability to run programs built against
-> > the old headers.
-> > 
-> > It's a fair bit of work any way we approach it, so I want to be clear
-> > on a direction before I dive in too deeply.
-> > 
-> > Thoughts?
-> > -- 
-> > Jeff Layton <jlayton@redhat.com>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-
--- 
-Jeff Layton <jlayton@redhat.com>
+Confirmed :)
+>
+> It is a Build-Depends, so should be, but...
+>
+> Sent from Nine
+> ________________________________
+> From: Alfredo Deza
+> Sent: Sep 27, 2016 7:25 AM
+> To: Gregory Farnum
+> Cc: Noah Watkins; ceph-devel; Dan Mick; Beocat KSU; Andrew Schoen
+> Subject: Re: libcephfs-java bindings built but not showing up in debian
+> repository
+>
+> On Fri, Jun 10, 2016 at 8:15 AM, Alfredo Deza <adeza@redhat.com> wrote:
+>> On Thu, Jun 9, 2016 at 8:50 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+>>> On Thu, Jun 9, 2016 at 4:29 PM, Noah Watkins <noahwatkins@gmail.com>
+>>> wrote:
+>>>> I'm trying to track down why the Java Debian packages are not showing
+>>>> up in the Jewel repository:
+>>>>
+>>>> Looking in the repository for jewel I see the JNI bindings deb:
+>>>>
+>>>>    http://download.ceph.com/debian-jewel/pool/main/c/ceph/
+>>>>    libcephfs-jni_10.2.1-1trusty_amd64.deb 13-May-2016 23:53 20368086
+>>>>
+>>>> but not the deb file containing the Java bits (libcephfs-java).
+>>>
+>>> Hmm, that's the official release packages, which I think aren't
+>>> produced using all the same stuff as the gitbuilders. Does
+>>> libcephfs-java get built the same way as the JNI bindings? I know we
+>>> have a separate gitbuilder for Hadoop JARs...
+>>
+>> The release packages are not produced using the same process as
+>> gitbuilders.
+>>
+>> This is an example output of Trusty building Jewel:
+>>
+>>
+>> https://jenkins.ceph.com/job/ceph-build/ARCH=x86_64,DIST=trusty,MACHINE_SIZE=huge/133/consoleFull
+>>
+>> At the end of the build, the process looks for files in:
+>> `release/$VERSION` which in the previous case would be
+>> `release/10.2.2`
+>>
+>> All binaries are placed there and that is what ends up being consumed.
+>>
+>> This is the actual file that builds debs for upstream releases:
+>>
+>>
+>> https://github.com/ceph/ceph-build/blob/master/ceph-build/build/build_deb
+>>
+>> The part that actually calls pbuilder to produce the binaries and then
+>> copy them to our centralized binary store is:
+>>
+>>
+>> https://github.com/ceph/ceph-build/blob/master/ceph-build/build/build_deb#L165-L194
+>>
+>>
+>
+> As part of the migration out of gitbuilders and into the new CI
+> system, we are now having issues where libcephfs-java is not getting
+> built.
+>
+> We tried debugging and are a bit lost on what is required to get this
+> built. The make flags seem correct (to me), and include
+> WITH_CEPHFS_JAVA=ON
+>
+> Recent gitbuilder output shows this line that is missing when we build
+> in Jenkins (and official releases as well):
+>
+>
+>     install -d debian/libcephfs-java
+>
+> If anyone can point us in the right direction, that would be great.
+> The teuthology integration is blocked on this currently and we are
+> running out of ideas.
+>
+>
+> Recent sample output from Jenkins that doesn't have libcephfs-java:
+>
+> https://jenkins.ceph.com/job/ceph-dev-build/ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=xenial,DIST=xenial,MACHINE_SIZE=huge/826/consoleFull
+>
+>
+>>>
+>>> -Greg
+>>>
+>>>> However, it looks like the gitbuilder is producing them:
+>>>>
+>>>>
+>>>> http://gitbuilder.ceph.com/ceph-deb-trusty-x86_64-basic/ref/jewel/pool/main/c/ceph/
+>>>>    ===> libcephfs-java_10.2.1-135-g50143ed-1trusty_all.deb2016-06-09
+>>>> 15:191.0M
+>>>>    libcephfs-jni_10.2.1-135-g50143ed-1trusty_amd64.deb2016-06-09
+>>>> 15:1919M
+>>>>
+>>>> I grepped around the autobuilders and don't see any special cases for
+>>>> Java. Any clues?
+>>>>
+>>>> Thanks,
+>>>> Noah
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
