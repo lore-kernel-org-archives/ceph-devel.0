@@ -1,142 +1,144 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: libcephfs API changes for credential rework
-Date: Tue, 27 Sep 2016 15:53:21 -0400
-Message-ID: <1475006001.2652.103.camel@redhat.com>
-References: <1474987148.2652.31.camel@redhat.com>
-         <alpine.DEB.2.11.1609271501090.19850@piezo.us.to>
-         <1474997941.2652.94.camel@redhat.com>
-         <CAJ4mKGYB1XBuPQiaVVLFQ1mC3XCMrju40=3iyHidMrWVrJrdPA@mail.gmail.com>
-         <1475003402.2652.98.camel@redhat.com>
-         <CAJ4mKGanmvTy+u7g8=fgXgqTyyQVv_FP4wKqDMpkFn3+SsFm4w@mail.gmail.com>
+From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
+Subject: Re: Cmake build. C compiler.
+Date: Tue, 27 Sep 2016 19:31:37 +0000
+Message-ID: <D4101537.12DDB%evgeniy.firsov@sandisk.com>
+References: <D405A8C2.12B32%evgeniy.firsov@sandisk.com>
+ <c41894d2-1d9f-b640-b9e3-bcc958a8a518@digiware.nl>
+ <D405E2C2.12B3D%evgeniy.firsov@sandisk.com>
+ <CAJE9aOMzGb920sKSk+AvCnmzCtKsTmk4JFO7QYdB6ZhCVgwujg@mail.gmail.com>
+ <D409B01F.12C8C%evgeniy.firsov@sandisk.com>
+ <CAJE9aOOviq9ZVfQ8JmB8TVmVbA47XG14nC8qGth4P1LjkJxmYA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f169.google.com ([209.85.161.169]:34919 "EHLO
-        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753284AbcI0TxX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Sep 2016 15:53:23 -0400
-Received: by mail-yw0-f169.google.com with SMTP id i129so14640332ywe.2
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Sep 2016 12:53:23 -0700 (PDT)
-In-Reply-To: <CAJ4mKGanmvTy+u7g8=fgXgqTyyQVv_FP4wKqDMpkFn3+SsFm4w@mail.gmail.com>
+Received: from mail-co1nam03on0054.outbound.protection.outlook.com ([104.47.40.54]:10799
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S933712AbcI0UEs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 27 Sep 2016 16:04:48 -0400
+In-Reply-To: <CAJE9aOOviq9ZVfQ8JmB8TVmVbA47XG14nC8qGth4P1LjkJxmYA@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <9541C2518FAB3044A3296213CB20D59C@namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 2016-09-27 at 12:13 -0700, Gregory Farnum wrote:
-> On Tue, Sep 27, 2016 at 12:10 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> > 
-> > On Tue, 2016-09-27 at 11:17 -0700, Gregory Farnum wrote:
-> > > 
-> > > On Tue, Sep 27, 2016 at 10:39 AM, Jeff Layton <jlayton@redhat.com> wrote:
-> > > > 
-> > > > 
-> > > > On Tue, 2016-09-27 at 15:13 +0000, Sage Weil wrote:
-> > > > > 
-> > > > > 
-> > > > > On Tue, 27 Sep 2016, Jeff Layton wrote:
-> > > > > > 
-> > > > > > 
-> > > > > > (tl;dr: we need to make some changes to the libcephfs API to allow
-> > > > > >  proper credential handling. What's the right approach to take?)
-> > > > > > 
-> > > > > > Greg Farnum has posted a pull request to rework how credentials are
-> > > > > > handled in cephfs:
-> > > > > > 
-> > > > > >     https://github.com/ceph/ceph/pull/11218
-> > > > > > 
-> > > > > > ...the patch pile is rather large, but the upshot is basically to
-> > > > > > change the code not to carve out '-1' in the uid and gid ranges, and to
-> > > > > > allow callers to pass down lists of supplementary groups. This is
-> > > > > > mainly needed for nfs-ganesha, but it also allows ceph-fuse to delegate
-> > > > > > permissions checks to the MDS.
-> > > > > > 
-> > > > > > That PR adds most of the low-level plumbing that's needed, but we still
-> > > > > > need to expose this capability to applications via libcephfs. Many
-> > > > > > libcephfs calls either take "int uid, int gid" or don't allow the
-> > > > > > caller to send down creds at all.
-> > > > > > 
-> > > > > > I think what we'll want to do is allow applications to create a new
-> > > > > > credential object and pass that down to the library in some fashion.
-> > > > > > The question is: what's the best way to handle those API changes?
-> > > > > > 
-> > > > > > We have several options here:
-> > > > > > 
-> > > > > > 1) make a clean break with the old API: just change the arguments to
-> > > > > > the existing functions, bump the library's major version and set the
-> > > > > > "age" field in it to 0. If you built against old headers, it'll fail to
-> > > > > > load the library at runtime. This is clearly the simplest option, but
-> > > > > > requires everyone to rebuild applications that were built against the
-> > > > > > old headers.
-> > > > > 
-> > > > > I think this is the way to go.  We'd bump the SONAME (libcephfs2!).  The
-> > > > > packaging infrastructure is such that you can have the old version of the
-> > > > > package (libcephfs1) installed at the same time as libcephfs2 (and
-> > > > > -devel), so stuff that's linked to the old API can still work and
-> > > > > coexist with stuff linked to the new one.  The only restriction (on debian
-> > > > > at least; I assume in rpm-land it is the same) is that you can only have
-> > > > > one version of the -dev package (headers) installed at a time, so you can
-> > > > > only compile new code against one version at a time.
-> > > > > 
-> > > > > IIRC with the SONAME stuff you can specify the oldest compatible
-> > > > > version.  We can take the lazy route and skip #2 below and make that 2 as
-> > > > > well, which would mean installing libcephfs1 and libcephfs2 concurrently
-> > > > > for compatibility.
-> > > > > 
-> > > > > It seems like the key downside here is that any project building against
-> > > > > libcephfs that isn't updated will not be able to use newer versions of the
-> > > > > client until they move to the new API...
-> > > > > 
-> > > > > sage
-> > > > > 
-> > > > 
-> > > > This brings up another point...
-> > > > 
-> > > > When I added the struct ceph_statx interfaces, I left the old struct
-> > > > stat interfaces intact. So we now have ceph_statx and ceph_ll_getattrx,
-> > > > etc. If we're making a clean API break where we change args on existing
-> > > > function names, then we don't really need those new calls.
-> > > > 
-> > > > Anyone have objections to me just converting the old struct stat based
-> > > > functions to use struct ceph_statx instead, and dumping the new
-> > > > function prototypes that I added?
-> > > > 
-> > > > It'll mean some code churn in the short term, but I think it'll make
-> > > > for a simpler API later.
-> > > 
-> > > Yeah, that makes sense as long as we're going incompatible.
-> > > 
-> > > Here's another question, though: should we actually copy the source
-> > > code to create libcephfs2, and generate libcephfs1 through the
-> > > Luminous release to give anybody who is running stuff out there a
-> > > window to change over smoothly? I don't expect we'd need to actually
-> > > change the libcephfs1 source code; certainly it won't take much...
-> > > -Greg
-> > 
-> > Sure, I don't think it'd be too hard to do that, just a little shim
-> > layer on top of the new API.
-> > 
-> > Here's another thing too though. We have both java and python bindings
-> > in the tree as well. They don't really deal with creds, but they do
-> > wrap ceph_stat() and friends...should I convert those over to use the
-> > statx-based APIs as well?
-> 
-> I dunno about the python ones. The Java API is really only used by our
-> Hadoop bindings AFAIK so it'd be dictated by that system's needs. I
-> imagine we'd want to swap them to use our new interfaces for ease of
-> maintenance, but if it's simpler we don't need to swap out their
-> exterior APIs to expose statx until there's demand?
-
-Maybe, but it might be good to go ahead and convert them too.
-
-The older interfaces were pretty heavy on the caps requirements. The
-ceph_statx APIs allow clients to get away with only the caps they need
-for the fields that they are interested in. I imagine hadoop workloads
-might benefit from that.
-
-Fixing the bindings themselves looks pretty simple, but I'd need
-someone else to drive fixing hadoop and the python consumers of them.
-
--- 
-Jeff Layton <jlayton@redhat.com>
+DQpPbiA5LzIzLzE2LCA0OjEyIEFNLCAia2VmdSBjaGFpIiA8dGNoYWlrb3ZAZ21haWwuY29tPiB3
+cm90ZToNCg0KPk9uIEZyaSwgU2VwIDIzLCAyMDE2IGF0IDc6MDIgQU0sIEV2Z2VuaXkgRmlyc292
+DQo+PEV2Z2VuaXkuRmlyc292QHNhbmRpc2suY29tPiB3cm90ZToNCj4+IEtlZnUsDQo+Pg0KPj4g
+WW91IGFyZSByaWdodC4gTXkgc3RhdGVtZW50IHdhcyB3cm9uZy4gSSBmb3VuZCB0aGF0IHRoZSBw
+cm9ibGVtIHdhcyBpbg0KPj4gTkRFQlVHIGhhbmRsaW5nIGluIFpTIGNvZGUuDQo+PiBIb3dldmVy
+LCBkbyB5b3Uga25vdyBpZiB0aGVyZSBpcyBhIHdheSB0byBidWlsZCDigJxpbiB0cmVl4oCdLCBJ
+IG1lYW4gYXMgd2UNCj4+IGRpZCB3aXRoIGF1dG8gdG9vbHMsIHdpdGhvdXQgY3JlYXRpbmcg4oCc
+YnVpbGTigJ0gZGlyZWN0b3J5Pw0KPg0KPndoeSB3b3VsZCB5b3Ugd2FudCB0byBidWlsZCAiaW4g
+dHJlZSI/IGJlY2F1c2UgeW91IGRvbid0IHdhbnQgY2VwaCdzDQo+ImFzc2VydC5oIiB0byBiZSBp
+bmNsdWRlIGJ5IFpTIGNvZGU/DQpJIGp1c3QgbWlzcyB0aGUgY29udmVuaWVuY2Ugb2YgcnVubmlu
+ZyDigJxtYWtlIiBhbnl3aGVyZSBpbiB0aGUgdHJlZS4NCj4+DQo+PiBPbiA5LzIwLzE2LCAxMTow
+NCBQTSwgImtlZnUgY2hhaSIgPHRjaGFpa292QGdtYWlsLmNvbT4gd3JvdGU6DQo+Pg0KPj4+T24g
+VHVlLCBTZXAgMjAsIDIwMTYgYXQgOTo0OCBBTSwgRXZnZW5peSBGaXJzb3YNCj4+PjxFdmdlbml5
+LkZpcnNvdkBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+Pj4+IEl0IGhhcyBub3RoaW5nIHRvIGRvIHdp
+dGggY29tcGlsZXJzLg0KPj4+PiBUaGVyZSBpcyBhIGJ1ZyBpbiBOREVCVUcgaGFuZGxpbmcgaW4g
+WmV0YVNjYWxlLCB3aGljaCBDZXBo4oCZcw0KPj4+PiBDbWFrZUxpc3RzLnR4dCBwYXNzZXMgZG93
+bi4NCj4+Pj4NCj4+Pj4gQW5kIOKAnGluIHRyZWXigJ0gYnVpbGQganVzdCB1c2VzIHdyb25nIGlu
+Y2x1ZGUgcGF0aHMsIEkgZ3Vlc3MuDQo+Pj4+DQo+Pj4+IE9uIDkvMTkvMTYsIDM6MDAgUE0sICJX
+aWxsZW0gSmFuIFdpdGhhZ2VuIiA8d2p3QGRpZ2l3YXJlLm5sPiB3cm90ZToNCj4+Pj4NCj4+Pj4+
+T24gMTktOS0yMDE2IDIzOjM3LCBFdmdlbml5IEZpcnNvdiB3cm90ZToNCj4+Pj4+PiBIaSwgR3V5
+cywNCj4+Pj4+Pg0KPj4+Pj4+IFdoZW4gSSBidWlsZCBDZXBoIHVzaW5nIC4vZG9fY21ha2Uuc2gg
+JiYgY2QgYnVpbGQgJiYgbWFrZSAtajMyLA0KPj4+Pj4+bG9va3MNCj4+Pj4+Pmxpa2UNCj4+Pj4+
+PiBldmVyeXRoaW5nIGlzIGNvbXBpbGVkIHVzaW5nIEMrKyBjb21waWxlciwgZXZlbiBmaWxlcyB3
+aXRoIC5jDQo+Pj4+Pj5leHRlbnNpb24uDQo+Pj4NCj4+PnRoaXMgaXMgbm90IHRydWUuIHNyYy90
+cmFjaW5nL2xpYnJhZG9zLmMgaXMgYSBwdXJlIEMgc291cmNlIGZpbGUuIHdoZW4NCj4+PmkgcnVu
+IGZvbGxvd2luZyBjb21tYW5kLCBpIGhhdmU6DQo+Pj4NCj4+PiQgbWFrZSByYWRvc190cCBWRVJC
+T1NFPTENCj4+Pi4uLg0KPj4+QnVpbGRpbmcgQyBvYmplY3QNCj4+PnNyYy90cmFjaW5nL0NNYWtl
+RmlsZXMvcmFkb3NfdHAuZGlyL19fL19fL2luY2x1ZGUvdHJhY2luZy9saWJyYWRvcy5jLm8NCj4+
+PmNkIC92YXIvY2VwaC9jZXBoL2J1aWxkL3NyYy90cmFjaW5nICYmIGNjYWNoZSAvdXNyL2Jpbi9j
+Yw0KPj4+LURDRVBIX0xJQkRJUj1cIi9ob21lL2tlZnUvLmxvY2FsL2xpYlwiDQo+Pj4tRENFUEhf
+UEtHTElCRElSPVwiL2hvbWUva2VmdS8ubG9jYWwvbGliL2NlcGhcIiAtRF9fbGludXhfXw0KPj4+
+LURyYWRvc190cF9FWFBPUlRTIC1JL3Zhci9jZXBoL2NlcGgvYnVpbGQvc3JjL2luY2x1ZGUNCj4+
+Pi1JL3Zhci9jZXBoL2NlcGgvc3JjIC1JL3Zhci9jZXBoL2NlcGgvYnVpbGQvaW5jbHVkZQ0KPj4+
+LUkvdmFyL2NlcGgvY2VwaC9zcmMveHhIYXNoICAtV2FsbCAtV3R5cGUtbGltaXRzIC1XaWdub3Jl
+ZC1xdWFsaWZpZXJzDQo+Pj4tV2luaXQtc2VsZiAtV3BvaW50ZXItYXJpdGggLVdlcnJvcj1mb3Jt
+YXQtc2VjdXJpdHkNCj4+Pi1mbm8tc3RyaWN0LWFsaWFzaW5nIC1mc2lnbmVkLWNoYXIgLXJkeW5h
+bWljIC1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZw0KPj4+LWZkaWFnbm9zdGljcy1jb2xvcj1hdXRv
+IC1nIC1mUElDICAgLURIQVZFX0NPTkZJR19IIC1EX19DRVBIX18NCj4+Pi1EX1JFRU5UUkFOVCAt
+RF9USFJFQURfU0FGRSAtRF9fU1REQ19GT1JNQVRfTUFDUk9TIC1EX0dOVV9TT1VSQ0UNCj4+Pi1E
+X0ZJTEVfT0ZGU0VUX0JJVFM9NjQgLW8NCj4+PkNNYWtlRmlsZXMvcmFkb3NfdHAuZGlyL19fL19f
+L2luY2x1ZGUvdHJhY2luZy9saWJyYWRvcy5jLm8gICAtYw0KPj4+L3Zhci9jZXBoL2NlcGgvYnVp
+bGQvaW5jbHVkZS90cmFjaW5nL2xpYnJhZG9zLmMNCj4+PkxpbmtpbmcgQyBzaGFyZWQgbGlicmFy
+eSAuLi8uLi9saWIvbGlicmFkb3NfdHAuc28NCj4+Pi4uLg0KPj4+DQo+Pj5zbyBpdCBpcyB1c2lu
+ZyBjYyBub3QgYysrIHRvIGNvbXBpbGUgdGhpcyBzb3VyY2UgZmlsZS4NCj4+Pg0KPj4+DQo+Pj4+
+Pj4gVGhpcyBmYWlscyBaZXRhU2NhbGUgY29tcGlsYXRpb24sIHdoaWNoIGlzIHB1cmUgQy4NCj4+
+Pg0KPj4+Y291bGQgeW91IHNoYXJlIHlvdXIgcmVwby9icmFuY2ggYWRkcmVzcyBvZiBDZXBoIHdp
+dGggWmV0YVNjYWxlIHNvDQo+Pj5wZW9wbGUgY2FuIHRyeSBhbmQgdmVyaWZ5Pw0KPj4+DQo+Pj4+
+Pj4NCj4+Pj4+PiBJbiBvcHBvc2UgdG8gdGhhdCBpZiBJIGFtIGJ1aWxkaW5nIMKzaW4gdHJlZcKy
+LCB3aXRoIGNtYWtlIC4gJiYgbWFrZQ0KPj4+Pj4+LWozMiwNCj4+Pj4+PiBDZXBoIGJ1aWxkIGZh
+aWxzLCBiZWNhdXNlIGl0IHVzZXMgcHJvcGVyIEMgY29tcGlsZXIgZm9yIC5jDQo+Pj4+Pj5leHRl
+bnNpb24sDQo+Pj4+Pj5idXQNCj4+Pj4+PiB0aGV5IGluY2x1ZGUgQ2VwaMK5cyBhc3NlcnQuaCB3
+aGljaCBpcyBDKysuDQo+Pj4+Pj4NCj4+Pj4+PiBTbywgcHJvYmFibHksIEkgbmVlZCB0byBjb25m
+aWd1cmUgY29tcGlsZXIgb24gcGVyIGRpcmVjdG9yeSBiYXNpcywNCj4+Pj4+PmlzDQo+Pj4+Pj4g
+dGhlcmUga25vd24gd2F5IHRvIGRvIHRoYXQ/DQo+Pj4+Pj4gQWxzbywgY2FuIHNvbWVib2R5IHBv
+aW50IG1lIHdoZXJlIGluIHRoZSBDTWFrZUxpc3QudHh0IGNvbXBpbGVyIGlzDQo+Pj4+Pj4gY29u
+ZmlndXJlZCBmb3IgwrNvdXQgb2YgdHJlZcKyIGJ1aWxkPyBJIG1lYW4gQysrIGZvciBldmVyeXRo
+aW5nLg0KPj4+Pj4NCj4+Pj4+WW91IGNhbiBydW4NCj4+Pj4+Y21ha2UgLS1zeXN0ZW0taW5mb3Jt
+YXRpb24NCj4+Pj4+dG8gZmluZCBvdXQgd2hhdCB5b3Ugc3lzdGVtIGlzIHVzaW5nIGZvciBkZWZh
+dWx0cy4uLi4NCj4+Pj4+DQo+Pj4+Pk1pbmUgKEZyZWVCU0QpIGhhczoNCj4+Pj4+DQo+Pj4+PkNN
+QUtFX0NYWF9DT01QSUxFUiA9PSAiL3Vzci9iaW4vQ0MiDQo+Pj4+PkNNQUtFX0NfQ09NUElMRVIg
+PT0gIi91c3IvYmluL2NjIg0KPj4+Pj4NCj4+Pj4+U28gaXQgc29ydCBvZiBhbHJlYWR5IGtub3dz
+IGZyb20gdGhlIGJlZ2lubmluZyB0aGUgZGlmZmVyZW5jZSBiZXR3ZWVuDQo+Pj4+PkMNCj4+Pj4+
+YW5kIEMrKw0KPj4+Pj4NCj4+Pj4+LS1XalcNCj4+Pj4+Pg0KPj4+Pj4+IOKAuQ0KPj4+Pj4+IEV2
+Z2VuaXkNCj4+Pj4+Pg0KPj4+Pj4+DQo+Pj4+Pj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlv
+biBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwNCj4+Pj4+Pm1lc3NhZ2UNCj4+Pj4+
+PmlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50
+KHMpIG5hbWVkDQo+Pj4+Pj5hYm92ZS4NCj4+Pj4+PklmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNz
+YWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlDQo+Pj4+Pj5oZXJlYnkg
+bm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5k
+IHRoYXQNCj4+Pj4+PmFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3Ig
+Y29weWluZyBvZiB0aGlzIG1lc3NhZ2UNCj4+Pj4+PmlzDQo+Pj4+Pj5zdHJpY3RseSBwcm9oaWJp
+dGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4NCj4+Pj4+PmVy
+cm9yLA0KPj4+Pj4+cGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1h
+aWwgKGFzIHNob3duIGFib3ZlKQ0KPj4+Pj4+aW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFu
+ZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyDQo+Pj4+Pj5wb3NzZXNzaW9uICh3
+aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4+
+Pj4+IC0tDQo+Pj4+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxp
+bmUgInVuc3Vic2NyaWJlDQo+Pj4+Pj5jZXBoLWRldmVsIg0KPj4+Pj4+aW4NCj4+Pj4+PiB0aGUg
+Ym9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4+Pj4+IE1v
+cmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWlu
+Zm8uaHRtbA0KPj4+Pj4+DQo+Pj4+Pg0KPj4+Pg0KPj4+PiBQTEVBU0UgTk9URTogVGhlIGluZm9y
+bWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlDQo+Pj4+aXMg
+aW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykg
+bmFtZWQNCj4+Pj5hYm92ZS4NCj4+Pj5JZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBu
+b3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZQ0KPj4+PmhlcmVieSBub3RpZmllZCB0
+aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdA0KPj4+
+PmFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0
+aGlzIG1lc3NhZ2UgaXMNCj4+Pj5zdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNl
+aXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsDQo+Pj4+cGxlYXNlIG5vdGlmeSB0aGUg
+c2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKQ0KPj4+PmltbWVk
+aWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4g
+eW91cg0KPj4+PnBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2Fs
+bHkgc3RvcmVkIGNvcGllcykuDQo+Pj4NCj4+Pg0KPj4+DQo+Pj4tLQ0KPj4+UmVnYXJkcw0KPj4+
+S2VmdSBDaGFpDQo+Pg0KPj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQg
+aW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZQ0KPj5pcyBpbnRlbmRlZCBvbmx5IGZvciB0
+aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4NCj4+SWYg
+dGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQs
+IHlvdSBhcmUNCj4+aGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBt
+ZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0DQo+PmFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRp
+c3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMNCj4+c3RyaWN0bHkgcHJv
+aGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9y
+LA0KPj5wbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMg
+c2hvd24gYWJvdmUpDQo+PmltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGll
+cyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91cg0KPj5wb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29w
+aWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0KPg0KPg0KPi0tDQo+UmVn
+YXJkcw0KPktlZnUgQ2hhaQ0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5l
+ZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRo
+ZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUg
+cmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91
+IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2Ug
+aW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9u
+LCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5
+b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3Rp
+ZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1t
+ZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBp
+biB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkg
+c3RvcmVkIGNvcGllcykuDQo=
