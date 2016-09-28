@@ -1,88 +1,57 @@
-From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Subject: RE: async messenger random read performance on NVMe
-Date: Wed, 28 Sep 2016 05:52:05 +0000
-Message-ID: <6AA21C22F0A5DA478922644AD2EC308C659B2ED5@SHSMSX101.ccr.corp.intel.com>
-References: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
- <6AA21C22F0A5DA478922644AD2EC308C659B2E9A@SHSMSX101.ccr.corp.intel.com>
- <BY2PR02MB396990CD6986513D8757A42F4CF0@BY2PR02MB396.namprd02.prod.outlook.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: Re: Detect memory leaks in ceph
+Date: Wed, 28 Sep 2016 06:16:57 +0000
+Message-ID: <MWHPR02MB263918AA0649AA223323EFD0E2CF0@MWHPR02MB2639.namprd02.prod.outlook.com>
+References: <CAA8xDw295OV5LoR4wwGixofoNmrTfgOsjbpw1RzyKMGRmqk=ag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:45280 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751246AbcI1FwK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 28 Sep 2016 01:52:10 -0400
-In-Reply-To: <BY2PR02MB396990CD6986513D8757A42F4CF0@BY2PR02MB396.namprd02.prod.outlook.com>
+Received: from mail-by2nam03on0074.outbound.protection.outlook.com ([104.47.42.74]:64809
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750775AbcI1GuT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 28 Sep 2016 02:50:19 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Elita Lobo <loboelita@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-VXNlIHRoZSBkZWZhdWx0IGNvbmZpZyBmb3IgY21ha2UuICBGb3IgZGVmYXVsdCwgY21ha2UgdXNl
-IHRjbWFsbG9jLg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogU29tbmF0aCBS
-b3kgW21haWx0bzpTb21uYXRoLlJveUBzYW5kaXNrLmNvbV0gDQpTZW50OiBXZWRuZXNkYXksIFNl
-cHRlbWJlciAyOCwgMjAxNiAxOjA3IFBNDQpUbzogTWEsIEppYW5wZW5nIDxqaWFucGVuZy5tYUBp
-bnRlbC5jb20+OyBNYXJrIE5lbHNvbiA8bW5lbHNvbkByZWRoYXQuY29tPjsgY2VwaC1kZXZlbCA8
-Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQpTdWJqZWN0OiBSRTogYXN5bmMgbWVzc2VuZ2Vy
-IHJhbmRvbSByZWFkIHBlcmZvcm1hbmNlIG9uIE5WTWUNCg0KRGlkIHlvdSBpbmNyZWFzZSB0Y21h
-bGxvYyB0aHJlYWQgY2FjaGUgdG8gYmlnZ2VyIHZhbHVlIGxpa2UgMjU2TUIgb3IgYXJlIHlvdSB1
-c2luZyBqZW1hbGxvYyA/DQpJZiBub3QsIHRoaXMgcmVzdWx0IGlzIHZlcnkgbXVjaCBleHBlY3Rl
-ZC4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
-LS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIE1hLCBKaWFucGVuZw0K
-U2VudDogVHVlc2RheSwgU2VwdGVtYmVyIDI3LCAyMDE2IDg6MzQgUE0NClRvOiBNYXJrIE5lbHNv
-bjsgY2VwaC1kZXZlbA0KU3ViamVjdDogUkU6IGFzeW5jIG1lc3NlbmdlciByYW5kb20gcmVhZCBw
-ZXJmb3JtYW5jZSBvbiBOVk1lDQoNCkhpIE1hcms6DQogICAgQmFzZSBvbiAxZjVkNzVmMzFhYTFh
-N2I0LA0KSU9QUzRLIFJXICAgICAgICAgICAgIDRLUlINCkFzeW5jICAgICAgICAgICAgMTQ0NDUw
-ICAgICAgICAgICA2MTI3MTYNCiAgICAgICAgICAgIFNpbXBsZSAgICAgICAgICAxMTExODcgICAg
-ICAgICAgIDQxNDY3Mg0KDQpBc3luYyB1c2UgdGhlIGRlZmF1bHQgdmFsdWUuDQpNeSBjbHVzdGVy
-OiA0IG5vZGUsIDE2IG9zZChzc2QgKyBudm1lKHN0b3JlIHJvY2tzZGIvd2FsKS4gRm9yIHRlc3Qg
-dXNlIGZpbytsaWJyYmQuDQoNCkJ1dCB0aGUgcmVzdWx0cyBhcmUgb3Bwb3NpdGUuDQoNClRoYW5r
-cyENCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmdd
-IE9uIEJlaGFsZiBPZiBNYXJrIE5lbHNvbg0KU2VudDogVGh1cnNkYXksIFNlcHRlbWJlciAyMiwg
-MjAxNiAyOjUwIEFNDQpUbzogY2VwaC1kZXZlbCA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+
-DQpTdWJqZWN0OiBhc3luYyBtZXNzZW5nZXIgcmFuZG9tIHJlYWQgcGVyZm9ybWFuY2Ugb24gTlZN
-ZQ0KDQpSZWNlbnRseSBpbiBtYXN0ZXIgd2UgbWFkZSBhc3luYyBtZXNzZW5nZXIgZGVmYXVsdC4g
-IEFmdGVyIGRvaW5nIGEgYnVuY2ggb2YgYmlzZWN0aW9uLCBpdCB0dXJucyBvdXQgdGhhdCB0aGlz
-IGNhdXNlZCBhIGZhaXJseSBkcmFtYXRpYyBkZWNyZWFzZSBpbiBibHVlc3RvcmUgcmFuZG9tIHJl
-YWQgcGVyZm9ybWFuY2UuICBUaGlzIGlzIG9uIGEgY2x1c3RlciB3aXRoIGZhaXJseSBmYXN0IE5W
-TWUgY2FyZHMsIDE2IE9TRHMgYWNyb3NzIDQgT1NEIGhvc3RzLiAgVGhlcmUgYXJlIDggZmlvIGNs
-aWVudCBwcm9jZXNzZXMgd2l0aCAzMiBjb25jdXJyZW50IHRocmVhZHMgZWFjaC4NCg0KQ2VwaCBt
-YXN0ZXIgdXNpbmcgYmx1ZXN0b3JlDQoNClBhcmFtZXRlcnMgdHdlYWtlZDoNCg0KbXNfYXN5bmNf
-c2VuZF9pbmxpbmUNCm1zX2FzeW5jX29wX3RocmVhZHMNCm1zX2FzeW5jX21heF9vcF90aHJlYWRz
-DQoNCnNpbXBsZTogMTY4SyBJT1BTDQoNCnNlbmRfaW5saW5lOiB0cnVlDQphc3luYyAzLzUgICB0
-aHJlYWRzOiAxMTFLIElPUFMNCmFzeW5jIDQvOCAgIHRocmVhZHM6IDEyNUsgSU9QUw0KYXN5bmMg
-OC8xNiAgdGhyZWFkczogMTI4SyBJT1BTDQphc3luYyAxNi8zMiB0aHJlYWRzOiAxMjhLIElPUFMN
-CmFzeW5jIDI0LzQ4IHRocmVhZHM6IDEyOEsgSU9QUw0KYXN5bmMgMjUvNTAgdGhyZWFkczogc2Vn
-ZmF1bHQNCmFzeW5jIDI2LzUyIHRocmVhZHM6IHNlZ2ZhdWx0DQphc3luYyAzMi82NCB0aHJlYWRz
-OiBzZWdmYXVsdA0KDQpzZW5kX2lubGluZTogZmFsc2UNCmFzeW5jIDMvNSAgIHRocmVhZHM6IDE1
-M0sgSU9QUw0KYXN5bmMgNC84ICAgdGhyZWFkczogMTUzSyBJT1BTDQphc3luYyA4LzE2ICB0aHJl
-YWRzOiAxNTJLIElPUFMNCg0KU28gZGVmaW5pdGVseSBzZXR0aW5nIHNlbmRfaW5saW5lIHRvIGZh
-bHNlIGhlbHBzIHByZXR0eSBkcmFtYXRpY2FsbHksIHRob3VnaCB3ZSdyZSBzdGlsbCBhIGxpdHRs
-ZSBzbG93ZXIgZm9yIHNtYWxsIHJhbmRvbSByZWFkcyB0aGFuIHNpbXBsZSBtZXNzZW5nZXIuICBI
-YW9tYWksIHJlZ2FyZGluZyB0aGUgc2VnZmF1bHRzLCBJIHRvb2sgYSBxdWljayBsb29rIHdpdGgg
-Z2RiIGF0IHRoZSBjb3JlIGZpbGUgYnV0IGRpZG4ndCBzZWUgYW55dGhpbmcgaW1tZWRpYXRlbHkg
-b2J2aW91cy4gIEl0IG1pZ2h0IGJlIHdvcnRoIHNlZWluZyBpZiB5b3UgY2FuIHJlcHJvZHVjZS4N
-Cg0KT24gdGhlIHBlcmZvcm1hbmNlIGZyb250LCBJJ2xsIHRyeSB0byBzZWUgaWYgSSBjYW4gc2Vl
-IGFueXRoaW5nIG9idmlvdXMgaW4gcGVyZi4NCg0KTWFyaw0KLS0NClRvIHVuc3Vic2NyaWJlIGZy
-b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0
-aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1h
-am9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwNChPvv73vv73subsc77+9Ju+/vX7vv70m77+9GO+/ve+/vSst77+977+93bYX77+977+9d++/
-ve+/vcub77+977+977+9be+/vR7vv70XXu+/ve+/vWLvv73vv71ebu+/vXLvv73vv73vv71677+9
-Gu+/ve+/vWjvv73vv73vv73vv70m77+977+9Hu+/vUfvv73vv73vv71o77+9Ayjvv73pmo7vv73d
-omoi77+977+9Gu+/vRtt77+977+977+977+977+9eu+/vd6W77+977+977+9Zu+/ve+/ve+/vWjv
-v73vv73vv71+77+9be+/vQ0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQg
-aW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUg
-dXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJl
-YWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBh
-cmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGlu
-IGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwg
-b3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91
-IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5
-IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVk
-aWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4g
-eW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0
-b3JlZCBjb3BpZXMpLg0K
+Valgrind(memcheck & massif) can help you in finding the leaks. If you
+are using tcmalloc, you can use heap profiler
+to see the current allocations and find out the culprit. You can refer
+http://docs.ceph.com/docs/jewel/rados/troubleshooting/memory-profiling/
+
+Varada
+
+
+On Wednesday 28 September 2016 10:51 AM, Elita Lobo wrote:
+> Hi,
+>
+> I am using ceph for a research project and was trying to implement a
+> new jerasure plugin. The code works perfectly when I try to put small
+> objects ( 16Mb files) in a single pg but breaks when I am trying to
+> put some really large object in a cluster having multiple pgs. I am
+> pretty sure its a memory leak but not sure how to detect it.
+>
+> Can someone please suggest some tools that would help me  detect
+> memory leaks in ceph?
+>
+> Thanking you,
+> Yours sincerely,
+> Elita Lobo
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
