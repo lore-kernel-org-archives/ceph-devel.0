@@ -1,104 +1,158 @@
-From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Subject: RE: async messenger random read performance on NVMe
-Date: Wed, 28 Sep 2016 09:27:31 +0000
-Message-ID: <6AA21C22F0A5DA478922644AD2EC308C659B2F30@SHSMSX101.ccr.corp.intel.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: async messenger random read performance on NVMe
+Date: Wed, 28 Sep 2016 17:37:52 +0800
+Message-ID: <CACJqLyaPz4jJRSPeq44PbV5BaH+oBb4zz9XWMwCniDGpQP3q2g@mail.gmail.com>
 References: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
  <6AA21C22F0A5DA478922644AD2EC308C659B2E9A@SHSMSX101.ccr.corp.intel.com>
  <BY2PR02MB396990CD6986513D8757A42F4CF0@BY2PR02MB396.namprd02.prod.outlook.com>
- <6AA21C22F0A5DA478922644AD2EC308C659B2ED5@SHSMSX101.ccr.corp.intel.com>
+ <6AA21C22F0A5DA478922644AD2EC308C659B2ED5@SHSMSX101.ccr.corp.intel.com> <6AA21C22F0A5DA478922644AD2EC308C659B2F30@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:2492 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752909AbcI1J1g (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 28 Sep 2016 05:27:36 -0400
-In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C659B2ED5@SHSMSX101.ccr.corp.intel.com>
-Content-Language: en-US
+Received: from mail-hk2apc01on0134.outbound.protection.outlook.com ([104.47.124.134]:55918
+        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751888AbcI1JiE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 28 Sep 2016 05:38:04 -0400
+Received: by mail-ua0-f174.google.com with SMTP id l16so14379306uaa.1
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Sep 2016 02:37:59 -0700 (PDT)
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C659B2F30@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Ma, Jianpeng" <jianpeng.ma@intel.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-VXNpbmcgamVtYWxsb2MNCiAgICAgICAgICAgICAgICAgICAgICAgIDRLIFJSICAgICAgICAgICAg
-ICAgICAgICAgNEsgUlcNCiAgICBBc3luYyAgICAgICA2MDUwNzcgICAgICAgICAgICAgICAgICAx
-MzQyNDENCiAgICBTaW1wbGUgICAgICA2NDA4OTIgICAgICAgICAgICAgICAgIDEzNDU4Mw0KVXNp
-bmcgamVtYWxsb2MsIHRoZSB0cmVuZCBmb3IgNEsgbGlrZSBNYXJrLCBzaW1wbGUgaXMgYmV0dGVy
-IHRoYW4gYXN5bmMuDQoNClVzaW5nIHRjbWFsbG9jKHZlcnNpb24gNC4xLjIpDQogICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgIDRLIFJXICAgICAgICAgICAgIDRLUlINCiAgICAgICAgICBB
-c3luYyAgICAgICAgICAgIDE0NDQ1MCAgICAgICAgICAgNjEyNzE2DQogICAgICAgICAgU2ltcGxl
-ICAgICAgICAgIDExMTE4NyAgICAgICAgICAgNDE0NjcyDQoNCldoeSB0Y21hbGxvYy9qZW1hbGxv
-YyBjYXVzZSBzbyBtdWNoIHBlcmZvcm1hbmNlIGZvciBzaW1wbGU/IEJ1dCBub3QgZm9yIGFzeW5j
-Pw0KDQpKaWFucGVuZw0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1k
-ZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIu
-a2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIE1hLCBKaWFucGVuZw0KU2VudDogV2VkbmVzZGF5LCBT
-ZXB0ZW1iZXIgMjgsIDIwMTYgMTo1MiBQTQ0KVG86IFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBz
-YW5kaXNrLmNvbT47IE1hcmsgTmVsc29uIDxtbmVsc29uQHJlZGhhdC5jb20+OyBjZXBoLWRldmVs
-IDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NClN1YmplY3Q6IFJFOiBhc3luYyBtZXNzZW5n
-ZXIgcmFuZG9tIHJlYWQgcGVyZm9ybWFuY2Ugb24gTlZNZQ0KDQpVc2UgdGhlIGRlZmF1bHQgY29u
-ZmlnIGZvciBjbWFrZS4gIEZvciBkZWZhdWx0LCBjbWFrZSB1c2UgdGNtYWxsb2MuDQoNCi0tLS0t
-T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBTb21uYXRoIFJveSBbbWFpbHRvOlNvbW5hdGgu
-Um95QHNhbmRpc2suY29tXQ0KU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMjgsIDIwMTYgMTow
-NyBQTQ0KVG86IE1hLCBKaWFucGVuZyA8amlhbnBlbmcubWFAaW50ZWwuY29tPjsgTWFyayBOZWxz
-b24gPG1uZWxzb25AcmVkaGF0LmNvbT47IGNlcGgtZGV2ZWwgPGNlcGgtZGV2ZWxAdmdlci5rZXJu
-ZWwub3JnPg0KU3ViamVjdDogUkU6IGFzeW5jIG1lc3NlbmdlciByYW5kb20gcmVhZCBwZXJmb3Jt
-YW5jZSBvbiBOVk1lDQoNCkRpZCB5b3UgaW5jcmVhc2UgdGNtYWxsb2MgdGhyZWFkIGNhY2hlIHRv
-IGJpZ2dlciB2YWx1ZSBsaWtlIDI1Nk1CIG9yIGFyZSB5b3UgdXNpbmcgamVtYWxsb2MgPw0KSWYg
-bm90LCB0aGlzIHJlc3VsdCBpcyB2ZXJ5IG11Y2ggZXhwZWN0ZWQuDQoNClRoYW5rcyAmIFJlZ2Fy
-ZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2
-ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtl
-cm5lbC5vcmddIE9uIEJlaGFsZiBPZiBNYSwgSmlhbnBlbmcNClNlbnQ6IFR1ZXNkYXksIFNlcHRl
-bWJlciAyNywgMjAxNiA4OjM0IFBNDQpUbzogTWFyayBOZWxzb247IGNlcGgtZGV2ZWwNClN1Ympl
-Y3Q6IFJFOiBhc3luYyBtZXNzZW5nZXIgcmFuZG9tIHJlYWQgcGVyZm9ybWFuY2Ugb24gTlZNZQ0K
-DQpIaSBNYXJrOg0KICAgIEJhc2Ugb24gMWY1ZDc1ZjMxYWExYTdiNCwNCklPUFM0SyBSVyAgICAg
-ICAgICAgICA0S1JSDQpBc3luYyAgICAgICAgICAgIDE0NDQ1MCAgICAgICAgICAgNjEyNzE2DQog
-ICAgICAgICAgICBTaW1wbGUgICAgICAgICAgMTExMTg3ICAgICAgICAgICA0MTQ2NzINCg0KQXN5
-bmMgdXNlIHRoZSBkZWZhdWx0IHZhbHVlLg0KTXkgY2x1c3RlcjogNCBub2RlLCAxNiBvc2Qoc3Nk
-ICsgbnZtZShzdG9yZSByb2Nrc2RiL3dhbCkuIEZvciB0ZXN0IHVzZSBmaW8rbGlicmJkLg0KDQpC
-dXQgdGhlIHJlc3VsdHMgYXJlIG9wcG9zaXRlLg0KDQpUaGFua3MhDQoNCi0tLS0tT3JpZ2luYWwg
-TWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFp
-bHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTWFyayBO
-ZWxzb24NClNlbnQ6IFRodXJzZGF5LCBTZXB0ZW1iZXIgMjIsIDIwMTYgMjo1MCBBTQ0KVG86IGNl
-cGgtZGV2ZWwgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KU3ViamVjdDogYXN5bmMgbWVz
-c2VuZ2VyIHJhbmRvbSByZWFkIHBlcmZvcm1hbmNlIG9uIE5WTWUNCg0KUmVjZW50bHkgaW4gbWFz
-dGVyIHdlIG1hZGUgYXN5bmMgbWVzc2VuZ2VyIGRlZmF1bHQuICBBZnRlciBkb2luZyBhIGJ1bmNo
-IG9mIGJpc2VjdGlvbiwgaXQgdHVybnMgb3V0IHRoYXQgdGhpcyBjYXVzZWQgYSBmYWlybHkgZHJh
-bWF0aWMgZGVjcmVhc2UgaW4gYmx1ZXN0b3JlIHJhbmRvbSByZWFkIHBlcmZvcm1hbmNlLiAgVGhp
-cyBpcyBvbiBhIGNsdXN0ZXIgd2l0aCBmYWlybHkgZmFzdCBOVk1lIGNhcmRzLCAxNiBPU0RzIGFj
-cm9zcyA0IE9TRCBob3N0cy4gIFRoZXJlIGFyZSA4IGZpbyBjbGllbnQgcHJvY2Vzc2VzIHdpdGgg
-MzIgY29uY3VycmVudCB0aHJlYWRzIGVhY2guDQoNCkNlcGggbWFzdGVyIHVzaW5nIGJsdWVzdG9y
-ZQ0KDQpQYXJhbWV0ZXJzIHR3ZWFrZWQ6DQoNCm1zX2FzeW5jX3NlbmRfaW5saW5lDQptc19hc3lu
-Y19vcF90aHJlYWRzDQptc19hc3luY19tYXhfb3BfdGhyZWFkcw0KDQpzaW1wbGU6IDE2OEsgSU9Q
-Uw0KDQpzZW5kX2lubGluZTogdHJ1ZQ0KYXN5bmMgMy81ICAgdGhyZWFkczogMTExSyBJT1BTDQph
-c3luYyA0LzggICB0aHJlYWRzOiAxMjVLIElPUFMNCmFzeW5jIDgvMTYgIHRocmVhZHM6IDEyOEsg
-SU9QUw0KYXN5bmMgMTYvMzIgdGhyZWFkczogMTI4SyBJT1BTDQphc3luYyAyNC80OCB0aHJlYWRz
-OiAxMjhLIElPUFMNCmFzeW5jIDI1LzUwIHRocmVhZHM6IHNlZ2ZhdWx0DQphc3luYyAyNi81MiB0
-aHJlYWRzOiBzZWdmYXVsdA0KYXN5bmMgMzIvNjQgdGhyZWFkczogc2VnZmF1bHQNCg0Kc2VuZF9p
-bmxpbmU6IGZhbHNlDQphc3luYyAzLzUgICB0aHJlYWRzOiAxNTNLIElPUFMNCmFzeW5jIDQvOCAg
-IHRocmVhZHM6IDE1M0sgSU9QUw0KYXN5bmMgOC8xNiAgdGhyZWFkczogMTUySyBJT1BTDQoNClNv
-IGRlZmluaXRlbHkgc2V0dGluZyBzZW5kX2lubGluZSB0byBmYWxzZSBoZWxwcyBwcmV0dHkgZHJh
-bWF0aWNhbGx5LCB0aG91Z2ggd2UncmUgc3RpbGwgYSBsaXR0bGUgc2xvd2VyIGZvciBzbWFsbCBy
-YW5kb20gcmVhZHMgdGhhbiBzaW1wbGUgbWVzc2VuZ2VyLiAgSGFvbWFpLCByZWdhcmRpbmcgdGhl
-IHNlZ2ZhdWx0cywgSSB0b29rIGEgcXVpY2sgbG9vayB3aXRoIGdkYiBhdCB0aGUgY29yZSBmaWxl
-IGJ1dCBkaWRuJ3Qgc2VlIGFueXRoaW5nIGltbWVkaWF0ZWx5IG9idmlvdXMuICBJdCBtaWdodCBi
-ZSB3b3J0aCBzZWVpbmcgaWYgeW91IGNhbiByZXByb2R1Y2UuDQoNCk9uIHRoZSBwZXJmb3JtYW5j
-ZSBmcm9udCwgSSdsbCB0cnkgdG8gc2VlIGlmIEkgY2FuIHNlZSBhbnl0aGluZyBvYnZpb3VzIGlu
-IHBlcmYuDQoNCk1hcmsNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0
-aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdl
-IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0
-cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoTICDsubscICYgfiAmIBgg
-ICstICDdthcgIHcgIMubICAgbSAeIBdeICBiICBebiByICAgeiAaICBoICAgICYgIB4gRyAgIGgg
-Aygg6ZqOIN2iaiIgIBogG20gICAgIHog3pYgICBmICAgaCAgIH4gbSANClBMRUFTRSBOT1RFOiBU
-aGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2Ug
-aXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQo
-cykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUg
-aW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZl
-IHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNz
-ZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0
-cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlv
-biBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1h
-aWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBj
-b3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNv
-cGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCk4gICAgIHIgIHkgICBiIFgg
-IMendiBeICneunsubiArICAgeiBdeiAgIHtheSAdyofamSAsaiAgIGYgICBoICAgeiAeIHcgICAg
-ICAgajordiAgIHcgaiBtICAgICAgICAgelorICAgICDdomoiICAhIGkNCg==
+On Wed, Sep 28, 2016 at 5:27 PM, Ma, Jianpeng <jianpeng.ma@intel.com> wrote=
+:
+> Using jemalloc
+>                         4K RR                     4K RW
+>     Async       605077                  134241
+>     Simple      640892                 134583
+> Using jemalloc, the trend for 4K like Mark, simple is better than async.
+>
+> Using tcmalloc(version 4.1.2)
+>                                 4K RW             4KRR
+>           Async            144450           612716
+>           Simple          111187           414672
+>
+> Why tcmalloc/jemalloc cause so much performance for simple? But not for a=
+sync?
+
+This is a old topic.. more thread cache will help for pipe's thread.
+So it will increase lots of memory. In short, give more memory space
+get more performance.
+
+>
+> Jianpeng
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kern=
+el.org] On Behalf Of Ma, Jianpeng
+> Sent: Wednesday, September 28, 2016 1:52 PM
+> To: Somnath Roy <Somnath.Roy@sandisk.com>; Mark Nelson <mnelson@redhat.co=
+m>; ceph-devel <ceph-devel@vger.kernel.org>
+> Subject: RE: async messenger random read performance on NVMe
+>
+> Use the default config for cmake.  For default, cmake use tcmalloc.
+>
+> -----Original Message-----
+> From: Somnath Roy [mailto:Somnath.Roy@sandisk.com]
+> Sent: Wednesday, September 28, 2016 1:07 PM
+> To: Ma, Jianpeng <jianpeng.ma@intel.com>; Mark Nelson <mnelson@redhat.com=
+>; ceph-devel <ceph-devel@vger.kernel.org>
+> Subject: RE: async messenger random read performance on NVMe
+>
+> Did you increase tcmalloc thread cache to bigger value like 256MB or are =
+you using jemalloc ?
+> If not, this result is very much expected.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kern=
+el.org] On Behalf Of Ma, Jianpeng
+> Sent: Tuesday, September 27, 2016 8:34 PM
+> To: Mark Nelson; ceph-devel
+> Subject: RE: async messenger random read performance on NVMe
+>
+> Hi Mark:
+>     Base on 1f5d75f31aa1a7b4,
+> IOPS4K RW             4KRR
+> Async            144450           612716
+>             Simple          111187           414672
+>
+> Async use the default value.
+> My cluster: 4 node, 16 osd(ssd + nvme(store rocksdb/wal). For test use fi=
+o+librbd.
+>
+> But the results are opposite.
+>
+> Thanks!
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kern=
+el.org] On Behalf Of Mark Nelson
+> Sent: Thursday, September 22, 2016 2:50 AM
+> To: ceph-devel <ceph-devel@vger.kernel.org>
+> Subject: async messenger random read performance on NVMe
+>
+> Recently in master we made async messenger default.  After doing a bunch =
+of bisection, it turns out that this caused a fairly dramatic decrease in b=
+luestore random read performance.  This is on a cluster with fairly fast NV=
+Me cards, 16 OSDs across 4 OSD hosts.  There are 8 fio client processes wit=
+h 32 concurrent threads each.
+>
+> Ceph master using bluestore
+>
+> Parameters tweaked:
+>
+> ms_async_send_inline
+> ms_async_op_threads
+> ms_async_max_op_threads
+>
+> simple: 168K IOPS
+>
+> send_inline: true
+> async 3/5   threads: 111K IOPS
+> async 4/8   threads: 125K IOPS
+> async 8/16  threads: 128K IOPS
+> async 16/32 threads: 128K IOPS
+> async 24/48 threads: 128K IOPS
+> async 25/50 threads: segfault
+> async 26/52 threads: segfault
+> async 32/64 threads: segfault
+>
+> send_inline: false
+> async 3/5   threads: 153K IOPS
+> async 4/8   threads: 153K IOPS
+> async 8/16  threads: 152K IOPS
+>
+> So definitely setting send_inline to false helps pretty dramatically, tho=
+ugh we're still a little slower for small random reads than simple messenge=
+r.  Haomai, regarding the segfaults, I took a quick look with gdb at the co=
+re file but didn't see anything immediately obvious.  It might be worth see=
+ing if you can reproduce.
+>
+> On the performance front, I'll try to see if I can see anything obvious i=
+n perf.
+>
+> Mark
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in =
+the body of a message to majordomo@vger.kernel.org More majordomo info at  =
+http://vger.kernel.org/majordomo-info.html
+>    =EC=B9=BB  & ~ &    +-  =DD=B6   w  =CB=9B   m    ^  b  ^n r   z    h =
+   &    G   h  ( =E9=9A=8E =DD=A2j"     m     z =DE=96   f   h   ~ m
+> PLEASE NOTE: The information contained in this electronic mail message is=
+ intended only for the use of the designated recipient(s) named above. If t=
+he reader of this message is not the intended recipient, you are hereby not=
+ified that you have received this message in error and that any review, dis=
+semination, distribution, or copying of this message is strictly prohibited=
+. If you have received this communication in error, please notify the sende=
+r by telephone or e-mail (as shown above) immediately and destroy any and a=
+ll copies of this message in your possession (whether hard copies or electr=
+onically stored copies).
+> N     r  y   b X  =C7=A7v ^ )=DE=BA{.n +   z ]z   {ay  =CA=87=DA=99 ,j   =
+f   h   z   w       j:+v   w j m         zZ+     =DD=A2j"  ! i
