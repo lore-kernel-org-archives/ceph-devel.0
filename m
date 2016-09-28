@@ -1,95 +1,143 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Mismatching nonce for 'ceph osd.0 tell'
-Date: Wed, 28 Sep 2016 14:01:56 +0200
-Message-ID: <89a9ee77-21db-e955-7bb3-c4adc3bb94bf@digiware.nl>
-References: <f54dda71-dabf-cab2-948c-83b9f2007aff@digiware.nl>
- <CACJqLybyu1_rKj7g7qSfrtZCVMhJvgcvU2Q7vfoRUvs-3hT3JQ@mail.gmail.com>
- <14688c37-068c-0bc6-615d-de2f8f5bfdc6@digiware.nl>
- <CAJ4mKGawPKP=rGB9t1wkwn00sYcBE8T9ac327mGLv90Z4MFxpg@mail.gmail.com>
- <3df7e2ed-eb34-8ba8-8a8d-9d7b66e45315@digiware.nl>
- <CAJ4mKGa+wydRuMtvCYiOe823v9UkN2Qk0FkViqHhLAPmGeFoGA@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: async messenger random read performance on NVMe
+Date: Wed, 28 Sep 2016 07:47:43 -0500
+Message-ID: <76bb9bdd-90b7-2991-e195-54f04df18c15@redhat.com>
+References: <9a0e4578-6143-378f-20cf-8e7e8b9cf98b@redhat.com>
+ <6AA21C22F0A5DA478922644AD2EC308C659B2E9A@SHSMSX101.ccr.corp.intel.com>
+ <BY2PR02MB396990CD6986513D8757A42F4CF0@BY2PR02MB396.namprd02.prod.outlook.com>
+ <6AA21C22F0A5DA478922644AD2EC308C659B2ED5@SHSMSX101.ccr.corp.intel.com>
+ <6AA21C22F0A5DA478922644AD2EC308C659B2F30@SHSMSX101.ccr.corp.intel.com>
+ <CACJqLyaPz4jJRSPeq44PbV5BaH+oBb4zz9XWMwCniDGpQP3q2g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:56724 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:49920 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753896AbcI1MCB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 28 Sep 2016 08:02:01 -0400
-In-Reply-To: <CAJ4mKGa+wydRuMtvCYiOe823v9UkN2Qk0FkViqHhLAPmGeFoGA@mail.gmail.com>
+        id S1752397AbcI1Mrr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 28 Sep 2016 08:47:47 -0400
+In-Reply-To: <CACJqLyaPz4jJRSPeq44PbV5BaH+oBb4zz9XWMwCniDGpQP3q2g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomai@xsky.com>, "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 13-9-2016 22:35, Gregory Farnum wrote:
-> On Tue, Sep 13, 2016 at 1:29 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> On 13-9-2016 21:52, Gregory Farnum wrote:
->>> Is osd.0 actually running? If so it *should* have a socket, unless
->>> you've disabled them somehow. Check the logs and see if there are
->>> failures when it gets set up, I guess?
->>>
->>> Anyway, something has indeed gone terribly wrong here. I know at one
->>> point you had some messenger patches you were using to try and get
->>> stuff going on BSD; if you still have some there I think you need to
->>> consider them suspect. Otherwise, uh...the network stack is behaving
->>> very differently than Linux's?
+On 09/28/2016 04:37 AM, Haomai Wang wrote:
+> On Wed, Sep 28, 2016 at 5:27 PM, Ma, Jianpeng <jianpeng.ma@intel.com> wrote:
+>> Using jemalloc
+>>                         4K RR                     4K RW
+>>     Async       605077                  134241
+>>     Simple      640892                 134583
+>> Using jemalloc, the trend for 4K like Mark, simple is better than async.
 >>
->> So what is the expected result of an osd down/up?
+>> Using tcmalloc(version 4.1.2)
+>>                                 4K RW             4KRR
+>>           Async            144450           612716
+>>           Simple          111187           414672
 >>
->> Before it is connected to ports like:
->>         127.0.0.1:{6800,,6801,6802}/{nonce=pid-like}
->> after the osd has gone down/up the sockets work be:
->>         127.0.0.1:{6800,,6801,6802}/{(nonce=pid-like)+1000000}
+>> Why tcmalloc/jemalloc cause so much performance for simple? But not for async?
+>
+> This is a old topic.. more thread cache will help for pipe's thread.
+> So it will increase lots of memory. In short, give more memory space
+> get more performance.
+
+It is an old topic, but I think it's good to get further confirmation 
+that simple is still faster for small random reads when jemalloc is used 
+(and presumably would be as well if tcmalloc was used with a high thread 
+cache setting).  I'm chasing some performance issues in the new 
+encode/decode work, but after that I can hopefully dig in a little more 
+and try to track it down.
+
+Mark
+
+>
 >>
->> or are the ports also incremented?
-> 
-> IIRC, it should usually be the same ports and different nonce. But the
-> port is *allowed* to change; that happens sometimes if there was an
-> unclean shutdown and the port is still considered in-use by the OS for
-> instance.
-> 
-ATM, I have the feeling that I'm even more off track.
-
-In FreeBSD I have:
-119: starting osd.0 at :/0 osd_data testdir/osd-bench/0
-testdir/osd-bench/0/journal
-119: create-or-move updating item name 'osd.0' weight 1 at location
-{host=localhost,root=default} to crush map
-119: 0
-119: epoch 5
-119: fsid 6e5ab220-d761-4636-b4b0-27eacadb41e3
-119: created 2016-09-28 02:32:44.704630
-119: modified 2016-09-28 02:32:49.971511
-119: flags sortbitwise,require_jewel_osds,require_kraken_osds
-119: pool 1 'rbd' replicated size 3 min_size 2 crush_ruleset 0
-object_hash rjenkins pg_num 4 pgp_num 4 last_change 3 flags hashpspool
-stripe_width 0
-119: max_osd 1
-119: osd.0 down out weight 0 up_from 0 up_thru 0 down_at 0
-last_clean_interval [0,0) :/0 :/0 :/0 :/0 exists,new
-1dddf568-c6dd-47d1-b4b4-584867a8b48d
-
-Where as in Linux I have, at the same point in the script:
-130: starting osd.0 at :/0 osd_data testdir/osd-bench/0
-testdir/osd-bench/0/journal
-130: create-or-move updating item name 'osd.0' weight 1 at location
-{host=localhost,root=default} to crush map
-130: 0
-130: osd.0 up   in  weight 1 up_from 6 up_thru 6 down_at 0
-last_clean_interval [0,0) 127.0.0.1:6800/19815 127.0.0.1:6801/19815
-127.0.0.1:6802/19815 127.0.0.1:6803/19815 exists,up
-084e3410-9eb9-4fc3-b395-e46e9587d351
-
-Question here is:
-  If I ask 'ceph osd dump', I'm actually asking ceph-mon.
-  And cehp-mon has learned this from (crush?)maps being sent to it by
-  ceph-osd.
-
-Is there an easy way to debug/monitor the content of what ceph-osd sends
-and ceph-mon receives in the maps?
-Just to make sure that it is clear where the problem occurs.
-
-thanx,
---WjW
-
+>> Jianpeng
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Ma, Jianpeng
+>> Sent: Wednesday, September 28, 2016 1:52 PM
+>> To: Somnath Roy <Somnath.Roy@sandisk.com>; Mark Nelson <mnelson@redhat.com>; ceph-devel <ceph-devel@vger.kernel.org>
+>> Subject: RE: async messenger random read performance on NVMe
+>>
+>> Use the default config for cmake.  For default, cmake use tcmalloc.
+>>
+>> -----Original Message-----
+>> From: Somnath Roy [mailto:Somnath.Roy@sandisk.com]
+>> Sent: Wednesday, September 28, 2016 1:07 PM
+>> To: Ma, Jianpeng <jianpeng.ma@intel.com>; Mark Nelson <mnelson@redhat.com>; ceph-devel <ceph-devel@vger.kernel.org>
+>> Subject: RE: async messenger random read performance on NVMe
+>>
+>> Did you increase tcmalloc thread cache to bigger value like 256MB or are you using jemalloc ?
+>> If not, this result is very much expected.
+>>
+>> Thanks & Regards
+>> Somnath
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Ma, Jianpeng
+>> Sent: Tuesday, September 27, 2016 8:34 PM
+>> To: Mark Nelson; ceph-devel
+>> Subject: RE: async messenger random read performance on NVMe
+>>
+>> Hi Mark:
+>>     Base on 1f5d75f31aa1a7b4,
+>> IOPS4K RW             4KRR
+>> Async            144450           612716
+>>             Simple          111187           414672
+>>
+>> Async use the default value.
+>> My cluster: 4 node, 16 osd(ssd + nvme(store rocksdb/wal). For test use fio+librbd.
+>>
+>> But the results are opposite.
+>>
+>> Thanks!
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+>> Sent: Thursday, September 22, 2016 2:50 AM
+>> To: ceph-devel <ceph-devel@vger.kernel.org>
+>> Subject: async messenger random read performance on NVMe
+>>
+>> Recently in master we made async messenger default.  After doing a bunch of bisection, it turns out that this caused a fairly dramatic decrease in bluestore random read performance.  This is on a cluster with fairly fast NVMe cards, 16 OSDs across 4 OSD hosts.  There are 8 fio client processes with 32 concurrent threads each.
+>>
+>> Ceph master using bluestore
+>>
+>> Parameters tweaked:
+>>
+>> ms_async_send_inline
+>> ms_async_op_threads
+>> ms_async_max_op_threads
+>>
+>> simple: 168K IOPS
+>>
+>> send_inline: true
+>> async 3/5   threads: 111K IOPS
+>> async 4/8   threads: 125K IOPS
+>> async 8/16  threads: 128K IOPS
+>> async 16/32 threads: 128K IOPS
+>> async 24/48 threads: 128K IOPS
+>> async 25/50 threads: segfault
+>> async 26/52 threads: segfault
+>> async 32/64 threads: segfault
+>>
+>> send_inline: false
+>> async 3/5   threads: 153K IOPS
+>> async 4/8   threads: 153K IOPS
+>> async 8/16  threads: 152K IOPS
+>>
+>> So definitely setting send_inline to false helps pretty dramatically, though we're still a little slower for small random reads than simple messenger.  Haomai, regarding the segfaults, I took a quick look with gdb at the core file but didn't see anything immediately obvious.  It might be worth seeing if you can reproduce.
+>>
+>> On the performance front, I'll try to see if I can see anything obvious in perf.
+>>
+>> Mark
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>    칻  & ~ &    +-  ݶ   w  ˛   m    ^  b  ^n r   z    h    &    G   h  ( 階 ݢj"     m     z ޖ   f   h   ~ m
+>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>> N     r  y   b X  ǧv ^ )޺{.n +   z ]z   {ay  ʇڙ ,j   f   h   z   w       j:+v   w j m         zZ+     ݢj"  ! i
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
