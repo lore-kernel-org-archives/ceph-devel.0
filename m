@@ -1,59 +1,46 @@
-From: Elita Lobo <loboelita@gmail.com>
-Subject: Fwd: Detect memory leaks in ceph
-Date: Wed, 28 Sep 2016 12:35:54 +0530
-Message-ID: <CAA8xDw2khY4in5HGNrPuSnOX-cB0uFDO1bfV3uDOEygzjA7D-w@mail.gmail.com>
-References: <CAA8xDw295OV5LoR4wwGixofoNmrTfgOsjbpw1RzyKMGRmqk=ag@mail.gmail.com>
- <CAJ4mKGaHG8fnTRNN+WWHy=Ag5KwQbXRdKXCgoLLoBC+svTcM1g@mail.gmail.com> <CAA8xDw3pf5nw294TUaH-3w-AiA+w16AwrLLorq341Z7U40nR8w@mail.gmail.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: Memory Pooling and Containers
+Date: Wed, 28 Sep 2016 09:13:32 +0000
+Message-ID: <BLUPR0201MB1524DEE54B0808968D29E3DBE8CF0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+References: <BLUPR0201MB1524456C8A99C6ABA036CBB9E8CC0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <CAJ4mKGYQLrP_Z28iitj9Vwt3dSfVp2yQ3bnGt2jcTC9LahnvUg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f176.google.com ([209.85.217.176]:35317 "EHLO
-        mail-ua0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750804AbcI1HFz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Sep 2016 03:05:55 -0400
-Received: by mail-ua0-f176.google.com with SMTP id q42so30345427uaq.2
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Sep 2016 00:05:55 -0700 (PDT)
-In-Reply-To: <CAA8xDw3pf5nw294TUaH-3w-AiA+w16AwrLLorq341Z7U40nR8w@mail.gmail.com>
+Received: from mail-sn1nam01on0073.outbound.protection.outlook.com ([104.47.32.73]:48852
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754068AbcI1JNl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 28 Sep 2016 05:13:41 -0400
+In-Reply-To: <CAJ4mKGYQLrP_Z28iitj9Vwt3dSfVp2yQ3bnGt2jcTC9LahnvUg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-maintainers@ceph.com
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
-
-@Varada , Abioy : Thanks a lot, will check it out. :)
-
-@gregory Farnum,Trying to store 10k 64MB objects on 30 PGs. Reed
-solomon technique does not crash so I am guessing there is some memory
-leak happening in the code my team wrote.
-
-
-Thanks and Regards,
-Elita lobo
-
-On Wed, Sep 28, 2016 at 12:21 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
->
-> On Tue, Sep 27, 2016 at 10:21 PM, Elita Lobo <loboelita@gmail.com> wrote:
-> > Hi,
-> >
-> > I am using ceph for a research project and was trying to implement a
-> > new jerasure plugin. The code works perfectly when I try to put small
-> > objects ( 16Mb files) in a single pg but breaks when I am trying to
-> > put some really large object in a cluster having multiple pgs. I am
-> > pretty sure its a memory leak but not sure how to detect it.
->
-> How big are these "really large object"s? Erasure coding can handle
-> much bigger objects than replication does, but there are still limits
-> beyond which stuff will go poorly.
-> -Greg
->
-> >
-> > Can someone please suggest some tools that would help me  detect
-> > memory leaks in ceph?
-> >
-> > Thanking you,
-> > Yours sincerely,
-> > Elita Lobo
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+U2hvdWxkIHdvcmsgaW4gYW55IEMrKyBjb250ZXh0IC0tIG5vdGhpbmcgdGhhdCdzIEJsdWVTdG9y
+ZSBkZXBlbmRlbnQuDQoNCg0KQWxsZW4gU2FtdWVscw0KU2FuRGlzayB8YSBXZXN0ZXJuIERpZ2l0
+YWwgYnJhbmQNCjI4ODAgSnVuY3Rpb24gQXZlbnVlLCBTYW4gSm9zZSwgQ0EgOTUxMzQNClQ6ICsx
+IDQwOCA4MDEgNzAzMHwgTTogKzEgNDA4IDc4MCA2NDE2DQphbGxlbi5zYW11ZWxzQFNhbkRpc2su
+Y29tDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBHcmVnb3J5IEZh
+cm51bSBbbWFpbHRvOmdmYXJudW1AcmVkaGF0LmNvbV0NCj4gU2VudDogV2VkbmVzZGF5LCBTZXB0
+ZW1iZXIgMjgsIDIwMTYgMTowMSBBTQ0KPiBUbzogQWxsZW4gU2FtdWVscyA8QWxsZW4uU2FtdWVs
+c0BzYW5kaXNrLmNvbT4NCj4gQ2M6IFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+OyBDZXBo
+IERldmVsb3BtZW50IDxjZXBoLQ0KPiBkZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQo+IFN1YmplY3Q6
+IFJlOiBNZW1vcnkgUG9vbGluZyBhbmQgQ29udGFpbmVycw0KPiANCj4gT24gVHVlLCBTZXAgMjcs
+IDIwMTYgYXQgMTozMCBQTSwgQWxsZW4gU2FtdWVscw0KPiA8QWxsZW4uU2FtdWVsc0BzYW5kaXNr
+LmNvbT4gd3JvdGU6DQo+ID4gQXMgd2UgZGlzY3Vzc2VkIGluIHRoZSBCbHVlc3RvcmUgc3RhbmR1
+cCB0aGlzIG1vcm5pbmcuIFRoaXMgaXMgaW50ZW5kZWQgdG8NCj4gc3RhcnQgYSBkaXNjdXNzaW9u
+IGFib3V0IGNyZWF0aW5nIHNvbWUgaW50ZXJuYWwgbWVtb3J5IHBvb2xpbmcgdGVjaG5vbG9neQ0K
+PiB0byB0cnkgdG8gZ2V0IGEgYmV0dGVyIGhhbmRsZSBvbiB0aGUgaW50ZXJuYWwgdXNhZ2Ugb2Yg
+bWVtb3J5IGJ5IENlcGguIExldCdzDQo+IHN0YXJ0IGJ5IGRpc2N1c3NpbmcgdGhlIHJlcXVpcmVt
+ZW50cy4uLg0KPiANCj4gSSdtIGFmcmFpZCBJIGRvbid0IGhhdmUgYW55IHVzZWZ1bCB0aG91Z2h0
+cyBvbiB0aGlzLCBidXQgSSdtIGN1cmlvdXMgaWYgdGhlcmUncw0KPiBhbnkgY2hhbmNlIG9mIHVz
+aW5nIHRoZXNlIG1lbW9yeSBwb29scyBlZmZlY3RpdmVseSBvdXRzaWRlIG9mIEJsdWVTdG9yZS4N
+Cj4gTWFueSBvZiB0aGUgZmVhdHVyZXMgeW91IGRpc2N1c3Mgd291bGQgYmUgbmljZSBpbiB0aGUg
+TURTLCB3aGljaCBjdXJyZW50bHkNCj4gdXNlcyBib29zdDo6cG9vbCBmb3Igc29tZSBvZiBpdHMg
+bWV0YWRhdGEgdHlwZXMsIGJ1dCBjb3VsZCByZWFsbHkgdXNlDQo+IHNvbWV0aGluZyB3aXRoIGEg
+bGl0dGxlIG1vcmUgY29udHJvbCAoYXQgbGVhc3QgdGhhbiB3ZSd2ZSBzZXQgdXAgc28gZmFyKS4N
+Cj4gLUdyZWcNCg==
