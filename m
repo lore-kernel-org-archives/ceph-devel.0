@@ -1,244 +1,193 @@
 From: Allen Samuels <Allen.Samuels@sandisk.com>
 Subject: RE: Memory Pooling and Containers
-Date: Wed, 28 Sep 2016 15:56:11 +0000
-Message-ID: <BLUPR0201MB15247F111610191A352CD7C0E8CF0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Date: Wed, 28 Sep 2016 15:56:42 +0000
+Message-ID: <BLUPR0201MB15248C633E182B073E7F94AEE8CF0@BLUPR0201MB1524.namprd02.prod.outlook.com>
 References: <BLUPR0201MB1524456C8A99C6ABA036CBB9E8CC0@BLUPR0201MB1524.namprd02.prod.outlook.com>
  <alpine.DEB.2.11.1609281316210.19847@piezo.us.to>
+ <CACJqLyauuKpGv9u7WJx18hLEBa0dp+dGZ_ueuMdNeaHi3YRK_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-dm3nam03on0073.outbound.protection.outlook.com ([104.47.41.73]:20163
-        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+Received: from mail-by2nam01on0056.outbound.protection.outlook.com ([104.47.34.56]:25440
+        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932921AbcI1P4N (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 28 Sep 2016 11:56:13 -0400
-In-Reply-To: <alpine.DEB.2.11.1609281316210.19847@piezo.us.to>
+        id S932921AbcI1P4p (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 28 Sep 2016 11:56:45 -0400
+In-Reply-To: <CACJqLyauuKpGv9u7WJx18hLEBa0dp+dGZ_ueuMdNeaHi3YRK_w@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Haomai Wang <haomai@xsky.com>, Sage Weil <sage@newdream.net>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-> -----Original Message-----
-> From: Sage Weil [mailto:sage@newdream.net]
-> Sent: Wednesday, September 28, 2016 3:28 PM
-> To: Allen Samuels <Allen.Samuels@sandisk.com>
-> Cc: Ceph Development <ceph-devel@vger.kernel.org>
-> Subject: Re: Memory Pooling and Containers
->=20
-> On Tue, 27 Sep 2016, Allen Samuels wrote:
-> > As we discussed in the Bluestore standup this morning. This is
-> > intended to start a discussion about creating some internal memory
-> > pooling technology to try to get a better handle on the internal usage
-> > of memory by Ceph. Let's start by discussing the requirements...
-> >
-> > Here is my list of requirements:
-> >
-> > (1) Should be able to create an arbitrary number of "pools" of memory.
-> >
-> > (2) Developers should be able to declare that a particular container
-> > (i.e., STL or boost-like container) is wholly contained within a pool.
-> >
-> > (3) Beyond declarations (and possibly constructor initialization), no
-> > explicit code is required to be written by developers to support (2).
-> > All container manipulation primitives properly update the accounting.
-> >
-> > (4) Beyond construction/destruction costs, no container operation is
-> > burdened by additional code -- only implicit malloc/free operations
-> > are burdened with accounting.
-> >
-> > (5) The system tracks the aggregate amount of memory consumed in each
-> > pool and it's relatively cheap to interrogate the current total
-> > consumption.
->=20
-> Yes
->=20
-> > (6) The system tracks the aggregate amount of memory consumed by each
-> > container in each pool -- but this is expensive to interrogate and is
-> > intended to be used primarily for debugging purposes.
->=20
-> This one sounds like a nice-to-have to me.  If there is a performance cos=
-t I
-> would skip it.
->=20
-> > (7) generic object new/delete is possible, but not freed of the
-> > accounting requirements -- especially #6, i.e..
-> >
-> > (8) No backpressure is built into the scheme, i.e., nobody has to
-> > worry about suddenly being "out" of memory or being delayed -- just
-> > because some particular pool is filling up. That's a higher level
-> > problem to solve. No memory is "reserved" either -- If you overcommit,
-> > that's also not solved at this layer. IMO, this is a crappy place to
-> > be doing ingest and flow control.
-> >
-> > (9) Implementation must be multi-thread and multi-socket aware. It
-> > should expect high levels of thread concurrency and avoid unnecessary
-> > global data manipulation (expect internal sharding of data structures
-> > -- something like an arena-based malloc scheme).
->=20
-> Yes
->=20
-> > Requirement 5 allows a "trimming" system to be developed. I think
-> > there are really two styles for this:
-> >
-> > (a) Time-based, i.e., periodically some thread wakes up and checks
-> > memory usage within a pool. If it doesn't like it, then it's
-> > responsible for "fixing" it, i.e., trimming as needed.
-> >
-> > (b) event-based. No reason that we couldn't setup an event or
-> > condition variable per-pool and have the malloc/free code trigger that
-> > condition/variable. It adds one or two compare/branches to each malloc
-> > / free operation (which is pretty cheap), but doesn't have the latency
-> > costs of (a). The downside is that this implicitly assumes a single
-> > global-thread is responsible for cleaning each pool which works well
-> > when there are a relatively small number of pools.
-> >
-> > Here is my list of anti-requirements:
-> >
-> > (1) No hierarchical relationship between the pools. [IMO, this is
-> > kewl, but unnecessary and tends to screw up your cache, i.e., destroys =
-#9.
-> >
-> > (2) No physical colocation of the allocated pool memory. The pool is
-> > "logical", i.e., an accounting mirage only.
-> >
-> > (3) No reason to dynamically create/destroy memory pools. They can be
-> > statically declared (this dramatically simplifies the code that uses
-> > this system).
->=20
-> Yes.  Great summary!
->=20
-> > Let the discussion begin!!
-> > /////////////////////////
-> >
-> > Here is my proposed external interface to the design:
-> >
-> > First, look at the slab_xxxx containers that I just submitted. You can
-> > find them at
-> > https://github.com/allensamuels/ceph/blob/master/src/include/slab_cont
-> > ainers.h
-> >
-> > I would propose to extend those containers as the basis for the memory
-> > pooling.
-> >
-> > First, there's a global enum that defines the memory pools -- yes,
-> > they're static and a small number
-> >
-> > enum mpool_index {
-> >    MPOOL_ONE,
-> >    MPOOL_TWO,
-> > ...
-> >    MPOOL_LAST
-> > };
-> >
-> > And a global object for each pool:
-> >
-> > class mpool; // TBD ... see below.
-> >
-> > Extern mpool[MPOOL_LAST]; // Actual definition of each pool
-> >
-> > Each slab_xxx container template is augmented to expect receive an
-> > additional "enum mpool_index" parameter.
-> >
-> > That's ALL THAT'S required for the developer. In other words, if each
-> > definition of an STL container uses a typedef with the right mpool
-> > index, then you're done. The machinery takes care of everything else
-> > :)
->=20
-> FWIW I'm not sure if there's much reason to pass MPOOL_FOO instead of
-> g_mpool[MPOOL_FOO] to the allocator instance.  The former hard-codes the
-> global instance; the latter means you could manage the memory pool
-> however you like (e.g., as part of the CephContext for librados).  That's=
- a
-> small detail, though.
->=20
-
-I went with the enum because my plan was to pass the pool into the object d=
-eclaration, not the construction (i.e., it's a template parameter)
-
-I agree that what you describe is more flexible -- but unless you have dyna=
-mic memory pool ctor/dtor, I believe it's flexibility without value.
-
-By going with the static declaration the biggest win is that the existing c=
-ode doesn't have to have a lot of ctor calls crafted to add the extra param=
-eter for construction -- a lot of tedious editing and value-less churn of t=
-he codebase.=20
-
-By decorating the declaration with the pool (i.e., using the enum), you'll =
-centralize both the pool and the slab-size into one place. I believe that b=
-est-practices will be to create a typedef for each of these containers and =
-to use that typedef everywhere. By using this best-practice, we'll be able =
-to change slab-sizes and move containers in and about of pools (as well as =
-provide clear debug evidence that some particular bug is or is-not due to p=
-ool-ization).
-=20
-> > Standalone objects, i.e., naked new/delete are easily done by making
-> > the equivalent of a slab_intrusive_list and maybe a macro or two.
-> > There's some tricky initialization for this one (see below).
-> >
-> > -------------------------------------------
-> >
-> > Implementation
-> >
-> > -------------------------------------------
-> >
-> > Requirement 6 is what drives this implementation.
-> >
-> > I would extend each slab_xxxx container to also virtually inherit from
-> > a Pool_Member interface, this interface allows the memory pool global
-> > machinery to implement #6.
-> >
-> > I propose that the ctor/dtor for Pool_Member (one for each container)
-> > put itself on a list within the respective memory pool. This MUST be a
-> > synchronized operation but we can shard the list to reduce the
-> > collisions (use the low 4-5 bits of the creating thread pointer to
-> > index the shard -- minimizes ctor expense but increases the dtor
-> > expense -- which is often done in "trim"). This assumes that the rate
-> > of container creation/destruction within a memory pool is not super
-> > high -- we could make this be a compile-time option if it becomes too
-> expensive.
-> >
-> > The per-pool sharded lists allow the debug routines to visit each
-> > container and do things like ask "how many elements do you have?" --
-> > "How big is each element" -- "Give me a printable string of the
-> > type-signature for this container". Once you have this list you can
-> > generate lots of interesting debug reports. Because you can sort by
-> > individual containers as well as group containers by their type
-> > signatures (i.e., combined the consumption of all "map<a,b>"
-> > containers as a group). You can report out both by Byte as well as by
-> > Element count consumption.
->=20
-> Yeah, this sounds pretty nice.  But I think it's important to be able to =
-compile
-> it out.  I think we will have a lot of creations/destructions.
-> For example, in BlueStore, Onodes have maps of Extents, those map to
-> Blobs, and those have a BufferSpace with a map of Buffers for cached data=
-.  I
-> expect that blobs and even onodes will be coming in and out of cache a lo=
-t.
->=20
-> > This kind of information usually allows you to quickly figure out
-> > where the memory is being consumed. A bit of script wizardry would
-> > recognize that some containers contain other containers. For example,
-> > no reason a simple Python script couldn't recognize that each oNode
-> > might have a bunch of vector<pextents> within it and tell you things
-> > like the average number of pextents / oNodes. Average DRAM
-> consumption
-> > per oNode (which is a pretty complicated combination of pextents,
-> > lextents, buffer::ptr,
-> > etc.)
-> >
-> > Comments: ?????
->=20
-> It would be nice to build this on top of existing allocator libraries if =
-we can.
-> For example, something in boost.  I took a quick peek the other day and
-> didn't find something that allowed simple interrogation about utilization=
-,
-> though, which was surprising.  It would be nice to have something useful
-> (perhaps without #6) that could be done relatively quickly and address al=
-l of
-> the other requirements.
->=20
-> sage
+SSdsbCBsb29rIGF0IHRob3NlIHJlZmVyZW5jZXMuIFRoYW5rcyENCg0KDQpBbGxlbiBTYW11ZWxz
+DQpTYW5EaXNrIHxhIFdlc3Rlcm4gRGlnaXRhbCBicmFuZA0KMjg4MCBKdW5jdGlvbiBBdmVudWUs
+IFNhbiBKb3NlLCBDQSA5NTEzNA0KVDogKzEgNDA4IDgwMSA3MDMwfCBNOiArMSA0MDggNzgwIDY0
+MTYNCmFsbGVuLnNhbXVlbHNAU2FuRGlzay5jb20NCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQo+IEZyb206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFpQHhza3kuY29tXQ0KPiBT
+ZW50OiBXZWRuZXNkYXksIFNlcHRlbWJlciAyOCwgMjAxNiAzOjM0IFBNDQo+IFRvOiBTYWdlIFdl
+aWwgPHNhZ2VAbmV3ZHJlYW0ubmV0Pg0KPiBDYzogQWxsZW4gU2FtdWVscyA8QWxsZW4uU2FtdWVs
+c0BzYW5kaXNrLmNvbT47IENlcGggRGV2ZWxvcG1lbnQNCj4gPGNlcGgtZGV2ZWxAdmdlci5rZXJu
+ZWwub3JnPg0KPiBTdWJqZWN0OiBSZTogTWVtb3J5IFBvb2xpbmcgYW5kIENvbnRhaW5lcnMNCj4g
+DQo+IE9uIFdlZCwgU2VwIDI4LCAyMDE2IGF0IDk6MjcgUE0sIFNhZ2UgV2VpbCA8c2FnZUBuZXdk
+cmVhbS5uZXQ+IHdyb3RlOg0KPiA+IE9uIFR1ZSwgMjcgU2VwIDIwMTYsIEFsbGVuIFNhbXVlbHMg
+d3JvdGU6DQo+ID4+IEFzIHdlIGRpc2N1c3NlZCBpbiB0aGUgQmx1ZXN0b3JlIHN0YW5kdXAgdGhp
+cyBtb3JuaW5nLiBUaGlzIGlzDQo+ID4+IGludGVuZGVkIHRvIHN0YXJ0IGEgZGlzY3Vzc2lvbiBh
+Ym91dCBjcmVhdGluZyBzb21lIGludGVybmFsIG1lbW9yeQ0KPiA+PiBwb29saW5nIHRlY2hub2xv
+Z3kgdG8gdHJ5IHRvIGdldCBhIGJldHRlciBoYW5kbGUgb24gdGhlIGludGVybmFsDQo+ID4+IHVz
+YWdlIG9mIG1lbW9yeSBieSBDZXBoLiBMZXQncyBzdGFydCBieSBkaXNjdXNzaW5nIHRoZSByZXF1
+aXJlbWVudHMuLi4NCj4gPj4NCj4gPj4gSGVyZSBpcyBteSBsaXN0IG9mIHJlcXVpcmVtZW50czoN
+Cj4gPj4NCj4gPj4gKDEpIFNob3VsZCBiZSBhYmxlIHRvIGNyZWF0ZSBhbiBhcmJpdHJhcnkgbnVt
+YmVyIG9mICJwb29scyIgb2YgbWVtb3J5Lg0KPiA+Pg0KPiA+PiAoMikgRGV2ZWxvcGVycyBzaG91
+bGQgYmUgYWJsZSB0byBkZWNsYXJlIHRoYXQgYSBwYXJ0aWN1bGFyIGNvbnRhaW5lcg0KPiA+PiAo
+aS5lLiwgU1RMIG9yIGJvb3N0LWxpa2UgY29udGFpbmVyKSBpcyB3aG9sbHkgY29udGFpbmVkIHdp
+dGhpbiBhIHBvb2wuDQo+ID4+DQo+ID4+ICgzKSBCZXlvbmQgZGVjbGFyYXRpb25zIChhbmQgcG9z
+c2libHkgY29uc3RydWN0b3IgaW5pdGlhbGl6YXRpb24pLCBubw0KPiA+PiBleHBsaWNpdCBjb2Rl
+IGlzIHJlcXVpcmVkIHRvIGJlIHdyaXR0ZW4gYnkgZGV2ZWxvcGVycyB0byBzdXBwb3J0ICgyKS4N
+Cj4gPj4gQWxsIGNvbnRhaW5lciBtYW5pcHVsYXRpb24gcHJpbWl0aXZlcyBwcm9wZXJseSB1cGRh
+dGUgdGhlIGFjY291bnRpbmcuDQo+ID4+DQo+ID4+ICg0KSBCZXlvbmQgY29uc3RydWN0aW9uL2Rl
+c3RydWN0aW9uIGNvc3RzLCBubyBjb250YWluZXIgb3BlcmF0aW9uIGlzDQo+ID4+IGJ1cmRlbmVk
+IGJ5IGFkZGl0aW9uYWwgY29kZSAtLSBvbmx5IGltcGxpY2l0IG1hbGxvYy9mcmVlIG9wZXJhdGlv
+bnMNCj4gPj4gYXJlIGJ1cmRlbmVkIHdpdGggYWNjb3VudGluZy4NCj4gPj4NCj4gPj4gKDUpIFRo
+ZSBzeXN0ZW0gdHJhY2tzIHRoZSBhZ2dyZWdhdGUgYW1vdW50IG9mIG1lbW9yeSBjb25zdW1lZCBp
+bg0KPiBlYWNoDQo+ID4+IHBvb2wgYW5kIGl0J3MgcmVsYXRpdmVseSBjaGVhcCB0byBpbnRlcnJv
+Z2F0ZSB0aGUgY3VycmVudCB0b3RhbA0KPiA+PiBjb25zdW1wdGlvbi4NCj4gPg0KPiA+IFllcw0K
+PiA+DQo+ID4+ICg2KSBUaGUgc3lzdGVtIHRyYWNrcyB0aGUgYWdncmVnYXRlIGFtb3VudCBvZiBt
+ZW1vcnkgY29uc3VtZWQgYnkNCj4gZWFjaA0KPiA+PiBjb250YWluZXIgaW4gZWFjaCBwb29sIC0t
+IGJ1dCB0aGlzIGlzIGV4cGVuc2l2ZSB0byBpbnRlcnJvZ2F0ZSBhbmQgaXMNCj4gPj4gaW50ZW5k
+ZWQgdG8gYmUgdXNlZCBwcmltYXJpbHkgZm9yIGRlYnVnZ2luZyBwdXJwb3Nlcy4NCj4gPg0KPiA+
+IFRoaXMgb25lIHNvdW5kcyBsaWtlIGEgbmljZS10by1oYXZlIHRvIG1lLiAgSWYgdGhlcmUgaXMg
+YSBwZXJmb3JtYW5jZQ0KPiA+IGNvc3QgSSB3b3VsZCBza2lwIGl0Lg0KPiA+DQo+ID4+ICg3KSBn
+ZW5lcmljIG9iamVjdCBuZXcvZGVsZXRlIGlzIHBvc3NpYmxlLCBidXQgbm90IGZyZWVkIG9mIHRo
+ZQ0KPiA+PiBhY2NvdW50aW5nIHJlcXVpcmVtZW50cyAtLSBlc3BlY2lhbGx5ICM2LCBpLmUuLg0K
+PiA+Pg0KPiA+PiAoOCkgTm8gYmFja3ByZXNzdXJlIGlzIGJ1aWx0IGludG8gdGhlIHNjaGVtZSwg
+aS5lLiwgbm9ib2R5IGhhcyB0bw0KPiA+PiB3b3JyeSBhYm91dCBzdWRkZW5seSBiZWluZyAib3V0
+IiBvZiBtZW1vcnkgb3IgYmVpbmcgZGVsYXllZCAtLSBqdXN0DQo+ID4+IGJlY2F1c2Ugc29tZSBw
+YXJ0aWN1bGFyIHBvb2wgaXMgZmlsbGluZyB1cC4gVGhhdCdzIGEgaGlnaGVyIGxldmVsDQo+ID4+
+IHByb2JsZW0gdG8gc29sdmUuIE5vIG1lbW9yeSBpcyAicmVzZXJ2ZWQiIGVpdGhlciAtLSBJZiB5
+b3UNCj4gPj4gb3ZlcmNvbW1pdCwgdGhhdCdzIGFsc28gbm90IHNvbHZlZCBhdCB0aGlzIGxheWVy
+LiBJTU8sIHRoaXMgaXMgYQ0KPiA+PiBjcmFwcHkgcGxhY2UgdG8gYmUgZG9pbmcgaW5nZXN0IGFu
+ZCBmbG93IGNvbnRyb2wuDQo+ID4+DQo+ID4+ICg5KSBJbXBsZW1lbnRhdGlvbiBtdXN0IGJlIG11
+bHRpLXRocmVhZCBhbmQgbXVsdGktc29ja2V0IGF3YXJlLiBJdA0KPiA+PiBzaG91bGQgZXhwZWN0
+IGhpZ2ggbGV2ZWxzIG9mIHRocmVhZCBjb25jdXJyZW5jeSBhbmQgYXZvaWQgdW5uZWNlc3NhcnkN
+Cj4gPj4gZ2xvYmFsIGRhdGEgbWFuaXB1bGF0aW9uIChleHBlY3QgaW50ZXJuYWwgc2hhcmRpbmcg
+b2YgZGF0YSBzdHJ1Y3R1cmVzDQo+ID4+IC0tIHNvbWV0aGluZyBsaWtlIGFuIGFyZW5hLWJhc2Vk
+IG1hbGxvYyBzY2hlbWUpLg0KPiA+DQo+ID4gWWVzDQo+ID4NCj4gPj4gUmVxdWlyZW1lbnQgNSBh
+bGxvd3MgYSAidHJpbW1pbmciIHN5c3RlbSB0byBiZSBkZXZlbG9wZWQuIEkgdGhpbmsNCj4gPj4g
+dGhlcmUgYXJlIHJlYWxseSB0d28gc3R5bGVzIGZvciB0aGlzOg0KPiA+Pg0KPiA+PiAoYSkgVGlt
+ZS1iYXNlZCwgaS5lLiwgcGVyaW9kaWNhbGx5IHNvbWUgdGhyZWFkIHdha2VzIHVwIGFuZCBjaGVj
+a3MNCj4gPj4gbWVtb3J5IHVzYWdlIHdpdGhpbiBhIHBvb2wuIElmIGl0IGRvZXNuJ3QgbGlrZSBp
+dCwgdGhlbiBpdCdzDQo+ID4+IHJlc3BvbnNpYmxlIGZvciAiZml4aW5nIiBpdCwgaS5lLiwgdHJp
+bW1pbmcgYXMgbmVlZGVkLg0KPiA+Pg0KPiA+PiAoYikgZXZlbnQtYmFzZWQuIE5vIHJlYXNvbiB0
+aGF0IHdlIGNvdWxkbid0IHNldHVwIGFuIGV2ZW50IG9yDQo+ID4+IGNvbmRpdGlvbiB2YXJpYWJs
+ZSBwZXItcG9vbCBhbmQgaGF2ZSB0aGUgbWFsbG9jL2ZyZWUgY29kZSB0cmlnZ2VyDQo+ID4+IHRo
+YXQgY29uZGl0aW9uL3ZhcmlhYmxlLiBJdCBhZGRzIG9uZSBvciB0d28gY29tcGFyZS9icmFuY2hl
+cyB0byBlYWNoDQo+ID4+IG1hbGxvYyAvIGZyZWUgb3BlcmF0aW9uICh3aGljaCBpcyBwcmV0dHkg
+Y2hlYXApLCBidXQgZG9lc24ndCBoYXZlIHRoZQ0KPiA+PiBsYXRlbmN5IGNvc3RzIG9mIChhKS4g
+VGhlIGRvd25zaWRlIGlzIHRoYXQgdGhpcyBpbXBsaWNpdGx5IGFzc3VtZXMgYQ0KPiA+PiBzaW5n
+bGUgZ2xvYmFsLXRocmVhZCBpcyByZXNwb25zaWJsZSBmb3IgY2xlYW5pbmcgZWFjaCBwb29sIHdo
+aWNoDQo+ID4+IHdvcmtzIHdlbGwgd2hlbiB0aGVyZSBhcmUgYSByZWxhdGl2ZWx5IHNtYWxsIG51
+bWJlciBvZiBwb29scy4NCj4gPj4NCj4gPj4gSGVyZSBpcyBteSBsaXN0IG9mIGFudGktcmVxdWly
+ZW1lbnRzOg0KPiA+Pg0KPiA+PiAoMSkgTm8gaGllcmFyY2hpY2FsIHJlbGF0aW9uc2hpcCBiZXR3
+ZWVuIHRoZSBwb29scy4gW0lNTywgdGhpcyBpcw0KPiA+PiBrZXdsLCBidXQgdW5uZWNlc3Nhcnkg
+YW5kIHRlbmRzIHRvIHNjcmV3IHVwIHlvdXIgY2FjaGUsIGkuZS4sIGRlc3Ryb3lzDQo+ICM5Lg0K
+PiA+Pg0KPiA+PiAoMikgTm8gcGh5c2ljYWwgY29sb2NhdGlvbiBvZiB0aGUgYWxsb2NhdGVkIHBv
+b2wgbWVtb3J5LiBUaGUgcG9vbCBpcw0KPiA+PiAibG9naWNhbCIsIGkuZS4sIGFuIGFjY291bnRp
+bmcgbWlyYWdlIG9ubHkuDQo+ID4+DQo+ID4+ICgzKSBObyByZWFzb24gdG8gZHluYW1pY2FsbHkg
+Y3JlYXRlL2Rlc3Ryb3kgbWVtb3J5IHBvb2xzLiBUaGV5IGNhbiBiZQ0KPiA+PiBzdGF0aWNhbGx5
+IGRlY2xhcmVkICh0aGlzIGRyYW1hdGljYWxseSBzaW1wbGlmaWVzIHRoZSBjb2RlIHRoYXQgdXNl
+cw0KPiA+PiB0aGlzIHN5c3RlbSkuDQo+ID4NCj4gPiBZZXMuICBHcmVhdCBzdW1tYXJ5IQ0KPiA+
+DQo+ID4+IExldCB0aGUgZGlzY3Vzc2lvbiBiZWdpbiEhDQo+ID4+IC8vLy8vLy8vLy8vLy8vLy8v
+Ly8vLy8vLy8NCj4gPj4NCj4gPj4gSGVyZSBpcyBteSBwcm9wb3NlZCBleHRlcm5hbCBpbnRlcmZh
+Y2UgdG8gdGhlIGRlc2lnbjoNCj4gPj4NCj4gPj4gRmlyc3QsIGxvb2sgYXQgdGhlIHNsYWJfeHh4
+eCBjb250YWluZXJzIHRoYXQgSSBqdXN0IHN1Ym1pdHRlZC4gWW91DQo+ID4+IGNhbiBmaW5kIHRo
+ZW0gYXQNCj4gPj4NCj4gaHR0cHM6Ly9naXRodWIuY29tL2FsbGVuc2FtdWVscy9jZXBoL2Jsb2Iv
+bWFzdGVyL3NyYy9pbmNsdWRlL3NsYWJfY29uDQo+ID4+IHRhaW5lcnMuaA0KPiA+Pg0KPiA+PiBJ
+IHdvdWxkIHByb3Bvc2UgdG8gZXh0ZW5kIHRob3NlIGNvbnRhaW5lcnMgYXMgdGhlIGJhc2lzIGZv
+ciB0aGUNCj4gPj4gbWVtb3J5IHBvb2xpbmcuDQo+ID4+DQo+ID4+IEZpcnN0LCB0aGVyZSdzIGEg
+Z2xvYmFsIGVudW0gdGhhdCBkZWZpbmVzIHRoZSBtZW1vcnkgcG9vbHMgLS0geWVzLA0KPiA+PiB0
+aGV5J3JlIHN0YXRpYyBhbmQgYSBzbWFsbCBudW1iZXINCj4gPj4NCj4gPj4gZW51bSBtcG9vbF9p
+bmRleCB7DQo+ID4+ICAgIE1QT09MX09ORSwNCj4gPj4gICAgTVBPT0xfVFdPLA0KPiA+PiAuLi4N
+Cj4gPj4gICAgTVBPT0xfTEFTVA0KPiA+PiB9Ow0KPiA+Pg0KPiA+PiBBbmQgYSBnbG9iYWwgb2Jq
+ZWN0IGZvciBlYWNoIHBvb2w6DQo+ID4+DQo+ID4+IGNsYXNzIG1wb29sOyAvLyBUQkQgLi4uIHNl
+ZSBiZWxvdy4NCj4gPj4NCj4gPj4gRXh0ZXJuIG1wb29sW01QT09MX0xBU1RdOyAvLyBBY3R1YWwg
+ZGVmaW5pdGlvbiBvZiBlYWNoIHBvb2wNCj4gPj4NCj4gPj4gRWFjaCBzbGFiX3h4eCBjb250YWlu
+ZXIgdGVtcGxhdGUgaXMgYXVnbWVudGVkIHRvIGV4cGVjdCByZWNlaXZlIGFuDQo+ID4+IGFkZGl0
+aW9uYWwgImVudW0gbXBvb2xfaW5kZXgiIHBhcmFtZXRlci4NCj4gPj4NCj4gPj4gVGhhdCdzIEFM
+TCBUSEFUJ1MgcmVxdWlyZWQgZm9yIHRoZSBkZXZlbG9wZXIuIEluIG90aGVyIHdvcmRzLCBpZiBl
+YWNoDQo+ID4+IGRlZmluaXRpb24gb2YgYW4gU1RMIGNvbnRhaW5lciB1c2VzIGEgdHlwZWRlZiB3
+aXRoIHRoZSByaWdodCBtcG9vbA0KPiA+PiBpbmRleCwgdGhlbiB5b3UncmUgZG9uZS4gVGhlIG1h
+Y2hpbmVyeSB0YWtlcyBjYXJlIG9mIGV2ZXJ5dGhpbmcgZWxzZQ0KPiA+PiA6KQ0KPiA+DQo+ID4g
+RldJVyBJJ20gbm90IHN1cmUgaWYgdGhlcmUncyBtdWNoIHJlYXNvbiB0byBwYXNzIE1QT09MX0ZP
+TyBpbnN0ZWFkIG9mDQo+ID4gZ19tcG9vbFtNUE9PTF9GT09dIHRvIHRoZSBhbGxvY2F0b3IgaW5z
+dGFuY2UuICBUaGUgZm9ybWVyIGhhcmQtY29kZXMNCj4gPiB0aGUgZ2xvYmFsIGluc3RhbmNlOyB0
+aGUgbGF0dGVyIG1lYW5zIHlvdSBjb3VsZCBtYW5hZ2UgdGhlIG1lbW9yeSBwb29sDQo+ID4gaG93
+ZXZlciB5b3UgbGlrZSAoZS5nLiwgYXMgcGFydCBvZiB0aGUgQ2VwaENvbnRleHQgZm9yIGxpYnJh
+ZG9zKS4NCj4gPiBUaGF0J3MgYSBzbWFsbCBkZXRhaWwsIHRob3VnaC4NCj4gPg0KPiA+PiBTdGFu
+ZGFsb25lIG9iamVjdHMsIGkuZS4sIG5ha2VkIG5ldy9kZWxldGUgYXJlIGVhc2lseSBkb25lIGJ5
+IG1ha2luZw0KPiA+PiB0aGUgZXF1aXZhbGVudCBvZiBhIHNsYWJfaW50cnVzaXZlX2xpc3QgYW5k
+IG1heWJlIGEgbWFjcm8gb3IgdHdvLg0KPiA+PiBUaGVyZSdzIHNvbWUgdHJpY2t5IGluaXRpYWxp
+emF0aW9uIGZvciB0aGlzIG9uZSAoc2VlIGJlbG93KS4NCj4gPj4NCj4gPj4gLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiA+Pg0KPiA+PiBJbXBsZW1lbnRhdGlv
+bg0KPiA+Pg0KPiA+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+DQo+ID4+DQo+ID4+IFJlcXVpcmVtZW50IDYgaXMgd2hhdCBkcml2ZXMgdGhpcyBpbXBsZW1lbnRh
+dGlvbi4NCj4gPj4NCj4gPj4gSSB3b3VsZCBleHRlbmQgZWFjaCBzbGFiX3h4eHggY29udGFpbmVy
+IHRvIGFsc28gdmlydHVhbGx5IGluaGVyaXQNCj4gPj4gZnJvbSBhIFBvb2xfTWVtYmVyIGludGVy
+ZmFjZSwgdGhpcyBpbnRlcmZhY2UgYWxsb3dzIHRoZSBtZW1vcnkgcG9vbA0KPiA+PiBnbG9iYWwg
+bWFjaGluZXJ5IHRvIGltcGxlbWVudCAjNi4NCj4gPj4NCj4gPj4gSSBwcm9wb3NlIHRoYXQgdGhl
+IGN0b3IvZHRvciBmb3IgUG9vbF9NZW1iZXIgKG9uZSBmb3IgZWFjaCBjb250YWluZXIpDQo+ID4+
+IHB1dCBpdHNlbGYgb24gYSBsaXN0IHdpdGhpbiB0aGUgcmVzcGVjdGl2ZSBtZW1vcnkgcG9vbC4g
+VGhpcyBNVVNUIGJlDQo+ID4+IGEgc3luY2hyb25pemVkIG9wZXJhdGlvbiBidXQgd2UgY2FuIHNo
+YXJkIHRoZSBsaXN0IHRvIHJlZHVjZSB0aGUNCj4gPj4gY29sbGlzaW9ucyAodXNlIHRoZSBsb3cg
+NC01IGJpdHMgb2YgdGhlIGNyZWF0aW5nIHRocmVhZCBwb2ludGVyIHRvDQo+ID4+IGluZGV4IHRo
+ZSBzaGFyZCAtLSBtaW5pbWl6ZXMgY3RvciBleHBlbnNlIGJ1dCBpbmNyZWFzZXMgdGhlIGR0b3IN
+Cj4gPj4gZXhwZW5zZSAtLSB3aGljaCBpcyBvZnRlbiBkb25lIGluICJ0cmltIikuIFRoaXMgYXNz
+dW1lcyB0aGF0IHRoZSByYXRlDQo+ID4+IG9mIGNvbnRhaW5lciBjcmVhdGlvbi9kZXN0cnVjdGlv
+biB3aXRoaW4gYSBtZW1vcnkgcG9vbCBpcyBub3Qgc3VwZXINCj4gPj4gaGlnaCAtLSB3ZSBjb3Vs
+ZCBtYWtlIHRoaXMgYmUgYSBjb21waWxlLXRpbWUgb3B0aW9uIGlmIGl0IGJlY29tZXMgdG9vDQo+
+IGV4cGVuc2l2ZS4NCj4gPj4NCj4gPj4gVGhlIHBlci1wb29sIHNoYXJkZWQgbGlzdHMgYWxsb3cg
+dGhlIGRlYnVnIHJvdXRpbmVzIHRvIHZpc2l0IGVhY2gNCj4gPj4gY29udGFpbmVyIGFuZCBkbyB0
+aGluZ3MgbGlrZSBhc2sgImhvdyBtYW55IGVsZW1lbnRzIGRvIHlvdSBoYXZlPyIgLS0NCj4gPj4g
+IkhvdyBiaWcgaXMgZWFjaCBlbGVtZW50IiAtLSAiR2l2ZSBtZSBhIHByaW50YWJsZSBzdHJpbmcg
+b2YgdGhlDQo+ID4+IHR5cGUtc2lnbmF0dXJlIGZvciB0aGlzIGNvbnRhaW5lciIuIE9uY2UgeW91
+IGhhdmUgdGhpcyBsaXN0IHlvdSBjYW4NCj4gPj4gZ2VuZXJhdGUgbG90cyBvZiBpbnRlcmVzdGlu
+ZyBkZWJ1ZyByZXBvcnRzLiBCZWNhdXNlIHlvdSBjYW4gc29ydCBieQ0KPiA+PiBpbmRpdmlkdWFs
+IGNvbnRhaW5lcnMgYXMgd2VsbCBhcyBncm91cCBjb250YWluZXJzIGJ5IHRoZWlyIHR5cGUNCj4g
+Pj4gc2lnbmF0dXJlcyAoaS5lLiwgY29tYmluZWQgdGhlIGNvbnN1bXB0aW9uIG9mIGFsbCAibWFw
+PGEsYj4iDQo+ID4+IGNvbnRhaW5lcnMgYXMgYSBncm91cCkuIFlvdSBjYW4gcmVwb3J0IG91dCBi
+b3RoIGJ5IEJ5dGUgYXMgd2VsbCBhcyBieQ0KPiA+PiBFbGVtZW50IGNvdW50IGNvbnN1bXB0aW9u
+Lg0KPiA+DQo+ID4gWWVhaCwgdGhpcyBzb3VuZHMgcHJldHR5IG5pY2UuICBCdXQgSSB0aGluayBp
+dCdzIGltcG9ydGFudCB0byBiZSBhYmxlDQo+ID4gdG8gY29tcGlsZSBpdCBvdXQuICBJIHRoaW5r
+IHdlIHdpbGwgaGF2ZSBhIGxvdCBvZiBjcmVhdGlvbnMvZGVzdHJ1Y3Rpb25zLg0KPiA+IEZvciBl
+eGFtcGxlLCBpbiBCbHVlU3RvcmUsIE9ub2RlcyBoYXZlIG1hcHMgb2YgRXh0ZW50cywgdGhvc2Ug
+bWFwIHRvDQo+ID4gQmxvYnMsIGFuZCB0aG9zZSBoYXZlIGEgQnVmZmVyU3BhY2Ugd2l0aCBhIG1h
+cCBvZiBCdWZmZXJzIGZvciBjYWNoZWQNCj4gPiBkYXRhLiAgSSBleHBlY3QgdGhhdCBibG9icyBh
+bmQgZXZlbiBvbm9kZXMgd2lsbCBiZSBjb21pbmcgaW4gYW5kIG91dA0KPiA+IG9mIGNhY2hlIGEg
+bG90Lg0KPiA+DQo+ID4+IFRoaXMga2luZCBvZiBpbmZvcm1hdGlvbiB1c3VhbGx5IGFsbG93cyB5
+b3UgdG8gcXVpY2tseSBmaWd1cmUgb3V0DQo+ID4+IHdoZXJlIHRoZSBtZW1vcnkgaXMgYmVpbmcg
+Y29uc3VtZWQuIEEgYml0IG9mIHNjcmlwdCB3aXphcmRyeSB3b3VsZA0KPiA+PiByZWNvZ25pemUg
+dGhhdCBzb21lIGNvbnRhaW5lcnMgY29udGFpbiBvdGhlciBjb250YWluZXJzLiBGb3IgZXhhbXBs
+ZSwNCj4gPj4gbm8gcmVhc29uIGEgc2ltcGxlIFB5dGhvbiBzY3JpcHQgY291bGRuJ3QgcmVjb2du
+aXplIHRoYXQgZWFjaCBvTm9kZQ0KPiA+PiBtaWdodCBoYXZlIGEgYnVuY2ggb2YgdmVjdG9yPHBl
+eHRlbnRzPiB3aXRoaW4gaXQgYW5kIHRlbGwgeW91IHRoaW5ncw0KPiA+PiBsaWtlIHRoZSBhdmVy
+YWdlIG51bWJlciBvZiBwZXh0ZW50cyAvIG9Ob2Rlcy4gQXZlcmFnZSBEUkFNDQo+ID4+IGNvbnN1
+bXB0aW9uIHBlciBvTm9kZSAod2hpY2ggaXMgYSBwcmV0dHkgY29tcGxpY2F0ZWQgY29tYmluYXRp
+b24gb2YNCj4gPj4gcGV4dGVudHMsIGxleHRlbnRzLCBidWZmZXI6OnB0ciwNCj4gPj4gZXRjLikN
+Cj4gPj4NCj4gPj4gQ29tbWVudHM6ID8/Pz8/DQo+ID4NCj4gPiBJdCB3b3VsZCBiZSBuaWNlIHRv
+IGJ1aWxkIHRoaXMgb24gdG9wIG9mIGV4aXN0aW5nIGFsbG9jYXRvciBsaWJyYXJpZXMNCj4gPiBp
+ZiB3ZSBjYW4uICBGb3IgZXhhbXBsZSwgc29tZXRoaW5nIGluIGJvb3N0LiAgSSB0b29rIGEgcXVp
+Y2sgcGVlayB0aGUNCj4gPiBvdGhlciBkYXkgYW5kIGRpZG4ndCBmaW5kIHNvbWV0aGluZyB0aGF0
+IGFsbG93ZWQgc2ltcGxlIGludGVycm9nYXRpb24NCj4gPiBhYm91dCB1dGlsaXphdGlvbiwgdGhv
+dWdoLCB3aGljaCB3YXMgc3VycHJpc2luZy4gIEl0IHdvdWxkIGJlIG5pY2UgdG8NCj4gPiBoYXZl
+IHNvbWV0aGluZyB1c2VmdWwgKHBlcmhhcHMgd2l0aG91dCAjNikgdGhhdCBjb3VsZCBiZSBkb25l
+DQo+ID4gcmVsYXRpdmVseSBxdWlja2x5IGFuZCBhZGRyZXNzIGFsbCBvZiB0aGUgb3RoZXIgcmVx
+dWlyZW1lbnRzLg0KPiANCj4gSWYgd2Ugd2FudCB0byBkbyBpbiBhIGxpZ2h0IHdheSwgSSByZWNv
+bW1lbmQgdG8gcmVmZXIgdG8gc2Vhc3Rhcg0KPiBpbXBsKGh0dHBzOi8vZ2l0aHViLmNvbS9zY3ls
+bGFkYi9zZWFzdGFyL2Jsb2IvbWFzdGVyL2NvcmUvbWVtb3J5LmhoDQo+IGh0dHBzOi8vZ2l0aHVi
+LmNvbS9zY3lsbGFkYi9zZWFzdGFyL2Jsb2IvbWFzdGVyL2NvcmUvc2xhYi5oaCkuIFRoaXMgY2Fu
+DQo+IGdpdmUgYSBsb3Qgb2YgaW5zaWdodHMuDQo+IA0KPiA+DQo+ID4gc2FnZQ0KPiA+IC0tDQo+
+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3UgYnNj
+cmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
+bW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4gbWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDov
+L3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
