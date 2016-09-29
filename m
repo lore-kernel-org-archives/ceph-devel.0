@@ -1,59 +1,69 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: Disable fiemap lead to Data In-balance between OSD
-Date: Thu, 29 Sep 2016 10:25:50 +0800
-Message-ID: <CACJqLyZpT=dF4LeBOpNpuCAvUsasFN-63r8BGMT5XDvTS7K4Mg@mail.gmail.com>
-References: <CALZt5jzUheF7C4OuYJ2hDwjserLX3wXgtDTZQM6Nk+C1k1QhTw@mail.gmail.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: Master build failure with jemalloc
+Date: Thu, 29 Sep 2016 04:25:34 +0000
+Message-ID: <MWHPR02MB26393FE04E6A5712E18142EFE2CE0@MWHPR02MB2639.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ty1jpn01on0119.outbound.protection.outlook.com ([104.47.93.119]:10378
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
+Received: from mail-bn3nam01on0065.outbound.protection.outlook.com ([104.47.33.65]:62592
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750719AbcI2CkK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 28 Sep 2016 22:40:10 -0400
-Received: by mail-vk0-f49.google.com with SMTP id z126so62109101vkd.0
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Sep 2016 19:25:57 -0700 (PDT)
-In-Reply-To: <CALZt5jzUheF7C4OuYJ2hDwjserLX3wXgtDTZQM6Nk+C1k1QhTw@mail.gmail.com>
+        id S1750879AbcI2EZh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 29 Sep 2016 00:25:37 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ning Yao <zay11022@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Sep 29, 2016 at 12:26 AM, Ning Yao <zay11022@gmail.com> wrote:
-> Hi,
->
-> As lots of fiemap issues in XFS, fiemap is default disabled now,
-> especially in Hammer, before seek_data, seek_hole is added.
->
-> But disabling fiemap feature will cause a small sparse object become a
-> large full object during PushOps, which may lead to notably data
-> in-balance between OSD, especially on the new added OSD  during data
-> rebalance. With those full objects, some OSDs may simultaneously
-> becomes full.
+Hi,
 
-Until now, I don't know existing problem with fiemap enabled in
-hammer. Although we find it maybe problem when clone to a existing
-overlap data range, but it won't exists in real case.
+I am facing a cmake build issue with jemalloc and latest master.
+Did anyone face same issue?
 
->
-> Furthermore, currently, it is impossible to make the full objects
-> sparse again if we enable the fiemap feature in the future.
->
-> So I think if any solutions to make a full object back to a sparse
-> object again?=E3=80=80One of the idea is to check whether the content in =
-the
-> object contains consecutive zero and punch zeros for those object
-> during deep-scrub,  is that possible and reasonable?
+Linking CXX executable ../../../bin/ceph_test_filestore_idempotent
+collect2: error: ld returned 1 exit status
+make[2]: *** [bin/ceph_test_keyvaluedb_iterators] Error 1
+make[1]: ***
+[src/test/ObjectMap/CMakeFiles/ceph_test_keyvaluedb_iterators.dir/all]
+Error 2
+../../../../src/rocksdb/librocksdb.a(db_impl.o): In function
+`DumpMallocStats':
+/home/ems/varada/mnt/master/src/rocksdb/db/db_impl.cc:595: undefined
+reference to `malloc_stats_print'
+../../../../src/rocksdb/librocksdb.a(db_impl.o): In function
+`DumpMallocStats':
+/home/ems/varada/mnt/master/src/rocksdb/db/db_impl.cc:595: undefined
+reference to `malloc_stats_print'
+collect2: error: ld returned 1 exit status
+collect2: error: ld returned 1 exit status
+make[2]: *** [bin/ceph_test_objectstore_workloadgen] Error 1
+make[1]: ***
+[src/test/objectstore/CMakeFiles/ceph_test_objectstore_workloadgen.dir/all]
+Error 2
+make[2]: *** [bin/ceph_smalliobenchfs] Error 1
+make[1]: *** [src/test/bench/CMakeFiles/ceph_smalliobenchfs.dir/all] Error =
+2
+../../../../src/rocksdb/librocksdb.a(db_impl.o): In function
+`DumpMallocStats':
+/home/ems/varada/mnt/master/src/rocksdb/db/db_impl.cc:595: undefined
+reference to `malloc_stats_print'
+collect2: error: ld returned 1 exit status
+make[2]: *** [bin/ceph_test_filestore_idempotent] Error 1
+make[1]: ***
+[src/test/objectstore/CMakeFiles/ceph_test_filestore_idempotent.dir/all]
+Error 2
 
-Obviously it's a complex thing more than we get.
 
->
->
->
-> Regards
-> Ning Yao
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Any workaround or fix for this issue?
+
+Varada
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
