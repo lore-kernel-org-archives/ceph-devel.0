@@ -1,68 +1,65 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: Memory Pooling and Containers
-Date: Wed, 28 Sep 2016 21:31:40 +0000
-Message-ID: <BLUPR0201MB152427C4BD08DEDB9178C89AE8CF0@BLUPR0201MB1524.namprd02.prod.outlook.com>
-References: <BLUPR0201MB1524456C8A99C6ABA036CBB9E8CC0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1609281316210.19847@piezo.us.to>
- <alpine.LSU.2.20.1609281413450.13361@ancalagon.suse.de>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: Disable fiemap lead to Data In-balance between OSD
+Date: Thu, 29 Sep 2016 10:27:02 +0800
+Message-ID: <CACJqLyZnZiJkQmRYRPk23qa4KO+FHeeNFpsq9cD9fYm67aEwfw@mail.gmail.com>
+References: <CALZt5jzUheF7C4OuYJ2hDwjserLX3wXgtDTZQM6Nk+C1k1QhTw@mail.gmail.com>
+ <CACJqLyZpT=dF4LeBOpNpuCAvUsasFN-63r8BGMT5XDvTS7K4Mg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-dm3nam03on0053.outbound.protection.outlook.com ([104.47.41.53]:43875
-        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+Received: from mail-ty1jpn01on0103.outbound.protection.outlook.com ([104.47.93.103]:33576
+        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752857AbcI1Vbm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 28 Sep 2016 17:31:42 -0400
-In-Reply-To: <alpine.LSU.2.20.1609281413450.13361@ancalagon.suse.de>
-Content-Language: en-US
+        id S1752823AbcI2C1P (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 28 Sep 2016 22:27:15 -0400
+Received: by mail-vk0-f53.google.com with SMTP id z126so62126925vkd.0
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Sep 2016 19:27:10 -0700 (PDT)
+In-Reply-To: <CACJqLyZpT=dF4LeBOpNpuCAvUsasFN-63r8BGMT5XDvTS7K4Mg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jesse Williamson <jwilliamson@suse.de>, Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ning Yao <zay11022@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Boost::pool works very well when you're allocated "same" sized objects. Tha=
-t's not our situation, we're allocating lots of different sized objects -- =
-some small, some large. The only way that Boost::pool supports that situati=
-on is to use the "ordered_free" operation to keep the freelist sorted (if y=
-ou don't use it then you'll get fragmentation that'll prevent allocation of=
- large objects -- even though there's plenty of free memory). The implement=
-ation of the sorted freelist is O(N). Which should work well for small pool=
-s, but that's the exact opposite of the desired use for Ceph, we're targeti=
-ng large pools (think 1GB).
+On Thu, Sep 29, 2016 at 10:25 AM, Haomai Wang <haomai@xsky.com> wrote:
+> On Thu, Sep 29, 2016 at 12:26 AM, Ning Yao <zay11022@gmail.com> wrote:
+>> Hi,
+>>
+>> As lots of fiemap issues in XFS, fiemap is default disabled now,
+>> especially in Hammer, before seek_data, seek_hole is added.
+>>
+>> But disabling fiemap feature will cause a small sparse object become a
+>> large full object during PushOps, which may lead to notably data
+>> in-balance between OSD, especially on the new added OSD  during data
+>> rebalance. With those full objects, some OSDs may simultaneously
+>> becomes full.
+>
+> Until now, I don't know existing problem with fiemap enabled in
+> hammer. Although we find it maybe problem when clone to a existing
+> overlap data range, but it won't exists in real case.
 
-I didn't word it very well, but my proposal doesn't actually change the und=
-erlying malloc/free algorithm, rather it's intended to put some statistics =
-around memory usage so that we can self-trim our memory pools.
+Hmm, I can't guarantee this... I only means if you want to have sparse
+object, you can enable this. ....
 
-Allen Samuels
-SanDisk |a Western Digital brand
-2880 Junction Avenue, San Jose, CA 95134
-T: +1 408 801 7030| M: +1 408 780 6416
-allen.samuels@SanDisk.com
-
-> -----Original Message-----
-> From: Jesse Williamson [mailto:jwilliamson@suse.de]
-> Sent: Wednesday, September 28, 2016 11:17 PM
-> To: Sage Weil <sage@newdream.net>
-> Cc: Allen Samuels <Allen.Samuels@sandisk.com>; Ceph Development
-> <ceph-devel@vger.kernel.org>
-> Subject: Re: Memory Pooling and Containers
->=20
-> On Wed, 28 Sep 2016, Sage Weil wrote:
->=20
-> > It would be nice to build this on top of existing allocator libraries
-> > if we can.  For example, something in boost.  I took a quick peek the
-> > other day and didn't find something that allowed simple interrogation
-> > about utilization, though, which was surprising.
->=20
-> Boost::pool look to me like it should fufill most of the requirements, bu=
-t I
-> haven't used it in production:
-> http://www.boost.org/doc/libs/1_62_0/libs/pool/doc/html/index.html
->=20
-> By "iterrogation about utilization", do you mean statistics about the all=
-ocator
-> activity?
->=20
-> -Jesse
+>
+>>
+>> Furthermore, currently, it is impossible to make the full objects
+>> sparse again if we enable the fiemap feature in the future.
+>>
+>> So I think if any solutions to make a full object back to a sparse
+>> object again?=E3=80=80One of the idea is to check whether the content in=
+ the
+>> object contains consecutive zero and punch zeros for those object
+>> during deep-scrub,  is that possible and reasonable?
+>
+> Obviously it's a complex thing more than we get.
+>
+>>
+>>
+>>
+>> Regards
+>> Ning Yao
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
