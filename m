@@ -1,61 +1,45 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: boost submodule update
-Date: Fri, 30 Sep 2016 08:42:28 -0400 (EDT)
-Message-ID: <761939168.1814833.1475239348666.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.11.1609291550010.19850@piezo.us.to> <CALqRxCzEXgA57EEty2j3vUrt9fm=eY8tTVYT4iy_p8Ad-rVfLw@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: RE: Memory Pooling and Containers
+Date: Fri, 30 Sep 2016 14:22:27 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1609301416270.19850@piezo.us.to>
+References: <BLUPR0201MB1524456C8A99C6ABA036CBB9E8CC0@BLUPR0201MB1524.namprd02.prod.outlook.com> <alpine.DEB.2.11.1609281316210.19847@piezo.us.to> <alpine.LSU.2.20.1609281413450.13361@ancalagon.suse.de>
+ <BLUPR0201MB152427C4BD08DEDB9178C89AE8CF0@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:50156 "EHLO
-        mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932707AbcI3Mm3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Sep 2016 08:42:29 -0400
-In-Reply-To: <CALqRxCzEXgA57EEty2j3vUrt9fm=eY8tTVYT4iy_p8Ad-rVfLw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:48138 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932237AbcI3OWb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Sep 2016 10:22:31 -0400
+In-Reply-To: <BLUPR0201MB152427C4BD08DEDB9178C89AE8CF0@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: Jesse Williamson <jwilliamson@suse.de>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Ken,
-
-I'm doubtful that case will arise in practice?
-
-Matt
-
------ Original Message -----
-> From: "Ken Dreyer" <kdreyer@redhat.com>
-> To: "Sage Weil" <sweil@redhat.com>
-> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Sent: Thursday, September 29, 2016 6:42:48 PM
-> Subject: Re: boost submodule update
+On Wed, 28 Sep 2016, Allen Samuels wrote:
+> Boost::pool works very well when you're allocated "same" sized objects. 
+> That's not our situation, we're allocating lots of different sized 
+> objects -- some small, some large. The only way that Boost::pool 
+> supports that situation is to use the "ordered_free" operation to keep 
+> the freelist sorted (if you don't use it then you'll get fragmentation 
+> that'll prevent allocation of large objects -- even though there's 
+> plenty of free memory). The implementation of the sorted freelist is 
+> O(N). Which should work well for small pools, but that's the exact 
+> opposite of the desired use for Ceph, we're targeting large pools (think 
+> 1GB).
 > 
-> On Thu, Sep 29, 2016 at 10:00 AM, Sage Weil <sweil@redhat.com> wrote:
-> >  * There is still the option to use a system boost via a cmake option.  I
-> > doubt anyone will opt for this in practice given the distros tend to lag,
-> > but they can if they want.
-> 
-> Can we have it automatically enable the system boost if it's > 1.6.1?
-> Otherwise I'm afraid no one will set WITH_SYSTEM_BOOST :)
-> 
-> Fedora 26 or 27 will probably have Boost 1.6.2+
-> (https://bugzilla.redhat.com/1374088)
-> 
-> - Ken
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> I didn't word it very well, but my proposal doesn't actually change the 
+> underlying malloc/free algorithm, rather it's intended to put some 
+> statistics around memory usage so that we can self-trim our memory 
+> pools.
 
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+We were doing some heap profiling yesterday and one interesting thing is 
+that the utilized heap reported by tcmalloc is about 1/2 the RSS.  We 
+probably want to consider creating separate pools for the handful of 
+objects that are consuming the bulk of the heap.
 
-http://www.redhat.com/en/technologies/storage
+We did this a few years back in the MDS and IIRC it helped significantly 
+with memory utilization there.
 
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+sage
