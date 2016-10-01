@@ -1,37 +1,51 @@
-From: Jesse Williamson <jwilliamson@suse.de>
-Subject: Re: Memory Pooling and Containers
-Date: Fri, 30 Sep 2016 14:47:05 -0700 (PDT)
-Message-ID: <alpine.LSU.2.20.1609301112330.8582@ancalagon.suse.de>
-References: <BLUPR0201MB1524456C8A99C6ABA036CBB9E8CC0@BLUPR0201MB1524.namprd02.prod.outlook.com> <alpine.DEB.2.11.1609281316210.19847@piezo.us.to> <alpine.LSU.2.20.1609281413450.13361@ancalagon.suse.de>
- <BLUPR0201MB152427C4BD08DEDB9178C89AE8CF0@BLUPR0201MB1524.namprd02.prod.outlook.com>,<alpine.DEB.2.11.1609301416270.19850@piezo.us.to> <0AA35578-9667-4B81-BE6A-71C8326B76F1@sandisk.com>
+From: Ning Yao <zay11022@gmail.com>
+Subject: CRUSH algorithm and its debug method
+Date: Sat, 1 Oct 2016 14:29:11 +0800
+Message-ID: <CALZt5jytLeocqK7TY5MhLbimgiriL8Tr5WQneLSaPK32KP88vw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; format=flowed; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:58284 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932687AbcI3VrL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 30 Sep 2016 17:47:11 -0400
-In-Reply-To: <0AA35578-9667-4B81-BE6A-71C8326B76F1@sandisk.com>
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:33014 "EHLO
+        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750864AbcJAG3M (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 1 Oct 2016 02:29:12 -0400
+Received: by mail-qk0-f177.google.com with SMTP id n189so52471714qke.0
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Sep 2016 23:29:12 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 30 Sep 2016, Allen Samuels wrote:
+Hi, Sage
 
-> I'm expecting the "in-object" capabilities of the slab_xxxxx containers 
-> to dramatically reduce malloc/free calls. Also having some visibility 
-> into where the memory is actually going will also spur a bit more 
-> development that will likely have more significant positive effects.
+I find that several issues related to current CRUSH algorithm as below:
 
-Definitely sounds useful! I see that some works been done with massif, 
-too.
+1. It is possible to select out the same collision and retry bucket in
+a crush_choose_firstn() loop. (e.g.  when we set reweight to 0 or mark
+osd out, it would be definitely rejected if it is selected. However,
+when the second chance to select out another one based on the
+different r', it is still possible to select out the same osd
+previously rejected, right? And until a different one is selected
+after several retries.).  I think we can record those rejected or
+collision osds in the same loop so that the process can be converged
+much faster?
 
-Also, I took a quick peek into boost::pool. It's built exactly as you 
-said-- specifically for the manu-small-objects situation. I didn't see an 
-"obvious" way to hook in a new freelist scheme.
+2. Currently, the reweight params in crushmap is memoryless (e.g we
+balance our data by reducing reweight, which will be lost after this
+osd DOWN and OUT automatically. And we mark its IN again because
+currently ceph osd in directly marks the reweight to 1.0 and out marks
+the reweight to 0.0).  It is quite awkward when we use ceph osd
+reweight-by-utilization to make data balance (If some osds down and
+out, our previous effort is totally lost).   So I think marking osd
+"in"  does not simply modify reweight to "1.0". Actually, we can
+iteration the previous osdmap and find out the value of the reweight
+or records it anywhere we can retrieve this value again?
 
-Have a great weekend,
+3. Currently, there is no debug option in the mapping progress in
+Mapper.c. dprintk is default disabled so that it will be hard to dig
+into the algorithm if something unexpected result happens. I think we
+can introduce the debug options and output the debug information when
+we use "ceph osd map xxx xxx" so that it is much more easier to find
+the shortness in current mapping process?
 
--Jesse
-
+Regards
+Ning Yao
