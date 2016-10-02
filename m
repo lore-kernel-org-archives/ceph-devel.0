@@ -1,51 +1,36 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: CRUSH algorithm and its debug method
-Date: Sat, 1 Oct 2016 14:29:11 +0800
-Message-ID: <CALZt5jytLeocqK7TY5MhLbimgiriL8Tr5WQneLSaPK32KP88vw@mail.gmail.com>
+From: Sascha Vogt <sascha.vogt-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Blog post about Ceph cache tiers - feedback welcome
+Date: Sun, 2 Oct 2016 21:59:27 +0200
+Message-ID: <57F1671F.8040705@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:33014 "EHLO
-        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750864AbcJAG3M (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 1 Oct 2016 02:29:12 -0400
-Received: by mail-qk0-f177.google.com with SMTP id n189so52471714qke.0
-        for <ceph-devel@vger.kernel.org>; Fri, 30 Sep 2016 23:29:12 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi, Sage
+Hi all,
 
-I find that several issues related to current CRUSH algorithm as below:
+as it took quite a while until we got our Ceph cache working (and we're 
+still hit but some unexpected things, see the thread Ceph with cache 
+pool - disk usage / cleanup), I thought it might be good to write a 
+summary of what I (believe) to know up to this point.
 
-1. It is possible to select out the same collision and retry bucket in
-a crush_choose_firstn() loop. (e.g.  when we set reweight to 0 or mark
-osd out, it would be definitely rejected if it is selected. However,
-when the second chance to select out another one based on the
-different r', it is still possible to select out the same osd
-previously rejected, right? And until a different one is selected
-after several retries.).  I think we can record those rejected or
-collision osds in the same loop so that the process can be converged
-much faster?
+Any feedback, especially corrections is highly welcome!
 
-2. Currently, the reweight params in crushmap is memoryless (e.g we
-balance our data by reducing reweight, which will be lost after this
-osd DOWN and OUT automatically. And we mark its IN again because
-currently ceph osd in directly marks the reweight to 1.0 and out marks
-the reweight to 0.0).  It is quite awkward when we use ceph osd
-reweight-by-utilization to make data balance (If some osds down and
-out, our previous effort is totally lost).   So I think marking osd
-"in"  does not simply modify reweight to "1.0". Actually, we can
-iteration the previous osdmap and find out the value of the reweight
-or records it anywhere we can retrieve this value again?
+http://maybebuggy.de/post/ceph-cache-tier/
 
-3. Currently, there is no debug option in the mapping progress in
-Mapper.c. dprintk is default disabled so that it will be hard to dig
-into the algorithm if something unexpected result happens. I think we
-can introduce the debug options and output the debug information when
-we use "ceph osd map xxx xxx" so that it is much more easier to find
-the shortness in current mapping process?
+Greetings
+-Sascha-
 
-Regards
-Ning Yao
+PS: Posted to ceph-devel as well, just in case a developer spots some 
+mistakes.
