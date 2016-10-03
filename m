@@ -1,36 +1,75 @@
-From: Sascha Vogt <sascha.vogt-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Blog post about Ceph cache tiers - feedback welcome
-Date: Sun, 2 Oct 2016 21:59:27 +0200
-Message-ID: <57F1671F.8040705@gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: CRUSH algorithm and its debug method
+Date: Mon, 3 Oct 2016 13:22:28 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1610031319090.19850@piezo.us.to>
+References: <CALZt5jytLeocqK7TY5MhLbimgiriL8Tr5WQneLSaPK32KP88vw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:33935 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750822AbcJCNWb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Oct 2016 09:22:31 -0400
+In-Reply-To: <CALZt5jytLeocqK7TY5MhLbimgiriL8Tr5WQneLSaPK32KP88vw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ning Yao <zay11022@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi all,
+Hi!
 
-as it took quite a while until we got our Ceph cache working (and we're 
-still hit but some unexpected things, see the thread Ceph with cache 
-pool - disk usage / cleanup), I thought it might be good to write a 
-summary of what I (believe) to know up to this point.
+On Sat, 1 Oct 2016, Ning Yao wrote:
+> Hi, Sage
+> 
+> I find that several issues related to current CRUSH algorithm as below:
+> 
+> 1. It is possible to select out the same collision and retry bucket in
+> a crush_choose_firstn() loop. (e.g.  when we set reweight to 0 or mark
+> osd out, it would be definitely rejected if it is selected. However,
+> when the second chance to select out another one based on the
+> different r', it is still possible to select out the same osd
+> previously rejected, right? And until a different one is selected
+> after several retries.).  I think we can record those rejected or
+> collision osds in the same loop so that the process can be converged
+> much faster?
 
-Any feedback, especially corrections is highly welcome!
+It's sitll possible to pick the same thing with a different r'.  
+That's why the max retries values has to be reasonably high.  I'm not sure 
+how you would avoid doing the full calculation, though... can you be 
+more specific?
+ 
+> 2. Currently, the reweight params in crushmap is memoryless (e.g we
+> balance our data by reducing reweight, which will be lost after this
+> osd DOWN and OUT automatically. And we mark its IN again because
+> currently ceph osd in directly marks the reweight to 1.0 and out marks
+> the reweight to 0.0).  It is quite awkward when we use ceph osd
+> reweight-by-utilization to make data balance (If some osds down and
+> out, our previous effort is totally lost).   So I think marking osd
+> "in"  does not simply modify reweight to "1.0". Actually, we can
+> iteration the previous osdmap and find out the value of the reweight
+> or records it anywhere we can retrieve this value again?
 
-http://maybebuggy.de/post/ceph-cache-tier/
+The old value is stored here
 
-Greetings
--Sascha-
+https://github.com/ceph/ceph/blob/master/src/osd/OSDMap.h#L89
 
-PS: Posted to ceph-devel as well, just in case a developer spots some 
-mistakes.
+and restored when the OSD is marked back up, although IIRC there is a 
+config option that controls when the old value is stored (it might only 
+happen when the osd is marked out automatically, not when it is done 
+manually?).  That behavior could be changed, though.
+
+> 3. Currently, there is no debug option in the mapping progress in
+> Mapper.c. dprintk is default disabled so that it will be hard to dig
+> into the algorithm if something unexpected result happens. I think we
+> can introduce the debug options and output the debug information when
+> we use "ceph osd map xxx xxx" so that it is much more easier to find
+> the shortness in current mapping process?
+
+Yeah, it's hard to debug.  I usually uncomment the dprintk define and 
+rebuild osdmaptool, which has a --test-map-pg option so that I can run 
+a specific problematic mapping.  We could do something a bit more clever 
+as long as it is a simple conditional--we don't want to slow down the 
+mapping code as it is performance sensitive.
+
+Thanks!
+sage
