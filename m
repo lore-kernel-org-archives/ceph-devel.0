@@ -1,65 +1,43 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Mismatching nonce for 'ceph osd.0 tell'
-Date: Tue, 4 Oct 2016 13:57:12 +0200
-Message-ID: <e467d1f1-8a29-1a32-b113-0d71e00d5ec5@digiware.nl>
-References: <f54dda71-dabf-cab2-948c-83b9f2007aff@digiware.nl>
- <CACJqLybyu1_rKj7g7qSfrtZCVMhJvgcvU2Q7vfoRUvs-3hT3JQ@mail.gmail.com>
- <14688c37-068c-0bc6-615d-de2f8f5bfdc6@digiware.nl>
- <CAJ4mKGawPKP=rGB9t1wkwn00sYcBE8T9ac327mGLv90Z4MFxpg@mail.gmail.com>
- <3df7e2ed-eb34-8ba8-8a8d-9d7b66e45315@digiware.nl>
- <CAJ4mKGa+wydRuMtvCYiOe823v9UkN2Qk0FkViqHhLAPmGeFoGA@mail.gmail.com>
- <89a9ee77-21db-e955-7bb3-c4adc3bb94bf@digiware.nl>
- <CAJ4mKGboUvhJhf1=bUD=unSAc4Z+1nQPmYXRFb=CfmA-Wk6GEQ@mail.gmail.com>
+Subject: Re: ceph-mgr is in master
+Date: Tue, 4 Oct 2016 14:03:31 +0200
+Message-ID: <bf4c0368-09f1-0f6d-16c3-ed7a321cba51@digiware.nl>
+References: <CALe9h7ebyOdYcy1hjJ1pje28fuVro68o=_q=WscRuNX2dLebjw@mail.gmail.com>
+ <CAJ4mKGb4BLwOs1sqmB=mD-_BUzUDrc0wL4NZ8wotp++kdkE9mQ@mail.gmail.com>
+ <CALe9h7eZO2XCWqmMhM+hiJqSgmLPLqs5yBgyOD-6sRCYDD3jDQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:15653 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([176.74.240.9]:16674 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751610AbcJDL51 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 4 Oct 2016 07:57:27 -0400
-In-Reply-To: <CAJ4mKGboUvhJhf1=bUD=unSAc4Z+1nQPmYXRFb=CfmA-Wk6GEQ@mail.gmail.com>
+        id S1753589AbcJDMDh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 4 Oct 2016 08:03:37 -0400
+In-Reply-To: <CALe9h7eZO2XCWqmMhM+hiJqSgmLPLqs5yBgyOD-6sRCYDD3jDQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 3-10-2016 19:50, Gregory Farnum wrote:
->> Question here is:
->>   If I ask 'ceph osd dump', I'm actually asking ceph-mon.
->>   And cehp-mon has learned this from (crush?)maps being sent to it by
->>   ceph-osd.
-> 
-> The monitor has learned about specific IP addresses/nonces/etc via
-> MOSDBoot messages from the OSDs. The crush locations are set via
-> monitor command messages, generally invoked as part of the init
-> scripts. Maps are generated entirely on the monitor. :)
-> 
->> Is there an easy way to debug/monitor the content of what ceph-osd sends
->> and ceph-mon receives in the maps?
->> Just to make sure that it is clear where the problem occurs.
-> 
-> You should be able to see the info going in and out by bumping the
-> debug levels up — every message's "print" function is invoked when
-> it's sent/received as long as you have "debug ms = 1". It looks like
-> the MOSDBoot message doesn't natively dump its addresses but you can
-> add them easily if you need to.
+On 4-10-2016 08:07, John Spray wrote:
+> As Dan says, `ceph tell` is the new one, the one that sends commands
+> directly from the CLI to the named service (not via the mon).
+> However, this is a bit of a placeholder, as we'll eventually be
+> switching to some commands (especially PG stats ones) to silently go
+> to the mgr instead of the mon.  There are various ways of
+> accomplishing that, the simplest one is to have the CLI fetch both mgr
+> and mon command descriptions, and preferentially send commands to
+> matching entries from the mgr.
 
-Hi Greg,
+ATM I had to disable building MGR, because Clang/Python/FreeBSD throw a
+fit when having to compile on of the python files...
+Something to do with function-signatures not matching.
+I'll look into it after I've completed most of my other blocking
+problems. Unless you'd really want to have the compiler errors now, I'll
+fireup a build with MGR on.
 
-Thanx for the answer....
-
-I've got debug_ms already pumped up all the way to 20.
-So I do get to see what addresses are selected during bind. But still
-they do not end up at the MON, and 'ceph osd dump' reports:
-	:/0
-as bind address.
-
-I'm going to add some more debugs to actually see what MOSDBoot is doing....
-
-It looks like I've tackled most of the EventKqueue forking trouble, by
-keeping a full administration.
-Got to make some more FreeBSD tests to see if I'm actually solving what
-I think is the problem. :)
+Just hope that this switch is not enforced before that...
+And I'd then expect the WITH_MGR flag to go away?
 
 --WjW
+
