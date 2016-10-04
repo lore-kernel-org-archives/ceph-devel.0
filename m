@@ -1,48 +1,66 @@
-From: Sage Weil <sweil@redhat.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
 Subject: Re: ceph-mgr is in master
-Date: Tue, 4 Oct 2016 13:25:08 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1610041324580.19850@piezo.us.to>
-References: <CALe9h7ebyOdYcy1hjJ1pje28fuVro68o=_q=WscRuNX2dLebjw@mail.gmail.com> <CAJ4mKGb4BLwOs1sqmB=mD-_BUzUDrc0wL4NZ8wotp++kdkE9mQ@mail.gmail.com> <b9e30685-d37d-f019-79cc-dbe5c77b71b8@redhat.com>
- <CAJ4mKGYJptXbrL54FZp=YLsH51STk=F9Fw5ztq32xboX-jvaAQ@mail.gmail.com>
+Date: Tue, 4 Oct 2016 16:42:06 +0200
+Message-ID: <e0edf2d6-55ae-e8e1-9d83-662617c5729c@digiware.nl>
+References: <CALe9h7ebyOdYcy1hjJ1pje28fuVro68o=_q=WscRuNX2dLebjw@mail.gmail.com>
+ <CAJ4mKGb4BLwOs1sqmB=mD-_BUzUDrc0wL4NZ8wotp++kdkE9mQ@mail.gmail.com>
+ <CALe9h7eZO2XCWqmMhM+hiJqSgmLPLqs5yBgyOD-6sRCYDD3jDQ@mail.gmail.com>
+ <bf4c0368-09f1-0f6d-16c3-ed7a321cba51@digiware.nl>
+ <CALe9h7dHVfTJgi-JBMiXtxAO9wLWJ5_N0TiE+hk0eg52DV420g@mail.gmail.com>
+ <19f91716-7a06-ad47-0c9f-f4d1e7ea585b@digiware.nl>
+ <CALe9h7eoX_Nuk0617eBY_5tuFWMw4_5CpvgHWJNVPhKiupKCvw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59394 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([176.74.240.9]:43171 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753565AbcJDNZL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 4 Oct 2016 09:25:11 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 4C92DC05ACA3
-        for <ceph-devel@vger.kernel.org>; Tue,  4 Oct 2016 13:25:11 +0000 (UTC)
-In-Reply-To: <CAJ4mKGYJptXbrL54FZp=YLsH51STk=F9Fw5ztq32xboX-jvaAQ@mail.gmail.com>
+        id S1751711AbcJDOmT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 4 Oct 2016 10:42:19 -0400
+In-Reply-To: <CALe9h7eoX_Nuk0617eBY_5tuFWMw4_5CpvgHWJNVPhKiupKCvw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Dan Mick <dmick@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 3 Oct 2016, Gregory Farnum wrote:
-> On Mon, Oct 3, 2016 at 8:16 PM, Dan Mick <dmick@redhat.com> wrote:
-> > On 10/03/2016 10:45 AM, Gregory Farnum wrote:
-> >
-> >> 3) It uses "ceph tell" syntax. I thought we were moving away from
-> >> top-level "tell" commands and towards making them part of the
-> >> sub-command (eg "ceph osd tell", "ceph mgr tell"); is this a
-> >> deliberate new lease on life for that? Unintended? Something I just
-> >> made up?
-> >
-> > Actually it's the other way around; 'osd tell', for example, says:
-> >
-> > "osd tell" is deprecated; try "tell osd.<id> <command> [options...]"
-> > instead (id can be "*")
+On 4-10-2016 15:15, John Spray wrote:
+> On Tue, Oct 4, 2016 at 2:28 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> On 4-10-2016 14:16, John Spray wrote:
+>>> On Tue, Oct 4, 2016 at 1:03 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>>> On 4-10-2016 08:07, John Spray wrote:
+>>>>> As Dan says, `ceph tell` is the new one, the one that sends commands
+>>>>> directly from the CLI to the named service (not via the mon).
+>>>>> However, this is a bit of a placeholder, as we'll eventually be
+>>>>> switching to some commands (especially PG stats ones) to silently go
+>>>>> to the mgr instead of the mon.  There are various ways of
+>>>>> accomplishing that, the simplest one is to have the CLI fetch both mgr
+>>>>> and mon command descriptions, and preferentially send commands to
+>>>>> matching entries from the mgr.
+>>>>
+>>>> ATM I had to disable building MGR, because Clang/Python/FreeBSD throw a
+>>>> fit when having to compile on of the python files...
+>>>> Something to do with function-signatures not matching.
+>>>> I'll look into it after I've completed most of my other blocking
+>>>> problems. Unless you'd really want to have the compiler errors now, I'll
+>>>> fireup a build with MGR on.
+>>>
+>>> Ah... yeah, I do seem to recall some places the compiler warned about
+>>> (perfectly safe) const char* casts.  I'll look into cleaning that up,
+>>> assuming it's what's making clang unhappy.
+>>
+>> Clang is a lot more picky at times... But usually I get away with a
+>> warning, this time it throws errors.
+>>
 > 
-> o_0. Thanks Dan.
-> 
-> In other news we've also acquired some valgrind errors in the
-> MgrMonitor; not sure how serious they are but it's getting flagged in
-> the tests. http://tracker.ceph.com/issues/17492
+> Can you try this please?
+> https://github.com/ceph/ceph/pull/11307
 
-https://github.com/ceph/ceph/pull/11308
+Seems we are talking about the same errors.
+At least PyObject_CallMethod is what I remember giving the errors.
+
+I'll put this in and give it a spinf for its money...
+
+--WjW
+
 
 
