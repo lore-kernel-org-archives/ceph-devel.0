@@ -1,82 +1,108 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: ceph-mgr is in master
-Date: Tue, 4 Oct 2016 07:07:13 +0100
-Message-ID: <CALe9h7eZO2XCWqmMhM+hiJqSgmLPLqs5yBgyOD-6sRCYDD3jDQ@mail.gmail.com>
-References: <CALe9h7ebyOdYcy1hjJ1pje28fuVro68o=_q=WscRuNX2dLebjw@mail.gmail.com>
- <CAJ4mKGb4BLwOs1sqmB=mD-_BUzUDrc0wL4NZ8wotp++kdkE9mQ@mail.gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: upgrade from v0.94.6 or lower and 'failed to encode map X with
+ expected crc'
+Date: Tue, 4 Oct 2016 15:18:40 +0800
+Message-ID: <CAJE9aONFauhy7v6n9bT11Sga+e0Qgi8hWu=gr-zoxuAq5Yv+cA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f172.google.com ([209.85.216.172]:34721 "EHLO
-        mail-qt0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751582AbcJDGNs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Oct 2016 02:13:48 -0400
-Received: by mail-qt0-f172.google.com with SMTP id 38so89762135qte.1
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Oct 2016 23:13:48 -0700 (PDT)
-In-Reply-To: <CAJ4mKGb4BLwOs1sqmB=mD-_BUzUDrc0wL4NZ8wotp++kdkE9mQ@mail.gmail.com>
+Received: from mail-oi0-f47.google.com ([209.85.218.47]:35562 "EHLO
+        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751975AbcJDHSl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Oct 2016 03:18:41 -0400
+Received: by mail-oi0-f47.google.com with SMTP id d132so24205068oib.2
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Oct 2016 00:18:41 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-users <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Oct 3, 2016 at 6:45 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> On Fri, Sep 30, 2016 at 4:24 AM, John Spray <jspray@redhat.com> wrote:
->> Hi all,
->>
->> A big thank you to everyone who helped with the reviews, packaging and
->> design discussions.  This will be included in forthcoming Kraken
->> (11.2.x) release.
->>
->> There is a new section in the documentation:
->> http://docs.ceph.com/docs/master/mgr/
->>
->> There is a new sub-project on tracker.ceph.com, populated with some
->> issues by me:
->> http://tracker.ceph.com/projects/mgr/issues
->>
->> Pull requests are of course welcome.
->>
->> At some point before Kraken I'll try to remember to send out a message
->> to ceph-users to give people a heads up about this mysterious new
->> daemon that's appearing on their systems.
->
-> Awesome, this is going to be great. :) A few questions just from going
-> over the admin guide:
->
-> 1) It says to run a ceph-mgr on each monitor host. Does this mean
-> admins need to do this manually when setting up a cluster?
+hi ceph users,
 
-The systemd units will automatically set up a mgr instance in Kraken.
-I haven't personally tested that though.
+If user upgrades the cluster from a prior release to v0.94.7 or up by
+following the steps:
 
-> 2) I gather that the way HA works is that traffic just gets directed
-> to whichever one the monitors pick. It seems like we'd want that to
-> migrate to the same host as the leader monitor when possible; is that
-> possible? Is it planned? Is it actually undesirable because it
-> increases CPU usage and network savings isn't worth that?
+1. upgrade the monitors first,
+2. and then the OSDs.
 
-The obvious advantage would be to avoid a network hop by running on
-the same host as the leader.  However, unless it's always going to be
-the case, that extra efficiency could give a false sense of security
-if things are fast enough in that case, but become too slow when the
-service runs somewhere else.  It would be interesting to try.
+It is expected that the cluster log will be flooded with messages like:
 
-> 3) It uses "ceph tell" syntax. I thought we were moving away from
-> top-level "tell" commands and towards making them part of the
-> sub-command (eg "ceph osd tell", "ceph mgr tell"); is this a
-> deliberate new lease on life for that? Unintended? Something I just
-> made up?
+2016-07-12 08:42:42.1234567 osd.1234 [WRN] failed to encode map e4321
+with expected crc
 
-As Dan says, `ceph tell` is the new one, the one that sends commands
-directly from the CLI to the named service (not via the mon).
-However, this is a bit of a placeholder, as we'll eventually be
-switching to some commands (especially PG stats ones) to silently go
-to the mgr instead of the mon.  There are various ways of
-accomplishing that, the simplest one is to have the CLI fetch both mgr
-and mon command descriptions, and preferentially send commands to
-matching entries from the mgr.
+Because we changed[1] the encoding of OSDMap in v0.94.7. And the
+monitors start sending the incremental OSDMaps with the new encoding
+to the OSDs once the quorum members are all at the new version. But
+the OSDs at the old version still re-encode the osdmaps with the old
+encoding, then compare the resulting CRC with the one carried by the
+received incremental maps. And, they don't match! So the OSDs will ask
+the monitors for the full map in this case.
 
-John
+For a large Ceph cluster, there are several consequences of the CRC mismatch:
+1. monitor being flooded by this clog
+2. monitor burdened by the sending the fullmaps.
+3. the network saturated by the osdmap messages carrying the requested fullmaps
+3. slow requests observed if the updated osdmaps are delayed by the
+saturated network.
 
->
-> -Greg
+as reported[2,3,4,5] by our users.
+
+The interim solution for those who are stuck in the middle of an upgrade is:
+
+1. revert all the monitors back to the previous version,
+2. upgrade the OSDs to the version you want to upgrade.
+3. upgrade the monitors to the version you want to upgrade.
+
+And for users who plan to upgrade from a version prior to v0.94.7 to
+v0.94.7 or up, please
+1. upgrade the OSDs to the version you want to upgrade
+2. upgrade the monitors to the version you want to upgrade.
+
+For users preferring upgrading from a version prior to v0.94.7 to
+jewel, it is suggested to upgrade to the latest hammer first by
+following the steps above, if the scale of your cluster is relatively
+large.
+
+And in the short term, we are preparing a fix[6] for hammer, so the
+monitors will send osdmap encoded with lower version encoding.
+
+In the long term, we won't use the new release feature bit in the
+cluster unless allowed explicitly[7].
+
+
+@ceph developers,
+
+so if we want to bump up the encoding version of OSDMap or its
+(sub)fields, I think it would be desirable to match the encoder with
+the new major release feature bit. For instance, if a new field named
+"foo" is added to `pg_pool_t` in kraken, and `map<int64_t,pg_pool_t>
+pools` is in turn a field of `OSDMap`, then we need to be careful when
+updating `pg_pool_t::encode()`, like
+
+void pg_pool_t::encode(bufferlist& bl, uint64_t features) const {
+  // ...
+  if ((features & CEPH_FEATURE_SERVER_KRAKEN) == 0) {
+    // encode in the jewel way
+    return;
+  }
+  // encode in the kraken way
+}
+
+Because,
+
+- it would be difficult for the monitor to send understandable osdmaps
+for all osds.
+- we disable/enable the new encoder by excluding/including the major
+release feature bit in [7].
+
+--
+[1] sha1 039240418060c9a49298dacc0478772334526dce
+[2] https://www.mail-archive.com/ceph-users@lists.ceph.com/msg30783.html
+[3] http://www.spinics.net/lists/ceph-users/msg28296.html
+[4] http://ceph-users.ceph.narkive.com/rPGrATpE/v0-94-7-hammer-released
+[5] http://lists.ceph.com/pipermail/ceph-users-ceph.com/2016-September/013189.html
+[6] http://tracker.ceph.com/issues/17386
+[7] https://github.com/ceph/ceph/pull/11284
+
+-- 
+Regards
+Kefu Chai
