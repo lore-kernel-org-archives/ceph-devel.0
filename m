@@ -1,47 +1,37 @@
-From: Credit Suisse Bank England <werberthfurtado@detran.ma.gov.br>
-Subject: Credit Suisse Bank England
-Date: Mon, 3 Oct 2016 04:19:47 -0300 (BRT)
-Message-ID: <1220663051.159140.1475479187825.JavaMail.root@detran.ma.gov.br>
-Reply-To: Chris Williams <chriswilliams-creditsuisse@mail.com>
+From: Dan Mick <dmick@redhat.com>
+Subject: Re: ceph-mgr is in master
+Date: Mon, 3 Oct 2016 20:16:56 -0700
+Message-ID: <b9e30685-d37d-f019-79cc-dbe5c77b71b8@redhat.com>
+References: <CALe9h7ebyOdYcy1hjJ1pje28fuVro68o=_q=WscRuNX2dLebjw@mail.gmail.com>
+ <CAJ4mKGb4BLwOs1sqmB=mD-_BUzUDrc0wL4NZ8wotp++kdkE9mQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail3.seati.ma.gov.br ([201.18.153.129]:58321 "EHLO
-        mail3.seati.ma.gov.br" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751657AbcJCTDh (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Oct 2016 15:03:37 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:34806 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750890AbcJDDQ5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 3 Oct 2016 23:16:57 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 7952D7EAB7
+        for <ceph-devel@vger.kernel.org>; Tue,  4 Oct 2016 03:16:56 +0000 (UTC)
+In-Reply-To: <CAJ4mKGb4BLwOs1sqmB=mD-_BUzUDrc0wL4NZ8wotp++kdkE9mQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Guten Tag, wie geht es Ihnen heute? Ich habe Ihre E-Mail-Kontakt aus Ihrem Land Business Directory und beschlossen, mit Ihnen in Verbindung zu diesem Business-Vorschlag. Ich bin Herr Chris Williams der Investment Banking Abteilung der Credit Suisse Bank One Cabot Square, London E14 4QJ, Großbritannien. Ich bin Kontaktaufnahme mit Ihnen in Bezug auf ein Geschäft Vorschlag, die von einer immensen Vorteil für uns beide sein wird.
+On 10/03/2016 10:45 AM, Gregory Farnum wrote:
 
-In meiner Abteilung, entdeckte ich eine verlassene Summe von £ 17,5 Mio. GBP (Siebzehn Millionen fünfhunderttausend britische Pfund Sterling) in einem Konto, das zu einem unserer ausländischen Kunden verstorbenen Herrn Brodskij Nikolai, ein russischer Geschäftsmann, der ein Opfer war, gehört der Malaysia Airlines Flight 370 (MH370 / MAS370), die im Süden der indische Ozean auf 8. März 2014 auf dem Weg von Kuala Lumpur international Airport abgestürzt zu Beijing Capital International Airport zu töten alle an Bord.
+> 3) It uses "ceph tell" syntax. I thought we were moving away from
+> top-level "tell" commands and towards making them part of the
+> sub-command (eg "ceph osd tell", "ceph mgr tell"); is this a
+> deliberate new lease on life for that? Unintended? Something I just
+> made up?
 
-Informieren Sie sich über den untenstehenden Link für die Passagierliste:
+Actually it's the other way around; 'osd tell', for example, says:
 
-
-http://online.wsj.com/news/articles/SB10001424052702303369904579427230127866184
-
-MR Brodskij Nikolai Nummer 7 auf der Liste, Seit seinem Tod unserer Bank hat für die nächsten Angehörigen zu kommen für die Behauptung seiner Gelder und Güter schätzten die Summe von £ 17,5 Mio. GBP, aber niemand hat so, ich persönlich getan gewartet , waren nicht erfolgreich bei der Suche nach einer seiner Verwandten. Ich suche Ihre Zustimmung an Sie an die Bank, wie die nächsten Angehörigen des Verstorbenen zu präsentieren, so dass die Erlöse aus diesem Konto bei £ 17,5 Mio. GBP an Sie gezahlt werden bewertet.
-
-
-Der Deal wird in diesem Verhältnis aufgeteilt: 55% für mich und 45% zu Ihnen. Ich habe in meinem Besitz alle notwendigen und wichtigen Dokumente, die in diesem Geschäft verwendet werden kann. Ich brauche Ihre ehrliche Zusammenarbeit, Verschwiegenheit und Vertrauen, damit wir sehen diese Verhandlung durch. Ich garantiere Ihnen 100% Erfolg in diesem Geschäft, wenden Sie sich bitte sicher sein, dass Sie das Angebot unter einer legitimen Anordnung, die Sie aus der Verletzung des Gesetzes sowohl hier als auch in Großbritannien und in Ihrem Land zu schützen wird ausgeführt.
-
-Wenn Sie in der Lage, dem Umgang mit diesem Angebot sind, bitte zurück zu mir mit folgenden Angaben, damit wir fortfahren:
-
-1. Ihr vollständiger Name:
-2. Telefonnummer:
-3. Kontakt-Adresse:
-4. Alter:
-5. Geschlecht:
-6. Beruf:
-7. Ihre Nationalität:
-
-
-Nachdem durch eine methodische Suche gegangen, entschied ich mich, Sie zu kontaktieren hoffen, dass Sie diesen Vorschlag interessant, Bitte auf Ihrer Bestätigung dieser Nachricht und geben Sie Ihr Interesse, ich will dich mit mehr Informationen liefern zu finden.
-
-Ihre Zustimmung zu dieser E-Mail und Business-Vorschlag wird sehr geschätzt werden.
-
-Freundliche Grüße,
-Chris Williams
+"osd tell" is deprecated; try "tell osd.<id> <command> [options...]"
+instead (id can be "*")
