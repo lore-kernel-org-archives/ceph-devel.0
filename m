@@ -1,66 +1,81 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
+From: Tim Serong <tserong@suse.com>
 Subject: Re: ceph-mgr is in master
-Date: Tue, 4 Oct 2016 16:42:06 +0200
-Message-ID: <e0edf2d6-55ae-e8e1-9d83-662617c5729c@digiware.nl>
+Date: Tue, 4 Oct 2016 17:29:44 +0200
+Message-ID: <73f6cf9e-59f3-44d7-d31f-a1cd79f873d6@suse.com>
 References: <CALe9h7ebyOdYcy1hjJ1pje28fuVro68o=_q=WscRuNX2dLebjw@mail.gmail.com>
  <CAJ4mKGb4BLwOs1sqmB=mD-_BUzUDrc0wL4NZ8wotp++kdkE9mQ@mail.gmail.com>
  <CALe9h7eZO2XCWqmMhM+hiJqSgmLPLqs5yBgyOD-6sRCYDD3jDQ@mail.gmail.com>
- <bf4c0368-09f1-0f6d-16c3-ed7a321cba51@digiware.nl>
- <CALe9h7dHVfTJgi-JBMiXtxAO9wLWJ5_N0TiE+hk0eg52DV420g@mail.gmail.com>
- <19f91716-7a06-ad47-0c9f-f4d1e7ea585b@digiware.nl>
- <CALe9h7eoX_Nuk0617eBY_5tuFWMw4_5CpvgHWJNVPhKiupKCvw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:43171 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751711AbcJDOmT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 4 Oct 2016 10:42:19 -0400
-In-Reply-To: <CALe9h7eoX_Nuk0617eBY_5tuFWMw4_5CpvgHWJNVPhKiupKCvw@mail.gmail.com>
+Received: from prv3-mh.provo.novell.com ([137.65.250.26]:43372 "EHLO
+        prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752046AbcJDP3w (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Tue, 4 Oct 2016 11:29:52 -0400
+In-Reply-To: <CALe9h7eZO2XCWqmMhM+hiJqSgmLPLqs5yBgyOD-6sRCYDD3jDQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 4-10-2016 15:15, John Spray wrote:
-> On Tue, Oct 4, 2016 at 2:28 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> On 4-10-2016 14:16, John Spray wrote:
->>> On Tue, Oct 4, 2016 at 1:03 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>> On 4-10-2016 08:07, John Spray wrote:
->>>>> As Dan says, `ceph tell` is the new one, the one that sends commands
->>>>> directly from the CLI to the named service (not via the mon).
->>>>> However, this is a bit of a placeholder, as we'll eventually be
->>>>> switching to some commands (especially PG stats ones) to silently go
->>>>> to the mgr instead of the mon.  There are various ways of
->>>>> accomplishing that, the simplest one is to have the CLI fetch both mgr
->>>>> and mon command descriptions, and preferentially send commands to
->>>>> matching entries from the mgr.
->>>>
->>>> ATM I had to disable building MGR, because Clang/Python/FreeBSD throw a
->>>> fit when having to compile on of the python files...
->>>> Something to do with function-signatures not matching.
->>>> I'll look into it after I've completed most of my other blocking
->>>> problems. Unless you'd really want to have the compiler errors now, I'll
->>>> fireup a build with MGR on.
+On 10/04/2016 08:07 AM, John Spray wrote:
+> On Mon, Oct 3, 2016 at 6:45 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+>> On Fri, Sep 30, 2016 at 4:24 AM, John Spray <jspray@redhat.com> wrote:
+>>> Hi all,
 >>>
->>> Ah... yeah, I do seem to recall some places the compiler warned about
->>> (perfectly safe) const char* casts.  I'll look into cleaning that up,
->>> assuming it's what's making clang unhappy.
+>>> A big thank you to everyone who helped with the reviews, packaging and
+>>> design discussions.  This will be included in forthcoming Kraken
+>>> (11.2.x) release.
+>>>
+>>> There is a new section in the documentation:
+>>> http://docs.ceph.com/docs/master/mgr/
+>>>
+>>> There is a new sub-project on tracker.ceph.com, populated with some
+>>> issues by me:
+>>> http://tracker.ceph.com/projects/mgr/issues
+>>>
+>>> Pull requests are of course welcome.
+>>>
+>>> At some point before Kraken I'll try to remember to send out a message
+>>> to ceph-users to give people a heads up about this mysterious new
+>>> daemon that's appearing on their systems.
 >>
->> Clang is a lot more picky at times... But usually I get away with a
->> warning, this time it throws errors.
+>> Awesome, this is going to be great. :) A few questions just from going
+>> over the admin guide:
 >>
+>> 1) It says to run a ceph-mgr on each monitor host. Does this mean
+>> admins need to do this manually when setting up a cluster?
 > 
-> Can you try this please?
-> https://github.com/ceph/ceph/pull/11307
+> The systemd units will automatically set up a mgr instance in Kraken.
+> I haven't personally tested that though.
 
-Seems we are talking about the same errors.
-At least PyObject_CallMethod is what I remember giving the errors.
+If you want a little more detail:
 
-I'll put this in and give it a spinf for its money...
+https://github.com/ceph/ceph/commit/61d7793 added
+Wants=ceph-mgr@%i.service to ceph-mon@.service, so when the mon starts,
+it will try to start mgr with the same instance ID, but because it's
+"Wants" (not "Requires"), if mgr for some reason fails to start, the mon
+will still run.
 
---WjW
+Additionally, ceph-mgr@.service will autogenerate a key for mgr if you
+didn't already create one manually (see
+https://github.com/ceph/ceph/commit/082199f).
 
+This seemed the safest way to get the mgr daemon *running* automatically
+with zero setup effort on the part of the user.
 
+One kink ATM -- ceph-mgr will run, but if you want to *use* the included
+REST API module, you additionally need to `pip2 install django==1.8
+python-dateutil gevent djangorestframework`, because that module has
+those dependencies.
 
+Regards,
+
+Tim
+-- 
+Tim Serong
+Senior Clustering Engineer
+SUSE
+tserong@suse.com
