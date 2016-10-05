@@ -1,47 +1,58 @@
-From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph + VMWare
-Date: Wed, 5 Oct 2016 14:32:33 -0400
-Message-ID: <CAAZbbf1HGbZVbB1m5vPd+afWb0pZz4haQhua4FcQa-31FPg=0g@mail.gmail.com>
+From: Zack Cerza <zack@redhat.com>
+Subject: teuthology support for the new build system
+Date: Wed, 5 Oct 2016 14:14:05 -0600
+Message-ID: <CACk6Fjm9x=j+QwKfcOqivEvk0xocvsVHHB6ZBUd_AfoSsCCweg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:33879 "EHLO
+        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753244AbcJEUOH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Oct 2016 16:14:07 -0400
+Received: by mail-lf0-f47.google.com with SMTP id b81so103511040lfe.1
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Oct 2016 13:14:06 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Development, Ceph" <ceph-devel@vger.kernel.org>, sepia@ceph.com
 
-Hey guys,
+Hi all,
 
-Starting to buckle down a bit in looking at how we can better set up
-Ceph for VMWare integration, but I need a little info/help from you
-folks.
+You've probably heard that we've been working on replacing the
+gitbuilders with a new build system. I recently did some work [0] in
+teuthology to support that new system, and that work got merged
+yesterday. Here's an overview of its current state:
 
-If you currently are using Ceph+VMWare, or are exploring the option,
-I'd like some simple info from you:
+The way it works is that it talks to Shaman [1] to locate the package
+repository to use. It is not enabled by default as it isn't yet able
+to cover all gitbuilder use cases. It can be enabled by setting
+"use_shaman: true" in either your teuthology.yaml or your job's yaml.
+It can be set for an entire suite-run by doing something like:
 
-1) Company
-2) Current deployment size
-3) Expected deployment growth
-4) Integration method (or desired method) ex: iscsi, native, etc
+$ echo "use_shaman: true" > ./shaman.yaml
+$ teuthology-suite -v -c jewel -s upgrade/jewel-x -m vps -k distro
+$PWD/shaman.yaml --dry-run
 
-Just casting the net so we know who is interested and might want to
-help us shape and/or test things in the future if we can make it
-better. Thanks.
+Of course, later on when we can fully replace gitbuilders this
+behavior will be the default. At some point after that we'll be
+decommissioning the gitbuilders.
 
+Please note that using it in the following scenarios will *not* do
+what you want:
 
--- 
+* Any job that requires one of our testing kernels, as the new system
+isn't building our kernels yet
+* Any job that uses the install task for samba, for the same reason
+* Any job that uses ceph-deploy, as ceph-deploy isn't using the new system yet
 
-Best Regards,
+Please try to give this new system some exercise. It's been tested
+well but of course we can't necessarily anticipate everything.
+Teuthology bugs, as always, should go here [2] and bugs related to the
+new build system should go here [3].
 
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+Thanks for reading!
+Zack
+
+[0] https://github.com/ceph/teuthology/pull/951
+[1] https://github.com/ceph/shaman/
+[2] http://tracker.ceph.com/projects/teuthology/issues/new
+[3] http://tracker.ceph.com/projects/ci/issues/new
