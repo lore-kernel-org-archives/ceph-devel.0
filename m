@@ -1,36 +1,77 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 10/05/2016 perf meeting canceled due to CDM
-Date: Wed, 5 Oct 2016 09:52:12 -0500
-Message-ID: <b18bf917-daef-b8b8-e743-0f9c3f174c1e@redhat.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: ceph-mgr is in master
+Date: Wed, 5 Oct 2016 18:25:30 +0200
+Message-ID: <af9675cf-521c-e852-ae5a-31f5c7106b4d@digiware.nl>
+References: <CALe9h7ebyOdYcy1hjJ1pje28fuVro68o=_q=WscRuNX2dLebjw@mail.gmail.com>
+ <CAJ4mKGb4BLwOs1sqmB=mD-_BUzUDrc0wL4NZ8wotp++kdkE9mQ@mail.gmail.com>
+ <CALe9h7eZO2XCWqmMhM+hiJqSgmLPLqs5yBgyOD-6sRCYDD3jDQ@mail.gmail.com>
+ <bf4c0368-09f1-0f6d-16c3-ed7a321cba51@digiware.nl>
+ <CALe9h7dHVfTJgi-JBMiXtxAO9wLWJ5_N0TiE+hk0eg52DV420g@mail.gmail.com>
+ <19f91716-7a06-ad47-0c9f-f4d1e7ea585b@digiware.nl>
+ <CALe9h7eoX_Nuk0617eBY_5tuFWMw4_5CpvgHWJNVPhKiupKCvw@mail.gmail.com>
+ <e0edf2d6-55ae-e8e1-9d83-662617c5729c@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54868 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([176.74.240.9]:23397 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754335AbcJEOwP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 5 Oct 2016 10:52:15 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 07FBAC008AE4
-        for <ceph-devel@vger.kernel.org>; Wed,  5 Oct 2016 14:52:15 +0000 (UTC)
-Received: from [10.3.112.10] (ovpn-112-10.phx2.redhat.com [10.3.112.10])
-        by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u95EqDlk004592
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Wed, 5 Oct 2016 10:52:14 -0400
+        id S1751968AbcJEQ0d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 5 Oct 2016 12:26:33 -0400
+In-Reply-To: <e0edf2d6-55ae-e8e1-9d83-662617c5729c@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Guys,
+On 4-10-2016 16:42, Willem Jan Withagen wrote:
+> On 4-10-2016 15:15, John Spray wrote:
+>> On Tue, Oct 4, 2016 at 2:28 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>> On 4-10-2016 14:16, John Spray wrote:
+>>>> On Tue, Oct 4, 2016 at 1:03 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>>>> On 4-10-2016 08:07, John Spray wrote:
+>>>>>> As Dan says, `ceph tell` is the new one, the one that sends commands
+>>>>>> directly from the CLI to the named service (not via the mon).
+>>>>>> However, this is a bit of a placeholder, as we'll eventually be
+>>>>>> switching to some commands (especially PG stats ones) to silently go
+>>>>>> to the mgr instead of the mon.  There are various ways of
+>>>>>> accomplishing that, the simplest one is to have the CLI fetch both mgr
+>>>>>> and mon command descriptions, and preferentially send commands to
+>>>>>> matching entries from the mgr.
+>>>>>
+>>>>> ATM I had to disable building MGR, because Clang/Python/FreeBSD throw a
+>>>>> fit when having to compile on of the python files...
+>>>>> Something to do with function-signatures not matching.
+>>>>> I'll look into it after I've completed most of my other blocking
+>>>>> problems. Unless you'd really want to have the compiler errors now, I'll
+>>>>> fireup a build with MGR on.
+>>>>
+>>>> Ah... yeah, I do seem to recall some places the compiler warned about
+>>>> (perfectly safe) const char* casts.  I'll look into cleaning that up,
+>>>> assuming it's what's making clang unhappy.
+>>>
+>>> Clang is a lot more picky at times... But usually I get away with a
+>>> warning, this time it throws errors.
+>>>
+>>
+>> Can you try this please?
+>> https://github.com/ceph/ceph/pull/11307
+> 
+> Seems we are talking about the same errors.
+> At least PyObject_CallMethod is what I remember giving the errors.
+> 
+> I'll put this in and give it a spinf for its money...
 
-Sorry for not sending this out earlier, I forgot CDM was today so we're 
-going to cancel the perf meeting.  If anyone is interested in this 
-week's update there are notes written up on the etherpad:
+This is another Clang warning, I guess...
+But as I read it, it sounds rather true...
 
-http://pad.ceph.com/p/performance_weekly
+/usr/srcs/Ceph/work/ceph/src/messages/MMgrReport.h:39:17: warning:
+comparison of constant 256 with expression of type 'const enum
+perfcounter_type_d' is always true
+      [-Wtautological-constant-out-of-range-compare]
+    assert(type < 256);
+           ~~~~ ^ ~~~
+atleast if enum perfcounter_type_d is a byte.
 
-See you all next week!
+--WjW
 
-Mark
