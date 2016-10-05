@@ -1,96 +1,60 @@
-From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
-Subject: Re: CRUSH algorithm and its debug method
-Date: Wed, 5 Oct 2016 15:55:23 +0800
-Message-ID: <CABF_e-GQQ_LJDDmQnLSbRLFxhd7ahDRAr7UvfGFx2B+5vnvk8A@mail.gmail.com>
-References: <CALZt5jytLeocqK7TY5MhLbimgiriL8Tr5WQneLSaPK32KP88vw@mail.gmail.com>
- <alpine.DEB.2.11.1610031319090.19850@piezo.us.to>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph Developer Monthly
+Date: Wed, 5 Oct 2016 07:48:48 -0400
+Message-ID: <CAAZbbf2R9JbFn3EAYgu522jiHy=40rz_c+MN+S8hj5Kd22BsmQ@mail.gmail.com>
+References: <CAAZbbf1eYAHTnP2Db8+ZHPhKbFWrgFG+EQUCF4fAtynxXUwKBA@mail.gmail.com>
+	<CAAZbbf1FL4kfYvEND7Kc2_262zYw2hm+zHRK8YE=k5eGjmg=rA@mail.gmail.com>
 Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============1724753178=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAAZbbf1FL4kfYvEND7Kc2_262zYw2hm+zHRK8YE=k5eGjmg=rA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+--===============1724753178==
+Content-Type: multipart/alternative; boundary=001a11488bb09fe3d6053e1cc204
+
+--001a11488bb09fe3d6053e1cc204
 Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f175.google.com ([209.85.161.175]:36260 "EHLO
-        mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751393AbcJEHzZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Oct 2016 03:55:25 -0400
-Received: by mail-yw0-f175.google.com with SMTP id u124so59868553ywg.3
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Oct 2016 00:55:24 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1610031319090.19850@piezo.us.to>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ning Yao <zay11022@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-2016-10-03 21:22 GMT+08:00 Sage Weil <sage@newdream.net>:
-> Hi!
->
-> On Sat, 1 Oct 2016, Ning Yao wrote:
->> Hi, Sage
->>
->> I find that several issues related to current CRUSH algorithm as below:
->>
->> 1. It is possible to select out the same collision and retry bucket in
->> a crush_choose_firstn() loop. (e.g.  when we set reweight to 0 or mark
->> osd out, it would be definitely rejected if it is selected. However,
->> when the second chance to select out another one based on the
->> different r', it is still possible to select out the same osd
->> previously rejected, right? And until a different one is selected
->> after several retries.).  I think we can record those rejected or
->> collision osds in the same loop so that the process can be converged
->> much faster?
->
-> It's sitll possible to pick the same thing with a different r'.
-> That's why the max retries values has to be reasonably high.  I'm not sure
-> how you would avoid doing the full calculation, though... can you be
-> more specific?
->
+Hey cephers,
 
-Hi all,
-I also have the same question and I already do a simple version for
-skipping the item that is already selected. (now ONLY for straw(2)
-algorithm)
+Just another reminder that today at 12:30 EDT we will be holding this
+month's CDM.
 
-I wanna to know why we don't skip the selected item?
-I thought that behavior would try to avoid choose the not suitable
-item in specific scenario (like the weight of 2 item with huge gap)
+Http://wiki.ceph.com/Planning
 
-thanks!
+Please join us if you are doing active work on Ceph. Thanks!
 
+--001a11488bb09fe3d6053e1cc204
+Content-Type: text/html; charset=UTF-8
 
->> 2. Currently, the reweight params in crushmap is memoryless (e.g we
->> balance our data by reducing reweight, which will be lost after this
->> osd DOWN and OUT automatically. And we mark its IN again because
->> currently ceph osd in directly marks the reweight to 1.0 and out marks
->> the reweight to 0.0).  It is quite awkward when we use ceph osd
->> reweight-by-utilization to make data balance (If some osds down and
->> out, our previous effort is totally lost).   So I think marking osd
->> "in"  does not simply modify reweight to "1.0". Actually, we can
->> iteration the previous osdmap and find out the value of the reweight
->> or records it anywhere we can retrieve this value again?
->
-> The old value is stored here
->
-> https://github.com/ceph/ceph/blob/master/src/osd/OSDMap.h#L89
->
-> and restored when the OSD is marked back up, although IIRC there is a
-> config option that controls when the old value is stored (it might only
-> happen when the osd is marked out automatically, not when it is done
-> manually?).  That behavior could be changed, though.
->
->> 3. Currently, there is no debug option in the mapping progress in
->> Mapper.c. dprintk is default disabled so that it will be hard to dig
->> into the algorithm if something unexpected result happens. I think we
->> can introduce the debug options and output the debug information when
->> we use "ceph osd map xxx xxx" so that it is much more easier to find
->> the shortness in current mapping process?
->
-> Yeah, it's hard to debug.  I usually uncomment the dprintk define and
-> rebuild osdmaptool, which has a --test-map-pg option so that I can run
-> a specific problematic mapping.  We could do something a bit more clever
-> as long as it is a simple conditional--we don't want to slow down the
-> mapping code as it is performance sensitive.
->
-> Thanks!
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+<p dir="ltr">Hey cephers,</p>
+<p dir="ltr">Just another reminder that today at 12:30 EDT we will be holding this month&#39;s CDM.</p>
+<p dir="ltr"><a href="Http://wiki.ceph.com/Planning">Http://wiki.ceph.com/Planning</a></p>
+<p dir="ltr">Please join us if you are doing active work on Ceph. Thanks!<br>
+</p>
+
+--001a11488bb09fe3d6053e1cc204--
+
+--===============1724753178==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1724753178==--
