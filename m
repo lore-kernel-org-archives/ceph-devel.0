@@ -1,135 +1,76 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: CRUSH algorithm and its debug method
-Date: Thu, 6 Oct 2016 13:27:29 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1610061325150.19850@piezo.us.to>
-References: <CALZt5jytLeocqK7TY5MhLbimgiriL8Tr5WQneLSaPK32KP88vw@mail.gmail.com> <alpine.DEB.2.11.1610031319090.19850@piezo.us.to> <CALZt5jxRt7KXF2_jJs5bMo0jyxhAJvEhO8tzQAedsfhJ-eWY6w@mail.gmail.com>
+From: Alex Gorbachev <ag@iss-integration.com>
+Subject: Re: [ceph-users] Ceph + VMWare
+Date: Thu, 6 Oct 2016 10:01:39 -0400
+Message-ID: <CADb9453mfXcgxMuOMvbz12XDB02bbzuaV-Jtoiqd04n7XuSzJg@mail.gmail.com>
+References: <CAAZbbf1HGbZVbB1m5vPd+afWb0pZz4haQhua4FcQa-31FPg=0g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55047 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752636AbcJFN1d (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Oct 2016 09:27:33 -0400
-In-Reply-To: <CALZt5jxRt7KXF2_jJs5bMo0jyxhAJvEhO8tzQAedsfhJ-eWY6w@mail.gmail.com>
+Received: from mail-ua0-f179.google.com ([209.85.217.179]:33388 "EHLO
+        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751308AbcJFOBl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Oct 2016 10:01:41 -0400
+Received: by mail-ua0-f179.google.com with SMTP id p102so18357933uap.0
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Oct 2016 07:01:40 -0700 (PDT)
+In-Reply-To: <CAAZbbf1HGbZVbB1m5vPd+afWb0pZz4haQhua4FcQa-31FPg=0g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ning Yao <zay11022@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Patrick McGarry <pmcgarry@redhat.com>
+Cc: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Thu, 6 Oct 2016, Ning Yao wrote:
-> Hi,
-> 
-> 2016-10-03 21:22 GMT+08:00 Sage Weil <sage@newdream.net>:
-> > Hi!
-> >
-> > On Sat, 1 Oct 2016, Ning Yao wrote:
-> >> Hi, Sage
-> >>
-> >> I find that several issues related to current CRUSH algorithm as below:
-> >>
-> >> 1. It is possible to select out the same collision and retry bucket in
-> >> a crush_choose_firstn() loop. (e.g.  when we set reweight to 0 or mark
-> >> osd out, it would be definitely rejected if it is selected. However,
-> >> when the second chance to select out another one based on the
-> >> different r', it is still possible to select out the same osd
-> >> previously rejected, right? And until a different one is selected
-> >> after several retries.).  I think we can record those rejected or
-> >> collision osds in the same loop so that the process can be converged
-> >> much faster?
-> >
-> > It's sitll possible to pick the same thing with a different r'.
-> > That's why the max retries values has to be reasonably high.  I'm not sure
-> > how you would avoid doing the full calculation, though... can you be
-> > more specific?
-> I have two ideas to do that:
-> 
-> 1) the simplest idea is allocate a bool array in crush_choose_firstn()
-> whose size is crush_bucket->size. And then pass the array pointer into
-> crush_bucket_choose(). What we shoud do is:
->     i) mark those already selected, collision or rejected items as true
->     ii) when determine (hight and high_draw in bucket_straw_choose or
-> bucket_straw2_choose), we can skip those items already marked TRUE.
->     But the drawback is that  we always need to allocate an dynamic
-> array within each iteration, And memory allocation in heap is an
-> expensive operation.
-> 
-> 2) So the second idea is to use a uint64_t s_mask (said selected_mask
-> to indicate those items already been selected). What we should do is:
->     i) init uint64_t s_mask = 0; in crush_choose_firstn()
->     ii) pass value by reference into  bucket_straw_choose or
-> bucket_straw2_choose and mark the corresponding bit as one if item is
-> selected, collision or rejected.  s_mask  = s_mask | (1ul << high)
->     iii) do not consider those whose bit (s_mask & (1ul << high)) is
-> marked as one.
->     But here is an explicit limitation, the number of items in the
-> bucket should be smaller than sizeof(int64_t). So we need to run the
-> previous strategy if crush_bucket->size > 64.
-> 
-> Furthermore, the strategy is just suitable for straw algorithm, so we
-> need to remain the strategy for tree, list and uniform algorithm.
-> 
-> Any other better ideas? @Wei-Chung Cheng
+On Wed, Oct 5, 2016 at 2:32 PM, Patrick McGarry <pmcgarry@redhat.com> wrote:
+> Hey guys,
+>
+> Starting to buckle down a bit in looking at how we can better set up
+> Ceph for VMWare integration, but I need a little info/help from you
+> folks.
+>
+> If you currently are using Ceph+VMWare, or are exploring the option,
+> I'd like some simple info from you:
+>
+> 1) Company
+> 2) Current deployment size
+> 3) Expected deployment growth
+> 4) Integration method (or desired method) ex: iscsi, native, etc
+>
+> Just casting the net so we know who is interested and might want to
+> help us shape and/or test things in the future if we can make it
+> better. Thanks.
+>
 
-This PR is doing something very similar in order to solve what we've been 
-calling the 'multi-pick anomaly,' which tends to allocate more data to 
-very low-weighted devices.
+Hi Patrick,
 
-	https://github.com/ceph/ceph/pull/10218
+We have Storcium certified with VMWare, and we use it ourselves:
 
-The effect is only noticeable with very small (relative) weights, but it 
-comes up in practice on large clusters semi-frequently.
+Ceph Hammer latest
 
-sage
+SCST redundant Pacemaker based delivery front ends - our agents are
+published on github
 
+EnhanceIO for read caching at delivery layer
 
+NFS v3, and iSCSI and FC delivery
 
+Our deployment size we use ourselves is 700 TB raw.
 
-> 
-> 
-> >> 2. Currently, the reweight params in crushmap is memoryless (e.g we
-> >> balance our data by reducing reweight, which will be lost after this
-> >> osd DOWN and OUT automatically. And we mark its IN again because
-> >> currently ceph osd in directly marks the reweight to 1.0 and out marks
-> >> the reweight to 0.0).  It is quite awkward when we use ceph osd
-> >> reweight-by-utilization to make data balance (If some osds down and
-> >> out, our previous effort is totally lost).   So I think marking osd
-> >> "in"  does not simply modify reweight to "1.0". Actually, we can
-> >> iteration the previous osdmap and find out the value of the reweight
-> >> or records it anywhere we can retrieve this value again?
-> >
-> > The old value is stored here
-> >
-> > https://github.com/ceph/ceph/blob/master/src/osd/OSDMap.h#L89
-> >
-> > and restored when the OSD is marked back up, although IIRC there is a
-> > config option that controls when the old value is stored (it might only
-> > happen when the osd is marked out automatically, not when it is done
-> > manually?).  That behavior could be changed, though.
-> Thanks, fix in PR #11293 is what we expect.
-> 
-> >> 3. Currently, there is no debug option in the mapping progress in
-> >> Mapper.c. dprintk is default disabled so that it will be hard to dig
-> >> into the algorithm if something unexpected result happens. I think we
-> >> can introduce the debug options and output the debug information when
-> >> we use "ceph osd map xxx xxx" so that it is much more easier to find
-> >> the shortness in current mapping process?
-> >
-> > Yeah, it's hard to debug.  I usually uncomment the dprintk define and
-> > rebuild osdmaptool, which has a --test-map-pg option so that I can run
-> > a specific problematic mapping.  We could do something a bit more clever
-> > as long as it is a simple conditional--we don't want to slow down the
-> > mapping code as it is performance sensitive.
-> 
-> Yeah, I think it is enough to print out the debug information when we
-> run "ceph osd map data object_1". So we can pass ostream* into the
-> function, gathering the information. Normally, we can default pass the
-> ostream*  as a NULL pointer so that we can skip all of the dprintk?
-> 
-> > Thanks!
-> > sage
+Challenges are as others described, but HA and multi host access works
+fine courtesy of SCST.  Write amplification is a challenge on spinning
+disks.
+
+Happy to share more.
+
+Alex
+
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>
+> Best Regards,
+>
+> Patrick McGarry
+> Director Ceph Community || Red Hat
+> http://ceph.com  ||  http://community.redhat.com
+> @scuttlemonkey || @ceph
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
