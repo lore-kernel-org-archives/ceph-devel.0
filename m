@@ -1,82 +1,42 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore-Performance regression in the latest master
-Date: Thu, 6 Oct 2016 21:52:55 +0000
-Message-ID: <BY2PR02MB3969BB28F45C805DB4D2735F4C70@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <BY2PR02MB396BEF6CFDD1164D194C9D2F4C70@BY2PR02MB396.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1610062115250.19850@piezo.us.to>
+From: Andrew Schoen <aschoen@redhat.com>
+Subject: Re: [sepia] teuthology support for the new build system
+Date: Thu, 6 Oct 2016 17:04:05 -0500
+Message-ID: <CAEPMp+780udSjbd5VY9mW9CER5GEB0H5wRYMEgBFD2sa2iSZHg@mail.gmail.com>
+References: <CACk6Fjm9x=j+QwKfcOqivEvk0xocvsVHHB6ZBUd_AfoSsCCweg@mail.gmail.com>
+ <CAEPMp+7A3qy-ut-8ALHucU1bG6TPwd3+iVXdqAqyAdfP3c2s3Q@mail.gmail.com> <CAKPXa=atQ6qG1y5KjWEmkyBz6Y5LQGhwPpkY2d29c8VVAf4ZJQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0070.outbound.protection.outlook.com ([104.47.37.70]:11968
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933672AbcJFVx2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 6 Oct 2016 17:53:28 -0400
-In-Reply-To: <alpine.DEB.2.11.1610062115250.19850@piezo.us.to>
-Content-Language: en-US
+Received: from mail-vk0-f51.google.com ([209.85.213.51]:36283 "EHLO
+        mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752434AbcJFWFC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Oct 2016 18:05:02 -0400
+Received: by mail-vk0-f51.google.com with SMTP id y190so30718420vkd.3
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Oct 2016 15:04:06 -0700 (PDT)
+In-Reply-To: <CAKPXa=atQ6qG1y5KjWEmkyBz6Y5LQGhwPpkY2d29c8VVAf4ZJQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Vasu Kulkarni <vakulkar@redhat.com>
+Cc: Zack Cerza <zack@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, sepia@ceph.com
 
-I have increased the cache size at the point where it is started swapping a=
-fter 30 min run or so , but, still I am seeing the huge latest difference.
-Will try to find out what went wrong recently..
+On Thu, Oct 6, 2016 at 4:05 PM, Vasu Kulkarni <vakulkar@redhat.com> wrote:
+> The builds page is really nice looking and fast page, It will be nice
+> to have another top table with *released* builds that are latest
+> like, jewel and hammer with last build date for rpm/deb  and probably
+> the last successful *master* for easy reference
 
-Thanks & Regards
-Somnath
+The url structure for shaman is
+(build|repos)/$project_name/$ref/$sha1/$flavor/$id/ so you could use
+this url to easily check on the status of the latest 'master' build
+for example:
 
------Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com]
-Sent: Thursday, October 06, 2016 2:17 PM
-To: Somnath Roy
-Cc: Ceph Development
-Subject: Re: Bluestore-Performance regression in the latest master
+https://shaman.ceph.com/builds/ceph/master/
 
-On Thu, 6 Oct 2016, Somnath Roy wrote:
-> Sage,
-> I am seeing the performance with the latest master is not stable compare =
-to 3 days old master. The peak performance is higher but it is jumping up a=
-nd down. Analyzing further I suspect recent cache changes has an impact. Wh=
-ile the performance is high , I am seeing lower disk reads (probably becaus=
-e of cache hits) , but the low point is much lower when it is missing the c=
-ache probably. You were saying on the standup about adding buffers in the c=
-ache in the write path , is that merged into the master ?
+Or, if you only care about repos:
 
-The buffered writes by default is not merged:
+https://shaman.ceph.com/repos/ceph/master/
 
-https://github.com/ceph/ceph/pull/11301
+On the right hand side of those pages it should also list the
+available sha1s, you can click those links to further filter.
 
-> The following pull request for cache that got merged seems reasonable.
->
-> https://github.com/ceph/ceph/pull/11295
-
-This cut the cache size down by 4x, plus whatever your sharding factor is/w=
-as.  Could that be it?
-
-> Any hunch what is causing this degradation recently ? Otherwise, I
-> need to dig down to find that out :-(
->
-> See the graph in the following link for the performance difference.
->
-> https://docs.google.com/spreadsheets/d/1JO3FaBbfT5jEdyYGB8EhHnAl5bAHe0
-> 6ojLE85mPzsK4/edit?usp=3Dsharing
->
-> The left side graph is with old master and right one is with latest maste=
-r..Old one I ran for 10 hour and latest master I ran it for 2 hours.
-> The new one has *4X more* latency as well..
-
-My guess is the cache size.  I can't think of what else would have much of =
-an effect on latency...
-
-s
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this message in error and that any review, disse=
-mination, distribution, or copying of this message is strictly prohibited. =
-If you have received this communication in error, please notify the sender =
-by telephone or e-mail (as shown above) immediately and destroy any and all=
- copies of this message in your possession (whether hard copies or electron=
-ically stored copies).
+Andrew
