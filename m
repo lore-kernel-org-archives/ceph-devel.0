@@ -1,94 +1,106 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: new naming convention for building repos and binaries from branches
-Date: Thu, 6 Oct 2016 14:55:42 -0400
-Message-ID: <CAC-Np1wmFwEHV4WvN9d8tX_NenZ3wAfZE4XNgtW2O_Z_o29D_A@mail.gmail.com>
-References: <CAC-Np1wcBGRcFYtK8WsjfM-WR+H_S58XgH74D+dBiGxd=KwZUQ@mail.gmail.com>
- <CALe9h7da1Oz29q2pot1BZLNBcs1NJ51BRLE+Uj_3mVjnDGw6fQ@mail.gmail.com>
- <CAEPMp+7OJ+pX=mYbNGgm+HZMGOGDK3xiApw5OL03vsN9YApTGA@mail.gmail.com>
- <alpine.DEB.2.11.1610061633440.19850@piezo.us.to> <CAJ4mKGbfTw+7y_XBkgDj6vzu65Z=VgfpMrBGNM5E+ZAVP3wC_w@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: mempool
+Date: Thu, 6 Oct 2016 18:59:19 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1610061854160.19850@piezo.us.to>
+References: <BLUPR0201MB1524FCE57FC7238B33A62A72E8C40@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-2838077-1475780361=:19850"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:35897 "EHLO
-        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932652AbcJFSzo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Oct 2016 14:55:44 -0400
-Received: by mail-wm0-f51.google.com with SMTP id k125so344582121wma.1
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Oct 2016 11:55:43 -0700 (PDT)
-In-Reply-To: <CAJ4mKGbfTw+7y_XBkgDj6vzu65Z=VgfpMrBGNM5E+ZAVP3wC_w@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:54406 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932990AbcJFS7V (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 6 Oct 2016 14:59:21 -0400
+In-Reply-To: <BLUPR0201MB1524FCE57FC7238B33A62A72E8C40@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, Andrew Schoen <aschoen@redhat.com>, John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Oct 6, 2016 at 1:56 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> On Thu, Oct 6, 2016 at 10:34 AM, Sage Weil <sweil@redhat.com> wrote:
->> On Thu, 6 Oct 2016, Andrew Schoen wrote:
->>> >> We could keep the implicit convention for `wip-*` or maybe something similar?
->>> >
->>> > Building everything that starts with wip-* sounds fine to me.  But
->>> > isn't that usually everything that we push to the ceph/ceph
->>> > repository?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-It isn't. There are a bunch of active branches that are not wip-*
+--8323329-2838077-1475780361=:19850
+Content-Type: TEXT/PLAIN; charset=ISO-8859-7
+Content-Transfer-Encoding: 8BIT
 
->> What is is that we're trying to avoid building?
+Hi Allen,
 
-We should "build" (create binaries and repos for multiple distros) for
-the branches that need to be tested out, either by
-teuthology or by consuming the repo directly (e.g. ceph-deploy install
---dev=my-branch)
-
-If you believe that every single active branch in
-https://github.com/ceph/ceph/branches/active meets those requirements,
-then
-we should just not try to get a naming convention. I don't know if
-that is the case.
-
->>> >
->>> > John
->>>
->>> I think the idea is that we only want to build branches that we plan
->>> to run tests against. As we add more flavors, distros and
->>> architectures to build for the workload increases exponentially. The
->>> system is designed to scale, but let's not build things we don't
->>> really need.
->>
->> I think we need a "do not build" prefix and a "build this asap" prefix.
->> Maybe nobuild-* and asap-*?
+On Wed, 5 Oct 2016, Allen Samuels wrote:
+> 
+> Ok, here¢s something to look at:
+> 
+> https://github.com/allensamuels/ceph/blob/master/src/include/mempool.h
+> https://github.com/allensamuels/ceph/blob/master/src/common/mempool.cc
+> 
+> and the unit test
+> 
+> https://github.com/allensamuels/ceph/blob/master/src/test/test_mempool.cc
 >
-> I can't imagine anybody's going to remember to stick "nobuild" in
-> front of things.
+> The simple comment is at the top of mempool.h
 
-Yep, I agree, we can't do it that way.
+I've pulled your core into wip-mempool in github.com:liewegas/ceph.git and 
+switched several bluestore types to use it.  The unit tests work fine, but 
+I have 2 problems:
 
->If we're really concerned about not building
-> everything, it needs to be proactive. I'd really like two interfaces:
-> 1) append "-build" to the end of a branch. This would have to be a
-> postfix so we don't pick up every branch that fixes some build issue
-> or rearranges the makefiles.
-> 2) Have a web page or github integration we can use to say "include
-> this branch in the builds".
->
-> In particular what I'm thinking is, we want a way to build stuff right
-> away from the push for quick turnaround times.
+1) when ceph-osd forks it asserts out in ~slab_container.  commenting out 
+the asserts for now is enough to proceed.  I assume it's because the
+mempool is in use at fork() time.
 
-That is the case *today* and will not change later. A dev might
-experience a slight delay but the whole idea
-is that even under heavy load the waiting time will not be 12 hours
-(unless everything is burning down?)
+2) After a few thousand ops I crash here:
 
->But we'll want to push
-> branches for RFC etc before we really care if they're widely built,
-> and renaming them or trying to update two refs would be a hassle.
-> -Greg
+#4  0x000055c6180a360b in mempool::slab_allocator<BlueStore::Extent, 0ul, 4ul>::freeslot (
+    freeEmpty=true, s=0x55c6253f73c8, this=0x55c618a2f6a0 <_factory_bluestore_extent>)
+    at /home/sage/src/ceph2/src/include/mempool.h:485
+#5  mempool::slab_allocator<BlueStore::Extent, 0ul, 4ul>::deallocate (s=0, p=0x55c6253f73d0, 
+    this=0x55c618a2f6a0 <_factory_bluestore_extent>)
+    at /home/sage/src/ceph2/src/include/mempool.h:602
+#6  mempool::factory<(mempool::pool_index_t)2, BlueStore::Extent, 0ul, 4ul>::free (
+    p=0x55c6253f73d0, this=0x55c618a2f6a0 <_factory_bluestore_extent>)
+    at /home/sage/src/ceph2/src/include/mempool.h:1072
+#7  BlueStore::Extent::operator delete (p=0x55c6253f73d0)
+    at /home/sage/src/ceph2/src/os/bluestore/BlueStore.cc:37
+#8  0x000055c6180cb7b0 in BlueStore::ExtentMap::rm (p=..., this=0x55c6254416a8)
+    at /home/sage/src/ceph2/src/os/bluestore/BlueStore.h:673
+#9  BlueStore::ExtentMap::punch_hole (this=this@entry=0x55c6231dbc78, 
+    offset=offset@entry=217088, length=length@entry=4096, 
+    old_extents=old_extents@entry=0x7ff6a70324a8)
+    at /home/sage/src/ceph2/src/os/bluestore/BlueStore.cc:2140
 
-The current caveat we have today is that the machines that produce the
-repos are at about 60% full (they use 500gb drives each, we have 4
-currently). Turning on 1 extra flavor would get us
-out of space on at least two pretty quickly.
+(gdb) 
+#4  0x000055c6180a360b in mempool::slab_allocator<BlueStore::Extent, 0ul, 4ul>::freeslot (
+    freeEmpty=true, s=0x55c6253f73c8, this=0x55c618a2f6a0 <_factory_bluestore_extent>)
+    at /home/sage/src/ceph2/src/include/mempool.h:485
+485              slab->slabHead.next->prev = slab->slabHead.prev;
+(gdb) p slab
+$1 = (mempool::slab_allocator<BlueStore::Extent, 0ul, 4ul>::slab_t *) 
+0x55c6253f7300
+(gdb) p slab->slabHead 
+$2 = {
+  prev = 0x0, 
+  next = 0x0
+}
+(gdb) list
+480           }
+481           if (freeEmpty && slab->freeSlots == slab->slabSize && slab != &stackSlab) {
+482              //
+483              // Slab is entirely free
+484              //
+485              slab->slabHead.next->prev = slab->slabHead.prev;
+486              slab->slabHead.prev->next = slab->slabHead.next;
+487              assert(freeSlotCount >= slab->slabSize);
+488              freeSlotCount -= slab->slabSize;
+489              assert(slabs > 0);
 
-*We can add more to the pool*. So this is not really a make-or-break
-situation, we can scale. But if there is a way to be more efficient by
-building stuff that we really care, then lets
-at least try.
+Any bright ideas before I dig in?
+
+BTW, we discussed this a bit last night at CDM and the main concern is 
+that this approach currently wraps up a slab allocator with the mempools.  
+It may be that these are both going to be good things, but they are 
+conceptually orthogonal, and it's hard to tell whether the slab allocator 
+is necessary without also having a simpler approach that does *just* the 
+accounting.  Is there any reason these have to be tied together?
+
+Thanks!
+sage
+
+--8323329-2838077-1475780361=:19850--
