@@ -1,55 +1,65 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: new naming convention for building repos and binaries from branches
-Date: Thu, 6 Oct 2016 11:56:35 -0600
-Message-ID: <CAJ4mKGbfTw+7y_XBkgDj6vzu65Z=VgfpMrBGNM5E+ZAVP3wC_w@mail.gmail.com>
-References: <CAC-Np1wcBGRcFYtK8WsjfM-WR+H_S58XgH74D+dBiGxd=KwZUQ@mail.gmail.com>
- <CALe9h7da1Oz29q2pot1BZLNBcs1NJ51BRLE+Uj_3mVjnDGw6fQ@mail.gmail.com>
- <CAEPMp+7OJ+pX=mYbNGgm+HZMGOGDK3xiApw5OL03vsN9YApTGA@mail.gmail.com> <alpine.DEB.2.11.1610061633440.19850@piezo.us.to>
+Subject: Re: [sepia] teuthology support for the new build system
+Date: Thu, 6 Oct 2016 11:59:55 -0600
+Message-ID: <CAJ4mKGZhEXiLBs-g438QD0_4hjOB4=PZK1nkEkwyRjsk2zWqXA@mail.gmail.com>
+References: <CACk6Fjm9x=j+QwKfcOqivEvk0xocvsVHHB6ZBUd_AfoSsCCweg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:38886 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751201AbcJFR4h (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Oct 2016 13:56:37 -0400
-Received: by mail-it0-f41.google.com with SMTP id o19so37308877ito.1
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Oct 2016 10:56:37 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1610061633440.19850@piezo.us.to>
+Received: from mail-it0-f44.google.com ([209.85.214.44]:37267 "EHLO
+        mail-it0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751346AbcJFR75 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Oct 2016 13:59:57 -0400
+Received: by mail-it0-f44.google.com with SMTP id j69so37345607itb.0
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Oct 2016 10:59:56 -0700 (PDT)
+In-Reply-To: <CACk6Fjm9x=j+QwKfcOqivEvk0xocvsVHHB6ZBUd_AfoSsCCweg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Andrew Schoen <aschoen@redhat.com>, John Spray <jspray@redhat.com>, Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Zack Cerza <zack@redhat.com>
+Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>, sepia@ceph.com, John Spray <jspray@redhat.com>
 
-On Thu, Oct 6, 2016 at 10:34 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Thu, 6 Oct 2016, Andrew Schoen wrote:
->> >> We could keep the implicit convention for `wip-*` or maybe something similar?
->> >
->> > Building everything that starts with wip-* sounds fine to me.  But
->> > isn't that usually everything that we push to the ceph/ceph
->> > repository?  What is is that we're trying to avoid building?
->> >
->> > John
->>
->> I think the idea is that we only want to build branches that we plan
->> to run tests against. As we add more flavors, distros and
->> architectures to build for the workload increases exponentially. The
->> system is designed to scale, but let's not build things we don't
->> really need.
+On Wed, Oct 5, 2016 at 2:14 PM, Zack Cerza <zack@redhat.com> wrote:
+> Hi all,
 >
-> I think we need a "do not build" prefix and a "build this asap" prefix.
-> Maybe nobuild-* and asap-*?
+> You've probably heard that we've been working on replacing the
+> gitbuilders with a new build system. I recently did some work [0] in
+> teuthology to support that new system, and that work got merged
+> yesterday. Here's an overview of its current state:
+>
+> The way it works is that it talks to Shaman [1] to locate the package
+> repository to use. It is not enabled by default as it isn't yet able
+> to cover all gitbuilder use cases. It can be enabled by setting
+> "use_shaman: true" in either your teuthology.yaml or your job's yaml.
+> It can be set for an entire suite-run by doing something like:
+>
+> $ echo "use_shaman: true" > ./shaman.yaml
+> $ teuthology-suite -v -c jewel -s upgrade/jewel-x -m vps -k distro
+> $PWD/shaman.yaml --dry-run
+>
+> Of course, later on when we can fully replace gitbuilders this
+> behavior will be the default. At some point after that we'll be
+> decommissioning the gitbuilders.
+>
+> Please note that using it in the following scenarios will *not* do
+> what you want:
+>
+> * Any job that requires one of our testing kernels, as the new system
+> isn't building our kernels yet
+> * Any job that uses the install task for samba, for the same reason
+> * Any job that uses ceph-deploy, as ceph-deploy isn't using the new system yet
 
-I can't imagine anybody's going to remember to stick "nobuild" in
-front of things. If we're really concerned about not building
-everything, it needs to be proactive. I'd really like two interfaces:
-1) append "-build" to the end of a branch. This would have to be a
-postfix so we don't pick up every branch that fixes some build issue
-or rearranges the makefiles.
-2) Have a web page or github integration we can use to say "include
-this branch in the builds".
+I think Alfredo mentioned this in his thread, but we also don't seem
+to be building the "notcmalloc" flavors, so don't try and run any
+valgrind tests against it.
+Are there other flavors we know are missing?
 
-In particular what I'm thinking is, we want a way to build stuff right
-away from the push for quick turnaround times. But we'll want to push
-branches for RFC etc before we really care if they're widely built,
-and renaming them or trying to update two refs would be a hassle.
+An FS run (http://pulpito.ceph.com/gregf-2016-10-05_20:40:25-fs-master---basic-mira/)
+had quite a few other failures, but just scanning the errors I don't
+think any of the others are because of the build system.
 -Greg
+
+>
+> Please try to give this new system some exercise. It's been tested
+> well but of course we can't necessarily anticipate everything.
+> Teuthology bugs, as always, should go here [2] and bugs related to the
+> new build system should go here [3].
