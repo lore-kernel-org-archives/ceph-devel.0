@@ -1,74 +1,104 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: [sepia] teuthology support for the new build system
-Date: Fri, 7 Oct 2016 11:26:16 +0200
-Message-ID: <CALe9h7f-wwcxW9KNVZvd6NZZzKjQxShy7RvZiOotH0db18b38w@mail.gmail.com>
-References: <CACk6Fjm9x=j+QwKfcOqivEvk0xocvsVHHB6ZBUd_AfoSsCCweg@mail.gmail.com>
- <CAJ4mKGZhEXiLBs-g438QD0_4hjOB4=PZK1nkEkwyRjsk2zWqXA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: Bluestore-Performance regression in the latest master
+Date: Fri, 7 Oct 2016 13:17:31 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1610071317080.18626@piezo.us.to>
+References: <BY2PR02MB396BEF6CFDD1164D194C9D2F4C70@BY2PR02MB396.namprd02.prod.outlook.com> <alpine.DEB.2.11.1610062115250.19850@piezo.us.to> <BY2PR02MB3969BB28F45C805DB4D2735F4C70@BY2PR02MB396.namprd02.prod.outlook.com> <50c62b05-5712-9502-1648-0772f8f8c5c1@redhat.com>
+ <BY2PR02MB396C9E7D9CB33A1CDD204AAF4C70@BY2PR02MB396.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f170.google.com ([209.85.220.170]:33837 "EHLO
-        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751990AbcJGJ0i (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Oct 2016 05:26:38 -0400
-Received: by mail-qk0-f170.google.com with SMTP id f128so18433421qkb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Oct 2016 02:26:37 -0700 (PDT)
-In-Reply-To: <CAJ4mKGZhEXiLBs-g438QD0_4hjOB4=PZK1nkEkwyRjsk2zWqXA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:38018 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751264AbcJGNRg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 7 Oct 2016 09:17:36 -0400
+In-Reply-To: <BY2PR02MB396C9E7D9CB33A1CDD204AAF4C70@BY2PR02MB396.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Zack Cerza <zack@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, sepia@ceph.com
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Mark Nelson <mnelson@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 6, 2016 at 7:59 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> On Wed, Oct 5, 2016 at 2:14 PM, Zack Cerza <zack@redhat.com> wrote:
->> Hi all,
->>
->> You've probably heard that we've been working on replacing the
->> gitbuilders with a new build system. I recently did some work [0] in
->> teuthology to support that new system, and that work got merged
->> yesterday. Here's an overview of its current state:
->>
->> The way it works is that it talks to Shaman [1] to locate the package
->> repository to use. It is not enabled by default as it isn't yet able
->> to cover all gitbuilder use cases. It can be enabled by setting
->> "use_shaman: true" in either your teuthology.yaml or your job's yaml.
->> It can be set for an entire suite-run by doing something like:
->>
->> $ echo "use_shaman: true" > ./shaman.yaml
->> $ teuthology-suite -v -c jewel -s upgrade/jewel-x -m vps -k distro
->> $PWD/shaman.yaml --dry-run
->>
->> Of course, later on when we can fully replace gitbuilders this
->> behavior will be the default. At some point after that we'll be
->> decommissioning the gitbuilders.
->>
->> Please note that using it in the following scenarios will *not* do
->> what you want:
->>
->> * Any job that requires one of our testing kernels, as the new system
->> isn't building our kernels yet
->> * Any job that uses the install task for samba, for the same reason
->> * Any job that uses ceph-deploy, as ceph-deploy isn't using the new system yet
->
-> I think Alfredo mentioned this in his thread, but we also don't seem
-> to be building the "notcmalloc" flavors, so don't try and run any
-> valgrind tests against it.
-> Are there other flavors we know are missing?
->
-> An FS run (http://pulpito.ceph.com/gregf-2016-10-05_20:40:25-fs-master---basic-mira/)
-> had quite a few other failures, but just scanning the errors I don't
-> think any of the others are because of the build system.
+On Thu, 6 Oct 2016, Somnath Roy wrote:
+> Mark,
+> If you see the graph in the below link , you will see it is choppy and faster till 1 hour , beyond that it is degrading fast..
+> If you see the left side graph that is holding the constant performance throughout for 10 hour (old master)
+> Have you checked the latency with the shorter run with the latest master as well ? Even with the shorter run it is 4X more latency (even though aggregated throughput is bit more) for me..
+> Anyways, I am trying to reproduce this in another setup just to eliminate HW issues in case..
 
-I believe the java failures there are probably because they're not
-getting built in the new system yet?  I think there was a ticket but I
-don't have it to hand.
+You mentioned yesterday you had tried switching the rocksdb compaction 
+mode.. could that be it?
 
-John
+sage
 
-> -Greg
->
->>
->> Please try to give this new system some exercise. It's been tested
->> well but of course we can't necessarily anticipate everything.
->> Teuthology bugs, as always, should go here [2] and bugs related to the
->> new build system should go here [3].
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: Mark Nelson [mailto:mnelson@redhat.com] 
+> Sent: Thursday, October 06, 2016 3:13 PM
+> To: Somnath Roy; Sage Weil
+> Cc: Ceph Development
+> Subject: Re: Bluestore-Performance regression in the latest master
+> 
+> This is bluestore specific?  My guess is the cache sizes as well. 
+> Bluestore on master is actually significantly faster for me in all of the tests I've thrown at it vs earlier this week, but my onode hit rate is still "decent".
+> 
+> I still see higher performance by increasing the min alloc size to 16k and then bumping up the onode cache size a bit with the memory savings.
+> 
+> Mark
+> 
+> On 10/06/2016 04:52 PM, Somnath Roy wrote:
+> > I have increased the cache size at the point where it is started swapping after 30 min run or so , but, still I am seeing the huge latest difference.
+> > Will try to find out what went wrong recently..
+> >
+> > Thanks & Regards
+> > Somnath
+> >
+> > -----Original Message-----
+> > From: Sage Weil [mailto:sweil@redhat.com]
+> > Sent: Thursday, October 06, 2016 2:17 PM
+> > To: Somnath Roy
+> > Cc: Ceph Development
+> > Subject: Re: Bluestore-Performance regression in the latest master
+> >
+> > On Thu, 6 Oct 2016, Somnath Roy wrote:
+> >> Sage,
+> >> I am seeing the performance with the latest master is not stable compare to 3 days old master. The peak performance is higher but it is jumping up and down. Analyzing further I suspect recent cache changes has an impact. While the performance is high , I am seeing lower disk reads (probably because of cache hits) , but the low point is much lower when it is missing the cache probably. You were saying on the standup about adding buffers in the cache in the write path , is that merged into the master ?
+> >
+> > The buffered writes by default is not merged:
+> >
+> > https://github.com/ceph/ceph/pull/11301
+> >
+> >> The following pull request for cache that got merged seems reasonable.
+> >>
+> >> https://github.com/ceph/ceph/pull/11295
+> >
+> > This cut the cache size down by 4x, plus whatever your sharding factor is/was.  Could that be it?
+> >
+> >> Any hunch what is causing this degradation recently ? Otherwise, I 
+> >> need to dig down to find that out :-(
+> >>
+> >> See the graph in the following link for the performance difference.
+> >>
+> >> https://docs.google.com/spreadsheets/d/1JO3FaBbfT5jEdyYGB8EhHnAl5bAHe
+> >> 0
+> >> 6ojLE85mPzsK4/edit?usp=sharing
+> >>
+> >> The left side graph is with old master and right one is with latest master..Old one I ran for 10 hour and latest master I ran it for 2 hours.
+> >> The new one has *4X more* latency as well..
+> >
+> > My guess is the cache size.  I can't think of what else would have much of an effect on latency...
+> >
+> > s
+> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
