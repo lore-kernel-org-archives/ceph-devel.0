@@ -1,67 +1,46 @@
-From: Victor Denisov <vdenisov@mirantis.com>
-Subject: Re: Snapshots of consistency groups
-Date: Fri, 7 Oct 2016 11:26:18 -0700
-Message-ID: <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com>
-References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
- <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
- <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
- <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
- <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
- <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
- <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
- <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
- <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
- <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
- <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
- <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
- <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
- <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
- <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
- <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
- <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
- <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
- <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
- <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com> <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: new naming convention for building repos and binaries from
+ branches
+Date: Fri, 7 Oct 2016 19:16:57 +0000
+Message-ID: <26CBB0BA-AF47-40AB-BF35-B50F5A6501A3@Teradata.com>
+References: <CAC-Np1wcBGRcFYtK8WsjfM-WR+H_S58XgH74D+dBiGxd=KwZUQ@mail.gmail.com>
+ <CALe9h7da1Oz29q2pot1BZLNBcs1NJ51BRLE+Uj_3mVjnDGw6fQ@mail.gmail.com>
+ <CAEPMp+7OJ+pX=mYbNGgm+HZMGOGDK3xiApw5OL03vsN9YApTGA@mail.gmail.com>
+ <alpine.DEB.2.11.1610061633440.19850@piezo.us.to>
+ <CAEPMp+7EyHBJSDoCZoTPvnd5bBKmsZ_D7UfZ5aYCvS6THLMqSg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f181.google.com ([209.85.217.181]:33027 "EHLO
-        mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932240AbcJGS0p (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Oct 2016 14:26:45 -0400
-Received: by mail-ua0-f181.google.com with SMTP id p102so51679498uap.0
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Oct 2016 11:26:20 -0700 (PDT)
-In-Reply-To: <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
+Received: from nat13.teradata.com ([153.65.16.13]:33577 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751959AbcJGTRA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Oct 2016 15:17:00 -0400
+In-Reply-To: <CAEPMp+7EyHBJSDoCZoTPvnd5bBKmsZ_D7UfZ5aYCvS6THLMqSg@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <E780A0359A6E564C8C20791C8463F1D6@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Andrew Schoen <aschoen@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>, Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Are any exceptions used in librbd code? Should the code be exception safe?
 
-Thanks,
-V.
+> On Oct 7, 2016, at 7:27 AM, Andrew Schoen <aschoen@redhat.com> wrote:
+> 
+>> I think we need a "do not build" prefix and a "build this asap" prefix.
+>> Maybe nobuild-* and asap-*?
+>> 
+> 
+> Is the 'asap-*' want here because of the typical long wait on the gitbuilders?
+> 
+> The way we're configured now we can build 10 branches at a time, all
+> of those branches building for 3 distros. I haven't seen a build take
+> longer than an hour or so. It'd be easy to scale that up as well, but
+> I don't see the queue ever being backed up at our current load.
 
-On Fri, Sep 16, 2016 at 10:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
-> On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->> if (struct_v >= 5) {
->>       ::decode(snapshot_namespace, p);
->>     } else {
->>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
->>     }
->>
->> then code for ::encode function of cls_rbd_snap would change accordingly:
->>
->> instead of
->>
->> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
->> snapshot_namespace);
->>
->> I would do:
->> ::encode(snapshot_namespace, bl);
->
->
-> +1 -- looks good to me
->
-> --
-> Jason
+Most of the builds will be building almost the same files, I hope you guys are
+using build caching mechanisms such as ccache to accelerate the build time.
+
+Nitin
+
+
