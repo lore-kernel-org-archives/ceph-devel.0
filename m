@@ -1,181 +1,71 @@
-From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
-Subject: Re: CRUSH algorithm and its debug method
-Date: Fri, 7 Oct 2016 11:20:10 +0800
-Message-ID: <CABF_e-HYn6qSt8vsUB0+t-SdjToJSa0=FKCwzi=UYVdF116wCA@mail.gmail.com>
-References: <CALZt5jytLeocqK7TY5MhLbimgiriL8Tr5WQneLSaPK32KP88vw@mail.gmail.com>
- <alpine.DEB.2.11.1610031319090.19850@piezo.us.to> <CALZt5jxRt7KXF2_jJs5bMo0jyxhAJvEhO8tzQAedsfhJ-eWY6w@mail.gmail.com>
- <alpine.DEB.2.11.1610061325150.19850@piezo.us.to>
+From: Marcus Watts <mwatts@redhat.com>
+Subject: Re: new naming convention for building repos and binaries from
+ branches
+Date: Thu, 6 Oct 2016 23:32:14 -0400
+Message-ID: <20161007033214.GB23519@degu.eng.arb.redhat.com>
+References: <CAC-Np1wcBGRcFYtK8WsjfM-WR+H_S58XgH74D+dBiGxd=KwZUQ@mail.gmail.com>
+ <CALe9h7da1Oz29q2pot1BZLNBcs1NJ51BRLE+Uj_3mVjnDGw6fQ@mail.gmail.com>
+ <CAEPMp+7OJ+pX=mYbNGgm+HZMGOGDK3xiApw5OL03vsN9YApTGA@mail.gmail.com>
+ <alpine.DEB.2.11.1610061633440.19850@piezo.us.to>
+ <CAJ4mKGbfTw+7y_XBkgDj6vzu65Z=VgfpMrBGNM5E+ZAVP3wC_w@mail.gmail.com>
+ <CAC-Np1wmFwEHV4WvN9d8tX_NenZ3wAfZE4XNgtW2O_Z_o29D_A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:33010 "EHLO
-        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752455AbcJGDUM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Oct 2016 23:20:12 -0400
-Received: by mail-yw0-f170.google.com with SMTP id t192so5102036ywf.0
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Oct 2016 20:20:11 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1610061325150.19850@piezo.us.to>
+Received: from mx1.redhat.com ([209.132.183.28]:59160 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751055AbcJGDcR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 6 Oct 2016 23:32:17 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 12F6BC05490E
+        for <ceph-devel@vger.kernel.org>; Fri,  7 Oct 2016 03:32:17 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <CAC-Np1wmFwEHV4WvN9d8tX_NenZ3wAfZE4XNgtW2O_Z_o29D_A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ning Yao <zay11022@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sweil@redhat.com>, Andrew Schoen <aschoen@redhat.com>, John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-2016-10-06 21:27 GMT+08:00 Sage Weil <sage@newdream.net>:
-> On Thu, 6 Oct 2016, Ning Yao wrote:
->> Hi,
->>
->> 2016-10-03 21:22 GMT+08:00 Sage Weil <sage@newdream.net>:
->> > Hi!
->> >
->> > On Sat, 1 Oct 2016, Ning Yao wrote:
->> >> Hi, Sage
->> >>
->> >> I find that several issues related to current CRUSH algorithm as below:
->> >>
->> >> 1. It is possible to select out the same collision and retry bucket in
->> >> a crush_choose_firstn() loop. (e.g.  when we set reweight to 0 or mark
->> >> osd out, it would be definitely rejected if it is selected. However,
->> >> when the second chance to select out another one based on the
->> >> different r', it is still possible to select out the same osd
->> >> previously rejected, right? And until a different one is selected
->> >> after several retries.).  I think we can record those rejected or
->> >> collision osds in the same loop so that the process can be converged
->> >> much faster?
->> >
->> > It's sitll possible to pick the same thing with a different r'.
->> > That's why the max retries values has to be reasonably high.  I'm not sure
->> > how you would avoid doing the full calculation, though... can you be
->> > more specific?
->> I have two ideas to do that:
->>
->> 1) the simplest idea is allocate a bool array in crush_choose_firstn()
->> whose size is crush_bucket->size. And then pass the array pointer into
->> crush_bucket_choose(). What we shoud do is:
->>     i) mark those already selected, collision or rejected items as true
->>     ii) when determine (hight and high_draw in bucket_straw_choose or
->> bucket_straw2_choose), we can skip those items already marked TRUE.
->>     But the drawback is that  we always need to allocate an dynamic
->> array within each iteration, And memory allocation in heap is an
->> expensive operation.
->>
->> 2) So the second idea is to use a uint64_t s_mask (said selected_mask
->> to indicate those items already been selected). What we should do is:
->>     i) init uint64_t s_mask = 0; in crush_choose_firstn()
->>     ii) pass value by reference into  bucket_straw_choose or
->> bucket_straw2_choose and mark the corresponding bit as one if item is
->> selected, collision or rejected.  s_mask  = s_mask | (1ul << high)
->>     iii) do not consider those whose bit (s_mask & (1ul << high)) is
->> marked as one.
->>     But here is an explicit limitation, the number of items in the
->> bucket should be smaller than sizeof(int64_t). So we need to run the
->> previous strategy if crush_bucket->size > 64.
->>
->> Furthermore, the strategy is just suitable for straw algorithm, so we
->> need to remain the strategy for tree, list and uniform algorithm.
->>
->> Any other better ideas? @Wei-Chung Cheng
+Someone in the middle said:
+...
+> >If we're really concerned about not building
+...
 
+I think that's key.  We build a lot more stuff, a lot
+more often, than I think most people actually need or use.
+Which means we wind up waiting for builds to complete
+that nobody will ever use.
 
+I think the natural progression of things is:
 
-hi ning:
+stage 1.	coded up, ready to share, not ready to build or test.
+		(might be being built out of stream,  etc.)
+		early stage of collaboration, code review, etc.
+		[ I think people currently do this in various
+		different ways... ]
+stage 2.	ready to test / build / for a LIMITED set of
+		architectures (often just one.)
+		start of testing, don't need all architectures yet.
+		OR, failed on one architecture, want to just test *that*
+		architecture.  [ We don't currently have a way to
+		do this, but I bet at least half of our builds could
+		work this way. ]
+stage 3.	ready to test / build / for ALL architectures.
+		about to commit fix to master / general distribution,
+		known to work on one architecture, but want to actually
+		do the thorough test on everything.
 
-I agree first idea. If we could handle the array (or selected item)
-scope well, maybe the memory usage would not be a problem.
+Doing this by special branch names seems a bit clumsy to me.  I suppose
+we could have "nobuild-FOO", "ubuntuonly-FOO", "buildeverywhere-FOO".
+But it seems more natural to me to have some kind of prefix
+matching/configuration thing that the builder could use to the same
+effect.  Then progressing wip-FOO from stage 2 to stage 3 could be just
+a matter of the programmer adjusting the filter for the "wip-foo" from
+"ubuntuonly" to "buildeverywhere", then the automation building the
+identical source on the other architectures (and *not* rebuilding on
+the original architecture for which perfectly good builds don't need to
+be repeated.)
 
-I am not sure about second idea.
-did you mean we store the high result and skip it next item we found
-the same high result?
-
-I don't have any better ideas now and I perfer first idea ; )
-
-
-
-
-
->
-> This PR is doing something very similar in order to solve what we've been
-> calling the 'multi-pick anomaly,' which tends to allocate more data to
-> very low-weighted devices.
->
->         https://github.com/ceph/ceph/pull/10218
->
-> The effect is only noticeable with very small (relative) weights, but it
-> comes up in practice on large clusters semi-frequently.
->
-> sage
->
->
-
-
-
-hi sage:
-
-as you say, this pr solve the problem that would allocate more data to
-very low-weighted devices with the configurable parameter.
-
-did it still choose the same item with straw2?
-I think it could reduce the retry times (did we avoid the retry?), and
-we still need to do the thing that would avoid/skip the selected item?
-
-thanks!!
-vicente
-
-
-
-
-
->
->
->>
->>
->> >> 2. Currently, the reweight params in crushmap is memoryless (e.g we
->> >> balance our data by reducing reweight, which will be lost after this
->> >> osd DOWN and OUT automatically. And we mark its IN again because
->> >> currently ceph osd in directly marks the reweight to 1.0 and out marks
->> >> the reweight to 0.0).  It is quite awkward when we use ceph osd
->> >> reweight-by-utilization to make data balance (If some osds down and
->> >> out, our previous effort is totally lost).   So I think marking osd
->> >> "in"  does not simply modify reweight to "1.0". Actually, we can
->> >> iteration the previous osdmap and find out the value of the reweight
->> >> or records it anywhere we can retrieve this value again?
->> >
->> > The old value is stored here
->> >
->> > https://github.com/ceph/ceph/blob/master/src/osd/OSDMap.h#L89
->> >
->> > and restored when the OSD is marked back up, although IIRC there is a
->> > config option that controls when the old value is stored (it might only
->> > happen when the osd is marked out automatically, not when it is done
->> > manually?).  That behavior could be changed, though.
->> Thanks, fix in PR #11293 is what we expect.
->>
->> >> 3. Currently, there is no debug option in the mapping progress in
->> >> Mapper.c. dprintk is default disabled so that it will be hard to dig
->> >> into the algorithm if something unexpected result happens. I think we
->> >> can introduce the debug options and output the debug information when
->> >> we use "ceph osd map xxx xxx" so that it is much more easier to find
->> >> the shortness in current mapping process?
->> >
->> > Yeah, it's hard to debug.  I usually uncomment the dprintk define and
->> > rebuild osdmaptool, which has a --test-map-pg option so that I can run
->> > a specific problematic mapping.  We could do something a bit more clever
->> > as long as it is a simple conditional--we don't want to slow down the
->> > mapping code as it is performance sensitive.
->>
->> Yeah, I think it is enough to print out the debug information when we
->> run "ceph osd map data object_1". So we can pass ostream* into the
->> function, gathering the information. Normally, we can default pass the
->> ostream*  as a NULL pointer so that we can skip all of the dprintk?
->>
->> > Thanks!
->> > sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+					-Marcus Watts
