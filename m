@@ -1,89 +1,67 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: bluestore performance snapshot - 20161006
-Date: Fri, 7 Oct 2016 11:00:26 -0700
-Message-ID: <CAN=+7FVQuHDpiK13RWv8p+x5cQgw==M903Jh_cD-CCuecMcCyQ@mail.gmail.com>
-References: <e3e00cbc-3e97-8582-bb93-7ac03b3da40b@redhat.com> <CACJqLyYkL6kDuzOX2PCggHLpCHm7gdv8oxjBONYCfrKJi9hCNQ@mail.gmail.com>
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: Snapshots of consistency groups
+Date: Fri, 7 Oct 2016 11:26:18 -0700
+Message-ID: <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+ <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+ <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
+ <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
+ <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
+ <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
+ <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
+ <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
+ <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
+ <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
+ <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
+ <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
+ <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
+ <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
+ <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
+ <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
+ <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
+ <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
+ <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
+ <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com> <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:34127 "EHLO
-        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756880AbcJGSAk (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Oct 2016 14:00:40 -0400
-Received: by mail-qk0-f171.google.com with SMTP id f128so30036497qkb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Oct 2016 11:00:29 -0700 (PDT)
-In-Reply-To: <CACJqLyYkL6kDuzOX2PCggHLpCHm7gdv8oxjBONYCfrKJi9hCNQ@mail.gmail.com>
+Received: from mail-ua0-f181.google.com ([209.85.217.181]:33027 "EHLO
+        mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932240AbcJGS0p (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Oct 2016 14:26:45 -0400
+Received: by mail-ua0-f181.google.com with SMTP id p102so51679498uap.0
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Oct 2016 11:26:20 -0700 (PDT)
+In-Reply-To: <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-Yeah, but it's not likely to make Kraken.
--Sam
+Are any exceptions used in librbd code? Should the code be exception safe?
 
-On Fri, Oct 7, 2016 at 10:27 AM, Haomai Wang <haomai@xsky.com> wrote:
-> On Fri, Oct 7, 2016 at 10:03 PM, Mark Nelson <mnelson@redhat.com> wrote:
->> Hi Guys,
+Thanks,
+V.
+
+On Fri, Sep 16, 2016 at 10:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+> On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>> if (struct_v >= 5) {
+>>       ::decode(snapshot_namespace, p);
+>>     } else {
+>>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
+>>     }
 >>
->> I wanted to give folks a quick snapshot of bluestore performance on our NVMe
->> test setup.  There's a lot of things happening very quickly in the code, so
->> here's a limited snapshot of how we are doing.  These are short running
->> tests, so do keep that in mind (5 minutes each).
+>> then code for ::encode function of cls_rbd_snap would change accordingly:
 >>
->> https://drive.google.com/uc?export=download&id=0B2gTBZrkrnpZRXFKRDBrTjZiWGc
+>> instead of
 >>
->> The gist of it is:
+>> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
+>> snapshot_namespace);
 >>
->> We are now basically faster than filestore in all short write tests.
->> Increasing the min_alloc size (and to a lesser extent) the number of cached
->> onodes brings 4K random write performance up even further. Likely increasing
->> the min_alloc size will improve long running test performance as well due to
->> drastically reduced metadata load on rocksdb.  Related to this, the amount
->> of memory that we cache with 4k min_alloc is pretty excessive, even when
->> limiting the number of cached onodes to 4k  The memory allocator work should
->> allow us to make this more flexible, but I suspect that for now we will want
->> to increase the min_alloc size to 16k to help alleviate memory consumption
->> and metadata overhead (and improve 4k random write performance!).  The extra
->> WAL write is probably still worth the tradeoff for now.
->>
->> On the read side we are seeing some regressions.  The sequential read case
->> is interesting.  We're doing quite a bit worse in recent bluestore even vs
->> older bluestore, and generally quite a bit worse than filestore.  Increasing
->> the min_alloc size reduces the degredation, but we still have ground to make
->> up.  In these tests rbd readahead is being used in an attempt to achieve
->> client-side readahead since bluestore no longer does it on the OSD side, but
->> appears to be fairly ineffective.  These are the settings used:
->>
->>         rbd readahead disable after bytes = 0
->>         rbd readahead max bytes = 4194304
->>
->> By default we require 10 sequential reads to trigger it.  I don't think that
->> should be a problem, but perhaps lowering the threshold will help. In
->> general this is an area we still need to focus.
->>
->> For random reads, the degradation was previously found to be due to the
->> async messenger.  Both filestore and bluestore performance has degraded
->> relative to Jewel in these tests.  Haomai suspects fast dispatch as the
->> primarily bottleneck here.
->>
->> So in general, the areas I think we still need to focus:
->>
->>
->> 1) memory allocator work (much easier caching configuration, better memory
->> usage, better memory fragmentation, etc)
->> 2) Long running tests (Somnath has been doing this, thanks Somnath!)
->> 2) Sequential read performance in bluestore (Need to understand this better)
->> 3) Fast dispatch performance improvement (Dan's RCU work?)
+>> I would do:
+>> ::encode(snapshot_namespace, bl);
 >
-> Oh, it would be great to here anyone is working on RCU. Is it really ongoing?
 >
->>
->> Mark
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +1 -- looks good to me
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Jason
