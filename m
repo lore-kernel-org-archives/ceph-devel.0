@@ -1,84 +1,80 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: [sepia] teuthology support for the new build system
-Date: Fri, 7 Oct 2016 09:46:03 -0400
-Message-ID: <CAC-Np1w2W5mPmZ9=Qidi2oXnT0ikyRqUvDcg=4_OD2LUC14ugg@mail.gmail.com>
-References: <CACk6Fjm9x=j+QwKfcOqivEvk0xocvsVHHB6ZBUd_AfoSsCCweg@mail.gmail.com>
- <CAJ4mKGZhEXiLBs-g438QD0_4hjOB4=PZK1nkEkwyRjsk2zWqXA@mail.gmail.com> <CALe9h7f-wwcxW9KNVZvd6NZZzKjQxShy7RvZiOotH0db18b38w@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: bluestore performance snapshot - 20161006
+Date: Fri, 7 Oct 2016 09:03:32 -0500
+Message-ID: <e3e00cbc-3e97-8582-bb93-7ac03b3da40b@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:35403 "EHLO
-        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752704AbcJGNqF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Oct 2016 09:46:05 -0400
-Received: by mail-wm0-f47.google.com with SMTP id f193so33795929wmg.0
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Oct 2016 06:46:04 -0700 (PDT)
-In-Reply-To: <CALe9h7f-wwcxW9KNVZvd6NZZzKjQxShy7RvZiOotH0db18b38w@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:60640 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753765AbcJGODf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 7 Oct 2016 10:03:35 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id D292CC057EC9
+        for <ceph-devel@vger.kernel.org>; Fri,  7 Oct 2016 14:03:34 +0000 (UTC)
+Received: from [10.3.112.10] (ovpn-112-10.phx2.redhat.com [10.3.112.10])
+        by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u97E3XLj018048
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+        for <ceph-devel@vger.kernel.org>; Fri, 7 Oct 2016 10:03:34 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, sepia@ceph.com
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Oct 7, 2016 at 5:26 AM, John Spray <jspray@redhat.com> wrote:
-> On Thu, Oct 6, 2016 at 7:59 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
->> On Wed, Oct 5, 2016 at 2:14 PM, Zack Cerza <zack@redhat.com> wrote:
->>> Hi all,
->>>
->>> You've probably heard that we've been working on replacing the
->>> gitbuilders with a new build system. I recently did some work [0] in
->>> teuthology to support that new system, and that work got merged
->>> yesterday. Here's an overview of its current state:
->>>
->>> The way it works is that it talks to Shaman [1] to locate the package
->>> repository to use. It is not enabled by default as it isn't yet able
->>> to cover all gitbuilder use cases. It can be enabled by setting
->>> "use_shaman: true" in either your teuthology.yaml or your job's yaml.
->>> It can be set for an entire suite-run by doing something like:
->>>
->>> $ echo "use_shaman: true" > ./shaman.yaml
->>> $ teuthology-suite -v -c jewel -s upgrade/jewel-x -m vps -k distro
->>> $PWD/shaman.yaml --dry-run
->>>
->>> Of course, later on when we can fully replace gitbuilders this
->>> behavior will be the default. At some point after that we'll be
->>> decommissioning the gitbuilders.
->>>
->>> Please note that using it in the following scenarios will *not* do
->>> what you want:
->>>
->>> * Any job that requires one of our testing kernels, as the new system
->>> isn't building our kernels yet
->>> * Any job that uses the install task for samba, for the same reason
->>> * Any job that uses ceph-deploy, as ceph-deploy isn't using the new system yet
->>
->> I think Alfredo mentioned this in his thread, but we also don't seem
->> to be building the "notcmalloc" flavors, so don't try and run any
->> valgrind tests against it.
->> Are there other flavors we know are missing?
->>
->> An FS run (http://pulpito.ceph.com/gregf-2016-10-05_20:40:25-fs-master---basic-mira/)
->> had quite a few other failures, but just scanning the errors I don't
->> think any of the others are because of the build system.
->
-> I believe the java failures there are probably because they're not
-> getting built in the new system yet?  I think there was a ticket but I
-> don't have it to hand.
+Hi Guys,
 
-We are now (since last week) building libcephfs-java
+I wanted to give folks a quick snapshot of bluestore performance on our 
+NVMe test setup.  There's a lot of things happening very quickly in the 
+code, so here's a limited snapshot of how we are doing.  These are short 
+running tests, so do keep that in mind (5 minutes each).
 
-http://tracker.ceph.com/issues/17397
+https://drive.google.com/uc?export=download&id=0B2gTBZrkrnpZRXFKRDBrTjZiWGc
 
->
-> John
->
->> -Greg
->>
->>>
->>> Please try to give this new system some exercise. It's been tested
->>> well but of course we can't necessarily anticipate everything.
->>> Teuthology bugs, as always, should go here [2] and bugs related to the
->>> new build system should go here [3].
-> _______________________________________________
-> Sepia mailing list
-> Sepia@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/sepia-ceph.com
+The gist of it is:
+
+We are now basically faster than filestore in all short write tests. 
+Increasing the min_alloc size (and to a lesser extent) the number of 
+cached onodes brings 4K random write performance up even further. 
+Likely increasing the min_alloc size will improve long running test 
+performance as well due to drastically reduced metadata load on rocksdb. 
+  Related to this, the amount of memory that we cache with 4k min_alloc 
+is pretty excessive, even when limiting the number of cached onodes to 
+4k  The memory allocator work should allow us to make this more 
+flexible, but I suspect that for now we will want to increase the 
+min_alloc size to 16k to help alleviate memory consumption and metadata 
+overhead (and improve 4k random write performance!).  The extra WAL 
+write is probably still worth the tradeoff for now.
+
+On the read side we are seeing some regressions.  The sequential read 
+case is interesting.  We're doing quite a bit worse in recent bluestore 
+even vs older bluestore, and generally quite a bit worse than filestore. 
+  Increasing the min_alloc size reduces the degredation, but we still 
+have ground to make up.  In these tests rbd readahead is being used in 
+an attempt to achieve client-side readahead since bluestore no longer 
+does it on the OSD side, but appears to be fairly ineffective.  These 
+are the settings used:
+
+         rbd readahead disable after bytes = 0
+         rbd readahead max bytes = 4194304
+
+By default we require 10 sequential reads to trigger it.  I don't think 
+that should be a problem, but perhaps lowering the threshold will help. 
+In general this is an area we still need to focus.
+
+For random reads, the degradation was previously found to be due to the 
+async messenger.  Both filestore and bluestore performance has degraded 
+relative to Jewel in these tests.  Haomai suspects fast dispatch as the 
+primarily bottleneck here.
+
+So in general, the areas I think we still need to focus:
+
+
+1) memory allocator work (much easier caching configuration, better 
+memory usage, better memory fragmentation, etc)
+2) Long running tests (Somnath has been doing this, thanks Somnath!)
+2) Sequential read performance in bluestore (Need to understand this better)
+3) Fast dispatch performance improvement (Dan's RCU work?)
+
+Mark
