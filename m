@@ -1,123 +1,181 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore-Performance regression in the latest master
-Date: Thu, 6 Oct 2016 23:04:17 +0000
-Message-ID: <BY2PR02MB396C9E7D9CB33A1CDD204AAF4C70@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <BY2PR02MB396BEF6CFDD1164D194C9D2F4C70@BY2PR02MB396.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1610062115250.19850@piezo.us.to>
- <BY2PR02MB3969BB28F45C805DB4D2735F4C70@BY2PR02MB396.namprd02.prod.outlook.com>
- <50c62b05-5712-9502-1648-0772f8f8c5c1@redhat.com>
+From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
+Subject: Re: CRUSH algorithm and its debug method
+Date: Fri, 7 Oct 2016 11:20:10 +0800
+Message-ID: <CABF_e-HYn6qSt8vsUB0+t-SdjToJSa0=FKCwzi=UYVdF116wCA@mail.gmail.com>
+References: <CALZt5jytLeocqK7TY5MhLbimgiriL8Tr5WQneLSaPK32KP88vw@mail.gmail.com>
+ <alpine.DEB.2.11.1610031319090.19850@piezo.us.to> <CALZt5jxRt7KXF2_jJs5bMo0jyxhAJvEhO8tzQAedsfhJ-eWY6w@mail.gmail.com>
+ <alpine.DEB.2.11.1610061325150.19850@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0055.outbound.protection.outlook.com ([104.47.37.55]:34259
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932395AbcJFXEU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 6 Oct 2016 19:04:20 -0400
-In-Reply-To: <50c62b05-5712-9502-1648-0772f8f8c5c1@redhat.com>
-Content-Language: en-US
+Received: from mail-yw0-f170.google.com ([209.85.161.170]:33010 "EHLO
+        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752455AbcJGDUM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Oct 2016 23:20:12 -0400
+Received: by mail-yw0-f170.google.com with SMTP id t192so5102036ywf.0
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Oct 2016 20:20:11 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1610061325150.19850@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ning Yao <zay11022@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Mark,
-If you see the graph in the below link , you will see it is choppy and fast=
-er till 1 hour , beyond that it is degrading fast..
-If you see the left side graph that is holding the constant performance thr=
-oughout for 10 hour (old master)
-Have you checked the latency with the shorter run with the latest master as=
- well ? Even with the shorter run it is 4X more latency (even though aggreg=
-ated throughput is bit more) for me..
-Anyways, I am trying to reproduce this in another setup just to eliminate H=
-W issues in case..
-
-Thanks & Regards
-Somnath
-
------Original Message-----
-From: Mark Nelson [mailto:mnelson@redhat.com]=20
-Sent: Thursday, October 06, 2016 3:13 PM
-To: Somnath Roy; Sage Weil
-Cc: Ceph Development
-Subject: Re: Bluestore-Performance regression in the latest master
-
-This is bluestore specific?  My guess is the cache sizes as well.=20
-Bluestore on master is actually significantly faster for me in all of the t=
-ests I've thrown at it vs earlier this week, but my onode hit rate is still=
- "decent".
-
-I still see higher performance by increasing the min alloc size to 16k and =
-then bumping up the onode cache size a bit with the memory savings.
-
-Mark
-
-On 10/06/2016 04:52 PM, Somnath Roy wrote:
-> I have increased the cache size at the point where it is started swapping=
- after 30 min run or so , but, still I am seeing the huge latest difference=
-.
-> Will try to find out what went wrong recently..
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Thursday, October 06, 2016 2:17 PM
-> To: Somnath Roy
-> Cc: Ceph Development
-> Subject: Re: Bluestore-Performance regression in the latest master
->
-> On Thu, 6 Oct 2016, Somnath Roy wrote:
->> Sage,
->> I am seeing the performance with the latest master is not stable compare=
- to 3 days old master. The peak performance is higher but it is jumping up =
-and down. Analyzing further I suspect recent cache changes has an impact. W=
-hile the performance is high , I am seeing lower disk reads (probably becau=
-se of cache hits) , but the low point is much lower when it is missing the =
-cache probably. You were saying on the standup about adding buffers in the =
-cache in the write path , is that merged into the master ?
->
-> The buffered writes by default is not merged:
->
-> https://github.com/ceph/ceph/pull/11301
->
->> The following pull request for cache that got merged seems reasonable.
+2016-10-06 21:27 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Thu, 6 Oct 2016, Ning Yao wrote:
+>> Hi,
 >>
->> https://github.com/ceph/ceph/pull/11295
->
-> This cut the cache size down by 4x, plus whatever your sharding factor is=
-/was.  Could that be it?
->
->> Any hunch what is causing this degradation recently ? Otherwise, I=20
->> need to dig down to find that out :-(
+>> 2016-10-03 21:22 GMT+08:00 Sage Weil <sage@newdream.net>:
+>> > Hi!
+>> >
+>> > On Sat, 1 Oct 2016, Ning Yao wrote:
+>> >> Hi, Sage
+>> >>
+>> >> I find that several issues related to current CRUSH algorithm as below:
+>> >>
+>> >> 1. It is possible to select out the same collision and retry bucket in
+>> >> a crush_choose_firstn() loop. (e.g.  when we set reweight to 0 or mark
+>> >> osd out, it would be definitely rejected if it is selected. However,
+>> >> when the second chance to select out another one based on the
+>> >> different r', it is still possible to select out the same osd
+>> >> previously rejected, right? And until a different one is selected
+>> >> after several retries.).  I think we can record those rejected or
+>> >> collision osds in the same loop so that the process can be converged
+>> >> much faster?
+>> >
+>> > It's sitll possible to pick the same thing with a different r'.
+>> > That's why the max retries values has to be reasonably high.  I'm not sure
+>> > how you would avoid doing the full calculation, though... can you be
+>> > more specific?
+>> I have two ideas to do that:
 >>
->> See the graph in the following link for the performance difference.
+>> 1) the simplest idea is allocate a bool array in crush_choose_firstn()
+>> whose size is crush_bucket->size. And then pass the array pointer into
+>> crush_bucket_choose(). What we shoud do is:
+>>     i) mark those already selected, collision or rejected items as true
+>>     ii) when determine (hight and high_draw in bucket_straw_choose or
+>> bucket_straw2_choose), we can skip those items already marked TRUE.
+>>     But the drawback is that  we always need to allocate an dynamic
+>> array within each iteration, And memory allocation in heap is an
+>> expensive operation.
 >>
->> https://docs.google.com/spreadsheets/d/1JO3FaBbfT5jEdyYGB8EhHnAl5bAHe
->> 0
->> 6ojLE85mPzsK4/edit?usp=3Dsharing
+>> 2) So the second idea is to use a uint64_t s_mask (said selected_mask
+>> to indicate those items already been selected). What we should do is:
+>>     i) init uint64_t s_mask = 0; in crush_choose_firstn()
+>>     ii) pass value by reference into  bucket_straw_choose or
+>> bucket_straw2_choose and mark the corresponding bit as one if item is
+>> selected, collision or rejected.  s_mask  = s_mask | (1ul << high)
+>>     iii) do not consider those whose bit (s_mask & (1ul << high)) is
+>> marked as one.
+>>     But here is an explicit limitation, the number of items in the
+>> bucket should be smaller than sizeof(int64_t). So we need to run the
+>> previous strategy if crush_bucket->size > 64.
 >>
->> The left side graph is with old master and right one is with latest mast=
-er..Old one I ran for 10 hour and latest master I ran it for 2 hours.
->> The new one has *4X more* latency as well..
+>> Furthermore, the strategy is just suitable for straw algorithm, so we
+>> need to remain the strategy for tree, list and uniform algorithm.
+>>
+>> Any other better ideas? @Wei-Chung Cheng
+
+
+
+hi ning:
+
+I agree first idea. If we could handle the array (or selected item)
+scope well, maybe the memory usage would not be a problem.
+
+I am not sure about second idea.
+did you mean we store the high result and skip it next item we found
+the same high result?
+
+I don't have any better ideas now and I perfer first idea ; )
+
+
+
+
+
 >
-> My guess is the cache size.  I can't think of what else would have much o=
-f an effect on latency...
+> This PR is doing something very similar in order to solve what we've been
+> calling the 'multi-pick anomaly,' which tends to allocate more data to
+> very low-weighted devices.
 >
-> s
-> PLEASE NOTE: The information contained in this electronic mail message is=
- intended only for the use of the designated recipient(s) named above. If t=
-he reader of this message is not the intended recipient, you are hereby not=
-ified that you have received this message in error and that any review, dis=
-semination, distribution, or copying of this message is strictly prohibited=
-. If you have received this communication in error, please notify the sende=
-r by telephone or e-mail (as shown above) immediately and destroy any and a=
-ll copies of this message in your possession (whether hard copies or electr=
-onically stored copies).
+>         https://github.com/ceph/ceph/pull/10218
+>
+> The effect is only noticeable with very small (relative) weights, but it
+> comes up in practice on large clusters semi-frequently.
+>
+> sage
+>
+>
+
+
+
+hi sage:
+
+as you say, this pr solve the problem that would allocate more data to
+very low-weighted devices with the configurable parameter.
+
+did it still choose the same item with straw2?
+I think it could reduce the retry times (did we avoid the retry?), and
+we still need to do the thing that would avoid/skip the selected item?
+
+thanks!!
+vicente
+
+
+
+
+
+>
+>
+>>
+>>
+>> >> 2. Currently, the reweight params in crushmap is memoryless (e.g we
+>> >> balance our data by reducing reweight, which will be lost after this
+>> >> osd DOWN and OUT automatically. And we mark its IN again because
+>> >> currently ceph osd in directly marks the reweight to 1.0 and out marks
+>> >> the reweight to 0.0).  It is quite awkward when we use ceph osd
+>> >> reweight-by-utilization to make data balance (If some osds down and
+>> >> out, our previous effort is totally lost).   So I think marking osd
+>> >> "in"  does not simply modify reweight to "1.0". Actually, we can
+>> >> iteration the previous osdmap and find out the value of the reweight
+>> >> or records it anywhere we can retrieve this value again?
+>> >
+>> > The old value is stored here
+>> >
+>> > https://github.com/ceph/ceph/blob/master/src/osd/OSDMap.h#L89
+>> >
+>> > and restored when the OSD is marked back up, although IIRC there is a
+>> > config option that controls when the old value is stored (it might only
+>> > happen when the osd is marked out automatically, not when it is done
+>> > manually?).  That behavior could be changed, though.
+>> Thanks, fix in PR #11293 is what we expect.
+>>
+>> >> 3. Currently, there is no debug option in the mapping progress in
+>> >> Mapper.c. dprintk is default disabled so that it will be hard to dig
+>> >> into the algorithm if something unexpected result happens. I think we
+>> >> can introduce the debug options and output the debug information when
+>> >> we use "ceph osd map xxx xxx" so that it is much more easier to find
+>> >> the shortness in current mapping process?
+>> >
+>> > Yeah, it's hard to debug.  I usually uncomment the dprintk define and
+>> > rebuild osdmaptool, which has a --test-map-pg option so that I can run
+>> > a specific problematic mapping.  We could do something a bit more clever
+>> > as long as it is a simple conditional--we don't want to slow down the
+>> > mapping code as it is performance sensitive.
+>>
+>> Yeah, I think it is enough to print out the debug information when we
+>> run "ceph osd map data object_1". So we can pass ostream* into the
+>> function, gathering the information. Normally, we can default pass the
+>> ostream*  as a NULL pointer so that we can skip all of the dprintk?
+>>
+>> > Thanks!
+>> > sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=20
-> in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> info at  http://vger.kernel.org/majordomo-info.html
->
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
