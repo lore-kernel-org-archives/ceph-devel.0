@@ -1,150 +1,82 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore-Performance regression in the latest master
-Date: Fri, 7 Oct 2016 16:20:42 +0000
-Message-ID: <BY2PR02MB3968A8225EE60516BABE810F4C60@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <BY2PR02MB396BEF6CFDD1164D194C9D2F4C70@BY2PR02MB396.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1610062115250.19850@piezo.us.to>
- <BY2PR02MB3969BB28F45C805DB4D2735F4C70@BY2PR02MB396.namprd02.prod.outlook.com>
- <50c62b05-5712-9502-1648-0772f8f8c5c1@redhat.com>
- <BY2PR02MB396C9E7D9CB33A1CDD204AAF4C70@BY2PR02MB396.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1610071317080.18626@piezo.us.to>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: bluestore performance snapshot - 20161006
+Date: Sat, 8 Oct 2016 01:27:42 +0800
+Message-ID: <CACJqLyYkL6kDuzOX2PCggHLpCHm7gdv8oxjBONYCfrKJi9hCNQ@mail.gmail.com>
+References: <e3e00cbc-3e97-8582-bb93-7ac03b3da40b@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0088.outbound.protection.outlook.com ([104.47.42.88]:7424
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+Received: from mail-ty1jpn01on0129.outbound.protection.outlook.com ([104.47.93.129]:1143
+        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932982AbcJGQUo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 7 Oct 2016 12:20:44 -0400
-In-Reply-To: <alpine.DEB.2.11.1610071317080.18626@piezo.us.to>
-Content-Language: en-US
+        id S965311AbcJGR1z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 7 Oct 2016 13:27:55 -0400
+Received: by mail-vk0-f47.google.com with SMTP id 192so51045251vkl.2
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Oct 2016 10:27:51 -0700 (PDT)
+In-Reply-To: <e3e00cbc-3e97-8582-bb93-7ac03b3da40b@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Mark Nelson <mnelson@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Shouldn't be, as amount of data we are writing per write is same as my last=
- test , so, level compaction shouldn't cause this..I am trying to nail it d=
-own , will update you hopefully soon..
+On Fri, Oct 7, 2016 at 10:03 PM, Mark Nelson <mnelson@redhat.com> wrote:
+> Hi Guys,
+>
+> I wanted to give folks a quick snapshot of bluestore performance on our NVMe
+> test setup.  There's a lot of things happening very quickly in the code, so
+> here's a limited snapshot of how we are doing.  These are short running
+> tests, so do keep that in mind (5 minutes each).
+>
+> https://drive.google.com/uc?export=download&id=0B2gTBZrkrnpZRXFKRDBrTjZiWGc
+>
+> The gist of it is:
+>
+> We are now basically faster than filestore in all short write tests.
+> Increasing the min_alloc size (and to a lesser extent) the number of cached
+> onodes brings 4K random write performance up even further. Likely increasing
+> the min_alloc size will improve long running test performance as well due to
+> drastically reduced metadata load on rocksdb.  Related to this, the amount
+> of memory that we cache with 4k min_alloc is pretty excessive, even when
+> limiting the number of cached onodes to 4k  The memory allocator work should
+> allow us to make this more flexible, but I suspect that for now we will want
+> to increase the min_alloc size to 16k to help alleviate memory consumption
+> and metadata overhead (and improve 4k random write performance!).  The extra
+> WAL write is probably still worth the tradeoff for now.
+>
+> On the read side we are seeing some regressions.  The sequential read case
+> is interesting.  We're doing quite a bit worse in recent bluestore even vs
+> older bluestore, and generally quite a bit worse than filestore.  Increasing
+> the min_alloc size reduces the degredation, but we still have ground to make
+> up.  In these tests rbd readahead is being used in an attempt to achieve
+> client-side readahead since bluestore no longer does it on the OSD side, but
+> appears to be fairly ineffective.  These are the settings used:
+>
+>         rbd readahead disable after bytes = 0
+>         rbd readahead max bytes = 4194304
+>
+> By default we require 10 sequential reads to trigger it.  I don't think that
+> should be a problem, but perhaps lowering the threshold will help. In
+> general this is an area we still need to focus.
+>
+> For random reads, the degradation was previously found to be due to the
+> async messenger.  Both filestore and bluestore performance has degraded
+> relative to Jewel in these tests.  Haomai suspects fast dispatch as the
+> primarily bottleneck here.
+>
+> So in general, the areas I think we still need to focus:
+>
+>
+> 1) memory allocator work (much easier caching configuration, better memory
+> usage, better memory fragmentation, etc)
+> 2) Long running tests (Somnath has been doing this, thanks Somnath!)
+> 2) Sequential read performance in bluestore (Need to understand this better)
+> 3) Fast dispatch performance improvement (Dan's RCU work?)
 
------Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com]=20
-Sent: Friday, October 07, 2016 6:18 AM
-To: Somnath Roy
-Cc: Mark Nelson; Ceph Development
-Subject: RE: Bluestore-Performance regression in the latest master
+Oh, it would be great to here anyone is working on RCU. Is it really ongoing?
 
-On Thu, 6 Oct 2016, Somnath Roy wrote:
-> Mark,
-> If you see the graph in the below link , you will see it is choppy and fa=
-ster till 1 hour , beyond that it is degrading fast..
-> If you see the left side graph that is holding the constant=20
-> performance throughout for 10 hour (old master) Have you checked the late=
-ncy with the shorter run with the latest master as well ? Even with the sho=
-rter run it is 4X more latency (even though aggregated throughput is bit mo=
-re) for me..
-> Anyways, I am trying to reproduce this in another setup just to eliminate=
- HW issues in case..
-
-You mentioned yesterday you had tried switching the rocksdb compaction mode=
-.. could that be it?
-
-sage
-
->=20
-> Thanks & Regards
-> Somnath
->=20
-> -----Original Message-----
-> From: Mark Nelson [mailto:mnelson@redhat.com]
-> Sent: Thursday, October 06, 2016 3:13 PM
-> To: Somnath Roy; Sage Weil
-> Cc: Ceph Development
-> Subject: Re: Bluestore-Performance regression in the latest master
->=20
-> This is bluestore specific?  My guess is the cache sizes as well.=20
-> Bluestore on master is actually significantly faster for me in all of the=
- tests I've thrown at it vs earlier this week, but my onode hit rate is sti=
-ll "decent".
->=20
-> I still see higher performance by increasing the min alloc size to 16k an=
-d then bumping up the onode cache size a bit with the memory savings.
->=20
+>
 > Mark
->=20
-> On 10/06/2016 04:52 PM, Somnath Roy wrote:
-> > I have increased the cache size at the point where it is started swappi=
-ng after 30 min run or so , but, still I am seeing the huge latest differen=
-ce.
-> > Will try to find out what went wrong recently..
-> >
-> > Thanks & Regards
-> > Somnath
-> >
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sweil@redhat.com]
-> > Sent: Thursday, October 06, 2016 2:17 PM
-> > To: Somnath Roy
-> > Cc: Ceph Development
-> > Subject: Re: Bluestore-Performance regression in the latest master
-> >
-> > On Thu, 6 Oct 2016, Somnath Roy wrote:
-> >> Sage,
-> >> I am seeing the performance with the latest master is not stable compa=
-re to 3 days old master. The peak performance is higher but it is jumping u=
-p and down. Analyzing further I suspect recent cache changes has an impact.=
- While the performance is high , I am seeing lower disk reads (probably bec=
-ause of cache hits) , but the low point is much lower when it is missing th=
-e cache probably. You were saying on the standup about adding buffers in th=
-e cache in the write path , is that merged into the master ?
-> >
-> > The buffered writes by default is not merged:
-> >
-> > https://github.com/ceph/ceph/pull/11301
-> >
-> >> The following pull request for cache that got merged seems reasonable.
-> >>
-> >> https://github.com/ceph/ceph/pull/11295
-> >
-> > This cut the cache size down by 4x, plus whatever your sharding factor =
-is/was.  Could that be it?
-> >
-> >> Any hunch what is causing this degradation recently ? Otherwise, I=20
-> >> need to dig down to find that out :-(
-> >>
-> >> See the graph in the following link for the performance difference.
-> >>
-> >> https://docs.google.com/spreadsheets/d/1JO3FaBbfT5jEdyYGB8EhHnAl5bA
-> >> He
-> >> 0
-> >> 6ojLE85mPzsK4/edit?usp=3Dsharing
-> >>
-> >> The left side graph is with old master and right one is with latest ma=
-ster..Old one I ran for 10 hour and latest master I ran it for 2 hours.
-> >> The new one has *4X more* latency as well..
-> >
-> > My guess is the cache size.  I can't think of what else would have much=
- of an effect on latency...
-> >
-> > s
-> > PLEASE NOTE: The information contained in this electronic mail message =
-is intended only for the use of the designated recipient(s) named above. If=
- the reader of this message is not the intended recipient, you are hereby n=
-otified that you have received this message in error and that any review, d=
-issemination, distribution, or copying of this message is strictly prohibit=
-ed. If you have received this communication in error, please notify the sen=
-der by telephone or e-mail (as shown above) immediately and destroy any and=
- all copies of this message in your possession (whether hard copies or elec=
-tronically stored copies).
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=20
-> > in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> > info at  http://vger.kernel.org/majordomo-info.html
-> >
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=20
-> in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
