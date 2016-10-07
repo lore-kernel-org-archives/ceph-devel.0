@@ -1,46 +1,46 @@
-From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Subject: Re: new naming convention for building repos and binaries from
- branches
-Date: Fri, 7 Oct 2016 19:16:57 +0000
-Message-ID: <26CBB0BA-AF47-40AB-BF35-B50F5A6501A3@Teradata.com>
-References: <CAC-Np1wcBGRcFYtK8WsjfM-WR+H_S58XgH74D+dBiGxd=KwZUQ@mail.gmail.com>
- <CALe9h7da1Oz29q2pot1BZLNBcs1NJ51BRLE+Uj_3mVjnDGw6fQ@mail.gmail.com>
- <CAEPMp+7OJ+pX=mYbNGgm+HZMGOGDK3xiApw5OL03vsN9YApTGA@mail.gmail.com>
- <alpine.DEB.2.11.1610061633440.19850@piezo.us.to>
- <CAEPMp+7EyHBJSDoCZoTPvnd5bBKmsZ_D7UfZ5aYCvS6THLMqSg@mail.gmail.com>
+From: Zack Cerza <zack@redhat.com>
+Subject: Selectively re-scheduling jobs in a teuthology run
+Date: Fri, 7 Oct 2016 15:57:36 -0600
+Message-ID: <CACk6Fjm5QNgb3kK6eY8Oi4XcQDm_s9i9KOqDk2GsbkPwr6E4ZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:33577 "EHLO
-        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751959AbcJGTRA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Oct 2016 15:17:00 -0400
-In-Reply-To: <CAEPMp+7EyHBJSDoCZoTPvnd5bBKmsZ_D7UfZ5aYCvS6THLMqSg@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <E780A0359A6E564C8C20791C8463F1D6@TD.Teradata.com>
+Received: from mail-lf0-f51.google.com ([209.85.215.51]:33651 "EHLO
+        mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750809AbcJGV5j (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Oct 2016 17:57:39 -0400
+Received: by mail-lf0-f51.google.com with SMTP id x79so50731794lff.0
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Oct 2016 14:57:38 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrew Schoen <aschoen@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>, Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Development, Ceph" <ceph-devel@vger.kernel.org>
 
+Hey all,
 
-> On Oct 7, 2016, at 7:27 AM, Andrew Schoen <aschoen@redhat.com> wrote:
-> 
->> I think we need a "do not build" prefix and a "build this asap" prefix.
->> Maybe nobuild-* and asap-*?
->> 
-> 
-> Is the 'asap-*' want here because of the typical long wait on the gitbuilders?
-> 
-> The way we're configured now we can build 10 branches at a time, all
-> of those branches building for 3 distros. I haven't seen a build take
-> longer than an hour or so. It'd be easy to scale that up as well, but
-> I don't see the queue ever being backed up at our current load.
+Yesterday I (finally) got around to implementing an oft-requested
+feature: re-scheduling failed jobs. What this means is that for
+example, when you schedule a huge test run and just a few fail, you'll
+be able to tell teuthology to schedule a new run containing only those
+jobs whose description match those of the old run.
 
-Most of the builds will be building almost the same files, I hope you guys are
-using build caching mechanisms such as ccache to accelerate the build time.
+Note that, of all the flags and values you can pass to
+teuthology-suite, the only one that is inherited is the --suite value.
+The rest will need to be specified explicitly. While this may seem
+like a pain, it also means that you can still use things like
+--filter, --filter-out, --priority, and really everything else.
 
-Nitin
+An example invocation:
+teuthology-suite -v --rerun
+teuthology-2016-10-06_05:00:03-smoke-master-testing-basic-vps -m vps
+-n 10 -c master --dry-run
 
+It will default to re-scheduling jobs in the 'fail' or 'dead' state -
+but you can override that using --rerun-statuses (aka -R).
 
+The PR is here:
+https://github.com/ceph/teuthology/pull/963/
+There's more background here:
+http://tracker.ceph.com/issues/10945
+
+Enjoy!
+Zack
