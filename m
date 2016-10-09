@@ -1,86 +1,69 @@
-From: agung Laksono <agung.smarts-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Fwd: if ceph tracker says the source was QA,
- what version that I have to checkout?
-Date: Mon, 10 Oct 2016 06:21:17 +0700
-Message-ID: <CAJ+86MOjgonJk-x9CfucTYy-+UTr16qU3J_9Y1hf0SdozZkZUQ@mail.gmail.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: [ceph-users] Fwd: if ceph tracker says the source was QA, what
+ version that I have to checkout?
+Date: Mon, 10 Oct 2016 09:28:04 +1000
+Message-ID: <CAF-wwdG8AEqQJZqhpJb74Y5h-T7i_TZBsb+aYstyha3UhmrYmQ@mail.gmail.com>
 References: <CAJ+86MN1GkiO1coWEXeEkKxmijKRL8zEvszeXPpa-Ky4vXfxSA@mail.gmail.com>
+ <CAJ+86MOjgonJk-x9CfucTYy-+UTr16qU3J_9Y1hf0SdozZkZUQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2084539435=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAJ+86MN1GkiO1coWEXeEkKxmijKRL8zEvszeXPpa-Ky4vXfxSA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
---===============2084539435==
-Content-Type: multipart/alternative; boundary=001a1147506883fd2b053e76e6a6
-
---001a1147506883fd2b053e76e6a6
 Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:35697 "EHLO
+        mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750786AbcJIX2H (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Oct 2016 19:28:07 -0400
+Received: by mail-lf0-f45.google.com with SMTP id l131so95440883lfl.2
+        for <ceph-devel@vger.kernel.org>; Sun, 09 Oct 2016 16:28:06 -0700 (PDT)
+In-Reply-To: <CAJ+86MOjgonJk-x9CfucTYy-+UTr16qU3J_9Y1hf0SdozZkZUQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: agung Laksono <agung.smarts@gmail.com>
+Cc: Ceph Users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi All ceph users,
+On Mon, Oct 10, 2016 at 9:21 AM, agung Laksono <agung.smarts@gmail.com> wrote:
+>
+> Hi All ceph users,
+>
+> I am interesting to learn ceph bug.
+>
+> Some bugs that I learned pointing particular ceph version or tags for their
+> buggy part.
+> However I found some bugs put Q/A as the source.
+> For instance http://tracker.ceph.com/issues/9301
+>
+> when I checked out on giant and firefly version, I saw the significant
+> different between
+> the version and the revision that changed by the developer.
+>
+> My question is how to have a buggy version( version when the patch has not
+> been implemented)?
 
-I am interesting to learn ceph bug.
+For this particular commit we can ask git.
 
-Some bugs that I learned pointing particular ceph version or tags for their
-buggy part.
-However I found some bugs put Q/A as the source.
-For instance http://tracker.ceph.com/issues/9301
+http://tracker.ceph.com/projects/ceph/repository/revisions/c421b55e8e15ef04ca8aeb47f7d090375eaa8573
 
-when I checked out on giant and firefly version, I saw the significant
-different between
-the version and the revision that changed by the developer.
+$ git describe c421b55e8e15ef04ca8aeb47f7d090375eaa8573
+v0.85-884-gc421b55
 
-My question is how to have a buggy version( version when the patch has not
-been implemented)?
+So this was the 884th commit after the v0.85 tag and you need to check
+out a copy of the source before that.
 
-Thanks
+>
+> Thanks
+>
+> --
+> Cheers,
+>
+> Agung Laksono
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+
+
 
 -- 
 Cheers,
-
-Agung Laksono
-
---001a1147506883fd2b053e76e6a6
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div class=3D"gmail_quote"><br></div><div class=3D"gmail_q=
-uote">Hi All ceph users,=C2=A0</div><div class=3D"gmail_quote"><br><div dir=
-=3D"ltr"><div><div><div><div>I am interesting to learn ceph bug.<br><br></d=
-iv>Some bugs that I learned pointing particular ceph version or tags for th=
-eir buggy part. <br></div>However I found some bugs put Q/A as the source. =
-<br>For instance <a href=3D"http://tracker.ceph.com/issues/9301" target=3D"=
-_blank">http://tracker.ceph.com/<wbr>issues/9301</a><br><br></div>when I ch=
-ecked out on giant and firefly version, I saw the significant different bet=
-ween<br>the version and the revision that changed by the developer. <br><br=
->My question is how to have a buggy version( version when the patch has not=
- been implemented)?<br><br></div>Thanks<span class=3D"HOEnZb"><font color=
-=3D"#888888"><br clear=3D"all"><div><div><div><div><div><div><br>-- <br><di=
-v class=3D"m_-326351098946061181gmail_signature"><div dir=3D"ltr"><div><div=
- dir=3D"ltr"><div>Cheers,</div><div><br></div>Agung Laksono<br></div></div>=
-</div></div></div></div></div></div></div></div></font></span></div></div>
-</div>
-
---001a1147506883fd2b053e76e6a6--
-
---===============2084539435==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============2084539435==--
+Brad
