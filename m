@@ -1,126 +1,84 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: bluestore performance snapshot - 20161006
-Date: Mon, 10 Oct 2016 21:29:58 +0000
-Message-ID: <BY2PR02MB3967B0DA74162EFB241FF23F4DB0@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <e3e00cbc-3e97-8582-bb93-7ac03b3da40b@redhat.com>
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: Snapshots of consistency groups
+Date: Mon, 10 Oct 2016 15:14:43 -0700
+Message-ID: <CA+hcxJR6S8AZQ0mY5MTKiBwjf0bQYswWoL16WBJgfrOzzQ40zg@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+ <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+ <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
+ <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
+ <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
+ <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
+ <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
+ <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
+ <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
+ <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
+ <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
+ <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
+ <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
+ <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
+ <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
+ <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
+ <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
+ <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
+ <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
+ <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
+ <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
+ <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com> <CA+aFP1A4YYDG0HSJ52R__DPKBc_Y7p62Ec4tzhdXt+UPkC=vNw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn3nam01on0069.outbound.protection.outlook.com ([104.47.33.69]:64999
-        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752225AbcJJWFn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Oct 2016 18:05:43 -0400
-In-Reply-To: <e3e00cbc-3e97-8582-bb93-7ac03b3da40b@redhat.com>
-Content-Language: en-US
+Received: from mail-yw0-f178.google.com ([209.85.161.178]:33354 "EHLO
+        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752245AbcJJWOp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2016 18:14:45 -0400
+Received: by mail-yw0-f178.google.com with SMTP id t192so2053878ywf.0
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Oct 2016 15:14:44 -0700 (PDT)
+In-Reply-To: <CA+aFP1A4YYDG0HSJ52R__DPKBc_Y7p62Ec4tzhdXt+UPkC=vNw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-TWFyaywNCkFzIHdlIGRpc2N1c3NlZCB0b2RheSwgaGVyZSBpcyBzb21lIGRhdGEgcG9pbnQgZm9y
-IG1pbl9hbGxvY19zaXplIHNldCB0byAxNksgdnMgZGVmYXVsdCA0Sy4uDQpJIGFtIHNlZWluZyA0
-SyBSVyBpcyBzdGFiaWxpemluZyB0byBhIGxvd2VyIHZhbHVlICh+MjUtMzAlKSBhZnRlciB+MSBo
-b3VyIHJ1biBpZiBJIHNldCBtaW5fYWxsb2Nfc2l6ZSA9IDE2SyB3aXRoIGJvdGggZGVmYXVsdCBy
-b2Nrc2RiIHR1bmluZyBhbmQgd2l0aCBteSB0dW5pbmcgSSBwb3N0ZWQgc29tZXRpbWVzIGJhY2su
-DQoNCjE2SyBtaW5fYWxsb2Nfc2l6ZSAoYWZ0ZXIgMSBhbmQgaGFsZiBob3VyKSAgOg0KLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0NCi0tLS10b3RhbC1jcHUtdXNhZ2UtLS0tIC1kc2svdG90YWwtIC1u
-ZXQvdG90YWwtIC0tLXBhZ2luZy0tIC0tLXN5c3RlbS0tDQp1c3Igc3lzIGlkbCB3YWkgaGlxIHNp
-cXwgcmVhZCAgd3JpdHwgcmVjdiAgc2VuZHwgIGluICAgb3V0IHwgaW50ICAgY3N3DQogIDMgICAx
-ICA5NSAgIDIgICAwICAgMHwgIDE5TSAgIDY4TXwgICAwICAgICAwIHwgMTYwayAgMjQya3wgIDE0
-ayAgIDU0aw0KIDE4ICAgNiAgNjcgICA4ICAgMCAgIDJ8IDM2NE0gIDU4Mk18IDExNE0gICA3NE18
-ICAgMCAgICAgMCB8IDMxM2sgIDM0M2sNCiAxOCAgIDYgIDY2ICAgOCAgIDAgICAyfCAzODRNICA2
-MTRNfCAxMjJNICAgNzlNfCAgIDAgICAgIDAgfCAzMTRrICAzNDRrDQogMTggICA2ICA2NyAgIDcg
-ICAwICAgMnwgMzM3TSAgNTc1TXwgMTA4TSAgIDcxTXwgICAwICAgICAwIHwgMzE2ayAgMzU2aw0K
-IDE4ICAgNSAgNjggICA3ICAgMCAgIDJ8IDM0OU0gIDU1Nk18IDExMU0gICA3M018ICAgMCAgICAg
-MCB8IDMwNWsgIDM0NGsNCiAxNyAgIDYgIDY4ICAgNyAgIDAgICAyfCA0MjZNICA2MzFNfCAxMDZN
-ICAgNjlNfCAgIDAgICAgIDAgfCAzMDZrICAzMzVrDQogMTkgICA2ICA2NiAgIDcgICAwICAgMnwg
-NDM2TSAgNjYxTXwgMTI5TSAgIDg0TXwgICAwICAgICAwIHwgMzQwayAgMzY1aw0KIDE5ICAgNyAg
-NjIgIDEwICAgMCAgIDJ8IDQ1ME0gIDcxMk18IDExM00gICA3NU18ICAgMCAgICAgMCB8IDMzMGsg
-IDM1MGsNCiAyMCAgIDcgIDYwICAxMSAgIDAgICAyfCA0NjNNICA3MTdNfCAxMjBNICAgNzlNfCAg
-IDAgICAgIDAgfCAzNDlrICAzNjNrDQogMjEgICA3ICA1NyAgMTMgICAwICAgMnwgNDk0TSAgNzIw
-TXwgMTM3TSAgIDg5TXwgICAwICAgICAwIHwgMzY3ayAgMzg1aw0KDQpEZWZhdWx0IDRLIG1pbl9h
-bGxvY19zaXplIChhZnRlciAxMCBob3VyIHJ1bik6DQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLQ0KDQotLS0tdG90YWwtY3B1LXVzYWdlLS0tLSAtZHNrL3RvdGFsLSAtbmV0L3RvdGFs
-LSAtLS1wYWdpbmctLSAtLS1zeXN0ZW0tLQ0KdXNyIHN5cyBpZGwgd2FpIGhpcSBzaXF8IHJlYWQg
-IHdyaXR8IHJlY3YgIHNlbmR8ICBpbiAgIG91dCB8IGludCAgIGNzdw0KIDQ0ICAgOSAgMzEgIDEz
-ICAgMCAgIDR8IDE1OE0gIDI1OU18IDE3M00gIDExM018ICAgMCAgICAgMCB8IDQ1MWsgIDQ2OWsN
-CiA0MSAgIDkgIDM0ICAxMiAgIDAgICAzfCAxNDZNICAyNTBNfCAxNjJNICAxMDZNfCAgIDAgICAg
-IDAgfCA0MzVrICA0NjFrDQogNDMgIDEwICAzMiAgMTIgICAwICAgNHwgMTQxTSAgMjY0TXwgMTcy
-TSAgMTEyTXwgICAwICAgICAwIHwgNDQ2ayAgNDYwaw0KIDQ1ICAxMCAgMjggIDE0ICAgMCAgIDR8
-IDE0ME0gIDI4Mk18IDE4ME0gIDExN018ICAgMCAgICAgMCB8IDQ1NGsgIDQ1OGsNCiA0NCAgMTAg
-IDI3ICAxNCAgIDAgICA0fCAxMzlNICAyNjFNfCAxODFNICAxMTlNfCAgIDAgICAgIDAgfCA0Njdr
-ICA0NTdrDQogNDYgIDEwICAyOCAgMTIgICAwICAgNHwgMTM3TSAgMjY0TXwgMTg1TSAgMTIxTXwg
-ICAwICAgICAwIHwgNDY1ayAgNDU4aw0KIDQ2ICAxMCAgMjkgIDExICAgMCAgIDR8IDE0M00gIDMw
-M018IDE3OU0gIDExNk18ICAgMCAgICAgMCB8IDQ1N2sgIDQ1M2sNCiA0NiAgMTAgIDI4ICAxMiAg
-IDAgICA0fCAxNzJNICAzMjVNfCAxNzNNICAxMTJNfCAgIDAgICAgIDAgfCA0NjBrICA0NTRrDQog
-NDQgIDEwICAyNiAgMTYgICAwICAgNHwgMjA2TSAgMzAyTXwgMTY5TSAgMTEwTXwgICAwICAgICAw
-IHwgNDYzayAgNDY2aw0KDQoNCllvdSBjYW4gc2VlIHdheSBtb3JlIHJlYWQvd3JpdGUgZ29pbmcg
-b24gaWYgSSBlbmFibGUgMTZLIG1pbl9hbGxvY19zaXplIGFuZCB0aGF0IGlzIGRlZ3JhZGluZyBw
-ZXJmb3JtYW5jZSBvdmVyIHRpbWUgZm9yIG1lLi4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0
-aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2
-Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10g
-T24gQmVoYWxmIE9mIE1hcmsgTmVsc29uDQpTZW50OiBGcmlkYXksIE9jdG9iZXIgMDcsIDIwMTYg
-NzowNCBBTQ0KVG86IGNlcGgtZGV2ZWwNClN1YmplY3Q6IGJsdWVzdG9yZSBwZXJmb3JtYW5jZSBz
-bmFwc2hvdCAtIDIwMTYxMDA2DQoNCkhpIEd1eXMsDQoNCkkgd2FudGVkIHRvIGdpdmUgZm9sa3Mg
-YSBxdWljayBzbmFwc2hvdCBvZiBibHVlc3RvcmUgcGVyZm9ybWFuY2Ugb24gb3VyIE5WTWUgdGVz
-dCBzZXR1cC4gIFRoZXJlJ3MgYSBsb3Qgb2YgdGhpbmdzIGhhcHBlbmluZyB2ZXJ5IHF1aWNrbHkg
-aW4gdGhlIGNvZGUsIHNvIGhlcmUncyBhIGxpbWl0ZWQgc25hcHNob3Qgb2YgaG93IHdlIGFyZSBk
-b2luZy4gIFRoZXNlIGFyZSBzaG9ydCBydW5uaW5nIHRlc3RzLCBzbyBkbyBrZWVwIHRoYXQgaW4g
-bWluZCAoNSBtaW51dGVzIGVhY2gpLg0KDQpodHRwczovL2RyaXZlLmdvb2dsZS5jb20vdWM/ZXhw
-b3J0PWRvd25sb2FkJmlkPTBCMmdUQlpya3JucFpSWEZLUkRCclRqWmlXR2MNCg0KVGhlIGdpc3Qg
-b2YgaXQgaXM6DQoNCldlIGFyZSBub3cgYmFzaWNhbGx5IGZhc3RlciB0aGFuIGZpbGVzdG9yZSBp
-biBhbGwgc2hvcnQgd3JpdGUgdGVzdHMuDQpJbmNyZWFzaW5nIHRoZSBtaW5fYWxsb2Mgc2l6ZSAo
-YW5kIHRvIGEgbGVzc2VyIGV4dGVudCkgdGhlIG51bWJlciBvZiBjYWNoZWQgb25vZGVzIGJyaW5n
-cyA0SyByYW5kb20gd3JpdGUgcGVyZm9ybWFuY2UgdXAgZXZlbiBmdXJ0aGVyLg0KTGlrZWx5IGlu
-Y3JlYXNpbmcgdGhlIG1pbl9hbGxvYyBzaXplIHdpbGwgaW1wcm92ZSBsb25nIHJ1bm5pbmcgdGVz
-dCBwZXJmb3JtYW5jZSBhcyB3ZWxsIGR1ZSB0byBkcmFzdGljYWxseSByZWR1Y2VkIG1ldGFkYXRh
-IGxvYWQgb24gcm9ja3NkYi4NCiAgUmVsYXRlZCB0byB0aGlzLCB0aGUgYW1vdW50IG9mIG1lbW9y
-eSB0aGF0IHdlIGNhY2hlIHdpdGggNGsgbWluX2FsbG9jIGlzIHByZXR0eSBleGNlc3NpdmUsIGV2
-ZW4gd2hlbiBsaW1pdGluZyB0aGUgbnVtYmVyIG9mIGNhY2hlZCBvbm9kZXMgdG8gNGsgIFRoZSBt
-ZW1vcnkgYWxsb2NhdG9yIHdvcmsgc2hvdWxkIGFsbG93IHVzIHRvIG1ha2UgdGhpcyBtb3JlIGZs
-ZXhpYmxlLCBidXQgSSBzdXNwZWN0IHRoYXQgZm9yIG5vdyB3ZSB3aWxsIHdhbnQgdG8gaW5jcmVh
-c2UgdGhlIG1pbl9hbGxvYyBzaXplIHRvIDE2ayB0byBoZWxwIGFsbGV2aWF0ZSBtZW1vcnkgY29u
-c3VtcHRpb24gYW5kIG1ldGFkYXRhIG92ZXJoZWFkIChhbmQgaW1wcm92ZSA0ayByYW5kb20gd3Jp
-dGUgcGVyZm9ybWFuY2UhKS4gIFRoZSBleHRyYSBXQUwgd3JpdGUgaXMgcHJvYmFibHkgc3RpbGwg
-d29ydGggdGhlIHRyYWRlb2ZmIGZvciBub3cuDQoNCk9uIHRoZSByZWFkIHNpZGUgd2UgYXJlIHNl
-ZWluZyBzb21lIHJlZ3Jlc3Npb25zLiAgVGhlIHNlcXVlbnRpYWwgcmVhZCBjYXNlIGlzIGludGVy
-ZXN0aW5nLiAgV2UncmUgZG9pbmcgcXVpdGUgYSBiaXQgd29yc2UgaW4gcmVjZW50IGJsdWVzdG9y
-ZSBldmVuIHZzIG9sZGVyIGJsdWVzdG9yZSwgYW5kIGdlbmVyYWxseSBxdWl0ZSBhIGJpdCB3b3Jz
-ZSB0aGFuIGZpbGVzdG9yZS4NCiAgSW5jcmVhc2luZyB0aGUgbWluX2FsbG9jIHNpemUgcmVkdWNl
-cyB0aGUgZGVncmVkYXRpb24sIGJ1dCB3ZSBzdGlsbCBoYXZlIGdyb3VuZCB0byBtYWtlIHVwLiAg
-SW4gdGhlc2UgdGVzdHMgcmJkIHJlYWRhaGVhZCBpcyBiZWluZyB1c2VkIGluIGFuIGF0dGVtcHQg
-dG8gYWNoaWV2ZSBjbGllbnQtc2lkZSByZWFkYWhlYWQgc2luY2UgYmx1ZXN0b3JlIG5vIGxvbmdl
-ciBkb2VzIGl0IG9uIHRoZSBPU0Qgc2lkZSwgYnV0IGFwcGVhcnMgdG8gYmUgZmFpcmx5IGluZWZm
-ZWN0aXZlLiAgVGhlc2UgYXJlIHRoZSBzZXR0aW5ncyB1c2VkOg0KDQogICAgICAgICByYmQgcmVh
-ZGFoZWFkIGRpc2FibGUgYWZ0ZXIgYnl0ZXMgPSAwDQogICAgICAgICByYmQgcmVhZGFoZWFkIG1h
-eCBieXRlcyA9IDQxOTQzMDQNCg0KQnkgZGVmYXVsdCB3ZSByZXF1aXJlIDEwIHNlcXVlbnRpYWwg
-cmVhZHMgdG8gdHJpZ2dlciBpdC4gIEkgZG9uJ3QgdGhpbmsgdGhhdCBzaG91bGQgYmUgYSBwcm9i
-bGVtLCBidXQgcGVyaGFwcyBsb3dlcmluZyB0aGUgdGhyZXNob2xkIHdpbGwgaGVscC4NCkluIGdl
-bmVyYWwgdGhpcyBpcyBhbiBhcmVhIHdlIHN0aWxsIG5lZWQgdG8gZm9jdXMuDQoNCkZvciByYW5k
-b20gcmVhZHMsIHRoZSBkZWdyYWRhdGlvbiB3YXMgcHJldmlvdXNseSBmb3VuZCB0byBiZSBkdWUg
-dG8gdGhlIGFzeW5jIG1lc3Nlbmdlci4gIEJvdGggZmlsZXN0b3JlIGFuZCBibHVlc3RvcmUgcGVy
-Zm9ybWFuY2UgaGFzIGRlZ3JhZGVkIHJlbGF0aXZlIHRvIEpld2VsIGluIHRoZXNlIHRlc3RzLiAg
-SGFvbWFpIHN1c3BlY3RzIGZhc3QgZGlzcGF0Y2ggYXMgdGhlIHByaW1hcmlseSBib3R0bGVuZWNr
-IGhlcmUuDQoNClNvIGluIGdlbmVyYWwsIHRoZSBhcmVhcyBJIHRoaW5rIHdlIHN0aWxsIG5lZWQg
-dG8gZm9jdXM6DQoNCg0KMSkgbWVtb3J5IGFsbG9jYXRvciB3b3JrIChtdWNoIGVhc2llciBjYWNo
-aW5nIGNvbmZpZ3VyYXRpb24sIGJldHRlciBtZW1vcnkgdXNhZ2UsIGJldHRlciBtZW1vcnkgZnJh
-Z21lbnRhdGlvbiwgZXRjKQ0KMikgTG9uZyBydW5uaW5nIHRlc3RzIChTb21uYXRoIGhhcyBiZWVu
-IGRvaW5nIHRoaXMsIHRoYW5rcyBTb21uYXRoISkNCjIpIFNlcXVlbnRpYWwgcmVhZCBwZXJmb3Jt
-YW5jZSBpbiBibHVlc3RvcmUgKE5lZWQgdG8gdW5kZXJzdGFuZCB0aGlzIGJldHRlcikNCjMpIEZh
-c3QgZGlzcGF0Y2ggcGVyZm9ybWFuY2UgaW1wcm92ZW1lbnQgKERhbidzIFJDVSB3b3JrPykNCg0K
-TWFyaw0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
-bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jk
-b21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5r
-ZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRp
-b24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQg
-b25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJv
-dmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVj
-aXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRo
-aXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBk
-aXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hp
-Yml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwg
-cGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3du
-IGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhp
-cyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVj
-dHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
+Ok. I didn't have any intention to throw exceptions.
+I was more concerned about whether it's ok to allocate and delete
+objects or I should use smart pointers.
+
+On Mon, Oct 10, 2016 at 7:18 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+> The only place exceptions are routinely used is within the "::decode"
+> functions. I would prefer to see the code not throwing new exceptions
+> on purpose.
+>
+> On Fri, Oct 7, 2016 at 2:26 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>> Are any exceptions used in librbd code? Should the code be exception safe?
+>>
+>> Thanks,
+>> V.
+>>
+>> On Fri, Sep 16, 2016 at 10:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>> On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>> if (struct_v >= 5) {
+>>>>       ::decode(snapshot_namespace, p);
+>>>>     } else {
+>>>>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
+>>>>     }
+>>>>
+>>>> then code for ::encode function of cls_rbd_snap would change accordingly:
+>>>>
+>>>> instead of
+>>>>
+>>>> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
+>>>> snapshot_namespace);
+>>>>
+>>>> I would do:
+>>>> ::encode(snapshot_namespace, bl);
+>>>
+>>>
+>>> +1 -- looks good to me
+>>>
+>>> --
+>>> Jason
+>
+>
+>
+> --
+> Jason
