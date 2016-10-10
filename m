@@ -1,158 +1,79 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: librgw init failed (-5)
-Date: Mon, 10 Oct 2016 09:53:43 -0400 (EDT)
-Message-ID: <1368180094.4143928.1476107623758.JavaMail.zimbra@redhat.com>
-References: <7C82F41C-1C24-4D78-B79B-E7B3BE012FE7@gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: Snapshots of consistency groups
+Date: Mon, 10 Oct 2016 10:18:14 -0400
+Message-ID: <CA+aFP1A4YYDG0HSJ52R__DPKBc_Y7p62Ec4tzhdXt+UPkC=vNw@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+ <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+ <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
+ <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
+ <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
+ <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
+ <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
+ <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
+ <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
+ <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
+ <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
+ <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
+ <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
+ <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
+ <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
+ <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
+ <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
+ <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
+ <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
+ <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
+ <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com> <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:54198 "EHLO
-        mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751702AbcJJNxq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2016 09:53:46 -0400
-In-Reply-To: <7C82F41C-1C24-4D78-B79B-E7B3BE012FE7@gmail.com>
+Received: from mail-pa0-f52.google.com ([209.85.220.52]:36364 "EHLO
+        mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752898AbcJJOSQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2016 10:18:16 -0400
+Received: by mail-pa0-f52.google.com with SMTP id ry6so55357051pac.3
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Oct 2016 07:18:16 -0700 (PDT)
+In-Reply-To: <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: yiming xie <platoxym@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Victor Denisov <vdenisov@mirantis.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-Hi Yiming,
+The only place exceptions are routinely used is within the "::decode"
+functions. I would prefer to see the code not throwing new exceptions
+on purpose.
 
-Can you share the contents of the RGW and FSAL blocks of your ganesha.conf?
+On Fri, Oct 7, 2016 at 2:26 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+> Are any exceptions used in librbd code? Should the code be exception safe?
+>
+> Thanks,
+> V.
+>
+> On Fri, Sep 16, 2016 at 10:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>> On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>> if (struct_v >= 5) {
+>>>       ::decode(snapshot_namespace, p);
+>>>     } else {
+>>>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
+>>>     }
+>>>
+>>> then code for ::encode function of cls_rbd_snap would change accordingly:
+>>>
+>>> instead of
+>>>
+>>> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
+>>> snapshot_namespace);
+>>>
+>>> I would do:
+>>> ::encode(snapshot_namespace, bl);
+>>
+>>
+>> +1 -- looks good to me
+>>
+>> --
+>> Jason
 
-For comparison, here's one that I use (keys sanitized):
 
-"""
-EXPORT
-{
-	# Export Id (mandatory, each EXPORT must have a unique Export_Id)
-	Export_Id = 77;
-
-	# Exported path (mandatory)
-	Path = "/";
-
-	# Pseudo Path (required for NFS v4)
-	Pseudo = "/";
-
-	# Required for access (default is None)
-	# Could use CLIENT blocks instead
-	Access_Type = RW;
-
-	SecType = "sys";
-
-	Protocols = 3,4;
-
-	#Delegations = Readwrite;
-
-	Squash = No_Root_Squash;
-
-	# Exporting FSAL
-	FSAL {
-		Name = RGW;
-		User_Id = "testuser";
-		Access_Key_Id = "acckey";
-		Secret_Access_Key = "secretkey";
-	}
-}
-
-RGW {
-    ceph_conf = "/opt/ceph-rgw/etc/ceph/ceph.conf";
-    init_args = "-d --debug-rgw=16";
-}
-
-NFS_Core_Param
-{
-        Nb_Worker = 12;
-}
-
-NFSV4 {
-    Graceless = true;
-    Allow_Numeric_Owners = true;
-    Only_Numeric_Owners = true;
-}
-
-LOG {
-	# Default_Log_Level is unknown token??
-	#Default_Log_Level = NIV_FULL_DEBUG;
-	Components {
-		#ALL = FULL_DEBUG;
-		MEMLEAKS = FATAL;
-		FSAL = FULL_DEBUG;
-		NFSPROTO = FATAL;
-		NFS_V4 = FATAL;
-		EXPORT = FATAL;
-		FILEHANDLE = FATAL;
-		DISPATCH = FATAL;
-		CACHE_INODE = FATAL;
-		CACHE_INODE_LRU = FATAL;
-		HASHTABLE = FATAL;
-		HASHTABLE_CACHE = FATAL;
-		DUPREQ = FATAL;
-		INIT = DEBUG;
-		MAIN = DEBUG;
-		IDMAPPER = FATAL;
-		NFS_READDIR = FATAL;
-		NFS_V4_LOCK = FATAL;
-		CONFIG = FATAL;
-		CLIENTID = FATAL;
-		SESSIONS = FATAL;
-		PNFS = FATAL;
-		RW_LOCK = FATAL;
-		NLM = FATAL;
-		RPC = FATAL;
-		NFS_CB = FATAL;
-		THREAD = FATAL;
-		NFS_V4_ACL = FATAL;
-		STATE = FATAL;
-#		9P = FATAL;
-#		9P_DISPATCH = FATAL;
-		FSAL_UP = FATAL;
-		DBUS = FATAL;
-	}
-	Facility {
-		name = FILE;
-		destination = "/tmp/ganesha-rgw.log";
-		enable = active;
-	}
-}
-"""
-
-Regards,
-
-Matt
-
------ Original Message -----
-> From: "yiming xie" <platoxym@gmail.com>
-> To: ceph-devel@vger.kernel.org
-> Cc: "Matt Benjamin" <mbenjamin@redhat.com>
-> Sent: Saturday, October 8, 2016 3:23:31 AM
-> Subject: librgw init failed (-5)
-> 
-> I start nfs-ganesha with FSAL_RGW failed, the nfs-ganesha log is:
-> "create_export :FSAL :CRIT :RGW module: librgw init failed (-5)”
-> 
-> ceph/src/rgw/librgw.cc:
-> int librgw_create(librgw_t* rgw, int argc, char **argv)
-> this interface return value equal -5 and it’s parameters as below:
-> 
-> argc=2
-> argv[0] = “nfs-ganesha”
-> argv[1] = “--conf=/etc/ceph/ceph.conf”
-> 
-> env:
-> nfs-genahsa(2.3)
-> librgw.so.2.0.0
 
 -- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
-H
+Jason
