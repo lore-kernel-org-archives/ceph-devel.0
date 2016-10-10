@@ -1,26 +1,40 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Upcoming 10.2.4
-Date: Mon, 10 Oct 2016 12:59:32 +0200
-Message-ID: <57FB7494.1010309@dachary.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:53972 "EHLO
-        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751570AbcJJK7j (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2016 06:59:39 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek.lekshmanan@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+From: Nikolay Borisov <kernel@kyup.com>
+Subject: [PATCH] ceph: Fix error handling in ceph_read_iter
+Date: Mon, 10 Oct 2016 15:38:18 +0300
+Message-ID: <1476103098-2925-1-git-send-email-kernel@kyup.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: zyan@redhat.com, idryomov@gmail.com
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Nikolay Borisov <kernel@kyup.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Abhishek,
+In case __ceph_do_getattr returns an error and the retry_op in
+ceph_read_iter is not READ_INLINE, then it's possible to invoke
+__free_page on a page which is NULL, this naturally leads to a crash.
+This can happen when, for example, a process waiting on a MDS reply
+receives sigterm.
 
-Since you're now release manager, it is my understanding that we'll be asking you if the release should be cut or not. I updated the issue tracking the progress of 10.2.4 accordingly. This is a heads up to let you know we'll most likely ask that question for 10.2.4 some time next week ;-)
+Fix this by explicitly checking whether the page is set or not.
 
-Cheers
+Signed-off-by: Nikolay Borisov <kernel@kyup.com>
+Link: http://www.spinics.net/lists/ceph-users/msg31592.html
+---
+ fs/ceph/file.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-[1] http://tracker.ceph.com/journals/diff/79457?detail_id=76318 
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 3c68e6aee2f0..7413313ae6c8 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -929,7 +929,8 @@ again:
+ 		statret = __ceph_do_getattr(inode, page,
+ 					    CEPH_STAT_CAP_INLINE_DATA, !!page);
+ 		if (statret < 0) {
+-			 __free_page(page);
++			if (!page)
++				__free_page(page);
+ 			if (statret == -ENODATA) {
+ 				BUG_ON(retry_op != READ_INLINE);
+ 				goto again;
 -- 
-Loïc Dachary, Artisan Logiciel Libre
+2.5.0
