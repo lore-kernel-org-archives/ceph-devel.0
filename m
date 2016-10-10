@@ -1,178 +1,126 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: mempool update
-Date: Mon, 10 Oct 2016 14:13:23 -0500
-Message-ID: <10c38cc8-3892-0100-a4c4-271c9527a916@redhat.com>
-References: <alpine.DEB.2.11.1610101848410.18626@piezo.us.to>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: bluestore performance snapshot - 20161006
+Date: Mon, 10 Oct 2016 21:29:58 +0000
+Message-ID: <BY2PR02MB3967B0DA74162EFB241FF23F4DB0@BY2PR02MB396.namprd02.prod.outlook.com>
+References: <e3e00cbc-3e97-8582-bb93-7ac03b3da40b@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45584 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751136AbcJJTN0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Oct 2016 15:13:26 -0400
-In-Reply-To: <alpine.DEB.2.11.1610101848410.18626@piezo.us.to>
+Received: from mail-bn3nam01on0069.outbound.protection.outlook.com ([104.47.33.69]:64999
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752225AbcJJWFn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 10 Oct 2016 18:05:43 -0400
+In-Reply-To: <e3e00cbc-3e97-8582-bb93-7ac03b3da40b@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
-Cc: allen.samuels@sandisk.com
+To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 10/10/2016 02:05 PM, Sage Weil wrote:
-> Hi Allen, everyone,
->
-> I spent the end of last week and today messing around some more with the
-> mempool framework.  My primary complaints were that the debug mode with
-> containers wasn't stable (because containers would come and go and race
-> with an enumeration of the list) and (more importantly) that the
-> per-container tracking wasn't actually what I wanted to see.  I wanted to
-> know "how much memory is consume in the entire pool by container
-> declaration x," and not how many items/bytes are in each individual
-> container instance.
->
-> This led me to restructure the way the containers are handled by defining
-> a template allocator *type* for the contained type (or
-> container-specific wrapper, like std::_Rb_tree_node) that had a static
-> member containing the actual allocator instance.  That mean that for
-> each type we declare to be in a container there has to be matching .cc
-> definition of the allocator structure (slightly more awkward) but it
-> totally eliminated the per-container-instance allocator state and made the
-> debug mode very light-weight (we enumerate the *types*, not instances).
->
-> The new version works something like so:
->
->  struct obj {
->    MEMBER_OF_MEMPOOL();
->    int a;
->    int b;
->    obj() : a(1), b(1) {}
->    obj(int _a) : a(_a), b(2) {}
->    obj(int _a,int _b) : a(_a), b(_b) {}
->    friend inline bool operator<(const obj& l, const obj& r) {
->      return l.a < r.a;
->    }
->  };
->
->  // and in a .cc file,
->  MEMPOOL_DEFINE_OBJECT_FACTORY(obj, obj, unittest_2);
->
-> (That duplicate obj arg is just because scoped types like BlueStore::Foo
-> can't be used to name the _factory_* static instance variable, so the user
-> has to pass in a second variable-nameable name.  Not sure if there is some
-> preprocessor magic that can automate that or not...)
->
-> If I want to make containers, I can do this:
->
->  unittest_1::vector<int> v;
->
->  // and in a .cc file,
->  MEMPOOL_DEFINE_FACTORY(int, int, unittest_1);
->
-> Vector works out of the box because it doesn't have a container-internal
-> wrapper, but for set and map and list you have to do
->
->  unittest_1::set<int> s;
->  unittest_1::map<int,obj> m;
->  unittest_1::list<int> l;
->
->  MEMPOOL_DEFINE_SET_FACTORY(int, int, unittest_1);
->  MEMPOOL_DEFINE_MAP_FACTORY(int, obj, int_obj, unittest_1);
->  MEMPOOL_DEFINE_LIST_FACTORY(int, int, unittest_1);
->
-> for the st::_List_node etc allocator instances.  Now, when you do debug
-> mode and dump the stats, you can see information like this (for
-> bluestore):
->
->     "bluestore_meta_onode": {
->         "total_bytes": 174760,
->         "total_items": 257,
->         "by_type": [
->             {
->                 "type": "BlueStore::Onode",
->                 "bytes": 174760,
->                 "items": 257
->             }
->         ]
->     },
->     "bluestore_meta_other": {
->         "total_bytes": 7969096,
->         "total_items": 76899,
->         "by_type": [
->             {
->                 "type": "std::_Rb_tree_node<std::pair<unsigned long const, bluestore_extent_ref_m
-> ap_t::record_t> >",
->                 "bytes": 1146048,
->                 "items": 23876
->             },
->             {
->                 "type": "BlueStore::ExtentMap::Shard",
->                 "bytes": 111384,
->                 "items": 1989
->             },
->             {
->                 "type": "BlueStore::SharedBlob",
->                 "bytes": 2494848,
->                 "items": 12994
->             },
->             {
->                 "type": "std::_Rb_tree_node<std::pair<int const, boost::intrusive_ptr<BlueStore::
-> Blob> > >",
->                 "bytes": 55056,
->                 "items": 1147
->             },
->             {
->                 "type": "BlueStore::Blob",
->                 "bytes": 3014608,
->                 "items": 12994
->             },
->             {
->                 "type": "BlueStore::Extent",
->                 "bytes": 1147152,
->                 "items": 23899
->             },
->             {
->                 "type": "std::_Rb_tree_node<std::pair<unsigned long const, std::unique_ptr<BlueSt
-> ore::Buffer, std::default_delete<BlueStore::Buffer> > > >",
->                 "bytes": 0,
->                 "items": 0
->             },
->             {
->                 "type": "BlueStore::Buffer",
->                 "bytes": 0,
->                 "items": 0
->             }
->         ]
->     }
->
-
-Beautiful!  Let me see if I can gather some more information with this 
-verison.
-
-> which tells pretty much the full story about where the memory is going and
-> doesn't have the per-instance uglyness.  Notably, the container types in
-> the mempool namespace are just convenient names for std::map<>
-> etc--there's no longer a need to define the container types.
->
-> Here's the latest iteration:
->
-> 	https://github.com/liewegas/ceph/blob/wip-mempool/src/include/mempool.h
->
-> Note that this version also removes all of the slab allocator logic--it's
-> just the accounting infrastructure.  Mark's most recent run shows that the
-> bluestore mempool is set at 1 GB and the RSS is almost 4 GB, so either
-> there are lots of allocations we're not capturing yet or the heap is
-> fragmenting heavily.  I suspect we'll want to add the slab behavior back
-> in soon so that we have memory that is nicely packed, but I'd prefer to
-> keep that change orthogonal so that we understand the full behavior!
-
-FWIW, there has been some discrepancy in the massif heap results vs RSS 
-too, though perhaps less of one than what we are seeing here.  I would 
-hazzard a guess that it's a bit of both.
-
->
-> Thoughts?
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+TWFyaywNCkFzIHdlIGRpc2N1c3NlZCB0b2RheSwgaGVyZSBpcyBzb21lIGRhdGEgcG9pbnQgZm9y
+IG1pbl9hbGxvY19zaXplIHNldCB0byAxNksgdnMgZGVmYXVsdCA0Sy4uDQpJIGFtIHNlZWluZyA0
+SyBSVyBpcyBzdGFiaWxpemluZyB0byBhIGxvd2VyIHZhbHVlICh+MjUtMzAlKSBhZnRlciB+MSBo
+b3VyIHJ1biBpZiBJIHNldCBtaW5fYWxsb2Nfc2l6ZSA9IDE2SyB3aXRoIGJvdGggZGVmYXVsdCBy
+b2Nrc2RiIHR1bmluZyBhbmQgd2l0aCBteSB0dW5pbmcgSSBwb3N0ZWQgc29tZXRpbWVzIGJhY2su
+DQoNCjE2SyBtaW5fYWxsb2Nfc2l6ZSAoYWZ0ZXIgMSBhbmQgaGFsZiBob3VyKSAgOg0KLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0NCi0tLS10b3RhbC1jcHUtdXNhZ2UtLS0tIC1kc2svdG90YWwtIC1u
+ZXQvdG90YWwtIC0tLXBhZ2luZy0tIC0tLXN5c3RlbS0tDQp1c3Igc3lzIGlkbCB3YWkgaGlxIHNp
+cXwgcmVhZCAgd3JpdHwgcmVjdiAgc2VuZHwgIGluICAgb3V0IHwgaW50ICAgY3N3DQogIDMgICAx
+ICA5NSAgIDIgICAwICAgMHwgIDE5TSAgIDY4TXwgICAwICAgICAwIHwgMTYwayAgMjQya3wgIDE0
+ayAgIDU0aw0KIDE4ICAgNiAgNjcgICA4ICAgMCAgIDJ8IDM2NE0gIDU4Mk18IDExNE0gICA3NE18
+ICAgMCAgICAgMCB8IDMxM2sgIDM0M2sNCiAxOCAgIDYgIDY2ICAgOCAgIDAgICAyfCAzODRNICA2
+MTRNfCAxMjJNICAgNzlNfCAgIDAgICAgIDAgfCAzMTRrICAzNDRrDQogMTggICA2ICA2NyAgIDcg
+ICAwICAgMnwgMzM3TSAgNTc1TXwgMTA4TSAgIDcxTXwgICAwICAgICAwIHwgMzE2ayAgMzU2aw0K
+IDE4ICAgNSAgNjggICA3ICAgMCAgIDJ8IDM0OU0gIDU1Nk18IDExMU0gICA3M018ICAgMCAgICAg
+MCB8IDMwNWsgIDM0NGsNCiAxNyAgIDYgIDY4ICAgNyAgIDAgICAyfCA0MjZNICA2MzFNfCAxMDZN
+ICAgNjlNfCAgIDAgICAgIDAgfCAzMDZrICAzMzVrDQogMTkgICA2ICA2NiAgIDcgICAwICAgMnwg
+NDM2TSAgNjYxTXwgMTI5TSAgIDg0TXwgICAwICAgICAwIHwgMzQwayAgMzY1aw0KIDE5ICAgNyAg
+NjIgIDEwICAgMCAgIDJ8IDQ1ME0gIDcxMk18IDExM00gICA3NU18ICAgMCAgICAgMCB8IDMzMGsg
+IDM1MGsNCiAyMCAgIDcgIDYwICAxMSAgIDAgICAyfCA0NjNNICA3MTdNfCAxMjBNICAgNzlNfCAg
+IDAgICAgIDAgfCAzNDlrICAzNjNrDQogMjEgICA3ICA1NyAgMTMgICAwICAgMnwgNDk0TSAgNzIw
+TXwgMTM3TSAgIDg5TXwgICAwICAgICAwIHwgMzY3ayAgMzg1aw0KDQpEZWZhdWx0IDRLIG1pbl9h
+bGxvY19zaXplIChhZnRlciAxMCBob3VyIHJ1bik6DQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLQ0KDQotLS0tdG90YWwtY3B1LXVzYWdlLS0tLSAtZHNrL3RvdGFsLSAtbmV0L3RvdGFs
+LSAtLS1wYWdpbmctLSAtLS1zeXN0ZW0tLQ0KdXNyIHN5cyBpZGwgd2FpIGhpcSBzaXF8IHJlYWQg
+IHdyaXR8IHJlY3YgIHNlbmR8ICBpbiAgIG91dCB8IGludCAgIGNzdw0KIDQ0ICAgOSAgMzEgIDEz
+ICAgMCAgIDR8IDE1OE0gIDI1OU18IDE3M00gIDExM018ICAgMCAgICAgMCB8IDQ1MWsgIDQ2OWsN
+CiA0MSAgIDkgIDM0ICAxMiAgIDAgICAzfCAxNDZNICAyNTBNfCAxNjJNICAxMDZNfCAgIDAgICAg
+IDAgfCA0MzVrICA0NjFrDQogNDMgIDEwICAzMiAgMTIgICAwICAgNHwgMTQxTSAgMjY0TXwgMTcy
+TSAgMTEyTXwgICAwICAgICAwIHwgNDQ2ayAgNDYwaw0KIDQ1ICAxMCAgMjggIDE0ICAgMCAgIDR8
+IDE0ME0gIDI4Mk18IDE4ME0gIDExN018ICAgMCAgICAgMCB8IDQ1NGsgIDQ1OGsNCiA0NCAgMTAg
+IDI3ICAxNCAgIDAgICA0fCAxMzlNICAyNjFNfCAxODFNICAxMTlNfCAgIDAgICAgIDAgfCA0Njdr
+ICA0NTdrDQogNDYgIDEwICAyOCAgMTIgICAwICAgNHwgMTM3TSAgMjY0TXwgMTg1TSAgMTIxTXwg
+ICAwICAgICAwIHwgNDY1ayAgNDU4aw0KIDQ2ICAxMCAgMjkgIDExICAgMCAgIDR8IDE0M00gIDMw
+M018IDE3OU0gIDExNk18ICAgMCAgICAgMCB8IDQ1N2sgIDQ1M2sNCiA0NiAgMTAgIDI4ICAxMiAg
+IDAgICA0fCAxNzJNICAzMjVNfCAxNzNNICAxMTJNfCAgIDAgICAgIDAgfCA0NjBrICA0NTRrDQog
+NDQgIDEwICAyNiAgMTYgICAwICAgNHwgMjA2TSAgMzAyTXwgMTY5TSAgMTEwTXwgICAwICAgICAw
+IHwgNDYzayAgNDY2aw0KDQoNCllvdSBjYW4gc2VlIHdheSBtb3JlIHJlYWQvd3JpdGUgZ29pbmcg
+b24gaWYgSSBlbmFibGUgMTZLIG1pbl9hbGxvY19zaXplIGFuZCB0aGF0IGlzIGRlZ3JhZGluZyBw
+ZXJmb3JtYW5jZSBvdmVyIHRpbWUgZm9yIG1lLi4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0
+aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2
+Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10g
+T24gQmVoYWxmIE9mIE1hcmsgTmVsc29uDQpTZW50OiBGcmlkYXksIE9jdG9iZXIgMDcsIDIwMTYg
+NzowNCBBTQ0KVG86IGNlcGgtZGV2ZWwNClN1YmplY3Q6IGJsdWVzdG9yZSBwZXJmb3JtYW5jZSBz
+bmFwc2hvdCAtIDIwMTYxMDA2DQoNCkhpIEd1eXMsDQoNCkkgd2FudGVkIHRvIGdpdmUgZm9sa3Mg
+YSBxdWljayBzbmFwc2hvdCBvZiBibHVlc3RvcmUgcGVyZm9ybWFuY2Ugb24gb3VyIE5WTWUgdGVz
+dCBzZXR1cC4gIFRoZXJlJ3MgYSBsb3Qgb2YgdGhpbmdzIGhhcHBlbmluZyB2ZXJ5IHF1aWNrbHkg
+aW4gdGhlIGNvZGUsIHNvIGhlcmUncyBhIGxpbWl0ZWQgc25hcHNob3Qgb2YgaG93IHdlIGFyZSBk
+b2luZy4gIFRoZXNlIGFyZSBzaG9ydCBydW5uaW5nIHRlc3RzLCBzbyBkbyBrZWVwIHRoYXQgaW4g
+bWluZCAoNSBtaW51dGVzIGVhY2gpLg0KDQpodHRwczovL2RyaXZlLmdvb2dsZS5jb20vdWM/ZXhw
+b3J0PWRvd25sb2FkJmlkPTBCMmdUQlpya3JucFpSWEZLUkRCclRqWmlXR2MNCg0KVGhlIGdpc3Qg
+b2YgaXQgaXM6DQoNCldlIGFyZSBub3cgYmFzaWNhbGx5IGZhc3RlciB0aGFuIGZpbGVzdG9yZSBp
+biBhbGwgc2hvcnQgd3JpdGUgdGVzdHMuDQpJbmNyZWFzaW5nIHRoZSBtaW5fYWxsb2Mgc2l6ZSAo
+YW5kIHRvIGEgbGVzc2VyIGV4dGVudCkgdGhlIG51bWJlciBvZiBjYWNoZWQgb25vZGVzIGJyaW5n
+cyA0SyByYW5kb20gd3JpdGUgcGVyZm9ybWFuY2UgdXAgZXZlbiBmdXJ0aGVyLg0KTGlrZWx5IGlu
+Y3JlYXNpbmcgdGhlIG1pbl9hbGxvYyBzaXplIHdpbGwgaW1wcm92ZSBsb25nIHJ1bm5pbmcgdGVz
+dCBwZXJmb3JtYW5jZSBhcyB3ZWxsIGR1ZSB0byBkcmFzdGljYWxseSByZWR1Y2VkIG1ldGFkYXRh
+IGxvYWQgb24gcm9ja3NkYi4NCiAgUmVsYXRlZCB0byB0aGlzLCB0aGUgYW1vdW50IG9mIG1lbW9y
+eSB0aGF0IHdlIGNhY2hlIHdpdGggNGsgbWluX2FsbG9jIGlzIHByZXR0eSBleGNlc3NpdmUsIGV2
+ZW4gd2hlbiBsaW1pdGluZyB0aGUgbnVtYmVyIG9mIGNhY2hlZCBvbm9kZXMgdG8gNGsgIFRoZSBt
+ZW1vcnkgYWxsb2NhdG9yIHdvcmsgc2hvdWxkIGFsbG93IHVzIHRvIG1ha2UgdGhpcyBtb3JlIGZs
+ZXhpYmxlLCBidXQgSSBzdXNwZWN0IHRoYXQgZm9yIG5vdyB3ZSB3aWxsIHdhbnQgdG8gaW5jcmVh
+c2UgdGhlIG1pbl9hbGxvYyBzaXplIHRvIDE2ayB0byBoZWxwIGFsbGV2aWF0ZSBtZW1vcnkgY29u
+c3VtcHRpb24gYW5kIG1ldGFkYXRhIG92ZXJoZWFkIChhbmQgaW1wcm92ZSA0ayByYW5kb20gd3Jp
+dGUgcGVyZm9ybWFuY2UhKS4gIFRoZSBleHRyYSBXQUwgd3JpdGUgaXMgcHJvYmFibHkgc3RpbGwg
+d29ydGggdGhlIHRyYWRlb2ZmIGZvciBub3cuDQoNCk9uIHRoZSByZWFkIHNpZGUgd2UgYXJlIHNl
+ZWluZyBzb21lIHJlZ3Jlc3Npb25zLiAgVGhlIHNlcXVlbnRpYWwgcmVhZCBjYXNlIGlzIGludGVy
+ZXN0aW5nLiAgV2UncmUgZG9pbmcgcXVpdGUgYSBiaXQgd29yc2UgaW4gcmVjZW50IGJsdWVzdG9y
+ZSBldmVuIHZzIG9sZGVyIGJsdWVzdG9yZSwgYW5kIGdlbmVyYWxseSBxdWl0ZSBhIGJpdCB3b3Jz
+ZSB0aGFuIGZpbGVzdG9yZS4NCiAgSW5jcmVhc2luZyB0aGUgbWluX2FsbG9jIHNpemUgcmVkdWNl
+cyB0aGUgZGVncmVkYXRpb24sIGJ1dCB3ZSBzdGlsbCBoYXZlIGdyb3VuZCB0byBtYWtlIHVwLiAg
+SW4gdGhlc2UgdGVzdHMgcmJkIHJlYWRhaGVhZCBpcyBiZWluZyB1c2VkIGluIGFuIGF0dGVtcHQg
+dG8gYWNoaWV2ZSBjbGllbnQtc2lkZSByZWFkYWhlYWQgc2luY2UgYmx1ZXN0b3JlIG5vIGxvbmdl
+ciBkb2VzIGl0IG9uIHRoZSBPU0Qgc2lkZSwgYnV0IGFwcGVhcnMgdG8gYmUgZmFpcmx5IGluZWZm
+ZWN0aXZlLiAgVGhlc2UgYXJlIHRoZSBzZXR0aW5ncyB1c2VkOg0KDQogICAgICAgICByYmQgcmVh
+ZGFoZWFkIGRpc2FibGUgYWZ0ZXIgYnl0ZXMgPSAwDQogICAgICAgICByYmQgcmVhZGFoZWFkIG1h
+eCBieXRlcyA9IDQxOTQzMDQNCg0KQnkgZGVmYXVsdCB3ZSByZXF1aXJlIDEwIHNlcXVlbnRpYWwg
+cmVhZHMgdG8gdHJpZ2dlciBpdC4gIEkgZG9uJ3QgdGhpbmsgdGhhdCBzaG91bGQgYmUgYSBwcm9i
+bGVtLCBidXQgcGVyaGFwcyBsb3dlcmluZyB0aGUgdGhyZXNob2xkIHdpbGwgaGVscC4NCkluIGdl
+bmVyYWwgdGhpcyBpcyBhbiBhcmVhIHdlIHN0aWxsIG5lZWQgdG8gZm9jdXMuDQoNCkZvciByYW5k
+b20gcmVhZHMsIHRoZSBkZWdyYWRhdGlvbiB3YXMgcHJldmlvdXNseSBmb3VuZCB0byBiZSBkdWUg
+dG8gdGhlIGFzeW5jIG1lc3Nlbmdlci4gIEJvdGggZmlsZXN0b3JlIGFuZCBibHVlc3RvcmUgcGVy
+Zm9ybWFuY2UgaGFzIGRlZ3JhZGVkIHJlbGF0aXZlIHRvIEpld2VsIGluIHRoZXNlIHRlc3RzLiAg
+SGFvbWFpIHN1c3BlY3RzIGZhc3QgZGlzcGF0Y2ggYXMgdGhlIHByaW1hcmlseSBib3R0bGVuZWNr
+IGhlcmUuDQoNClNvIGluIGdlbmVyYWwsIHRoZSBhcmVhcyBJIHRoaW5rIHdlIHN0aWxsIG5lZWQg
+dG8gZm9jdXM6DQoNCg0KMSkgbWVtb3J5IGFsbG9jYXRvciB3b3JrIChtdWNoIGVhc2llciBjYWNo
+aW5nIGNvbmZpZ3VyYXRpb24sIGJldHRlciBtZW1vcnkgdXNhZ2UsIGJldHRlciBtZW1vcnkgZnJh
+Z21lbnRhdGlvbiwgZXRjKQ0KMikgTG9uZyBydW5uaW5nIHRlc3RzIChTb21uYXRoIGhhcyBiZWVu
+IGRvaW5nIHRoaXMsIHRoYW5rcyBTb21uYXRoISkNCjIpIFNlcXVlbnRpYWwgcmVhZCBwZXJmb3Jt
+YW5jZSBpbiBibHVlc3RvcmUgKE5lZWQgdG8gdW5kZXJzdGFuZCB0aGlzIGJldHRlcikNCjMpIEZh
+c3QgZGlzcGF0Y2ggcGVyZm9ybWFuY2UgaW1wcm92ZW1lbnQgKERhbidzIFJDVSB3b3JrPykNCg0K
+TWFyaw0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
+bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jk
+b21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5r
+ZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRp
+b24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQg
+b25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJv
+dmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVj
+aXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRo
+aXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBk
+aXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hp
+Yml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwg
+cGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3du
+IGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhp
+cyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVj
+dHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
