@@ -1,8 +1,10 @@
 From: Nikolay Borisov <kernel@kyup.com>
-Subject: [PATCH] ceph: Fix error handling in ceph_read_iter
-Date: Mon, 10 Oct 2016 15:38:18 +0300
-Message-ID: <1476103098-2925-1-git-send-email-kernel@kyup.com>
+Subject: [PATCHv2] ceph: Fix error handling in ceph_read_iter
+Date: Mon, 10 Oct 2016 15:56:39 +0300
+Message-ID: <1476104199-3259-1-git-send-email-kernel@kyup.com>
+References: <1476103098-2925-1-git-send-email-kernel@kyup.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1476103098-2925-1-git-send-email-kernel@kyup.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: zyan@redhat.com, idryomov@gmail.com
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Nikolay Borisov <kernel@kyup.com>
@@ -19,6 +21,10 @@ Fix this by explicitly checking whether the page is set or not.
 Signed-off-by: Nikolay Borisov <kernel@kyup.com>
 Link: http://www.spinics.net/lists/ceph-users/msg31592.html
 ---
+
+Inverted the condition, so resending with correct condition
+this time. 
+
  fs/ceph/file.c | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
@@ -31,7 +37,7 @@ index 3c68e6aee2f0..7413313ae6c8 100644
  					    CEPH_STAT_CAP_INLINE_DATA, !!page);
  		if (statret < 0) {
 -			 __free_page(page);
-+			if (!page)
++			if (page)
 +				__free_page(page);
  			if (statret == -ENODATA) {
  				BUG_ON(retry_op != READ_INLINE);
