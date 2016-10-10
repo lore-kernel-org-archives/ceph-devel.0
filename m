@@ -1,46 +1,26 @@
-From: Zhangzengran <zhangzengran@h3c.com>
-Subject: [rgw multisite] issue of sync large file
-Date: Mon, 10 Oct 2016 10:12:11 +0000
-Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314E6254@H3CMLB12-EX.srv.huawei-3com.com>
-References: <7BD28126D6935A4498AE6DE60B5D4CAB314E61EE@H3CMLB12-EX.srv.huawei-3com.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Upcoming 10.2.4
+Date: Mon, 10 Oct 2016 12:59:32 +0200
+Message-ID: <57FB7494.1010309@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:42036 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751368AbcJJKNX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Oct 2016 06:13:23 -0400
-In-Reply-To: <7BD28126D6935A4498AE6DE60B5D4CAB314E61EE@H3CMLB12-EX.srv.huawei-3com.com>
-Content-Language: zh-CN
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:53972 "EHLO
+        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751570AbcJJK7j (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2016 06:59:39 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "cbodley@redhat.com" <cbodley@redhat.com>, "yehuda@redhat.com" <yehuda@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Abhishek L <abhishek.lekshmanan@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgQ2FzZXk6DQogIFdlIHJlYWxpemVkIGFuIGlzc3VlIHJlY2VudGx5IHdoZW4gdGVzdGluZyBy
-Z3cgbXVsdGlzaXRlLiB3aGVuIHdlIHB1dCBhIGxhcmdlIGZpbGUoVCBzY2FsZSkNCnVzaW5nIG11
-bHRpcGFydCBpbnRvIG1hc3RlciB6b25lLCB0aGUgc2xhdmUgem9uZSB3aWxsIHN5bmMgaXQgd2l0
-aCBhdG9taWMgcHJvY2Vzc29yLiBUaGlzIG1lYW5zDQppdCB3aWxsIGdldCB0aGUgd2hvbGUgZmls
-ZSBpbiBhIHNpbmdsZSByZXF1ZXN0LHNvIHdlIHdvcnJ5IGFib3V0IHRoZSBzeW5jIHByb2Nlc3Mg
-aW4gdGhpcyBzaXR1YXRpb24uDQoNCk1heWJlIHdlIGNvdWxkIHJld3JpdGUgYSBuZXcgZnVuY3Rp
-b24gZm9yIFJHV0FzeW5jRmV0Y2hSZW1vdGVPYmouIEl0IGNvdWxkIGRvd25sb2FkIHRoZQ0Kb3Jp
-Z24gZmlsZSB3aXRoIGJ5dGUtcmFuZ2UsIGFuZCByZXN0b3JlIGl0IHdpdGggbXVsdGktcGFydD8N
-Cg0KUmVnYXJkcywgdGhhbmsgeW91IQ0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K5pys6YKu5Lu25Y+K
-5YW26ZmE5Lu25ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d
-5a+G5L+h5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQrnmoTk
-uKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbku5bkurrku6Xku7vkvZXlvaLlvI/kvb/n
-lKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDms4TpnLLjgIHlpI3liLbj
-gIENCuaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OAguWmguaenOaCqOmUmeaUtuS6
-huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumAmuefpeWPkeS7tuS6uuW5
-tuWIoOmZpOacrA0K6YKu5Lu277yBDQpUaGlzIGUtbWFpbCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNv
-bnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20gSDNDLCB3aGljaCBpcw0KaW50ZW5k
-ZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQg
-YWJvdmUuIEFueSB1c2Ugb2YgdGhlDQppbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFu
-eSB3YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsDQpk
-aXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3Ro
-ZXIgdGhhbiB0aGUgaW50ZW5kZWQNCnJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3Ug
-cmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyDQpi
-eSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0K
+Hi Abhishek,
+
+Since you're now release manager, it is my understanding that we'll be asking you if the release should be cut or not. I updated the issue tracking the progress of 10.2.4 accordingly. This is a heads up to let you know we'll most likely ask that question for 10.2.4 some time next week ;-)
+
+Cheers
+
+[1] http://tracker.ceph.com/journals/diff/79457?detail_id=76318 
+-- 
+Loïc Dachary, Artisan Logiciel Libre
