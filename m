@@ -1,62 +1,160 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: [rgw multisite] issue of sync large file
-Date: Mon, 10 Oct 2016 11:45:45 -0400
-Message-ID: <506f479a-2138-80bc-0a24-0b43be9991c5@redhat.com>
-References: <7BD28126D6935A4498AE6DE60B5D4CAB314E61EE@H3CMLB12-EX.srv.huawei-3com.com>
- <7BD28126D6935A4498AE6DE60B5D4CAB314E6254@H3CMLB12-EX.srv.huawei-3com.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: mempool update
+Date: Mon, 10 Oct 2016 19:05:44 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1610101848410.18626@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f180.google.com ([209.85.220.180]:32993 "EHLO
-        mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752464AbcJJPqC (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2016 11:46:02 -0400
-Received: by mail-qk0-f180.google.com with SMTP id n189so117584346qke.0
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Oct 2016 08:46:02 -0700 (PDT)
-In-Reply-To: <7BD28126D6935A4498AE6DE60B5D4CAB314E6254@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from mx1.redhat.com ([209.132.183.28]:36724 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751288AbcJJTGK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 10 Oct 2016 15:06:10 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zhangzengran <zhangzengran@h3c.com>, "yehuda@redhat.com" <yehuda@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: allen.samuels@sandisk.com
 
-Hi,
+Hi Allen, everyone,
 
-What exactly has you worried about large transfers for sync?
+I spent the end of last week and today messing around some more with the 
+mempool framework.  My primary complaints were that the debug mode with 
+containers wasn't stable (because containers would come and go and race 
+with an enumeration of the list) and (more importantly) that the 
+per-container tracking wasn't actually what I wanted to see.  I wanted to 
+know "how much memory is consume in the entire pool by container 
+declaration x," and not how many items/bytes are in each individual 
+container instance.
 
-Breaking them up and sending the parts in parallel could certainly help 
-to reduce the latency of data sync between zones, as long as there's 
-bandwidth available. But without some careful throttling and i/o 
-scheduling (which we don't currently do at all for data sync), I'd worry 
-about saturating the network with sync i/o and starving clients. Our 
-civetweb frontend is also imposing a limit on the number of threads for 
-incoming connections, so I'd be wary about tying up more of those for 
-sync. A strategy for i/o scheduling, along with a replacement for 
-civetweb, are both on our long-term roadmap - we'd love your input on those.
+This led me to restructure the way the containers are handled by defining 
+a template allocator *type* for the contained type (or 
+container-specific wrapper, like std::_Rb_tree_node) that had a static 
+member containing the actual allocator instance.  That mean that for 
+each type we declare to be in a container there has to be matching .cc 
+definition of the allocator structure (slightly more awkward) but it 
+totally eliminated the per-container-instance allocator state and made the 
+debug mode very light-weight (we enumerate the *types*, not instances).
 
-Thanks,
-Casey
+The new version works something like so:
 
+ struct obj {
+   MEMBER_OF_MEMPOOL();
+   int a;
+   int b;
+   obj() : a(1), b(1) {}
+   obj(int _a) : a(_a), b(2) {}
+   obj(int _a,int _b) : a(_a), b(_b) {}
+   friend inline bool operator<(const obj& l, const obj& r) {
+     return l.a < r.a;
+   }
+ };
 
-On 10/10/2016 06:12 AM, Zhangzengran wrote:
-> Hi Casey:
->    We realized an issue recently when testing rgw multisite. when we put a large file(T scale)
-> using multipart into master zone, the slave zone will sync it with atomic processor. This means
-> it will get the whole file in a single request,so we worry about the sync process in this situation.
->
-> Maybe we could rewrite a new function for RGWAsyncFetchRemoteObj. It could download the
-> orign file with byte-range, and restore it with multi-part?
->
-> Regards, thank you!
-> -------------------------------------------------------------------------------------------------------------------------------------
-> 本邮件及其附件含有杭州华三通信技术有限公司的保密信息，仅限于发送给上面地址中列出
-> 的个人或群组。禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制、
-> 或散发）本邮件中的信息。如果您错收了本邮件，请您立即电话或邮件通知发件人并删除本
-> 邮件！
-> This e-mail and its attachments contain confidential information from H3C, which is
-> intended only for the person or entity whose address is listed above. Any use of the
-> information contained herein in any way (including, but not limited to, total or partial
-> disclosure, reproduction, or dissemination) by persons other than the intended
-> recipient(s) is prohibited. If you receive this e-mail in error, please notify the sender
-> by phone or email immediately and delete it!
+ // and in a .cc file,
+ MEMPOOL_DEFINE_OBJECT_FACTORY(obj, obj, unittest_2);
 
+(That duplicate obj arg is just because scoped types like BlueStore::Foo 
+can't be used to name the _factory_* static instance variable, so the user 
+has to pass in a second variable-nameable name.  Not sure if there is some 
+preprocessor magic that can automate that or not...)
+
+If I want to make containers, I can do this:
+
+ unittest_1::vector<int> v;
+
+ // and in a .cc file,
+ MEMPOOL_DEFINE_FACTORY(int, int, unittest_1);
+
+Vector works out of the box because it doesn't have a container-internal 
+wrapper, but for set and map and list you have to do
+
+ unittest_1::set<int> s;
+ unittest_1::map<int,obj> m;
+ unittest_1::list<int> l;
+
+ MEMPOOL_DEFINE_SET_FACTORY(int, int, unittest_1);
+ MEMPOOL_DEFINE_MAP_FACTORY(int, obj, int_obj, unittest_1);
+ MEMPOOL_DEFINE_LIST_FACTORY(int, int, unittest_1);
+
+for the st::_List_node etc allocator instances.  Now, when you do debug 
+mode and dump the stats, you can see information like this (for 
+bluestore):
+
+    "bluestore_meta_onode": {
+        "total_bytes": 174760,
+        "total_items": 257,
+        "by_type": [
+            {
+                "type": "BlueStore::Onode",
+                "bytes": 174760,
+                "items": 257
+            }
+        ]
+    },
+    "bluestore_meta_other": {
+        "total_bytes": 7969096,
+        "total_items": 76899,
+        "by_type": [
+            {
+                "type": "std::_Rb_tree_node<std::pair<unsigned long const, bluestore_extent_ref_m
+ap_t::record_t> >",
+                "bytes": 1146048,
+                "items": 23876
+            },
+            {
+                "type": "BlueStore::ExtentMap::Shard",
+                "bytes": 111384,
+                "items": 1989
+            },
+            {
+                "type": "BlueStore::SharedBlob",
+                "bytes": 2494848,
+                "items": 12994
+            },
+            {
+                "type": "std::_Rb_tree_node<std::pair<int const, boost::intrusive_ptr<BlueStore::
+Blob> > >",
+                "bytes": 55056,
+                "items": 1147
+            },
+            {
+                "type": "BlueStore::Blob",
+                "bytes": 3014608,
+                "items": 12994
+            },
+            {
+                "type": "BlueStore::Extent",
+                "bytes": 1147152,
+                "items": 23899
+            },
+            {
+                "type": "std::_Rb_tree_node<std::pair<unsigned long const, std::unique_ptr<BlueSt
+ore::Buffer, std::default_delete<BlueStore::Buffer> > > >",
+                "bytes": 0,
+                "items": 0
+            },
+            {
+                "type": "BlueStore::Buffer",
+                "bytes": 0,
+                "items": 0
+            }
+        ]
+    }
+
+which tells pretty much the full story about where the memory is going and 
+doesn't have the per-instance uglyness.  Notably, the container types in 
+the mempool namespace are just convenient names for std::map<> 
+etc--there's no longer a need to define the container types.
+
+Here's the latest iteration:
+
+	https://github.com/liewegas/ceph/blob/wip-mempool/src/include/mempool.h
+
+Note that this version also removes all of the slab allocator logic--it's 
+just the accounting infrastructure.  Mark's most recent run shows that the 
+bluestore mempool is set at 1 GB and the RSS is almost 4 GB, so either 
+there are lots of allocations we're not capturing yet or the heap is 
+fragmenting heavily.  I suspect we'll want to add the slab behavior back 
+in soon so that we have memory that is nicely packed, but I'd prefer to 
+keep that change orthogonal so that we understand the full behavior!
+
+Thoughts?
+sage
