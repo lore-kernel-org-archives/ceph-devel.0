@@ -1,47 +1,69 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: issue about the parameter 'paxos_propose_interval'
-Date: Mon, 10 Oct 2016 13:23:58 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1610101322230.18626@piezo.us.to>
-References: <CAHRQ3VVecRDO1kf8BdtB6jd9rZVF+C42r8xDBYhjLvMoosMcng@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCHv2] ceph: Fix error handling in ceph_read_iter
+Date: Mon, 10 Oct 2016 15:50:42 +0200
+Message-ID: <CAOi1vP_piBraimiPzzZL8h9d1WLjJ9h1amYbmsUBSJfprT9u-Q@mail.gmail.com>
+References: <1476103098-2925-1-git-send-email-kernel@kyup.com>
+ <1476104199-3259-1-git-send-email-kernel@kyup.com> <530F1E79-6653-45F5-BBC6-B1D9F9005D14@redhat.com>
+ <57FB93ED.5030602@kyup.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49252 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752343AbcJJNY7 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2016 09:24:59 -0400
-In-Reply-To: <CAHRQ3VVecRDO1kf8BdtB6jd9rZVF+C42r8xDBYhjLvMoosMcng@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Songbo Wang <songbo1227@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <57FB93ED.5030602@kyup.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Nikolay Borisov <kernel@kyup.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Sun, 9 Oct 2016, Songbo Wang wrote:
-> Hi, Sage, Sam
-> 
-> I got a issue about the parameter 'paxos_propose_interval' with the
-> default value 1.0.
-> 
-> I think this parameter aim to reduce the Monitor pressure to call the
-> propose_pending(). But, this introduces another problem, when a osd is
-> started,  it will send 3 kinds of requests to Monitor (e.g. MOSDBoot,
-> MOSDPGTemp, MOSDAlive). Without other changes, It will take 3 seconds
-> at least. which will increase the time that blocks the whole cluster.
-> 
-> If the parameter 'paxos_propose_interval' is set to 0.05 or smaller,
-> it loses the propse it designed.
-> 
-> I think we can introduce some special process, for some kinds of
-> messages (e.g. MOSDPGTemp, MOSDAlive), to process them immediately.
+On Mon, Oct 10, 2016 at 3:13 PM, Nikolay Borisov <kernel@kyup.com> wrote:
+>
+>
+> On 10/10/2016 04:11 PM, Yan, Zheng wrote:
+>>
+>>> On 10 Oct 2016, at 20:56, Nikolay Borisov <kernel@kyup.com> wrote:
+>>>
+>>> In case __ceph_do_getattr returns an error and the retry_op in
+>>> ceph_read_iter is not READ_INLINE, then it's possible to invoke
+>>> __free_page on a page which is NULL, this naturally leads to a crash.
+>>> This can happen when, for example, a process waiting on a MDS reply
+>>> receives sigterm.
+>>>
+>>> Fix this by explicitly checking whether the page is set or not.
+>>>
+>>> Signed-off-by: Nikolay Borisov <kernel@kyup.com>
+>>> Link: http://www.spinics.net/lists/ceph-users/msg31592.html
+>>> ---
+>>>
+>>> Inverted the condition, so resending with correct condition
+>>> this time.
+>>>
+>>> fs/ceph/file.c | 3 ++-
+>>> 1 file changed, 2 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+>>> index 3c68e6aee2f0..7413313ae6c8 100644
+>>> --- a/fs/ceph/file.c
+>>> +++ b/fs/ceph/file.c
+>>> @@ -929,7 +929,8 @@ again:
+>>>              statret =3D __ceph_do_getattr(inode, page,
+>>>                                          CEPH_STAT_CAP_INLINE_DATA, !!p=
+age);
+>>>              if (statret < 0) {
+>>> -                     __free_page(page);
+>>> +                    if (page)
+>>> +                            __free_page(page);
+>>>                      if (statret =3D=3D -ENODATA) {
+>>>                              BUG_ON(retry_op !=3D READ_INLINE);
+>>>                              goto again;
+>>> =E2=80=94
+>> Reviewed-by: Yan, Zheng <zyan@redhat.com>
+>
+> I believe this needs to also be tagged as stable. To whomever is going
+> to merge it: can you please do that?
 
-Currently we essentially have two classes of messages: those that are 
-processed immediately (no delay), and those that respect the 
-paxos_propose_interval.  We can either introduce a second tunable and 
-create a third class (process quickly) with something like .05, or we can 
-say that all of the current 'no delay' messages should delay for a short 
-period (like .05).
+I'll do that.  Zheng, do you see any other issues with the killable
+wait here?
 
-Any preferences?
+Thanks,
 
-sage
-
+                Ilya
