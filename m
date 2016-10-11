@@ -1,162 +1,140 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: jewel backport of https://github.com/ceph/ceph/pull/11326
-Date: Tue, 11 Oct 2016 10:11:53 -0400
-Message-ID: <CA+aFP1C+baLbCvxAVKsN8J2AqRdmFt6ys8UOhp9CkrJoZowSnQ@mail.gmail.com>
-References: <57FCB6CA.8060904@dachary.org>
-Reply-To: dillaman@redhat.com
+From: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org>
+Subject: Re: Ceph + VMWare
+Date: Tue, 11 Oct 2016 17:13:34 +0200
+Message-ID: <985e234d-eae1-c0cc-2fa3-97bfe37e6a0c@univ-lorraine.fr>
+References: <CAAZbbf1HGbZVbB1m5vPd+afWb0pZz4haQhua4FcQa-31FPg=0g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:36594 "EHLO
-        mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750989AbcJKOUs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2016 10:20:48 -0400
-Received: by mail-pa0-f41.google.com with SMTP id ry6so15886940pac.3
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Oct 2016 07:20:05 -0700 (PDT)
-In-Reply-To: <57FCB6CA.8060904@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Mykola Golub <mgolub@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAAZbbf1HGbZVbB1m5vPd+afWb0pZz4haQhua4FcQa-31FPg=0g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-I think the biggest set of conflicts will come from
-https://github.com/ceph/ceph/pull/10445, which will need to be merged
-along with #11326. If you'd like, I can take care of this backport
-today.
-
-On Tue, Oct 11, 2016 at 5:54 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi,
->
-> Trying to cherry pick commits instead of resolving conflicts and it looks like I'm going to end up adding a number of commits. Before I go down this path, I'd like a confirmation from you that it's the right call (see below for more information about what I did).
->
-> Thanks !
->
-> git cherry-pick -x dc77a62 from https://github.com/ceph/ceph/pull/11326 conflicts on
->
-> unmerged   src/journal/JournalRecorder.cc
-> @@@ -279,8 -281,7 +276,12 @@@ void JournalRecorder::create_next_objec
->         new_object_recorder->get_object_number());
->     }
->
-> ++<<<<<<< HEAD
->  +  new_object_recorder->append(append_buffers, false);
->  +
-> ++=======
-> +   new_object_recorder->append_unlock(std::move(append_buffers));
-> ++>>>>>>> dc77a62... journal: avoid holding lock while sending journal append
->     m_object_ptrs[splay_offset] = new_object_recorder;
->   }
->
-> ----------------------------------------------------------------------
->
-> git log --no-merges --oneline --cherry-mark --left-right ceph/jewel...ceph/master -- src/journal/JournalRecorder.cc
->
->> dc77a62 journal: avoid holding lock while sending journal append
->> 7b740f5 journal: make librados call async in ObjectRecorder
->> 5c88edd journal: increase concurrency of journal recorder
-> = b4b9843 journal: improve debug log messages
-> = 11475f4 journal: improve debug log messages
-> = 30c7f4d journal: update commit entry object number upon overflow
-> = 5fbf5f8 journal: update commit entry object number upon overflow
-> = 18f663d journal: close, advance, and open object set ordering
-> = 27fba6a journal: new ObjectRecorder closed callback
-> = de83005 journal: close, advance, and open object set ordering
-> = bba9143 journal: new ObjectRecorder closed callback
-> = f1a2e6a journal: prohibit journal entries larger than the soft object size
-> = d5f307d journal: prohibit journal entries larger than the soft object size
->
-> git cherry-pick -x 5c88edd conflicts on
->
-> unmerged   src/librbd/Journal.cc
-> @@@ -17,8 -16,11 +17,9 @@@
->   #include "common/Timer.h"
->   #include "common/WorkQueue.h"
->   #include "include/rados/librados.hpp"
->  -#include "librbd/journal/RemoveRequest.h"
->  -#include "librbd/journal/CreateRequest.h"
->
->   #include <boost/scope_exit.hpp>
-> + #include <utility>
->
->   #define dout_subsys ceph_subsys_rbd
->   #undef dout_prefix
-> @@@ -705,40 -671,56 +706,70 @@@ int Journal<I>::demote()
->     CephContext *cct = m_image_ctx.cct;
->     ldout(cct, 20) << __func__ << dendl;
->
-> ++<<<<<<< HEAD
->  +  Mutex::Locker locker(m_lock);
->  +  assert(m_journaler != nullptr && is_tag_owner());
-> ++=======
-> +   int r;
-> +   C_SaferCond ctx;
-> +   Future future;
-> +   C_SaferCond flush_ctx;
-> ++>>>>>>> 7b740f5... journal: make librados call async in ObjectRecorder
->
-> ----------------------------------------------------------------------
-> git log --no-merges --oneline --cherry-mark --left-right ceph/jewel...ceph/master -- src/librbd/Journal.cc
->
->> 953561f librbd: async method to check journal tag owner
->> 7b740f5 journal: make librados call async in ObjectRecorder
->> 5c88edd journal: increase concurrency of journal recorder
->> fd00549 librbd: new journal listener event for force promotion
->> dbbcecf librbd: unify journal event callbacks into single interface
->> b8eafef librbd: optionally flag "laggy" journal clients disconnected
->> 551d7ea librbd: remove use of owner_lock on IO path
-> = e83866b librbd: do not record journal events if append is disabled by policy
-> = 1f63307 librbd: optimize header file dependency & modify related file.
-> = 549aada librbd: new configuration option to restrict journal payload size
-> = 99195e8 librbd: wait for journal commit op event to be safely recorded
-> = 91c70f3 journal: helper class for organizing optional settings
-> = f71dc87 librbd: improve journaling debug log messages
-> = 14db535 librbd: separate journal event decoding and processing
->> ac590e8 librbd: normalize journal promotion/demotion events
->> 718befd librbd: separate journal::TagData predecessor data into new struct
->> 47d1e62 rbd-mirror: include tag tid in bootstrap debug log messages
-> = c2b786c rbd: journal: Support for listening updates on client metadata
->> 3492153 journaler: remove ununsed synchronous API routines
->> d5fa466 librbd / journal: async journal creation state machine
->> c4e439d librbd / journal: async journal removal state machine
->> 1416f1c librbd / ImageCtx: singleton safetimer instance helper
-> = 405142c librbd: do not record journal events if append is disabled by policy
-> = 11d7500 librbd: new configuration option to restrict journal payload size
-> = 47e0fbf librbd: wait for journal commit op event to be safely recorded
-> = dad8328 journal: helper class for organizing optional settings
-> = 270cb74 librbd: improve journaling debug log messages
-> = 57cd75e librbd: separate journal event decoding and processing
-> = f3f4a4a librbd: journal callback to interrupt replay
-> = deb6ca8 librbd: force-remove journal when disabling feature and removing image
-> = 2185a62 librbd: optimize header file dependency & modify related file.
-> = 9687e5e librbd: journal callback to interrupt replay
-> = d83aa1e librbd: force-remove journal when disabling feature and removing image
-> = 0dd8573 rbd: journal: Support for listening updates on client metadata
-> = f0bf15e librbd: stop journal recorder before starting external replay
-> = 0014a9e librbd: flush journal commit positions before starting op
-> = ef12536 librbd: resize and snap create can hang on journal replay failure
-> = c8b4cab librbd: missing journal state for flushing/restarting replay
-> = de29be7 librbd: Journal no longer requires AioCompletion for IO events
-> = 65556aa librbd: bubble journal error up via existing AioObjectRequests
-> = 5aa6eb2 librbd: stop journal recorder before starting external replay
-> = 6361296 librbd: flush journal commit positions before starting op
-> = 1032f19 librbd: resize and snap create can hang on journal replay failure
-> = a7f5bc1 librbd: missing journal state for flushing/restarting replay
-> = 82587a3 librbd: Journal no longer requires AioCompletion for IO events
-> = 79c9347 librbd: bubble journal error up via existing AioObjectRequests
-> = bf4c458 librbd: integrate with async journaler shutdown API
-> = 0780230 rbd-mirror: Added implementation of image-deleter thread
-> = ad29785 librbd: integrate with async journaler shutdown API
-> = 6cc6e66 rbd-mirror: Added implementation of image-deleter thread
-> = 5ec1f79 librbd: split large AioWrite journal events
-> = f221fed librbd: assertion to ensure no concurrent processing of replay events
-> = 44827a3 librbd: assertion to ensure no concurrent processing of replay events
-> = 70b9fbf librbd: split large AioWrite journal events
->
-> --
-> Loïc Dachary, Artisan Logiciel Libre
-
-
-
--- 
-Jason
+SGkgUGF0cmljaywKCjEpIFVuaXZlcnNpdMOpIGRlIExvcnJhaW5lLiAoNy4wMDAgcmVzZWFyY2hl
+cnMgYW5kIHN0YWZmIG1lbWJlcnMsIDYwLjAwMCAKc3R1ZGVudHMsIDQyIHNjaG9vbHMgYW5kIGVk
+dWNhdGlvbiBzdHJ1Y3R1cmVzLCA2MCByZXNlYXJjaCBsYWJzKS4KCjIpIFJIQ1MgY2x1c3Rlcjog
+MTQ0IE9TRHMgb24gMTIgbm9kZXMgZm9yIDUyMCBUQiByYXcgY2FwYWNpdHkuCiAgICAgVk13YXJl
+IGNsdXN0ZXJzOiA3IFZNd2FyZSBjbHVzdGVycyAoNDAgRVNYaSBob3N0cykuIEZpcnN0IG5lZWQg
+aXMgCnRvIHByb3ZpZGUgY2FwYWNpdGl2ZSBzdG9yYWdlIChDZXBoKSB0byBWTXMgcnVubmluZyBp
+biBhIFZNd2FyZSB2UkEgSWFhUyAKY2x1c3RlciAoNiBFU1hpIGhvc3RzKS4KCjMpIERlcGxveW1l
+bnQgZ3Jvd3RoID8KICAgICBSSENTIGNsdXN0ZXI6IEluaXRpYWwgbmVlZCB3YXMgNzUwIFRCIG9m
+IHVzYWJsZSBzdG9yYWdlLCBzbyBhIHg0IApncm93dGggaW4gdGhlIG5leHQgMyB5ZWFycyBpcyBl
+eHBlY3RlZCB0byByZWFjaCAxIFBCIG9mIHVzYWJsZSBzdG9yYWdlLgogICAgIFZNd2FyZSBjbHVz
+dGVyczogV2UganVzdCBzdGFydGVkIHRvIG9mZmVyIGEgSWFhUyBzZXJ2aWNlIHRvIApyZXNlYXJj
+aCBsYWJvcmF0b3JpZXMgYW5kIGVkdWNhdGlvbiBzdHJ1Y3R1cmVzIHdoaXRoaW4gb3VyIHVuaXZl
+cnNpdHkuCiAgICAgV2UgY2FuIGV4cGVjdCB0byBob3N0IHNldmVyYWwgaHVuZHJlZHMgb2YgVk1z
+IGluIHRoZSBuZXh0IDIgeWVhcnMgCih+NjAwLTgwMCkuCgo0KSBJbnRlZ3JhdGlvbiBtZXRob2Qg
+PyBDbGVhcmx5IG5hdGl2ZS4KICAgICBJIHNwZW50IHNvbWUgb2YgdGhlIGxhc3QgNiBtb250aHMg
+d29ya2luZyBvbiBidWlsZGluZyBhbiBIQSBnYXRld2F5IApjbHVzdGVyIChpU0NTSSBhbmQgTkZT
+KSB0byBwcm92aWRlIFJIQ1MgQ2VwaCBzdG9yYWdlIHRvIG91ciBWTXdhcmUgSWFhUyAKQ2x1c3Rl
+ci4gSGVyZSBhcmUgbXkgZmluZGluZ3M6CgogICAgICogaVNDU0kgPwoKICAgICBHaXZlcyBiZXR0
+ZXIgcGVyZm9ybWFuY2UgdGhhbiBORlMsIHdlIGtub3cgdGhhdC4gQlVULCB3ZSBjYW5ub3QgZ28g
+CmludG8gcHJvZHVjdGlvbiB3aXRoIGlTQ1NJIGJlY2F1c2Ugb2YgRVNYaSBob3N0cyBlbnRlcmlu
+ZyBhIG5ldmVyIGVuZGluZyAKaVNDU0kgJ0Fib3J0IFRhc2snIGxvb3Agd2hlbiB0aGUgQ2VwaCBj
+bHVzdGVyIGZhaWxzIHRvIGFja25vd2xlZGdlIGEgNE1CIApJTyBpbiBsZXNzIHRoYW4gNXMsIHJl
+c3VsdGluZyBpbiBWTXMgY3Jhc2hpbmcuIEkndmUgYmVlbiB0b2xkIGJ5IGEgClZNd2FyZSBlbmdp
+bmVlciB0aGF0IHRoaXMgNXMgbGltaXQgY2Fubm90IGJlIHJhaXNlZCBhcyBpdCdzIGhhcmRjb2Rl
+ZCBpbiAKRVNYaSBpU0NTSSBzb2Z0d2FyZSBpbml0aWF0b3IuCiAgICAgV2h5IHdvdWxkIGFuIElP
+IHRha2UgbW9yZSB0aGFuIDVzID8gSW4gY2FzZSBvZiBhIGltcG9ydGFudCBsb2FkIG9uIAp0aGUg
+Q2VwaCBjbHVzdGVyLCBvciBhIENlcGggZmFpbHVyZSBzY2VuYXJpbyAobmV0d29yayBpc29sYXRp
+b24sIE9TRCAKY3Jhc2gpLCBvciBkZWVwLXNjcnViYmluZyBib3RoZXJpbmcgY2xpZW50IElPcyBv
+ciBhbnkgY29tYmluYXRpb24gb2YgCnRoZXNlIG9yIHRob3NlIEkgZGlkbid0IHRoaW5rIGFib3V0
+Li4uCgogICAgIFdoYXQgSSBoYXZlIHRlc3RlZDoKICAgICBpU0NTSSBBY3RpdmUvQWN0aXZlIEhB
+IGNsdXN0ZXIuIEVhY2ggRVNYaSBzZWVzIHRoZSBzYW1lIGRhdGFzdG9yZSAKdGhyb3VnaCBib3Ro
+IHRhcmdldHMgYnV0IG9ubHkgYWNjZXNzZXMgb25lIGRhdGFzdG9yZSBhdCBhIHRpbWUgdGhyb3Vn
+aCBhIApzdGF0aWNhbGx5IGRlZmluZWQgcHJlZmVyZWQgcGF0aC4KICAgICAzIEVTWGkgd29yayBv
+biBvbmUgdGFyZ2V0LCAzIEVTWGkgd29yayBvbiB0aGUgb3RoZXIuIElmIGEgdGFyZ2V0IApnb2Vz
+IGRvd24sIHRoZSBvdGhlciBwYXRocyBhcmUgdXNlZC4KCiAgICAgLSBMSU8gaVNDU0kgdGFyZ2V0
+cyB3aXRoIGtlcm5lbCBSQkQgbWFwcGluZyAobm8gY2FjaGUpLiBWQUFJIAptZXRob2RzLiBFYXN5
+IHRvIGNvbmZpZ3VyZS4gRGVsaXZlcnMgZ29vZCBwZXJmb3JtYW5jZSB3aXRoIGVhZ2dlciB6ZXJv
+ZWQgCnZpcnR1YWwgZGlza3MuICdBYm9ydCBUYXNrJyBsb29wIGhhcyB0aGUgRVNYaSBkaXNjb25u
+ZWN0IGZyb20gdGhlIAp2Q2VudGVyIFNlcnZlci4KICAgICBSZXN0YXJ0aWduIHRoZSB0YXJnZXQg
+Z2V0IHRoZW0gYmFjayBpbiBidXQgc29tZSBWTXMgY2VydGFpbmx5IGNyYXNoZWQuCiAgICAgLSBG
+cmVlQlNEIC8gRnJlZU5BUyBydW5uaW5nIGluIEtWTSAob24gdG9wIG9mIENlbnRPUykgbWFwcGlu
+ZyBSQkQgCmltYWdlcyB0aHJvdWdoIGxpYnJiZC4gRm91bmQgdGhhdCBmaWxlaW8gYmFja3N0b3Jl
+IHdhcyB1c2VkLiBGb3VuZCBoYXJkIAp0byBtYWtlIGl0IEhBIHdpdGggbGlicmJkIGNhY2hlLiBB
+bmQgc3RpbGwgdGhlICdBYm9ydCBUYXNrJyBsb29wLi4uCiAgICAgLSBTQ1NUIEVTT1MgdGFyZ2V0
+cyB3aXRoIGtlcm5lbCBSQkQgbWFwcGluZyAobm8gY2FjaGUpLiBWQUFJIAptZXRob2RzLCBBTFVB
+LiBFYXN5IHRvIGNvbmZpZ3VyZSB0b28uICdBYm9ydCBUYXNrJyBzdGlsbCBoYXBwZW5zIGJ1dCB0
+aGUgCkVTWCBkb2VzIG5vdCBnZXQgZGlzY29ubmVjdGVkIGZyb20gdGhlIHZDZW50ZXIgU2VydmVy
+LiBTdGlsbCB0YXJnZXRzIApoYXZlIHRvIGJlIHJlc3RhcnRlZCB0byBmaXggdGhpcyBzaXR1YXRp
+b24uCgogICAgICogTkZTID8KCiAgICAgR2l2ZXMgbGVzcyBwZXJmb3JtYW5jZSB0aGFuIGlTQ1NJ
+LCB3ZSBrbm93IHRoYXQgdG9vLiBCVVQsIGl0J3MgCnByb2JhYmx5IHRoZSBiZXN0IG9wdGlvbiBy
+aWdodCBub3cuIEl0J3MgdmVyeSBlYXN5IHRvIG1ha2UgaXQgSEEgd2l0aCAKUGFjZW1ha2VyL0Nv
+cm9zeW5jIGFzIFZNd2FyZSBkb2Vzbid0IG1ha2UgdXNlIG9mIHRoZSBORlMgbG9jayBtYW5hZ2Vy
+LiAKSGVyZSBpcyBhIGdvb2Qgc3RhcnQgOiAKaHR0cHM6Ly93d3cuc2ViYXN0aWVuLWhhbi5mci9i
+bG9nLzIwMTIvMDcvMDYvbmZzLW92ZXItcmJkLwogICAgIFdlJ3JlIHN0aWxsIGJlbmNobWFya2lu
+ZyBJT1BzIHRvIGRlY2lkZSB3aGV0aGVyIHdlIGNhbiBnbyBpbnRvIApwcm9kdWN0aW9uIHdpdGgg
+dGhpcyBpbmZyYXN0cnVjdHVyZSBidXQgd2UncmUgYWN0dWFsbHkgdmVyeSBzYXRpc2ZpZWQgCndp
+dGggdGhlIEhBIG1lY2hhbmlzbS4KICAgICBSdW5uaW5nIHN5bmNocm9ub3VzIHdyaXRlcyBvbiBt
+dWx0aXBsZSBWTXMgKG9uIHZpcnR1YWwgZGlzayBob3N0ZWQgCm9uIE5GUyBkYXRhc3RvcmVzIHdp
+dGggJ3N5bmMnIGV4cG9ydHMgb2YgUkJEIGltYWdlcykgd2hpbGUgU3RvcmFnZSAKdk1vdGlvbmlu
+ZyB0aG9zZSBtdWx0aXBsZSBkaXNrcyBiZXR3ZWVuIE5GUyBSQkQgZGF0YXN0b3JlcyBhbmQgZmxh
+cHBpbmcgClZpUCAoYW5kIHRodXMgTkZTIGV4cG9ydHMpIGZyb20gb25lIHNlcnZlciB0byB0aGUg
+b3RoZXIgYXQgdGhlIHNhbWUgdGltZSAKbmV2ZXIga2lsbHMgYW55IFZNIG5vciBtYWtlcyBhbnkg
+ZGF0YXN0b3JlIHVuYXZhaWxhYmxlLgogICAgIEFuZCBldmVyeSBTdG9yYWdlIHZNb3Rpb24gdGFz
+ayBjb21wbGV0ZSAhIFRoaXMgaXMgZXhjZWxsZW50IApyZXN1bHRzLiBOb3RlIHRoYXQgaXQncyBp
+bXBvcnRhbnQgdG8gcnVuIFZNd2FyZSBUb29scyBpbiBWTXMgYXMgVk13YXJlIApUb29scyBpbnN0
+YWxsYXRpb24gZXh0ZW5kIHRoZSB3cml0ZSBkZWxheSB0aW1lb3V0IG9uIGxvY2FsIGlTQ1NJIGRl
+dmljZXMuCgogICAgIFdoYXQgSSBoYXZlIHRlc3RlZDoKICAgICAtIE5GUyBleHBvcnRzIHdpdGgg
+YXN5bmMgbW9kZSBzaGFyaW5nIFJCRCBpbWFnZXMgd2l0aCBYRlMgb24gdG9wIG9mIAppdC4gR2l2
+ZXMgdGhlIGJlc3QgcGVyZm9ybWFuY2VzIGJ1dCwgYXMgYW4gZXZpZGVuY2UsIG5vIG9uZSB3aWxs
+IHdhbnQgdG8gCnVzZSB0aGlzIG1vZGUgaW4gcHJvZHVjdGlvbi4KICAgICAtIE5GUyBleHBvcnRz
+IHdpdGggc3luYyBtb2RlIHNoYXJpbmcgUkJEIGltYWdlcyB3aXRoIFhGUyBvbiB0b3Agb2YgCml0
+LiBHaXZlcyBtaXRpZ2F0ZWQgcGVyZm9ybWFuY2VzLiBXZSB3b3VsZCBjbGVhcmx5IGFubm91bmNl
+IHRoaXMgdHlwZSBvZiAKc3RvcmFnZSBhcyBjYXBhY2l0aXZlIGFuZCBub3QgcGVyZm9ybWFudCB0
+aHJvdWdoIG91ciBJYWFTIHNlcnZpY2UuCiAgICAgICBBcyBWTXMgY2FjaGVzIHdyaXRlcywgSU9Q
+UyBtaWdodCBiZSBnb29kIGVub3VnaCBmb3IgdGllciAyIG9yIDMgCmFwcGxpY2F0aW9ucy4gV2Ug
+d291bGQgcHJvYmFibHkgYmUgYWJsZSB0byBpbmNyZWFzZSB0aGUgbnVtYmVyIG9mIElPUFMgCmJ5
+IHVzaW5nIG1vcmUgUkJEIGltYWdlcyBhbmQgTkZTIHNoYXJlcy4KICAgICAtIE5GUyBleHBvcnRz
+IHdpdGggc3luYyBtb2RlIHNoYXJpbmcgUkJEIGltYWdlcyB3aXRoIFpGUyAod2l0aCAKY29tcHJl
+c3Npb24pIG9uIHRvcCBvZiBpdC4gVGhlIGlkZWEgaXMgdG8gcHJvdmlkZSBiZXR0ZXIgcGVyZm9y
+bWFuY2UgYnkgCnB1dHRpbmcgdGhlIFNMT0cgKHdyaXRlIGpvdXJuYWwpIG9uIGZhc3QgU1NEIGRy
+aXZlcy4KICAgICAgIFNlZSB0aGlzIHJlYWwgbGlmZSAobG92ZS0pc3RvcnkgOiAKaHR0cHM6Ly92
+aXJ0dWFsZXhpc3Rlbnoud29yZHByZXNzLmNvbS8yMDEzLzAyLzAxL3VzaW5nLXpmcy1zdG9yYWdl
+LWFzLXZtd2FyZS1uZnMtZGF0YXN0b3Jlcy1hLXJlYWwtbGlmZS1sb3ZlLXN0b3J5LwogICAgICAg
+RWFjaCBORlMgc2VydmVyIGhhcyAyIG1pcnJvcmVkIFNTRHMgKFJBSUQxKS4gRWFjaCBORlMgc2Vy
+dmVyIApleHBvcnQgcGFydGl0aW9ucyBvZiB0aGlzIFNTRCB2b2x1bWUgdGhyb3VnaCBpU0NTSS4K
+ICAgICAgIEVhY2ggTkZTIHNlcnZlciBpcyBhIGNsaWVudCBvZiBsb2NhbCBhbmQgZGlzdGFudCBp
+U0NTSSB0YXJnZXQuIApUaGVuIHRoZSBTTE9HIGRldmljZSBpcyBtYWRlIG9mIGEgWkZTIG1pcnJv
+ciBvZiAyIGRpc2tzIDogbG9jYWwgaVNDU0kgCmRldmljZSBhbmQgZGlzdGFudCBpU0NTSSBkZXZp
+Y2UgKGFzIHZkZXZzKS4KCiAgICAgICBTbyBldmVuIGlmIGEgd2hvbGUgTkZTIHNlcnZlciBjcmFz
+aGVzIG9yIGlzIHBlcm1hbmVudGx5IGRvd24sIHRoZSAKWkZTIHBvb2wgY2FuIHN0aWxsIGJlIGlt
+cG9ydGVkIG9uIHRoZSBzZWNvbmQgTkZTIHNlcnZlci4KCiAgICAgICBGaXJzdCBiZW5jaG1hcmtz
+IHNob3cgYSB4NCBwZXJmb3JtYW5jZSBpbXByb3ZlbWVudC4gRnVydGhlciB0ZXN0cyAKd2lsbCBo
+ZWxwIHRvIGRlY2lkZSB3aGV0aGVyIGl0cyBzYWZlIG9yIG5vdCB0byBnbyBpbnRvIHByb2R1Y3Rp
+b24gd2l0aCAKdGhpcyBsZXZlbCBvZiBjb21wbGV4aXR5LgogICAgICAgU3RpbGwsIGFzIHdlJ3Jl
+IHVzaW5nIFZNd2FyZSBjbHVzdGVyZWQgZGF0YXN0b3JlcywgaXQncyBlYXN5IHRvIApnbyBiYWNr
+IHRvIGNsYXNzaWMgWEZTIE5GUyBkYXRhc3RvcmVzIGJ5IHB1dHRpbmcgYSBaRlMgZGF0YXN0b3Jl
+IGluIAptYWludGVuYW5jZSBtb2RlLgoKICAgICBBcyBmb3IgU1VTRSBFbnRlcnByaXNlIFN0b3Jh
+Z2UgSEEgaVNDU0kgdGFyZ2V0cywgSSBkb3VidCBpdCBjYW4gZG8gCmFueSBiZXR0ZXIgcmVnYXJk
+aW5nIHRoZSAnQWJvcnQgVGFzaycgY29tbWFuZCwgdW5sZXNzIHRoZXkgcGF0Y2ggdGhlIApjZXBo
+IGNsdXN0ZXIgdG8gYmUgYWJsZSB0byBBYm9ydCBhbiBJTyB3aGljaCBJIGRvdWJ0IHRoZXkgY291
+bGQuCiAgICAgRnJvbSB3aGF0IEkgZ290LCB3aXRoIGhvdyB0aGUgRVNYaSBpU0NTSSBzb2Z0d2Fy
+ZSBpbml0aWF0b3Igd29ya3MsIAp0aGUgQ2VwaCBjbHVzdGVyIEhBUyB0byBBQ0sgYW4gSU8gaW4g
+bGVzcyB0aGFuIDVzLiBQZXJpb2QuCgpSZWdhcmRzLAoKRnJlZGVyaWMgTmFzcy4KClBTIDogVGhh
+bmsgeW91IE5pY2sgZm9yIHlvdXIgaGVscCByZWdhcmRpbmcgdGhlICdBYm9ydCBUYWtzJyBsb29w
+LiA7LSkKCgpMZSAwNS8xMC8yMDE2IMOgIDIwOjMyLCBQYXRyaWNrIE1jR2FycnkgYSDDqWNyaXQg
+Ogo+IEhleSBndXlzLAo+Cj4gU3RhcnRpbmcgdG8gYnVja2xlIGRvd24gYSBiaXQgaW4gbG9va2lu
+ZyBhdCBob3cgd2UgY2FuIGJldHRlciBzZXQgdXAKPiBDZXBoIGZvciBWTVdhcmUgaW50ZWdyYXRp
+b24sIGJ1dCBJIG5lZWQgYSBsaXR0bGUgaW5mby9oZWxwIGZyb20geW91Cj4gZm9sa3MuCj4KPiBJ
+ZiB5b3UgY3VycmVudGx5IGFyZSB1c2luZyBDZXBoK1ZNV2FyZSwgb3IgYXJlIGV4cGxvcmluZyB0
+aGUgb3B0aW9uLAo+IEknZCBsaWtlIHNvbWUgc2ltcGxlIGluZm8gZnJvbSB5b3U6Cj4KPiAxKSBD
+b21wYW55Cj4gMikgQ3VycmVudCBkZXBsb3ltZW50IHNpemUKPiAzKSBFeHBlY3RlZCBkZXBsb3lt
+ZW50IGdyb3d0aAo+IDQpIEludGVncmF0aW9uIG1ldGhvZCAob3IgZGVzaXJlZCBtZXRob2QpIGV4
+OiBpc2NzaSwgbmF0aXZlLCBldGMKPgo+IEp1c3QgY2FzdGluZyB0aGUgbmV0IHNvIHdlIGtub3cg
+d2hvIGlzIGludGVyZXN0ZWQgYW5kIG1pZ2h0IHdhbnQgdG8KPiBoZWxwIHVzIHNoYXBlIGFuZC9v
+ciB0ZXN0IHRoaW5ncyBpbiB0aGUgZnV0dXJlIGlmIHdlIGNhbiBtYWtlIGl0Cj4gYmV0dGVyLiBU
+aGFua3MuCj4KPgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRw
+Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
