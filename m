@@ -1,84 +1,214 @@
-From: Victor Denisov <vdenisov@mirantis.com>
-Subject: Re: Snapshots of consistency groups
-Date: Mon, 10 Oct 2016 15:14:43 -0700
-Message-ID: <CA+hcxJR6S8AZQ0mY5MTKiBwjf0bQYswWoL16WBJgfrOzzQ40zg@mail.gmail.com>
-References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
- <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
- <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
- <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
- <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
- <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
- <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
- <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
- <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
- <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
- <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
- <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
- <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
- <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
- <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
- <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
- <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
- <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
- <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
- <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
- <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
- <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com> <CA+aFP1A4YYDG0HSJ52R__DPKBc_Y7p62Ec4tzhdXt+UPkC=vNw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: yiming xie <platoxym@gmail.com>
+Subject: Re: librgw init failed (-5)
+Date: Tue, 11 Oct 2016 11:05:45 +0800
+Message-ID: <159FD7C6-5997-4D34-B975-B17490C847F4@gmail.com>
+References: <7C82F41C-1C24-4D78-B79B-E7B3BE012FE7@gmail.com> <1368180094.4143928.1476107623758.JavaMail.zimbra@redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=gb2312
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f178.google.com ([209.85.161.178]:33354 "EHLO
-        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752245AbcJJWOp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2016 18:14:45 -0400
-Received: by mail-yw0-f178.google.com with SMTP id t192so2053878ywf.0
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Oct 2016 15:14:44 -0700 (PDT)
-In-Reply-To: <CA+aFP1A4YYDG0HSJ52R__DPKBc_Y7p62Ec4tzhdXt+UPkC=vNw@mail.gmail.com>
+Received: from mail-pa0-f49.google.com ([209.85.220.49]:35279 "EHLO
+        mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753245AbcJKDOm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2016 23:14:42 -0400
+Received: by mail-pa0-f49.google.com with SMTP id qn10so6690284pac.2
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Oct 2016 20:14:42 -0700 (PDT)
+In-Reply-To: <1368180094.4143928.1476107623758.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-Ok. I didn't have any intention to throw exceptions.
-I was more concerned about whether it's ok to allocate and delete
-objects or I should use smart pointers.
+Hi,matt:
 
-On Mon, Oct 10, 2016 at 7:18 AM, Jason Dillaman <jdillama@redhat.com> wrote:
-> The only place exceptions are routinely used is within the "::decode"
-> functions. I would prefer to see the code not throwing new exceptions
-> on purpose.
->
-> On Fri, Oct 7, 2016 at 2:26 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->> Are any exceptions used in librbd code? Should the code be exception safe?
->>
->> Thanks,
->> V.
->>
->> On Fri, Sep 16, 2016 at 10:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>> On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>> if (struct_v >= 5) {
->>>>       ::decode(snapshot_namespace, p);
->>>>     } else {
->>>>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
->>>>     }
->>>>
->>>> then code for ::encode function of cls_rbd_snap would change accordingly:
->>>>
->>>> instead of
->>>>
->>>> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
->>>> snapshot_namespace);
->>>>
->>>> I would do:
->>>> ::encode(snapshot_namespace, bl);
->>>
->>>
->>> +1 -- looks good to me
->>>
->>> --
->>> Jason
->
->
->
-> --
-> Jason
+I will try to start nfs-ganesha according your ganesha.conf with my =
+private parameters.
+I created ganesha.conf according to =
+=A1=B0/usr/share/doc/ganesha/config_samples/rgw.conf=A1=B1.
+The all contents of ganesha.conf:
+EXPORT
+{
+        Export_ID=3D1;
+
+        Path =3D "/";
+
+        Pseudo =3D "/";
+
+        Access_Type =3D RW;
+
+        NFS_Protocols =3D 4;
+
+        Transport_Protocols =3D TCP;
+
+        FSAL {
+                Name =3D RGW;
+                User_Id =3D "admin";
+                Access_Key_Id =3D"admin";
+                Secret_Access_Key =3D "admin";
+        }
+}
+
+RGW {
+    ceph_conf =3D "/etc/ceph/ceph.conf";
+}
+=20
+The all contents of /etc/ceph/ceph.conf:
+[global]
+fsid =3D 9dddf9d6-951b-4da7-9943-7eb7623dc2f4
+mon_initial_members =3D node2
+mon_host =3D 172.16.121.132
+auth_cluster_required =3D cephx
+auth_service_required =3D cephx
+auth_client_required =3D cephx
+osd_pool_default_size =3D 2
+
+Best regards
+Yiming xie
+
+
+> =D4=DA 2016=C4=EA10=D4=C210=C8=D5=A3=AC=CF=C2=CE=E79:53=A3=ACMatt =
+Benjamin <mbenjamin@redhat.com> =D0=B4=B5=C0=A3=BA
+>=20
+> Hi Yiming,
+>=20
+> Can you share the contents of the RGW and FSAL blocks of your =
+ganesha.conf?
+>=20
+> For comparison, here's one that I use (keys sanitized):
+>=20
+> """
+> EXPORT
+> {
+> 	# Export Id (mandatory, each EXPORT must have a unique =
+Export_Id)
+> 	Export_Id =3D 77;
+>=20
+> 	# Exported path (mandatory)
+> 	Path =3D "/";
+>=20
+> 	# Pseudo Path (required for NFS v4)
+> 	Pseudo =3D "/";
+>=20
+> 	# Required for access (default is None)
+> 	# Could use CLIENT blocks instead
+> 	Access_Type =3D RW;
+>=20
+> 	SecType =3D "sys";
+>=20
+> 	Protocols =3D 3,4;
+>=20
+> 	#Delegations =3D Readwrite;
+>=20
+> 	Squash =3D No_Root_Squash;
+>=20
+> 	# Exporting FSAL
+> 	FSAL {
+> 		Name =3D RGW;
+> 		User_Id =3D "testuser";
+> 		Access_Key_Id =3D "acckey";
+> 		Secret_Access_Key =3D "secretkey";
+> 	}
+> }
+>=20
+> RGW {
+>    ceph_conf =3D "/opt/ceph-rgw/etc/ceph/ceph.conf";
+>    init_args =3D "-d --debug-rgw=3D16";
+> }
+>=20
+> NFS_Core_Param
+> {
+>        Nb_Worker =3D 12;
+> }
+>=20
+> NFSV4 {
+>    Graceless =3D true;
+>    Allow_Numeric_Owners =3D true;
+>    Only_Numeric_Owners =3D true;
+> }
+>=20
+> LOG {
+> 	# Default_Log_Level is unknown token??
+> 	#Default_Log_Level =3D NIV_FULL_DEBUG;
+> 	Components {
+> 		#ALL =3D FULL_DEBUG;
+> 		MEMLEAKS =3D FATAL;
+> 		FSAL =3D FULL_DEBUG;
+> 		NFSPROTO =3D FATAL;
+> 		NFS_V4 =3D FATAL;
+> 		EXPORT =3D FATAL;
+> 		FILEHANDLE =3D FATAL;
+> 		DISPATCH =3D FATAL;
+> 		CACHE_INODE =3D FATAL;
+> 		CACHE_INODE_LRU =3D FATAL;
+> 		HASHTABLE =3D FATAL;
+> 		HASHTABLE_CACHE =3D FATAL;
+> 		DUPREQ =3D FATAL;
+> 		INIT =3D DEBUG;
+> 		MAIN =3D DEBUG;
+> 		IDMAPPER =3D FATAL;
+> 		NFS_READDIR =3D FATAL;
+> 		NFS_V4_LOCK =3D FATAL;
+> 		CONFIG =3D FATAL;
+> 		CLIENTID =3D FATAL;
+> 		SESSIONS =3D FATAL;
+> 		PNFS =3D FATAL;
+> 		RW_LOCK =3D FATAL;
+> 		NLM =3D FATAL;
+> 		RPC =3D FATAL;
+> 		NFS_CB =3D FATAL;
+> 		THREAD =3D FATAL;
+> 		NFS_V4_ACL =3D FATAL;
+> 		STATE =3D FATAL;
+> #		9P =3D FATAL;
+> #		9P_DISPATCH =3D FATAL;
+> 		FSAL_UP =3D FATAL;
+> 		DBUS =3D FATAL;
+> 	}
+> 	Facility {
+> 		name =3D FILE;
+> 		destination =3D "/tmp/ganesha-rgw.log";
+> 		enable =3D active;
+> 	}
+> }
+> """
+>=20
+> Regards,
+>=20
+> Matt
+>=20
+> ----- Original Message -----
+>> From: "yiming xie" <platoxym@gmail.com>
+>> To: ceph-devel@vger.kernel.org
+>> Cc: "Matt Benjamin" <mbenjamin@redhat.com>
+>> Sent: Saturday, October 8, 2016 3:23:31 AM
+>> Subject: librgw init failed (-5)
+>>=20
+>> I start nfs-ganesha with FSAL_RGW failed, the nfs-ganesha log is:
+>> "create_export :FSAL :CRIT :RGW module: librgw init failed (-5)=A1=B1
+>>=20
+>> ceph/src/rgw/librgw.cc:
+>> int librgw_create(librgw_t* rgw, int argc, char **argv)
+>> this interface return value equal -5 and it=A1=AFs parameters as =
+below:
+>>=20
+>> argc=3D2
+>> argv[0] =3D =A1=B0nfs-ganesha=A1=B1
+>> argv[1] =3D =A1=B0--conf=3D/etc/ceph/ceph.conf=A1=B1
+>>=20
+>> env:
+>> nfs-genahsa(2.3)
+>> librgw.so.2.0.0
+>=20
+> --=20
+> Matt Benjamin
+> Red Hat, Inc.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+>=20
+> http://www.redhat.com/en/technologies/storage
+>=20
+> tel.  734-707-0660
+> fax.  734-769-8938
+> cel.  734-216-5309
+> H
+
