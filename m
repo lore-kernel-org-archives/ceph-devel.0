@@ -1,117 +1,169 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Single slow OSD can cause unfound object
-Date: Tue, 11 Oct 2016 13:45:25 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1610111340430.31080@piezo.us.to>
-References: <ed8ed02e-4fb7-25ad-3a5f-d462f70409e2@sadziu.pl>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: jewel backport of https://github.com/ceph/ceph/pull/11326
+Date: Tue, 11 Oct 2016 16:15:58 +0200
+Message-ID: <57FCF41E.9090000@dachary.org>
+References: <57FCB6CA.8060904@dachary.org>
+ <CA+aFP1C+baLbCvxAVKsN8J2AqRdmFt6ys8UOhp9CkrJoZowSnQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-649248288-1476193527=:31080"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57800 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751537AbcJKNp2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2016 09:45:28 -0400
-In-Reply-To: <ed8ed02e-4fb7-25ad-3a5f-d462f70409e2@sadziu.pl>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:52507 "EHLO
+        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753511AbcJKOQE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2016 10:16:04 -0400
+In-Reply-To: <CA+aFP1C+baLbCvxAVKsN8J2AqRdmFt6ys8UOhp9CkrJoZowSnQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?Pawe=B3_Sadowski?= <ceph@sadziu.pl>
-Cc: ceph-devel@vger.kernel.org
+To: dillaman@redhat.com
+Cc: Mykola Golub <mgolub@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
 
---8323329-649248288-1476193527=:31080
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
 
-Hi Pawel,
+On 11/10/2016 16:11, Jason Dillaman wrote:
+> I think the biggest set of conflicts will come from
+> https://github.com/ceph/ceph/pull/10445, which will need to be merged
+> along with #11326. If you'd like, I can take care of this backport
+> today.
 
-On Tue, 11 Oct 2016, Paweł Sadowski wrote:
-> Hi,
+That would be fantastic. And then I can take care the other, simpler, backports.
+
+Thanks !
+
 > 
-> I managed to trigger unfound objects on a pool with size 3 and min_size
-> 2 just by removing 'slow' OSD (out and then stop) which is quite
-> frightening. Shouldn't Ceph stop IO if there is only one copy in this
-> case (even during recovery/peering/etc)? I'm able to reproduce this on
-> Hammer (0.94.5, 0.94.9) and Jewel (10.2.3). So far I wasn't able to
-> trigger this behavior by just stopping such OSD (still testing).
-
-This is definitely concerning.  I have a couple questions...
-
-1. Looking at the log, I see that at one point all of the OSDs mark 
-themselves down, here:
-
-2016-10-11 08:46:23.473335 mon.0 10.99.128.50:6789/0 3275 : cluster [INF] 
-osd.1 marked itself down
-
-Do you know why they do that?
-
-2. Are you throttling the CPU on just a single OSD, or on a whole host?  I 
-also see that the monitors are calling elections.  (This shouldn't have 
-anything to do with the problem, but I'm not sure I understand the test 
-setup.)
- 
-> Second thing: throttling mechanism is blocking recovery operations/whole
-> OSD[4] when there is a lot of client requests for missing objects. I
-> think it shouldn't be like that.
-
-Yeah, there is a similar problem with a PG is inactive and requests pile 
-up, eventually preventing ops even on active PGs... and 'ceph tell $pgid 
-query' admin commands.  It's non-trivial to fix, though: we need a way to 
-inform the client that a PG or individual object is blocked so that they 
-stop sending requests... and then also a way to inform them that the PG is 
-unblocked so they can start again.
-
-> 1: logs from Jewel
-> https://gist.github.com/anonymous/c8618adca8984132c82f16c351222883
-
-Do you mind reproducing this sequence with debug ms = 1, debug osd = 20, 
-and capture all of the OSD logs as well as the cluster ceph.log?  You can 
-send us the tarball with the ceph-post-file utility.
-
-Thanks!
-sage
-
-
-
-> 2: steps to reproduce
->  - put some load on the cluster (run FIO with high iodepth)
->  - slow down single OSD (in my case reduce CPU time using cgroups:
-> cpu.cfs_quota_us 15000)
->  - sleep 120
->  - ceph osd out 6
->  - sleep 15
->  - stop ceph-osd id=6
->  - unfound objects appear
+> On Tue, Oct 11, 2016 at 5:54 AM, Loic Dachary <loic@dachary.org> wrote:
+>> Hi,
+>>
+>> Trying to cherry pick commits instead of resolving conflicts and it looks like I'm going to end up adding a number of commits. Before I go down this path, I'd like a confirmation from you that it's the right call (see below for more information about what I did).
+>>
+>> Thanks !
+>>
+>> git cherry-pick -x dc77a62 from https://github.com/ceph/ceph/pull/11326 conflicts on
+>>
+>> unmerged   src/journal/JournalRecorder.cc
+>> @@@ -279,8 -281,7 +276,12 @@@ void JournalRecorder::create_next_objec
+>>         new_object_recorder->get_object_number());
+>>     }
+>>
+>> ++<<<<<<< HEAD
+>>  +  new_object_recorder->append(append_buffers, false);
+>>  +
+>> ++=======
+>> +   new_object_recorder->append_unlock(std::move(append_buffers));
+>> ++>>>>>>> dc77a62... journal: avoid holding lock while sending journal append
+>>     m_object_ptrs[splay_offset] = new_object_recorder;
+>>   }
+>>
+>> ----------------------------------------------------------------------
+>>
+>> git log --no-merges --oneline --cherry-mark --left-right ceph/jewel...ceph/master -- src/journal/JournalRecorder.cc
+>>
+>>> dc77a62 journal: avoid holding lock while sending journal append
+>>> 7b740f5 journal: make librados call async in ObjectRecorder
+>>> 5c88edd journal: increase concurrency of journal recorder
+>> = b4b9843 journal: improve debug log messages
+>> = 11475f4 journal: improve debug log messages
+>> = 30c7f4d journal: update commit entry object number upon overflow
+>> = 5fbf5f8 journal: update commit entry object number upon overflow
+>> = 18f663d journal: close, advance, and open object set ordering
+>> = 27fba6a journal: new ObjectRecorder closed callback
+>> = de83005 journal: close, advance, and open object set ordering
+>> = bba9143 journal: new ObjectRecorder closed callback
+>> = f1a2e6a journal: prohibit journal entries larger than the soft object size
+>> = d5f307d journal: prohibit journal entries larger than the soft object size
+>>
+>> git cherry-pick -x 5c88edd conflicts on
+>>
+>> unmerged   src/librbd/Journal.cc
+>> @@@ -17,8 -16,11 +17,9 @@@
+>>   #include "common/Timer.h"
+>>   #include "common/WorkQueue.h"
+>>   #include "include/rados/librados.hpp"
+>>  -#include "librbd/journal/RemoveRequest.h"
+>>  -#include "librbd/journal/CreateRequest.h"
+>>
+>>   #include <boost/scope_exit.hpp>
+>> + #include <utility>
+>>
+>>   #define dout_subsys ceph_subsys_rbd
+>>   #undef dout_prefix
+>> @@@ -705,40 -671,56 +706,70 @@@ int Journal<I>::demote()
+>>     CephContext *cct = m_image_ctx.cct;
+>>     ldout(cct, 20) << __func__ << dendl;
+>>
+>> ++<<<<<<< HEAD
+>>  +  Mutex::Locker locker(m_lock);
+>>  +  assert(m_journaler != nullptr && is_tag_owner());
+>> ++=======
+>> +   int r;
+>> +   C_SaferCond ctx;
+>> +   Future future;
+>> +   C_SaferCond flush_ctx;
+>> ++>>>>>>> 7b740f5... journal: make librados call async in ObjectRecorder
+>>
+>> ----------------------------------------------------------------------
+>> git log --no-merges --oneline --cherry-mark --left-right ceph/jewel...ceph/master -- src/librbd/Journal.cc
+>>
+>>> 953561f librbd: async method to check journal tag owner
+>>> 7b740f5 journal: make librados call async in ObjectRecorder
+>>> 5c88edd journal: increase concurrency of journal recorder
+>>> fd00549 librbd: new journal listener event for force promotion
+>>> dbbcecf librbd: unify journal event callbacks into single interface
+>>> b8eafef librbd: optionally flag "laggy" journal clients disconnected
+>>> 551d7ea librbd: remove use of owner_lock on IO path
+>> = e83866b librbd: do not record journal events if append is disabled by policy
+>> = 1f63307 librbd: optimize header file dependency & modify related file.
+>> = 549aada librbd: new configuration option to restrict journal payload size
+>> = 99195e8 librbd: wait for journal commit op event to be safely recorded
+>> = 91c70f3 journal: helper class for organizing optional settings
+>> = f71dc87 librbd: improve journaling debug log messages
+>> = 14db535 librbd: separate journal event decoding and processing
+>>> ac590e8 librbd: normalize journal promotion/demotion events
+>>> 718befd librbd: separate journal::TagData predecessor data into new struct
+>>> 47d1e62 rbd-mirror: include tag tid in bootstrap debug log messages
+>> = c2b786c rbd: journal: Support for listening updates on client metadata
+>>> 3492153 journaler: remove ununsed synchronous API routines
+>>> d5fa466 librbd / journal: async journal creation state machine
+>>> c4e439d librbd / journal: async journal removal state machine
+>>> 1416f1c librbd / ImageCtx: singleton safetimer instance helper
+>> = 405142c librbd: do not record journal events if append is disabled by policy
+>> = 11d7500 librbd: new configuration option to restrict journal payload size
+>> = 47e0fbf librbd: wait for journal commit op event to be safely recorded
+>> = dad8328 journal: helper class for organizing optional settings
+>> = 270cb74 librbd: improve journaling debug log messages
+>> = 57cd75e librbd: separate journal event decoding and processing
+>> = f3f4a4a librbd: journal callback to interrupt replay
+>> = deb6ca8 librbd: force-remove journal when disabling feature and removing image
+>> = 2185a62 librbd: optimize header file dependency & modify related file.
+>> = 9687e5e librbd: journal callback to interrupt replay
+>> = d83aa1e librbd: force-remove journal when disabling feature and removing image
+>> = 0dd8573 rbd: journal: Support for listening updates on client metadata
+>> = f0bf15e librbd: stop journal recorder before starting external replay
+>> = 0014a9e librbd: flush journal commit positions before starting op
+>> = ef12536 librbd: resize and snap create can hang on journal replay failure
+>> = c8b4cab librbd: missing journal state for flushing/restarting replay
+>> = de29be7 librbd: Journal no longer requires AioCompletion for IO events
+>> = 65556aa librbd: bubble journal error up via existing AioObjectRequests
+>> = 5aa6eb2 librbd: stop journal recorder before starting external replay
+>> = 6361296 librbd: flush journal commit positions before starting op
+>> = 1032f19 librbd: resize and snap create can hang on journal replay failure
+>> = a7f5bc1 librbd: missing journal state for flushing/restarting replay
+>> = 82587a3 librbd: Journal no longer requires AioCompletion for IO events
+>> = 79c9347 librbd: bubble journal error up via existing AioObjectRequests
+>> = bf4c458 librbd: integrate with async journaler shutdown API
+>> = 0780230 rbd-mirror: Added implementation of image-deleter thread
+>> = ad29785 librbd: integrate with async journaler shutdown API
+>> = 6cc6e66 rbd-mirror: Added implementation of image-deleter thread
+>> = 5ec1f79 librbd: split large AioWrite journal events
+>> = f221fed librbd: assertion to ensure no concurrent processing of replay events
+>> = 44827a3 librbd: assertion to ensure no concurrent processing of replay events
+>> = 70b9fbf librbd: split large AioWrite journal events
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
 > 
-> This is not 100% reproducible but in my test lab (9 OSDs) I'm able to
-> trigger this very easily.
-> 
-> 3:
-> mon-01:~ # ceph osd pool get rbd size
-> size: 3
-> mon-01:~ # ceph osd pool get rbd min_size
-> min_size: 2
-> mon-01:~ # ceph --version
-> ceph version 10.2.3 (ecc23778eb545d8dd55e2e4735b53cc93f92e65b)
-> 
-> 4:
-> perf dump | grep -A 2 'throttle-osd_client_messages'
->     "throttle-osd_client_messages": {
->         "val": 100,
->         "max": 100,
-> 
-> ops_in_flight:
-> https://gist.github.com/anonymous/643607fa3f959c91ba7a9794e5d99dea
 > 
 > 
-> -- 
-> PS
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---8323329-649248288-1476193527=:31080--
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
