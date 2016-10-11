@@ -1,150 +1,120 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: bluestore performance snapshot - 20161006
-Date: Tue, 11 Oct 2016 19:30:05 +0000
-Message-ID: <BY2PR02MB396D9464C24D83649BFB2A7F4DA0@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <e3e00cbc-3e97-8582-bb93-7ac03b3da40b@redhat.com>
- <BY2PR02MB3967B0DA74162EFB241FF23F4DB0@BY2PR02MB396.namprd02.prod.outlook.com>
- <ea54fb10-2829-5a91-a644-0600f9314f2e@redhat.com>
+From: =?UTF-8?Q?Pawe=c5=82_Sadowski?= <pawel@sadziu.pl>
+Subject: Re: Single slow OSD can cause unfound object
+Date: Tue, 11 Oct 2016 21:34:29 +0200
+Message-ID: <8b92ccce-1e31-7a0d-06d0-9126c3d02ffd@sadziu.pl>
+References: <ed8ed02e-4fb7-25ad-3a5f-d462f70409e2@sadziu.pl>
+ <alpine.DEB.2.11.1610111340430.31080@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-co1nam03on0042.outbound.protection.outlook.com ([104.47.40.42]:23103
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752822AbcJKTs3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 11 Oct 2016 15:48:29 -0400
-In-Reply-To: <ea54fb10-2829-5a91-a644-0600f9314f2e@redhat.com>
-Content-Language: en-US
+Received: from h82-143-163-170-static.e-wro.net.pl ([82.143.163.170]:39544
+        "EHLO mail.sadziu.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751297AbcJKUKV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2016 16:10:21 -0400
+In-Reply-To: <alpine.DEB.2.11.1610111340430.31080@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-TWFyay9TYWdlLA0KSSBmaWd1cmVkIG91dCB0aGUgKkdDIGNvZGUqIGlzIGNhdXNpbmcgdGhlIGV4
-dHJhIHJlYWRzIEkgYW0gc2VlaW5nICwgSSBoYXZlIHRlbXBvcmFyaWx5IGluY3JlYXNlZCBibHVl
-c3RvcmVfZ2NfbWF4X2Jsb2JfZGVwdGggdG8gYmlnIG51bWJlciBmb3Igbm90IHRvIGhpdCB0aGF0
-IGFuZCBydW5uaW5nIG15IGJlbmNobWFyayBub3cuDQpTYWdlLCANCkJlZm9yZSBJIGdvIHRocm91
-Z2ggdGhlIEdDIGNvZGUsIGNvdWxkIHlvdSBxdWlja2x5IGxldCBtZSBrbm93IGhvdyBibG9iIGRl
-cHRoIGlzIGRldGVybWluZWQgYW5kIHdoYXQgaXMgaXQgcmVwcmVzZW50aW5nID8NCg0KT25seSB0
-aGUgZm9sbG93aW5nIGNvbmZpZyBvcHRpb24gSSBjaGFuZ2VkIG9uIGV4dGVudC9ibG9iIHBhcnQu
-DQoNCmJsdWVzdG9yZV9leHRlbnRfbWFwX3NoYXJkX21heF9zaXplID0gNjAwDQpibHVlc3RvcmVf
-ZXh0ZW50X21hcF9zaGFyZF90YXJnZXRfc2l6ZSA9IDI1MA0KDQpUaGFua3MgJiBSZWdhcmRzDQpT
-b21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBNYXJrIE5lbHNvbiBb
-bWFpbHRvOm1uZWxzb25AcmVkaGF0LmNvbV0gDQpTZW50OiBUdWVzZGF5LCBPY3RvYmVyIDExLCAy
-MDE2IDc6MTkgQU0NClRvOiBTb21uYXRoIFJveTsgY2VwaC1kZXZlbA0KU3ViamVjdDogUmU6IGJs
-dWVzdG9yZSBwZXJmb3JtYW5jZSBzbmFwc2hvdCAtIDIwMTYxMDA2DQoNCg0KDQpPbiAxMC8xMC8y
-MDE2IDA0OjI5IFBNLCBTb21uYXRoIFJveSB3cm90ZToNCj4gTWFyaywNCj4gQXMgd2UgZGlzY3Vz
-c2VkIHRvZGF5LCBoZXJlIGlzIHNvbWUgZGF0YSBwb2ludCBmb3IgbWluX2FsbG9jX3NpemUgc2V0
-IHRvIDE2SyB2cyBkZWZhdWx0IDRLLi4NCj4gSSBhbSBzZWVpbmcgNEsgUlcgaXMgc3RhYmlsaXpp
-bmcgdG8gYSBsb3dlciB2YWx1ZSAofjI1LTMwJSkgYWZ0ZXIgfjEgaG91ciBydW4gaWYgSSBzZXQg
-bWluX2FsbG9jX3NpemUgPSAxNksgd2l0aCBib3RoIGRlZmF1bHQgcm9ja3NkYiB0dW5pbmcgYW5k
-IHdpdGggbXkgdHVuaW5nIEkgcG9zdGVkIHNvbWV0aW1lcyBiYWNrLg0KPg0KPiAxNksgbWluX2Fs
-bG9jX3NpemUgKGFmdGVyIDEgYW5kIGhhbGYgaG91cikgIDoNCj4gLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0NCj4gLS0tLXRvdGFsLWNwdS11c2FnZS0tLS0gLWRzay90b3RhbC0gLW5ldC90b3RhbC0g
-LS0tcGFnaW5nLS0gLS0tc3lzdGVtLS0NCj4gdXNyIHN5cyBpZGwgd2FpIGhpcSBzaXF8IHJlYWQg
-IHdyaXR8IHJlY3YgIHNlbmR8ICBpbiAgIG91dCB8IGludCAgIGNzdw0KPiAgIDMgICAxICA5NSAg
-IDIgICAwICAgMHwgIDE5TSAgIDY4TXwgICAwICAgICAwIHwgMTYwayAgMjQya3wgIDE0ayAgIDU0
-aw0KPiAgMTggICA2ICA2NyAgIDggICAwICAgMnwgMzY0TSAgNTgyTXwgMTE0TSAgIDc0TXwgICAw
-ICAgICAwIHwgMzEzayAgMzQzaw0KPiAgMTggICA2ICA2NiAgIDggICAwICAgMnwgMzg0TSAgNjE0
-TXwgMTIyTSAgIDc5TXwgICAwICAgICAwIHwgMzE0ayAgMzQ0aw0KPiAgMTggICA2ICA2NyAgIDcg
-ICAwICAgMnwgMzM3TSAgNTc1TXwgMTA4TSAgIDcxTXwgICAwICAgICAwIHwgMzE2ayAgMzU2aw0K
-PiAgMTggICA1ICA2OCAgIDcgICAwICAgMnwgMzQ5TSAgNTU2TXwgMTExTSAgIDczTXwgICAwICAg
-ICAwIHwgMzA1ayAgMzQ0aw0KPiAgMTcgICA2ICA2OCAgIDcgICAwICAgMnwgNDI2TSAgNjMxTXwg
-MTA2TSAgIDY5TXwgICAwICAgICAwIHwgMzA2ayAgMzM1aw0KPiAgMTkgICA2ICA2NiAgIDcgICAw
-ICAgMnwgNDM2TSAgNjYxTXwgMTI5TSAgIDg0TXwgICAwICAgICAwIHwgMzQwayAgMzY1aw0KPiAg
-MTkgICA3ICA2MiAgMTAgICAwICAgMnwgNDUwTSAgNzEyTXwgMTEzTSAgIDc1TXwgICAwICAgICAw
-IHwgMzMwayAgMzUwaw0KPiAgMjAgICA3ICA2MCAgMTEgICAwICAgMnwgNDYzTSAgNzE3TXwgMTIw
-TSAgIDc5TXwgICAwICAgICAwIHwgMzQ5ayAgMzYzaw0KPiAgMjEgICA3ICA1NyAgMTMgICAwICAg
-MnwgNDk0TSAgNzIwTXwgMTM3TSAgIDg5TXwgICAwICAgICAwIHwgMzY3ayAgMzg1aw0KPg0KPiBE
-ZWZhdWx0IDRLIG1pbl9hbGxvY19zaXplIChhZnRlciAxMCBob3VyIHJ1bik6DQo+IC0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+DQo+IC0tLS10b3RhbC1jcHUtdXNhZ2UtLS0tIC1k
-c2svdG90YWwtIC1uZXQvdG90YWwtIC0tLXBhZ2luZy0tIC0tLXN5c3RlbS0tDQo+IHVzciBzeXMg
-aWRsIHdhaSBoaXEgc2lxfCByZWFkICB3cml0fCByZWN2ICBzZW5kfCAgaW4gICBvdXQgfCBpbnQg
-ICBjc3cNCj4gIDQ0ICAgOSAgMzEgIDEzICAgMCAgIDR8IDE1OE0gIDI1OU18IDE3M00gIDExM018
-ICAgMCAgICAgMCB8IDQ1MWsgIDQ2OWsNCj4gIDQxICAgOSAgMzQgIDEyICAgMCAgIDN8IDE0Nk0g
-IDI1ME18IDE2Mk0gIDEwNk18ICAgMCAgICAgMCB8IDQzNWsgIDQ2MWsNCj4gIDQzICAxMCAgMzIg
-IDEyICAgMCAgIDR8IDE0MU0gIDI2NE18IDE3Mk0gIDExMk18ICAgMCAgICAgMCB8IDQ0NmsgIDQ2
-MGsNCj4gIDQ1ICAxMCAgMjggIDE0ICAgMCAgIDR8IDE0ME0gIDI4Mk18IDE4ME0gIDExN018ICAg
-MCAgICAgMCB8IDQ1NGsgIDQ1OGsNCj4gIDQ0ICAxMCAgMjcgIDE0ICAgMCAgIDR8IDEzOU0gIDI2
-MU18IDE4MU0gIDExOU18ICAgMCAgICAgMCB8IDQ2N2sgIDQ1N2sNCj4gIDQ2ICAxMCAgMjggIDEy
-ICAgMCAgIDR8IDEzN00gIDI2NE18IDE4NU0gIDEyMU18ICAgMCAgICAgMCB8IDQ2NWsgIDQ1OGsN
-Cj4gIDQ2ICAxMCAgMjkgIDExICAgMCAgIDR8IDE0M00gIDMwM018IDE3OU0gIDExNk18ICAgMCAg
-ICAgMCB8IDQ1N2sgIDQ1M2sNCj4gIDQ2ICAxMCAgMjggIDEyICAgMCAgIDR8IDE3Mk0gIDMyNU18
-IDE3M00gIDExMk18ICAgMCAgICAgMCB8IDQ2MGsgIDQ1NGsNCj4gIDQ0ICAxMCAgMjYgIDE2ICAg
-MCAgIDR8IDIwNk0gIDMwMk18IDE2OU0gIDExME18ICAgMCAgICAgMCB8IDQ2M2sgIDQ2NmsNCj4N
-Cj4NCj4gWW91IGNhbiBzZWUgd2F5IG1vcmUgcmVhZC93cml0ZSBnb2luZyBvbiBpZiBJIGVuYWJs
-ZSAxNksgbWluX2FsbG9jX3NpemUgYW5kIHRoYXQgaXMgZGVncmFkaW5nIHBlcmZvcm1hbmNlIG92
-ZXIgdGltZSBmb3IgbWUuLg0KDQpUaGF0J3MgcmVhbGx5IGludGVyZXN0aW5nISAgSSB0ZW5kIHRv
-IHNlZSBiZXR0ZXIgcGVyZm9ybWFuY2Ugd2l0aCBhIGhpZ2hlciBtaW5fYWxsb2Nfc2l6ZSBoZXJl
-LiBJdCBkb2Vzbid0IHJlYWxseSBtYWtlIHNlbnNlIHRvIG1lIHRoYXQgeW91J2Qgc2VlIGhpZ2hl
-ciByZWFkIG51bWJlcnMgd2l0aCBhIGhpZ2hlciBtaW5fYWxsb2Nfc2l6ZSB1bmxlc3MgYSBsb3Qg
-b2YgV0FMIHdyaXRlcyBhcmUgbGVha2luZyBpbnRvIHRoZSBTU1RzIHNpbmNlIHRoZXJlIHNob3Vs
-ZCBiZSBuZWFybHkgNHggbGVzcyBtZXRhZGF0YSBmb3Igcm9ja3NkYiB0byBkZWFsIHdpdGguDQoN
-Ck1hcmsNCg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4gLS0tLS1Pcmln
-aW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5v
-cmcgDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFs
-ZiBPZiBNYXJrIE5lbHNvbg0KPiBTZW50OiBGcmlkYXksIE9jdG9iZXIgMDcsIDIwMTYgNzowNCBB
-TQ0KPiBUbzogY2VwaC1kZXZlbA0KPiBTdWJqZWN0OiBibHVlc3RvcmUgcGVyZm9ybWFuY2Ugc25h
-cHNob3QgLSAyMDE2MTAwNg0KPg0KPiBIaSBHdXlzLA0KPg0KPiBJIHdhbnRlZCB0byBnaXZlIGZv
-bGtzIGEgcXVpY2sgc25hcHNob3Qgb2YgYmx1ZXN0b3JlIHBlcmZvcm1hbmNlIG9uIG91ciBOVk1l
-IHRlc3Qgc2V0dXAuICBUaGVyZSdzIGEgbG90IG9mIHRoaW5ncyBoYXBwZW5pbmcgdmVyeSBxdWlj
-a2x5IGluIHRoZSBjb2RlLCBzbyBoZXJlJ3MgYSBsaW1pdGVkIHNuYXBzaG90IG9mIGhvdyB3ZSBh
-cmUgZG9pbmcuICBUaGVzZSBhcmUgc2hvcnQgcnVubmluZyB0ZXN0cywgc28gZG8ga2VlcCB0aGF0
-IGluIG1pbmQgKDUgbWludXRlcyBlYWNoKS4NCj4NCj4gaHR0cHM6Ly9kcml2ZS5nb29nbGUuY29t
-L3VjP2V4cG9ydD1kb3dubG9hZCZpZD0wQjJnVEJacmtybnBaUlhGS1JEQnJUag0KPiBaaVdHYw0K
-Pg0KPiBUaGUgZ2lzdCBvZiBpdCBpczoNCj4NCj4gV2UgYXJlIG5vdyBiYXNpY2FsbHkgZmFzdGVy
-IHRoYW4gZmlsZXN0b3JlIGluIGFsbCBzaG9ydCB3cml0ZSB0ZXN0cy4NCj4gSW5jcmVhc2luZyB0
-aGUgbWluX2FsbG9jIHNpemUgKGFuZCB0byBhIGxlc3NlciBleHRlbnQpIHRoZSBudW1iZXIgb2Yg
-Y2FjaGVkIG9ub2RlcyBicmluZ3MgNEsgcmFuZG9tIHdyaXRlIHBlcmZvcm1hbmNlIHVwIGV2ZW4g
-ZnVydGhlci4NCj4gTGlrZWx5IGluY3JlYXNpbmcgdGhlIG1pbl9hbGxvYyBzaXplIHdpbGwgaW1w
-cm92ZSBsb25nIHJ1bm5pbmcgdGVzdCBwZXJmb3JtYW5jZSBhcyB3ZWxsIGR1ZSB0byBkcmFzdGlj
-YWxseSByZWR1Y2VkIG1ldGFkYXRhIGxvYWQgb24gcm9ja3NkYi4NCj4gICBSZWxhdGVkIHRvIHRo
-aXMsIHRoZSBhbW91bnQgb2YgbWVtb3J5IHRoYXQgd2UgY2FjaGUgd2l0aCA0ayBtaW5fYWxsb2Mg
-aXMgcHJldHR5IGV4Y2Vzc2l2ZSwgZXZlbiB3aGVuIGxpbWl0aW5nIHRoZSBudW1iZXIgb2YgY2Fj
-aGVkIG9ub2RlcyB0byA0ayAgVGhlIG1lbW9yeSBhbGxvY2F0b3Igd29yayBzaG91bGQgYWxsb3cg
-dXMgdG8gbWFrZSB0aGlzIG1vcmUgZmxleGlibGUsIGJ1dCBJIHN1c3BlY3QgdGhhdCBmb3Igbm93
-IHdlIHdpbGwgd2FudCB0byBpbmNyZWFzZSB0aGUgbWluX2FsbG9jIHNpemUgdG8gMTZrIHRvIGhl
-bHAgYWxsZXZpYXRlIG1lbW9yeSBjb25zdW1wdGlvbiBhbmQgbWV0YWRhdGEgb3ZlcmhlYWQgKGFu
-ZCBpbXByb3ZlIDRrIHJhbmRvbSB3cml0ZSBwZXJmb3JtYW5jZSEpLiAgVGhlIGV4dHJhIFdBTCB3
-cml0ZSBpcyBwcm9iYWJseSBzdGlsbCB3b3J0aCB0aGUgdHJhZGVvZmYgZm9yIG5vdy4NCj4NCj4g
-T24gdGhlIHJlYWQgc2lkZSB3ZSBhcmUgc2VlaW5nIHNvbWUgcmVncmVzc2lvbnMuICBUaGUgc2Vx
-dWVudGlhbCByZWFkIGNhc2UgaXMgaW50ZXJlc3RpbmcuICBXZSdyZSBkb2luZyBxdWl0ZSBhIGJp
-dCB3b3JzZSBpbiByZWNlbnQgYmx1ZXN0b3JlIGV2ZW4gdnMgb2xkZXIgYmx1ZXN0b3JlLCBhbmQg
-Z2VuZXJhbGx5IHF1aXRlIGEgYml0IHdvcnNlIHRoYW4gZmlsZXN0b3JlLg0KPiAgIEluY3JlYXNp
-bmcgdGhlIG1pbl9hbGxvYyBzaXplIHJlZHVjZXMgdGhlIGRlZ3JlZGF0aW9uLCBidXQgd2Ugc3Rp
-bGwgaGF2ZSBncm91bmQgdG8gbWFrZSB1cC4gIEluIHRoZXNlIHRlc3RzIHJiZCByZWFkYWhlYWQg
-aXMgYmVpbmcgdXNlZCBpbiBhbiBhdHRlbXB0IHRvIGFjaGlldmUgY2xpZW50LXNpZGUgcmVhZGFo
-ZWFkIHNpbmNlIGJsdWVzdG9yZSBubyBsb25nZXIgZG9lcyBpdCBvbiB0aGUgT1NEIHNpZGUsIGJ1
-dCBhcHBlYXJzIHRvIGJlIGZhaXJseSBpbmVmZmVjdGl2ZS4gIFRoZXNlIGFyZSB0aGUgc2V0dGlu
-Z3MgdXNlZDoNCj4NCj4gICAgICAgICAgcmJkIHJlYWRhaGVhZCBkaXNhYmxlIGFmdGVyIGJ5dGVz
-ID0gMA0KPiAgICAgICAgICByYmQgcmVhZGFoZWFkIG1heCBieXRlcyA9IDQxOTQzMDQNCj4NCj4g
-QnkgZGVmYXVsdCB3ZSByZXF1aXJlIDEwIHNlcXVlbnRpYWwgcmVhZHMgdG8gdHJpZ2dlciBpdC4g
-IEkgZG9uJ3QgdGhpbmsgdGhhdCBzaG91bGQgYmUgYSBwcm9ibGVtLCBidXQgcGVyaGFwcyBsb3dl
-cmluZyB0aGUgdGhyZXNob2xkIHdpbGwgaGVscC4NCj4gSW4gZ2VuZXJhbCB0aGlzIGlzIGFuIGFy
-ZWEgd2Ugc3RpbGwgbmVlZCB0byBmb2N1cy4NCj4NCj4gRm9yIHJhbmRvbSByZWFkcywgdGhlIGRl
-Z3JhZGF0aW9uIHdhcyBwcmV2aW91c2x5IGZvdW5kIHRvIGJlIGR1ZSB0byB0aGUgYXN5bmMgbWVz
-c2VuZ2VyLiAgQm90aCBmaWxlc3RvcmUgYW5kIGJsdWVzdG9yZSBwZXJmb3JtYW5jZSBoYXMgZGVn
-cmFkZWQgcmVsYXRpdmUgdG8gSmV3ZWwgaW4gdGhlc2UgdGVzdHMuICBIYW9tYWkgc3VzcGVjdHMg
-ZmFzdCBkaXNwYXRjaCBhcyB0aGUgcHJpbWFyaWx5IGJvdHRsZW5lY2sgaGVyZS4NCj4NCj4gU28g
-aW4gZ2VuZXJhbCwgdGhlIGFyZWFzIEkgdGhpbmsgd2Ugc3RpbGwgbmVlZCB0byBmb2N1czoNCj4N
-Cj4NCj4gMSkgbWVtb3J5IGFsbG9jYXRvciB3b3JrIChtdWNoIGVhc2llciBjYWNoaW5nIGNvbmZp
-Z3VyYXRpb24sIGJldHRlciANCj4gbWVtb3J5IHVzYWdlLCBiZXR0ZXIgbWVtb3J5IGZyYWdtZW50
-YXRpb24sIGV0YykNCj4gMikgTG9uZyBydW5uaW5nIHRlc3RzIChTb21uYXRoIGhhcyBiZWVuIGRv
-aW5nIHRoaXMsIHRoYW5rcyBTb21uYXRoISkNCj4gMikgU2VxdWVudGlhbCByZWFkIHBlcmZvcm1h
-bmNlIGluIGJsdWVzdG9yZSAoTmVlZCB0byB1bmRlcnN0YW5kIHRoaXMgDQo+IGJldHRlcikNCj4g
-MykgRmFzdCBkaXNwYXRjaCBwZXJmb3JtYW5jZSBpbXByb3ZlbWVudCAoRGFuJ3MgUkNVIHdvcms/
-KQ0KPg0KPiBNYXJrDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
-IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBt
-ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGlu
-Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiBQTEVB
-U0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFp
-bCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQg
-cmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBp
-cyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhh
-dCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJl
-dmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVz
-c2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNv
-bW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhv
-bmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55
-IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRo
-ZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+DQo=
+Hi Sage,
+
+W dniu 11.10.2016 o 15:45, Sage Weil pisze:
+
+> Hi Pawel,
+>
+> On Tue, 11 Oct 2016, Paweł Sadowski wrote:
+>> Hi,
+>>
+>> I managed to trigger unfound objects on a pool with size 3 and min_size
+>> 2 just by removing 'slow' OSD (out and then stop) which is quite
+>> frightening. Shouldn't Ceph stop IO if there is only one copy in this
+>> case (even during recovery/peering/etc)? I'm able to reproduce this on
+>> Hammer (0.94.5, 0.94.9) and Jewel (10.2.3). So far I wasn't able to
+>> trigger this behavior by just stopping such OSD (still testing).
+> This is definitely concerning.  I have a couple questions...
+>
+> 1. Looking at the log, I see that at one point all of the OSDs mark
+> themselves down, here:
+>
+> 2016-10-11 08:46:23.473335 mon.0 10.99.128.50:6789/0 3275 : cluster [INF]
+> osd.1 marked itself down
+>
+> Do you know why they do that?
+
+It's probably due to load triggered by rebalance after marking OSD out.
+In other tests OSDs stayed up during this period. It didn't happen
+in my last test (logs posted via ceph-post-file).
+
+> 2. Are you throttling the CPU on just a single OSD, or on a whole host?  I
+> also see that the monitors are calling elections.  (This shouldn't have
+> anything to do with the problem, but I'm not sure I understand the test
+> setup.)
+
+I'm throttling CPU for single OSD process (in our production we had disk
+that was slowing down OSD). Monitors share device with one of the OSD.
+Sometimes election happens after marking OSD out, sometimes not. Probably
+caused by load on the underlaying device (didn't happen in last test).
+
+>> Second thing: throttling mechanism is blocking recovery operations/whole
+>> OSD[4] when there is a lot of client requests for missing objects. I
+>> think it shouldn't be like that.
+> Yeah, there is a similar problem with a PG is inactive and requests pile
+> up, eventually preventing ops even on active PGs... and 'ceph tell $pgid
+> query' admin commands.  It's non-trivial to fix, though: we need a way to
+> inform the client that a PG or individual object is blocked so that they
+> stop sending requests... and then also a way to inform them that the PG is
+> unblocked so they can start again.
+
+OK. Is it wise to increase this throttling limit and if yes how much?
+Anyway, in the end it'll probably just delay moment until OSD is blocked.
+
+>> 1: logs from Jewel
+>> https://gist.github.com/anonymous/c8618adca8984132c82f16c351222883
+> Do you mind reproducing this sequence with debug ms = 1, debug osd = 20,
+> and capture all of the OSD logs as well as the cluster ceph.log?  You can
+> send us the tarball with the ceph-post-file utility.
+
+Sure. Gzipped logs are about ~2.7G, ceph-post-file id:
+7e16f69e-c410-49c2-b11c-e727854ce7b3
+
+> Thanks!
+> sage
+>
+>> 2: steps to reproduce
+>>   - put some load on the cluster (run FIO with high iodepth)
+>>   - slow down single OSD (in my case reduce CPU time using cgroups:
+>> cpu.cfs_quota_us 15000)
+>>   - sleep 120
+>>   - ceph osd out 6
+>>   - sleep 15
+>>   - stop ceph-osd id=6
+>>   - unfound objects appear
+>>
+>> This is not 100% reproducible but in my test lab (9 OSDs) I'm able to
+>> trigger this very easily.
+>>
+>> 3:
+>> mon-01:~ # ceph osd pool get rbd size
+>> size: 3
+>> mon-01:~ # ceph osd pool get rbd min_size
+>> min_size: 2
+>> mon-01:~ # ceph --version
+>> ceph version 10.2.3 (ecc23778eb545d8dd55e2e4735b53cc93f92e65b)
+>>
+>> 4:
+>> perf dump | grep -A 2 'throttle-osd_client_messages'
+>>      "throttle-osd_client_messages": {
+>>          "val": 100,
+>>          "max": 100,
+>>
+>> ops_in_flight:
+>> https://gist.github.com/anonymous/643607fa3f959c91ba7a9794e5d99dea
+
+Thanks!
+
+
+-- 
+PS
+
