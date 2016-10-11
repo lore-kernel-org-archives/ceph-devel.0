@@ -1,74 +1,146 @@
-From: =?UTF-8?Q?Pawe=c5=82_Sadowski?= <ceph@sadziu.pl>
-Subject: Single slow OSD can cause unfound object
-Date: Tue, 11 Oct 2016 11:35:16 +0200
-Message-ID: <ed8ed02e-4fb7-25ad-3a5f-d462f70409e2@sadziu.pl>
-Reply-To: ceph@sadziu.pl
+From: Loic Dachary <loic@dachary.org>
+Subject: jewel backport of https://github.com/ceph/ceph/pull/11326
+Date: Tue, 11 Oct 2016 11:54:18 +0200
+Message-ID: <57FCB6CA.8060904@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from h82-143-163-170-static.e-wro.net.pl ([82.143.163.170]:59845
-        "EHLO mail.sadziu.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752504AbcJKJgC (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2016 05:36:02 -0400
-Received: from proxy-109-190-254-6.ovh.net ([109.190.254.6] helo=[10.40.3.135])
-        by mail.sadziu.pl with esmtpsa (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
-        (Exim 4.84_2)
-        (envelope-from <ceph@sadziu.pl>)
-        id 1bttSw-0004aN-SI
-        for ceph-devel@vger.kernel.org; Tue, 11 Oct 2016 11:35:19 +0200
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:46733 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752861AbcJKJyj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2016 05:54:39 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Mykola Golub <mgolub@mirantis.com>, Jason Dillaman <dillaman@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 Hi,
 
-I managed to trigger unfound objects on a pool with size 3 and min_size
-2 just by removing 'slow' OSD (out and then stop) which is quite
-frightening. Shouldn't Ceph stop IO if there is only one copy in this
-case (even during recovery/peering/etc)? I'm able to reproduce this on
-Hammer (0.94.5, 0.94.9) and Jewel (10.2.3). So far I wasn't able to
-trigger this behavior by just stopping such OSD (still testing).
+Trying to cherry pick commits instead of resolving conflicts and it looks like I'm going to end up adding a number of commits. Before I go down this path, I'd like a confirmation from you that it's the right call (see below for more information about what I did).
 
-Second thing: throttling mechanism is blocking recovery operations/whole
-OSD[4] when there is a lot of client requests for missing objects. I
-think it shouldn't be like that.
+Thanks !
 
-1: logs from Jewel
-https://gist.github.com/anonymous/c8618adca8984132c82f16c351222883
+git cherry-pick -x dc77a62 from https://github.com/ceph/ceph/pull/11326 conflicts on
 
-2: steps to reproduce
- - put some load on the cluster (run FIO with high iodepth)
- - slow down single OSD (in my case reduce CPU time using cgroups:
-cpu.cfs_quota_us 15000)
- - sleep 120
- - ceph osd out 6
- - sleep 15
- - stop ceph-osd id=6
- - unfound objects appear
+unmerged   src/journal/JournalRecorder.cc
+@@@ -279,8 -281,7 +276,12 @@@ void JournalRecorder::create_next_objec
+        new_object_recorder->get_object_number());
+    }
+  
+++<<<<<<< HEAD
+ +  new_object_recorder->append(append_buffers, false);
+ +
+++=======
++   new_object_recorder->append_unlock(std::move(append_buffers));
+++>>>>>>> dc77a62... journal: avoid holding lock while sending journal append
+    m_object_ptrs[splay_offset] = new_object_recorder;
+  }
 
-This is not 100% reproducible but in my test lab (9 OSDs) I'm able to
-trigger this very easily.
+----------------------------------------------------------------------
 
-3:
-mon-01:~ # ceph osd pool get rbd size
-size: 3
-mon-01:~ # ceph osd pool get rbd min_size
-min_size: 2
-mon-01:~ # ceph --version
-ceph version 10.2.3 (ecc23778eb545d8dd55e2e4735b53cc93f92e65b)
+git log --no-merges --oneline --cherry-mark --left-right ceph/jewel...ceph/master -- src/journal/JournalRecorder.cc
 
-4:
-perf dump | grep -A 2 'throttle-osd_client_messages'
-    "throttle-osd_client_messages": {
-        "val": 100,
-        "max": 100,
+> dc77a62 journal: avoid holding lock while sending journal append
+> 7b740f5 journal: make librados call async in ObjectRecorder
+> 5c88edd journal: increase concurrency of journal recorder
+= b4b9843 journal: improve debug log messages
+= 11475f4 journal: improve debug log messages
+= 30c7f4d journal: update commit entry object number upon overflow
+= 5fbf5f8 journal: update commit entry object number upon overflow
+= 18f663d journal: close, advance, and open object set ordering
+= 27fba6a journal: new ObjectRecorder closed callback
+= de83005 journal: close, advance, and open object set ordering
+= bba9143 journal: new ObjectRecorder closed callback
+= f1a2e6a journal: prohibit journal entries larger than the soft object size
+= d5f307d journal: prohibit journal entries larger than the soft object size
 
-ops_in_flight:
-https://gist.github.com/anonymous/643607fa3f959c91ba7a9794e5d99dea
+git cherry-pick -x 5c88edd conflicts on
 
+unmerged   src/librbd/Journal.cc
+@@@ -17,8 -16,11 +17,9 @@@
+  #include "common/Timer.h"
+  #include "common/WorkQueue.h"
+  #include "include/rados/librados.hpp"
+ -#include "librbd/journal/RemoveRequest.h"
+ -#include "librbd/journal/CreateRequest.h"
+  
+  #include <boost/scope_exit.hpp>
++ #include <utility>
+  
+  #define dout_subsys ceph_subsys_rbd
+  #undef dout_prefix
+@@@ -705,40 -671,56 +706,70 @@@ int Journal<I>::demote() 
+    CephContext *cct = m_image_ctx.cct;
+    ldout(cct, 20) << __func__ << dendl;
+  
+++<<<<<<< HEAD
+ +  Mutex::Locker locker(m_lock);
+ +  assert(m_journaler != nullptr && is_tag_owner());
+++=======
++   int r;
++   C_SaferCond ctx;
++   Future future;
++   C_SaferCond flush_ctx;
+++>>>>>>> 7b740f5... journal: make librados call async in ObjectRecorder
+
+----------------------------------------------------------------------
+git log --no-merges --oneline --cherry-mark --left-right ceph/jewel...ceph/master -- src/librbd/Journal.cc
+
+> 953561f librbd: async method to check journal tag owner
+> 7b740f5 journal: make librados call async in ObjectRecorder
+> 5c88edd journal: increase concurrency of journal recorder
+> fd00549 librbd: new journal listener event for force promotion
+> dbbcecf librbd: unify journal event callbacks into single interface
+> b8eafef librbd: optionally flag "laggy" journal clients disconnected
+> 551d7ea librbd: remove use of owner_lock on IO path
+= e83866b librbd: do not record journal events if append is disabled by policy
+= 1f63307 librbd: optimize header file dependency & modify related file.
+= 549aada librbd: new configuration option to restrict journal payload size
+= 99195e8 librbd: wait for journal commit op event to be safely recorded
+= 91c70f3 journal: helper class for organizing optional settings
+= f71dc87 librbd: improve journaling debug log messages
+= 14db535 librbd: separate journal event decoding and processing
+> ac590e8 librbd: normalize journal promotion/demotion events
+> 718befd librbd: separate journal::TagData predecessor data into new struct
+> 47d1e62 rbd-mirror: include tag tid in bootstrap debug log messages
+= c2b786c rbd: journal: Support for listening updates on client metadata
+> 3492153 journaler: remove ununsed synchronous API routines
+> d5fa466 librbd / journal: async journal creation state machine
+> c4e439d librbd / journal: async journal removal state machine
+> 1416f1c librbd / ImageCtx: singleton safetimer instance helper
+= 405142c librbd: do not record journal events if append is disabled by policy
+= 11d7500 librbd: new configuration option to restrict journal payload size
+= 47e0fbf librbd: wait for journal commit op event to be safely recorded
+= dad8328 journal: helper class for organizing optional settings
+= 270cb74 librbd: improve journaling debug log messages
+= 57cd75e librbd: separate journal event decoding and processing
+= f3f4a4a librbd: journal callback to interrupt replay
+= deb6ca8 librbd: force-remove journal when disabling feature and removing image
+= 2185a62 librbd: optimize header file dependency & modify related file.
+= 9687e5e librbd: journal callback to interrupt replay
+= d83aa1e librbd: force-remove journal when disabling feature and removing image
+= 0dd8573 rbd: journal: Support for listening updates on client metadata
+= f0bf15e librbd: stop journal recorder before starting external replay
+= 0014a9e librbd: flush journal commit positions before starting op
+= ef12536 librbd: resize and snap create can hang on journal replay failure
+= c8b4cab librbd: missing journal state for flushing/restarting replay
+= de29be7 librbd: Journal no longer requires AioCompletion for IO events
+= 65556aa librbd: bubble journal error up via existing AioObjectRequests
+= 5aa6eb2 librbd: stop journal recorder before starting external replay
+= 6361296 librbd: flush journal commit positions before starting op
+= 1032f19 librbd: resize and snap create can hang on journal replay failure
+= a7f5bc1 librbd: missing journal state for flushing/restarting replay
+= 82587a3 librbd: Journal no longer requires AioCompletion for IO events
+= 79c9347 librbd: bubble journal error up via existing AioObjectRequests
+= bf4c458 librbd: integrate with async journaler shutdown API
+= 0780230 rbd-mirror: Added implementation of image-deleter thread
+= ad29785 librbd: integrate with async journaler shutdown API
+= 6cc6e66 rbd-mirror: Added implementation of image-deleter thread
+= 5ec1f79 librbd: split large AioWrite journal events
+= f221fed librbd: assertion to ensure no concurrent processing of replay events
+= 44827a3 librbd: assertion to ensure no concurrent processing of replay events
+= 70b9fbf librbd: split large AioWrite journal events
 
 -- 
-PS
-
-
+Loïc Dachary, Artisan Logiciel Libre
