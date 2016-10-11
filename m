@@ -1,63 +1,60 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Upcoming 10.2.4
-Date: Tue, 11 Oct 2016 12:48:33 +0200
-Message-ID: <57FCC381.1070605@dachary.org>
-References: <57FB7494.1010309@dachary.org>
- <CALe9h7c=doR1DiahZceq2+i-5i=X4rQqXnprwGDTO7mgS8V4Hw@mail.gmail.com>
- <CABZ+qqnOUTZun6SS4m4VpC5aMQcfvfU6W+9Po=ai-p04zMzvdw@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: [sepia] Selectively re-scheduling jobs in a teuthology run
+Date: Tue, 11 Oct 2016 11:45:02 +0100
+Message-ID: <CALe9h7djfpf16seyOOQGaFfCfMR+bMUfBsL109znt1q8hP0ung@mail.gmail.com>
+References: <CACk6Fjm2NDr1WSdGpApG7awyTGpJVwbBzmL7q8DO093BAKAzkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from slow1-d.mail.gandi.net ([217.70.178.86]:38428 "EHLO
-        slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752170AbcJKKvb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2016 06:51:31 -0400
-Received: from relay4-d.mail.gandi.net (relay4-d.mail.gandi.net [217.70.183.196])
-        by slow1-d.mail.gandi.net (Postfix) with ESMTP id 9831E47F12C
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Oct 2016 12:49:39 +0200 (CEST)
-In-Reply-To: <CABZ+qqnOUTZun6SS4m4VpC5aMQcfvfU6W+9Po=ai-p04zMzvdw@mail.gmail.com>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:34478 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752364AbcJKLOf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2016 07:14:35 -0400
+Received: by mail-qk0-f174.google.com with SMTP id f128so26781230qkb.1
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Oct 2016 04:14:35 -0700 (PDT)
+In-Reply-To: <CACk6Fjm2NDr1WSdGpApG7awyTGpJVwbBzmL7q8DO093BAKAzkA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>, John Spray <jspray@redhat.com>
-Cc: Abhishek L <abhishek.lekshmanan@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Zack Cerza <zack@redhat.com>
+Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>, sepia@ceph.com
 
+Working for me, thank you!
 
+John
 
-On 11/10/2016 12:33, Dan van der Ster wrote:
-> On Tue, Oct 11, 2016 at 12:15 PM, John Spray <jspray@redhat.com> wrote:
->> On Mon, Oct 10, 2016 at 11:59 AM, Loic Dachary <loic@dachary.org> wrote:
->>> Hi Abhishek,
->>>
->>> Since you're now release manager, it is my understanding that we'll be asking you if the release should be cut or not. I updated the issue tracking the progress of 10.2.4 accordingly. This is a heads up to let you know we'll most likely ask that question for 10.2.4 some time next week ;-)
->>
->> I've just done a test run of the following jewel PRs:
->> [11389]  mon: don't crash on invalid standby_for_fscid
->> [10997]  jewel: multimds: allow_multimds not required when max_mds is
->> set in ceph.conf at startup
->> [10958]  jewel: client: fix shutdown with open inodes
->> [10921]  jewel client: add missing client_lock for get_root
->> [10107]  jewel: client: FAILED assert(root_ancestor->qtree == __null)
->>
->> http://pulpito.ceph.com/jspray-2016-10-10_15:27:25-fs-wip-jcsp-backports-20161010-distro-basic-mira/
->>
->> No (real) failures -- can we go ahead and merge all these before 10.2.4?
->>
->> Cheers,
->> John
-> 
-> John/Loic, did "client: kill QuotaTree" fall off the backport radar?
-> 
->   https://github.com/ceph/ceph/pull/9591/commits/161954bbfeb13d5588668637d5258221948128ea
->   http://tracker.ceph.com/issues/16066
-> 
-> Tracker's offline now, but AFAICT this wasn't yet backported to jewel.
-> And this is unfortunate because jewel's ceph-fuse is still crashy with
-> client quota enabled.
-
-I'll make sure it lands in 10.2.4.
-
-Cheers
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+On Fri, Oct 7, 2016 at 10:47 PM, Zack Cerza <zack@redhat.com> wrote:
+> Hey all,
+>
+> Yesterday I (finally) got around to implementing an oft-requested feature:
+> re-scheduling failed jobs. What this means is that for example, when you
+> schedule a huge test run and just a few fail, you'll be able to tell
+> teuthology to schedule a new run containing only those jobs whose
+> description match those of the old run.
+>
+> Note that, of all the flags and values you can pass to teuthology-suite, the
+> only one that is inherited is the --suite value. The rest will need to be
+> specified explicitly. While this may seem like a pain, it also means that
+> you can still use things like --filter, --filter-out, --priority, and really
+> everything else.
+>
+> An example invocation:
+> teuthology-suite -v --rerun
+> teuthology-2016-10-06_05:00:03-smoke-master-testing-basic-vps -m vps -n 10
+> -c master --dry-run
+>
+> It will default to re-scheduling jobs in the 'fail' or 'dead' state - but
+> you can override that using --rerun-statuses (aka -R).
+>
+> The PR is here:
+> https://github.com/ceph/teuthology/pull/963/
+> There's more background here:
+> http://tracker.ceph.com/issues/10945
+>
+> Enjoy!
+> Zack
+>
+> _______________________________________________
+> Sepia mailing list
+> Sepia@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/sepia-ceph.com
+>
