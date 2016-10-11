@@ -1,8 +1,10 @@
 From: Nikolay Borisov <kernel@kyup.com>
-Subject: [PATCH] cephfs: Fix scheduler warning due to nested blocking
-Date: Tue, 11 Oct 2016 12:04:09 +0300
-Message-ID: <1476176649-13393-1-git-send-email-kernel@kyup.com>
+Subject: [PATCHv2] cephfs: Fix scheduler warning due to nested blocking
+Date: Tue, 11 Oct 2016 12:16:11 +0300
+Message-ID: <1476177371-13652-1-git-send-email-kernel@kyup.com>
+References: <1476176649-13393-1-git-send-email-kernel@kyup.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1476176649-13393-1-git-send-email-kernel@kyup.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: idryomov@gmail.com, zyan@redhat.com
 Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, Nikolay Borisov <kernel@kyup.com>
@@ -61,14 +63,14 @@ Signed-off-by: Nikolay Borisov <kernel@kyup.com>
  1 file changed, 9 insertions(+), 3 deletions(-)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index c69e1253b47b..c6bf34e29ea4 100644
+index c69e1253b47b..9d401520b981 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
 @@ -2467,6 +2467,7 @@ int ceph_get_caps(struct ceph_inode_info *ci, int need, int want,
  		  loff_t endoff, int *got, struct page **pinned_page)
  {
  	int _got, ret, err = 0;
-+	DEFINE_WAIT_FUNC(wait, woken_wait_function);
++	DEFINE_WAIT_FUNC(wait, woken_wake_function);
  
  	ret = ceph_pool_perm_check(ci, need);
  	if (ret < 0)
@@ -79,13 +81,13 @@ index c69e1253b47b..c6bf34e29ea4 100644
 -			ret = wait_event_interruptible(ci->i_cap_wq,
 -					try_get_cap_refs(ci, need, want, endoff,
 -							 true, &_got, &err));
-+			add_wait_queue(ci->i_cap_wq, &wait);
++			add_wait_queue(&ci->i_cap_wq, &wait);
 +
 +			while (!try_get_cap_refs(ci, need, want, endoff,
 +                                                         true, &_got, &err))
 +				wait_woken(&wait, TASK_INTERRUPTIBLE, MAX_SCHEDULE_TIMEOUT);
 +
-+			remove_wait_queue(ci->i_cap_wq, &wait);
++			remove_wait_queue(&ci->i_cap_wq, &wait);
 +
  			if (err == -EAGAIN)
  				continue;
