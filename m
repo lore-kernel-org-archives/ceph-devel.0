@@ -1,112 +1,74 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: Disable fiemap lead to Data In-balance between OSD
-Date: Wed, 12 Oct 2016 23:02:10 +0800
-Message-ID: <CACJqLyY5i5JKjgEyM-6kbZq9U1haO=U6KCThQe31N1pO126=Yw@mail.gmail.com>
-References: <CALZt5jzUheF7C4OuYJ2hDwjserLX3wXgtDTZQM6Nk+C1k1QhTw@mail.gmail.com>
- <CACJqLyZpT=dF4LeBOpNpuCAvUsasFN-63r8BGMT5XDvTS7K4Mg@mail.gmail.com>
- <CACJqLyZnZiJkQmRYRPk23qa4KO+FHeeNFpsq9cD9fYm67aEwfw@mail.gmail.com>
- <CALZt5jwaVhpjdw22avC4kNwQ44VFtAQxCuhCqSYsmRK4SMF8Ow@mail.gmail.com> <57EDDA9B.5030807@easystack.cn>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Possible corruption with MSSQL on RBD
+Date: Wed, 12 Oct 2016 17:57:02 +0200 (CEST)
+Message-ID: <439702971.6004.1476287822395@ox.pcextreme.nl>
+References: <262972897.5995.1476280634060@ox.pcextreme.nl>
+ <CAJ4mKGZx+PgcqAPVB0LSFxp1z=aZiKWt-H1hjnKJU5_hxAoxWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ty1jpn01on0097.outbound.protection.outlook.com ([104.47.93.97]:21680
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933826AbcJLPCW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 12 Oct 2016 11:02:22 -0400
-Received: by mail-ua0-f176.google.com with SMTP id m26so7306321uaa.1
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Oct 2016 08:02:15 -0700 (PDT)
-In-Reply-To: <57EDDA9B.5030807@easystack.cn>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:51968 "EHLO
+        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753068AbcJLP5H (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Oct 2016 11:57:07 -0400
+In-Reply-To: <CAJ4mKGZx+PgcqAPVB0LSFxp1z=aZiKWt-H1hjnKJU5_hxAoxWg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Liu <jeff.liu@easystack.cn>
-Cc: Ning Yao <zay11022@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "xfs@oss.sgi.com" <xfs@oss.sgi.com>
-
-thanks to Ning Yao. We have found ceph's incorrect usage in xfs fiemap.
-
-Actually this reminds me when I'm looking for unaligned fiemap lookup,
-we also observe this case. Refer to
-http://www.spinics.net/lists/xfs/msg38001.html, if fiemap extents
-larger than 1364, single fiemap call will only return 1364. We need to
-check the last fiemap extent with FIEMAP_EXTENT_LAST flag. If not, we
-need to continue to call fiemap.
-
-Fortunately 1364 extents requires at least 8MB object but rbd's
-default object size is 4MB. So if we don't change object size, nothing
-happen. But I remember openstack glance's default object size is 64MB.
-So it maybe problem for that case. Since I often advertise rbd users
-to turn fiemap on, I hope no one don't hit this bug....
-
-And one way is fix fiemap usage in GenericFilesystemBackend, another
-is totally abandon fiemap in hammer. Or we don't need to do anything
-since fiemap is disable default?
-
-Anyway, thanks Ning Yao again!
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 
-On Fri, Sep 30, 2016 at 11:23 AM, Jeff Liu <jeff.liu@easystack.cn> wrote:
-> Could you please show your test cases about the fiemap issue against XFS?
-> I'd like to dig into it if that is still existing in upstream code base.
->
-> On 2016=E5=B9=B409=E6=9C=8829=E6=97=A5 21:49, Ning Yao wrote:
->
-> XFS has #fiemap extent intervals limitted in kernel=EF=BC=8C so if we do =
-not
-> use seek_data, seek_hole. It will lead to getting a wrong fiemap
-> (absence of some extents)  from a large object. It is actually not
-> security before Jewel with enabling filestore_seek_data_hole.
-> Regards
-> Ning Yao
->
->
-> 2016-09-29 10:27 GMT+08:00 Haomai Wang <haomai@xsky.com>:
->
->> On Thu, Sep 29, 2016 at 10:25 AM, Haomai Wang <haomai@xsky.com> wrote:
->>> On Thu, Sep 29, 2016 at 12:26 AM, Ning Yao <zay11022@gmail.com> wrote:
->>>> Hi,
->>>>
->>>> As lots of fiemap issues in XFS, fiemap is default disabled now,
->>>> especially in Hammer, before seek_data, seek_hole is added.
->>>>
->>>> But disabling fiemap feature will cause a small sparse object become a
->>>> large full object during PushOps, which may lead to notably data
->>>> in-balance between OSD, especially on the new added OSD  during data
->>>> rebalance. With those full objects, some OSDs may simultaneously
->>>> becomes full.
->>> Until now, I don't know existing problem with fiemap enabled in
->>> hammer. Although we find it maybe problem when clone to a existing
->>> overlap data range, but it won't exists in real case.
->> Hmm, I can't guarantee this... I only means if you want to have sparse
->> object, you can enable this. ....
->>
->>>> Furthermore, currently, it is impossible to make the full objects
->>>> sparse again if we enable the fiemap feature in the future.
->>>>
->>>> So I think if any solutions to make a full object back to a sparse
->>>> object again?=E3=80=80One of the idea is to check whether the content =
-in the
->>>> object contains consecutive zero and punch zeros for those object
->>>> during deep-scrub,  is that possible and reasonable?
->>> Obviously it's a complex thing more than we get.
->>>
->>>>
->>>> Regards
->>>> Ning Yao
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+> Op 12 oktober 2016 om 17:01 schreef Gregory Farnum <gfarnum@redhat.com>:
+> 
+> 
+> On Wed, Oct 12, 2016 at 7:57 AM, Wido den Hollander <wido@42on.com> wrote:
+> > Hi,
+> >
+> > I filed a issue in the tracker, but I'm looking for some feedback to diagnose this a bit further: http://tracker.ceph.com/issues/17545
+> >
+> > The situation is that with a Firefly or Hammer (haven't tested Jewel yet) a MSSQL server running on RBD will sometimes complain about corruption.
+> >
+> > Using SQLioSim we can reproduce the issue on a small Proxmox + Ceph cluster and after an hour or so it will yield:
+> >
+> > Expected FileId: 0x0
+> > Received FileId: 0x0
+> > Expected PageId: 0xCB19C
+> > Received PageId: 0xCB19A (does not match expected)
+> > Received CheckSum: 0x9F444071
+> > Calculated CheckSum: 0x89603EC9 (does not match expected)
+> > Received Buffer Length: 0x2000
+> >
+> > The issue only seems to happen with RBD caching enabled. When disabling the RBD cache or using cache=directsync we were not able to reproduce the issue.
+> >
+> > When using LVM/file based backends for Qemu the problem also didn't pop up.
+> >
+> > So this seems to be either a librbd issue or the RBD driver inside Qemu.
+> >
+> > Any hints on how to debug this further to find the root cause?
+> 
+> If you've got control over the clients, try building with commit
+> 9ec6e7f608608088d51e449c9d375844631dcdde backported to them (I believe
+> it's also in the latest Hammer release, but maybe there hasn't been
+> one cut since the backport?); tracked at
+> http://tracker.ceph.com/issues/16002 but of course the web site is
+> dead so you can't look at that right now. :(
+
+I verified, but 9ec6e7 is not in v0.94.9, but it is in the Jewel release.
+
+Tests are running with Jewel now and I will probably have the results tomorrow. If Jewel doesn't break the commit you send might indeed resolve it.
+
+Wido
+
+> -Greg
+> 
+> >
+> > Wido
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
-> --
-> Cheers,
->
-> Jeff Liu
->
