@@ -1,74 +1,54 @@
-From: agung Laksono <agung.smarts-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: How do I restart node that I've killed in development
-	mode
-Date: Wed, 12 Oct 2016 13:54:22 +0700
-Message-ID: <CAJ+86MPR6Ux6RW_JyX4vmAWjMygCbV6SHf1YuSJnzrmUFBeYCQ@mail.gmail.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: [ceph-users] How do I restart node that I've killed in
+ development mode
+Date: Wed, 12 Oct 2016 15:06:58 +0800
+Message-ID: <CABAwU-b_a437kTm5pWm-qJmcPTphBS5Msmjj8q1CQ9gBpop-FQ@mail.gmail.com>
+References: <CAJ+86MPR6Ux6RW_JyX4vmAWjMygCbV6SHf1YuSJnzrmUFBeYCQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1519622655=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============1519622655==
-Content-Type: multipart/alternative; boundary=001a114462fa913e2d053ea57679
-
---001a114462fa913e2d053ea57679
 Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:33368 "EHLO
+        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752980AbcJLHHA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Oct 2016 03:07:00 -0400
+Received: by mail-qk0-f176.google.com with SMTP id n189so18389429qke.0
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Oct 2016 00:06:59 -0700 (PDT)
+In-Reply-To: <CAJ+86MPR6Ux6RW_JyX4vmAWjMygCbV6SHf1YuSJnzrmUFBeYCQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: agung Laksono <agung.smarts@gmail.com>
+Cc: Ceph Users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>, Brad Hubbard <bhubbard@redhat.com>
 
-Hi Ceph Users,
+./init-ceph start mon.a
 
-I deploy development cluster using vstart with 3 MONs and 3 OSDs.
-On my experiment, Kill one of the monitor nodes by its pid. like this:
+2016-10-12 14:54 GMT+08:00 agung Laksono <agung.smarts@gmail.com>:
+> Hi Ceph Users,
+>
+> I deploy development cluster using vstart with 3 MONs and 3 OSDs.
+> On my experiment, Kill one of the monitor nodes by its pid. like this:
+>
+>   $ kill -SIGSEGV 27557
+>
+> After a new monitor leader is chosen, I would like to re-run the monitor
+> that I've killed in the previous step. How do I do this?
+>
+>
+> Thanks
+>
+> --
+> Cheers,
+>
+> Agung Laksono
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
 
-  $ kill -SIGSEGV 27557
 
-After a new monitor leader is chosen, I would like to re-run the monitor
-that I've killed in the previous step. How do I do this?
-
-
-Thanks
 
 -- 
-Cheers,
-
-Agung Laksono
-
---001a114462fa913e2d053ea57679
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hi Ceph Users,<div><br></div><div>I deploy development clu=
-ster using vstart=C2=A0with 3 MONs and 3 OSDs.=C2=A0</div><div>On my experi=
-ment, Kill one of the monitor nodes by its=C2=A0pid. like this:</div><div><=
-br></div><div>=C2=A0 $ kill -SIGSEGV 27557</div><div><br></div><div>After a=
- new monitor=C2=A0leader is chosen, I would like to re-run the monitor</div=
-><div>that I&#39;ve killed in the previous step. How do I do this?</div><di=
-v><br></div><div><br></div><div>Thanks =C2=A0=C2=A0</div><div><div><br></di=
-v>-- <br><div class=3D"gmail_signature"><div dir=3D"ltr"><div><div dir=3D"l=
-tr"><div>Cheers,</div><div><br></div>Agung Laksono<br><br></div></div></div=
-></div>
-</div></div>
-
---001a114462fa913e2d053ea57679--
-
---===============1519622655==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1519622655==--
+Thank you!
+HuangJun
