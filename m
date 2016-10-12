@@ -1,26 +1,30 @@
-From: Jaze Lee <jazeltq@gmail.com>
-Subject: [ceph-disk]how to specific cluster name when active an osd?
-Date: Wed, 12 Oct 2016 15:18:06 +0800
-Message-ID: <CAKZcxgdYG__w1f_YEu0fcO8CpRWejBnadRP-giVLY7MC7QYsEw@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Running multiple Jenkins on one host??
+Date: Wed, 12 Oct 2016 14:52:55 +0200
+Message-ID: <f01169fc-17c9-19dc-58d4-63c58085bb10@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f53.google.com ([209.85.214.53]:38186 "EHLO
-        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753768AbcJLHYQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Oct 2016 03:24:16 -0400
-Received: by mail-it0-f53.google.com with SMTP id o19so48201488ito.1
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Oct 2016 00:24:15 -0700 (PDT)
+Received: from smtp.digiware.nl ([176.74.240.9]:16870 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932866AbcJLMxO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 12 Oct 2016 08:53:14 -0400
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 2FA852AFB8
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Oct 2016 14:53:09 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-If using systemd, we can not specific cluster name when active an osd...
-Is there a way to send in the ENV CLUSTER by systemctl?
+Hi,
 
+Are people running multiple builds in Jenkins in parallel on the same
+host/vm?
 
-Thank a lot
+Or is everybody using one Jenkings thread per VM, and thus avoiding
+classes in /tmp and in port-usuage?
 
---=20
-=E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
+--WjW
