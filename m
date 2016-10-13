@@ -1,44 +1,51 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: teuthology-suite argument puzzle
-Date: Thu, 13 Oct 2016 16:29:50 +0200
-Message-ID: <57FF9A5E.7080106@dachary.org>
-References: <57FF8326.4040209@dachary.org>
- <CAOi1vP-QpF=0GLVUq_VScGhU7jJnmFUZUSSHXMWkOY4uvPfM2w@mail.gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: [PATCH] ceph: Fix uninitialized dentry pointer in ceph_real_mount()
+Date: Thu, 13 Oct 2016 17:15:37 +0200
+Message-ID: <1476371737-2116-1-git-send-email-geert@linux-m68k.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:57511 "EHLO
-        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751667AbcJMOaM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2016 10:30:12 -0400
-In-Reply-To: <CAOi1vP-QpF=0GLVUq_VScGhU7jJnmFUZUSSHXMWkOY4uvPfM2w@mail.gmail.com>
+Received: from andre.telenet-ops.be ([195.130.132.53]:59115 "EHLO
+        andre.telenet-ops.be" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754581AbcJMPQF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2016 11:16:05 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Zack Cerza <zack@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Zheng Yan <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>
 
+    fs/ceph/super.c: In function ‘ceph_real_mount’:
+    fs/ceph/super.c:818: warning: ‘root’ may be used uninitialized in this function
 
+If s_root is already valid, dentry pointer root is never initialized,
+and returned by ceph_real_mount(). This will cause a crash later when
+the caller dereferences the pointer.
 
-On 13/10/2016 14:56, Ilya Dryomov wrote:
-> On Thu, Oct 13, 2016 at 2:50 PM, Loic Dachary <loic@dachary.org> wrote:
->> Hi Zack,
->>
->> I wanted to try --rerun and ran into a cryptic error message:
->>
->> run=loic-2016-10-13_09:20:07-rgw-jewel-backports-distro-basic-smithi
->> teuthology-suite -k distro --priority 101 --suite rgw --rerun $run --suite-branch jewel --email loic@dachary.org --ceph jewel-backports --machine-type smithi
->> usage: teuthology-suite --help
->>        teuthology-suite [-v | -vv ] --suite <suite> [options] [<config_yaml>...]
->>        teuthology-suite [-v | -vv ] --rerun <name>  [options] [<config_yaml>...]
->>
->> What did I do wrong ?
-> 
-> Try w/o the --suite?  Just guessing - --suite gets inherited on --rerun.
+Fix this by initializing root early.
 
-It does work, I'm impressed by your guessing skills :-)
+Fixes: ce2728aaa82bbeba ("ceph: avoid accessing / when mounting a subpath")
+Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+---
+Compile-tested only.
+---
+ fs/ceph/super.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Cheers
-
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index a29ffce981879d5f..794c5fd0e0cf5e45 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -821,7 +821,8 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
+ 	dout("mount start %p\n", fsc);
+ 	mutex_lock(&fsc->client->mount_mutex);
+ 
+-	if (!fsc->sb->s_root) {
++	root = fsc->sb->s_root;
++	if (!root) {
+ 		const char *path;
+ 		err = __ceph_open_session(fsc->client, started);
+ 		if (err < 0)
 -- 
-Loïc Dachary, Artisan Logiciel Libre
+1.9.1
+
