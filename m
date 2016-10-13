@@ -1,218 +1,186 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: bluestore performance snapshot - 20161006
-Date: Thu, 13 Oct 2016 19:42:29 +0300
-Message-ID: <d7b5c7b3-78b2-49b1-c5a8-0c03d66d0c90@mirantis.com>
-References: <e3e00cbc-3e97-8582-bb93-7ac03b3da40b@redhat.com>
- <BY2PR02MB3967B0DA74162EFB241FF23F4DB0@BY2PR02MB396.namprd02.prod.outlook.com>
- <ea54fb10-2829-5a91-a644-0600f9314f2e@redhat.com>
- <BY2PR02MB396D9464C24D83649BFB2A7F4DA0@BY2PR02MB396.namprd02.prod.outlook.com>
- <bc962f08-672e-d53c-5895-37f6c6c53ca4@mirantis.com>
- <BL2PR02MB338FB0D2720F86ED1853EB7EADC0@BL2PR02MB338.namprd02.prod.outlook.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Single slow OSD can cause unfound object
+Date: Thu, 13 Oct 2016 16:53:29 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1610111935530.18626@piezo.us.to>
+References: <ed8ed02e-4fb7-25ad-3a5f-d462f70409e2@sadziu.pl> <alpine.DEB.2.11.1610111340430.31080@piezo.us.to> <8b92ccce-1e31-7a0d-06d0-9126c3d02ffd@sadziu.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-546007032-1476214784=:18626"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f178.google.com ([209.85.161.178]:36338 "EHLO
-        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933295AbcJMQmc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2016 12:42:32 -0400
-Received: by mail-yw0-f178.google.com with SMTP id u124so58245056ywg.3
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Oct 2016 09:42:32 -0700 (PDT)
-In-Reply-To: <BL2PR02MB338FB0D2720F86ED1853EB7EADC0@BL2PR02MB338.namprd02.prod.outlook.com>
+Received: from cobra.newdream.net ([66.33.216.30]:50199 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933345AbcJMQxd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2016 12:53:33 -0400
+In-Reply-To: <8b92ccce-1e31-7a0d-06d0-9126c3d02ffd@sadziu.pl>
+Content-ID: <alpine.DEB.2.11.1610131643300.19763@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Roushan Ali <Roushan.Ali@sandisk.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-2?Q?Pawe=B3_Sadowski?= <pawel@sadziu.pl>
+Cc: ceph-devel@vger.kernel.org
 
-Roushan,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-I made a PR #11482 that refactors GC infra a bit to be able to cover it 
-with UT.  It fixes a couple of GC issues as well.
+--8323329-546007032-1476214784=:18626
+Content-Type: TEXT/PLAIN; CHARSET=ISO-8859-2
+Content-Transfer-Encoding: 8BIT
+Content-ID: <alpine.DEB.2.11.1610131643301.19763@piezo.us.to>
 
-Could you please take a look and start using this patch for new 
-fixes/test cases if it looks good for you?
+On Tue, 11 Oct 2016, Pawe� Sadowski wrote:
+> Hi Sage,
+> 
+> W dniu 11.10.2016 o 15:45, Sage Weil pisze:
+> 
+> > Hi Pawel,
+> > 
+> > On Tue, 11 Oct 2016, Pawe� Sadowski wrote:
+> > > Hi,
+> > > 
+> > > I managed to trigger unfound objects on a pool with size 3 and min_size
+> > > 2 just by removing 'slow' OSD (out and then stop) which is quite
+> > > frightening. Shouldn't Ceph stop IO if there is only one copy in this
+> > > case (even during recovery/peering/etc)? I'm able to reproduce this on
+> > > Hammer (0.94.5, 0.94.9) and Jewel (10.2.3). So far I wasn't able to
+> > > trigger this behavior by just stopping such OSD (still testing).
+> > This is definitely concerning.  I have a couple questions...
+> > 
+> > 1. Looking at the log, I see that at one point all of the OSDs mark
+> > themselves down, here:
+> > 
+> > 2016-10-11 08:46:23.473335 mon.0 10.99.128.50:6789/0 3275 : cluster [INF]
+> > osd.1 marked itself down
+> > 
+> > Do you know why they do that?
+> 
+> It's probably due to load triggered by rebalance after marking OSD out.
+> In other tests OSDs stayed up during this period. It didn't happen
+> in my last test (logs posted via ceph-post-file).
+> 
+> > 2. Are you throttling the CPU on just a single OSD, or on a whole host?  I
+> > also see that the monitors are calling elections.  (This shouldn't have
+> > anything to do with the problem, but I'm not sure I understand the test
+> > setup.)
+> 
+> I'm throttling CPU for single OSD process (in our production we had disk
+> that was slowing down OSD). Monitors share device with one of the OSD.
+> Sometimes election happens after marking OSD out, sometimes not. Probably
+> caused by load on the underlaying device (didn't happen in last test).
+> 
+> > > Second thing: throttling mechanism is blocking recovery operations/whole
+> > > OSD[4] when there is a lot of client requests for missing objects. I
+> > > think it shouldn't be like that.
+> > Yeah, there is a similar problem with a PG is inactive and requests pile
+> > up, eventually preventing ops even on active PGs... and 'ceph tell $pgid
+> > query' admin commands.  It's non-trivial to fix, though: we need a way to
+> > inform the client that a PG or individual object is blocked so that they
+> > stop sending requests... and then also a way to inform them that the PG is
+> > unblocked so they can start again.
+> 
+> OK. Is it wise to increase this throttling limit and if yes how much?
+> Anyway, in the end it'll probably just delay moment until OSD is blocked.
 
-Thanks,
+Yeah, I wouldn't increase it (at least not by much)... it'll just delay 
+the inevitable.
 
-Igor
+> > > 1: logs from Jewel
+> > > https://gist.github.com/anonymous/c8618adca8984132c82f16c351222883
+> > Do you mind reproducing this sequence with debug ms = 1, debug osd = 20,
+> > and capture all of the OSD logs as well as the cluster ceph.log?  You can
+> > send us the tarball with the ceph-post-file utility.
+> 
+> Sure. Gzipped logs are about ~2.7G, ceph-post-file id:
+> 7e16f69e-c410-49c2-b11c-e727854ce7b3
+
+Thanks!  I took a look at this and I see what is going on.  
+It's... subtle.
+
+Initially the PG is, say, OSDs [1,2,3].  We are writing a sequence of 
+updates to existing objects.  Eventually we mark osd.1 out.  At that point 
+we have
+
+osd.1: object A version '23 in flight to disk and replicas
+osd.2,3: object A version '22 (hasn't gotten replicated write yet)
+
+If osds 2 and 3 learn about the new osdmap (osd.1 is out) before osd.1, 
+they will toss the replicate write away when they get it (they've already 
+moved on and are part of the way through peering in the new [2,3] 
+interval.  And during peering they learn from osd.1 that it has a newer 
+version of the object, '23.  They assume this is the best one and include 
+the '23 write as part of the official history.
+
+All is well as long as osd.1 stays alive long enough for them to also 
+fetch version '23 of the object.  If osd.1 is then killed before that 
+happens, though, we are in the situation where osds [2,3] know there was a 
+newer write but there is no longer a copy available.
+
+Since the '23 didn't actually complete (all replicas didn't commit it 
+so the client didn't get an ack) it is equally valid for us to throw it 
+out and say that '22 is the "official" version.  But if we do that we 
+could fall into a similar situation where, say, osd.1 and osd.3 had 
+'23 and osd.2 had '22, we chose '22, osd.1 and 3 throw away their 
+'divergent' '23, but then osd.2 fails before we copy '22 around.
+
+Somewhere in there is a better strategy that recognizes that either 
+version is okay and either picks the official version that is least likely 
+to lead to one of these failure cases *or* adds some complicated logic to 
+record that either is okay and adjust the official record 
+as-needed if one of those failure situations comes up.
+
+For now, the way to address this is to do the mark-unfound-revert thing, 
+which takes you from a situation where the history says '22 was modified 
+to get '23 but you don't have a '23 copy (only '22's).  This is a manual 
+admin intervention, but it's generally safe and is designed to handle 
+exactly this case.
+
+Perhaps the simplest improvement would be to automatically recognized 
+that the '23 version was never acked to the client and automatic revert 
+to '22 is safe...
+
+Sam's on vacation, but I suspect he'll have some additional thoughts on 
+this when he gets back next week!
+
+sage
 
 
-On 13.10.2016 12:27, Roushan Ali wrote:
-> Sorry, I was not following the thread.
->
-> I am working on the fix now. We should not  garbage collect  the uncompressed/mutable blobs.
->
->
-> Regards,
-> Roushan
->
->
->
->
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Igor Fedotov
-> Sent: Wednesday, October 12, 2016 7:36 PM
-> To: Somnath Roy; Mark Nelson; ceph-devel
-> Subject: Re: bluestore performance snapshot - 20161006
->
-> Hi Somnath,
->
-> IMHO blob depths were introduced to handle overlapping extents/blobs produced due to compression. Imaging following 3 8K writes with enabled compression causing extent's 8K->4K squeeze :
->
-> 0~8K, 4K~8K, 8K~8K.
->
-> Due to we avoid existing extent decompression during partial overwrite resulting logical extent map is something like
->
-> 1) 0********8K -> 4K blob
->
-> 2)          4K********12K -> 4K blob
->
->    3)                   8K********12K -> 4K blob
->
-> Hence extent depth should denote maximum overlapping depth ( i.e. max amount of extents below the specific one that cover the same logical ).
->
-> This is 2 for extent 3, 1 for extent 2 and 0 for extent 1.  ( GC actually uses  1-based numbering).
->
-> And gc_max_blob_depth specifies a depth value when to perform extent merge - i.e. do read/decompress/compress/write for some region.
->
->
-> Unfortunately it looks like there are some defects in the current GC
-> implementation. The major one is that it increments blob depth when no
-> compression is applied at all that's a nonsense IMHO.
->
-> Hence you might face unexpected extent merge attempts when they are
-> absolutely unneeded.
->
->
-> I'm planning to take a look at that shortly.
->
->
-> Hope this helps,
->
-> Igor
->
->
->
-> On 11.10.2016 22:30, Somnath Roy wrote:
->> Mark/Sage,
->> I figured out the *GC code* is causing the extra reads I am seeing , I have temporarily increased bluestore_gc_max_blob_depth to big number for not to hit that and running my benchmark now.
->> Sage,
->> Before I go through the GC code, could you quickly let me know how blob depth is determined and what is it representing ?
->>
->> Only the following config option I changed on extent/blob part.
->>
->> bluestore_extent_map_shard_max_size = 600
->> bluestore_extent_map_shard_target_size = 250
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Mark Nelson [mailto:mnelson@redhat.com]
->> Sent: Tuesday, October 11, 2016 7:19 AM
->> To: Somnath Roy; ceph-devel
->> Subject: Re: bluestore performance snapshot - 20161006
->>
->>
->>
->> On 10/10/2016 04:29 PM, Somnath Roy wrote:
->>> Mark,
->>> As we discussed today, here is some data point for min_alloc_size set to 16K vs default 4K..
->>> I am seeing 4K RW is stabilizing to a lower value (~25-30%) after ~1 hour run if I set min_alloc_size = 16K with both default rocksdb tuning and with my tuning I posted sometimes back.
->>>
->>> 16K min_alloc_size (after 1 and half hour)  :
->>> -----------------------
->>> ----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system--
->>> usr sys idl wai hiq siq| read  writ| recv  send|  in   out | int   csw
->>>     3   1  95   2   0   0|  19M   68M|   0     0 | 160k  242k|  14k   54k
->>>    18   6  67   8   0   2| 364M  582M| 114M   74M|   0     0 | 313k  343k
->>>    18   6  66   8   0   2| 384M  614M| 122M   79M|   0     0 | 314k  344k
->>>    18   6  67   7   0   2| 337M  575M| 108M   71M|   0     0 | 316k  356k
->>>    18   5  68   7   0   2| 349M  556M| 111M   73M|   0     0 | 305k  344k
->>>    17   6  68   7   0   2| 426M  631M| 106M   69M|   0     0 | 306k  335k
->>>    19   6  66   7   0   2| 436M  661M| 129M   84M|   0     0 | 340k  365k
->>>    19   7  62  10   0   2| 450M  712M| 113M   75M|   0     0 | 330k  350k
->>>    20   7  60  11   0   2| 463M  717M| 120M   79M|   0     0 | 349k  363k
->>>    21   7  57  13   0   2| 494M  720M| 137M   89M|   0     0 | 367k  385k
->>>
->>> Default 4K min_alloc_size (after 10 hour run):
->>> --------------------------------
->>>
->>> ----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system--
->>> usr sys idl wai hiq siq| read  writ| recv  send|  in   out | int   csw
->>>    44   9  31  13   0   4| 158M  259M| 173M  113M|   0     0 | 451k  469k
->>>    41   9  34  12   0   3| 146M  250M| 162M  106M|   0     0 | 435k  461k
->>>    43  10  32  12   0   4| 141M  264M| 172M  112M|   0     0 | 446k  460k
->>>    45  10  28  14   0   4| 140M  282M| 180M  117M|   0     0 | 454k  458k
->>>    44  10  27  14   0   4| 139M  261M| 181M  119M|   0     0 | 467k  457k
->>>    46  10  28  12   0   4| 137M  264M| 185M  121M|   0     0 | 465k  458k
->>>    46  10  29  11   0   4| 143M  303M| 179M  116M|   0     0 | 457k  453k
->>>    46  10  28  12   0   4| 172M  325M| 173M  112M|   0     0 | 460k  454k
->>>    44  10  26  16   0   4| 206M  302M| 169M  110M|   0     0 | 463k  466k
->>>
->>>
->>> You can see way more read/write going on if I enable 16K min_alloc_size and that is degrading performance over time for me..
->> That's really interesting!  I tend to see better performance with a higher min_alloc_size here. It doesn't really make sense to me that you'd see higher read numbers with a higher min_alloc_size unless a lot of WAL writes are leaking into the SSTs since there should be nearly 4x less metadata for rocksdb to deal with.
->>
->> Mark
->>
->>> Thanks & Regards
->>> Somnath
->>>
->>> -----Original Message-----
->>> From: ceph-devel-owner@vger.kernel.org
->>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
->>> Sent: Friday, October 07, 2016 7:04 AM
->>> To: ceph-devel
->>> Subject: bluestore performance snapshot - 20161006
->>>
->>> Hi Guys,
->>>
->>> I wanted to give folks a quick snapshot of bluestore performance on our NVMe test setup.  There's a lot of things happening very quickly in the code, so here's a limited snapshot of how we are doing.  These are short running tests, so do keep that in mind (5 minutes each).
->>>
->>> https://drive.google.com/uc?export=download&id=0B2gTBZrkrnpZRXFKRDBrTj
->>> ZiWGc
->>>
->>> The gist of it is:
->>>
->>> We are now basically faster than filestore in all short write tests.
->>> Increasing the min_alloc size (and to a lesser extent) the number of cached onodes brings 4K random write performance up even further.
->>> Likely increasing the min_alloc size will improve long running test performance as well due to drastically reduced metadata load on rocksdb.
->>>     Related to this, the amount of memory that we cache with 4k min_alloc is pretty excessive, even when limiting the number of cached onodes to 4k  The memory allocator work should allow us to make this more flexible, but I suspect that for now we will want to increase the min_alloc size to 16k to help alleviate memory consumption and metadata overhead (and improve 4k random write performance!).  The extra WAL write is probably still worth the tradeoff for now.
->>>
->>> On the read side we are seeing some regressions.  The sequential read case is interesting.  We're doing quite a bit worse in recent bluestore even vs older bluestore, and generally quite a bit worse than filestore.
->>>     Increasing the min_alloc size reduces the degredation, but we still have ground to make up.  In these tests rbd readahead is being used in an attempt to achieve client-side readahead since bluestore no longer does it on the OSD side, but appears to be fairly ineffective.  These are the settings used:
->>>
->>>            rbd readahead disable after bytes = 0
->>>            rbd readahead max bytes = 4194304
->>>
->>> By default we require 10 sequential reads to trigger it.  I don't think that should be a problem, but perhaps lowering the threshold will help.
->>> In general this is an area we still need to focus.
->>>
->>> For random reads, the degradation was previously found to be due to the async messenger.  Both filestore and bluestore performance has degraded relative to Jewel in these tests.  Haomai suspects fast dispatch as the primarily bottleneck here.
->>>
->>> So in general, the areas I think we still need to focus:
->>>
->>>
->>> 1) memory allocator work (much easier caching configuration, better
->>> memory usage, better memory fragmentation, etc)
->>> 2) Long running tests (Somnath has been doing this, thanks Somnath!)
->>> 2) Sequential read performance in bluestore (Need to understand this
->>> better)
->>> 3) Fast dispatch performance improvement (Dan's RCU work?)
->>>
->>> Mark
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>> info at  http://vger.kernel.org/majordomo-info.html
->>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>>
->> N     r  y   b X  ǧv ^ )޺{.n +   z ]z   {ay ʇڙ ,j   f   h   z  w
->     j:+v   w j m         zZ+     ݢj"  !tml=
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+> 
+> > Thanks!
+> > sage
+> > 
+> > > 2: steps to reproduce
+> > >   - put some load on the cluster (run FIO with high iodepth)
+> > >   - slow down single OSD (in my case reduce CPU time using cgroups:
+> > > cpu.cfs_quota_us 15000)
+> > >   - sleep 120
+> > >   - ceph osd out 6
+> > >   - sleep 15
+> > >   - stop ceph-osd id=6
+> > >   - unfound objects appear
+> > > 
+> > > This is not 100% reproducible but in my test lab (9 OSDs) I'm able to
+> > > trigger this very easily.
+> > > 
+> > > 3:
+> > > mon-01:~ # ceph osd pool get rbd size
+> > > size: 3
+> > > mon-01:~ # ceph osd pool get rbd min_size
+> > > min_size: 2
+> > > mon-01:~ # ceph --version
+> > > ceph version 10.2.3 (ecc23778eb545d8dd55e2e4735b53cc93f92e65b)
+> > > 
+> > > 4:
+> > > perf dump | grep -A 2 'throttle-osd_client_messages'
+> > >      "throttle-osd_client_messages": {
+> > >          "val": 100,
+> > >          "max": 100,
+> > > 
+> > > ops_in_flight:
+> > > https://gist.github.com/anonymous/643607fa3f959c91ba7a9794e5d99dea
+> 
+> Thanks!
+> 
+> 
+> -- 
+> PS
+> 
+> 
+--8323329-546007032-1476214784=:18626--
