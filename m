@@ -1,64 +1,59 @@
 From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: Running multiple Jenkins on one host??
-Date: Thu, 13 Oct 2016 08:12:32 -0400
-Message-ID: <CAC-Np1wOJTZWMsUyu8t88BzAFJw-x1E1evgse1q4Bk3+6ywzxg@mail.gmail.com>
-References: <f01169fc-17c9-19dc-58d4-63c58085bb10@digiware.nl>
- <CALqRxCwCFNVhUuf5=9H7RHqYUzPRML+hD9O+P-cuCGPpG4EAhg@mail.gmail.com> <359a1cc9-93a0-ecf1-19ac-f2ce414f9d55@digiware.nl>
+Subject: Re: new naming convention for building repos and binaries from branches
+Date: Thu, 13 Oct 2016 08:20:42 -0400
+Message-ID: <CAC-Np1xnSoNth7rn-9Cu=ws_=6AwMQP7zKvgu2URi5-dTijndg@mail.gmail.com>
+References: <CAC-Np1wcBGRcFYtK8WsjfM-WR+H_S58XgH74D+dBiGxd=KwZUQ@mail.gmail.com>
+ <CALe9h7da1Oz29q2pot1BZLNBcs1NJ51BRLE+Uj_3mVjnDGw6fQ@mail.gmail.com>
+ <CAEPMp+7OJ+pX=mYbNGgm+HZMGOGDK3xiApw5OL03vsN9YApTGA@mail.gmail.com>
+ <alpine.DEB.2.11.1610061633440.19850@piezo.us.to> <CAEPMp+7EyHBJSDoCZoTPvnd5bBKmsZ_D7UfZ5aYCvS6THLMqSg@mail.gmail.com>
+ <26CBB0BA-AF47-40AB-BF35-B50F5A6501A3@Teradata.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:34078 "EHLO
-        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755047AbcJMMMf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2016 08:12:35 -0400
-Received: by mail-qk0-f174.google.com with SMTP id f128so82378567qkb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Oct 2016 05:12:34 -0700 (PDT)
-In-Reply-To: <359a1cc9-93a0-ecf1-19ac-f2ce414f9d55@digiware.nl>
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:35031 "EHLO
+        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753205AbcJMMUn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2016 08:20:43 -0400
+Received: by mail-qk0-f170.google.com with SMTP id z190so86115449qkc.2
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Oct 2016 05:20:43 -0700 (PDT)
+In-Reply-To: <26CBB0BA-AF47-40AB-BF35-B50F5A6501A3@Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ken Dreyer <kdreyer@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
+Cc: Andrew Schoen <aschoen@redhat.com>, Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 13, 2016 at 6:32 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
-> On 12-10-2016 18:40, Ken Dreyer wrote:
->> For jenkins.ceph.com, when we set up each Jenkins slave in OpenStack
->> and connect it up to our Jenkins master, we only assign a single
->> executor per slave, so we haven't seen issues with /tmp or colliding
->> ports.
+On Fri, Oct 7, 2016 at 3:16 PM, Kamble, Nitin A
+<Nitin.Kamble@teradata.com> wrote:
+>
+>> On Oct 7, 2016, at 7:27 AM, Andrew Schoen <aschoen@redhat.com> wrote:
 >>
->> If we want to parallelize Jenkins jobs further, we create more VMs
->> (https://github.com/ceph/mita/)
->
-> Yes, makes sense if you already have a OpenStack running.
-> Did not want to burden our cluster with this, but perhaps it is the
-> easier road
+>>> I think we need a "do not build" prefix and a "build this asap" prefix.
+>>> Maybe nobuild-* and asap-*?
 
-Note that this isn't tied to openstack only, it uses libcloud to start
-machines and make them join Jenkins as slaves, so it can
-talk to AWS and other providers libcloud supports.
+What we are going to start with *today* is to build every branch that
+is prefixed with "wip-" since
+that is the implicit/historical naming convention for branches.
 
-Even in the case you don't want to use it, you should have nodes in
-Jenkins (vs. having everything in the master).
+We will include all the release branches (e.g. hammer, infernalis,
+jewel, kraken) as well
+as master.
 
-Having everything running in the master defeats the main purpose of
-Jenkins itself: distributing builds on machines that have have
-availability.
+This will allow the "do not build this" branches to just be anything
+not prefixed with "wip-" (there are already a few of those
+today, like dnm- and testing-)
 
-See: https://wiki.jenkins-ci.org/display/JENKINS/Distributed+builds
-
->
-> --WjW
->
->> On Wed, Oct 12, 2016 at 6:52 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>> Hi,
 >>>
->>> Are people running multiple builds in Jenkins in parallel on the same
->>> host/vm?
->>>
->>> Or is everybody using one Jenkings thread per VM, and thus avoiding
->>> classes in /tmp and in port-usuage?
+>>
+>> Is the 'asap-*' want here because of the typical long wait on the gitbuilders?
+>>
+>> The way we're configured now we can build 10 branches at a time, all
+>> of those branches building for 3 distros. I haven't seen a build take
+>> longer than an hour or so. It'd be easy to scale that up as well, but
+>> I don't see the queue ever being backed up at our current load.
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Most of the builds will be building almost the same files, I hope you guys are
+> using build caching mechanisms such as ccache to accelerate the build time.
+>
+> Nitin
+>
+>
