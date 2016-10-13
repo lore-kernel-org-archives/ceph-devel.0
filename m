@@ -1,40 +1,44 @@
-From: Venky Shankar <vshankar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: rbd ThreadPool threads number
-Date: Thu, 13 Oct 2016 13:52:17 +0530
-Message-ID: <20161013082217.GA2357@h3ckers-pride>
-References: <CAKT23OLRRLsy=fFJOpC3vqKM1zy0dCLy1nm9zpLov2yqvqb=cA@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Running multiple Jenkins on one host??
+Date: Thu, 13 Oct 2016 12:32:02 +0200
+Message-ID: <359a1cc9-93a0-ecf1-19ac-f2ce414f9d55@digiware.nl>
+References: <f01169fc-17c9-19dc-58d4-63c58085bb10@digiware.nl>
+ <CALqRxCwCFNVhUuf5=9H7RHqYUzPRML+hD9O+P-cuCGPpG4EAhg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKT23OLRRLsy=fFJOpC3vqKM1zy0dCLy1nm9zpLov2yqvqb=cA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: tao changtao <changtao381-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([176.74.240.9]:52247 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753682AbcJMKcF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 13 Oct 2016 06:32:05 -0400
+In-Reply-To: <CALqRxCwCFNVhUuf5=9H7RHqYUzPRML+hD9O+P-cuCGPpG4EAhg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-T24gMTYtMTAtMTMgMTQ6NTY6MTIsIHRhbyBjaGFuZ3RhbyB3cm90ZToKPiBIaSBBbGzvvIwKPiAK
-PiB3aHkgdGhlIHJiZCBUaHJlYWRQb29sICB0aHJlYWRzIG51bWJlciBhcmUgc2V0IDEgYnkgaGFy
-ZCBjb2RlID8KCmRldGFpbHMgaGVyZTogaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzE1
-MDM0Cgo+IAo+IAo+IGNsYXNzIFRocmVhZFBvb2xTaW5nbGV0b24gOiBwdWJsaWMgVGhyZWFkUG9v
-bCB7Cj4gcHVibGljOgo+ICAgZXhwbGljaXQgVGhyZWFkUG9vbFNpbmdsZXRvbihDZXBoQ29udGV4
-dCAqY2N0KQo+ICAgICA6IFRocmVhZFBvb2woY2N0LCAibGlicmJkOjp0aHJlYWRfcG9vbCIsICJ0
-cF9saWJyYmQiLCAxLAo+ICAgICAgICAgICAgICAgICAgInJiZF9vcF90aHJlYWRzIikgewo+ICAg
-ICBzdGFydCgpOwo+ICAgfQo+ICAgdmlydHVhbCB+VGhyZWFkUG9vbFNpbmdsZXRvbigpIHsKPiAg
-ICAgc3RvcCgpOwo+ICAgfQo+IH07Cj4gCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X18KPiBjaGFuZ3RhbzM4MUBnbWFpbC5jb20KPiAtLQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
-cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBi
-b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpv
-cmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1s
-Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNl
-cnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNl
-cGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+On 12-10-2016 18:40, Ken Dreyer wrote:
+> For jenkins.ceph.com, when we set up each Jenkins slave in OpenStack
+> and connect it up to our Jenkins master, we only assign a single
+> executor per slave, so we haven't seen issues with /tmp or colliding
+> ports.
+> 
+> If we want to parallelize Jenkins jobs further, we create more VMs
+> (https://github.com/ceph/mita/)
+
+Yes, makes sense if you already have a OpenStack running.
+Did not want to burden our cluster with this, but perhaps it is the
+easier road
+
+--WjW
+
+> On Wed, Oct 12, 2016 at 6:52 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> Hi,
+>>
+>> Are people running multiple builds in Jenkins in parallel on the same
+>> host/vm?
+>>
+>> Or is everybody using one Jenkings thread per VM, and thus avoiding
+>> classes in /tmp and in port-usuage?
+
