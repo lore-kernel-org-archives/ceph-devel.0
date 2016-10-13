@@ -1,52 +1,40 @@
-From: Wido den Hollander <wido@42on.com>
+From: Venky Shankar <vshankar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: rbd ThreadPool threads number
-Date: Thu, 13 Oct 2016 10:19:21 +0200 (CEST)
-Message-ID: <815131890.6020.1476346761763@ox.pcextreme.nl>
+Date: Thu, 13 Oct 2016 13:52:17 +0530
+Message-ID: <20161013082217.GA2357@h3ckers-pride>
 References: <CAKT23OLRRLsy=fFJOpC3vqKM1zy0dCLy1nm9zpLov2yqvqb=cA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:60098 "EHLO
-        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751529AbcJMIT1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2016 04:19:27 -0400
-In-Reply-To: <CAKT23OLRRLsy=fFJOpC3vqKM1zy0dCLy1nm9zpLov2yqvqb=cA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: tao changtao <changtao381@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKT23OLRRLsy=fFJOpC3vqKM1zy0dCLy1nm9zpLov2yqvqb=cA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: tao changtao <changtao381-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-
-> Op 13 oktober 2016 om 8:56 schreef tao changtao <changtao381@gmail.com>:
-> 
-> 
-> Hi All，
-> 
-> why the rbd ThreadPool  threads number are set 1 by hard code ?
-> 
-
-See this PR: https://github.com/ceph/ceph/commit/6c0ab75bceeff3239959f55b070a44fcb8dd6e23
-
-And this issue: http://tracker.ceph.com/issues/15034
-
-Wido
-
-> 
-> class ThreadPoolSingleton : public ThreadPool {
-> public:
->   explicit ThreadPoolSingleton(CephContext *cct)
->     : ThreadPool(cct, "librbd::thread_pool", "tp_librbd", 1,
->                  "rbd_op_threads") {
->     start();
->   }
->   virtual ~ThreadPoolSingleton() {
->     stop();
->   }
-> };
-> 
-> ________________________________
-> changtao381@gmail.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+T24gMTYtMTAtMTMgMTQ6NTY6MTIsIHRhbyBjaGFuZ3RhbyB3cm90ZToKPiBIaSBBbGzvvIwKPiAK
+PiB3aHkgdGhlIHJiZCBUaHJlYWRQb29sICB0aHJlYWRzIG51bWJlciBhcmUgc2V0IDEgYnkgaGFy
+ZCBjb2RlID8KCmRldGFpbHMgaGVyZTogaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzE1
+MDM0Cgo+IAo+IAo+IGNsYXNzIFRocmVhZFBvb2xTaW5nbGV0b24gOiBwdWJsaWMgVGhyZWFkUG9v
+bCB7Cj4gcHVibGljOgo+ICAgZXhwbGljaXQgVGhyZWFkUG9vbFNpbmdsZXRvbihDZXBoQ29udGV4
+dCAqY2N0KQo+ICAgICA6IFRocmVhZFBvb2woY2N0LCAibGlicmJkOjp0aHJlYWRfcG9vbCIsICJ0
+cF9saWJyYmQiLCAxLAo+ICAgICAgICAgICAgICAgICAgInJiZF9vcF90aHJlYWRzIikgewo+ICAg
+ICBzdGFydCgpOwo+ICAgfQo+ICAgdmlydHVhbCB+VGhyZWFkUG9vbFNpbmdsZXRvbigpIHsKPiAg
+ICAgc3RvcCgpOwo+ICAgfQo+IH07Cj4gCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18KPiBjaGFuZ3RhbzM4MUBnbWFpbC5jb20KPiAtLQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
+cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBi
+b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpv
+cmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1s
+Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNl
+cnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNl
+cGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
