@@ -1,49 +1,44 @@
-From: Ruben Kerkhof <ruben@rubenkerkhof.com>
-Subject: Re: [ceph-disk]how to specific cluster name when active an osd?
-Date: Thu, 13 Oct 2016 15:51:49 +0200
-Message-ID: <CAPed3OG_Aj5GCs21RXUfXu+Kk9h9xp2QcrRKAboooMh3_0ahBw@mail.gmail.com>
-References: <CAKZcxgdYG__w1f_YEu0fcO8CpRWejBnadRP-giVLY7MC7QYsEw@mail.gmail.com>
- <CALZt5jzzjpi07dLXc9636zeMwN4b9Qmo_JBnN-3ePvZqqO72OA@mail.gmail.com> <alpine.DEB.2.11.1610131335410.19763@piezo.us.to>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: teuthology-suite argument puzzle
+Date: Thu, 13 Oct 2016 16:29:50 +0200
+Message-ID: <57FF9A5E.7080106@dachary.org>
+References: <57FF8326.4040209@dachary.org>
+ <CAOi1vP-QpF=0GLVUq_VScGhU7jJnmFUZUSSHXMWkOY4uvPfM2w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f65.google.com ([209.85.213.65]:33142 "EHLO
-        mail-vk0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932284AbcJMOHt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2016 10:07:49 -0400
-Received: by mail-vk0-f65.google.com with SMTP id 83so2467604vkd.0
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Oct 2016 07:07:16 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1610131335410.19763@piezo.us.to>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:57511 "EHLO
+        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751667AbcJMOaM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2016 10:30:12 -0400
+In-Reply-To: <CAOi1vP-QpF=0GLVUq_VScGhU7jJnmFUZUSSHXMWkOY4uvPfM2w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ning Yao <zay11022@gmail.com>, Jaze Lee <jazeltq@gmail.com>, Loic Dachary <loic@dachary.org>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Zack Cerza <zack@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 13, 2016 at 3:36 PM, Sage Weil <sage@newdream.net> wrote:
-> On Thu, 13 Oct 2016, Ning Yao wrote:
->> Yeah,
+
+
+On 13/10/2016 14:56, Ilya Dryomov wrote:
+> On Thu, Oct 13, 2016 at 2:50 PM, Loic Dachary <loic@dachary.org> wrote:
+>> Hi Zack,
 >>
->> If we want to use a different cluster name instead of the default
->> cluster name 'ceph'. we need to modify the ceph-osd@.service file to
->> make sure the cluster name is what we use.
->> Any ideas to solve the issue under systemd?  @Loic
->
-> I believe you can set the cluster name in /etc/default/ceph or
-> /etc/sysconfig/ceph, but I'm not sure if it's tested.
->
-> sage
->
+>> I wanted to try --rerun and ran into a cryptic error message:
+>>
+>> run=loic-2016-10-13_09:20:07-rgw-jewel-backports-distro-basic-smithi
+>> teuthology-suite -k distro --priority 101 --suite rgw --rerun $run --suite-branch jewel --email loic@dachary.org --ceph jewel-backports --machine-type smithi
+>> usage: teuthology-suite --help
+>>        teuthology-suite [-v | -vv ] --suite <suite> [options] [<config_yaml>...]
+>>        teuthology-suite [-v | -vv ] --rerun <name>  [options] [<config_yaml>...]
+>>
+>> What did I do wrong ?
+> 
+> Try w/o the --suite?  Just guessing - --suite gets inherited on --rerun.
 
-FWIW, at least on CentOS this works fine:
+It does work, I'm impressed by your guessing skills :-)
 
-$ grep CLUSTER /etc/sysconfig/ceph
+Cheers
 
-CLUSTER="hlm1-ceph01"
-
-I did need to add --cluster to various commands when setting up the
-cluster though, for instance ceph-disk prepare --cluster $cluster.
-There was no need to modify any systemd units after that.
-
-Kind regards,
-
-Ruben
+-- 
+Loïc Dachary, Artisan Logiciel Libre
