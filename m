@@ -1,55 +1,44 @@
-From: Wukongming <wu.kongming@h3c.com>
-Subject: ceph-osd activate timeout
-Date: Thu, 13 Oct 2016 01:54:30 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D7525256D5E@H3CMLB12-EX.srv.huawei-3com.com>
-References: <47D132BF400BE64BAE6D71033F7D3D7525256C47@H3CMLB12-EX.srv.huawei-3com.com>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Re: [ceph-disk]how to specific cluster name when active an osd?
+Date: Thu, 13 Oct 2016 11:58:45 +0800
+Message-ID: <CALZt5jzzjpi07dLXc9636zeMwN4b9Qmo_JBnN-3ePvZqqO72OA@mail.gmail.com>
+References: <CAKZcxgdYG__w1f_YEu0fcO8CpRWejBnadRP-giVLY7MC7QYsEw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:11664 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933475AbcJMCAP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 12 Oct 2016 22:00:15 -0400
-In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D7525256C47@H3CMLB12-EX.srv.huawei-3com.com>
-Content-Language: zh-CN
+Received: from mail-it0-f46.google.com ([209.85.214.46]:35273 "EHLO
+        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752237AbcJMEEt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2016 00:04:49 -0400
+Received: by mail-it0-f46.google.com with SMTP id e203so110253734itc.0
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Oct 2016 21:04:48 -0700 (PDT)
+In-Reply-To: <CAKZcxgdYG__w1f_YEu0fcO8CpRWejBnadRP-giVLY7MC7QYsEw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Jaze Lee <jazeltq@gmail.com>, Loic Dachary <loic@dachary.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgQWxsLA0KICAgIEkgbm90aWNlZCB0aGF0IHNvbWV0aW1lIHVkZXYgbWF5IHJlY2VpdmUgYSB0
-aW1lLW91dCBtZXNzYWdlIGR1cmluZyBhY3RpdmF0aW5nIG9zZCBhZnRlciByZWJvb3Rpbmcgc3lz
-dGVtLiBTdGggbGlrZSB0aGF0Og0KDQpPY3QgMTEgMDc6MTU6NDAgY3Zrbm9kZTIgdWRldmRbOTY1
-XTogdGltZW91dDoga2lsbGluZyAnL3Vzci9zYmluL2NlcGgtZGlzayBhY3RpdmF0ZS1qb3VybmFs
-IC9kZXYvc2RiMicgWzE4MzRdIE9jdCAxMSAwNzoxNTo0MCBjdmtub2RlMiB1ZGV2ZFs5NjVdOiAn
-L3Vzci9zYmluL2NlcGgtZGlzayBhY3RpdmF0ZS1qb3VybmFsIC9kZXYvc2RiMicgWzE4MzRdIHRl
-cm1pbmF0ZWQgYnkgc2lnbmFsIDkgKEtpbGxlZCkNCg0KSXQgd2lsbCBjYXVzZSBkZXZpY2Ugb3Ig
-cGFydGl0aW9uIG1vdW50ZWQgb24gYm90aCBkaXJlY3RvcnksIHRoZSByaWdodCBvbmUgYW5kIHRt
-cCBvbmUuDQoNCi9kZXYvc2RiMSA0Nzc2MzA0NjQgMjE4NDIxNTEyIDI1OTIwODk1MiA0NiUgL3Zh
-ci9saWIvY2VwaC90bXAvbW50LnJ6RV9mYQ0KL2Rldi9zZGIxIDQ3NzYzMDQ2NCAyMTg0MjE1MTIg
-MjU5MjA4OTUyIDQ2JSAvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTINCg0KV2hlbiBJIGNvbW1lbnRl
-ZCBvdXQgYWxsIGluIHRoZSAvbGliL3VkZXYvcnVsZXMuZC85NS1jZXBoLW9zZC5ydWxlcyBhbmQg
-cmVib290ZWQgc3lzdGVtLCB0aGVyZSB3b3VsZCBiZSBubyB0aW1lb3V0IGFuZCBvc2QgY291bGQg
-YmUgYWN0aXZhdGVkIG5vcm1hbGx5LiBJIGhhdmUgMiBxdWVzdGlvbnM6DQoxLiBXaGF0IGNhdXNl
-ZCB1ZGV2IHJlY2VpdmUgdGltZW91dCBtZXNzYWdlLg0KMi4gQ2FuIEkganVzdCBjb21tZW50ZWQg
-b3V0IGFsbCBpbiB0aGUgL2xpYi91ZGV2L3J1bGVzLmQvOTUtY2VwaC1vc2QucnVsZXMsIENhdXNl
-IGNhbGxpbmcgYWN0aXZhdGUtYWxsIGNhbiBkbyBhY3RpdmF0ZSBvc2RzLCB3aHkgbmVlZCBleHRy
-YSBjYWxsaW5nIGFjdGl2YXRlIGFuZCBhY3RpdmF0ZS1qb3VybmFsPw0KDQpCZXN0IHJlZ2FyZHMs
-DQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0Kd3Vrb25n
-bWluZyBJRDogMTIwMTkNClRlbKO6MDU3MS04Njc2MDIzOQ0KRGVwdKO6T05FU3RvciBSRA0KDQoN
-Ci0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0NCrG+08q8/rywxuS4vbz+uqzT0Lq81t27qsj9zajQxby8yvXT
-0M/euavLvrXEsaPD3NDFz6KjrL32z97T2reiy824+MnPw+a12Na31tDB0LP2DQq1xLj2yMu78si6
-1+mho7371rnIzrrOxuTL+8jL0tTIzrrO0M7Kvcq508OjqLD8wKi1q7K7z97T2sirsr+78rK/t9a1
-2NC5wrahori01sahog0Ku/LJoreio6mxvtPKvP7W0LXE0MXPoqGjyOe5+8T6tO3K1cHLsb7Tyrz+
-o6zH68T6waK8tLXnu7C78tPKvP7NqNaqt6K8/sjLsqLJvrP9sb4NCtPKvP6joQ0KVGhpcyBlLW1h
-aWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBm
-cm9tIEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5
-IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRp
-b24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRl
-ZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNz
-ZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQpyZWNpcGllbnQo
-cykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBs
-ZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5k
-IGRlbGV0ZSBpdCENCg==
+Yeah,
+
+If we want to use a different cluster name instead of the default
+cluster name 'ceph'. we need to modify the ceph-osd@.service file to
+make sure the cluster name is what we use.
+Any ideas to solve the issue under systemd?  @Loic
+Regards
+Ning Yao
+
+
+2016-10-12 15:18 GMT+08:00 Jaze Lee <jazeltq@gmail.com>:
+> If using systemd, we can not specific cluster name when active an osd...
+> Is there a way to send in the ENV CLUSTER by systemctl?
+>
+>
+> Thank a lot
+>
+> --
+> =E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
