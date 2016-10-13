@@ -1,39 +1,34 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: BlueFS per counter
-Date: Thu, 13 Oct 2016 17:36:50 +0000
-Message-ID: <BY2PR02MB396B782E390FC09E10A8E97F4DC0@BY2PR02MB396.namprd02.prod.outlook.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: BlueFS per counter
+Date: Thu, 13 Oct 2016 19:18:59 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1610131914530.19763@piezo.us.to>
+References: <BY2PR02MB396B782E390FC09E10A8E97F4DC0@BY2PR02MB396.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0054.outbound.protection.outlook.com ([104.47.37.54]:13664
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752030AbcJMTNt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 13 Oct 2016 15:13:49 -0400
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:55764 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756654AbcJMTUj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 13 Oct 2016 15:20:39 -0400
+In-Reply-To: <BY2PR02MB396B782E390FC09E10A8E97F4DC0@BY2PR02MB396.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>, "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Sage,
-I found the following counters are tracking (from _flush_range()) the numbe=
-r of WAL and SST writes happening in rocksdb. Based on the today's discussi=
-on on characterizing rocksdb write pattern, isn't these two counters are he=
-lpful ?
+On Thu, 13 Oct 2016, Somnath Roy wrote:
+> Sage,
+> I found the following counters are tracking (from _flush_range()) the number of WAL and SST writes happening in rocksdb. Based on the today's discussion on characterizing rocksdb write pattern, isn't these two counters are helpful ?
+> 
+> l_bluefs_bytes_written_wal
+> l_bluefs_bytes_written_sst
 
-l_bluefs_bytes_written_wal
-l_bluefs_bytes_written_sst
+Maybe, but I *think* want we want to know is how much wal data is ending 
+up in the level0 (or later) sst files.  I don't think there is a way to do 
+that except to go and look at the level0 files and see how many key/value 
+data has the wal prefix ("L\0").  I don't think it's even very easy to 
+tell from bluefs files which sst files are l0.. probably need to parse the 
+manifest to see that.  This should be possible by exporting the bluefs 
+data, though, which should be possible with the ceph-bluefs-tool.
 
-Thanks & Regards
-Somnath
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this message in error and that any review, disse=
-mination, distribution, or copying of this message is strictly prohibited. =
-If you have received this communication in error, please notify the sender =
-by telephone or e-mail (as shown above) immediately and destroy any and all=
- copies of this message in your possession (whether hard copies or electron=
-ically stored copies).
+sage
