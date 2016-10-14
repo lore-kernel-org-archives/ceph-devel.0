@@ -1,146 +1,143 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
+From: Sage Weil <sage@newdream.net>
 Subject: RE: bufferlist rebuild_aligned issue
-Date: Fri, 14 Oct 2016 20:31:22 +0000
-Message-ID: <BY2PR02MB3964BFD0FF2208D82C0DB1DF4DF0@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <7BD28126D6935A4498AE6DE60B5D4CAB314E86DD@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.11.1610142019370.23150@piezo.us.to>
+Date: Fri, 14 Oct 2016 20:33:27 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1610142033100.23131@piezo.us.to>
+References: <7BD28126D6935A4498AE6DE60B5D4CAB314E86DD@H3CMLB12-EX.srv.huawei-3com.com> <alpine.DEB.2.11.1610142019370.23150@piezo.us.to> <BY2PR02MB3964BFD0FF2208D82C0DB1DF4DF0@BY2PR02MB396.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-851505411-1476477210=:23131"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam01on0054.outbound.protection.outlook.com ([104.47.34.54]:16062
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751594AbcJNUbY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 14 Oct 2016 16:31:24 -0400
-In-Reply-To: <alpine.DEB.2.11.1610142019370.23150@piezo.us.to>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:58567 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753378AbcJNUdm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Oct 2016 16:33:42 -0400
+In-Reply-To: <BY2PR02MB3964BFD0FF2208D82C0DB1DF4DF0@BY2PR02MB396.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Zhangzengran <zhangzengran@h3c.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Zhangzengran <zhangzengran@h3c.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-U2FnZSwNCkkgYW0gc2VlaW5nIHRoZSByZWJ1aWxkIGJ1ZmZlcmxpc3QgaXMgaGFwcGVuaW5nIGZy
-b20gS2VybmVsRGV2aWNlOjphaW9fd3JpdGUgIHdyaXRlIHBhdGggYXMgd2VsbCBhbmQgYXMgYSBy
-ZXN1bHQgaXQgaXMgcG9wcGluZyB1cCBkdXJpbmcgcHJvZmlsaW5nLiBJc24ndCB0aGUgYnVmZmVy
-IHN1cHBvc2VkIHRvIGFsaWduZWQgaW4gdGhpcyBjYXNlIGFzIHdlbGwgPw0KDQpUaGFua3MgJiBS
-ZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdl
-ci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgU2FnZSBXZWlsDQpTZW50OiBGcmlkYXksIE9jdG9i
-ZXIgMTQsIDIwMTYgMToyNiBQTQ0KVG86IFpoYW5nemVuZ3Jhbg0KQ2M6IGNlcGgtZGV2ZWxAdmdl
-ci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogYnVmZmVybGlzdCByZWJ1aWxkX2FsaWduZWQgaXNz
-dWUNCg0KT24gRnJpLCAxNCBPY3QgMjAxNiwgWmhhbmd6ZW5ncmFuIHdyb3RlOg0KPiBIaSBTYWdl
-LA0KPiAgIFJlY2VudGx5IEkgdHJhY2tlZCBzb21lIHNpbmdsZSBvcCwgYW5kIGZvdW5kIHRoYXQg
-dGhlIGJ1ZmZlcmxpc3Q6OnJlYnVpbGRfYWxpZ25lZCB3aWxsIGNvc3Qgc29tZSB0aW1lIHRoYXQg
-YSBsaXR0ZSBsb25nZXIuDQo+IFRoZSB3aG9sZSBzdWJvcCBzcGVuZCA3bXMsYW5kIHRoZSBwd3Jp
-dGV2IHNwZW5kIDEuMm1zLCBidXQgdGhlDQo+IHJlYnVpbGRfYWxpZ25lZCBjb3N0IDEuMW1zLnRo
-ZSB0ZXN04oCZcyBvYmplY3QgbGVuZ3RoIGlzIDFNLCBVc2luZyByYWRvcw0KPiBwdXQuIEkgdGhp
-bmsgdGhlIGJ1ZmZlcmxpc3QgcmVidWlsZCBhbmQgYWxpZ24gc2hvdWxkIG5vdCBjb3N0IHNvIG11
-Y2ggdGltZS4gVGhlIG9zIGVudmlyb25tZW50IGhhdmUgdm0uc3dhcHBpbmVzcyA9IDAgYW5kIGhh
-dmUgdGNtYWxsb2MuIElzIHRoaXMgbm9ybWFsPw0KPg0KPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEz
-MTEwMyAgcXVldWVfdHJhbnNhY3Rpb25zIGV4aXN0aW5nIDB4N2Y4OTAwYzMwMmMwDQo+IG9zcigx
-MzQuNjJzMyAweDdmODhmZjQ1ODE2MCkNCj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzI0NzcgIHF1
-ZXVlX3RyYW5zYWN0aW9ucyAod3JpdGVhaGVhZCkgMzIzNA0KPiBbVHJhbnNhY3Rpb24oMHg3Zjg5
-MDc3MzYwMDApLFRyYW5zYWN0aW9uKDB4N2Y4OTA3NzM2MWMwKV0NCj4gPj4gY29zdCAxLjFtcyBG
-aWxlSm91cm5hbDo6cHJlcGFyZV9lbnRyeSA9PiBidWZmZXJsaXN0OjoNCj4gPj4gcmVidWlsZF9h
-bGlnbmVkDQoNClRoaXMgbG9va3MgbGlrZSBhIGJ1Zy4gIEluIGdlbmVyYWwgd2Ugc2hvdWxkIG5l
-dmVyIGhhdmUgdG8gZG8gYSByZWJ1aWxkIGhlcmUuICBUd28gdGhpbmdzIG1pZ2h0IGJlIGdvaW5n
-IHdyb25nOg0KDQoxLSBUaGUgbWVzc2VuZ2VyIHNob3VsZCBiZSByZWFkaW5nIHRoZSB3cml0ZSBp
-bnRvIGFsaWduZWQgbWVtb3J5IGJhc2VkIG9uIHRoZSBvZmZzZXQgaW4gdGhlIGNlcGhfbXNnX2hl
-YWRlci4gIFlvdSBjYW4gY29tcGFyZSB0aGUgYnVmZmVyIHBvaW50ZXIgKGp1c3QgZG91dCB0aGUg
-YnVmZmVybGlzdCB2YXIgYW5kIHlvdSdsbCBzZWUgdGhlIGJ1ZmZlciBzZWdtZW50cyBhbmQgdGhl
-aXIgYWN0dWFsIGRhdGEgcG9pbnRlcnMpIGFuZCB0aGUgd3JpdGUgb2Zmc2V0IGFuZCBtYWtlIHN1
-cmUgdGhleSBtYXRjaCB1cC4NCg0KMi0gVGhlIGpvdXJuYWwgY29kZSBoYXMgc29tZSBkZWxpY2F0
-ZSBsb2dpYyB0byBhZGp1c3QgdGhlIGhlYWQgYW5kIHRhaWwgcGFkZGluZyBzbyB0aGF0IHRoZSBk
-YXRhIGJ1ZmZlciByZW1haW5zIGFsaWduZWQgdG8gdGhlIGpvdXJuYWwgYmxvY2tzIGFzIHdlbGwu
-ICBUaGlzIGNvZGUgaXMgaW4gRmlsZUpvdXJuYWw6OnByZV9wYWQuICBJdCBtYXkgYWxzbyBiZSB0
-aGF0IHRoZSBhbGlnbm1lbnQgaXMgZ2V0dGluZyBjbG9iYmVyZWQgYnkgdGhlIE9iamVjdFN0b3Jl
-OjpUcmFuc2FjdGlvbiwgd2hpY2ggdHJpZXMgdG8gdHJhY2sgdGhlIGxhcmdlc3QgZGF0YSBidWZm
-ZXIgaW4gdGhlIHRyYW5zYWN0aW9uIGFuZCBub3RlIGl0J3MgYWxpZ25tZW50Lg0KDQpJIHN1c3Bl
-Y3Qgb25lIG9mIHRob3NlIHR3byB0aGluZ3MgaXMgdGhlIGN1bHByaXQsIHRob3VnaCENCg0KPiAy
-MDE2LTEwLTE0IDExOjUwOjQ4LjEzMzU4MyAgX2pvdXJuYWxlZF9haGVhZCAweDdmODhmZjU4NmJh
-MCBzZXEgMzIzNCBvc3IoMTM0LjYyczMgMHg3Zjg4ZmY0NTgxNjApIFtUcmFuc2FjdGlvbigweDdm
-ODkwNzczNjAwMCksVHJhbnNhY3Rpb24oMHg3Zjg5MDc3MzYxYzApXQ0KPiAyMDE2LTEwLTE0IDEx
-OjUwOjQ4LjEzMzYyMCAgcXVldWVfb3AgMHg3Zjg4ZmY1ODZiYTAgc2VxIDMyMzQgb3NyKDEzNC42
-MnMzIDB4N2Y4OGZmNDU4MTYwKSAxMDUxMzMwIGJ5dGVzICAgKHF1ZXVlIGhhcyAxIG9wcyBhbmQg
-MTA1MTMzMCBieXRlcykNCj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzM2MzAgICBxdWV1ZWluZyBv
-bmRpc2sgMHg3Zjg5MDNhYjc3YzANCj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzM2NTQgIF9kb19v
-cCAweDdmODhmZjU4NmJhMCBzZXEgMzIzNA0KPiBvc3IoMTM0LjYyczMgMHg3Zjg4ZmY0NTgxNjAp
-LzB4N2Y4OGZmNDU4MTYwIHN0YXJ0DQo+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTMzNjY5ICBfZG9f
-dHJhbnNhY3Rpb24gb24gMHg3Zjg5MDc3MzYwMDANCj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzM2
-ODUgIHJlbW92ZQ0KPiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVfNE06
-aGVhZCMyOTgNCj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzM3NTQgIGxmbl91bmxpbms6IGNsZWFy
-aW5nIG9tYXAgb24NCj4gMyMxMzQ6NDYxZTNhMWM6Ojp0ZXN0ZmlsZV80TTpoZWFkIzI5OCBpbiBj
-aWQgMTM0LjYyczNfaGVhZA0KPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzNDUyNiAgcmVtb3ZlDQo+
-IDEzNC42MnMzX2hlYWQvMyMxMzQ6NDYxZTNhMWM6Ojp0ZXN0ZmlsZV80TTpoZWFkIzI5OCA9IDAN
-Cj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzQ1NTcgIF9vbWFwX3NldGtleXMNCj4gMTM0LjYyczNf
-aGVhZC8zIzEzNDo0NjAwMDAwMDo6OjpoZWFkIw0KPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzNDcw
-NSAgX29tYXBfc2V0a2V5cw0KPiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MDAwMDAwOjo6OmhlYWQj
-ID0gMA0KPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzNDcxNiAgX2RvX3RyYW5zYWN0aW9uIG9uIDB4
-N2Y4OTA3NzM2MWMwDQo+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM0NzIzICBfY29sbGVjdGlvbl9t
-b3ZlX3JlbmFtZQ0KPiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVfNE06
-aGVhZCMyOWEgZnJvbQ0KPiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVf
-NE06aGVhZCMNCj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzQ3MzYgIF9zZXRfcmVwbGF5X2d1YXJk
-IDMyMzQuMS4wIFNUQVJUDQo+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM1ODU5ICBfc2V0X3JlcGxh
-eV9ndWFyZCAzMjM0LjEuMCBkb25lDQo+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM2MTMwICBsZm5f
-dW5saW5rOiBjbGVhcmluZyBvbWFwIG9uDQo+IDMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVfNE06
-aGVhZCMgaW4gY2lkIDEzNC42MnMzX2hlYWQNCj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzYzMDUg
-IF9jbG9zZV9yZXBsYXlfZ3VhcmQgMzIzNC4xLjANCj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzcw
-MjMgIF9jbG9zZV9yZXBsYXlfZ3VhcmQgMzIzNC4xLjAgZG9uZQ0KPiAyMDE2LTEwLTE0IDExOjUw
-OjQ4LjEzNzAzOSAgX2NvbGxlY3Rpb25fbW92ZV9yZW5hbWUNCj4gMTM0LjYyczNfaGVhZC8zIzEz
-NDo0NjFlM2ExYzo6OnRlc3RmaWxlXzRNOmhlYWQjMjlhIGZyb20NCj4gMTM0LjYyczNfaGVhZC8z
-IzEzNDo0NjFlM2ExYzo6OnRlc3RmaWxlXzRNOmhlYWQjID0gMA0KPiAyMDE2LTEwLTE0IDExOjUw
-OjQ4LjEzNzA1NyAgd3JpdGUNCj4gMTM0LjYyczNfaGVhZC8zIzEzNDo0NjFlM2ExYzo6OnRlc3Rm
-aWxlXzRNOmhlYWQjIDB+MTA0ODU3Ng0KPiA+PiBjb3N0IDEuMm1zIHB3cml0ZXYNCg0KVGhpcyBk
-b2luZyBhIGJ1ZmZlcmVkIHdyaXRlLCB3aGljaCBjb3BpZXMgZGF0YSBpbnRvIHRoZSBwYWdlIGNh
-Y2hlLiAgSXQncyBub3QgY2xlYXIgd2UgY2FuIGF2b2lkIHRoYXQgdW5sZXNzIHdpdGggZG8gT19E
-SVJFQ1QuLiB3aGljaCBpcyB0cmlja3kgYmVjYXVzZSBvZiB0aGUgd2F5IHdlIGNhY2hlIGZpbGUg
-ZGVzY3JpcHRvcnMuDQoNCnNhZ2UNCg0KDQo+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM4MjU1ICB3
-cml0ZQ0KPiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVfNE06aGVhZCMg
-MH4xMDQ4NTc2ID0gMTA0ODU3Ng0KPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzODI5MSAgc2V0YXR0
-cnMNCj4gMTM0LjYyczNfaGVhZC8zIzEzNDo0NjFlM2ExYzo6OnRlc3RmaWxlXzRNOmhlYWQjDQo+
-IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM4MzEzICBzZXRhdHRycw0KPiAxMzQuNjJzM19oZWFkLzMj
-MTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVfNE06aGVhZCMgPSAwDQo+IDIwMTYtMTAtMTQgMTE6NTA6
-NDguMTM4MzMwICBmZ2V0YXR0cnMgNzAgZ2V0dGluZyAnaGluZm9fa2V5Jw0KPiAyMDE2LTEwLTE0
-IDExOjUwOjQ4LjEzODMzNyAgc2V0YXR0cnMNCj4gMTM0LjYyczNfaGVhZC8zIzEzNDo0NjFlM2Ex
-Yzo6OnRlc3RmaWxlXzRNOmhlYWQjDQo+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM4MzU3ICBzZXRh
-dHRycw0KPiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVfNE06aGVhZCMg
-PSAwDQo+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM4MzcxICBmZ2V0YXR0cnMgNzAgZ2V0dGluZyAn
-XycNCj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzgzNzYgIGZnZXRhdHRycyA3MCBnZXR0aW5nICdz
-bmFwc2V0Jw0KPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzODM4MSAgZmdldGF0dHJzIDcwIGdldHRp
-bmcgJ2hpbmZvX2tleScNCj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzgzODYgIHNldGF0dHJzDQo+
-IDEzNC42MnMzX2hlYWQvMyMxMzQ6NDYxZTNhMWM6Ojp0ZXN0ZmlsZV80TTpoZWFkIw0KPiAyMDE2
-LTEwLTE0IDExOjUwOjQ4LjEzODQwOSAgX2RvX29wIDB4N2Y4OGZmNTg2YmEwIHNlcSAzMjM0IHIg
-PSAwLA0KPiBmaW5pc2hlciAweDdmODkwOTM5ODY4MCAwDQo+IDIwMTYtMTAtMTQgMTE6NTA6NDgu
-MTM4NDIwICBfZmluaXNoX29wIDB4N2Y4OGZmNTg2YmEwIHNlcSAzMjM0DQo+IG9zcigxMzQuNjJz
-MyAweDdmODhmZjQ1ODE2MCkvMHg3Zjg4ZmY0NTgxNjAgbGF0IDAuMDA3MzA2DQo+DQo+IFRoYW4g
-eW91LCBiZXN0IHJlZ2FyZHMNCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiAtLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4g5pys6YKu5Lu2
-5Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE
-5L+d5a+G5L+h5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQo+
-IOeahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8
-j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWk
-jeWItuOAgQ0KPiDmiJbmlaPlj5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjp
-lJnmlLbkuobmnKzpgq7ku7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hk
-u7bkurrlubbliKDpmaTmnKwNCj4g6YKu5Lu277yBDQo+IFRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0
-YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbQ0KPiBIM0MsIHdo
-aWNoIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJl
-c3MgaXMNCj4gbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZSBpbmZvcm1hdGlvbiBjb250YWlu
-ZWQgaGVyZWluIGluIGFueSB3YXkNCj4gKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0
-b3RhbCBvciBwYXJ0aWFsIGRpc2Nsb3N1cmUsDQo+IHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5h
-dGlvbikgYnkgcGVyc29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KPiByZWNpcGllbnQocykg
-aXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsDQo+IHBs
-ZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQg
-ZGVsZXRlIGl0IQ0KPg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4g
-dGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNl
-IG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRl
-ciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUg
-aGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVy
-cm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3Ig
-Y29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhh
-dmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRo
-ZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0
-ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91
-ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3Jl
-ZCBjb3BpZXMpLg0K
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-851505411-1476477210=:23131
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+On Fri, 14 Oct 2016, Somnath Roy wrote:
+> Sage,
+> I am seeing the rebuild bufferlist is happening from KernelDevice::aio_write  write path as well and as a result it is popping up during profiling. Isn't the buffer supposed to aligned in this case as well ?
+
+The bluestore rebuild is fixed as part of wip-denc, which should merge 
+soon.. hopefully next week.
+
+s
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Friday, October 14, 2016 1:26 PM
+> To: Zhangzengran
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: bufferlist rebuild_aligned issue
+> 
+> On Fri, 14 Oct 2016, Zhangzengran wrote:
+> > Hi Sage,
+> >   Recently I tracked some single op, and found that the bufferlist::rebuild_aligned will cost some time that a litte longer.
+> > The whole subop spend 7ms,and the pwritev spend 1.2ms, but the
+> > rebuild_aligned cost 1.1ms.the test’s object length is 1M, Using rados
+> > put. I think the bufferlist rebuild and align should not cost so much time. The os environment have vm.swappiness = 0 and have tcmalloc. Is this normal?
+> >
+> > 2016-10-14 11:50:48.131103  queue_transactions existing 0x7f8900c302c0
+> > osr(134.62s3 0x7f88ff458160)
+> > 2016-10-14 11:50:48.132477  queue_transactions (writeahead) 3234
+> > [Transaction(0x7f8907736000),Transaction(0x7f89077361c0)]
+> > >> cost 1.1ms FileJournal::prepare_entry => bufferlist::
+> > >> rebuild_aligned
+> 
+> This looks like a bug.  In general we should never have to do a rebuild here.  Two things might be going wrong:
+> 
+> 1- The messenger should be reading the write into aligned memory based on the offset in the ceph_msg_header.  You can compare the buffer pointer (just dout the bufferlist var and you'll see the buffer segments and their actual data pointers) and the write offset and make sure they match up.
+> 
+> 2- The journal code has some delicate logic to adjust the head and tail padding so that the data buffer remains aligned to the journal blocks as well.  This code is in FileJournal::pre_pad.  It may also be that the alignment is getting clobbered by the ObjectStore::Transaction, which tries to track the largest data buffer in the transaction and note it's alignment.
+> 
+> I suspect one of those two things is the culprit, though!
+> 
+> > 2016-10-14 11:50:48.133583  _journaled_ahead 0x7f88ff586ba0 seq 3234 osr(134.62s3 0x7f88ff458160) [Transaction(0x7f8907736000),Transaction(0x7f89077361c0)]
+> > 2016-10-14 11:50:48.133620  queue_op 0x7f88ff586ba0 seq 3234 osr(134.62s3 0x7f88ff458160) 1051330 bytes   (queue has 1 ops and 1051330 bytes)
+> > 2016-10-14 11:50:48.133630   queueing ondisk 0x7f8903ab77c0
+> > 2016-10-14 11:50:48.133654  _do_op 0x7f88ff586ba0 seq 3234
+> > osr(134.62s3 0x7f88ff458160)/0x7f88ff458160 start
+> > 2016-10-14 11:50:48.133669  _do_transaction on 0x7f8907736000
+> > 2016-10-14 11:50:48.133685  remove
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head#298
+> > 2016-10-14 11:50:48.133754  lfn_unlink: clearing omap on
+> > 3#134:461e3a1c:::testfile_4M:head#298 in cid 134.62s3_head
+> > 2016-10-14 11:50:48.134526  remove
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head#298 = 0
+> > 2016-10-14 11:50:48.134557  _omap_setkeys
+> > 134.62s3_head/3#134:46000000::::head#
+> > 2016-10-14 11:50:48.134705  _omap_setkeys
+> > 134.62s3_head/3#134:46000000::::head# = 0
+> > 2016-10-14 11:50:48.134716  _do_transaction on 0x7f89077361c0
+> > 2016-10-14 11:50:48.134723  _collection_move_rename
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head#29a from
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head#
+> > 2016-10-14 11:50:48.134736  _set_replay_guard 3234.1.0 START
+> > 2016-10-14 11:50:48.135859  _set_replay_guard 3234.1.0 done
+> > 2016-10-14 11:50:48.136130  lfn_unlink: clearing omap on
+> > 3#134:461e3a1c:::testfile_4M:head# in cid 134.62s3_head
+> > 2016-10-14 11:50:48.136305  _close_replay_guard 3234.1.0
+> > 2016-10-14 11:50:48.137023  _close_replay_guard 3234.1.0 done
+> > 2016-10-14 11:50:48.137039  _collection_move_rename
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head#29a from
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head# = 0
+> > 2016-10-14 11:50:48.137057  write
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head# 0~1048576
+> > >> cost 1.2ms pwritev
+> 
+> This doing a buffered write, which copies data into the page cache.  It's not clear we can avoid that unless with do O_DIRECT.. which is tricky because of the way we cache file descriptors.
+> 
+> sage
+> 
+> 
+> > 2016-10-14 11:50:48.138255  write
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head# 0~1048576 = 1048576
+> > 2016-10-14 11:50:48.138291  setattrs
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head#
+> > 2016-10-14 11:50:48.138313  setattrs
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head# = 0
+> > 2016-10-14 11:50:48.138330  fgetattrs 70 getting 'hinfo_key'
+> > 2016-10-14 11:50:48.138337  setattrs
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head#
+> > 2016-10-14 11:50:48.138357  setattrs
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head# = 0
+> > 2016-10-14 11:50:48.138371  fgetattrs 70 getting '_'
+> > 2016-10-14 11:50:48.138376  fgetattrs 70 getting 'snapset'
+> > 2016-10-14 11:50:48.138381  fgetattrs 70 getting 'hinfo_key'
+> > 2016-10-14 11:50:48.138386  setattrs
+> > 134.62s3_head/3#134:461e3a1c:::testfile_4M:head#
+> > 2016-10-14 11:50:48.138409  _do_op 0x7f88ff586ba0 seq 3234 r = 0,
+> > finisher 0x7f8909398680 0
+> > 2016-10-14 11:50:48.138420  _finish_op 0x7f88ff586ba0 seq 3234
+> > osr(134.62s3 0x7f88ff458160)/0x7f88ff458160 lat 0.007306
+> >
+> > Than you, best regards
+> > ----------------------------------------------------------------------
+> > ---------------------------------------------------------------
+> > 本邮件及其附件含有杭州华三通信技术有限公司的保密信息，仅限于发送给上面地址中列出
+> > 的个人或群组。禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制、
+> > 或散发）本邮件中的信息。如果您错收了本邮件，请您立即电话或邮件通知发件人并删除本
+> > 邮件！
+> > This e-mail and its attachments contain confidential information from
+> > H3C, which is intended only for the person or entity whose address is
+> > listed above. Any use of the information contained herein in any way
+> > (including, but not limited to, total or partial disclosure,
+> > reproduction, or dissemination) by persons other than the intended
+> > recipient(s) is prohibited. If you receive this e-mail in error,
+> > please notify the sender by phone or email immediately and delete it!
+> >
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> N?????r??y??????X??ǧv???)޺{.n?????z?]z????ay?ʇڙ??j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+--8323329-851505411-1476477210=:23131--
