@@ -1,111 +1,272 @@
-From: Zhangzengran <zhangzengran@h3c.com>
-Subject: re: bufferlist rebuild_aligned issue
-Date: Fri, 14 Oct 2016 07:03:24 +0000
-Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314E89CB@H3CMLB12-EX.srv.huawei-3com.com>
+From: Tomasz Kuzemko <tomasz.kuzemko@corp.ovh.com>
+Subject: Re: Single slow OSD can cause unfound object
+Date: Fri, 14 Oct 2016 10:58:32 +0200
+Message-ID: <4556c45e-1e23-3709-ad99-3feb580525a5@corp.ovh.com>
+References: <ed8ed02e-4fb7-25ad-3a5f-d462f70409e2@sadziu.pl>
+ <alpine.DEB.2.11.1610111340430.31080@piezo.us.to>
+ <8b92ccce-1e31-7a0d-06d0-9126c3d02ffd@sadziu.pl>
+ <alpine.DEB.2.11.1610111935530.18626@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature";
+        boundary="NR5mTalHLAdsoFXS3FtXrD4gQTbdIblus"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:29439 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1757378AbcJNHE3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 14 Oct 2016 03:04:29 -0400
-Content-Language: zh-CN
+Received: from 8.mo301.mail-out.ovh.net ([137.74.110.71]:59466 "EHLO
+        8.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753254AbcJNJIY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Oct 2016 05:08:24 -0400
+Received: from EX3.OVH.local (gw1.corp.ovh.com [51.255.55.226])
+        by mo301.mail-out.ovh.net (Postfix) with ESMTPS id 140401A37
+        for <ceph-devel@vger.kernel.org>; Fri, 14 Oct 2016 10:58:38 +0200 (CEST)
+In-Reply-To: <alpine.DEB.2.11.1610111935530.18626@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "haomai@xsky.com" <haomai@xsky.com>
-Cc: "Sage Weil (sage@newdream.net)" <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Pj4gSGkgU2FnZSwNCj4+ICAgUmVjZW50bHkgSSB0cmFja2VkIHNvbWUgc2luZ2xlIG9wLCBhbmQg
-Zm91bmQgdGhhdCB0aGUgYnVmZmVybGlzdDo6cmVidWlsZF9hbGlnbmVkIHdpbGwgY29zdCBzb21l
-IHRpbWUgdGhhdCBhIGxpdHRlIGxvbmdlci4NCj4+IFRoZSB3aG9sZSBzdWJvcCBzcGVuZCA3bXMs
-YW5kIHRoZSBwd3JpdGV2IHNwZW5kIDEuMm1zLCBidXQgdGhlDQo+PiByZWJ1aWxkX2FsaWduZWQg
-Y29zdCAxLjFtcy50aGUgdGVzdOKAmXMgb2JqZWN0IGxlbmd0aCBpcyAxTSwgVXNpbmcNCj4+IHJh
-ZG9zIHB1dC4gSSB0aGluayB0aGUgYnVmZmVybGlzdCByZWJ1aWxkIGFuZCBhbGlnbiBzaG91bGQg
-bm90IGNvc3Qgc28gbXVjaCB0aW1lLiBUaGUgb3MgZW52aXJvbm1lbnQgaGF2ZSB2bS5zd2FwcGlu
-ZXNzID0gMCBhbmQgaGF2ZSB0Y21hbGxvYy4gSXMgdGhpcyBub3JtYWw/DQo+Pg0KPj4gMjAxNi0x
-MC0xNCAxMTo1MDo0OC4xMzExMDMgIHF1ZXVlX3RyYW5zYWN0aW9ucyBleGlzdGluZw0KPj4gMHg3
-Zjg5MDBjMzAyYzANCj4+IG9zcigxMzQuNjJzMyAweDdmODhmZjQ1ODE2MCkNCj4+IDIwMTYtMTAt
-MTQgMTE6NTA6NDguMTMyNDc3ICBxdWV1ZV90cmFuc2FjdGlvbnMgKHdyaXRlYWhlYWQpIDMyMzQN
-Cj4+IFtUcmFuc2FjdGlvbigweDdmODkwNzczNjAwMCksVHJhbnNhY3Rpb24oMHg3Zjg5MDc3MzYx
-YzApXQ0KPj4+PiBjb3N0IDEuMW1zIEZpbGVKb3VybmFsOjpwcmVwYXJlX2VudHJ5ID0+IGJ1ZmZl
-cmxpc3Q6Og0KPj4+PiByZWJ1aWxkX2FsaWduZWQNCj4NCj53aHkgZG8geW91IHRoaW5rIDEuMW1z
-IGlzIGNvc3QgZnJvbSByZWJ1aWxkLi4uIHRoZXJlIGV4aXN0cyBhIGxvdCBvZiB0aGluZ3MuIHJl
-YnVpbGQgb2YgY291cnNlIGlzIGEgcHJvYmxlbSB3ZSBuZWVkIHRvIHJlc29sdmUuIGJ1dCBpdCB3
-b24ndCBiZSBwcm9ibGVtIGluIGhkZCBjYXNlIHNpbmNlIGl0J3MganVzdCBtZW1vcnkgY29weS4N
-Cg0KaSBwcmludGVkIHRoZSB0aW1lc3RhbXAgb24gdGhlIHBhdGgsIGFuZCBmb3VuZCB0aGUgbW9z
-dCB0aW1lIG9mIDEuMW1zIHNwZW5kIGluIGJ1ZmZlcmxpc3Q6OnJlYnVpbGRfYWxpZ25lZC4uLg0K
-dGhlIDFNIGRhdGEgb2YgcHdyaXRldiBpcyB3cml0ZSB0byBwYWdlIGNhY2hlIG5vdCBvbiBkaXNr
-LCBtYXliZSBpdCBsZXQgYnVmZmVybGlzdCBhbGlnbmVkIHNlZW0gc29tZXdoYXQgZXhwZW5zaXZl
-Li4uDQoNCj4+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTMzNTgzICBfam91cm5hbGVkX2FoZWFkIDB4
-N2Y4OGZmNTg2YmEwIHNlcSAzMjM0IG9zcigxMzQuNjJzMyAweDdmODhmZjQ1ODE2MCkgW1RyYW5z
-YWN0aW9uKDB4N2Y4OTA3NzM2MDAwKSxUcmFuc2FjdGlvbigweDdmODkwNzczNjFjMCldDQo+PiAy
-MDE2LTEwLTE0IDExOjUwOjQ4LjEzMzYyMCAgcXVldWVfb3AgMHg3Zjg4ZmY1ODZiYTAgc2VxIDMy
-MzQgb3NyKDEzNC42MnMzIDB4N2Y4OGZmNDU4MTYwKSAxMDUxMzMwIGJ5dGVzICAgKHF1ZXVlIGhh
-cyAxIG9wcyBhbmQgMTA1MTMzMCBieXRlcykNCj4+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTMzNjMw
-ICAgcXVldWVpbmcgb25kaXNrIDB4N2Y4OTAzYWI3N2MwDQo+PiAyMDE2LTEwLTE0IDExOjUwOjQ4
-LjEzMzY1NCAgX2RvX29wIDB4N2Y4OGZmNTg2YmEwIHNlcSAzMjM0DQo+PiBvc3IoMTM0LjYyczMg
-MHg3Zjg4ZmY0NTgxNjApLzB4N2Y4OGZmNDU4MTYwIHN0YXJ0DQo+PiAyMDE2LTEwLTE0IDExOjUw
-OjQ4LjEzMzY2OSAgX2RvX3RyYW5zYWN0aW9uIG9uIDB4N2Y4OTA3NzM2MDAwDQo+PiAyMDE2LTEw
-LTE0IDExOjUwOjQ4LjEzMzY4NSAgcmVtb3ZlDQo+PiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUz
-YTFjOjo6dGVzdGZpbGVfNE06aGVhZCMyOTgNCj4+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTMzNzU0
-ICBsZm5fdW5saW5rOiBjbGVhcmluZyBvbWFwIG9uDQo+PiAzIzEzNDo0NjFlM2ExYzo6OnRlc3Rm
-aWxlXzRNOmhlYWQjMjk4IGluIGNpZCAxMzQuNjJzM19oZWFkDQo+PiAyMDE2LTEwLTE0IDExOjUw
-OjQ4LjEzNDUyNiAgcmVtb3ZlDQo+PiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVz
-dGZpbGVfNE06aGVhZCMyOTggPSAwDQo+PiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzNDU1NyAgX29t
-YXBfc2V0a2V5cw0KPj4gMTM0LjYyczNfaGVhZC8zIzEzNDo0NjAwMDAwMDo6OjpoZWFkIw0KPj4g
-MjAxNi0xMC0xNCAxMTo1MDo0OC4xMzQ3MDUgIF9vbWFwX3NldGtleXMNCj4+IDEzNC42MnMzX2hl
-YWQvMyMxMzQ6NDYwMDAwMDA6Ojo6aGVhZCMgPSAwDQo+PiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEz
-NDcxNiAgX2RvX3RyYW5zYWN0aW9uIG9uIDB4N2Y4OTA3NzM2MWMwDQo+PiAyMDE2LTEwLTE0IDEx
-OjUwOjQ4LjEzNDcyMyAgX2NvbGxlY3Rpb25fbW92ZV9yZW5hbWUNCj4+IDEzNC42MnMzX2hlYWQv
-MyMxMzQ6NDYxZTNhMWM6Ojp0ZXN0ZmlsZV80TTpoZWFkIzI5YSBmcm9tDQo+PiAxMzQuNjJzM19o
-ZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVfNE06aGVhZCMNCj4+IDIwMTYtMTAtMTQgMTE6
-NTA6NDguMTM0NzM2ICBfc2V0X3JlcGxheV9ndWFyZCAzMjM0LjEuMCBTVEFSVA0KPj4gMjAxNi0x
-MC0xNCAxMTo1MDo0OC4xMzU4NTkgIF9zZXRfcmVwbGF5X2d1YXJkIDMyMzQuMS4wIGRvbmUNCj4+
-IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM2MTMwICBsZm5fdW5saW5rOiBjbGVhcmluZyBvbWFwIG9u
-DQo+PiAzIzEzNDo0NjFlM2ExYzo6OnRlc3RmaWxlXzRNOmhlYWQjIGluIGNpZCAxMzQuNjJzM19o
-ZWFkDQo+PiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzNjMwNSAgX2Nsb3NlX3JlcGxheV9ndWFyZCAz
-MjM0LjEuMA0KPj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzcwMjMgIF9jbG9zZV9yZXBsYXlfZ3Vh
-cmQgMzIzNC4xLjAgZG9uZQ0KPj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzcwMzkgIF9jb2xsZWN0
-aW9uX21vdmVfcmVuYW1lDQo+PiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZp
-bGVfNE06aGVhZCMyOWEgZnJvbQ0KPj4gMTM0LjYyczNfaGVhZC8zIzEzNDo0NjFlM2ExYzo6OnRl
-c3RmaWxlXzRNOmhlYWQjID0gMA0KPj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzcwNTcgIHdyaXRl
-DQo+PiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVfNE06aGVhZCMgMH4x
-MDQ4NTc2DQo+Pj4+IGNvc3QgMS4ybXMgcHdyaXRldg0KPj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4x
-MzgyNTUgIHdyaXRlDQo+PiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVf
-NE06aGVhZCMgMH4xMDQ4NTc2ID0gMTA0ODU3Ng0KPj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzgy
-OTEgIHNldGF0dHJzDQo+PiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVf
-NE06aGVhZCMNCj4+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM4MzEzICBzZXRhdHRycw0KPj4gMTM0
-LjYyczNfaGVhZC8zIzEzNDo0NjFlM2ExYzo6OnRlc3RmaWxlXzRNOmhlYWQjID0gMA0KPj4gMjAx
-Ni0xMC0xNCAxMTo1MDo0OC4xMzgzMzAgIGZnZXRhdHRycyA3MCBnZXR0aW5nICdoaW5mb19rZXkn
-DQo+PiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzODMzNyAgc2V0YXR0cnMNCj4+IDEzNC42MnMzX2hl
-YWQvMyMxMzQ6NDYxZTNhMWM6Ojp0ZXN0ZmlsZV80TTpoZWFkIw0KPj4gMjAxNi0xMC0xNCAxMTo1
-MDo0OC4xMzgzNTcgIHNldGF0dHJzDQo+PiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6
-dGVzdGZpbGVfNE06aGVhZCMgPSAwDQo+PiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzODM3MSAgZmdl
-dGF0dHJzIDcwIGdldHRpbmcgJ18nDQo+PiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzODM3NiAgZmdl
-dGF0dHJzIDcwIGdldHRpbmcgJ3NuYXBzZXQnDQo+PiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzODM4
-MSAgZmdldGF0dHJzIDcwIGdldHRpbmcgJ2hpbmZvX2tleScNCj4+IDIwMTYtMTAtMTQgMTE6NTA6
-NDguMTM4Mzg2ICBzZXRhdHRycw0KPj4gMTM0LjYyczNfaGVhZC8zIzEzNDo0NjFlM2ExYzo6OnRl
-c3RmaWxlXzRNOmhlYWQjDQo+PiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzODQwOSAgX2RvX29wIDB4
-N2Y4OGZmNTg2YmEwIHNlcSAzMjM0IHIgPSAwLA0KPj4gZmluaXNoZXIgMHg3Zjg5MDkzOTg2ODAg
-MA0KPj4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzg0MjAgIF9maW5pc2hfb3AgMHg3Zjg4ZmY1ODZi
-YTAgc2VxIDMyMzQNCj4+IG9zcigxMzQuNjJzMyAweDdmODhmZjQ1ODE2MCkvMHg3Zjg4ZmY0NTgx
-NjAgbGF0IDAuMDA3MzA2DQo+Pg0KPj4gVGhhbiB5b3UsIGJlc3QgcmVnYXJkcw0KLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLQ0K5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa5L+h
-5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK
-6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQrnmoTkuKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbk
-u5bkurrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbp
-g6jliIblnLDms4TpnLLjgIHlpI3liLbjgIENCuaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/
-oeaBr+OAguWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaI
-lumCruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0K6YKu5Lu277yBDQpUaGlzIGUtbWFp
-bCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZy
-b20gSDNDLCB3aGljaCBpcw0KaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkg
-d2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhlDQppbmZvcm1hdGlv
-biBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVk
-IHRvLCB0b3RhbCBvciBwYXJ0aWFsDQpkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3Nl
-bWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCnJlY2lwaWVudChz
-KSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgcGxl
-YXNlIG5vdGlmeSB0aGUgc2VuZGVyDQpieSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQg
-ZGVsZXRlIGl0IQ0K
+--NR5mTalHLAdsoFXS3FtXrD4gQTbdIblus
+Content-Type: multipart/mixed; boundary="WKdM6P8dd5mdw4Srk6XuF2EJRJFUIdKIT";
+ protected-headers="v1"
+From: Tomasz Kuzemko <tomasz.kuzemko@corp.ovh.com>
+To: ceph-devel@vger.kernel.org
+Message-ID: <4556c45e-1e23-3709-ad99-3feb580525a5@corp.ovh.com>
+Subject: Re: Single slow OSD can cause unfound object
+References: <ed8ed02e-4fb7-25ad-3a5f-d462f70409e2@sadziu.pl>
+ <alpine.DEB.2.11.1610111340430.31080@piezo.us.to>
+ <8b92ccce-1e31-7a0d-06d0-9126c3d02ffd@sadziu.pl>
+ <alpine.DEB.2.11.1610111935530.18626@piezo.us.to>
+In-Reply-To: <alpine.DEB.2.11.1610111935530.18626@piezo.us.to>
+
+--WKdM6P8dd5mdw4Srk6XuF2EJRJFUIdKIT
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+I work with Pawe=B3 on this subject.
+
+Do I understand correctly that not marking osd.1 as out but instead
+making it down first (ie. by killing process) would prevent this
+situation from happening?
+
+On 13.10.2016 18:53, Sage Weil wrote:
+> On Tue, 11 Oct 2016, Pawe=B3 Sadowski wrote:
+>> Hi Sage,
+>>
+>> W dniu 11.10.2016 o 15:45, Sage Weil pisze:
+>>
+>>> Hi Pawel,
+>>>
+>>> On Tue, 11 Oct 2016, Pawe=B3 Sadowski wrote:
+>>>> Hi,
+>>>>
+>>>> I managed to trigger unfound objects on a pool with size 3 and min_s=
+ize
+>>>> 2 just by removing 'slow' OSD (out and then stop) which is quite
+>>>> frightening. Shouldn't Ceph stop IO if there is only one copy in thi=
+s
+>>>> case (even during recovery/peering/etc)? I'm able to reproduce this =
+on
+>>>> Hammer (0.94.5, 0.94.9) and Jewel (10.2.3). So far I wasn't able to
+>>>> trigger this behavior by just stopping such OSD (still testing).
+>>> This is definitely concerning.  I have a couple questions...
+>>>
+>>> 1. Looking at the log, I see that at one point all of the OSDs mark
+>>> themselves down, here:
+>>>
+>>> 2016-10-11 08:46:23.473335 mon.0 10.99.128.50:6789/0 3275 : cluster [=
+INF]
+>>> osd.1 marked itself down
+>>>
+>>> Do you know why they do that?
+>>
+>> It's probably due to load triggered by rebalance after marking OSD out=
+=2E
+>> In other tests OSDs stayed up during this period. It didn't happen
+>> in my last test (logs posted via ceph-post-file).
+>>
+>>> 2. Are you throttling the CPU on just a single OSD, or on a whole hos=
+t?  I
+>>> also see that the monitors are calling elections.  (This shouldn't ha=
+ve
+>>> anything to do with the problem, but I'm not sure I understand the te=
+st
+>>> setup.)
+>>
+>> I'm throttling CPU for single OSD process (in our production we had di=
+sk
+>> that was slowing down OSD). Monitors share device with one of the OSD.=
+
+>> Sometimes election happens after marking OSD out, sometimes not. Proba=
+bly
+>> caused by load on the underlaying device (didn't happen in last test).=
+
+>>
+>>>> Second thing: throttling mechanism is blocking recovery operations/w=
+hole
+>>>> OSD[4] when there is a lot of client requests for missing objects. I=
+
+>>>> think it shouldn't be like that.
+>>> Yeah, there is a similar problem with a PG is inactive and requests p=
+ile
+>>> up, eventually preventing ops even on active PGs... and 'ceph tell $p=
+gid
+>>> query' admin commands.  It's non-trivial to fix, though: we need a wa=
+y to
+>>> inform the client that a PG or individual object is blocked so that t=
+hey
+>>> stop sending requests... and then also a way to inform them that the =
+PG is
+>>> unblocked so they can start again.
+>>
+>> OK. Is it wise to increase this throttling limit and if yes how much?
+>> Anyway, in the end it'll probably just delay moment until OSD is block=
+ed.
+>=20
+> Yeah, I wouldn't increase it (at least not by much)... it'll just delay=
+=20
+> the inevitable.
+>=20
+>>>> 1: logs from Jewel
+>>>> https://gist.github.com/anonymous/c8618adca8984132c82f16c351222883
+>>> Do you mind reproducing this sequence with debug ms =3D 1, debug osd =
+=3D 20,
+>>> and capture all of the OSD logs as well as the cluster ceph.log?  You=
+ can
+>>> send us the tarball with the ceph-post-file utility.
+>>
+>> Sure. Gzipped logs are about ~2.7G, ceph-post-file id:
+>> 7e16f69e-c410-49c2-b11c-e727854ce7b3
+>=20
+> Thanks!  I took a look at this and I see what is going on. =20
+> It's... subtle.
+>=20
+> Initially the PG is, say, OSDs [1,2,3].  We are writing a sequence of=20
+> updates to existing objects.  Eventually we mark osd.1 out.  At that po=
+int=20
+> we have
+>=20
+> osd.1: object A version '23 in flight to disk and replicas
+> osd.2,3: object A version '22 (hasn't gotten replicated write yet)
+>=20
+> If osds 2 and 3 learn about the new osdmap (osd.1 is out) before osd.1,=
+=20
+> they will toss the replicate write away when they get it (they've alrea=
+dy=20
+> moved on and are part of the way through peering in the new [2,3]=20
+> interval.  And during peering they learn from osd.1 that it has a newer=
+=20
+> version of the object, '23.  They assume this is the best one and inclu=
+de=20
+> the '23 write as part of the official history.
+>=20
+> All is well as long as osd.1 stays alive long enough for them to also=20
+> fetch version '23 of the object.  If osd.1 is then killed before that=20
+> happens, though, we are in the situation where osds [2,3] know there wa=
+s a=20
+> newer write but there is no longer a copy available.
+>=20
+> Since the '23 didn't actually complete (all replicas didn't commit it=20
+> so the client didn't get an ack) it is equally valid for us to throw it=
+=20
+> out and say that '22 is the "official" version.  But if we do that we=20
+> could fall into a similar situation where, say, osd.1 and osd.3 had=20
+> '23 and osd.2 had '22, we chose '22, osd.1 and 3 throw away their=20
+> 'divergent' '23, but then osd.2 fails before we copy '22 around.
+>=20
+> Somewhere in there is a better strategy that recognizes that either=20
+> version is okay and either picks the official version that is least lik=
+ely=20
+> to lead to one of these failure cases *or* adds some complicated logic =
+to=20
+> record that either is okay and adjust the official record=20
+> as-needed if one of those failure situations comes up.
+>=20
+> For now, the way to address this is to do the mark-unfound-revert thing=
+,=20
+> which takes you from a situation where the history says '22 was modifie=
+d=20
+> to get '23 but you don't have a '23 copy (only '22's).  This is a manua=
+l=20
+> admin intervention, but it's generally safe and is designed to handle=20
+> exactly this case.
+>=20
+> Perhaps the simplest improvement would be to automatically recognized=20
+> that the '23 version was never acked to the client and automatic revert=
+=20
+> to '22 is safe...
+>=20
+> Sam's on vacation, but I suspect he'll have some additional thoughts on=
+=20
+> this when he gets back next week!
+>=20
+> sage
+>=20
+>=20
+>=20
+>>
+>>> Thanks!
+>>> sage
+>>>
+>>>> 2: steps to reproduce
+>>>>   - put some load on the cluster (run FIO with high iodepth)
+>>>>   - slow down single OSD (in my case reduce CPU time using cgroups:
+>>>> cpu.cfs_quota_us 15000)
+>>>>   - sleep 120
+>>>>   - ceph osd out 6
+>>>>   - sleep 15
+>>>>   - stop ceph-osd id=3D6
+>>>>   - unfound objects appear
+>>>>
+>>>> This is not 100% reproducible but in my test lab (9 OSDs) I'm able t=
+o
+>>>> trigger this very easily.
+>>>>
+>>>> 3:
+>>>> mon-01:~ # ceph osd pool get rbd size
+>>>> size: 3
+>>>> mon-01:~ # ceph osd pool get rbd min_size
+>>>> min_size: 2
+>>>> mon-01:~ # ceph --version
+>>>> ceph version 10.2.3 (ecc23778eb545d8dd55e2e4735b53cc93f92e65b)
+>>>>
+>>>> 4:
+>>>> perf dump | grep -A 2 'throttle-osd_client_messages'
+>>>>      "throttle-osd_client_messages": {
+>>>>          "val": 100,
+>>>>          "max": 100,
+>>>>
+>>>> ops_in_flight:
+>>>> https://gist.github.com/anonymous/643607fa3f959c91ba7a9794e5d99dea
+>>
+>> Thanks!
+>>
+>>
+>> --=20
+>> PS
+>>
+
+--=20
+Tomasz Kuzemko
+tomasz.kuzemko@corp.ovh.com
+
+
+--WKdM6P8dd5mdw4Srk6XuF2EJRJFUIdKIT--
+
+--NR5mTalHLAdsoFXS3FtXrD4gQTbdIblus
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iQEcBAEBAgAGBQJYAJ49AAoJEH0wj3uDfd0nMf0H/23iKOhCn3Ho9jHRnYl+Ba5I
+VHqk3xlzL5u/JVaV7LQ+TFStPY9le9Nf33FaVCNZBSC9xkjprU13oSCRTAsJmKNa
+fVHZl7o3EqfnwVcVM+6mE7yLWSh9YP3NZeu6jtwt8h3M60/jPTp/z9MRuwFsBglY
+W7cU7NDbdSBgTEZ1CEW1iLm745xcmXjJNqhIMTB6fWIXTWqvgNw0AQoSUtgrPq8N
+4y7r0a5a0s2SlgWUJST9JDieRP5DuHNReIdwMA2cDBSFW/pLwNpWdap/CKsmrPop
+e4x+2OVR/O6nPPM6DfZfaOujXIyhdsQQA44+qL/NbFxmvWhzzuyrobRcP/wv6y0=
+=OVIk
+-----END PGP SIGNATURE-----
+
+--NR5mTalHLAdsoFXS3FtXrD4gQTbdIblus--
