@@ -1,75 +1,88 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [bug report] ceph: avoid accessing / when mounting a subpath
-Date: Fri, 14 Oct 2016 12:46:04 +0300
-Message-ID: <20161014094604.GA25372@mwanda>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Possible corruption with MSSQL on RBD
+Date: Fri, 14 Oct 2016 12:04:31 +0200 (CEST)
+Message-ID: <2126451990.6086.1476439471715@ox.pcextreme.nl>
+References: <262972897.5995.1476280634060@ox.pcextreme.nl>
+ <CAJ4mKGZx+PgcqAPVB0LSFxp1z=aZiKWt-H1hjnKJU5_hxAoxWg@mail.gmail.com>
+ <439702971.6004.1476287822395@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:21565 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750846AbcJNJqg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Oct 2016 05:46:36 -0400
-Content-Disposition: inline
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:40178 "EHLO
+        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751939AbcJNKEg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Oct 2016 06:04:36 -0400
+In-Reply-To: <439702971.6004.1476287822395@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: zyan@redhat.com
-Cc: ceph-devel@vger.kernel.org
-
-Hello Yan, Zheng,
-
-The patch ce2728aaa82b: "ceph: avoid accessing / when mounting a
-subpath" from Sep 14, 2016, leads to the following static checker
-warning:
-
-	fs/ceph/super.c:853 ceph_real_mount()
-	error: uninitialized symbol 'root'.
-
-fs/ceph/super.c
-   814  static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
-   815  {
-   816          int err;
-   817          unsigned long started = jiffies;  /* note the start time */
-   818          struct dentry *root;
-   819          int first = 0;   /* first vfsmount for this super_block */
-   820  
-   821          dout("mount start %p\n", fsc);
-   822          mutex_lock(&fsc->client->mount_mutex);
-   823  
-   824          if (!fsc->sb->s_root) {
-   825                  const char *path;
-   826                  err = __ceph_open_session(fsc->client, started);
-   827                  if (err < 0)
-   828                          goto out;
-   829  
-   830                  if (!fsc->mount_options->server_path) {
-   831                          path = "";
-   832                          dout("mount opening path \\t\n");
-   833                  } else {
-   834                          path = fsc->mount_options->server_path + 1;
-   835                          dout("mount opening path %s\n", path);
-   836                  }
-   837                  root = open_root_dentry(fsc, path, started);
-   838                  if (IS_ERR(root)) {
-   839                          err = PTR_ERR(root);
-   840                          goto out;
-   841                  }
-   842                  fsc->sb->s_root = dget(root);
-   843                  first = 1;
-   844  
-   845                  err = ceph_fs_debugfs_init(fsc);
-   846                  if (err < 0)
-   847                          goto fail;
-   848          }
-
-We should initialize root on the else side.
-
-   849  
-   850          fsc->mount_state = CEPH_MOUNT_MOUNTED;
-   851          dout("mount success\n");
-   852          mutex_unlock(&fsc->client->mount_mutex);
-   853          return root;
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 
+> Op 12 oktober 2016 om 17:57 schreef Wido den Hollander <wido@42on.com>:
+> 
+> 
+> 
+> > Op 12 oktober 2016 om 17:01 schreef Gregory Farnum <gfarnum@redhat.com>:
+> > 
+> > 
+> > On Wed, Oct 12, 2016 at 7:57 AM, Wido den Hollander <wido@42on.com> wrote:
+> > > Hi,
+> > >
+> > > I filed a issue in the tracker, but I'm looking for some feedback to diagnose this a bit further: http://tracker.ceph.com/issues/17545
+> > >
+> > > The situation is that with a Firefly or Hammer (haven't tested Jewel yet) a MSSQL server running on RBD will sometimes complain about corruption.
+> > >
+> > > Using SQLioSim we can reproduce the issue on a small Proxmox + Ceph cluster and after an hour or so it will yield:
+> > >
+> > > Expected FileId: 0x0
+> > > Received FileId: 0x0
+> > > Expected PageId: 0xCB19C
+> > > Received PageId: 0xCB19A (does not match expected)
+> > > Received CheckSum: 0x9F444071
+> > > Calculated CheckSum: 0x89603EC9 (does not match expected)
+> > > Received Buffer Length: 0x2000
+> > >
+> > > The issue only seems to happen with RBD caching enabled. When disabling the RBD cache or using cache=directsync we were not able to reproduce the issue.
+> > >
+> > > When using LVM/file based backends for Qemu the problem also didn't pop up.
+> > >
+> > > So this seems to be either a librbd issue or the RBD driver inside Qemu.
+> > >
+> > > Any hints on how to debug this further to find the root cause?
+> > 
+> > If you've got control over the clients, try building with commit
+> > 9ec6e7f608608088d51e449c9d375844631dcdde backported to them (I believe
+> > it's also in the latest Hammer release, but maybe there hasn't been
+> > one cut since the backport?); tracked at
+> > http://tracker.ceph.com/issues/16002 but of course the web site is
+> > dead so you can't look at that right now. :(
+> 
+> I verified, but 9ec6e7 is not in v0.94.9, but it is in the Jewel release.
+> 
+> Tests are running with Jewel now and I will probably have the results tomorrow. If Jewel doesn't break the commit you send might indeed resolve it.
+> 
 
-regards,
-dan carpenter
+The tests have been running for over 24 hours and all still looks good. We will let it run for over the weekend to make sure it has been fixed.
+
+Wido
+
+> Wido
+> 
+> > -Greg
+> > 
+> > >
+> > > Wido
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
