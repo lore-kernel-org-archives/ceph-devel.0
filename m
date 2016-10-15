@@ -1,164 +1,93 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: bufferlist rebuild_aligned issue
-Date: Fri, 14 Oct 2016 20:35:44 +0000
-Message-ID: <BY2PR02MB39697F9016069676CD54D92F4DF0@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <7BD28126D6935A4498AE6DE60B5D4CAB314E86DD@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.11.1610142019370.23150@piezo.us.to>
- <BY2PR02MB3964BFD0FF2208D82C0DB1DF4DF0@BY2PR02MB396.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1610142033100.23131@piezo.us.to>
+From: Mike <mike.almateia@gmail.com>
+Subject: Re: Cyclic performance drop
+Date: Sat, 15 Oct 2016 16:22:10 +0300
+Message-ID: <1476537730.1723.8.camel@gmail.com>
+References: <716f53fa-0fce-a7b2-1d2a-f4bd10ea9133@gmail.com>
+         <alpine.DEB.2.11.1610141848010.23131@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0068.outbound.protection.outlook.com ([104.47.37.68]:4982
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752435AbcJNUfy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 14 Oct 2016 16:35:54 -0400
-In-Reply-To: <alpine.DEB.2.11.1610142033100.23131@piezo.us.to>
-Content-Language: en-US
+Received: from mail-lf0-f44.google.com ([209.85.215.44]:35892 "EHLO
+        mail-lf0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753578AbcJONWb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 15 Oct 2016 09:22:31 -0400
+Received: by mail-lf0-f44.google.com with SMTP id b75so216368079lfg.3
+        for <ceph-devel@vger.kernel.org>; Sat, 15 Oct 2016 06:22:30 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1610141848010.23131@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: Zhangzengran <zhangzengran@h3c.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Q29vbCAsIHRoYW5rcy4uDQpCVFcsIGNvdWxkbid0IGFibGUgdG8gY2hlcnJ5LXBpY2sgd2lwLWRl
-bmMgYXMgaXQgbmVlZHMgcmViYXNlLi5XaWxsIHByb2ZpbGUgb25jZSBpdCBpcyBtZXJnZWQgdGhl
-bi4uDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdl
-LS0tLS0NCkZyb206IFNhZ2UgV2VpbCBbbWFpbHRvOnNhZ2VAbmV3ZHJlYW0ubmV0XSANClNlbnQ6
-IEZyaWRheSwgT2N0b2JlciAxNCwgMjAxNiAxOjMzIFBNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBa
-aGFuZ3plbmdyYW47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSRTogYnVm
-ZmVybGlzdCByZWJ1aWxkX2FsaWduZWQgaXNzdWUNCg0KT24gRnJpLCAxNCBPY3QgMjAxNiwgU29t
-bmF0aCBSb3kgd3JvdGU6DQo+IFNhZ2UsDQo+IEkgYW0gc2VlaW5nIHRoZSByZWJ1aWxkIGJ1ZmZl
-cmxpc3QgaXMgaGFwcGVuaW5nIGZyb20gS2VybmVsRGV2aWNlOjphaW9fd3JpdGUgIHdyaXRlIHBh
-dGggYXMgd2VsbCBhbmQgYXMgYSByZXN1bHQgaXQgaXMgcG9wcGluZyB1cCBkdXJpbmcgcHJvZmls
-aW5nLiBJc24ndCB0aGUgYnVmZmVyIHN1cHBvc2VkIHRvIGFsaWduZWQgaW4gdGhpcyBjYXNlIGFz
-IHdlbGwgPw0KDQpUaGUgYmx1ZXN0b3JlIHJlYnVpbGQgaXMgZml4ZWQgYXMgcGFydCBvZiB3aXAt
-ZGVuYywgd2hpY2ggc2hvdWxkIG1lcmdlIHNvb24uLiBob3BlZnVsbHkgbmV4dCB3ZWVrLg0KDQpz
-DQo+IA0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4gDQo+IC0tLS0tT3JpZ2luYWwg
-TWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIA0K
-PiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2Yg
-U2FnZSBXZWlsDQo+IFNlbnQ6IEZyaWRheSwgT2N0b2JlciAxNCwgMjAxNiAxOjI2IFBNDQo+IFRv
-OiBaaGFuZ3plbmdyYW4NCj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1Ympl
-Y3Q6IFJlOiBidWZmZXJsaXN0IHJlYnVpbGRfYWxpZ25lZCBpc3N1ZQ0KPiANCj4gT24gRnJpLCAx
-NCBPY3QgMjAxNiwgWmhhbmd6ZW5ncmFuIHdyb3RlOg0KPiA+IEhpIFNhZ2UsDQo+ID4gICBSZWNl
-bnRseSBJIHRyYWNrZWQgc29tZSBzaW5nbGUgb3AsIGFuZCBmb3VuZCB0aGF0IHRoZSBidWZmZXJs
-aXN0OjpyZWJ1aWxkX2FsaWduZWQgd2lsbCBjb3N0IHNvbWUgdGltZSB0aGF0IGEgbGl0dGUgbG9u
-Z2VyLg0KPiA+IFRoZSB3aG9sZSBzdWJvcCBzcGVuZCA3bXMsYW5kIHRoZSBwd3JpdGV2IHNwZW5k
-IDEuMm1zLCBidXQgdGhlIA0KPiA+IHJlYnVpbGRfYWxpZ25lZCBjb3N0IDEuMW1zLnRoZSB0ZXN0
-4oCZcyBvYmplY3QgbGVuZ3RoIGlzIDFNLCBVc2luZyANCj4gPiByYWRvcyBwdXQuIEkgdGhpbmsg
-dGhlIGJ1ZmZlcmxpc3QgcmVidWlsZCBhbmQgYWxpZ24gc2hvdWxkIG5vdCBjb3N0IHNvIG11Y2gg
-dGltZS4gVGhlIG9zIGVudmlyb25tZW50IGhhdmUgdm0uc3dhcHBpbmVzcyA9IDAgYW5kIGhhdmUg
-dGNtYWxsb2MuIElzIHRoaXMgbm9ybWFsPw0KPiA+DQo+ID4gMjAxNi0xMC0xNCAxMTo1MDo0OC4x
-MzExMDMgIHF1ZXVlX3RyYW5zYWN0aW9ucyBleGlzdGluZyANCj4gPiAweDdmODkwMGMzMDJjMA0K
-PiA+IG9zcigxMzQuNjJzMyAweDdmODhmZjQ1ODE2MCkNCj4gPiAyMDE2LTEwLTE0IDExOjUwOjQ4
-LjEzMjQ3NyAgcXVldWVfdHJhbnNhY3Rpb25zICh3cml0ZWFoZWFkKSAzMjM0IA0KPiA+IFtUcmFu
-c2FjdGlvbigweDdmODkwNzczNjAwMCksVHJhbnNhY3Rpb24oMHg3Zjg5MDc3MzYxYzApXQ0KPiA+
-ID4+IGNvc3QgMS4xbXMgRmlsZUpvdXJuYWw6OnByZXBhcmVfZW50cnkgPT4gYnVmZmVybGlzdDo6
-DQo+ID4gPj4gcmVidWlsZF9hbGlnbmVkDQo+IA0KPiBUaGlzIGxvb2tzIGxpa2UgYSBidWcuICBJ
-biBnZW5lcmFsIHdlIHNob3VsZCBuZXZlciBoYXZlIHRvIGRvIGEgcmVidWlsZCBoZXJlLiAgVHdv
-IHRoaW5ncyBtaWdodCBiZSBnb2luZyB3cm9uZzoNCj4gDQo+IDEtIFRoZSBtZXNzZW5nZXIgc2hv
-dWxkIGJlIHJlYWRpbmcgdGhlIHdyaXRlIGludG8gYWxpZ25lZCBtZW1vcnkgYmFzZWQgb24gdGhl
-IG9mZnNldCBpbiB0aGUgY2VwaF9tc2dfaGVhZGVyLiAgWW91IGNhbiBjb21wYXJlIHRoZSBidWZm
-ZXIgcG9pbnRlciAoanVzdCBkb3V0IHRoZSBidWZmZXJsaXN0IHZhciBhbmQgeW91J2xsIHNlZSB0
-aGUgYnVmZmVyIHNlZ21lbnRzIGFuZCB0aGVpciBhY3R1YWwgZGF0YSBwb2ludGVycykgYW5kIHRo
-ZSB3cml0ZSBvZmZzZXQgYW5kIG1ha2Ugc3VyZSB0aGV5IG1hdGNoIHVwLg0KPiANCj4gMi0gVGhl
-IGpvdXJuYWwgY29kZSBoYXMgc29tZSBkZWxpY2F0ZSBsb2dpYyB0byBhZGp1c3QgdGhlIGhlYWQg
-YW5kIHRhaWwgcGFkZGluZyBzbyB0aGF0IHRoZSBkYXRhIGJ1ZmZlciByZW1haW5zIGFsaWduZWQg
-dG8gdGhlIGpvdXJuYWwgYmxvY2tzIGFzIHdlbGwuICBUaGlzIGNvZGUgaXMgaW4gRmlsZUpvdXJu
-YWw6OnByZV9wYWQuICBJdCBtYXkgYWxzbyBiZSB0aGF0IHRoZSBhbGlnbm1lbnQgaXMgZ2V0dGlu
-ZyBjbG9iYmVyZWQgYnkgdGhlIE9iamVjdFN0b3JlOjpUcmFuc2FjdGlvbiwgd2hpY2ggdHJpZXMg
-dG8gdHJhY2sgdGhlIGxhcmdlc3QgZGF0YSBidWZmZXIgaW4gdGhlIHRyYW5zYWN0aW9uIGFuZCBu
-b3RlIGl0J3MgYWxpZ25tZW50Lg0KPiANCj4gSSBzdXNwZWN0IG9uZSBvZiB0aG9zZSB0d28gdGhp
-bmdzIGlzIHRoZSBjdWxwcml0LCB0aG91Z2ghDQo+IA0KPiA+IDIwMTYtMTAtMTQgMTE6NTA6NDgu
-MTMzNTgzICBfam91cm5hbGVkX2FoZWFkIDB4N2Y4OGZmNTg2YmEwIHNlcSAzMjM0IG9zcigxMzQu
-NjJzMyAweDdmODhmZjQ1ODE2MCkgW1RyYW5zYWN0aW9uKDB4N2Y4OTA3NzM2MDAwKSxUcmFuc2Fj
-dGlvbigweDdmODkwNzczNjFjMCldDQo+ID4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzM2MjAgIHF1
-ZXVlX29wIDB4N2Y4OGZmNTg2YmEwIHNlcSAzMjM0IG9zcigxMzQuNjJzMyAweDdmODhmZjQ1ODE2
-MCkgMTA1MTMzMCBieXRlcyAgIChxdWV1ZSBoYXMgMSBvcHMgYW5kIDEwNTEzMzAgYnl0ZXMpDQo+
-ID4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzM2MzAgICBxdWV1ZWluZyBvbmRpc2sgMHg3Zjg5MDNh
-Yjc3YzANCj4gPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzMzY1NCAgX2RvX29wIDB4N2Y4OGZmNTg2
-YmEwIHNlcSAzMjM0DQo+ID4gb3NyKDEzNC42MnMzIDB4N2Y4OGZmNDU4MTYwKS8weDdmODhmZjQ1
-ODE2MCBzdGFydA0KPiA+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTMzNjY5ICBfZG9fdHJhbnNhY3Rp
-b24gb24gMHg3Zjg5MDc3MzYwMDANCj4gPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzMzY4NSAgcmVt
-b3ZlDQo+ID4gMTM0LjYyczNfaGVhZC8zIzEzNDo0NjFlM2ExYzo6OnRlc3RmaWxlXzRNOmhlYWQj
-Mjk4DQo+ID4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzM3NTQgIGxmbl91bmxpbms6IGNsZWFyaW5n
-IG9tYXAgb24NCj4gPiAzIzEzNDo0NjFlM2ExYzo6OnRlc3RmaWxlXzRNOmhlYWQjMjk4IGluIGNp
-ZCAxMzQuNjJzM19oZWFkDQo+ID4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzQ1MjYgIHJlbW92ZQ0K
-PiA+IDEzNC42MnMzX2hlYWQvMyMxMzQ6NDYxZTNhMWM6Ojp0ZXN0ZmlsZV80TTpoZWFkIzI5OCA9
-IDANCj4gPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzNDU1NyAgX29tYXBfc2V0a2V5cyANCj4gPiAx
-MzQuNjJzM19oZWFkLzMjMTM0OjQ2MDAwMDAwOjo6OmhlYWQjDQo+ID4gMjAxNi0xMC0xNCAxMTo1
-MDo0OC4xMzQ3MDUgIF9vbWFwX3NldGtleXMgDQo+ID4gMTM0LjYyczNfaGVhZC8zIzEzNDo0NjAw
-MDAwMDo6OjpoZWFkIyA9IDANCj4gPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzNDcxNiAgX2RvX3Ry
-YW5zYWN0aW9uIG9uIDB4N2Y4OTA3NzM2MWMwDQo+ID4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzQ3
-MjMgIF9jb2xsZWN0aW9uX21vdmVfcmVuYW1lIA0KPiA+IDEzNC42MnMzX2hlYWQvMyMxMzQ6NDYx
-ZTNhMWM6Ojp0ZXN0ZmlsZV80TTpoZWFkIzI5YSBmcm9tIA0KPiA+IDEzNC42MnMzX2hlYWQvMyMx
-MzQ6NDYxZTNhMWM6Ojp0ZXN0ZmlsZV80TTpoZWFkIw0KPiA+IDIwMTYtMTAtMTQgMTE6NTA6NDgu
-MTM0NzM2ICBfc2V0X3JlcGxheV9ndWFyZCAzMjM0LjEuMCBTVEFSVA0KPiA+IDIwMTYtMTAtMTQg
-MTE6NTA6NDguMTM1ODU5ICBfc2V0X3JlcGxheV9ndWFyZCAzMjM0LjEuMCBkb25lDQo+ID4gMjAx
-Ni0xMC0xNCAxMTo1MDo0OC4xMzYxMzAgIGxmbl91bmxpbms6IGNsZWFyaW5nIG9tYXAgb24gDQo+
-ID4gMyMxMzQ6NDYxZTNhMWM6Ojp0ZXN0ZmlsZV80TTpoZWFkIyBpbiBjaWQgMTM0LjYyczNfaGVh
-ZA0KPiA+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM2MzA1ICBfY2xvc2VfcmVwbGF5X2d1YXJkIDMy
-MzQuMS4wDQo+ID4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzcwMjMgIF9jbG9zZV9yZXBsYXlfZ3Vh
-cmQgMzIzNC4xLjAgZG9uZQ0KPiA+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM3MDM5ICBfY29sbGVj
-dGlvbl9tb3ZlX3JlbmFtZSANCj4gPiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVz
-dGZpbGVfNE06aGVhZCMyOWEgZnJvbSANCj4gPiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFj
-Ojo6dGVzdGZpbGVfNE06aGVhZCMgPSAwDQo+ID4gMjAxNi0xMC0xNCAxMTo1MDo0OC4xMzcwNTcg
-IHdyaXRlDQo+ID4gMTM0LjYyczNfaGVhZC8zIzEzNDo0NjFlM2ExYzo6OnRlc3RmaWxlXzRNOmhl
-YWQjIDB+MTA0ODU3Ng0KPiA+ID4+IGNvc3QgMS4ybXMgcHdyaXRldg0KPiANCj4gVGhpcyBkb2lu
-ZyBhIGJ1ZmZlcmVkIHdyaXRlLCB3aGljaCBjb3BpZXMgZGF0YSBpbnRvIHRoZSBwYWdlIGNhY2hl
-LiAgSXQncyBub3QgY2xlYXIgd2UgY2FuIGF2b2lkIHRoYXQgdW5sZXNzIHdpdGggZG8gT19ESVJF
-Q1QuLiB3aGljaCBpcyB0cmlja3kgYmVjYXVzZSBvZiB0aGUgd2F5IHdlIGNhY2hlIGZpbGUgZGVz
-Y3JpcHRvcnMuDQo+IA0KPiBzYWdlDQo+IA0KPiANCj4gPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEz
-ODI1NSAgd3JpdGUNCj4gPiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVf
-NE06aGVhZCMgMH4xMDQ4NTc2ID0gMTA0ODU3Ng0KPiA+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM4
-MjkxICBzZXRhdHRycyANCj4gPiAxMzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZp
-bGVfNE06aGVhZCMNCj4gPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzODMxMyAgc2V0YXR0cnMgDQo+
-ID4gMTM0LjYyczNfaGVhZC8zIzEzNDo0NjFlM2ExYzo6OnRlc3RmaWxlXzRNOmhlYWQjID0gMA0K
-PiA+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM4MzMwICBmZ2V0YXR0cnMgNzAgZ2V0dGluZyAnaGlu
-Zm9fa2V5Jw0KPiA+IDIwMTYtMTAtMTQgMTE6NTA6NDguMTM4MzM3ICBzZXRhdHRycyANCj4gPiAx
-MzQuNjJzM19oZWFkLzMjMTM0OjQ2MWUzYTFjOjo6dGVzdGZpbGVfNE06aGVhZCMNCj4gPiAyMDE2
-LTEwLTE0IDExOjUwOjQ4LjEzODM1NyAgc2V0YXR0cnMgDQo+ID4gMTM0LjYyczNfaGVhZC8zIzEz
-NDo0NjFlM2ExYzo6OnRlc3RmaWxlXzRNOmhlYWQjID0gMA0KPiA+IDIwMTYtMTAtMTQgMTE6NTA6
-NDguMTM4MzcxICBmZ2V0YXR0cnMgNzAgZ2V0dGluZyAnXycNCj4gPiAyMDE2LTEwLTE0IDExOjUw
-OjQ4LjEzODM3NiAgZmdldGF0dHJzIDcwIGdldHRpbmcgJ3NuYXBzZXQnDQo+ID4gMjAxNi0xMC0x
-NCAxMTo1MDo0OC4xMzgzODEgIGZnZXRhdHRycyA3MCBnZXR0aW5nICdoaW5mb19rZXknDQo+ID4g
-MjAxNi0xMC0xNCAxMTo1MDo0OC4xMzgzODYgIHNldGF0dHJzIA0KPiA+IDEzNC42MnMzX2hlYWQv
-MyMxMzQ6NDYxZTNhMWM6Ojp0ZXN0ZmlsZV80TTpoZWFkIw0KPiA+IDIwMTYtMTAtMTQgMTE6NTA6
-NDguMTM4NDA5ICBfZG9fb3AgMHg3Zjg4ZmY1ODZiYTAgc2VxIDMyMzQgciA9IDAsIA0KPiA+IGZp
-bmlzaGVyIDB4N2Y4OTA5Mzk4NjgwIDANCj4gPiAyMDE2LTEwLTE0IDExOjUwOjQ4LjEzODQyMCAg
-X2ZpbmlzaF9vcCAweDdmODhmZjU4NmJhMCBzZXEgMzIzNA0KPiA+IG9zcigxMzQuNjJzMyAweDdm
-ODhmZjQ1ODE2MCkvMHg3Zjg4ZmY0NTgxNjAgbGF0IDAuMDA3MzA2DQo+ID4NCj4gPiBUaGFuIHlv
-dSwgYmVzdCByZWdhcmRzDQo+ID4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gPiAtLQ0KPiA+IC0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiA+
-IOacrOmCruS7tuWPiuWFtumZhOS7tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZ
-kOWFrOWPuOeahOS/neWvhuS/oeaBr++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4
-reWIl+WHug0KPiA+IOeahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7
-peS7u+S9leW9ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWc
-sOazhOmcsuOAgeWkjeWItuOAgQ0KPiA+IOaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaB
-r+OAguWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumC
-ruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0KPiA+IOmCruS7tu+8gQ0KPiA+IFRoaXMg
-ZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRp
-b24gDQo+ID4gZnJvbSBIM0MsIHdoaWNoIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24g
-b3IgZW50aXR5IHdob3NlIA0KPiA+IGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9m
-IHRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIA0KPiA+IGluIGFueSB3YXkgKGluY2x1
-ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsIA0KPiA+IGRpc2Nsb3N1
-cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29ucyBvdGhlciB0aGFu
-IA0KPiA+IHRoZSBpbnRlbmRlZA0KPiA+IHJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5
-b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgDQo+ID4gcGxlYXNlIG5vdGlmeSB0aGUg
-c2VuZGVyIGJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo+ID4N
-Cj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJv
-bmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNp
-Z25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1l
-c3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlm
-aWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0
-IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0
-aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQg
-dGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkg
-dGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0
-cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9u
-ICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0K
-PiBOPz8/Pz9yPz95Pz8/Pz8/WD8/x6d2Pz8/Kd66ey5uPz8/Pz96P116Pz8/P2F5Px3Kh9qZPz9q
-ID8/Zj8/P2g/Pz8/Px4/dz8/Pw0KPz8/ajordj8/P3c/Pz8/Pz8/PyA/Pz8/elorPz8/Pz8/P2oi
-Pz8/P2kNCg==
+On Пт, 2016-10-14 at 18:53 +0000, Sage Weil wrote:
+> On Fri, 14 Oct 2016, Mike wrote:
+> > Hello.
+> > On the latest Jewel release I see a cyclic performance drop on read operations.
+> > Performance significantly drops every 4-5 seconds from ~70k IOPS to ~20k IOPS.
+> > 
+> > It looks like this (some fields were truncated to fit in line length):
+> > <CUT>
+> > ...
+> > 19:46:10.432125 4096 pgs: 4096 active+clean; 67378 MB data, 82433 kB/s rd, 20608
+> op/s
+> > 19:46:11.453338 4096 pgs: 4096 active+clean; 67378 MB data, 104 MB/s rd, 26857 op/s
+> > 19:46:12.486138 4096 pgs: 4096 active+clean; 67378 MB data, 276 MB/s rd, 70879 op/s
+> > 19:46:13.517175 4096 pgs: 4096 active+clean; 67378 MB data, 235 MB/s rd, 60375 op/s
+> > 19:46:15.530826 4096 pgs: 4096 active+clean; 67378 MB data, 81768 kB/s rd, 20442
+> op/s
+> > 19:46:16.561929 4096 pgs: 4096 active+clean; 67378 MB data, 132 MB/s rd, 33811 op/s
+> > 19:46:17.582495 4096 pgs: 4096 active+clean; 67378 MB data, 277 MB/s rd, 71027 op/s
+> > 19:46:18.614087 4096 pgs: 4096 active+clean; 67378 MB data, 200 MB/s rd, 51365 op/s
+> > 19:46:20.643567 4096 pgs: 4096 active+clean; 67378 MB data, 97849 kB/s rd, 24462
+> op/s
+> > 19:46:21.664988 4096 pgs: 4096 active+clean; 67378 MB data, 129 MB/s rd, 33108 op/s
+> > 19:46:22.693243 4096 pgs: 4096 active+clean; 67378 MB data, 270 MB/s rd, 69269 op/s
+> > 19:46:23.692111 4096 pgs: 4096 active+clean; 67378 MB data, 199 MB/s rd, 51186 op/s
+> > 19:46:25.725054 4096 pgs: 4096 active+clean; 67378 MB data, 84951 kB/s rd, 21238
+> op/s
+> > 19:46:26.746227 4096 pgs: 4096 active+clean; 67378 MB data, 132 MB/s rd, 33833 op/s
+> > 19:46:27.779780 4096 pgs: 4096 active+clean; 67378 MB data, 293 MB/s rd, 75189 op/s
+> > 19:46:28.775288 4096 pgs: 4096 active+clean; 67378 MB data, 204 MB/s rd, 52249 op/s
+> > 19:46:30.795561 4096 pgs: 4096 active+clean; 67378 MB data, 75260 kB/s rd, 18815
+> op/s
+> > 19:46:31.818544 4096 pgs: 4096 active+clean; 67378 MB data, 133 MB/s rd, 34243 op/s
+> > 19:46:32.851392 4096 pgs: 4096 active+clean; 67378 MB data, 295 MB/s rd, 75755 op/s
+> > 19:46:33.843960 4096 pgs: 4096 active+clean; 67378 MB data, 205 MB/s rd, 52649 op/s
+> > 19:46:34.861416 4096 pgs: 4096 active+clean; 67378 MB data, 69177 kB/s rd, 17294
+> op/s
+> > 19:46:35.872386 4096 pgs: 4096 active+clean; 67378 MB data, 85299 kB/s rd, 21324
+> op/s
+> > 19:46:36.898020 4096 pgs: 4096 active+clean; 67378 MB data, 155 MB/s rd, 39896 op/s
+> > 19:46:37.934147 4096 pgs: 4096 active+clean; 67378 MB data, 321 MB/s rd, 82209 op/s
+> > 19:46:39.966386 4096 pgs: 4096 active+clean; 67378 MB data, 163 MB/s rd, 41735 op/s
+> > 19:46:40.973110 4096 pgs: 4096 active+clean; 67378 MB data, 55481 kB/s rd, 13870
+> op/s
+> > ...
+> > <CUT>
+> 
+> You should probably confirm this result by looking at the raw perfcounter 
+> stats coming out of the OSD admin socket interface.  (Operators usually 
+> wire this up to graphite or similar monitoring tools.)
+> 
+> If this is a smallish cluster, a simpler check would be
+> 
+>  ceph daemonperf osd.0
+> 
+> and see if the stats reported by a single OSD show the same behavior.
+> 
+> The numbers reported by the monitor are not very accurate.  They average 
+> over a short period of time and can be sensitive to the timing of stat 
+> reports from OSDs (we're effectively taking the differential of a very 
+> choppy stair-step function and hoping for the best).
+> 
+> sage
+> 
+> 
+
+Thanks Sage! You are right when use "ceph daemon perf ..." I didn't see the issue
+described above.
+
+
+-- 
+Mike, run.
