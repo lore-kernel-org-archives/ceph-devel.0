@@ -1,67 +1,111 @@
-From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
-Subject: Re: OSDs are flapping and marked down wrongly
-Date: Mon, 17 Oct 2016 09:51:41 +0200
-Message-ID: <20161017075141.GA28088@predictor>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: OSDs are flapping and marked down wrongly
+Date: Mon, 17 Oct 2016 08:06:19 +0000
+Message-ID: <BY2PR02MB396DD0B2B7541A1DB23123CF4D00@BY2PR02MB396.namprd02.prod.outlook.com>
 References: <BY2PR02MB3964B80170065D0141B7931F4D00@BY2PR02MB396.namprd02.prod.outlook.com>
+ <20161017075141.GA28088@predictor>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from predictor.org.pl ([185.5.97.54]:53411 "EHLO predictor.org.pl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932503AbcJQH4F (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 17 Oct 2016 03:56:05 -0400
-Content-Disposition: inline
-In-Reply-To: <BY2PR02MB3964B80170065D0141B7931F4D00@BY2PR02MB396.namprd02.prod.outlook.com>
+Received: from mail-sn1nam02on0063.outbound.protection.outlook.com ([104.47.36.63]:10784
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932265AbcJQIGW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 17 Oct 2016 04:06:22 -0400
+In-Reply-To: <20161017075141.GA28088@predictor>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users@lists.ceph.com, Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel@vger.kernel.org
+To: =?utf-8?B?UGlvdHIgRGHFgmVr?= <branch@predictor.org.pl>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Oct 17, 2016 at 07:16:44AM +0000, Somnath Roy wrote:
-> Hi Sage et. al,
-> 
-> I know this issue is reported number of times in community and attributed to either network issue or unresponsive OSDs.
-> Recently, we are seeing this issue when our all SSD cluster (Jewel based)  is stressed with large block size and very high QD. Lowering QD it is working just fine.
-> We are seeing the lossy connection message like below and followed by the osd marked down by monitor.
-> 
-> 2016-10-15 14:30:13.957534 7f6297bff700  0 -- 10.10.10.94:6810/2461767 submit_message osd_op_reply(1463 rbd_data.55246b8b4567.000000000000d633 [set-alloc-hint object_size 4194304 write_size 4194304,write 3932160~262144] v222'95890 uv95890 ondisk = 0) v7 remote, 10.10.10.98:0/1174431362, dropping message
-> 
-> In the monitor log, I am seeing the osd is reported down by peers and subsequently monitor is marking it down.
-> OSDs is rejoining the cluster after detecting it is marked down wrongly and rebalancing started. This is hurting performance very badly.
-> 
-> My question is the following.
-> 
-> 1. I have 40Gb network and I am seeing network is not utilized beyond 10-12Gb/s , no network error is reported. So, why this lossy connection message is coming ? what could go wrong here ? Is it network prioritization issue of smaller ping packets ? I tried to gaze ping round time during this and nothing seems abnormal.
-> 
-> 2. Nothing is saturated on the OSD side , plenty of network/memory/cpu/disk is left. So, I doubt my osds are unresponsive but yes it is really busy on IO path. Heartbeat is going through separate messenger and threads as well, so, busy op threads should not be making heartbeat delayed. Increasing osd heartbeat grace is only delaying this phenomenon , but, eventually happens after several hours. Anything else we can tune here ?
-
-There's a bunch of messengers in OSD code, if ANY of them doesn't respond
-to heartbeat messages in reasonable time, it is marked as down. Since packets
-are processed in FIFO/synchronous manner, overloading OSD with large I/O will
-cause it to time-out on at least one messenger. 
-There was an idea to have heartbeat messages go in the OOB TCP/IP stream and
-process them asynchronously, but I don't know if that went beyond the idea
-stage.
- 
-> 3. What could be the side effect of big grace period ? I understand that detecting a faulty osd will be delayed, anything else ?
-
-Yes - stalled ops. Assume that primary OSD goes down and replicas are still
-alive. Having big grace period will cause all ops going to that OSD to
-stall until that particular OSD is marked down or resumes normal operation.
- 
-> 4. I saw if an OSD is crashed, monitor will detect the down osd almost instantaneously and it is not waiting till this grace period. How it is distinguishing between unresponsive and crashed osds ? In which scenario this heartbeat grace is coming into picture ?
-
-This is the effect of my PR#8558 (https://github.com/ceph/ceph/pull/8558) 
-which causes any OSD that crash to be immediately marked as down, preventing
-stalled I/Os in most common cases. Grace period is only applied to
-unresponsive OSDs (i.e. temporary packet loss, bad cases of network lags,
-routing issues, in other words, everything that is known to be at least
-possible to resolve by itself in a finite amount of time). OSDs that crash 
-and burn won't respond - instead, OS will respond with ECONNREFUSED
-indicating that OSD is not listening and in that case the OSD will be
-immediately marked down.
-
--- 
-Piotr Dałek
-branch@predictor.org.pl
-http://blog.predictor.org.pl
+VGhhbmtzIFBpb3RyLCBXaWRvIGZvciBxdWljayByZXNwb25zZS4NCg0KQFdpZG8gLCB5ZXMsIEkg
+dGhvdWdodCBvZiB0cnlpbmcgd2l0aCB0aG9zZSB2YWx1ZXMgYnV0IEkgYW0gc2VlaW5nIGluIHRo
+ZSBsb2cgbWVzc2FnZXMgYXQgbGVhc3QgNyBvc2RzIGFyZSByZXBvcnRpbmcgZmFpbHVyZSAsIHNv
+LCBkaWRuJ3QgdHJ5LiBCVFcsIEkgZm91bmQgZGVmYXVsdCBtb25fb3NkX21pbl9kb3duX3JlcG9y
+dGVycyBpcyAyICwgbm90IDEgYW5kIGxhdGVzdCBtYXN0ZXIgaXMgbm90IGhhdmluZyBtb25fb3Nk
+X21pbl9kb3duX3JlcG9ydHMgYW55bW9yZS4gTm90IHN1cmUgd2hhdCBpdCBpcyByZXBsYWNlZCB3
+aXRoLi4NCg0KQFBpb3RyICwgeWVzLCB5b3VyIFBSIHJlYWxseSBoZWxwcyAsIHRoYW5rcyAhICBS
+ZWdhcmRpbmcgZWFjaCBtZXNzZW5nZXIgbmVlZHMgdG8gcmVzcG9uZCB0byBIQiBpcyBjb25mdXNp
+bmcsIEkga25vdyBlYWNoIHRocmVhZCBoYXMgYSBIQiB0aW1lb3V0IHZhbHVlIGFuZCBiZXlvbmQg
+d2hpY2ggaXQgd2lsbCBjcmFzaCB3aXRoIHN1aWNpZGUgdGltZW91dCAsIGFyZSB5b3UgdGFsa2lu
+ZyBhYm91dCB0aGF0ID8NCg0KUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3Nh
+Z2UtLS0tLQ0KRnJvbTogUGlvdHIgRGHFgmVrIFttYWlsdG86YnJhbmNoQHByZWRpY3Rvci5vcmcu
+cGxdDQpTZW50OiBNb25kYXksIE9jdG9iZXIgMTcsIDIwMTYgMTI6NTIgQU0NClRvOiBjZXBoLXVz
+ZXJzQGxpc3RzLmNlcGguY29tOyBTb21uYXRoIFJveTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5v
+cmcNClN1YmplY3Q6IFJlOiBPU0RzIGFyZSBmbGFwcGluZyBhbmQgbWFya2VkIGRvd24gd3Jvbmds
+eQ0KDQpPbiBNb24sIE9jdCAxNywgMjAxNiBhdCAwNzoxNjo0NEFNICswMDAwLCBTb21uYXRoIFJv
+eSB3cm90ZToNCj4gSGkgU2FnZSBldC4gYWwsDQo+DQo+IEkga25vdyB0aGlzIGlzc3VlIGlzIHJl
+cG9ydGVkIG51bWJlciBvZiB0aW1lcyBpbiBjb21tdW5pdHkgYW5kIGF0dHJpYnV0ZWQgdG8gZWl0
+aGVyIG5ldHdvcmsgaXNzdWUgb3IgdW5yZXNwb25zaXZlIE9TRHMuDQo+IFJlY2VudGx5LCB3ZSBh
+cmUgc2VlaW5nIHRoaXMgaXNzdWUgd2hlbiBvdXIgYWxsIFNTRCBjbHVzdGVyIChKZXdlbCBiYXNl
+ZCkgIGlzIHN0cmVzc2VkIHdpdGggbGFyZ2UgYmxvY2sgc2l6ZSBhbmQgdmVyeSBoaWdoIFFELiBM
+b3dlcmluZyBRRCBpdCBpcyB3b3JraW5nIGp1c3QgZmluZS4NCj4gV2UgYXJlIHNlZWluZyB0aGUg
+bG9zc3kgY29ubmVjdGlvbiBtZXNzYWdlIGxpa2UgYmVsb3cgYW5kIGZvbGxvd2VkIGJ5IHRoZSBv
+c2QgbWFya2VkIGRvd24gYnkgbW9uaXRvci4NCj4NCj4gMjAxNi0xMC0xNSAxNDozMDoxMy45NTc1
+MzQgN2Y2Mjk3YmZmNzAwICAwIC0tIDEwLjEwLjEwLjk0OjY4MTAvMjQ2MTc2Nw0KPiBzdWJtaXRf
+bWVzc2FnZSBvc2Rfb3BfcmVwbHkoMTQ2Mw0KPiByYmRfZGF0YS41NTI0NmI4YjQ1NjcuMDAwMDAw
+MDAwMDAwZDYzMyBbc2V0LWFsbG9jLWhpbnQgb2JqZWN0X3NpemUNCj4gNDE5NDMwNCB3cml0ZV9z
+aXplIDQxOTQzMDQsd3JpdGUgMzkzMjE2MH4yNjIxNDRdIHYyMjInOTU4OTAgdXY5NTg5MA0KPiBv
+bmRpc2sgPSAwKSB2NyByZW1vdGUsIDEwLjEwLjEwLjk4OjAvMTE3NDQzMTM2MiwgZHJvcHBpbmcg
+bWVzc2FnZQ0KPg0KPiBJbiB0aGUgbW9uaXRvciBsb2csIEkgYW0gc2VlaW5nIHRoZSBvc2QgaXMg
+cmVwb3J0ZWQgZG93biBieSBwZWVycyBhbmQgc3Vic2VxdWVudGx5IG1vbml0b3IgaXMgbWFya2lu
+ZyBpdCBkb3duLg0KPiBPU0RzIGlzIHJlam9pbmluZyB0aGUgY2x1c3RlciBhZnRlciBkZXRlY3Rp
+bmcgaXQgaXMgbWFya2VkIGRvd24gd3JvbmdseSBhbmQgcmViYWxhbmNpbmcgc3RhcnRlZC4gVGhp
+cyBpcyBodXJ0aW5nIHBlcmZvcm1hbmNlIHZlcnkgYmFkbHkuDQo+DQo+IE15IHF1ZXN0aW9uIGlz
+IHRoZSBmb2xsb3dpbmcuDQo+DQo+IDEuIEkgaGF2ZSA0MEdiIG5ldHdvcmsgYW5kIEkgYW0gc2Vl
+aW5nIG5ldHdvcmsgaXMgbm90IHV0aWxpemVkIGJleW9uZCAxMC0xMkdiL3MgLCBubyBuZXR3b3Jr
+IGVycm9yIGlzIHJlcG9ydGVkLiBTbywgd2h5IHRoaXMgbG9zc3kgY29ubmVjdGlvbiBtZXNzYWdl
+IGlzIGNvbWluZyA/IHdoYXQgY291bGQgZ28gd3JvbmcgaGVyZSA/IElzIGl0IG5ldHdvcmsgcHJp
+b3JpdGl6YXRpb24gaXNzdWUgb2Ygc21hbGxlciBwaW5nIHBhY2tldHMgPyBJIHRyaWVkIHRvIGdh
+emUgcGluZyByb3VuZCB0aW1lIGR1cmluZyB0aGlzIGFuZCBub3RoaW5nIHNlZW1zIGFibm9ybWFs
+Lg0KPg0KPiAyLiBOb3RoaW5nIGlzIHNhdHVyYXRlZCBvbiB0aGUgT1NEIHNpZGUgLCBwbGVudHkg
+b2YgbmV0d29yay9tZW1vcnkvY3B1L2Rpc2sgaXMgbGVmdC4gU28sIEkgZG91YnQgbXkgb3NkcyBh
+cmUgdW5yZXNwb25zaXZlIGJ1dCB5ZXMgaXQgaXMgcmVhbGx5IGJ1c3kgb24gSU8gcGF0aC4gSGVh
+cnRiZWF0IGlzIGdvaW5nIHRocm91Z2ggc2VwYXJhdGUgbWVzc2VuZ2VyIGFuZCB0aHJlYWRzIGFz
+IHdlbGwsIHNvLCBidXN5IG9wIHRocmVhZHMgc2hvdWxkIG5vdCBiZSBtYWtpbmcgaGVhcnRiZWF0
+IGRlbGF5ZWQuIEluY3JlYXNpbmcgb3NkIGhlYXJ0YmVhdCBncmFjZSBpcyBvbmx5IGRlbGF5aW5n
+IHRoaXMgcGhlbm9tZW5vbiAsIGJ1dCwgZXZlbnR1YWxseSBoYXBwZW5zIGFmdGVyIHNldmVyYWwg
+aG91cnMuIEFueXRoaW5nIGVsc2Ugd2UgY2FuIHR1bmUgaGVyZSA/DQoNClRoZXJlJ3MgYSBidW5j
+aCBvZiBtZXNzZW5nZXJzIGluIE9TRCBjb2RlLCBpZiBBTlkgb2YgdGhlbSBkb2Vzbid0IHJlc3Bv
+bmQgdG8gaGVhcnRiZWF0IG1lc3NhZ2VzIGluIHJlYXNvbmFibGUgdGltZSwgaXQgaXMgbWFya2Vk
+IGFzIGRvd24uIFNpbmNlIHBhY2tldHMgYXJlIHByb2Nlc3NlZCBpbiBGSUZPL3N5bmNocm9ub3Vz
+IG1hbm5lciwgb3ZlcmxvYWRpbmcgT1NEIHdpdGggbGFyZ2UgSS9PIHdpbGwgY2F1c2UgaXQgdG8g
+dGltZS1vdXQgb24gYXQgbGVhc3Qgb25lIG1lc3Nlbmdlci4NClRoZXJlIHdhcyBhbiBpZGVhIHRv
+IGhhdmUgaGVhcnRiZWF0IG1lc3NhZ2VzIGdvIGluIHRoZSBPT0IgVENQL0lQIHN0cmVhbSBhbmQg
+cHJvY2VzcyB0aGVtIGFzeW5jaHJvbm91c2x5LCBidXQgSSBkb24ndCBrbm93IGlmIHRoYXQgd2Vu
+dCBiZXlvbmQgdGhlIGlkZWEgc3RhZ2UuDQoNCj4gMy4gV2hhdCBjb3VsZCBiZSB0aGUgc2lkZSBl
+ZmZlY3Qgb2YgYmlnIGdyYWNlIHBlcmlvZCA/IEkgdW5kZXJzdGFuZCB0aGF0IGRldGVjdGluZyBh
+IGZhdWx0eSBvc2Qgd2lsbCBiZSBkZWxheWVkLCBhbnl0aGluZyBlbHNlID8NCg0KWWVzIC0gc3Rh
+bGxlZCBvcHMuIEFzc3VtZSB0aGF0IHByaW1hcnkgT1NEIGdvZXMgZG93biBhbmQgcmVwbGljYXMg
+YXJlIHN0aWxsIGFsaXZlLiBIYXZpbmcgYmlnIGdyYWNlIHBlcmlvZCB3aWxsIGNhdXNlIGFsbCBv
+cHMgZ29pbmcgdG8gdGhhdCBPU0QgdG8gc3RhbGwgdW50aWwgdGhhdCBwYXJ0aWN1bGFyIE9TRCBp
+cyBtYXJrZWQgZG93biBvciByZXN1bWVzIG5vcm1hbCBvcGVyYXRpb24uDQoNCj4gNC4gSSBzYXcg
+aWYgYW4gT1NEIGlzIGNyYXNoZWQsIG1vbml0b3Igd2lsbCBkZXRlY3QgdGhlIGRvd24gb3NkIGFs
+bW9zdCBpbnN0YW50YW5lb3VzbHkgYW5kIGl0IGlzIG5vdCB3YWl0aW5nIHRpbGwgdGhpcyBncmFj
+ZSBwZXJpb2QuIEhvdyBpdCBpcyBkaXN0aW5ndWlzaGluZyBiZXR3ZWVuIHVucmVzcG9uc2l2ZSBh
+bmQgY3Jhc2hlZCBvc2RzID8gSW4gd2hpY2ggc2NlbmFyaW8gdGhpcyBoZWFydGJlYXQgZ3JhY2Ug
+aXMgY29taW5nIGludG8gcGljdHVyZSA/DQoNClRoaXMgaXMgdGhlIGVmZmVjdCBvZiBteSBQUiM4
+NTU4IChodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvODU1OCkNCndoaWNoIGNhdXNl
+cyBhbnkgT1NEIHRoYXQgY3Jhc2ggdG8gYmUgaW1tZWRpYXRlbHkgbWFya2VkIGFzIGRvd24sIHBy
+ZXZlbnRpbmcgc3RhbGxlZCBJL09zIGluIG1vc3QgY29tbW9uIGNhc2VzLiBHcmFjZSBwZXJpb2Qg
+aXMgb25seSBhcHBsaWVkIHRvIHVucmVzcG9uc2l2ZSBPU0RzIChpLmUuIHRlbXBvcmFyeSBwYWNr
+ZXQgbG9zcywgYmFkIGNhc2VzIG9mIG5ldHdvcmsgbGFncywgcm91dGluZyBpc3N1ZXMsIGluIG90
+aGVyIHdvcmRzLCBldmVyeXRoaW5nIHRoYXQgaXMga25vd24gdG8gYmUgYXQgbGVhc3QgcG9zc2li
+bGUgdG8gcmVzb2x2ZSBieSBpdHNlbGYgaW4gYSBmaW5pdGUgYW1vdW50IG9mIHRpbWUpLiBPU0Rz
+IHRoYXQgY3Jhc2ggYW5kIGJ1cm4gd29uJ3QgcmVzcG9uZCAtIGluc3RlYWQsIE9TIHdpbGwgcmVz
+cG9uZCB3aXRoIEVDT05OUkVGVVNFRCBpbmRpY2F0aW5nIHRoYXQgT1NEIGlzIG5vdCBsaXN0ZW5p
+bmcgYW5kIGluIHRoYXQgY2FzZSB0aGUgT1NEIHdpbGwgYmUgaW1tZWRpYXRlbHkgbWFya2VkIGRv
+d24uDQoNCi0tDQpQaW90ciBEYcWCZWsNCmJyYW5jaEBwcmVkaWN0b3Iub3JnLnBsDQpodHRwOi8v
+YmxvZy5wcmVkaWN0b3Iub3JnLnBsDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRh
+aW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9y
+IHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0
+aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwg
+eW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3Nh
+Z2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0
+aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJ
+ZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBu
+b3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkg
+aW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2Fn
+ZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2Fs
+bHkgc3RvcmVkIGNvcGllcykuDQo=
