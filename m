@@ -1,13 +1,13 @@
-From: Pavan Rallabhandi <PRallabhandi-BUSGJyHLLMGGw+nKnLezzg@public.gmane.org>
+From: Wei Jin <wjin.cn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: OSDs are flapping and marked down wrongly
-Date: Mon, 17 Oct 2016 08:24:24 +0000
-Message-ID: <7DD2F34A-1191-4332-95F1-9C8B6D662C19@walmartlabs.com>
+Date: Mon, 17 Oct 2016 17:13:20 +0800
+Message-ID: <CAPpSHbVR1W921Lx6xgg30L5KS_U+_bVSVW+c4h+c2-W7N1yXbg@mail.gmail.com>
+References: <BY2PR02MB3964B80170065D0141B7931F4D00@BY2PR02MB396.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: en-US
-Content-ID: <F0D6017A7DBD27479B4779736AE6FBE6-Q5+yaeBwhZL9SOyiPdwG7kEZadJ+ESx9@public.gmane.org>
+In-Reply-To: <BY2PR02MB3964B80170065D0141B7931F4D00-USF8g7QUirCbDkdw+1LTknlDjJuWSFo1XA4E9RH9d+qIuWR1G4zioA@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -17,111 +17,51 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, =?utf-8?B?UGlvdHIgRGHFgmVr?= <branch-WWSZ/45jja/Y+gB93Hw7NA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-UmVnYXJkaW5nIHRoZSBtb25fb3NkX21pbl9kb3duX3JlcG9ydHMgSSB3YXMgbG9va2luZyBhdCBp
-dCByZWNlbnRseSwgdGhpcyBjb3VsZCBwcm92aWRlIHNvbWUgaW5zaWdodCBodHRwczovL2dpdGh1
-Yi5jb20vY2VwaC9jZXBoL2NvbW1pdC8wMjY5YTBjMTc3MjNmZDNlMjI3MzhmNzQ5NWZlMDE3MjI1
-YjkyNGE0DQoNClRoYW5rcyENCg0KT24gMTAvMTcvMTYsIDE6MzYgUE0sICJjZXBoLXVzZXJzIG9u
-IGJlaGFsZiBvZiBTb21uYXRoIFJveSIgPGNlcGgtdXNlcnMtYm91bmNlc0BsaXN0cy5jZXBoLmNv
-bSBvbiBiZWhhbGYgb2YgU29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KDQogICAgVGhh
-bmtzIFBpb3RyLCBXaWRvIGZvciBxdWljayByZXNwb25zZS4NCiAgICANCiAgICBAV2lkbyAsIHll
-cywgSSB0aG91Z2h0IG9mIHRyeWluZyB3aXRoIHRob3NlIHZhbHVlcyBidXQgSSBhbSBzZWVpbmcg
-aW4gdGhlIGxvZyBtZXNzYWdlcyBhdCBsZWFzdCA3IG9zZHMgYXJlIHJlcG9ydGluZyBmYWlsdXJl
-ICwgc28sIGRpZG4ndCB0cnkuIEJUVywgSSBmb3VuZCBkZWZhdWx0IG1vbl9vc2RfbWluX2Rvd25f
-cmVwb3J0ZXJzIGlzIDIgLCBub3QgMSBhbmQgbGF0ZXN0IG1hc3RlciBpcyBub3QgaGF2aW5nIG1v
-bl9vc2RfbWluX2Rvd25fcmVwb3J0cyBhbnltb3JlLiBOb3Qgc3VyZSB3aGF0IGl0IGlzIHJlcGxh
-Y2VkIHdpdGguLg0KICAgIA0KICAgIEBQaW90ciAsIHllcywgeW91ciBQUiByZWFsbHkgaGVscHMg
-LCB0aGFua3MgISAgUmVnYXJkaW5nIGVhY2ggbWVzc2VuZ2VyIG5lZWRzIHRvIHJlc3BvbmQgdG8g
-SEIgaXMgY29uZnVzaW5nLCBJIGtub3cgZWFjaCB0aHJlYWQgaGFzIGEgSEIgdGltZW91dCB2YWx1
-ZSBhbmQgYmV5b25kIHdoaWNoIGl0IHdpbGwgY3Jhc2ggd2l0aCBzdWljaWRlIHRpbWVvdXQgLCBh
-cmUgeW91IHRhbGtpbmcgYWJvdXQgdGhhdCA/DQogICAgDQogICAgUmVnYXJkcw0KICAgIFNvbW5h
-dGgNCiAgICANCiAgICAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KICAgIEZyb206IFBpb3Ry
-IERhxYJlayBbbWFpbHRvOmJyYW5jaEBwcmVkaWN0b3Iub3JnLnBsXQ0KICAgIFNlbnQ6IE1vbmRh
-eSwgT2N0b2JlciAxNywgMjAxNiAxMjo1MiBBTQ0KICAgIFRvOiBjZXBoLXVzZXJzQGxpc3RzLmNl
-cGguY29tOyBTb21uYXRoIFJveTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCiAgICBTdWJq
-ZWN0OiBSZTogT1NEcyBhcmUgZmxhcHBpbmcgYW5kIG1hcmtlZCBkb3duIHdyb25nbHkNCiAgICAN
-CiAgICBPbiBNb24sIE9jdCAxNywgMjAxNiBhdCAwNzoxNjo0NEFNICswMDAwLCBTb21uYXRoIFJv
-eSB3cm90ZToNCiAgICA+IEhpIFNhZ2UgZXQuIGFsLA0KICAgID4NCiAgICA+IEkga25vdyB0aGlz
-IGlzc3VlIGlzIHJlcG9ydGVkIG51bWJlciBvZiB0aW1lcyBpbiBjb21tdW5pdHkgYW5kIGF0dHJp
-YnV0ZWQgdG8gZWl0aGVyIG5ldHdvcmsgaXNzdWUgb3IgdW5yZXNwb25zaXZlIE9TRHMuDQogICAg
-PiBSZWNlbnRseSwgd2UgYXJlIHNlZWluZyB0aGlzIGlzc3VlIHdoZW4gb3VyIGFsbCBTU0QgY2x1
-c3RlciAoSmV3ZWwgYmFzZWQpICBpcyBzdHJlc3NlZCB3aXRoIGxhcmdlIGJsb2NrIHNpemUgYW5k
-IHZlcnkgaGlnaCBRRC4gTG93ZXJpbmcgUUQgaXQgaXMgd29ya2luZyBqdXN0IGZpbmUuDQogICAg
-PiBXZSBhcmUgc2VlaW5nIHRoZSBsb3NzeSBjb25uZWN0aW9uIG1lc3NhZ2UgbGlrZSBiZWxvdyBh
-bmQgZm9sbG93ZWQgYnkgdGhlIG9zZCBtYXJrZWQgZG93biBieSBtb25pdG9yLg0KICAgID4NCiAg
-ICA+IDIwMTYtMTAtMTUgMTQ6MzA6MTMuOTU3NTM0IDdmNjI5N2JmZjcwMCAgMCAtLSAxMC4xMC4x
-MC45NDo2ODEwLzI0NjE3NjcNCiAgICA+IHN1Ym1pdF9tZXNzYWdlIG9zZF9vcF9yZXBseSgxNDYz
-DQogICAgPiByYmRfZGF0YS41NTI0NmI4YjQ1NjcuMDAwMDAwMDAwMDAwZDYzMyBbc2V0LWFsbG9j
-LWhpbnQgb2JqZWN0X3NpemUNCiAgICA+IDQxOTQzMDQgd3JpdGVfc2l6ZSA0MTk0MzA0LHdyaXRl
-IDM5MzIxNjB+MjYyMTQ0XSB2MjIyJzk1ODkwIHV2OTU4OTANCiAgICA+IG9uZGlzayA9IDApIHY3
-IHJlbW90ZSwgMTAuMTAuMTAuOTg6MC8xMTc0NDMxMzYyLCBkcm9wcGluZyBtZXNzYWdlDQogICAg
-Pg0KICAgID4gSW4gdGhlIG1vbml0b3IgbG9nLCBJIGFtIHNlZWluZyB0aGUgb3NkIGlzIHJlcG9y
-dGVkIGRvd24gYnkgcGVlcnMgYW5kIHN1YnNlcXVlbnRseSBtb25pdG9yIGlzIG1hcmtpbmcgaXQg
-ZG93bi4NCiAgICA+IE9TRHMgaXMgcmVqb2luaW5nIHRoZSBjbHVzdGVyIGFmdGVyIGRldGVjdGlu
-ZyBpdCBpcyBtYXJrZWQgZG93biB3cm9uZ2x5IGFuZCByZWJhbGFuY2luZyBzdGFydGVkLiBUaGlz
-IGlzIGh1cnRpbmcgcGVyZm9ybWFuY2UgdmVyeSBiYWRseS4NCiAgICA+DQogICAgPiBNeSBxdWVz
-dGlvbiBpcyB0aGUgZm9sbG93aW5nLg0KICAgID4NCiAgICA+IDEuIEkgaGF2ZSA0MEdiIG5ldHdv
-cmsgYW5kIEkgYW0gc2VlaW5nIG5ldHdvcmsgaXMgbm90IHV0aWxpemVkIGJleW9uZCAxMC0xMkdi
-L3MgLCBubyBuZXR3b3JrIGVycm9yIGlzIHJlcG9ydGVkLiBTbywgd2h5IHRoaXMgbG9zc3kgY29u
-bmVjdGlvbiBtZXNzYWdlIGlzIGNvbWluZyA/IHdoYXQgY291bGQgZ28gd3JvbmcgaGVyZSA/IElz
-IGl0IG5ldHdvcmsgcHJpb3JpdGl6YXRpb24gaXNzdWUgb2Ygc21hbGxlciBwaW5nIHBhY2tldHMg
-PyBJIHRyaWVkIHRvIGdhemUgcGluZyByb3VuZCB0aW1lIGR1cmluZyB0aGlzIGFuZCBub3RoaW5n
-IHNlZW1zIGFibm9ybWFsLg0KICAgID4NCiAgICA+IDIuIE5vdGhpbmcgaXMgc2F0dXJhdGVkIG9u
-IHRoZSBPU0Qgc2lkZSAsIHBsZW50eSBvZiBuZXR3b3JrL21lbW9yeS9jcHUvZGlzayBpcyBsZWZ0
-LiBTbywgSSBkb3VidCBteSBvc2RzIGFyZSB1bnJlc3BvbnNpdmUgYnV0IHllcyBpdCBpcyByZWFs
-bHkgYnVzeSBvbiBJTyBwYXRoLiBIZWFydGJlYXQgaXMgZ29pbmcgdGhyb3VnaCBzZXBhcmF0ZSBt
-ZXNzZW5nZXIgYW5kIHRocmVhZHMgYXMgd2VsbCwgc28sIGJ1c3kgb3AgdGhyZWFkcyBzaG91bGQg
-bm90IGJlIG1ha2luZyBoZWFydGJlYXQgZGVsYXllZC4gSW5jcmVhc2luZyBvc2QgaGVhcnRiZWF0
-IGdyYWNlIGlzIG9ubHkgZGVsYXlpbmcgdGhpcyBwaGVub21lbm9uICwgYnV0LCBldmVudHVhbGx5
-IGhhcHBlbnMgYWZ0ZXIgc2V2ZXJhbCBob3Vycy4gQW55dGhpbmcgZWxzZSB3ZSBjYW4gdHVuZSBo
-ZXJlID8NCiAgICANCiAgICBUaGVyZSdzIGEgYnVuY2ggb2YgbWVzc2VuZ2VycyBpbiBPU0QgY29k
-ZSwgaWYgQU5ZIG9mIHRoZW0gZG9lc24ndCByZXNwb25kIHRvIGhlYXJ0YmVhdCBtZXNzYWdlcyBp
-biByZWFzb25hYmxlIHRpbWUsIGl0IGlzIG1hcmtlZCBhcyBkb3duLiBTaW5jZSBwYWNrZXRzIGFy
-ZSBwcm9jZXNzZWQgaW4gRklGTy9zeW5jaHJvbm91cyBtYW5uZXIsIG92ZXJsb2FkaW5nIE9TRCB3
-aXRoIGxhcmdlIEkvTyB3aWxsIGNhdXNlIGl0IHRvIHRpbWUtb3V0IG9uIGF0IGxlYXN0IG9uZSBt
-ZXNzZW5nZXIuDQogICAgVGhlcmUgd2FzIGFuIGlkZWEgdG8gaGF2ZSBoZWFydGJlYXQgbWVzc2Fn
-ZXMgZ28gaW4gdGhlIE9PQiBUQ1AvSVAgc3RyZWFtIGFuZCBwcm9jZXNzIHRoZW0gYXN5bmNocm9u
-b3VzbHksIGJ1dCBJIGRvbid0IGtub3cgaWYgdGhhdCB3ZW50IGJleW9uZCB0aGUgaWRlYSBzdGFn
-ZS4NCiAgICANCiAgICA+IDMuIFdoYXQgY291bGQgYmUgdGhlIHNpZGUgZWZmZWN0IG9mIGJpZyBn
-cmFjZSBwZXJpb2QgPyBJIHVuZGVyc3RhbmQgdGhhdCBkZXRlY3RpbmcgYSBmYXVsdHkgb3NkIHdp
-bGwgYmUgZGVsYXllZCwgYW55dGhpbmcgZWxzZSA/DQogICAgDQogICAgWWVzIC0gc3RhbGxlZCBv
-cHMuIEFzc3VtZSB0aGF0IHByaW1hcnkgT1NEIGdvZXMgZG93biBhbmQgcmVwbGljYXMgYXJlIHN0
-aWxsIGFsaXZlLiBIYXZpbmcgYmlnIGdyYWNlIHBlcmlvZCB3aWxsIGNhdXNlIGFsbCBvcHMgZ29p
-bmcgdG8gdGhhdCBPU0QgdG8gc3RhbGwgdW50aWwgdGhhdCBwYXJ0aWN1bGFyIE9TRCBpcyBtYXJr
-ZWQgZG93biBvciByZXN1bWVzIG5vcm1hbCBvcGVyYXRpb24uDQogICAgDQogICAgPiA0LiBJIHNh
-dyBpZiBhbiBPU0QgaXMgY3Jhc2hlZCwgbW9uaXRvciB3aWxsIGRldGVjdCB0aGUgZG93biBvc2Qg
-YWxtb3N0IGluc3RhbnRhbmVvdXNseSBhbmQgaXQgaXMgbm90IHdhaXRpbmcgdGlsbCB0aGlzIGdy
-YWNlIHBlcmlvZC4gSG93IGl0IGlzIGRpc3Rpbmd1aXNoaW5nIGJldHdlZW4gdW5yZXNwb25zaXZl
-IGFuZCBjcmFzaGVkIG9zZHMgPyBJbiB3aGljaCBzY2VuYXJpbyB0aGlzIGhlYXJ0YmVhdCBncmFj
-ZSBpcyBjb21pbmcgaW50byBwaWN0dXJlID8NCiAgICANCiAgICBUaGlzIGlzIHRoZSBlZmZlY3Qg
-b2YgbXkgUFIjODU1OCAoaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzg1NTgpDQog
-ICAgd2hpY2ggY2F1c2VzIGFueSBPU0QgdGhhdCBjcmFzaCB0byBiZSBpbW1lZGlhdGVseSBtYXJr
-ZWQgYXMgZG93biwgcHJldmVudGluZyBzdGFsbGVkIEkvT3MgaW4gbW9zdCBjb21tb24gY2FzZXMu
-IEdyYWNlIHBlcmlvZCBpcyBvbmx5IGFwcGxpZWQgdG8gdW5yZXNwb25zaXZlIE9TRHMgKGkuZS4g
-dGVtcG9yYXJ5IHBhY2tldCBsb3NzLCBiYWQgY2FzZXMgb2YgbmV0d29yayBsYWdzLCByb3V0aW5n
-IGlzc3VlcywgaW4gb3RoZXIgd29yZHMsIGV2ZXJ5dGhpbmcgdGhhdCBpcyBrbm93biB0byBiZSBh
-dCBsZWFzdCBwb3NzaWJsZSB0byByZXNvbHZlIGJ5IGl0c2VsZiBpbiBhIGZpbml0ZSBhbW91bnQg
-b2YgdGltZSkuIE9TRHMgdGhhdCBjcmFzaCBhbmQgYnVybiB3b24ndCByZXNwb25kIC0gaW5zdGVh
-ZCwgT1Mgd2lsbCByZXNwb25kIHdpdGggRUNPTk5SRUZVU0VEIGluZGljYXRpbmcgdGhhdCBPU0Qg
-aXMgbm90IGxpc3RlbmluZyBhbmQgaW4gdGhhdCBjYXNlIHRoZSBPU0Qgd2lsbCBiZSBpbW1lZGlh
-dGVseSBtYXJrZWQgZG93bi4NCiAgICANCiAgICAtLQ0KICAgIFBpb3RyIERhxYJlaw0KICAgIGJy
-YW5jaEBwcmVkaWN0b3Iub3JnLnBsDQogICAgaHR0cDovL2Jsb2cucHJlZGljdG9yLm9yZy5wbA0K
-ICAgIFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ry
-b25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVz
-aWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBt
-ZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3Rp
-ZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhh
-dCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2Yg
-dGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVk
-IHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5
-IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVz
-dHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lv
-biAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4N
-CiAgICBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KICAg
-IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0DQogICAgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0K
-ICAgIGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNv
-bQ0KICAgIA0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-XwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6
-Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Mon, Oct 17, 2016 at 3:16 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+> Hi Sage et. al,
+>
+> I know this issue is reported number of times in community and attributed to either network issue or unresponsive OSDs.
+> Recently, we are seeing this issue when our all SSD cluster (Jewel based)  is stressed with large block size and very high QD. Lowering QD it is working just fine.
+> We are seeing the lossy connection message like below and followed by the osd marked down by monitor.
+>
+> 2016-10-15 14:30:13.957534 7f6297bff700  0 -- 10.10.10.94:6810/2461767 submit_message osd_op_reply(1463 rbd_data.55246b8b4567.000000000000d633 [set-alloc-hint object_size 4194304 write_size 4194304,write 3932160~262144] v222'95890 uv95890 ondisk = 0) v7 remote, 10.10.10.98:0/1174431362, dropping message
+>
+> In the monitor log, I am seeing the osd is reported down by peers and subsequently monitor is marking it down.
+> OSDs is rejoining the cluster after detecting it is marked down wrongly and rebalancing started. This is hurting performance very badly.
+
+I think you need to tune threads' timeout values as heartbeat message
+will be dropped during timeout and suicide (health check will fail).
+That's why you observe 'wrongly marked me down' message but osd
+process is still alive. See function OSD::handle_osd_ping()
+
+Also, you could backport this
+pr(https://github.com/ceph/ceph/pull/8808) to accelerate dealing with
+heartbeat message.
+
+After that, you may consider tuning grace time.
+
+
+>
+> My question is the following.
+>
+> 1. I have 40Gb network and I am seeing network is not utilized beyond 10-12Gb/s , no network error is reported. So, why this lossy connection message is coming ? what could go wrong here ? Is it network prioritization issue of smaller ping packets ? I tried to gaze ping round time during this and nothing seems abnormal.
+>
+> 2. Nothing is saturated on the OSD side , plenty of network/memory/cpu/disk is left. So, I doubt my osds are unresponsive but yes it is really busy on IO path. Heartbeat is going through separate messenger and threads as well, so, busy op threads should not be making heartbeat delayed. Increasing osd heartbeat grace is only delaying this phenomenon , but, eventually happens after several hours. Anything else we can tune here ?
+>
+> 3. What could be the side effect of big grace period ? I understand that detecting a faulty osd will be delayed, anything else ?
+>
+> 4. I saw if an OSD is crashed, monitor will detect the down osd almost instantaneously and it is not waiting till this grace period. How it is distinguishing between unresponsive and crashed osds ? In which scenario this heartbeat grace is coming into picture ?
+>
+> Any help on clarifying this would be very helpful.
+>
+> Thanks & Regards
+> Somnath
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
