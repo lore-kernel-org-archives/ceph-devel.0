@@ -1,73 +1,77 @@
-From: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
-Subject: Re: OSDs are flapping and marked down wrongly
-Date: Mon, 17 Oct 2016 09:23:02 +0200 (CEST)
-Message-ID: <714165422.6174.1476688982765@ox.pcextreme.nl>
-References: <BY2PR02MB3964B80170065D0141B7931F4D00@BY2PR02MB396.namprd02.prod.outlook.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH] ceph: Fix uninitialized dentry pointer in ceph_real_mount()
+Date: Mon, 17 Oct 2016 09:46:07 +0200
+Message-ID: <CAMuHMdUrQ9J6xu9+wwXBWeaYg_k=GkRtaTH6ZxfFc2YWeVq5Ug@mail.gmail.com>
+References: <1476371737-2116-1-git-send-email-geert@linux-m68k.org> <CAAM7YAkuzcCB45Jx3nqQjyt3mUNmgYsq3cSG707ga_-mQ8ag8Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <BY2PR02MB3964B80170065D0141B7931F4D00-USF8g7QUirCbDkdw+1LTknlDjJuWSFo1XA4E9RH9d+qIuWR1G4zioA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAAM7YAkuzcCB45Jx3nqQjyt3mUNmgYsq3cSG707ga_-mQ8ag8Q@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Zheng Yan <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
+Hi Zheng,
 
-> Op 17 oktober 2016 om 9:16 schreef Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>:
-> 
-> 
-> Hi Sage et. al,
-> 
-> I know this issue is reported number of times in community and attributed to either network issue or unresponsive OSDs.
-> Recently, we are seeing this issue when our all SSD cluster (Jewel based)  is stressed with large block size and very high QD. Lowering QD it is working just fine.
-> We are seeing the lossy connection message like below and followed by the osd marked down by monitor.
-> 
-> 2016-10-15 14:30:13.957534 7f6297bff700  0 -- 10.10.10.94:6810/2461767 submit_message osd_op_reply(1463 rbd_data.55246b8b4567.000000000000d633 [set-alloc-hint object_size 4194304 write_size 4194304,write 3932160~262144] v222'95890 uv95890 ondisk = 0) v7 remote, 10.10.10.98:0/1174431362, dropping message
-> 
-> In the monitor log, I am seeing the osd is reported down by peers and subsequently monitor is marking it down.
-> OSDs is rejoining the cluster after detecting it is marked down wrongly and rebalancing started. This is hurting performance very badly.
-> 
-> My question is the following.
-> 
-> 1. I have 40Gb network and I am seeing network is not utilized beyond 10-12Gb/s , no network error is reported. So, why this lossy connection message is coming ? what could go wrong here ? Is it network prioritization issue of smaller ping packets ? I tried to gaze ping round time during this and nothing seems abnormal.
-> 
-> 2. Nothing is saturated on the OSD side , plenty of network/memory/cpu/disk is left. So, I doubt my osds are unresponsive but yes it is really busy on IO path. Heartbeat is going through separate messenger and threads as well, so, busy op threads should not be making heartbeat delayed. Increasing osd heartbeat grace is only delaying this phenomenon , but, eventually happens after several hours. Anything else we can tune here ?
-> 
-> 3. What could be the side effect of big grace period ? I understand that detecting a faulty osd will be delayed, anything else ?
-> 
+On Fri, Oct 14, 2016 at 4:47 AM, Yan, Zheng <ukernel@gmail.com> wrote:
+> On Thu, Oct 13, 2016 at 11:15 PM, Geert Uytterhoeven
+> <geert@linux-m68k.org> wrote:
+>>     fs/ceph/super.c: In function =E2=80=98ceph_real_mount=E2=80=99:
+>>     fs/ceph/super.c:818: warning: =E2=80=98root=E2=80=99 may be used uni=
+nitialized in this function
+>>
+>> If s_root is already valid, dentry pointer root is never initialized,
+>> and returned by ceph_real_mount(). This will cause a crash later when
+>> the caller dereferences the pointer.
+>>
+>> Fix this by initializing root early.
+>>
+>> Fixes: ce2728aaa82bbeba ("ceph: avoid accessing / when mounting a subpat=
+h")
+>> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+>> ---
+>> Compile-tested only.
+>> ---
+>>  fs/ceph/super.c | 3 ++-
+>>  1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+>> index a29ffce981879d5f..794c5fd0e0cf5e45 100644
+>> --- a/fs/ceph/super.c
+>> +++ b/fs/ceph/super.c
+>> @@ -821,7 +821,8 @@ static struct dentry *ceph_real_mount(struct ceph_fs=
+_client *fsc)
+>>         dout("mount start %p\n", fsc);
+>>         mutex_lock(&fsc->client->mount_mutex);
+>>
+>> -       if (!fsc->sb->s_root) {
+>> +       root =3D fsc->sb->s_root;
+>> +       if (!root) {
+>>                 const char *path;
+>>                 err =3D __ceph_open_session(fsc->client, started);
+>>                 if (err < 0)
+>
+> For sb->s_root is not NULL case, we also need to increase sb->s_root's
+> reference count.
 
-You might want to look at:
+OK
 
-OPTION(mon_osd_min_down_reporters, OPT_INT, 1)   // number of OSDs who need to report a down OSD for it to count
-OPTION(mon_osd_min_down_reports, OPT_INT, 3)     // number of times a down OSD must be reported for it to count
+> I applied this patch and fixed it.
 
-Setting 'mon_osd_min_down_reporters' to 3 means that 3 individual OSDs have to mark a OSD as down. You could also increase the amount of reports.
+Thanks for handling!
 
-On larger environments I always set reporters to 3 or 5, just to prevent such flapping.
+Gr{oetje,eeting}s,
 
-> 4. I saw if an OSD is crashed, monitor will detect the down osd almost instantaneously and it is not waiting till this grace period. How it is distinguishing between unresponsive and crashed osds ? In which scenario this heartbeat grace is coming into picture ?
-> 
+                        Geert
 
-A crashed OSD will not be detected by the MON. It are the other OSDs which inform the monitor about this OSD crashing. But you will have to wait for the heartbeats to time out.
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
 
-Only when a OSD gracefully shuts down it will mark itself down instantly.
-
-Wido
-
-> Any help on clarifying this would be very helpful.
-> 
-> Thanks & Regards
-> Somnath
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
