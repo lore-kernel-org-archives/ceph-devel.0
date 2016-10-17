@@ -1,78 +1,82 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: new naming convention for building repos and binaries from branches
-Date: Mon, 17 Oct 2016 07:08:29 -0400
-Message-ID: <CAC-Np1zEB4Tx2XgpS0r9GcM1wHHzjE7jkBbuqQ=BXR8o4cGe+g@mail.gmail.com>
-References: <CAC-Np1wcBGRcFYtK8WsjfM-WR+H_S58XgH74D+dBiGxd=KwZUQ@mail.gmail.com>
- <CALe9h7da1Oz29q2pot1BZLNBcs1NJ51BRLE+Uj_3mVjnDGw6fQ@mail.gmail.com>
- <CAEPMp+7OJ+pX=mYbNGgm+HZMGOGDK3xiApw5OL03vsN9YApTGA@mail.gmail.com>
- <alpine.DEB.2.11.1610061633440.19850@piezo.us.to> <CAEPMp+7EyHBJSDoCZoTPvnd5bBKmsZ_D7UfZ5aYCvS6THLMqSg@mail.gmail.com>
- <26CBB0BA-AF47-40AB-BF35-B50F5A6501A3@Teradata.com> <CAC-Np1xnSoNth7rn-9Cu=ws_=6AwMQP7zKvgu2URi5-dTijndg@mail.gmail.com>
- <alpine.DEB.2.11.1610141858350.23131@piezo.us.to> <CAJ4mKGbaND27MDDZc3dT+a2enM6-t=io68U6vPEca1vP28cJNQ@mail.gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: jewel: rbd: FAILED assert(m_in_flight_object_closes > 0)
+Date: Mon, 17 Oct 2016 09:22:42 -0400
+Message-ID: <CA+aFP1BDLPsB=e7Y+8xx9zkPrqyAU0H26ntgbmEYUq5AMrg68Q@mail.gmail.com>
+References: <5804970A.6080902@dachary.org>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f51.google.com ([209.85.215.51]:36536 "EHLO
-        mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932790AbcJQLIb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Oct 2016 07:08:31 -0400
-Received: by mail-lf0-f51.google.com with SMTP id b75so282762790lfg.3
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Oct 2016 04:08:30 -0700 (PDT)
-In-Reply-To: <CAJ4mKGbaND27MDDZc3dT+a2enM6-t=io68U6vPEca1vP28cJNQ@mail.gmail.com>
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:35350 "EHLO
+        mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752083AbcJQNWr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Oct 2016 09:22:47 -0400
+Received: by mail-lf0-f54.google.com with SMTP id l131so242653942lfl.2
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Oct 2016 06:22:45 -0700 (PDT)
+In-Reply-To: <5804970A.6080902@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, "Kamble, Nitin A" <Nitin.Kamble@teradata.com>, Andrew Schoen <aschoen@redhat.com>, John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Oct 14, 2016 at 3:53 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> +1 this idea
+I don't see any missing commits related to that area of code. I ran
+unittest_librbd in a continuous loop and was able to recreate on the
+master branch, so this is a real issue that needs to be addressed.
+
+Thanks,
+Jason
+
+On Mon, Oct 17, 2016 at 5:16 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Jason,
 >
-> On Fri, Oct 14, 2016 at 12:03 PM, Sage Weil <sage@newdream.net> wrote:
->> That seems okay for now.  I think this might have gotten lost in the
->> earlier thread, though:
->>
->> Why don't we take this opportunity to create a ceph-ci.git and lock down
->> ceph.git?
->>
->>  - ceph.git would contain only official branches (master, jewel, etc.)
->>  - ceph-ci.git would have all the branches that need to get build for
->>    ci purposes.
->>  - ci would build everything in ceph.git and ceph-ci.git that doesn't have
->>    a / in it
->>  - if you don't want a branch built, don't push it to either one; push it
->>    to your private clone (which is what you should be doing anyway!)
-
-But nobody does and it is not enforceable :(
-
->>  - restrict access to ceph.git to core developers (and trusted robots)
->>  - grant access to ceph-ci to a broader set of developers (and robots)
+> The
 >
-> Except for this. Until/unless we find something requiring ceph.git
-> access, we should lock down push access and only let code go in via
-> Github PRs. Give ceph-ci access to everybody who's allowed in to
-> sepia. Why open any gates preemptively if we don't need to? :)
-
-This sounds very similar to the problem we have today. Building
-everything in ceph.git and ceph-ci.git would
-get us right where we are right now (although not from the start).
-
-Not that we can't adapt these rules and settings as we move forward though.
-
-> -Greg
+> rbd/qemu/{cache/writeback.yaml cachepool/ec-cache.yaml clusters/{fixed-3.yaml openstack.yaml} features/journaling.yaml fs/xfs.yaml msgr-failures/few.yaml workloads/qemu_xfstests.yaml}
 >
->>
->> Right now, I think this requires that
->>
->> 1) shaman and/or jenkins build branches in both ceph.git and ceph-ci.git
->>
->> and then at our leisure,
->>
->> 2) we delete or move all non-official branches over to ceph-gi.git
->> (prefixing historical branches with old/ or similar), and
->> 3) we restrict ceph.git access.
->>
->> ?
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> job failed twice in a row
+>
+> http://pulpito.ceph.com/loic-2016-10-14_06:48:18-rbd-jewel-backports---basic-smithi/473422
+> http://pulpito.ceph.com/loic-2016-10-13_09:17:31-rbd-jewel-backports---basic-smithi/470997
+>
+> with
+>
+> 2016-10-14T06:57:57.700 INFO:tasks.qemu.client.0.smithi087.stdout:mount: block device /dev/sr0 is write-protected, mounting read-only
+> 2016-10-14T06:59:18.374 INFO:tasks.ceph.osd.5.smithi096.stderr:2016-10-14 06:59:18.373238 7f89520fb700 -1 reset not still connected to 0x7f89737050c0
+> 2016-10-14T06:59:58.946 INFO:tasks.ceph.osd.5.smithi096.stderr:2016-10-14 06:59:58.946646 7f89520fb700 -1 reset not still connected to 0x7f8973913180
+> 2016-10-14T07:07:59.122 INFO:tasks.qemu.client.0.smithi087.stderr:main-loop: WARNING: I/O thread spun for 1000 iterations
+> 2016-10-14T07:09:11.712 INFO:tasks.ceph.osd.5.smithi096.stderr:2016-10-14 07:09:11.711124 7f89520fb700 -1 reset not still connected to 0x7f8973913180
+> 2016-10-14T07:10:28.034 INFO:tasks.ceph.osd.5.smithi096.stderr:2016-10-14 07:10:28.034047 7f89520fb700 -1 reset not still connected to 0x7f8973913180
+> 2016-10-14T07:14:20.062 INFO:tasks.qemu.client.0.smithi087.stderr:journal/JournalRecorder.cc: In function 'void journal::JournalRecorder::handle_closed(journal::ObjectRecorder*)' thread 7fe0b3066700 time 2016-10-14 07:14:20.069199
+> 2016-10-14T07:14:20.063 INFO:tasks.qemu.client.0.smithi087.stderr:journal/JournalRecorder.cc: 321: FAILED assert(m_in_flight_object_closes > 0)
+> 2016-10-14T07:14:20.091 INFO:tasks.qemu.client.0.smithi087.stderr: ceph version 10.2.3-266-g94a5296 (94a52962cdb0eb3d2f2eba11daa0e14ae349734e)
+> 2016-10-14T07:14:20.092 INFO:tasks.qemu.client.0.smithi087.stderr: 1: (()+0x29e865) [0x7fe0cf2c1865]
+> 2016-10-14T07:14:20.092 INFO:tasks.qemu.client.0.smithi087.stderr: 2: (()+0x1a7589) [0x7fe0cf1ca589]
+> 2016-10-14T07:14:20.092 INFO:tasks.qemu.client.0.smithi087.stderr: 3: (()+0x1b2c46) [0x7fe0cf1d5c46]
+> 2016-10-14T07:14:20.092 INFO:tasks.qemu.client.0.smithi087.stderr: 4: (()+0x1b5b23) [0x7fe0cf1d8b23]
+> 2016-10-14T07:14:20.092 INFO:tasks.qemu.client.0.smithi087.stderr: 5: (()+0x75ef9) [0x7fe0cf098ef9]
+> 2016-10-14T07:14:20.092 INFO:tasks.qemu.client.0.smithi087.stderr: 6: (()+0xc1487) [0x7fe0cf0e4487]
+> 2016-10-14T07:14:20.092 INFO:tasks.qemu.client.0.smithi087.stderr: 7: (()+0xc15a2) [0x7fe0cf0e45a2]
+> 2016-10-14T07:14:20.092 INFO:tasks.qemu.client.0.smithi087.stderr: 8: (()+0xb1c39) [0x7fe0cf0d4c39]
+> 2016-10-14T07:14:20.092 INFO:tasks.qemu.client.0.smithi087.stderr: 9: (()+0x9ebad) [0x7fe0c5941bad]
+> 2016-10-14T07:14:20.093 INFO:tasks.qemu.client.0.smithi087.stderr: 10: (()+0x87099) [0x7fe0c592a099]
+> 2016-10-14T07:14:20.093 INFO:tasks.qemu.client.0.smithi087.stderr: 11: (()+0x173d06) [0x7fe0c5a16d06]
+> 2016-10-14T07:14:20.093 INFO:tasks.qemu.client.0.smithi087.stderr: 12: (()+0x7dc5) [0x7fe0d8d8cdc5]
+> 2016-10-14T07:14:20.093 INFO:tasks.qemu.client.0.smithi087.stderr: 13: (clone()+0x6d) [0x7fe0c2fb5ced]
+> 2016-10-14T07:14:20.093 INFO:tasks.qemu.client.0.smithi087.stderr: NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+> 2016-10-14T07:14:23.511 INFO:tasks.qemu.client.0.smithi087.stderr:daemon-helper: command crashed with signal 6
+> 2016-10-14T07:14:23.518 INFO:tasks.rbd:Deleting rbd clones...
+>
+> It used the jewel-backports branch ( http://tracker.ceph.com/issues/17487#note-9 ).
+>
+> I looked in the tracker for m_in_flight_object_closes and did not find any match. Since https://github.com/ceph/ceph/pull/11433 has many journal related commits, I wonder if maybe something is missing ?
+>
+> Cheers
+>
+> --
+> Loïc Dachary, Artisan Logiciel Libre
+
+
+
+-- 
+Jason
