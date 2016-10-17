@@ -1,56 +1,94 @@
-From: Wei Yongjun <weiyj.lk@gmail.com>
-Subject: [PATCH -next] ceph: fix non static symbol warning
-Date: Mon, 17 Oct 2016 15:11:29 +0000
-Message-ID: <1476717089-10359-1-git-send-email-weiyj.lk@gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: [ceph-users] OSDs are flapping and marked down wrongly
+Date: Mon, 17 Oct 2016 17:14:00 +0000
+Message-ID: <BY2PR02MB396F3B9321EDA0499B818E4F4D00@BY2PR02MB396.namprd02.prod.outlook.com>
+References: <BY2PR02MB3964B80170065D0141B7931F4D00@BY2PR02MB396.namprd02.prod.outlook.com>
+ <CAPpSHbVR1W921Lx6xgg30L5KS_U+_bVSVW+c4h+c2-W7N1yXbg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f65.google.com ([209.85.220.65]:36453 "EHLO
-        mail-pa0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757006AbcJQPLi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Oct 2016 11:11:38 -0400
-Received: by mail-pa0-f65.google.com with SMTP id os4so5258087pac.3
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Oct 2016 08:11:37 -0700 (PDT)
+Received: from mail-co1nam03on0086.outbound.protection.outlook.com ([104.47.40.86]:46048
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S933464AbcJQROD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 17 Oct 2016 13:14:03 -0400
+In-Reply-To: <CAPpSHbVR1W921Lx6xgg30L5KS_U+_bVSVW+c4h+c2-W7N1yXbg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc: Wei Yongjun <weiyongjun1@huawei.com>, ceph-devel@vger.kernel.org
+To: Wei Jin <wjin.cn@gmail.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-From: Wei Yongjun <weiyongjun1@huawei.com>
-
-Fixes the following sparse warning:
-
-fs/ceph/xattr.c:19:28: warning:
- symbol 'ceph_other_xattr_handler' was not declared. Should it be static?
-
-Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
----
- fs/ceph/xattr.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 40b7032..febc28f 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -16,7 +16,7 @@
- static int __remove_xattr(struct ceph_inode_info *ci,
- 			  struct ceph_inode_xattr *xattr);
- 
--const struct xattr_handler ceph_other_xattr_handler;
-+static const struct xattr_handler ceph_other_xattr_handler;
- 
- /*
-  * List of handlers for synthetic system.* attributes. Other
-@@ -1086,7 +1086,7 @@ static int ceph_set_xattr_handler(const struct xattr_handler *handler,
- 	return __ceph_setxattr(inode, name, value, size, flags);
- }
- 
--const struct xattr_handler ceph_other_xattr_handler = {
-+static const struct xattr_handler ceph_other_xattr_handler = {
- 	.prefix = "",  /* match any name => handlers called with full name */
- 	.get = ceph_get_xattr_handler,
- 	.set = ceph_set_xattr_handler,
-
-
-
+VGhhbmtzIFdlaS9QYXZhbiBmb3IgdGhlIHJlc3BvbnNlLCBpdCBzZWVtcyBJIG5lZWQgdG8gZGVi
+dWcgb3NkcyB0byBmaW5kIG91dCB3aGF0IGlzIHRoZSBjYXVzZSBvZiBzbG93aW5nIGRvd24uDQpX
+aWxsIHVwZGF0ZSBjb21tdW5pdHkgaWYgSSBmaW5kIGFueXRoaW5nIGNvbmNsdXNpdmUuDQoNClJl
+Z2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFdlaSBK
+aW4gW21haWx0bzp3amluLmNuQGdtYWlsLmNvbV0gDQpTZW50OiBNb25kYXksIE9jdG9iZXIgMTcs
+IDIwMTYgMjoxMyBBTQ0KVG86IFNvbW5hdGggUm95DQpDYzogY2VwaC11c2Vyc0BsaXN0cy5jZXBo
+LmNvbTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBbY2VwaC11c2Vy
+c10gT1NEcyBhcmUgZmxhcHBpbmcgYW5kIG1hcmtlZCBkb3duIHdyb25nbHkNCg0KT24gTW9uLCBP
+Y3QgMTcsIDIwMTYgYXQgMzoxNiBQTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2su
+Y29tPiB3cm90ZToNCj4gSGkgU2FnZSBldC4gYWwsDQo+DQo+IEkga25vdyB0aGlzIGlzc3VlIGlz
+IHJlcG9ydGVkIG51bWJlciBvZiB0aW1lcyBpbiBjb21tdW5pdHkgYW5kIGF0dHJpYnV0ZWQgdG8g
+ZWl0aGVyIG5ldHdvcmsgaXNzdWUgb3IgdW5yZXNwb25zaXZlIE9TRHMuDQo+IFJlY2VudGx5LCB3
+ZSBhcmUgc2VlaW5nIHRoaXMgaXNzdWUgd2hlbiBvdXIgYWxsIFNTRCBjbHVzdGVyIChKZXdlbCBi
+YXNlZCkgIGlzIHN0cmVzc2VkIHdpdGggbGFyZ2UgYmxvY2sgc2l6ZSBhbmQgdmVyeSBoaWdoIFFE
+LiBMb3dlcmluZyBRRCBpdCBpcyB3b3JraW5nIGp1c3QgZmluZS4NCj4gV2UgYXJlIHNlZWluZyB0
+aGUgbG9zc3kgY29ubmVjdGlvbiBtZXNzYWdlIGxpa2UgYmVsb3cgYW5kIGZvbGxvd2VkIGJ5IHRo
+ZSBvc2QgbWFya2VkIGRvd24gYnkgbW9uaXRvci4NCj4NCj4gMjAxNi0xMC0xNSAxNDozMDoxMy45
+NTc1MzQgN2Y2Mjk3YmZmNzAwICAwIC0tIDEwLjEwLjEwLjk0OjY4MTAvMjQ2MTc2NyANCj4gc3Vi
+bWl0X21lc3NhZ2Ugb3NkX29wX3JlcGx5KDE0NjMgDQo+IHJiZF9kYXRhLjU1MjQ2YjhiNDU2Ny4w
+MDAwMDAwMDAwMDBkNjMzIFtzZXQtYWxsb2MtaGludCBvYmplY3Rfc2l6ZSANCj4gNDE5NDMwNCB3
+cml0ZV9zaXplIDQxOTQzMDQsd3JpdGUgMzkzMjE2MH4yNjIxNDRdIHYyMjInOTU4OTAgdXY5NTg5
+MCANCj4gb25kaXNrID0gMCkgdjcgcmVtb3RlLCAxMC4xMC4xMC45ODowLzExNzQ0MzEzNjIsIGRy
+b3BwaW5nIG1lc3NhZ2UNCj4NCj4gSW4gdGhlIG1vbml0b3IgbG9nLCBJIGFtIHNlZWluZyB0aGUg
+b3NkIGlzIHJlcG9ydGVkIGRvd24gYnkgcGVlcnMgYW5kIHN1YnNlcXVlbnRseSBtb25pdG9yIGlz
+IG1hcmtpbmcgaXQgZG93bi4NCj4gT1NEcyBpcyByZWpvaW5pbmcgdGhlIGNsdXN0ZXIgYWZ0ZXIg
+ZGV0ZWN0aW5nIGl0IGlzIG1hcmtlZCBkb3duIHdyb25nbHkgYW5kIHJlYmFsYW5jaW5nIHN0YXJ0
+ZWQuIFRoaXMgaXMgaHVydGluZyBwZXJmb3JtYW5jZSB2ZXJ5IGJhZGx5Lg0KDQpJIHRoaW5rIHlv
+dSBuZWVkIHRvIHR1bmUgdGhyZWFkcycgdGltZW91dCB2YWx1ZXMgYXMgaGVhcnRiZWF0IG1lc3Nh
+Z2Ugd2lsbCBiZSBkcm9wcGVkIGR1cmluZyB0aW1lb3V0IGFuZCBzdWljaWRlIChoZWFsdGggY2hl
+Y2sgd2lsbCBmYWlsKS4NClRoYXQncyB3aHkgeW91IG9ic2VydmUgJ3dyb25nbHkgbWFya2VkIG1l
+IGRvd24nIG1lc3NhZ2UgYnV0IG9zZCBwcm9jZXNzIGlzIHN0aWxsIGFsaXZlLiBTZWUgZnVuY3Rp
+b24gT1NEOjpoYW5kbGVfb3NkX3BpbmcoKQ0KDQpBbHNvLCB5b3UgY291bGQgYmFja3BvcnQgdGhp
+cw0KcHIoaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzg4MDgpIHRvIGFjY2VsZXJh
+dGUgZGVhbGluZyB3aXRoIGhlYXJ0YmVhdCBtZXNzYWdlLg0KDQpBZnRlciB0aGF0LCB5b3UgbWF5
+IGNvbnNpZGVyIHR1bmluZyBncmFjZSB0aW1lLg0KDQoNCj4NCj4gTXkgcXVlc3Rpb24gaXMgdGhl
+IGZvbGxvd2luZy4NCj4NCj4gMS4gSSBoYXZlIDQwR2IgbmV0d29yayBhbmQgSSBhbSBzZWVpbmcg
+bmV0d29yayBpcyBub3QgdXRpbGl6ZWQgYmV5b25kIDEwLTEyR2IvcyAsIG5vIG5ldHdvcmsgZXJy
+b3IgaXMgcmVwb3J0ZWQuIFNvLCB3aHkgdGhpcyBsb3NzeSBjb25uZWN0aW9uIG1lc3NhZ2UgaXMg
+Y29taW5nID8gd2hhdCBjb3VsZCBnbyB3cm9uZyBoZXJlID8gSXMgaXQgbmV0d29yayBwcmlvcml0
+aXphdGlvbiBpc3N1ZSBvZiBzbWFsbGVyIHBpbmcgcGFja2V0cyA/IEkgdHJpZWQgdG8gZ2F6ZSBw
+aW5nIHJvdW5kIHRpbWUgZHVyaW5nIHRoaXMgYW5kIG5vdGhpbmcgc2VlbXMgYWJub3JtYWwuDQo+
+DQo+IDIuIE5vdGhpbmcgaXMgc2F0dXJhdGVkIG9uIHRoZSBPU0Qgc2lkZSAsIHBsZW50eSBvZiBu
+ZXR3b3JrL21lbW9yeS9jcHUvZGlzayBpcyBsZWZ0LiBTbywgSSBkb3VidCBteSBvc2RzIGFyZSB1
+bnJlc3BvbnNpdmUgYnV0IHllcyBpdCBpcyByZWFsbHkgYnVzeSBvbiBJTyBwYXRoLiBIZWFydGJl
+YXQgaXMgZ29pbmcgdGhyb3VnaCBzZXBhcmF0ZSBtZXNzZW5nZXIgYW5kIHRocmVhZHMgYXMgd2Vs
+bCwgc28sIGJ1c3kgb3AgdGhyZWFkcyBzaG91bGQgbm90IGJlIG1ha2luZyBoZWFydGJlYXQgZGVs
+YXllZC4gSW5jcmVhc2luZyBvc2QgaGVhcnRiZWF0IGdyYWNlIGlzIG9ubHkgZGVsYXlpbmcgdGhp
+cyBwaGVub21lbm9uICwgYnV0LCBldmVudHVhbGx5IGhhcHBlbnMgYWZ0ZXIgc2V2ZXJhbCBob3Vy
+cy4gQW55dGhpbmcgZWxzZSB3ZSBjYW4gdHVuZSBoZXJlID8NCj4NCj4gMy4gV2hhdCBjb3VsZCBi
+ZSB0aGUgc2lkZSBlZmZlY3Qgb2YgYmlnIGdyYWNlIHBlcmlvZCA/IEkgdW5kZXJzdGFuZCB0aGF0
+IGRldGVjdGluZyBhIGZhdWx0eSBvc2Qgd2lsbCBiZSBkZWxheWVkLCBhbnl0aGluZyBlbHNlID8N
+Cj4NCj4gNC4gSSBzYXcgaWYgYW4gT1NEIGlzIGNyYXNoZWQsIG1vbml0b3Igd2lsbCBkZXRlY3Qg
+dGhlIGRvd24gb3NkIGFsbW9zdCBpbnN0YW50YW5lb3VzbHkgYW5kIGl0IGlzIG5vdCB3YWl0aW5n
+IHRpbGwgdGhpcyBncmFjZSBwZXJpb2QuIEhvdyBpdCBpcyBkaXN0aW5ndWlzaGluZyBiZXR3ZWVu
+IHVucmVzcG9uc2l2ZSBhbmQgY3Jhc2hlZCBvc2RzID8gSW4gd2hpY2ggc2NlbmFyaW8gdGhpcyBo
+ZWFydGJlYXQgZ3JhY2UgaXMgY29taW5nIGludG8gcGljdHVyZSA/DQo+DQo+IEFueSBoZWxwIG9u
+IGNsYXJpZnlpbmcgdGhpcyB3b3VsZCBiZSB2ZXJ5IGhlbHBmdWwuDQo+DQo+IFRoYW5rcyAmIFJl
+Z2FyZHMNCj4gU29tbmF0aA0KPiBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5l
+ZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRo
+ZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUg
+cmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91
+IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2Ug
+aW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9u
+LCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5
+b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3Rp
+ZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1t
+ZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBp
+biB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkg
+c3RvcmVkIGNvcGllcykuDQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fDQo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0DQo+IGNlcGgtdXNlcnNAbGlzdHMu
+Y2VwaC5jb20NCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
+LWNlcGguY29tDQo=
