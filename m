@@ -1,27 +1,26 @@
-From: Jaze Lee <jazeltq@gmail.com>
-Subject: how to view the list for pad.ceph.com?
-Date: Tue, 18 Oct 2016 11:19:35 +0800
-Message-ID: <CAKZcxgcwyUJWejmT7ujE53DG4tJX9cec01Vno_OhEyb049y3iw@mail.gmail.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 00/28] Reenable maybe-uninitialized warnings
+Date: Mon, 17 Oct 2016 22:08:04 -0700
+Message-ID: <20161018050804.GA9902@infradead.org>
+References: <20161017220342.1627073-1-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f182.google.com ([209.85.223.182]:35418 "EHLO
-        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754832AbcJRDTh (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Oct 2016 23:19:37 -0400
-Received: by mail-io0-f182.google.com with SMTP id f5so26054792ioj.2
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Oct 2016 20:19:37 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-ext4-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20161017220342.1627073-1-arnd@arndb.de>
+Sender: linux-ext4-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-media@vger.kernel.org, Mauro Carvalho Chehab <mchehab@kernel.org>, Martin Schwidefsky <schwidefsky@de.ibm.com>, linux-s390@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, dri-devel@lists.freedesktop.org, linux-mtd@lists.infradead.org, Herbert Xu <herbert@gondor.apana.org.au>, linux-crypto@vger.kernel.org, "David S. Miller" <davem@davemloft.net>, netdev@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, ceph-devel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-ext4@vger.kernel.org, netfilter-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi all
+On Tue, Oct 18, 2016 at 12:03:28AM +0200, Arnd Bergmann wrote:
+> This is a set of patches that I hope to get into v4.9 in some form
+> in order to turn on the -Wmaybe-uninitialized warnings again.
 
-   Is there a way to view a list of all pad in  our pad.cep.com?
+Hi Arnd,
 
-
-Thanks a lot.
-
---=20
-=E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
+I jsut complained to Geert that I was introducing way to many
+bugs or pointless warnings for some compilers lately, but gcc didn't
+warn me about them.  From a little research the lack of
+-Wmaybe-uninitialized seems to be the reason for it, so I'm all
+for re-enabling it.
