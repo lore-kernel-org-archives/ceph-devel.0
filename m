@@ -1,73 +1,62 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 00/10] mm: adjust get_user_pages* functions to explicitly
- pass FOLL_* flags
-Date: Tue, 18 Oct 2016 17:30:50 +0200
-Message-ID: <20161018153050.GC13117@dhcp22.suse.cz>
-References: <20161013002020.3062-1-lstoakes@gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: mempools everywhere
+Date: Tue, 18 Oct 2016 16:52:22 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1610181634150.6167@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20161013002020.3062-1-lstoakes@gmail.com>
-Sender: owner-linux-mm@kvack.org
-To: Lorenzo Stoakes <lstoakes@gmail.com>
-Cc: linux-mm@kvack.org, Linus Torvalds <torvalds@linux-foundation.org>, Jan Kara <jack@suse.cz>, Hugh Dickins <hughd@google.com>, Dave Hansen <dave.hansen@linux.intel.com>, Rik van Riel <riel@redhat.com>, Mel Gorman <mgorman@techsingularity.net>, Andrew Morton <akpm@linux-foundation.org>, adi-buildroot-devel@lists.sourceforge.net, ceph-devel@vger.kernel.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, kvm@vger.kernel.org, linux-alpha@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-cris-kernel@axis.com, linux-fbdev@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, linux-media@vger.kernel.org, linux-mips@linux-mips.org, linux-rdma@vger.kernel.org, linux-s390@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-security-module@vger.kernel.org, linux-sh@
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:60536 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757192AbcJRQwZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 18 Oct 2016 12:52:25 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: allen.samuels@sandisk.com
 
-On Thu 13-10-16 01:20:10, Lorenzo Stoakes wrote:
-> This patch series adjusts functions in the get_user_pages* family such that
-> desired FOLL_* flags are passed as an argument rather than implied by flags.
-> 
-> The purpose of this change is to make the use of FOLL_FORCE explicit so it is
-> easier to grep for and clearer to callers that this flag is being used. The use
-> of FOLL_FORCE is an issue as it overrides missing VM_READ/VM_WRITE flags for the
-> VMA whose pages we are reading from/writing to, which can result in surprising
-> behaviour.
-> 
-> The patch series came out of the discussion around commit 38e0885, which
-> addressed a BUG_ON() being triggered when a page was faulted in with PROT_NONE
-> set but having been overridden by FOLL_FORCE. do_numa_page() was run on the
-> assumption the page _must_ be one marked for NUMA node migration as an actual
-> PROT_NONE page would have been dealt with prior to this code path, however
-> FOLL_FORCE introduced a situation where this assumption did not hold.
-> 
-> See https://marc.info/?l=linux-mm&m=147585445805166 for the patch proposal.
+The mempool PR is more or less ready for final test/merge.  Once it's in 
+place we'd love to use this all over the place so that we can tell 
+where memory is going.  There's one major remaining roadblock, though: 
+right now mempool is part of libglobal since it has global state (the 
+mempools themselves).  This prevents us from putting anything in, say, 
+osd_types.h (which is included in client code) in a mempool.  Which 
+includes things like pg_log_t, a major consumer of memory.
 
-I like this cleanup. Tracking FOLL_FORCE users was always a nightmare
-and the flag behavior is really subtle so we should better be explicit
-about it. I haven't gone through each patch separately but rather
-applied the whole series and checked the resulting diff. This all seems
-OK to me and feel free to add
-Acked-by: Michal Hocko <mhocko@suse.com>
+We have a few options...
 
-I am wondering whether we can go further. E.g. it is not really clear to
-me whether we need an explicit FOLL_REMOTE when we can in fact check
-mm != current->mm and imply that. Maybe there are some contexts which
-wouldn't work, I haven't checked.
+- Segregate types into different compilation units so that things that are 
+server-side only can be built separately (and put in mempools).
 
-Then I am also wondering about FOLL_TOUCH behavior.
-__get_user_pages_unlocked has only few callers which used to be
-get_user_pages_unlocked before 1e9877902dc7e ("mm/gup: Introduce
-get_user_pages_remote()"). To me a dropped FOLL_TOUCH seems
-unintentional. Now that get_user_pages_unlocked has gup_flags argument I
-guess we might want to get rid of the __g-u-p-u version altogether, no?
+- Just avoid these types :(
 
-__get_user_pages is quite low level and imho shouldn't be exported. It's
-only user - kvm - should rather pull those two functions to gup instead
-and export them. There is nothing really KVM specific in them.
+- Use mempools for client code as well.
 
-I also cannot say I would be entirely thrilled about get_user_pages_locked,
-we only have one user which can simply do lock g-u-p unlock AFAICS.
+The last one is the most appealing to me, but it's violating a big no-no 
+of shared libraries (static state!).  However, I think that mempools may 
+be one of those special things that all of the usual reasons that global 
+variables are bad don't really apply to.  The main one being: if we have 
+multiple users of, say, librados in the same process, it is totally fine 
+(and possibly desired?) that they would share the same mempools.
 
-I guess there is more work in that area and I do not want to impose all
-that work on you, but I couldn't resist once I saw you playing in that
-area ;) Definitely a good start!
--- 
-Michal Hocko
-SUSE Labs
+What do you think?
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+FWIW, there is one bit of potentially shady initialization going on with 
+the mempools.  Instead of statically defining the pools, we instead 
+declare an array of pool pointers, and rely on the compiler and runtime 
+environment to zero that for the process *before* any constructors are run 
+for any compilation unit.  This allows pools to be allocated on-demand 
+when needed by constructors in any compilation unit, regardless of the 
+link order relative to mempool.cc.  This appears to be a safe thing to do 
+(and avoids the very tedious process of ensuring that mempool.cc is always 
+linked first so that it's ctors run first).
+
+If we want to take the plunge and make this usable by librados and other 
+client code, I think it may just work, modulo leaking the pool_t 
+structures if the .so is ever unloaded (not sure any librados user does 
+this?).  In that case, we could probably move the setup/teardown into the 
+init/fini .so methods, although we'd need to confirm that these would run 
+*before* any constructors for statically linked modules.
+
+Anyway.. thoughts?
+
+sage
