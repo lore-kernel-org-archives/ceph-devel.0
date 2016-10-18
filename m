@@ -1,63 +1,61 @@
-From: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org>
-Subject: Re: Ceph + VMWare
-Date: Tue, 18 Oct 2016 12:19:36 +0200
-Message-ID: <abfbfe99-97ea-0e25-2e73-4625637ddcdc@univ-lorraine.fr>
-References: <CAAZbbf1HGbZVbB1m5vPd+afWb0pZz4haQhua4FcQa-31FPg=0g@mail.gmail.com>
-	<CADb9453mfXcgxMuOMvbz12XDB02bbzuaV-Jtoiqd04n7XuSzJg@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH -next] ceph: fix non static symbol warning
+Date: Tue, 18 Oct 2016 12:33:14 +0200
+Message-ID: <CAOi1vP9k61eiwDMt833+Dz=RVgFOsa5yySQd0TOLArYHBNJcRQ@mail.gmail.com>
+References: <1476717089-10359-1-git-send-email-weiyj.lk@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CADb9453mfXcgxMuOMvbz12XDB02bbzuaV-Jtoiqd04n7XuSzJg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alex Gorbachev <ag-VxEtxStO0vCD5NdjQRoWIEEOCMrvLtNR@public.gmane.org>, Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lf0-f68.google.com ([209.85.215.68]:36378 "EHLO
+        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932599AbcJRKdR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Oct 2016 06:33:17 -0400
+Received: by mail-lf0-f68.google.com with SMTP id b75so31566320lfg.3
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Oct 2016 03:33:16 -0700 (PDT)
+In-Reply-To: <1476717089-10359-1-git-send-email-weiyj.lk@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Wei Yongjun <weiyj.lk@gmail.com>
+Cc: Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Wei Yongjun <weiyongjun1@huawei.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-CkhpIEFsZXgsCgpKdXN0IHRvIGtub3csIHdoYXQga2luZCBvZiBiYWNrc3RvcmUgYXJlIHlvdSB1
-c2luZyB3aGl0aGluIFN0b3JjaXVtID8gCnZkaXNrX2ZpbGVpbyBvciB2ZGlza19ibG9ja2lvID8K
-Ckkgc2VlIHlvdXIgYWdlbnRzIGNhbiBoYW5kbGUgYm90aCA6IApodHRwOi8vd3d3LnNwaW5pY3Mu
-bmV0L2xpc3RzL2NlcGgtdXNlcnMvbXNnMjc4MTcuaHRtbAoKUmVnYXJkcywKCkZyw6lkw6lyaWMu
-CgpMZSAwNi8xMC8yMDE2IMOgIDE2OjAxLCBBbGV4IEdvcmJhY2hldiBhIMOpY3JpdCA6Cj4gT24g
-V2VkLCBPY3QgNSwgMjAxNiBhdCAyOjMyIFBNLCBQYXRyaWNrIE1jR2FycnkgPHBtY2dhcnJ5QHJl
-ZGhhdC5jb20+IHdyb3RlOgo+PiBIZXkgZ3V5cywKPj4KPj4gU3RhcnRpbmcgdG8gYnVja2xlIGRv
-d24gYSBiaXQgaW4gbG9va2luZyBhdCBob3cgd2UgY2FuIGJldHRlciBzZXQgdXAKPj4gQ2VwaCBm
-b3IgVk1XYXJlIGludGVncmF0aW9uLCBidXQgSSBuZWVkIGEgbGl0dGxlIGluZm8vaGVscCBmcm9t
-IHlvdQo+PiBmb2xrcy4KPj4KPj4gSWYgeW91IGN1cnJlbnRseSBhcmUgdXNpbmcgQ2VwaCtWTVdh
-cmUsIG9yIGFyZSBleHBsb3JpbmcgdGhlIG9wdGlvbiwKPj4gSSdkIGxpa2Ugc29tZSBzaW1wbGUg
-aW5mbyBmcm9tIHlvdToKPj4KPj4gMSkgQ29tcGFueQo+PiAyKSBDdXJyZW50IGRlcGxveW1lbnQg
-c2l6ZQo+PiAzKSBFeHBlY3RlZCBkZXBsb3ltZW50IGdyb3d0aAo+PiA0KSBJbnRlZ3JhdGlvbiBt
-ZXRob2QgKG9yIGRlc2lyZWQgbWV0aG9kKSBleDogaXNjc2ksIG5hdGl2ZSwgZXRjCj4+Cj4+IEp1
-c3QgY2FzdGluZyB0aGUgbmV0IHNvIHdlIGtub3cgd2hvIGlzIGludGVyZXN0ZWQgYW5kIG1pZ2h0
-IHdhbnQgdG8KPj4gaGVscCB1cyBzaGFwZSBhbmQvb3IgdGVzdCB0aGluZ3MgaW4gdGhlIGZ1dHVy
-ZSBpZiB3ZSBjYW4gbWFrZSBpdAo+PiBiZXR0ZXIuIFRoYW5rcy4KPj4KPiBIaSBQYXRyaWNrLAo+
-Cj4gV2UgaGF2ZSBTdG9yY2l1bSBjZXJ0aWZpZWQgd2l0aCBWTVdhcmUsIGFuZCB3ZSB1c2UgaXQg
-b3Vyc2VsdmVzOgo+Cj4gQ2VwaCBIYW1tZXIgbGF0ZXN0Cj4KPiBTQ1NUIHJlZHVuZGFudCBQYWNl
-bWFrZXIgYmFzZWQgZGVsaXZlcnkgZnJvbnQgZW5kcyAtIG91ciBhZ2VudHMgYXJlCj4gcHVibGlz
-aGVkIG9uIGdpdGh1Ygo+Cj4gRW5oYW5jZUlPIGZvciByZWFkIGNhY2hpbmcgYXQgZGVsaXZlcnkg
-bGF5ZXIKPgo+IE5GUyB2MywgYW5kIGlTQ1NJIGFuZCBGQyBkZWxpdmVyeQo+Cj4gT3VyIGRlcGxv
-eW1lbnQgc2l6ZSB3ZSB1c2Ugb3Vyc2VsdmVzIGlzIDcwMCBUQiByYXcuCj4KPiBDaGFsbGVuZ2Vz
-IGFyZSBhcyBvdGhlcnMgZGVzY3JpYmVkLCBidXQgSEEgYW5kIG11bHRpIGhvc3QgYWNjZXNzIHdv
-cmtzCj4gZmluZSBjb3VydGVzeSBvZiBTQ1NULiAgV3JpdGUgYW1wbGlmaWNhdGlvbiBpcyBhIGNo
-YWxsZW5nZSBvbiBzcGlubmluZwo+IGRpc2tzLgo+Cj4gSGFwcHkgdG8gc2hhcmUgbW9yZS4KPgo+
-IEFsZXgKPgo+PiAtLQo+Pgo+PiBCZXN0IFJlZ2FyZHMsCj4+Cj4+IFBhdHJpY2sgTWNHYXJyeQo+
-PiBEaXJlY3RvciBDZXBoIENvbW11bml0eSB8fCBSZWQgSGF0Cj4+IGh0dHA6Ly9jZXBoLmNvbSAg
-fHwgIGh0dHA6Ly9jb21tdW5pdHkucmVkaGF0LmNvbQo+PiBAc2N1dHRsZW1vbmtleSB8fCBAY2Vw
-aAo+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+PiBj
-ZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4+IGh0
-dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+IC0t
-Cj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2Ny
-aWJlIGNlcGgtZGV2ZWwiIGluCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
-Z2VyLmtlcm5lbC5vcmcKPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlz
-dHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
-LWNlcGguY29tCg==
+On Mon, Oct 17, 2016 at 5:11 PM, Wei Yongjun <weiyj.lk@gmail.com> wrote:
+> From: Wei Yongjun <weiyongjun1@huawei.com>
+>
+> Fixes the following sparse warning:
+>
+> fs/ceph/xattr.c:19:28: warning:
+>  symbol 'ceph_other_xattr_handler' was not declared. Should it be static?
+>
+> Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
+> ---
+>  fs/ceph/xattr.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+> index 40b7032..febc28f 100644
+> --- a/fs/ceph/xattr.c
+> +++ b/fs/ceph/xattr.c
+> @@ -16,7 +16,7 @@
+>  static int __remove_xattr(struct ceph_inode_info *ci,
+>                           struct ceph_inode_xattr *xattr);
+>
+> -const struct xattr_handler ceph_other_xattr_handler;
+> +static const struct xattr_handler ceph_other_xattr_handler;
+>
+>  /*
+>   * List of handlers for synthetic system.* attributes. Other
+> @@ -1086,7 +1086,7 @@ static int ceph_set_xattr_handler(const struct xattr_handler *handler,
+>         return __ceph_setxattr(inode, name, value, size, flags);
+>  }
+>
+> -const struct xattr_handler ceph_other_xattr_handler = {
+> +static const struct xattr_handler ceph_other_xattr_handler = {
+>         .prefix = "",  /* match any name => handlers called with full name */
+>         .get = ceph_get_xattr_handler,
+>         .set = ceph_set_xattr_handler,
+
+Applied.
+
+Thanks,
+
+                Ilya
