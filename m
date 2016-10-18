@@ -1,67 +1,51 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: inconsistent problem....
-Date: Tue, 18 Oct 2016 15:07:54 +0200
-Message-ID: <851ba931-f1c8-dc23-7cc4-822efb2c6cab@digiware.nl>
+From: Lorenzo Stoakes <lstoakes@gmail.com>
+Subject: Re: [PATCH 04/10] mm: replace get_user_pages_locked() write/force
+ parameters with gup_flags
+Date: Tue, 18 Oct 2016 14:56:09 +0100
+Message-ID: <20161018135609.GA30025@lucifer>
+References: <20161013002020.3062-1-lstoakes@gmail.com>
+ <20161013002020.3062-5-lstoakes@gmail.com>
+ <20161018125425.GD29967@quack2.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:12322 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1759960AbcJRNH7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 18 Oct 2016 09:07:59 -0400
-Received: from [192.168.10.67] (opteron [192.168.10.67])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by smtp.digiware.nl (Postfix) with ESMTPSA id BE9F72BAA7
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Oct 2016 15:07:54 +0200 (CEST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20161018125425.GD29967@quack2.suse.cz>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: linux-mm@kvack.org, Linus Torvalds <torvalds@linux-foundation.org>, Hugh Dickins <hughd@google.com>, Dave Hansen <dave.hansen@linux.intel.com>, Rik van Riel <riel@redhat.com>, Mel Gorman <mgorman@techsingularity.net>, Andrew Morton <akpm@linux-foundation.org>, adi-buildroot-devel@lists.sourceforge.net, ceph-devel@vger.kernel.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, kvm@vger.kernel.org, linux-alpha@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-cris-kernel@axis.com, linux-fbdev@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, linux-media@vger.kernel.org, linux-mips@linux-mips.org, linux-rdma@vger.kernel.org, linux-s390@vger.kernel.org, linux-samsung-soc@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+On Tue, Oct 18, 2016 at 02:54:25PM +0200, Jan Kara wrote:
+> > @@ -1282,7 +1282,7 @@ long get_user_pages(unsigned long start, unsigned long nr_pages,
+> >  			    int write, int force, struct page **pages,
+> >  			    struct vm_area_struct **vmas);
+> >  long get_user_pages_locked(unsigned long start, unsigned long nr_pages,
+> > -		    int write, int force, struct page **pages, int *locked);
+> > +		    unsigned int gup_flags, struct page **pages, int *locked);
+>
+> Hum, the prototype is inconsistent with e.g. __get_user_pages_unlocked()
+> where gup_flags come after **pages argument. Actually it makes more sense
+> to have it before **pages so that input arguments come first and output
+> arguments second but I don't care that much. But it definitely should be
+> consistent...
 
-I have all tests up and running on my development box.
-So I build a Jenkins instance to do regular testing.
+It was difficult to decide quite how to arrange parameters as there was
+inconsitency with regards to parameter ordering already - for example
+__get_user_pages() places its flags argument before pages whereas, as you note,
+__get_user_pages_unlocked() puts them afterwards.
 
-But there readable.sh consistently fails with errors like the one below.
-However it is not always on the smae file, and comparing files with
-those in the repo shows that they are equal.
+I ended up compromising by trying to match the existing ordering of the function
+as much as I could by replacing write, force pairs with gup_flags in the same
+location (with the exception of get_user_pages_unlocked() which I felt should
+match __get_user_pages_unlocked() in signature) or if there was already a
+gup_flags parameter as in the case of __get_user_pages_unlocked() I simply
+removed the write, force pair and left the flags as the last parameter.
 
-Anybody a suggestion of what is going wrong here?
-Memory corruption coudl be one, but then I'd expect other type of
-failures as well.
+I am happy to rearrange parameters as needed, however I am not sure if it'd be
+worthwhile for me to do so (I am keen to try to avoid adding too much noise here
+:)
 
---WjW
-
- /usr/local/jenkins/workspace/ceph-freebsd/src/test/encoding/readable.sh: line 104: 45887 Abort trap              (core dumped) $CEPH_DENCODER type $type import $vdir/objects/$type/$f decode dump_json > $tmp1
-75: **** failed to decode
-/usr/local/jenkins/workspace/ceph-freebsd/ceph-object-corpus/archive/0.52/objects/ObjectStore::Transaction/c46fcf6ab50f20c159da635e80a21382
-****
-75: /usr/local/jenkins/workspace/ceph-freebsd/src/os/Transaction.cc: In
-function 'void ObjectStore::Transaction::_build_actions_from_tbl()'
-thread aef8000 time 2016-10-18 12:35:36.204693
-75: /usr/local/jenkins/workspace/ceph-freebsd/src/os/Transaction.cc:
-343: FAILED assert(0 == "collection attr methods have been removed")
-75:  ceph version Development (no_version)
-75:  1: 0x1a03098 <_ZN4ceph18__ceph_assert_failEPKcS1_iS1_+0x4e8> at
-/usr/local/jenkins/workspace/ceph-freebsd/build/bin/ceph-dencoder
-75:  2: 0x11593d2
-<_ZN11ObjectStore11Transaction23_build_actions_from_tblEv+0x1802> at
-/usr/local/jenkins/workspace/ceph-freebsd/build/bin/ceph-dencoder
-75:  3: 0x1163052 <_ZN11ObjectStore11Transaction5beginEv+0x32> at
-/usr/local/jenkins/workspace/ceph-freebsd/build/bin/ceph-dencoder
-75:  4: 0x1159dd1
-<_ZN11ObjectStore11Transaction4dumpEPN4ceph9FormatterE+0x51> at
-/usr/local/jenkins/workspace/ceph-freebsd/build/bin/ceph-dencoder
-75:  5: 0xe9eb21
-<_ZN12DencoderBaseIN11ObjectStore11TransactionEE4dumpEPN4ceph9FormatterE+0x21>
-at /usr/local/jenkins/workspace/ceph-freebsd/build/bin/ceph-dencoder
-75:  6: 0xd2f278 <main+0x18838> at
-/usr/local/jenkins/workspace/ceph-freebsd/build/bin/ceph-dencoder
-75:  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-75: /usr/local/jenkins/workspace/ceph-freebsd/src/os/Transaction.cc: In
-function 'void ObjectStore::Transaction::_build_actions_from_tbl()'
-thread aef8000 time 2016-10-18 12:35:36.211442
-
+If we were to rearrange parameters for consistency I'd suggest adjusting
+__get_user_pages_unlocked() to put gup_flags before pages and do the same with
+get_user_pages_unlocked(), let me know what you think.
