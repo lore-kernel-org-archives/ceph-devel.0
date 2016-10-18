@@ -1,99 +1,62 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: mempools everywhere
-Date: Tue, 18 Oct 2016 16:59:45 +0000
-Message-ID: <BLUPR0201MB15240B7882D0381D5152363AE8D30@BLUPR0201MB1524.namprd02.prod.outlook.com>
-References: <alpine.DEB.2.11.1610181634150.6167@piezo.us.to>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: upgrade testing with shaman
+Date: Tue, 18 Oct 2016 13:04:46 -0600
+Message-ID: <CAJ4mKGYoEkEYFesWisQsOv+XCu5nuD-hA2wS+R7t8vDdNLONqg@mail.gmail.com>
+References: <CAEPMp+696EQxGjBi6v6kN5KycaoNMuEemaromTCSh4P2gwh2rA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0046.outbound.protection.outlook.com ([104.47.42.46]:14176
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933951AbcJRRdI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 18 Oct 2016 13:33:08 -0400
-In-Reply-To: <alpine.DEB.2.11.1610181634150.6167@piezo.us.to>
-Content-Language: en-US
+Received: from mail-io0-f179.google.com ([209.85.223.179]:33162 "EHLO
+        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935155AbcJRTEs (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Oct 2016 15:04:48 -0400
+Received: by mail-io0-f179.google.com with SMTP id q192so8348390iod.0
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Oct 2016 12:04:48 -0700 (PDT)
+In-Reply-To: <CAEPMp+696EQxGjBi6v6kN5KycaoNMuEemaromTCSh4P2gwh2rA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Andrew Schoen <aschoen@redhat.com>
+Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>, sepia@ceph.com
 
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Tuesday, October 18, 2016 9:52 AM
-> To: ceph-devel@vger.kernel.org
-> Cc: Allen Samuels <Allen.Samuels@sandisk.com>
-> Subject: mempools everywhere
->=20
-> The mempool PR is more or less ready for final test/merge.  Once it's in =
-place
-> we'd love to use this all over the place so that we can tell where memory=
- is
-> going.  There's one major remaining roadblock, though:
-> right now mempool is part of libglobal since it has global state (the mem=
-pools
-> themselves).  This prevents us from putting anything in, say, osd_types.h
-> (which is included in client code) in a mempool.  Which includes things l=
-ike
-> pg_log_t, a major consumer of memory.
->=20
-> We have a few options...
->=20
-> - Segregate types into different compilation units so that things that ar=
-e
-> server-side only can be built separately (and put in mempools).
->=20
-> - Just avoid these types :(
->=20
-> - Use mempools for client code as well.
+On Tue, Oct 18, 2016 at 11:04 AM, Andrew Schoen <aschoen@redhat.com> wrote:
+> All,
+>
+> We are working on a solution that will allow us to run the
+> teuthology upgrade tests with shaman, until we can start using the
+> repos from download.ceph.com (which is the ideal scenario).
 
-+1
+Can you elaborate on this? I can understand wanting to test against
+release packages, but we also need to not muck up our stable branches
+and sometimes test our next major release against a patched previous
+release.
+-Greg
 
->=20
-> The last one is the most appealing to me, but it's violating a big no-no =
-of
-> shared libraries (static state!).  However, I think that mempools may be =
-one
-> of those special things that all of the usual reasons that global variabl=
-es are
-> bad don't really apply to.  The main one being: if we have multiple users=
- of,
-> say, librados in the same process, it is totally fine (and possibly desir=
-ed?) that
-> they would share the same mempools.
->=20
-> What do you think?
->=20
-> FWIW, there is one bit of potentially shady initialization going on with =
-the
-> mempools.  Instead of statically defining the pools, we instead declare a=
-n
-> array of pool pointers, and rely on the compiler and runtime environment =
-to
-> zero that for the process *before* any constructors are run for any
-> compilation unit.  This allows pools to be allocated on-demand when neede=
-d
-> by constructors in any compilation unit, regardless of the link order rel=
-ative to
-> mempool.cc.  This appears to be a safe thing to do (and avoids the very
-> tedious process of ensuring that mempool.cc is always linked first so tha=
-t it's
-> ctors run first).
-
-I don't think is a cause for concern. There are hundreds of thousands of li=
-nes of existing code that are making the same assumption (global statics ar=
-e set to zero unless overridden explicitly).
-=20
->=20
-> If we want to take the plunge and make this usable by librados and other
-> client code, I think it may just work, modulo leaking the pool_t structur=
-es if
-> the .so is ever unloaded (not sure any librados user does this?).  In tha=
-t case,
-> we could probably move the setup/teardown into the init/fini .so methods,
-> although we'd need to confirm that these would run
-> *before* any constructors for statically linked modules.
->=20
-> Anyway.. thoughts?
->=20
-> sage
+>
+> We are going to register all the upstream repos that are currently
+> built on chacra.ceph.com with shaman. These are the unsigned repos
+> that eventually get pushed to download.ceph.com. This would require a
+> bit of work with ceph-build so that we can get the 'extras' info, like
+> ``version``, in the json output from shaman. We'd also have to rebuild
+> all these repos (for that 'extras' info) and to make sure we have all
+> the repos there we need.
+>
+> This will mean that:
+>
+> 1) Any new upstream releases will automatically be added to shaman and
+> available for testing
+>
+> 2) It keeps all the repos we need to test in a single system, shaman.
+>
+> 3) Repos on chacra.ceph.com are not auto deleted, so we won't have to
+> worry about these repos disappearing.
+>
+> For this to work correctly teuthology will need to do a tag to sha1
+> conversion using git or replace tags in ceph-qa-suite with sha1s
+> because our system cannot provide tag references.
+>
+> Thanks,
+> Andrew
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
