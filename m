@@ -1,61 +1,37 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH -next] ceph: fix non static symbol warning
-Date: Tue, 18 Oct 2016 12:33:14 +0200
-Message-ID: <CAOi1vP9k61eiwDMt833+Dz=RVgFOsa5yySQd0TOLArYHBNJcRQ@mail.gmail.com>
-References: <1476717089-10359-1-git-send-email-weiyj.lk@gmail.com>
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH 01/10] mm: remove write/force parameters
+ from __get_user_pages_locked()
+Date: Tue, 18 Oct 2016 14:43:05 +0200
+Message-ID: <20161018124305.GA29967@quack2.suse.cz>
+References: <20161013002020.3062-1-lstoakes@gmail.com>
+ <20161013002020.3062-2-lstoakes@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f68.google.com ([209.85.215.68]:36378 "EHLO
-        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932599AbcJRKdR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Oct 2016 06:33:17 -0400
-Received: by mail-lf0-f68.google.com with SMTP id b75so31566320lfg.3
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Oct 2016 03:33:16 -0700 (PDT)
-In-Reply-To: <1476717089-10359-1-git-send-email-weiyj.lk@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Wei Yongjun <weiyj.lk@gmail.com>
-Cc: Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Wei Yongjun <weiyongjun1@huawei.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <intel-gfx-bounces@lists.freedesktop.org>
+Content-Disposition: inline
+In-Reply-To: <20161013002020.3062-2-lstoakes@gmail.com>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
+List-Post: <mailto:intel-gfx@lists.freedesktop.org>
+List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: intel-gfx-bounces@lists.freedesktop.org
+Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
+To: Lorenzo Stoakes <lstoakes@gmail.com>
+Cc: linux-mips@linux-mips.org, linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, linux-sh@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, netdev@vger.kernel.org, sparclinux@vger.kernel.org, linux-ia64@vger.kernel.org, linux-s390@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-rdma@vger.kernel.org, x86@kernel.org, Hugh Dickins <hughd@google.com>, linux-media@vger.kernel.org, Rik van Riel <riel@redhat.com>, intel-gfx@lists.freedesktop.org, adi-buildroot-devel@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-cris-kernel@axis.com, Linus Torvalds <torvalds@linux-foundation.org>, linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-alpha@vger.kernel.orglin
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Oct 17, 2016 at 5:11 PM, Wei Yongjun <weiyj.lk@gmail.com> wrote:
-> From: Wei Yongjun <weiyongjun1@huawei.com>
->
-> Fixes the following sparse warning:
->
-> fs/ceph/xattr.c:19:28: warning:
->  symbol 'ceph_other_xattr_handler' was not declared. Should it be static?
->
-> Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
-> ---
->  fs/ceph/xattr.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-> index 40b7032..febc28f 100644
-> --- a/fs/ceph/xattr.c
-> +++ b/fs/ceph/xattr.c
-> @@ -16,7 +16,7 @@
->  static int __remove_xattr(struct ceph_inode_info *ci,
->                           struct ceph_inode_xattr *xattr);
->
-> -const struct xattr_handler ceph_other_xattr_handler;
-> +static const struct xattr_handler ceph_other_xattr_handler;
->
->  /*
->   * List of handlers for synthetic system.* attributes. Other
-> @@ -1086,7 +1086,7 @@ static int ceph_set_xattr_handler(const struct xattr_handler *handler,
->         return __ceph_setxattr(inode, name, value, size, flags);
->  }
->
-> -const struct xattr_handler ceph_other_xattr_handler = {
-> +static const struct xattr_handler ceph_other_xattr_handler = {
->         .prefix = "",  /* match any name => handlers called with full name */
->         .get = ceph_get_xattr_handler,
->         .set = ceph_set_xattr_handler,
-
-Applied.
-
-Thanks,
-
-                Ilya
+T24gVGh1IDEzLTEwLTE2IDAxOjIwOjExLCBMb3JlbnpvIFN0b2FrZXMgd3JvdGU6Cj4gVGhpcyBw
+YXRjaCByZW1vdmVzIHRoZSB3cml0ZSBhbmQgZm9yY2UgcGFyYW1ldGVycyBmcm9tIF9fZ2V0X3Vz
+ZXJfcGFnZXNfbG9ja2VkKCkKPiB0byBtYWtlIHRoZSB1c2Ugb2YgRk9MTF9GT1JDRSBleHBsaWNp
+dCBpbiBjYWxsZXJzIGFzIHVzZSBvZiB0aGlzIGZsYWcgY2FuIHJlc3VsdAo+IGluIHN1cnByaXNp
+bmcgYmVoYXZpb3VyIChhbmQgaGVuY2UgYnVncykgd2l0aGluIHRoZSBtbSBzdWJzeXN0ZW0uCj4g
+Cj4gU2lnbmVkLW9mZi1ieTogTG9yZW56byBTdG9ha2VzIDxsc3RvYWtlc0BnbWFpbC5jb20+CgpM
+b29rcyBnb29kLiBZb3UgY2FuIGFkZDoKClJldmlld2VkLWJ5OiBKYW4gS2FyYSA8amFja0BzdXNl
+LmN6PgoKCQkJCQkJCQlIb256YQotLSAKSmFuIEthcmEgPGphY2tAc3VzZS5jb20+ClNVU0UgTGFi
+cywgQ1IKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KSW50
+ZWwtZ2Z4IG1haWxpbmcgbGlzdApJbnRlbC1nZnhAbGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBz
+Oi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vaW50ZWwtZ2Z4Cg==
