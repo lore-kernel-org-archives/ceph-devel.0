@@ -1,55 +1,70 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 04/10] mm: replace get_user_pages_locked()
- write/force parameters with gup_flags
-Date: Tue, 18 Oct 2016 14:54:25 +0200
-Message-ID: <20161018125425.GD29967@quack2.suse.cz>
-References: <20161013002020.3062-1-lstoakes@gmail.com>
- <20161013002020.3062-5-lstoakes@gmail.com>
+From: Abhishek L <abhishek@suse.com>
+Subject: v11.0.2 released
+Date: Tue, 18 Oct 2016 15:04:09 +0200
+Message-ID: <87funtn706.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <intel-gfx-bounces@lists.freedesktop.org>
-Content-Disposition: inline
-In-Reply-To: <20161013002020.3062-5-lstoakes@gmail.com>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
-List-Post: <mailto:intel-gfx@lists.freedesktop.org>
-List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: intel-gfx-bounces@lists.freedesktop.org
-Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
-To: Lorenzo Stoakes <lstoakes@gmail.com>
-Cc: linux-mips@linux-mips.org, linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, linux-sh@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, netdev@vger.kernel.org, sparclinux@vger.kernel.org, linux-ia64@vger.kernel.org, linux-s390@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-rdma@vger.kernel.org, x86@kernel.org, Hugh Dickins <hughd@google.com>, linux-media@vger.kernel.org, Rik van Riel <riel@redhat.com>, intel-gfx@lists.freedesktop.org, adi-buildroot-devel@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-cris-kernel@axis.com, Linus Torvalds <torvalds@linux-foundation.org>, linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-alpha@vger.kernel.orglin
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; boundary="=-=-=";
+        micalg=pgp-sha1; protocol="application/pgp-signature"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.nue.novell.com ([195.135.221.5]:47868 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755723AbcJRNEU (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Tue, 18 Oct 2016 09:04:20 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
 
-T24gVGh1IDEzLTEwLTE2IDAxOjIwOjE0LCBMb3JlbnpvIFN0b2FrZXMgd3JvdGU6Cj4gVGhpcyBw
-YXRjaCByZW1vdmVzIHRoZSB3cml0ZSBhbmQgZm9yY2UgcGFyYW1ldGVycyBmcm9tIGdldF91c2Vy
-X3BhZ2VzX2xvY2tlZCgpCj4gYW5kIHJlcGxhY2VzIHRoZW0gd2l0aCBhIGd1cF9mbGFncyBwYXJh
-bWV0ZXIgdG8gbWFrZSB0aGUgdXNlIG9mIEZPTExfRk9SQ0UKPiBleHBsaWNpdCBpbiBjYWxsZXJz
-IGFzIHVzZSBvZiB0aGlzIGZsYWcgY2FuIHJlc3VsdCBpbiBzdXJwcmlzaW5nIGJlaGF2aW91ciAo
-YW5kCj4gaGVuY2UgYnVncykgd2l0aGluIHRoZSBtbSBzdWJzeXN0ZW0uCj4gCj4gU2lnbmVkLW9m
-Zi1ieTogTG9yZW56byBTdG9ha2VzIDxsc3RvYWtlc0BnbWFpbC5jb20+Cj4gLS0tCj4gIGluY2x1
-ZGUvbGludXgvbW0uaCB8ICAyICstCj4gIG1tL2ZyYW1lX3ZlY3Rvci5jICB8ICA4ICsrKysrKyst
-Cj4gIG1tL2d1cC5jICAgICAgICAgICB8IDEyICsrKy0tLS0tLS0tLQo+ICBtbS9ub21tdS5jICAg
-ICAgICAgfCAgNSArKysrLQo+ICA0IGZpbGVzIGNoYW5nZWQsIDE1IGluc2VydGlvbnMoKyksIDEy
-IGRlbGV0aW9ucygtKQo+IAo+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L21tLmggYi9pbmNs
-dWRlL2xpbnV4L21tLmgKPiBpbmRleCA2YWRjNGJjLi4yN2FiNTM4IDEwMDY0NAo+IC0tLSBhL2lu
-Y2x1ZGUvbGludXgvbW0uaAo+ICsrKyBiL2luY2x1ZGUvbGludXgvbW0uaAo+IEBAIC0xMjgyLDcg
-KzEyODIsNyBAQCBsb25nIGdldF91c2VyX3BhZ2VzKHVuc2lnbmVkIGxvbmcgc3RhcnQsIHVuc2ln
-bmVkIGxvbmcgbnJfcGFnZXMsCj4gIAkJCSAgICBpbnQgd3JpdGUsIGludCBmb3JjZSwgc3RydWN0
-IHBhZ2UgKipwYWdlcywKPiAgCQkJICAgIHN0cnVjdCB2bV9hcmVhX3N0cnVjdCAqKnZtYXMpOwo+
-ICBsb25nIGdldF91c2VyX3BhZ2VzX2xvY2tlZCh1bnNpZ25lZCBsb25nIHN0YXJ0LCB1bnNpZ25l
-ZCBsb25nIG5yX3BhZ2VzLAo+IC0JCSAgICBpbnQgd3JpdGUsIGludCBmb3JjZSwgc3RydWN0IHBh
-Z2UgKipwYWdlcywgaW50ICpsb2NrZWQpOwo+ICsJCSAgICB1bnNpZ25lZCBpbnQgZ3VwX2ZsYWdz
-LCBzdHJ1Y3QgcGFnZSAqKnBhZ2VzLCBpbnQgKmxvY2tlZCk7CgpIdW0sIHRoZSBwcm90b3R5cGUg
-aXMgaW5jb25zaXN0ZW50IHdpdGggZS5nLiBfX2dldF91c2VyX3BhZ2VzX3VubG9ja2VkKCkKd2hl
-cmUgZ3VwX2ZsYWdzIGNvbWUgYWZ0ZXIgKipwYWdlcyBhcmd1bWVudC4gQWN0dWFsbHkgaXQgbWFr
-ZXMgbW9yZSBzZW5zZQp0byBoYXZlIGl0IGJlZm9yZSAqKnBhZ2VzIHNvIHRoYXQgaW5wdXQgYXJn
-dW1lbnRzIGNvbWUgZmlyc3QgYW5kIG91dHB1dAphcmd1bWVudHMgc2Vjb25kIGJ1dCBJIGRvbid0
-IGNhcmUgdGhhdCBtdWNoLiBCdXQgaXQgZGVmaW5pdGVseSBzaG91bGQgYmUKY29uc2lzdGVudC4u
-LgoKCQkJCQkJCQlIb256YQotLSAKSmFuIEthcmEgPGphY2tAc3VzZS5jb20+ClNVU0UgTGFicywg
-Q1IKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KSW50ZWwt
-Z2Z4IG1haWxpbmcgbGlzdApJbnRlbC1nZnhAbGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBzOi8v
-bGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vaW50ZWwtZ2Z4Cg==
+--=-=-=
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+This development checkpoint release includes a lot of changes and
+improvements to Kraken. This is the first release introducing ceph-mgr,
+a new daemon which provides additional monitoring & interfaces to
+external monitoring/management systems. There are also many improvements
+to bluestore, RGW introduces sync modules, copy part for multipart
+uploads and metadata search via elastic search as a tech preview. We've
+had to skip releasing 11.0.1 due to an issue with git tags and package
+versions as we were transitioning away from autotools to cmake and the
+new build system in place.
+
+Due to the really long changelog in this release, please read the
+list of changes here:
+http://ceph.com/releases/kraken-11-0-2-released/
+
+The debian and rpm packages are available at the usual locations at
+http://download.ceph.com/debian-kraken/ and
+http://download.ceph.com/rpm-kraken respectively. For more details refer
+below.
+
+
+Getting Ceph
+=2D-----------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://download.ceph.com/tarballs/ceph-11.0.2.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-dep=
+loy
+
+=2D-
+Abhishek Lekshmanan
+SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton, =
+HRB 21284 (AG N=C3=BCrnberg)
+
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBAgAGBQJYBh3RAAoJEPnwZB8bZe1fimwH/0etgc01WicJsVcdWKlwN28H
+RBDVU7h840cpe4shbuYWvBFz8I3oZSI3wAM+n0xQD7wsLWNNQusxA7/vcoDmkhVc
+rT54QE9+ydHAhESVdeuRGFQ5+h4997r/Z8Wvm1SiJZaPhpEU5btdQ/3of+a7oVUE
+fi6En4OcXI/NssXynILFPIH4EXpJRXWdnfmwLm08cfDbURDglL1Zsm+V5UCcUhay
+kTyifn0p5pnsGtgUEzav4qXes0scWpntu1/Qv8h+ui7/jDw7xDorz2cCCgZYR0Cj
+0eMRNQ0Vjpc0Lrw8DI5rZl2nvNwxyu4Tf+JTNmuyNrFLelyT77tX0XamH450Xa4=
+=qmL9
+-----END PGP SIGNATURE-----
+--=-=-=--
