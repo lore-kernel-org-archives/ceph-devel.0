@@ -1,44 +1,40 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: CDM in 2 weeks
-Date: Wed, 19 Oct 2016 13:10:02 -0400
-Message-ID: <CAAZbbf0=2xVA9nv5gZvdxLDXr137APtNLvduEEyE=6AsjAvM7g@mail.gmail.com>
+From: Dave Hansen <dave.hansen@linux.intel.com>
+Subject: Re: [PATCH 00/10] mm: adjust get_user_pages* functions
+ to explicitly pass FOLL_* flags
+Date: Wed, 19 Oct 2016 10:23:55 -0700
+Message-ID: <5807AC2B.4090208@linux.intel.com>
+References: <20161013002020.3062-1-lstoakes@gmail.com>
+ <20161018153050.GC13117@dhcp22.suse.cz> <20161019085815.GA22239@lucifer>
+ <20161019090727.GE7517@dhcp22.suse.cz> <5807A427.7010200@linux.intel.com>
+ <20161019170127.GN24393@dhcp22.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f177.google.com ([209.85.216.177]:35891 "EHLO
-        mail-qt0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S944357AbcJSRKD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Oct 2016 13:10:03 -0400
-Received: by mail-qt0-f177.google.com with SMTP id m5so28233617qtb.3
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Oct 2016 10:10:03 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, board@lists.ceph.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <intel-gfx-bounces@lists.freedesktop.org>
+In-Reply-To: <20161019170127.GN24393@dhcp22.suse.cz>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
+List-Post: <mailto:intel-gfx@lists.freedesktop.org>
+List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: intel-gfx-bounces@lists.freedesktop.org
+Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
+To: Michal Hocko <mhocko@kernel.org>
+Cc: linux-mips@linux-mips.org, linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, linux-sh@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-mm@kvack.org, netdev@vger.kernel.org, sparclinux@vger.kernel.org, linux-ia64@vger.kernel.org, linux-s390@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-rdma@vger.kernel.org, x86@kernel.org, Hugh Dickins <hughd@google.com>, linux-media@vger.kernel.org, Rik van Riel <riel@redhat.com>, intel-gfx@lists.freedesktop.org, adi-buildroot-devel@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Lorenzo Stoakes <lstoakes@gmail.com>, linux-cris-kernel@axis.com, Linus Torvalds <torvalds@linux-foundation.org>, linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-alpha@vger.kernel.org, linux-fs
+List-Id: ceph-devel.vger.kernel.org
 
-Hey cephers,
-
-Just a friendly reminder that the next Ceph Developer Monthly is in
-two weeks. We have been playing it pretty fast and loose with who
-submits talking points, so I would really like people to submit early
-this time around.
-
-We really try to keep it as lightweight as possible, but in order for
-me to continue doing that I need community members to step up and add
-topics they are working on. It can be as simple as:
-
-"Patrick McGarry - CephFS multi-mds work - http://pad.ceph.com/p/example"
-
-Please add your own entries to the wiki with what you are working on
-currently. Thanks.
-
-wiki.ceph.com/CDM_02-NOV-2016
-
-
--- 
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+T24gMTAvMTkvMjAxNiAxMDowMSBBTSwgTWljaGFsIEhvY2tvIHdyb3RlOgo+IFRoZSBxdWVzdGlv
+biBJIGhhZCBlYXJsaWVyIHdhcyB3aGV0aGVyIHRoaXMgaGFzIHRvIGJlIGFuIGV4cGxpY2l0IEZP
+TEwKPiBmbGFnIHVzZWQgYnkgZy11LXAgdXNlcnMgb3Igd2UgY2FuIGp1c3QgdXNlIGl0IGludGVy
+bmFsbHkgd2hlbiBtbSAhPQo+IGN1cnJlbnQtPm1tCgpUaGUgcmVhc29uIEkgY2hvc2Ugbm90IHRv
+IGRvIHRoYXQgd2FzIHRoYXQgZGVmZXJyZWQgd29yayBnZXRzIHJ1biB1bmRlcgphIGJhc2ljYWxs
+eSByYW5kb20gJ2N1cnJlbnQnLiAgSWYgd2UganVzdCB1c2UgJ21tICE9IGN1cnJlbnQtPm1tJywg
+dGhlbgp0aGUgZGVmZXJyZWQgd29yayB3aWxsIHNvbWV0aW1lcyBoYXZlIHBrZXlzIGVuZm9yY2Vk
+IGFuZCBzb21ldGltZXMgbm90LApiYXNpY2FsbHkgcmFuZG9tbHkuCgpXZSB3YW50IHRvIGJlIGNv
+bnNpc3RlbnQgd2l0aCB3aGV0aGVyIHRoZXkgYXJlIGVuZm9yY2VkIG9yIG5vdCwgc28gd2UKZXhw
+bGljaXRseSBpbmRpY2F0ZSB0aGF0IGJ5IGNhbGxpbmcgdGhlIHJlbW90ZSB2YXJpYW50IHZzLiBw
+bGFpbi4KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KSW50
+ZWwtZ2Z4IG1haWxpbmcgbGlzdApJbnRlbC1nZnhAbGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBz
+Oi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vaW50ZWwtZ2Z4Cg==
