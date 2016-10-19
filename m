@@ -1,63 +1,45 @@
-From: Michael Ellerman <mpe@ellerman.id.au>
-Subject: Re: [PATCH 10/10] mm: replace access_process_vm() write parameter with gup_flags
-Date: Wed, 19 Oct 2016 22:10:46 +1100
-Message-ID: <87twc84mrt.fsf@concordia.ellerman.id.au>
-References: <20161013002020.3062-1-lstoakes@gmail.com> <20161013002020.3062-11-lstoakes@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Upcoming 10.2.4
+Date: Wed, 19 Oct 2016 11:52:06 +0200
+Message-ID: <58074246.7030904@dachary.org>
+References: <57FB7494.1010309@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20161013002020.3062-11-lstoakes@gmail.com>
-Sender: owner-linux-mm@kvack.org
-To: linux-mm@kvack.org
-Cc: linux-mips@linux-mips.org, linux-fbdev@vger.kernel.org, Jan Kara <jack@suse.cz>, kvm@vger.kernel.org, linux-sh@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, dri-devel@lists.freedesktop.org, netdev@vger.kernel.org, sparclinux@vger.kernel.org, linux-ia64@vger.kernel.org, linux-s390@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-rdma@vger.kernel.org, x86@kernel.org, Hugh Dickins <hughd@google.com>, linux-media@vger.kernel.org, Rik van Riel <riel@redhat.com>, intel-gfx@lists.freedesktop.org, adi-buildroot-devel@lists.sourceforge.net, ceph-devel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Lorenzo Stoakes <lstoakes@gmail.com>, linux-cris-kernel@axis.com, Linus Torvalds <torvalds@linux-foundation.org>, linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-alpha@vger.kernel.o
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from slow1-d.mail.gandi.net ([217.70.178.86]:57045 "EHLO
+        slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S941078AbcJSOTK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Oct 2016 10:19:10 -0400
+Received: from relay4-d.mail.gandi.net (relay4-d.mail.gandi.net [217.70.183.196])
+        by slow1-d.mail.gandi.net (Postfix) with ESMTP id A8F2847EDEE
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Oct 2016 11:52:42 +0200 (CEST)
+In-Reply-To: <57FB7494.1010309@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Abhishek L <abhishek.lekshmanan@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Lorenzo Stoakes <lstoakes@gmail.com> writes:
+Hi Abhishek,
 
-> diff --git a/arch/powerpc/kernel/ptrace32.c b/arch/powerpc/kernel/ptrace32.c
-> index f52b7db3..010b7b3 100644
-> --- a/arch/powerpc/kernel/ptrace32.c
-> +++ b/arch/powerpc/kernel/ptrace32.c
-> @@ -74,7 +74,7 @@ long compat_arch_ptrace(struct task_struct *child, compat_long_t request,
->  			break;
->  
->  		copied = access_process_vm(child, (u64)addrOthers, &tmp,
-> -				sizeof(tmp), 0);
-> +				sizeof(tmp), FOLL_FORCE);
->  		if (copied != sizeof(tmp))
->  			break;
->  		ret = put_user(tmp, (u32 __user *)data);
+Unless I missed something, all backports that matter are now in the last round of testing[1]. If we're lucky all backports in the testing branch (jewel-backports) will be merged. Even if it's not the case I'll make sure at least all the urgent ones[2] are.
 
-LGTM.
+If the test infrastructure permits, I should be able to propose you to cut 10.2.4 early next week.
 
-> @@ -179,7 +179,8 @@ long compat_arch_ptrace(struct task_struct *child, compat_long_t request,
->  			break;
->  		ret = 0;
->  		if (access_process_vm(child, (u64)addrOthers, &tmp,
-> -					sizeof(tmp), 1) == sizeof(tmp))
-> +					sizeof(tmp),
-> +					FOLL_FORCE | FOLL_WRITE) == sizeof(tmp))
->  			break;
->  		ret = -EIO;
->  		break;
+Cheers
 
-If you're respinning this anyway, can you format that as:
+[1] http://tracker.ceph.com/issues/17487#note-16
+[2] http://tracker.ceph.com/projects/ceph/issues?query_id=96
 
-		if (access_process_vm(child, (u64)addrOthers, &tmp, sizeof(tmp),
-				      FOLL_FORCE | FOLL_WRITE) == sizeof(tmp))
-  			break;
+On 10/10/2016 12:59, Loic Dachary wrote:
+> Hi Abhishek,
+> 
+> Since you're now release manager, it is my understanding that we'll be asking you if the release should be cut or not. I updated the issue tracking the progress of 10.2.4 accordingly. This is a heads up to let you know we'll most likely ask that question for 10.2.4 some time next week ;-)
+> 
+> Cheers
+> 
+> [1] http://tracker.ceph.com/journals/diff/79457?detail_id=76318 
+> 
 
-I realise you probably deliberately didn't do that to make the diff clearer.
-
-Either way:
-
-Acked-by: Michael Ellerman <mpe@ellerman.id.au> (powerpc)
-
-
-cheers
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+-- 
+Loïc Dachary, Artisan Logiciel Libre
