@@ -1,66 +1,114 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Upcoming 10.2.4
-Date: Wed, 19 Oct 2016 16:54:58 +0200
-Message-ID: <58078942.5080206@dachary.org>
-References: <57FB7494.1010309@dachary.org> <58074246.7030904@dachary.org>
- <CA+aFP1CcCw=4qvx1qh+xqdQ8vUZkwWbXmYdbYhMqdeJOArb-+A@mail.gmail.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: mempools everywhere
+Date: Wed, 19 Oct 2016 15:09:48 +0000
+Message-ID: <BLUPR0201MB152443595C256F34701829CFE8D20@BLUPR0201MB1524.namprd02.prod.outlook.com>
+References: <alpine.DEB.2.11.1610181634150.6167@piezo.us.to>
+ <BLUPR0201MB15240B7882D0381D5152363AE8D30@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay6-d.mail.gandi.net ([217.70.183.198]:49270 "EHLO
-        relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S943067AbcJSOzI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Oct 2016 10:55:08 -0400
-In-Reply-To: <CA+aFP1CcCw=4qvx1qh+xqdQ8vUZkwWbXmYdbYhMqdeJOArb-+A@mail.gmail.com>
+Received: from mail-bn3nam01on0045.outbound.protection.outlook.com ([104.47.33.45]:20832
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754337AbcJSPJv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 19 Oct 2016 11:09:51 -0400
+In-Reply-To: <BLUPR0201MB15240B7882D0381D5152363AE8D30@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: Abhishek L <abhishek.lekshmanan@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Ok. I created http://tracker.ceph.com/issues/17616 and set it to Urgent so that it's not overlooked.
+Here's a two-line patch to eliminate the memory leak of the mempool object =
+itself :)
 
-On 19/10/2016 16:26, Jason Dillaman wrote:
-> There is one more backport required [1] once it is merged into the
-> master branch (hopefully this week) to fix an assertion failure that
-> would otherwise be introduced by 10.2.4.
-> 
-> Thanks,
-> Jason
-> 
-> [1] https://github.com/ceph/ceph/pull/11520
-> 
-> On Wed, Oct 19, 2016 at 5:52 AM, Loic Dachary <loic@dachary.org> wrote:
->> Hi Abhishek,
->>
->> Unless I missed something, all backports that matter are now in the last round of testing[1]. If we're lucky all backports in the testing branch (jewel-backports) will be merged. Even if it's not the case I'll make sure at least all the urgent ones[2] are.
->>
->> If the test infrastructure permits, I should be able to propose you to cut 10.2.4 early next week.
->>
->> Cheers
->>
->> [1] http://tracker.ceph.com/issues/17487#note-16
->> [2] http://tracker.ceph.com/projects/ceph/issues?query_id=96
->>
->> On 10/10/2016 12:59, Loic Dachary wrote:
->>> Hi Abhishek,
->>>
->>> Since you're now release manager, it is my understanding that we'll be asking you if the release should be cut or not. I updated the issue tracking the progress of 10.2.4 accordingly. This is a heads up to let you know we'll most likely ask that question for 10.2.4 some time next week ;-)
->>>
->>> Cheers
->>>
->>> [1] http://tracker.ceph.com/journals/diff/79457?detail_id=76318
->>>
->>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
+Mempool& GetPool(index) {
+   If (table[index] =3D=3D nullptr) {
+      Static char storage[num_mempools][sizeof(mempool_t)];
+      Table[index] =3D new ((void *)stroage[index]) mempool_t;
+   }
+   Return Table[index];
+}
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+
+Volia, no leaks :) Makes the .so unload problem easier too :)
+
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Allen Samuels
+> Sent: Tuesday, October 18, 2016 10:00 AM
+> To: Sage Weil <sweil@redhat.com>; ceph-devel@vger.kernel.org
+> Subject: RE: mempools everywhere
+>=20
+> > -----Original Message-----
+> > From: Sage Weil [mailto:sweil@redhat.com]
+> > Sent: Tuesday, October 18, 2016 9:52 AM
+> > To: ceph-devel@vger.kernel.org
+> > Cc: Allen Samuels <Allen.Samuels@sandisk.com>
+> > Subject: mempools everywhere
+> >
+> > The mempool PR is more or less ready for final test/merge.  Once it's
+> > in place we'd love to use this all over the place so that we can tell
+> > where memory is going.  There's one major remaining roadblock, though:
+> > right now mempool is part of libglobal since it has global state (the
+> > mempools themselves).  This prevents us from putting anything in, say,
+> > osd_types.h (which is included in client code) in a mempool.  Which
+> > includes things like pg_log_t, a major consumer of memory.
+> >
+> > We have a few options...
+> >
+> > - Segregate types into different compilation units so that things that
+> > are server-side only can be built separately (and put in mempools).
+> >
+> > - Just avoid these types :(
+> >
+> > - Use mempools for client code as well.
+>=20
+> +1
+>=20
+> >
+> > The last one is the most appealing to me, but it's violating a big
+> > no-no of shared libraries (static state!).  However, I think that
+> > mempools may be one of those special things that all of the usual
+> > reasons that global variables are bad don't really apply to.  The main
+> > one being: if we have multiple users of, say, librados in the same
+> > process, it is totally fine (and possibly desired?) that they would sha=
+re the
+> same mempools.
+> >
+> > What do you think?
+> >
+> > FWIW, there is one bit of potentially shady initialization going on
+> > with the mempools.  Instead of statically defining the pools, we
+> > instead declare an array of pool pointers, and rely on the compiler
+> > and runtime environment to zero that for the process *before* any
+> > constructors are run for any compilation unit.  This allows pools to
+> > be allocated on-demand when needed by constructors in any compilation
+> > unit, regardless of the link order relative to mempool.cc.  This
+> > appears to be a safe thing to do (and avoids the very tedious process
+> > of ensuring that mempool.cc is always linked first so that it's ctors r=
+un first).
+>=20
+> I don't think is a cause for concern. There are hundreds of thousands of =
+lines
+> of existing code that are making the same assumption (global statics are =
+set
+> to zero unless overridden explicitly).
+>=20
+> >
+> > If we want to take the plunge and make this usable by librados and
+> > other client code, I think it may just work, modulo leaking the pool_t
+> > structures if the .so is ever unloaded (not sure any librados user
+> > does this?).  In that case, we could probably move the setup/teardown
+> > into the init/fini .so methods, although we'd need to confirm that
+> > these would run
+> > *before* any constructors for statically linked modules.
+> >
+> > Anyway.. thoughts?
+> >
+> > sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in =
+the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
