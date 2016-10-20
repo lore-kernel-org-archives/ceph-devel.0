@@ -1,30 +1,33 @@
-From: John Spray <jspray@redhat.com>
-Subject: Crashes with new encoding
-Date: Thu, 20 Oct 2016 11:33:27 +0100
-Message-ID: <CALe9h7frgSiSV0YkaP4h0nK0Z2p7R_QXe=xwf9ujvCg01ZusxA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: jewel: bad rados_buffer_free from librados python bindings
+Date: Thu, 20 Oct 2016 12:33:59 +0200
+Message-ID: <58089D97.2020606@dachary.org>
+References: <580881D6.2070603@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f48.google.com ([209.85.215.48]:33783 "EHLO
-        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752837AbcJTKdt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Oct 2016 06:33:49 -0400
-Received: by mail-lf0-f48.google.com with SMTP id x79so80807622lff.0
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Oct 2016 03:33:48 -0700 (PDT)
+Received: from relay5-d.mail.gandi.net ([217.70.183.197]:34263 "EHLO
+        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752837AbcJTKeE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Oct 2016 06:34:04 -0400
+In-Reply-To: <580881D6.2070603@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Latest master has the MDS crashing on startup:
-http://tracker.ceph.com/issues/17636
-https://github.com/ceph/ceph/pull/11577
+It passed 10 times in a row on the same branch (http://pulpito.ceph.com/loic-2016-10-20_09:32:24-rados-jewel-backports-distro-basic-smithi/). I guess it's a rare transient error and we were unlucky enough to hit it twice in a row.
 
-My patch is kind of dumb, clearly the intent of the original code is
-to avoid any constructor overhead and it would be nice to do so, but
-the original code seems to make the assumption that no encode/decode
-implementations deferences the object they're passed.
+On 20/10/2016 10:35, Loic Dachary wrote:
+> H Sage,
+> 
+> It looks like http://tracker.ceph.com/issues/15454 surfaced in jewel (failed twice in a row at http://tracker.ceph.com/issues/17487#note-19). It did not occur before, therefore I suspect it's a side effect of some of the commits in the jewel backports integration branch ( http://tracker.ceph.com/issues/17487#note-16 ), but I don't see which commit in that branch could have caused that kind of misbehavior.
+> 
+> Since you marked http://tracker.ceph.com/issues/15454 as Resolved with no commits attached, I suppose it means it went away for some reason. Could you please confirm ? 
+> 
+> Cheers
+> 
 
-Good motivation to go and immediately familiarise myself with the new
-code this morning though :-)
-
-John
+-- 
+Loïc Dachary, Artisan Logiciel Libre
