@@ -1,28 +1,66 @@
 From: Igor Fedotov <ifedotov@mirantis.com>
 Subject: Re: Bluestore performance degradation for the latest master
-Date: Fri, 21 Oct 2016 18:47:27 +0300
-Message-ID: <0d0f9481-15ed-5ad7-ff1f-143293fa10bf@mirantis.com>
+Date: Fri, 21 Oct 2016 19:09:06 +0300
+Message-ID: <0753374c-8909-596b-b060-fe249a027db4@mirantis.com>
 References: <BY2PR02MB3966F0CF4E7F1AD850C1E2BF4D40@BY2PR02MB396.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:35052 "EHLO
+Received: from mail-yw0-f170.google.com ([209.85.161.170]:34334 "EHLO
         mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934306AbcJUPra (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Oct 2016 11:47:30 -0400
-Received: by mail-yw0-f170.google.com with SMTP id t193so100636440ywc.2
-        for <ceph-devel@vger.kernel.org>; Fri, 21 Oct 2016 08:47:29 -0700 (PDT)
+        with ESMTP id S935043AbcJUQJJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Oct 2016 12:09:09 -0400
+Received: by mail-yw0-f170.google.com with SMTP id w3so100807867ywg.1
+        for <ceph-devel@vger.kernel.org>; Fri, 21 Oct 2016 09:09:09 -0700 (PDT)
 In-Reply-To: <BY2PR02MB3966F0CF4E7F1AD850C1E2BF4D40@BY2PR02MB396.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Somnath Roy <Somnath.Roy@sandisk.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Yeah, I have similar concerns about broken sharding...
+IMHO one bug is at
 
-Looking into that.
+bool BlueStore::ExtentMap::update(Onode *o, KeyValueDB::Transaction t,
+                                   bool force)
+{
 
+...
+
+       if (!force && len > g_conf->bluestore_extent_map_shard_max_size) {
+ >>>>        inline_bl.clear();
+         return true;
+       }
+
+inline_bl should be preserved for proper functioning at
+
+void BlueStore::ExtentMap::reshard(Onode *o, uint64_t min_alloc_size)
+...
+
+   unsigned bytes = 0;
+   if (o->onode.extent_map_shards.empty()) {
+ >>>    bytes = inline_bl.length();
+Commenting out inline_bl.clear seems to be enough in this case.
+
+Second suspicious place is two lines above:
+
+bool BlueStore::ExtentMap::update(Onode *o, KeyValueDB::Transaction t,
+                                   bool force)
+{
+
+...
+
+     if (inline_bl.length() == 0) {
+       unsigned n;
+       if (encode_some(0, OBJECT_MAX_SIZE, inline_bl, &n)) {
+     return true;
+       }
+
+Looks like encode_some might return true and leave inline_bl empty...
+Still thinking how to fix that...
+
+Thanks,
+Igor
 
 On 21.10.2016 18:29, Somnath Roy wrote:
 > Hi Sage,
