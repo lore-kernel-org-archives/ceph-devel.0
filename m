@@ -1,24 +1,37 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Bluestore performance degradation for the latest master
-Date: Fri, 21 Oct 2016 16:41:21 +0000
-Message-ID: <BY2PR02MB3961FB46B0CFE536B412C9EF4D40@BY2PR02MB396.namprd02.prod.outlook.com>
+Date: Fri, 21 Oct 2016 16:47:29 +0000
+Message-ID: <BY2PR02MB396928A20C989A1AC7B0A25F4D40@BY2PR02MB396.namprd02.prod.outlook.com>
 References: <BY2PR02MB3966F0CF4E7F1AD850C1E2BF4D40@BY2PR02MB396.namprd02.prod.outlook.com>
  <21ba142d-7b47-3b9d-2afd-6daf7d8b13d5@mirantis.com>
+ <BY2PR02MB3961FB46B0CFE536B412C9EF4D40@BY2PR02MB396.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2nam02on0041.outbound.protection.outlook.com ([104.47.38.41]:34560
-        "EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
+Received: from mail-co1nam03on0069.outbound.protection.outlook.com ([104.47.40.69]:26880
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752432AbcJUQlX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 21 Oct 2016 12:41:23 -0400
-In-Reply-To: <21ba142d-7b47-3b9d-2afd-6daf7d8b13d5@mirantis.com>
+        id S1755045AbcJUQrc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 21 Oct 2016 12:47:32 -0400
+In-Reply-To: <BY2PR02MB3961FB46B0CFE536B412C9EF4D40@BY2PR02MB396.namprd02.prod.outlook.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Igor Fedotov <ifedotov@mirantis.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Ah ! I did a diff and saw inline_bl.clear() was not there earlier , that is=
+ the problem indeed..
+Thanks for quick catch..=20
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel=
+.org] On Behalf Of Somnath Roy
+Sent: Friday, October 21, 2016 9:41 AM
+To: Igor Fedotov; Sage Weil (sweil@redhat.com)
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: Bluestore performance degradation for the latest master
 
 Thanks Igor !
 But, I think this part of the code base was working fine for me , change in=
@@ -30,7 +43,7 @@ Regards
 Somnath
 
 -----Original Message-----
-From: Igor Fedotov [mailto:ifedotov@mirantis.com]=20
+From: Igor Fedotov [mailto:ifedotov@mirantis.com]
 Sent: Friday, October 21, 2016 9:32 AM
 To: Somnath Roy; Sage Weil (sweil@redhat.com)
 Cc: ceph-devel@vger.kernel.org
@@ -63,12 +76,12 @@ ditioning). Onode key is 18K , no shard key..
 >
 > 2016-10-21 08:24:35.666549 7fd3ac701700 30 submit_transaction Rocksdb tra=
 nsaction:
-> Put( Prefix =3D M key =3D=20
+> Put( Prefix =3D M key =3D
 > 0x0000000000000490'.0000000016.00000000000000019834' Value size =3D 182)=
 =20
 > Put( Prefix =3D M key =3D 0x0000000000000490'._fastinfo' Value size =3D 1=
 86)=20
-> Put( Prefix =3D O key =3D=20
+> Put( Prefix =3D O key =3D
 > 0x7f800000000000000139748c93217262'd_data.10156b8b4567.000000000000324
 > c!=3D'0xfffffffffffffffeffffffffffffffff'o' Value size =3D 18616) Merge(=
 =20
@@ -92,3 +105,7 @@ onically stored copies).
 > in the body of a message to majordomo@vger.kernel.org More majordomo=20
 > info at  http://vger.kernel.org/majordomo-info.html
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in th=
+e body of a message to majordomo@vger.kernel.org More majordomo info at  ht=
+tp://vger.kernel.org/majordomo-info.html
