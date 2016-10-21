@@ -1,31 +1,50 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Bluestore performance degradation for the latest master
-Date: Fri, 21 Oct 2016 20:22:23 +0300
-Message-ID: <02a670b3-02d0-5386-91e3-fe4c59753b3c@mirantis.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore performance degradation for the latest master
+Date: Fri, 21 Oct 2016 18:28:44 +0000
+Message-ID: <BY2PR02MB3968D76397C0AB0750A63C0F4D40@BY2PR02MB396.namprd02.prod.outlook.com>
 References: <BY2PR02MB3966F0CF4E7F1AD850C1E2BF4D40@BY2PR02MB396.namprd02.prod.outlook.com>
  <21ba142d-7b47-3b9d-2afd-6daf7d8b13d5@mirantis.com>
  <BY2PR02MB3961FB46B0CFE536B412C9EF4D40@BY2PR02MB396.namprd02.prod.outlook.com>
  <BY2PR02MB396928A20C989A1AC7B0A25F4D40@BY2PR02MB396.namprd02.prod.outlook.com>
+ <02a670b3-02d0-5386-91e3-fe4c59753b3c@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f169.google.com ([209.85.161.169]:33720 "EHLO
-        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932507AbcJURW0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Oct 2016 13:22:26 -0400
-Received: by mail-yw0-f169.google.com with SMTP id t192so105373936ywf.0
-        for <ceph-devel@vger.kernel.org>; Fri, 21 Oct 2016 10:22:26 -0700 (PDT)
-In-Reply-To: <BY2PR02MB396928A20C989A1AC7B0A25F4D40@BY2PR02MB396.namprd02.prod.outlook.com>
+Received: from mail-sn1nam01on0059.outbound.protection.outlook.com ([104.47.32.59]:11449
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S933304AbcJUS2r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 21 Oct 2016 14:28:47 -0400
+In-Reply-To: <02a670b3-02d0-5386-91e3-fe4c59753b3c@mirantis.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
+To: Igor Fedotov <ifedotov@mirantis.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+I can confirm with Igor's fix the performance came back to normal, shards a=
+re written as expected..
+With latest master I am seeing 80-90% cpu improvement (because of wip-denc =
+work I believe) and that translates to *~30% performance improvement* for 4=
+K RW with min_alloc_size =3D 4K , 1 hour fio run.
+But, one *concern* is bigger block seq write I am seeing at least 15% perfo=
+rmance degradation..
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Igor Fedotov [mailto:ifedotov@mirantis.com]=20
+Sent: Friday, October 21, 2016 10:22 AM
+To: Somnath Roy; Sage Weil (sweil@redhat.com)
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: Bluestore performance degradation for the latest master
 
 Latest update:
 
-this patch fixes the resharding but doesn't pass SimpleCloneTest in 
-store_test. Root cause is unclear for me at the moment.
+this patch fixes the resharding but doesn't pass SimpleCloneTest in store_t=
+est. Root cause is unclear for me at the moment.
 
 Will proceed on Monday.
 
@@ -36,18 +55,21 @@ Igor
 
 
 On 21.10.2016 19:47, Somnath Roy wrote:
-> Ah ! I did a diff and saw inline_bl.clear() was not there earlier , that is the problem indeed..
+> Ah ! I did a diff and saw inline_bl.clear() was not there earlier , that =
+is the problem indeed..
 > Thanks for quick catch..
 >
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+> From: ceph-devel-owner@vger.kernel.org=20
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
 > Sent: Friday, October 21, 2016 9:41 AM
 > To: Igor Fedotov; Sage Weil (sweil@redhat.com)
 > Cc: ceph-devel@vger.kernel.org
 > Subject: RE: Bluestore performance degradation for the latest master
 >
 > Thanks Igor !
-> But, I think this part of the code base was working fine for me , change in encoding recently is breaking stuff ?
+> But, I think this part of the code base was working fine for me , change =
+in encoding recently is breaking stuff ?
 > I will try your PR.
 >
 >
@@ -66,40 +88,63 @@ On 21.10.2016 19:47, Somnath Roy wrote:
 >
 > On 21.10.2016 18:29, Somnath Roy wrote:
 >> Hi Sage,
->> I am profiling yesterday's master and seeing significant performance degradation both for bigger block seq write and 4K RW.
+>> I am profiling yesterday's master and seeing significant performance deg=
+radation both for bigger block seq write and 4K RW.
 >>
->> See the write amp (~5X) it is introducing for 4K RW (with
->> min_alloc_size = 4K)
+>> See the write amp (~5X) it is introducing for 4K RW (with=20
+>> min_alloc_size =3D 4K)
 >>
 >> ----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system--
 >> usr sys idl wai hiq siq| read  writ| recv  send|  in   out | int   csw
->>    52   8  32   6   0   2|  98M  504M| 122M   81M|   0     0 | 318k  361k
->>    53   8  31   6   0   2|  91M  517M| 123M   83M|   0     0 | 358k  357k
->>    53   8  30   6   0   2|  90M  572M| 123M   81M|   0     0 | 339k  348k
->>    53   8  30   6   0   2|  95M  560M| 123M   81M|   0     0 | 321k  354k
->>    53   8  31   6   0   2|  97M  509M| 125M   82M|   0     0 | 315k  365k
->>    53   8  30   6   0   2|  87M  567M| 122M   81M|   0     0 | 322k  355k
->>    53   9  30   6   0   2|  92M  547M| 122M   81M|   0     0 | 345k  361k
+>>    52   8  32   6   0   2|  98M  504M| 122M   81M|   0     0 | 318k  361=
+k
+>>    53   8  31   6   0   2|  91M  517M| 123M   83M|   0     0 | 358k  357=
+k
+>>    53   8  30   6   0   2|  90M  572M| 123M   81M|   0     0 | 339k  348=
+k
+>>    53   8  30   6   0   2|  95M  560M| 123M   81M|   0     0 | 321k  354=
+k
+>>    53   8  31   6   0   2|  97M  509M| 125M   82M|   0     0 | 315k  365=
+k
+>>    53   8  30   6   0   2|  87M  567M| 122M   81M|   0     0 | 322k  355=
+k
+>>    53   9  30   6   0   2|  92M  547M| 122M   81M|   0     0 | 345k  361=
+k
 >>
->> I think the reason is, it seems the extent sharding logic is broken. See the tx we are writing after 10 min run (4K rw on 100G image after 1M preconditioning). Onode key is 18K , no shard key..
+>> I think the reason is, it seems the extent sharding logic is broken. See=
+ the tx we are writing after 10 min run (4K rw on 100G image after 1M preco=
+nditioning). Onode key is 18K , no shard key..
 >>
->> 2016-10-21 08:24:35.666549 7fd3ac701700 30 submit_transaction Rocksdb transaction:
->> Put( Prefix = M key =
->> 0x0000000000000490'.0000000016.00000000000000019834' Value size = 182)
->> Put( Prefix = M key = 0x0000000000000490'._fastinfo' Value size = 186)
->> Put( Prefix = O key =
->> 0x7f800000000000000139748c93217262'd_data.10156b8b4567.000000000000324
->> c!='0xfffffffffffffffeffffffffffffffff'o' Value size = 18616) Merge(
->> Prefix = b key = 0x0000004590180000 Value size = 16) Merge( Prefix = b
->> key = 0x00000046df380000 Value size = 16)
+>> 2016-10-21 08:24:35.666549 7fd3ac701700 30 submit_transaction Rocksdb tr=
+ansaction:
+>> Put( Prefix =3D M key =3D
+>> 0x0000000000000490'.0000000016.00000000000000019834' Value size =3D=20
+>> 182) Put( Prefix =3D M key =3D 0x0000000000000490'._fastinfo' Value size=
+=20
+>> =3D 186) Put( Prefix =3D O key =3D
+>> 0x7f800000000000000139748c93217262'd_data.10156b8b4567.00000000000032
+>> 4 c!=3D'0xfffffffffffffffeffffffffffffffff'o' Value size =3D 18616)=20
+>> Merge( Prefix =3D b key =3D 0x0000004590180000 Value size =3D 16) Merge(=
+=20
+>> Prefix =3D b key =3D 0x00000046df380000 Value size =3D 16)
 >>
 >> Thanks & Regards
 >> Somnath
->> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>> PLEASE NOTE: The information contained in this electronic mail message i=
+s intended only for the use of the designated recipient(s) named above. If =
+the reader of this message is not the intended recipient, you are hereby no=
+tified that you have received this message in error and that any review, di=
+ssemination, distribution, or copying of this message is strictly prohibite=
+d. If you have received this communication in error, please notify the send=
+er by telephone or e-mail (as shown above) immediately and destroy any and =
+all copies of this message in your possession (whether hard copies or elect=
+ronically stored copies).
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> in the body of a message to majordomo@vger.kernel.org More majordomo=20
 >> info at  http://vger.kernel.org/majordomo-info.html
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=20
+> in the body of a message to majordomo@vger.kernel.org More majordomo=20
+> info at  http://vger.kernel.org/majordomo-info.html
 
