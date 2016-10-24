@@ -1,66 +1,85 @@
-From: xxhdx1985126 <xxhdx1985126@163.com>
-Subject: Re:Re:Re: Question about OSDSuperblock
-Date: Mon, 24 Oct 2016 18:45:24 +0800 (CST)
-Message-ID: <667a1924.e595.157f64b7bdc.Coremail.xxhdx1985126@163.com>
-References: <463456f6.b4bb.157f5bb2656.Coremail.xxhdx1985126@163.com>
- <alpine.DEB.2.11.1610241000230.14316@piezo.us.to>
- <745b98e.e49f.157f645131d.Coremail.xxhdx1985126@163.com>
- <alpine.DEB.2.11.1610241041030.14316@piezo.us.to>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: Fw: Questions about bad CRC in KRBD
+Date: Mon, 24 Oct 2016 15:37:49 +0200
+Message-ID: <CAOi1vP8gHjV5S5Z8GFO87-vHx8y8-iwrekQC_r_VJnG0knAaBg@mail.gmail.com>
+References: <13101b6b-a5b5-47ed-a558-55de6e3119f6.james.liu@alibaba-inc.com> <alpine.DEB.2.11.1610241021510.14539@piezo.us.to>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m13-20.163.com ([220.181.13.20]:62931 "EHLO m13-20.163.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752171AbcJXKpc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 24 Oct 2016 06:45:32 -0400
-In-Reply-To: <alpine.DEB.2.11.1610241041030.14316@piezo.us.to>
+Received: from mail-ua0-f181.google.com ([209.85.217.181]:34042 "EHLO
+        mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934306AbcJXNhv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Oct 2016 09:37:51 -0400
+Received: by mail-ua0-f181.google.com with SMTP id m26so43072562uaa.1
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Oct 2016 06:37:51 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1610241021510.14539@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: "LIU, Fei" <james.liu@alibaba-inc.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-ClRoYW5rcywgc2lyOi0pCgoKCgoKCgoKQXQgMjAxNi0xMC0yNCAxODo0Mjo1MywgIlNhZ2UgV2Vp
-bCIgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3cm90ZToKPk9uIE1vbiwgMjQgT2N0IDIwMTYsIHh4aGR4
-MTk4NTEyNiB3cm90ZToKPj4gVGhhbmtzLCBzaXI6LSkgSSBnb3QgaXQuIEknbGwgdHJ5IHRvIHVu
-ZGVyc3RhbmQgdGhlICJwZWVyaW5nIiBwYXJ0IG9mCj4+IGNvZGUuOi0pCj4+IAo+PiBCeSB0aGUg
-d2F5LCBwbGVhc2UgYWxsb3cgbWUgdG8gYXNrIGp1c3Qgb25lIG1vcmUgcXVlc3Rpb246LSkKPj4g
-VW5kZXIgd2hhdCBjaXJjdW1zdGFuY2Ugd2lsbCB0aGUgT1NETWFwIG1hcmsgYSBuZXdseSBhZGRl
-ZCBvc2QgIlVQIj8gT3IsIGluCj4+IG90aGVyIHdvcmRzLCBob3cgZG9lcyB0aGUgT1NETWFwIGp1
-ZGdlIHdoZXRoZXIgb3Igbm90IGFuIGJvb3Rpbmcgb3NkIGhhcwo+PiBmaW5pc2hlZCB0aGUgJ2Jv
-b3RpbmcnIHNlcXVlbmNlIGFuZCBzaG91bGQgYmUgbWFyayAiVVAiPwo+PiAKPj4gVGhhbmsgeW91
-IHZlcnkgbXVjaCwgc2lyOi0pCj4KPk9uY2UgdGhlIHN0YXJ0aW5nIE9TRCBoYXMgZmV0Y2hlZCBh
-bGwgb2YgdGhlIE9TRE1hcHMgZnJvbSB0aGUgbW9uaXRvciAodG8gCj53aXRoaW4gYSBmZXcgZXBv
-Y2hzIGF0IGxlYXN0KSwgaXQgd2lsbCBzZW5kIGFuIE1PU0RCb290IG1lc3NhZ2UgYXNraW5nIHRo
-ZSAKPm1vbml0b3IgdG8gbWFyayBpdCBVUC4KPgo+U2VlIE9TRDo6c3RhcnRfYm9vdCgpIHRvIGZv
-bGxvdyB0aGUgdGhlIGZ1bGwgc2VxdWVuY2UhCj4KPnNhZ2UKPgo+Cj4gPiAKPj4gCj4+IAo+PiAK
-Pj4gQXQgMjAxNi0xMC0yNCAxODowNjo0NSwgIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0
-PiB3cm90ZToKPj4gPk9uIE1vbiwgMjQgT2N0IDIwMTYsIHh4aGR4MTk4NTEyNiB3cm90ZToKPj4g
-Pj4gSGksIGV2ZXJ5b25lLgo+PiA+PiAKPj4gPj4gCj4+ID4+IEknbSB0cnlpbmcgdG8gcmVhZCB0
-aGUgc291cmNlIGNvZGUgdGhhdCBib290cyBhbiBPU0QgaW5zdGFuY2UsIGFuZCBJIGZpbmQKPj4g
-IHNvbWV0aGluZyByZWFsbHkgb3ZlcndoZWxtcyBtZS4KPj4gPj4gSW4gdGhlIE9TRDo6aW5pdCgp
-IG1ldGhvZCwgaXQgcmVhZCB0aGUgT1NEU3VwZXJibG9jayBieSBjYWxsaW5nIE9TRDo6cmVhZAo+
-PiBfc3VwZXJibG9jaygpLCBhbmQgdGhlIGl0IHRyaWVkIHRvIGdldCB0aGUgImN1cnJlbnQiIG1h
-cCA6ICJvc2RtYXAgPSBnZXRfbWFwCj4+IChzdXBlcmJsb2NrLmN1cnJlbnRfZXBvY2gpIi4gVGhl
-biBPU0QgdXNlcyB0aGlzIG9zZG1hcCB0byBjYWxjdWxhdGUgdGhlIGFjdGkKPj4gbmcgYW5kIHVw
-IHNldCBvZiBlYWNoIHBnLsKgCj4+ID4+IEkgcmVhbGx5IGRvbid0IHVuZGVyc3RhbmQgdGhpcyEg
-U2luY2UgdGhlIE9TRFN1cGVyYmxvY2sgaXMgcmVhZCBmcm9tIHRoZSAKPj4gZGlzaywgdGhlIGNv
-bnRlbnQgb2YgdGhlIHN1cGVyYmxvY2suY3VycmVudF9lcG9jaCBtdXN0IGJlIGFuIG9sZCBlcG9j
-aCB3aGljaAo+PiAgaXMgcmVjb3JkZWQgYnkgdGhlIGxhc3QgT1NEIGluc3RhbmNlIHRoYXQgcnVu
-IG9uIHRoZSBjZXBoIG9zZCdzIGRpcmVjdG9yeS4gCj4+IFdoeSB1c2UgYW4gb2xkICJjdXJyZW50
-X2Vwb2NoIiB0byBjYWxjdWxhdGUgdGhlIGFjdGluZyBhbmQgdXAgc2V0IG9mIGVhY2ggcGcKPj4g
-Pwo+PiA+Cj4+ID5ZZXMuICBsb2FkX3BncygpIGluc3RhbnRpYXRlcyBhbGwgb2YgdGhlIFBHcywg
-cG9wdWxhdGVzIHRoZSBjdXJyZW50ICg9PSAKPj4gPmN1cnJlbnRfZXBvY2gpIHVwIGFuZCBhY3Rp
-bmcgdmVjdG9ycywgYW5kIHRyaWdnZXJzIGEgbG9hZGVkIGV2ZW50IHRvIGhlbHAgCj4+ID5nZXQg
-ZXZlcnl0aGluZyBpbi1tZW1vcnkgaW5pdGlhbGl6ZWQuCj4+ID4KPj4gPlRoZW4sIGR1cmluZyB0
-aGUgJ2Jvb3RpbmcnIHNlcXVlbmNlLCB3ZSByZXF1ZXN0IHRoZSBsYXRlc3QgbWFwIGZyb20gdGhl
-IAo+PiA+bW9uaXRvciwgYW5kIHJlc3BvbmQgdG8gYW55IGNoYW5nZXMgaW4gdGhlIE9TRE1hcC0t
-ZXZlcnl0aGluZyB0aGF0IAo+PiA+aGFwcGVuZWQgd2hpbGUgdGhlIE9TRCB3YXMgZG93biwgYW5k
-IGV2ZW50dWFsbHkgdGhlIE9TRG1hcCB0aGF0IGluZGljYXRlcyAKPj4gPnRoZSBPU0QgaXMgbm93
-IHVwLiAgQXQgdGhhdCBwb2ludCBpdCBjYW4gc3RhcnQgZG9pbmcgdXNlZnVsIHdvcmsuIExvb2sg
-Zm9yIAo+PiA+dGhlIEFkdk1hcCBhbmQgQWN0TWFwIHN0YXRlIGV2ZW50cy4KPj4gPgo+PiA+VGhp
-cyBwcm9jZXNzIG9mIHJlc3BvbmRpbmcgdG8gY2hhbmdlcyB0byB0aGUgT1NETWFwIGFuZCBzeW5j
-aHJvbml6aW5nIHdpdGggCj4+ID5vdGhlciBPU0RzIGluIGNvbGxlY3RpdmVseSBjYWxsZWQgInBl
-ZXJpbmciIGFuZCBpcyBvbmUgb2YgdGhlIG1vcmUgCj4+ID5kaWZmaWN1bHQgYXJlYXMgb2YgdGhl
-IGNvZGUgdG8gdW5kZXJzdGFuZC4gIDovCj4+ID4KPj4gPnNhZ2UKPj4gCj4+IAo+PiDCoAo+PiAK
-Pj4gCj4+IAo=
+On Mon, Oct 24, 2016 at 12:26 PM, Sage Weil <sweil@redhat.com> wrote:
+> Hi James,
+>
+> On Mon, 24 Oct 2016, LIU, Fei wrote:
+>> Hi Sage,
+>>    We built a ceph binary package by ourselves based on Jewel 10.2.2 source
+>> code in Alibaba. However,
+>>    we got below error with krbd/libceph during rbd map with CentOS
+>> 7.2(Kernel 3.10).  I am still able to use rados  put/fio rbd to put key
+>> value pairs into the ceph cluster. So , we are kind of confidence that was
+>> krbd issues.
+>>
+>>    We do disable sign message.
+>>
+>> cephx_sign_messages = false
+>>
+>> cephx_require_signatures = false
+>>
+>>
+>>    And also we make sure we have latest
+>>  struct ceph_msg_header {
+>>     __le64 seq;       /* message seq# for this session */
+>>     __le64 tid;       /* transaction id */
+>>     __le16 type;      /* message type */
+>>     __le16 priority;  /* priority.  higher value == higher priority */
+>>     __le16 version;   /* version of message encoding */
+>>
+>>     __le32 front_len; /* bytes in main payload */
+>>     __le32 middle_len;/* bytes in middle payload */
+>>     __le32 data_len;  /* bytes of data payload */
+>>     __le16 data_off;  /* sender: include full offset;
+>>                  receiver: mask against ~PAGE_MASK */
+>>
+>>     struct ceph_entity_name src;
+>>     __le16 compat_version;
+>>     __le16 reserved;
+>>     __le32 crc;       /* header crc32c */
+>> } __attribute__ ((packed));
+>>
+>>   Any help would be appreciated greatly.
+>>
+>>    Regards,
+>>    James
+>>
+>>
+>> [69318.023791] libceph: read_partial_message ffff881fc6140000 signature
+>> check failed
+>>
+>> [69318.031451] libceph: osd6 11.238.201.173:6824 bad crc
+>
+> This doesn't sound familiar.  Ilya, have you seen anything like this
+> with the centos 7.2 kernel client?
+>
+> Perhaps you've made some changes from the upstream ceph code and that is
+> part of the problem?
+
+Hi James,
+
+"rbd map" doesn't generally parse ceph.conf.  In this case you need to
+map with -o nocephx_sign_messages or add it to rbd_default_map_options
+config variable, which is a comma-separated list of default map options.
+
+Thanks,
+
+                Ilya
