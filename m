@@ -1,72 +1,84 @@
-From: Jesse Williamson <jwilliamson@suse.de>
-Subject: Re: mempools everywhere
-Date: Mon, 24 Oct 2016 15:12:06 -0700 (PDT)
-Message-ID: <alpine.LSU.2.20.1610241506011.31007@ancalagon.suse.de>
-References: <alpine.DEB.2.11.1610181634150.6167@piezo.us.to> <BLUPR0201MB15240B7882D0381D5152363AE8D30@BLUPR0201MB1524.namprd02.prod.outlook.com> <BLUPR0201MB152443595C256F34701829CFE8D20@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <589246c6-4094-c782-28b7-5d5dd7f493dd@corp.ovh.com>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: Re: jewel 10.2.4 freeze
+Date: Mon, 24 Oct 2016 22:01:57 -0400 (EDT)
+Message-ID: <618111920.22040164.1477360917772.JavaMail.zimbra@redhat.com>
+References: <580E1C53.6060503@dachary.org> <87funlerf5.fsf@suse.com> <CABo9giRJpEcMJjLeAHWivJGXYtpsTnN72Nwvej0CoMtRvGYkQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; BOUNDARY="8323584-636748606-1477346963=:31007"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:52926 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757422AbcJXWMN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 24 Oct 2016 18:12:13 -0400
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 08BC4ABC8
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Oct 2016 22:12:11 +0000 (UTC)
-In-Reply-To: <589246c6-4094-c782-28b7-5d5dd7f493dd@corp.ovh.com>
-Content-ID: <alpine.LSU.2.20.1610241510040.31007@ancalagon.suse.de>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:56861 "EHLO
+        mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754688AbcJYCDf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Oct 2016 22:03:35 -0400
+In-Reply-To: <CABo9giRJpEcMJjLeAHWivJGXYtpsTnN72Nwvej0CoMtRvGYkQg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Orit Wasserman <owasserm@redhat.com>
+Cc: Abhishek L <abhishek@suse.com>, Loic Dachary <loic@dachary.org>, Abhishek L <abhishek.lekshmanan@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+This would really be a wise idea.
 
---8323584-636748606-1477346963=:31007
-Content-Type: text/plain; CHARSET=ISO-8859-2; FORMAT=flowed
-Content-Transfer-Encoding: 8BIT
-Content-ID: <alpine.LSU.2.20.1610241510041.31007@ancalagon.suse.de>
+Matt
 
-On Thu, 20 Oct 2016, Bart這miej 安i璚ki wrote:
+----- Original Message -----
+> From: "Orit Wasserman" <owasserm@redhat.com>
+> To: "Abhishek L" <abhishek@suse.com>
+> Cc: "Loic Dachary" <loic@dachary.org>, "Abhishek L" <abhishek.lekshmanan@gmail.com>, "Ceph Development"
+> <ceph-devel@vger.kernel.org>, "Abhishek Varshney" <abhishek.varshney@flipkart.com>
+> Sent: Monday, October 24, 2016 4:21:40 PM
+> Subject: Re: jewel 10.2.4 freeze
+> 
+> Hi,
+> Will it be possible to include https://github.com/ceph/ceph/pull/11626 ?
+> 
+> Orit
+> 
+> On Mon, Oct 24, 2016 at 4:46 PM, Abhishek L <abhishek@suse.com> wrote:
+> >
+> > Loic Dachary writes:
+> >
+> >> Hi Abhishek,
+> >>
+> >> If we were to freeze jewel 10.2.4 today it would have 115 backports[0]. Do
+> >> you think it we should stop merging new backports and prepare for the
+> >> release ? If so, I'll ask the lead of each component to make sure nothing
+> >> is missing from their point of view.
+> >
+> > Yes, lets start getting the ack from the leads
+> >>
+> >> You can find the progress of the jewel 10.2.4 release in the
+> >> ttp://tracker.ceph.com/issues/17487.
+> >>
+> >> Cheers
+> >>
+> >> [0] issues backported and merged in jewel 10.2.4
+> >> http://tracker.ceph.com/versions/524
+> >>
+> >> --
+> >> Lo簿c Dachary, Artisan Logiciel Libre
+> >
+> >
+> > Best,
+> > Abhishek
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-Hi Bart這miej,
+-- 
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
 
-WRT the function-returning static trick, yep, it should work as you 
-describe. I believe Scott Meyers popularized this "static singleton" 
-trick. I pretty much abhorr singletons, but it's super handy way to 
-mitigate the "unordered initialization fiasco", which is exactly wher e 
-you're going here.
+http://www.redhat.com/en/technologies/storage
 
-> IIRC this should also ensure that destructors are called when unloading
->the module, not 100% sure about that though.
-
-I seem to remember this biting me, so checked-- it's a "fun" answer: from 
-what I can see, the C++ standard says nothing about it, and furthermore 
-the POSIX standard doesn't require specific behavior from dlclose(). In 
-practice, it probably will happen, but it's not reliable behavior. (But, 
-see below.)
-
-I suppose that means the way to go is to write a finalizer (perhaps put 
-both that, and the mutable singleton-function in a shared namespace to 
-keep them together but make it clear there's no class behavior, and then 
-for "const" data, make the finalizer a friend) and calling it before the 
-module is unloaded. Imagine this now requires some locks, since the data's 
-mutable.
-
-I mentioned this to Bart這miej in a PM, and he pointed out that if the 
-module consumer can be sure that nothing's using the memory pools at the 
-point of unloading, locking could be avoided. As long as that guarantee 
-holds, I agree.
-
-I hope that's helpful,
-
--Jesse
-
-Also:
-
-The manpage (3 dlopen) has an interesting note under the heading 
-"Initialization and finalization functions"-- there are some extensions 
-for a sort of constructor/destructor mechanism, and some interesting notes 
-about _init() and _fini() that are worth reading.
---8323584-636748606-1477346963=:31007--
+tel.  734-707-0660
+fax.  734-769-8938
+cel.  734-216-5309
