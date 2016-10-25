@@ -1,67 +1,64 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: rgw backports
-Date: Mon, 24 Oct 2016 22:22:06 -0400 (EDT)
-Message-ID: <1276006469.22059372.1477362126674.JavaMail.zimbra@redhat.com>
-References: <57FF63DD.1090806@dachary.org>
+From: Andrzej Jakowski <andrzej.jakowski@gmail.com>
+Subject: Re: Deep scrubbing
+Date: Mon, 24 Oct 2016 20:20:38 -0700
+Message-ID: <CAOmo8DaC0A605-37WPYVd4nMpYJ+Pxg0oDqMFkEXQKwWgzGurQ@mail.gmail.com>
+References: <CAOmo8DZHhJPD-uozsSk7djUxQBdfoBp6UDu7Ou1Bwc8vwHRtiQ@mail.gmail.com>
+ <CAJE9aOO5svW_AZLzDkJ4hfh2Lc0co4e_Swe6g8pmscKrr_rbpQ@mail.gmail.com> <CAOmo8DY7XJ5dgQV7wZL2K7TkvSJ==+=Tk9yNFw3bO_nZ3Y5ERQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:57123 "EHLO
-        mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754734AbcJYCWJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Oct 2016 22:22:09 -0400
-In-Reply-To: <57FF63DD.1090806@dachary.org>
+Received: from mail-ua0-f178.google.com ([209.85.217.178]:33085 "EHLO
+        mail-ua0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750800AbcJYDUj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Oct 2016 23:20:39 -0400
+Received: by mail-ua0-f178.google.com with SMTP id 6so28391715uat.0
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Oct 2016 20:20:39 -0700 (PDT)
+In-Reply-To: <CAOmo8DY7XJ5dgQV7wZL2K7TkvSJ==+=Tk9yNFw3bO_nZ3Y5ERQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Loic,
+2016-10-24 19:27 GMT-07:00 kefu chai <tchaikov@gmail.com>:
+> posting this to ceph-users mailing list.
+>
+> On Tue, Oct 25, 2016 at 2:02 AM, Andrzej Jakowski
+> <andrzej.jakowski@gmail.com> wrote:
+>> Hi,
+>>
+>> Wanted to learn more on what is the Ceph community take on the deep
+>> scrubbing process.
+>> It seems that deep scrubbing is expected to read data from physical
+>> media: NAND dies or magnetic platters.
+>> What in case if OSD is build on top of some kind of volume and the
+>> logic in the volume manager prevents OSD scrubbing process to read the
+>> data from physical media?
+>
+> so it's a read only media, and read-only only for scrubbing. so you
+> have no choice but to disable the scrub, i guess?
+>
+> $ ceph osd set noscrub
+> $ ceph osd set nodeep-scrub
 
-Sorry about the late response.  Looks like you resolved the first two.  Drilling into 3, does the lack of conditional -lldap obstruct automake build?  Apparently not?
+No, let me rephrase this. We can imagine following situation: Logical
+volume manager
+implements some kind of caching. OSD is built on top of the cache
+volume. If deep scrubbing
+is done, data may not be read from primary storage but from cache due
+to cache hit.
+In case if data is corrupted in the primary storage deep scrubbing may
+not be detect it.
+Is there a way for OSD to force reading data from primary storage device?
 
-Regards,
-
-Matt
-
------ Original Message -----
-> From: "Loic Dachary" <loic@dachary.org>
-> To: "Matt Benjamin" <mbenjamin@redhat.com>
-> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-> Sent: Thursday, October 13, 2016 6:37:17 AM
-> Subject: rgw backports
-> 
-> Hi Matt,
-> 
-> The following jewel backports
-> 
-> http://tracker.ceph.com/issues/17322
-> http://tracker.ceph.com/issues/17319
-> http://tracker.ceph.com/issues/17313
-> 
-> conflict when trying to cherry-pick them and I would appreciate your advice
-> on how to handle them. Should they be resolved or do you think the best
-> action is to try to backport the commits that could prevent the conflict ?
-> If you don't have an opinion it's also fine, I'll figure it out ;-)
-> 
-> Cheers
+>>
+>> Thanks!
+>> Andrzej Jakowski
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
 > --
-> Loïc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+> Regards
+> Kefu Chai
