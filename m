@@ -1,36 +1,36 @@
 From: Loic Dachary <loic@dachary.org>
 Subject: Re: jewel 10.2.4 freeze
-Date: Tue, 25 Oct 2016 12:34:15 +0200
-Message-ID: <580F3527.9070803@dachary.org>
+Date: Tue, 25 Oct 2016 12:36:34 +0200
+Message-ID: <580F35B2.9050609@dachary.org>
 References: <580E1C53.6060503@dachary.org> <87funlerf5.fsf@suse.com>
- <CABo9giRJpEcMJjLeAHWivJGXYtpsTnN72Nwvej0CoMtRvGYkQg@mail.gmail.com>
+ <CA+aFP1C4DSn+skaQ_UL3KSABdiBZLBZ7SP0y9AE_4ANZ6PQUEQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:48222 "EHLO
-        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S941505AbcJYKeU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Oct 2016 06:34:20 -0400
-In-Reply-To: <CABo9giRJpEcMJjLeAHWivJGXYtpsTnN72Nwvej0CoMtRvGYkQg@mail.gmail.com>
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:59094 "EHLO
+        relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S941611AbcJYKgj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Oct 2016 06:36:39 -0400
+In-Reply-To: <CA+aFP1C4DSn+skaQ_UL3KSABdiBZLBZ7SP0y9AE_4ANZ6PQUEQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Orit Wasserman <owasserm@redhat.com>
+To: dillaman@redhat.com
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Orit,
+Hi Jason,
 
-Created http://tracker.ceph.com/issues/17693 to track https://github.com/ceph/ceph/pull/11626 and marked it urgent. We'll wait for it to be merged.
+Ok, will wait for them to be merged before moving forward.
 
 Cheers
 
-On 24/10/2016 22:21, Orit Wasserman wrote:
-> Hi,
-> Will it be possible to include https://github.com/ceph/ceph/pull/11626 ?
+On 25/10/2016 05:27, Jason Dillaman wrote:
+> Nack for RBD pending the following:
 > 
-> Orit
+> https://github.com/ceph/ceph/pull/11467
+> https://github.com/ceph/ceph/pull/11634
 > 
-> On Mon, Oct 24, 2016 at 4:46 PM, Abhishek L <abhishek@suse.com> wrote:
+> On Mon, Oct 24, 2016 at 10:46 AM, Abhishek L <abhishek@suse.com> wrote:
 >>
 >> Loic Dachary writes:
 >>
@@ -56,10 +56,8 @@ On 24/10/2016 22:21, Orit Wasserman wrote:
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 > 
 
 -- 
