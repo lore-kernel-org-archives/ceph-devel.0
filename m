@@ -1,88 +1,48 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: jewel 10.2.4 freeze
-Date: Tue, 25 Oct 2016 16:00:53 +0200
-Message-ID: <580F6595.1070408@dachary.org>
-References: <580E1C53.6060503@dachary.org> <87funlerf5.fsf@suse.com>
- <CA+aFP1C4DSn+skaQ_UL3KSABdiBZLBZ7SP0y9AE_4ANZ6PQUEQ@mail.gmail.com>
- <580F35B2.9050609@dachary.org>
- <CAJE9aOPP=6V6Y1TUERYoCYeNykVns_2+_Dh+Uu-Fw_g_iBT_dw@mail.gmail.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: OSD bug - can fill up cluster to 100%
+Date: Tue, 25 Oct 2016 16:23:21 +0200
+Message-ID: <2dd0d7a4-8619-ffea-503f-44ba75152a38@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:46512 "EHLO
-        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757288AbcJYOBA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Oct 2016 10:01:00 -0400
-In-Reply-To: <CAJE9aOPP=6V6Y1TUERYoCYeNykVns_2+_Dh+Uu-Fw_g_iBT_dw@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:34474 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752690AbcJYOXZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 25 Oct 2016 10:23:25 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 7130BAC56
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Oct 2016 14:23:22 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+We have a report that, due to an OSD bug, it is possible to fill a 
+cluster (using "rados bench write") to the point that some OSDs reach 
+100% full.
 
+The issue is http://tracker.ceph.com/issues/16878
 
-On 25/10/2016 14:40, kefu chai wrote:
-> Loïc,
-> 
-> would be ideal if we can have https://github.com/ceph/ceph/pull/11642
-> also. it's a simple and low-risk one.
+The report came from a cluster that had 24 OSDs, each 1 TB in size and 
+with an 87 GB journal on an external partition.
 
-Right ! Merged :-)
+I tried to reproduce this on a much smaller cluster (2 OSDs, 10 GB data 
+partition, 1 GB journal partition) using teuthology-openstack. I was 
+able to reliably fill this cluster to 98% (past the 95% FULL mark) when 
+I constructed the journal partitions so they do not end on 2048-sector 
+boundary.
 
-> 
-> On Tue, Oct 25, 2016 at 6:36 PM, Loic Dachary <loic@dachary.org> wrote:
->> Hi Jason,
->>
->> Ok, will wait for them to be merged before moving forward.
->>
->> Cheers
->>
->> On 25/10/2016 05:27, Jason Dillaman wrote:
->>> Nack for RBD pending the following:
->>>
->>> https://github.com/ceph/ceph/pull/11467
->>> https://github.com/ceph/ceph/pull/11634
->>>
->>> On Mon, Oct 24, 2016 at 10:46 AM, Abhishek L <abhishek@suse.com> wrote:
->>>>
->>>> Loic Dachary writes:
->>>>
->>>>> Hi Abhishek,
->>>>>
->>>>> If we were to freeze jewel 10.2.4 today it would have 115 backports[0]. Do you think it we should stop merging new backports and prepare for the release ? If so, I'll ask the lead of each component to make sure nothing is missing from their point of view.
->>>>
->>>> Yes, lets start getting the ack from the leads
->>>>>
->>>>> You can find the progress of the jewel 10.2.4 release in the ttp://tracker.ceph.com/issues/17487.
->>>>>
->>>>> Cheers
->>>>>
->>>>> [0] issues backported and merged in jewel 10.2.4 http://tracker.ceph.com/versions/524
->>>>>
->>>>> --
->>>>> Loïc Dachary, Artisan Logiciel Libre
->>>>
->>>>
->>>> Best,
->>>> Abhishek
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
+(When the journals are "evenly sized", the cluster fills up to 95% and 
+usage does not rise further.)
+
+I would be grateful if someone who is much more familiar with the OSD 
+code than I am (and that is not a difficult criterion to meet!) could 
+look at the bug report - I have posted logs and a detailed analysis.
+
+Thanks for your time!
 
 -- 
-Loïc Dachary, Artisan Logiciel Libre
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
