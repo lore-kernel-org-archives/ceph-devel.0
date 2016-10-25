@@ -1,86 +1,67 @@
-From: Abhishek L <abhishek@suse.com>
-Subject: Re: jewel 10.2.4 freeze
-Date: Tue, 25 Oct 2016 11:31:06 +0200
-Message-ID: <87y41cixlx.fsf@suse.com>
-References: <580E1C53.6060503@dachary.org> <87funlerf5.fsf@suse.com> <CABo9giRJpEcMJjLeAHWivJGXYtpsTnN72Nwvej0CoMtRvGYkQg@mail.gmail.com> <618111920.22040164.1477360917772.JavaMail.zimbra@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: rgw backports
+Date: Tue, 25 Oct 2016 11:52:42 +0200
+Message-ID: <580F2B6A.50509@dachary.org>
+References: <57FF63DD.1090806@dachary.org>
+ <1276006469.22059372.1477362126674.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:45849 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755405AbcJYJbT (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Tue, 25 Oct 2016 05:31:19 -0400
-In-reply-to: <618111920.22040164.1477360917772.JavaMail.zimbra@redhat.com>
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:59416 "EHLO
+        relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932843AbcJYJws (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Oct 2016 05:52:48 -0400
+In-Reply-To: <1276006469.22059372.1477362126674.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjamin@redhat.com>, Orit Wasserman <owasserm@redhat.com>
-Cc: Abhishek L <abhishek@suse.com>, Loic Dachary <loic@dachary.org>, Abhishek L <abhishek.lekshmanan@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 
-Matt Benjamin writes:
 
-> This would really be a wise idea.
->
+On 25/10/2016 04:22, Matt Benjamin wrote:
+> Hi Loic,
+> 
+> Sorry about the late response.  Looks like you resolved the first two.  Drilling into 3, does the lack of conditional -lldap obstruct automake build?  Apparently not?
+
+It looks like it's not a blocker indeed :-)
+
+Cheers
+
+> Regards,
+> 
 > Matt
->
+> 
 > ----- Original Message -----
->> From: "Orit Wasserman" <owasserm@redhat.com>
->> To: "Abhishek L" <abhishek@suse.com>
->> Cc: "Loic Dachary" <loic@dachary.org>, "Abhishek L" <abhishek.lekshmanan@gmail.com>, "Ceph Development"
->> <ceph-devel@vger.kernel.org>, "Abhishek Varshney" <abhishek.varshney@flipkart.com>
->> Sent: Monday, October 24, 2016 4:21:40 PM
->> Subject: Re: jewel 10.2.4 freeze
+>> From: "Loic Dachary" <loic@dachary.org>
+>> To: "Matt Benjamin" <mbenjamin@redhat.com>
+>> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+>> Sent: Thursday, October 13, 2016 6:37:17 AM
+>> Subject: rgw backports
 >>
->> Hi,
->> Will it be possible to include https://github.com/ceph/ceph/pull/11626 ?
+>> Hi Matt,
 >>
->> Orit
-
-There are a few valgrind failures for RGW on the teuthology run scheduled,
-http://pulpito.ceph.com/owasserm-2016-10-24_20:21:59-rgw-wip-jewel-11567---basic-vps/
-
-(and maybe related to the patch?)
+>> The following jewel backports
 >>
->> On Mon, Oct 24, 2016 at 4:46 PM, Abhishek L <abhishek@suse.com> wrote:
->> >
->> > Loic Dachary writes:
->> >
->> >> Hi Abhishek,
->> >>
->> >> If we were to freeze jewel 10.2.4 today it would have 115 backports[0]. Do
->> >> you think it we should stop merging new backports and prepare for the
->> >> release ? If so, I'll ask the lead of each component to make sure nothing
->> >> is missing from their point of view.
->> >
->> > Yes, lets start getting the ack from the leads
->> >>
->> >> You can find the progress of the jewel 10.2.4 release in the
->> >> ttp://tracker.ceph.com/issues/17487.
->> >>
->> >> Cheers
->> >>
->> >> [0] issues backported and merged in jewel 10.2.4
->> >> http://tracker.ceph.com/versions/524
->> >>
->> >> --
->> >> Loïc Dachary, Artisan Logiciel Libre
->> >
->> >
->> > Best,
->> > Abhishek
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> http://tracker.ceph.com/issues/17322
+>> http://tracker.ceph.com/issues/17319
+>> http://tracker.ceph.com/issues/17313
+>>
+>> conflict when trying to cherry-pick them and I would appreciate your advice
+>> on how to handle them. Should they be resolved or do you think the best
+>> action is to try to backport the commits that could prevent the conflict ?
+>> If you don't have an opinion it's also fine, I'll figure it out ;-)
+>>
+>> Cheers
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>
+> 
 
-
---
-Abhishek Lekshmanan
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
+Loïc Dachary, Artisan Logiciel Libre
