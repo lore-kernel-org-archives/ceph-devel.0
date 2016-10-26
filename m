@@ -1,94 +1,93 @@
-From: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
-Subject: RGW recursive lock on Jewel
-Date: Wed, 26 Oct 2016 16:11:50 +0000
-Message-ID: <D9881DD9-3DEE-4E37-8ED3-B47017168CBA@walmartlabs.com>
+From: Daniel Gryniewicz <dang@redhat.com>
+Subject: Re: RGW recursive lock on Jewel
+Date: Wed, 26 Oct 2016 13:17:36 -0400
+Message-ID: <fe5921e6-dfa7-bbb5-2734-494e865f5387@redhat.com>
+References: <D9881DD9-3DEE-4E37-8ED3-B47017168CBA@walmartlabs.com>
+Reply-To: dang@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from homgw005.wal-mart.com ([161.165.225.34]:48601 "EHLO
-        PPES-Mail-E3.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755722AbcJZQMt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2016 12:12:49 -0400
-Received: from pps.filterd (PPES-Mail-E3.wal-mart.com [127.0.0.1])
-        by PPES-Mail-E3.wal-mart.com (8.16.0.17/8.16.0.17) with SMTP id u9QG9ukX008817
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 11:12:48 -0500
-Received: from oser500437.wal-mart.com ([161.165.225.1])
-        by PPES-Mail-E3.wal-mart.com with ESMTP id 26825q5a87-117
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 11:12:46 -0500
-Content-Language: en-US
-Content-ID: <1D4093E4AC66224792C90DCC9085CAC7@NAMP100.PROD.OUTLOOK.COM>
+Received: from mail-qk0-f179.google.com ([209.85.220.179]:34348 "EHLO
+        mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752427AbcJZRRi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2016 13:17:38 -0400
+Received: by mail-qk0-f179.google.com with SMTP id x11so11523196qka.1
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 10:17:38 -0700 (PDT)
+In-Reply-To: <D9881DD9-3DEE-4E37-8ED3-B47017168CBA@walmartlabs.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SW4gb25lIG9mIG91ciBjbHVzdGVycywgd2UgYXJlIHJ1bm5pbmcgYSBuaWdodGx5IHZlcnNpb24g
-b2YgSmV3ZWwgKGJlbG93KSwgYW5kIG9uZSBvZiB0aGUgUkdXIG5vZGVzIGlzIHVucmVzcG9uc2l2
-ZSB3aXRoIH40LjVHIG9mIHJlc2lkZW50IG1lbW9yeSBhbmQgYWxtb3N0IG9uZSBjb3JlIG9mIENQ
-VSBjb25zdW1lZC4gQWxtb3N0IGFsbCBvZiB0aGUgY2xpZW50IGNvbm5lY3Rpb25zIHRvIHRoZSBS
-R1cgYXJlIGluIENMT1NFX1dBSVQsIGFuZCB3ZSB3ZXJlIHRyeWluZyB3aXRoIDEwMjQgUkdXIHRo
-cmVhZCBwb29sIHNpemUgZm9yIHNvbWUgY2xpZW50IG9wZXJhdGlvbnMuIFRoZXJlIGFyZSBhdCBs
-ZWFzdCAzIG90aGVyIFJHV3MgaW4gdGhlIHNhbWUgY2x1c3RlciB3aXRoIHNpbWlsYXIgY29uZmln
-dXJhdGlvbiBidXQgdGhleSBzZWVtIHRvIGJlIGRvaW5nIGZpbmUuDQoNCkkgd29uZGVyIGlmIHdl
-IGhhdmUgcnVuIGludG8gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzEwNTYyIG9u
-IEpld2VsLiBQbGVhc2UgZmluZCB0aGUgc3RhY2sgdHJhY2VzIGZyb20gY291cGxlIG9mIHRocmVh
-ZHMgaW4gdGhlIHJvZ3VlIFJHVy4gDQoNCkNhbiBzb21lb25lIHBsZWFzZSBjb25maXJtIGlmIHRo
-YXTigJlzIGluZGVlZCB0aGUgY2FzZT8NCg0KPHNuaXA+DQoNCiRjZXBoIC12DQpjZXBoIHZlcnNp
-b24gMTAuMi4yLTUwOC1nOWJmYzBjZiAoOWJmYzBjZjE3OGRjMjFiMGZlMzNlMGNlM2I5MGExODg1
-OGFiYWYxYikNCg0KDQooZ2RiKSB0IDY4MzYNCltTd2l0Y2hpbmcgdG8gdGhyZWFkIDY4MzYgKFRo
-cmVhZCAweDdmNmE2MzA2OTcwMCAoTFdQIDI3NjAxKSldDQojMCAgX19sbGxfbG9ja193YWl0ICgp
-IGF0IC4uL25wdGwvc3lzZGVwcy91bml4L3N5c3YvbGludXgveDg2XzY0L2xvd2xldmVsbG9jay5T
-OjEzNQ0KMTM1CS4uL25wdGwvc3lzZGVwcy91bml4L3N5c3YvbGludXgveDg2XzY0L2xvd2xldmVs
-bG9jay5TOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5Lg0KKGdkYikgYnQNCiMwICBfX2xsbF9s
-b2NrX3dhaXQgKCkgYXQgLi4vbnB0bC9zeXNkZXBzL3VuaXgvc3lzdi9saW51eC94ODZfNjQvbG93
-bGV2ZWxsb2NrLlM6MTM1DQojMSAgMHgwMDAwN2Y3ZWNkMGNhNjY0IGluIF9MX2xvY2tfOTUyICgp
-IGZyb20gL2xpYi94ODZfNjQtbGludXgtZ251L2xpYnB0aHJlYWQuc28uMA0KIzIgIDB4MDAwMDdm
-N2VjZDBjYTRjNiBpbiBfX0dJX19fcHRocmVhZF9tdXRleF9sb2NrIChtdXRleD0weDU1YTE5Zjhi
-OGZlMCkgYXQgLi4vbnB0bC9wdGhyZWFkX211dGV4X2xvY2suYzoxMTQNCiMzICAweDAwMDA3Zjdl
-Y2UwMDI2MzggaW4gTXV0ZXg6OkxvY2soYm9vbCkgKCkgZnJvbSAvdXNyL2xpYi9saWJyZ3cuc28u
-Mg0KIzQgIDB4MDAwMDdmN2VjZGM4MDk3YSBpbiBSR1dLZXlzdG9uZVRva2VuQ2FjaGU6OmZpbmQo
-c3RkOjpzdHJpbmcgY29uc3QmLCBLZXlzdG9uZVRva2VuJikgKCkgZnJvbSAvdXNyL2xpYi9saWJy
-Z3cuc28uMg0KIzUgIDB4MDAwMDdmN2VjZGUxNzgyOSBpbiBSR1dTd2lmdDo6dmFsaWRhdGVfa2V5
-c3RvbmVfdG9rZW4oUkdXUmFkb3MqLCBzdGQ6OnN0cmluZyBjb25zdCYsIFJHV1VzZXJJbmZvJikg
-KCkgZnJvbSAvdXNyL2xpYi9saWJyZ3cuc28uMg0KIzYgIDB4MDAwMDdmN2VjZGUxYTI1ZCBpbiBS
-R1dTd2lmdDo6ZG9fdmVyaWZ5X3N3aWZ0X3Rva2VuKFJHV1JhZG9zKiwgcmVxX3N0YXRlKikgKCkg
-ZnJvbSAvdXNyL2xpYi9saWJyZ3cuc28uMg0KIzcgIDB4MDAwMDdmN2VjZGUxYTgwNiBpbiBSR1dT
-d2lmdDo6dmVyaWZ5X3N3aWZ0X3Rva2VuKFJHV1JhZG9zKiwgcmVxX3N0YXRlKikgKCkgZnJvbSAv
-dXNyL2xpYi9saWJyZ3cuc28uMg0KIzggIDB4MDAwMDdmN2VjZGUwNjRkYSBpbiBSR1dIYW5kbGVy
-X1JFU1RfU1dJRlQ6OmF1dGhvcml6ZSgpICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNvLjINCiM5
-ICAweDAwMDA3ZjdlY2RkMTlkNjcgaW4gcHJvY2Vzc19yZXF1ZXN0KFJHV1JhZG9zKiwgUkdXUkVT
-VCosIFJHV1JlcXVlc3QqLCBSR1dTdHJlYW1JTyosIE9wc0xvZ1NvY2tldCopICgpIGZyb20gL3Vz
-ci9saWIvbGlicmd3LnNvLjINCiMxMCAweDAwMDA1NWExOWRhODhiOWYgaW4gPz8gKCkNCiMxMSAw
-eDAwMDA1NWExOWRhOTI4OGYgaW4gPz8gKCkNCiMxMiAweDAwMDA1NWExOWRhOTQ4NWUgaW4gPz8g
-KCkNCiMxMyAweDAwMDA3ZjdlY2QwYzgxODQgaW4gc3RhcnRfdGhyZWFkIChhcmc9MHg3ZjZhNjMw
-Njk3MDApIGF0IHB0aHJlYWRfY3JlYXRlLmM6MzEyDQojMTQgMHgwMDAwN2Y3ZWNjOGRiMzdkIGlu
-IGNsb25lICgpIGF0IC4uL3N5c2RlcHMvdW5peC9zeXN2L2xpbnV4L3g4Nl82NC9jbG9uZS5TOjEx
-MQ0KIChnZGIpIHQgNTM2OQ0KW1N3aXRjaGluZyB0byB0aHJlYWQgNTM2OSAoVGhyZWFkIDB4N2Y2
-Nzg2MmIwNzAwIChMV1AgMjkwNzQpKV0NCiMwICBfX2xsbF9sb2NrX3dhaXQgKCkgYXQgLi4vbnB0
-bC9zeXNkZXBzL3VuaXgvc3lzdi9saW51eC94ODZfNjQvbG93bGV2ZWxsb2NrLlM6MTM1DQoxMzUJ
-Li4vbnB0bC9zeXNkZXBzL3VuaXgvc3lzdi9saW51eC94ODZfNjQvbG93bGV2ZWxsb2NrLlM6IE5v
-IHN1Y2ggZmlsZSBvciBkaXJlY3RvcnkuDQooZ2RiKSBidA0KIzAgIF9fbGxsX2xvY2tfd2FpdCAo
-KSBhdCAuLi9ucHRsL3N5c2RlcHMvdW5peC9zeXN2L2xpbnV4L3g4Nl82NC9sb3dsZXZlbGxvY2su
-UzoxMzUNCiMxICAweDAwMDA3ZjdlY2QwY2E2NjQgaW4gX0xfbG9ja185NTIgKCkgZnJvbSAvbGli
-L3g4Nl82NC1saW51eC1nbnUvbGlicHRocmVhZC5zby4wDQojMiAgMHgwMDAwN2Y3ZWNkMGNhNGM2
-IGluIF9fR0lfX19wdGhyZWFkX211dGV4X2xvY2sgKG11dGV4PTB4NTVhMTlmOGI4ZmUwKSBhdCAu
-Li9ucHRsL3B0aHJlYWRfbXV0ZXhfbG9jay5jOjExNA0KIzMgIDB4MDAwMDdmN2VjZTAwMjYzOCBp
-biBNdXRleDo6TG9jayhib29sKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQojNCAgMHgw
-MDAwN2Y3ZWNkYzgwOTdhIGluIFJHV0tleXN0b25lVG9rZW5DYWNoZTo6ZmluZChzdGQ6OnN0cmlu
-ZyBjb25zdCYsIEtleXN0b25lVG9rZW4mKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQoj
-NSAgMHgwMDAwN2Y3ZWNkZTE3ODI5IGluIFJHV1N3aWZ0Ojp2YWxpZGF0ZV9rZXlzdG9uZV90b2tl
-bihSR1dSYWRvcyosIHN0ZDo6c3RyaW5nIGNvbnN0JiwgUkdXVXNlckluZm8mKSAoKSBmcm9tIC91
-c3IvbGliL2xpYnJndy5zby4yDQojNiAgMHgwMDAwN2Y3ZWNkZTFhMjVkIGluIFJHV1N3aWZ0Ojpk
-b192ZXJpZnlfc3dpZnRfdG9rZW4oUkdXUmFkb3MqLCByZXFfc3RhdGUqKSAoKSBmcm9tIC91c3Iv
-bGliL2xpYnJndy5zby4yDQojNyAgMHgwMDAwN2Y3ZWNkZTFhODA2IGluIFJHV1N3aWZ0Ojp2ZXJp
-Znlfc3dpZnRfdG9rZW4oUkdXUmFkb3MqLCByZXFfc3RhdGUqKSAoKSBmcm9tIC91c3IvbGliL2xp
-YnJndy5zby4yDQojOCAgMHgwMDAwN2Y3ZWNkZTA2NGRhIGluIFJHV0hhbmRsZXJfUkVTVF9TV0lG
-VDo6YXV0aG9yaXplKCkgKCkgZnJvbSAvdXNyL2xpYi9saWJyZ3cuc28uMg0KIzkgIDB4MDAwMDdm
-N2VjZGQxOWQ2NyBpbiBwcm9jZXNzX3JlcXVlc3QoUkdXUmFkb3MqLCBSR1dSRVNUKiwgUkdXUmVx
-dWVzdCosIFJHV1N0cmVhbUlPKiwgT3BzTG9nU29ja2V0KikgKCkgZnJvbSAvdXNyL2xpYi9saWJy
-Z3cuc28uMg0KIzEwIDB4MDAwMDU1YTE5ZGE4OGI5ZiBpbiA/PyAoKQ0KIzExIDB4MDAwMDU1YTE5
-ZGE5Mjg4ZiBpbiA/PyAoKQ0KIzEyIDB4MDAwMDU1YTE5ZGE5NDg1ZSBpbiA/PyAoKQ0KIzEzIDB4
-MDAwMDdmN2VjZDBjODE4NCBpbiBzdGFydF90aHJlYWQgKGFyZz0weDdmNjc4NjJiMDcwMCkgYXQg
-cHRocmVhZF9jcmVhdGUuYzozMTINCiMxNCAweDAwMDA3ZjdlY2M4ZGIzN2QgaW4gY2xvbmUgKCkg
-YXQgLi4vc3lzZGVwcy91bml4L3N5c3YvbGludXgveDg2XzY0L2Nsb25lLlM6MTExDQooZ2RiKSAN
-Cg0KPFxzbmlwPg0KDQpUaGFua3MsDQotUGF2YW4uDQoNCg==
+It seems unlikely.  The codepath in that PR traversed 
+RGWKeystoneTokenCache::find_admin() which caused the recursive lock, 
+while the backtraces below traverse RGWSwift::validate_keystone_token() 
+instead, which does not take the lock in question.
+
+It's possible another thread may be hitting the recursive lock, however.
+
+Daniel
+
+On 10/26/2016 12:11 PM, Pavan Rallabhandi wrote:
+> In one of our clusters, we are running a nightly version of Jewel (below), and one of the RGW nodes is unresponsive with ~4.5G of resident memory and almost one core of CPU consumed. Almost all of the client connections to the RGW are in CLOSE_WAIT, and we were trying with 1024 RGW thread pool size for some client operations. There are at least 3 other RGWs in the same cluster with similar configuration but they seem to be doing fine.
+>
+> I wonder if we have run into https://github.com/ceph/ceph/pull/10562 on Jewel. Please find the stack traces from couple of threads in the rogue RGW.
+>
+> Can someone please confirm if that’s indeed the case?
+>
+> <snip>
+>
+> $ceph -v
+> ceph version 10.2.2-508-g9bfc0cf (9bfc0cf178dc21b0fe33e0ce3b90a18858abaf1b)
+>
+>
+> (gdb) t 6836
+> [Switching to thread 6836 (Thread 0x7f6a63069700 (LWP 27601))]
+> #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
+> 135	../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S: No such file or directory.
+> (gdb) bt
+> #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
+> #1  0x00007f7ecd0ca664 in _L_lock_952 () from /lib/x86_64-linux-gnu/libpthread.so.0
+> #2  0x00007f7ecd0ca4c6 in __GI___pthread_mutex_lock (mutex=0x55a19f8b8fe0) at ../nptl/pthread_mutex_lock.c:114
+> #3  0x00007f7ece002638 in Mutex::Lock(bool) () from /usr/lib/librgw.so.2
+> #4  0x00007f7ecdc8097a in RGWKeystoneTokenCache::find(std::string const&, KeystoneToken&) () from /usr/lib/librgw.so.2
+> #5  0x00007f7ecde17829 in RGWSwift::validate_keystone_token(RGWRados*, std::string const&, RGWUserInfo&) () from /usr/lib/librgw.so.2
+> #6  0x00007f7ecde1a25d in RGWSwift::do_verify_swift_token(RGWRados*, req_state*) () from /usr/lib/librgw.so.2
+> #7  0x00007f7ecde1a806 in RGWSwift::verify_swift_token(RGWRados*, req_state*) () from /usr/lib/librgw.so.2
+> #8  0x00007f7ecde064da in RGWHandler_REST_SWIFT::authorize() () from /usr/lib/librgw.so.2
+> #9  0x00007f7ecdd19d67 in process_request(RGWRados*, RGWREST*, RGWRequest*, RGWStreamIO*, OpsLogSocket*) () from /usr/lib/librgw.so.2
+> #10 0x000055a19da88b9f in ?? ()
+> #11 0x000055a19da9288f in ?? ()
+> #12 0x000055a19da9485e in ?? ()
+> #13 0x00007f7ecd0c8184 in start_thread (arg=0x7f6a63069700) at pthread_create.c:312
+> #14 0x00007f7ecc8db37d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
+>  (gdb) t 5369
+> [Switching to thread 5369 (Thread 0x7f67862b0700 (LWP 29074))]
+> #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
+> 135	../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S: No such file or directory.
+> (gdb) bt
+> #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
+> #1  0x00007f7ecd0ca664 in _L_lock_952 () from /lib/x86_64-linux-gnu/libpthread.so.0
+> #2  0x00007f7ecd0ca4c6 in __GI___pthread_mutex_lock (mutex=0x55a19f8b8fe0) at ../nptl/pthread_mutex_lock.c:114
+> #3  0x00007f7ece002638 in Mutex::Lock(bool) () from /usr/lib/librgw.so.2
+> #4  0x00007f7ecdc8097a in RGWKeystoneTokenCache::find(std::string const&, KeystoneToken&) () from /usr/lib/librgw.so.2
+> #5  0x00007f7ecde17829 in RGWSwift::validate_keystone_token(RGWRados*, std::string const&, RGWUserInfo&) () from /usr/lib/librgw.so.2
+> #6  0x00007f7ecde1a25d in RGWSwift::do_verify_swift_token(RGWRados*, req_state*) () from /usr/lib/librgw.so.2
+> #7  0x00007f7ecde1a806 in RGWSwift::verify_swift_token(RGWRados*, req_state*) () from /usr/lib/librgw.so.2
+> #8  0x00007f7ecde064da in RGWHandler_REST_SWIFT::authorize() () from /usr/lib/librgw.so.2
+> #9  0x00007f7ecdd19d67 in process_request(RGWRados*, RGWREST*, RGWRequest*, RGWStreamIO*, OpsLogSocket*) () from /usr/lib/librgw.so.2
+> #10 0x000055a19da88b9f in ?? ()
+> #11 0x000055a19da9288f in ?? ()
+> #12 0x000055a19da9485e in ?? ()
+> #13 0x00007f7ecd0c8184 in start_thread (arg=0x7f67862b0700) at pthread_create.c:312
+> #14 0x00007f7ecc8db37d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
+> (gdb)
+>
+> <\snip>
+>
+> Thanks,
+> -Pavan.
+>
+> N�����r��y���b�X��ǧv�^�)޺{.n�+���z�]z���{ay�ʇڙ�,j��f���h���z��w������j:+v���w�j�m��������zZ+�����ݢj"��!tml=
+>
+
