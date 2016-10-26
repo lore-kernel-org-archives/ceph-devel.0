@@ -1,34 +1,29 @@
-From: Daniel Gryniewicz <dang@redhat.com>
+From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
 Subject: Re: RGW recursive lock on Jewel
-Date: Wed, 26 Oct 2016 13:17:36 -0400
-Message-ID: <fe5921e6-dfa7-bbb5-2734-494e865f5387@redhat.com>
+Date: Wed, 26 Oct 2016 10:53:18 -0700
+Message-ID: <CADRKj5SunNTh9a1A79TopHwzp9477o966p68cSJ3=8E1-7whZg@mail.gmail.com>
 References: <D9881DD9-3DEE-4E37-8ED3-B47017168CBA@walmartlabs.com>
-Reply-To: dang@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f179.google.com ([209.85.220.179]:34348 "EHLO
-        mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752427AbcJZRRi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2016 13:17:38 -0400
-Received: by mail-qk0-f179.google.com with SMTP id x11so11523196qka.1
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 10:17:38 -0700 (PDT)
+Received: from mail-vk0-f53.google.com ([209.85.213.53]:33980 "EHLO
+        mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754722AbcJZRxU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2016 13:53:20 -0400
+Received: by mail-vk0-f53.google.com with SMTP id p81so8449264vkd.1
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 10:53:19 -0700 (PDT)
 In-Reply-To: <D9881DD9-3DEE-4E37-8ED3-B47017168CBA@walmartlabs.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-It seems unlikely.  The codepath in that PR traversed 
-RGWKeystoneTokenCache::find_admin() which caused the recursive lock, 
-while the backtraces below traverse RGWSwift::validate_keystone_token() 
-instead, which does not take the lock in question.
+Not sure that these threads are the culprit, can you provide a list of
+all the rgw threads?
 
-It's possible another thread may be hitting the recursive lock, however.
-
-Daniel
-
-On 10/26/2016 12:11 PM, Pavan Rallabhandi wrote:
+On Wed, Oct 26, 2016 at 9:11 AM, Pavan Rallabhandi
+<PRallabhandi@walmartlabs.com> wrote:
 > In one of our clusters, we are running a nightly version of Jewel (below), and one of the RGW nodes is unresponsive with ~4.5G of resident memory and almost one core of CPU consumed. Almost all of the client connections to the RGW are in CLOSE_WAIT, and we were trying with 1024 RGW thread pool size for some client operations. There are at least 3 other RGWs in the same cluster with similar configuration but they seem to be doing fine.
 >
 > I wonder if we have run into https://github.com/ceph/ceph/pull/10562 on Jewel. Please find the stack traces from couple of threads in the rogue RGW.
@@ -44,7 +39,7 @@ On 10/26/2016 12:11 PM, Pavan Rallabhandi wrote:
 > (gdb) t 6836
 > [Switching to thread 6836 (Thread 0x7f6a63069700 (LWP 27601))]
 > #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
-> 135	../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S: No such file or directory.
+> 135     ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S: No such file or directory.
 > (gdb) bt
 > #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
 > #1  0x00007f7ecd0ca664 in _L_lock_952 () from /lib/x86_64-linux-gnu/libpthread.so.0
@@ -64,7 +59,7 @@ On 10/26/2016 12:11 PM, Pavan Rallabhandi wrote:
 >  (gdb) t 5369
 > [Switching to thread 5369 (Thread 0x7f67862b0700 (LWP 29074))]
 > #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
-> 135	../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S: No such file or directory.
+> 135     ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S: No such file or directory.
 > (gdb) bt
 > #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
 > #1  0x00007f7ecd0ca664 in _L_lock_952 () from /lib/x86_64-linux-gnu/libpthread.so.0
@@ -88,6 +83,3 @@ On 10/26/2016 12:11 PM, Pavan Rallabhandi wrote:
 > Thanks,
 > -Pavan.
 >
-> N�����r��y���b�X��ǧv�^�)޺{.n�+���z�]z���{ay�ʇڙ�,j��f���h���z��w������j:+v���w�j�m��������zZ+�����ݢj"��!tml=
->
-
