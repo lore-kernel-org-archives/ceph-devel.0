@@ -1,92 +1,81 @@
-From: Victor Denisov <vdenisov@mirantis.com>
-Subject: Re: Snapshots of consistency groups
-Date: Tue, 25 Oct 2016 20:07:40 -0700
-Message-ID: <CA+hcxJS4JDHBc-GYqwjXjHTiVBeq_YZhcvRfG5SRZMhTGZt-FA@mail.gmail.com>
-References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
- <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
- <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
- <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
- <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
- <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
- <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
- <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
- <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
- <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
- <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
- <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
- <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
- <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
- <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
- <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
- <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
- <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
- <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
- <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
- <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
- <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com>
- <CA+aFP1A4YYDG0HSJ52R__DPKBc_Y7p62Ec4tzhdXt+UPkC=vNw@mail.gmail.com> <CA+hcxJR6S8AZQ0mY5MTKiBwjf0bQYswWoL16WBJgfrOzzQ40zg@mail.gmail.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: Deep scrubbing
+Date: Wed, 26 Oct 2016 10:32:50 +0200
+Message-ID: <CABZ+qq=gr6jtJ0geyEA=K_Lrg=V6EZnQ10Ku3dyggsDEVstrtw@mail.gmail.com>
+References: <CAOmo8DZHhJPD-uozsSk7djUxQBdfoBp6UDu7Ou1Bwc8vwHRtiQ@mail.gmail.com>
+ <CAJE9aOO5svW_AZLzDkJ4hfh2Lc0co4e_Swe6g8pmscKrr_rbpQ@mail.gmail.com>
+ <CAOmo8DY7XJ5dgQV7wZL2K7TkvSJ==+=Tk9yNFw3bO_nZ3Y5ERQ@mail.gmail.com> <CAOmo8DaC0A605-37WPYVd4nMpYJ+Pxg0oDqMFkEXQKwWgzGurQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f42.google.com ([209.85.213.42]:40203 "EHLO
-        mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754749AbcJZDHm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Oct 2016 23:07:42 -0400
-Received: by mail-vk0-f42.google.com with SMTP id c126so18839774vkd.7
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Oct 2016 20:07:41 -0700 (PDT)
-In-Reply-To: <CA+hcxJR6S8AZQ0mY5MTKiBwjf0bQYswWoL16WBJgfrOzzQ40zg@mail.gmail.com>
+Received: from mail-lf0-f41.google.com ([209.85.215.41]:38766 "EHLO
+        mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751592AbcJZIde (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2016 04:33:34 -0400
+Received: by mail-lf0-f41.google.com with SMTP id d20so2225428lfj.5
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 01:33:33 -0700 (PDT)
+Received: from mail-wm0-f41.google.com (mail-wm0-f41.google.com. [74.125.82.41])
+        by smtp.gmail.com with ESMTPSA id jq10sm1205215wjb.46.2016.10.26.01.33.31
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 26 Oct 2016 01:33:31 -0700 (PDT)
+Received: by mail-wm0-f41.google.com with SMTP id b80so211069249wme.1
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 01:33:31 -0700 (PDT)
+In-Reply-To: <CAOmo8DaC0A605-37WPYVd4nMpYJ+Pxg0oDqMFkEXQKwWgzGurQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Andrzej Jakowski <andrzej.jakowski@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Question. When we print out snapshots of an image, should the group
-snapshots be listed, or should they be marked as special snapshots?
-
-Thanks,
-V.
-
-On Mon, Oct 10, 2016 at 3:14 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
-> Ok. I didn't have any intention to throw exceptions.
-> I was more concerned about whether it's ok to allocate and delete
-> objects or I should use smart pointers.
+On Tue, Oct 25, 2016 at 5:20 AM, Andrzej Jakowski
+<andrzej.jakowski@gmail.com> wrote:
+> 2016-10-24 19:27 GMT-07:00 kefu chai <tchaikov@gmail.com>:
+>> posting this to ceph-users mailing list.
+>>
+>> On Tue, Oct 25, 2016 at 2:02 AM, Andrzej Jakowski
+>> <andrzej.jakowski@gmail.com> wrote:
+>>> Hi,
+>>>
+>>> Wanted to learn more on what is the Ceph community take on the deep
+>>> scrubbing process.
+>>> It seems that deep scrubbing is expected to read data from physical
+>>> media: NAND dies or magnetic platters.
+>>> What in case if OSD is build on top of some kind of volume and the
+>>> logic in the volume manager prevents OSD scrubbing process to read the
+>>> data from physical media?
+>>
+>> so it's a read only media, and read-only only for scrubbing. so you
+>> have no choice but to disable the scrub, i guess?
+>>
+>> $ ceph osd set noscrub
+>> $ ceph osd set nodeep-scrub
 >
-> On Mon, Oct 10, 2016 at 7:18 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->> The only place exceptions are routinely used is within the "::decode"
->> functions. I would prefer to see the code not throwing new exceptions
->> on purpose.
->>
->> On Fri, Oct 7, 2016 at 2:26 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>> Are any exceptions used in librbd code? Should the code be exception safe?
->>>
->>> Thanks,
->>> V.
->>>
->>> On Fri, Sep 16, 2016 at 10:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>>> On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>>> if (struct_v >= 5) {
->>>>>       ::decode(snapshot_namespace, p);
->>>>>     } else {
->>>>>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
->>>>>     }
->>>>>
->>>>> then code for ::encode function of cls_rbd_snap would change accordingly:
->>>>>
->>>>> instead of
->>>>>
->>>>> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
->>>>> snapshot_namespace);
->>>>>
->>>>> I would do:
->>>>> ::encode(snapshot_namespace, bl);
->>>>
->>>>
->>>> +1 -- looks good to me
->>>>
->>>> --
->>>> Jason
->>
->>
->>
->> --
->> Jason
+> No, let me rephrase this. We can imagine following situation: Logical
+> volume manager
+> implements some kind of caching. OSD is built on top of the cache
+> volume. If deep scrubbing
+> is done, data may not be read from primary storage but from cache due
+> to cache hit.
+> In case if data is corrupted in the primary storage deep scrubbing may
+> not be detect it.
+> Is there a way for OSD to force reading data from primary storage device?
+
+I've had this same concern in relation to bcache/dm-cache/iCAS
+accelerated OSDs. It seems that deep scrubbing would be useless if
+you're reading the cached data and not the HDD itself. And to make
+things worse, deep scrubbing will tend to thrash the cache and evict
+all the hot data, making the cache itself of less value.
+
+So in general, for these things to be useful we need a way to identify
+and bypass the cache for deep scrub IOs. (and there are probably other
+types of IO that we don't want to cache, such as reads for
+backfilling).
+
+I've worked a bit with iCAS, and it allows you to define a policy
+whereby reads above a particular size bypass the cache. And AFAIK
+bcache will bypass the cache for sequential IO. Maybe these help,
+maybe not...
+I've heard that RedHat is working on dm-cache tooling for OSDs --
+maybe they already realized this problem and have a good solution.
+
+Cheers, dan
