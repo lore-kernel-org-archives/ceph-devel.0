@@ -1,48 +1,92 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: OSD bug - can fill up cluster to 100%
-Date: Tue, 25 Oct 2016 16:23:21 +0200
-Message-ID: <2dd0d7a4-8619-ffea-503f-44ba75152a38@suse.cz>
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: Snapshots of consistency groups
+Date: Tue, 25 Oct 2016 20:07:40 -0700
+Message-ID: <CA+hcxJS4JDHBc-GYqwjXjHTiVBeq_YZhcvRfG5SRZMhTGZt-FA@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+ <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+ <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
+ <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
+ <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
+ <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
+ <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
+ <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
+ <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
+ <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
+ <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
+ <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
+ <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
+ <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
+ <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
+ <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
+ <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
+ <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
+ <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
+ <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
+ <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
+ <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com>
+ <CA+aFP1A4YYDG0HSJ52R__DPKBc_Y7p62Ec4tzhdXt+UPkC=vNw@mail.gmail.com> <CA+hcxJR6S8AZQ0mY5MTKiBwjf0bQYswWoL16WBJgfrOzzQ40zg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:34474 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752690AbcJYOXZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 25 Oct 2016 10:23:25 -0400
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 7130BAC56
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Oct 2016 14:23:22 +0000 (UTC)
+Received: from mail-vk0-f42.google.com ([209.85.213.42]:40203 "EHLO
+        mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754749AbcJZDHm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Oct 2016 23:07:42 -0400
+Received: by mail-vk0-f42.google.com with SMTP id c126so18839774vkd.7
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Oct 2016 20:07:41 -0700 (PDT)
+In-Reply-To: <CA+hcxJR6S8AZQ0mY5MTKiBwjf0bQYswWoL16WBJgfrOzzQ40zg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-We have a report that, due to an OSD bug, it is possible to fill a 
-cluster (using "rados bench write") to the point that some OSDs reach 
-100% full.
+Question. When we print out snapshots of an image, should the group
+snapshots be listed, or should they be marked as special snapshots?
 
-The issue is http://tracker.ceph.com/issues/16878
+Thanks,
+V.
 
-The report came from a cluster that had 24 OSDs, each 1 TB in size and 
-with an 87 GB journal on an external partition.
-
-I tried to reproduce this on a much smaller cluster (2 OSDs, 10 GB data 
-partition, 1 GB journal partition) using teuthology-openstack. I was 
-able to reliably fill this cluster to 98% (past the 95% FULL mark) when 
-I constructed the journal partitions so they do not end on 2048-sector 
-boundary.
-
-(When the journals are "evenly sized", the cluster fills up to 95% and 
-usage does not rise further.)
-
-I would be grateful if someone who is much more familiar with the OSD 
-code than I am (and that is not a difficult criterion to meet!) could 
-look at the bug report - I have posted logs and a detailed analysis.
-
-Thanks for your time!
-
--- 
-Nathan Cutler
-Software Engineer Distributed Storage
-SUSE LINUX, s.r.o.
-Tel.: +420 284 084 037
+On Mon, Oct 10, 2016 at 3:14 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+> Ok. I didn't have any intention to throw exceptions.
+> I was more concerned about whether it's ok to allocate and delete
+> objects or I should use smart pointers.
+>
+> On Mon, Oct 10, 2016 at 7:18 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>> The only place exceptions are routinely used is within the "::decode"
+>> functions. I would prefer to see the code not throwing new exceptions
+>> on purpose.
+>>
+>> On Fri, Oct 7, 2016 at 2:26 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>> Are any exceptions used in librbd code? Should the code be exception safe?
+>>>
+>>> Thanks,
+>>> V.
+>>>
+>>> On Fri, Sep 16, 2016 at 10:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>> On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>> if (struct_v >= 5) {
+>>>>>       ::decode(snapshot_namespace, p);
+>>>>>     } else {
+>>>>>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
+>>>>>     }
+>>>>>
+>>>>> then code for ::encode function of cls_rbd_snap would change accordingly:
+>>>>>
+>>>>> instead of
+>>>>>
+>>>>> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
+>>>>> snapshot_namespace);
+>>>>>
+>>>>> I would do:
+>>>>> ::encode(snapshot_namespace, bl);
+>>>>
+>>>>
+>>>> +1 -- looks good to me
+>>>>
+>>>> --
+>>>> Jason
+>>
+>>
+>>
+>> --
+>> Jason
