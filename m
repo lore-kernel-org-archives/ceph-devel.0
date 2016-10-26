@@ -1,104 +1,94 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Snapshots of consistency groups
-Date: Wed, 26 Oct 2016 09:16:09 -0400
-Message-ID: <CA+aFP1Dg0Tc8CDumoL7hJPD62itu+RqZaKcjnuEnvZwrHdZZ=w@mail.gmail.com>
-References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
- <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
- <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
- <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
- <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
- <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
- <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
- <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
- <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
- <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
- <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
- <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
- <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
- <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
- <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
- <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
- <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
- <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
- <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
- <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
- <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
- <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com>
- <CA+aFP1A4YYDG0HSJ52R__DPKBc_Y7p62Ec4tzhdXt+UPkC=vNw@mail.gmail.com>
- <CA+hcxJR6S8AZQ0mY5MTKiBwjf0bQYswWoL16WBJgfrOzzQ40zg@mail.gmail.com> <CA+hcxJS4JDHBc-GYqwjXjHTiVBeq_YZhcvRfG5SRZMhTGZt-FA@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
+Subject: RGW recursive lock on Jewel
+Date: Wed, 26 Oct 2016 16:11:50 +0000
+Message-ID: <D9881DD9-3DEE-4E37-8ED3-B47017168CBA@walmartlabs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f44.google.com ([209.85.215.44]:35357 "EHLO
-        mail-lf0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S941845AbcJZNQM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2016 09:16:12 -0400
-Received: by mail-lf0-f44.google.com with SMTP id f134so1352966lfg.2
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 06:16:11 -0700 (PDT)
-In-Reply-To: <CA+hcxJS4JDHBc-GYqwjXjHTiVBeq_YZhcvRfG5SRZMhTGZt-FA@mail.gmail.com>
+Received: from homgw005.wal-mart.com ([161.165.225.34]:48601 "EHLO
+        PPES-Mail-E3.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755722AbcJZQMt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2016 12:12:49 -0400
+Received: from pps.filterd (PPES-Mail-E3.wal-mart.com [127.0.0.1])
+        by PPES-Mail-E3.wal-mart.com (8.16.0.17/8.16.0.17) with SMTP id u9QG9ukX008817
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 11:12:48 -0500
+Received: from oser500437.wal-mart.com ([161.165.225.1])
+        by PPES-Mail-E3.wal-mart.com with ESMTP id 26825q5a87-117
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 11:12:46 -0500
+Content-Language: en-US
+Content-ID: <1D4093E4AC66224792C90DCC9085CAC7@NAMP100.PROD.OUTLOOK.COM>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Victor Denisov <vdenisov@mirantis.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-In a perfect world, it would be nice to add a new optional to "rbd
-snap ls" to show all snapshots (with a new column to indicate the
-associated namespace).
-
-On Tue, Oct 25, 2016 at 11:07 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
-> Question. When we print out snapshots of an image, should the group
-> snapshots be listed, or should they be marked as special snapshots?
->
-> Thanks,
-> V.
->
-> On Mon, Oct 10, 2016 at 3:14 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->> Ok. I didn't have any intention to throw exceptions.
->> I was more concerned about whether it's ok to allocate and delete
->> objects or I should use smart pointers.
->>
->> On Mon, Oct 10, 2016 at 7:18 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>> The only place exceptions are routinely used is within the "::decode"
->>> functions. I would prefer to see the code not throwing new exceptions
->>> on purpose.
->>>
->>> On Fri, Oct 7, 2016 at 2:26 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>> Are any exceptions used in librbd code? Should the code be exception safe?
->>>>
->>>> Thanks,
->>>> V.
->>>>
->>>> On Fri, Sep 16, 2016 at 10:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>>>> On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>>>> if (struct_v >= 5) {
->>>>>>       ::decode(snapshot_namespace, p);
->>>>>>     } else {
->>>>>>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
->>>>>>     }
->>>>>>
->>>>>> then code for ::encode function of cls_rbd_snap would change accordingly:
->>>>>>
->>>>>> instead of
->>>>>>
->>>>>> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
->>>>>> snapshot_namespace);
->>>>>>
->>>>>> I would do:
->>>>>> ::encode(snapshot_namespace, bl);
->>>>>
->>>>>
->>>>> +1 -- looks good to me
->>>>>
->>>>> --
->>>>> Jason
->>>
->>>
->>>
->>> --
->>> Jason
-
-
-
--- 
-Jason
+SW4gb25lIG9mIG91ciBjbHVzdGVycywgd2UgYXJlIHJ1bm5pbmcgYSBuaWdodGx5IHZlcnNpb24g
+b2YgSmV3ZWwgKGJlbG93KSwgYW5kIG9uZSBvZiB0aGUgUkdXIG5vZGVzIGlzIHVucmVzcG9uc2l2
+ZSB3aXRoIH40LjVHIG9mIHJlc2lkZW50IG1lbW9yeSBhbmQgYWxtb3N0IG9uZSBjb3JlIG9mIENQ
+VSBjb25zdW1lZC4gQWxtb3N0IGFsbCBvZiB0aGUgY2xpZW50IGNvbm5lY3Rpb25zIHRvIHRoZSBS
+R1cgYXJlIGluIENMT1NFX1dBSVQsIGFuZCB3ZSB3ZXJlIHRyeWluZyB3aXRoIDEwMjQgUkdXIHRo
+cmVhZCBwb29sIHNpemUgZm9yIHNvbWUgY2xpZW50IG9wZXJhdGlvbnMuIFRoZXJlIGFyZSBhdCBs
+ZWFzdCAzIG90aGVyIFJHV3MgaW4gdGhlIHNhbWUgY2x1c3RlciB3aXRoIHNpbWlsYXIgY29uZmln
+dXJhdGlvbiBidXQgdGhleSBzZWVtIHRvIGJlIGRvaW5nIGZpbmUuDQoNCkkgd29uZGVyIGlmIHdl
+IGhhdmUgcnVuIGludG8gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzEwNTYyIG9u
+IEpld2VsLiBQbGVhc2UgZmluZCB0aGUgc3RhY2sgdHJhY2VzIGZyb20gY291cGxlIG9mIHRocmVh
+ZHMgaW4gdGhlIHJvZ3VlIFJHVy4gDQoNCkNhbiBzb21lb25lIHBsZWFzZSBjb25maXJtIGlmIHRo
+YXTigJlzIGluZGVlZCB0aGUgY2FzZT8NCg0KPHNuaXA+DQoNCiRjZXBoIC12DQpjZXBoIHZlcnNp
+b24gMTAuMi4yLTUwOC1nOWJmYzBjZiAoOWJmYzBjZjE3OGRjMjFiMGZlMzNlMGNlM2I5MGExODg1
+OGFiYWYxYikNCg0KDQooZ2RiKSB0IDY4MzYNCltTd2l0Y2hpbmcgdG8gdGhyZWFkIDY4MzYgKFRo
+cmVhZCAweDdmNmE2MzA2OTcwMCAoTFdQIDI3NjAxKSldDQojMCAgX19sbGxfbG9ja193YWl0ICgp
+IGF0IC4uL25wdGwvc3lzZGVwcy91bml4L3N5c3YvbGludXgveDg2XzY0L2xvd2xldmVsbG9jay5T
+OjEzNQ0KMTM1CS4uL25wdGwvc3lzZGVwcy91bml4L3N5c3YvbGludXgveDg2XzY0L2xvd2xldmVs
+bG9jay5TOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5Lg0KKGdkYikgYnQNCiMwICBfX2xsbF9s
+b2NrX3dhaXQgKCkgYXQgLi4vbnB0bC9zeXNkZXBzL3VuaXgvc3lzdi9saW51eC94ODZfNjQvbG93
+bGV2ZWxsb2NrLlM6MTM1DQojMSAgMHgwMDAwN2Y3ZWNkMGNhNjY0IGluIF9MX2xvY2tfOTUyICgp
+IGZyb20gL2xpYi94ODZfNjQtbGludXgtZ251L2xpYnB0aHJlYWQuc28uMA0KIzIgIDB4MDAwMDdm
+N2VjZDBjYTRjNiBpbiBfX0dJX19fcHRocmVhZF9tdXRleF9sb2NrIChtdXRleD0weDU1YTE5Zjhi
+OGZlMCkgYXQgLi4vbnB0bC9wdGhyZWFkX211dGV4X2xvY2suYzoxMTQNCiMzICAweDAwMDA3Zjdl
+Y2UwMDI2MzggaW4gTXV0ZXg6OkxvY2soYm9vbCkgKCkgZnJvbSAvdXNyL2xpYi9saWJyZ3cuc28u
+Mg0KIzQgIDB4MDAwMDdmN2VjZGM4MDk3YSBpbiBSR1dLZXlzdG9uZVRva2VuQ2FjaGU6OmZpbmQo
+c3RkOjpzdHJpbmcgY29uc3QmLCBLZXlzdG9uZVRva2VuJikgKCkgZnJvbSAvdXNyL2xpYi9saWJy
+Z3cuc28uMg0KIzUgIDB4MDAwMDdmN2VjZGUxNzgyOSBpbiBSR1dTd2lmdDo6dmFsaWRhdGVfa2V5
+c3RvbmVfdG9rZW4oUkdXUmFkb3MqLCBzdGQ6OnN0cmluZyBjb25zdCYsIFJHV1VzZXJJbmZvJikg
+KCkgZnJvbSAvdXNyL2xpYi9saWJyZ3cuc28uMg0KIzYgIDB4MDAwMDdmN2VjZGUxYTI1ZCBpbiBS
+R1dTd2lmdDo6ZG9fdmVyaWZ5X3N3aWZ0X3Rva2VuKFJHV1JhZG9zKiwgcmVxX3N0YXRlKikgKCkg
+ZnJvbSAvdXNyL2xpYi9saWJyZ3cuc28uMg0KIzcgIDB4MDAwMDdmN2VjZGUxYTgwNiBpbiBSR1dT
+d2lmdDo6dmVyaWZ5X3N3aWZ0X3Rva2VuKFJHV1JhZG9zKiwgcmVxX3N0YXRlKikgKCkgZnJvbSAv
+dXNyL2xpYi9saWJyZ3cuc28uMg0KIzggIDB4MDAwMDdmN2VjZGUwNjRkYSBpbiBSR1dIYW5kbGVy
+X1JFU1RfU1dJRlQ6OmF1dGhvcml6ZSgpICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNvLjINCiM5
+ICAweDAwMDA3ZjdlY2RkMTlkNjcgaW4gcHJvY2Vzc19yZXF1ZXN0KFJHV1JhZG9zKiwgUkdXUkVT
+VCosIFJHV1JlcXVlc3QqLCBSR1dTdHJlYW1JTyosIE9wc0xvZ1NvY2tldCopICgpIGZyb20gL3Vz
+ci9saWIvbGlicmd3LnNvLjINCiMxMCAweDAwMDA1NWExOWRhODhiOWYgaW4gPz8gKCkNCiMxMSAw
+eDAwMDA1NWExOWRhOTI4OGYgaW4gPz8gKCkNCiMxMiAweDAwMDA1NWExOWRhOTQ4NWUgaW4gPz8g
+KCkNCiMxMyAweDAwMDA3ZjdlY2QwYzgxODQgaW4gc3RhcnRfdGhyZWFkIChhcmc9MHg3ZjZhNjMw
+Njk3MDApIGF0IHB0aHJlYWRfY3JlYXRlLmM6MzEyDQojMTQgMHgwMDAwN2Y3ZWNjOGRiMzdkIGlu
+IGNsb25lICgpIGF0IC4uL3N5c2RlcHMvdW5peC9zeXN2L2xpbnV4L3g4Nl82NC9jbG9uZS5TOjEx
+MQ0KIChnZGIpIHQgNTM2OQ0KW1N3aXRjaGluZyB0byB0aHJlYWQgNTM2OSAoVGhyZWFkIDB4N2Y2
+Nzg2MmIwNzAwIChMV1AgMjkwNzQpKV0NCiMwICBfX2xsbF9sb2NrX3dhaXQgKCkgYXQgLi4vbnB0
+bC9zeXNkZXBzL3VuaXgvc3lzdi9saW51eC94ODZfNjQvbG93bGV2ZWxsb2NrLlM6MTM1DQoxMzUJ
+Li4vbnB0bC9zeXNkZXBzL3VuaXgvc3lzdi9saW51eC94ODZfNjQvbG93bGV2ZWxsb2NrLlM6IE5v
+IHN1Y2ggZmlsZSBvciBkaXJlY3RvcnkuDQooZ2RiKSBidA0KIzAgIF9fbGxsX2xvY2tfd2FpdCAo
+KSBhdCAuLi9ucHRsL3N5c2RlcHMvdW5peC9zeXN2L2xpbnV4L3g4Nl82NC9sb3dsZXZlbGxvY2su
+UzoxMzUNCiMxICAweDAwMDA3ZjdlY2QwY2E2NjQgaW4gX0xfbG9ja185NTIgKCkgZnJvbSAvbGli
+L3g4Nl82NC1saW51eC1nbnUvbGlicHRocmVhZC5zby4wDQojMiAgMHgwMDAwN2Y3ZWNkMGNhNGM2
+IGluIF9fR0lfX19wdGhyZWFkX211dGV4X2xvY2sgKG11dGV4PTB4NTVhMTlmOGI4ZmUwKSBhdCAu
+Li9ucHRsL3B0aHJlYWRfbXV0ZXhfbG9jay5jOjExNA0KIzMgIDB4MDAwMDdmN2VjZTAwMjYzOCBp
+biBNdXRleDo6TG9jayhib29sKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQojNCAgMHgw
+MDAwN2Y3ZWNkYzgwOTdhIGluIFJHV0tleXN0b25lVG9rZW5DYWNoZTo6ZmluZChzdGQ6OnN0cmlu
+ZyBjb25zdCYsIEtleXN0b25lVG9rZW4mKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQoj
+NSAgMHgwMDAwN2Y3ZWNkZTE3ODI5IGluIFJHV1N3aWZ0Ojp2YWxpZGF0ZV9rZXlzdG9uZV90b2tl
+bihSR1dSYWRvcyosIHN0ZDo6c3RyaW5nIGNvbnN0JiwgUkdXVXNlckluZm8mKSAoKSBmcm9tIC91
+c3IvbGliL2xpYnJndy5zby4yDQojNiAgMHgwMDAwN2Y3ZWNkZTFhMjVkIGluIFJHV1N3aWZ0Ojpk
+b192ZXJpZnlfc3dpZnRfdG9rZW4oUkdXUmFkb3MqLCByZXFfc3RhdGUqKSAoKSBmcm9tIC91c3Iv
+bGliL2xpYnJndy5zby4yDQojNyAgMHgwMDAwN2Y3ZWNkZTFhODA2IGluIFJHV1N3aWZ0Ojp2ZXJp
+Znlfc3dpZnRfdG9rZW4oUkdXUmFkb3MqLCByZXFfc3RhdGUqKSAoKSBmcm9tIC91c3IvbGliL2xp
+YnJndy5zby4yDQojOCAgMHgwMDAwN2Y3ZWNkZTA2NGRhIGluIFJHV0hhbmRsZXJfUkVTVF9TV0lG
+VDo6YXV0aG9yaXplKCkgKCkgZnJvbSAvdXNyL2xpYi9saWJyZ3cuc28uMg0KIzkgIDB4MDAwMDdm
+N2VjZGQxOWQ2NyBpbiBwcm9jZXNzX3JlcXVlc3QoUkdXUmFkb3MqLCBSR1dSRVNUKiwgUkdXUmVx
+dWVzdCosIFJHV1N0cmVhbUlPKiwgT3BzTG9nU29ja2V0KikgKCkgZnJvbSAvdXNyL2xpYi9saWJy
+Z3cuc28uMg0KIzEwIDB4MDAwMDU1YTE5ZGE4OGI5ZiBpbiA/PyAoKQ0KIzExIDB4MDAwMDU1YTE5
+ZGE5Mjg4ZiBpbiA/PyAoKQ0KIzEyIDB4MDAwMDU1YTE5ZGE5NDg1ZSBpbiA/PyAoKQ0KIzEzIDB4
+MDAwMDdmN2VjZDBjODE4NCBpbiBzdGFydF90aHJlYWQgKGFyZz0weDdmNjc4NjJiMDcwMCkgYXQg
+cHRocmVhZF9jcmVhdGUuYzozMTINCiMxNCAweDAwMDA3ZjdlY2M4ZGIzN2QgaW4gY2xvbmUgKCkg
+YXQgLi4vc3lzZGVwcy91bml4L3N5c3YvbGludXgveDg2XzY0L2Nsb25lLlM6MTExDQooZ2RiKSAN
+Cg0KPFxzbmlwPg0KDQpUaGFua3MsDQotUGF2YW4uDQoNCg==
