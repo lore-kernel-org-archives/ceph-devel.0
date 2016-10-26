@@ -1,210 +1,303 @@
-From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Subject: Re: RGW recursive lock on Jewel
-Date: Wed, 26 Oct 2016 12:06:14 -0700
-Message-ID: <CADRKj5RP1mrfFQh5HCv3Hb6WTy3hzdQnS1HJt8RvFgBbw5jnbQ@mail.gmail.com>
-References: <D9881DD9-3DEE-4E37-8ED3-B47017168CBA@walmartlabs.com>
- <CADRKj5SunNTh9a1A79TopHwzp9477o966p68cSJ3=8E1-7whZg@mail.gmail.com> <B093F233-8CAA-45A1-8BB9-8909652E4E90@walmartlabs.com>
+From: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
+Subject: Re: RGW unresponsive on Jewel
+Date: Wed, 26 Oct 2016 19:51:14 +0000
+Message-ID: <EE5530C0-D977-4779-BBEF-492544512E2F@walmartlabs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f178.google.com ([209.85.217.178]:34506 "EHLO
-        mail-ua0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753120AbcJZTGQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2016 15:06:16 -0400
-Received: by mail-ua0-f178.google.com with SMTP id 6so2744022uau.1
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 12:06:16 -0700 (PDT)
-In-Reply-To: <B093F233-8CAA-45A1-8BB9-8909652E4E90@walmartlabs.com>
+Received: from ppes-mail-e2.wal-mart.com ([161.165.225.16]:52646 "EHLO
+        PPES-Mail-E2.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932607AbcJZTzE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2016 15:55:04 -0400
+Content-Language: en-US
+Content-ID: <A7DAB9BDA0240F4F863101C20FAA2244@NAMP100.PROD.OUTLOOK.COM>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
+To: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Can you run in gdb:
-
-$ thread apply all bt
-
-
-and provide the output somehow?
-
-Thanks,
-Yehuda
-
-On Wed, Oct 26, 2016 at 12:00 PM, Pavan Rallabhandi
-<PRallabhandi@walmartlabs.com> wrote:
-> Thanks for the responses, as Dan mentioned I ruled out the find_admin() stack traces.
->
-> There are ~15K threads in the process (below are how most of them are looking like), and I see the logs are not rotated as well. Sorry for the verbosity of the below snippet.
->
-> I have never seen a ‘t’ across virtual memory size but here is how the top for rgw looks like:
->
->   18784 ceph      20   0  0.102t 4.432g   6084 S  98.0  2.3   2318:15 radosgw
->
-> <snip>
->
-> For one such interesting thread:
->
-> Thread 6903 (Thread 0x7f6a848ac700 (LWP 27534)):
-> #0  __lll_lock_wait_private () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:95
-> #1  0x00007f7ecc865cba in _L_lock_12808 () at malloc.c:5206
-> #2  0x00007f7ecc8636b5 in __GI___libc_malloc (bytes=56) at malloc.c:2887
-> #3  0x00007f7ed756fe7c in _dl_map_object_deps (map=map@entry=0x7f7ed77794f8, preloads=preloads@entry=0x0, npreloads=npreloads@entry=0, trace_mode=trace_mode@entry=0,
->     open_mode=open_mode@entry=-2147483648) at dl-deps.c:511
-> #4  0x00007f7ed7576a6b in dl_open_worker (a=a@entry=0x7f6a848a2f48) at dl-open.c:272
-> #5  0x00007f7ed7571fc4 in _dl_catch_error (objname=objname@entry=0x7f6a848a2f38, errstring=errstring@entry=0x7f6a848a2f40, mallocedp=mallocedp@entry=0x7f6a848a2f30,
->     operate=operate@entry=0x7f7ed7576960 <dl_open_worker>, args=args@entry=0x7f6a848a2f48) at dl-error.c:187
-> #6  0x00007f7ed757637b in _dl_open (file=0x7f7ecc95d1a6 "libgcc_s.so.1", mode=-2147483647, caller_dlopen=<optimized out>, nsid=-2, argc=9, argv=0x7ffe720f2bd8, env=0x7ffe720f2c28) at dl-open.c:661
-> #7  0x00007f7ecc916cf2 in do_dlopen (ptr=ptr@entry=0x7f6a848a3160) at dl-libc.c:87
-> #8  0x00007f7ed7571fc4 in _dl_catch_error (objname=0x7f6a848a3140, errstring=0x7f6a848a3150, mallocedp=0x7f6a848a3130, operate=0x7f7ecc916cb0 <do_dlopen>, args=0x7f6a848a3160) at dl-error.c:187
-> #9  0x00007f7ecc916db2 in dlerror_run (args=0x7f6a848a3160, operate=0x7f7ecc916cb0 <do_dlopen>) at dl-libc.c:46
-> #10 __GI___libc_dlopen_mode (name=name@entry=0x7f7ecc95d1a6 "libgcc_s.so.1", mode=mode@entry=-2147483647) at dl-libc.c:163
-> #11 0x00007f7ecc8ebc75 in init () at ../sysdeps/x86_64/backtrace.c:52
-> #12 0x00007f7ecd0cda80 in pthread_once () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_once.S:103
-> #13 0x00007f7ecc8ebd8c in __GI___backtrace (array=<optimized out>, size=100) at ../sysdeps/x86_64/backtrace.c:103
-> #14 0x00007f7ecde93f42 in ?? () from /usr/lib/librgw.so.2
-> #15 <signal handler called>
-> #16 malloc_consolidate (av=av@entry=0x7f7d08000020) at malloc.c:4151
-> #17 0x00007f7ecc860ce8 in _int_malloc (av=0x7f7d08000020, bytes=1408) at malloc.c:3423
-> #18 0x00007f7ecc8636c0 in __GI___libc_malloc (bytes=1408) at malloc.c:2891
-> #19 0x00007f7ecce1adad in operator new(unsigned long) () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #20 0x00007f7ecdd8ef11 in std::_Rb_tree_iterator<std::pair<rgw_obj const, RGWObjState> > std::_Rb_tree<rgw_obj, std::pair<rgw_obj const, RGWObjState>, std::_Select1st<std::pair<rgw_obj const, RGWObjState> >, std::less<rgw_obj>, std::allocator<std::pair<rgw_obj const, RGWObjState> > >::_M_emplace_hint_unique<std::piecewise_construct_t const&, std::tuple<rgw_obj const&>, std::tuple<> >(std::_Rb_tree_const_iterator<std::pair<rgw_obj const, RGWObjState> >, std::piecewise_construct_t const&, std::tuple<rgw_obj const&>&&, std::tuple<>&&) () from /usr/lib/librgw.so.2
-> #21 0x00007f7ecdd8f725 in std::map<rgw_obj, RGWObjState, std::less<rgw_obj>, std::allocator<std::pair<rgw_obj const, RGWObjState> > >::operator[](rgw_obj const&) () from /usr/lib/librgw.so.2
-> #22 0x00007f7ecdd3c585 in RGWObjectCtx::get_state(rgw_obj&) () from /usr/lib/librgw.so.2
-> #23 0x00007f7ecdd3e6ed in RGWRados::get_system_obj_state_impl(RGWObjectCtx*, rgw_obj&, RGWObjState**, RGWObjVersionTracker*) () from /usr/lib/librgw.so.2
-> #24 0x00007f7ecdd3ecb4 in RGWRados::get_system_obj_state(RGWObjectCtx*, rgw_obj&, RGWObjState**, RGWObjVersionTracker*) () from /usr/lib/librgw.so.2
-> #25 0x00007f7ecdd3ed2a in RGWRados::stat_system_obj(RGWObjectCtx&, RGWRados::SystemObject::Read::GetObjState&, rgw_obj&, std::map<std::string, ceph::buffer::list, std::less<std::string>, std::allocator<std::pair<std::string const, ceph::buffer::list> > >*, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >*, unsigned long*, RGWObjVersionTracker*) () from /usr/lib/librgw.so.2
-> #26 0x00007f7ecdd27bbb in RGWRados::SystemObject::Read::stat(RGWObjVersionTracker*) () from /usr/lib/librgw.so.2
-> #27 0x00007f7ecdc2d4a8 in rgw_get_system_obj(RGWRados*, RGWObjectCtx&, rgw_bucket&, std::string const&, ceph::buffer::list&, RGWObjVersionTracker*, std::chrono::time_point<ceph::time_detail::real_clock, s---Type <return> to continue, or q <return> to quit---
-> td::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >*, std::map<std::string, ceph::buffer::list, std::less<std::string>, std::allocator<std::pair<std::string const, ceph::buffer::list> > >*, rgw_cache_entry_info*) () from /usr/lib/librgw.so.2
-> #28 0x00007f7ecde2320b in rgw_get_user_info_by_uid(RGWRados*, rgw_user const&, RGWUserInfo&, RGWObjVersionTracker*, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >*, rgw_cache_entry_info*, std::map<std::string, ceph::buffer::list, std::less<std::string>, std::allocator<std::pair<std::string const, ceph::buffer::list> > >*) ()
->    from /usr/lib/librgw.so.2
-> #29 0x00007f7ecde15965 in RGWSwift::update_user_info(RGWRados*, rgw_swift_auth_info*, RGWUserInfo&) () from /usr/lib/librgw.so.2
-> #30 0x00007f7ecde17945 in RGWSwift::validate_keystone_token(RGWRados*, std::string const&, RGWUserInfo&) () from /usr/lib/librgw.so.2
-> #31 0x00007f7ecde1a25d in RGWSwift::do_verify_swift_token(RGWRados*, req_state*) () from /usr/lib/librgw.so.2
-> #32 0x00007f7ecde1a806 in RGWSwift::verify_swift_token(RGWRados*, req_state*) () from /usr/lib/librgw.so.2
-> #33 0x00007f7ecde064da in RGWHandler_REST_SWIFT::authorize() () from /usr/lib/librgw.so.2
-> #34 0x00007f7ecdd19d67 in process_request(RGWRados*, RGWREST*, RGWRequest*, RGWStreamIO*, OpsLogSocket*) () from /usr/lib/librgw.so.2
-> #35 0x000055a19da88b9f in ?? ()
-> #36 0x000055a19da9288f in ?? ()
-> #37 0x000055a19da9485e in ?? ()
-> #38 0x00007f7ecd0c8184 in start_thread (arg=0x7f6a848ac700) at pthread_create.c:312
-> #39 0x00007f7ecc8db37d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
->
->
-> Thread 7485 (Thread 0x7f6ba6af0700 (LWP 26948)):
-> #0  pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:185
-> #1  0x00007f7ec30e2ef1 in librados::AioCompletion::wait_for_complete_and_cb() () from /usr/lib/librados.so.2
-> #2  0x00007f7ecdd559e0 in RGWRados::Object::Read::iterate(long, long, RGWGetDataCB*) () from /usr/lib/librgw.so.2
-> #3  0x00007f7ecdd065cb in RGWGetObj::execute() () from /usr/lib/librgw.so.2
-> #4  0x00007f7ecdd19f4b in process_request(RGWRados*, RGWREST*, RGWRequest*, RGWStreamIO*, OpsLogSocket*) () from /usr/lib/librgw.so.2
-> #5  0x000055a19da88b9f in ?? ()
-> #6  0x000055a19da9288f in ?? ()
-> #7  0x000055a19da9485e in ?? ()
-> #8  0x00007f7ecd0c8184 in start_thread (arg=0x7f6ba6af0700) at pthread_create.c:312
-> #9  0x00007f7ecc8db37d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
->
->
-> Thread 4805 (Thread 0x7f666d07e700 (LWP 29641)):
-> #0  pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:185
-> #1  0x00007f7ecdf76e43 in ceph::log::Log::submit_entry(ceph::log::Entry*) () from /usr/lib/librgw.so.2
-> #2  0x00007f7ecdd1931f in process_request(RGWRados*, RGWREST*, RGWRequest*, RGWStreamIO*, OpsLogSocket*) () from /usr/lib/librgw.so.2
-> #3  0x000055a19da88b9f in ?? ()
-> #4  0x000055a19da9288f in ?? ()
-> #5  0x000055a19da9485e in ?? ()
-> #6  0x00007f7ecd0c8184 in start_thread (arg=0x7f666d07e700) at pthread_create.c:312
-> #7  0x00007f7ecc8db37d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
->
-> Thread 6853 (Thread 0x7f6a6b87a700 (LWP 27584)):
-> #0  pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:185
-> #1  0x00007f7ece059a44 in Throttle::_wait(long) () from /usr/lib/librgw.so.2
-> #2  0x00007f7ece05a6a7 in Throttle::get(long, long) () from /usr/lib/librgw.so.2
-> #3  0x00007f7ecdd51ca7 in RGWRados::get_obj_iterate_cb(RGWObjectCtx*, RGWObjState*, rgw_obj&, long, long, long, bool, void*) () from /usr/lib/librgw.so.2
-> #4  0x00007f7ecdd5289e in ?? () from /usr/lib/librgw.so.2
-> #5  0x00007f7ecdd555b4 in RGWRados::iterate_obj(RGWObjectCtx&, rgw_obj&, long, long, unsigned long, int (*)(rgw_obj&, long, long, long, bool, RGWObjState*, void*), void*) () from /usr/lib/librgw.so.2
-> #6  0x00007f7ecdd559aa in RGWRados::Object::Read::iterate(long, long, RGWGetDataCB*) () from /usr/lib/librgw.so.2
-> #7  0x00007f7ecdd065cb in RGWGetObj::execute() () from /usr/lib/librgw.so.2
-> #8  0x00007f7ecdd19f4b in process_request(RGWRados*, RGWREST*, RGWRequest*, RGWStreamIO*, OpsLogSocket*) () from /usr/lib/librgw.so.2
-> #9  0x000055a19da88b9f in ?? ()
-> #10 0x000055a19da9288f in ?? ()
-> #11 0x000055a19da9485e in ?? ()
-> #12 0x00007f7ecd0c8184 in start_thread (arg=0x7f6a6b87a700) at pthread_create.c:312
-> #13 0x00007f7ecc8db37d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
->
->
-> <\snip>
->
-> Thanks,
-> -Pavan.
->
-> On 10/26/16, 11:23 PM, "ceph-devel-owner@vger.kernel.org on behalf of Yehuda Sadeh-Weinraub" <ceph-devel-owner@vger.kernel.org on behalf of ysadehwe@redhat.com> wrote:
->
->     Not sure that these threads are the culprit, can you provide a list of
->     all the rgw threads?
->
->     On Wed, Oct 26, 2016 at 9:11 AM, Pavan Rallabhandi
->     <PRallabhandi@walmartlabs.com> wrote:
->     > In one of our clusters, we are running a nightly version of Jewel (below), and one of the RGW nodes is unresponsive with ~4.5G of resident memory and almost one core of CPU consumed. Almost all of the client connections to the RGW are in CLOSE_WAIT, and we were trying with 1024 RGW thread pool size for some client operations. There are at least 3 other RGWs in the same cluster with similar configuration but they seem to be doing fine.
->     >
->     > I wonder if we have run into https://github.com/ceph/ceph/pull/10562 on Jewel. Please find the stack traces from couple of threads in the rogue RGW.
->     >
->     > Can someone please confirm if that’s indeed the case?
->     >
->     > <snip>
->     >
->     > $ceph -v
->     > ceph version 10.2.2-508-g9bfc0cf (9bfc0cf178dc21b0fe33e0ce3b90a18858abaf1b)
->     >
->     >
->     > (gdb) t 6836
->     > [Switching to thread 6836 (Thread 0x7f6a63069700 (LWP 27601))]
->     > #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
->     > 135     ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S: No such file or directory.
->     > (gdb) bt
->     > #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
->     > #1  0x00007f7ecd0ca664 in _L_lock_952 () from /lib/x86_64-linux-gnu/libpthread.so.0
->     > #2  0x00007f7ecd0ca4c6 in __GI___pthread_mutex_lock (mutex=0x55a19f8b8fe0) at ../nptl/pthread_mutex_lock.c:114
->     > #3  0x00007f7ece002638 in Mutex::Lock(bool) () from /usr/lib/librgw.so.2
->     > #4  0x00007f7ecdc8097a in RGWKeystoneTokenCache::find(std::string const&, KeystoneToken&) () from /usr/lib/librgw.so.2
->     > #5  0x00007f7ecde17829 in RGWSwift::validate_keystone_token(RGWRados*, std::string const&, RGWUserInfo&) () from /usr/lib/librgw.so.2
->     > #6  0x00007f7ecde1a25d in RGWSwift::do_verify_swift_token(RGWRados*, req_state*) () from /usr/lib/librgw.so.2
->     > #7  0x00007f7ecde1a806 in RGWSwift::verify_swift_token(RGWRados*, req_state*) () from /usr/lib/librgw.so.2
->     > #8  0x00007f7ecde064da in RGWHandler_REST_SWIFT::authorize() () from /usr/lib/librgw.so.2
->     > #9  0x00007f7ecdd19d67 in process_request(RGWRados*, RGWREST*, RGWRequest*, RGWStreamIO*, OpsLogSocket*) () from /usr/lib/librgw.so.2
->     > #10 0x000055a19da88b9f in ?? ()
->     > #11 0x000055a19da9288f in ?? ()
->     > #12 0x000055a19da9485e in ?? ()
->     > #13 0x00007f7ecd0c8184 in start_thread (arg=0x7f6a63069700) at pthread_create.c:312
->     > #14 0x00007f7ecc8db37d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
->     >  (gdb) t 5369
->     > [Switching to thread 5369 (Thread 0x7f67862b0700 (LWP 29074))]
->     > #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
->     > 135     ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S: No such file or directory.
->     > (gdb) bt
->     > #0  __lll_lock_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/lowlevellock.S:135
->     > #1  0x00007f7ecd0ca664 in _L_lock_952 () from /lib/x86_64-linux-gnu/libpthread.so.0
->     > #2  0x00007f7ecd0ca4c6 in __GI___pthread_mutex_lock (mutex=0x55a19f8b8fe0) at ../nptl/pthread_mutex_lock.c:114
->     > #3  0x00007f7ece002638 in Mutex::Lock(bool) () from /usr/lib/librgw.so.2
->     > #4  0x00007f7ecdc8097a in RGWKeystoneTokenCache::find(std::string const&, KeystoneToken&) () from /usr/lib/librgw.so.2
->     > #5  0x00007f7ecde17829 in RGWSwift::validate_keystone_token(RGWRados*, std::string const&, RGWUserInfo&) () from /usr/lib/librgw.so.2
->     > #6  0x00007f7ecde1a25d in RGWSwift::do_verify_swift_token(RGWRados*, req_state*) () from /usr/lib/librgw.so.2
->     > #7  0x00007f7ecde1a806 in RGWSwift::verify_swift_token(RGWRados*, req_state*) () from /usr/lib/librgw.so.2
->     > #8  0x00007f7ecde064da in RGWHandler_REST_SWIFT::authorize() () from /usr/lib/librgw.so.2
->     > #9  0x00007f7ecdd19d67 in process_request(RGWRados*, RGWREST*, RGWRequest*, RGWStreamIO*, OpsLogSocket*) () from /usr/lib/librgw.so.2
->     > #10 0x000055a19da88b9f in ?? ()
->     > #11 0x000055a19da9288f in ?? ()
->     > #12 0x000055a19da9485e in ?? ()
->     > #13 0x00007f7ecd0c8184 in start_thread (arg=0x7f67862b0700) at pthread_create.c:312
->     > #14 0x00007f7ecc8db37d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
->     > (gdb)
->     >
->     > <\snip>
->     >
->     > Thanks,
->     > -Pavan.
->     >
->     --
->     To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->     the body of a message to majordomo@vger.kernel.org
->     More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+Q29ycmVjdGluZyB0aGUgc3ViamVjdCANCg0KRmluZCBiZWxvdyB0aGUgcmVzdWx0cywgcmVhbGl6
+ZWQgdGhhdCB0aGVyZSB3YXMgYSB0eXBvIGluIHRoZSB0aHJlYWQgcG9vbCBzaXplIEkgbWVudGlv
+bmVkIGVhcmxpZXIsIGl0IGhhcyB0byBiZSAxMDI0MC4NCg0KaHR0cHM6Ly93d3cuZHJvcGJveC5j
+b20vcy8zbjk4dW51NTdsNHJ4cDUvUkdXJTIwYnQlMjB0aHJlYWQlMjBhbGwlMjAyLnR4dD9kbD0w
+DQoNClRoYW5rcywNCi1QYXZhbi4NCg0KT24gMTAvMjcvMTYsIDEyOjM2IEFNLCAiY2VwaC1kZXZl
+bC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mIFllaHVkYSBTYWRlaC1XZWlucmF1
+YiIgPGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiB5c2FkZWh3
+ZUByZWRoYXQuY29tPiB3cm90ZToNCg0KICAgIENhbiB5b3UgcnVuIGluIGdkYjoNCiAgICANCiAg
+ICAkIHRocmVhZCBhcHBseSBhbGwgYnQNCiAgICANCiAgICANCiAgICBhbmQgcHJvdmlkZSB0aGUg
+b3V0cHV0IHNvbWVob3c/DQogICAgDQogICAgVGhhbmtzLA0KICAgIFllaHVkYQ0KICAgIA0KICAg
+IE9uIFdlZCwgT2N0IDI2LCAyMDE2IGF0IDEyOjAwIFBNLCBQYXZhbiBSYWxsYWJoYW5kaQ0KICAg
+IDxQUmFsbGFiaGFuZGlAd2FsbWFydGxhYnMuY29tPiB3cm90ZToNCiAgICA+IFRoYW5rcyBmb3Ig
+dGhlIHJlc3BvbnNlcywgYXMgRGFuIG1lbnRpb25lZCBJIHJ1bGVkIG91dCB0aGUgZmluZF9hZG1p
+bigpIHN0YWNrIHRyYWNlcy4NCiAgICA+DQogICAgPiBUaGVyZSBhcmUgfjE1SyB0aHJlYWRzIGlu
+IHRoZSBwcm9jZXNzIChiZWxvdyBhcmUgaG93IG1vc3Qgb2YgdGhlbSBhcmUgbG9va2luZyBsaWtl
+KSwgYW5kIEkgc2VlIHRoZSBsb2dzIGFyZSBub3Qgcm90YXRlZCBhcyB3ZWxsLiBTb3JyeSBmb3Ig
+dGhlIHZlcmJvc2l0eSBvZiB0aGUgYmVsb3cgc25pcHBldC4NCiAgICA+DQogICAgPiBJIGhhdmUg
+bmV2ZXIgc2VlbiBhIOKAmHTigJkgYWNyb3NzIHZpcnR1YWwgbWVtb3J5IHNpemUgYnV0IGhlcmUg
+aXMgaG93IHRoZSB0b3AgZm9yIHJndyBsb29rcyBsaWtlOg0KICAgID4NCiAgICA+ICAgMTg3ODQg
+Y2VwaCAgICAgIDIwICAgMCAgMC4xMDJ0IDQuNDMyZyAgIDYwODQgUyAgOTguMCAgMi4zICAgMjMx
+ODoxNSByYWRvc2d3DQogICAgPg0KICAgID4gPHNuaXA+DQogICAgPg0KICAgID4gRm9yIG9uZSBz
+dWNoIGludGVyZXN0aW5nIHRocmVhZDoNCiAgICA+DQogICAgPiBUaHJlYWQgNjkwMyAoVGhyZWFk
+IDB4N2Y2YTg0OGFjNzAwIChMV1AgMjc1MzQpKToNCiAgICA+ICMwICBfX2xsbF9sb2NrX3dhaXRf
+cHJpdmF0ZSAoKSBhdCAuLi9ucHRsL3N5c2RlcHMvdW5peC9zeXN2L2xpbnV4L3g4Nl82NC9sb3ds
+ZXZlbGxvY2suUzo5NQ0KICAgID4gIzEgIDB4MDAwMDdmN2VjYzg2NWNiYSBpbiBfTF9sb2NrXzEy
+ODA4ICgpIGF0IG1hbGxvYy5jOjUyMDYNCiAgICA+ICMyICAweDAwMDA3ZjdlY2M4NjM2YjUgaW4g
+X19HSV9fX2xpYmNfbWFsbG9jIChieXRlcz01NikgYXQgbWFsbG9jLmM6Mjg4Nw0KICAgID4gIzMg
+IDB4MDAwMDdmN2VkNzU2ZmU3YyBpbiBfZGxfbWFwX29iamVjdF9kZXBzIChtYXA9bWFwQGVudHJ5
+PTB4N2Y3ZWQ3Nzc5NGY4LCBwcmVsb2Fkcz1wcmVsb2Fkc0BlbnRyeT0weDAsIG5wcmVsb2Fkcz1u
+cHJlbG9hZHNAZW50cnk9MCwgdHJhY2VfbW9kZT10cmFjZV9tb2RlQGVudHJ5PTAsDQogICAgPiAg
+ICAgb3Blbl9tb2RlPW9wZW5fbW9kZUBlbnRyeT0tMjE0NzQ4MzY0OCkgYXQgZGwtZGVwcy5jOjUx
+MQ0KICAgID4gIzQgIDB4MDAwMDdmN2VkNzU3NmE2YiBpbiBkbF9vcGVuX3dvcmtlciAoYT1hQGVu
+dHJ5PTB4N2Y2YTg0OGEyZjQ4KSBhdCBkbC1vcGVuLmM6MjcyDQogICAgPiAjNSAgMHgwMDAwN2Y3
+ZWQ3NTcxZmM0IGluIF9kbF9jYXRjaF9lcnJvciAob2JqbmFtZT1vYmpuYW1lQGVudHJ5PTB4N2Y2
+YTg0OGEyZjM4LCBlcnJzdHJpbmc9ZXJyc3RyaW5nQGVudHJ5PTB4N2Y2YTg0OGEyZjQwLCBtYWxs
+b2NlZHA9bWFsbG9jZWRwQGVudHJ5PTB4N2Y2YTg0OGEyZjMwLA0KICAgID4gICAgIG9wZXJhdGU9
+b3BlcmF0ZUBlbnRyeT0weDdmN2VkNzU3Njk2MCA8ZGxfb3Blbl93b3JrZXI+LCBhcmdzPWFyZ3NA
+ZW50cnk9MHg3ZjZhODQ4YTJmNDgpIGF0IGRsLWVycm9yLmM6MTg3DQogICAgPiAjNiAgMHgwMDAw
+N2Y3ZWQ3NTc2MzdiIGluIF9kbF9vcGVuIChmaWxlPTB4N2Y3ZWNjOTVkMWE2ICJsaWJnY2Nfcy5z
+by4xIiwgbW9kZT0tMjE0NzQ4MzY0NywgY2FsbGVyX2Rsb3Blbj08b3B0aW1pemVkIG91dD4sIG5z
+aWQ9LTIsIGFyZ2M9OSwgYXJndj0weDdmZmU3MjBmMmJkOCwgZW52PTB4N2ZmZTcyMGYyYzI4KSBh
+dCBkbC1vcGVuLmM6NjYxDQogICAgPiAjNyAgMHgwMDAwN2Y3ZWNjOTE2Y2YyIGluIGRvX2Rsb3Bl
+biAocHRyPXB0ckBlbnRyeT0weDdmNmE4NDhhMzE2MCkgYXQgZGwtbGliYy5jOjg3DQogICAgPiAj
+OCAgMHgwMDAwN2Y3ZWQ3NTcxZmM0IGluIF9kbF9jYXRjaF9lcnJvciAob2JqbmFtZT0weDdmNmE4
+NDhhMzE0MCwgZXJyc3RyaW5nPTB4N2Y2YTg0OGEzMTUwLCBtYWxsb2NlZHA9MHg3ZjZhODQ4YTMx
+MzAsIG9wZXJhdGU9MHg3ZjdlY2M5MTZjYjAgPGRvX2Rsb3Blbj4sIGFyZ3M9MHg3ZjZhODQ4YTMx
+NjApIGF0IGRsLWVycm9yLmM6MTg3DQogICAgPiAjOSAgMHgwMDAwN2Y3ZWNjOTE2ZGIyIGluIGRs
+ZXJyb3JfcnVuIChhcmdzPTB4N2Y2YTg0OGEzMTYwLCBvcGVyYXRlPTB4N2Y3ZWNjOTE2Y2IwIDxk
+b19kbG9wZW4+KSBhdCBkbC1saWJjLmM6NDYNCiAgICA+ICMxMCBfX0dJX19fbGliY19kbG9wZW5f
+bW9kZSAobmFtZT1uYW1lQGVudHJ5PTB4N2Y3ZWNjOTVkMWE2ICJsaWJnY2Nfcy5zby4xIiwgbW9k
+ZT1tb2RlQGVudHJ5PS0yMTQ3NDgzNjQ3KSBhdCBkbC1saWJjLmM6MTYzDQogICAgPiAjMTEgMHgw
+MDAwN2Y3ZWNjOGViYzc1IGluIGluaXQgKCkgYXQgLi4vc3lzZGVwcy94ODZfNjQvYmFja3RyYWNl
+LmM6NTINCiAgICA+ICMxMiAweDAwMDA3ZjdlY2QwY2RhODAgaW4gcHRocmVhZF9vbmNlICgpIGF0
+IC4uL25wdGwvc3lzZGVwcy91bml4L3N5c3YvbGludXgveDg2XzY0L3B0aHJlYWRfb25jZS5TOjEw
+Mw0KICAgID4gIzEzIDB4MDAwMDdmN2VjYzhlYmQ4YyBpbiBfX0dJX19fYmFja3RyYWNlIChhcnJh
+eT08b3B0aW1pemVkIG91dD4sIHNpemU9MTAwKSBhdCAuLi9zeXNkZXBzL3g4Nl82NC9iYWNrdHJh
+Y2UuYzoxMDMNCiAgICA+ICMxNCAweDAwMDA3ZjdlY2RlOTNmNDIgaW4gPz8gKCkgZnJvbSAvdXNy
+L2xpYi9saWJyZ3cuc28uMg0KICAgID4gIzE1IDxzaWduYWwgaGFuZGxlciBjYWxsZWQ+DQogICAg
+PiAjMTYgbWFsbG9jX2NvbnNvbGlkYXRlIChhdj1hdkBlbnRyeT0weDdmN2QwODAwMDAyMCkgYXQg
+bWFsbG9jLmM6NDE1MQ0KICAgID4gIzE3IDB4MDAwMDdmN2VjYzg2MGNlOCBpbiBfaW50X21hbGxv
+YyAoYXY9MHg3ZjdkMDgwMDAwMjAsIGJ5dGVzPTE0MDgpIGF0IG1hbGxvYy5jOjM0MjMNCiAgICA+
+ICMxOCAweDAwMDA3ZjdlY2M4NjM2YzAgaW4gX19HSV9fX2xpYmNfbWFsbG9jIChieXRlcz0xNDA4
+KSBhdCBtYWxsb2MuYzoyODkxDQogICAgPiAjMTkgMHgwMDAwN2Y3ZWNjZTFhZGFkIGluIG9wZXJh
+dG9yIG5ldyh1bnNpZ25lZCBsb25nKSAoKSBmcm9tIC91c3IvbGliL3g4Nl82NC1saW51eC1nbnUv
+bGlic3RkYysrLnNvLjYNCiAgICA+ICMyMCAweDAwMDA3ZjdlY2RkOGVmMTEgaW4gc3RkOjpfUmJf
+dHJlZV9pdGVyYXRvcjxzdGQ6OnBhaXI8cmd3X29iaiBjb25zdCwgUkdXT2JqU3RhdGU+ID4gc3Rk
+OjpfUmJfdHJlZTxyZ3dfb2JqLCBzdGQ6OnBhaXI8cmd3X29iaiBjb25zdCwgUkdXT2JqU3RhdGU+
+LCBzdGQ6Ol9TZWxlY3Qxc3Q8c3RkOjpwYWlyPHJnd19vYmogY29uc3QsIFJHV09ialN0YXRlPiA+
+LCBzdGQ6Omxlc3M8cmd3X29iaj4sIHN0ZDo6YWxsb2NhdG9yPHN0ZDo6cGFpcjxyZ3dfb2JqIGNv
+bnN0LCBSR1dPYmpTdGF0ZT4gPiA+OjpfTV9lbXBsYWNlX2hpbnRfdW5pcXVlPHN0ZDo6cGllY2V3
+aXNlX2NvbnN0cnVjdF90IGNvbnN0Jiwgc3RkOjp0dXBsZTxyZ3dfb2JqIGNvbnN0Jj4sIHN0ZDo6
+dHVwbGU8PiA+KHN0ZDo6X1JiX3RyZWVfY29uc3RfaXRlcmF0b3I8c3RkOjpwYWlyPHJnd19vYmog
+Y29uc3QsIFJHV09ialN0YXRlPiA+LCBzdGQ6OnBpZWNld2lzZV9jb25zdHJ1Y3RfdCBjb25zdCYs
+IHN0ZDo6dHVwbGU8cmd3X29iaiBjb25zdCY+JiYsIHN0ZDo6dHVwbGU8PiYmKSAoKSBmcm9tIC91
+c3IvbGliL2xpYnJndy5zby4yDQogICAgPiAjMjEgMHgwMDAwN2Y3ZWNkZDhmNzI1IGluIHN0ZDo6
+bWFwPHJnd19vYmosIFJHV09ialN0YXRlLCBzdGQ6Omxlc3M8cmd3X29iaj4sIHN0ZDo6YWxsb2Nh
+dG9yPHN0ZDo6cGFpcjxyZ3dfb2JqIGNvbnN0LCBSR1dPYmpTdGF0ZT4gPiA+OjpvcGVyYXRvcltd
+KHJnd19vYmogY29uc3QmKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQogICAgPiAjMjIg
+MHgwMDAwN2Y3ZWNkZDNjNTg1IGluIFJHV09iamVjdEN0eDo6Z2V0X3N0YXRlKHJnd19vYmomKSAo
+KSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQogICAgPiAjMjMgMHgwMDAwN2Y3ZWNkZDNlNmVk
+IGluIFJHV1JhZG9zOjpnZXRfc3lzdGVtX29ial9zdGF0ZV9pbXBsKFJHV09iamVjdEN0eCosIHJn
+d19vYmomLCBSR1dPYmpTdGF0ZSoqLCBSR1dPYmpWZXJzaW9uVHJhY2tlciopICgpIGZyb20gL3Vz
+ci9saWIvbGlicmd3LnNvLjINCiAgICA+ICMyNCAweDAwMDA3ZjdlY2RkM2VjYjQgaW4gUkdXUmFk
+b3M6OmdldF9zeXN0ZW1fb2JqX3N0YXRlKFJHV09iamVjdEN0eCosIHJnd19vYmomLCBSR1dPYmpT
+dGF0ZSoqLCBSR1dPYmpWZXJzaW9uVHJhY2tlciopICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNv
+LjINCiAgICA+ICMyNSAweDAwMDA3ZjdlY2RkM2VkMmEgaW4gUkdXUmFkb3M6OnN0YXRfc3lzdGVt
+X29iaihSR1dPYmplY3RDdHgmLCBSR1dSYWRvczo6U3lzdGVtT2JqZWN0OjpSZWFkOjpHZXRPYmpT
+dGF0ZSYsIHJnd19vYmomLCBzdGQ6Om1hcDxzdGQ6OnN0cmluZywgY2VwaDo6YnVmZmVyOjpsaXN0
+LCBzdGQ6Omxlc3M8c3RkOjpzdHJpbmc+LCBzdGQ6OmFsbG9jYXRvcjxzdGQ6OnBhaXI8c3RkOjpz
+dHJpbmcgY29uc3QsIGNlcGg6OmJ1ZmZlcjo6bGlzdD4gPiA+Kiwgc3RkOjpjaHJvbm86OnRpbWVf
+cG9pbnQ8Y2VwaDo6dGltZV9kZXRhaWw6OnJlYWxfY2xvY2ssIHN0ZDo6Y2hyb25vOjpkdXJhdGlv
+bjx1bnNpZ25lZCBsb25nLCBzdGQ6OnJhdGlvPDFsLCAxMDAwMDAwMDAwbD4gPiA+KiwgdW5zaWdu
+ZWQgbG9uZyosIFJHV09ialZlcnNpb25UcmFja2VyKikgKCkgZnJvbSAvdXNyL2xpYi9saWJyZ3cu
+c28uMg0KICAgID4gIzI2IDB4MDAwMDdmN2VjZGQyN2JiYiBpbiBSR1dSYWRvczo6U3lzdGVtT2Jq
+ZWN0OjpSZWFkOjpzdGF0KFJHV09ialZlcnNpb25UcmFja2VyKikgKCkgZnJvbSAvdXNyL2xpYi9s
+aWJyZ3cuc28uMg0KICAgID4gIzI3IDB4MDAwMDdmN2VjZGMyZDRhOCBpbiByZ3dfZ2V0X3N5c3Rl
+bV9vYmooUkdXUmFkb3MqLCBSR1dPYmplY3RDdHgmLCByZ3dfYnVja2V0Jiwgc3RkOjpzdHJpbmcg
+Y29uc3QmLCBjZXBoOjpidWZmZXI6Omxpc3QmLCBSR1dPYmpWZXJzaW9uVHJhY2tlciosIHN0ZDo6
+Y2hyb25vOjp0aW1lX3BvaW50PGNlcGg6OnRpbWVfZGV0YWlsOjpyZWFsX2Nsb2NrLCBzLS0tVHlw
+ZSA8cmV0dXJuPiB0byBjb250aW51ZSwgb3IgcSA8cmV0dXJuPiB0byBxdWl0LS0tDQogICAgPiB0
+ZDo6Y2hyb25vOjpkdXJhdGlvbjx1bnNpZ25lZCBsb25nLCBzdGQ6OnJhdGlvPDFsLCAxMDAwMDAw
+MDAwbD4gPiA+Kiwgc3RkOjptYXA8c3RkOjpzdHJpbmcsIGNlcGg6OmJ1ZmZlcjo6bGlzdCwgc3Rk
+OjpsZXNzPHN0ZDo6c3RyaW5nPiwgc3RkOjphbGxvY2F0b3I8c3RkOjpwYWlyPHN0ZDo6c3RyaW5n
+IGNvbnN0LCBjZXBoOjpidWZmZXI6Omxpc3Q+ID4gPiosIHJnd19jYWNoZV9lbnRyeV9pbmZvKikg
+KCkgZnJvbSAvdXNyL2xpYi9saWJyZ3cuc28uMg0KICAgID4gIzI4IDB4MDAwMDdmN2VjZGUyMzIw
+YiBpbiByZ3dfZ2V0X3VzZXJfaW5mb19ieV91aWQoUkdXUmFkb3MqLCByZ3dfdXNlciBjb25zdCYs
+IFJHV1VzZXJJbmZvJiwgUkdXT2JqVmVyc2lvblRyYWNrZXIqLCBzdGQ6OmNocm9ubzo6dGltZV9w
+b2ludDxjZXBoOjp0aW1lX2RldGFpbDo6cmVhbF9jbG9jaywgc3RkOjpjaHJvbm86OmR1cmF0aW9u
+PHVuc2lnbmVkIGxvbmcsIHN0ZDo6cmF0aW88MWwsIDEwMDAwMDAwMDBsPiA+ID4qLCByZ3dfY2Fj
+aGVfZW50cnlfaW5mbyosIHN0ZDo6bWFwPHN0ZDo6c3RyaW5nLCBjZXBoOjpidWZmZXI6Omxpc3Qs
+IHN0ZDo6bGVzczxzdGQ6OnN0cmluZz4sIHN0ZDo6YWxsb2NhdG9yPHN0ZDo6cGFpcjxzdGQ6OnN0
+cmluZyBjb25zdCwgY2VwaDo6YnVmZmVyOjpsaXN0PiA+ID4qKSAoKQ0KICAgID4gICAgZnJvbSAv
+dXNyL2xpYi9saWJyZ3cuc28uMg0KICAgID4gIzI5IDB4MDAwMDdmN2VjZGUxNTk2NSBpbiBSR1dT
+d2lmdDo6dXBkYXRlX3VzZXJfaW5mbyhSR1dSYWRvcyosIHJnd19zd2lmdF9hdXRoX2luZm8qLCBS
+R1dVc2VySW5mbyYpICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNvLjINCiAgICA+ICMzMCAweDAw
+MDA3ZjdlY2RlMTc5NDUgaW4gUkdXU3dpZnQ6OnZhbGlkYXRlX2tleXN0b25lX3Rva2VuKFJHV1Jh
+ZG9zKiwgc3RkOjpzdHJpbmcgY29uc3QmLCBSR1dVc2VySW5mbyYpICgpIGZyb20gL3Vzci9saWIv
+bGlicmd3LnNvLjINCiAgICA+ICMzMSAweDAwMDA3ZjdlY2RlMWEyNWQgaW4gUkdXU3dpZnQ6OmRv
+X3ZlcmlmeV9zd2lmdF90b2tlbihSR1dSYWRvcyosIHJlcV9zdGF0ZSopICgpIGZyb20gL3Vzci9s
+aWIvbGlicmd3LnNvLjINCiAgICA+ICMzMiAweDAwMDA3ZjdlY2RlMWE4MDYgaW4gUkdXU3dpZnQ6
+OnZlcmlmeV9zd2lmdF90b2tlbihSR1dSYWRvcyosIHJlcV9zdGF0ZSopICgpIGZyb20gL3Vzci9s
+aWIvbGlicmd3LnNvLjINCiAgICA+ICMzMyAweDAwMDA3ZjdlY2RlMDY0ZGEgaW4gUkdXSGFuZGxl
+cl9SRVNUX1NXSUZUOjphdXRob3JpemUoKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQog
+ICAgPiAjMzQgMHgwMDAwN2Y3ZWNkZDE5ZDY3IGluIHByb2Nlc3NfcmVxdWVzdChSR1dSYWRvcyos
+IFJHV1JFU1QqLCBSR1dSZXF1ZXN0KiwgUkdXU3RyZWFtSU8qLCBPcHNMb2dTb2NrZXQqKSAoKSBm
+cm9tIC91c3IvbGliL2xpYnJndy5zby4yDQogICAgPiAjMzUgMHgwMDAwNTVhMTlkYTg4YjlmIGlu
+ID8/ICgpDQogICAgPiAjMzYgMHgwMDAwNTVhMTlkYTkyODhmIGluID8/ICgpDQogICAgPiAjMzcg
+MHgwMDAwNTVhMTlkYTk0ODVlIGluID8/ICgpDQogICAgPiAjMzggMHgwMDAwN2Y3ZWNkMGM4MTg0
+IGluIHN0YXJ0X3RocmVhZCAoYXJnPTB4N2Y2YTg0OGFjNzAwKSBhdCBwdGhyZWFkX2NyZWF0ZS5j
+OjMxMg0KICAgID4gIzM5IDB4MDAwMDdmN2VjYzhkYjM3ZCBpbiBjbG9uZSAoKSBhdCAuLi9zeXNk
+ZXBzL3VuaXgvc3lzdi9saW51eC94ODZfNjQvY2xvbmUuUzoxMTENCiAgICA+DQogICAgPg0KICAg
+ID4gVGhyZWFkIDc0ODUgKFRocmVhZCAweDdmNmJhNmFmMDcwMCAoTFdQIDI2OTQ4KSk6DQogICAg
+PiAjMCAgcHRocmVhZF9jb25kX3dhaXRAQEdMSUJDXzIuMy4yICgpIGF0IC4uL25wdGwvc3lzZGVw
+cy91bml4L3N5c3YvbGludXgveDg2XzY0L3B0aHJlYWRfY29uZF93YWl0LlM6MTg1DQogICAgPiAj
+MSAgMHgwMDAwN2Y3ZWMzMGUyZWYxIGluIGxpYnJhZG9zOjpBaW9Db21wbGV0aW9uOjp3YWl0X2Zv
+cl9jb21wbGV0ZV9hbmRfY2IoKSAoKSBmcm9tIC91c3IvbGliL2xpYnJhZG9zLnNvLjINCiAgICA+
+ICMyICAweDAwMDA3ZjdlY2RkNTU5ZTAgaW4gUkdXUmFkb3M6Ok9iamVjdDo6UmVhZDo6aXRlcmF0
+ZShsb25nLCBsb25nLCBSR1dHZXREYXRhQ0IqKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4y
+DQogICAgPiAjMyAgMHgwMDAwN2Y3ZWNkZDA2NWNiIGluIFJHV0dldE9iajo6ZXhlY3V0ZSgpICgp
+IGZyb20gL3Vzci9saWIvbGlicmd3LnNvLjINCiAgICA+ICM0ICAweDAwMDA3ZjdlY2RkMTlmNGIg
+aW4gcHJvY2Vzc19yZXF1ZXN0KFJHV1JhZG9zKiwgUkdXUkVTVCosIFJHV1JlcXVlc3QqLCBSR1dT
+dHJlYW1JTyosIE9wc0xvZ1NvY2tldCopICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNvLjINCiAg
+ICA+ICM1ICAweDAwMDA1NWExOWRhODhiOWYgaW4gPz8gKCkNCiAgICA+ICM2ICAweDAwMDA1NWEx
+OWRhOTI4OGYgaW4gPz8gKCkNCiAgICA+ICM3ICAweDAwMDA1NWExOWRhOTQ4NWUgaW4gPz8gKCkN
+CiAgICA+ICM4ICAweDAwMDA3ZjdlY2QwYzgxODQgaW4gc3RhcnRfdGhyZWFkIChhcmc9MHg3ZjZi
+YTZhZjA3MDApIGF0IHB0aHJlYWRfY3JlYXRlLmM6MzEyDQogICAgPiAjOSAgMHgwMDAwN2Y3ZWNj
+OGRiMzdkIGluIGNsb25lICgpIGF0IC4uL3N5c2RlcHMvdW5peC9zeXN2L2xpbnV4L3g4Nl82NC9j
+bG9uZS5TOjExMQ0KICAgID4NCiAgICA+DQogICAgPiBUaHJlYWQgNDgwNSAoVGhyZWFkIDB4N2Y2
+NjZkMDdlNzAwIChMV1AgMjk2NDEpKToNCiAgICA+ICMwICBwdGhyZWFkX2NvbmRfd2FpdEBAR0xJ
+QkNfMi4zLjIgKCkgYXQgLi4vbnB0bC9zeXNkZXBzL3VuaXgvc3lzdi9saW51eC94ODZfNjQvcHRo
+cmVhZF9jb25kX3dhaXQuUzoxODUNCiAgICA+ICMxICAweDAwMDA3ZjdlY2RmNzZlNDMgaW4gY2Vw
+aDo6bG9nOjpMb2c6OnN1Ym1pdF9lbnRyeShjZXBoOjpsb2c6OkVudHJ5KikgKCkgZnJvbSAvdXNy
+L2xpYi9saWJyZ3cuc28uMg0KICAgID4gIzIgIDB4MDAwMDdmN2VjZGQxOTMxZiBpbiBwcm9jZXNz
+X3JlcXVlc3QoUkdXUmFkb3MqLCBSR1dSRVNUKiwgUkdXUmVxdWVzdCosIFJHV1N0cmVhbUlPKiwg
+T3BzTG9nU29ja2V0KikgKCkgZnJvbSAvdXNyL2xpYi9saWJyZ3cuc28uMg0KICAgID4gIzMgIDB4
+MDAwMDU1YTE5ZGE4OGI5ZiBpbiA/PyAoKQ0KICAgID4gIzQgIDB4MDAwMDU1YTE5ZGE5Mjg4ZiBp
+biA/PyAoKQ0KICAgID4gIzUgIDB4MDAwMDU1YTE5ZGE5NDg1ZSBpbiA/PyAoKQ0KICAgID4gIzYg
+IDB4MDAwMDdmN2VjZDBjODE4NCBpbiBzdGFydF90aHJlYWQgKGFyZz0weDdmNjY2ZDA3ZTcwMCkg
+YXQgcHRocmVhZF9jcmVhdGUuYzozMTINCiAgICA+ICM3ICAweDAwMDA3ZjdlY2M4ZGIzN2QgaW4g
+Y2xvbmUgKCkgYXQgLi4vc3lzZGVwcy91bml4L3N5c3YvbGludXgveDg2XzY0L2Nsb25lLlM6MTEx
+DQogICAgPg0KICAgID4gVGhyZWFkIDY4NTMgKFRocmVhZCAweDdmNmE2Yjg3YTcwMCAoTFdQIDI3
+NTg0KSk6DQogICAgPiAjMCAgcHRocmVhZF9jb25kX3dhaXRAQEdMSUJDXzIuMy4yICgpIGF0IC4u
+L25wdGwvc3lzZGVwcy91bml4L3N5c3YvbGludXgveDg2XzY0L3B0aHJlYWRfY29uZF93YWl0LlM6
+MTg1DQogICAgPiAjMSAgMHgwMDAwN2Y3ZWNlMDU5YTQ0IGluIFRocm90dGxlOjpfd2FpdChsb25n
+KSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQogICAgPiAjMiAgMHgwMDAwN2Y3ZWNlMDVh
+NmE3IGluIFRocm90dGxlOjpnZXQobG9uZywgbG9uZykgKCkgZnJvbSAvdXNyL2xpYi9saWJyZ3cu
+c28uMg0KICAgID4gIzMgIDB4MDAwMDdmN2VjZGQ1MWNhNyBpbiBSR1dSYWRvczo6Z2V0X29ial9p
+dGVyYXRlX2NiKFJHV09iamVjdEN0eCosIFJHV09ialN0YXRlKiwgcmd3X29iaiYsIGxvbmcsIGxv
+bmcsIGxvbmcsIGJvb2wsIHZvaWQqKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQogICAg
+PiAjNCAgMHgwMDAwN2Y3ZWNkZDUyODllIGluID8/ICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNv
+LjINCiAgICA+ICM1ICAweDAwMDA3ZjdlY2RkNTU1YjQgaW4gUkdXUmFkb3M6Oml0ZXJhdGVfb2Jq
+KFJHV09iamVjdEN0eCYsIHJnd19vYmomLCBsb25nLCBsb25nLCB1bnNpZ25lZCBsb25nLCBpbnQg
+KCopKHJnd19vYmomLCBsb25nLCBsb25nLCBsb25nLCBib29sLCBSR1dPYmpTdGF0ZSosIHZvaWQq
+KSwgdm9pZCopICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNvLjINCiAgICA+ICM2ICAweDAwMDA3
+ZjdlY2RkNTU5YWEgaW4gUkdXUmFkb3M6Ok9iamVjdDo6UmVhZDo6aXRlcmF0ZShsb25nLCBsb25n
+LCBSR1dHZXREYXRhQ0IqKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQogICAgPiAjNyAg
+MHgwMDAwN2Y3ZWNkZDA2NWNiIGluIFJHV0dldE9iajo6ZXhlY3V0ZSgpICgpIGZyb20gL3Vzci9s
+aWIvbGlicmd3LnNvLjINCiAgICA+ICM4ICAweDAwMDA3ZjdlY2RkMTlmNGIgaW4gcHJvY2Vzc19y
+ZXF1ZXN0KFJHV1JhZG9zKiwgUkdXUkVTVCosIFJHV1JlcXVlc3QqLCBSR1dTdHJlYW1JTyosIE9w
+c0xvZ1NvY2tldCopICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNvLjINCiAgICA+ICM5ICAweDAw
+MDA1NWExOWRhODhiOWYgaW4gPz8gKCkNCiAgICA+ICMxMCAweDAwMDA1NWExOWRhOTI4OGYgaW4g
+Pz8gKCkNCiAgICA+ICMxMSAweDAwMDA1NWExOWRhOTQ4NWUgaW4gPz8gKCkNCiAgICA+ICMxMiAw
+eDAwMDA3ZjdlY2QwYzgxODQgaW4gc3RhcnRfdGhyZWFkIChhcmc9MHg3ZjZhNmI4N2E3MDApIGF0
+IHB0aHJlYWRfY3JlYXRlLmM6MzEyDQogICAgPiAjMTMgMHgwMDAwN2Y3ZWNjOGRiMzdkIGluIGNs
+b25lICgpIGF0IC4uL3N5c2RlcHMvdW5peC9zeXN2L2xpbnV4L3g4Nl82NC9jbG9uZS5TOjExMQ0K
+ICAgID4NCiAgICA+DQogICAgPiA8XHNuaXA+DQogICAgPg0KICAgID4gVGhhbmtzLA0KICAgID4g
+LVBhdmFuLg0KICAgID4NCiAgICA+IE9uIDEwLzI2LzE2LCAxMToyMyBQTSwgImNlcGgtZGV2ZWwt
+b3duZXJAdmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBZZWh1ZGEgU2FkZWgtV2VpbnJhdWIi
+IDxjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YgeXNhZGVod2VA
+cmVkaGF0LmNvbT4gd3JvdGU6DQogICAgPg0KICAgID4gICAgIE5vdCBzdXJlIHRoYXQgdGhlc2Ug
+dGhyZWFkcyBhcmUgdGhlIGN1bHByaXQsIGNhbiB5b3UgcHJvdmlkZSBhIGxpc3Qgb2YNCiAgICA+
+ICAgICBhbGwgdGhlIHJndyB0aHJlYWRzPw0KICAgID4NCiAgICA+ICAgICBPbiBXZWQsIE9jdCAy
+NiwgMjAxNiBhdCA5OjExIEFNLCBQYXZhbiBSYWxsYWJoYW5kaQ0KICAgID4gICAgIDxQUmFsbGFi
+aGFuZGlAd2FsbWFydGxhYnMuY29tPiB3cm90ZToNCiAgICA+ICAgICA+IEluIG9uZSBvZiBvdXIg
+Y2x1c3RlcnMsIHdlIGFyZSBydW5uaW5nIGEgbmlnaHRseSB2ZXJzaW9uIG9mIEpld2VsIChiZWxv
+dyksIGFuZCBvbmUgb2YgdGhlIFJHVyBub2RlcyBpcyB1bnJlc3BvbnNpdmUgd2l0aCB+NC41RyBv
+ZiByZXNpZGVudCBtZW1vcnkgYW5kIGFsbW9zdCBvbmUgY29yZSBvZiBDUFUgY29uc3VtZWQuIEFs
+bW9zdCBhbGwgb2YgdGhlIGNsaWVudCBjb25uZWN0aW9ucyB0byB0aGUgUkdXIGFyZSBpbiBDTE9T
+RV9XQUlULCBhbmQgd2Ugd2VyZSB0cnlpbmcgd2l0aCAxMDI0IFJHVyB0aHJlYWQgcG9vbCBzaXpl
+IGZvciBzb21lIGNsaWVudCBvcGVyYXRpb25zLiBUaGVyZSBhcmUgYXQgbGVhc3QgMyBvdGhlciBS
+R1dzIGluIHRoZSBzYW1lIGNsdXN0ZXIgd2l0aCBzaW1pbGFyIGNvbmZpZ3VyYXRpb24gYnV0IHRo
+ZXkgc2VlbSB0byBiZSBkb2luZyBmaW5lLg0KICAgID4gICAgID4NCiAgICA+ICAgICA+IEkgd29u
+ZGVyIGlmIHdlIGhhdmUgcnVuIGludG8gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxs
+LzEwNTYyIG9uIEpld2VsLiBQbGVhc2UgZmluZCB0aGUgc3RhY2sgdHJhY2VzIGZyb20gY291cGxl
+IG9mIHRocmVhZHMgaW4gdGhlIHJvZ3VlIFJHVy4NCiAgICA+ICAgICA+DQogICAgPiAgICAgPiBD
+YW4gc29tZW9uZSBwbGVhc2UgY29uZmlybSBpZiB0aGF04oCZcyBpbmRlZWQgdGhlIGNhc2U/DQog
+ICAgPiAgICAgPg0KICAgID4gICAgID4gPHNuaXA+DQogICAgPiAgICAgPg0KICAgID4gICAgID4g
+JGNlcGggLXYNCiAgICA+ICAgICA+IGNlcGggdmVyc2lvbiAxMC4yLjItNTA4LWc5YmZjMGNmICg5
+YmZjMGNmMTc4ZGMyMWIwZmUzM2UwY2UzYjkwYTE4ODU4YWJhZjFiKQ0KICAgID4gICAgID4NCiAg
+ICA+ICAgICA+DQogICAgPiAgICAgPiAoZ2RiKSB0IDY4MzYNCiAgICA+ICAgICA+IFtTd2l0Y2hp
+bmcgdG8gdGhyZWFkIDY4MzYgKFRocmVhZCAweDdmNmE2MzA2OTcwMCAoTFdQIDI3NjAxKSldDQog
+ICAgPiAgICAgPiAjMCAgX19sbGxfbG9ja193YWl0ICgpIGF0IC4uL25wdGwvc3lzZGVwcy91bml4
+L3N5c3YvbGludXgveDg2XzY0L2xvd2xldmVsbG9jay5TOjEzNQ0KICAgID4gICAgID4gMTM1ICAg
+ICAuLi9ucHRsL3N5c2RlcHMvdW5peC9zeXN2L2xpbnV4L3g4Nl82NC9sb3dsZXZlbGxvY2suUzog
+Tm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeS4NCiAgICA+ICAgICA+IChnZGIpIGJ0DQogICAgPiAg
+ICAgPiAjMCAgX19sbGxfbG9ja193YWl0ICgpIGF0IC4uL25wdGwvc3lzZGVwcy91bml4L3N5c3Yv
+bGludXgveDg2XzY0L2xvd2xldmVsbG9jay5TOjEzNQ0KICAgID4gICAgID4gIzEgIDB4MDAwMDdm
+N2VjZDBjYTY2NCBpbiBfTF9sb2NrXzk1MiAoKSBmcm9tIC9saWIveDg2XzY0LWxpbnV4LWdudS9s
+aWJwdGhyZWFkLnNvLjANCiAgICA+ICAgICA+ICMyICAweDAwMDA3ZjdlY2QwY2E0YzYgaW4gX19H
+SV9fX3B0aHJlYWRfbXV0ZXhfbG9jayAobXV0ZXg9MHg1NWExOWY4YjhmZTApIGF0IC4uL25wdGwv
+cHRocmVhZF9tdXRleF9sb2NrLmM6MTE0DQogICAgPiAgICAgPiAjMyAgMHgwMDAwN2Y3ZWNlMDAy
+NjM4IGluIE11dGV4OjpMb2NrKGJvb2wpICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNvLjINCiAg
+ICA+ICAgICA+ICM0ICAweDAwMDA3ZjdlY2RjODA5N2EgaW4gUkdXS2V5c3RvbmVUb2tlbkNhY2hl
+OjpmaW5kKHN0ZDo6c3RyaW5nIGNvbnN0JiwgS2V5c3RvbmVUb2tlbiYpICgpIGZyb20gL3Vzci9s
+aWIvbGlicmd3LnNvLjINCiAgICA+ICAgICA+ICM1ICAweDAwMDA3ZjdlY2RlMTc4MjkgaW4gUkdX
+U3dpZnQ6OnZhbGlkYXRlX2tleXN0b25lX3Rva2VuKFJHV1JhZG9zKiwgc3RkOjpzdHJpbmcgY29u
+c3QmLCBSR1dVc2VySW5mbyYpICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNvLjINCiAgICA+ICAg
+ICA+ICM2ICAweDAwMDA3ZjdlY2RlMWEyNWQgaW4gUkdXU3dpZnQ6OmRvX3ZlcmlmeV9zd2lmdF90
+b2tlbihSR1dSYWRvcyosIHJlcV9zdGF0ZSopICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNvLjIN
+CiAgICA+ICAgICA+ICM3ICAweDAwMDA3ZjdlY2RlMWE4MDYgaW4gUkdXU3dpZnQ6OnZlcmlmeV9z
+d2lmdF90b2tlbihSR1dSYWRvcyosIHJlcV9zdGF0ZSopICgpIGZyb20gL3Vzci9saWIvbGlicmd3
+LnNvLjINCiAgICA+ICAgICA+ICM4ICAweDAwMDA3ZjdlY2RlMDY0ZGEgaW4gUkdXSGFuZGxlcl9S
+RVNUX1NXSUZUOjphdXRob3JpemUoKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQogICAg
+PiAgICAgPiAjOSAgMHgwMDAwN2Y3ZWNkZDE5ZDY3IGluIHByb2Nlc3NfcmVxdWVzdChSR1dSYWRv
+cyosIFJHV1JFU1QqLCBSR1dSZXF1ZXN0KiwgUkdXU3RyZWFtSU8qLCBPcHNMb2dTb2NrZXQqKSAo
+KSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQogICAgPiAgICAgPiAjMTAgMHgwMDAwNTVhMTlk
+YTg4YjlmIGluID8/ICgpDQogICAgPiAgICAgPiAjMTEgMHgwMDAwNTVhMTlkYTkyODhmIGluID8/
+ICgpDQogICAgPiAgICAgPiAjMTIgMHgwMDAwNTVhMTlkYTk0ODVlIGluID8/ICgpDQogICAgPiAg
+ICAgPiAjMTMgMHgwMDAwN2Y3ZWNkMGM4MTg0IGluIHN0YXJ0X3RocmVhZCAoYXJnPTB4N2Y2YTYz
+MDY5NzAwKSBhdCBwdGhyZWFkX2NyZWF0ZS5jOjMxMg0KICAgID4gICAgID4gIzE0IDB4MDAwMDdm
+N2VjYzhkYjM3ZCBpbiBjbG9uZSAoKSBhdCAuLi9zeXNkZXBzL3VuaXgvc3lzdi9saW51eC94ODZf
+NjQvY2xvbmUuUzoxMTENCiAgICA+ICAgICA+ICAoZ2RiKSB0IDUzNjkNCiAgICA+ICAgICA+IFtT
+d2l0Y2hpbmcgdG8gdGhyZWFkIDUzNjkgKFRocmVhZCAweDdmNjc4NjJiMDcwMCAoTFdQIDI5MDc0
+KSldDQogICAgPiAgICAgPiAjMCAgX19sbGxfbG9ja193YWl0ICgpIGF0IC4uL25wdGwvc3lzZGVw
+cy91bml4L3N5c3YvbGludXgveDg2XzY0L2xvd2xldmVsbG9jay5TOjEzNQ0KICAgID4gICAgID4g
+MTM1ICAgICAuLi9ucHRsL3N5c2RlcHMvdW5peC9zeXN2L2xpbnV4L3g4Nl82NC9sb3dsZXZlbGxv
+Y2suUzogTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeS4NCiAgICA+ICAgICA+IChnZGIpIGJ0DQog
+ICAgPiAgICAgPiAjMCAgX19sbGxfbG9ja193YWl0ICgpIGF0IC4uL25wdGwvc3lzZGVwcy91bml4
+L3N5c3YvbGludXgveDg2XzY0L2xvd2xldmVsbG9jay5TOjEzNQ0KICAgID4gICAgID4gIzEgIDB4
+MDAwMDdmN2VjZDBjYTY2NCBpbiBfTF9sb2NrXzk1MiAoKSBmcm9tIC9saWIveDg2XzY0LWxpbnV4
+LWdudS9saWJwdGhyZWFkLnNvLjANCiAgICA+ICAgICA+ICMyICAweDAwMDA3ZjdlY2QwY2E0YzYg
+aW4gX19HSV9fX3B0aHJlYWRfbXV0ZXhfbG9jayAobXV0ZXg9MHg1NWExOWY4YjhmZTApIGF0IC4u
+L25wdGwvcHRocmVhZF9tdXRleF9sb2NrLmM6MTE0DQogICAgPiAgICAgPiAjMyAgMHgwMDAwN2Y3
+ZWNlMDAyNjM4IGluIE11dGV4OjpMb2NrKGJvb2wpICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNv
+LjINCiAgICA+ICAgICA+ICM0ICAweDAwMDA3ZjdlY2RjODA5N2EgaW4gUkdXS2V5c3RvbmVUb2tl
+bkNhY2hlOjpmaW5kKHN0ZDo6c3RyaW5nIGNvbnN0JiwgS2V5c3RvbmVUb2tlbiYpICgpIGZyb20g
+L3Vzci9saWIvbGlicmd3LnNvLjINCiAgICA+ICAgICA+ICM1ICAweDAwMDA3ZjdlY2RlMTc4Mjkg
+aW4gUkdXU3dpZnQ6OnZhbGlkYXRlX2tleXN0b25lX3Rva2VuKFJHV1JhZG9zKiwgc3RkOjpzdHJp
+bmcgY29uc3QmLCBSR1dVc2VySW5mbyYpICgpIGZyb20gL3Vzci9saWIvbGlicmd3LnNvLjINCiAg
+ICA+ICAgICA+ICM2ICAweDAwMDA3ZjdlY2RlMWEyNWQgaW4gUkdXU3dpZnQ6OmRvX3ZlcmlmeV9z
+d2lmdF90b2tlbihSR1dSYWRvcyosIHJlcV9zdGF0ZSopICgpIGZyb20gL3Vzci9saWIvbGlicmd3
+LnNvLjINCiAgICA+ICAgICA+ICM3ICAweDAwMDA3ZjdlY2RlMWE4MDYgaW4gUkdXU3dpZnQ6OnZl
+cmlmeV9zd2lmdF90b2tlbihSR1dSYWRvcyosIHJlcV9zdGF0ZSopICgpIGZyb20gL3Vzci9saWIv
+bGlicmd3LnNvLjINCiAgICA+ICAgICA+ICM4ICAweDAwMDA3ZjdlY2RlMDY0ZGEgaW4gUkdXSGFu
+ZGxlcl9SRVNUX1NXSUZUOjphdXRob3JpemUoKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4y
+DQogICAgPiAgICAgPiAjOSAgMHgwMDAwN2Y3ZWNkZDE5ZDY3IGluIHByb2Nlc3NfcmVxdWVzdChS
+R1dSYWRvcyosIFJHV1JFU1QqLCBSR1dSZXF1ZXN0KiwgUkdXU3RyZWFtSU8qLCBPcHNMb2dTb2Nr
+ZXQqKSAoKSBmcm9tIC91c3IvbGliL2xpYnJndy5zby4yDQogICAgPiAgICAgPiAjMTAgMHgwMDAw
+NTVhMTlkYTg4YjlmIGluID8/ICgpDQogICAgPiAgICAgPiAjMTEgMHgwMDAwNTVhMTlkYTkyODhm
+IGluID8/ICgpDQogICAgPiAgICAgPiAjMTIgMHgwMDAwNTVhMTlkYTk0ODVlIGluID8/ICgpDQog
+ICAgPiAgICAgPiAjMTMgMHgwMDAwN2Y3ZWNkMGM4MTg0IGluIHN0YXJ0X3RocmVhZCAoYXJnPTB4
+N2Y2Nzg2MmIwNzAwKSBhdCBwdGhyZWFkX2NyZWF0ZS5jOjMxMg0KICAgID4gICAgID4gIzE0IDB4
+MDAwMDdmN2VjYzhkYjM3ZCBpbiBjbG9uZSAoKSBhdCAuLi9zeXNkZXBzL3VuaXgvc3lzdi9saW51
+eC94ODZfNjQvY2xvbmUuUzoxMTENCiAgICA+ICAgICA+IChnZGIpDQogICAgPiAgICAgPg0KICAg
+ID4gICAgID4gPFxzbmlwPg0KICAgID4gICAgID4NCiAgICA+ICAgICA+IFRoYW5rcywNCiAgICA+
+ICAgICA+IC1QYXZhbi4NCiAgICA+ICAgICA+DQogICAgPiAgICAgLS0NCiAgICA+ICAgICBUbyB1
+bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2Vw
+aC1kZXZlbCIgaW4NCiAgICA+ICAgICB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21v
+QHZnZXIua2VybmVsLm9yZw0KICAgID4gICAgIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6
+Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KICAgID4NCiAgICA+DQogICAg
+LS0NCiAgICBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
+dWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCiAgICB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
+b3Jkb21vQHZnZXIua2VybmVsLm9yZw0KICAgIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6
+Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KICAgIA0KDQo=
