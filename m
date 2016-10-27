@@ -1,122 +1,32 @@
-From: Sage Weil <sage@newdream.net>
-Subject: re: ubuntu upstart hang due xfs mount hang
-Date: Thu, 27 Oct 2016 16:35:01 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1610271634290.14316@piezo.us.to>
-References: <7BD28126D6935A4498AE6DE60B5D4CAB314ECDF8@H3CMLB12-EX.srv.huawei-3com.com>
+From: John Spray <jspray@redhat.com>
+Subject: rocksdb breakage on master?
+Date: Thu, 27 Oct 2016 18:37:47 +0100
+Message-ID: <CALe9h7e27rDp7V9CCWdyQrAvDZ67kJbQVS5fYV0zdt9B4Lj0MA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-173092139-1477586104=:14316"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33947 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932109AbcJ0QfF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Oct 2016 12:35:05 -0400
-In-Reply-To: <7BD28126D6935A4498AE6DE60B5D4CAB314ECDF8@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:34108 "EHLO
+        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935238AbcJ0RiJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Oct 2016 13:38:09 -0400
+Received: by mail-lf0-f49.google.com with SMTP id b81so38016055lfe.1
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Oct 2016 10:38:08 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zhangzengran <zhangzengran@h3c.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, Bassam Tabbara <bassamtabbara@hotmail.com>, Kefu Chai <kchai@redhat.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+I had a totally failing test branch based on recent master:
+http://pulpito.ceph.com/jspray-2016-10-27_14:08:19-fs-wip-jcsp-testing-20161026-distro-basic-mira
 
---8323329-173092139-1477586104=:14316
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+With OSD coredumps and failures like this:
+> Command failed on mira110 with status 132: 'sudo MALLOC_CHECK_=3 adjust-ulimits ceph-coverage /home/ubuntu/cephtest/archive/coverage ceph-osd --cluster ceph --mkfs --mkkey -i 0 --monmap /home/ubuntu/cephtest/ceph.monmap'
 
-On Thu, 27 Oct 2016, Zhangzengran wrote:
-> 
-> >On Thu, 27 Oct 2016, Zhangzengran wrote:
-> 
-> >> >On Thu, 27 Oct 2016, Zhangzengran wrote:
-> 
-> >> >> Hi Sage & all:
-> 
-> >> >>   There is a data disk on ceph host with xfs, it’s EFIs corrupt in
-> 
-> >> >> an unexpected power outage.when the host power on again,
-> 
-> >> >> system(ubuntu) hang in upstart’s console, we learn that upstart try to
-> do `ceph-disk activate-all` and mount that disk in ceph-osd-all series
-> jobs,but the mount hang indefinite. there is also a S20ceph script called by
-> rc series jobs,and the tty1.conf start on `stoped rc`,so we cant login from
-> console.
-> 
-> >> >>
-> 
-> >> >> I saw there is a Patch for ceph-disk,it provided a timeout to
-> 
-> >> >> mkfs.So I think,  do we also need to provide a timeout for
-> mount?because if ceph-disk hang in upstart, no osd  daemon could start on
-> that host.
-> 
-> >>
-> 
-> >> >What version of ubuntu and Ceph is this? Since jewel we are all systemd,
-> and the activate etc jobs are all async systemd tasks, so I don't think this
-> should happen.
-> 
-> >>
-> 
-> >> Ubuntu is 14.04, Ceph is Hammer 0.94.5
-> 
-> > 
-> 
-> >Ah.  This will all go away once you upgrade to jewel.  In the meantime, you
-> can probably remove the S20 file.. though I don't think it should be doing
-> anything anyway since you're using upstart.
-> 
->  
-> 
-> thank you,and should we provide a timeout for mount in ceph-disk, like
-> something done for mkfs?
+So I tried reverting these two guys:
+418bfd7bb5ec1dcec2b011e9df118c33ce38d398 cmake: use external project for rocksdb
+5bbcf8547c45eb962507d26649cab2c1dec20dc6 pickup new rocksdb with
+support for linux cmake
+( from PR https://github.com/ceph/ceph/pull/11385)
 
-In teh systemd world I don't think it's needed.  Since you're just hacking 
-the hammer scripts to survive until you upgrade I'd say go for it...
+...and my current run seems to be passing.
 
-s
-
-> 
->  
-> 
-> >sage
-> 
-> > 
-> 
-> >>
-> 
-> >> >> I have another question, could we move the S20ceph(init-ceph) script
-> out of rcN.d in Ubuntu ? looks like it did not appear in RHEL’s rcN.d.
-> 
-> >>
-> 
-> >> >Similarly, I think the sysvinit files should all be gone at this
-> point...
-> 
-> >>
-> 
-> >> >sage
-> 
->  
-> 
-> ---------------------------------------------------------------------------
-> ----------------------------------------------------------
-> 本邮件及其附件含有杭州华三通信技术有限公司的保密信息，仅限于发送给上面地址
-?? ??列出
-> 的个人或群组。禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、
-?? ??制、
-> 或散发）本邮件中的信息。如果您错收了本邮件，请您立即电话或邮件通知发件人并
-?? ??除本
-> 邮件！
-> This e-mail and its attachments contain confidential information from H3C,
-> which is
-> intended only for the person or entity whose address is listed above. Any
-> use of the
-> information contained herein in any way (including, but not limited to,
-> total or partial
-> disclosure, reproduction, or dissemination) by persons other than the
-> intended
-> recipient(s) is prohibited. If you receive this e-mail in error, please
-> notify the sender
-> by phone or email immediately and delete it!
-> 
---8323329-173092139-1477586104=:14316--
+John
