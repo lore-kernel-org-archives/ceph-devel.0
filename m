@@ -1,64 +1,77 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: starting with jewel v10.2.5
-Date: Thu, 27 Oct 2016 15:52:03 -0400
-Message-ID: <CAC-Np1w=ZPQxFwt_KCS_BzHRLa-e55e=KiYisiPzNkPsKBbTww@mail.gmail.com>
-References: <5811D09C.9080307@dachary.org> <278431d9-747e-baf6-90f5-8980c992a1c6@suse.cz>
- <5811D546.2050607@dachary.org> <87lgxajayr.fsf@suse.com> <5811F337.7080907@dachary.org>
- <CAP3mxSwFciX_7nH5PP8KcML3irmnoT-thELGrUZMi76bzwCkyg@mail.gmail.com>
- <5812271F.6060709@dachary.org> <CALqRxCwo2EGecpMQ8i7oHsWHR9nb_A-M4CYsJOZGCad5ntKs=w@mail.gmail.com>
+From: "Robin H. Johnson" <robbat2@gentoo.org>
+Subject: Re: rgw and the next jewel release v10.2.4
+Date: Thu, 27 Oct 2016 21:10:37 +0000
+Message-ID: <robbat2-20161027T210703-533951955Z@orbis-terrarum.net>
+References: <5811C853.1070706@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="hNG1vEeyG8BCaHbQ"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:37451 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932887AbcJ0TwJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Oct 2016 15:52:09 -0400
-Received: by mail-wm0-f45.google.com with SMTP id 140so40098896wmv.0
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Oct 2016 12:52:08 -0700 (PDT)
-In-Reply-To: <CALqRxCwo2EGecpMQ8i7oHsWHR9nb_A-M4CYsJOZGCad5ntKs=w@mail.gmail.com>
+Received: from smtp.gentoo.org ([140.211.166.183]:35622 "EHLO smtp.gentoo.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S934631AbcJ0VKi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 27 Oct 2016 17:10:38 -0400
+Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by smtp.gentoo.org (Postfix) with ESMTPS id 6806334164A
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Oct 2016 21:10:37 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <5811C853.1070706@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Abhishek L <abhishek@suse.com>, Nathan Cutler <ncutler@suse.cz>, Ceph Development <ceph-devel@vger.kernel.org>
-
-On Thu, Oct 27, 2016 at 1:53 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
-> On Thu, Oct 27, 2016 at 10:11 AM, Loic Dachary <loic@dachary.org> wrote:
->>
->>
->> On 27/10/2016 17:04, Abhishek Varshney wrote:
->>> If I understand the concerns right, how about doing it the other way round?
->>
->> That would make a lot of sense. It would however require changing the scripts that are used for the release and I suspect it won't be possible for the same reasons changing them to use the SHA1 did not happen.
->
-> Right, I think we would need to alter the build workflow to avoid
-> hard-coding any version at all within /debian/changelog, so that we no
-> longer need to do the "bump" commit, similar to what we do for the
-> RPMs with ceph.spec.in.
->
-> In Jenkins/Gitbuilder, we already have Jenkins run "dch" on every
-> build, to further distinguish trusty vs xenial builds that would
-> otherwise have the same NVR. I think we'd need to expand that concept
-> to also get the entire version from "git describe".
->
-> It would be cool to have this work so we could tag/release arbitrary
-> SHA1s on jewel, rather than having to bump /debian/changelog on the
-> tip of the branch and then tag that "new version" bump commit.'
-
-Exactly. That is the actual reason why we can't really build from a
-sha1. However the changelog
-is not the only file that is now changing, the CMakeLists.txt is now
-affected too:
-
-https://github.com/ceph/ceph/commit/697fe64f9f106252c49a2c4fe4d79aea29363be7
-
-If we can find a middle ground where we don't need to keep modifying
-these things on the fly for the build that would be easier
-for us as well.
+To: Loic Dachary <loic@dachary.org>
+Cc: Yehuda Sadeh <yehuda@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
 
 
->
-> - Ken
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--hNG1vEeyG8BCaHbQ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Thu, Oct 27, 2016 at 11:26:43AM +0200, Loic Dachary wrote:
+> Hi Yehuda,
+>=20
+> The next jewel release as found at
+> https://github.com/ceph/ceph/tree/jewel passed the rgw suite
+> (http://tracker.ceph.com/issues/17487#note-18). Do you think the jewel
+> branch is ready for QE to start their own round of testing ?
+Can you please bring in the StaticSites fix in
+https://github.com/ceph/ceph/pull/11280
+
+This issue has been dragging since late August now :-(.
+(it got reverted last time because it exposed a test suite bug)
+
+--=20
+Robin Hugh Johnson
+Gentoo Linux: Dev, Infra Lead, Foundation Trustee & Treasurer
+E-Mail   : robbat2@gentoo.org
+GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
+
+--hNG1vEeyG8BCaHbQ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.1
+Comment: Robbat2 @ Orbis-Terrarum Networks - The text below is a digital signature. If it doesn't make any sense to you, ignore it.
+
+iQJ8BAEBCgBmBQJYEm1MXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
+ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXRCREVCQjZBNTJGMTU2RkRGMzE2OEQ5MTEx
+OTM5NUYyM0M1ODgyNkM0AAoJEBk5XyPFiCbEJC0P/0pSxzyiBfzXYwZlFteR95rU
+jk+thzarJd+Ijx2S2seOvovW2+mUw1x6D+SEzRk4StFRSYkgBKC+WvvsHmTznbVW
+NjiQYS2dKgJdIDUBaKvRTOS+EE3vP9OLvdTp5yIvdCaM1vzdj8eBuFkA686k6XjG
+rOPTW41Ag+O1m1Rf/t581moEvE/+NNuw7/RzFIMAPMygfhLY87GjMmuqEX0Akhn2
+thzZbi4bNGJvB8l/gC1L8+x6vBbK+BQquQ2dtV1hqlk81yH7av1Nu5YKehdWBpbg
+CAMX2V8xWwDzMKEGl4/ppGKHrP0jFP0r2U31u3DhZ3GuLZ5HY4Ys/p3rD9dOK7yq
+ppuJbcE51rcF5k4rfNnPi3s0ACvqYOMr4bojMtpwmNYvsOu+5rh0SQqNRFRL47Np
+Mjw4HWWKOfY4Q67aYLfgGp1sNGCjSnYA5B6jcMQ9jBOUp0qu2ncL7hsNL0FnHGK+
+afxpmPQWiFVNjwsLkqHAGVgfkPHY+JKmYoc459upSg/9Vz3JG4haKsLgd/CKJ5GA
+lCPFYyEclYIKzjpw3nQMYdl9fE4sicd3z89EiNOUuCyaW9b1EUg/uFq327ylr9fn
+KiFR2ecMlCUfNtbQgNEEDKHLTCnfJnWew++rQFksk3HrKFQffE8Rjr4tEioJUftb
+eR17ZavjadTumFNfwYa5
+=ESEK
+-----END PGP SIGNATURE-----
+
+--hNG1vEeyG8BCaHbQ--
