@@ -1,71 +1,50 @@
-From: Dong Wu <archer.wudong@gmail.com>
-Subject: Re: OSDs marked OUT wrongly after monitor failover
-Date: Thu, 27 Oct 2016 11:01:27 +0800
-Message-ID: <CAAL-TMdpTocq18ezERvbZL+VOWU-=emQ-3g9xDWj_V_aUWYc0g@mail.gmail.com>
-References: <CAOb-7Ewpqg1XhCE5HY2P0HcFaZi8CLOzAy=KAFTqisWYiuJXdg@mail.gmail.com>
- <CAOb-7ExV5fSBvkoPid5jvKXOZN2kvbzUAYT2oqpbXZx2+5iYtg@mail.gmail.com>
+From: Zhangzengran <zhangzengran@h3c.com>
+Subject: ubuntu upstart hang due xfs mount hang
+Date: Thu, 27 Oct 2016 05:07:10 +0000
+Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314EC306@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f178.google.com ([209.85.217.178]:34622 "EHLO
-        mail-ua0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932882AbcJ0DB3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2016 23:01:29 -0400
-Received: by mail-ua0-f178.google.com with SMTP id 51so619763uai.1
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 20:01:29 -0700 (PDT)
-In-Reply-To: <CAOb-7ExV5fSBvkoPid5jvKXOZN2kvbzUAYT2oqpbXZx2+5iYtg@mail.gmail.com>
+Received: from smtp.h3c.com ([60.191.123.56]:40566 "EHLO h3cmg01-ex.h3c.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750971AbcJ0FIQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 27 Oct 2016 01:08:16 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ridge Chen <ridge.chen@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Sage Weil (sage@newdream.net)" <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-we can easily reproduce:
-1. stop osd.0;
-2. start osd.0;
-3. wait mon_osd_down_out_interval time, eg:300s;
-4. stop osd.0;
-5. stop monA(leader);
-6. monB won the election, becomes the leader, and then osd.0 is marked out.
-
-2016-10-27 10:48 GMT+08:00 Ridge Chen <ridge.chen@gmail.com>:
-> I also raised a bug report: http://tracker.ceph.com/issues/17719
->
-> 2016-10-27 10:36 GMT+08:00 Ridge Chen <ridge.chen@gmail.com>:
->> Hi Experts,
->>
->> Recently we find an issue with our ceph cluster, the version is 0.94.6.
->>
->> We want to add additional RAM to the ceph nodes, so we need to stop
->> the ceph service on the nodes first. When we did that on the first
->> node, we found the OSDs on that node marked OUT and backfill started
->> (DOWN is expected in this case). The first node is somewhat special
->> that it is also the location of the leader monitor.
->>
->> Then checked the monitor log and found the following:
->>
->> cluster [INF] osd.0 out (down for 3375169.141844)
->>
->> Looks like the monitor (who just become leader) has wrong
->> "down_pending_out" records and computes out a  a very long DOWN time ,
->> finally decides to mark them OUT.
->>
->> After researching the related code, the reason could be that:
->>
->> 1. "down_pending_out" is set a month ago for those OSDs because of a
->> network issue.
->> 2. The down OSDs up and join the cluster again. "down_pending_out" is
->> cleared in the "OSDMonitor::tick()" method. But only happened on
->> leader monitor.
->> 3. When we stop the ceph service on the first node. The monitor group
->> failover. The new leader monitor will recognize the OSDs kept in DOWN
->> status for a a very long time, and mark them OUT wrongly.
->>
->>
->> What do you think of this?
->>
->> Regards
->> Ridge
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgU2FnZSAmIGFsbDoNCiAgVGhlcmUgaXMgYSBkYXRhIGRpc2sgb24gY2VwaCBob3N0IHdpdGgg
+eGZzLCBpdOKAmXMgRUZJcyBjb3JydXB0IGluIGFuIHVuZXhwZWN0ZWQgcG93ZXIgb3V0YWdlLndo
+ZW4gdGhlIGhvc3QgcG93ZXIgb24gYWdhaW4sIHN5c3RlbSh1YnVudHUpIGhhbmcgaW4gdXBzdGFy
+dOKAmXMgY29uc29sZSwNCndlIGxlYXJuIHRoYXQgdXBzdGFydCB0cnkgdG8gZG8gYGNlcGgtZGlz
+ayBhY3RpdmF0ZS1hbGxgIGFuZCBtb3VudCB0aGF0IGRpc2sgaW4gY2VwaC1vc2QtYWxsIHNlcmll
+cyBqb2JzLGJ1dCB0aGUgbW91bnQgaGFuZyBpbmRlZmluaXRlLiB0aGVyZSBpcyBhbHNvIGEgUzIw
+Y2VwaCBzY3JpcHQgY2FsbGVkDQpieSByYyBzZXJpZXMgam9icyxhbmQgdGhlIHR0eTEuY29uZiBz
+dGFydCBvbiBgc3RvcGVkIHJjYCxzbyB3ZSBjYW50IGxvZ2luIGZyb20gY29uc29sZS4NCg0KSSBz
+YXcgdGhlcmUgaXMgYSBQYXRjaCBmb3IgY2VwaC1kaXNrLGl0IHByb3ZpZGVkIGEgdGltZW91dCB0
+byBta2ZzLlNvIEkgdGhpbmssICBkbyB3ZSBhbHNvIG5lZWQgdG8gcHJvdmlkZSBhIHRpbWVvdXQg
+Zm9yIG1vdW50P2JlY2F1c2UgaWYgY2VwaC1kaXNrIGhhbmcgaW4gdXBzdGFydCwgbm8gb3NkDQog
+ZGFlbW9uIGNvdWxkIHN0YXJ0IG9uIHRoYXQgaG9zdC4NCg0KSSBoYXZlIGFub3RoZXIgcXVlc3Rp
+b24sIGNvdWxkIHdlIG1vdmUgdGhlIFMyMGNlcGgoaW5pdC1jZXBoKSBzY3JpcHQgb3V0IG9mIHJj
+Ti5kIGluIFVidW50dSA/IGxvb2tzIGxpa2UgaXQgZGlkIG5vdCBhcHBlYXIgaW4gUkhFTOKAmXMg
+cmNOLmQuDQoNClRoYW5rcyAsYmVzdCByZWdhcmRzDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrmnKzp
+gq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDlhazl
+j7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJfl
+h7oNCueahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9
+ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOA
+geWkjeWItuOAgQ0K5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo
+6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R
+5Lu25Lq65bm25Yig6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNo
+bWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNoIGlz
+DQppbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlz
+IGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJl
+aW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBh
+cnRpYWwNCmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVy
+c29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQu
+IElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBz
+ZW5kZXINCmJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo=
