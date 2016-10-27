@@ -1,25 +1,53 @@
-From: Bharath Krishna <BKrishna@walmartlabs.com>
-Subject: <no subject>
-Date: Thu, 27 Oct 2016 05:26:30 +0000
-Message-ID: <AEA4B64B-F3E9-423E-8DC8-03D2FEAB803F@walmartlabs.com>
+From: Zhangzengran <zhangzengran@h3c.com>
+Subject: re: ubuntu upstart hang due xfs mount hang
+Date: Thu, 27 Oct 2016 06:35:17 +0000
+Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314EC739@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ppes-mail-n2.wal-mart.com ([161.168.202.17]:48940 "EHLO
-        PPES-Mail-N2.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754809AbcJ0Gcr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Oct 2016 02:32:47 -0400
-Received: from pps.filterd (PPES-Mail-N2.wal-mart.com [127.0.0.1])
-        by PPES-Mail-N2.wal-mart.com (8.16.0.17/8.16.0.17) with SMTP id u9R5Kjrm019247
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Oct 2016 00:27:29 -0500
-Received: from honts35003.homeoffice.wal-mart.com ([161.168.202.1])
-        by PPES-Mail-N2.wal-mart.com with ESMTP id 26a38g0abq-18
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Oct 2016 00:27:29 -0500
-Content-Language: en-US
-Content-ID: <EEACFFA6E0239C448115334C85C2671A@NAMP100.PROD.OUTLOOK.COM>
+Received: from smtp.h3c.com ([60.191.123.56]:41959 "EHLO h3cmg01-ex.h3c.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932605AbcJ0GhJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 27 Oct 2016 02:37:09 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Sage Weil (sage@newdream.net)" <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-c3Vic2NyaWJlIGNlcGgtZGV2ZWwNCg0K
+QWJvdXQgdGhlIHhmcyBtb3VudCBoYW5nIGJ1Zyx0aGVyZSBpcyBhIHJlcG9ydCBpbiBsaW51eCBr
+ZXJuZWwgYnVnIHRyYWNrZXIuaXQgc2VlbXMgaGFyZCB0byByZXNvbHZlLi4uDQpodHRwczovL2J1
+Z3ppbGxhLmtlcm5lbC5vcmcvc2hvd19idWcuY2dpP2lkPTY1MzIxDQoNCj5IaSBTYWdlICYgYWxs
+Og0KPiAgVGhlcmUgaXMgYSBkYXRhIGRpc2sgb24gY2VwaCBob3N0IHdpdGggeGZzLCBpdOKAmXMg
+RUZJcyBjb3JydXB0IGluIGFuIHVuZXhwZWN0ZWQgcG93ZXIgb3V0YWdlLndoZW4gdGhlIGhvc3Qg
+cG93ZXIgb24NCj5hZ2Fpbiwgc3lzdGVtKHVidW50dSkgaGFuZyBpbiB1cHN0YXJ04oCZcyBjb25z
+b2xlLCB3ZSBsZWFybiB0aGF0IHVwc3RhcnQgdHJ5IHRvIGRvIGBjZXBoLWRpc2sgYWN0aXZhdGUt
+YWxsYCBhbmQgbW91bnQgdGhhdA0KPmRpc2sgaW4gY2VwaC1vc2QtYWxsIHNlcmllcyBqb2JzLGJ1
+dCB0aGUgbW91bnQgaGFuZyBpbmRlZmluaXRlLiB0aGVyZSBpcyBhbHNvIGEgUzIwY2VwaCBzY3Jp
+cHQgY2FsbGVkIGJ5IHJjIHNlcmllcyBqb2JzLGFuZCB0aGUgdHR5MS5jb25mIHN0YXJ0IG9uIGBz
+dG9wZWQgcmNgLHNvIHdlIGNhbnQgbG9naW4gZnJvbSBjb25zb2xlLg0KPg0KPkkgc2F3IHRoZXJl
+IGlzIGEgUGF0Y2ggZm9yIGNlcGgtZGlzayxpdCBwcm92aWRlZCBhIHRpbWVvdXQgdG8gbWtmcy5T
+byBJIHRoaW5rLCAgZG8gd2UgYWxzbyBuZWVkIHRvIHByb3ZpZGUgYSB0aW1lb3V0IGZvciBtb3Vu
+dD9iZWNhdXNlIGlmIGNlcGgtZGlzayBoYW5nIGluIHVwc3RhcnQsIG5vIG9zZCAgZGFlbW9uIGNv
+dWxkIHN0YXJ0IG9uIHRoYXQgaG9zdC4NCj4NCj5JIGhhdmUgYW5vdGhlciBxdWVzdGlvbiwgY291
+bGQgd2UgbW92ZSB0aGUgUzIwY2VwaChpbml0LWNlcGgpIHNjcmlwdCBvdXQgb2YgcmNOLmQgaW4g
+VWJ1bnR1ID8gbG9va3MgbGlrZSBpdCBkaWQgbm90IGFwcGVhciBpbiBSSEVM4oCZcyByY04uZC4N
+Cj4NCj5UaGFua3MgLGJlc3QgcmVnYXJkcw0KDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrmnKzpgq7k
+u7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDlhazlj7jn
+moTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7oN
+CueahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8
+j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWk
+jeWItuOAgQ0K5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo6ZSZ
+5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R5Lu2
+5Lq65bm25Yig6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVu
+dHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNoIGlzDQpp
+bnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlzIGxp
+c3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4g
+aW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRp
+YWwNCmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29u
+cyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQuIElm
+IHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5k
+ZXINCmJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo=
