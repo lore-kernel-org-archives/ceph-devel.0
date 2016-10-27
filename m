@@ -1,50 +1,36 @@
-From: Zhangzengran <zhangzengran@h3c.com>
-Subject: ubuntu upstart hang due xfs mount hang
-Date: Thu, 27 Oct 2016 05:07:10 +0000
-Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314EC306@H3CMLB12-EX.srv.huawei-3com.com>
+From: Kostis Fardelas <dante1234@gmail.com>
+Subject: Re: ceph -s report all mons down
+Date: Thu, 27 Oct 2016 08:23:11 +0300
+Message-ID: <CAN3wisUHiVixEuzJx1qHFJzV525XSv0=GvQ-VBe83R6+YT6huQ@mail.gmail.com>
+References: <CAKE=UQLCJoJXzhVdtp24wQzb2AKDzMywUqG_R-cvC+0WNOi1xw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:40566 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750971AbcJ0FIQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 27 Oct 2016 01:08:16 -0400
-Content-Language: zh-CN
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:36209 "EHLO
+        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750855AbcJ0FXR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Oct 2016 01:23:17 -0400
+Received: by mail-qk0-f170.google.com with SMTP id o68so30823259qkf.3
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2016 22:23:12 -0700 (PDT)
+In-Reply-To: <CAKE=UQLCJoJXzhVdtp24wQzb2AKDzMywUqG_R-cvC+0WNOi1xw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Sage Weil (sage@newdream.net)" <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Rui Xie <jerry.xr86@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgU2FnZSAmIGFsbDoNCiAgVGhlcmUgaXMgYSBkYXRhIGRpc2sgb24gY2VwaCBob3N0IHdpdGgg
-eGZzLCBpdOKAmXMgRUZJcyBjb3JydXB0IGluIGFuIHVuZXhwZWN0ZWQgcG93ZXIgb3V0YWdlLndo
-ZW4gdGhlIGhvc3QgcG93ZXIgb24gYWdhaW4sIHN5c3RlbSh1YnVudHUpIGhhbmcgaW4gdXBzdGFy
-dOKAmXMgY29uc29sZSwNCndlIGxlYXJuIHRoYXQgdXBzdGFydCB0cnkgdG8gZG8gYGNlcGgtZGlz
-ayBhY3RpdmF0ZS1hbGxgIGFuZCBtb3VudCB0aGF0IGRpc2sgaW4gY2VwaC1vc2QtYWxsIHNlcmll
-cyBqb2JzLGJ1dCB0aGUgbW91bnQgaGFuZyBpbmRlZmluaXRlLiB0aGVyZSBpcyBhbHNvIGEgUzIw
-Y2VwaCBzY3JpcHQgY2FsbGVkDQpieSByYyBzZXJpZXMgam9icyxhbmQgdGhlIHR0eTEuY29uZiBz
-dGFydCBvbiBgc3RvcGVkIHJjYCxzbyB3ZSBjYW50IGxvZ2luIGZyb20gY29uc29sZS4NCg0KSSBz
-YXcgdGhlcmUgaXMgYSBQYXRjaCBmb3IgY2VwaC1kaXNrLGl0IHByb3ZpZGVkIGEgdGltZW91dCB0
-byBta2ZzLlNvIEkgdGhpbmssICBkbyB3ZSBhbHNvIG5lZWQgdG8gcHJvdmlkZSBhIHRpbWVvdXQg
-Zm9yIG1vdW50P2JlY2F1c2UgaWYgY2VwaC1kaXNrIGhhbmcgaW4gdXBzdGFydCwgbm8gb3NkDQog
-ZGFlbW9uIGNvdWxkIHN0YXJ0IG9uIHRoYXQgaG9zdC4NCg0KSSBoYXZlIGFub3RoZXIgcXVlc3Rp
-b24sIGNvdWxkIHdlIG1vdmUgdGhlIFMyMGNlcGgoaW5pdC1jZXBoKSBzY3JpcHQgb3V0IG9mIHJj
-Ti5kIGluIFVidW50dSA/IGxvb2tzIGxpa2UgaXQgZGlkIG5vdCBhcHBlYXIgaW4gUkhFTOKAmXMg
-cmNOLmQuDQoNClRoYW5rcyAsYmVzdCByZWdhcmRzDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrmnKzp
-gq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDlhazl
-j7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJfl
-h7oNCueahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9
-ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOA
-geWkjeWItuOAgQ0K5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo
-6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R
-5Lu25Lq65bm25Yig6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNo
-bWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNoIGlz
-DQppbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlz
-IGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJl
-aW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBh
-cnRpYWwNCmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVy
-c29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQu
-IElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBz
-ZW5kZXINCmJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo=
+What do you mean 'it is not really down"? Does the process run? If
+yes, then had the process been bound to its port (netstat check) ? If
+yes, then my next guess is a firewall issue that prevents monitors for
+reaching each other. If no, then check the logs for the cause. One
+possible case is that you run out of file descriptors.
+
+On 27 October 2016 at 04:56, Rui Xie <jerry.xr86@gmail.com> wrote:
+> Hi:
+>       Sometimes when i use ceph -s to query cluster status, it shows
+> all mons down (Hammer), but in fact monitor is not really down. from
+> the code it seems ceph -s not wait elect finish, so maybe quorum is
+> empty at that time?
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
