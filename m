@@ -1,63 +1,122 @@
-From: Zhangzengran <zhangzengran@h3c.com>
+From: Sage Weil <sage@newdream.net>
 Subject: re: ubuntu upstart hang due xfs mount hang
-Date: Thu, 27 Oct 2016 16:13:53 +0000
-Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314ECF88@H3CMLB12-EX.srv.huawei-3com.com>
+Date: Thu, 27 Oct 2016 16:35:01 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1610271634290.14316@piezo.us.to>
+References: <7BD28126D6935A4498AE6DE60B5D4CAB314ECDF8@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-173092139-1477586104=:14316"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:47514 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752786AbcJ0QOo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 27 Oct 2016 12:14:44 -0400
-Content-Language: zh-CN
+Received: from cobra.newdream.net ([66.33.216.30]:33947 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932109AbcJ0QfF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Oct 2016 12:35:05 -0400
+In-Reply-To: <7BD28126D6935A4498AE6DE60B5D4CAB314ECDF8@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Sage Weil (sage@newdream.net)" <sage@newdream.net>
+To: Zhangzengran <zhangzengran@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-DQo+T24gVGh1LCAyNyBPY3QgMjAxNiwgWmhhbmd6ZW5ncmFuIHdyb3RlOg0KPj4gPk9uIFRodSwg
-MjcgT2N0IDIwMTYsIFpoYW5nemVuZ3JhbiB3cm90ZToNCj4+ID4+IEhpIFNhZ2UgJiBhbGw6DQo+
-PiA+PiAgIFRoZXJlIGlzIGEgZGF0YSBkaXNrIG9uIGNlcGggaG9zdCB3aXRoIHhmcywgaXTigJlz
-IEVGSXMgY29ycnVwdCBpbg0KPj4gPj4gYW4gdW5leHBlY3RlZCBwb3dlciBvdXRhZ2Uud2hlbiB0
-aGUgaG9zdCBwb3dlciBvbiBhZ2FpbiwNCj4+ID4+IHN5c3RlbSh1YnVudHUpIGhhbmcgaW4gdXBz
-dGFydOKAmXMgY29uc29sZSwgd2UgbGVhcm4gdGhhdCB1cHN0YXJ0IHRyeSB0byBkbyBgY2VwaC1k
-aXNrIGFjdGl2YXRlLWFsbGAgYW5kIG1vdW50IHRoYXQgZGlzayBpbiBjZXBoLW9zZC1hbGwgc2Vy
-aWVzIGpvYnMsYnV0IHRoZSBtb3VudCBoYW5nIGluZGVmaW5pdGUuIHRoZXJlIGlzIGFsc28gYSBT
-MjBjZXBoIHNjcmlwdCBjYWxsZWQgYnkgcmMgc2VyaWVzIGpvYnMsYW5kIHRoZSB0dHkxLmNvbmYg
-c3RhcnQgb24gYHN0b3BlZCByY2Asc28gd2UgY2FudCBsb2dpbiBmcm9tIGNvbnNvbGUuDQo+PiA+
-Pg0KPj4gPj4gSSBzYXcgdGhlcmUgaXMgYSBQYXRjaCBmb3IgY2VwaC1kaXNrLGl0IHByb3ZpZGVk
-IGEgdGltZW91dCB0bw0KPj4gPj4gbWtmcy5TbyBJIHRoaW5rLCAgZG8gd2UgYWxzbyBuZWVkIHRv
-IHByb3ZpZGUgYSB0aW1lb3V0IGZvciBtb3VudD9iZWNhdXNlIGlmIGNlcGgtZGlzayBoYW5nIGlu
-IHVwc3RhcnQsIG5vIG9zZCAgZGFlbW9uIGNvdWxkIHN0YXJ0IG9uIHRoYXQgaG9zdC4NCj4+DQo+
-PiA+V2hhdCB2ZXJzaW9uIG9mIHVidW50dSBhbmQgQ2VwaCBpcyB0aGlzPyBTaW5jZSBqZXdlbCB3
-ZSBhcmUgYWxsIHN5c3RlbWQsIGFuZCB0aGUgYWN0aXZhdGUgZXRjIGpvYnMgYXJlIGFsbCBhc3lu
-YyBzeXN0ZW1kIHRhc2tzLCBzbyBJIGRvbid0IHRoaW5rIHRoaXMgc2hvdWxkIGhhcHBlbi4NCj4+
-DQo+PiBVYnVudHUgaXMgMTQuMDQsIENlcGggaXMgSGFtbWVyIDAuOTQuNQ0KPg0KPkFoLiAgVGhp
-cyB3aWxsIGFsbCBnbyBhd2F5IG9uY2UgeW91IHVwZ3JhZGUgdG8gamV3ZWwuICBJbiB0aGUgbWVh
-bnRpbWUsIHlvdSBjYW4gcHJvYmFibHkgcmVtb3ZlIHRoZSBTMjAgZmlsZS4uIHRob3VnaCBJIGRv
-bid0IHRoaW5rIGl0IHNob3VsZCBiZSBkb2luZyBhbnl0aGluZyBhbnl3YXkgc2luY2UgeW91J3Jl
-IHVzaW5nIHVwc3RhcnQuDQoNCnRoYW5rIHlvdSxhbmQgc2hvdWxkIHdlIHByb3ZpZGUgYSB0aW1l
-b3V0IGZvciBtb3VudCBpbiBjZXBoLWRpc2ssIGxpa2Ugc29tZXRoaW5nIGRvbmUgZm9yIG1rZnM/
-DQoNCj5zYWdlDQo+DQo+Pg0KPj4gPj4gSSBoYXZlIGFub3RoZXIgcXVlc3Rpb24sIGNvdWxkIHdl
-IG1vdmUgdGhlIFMyMGNlcGgoaW5pdC1jZXBoKSBzY3JpcHQgb3V0IG9mIHJjTi5kIGluIFVidW50
-dSA/IGxvb2tzIGxpa2UgaXQgZGlkIG5vdCBhcHBlYXIgaW4gUkhFTOKAmXMgcmNOLmQuDQo+Pg0K
-Pj4gPlNpbWlsYXJseSwgSSB0aGluayB0aGUgc3lzdmluaXQgZmlsZXMgc2hvdWxkIGFsbCBiZSBn
-b25lIGF0IHRoaXMgcG9pbnQuLi4NCj4+DQo+PiA+c2FnZQ0KDQotLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-DQrmnKzpgq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInp
-mZDlhazlj7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDk
-uK3liJflh7oNCueahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7
-u+S9leW9ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOaz
-hOmcsuOAgeWkjeWItuOAgQ0K5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC
-5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa
-55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMg
-YXR0YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdo
-aWNoIGlzDQppbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRy
-ZXNzIGlzIGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5l
-ZCBoZXJlaW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFs
-IG9yIHBhcnRpYWwNCmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikg
-YnkgcGVyc29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hp
-Yml0ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5
-IHRoZSBzZW5kZXINCmJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQh
-DQo=
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-173092139-1477586104=:14316
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+On Thu, 27 Oct 2016, Zhangzengran wrote:
+> 
+> >On Thu, 27 Oct 2016, Zhangzengran wrote:
+> 
+> >> >On Thu, 27 Oct 2016, Zhangzengran wrote:
+> 
+> >> >> Hi Sage & all:
+> 
+> >> >>   There is a data disk on ceph host with xfs, it’s EFIs corrupt in
+> 
+> >> >> an unexpected power outage.when the host power on again,
+> 
+> >> >> system(ubuntu) hang in upstart’s console, we learn that upstart try to
+> do `ceph-disk activate-all` and mount that disk in ceph-osd-all series
+> jobs,but the mount hang indefinite. there is also a S20ceph script called by
+> rc series jobs,and the tty1.conf start on `stoped rc`,so we cant login from
+> console.
+> 
+> >> >>
+> 
+> >> >> I saw there is a Patch for ceph-disk,it provided a timeout to
+> 
+> >> >> mkfs.So I think,  do we also need to provide a timeout for
+> mount?because if ceph-disk hang in upstart, no osd  daemon could start on
+> that host.
+> 
+> >>
+> 
+> >> >What version of ubuntu and Ceph is this? Since jewel we are all systemd,
+> and the activate etc jobs are all async systemd tasks, so I don't think this
+> should happen.
+> 
+> >>
+> 
+> >> Ubuntu is 14.04, Ceph is Hammer 0.94.5
+> 
+> > 
+> 
+> >Ah.  This will all go away once you upgrade to jewel.  In the meantime, you
+> can probably remove the S20 file.. though I don't think it should be doing
+> anything anyway since you're using upstart.
+> 
+>  
+> 
+> thank you,and should we provide a timeout for mount in ceph-disk, like
+> something done for mkfs?
+
+In teh systemd world I don't think it's needed.  Since you're just hacking 
+the hammer scripts to survive until you upgrade I'd say go for it...
+
+s
+
+> 
+>  
+> 
+> >sage
+> 
+> > 
+> 
+> >>
+> 
+> >> >> I have another question, could we move the S20ceph(init-ceph) script
+> out of rcN.d in Ubuntu ? looks like it did not appear in RHEL’s rcN.d.
+> 
+> >>
+> 
+> >> >Similarly, I think the sysvinit files should all be gone at this
+> point...
+> 
+> >>
+> 
+> >> >sage
+> 
+>  
+> 
+> ---------------------------------------------------------------------------
+> ----------------------------------------------------------
+> 本邮件及其附件含有杭州华三通信技术有限公司的保密信息，仅限于发送给上面地址
+?? ??列出
+> 的个人或群组。禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、
+?? ??制、
+> 或散发）本邮件中的信息。如果您错收了本邮件，请您立即电话或邮件通知发件人并
+?? ??除本
+> 邮件！
+> This e-mail and its attachments contain confidential information from H3C,
+> which is
+> intended only for the person or entity whose address is listed above. Any
+> use of the
+> information contained herein in any way (including, but not limited to,
+> total or partial
+> disclosure, reproduction, or dissemination) by persons other than the
+> intended
+> recipient(s) is prohibited. If you receive this e-mail in error, please
+> notify the sender
+> by phone or email immediately and delete it!
+> 
+--8323329-173092139-1477586104=:14316--
