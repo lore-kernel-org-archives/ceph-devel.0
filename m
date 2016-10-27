@@ -1,56 +1,52 @@
-From: Zhangzengran <zhangzengran@h3c.com>
-Subject: re: ubuntu upstart hang due xfs mount hang
-Date: Thu, 27 Oct 2016 14:46:31 +0000
-Message-ID: <7BD28126D6935A4498AE6DE60B5D4CAB314ECB05@H3CMLB12-EX.srv.huawei-3com.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: starting with jewel v10.2.5
+Date: Thu, 27 Oct 2016 12:19:23 +0200
+Message-ID: <278431d9-747e-baf6-90f5-8980c992a1c6@suse.cz>
+References: <5811D09C.9080307@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:47147 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1756008AbcJ0Orn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 27 Oct 2016 10:47:43 -0400
-Content-Language: zh-CN
+Received: from mx2.suse.de ([195.135.220.15]:40574 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753138AbcJ0Oyg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 27 Oct 2016 10:54:36 -0400
+In-Reply-To: <5811D09C.9080307@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: 'Sage Weil' <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Lekshmanan <abhishek@suse.com>
 
-DQo+T24gVGh1LCAyNyBPY3QgMjAxNiwgWmhhbmd6ZW5ncmFuIHdyb3RlOg0KPj4gSGkgU2FnZSAm
-IGFsbDoNCj4+ICAgVGhlcmUgaXMgYSBkYXRhIGRpc2sgb24gY2VwaCBob3N0IHdpdGggeGZzLCBp
-dOKAmXMgRUZJcyBjb3JydXB0IGluIGFuDQo+PiB1bmV4cGVjdGVkIHBvd2VyIG91dGFnZS53aGVu
-IHRoZSBob3N0IHBvd2VyIG9uIGFnYWluLCBzeXN0ZW0odWJ1bnR1KQ0KPj4gaGFuZyBpbiB1cHN0
-YXJ04oCZcyBjb25zb2xlLCB3ZSBsZWFybiB0aGF0IHVwc3RhcnQgdHJ5IHRvIGRvIGBjZXBoLWRp
-c2sgYWN0aXZhdGUtYWxsYCBhbmQgbW91bnQgdGhhdCBkaXNrIGluIGNlcGgtb3NkLWFsbCBzZXJp
-ZXMgam9icyxidXQgdGhlIG1vdW50IGhhbmcgaW5kZWZpbml0ZS4gdGhlcmUgaXMgYWxzbyBhIFMy
-MGNlcGggc2NyaXB0IGNhbGxlZCBieSByYyBzZXJpZXMgam9icyxhbmQgdGhlIHR0eTEuY29uZiBz
-dGFydCBvbiBgc3RvcGVkIHJjYCxzbyB3ZSBjYW50IGxvZ2luIGZyb20gY29uc29sZS4NCj4+DQo+
-PiBJIHNhdyB0aGVyZSBpcyBhIFBhdGNoIGZvciBjZXBoLWRpc2ssaXQgcHJvdmlkZWQgYSB0aW1l
-b3V0IHRvIG1rZnMuU28NCj4+IEkgdGhpbmssICBkbyB3ZSBhbHNvIG5lZWQgdG8gcHJvdmlkZSBh
-IHRpbWVvdXQgZm9yIG1vdW50P2JlY2F1c2UgaWYgY2VwaC1kaXNrIGhhbmcgaW4gdXBzdGFydCwg
-bm8gb3NkICBkYWVtb24gY291bGQgc3RhcnQgb24gdGhhdCBob3N0Lg0KDQo+V2hhdCB2ZXJzaW9u
-IG9mIHVidW50dSBhbmQgQ2VwaCBpcyB0aGlzPyBTaW5jZSBqZXdlbCB3ZSBhcmUgYWxsIHN5c3Rl
-bWQsIGFuZCB0aGUgYWN0aXZhdGUgZXRjIGpvYnMgYXJlIGFsbCBhc3luYyBzeXN0ZW1kIHRhc2tz
-LCBzbyBJIGRvbid0IHRoaW5rIHRoaXMgc2hvdWxkIGhhcHBlbi4NCg0KVWJ1bnR1IGlzIDE0LjA0
-LCBDZXBoIGlzIEhhbW1lciAwLjk0LjUNCg0KPj4gSSBoYXZlIGFub3RoZXIgcXVlc3Rpb24sIGNv
-dWxkIHdlIG1vdmUgdGhlIFMyMGNlcGgoaW5pdC1jZXBoKSBzY3JpcHQgb3V0IG9mIHJjTi5kIGlu
-IFVidW50dSA/IGxvb2tzIGxpa2UgaXQgZGlkIG5vdCBhcHBlYXIgaW4gUkhFTOKAmXMgcmNOLmQu
-DQoNCj5TaW1pbGFybHksIEkgdGhpbmsgdGhlIHN5c3Zpbml0IGZpbGVzIHNob3VsZCBhbGwgYmUg
-Z29uZSBhdCB0aGlzIHBvaW50Li4uDQoNCj5zYWdlDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrmnKzp
-gq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDlhazl
-j7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJfl
-h7oNCueahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9
-ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOA
-geWkjeWItuOAgQ0K5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo
-6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R
-5Lu25Lq65bm25Yig6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNo
-bWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNoIGlz
-DQppbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlz
-IGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJl
-aW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBh
-cnRpYWwNCmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVy
-c29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQu
-IElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBz
-ZW5kZXINCmJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo=
+On 10/27/2016 12:02 PM, Loic Dachary wrote:
+> Hi Abhishek & Nathan & Abhishek,
+>
+> Hopefully jewel will start testing with QE tomorrow or early next week.
+>
+> In the past we kept backporting but we were very careful not to merge anything because the release process is not able to work with a SHA1, it will create the next jewel release with whatever is at the tip of that branch. This limitation has been there for years and there is little chance that it will be resolved any time soon. It routinely creates frustration when something is merged by accident and tests have to be run again (or worse: they are not run and the release is done anyway). It also creates extra work for the backporters who need to collect backports that could have been merged because they passed the tests.
+>
+> Instead, I propose that we backport, test and merge to wip-jewel, as if it was the jewel branch, until the release is done. And when it's done we rebase wip-jewel on top of jewel (or we verify that there is no need to rebase), we push all commits from wip-jewel to jewel, we delete the wip-jewel branch and we resume backporting to the jewel branch.
+>
+> In a nutshell it means we have a little extra work:
+>
+> a) re-targeting backports to wip-jewel in each PR (which is now possible with github)
+> b) pushing wip-jewel to jewel after the release and re-targeting backports to jewel
+>
+> And the benefits are that
+>
+> a) we don't have to stop merging while QE runs tests and the release is prepared, which takes a few weeks
+> b) there is no risk of an accidental merge that would break the release process
+>
+> What do you think ?
+
+I wouldn't say it completely removes the risk of an accidental merge to 
+jewel, but it certainly reduces it :-)
+
+Anyway, it sounds good to me. The only awkwardness is that it will 
+require existing backport PRs to be closed and reopened (AFAIK there is 
+no other way to "retarget" a PR to a different branch).
+
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
