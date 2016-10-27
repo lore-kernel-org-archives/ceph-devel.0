@@ -1,28 +1,35 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: rgw and the next jewel release v10.2.4
-Date: Thu, 27 Oct 2016 11:26:43 +0200
-Message-ID: <5811C853.1070706@dachary.org>
+From: Yoann Moulin <yoann.moulin@epfl.ch>
+Subject: ceph-post-file : Permission denied (publickey).
+Date: Thu, 27 Oct 2016 15:30:33 +0200
+Message-ID: <89b95e99-73e5-474e-df5f-cbd7927924ed@epfl.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from slow1-d.mail.gandi.net ([217.70.178.86]:59047 "EHLO
-        slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934223AbcJ0OBZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Oct 2016 10:01:25 -0400
-Received: from relay2-d.mail.gandi.net (relay2-d.mail.gandi.net [217.70.183.194])
-        by slow1-d.mail.gandi.net (Postfix) with ESMTP id E95545345AB
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Oct 2016 11:26:47 +0200 (CEST)
+Received: from smtp0.epfl.ch ([128.178.224.218]:54736 "EHLO smtp0.epfl.ch"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S942670AbcJ0OW6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 27 Oct 2016 10:22:58 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
+To: ceph-devel@vger.kernel.org
 
-Hi Yehuda,
+Hello,
 
-The next jewel release as found at https://github.com/ceph/ceph/tree/jewel passed the rgw suite (http://tracker.ceph.com/issues/17487#note-18). Do you think the jewel branch is ready for QE to start their own round of testing ?
+I tried to upload files with ceph-post-file but got "Permission denied (publickey)."
 
-Cheers
+> $ ceph-post-file 17180.tgz
+> args: -- 17180.tgz
+> /usr/bin/ceph-post-file: upload tag 60a84fdd-b9e9-42cb-817e-5a90e0f9bcf0
+> /usr/bin/ceph-post-file: user: yoann@kveikur
+> /usr/bin/ceph-post-file: will upload file 17180.tgz
+> Permission denied (publickey).
+> Couldn't read packet: Connection reset by peer
+
+do I need to set anything on my side to be able to upload file with this command ?
+
+Thanks
 
 -- 
-Loïc Dachary, Artisan Logiciel Libre
+Yoann Moulin
+EPFL IC-IT
