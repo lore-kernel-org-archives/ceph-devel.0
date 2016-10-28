@@ -1,53 +1,74 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: [rbd] should we add iov support to read/write/aio_read/aio_write
-Date: Fri, 28 Oct 2016 07:55:42 -0400
-Message-ID: <CA+aFP1AsHp6y6jxPTgjjO7VTR6EDEsGFExpAsM03==QpZpMtrg@mail.gmail.com>
-References: <CAKZcxgdxpjv1SATfb5vx7SypnCbmywLPu3MYU+TJOwxO-bUV5A@mail.gmail.com>
- <20161028084531.GA1838@h3ckers-pride>
-Reply-To: dillaman@redhat.com
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: rgw and the next jewel release v10.2.4
+Date: Fri, 28 Oct 2016 14:39:04 +0200
+Message-ID: <581346E8.2040001@dachary.org>
+References: <5811C853.1070706@dachary.org>
+ <CABo9giSD3B=83d7yRyJLX7zg1NTrELFM4jK+uNLNzZ0sgMmSOQ@mail.gmail.com>
+ <5812590B.8050801@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f50.google.com ([209.85.215.50]:32943 "EHLO
-        mail-lf0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752803AbcJ1Lzo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2016 07:55:44 -0400
-Received: by mail-lf0-f50.google.com with SMTP id x79so54933691lff.0
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Oct 2016 04:55:43 -0700 (PDT)
-In-Reply-To: <20161028084531.GA1838@h3ckers-pride>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:37838 "EHLO
+        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1761211AbcJ1MjK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2016 08:39:10 -0400
+In-Reply-To: <5812590B.8050801@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Venky Shankar <vshankar@redhat.com>
-Cc: Jaze Lee <jazeltq@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Orit Wasserman <owasserm@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-We'll definitely get it into librbd for the Luminous release and
-hopefully get a patch submitted to qemu to conditionally use the new
-API to eliminate an unnecessary buffer copy.
 
-On Fri, Oct 28, 2016 at 4:45 AM, Venky Shankar <vshankar@redhat.com> wrote:
-> On 16-10-28 16:36:18, Jaze Lee wrote:
->> Hi
->>     Should we add iov support at rbd level ?  I think add iov support
->> will be valuable for cloud vm which use ceph as the backend.
->
-> There's already a WIP PR by Jason for this: https://github.com/ceph/ceph/pull/5898
->
-> Though it hasn't been worked on for quite some time.
->
+
+On 27/10/2016 21:44, Loic Dachary wrote:
+> 
+> 
+> On 27/10/2016 20:33, Orit Wasserman wrote:
+>> Hi Loic,
+>> We still need :
+>> https://github.com/ceph/ceph/pull/11472
+> 
+> Merged.
+> 
+>> https://github.com/ceph/ceph/pull/11669 (needs teuthology run)
+> 
+> Will run it first thing tomorrow morning.
+
+The tests were successfull (https://github.com/ceph/ceph/pull/11669#issuecomment-256782689) and the pull request was merged.
+
 >>
+>> Nice to have:
+>> http://tracker.ceph.com/issues/17372
+>> http://tracker.ceph.com/issues/17571
+> 
+> Thanks for the quick feedback !
+> 
+> Cheers
+> 
 >>
+>> Thanks,
+>> Orit
 >>
->>
->>
->> --
->> 谦谦君子
+>> On Thu, Oct 27, 2016 at 11:26 AM, Loic Dachary <loic@dachary.org> wrote:
+>>> Hi Yehuda,
+>>>
+>>> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel passed the rgw suite (http://tracker.ceph.com/issues/17487#note-18). Do you think the jewel branch is ready for QE to start their own round of testing ?
+>>>
+>>> Cheers
+>>>
+>>> --
+>>> Loïc Dachary, Artisan Logiciel Libre
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
+>>
+> 
 
 -- 
-Jason
+Loïc Dachary, Artisan Logiciel Libre
