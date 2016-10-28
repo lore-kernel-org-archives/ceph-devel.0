@@ -1,45 +1,53 @@
-From: Tobias Klauser <tklauser@distanz.ch>
-Subject: [PATCH] ceph: include linux/crush/mapper.h in crush/mapper.c
-Date: Fri, 28 Oct 2016 13:23:24 +0200
-Message-ID: <20161028112324.14850-1-tklauser@distanz.ch>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: [rbd] should we add iov support to read/write/aio_read/aio_write
+Date: Fri, 28 Oct 2016 07:55:42 -0400
+Message-ID: <CA+aFP1AsHp6y6jxPTgjjO7VTR6EDEsGFExpAsM03==QpZpMtrg@mail.gmail.com>
+References: <CAKZcxgdxpjv1SATfb5vx7SypnCbmywLPu3MYU+TJOwxO-bUV5A@mail.gmail.com>
+ <20161028084531.GA1838@h3ckers-pride>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.zhinst.com ([212.126.164.98]:37718 "EHLO mail.zhinst.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754436AbcJ1LX1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 28 Oct 2016 07:23:27 -0400
+Received: from mail-lf0-f50.google.com ([209.85.215.50]:32943 "EHLO
+        mail-lf0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752803AbcJ1Lzo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2016 07:55:44 -0400
+Received: by mail-lf0-f50.google.com with SMTP id x79so54933691lff.0
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Oct 2016 04:55:43 -0700 (PDT)
+In-Reply-To: <20161028084531.GA1838@h3ckers-pride>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Venky Shankar <vshankar@redhat.com>
+Cc: Jaze Lee <jazeltq@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Include linux/crush/mapper.h in crush/mapper.c to get the prototypes of
-crush_find_rule and crush_do_rule which are defined there. This fixes
-the following GCC warnings when building with 'W=1':
+We'll definitely get it into librbd for the Luminous release and
+hopefully get a patch submitted to qemu to conditionally use the new
+API to eliminate an unnecessary buffer copy.
 
-  net/ceph/crush/mapper.c:40:5: warning: no previous prototype for ‘crush_find_rule’ [-Wmissing-prototypes]
-  net/ceph/crush/mapper.c:793:5: warning: no previous prototype for ‘crush_do_rule’ [-Wmissing-prototypes]
+On Fri, Oct 28, 2016 at 4:45 AM, Venky Shankar <vshankar@redhat.com> wrote:
+> On 16-10-28 16:36:18, Jaze Lee wrote:
+>> Hi
+>>     Should we add iov support at rbd level ?  I think add iov support
+>> will be valuable for cloud vm which use ceph as the backend.
+>
+> There's already a WIP PR by Jason for this: https://github.com/ceph/ceph/pull/5898
+>
+> Though it hasn't been worked on for quite some time.
+>
+>>
+>>
+>>
+>>
+>>
+>> --
+>> 谦谦君子
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Signed-off-by: Tobias Klauser <tklauser@distanz.ch>
----
- net/ceph/crush/mapper.c | 1 +
- 1 file changed, 1 insertion(+)
 
-diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index a421e905331a..407bd146ba9e 100644
---- a/net/ceph/crush/mapper.c
-+++ b/net/ceph/crush/mapper.c
-@@ -17,6 +17,7 @@
- # include <linux/kernel.h>
- # include <linux/crush/crush.h>
- # include <linux/crush/hash.h>
-+# include <linux/crush/mapper.h>
- #else
- # include "crush_compat.h"
- # include "crush.h"
+
 -- 
-2.9.0
-
-
+Jason
