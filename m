@@ -1,28 +1,30 @@
-From: Jaze Lee <jazeltq@gmail.com>
-Subject: [rbd] should we add iov support to read/write/aio_read/aio_write
-Date: Fri, 28 Oct 2016 16:36:18 +0800
-Message-ID: <CAKZcxgdxpjv1SATfb5vx7SypnCbmywLPu3MYU+TJOwxO-bUV5A@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Changes to Rocksdb in tree
+Date: Fri, 28 Oct 2016 10:40:08 +0200
+Message-ID: <db531186-389a-fafe-c911-8e75a33da72a@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f48.google.com ([209.85.218.48]:36507 "EHLO
-        mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936640AbcJ1Iga (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2016 04:36:30 -0400
-Received: by mail-oi0-f48.google.com with SMTP id n202so101154613oig.3
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Oct 2016 01:36:25 -0700 (PDT)
+Received: from smtp.digiware.nl ([176.74.240.9]:16286 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752374AbcJ1IkK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 28 Oct 2016 04:40:10 -0400
+Received: from [192.168.10.10] (asus [192.168.10.10])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id C75AC2B616
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Oct 2016 10:40:07 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi
-    Should we add iov support at rbd level ?  I think add iov support
-will be valuable for cloud vm which use ceph as the backend.
+Hi,
 
+Now that we have an In-tree rocksdb:
+When I have changes to rocksdb how to I get them permanently into the
+Ceph tree?
 
+I submitted the changes upstream to rocksdb.
 
-
-
---=20
-=E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
+--WjW
