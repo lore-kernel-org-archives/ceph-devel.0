@@ -1,42 +1,33 @@
-From: Venky Shankar <vshankar@redhat.com>
-Subject: Re: [rbd] should we add iov support to read/write/aio_read/aio_write
-Date: Fri, 28 Oct 2016 14:15:31 +0530
-Message-ID: <20161028084531.GA1838@h3ckers-pride>
-References: <CAKZcxgdxpjv1SATfb5vx7SypnCbmywLPu3MYU+TJOwxO-bUV5A@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Changes to Rocksdb in tree
+Date: Fri, 28 Oct 2016 10:46:07 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1610281044550.10754@piezo.us.to>
+References: <db531186-389a-fafe-c911-8e75a33da72a@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f181.google.com ([209.85.220.181]:35568 "EHLO
-        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750878AbcJ1Ipj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2016 04:45:39 -0400
-Received: by mail-qk0-f181.google.com with SMTP id z190so77755843qkc.2
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Oct 2016 01:45:39 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CAKZcxgdxpjv1SATfb5vx7SypnCbmywLPu3MYU+TJOwxO-bUV5A@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:39369 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752419AbcJ1KqL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2016 06:46:11 -0400
+In-Reply-To: <db531186-389a-fafe-c911-8e75a33da72a@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jaze Lee <jazeltq@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Jason Dillaman <jdillama@redhat.com>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 16-10-28 16:36:18, Jaze Lee wrote:
-> Hi
->     Should we add iov support at rbd level ?  I think add iov support
-> will be valuable for cloud vm which use ceph as the backend.
+On Fri, 28 Oct 2016, Willem Jan Withagen wrote:
+> Hi,
+> 
+> Now that we have an In-tree rocksdb:
+> When I have changes to rocksdb how to I get them permanently into the
+> Ceph tree?
+> 
+> I submitted the changes upstream to rocksdb.
 
-There's already a WIP PR by Jason for this: https://github.com/ceph/ceph/pull/5898
+Once they are merged upstream in rocksdb we will push the commit to 
+github.com/ceph/rocksdb and update the submodule.  If you like, we can 
+cherry-pick the patch in our tree too for the time being (in which case 
+you can submit a PR to ceph/rocksdb too).
 
-Though it hasn't been worked on for quite some time.
-
-> 
-> 
-> 
-> 
-> 
-> -- 
-> 谦谦君子
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
